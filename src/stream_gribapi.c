@@ -1066,16 +1066,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
 
-  if ( streamptr->ntsteps == -1 )
-    {
-      tsID = tstepsNewEntry(streamptr);
-      if ( tsID != streamptr->rtsteps )
-        Error("Internal error. tsID = %d", tsID);
-
-      streamptr->tsteps[tsID-1].next   = true;
-      streamptr->tsteps[tsID].position = recpos;
-    }
-
+  streamScanTsFixNtsteps(streamptr, recpos);
   streamScanTimeConstAdjust(streamptr, taxis);
 
   return 0;
@@ -1289,15 +1280,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
   streamptr->rtsteps = 2;
 
-  if ( streamptr->ntsteps == -1 )
-    {
-      tsID = tstepsNewEntry(streamptr);
-      if ( tsID != streamptr->rtsteps )
-	Error("Internal error. tsID = %d", tsID);
-
-      streamptr->tsteps[tsID-1].next   = true;
-      streamptr->tsteps[tsID].position = recpos;
-    }
+  streamScanTsFixNtsteps(streamptr, recpos);
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;

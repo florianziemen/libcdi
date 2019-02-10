@@ -703,19 +703,6 @@ int cgribexVarCompare(compvar_t compVar, record_t record, int flag)
 #define gribWarning(text, nrecs, timestep, paramstr, level1, level2) \
             Warning("Record %2d (id=%s lev1=%d lev2=%d) timestep %d: %s", nrecs, paramstr, level1, level2, timestep, text)
 
-static inline
-void cgribexScanTsFixNtsteps(stream_t *streamptr, off_t recpos)
-{
-  if ( streamptr->ntsteps == -1 )
-    {
-      const int tsID = tstepsNewEntry(streamptr);
-      if ( tsID != streamptr->rtsteps )
-	Error("Internal error. tsID = %d", tsID);
-
-      streamptr->tsteps[tsID-1].next   = true;
-      streamptr->tsteps[tsID].position = recpos;
-    }
-}
 
 static
 void cgribexSkipRecords(const int fileID)
@@ -896,7 +883,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
 
-  cgribexScanTsFixNtsteps(streamptr, recpos);
+  streamScanTsFixNtsteps(streamptr, recpos);
   streamScanTimeConstAdjust(streamptr, taxis);
 
   return 0;
@@ -1105,7 +1092,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
   streamptr->rtsteps = 2;
 
-  cgribexScanTsFixNtsteps(streamptr, recpos);
+  streamScanTsFixNtsteps(streamptr, recpos);
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;

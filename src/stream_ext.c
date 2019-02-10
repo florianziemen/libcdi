@@ -309,16 +309,7 @@ void extScanTimestep1(stream_t *streamptr)
   for ( int recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[0].recIDs[recID] = recID;
 
-  if ( streamptr->ntsteps == -1 )
-    {
-      int tsID = tstepsNewEntry(streamptr);
-      if ( tsID != streamptr->rtsteps )
-	Error("Internal error. tsID = %d", tsID);
-
-      streamptr->tsteps[tsID-1].next   = true;
-      streamptr->tsteps[tsID].position = recpos;
-    }
-
+  streamScanTsFixNtsteps(streamptr, recpos);
   streamScanTimeConstAdjust(streamptr, taxis);
 }
 
@@ -454,15 +445,7 @@ int extScanTimestep2(stream_t *streamptr)
 
   streamptr->rtsteps = 2;
 
-  if ( streamptr->ntsteps == -1 )
-    {
-      int tsID = tstepsNewEntry(streamptr);
-      if ( tsID != streamptr->rtsteps )
-	Error("Internal error. tsID = %d", tsID);
-
-      streamptr->tsteps[tsID-1].next   = true;
-      streamptr->tsteps[tsID].position = recpos;
-    }
+  streamScanTsFixNtsteps(streamptr, recpos);
 
   return 0;
 }
