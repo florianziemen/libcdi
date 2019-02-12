@@ -104,7 +104,7 @@ libcdi_la_SOURCES = 	 \
 	cdi_int.c        \
 	cdi_int.h	 \
 	stream_scan.c    \
-	strean_scan.h	 \
+	stream_scan.h	 \
 	stream_record.c  \
 	stream_srv.c     \
 	stream_srv.h	 \
