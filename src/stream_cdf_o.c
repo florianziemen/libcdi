@@ -448,10 +448,9 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
 {
   int dimID = CDI_UNDEFID;
   int ncvarid = CDI_UNDEFID, ncbvarid = CDI_UNDEFID;
-  int nvdimID = CDI_UNDEFID;
-  int fileID  = streamptr->fileID;
-  size_t dimlen = gridAxisInq->axisSize(gridID);
-  nc_type xtype = (nc_type)cdfDefDatatype(gridInqDatatype(gridID), streamptr);
+  const int fileID  = streamptr->fileID;
+  const size_t dimlen = gridAxisInq->axisSize(gridID);
+  const nc_type xtype = (nc_type)cdfDefDatatype(gridInqDatatype(gridID), streamptr);
 
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
@@ -461,27 +460,25 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
 
   for ( int index = 0; index < gridindex; ++index )
     {
-      int gridID0 = ncgrid[index].gridID;
+      const int gridID0 = ncgrid[index].gridID;
       assert(gridID0 != CDI_UNDEFID);
-      int gridtype0 = gridInqType(gridID0);
+      const int gridtype0 = gridInqType(gridID0);
       if ( gridtype0 == GRID_GAUSSIAN    ||
            gridtype0 == GRID_LONLAT      ||
            gridtype0 == GRID_PROJECTION  ||
-           gridtype0 == GRID_CURVILINEAR ||
            gridtype0 == GRID_GENERIC )
         {
-          size_t dimlen0 = gridAxisInq->axisSize(gridID0);
+          const size_t dimlen0 = gridAxisInq->axisSize(gridID0);
           char dimname0[CDI_MAX_NAME]; dimname0[0] = 0;
           if ( dimname[0] ) cdiGridInqKeyStr(gridID0, dimKey, CDI_MAX_NAME, dimname0);
-          bool lname = dimname0[0] ? strcmp(dimname, dimname0) == 0 : true;
+          const bool lname = dimname0[0] ? strcmp(dimname, dimname0) == 0 : true;
           if ( dimlen == dimlen0 && lname )
             {
               double (*inqVal)(int gridID, size_t index) = gridAxisInq->axisVal;
               if ( IS_EQUAL(inqVal(gridID0, 0), inqVal(gridID, 0)) &&
                    IS_EQUAL(inqVal(gridID0, dimlen-1), inqVal(gridID, dimlen-1)) )
                 {
-                  dimID = ncgrid[index].ncIDs[dimKey == CDI_KEY_XDIMNAME
-                                              ? CDF_DIMID_X : CDF_DIMID_Y];
+                  dimID = ncgrid[index].ncIDs[dimKey == CDI_KEY_XDIMNAME ? CDF_DIMID_X : CDF_DIMID_Y];
                   break;
                 }
             }
@@ -491,7 +488,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
   if ( dimID == CDI_UNDEFID )
     {
       char axisname[CDI_MAX_NAME]; axisname[0] = 0;
-      int keyname = (axisLetter == 'X') ? CDI_KEY_XNAME : CDI_KEY_YNAME;
+      const int keyname = (axisLetter == 'X') ? CDI_KEY_XNAME : CDI_KEY_YNAME;
       gridAxisInq->axisName(gridID, keyname, CDI_MAX_NAME, axisname);
       if ( axisname[0] == 0 ) Error("axis name undefined!");
 
@@ -509,7 +506,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
         }
 
       bool gen_bounds = false;
-      bool grid_is_cyclic = gridIsCircular(gridID) > 0;
+      const bool grid_is_cyclic = gridIsCircular(gridID) > 0;
       double *pbounds = NULL;
       if ( pvals )
         {
@@ -536,6 +533,8 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
                 }
               finishCyclicBounds(pbounds, dimlen, pvals);
             }
+
+          int nvdimID = CDI_UNDEFID;
           if ( pbounds )
             {
               if ( nc_inq_dimid(fileID, bndsName, &nvdimID) != NC_NOERR )
@@ -561,13 +560,11 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
       if ( gen_bounds ) Free(pbounds);
 
       if ( ndims == 0 )
-        ncgrid[gridindex].ncIDs[dimKey == CDI_KEY_XDIMNAME
-                                ? CDF_VARID_X : CDF_VARID_Y] = ncvarid;
+        ncgrid[gridindex].ncIDs[dimKey == CDI_KEY_XDIMNAME ? CDF_VARID_X : CDF_VARID_Y] = ncvarid;
     }
 
   ncgrid[gridindex].gridID = gridID;
-  ncgrid[gridindex].ncIDs[dimKey == CDI_KEY_XDIMNAME
-                          ? CDF_DIMID_X : CDF_DIMID_Y] = dimID;
+  ncgrid[gridindex].ncIDs[dimKey == CDI_KEY_XDIMNAME ? CDF_DIMID_X : CDF_DIMID_Y] = dimID;
 }
 
 static
