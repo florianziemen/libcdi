@@ -1419,7 +1419,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
                   if ( !cdiIgnoreValidRange && lignore == false )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 2, ncvars[ncvarid].validrange);
-                      ncvars[ncvarid].lvalidrange = true;
+                      ncvars[ncvarid].lvalidrange = (ncvars[ncvarid].validrange[0] <= ncvars[ncvarid].validrange[1]);
                       if ( ((int)ncvars[ncvarid].validrange[0]) == 0 && ((int)ncvars[ncvarid].validrange[1]) == 255 )
                         ncvars[ncvarid].lunsigned = true;
                       /* cdf_set_var(ncvars, ncvarid, TRUE); */

@@ -1,3 +1,7 @@
+2019-02-15  Uwe Schulzweida
+
+	* cdfScanVarAttr: ignore attribute valid_range if min > max (bug fix)
+
 2019-02-07  Uwe Schulzweida
 
         * using CGRIBEX library version 1.9.2
