@@ -1,5 +1,3 @@
-// This file is used in CDI and CDO !!!
-
 #ifdef HAVE_CONFIG_H
 #include "../src/config.h"
 #endif
@@ -12,36 +10,9 @@
 #include <cdi.h>
 #include "cdi_uuid.h"
 
-#ifdef CDO
-
-#include "text.h"
-#include "datetime.h"
-#include "compare.h"
-#include "util.h"
-#include "pstream_int.h"
-#include "process_int.h"  //TODO: this include must not be here.
-                          //refactoring needed (11.9.2018);
-#define streamInqFiletype pstreamInqFiletype
-#define streamInqByteorder pstreamInqByteorder
-#define streamInqTimestep cdoStreamInqTimestep
-
-#else
-
 #include "cdi_int.h"
 
-#endif
-
-
 #include "printinfo.h"
-
-static void
-my_reset_text_color(FILE *fp)
-{
-  (void) fp;
-#ifdef CDO
-  reset_text_color(fp);
-#endif
-}
 
 void
 datetime2str(int64_t date, int time, char *datetimestr, int maxlen)
@@ -126,11 +97,7 @@ printFiletype(int streamID, int vlistID)
         const int comptype = vlistInqVarCompType(vlistID, varID);
         if (comptype == comps[k])
           {
-            if (kk++ == 0)
-              printf(" ");
-            else
-              printf("/");
-            printf("%s", comp_name(comptype));
+            printf("%c%s", (kk++ == 0) ? ' ' : '/', comp_name(comptype));
             break;
           }
       }
@@ -303,7 +270,6 @@ printGridNp(int gridtype, int gridID, size_t gridsize, size_t xsize, size_t ysiz
     fprintf(stdout, " (%zux%zu)", xsize, ysize);
 
   if (gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED) fprintf(stdout, "  np=%d", gridInqNP(gridID));
-  my_reset_text_color(stdout);
 
   fprintf(stdout, "\n");
 }
@@ -324,19 +290,11 @@ printGridInfoKernel(int gridID, int index, bool lproj)
   // int prec     = gridInqDatatype(gridID);
   // int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
   int dig = 7;
-#ifdef CDO
-  extern int CDO_flt_digits;
-  dig = CDO_flt_digits;
-#endif
 
   if (!lproj)
     {
       fprintf(stdout, "  %4d : ", index + 1);
-#ifdef CDO
-      set_text_color(stdout, RESET, BLUE);
-#endif
       fprintf(stdout, "%-24s", gridNamePtr(gridtype));
-      my_reset_text_color(stdout);
       fprintf(stdout, " : ");
     }
 
@@ -344,11 +302,7 @@ printGridInfoKernel(int gridID, int index, bool lproj)
       || gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED)
     {
       if (!lproj)
-
         {
-#ifdef CDO
-          set_text_color(stdout, RESET, GREEN);
-#endif
           printGridNp(gridtype, gridID, gridsize, xsize, ysize);
         }
 
@@ -358,17 +312,9 @@ printGridInfoKernel(int gridID, int index, bool lproj)
       if (gridtype == GRID_PROJECTION || name[0])
         {
           if (name[0] == 0) strcpy(name, "undefined");
-#ifdef CDO
-          set_text_color(stdout, RESET, BLUE);
-#endif
           fprintf(stdout, "         %24s", "mapping");
-          my_reset_text_color(stdout);
           fprintf(stdout, " : ");
-#ifdef CDO
-          set_text_color(stdout, RESET, GREEN);
-#endif
           fprintf(stdout, "%s\n", name);
-          my_reset_text_color(stdout);
         }
 
       print_xvals(gridID, dig);
@@ -385,44 +331,28 @@ printGridInfoKernel(int gridID, int index, bool lproj)
     }
   else if (gridtype == GRID_SPECTRAL)
     {
-#ifdef CDO
-      set_text_color(stdout, RESET, GREEN);
-#endif
       fprintf(stdout, "points=%zu  nsp=%zu  truncation=%d", gridsize, gridsize / 2, trunc);
       if (gridInqComplexPacking(gridID)) fprintf(stdout, "  complexPacking");
-      my_reset_text_color(stdout);
       fprintf(stdout, "\n");
     }
   else if (gridtype == GRID_FOURIER)
     {
-#ifdef CDO
-      set_text_color(stdout, RESET, GREEN);
-#endif
       fprintf(stdout, "points=%zu  nfc=%zu  truncation=%d\n", gridsize, gridsize / 2, trunc);
-      my_reset_text_color(stdout);
     }
   else if (gridtype == GRID_GME)
     {
       int nd, ni, ni2, ni3;
       gridInqParamGME(gridID, &nd, &ni, &ni2, &ni3);
-#ifdef CDO
-      set_text_color(stdout, RESET, GREEN);
-#endif
       fprintf(stdout, "points=%zu  nd=%d  ni=%d\n", gridsize, nd, ni);
-      my_reset_text_color(stdout);
     }
   else if (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
     {
-#ifdef CDO
-      set_text_color(stdout, RESET, GREEN);
-#endif
       if (gridtype == GRID_CURVILINEAR)
         fprintf(stdout, "points=%zu (%zux%zu)", gridsize, xsize, ysize);
       else
         fprintf(stdout, "points=%zu", gridsize);
 
       if (gridtype == GRID_UNSTRUCTURED && gridInqNvertex(gridID) > 0) fprintf(stdout, "  nvertex=%d", gridInqNvertex(gridID));
-      my_reset_text_color(stdout);
 
       fprintf(stdout, "\n");
 
@@ -444,14 +374,10 @@ printGridInfoKernel(int gridID, int index, bool lproj)
     }
   else /* if ( gridtype == GRID_GENERIC ) */
     {
-#ifdef CDO
-      set_text_color(stdout, RESET, GREEN);
-#endif
       if (ysize == 0)
         fprintf(stdout, "points=%zu\n", gridsize);
       else
         fprintf(stdout, "points=%zu (%zux%zu)\n", gridsize, xsize, ysize);
-      my_reset_text_color(stdout);
     }
 
   if (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
@@ -607,10 +533,6 @@ printZaxisInfo(int vlistID)
   for (int index = 0; index < nzaxis; index++)
     {
       int dig = 7;
-#ifdef CDO
-      extern int CDO_flt_digits;
-      dig = CDO_flt_digits;
-#endif
       //______________________________________________________--
       double zinc = 0;
       const int zaxisID = vlistZaxis(vlistID, index);
@@ -626,22 +548,14 @@ printZaxisInfo(int vlistID)
       zunits[12] = 0;
 
       fprintf(stdout, "  %4d : ", vlistZaxisIndex(vlistID, zaxisID) + 1);
-#ifdef CDO
-      set_text_color(stdout, RESET, BLUE);
-#endif
-      printZaxisGenericInfo(ltype, zaxistype, zaxisname);
 
-      my_reset_text_color(stdout);
+      printZaxisGenericInfo(ltype, zaxistype, zaxisname);
 
       fprintf(stdout, " :");
 
-#ifdef CDO
-      set_text_color(stdout, RESET, GREEN);
-#endif
       fprintf(stdout, " levels=%d", levelsize);
       const bool zscalar = (levelsize == 1) ? zaxisInqScalar(zaxisID) : false;
       if (zscalar) fprintf(stdout, "  scalar");
-      my_reset_text_color(stdout);
       fprintf(stdout, "\n");
 
       if (zaxisInqLevels(zaxisID, NULL))
@@ -744,19 +658,10 @@ printTimesteps(int streamID, int taxisID, int verbose)
   int nfact = 1;
   int tsID = 0;
 
-#ifdef CDO
-  DateTimeList dtlist;
-#endif
   while ((nrecs = streamInqTimestep(streamID, tsID)))
     {
-#ifdef CDO
-      dtlist.taxisInqTimestep(taxisID, 0);
-      const int64_t vdate = dtlist.getVdate(0);
-      const int vtime = dtlist.getVtime(0);
-#else
       const int64_t vdate = taxisInqVdate(taxisID);
       const int vtime = taxisInqVtime(taxisID);
-#endif
 
       if (verbose || tsID < NUM_TIMESTEP)
         {

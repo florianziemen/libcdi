@@ -1,5 +1,3 @@
-// This file is used in CDI and CDO !!!
-
 #ifndef PRINTINFO_H
 #define PRINTINFO_H
 
