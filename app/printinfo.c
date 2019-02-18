@@ -1,7 +1,3 @@
-#ifdef HAVE_CONFIG_H
-#include "../src/config.h"
-#endif
-
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
