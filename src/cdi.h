@@ -802,6 +802,7 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_GRIB2LOCALSECTIONNUMBER       818  // GRIB2 grib2LocalSectionNumber
 #define  CDI_KEY_SECTION2PADDINGLENGTH         819  // GRIB2 length of section2Padding
 #define  CDI_KEY_SECTION2PADDING               820  // GRIB2 section2Padding
+#define  CDI_KEY_UVRELATIVETOGRID              821  // GRIB  uvRelativeToGrid
 
 //      cdiDefKeyInt: Define an integer value from a key of a CDI variable
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
@@ -1000,9 +1001,6 @@ void    gridChangeType(int gridID, int gridtype);
 
 void    gridDefComplexPacking(int gridID, int lpack);
 int     gridInqComplexPacking(int gridID);
-
-void    gridDefUvRelativeToGrid(int gridID, int uvRelativeToGrid);
-int     gridInqUvRelativeToGrid(int gridID);
 
 void    gridDefScanningMode(int gridID, int mode);
 int     gridInqScanningMode(int gridID);

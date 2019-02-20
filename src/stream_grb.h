@@ -39,12 +39,6 @@ struct cdiGribParamChange
   bool active;
 };
 
-struct cdiGribModeChange
-{
-  bool mode;
-  bool active;
-};
-
 struct cdiGribScanModeChange
 {
   int value;
@@ -52,12 +46,10 @@ struct cdiGribScanModeChange
 };
 
 extern struct cdiGribParamChange cdiGribChangeParameterID;
-extern struct cdiGribModeChange cdiGribChangeModeUvRelativeToGrid;
 extern struct cdiGribScanModeChange cdiGribDataScanningMode;
 
 // Used in CDO
 void streamGrbChangeParameterIdentification(int code, int ltype, int lev);
-void streamGrbChangeModeUvRelativeToGrid(int mode);
 void streamGrbDefDataScanningMode(int scanmode);
 int  streamGrbInqDataScanningMode(void);
 

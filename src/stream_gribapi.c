@@ -595,12 +595,12 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
 {
   char stdname[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
 
-  int vlistID = streamptr->vlistID;
-  int tsID    = streamptr->curTsID;
-  int recID   = recordNewEntry(streamptr, tsID);
+  const int vlistID = streamptr->vlistID;
+  const int tsID    = streamptr->curTsID;
+  const int recID   = recordNewEntry(streamptr, tsID);
   record_t *record = &streamptr->tsteps[tsID].records[recID];
 
-  int tsteptype = gribapiGetTsteptype(gh);
+  const int tsteptype = gribapiGetTsteptype(gh);
   // numavg  = ISEC1_AvgNum;
   int numavg = 0;
 
@@ -622,16 +622,16 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   record->varname[sizeof(record->varname) - 1] = 0;
 
   grid_t *grid = (grid_t *)Malloc(sizeof(*grid));
-  gribapiGetGrid(gh, grid);
+  const bool uvRelativeToGrid = gribapiGetGrid(gh, grid);
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
-  int gridID = gridAdded.Id;
+  const int gridID = gridAdded.Id;
   if      ( !gridAdded.isNew ) Free(grid);
   else if ( grid->projtype == CDI_PROJ_RLL ) gribapiDefProjRLL(gh, gridID);
   else if ( grid->projtype == CDI_PROJ_LCC ) gribapiDefProjLCC(gh, gridID);
   else if ( grid->projtype == CDI_PROJ_STERE ) gribapiDefProjSTERE(gh, gridID);
 
-  int zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
+  const int zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
 
   switch (zaxistype)
     {
@@ -641,7 +641,7 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
         long lpar;
         GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
         /* FIXME: assert(lpar >= 0) */
-        size_t vctsize = (size_t)lpar;
+        const size_t vctsize = (size_t)lpar;
         if ( vctsize > 0 )
           {
             double *vctptr = (double *) Malloc(vctsize*sizeof(double));
@@ -697,10 +697,12 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype1, leveltype2,
 	       varname, stdname, longname, units, tiles, &tile_index, perturbationNumber);
 
-  record->varID   = (short)varID;
+  record->varID = (short)varID;
   record->levelID = (short)levelID;
 
   varDefCompType(varID, comptype);
+
+  if ( uvRelativeToGrid ) varDefKeyInt(varID, CDI_KEY_UVRELATIVETOGRID, 1);
 
   gribapiGetKeys(gh, varID);
 
@@ -1883,7 +1885,7 @@ void gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOf
 }
 
 static
-void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRotated, bool gridIsCurvilinear)
+void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRotated, bool gridIsCurvilinear, int uvRelativeToGrid)
 {
   const char *mesg;
   size_t len;
@@ -1999,12 +2001,11 @@ void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridI
       GRIB_CHECK(my_grib_set_double(gh, "angleOfRotation", angle), 0);
     }
 
-  long uvRelativeToGrid = gridInqUvRelativeToGrid(gridID);
-  if ( uvRelativeToGrid ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+  if ( uvRelativeToGrid >= 0 ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
 }
 
 static
-void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID)
+void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelativeToGrid)
 {
   long xsize = (long) gridInqXsize(gridID);
   long ysize = (long) gridInqYsize(gridID);
@@ -2036,8 +2037,7 @@ void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID)
   GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", lat_2), 0);
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
-  long uvRelativeToGrid = gridInqUvRelativeToGrid(gridID);
-  if ( uvRelativeToGrid ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+  if ( uvRelativeToGrid >= 0 ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
   long earthIsOblate = (IS_EQUAL(a, 6378160.) && IS_EQUAL(rf, 297.));
   if ( earthIsOblate ) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
 
@@ -2200,7 +2200,7 @@ void gribapiDefPackingType(grib_handle *gh, bool lieee, bool lspectral, bool lco
 }
 
 static
-void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int datatype)
+void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int datatype, int uvRelativeToGrid)
 {
   // bitsPerValue have to be defined first (complex packing)
   GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", (long)grbBitsPerValue(datatype)), 0);
@@ -2237,12 +2237,12 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
     case GRID_GAUSSIAN_REDUCED:
     case GRID_TRAJECTORY:
       {
-        gribapiDefGridRegular(gh, gridID, gridtype, gridIsRotated, gridIsCurvilinear);
+        gribapiDefGridRegular(gh, gridID, gridtype, gridIsRotated, gridIsCurvilinear, uvRelativeToGrid);
 	break;
       }
     case CDI_PROJ_LCC:
       {
-        gribapiDefGridLCC(gh, editionNumber, gridID);
+        gribapiDefGridLCC(gh, editionNumber, gridID, uvRelativeToGrid);
 	break;
       }
     case CDI_PROJ_STERE:
@@ -2607,7 +2607,7 @@ int gribapiGetScanningMode(grib_handle *gh)
 
 void gribapiSetScanningMode(grib_handle *gh, int scanningMode)
 {
-   // 127: reserved for testing; generated test data will be in 64 scanning mode
+  // 127: reserved for testing; generated test data will be in 64 scanning mode
   //if (scanningMode== 127)  scanningMode = 64;
 
   long iScansNegatively      = (scanningMode & 128)/128;
@@ -2630,21 +2630,6 @@ void gribapiSetScanningMode(grib_handle *gh, int scanningMode)
   GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", iScansNegatively), 0);
   GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jScansPositively), 0);
   GRIB_CHECK(my_grib_set_long(gh, "jPointsAreConsecutive", jPointsAreConsecutive), 0);
-}
-
-
-static
-void gribapiSetUvRelativeToGrid(grib_handle *gh, int mode)
-{
-  long uvRelativeToGridMode = mode;
-  long uvRelativeToGridModeOld;
-
-  GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &uvRelativeToGridModeOld), 0);
-
-  if (cdiDebugExt>=30)
-    printf("gribapiSetUvRelativeToGrid():  uvRelativeToGrid: %02d (old) => %02d (new); \n",(int)uvRelativeToGridModeOld,(int)uvRelativeToGridMode);
-
-  GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGridMode), 0);
 }
 
 
@@ -2995,19 +2980,6 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const doubl
           gribapiSetScanningMode(gh, scanModeIN);
         }
 #endif
-
-      if ( cdiGribChangeModeUvRelativeToGrid.active )
-        {
-          // this will overrule/change the UvRelativeToGrid flag;
-          // typically when the wind is rotated with respect to north pole
-          if (cdiDebugExt>=100) Message("Set ModeUvRelativeToGrid =>%d ( note grid has: %d)", cdiGribChangeModeUvRelativeToGrid.mode, gridInqUvRelativeToGrid(gridID));
-          GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", (long) cdiGribChangeModeUvRelativeToGrid.mode), 0);
-        }
-      else
-        {
-          if (cdiDebugExt>=100) Message("Set ModeUvRelativeToGrid =>%d based on used grid", gridInqUvRelativeToGrid(gridID));
-          gribapiSetUvRelativeToGrid(gh, gridInqUvRelativeToGrid(gridID));
-        }
     }
 }
 
@@ -3031,6 +3003,9 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFGENERATINGPROCESS, &typeOfGeneratingProcess);
   int productDefinitionTemplate = 0;
   cdiInqKeyInt(vlistID, varID, CDI_KEY_PRODUCTDEFINITIONTEMPLATE, &productDefinitionTemplate);
+
+  int uvRelativeToGrid = -1;
+  cdiInqKeyInt(vlistID, varID, CDI_KEY_UVRELATIVETOGRID, &uvRelativeToGrid);
 
   char name[256];
   char stdname[256];
@@ -3127,7 +3102,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
         }
     }
 
-  if ( ! gc->init ) gribapiDefGrid((int)editionNumber, gh, gridID, comptype, datatype);
+  if ( ! gc->init ) gribapiDefGrid((int)editionNumber, gh, gridID, comptype, datatype, uvRelativeToGrid);
 
   gribapiDefLevel((int)editionNumber, gh, zaxisID, levelID, gc->init, productDefinitionTemplate);
 

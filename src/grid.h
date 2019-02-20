@@ -108,7 +108,6 @@ struct grid_t {
                                    */
   bool    lcomplex;
   bool    hasdims;
-  bool uvRelativeToGrid;  /* Some models deliver wind U,V relative to the grid-cell */
   struct gridaxis_t x;
   struct gridaxis_t y;
   const struct gridVirtTable *vtable;

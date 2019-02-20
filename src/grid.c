@@ -180,7 +180,6 @@ void grid_init(grid_t *gridptr)
   gridptr->vtable        = &cdiGridVtable;
   gridptr->atts.nalloc   = MAX_ATTRIBUTES;
   gridptr->atts.nelems   = 0;
-  gridptr->uvRelativeToGrid      = 0;   // Some models deliver wind U,V relative to the grid-cell
   gridptr->iScansNegatively      = 0;
   gridptr->jScansPositively      = 1;
   gridptr->jPointsAreConsecutive = 0;
@@ -2429,14 +2428,14 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
 	}
     }
 
-  if ( (grid->scanningMode != gridInqScanningMode(gridID)) || (grid->uvRelativeToGrid != gridInqUvRelativeToGrid(gridID)) )
+  if ( (grid->scanningMode != gridInqScanningMode(gridID)) )
     {
       // often grid definition may differ in UV-relativeToGrid
       differ = 1;
 #ifdef HIRLAM_EXTENSIONS
       if ( cdiDebugExt>=200 )
-        printf("gridCompare(gridID=%d): Differs: grid.scanningMode [%d] != gridInqScanningMode(gridID) [%d] or  grid.uvRelativeToGrid [%d] != gridInqUvRelativeToGrid(gridID) [%d]\n",
-               gridID, grid->scanningMode, gridInqScanningMode(gridID), grid->uvRelativeToGrid, gridInqUvRelativeToGrid(gridID) );
+        printf("gridCompare(gridID=%d): Differs: grid.scanningMode [%d] != gridInqScanningMode(gridID) [%d]\n",
+               gridID, grid->scanningMode, gridInqScanningMode(gridID));
 #endif // HIRLAM_EXTENSIONS
     }
 
@@ -2490,7 +2489,6 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   if ( IS_NOT_EQUAL(g1->y.last        , g2->y.last)        ) return differ;
   if ( IS_NOT_EQUAL(g1->x.inc	      , g2->x.inc)         ) return differ;
   if ( IS_NOT_EQUAL(g1->y.inc	      , g2->y.inc)         ) return differ;
-  if ( IS_NOT_EQUAL(g1->uvRelativeToGrid     , g2->uvRelativeToGrid)     ) return differ;
   if ( IS_NOT_EQUAL(g1->scanningMode         , g2->scanningMode)         ) return differ;
 
   const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1),
@@ -2808,7 +2806,6 @@ int gridGenerate(const grid_t *grid)
     gridDefArea(gridID, grid->area);
   gridptr->number = grid->number;
   gridptr->position = grid->position;
-  gridptr->uvRelativeToGrid       = grid->uvRelativeToGrid;
   gridptr->scanningMode           = grid->scanningMode;
   gridptr->iScansNegatively       = grid->iScansNegatively;
   gridptr->jScansPositively       = grid->jScansPositively;
@@ -4382,25 +4379,6 @@ void gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE])
 }
 
 
-void gridDefUvRelativeToGrid(int gridID, int uvRelativeToGrid)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
-
-  if ( gridptr->uvRelativeToGrid != uvRelativeToGrid )
-    {
-      gridMark4Update(gridID);
-      gridptr->uvRelativeToGrid = (bool)uvRelativeToGrid;
-    }
-}
-
-
-int gridInqUvRelativeToGrid(int gridID)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->uvRelativeToGrid;
-}
-
-
 void gridDefScanningMode(int gridID, int mode)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
@@ -4461,7 +4439,6 @@ enum {
   GRID_PACK_INT_IDX_MEMBERMASK,
   GRID_PACK_INT_IDX_XTSTDNNAME,
   GRID_PACK_INT_IDX_YTSTDNNAME,
-  GRID_PACK_INT_IDX_UVRELATIVETOGRID,
   GRID_PACK_INT_IDX_ISCANSNEGATIVELY,
   GRID_PACK_INT_IDX_JSCANSPOSITIVELY,
   GRID_PACK_INT_IDX_JPOINTSARECONSECUTIVE,
@@ -4669,7 +4646,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       xystdname_tab[intBuffer[GRID_PACK_INT_IDX_XTSTDNNAME]][0];
     gridP->y.stdname     =
       xystdname_tab[intBuffer[GRID_PACK_INT_IDX_YTSTDNNAME]][1];
-    gridP->uvRelativeToGrid         =   intBuffer[GRID_PACK_INT_IDX_UVRELATIVETOGRID];
     gridP->iScansNegatively         =   (bool)intBuffer[GRID_PACK_INT_IDX_ISCANSNEGATIVELY];
     gridP->jScansPositively         =   (bool)intBuffer[GRID_PACK_INT_IDX_JSCANSPOSITIVELY];
     gridP->jPointsAreConsecutive    =   (bool)intBuffer[GRID_PACK_INT_IDX_JPOINTSARECONSECUTIVE];
@@ -4858,7 +4834,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
       (int)((const char (*)[2][24])gridP->y.stdname
             - (const char (*)[2][24])xystdname_tab[0][1]);
 
-    intBuffer[GRID_PACK_INT_IDX_UVRELATIVETOGRID] = gridP->uvRelativeToGrid;
     intBuffer[GRID_PACK_INT_IDX_ISCANSNEGATIVELY] = gridP->iScansNegatively;
     intBuffer[GRID_PACK_INT_IDX_JSCANSPOSITIVELY] = gridP->jScansPositively;
     intBuffer[GRID_PACK_INT_IDX_JPOINTSARECONSECUTIVE] = gridP->jPointsAreConsecutive;
