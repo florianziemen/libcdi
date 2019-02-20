@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   January 2019
+! Uwe Schulzweida, MPI-MET, Hamburg,   February 2019
 !
 
       INTEGER    CDI_MAX_NAME
@@ -1568,6 +1568,8 @@
       PARAMETER (CDI_KEY_SECTION2PADDINGLENGTH = 819)
       INTEGER    CDI_KEY_SECTION2PADDING
       PARAMETER (CDI_KEY_SECTION2PADDING = 820)
+      INTEGER    CDI_KEY_UVRELATIVETOGRID
+      PARAMETER (CDI_KEY_UVRELATIVETOGRID = 821)
       INTEGER         cdiDefKeyInt
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
@@ -2017,15 +2019,6 @@
       INTEGER         gridInqComplexPacking
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqComplexPacking
-
-!                     gridDefUvRelativeToGrid
-!                                    (INTEGER         gridID,
-!                                     INTEGER         uvRelativeToGrid)
-      EXTERNAL        gridDefUvRelativeToGrid
-
-      INTEGER         gridInqUvRelativeToGrid
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqUvRelativeToGrid
 
 !                     gridDefScanningMode
 !                                    (INTEGER         gridID,
