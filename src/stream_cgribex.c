@@ -442,8 +442,6 @@ bool cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
   grid->type = gridtype;
   grid->projtype = projtype;
 
-  if ( uvRelativeToGrid ) grid->uvRelativeToGrid = 1;
-
   return uvRelativeToGrid;
 }
 

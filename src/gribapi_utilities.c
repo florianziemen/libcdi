@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #ifdef HAVE_LIBGRIB_API
@@ -834,7 +834,6 @@ bool gribapiGetGrid(grib_handle *gh, grid_t *grid)
       long temp;
       GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &temp), 0);
       assert(temp == 0 || temp == 1);
-      grid->uvRelativeToGrid = (bool)temp;
       uvRelativeToGrid = (bool)temp;
     }
 
