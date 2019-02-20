@@ -35,8 +35,7 @@ leveltable_t;
 
 typedef struct
 {
-  int           subtypeIndex; /* corresponding tile in subtype_t structure (subtype->self) */
-
+  int           subtypeIndex; //  corresponding tile in subtype_t structure (subtype->self)
   unsigned      nlevels;
   int           levelTableSize;
   leveltable_t* levelTable;
@@ -52,8 +51,8 @@ typedef struct
   int            perturbationNumber;
   int            gridID;
   int            zaxistype;
-  int            ltype1;     /* GRIB first level type */
-  int            ltype2;     /* GRIB second level type */
+  int            ltype1;        // GRIB first level type
+  int            ltype2;        // GRIB second level type
   int            lbounds;
   int            level_sf;
   int            level_unit;
@@ -61,7 +60,7 @@ typedef struct
 
   int            nsubtypes_alloc;
   int            nsubtypes;
-  subtypetable_t *recordTable;    /* ~ two-dimensional record list [nsubtypes_alloc][levelTableSize] */
+  subtypetable_t *recordTable;   // ~ two-dimensional record list [nsubtypes_alloc][levelTableSize]
 
   int            instID;
   int            modelID;
@@ -81,9 +80,9 @@ typedef struct
 
   cdi_keys_t     keys;
 
-  int                 opt_grib_nentries;                       /* current no. key-value pairs            */
-  int                 opt_grib_kvpair_size;                    /* current allocated size                 */
-  opt_key_val_pair_t *opt_grib_kvpair;                         /* (optional) list of keyword/value pairs */
+  int                 opt_grib_nentries;        // current no. key-value pairs
+  int                 opt_grib_kvpair_size;     // current allocated size
+  opt_key_val_pair_t *opt_grib_kvpair;          // (optional) list of keyword/value pairs
 }
 vartable_t;
 
@@ -127,21 +126,18 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].tiles          = NULL;
 }
 
-/* Test if a variable specified by the given meta-data has already been registered in "vartable". */
+// Test if a variable specified by the given meta-data has already been registered in "vartable".
 static unsigned
 varGetEntry(int param, int gridID, int zaxistype, int ltype1, int tsteptype, const char *name, const var_tile_t *tiles, int perturbationNumber)
 {
   for ( unsigned varID = 0; varID < varTablesize; varID++ )
     {
-      /* testing for "param" implicitly checks if we are beyond the current vartable size: */
+      // testing for "param" implicitly checks if we are beyond the current vartable size:
       if ( vartable[varID].param == param )
         {
-          int no_of_tiles = -1;
-          if ( tiles ) no_of_tiles = tiles->numberOfTiles;
-          int vt_no_of_tiles = -1;
-          if ( vartable[varID].tiles )
-            vt_no_of_tiles = subtypeGetGlobalDataP(vartable[varID].tiles,
-                                                   SUBTYPE_ATT_NUMBER_OF_TILES);
+          const int no_of_tiles = tiles ? tiles->numberOfTiles : -1;
+          const int vt_no_of_tiles = vartable[varID].tiles ?
+            subtypeGetGlobalDataP(vartable[varID].tiles, SUBTYPE_ATT_NUMBER_OF_TILES) : -1;
           if ( (vartable[varID].zaxistype  == zaxistype)               &&
                (vartable[varID].ltype1     == ltype1   )               &&
                (vartable[varID].tsteptype  == tsteptype)               &&
@@ -189,10 +185,11 @@ void varFree(void)
 
       if ( vartable[varID].opt_grib_kvpair )
         {
-          for (int i=0; i<vartable[varID].opt_grib_nentries; i++) {
-            if ( vartable[varID].opt_grib_kvpair[i].keyword )
-              Free(vartable[varID].opt_grib_kvpair[i].keyword);
-          }
+          for (int i=0; i<vartable[varID].opt_grib_nentries; i++)
+            {
+              if ( vartable[varID].opt_grib_kvpair[i].keyword )
+                Free(vartable[varID].opt_grib_kvpair[i].keyword);
+            }
           Free(vartable[varID].opt_grib_kvpair);
         }
       vartable[varID].opt_grib_nentries    = 0;
@@ -200,21 +197,17 @@ void varFree(void)
       vartable[varID].opt_grib_kvpair      = NULL;
     }
 
-  if ( vartable )
-    Free(vartable);
-
+  if ( vartable ) Free(vartable);
   vartable = NULL;
   varTablesize = 0;
   varTableUsed = 0;
 
-  if ( Vct )
-    Free(Vct);
-
+  if ( Vct ) Free(Vct);
   Vct = NULL;
   Vctsize = 0;
 }
 
-/* Search for a tile subtype with subtypeIndex == tile_index. */
+// Search for a tile subtype with subtypeIndex == tile_index.
 static int tileGetEntry(unsigned varID, int tile_index)
 {
   for (int isub=0; isub<vartable[varID].nsubtypes; isub++)
@@ -283,27 +276,20 @@ static int levelNewEntry(unsigned varID, int level1, int level2, int tileID)
   int levelTableSize = vartable[varID].recordTable[tileID].levelTableSize;
   leveltable_t *levelTable = vartable[varID].recordTable[tileID].levelTable;
 
-  /*
-    Look for a free slot in levelTable.
-    (Create the table the first time through).
-  */
+  // Look for a free slot in levelTable. (Create the table the first time through).
   if ( ! levelTableSize )
     {
       levelTableSize = 2;
-      levelTable = (leveltable_t *) Malloc((size_t)levelTableSize
-                                           * sizeof (leveltable_t));
-      for ( int i = 0; i < levelTableSize; i++ )
-        levelTable[i].recID = CDI_UNDEFID;
+      levelTable = (leveltable_t *) Malloc((size_t)levelTableSize * sizeof (leveltable_t));
+      for ( int i = 0; i < levelTableSize; i++ ) levelTable[i].recID = CDI_UNDEFID;
     }
   else
     {
-      while( levelID < levelTableSize
-             && levelTable[levelID].recID != CDI_UNDEFID )
+      while( levelID < levelTableSize && levelTable[levelID].recID != CDI_UNDEFID )
         ++levelID;
     }
-  /*
-    If the table overflows, double its size.
-  */
+
+  // If the table overflows, double its size.
   if ( levelID == levelTableSize )
     {
       levelTable = (leveltable_t *) Realloc(levelTable,
@@ -313,9 +299,9 @@ static int levelNewEntry(unsigned varID, int level1, int level2, int tileID)
         levelTable[i].recID = CDI_UNDEFID;
     }
 
-  levelTable[levelID].level1   = level1;
-  levelTable[levelID].level2   = level2;
-  levelTable[levelID].lindex   = levelID;
+  levelTable[levelID].level1 = level1;
+  levelTable[levelID].level2 = level2;
+  levelTable[levelID].lindex = levelID;
 
   vartable[varID].recordTable[tileID].nlevels        = (unsigned)levelID+1;
   vartable[varID].recordTable[tileID].levelTableSize = levelTableSize;
@@ -331,15 +317,11 @@ paramNewEntry(int param)
 {
   unsigned varID = 0;
 
-  /*
-    Look for a free slot in vartable.
-    (Create the table the first time through).
-  */
+  // Look for a free slot in vartable. (Create the table the first time through).
   if ( ! varTablesize )
     {
       varTablesize = 2;
-      vartable = (vartable_t *) Malloc((size_t)varTablesize
-                                       * sizeof (vartable_t));
+      vartable = (vartable_t *) Malloc((size_t)varTablesize * sizeof (vartable_t));
       if( vartable == NULL )
 	{
           Message("varTablesize = %d", varTablesize);
@@ -362,9 +344,8 @@ paramNewEntry(int param)
 	  varID++;
 	}
     }
-  /*
-    If the table overflows, double its size.
-  */
+
+  // If the table overflows, double its size.
   if ( varID == varTablesize )
     {
       vartable = (vartable_t *) Realloc(vartable, (size_t)(varTablesize *= 2)
@@ -383,30 +364,24 @@ paramNewEntry(int param)
   return varID;
 }
 
-
-/* Append tile set to a subtype. Return index of the new tile (i.e.
- * the "entry->self" value). */
+// Append tile set to a subtype. Return index of the new tile (i.e. the "entry->self" value).
 static
 int varInsertTileSubtype(vartable_t *vptr, const var_tile_t *tiles)
 {
   if ( tiles == NULL ) return -1;
 
-  /* first, generate a subtype based on the info in "tiles". */
-
+  // first, generate a subtype based on the info in "tiles".
   subtype_t *subtype_ptr;
   subtypeAllocate(&subtype_ptr, SUBTYPE_TILES);
   subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS, tiles->totalno_of_tileattr_pairs);
   subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_TILE_CLASSIFICATION      , tiles->tileClassification);
   subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_NUMBER_OF_TILES          , tiles->numberOfTiles);
 
-  /*
-   * Here, we create a tile set for comparison that contains only one
-   * tile/attribute pair (based on "tiles").
-   */
+  // Here, we create a tile set for comparison that contains only one tile/attribute pair (based on "tiles").
   struct subtype_entry_t *entry = subtypeEntryInsert(subtype_ptr);
-  subtypeDefEntryDataP(entry, SUBTYPE_ATT_NUMBER_OF_ATTR,            tiles->numberOfAttributes);
-  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEINDEX,                 tiles->tileindex);
-  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEATTRIBUTE,             tiles->attribute);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_NUMBER_OF_ATTR, tiles->numberOfAttributes);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEINDEX,      tiles->tileindex);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEATTRIBUTE,  tiles->attribute);
 
   if (vptr->tiles == NULL) {
     vptr->tiles = subtype_ptr;
@@ -471,8 +446,8 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 
   if ( prec > vartable[varID].prec ) vartable[varID].prec = prec;
 
-  /* append current tile to tile subtype info. */
-  int this_tile = varInsertTileSubtype(&vartable[varID], tiles);
+  // append current tile to tile subtype info.
+  const int this_tile = varInsertTileSubtype(&vartable[varID], tiles);
   int tileID = tileGetEntry(varID, this_tile);
   if ( tile_index ) (*tile_index) = this_tile;
   if ( tileID == CDI_UNDEFID )
@@ -482,8 +457,8 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       vartable[varID].nsubtypes++;
     }
 
-  /* append current level to level table info */
-  int levelID = levelNewEntry(varID, level1, level2, tileID);
+  // append current level to level table info
+  const int levelID = levelNewEntry(varID, level1, level2, tileID);
   if (CDI_Debug)
     Message("vartable[%d].recordTable[%d].levelTable[%d].recID = %d; level1,2=%d,%d",
             varID, tileID, levelID, recID, level1, level2);
@@ -664,9 +639,9 @@ void cdi_generate_vars(stream_t *streamptr)
           bool linc = true, ldec = true, lsort = false;
           for ( unsigned levelID = 1; levelID < nlevels; levelID++ )
             {
-              /* check increasing of levels */
+              // check increasing of levels
               linc &= (dlevels[levelID] > dlevels[levelID-1]);
-              /* check decreasing of levels */
+              // check decreasing of levels
               ldec &= (dlevels[levelID] < dlevels[levelID-1]);
             }
           /*
