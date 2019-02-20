@@ -1,3 +1,7 @@
+2019-02-20  Uwe Schulzweida
+
+	* uvRelativeToGrid: changed flag from grid to variable
+
 2019-02-15  Uwe Schulzweida
 
 	* cdfScanVarAttr: ignore attribute valid_range if min > max (bug fix)
