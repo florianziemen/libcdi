@@ -2980,14 +2980,6 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const doubl
           gribapiSetScanningMode(gh, scanModeIN);
         }
 #endif
-
-      if ( cdiGribChangeModeUvRelativeToGrid.active )
-        {
-          // this will overrule/change the UvRelativeToGrid flag;
-          // typically when the wind is rotated with respect to north pole
-          if (cdiDebugExt>=100) Message("Set ModeUvRelativeToGrid =>%d ( note grid has: %d)", cdiGribChangeModeUvRelativeToGrid.mode, gridInqUvRelativeToGrid(gridID));
-          GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", (long) cdiGribChangeModeUvRelativeToGrid.mode), 0);
-        }
     }
 }
 

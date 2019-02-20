@@ -64,15 +64,6 @@ void streamGrbChangeParameterIdentification(int code, int ltype, int lev)
   cdiGribChangeParameterID.lev = lev;
 }
 
-struct cdiGribModeChange cdiGribChangeModeUvRelativeToGrid;
-
-// Used only for CDO module WindTrans
-void streamGrbChangeModeUvRelativeToGrid(int mode)
-{
-  cdiGribChangeModeUvRelativeToGrid.active = true;
-  cdiGribChangeModeUvRelativeToGrid.mode = (mode > 0);
-}
-
 struct cdiGribScanModeChange cdiGribDataScanningMode;
 
 void streamGrbDefDataScanningMode(int scanmode)
