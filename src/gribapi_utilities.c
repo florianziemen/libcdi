@@ -764,8 +764,9 @@ void gribapiGetGridGeneric(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 }
 
 //TODO: Simplify by use of the convenience functions (gribGetLong(), gribGetLongDefault(), etc.).
-void gribapiGetGrid(grib_handle *gh, grid_t *grid)
+bool gribapiGetGrid(grib_handle *gh, grid_t *grid)
 {
+  bool uvRelativeToGrid = false;
   const long editionNumber = gribEditionNumber(gh);
   int gridtype = gribapiGetGridType(gh);
   int projtype = (gridtype == GRID_PROJECTION && gribapiGetIsRotated(gh)) ? CDI_PROJ_RLL : CDI_UNDEFID;
@@ -834,6 +835,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &temp), 0);
       assert(temp == 0 || temp == 1);
       grid->uvRelativeToGrid = (bool)temp;
+      uvRelativeToGrid = (bool)temp;
     }
 
   if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION )
@@ -863,14 +865,16 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         Message("(param,ltype,level) = (%3d,%3d,%4d); Scanning mode = %02d -> bits:(%1d.%1d.%1d)*32;  uvRelativeToGrid = %02d",\
                 (int)paramId, (int)levelTypeId, (int)levelId,
                 grid->scanningMode,grid->jPointsAreConsecutive,
-                grid->jScansPositively,grid->iScansNegatively,
-                grid->uvRelativeToGrid);
+                grid->jScansPositively, grid->iScansNegatively,
+                uvRelativeToGrid);
       }
 #endif //HIRLAM_EXTENSIONS
     }
 
   grid->type  = gridtype;
   grid->projtype  = projtype;
+
+  return uvRelativeToGrid;
 }
 #endif
 /*

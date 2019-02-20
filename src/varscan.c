@@ -560,7 +560,7 @@ int cdi_generate_cmp_varname(const void *s1, const void *s2)
 
 void cdi_generate_vars(stream_t *streamptr)
 {
-  int vlistID = streamptr->vlistID;
+  const int vlistID = streamptr->vlistID;
 
   int *varids = (int *) Malloc(varTableUsed*sizeof(int));
   for ( size_t varID = 0; varID < varTableUsed; varID++ ) varids[varID] = (int)varID;
@@ -594,29 +594,29 @@ void cdi_generate_vars(stream_t *streamptr)
 
   for ( size_t index = 0; index < varTableUsed; index++ )
     {
-      int varid      = varids[index];
+      const int varid      = varids[index];
 
-      int gridID     = vartable[varid].gridID;
-      int param      = vartable[varid].param;
-      int ltype1     = vartable[varid].ltype1;
-      int ltype2     = vartable[varid].ltype2;
+      const int gridID     = vartable[varid].gridID;
+      const int param      = vartable[varid].param;
+      const int ltype1     = vartable[varid].ltype1;
+      const int ltype2     = vartable[varid].ltype2;
       int zaxistype  = vartable[varid].zaxistype;
       if ( ltype1 == 0 && zaxistype == ZAXIS_GENERIC && cdiDefaultLeveltype != -1 )
 	zaxistype = cdiDefaultLeveltype;
-      int lbounds    = vartable[varid].lbounds;
-      int prec       = vartable[varid].prec;
+      const int lbounds    = vartable[varid].lbounds;
+      const int prec       = vartable[varid].prec;
       int instID     = vartable[varid].instID;
       int modelID    = vartable[varid].modelID;
       int tableID    = vartable[varid].tableID;
-      int tsteptype  = vartable[varid].tsteptype;
-      int timave     = vartable[varid].timave;
-      int comptype   = vartable[varid].comptype;
+      const int tsteptype  = vartable[varid].tsteptype;
+      const int timave     = vartable[varid].timave;
+      const int comptype   = vartable[varid].comptype;
 
       double level_sf = 1;
       if ( vartable[varid].level_sf != 0 ) level_sf = 1./vartable[varid].level_sf;
 
       /* consistency check: test if all subtypes have the same levels: */
-      unsigned nlevels = vartable[varid].recordTable[0].nlevels;
+      const unsigned nlevels = vartable[varid].recordTable[0].nlevels;
       for ( int isub = 1; isub < vartable[varid].nsubtypes; isub++ ) {
         if ( vartable[varid].recordTable[isub].nlevels != nlevels )
           {
@@ -627,8 +627,8 @@ void cdi_generate_vars(stream_t *streamptr)
             Error("zaxis size must not change for same parameter!");
           }
 
-        leveltable_t *t1 = vartable[varid].recordTable[isub-1].levelTable;
-        leveltable_t *t2 = vartable[varid].recordTable[isub  ].levelTable;
+        const leveltable_t *t1 = vartable[varid].recordTable[isub-1].levelTable;
+        const leveltable_t *t2 = vartable[varid].recordTable[isub  ].levelTable;
         for ( unsigned ilev = 0; ilev < nlevels; ilev++ )
           if ((t1[ilev].level1 != t2[ilev].level1)  ||
               (t1[ilev].level2 != t2[ilev].level2)  ||
@@ -763,7 +763,7 @@ void cdi_generate_vars(stream_t *streamptr)
         {
           resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries+1);
           vlistptr->vars[varID].opt_grib_nentries += 1;
-          int idx = vlistptr->vars[varID].opt_grib_nentries-1;
+          const int idx = vlistptr->vars[varID].opt_grib_nentries-1;
 
           vlistptr->vars[varID].opt_grib_kvpair[idx] = vartable[varid].opt_grib_kvpair[i];
           vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = NULL;
