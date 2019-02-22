@@ -1,12 +1,16 @@
 #! /usr/bin/env bash
 #
 # default configuration options and compiler flags for different hosts
+LIBSDIR=/work/k20200/k202125/opt/libs
 #
+module purge
+
 if test -z "$1" ; then
   HOSTNAME=`hostname`
 else
   HOSTNAME=$1
 fi
+SETUP=${SETUP:-intel17-ompi202}
 set -x
 cwd=`pwd -P`
 srcd="$(readlink -f ${0})"
@@ -19,47 +23,237 @@ elif [[ "$srcd" = "$cwd" ]]; then
 else
   confpath="${srcd}"
 fi
+echo "HOSTNAME:${HOSTNAME}"
+echo "SETUP:${SETUP}"
 #
 case "${HOSTNAME}" in
-# powerpc-ibm-aix6.1.0.0
-  blizzard*|passat*)
-    export MP_PROCS=1
-    export MP_HOSTFILE="${cwd}/hostfile"
-    hostname >"$MP_HOSTFILE"
-    export PKG_CONFIG_PATH="/sw/aix61/yaxt-0.1.5-64bit/lib/pkgconfig:/sw/aix61/ppm-1.0.2-64bit-xl-pe-noomp/lib/pkgconfig:${PKG_CONFIG_PATH+:$PKG_CONFIG_PATH}"
-    OPTFLAGS='-O3 -qarch=pwr6 -qtune=pwr6'
-    export CONFIG_SHELL=/bin/bash
-    # add shared library wrappers to PATH
-    case ":$PATH:" in
-      *:/sw/aix61/smartmpxlf/bin:*)
+  mlogin*)
+    case "${SETUP}" in
+      gcc7-openmpi202p2)
+        
+         SPACKENV_SH=/work/k20200/k202125/src/spack/share/spack/setup-env.sh;
+        SPACKENV_CSH=/work/k20200/k202125/src/spack/share/spack/setup-env.sh;
+        if test "x${SHELL}" = 'xtcsh'; then source ${SPACKENV_CSH}; else source ${SPACKENV_SH}; fi;
+        CDI_SRC=${CDI_SRC:-.}
+        spack load -r /ochh3qn;
+        spack load -r /u7pouu7;
+        spack load -r /cyq76so;
+        ${CDI_SRC}/configure  \
+        --prefix=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/libcdi-1.9.5-vilwh7b72cg47de4aeilad4bbffibynw  \
+        --enable-service --enable-extra --enable-ieg  \
+        --disable-hirlam-extensions --disable-swig --disable-ruby  \
+        --disable-python  \
+        --with-netcdf=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/netcdf-4.6.2-cyq76so2nfl7umlltb2uv2rtxpmvxyq2  \
+        --with-threads --without-grib_api --enable-cgribex --without-szlib  \
+        --enable-iso-c-interface --enable-cf-interface --enable-mpi  \
+        CC=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/openmpi-2.0.2p3-qigwpmjhtg443dv3lpkivhqq3xnqecbu/bin/mpicc  \
+        FC=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/openmpi-2.0.2p3-qigwpmjhtg443dv3lpkivhqq3xnqecbu/bin/mpif90  \
+        F77=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/openmpi-2.0.2p3-qigwpmjhtg443dv3lpkivhqq3xnqecbu/bin/mpif90  \
+        MPI_LAUNCH=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/openmpi-2.0.2p3-qigwpmjhtg443dv3lpkivhqq3xnqecbu/bin/mpirun  \
+        PKG_CONFIG_PATH=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/ppm-1.0.5p1-mbebe2mmgb2ov7epwh26d7pmsdscthzd/lib/pkgconfig:/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/yaxt-0.6.0-jo7fx5yoera7exefxchgnevnncpm42sh/lib/pkgconfig
+          make && make check
         ;;
-      *)
-        PATH="/sw/aix61/smartmpxlf/bin:$PATH"
+      intel16-openmpi202p2)
+
+        BUILD_DIR=`pwd`/build-cdi-openmpi-2.0.2p2
+        INST_DIR=`pwd`/inst-cdi-openmpi-2.0.2p2
+        SRC_DIR=`pwd`/cdi
+
+
+        AEC_DIR=/sw/rhel6-x64/sys/libaec-0.3.2-intel14
+        NETCDFC_DIR=/sw/rhel6-x64/netcdf/netcdf_c-4.4.0-parallel-openmpi2-intel14
+        PNETCDF_DIR=/sw/rhel6-x64/netcdf/parallel_netcdf-1.6.1-openmpi2-intel14
+        ECCODES_DIR=/sw/rhel6-x64/eccodes/eccodes-2.6.0-gcc64
+        HDF5_DIR=/sw/rhel6-x64/hdf5/hdf5-1.8.18-parallel-openmpi2-intel14
+
+        SCALES_PPM_DIR=${LIBSDIR}/ppm-intel16-openmpi-2.0.2p2
+        YAXT_DIR=${LIBSDIR}/yaxt-intel16-openmpi-2.0.2p2
+
+        export PKG_CONFIG_PATH="${SCALES_PPM_DIR}/lib/pkgconfig:${YAXT_DIR}/lib/pkgconfig${PKG_CONFIG_PATH+:$PKG_CONFIG_PATH}"
+        export ROMIO_HINTS="${SRC_DIR}/bullxmpi-lustre-fail-workaround-romio-hints.txt"
+
+
+
+        module purge
+        module load intel/16.0 openmpi/2.0.2p2_hpcx-intel14
+
+
+        CDI_SRC=${CDI_SRC:-.}
+        ${CDI_SRC}/configure CC=mpicc \
+          CFLAGS="-g -fp-model precise -fno-math-errno -march=native" \
+          CPPFLAGS=-I/usr/include/jasper \
+          FC=mpif90 \
+          F77=mpif77 \
+          FCFLAGS="-g -fp-model precise -fno-math-errno -march=native" \
+          CXX=mpic++ \
+          CXXFLAGS="-g -fp-model precise -fno-math-errno -march=native" \
+          LDFLAGS=-g \
+          MPI_LAUNCH=`which mpirun` \
+          LIBS=-Wl,-rpath,$NETCDFC_DIR/lib:$HDF5_DIR/lib:$PNETCDF_DIR/lib:$ECCODES_DIR/lib:$AEC_DIR/lib \
+          --enable-mpi \
+          --with-hdf5=$HDF5_DIR \
+          --with-netcdf=$NETCDFC_DIR \
+          --with-szlib=$AEC_DIR \
+          --with-eccodes=$ECCODES_DIR \
+          --with-jasper \
+          --enable-iso-c-interface \
+          --prefix=$INST_DIR
+          make && make check
+        ;;
+      intel18-mpich)
+
+        SPACKENV_SH=/work/k20200/k202125/src/spack/share/spack/setup-env.sh;
+        SPACKENV_CSH=/work/k20200/k202125/src/spack/share/spack/setup-env.sh;
+        if test "x${SHELL}" = 'xtcsh'; then source ${SPACKENV_CSH}; else source ${SPACKENV_SH}; fi;
+          spack load -r /wqvrvlb;
+          CDI_SRC=${CDI_SRC:-.}
+          ${CDI_SRC}/configure --prefix=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/intel-18.0.2/libcdi-1.8.2-wqvrvlbo5q3lxcyuq36odlwogrri6uag --enable-service --enable-extra --enable-ieg --disable-hirlam-extensions --disable-swig --disable-ruby --disable-python --with-netcdf=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/intel-18.0.2/netcdf-4.6.2-beu3hwjpmhvmf6zjqdtoadixhdemezhg --with-threads LIBS=-leccodes --with-grib_api --enable-cgribex --without-szlib --enable-iso-c-interface --enable-cf-interface --enable-mpi CC=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/intel-18.0.2/mpich-3.3-fzigj77tiugsgcbcf7giumn3imruzpo5/bin/mpicc FC=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/intel-18.0.2/mpich-3.3-fzigj77tiugsgcbcf7giumn3imruzpo5/bin/mpif90 F77=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/intel-18.0.2/mpich-3.3-fzigj77tiugsgcbcf7giumn3imruzpo5/bin/mpif90 MPI_LAUNCH=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/intel-18.0.2/mpich-3.3-fzigj77tiugsgcbcf7giumn3imruzpo5/bin/mpirun PKG_CONFIG_PATH=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/intel-18.0.2/ppm-1.0.5p1-bvwppx2rch3eks365jc4md3awjvrwgid/lib/pkgconfig:/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/intel-18.0.2/yaxt-0.6.0-ok2texrlbqufde6ledr55chstqipkinw/lib/pkgconfig
+          make && make check
+          ;;
+
+      nag-mvapich)
+
+          CC=gcc
+          module purge
+          module load nag/6.0.1064
+          module load gcc/6.2.0
+          module load mvapich2/2.1-static-nag60
+          os=x64-linux
+          nagforVersion=$(nagfor -V 2>&1 | sed -n -e '/Release /{' -e 's/.*Release \([0-9.]*\).*/\1/;p;q;}')
+          compiler="nag${nagforVersion}"
+          mpi=mvapich
+          LDOPTFLAGS='-g'
+          CFLAGS="-Og  -mtune=native $LDOPTFLAGS"
+          FCFLAGS="-Wc=$(which gcc) -O0 -C=all -gline -nan -fpp -colour=warn:yellow -wmismatch=mpi_pack,mpi_unpack,mpi_bcast,mpi_send,mpi_recv,mpi_allreduce,mpi_isend,mpi_irecv,mpi_allgather,mpi_allgatherv,mpi_gather,mpi_gatherv,mpi_sendrecv,mpi_type_get_extent,xt_slice_c_loc -w=uda -w=alloctr -w=uep -w=x77 -f2003"
+          MPIROOT=$(which mpicc) ; MPIROOT=${MPIROOT%/bin/mpicc}
+          MPI_FC_INCLUDE="$(mpif90 -compile_info | sed 's/^[^ ]*nagfor / /
+          s/ -pthread / /
+          s/ -mismatch / /
+          s/\( -[Ll][^    ]*\)* / /g
+          s/ -[Ll][^      ]*//
+          s/-[Ll][^       ]* //
+          s/ *-thread_safe */ /;s/ *-dusty */ /
+          s/ -O[0-9]* / /
+          s/^ //')"
+          MPI_FC_LIB="$(mpif90 -link_info | sed 's/^[^ ]*nagfor */ /
+          s/ -mismatch / /
+          s/ -I[^ 	]*\b//g
+          s/ -kind=byte[ 	]*/ /
+          s/ -Wl,-Wl,,-rpath[ 	]*-Wl,-Wl,,\([^ 	]\)/ -Wl,-Wl,,-rpath,,\1/g
+          s/  *-thread_safe  */ /;s/  *-dusty  */ /
+          s/ -O[0-9]* / /
+          s/^ *//')"
+          MPI_C_INCLUDE="$(mpicc -compile_info | sed 's/^[^ ]*gcc / /
+          s/\( -[Ll][^ 	]*\)* / /g
+          s/ -[Ll][^ 	]*//
+          s/-[Ll][^ 	]* //
+          s/ -O[0-9]* / /
+          s/^ *//')"
+          MPI_C_LIB="$(mpicc -link_info | sed 's/^[^ ]*gcc / /
+          s/ -I[^ 	]*\b//g
+          s/ -O[0-9]* / /
+          s/^ *//')"
+
+          CONFIG_SHELL=/bin/bash
+          CDI_SRC=${CDI_SRC:-.}
+          LIBSDIR='/work/k20200/k202125/opt/libs'
+          export PKG_CONFIG_PATH="${LIBSDIR}/yaxt-${os}-${compiler}-${mpi}/lib/pkgconfig:${LIBSDIR}/ppm-${os}-${compiler}-${mpi}/lib/pkgconfig${PKG_CONFIG_PATH+:$PKG_CONFIG_PATH}"
+          ${CDI_SRC}/configure \
+            --prefix="$(pwd)" \
+            --disable-shared \
+            --with-grib_api=/sw/rhel6-x64/grib_api/grib_api-1.15.0-gcc48 \
+            --with-netcdf=/sw/rhel6-x64/netcdf/netcdf_c-4.4.0-static-gcc48 \
+            --with-szlib=/sw/rhel6-x64/sys/libaec-0.3.3-gcc48 \
+            --with-jasper=yes \
+            --enable-mpi \
+            CC=gcc \
+            CFLAGS="${CFLAGS}" \
+            CPPFLAGS="-DNDEBUG" \
+            FC=nagfor \
+            F77=nagfor \
+            FCFLAGS="${FCFLAGS}" \
+            MPI_C_INCLUDE="${MPI_C_INCLUDE}" \
+            MPI_C_LIB="${MPI_C_LIB}" \
+            MPI_FC_INCLUDE="${MPI_FC_INCLUDE}" \
+            MPI_FC_LIB="${MPI_FC_LIB}" \
+            MPI_LAUNCH="$(which mpirun)" \
+            LIBS="-lcurl -luuid" \
+            BUILD_CFLAGS="-Wall -Wextra -Werror -Wno-error=unused-function" \
+            LDFLAGS="${LDOPTFLAGS}"
+          make && make check
+        ;;
+      nag-openmpi202p2)
+
+        module load nag/6.2
+        module load gcc/6.2.0
+        CC=gcc
+        os=x64-linux
+        nagforVersion=$(nagfor -V 2>&1 | sed -n -e '/Release /{' -e 's/.*Release \([0-9.]*\).*/\1/;p;q;}')
+        compiler="nag${nagforVersion}"
+        mpi=mvapich
+        LDOPTFLAGS='-g'
+        CFLAGS="-Og -march=native -mtune=native $LDOPTFLAGS"
+        FCFLAGS="-Wc=$(which gcc) -O0 -Wc,-march=native -Wc,-mtune=native -C=all -gline -nan -fpp -colour=warn:yellow -wmismatch=mpi_pack,mpi_unpack,mpi_bcast,mpi_send,mpi_recv,mpi_allreduce,mpi_isend,mpi_irecv,mpi_allgather,mpi_allgatherv,mpi_gather,mpi_gatherv,mpi_sendrecv,mpi_type_get_extent,xt_slice_c_loc -w=uda -w=alloctr -w=uep -w=x77 -f2003"
+        MPIROOT=$(which mpicc) ; MPIROOT=${MPIROOT%/bin/mpicc}
+        MPI_FC_INCLUDE="$(mpif90 -compile_info | sed 's/^[^ ]*nagfor / /
+        s/ -pthread / /
+        s/ -mismatch / /
+        s/\( -[Ll][^    ]*\)* / /g
+        s/ -[Ll][^      ]*//
+        s/-[Ll][^       ]* //
+        s/ *-thread_safe */ /;s/ *-dusty */ /
+        s/ -O[0-9]* / /
+        s/^ //')"
+        MPI_FC_LIB="$(mpif90 -link_info | sed 's/^[^ ]*nagfor */ /
+        s/ -mismatch / /
+        s/ -I[^ 	]*\b//g
+        s/ -kind=byte[ 	]*/ /
+        s/ -Wl,-Wl,,-rpath[ 	]*-Wl,-Wl,,\([^ 	]\)/ -Wl,-Wl,,-rpath,,\1/g
+        s/  *-thread_safe  */ /;s/  *-dusty  */ /
+        s/ -O[0-9]* / /
+        s/^ *//')"
+        MPI_C_INCLUDE="$(mpicc -compile_info | sed 's/^[^ ]*gcc / /
+        s/\( -[Ll][^ 	]*\)* / /g
+        s/ -[Ll][^ 	]*//
+        s/-[Ll][^ 	]* //
+        s/ -O[0-9]* / /
+        s/^ *//')"
+        MPI_C_LIB="$(mpicc -link_info | sed 's/^[^ ]*gcc / /
+        s/ -I[^ 	]*\b//g
+        s/ -O[0-9]* / /
+        s/^ *//')"
+
+        CONFIG_SHELL=/bin/bash
+        export PKG_CONFIG_PATH="${LIBSDIR}/opt/yaxt-${os}-${compiler}-${mpi}/lib/pkgconfig:${LIBSDIR}/opt/ppm-${os}-${compiler}-${mpi}/lib/pkgconfig${PKG_CONFIG_PATH+:$PKG_CONFIG_PATH}"
+        echo $PKG_CON
+        ./configure \
+          --disable-shared \
+          --with-grib_api=/sw/rhel6-x64/grib_api/grib_api-1.15.0-gcc48 \
+          --with-netcdf=/sw/rhel6-x64/netcdf/netcdf_c-4.4.0-static-gcc48 \
+          --with-szlib=/sw/rhel6-x64/sys/libaec-0.3.3-gcc48 \
+          --with-jasper=yes \
+          --enable-mpi \
+          CC=gcc \
+          CFLAGS="${CFLAGS}" \
+          CPPFLAGS="-DNDEBUG" \
+          FC=nagfor \
+          F77=nagfor \
+          FCFLAGS="${FCFLAGS}" \
+          MPI_C_INCLUDE="${MPI_C_INCLUDE}" \
+          MPI_C_LIB="${MPI_C_LIB}" \
+          MPI_FC_INCLUDE="${MPI_FC_INCLUDE}" \
+          MPI_FC_LIB="${MPI_FC_LIB}" \
+          MPI_LAUNCH="$(which srun) --propagate=STACK,CORE" \
+          LIBS="-lcurl -luuid" \
+          BUILD_CFLAGS="-Wall -Wextra -Werror -Wno-error=unused-function" \
+          LDFLAGS="${LDOPTFLAGS}"
+
+          make && make check
+
         ;;
     esac
-    $CONFIG_SHELL "$confpath/configure" \
-      --prefix="$HOME/opt/cdi-powerpc-ibm-aix6-netcdf4-pe" \
-      --with-netcdf=/sw/aix61/netcdf-4.2.1.1-64bit-parallel \
-      --with-szlib=/sw/aix61/szip-2.1-64bit \
-      AR='ar -X 64' \
-      LDFLAGS='-g -q64 -Wl,-brtl' \
-      CC='smartmpcc_r -qlanglvl=extc99' \
-      CFLAGS="$OPTFLAGS -q64" \
-      CPPFLAGS='-Dextname' \
-      F77=smartmpxlf \
-      FFLAGS="$OPTFLAGS -q64 -qsuffix=cpp=f90 -qextname" \
-      FC=smartmpxlf \
-      FCFLAGS="$OPTFLAGS -q64 -qsuffix=cpp=f90 -qextname" \
-      CXX=smartmpCC_r \
-      LIBS='-L/sw/aix61/parallel-netcdf-1.3.0-64bit/lib -lpnetcdf -L/sw/aix61/curl-7.21.3/lib -lcurl -L/sw/aix61/openssl-1.0.0d/lib -lcrypto -lssl -L/usr/lpp/ppe.poe/lib -lgpfs' \
-      ac_cv_func_mmap_fixed_mapped=yes \
-      --host=powerpc-ibm-aix6.1.0.0 \
-      host_alias=powerpc-ibm-aix6.1.0.0 \
-      --enable-mpi=yes \
-      MPI_LAUNCH="${srcd}/util/mpi_launch_poe"
-    make -j8
-    make -j8 check
-    make install
-    ;;
+  ;;
+  breez*)
+  ;;
 esac
 
