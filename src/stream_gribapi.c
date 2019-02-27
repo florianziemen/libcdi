@@ -34,10 +34,9 @@ typedef struct {
   int level2;
   int ltype;
   int tsteptype;
-  int perturbationNumber;
   size_t gridsize;
   char name[32];
-
+  VarScanKeys scanKeys;
   var_tile_t tiles;
 } compvar2_t;
 
@@ -591,7 +590,7 @@ static
 void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
                       size_t recsize, off_t position, int datatype, int comptype, const char *varname,
                       int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf, int level_unit,
-                      const var_tile_t *tiles, int perturbationNumber, int lread_additional_keys)
+                      VarScanKeys *scanKeys, const var_tile_t *tiles, int lread_additional_keys)
 {
   char stdname[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
 
@@ -615,8 +614,6 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   record->tsteptype = (short)tsteptype;
   record->gridsize  = gribapiGetGridsize(gh);
   record->tiles = tiles ? *tiles : dummy_tiles;
-
-  record->perturbationNumber = perturbationNumber;
 
   strncpy(record->varname, varname, sizeof(record->varname)-1);
   record->varname[sizeof(record->varname) - 1] = 0;
@@ -684,7 +681,7 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
       vlen = CDI_MAX_NAME;
       gribapiGetString(gh, "units", units, vlen);
       vlen = CDI_MAX_NAME;
-      int status = grib_get_string(gh, "cfName", stdname, &vlen);
+      const int status = grib_get_string(gh, "cfName", stdname, &vlen);
       if ( status != 0 || vlen <= 1 || strncmp(stdname, "unknown", 7) == 0 )
         stdname[0] = 0;
     }
@@ -695,7 +692,7 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   int tile_index = 0, varID;
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, level_sf, level_unit,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype1, leveltype2,
-	       varname, stdname, longname, units, tiles, &tile_index, perturbationNumber);
+	       varname, stdname, longname, units, scanKeys, tiles, &tile_index);
 
   record->varID = (short)varID;
   record->levelID = (short)levelID;
@@ -768,8 +765,8 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
 }
 
 static
-compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int tsteptype, long perturbationNumber,
-                         size_t gridsize, char *name, var_tile_t tiles_data)
+compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int tsteptype,
+                         size_t gridsize, char *name, VarScanKeys scanKeys, var_tile_t tiles_data)
 {
   compvar2_t compVar;
   memset(&compVar, 0, sizeof(compvar2_t));
@@ -782,10 +779,10 @@ compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int t
   compVar.level2    = level2;
   compVar.ltype     = leveltype;
   compVar.tsteptype = tsteptype;
-  compVar.perturbationNumber = (int)perturbationNumber;
   compVar.gridsize  = gridsize;
   //memset(compVar.name, 0, maxlen);
   memcpy(compVar.name, name, len);
+  compVar.scanKeys = scanKeys;
   compVar.tiles = tiles_data;
 
   return compVar;
@@ -801,7 +798,6 @@ int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
   compVar0.level2    = record.ilevel2;
   compVar0.ltype     = record.ltype;
   compVar0.tsteptype = record.tsteptype;
-  compVar0.perturbationNumber = record.perturbationNumber;
   compVar0.gridsize  = record.gridsize;
   memcpy(compVar0.name, record.varname, sizeof(compVar.name));
 
@@ -811,6 +807,7 @@ int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
       if ( compVar0.tsteptype == TSTEP_INSTANT3 && compVar.tsteptype == TSTEP_INSTANT  ) compVar0.tsteptype = TSTEP_INSTANT;
     }
 
+  compVar0.scanKeys = record.scanKeys;
   compVar0.tiles = record.tiles;
 
   return memcmp(&compVar0, &compVar, sizeof(compvar2_t));
@@ -912,13 +909,12 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
   streamptr->curTsID = 0;
 
-  int tsID  = tstepsNewEntry(streamptr);
+  const int tsID  = tstepsNewEntry(streamptr);
+  if ( tsID != 0 ) Error("Internal problem! tstepsNewEntry returns %d", tsID);
+
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
-  if ( tsID != 0 )
-    Error("Internal problem! tstepsNewEntry returns %d", tsID);
-
-  int fileID = streamptr->fileID;
+  const int fileID = streamptr->fileID;
 
   unsigned nrecs = 0;
   while ( true )
@@ -945,7 +941,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       nrecs_scanned++;
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_default_missval), 0);
 
-      int param = gribapiGetParam(gh);
+      const int param = gribapiGetParam(gh);
       int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
       var_tile_t tiles = dummy_tiles;
       gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
@@ -964,9 +960,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
           if ( datetimeCmp(datetime, datetime0) || !nrecs ) //Do we really need this condition? I have included it in order not to change the number of times gribapiGetDataDateTime() etc. get called. But if those are sideeffect-free, this condition should be removed.
             {
               datetime0 = datetime;
-
               gribapiGetDataDateTime(gh, &rdate, &rtime);
-
               fcast = gribapiTimeIsFC(gh);
               if ( fcast ) tunit = gribapiGetTimeUnits(gh);
             }
@@ -975,12 +969,16 @@ int gribapiScanTimestep1(stream_t * streamptr)
       long typeOfEnsembleForecast = 0, numberOfForecastsInEnsemble = 0, perturbationNumber = 0;
       gribapiGetEnsembleInfo(gh, &typeOfEnsembleForecast, &numberOfForecastsInEnsemble, &perturbationNumber);
 
+      VarScanKeys scanKeys;
+      varScanKeysInit(&scanKeys);
+      scanKeys.perturbationNumber = (short)perturbationNumber;
+
       if ( nrecs )
         {
           int tsteptype = gribapiGetTsteptype(gh);
           size_t gridsize = gribapiGetGridsize(gh);
           checkTimeResult result = checkTime(streamptr,
-                                             gribapiVarSet(param, level1, level2, leveltype1, tsteptype, perturbationNumber, gridsize, varname, tiles),
+                                             gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles),
                                              &datetime, &datetime0);
           if ( result == CHECKTIME_STOP )
             {
@@ -998,21 +996,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
             }
           assert(result == CHECKTIME_OK || result == CHECKTIME_INCONSISTENT);
         }
-      /*
-      if ( ISEC1_AvgNum )
-        {
-          if (  taxis->numavg && warn_numavg && (taxis->numavg != ISEC1_AvgNum) )
-            {
-              Message("Change numavg from %d to %d not allowed!",
-                      taxis->numavg, ISEC1_AvgNum);
-              warn_numavg = false;
-            }
-          else
-            {
-              taxis->numavg = ISEC1_AvgNum;
-            }
-        }
-      */
+
       nrecs++;
 
       if ( CDI_Debug )
@@ -1025,7 +1009,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname,
-                       leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit, ptiles, perturbationNumber, 1);
+                       leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit, &scanKeys, ptiles, 1);
 
       grib_handle_delete(gh);
       gh = NULL;
@@ -1039,11 +1023,9 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
   cdi_generate_vars(streamptr);
 
-  int taxisID = -1;
-
   taxis->unit = tunit;
   taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
-  taxisID = taxisCreate(taxis->type);
+  int taxisID = taxisCreate(taxis->type);
   taxis->rdate = rdate;
   taxis->rtime = rtime;
   taxis->vdate = (int64_t)datetime0.date;
@@ -1076,16 +1058,15 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
   streamptr->curTsID = 1;
 
-  int fileID  = streamptr->fileID;
-  int vlistID = streamptr->vlistID;
-  int taxisID = vlistInqTaxis(vlistID);
+  const int fileID  = streamptr->fileID;
+  const int vlistID = streamptr->vlistID;
+  const int taxisID = vlistInqTaxis(vlistID);
 
   void *gribbuffer = streamptr->record->buffer;
   size_t buffersize = streamptr->record->buffersize;
 
   int tsID = streamptr->rtsteps;
-  if ( tsID != 1 )
-    Error("Internal problem! unexpected timestep %d", tsID+1);
+  if ( tsID != 1 ) Error("Internal problem! unexpected timestep %d", tsID+1);
 
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -1121,7 +1102,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
       gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_default_missval), 0);
 
-      int param = gribapiGetParam(gh);
+      const int param = gribapiGetParam(gh);
       int level1 = 0, level2 = 0, leveltype1, leveltype2, lbounds, level_sf, level_unit;
       var_tile_t tiles = dummy_tiles;
       gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
@@ -1139,9 +1120,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	  if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 	    {
 	      taxis->type  = TAXIS_RELATIVE;
-
               gribapiGetDataDateTime(gh, &(taxis->rdate), &(taxis->rtime));
-
 	      taxis->unit  = gribapiGetTimeUnits(gh);
 	    }
 	  else
@@ -1155,20 +1134,6 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	  datetime0.time = vtime;
 	}
 
-      /*
-      if ( ISEC1_AvgNum )
-	{
-	  if (  taxis->numavg && warn_numavg &&
-		(taxis->numavg != ISEC1_AvgNum) )
-	    {
-	      warn_numavg = false;
-	    }
-	  else
-	    {
-	      taxis->numavg = ISEC1_AvgNum;
-	    }
-	}
-      */
       DateTime datetime = {
         .date = vdate,
         .time = vtime
@@ -1176,9 +1141,14 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       long typeOfEnsembleForecast = 0, numberOfForecastsInEnsemble = 0, perturbationNumber = 0;
       gribapiGetEnsembleInfo(gh, &typeOfEnsembleForecast, &numberOfForecastsInEnsemble, &perturbationNumber);
+
+      VarScanKeys scanKeys;
+      varScanKeysInit(&scanKeys);
+      scanKeys.perturbationNumber = (short)perturbationNumber;
+
       int tsteptype = gribapiGetTsteptype(gh);
       size_t gridsize = gribapiGetGridsize(gh);
-      compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, perturbationNumber, gridsize, varname, tiles);
+      compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
 
       for ( recID = 0; recID < nrecords; recID++ )
         if ( gribapiVarCompare(compVar, records[recID], 0) == 0 ) break;
@@ -1222,16 +1192,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
       records[recID].position = recpos;
       records[recID].size = recsize;
 
-      int varID = records[recID].varID;
-      /*
-      gridID = vlistInqVarGrid(vlistID, varID);
-      if ( gridInqSize(gridID) == 1 && gridInqType(gridID) == GRID_LONLAT )
-	{
-	  if ( IS_NOT_EQUAL(gridInqXval(gridID, 0),ISEC2_FirstLon*0.001) ||
-	       IS_NOT_EQUAL(gridInqYval(gridID, 0),ISEC2_FirstLat*0.001) )
-	    gridChangeType(gridID, GRID_TRAJECTORY);
-	}
-      */
+      const int varID = records[recID].varID;
+
       if ( tsteptype != vlistInqVarTsteptype(vlistID, varID) )
 	vlistDefVarTsteptype(vlistID, varID, tsteptype);
 
@@ -1302,7 +1264,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	{
 	  if ( rindex > nrecs ) break;
 
-	  size_t recsize = gribGetSize(fileID);
+	  const size_t recsize = gribGetSize(fileID);
 	  recpos = fileGetPos(fileID);
 	  if ( recsize == 0 )
 	    {
@@ -1328,7 +1290,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
 	  GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_default_missval), 0);
 
-          int param = gribapiGetParam(gh);
+          const int param = gribapiGetParam(gh);
           int level1 = 0, level2 = 0, leveltype1, leveltype2 = -1, lbounds, level_sf, level_unit;
           var_tile_t tiles = dummy_tiles;
           gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
@@ -1348,9 +1310,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 		{
 		  taxis->type  = TAXIS_RELATIVE;
-
                   gribapiGetDataDateTime(gh, &(taxis->rdate), &(taxis->rtime));
-
 		  taxis->unit  = gribapiGetTimeUnits(gh);
 		}
 	      else
@@ -1363,20 +1323,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	      datetime0.date = vdate;
 	      datetime0.time = vtime;
 	    }
-	  /*
-	  if ( ISEC1_AvgNum )
-	    {
-	      if (  taxis->numavg && warn_numavg &&
-		   (taxis->numavg != ISEC1_AvgNum) )
-		{
-		  warn_numavg = false;
-		}
-	      else
-		{
-		  taxis->numavg = ISEC1_AvgNum;
-		}
-	    }
-	  */
+
           DateTime datetime = {
             .date  = vdate,
             .time  = vtime
@@ -1384,9 +1331,14 @@ int gribapiScanTimestep(stream_t * streamptr)
 
           long typeOfEnsembleForecast = 0, numberOfForecastsInEnsemble = 0, perturbationNumber = 0;
           gribapiGetEnsembleInfo(gh, &typeOfEnsembleForecast, &numberOfForecastsInEnsemble, &perturbationNumber);
+
+          VarScanKeys scanKeys;
+          varScanKeysInit(&scanKeys);
+          scanKeys.perturbationNumber = (short)perturbationNumber;
+
           int tsteptype = gribapiGetTsteptype(gh);
           size_t gridsize = gribapiGetGridsize(gh);
-          compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, perturbationNumber, gridsize, varname, tiles);
+          compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
 
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
@@ -1744,24 +1696,18 @@ void gribapiDefStepUnits(int editionNumber, grib_handle *gh, int timeunit, int p
 static
 int gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinitionTemplate, int typeOfGeneratingProcess, int tsteptype, int gcinit)
 {
+  const char *stepType = "instant";
   long proDefTempNum = 0;
-  const char *stepType;
 
   if ( tsteptype >= TSTEP_INSTANT && tsteptype <= TSTEP_RATIO )
     {
       stepType = cdiGribAPI_ts_str_map[tsteptype].sname;
       proDefTempNum = cdiGribAPI_ts_str_map[tsteptype].productionTemplate;
     }
-  else
-    {
-      stepType = "instant";
-      proDefTempNum = 0;
-    }
 
   if ( typeOfGeneratingProcess == 4 )
     {
-      if ( proDefTempNum == 8 ) proDefTempNum = 11;
-      else                      proDefTempNum = 1;
+      proDefTempNum = (proDefTempNum == 8) ? 11 : 1;
     }
 
   if ( productDefinitionTemplate != -1 ) proDefTempNum = productDefinitionTemplate;

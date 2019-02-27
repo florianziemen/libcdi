@@ -556,7 +556,7 @@ void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, si
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0, 0,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype, -1,
-               NULL, NULL, NULL, NULL, NULL, NULL, 0);
+               NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
   record->varID = (short)varID;
   record->levelID = (short)levelID;
@@ -731,7 +731,6 @@ int cgribexScanTimestep1(stream_t *streamptr)
   int nrecs_scanned = 0;
   bool warn_time = true;
   bool warn_numavg = true;
-  int taxisID = -1;
   int rdate = 0, rtime = 0, tunit = 0;
   bool fcast = false;
   char paramstr[32];
@@ -860,10 +859,10 @@ int cgribexScanTimestep1(stream_t *streamptr)
 
   taxis->unit = tunit;
   taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
-  taxisID = taxisCreate(taxis->type);
+  int taxisID = taxisCreate(taxis->type);
   taxis->rdate = rdate;
   taxis->rtime = rtime;
-  taxis->vdate = (int)datetime0.date;
+  taxis->vdate = (int64_t)datetime0.date;
   taxis->vtime = (int)datetime0.time;
 
   const int vlistID = streamptr->vlistID;
@@ -887,7 +886,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   off_t recpos = 0;
   int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
-  int nrecs, recID = 0;
+  int recID = 0;
   bool warn_numavg = true;
   char paramstr[32];
 
@@ -1055,7 +1054,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
       rindex++;
     }
 
-  nrecs = 0;
+  int nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
     {
       if ( ! records[recID].used )
@@ -1088,7 +1087,6 @@ int cgribexScanTimestep(stream_t * streamptr)
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int vrecID, recID = 0;
   bool warn_numavg = true;
-  int taxisID = -1;
   int nrecs = 0;
   char paramstr[32];
 
@@ -1155,7 +1153,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  if ( rindex == 0 )
 	    {
               const int vlistID = streamptr->vlistID;
-	      taxisID = vlistInqTaxis(vlistID);
+	      int taxisID = vlistInqTaxis(vlistID);
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 		{
 		  taxis->type  = TAXIS_RELATIVE;

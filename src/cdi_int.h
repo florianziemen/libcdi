@@ -137,8 +137,7 @@ typedef struct
 }
 Record;
 
-/* data structure specifying tile-related meta-data. structure
- * contains "-1" if this is no tile-variable. */
+// data structure specifying tile-related meta-data. structure contains "-1" if this is no tile-variable.
 typedef struct {
   int
     tileindex,
@@ -150,6 +149,23 @@ typedef struct {
 } var_tile_t;
 
 
+typedef struct {
+  short perturbationNumber;
+  //short typeOfGeneratingProcess;
+} VarScanKeys;
+
+static inline void
+varScanKeysInit(VarScanKeys *scanKeys)
+{
+  memset(scanKeys, 0, sizeof(VarScanKeys));
+}
+
+static inline bool
+varScanKeysIsEqual(const VarScanKeys *s1, const VarScanKeys *s2)
+{
+  return memcmp(s1, s2, sizeof(VarScanKeys)) == 0;
+}
+
 typedef struct
 {
   off_t     position;
@@ -160,12 +176,12 @@ typedef struct
   int       ilevel;
   int       ilevel2;
   int       ltype;
-  short     perturbationNumber;
   short     tsteptype;
   short     varID;
   short     levelID;
   short     used;
   char      varname[32]; // needed for grib decoding with GRIB_API
+  VarScanKeys scanKeys;
   var_tile_t tiles;      // tile-related meta-data, currently for GRIB-API only.
 }
 record_t;

@@ -497,9 +497,9 @@ static
 void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct,
 		  size_t recsize, off_t position, int prec)
 {
-  int vlistID = streamptr->vlistID;
-  int tsID    = streamptr->curTsID;
-  int recID   = recordNewEntry(streamptr, tsID);
+  const int vlistID = streamptr->vlistID;
+  const int tsID    = streamptr->curTsID;
+  const int recID   = recordNewEntry(streamptr, tsID);
   record_t *record = &streamptr->tsteps[tsID].records[recID];
 
   int level1, level2;
@@ -529,8 +529,8 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
   grid_init(grid);
   cdiGridTypeInit(grid, gridtype, IEG_G_NumLon(gdb)*IEG_G_NumLat(gdb));
-  size_t xsize = (size_t)IEG_G_NumLon(gdb);
-  size_t ysize = (size_t)IEG_G_NumLat(gdb);
+  const size_t xsize = (size_t)IEG_G_NumLon(gdb);
+  const size_t ysize = (size_t)IEG_G_NumLat(gdb);
   grid->x.size = xsize;
   grid->y.size = ysize;
   grid->x.inc  = 0;
@@ -539,7 +539,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
 
   int iresfac = IEG_G_ResFac(gdb);
   if ( iresfac == 0 ) iresfac = 1000;
-  double resfac = 1./(double) iresfac;
+  const double resfac = 1./(double) iresfac;
 
   /* if ( IEG_G_FirstLon != 0 || IEG_G_LastLon != 0 ) */
   {
@@ -553,7 +553,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
 	/* correct xinc if necessary */
 	if ( IEG_G_FirstLon(gdb) == 0 && IEG_G_LastLon(gdb) > 354000 )
 	  {
-	    double xinc = 360. / xsize;
+	    const double xinc = 360. / xsize;
             /* FIXME: why not use grid->x.inc != xinc as condition? */
 	    if ( fabs(grid->x.inc-xinc) > 0.0 )
 	      {
@@ -590,7 +590,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
     }
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
-  int gridID = gridAdded.Id;
+  const int gridID = gridAdded.Id;
   if ( !gridAdded.isNew ) Free(grid);
   else if ( gridtype == GRID_PROJECTION ) gridDefParamRLL(gridID, xpole, ypole, 0);
 
@@ -606,14 +606,14 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
       varDefVCT(vctsize, tmpvct);
     }
 
-  int lbounds = IEG_P_LevelType(pdb) == IEG_LTYPE_HYBRID_LAYER ? 1 : 0;
+  const int lbounds = IEG_P_LevelType(pdb) == IEG_LTYPE_HYBRID_LAYER ? 1 : 0;
 
-  int datatype = iegInqDatatype(prec);
+  const int datatype = iegInqDatatype(prec);
 
   int varID, levelID = 0;
   varAddRecord(recID, param, gridID, leveltype, lbounds, level1, level2, 0, 0,
 	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1,
-               NULL, NULL, NULL, NULL, NULL, NULL, 0);
+               NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
   record->varID   = (short)varID;
   record->levelID = (short)levelID;

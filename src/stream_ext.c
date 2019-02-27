@@ -167,9 +167,9 @@ static
 void extAddRecord(stream_t *streamptr, int param, int level, size_t xysize,
 		  size_t recsize, off_t position, int prec, int number)
 {
-  int vlistID = streamptr->vlistID;
-  int tsID    = streamptr->curTsID;
-  int recID   = recordNewEntry(streamptr, tsID);
+  const int vlistID = streamptr->vlistID;
+  const int tsID    = streamptr->curTsID;
+  const int recID   = recordNewEntry(streamptr, tsID);
   record_t *record = &streamptr->tsteps[tsID].records[recID];
 
   record->size     = recsize;
@@ -183,16 +183,16 @@ void extAddRecord(stream_t *streamptr, int param, int level, size_t xysize,
   grid->x.size = xysize;
   grid->y.size = 0;
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
-  int gridID = gridAdded.Id;
+  const int gridID = gridAdded.Id;
   if (!gridAdded.isNew) Free(grid);
 
-  int leveltype = ZAXIS_GENERIC;
-  int datatype = extInqDatatype(prec, number);
+  const int leveltype = ZAXIS_GENERIC;
+  const int datatype = extInqDatatype(prec, number);
 
   int varID, levelID = 0;
   varAddRecord(recID, param, gridID, leveltype, 0, level, 0, 0, 0,
                datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1,
-               NULL, NULL, NULL, NULL, NULL, NULL, 0);
+               NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
   record->varID   = (short)varID;
   record->levelID = (short)levelID;
