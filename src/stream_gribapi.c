@@ -423,6 +423,23 @@ int gribapiGetEnsembleInfo(grib_handle *gh, long *typeOfEnsembleForecast, long *
 }
 
 static
+VarScanKeys gribapiGetScanKeys(grib_handle *gh)
+{
+  VarScanKeys scanKeys;
+  varScanKeysInit(&scanKeys);
+
+  long typeOfEnsembleForecast = 0, numberOfForecastsInEnsemble = 0, perturbationNumber = 0;
+  gribapiGetEnsembleInfo(gh, &typeOfEnsembleForecast, &numberOfForecastsInEnsemble, &perturbationNumber);
+  scanKeys.perturbationNumber = (short)perturbationNumber;
+
+  long typeOfGeneratingProcess = 0;
+  if (grib_get_long(gh, "typeOfGeneratingProcess", &typeOfGeneratingProcess) == 0)
+    scanKeys.typeOfGeneratingProcess = (short)typeOfGeneratingProcess;
+
+  return scanKeys;
+}
+
+static
 void gribapiGetKeys(grib_handle *gh, int varID)
 {
   long tablesVersion = 0;
@@ -966,12 +983,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
             }
         }
 
-      long typeOfEnsembleForecast = 0, numberOfForecastsInEnsemble = 0, perturbationNumber = 0;
-      gribapiGetEnsembleInfo(gh, &typeOfEnsembleForecast, &numberOfForecastsInEnsemble, &perturbationNumber);
-
-      VarScanKeys scanKeys;
-      varScanKeysInit(&scanKeys);
-      scanKeys.perturbationNumber = (short)perturbationNumber;
+      VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
       if ( nrecs )
         {
@@ -1139,12 +1151,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
         .time = vtime
       };
 
-      long typeOfEnsembleForecast = 0, numberOfForecastsInEnsemble = 0, perturbationNumber = 0;
-      gribapiGetEnsembleInfo(gh, &typeOfEnsembleForecast, &numberOfForecastsInEnsemble, &perturbationNumber);
-
-      VarScanKeys scanKeys;
-      varScanKeysInit(&scanKeys);
-      scanKeys.perturbationNumber = (short)perturbationNumber;
+      VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
       int tsteptype = gribapiGetTsteptype(gh);
       size_t gridsize = gribapiGetGridsize(gh);
@@ -1324,17 +1331,9 @@ int gribapiScanTimestep(stream_t * streamptr)
 	      datetime0.time = vtime;
 	    }
 
-          DateTime datetime = {
-            .date  = vdate,
-            .time  = vtime
-          };
+          DateTime datetime = { .date  = vdate, .time  = vtime };
 
-          long typeOfEnsembleForecast = 0, numberOfForecastsInEnsemble = 0, perturbationNumber = 0;
-          gribapiGetEnsembleInfo(gh, &typeOfEnsembleForecast, &numberOfForecastsInEnsemble, &perturbationNumber);
-
-          VarScanKeys scanKeys;
-          varScanKeysInit(&scanKeys);
-          scanKeys.perturbationNumber = (short)perturbationNumber;
+          VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
           int tsteptype = gribapiGetTsteptype(gh);
           size_t gridsize = gribapiGetGridsize(gh);

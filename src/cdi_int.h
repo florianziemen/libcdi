@@ -151,13 +151,13 @@ typedef struct {
 
 typedef struct {
   short perturbationNumber;
-  //short typeOfGeneratingProcess;
+  short typeOfGeneratingProcess;
 } VarScanKeys;
 
 static inline void
-varScanKeysInit(VarScanKeys *scanKeys)
+varScanKeysInit(VarScanKeys *s)
 {
-  memset(scanKeys, 0, sizeof(VarScanKeys));
+  memset(s, 0, sizeof(VarScanKeys));
 }
 
 static inline bool

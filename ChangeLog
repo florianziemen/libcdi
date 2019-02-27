@@ -1,3 +1,7 @@
+2019-02-27  Uwe Schulzweida
+
+	* GRIB2: added support for inventory key typeOfGeneratingProcess
+
 2019-02-20  Uwe Schulzweida
 
 	* uvRelativeToGrid: changed flag from grid to variable
