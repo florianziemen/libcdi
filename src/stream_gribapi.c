@@ -103,10 +103,9 @@ int gribapiGetTimeUnits(grib_handle *gh)
 static
 void gribapiGetSteps(grib_handle *gh, int timeunits, int *startStep, int *endStep)
 {
-  int timeunits2 = timeunits;
   long unitsOfTime;
   int status = grib_get_long(gh, "stepUnits", &unitsOfTime);
-  if ( status == 0 ) timeunits2 = getTimeunits(unitsOfTime);
+  const int timeunits2 = (status == 0) ? getTimeunits(unitsOfTime) : timeunits;
   //timeunits2 = gribapiGetTimeUnits(gh);
 
   long lpar;
@@ -164,16 +163,12 @@ int gribapiGetValidityDateTime(grib_handle *gh, int64_t *vdate, int *vtime)
       int rtime;
       gribapiGetDataDateTime(gh, &rdate, &rtime);
 
-      int timeUnits = gribapiGetTimeUnits(gh);
+      const int timeUnits = gribapiGetTimeUnits(gh);
       int startStep = 0, endStep = 0;
       gribapiGetSteps(gh, timeUnits, &startStep, &endStep);
 
-      int range = endStep - startStep;
-      if ( range > 0 )
-	{
-	  if ( startStep == 0 ) tstepRange = -1;
-	  else                  tstepRange =  1;
-	}
+      const int range = endStep - startStep;
+      if ( range > 0 ) tstepRange = (startStep == 0) ? -1 : 1;
 
       {
 	int ryear, rmonth, rday, rhour, rminute, rsecond;
@@ -266,7 +261,7 @@ void grib1GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
 }
 
 static
-double grib2ScaleFactor(long factor)
+double grib2ScaleFactor(const long factor)
 {
   switch(factor)
     {
@@ -704,9 +699,9 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
     }
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units);
 
-  /* add the previously read record data to the (intermediate) list of records */
-  int levelID = 0;
-  int tile_index = 0, varID;
+  // add the previously read record data to the (intermediate) list of records
+  int tile_index = 0;
+  int varID = 0, levelID = 0;
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, level_sf, level_unit,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype1, leveltype2,
 	       varname, stdname, longname, units, scanKeys, tiles, &tile_index);
@@ -787,7 +782,7 @@ compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int t
 {
   compvar2_t compVar;
   memset(&compVar, 0, sizeof(compvar2_t));
-  size_t maxlen = sizeof(compVar.name);
+  const size_t maxlen = sizeof(compVar.name);
   size_t len = strlen(name);
   if ( len > maxlen ) len = maxlen;
 
@@ -859,7 +854,7 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
     {
       *outDatatype = CDI_DATATYPE_FLT64;
       long precision;
-      int status = grib_get_long(gh, "precision", &precision);
+      const int status = grib_get_long(gh, "precision", &precision);
       if ( status == 0 && precision == 1 ) *outDatatype = CDI_DATATYPE_FLT32;
     }
   else
@@ -883,10 +878,10 @@ static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const 
     {
       if ( gribapiVarCompare(compVar, streamptr->tsteps[0].records[recID], 1) == 0 ) break;
     }
-  int recordExists = recID < streamptr->nrecs;
+  const bool recordExists = recID < streamptr->nrecs;
 
   // Then we need to know whether the verification time is consistent.
-  int consistentTime = !memcmp(verificationTime, expectedVTime, sizeof(*verificationTime));
+  const bool consistentTime = !memcmp(verificationTime, expectedVTime, sizeof(*verificationTime));
 
   // Finally, we make a decision.
   if ( CDI_inventory_mode == 1 )
@@ -987,8 +982,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       if ( nrecs )
         {
-          int tsteptype = gribapiGetTsteptype(gh);
-          size_t gridsize = gribapiGetGridsize(gh);
+          const int tsteptype = gribapiGetTsteptype(gh);
+          const size_t gridsize = gribapiGetGridsize(gh);
           checkTimeResult result = checkTime(streamptr,
                                              gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles),
                                              &datetime, &datetime0);
@@ -1153,8 +1148,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
-      int tsteptype = gribapiGetTsteptype(gh);
-      size_t gridsize = gribapiGetGridsize(gh);
+      const int tsteptype = gribapiGetTsteptype(gh);
+      const size_t gridsize = gribapiGetGridsize(gh);
       compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
 
       for ( recID = 0; recID < nrecords; recID++ )
@@ -1335,8 +1330,8 @@ int gribapiScanTimestep(stream_t * streamptr)
 
           VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
-          int tsteptype = gribapiGetTsteptype(gh);
-          size_t gridsize = gribapiGetGridsize(gh);
+          const int tsteptype = gribapiGetTsteptype(gh);
+          const size_t gridsize = gribapiGetGridsize(gh);
           compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
 
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
@@ -1754,18 +1749,18 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t rdate, int
 
   (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
 
-  int factor = getTimeunitFactor(timeunit);
+  const int factor = getTimeunitFactor(timeunit);
 
   if ( !(int)(fmod(days*86400.0 + secs, factor)))
     {
-      int proDefTempNum = gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
+      const int proDefTempNum = gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
       gribapiDefStepUnits(editionNumber, gh, timeunit, proDefTempNum, gcinit);
 
       long startStep = 0;
-      double endStepF = (days*86400.0 + secs)/factor;
-      long maxStep = (editionNumber > 1) ? INT_MAX : 65000;
+      const double endStepF = (days*86400.0 + secs)/factor;
+      const long maxStep = (editionNumber > 1) ? INT_MAX : 65000;
       if (endStepF > maxStep) return status;
-      long endStep = (long) endStepF;
+      const long endStep = (long) endStepF;
 
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "stepRange", 0), 0);
@@ -1813,10 +1808,10 @@ void gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOf
 
   if ( taxistype == TAXIS_RELATIVE )
     {
-      int calendar = taxisInqCalendar(taxisID);
-      int64_t rdate = taxisInqRdate(taxisID);
-      int rtime    = taxisInqRtime(taxisID);
-      int timeunit = taxisInqTunit(taxisID);
+      const int calendar = taxisInqCalendar(taxisID);
+      const int64_t rdate = taxisInqRdate(taxisID);
+      const int rtime    = taxisInqRtime(taxisID);
+      const int timeunit = taxisInqTunit(taxisID);
 
       int status = gribapiDefDateTimeRel(editionNumber, gh, rdate, rtime, vdate, vtime, productDefinitionTemplate,
                                          typeOfGeneratingProcess, tsteptype, timeunit, calendar, gcinit);
@@ -1952,14 +1947,14 @@ void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridI
 static
 void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelativeToGrid)
 {
-  long xsize = (long) gridInqXsize(gridID);
-  long ysize = (long) gridInqYsize(gridID);
+  const long xsize = (long) gridInqXsize(gridID);
+  const long ysize = (long) gridInqYsize(gridID);
 
   double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
   gridInqParamLCC(gridID, CDI_grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
   gridVerifyGribParamLCC(CDI_grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
   if ( xval_0 < 0 ) xval_0 += 360;
-  bool lsouth = (lat_1 < 0);
+  const bool lsouth = (lat_1 < 0);
   if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }
   int projflag = 0;
   if ( lsouth ) gribbyte_set_bit(&projflag, 1);
@@ -1983,7 +1978,7 @@ void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRel
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
   if ( uvRelativeToGrid >= 0 ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
-  long earthIsOblate = (IS_EQUAL(a, 6378160.) && IS_EQUAL(rf, 297.));
+  const long earthIsOblate = (IS_EQUAL(a, 6378160.) && IS_EQUAL(rf, 297.));
   if ( earthIsOblate ) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
 
   int scanflag = 0;
@@ -1995,8 +1990,8 @@ void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRel
 static
 void gribapiDefGridSTERE(grib_handle *gh, int editionNumber, int gridID)
 {
-  long xsize = (long) gridInqXsize(gridID);
-  long ysize = (long) gridInqYsize(gridID);
+  const long xsize = (long) gridInqXsize(gridID);
+  const long ysize = (long) gridInqYsize(gridID);
 
   double lon_0, lat_ts, lat_0, a, xval_0, yval_0, x_0, y_0;
   gridInqParamSTERE(gridID, CDI_grid_missval, &lon_0, &lat_ts, &lat_0, &a, &xval_0, &yval_0, &x_0, &y_0);
@@ -2004,8 +1999,8 @@ void gribapiDefGridSTERE(grib_handle *gh, int editionNumber, int gridID)
   if ( xval_0 < 0 ) xval_0 += 360;
   int projflag = 0;
 
-  double xinc = gridInqXinc(gridID);
-  double yinc = gridInqYinc(gridID);
+  const double xinc = gridInqXinc(gridID);
+  const double yinc = gridInqYinc(gridID);
 
   static const char mesg[] = "polar_stereographic";
   size_t len = sizeof(mesg) -1;
@@ -2019,11 +2014,11 @@ void gribapiDefGridSTERE(grib_handle *gh, int editionNumber, int gridID)
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", yval_0), 0);
   GRIB_CHECK(my_grib_set_double(gh, "LaDInDegrees", lat_ts), 0);
   GRIB_CHECK(my_grib_set_double(gh, "orientationOfTheGridInDegrees", lon_0), 0);
-  long southPoleOnProjectionPlane = IS_EQUAL(lat_0, -90.);
+  const long southPoleOnProjectionPlane = IS_EQUAL(lat_0, -90.);
   GRIB_CHECK(my_grib_set_double(gh, "southPoleOnProjectionPlane", southPoleOnProjectionPlane), 0);
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
-  long shapeOfTheEarth = IS_EQUAL(a, 6371229.) ? 6 : 0;
+  const long shapeOfTheEarth = IS_EQUAL(a, 6371229.) ? 6 : 0;
   if ( shapeOfTheEarth ) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
 
   GRIB_CHECK(my_grib_set_long(gh, "resolutionAndComponentFlags", 8), 0);
@@ -2054,7 +2049,7 @@ void gribapiDefGridUnstructured(grib_handle *gh, int gridID)
 {
   static bool warning = true;
 
-  int status = my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
+  const int status = my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
   if ( status != 0 && warning )
     {
       warning = false;
@@ -2081,7 +2076,7 @@ void gribapiDefGridUnstructured(grib_handle *gh, int gridID)
 static
 void gribapiDefGridSpectral(grib_handle *gh, int gridID)
 {
-  int trunc = gridInqTrunc(gridID);
+  const int trunc = gridInqTrunc(gridID);
   enum { numTruncAtt = 3 };
   static const char truncAttNames[numTruncAtt][2] = { "J", "K", "M" };
   for (size_t i = 0; i < numTruncAtt; ++i)
@@ -2150,10 +2145,10 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
   // bitsPerValue have to be defined first (complex packing)
   GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", (long)grbBitsPerValue(datatype)), 0);
 
-  size_t gridsize = gridInqSize(gridID);
+  const size_t gridsize = gridInqSize(gridID);
   bool gridIsRotated = false;
   bool gridIsCurvilinear = false;
-  int gridtype = grbGetGridtype(gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
+  const int gridtype = grbGetGridtype(gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
 
   bool lieee = (editionNumber == 2 && (datatype == CDI_DATATYPE_FLT32 || datatype == CDI_DATATYPE_FLT64));
   bool lspectral = (gridtype == GRID_SPECTRAL);
@@ -2555,9 +2550,9 @@ void gribapiSetScanningMode(grib_handle *gh, int scanningMode)
   // 127: reserved for testing; generated test data will be in 64 scanning mode
   //if (scanningMode== 127)  scanningMode = 64;
 
-  long iScansNegatively      = (scanningMode & 128)/128;
-  long jScansPositively      = (scanningMode & 64)/64;
-  long jPointsAreConsecutive = (scanningMode & 32)/32;
+  const long iScansNegatively      = (scanningMode & 128)/128;
+  const long jScansPositively      = (scanningMode & 64)/64;
+  const long jPointsAreConsecutive = (scanningMode & 32)/32;
 
   if (cdiDebugExt>=30)
   {
@@ -2681,7 +2676,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
       if (cdiDebugExt>=30) printf("convertDataScanningMode(): Generating test data in 64 scanning mode..\n");
       for (j=0; j<jDim; j++)
       {
-        size_t jXiDim = j*iDim;
+        const size_t jXiDim = j*iDim;
         for (i=0; i<iDim; i++)
         {
           idxIN = i + jXiDim;
@@ -3141,9 +3136,9 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 void gribapiChangeParameterIdentification(grib_handle *gh, int code, int ltype, int lev)
 {
   //  timeRangeIndicator: could be included later
-  long indicatorOfParameter = code;
-  long indicatorOfTypeOfLevel = ltype;
-  long level = lev;
+  const long indicatorOfParameter = code;
+  const long indicatorOfTypeOfLevel = ltype;
+  const long level = lev;
 
   if (indicatorOfParameter!=-1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", indicatorOfParameter), 0);
   if (indicatorOfTypeOfLevel!=-1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfTypeOfLevel", indicatorOfTypeOfLevel), 0);

@@ -469,9 +469,6 @@ void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, si
   if ( datatype > 32 ) datatype = CDI_DATATYPE_PACK32;
   if ( datatype <  0 ) datatype = CDI_DATATYPE_PACK;
 
-  int varID;
-  int levelID = 0;
-
   const int vlistID = streamptr->vlistID;
   const int tsID    = streamptr->curTsID;
   const int recID   = recordNewEntry(streamptr, tsID);
@@ -554,6 +551,7 @@ void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, si
 
   const bool lbounds = cgribexGetZaxisHasBounds(leveltype);
 
+  int varID = 0, levelID = 0;
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0, 0,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype, -1,
                NULL, NULL, NULL, NULL, NULL, NULL, NULL);
@@ -617,25 +615,22 @@ static
 void MCH_get_undef(int *isec1, double *undef_pds, double *undef_eps)
 {
   /* 2010-01-13: Oliver Fuhrer */
-  if ( ISEC1_CenterID == 215 ) {
-    if (isec1[34] != 0 && isec1[34] != 255) {
-      if (isec1[34] & 2) {
-        if (isec1[34] & 1) {
-          *undef_pds = -0.99*pow(10.0,-isec1[35]);
-        } else {
-          *undef_pds = +0.99*pow(10.0,-isec1[35]);
+  if ( ISEC1_CenterID == 215 )
+    {
+      if (isec1[34] != 0 && isec1[34] != 255)
+        {
+          if (isec1[34] & 2)
+            {
+              *undef_pds = ((isec1[34] & 1) ? -0.99 : +0.99) * pow(10.0,-isec1[35]);
+              *undef_eps = pow(10.0,-isec1[35]-1);
+            }
+          else
+            {
+              *undef_pds = ((isec1[34] & 1) ? -0.99 : +0.99) * pow(10.0,+isec1[35]);
+              *undef_eps = pow(10.0,isec1[35]-1);
+            }
         }
-        *undef_eps = pow(10.0,-isec1[35]-1);
-      } else {
-        if (isec1[34] & 1) {
-          *undef_pds = -0.99*pow(10.0,+isec1[35]);
-        } else {
-          *undef_pds = +0.99*pow(10.0,+isec1[35]);
-        }
-        *undef_eps = pow(10.0,isec1[35]-1);
-      }
     }
-  }
 }
 
 static
@@ -2029,7 +2024,7 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 {
   cgribexrec_t *cgribexp = (cgribexrec_t *)cgribexNew();
 
-  size_t sec2len = 1024 + 2*gridInqYsize(gridID); // Gaussian reduced grid
+  const size_t sec2len = 1024 + 2*gridInqYsize(gridID); // Gaussian reduced grid
   if (sec2len > cgribexp->sec2len)
     {
       cgribexp->sec2len = sec2len;
