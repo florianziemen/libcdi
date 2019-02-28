@@ -625,7 +625,8 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   record->ltype     = leveltype1;
   record->tsteptype = (short)tsteptype;
   record->gridsize  = gribapiGetGridsize(gh);
-  record->tiles = tiles ? *tiles : dummy_tiles;
+  record->scanKeys  = *scanKeys;
+  record->tiles     = tiles ? *tiles : dummy_tiles;
 
   strncpy(record->varname, varname, sizeof(record->varname)-1);
   record->varname[sizeof(record->varname) - 1] = 0;
@@ -871,6 +872,7 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
 }
 
 typedef enum { CHECKTIME_OK, CHECKTIME_SKIP, CHECKTIME_STOP, CHECKTIME_INCONSISTENT } checkTimeResult;
+
 static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const DateTime* verificationTime, const DateTime* expectedVTime) {
   // First determine whether the current record exists already.
   int recID = 0;
