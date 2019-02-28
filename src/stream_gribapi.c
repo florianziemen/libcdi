@@ -1159,9 +1159,17 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       if ( recID == nrecords )
 	{
-	  gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, varname, param, level1, level2);
-	  return CDI_EUFSTRUCT;
-	}
+          if ( CDI_inventory_mode == 1 )
+            {
+              gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, varname, param, level1, level2);
+              return CDI_EUFSTRUCT;
+            }
+          else
+            {
+              gribWarning("Parameter not defined at timestep 1, skipped!", nrecs_scanned, tsID+1, varname, param, level1, level2);
+              continue;
+            }
+        }
 
       if ( records[recID].used )
         {
@@ -1344,12 +1352,16 @@ int gribapiScanTimestep(stream_t * streamptr)
 
 	  if ( vrecID == nrecs )
 	    {
-	      gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, varname, param, level1, level2);
-
-	      if ( CDI_inventory_mode == 1 )
-		return CDI_EUFSTRUCT;
-	      else
-		continue;
+              if ( CDI_inventory_mode == 1 )
+                {
+                  gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, varname, param, level1, level2);
+                  return CDI_EUFSTRUCT;
+                }
+              else
+                {
+                  gribWarning("Parameter not defined at timestep 1, skipped!", nrecs_scanned, tsID+1, varname, param, level1, level2);
+                  continue;
+                }
 	    }
 
 	  if ( CDI_inventory_mode != 1 )
