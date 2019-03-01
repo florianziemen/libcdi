@@ -888,7 +888,7 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
     {
       char attstring[8192];
       cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
-      cdiDefAttTxt(cdiID, varID, attname, (int)attlen, attstring);
+      cdiDefAttTxt(cdiID, varID, attname, strlen(attstring), attstring);
     }
 }
 

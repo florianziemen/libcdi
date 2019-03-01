@@ -1,3 +1,7 @@
+2019-03-01  Uwe Schulzweida
+
+	* cdf_set_cdi_attr: bug fix for length of string attributes
+
 2019-02-27  Uwe Schulzweida
 
 	* GRIB2: added support for inventory key typeOfGeneratingProcess

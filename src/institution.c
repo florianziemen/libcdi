@@ -181,8 +181,7 @@ institute_t *instituteNewEntry(cdiResH resH, int center, int subcenter,
 
 int institutDef(int center, int subcenter, const char *name, const char *longname)
 {
-  institute_t * instituteptr
-    = instituteNewEntry(CDI_UNDEFID, center, subcenter, name, longname);
+  institute_t *instituteptr = instituteNewEntry(CDI_UNDEFID, center, subcenter, name, longname);
   return instituteptr->self;
 }
 
