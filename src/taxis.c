@@ -1016,7 +1016,7 @@ void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
 }
 
 
-void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
+void timeval2vtime(double timevalue, const taxis_t *taxis, int *vdate, int *vtime)
 {
   int rdate = taxis->rdate;
   int rtime = taxis->rtime;
@@ -1073,20 +1073,20 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
 }
 
 
-double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
+double vtime2timeval(int vdate, int vtime, const taxis_t *taxis)
 {
   double value = 0;
   int julday1, secofday1, julday2, secofday2, days, secs;
 
-  int timeunit = (*taxis).unit;
-  int calendar = (*taxis).calendar;
+  int timeunit = taxis->unit;
+  int calendar = taxis->calendar;
 
-  int rdate = (*taxis).rdate;
-  int rtime = (*taxis).rtime;
+  int rdate = taxis->rdate;
+  int rtime = taxis->rtime;
   if ( rdate == -1 )
     {
-      rdate  = (*taxis).vdate;
-      rtime  = (*taxis).vtime;
+      rdate  = taxis->vdate;
+      rtime  = taxis->vtime;
     }
 
   if ( rdate == 0 && rtime == 0 && vdate == 0 && vtime == 0 ) return value;
@@ -1256,13 +1256,13 @@ void cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
 {
   int julday, secofday, days, secs;
 
-  (*taxis).fc_period = timevalue;
+  taxis->fc_period = timevalue;
 
-  int timeunit = (*taxis).fc_unit;
-  int calendar = (*taxis).calendar;
+  int timeunit = taxis->fc_unit;
+  int calendar = taxis->calendar;
 
-  int vdate = (*taxis).vdate;
-  int vtime = (*taxis).vtime;
+  int vdate = taxis->vdate;
+  int vtime = taxis->vtime;
 
   if ( vdate == 0 && vtime == 0 && DBL_IS_EQUAL(timevalue, 0.) ) return;
 
@@ -1305,12 +1305,13 @@ void cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
 
   decode_caldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
 
-  (*taxis).fdate = cdiEncodeDate(year, month, day);
-  (*taxis).ftime = cdiEncodeTime(hour, minute, second);
+  taxis->fdate = cdiEncodeDate(year, month, day);
+  taxis->ftime = cdiEncodeTime(hour, minute, second);
 }
 
 
-void cdiDecodeTimeval(double timevalue, taxis_t *taxis, int *date, int *time)
+void cdiDecodeTimeval(double timevalue, const taxis_t *taxis,
+                      int *date, int *time)
 {
   if ( taxis->type == TAXIS_ABSOLUTE )
     splitTimevalue(timevalue, taxis->unit, date, time);

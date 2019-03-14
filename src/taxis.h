@@ -40,10 +40,11 @@ void     ptaxisInit(taxis_t* taxis);
 void     ptaxisCopy(taxis_t* dest, taxis_t* source);
 taxis_t* taxisPtr(int taxisID);
 void     cdiSetForecastPeriod(double timevalue, taxis_t *taxis);
-void     cdiDecodeTimeval(double timevalue, taxis_t* taxis, int* date, int* time);
+void     cdiDecodeTimeval(double timevalue, const taxis_t *taxis,
+                          int *date, int *time);
 double   cdiEncodeTimeval(int date, int time, taxis_t* taxis);
-void     timeval2vtime(double timevalue, taxis_t* taxis, int* vdate, int* vtime);
-double   vtime2timeval(int vdate, int vtime, taxis_t *taxis);
+void     timeval2vtime(double timevalue, const taxis_t *taxis, int *vdate, int *vtime);
+double   vtime2timeval(int vdate, int vtime, const taxis_t *taxis);
 
 void    ptaxisDefDatatype(taxis_t *taxisptr, int datatype);
 void    ptaxisDefName(taxis_t *taxisptr, const char *name);
