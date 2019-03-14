@@ -1282,7 +1282,7 @@ int     vlistInqVarSubtype(int vlistID, int varID);
 
 void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision_version);
 
-void gaussaw(double *pa, double *pw, size_t nlat);
+void gaussianLatitudes(double *latitudes, double *weights, size_t nlat);
 
 #ifdef __cplusplus
 }

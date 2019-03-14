@@ -176,10 +176,10 @@ void gauaw(size_t kn, double *restrict pl, double *restrict pw)
 }
 
 
-void gaussaw(double *pa, double *pw, size_t nlat)
+void gaussianLatitudes(double *latitudes, double *weights, size_t nlat)
 {
-  //gauaw_old(pa, pw, nlat);
-  gauaw(nlat, pa, pw);
+  //gauaw_old(latitudes, weights, nlat);
+  gauaw(nlat, latitudes, weights);
 }
 
 
@@ -187,12 +187,12 @@ bool isGaussGrid(size_t ysize, double yinc, const double *yvals)
 {
   bool lgauss = false;
 
-  if ( IS_EQUAL(yinc, 0) && ysize > 2 ) /* check if gaussian */
+  if ( IS_EQUAL(yinc, 0) && ysize > 2 ) // check if gaussian
     {
       size_t i;
       double *yv = (double *) Malloc(ysize*sizeof(double));
       double *yw = (double *) Malloc(ysize*sizeof(double));
-      gaussaw(yv, yw, ysize);
+      gaussianLatitudes(yv, yw, ysize);
       Free(yw);
       for ( i = 0; i < ysize; i++ )
         yv[i] = asin(yv[i])/M_PI*180.0;
@@ -203,7 +203,7 @@ bool isGaussGrid(size_t ysize, double yinc, const double *yvals)
 
       if ( i == ysize ) lgauss = true;
 
-      /* check S->N */
+      // check S->N
       if ( lgauss == false )
         {
           for ( i = 0; i < ysize; i++ )

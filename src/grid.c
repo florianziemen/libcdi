@@ -381,7 +381,7 @@ static
 void calc_gaussgrid(double *restrict yvals, size_t ysize, double yfirst, double ylast)
 {
   double *restrict yw = (double *) Malloc(ysize * sizeof(double));
-  gaussaw(yvals, yw, ysize);
+  gaussianLatitudes(yvals, yw, ysize);
   Free(yw);
   for (size_t i = 0; i < ysize; i++ )
     yvals[i] = asin(yvals[i])/M_PI*180.0;
