@@ -8,7 +8,6 @@
 #include <limits.h>
 
 #include "dmemory.h"
-#include "gaussgrid.h"
 #include "cdi_int.h"
 #include "cdi_uuid.h"
 #include "stream_cdf.h"

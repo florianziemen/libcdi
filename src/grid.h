@@ -169,6 +169,8 @@ int gridVerifyGribParamLCC(double missval, double *lon_0, double *lat_0, double 
 int gridVerifyGribParamSTERE(double missval, double *lon_0, double *lat_ts, double *lat_0,
                              double *a, double *xval_0, double *yval_0, double *x_0, double *y_0);
 
+bool isGaussGrid(size_t ysize, double yinc, const double *yvals);
+
 #endif
 /*
  * Local Variables:

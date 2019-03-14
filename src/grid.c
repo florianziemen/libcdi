@@ -11,7 +11,6 @@
 #include "cdi_int.h"
 #include "cdi_uuid.h"
 #include "grid.h"
-#include "gaussgrid.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
 #include "namespace.h"

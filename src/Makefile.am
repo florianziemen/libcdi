@@ -63,7 +63,6 @@ libcdi_la_SOURCES = 	 \
 	file.c         	 \
 	file.h	 	 \
 	gaussgrid.c      \
-	gaussgrid.h	 \
 	gribapi.c  	 \
 	gribapi.h	 \
 	gribapi_utilities.h \

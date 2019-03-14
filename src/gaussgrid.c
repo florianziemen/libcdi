@@ -11,7 +11,6 @@
 #endif
 
 #include "dmemory.h"
-#include "gaussgrid.h"
 #include "cdi_int.h"
 
 
@@ -136,10 +135,7 @@ void gauaw(size_t kn, double *restrict pl, double *restrict pw)
       ik++;
     }
 
-  /*
-   * 2.1 Find first approximation of the roots of the
-   *     Legendre polynomial of degree kn.
-   */
+  /* 2.1 Find first approximation of the roots of the Legendre polynomial of degree kn */
 
   size_t ins2 = kn/2+(kn % 2);
   double z;
@@ -180,7 +176,7 @@ void gauaw(size_t kn, double *restrict pl, double *restrict pw)
 }
 
 
-void gaussaw(double *restrict pa, double *restrict pw, size_t nlat)
+void gaussaw(double *pa, double *pw, size_t nlat)
 {
   //gauaw_old(pa, pw, nlat);
   gauaw(nlat, pa, pw);

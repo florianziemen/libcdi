@@ -15,7 +15,6 @@
 extern "C" {
 #endif
 
-
 #define  CDI_MAX_NAME             256   // max length of a name
 
 #define  CDI_UNDEFID               -1
@@ -1283,8 +1282,9 @@ int     vlistInqVarSubtype(int vlistID, int varID);
 
 void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision_version);
 
+void gaussaw(double *pa, double *pw, size_t nlat);
 
-#if defined (__cplusplus)
+#ifdef __cplusplus
 }
 #endif
 
