@@ -308,7 +308,7 @@ listInitialize(void)
 /**************************************************************/
 
 static void
-listSizeExtend()
+listSizeExtend(void)
 {
   int nsp = namespaceGetActive();
   checkList(__func__, nsp);
