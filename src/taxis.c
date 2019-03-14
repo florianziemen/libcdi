@@ -1007,7 +1007,7 @@ cdi_encode_timevalue(int days, double secs, int timeunit)
 
 // convert relative time value to CdiDateTime
 static CdiDateTime
-rtimeval2datetime(double timevalue, taxis_t *taxis)
+rtimeval2datetime(double timevalue, const taxis_t *taxis)
 {
   if (IS_EQUAL(timevalue, 0.0)) return taxis->rDateTime;
 
@@ -1053,15 +1053,15 @@ rtimeval2datetime(double timevalue, taxis_t *taxis)
 
 // convert CdiDateTime to relative time value
 static double
-datetime2rtimeval(CdiDateTime vDateTime, taxis_t *taxis)
+datetime2rtimeval(CdiDateTime vDateTime, const taxis_t *taxis)
 {
   double value = 0.0;
 
-  const int calendar = (*taxis).calendar;
-  int timeunits = (*taxis).unit;
+  const int calendar = taxis->calendar;
+  int timeunits = taxis->unit;
   const int timeunits0 = timeunits;
 
-  CdiDateTime rDateTime = (*taxis).rDateTime;
+  CdiDateTime rDateTime = taxis->rDateTime;
 
   if (cdiDateTime_isNull(rDateTime)) rDateTime = (*taxis).vDateTime;
 
@@ -1278,11 +1278,11 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
   const JulianDate julianDate = julianDate_encode(calendar, vDateTime);
   const JulianDate julianDate2 = timevalue_decode(timeunits, timevalue);
 
-  (*taxis).fDateTime = julianDate_decode(calendar, julianDate_sub(julianDate, julianDate2));
+  taxis->fDateTime = julianDate_decode(calendar, julianDate_sub(julianDate, julianDate2));
 }
 
 CdiDateTime
-cdi_decode_timeval(double timevalue, taxis_t *taxis)
+cdi_decode_timeval(double timevalue, const taxis_t *taxis)
 {
   return (taxis->type == TAXIS_ABSOLUTE) ? split_timevalue(timevalue, taxis->unit) : rtimeval2datetime(timevalue, taxis);
 }
