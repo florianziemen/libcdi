@@ -1,3 +1,11 @@
+2019-05-23  Uwe Schulzweida
+
+	* Version 1.9.7 released
+
+2019-03-15  Uwe Schulzweida
+
+	* gridInqParamLCC: set gridtype to GRID_PROJECTION
+
 2019-03-01  Uwe Schulzweida
 
 	* cdf_set_cdi_attr: bug fix for length of string attributes
