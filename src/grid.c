@@ -1013,11 +1013,11 @@ int gridInqProjType(int gridID)
       if ( mapping[0] )
         {
           // clang-format off
-          if      ( strcmp(mapping, "rotated_latitude_longitude") == 0 )   projtype = CDI_PROJ_RLL;
-          else if ( strcmp(mapping, "lambert_azimuthal_equal_area") == 0 ) projtype = CDI_PROJ_LAEA;
-          else if ( strcmp(mapping, "lambert_conformal_conic") == 0 )      projtype = CDI_PROJ_LCC;
-          else if ( strcmp(mapping, "sinusoidal") == 0 )                   projtype = CDI_PROJ_SINU;
-          else if ( strcmp(mapping, "polar_stereographic") == 0 )          projtype = CDI_PROJ_STERE;
+          if      ( strIsEqual(mapping, "rotated_latitude_longitude") )   projtype = CDI_PROJ_RLL;
+          else if ( strIsEqual(mapping, "lambert_azimuthal_equal_area") ) projtype = CDI_PROJ_LAEA;
+          else if ( strIsEqual(mapping, "lambert_conformal_conic") )      projtype = CDI_PROJ_LCC;
+          else if ( strIsEqual(mapping, "sinusoidal") )                   projtype = CDI_PROJ_SINU;
+          else if ( strIsEqual(mapping, "polar_stereographic") )          projtype = CDI_PROJ_STERE;
           // clang-format on
           gridptr->projtype = projtype;
         }
@@ -1970,7 +1970,7 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
   const char *projection = "rotated_latitude_longitude";
   char mapping[CDI_MAX_NAME]; mapping[0] = 0;
   cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapping);
-  if ( mapping[0] && strcmp(mapping, projection) == 0 )
+  if ( mapping[0] && strIsEqual(mapping, projection) )
     {
       int atttype, attlen;
       char attname[CDI_MAX_NAME+1];
@@ -1986,9 +1986,9 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
           double attflt;
           if ( cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, &attflt) )
             {
-              if      ( strcmp(attname, "grid_north_pole_longitude") == 0 ) *xpole = attflt;
-              else if ( strcmp(attname, "grid_north_pole_latitude")  == 0 ) *ypole = attflt;
-              else if ( strcmp(attname, "north_pole_grid_longitude") == 0 ) *angle = attflt;
+              if      ( strIsEqual(attname, "grid_north_pole_longitude") ) *xpole = attflt;
+              else if ( strIsEqual(attname, "grid_north_pole_latitude")  ) *ypole = attflt;
+              else if ( strIsEqual(attname, "north_pole_grid_longitude") ) *angle = attflt;
             }
         }
     }
@@ -3919,7 +3919,7 @@ int gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, do
   const char *projection = "lambert_conformal_conic";
   char mapname[CDI_MAX_NAME]; mapname[0] = 0;
   cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapname);
-  if ( mapname[0] && strcmp(mapname, projection) == 0 )
+  if ( mapname[0] && strIsEqual(mapname, projection) )
     {
       int atttype, attlen;
       char attname[CDI_MAX_NAME+1];
@@ -3937,15 +3937,15 @@ int gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, do
           double attflt[2];
           if ( cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, attflt) )
             {
-              if      ( strcmp(attname, "earth_radius") == 0 )                       *a      = attflt[0];
-              else if ( strcmp(attname, "inverse_flattening") == 0 )                 *rf     = attflt[0];
-              else if ( strcmp(attname, "longitude_of_central_meridian") == 0 )      *lon_0  = attflt[0];
-              else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )      *lat_0  = attflt[0];
-              else if ( strcmp(attname, "false_easting")  == 0 )                     *x_0    = attflt[0];
-              else if ( strcmp(attname, "false_northing") == 0 )                     *y_0    = attflt[0];
-              else if ( strcmp(attname, "longitudeOfFirstGridPointInDegrees") == 0 ) *xval_0 = attflt[0];
-              else if ( strcmp(attname, "latitudeOfFirstGridPointInDegrees")  == 0 ) *yval_0 = attflt[0];
-              else if ( strcmp(attname, "standard_parallel") == 0 )
+              if      ( strIsEqual(attname, "earth_radius") )                       *a      = attflt[0];
+              else if ( strIsEqual(attname, "inverse_flattening") )                 *rf     = attflt[0];
+              else if ( strIsEqual(attname, "longitude_of_central_meridian") )      *lon_0  = attflt[0];
+              else if ( strIsEqual(attname, "latitude_of_projection_origin") )      *lat_0  = attflt[0];
+              else if ( strIsEqual(attname, "false_easting")  )                     *x_0    = attflt[0];
+              else if ( strIsEqual(attname, "false_northing") )                     *y_0    = attflt[0];
+              else if ( strIsEqual(attname, "longitudeOfFirstGridPointInDegrees") ) *xval_0 = attflt[0];
+              else if ( strIsEqual(attname, "latitudeOfFirstGridPointInDegrees")  ) *yval_0 = attflt[0];
+              else if ( strIsEqual(attname, "standard_parallel") )
                 {
                   *lat_1 = attflt[0];
                   *lat_2 = (attlen == 2) ? attflt[1] : attflt[0];
@@ -4094,7 +4094,7 @@ int gridInqParamSTERE(int gridID, double missval, double *lon_0, double *lat_ts,
   const char *projection = "polar_stereographic";
   char mapname[CDI_MAX_NAME]; mapname[0] = 0;
   cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapname);
-  if ( mapname[0] && strcmp(mapname, projection) == 0 )
+  if ( mapname[0] && strIsEqual(mapname, projection) )
     {
       int atttype, attlen;
       char attname[CDI_MAX_NAME+1];
@@ -4112,14 +4112,14 @@ int gridInqParamSTERE(int gridID, double missval, double *lon_0, double *lat_ts,
           double attflt[2];
           if ( cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, attflt) )
             {
-              if      ( strcmp(attname, "earth_radius") == 0 )                          *a      = attflt[0];
-              else if ( strcmp(attname, "standard_parallel") == 0 )                     *lat_ts = attflt[0];
-              else if ( strcmp(attname, "straight_vertical_longitude_from_pole") == 0 ) *lon_0  = attflt[0];
-              else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )         *lat_0  = attflt[0];
-              else if ( strcmp(attname, "false_easting")  == 0 )                        *x_0    = attflt[0];
-              else if ( strcmp(attname, "false_northing") == 0 )                        *y_0    = attflt[0];
-              else if ( strcmp(attname, "longitudeOfFirstGridPointInDegrees") == 0 )    *xval_0 = attflt[0];
-              else if ( strcmp(attname, "latitudeOfFirstGridPointInDegrees")  == 0 )    *yval_0 = attflt[0];
+              if      ( strIsEqual(attname, "earth_radius") )                          *a      = attflt[0];
+              else if ( strIsEqual(attname, "standard_parallel") )                     *lat_ts = attflt[0];
+              else if ( strIsEqual(attname, "straight_vertical_longitude_from_pole") ) *lon_0  = attflt[0];
+              else if ( strIsEqual(attname, "latitude_of_projection_origin") )         *lat_0  = attflt[0];
+              else if ( strIsEqual(attname, "false_easting")  )                        *x_0    = attflt[0];
+              else if ( strIsEqual(attname, "false_northing") )                        *y_0    = attflt[0];
+              else if ( strIsEqual(attname, "longitudeOfFirstGridPointInDegrees") )    *xval_0 = attflt[0];
+              else if ( strIsEqual(attname, "latitudeOfFirstGridPointInDegrees")  )    *yval_0 = attflt[0];
             }
         }
     }
