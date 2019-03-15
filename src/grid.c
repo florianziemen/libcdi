@@ -3878,6 +3878,8 @@ void gridDefParamLCC(int gridID, double missval, double lon_0, double lat_0, dou
   grid_t *gridptr = grid_to_pointer(gridID);
   gridptr->projtype = CDI_PROJ_LCC;
 
+  if (gridptr->type != GRID_PROJECTION) gridptr->type = GRID_PROJECTION;
+
   gridVerifyProj(gridID);
 }
 
