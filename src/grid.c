@@ -534,6 +534,7 @@ int gridCreate(int gridtype, size_t size)
 {
   if ( CDI_Debug ) Message("gridtype=%s  size=%zu", gridNamePtr(gridtype), size);
 
+  xassert(size);
   gridInit();
 
   grid_t *gridptr = gridNewEntry(CDI_UNDEFID);
@@ -1813,8 +1814,8 @@ static
 void gridDefYValsSerial(grid_t *gridptr, const double *yvals)
 {
   const int gridtype = gridptr->type;
-  size_t size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
-            ? gridptr->size : gridptr->y.size;
+  const size_t size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
+                    ? gridptr->size : gridptr->y.size;
 
   if ( size == 0 )
     Error("Size undefined for gridID = %d!", gridptr->self);
@@ -3084,19 +3085,19 @@ static void
 gridDefBoundsGeneric(grid_t *gridptr, const double *bounds, size_t regularSize,
                      double **field)
 {
-  int irregular = gridptr->type == GRID_CURVILINEAR
-    || gridptr->type == GRID_UNSTRUCTURED;
-  size_t nvertex = (size_t)gridptr->nvertex;
+  const int irregular = gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED;
+  const size_t nvertex = (size_t)gridptr->nvertex;
   if ( nvertex == 0 )
     {
       Warning("nvertex undefined for gridID = %d. Cannot define bounds!", gridptr->self);
       return;
     }
-  size_t size = nvertex * (irregular ? gridptr->size : regularSize);
+
+  const size_t size = nvertex * (irregular ? gridptr->size : regularSize);
   if ( size == 0 )
     Error("size undefined for gridID = %d", gridptr->self);
 
-  if (*field == NULL)
+  if (*field == NULL && size)
     *field = (double *)Malloc(size * sizeof (double));
   else if ( CDI_Debug )
     Warning("values already defined!");

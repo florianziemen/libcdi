@@ -818,9 +818,11 @@ The function @func{zaxisDefLevel} defines one level of a Z-axis.
 void zaxisDefLevel(int zaxisID, int levelID, double level)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  int size = zaxisptr->size;
+  const int size = zaxisptr->size;
+  xassert(size);
+  xassert(levelID >= 0 && levelID < size);
 
-  if ( zaxisptr->vals == NULL )
+  if (zaxisptr->vals == NULL && size)
     zaxisptr->vals = (double*) Malloc((size_t)size*sizeof(double));
 
   if ( levelID >= 0 && levelID < size )

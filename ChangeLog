@@ -4,7 +4,7 @@
 
 2019-03-21  Uwe Schulzweida
 
-	* zaxisDefLevels: check number of levels
+	* zaxisCreate/gridCreate: added check for size != 0
 
 2019-03-15  Uwe Schulzweida
 
