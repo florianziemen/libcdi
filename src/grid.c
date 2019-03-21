@@ -2383,37 +2383,38 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
 	    }
 	  else if ( grid->type == GRID_UNSTRUCTURED )
 	    {
-              if ( coord_compare )
+              /* FIXME: not octet 0 but octet 7 is guaranteed  non-zero for any non-NULL UUID */
+              differ |= ((gridRef->uuid[0] || grid->uuid[0]) && memcmp(gridRef->uuid, grid->uuid, CDI_UUID_SIZE));
+              if (!differ)
                 {
-                  differ = grid->nvertex != gridRef->nvertex
-                    || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
-                }
-              else
-                {
-                  /* FIXME: not octet 0 but octet 7 is guaranteed  non-zero for any non-NULL UUID */
-                  differ |= ((gridRef->uuid[0] || grid->uuid[0]) && memcmp(gridRef->uuid, grid->uuid, CDI_UUID_SIZE));
-
-                  if ( !differ &&
-                       ((grid->x.vals == NULL) ^ (gridRef->x.vals == NULL)) &&
-                       ((grid->y.vals == NULL) ^ (gridRef->y.vals == NULL)) )
-                    {
-                      int nvertexA, nvertexB, numberA, numberB;
-                      differ = ( (nvertexA = grid->nvertex)
-                                 && (nvertexB = gridRef->nvertex)
-                                 && (nvertexA != nvertexB) )
-                        || (numberA = grid->number, numberB = gridRef->number,
-                            ( (numberA)
-                              && numberB
-                              && (numberA != numberB) )
-                            || ( (numberA && numberB)
-                                 && (grid->position) != (gridRef->position) ) );
-                    }
-                  else if ( !differ )
+                  if ( coord_compare )
                     {
                       differ = grid->nvertex != gridRef->nvertex
-                        || grid->number != gridRef->number
-                        || (grid->number > 0 && grid->position != gridRef->position)
                         || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
+                    }
+                  else
+                    {
+                      if ( ((grid->x.vals == NULL) ^ (gridRef->x.vals == NULL)) &&
+                           ((grid->y.vals == NULL) ^ (gridRef->y.vals == NULL)) )
+                        {
+                          int nvertexA, nvertexB, numberA, numberB;
+                          differ = ( (nvertexA = grid->nvertex)
+                                     && (nvertexB = gridRef->nvertex)
+                                     && (nvertexA != nvertexB) )
+                            || (numberA = grid->number, numberB = gridRef->number,
+                                ( (numberA)
+                                  && numberB
+                                  && (numberA != numberB) )
+                                || ( (numberA && numberB)
+                                     && (grid->position) != (gridRef->position) ) );
+                        }
+                      else
+                        {
+                          differ = grid->nvertex != gridRef->nvertex
+                            || grid->number != gridRef->number
+                            || (grid->number > 0 && grid->position != gridRef->position)
+                            || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
+                        }
                     }
                 }
             }
