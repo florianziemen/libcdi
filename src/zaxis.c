@@ -256,6 +256,7 @@ int zaxisCreate(int zaxistype, int size)
 {
   if ( CDI_Debug ) Message("zaxistype: %d size: %d ", zaxistype, size);
 
+  xassert(size);
   zaxisInit();
 
   return zaxisCreate_(zaxistype, size, CDI_UNDEFID);
@@ -760,12 +761,13 @@ The function @func{zaxisDefLevels} defines the levels of a Z-axis.
 */
 void zaxisDefLevels(int zaxisID, const double *levels)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  size_t size = (size_t)zaxisptr->size;
-
   if ( levels )
     {
-      if ( zaxisptr->vals == NULL )
+      zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
+      const size_t size = (size_t)zaxisptr->size;
+      xassert(size);
+
+      if (zaxisptr->vals == NULL && size)
         zaxisptr->vals = (double*) Malloc(size*sizeof(double));
 
       double *vals = zaxisptr->vals;
@@ -780,18 +782,19 @@ void zaxisDefLevels(int zaxisID, const double *levels)
 
 void zaxisDefCvals(int zaxisID, const char **cvals, int clen)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  int size = zaxisptr->size;
-
   if ( cvals && clen )
     {
-      zaxisptr->clength = clen;
-      zaxisptr->cvals = (char**) Malloc((size_t)size*sizeof(char *));
+      zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
+      const size_t size = zaxisptr->size;
+      xassert(size);
 
-      for ( int ilev = 0; ilev < size; ++ilev )
+      zaxisptr->clength = clen;
+      if (size) zaxisptr->cvals = (char**) Malloc(size*sizeof(char *));
+
+      for ( size_t ilev = 0; ilev < size; ++ilev )
         {
-          zaxisptr->cvals[ilev] = (char*) Malloc((size_t)clen*sizeof(char));
-          memcpy(zaxisptr->cvals[ilev], cvals[ilev], (size_t)clen*sizeof(char));
+          zaxisptr->cvals[ilev] = (char*) Malloc(clen*sizeof(char));
+          memcpy(zaxisptr->cvals[ilev], cvals[ilev], clen*sizeof(char));
         }
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
