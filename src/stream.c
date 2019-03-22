@@ -439,7 +439,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
 
   switch (filetype)
     {
-#ifdef  HAVE_LIBGRIB
+#if defined(HAVE_LIBGRIB) && (defined(HAVE_LIBCGRIBEX) || defined(HAVE_LIBGRIB_API))
     case CDI_FILETYPE_GRB:
       {
         fileID = gribOpen(filename, temp);
@@ -660,7 +660,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 
   switch (filetype)
     {
-#ifdef  HAVE_LIBGRIB
+#if defined(HAVE_LIBGRIB) && (defined(HAVE_LIBCGRIBEX) || defined(HAVE_LIBGRIB_API))
     case CDI_FILETYPE_GRB:
 #ifdef  HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB2:
@@ -936,7 +936,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
   else
     switch (filetype)
       {
-#ifdef  HAVE_LIBGRIB
+#if defined(HAVE_LIBGRIB) && (defined(HAVE_LIBCGRIBEX) || defined(HAVE_LIBGRIB_API))
       case CDI_FILETYPE_GRB:
         {
           gribClose(fileID);
