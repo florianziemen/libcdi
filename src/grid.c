@@ -2385,13 +2385,13 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
 	  else if ( grid->type == GRID_UNSTRUCTURED )
 	    {
               /* FIXME: not octet 0 but octet 7 is guaranteed  non-zero for any non-NULL UUID */
-              differ |= ((gridRef->uuid[0] || grid->uuid[0]) && memcmp(gridRef->uuid, grid->uuid, CDI_UUID_SIZE));
+              differ = ((gridRef->uuid[0] || grid->uuid[0]) && memcmp(gridRef->uuid, grid->uuid, CDI_UUID_SIZE));
               if (!differ)
                 {
                   if ( coord_compare )
                     {
                       differ = grid->nvertex != gridRef->nvertex
-                        || (grid->number > 0 && grid->position != gridRef->position);
+                        || (grid->number > 0 && grid->position != gridRef->position)
                         || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
                     }
                   else
@@ -5067,6 +5067,7 @@ struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
         }
       if ( mode < 2 )
         {
+          xassert(ngrids < MAX_GRIDS_PS);
           vlistptr->gridIDs[ngrids] = gridID;
           vlistptr->ngrids++;
         }
