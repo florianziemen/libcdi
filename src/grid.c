@@ -2391,6 +2391,7 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
                   if ( coord_compare )
                     {
                       differ = grid->nvertex != gridRef->nvertex
+                        || (grid->number > 0 && grid->position != gridRef->position);
                         || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
                     }
                   else
@@ -2403,9 +2404,7 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
                                      && (nvertexB = gridRef->nvertex)
                                      && (nvertexA != nvertexB) )
                             || (numberA = grid->number, numberB = gridRef->number,
-                                ( (numberA)
-                                  && numberB
-                                  && (numberA != numberB) )
+                                ( numberA && numberB && (numberA != numberB) )
                                 || ( (numberA && numberB)
                                      && (grid->position) != (gridRef->position) ) );
                         }
