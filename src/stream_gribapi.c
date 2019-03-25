@@ -1968,6 +1968,7 @@ void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRel
   gridInqParamLCC(gridID, CDI_grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
   gridVerifyGribParamLCC(CDI_grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
   if ( xval_0 < 0 ) xval_0 += 360;
+  if ( lon_0 < 0 ) lon_0 += 360;
   const bool lsouth = (lat_1 < 0);
   if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }
   int projflag = 0;
