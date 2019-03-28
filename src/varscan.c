@@ -694,11 +694,9 @@ void cdi_generate_vars(stream_t *streamptr)
       const char **cvals = NULL;
       const char *unitptr = cdiUnitNamePtr(vartable[varid].level_unit);
       int zaxisID = varDefZaxis(vlistID, zaxistype, (int)nlevels, dlevels, cvals, 0, lbounds, dlevels1, dlevels2,
-                                (int)Vctsize, Vct, NULL, NULL, unitptr, 0, 0, ltype1);
+                                (int)Vctsize, Vct, NULL, NULL, unitptr, 0, 0, ltype1, ltype2);
 
       if ( CDI_cmor_mode && nlevels == 1 && zaxistype != ZAXIS_HYBRID ) zaxisDefScalar(zaxisID);
-
-      if ( ltype1 != ltype2 && ltype2 != -1 ) zaxisDefLtype2(zaxisID, ltype2);
 
       if ( zaxisInqType(zaxisID) == ZAXIS_REFERENCE )
         {
@@ -826,13 +824,14 @@ void varDefZAxisReference(int nhlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZ
 }
 
 
-bool zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const double *levels, const char *longname, const char *units, int ltype1)
+bool zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const double *levels, const char *longname, const char *units, int ltype1, int ltype2)
 {
   bool differ = true;
 
-  bool ltype_is_equal = (ltype1 == zaxisInqLtype(zaxisID));
+  bool ltype1_is_equal = (ltype1 == zaxisInqLtype(zaxisID));
+  bool ltype2_is_equal = (ltype2 == zaxisInqLtype2(zaxisID));
 
-  if ( ltype_is_equal && (zaxistype == zaxisInqType(zaxisID) || zaxistype == ZAXIS_GENERIC) )
+  if ( ltype1_is_equal && ltype2_is_equal && (zaxistype == zaxisInqType(zaxisID) || zaxistype == ZAXIS_GENERIC) )
     {
       bool zlbounds = (zaxisInqLbounds(zaxisID, NULL) > 0);
       if ( nlevels == zaxisInqSize(zaxisID) && zlbounds == lbounds )
@@ -879,7 +878,8 @@ struct varDefZAxisSearchState
   const double *levels;
   const char *longname;
   const char *units;
-  int ltype;
+  int ltype1;
+  int ltype2;
 };
 
 static enum cdiApplyRet
@@ -888,7 +888,7 @@ varDefZAxisSearch(int id, void *res, void *data)
   struct varDefZAxisSearchState *state = (struct varDefZAxisSearchState *)data;
   (void)res;
   if ( zaxisCompare(id, state->zaxistype, state->nlevels, state->lbounds,
-                    state->levels, state->longname, state->units, state->ltype)
+                    state->levels, state->longname, state->units, state->ltype1, state->ltype2)
       == false)
     {
       state->resIDValue = id;
@@ -901,7 +901,7 @@ varDefZAxisSearch(int id, void *res, void *data)
 
 int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, size_t clength, bool lbounds,
                 const double *levels1, const double *levels2, int vctsize, const double *vct, char *name,
-		const char *longname, const char *units, int prec, int mode, int ltype1)
+		const char *longname, const char *units, int prec, int mode, int ltype1, int ltype2)
 {
   /*
     mode: 0 search in vlist and zaxis table
@@ -913,12 +913,14 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, c
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   int nzaxis = vlistptr->nzaxis;
 
+  if ( ltype2 == 255 ) ltype2 = -1;
+
   if ( mode == 0 )
     for ( int index = 0; index < nzaxis; index++ )
       {
 	zaxisID = vlistptr->zaxisIDs[index];
 
-	if ( !zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, longname, units, ltype1) )
+	if ( !zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, longname, units, ltype1, ltype2) )
 	  {
 	    zaxisdefined = true;
 	    break;
@@ -934,7 +936,8 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, c
       query.lbounds = lbounds;
       query.longname = longname;
       query.units = units;
-      query.ltype = ltype1;
+      query.ltype1 = ltype1;
+      query.ltype2 = ltype2;
 
       if ((zaxisglobdefined
            = (cdiResHFilterApply(getZaxisOps(), varDefZAxisSearch, &query)
@@ -969,11 +972,11 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, c
 
 	  if ( name && name[0] ) zaxisDefName(zaxisID, name);
 	  if ( longname && longname[0] ) zaxisDefLongname(zaxisID, longname);
-          //else                           zaxisDefLongname(zaxisID, "");
 	  if ( units && units[0] ) zaxisDefUnits(zaxisID, units);
-          //else                     zaxisDefUnits(zaxisID, "");
 	  zaxisDefDatatype(zaxisID, prec);
 	  zaxisDefLtype(zaxisID, ltype1);
+          //if ( ltype1 != ltype2 && ltype2 != -1 ) zaxisDefLtype2(zaxisID, ltype2);
+          if ( ltype2 != -1 ) zaxisDefLtype2(zaxisID, ltype2);
 	}
 
       vlistptr->zaxisIDs[nzaxis] = zaxisID;

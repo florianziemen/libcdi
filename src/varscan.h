@@ -17,7 +17,7 @@ void varDefZAxisReference(int nlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZE
 
 int  varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, size_t clength, bool lbounds,
 		 const double *levels1, const double *levels2, int vctsize, const double *vct, char *name,
-		 const char *longname, const char *units, int prec, int mode, int ltype);
+		 const char *longname, const char *units, int prec, int mode, int ltype1, int ltype2);
 
 void varDefMissval(int varID, double missval);
 void varDefCompType(int varID, int comptype);
@@ -36,7 +36,7 @@ void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword)
 void varDefOptGribDbl(int varID, int tile_index, double dval, const char *keyword);
 int varOptGribNentries(int varID);
 
-bool zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const double *levels, const char *longname, const char *units, int ltype);
+bool zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const double *levels, const char *longname, const char *units, int ltype1, int ltype2);
 
 #endif
 /*

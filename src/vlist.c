@@ -435,7 +435,7 @@ vgzZAxisSearch(int id, void *res, void *data)
   struct vgzSearchState *state = (struct vgzSearchState *)data;
   (void)res;
   if (zaxisCompare(id, state->zaxistype, state->nlevels, state->lbounds,
-                   state->levels, NULL, NULL, 0)
+                   state->levels, NULL, NULL, 0, -1)
       == false)
     {
       state->resIDValue = id;
@@ -463,7 +463,7 @@ int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *
     {
       zaxisID = vlistptr->zaxisIDs[index];
 
-      if ( zaxisCompare(zaxisID, zaxistype, nlevels, has_bounds, levels, NULL, NULL, 0) == false )
+      if ( zaxisCompare(zaxisID, zaxistype, nlevels, has_bounds, levels, NULL, NULL, 0, -1) == false )
         {
           zaxisdefined = true;
           break;
