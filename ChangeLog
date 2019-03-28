@@ -2,6 +2,10 @@
 
 	* Version 1.9.7 released
 
+2019-03-25  Uwe Schulzweida
+
+	* Added support for GRIB2 key shapeOfTheEarth=6
+
 2019-03-21  Uwe Schulzweida
 
 	* zaxisCreate/gridCreate: added check for size != 0

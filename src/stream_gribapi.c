@@ -534,12 +534,26 @@ void gribapiDefProjRLL(grib_handle *gh, int gridID)
 }
 
 static
+double shapeOfTheEarthToRadius(long shapeOfTheEarth)
+{
+  switch (shapeOfTheEarth)
+    {
+    case 0:  return 6367470.; break;
+    case 2:  return 6378160.; break;
+    case 6:  return 6371229.; break;
+    case 8:  return 6371200.; break;
+    default: return 6367470.; break;
+    }
+  return 6367470.;
+}
+
+static
 void gribapiDefProjLCC(grib_handle *gh, int gridID)
 {
-  double a = 6367470., rf = 0;
-  long earthIsOblate;
-  grib_get_long(gh, "earthIsOblate", &earthIsOblate);
-  if ( earthIsOblate ) { a = 6378160.; rf = 297.0; }
+  long shapeOfTheEarth;
+  grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth);
+  const double a = shapeOfTheEarthToRadius(shapeOfTheEarth);
+  const double rf = (shapeOfTheEarth == 2) ? 297.0 : 0;
   double lon_0, lat_1, lat_2, xval_0, yval_0;
   long projflag = 0;
   grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &xval_0);
@@ -572,7 +586,7 @@ void gribapiDefProjSTERE(grib_handle *gh, int gridID)
 {
   long shapeOfTheEarth;
   grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth);
-  double a = (shapeOfTheEarth == 6) ? 6371229 : 6367470;
+  const double a = shapeOfTheEarthToRadius(shapeOfTheEarth);
 
   double lon_0, lat_ts, xval_0, yval_0;
   grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &xval_0);
@@ -1959,6 +1973,19 @@ void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridI
 }
 
 static
+long radiusToShapeOfTheEarth(double radius)
+{
+  long shapeOfTheEarth = 0;
+
+  if      (IS_EQUAL(radius, 6367470.)) shapeOfTheEarth = 0;
+  else if (IS_EQUAL(radius, 6378160.)) shapeOfTheEarth = 2;
+  else if (IS_EQUAL(radius, 6371229.)) shapeOfTheEarth = 6;
+  else if (IS_EQUAL(radius, 6371200.)) shapeOfTheEarth = 8;
+
+  return shapeOfTheEarth;
+}
+
+static
 void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelativeToGrid)
 {
   const long xsize = (long) gridInqXsize(gridID);
@@ -1992,7 +2019,12 @@ void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRel
   GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", lat_2), 0);
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
+
+  const long shapeOfTheEarth = radiusToShapeOfTheEarth(a);
+  if ( shapeOfTheEarth ) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
+
   if ( uvRelativeToGrid >= 0 ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+
   const long earthIsOblate = (IS_EQUAL(a, 6378160.) && IS_EQUAL(rf, 297.));
   if ( earthIsOblate ) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
 
@@ -2033,7 +2065,7 @@ void gribapiDefGridSTERE(grib_handle *gh, int editionNumber, int gridID)
   GRIB_CHECK(my_grib_set_double(gh, "southPoleOnProjectionPlane", southPoleOnProjectionPlane), 0);
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
-  const long shapeOfTheEarth = IS_EQUAL(a, 6371229.) ? 6 : 0;
+  const long shapeOfTheEarth = radiusToShapeOfTheEarth(a);
   if ( shapeOfTheEarth ) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
 
   GRIB_CHECK(my_grib_set_long(gh, "resolutionAndComponentFlags", 8), 0);
