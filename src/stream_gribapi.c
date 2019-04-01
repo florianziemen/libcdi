@@ -2357,7 +2357,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
     }
 
   long grib_ltype = (editionNumber <= 1) ? zaxisTypeToGrib1ltype(zaxistype) : zaxisTypeToGrib2ltype(zaxistype);
-  long grib_ltype2 = (ltype != ltype2) ? ltype2 : grib_ltype;
+  long grib_ltype2 = (ltype != ltype2 && ltype2 != -1) ? ltype2 : grib_ltype;
 
   switch (zaxistype)
     {
@@ -2528,13 +2528,13 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
             if ( lbounds )
               {
                 gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", grib_ltype);
-                gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", grib_ltype);
+                gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", grib_ltype2);
                 GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
                 GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
               }
             else
               {
-                grib2DefLevel(gh, gcinit, GRIB2_LTYPE_REFERENCE, GRIB2_LTYPE_REFERENCE, lbounds, level, dlevel1, dlevel2);
+                grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype2, lbounds, level, dlevel1, dlevel2);
               }
 
             int number = zaxisInqNumber(zaxisID);
