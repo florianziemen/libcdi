@@ -487,9 +487,6 @@ size_t cdiGetPageSize(bool largePageAlign);
 
 void zaxisGetIndexList(int nzaxis, int *zaxisIndexList);
 
-void zaxisDefLtype2(int zaxisID, int ltype2);
-int  zaxisInqLtype2(int zaxisID);
-
 #ifdef __cplusplus
 extern "C" {
 #endif
