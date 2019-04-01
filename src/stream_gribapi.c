@@ -2401,7 +2401,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
                The key/value pairs that are set in "grib2DefLevel" do not exist for this template.
             */
             if ( proddef_template_num != 32 )
-              grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level, dlevel1, dlevel2);
+              grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype2, lbounds, level, dlevel1, dlevel2);
           }
 
 	break;
@@ -3161,7 +3161,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
           gribapiGetString(gh, "shortName", grb_name, sizeof(grb_name));
           strToLower(cdi_name);
           strToLower(grb_name);
-          if ( (strlen(cdi_name) != strlen(grb_name)) || !strStartsWith(cdi_name, grb_name) )
+          bool checkName = (!grb_name[0] && strncmp(cdi_name, "param", 5) == 0) ? false : true;
+          if ( checkName && ((strlen(cdi_name) != strlen(grb_name)) || !strStartsWith(cdi_name, grb_name)) )
             Message("*** GRIB2 shortName does not correspond to chosen variable name: \"%s\" (\"%s\").",
                     grb_name[0]?grb_name:"unknown", cdi_name);
         }
