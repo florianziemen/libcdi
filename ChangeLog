@@ -2,6 +2,10 @@
 
 	* Version 1.9.7 released
 
+2019-04-01  Uwe Schulzweida
+
+	* Added support gpt GRIB2 key typeOfSecondFixedSurface
+
 2019-03-25  Uwe Schulzweida
 
 	* Added support for GRIB2 key shapeOfTheEarth=6
