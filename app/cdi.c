@@ -746,6 +746,7 @@ int main(int argc, char *argv[])
   int varID;
   int itableID = CDI_UNDEFID, otableID = CDI_UNDEFID;
   int Info = 1;
+  int NoInfo = 0;
   char varname[CDI_MAX_NAME];
   char paramstr[32];
 
@@ -753,7 +754,7 @@ int main(int argc, char *argv[])
   if (Progname == 0) Progname = argv[0];
   else               Progname++;
 
-  while ( (c = getopt(argc, argv, "b:f:t:w:z:cdhlMmqRrsvVxZ")) != EOF )
+  while ( (c = getopt(argc, argv, "b:f:t:w:z:cdhlMmnqRrsvVxZ")) != EOF )
     {
       switch (c)
 	{
@@ -777,6 +778,10 @@ int main(int argc, char *argv[])
 	  break;
 	case 'm':
 	  Move = 1;
+	  break;
+	case 'n':
+	  Info = 0;
+          NoInfo = 1;
 	  break;
 	case 'q':
 	  /* Quiet = 1; */
@@ -925,7 +930,7 @@ int main(int argc, char *argv[])
 
       size_t idum;
       int tsID = 0;
-      if ( Info || fname2 )
+      if ( Info || fname2 || NoInfo )
       while ( (nrecs = streamInqTimestep(streamID1, tsID)) > 0 )
 	{
 	  if ( fname2 /* && ntsteps != 0*/ )
