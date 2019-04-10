@@ -184,7 +184,7 @@ initAFiledataFileWriteAtReblock(struct fileMPIFWAR *of, const char *filename,
   of->name = Malloc(nameSize);
   memcpy(of->name, filename, nameSize);
   {
-    void *ptr;
+    void *ptr = NULL;
     int err = posix_memalign(&ptr, bufBlockAlign, bufSize);
     if (!err)
       of->blockBuf = ptr;
