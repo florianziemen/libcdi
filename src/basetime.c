@@ -6,15 +6,17 @@
 
 void basetimeInit(basetime_t *basetime)
 {
-  if ( basetime == NULL )
-    Error("Internal problem! Basetime not allocated.");
+  if (basetime == NULL) Error("Internal problem! Basetime not allocated.");
 
-  basetime->ncvarid       = CDI_UNDEFID;
-  basetime->ncdimid       = CDI_UNDEFID;
-  basetime->ncvarboundsid = CDI_UNDEFID;
-  basetime->leadtimeid    = CDI_UNDEFID;
-  basetime->lwrf          = false;
-  basetime->timevar_cache = NULL;
+  if (basetime)
+    {
+      basetime->ncvarid       = CDI_UNDEFID;
+      basetime->ncdimid       = CDI_UNDEFID;
+      basetime->ncvarboundsid = CDI_UNDEFID;
+      basetime->leadtimeid    = CDI_UNDEFID;
+      basetime->lwrf          = false;
+      basetime->timevar_cache = NULL;
+    }
 }
 
 /*
