@@ -363,6 +363,8 @@ bool cdfCheckAttText(int fileID, int ncvarid, const char *attname)
 static
 void cdfGetAttText(int fileID, int ncvarid, const char *attname, size_t attlen, char *atttext)
 {
+  atttext[0] = 0;
+
   nc_type atttype;
   size_t nc_attlen;
 
@@ -381,10 +383,6 @@ void cdfGetAttText(int fileID, int ncvarid, const char *attname, size_t attlen, 
           attbuf[nc_attlen++] = 0;
           memcpy(atttext, attbuf, nc_attlen);
         }
-      else
-        {
-          atttext[0] = 0;
-        }
     }
 #ifdef HAVE_NETCDF4
   else if ( atttype == NC_STRING )
@@ -400,10 +398,6 @@ void cdfGetAttText(int fileID, int ncvarid, const char *attname, size_t attlen, 
           memcpy(atttext, attbuf, ssize);
           atttext[ssize - 1] = 0;
           Free(attbuf);
-        }
-      else
-        {
-          atttext[0] = 0;
         }
     }
 #endif
