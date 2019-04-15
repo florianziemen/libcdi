@@ -1,6 +1,6 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.9.5
+! Fortran interface for CDI library version 1.9.7
 !
 ! Author:
 ! -------
@@ -1303,9 +1303,6 @@
 !                                     CHARACTER*(*)   name)
       EXTERNAL        vlistInqVarIntKey
 
-!
-!  CDI attributes
-!
       INTEGER         cdiInqNatts
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
@@ -1384,9 +1381,6 @@
 !                                     CHARACTER*(*)   tp_cbuf)
       EXTERNAL        cdiInqAttTxt
 
-!
-!  GRID routines
-!
 !                     gridName
 !                                    (INTEGER         gridtype,
 !                                     CHARACTER*(*)   gridname)
@@ -1419,11 +1413,6 @@
 !                                    (INTEGER         gridID,
 !                                     INTEGER         mask(*))
       EXTERNAL        gridInqMask
-
-!                     gridPrint
-!                                    (INTEGER         gridID,
-!                                     INTEGER         opt)
-      EXTERNAL        gridPrint
 
       INTEGER         gridCreate
 !                                    (INTEGER         gridtype,
@@ -2563,7 +2552,7 @@
       EXTERNAL        subtypePrint
 
 !
-!  Compares two subtype data structures.
+!  Compares two subtype data structures
 !
       INTEGER         subtypeCompare
 !                                    (INTEGER         subtypeID1,
@@ -2584,10 +2573,10 @@
       EXTERNAL        subtypeDefActiveIndex
 
 !
-!  Generate a "query object" out of a key-value pair.
+!  Generate a "query object" out of a key-value pair
 !
 !
-!  Generate an AND-combined "query object" out of two previous query objects.
+!  Generate an AND-combined "query object" out of two previous query objects
 !
       INTEGER         subtypeInqTile
 !                                    (INTEGER         subtypeID,

@@ -5,6 +5,7 @@
 
 2019-04-15  Uwe Schulzweida
 
+	* Removed funtion gridPrint()
 	* Removed funtion zaxisPrint()
 
 2019-04-01  Uwe Schulzweida

@@ -3733,12 +3733,6 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
 }
 
 
-void gridPrint(int gridID, int opt)
-{
-  gridPrintKernel(gridID, opt, stdout);
-}
-
-
 void gridPrintP(void *voidptr, FILE *fp)
 {
   grid_t *gridptr = (grid_t *) voidptr;

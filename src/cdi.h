@@ -655,9 +655,9 @@ int     vlistFindLevel(int vlistID, int fvarID, int flevelID);
 int     vlistMergedVar(int vlistID, int varID);
 int     vlistMergedLevel(int vlistID, int varID, int levelID);
 
-/* cdiClearAdditionalKeys: Clear the list of additional GRIB keys. */
+/* cdiClearAdditionalKeys: Clear the list of additional GRIB keys */
 void    cdiClearAdditionalKeys(void);
-/* cdiDefAdditionalKey: Register an additional GRIB key which is read when file is opened. */
+/* cdiDefAdditionalKey: Register an additional GRIB key which is read when file is opened */
 void    cdiDefAdditionalKey(const char *string);
 
 /* vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API */
@@ -665,39 +665,39 @@ void    vlistDefVarIntKey(int vlistID, int varID, const char *name, int value);
 /* vlistDefVarDblKey: Set an arbitrary keyword/double value pair for GRIB API */
 void    vlistDefVarDblKey(int vlistID, int varID, const char *name, double value);
 
-/* vlistHasVarKey: returns 1 if meta-data key was read, 0 otherwise. */
+/* vlistHasVarKey: returns 1 if meta-data key was read, 0 otherwise */
 int     vlistHasVarKey(int vlistID, int varID, const char *name);
 /* vlistInqVarDblKey: raw access to GRIB meta-data */
 double  vlistInqVarDblKey(int vlistID, int varID, const char *name);
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
 int     vlistInqVarIntKey(int vlistID, int varID, const char *name);
 
-/* CDI attributes */
+// CDI attributes
 
-/*      cdiInqNatts: Get number of attributes assigned to this variable */
+//      cdiInqNatts: Get number of attributes assigned to this variable
 int     cdiInqNatts(int cdiID, int varID, int *nattsp);
-/*      cdiInqAtt: Get information about an attribute */
+//      cdiInqAtt: Get information about an attribute
 int     cdiInqAtt(int cdiID, int varID, int attrnum, char *name, int *typep, int *lenp);
 int     cdiDelAtt(int cdiID, int varID, const char *name);
 
 int     cdiCopyAtts(int cdiID1, int varID1, int cdiID2, int varID2);
 
-/*      cdiDefAttInt: Define an integer attribute */
+//      cdiDefAttInt: Define an integer attribute
 int     cdiDefAttInt(int cdiID, int varID, const char *name, int type, int len, const int ip[]);
-/*      cdiDefAttFlt: Define a floating point attribute */
+//      cdiDefAttFlt: Define a floating point attribute
 int     cdiDefAttFlt(int cdiID, int varID, const char *name, int type, int len, const double dp[]);
-/*      cdiDefAttTxt: Define a text attribute */
+//      cdiDefAttTxt: Define a text attribute
 int     cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp_cbuf);
 
-/*      cdiInqAttInt: Get the value(s) of an integer attribute */
+//      cdiInqAttInt: Get the value(s) of an integer attribute
 int     cdiInqAttInt(int cdiID, int varID, const char *name, int mlen, int ip[]);
-/*      cdiInqAttFlt: Get the value(s) of a floating point attribute */
+//      cdiInqAttFlt: Get the value(s) of a floating point attribute
 int     cdiInqAttFlt(int cdiID, int varID, const char *name, int mlen, double dp[]);
-/*      cdiInqAttTxt: Get the value(s) of a text attribute */
+//      cdiInqAttTxt: Get the value(s) of a text attribute
 int     cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp_cbuf);
 
 
-/* GRID routines */
+// GRID routines
 
 void    gridName(int gridtype, char *gridname);
 const char *gridNamePtr(int gridtype);
@@ -709,8 +709,6 @@ int     gridInqMaskGME(int gridID, int mask[]);
 
 void    gridDefMask(int gridID, const int mask[]);
 int     gridInqMask(int gridID, int mask[]);
-
-void    gridPrint(int gridID, int opt);
 
 //      gridCreate: Create a horizontal Grid
 int     gridCreate(int gridtype, size_t size);
@@ -1250,34 +1248,34 @@ int     subtypeCreate(int subtype);
 /*      Gives a textual summary of the variable subtype */
 void    subtypePrint(int subtypeID);
 
-/* Compares two subtype data structures. */
+/* Compares two subtype data structures */
 int     subtypeCompare(int subtypeID1, int subtypeID2);
 
-/*      subtypeInqSize: Get the size of a subtype (e.g. no. of tiles). */
+/*      subtypeInqSize: Get the size of a subtype (e.g. no. of tiles) */
 int     subtypeInqSize(int subtypeID);
 
-/*      subtypeInqActiveIndex: Get the currently active index of a subtype (e.g. current tile index). */
+/*      subtypeInqActiveIndex: Get the currently active index of a subtype (e.g. current tile index) */
 int     subtypeInqActiveIndex(int subtypeID);
 
-/*      subtypeDefActiveIndex: Set the currently active index of a subtype (e.g. current tile index). */
+/*      subtypeDefActiveIndex: Set the currently active index of a subtype (e.g. current tile index) */
 void    subtypeDefActiveIndex(int subtypeID, int index);
 
-/*      Generate a "query object" out of a key-value pair. */
+/*      Generate a "query object" out of a key-value pair */
 subtype_query_t keyValuePair(const char *key, int value);
 
-/*       Generate an AND-combined "query object" out of two previous query objects. */
+/*       Generate an AND-combined "query object" out of two previous query objects */
 subtype_query_t matchAND(subtype_query_t q1, subtype_query_t q2);
 
-/*      subtypeInqSubEntry: Returns subtype entry ID for a given criterion. */
+/*      subtypeInqSubEntry: Returns subtype entry ID for a given criterion */
 int     subtypeInqSubEntry(int subtypeID, subtype_query_t criterion);
 
-/*      subtypeInqTile: Specialized version of subtypeInqSubEntry looking for tile/attribute pair. */
+/*      subtypeInqTile: Specialized version of subtypeInqSubEntry looking for tile/attribute pair */
 int     subtypeInqTile(int subtypeID, int tileindex, int attribute);
 
 /*      subtypeInqAttribute: Inquire the value of a subtype attribute. Returns CDI_EINVAL if the attribute does not exist.*/
 int     subtypeInqAttribute(int subtypeID, int index, const char *key, int *outValue);
 
-/*      vlistInqVarSubtype: Return subtype ID for a given variable. */
+/*      vlistInqVarSubtype: Return subtype ID for a given variable */
 int     vlistInqVarSubtype(int vlistID, int varID);
 
 void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision_version);

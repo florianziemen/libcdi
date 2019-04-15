@@ -400,9 +400,6 @@ FCALLSCSUB4 (vlistDefVarDblKey, VLISTDEFVARDBLKEY, vlistdefvardblkey, INT, INT, 
 FCALLSCFUN3 (INT, vlistHasVarKey, VLISTHASVARKEY, vlisthasvarkey, INT, INT, STRING)
 FCALLSCFUN3 (DOUBLE, vlistInqVarDblKey, VLISTINQVARDBLKEY, vlistinqvardblkey, INT, INT, STRING)
 FCALLSCFUN3 (INT, vlistInqVarIntKey, VLISTINQVARINTKEY, vlistinqvarintkey, INT, INT, STRING)
-
-/*  CDI attributes  */
-
 FCALLSCFUN3 (INT, cdiInqNatts, CDIINQNATTS, cdiinqnatts, INT, INT, PINT)
 FCALLSCFUN6 (INT, cdiInqAtt, CDIINQATT, cdiinqatt, INT, INT, INT, PSTRING, PINT, PINT)
 FCALLSCFUN3 (INT, cdiDelAtt, CDIDELATT, cdidelatt, INT, INT, STRING)
@@ -413,9 +410,6 @@ FCALLSCFUN5 (INT, cdiDefAttTxt, CDIDEFATTTXT, cdidefatttxt, INT, INT, STRING, IN
 FCALLSCFUN5 (INT, cdiInqAttInt, CDIINQATTINT, cdiinqattint, INT, INT, STRING, INT, INTV)
 FCALLSCFUN5 (INT, cdiInqAttFlt, CDIINQATTFLT, cdiinqattflt, INT, INT, STRING, INT, DOUBLEV)
 FCALLSCFUN5 (INT, cdiInqAttTxt, CDIINQATTTXT, cdiinqatttxt, INT, INT, STRING, INT, PPSTRING)
-
-/*  GRID routines  */
-
 FCALLSCSUB2 (gridName, GRIDNAME, gridname, INT, PSTRING)
 FCALLSCFUN1 (STRING, gridNamePtr, GRIDNAMEPTR, gridnameptr, INT)
 FCALLSCSUB1 (gridCompress, GRIDCOMPRESS, gridcompress, INT)
@@ -423,7 +417,6 @@ FCALLSCSUB2 (gridDefMaskGME, GRIDDEFMASKGME, griddefmaskgme, INT, INTV)
 FCALLSCFUN2 (INT, gridInqMaskGME, GRIDINQMASKGME, gridinqmaskgme, INT, INTV)
 FCALLSCSUB2 (gridDefMask, GRIDDEFMASK, griddefmask, INT, INTV)
 FCALLSCFUN2 (INT, gridInqMask, GRIDINQMASK, gridinqmask, INT, INTV)
-FCALLSCSUB2 (gridPrint, GRIDPRINT, gridprint, INT, INT)
 static int gridCreate_fwrap(int gridtype, int size)
 {
   int v;
@@ -797,17 +790,17 @@ FCALLSCFUN1 (INT, subtypeCreate, SUBTYPECREATE, subtypecreate, INT)
 
 FCALLSCSUB1 (subtypePrint, SUBTYPEPRINT, subtypeprint, INT)
 
-/*  Compares two subtype data structures.  */
+/*  Compares two subtype data structures  */
 
 FCALLSCFUN2 (INT, subtypeCompare, SUBTYPECOMPARE, subtypecompare, INT, INT)
 FCALLSCFUN1 (INT, subtypeInqSize, SUBTYPEINQSIZE, subtypeinqsize, INT)
 FCALLSCFUN1 (INT, subtypeInqActiveIndex, SUBTYPEINQACTIVEINDEX, subtypeinqactiveindex, INT)
 FCALLSCSUB2 (subtypeDefActiveIndex, SUBTYPEDEFACTIVEINDEX, subtypedefactiveindex, INT, INT)
 
-/*  Generate a "query object" out of a key-value pair.  */
+/*  Generate a "query object" out of a key-value pair  */
 
 
-/*  Generate an AND-combined "query object" out of two previous query objects.  */
+/*  Generate an AND-combined "query object" out of two previous query objects  */
 
 FCALLSCFUN3 (INT, subtypeInqTile, SUBTYPEINQTILE, subtypeinqtile, INT, INT, INT)
 FCALLSCFUN4 (INT, subtypeInqAttribute, SUBTYPEINQATTRIBUTE, subtypeinqattribute, INT, INT, STRING, PINT)

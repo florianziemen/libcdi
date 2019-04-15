@@ -15,7 +15,7 @@
 #endif
 
 //#include "config.h"
-#define VERSION "1.9.5"
+#define VERSION "1.9.7"
 typedef struct
 {
   size_t naline;
@@ -60,13 +60,11 @@ static int doccmp(const void *s1, const void *s2)
 
 static void doctotex(FILE *fp, Docu *doc, size_t ndoc)
 {
-  size_t i, k;
-
-  for ( i = 0; i < ndoc; i++ )
+  for ( size_t i = 0; i < ndoc; i++ )
     {
       fprintf(fp, "\\section*{\\tt \\htmlref{%s}{%s}}\n\n", doc[i].fname, doc[i].fname);
       fprintf(fp, "\\begin{verbatim}\n");
-      for ( k = 0; k < doc[i].naline; k++ )
+      for ( size_t k = 0; k < doc[i].naline; k++ )
 	fprintf(fp, "    %s\n", doc[i].aline[k]);
       fprintf(fp, "\\end{verbatim}\n");
       fprintf(fp, "\n%s.\n\n\n", doc[i].text);
@@ -280,7 +278,7 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
                          char *xname, size_t *xnameLen, char **xdes,
                          int *lineno, FILE *fpin, FILE *fpinc, FILE *fpint);
 
-static regex_t commentStartRE, commentEndRE, commentRE, docCommentRE;
+static regex_t commentStartRE, commentEndRE, commentRE, docCommentRE, docLineCommentRE;
 
 static inline int
 arrayArgRank(int argType);
@@ -372,9 +370,11 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   }
   /* compile documentation comment regular expression */
   {
-    static const char docCommentREString[] = "^"WS"*/\\*"WS"*"SYMRE":("
-      WS"*).*"NWS"("WS"*)\\*/";
+    static const char docCommentREString[]     = "^"WS"*/\\*"WS"*"SYMRE":("WS"*).*"NWS"("WS"*)\\*/";
+    static const char docLineCommentREString[] = "^"WS"*//"WS"*"SYMRE":("WS"*).*"NWS"("WS"*)";
     if (reCompile(&docCommentRE, docCommentREString, &line, &lineBufSize))
+      exit(EXIT_FAILURE);
+    if (reCompile(&docLineCommentRE, docLineCommentREString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
   }
   regex_t cppCondRE;
@@ -818,8 +818,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 	  fprintf(fpint, ")\n");
 
 
-	  if ( funcnameLen == xnameLen
-               && memcmp(funcname, xname, funcnameLen) == 0 )
+	  if ( funcnameLen == xnameLen && memcmp(funcname, xname, funcnameLen) == 0 )
 	    {
 	      char xline[128];
               size_t xlineLen = 0;
@@ -831,8 +830,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 	      cdoc[ncdoc].text   = NULL;
 	      cdoc[ncdoc].fname  = strdup(funcname);
 
-	      nch = sprintf(xline, funRet[functype].cfmt,
-                            "", (int)funcnameLen, funcname);
+	      nch = sprintf(xline, funRet[functype].cfmt, "", (int)funcnameLen, funcname);
               xline[nch++] = ' ';
               xline[nch++] = '(';
               xline[nch] = '\0';
@@ -852,11 +850,9 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                   char farg[128];
                   /* - 1 to omit closing paren ) or comma , */
                   int nchn = snprintf(farg, sizeof (farg), "%.*s",
-                                      (int)(funcargfull[i].rm_eo
-                                            - funcargfull[i].rm_so - 1),
+                                      (int)(funcargfull[i].rm_eo - funcargfull[i].rm_so - 1),
                                       line + funcargfull[i].rm_so);
-                  if (nchn < 0)
-                    abort();
+                  if (nchn < 0) abort();
                   /* compress white-space */
                   nchn = (int)compress_whitespace((size_t)nchn, farg);
 		  if ( (xlineLen + (size_t)nchn) > (size_t)80 )
@@ -917,8 +913,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                                      - funcargname[i].rm_so),
                                line + funcargname[i].rm_so,
                                argDimsF);
-                  if (nchn < 0)
-                    abort();
+                  if (nchn < 0) abort();
 		  if ( (xlineLen + (size_t)nchn) > 80 )
 		    {
                       if (i) xline[--xlineLen] = 0;
@@ -1104,8 +1099,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
       fputs("\\chapter*{Quick Reference}\n"
             "\\addcontentsline{toc}{chapter}{Quick Reference}\n"
             "\n"
-            "This appendix provide a brief listing of the C language bindings of the\n"
-            "CDI library routines:\n"
+            "This appendix provide a brief listing of the C language bindings of the CDI library routines:\n"
             "\n", fp);
 
       doctotex(fp, cdoc, ncdoc);
@@ -1126,8 +1120,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
       fputs("\\chapter*{Quick Reference}\n"
             "\\addcontentsline{toc}{chapter}{Quick Reference}\n"
             "\n"
-            "This appendix provide a brief listing of the Fortran language bindings of the\n"
-            "CDI library routines:\n"
+            "This appendix provide a brief listing of the Fortran language bindings of the CDI library routines:\n"
             "\n", fp);
 
       doctotex(fp, fdoc, nfdoc);
@@ -1403,7 +1396,7 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
   char *restrict line = *line_;
   int matchType;
   do {
-    if (!regexec(&docCommentRE, line, maxMatch, reMatch, 0))
+    if (!regexec(&docCommentRE, line, maxMatch, reMatch, 0) || !regexec(&docLineCommentRE, line, maxMatch, reMatch, 0))
       {
         /* found documentation comment */
         size_t nameMatchLen = (size_t)(reMatch[1].rm_eo - reMatch[1].rm_so),
@@ -1422,15 +1415,13 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
               /* delete whitespace following newline */
               size_t squeezeLen = strspn(eol, " \t*");
               char *startoftext = eol + squeezeLen;
-              memmove(eol, startoftext,
-                      docMatchLen - (size_t)(startoftext - xdes));
+              memmove(eol, startoftext, docMatchLen - (size_t)(startoftext - xdes));
               docMatchLen -= squeezeLen;
               xdes[docMatchLen] = 0;
             }
         }
         if (verbose || debug)
-          printf("Found documentation for \"%s\": \"%s\"\n", xname,
-                 xdes);
+          printf("Found documentation for \"%s\": \"%s\"\n", xname, xdes);
         matchType = FOUND_DOCCOMMENT;
         break;
       }

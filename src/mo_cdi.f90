@@ -431,7 +431,6 @@ module mo_cdi
   public :: gridInqMaskGME
   public :: gridDefMask
   public :: gridInqMask
-  public :: gridPrint
   public :: gridCreate
   public :: gridDestroy
   public :: gridDuplicate
@@ -1773,12 +1772,6 @@ module mo_cdi
       integer(c_int), intent(inout) :: mask_dummy(*)
       integer(c_int) :: f_result
     end function gridInqMask
-
-    subroutine gridPrint(gridID_dummy, opt_dummy) bind(c, name = 'gridPrint')
-      import c_int
-      integer(c_int), value :: gridID_dummy
-      integer(c_int), value :: opt_dummy
-    end subroutine gridPrint
 
     function gridCreate(gridtype_dummy, size_dummy) bind(c, name =&
     & 'gridCreate') result(f_result)

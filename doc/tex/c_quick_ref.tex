@@ -1,8 +1,7 @@
 \chapter*{Quick Reference}
 \addcontentsline{toc}{chapter}{Quick Reference}
 
-This appendix provide a brief listing of the C language bindings of the
-CDI library routines:
+This appendix provide a brief listing of the C language bindings of the CDI library routines:
 
 \section*{\tt \htmlref{cdiClearAdditionalKeys}{cdiClearAdditionalKeys}}
 
@@ -10,7 +9,7 @@ CDI library routines:
     void cdiClearAdditionalKeys ();
 \end{verbatim}
 
-Clear the list of additional GRIB keys..
+Clear the list of additional GRIB keys.
 
 
 \section*{\tt \htmlref{cdiDefAdditionalKey}{cdiDefAdditionalKey}}
@@ -19,7 +18,7 @@ Clear the list of additional GRIB keys..
     void cdiDefAdditionalKey (const char *string);
 \end{verbatim}
 
-Register an additional GRIB key which is read when file is opened..
+Register an additional GRIB key which is read when file is opened.
 
 
 \section*{\tt \htmlref{cdiDefAttFlt}{cdiDefAttFlt}}
@@ -50,6 +49,42 @@ Define an integer attribute.
 \end{verbatim}
 
 Define a text attribute.
+
+
+\section*{\tt \htmlref{cdiDefKeyInt}{cdiDefKeyInt}}
+
+\begin{verbatim}
+    int cdiDefKeyInt (int cdiID, int varID, int key, int value);
+\end{verbatim}
+
+Define an integer value from a key of a CDI variable.
+
+
+\section*{\tt \htmlref{cdiDefKeyString}{cdiDefKeyString}}
+
+\begin{verbatim}
+    int cdiDefKeyString (int cdiID, int varID, int key, const char *string);
+\end{verbatim}
+
+Define a string value from a key of a CDI variable.
+
+
+\section*{\tt \htmlref{cdiGridDefKeyStr}{cdiGridDefKeyStr}}
+
+\begin{verbatim}
+    int cdiGridDefKeyStr (int gridID, int key, int size, const char *mesg);
+\end{verbatim}
+
+Define a CDI grid string value from a key.
+
+
+\section*{\tt \htmlref{cdiGridInqKeyStr}{cdiGridInqKeyStr}}
+
+\begin{verbatim}
+    int cdiGridInqKeyStr (int gridID, int key, int size, char *mesg);
+\end{verbatim}
+
+Get a CDI grid string value from a key.
 
 
 \section*{\tt \htmlref{cdiInqAtt}{cdiInqAtt}}
@@ -90,6 +125,33 @@ Get the value(s) of an integer attribute.
 Get the value(s) of a text attribute.
 
 
+\section*{\tt \htmlref{cdiInqKeyInt}{cdiInqKeyInt}}
+
+\begin{verbatim}
+    int cdiInqKeyInt (int cdiID, int varID, int key, int *value);
+\end{verbatim}
+
+Get an integer value from a key of a CDI variable.
+
+
+\section*{\tt \htmlref{cdiInqKeyLen}{cdiInqKeyLen}}
+
+\begin{verbatim}
+    int cdiInqKeyLen (int cdiID, int varID, int key, int *length);
+\end{verbatim}
+
+Get the length of the string representation of the key.
+
+
+\section*{\tt \htmlref{cdiInqKeyString}{cdiInqKeyString}}
+
+\begin{verbatim}
+    int cdiInqKeyString (int cdiID, int varID, int key, char *string, int *length);
+\end{verbatim}
+
+Get a string value from a key of a CDI variable.
+
+
 \section*{\tt \htmlref{cdiInqNatts}{cdiInqNatts}}
 
 \begin{verbatim}
@@ -97,6 +159,42 @@ Get the value(s) of a text attribute.
 \end{verbatim}
 
 Get number of attributes assigned to this variable.
+
+
+\section*{\tt \htmlref{cdiZaxisDefKeyFlt}{cdiZaxisDefKeyFlt}}
+
+\begin{verbatim}
+    int cdiZaxisDefKeyFlt (int zaxisID, int key, double value);
+\end{verbatim}
+
+Define a CDI Z-axis floating point value from a key.
+
+
+\section*{\tt \htmlref{cdiZaxisDefKeyStr}{cdiZaxisDefKeyStr}}
+
+\begin{verbatim}
+    int cdiZaxisDefKeyStr (int zaxisID, int key, int size, const char *mesg);
+\end{verbatim}
+
+Define a CDI Z-axis string value from a key.
+
+
+\section*{\tt \htmlref{cdiZaxisInqKeyFlt}{cdiZaxisInqKeyFlt}}
+
+\begin{verbatim}
+    int cdiZaxisInqKeyFlt (int zaxisID, int key, double *value);
+\end{verbatim}
+
+Get a CDI Z-axis floating point value from a key.
+
+
+\section*{\tt \htmlref{cdiZaxisInqKeyStr}{cdiZaxisInqKeyStr}}
+
+\begin{verbatim}
+    int cdiZaxisInqKeyStr (int zaxisID, int key, int size, char *mesg);
+\end{verbatim}
+
+Get a CDI Z-axis string value from a key.
 
 
 \section*{\tt \htmlref{gridCreate}{gridCreate}}
@@ -755,7 +853,7 @@ Create a variable subtype.
     void subtypeDefActiveIndex (int subtypeID, int index);
 \end{verbatim}
 
-Set the currently active index of a subtype (e.g. current tile index)..
+Set the currently active index of a subtype (e.g. current tile index).
 
 
 \section*{\tt \htmlref{subtypeInqActiveIndex}{subtypeInqActiveIndex}}
@@ -764,7 +862,7 @@ Set the currently active index of a subtype (e.g. current tile index)..
     int subtypeInqActiveIndex (int subtypeID);
 \end{verbatim}
 
-Get the currently active index of a subtype (e.g. current tile index)..
+Get the currently active index of a subtype (e.g. current tile index).
 
 
 \section*{\tt \htmlref{subtypeInqAttribute}{subtypeInqAttribute}}
@@ -783,7 +881,7 @@ Inquire the value of a subtype attribute. Returns CDI_EINVAL if the attribute do
     int subtypeInqSize (int subtypeID);
 \end{verbatim}
 
-Get the size of a subtype (e.g. no. of tiles)..
+Get the size of a subtype (e.g. no. of tiles).
 
 
 \section*{\tt \htmlref{subtypeInqTile}{subtypeInqTile}}
@@ -792,7 +890,7 @@ Get the size of a subtype (e.g. no. of tiles)..
     int subtypeInqTile (int subtypeID, int tileindex, int attribute);
 \end{verbatim}
 
-Specialized version of subtypeInqSubEntry looking for tile/attribute pair..
+Specialized version of subtypeInqSubEntry looking for tile/attribute pair.
 
 
 \section*{\tt \htmlref{tableRead}{tableRead}}
@@ -1153,7 +1251,7 @@ Duplicate a variable list.
     int vlistHasVarKey (int vlistID, int varID, const char *name);
 \end{verbatim}
 
-returns 1 if meta-data key was read, 0 otherwise..
+returns 1 if meta-data key was read, 0 otherwise.
 
 
 \section*{\tt \htmlref{vlistInqTaxis}{vlistInqTaxis}}
@@ -1261,7 +1359,7 @@ Get the standard name of a Variable.
     int vlistInqVarSubtype (int vlistID, int varID);
 \end{verbatim}
 
-Return subtype ID for a given variable..
+Return subtype ID for a given variable.
 
 
 \section*{\tt \htmlref{vlistInqVarTsteptype}{vlistInqVarTsteptype}}
