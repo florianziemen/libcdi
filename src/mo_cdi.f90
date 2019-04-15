@@ -475,6 +475,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_GRIB2LOCALSECTIONNUMBER = 818
   integer(c_int), public, parameter :: CDI_KEY_SECTION2PADDINGLENGTH = 819
   integer(c_int), public, parameter :: CDI_KEY_SECTION2PADDING = 820
+  integer(c_int), public, parameter :: CDI_KEY_UVRELATIVETOGRID = 821
   public :: cdiDefKeyInt
   public :: cdiInqKeyInt
   public :: cdiDefKeyBytes
@@ -562,8 +563,6 @@ module mo_cdi
   public :: gridChangeType
   public :: gridDefComplexPacking
   public :: gridInqComplexPacking
-  public :: gridDefUvRelativeToGrid
-  public :: gridInqUvRelativeToGrid
   public :: gridDefScanningMode
   public :: gridInqScanningMode
   public :: zaxisName
@@ -573,7 +572,6 @@ module mo_cdi
   public :: zaxisInqType
   public :: zaxisInqSize
   public :: zaxisDuplicate
-  public :: zaxisPrint
   public :: zaxisDefLevels
   public :: zaxisInqLevels
   public :: zaxisInqCLen
@@ -600,6 +598,8 @@ module mo_cdi
   public :: zaxisInqScalar
   public :: zaxisDefLtype
   public :: zaxisInqLtype
+  public :: zaxisDefLtype2
+  public :: zaxisInqLtype2
   public :: zaxisDefVct
   public :: zaxisInqVct
   public :: zaxisInqVctSize
@@ -683,6 +683,7 @@ module mo_cdi
   public :: subtypeInqAttribute
   public :: vlistInqVarSubtype
   public :: gribapiLibraryVersion
+  public :: gaussianLatitudes
 
   interface
     subroutine cdiReset() bind(c, name = 'cdiReset')
@@ -2357,20 +2358,6 @@ module mo_cdi
       integer(c_int) :: f_result
     end function gridInqComplexPacking
 
-    subroutine gridDefUvRelativeToGrid(gridID_dummy, uvRelativeToGrid_dummy)&
-    & bind(c, name = 'gridDefUvRelativeToGrid')
-      import c_int
-      integer(c_int), value :: gridID_dummy
-      integer(c_int), value :: uvRelativeToGrid_dummy
-    end subroutine gridDefUvRelativeToGrid
-
-    function gridInqUvRelativeToGrid(gridID_dummy) bind(c, name =&
-    & 'gridInqUvRelativeToGrid') result(f_result)
-      import c_int
-      integer(c_int), value :: gridID_dummy
-      integer(c_int) :: f_result
-    end function gridInqUvRelativeToGrid
-
     subroutine gridDefScanningMode(gridID_dummy, mode_dummy) bind(c, name =&
     & 'gridDefScanningMode')
       import c_int
@@ -2418,11 +2405,6 @@ module mo_cdi
       integer(c_int), value :: zaxisID_dummy
       integer(c_int) :: f_result
     end function zaxisDuplicate
-
-    subroutine zaxisPrint(zaxisID_dummy) bind(c, name = 'zaxisPrint')
-      import c_int
-      integer(c_int), value :: zaxisID_dummy
-    end subroutine zaxisPrint
 
     subroutine zaxisDefLevels(zaxisID_dummy, levels_dummy) bind(c, name =&
     & 'zaxisDefLevels')
@@ -2557,6 +2539,20 @@ module mo_cdi
       integer(c_int), value :: zaxisID_dummy
       integer(c_int) :: f_result
     end function zaxisInqLtype
+
+    subroutine zaxisDefLtype2(zaxisID_dummy, ltype2_dummy) bind(c, name =&
+    & 'zaxisDefLtype2')
+      import c_int
+      integer(c_int), value :: zaxisID_dummy
+      integer(c_int), value :: ltype2_dummy
+    end subroutine zaxisDefLtype2
+
+    function zaxisInqLtype2(zaxisID_dummy) bind(c, name = 'zaxisInqLtype2')&
+    & result(f_result)
+      import c_int
+      integer(c_int), value :: zaxisID_dummy
+      integer(c_int) :: f_result
+    end function zaxisInqLtype2
 
     subroutine zaxisDefVct(zaxisID_dummy, size_dummy, vct_dummy) bind(c, name =&
     & 'zaxisDefVct')
@@ -3000,6 +2996,14 @@ module mo_cdi
       integer(c_int), intent(inout) :: minor_version_dummy
       integer(c_int), intent(inout) :: revision_version_dummy
     end subroutine gribapiLibraryVersion
+
+    subroutine gaussianLatitudes(latitudes_dummy, weights_dummy, nlat_dummy)&
+    & bind(c, name = 'gaussianLatitudes')
+      import c_double, c_size_t
+      real(c_double), intent(inout) :: latitudes_dummy
+      real(c_double), intent(inout) :: weights_dummy
+      integer(c_size_t), value :: nlat_dummy
+    end subroutine gaussianLatitudes
 
   end interface
 

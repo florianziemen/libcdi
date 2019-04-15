@@ -1402,12 +1402,11 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 {
   xassert(zaxisptr);
 
-  int zaxisID = zaxisptr->self;
-  int type    = zaxisptr->type;
-  int nlevels = zaxisptr->size;
-  int datatype = zaxisptr->datatype;
+  const int type    = zaxisptr->type;
+  const int nlevels = zaxisptr->size;
+  const int datatype = zaxisptr->datatype;
 
-  int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
+  const int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
 
   int nbyte;
   int nbyte0 = 0;
@@ -1415,7 +1414,7 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
   fprintf(fp, "size      = %d\n", nlevels);
   if ( nlevels == 1 )
     {
-      bool zscalar = (bool)zaxisptr->scalar;
+      const bool zscalar = (bool)zaxisptr->scalar;
       if ( zscalar ) fprintf(fp, "scalar    = true\n");
     }
   if ( zaxisptr->name[0]     ) fprintf(fp, "name      = %s\n", zaxisptr->name);
@@ -1435,21 +1434,6 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
               nbyte = nbyte0;
             }
           nbyte += fprintf(fp, "%.*g ", dig, zaxisptr->vals[levelID]);
-        }
-      fprintf(fp, "\n");
-    }
-
-  if ( zaxisptr->cvals )
-    {
-      dig = datatype;
-      nbyte0 = fprintf(fp, "types     = ");
-      nbyte = nbyte0;
-      for ( int levelID = 0; levelID < nlevels; levelID++ )
-        {
-          fprintf(fp, "\n");
-          fprintf(fp, "%*s", nbyte0, "");
-          nbyte = nbyte0;
-          nbyte += fprintf(fp, "%.*s [%d]", dig, zaxisptr->cvals[levelID], levelID+1);
         }
       fprintf(fp, "\n");
     }
@@ -1487,7 +1471,7 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 
   if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
     {
-      int vctsize = zaxisptr->vctsize;
+      const int vctsize = zaxisptr->vctsize;
       const double *vct = zaxisptr->vct;
       fprintf(fp, "vctsize   = %d\n", vctsize);
       if ( vctsize )
@@ -1504,33 +1488,6 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
               nbyte += fprintf(fp, "%.15g ", vct[i]);
             }
           fprintf(fp, "\n");
-          /*
-          nbyte0 = fprintf(fp, "vct_b     = ");
-          nbyte  = nbyte0;
-          for ( i = 0; i < vctsize/2; i++ )
-            {
-              if ( nbyte > 70 )
-                {
-                  fprintf(fp, "\n%*s", nbyte0, "");
-                  nbyte = nbyte0;
-                }
-              nbyte += fprintf(fp, "%.15g ", vct[vctsize/2+i]);
-            }
-          fprintf(fp, "\n");
-          */
-        }
-    }
-
-  if ( type == ZAXIS_REFERENCE )
-    {
-      unsigned char uuid[CDI_UUID_SIZE];
-      zaxisInqUUID(zaxisID, uuid);
-      if ( *uuid )
-        {
-          const unsigned char *d = uuid;
-          fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
-                  d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
-                  d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);
         }
     }
 }

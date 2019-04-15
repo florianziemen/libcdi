@@ -622,9 +622,6 @@ FCALLSCSUB2 (gridDefComplexPacking, GRIDDEFCOMPLEXPACKING, griddefcomplexpacking
 FCALLSCFUN1 (INT, gridInqComplexPacking, GRIDINQCOMPLEXPACKING, gridinqcomplexpacking, INT)
 FCALLSCSUB2 (gridDefScanningMode, GRIDDEFSCANNINGMODE, griddefscanningmode, INT, INT)
 FCALLSCFUN1 (INT, gridInqScanningMode, GRIDINQSCANNINGMODE, gridinqscanningmode, INT)
-
-/*  ZAXIS routines  */
-
 FCALLSCSUB2 (zaxisName, ZAXISNAME, zaxisname, INT, PSTRING)
 FCALLSCFUN1 (STRING, zaxisNamePtr, ZAXISNAMEPTR, zaxisnameptr, INT)
 FCALLSCFUN2 (INT, zaxisCreate, ZAXISCREATE, zaxiscreate, INT, INT)
@@ -632,7 +629,6 @@ FCALLSCSUB1 (zaxisDestroy, ZAXISDESTROY, zaxisdestroy, INT)
 FCALLSCFUN1 (INT, zaxisInqType, ZAXISINQTYPE, zaxisinqtype, INT)
 FCALLSCFUN1 (INT, zaxisInqSize, ZAXISINQSIZE, zaxisinqsize, INT)
 FCALLSCFUN1 (INT, zaxisDuplicate, ZAXISDUPLICATE, zaxisduplicate, INT)
-FCALLSCSUB1 (zaxisPrint, ZAXISPRINT, zaxisprint, INT)
 FCALLSCSUB2 (zaxisDefLevels, ZAXISDEFLEVELS, zaxisdeflevels, INT, DOUBLEV)
 FCALLSCFUN2 (INT, zaxisInqLevels, ZAXISINQLEVELS, zaxisinqlevels, INT, DOUBLEV)
 FCALLSCFUN1 (INT, zaxisInqCLen, ZAXISINQCLEN, zaxisinqclen, INT)
@@ -659,6 +655,8 @@ FCALLSCSUB1 (zaxisDefScalar, ZAXISDEFSCALAR, zaxisdefscalar, INT)
 FCALLSCFUN1 (INT, zaxisInqScalar, ZAXISINQSCALAR, zaxisinqscalar, INT)
 FCALLSCSUB2 (zaxisDefLtype, ZAXISDEFLTYPE, zaxisdefltype, INT, INT)
 FCALLSCFUN1 (INT, zaxisInqLtype, ZAXISINQLTYPE, zaxisinqltype, INT)
+FCALLSCSUB2 (zaxisDefLtype2, ZAXISDEFLTYPE2, zaxisdefltype2, INT, INT)
+FCALLSCFUN1 (INT, zaxisInqLtype2, ZAXISINQLTYPE2, zaxisinqltype2, INT)
 FCALLSCSUB3 (zaxisDefVct, ZAXISDEFVCT, zaxisdefvct, INT, INT, DOUBLEV)
 FCALLSCSUB2 (zaxisInqVct, ZAXISINQVCT, zaxisinqvct, INT, DOUBLEV)
 FCALLSCFUN1 (INT, zaxisInqVctSize, ZAXISINQVCTSIZE, zaxisinqvctsize, INT)
@@ -809,13 +807,17 @@ FCALLSCSUB2 (subtypeDefActiveIndex, SUBTYPEDEFACTIVEINDEX, subtypedefactiveindex
 /*  Generate a "query object" out of a key-value pair.  */
 
 
-/*  Generate an AND-combined "query object" out of two previous
-         query objects.  */
+/*  Generate an AND-combined "query object" out of two previous query objects.  */
 
 FCALLSCFUN3 (INT, subtypeInqTile, SUBTYPEINQTILE, subtypeinqtile, INT, INT, INT)
 FCALLSCFUN4 (INT, subtypeInqAttribute, SUBTYPEINQATTRIBUTE, subtypeinqattribute, INT, INT, STRING, PINT)
 FCALLSCFUN2 (INT, vlistInqVarSubtype, VLISTINQVARSUBTYPE, vlistinqvarsubtype, INT, INT)
 FCALLSCSUB3 (gribapiLibraryVersion, GRIBAPILIBRARYVERSION, gribapilibraryversion, PINT, PINT, PINT)
+static void gaussianLatitudes_fwrap(double *latitudes, double *weights, int nlat)
+{
+  gaussianLatitudes(latitudes, weights, (size_t)nlat);
+}
+FCALLSCSUB3 (gaussianLatitudes_fwrap, GAUSSIANLATITUDES, gaussianlatitudes, PDOUBLE, PDOUBLE, INT)
 
 #if defined __clang__
 #  pragma GCC diagnostic pop

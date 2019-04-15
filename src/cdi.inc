@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   February 2019
+! Uwe Schulzweida, MPI-MET, Hamburg,   April 2019
 !
 
       INTEGER    CDI_MAX_NAME
@@ -2029,9 +2029,6 @@
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqScanningMode
 
-!
-!  ZAXIS routines
-!
 !                     zaxisName
 !                                    (INTEGER         zaxistype,
 !                                     CHARACTER*(*)   zaxisname)
@@ -2061,10 +2058,6 @@
       INTEGER         zaxisDuplicate
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisDuplicate
-
-!                     zaxisPrint
-!                                    (INTEGER         zaxisID)
-      EXTERNAL        zaxisPrint
 
 !                     zaxisDefLevels
 !                                    (INTEGER         zaxisID,
@@ -2188,6 +2181,15 @@
       INTEGER         zaxisInqLtype
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisInqLtype
+
+!                     zaxisDefLtype2
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         ltype2)
+      EXTERNAL        zaxisDefLtype2
+
+      INTEGER         zaxisInqLtype2
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqLtype2
 
 !                     zaxisDefVct
 !                                    (INTEGER         zaxisID,
@@ -2585,8 +2587,7 @@
 !  Generate a "query object" out of a key-value pair.
 !
 !
-!  Generate an AND-combined "query object" out of two previous
-!  query objects.
+!  Generate an AND-combined "query object" out of two previous query objects.
 !
       INTEGER         subtypeInqTile
 !                                    (INTEGER         subtypeID,
@@ -2611,4 +2612,10 @@
 !                                     INTEGER         minor_version,
 !                                     INTEGER         revision_version)
       EXTERNAL        gribapiLibraryVersion
+
+!                     gaussianLatitudes
+!                                    (DOUBLEPRECISION latitudes,
+!                                     DOUBLEPRECISION weights,
+!                                     INTEGER         nlat)
+      EXTERNAL        gaussianLatitudes
 
