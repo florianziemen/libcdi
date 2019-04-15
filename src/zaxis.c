@@ -1536,13 +1536,6 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 }
 
 
-void zaxisPrint(int zaxisID)
-{
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  zaxisPrintKernel(zaxisptr, stdout);
-}
-
-
 static
 void zaxisPrintP(void * voidptr, FILE * fp)
 {

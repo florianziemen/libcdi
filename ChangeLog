@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.3
 	* Version 1.9.7 released
 
+2019-04-15  Uwe Schulzweida
+
+	* Removed funtion zaxisPrint()
+
 2019-04-01  Uwe Schulzweida
 
 	* Added support gpt GRIB2 key typeOfSecondFixedSurface

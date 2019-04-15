@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-#define  CDI_MAX_NAME             256   // max length of a name
+#define  CDI_MAX_NAME             256   // Max length of a name
 
 #define  CDI_UNDEFID               -1
 #define  CDI_GLOBAL                -1   // Global var ID for vlist
@@ -712,72 +712,72 @@ int     gridInqMask(int gridID, int mask[]);
 
 void    gridPrint(int gridID, int opt);
 
-/*      gridCreate: Create a horizontal Grid */
+//      gridCreate: Create a horizontal Grid
 int     gridCreate(int gridtype, size_t size);
 
-/*      gridDestroy: Destroy a horizontal Grid */
+//      gridDestroy: Destroy a horizontal Grid
 void    gridDestroy(int gridID);
 
-/*      gridDuplicate: Duplicate a Grid */
+//      gridDuplicate: Duplicate a Grid
 int     gridDuplicate(int gridID);
 
-/*      gridDefProj: Define the projection ID of a Grid */
+//      gridDefProj: Define the projection ID of a Grid
 void    gridDefProj(int gridID, int projID);
 
-/*      gridInqProj: Get the projection ID of a Grid */
+//      gridInqProj: Get the projection ID of a Grid
 int     gridInqProj(int gridID);
 
-/*      gridInqProjType: Get the projection type */
+//      gridInqProjType: Get the projection type
 int     gridInqProjType(int gridID);
 
-/*      gridInqType: Get the type of a Grid */
+//      gridInqType: Get the type of a Grid
 int     gridInqType(int gridID);
 
-/*      gridInqSize: Get the size of a Grid */
+//      gridInqSize: Get the size of a Grid
 size_t  gridInqSize(int gridID);
 
-/*      gridDefXsize: Define the size of a X-axis */
+//      gridDefXsize: Define the size of a X-axis
 void    gridDefXsize(int gridID, size_t xsize);
 
-/*      gridInqXsize: Get the size of a X-axis */
+//      gridInqXsize: Get the size of a X-axis
 size_t  gridInqXsize(int gridID);
 
-/*      gridDefYsize: Define the size of a Y-axis */
+//      gridDefYsize: Define the size of a Y-axis
 void    gridDefYsize(int gridID, size_t ysize);
 
-/*      gridInqYsize: Get the size of a Y-axis */
+//      gridInqYsize: Get the size of a Y-axis
 size_t  gridInqYsize(int gridID);
 
-/*      gridDefNP: Define the number of parallels between a pole and the equator */
+//      gridDefNP: Define the number of parallels between a pole and the equator
 void    gridDefNP(int gridID, int np);
 
-/*      gridInqNP: Get the number of parallels between a pole and the equator */
+//      gridInqNP: Get the number of parallels between a pole and the equator
 int     gridInqNP(int gridID);
 
-/*      gridDefXvals: Define the values of a X-axis */
+//      gridDefXvals: Define the values of a X-axis
 void    gridDefXvals(int gridID, const double xvals[]);
 
-/*      gridInqXvals: Get all values of a X-axis */
+//      gridInqXvals: Get all values of a X-axis
 size_t  gridInqXvals(int gridID, double xvals[]);
 size_t  gridInqXvalsPart(int gridID, int start, size_t size, double xvals[]);
 
-/*      gridInqXIsc: Find out whether X-coordinate is of type CHAR */
+//      gridInqXIsc: Find out whether X-coordinate is of type CHAR
 int     gridInqXIsc(int gridID);
 
-/*      gridInqXCvals: Get strings from X-axis in case grid is of type GRID_CHARXY */
+//      gridInqXCvals: Get strings from X-axis in case grid is of type GRID_CHARXY
 size_t  gridInqXCvals(int gridID, char *xcvals[]);
 
-/*      gridDefYvals: Define the values of a Y-axis */
+//      gridDefYvals: Define the values of a Y-axis
 void    gridDefYvals(int gridID, const double yvals[]);
 
-/*      gridInqYvals: Get all values of a Y-axis */
+//      gridInqYvals: Get all values of a Y-axis
 size_t  gridInqYvals(int gridID, double yvals[]);
 size_t  gridInqYvalsPart(int gridID, int start, size_t size, double yvals[]);
 
-/*      gridInqYIsc: Find out whether Y-coordinate is of type CHAR */
+//      gridInqYIsc: Find out whether Y-coordinate is of type CHAR
 int     gridInqYIsc(int gridID);
 
-/*      gridInqYCvals: Get strings from Y-axis in case grid is of type GRID_CHARXY */
+//      gridInqYCvals: Get strings from Y-axis in case grid is of type GRID_CHARXY
 size_t  gridInqYCvals(int gridID, char *ycvals[]);
 
 // CDI var keys
@@ -1004,86 +1004,84 @@ int     gridInqComplexPacking(int gridID);
 void    gridDefScanningMode(int gridID, int mode);
 int     gridInqScanningMode(int gridID);
 
-/* ZAXIS routines */
+// ZAXIS routines
 
 void    zaxisName(int zaxistype, char *zaxisname);
 const char *zaxisNamePtr(int leveltype);
 
-/*      zaxisCreate: Create a vertical Z-axis */
+//      zaxisCreate: Create a vertical Z-axis
 int     zaxisCreate(int zaxistype, int size);
 
-/*      zaxisDestroy: Destroy a vertical Z-axis */
+//      zaxisDestroy: Destroy a vertical Z-axis
 void    zaxisDestroy(int zaxisID);
 
-/*      zaxisInqType: Get the type of a Z-axis */
+//      zaxisInqType: Get the type of a Z-axis
 int     zaxisInqType(int zaxisID);
 
-/*      zaxisInqSize: Get the size of a Z-axis */
+//      zaxisInqSize: Get the size of a Z-axis
 int     zaxisInqSize(int zaxisID);
 
-/*      zaxisDuplicate: Duplicate a Z-axis */
+//      zaxisDuplicate: Duplicate a Z-axis
 int     zaxisDuplicate(int zaxisID);
 
-void    zaxisPrint(int zaxisID);
-
-/*      zaxisDefLevels: Define the levels of a Z-axis */
+//      zaxisDefLevels: Define the levels of a Z-axis
 void    zaxisDefLevels(int zaxisID, const double levels[]);
 
-/*      zaxisDefCvals: Define area types of a Z-axis */
+//      zaxisDefCvals: Define area types of a Z-axis
 void    zaxisDefCvals(int zaxisID, const char *cvals[], int clength);
 
-/*      zaxisInqLevels: Get all levels of a Z-axis */
+//      zaxisInqLevels: Get all levels of a Z-axis
 int     zaxisInqLevels(int zaxisID, double levels[]);
 
-/*      zaxisInqCLen: Get maximal string length of character Z-axis */
+//      zaxisInqCLen: Get maximal string length of character Z-axis
 int     zaxisInqCLen(int zaxisID);
 
-/*      zaxisInqCVals: Get all string values of a character Z-axis */
+//      zaxisInqCVals: Get all string values of a character Z-axis
 int     zaxisInqCVals(int zaxisID, char ***clevels);
 
-/*      zaxisDefLevel: Define one level of a Z-axis */
+//      zaxisDefLevel: Define one level of a Z-axis
 void    zaxisDefLevel(int zaxisID, int levelID, double levels);
 
-/*      zaxisInqLevel: Get one level of a Z-axis */
+//      zaxisInqLevel: Get one level of a Z-axis
 double  zaxisInqLevel(int zaxisID, int levelID);
 
-/*      zaxisDefNlevRef: Define the number of half levels of a generalized Z-axis */
+//      zaxisDefNlevRef: Define the number of half levels of a generalized Z-axis
 void    zaxisDefNlevRef(int gridID, int nhlev);
 
-/*      zaxisInqNlevRef: Get the number of half levels of a generalized Z-axis */
+//      zaxisInqNlevRef: Get the number of half levels of a generalized Z-axis
 int     zaxisInqNlevRef(int gridID);
 
 /*      zaxisDefNumber: Define the reference number for a generalized Z-axis */
 void    zaxisDefNumber(int gridID, int number);
 
-/*      zaxisInqNumber: Get the reference number to a generalized Z-axis */
+//      zaxisInqNumber: Get the reference number to a generalized Z-axis
 int     zaxisInqNumber(int gridID);
 
-/*      zaxisDefUUID: Define the UUID of a generalized Z-axis */
+//      zaxisDefUUID: Define the UUID of a generalized Z-axis
 void    zaxisDefUUID(int zaxisID, const unsigned char uuid[CDI_UUID_SIZE]);
 
-/*      zaxisInqUUID: Get the UUID of a generalized Z-axis */
+//      zaxisInqUUID: Get the UUID of a generalized Z-axis
 void    zaxisInqUUID(int zaxisID, unsigned char uuid[CDI_UUID_SIZE]);
 
-/*      zaxisDefName: Define the name of a Z-axis */
+//      zaxisDefName: Define the name of a Z-axis
 void    zaxisDefName(int zaxisID, const char *name_optional);
 
-/*      zaxisInqName: Get the name of a Z-axis */
+//      zaxisInqName: Get the name of a Z-axis
 void    zaxisInqName(int zaxisID, char *name);
 
-/*      zaxisDefLongname: Define the longname of a Z-axis */
+//      zaxisDefLongname: Define the longname of a Z-axis
 void    zaxisDefLongname(int zaxisID, const char *longname_optional);
 
-/*      zaxisInqLongname: Get the longname of a Z-axis */
+//      zaxisInqLongname: Get the longname of a Z-axis
 void    zaxisInqLongname(int zaxisID, char *longname);
 
-/*      zaxisDefUnits: Define the units of a Z-axis */
+//      zaxisDefUnits: Define the units of a Z-axis
 void    zaxisDefUnits(int zaxisID, const char *units_optional);
 
-/*      zaxisInqUnits: Get the units of a Z-axis */
+//      zaxisInqUnits: Get the units of a Z-axis
 void    zaxisInqUnits(int zaxisID, char *units);
 
-/*      zaxisInqStdname: Get the standard name of a Z-axis */
+//      zaxisInqStdname: Get the standard name of a Z-axis
 void    zaxisInqStdname(int zaxisID, char *stdname);
 
 void    zaxisDefDatatype(int zaxisID, int prec);
@@ -1267,8 +1265,7 @@ void    subtypeDefActiveIndex(int subtypeID, int index);
 /*      Generate a "query object" out of a key-value pair. */
 subtype_query_t keyValuePair(const char *key, int value);
 
-/*       Generate an AND-combined "query object" out of two previous
-         query objects. */
+/*       Generate an AND-combined "query object" out of two previous query objects. */
 subtype_query_t matchAND(subtype_query_t q1, subtype_query_t q2);
 
 /*      subtypeInqSubEntry: Returns subtype entry ID for a given criterion. */
