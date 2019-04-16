@@ -3324,61 +3324,6 @@ printDblsPrefixAutoBrk(FILE *fp, int dig, const char prefix[], size_t nbyte0,
   fputs("\n", fp);
 }
 
-static void
-printIntsPrefixAutoBrk(FILE *fp, const char prefix[], size_t nbyte0,
-                       size_t n, const int vals[])
-{
-  fputs(prefix, fp);
-  size_t nbyte = nbyte0;
-  for ( size_t i = 0; i < n; i++ )
-    {
-      if ( nbyte > 80 )
-        {
-          fprintf(fp, "\n%*s", (int)nbyte0, "");
-          nbyte = nbyte0;
-        }
-      nbyte += (size_t)fprintf(fp, "%d ", vals[i]);
-    }
-  fputs("\n", fp);
-}
-
-static void
-printBounds(FILE *fp, int dig, const char prefix[], size_t nbyte0,
-            size_t n, size_t nvertex, const double bounds[])
-{
-  fputs(prefix, fp);
-  if ( n > 0 )
-    {
-      for ( size_t iv = 0; iv < nvertex; iv++ )
-        fprintf(fp, "%.*g ", dig, bounds[iv]);
-      for ( size_t i = 1; i < n; i++ )
-        {
-          fprintf(fp, "\n%*s", (int)nbyte0, "");
-          for ( size_t iv = 0; iv < nvertex; iv++ )
-            fprintf(fp, "%.*g ", dig, bounds[i*nvertex+iv]);
-        }
-      fputs("\n", fp);
-    }
-}
-
-static void
-printMask(FILE *fp, const char prefix[], size_t nbyte0,
-          size_t n, const int mask[])
-{
-  fputs(prefix, fp);
-  size_t nbyte = nbyte0;
-  for ( size_t i = 0; i < n; i++ )
-    {
-      if ( nbyte > 80 )
-        {
-          fprintf(fp, "\n%*s", (int)nbyte0, "");
-          nbyte = nbyte0;
-        }
-      nbyte += (size_t)fprintf(fp, "%d ", mask[i]);
-    }
-  fputs("\n", fp);
-}
-
 static inline
 void *resizeBuffer(void **buf, size_t *bufSize, size_t reqSize)
 {
@@ -3452,23 +3397,15 @@ void gridPrintAttributes(FILE *fp, int gridID)
 static
 void gridPrintKernel(int gridID, int opt, FILE *fp)
 {
-  size_t xdimLen, ydimLen;
   char attstr[CDI_MAX_NAME];
   char attstr2[CDI_MAX_NAME];
-  unsigned char uuidOfHGrid[CDI_UUID_SIZE];
-  const char  **xcvals  = gridInqXCvalsPtr(gridID);
-  const char  **ycvals  = gridInqYCvalsPtr(gridID);
   size_t nxvals = gridInqXvals(gridID, NULL);
   size_t nyvals = gridInqYvals(gridID, NULL);
-  size_t nxbounds = gridInqXbounds(gridID, NULL);
-  size_t nybounds = gridInqYbounds(gridID, NULL);
 
   int type     = gridInqType(gridID);
   size_t gridsize = gridInqSize(gridID);
   size_t xsize    = gridInqXsize(gridID);
   size_t ysize    = gridInqYsize(gridID);
-  int xstrlen  = gridInqXIsc(gridID);
-  int ystrlen  = gridInqYIsc(gridID);
   int nvertex  = gridInqNvertex(gridID);
   int datatype = gridInqDatatype(gridID);
 
@@ -3484,9 +3421,8 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
           if ( ysize > 0 ) fprintf(fp, "ysize     = %zu\n", ysize);
         }
 
-      if ( nxvals > 0 || xcvals )
+      if ( nxvals > 0 )
         {
-          if ( xstrlen )  fprintf(fp, "xstringlen= %d\n", xstrlen);
           attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, attstr);
           if ( attstr[0] )  fprintf(fp, "xname     = %s\n", attstr);
           attstr2[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_XDIMNAME, CDI_MAX_NAME, attstr2);
@@ -3497,9 +3433,8 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
           if ( attstr[0] )  fprintf(fp, "xunits    = %s\n", attstr);
         }
 
-      if ( nyvals > 0 || ycvals )
+      if ( nyvals > 0 )
         {
-          if ( ystrlen )  fprintf(fp, "ystringlen= %d\n", ystrlen);
           attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_YNAME, CDI_MAX_NAME, attstr);
           if ( attstr[0] )  fprintf(fp, "yname     = %s\n", attstr);
           attstr2[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_YDIMNAME, CDI_MAX_NAME, attstr2);
@@ -3530,22 +3465,6 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
     case GRID_CHARXY:
       {
         if ( type == GRID_GAUSSIAN || type == GRID_GAUSSIAN_REDUCED ) fprintf(fp, "np        = %d\n", gridInqNP(gridID));
-
-	if ( type == GRID_CURVILINEAR || type == GRID_UNSTRUCTURED )
-	  {
-	    xdimLen = gridsize;
-	    ydimLen = gridsize;
-	  }
-        else if ( type == GRID_GAUSSIAN_REDUCED )
-          {
-	    xdimLen = 2;
-	    ydimLen = ysize;
-          }
-	else
-	  {
-	    xdimLen = xsize;
-	    ydimLen = ysize;
-	  }
 
 	if ( type == GRID_UNSTRUCTURED )
           {
@@ -3598,26 +3517,6 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
 	      }
 	  }
 
-        if ( xcvals )
-          {
-            attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, attstr);
-            if ( attstr[0] )
-              fprintf(fp, "x%ss = %.*s\n", attstr, xstrlen, xcvals[0]);
-            else
-              fprintf(fp, "xstrings  = %.*s\n", xstrlen, xcvals[0]);
-            for ( size_t i = 1; i < xsize; i++ )
-              fprintf(fp, "          = %.*s\n", xstrlen, xcvals[i]);
-          }
-
-	if ( nxbounds )
-	  {
-            double *xbounds = (double*) Malloc(nxbounds*sizeof(double));
-            gridInqXbounds(gridID, xbounds);
-            static const char prefix[] = "xbounds   = ";
-            printBounds(fp, dig, prefix, sizeof(prefix)-1, xdimLen, (size_t)nvertex, xbounds);
-            Free(xbounds);
-	  }
-
 	if ( nyvals > 0 )
 	  {
 	    double yfirst = 0.0, yinc = 0.0;
@@ -3643,45 +3542,6 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
                 Free(yvals);
 	      }
 	  }
-
-        if ( ycvals )
-          {
-            attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_YNAME, CDI_MAX_NAME, attstr);
-            if ( attstr[0] )
-              fprintf(fp, "x%ss = %.*s\n", attstr, ystrlen, ycvals[0]);
-            else
-              fprintf(fp, "ystrings  = %.*s\n", ystrlen, ycvals[0]);
-            for ( size_t i = 1; i < ysize; i++ )
-              fprintf(fp, "          = %.*s\n", ystrlen, ycvals[i]);
-          }
-
-	if ( nybounds )
-	  {
-            double *ybounds = (double*) Malloc(nybounds*sizeof(double));
-            gridInqYbounds(gridID, ybounds);
-            static const char prefix[] = "ybounds   = ";
-            printBounds(fp, dig, prefix, sizeof(prefix)-1, ydimLen, (size_t)nvertex, ybounds);
-            Free(ybounds);
-	  }
-
-	if ( gridHasArea(gridID) )
-	  {
-            double *area = (double*) Malloc(gridsize*sizeof(double));
-            gridInqArea(gridID, area);
-            static const char prefix[] = "area      = ";
-            printDblsPrefixAutoBrk(fp, dig, prefix, sizeof(prefix)-1, gridsize, area);
-            Free(area);
-	  }
-
-        if ( type == GRID_GAUSSIAN_REDUCED )
-          {
-            static const char prefix[] = "rowlon    = ";
-            int *rowlon = (int *)Malloc(ysize*sizeof(int));
-            gridInqRowlon(gridID, rowlon);
-            printIntsPrefixAutoBrk(fp, prefix, sizeof(prefix)-1,
-                                   (ysize > 0 ? ysize : 0), rowlon);
-            Free(rowlon);
-          }
 
         if ( type == GRID_PROJECTION ) gridPrintAttributes(fp, gridID);
 
@@ -3711,25 +3571,6 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
         break;
       }
     }
-
-  gridInqUUID(gridID, uuidOfHGrid);
-  if ( !cdiUUIDIsNull(uuidOfHGrid) )
-    {
-      char uuidOfHGridStr[37];
-      cdiUUID2Str(uuidOfHGrid, uuidOfHGridStr);
-      if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
-        fprintf(fp, "uuid      = %s\n", uuidOfHGridStr);
-    }
-
-  if ( gridInqMask(gridID, NULL) )
-    {
-      int *mask = (gridsize>0) ? (int*) Malloc(gridsize*sizeof(int)) : NULL;
-      gridInqMask(gridID, mask);
-      static const char prefix[] = "mask      = ";
-      printMask(fp, prefix, sizeof(prefix)-1,
-                (gridsize > 0 ? gridsize : 0), mask);
-      if ( mask ) Free(mask);
-    }
 }
 
 
@@ -3756,25 +3597,6 @@ void gridPrintP(void *voidptr, FILE *fp)
           gridptr->datatype, gridptr->gme.nd, gridptr->gme.ni, gridptr->gme.ni2,
           gridptr->gme.ni3, gridptr->number, gridptr->position, gridptr->trunc,
           gridptr->lcomplex, gridptr->nrowlon );
-
-  if ( gridptr->rowlon )
-    {
-      static const char prefix[] = "rowlon    = ";
-      printIntsPrefixAutoBrk(fp, prefix, sizeof(prefix)-1,
-                             (size_t)(gridptr->nrowlon > 0
-                                      ? gridptr->nrowlon : 0), gridptr->rowlon);
-    }
-
-  if ( gridInqMaskGME(gridID, NULL) )
-    {
-      size_t gridsize = gridptr->size;
-      int *mask = (gridsize>0) ? (int*) Malloc(gridsize*sizeof(int)) : NULL;
-      gridInqMaskGME(gridID, mask);
-      static const char prefix[] = "mask_gme  = ";
-      printMask(fp, prefix, sizeof(prefix)-1,
-                (gridptr->size > 0 ? gridptr->size : 0), mask);
-      if ( mask ) Free(mask);
-    }
 }
 
 static const double *gridInqXValsPtrSerial(grid_t *gridptr)
