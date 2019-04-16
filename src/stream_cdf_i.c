@@ -1988,6 +1988,7 @@ void cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **g
     }
 }
 
+#ifndef USE_MPI
 static
 void cdf_load_cvals(size_t size, int varid, ncvar_t *ncvar, char ***gridvals, size_t dimlength)
 {
@@ -2001,6 +2002,7 @@ void cdf_load_cvals(size_t size, int varid, ncvar_t *ncvar, char ***gridvals, si
       startc[0] = i+1;
     }
 }
+#endif
 
 static
 void cdf_load_bounds(size_t size, ncvar_t *ncvar, double **gridbounds, struct cdfLazyGridIds *cellBoundsGet)
@@ -2040,8 +2042,10 @@ void cdf_copy_axis_attr(ncvar_t *ncvar, struct gridaxis_t *gridaxis)
   strcpy(gridaxis->name, ncvar->name);
   strcpy(gridaxis->longname, ncvar->longname);
   strcpy(gridaxis->units, ncvar->units);
+#ifndef USE_MPI
   if ( gridaxis->cvals )
     gridaxis->stdname = ncvar->stdname;
+#endif
 }
 
 static
@@ -2172,8 +2176,10 @@ bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
 
   if ( datatype == CDI_DATATYPE_UINT8 && !CDI_netcdf_lazy_grid_load )
     {
+#ifndef USE_MPI
       cdf_load_cvals(size, xvarid, axisvar, &grid->x.cvals, *xsize);
       grid->x.clength = size / (*xsize) ;
+#endif
     }
   else
     cdf_load_vals(size, ndims, xvarid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, ntdims, start, count);
@@ -2241,8 +2247,10 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
 
   if ( datatype == CDI_DATATYPE_UINT8 && !CDI_netcdf_lazy_grid_load )
     {
+#ifndef USE_MPI
       cdf_load_cvals(size, yvarid, axisvar, &grid->y.cvals, *ysize);
       grid->y.clength = size / (*ysize) ;
+#endif
     }
   else
     cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet, ntdims, start, count);
@@ -2838,6 +2846,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 		if ( pname[len-2] == '_' && isdigit((int) pname[len-1]) )
 		  pname[len-2] = 0;
 	      */
+#ifndef USE_MPI
               if ( zaxisType == ZAXIS_CHAR )
                 {
                   if ( ncvars[zvarid].ndims == 2 )
@@ -2847,6 +2856,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
                       cdf_load_cvals(zsize*zclength, zvarid, ncvar, &zcvals, zsize);
                     }
                 }
+#endif
 
               if ( zaxisType == ZAXIS_HYBRID && ncvars[zvarid].vct )
                 {

@@ -122,17 +122,18 @@ void grid_init(grid_t *gridptr)
   gridptr->mask          = NULL;
   gridptr->mask_gme      = NULL;
   gridptr->x.vals        = NULL;
-  gridptr->x.cvals       = NULL;
-  gridptr->x.clength     = 0;
   gridptr->y.vals        = NULL;
-  gridptr->y.cvals       = NULL;
-  gridptr->y.clength     = 0;
   gridptr->x.bounds      = NULL;
   gridptr->y.bounds      = NULL;
   gridptr->area          = NULL;
   gridptr->rowlon        = NULL;
   gridptr->nrowlon       = 0;
-
+#ifndef USE_MPI
+  gridptr->x.clength     = 0;
+  gridptr->y.clength     = 0;
+  gridptr->x.cvals       = NULL;
+  gridptr->y.cvals       = NULL;
+#endif
   gridptr->x.first       = 0.0;
   gridptr->x.last        = 0.0;
   gridptr->x.inc         = 0.0;
@@ -197,7 +198,9 @@ void grid_free_components(grid_t *gridptr)
 {
   void *p2free[] = { gridptr->mask, gridptr->mask_gme,
                      gridptr->x.vals, gridptr->y.vals,
+#ifndef USE_MPI
                      gridptr->x.cvals, gridptr->y.cvals,
+#endif
                      gridptr->x.bounds, gridptr->y.bounds,
                      gridptr->rowlon, gridptr->area,
                      gridptr->reference, gridptr->name};
@@ -329,13 +332,15 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
 
         break;
       }
+#ifndef USE_MPI
     case GRID_CHARXY:
       {
         if ( gridptr->x.cvals ) gridptr->x.stdname = xystdname_tab[grid_xystdname_char][0];
         if ( gridptr->y.cvals ) gridptr->y.stdname = xystdname_tab[grid_xystdname_char][0];
 
         break;
-     }
+      }
+#endif
     case GRID_GENERIC:
     case GRID_PROJECTION:
       {
@@ -1564,6 +1569,7 @@ size_t gridInqXValsPartSerial(grid_t *gridptr, int start, size_t length, double 
   return size;
 }
 
+#ifndef USE_MPI
 static
 size_t gridInqXCvalsSerial(grid_t *gridptr, char **xcvals)
 {
@@ -1594,6 +1600,7 @@ int gridInqXIscSerial(grid_t *gridptr)
   */
   return clen;
 }
+#endif
 
 /*
 @Function  gridInqXvals
@@ -1632,14 +1639,22 @@ size_t gridInqXvalsPart(int gridID, int start, size_t length, double *xvals)
 size_t gridInqXCvals(int gridID, char **xcvals)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
+#ifndef USE_MPI
   return gridptr->vtable->inqXCvals(gridptr, xcvals);
+#else
+  return 0;
+#endif
 }
 
 
 int gridInqXIsc(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
+#ifndef USE_MPI
   return gridptr->vtable->inqXIsc(gridptr);
+#else
+  return 0;
+#endif
 }
 
 static
@@ -1663,6 +1678,7 @@ void gridDefXValsSerial(grid_t *gridptr, const double *xvals)
   memcpy(gridptr->x.vals, xvals, size * sizeof (double));
 }
 
+#ifndef USE_MPI
 static
 size_t gridInqYCvalsSerial(grid_t *gridptr, char **ycvals)
 {
@@ -1693,6 +1709,7 @@ int gridInqYIscSerial(grid_t *gridptr)
   */
   return clen;
 }
+#endif
 
 /*
 @Function  gridDefXvals
@@ -1800,14 +1817,22 @@ size_t gridInqYvalsPart(int gridID, int start, size_t size, double *yvals)
 size_t gridInqYCvals(int gridID, char **ycvals)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
+#ifndef USE_MPI
   return gridptr->vtable->inqYCvals(gridptr, ycvals);
+#else
+  return 0;
+#endif
 }
 
 
 int gridInqYIsc(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
+#ifndef USE_MPI
   return gridptr->vtable->inqYIsc(gridptr);
+#else
+  return 0;
+#endif
 }
 
 static
@@ -3604,11 +3629,12 @@ static const double *gridInqXValsPtrSerial(grid_t *gridptr)
   return gridptr->x.vals;
 }
 
+#ifndef USE_MPI
 static const char **gridInqXCvalsPtrSerial(grid_t *gridptr)
 {
   return (const char **) gridptr->x.cvals;
 }
-
+#endif
 
 const double *gridInqXvalsPtr(int gridID)
 {
@@ -3616,22 +3642,25 @@ const double *gridInqXvalsPtr(int gridID)
   return gridptr->vtable->inqXValsPtr(gridptr);
 }
 
-
+#ifndef USE_MPI
 const char **gridInqXCvalsPtr(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqXCvalsPtr(gridptr);
 }
+#endif
 
 static const double *gridInqYValsPtrSerial(grid_t *gridptr)
 {
   return gridptr->y.vals;
 }
 
+#ifndef USE_MPI
 static const char **gridInqYCvalsPtrSerial(grid_t *gridptr)
 {
   return (const char **) gridptr->y.cvals;
 }
+#endif
 
 const double *gridInqYvalsPtr(int gridID)
 {
@@ -3639,11 +3668,13 @@ const double *gridInqYvalsPtr(int gridID)
   return gridptr->vtable->inqYValsPtr(gridptr);
 }
 
+#ifndef USE_MPI
 const char **gridInqYCvalsPtr(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqYCvalsPtr(gridptr);
 }
+#endif
 
 /*
 @Function  gridDefParamLCC
@@ -4910,16 +4941,18 @@ const struct gridVirtTable cdiGridVtable
   .inqYVal = gridInqYValSerial,
   .inqXVals = gridInqXValsSerial,
   .inqXValsPart = gridInqXValsPartSerial,
-  .inqXCvals = gridInqXCvalsSerial,
-  .inqXIsc = gridInqXIscSerial,
   .inqYVals = gridInqYValsSerial,
   .inqYValsPart = gridInqYValsPartSerial,
-  .inqYCvals = gridInqYCvalsSerial,
-  .inqYIsc = gridInqYIscSerial,
   .inqXValsPtr = gridInqXValsPtrSerial,
   .inqYValsPtr = gridInqYValsPtrSerial,
+#ifndef USE_MPI
+  .inqXIsc = gridInqXIscSerial,
+  .inqYIsc = gridInqYIscSerial,
+  .inqXCvals = gridInqXCvalsSerial,
+  .inqYCvals = gridInqYCvalsSerial,
   .inqXCvalsPtr = gridInqXCvalsPtrSerial,
   .inqYCvalsPtr = gridInqYCvalsPtrSerial,
+#endif
   .compareXYFull = compareXYvals,
   .compareXYAO = compareXYvals2,
   .inqArea = gridInqAreaSerial,

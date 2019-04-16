@@ -32,16 +32,18 @@ struct gridVirtTable
   double (*inqYVal)(grid_t *gridptr, size_t index);
   size_t (*inqXVals)(grid_t *gridptr, double *xvals);
   size_t (*inqXValsPart)(grid_t *gridptr, int start, size_t length, double *xvals);
-  size_t (*inqXCvals)(grid_t *gridptr, char **xcvals);
-  int (*inqXIsc)(grid_t *gridptr);
   size_t (*inqYVals)(grid_t *gridptr, double *yvals);
   size_t (*inqYValsPart)(grid_t *gridptr, int start, size_t length, double *yvals);
-  size_t (*inqYCvals)(grid_t *gridptr, char **ycvals);
-  int (*inqYIsc)(grid_t *gridptr);
   const double *(*inqXValsPtr)(grid_t *gridptr);
-  const char **(*inqXCvalsPtr)(grid_t *gridptr);
   const double *(*inqYValsPtr)(grid_t *gridptr);
+#ifndef USE_MPI
+  int (*inqXIsc)(grid_t *gridptr);
+  int (*inqYIsc)(grid_t *gridptr);
+  size_t (*inqXCvals)(grid_t *gridptr, char **xcvals);
+  size_t (*inqYCvals)(grid_t *gridptr, char **ycvals);
+  const char **(*inqXCvalsPtr)(grid_t *gridptr);
   const char **(*inqYCvalsPtr)(grid_t *gridptr);
+#endif
   /* return if for both grids, all xval and all yval are equal */
   bool (*compareXYFull)(grid_t *gridRef, grid_t *gridTest);
   /* return if for both grids, x[0], y[0], x[size-1] and y[size-1] are
@@ -68,9 +70,11 @@ struct gridaxis_t {
   short   flag;                  // 0: undefined 1:vals 2:first+inc
   double  first, last, inc;
   double *vals;
+  double *bounds;
+#ifndef USE_MPI
   int clength;
   char  **cvals;
-  double *bounds;
+#endif
 };
 
 // GME Grid
