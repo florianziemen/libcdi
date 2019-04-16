@@ -393,10 +393,10 @@ void calc_gaussgrid(double *restrict yvals, size_t ysize, double yfirst, double 
 
   if ( yfirst < ylast && yfirst > -90.0 && ylast < 90.0 )
     {
-      size_t yhsize = ysize/2;
+      const size_t yhsize = ysize/2;
       for (size_t i = 0; i < yhsize; i++ )
         {
-          double ytmp = yvals[i];
+          const double ytmp = yvals[i];
           yvals[i] = yvals[ysize-i-1];
           yvals[ysize-i-1] = ytmp;
         }
@@ -559,12 +559,12 @@ void gridDestroyKernel( grid_t * gridptr )
 {
   xassert ( gridptr );
 
-  int id = gridptr->self;
+  const int id = gridptr->self;
 
   grid_free_components(gridptr);
   Free( gridptr );
 
-  reshRemove ( id, &gridOps );
+  reshRemove( id, &gridOps );
 }
 
 /*
@@ -592,7 +592,7 @@ void gridDestroyP(void * gridptr)
 
 const char *gridNamePtr(int gridtype)
 {
-  int size = (int) (sizeof(Grids)/sizeof(Grids[0]));
+  const int size = (int) (sizeof(Grids)/sizeof(Grids[0]));
 
   const char *name = (gridtype >= 0 && gridtype < size) ? Grids[gridtype] : Grids[GRID_GENERIC];
 
@@ -1102,7 +1102,6 @@ size_t gridInqSize(int gridID)
   grid_t *gridptr = grid_to_pointer(gridID);
 
   size_t size = gridptr->size;
-
   if ( size == 0 )
     {
       size_t xsize = gridptr->x.size;
@@ -1593,12 +1592,11 @@ size_t gridInqXCvalsSerial(grid_t *gridptr, char **xcvals)
 static
 int gridInqXIscSerial(grid_t *gridptr)
 {
-  int clen = gridptr->x.clength;
   /*
   if ( gridptr->type != GRID_CHARXY )
     Error("Axis type is 'char' but grid is not type 'GRID_CHARXY'.");
   */
-  return clen;
+  return gridptr->x.clength;
 }
 #endif
 
@@ -1702,12 +1700,11 @@ size_t gridInqYCvalsSerial(grid_t *gridptr, char **ycvals)
 static
 int gridInqYIscSerial(grid_t *gridptr)
 {
-  const int clen = gridptr->y.clength;
   /*
   if ( gridptr->type != GRID_CHARXY )
     Error("Axis type is 'char' but grid is not type 'GRID_CHARXY'.");
   */
-  return clen;
+  return gridptr->y.clength;
 }
 #endif
 
