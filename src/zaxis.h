@@ -1,6 +1,10 @@
 #ifndef  ZAXIS_H
 #define  ZAXIS_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "cdi_att.h"
 
 typedef struct {
@@ -20,8 +24,10 @@ typedef struct {
   char     p0name[CDI_MAX_NAME];
   zkey_double_t p0value;
   double  *vals;
+#ifndef USE_MPI
   char   **cvals;
   int      clength;
+#endif
   double  *lbounds;
   double  *ubounds;
   double  *weights;
@@ -64,8 +70,9 @@ const resOps *getZaxisOps(void);
 const char *zaxisInqNamePtr(int zaxisID);
 
 const double *zaxisInqLevelsPtr(int zaxisID);
+#ifndef USE_MPI
 char **zaxisInqCValsPtr(int zaxisID);
-
+#endif
 void zaxisResize(int zaxisID, int size);
 
 #endif

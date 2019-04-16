@@ -591,8 +591,6 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	      {
 		int nvct = 0;
                 double *levels = NULL;
-                char **cvals1 = NULL, **cvals2 = NULL;
-                size_t clen2 = 0;
 		double *lbounds = NULL, *ubounds = NULL;
 		const double *vct = NULL;
                 char ctemp[CDI_MAX_NAME];
@@ -627,9 +625,12 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                     vct  = zaxisInqVctPtr(zaxisID);
                   }
 
+                size_t clen2 = 0;
+                char **cvals2 = NULL;
+#ifndef USE_MPI
                 if ( zaxisType == ZAXIS_CHAR )
                   {
-                    cvals1 = zaxisInqCValsPtr(zaxisID);
+                    char **cvals1 = zaxisInqCValsPtr(zaxisID);
                     size_t clen1 = (size_t)zaxisInqCLen(zaxisID);
                     for ( int levID = 0; levID < nlevs; ++levID )
                       if ( vars1[varID].levinfo[levID].flag )
@@ -651,6 +652,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                           levID2++;
                         }
                   }
+#endif
 
                 if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
                   {

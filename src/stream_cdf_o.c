@@ -1406,6 +1406,7 @@ void cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
     }
 }
 
+#ifndef USE_MPI
 static
 void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimID, size_t dimlen, int zaxisindex)
 {
@@ -1466,6 +1467,7 @@ void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimI
 
   streamptr->ncmode = 2;
 }
+#endif
 
 static
 void cdfDefZaxis(stream_t *streamptr, int zaxisID)
@@ -1541,8 +1543,10 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
           cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
           if ( natts > 0 && streamptr->ncmode == 2 ) cdf_enddef(fileID);
         }
+#ifndef USE_MPI
       else if ( type == ZAXIS_CHAR )
         cdfDefZaxisChar(streamptr, zaxisID, axisname, &dimID, dimlen, zaxisindex);
+#endif
       else
         {
           dimID = checkDimName(fileID, dimlen, dimname);

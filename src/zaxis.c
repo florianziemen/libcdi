@@ -123,8 +123,10 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->p0name[0]     = 0;
   zaxisptr->p0value.defined = false;
   zaxisptr->vals          = NULL;
+#ifndef USE_MPI
   zaxisptr->cvals         = NULL;
   zaxisptr->clength       = 0;
+#endif
   zaxisptr->ubounds       = NULL;
   zaxisptr->lbounds       = NULL;
   zaxisptr->weights       = NULL;
@@ -269,13 +271,15 @@ void zaxisDestroyKernel( zaxis_t * zaxisptr )
 
   const int id = zaxisptr->self;
 
-  if ( zaxisptr->vals )    Free( zaxisptr->vals );
+  if ( zaxisptr->vals ) Free( zaxisptr->vals );
+#ifndef USE_MPI
   if ( zaxisptr->cvals )
     {
       for ( int i=0; i<zaxisptr->size; i++)
         Free(zaxisptr->cvals[i]);
       Free( zaxisptr->cvals );
     }
+#endif
   if ( zaxisptr->lbounds ) Free( zaxisptr->lbounds );
   if ( zaxisptr->ubounds ) Free( zaxisptr->ubounds );
   if ( zaxisptr->weights ) Free( zaxisptr->weights );
@@ -782,6 +786,7 @@ void zaxisDefLevels(int zaxisID, const double *levels)
 
 void zaxisDefCvals(int zaxisID, const char **cvals, int clen)
 {
+#ifndef USE_MPI
   if ( cvals && clen )
     {
       zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
@@ -798,6 +803,9 @@ void zaxisDefCvals(int zaxisID, const char **cvals, int clen)
         }
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
+#else
+  Error("This function was disabled!");
+#endif
 }
 
 /*
@@ -996,11 +1004,13 @@ const double *zaxisInqLevelsPtr(int zaxisID)
 }
 
 
+#ifndef USE_MPI
 char **zaxisInqCValsPtr(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   return zaxisptr->cvals;
 }
+#endif
 
 /*
 @Function  zaxisInqLevels
@@ -1041,8 +1051,10 @@ int zaxisInqCLen(int zaxisID)
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
 
   int clen = 0;
+#ifndef USE_MPI
   if ( zaxisptr->cvals && zaxisptr->clength)
     clen = zaxisptr->clength;
+#endif
 
   return clen;
 }
@@ -1052,6 +1064,7 @@ int zaxisInqCVals(int zaxisID, char ***clevels)
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
 
   int size = 0;
+#ifndef USE_MPI
   if ( zaxisptr->cvals )
     {
       size = zaxisptr->size;
@@ -1066,6 +1079,7 @@ int zaxisInqCVals(int zaxisID, char ***clevels)
             }
           }
     }
+#endif
 
   return size;
 }
