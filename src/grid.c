@@ -297,7 +297,9 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
   gridptr->type = gridtype;
   gridptr->size = size;
 
-  if      ( gridtype == GRID_CURVILINEAR  ) gridptr->nvertex = 4;
+  if      ( gridtype == GRID_LONLAT   ) gridptr->nvertex = 2;
+  else if ( gridtype == GRID_GAUSSIAN ) gridptr->nvertex = 2;
+  else if ( gridtype == GRID_CURVILINEAR  ) gridptr->nvertex = 4;
   else if ( gridtype == GRID_UNSTRUCTURED ) gridptr->x.size = size;
 
   switch (gridtype)
@@ -403,54 +405,91 @@ void calc_gaussgrid(double *restrict yvals, size_t ysize, double yfirst, double 
     }
 }
 
-// used also in CDO
-void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *restrict yvals)
+static
+void gridGenYvalsGaussian(int ysize, double yfirst, double ylast, double *restrict yvals)
 {
   const double deleps = 0.002;
 
+  calc_gaussgrid(yvals, ysize, yfirst, ylast);
+
+  if ( ! (IS_EQUAL(yfirst, 0) && IS_EQUAL(ylast, 0)) )
+    if ( fabs(yvals[0] - yfirst) > deleps || fabs(yvals[ysize-1] - ylast) > deleps )
+      {
+        double *ytmp = NULL;
+        int nstart;
+        bool lfound = false;
+        int ny = (int) (180./(fabs(ylast-yfirst)/(ysize-1)) + 0.5);
+        ny -= ny%2;
+        if ( ny > ysize && ny < 4096 )
+          {
+            ytmp = (double *) Malloc((size_t)ny * sizeof (double));
+            calc_gaussgrid(ytmp, ny, yfirst, ylast);
+            {
+              int i;
+              for ( i = 0; i < (ny-ysize); i++ )
+                if ( fabs(ytmp[i] - yfirst) < deleps ) break;
+              nstart = i;
+            }
+
+            lfound = (nstart+ysize-1) < ny && fabs(ytmp[nstart+ysize-1] - ylast) < deleps;
+            if ( lfound )
+              {
+                for (int i = 0; i < ysize; i++) yvals[i] = ytmp[i+nstart];
+              }
+          }
+
+        if ( !lfound )
+          {
+            Warning("Cannot calculate gaussian latitudes for lat1 = %g latn = %g!", yfirst, ylast);
+            for (int i = 0; i < ysize; i++ ) yvals[i] = 0;
+            yvals[0] = yfirst;
+            yvals[ysize-1] = ylast;
+          }
+
+        if ( ytmp ) Free(ytmp);
+      }
+}
+
+static
+void gridGenYvalsRegular(int ysize, double yfirst, double ylast, double yinc, double *restrict yvals)
+{
+  if (fabs(yinc) <= 0 && ysize > 1)
+    {
+      if ( IS_EQUAL(yfirst, ylast) && IS_NOT_EQUAL(yfirst, 0) ) ylast *= -1;
+
+      if ( yfirst > ylast )
+        yinc = (yfirst-ylast)/(ysize-1);
+      else if ( yfirst < ylast )
+        yinc = (ylast-yfirst)/(ysize-1);
+      else
+        {
+          if ( ysize%2 != 0 )
+            {
+              yinc = 180.0/(ysize-1);
+              yfirst = -90;
+            }
+          else
+            {
+              yinc = 180.0/ysize;
+              yfirst = -90 + yinc/2;
+            }
+        }
+    }
+
+  if ( yfirst > ylast && yinc > 0 ) yinc = -yinc;
+
+  for (int i = 0; i < ysize; i++ )
+    yvals[i] = yfirst + i*yinc;
+}
+
+// used also in CDO
+void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *restrict yvals)
+{
   if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
     {
       if ( ysize > 2 )
 	{
-	  calc_gaussgrid(yvals, ysize, yfirst, ylast);
-
-	  if ( ! (IS_EQUAL(yfirst, 0) && IS_EQUAL(ylast, 0)) )
-	    if ( fabs(yvals[0] - yfirst) > deleps || fabs(yvals[ysize-1] - ylast) > deleps )
-	      {
-		double *restrict ytmp = NULL;
-		int nstart;
-                bool lfound = false;
-		int ny = (int) (180./(fabs(ylast-yfirst)/(ysize-1)) + 0.5);
-		ny -= ny%2;
-		if ( ny > ysize && ny < 4096 )
-		  {
-		    ytmp = (double *) Malloc((size_t)ny * sizeof (double));
-		    calc_gaussgrid(ytmp, ny, yfirst, ylast);
-                    {
-                      int i;
-                      for ( i = 0; i < (ny-ysize); i++ )
-                        if ( fabs(ytmp[i] - yfirst) < deleps ) break;
-                      nstart = i;
-                    }
-
-		    lfound = (nstart+ysize-1) < ny
-                      && fabs(ytmp[nstart+ysize-1] - ylast) < deleps;
-                    if ( lfound )
-                      {
-                        for (int i = 0; i < ysize; i++) yvals[i] = ytmp[i+nstart];
-                      }
-		  }
-
-		if ( !lfound )
-		  {
-		    Warning("Cannot calculate gaussian latitudes for lat1 = %g latn = %g!", yfirst, ylast);
-		    for (int i = 0; i < ysize; i++ ) yvals[i] = 0;
-		    yvals[0] = yfirst;
-		    yvals[ysize-1] = ylast;
-		  }
-
-		if ( ytmp ) Free(ytmp);
-	      }
+          gridGenYvalsGaussian(ysize, yfirst, ylast, yvals);
 	}
       else
         {
@@ -461,35 +500,9 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
   /*     else if ( gridtype == GRID_LONLAT || gridtype == GRID_GENERIC ) */
   else
     {
-      if (fabs(yinc) <= 0 && ysize > 1)
-        {
-          if ( IS_EQUAL(yfirst, ylast) && IS_NOT_EQUAL(yfirst, 0) ) ylast *= -1;
-
-          if ( yfirst > ylast )
-            yinc = (yfirst-ylast)/(ysize-1);
-          else if ( yfirst < ylast )
-            yinc = (ylast-yfirst)/(ysize-1);
-          else
-            {
-              if ( ysize%2 != 0 )
-                {
-                  yinc = 180.0/(ysize-1);
-                  yfirst = -90;
-                }
-              else
-                {
-                  yinc = 180.0/ysize;
-                  yfirst = -90 + yinc/2;
-                }
-            }
-        }
-
-      if ( yfirst > ylast && yinc > 0 ) yinc = -yinc;
-
-      for (int i = 0; i < ysize; i++ )
-        yvals[i] = yfirst + i*yinc;
+      gridGenYvalsRegular(ysize, yfirst, ylast, yinc, yvals);
     }
-  /*
+   /*
     else
     Error("unable to calculate values for %s grid!", gridNamePtr(gridtype));
   */
@@ -2642,10 +2655,10 @@ int gridCompareP(void *gridptr1, void *gridptr2)
 static
 void gridComplete(grid_t *grid)
 {
-  int gridID = grid->self;
+  const int gridID = grid->self;
   gridDefDatatype(gridID, grid->datatype);
 
-  int gridtype = grid->type;
+  const int gridtype = grid->type;
   switch (gridtype)
     {
     case GRID_LONLAT:
@@ -2696,8 +2709,8 @@ void gridComplete(grid_t *grid)
 
         if ( gridtype == GRID_UNSTRUCTURED )
           {
-            int number = grid->number;
-            int position = grid->position >= 0 ? grid->position : 0;
+            const int number = grid->number;
+            const int position = grid->position >= 0 ? grid->position : 0;
             if ( number > 0 ) gridDefNumber(gridID, number);
             gridDefPosition(gridID, position);
           }
