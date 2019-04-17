@@ -377,8 +377,8 @@ void cdfAppendCoordinates(int fileID, int ncvarid, char coordinates[CDI_MAX_NAME
 {
   if (ncvarid != CDI_UNDEFID)
     {
-      size_t len = strlen(coordinates);
-      if (len) coordinates[len++] = ' ';
+      const size_t len = strlen(coordinates);
+      if (len) coordinates[len + 1] = ' ';
       cdf_inq_varname(fileID, ncvarid, coordinates+len);
     }
 }
@@ -408,6 +408,13 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarid, int nczvarID, 
       cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "tlon tlat" );
     }
   else if ( gridtype == GRID_LONLAT && xid == CDI_UNDEFID && yid == CDI_UNDEFID && gridsize == 1 )
+    {
+      const int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
+      const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
+      cdfAppendCoordinates(fileID, ncyvarID, coordinates);
+      cdfAppendCoordinates(fileID, ncxvarID, coordinates);
+    }
+  else if ( gridtype == GRID_GAUSSIAN_REDUCED )
     {
       const int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
       const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];

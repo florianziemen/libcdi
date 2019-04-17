@@ -1776,7 +1776,7 @@ void cdfDefRgrid(stream_t *streamptr, int gridID, int gridindex)
 {
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
-  size_t dimlen = gridInqSize(gridID);
+  const size_t dimlen = gridInqSize(gridID);
 
   int iz;
   int dimID;
@@ -1791,7 +1791,7 @@ void cdfDefRgrid(stream_t *streamptr, int gridID, int gridindex)
 
   if ( dimID == CDI_UNDEFID )
     {
-      int fileID  = streamptr->fileID;
+      const int fileID  = streamptr->fileID;
       static bool lwarn = true;
       if ( lwarn )
         {
@@ -1870,8 +1870,8 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
 {
   if ( streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X] != CDI_UNDEFID ) return;
 
-  int gridtype = gridInqType(gridID);
-  size_t size = gridInqSize(gridID);
+  const int gridtype = gridInqType(gridID);
+  const size_t size = gridInqSize(gridID);
 
   if ( CDI_Debug )
     Message("gridtype = %d  size = %zu", gridtype, size);
@@ -1915,7 +1915,7 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
         }
       else
         {
-          int ndims = !(gridtype == GRID_LONLAT && size == 1 && !gridInqHasDims(gridID));
+          const int ndims = !(gridtype == GRID_LONLAT && size == 1 && !gridInqHasDims(gridID));
 
           if ( gridInqXsize(gridID) > 0 ) cdfDefXaxis(streamptr, gridID, gridindex, ndims);
           if ( gridInqYsize(gridID) > 0 ) cdfDefYaxis(streamptr, gridID, gridindex, ndims);
