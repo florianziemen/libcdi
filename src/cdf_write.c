@@ -377,8 +377,8 @@ void cdfAppendCoordinates(int fileID, int ncvarid, char coordinates[CDI_MAX_NAME
 {
   if (ncvarid != CDI_UNDEFID)
     {
-      const size_t len = strlen(coordinates);
-      if (len) coordinates[len + 1] = ' ';
+      size_t len = strlen(coordinates);
+      if (len) coordinates[len++] = ' ';
       cdf_inq_varname(fileID, ncvarid, coordinates+len);
     }
 }
