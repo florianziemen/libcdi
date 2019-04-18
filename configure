@@ -27255,7 +27255,15 @@ case "$CC" in
   clang*) COMP_VERSION=`$CC --version | head -n 1`;;
   sxc*)   COMP_VERSION=`$CC -V 2>&1   | tail -n 1`;;
   xlc*)   COMP_VERSION=`$CC -qversion 2>&1   | head -n 1`;;
-  *)      COMP_VERSION=`$CC -V 2>&1   | head -n 1`;;
+  *)
+     # 'head -n 1' exits after printing the first line, which closes the pipe
+     # and kills the compiler's process leaving it no chance to clean any
+     # temporary files it might have created (e.g. Intel compiler creates
+     # 'a.out' when it is called with additional flags like -I, -L, etc.,
+     # which is the case when $CC is an MPI wrapper). Therefore, we have to
+     # run the processes one after another:
+     COMP_VERSION=`$CC -V 2>&1`
+     COMP_VERSION=`echo "$COMP_VERSION" | head -n 1` ;;
 esac
 
 if test -z "$COMP_VERSION" ; then COMP_VERSION="unknown"; fi;
