@@ -63,9 +63,6 @@ AC_SYS_LARGEFILE
 # Checks for library functions.
 AC_FUNC_MMAP
 #  ----------------------------------------------------------------------
-# Checks for library malloc.
-AC_CHECK_LIB(malloc, malloc)
-#  ----------------------------------------------------------------------
 # Checks for structures.
 AC_CHECK_MEMBERS([struct stat.st_blksize])
 #  ----------------------------------------------------------------------
