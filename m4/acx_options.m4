@@ -99,7 +99,7 @@ AC_ARG_WITH([netcdf],
                                          [AC_DEFINE([HAVE_NC4HDF5],[1],[Define to 1 for NetCDF4/HDF5 support])
                                           ENABLE_NC4HDF5=yes
                                           AC_MSG_RESULT([yes])],[AC_MSG_RESULT([no])]) ],
-                                  [AS_ECHO([Could not find nc-config! go on with default configuration])])],
+                                  [AC_MSG_WARN([Could not find nc-config! go on with default configuration])])],
                      [*],[AS_IF([test -d "$with_netcdf"],
                                 [NETCDF_ROOT=$with_netcdf
                                  LDFLAGS="-L$NETCDF_ROOT/lib $LDFLAGS"
