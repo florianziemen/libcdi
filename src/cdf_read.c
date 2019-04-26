@@ -445,7 +445,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
 
   streamptr->numvals += gridsize;
 
-  int dimIds[3];    //this array joins the old variables xid, yid, and zid
+  int dimIds[3]; // this array joins the old variables xid, yid, and zid
   cdfInqDimIds(streamptr, varId, &dimIds);
 
   int skipdim = cdfGetSkipDim(fileId, ncvarid, &dimIds);

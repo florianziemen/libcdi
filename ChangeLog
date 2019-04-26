@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.3
 	* Version 1.9.7 released
 
+2019-04-26  Uwe Schulzweida
+
+	* netCDF4: dimids are greater than ndims after ncrename (bug fix)
+
 2019-04-15  Uwe Schulzweida
 
 	* Removed funtion gridPrint()

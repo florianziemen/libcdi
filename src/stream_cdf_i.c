@@ -1055,7 +1055,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
-      int ncid    = ncvars[ncvarid].ncid;
+      int ncid = ncvars[ncvarid].ncid;
       int *dimidsp = ncvars[ncvarid].dimids;
 
       cdf_inq_var(ncid, ncvarid, name, &xtype, &nvdims, dimidsp, &nvatts);
@@ -2674,7 +2674,6 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
           xaxisid = (xdimid != CDI_UNDEFID) ? ncdims[xdimid].ncvarid : CDI_UNDEFID;
           yaxisid = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].ncvarid : CDI_UNDEFID;
 
-
           if ( cdf_read_coordinates(lazyGrid, ncvar, ncvars, ncdims,
                                     timedimid, xvarid, yvarid, xsize, ysize, &vdimid) )
             continue;
@@ -2690,9 +2689,9 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
 
           if ( lproj && lgrid )
             {
-              int dumid;
+              int dimid;
               cdf_read_coordinates(lazyProj, ncvar, ncvars, ncdims, timedimid,
-                                   xaxisid, yaxisid, xsize, ysize, &dumid);
+                                   xaxisid, yaxisid, xsize, ysize, &dimid);
 	    }
 
 	  if ( CDI_Debug )
@@ -2733,8 +2732,10 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
 
 	  int gridindex = vlistGridIndex(vlistID, gridID);
           ncgrid[gridindex].gridID = gridID;
-          ncgrid[gridindex].ncIDs[CDF_DIMID_X] = xdimid;
-          ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ydimid;
+          ncgrid[gridindex].ncIDs[CDF_DIMID_X] = ncdims[xdimid].dimid;
+          ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ncdims[ydimid].dimid;
+          //ncgrid[gridindex].ncIDs[CDF_DIMID_X] = xdimid;
+          //ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ydimid;
           if ( grid->type == GRID_TRAJECTORY )
             {
               ncgrid[gridindex].ncIDs[CDF_VARID_X] = xvarid;
@@ -2972,6 +2973,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
             }
 
           int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
+	  //US streamptr->zaxisID[zaxisindex] = ncdims[zdimid].dimid;
 	  streamptr->zaxisID[zaxisindex] = zdimid;
 
 	  if ( CDI_Debug )
@@ -3028,7 +3030,7 @@ int cdf_cmp_varname(const void *s1, const void *s2)
 
 // define all input data variables
 static
-void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, int num_ncvars, ncvar_t *ncvars)
+void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, int num_ncvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
   if ( CDI_Debug )
     for ( int i = 0; i < nvars; i++ ) Message("varids[%d] = %d", i, varids[i]);
@@ -3132,15 +3134,18 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
       if ( gridInqType(gridID) == GRID_UNSTRUCTURED && ndims-iodim <= 2 && (ydimid == xdimid || ydimid == CDI_UNDEFID) )
         {
-          ixyz = (xdimid == dimids[ndims-1]) ? 321 : 213;
+          ixyz = (xdimid == ncdims[dimids[ndims-1]].dimid) ? 321 : 213;
+          //US ixyz = (xdimid == dimids[ndims-1]) ? 321 : 213;
         }
       else
         {
           for ( int idim = iodim; idim < ndims; idim++ )
             {
-              if      ( xdimid == dimids[idim] ) ixyz += 1*ipow10[ndims-idim-1];
-              else if ( ydimid == dimids[idim] ) ixyz += 2*ipow10[ndims-idim-1];
-              else if ( zdimid == dimids[idim] ) ixyz += 3*ipow10[ndims-idim-1];
+              int dimid = ncdims[dimids[idim]].dimid;
+              //US int dimid = dimids[idim];
+              if      ( xdimid == dimid ) ixyz += 1*ipow10[ndims-idim-1];
+              else if ( ydimid == dimid ) ixyz += 2*ipow10[ndims-idim-1];
+              else if ( zdimid == dimid ) ixyz += 3*ipow10[ndims-idim-1];
             }
         }
 
@@ -3635,7 +3640,6 @@ int cdfCheckVars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 
       if ( xtypeIsText(ncvars[ncvarid].xtype) )
 	{
-          printf("ncvars[ncvarid].isvar %d\n", ncvars[ncvarid].isvar);
 	  ncvars[ncvarid].isvar = 0;
 	  Warning("Unsupported data type (char/string), skipped variable %s!", ncvars[ncvarid].name);
 	  continue;
@@ -3984,7 +3988,7 @@ int cdfInqContents(stream_t *streamptr)
   streamptr->ntsteps = (long)ntsteps;
 
   // define all data variables
-  cdf_define_all_vars(streamptr, vlistID, instID, modelID, varids, nvars_data, nvars, ncvars);
+  cdf_define_all_vars(streamptr, vlistID, instID, modelID, varids, nvars_data, nvars, ncvars, ncdims);
 
 
   cdiCreateTimesteps(streamptr);
