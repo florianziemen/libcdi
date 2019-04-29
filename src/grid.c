@@ -1194,8 +1194,10 @@ void gridDefXsize(int gridID, size_t xsize)
     Error("xsize %zu is greater then gridsize %zu", xsize, gridSize);
 
   const int gridType = gridInqType(gridID);
-  if ( (gridType == GRID_UNSTRUCTURED || gridType == GRID_GAUSSIAN_REDUCED) && xsize != gridSize )
-    Error("xsize %zu must be equal to gridsize %zu for gridtype: %s", gridNamePtr(gridType), xsize, gridSize);
+  if ( gridType == GRID_UNSTRUCTURED && xsize != gridSize )
+    Error("xsize %zu must be equal to gridsize %zu for gridtype: %s", xsize, gridSize, gridNamePtr(gridType));
+  if ( gridType == GRID_GAUSSIAN_REDUCED && xsize != 2 && xsize != gridSize )
+    Error("xsize %zu must be equal to gridsize %zu for gridtype: %s", xsize, gridSize, gridNamePtr(gridType));
 
   if ( gridptr->x.size != xsize )
     {
