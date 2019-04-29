@@ -2962,7 +2962,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
             }
 
           const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-  	  streamptr->zaxisID[zaxisindex] = zdimid;
+	  streamptr->zaxisID[zaxisindex] = zdimid >= 0 ? ncdims[zdimid].dimid : zdimid;
 
 	  if ( CDI_Debug )
 	    Message("zaxisID %d %d %s", zaxisID, ncvarid, ncvar->name);
