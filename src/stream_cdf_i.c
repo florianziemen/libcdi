@@ -3020,6 +3020,28 @@ int cdf_cmp_varname(const void *s1, const void *s2)
   return strcmp(x->name, y->name);
 }
 
+static
+void cdf_sort_varname(int *varids, const int nvars, const ncvar_t *ncvars)
+{
+  struct cdf_varinfo *varInfo
+    = (struct cdf_varinfo *) Malloc((size_t)nvars * sizeof(struct cdf_varinfo));
+
+  for ( int varID = 0; varID < nvars; varID++ )
+    {
+      const int ncvarid = varids[varID];
+      varInfo[varID].varid = ncvarid;
+      varInfo[varID].name = ncvars[ncvarid].name;
+    }
+  qsort(varInfo, (size_t)nvars, sizeof(varInfo[0]), cdf_cmp_varname);
+  for ( int varID = 0; varID < nvars; varID++ )
+    {
+      varids[varID] = varInfo[varID].varid;
+    }
+  Free(varInfo);
+  if ( CDI_Debug )
+    for ( int i = 0; i < nvars; i++ ) Message("sorted varids[%d] = %d", i, varids[i]);
+}
+
 // define all input data variables
 static
 void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, int num_ncvars, ncvar_t *ncvars, ncdim_t *ncdims)
@@ -3027,26 +3049,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
   if ( CDI_Debug )
     for ( int i = 0; i < nvars; i++ ) Message("varids[%d] = %d", i, varids[i]);
 
-  if ( streamptr->sortname )
-    {
-      struct cdf_varinfo *varInfo
-        = (struct cdf_varinfo *) Malloc((size_t)nvars * sizeof(struct cdf_varinfo));
-
-      for ( int varID = 0; varID < nvars; varID++ )
-	{
-	  const int ncvarid = varids[varID];
-	  varInfo[varID].varid = ncvarid;
-	  varInfo[varID].name = ncvars[ncvarid].name;
-	}
-      qsort(varInfo, (size_t)nvars, sizeof(varInfo[0]), cdf_cmp_varname);
-      for ( int varID = 0; varID < nvars; varID++ )
-	{
-	  varids[varID] = varInfo[varID].varid;
-	}
-      Free(varInfo);
-      if ( CDI_Debug )
-        for ( int i = 0; i < nvars; i++ ) Message("sorted varids[%d] = %d", i, varids[i]);
-    }
+  if ( streamptr->sortname ) cdf_sort_varname(varids, nvars, ncvars);
 
   for ( int varID1 = 0; varID1 < nvars; varID1++ )
     {
