@@ -726,7 +726,6 @@ void cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varT
   cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
 
   const int gridId = vlistInqVarGrid(vlistID, varID);
-  //int time = vlistInqVarTsteptype(vlistID, varID);
   const size_t gridsize = gridInqSize(gridId);
 
   unsigned int position = 0; 
@@ -758,7 +757,6 @@ void cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varT
   cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
 
   const int gridId = vlistInqVarGrid(vlistID, varID);
-  // int time = vlistInqVarTsteptype(vlistID, varID);
   size_t gridsize = gridInqSize(gridId);
 
   unsigned int position = 0; 
@@ -831,17 +829,9 @@ void cdfReadVarDPPart(stream_t *streamptr, int varID, int varType, int startpoin
   size_t start[4], count[4];
   cdfGetSlapDescription(streamptr, varID, &start, &count);
 
-  const int timetype = vlistInqVarTimetype(vlistID, varID);
-  if (timetype)
-    {
-      start[2] = start[2]+startpoint;
-      count[2] = length;
-    }
-  else
-    {
-      start[1] = start[1]+startpoint;
-      count[1] = length;
-    } 
+  const int ltime = TIME_CONSTANT != vlistInqVarTimetype(vlistID, varID);
+  start[1+ltime] = start[1+ltime]+startpoint;
+  count[1+ltime] = length;
 
   cdf_get_vara_double(streamptr->fileID, ncvarid, start, count, data);
 
@@ -859,17 +849,9 @@ void cdfReadVarSPPart(stream_t *streamptr, int varID, int varType, int startpoin
   size_t start[4], count[4];
   cdfGetSlapDescription(streamptr, varID, &start, &count);
 
-  const int timetype = vlistInqVarTimetype(vlistID, varID);
-  if (timetype)
-    {
-      start[2] = start[2]+startpoint;
-      count[2] = length;
-    }
-  else
-    {
-      start[1] = start[1]+startpoint;
-      count[1] = length;
-    } 
+  const int ltime = TIME_CONSTANT != vlistInqVarTimetype(vlistID, varID);
+  start[1+ltime] = start[1+ltime]+startpoint;
+  count[1+ltime] = length;
 
   cdf_get_vara_float(streamptr->fileID, ncvarid, start, count, data);
 
