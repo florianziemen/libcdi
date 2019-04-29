@@ -1194,8 +1194,8 @@ void gridDefXsize(int gridID, size_t xsize)
     Error("xsize %zu is greater then gridsize %zu", xsize, gridSize);
 
   const int gridType = gridInqType(gridID);
-  if ( gridType == GRID_UNSTRUCTURED && xsize != gridSize )
-    Error("xsize %zu must be equal to gridsize %zu for gridtype: UNSTRUCTURED", xsize, gridSize);
+  if ( (gridType == GRID_UNSTRUCTURED || gridType == GRID_GAUSSIAN_REDUCED) && xsize != gridSize )
+    Error("xsize %zu must be equal to gridsize %zu for gridtype: %s", gridNamePtr(gridType), xsize, gridSize);
 
   if ( gridptr->x.size != xsize )
     {
@@ -1203,7 +1203,7 @@ void gridDefXsize(int gridID, size_t xsize)
       gridptr->x.size = xsize;
     }
 
-  if ( gridType != GRID_UNSTRUCTURED && gridType != GRID_PROJECTION )
+  if ( gridType != GRID_UNSTRUCTURED && gridType != GRID_GAUSSIAN_REDUCED && gridType != GRID_PROJECTION )
     {
       const size_t axisproduct = gridptr->x.size*gridptr->y.size;
       if ( axisproduct > 0 && axisproduct != gridSize )
@@ -1296,7 +1296,7 @@ void gridDefYsize(int gridID, size_t ysize)
 
   const int gridType = gridInqType(gridID);
   if ( gridType == GRID_UNSTRUCTURED && ysize != gridSize )
-    Error("ysize %zu must be equal gridsize %zu for gridtype: UNSTRUCTURED", ysize, gridSize);
+    Error("ysize %zu must be equal gridsize %zu for gridtype: %s", gridNamePtr(gridType), ysize, gridSize);
 
   if ( gridptr->y.size != ysize )
     {
@@ -1304,7 +1304,7 @@ void gridDefYsize(int gridID, size_t ysize)
       gridptr->y.size = ysize;
     }
 
-  if ( gridType != GRID_UNSTRUCTURED && gridType != GRID_PROJECTION )
+  if ( gridType != GRID_UNSTRUCTURED && gridType != GRID_GAUSSIAN_REDUCED && gridType != GRID_PROJECTION )
     {
       const size_t axisproduct = gridptr->x.size*gridptr->y.size;
       if ( axisproduct > 0 && axisproduct != gridSize )
@@ -1531,8 +1531,6 @@ size_t gridInqXValsSerial(grid_t *gridptr, double *xvals)
   size_t size;
   if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
     size = gridptr->size;
-  else if ( gridptr->type == GRID_GAUSSIAN_REDUCED )
-    size = 2;
   else
     size = gridptr->x.size;
 
@@ -1559,8 +1557,6 @@ size_t gridInqXValsPartSerial(grid_t *gridptr, int start, size_t length, double 
   size_t size;
   if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
     size = gridptr->size;
-  else if ( gridptr->type == GRID_GAUSSIAN_REDUCED )
-    size = 2;
   else
     size = gridptr->x.size;
 
@@ -1676,8 +1672,6 @@ void gridDefXValsSerial(grid_t *gridptr, const double *xvals)
   size_t size;
   if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     size = gridptr->size;
-  else if ( gridtype == GRID_GAUSSIAN_REDUCED )
-    size = 2;
   else
     size = gridptr->x.size;
 
@@ -2724,6 +2718,7 @@ void gridComplete(grid_t *grid)
         if ( grid->x.flag == 2 )
           {
             double xvals[2] = { grid->x.first, grid->x.last };
+            gridDefXsize(gridID, 2);
             gridDefXvals(gridID, xvals);
           }
 
