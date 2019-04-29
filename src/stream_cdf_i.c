@@ -3042,6 +3042,45 @@ void cdf_sort_varname(int *varids, const int nvars, const ncvar_t *ncvars)
     for ( int i = 0; i < nvars; i++ ) Message("sorted varids[%d] = %d", i, varids[i]);
 }
 
+static
+void cdf_define_institut_and_model_id(int vlistID, int varID)
+{
+  int varInstID  = vlistInqVarInstitut(vlistID, varID);
+  int varModelID = vlistInqVarModel(vlistID, varID);
+  int varTableID = vlistInqVarTable(vlistID, varID);
+  const int code = vlistInqVarCode(vlistID, varID);
+  if ( cdiDefaultTableID != CDI_UNDEFID )
+    {
+      char name[CDI_MAX_NAME]; name[0] = 0;
+      char longname[CDI_MAX_NAME]; longname[0] = 0;
+      char units[CDI_MAX_NAME]; units[0] = 0;
+      tableInqEntry(cdiDefaultTableID, code, -1, name, longname, units);
+      if ( name[0] )
+        {
+          vlistDestroyVarName(vlistID, varID);
+          vlistDestroyVarLongname(vlistID, varID);
+          vlistDestroyVarUnits(vlistID, varID);
+
+          if ( varTableID != CDI_UNDEFID )
+            {
+              vlistDefVarName(vlistID, varID, name);
+              if ( longname[0] ) vlistDefVarLongname(vlistID, varID, longname);
+              if ( units[0] ) vlistDefVarUnits(vlistID, varID, units);
+            }
+          else
+            {
+              varTableID = cdiDefaultTableID;
+            }
+        }
+
+      if ( cdiDefaultModelID != CDI_UNDEFID ) varModelID = cdiDefaultModelID;
+      if ( cdiDefaultInstID  != CDI_UNDEFID ) varInstID  = cdiDefaultInstID;
+    }
+  if ( varInstID  != CDI_UNDEFID ) vlistDefVarInstitut(vlistID, varID, varInstID);
+  if ( varModelID != CDI_UNDEFID ) vlistDefVarModel(vlistID, varID, varModelID);
+  if ( varTableID != CDI_UNDEFID ) vlistDefVarTable(vlistID, varID, varTableID);
+}
+
 // define all input data variables
 static
 void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, int num_ncvars, ncvar_t *ncvars, ncdim_t *ncdims)
@@ -3230,43 +3269,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 	}
     }
 
-  for ( int varID = 0; varID < nvars; varID++ )
-    {
-      int varInstID  = vlistInqVarInstitut(vlistID, varID);
-      int varModelID = vlistInqVarModel(vlistID, varID);
-      int varTableID = vlistInqVarTable(vlistID, varID);
-      const int code = vlistInqVarCode(vlistID, varID);
-      if ( cdiDefaultTableID != CDI_UNDEFID )
-	{
-          char name[CDI_MAX_NAME]; name[0] = 0;
-          char longname[CDI_MAX_NAME]; longname[0] = 0;
-          char units[CDI_MAX_NAME]; units[0] = 0;
-          tableInqEntry(cdiDefaultTableID, code, -1, name, longname, units);
-	  if ( name[0] )
-	    {
-	      vlistDestroyVarName(vlistID, varID);
-	      vlistDestroyVarLongname(vlistID, varID);
-	      vlistDestroyVarUnits(vlistID, varID);
-
-	      if ( varTableID != CDI_UNDEFID )
-		{
-		  vlistDefVarName(vlistID, varID, name);
-		  if ( longname[0] ) vlistDefVarLongname(vlistID, varID, longname);
-		  if ( units[0] ) vlistDefVarUnits(vlistID, varID, units);
-		}
-	      else
-		{
-		  varTableID = cdiDefaultTableID;
-		}
-	    }
-
-	  if ( cdiDefaultModelID != CDI_UNDEFID ) varModelID = cdiDefaultModelID;
-	  if ( cdiDefaultInstID  != CDI_UNDEFID ) varInstID  = cdiDefaultInstID;
-	}
-      if ( varInstID  != CDI_UNDEFID ) vlistDefVarInstitut(vlistID, varID, varInstID);
-      if ( varModelID != CDI_UNDEFID ) vlistDefVarModel(vlistID, varID, varModelID);
-      if ( varTableID != CDI_UNDEFID ) vlistDefVarTable(vlistID, varID, varTableID);
-    }
+  for ( int varID = 0; varID < nvars; varID++ ) cdf_define_institut_and_model_id(vlistID, varID);
 }
 
 static
