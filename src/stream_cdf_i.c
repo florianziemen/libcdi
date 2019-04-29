@@ -2631,7 +2631,7 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
 		}
 	    }
 
-          int gmapvarid = ncvar->gmapid;
+          const int gmapvarid = ncvar->gmapid;
           bool lproj = gmapvarid != CDI_UNDEFID;
 
           if ( !lproj && xaxisid != CDI_UNDEFID && xaxisid != xvarid && yaxisid != CDI_UNDEFID && yaxisid != yvarid )
@@ -2639,16 +2639,16 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
               lproj = true;
             }
 
-          bool lgrid = !(lproj && ncvar->xvarid == CDI_UNDEFID);
+          const bool lgrid = !(lproj && ncvar->xvarid == CDI_UNDEFID);
 
-          bool lunstructured = xdimid != CDI_UNDEFID && xdimid == ydimid && nydims == 0;
+          const bool lunstructured = xdimid != CDI_UNDEFID && xdimid == ydimid && nydims == 0;
 	  if ( (ncvar->gridtype == CDI_UNDEFID || ncvar->gridtype == GRID_GENERIC) && lunstructured )
             ncvar->gridtype = GRID_UNSTRUCTURED;
 
           struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
 
           {
-            int gridtype = !lgrid ? GRID_PROJECTION : ncvar->gridtype;
+            const int gridtype = !lgrid ? GRID_PROJECTION : ncvar->gridtype;
             if ( CDI_netcdf_lazy_grid_load )
               {
                 cdfLazyGridRenew(&lazyGrid, gridtype);
@@ -2705,12 +2705,12 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
           gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 1);
           ncvar->gridID = gridAdded.Id;
 
-          int gridID = ncvar->gridID;
+          const int gridID = ncvar->gridID;
 
           if ( lproj && gmapvarid != CDI_UNDEFID )
             {
-              int projID = lgrid ? grid->proj : gridID;
-              int ncid = ncvars[gmapvarid].ncid;
+              const int projID = lgrid ? grid->proj : gridID;
+              const int ncid = ncvars[gmapvarid].ncid;
               const char *gmapname = ncvars[gmapvarid].name;
               cdf_read_mapping_atts(ncid, gmapvarid, projID, gmapname);
               cdiGridDefKeyStr(projID, CDI_KEY_MAPPING, (int)(strlen(gmapname)+1), gmapname);
@@ -2722,12 +2722,10 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
 
           if ( ncvar->chunked ) grid_set_chunktype(grid, ncvar);
 
-	  int gridindex = vlistGridIndex(vlistID, gridID);
+	  const int gridindex = vlistGridIndex(vlistID, gridID);
           ncgrid[gridindex].gridID = gridID;
           ncgrid[gridindex].ncIDs[CDF_DIMID_X] = ncdims[xdimid].dimid;
           ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ncdims[ydimid].dimid;
-          //ncgrid[gridindex].ncIDs[CDF_DIMID_X] = xdimid;
-          //ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ydimid;
           if ( grid->type == GRID_TRAJECTORY )
             {
               ncgrid[gridindex].ncIDs[CDF_VARID_X] = xvarid;
@@ -2789,7 +2787,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
           int p0varid = -1;
 
           int positive = 0;
-	  int ndims = ncvar->ndims;
+          int ndims = ncvar->ndims;
 
           if ( ncvar->zvarid != -1 && ncvars[ncvar->zvarid].ndims == 0 )
             {
@@ -2822,7 +2820,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 	  if ( zvarid != CDI_UNDEFID ) zaxisType = ncvars[zvarid].zaxistype;
 	  if ( zaxisType == CDI_UNDEFID ) zaxisType = ZAXIS_GENERIC;
 
-	  int zdatatype = CDI_DATATYPE_FLT64;
+          int zdatatype = CDI_DATATYPE_FLT64;
 	  double *restrict lbounds = NULL;
 	  double *restrict ubounds = NULL;
 
@@ -2868,11 +2866,11 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 
 	      if ( ncvars[zvarid].bounds != CDI_UNDEFID )
 		{
-		  int nbdims = ncvars[ncvars[zvarid].bounds].ndims;
+		  const int nbdims = ncvars[ncvars[zvarid].bounds].ndims;
 		  if ( nbdims == 2 || is_scalar )
 		    {
-		      size_t nlevel  = is_scalar ? 1 : ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
-		      int nvertex = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[1-is_scalar]].len;
+		      const size_t nlevel  = is_scalar ? 1 : ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
+		      const int nvertex = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[1-is_scalar]].len;
 		      if ( nlevel == zsize && nvertex == 2 )
 			{
 			  with_bounds = true;
@@ -2915,7 +2913,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
       	  ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (const char **)zcvals, zclength, with_bounds, lbounds, ubounds,
                                        (int)vctsize, vct, pname, plongname, punits, zdatatype, 1, 0, -1);
 
-          int zaxisID = ncvar->zaxisID;
+          const int zaxisID = ncvar->zaxisID;
 
           if ( CDI_cmor_mode && zsize == 1 && zaxisType != ZAXIS_HYBRID ) zaxisDefScalar(zaxisID);
 
@@ -2944,29 +2942,27 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
           if ( vdimid != -1 )
             cdiZaxisDefKeyStr(zaxisID, CDI_KEY_VDIMNAME, strlen(ncdims[vdimid].name)+1, ncdims[vdimid].name);
           */
-	  if ( zvar    ) Free(zvar);
-	  if ( zcvals  )
+	  if ( zvar ) Free(zvar);
+	  if ( zcvals )
             {
-              for ( size_t i = 0; i < zsize; i++ )
-                Free(zcvals[i]);
+              for ( size_t i = 0; i < zsize; i++ ) Free(zcvals[i]);
               Free(zcvals);
             }
 	  if ( lbounds ) Free(lbounds);
 
           if ( zvarid != CDI_UNDEFID )
             {
-              int ncid = ncvars[zvarid].ncid;
-              int nvatts = ncvars[zvarid].natts;
+              const int ncid = ncvars[zvarid].ncid;
+              const int nvatts = ncvars[zvarid].natts;
               for ( int iatt = 0; iatt < nvatts; ++iatt )
                 {
-                  int attnum = ncvars[zvarid].atts[iatt];
+                  const int attnum = ncvars[zvarid].atts[iatt];
                   cdf_set_cdi_attr(ncid, zvarid, attnum, zaxisID, CDI_GLOBAL);
                 }
             }
 
-          int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-	  //US streamptr->zaxisID[zaxisindex] = ncdims[zdimid].dimid;
-	  streamptr->zaxisID[zaxisindex] = zdimid;
+          const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
+  	  streamptr->zaxisID[zaxisindex] = zdimid;
 
 	  if ( CDI_Debug )
 	    Message("zaxisID %d %d %s", zaxisID, ncvarid, ncvar->name);

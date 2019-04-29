@@ -478,11 +478,9 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
             cdf_inq_dimlen(fileId, curDimId, &size);
             addDimension(0, size);
             break;
-
           case 3:
             addDimension((size_t)levelId, 1);
             break;
-
           default:
             Error("Internal errror: Malformed dimension order encountered. Please report this bug.\n");
         }
