@@ -3043,6 +3043,43 @@ void cdf_sort_varname(int *varids, const int nvars, const ncvar_t *ncvars)
 }
 
 static
+void cdf_define_code_and_param(int vlistID, int varID)
+{
+  if ( vlistInqVarCode(vlistID, varID) == -varID-1 )
+    {
+      char name[CDI_MAX_NAME]; name[0] = 0;
+      vlistInqVarName(vlistID, varID, name);
+      const size_t len = strlen(name);
+      if ( len > 3 && isdigit((int) name[3]) )
+        {
+          if ( strStartsWith(name, "var") )
+            {
+              vlistDefVarCode(vlistID, varID, atoi(name+3));
+              // vlistDestroyVarName(vlistID, varID);
+            }
+        }
+      else if ( len > 4 && isdigit((int) name[4]) )
+        {
+          if ( strStartsWith(name, "code") )
+            {
+              vlistDefVarCode(vlistID, varID, atoi(name+4));
+              // vlistDestroyVarName(vlistID, varID);
+            }
+        }
+      else if ( len > 5 && isdigit((int) name[5]) )
+        {
+          if ( strStartsWith(name, "param") )
+            {
+              int pnum = -1, pcat = 255, pdis = 255;
+              sscanf(name+5, "%d.%d.%d", &pnum, &pcat, &pdis);
+              vlistDefVarParam(vlistID, varID, cdiEncodeParam(pnum, pcat, pdis));
+              // vlistDestroyVarName(vlistID, varID);
+            }
+        }
+    }
+}
+
+static
 void cdf_define_institut_and_model_id(int vlistID, int varID)
 {
   int varInstID  = vlistInqVarInstitut(vlistID, varID);
@@ -3233,41 +3270,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
   if ( varids ) Free(varids);
 
-  for ( int varID = 0; varID < nvars; varID++ )
-    {
-      if ( vlistInqVarCode(vlistID, varID) == -varID-1 )
-	{
-          char name[CDI_MAX_NAME]; name[0] = 0;
-	  vlistInqVarName(vlistID, varID, name);
-	  const size_t len = strlen(name);
-	  if ( len > 3 && isdigit((int) name[3]) )
-	    {
-	      if ( strStartsWith(name, "var") )
-		{
-		  vlistDefVarCode(vlistID, varID, atoi(name+3));
-                  // vlistDestroyVarName(vlistID, varID);
-		}
-	    }
-	  else if ( len > 4 && isdigit((int) name[4]) )
-	    {
-	      if ( strStartsWith(name, "code") )
-		{
-		  vlistDefVarCode(vlistID, varID, atoi(name+4));
-		  // vlistDestroyVarName(vlistID, varID);
-		}
-	    }
-	  else if ( len > 5 && isdigit((int) name[5]) )
-	    {
-	      if ( strStartsWith(name, "param") )
-		{
-		  int pnum = -1, pcat = 255, pdis = 255;
-		  sscanf(name+5, "%d.%d.%d", &pnum, &pcat, &pdis);
-		  vlistDefVarParam(vlistID, varID, cdiEncodeParam(pnum, pcat, pdis));
-                  // vlistDestroyVarName(vlistID, varID);
-		}
-	    }
-	}
-    }
+  for ( int varID = 0; varID < nvars; varID++ ) cdf_define_code_and_param(vlistID, varID);
 
   for ( int varID = 0; varID < nvars; varID++ ) cdf_define_institut_and_model_id(vlistID, varID);
 }
