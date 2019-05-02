@@ -478,7 +478,7 @@ void gribapiGetKeys(grib_handle *gh, int varID)
       varDefKeyInt(varID, CDI_KEY_PERTURBATIONNUMBER, (int) perturbationNumber);
     }
 
-  long section2Length;
+  long section2Length = 0;
   int status = grib_get_long(gh, "section2Length", &section2Length);
   if (status == 0 && section2Length > 0)
     {
