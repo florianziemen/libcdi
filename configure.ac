@@ -27,7 +27,6 @@ AC_CONFIG_HEADERS([src/config.h])
 AM_MAINTAINER_MODE([disable])
 
 # Check building environment
-AC_CHECK_TOOL([CC],[gcc],[:])
 AC_PROG_CC_C99
 dnl verify the setup supports POSIX 2001
 ACX_PROG_CC_POSIX([2001])
