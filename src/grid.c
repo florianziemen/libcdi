@@ -112,6 +112,26 @@ bool cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int
   return status;
 }
 
+static
+void grid_axis_init(struct gridaxis_t *axisptr)
+{
+  axisptr->size        = 0;
+  axisptr->vals        = NULL;
+  axisptr->bounds      = NULL;
+  axisptr->flag        = 0;
+  axisptr->first       = 0.0;
+  axisptr->last        = 0.0;
+  axisptr->inc         = 0.0;
+#ifndef USE_MPI
+  axisptr->clength     = 0;
+  axisptr->cvals       = NULL;
+#endif
+  axisptr->dimname[0]  = 0;
+  axisptr->name[0]     = 0;
+  axisptr->longname[0] = 0;
+  axisptr->units[0]    = 0;
+  axisptr->stdname     = NULL;
+}
 
 void grid_init(grid_t *gridptr)
 {
@@ -121,25 +141,14 @@ void grid_init(grid_t *gridptr)
   gridptr->projtype      = CDI_UNDEFID;
   gridptr->mask          = NULL;
   gridptr->mask_gme      = NULL;
-  gridptr->x.vals        = NULL;
-  gridptr->y.vals        = NULL;
-  gridptr->x.bounds      = NULL;
-  gridptr->y.bounds      = NULL;
+  gridptr->size          = 0;
+
+  grid_axis_init(&gridptr->x);
+  grid_axis_init(&gridptr->y);
+
   gridptr->area          = NULL;
   gridptr->rowlon        = NULL;
   gridptr->nrowlon       = 0;
-#ifndef USE_MPI
-  gridptr->x.clength     = 0;
-  gridptr->y.clength     = 0;
-  gridptr->x.cvals       = NULL;
-  gridptr->y.cvals       = NULL;
-#endif
-  gridptr->x.first       = 0.0;
-  gridptr->x.last        = 0.0;
-  gridptr->x.inc         = 0.0;
-  gridptr->y.first       = 0.0;
-  gridptr->y.last        = 0.0;
-  gridptr->y.inc         = 0.0;
 
   gridptr->gme.nd        = 0;
   gridptr->gme.ni        = 0;
@@ -152,26 +161,11 @@ void grid_init(grid_t *gridptr)
   gridptr->position      = 0;
   gridptr->reference     = NULL;
   gridptr->datatype      = CDI_DATATYPE_FLT64;
-  gridptr->size          = 0;
-  gridptr->x.size        = 0;
-  gridptr->y.size        = 0;
   gridptr->np            = 0;
-  gridptr->x.flag        = 0;
-  gridptr->y.flag        = 0;
   gridptr->isCyclic      = CDI_UNDEFID;
 
   gridptr->lcomplex      = false;
   gridptr->hasdims       = true;
-  gridptr->x.dimname[0]  = 0;
-  gridptr->y.dimname[0]  = 0;
-  gridptr->x.name[0]     = 0;
-  gridptr->y.name[0]     = 0;
-  gridptr->x.longname[0] = 0;
-  gridptr->y.longname[0] = 0;
-  gridptr->x.units[0]    = 0;
-  gridptr->y.units[0]    = 0;
-  gridptr->x.stdname     = NULL;
-  gridptr->y.stdname     = NULL;
   gridptr->vdimname[0]   = 0;
   gridptr->mapname[0]    = 0;
   gridptr->mapping[0]    = 0;
