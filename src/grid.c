@@ -293,6 +293,7 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
 
   if      ( gridtype == GRID_LONLAT   ) gridptr->nvertex = 2;
   else if ( gridtype == GRID_GAUSSIAN ) gridptr->nvertex = 2;
+  else if ( gridtype == GRID_GAUSSIAN_REDUCED ) gridptr->nvertex = 2;
   else if ( gridtype == GRID_CURVILINEAR  ) gridptr->nvertex = 4;
   else if ( gridtype == GRID_UNSTRUCTURED ) gridptr->x.size = size;
 
