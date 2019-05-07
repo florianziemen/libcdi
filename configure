@@ -28012,6 +28012,8 @@ if test "x$ac_cv_header_netcdf_h" = xyes; then :
 #define HAVE_NETCDF_H 1
 _ACEOF
 
+else
+  as_fn_error $? "Could not find netcdf.h" "$LINENO" 5
 fi
 
 done
@@ -28128,6 +28130,8 @@ if test "x$ac_cv_header_netcdf_h" = xyes; then :
 #define HAVE_NETCDF_H 1
 _ACEOF
 
+else
+  as_fn_error $? "Could not find netcdf.h" "$LINENO" 5
 fi
 
 done
