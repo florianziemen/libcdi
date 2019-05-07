@@ -131,7 +131,7 @@ AC_DEFINE_UNQUOTED([SYSTEM_TYPE],["$ac_cv_build"], [System type])
 AC_SUBST([SYSTEM_TYPE],["$ac_cv_build"])
 #  ----------------------------------------------------------------------
 #  Check for math library
-AC_CHECK_LIB(m, floor)
+AC_SEARCH_LIBS(floor, m)
 #  ----------------------------------------------------------------------
 # Add basic configure options
 ACX_CDI_OPTIONS
