@@ -349,7 +349,7 @@ void cdfDefVarCompression(const stream_t *streamptr, int ncvarid, bool lchunk)
 static
 void cdfDefVarPacking(const stream_t *streamptr, int ncvarid, nc_type xtype, int vlistID, int varID)
 {
-  /*  if ( xtype == NC_BYTE || xtype == NC_SHORT || xtype == NC_INT ) */
+  //  if ( xtype == NC_BYTE || xtype == NC_SHORT || xtype == NC_INT )
     {
       const double addoffset   = vlistInqVarAddoffset(vlistID, varID);
       const double scalefactor = vlistInqVarScalefactor(vlistID, varID);
