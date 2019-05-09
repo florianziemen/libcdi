@@ -410,27 +410,26 @@ void gridGenYvalsGaussian(int ysize, double yfirst, double ylast, double *restri
   if ( ! (IS_EQUAL(yfirst, 0) && IS_EQUAL(ylast, 0)) )
     if ( fabs(yvals[0] - yfirst) > deleps || fabs(yvals[ysize-1] - ylast) > deleps )
       {
-        double *ytmp = NULL;
-        int nstart;
         bool lfound = false;
         int ny = (int) (180./(fabs(ylast-yfirst)/(ysize-1)) + 0.5);
         ny -= ny%2;
         if ( ny > ysize && ny < 4096 )
           {
-            ytmp = (double *) Malloc((size_t)ny * sizeof (double));
+            double *ytmp = (double *) Malloc((size_t)ny * sizeof (double));
             calc_gaussgrid(ytmp, ny, yfirst, ylast);
-            {
-              int i;
-              for ( i = 0; i < (ny-ysize); i++ )
-                if ( fabs(ytmp[i] - yfirst) < deleps ) break;
-              nstart = i;
-            }
+
+            int i;
+            for ( i = 0; i < (ny-ysize); i++ )
+              if ( fabs(ytmp[i] - yfirst) < deleps ) break;
+            int nstart = i;
 
             lfound = (nstart+ysize-1) < ny && fabs(ytmp[nstart+ysize-1] - ylast) < deleps;
             if ( lfound )
               {
-                for (int i = 0; i < ysize; i++) yvals[i] = ytmp[i+nstart];
+                for (i = 0; i < ysize; i++) yvals[i] = ytmp[i+nstart];
               }
+
+            if ( ytmp ) Free(ytmp);
           }
 
         if ( !lfound )
@@ -440,8 +439,6 @@ void gridGenYvalsGaussian(int ysize, double yfirst, double ylast, double *restri
             yvals[0] = yfirst;
             yvals[ysize-1] = ylast;
           }
-
-        if ( ytmp ) Free(ytmp);
       }
 }
 
