@@ -799,9 +799,9 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
 {
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
-  size_t dimlen = gridInqSize(gridID);
-  size_t xdimlen = gridInqXsize(gridID);
-  size_t ydimlen = gridInqYsize(gridID);
+  const size_t dimlen = gridInqSize(gridID);
+  const size_t xdimlen = gridInqXsize(gridID);
+  const size_t ydimlen = gridInqYsize(gridID);
 
   int xdimID = CDI_UNDEFID, ydimID = CDI_UNDEFID;
   int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
@@ -812,10 +812,10 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
         = cdfSearchIDBySize(ofs, (size_t)gridindex, ncgrid, CDF_DIMID_X,
                             GRID_CURVILINEAR, (int)dimlen,
                             gridInqType, gridInqSize);
-      size_t index = search.foundIdx;
+      const size_t index = search.foundIdx;
       if ( index != SIZE_MAX )
         {
-          int gridID0 = ncgrid[index].gridID;
+          const int gridID0 = ncgrid[index].gridID;
           if (    IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0))
                && IS_EQUAL(gridInqXval(gridID0, dimlen-1),
                            gridInqXval(gridID, dimlen-1))
@@ -864,7 +864,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
 {
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
-  size_t dimlen = gridInqSize(gridID);
+  const size_t dimlen = gridInqSize(gridID);
 
   int dimID = CDI_UNDEFID;
   int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
@@ -875,10 +875,10 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
         = cdfSearchIDBySize(ofs, (size_t)gridindex, ncgrid, CDF_DIMID_X,
                             GRID_UNSTRUCTURED, (int)dimlen,
                             gridInqType, gridInqSize);
-      size_t index = search.foundIdx;
+      const size_t index = search.foundIdx;
       if ( index != SIZE_MAX )
         {
-          int gridID0 = ncgrid[index].gridID;
+          const int gridID0 = ncgrid[index].gridID;
           if ( gridInqNvertex(gridID0) == gridInqNvertex(gridID) &&
                IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0)) &&
                IS_EQUAL(gridInqXval(gridID0, dimlen-1),
@@ -1933,7 +1933,7 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
   else if ( gridtype == GRID_GAUSSIAN_REDUCED )
     {
       cdfDefRgrid(streamptr, gridID, gridindex);
-      //if ( gridInqYsize(gridID) ) cdfDefYaxis(streamptr, gridID, gridindex, 1);
+      // if ( gridInqYsize(gridID) ) cdfDefYaxis(streamptr, gridID, gridindex, 1);
     }
   else if ( gridtype == GRID_SPECTRAL )
     {

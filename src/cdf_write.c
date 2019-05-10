@@ -476,7 +476,7 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarid, int nczvarID, 
         }
     }
 
-  size_t len = strlen(coordinates);
+  const size_t len = strlen(coordinates);
   if ( len ) cdf_put_att_text(fileID, ncvarid, "coordinates", len, coordinates);
 }
 
