@@ -2724,8 +2724,8 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
 
 	  const int gridindex = vlistGridIndex(vlistID, gridID);
           ncgrid[gridindex].gridID = gridID;
-          ncgrid[gridindex].ncIDs[CDF_DIMID_X] = ncdims[xdimid].dimid;
-          ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ncdims[ydimid].dimid;
+          if (xdimid != CDI_UNDEFID) ncgrid[gridindex].ncIDs[CDF_DIMID_X] = ncdims[xdimid].dimid;
+          if (ydimid != CDI_UNDEFID) ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ncdims[ydimid].dimid;
           if ( grid->type == GRID_TRAJECTORY )
             {
               ncgrid[gridindex].ncIDs[CDF_VARID_X] = xvarid;
