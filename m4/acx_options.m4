@@ -58,6 +58,19 @@ AC_ARG_WITH([szlib],
 AC_SUBST([SZLIB_INCLUDE])
 AC_SUBST([SZLIB_LIBS])
 #  ----------------------------------------------------------------------
+#  Compile interface with ESDM library
+AC_MSG_CHECKING([for ESDM support])
+AC_ARG_ENABLE([esdm],
+              [AC_HELP_STRING([--enable-esdm],[Use the esdm library [default=no]])],
+              [AS_IF([test "x$enable_esdm" != 'xno'],
+                     [AC_DEFINE(HAVE_LIBESDM,[1],[Define to 1 for ESDM])
+                      enable_cgribex=yes])],
+              [AC_DEFINE(HAVE_LIBESDM,[1],[Define to 1 for ESDM])
+               enable_esdm=yes])
+AC_MSG_RESULT([$enable_esdm])
+AC_SUBST([ENABLE_ESDM],[$enable_esdm])
+
+#  ----------------------------------------------------------------------
 #  Compile application with netcdf
 NETCDF_ROOT=''
 NETCDF_INCLUDE=''
@@ -77,7 +90,7 @@ AC_ARG_WITH([netcdf],
                                            [AC_DEFINE([HAVE_LIBNETCDF],[1],[Define to 1 for NetCDF support])
                                             ENABLE_NETCDF=yes],
                                            [AC_MSG_ERROR([Could not link to NetCDF library])])
-                            NETCDF_LIBS=" -lnetcdf"
+                            NETCDF_LIBS=" -lesdm"
                             AC_CHECK_PROG(NC_CONFIG,nc-config,nc-config)
                             AS_IF([test "x$NC_CONFIG" != "x"],
                                   [AC_MSG_CHECKING([netcdf's OpenDAP support])
@@ -110,7 +123,7 @@ AC_ARG_WITH([netcdf],
                                                 [AC_DEFINE([HAVE_LIBNETCDF],[1],[Define to 1 for NetCDF support])
                                                  ENABLE_NETCDF=yes],
                                                 [AC_MSG_ERROR([Could not link to NetCDF library])])
-                                 NETCDF_LIBS=" -L$NETCDF_ROOT/lib -lnetcdf"
+                                 NETCDF_LIBS=" -L$NETCDF_ROOT/lib -lesdm"
                                  NETCDF_INCLUDE=" -I$NETCDF_ROOT/include"
                                  AC_MSG_CHECKING([nc-config script])
                                  AC_CHECK_PROG(NC_CONFIG,nc-config,[$NETCDF_ROOT/bin/nc-config],,["$NETCDF_ROOT/bin"])
