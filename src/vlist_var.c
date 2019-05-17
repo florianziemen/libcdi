@@ -579,7 +579,11 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 	}
     }
   else
-    strcpy(longname, vlistptr->vars[varID].longname);
+    {
+      // strcpy(longname, vlistptr->vars[varID].longname);
+      strncpy(longname, vlistptr->vars[varID].longname, CDI_MAX_NAME);
+      longname[CDI_MAX_NAME-1] = 0;
+    }
 
   return;
 }
@@ -716,7 +720,7 @@ The function @func{vlistInqVarDatatype} returns the data type of a variable.
 @Result
 @func{vlistInqVarDatatype} returns an identifier to the data type of the variable.
 The valid CDI data types are @func{CDI_DATATYPE_PACK8}, @func{CDI_DATATYPE_PACK16}, @func{CDI_DATATYPE_PACK24},
-@func{CDI_DATATYPE_FLT32}, @func{CDI_DATATYPE_FLT64}, @func{CDI_DATATYPE_INT8}, @func{CDI_DATATYPE_INT16} and 
+@func{CDI_DATATYPE_FLT32}, @func{CDI_DATATYPE_FLT64}, @func{CDI_DATATYPE_INT8}, @func{CDI_DATATYPE_INT16} and
 @func{CDI_DATATYPE_INT32}.
 
 @EndFunction
