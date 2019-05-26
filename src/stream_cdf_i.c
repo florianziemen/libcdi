@@ -3992,6 +3992,7 @@ int cdfInqContents(stream_t *streamptr)
   int nctimevarid = streamptr->basetime.ncvarid;
 
   if (nctimevarid != CDI_UNDEFID && (!time_has_units || streamptr->basetime.lwrf)) ncvars[nctimevarid].units[0] = 0;
+  if (nctimevarid != CDI_UNDEFID && time_has_units) streamptr->basetime.lunits = true;
 
   if ( time_has_units )
     {
@@ -4001,6 +4002,7 @@ int cdfInqContents(stream_t *streamptr)
         {
           nctimevarid = CDI_UNDEFID;
           streamptr->basetime.ncvarid = CDI_UNDEFID;
+          streamptr->basetime.lunits = false;
         }
 
       if ( leadtime_id != CDI_UNDEFID && taxis->type == TAXIS_RELATIVE )
@@ -4179,7 +4181,7 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
       double timevalue = tsID;
 
       int nctimevarid = streamptr->basetime.ncvarid;
-      if ( nctimevarid != CDI_UNDEFID )
+      if (nctimevarid != CDI_UNDEFID && streamptr->basetime.lunits)
 	{
 	  int fileID = streamptr->fileID;
 	  size_t index = (size_t)tsID;

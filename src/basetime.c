@@ -14,6 +14,7 @@ void basetimeInit(basetime_t *basetime)
       basetime->ncdimid       = CDI_UNDEFID;
       basetime->ncvarboundsid = CDI_UNDEFID;
       basetime->leadtimeid    = CDI_UNDEFID;
+      basetime->lunits        = false;
       basetime->lwrf          = false;
       basetime->timevar_cache = NULL;
     }

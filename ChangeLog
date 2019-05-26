@@ -1,7 +1,11 @@
-2019-05-23  Uwe Schulzweida
+2019-06-11  Uwe Schulzweida
 
         * using CGRIBEX library version 1.9.3
 	* Version 1.9.7 released
+
+2019-05-26  Uwe Schulzweida
+
+	* netCDF: don't decode timevalue if timeunits is missing
 
 2019-05-17  Uwe Schulzweida
 
