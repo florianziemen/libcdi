@@ -341,17 +341,20 @@ int gribapiTimeIsFC(grib_handle *gh)
 }
 
 struct cdiGribAPI_ts_str_map_elem cdiGribAPI_ts_str_map[] = {
+  // clang-format off
   [TSTEP_INSTANT] = {  0, "instant" },
-  [TSTEP_AVG] = { 8, "avg" },
-  [TSTEP_ACCUM] = {  8, "accum" },
-  [TSTEP_MAX] = {  8, "max" },
-  [TSTEP_MIN] = {  8, "min" },
-  [TSTEP_DIFF] = {  8, "diff" },
-  [TSTEP_RMS] = {  8, "rms" },
-  [TSTEP_SD] = {  8, "sd" },
-  [TSTEP_COV] = { 8, "cov" },
-  [TSTEP_RATIO] = {  8, "ratio" },
+  [TSTEP_AVG]     = {  8, "avg" },
+  [TSTEP_ACCUM]   = {  8, "accum" },
+  [TSTEP_MAX]     = {  8, "max" },
+  [TSTEP_MIN]     = {  8, "min" },
+  [TSTEP_DIFF]    = {  8, "diff" },
+  [TSTEP_RMS]     = {  8, "rms" },
+  [TSTEP_SD]      = {  8, "sd" },
+  [TSTEP_COV]     = {  8, "cov" },
+  [TSTEP_RATIO]   = {  8, "ratio" },
+  [TSTEP_SUM]     = {  8, "sum" },
   { 0, "" }
+  // clang-format on
 };
 
 

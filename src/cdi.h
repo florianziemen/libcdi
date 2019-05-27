@@ -199,35 +199,36 @@ typedef struct  {
 
 
 
-/* TIME types */
+// TIME types
 
-#define  TIME_CONSTANT              0  /* Time constant              */
-#define  TIME_VARYING               1  /* Time varying               */
-#define  TIME_VARIABLE              1  /* obsolate, use TIME_VARYING */
+#define  TIME_CONSTANT            0  // Time constant
+#define  TIME_VARYING             1  // Time varying
+#define  TIME_VARIABLE            1  // obsolate, use TIME_VARYING
 
-/* TSTEP types */
+// TSTEP types
 
-#define  TSTEP_INSTANT              1  /* Instant             */
-#define  TSTEP_AVG                  2  /* Average             */
-#define  TSTEP_ACCUM                3  /* Accumulation        */
-#define  TSTEP_MAX                  4  /* Maximum             */
-#define  TSTEP_MIN                  5  /* Minimum             */
-#define  TSTEP_DIFF                 6  /* Difference          */
-#define  TSTEP_RMS                  7  /* Root mean square    */
-#define  TSTEP_SD                   8  /* Standard deviation  */
-#define  TSTEP_COV                  9  /* Covariance          */
-#define  TSTEP_RATIO               10  /* Ratio               */
-#define  TSTEP_RANGE               11
-#define  TSTEP_INSTANT2            12
-#define  TSTEP_INSTANT3            13
+#define  TSTEP_INSTANT            1  // Instant
+#define  TSTEP_AVG                2  // Average
+#define  TSTEP_ACCUM              3  // Accumulation
+#define  TSTEP_MAX                4  // Maximum
+#define  TSTEP_MIN                5  // Minimum
+#define  TSTEP_DIFF               6  // Difference
+#define  TSTEP_RMS                7  // Root mean square
+#define  TSTEP_SD                 8  // Standard deviation
+#define  TSTEP_COV                9  // Covariance
+#define  TSTEP_RATIO             10  // Ratio
+#define  TSTEP_RANGE             11
+#define  TSTEP_INSTANT2          12
+#define  TSTEP_INSTANT3          13
+#define  TSTEP_SUM               14  // Summation
 
-/* TAXIS types */
+// TAXIS types
 
 #define  TAXIS_ABSOLUTE           1
 #define  TAXIS_RELATIVE           2
 #define  TAXIS_FORECAST           3
 
-/* TUNIT types */
+// TUNIT types
 
 #define  TUNIT_SECOND             1
 #define  TUNIT_MINUTE             2
@@ -241,9 +242,9 @@ typedef struct  {
 #define  TUNIT_MONTH             10
 #define  TUNIT_YEAR              11
 
-/* CALENDAR types */
+// CALENDAR types
 
-#define  CALENDAR_STANDARD        0  /* don't change this value (used also in cgribexlib)! */
+#define  CALENDAR_STANDARD        0  // don't change this value (used also in cgribexlib)!
 #define  CALENDAR_GREGORIAN       1
 #define  CALENDAR_PROLEPTIC       2
 #define  CALENDAR_360DAYS         3

@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.3
 	* Version 1.9.7 released
 
+2019-05-27  Uwe Schulzweida
+
+	* GRIB: Support of typeOfStatisticalProcessing = 11 (Summation) [Feature #9055]
+
 2019-05-26  Uwe Schulzweida
 
 	* netCDF: don't decode timevalue if timeunits is missing
