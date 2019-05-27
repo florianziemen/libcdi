@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2019
+! Uwe Schulzweida, MPI-MET, Hamburg,   May 2019
 !
 
       INTEGER    CDI_MAX_NAME
@@ -313,18 +313,12 @@
 !  
 !  Currently, only multiple pairs combined by AND are supported.
 !
-!
-!  TIME types
-!
       INTEGER    TIME_CONSTANT
       PARAMETER (TIME_CONSTANT          =  0)
       INTEGER    TIME_VARYING
       PARAMETER (TIME_VARYING           =  1)
       INTEGER    TIME_VARIABLE
       PARAMETER (TIME_VARIABLE          =  1)
-!
-!  TSTEP types
-!
       INTEGER    TSTEP_INSTANT
       PARAMETER (TSTEP_INSTANT          =  1)
       INTEGER    TSTEP_AVG
@@ -351,18 +345,14 @@
       PARAMETER (TSTEP_INSTANT2         = 12)
       INTEGER    TSTEP_INSTANT3
       PARAMETER (TSTEP_INSTANT3         = 13)
-!
-!  TAXIS types
-!
+      INTEGER    TSTEP_SUM
+      PARAMETER (TSTEP_SUM              = 14)
       INTEGER    TAXIS_ABSOLUTE
       PARAMETER (TAXIS_ABSOLUTE         =  1)
       INTEGER    TAXIS_RELATIVE
       PARAMETER (TAXIS_RELATIVE         =  2)
       INTEGER    TAXIS_FORECAST
       PARAMETER (TAXIS_FORECAST         =  3)
-!
-!  TUNIT types
-!
       INTEGER    TUNIT_SECOND
       PARAMETER (TUNIT_SECOND           =  1)
       INTEGER    TUNIT_MINUTE
@@ -385,9 +375,6 @@
       PARAMETER (TUNIT_MONTH            = 10)
       INTEGER    TUNIT_YEAR
       PARAMETER (TUNIT_YEAR             = 11)
-!
-!  CALENDAR types
-!
       INTEGER    CALENDAR_STANDARD
       PARAMETER (CALENDAR_STANDARD      =  0)
       INTEGER    CALENDAR_GREGORIAN

@@ -173,6 +173,7 @@ module mo_cdi
   integer(c_int), public, parameter :: TSTEP_RANGE = 11
   integer(c_int), public, parameter :: TSTEP_INSTANT2 = 12
   integer(c_int), public, parameter :: TSTEP_INSTANT3 = 13
+  integer(c_int), public, parameter :: TSTEP_SUM = 14
   integer(c_int), public, parameter :: TAXIS_ABSOLUTE = 1
   integer(c_int), public, parameter :: TAXIS_RELATIVE = 2
   integer(c_int), public, parameter :: TAXIS_FORECAST = 3

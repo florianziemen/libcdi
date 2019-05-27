@@ -80,21 +80,6 @@ int size_t_c2f(size_t value_size_t)
    Currently, only multiple pairs combined by AND are supported.  */
 
 
-/*  TIME types  */
-
-
-/*  TSTEP types  */
-
-
-/*  TAXIS types  */
-
-
-/*  TUNIT types  */
-
-
-/*  CALENDAR types  */
-
-
 /*  number of unsigned char needed to store UUID  */
 
 
