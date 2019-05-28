@@ -1721,7 +1721,7 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinition
   const char *stepType = "instant";
   long proDefTempNum = 0;
 
-  if ( tsteptype >= TSTEP_INSTANT && tsteptype <= TSTEP_RATIO )
+  if ( tsteptype >= TSTEP_INSTANT && tsteptype <= TSTEP_SUM )
     {
       stepType = cdiGribAPI_ts_str_map[tsteptype].sname;
       proDefTempNum = cdiGribAPI_ts_str_map[tsteptype].productionTemplate;
@@ -1738,7 +1738,8 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinition
     {
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
       size_t len = strlen(stepType);
-      GRIB_CHECK(my_grib_set_string(gh, "stepType", stepType, &len), 0);
+      int status = my_grib_set_string(gh, "stepType", stepType, &len);
+      if (status != 0) GRIB_CHECK(my_grib_set_long(gh, "productDefinitionTemplateNumber", 0), 0);
     }
 
   return (int)proDefTempNum;

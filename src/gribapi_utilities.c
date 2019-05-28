@@ -340,6 +340,7 @@ int gribapiTimeIsFC(grib_handle *gh)
   return sigofrtime != 3;
 }
 
+
 struct cdiGribAPI_ts_str_map_elem cdiGribAPI_ts_str_map[] = {
   // clang-format off
   [TSTEP_INSTANT] = {  0, "instant" },
@@ -353,7 +354,7 @@ struct cdiGribAPI_ts_str_map_elem cdiGribAPI_ts_str_map[] = {
   [TSTEP_COV]     = {  8, "cov" },
   [TSTEP_RATIO]   = {  8, "ratio" },
   [TSTEP_SUM]     = {  8, "sum" },
-  { 0, "" }
+                    {  0, "" }
   // clang-format on
 };
 
