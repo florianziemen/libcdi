@@ -27,6 +27,8 @@ endif
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 
 libcdi_la_SOURCES = 	 \
+	async_worker.c   \
+	async_worker.h	 \
 	basetime.c     	 \
 	basetime.h	 \
 	binary.c	 \

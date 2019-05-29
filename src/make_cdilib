@@ -96,7 +96,8 @@ cat > ${PROG} << EOR
 
 EOR
 
-files="basetime.c \
+files="async_worker.c \
+   basetime.c \
    binary.c \
    calendar.c \
    cdf.c \
