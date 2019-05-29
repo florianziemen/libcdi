@@ -255,6 +255,7 @@ typedef struct {
   int         accesstype;   // TYPE_REC or TYPE_VAR
   int         accessmode;
   int         filetype;
+  int         numWorker;
   int         byteorder;
   int         fileID;
   int         filemode;

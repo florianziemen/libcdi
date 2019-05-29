@@ -231,6 +231,14 @@ int getByteswap(int byteorder)
   return byteswap;
 }
 
+
+void streamDefNumWorker(int streamID, int numWorker)
+{
+  stream_t *streamptr = stream_to_pointer(streamID);
+  streamptr->numWorker = numWorker;
+}
+
+
 /*
 @Function  streamDefByteorder
 @Title     Define the byte order
@@ -857,6 +865,7 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->accesstype        = CDI_UNDEFID;
   streamptr->accessmode        = 0;
   streamptr->filetype          = CDI_FILETYPE_UNDEF;
+  streamptr->numWorker         = 0;
   streamptr->byteorder         = CDI_UNDEFID;
   streamptr->fileID            = 0;
   streamptr->filemode          = 0;

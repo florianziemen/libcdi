@@ -311,54 +311,56 @@ int     cdiEncodeTime(int hour, int minute, int second);
 
 int     cdiGetFiletype(const char *path, int *byteorder);
 
-/*      streamOpenRead: Open a dataset for reading */
+//      streamOpenRead: Open a dataset for reading
 int     streamOpenRead(const char *path);
 
-/*      streamOpenWrite: Create a new dataset */
+//      streamOpenWrite: Create a new dataset
 int     streamOpenWrite(const char *path, int filetype);
 
 int     streamOpenAppend(const char *path);
 
-/*      streamClose: Close an open dataset */
+//      streamClose: Close an open dataset
 void    streamClose(int streamID);
 
-/*      streamSync: Synchronize an Open Dataset to Disk */
+//      streamSync: Synchronize an Open Dataset to Disk
 void    streamSync(int streamID);
 
-/*      streamDefVlist: Define the Vlist for a stream */
+void    streamDefNumWorker(int streamID, int numWorker);
+
+//      streamDefVlist: Define the Vlist for a stream
 void    streamDefVlist(int streamID, int vlistID);
 
-/*      streamInqVlist: Get the Vlist of a stream */
+//      streamInqVlist: Get the Vlist of a stream
 int     streamInqVlist(int streamID);
 
-/*      streamInqFiletype: Get the filetype */
+//      streamInqFiletype: Get the filetype
 int     streamInqFiletype(int streamID);
 
-/*      streamDefByteorder: Define the byteorder */
+//      streamDefByteorder: Define the byteorder
 void    streamDefByteorder(int streamID, int byteorder);
 
-/*      streamInqByteorder: Get the byteorder */
+//      streamInqByteorder: Get the byteorder
 int     streamInqByteorder(int streamID);
 
-/*      streamDefCompType: Define compression type */
+//      streamDefCompType: Define compression type
 void    streamDefCompType(int streamID, int comptype);
 
-/*      streamInqCompType: Get compression type */
+//      streamInqCompType: Get compression type
 int     streamInqCompType(int streamID);
 
-/*      streamDefCompLevel: Define compression level */
+//      streamDefCompLevel: Define compression level
 void    streamDefCompLevel(int streamID, int complevel);
 
-/*      streamInqCompLevel: Get compression level */
+//      streamInqCompLevel: Get compression level
 int     streamInqCompLevel(int streamID);
 
-/*      streamDefTimestep: Define time step */
+//      streamDefTimestep: Define time step
 int     streamDefTimestep(int streamID, int tsID);
 
-/*      streamInqTimestep: Get time step */
+//      streamInqTimestep: Get time step
 int     streamInqTimestep(int streamID, int tsID);
 
-/*      PIO: query currently set timestep id  */
+//      PIO: query currently set timestep id
 int     streamInqCurTimestepID(int streamID);
 
 const char *streamFilename(int streamID);
