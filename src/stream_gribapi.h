@@ -10,7 +10,7 @@ int gribapiScanTimestep2(stream_t * streamptr);
 int gribapiScanTimestep(stream_t * streamptr);
 
 int gribapiDecode(void *gribbuffer, size_t gribsize, double *data, size_t datasize,
-		  int unreduced, size_t *nmiss, double missval, int vlistID, int varID);
+		  int unreduced, size_t *nmiss, double missval);
 
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int64_t vdate, int vtime, int tsteptype, int numavg,

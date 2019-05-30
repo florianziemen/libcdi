@@ -75,10 +75,10 @@ typedef struct AsyncManager {
   AsyncJob* communicators;
 } AsyncManager;
 
-static AsyncManager* gManager = NULL;
+static AsyncManager *gManager = NULL;
 
 static
-void* workerMain(void* arg)
+void *workerMain(void *arg)
 {
   AsyncJob* communicator = arg;
   while(true)
@@ -95,11 +95,12 @@ void* workerMain(void* arg)
           break;
         }
     }
+
   return NULL;
 }
 
 static
-void startWorker(AsyncJob* communicator)
+void startWorker(AsyncJob *communicator)
 {
   communicator->inUse = false;
   communicator->work = NULL;
@@ -117,9 +118,10 @@ int AsyncWorker_init(int threadCount)
   if(threadCount <= 0)
     {
       xabort("CPU core count discovery not implemented yet");
-      return CDI_EINVAL;	//TODO: discover CPU core count, and set threadCount to a sensible positive value
+      return CDI_EINVAL;  // TODO: discover CPU core count, and set threadCount to a sensible positive value
     }
-  if(gManager) return CDI_NOERR;
+
+  if (gManager) return CDI_NOERR;
 
   gManager = malloc(sizeof*gManager);
   if(!gManager) return CDI_ESYSTEM;
@@ -132,7 +134,7 @@ int AsyncWorker_init(int threadCount)
   return CDI_NOERR;
 }
 
-AsyncJob* AsyncWorker_requestWork(int (*work)(void* data), void* data)
+AsyncJob *AsyncWorker_requestWork(int (*work)(void* data), void* data)
 {
   if(!gManager) xabort("AsyncWorker_requestWork() called without calling AsyncWorker_init() first");
   if(!work) xabort("AsyncWorker_requestWork() called without a valid function pointer");	//need to catch this condition to stop users from terminating our worker threads
@@ -161,7 +163,7 @@ AsyncJob* AsyncWorker_requestWork(int (*work)(void* data), void* data)
   return worker;
 }
 
-int AsyncWorker_wait(AsyncJob* job)
+int AsyncWorker_wait(AsyncJob *job)
 {
   if(!gManager) xabort("AsyncWorker_wait() called without calling AsyncWorker_init() first");
   if(job < gManager->communicators) return CDI_EINVAL;
@@ -215,5 +217,6 @@ int AsyncWorker_finalize()
   free(gManager->communicators);
   free(gManager);
   gManager = NULL;
+
   return result;
 }

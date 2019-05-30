@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.3
 	* Version 1.9.7 released
 
+2019-05-30  Uwe Schulzweida
+
+	* GRIB decoding parallelization [patch from Nathanael Huebbe]
+
 2019-05-27  Uwe Schulzweida
 
 	* GRIB: Support of typeOfStatisticalProcessing = 11 (Summation) [Feature #9055]

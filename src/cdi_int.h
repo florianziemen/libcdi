@@ -255,7 +255,6 @@ typedef struct {
   int         accesstype;   // TYPE_REC or TYPE_VAR
   int         accessmode;
   int         filetype;
-  int         numWorker;
   int         byteorder;
   int         fileID;
   int         filemode;
@@ -295,6 +294,11 @@ typedef struct {
 #else
   void       *gribContainers;
 #endif
+
+  int         numWorker;
+  int         nextRecID;
+  int         cachedTsID;
+  void       *jobs;
 
   void *gh; // grib handle
 }

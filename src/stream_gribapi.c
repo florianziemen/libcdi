@@ -1464,12 +1464,9 @@ int gribapiScanTimestep(stream_t * streamptr)
 #endif
 
 int gribapiDecode(void *gribbuffer, size_t gribsize, double *data, size_t gridsize,
-		  int unreduced, size_t *nmiss, double missval, int vlistID, int varID)
+		  int unreduced, size_t *nmiss, double missval)
 {
   int status = 0;
-
-  UNUSED(vlistID);
-  UNUSED(varID);
 
   if ( unreduced )
     {

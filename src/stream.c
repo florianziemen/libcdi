@@ -234,8 +234,11 @@ int getByteswap(int byteorder)
 
 void streamDefNumWorker(int streamID, int numWorker)
 {
-  stream_t *streamptr = stream_to_pointer(streamID);
-  streamptr->numWorker = numWorker;
+  if (numWorker > 0)
+    {
+      stream_t *streamptr = stream_to_pointer(streamID);
+      streamptr->numWorker = numWorker;
+    }
 }
 
 
@@ -865,7 +868,6 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->accesstype        = CDI_UNDEFID;
   streamptr->accessmode        = 0;
   streamptr->filetype          = CDI_FILETYPE_UNDEF;
-  streamptr->numWorker         = 0;
   streamptr->byteorder         = CDI_UNDEFID;
   streamptr->fileID            = 0;
   streamptr->filemode          = 0;
@@ -914,6 +916,11 @@ void streamDefaultValue ( stream_t * streamptr )
 #endif
 
   streamptr->gribContainers    = NULL;
+
+  streamptr->numWorker         = 0;
+  streamptr->nextRecID         = 0;
+  streamptr->cachedTsID        = -1;
+  streamptr->jobs              = NULL;
 }
 
 static
@@ -1100,6 +1107,8 @@ void streamClose(int streamID)
 
       cdiVlistDestroy_(vlistID);
     }
+
+  if (streamptr->jobs) free(streamptr->jobs);
 
   stream_delete_entry(streamptr);
 }
