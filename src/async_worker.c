@@ -9,6 +9,7 @@
 #ifdef __APPLE__
 #include <dispatch/dispatch.h>
 #else
+#include <errno.h>
 #include <semaphore.h>
 #endif
 
