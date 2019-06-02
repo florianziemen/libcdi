@@ -72,12 +72,11 @@ struct AsyncJob {
   int result;
 };
 
-typedef struct AsyncManager {
+struct AsyncManager {
   int workerCount, idleWorkerCount;
   AsyncJob *communicators;
-} AsyncManager;
+};
 
-static AsyncManager *gManager = NULL;
 
 static
 void *workerMain(void *arg)
@@ -117,7 +116,7 @@ void startWorker(AsyncJob *communicator)
   if (pthread_detach(worker)) xabort("pthread_detach() failed");
 }
 
-int AsyncWorker_init(int threadCount)
+int AsyncWorker_init(AsyncManager **jobManager, int threadCount)
 {
   if (threadCount <= 0)
     {
@@ -125,41 +124,41 @@ int AsyncWorker_init(int threadCount)
       return CDI_EINVAL;  // TODO: discover CPU core count, and set threadCount to a sensible positive value
     }
 
-  if (gManager) return CDI_NOERR;
+  if (*jobManager) return CDI_NOERR;
 
-  gManager = malloc(sizeof*gManager);
-  if(!gManager) return CDI_ESYSTEM;
-  gManager->workerCount = threadCount;
-  gManager->communicators = malloc(threadCount*sizeof*gManager->communicators);
-  if (!gManager->communicators) xabort("memory allocation failure");
+  *jobManager = malloc(sizeof(AsyncManager));
+  if(!*jobManager) return CDI_ESYSTEM;
+  (*jobManager)->workerCount = threadCount;
+  (*jobManager)->communicators = malloc(threadCount*sizeof(AsyncJob));
+  if (!(*jobManager)->communicators) xabort("memory allocation failure");
 
-  for (int i = 0; i < threadCount; i++) startWorker(&gManager->communicators[i]);
-  gManager->idleWorkerCount = threadCount;
+  for (int i = 0; i < threadCount; i++) startWorker(&((*jobManager)->communicators[i]));
+  (*jobManager)->idleWorkerCount = threadCount;
 
   return CDI_NOERR;
 }
 
-AsyncJob *AsyncWorker_requestWork(int (*work)(void *data), void *data)
+AsyncJob *AsyncWorker_requestWork(AsyncManager *jobManager, int (*work)(void *data), void *data)
 {
-  if (!gManager) xabort("AsyncWorker_requestWork() called without calling AsyncWorker_init() first");
+  if (!jobManager) xabort("AsyncWorker_requestWork() called without calling AsyncWorker_init() first");
   if (!work) xabort("AsyncWorker_requestWork() called without a valid function pointer");	//need to catch this condition to stop users from terminating our worker threads
 
   // find an unused worker
-  if(!gManager->idleWorkerCount) return NULL;
+  if(!jobManager->idleWorkerCount) return NULL;
 
   AsyncJob *worker = NULL;
-  for (int i = 0; i < gManager->workerCount; i++)
+  for (int i = 0; i < jobManager->workerCount; i++)
     {
-      if(!gManager->communicators[i].inUse)
+      if (!jobManager->communicators[i].inUse)
         {
-          worker = &gManager->communicators[i];
+          worker = &jobManager->communicators[i];
           break;
         }
     }
   if (!worker) xabort("internal error: idleWorkerCount is not in sync with the worker states, please report this bug");
 
   // pass the request to that worker
-  gManager->idleWorkerCount--;
+  jobManager->idleWorkerCount--;
   worker->inUse = true;
   worker->work = work;
   worker->data = data;
@@ -169,11 +168,11 @@ AsyncJob *AsyncWorker_requestWork(int (*work)(void *data), void *data)
   return worker;
 }
 
-int AsyncWorker_wait(AsyncJob *job)
+int AsyncWorker_wait(AsyncManager *jobManager, AsyncJob *job)
 {
-  if (!gManager) xabort("AsyncWorker_wait() called without calling AsyncWorker_init() first");
-  if (job < gManager->communicators) return CDI_EINVAL;
-  if (job >= gManager->communicators + gManager->workerCount) return CDI_EINVAL;
+  if (!jobManager) xabort("AsyncWorker_wait() called without calling AsyncWorker_init() first");
+  if (job < jobManager->communicators) return CDI_EINVAL;
+  if (job >= jobManager->communicators + jobManager->workerCount) return CDI_EINVAL;
   if (!job->inUse) return CDI_EINVAL;
 
   while (sema_wait(&job->completion)) ;
@@ -184,31 +183,31 @@ int AsyncWorker_wait(AsyncJob *job)
   job->data = NULL;
   job->result = 0;
   job->inUse = false;
-  gManager->idleWorkerCount++;
+  jobManager->idleWorkerCount++;
 
   return result;
 }
 
-int AsyncWorker_availableWorkers()
+int AsyncWorker_availableWorkers(AsyncManager *jobManager)
 {
-  if (!gManager) return 0;
-  return gManager->idleWorkerCount;
+  if (!jobManager) return 0;
+  return jobManager->idleWorkerCount;
 }
 
-int AsyncWorker_finalize()
+int AsyncWorker_finalize(AsyncManager *jobManager)
 {
   int result = CDI_NOERR;
-  if (!gManager) return CDI_NOERR;
+  if (!jobManager) return CDI_NOERR;
 
-  for (int i = 0; i < gManager->workerCount; i++)
+  for (int i = 0; i < jobManager->workerCount; i++)
     {
-      AsyncJob *curWorker = &gManager->communicators[i];
+      AsyncJob *curWorker = &jobManager->communicators[i];
 
       // finish any pending job
-      if(curWorker->inUse)
+      if (curWorker->inUse)
         {
-          AsyncWorker_wait(curWorker);
-          if(curWorker->result) result = curWorker->result;
+          AsyncWorker_wait(jobManager, curWorker);
+          if (curWorker->result) result = curWorker->result;
         }
 
       // send the teardown signal
@@ -219,12 +218,12 @@ int AsyncWorker_finalize()
       if (sema_post(&curWorker->request)) xabort("sema_post() failed");
 
       // wait for the worker to exit
-      AsyncWorker_wait(curWorker);
+      AsyncWorker_wait(jobManager, curWorker);
     }
 
-  free(gManager->communicators);
-  free(gManager);
-  gManager = NULL;
+  free(jobManager->communicators);
+  free(jobManager);
+  jobManager = NULL;
 
   return result;
 }

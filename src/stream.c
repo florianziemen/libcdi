@@ -30,6 +30,7 @@
 #include "resource_handle.h"
 #include "resource_unpack.h"
 #include "namespace.h"
+#include "async_worker.h"
 
 
 static stream_t *stream_new_entry(int resH);
@@ -921,6 +922,7 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->nextRecID         = 0;
   streamptr->cachedTsID        = -1;
   streamptr->jobs              = NULL;
+  streamptr->jobManager        = NULL;
 }
 
 static
@@ -1056,7 +1058,7 @@ void streamClose(int streamID)
   if ( CDI_Debug )
     Message("streamID = %d filename = %s", streamID, streamptr->filename);
 
-  int vlistID  = streamptr->vlistID;
+  const int vlistID  = streamptr->vlistID;
 
   void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
     = (void (*)(stream_t *, int))
@@ -1078,7 +1080,7 @@ void streamClose(int streamID)
   for ( int index = 0; index < streamptr->nvars; index++ )
     {
       sleveltable_t *pslev = streamptr->vars[index].recordTable;
-      unsigned nsub = streamptr->vars[index].subtypeSize >= 0
+      const unsigned nsub = streamptr->vars[index].subtypeSize >= 0
         ? (unsigned)streamptr->vars[index].subtypeSize : 0U;
       for (size_t isub=0; isub < nsub; isub++)
         {
@@ -1109,6 +1111,7 @@ void streamClose(int streamID)
     }
 
   if (streamptr->jobs) free(streamptr->jobs);
+  if (streamptr->jobManager) AsyncWorker_finalize(streamptr->jobManager);
 
   stream_delete_entry(streamptr);
 }

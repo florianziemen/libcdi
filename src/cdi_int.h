@@ -299,6 +299,7 @@ typedef struct {
   int         nextRecID;
   int         cachedTsID;
   void       *jobs;
+  void       *jobManager;
 
   void *gh; // grib handle
 }

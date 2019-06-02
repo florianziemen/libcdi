@@ -174,17 +174,17 @@ typedef struct JobDescriptor {
 } JobDescriptor;
 
 static
-void JobDescriptor_startJob(JobDescriptor *me, stream_t *streamptr, int recID, int memtype, bool resetFilePos)
+void JobDescriptor_startJob(AsyncManager *jobManager, JobDescriptor *me, stream_t *streamptr, int recID, int memtype, bool resetFilePos)
 {
   me->args = grb_read_raw_data(streamptr, recID, memtype, NULL, NULL, resetFilePos);
-  me->job = AsyncWorker_requestWork(grb_decode_record, &me->args);
+  me->job = AsyncWorker_requestWork(jobManager, grb_decode_record, &me->args);
   if (!me->job) xabort("error while trying to send job to worker thread");
 }
 
 static
-void JobDescriptor_finishJob(JobDescriptor *me, void *data, size_t *nmiss)
+void JobDescriptor_finishJob(AsyncManager *jobManager, JobDescriptor *me, void *data, size_t *nmiss)
 {
-  if (AsyncWorker_wait(me->job)) xabort("error executing job in worker thread");
+  if (AsyncWorker_wait(jobManager, me->job)) xabort("error executing job in worker thread");
   memcpy(data, me->args.data, me->args.gridsize*(me->args.memtype == MEMTYPE_FLOAT ? sizeof(float) : sizeof(double)));
   *nmiss = me->args.nmiss;
 
@@ -201,6 +201,7 @@ void grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *dat
   const int workerCount = streamptr->numWorker;
   if (workerCount > 0)
     {
+      AsyncManager *jobManager = (AsyncManager *) streamptr->jobManager;
       JobDescriptor *jobs = (JobDescriptor *) streamptr->jobs;
 
       // if this is the first call, init and start worker threads
@@ -211,7 +212,8 @@ void grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *dat
           jobs = malloc(workerCount*sizeof*jobs);
           streamptr->jobs = jobs;
           for (int i = 0; i < workerCount; i++) jobs[i].args.recID = -1;
-          if (AsyncWorker_init(workerCount)) xabort("error while trying to start worker threads");
+          if (AsyncWorker_init(&jobManager, workerCount)) xabort("error while trying to start worker threads");
+          streamptr->jobManager = jobManager;
         }
 
       if (recID == 0) streamptr->nextRecID = 0;
@@ -225,7 +227,7 @@ void grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *dat
               JobDescriptor *jd = &jobs[i];
               if (jd->args.recID < 0)
                 {
-                  JobDescriptor_startJob(jd, streamptr, timestep->recIDs[streamptr->nextRecID++], memtype, resetFilePos);
+                  JobDescriptor_startJob(jobManager, jd, streamptr, timestep->recIDs[streamptr->nextRecID++], memtype, resetFilePos);
                 }
             }
 
@@ -236,10 +238,10 @@ void grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *dat
               if (jd->args.recID == recID)
                 {
                   jobFound = true;
-                  JobDescriptor_finishJob(jd, data, nmiss);
+                  JobDescriptor_finishJob(jobManager, jd, data, nmiss);
                   if (streamptr->nextRecID < timestep->nrecs)
                     {
-                      JobDescriptor_startJob(jd, streamptr, timestep->recIDs[streamptr->nextRecID++], memtype, resetFilePos);
+                      JobDescriptor_startJob(jobManager, jd, streamptr, timestep->recIDs[streamptr->nextRecID++], memtype, resetFilePos);
                     }
                 }
             }
