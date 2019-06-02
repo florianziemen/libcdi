@@ -135,7 +135,7 @@ DecodeArgs grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *
 
   if ( recsize == 0 ) Error("Internal problem! Recordsize is zero for record %d at timestep %d", recID+1, tsID+1);
 
-  if (!gribbuffer) gribbuffer = Malloc(recsize);
+  if (!gribbuffer) gribbuffer = Malloc(streamptr->record->buffersize);
   if (!data) data = Malloc(gridsize*(memtype == MEMTYPE_FLOAT ? sizeof(float) : sizeof(double)));
 
   if (resetFilePos)
@@ -184,7 +184,7 @@ void JobDescriptor_startJob(JobDescriptor *me, stream_t *streamptr, int recID, i
 static
 void JobDescriptor_finishJob(JobDescriptor* me, void *data, size_t *nmiss)
 {
-  if(AsyncWorker_wait(me->job)) xabort("error executing job in worker thread");
+  if (AsyncWorker_wait(me->job)) xabort("error executing job in worker thread");
   memcpy(data, me->args.data, me->args.gridsize*(me->args.memtype == MEMTYPE_FLOAT ? sizeof(float) : sizeof(double)));
   *nmiss = me->args.nmiss;
 
