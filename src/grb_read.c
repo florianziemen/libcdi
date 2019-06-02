@@ -182,7 +182,7 @@ void JobDescriptor_startJob(JobDescriptor *me, stream_t *streamptr, int recID, i
 }
 
 static
-void JobDescriptor_finishJob(JobDescriptor* me, void *data, size_t *nmiss)
+void JobDescriptor_finishJob(JobDescriptor *me, void *data, size_t *nmiss)
 {
   if (AsyncWorker_wait(me->job)) xabort("error executing job in worker thread");
   memcpy(data, me->args.data, me->args.gridsize*(me->args.memtype == MEMTYPE_FLOAT ? sizeof(float) : sizeof(double)));
