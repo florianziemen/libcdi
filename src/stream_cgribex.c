@@ -1297,7 +1297,8 @@ int cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize,
 {
   int status = 0;
 
-  cgribexrec_t *cgribexp = (cgribexrec_t *) cgribex;
+  bool lalloc = cgribex == NULL;
+  cgribexrec_t *cgribexp = (cgribexrec_t *) (lalloc ? cgribexNew() : cgribex);
 
   int *isec0 = cgribexp->sec0;
   int *isec1 = cgribexp->sec1;
@@ -1351,6 +1352,8 @@ int cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize,
               }
         }
     }
+
+  if (lalloc) cgribexDelete(cgribexp);
 
   return status;
 }

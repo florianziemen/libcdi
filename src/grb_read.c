@@ -135,6 +135,7 @@ DecodeArgs grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *
 
   if ( recsize == 0 ) Error("Internal problem! Recordsize is zero for record %d at timestep %d", recID+1, tsID+1);
 
+  void *cgribexp = (gribbuffer && streamptr->record->cgribexp) ? streamptr->record->cgribexp : NULL;
   if (!gribbuffer) gribbuffer = Malloc(streamptr->record->buffersize);
   if (!data) data = Malloc(gridsize*(memtype == MEMTYPE_FLOAT ? sizeof(float) : sizeof(double)));
 
@@ -157,7 +158,7 @@ DecodeArgs grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *
     .outZip = &streamptr->tsteps[tsID].records[recID].zip,
     .filetype = streamptr->filetype,
     .memtype = memtype,
-    .cgribexp = streamptr->record->cgribexp,
+    .cgribexp = cgribexp,
     .gribbuffer = gribbuffer,
     .recsize = recsize,
     .data = data,
