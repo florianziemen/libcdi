@@ -730,6 +730,7 @@ int main(int argc, char *argv[])
   char *wTable = NULL;
   int Move = 0;
   int Record = 0;
+  int Variable = 0;
   int Debug = 0;
   /* int Quiet  = 0; */
   int Vardis = 0;
@@ -750,7 +751,7 @@ int main(int argc, char *argv[])
   else               Progname++;
 
   // clang-format off
-  while ( (c = getopt(argc, argv, "b:f:i:o:t:w:z:cdhlMmnqRrsvVxZ")) != EOF )
+  while ( (c = getopt(argc, argv, "b:f:i:o:t:w:z:cdhlMmnqRrsvVxXZ")) != EOF )
     {
       switch (c)
 	{
@@ -767,6 +768,7 @@ int main(int argc, char *argv[])
 	case 'q': /* Quiet = 1; */  break;
 	case 'R': cdiDefGlobal("REGULARGRID", 1); break;
 	case 'r': Record = 1; break;
+	case 'X': Variable = 1; break;
 	case 's': Shortinfo = 1; break;
 	case 't': rTable = optarg;  break;
 	case 'v': Vardis = 1; break;
@@ -803,12 +805,12 @@ int main(int argc, char *argv[])
     {
       size_t nmiss;
       size_t datasize = 0;
+      size_t maxlev = 0;
       int streamID2 = CDI_UNDEFID;
       int filetype;
       int nrecs;
-      int levelID, levelsize;
+      int levelID;
       int nts = 0;
-      size_t gridsize = 0;
       int recID;
       int taxisID2 = CDI_UNDEFID;
       int vlistID2 = CDI_UNDEFID;
@@ -838,8 +840,11 @@ int main(int argc, char *argv[])
       for ( varID = 0; varID < nvars; varID++)
 	{
 	  const int gridID = vlistInqVarGrid(vlistID1, varID);
-	  gridsize = gridInqSize(gridID);
+	  const size_t gridsize = gridInqSize(gridID);
 	  if ( gridsize > datasize ) datasize = gridsize;
+	  const int zaxisID = vlistInqVarZaxis(vlistID1, varID);
+	  const size_t nlev = zaxisInqSize(zaxisID);
+	  if ( nlev > maxlev ) maxlev = nlev;
 	  if ( fname2 )
 	    {
 	      if ( DefaultDataType != CDI_UNDEFID )
@@ -876,11 +881,10 @@ int main(int argc, char *argv[])
 	}
 
       if ( vlistNumber(vlistID1) != CDI_REAL ) datasize *= 2;
+      if (Variable) datasize *= maxlev;
       double *data = (double *) malloc(datasize * sizeof (double));
 
-      /*
-	nts = cdiInqTimeSize(streamID1);
-      */
+      // nts = cdiInqTimeSize(streamID1);
       if ( Debug )
 	printf("nts = %d streamID1 = %d, streamID2 = %d\n", nts, streamID1, streamID2);
 
@@ -890,7 +894,6 @@ int main(int argc, char *argv[])
 	  printShortinfo(streamID1, vlistID1, Vardis);
 	}
 
-      size_t idum;
       int tsID = 0;
       if ( Info || fname2 || NoInfo )
       while ( (nrecs = streamInqTimestep(streamID1, tsID)) > 0 )
@@ -911,8 +914,7 @@ int main(int argc, char *argv[])
 	      for ( recID = 0; recID < nrecs; recID++ )
 		{
 		  streamInqRecord(streamID1, &varID, &levelID);
-		  streamReadRecord(streamID1, data, &idum);
-                  nmiss = idum;
+		  streamReadRecord(streamID1, data, &nmiss);
 
 		  const int number = vlistInqVarNumber(vlistID1, varID);
 		  const int gridID = vlistInqVarGrid(vlistID1, varID);
@@ -927,7 +929,7 @@ int main(int argc, char *argv[])
 		  printf("varID=%d, param=%d, gridID=%d, zaxisID=%d levelID=%d\n",
 			 varID, param, gridID, zaxisID, levelID);
 		  */
-		  gridsize = gridInqSize(gridID);
+		  const size_t gridsize = gridInqSize(gridID);
 		  const double level   = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
                   const double missval = vlistInqVarMissval(vlistID1, varID);
 
@@ -940,9 +942,45 @@ int main(int argc, char *argv[])
 		      if ( Move )
 			streamCopyRecord(streamID2, streamID1);
 		      else
-			streamWriteRecord(streamID2, data, idum);
+			streamWriteRecord(streamID2, data, nmiss);
 		    }
 	      	}
+	    }
+	  else if (Variable)
+	    {
+	      for ( varID = 0; varID < nvars; varID++ )
+		{
+		  if ( vlistInqVarTimetype(vlistID1, varID) == TIME_CONSTANT && tsID > 0 ) continue;
+
+		  const int number = vlistInqVarNumber(vlistID1, varID);
+		  const int gridID = vlistInqVarGrid(vlistID1, varID);
+		  const int zaxisID = vlistInqVarZaxis(vlistID1, varID);
+		  const int param = vlistInqVarParam(vlistID1, varID);
+
+		  cdiParamToString(param, paramstr, sizeof(paramstr));
+
+		  if ( Vardis ) vlistInqVarName(vlistID1, varID, varname);
+		  else          strcpy(varname, paramstr);
+
+		  if ( Debug )
+		    fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n",
+			    varID, param, gridID, zaxisID);
+
+		  const size_t gridsize = gridInqSize(gridID);
+		  const double missval = vlistInqVarMissval(vlistID1, varID);
+
+                  streamReadVar(streamID1, varID, data, &nmiss);
+
+		  const int nlevs = zaxisInqSize(zaxisID);
+		  for ( levelID = 0; levelID < nlevs; levelID++ )
+		    {
+                      const double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
+                      const size_t offset = levelID * gridsize;
+		      if (Info) printInfo(vdate, vtime, varname, level, gridsize, number, nmiss, missval, data + offset, Vardis);
+		    }
+
+                  if (fname2) streamWriteVar(streamID2, varID, data, nmiss);
+		}
 	    }
 	  else
 	    {
@@ -964,21 +1002,18 @@ int main(int argc, char *argv[])
 		    fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n",
 			    varID, param, gridID, zaxisID);
 
-		  gridsize = gridInqSize(gridID);
+		  const size_t gridsize = gridInqSize(gridID);
 		  const double missval = vlistInqVarMissval(vlistID1, varID);
 
-		  levelsize = zaxisInqSize(zaxisID);
-		  for ( levelID = 0; levelID < levelsize; levelID++ )
+		  const int nlevs = zaxisInqSize(zaxisID);
+		  for ( levelID = 0; levelID < nlevs; levelID++ )
 		    {
                       const double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
-		      streamReadVarSlice(streamID1, varID, levelID, data, &idum);
-                      nmiss = idum;
+		      streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
 
-		      if ( Info )
-			printInfo(vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
+		      if (Info) printInfo(vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
 
-		      if ( fname2 )
-			streamWriteVarSlice(streamID2, varID, levelID, data, nmiss);
+		      if (fname2) streamWriteVarSlice(streamID2, varID, levelID, data, nmiss);
 		    }
 		}
 	    }
@@ -999,8 +1034,7 @@ int main(int argc, char *argv[])
       streamClose(streamID1);
     }
 
-  if ( wTable )
-    tableWrite(wTable, itableID);
+  if (wTable) tableWrite(wTable, itableID);
 
   return 0;
 }
