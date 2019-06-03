@@ -269,16 +269,19 @@ void grb_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss
 }
 
 
+void grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *nmiss)
+{
+  const int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
+  const int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
+
+  grb_read_next_record(streamptr, recID, memtype, data, nmiss, true);
+}
+
+
 void grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nmiss)
 {
-  const int filetype = streamptr->filetype;
-
-  void *gribbuffer = streamptr->record->buffer;
-  void *cgribexp = streamptr->record->cgribexp;
-
   const int vlistID = streamptr->vlistID;
   const int fileID = streamptr->fileID;
-  const int tsID = streamptr->curTsID;
 
   const int gridID = vlistInqVarGrid(vlistID, varID);
   const size_t gridsize = gridInqSize(gridID);
@@ -291,16 +294,9 @@ void grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_
   if ( CDI_Debug ) Message("nlevs = %d gridID = %d gridsize = %zu", nlevs, gridID, gridsize);
 
   *nmiss = 0;
-  for (int levelID = 0; levelID < nlevs; levelID++ )
+  for (int levelID = 0; levelID < nlevs; levelID++)
     {
       const int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
-      const off_t recpos = streamptr->tsteps[tsID].records[recID].position;
-      size_t recsize = streamptr->tsteps[tsID].records[recID].size;
-
-      fileSetPos(fileID, recpos, SEEK_SET);
-      fileRead(fileID, gribbuffer, recsize);
-
-      streamptr->tsteps[tsID].records[recID].zip = grbUnzipRecord(gribbuffer, &recsize);
 
       void *datap = NULL;
       if ( memtype == MEMTYPE_FLOAT )
@@ -308,22 +304,12 @@ void grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_
       else
         datap = (double*)data + levelID*gridsize;
 
-      const double missval = vlistInqVarMissval(vlistID, varID);
       size_t imiss;
-      grbDecode(filetype, memtype, cgribexp, gribbuffer, recsize, datap, gridsize, streamptr->unreduced, &imiss, missval);
+      grb_read_next_record(streamptr, recID, memtype, datap, &imiss, false);
       *nmiss += imiss;
     }
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
-}
-
-
-void grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *nmiss)
-{
-  const int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
-  const int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
-
-  grb_read_next_record(streamptr, recID, memtype, data, nmiss, true);
 }
 
 #endif
