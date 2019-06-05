@@ -12,6 +12,7 @@
 #include "taxis.h"
 
 #include "pio_interface.h"
+#include "pio_comm.h"
 #include "pio_rpc.h"
 #include "pio_util.h"
 
@@ -54,12 +55,13 @@ computeClientStreamBufSize(int streamID, const struct collSpec *collector)
             = (size_t)(xt_idxlist_get_num_indices(partDesc[varID]));
           rmaSizeSpec.numDataRecords += 2;
           size_t elemSize = cdiPioElemSizeInference(varID, conversion);
-          rmaSizeSpec.bufSize += chunkSize * elemSize
+          size_t chunkBytes = chunkSize * elemSize
             /* re-align chunk to multiple of double size */
             + elemSize - 1
             /* one header for data record, one for corresponding part
              * descriptor*/
             + 2 * sizeof (struct winHeaderEntry);
+          rmaSizeSpec.bufSize += chunkBytes;
         }
     }
   else
@@ -92,11 +94,13 @@ computeClientStreamBufSize(int streamID, const struct collSpec *collector)
   // from one model process
   if (collector->sendRPCData)
     {
+      int taxisID = vlistInqTaxis(vlistID);
+      MPI_Comm comm = cdiPioInqInterComm();
       rmaSizeSpec.numRPCRecords = numRPCFuncs;
       rmaSizeSpec.bufSize +=
         numRPCFuncs * sizeof (struct winHeaderEntry)
         /* data part of streamDefTimestep */
-        + (2 * CDI_MAX_NAME + sizeof (taxis_t));
+        + (size_t)(reshResourceGetPackSize(taxisID, &taxisOps, &comm));
     }
   rmaSizeSpec.bufSize = roundUpToMultiple(rmaSizeSpec.bufSize, PIO_WIN_ALIGN);
   return rmaSizeSpec;
