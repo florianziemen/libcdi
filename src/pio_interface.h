@@ -27,6 +27,8 @@ void memcpyPackFunc(void *dataDesc, void *buf, int size, int *pos, void *context
 
 extern float cdiPIOpartInflate_;
 
+void cdiPioStreamWriteVarPart_(int streamID, int varID, int memtype, const void *data, int nmiss, Xt_idxlist partDesc);
+
 void cdiPioClientStreamWinInit(int streamID);
 void cdiPioClientStreamWinCreate(int streamID, struct collSpec *cspec);
 void cdiPioClientStreamWinDestroy(int streamID);

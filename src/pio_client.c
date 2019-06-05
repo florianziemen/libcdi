@@ -299,24 +299,21 @@ cdiPioStreamDefDecomposedVlist(int streamID, int vlistID, const Xt_idxlist partD
   cdiPioClientStreamWinCreate(streamID, &cspec);
 }
 
-/* If we're not using GNU C, elide __attribute__ */
-#if !defined __GNUC__ && !defined __attribute__
-#define __attribute__(x) /*NOTHING*/
-#endif
-
-static void cdiPioClientStreamWriteVar_(int streamID, int varID, int memtype, const void *data, size_t nmiss)
-    __attribute__((noreturn));
-
 static void
 cdiPioClientStreamWriteVar_(int streamID, int varID, int memtype, const void *data, size_t nmiss)
 {
-  (void) streamID;
-  (void) varID;
-  (void) memtype;
-  (void) data;
-  (void) nmiss;
-  xabort("parallel writing requires explicit partition information,"
-         " use streamWriteVarPart!");
+  struct partDescPreset clientDeco = cdiPioGetStreamPartDescPreset(streamID);
+  int vlistID = streamInqVlist(streamID);
+  size_t nVars = (size_t) (vlistNvars(vlistID));
+  if (varID < 0 || (size_t) varID > nVars) xabort("invalid variable ID %d for stream %d requested!", varID, streamID);
+  if (!clientDeco.uids)
+    xabort("parallel writing requires explicit partition information,"
+           " use either streamWriteVarPart or cdiPioStreamDefDecomposedVlist!");
+  if (clientDeco.conversion && memtype != clientDeco.conversion[varID])
+    xabort("data type does not match pre-declared conversion for stream %d,"
+           " variable ID %d!",
+           streamID, varID);
+  cdiPioStreamWriteVarPart_(streamID, varID, memtype, data, nmiss, clientDeco.lists[varID]);
 }
 
 static struct cdiPioIdxlistCache *clientIdxlistCache;
