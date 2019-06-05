@@ -324,7 +324,7 @@ buildVarXmap(struct Xt_offset_ext *restrict partExts,
       size_t charOfs = (size_t)((clientMem
                                  + ((wHECast)clientMem)[headerIdx].offset)
                                 - clientBuf[0].mem);
-      xassert(charOfs % PIO_WIN_ALIGN == 0
+      xassert(charOfs % elemSize == 0
               && charOfs / elemSize + partSize <= INT_MAX);
       int elemOfs = (int)(charOfs / elemSize);
       partExts[clientIdx].start = elemOfs;
@@ -869,7 +869,7 @@ buildVarRedist(int headerIdx, size_t streamIdx,
                                          + ((wHECast)clientMem)[headerIdx].offset)
                                         - clientBuf[0].mem);
               int partSize = partSizes[clientIdx+1];
-              xassert(charOfs % PIO_WIN_ALIGN == 0
+              xassert(charOfs % elemSize == 0
                       && charOfs / elemSize + (size_t)partSize <= INT_MAX);
               int elemOfs = (int)(charOfs / elemSize);
               partExts[clientIdx].start = elemOfs;
