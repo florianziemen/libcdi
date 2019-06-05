@@ -129,7 +129,7 @@ struct clientBufSize
 
 struct collSpec
 {
-  Xt_idxlist *partDesc;
+  const Xt_idxlist *partDesc;
   int *conversion;
   int numClients;
   int numServers;

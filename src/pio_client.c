@@ -335,7 +335,7 @@ void cdiPioStreamDefDecomposedVlist(int streamID, int vlistID,
   struct collSpec cspec = { .numClients = rup.numClients,
                             .numServers = rup.numColl,
                             .sendRPCData = rup.sendRPCData,
-                            .partDesc = (Xt_idxlist *)partDesc,
+                            .partDesc = partDesc,
                             .conversion = (int *)conversion};
   cdiPioClientStreamWinCreate(streamID, &cspec);
 }
