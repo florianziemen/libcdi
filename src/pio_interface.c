@@ -742,8 +742,8 @@ pioWriteTimestep(void)
   xdebug("%s", "RETURN. messages sent, windows posted");
 }
 
-static void
-streamWriteVarPart_(int streamID, int varID, int memtype, const void *data, int nmiss, Xt_idxlist partDesc)
+void
+cdiPioStreamWriteVarPart_(int streamID, int varID, int memtype, const void *data, int nmiss, Xt_idxlist partDesc)
 {
   if (CDI_Debug) Message("streamID = %d varID = %d", streamID, varID);
 
@@ -761,13 +761,13 @@ streamWriteVarPart_(int streamID, int varID, int memtype, const void *data, int 
 void
 streamWriteVarPart(int streamID, int varID, const double *data, int nmiss, Xt_idxlist partDesc)
 {
-  streamWriteVarPart_(streamID, varID, MEMTYPE_DOUBLE, data, nmiss, partDesc);
+  cdiPioStreamWriteVarPart_(streamID, varID, MEMTYPE_DOUBLE, data, nmiss, partDesc);
 }
 
 void
 streamWriteVarPartF(int streamID, int varID, const float *data, int nmiss, Xt_idxlist partDesc)
 {
-  streamWriteVarPart_(streamID, varID, MEMTYPE_FLOAT, data, nmiss, partDesc);
+  cdiPioStreamWriteVarPart_(streamID, varID, MEMTYPE_FLOAT, data, nmiss, partDesc);
 }
 
 static void
