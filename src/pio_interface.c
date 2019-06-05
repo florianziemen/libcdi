@@ -224,8 +224,8 @@ modelWinEnqueue(size_t streamIdx, struct winHeaderEntry header, const void *data
     targetEntry = txWin[streamIdx].dictSize - ++(txWin[streamIdx].dictRPCUsed);
   if (header.id > 0)
     {
-      int offset = header.offset
-          = (int) roundUpToMultiple((size_t) (txWin[streamIdx].head - txWin[streamIdx].buffer), PIO_WIN_ALIGN);
+      size_t alignTo = header.id == DATA_HEADER_DOUBLE ? sizeof(double) : sizeof(float);
+      int offset = header.offset = (int) roundUpToMultiple((size_t) (txWin[streamIdx].head - txWin[streamIdx].buffer), alignTo);
       MPI_Comm comm = cdiPioInqInterComm();
       packFunc((void *) data, txWin[streamIdx].buffer, (int) txWin[streamIdx].size, &offset, &comm);
       txWin[streamIdx].head = txWin[streamIdx].buffer + offset;

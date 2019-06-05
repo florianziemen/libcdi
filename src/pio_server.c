@@ -294,7 +294,7 @@ buildVarXmap(struct Xt_offset_ext *restrict partExts, const struct clientBuf *re
         }
       unsigned partSize = (unsigned) xt_idxlist_get_num_indices(part[clientIdx]);
       size_t charOfs = (size_t) ((clientMem + ((wHECast) clientMem)[headerIdx].offset) - clientBuf[0].mem);
-      xassert(charOfs % PIO_WIN_ALIGN == 0 && charOfs / elemSize + partSize <= INT_MAX);
+      xassert(charOfs % elemSize == 0 && charOfs / elemSize + partSize <= INT_MAX);
       int elemOfs = (int) (charOfs / elemSize);
       partExts[clientIdx].start = elemOfs;
       partExts[clientIdx].size = (int) partSize;
@@ -742,7 +742,7 @@ buildVarRedist(int headerIdx, size_t streamIdx,
               xassert(dataHeader->varID == varID && ((wHECast) clientMem)[headerIdx].id == conversion);
               size_t charOfs = (size_t) ((clientMem + ((wHECast) clientMem)[headerIdx].offset) - clientBuf[0].mem);
               int partSize = partSizes[clientIdx + 1];
-              xassert(charOfs % PIO_WIN_ALIGN == 0 && charOfs / elemSize + (size_t) partSize <= INT_MAX);
+              xassert(charOfs % elemSize == 0 && charOfs / elemSize + (size_t) partSize <= INT_MAX);
               int elemOfs = (int) (charOfs / elemSize);
               partExts[clientIdx].start = elemOfs;
               partExts[clientIdx].size = partSize;
