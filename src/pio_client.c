@@ -294,7 +294,7 @@ cdiPioStreamDefDecomposedVlist(int streamID, int vlistID, const Xt_idxlist partD
   struct collSpec cspec = { .numClients = rup.numClients,
                             .numServers = rup.numColl,
                             .sendRPCData = rup.sendRPCData,
-                            .partDesc = (Xt_idxlist *) partDesc,
+                            .partDesc = partDesc,
                             .conversion = (int *) conversion };
   cdiPioClientStreamWinCreate(streamID, &cspec);
 }
