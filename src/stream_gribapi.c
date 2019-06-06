@@ -464,6 +464,11 @@ void gribapiGetKeys(grib_handle *gh, int varID)
   long backgroundProcess = 0;
   if ( grib_get_long(gh, "backgroundProcess", &backgroundProcess) == 0 )
     varDefKeyInt(varID, CDI_KEY_BACKGROUNDPROCESS, (int) backgroundProcess);
+  /*
+  long constituentType = 0;
+  if ( grib_get_long(gh, "constituentType", &constituentType) == 0 )
+    varDefKeyInt(varID, CDI_KEY_CONSTITUENTTYPE, (int) constituentType);
+  */
 
   /*
     Get the ensemble Info from the grib-2 Tables and update the intermediate datastructure.
@@ -3023,6 +3028,11 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
           int typeOfProcessedData = 0;
           status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFPROCESSEDDATA, &typeOfProcessedData);
           if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "typeOfProcessedData", (long)typeOfProcessedData), 0);
+          /*
+          int constituentType = 0;
+          status = cdiInqKeyInt(vlistID, varID, CDI_KEY_CONSTITUENTTYPE, &constituentType);
+          if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "constituentType", (long)constituentType), 0);
+          */
         }
     }
 
