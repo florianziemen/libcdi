@@ -199,9 +199,11 @@ void grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *dat
 {
   bool jobFound = false;
 
-  const int workerCount = streamptr->numWorker;
+  int workerCount = streamptr->numWorker;
   if (workerCount > 0)
     {
+      if (workerCount > streamptr->tsteps[0].nrecs) workerCount = streamptr->tsteps[0].nrecs;
+
       AsyncManager *jobManager = (AsyncManager *) streamptr->jobManager;
       JobDescriptor *jobs = (JobDescriptor *) streamptr->jobs;
 
