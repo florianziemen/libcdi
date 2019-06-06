@@ -217,10 +217,10 @@ typedef struct  {
 #define  TSTEP_SD                 8  // Standard deviation
 #define  TSTEP_COV                9  // Covariance
 #define  TSTEP_RATIO             10  // Ratio
-#define  TSTEP_RANGE             11
-#define  TSTEP_INSTANT2          12
-#define  TSTEP_INSTANT3          13
-#define  TSTEP_SUM               14  // Summation
+#define  TSTEP_SUM               11  // Summation
+#define  TSTEP_RANGE             12
+#define  TSTEP_INSTANT2          13
+#define  TSTEP_INSTANT3          14
 
 // TAXIS types
 
