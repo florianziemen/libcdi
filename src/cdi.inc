@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   May 2019
+! Uwe Schulzweida, MPI-MET, Hamburg,   June 2019
 !
 
       INTEGER    CDI_MAX_NAME
@@ -339,14 +339,14 @@
       PARAMETER (TSTEP_COV              =  9)
       INTEGER    TSTEP_RATIO
       PARAMETER (TSTEP_RATIO            = 10)
-      INTEGER    TSTEP_RANGE
-      PARAMETER (TSTEP_RANGE            = 11)
-      INTEGER    TSTEP_INSTANT2
-      PARAMETER (TSTEP_INSTANT2         = 12)
-      INTEGER    TSTEP_INSTANT3
-      PARAMETER (TSTEP_INSTANT3         = 13)
       INTEGER    TSTEP_SUM
-      PARAMETER (TSTEP_SUM              = 14)
+      PARAMETER (TSTEP_SUM              = 11)
+      INTEGER    TSTEP_RANGE
+      PARAMETER (TSTEP_RANGE            = 12)
+      INTEGER    TSTEP_INSTANT2
+      PARAMETER (TSTEP_INSTANT2         = 13)
+      INTEGER    TSTEP_INSTANT3
+      PARAMETER (TSTEP_INSTANT3         = 14)
       INTEGER    TAXIS_ABSOLUTE
       PARAMETER (TAXIS_ABSOLUTE         =  1)
       INTEGER    TAXIS_RELATIVE
@@ -538,6 +538,11 @@
 !                     streamSync
 !                                    (INTEGER         streamID)
       EXTERNAL        streamSync
+
+!                     streamDefNumWorker
+!                                    (INTEGER         streamID,
+!                                     INTEGER         numWorker)
+      EXTERNAL        streamDefNumWorker
 
 !                     streamDefVlist
 !                                    (INTEGER         streamID,
@@ -1546,6 +1551,8 @@
       PARAMETER (CDI_KEY_SECTION2PADDING = 820)
       INTEGER    CDI_KEY_UVRELATIVETOGRID
       PARAMETER (CDI_KEY_UVRELATIVETOGRID = 821)
+      INTEGER    CDI_KEY_CONSTITUENTTYPE
+      PARAMETER (CDI_KEY_CONSTITUENTTYPE = 822)
       INTEGER         cdiDefKeyInt
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,

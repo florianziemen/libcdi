@@ -143,6 +143,7 @@ FCALLSCFUN2 (INT, streamOpenWrite, STREAMOPENWRITE, streamopenwrite, STRING, INT
 FCALLSCFUN1 (INT, streamOpenAppend, STREAMOPENAPPEND, streamopenappend, STRING)
 FCALLSCSUB1 (streamClose, STREAMCLOSE, streamclose, INT)
 FCALLSCSUB1 (streamSync, STREAMSYNC, streamsync, INT)
+FCALLSCSUB2 (streamDefNumWorker, STREAMDEFNUMWORKER, streamdefnumworker, INT, INT)
 FCALLSCSUB2 (streamDefVlist, STREAMDEFVLIST, streamdefvlist, INT, INT)
 FCALLSCFUN1 (INT, streamInqVlist, STREAMINQVLIST, streaminqvlist, INT)
 FCALLSCFUN1 (INT, streamInqFiletype, STREAMINQFILETYPE, streaminqfiletype, INT)
