@@ -170,10 +170,10 @@ module mo_cdi
   integer(c_int), public, parameter :: TSTEP_SD = 8
   integer(c_int), public, parameter :: TSTEP_COV = 9
   integer(c_int), public, parameter :: TSTEP_RATIO = 10
-  integer(c_int), public, parameter :: TSTEP_RANGE = 11
-  integer(c_int), public, parameter :: TSTEP_INSTANT2 = 12
-  integer(c_int), public, parameter :: TSTEP_INSTANT3 = 13
-  integer(c_int), public, parameter :: TSTEP_SUM = 14
+  integer(c_int), public, parameter :: TSTEP_SUM = 11
+  integer(c_int), public, parameter :: TSTEP_RANGE = 12
+  integer(c_int), public, parameter :: TSTEP_INSTANT2 = 13
+  integer(c_int), public, parameter :: TSTEP_INSTANT3 = 14
   integer(c_int), public, parameter :: TAXIS_ABSOLUTE = 1
   integer(c_int), public, parameter :: TAXIS_RELATIVE = 2
   integer(c_int), public, parameter :: TAXIS_FORECAST = 3
@@ -240,6 +240,7 @@ module mo_cdi
   public :: streamOpenAppend
   public :: streamClose
   public :: streamSync
+  public :: streamDefNumWorker
   public :: streamDefVlist
   public :: streamInqVlist
   public :: streamInqFiletype
@@ -476,6 +477,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_SECTION2PADDINGLENGTH = 819
   integer(c_int), public, parameter :: CDI_KEY_SECTION2PADDING = 820
   integer(c_int), public, parameter :: CDI_KEY_UVRELATIVETOGRID = 821
+  integer(c_int), public, parameter :: CDI_KEY_CONSTITUENTTYPE = 822
   public :: cdiDefKeyInt
   public :: cdiInqKeyInt
   public :: cdiDefKeyBytes
@@ -806,6 +808,13 @@ module mo_cdi
       import c_int
       integer(c_int), value :: streamID_dummy
     end subroutine streamSync
+
+    subroutine streamDefNumWorker(streamID_dummy, numWorker_dummy) bind(c, name&
+    & = 'streamDefNumWorker')
+      import c_int
+      integer(c_int), value :: streamID_dummy
+      integer(c_int), value :: numWorker_dummy
+    end subroutine streamDefNumWorker
 
     subroutine streamDefVlist(streamID_dummy, vlistID_dummy) bind(c, name =&
     & 'streamDefVlist')
