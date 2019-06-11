@@ -30025,7 +30025,7 @@ else
       cat > conftest.$ac_ext <<_ACEOF
       module cnftst
       implicit none
-      integer :: i
+      integer,public :: i
       end module cnftst
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
