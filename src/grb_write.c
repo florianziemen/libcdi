@@ -95,19 +95,19 @@ size_t grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
 
 void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 {
-  int filetype = streamptr1->filetype;
-  int fileID1 = streamptr1->fileID;
-  int fileID2 = streamptr2->fileID;
-  int tsID    = streamptr1->curTsID;
-  int vrecID  = streamptr1->tsteps[tsID].curRecID;
-  int recID   = streamptr1->tsteps[tsID].recIDs[vrecID];
-  off_t recpos  = streamptr1->tsteps[tsID].records[recID].position;
-  size_t recsize = streamptr1->tsteps[tsID].records[recID].size;
+  const int filetype = streamptr1->filetype;
+  const int fileID1 = streamptr1->fileID;
+  const int fileID2 = streamptr2->fileID;
+  const int tsID    = streamptr1->curTsID;
+  const int vrecID  = streamptr1->tsteps[tsID].curRecID;
+  const int recID   = streamptr1->tsteps[tsID].recIDs[vrecID];
+  const off_t recpos  = streamptr1->tsteps[tsID].records[recID].position;
+  const size_t recsize = streamptr1->tsteps[tsID].records[recID].size;
 
   fileSetPos(fileID1, recpos, SEEK_SET);
 
-  /* round up recsize to next multiple of 8 */
-  size_t gribbuffersize = ((recsize + 7U) & ~7U);
+  // round up recsize to next multiple of 8
+  const size_t gribbuffersize = ((recsize + 7U) & ~7U);
 
   unsigned char *gribbuffer = (unsigned char *) Malloc(gribbuffersize);
 
@@ -147,71 +147,50 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
     }
 #endif
 
+#ifdef HAVE_LIBGRIB_API
 #ifdef HIRLAM_EXTENSIONS
   // Even if you are stream-copy records you might need to change a bit of grib-header !
 
   if ( cdiGribDataScanningMode.active )
     // allowed modes: <0, 64, 96>; Default is 64
     // This will overrule the old scanning mode of the given grid
-  {
-    grib_handle *gh = NULL;
-    gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
-
-    int scanModeIN = gribapiGetScanningMode(gh);
-
-    grib_handle_delete(gh);
-
-    if (cdiDebugExt>=20) Message("Change GribDataScanningMode => %d (scanModeIN = %d)", cdiGribDataScanningMode.value, scanModeIN);
-
-    if (scanModeIN != cdiGribDataScanningMode.value)
     {
-        //int zip;
-        size_t nmiss = 0;
+      grib_handle *gh = NULL;
+      gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
 
-        int vlistID = streamptr1->vlistID;
-        int varID   = streamptr1->tsteps[tsID].records[recID].varID;
-        int levelID = streamptr1->tsteps[tsID].records[recID].levelID;
-        //gribbuffer = (unsigned char *) streamptr->record->buffer;
-        // allocate above ..
-        int gridID   = vlistInqVarGrid(vlistID, varID);
+      const int scanModeIN = gribapiGetScanningMode(gh);
 
-        size_t gridsize = vlistGridsizeMax(vlistID);
-        if ( vlistNumber(vlistID) != CDI_REAL ) gridsize *= 2;
-        double *data = (double *) malloc(gridsize*sizeof(double));
-        //int missval = vlistInqVarMissval(vlistID, varID);
+      grib_handle_delete(gh);
 
-        //streamptr->numvals += gridsize;
+      if (cdiDebugExt>=20) Message("Change GribDataScanningMode => %d (scanModeIN = %d)", cdiGribDataScanningMode.value, scanModeIN);
 
-        // memtype: MEMTYPE_FLOAT or MEMTYPE_DOUBLE
-        //int statusDC = grbDecode(filetype, MEMTYPE_DOUBLE, gribbuffer, recsize, data, gridsize, streamptr1->unreduced, &nmiss, missval, vlistID, varID);
-        //int grbDecode(int filetype, int memtype, void *gribbuffer, int gribsize, void *data, size_t datasize,
-        //              int unreduced, size_t *nmiss, double missval, int vlistID, int varID);
+      if (scanModeIN != cdiGribDataScanningMode.value)
+        {
+          size_t nmiss = 0;
 
-        //streamptr1->tsteps[tsID].records[recID].zip = zip;
-        //gribapiSetScanningMode(gh, cdoGribDataScanningMode);  // T.B.D. this will be done by grbDecode..
+          const int vlistID = streamptr1->vlistID;
+          const int varID   = streamptr1->tsteps[tsID].records[recID].varID;
+          const int levelID = streamptr1->tsteps[tsID].records[recID].levelID;
+          const int gridID  = vlistInqVarGrid(vlistID, varID);
 
-        //varID   = streamptr1->record->varID;
-        //levelID = streamptr1->record->levelID;
+          size_t gridsize = gridInqSize(gridID);
+          if ( vlistNumber(vlistID) != CDI_REAL ) gridsize *= 2;
+          double *data = (double *) malloc(gridsize*sizeof(double));
 
-        if (cdiDebugExt>=20) Message(" processing varID %d; levelID %d",varID,levelID);
+          if (cdiDebugExt>=20) Message(" processing varID %d; levelID %d",varID,levelID);
 
-        grb_write_var_slice(streamptr2, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
-        //grb_write_var_slice(streamptr, varID, levelID, memtype, ((double*)data)+levelID*gridsize, nmiss);
+          grb_write_var_slice(streamptr2, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
 
-        //grb_write_var(streamptr2, varID, MEMTYPE_DOUBLE, data, nmiss);
-        //grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t nmiss)
-        //grb_write_var_slice(streamptr2, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
-
-        free(data);
-        free(gribbuffer);
+          free(data);
+        }
     }
-  }
 #endif // HIRLAM_EXTENSIONS
+#endif
 
   if ( filetype == CDI_FILETYPE_GRB )
     {
       size_t unzipsize;
-      int izip = gribGetZip(recsize, gribbuffer, &unzipsize);
+      const int izip = gribGetZip(recsize, gribbuffer, &unzipsize);
 
       if ( izip == 0 && (streamptr2->comptype == CDI_COMPRESS_SZIP || streamptr2->comptype == CDI_COMPRESS_AEC) )
           nbytes = grbSzip(filetype, gribbuffer, nbytes);
@@ -219,7 +198,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 
   while ( nbytes & 7 ) gribbuffer[nbytes++] = 0;
 
-  size_t nwrite = fileWrite(fileID2, gribbuffer, nbytes);
+  const size_t nwrite = fileWrite(fileID2, gribbuffer, nbytes);
   if ( nwrite != nbytes )
     {
       perror(__func__);
@@ -286,8 +265,8 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   size_t (*myFileWrite)(int fileID, const void *restrict buffer, size_t len, int tsID)
     = (size_t (*)(int, const void *restrict, size_t, int))
     namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
-  size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes, tsID);
 
+  const size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes, tsID);
   if ( nwrite != nbytes )
     {
       perror(__func__);

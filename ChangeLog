@@ -1,3 +1,7 @@
+2019-06-12  Uwe Schulzweida
+
+	* grbCopyRecord: fix compile error with HIRLAM_EXTENSIONS
+
 2019-06-07  Uwe Schulzweida
 
         * using CGRIBEX library version 1.9.3
