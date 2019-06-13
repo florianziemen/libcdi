@@ -7,7 +7,7 @@
 AC_PREREQ([2.69])
 LT_PREREQ([2.4.6])
 
-AC_INIT([cdi], [1.9.7], [http://mpimet.mpg.de/cdi])
+AC_INIT([cdi], [1.9.7.1], [http://mpimet.mpg.de/cdi])
 
 AC_DEFINE_UNQUOTED(CDI, ["$PACKAGE_VERSION"], [CDI version])
 

@@ -1,3 +1,7 @@
+2019-06-13  Uwe Schulzweida
+
+	* Version 1.9.7.1 released
+
 2019-06-12  Uwe Schulzweida
 
 	* grbCopyRecord: fix compile error with HIRLAM_EXTENSIONS
