@@ -7859,17 +7859,16 @@ func_mode_link ()
 	# Read the .la file
 	func_source "$lib"
 
-	# Change -pthread to -Wl,-pthread for nagfor
-        if test -n "$inherited_linker_flags"; then
-          func_cc_basename "$CC"
-          case $func_cc_basename_result in
-            nagfor*) inherited_linker_flags=`$ECHO "$inherited_linker_flags" | $SED 's/ -pthread/ -Wl,-pthread/g'` ;;
-          esac
-        fi
-
 	# Convert "-framework foo" to "foo.ltframework"
 	if test -n "$inherited_linker_flags"; then
 	  tmp_inherited_linker_flags=`$ECHO "$inherited_linker_flags" | $SED 's/-framework \([^ $]*\)/\1.ltframework/g'`
+
+	  # Additionally convert " -pthread" to " -Wl,-pthread" for nagfor
+	  func_cc_basename $CC
+	  case $func_cc_basename_result in
+	    nagfor*) tmp_inherited_linker_flags=`$ECHO "$tmp_inherited_linker_flags" | $SED 's/ -pthread/ -Wl,-pthread/g'` ;;
+	  esac
+
 	  for tmp_inherited_linker_flag in $tmp_inherited_linker_flags; do
 	    case " $new_inherited_linker_flags " in
 	      *" $tmp_inherited_linker_flag "*) ;;
@@ -8889,7 +8888,8 @@ func_mode_link ()
 	  xlcverstring="$wl-compatibility_version $wl$minor_current $wl-current_version $wl$minor_current.$revision"
 	  verstring="-compatibility_version $minor_current -current_version $minor_current.$revision"
           # On Darwin other compilers
-          case $CC in
+          func_cc_basename $CC
+          case $func_cc_basename_result in
               nagfor*)
                   verstring="$wl-compatibility_version $wl$minor_current $wl-current_version $wl$minor_current.$revision"
                   ;;
@@ -9500,6 +9500,22 @@ EOF
 	  deplibs=`$ECHO " $deplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
 	  ;;
       esac
+
+      # Time to revert the changes made for nagfor. This might be required if
+      # we need to make the output '*.la' file to be correctly interpreted for
+      # gcc (e.g. the output library that we are linking now with nagfor needs
+      # to be linked by gcc later). In this case, the libtool script of a
+      # package that will try to link our library will have to make similar
+      # non-standard nagfor-specific modifications of the '-pthread' flag.
+      # Thus, if we are creating a Fortran library for nagfor only, it is
+      # better not to revert the changes, otherwise, uncomment the following
+      # lines.
+
+      # func_cc_basename $CC
+      # case $func_cc_basename_result in
+      #   nagfor*)
+      #     new_inherited_linker_flags=`$ECHO " $new_inherited_linker_flags" | $SED 's% -Wl,-pthread% -pthread%g'` ;;
+      # esac
 
       # move library search paths that coincide with paths to not yet
       # installed libraries to the beginning of the library search list

@@ -118,6 +118,12 @@ func_cc_basename ()
       esac
     done
     func_cc_basename_result=`$ECHO "$cc_temp" | $SED "s%.*/%%; s%^$host_alias-%%"`
+
+    # Set result to 'nagfor-wrapper' when NAG compiler is called via a wrapper (e.g. mpif90).
+    case $func_cc_basename_result in
+      nagfor*) ;;
+      *) $cc_temp -V 2>&1 | $GREP '^NAG Fortran Compiler Release' >/dev/null 2>&1 && func_cc_basename_result='nagfor-wrapper' ;;
+    esac
 }
 ])# _LT_PREPARE_CC_BASENAME
 
