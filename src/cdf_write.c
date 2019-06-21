@@ -384,7 +384,8 @@ void cdfAppendCoordinates(int fileID, int ncvarid, char coordinates[CDI_MAX_NAME
 }
 
 static
-void cdfDefineCoordinates(const stream_t *streamptr, int ncvarid, int nczvarID, int gridtype, int gridID, int gridindex, int xid, int yid, size_t gridsize, char axis[5], size_t iax)
+void cdfDefineCoordinates(const stream_t *streamptr, int ncvarid, int nczvarID, int gridtype, int gridID, int gridindex,
+                          int xid, int yid, size_t gridsize, char axis[5], size_t iax)
 {
   const int fileID  = streamptr->fileID;
 
@@ -405,7 +406,7 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarid, int nczvarID, 
 
   if ( gridtype == GRID_TRAJECTORY )
     {
-      cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "tlon tlat" );
+      cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "tlon tlat");
     }
   else if ( gridtype == GRID_LONLAT && xid == CDI_UNDEFID && yid == CDI_UNDEFID && gridsize == 1 )
     {
