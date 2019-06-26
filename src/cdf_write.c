@@ -547,7 +547,7 @@ int cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yi
   if ( CDI_Debug )
     fprintf(stderr, "lchunk %d chunktype %d  chunks %zu %zu %zu %zu\n", lchunk, chunktype, chunks[0], chunks[1], chunks[2], chunks[3]);
 
-  iax = *piax;
+  *piax = iax;
   return ndims;
 }
 
