@@ -47,8 +47,8 @@ test_byteswap_SOURCES = test_byteswap.c
 #
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 if USE_MPI
-pio_write_LDADD = ../src/libcdipio.la $(MPI_C_LIB)
-pio_write_deco2d_LDADD = ../src/libcdipio.la $(MPI_C_LIB)
+pio_write_LDADD = ../src/libcdipio.la $(LIBRT) $(MPI_C_LIB)
+pio_write_deco2d_LDADD = ../src/libcdipio.la $(LIBRT) $(MPI_C_LIB)
 TESTS +=  test_resource_copy_mpi_run
 check_PROGRAMS += test_resource_copy_mpi
 test_resource_copy_mpi_LDADD = ../src/libcdipio.la 
