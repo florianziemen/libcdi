@@ -89,9 +89,12 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = $(am__EXEEXT_1)
-noinst_PROGRAMS = $(am__EXEEXT_2) createtable$(EXEEXT)
-@ENABLE_CDI_LIB_TRUE@am__append_1 = cdi
-@ENABLE_CDI_LIB_FALSE@am__append_2 = cdi
+noinst_PROGRAMS = $(am__EXEEXT_3) $(am__EXEEXT_4)
+check_PROGRAMS = $(am__EXEEXT_2)
+@ENABLE_CDI_APP_TRUE@@ENABLE_CDI_LIB_TRUE@am__append_1 = cdi
+@ENABLE_CDI_APP_TRUE@@ENABLE_CDI_LIB_FALSE@am__append_2 = cdi
+@ENABLE_CDI_APP_TRUE@am__append_3 = createtable
+@ENABLE_CDI_APP_FALSE@am__append_4 = cdi
 subdir = app
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps =  \
@@ -129,9 +132,12 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-@ENABLE_CDI_LIB_TRUE@am__EXEEXT_1 = cdi$(EXEEXT)
+@ENABLE_CDI_APP_TRUE@@ENABLE_CDI_LIB_TRUE@am__EXEEXT_1 = cdi$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
-@ENABLE_CDI_LIB_FALSE@am__EXEEXT_2 = cdi$(EXEEXT)
+@ENABLE_CDI_APP_FALSE@am__EXEEXT_2 = cdi$(EXEEXT)
+@ENABLE_CDI_APP_TRUE@@ENABLE_CDI_LIB_FALSE@am__EXEEXT_3 =  \
+@ENABLE_CDI_APP_TRUE@@ENABLE_CDI_LIB_FALSE@	cdi$(EXEEXT)
+@ENABLE_CDI_APP_TRUE@am__EXEEXT_4 = createtable$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_cdi_OBJECTS = cdi.$(OBJEXT)
 cdi_OBJECTS = $(am_cdi_OBJECTS)
@@ -281,6 +287,7 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
+LIBRT = @LIBRT@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
@@ -399,6 +406,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 #
+#
 cdi_SOURCES = cdi.c printinfo.h
 cdi_LDADD = $(top_builddir)/src/libcdi.la @LIBS@
 @ENABLE_ALL_STATIC_TRUE@cdi_LDFLAGS = -all-static
@@ -486,6 +494,15 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	@list='$(bin_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
+
+clean-checkPROGRAMS:
+	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
 	rm -f $$list || exit $$?; \
 	test -n "$(EXEEXT)" || exit 0; \
@@ -638,6 +655,7 @@ distdir-am: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 check: check-am
 all-am: Makefile $(PROGRAMS)
 installdirs:
@@ -677,8 +695,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool clean-local \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-local clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/cdi.Po
@@ -748,19 +766,19 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS
 
-.MAKE: install-am install-strip
+.MAKE: check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
-	clean-binPROGRAMS clean-generic clean-libtool clean-local \
-	clean-noinstPROGRAMS cscopelist-am ctags ctags-am distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-binPROGRAMS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-local clean-noinstPROGRAMS cscopelist-am \
+	ctags ctags-am distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS

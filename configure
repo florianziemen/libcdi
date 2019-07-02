@@ -672,6 +672,7 @@ ENABLE_F2003_ISOC
 CREATE_ISOC_FALSE
 CREATE_ISOC_TRUE
 RUBY
+LIBRT
 ENABLE_MPI
 USE_MPI
 HAVE_PARALLEL_NC4_FALSE
@@ -28907,13 +28908,18 @@ done
 
 #  ----------------------------------------------------------------------
 # Compile with MPI support
+# Check whether --enable-mpi was given.
+if test "${enable_mpi+set}" = set; then :
+  enableval=$enable_mpi;
+else
+  enable_mpi=no
+fi
+
 # Sed expression to map a string onto a valid argument string part.
 asx_tr_arg="eval sed 'y%*+%pp%;s%[^-$as_cr_alnum]%-%g'"
 
-# Check whether --enable-mpi was given.
-if test "${enable_mpi+set}" = set; then :
-  enableval=$enable_mpi; enable_mpi=yes
-     ac_ext=c
+if test "x$enable_mpi" = xyes; then :
+  ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -29023,7 +29029,7 @@ else
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "Required header mpi.h not found or not compilable.
 See \`config.log' for more details" "$LINENO" 5; }
-        enable_MPI=no
+      enable_MPI=no
 fi
 
 
@@ -29111,7 +29117,7 @@ else
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "Cannot link C MPI programs.
 See \`config.log' for more details" "$LINENO" 5; }
-        enable_MPI=no
+      enable_MPI=no
 fi
 
          acx_temp=$acx_cv_option_search_MPI_Waitall_c
@@ -29132,7 +29138,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="./libtool --mode=link --tag=CC $ac_link"
 
-     if test -n "$FC" && test "X$FC" != "Xno"; then :
+   if test -n "$FC" && test "X$FC" != "Xno"; then :
   ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
@@ -29243,7 +29249,7 @@ else
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "Required include mpif.h not found or not compilable.
 See \`config.log' for more details" "$LINENO" 5; }
-           enable_MPI=no
+         enable_MPI=no
 fi
 
 
@@ -29382,7 +29388,7 @@ else
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "Cannot link Fortran MPI programs.
 See \`config.log' for more details" "$LINENO" 5; }
-           enable_MPI=no
+         enable_MPI=no
 fi
 
          acx_temp=$acx_cv_option_search_mpi_waitall_fc
@@ -29404,10 +29410,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="./libtool --mode=link --tag=CC $ac_link"
 
 fi
-else
-  enable_mpi=no
 fi
-
 if test x"${enable_mpi}" = x"yes"; then :
   USE_MPI=yes
 fi
@@ -29878,6 +29881,68 @@ fi
 
 ENABLE_MPI=`test x"$enable_mpi" = xyes && echo true || echo false`
 
+
+if test -z "$USE_MPI_TRUE"; then :
+  LIBRT=
+   LIBS_save=$LIBS
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing aio_suspend" >&5
+$as_echo_n "checking for library containing aio_suspend... " >&6; }
+if ${ac_cv_search_aio_suspend+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char aio_suspend ();
+int
+main ()
+{
+return aio_suspend ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' rt; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_aio_suspend=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_aio_suspend+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_aio_suspend+:} false; then :
+
+else
+  ac_cv_search_aio_suspend=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_aio_suspend" >&5
+$as_echo "$ac_cv_search_aio_suspend" >&6; }
+ac_res=$ac_cv_search_aio_suspend
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+  test "$ac_res" = "none required" || LIBRT=$ac_res
+fi
+
+   LIBS=$LIBS_save
+fi
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
 #
