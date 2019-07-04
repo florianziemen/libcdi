@@ -37,6 +37,7 @@
 /tests/test_cksum_service
 /tests/test_f2003
 /tests/test_resource_copy_mpi_run
+/tests/*.log
 /util/serialrun
 Makefile
 

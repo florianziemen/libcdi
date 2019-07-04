@@ -63,7 +63,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 #
 EXTRA_DIST = test_cdf_write.c test_cdf_read.c
 #
-CLEANFILES  = `ls *~ *.grb *.nc *.nc4 *.srv *.ext example_*.cksum`
+CLEANFILES  = `ls *~ *.grb *.nc *.nc4 *.srv *.ext example_*.cksum *.log`
 #
 AUTOMAKE_OPTIONS = color-tests
 #
