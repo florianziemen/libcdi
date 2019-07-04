@@ -31,6 +31,7 @@ Makefile.in
 /src/pkgconfig/cdipio.pc
 /src/stamp-h1
 /tables/gen_tableheaderfile
+/tests/*.log
 /tests/pio_cksum_asynch
 /tests/pio_cksum_cdf
 /tests/pio_cksum_fpguard
