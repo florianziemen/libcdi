@@ -368,7 +368,7 @@ paramNewEntry(int param)
 static
 int varInsertTileSubtype(vartable_t *vptr, const var_tile_t *tiles)
 {
-  if ( tiles == NULL ) return -1;
+  if ( tiles == NULL ) return 0;
 
   // first, generate a subtype based on the info in "tiles".
   subtype_t *subtype_ptr;
