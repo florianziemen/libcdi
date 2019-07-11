@@ -40,7 +40,7 @@ static const resOps instituteOps = {
 };
 
 static
-void instituteDefaultValue ( institute_t * instituteptr )
+void instituteDefaultValue(institute_t *instituteptr)
 {
   instituteptr->self       = CDI_UNDEFID;
   instituteptr->used       = 0;
@@ -50,7 +50,7 @@ void instituteDefaultValue ( institute_t * instituteptr )
   instituteptr->longname   = NULL;
 }
 
-void instituteDefaultEntries ( void )
+void instituteDefaultEntries(void)
 {
   cdiResH resH[]
     = { institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts"),
@@ -66,21 +66,20 @@ void instituteDefaultEntries ( void )
         institutDef( 74,   0, "METOFFICE", "U.K. Met Office"),
         institutDef( 97,   0, "ESA",       "European Space Agency"),
         institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute"),
+        institutDef( 80,   0, "CNMC",      "Reparto per la Meteorologia, Rome (REMET)"),
+        // institutDef(  0,   0, "IPSL", "IPSL (Institut Pierre Simon Laplace, Paris, France)");
   };
-  /*     (void) institutDef(  0,   0, "IPSL", "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
 
-  size_t n = sizeof(resH)/sizeof(*resH);
-
+  const size_t n = sizeof(resH)/sizeof(*resH);
   for (size_t i = 0; i < n ; i++ )
     reshSetStatus(resH[i], &instituteOps, RESH_IN_USE);
 }
 
 
 static int
-instituteCompareKernel(institute_t *  ip1, institute_t * ip2)
+instituteCompareKernel(institute_t *ip1, institute_t *ip2)
 {
   int differ = 0;
-  size_t len1, len2;
 
   if ( ip1->name )
     {
@@ -91,8 +90,8 @@ instituteCompareKernel(institute_t *  ip1, institute_t * ip2)
         {
           if ( ip2->name )
             {
-              len1 = strlen(ip1->name);
-              len2 = strlen(ip2->name);
+              const size_t len1 = strlen(ip1->name);
+              const size_t len2 = strlen(ip2->name);
               if ( (len1 != len2) || memcmp(ip2->name, ip1->name, len2) ) differ = 1;
             }
         }
@@ -101,8 +100,8 @@ instituteCompareKernel(institute_t *  ip1, institute_t * ip2)
     {
       if ( ip2->longname )
         {
-          len1 = strlen(ip1->longname);
-          len2 = strlen(ip2->longname);
+          const size_t len1 = strlen(ip1->longname);
+          const size_t len2 = strlen(ip2->longname);
           if ( (len1 < len2) || memcmp(ip2->longname, ip1->longname, len2) ) differ = 1;
         }
     }
@@ -110,6 +109,7 @@ instituteCompareKernel(institute_t *  ip1, institute_t * ip2)
     {
       if ( !( ip2->center    == ip1->center &&
               ip2->subcenter == ip1->subcenter )) differ = 1;
+      if (ip1->subcenter > 0 && ip1->subcenter != 255 && ip2->subcenter != ip1->subcenter) differ = 1;
     }
 
   return differ;

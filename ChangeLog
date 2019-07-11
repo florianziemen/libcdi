@@ -2,6 +2,10 @@
 
 	* Version 1.9.8 released
 
+2019-07-11  Uwe Schulzweida
+
+	* instituteDefaultEntries: added CNMC [patch: Florian Prill]
+
 2019-07-08  Uwe Schulzweida
 
 	* varInsertTileSubtype: bug fix [report: Florian Prill]
