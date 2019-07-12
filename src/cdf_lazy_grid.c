@@ -338,15 +338,15 @@ cdfLazyGridCopyScalarFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 static void
 cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 {
-  size_t nrowlon = (size_t)gridptrOrig->nrowlon;
+  size_t reducedPointsSize = (size_t)gridptrOrig->reducedPointsSize;
   size_t gridsize = gridptrOrig->size;
   int gridtype = gridptrOrig->type;
   int irregular = gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED;
 
-  if ( nrowlon )
+  if ( reducedPointsSize )
     {
-      gridptrDup->rowlon = (int *)Malloc(nrowlon * sizeof (int));
-      memcpy(gridptrDup->rowlon, gridptrOrig->rowlon, nrowlon * sizeof(int));
+      gridptrDup->rowlon = (int *)Malloc(reducedPointsSize * sizeof (int));
+      memcpy(gridptrDup->rowlon, gridptrOrig->rowlon, reducedPointsSize * sizeof(int));
     }
 
   if ( gridptrOrig->x.vals != NULL && gridptrOrig->x.vals != cdfPendingLoad )

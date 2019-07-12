@@ -532,7 +532,7 @@ void gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, int editionNum
 
   grid->size = numberOfPoints;
 
-  grid->nrowlon = (int)nlat;
+  grid->reducedPointsSize = (int)nlat;
   grid->rowlon = (int *) Malloc(nlat * sizeof(int));
   long *pl     = (long *) Malloc(nlat * sizeof(long));
   size_t dummy = nlat;

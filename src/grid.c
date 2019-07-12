@@ -148,7 +148,7 @@ void grid_init(grid_t *gridptr)
 
   gridptr->area          = NULL;
   gridptr->rowlon        = NULL;
-  gridptr->nrowlon       = 0;
+  gridptr->reducedPointsSize       = 0;
 
   gridptr->gme.nd        = 0;
   gridptr->gme.ni        = 0;
@@ -1388,13 +1388,13 @@ int gridInqNP(int gridID)
 
 @EndFunction
 */
-void gridDefReducedPoints(int gridID, int nrowlon, const int rowlon[])
+void gridDefReducedPoints(int gridID, int reducedPointsSize, const int rowlon[])
 {
   grid_t *gridptr = grid_to_pointer(gridID);
 
-  gridptr->rowlon = (int *) Malloc((size_t)nrowlon * sizeof(int));
-  gridptr->nrowlon = nrowlon;
-  memcpy(gridptr->rowlon, rowlon, (size_t)nrowlon * sizeof(int));
+  gridptr->rowlon = (int *) Malloc((size_t)reducedPointsSize * sizeof(int));
+  gridptr->reducedPointsSize = reducedPointsSize;
+  memcpy(gridptr->rowlon, rowlon, (size_t)reducedPointsSize * sizeof(int));
   gridMark4Update(gridID);
 }
 
@@ -1414,7 +1414,7 @@ void gridInqReducedPoints(int gridID, int *rowlon)
 
   if ( gridptr->rowlon == 0 )  Error("undefined pointer!");
 
-  memcpy(rowlon, gridptr->rowlon, (size_t)gridptr->nrowlon * sizeof(int));
+  memcpy(rowlon, gridptr->rowlon, (size_t)gridptr->reducedPointsSize * sizeof(int));
 }
 
 static size_t
@@ -2493,7 +2493,7 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   if ( g1->position      != g2->position     ) return differ;
   if ( g1->trunc         != g2->trunc        ) return differ;
   if ( g1->nvertex       != g2->nvertex      ) return differ;
-  if ( g1->nrowlon       != g2->nrowlon      ) return differ;
+  if ( g1->reducedPointsSize       != g2->reducedPointsSize      ) return differ;
   if ( g1->size          != g2->size         ) return differ;
   if ( g1->x.size        != g2->x.size       ) return differ;
   if ( g1->y.size        != g2->y.size       ) return differ;
@@ -2853,14 +2853,14 @@ int gridGenerate(const grid_t *grid)
 static void
 grid_copy_base_array_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
 {
-  size_t nrowlon = (size_t)gridptrOrig->nrowlon;
+  size_t reducedPointsSize = (size_t)gridptrOrig->reducedPointsSize;
   size_t gridsize = gridptrOrig->size;
   int gridtype = gridptrOrig->type;
   int irregular = gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED;
-  if ( nrowlon )
+  if ( reducedPointsSize )
     {
-      gridptrDup->rowlon = (int*) Malloc(nrowlon * sizeof(int));
-      memcpy(gridptrDup->rowlon, gridptrOrig->rowlon, nrowlon * sizeof(int));
+      gridptrDup->rowlon = (int*) Malloc(reducedPointsSize * sizeof(int));
+      memcpy(gridptrDup->rowlon, gridptrOrig->rowlon, reducedPointsSize * sizeof(int));
     }
 
   if ( gridptrOrig->x.vals != NULL )
@@ -3617,10 +3617,10 @@ void gridPrintP(void *voidptr, FILE *fp)
           "position  = %d\n"
           "trunc     = %d\n"
           "lcomplex  = %d\n"
-          "nrowlon   = %d\n",
+          "reducedPointsSize   = %d\n",
           gridptr->datatype, gridptr->gme.nd, gridptr->gme.ni, gridptr->gme.ni2,
           gridptr->gme.ni3, gridptr->number, gridptr->position, gridptr->trunc,
-          gridptr->lcomplex, gridptr->nrowlon );
+          gridptr->lcomplex, gridptr->reducedPointsSize );
 }
 
 static const double *gridInqXValsPtrSerial(grid_t *gridptr)
@@ -4341,8 +4341,8 @@ gridGetPackSize(void * voidP, void *context)
 
   if (gridP->rowlon)
     {
-      xassert(gridP->nrowlon);
-      packBuffSize += serializeGetSize(gridP->nrowlon, CDI_DATATYPE_INT, context)
+      xassert(gridP->reducedPointsSize);
+      packBuffSize += serializeGetSize(gridP->reducedPointsSize, CDI_DATATYPE_INT, context)
         + serializeGetSize( 1, CDI_DATATYPE_UINT32, context);
     }
 
@@ -4477,7 +4477,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->position      =   intBuffer[GRID_PACK_INT_IDX_POSITION];
     gridP->trunc         =   intBuffer[GRID_PACK_INT_IDX_TRUNC];
     gridP->nvertex       =   intBuffer[GRID_PACK_INT_IDX_NVERTEX];
-    gridP->nrowlon       =   intBuffer[GRID_PACK_INT_IDX_NROWLON];
+    gridP->reducedPointsSize       =   intBuffer[GRID_PACK_INT_IDX_NROWLON];
     gridP->size          =   intBuffer[GRID_PACK_INT_IDX_SIZE];
     gridP->x.size        =   intBuffer[GRID_PACK_INT_IDX_X_SIZE];
     gridP->y.size        =   intBuffer[GRID_PACK_INT_IDX_Y_SIZE];
@@ -4495,13 +4495,13 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
   if (memberMask & gridHasRowLonFlag)
     {
-      xassert(gridP->nrowlon);
-      gridP->rowlon = (int *) Malloc((size_t)gridP->nrowlon * sizeof (int));
+      xassert(gridP->reducedPointsSize);
+      gridP->rowlon = (int *) Malloc((size_t)gridP->reducedPointsSize * sizeof (int));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->rowlon, gridP->nrowlon , CDI_DATATYPE_INT, context);
+                      gridP->rowlon, gridP->reducedPointsSize , CDI_DATATYPE_INT, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       &d, 1, CDI_DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(CDI_DATATYPE_INT, gridP->nrowlon, gridP->rowlon) == d);
+      xassert(cdiCheckSum(CDI_DATATYPE_INT, gridP->reducedPointsSize, gridP->rowlon) == d);
     }
 
   {
@@ -4662,7 +4662,7 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[GRID_PACK_INT_IDX_POSITION]     = gridP->position;
     intBuffer[GRID_PACK_INT_IDX_TRUNC]        = gridP->trunc;
     intBuffer[GRID_PACK_INT_IDX_NVERTEX]      = gridP->nvertex;
-    intBuffer[GRID_PACK_INT_IDX_NROWLON]      = gridP->nrowlon;
+    intBuffer[GRID_PACK_INT_IDX_NROWLON]      = gridP->reducedPointsSize;
     intBuffer[GRID_PACK_INT_IDX_SIZE]         = gridP->size;
     intBuffer[GRID_PACK_INT_IDX_X_SIZE]       = gridP->x.size;
     intBuffer[GRID_PACK_INT_IDX_Y_SIZE]       = gridP->y.size;
@@ -4689,7 +4689,7 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
 
   if (memberMask & gridHasRowLonFlag)
     {
-      size = gridP->nrowlon;
+      size = gridP->reducedPointsSize;
       xassert(size > 0);
       serializePack(gridP->rowlon, size, CDI_DATATYPE_INT,
                     packBuffer, packBufferSize, packBufferPos, context);

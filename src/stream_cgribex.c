@@ -356,7 +356,7 @@ bool cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
       grid->np      = ISEC2_NumPar;
       grid->size    = (size_t)ISEC4_NumValues;
       grid->rowlon  = ISEC2_RowLonPtr;
-      grid->nrowlon = (size_t)ISEC2_NumLat;
+      grid->reducedPointsSize = (size_t)ISEC2_NumLat;
       grid->y.size  = (size_t)ISEC2_NumLat;
       grid->x.inc   = 0;
       grid->y.inc   = 0;
@@ -497,12 +497,12 @@ void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, si
   int gridID = gridAdded.Id;
   if ( gridAdded.isNew )
     {
-      if ( gridptr->nrowlon )
+      if ( gridptr->reducedPointsSize )
         {
-          const size_t nrowlon = (size_t) gridptr->nrowlon;
+          const size_t reducedPointsSize = (size_t) gridptr->reducedPointsSize;
           int *rowlon = gridptr->rowlon;
-          gridptr->rowlon = (int*) Malloc(nrowlon * sizeof(int));
-          memcpy(gridptr->rowlon, rowlon, nrowlon * sizeof(int));
+          gridptr->rowlon = (int*) Malloc(reducedPointsSize * sizeof(int));
+          memcpy(gridptr->rowlon, rowlon, reducedPointsSize * sizeof(int));
         }
       else if ( gridptr->projtype == CDI_PROJ_RLL )
         {

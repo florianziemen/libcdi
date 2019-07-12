@@ -103,7 +103,7 @@ struct grid_t {
   char   *reference;
   unsigned char uuid[CDI_UUID_SIZE]; /* uuid for grid reference        */
   int    *rowlon;
-  int     nrowlon;
+  int     reducedPointsSize;
   int     np;                     /* number of parallels between a pole and the equator */
   signed char isCyclic;           /* three possible states:
                                    * -1 if unknown,
