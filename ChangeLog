@@ -1366,7 +1366,7 @@
 
 2012-09-10  Uwe Schulzweida
 
-	* unreduced: compute nlon and nvalues from rowlon[] (bug fix)
+	* unreduced: compute nlon and nvalues from reducedPoints[] (bug fix)
 
 2012-09-05  Uwe Schulzweida
 

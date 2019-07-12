@@ -72,7 +72,7 @@ static int defineGrid (void)
   gridDefArea ( gridID, ap );
   for ( i = 0; i < nlon*nlat; i++ )
     mask_vec[i] = i;
-  gridDefRowlon ( gridID, nlon*nlat, mp );
+  gridDefReducedPoints ( gridID, nlon*nlat, mp );
   gridDefComplexPacking ( gridID, 1 );
   {
     unsigned char uuid[CDI_UUID_SIZE];

@@ -67,13 +67,13 @@ static int defineGrid()
 /* gridDefLcc2 ( gridID, double earth_radius, double lon_0,  */
 /* 	    double lat_0, double lat_1,double lat_2);*/
 /* gridDefLaea ( gridID, double earth_radius, double lon_0, double lat_0); */
-  for ( i = 0; i < nlon*nlat; i++ )    
+  for ( i = 0; i < nlon*nlat; i++ )
     area_vec[i] = 0.1 * i;
   gridDefArea ( gridID, ap );
-  for ( i = 0; i < nlon*nlat; i++ )    
+  for ( i = 0; i < nlon*nlat; i++ )
     mask_vec[i] = i;
-  gridDefRowlon ( gridID, nlon*nlat, mp );
-  gridDefComplexPacking ( gridID, 1 );	       
+  gridDefReducedPoints ( gridID, nlon*nlat, mp );
+  gridDefComplexPacking ( gridID, 1 );
 
   return gridID;
 }
