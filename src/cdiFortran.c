@@ -594,7 +594,7 @@ static int gridInqYboundsPart_fwrap(int gridID, int start, int size, double ybou
   return size_t_c2f(v);
 }
 FCALLSCFUN4 (INT, gridInqYboundsPart_fwrap, GRIDINQYBOUNDSPART, gridinqyboundspart, INT, INT, INT, DOUBLEV)
-FCALLSCSUB3 (gridDefRowlon, GRIDDEFROWLON, griddefrowlon, INT, INT, INTV)
+FCALLSCSUB3 (gridDefReducedPoints, GRIDDEFROWLON, griddefrowlon, INT, INT, INTV)
 FCALLSCSUB2 (gridInqReducedPoints, GRIDINQROWLON, gridinqrowlon, INT, INTV)
 FCALLSCSUB2 (gridChangeType, GRIDCHANGETYPE, gridchangetype, INT, INT)
 FCALLSCSUB2 (gridDefComplexPacking, GRIDDEFCOMPLEXPACKING, griddefcomplexpacking, INT, INT)

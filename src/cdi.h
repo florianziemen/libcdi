@@ -996,7 +996,7 @@ void    gridDefYbounds(int gridID, const double ybounds[]);
 size_t  gridInqYbounds(int gridID, double ybounds[]);
 size_t  gridInqYboundsPart(int gridID, int start, size_t size, double ybounds[]);
 
-void    gridDefRowlon(int gridID, int nrowlon, const int rowlon[]);
+void    gridDefReducedPoints(int gridID, int nrowlon, const int rowlon[]);
 void    gridInqReducedPoints(int gridID, int rowlon[]);
 void    gridChangeType(int gridID, int gridtype);
 

@@ -1388,7 +1388,7 @@ int gridInqNP(int gridID)
 
 @EndFunction
 */
-void gridDefRowlon(int gridID, int nrowlon, const int rowlon[])
+void gridDefReducedPoints(int gridID, int nrowlon, const int rowlon[])
 {
   grid_t *gridptr = grid_to_pointer(gridID);
 
@@ -2833,7 +2833,7 @@ int gridGenerate(const grid_t *grid)
   if ( gridtype == GRID_PROJECTION )
     gridptr->name = strdup(grid->name);
   if ( gridtype == GRID_GAUSSIAN_REDUCED )
-    gridDefRowlon(gridID, grid->y.size, grid->rowlon);
+    gridDefReducedPoints(gridID, grid->y.size, grid->rowlon);
   gridptr->trunc = grid->trunc;
   gridptr->lcomplex = grid->lcomplex;
   gridptr->gme.nd = grid->gme.nd;
