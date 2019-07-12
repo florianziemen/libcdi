@@ -238,8 +238,10 @@ VCT;
 enum {
   CDF_DIMID_X,
   CDF_DIMID_Y,
+  CDF_DIMID_RP, // reducedPoints
   CDF_VARID_X,
   CDF_VARID_Y,
+  CDF_VARID_RP, // reducedPoints
   CDF_VARID_A,
   CDF_SIZE_ncIDs,
 };
