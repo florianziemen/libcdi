@@ -256,7 +256,7 @@ bool cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
     {
       int nlon = 0;
       for ( int ilat = 0; ilat < ISEC2_NumLat; ++ilat )
-        if ( ISEC2_RowLon(ilat) > nlon ) nlon = ISEC2_RowLon(ilat);
+        if ( ISEC2_ReducedPoints(ilat) > nlon ) nlon = ISEC2_ReducedPoints(ilat);
       gridtype = GRID_GAUSSIAN;
       ISEC2_NumLon = nlon;
       ISEC4_NumValues = nlon*ISEC2_NumLat;
@@ -355,7 +355,7 @@ bool cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
       uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
       grid->np      = ISEC2_NumPar;
       grid->size    = (size_t)ISEC4_NumValues;
-      grid->reducedPoints  = ISEC2_RowLonPtr;
+      grid->reducedPoints  = ISEC2_ReducedPointsPtr;
       grid->reducedPointsSize = (size_t)ISEC2_NumLat;
       grid->y.size  = (size_t)ISEC2_NumLat;
       grid->x.inc   = 0;
@@ -1603,7 +1603,7 @@ void cgribexDefGridRegular(int *isec2, double *fsec2, int gridID, int gridtype, 
     {
       ISEC2_Reduced = true;
       nlon = 0;
-      gridInqReducedPoints(gridID, ISEC2_RowLonPtr);
+      gridInqReducedPoints(gridID, ISEC2_ReducedPointsPtr);
     }
   else
     {

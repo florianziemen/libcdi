@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.9.7
+! Fortran interface for CDI library version 1.9.8
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   June 2019
+! Uwe Schulzweida, MPI-MET, Hamburg,   July 2019
 !
 
       INTEGER    CDI_MAX_NAME
@@ -1978,16 +1978,16 @@
 !                                     DOUBLEPRECISION ybounds(*))
       EXTERNAL        gridInqYboundsPart
 
-!                     gridDefRowlon
+!                     gridDefReducedPoints
 !                                    (INTEGER         gridID,
-!                                     INTEGER         nrowlon,
-!                                     INTEGER         rowlon(*))
-      EXTERNAL        gridDefRowlon
+!                                     INTEGER         reducedPointsSize,
+!                                     INTEGER         reducedPoints(*))
+      EXTERNAL        gridDefReducedPoints
 
-!                     gridInqRowlon
+!                     gridInqReducedPoints
 !                                    (INTEGER         gridID,
-!                                     INTEGER         rowlon(*))
-      EXTERNAL        gridInqRowlon
+!                                     INTEGER         reducedPoints(*))
+      EXTERNAL        gridInqReducedPoints
 
 !                     gridChangeType
 !                                    (INTEGER         gridID,
