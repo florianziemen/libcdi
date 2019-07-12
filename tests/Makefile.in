@@ -177,21 +177,19 @@ cksum_write_chunk_DEPENDENCIES = ../src/libcdi.la
 am_pio_write_OBJECTS = pio_write.$(OBJEXT) simple_model.$(OBJEXT) \
 	simple_model_helper.$(OBJEXT)
 pio_write_OBJECTS = $(am_pio_write_OBJECTS)
-am__DEPENDENCIES_1 = ../src/libcdi.la
-am__DEPENDENCIES_2 =
-@USE_MPI_FALSE@pio_write_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-@USE_MPI_FALSE@	$(am__DEPENDENCIES_2)
+am__DEPENDENCIES_1 =
+@USE_MPI_FALSE@pio_write_DEPENDENCIES = $(LDADD) $(am__DEPENDENCIES_1)
 @USE_MPI_TRUE@pio_write_DEPENDENCIES = ../src/libcdipio.la \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_2) \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_2)
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_1)
 am_pio_write_deco2d_OBJECTS = pio_write.$(OBJEXT) \
 	deco2d_model.$(OBJEXT) simple_model_helper.$(OBJEXT)
 pio_write_deco2d_OBJECTS = $(am_pio_write_deco2d_OBJECTS)
-@USE_MPI_FALSE@pio_write_deco2d_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-@USE_MPI_FALSE@	$(am__DEPENDENCIES_2)
+@USE_MPI_FALSE@pio_write_deco2d_DEPENDENCIES = $(LDADD) \
+@USE_MPI_FALSE@	$(am__DEPENDENCIES_1)
 @USE_MPI_TRUE@pio_write_deco2d_DEPENDENCIES = ../src/libcdipio.la \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_2) \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_2)
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_1)
 am_test_byteswap_OBJECTS = test_byteswap.$(OBJEXT)
 test_byteswap_OBJECTS = $(am_test_byteswap_OBJECTS)
 test_byteswap_LDADD = $(LDADD)
@@ -210,15 +208,15 @@ test_grib_LDADD = $(LDADD)
 test_grib_DEPENDENCIES = ../src/libcdi.la
 am_test_resource_copy_OBJECTS = test_resource_copy.$(OBJEXT)
 test_resource_copy_OBJECTS = $(am_test_resource_copy_OBJECTS)
-test_resource_copy_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	../src/libcdiresunpack.la $(am__DEPENDENCIES_1)
+test_resource_copy_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	../src/libcdiresunpack.la $(LDADD)
 am_test_resource_copy_mpi_OBJECTS =  \
 	test_resource_copy_mpi-test_resource_copy.$(OBJEXT)
 test_resource_copy_mpi_OBJECTS = $(am_test_resource_copy_mpi_OBJECTS)
-@USE_MPI_FALSE@test_resource_copy_mpi_DEPENDENCIES =  \
-@USE_MPI_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+@USE_MPI_FALSE@test_resource_copy_mpi_DEPENDENCIES = $(LDADD) \
+@USE_MPI_FALSE@	$(am__DEPENDENCIES_1)
 @USE_MPI_TRUE@test_resource_copy_mpi_DEPENDENCIES =  \
-@USE_MPI_TRUE@	../src/libcdipio.la $(am__DEPENDENCIES_2)
+@USE_MPI_TRUE@	../src/libcdipio.la $(am__DEPENDENCIES_1)
 test_resource_copy_mpi_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(test_resource_copy_mpi_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
@@ -570,7 +568,7 @@ AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 @USE_MPI_TRUE@test_resource_copy_mpi_CFLAGS = $(AM_CFLAGS) $(CFLAGS) \
 @USE_MPI_TRUE@	-DMPI_MARSHALLING
 
-LDADD = ../src/libcdi.la -lm
+LDADD = ../src/libcdi.la
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #
 EXTRA_DIST = test_cdf_write.c test_cdf_read.c
