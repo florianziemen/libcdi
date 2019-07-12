@@ -4272,7 +4272,7 @@ enum {
   GRID_PACK_INT_IDX_POSITION,
   GRID_PACK_INT_IDX_TRUNC,
   GRID_PACK_INT_IDX_NVERTEX,
-  GRID_PACK_INT_IDX_NROWLON,
+  REDUCEDPOINTSSIZE,
   GRID_PACK_INT_IDX_SIZE,
   GRID_PACK_INT_IDX_X_SIZE,
   GRID_PACK_INT_IDX_Y_SIZE,
@@ -4306,7 +4306,7 @@ enum {
        gridHasXBoundsFlag = 1 << 5,
        gridHasYBoundsFlag = 1 << 6,
        gridHasReferenceFlag = 1 << 7,
-       gridHasRowLonFlag = 1 << 8,
+       gridHasReducedPointsFlag = 1 << 8,
        gridHasUUIDFlag = 1 << 9,
 };
 
@@ -4325,7 +4325,7 @@ static int gridGetComponentFlags(const grid_t * gridP)
     | (gridHasXBoundsFlag & (int)((unsigned)(gridP->x.bounds == NULL) - 1U))
     | (gridHasYBoundsFlag & (int)((unsigned)(gridP->y.bounds == NULL) - 1U))
     | (gridHasReferenceFlag & (int)((unsigned)(gridP->reference == NULL) - 1U))
-    | (gridHasRowLonFlag & (int)((unsigned)(gridP->reducedPoints == NULL) - 1U))
+    | (gridHasReducedPointsFlag & (int)((unsigned)(gridP->reducedPoints == NULL) - 1U))
     | (gridHasUUIDFlag & (int)((unsigned)cdiUUIDIsNull(gridP->uuid) - 1U));
   return flags;
 }
@@ -4477,7 +4477,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->position      =   intBuffer[GRID_PACK_INT_IDX_POSITION];
     gridP->trunc         =   intBuffer[GRID_PACK_INT_IDX_TRUNC];
     gridP->nvertex       =   intBuffer[GRID_PACK_INT_IDX_NVERTEX];
-    gridP->reducedPointsSize       =   intBuffer[GRID_PACK_INT_IDX_NROWLON];
+    gridP->reducedPointsSize       =   intBuffer[REDUCEDPOINTSSIZE];
     gridP->size          =   intBuffer[GRID_PACK_INT_IDX_SIZE];
     gridP->x.size        =   intBuffer[GRID_PACK_INT_IDX_X_SIZE];
     gridP->y.size        =   intBuffer[GRID_PACK_INT_IDX_Y_SIZE];
@@ -4493,7 +4493,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->scanningMode             =   intBuffer[GRID_PACK_INT_IDX_SCANNINGMODE];
   }
 
-  if (memberMask & gridHasRowLonFlag)
+  if (memberMask & gridHasReducedPointsFlag)
     {
       xassert(gridP->reducedPointsSize);
       gridP->reducedPoints = (int *) Malloc((size_t)gridP->reducedPointsSize * sizeof (int));
@@ -4662,7 +4662,7 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[GRID_PACK_INT_IDX_POSITION]     = gridP->position;
     intBuffer[GRID_PACK_INT_IDX_TRUNC]        = gridP->trunc;
     intBuffer[GRID_PACK_INT_IDX_NVERTEX]      = gridP->nvertex;
-    intBuffer[GRID_PACK_INT_IDX_NROWLON]      = gridP->reducedPointsSize;
+    intBuffer[REDUCEDPOINTSSIZE]      = gridP->reducedPointsSize;
     intBuffer[GRID_PACK_INT_IDX_SIZE]         = gridP->size;
     intBuffer[GRID_PACK_INT_IDX_X_SIZE]       = gridP->x.size;
     intBuffer[GRID_PACK_INT_IDX_Y_SIZE]       = gridP->y.size;
@@ -4687,7 +4687,7 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
                   packBuffer, packBufferSize, packBufferPos, context);
   }
 
-  if (memberMask & gridHasRowLonFlag)
+  if (memberMask & gridHasReducedPointsFlag)
     {
       size = gridP->reducedPointsSize;
       xassert(size > 0);
