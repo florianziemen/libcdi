@@ -437,7 +437,6 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
                  void (*finishCyclicBounds)(double *pbounds, size_t dimlen, const double *pvals))
 {
   int dimID = CDI_UNDEFID;
-  int ncvarid = CDI_UNDEFID, ncbvarid = CDI_UNDEFID;
   const int fileID  = streamptr->fileID;
   const size_t dimlen = gridAxisInq->axisSize(gridID);
   const nc_type xtype = (nc_type)cdfDefDatatype(gridInqDatatype(gridID), streamptr);
@@ -477,6 +476,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
 
   if ( dimID == CDI_UNDEFID )
     {
+      int ncvarid = CDI_UNDEFID, ncbvarid = CDI_UNDEFID;
       char axisname[CDI_MAX_NAME]; axisname[0] = 0;
       const int keyname = (axisLetter == 'X') ? CDI_KEY_XNAME : CDI_KEY_YNAME;
       gridAxisInq->axisName(gridID, keyname, CDI_MAX_NAME, axisname);
@@ -1755,39 +1755,81 @@ void cdfDefRgrid(stream_t *streamptr, int gridID, int gridindex)
 {
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
-  const size_t dimlen = gridInqSize(gridID);
-
-  struct idSearch search
-      = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_X,
-                          GRID_GAUSSIAN_REDUCED, (int)dimlen, gridInqType, gridInqSize);
-  const int iz = search.numNonMatching;
-  int dimID = search.foundID;
-
-  if ( dimID == CDI_UNDEFID )
-    {
-      const int fileID  = streamptr->fileID;
-      static bool lwarn = true;
-      if ( lwarn )
-        {
-          Warning("Creating a NetCDF file with data on a gaussian reduced grid.");
-          Warning("The further processing of the resulting file is unsupported!");
-          lwarn = false;
-        }
-
-      char axisname[16] = "rgridX";
-      if ( iz == 0 ) axisname[5] = '\0';
-      else           sprintf(&axisname[5], "%1d", iz+1);
-
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-
-      cdf_def_dim(fileID, axisname, dimlen, &dimID);
-
-      cdf_enddef(fileID);
-      streamptr->ncmode = 2;
-    }
-
   ncgrid[gridindex].gridID = gridID;
-  ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
+
+  {
+    const size_t dimlen = gridInqSize(gridID);
+
+    struct idSearch search = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_X,
+                                               GRID_GAUSSIAN_REDUCED, (int)dimlen, gridInqType, gridInqSize);
+    const int iz = search.numNonMatching;
+    int dimID = search.foundID;
+
+    if ( dimID == CDI_UNDEFID )
+      {
+        const int fileID  = streamptr->fileID;
+        static bool lwarn = true;
+        if ( lwarn )
+          {
+            Warning("Creating a NetCDF file with data on a gaussian reduced grid.");
+            Warning("The further processing of the resulting file is unsupported!");
+            lwarn = false;
+          }
+
+        char axisname[16] = "rgridX";
+        if ( iz == 0 ) axisname[5] = '\0';
+        else           sprintf(&axisname[5], "%1d", iz+1);
+
+        if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+
+        cdf_def_dim(fileID, axisname, dimlen, &dimID);
+
+        cdf_enddef(fileID);
+        streamptr->ncmode = 2;
+      }
+
+    ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
+  }
+
+  {
+    const size_t dimlen = gridInqYsize(gridID);
+
+    struct idSearch search = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_RP,
+                                               GRID_GAUSSIAN_REDUCED, (int)dimlen, gridInqType, gridInqSize);
+    const int iz = search.numNonMatching;
+    int dimID = search.foundID;
+
+    if ( dimID == CDI_UNDEFID )
+      {
+        const int fileID  = streamptr->fileID;
+
+        char axisname[32] = "reduced_pointsX";
+        if ( iz == 0 ) axisname[14] = '\0';
+        else           sprintf(&axisname[5], "%1d", iz+1);
+
+        if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+
+        cdf_def_dim(fileID, axisname, dimlen, &dimID);
+
+        int ncvarid = CDI_UNDEFID;
+
+        int ndims = 1;
+        const nc_type xtype = NC_INT;
+        cdf_def_var(fileID, axisname, xtype, ndims, &dimID, &ncvarid);
+
+        cdf_enddef(fileID);
+        streamptr->ncmode = 2;
+
+        int *reducedPoints = (int*) Malloc(dimlen*sizeof(int));
+        gridInqReducedPoints(gridID, reducedPoints);
+        cdf_put_var_int(fileID, ncvarid, reducedPoints);
+        Free(reducedPoints);
+
+        ncgrid[gridindex].ncIDs[CDF_VARID_RP] = ncvarid;
+      }
+
+    ncgrid[gridindex].ncIDs[CDF_DIMID_RP] = dimID;
+  }
 }
 
 static
