@@ -58,7 +58,7 @@ pio_write_deco2d_LDADD = $(LDADD) $(UUID_C_LIB)
 test_resource_copy_mpi_LDADD = $(LDADD) $(UUID_C_LIB)
 endif
 
-LDADD = ../src/libcdi.la -lm
+LDADD = ../src/libcdi.la
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #
 EXTRA_DIST = test_cdf_write.c test_cdf_read.c
