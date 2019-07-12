@@ -1408,7 +1408,7 @@ void gridDefRowlon(int gridID, int nrowlon, const int rowlon[])
 
 @EndFunction
 */
-void gridInqRowlon(int gridID, int *rowlon)
+void gridInqReducedPoints(int gridID, int *rowlon)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
 

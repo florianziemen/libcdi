@@ -1603,7 +1603,7 @@ void cgribexDefGridRegular(int *isec2, double *fsec2, int gridID, int gridtype, 
     {
       ISEC2_Reduced = true;
       nlon = 0;
-      gridInqRowlon(gridID, ISEC2_RowLonPtr);
+      gridInqReducedPoints(gridID, ISEC2_RowLonPtr);
     }
   else
     {

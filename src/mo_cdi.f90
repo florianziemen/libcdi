@@ -561,7 +561,7 @@ module mo_cdi
   public :: gridInqYbounds
   public :: gridInqYboundsPart
   public :: gridDefRowlon
-  public :: gridInqRowlon
+  public :: gridInqReducedPoints
   public :: gridChangeType
   public :: gridDefComplexPacking
   public :: gridInqComplexPacking
@@ -2333,12 +2333,12 @@ module mo_cdi
       integer(c_int), intent(in) :: rowlon_dummy(*)
     end subroutine gridDefRowlon
 
-    subroutine gridInqRowlon(gridID_dummy, rowlon_dummy) bind(c, name =&
-    & 'gridInqRowlon')
+    subroutine gridInqReducedPoints(gridID_dummy, rowlon_dummy) bind(c, name =&
+    & 'gridInqReducedPoints')
       import c_int
       integer(c_int), value :: gridID_dummy
       integer(c_int), intent(inout) :: rowlon_dummy(*)
-    end subroutine gridInqRowlon
+    end subroutine gridInqReducedPoints
 
     subroutine gridChangeType(gridID_dummy, gridtype_dummy) bind(c, name =&
     & 'gridChangeType')

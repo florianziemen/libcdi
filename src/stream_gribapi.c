@@ -1898,7 +1898,7 @@ void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridI
 
       int *rowlon = (int *) Malloc(nlat*sizeof(int));
       long *pl    = (long *) Malloc(nlat*sizeof(long));
-      gridInqRowlon(gridID, rowlon);
+      gridInqReducedPoints(gridID, rowlon);
       for ( size_t i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
 
       GRIB_CHECK(grib_set_long_array(gh, "pl", pl, nlat), 0);
