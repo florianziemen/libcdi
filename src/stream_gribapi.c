@@ -1896,15 +1896,15 @@ void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridI
     {
       nlon = 0;
 
-      int *rowlon = (int *) Malloc(nlat*sizeof(int));
+      int *reducedPoints = (int *) Malloc(nlat*sizeof(int));
       long *pl    = (long *) Malloc(nlat*sizeof(long));
-      gridInqReducedPoints(gridID, rowlon);
-      for ( size_t i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
+      gridInqReducedPoints(gridID, reducedPoints);
+      for ( size_t i = 0; i < nlat; ++i ) pl[i] = reducedPoints[i];
 
       GRIB_CHECK(grib_set_long_array(gh, "pl", pl, nlat), 0);
 
       Free(pl);
-      Free(rowlon);
+      Free(reducedPoints);
 
       xfirst = 0;
       xinc   =        360. * 0.5 / (double)nlat;

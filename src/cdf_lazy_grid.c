@@ -345,8 +345,8 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 
   if ( reducedPointsSize )
     {
-      gridptrDup->rowlon = (int *)Malloc(reducedPointsSize * sizeof (int));
-      memcpy(gridptrDup->rowlon, gridptrOrig->rowlon, reducedPointsSize * sizeof(int));
+      gridptrDup->reducedPoints = (int *)Malloc(reducedPointsSize * sizeof (int));
+      memcpy(gridptrDup->reducedPoints, gridptrOrig->reducedPoints, reducedPointsSize * sizeof(int));
     }
 
   if ( gridptrOrig->x.vals != NULL && gridptrOrig->x.vals != cdfPendingLoad )

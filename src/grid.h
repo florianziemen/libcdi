@@ -102,7 +102,7 @@ struct grid_t {
   int     nvertex;
   char   *reference;
   unsigned char uuid[CDI_UUID_SIZE]; /* uuid for grid reference        */
-  int    *rowlon;
+  int    *reducedPoints;
   int     reducedPointsSize;
   int     np;                     /* number of parallels between a pole and the equator */
   signed char isCyclic;           /* three possible states:

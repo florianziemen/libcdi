@@ -147,7 +147,7 @@ void grid_init(grid_t *gridptr)
   grid_axis_init(&gridptr->y);
 
   gridptr->area          = NULL;
-  gridptr->rowlon        = NULL;
+  gridptr->reducedPoints        = NULL;
   gridptr->reducedPointsSize       = 0;
 
   gridptr->gme.nd        = 0;
@@ -196,7 +196,7 @@ void grid_free_components(grid_t *gridptr)
                      gridptr->x.cvals, gridptr->y.cvals,
 #endif
                      gridptr->x.bounds, gridptr->y.bounds,
-                     gridptr->rowlon, gridptr->area,
+                     gridptr->reducedPoints, gridptr->area,
                      gridptr->reference, gridptr->name};
 
   for ( size_t i = 0; i < sizeof(p2free)/sizeof(p2free[0]); ++i )
@@ -1388,13 +1388,13 @@ int gridInqNP(int gridID)
 
 @EndFunction
 */
-void gridDefReducedPoints(int gridID, int reducedPointsSize, const int rowlon[])
+void gridDefReducedPoints(int gridID, int reducedPointsSize, const int reducedPoints[])
 {
   grid_t *gridptr = grid_to_pointer(gridID);
 
-  gridptr->rowlon = (int *) Malloc((size_t)reducedPointsSize * sizeof(int));
+  gridptr->reducedPoints = (int *) Malloc((size_t)reducedPointsSize * sizeof(int));
   gridptr->reducedPointsSize = reducedPointsSize;
-  memcpy(gridptr->rowlon, rowlon, (size_t)reducedPointsSize * sizeof(int));
+  memcpy(gridptr->reducedPoints, reducedPoints, (size_t)reducedPointsSize * sizeof(int));
   gridMark4Update(gridID);
 }
 
@@ -1408,13 +1408,13 @@ void gridDefReducedPoints(int gridID, int reducedPointsSize, const int rowlon[])
 
 @EndFunction
 */
-void gridInqReducedPoints(int gridID, int *rowlon)
+void gridInqReducedPoints(int gridID, int *reducedPoints)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
 
-  if ( gridptr->rowlon == 0 )  Error("undefined pointer!");
+  if ( gridptr->reducedPoints == 0 )  Error("undefined pointer!");
 
-  memcpy(rowlon, gridptr->rowlon, (size_t)gridptr->reducedPointsSize * sizeof(int));
+  memcpy(reducedPoints, gridptr->reducedPoints, (size_t)gridptr->reducedPointsSize * sizeof(int));
 }
 
 static size_t
@@ -2833,7 +2833,7 @@ int gridGenerate(const grid_t *grid)
   if ( gridtype == GRID_PROJECTION )
     gridptr->name = strdup(grid->name);
   if ( gridtype == GRID_GAUSSIAN_REDUCED )
-    gridDefReducedPoints(gridID, grid->y.size, grid->rowlon);
+    gridDefReducedPoints(gridID, grid->y.size, grid->reducedPoints);
   gridptr->trunc = grid->trunc;
   gridptr->lcomplex = grid->lcomplex;
   gridptr->gme.nd = grid->gme.nd;
@@ -2859,8 +2859,8 @@ grid_copy_base_array_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
   int irregular = gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED;
   if ( reducedPointsSize )
     {
-      gridptrDup->rowlon = (int*) Malloc(reducedPointsSize * sizeof(int));
-      memcpy(gridptrDup->rowlon, gridptrOrig->rowlon, reducedPointsSize * sizeof(int));
+      gridptrDup->reducedPoints = (int*) Malloc(reducedPointsSize * sizeof(int));
+      memcpy(gridptrDup->reducedPoints, gridptrOrig->reducedPoints, reducedPointsSize * sizeof(int));
     }
 
   if ( gridptrOrig->x.vals != NULL )
@@ -4325,7 +4325,7 @@ static int gridGetComponentFlags(const grid_t * gridP)
     | (gridHasXBoundsFlag & (int)((unsigned)(gridP->x.bounds == NULL) - 1U))
     | (gridHasYBoundsFlag & (int)((unsigned)(gridP->y.bounds == NULL) - 1U))
     | (gridHasReferenceFlag & (int)((unsigned)(gridP->reference == NULL) - 1U))
-    | (gridHasRowLonFlag & (int)((unsigned)(gridP->rowlon == NULL) - 1U))
+    | (gridHasRowLonFlag & (int)((unsigned)(gridP->reducedPoints == NULL) - 1U))
     | (gridHasUUIDFlag & (int)((unsigned)cdiUUIDIsNull(gridP->uuid) - 1U));
   return flags;
 }
@@ -4339,7 +4339,7 @@ gridGetPackSize(void * voidP, void *context)
   packBuffSize += serializeGetSize(gridNint, CDI_DATATYPE_INT, context)
     + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
 
-  if (gridP->rowlon)
+  if (gridP->reducedPoints)
     {
       xassert(gridP->reducedPointsSize);
       packBuffSize += serializeGetSize(gridP->reducedPointsSize, CDI_DATATYPE_INT, context)
@@ -4496,12 +4496,12 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
   if (memberMask & gridHasRowLonFlag)
     {
       xassert(gridP->reducedPointsSize);
-      gridP->rowlon = (int *) Malloc((size_t)gridP->reducedPointsSize * sizeof (int));
+      gridP->reducedPoints = (int *) Malloc((size_t)gridP->reducedPointsSize * sizeof (int));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->rowlon, gridP->reducedPointsSize , CDI_DATATYPE_INT, context);
+                      gridP->reducedPoints, gridP->reducedPointsSize , CDI_DATATYPE_INT, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       &d, 1, CDI_DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(CDI_DATATYPE_INT, gridP->reducedPointsSize, gridP->rowlon) == d);
+      xassert(cdiCheckSum(CDI_DATATYPE_INT, gridP->reducedPointsSize, gridP->reducedPoints) == d);
     }
 
   {
@@ -4691,9 +4691,9 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     {
       size = gridP->reducedPointsSize;
       xassert(size > 0);
-      serializePack(gridP->rowlon, size, CDI_DATATYPE_INT,
+      serializePack(gridP->reducedPoints, size, CDI_DATATYPE_INT,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(CDI_DATATYPE_INT , size, gridP->rowlon);
+      d = cdiCheckSum(CDI_DATATYPE_INT , size, gridP->reducedPoints);
       serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
