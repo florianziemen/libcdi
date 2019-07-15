@@ -28,7 +28,7 @@ static int activeNamespace = 0;
   { .func = (void (*)()) nc__create },          \
   { .func = (void (*)()) cdf_def_var_serial },  \
   { .func = (void (*)()) cdfDefTimestep },      \
-  { .func = (void (*)()) cdfDefVars }
+  { .func = (void (*)()) cdfDefCoordinateVars }
 
 #else
 #define CDI_NETCDF_SWITCHES

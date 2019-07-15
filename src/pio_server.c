@@ -513,7 +513,7 @@ cdiPioServerCdfDefVars(stream_t *streamptr)
   if (commInqIOMode() == PIO_NONE
       || ((rank = commInqRankColl())
           == (rankOpen = cdiPioSerialOpenFileMap(streamptr->self))))
-    cdfDefVars(streamptr);
+    cdfDefCoordinateVars(streamptr);
 }
 
 static void

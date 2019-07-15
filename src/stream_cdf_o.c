@@ -1990,7 +1990,7 @@ void cdfDefHistory(stream_t *streamptr, int size, const char *history)
 }
 
 
-void cdfDefVars(stream_t *streamptr)
+void cdfDefCoordinateVars(stream_t *streamptr)
 {
   const int vlistID = streamptr->vlistID;
   if ( vlistID == CDI_UNDEFID ) Error("Internal problem! vlist undefined for streamptr %p", streamptr);

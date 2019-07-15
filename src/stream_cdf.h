@@ -3,7 +3,7 @@
 
 #include "cdi_int.h"
 
-void   cdfDefVars(stream_t *streamptr);
+void   cdfDefCoordinateVars(stream_t *streamptr);
 void   cdfDefTimestep(stream_t *streamptr, int tsID);
 int    cdfInqTimestep(stream_t *streamptr, int tsID);
 int    cdfInqContents(stream_t *streamptr);

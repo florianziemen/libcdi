@@ -1690,7 +1690,7 @@ void cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
         case CDI_FILETYPE_NC4C:
         case CDI_FILETYPE_NC5:
           {
-            /* calls cdfDefVars in serial mode but
+            /* calls cdfDefCoordinateVars in serial mode but
              * cdiPioClientStreamNOP (i.e. nothing) on client ranks
              * and cdiPioServerCdfDefVars on server ranks in parallel mode*/
             void (*myCdfDefVars)(stream_t *streamptr)
