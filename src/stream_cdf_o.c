@@ -1768,13 +1768,6 @@ void cdfDefRgrid(stream_t *streamptr, int gridID, int gridindex)
     if ( dimID == CDI_UNDEFID )
       {
         const int fileID  = streamptr->fileID;
-        static bool lwarn = true;
-        if ( lwarn )
-          {
-            Warning("Creating a NetCDF file with data on a gaussian reduced grid.");
-            Warning("The further processing of the resulting file is unsupported!");
-            lwarn = false;
-          }
 
         char axisname[16] = "rgridX";
         if ( iz == 0 ) axisname[5] = '\0';

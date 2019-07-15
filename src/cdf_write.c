@@ -388,6 +388,22 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, 
   cdf_get_gmapvarname(gridID, gmapvarname);
   if ( gmapvarname[0] ) cdf_put_att_text(fileID, ncvarID, "grid_mapping", strlen(gmapvarname), gmapvarname);
 
+  if ( gridtype == GRID_GAUSSIAN_REDUCED )
+    {
+      const int numLPE = gridInqNP(gridID);
+      if (numLPE > 0)
+        cdf_put_att_int(fileID, ncvarID, "CDI_grid_num_LPE", NC_INT, 1, &numLPE);
+
+      const int ncrpvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_RP];
+      if (ncrpvarID != CDI_UNDEFID)
+        {
+          char name[CDI_MAX_NAME]; name[0] = 0;
+          cdf_inq_varname(fileID, ncrpvarID, name);
+          size_t len = strlen(name);
+          cdf_put_att_text(fileID, ncvarID, "CDI_grid_reduced_points", len, name);
+        }
+    }
+
   if ( gridtype == GRID_TRAJECTORY )
     {
       cdf_put_att_text(fileID, ncvarID, "coordinates", 9, "tlon tlat");
