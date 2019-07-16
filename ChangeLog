@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.4
 	* Version 1.9.8 released
 
+2019-07-16  Uwe Schulzweida
+
+	* netCDF: added support for GAUSSIAN_REDUCED grids
+
 2019-07-11  Uwe Schulzweida
 
 	* instituteDefaultEntries: added CNMC [patch: Florian Prill]
