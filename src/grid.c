@@ -3787,6 +3787,7 @@ int gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, do
           if ( cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, attflt) )
             {
               if      ( strIsEqual(attname, "earth_radius") )                       *a      = attflt[0];
+              else if ( strIsEqual(attname, "semi_major_axis") )                    *a      = attflt[0];
               else if ( strIsEqual(attname, "inverse_flattening") )                 *rf     = attflt[0];
               else if ( strIsEqual(attname, "longitude_of_central_meridian") )      *lon_0  = attflt[0];
               else if ( strIsEqual(attname, "latitude_of_projection_origin") )      *lat_0  = attflt[0];
