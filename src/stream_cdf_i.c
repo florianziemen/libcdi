@@ -67,6 +67,7 @@ typedef struct {
   int      zdim;
   int      xvarid;
   int      yvarid;
+  int      rpvarid;
   int      zvarid;
   int      cvarids[MAX_COORDVARS];
   int      tvarid;
@@ -80,6 +81,7 @@ typedef struct {
   int      tableID;
   int      truncation;
   int      position;
+  int      numLPE;
   bool     defmissval;
   bool     deffillval;
   int      xtype;
@@ -610,6 +612,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].zdim            = CDI_UNDEFID;
       ncvars[ncvarid].xvarid          = CDI_UNDEFID;
       ncvars[ncvarid].yvarid          = CDI_UNDEFID;
+      ncvars[ncvarid].rpvarid         = CDI_UNDEFID;
       ncvars[ncvarid].zvarid          = CDI_UNDEFID;
       ncvars[ncvarid].tvarid          = CDI_UNDEFID;
       ncvars[ncvarid].psvarid         = CDI_UNDEFID;
@@ -632,6 +635,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].vct             = NULL;
       ncvars[ncvarid].truncation      = 0;
       ncvars[ncvarid].position        = 0;
+      ncvars[ncvarid].numLPE          = 0;
       ncvars[ncvarid].positive        = 0;
       ncvars[ncvarid].chunked         = 0;
       ncvars[ncvarid].chunktype       = CDI_UNDEFID;
@@ -1196,6 +1200,38 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
               strToLower(attstring);
               set_gridtype(attstring, &ncvars[ncvarid].gridtype);
               cdf_set_var(ncvars, ncvarid, TRUE);
+            }
+          else if ( isText && strIsEqual(attname, "CDI_grid_latitudes") )
+            {
+              int nc_yvar_id;
+              int status = nc_inq_varid(ncid, attstring, &nc_yvar_id);
+              if ( status == NC_NOERR )
+                {
+                  ncvars[ncvarid].yvarid = nc_yvar_id;
+                  cdf_set_var(ncvars, ncvars[ncvarid].yvarid, FALSE);
+                }
+              else
+                Warning("%s - %s", nc_strerror(status), attstring);
+
+              cdf_set_var(ncvars, ncvarid, TRUE);
+            }
+          else if ( isText && strIsEqual(attname, "CDI_grid_reduced_points") )
+            {
+              int nc_rpvar_id;
+              int status = nc_inq_varid(ncid, attstring, &nc_rpvar_id);
+              if ( status == NC_NOERR )
+                {
+                  ncvars[ncvarid].rpvarid = nc_rpvar_id;
+                  cdf_set_var(ncvars, ncvars[ncvarid].rpvarid, FALSE);
+                }
+              else
+                Warning("%s - %s", nc_strerror(status), attstring);
+
+              cdf_set_var(ncvars, ncvarid, TRUE);
+            }
+          else if ( isNumber && strIsEqual(attname, "CDI_grid_num_LPE") )
+            {
+              cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvars[ncvarid].numLPE);
             }
           else if ( isText && strIsEqual(attname, "level_type") )
             {
@@ -2337,10 +2373,11 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
                              xsize, &ysize, ntdims, start, count, &islat) )
           return true;
 
-      if      ( ysize == 0 ) size = xsize;
+      if      ( ncvar->gridtype == GRID_UNSTRUCTURED ) size = xsize;
+      else if ( ncvar->gridtype == GRID_GAUSSIAN_REDUCED ) size = xsize;
+      else if ( ysize == 0 ) size = xsize;
       else if ( xsize == 0 ) size = ysize;
-      else if ( ncvar->gridtype == GRID_UNSTRUCTURED ) size = xsize;
-      else                         size = xsize*ysize;
+      else                   size = xsize*ysize;
 
       if ( ncvar->gridtype == CDI_UNDEFID || ncvar->gridtype == GRID_GENERIC )
         cdf_check_gridtype(&ncvar->gridtype, islon, islat, xsize, ysize, grid);
@@ -2408,6 +2445,24 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
         if ( ncvar->cellarea != CDI_UNDEFID )
           cdf_load_cellarea(size, ncvar, &grid->area, &lazyGrid->cellAreaGet);
 
+        break;
+      }
+    case GRID_GAUSSIAN_REDUCED:
+      {
+        if (ncvar->numLPE > 0 && ncvar->rpvarid != CDI_UNDEFID)
+          {
+            if (ncvars[ncvar->rpvarid].ndims == 1)
+              {
+                grid->size = size;
+                int dimid = ncvars[ncvar->rpvarid].dimids[0];
+                size_t ysize = ncdims[dimid].len;
+                grid->y.size = ysize;
+                grid->reducedPointsSize = ysize;
+                grid->reducedPoints = (int*) Malloc(ysize*sizeof(int));
+                cdf_get_var_int(ncvar->ncid, ncvar->rpvarid, grid->reducedPoints);
+                grid->np = ncvar->numLPE;
+              }
+          }
         break;
       }
     case GRID_SPECTRAL:
@@ -2726,7 +2781,8 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
           ncgrid[gridindex].gridID = gridID;
           if (xdimid != CDI_UNDEFID) ncgrid[gridindex].ncIDs[CDF_DIMID_X] = ncdims[xdimid].dimid;
           if (ydimid != CDI_UNDEFID) ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ncdims[ydimid].dimid;
-          if ( grid->type == GRID_TRAJECTORY )
+
+          if (grid->type == GRID_TRAJECTORY)
             {
               ncgrid[gridindex].ncIDs[CDF_VARID_X] = xvarid;
               ncgrid[gridindex].ncIDs[CDF_VARID_Y] = yvarid;

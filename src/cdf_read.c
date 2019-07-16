@@ -390,6 +390,10 @@ void cdfInqDimIds(stream_t *streamptr, int varId, int (*outDimIds)[3])
         (*outDimIds)[0] = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
         break;
 
+      case GRID_GAUSSIAN_REDUCED:
+        (*outDimIds)[0] = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
+        break;
+
       default:
         (*outDimIds)[0] = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
         (*outDimIds)[1] = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];

@@ -373,10 +373,6 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, 
 {
   const int fileID  = streamptr->fileID;
 
-  char coordinates[CDI_MAX_NAME]; coordinates[0] = 0;
-
-  if (nczvarID != CDI_UNDEFID) cdfAppendCoordinates(fileID, nczvarID, coordinates);
-
   if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT && gridtype != GRID_GAUSSIAN &&
        gridtype != GRID_PROJECTION && gridtype != GRID_CURVILINEAR && gridtype != GRID_CHARXY )
     {
@@ -394,6 +390,15 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, 
       if (numLPE > 0)
         cdf_put_att_int(fileID, ncvarID, "CDI_grid_num_LPE", NC_INT, 1, &numLPE);
 
+      const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
+      if (ncyvarID != CDI_UNDEFID)
+        {
+          char name[CDI_MAX_NAME]; name[0] = 0;
+          cdf_inq_varname(fileID, ncyvarID, name);
+          size_t len = strlen(name);
+          cdf_put_att_text(fileID, ncvarID, "CDI_grid_latitudes", len, name);
+        }
+
       const int ncrpvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_RP];
       if (ncrpvarID != CDI_UNDEFID)
         {
@@ -403,6 +408,12 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, 
           cdf_put_att_text(fileID, ncvarID, "CDI_grid_reduced_points", len, name);
         }
     }
+
+  // define coordinates attribute
+
+  char coordinates[CDI_MAX_NAME]; coordinates[0] = 0;
+
+  if (nczvarID != CDI_UNDEFID) cdfAppendCoordinates(fileID, nczvarID, coordinates);
 
   if ( gridtype == GRID_TRAJECTORY )
     {
@@ -417,10 +428,12 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, 
     }
   else if ( gridtype == GRID_GAUSSIAN_REDUCED )
     {
+      /*
       const int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
       const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
       cdfAppendCoordinates(fileID, ncyvarID, coordinates);
       cdfAppendCoordinates(fileID, ncxvarID, coordinates);
+      */
     }
   else if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     {
@@ -669,7 +682,8 @@ int cdfDefVar(stream_t *streamptr, int varID)
   const int gridtype = gridInqType(gridID);
   const int gridindex = nc_grid_index(streamptr, gridID);
   const int xid = (gridtype != GRID_TRAJECTORY) ? streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X] : CDI_UNDEFID;
-  const int yid = (gridtype != GRID_TRAJECTORY) ? streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y] : CDI_UNDEFID;
+  const int yid = (gridtype != GRID_TRAJECTORY && gridtype != GRID_GAUSSIAN_REDUCED) ?
+    streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y] : CDI_UNDEFID;
 
   const int zaxisID = vlistInqVarZaxis(vlistID, varID);
   const int zaxistype = zaxisInqType(zaxisID);
@@ -997,7 +1011,8 @@ void cdfGetXYZid(stream_t *streamptr, int gridID, int zaxisID, int *xid, int *yi
   *xid = CDI_UNDEFID;
   *yid = CDI_UNDEFID;
 
-  if (gridInqType(gridID) == GRID_TRAJECTORY)
+  const int gridtype = gridInqType(gridID);
+  if (gridtype == GRID_TRAJECTORY)
     {
       cdfWriteGridTraj(streamptr, gridID);
     }
@@ -1005,7 +1020,8 @@ void cdfGetXYZid(stream_t *streamptr, int gridID, int zaxisID, int *xid, int *yi
     {
       const int gridindex = nc_grid_index(streamptr, gridID);
       *xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
-      *yid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
+      if (gridtype != GRID_GAUSSIAN_REDUCED)
+        *yid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
     }
 
   const int vlistID = streamptr->vlistID;
