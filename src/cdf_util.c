@@ -34,6 +34,7 @@ int get_timeunit(size_t len, const char *ptu)
 
   while ( isspace(*ptu) && len ) { ptu++; len--; }
 
+  // clang-format off
   if ( len > 2 )
     {
       if      ( strStartsWith(ptu, "sec") )            timeunit = TUNIT_SECOND;
@@ -45,6 +46,7 @@ int get_timeunit(size_t len, const char *ptu)
       else if ( strStartsWith(ptu, "year") )           timeunit = TUNIT_YEAR;
     }
   else if ( len == 1 && ptu[0] == 's' )  timeunit = TUNIT_SECOND;
+  // clang-format on
 
   return timeunit;
 }
@@ -100,7 +102,7 @@ bool is_timeaxis_units(const char *timeunits)
 
 bool is_height_units(const char *units)
 {
-  int u0 = units[0];
+  const int u0 = units[0];
 
   bool status
     = (u0=='m' && (!units[1] || strncmp(units, "meter", 5) == 0))
@@ -156,13 +158,14 @@ bool is_depth_axis(const char *stdname, const char *longname)
   bool status = false;
 
   if ( strcmp(stdname, "depth") == 0 )
-    status = true;
-  else
-    if ( strcmp(longname, "depth_below_sea") == 0 ||
-         strcmp(longname, "depth below sea") == 0 )
-      {
-        status = true;
-      }
+    {
+      status = true;
+    }
+  else if ( strcmp(longname, "depth_below_sea") == 0 ||
+            strcmp(longname, "depth below sea") == 0 )
+    {
+      status = true;
+    }
 
   return status;
 }
@@ -173,13 +176,14 @@ bool is_height_axis(const char *stdname, const char *longname)
   bool status = false;
 
   if ( strcmp(stdname, "height") == 0 )
-    status = true;
-  else
-    if ( strcmp(longname, "height") == 0 ||
-         strcmp(longname, "height above the surface") == 0 )
-      {
-        status = true;
-      }
+    {
+      status = true;
+    }
+  else if ( strcmp(longname, "height") == 0 ||
+            strcmp(longname, "height above the surface") == 0 )
+    {
+      status = true;
+    }
 
   return status;
 }
@@ -259,34 +263,21 @@ bool is_y_axis(const char *units, const char *stdname)
 
 void set_gridtype(const char *attstring, int *gridtype)
 {
-  if      ( strcmp(attstring, "gaussian reduced") == 0 )
-    *gridtype = GRID_GAUSSIAN_REDUCED;
-  else if ( strcmp(attstring, "gaussian") == 0 )
-    *gridtype = GRID_GAUSSIAN;
-  else if ( strncmp(attstring, "spectral", 8) == 0 )
-    *gridtype = GRID_SPECTRAL;
-  else if ( strncmp(attstring, "fourier", 7) == 0 )
-    *gridtype = GRID_FOURIER;
-  else if ( strcmp(attstring, "trajectory") == 0 )
-    *gridtype = GRID_TRAJECTORY;
-  else if ( strcmp(attstring, "generic") == 0 )
-    *gridtype = GRID_GENERIC;
-  else if ( strcmp(attstring, "cell") == 0 )
-    *gridtype = GRID_UNSTRUCTURED;
-  else if ( strcmp(attstring, "unstructured") == 0 )
-    *gridtype = GRID_UNSTRUCTURED;
-  else if ( strcmp(attstring, "curvilinear") == 0 )
-    ;
-  else if ( strcmp(attstring, "characterxy") == 0 )
-    *gridtype = GRID_CHARXY;
-  else if ( strcmp(attstring, "sinusoidal") == 0 )
-    ;
-  else if ( strcmp(attstring, "laea") == 0 )
-    ;
-  else if ( strcmp(attstring, "lcc2") == 0 )
-    ;
-  else if ( strcmp(attstring, "linear") == 0 ) // ignore grid type linear
-    ;
+  // clang-format off
+  if      ( strcmp(attstring, "gaussian_reduced") == 0 ) *gridtype = GRID_GAUSSIAN_REDUCED;
+  else if ( strcmp(attstring, "gaussian") == 0 ) *gridtype = GRID_GAUSSIAN;
+  else if ( strncmp(attstring, "spectral", 8) == 0 ) *gridtype = GRID_SPECTRAL;
+  else if ( strncmp(attstring, "fourier", 7) == 0 ) *gridtype = GRID_FOURIER;
+  else if ( strcmp(attstring, "trajectory") == 0 ) *gridtype = GRID_TRAJECTORY;
+  else if ( strcmp(attstring, "generic") == 0 ) *gridtype = GRID_GENERIC;
+  else if ( strcmp(attstring, "cell") == 0 ) *gridtype = GRID_UNSTRUCTURED;
+  else if ( strcmp(attstring, "unstructured") == 0 ) *gridtype = GRID_UNSTRUCTURED;
+  else if ( strcmp(attstring, "curvilinear") == 0 ) ;
+  else if ( strcmp(attstring, "characterxy") == 0 ) *gridtype = GRID_CHARXY;
+  else if ( strcmp(attstring, "sinusoidal") == 0 ) ;
+  else if ( strcmp(attstring, "laea") == 0 ) ;
+  else if ( strcmp(attstring, "lcc2") == 0 ) ;
+  else if ( strcmp(attstring, "linear") == 0 ) ; // ignore grid type linear
   else
     {
       static bool warn = true;
@@ -296,11 +287,13 @@ void set_gridtype(const char *attstring, int *gridtype)
           Warning("NetCDF attribute grid_type='%s' unsupported!", attstring);
         }
     }
+  // clang-format on
 }
 
 
 void set_zaxistype(const char *attstring, int *zaxistype)
 {
+  // clang-format off
   if      ( strcmp(attstring, "toa") == 0 ) *zaxistype = ZAXIS_TOA;
   else if ( strcmp(attstring, "cloudbase") == 0 ) *zaxistype = ZAXIS_CLOUD_BASE;
   else if ( strcmp(attstring, "cloudtop") == 0 ) *zaxistype = ZAXIS_CLOUD_TOP;
@@ -320,28 +313,23 @@ void set_zaxistype(const char *attstring, int *zaxistype)
           warn = false;
           Warning("NetCDF attribute level_type='%s' unsupported!", attstring);
         }
-    }  
+    }
+  // clang-format on
 }
 
 
 void set_calendar(const char *attstring, int *calendar)
 {
-  if ( strStartsWith(attstring, "standard") )
-    *calendar = CALENDAR_STANDARD;
-  else if ( strStartsWith(attstring, "gregorian") )
-    *calendar = CALENDAR_GREGORIAN;
-  else if ( strStartsWith(attstring, "none") )
-    *calendar = CALENDAR_NONE;
-  else if ( strStartsWith(attstring, "proleptic") )
-    *calendar = CALENDAR_PROLEPTIC;
-  else if ( strStartsWith(attstring, "360") )
-    *calendar = CALENDAR_360DAYS;
+  // clang-format off
+  if      ( strStartsWith(attstring, "standard") ) *calendar = CALENDAR_STANDARD;
+  else if ( strStartsWith(attstring, "gregorian") ) *calendar = CALENDAR_GREGORIAN;
+  else if ( strStartsWith(attstring, "none") ) *calendar = CALENDAR_NONE;
+  else if ( strStartsWith(attstring, "proleptic") ) *calendar = CALENDAR_PROLEPTIC;
+  else if ( strStartsWith(attstring, "360") ) *calendar = CALENDAR_360DAYS;
   else if ( strStartsWith(attstring, "365") ||
-            strStartsWith(attstring, "noleap") )
-    *calendar = CALENDAR_365DAYS;
+            strStartsWith(attstring, "noleap") ) *calendar = CALENDAR_365DAYS;
   else if ( strStartsWith(attstring, "366") ||
-            strStartsWith(attstring, "all_leap") )
-    *calendar = CALENDAR_366DAYS;
-  else
-    Warning("calendar >%s< unsupported!", attstring);
+            strStartsWith(attstring, "all_leap") ) *calendar = CALENDAR_366DAYS;
+  else Warning("calendar >%s< unsupported!", attstring);
+  // clang-format on
 }
