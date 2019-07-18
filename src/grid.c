@@ -584,6 +584,9 @@ void gridDestroyKernel( grid_t * gridptr )
 */
 void gridDestroy(int gridID)
 {
+  //cdiDeleteKeys(gridID, CDI_GLOBAL);
+  //cdiDeleteAtts(gridID, CDI_GLOBAL);
+
   grid_t *gridptr = grid_to_pointer(gridID);
   gridptr->vtable->destroy(gridptr);
 }
