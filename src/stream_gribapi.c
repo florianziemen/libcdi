@@ -3002,12 +3002,12 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   vlistInqVarName(vlistID, varID, name);
   vlistInqVarStdname(vlistID, varID, stdname);
 
-#if defined(GRIBAPIENCODETEST)
+#ifdef  GRIBAPIENCODETEST
   grib_handle *gh = (grib_handle *) gribHandleNew(editionNumber);
 #else
   gribContainer_t *gc = (gribContainer_t *) gribContainer;
   assert(gc != NULL);
-  grib_handle *gh = (struct grib_handle *)gc->gribHandle;
+  grib_handle *gh = (struct grib_handle *) gc->gribHandle;
 #endif
 
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
@@ -3059,7 +3059,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       int shapeOfTheEarth = 0;
       cdiInqKeyInt(vlistID, varID, CDI_KEY_SHAPEOFTHEEARTH, &shapeOfTheEarth);
       GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", (long)shapeOfTheEarth), 0);
-      GRIB_CHECK(my_grib_set_long(gh, "grib2LocalSectionPresent", 0), 0);
 
       int grib2LocalSectionNumber, section2PaddingLength;
       int mpimType, mpimClass, mpimUser;
@@ -3179,7 +3178,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   /* get a copy of the coded message */
   GRIB_CHECK(grib_get_message_copy(gh, *gribbuffer, &recsize), 0);
 
-#if defined(GRIBAPIENCODETEST)
+#ifdef  GRIBAPIENCODETEST
   gribHandleDelete(gh);
 #endif
 
