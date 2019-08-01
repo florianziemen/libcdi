@@ -2198,7 +2198,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
   const size_t gridsize = gridInqSize(gridID);
   bool gridIsRotated = false;
   bool gridIsCurvilinear = false;
-  const int gridtype = grbGetGridtype(gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
+  const int gridtype = grbGetGridtype(&gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
 
   bool lieee = (editionNumber == 2 && (datatype == CDI_DATATYPE_FLT32 || datatype == CDI_DATATYPE_FLT64));
   bool lspectral = (gridtype == GRID_SPECTRAL);

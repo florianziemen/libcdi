@@ -405,14 +405,14 @@ void streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
 }
 
 
-int grbGetGridtype(int gridID, size_t gridsize, bool *gridIsRotated, bool *gridIsCurvilinear)
+int grbGetGridtype(int *gridID, size_t gridsize, bool *gridIsRotated, bool *gridIsCurvilinear)
 {
-  int gridtype = gridInqType(gridID);
+  int gridtype = gridInqType(*gridID);
 
   if ( gridtype == GRID_GENERIC )
     {
-      int xsize = (int) gridInqXsize(gridID);
-      int ysize = (int) gridInqYsize(gridID);
+      int xsize = (int) gridInqXsize(*gridID);
+      int ysize = (int) gridInqYsize(*gridID);
 
       if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
 	    ysize ==  96 || ysize == 160 || ysize == 192 ||
@@ -426,17 +426,17 @@ int grbGetGridtype(int gridID, size_t gridsize, bool *gridIsRotated, bool *gridI
 	{
 	  gridtype = GRID_LONLAT;
 	}
-      else if ( gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL) )
+      else if ( gridInqXvals(*gridID, NULL) && gridInqYvals(*gridID, NULL) )
 	{
 	  gridtype = GRID_LONLAT;
 	}
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
-      int projID = gridInqProj(gridID);
+      int projID = gridInqProj(*gridID);
       if ( projID != CDI_UNDEFID && gridInqType(projID) == GRID_PROJECTION )
         {
-          gridID = projID;
+          *gridID = projID;
           gridtype = GRID_PROJECTION;
         }
       else
@@ -454,7 +454,7 @@ int grbGetGridtype(int gridID, size_t gridsize, bool *gridIsRotated, bool *gridI
 
   if ( gridtype == GRID_PROJECTION )
     {
-      int projtype = gridInqProjType(gridID);
+      int projtype = gridInqProjType(*gridID);
       if ( projtype == CDI_PROJ_RLL )
         {
           gridtype = GRID_LONLAT;

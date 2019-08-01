@@ -31,7 +31,7 @@ int   grib2ltypeToZaxisType(int grib_ltype);
 int   zaxisTypeToGrib1ltype(int zaxistype);
 int   zaxisTypeToGrib2ltype(int zaxistype);
 
-int grbGetGridtype(int gridID, size_t gridsize, bool *gridIsRotated, bool *gridIsCurvilinear);
+int grbGetGridtype(int *gridID, size_t gridsize, bool *gridIsRotated, bool *gridIsCurvilinear);
 
 struct cdiGribParamChange
 {

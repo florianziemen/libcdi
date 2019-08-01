@@ -1772,7 +1772,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
   int gridsize = (int) gridInqSize(gridID);
   bool gridIsRotated = false;
   bool gridIsCurvilinear = false;
-  int gridtype = grbGetGridtype(gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
+  int gridtype = grbGetGridtype(&gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
 
   switch (gridtype)
     {
