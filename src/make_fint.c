@@ -56,7 +56,7 @@ static int doccmp(const void *s1, const void *s2)
   Docu *x = (Docu *) s1;
   Docu *y = (Docu *) s2;
 
-  return (strcmp(x->fname, y->fname));
+  return strcmp(x->fname, y->fname);
 }
 
 static void doctotex(FILE *fp, const Docu *doc, const size_t ndoc)
@@ -494,8 +494,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
           printf("Found: %.*s\n",
                  (int) (nameMatch->rm_eo - nameMatch->rm_so),
                  pline + nameMatch->rm_so);
-        ssize_t funNameLast = reMatch[0].rm_eo - 1;
-        ssize_t nameLen = nameMatch->rm_eo - nameMatch->rm_so;
+        const ssize_t funNameLast = reMatch[0].rm_eo - 1;
+        const ssize_t nameLen = nameMatch->rm_eo - nameMatch->rm_so;
         funcnameLen = (size_t)nameLen;
         if ( pline[funNameLast] != '(' )
           {
@@ -516,7 +516,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
             ssize_t i = 0;
             size_t innerParens = 0;
             do {
-              ssize_t restLen = lineLen - (ssize_t)(pline - line);
+              const ssize_t restLen = lineLen - (ssize_t)(pline - line);
               for (; i < restLen; i++ )
                 {
                   switch (pline[i])
@@ -578,7 +578,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
               {
                 pline = line + funcargname[i].rm_so;
                 int argtype;
-                regoff_t argStart = (regoff_t)(pline - line);
+                const regoff_t argStart = (regoff_t)(pline - line);
                 for (argtype = ISVOID;
                      argtype < NUM_KNOWN_ARG_TYPES;
                      ++argtype)
@@ -628,8 +628,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 		fprintf(fpinc, "!%36s(", "");
 	      else
 		fprintf(fpinc, ",\n!%36s ", "");
-              int argType = funcargtype[i];
-              int isArray = isArrayArgType(argType);
+              const int argType = funcargtype[i];
+              const int isArray = isArrayArgType(argType);
               enum { argDimsFSize = 128 };
               char argDimsF[argDimsFSize];
               if (!isArray)
@@ -682,8 +682,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                   char arrayDimsC[arrayDimsCSize];
                   static const char constStr[] = "const ", nonConstStr[] = "";
                   const char *constStrP;
-                  int argType = funcargtype[i];
-                  int isArray = isArrayArgType(argType);
+                  const int argType = funcargtype[i];
+                  const int isArray = isArrayArgType(argType);
                   if (!isArray)
                     {
                       arrayDimsC[0] = 0;
@@ -895,15 +895,15 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                   enum { argDimsFSize = 128 };
                   char farg[128], argDimsF[argDimsFSize];
                   /* FIXME: optional empty argument name unhandled */
-                  int argType = funcargtype[i];
-                  int isArray = isArrayArgType(argType);
+                  const int argType = funcargtype[i];
+                  const int isArray = isArrayArgType(argType);
                   if (!isArray)
                     argDimsF[0] = 0;
                   else
                     sprintFortranArrayArgDims(argDimsFSize, argDimsF, argType,
                                               line + funcargfull[i].rm_so,
                                               maxMatch, reMatch);
-		  int nchn
+		  const int nchn
                     = snprintf(farg, sizeof (farg), "%s %.*s%s",
                                funArgSym[argType].f77name,
                                (int)(funcargname[i].rm_eo
@@ -943,7 +943,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 	  if ( isdigit((int)*(pline + (*pline == '-'))) )
             {
               parname[parnameLen] = 0;
-              int parvalue = atoi(pline);
+              const int parvalue = atoi(pline);
               /* fortran include */
               fprintf(fpinc, "      INTEGER    %s\n"
                       "      PARAMETER (%-22s = %2d)\n", parname, parname, parvalue);
@@ -1034,7 +1034,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 
 
   char *filename;
-  size_t doc_root_len = strlen(doc_root);
+  const size_t doc_root_len = strlen(doc_root);
   {
     size_t max_len = 0;
     for (size_t i = 0; i < (size_t)fname_list_size; ++i)
@@ -1162,7 +1162,7 @@ int main(int argc, char *argv[])
         break;
       default: /* '?' */
         fprintf(stderr, "Usage: %s [-d DOCROOT] includefile\n", argv[0]);
-        return(EXIT_FAILURE);
+        return EXIT_FAILURE;
       }
   }
 
@@ -1170,7 +1170,7 @@ int main(int argc, char *argv[])
   if ( argc != 2 + optargCount)
     {
       printf("Usage:  %s [-d DOCROOT] includefile\n", argv[0]);
-      return (1);
+      return 1;
     }
 
   char *fname = argv[1 + optargCount];
@@ -1233,7 +1233,7 @@ symRegexCompile(size_t numSyms, struct symbol symList[],
       if (reCompile(&symList[sym].preg, symList[sym].parseRE,
                     line, lineBufSize))
         exit(EXIT_FAILURE);
-      size_t numMatches = symList[sym].nameMatch
+      const size_t numMatches = symList[sym].nameMatch
         + (size_t)arrayArgRank((int)sym);
       if (numMatches > maxMatch)
         maxMatch = numMatches;
@@ -1406,7 +1406,7 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
             {
               ++eol;
               /* delete whitespace following newline */
-              size_t squeezeLen = strspn(eol, " \t*");
+              const size_t squeezeLen = strspn(eol, " \t*");
               char *startoftext = eol + squeezeLen;
               memmove(eol, startoftext, docMatchLen - (size_t)(startoftext - xdes));
               docMatchLen -= squeezeLen;
@@ -1420,10 +1420,10 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
       }
     else if (!regexec(&commentRE, line, maxMatch, reMatch, 0))
       {
-        size_t commentLen = (size_t)(reMatch[1].rm_eo - reMatch[1].rm_so);
+        const size_t commentLen = (size_t)(reMatch[1].rm_eo - reMatch[1].rm_so);
         char *comment = line + reMatch[1].rm_so;
         {
-          char savedCommentEnd = comment[commentLen];
+          const char savedCommentEnd = comment[commentLen];
           comment[commentLen] = '\0';
           /* fortran include */
           fputs("!\n", fpinc);
@@ -1431,8 +1431,7 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
           do {
             cline += strspn(cline, " \t*");
             char *eol = strchr(cline, '\n');
-            if (!eol)
-              eol = comment + commentLen;
+            if (!eol) eol = comment + commentLen;
             size_t lineLen = (size_t)(eol - cline);
             fprintf(fpinc, "!  %.*s\n", (int)lineLen, cline);
             cline = (eol != comment + commentLen) ? eol + 1: NULL;
