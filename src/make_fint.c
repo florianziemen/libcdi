@@ -59,7 +59,7 @@ static int doccmp(const void *s1, const void *s2)
   return (strcmp(x->fname, y->fname));
 }
 
-static void doctotex(FILE *fp, Docu *doc, size_t ndoc)
+static void doctotex(FILE *fp, const Docu *doc, const size_t ndoc)
 {
   for ( size_t i = 0; i < ndoc; i++ )
     {
@@ -72,14 +72,12 @@ static void doctotex(FILE *fp, Docu *doc, size_t ndoc)
     }
 }
 
-static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
+static void doctotxt(FILE *fp, const Docu *doc, const size_t ndoc)
 {
-  size_t i, k;
-
-  for ( i = 0; i < ndoc; i++ )
+  for ( size_t i = 0; i < ndoc; i++ )
     {
       fprintf(fp, "%s\n\n", doc[i].fname);
-      for ( k = 0; k < doc[i].naline; k++ )
+      for ( size_t k = 0; k < doc[i].naline; k++ )
 	fprintf(fp, "    %s\n", doc[i].aline[k]);
       fprintf(fp, "\n  %s.\n\n", doc[i].text);
     }
@@ -136,12 +134,12 @@ struct symbol {
 
 /* C symbol names */
 #define SYMRE "([A-Za-z_][A-Za-z_0-9]*)"
-static inline int isSymStart(int c)
+static inline int isSymStart(const int c)
 {
   return (isalpha(c) || c == '_');
 }
 
-static inline int isSym(int c)
+static inline int isSym(const int c)
 {
   return (isalnum(c) || c == '_');
 }
@@ -297,7 +295,6 @@ sprintCArrayArgDims(size_t argDimsCSize, char argDimsC[argDimsCSize],
 static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                               const char *doc_root)
 {
-  FILE *fpin, *fpinc, *fpint;
   FILE *fp;
   char *line = NULL, *pline;
   size_t lineBufSize = 0;
@@ -315,14 +312,13 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   int  funcargtype[MAX_FUNC_ARGS];
   /* char *strsort[99999]; */
   char timestr[30];
-  time_t date_and_time_in_sec;
   struct tm *date_and_time;
   regmatch_t *reMatch = NULL;
   size_t maxMatch = 0;
   char **definedParnames = NULL;
   size_t numDefinedParnames = 0;
 
-  date_and_time_in_sec = time(NULL);
+  time_t date_and_time_in_sec = time(NULL);
   timestr[0] = 0;
 
   if ( date_and_time_in_sec != -1 )
@@ -331,13 +327,13 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
       (void) strftime(timestr, sizeof(timestr), "%B %Y", date_and_time);
     }
 
-  fpin = fopen(fname, "r");
+  FILE *fpin = fopen(fname, "r");
   if ( fpin == NULL ) { perror(fname); return; }
 
-  fpinc = fopen(fnameinc, "w");
+  FILE *fpinc = fopen(fnameinc, "w");
   if ( fpinc == NULL ) { perror(fnameinc); return; }
 
-  fpint = fopen(fnameint, "w");
+  FILE *fpint = fopen(fnameint, "w");
   if ( fpint == NULL ) { perror(fnameint); return; }
 
   /* complete symbol table data */
@@ -422,7 +418,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   {
     char *lastSlash = strrchr(fname, '/');
     char *fbasename = lastSlash ? (lastSlash+1) : fname;
-    size_t fbasenameLen = strlen(fbasename);
+    const size_t fbasenameLen = strlen(fbasename);
     cppHeaderSentinelMacroLen = fbasenameLen + 1;
     cppHeaderSentinelMacro = (char *)malloc(fbasenameLen + 2);
     build_header_name(fbasenameLen, fbasename, cppHeaderSentinelMacro);
@@ -1136,7 +1132,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 }
 
 static void
-build_header_name(size_t len, const char *fname, char *cppMacro)
+build_header_name(const size_t len, const char *fname, char *cppMacro)
 {
   for (size_t i = 0; i < len; ++i)
     switch (fname[i])
@@ -1153,11 +1149,7 @@ build_header_name(size_t len, const char *fname, char *cppMacro)
 
 int main(int argc, char *argv[])
 {
-  char *fname;
-  char *cp;
   const char *doc_root = default_doc_root;
-  char fnameinc[128], fnameint[128];
-  size_t len;
 
   int optargCount = 0;
   {
@@ -1181,12 +1173,12 @@ int main(int argc, char *argv[])
       return (1);
     }
 
-  fname = argv[1 + optargCount];
+  char *fname = argv[1 + optargCount];
 
-  cp = strrchr(fname, '.');
-  if ( cp == NULL ) len = strlen(fname);
-  else              len = (size_t)(cp - fname);
+  char *cp = strrchr(fname, '.');
+  const size_t len = (cp == NULL) ? strlen(fname) : (size_t)(cp - fname);
 
+  char fnameinc[128], fnameint[128];
   memcpy(fnameinc, fname, len);
   memcpy(fnameint, fname, len);
 
@@ -1195,7 +1187,7 @@ int main(int argc, char *argv[])
 
   fortran_interface(fname, fnameinc, fnameint, doc_root);
 
-  return (0);
+  return 0;
 }
 
 static inline size_t
@@ -1377,7 +1369,7 @@ static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
 
 static int cfVoidFuncPrologue(FILE *outfp, size_t argNum)
 {
-  int retval
+  const int retval
     = fprintf(outfp, "\n#undef ROUTINE_%zu\n#define ROUTINE_%zu %s\n",
               argNum+1, argNum+1, "(void (*)(void))");
   return retval;
@@ -1485,7 +1477,7 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
 }
 
 static inline int
-isArrayArgType(int argType)
+isArrayArgType(const int argType)
 {
   return argType == ISFLOATV
     || argType == ISFLOATVV
@@ -1497,7 +1489,7 @@ isArrayArgType(int argType)
 }
 
 static inline int
-arrayArgRank(int argType)
+arrayArgRank(const int argType)
 {
   int rank = 0;
   switch (argType) {
@@ -1524,12 +1516,12 @@ sprintCArrayArgDims(size_t argDimsCSize, char argDimsC[argDimsCSize],
                     const regmatch_t reMatch[])
 {
   size_t argDimsCPos = 0;
-  int arank = arrayArgRank(argType);
+  const int arank = arrayArgRank(argType);
   for (int rank = 1; rank <= arank; ++rank)
     {
-      size_t rankBoundMatch
+      const size_t rankBoundMatch
         = funArgSym[argType].nameMatch + (size_t)rank;
-      size_t boundStringLen
+      const size_t boundStringLen
         = (size_t)(reMatch[rankBoundMatch].rm_eo
                    - reMatch[rankBoundMatch].rm_so);
       argDimsC[argDimsCPos++] = '[';
@@ -1559,12 +1551,12 @@ sprintFortranArrayArgDims(size_t argDimsFSize, char argDimsF[argDimsFSize],
     }
   argDimsF[0] = '(';
   size_t argDimsFPos = 1;
-  int arank = arrayArgRank(argType);
+  const int arank = arrayArgRank(argType);
   for (int rank = arank; rank > 0; --rank)
     {
-      size_t rankBoundMatch
+      const size_t rankBoundMatch
         = funArgSym[argType].nameMatch + (size_t)rank;
-      size_t boundStringLen
+      const size_t boundStringLen
         = (size_t)(reMatch[rankBoundMatch].rm_eo
                    - reMatch[rankBoundMatch].rm_so);
       if (!boundStringLen)
