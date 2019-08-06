@@ -313,12 +313,18 @@
 !  
 !  Currently, only multiple pairs combined by AND are supported.
 !
+!
+!  TIME types
+!
       INTEGER    TIME_CONSTANT
       PARAMETER (TIME_CONSTANT          =  0)
       INTEGER    TIME_VARYING
       PARAMETER (TIME_VARYING           =  1)
       INTEGER    TIME_VARIABLE
       PARAMETER (TIME_VARIABLE          =  1)
+!
+!  TSTEP types
+!
       INTEGER    TSTEP_INSTANT
       PARAMETER (TSTEP_INSTANT          =  1)
       INTEGER    TSTEP_AVG
@@ -347,12 +353,18 @@
       PARAMETER (TSTEP_INSTANT2         = 13)
       INTEGER    TSTEP_INSTANT3
       PARAMETER (TSTEP_INSTANT3         = 14)
+!
+!  TAXIS types
+!
       INTEGER    TAXIS_ABSOLUTE
       PARAMETER (TAXIS_ABSOLUTE         =  1)
       INTEGER    TAXIS_RELATIVE
       PARAMETER (TAXIS_RELATIVE         =  2)
       INTEGER    TAXIS_FORECAST
       PARAMETER (TAXIS_FORECAST         =  3)
+!
+!  TUNIT types
+!
       INTEGER    TUNIT_SECOND
       PARAMETER (TUNIT_SECOND           =  1)
       INTEGER    TUNIT_MINUTE
@@ -375,6 +387,9 @@
       PARAMETER (TUNIT_MONTH            = 10)
       INTEGER    TUNIT_YEAR
       PARAMETER (TUNIT_YEAR             = 11)
+!
+!  CALENDAR types
+!
       INTEGER    CALENDAR_STANDARD
       PARAMETER (CALENDAR_STANDARD      =  0)
       INTEGER    CALENDAR_GREGORIAN
@@ -731,6 +746,33 @@
 
 !
 !  File driven I/O (may yield better performance than using the streamXXX functions)
+!
+!
+!  Creation & Destruction
+!
+!
+!  Advancing an iterator
+!
+!
+!  Introspecting metadata
+!
+!
+!  All outXXX arguments to these functions may be NULL.
+!
+!
+!  Reading data
+!
+!
+!  TODO[NH]: Add functions to read partial fields.
+!
+!
+!  Direct access to grib fields
+!
+!
+!  Callthroughs to GRIB-API
+!
+!
+!  Convenience functions for accessing GRIB-API keys
 !
 !
 !  VLIST routines
@@ -1295,6 +1337,9 @@
 !                                     CHARACTER*(*)   name)
       EXTERNAL        vlistInqVarIntKey
 
+!
+!  CDI attributes
+!
       INTEGER         cdiInqNatts
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
@@ -1373,6 +1418,9 @@
 !                                     CHARACTER*(*)   tp_cbuf)
       EXTERNAL        cdiInqAttTxt
 
+!
+!  GRID routines
+!
 !                     gridName
 !                                    (INTEGER         gridtype,
 !                                     CHARACTER*(*)   gridname)
@@ -1509,6 +1557,9 @@
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqYIsc
 
+!
+!  CDI var keys
+!
       INTEGER    CDI_KEY_TABLESVERSION
       PARAMETER (CDI_KEY_TABLESVERSION  = 801)
       INTEGER    CDI_KEY_LOCALTABLESVERSION
@@ -1596,6 +1647,9 @@
 !                                     INTEGER         varID2)
       EXTERNAL        cdiCopyKeys
 
+!
+!  CDI grid keys
+!
       INTEGER    CDI_KEY_XNAME
       PARAMETER (CDI_KEY_XNAME          = 901)
       INTEGER    CDI_KEY_XDIMNAME
@@ -1618,6 +1672,9 @@
       PARAMETER (CDI_KEY_MAPPING        = 921)
       INTEGER    CDI_KEY_MAPNAME
       PARAMETER (CDI_KEY_MAPNAME        = 922)
+!
+!  CDI zaxis keys
+!
       INTEGER    CDI_KEY_NAME
       PARAMETER (CDI_KEY_NAME           = 941)
       INTEGER    CDI_KEY_DIMNAME
@@ -2012,6 +2069,9 @@
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqScanningMode
 
+!
+!  ZAXIS routines
+!
 !                     zaxisName
 !                                    (INTEGER         zaxistype,
 !                                     CHARACTER*(*)   zaxisname)

@@ -277,25 +277,21 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
                          char *xname, size_t *xnameLen, char **xdes,
                          int *lineno, FILE *fpin, FILE *fpinc, FILE *fpint);
 
-static regex_t commentStartRE, commentEndRE, commentRE, docCommentRE, docLineCommentRE;
+static regex_t commentStartRE, commentEndRE, commentRE, comment2RE, docCommentRE, docComment2RE;
 
 static inline int
 arrayArgRank(int argType);
 
 static void
 sprintFortranArrayArgDims(size_t argDimsFSize, char argDimsF[argDimsFSize],
-                          int argType, const char *argSpecC,
-                          size_t maxMatch, regmatch_t reMatch[]);
+                          int argType, const char *argSpecC, size_t maxMatch, regmatch_t reMatch[]);
 
 static void
 sprintCArrayArgDims(size_t argDimsCSize, char argDimsC[argDimsCSize],
-                    int argType, const char *argSpecC,
-                    const regmatch_t reMatch[]);
+                    int argType, const char *argSpecC, const regmatch_t reMatch[]);
 
-static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
-                              const char *doc_root)
+static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const char *doc_root)
 {
-  FILE *fp;
   char *line = NULL, *pline;
   size_t lineBufSize = 0;
   char sname[128], *parname;
@@ -338,10 +334,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 
   /* complete symbol table data */
   {
-    maxMatch = symRegexCompile(NUM_KNOWN_ARG_TYPES, funArgSym,
-                               &line, &lineBufSize);
-    size_t maxFunMatch = symRegexCompile(NUM_RET_TYPES, funRet,
-                                         &line, &lineBufSize);
+    maxMatch = symRegexCompile(NUM_KNOWN_ARG_TYPES, funArgSym, &line, &lineBufSize);
+    size_t maxFunMatch = symRegexCompile(NUM_RET_TYPES, funRet, &line, &lineBufSize);
     if (maxFunMatch > maxMatch)
       maxMatch = maxFunMatch;
   }
@@ -361,17 +355,20 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   }
   /* compile complete comment regular expression */
   {
-    static const char commentREString[] = "^"WS"*/\\*"WS"*(.*"NWS")"WS"*\\*/";
+    static const char commentREString[]  = "^"WS"*/\\*"WS"*(.*"NWS")"WS"*\\*/";
+    static const char comment2REString[] = "^"WS"*//"WS"*(.*"NWS")";
     if (reCompile(&commentRE, commentREString, &line, &lineBufSize))
+      exit(EXIT_FAILURE);
+    if (reCompile(&comment2RE, comment2REString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
   }
   /* compile documentation comment regular expression */
   {
-    static const char docCommentREString[]     = "^"WS"*/\\*"WS"*"SYMRE":("WS"*).*"NWS"("WS"*)\\*/";
-    static const char docLineCommentREString[] = "^"WS"*//"WS"*"SYMRE":("WS"*).*"NWS"("WS"*)";
+    static const char docCommentREString[]  = "^"WS"*/\\*"WS"*"SYMRE":("WS"*).*"NWS"("WS"*)\\*/";
+    static const char docComment2REString[] = "^"WS"*//"WS"*"SYMRE":("WS"*).*"NWS"("WS"*)";
     if (reCompile(&docCommentRE, docCommentREString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
-    if (reCompile(&docLineCommentRE, docLineCommentREString, &line, &lineBufSize))
+    if (reCompile(&docComment2RE, docComment2REString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
   }
   regex_t cppCondRE;
@@ -525,8 +522,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                       if (!innerParens)
                         {
                           funcargc++;
-                          funcargname[funcargc].rm_so
-                            = (regoff_t)(pline - line + i + 1);
+                          funcargname[funcargc].rm_so = (regoff_t)(pline - line + i + 1);
                         }
                       break;
                     case '(':
@@ -536,8 +532,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                       if (!innerParens)
                         {
                           funcargc++;
-                          funcargname[funcargc].rm_so
-                            = (regoff_t)(pline - line + i + 1);
+                          funcargname[funcargc].rm_so = (regoff_t)(pline - line + i + 1);
                           goto endOfArgSearch;
                         }
                       else
@@ -565,10 +560,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 
             /* test if argument list is actually empty */
           if (funcargc == 1
-              && !regexec(&emptyStringRE, line + funcargname[0].rm_so, 1,
-                          reMatch, 0)
-              && (funcargname[0].rm_so + reMatch[0].rm_eo
-                  == funcargname[funcargc].rm_so - 1))
+              && !regexec(&emptyStringRE, line + funcargname[0].rm_so, 1, reMatch, 0)
+              && (funcargname[0].rm_so + reMatch[0].rm_eo == funcargname[funcargc].rm_so - 1))
             {
               funcargc = 0;
             }
@@ -579,11 +572,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                 pline = line + funcargname[i].rm_so;
                 int argtype;
                 const regoff_t argStart = (regoff_t)(pline - line);
-                for (argtype = ISVOID;
-                     argtype < NUM_KNOWN_ARG_TYPES;
-                     ++argtype)
-                  if (!regexec(&funArgSym[argtype].preg, pline, maxMatch,
-                               reMatch, 0))
+                for (argtype = ISVOID; argtype < NUM_KNOWN_ARG_TYPES; ++argtype)
+                  if (!regexec(&funArgSym[argtype].preg, pline, maxMatch, reMatch, 0))
                     {
                       funcargtype[i] = argtype;
                       funcargfull[i].rm_so = reMatch[0].rm_so + argStart;
@@ -591,10 +581,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                       regmatch_t *nameMatch = reMatch + funArgSym[argtype].nameMatch;
                       funcargname[i].rm_so = nameMatch->rm_so + argStart;
                       funcargname[i].rm_eo = nameMatch->rm_eo + argStart;
-                      needsExtraWrapper
-                        = needsExtraWrapper || funArgSym[argtype].needsExtraWrapper;
-                      needsPrologue = needsPrologue
-                        || funArgSym[argtype].needsPrologue;
+                      needsExtraWrapper = needsExtraWrapper || funArgSym[argtype].needsExtraWrapper;
+                      needsPrologue = needsPrologue || funArgSym[argtype].needsPrologue;
                       break;
                     }
                 if (argtype == NUM_KNOWN_ARG_TYPES)
@@ -636,12 +624,10 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                 argDimsF[0] = 0;
               else
                 sprintFortranArrayArgDims(argDimsFSize, argDimsF, argType,
-                                          line + funcargfull[i].rm_so,
-                                          maxMatch, reMatch);
+                                          line + funcargfull[i].rm_so, maxMatch, reMatch);
 	      fprintf(fpinc, "%-16s%.*s%s", funArgSym[argType].f77name,
                       (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
-                      line + funcargname[i].rm_so,
-                      argDimsF);
+                      line + funcargname[i].rm_so, argDimsF);
 	    }
 	  if ( funcargc )
 	    fprintf(fpinc, ")\n");
@@ -901,15 +887,11 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                     argDimsF[0] = 0;
                   else
                     sprintFortranArrayArgDims(argDimsFSize, argDimsF, argType,
-                                              line + funcargfull[i].rm_so,
-                                              maxMatch, reMatch);
+                                              line + funcargfull[i].rm_so, maxMatch, reMatch);
 		  const int nchn
-                    = snprintf(farg, sizeof (farg), "%s %.*s%s",
-                               funArgSym[argType].f77name,
-                               (int)(funcargname[i].rm_eo
-                                     - funcargname[i].rm_so),
-                               line + funcargname[i].rm_so,
-                               argDimsF);
+                    = snprintf(farg, sizeof (farg), "%s %.*s%s", funArgSym[argType].f77name,
+                               (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
+                               line + funcargname[i].rm_so, argDimsF);
                   if (nchn < 0) abort();
 		  if ( (xlineLen + (size_t)nchn) > 80 )
 		    {
@@ -948,8 +930,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
               fprintf(fpinc, "      INTEGER    %s\n"
                       "      PARAMETER (%-22s = %2d)\n", parname, parname, parvalue);
             }
-          else if (isSymStart((int)*pline)
-                   || (*pline == '-' && isSymStart(pline[1])))
+          else if (isSymStart((int)*pline) || (*pline == '-' && isSymStart(pline[1])))
             {
               parname[parnameLen] = 0;
               size_t parValueLen = 1 + (*pline == '-');
@@ -959,8 +940,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
               for (size_t i = 0; i < numDefinedParnames; ++i)
                 if (!strcmp(definedParnames[i], parValue + (*pline == '-')))
                   goto foundParname;
-              fprintf(stderr, "Found definition for %s to unknown value: %*s\n",
-                      parname, (int)parValueLen, parValue);
+              fprintf(stderr, "Found definition for %s to unknown value: %*s\n", parname, (int)parValueLen, parValue);
               foundParname:
               fprintf(fpinc, "      INTEGER    %s\n"
                       "      PARAMETER (%-22s = %1.*s)\n",
@@ -973,13 +953,10 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
               fprintf(fpinc, "%s", line);
               continue;
             }
-          definedParnames = realloc(definedParnames,
-                                    sizeof (definedParnames[0])
-                                    * (numDefinedParnames+1));
+          definedParnames = realloc(definedParnames, sizeof (definedParnames[0]) * (numDefinedParnames+1));
           if (!definedParnames)
             abort();
-          char *remembered = definedParnames[numDefinedParnames]
-            = malloc(parnameLen+1);
+          char *remembered = definedParnames[numDefinedParnames] = malloc(parnameLen+1);
           if (!remembered)
             abort();
           memcpy(remembered, parname, parnameLen+1);
@@ -987,10 +964,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 	}
       else if (!regexec(&cppCondRE, line, maxMatch, reMatch, 0)
                && ((cppSwitchLen = reMatch[2].rm_eo - reMatch[2].rm_so) == 5)
-               && ((size_t)(cppSymLen = reMatch[3].rm_eo - reMatch[3].rm_so)
-                   == sizeof (cplusplus_macro) - 1)
-               && !memcmp(line + reMatch[3].rm_so, cplusplus_macro,
-                          sizeof (cplusplus_macro) - 1))
+               && ((size_t)(cppSymLen = reMatch[3].rm_eo - reMatch[3].rm_so) == sizeof (cplusplus_macro) - 1)
+               && !memcmp(line + reMatch[3].rm_so, cplusplus_macro, sizeof (cplusplus_macro) - 1))
 	{
           fprintf(stderr, "Found conditional C++ block, skipping to #else\n");
           while ((lineLen = getline(&line, &lineBufSize, fpin)) >= 0)
@@ -999,10 +974,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
               static const char endif_str[] = "endif";
               if (!regexec(&cppElseRE, line, maxMatch, reMatch, 0)
                   || (!regexec(&cppCondRE, line, maxMatch, reMatch, 0)
-                      && ((size_t)(cppSymLen = reMatch[1].rm_eo - reMatch[1].rm_so)
-                          == sizeof (endif_str) - 1)
-                      && !memcmp(line + reMatch[1].rm_so, endif_str,
-                                 sizeof (endif_str) - 1)))
+                      && ((size_t)(cppSymLen = reMatch[1].rm_eo - reMatch[1].rm_so) == sizeof (endif_str) - 1)
+                      && !memcmp(line + reMatch[1].rm_so, endif_str, sizeof (endif_str) - 1)))
                 break;
             }
         }
@@ -1054,7 +1027,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   memcpy(filename + doc_root_len + 1,
          fname_list[NAME_C_QUICK_REF].name,
          fname_list[NAME_C_QUICK_REF].len + 1);
-  fp = fopen(filename, "w");
+  FILE *fp = fopen(filename, "w");
   if ( fp )
     {
       fputs("C Quick Reference\n"
@@ -1083,8 +1056,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
     }
   else
     {
-      fprintf(stderr, "warning: cannot open documentation output file %s, %s",
-              filename, strerror(errno));
+      fprintf(stderr, "warning: cannot open documentation output file %s, %s", filename, strerror(errno));
     }
 
   memcpy(filename + doc_root_len + 1,
@@ -1104,8 +1076,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
     }
   else
     {
-      fprintf(stderr, "warning: cannot open documentation output file %s, %s",
-              filename, strerror(errno));
+      fprintf(stderr, "warning: cannot open documentation output file %s, %s", filename, strerror(errno));
     }
 
   memcpy(filename + doc_root_len + 1,
@@ -1125,8 +1096,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
     }
   else
     {
-      fprintf(stderr, "warning: cannot open documentation output file %s, %s",
-              filename, strerror(errno));
+      fprintf(stderr, "warning: cannot open documentation output file %s, %s", filename, strerror(errno));
     }
   free(filename);
 }
@@ -1224,17 +1194,14 @@ enum {
 
 
 static size_t
-symRegexCompile(size_t numSyms, struct symbol symList[],
-                char **line, size_t *lineBufSize)
+symRegexCompile(size_t numSyms, struct symbol symList[], char **line, size_t *lineBufSize)
 {
   size_t maxMatch = 0;
   for (size_t sym = 0; sym < numSyms; ++sym)
     {
-      if (reCompile(&symList[sym].preg, symList[sym].parseRE,
-                    line, lineBufSize))
+      if (reCompile(&symList[sym].preg, symList[sym].parseRE, line, lineBufSize))
         exit(EXIT_FAILURE);
-      const size_t numMatches = symList[sym].nameMatch
-        + (size_t)arrayArgRank((int)sym);
+      const size_t numMatches = symList[sym].nameMatch + (size_t)arrayArgRank((int)sym);
       if (numMatches > maxMatch)
         maxMatch = numMatches;
     }
@@ -1256,8 +1223,7 @@ reCompile(regex_t *restrict RE, const char *restrict REstring,
           *lineBuf = line;
           *lineBufSize = resize;
           regerror(errcode, RE, line, *lineBufSize);
-          fprintf(stderr, "Error compiling regular expression: %s: %s\n",
-                  REstring, *lineBuf);
+          fprintf(stderr, "Error compiling regular expression: %s: %s\n", REstring, *lineBuf);
         }
     }
   return errcode;
@@ -1389,7 +1355,7 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
   char *restrict line = *line_;
   int matchType;
   do {
-    if (!regexec(&docCommentRE, line, maxMatch, reMatch, 0) || !regexec(&docLineCommentRE, line, maxMatch, reMatch, 0))
+    if (!regexec(&docCommentRE, line, maxMatch, reMatch, 0) || !regexec(&docComment2RE, line, maxMatch, reMatch, 0))
       {
         /* found documentation comment */
         size_t nameMatchLen = (size_t)(reMatch[1].rm_eo - reMatch[1].rm_so),
@@ -1418,7 +1384,7 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
         matchType = FOUND_DOCCOMMENT;
         break;
       }
-    else if (!regexec(&commentRE, line, maxMatch, reMatch, 0))
+    else if (!regexec(&commentRE, line, maxMatch, reMatch, 0) || !regexec(&comment2RE, line, maxMatch, reMatch, 0))
       {
         const size_t commentLen = (size_t)(reMatch[1].rm_eo - reMatch[1].rm_so);
         char *comment = line + reMatch[1].rm_so;
@@ -1440,7 +1406,7 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
           comment[commentLen] = savedCommentEnd;
         }
         /* fortran interface */
-        fprintf(fpint, "\n/*  %.*s  */\n\n", (int)commentLen, comment);
+        fprintf(fpint, "\n//  %.*s\n\n", (int)commentLen, comment);
         matchType = FOUND_COMMENT;
         break;
       }
