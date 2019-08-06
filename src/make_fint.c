@@ -979,10 +979,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
                 break;
             }
         }
-      else if (detectComment(&line, &lineLen, &lineBufSize,
-                             maxMatch, reMatch,
-                             xname, &xnameLen, &xdes, &lineno,
-                             fpin, fpinc, fpint))
+      else if (detectComment(&line, &lineLen, &lineBufSize, maxMatch, reMatch,
+                             xname, &xnameLen, &xdes, &lineno, fpin, fpinc, fpint))
         ;
       else
 	{
@@ -1017,8 +1015,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         if (len > max_len)
           max_len = len;
       }
-    /* path to document root, separating /, max of path within root,
-     * terminating '\0'  */
+    /* path to document root, separating /, max of path within root, terminating '\0'  */
     filename = (char*) malloc(doc_root_len + 1 + max_len + 1);
   }
 
@@ -1406,7 +1403,7 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
           comment[commentLen] = savedCommentEnd;
         }
         /* fortran interface */
-        fprintf(fpint, "\n//  %.*s\n\n", (int)commentLen, comment);
+        fprintf(fpint, "\n/*  %.*s  */\n\n", (int)commentLen, comment);
         matchType = FOUND_COMMENT;
         break;
       }

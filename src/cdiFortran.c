@@ -44,67 +44,67 @@ int size_t_c2f(size_t value_size_t)
 }
 
 
-//  Byte order
+/*  Byte order  */
 
 
-//  Error identifier
+/*  Error identifier  */
 
 
-//  File types
+/*  File types  */
 
 
-//  Compress types
+/*  Compress types  */
 
 
-//  external data types
+/*  external data types  */
 
 
-//  internal data types
+/*  internal data types  */
 
 
-//  Chunks
+/*  Chunks  */
 
 
-//  GRID types
+/*  GRID types  */
 
 
-//  ZAXIS types
+/*  ZAXIS types  */
 
 
-//  SUBTYPE types
+/*  SUBTYPE types  */
 
 
-//  Data structure defining a key-value search, possibly with multiple
+/*  Data structure defining a key-value search, possibly with multiple
    key-value pairs in combination.
 
-   Currently, only multiple pairs combined by AND are supported.
+   Currently, only multiple pairs combined by AND are supported.  */
 
 
-//  TIME types
+/*  TIME types  */
 
 
-//  TSTEP types
+/*  TSTEP types  */
 
 
-//  TAXIS types
+/*  TAXIS types  */
 
 
-//  TUNIT types
+/*  TUNIT types  */
 
 
-//  CALENDAR types
+/*  CALENDAR types  */
 
 
-//  number of unsigned char needed to store UUID
+/*  number of unsigned char needed to store UUID  */
 
 
-//  Structs that are used to return data to the user
+/*  Structs that are used to return data to the user  */
 
 
-//  Opaque types
+/*  Opaque types  */
 
 
-//  CDI control routines
+/*  CDI control routines  */
 
 FCALLSCSUB0 (cdiReset, CDIRESET, cdireset)
 FCALLSCFUN1 (STRING, cdiStringError, CDISTRINGERROR, cdistringerror, INT)
@@ -121,19 +121,19 @@ FCALLSCSUB1 (namespaceSetActive, NAMESPACESETACTIVE, namespacesetactive, INT)
 FCALLSCFUN0 (INT, namespaceGetActive, NAMESPACEGETACTIVE, namespacegetactive)
 FCALLSCSUB1 (namespaceDelete, NAMESPACEDELETE, namespacedelete, INT)
 
-//  CDI converter routines
+/*  CDI converter routines  */
 
 
-//  parameter
+/*  parameter  */
 
 FCALLSCSUB3 (cdiParamToString, CDIPARAMTOSTRING, cdiparamtostring, INT, PSTRING, INT)
 FCALLSCSUB4 (cdiDecodeParam, CDIDECODEPARAM, cdidecodeparam, INT, PINT, PINT, PINT)
 FCALLSCFUN3 (INT, cdiEncodeParam, CDIENCODEPARAM, cdiencodeparam, INT, INT, INT)
 
-//  date format:  YYYYMMDD
+/*  date format:  YYYYMMDD  */
 
 
-//  time format:    hhmmss
+/*  time format:    hhmmss  */
 
 static void cdiDecodeDate_fwrap(int date, int *year, int *month, int *day)
 {
@@ -150,7 +150,7 @@ FCALLSCFUN3 (INT, cdiEncodeDate_fwrap, CDIENCODEDATE, cdiencodedate, INT, INT, I
 FCALLSCSUB4 (cdiDecodeTime, CDIDECODETIME, cdidecodetime, INT, PINT, PINT, PINT)
 FCALLSCFUN3 (INT, cdiEncodeTime, CDIENCODETIME, cdiencodetime, INT, INT, INT)
 
-//  STREAM control routines
+/*  STREAM control routines  */
 
 FCALLSCFUN2 (INT, cdiGetFiletype, CDIGETFILETYPE, cdigetfiletype, STRING, PINT)
 FCALLSCFUN1 (INT, streamOpenRead, STREAMOPENREAD, streamopenread, STRING)
@@ -182,7 +182,7 @@ static int streamNvals_fwrap(int streamID)
 FCALLSCFUN1 (INT, streamNvals_fwrap, STREAMNVALS, streamnvals, INT)
 FCALLSCFUN1 (INT, streamInqNvars, STREAMINQNVARS, streaminqnvars, INT)
 
-//  STREAM var I/O routines (random access)
+/*  STREAM var I/O routines (random access)  */
 
 static void streamWriteVar_fwrap(int streamID, int varID, const double data[], int nmiss)
 {
@@ -242,7 +242,7 @@ static void streamWriteVarChunk_fwrap(int streamID, int varID, const int rect[3]
 }
 FCALLSCSUB5 (streamWriteVarChunk_fwrap, STREAMWRITEVARCHUNK, streamwritevarchunk, INT, INT, INTVV, DOUBLEV, INT)
 
-//  STREAM record I/O routines (sequential access)
+/*  STREAM record I/O routines (sequential access)  */
 
 FCALLSCSUB3 (streamDefRecord, STREAMDEFRECORD, streamdefrecord, INT, INT, INT)
 FCALLSCSUB3 (streamInqRecord, STREAMINQRECORD, streaminqrecord, INT, PINT, PINT)
@@ -274,37 +274,37 @@ static void streamReadRecordF_fwrap(int streamID, float data[], int *nmiss)
 FCALLSCSUB3 (streamReadRecordF_fwrap, STREAMREADRECORDF, streamreadrecordf, INT, FLOATV, PINT)
 FCALLSCSUB2 (streamCopyRecord, STREAMCOPYRECORD, streamcopyrecord, INT, INT)
 
-//  File driven I/O (may yield better performance than using the streamXXX functions)
+/*  File driven I/O (may yield better performance than using the streamXXX functions)  */
 
 
-//  Creation & Destruction
+/*  Creation & Destruction  */
 
 
-//  Advancing an iterator
+/*  Advancing an iterator  */
 
 
-//  Introspecting metadata
+/*  Introspecting metadata  */
 
 
-//  All outXXX arguments to these functions may be NULL.
+/*  All outXXX arguments to these functions may be NULL.  */
 
 
-//  Reading data
+/*  Reading data  */
 
 
-//  TODO[NH]: Add functions to read partial fields.
+/*  TODO[NH]: Add functions to read partial fields.  */
 
 
-//  Direct access to grib fields
+/*  Direct access to grib fields  */
 
 
-//  Callthroughs to GRIB-API
+/*  Callthroughs to GRIB-API  */
 
 
-//  Convenience functions for accessing GRIB-API keys
+/*  Convenience functions for accessing GRIB-API keys  */
 
 
-//  VLIST routines
+/*  VLIST routines  */
 
 FCALLSCFUN0 (INT, vlistCreate, VLISTCREATE, vlistcreate)
 FCALLSCSUB1 (vlistDestroy, VLISTDESTROY, vlistdestroy, INT)
@@ -349,7 +349,7 @@ FCALLSCFUN1 (INT, vlistInqInstitut, VLISTINQINSTITUT, vlistinqinstitut, INT)
 FCALLSCSUB2 (vlistDefModel, VLISTDEFMODEL, vlistdefmodel, INT, INT)
 FCALLSCFUN1 (INT, vlistInqModel, VLISTINQMODEL, vlistinqmodel, INT)
 
-//  VLIST VAR routines
+/*  VLIST VAR routines  */
 
 FCALLSCFUN5 (INT, vlistDefVarTiles, VLISTDEFVARTILES, vlistdefvartiles, INT, INT, INT, INT, INT)
 FCALLSCFUN4 (INT, vlistDefVar, VLISTDEFVAR, vlistdefvar, INT, INT, INT, INT)
@@ -359,7 +359,7 @@ FCALLSCSUB5 (vlistInqVar, VLISTINQVAR, vlistinqvar, INT, INT, PINT, PINT, PINT)
 FCALLSCFUN2 (INT, vlistInqVarGrid, VLISTINQVARGRID, vlistinqvargrid, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarZaxis, VLISTINQVARZAXIS, vlistinqvarzaxis, INT, INT)
 
-//  used in MPIOM
+/*  used in MPIOM  */
 
 FCALLSCFUN2 (INT, vlistInqVarID, VLISTINQVARID, vlistinqvarid, INT, INT)
 FCALLSCSUB3 (vlistDefVarTimetype, VLISTDEFVARTIMETYPE, vlistdefvartimetype, INT, INT, INT)
@@ -429,7 +429,7 @@ FCALLSCFUN3 (INT, vlistHasVarKey, VLISTHASVARKEY, vlisthasvarkey, INT, INT, STRI
 FCALLSCFUN3 (DOUBLE, vlistInqVarDblKey, VLISTINQVARDBLKEY, vlistinqvardblkey, INT, INT, STRING)
 FCALLSCFUN3 (INT, vlistInqVarIntKey, VLISTINQVARINTKEY, vlistinqvarintkey, INT, INT, STRING)
 
-//  CDI attributes
+/*  CDI attributes  */
 
 FCALLSCFUN3 (INT, cdiInqNatts, CDIINQNATTS, cdiinqnatts, INT, INT, PINT)
 FCALLSCFUN6 (INT, cdiInqAtt, CDIINQATT, cdiinqatt, INT, INT, INT, PSTRING, PINT, PINT)
@@ -442,7 +442,7 @@ FCALLSCFUN5 (INT, cdiInqAttInt, CDIINQATTINT, cdiinqattint, INT, INT, STRING, IN
 FCALLSCFUN5 (INT, cdiInqAttFlt, CDIINQATTFLT, cdiinqattflt, INT, INT, STRING, INT, DOUBLEV)
 FCALLSCFUN5 (INT, cdiInqAttTxt, CDIINQATTTXT, cdiinqatttxt, INT, INT, STRING, INT, PPSTRING)
 
-//  GRID routines
+/*  GRID routines  */
 
 FCALLSCSUB2 (gridName, GRIDNAME, gridname, INT, PSTRING)
 FCALLSCFUN1 (STRING, gridNamePtr, GRIDNAMEPTR, gridnameptr, INT)
@@ -530,7 +530,7 @@ static int gridInqYvalsPart_fwrap(int gridID, int start, int size, double yvals[
 FCALLSCFUN4 (INT, gridInqYvalsPart_fwrap, GRIDINQYVALSPART, gridinqyvalspart, INT, INT, INT, DOUBLEV)
 FCALLSCFUN1 (INT, gridInqYIsc, GRIDINQYISC, gridinqyisc, INT)
 
-//  CDI var keys
+/*  CDI var keys  */
 
 FCALLSCFUN4 (INT, cdiDefKeyInt, CDIDEFKEYINT, cdidefkeyint, INT, INT, INT, INT)
 FCALLSCFUN4 (INT, cdiInqKeyInt, CDIINQKEYINT, cdiinqkeyint, INT, INT, INT, PINT)
@@ -539,10 +539,10 @@ FCALLSCFUN5 (INT, cdiInqKeyString, CDIINQKEYSTRING, cdiinqkeystring, INT, INT, I
 FCALLSCFUN4 (INT, cdiInqKeyLen, CDIINQKEYLEN, cdiinqkeylen, INT, INT, INT, PINT)
 FCALLSCFUN4 (INT, cdiCopyKeys, CDICOPYKEYS, cdicopykeys, INT, INT, INT, INT)
 
-//  CDI grid keys
+/*  CDI grid keys  */
 
 
-//  CDI zaxis keys
+/*  CDI zaxis keys  */
 
 FCALLSCFUN4 (INT, cdiGridDefKeyStr, CDIGRIDDEFKEYSTR, cdigriddefkeystr, INT, INT, INT, STRING)
 FCALLSCFUN4 (INT, cdiGridInqKeyStr, CDIGRIDINQKEYSTR, cdigridinqkeystr, INT, INT, INT, PSTRING)
@@ -586,7 +586,7 @@ FCALLSCFUN1 (INT, gridIsCircular, GRIDISCIRCULAR, gridiscircular, INT)
 FCALLSCFUN1 (INT, gridInqTrunc, GRIDINQTRUNC, gridinqtrunc, INT)
 FCALLSCSUB2 (gridDefTrunc, GRIDDEFTRUNC, griddeftrunc, INT, INT)
 
-//  Reference of an unstructured grid
+/*  Reference of an unstructured grid  */
 
 FCALLSCSUB2 (gridDefNumber, GRIDDEFNUMBER, griddefnumber, INT, INT)
 FCALLSCFUN1 (INT, gridInqNumber, GRIDINQNUMBER, gridinqnumber, INT)
@@ -597,22 +597,22 @@ FCALLSCFUN2 (INT, gridInqReference, GRIDINQREFERENCE, gridinqreference, INT, PST
 FCALLSCSUB2 (gridDefUUID, GRIDDEFUUID, griddefuuid, INT, PVOID)
 FCALLSCSUB2 (gridInqUUID, GRIDINQUUID, gridinquuid, INT, PVOID)
 
-//  Rotated Lon/Lat grid
+/*  Rotated Lon/Lat grid  */
 
 FCALLSCSUB4 (gridDefParamRLL, GRIDDEFPARAMRLL, griddefparamrll, INT, DOUBLE, DOUBLE, DOUBLE)
 FCALLSCSUB4 (gridInqParamRLL, GRIDINQPARAMRLL, gridinqparamrll, INT, PDOUBLE, PDOUBLE, PDOUBLE)
 
-//  Hexagonal GME grid
+/*  Hexagonal GME grid  */
 
 FCALLSCSUB5 (gridDefParamGME, GRIDDEFPARAMGME, griddefparamgme, INT, INT, INT, INT, INT)
 FCALLSCSUB5 (gridInqParamGME, GRIDINQPARAMGME, gridinqparamgme, INT, PINT, PINT, PINT, PINT)
 
-//  Lambert Conformal Conic grid
+/*  Lambert Conformal Conic grid  */
 
 FCALLSCSUB12 (gridDefParamLCC, GRIDDEFPARAMLCC, griddefparamlcc, INT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE)
 FCALLSCFUN12 (INT, gridInqParamLCC, GRIDINQPARAMLCC, gridinqparamlcc, INT, DOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE)
 
-//  Polar stereographic grid
+/*  Polar stereographic grid  */
 
 FCALLSCSUB10 (gridDefParamSTERE, GRIDDEFPARAMSTERE, griddefparamstere, INT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE)
 FCALLSCFUN10 (INT, gridInqParamSTERE, GRIDINQPARAMSTERE, gridinqparamstere, INT, DOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE)
@@ -659,7 +659,7 @@ FCALLSCFUN1 (INT, gridInqComplexPacking, GRIDINQCOMPLEXPACKING, gridinqcomplexpa
 FCALLSCSUB2 (gridDefScanningMode, GRIDDEFSCANNINGMODE, griddefscanningmode, INT, INT)
 FCALLSCFUN1 (INT, gridInqScanningMode, GRIDINQSCANNINGMODE, gridinqscanningmode, INT)
 
-//  ZAXIS routines
+/*  ZAXIS routines  */
 
 FCALLSCSUB2 (zaxisName, ZAXISNAME, zaxisname, INT, PSTRING)
 FCALLSCFUN1 (STRING, zaxisNamePtr, ZAXISNAMEPTR, zaxisnameptr, INT)
@@ -709,7 +709,7 @@ FCALLSCSUB2 (zaxisDefWeights, ZAXISDEFWEIGHTS, zaxisdefweights, INT, DOUBLEV)
 FCALLSCFUN2 (INT, zaxisInqWeights, ZAXISINQWEIGHTS, zaxisinqweights, INT, DOUBLEV)
 FCALLSCSUB2 (zaxisChangeType, ZAXISCHANGETYPE, zaxischangetype, INT, INT)
 
-//  TAXIS routines
+/*  TAXIS routines  */
 
 FCALLSCFUN1 (INT, taxisCreate, TAXISCREATE, taxiscreate, INT)
 FCALLSCSUB1 (taxisDestroy, TAXISDESTROY, taxisdestroy, INT)
@@ -792,7 +792,7 @@ FCALLSCSUB2 (taxisDefNumavg, TAXISDEFNUMAVG, taxisdefnumavg, INT, INT)
 FCALLSCFUN1 (INT, taxisInqNumavg, TAXISINQNUMAVG, taxisinqnumavg, INT)
 FCALLSCFUN1 (STRING, tunitNamePtr, TUNITNAMEPTR, tunitnameptr, INT)
 
-//  Institut routines
+/*  Institut routines  */
 
 FCALLSCFUN4 (INT, institutDef, INSTITUTDEF, institutdef, INT, INT, STRING, STRING)
 FCALLSCFUN4 (INT, institutInq, INSTITUTINQ, institutinq, INT, INT, STRING, STRING)
@@ -802,7 +802,7 @@ FCALLSCFUN1 (INT, institutInqSubcenter, INSTITUTINQSUBCENTER, institutinqsubcent
 FCALLSCFUN1 (STRING, institutInqNamePtr, INSTITUTINQNAMEPTR, institutinqnameptr, INT)
 FCALLSCFUN1 (STRING, institutInqLongnamePtr, INSTITUTINQLONGNAMEPTR, institutinqlongnameptr, INT)
 
-//  Model routines
+/*  Model routines  */
 
 FCALLSCFUN3 (INT, modelDef, MODELDEF, modeldef, INT, INT, STRING)
 FCALLSCFUN3 (INT, modelInq, MODELINQ, modelinq, INT, INT, STRING)
@@ -810,7 +810,7 @@ FCALLSCFUN1 (INT, modelInqInstitut, MODELINQINSTITUT, modelinqinstitut, INT)
 FCALLSCFUN1 (INT, modelInqGribID, MODELINQGRIBID, modelinqgribid, INT)
 FCALLSCFUN1 (STRING, modelInqNamePtr, MODELINQNAMEPTR, modelinqnameptr, INT)
 
-//  Table routines
+/*  Table routines  */
 
 FCALLSCSUB2 (tableWrite, TABLEWRITE, tablewrite, STRING, INT)
 FCALLSCFUN1 (INT, tableRead, TABLEREAD, tableread, STRING)
@@ -822,31 +822,31 @@ FCALLSCFUN1 (INT, tableInqNum, TABLEINQNUM, tableinqnum, INT)
 FCALLSCFUN1 (INT, tableInqModel, TABLEINQMODEL, tableinqmodel, INT)
 FCALLSCSUB6 (tableInqEntry, TABLEINQENTRY, tableinqentry, INT, INT, INT, PSTRING, PSTRING, PSTRING)
 
-//  History routines
+/*  History routines  */
 
 FCALLSCSUB3 (streamDefHistory, STREAMDEFHISTORY, streamdefhistory, INT, INT, STRING)
 FCALLSCFUN1 (INT, streamInqHistorySize, STREAMINQHISTORYSIZE, streaminqhistorysize, INT)
 FCALLSCSUB2 (streamInqHistoryString, STREAMINQHISTORYSTRING, streaminqhistorystring, INT, PSTRING)
 
-//  Subtype routines
+/*  Subtype routines  */
 
 FCALLSCFUN1 (INT, subtypeCreate, SUBTYPECREATE, subtypecreate, INT)
 
-//  Gives a textual summary of the variable subtype
+/*  Gives a textual summary of the variable subtype  */
 
 FCALLSCSUB1 (subtypePrint, SUBTYPEPRINT, subtypeprint, INT)
 
-//  Compares two subtype data structures
+/*  Compares two subtype data structures  */
 
 FCALLSCFUN2 (INT, subtypeCompare, SUBTYPECOMPARE, subtypecompare, INT, INT)
 FCALLSCFUN1 (INT, subtypeInqSize, SUBTYPEINQSIZE, subtypeinqsize, INT)
 FCALLSCFUN1 (INT, subtypeInqActiveIndex, SUBTYPEINQACTIVEINDEX, subtypeinqactiveindex, INT)
 FCALLSCSUB2 (subtypeDefActiveIndex, SUBTYPEDEFACTIVEINDEX, subtypedefactiveindex, INT, INT)
 
-//  Generate a "query object" out of a key-value pair
+/*  Generate a "query object" out of a key-value pair  */
 
 
-//  Generate an AND-combined "query object" out of two previous query objects
+/*  Generate an AND-combined "query object" out of two previous query objects  */
 
 FCALLSCFUN3 (INT, subtypeInqTile, SUBTYPEINQTILE, subtypeinqtile, INT, INT, INT)
 FCALLSCFUN4 (INT, subtypeInqAttribute, SUBTYPEINQATTRIBUTE, subtypeinqattribute, INT, INT, STRING, PINT)
