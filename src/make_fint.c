@@ -290,6 +290,118 @@ static void
 sprintCArrayArgDims(size_t argDimsCSize, char argDimsC[argDimsCSize],
                     int argType, const char *argSpecC, const regmatch_t reMatch[]);
 
+static void
+function_fwrap(FILE *fpint, enum cftype functype, const char *delegateName, size_t delegateNameLen, size_t funcargc, int *funcargtype,
+               regmatch_t *funcargfull, regmatch_t *funcargname, char *funcname, size_t maxMatch, regmatch_t *reMatch, char *line)
+{
+  fputs("static ", fpint);
+  fprintf(fpint, (funRet[functype].convert ? funRet[functype].convcfmt : funRet[functype].cfmt),
+          "", (int)delegateNameLen, delegateName);
+  fputs("(", fpint);
+  for (size_t i = 0; i < funcargc; i++)
+    {
+      if (i > 0)
+        fputs(", ", fpint);
+      enum { arrayDimsCSize = 128 };
+      char arrayDimsC[arrayDimsCSize];
+      static const char constStr[] = "const ", nonConstStr[] = "";
+      const char *constStrP;
+      const int argType = funcargtype[i];
+      const int isArray = isArrayArgType(argType);
+      if (!isArray)
+        {
+          arrayDimsC[0] = 0;
+          constStrP = nonConstStr;
+        }
+      else
+        {
+          if (regexec(&funArgSym[argType].preg, line + funcargfull[i].rm_so, maxMatch, reMatch, 0))
+            {
+              fprintf(stderr, "unexpected non-matching of array argument regexp!\n");
+              exit(1);
+            }
+          if (reMatch[1].rm_eo - reMatch[1].rm_so > 5
+              && !strncmp(line + funcargfull[i].rm_so + reMatch[1].rm_so, constStr, sizeof (constStr) - 2))
+            constStrP = constStr;
+          else
+            constStrP = nonConstStr;
+          sprintCArrayArgDims(arrayDimsCSize, arrayDimsC, argType, line + funcargfull[i].rm_so, reMatch);
+        }
+      fprintf(fpint, (funArgSym[argType].convert ? funArgSym[argType].convcfmt : funArgSym[argType].cfmt),
+              constStrP, (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
+              line + funcargname[i].rm_so, arrayDimsC);
+    }
+  fputs(")\n{\n", fpint);
+  for (size_t i = 0; i < funcargc; i++ )
+    {
+      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISINT64TP)
+        {
+          // create temporary int64_t variable
+          fprintf(fpint, "  int64_t %.*s_int64_t;\n",
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+        }
+      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETP)
+        {
+          // create temporary size_t variable
+          fprintf(fpint, "  size_t %.*s_size_t;\n",
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+        }
+    }
+  if (functype != ISVOID)
+    {
+      fputs("  ", fpint);
+      fprintf(fpint, funRet[functype].cfmt, "", 1, "v");
+      fprintf(fpint, ";\n");
+      fprintf(fpint, "  v = %s(", funcname);
+    }
+  else
+    fprintf(fpint, "  %s(", funcname);
+  for (size_t i = 0; i < funcargc; i++ )
+    {
+      if (i > 0)
+        fputs(", ", fpint);
+      if (funArgSym[funcargtype[i]].convert)
+        {
+          funArgSym[funcargtype[i]].convert(fpint, line + funcargname[i].rm_so,
+                                            (size_t)(funcargname[i].rm_eo - funcargname[i].rm_so), CONV_ARG);
+        }
+      else
+        fprintf(fpint, "%.*s", (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+    }
+  fputs(");\n", fpint);
+  for (size_t i = 0; i < funcargc; i++ )
+    {
+      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISINT64TP)
+        {
+          fprintf(fpint, "  assert(%.*s_int64_t < INT_MAX);\n",
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+          // copy temporary int64_t variable
+          fprintf(fpint, "  *%.*s = %.*s_int64_t;\n",
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so,
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+        }
+      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETP)
+        {
+          fprintf(fpint, "  assert(%.*s_size_t < INT_MAX);\n",
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+          // copy temporary size_t variable
+          fprintf(fpint, "  *%.*s = %.*s_size_t;\n",
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so,
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+        }
+    }
+  if (functype != ISVOID)
+    {
+      fputs("  return ", fpint);
+      if (funRet[functype].convert)
+        funRet[functype].convert(fpint, "v", 1, CONV_RET);
+      else
+        fputc('v', fpint);
+      fputs(";\n", fpint);
+    }
+  fputs("}\n", fpint);
+}
+
 static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const char *doc_root)
 {
   char *line = NULL, *pline;
@@ -655,130 +767,13 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
               strcat(delegateNameBuf, "_fwrap");
               delegateNameLen += 6;
               delegateName = delegateNameBuf;
-              fputs("static ", fpint);
-              fprintf(fpint, (funRet[functype].convert
-                              ?funRet[functype].convcfmt:funRet[functype].cfmt),
-                      "", (int)delegateNameLen, delegateName);
-              fputs("(", fpint);
-              for (size_t i = 0; i < funcargc; i++ )
-                {
-                  if (i > 0)
-                    fputs(", ", fpint);
-                  enum { arrayDimsCSize = 128 };
-                  char arrayDimsC[arrayDimsCSize];
-                  static const char constStr[] = "const ", nonConstStr[] = "";
-                  const char *constStrP;
-                  const int argType = funcargtype[i];
-                  const int isArray = isArrayArgType(argType);
-                  if (!isArray)
-                    {
-                      arrayDimsC[0] = 0;
-                      constStrP = nonConstStr;
-                    }
-                  else
-                    {
-                      if (regexec(&funArgSym[argType].preg,
-                                  line + funcargfull[i].rm_so,
-                                  maxMatch, reMatch, 0))
-                        {
-                          fprintf(stderr, "unexpected non-matching of array argument regexp!\n");
-                          exit(1);
-                        }
-                      if (reMatch[1].rm_eo - reMatch[1].rm_so > 5
-                          && !strncmp(line + funcargfull[i].rm_so
-                                      + reMatch[1].rm_so, constStr,
-                                      sizeof (constStr) - 2))
-                        constStrP = constStr;
-                      else
-                        constStrP = nonConstStr;
-                      sprintCArrayArgDims(arrayDimsCSize, arrayDimsC,
-                                          argType, line + funcargfull[i].rm_so,
-                                          reMatch);
-                    }
-                  fprintf(fpint, (funArgSym[argType].convert
-                                  ?funArgSym[argType].convcfmt
-                                  :funArgSym[argType].cfmt),
-                          constStrP,
-                          (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
-                          line + funcargname[i].rm_so, arrayDimsC);
-                }
-              fputs(")\n{\n", fpint);
-              for (size_t i = 0; i < funcargc; i++ )
-                {
-                  if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISINT64TP)
-                    {
-                      // create temporary int64_t variable
-                      fprintf(fpint, "  int64_t %.*s_int64_t;\n",
-                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-                    }
-                  if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETP)
-                    {
-                      // create temporary size_t variable
-                      fprintf(fpint, "  size_t %.*s_size_t;\n",
-                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-                    }
-                }
-              if (functype != ISVOID)
-                {
-                  fputs("  ", fpint);
-                  fprintf(fpint, funRet[functype].cfmt, "", 1, "v");
-                  fprintf(fpint, ";\n"
-                          "  v = %s(", funcname);
-                }
-              else
-                fprintf(fpint, "  %s(", funcname);
-              for (size_t i = 0; i < funcargc; i++ )
-                {
-                  if (i > 0)
-                    fputs(", ", fpint);
-                  if (funArgSym[funcargtype[i]].convert)
-                    {
-                      funArgSym[funcargtype[i]]
-                        .convert(fpint,
-                                 line + funcargname[i].rm_so,
-                                 (size_t)(funcargname[i].rm_eo
-                                          - funcargname[i].rm_so), CONV_ARG);
-                    }
-                  else
-                    fprintf(fpint, "%.*s",
-                            (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
-                            line + funcargname[i].rm_so);
-                }
-              fputs(");\n", fpint);
-              for (size_t i = 0; i < funcargc; i++ )
-                {
-                  if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISINT64TP)
-                    {
-                      fprintf(fpint, "  assert(%.*s_int64_t < INT_MAX);\n",
-                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-                      // copy temporary int64_t variable
-                      fprintf(fpint, "  *%.*s = %.*s_int64_t;\n",
-                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so,
-                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-                    }
-                  if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETP)
-                    {
-                      fprintf(fpint, "  assert(%.*s_size_t < INT_MAX);\n",
-                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-                      // copy temporary size_t variable
-                      fprintf(fpint, "  *%.*s = %.*s_size_t;\n",
-                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so,
-                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-                    }
-                }
-              if (functype != ISVOID)
-                {
-                  fputs("  return ", fpint);
-                  if (funRet[functype].convert)
-                    funRet[functype].convert(fpint, "v", 1, CONV_RET);
-                  else
-                    fputc('v', fpint);
-                  fputs(";\n", fpint);
-                }
-              fputs("}\n", fpint);
+
+              function_fwrap(fpint, functype, delegateName, delegateNameLen, funcargc, funcargtype,
+                             funcargfull, funcargname, funcname, maxMatch, reMatch, line);
             }
           else
             delegateName = funcname;
+
 	  if ( functype == ISVOID )
 	    fprintf(fpint, "FCALLSCSUB");
 	  else
