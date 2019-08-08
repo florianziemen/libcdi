@@ -1,14 +1,27 @@
 ## Process this file with automake to produce Makefile.in
 #
-EXTRA_DIST = cdilib.c mo_cdi.f90
+EXTRA_DIST = cdilib.c
 
+lib_LTLIBRARIES =
 noinst_LTLIBRARIES = libcdiresunpack.la
+include_HEADERS =
+nodist_include_HEADERS =
 
 if ENABLE_CDI_LIB
-  lib_LTLIBRARIES = libcdi.la
-  include_HEADERS = cdi.h cdi.inc
+  lib_LTLIBRARIES += libcdi.la
+  include_HEADERS += cdi.h
+if USE_FC
+  include_HEADERS += cdi.inc
+endif
+if CREATE_ISOC
+  lib_LTLIBRARIES += libcdi_f2003.la
+  nodist_include_HEADERS += mo_cdi.$(FCMODEXT)
+endif
 else
   noinst_LTLIBRARIES += libcdi.la
+if CREATE_ISOC
+  lib_LTLIBRARIES += libcdi_f2003.la
+endif
 endif
 
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
@@ -134,6 +147,9 @@ libcdi_la_SOURCES = 	 \
 	iterator_grib.c     \
 	iterator_grib.h
 
+libcdi_f2003_la_SOURCES = mo_cdi.f90
+libcdi_f2003_la_LIBADD = libcdi.la
+
 # cfortran.h is an optional part of libcdi
 libcdi_la_USE_FC_extra_sources = \
 	cfortran.h       \
@@ -243,16 +259,13 @@ LOCALTARGETS += pkgconfig/cdipio.pc
 endif
 endif
 
-if CREATE_ISOC
-LOCALTARGETS += mo_cdi.$(OBJEXT)
-endif
 #
 mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb \
 		$(top_srcdir)/src/cdi.h $@
 #
-mo_cdi.$(OBJEXT): mo_cdi.f90
-	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) $<
+mo_cdi.$(FCMODEXT): mo_cdi.lo
+	@if test ! -f $@; then rm -f $<; $(MAKE) $<; fi
 #
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
@@ -267,7 +280,7 @@ all-local: $(LOCALTARGETS)
 CLEANFILES  = `ls *~`
 #CLEANFILES += cdilib.c
 if CREATE_ISOC
-CLEANFILES += mo_cdi.$(FCMODEXT) mo_cdi.$(OBJEXT)
+CLEANFILES += mo_cdi.$(FCMODEXT)
 endif
 
 if ENABLE_CDI_LIB

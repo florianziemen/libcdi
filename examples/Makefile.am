@@ -28,11 +28,11 @@ cdi_read_SOURCES         = cdi_read.c
 cdi_copy_SOURCES         = cdi_copy.c
 #
 cdi_read_f2003_SOURCES   = cdi_read_f2003.f90
-cdi_read_f2003_LDADD     = $(top_builddir)/src/mo_cdi.o $(top_builddir)/src/libcdi.la
+cdi_read_f2003_LDADD     = $(top_builddir)/src/libcdi_f2003.la $(top_builddir)/src/libcdi.la
 cdi_read_f2003.$(OBJEXT): $(top_builddir)/src/mo_cdi.$(FCMODEXT)
 #
 cdi_write_f2003_SOURCES  = cdi_write_f2003.f90
-cdi_write_f2003_LDADD    = $(top_builddir)/src/mo_cdi.$(OBJEXT) $(top_builddir)/src/libcdi.la
+cdi_write_f2003_LDADD    = $(top_builddir)/src/libcdi_f2003.la $(top_builddir)/src/libcdi.la
 cdi_write_f2003.$(OBJEXT): $(top_builddir)/src/mo_cdi.$(FCMODEXT)
 
 #
