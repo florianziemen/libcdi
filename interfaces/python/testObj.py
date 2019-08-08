@@ -7,25 +7,22 @@ cdi = CdiObj.Cdi(ifile)
 print('Stream: ',cdi.streamID,' vlistID:',cdi.vlistID,' nvars:{d}', cdi.nvars)
 
 print('#========== TAXES ====================================#')
-for k in range(cdi.taxes.size()):
-  print(k,": ", cdi.taxes[k].unitname)
+for k, tax in cdi.taxes.items():
+  print(k,": ", tax.unitname)
+  print(k,": ", tax.ntsteps)
 
 print('#========== GRIDS ====================================#')
-for k in range(cdi.grids.size()):
-  print(k,": ", cdi.grids[k].size,' ', cdi.grids[k].xname,' ', cdi.grids[k].yname,' ', cdi.grids[k].ylongname) 
+for k, grid in cdi.grids.items():
+  print(k,": ", grid.size,' ', grid.xname,' ', grid.yname,' ', grid.ylongname) 
 
 print("#========== ZAXES ====================================#")
-for k in range(cdi.zaxes.size()):
-  print(k,": ", cdi.zaxes[k].size,' ', cdi.zaxes[k].name,' ', cdi.zaxes[k].units)
+for k, zax in cdi.zaxes.items():
+  print(k,": ", zax.size,' ', zax.name,' ', zax.units)
 
 print("#========== VARIABLES ================================#")
-for k in range(cdi.variables.size()):
-  v = cdi.variables[k]
-  print(v.name," ",v.size, " ", v.missval)
-
-print("#========== VARIABLEcdi.NAMES =================================#")
-for k in range(cdi.variables.size()):
-  print(cdi.variables[k].longname,' ',cdi.variables[k].units)
+for var in cdi.variables:
+  print(k,var.name," ",var.size, " ", var.missval)
+  print(var.longname,' ',var.units)
 
 print("#========== VAR by index ======================================#")
 var = cdi.variables[1]
