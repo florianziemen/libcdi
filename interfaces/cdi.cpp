@@ -265,7 +265,12 @@ CdiVariable::CdiVariable(int streamid,int vlistid, int varid) {
 CdiVariable::~CdiVariable(){ size = -1; }
 
 void
-CdiVariable::sinfo() { std::cout << "code:"  << std::endl; }
+CdiVariable::sinfo() {
+  std::cout << "name:"  << name << std::endl;
+  std::cout << "longname:"  << longname << std::endl;
+  std::cout << "units:"  << units << std::endl;
+  std::cout << "code:"  << code << std::endl;
+}
 
 double *
 CdiVariable::getValuesAsPointer()
