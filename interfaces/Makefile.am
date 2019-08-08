@@ -4,9 +4,7 @@ SWIGCDILIB = cdilib.i
 SWIGCDIOBJ = cdiobj.i
 BINDINGS   =
 
-EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB) \
-	\
-	ruby/cdilib_wrap.c ruby/cdiobj_wrap.cpp ruby/testLib.rb \
+INTERFACES_FILES = ruby/cdilib_wrap.c ruby/cdiobj_wrap.cpp ruby/testLib.rb \
 	ruby/testObj.rb \
 	\
 	python/cdilib_wrap.c python/cdiobj_wrap.cpp python/testLib.py \
@@ -17,6 +15,8 @@ EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB) \
 	CdiInfo.cpp \
 	\
 	f2003/bindGen.rb
+
+EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB) $(INTERFACES_FILES)
 
 if CREATE_INTERFACES
 BINDINGS += help
@@ -30,7 +30,7 @@ noinst_PROGRAMS += CdiInfo
 noinst_LTLIBRARIES += libcdipp.la
 endif
 #
-locallibs = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LIBS@ @SZLIB_LIBS@
+locallibs = $(abs_top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LIBS@ @SZLIB_LIBS@
 
 libcdipp_la_SOURCES = cdi.cpp cdi.hpp
 libcdipp_la_LIBADD  = $(top_builddir)/src/libcdi.la
