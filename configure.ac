@@ -312,8 +312,8 @@ AC_ARG_ENABLE(python,
   [AC_CHECK_PROG(PYTHON,python,python)
    enable_python=no
    for PYTHON_INCLUDES in \
-     "-I`$PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_inc()'`" \
-     "-I`$PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_lib(1,1)' | $SED 's/lib/include/'`"
+     "-I`$PYTHON -c 'from distutils import sysconfig;print(sysconfig.get_python_inc())'`" \
+     "-I`$PYTHON -c 'from distutils import sysconfig;print(sysconfig.get_python_lib(1,1))' | $SED 's/lib/include/'`"
    do
      save_CPPFLAGS=$CPPFLAGS
      CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
