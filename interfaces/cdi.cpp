@@ -7,7 +7,6 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
-#include "cdi.h"
 #if defined (__cplusplus)
 }
 #endif
@@ -19,11 +18,12 @@ extern "C" {
  */
 CdiGrid::CdiGrid() { gridID = -1; }
 CdiGrid::CdiGrid(int gridid) {
-  char _name[CHARSIZE];
-  char _xname[CHARSIZE], _xlongname[CHARSIZE], _xstdname[CHARSIZE], _xunits[CHARSIZE];
-  char _yname[CHARSIZE], _ylongname[CHARSIZE], _ystdname[CHARSIZE], _yunits[CHARSIZE];
+  char _name[CDI_MAX_NAME];
+  char _xname[CDI_MAX_NAME], _xlongname[CDI_MAX_NAME], _xstdname[CDI_MAX_NAME], _xunits[CDI_MAX_NAME];
+  char _yname[CDI_MAX_NAME], _ylongname[CDI_MAX_NAME], _ystdname[CDI_MAX_NAME], _yunits[CDI_MAX_NAME];
 
   gridID = gridid;
+  //std::cout << "DEBUG:input gridid =" << gridid << std::endl;
   type   = gridInqType(gridID);
   /*  strcpy(_name,gridNamePtr(type)); */
   name = std::string(gridNamePtr(type));
@@ -33,7 +33,7 @@ CdiGrid::CdiGrid(int gridid) {
   ysize = gridInqYsize(gridID);
   xvalues.resize(xsize);
   yvalues.resize(ysize);
-//  std::cout << "(gridID:" << gridID<< ") xsize: " << xsize << " ysize:" << ysize << std::endl;
+  // std::cout << "DEBUG:(gridID:" << gridID<< ") xsize: " << xsize << " ysize:" << ysize << std::endl;
 
   getValues();
   getBounds();
@@ -208,7 +208,7 @@ CdiTaxis::~CdiTaxis() { if (taxisID >= 0) taxisID = -1; }
  */
 CdiZaxis::CdiZaxis() { zaxisID = -1; }
 CdiZaxis::CdiZaxis(int zaxisid) {
-  char name[CHARSIZE], longname[CHARSIZE], units[CHARSIZE];
+  char name[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
 
   zaxisID = zaxisid;
   size    = zaxisInqSize(zaxisID);
@@ -243,7 +243,7 @@ CdiZaxis::~CdiZaxis() { if (zaxisID >= 0) zaxisID = -1; }
  */
 CdiVariable::CdiVariable() { size = -1; }
 CdiVariable::CdiVariable(int streamid,int vlistid, int varid) {
-  char _name[CHARSIZE],_longname[CHARSIZE], _units[CHARSIZE], _stdname[CHARSIZE];
+  char _name[CDI_MAX_NAME],_longname[CDI_MAX_NAME], _units[CDI_MAX_NAME], _stdname[CDI_MAX_NAME];
   streamID = streamid;
   vlistID  = vlistid;
   varID    = varid;
@@ -362,7 +362,9 @@ Cdi::Cdi(const char *path)  {
   getVars();
 }
 
-Cdi::~Cdi() {}
+Cdi::~Cdi() {
+  streamClose(streamID);
+}
 
 void
 Cdi::getTaxes() {
@@ -388,17 +390,18 @@ void
 Cdi::getGrids() {
   int gridID;
   ngrids = vlistNgrids(vlistID);
+    std::cout << "ngrids=" << ngrids << std::endl;
   for (int i = 0; i < ngrids; i++)
   {
     gridID        = vlistGrid(vlistID, i);
-//    std::cout << "getGrids : gridID=" << gridID << std::endl;
+    std::cout << "getGrids : gridID=" << gridID << std::endl;
     grids[gridID] = CdiGrid(gridID);
   }
 }
 
 void
 Cdi::getVars() {
-  char name[CHARSIZE];
+  char name[CDI_MAX_NAME];
   int varID, code;
 //  std::cout << vlistID << std::endl;
   for (varID = 0; varID < nvars; varID++)
