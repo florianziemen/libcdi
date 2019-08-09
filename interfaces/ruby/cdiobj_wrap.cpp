@@ -29009,7 +29009,7 @@ _wrap_CdiTaxis_name_set(int argc, VALUE *argv, VALUE self) {
   char *arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  char temp2[128] ;
+  char temp2[CDI_MAX_NAME] ;
   int res2 ;
   
   if ((argc < 1) || (argc > 1)) {
@@ -29020,13 +29020,13 @@ _wrap_CdiTaxis_name_set(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiTaxis *","name", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiTaxis * >(argp1);
-  res2 = SWIG_AsCharArray(argv[0], temp2, 128);
+  res2 = SWIG_AsCharArray(argv[0], temp2, CDI_MAX_NAME);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "char [128]","name", 2, argv[0] ));
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "char [CDI_MAX_NAME]","name", 2, argv[0] ));
   }
   arg2 = reinterpret_cast< char * >(temp2);
-  if (arg2) memcpy(arg1->name,arg2,128*sizeof(char));
-  else memset(arg1->name,0,128*sizeof(char));
+  if (arg2) memcpy(arg1->name,arg2,CDI_MAX_NAME*sizeof(char));
+  else memset(arg1->name,0,CDI_MAX_NAME*sizeof(char));
   return Qnil;
 fail:
   return Qnil;
@@ -29051,7 +29051,7 @@ _wrap_CdiTaxis_name_get(int argc, VALUE *argv, VALUE self) {
   arg1 = reinterpret_cast< CdiTaxis * >(argp1);
   result = (char *)(char *) ((arg1)->name);
   {
-    size_t size = SWIG_strnlen(result, 128);
+    size_t size = SWIG_strnlen(result, CDI_MAX_NAME);
     
     
     
@@ -33568,7 +33568,6 @@ SWIGEXPORT void Init_CdiObj(void) {
   SwigClassGridsMap.mark = 0;
   SwigClassGridsMap.destroy = (void (*)(void *)) free_std_map_Sl_int_Sc_CdiGrid_Sg_;
   SwigClassGridsMap.trackObjects = 0;
-  rb_define_const(mCdiObj, "CHARSIZE", SWIG_From_int(static_cast< int >(128)));
   
   SwigClassCdiGrid.klass = rb_define_class_under(mCdiObj, "CdiGrid", rb_cObject);
   SWIG_TypeClientData(SWIGTYPE_p_CdiGrid, (void *) &SwigClassCdiGrid);
