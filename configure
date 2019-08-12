@@ -30023,26 +30023,24 @@ contains
       end function strlen
     end interface
     type(c_ptr) :: cptr
-    character(len=:, kind=c_char), pointer :: errstr
+    character(kind=c_char), dimension(:), pointer :: buf
+    character(len=:), pointer :: errstr
+    integer :: i, rv_shape(1)
 
     cptr = strerror(int(errno, c_int))
-    errstr => c2f_string(cptr, int(strlen(cptr)))
+    rv_shape(1) = int(strlen(cptr))
+    call c_f_pointer(cptr, buf, rv_shape)
+    allocate(character(rv_shape(1)) :: errstr)
+    do i = 1, rv_shape(1)
+      errstr(i:i) = buf(i)
+    end do
   end function errstr
-
-  function c2f_string(s, slen)
-    type(c_ptr), intent(in) :: s
-    integer, intent(in) :: slen
-    CHARACTER(len=slen, kind=c_char), POINTER :: c2f_string
-    c2f_string => NULL()
-    call c_f_pointer(s, c2f_string)
-  end function c2f_string
 end module conftest_mod
 
 program conftest
-  use iso_c_binding
   use conftest_mod, only: errstr
   implicit none
-  character(kind=c_char, len=:), pointer :: msg
+  character(len=:), pointer :: msg
   msg => errstr(42)
   write (0, '(a)') msg
 end program conftest
@@ -30054,7 +30052,10 @@ $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-enable_isoc=no
+{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "the Fortran compiler cannot handle complex CHARACTER interoperability: disable Fortran 2003 interface (--disable-iso-c-interface)
+See \`config.log' for more details" "$LINENO" 5; }
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
    ac_ext=c
