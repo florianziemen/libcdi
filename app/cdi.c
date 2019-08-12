@@ -117,9 +117,6 @@ void version(void)
 #ifdef  HAVE_LIBJASPER
   fprintf(stderr, " JASPER");
 #endif
-#ifdef  HAVE_LIBPROJ
-  fprintf(stderr, " PROJ.4");
-#endif
 #ifdef  HAVE_LIBDRMAA
   fprintf(stderr, " DRMAA");
 #endif
