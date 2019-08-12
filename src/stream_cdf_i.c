@@ -3974,17 +3974,20 @@ int cdfInqContents(stream_t *streamptr)
       ncvar_t *ncvar = &ncvars[ncvarid];
       if ( ncvar->isvar == TRUE && ncvar->ncoordvars )
 	{
-	  int ncoordvars = ncvar->ncoordvars;
-	  for ( int i = 0; i < ncoordvars; i++ )
+	  for ( int i = 0; i < ncvar->ncoordvars; i++ )
 	    {
+              const int cvarid = ncvar->coordvarids[i];
               if ( ncvar->coordvarids[i] != CDI_UNDEFID )
                 {
-                  if      ( ncvars[ncvar->coordvarids[i]].islon ||
-                            ncvars[ncvar->coordvarids[i]].isx )   ncvar->xvarid = ncvar->coordvarids[i];
-                  else if ( ncvars[ncvar->coordvarids[i]].islat ||
-                            ncvars[ncvar->coordvarids[i]].isy )   ncvar->yvarid = ncvar->coordvarids[i];
-                  else if ( ncvars[ncvar->coordvarids[i]].islev ) ncvar->zvarid = ncvar->coordvarids[i];
-                  else if ( ncvars[ncvar->coordvarids[i]].isc )   ncvar->cvarids[i] = ncvar->coordvarids[i];
+                  if      (ncvars[cvarid].islon || ncvars[cvarid].isx)   ncvar->xvarid = cvarid;
+                  else if (ncvars[cvarid].islat || ncvars[cvarid].isy)   ncvar->yvarid = cvarid;
+                  else if (ncvars[cvarid].islev)  ncvar->zvarid = cvarid;
+                  else if (ncvars[cvarid].isc)    ncvar->cvarids[i] = cvarid;
+                  else if (ncvars[cvarid].warn == false)
+                    {
+                      Warning("Coordinates variable %s can't be assigned!", ncvars[cvarid].name);
+                      ncvars[ncvarid].warn = true;
+                    }
                 }
             }
 	}
