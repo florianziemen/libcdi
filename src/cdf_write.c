@@ -521,10 +521,11 @@ int cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yi
     }
 
   int chunktype = vlistInqVarChunkType(vlistID, varID);
-  size_t chunk_size_max = 65536;
-  if ( chunktype != CDI_CHUNK_LINES && gridsize > INT32_MAX )
+  const size_t chunk_size_max = 65536;
+  const size_t chunk_size_lim = 1073741823;
+  if ( chunktype != CDI_CHUNK_LINES && gridsize > chunk_size_lim )
     {
-      if ( CDI_Debug ) fprintf(stderr, "gridsize > %d, changed chunktype to CDI_CHUNK_LINES!\n", INT32_MAX);
+      if ( CDI_Debug ) fprintf(stderr, "gridsize > %zu, changed chunktype to CDI_CHUNK_LINES!\n", chunk_size_lim);
       chunktype = CDI_CHUNK_LINES;
     }
 
@@ -551,7 +552,7 @@ int cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yi
           if ( chunktype == CDI_CHUNK_AUTO && yid == CDI_UNDEFID )
             chunks[ndims] = (chunk_size_max > xsize) ? xsize : chunk_size_max;
           else
-            chunks[ndims] = (xsize > INT32_MAX) ? INT32_MAX : xsize;
+            chunks[ndims] = (xsize > chunk_size_lim) ? chunk_size_lim : xsize;
           dims[ndims] = xid;
           ndims++;
         }
