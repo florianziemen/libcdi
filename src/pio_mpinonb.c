@@ -32,6 +32,17 @@ struct fileMPIFWS
 static struct fileMPIFWS *openFiles;
 static unsigned openFilesSize, openFilesFill;
 
+/* Open MPI 2.0.2 forgets to set request to MPI_REQUEST_NULL */
+#ifdef OMPI_MINOR_VERSION
+#if OMPI_MAJOR_VERSION == 2 && OMPI_MINOR_VERSION == 0 && OMPI_RELEASE_VERSION == 2
+#define POSTWAIT_WORKAROUND(req) req = MPI_REQUEST_NULL
+#else
+#define POSTWAIT_WORKAROUND(req)
+#endif
+#else
+#define POSTWAIT_WORKAROUND(req)
+#endif
+
 /***************************************************************/
 
 static void
@@ -70,8 +81,8 @@ initAFiledataMPINONB(struct fileMPIFWS *of, const char *filename, size_t bufSize
 #if OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION == 2 && MPI_SUBVERSION == 1
 #warning "implementing Bull X MPI work-around"
   {
-    MPI_Status stat;
-    xmpi(MPI_File_write_ordered(of->fh, filename, 0, MPI_BYTE, &stat));
+    MPI_Status status;
+    xmpiStat(MPI_File_write_ordered(of->fh, filename, 0, MPI_BYTE, &status), &status);
   }
 #endif
 #endif
@@ -151,6 +162,7 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
       of->tsID = tsID;
       MPI_Status status;
       xmpiStat(MPI_Wait(&of->request, &status), &status);
+      POSTWAIT_WORKAROUND(of->request);
       xmpi(MPI_Barrier(commInqCommPio()));
     }
 
@@ -192,6 +204,7 @@ fcMPINONB(int fileID)
   writeMPINONB(of);
   MPI_Status status;
   xmpiStat(MPI_Wait(&(of->request), &status), &status);
+  POSTWAIT_WORKAROUND(of->request);
   /* remove file element */
   int iret = destroyAFiledataMPINONB(of);
   --openFilesFill;
