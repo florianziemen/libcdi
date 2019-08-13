@@ -910,6 +910,7 @@ MPI_C_INCLUDE
 MPI_C_LIB
 MPI_FC_INCLUDE
 MPI_FC_LIB
+MPI_LAUNCH
 YAXT_FC_LIB
 YAXT_FC_INCLUDE
 PKG_CONFIG
@@ -1643,6 +1644,8 @@ Some influential environment variables:
               specifically set flags to use when compiling sources using MPI
               includes.
   MPI_FC_LIB  specifically set flags to use when linking MPI.
+  MPI_LAUNCH  absolute path to launcher for MPI programs, must be working
+              unless configuring in cross-compilation mode
   YAXT_FC_LIB Flags needed to link YAXT for the Fortran API
   YAXT_FC_INCLUDE
               Flags needed to compile for the Fortran API of YAXT
@@ -7180,102 +7183,6 @@ fi
 # Set up libtool.
 { $as_echo "$as_me:${as_lineno-$LINENO}: setting up libtool" >&5
 $as_echo "$as_me: setting up libtool" >&6;}
-if test x"$enable_shared" != xno; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking any compiler has problems building shared objects" >&5
-$as_echo_n "checking any compiler has problems building shared objects... " >&6; }
-if ${acx_cv_disable_shared+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  acx_cv_disable_shared=no
-         ac_ext=${ac_fc_srcext-f}
-ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-
-
-   acx_Comp=$FC
-   $as_echo "$as_me:${as_lineno-$LINENO}: testing if $acx_Comp cannot build working shared objects" >&5
-   case $host in #(
-  *-ibm-aix*) :
-    if $acx_Comp -G -v 2>&1 | grep ' -binitfini:poe_remote_main ' >/dev/null; then :
-  acx_cv_disable_shared=yes
-fi ;; #(
-  x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*) :
-    if $acx_Comp -V 2>&1 | grep '^Intel(R).*Fortran.*Compiler.*Version 15.0.[123]' >/dev/null; then :
-  acx_cv_disable_shared=yes
-fi ;; #(
-  *) :
-     ;;
-esac
-   $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_disable_shared" >&5
-            ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-         ac_ext=f
-ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
-ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_f77_compiler_gnu
-
-
-   acx_Comp=$F77
-   $as_echo "$as_me:${as_lineno-$LINENO}: testing if $acx_Comp cannot build working shared objects" >&5
-   case $host in #(
-  *-ibm-aix*) :
-    if $acx_Comp -G -v 2>&1 | grep ' -binitfini:poe_remote_main ' >/dev/null; then :
-  acx_cv_disable_shared=yes
-fi ;; #(
-  x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*) :
-    if $acx_Comp -V 2>&1 | grep '^Intel(R).*Fortran.*Compiler.*Version 15.0.[123]' >/dev/null; then :
-  acx_cv_disable_shared=yes
-fi ;; #(
-  *) :
-     ;;
-esac
-   $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_disable_shared" >&5
-            ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-         ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-
-   acx_Comp=$CC
-   $as_echo "$as_me:${as_lineno-$LINENO}: testing if $acx_Comp cannot build working shared objects" >&5
-   case $host in #(
-  *-ibm-aix*) :
-    if $acx_Comp -G -v 2>&1 | grep ' -binitfini:poe_remote_main ' >/dev/null; then :
-  acx_cv_disable_shared=yes
-fi ;; #(
-  x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*) :
-    if $acx_Comp -V 2>&1 | grep '^Intel(R).*Fortran.*Compiler.*Version 15.0.[123]' >/dev/null; then :
-  acx_cv_disable_shared=yes
-fi ;; #(
-  *) :
-     ;;
-esac
-   $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_disable_shared" >&5
-            ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_disable_shared" >&5
-$as_echo "$acx_cv_disable_shared" >&6; }
-       if test x"$acx_cv_disable_shared" = xyes; then :
-  enable_shared=no
-fi
-fi
 case `pwd` in
   *\ * | *\	*)
     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Libtool does not cope well with whitespace in \`pwd\`" >&5
@@ -10790,6 +10697,102 @@ func_stripname_cnf ()
 } # func_stripname_cnf
 
 
+      if test x"$enable_shared" != xno; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking any compiler has problems building shared objects" >&5
+$as_echo_n "checking any compiler has problems building shared objects... " >&6; }
+if ${acx_cv_disable_shared+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  acx_cv_disable_shared=no
+         ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+
+   acx_Comp=$FC
+   $as_echo "$as_me:${as_lineno-$LINENO}: testing if $acx_Comp cannot build working shared objects" >&5
+   case $host in #(
+  *-ibm-aix*) :
+    if $acx_Comp -G -v 2>&1 | grep ' -binitfini:poe_remote_main ' >/dev/null; then :
+  acx_cv_disable_shared=yes
+fi ;; #(
+  x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*) :
+    if $acx_Comp -V 2>&1 | grep '^Intel(R).*Fortran.*Compiler.*Version 15.0.[123]' >/dev/null; then :
+  acx_cv_disable_shared=yes
+fi ;; #(
+  *) :
+     ;;
+esac
+   $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_disable_shared" >&5
+            ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+         ac_ext=f
+ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
+ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_f77_compiler_gnu
+
+
+   acx_Comp=$F77
+   $as_echo "$as_me:${as_lineno-$LINENO}: testing if $acx_Comp cannot build working shared objects" >&5
+   case $host in #(
+  *-ibm-aix*) :
+    if $acx_Comp -G -v 2>&1 | grep ' -binitfini:poe_remote_main ' >/dev/null; then :
+  acx_cv_disable_shared=yes
+fi ;; #(
+  x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*) :
+    if $acx_Comp -V 2>&1 | grep '^Intel(R).*Fortran.*Compiler.*Version 15.0.[123]' >/dev/null; then :
+  acx_cv_disable_shared=yes
+fi ;; #(
+  *) :
+     ;;
+esac
+   $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_disable_shared" >&5
+            ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+         ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+   acx_Comp=$CC
+   $as_echo "$as_me:${as_lineno-$LINENO}: testing if $acx_Comp cannot build working shared objects" >&5
+   case $host in #(
+  *-ibm-aix*) :
+    if $acx_Comp -G -v 2>&1 | grep ' -binitfini:poe_remote_main ' >/dev/null; then :
+  acx_cv_disable_shared=yes
+fi ;; #(
+  x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*) :
+    if $acx_Comp -V 2>&1 | grep '^Intel(R).*Fortran.*Compiler.*Version 15.0.[123]' >/dev/null; then :
+  acx_cv_disable_shared=yes
+fi ;; #(
+  *) :
+     ;;
+esac
+   $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_disable_shared" >&5
+            ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_disable_shared" >&5
+$as_echo "$acx_cv_disable_shared" >&6; }
+       if test x"$acx_cv_disable_shared" = xyes; then :
+  enable_shared=no
+fi
+fi
 
 
 
@@ -11538,8 +11541,13 @@ lt_prog_compiler_static=
 	  lt_prog_compiler_wl='-Wl,'
 	  lt_prog_compiler_pic='-fPIC'
 	  lt_prog_compiler_static='-static'
+	  ;; #(
+	*NAG\ Fortran\ Compiler*)
+	  lt_prog_compiler_wl='-Wl,-Wl,,'
+	  lt_prog_compiler_pic='-PIC'
+	  lt_prog_compiler_static='-Bstatic'
 	  ;;
-	*Portland\ Group*)
+	*PGI\ Compilers\ and\ Tools*|*Portland\ Group*)
 	  lt_prog_compiler_wl='-Wl,'
 	  lt_prog_compiler_pic='-fpic'
 	  lt_prog_compiler_static='-Bstatic'
@@ -12107,6 +12115,7 @@ _LT_EOF
       then
 	tmp_addflag=' $pic_flag'
 	tmp_sharedflag='-shared'
+	tmp_compiler_flags='$compiler_flags'
 	case $cc_basename,$host_cpu in
         pgcc*)				# Portland Group C compiler
 	  whole_archive_flag_spec='${wl}--whole-archive`for conv in $convenience\"\"; do test  -n \"$conv\" && new_convenience=\"$new_convenience,$conv\"; done; func_echo_all \"$new_convenience\"` ${wl}--no-whole-archive'
@@ -12126,7 +12135,8 @@ _LT_EOF
 	  whole_archive_flag_spec=
 	  tmp_sharedflag='--shared' ;;
         nagfor*)                        # NAGFOR 5.3
-          tmp_sharedflag='-Wl,-shared' ;;
+          tmp_sharedflag='-Wl,-shared'
+	  tmp_compiler_flags='`echo $compiler_flags | sed -e '"'"'s/ -W[cl],-no-pie\b//g'"'"'`' ;;
 	xl[cC]* | bgxl[cC]* | mpixl[cC]*) # IBM XL C 8.0 on PPC (deal with xlf below)
 	  tmp_sharedflag='-qmkshrobj'
 	  tmp_addflag= ;;
@@ -18333,8 +18343,13 @@ lt_prog_compiler_static_F77=
 	  lt_prog_compiler_wl_F77='-Wl,'
 	  lt_prog_compiler_pic_F77='-fPIC'
 	  lt_prog_compiler_static_F77='-static'
+	  ;; #(
+	*NAG\ Fortran\ Compiler*)
+	  lt_prog_compiler_wl_F77='-Wl,-Wl,,'
+	  lt_prog_compiler_pic_F77='-PIC'
+	  lt_prog_compiler_static_F77='-Bstatic'
 	  ;;
-	*Portland\ Group*)
+	*PGI\ Compilers\ and\ Tools*|*Portland\ Group*)
 	  lt_prog_compiler_wl_F77='-Wl,'
 	  lt_prog_compiler_pic_F77='-fpic'
 	  lt_prog_compiler_static_F77='-Bstatic'
@@ -18887,6 +18902,7 @@ _LT_EOF
       then
 	tmp_addflag=' $pic_flag'
 	tmp_sharedflag='-shared'
+	tmp_compiler_flags='$compiler_flags'
 	case $cc_basename,$host_cpu in
         pgcc*)				# Portland Group C compiler
 	  whole_archive_flag_spec_F77='${wl}--whole-archive`for conv in $convenience\"\"; do test  -n \"$conv\" && new_convenience=\"$new_convenience,$conv\"; done; func_echo_all \"$new_convenience\"` ${wl}--no-whole-archive'
@@ -18906,7 +18922,8 @@ _LT_EOF
 	  whole_archive_flag_spec_F77=
 	  tmp_sharedflag='--shared' ;;
         nagfor*)                        # NAGFOR 5.3
-          tmp_sharedflag='-Wl,-shared' ;;
+          tmp_sharedflag='-Wl,-shared'
+	  tmp_compiler_flags='`echo $compiler_flags | sed -e '"'"'s/ -W[cl],-no-pie\b//g'"'"'`' ;;
 	xl[cC]* | bgxl[cC]* | mpixl[cC]*) # IBM XL C 8.0 on PPC (deal with xlf below)
 	  tmp_sharedflag='-qmkshrobj'
 	  tmp_addflag= ;;
@@ -21202,8 +21219,13 @@ lt_prog_compiler_static_FC=
 	  lt_prog_compiler_wl_FC='-Wl,'
 	  lt_prog_compiler_pic_FC='-fPIC'
 	  lt_prog_compiler_static_FC='-static'
+	  ;; #(
+	*NAG\ Fortran\ Compiler*)
+	  lt_prog_compiler_wl_FC='-Wl,-Wl,,'
+	  lt_prog_compiler_pic_FC='-PIC'
+	  lt_prog_compiler_static_FC='-Bstatic'
 	  ;;
-	*Portland\ Group*)
+	*PGI\ Compilers\ and\ Tools*|*Portland\ Group*)
 	  lt_prog_compiler_wl_FC='-Wl,'
 	  lt_prog_compiler_pic_FC='-fpic'
 	  lt_prog_compiler_static_FC='-Bstatic'
@@ -21756,6 +21778,7 @@ _LT_EOF
       then
 	tmp_addflag=' $pic_flag'
 	tmp_sharedflag='-shared'
+	tmp_compiler_flags='$compiler_flags'
 	case $cc_basename,$host_cpu in
         pgcc*)				# Portland Group C compiler
 	  whole_archive_flag_spec_FC='${wl}--whole-archive`for conv in $convenience\"\"; do test  -n \"$conv\" && new_convenience=\"$new_convenience,$conv\"; done; func_echo_all \"$new_convenience\"` ${wl}--no-whole-archive'
@@ -21775,7 +21798,8 @@ _LT_EOF
 	  whole_archive_flag_spec_FC=
 	  tmp_sharedflag='--shared' ;;
         nagfor*)                        # NAGFOR 5.3
-          tmp_sharedflag='-Wl,-shared' ;;
+          tmp_sharedflag='-Wl,-shared'
+	  tmp_compiler_flags='`echo $compiler_flags | sed -e '"'"'s/ -W[cl],-no-pie\b//g'"'"'`' ;;
 	xl[cC]* | bgxl[cC]* | mpixl[cC]*) # IBM XL C 8.0 on PPC (deal with xlf below)
 	  tmp_sharedflag='-qmkshrobj'
 	  tmp_addflag= ;;
@@ -23573,7 +23597,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # Only expand once:
 
 
-## _KPSE_USE_LIBTOOL: Generate a libtool script for use in configure tests
+                  ## _KPSE_USE_LIBTOOL: Generate a libtool script for use in configure tests
 : ${CONFIG_LT=./config.lt}
 { $as_echo "$as_me:${as_lineno-$LINENO}: creating $CONFIG_LT" >&5
 $as_echo "$as_me: creating $CONFIG_LT" >&6;}
@@ -25708,6 +25732,92 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
 ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
+   if test -n "$FC" -a X"$FC" != Xno; then :
+  ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+ac_link="$ac_pwd/libtool --mode=link --tag=FC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=FC $ac_compile"
+
+
+
+   acx_temp=`$FC -V 2>&1 | sed 5q`
+   case "$acx_temp" in #(
+  *NAG\ Fortran\ Compiler\ Release*) :
+    if test x${FCFLAGS+set} = xset; then :
+  FCFLAGS=`echo "$FCFLAGS" | tr ' ' '\n' | sed -e '/^-W[lc]/{' \
+-e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}'     | tr '\n' ' '`
+fi
+      if test x${FCLDFLAGS+set} = xset; then :
+  FCLDFLAGS=`echo "$FCLDFLAGS" | tr ' ' '\n' | sed -e '/^-W[lc]/{' \
+-e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}'     | tr '\n' ' '`
+fi ;; #(
+  *) :
+     ;;
+esac
+   case "x${FC_MODOUT}x" in #(
+  x'-module 'x|x'-mod 'x) :
+    FC_MODOUT="-Xcompiler ${FC_MODOUT}-Xcompiler " ;; #(
+  *) :
+     ;;
+esac
+         ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
+
+fi
+   if test -n "$F77" -a X"$F77" != Xno; then :
+  ac_ext=f
+ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
+ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_f77_compiler_gnu
+ac_link="$ac_pwd/libtool --mode=link --tag=F77 $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=F77 $ac_compile"
+
+
+
+   acx_temp=`$F77 -V 2>&1 | sed 5q`
+   case "$acx_temp" in #(
+  *NAG\ Fortran\ Compiler\ Release*) :
+    if test x${FFLAGS+set} = xset; then :
+  FFLAGS=`echo "$FFLAGS" | tr ' ' '\n' | sed -e '/^-W[lc]/{' \
+-e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}'     | tr '\n' ' '`
+fi
+      if test x${F77LDFLAGS+set} = xset; then :
+  F77LDFLAGS=`echo "$F77LDFLAGS" | tr ' ' '\n' | sed -e '/^-W[lc]/{' \
+-e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}'     | tr '\n' ' '`
+fi ;; #(
+  *) :
+     ;;
+esac
+
+         ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
+
+fi
+   for acx_flag_var_ in CFLAGS CXXFLAGS FCFLAGS F77FLAGS LDFLAGS FCLDFLAGS
+do :
+  if eval test x\$\{$acx_flag_var_+set\} = xset; then :
+  eval acx_temp="\" \$$acx_flag_var_ \""
+         case $acx_temp in #(
+  *\ -shared-intel\ *|*\ -static-intel\ *) :
+    acx_temp=`echo "$acx_temp" | sed -e 's/ \(-\(shared\|static\)-intel\) / -Xcompiler \1 -XCClinker \1 /'` ;; #(
+  *) :
+     ;;
+esac
+         eval $acx_flag_var_=\"`echo "$acx_temp" | sed -r -e 's/ -(align|allow|assume|ccdefault|check|convert|debug|debug-parameters|diag-type|diag-enable|diag-disable|double-size|dynamic-linker|dyncom|export-dir|extend-source|fp-model|fpscomp|gen-interfaces|heap-arrays|imacros|integer-size|iprefix|iquote|iwithprefixbefore|module|names|opt-report|opt-streaming-stores|pch-dir|pch-use|prof-dir|prof-file|real-size|reentrancy|stand|tcollect-filter|tune|warn|watch) ([^-][^ ]*) / -Xcompiler -\1 -Xcompiler \2 /g' -e 's/^ //;s/ $//'`\"
+fi
+done
 
 # -----------------------------------------------------------------------
 # Check endianess of system
@@ -28680,27 +28790,25 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 # Check whether --with-mpi-root was given.
 if test "${with_mpi_root+set}" = set; then :
-  withval=$with_mpi_root; MPIROOT="$with_mpi_root"
+  withval=$with_mpi_root; MPIROOT=$withval
 fi
 
    if ${MPIROOT+:} false; then :
   if ${MPI_C_LIB+:} false; then :
 
 else
-  acx_temp=$MPIROOT
-         MPI_C_LIB="-L$acx_temp/lib"
+  MPI_C_LIB="-L$MPIROOT/lib"
 fi
       if ${MPI_C_INCLUDE+:} false; then :
 
 else
-  acx_temp=$MPIROOT
-         MPI_C_INCLUDE="-I$acx_temp/include"
+  MPI_C_INCLUDE="-I$MPIROOT/include"
 fi
 fi
 
 # Check whether --with-mpi-include was given.
 if test "${with_mpi_include+set}" = set; then :
-  withval=$with_mpi_include; MPI_C_INCLUDE="-I$with_mpi_include"
+  withval=$with_mpi_include; MPI_C_INCLUDE="-I$withval"
 fi
 
 
@@ -28711,17 +28819,17 @@ $as_echo_n "checking for mpi.h extra include path... " >&6; }
   $as_echo_n "(cached) " >&6
 else
        ac_include_search_mpi_h_SAVE="$CPPFLAGS"
-      while :; do
-        for ac_incdir in ''
+            while :; do
+	for ac_incdir in ''
 do :
   if test -z "$ac_incdir"; then :
   ac_res="none required"
-                 CPPFLAGS="$MPI_C_INCLUDE $ac_include_search_mpi_h_SAVE"
+	         CPPFLAGS="$MPI_C_INCLUDE $ac_include_search_mpi_h_SAVE"
 else
   ac_res="-I$ac_incdir"
-                 CPPFLAGS="$MPI_C_INCLUDE $ac_res $ac_include_search_mpi_h_SAVE"
+	         CPPFLAGS="$MPI_C_INCLUDE $ac_res $ac_include_search_mpi_h_SAVE"
 fi
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $ac_includes_default
 #include <mpi.h>
@@ -28731,45 +28839,42 @@ if ac_fn_c_try_compile "$LINENO"; then :
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
    if ${acx_cv_c_include_mpi_h+:} false; then :
-                  if test -z "$ac_incdir"; then :
-                     acx_cv_c_include_mpi_h="$MPI_C_INCLUDE"
+  	        if test -z "$ac_incdir"; then :
+  	           acx_cv_c_include_mpi_h="$MPI_C_INCLUDE"
 else
-                     acx_cv_c_include_mpi_h="$MPI_C_INCLUDE -I$ac_incdir"
+  	           acx_cv_c_include_mpi_h="$MPI_C_INCLUDE -I$ac_incdir"
 fi
 fi
-              if ${acx_cv_c_include_mpi_h+:} false; then :
+	      if ${acx_cv_c_include_mpi_h+:} false; then :
   break
 fi
 done
-           if ${acx_cv_c_include_mpi_h+:} false; then :
+	   if ${acx_cv_c_include_mpi_h+:} false; then :
   break
 fi
 
-        break
+	break
       done
       CPPFLAGS=$ac_include_search_mpi_h_SAVE
 fi
 
    if ${acx_cv_c_include_mpi_h+:} false; then :
-  acx_temp=$acx_cv_c_include_mpi_h
-      if test x"$acx_temp" = x; then :
+        if test x"$acx_cv_c_include_mpi_h" = x; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: (none required)" >&5
 $as_echo "(none required)" >&6; }
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_temp" >&5
-$as_echo "$acx_temp" >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_c_include_mpi_h" >&5
+$as_echo "$acx_cv_c_include_mpi_h" >&6; }
 fi
+
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
 fi
    if ${acx_cv_c_include_mpi_h+:} false; then :
-  acx_temp=$acx_cv_c_include_mpi_h
-         acx_temp=`echo "$acx_temp" | sed -e 's/^ *//;s/ *$//'`
-         MPI_C_INCLUDE=$acx_temp
+  MPI_C_INCLUDE=`echo "$acx_cv_c_include_mpi_h" | sed -e 's/^ *//;s/ *$//'`
 else
-  have_MPI_c_bindings=no
-         { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+  have_MPI_c_bindings=no; { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "Required header mpi.h not found or not compilable.
 See \`config.log' for more details" "$LINENO" 5; }
@@ -28779,20 +28884,18 @@ fi
 
 # Check whether --with-mpi-lib was given.
 if test "${with_mpi_lib+set}" = set; then :
-  withval=$with_mpi_lib; MPI_C_LIB="-L$with_mpi_lib"
+  withval=$with_mpi_lib; MPI_C_LIB="-L$withval"
 fi
 
-
-
-      if test "x$have_MPI_c_bindings" = xyes; then :
+                  if test "x$have_MPI_c_bindings" = xyes; then :
               { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing MPI_Waitall" >&5
 $as_echo_n "checking for library containing MPI_Waitall... " >&6; }
    if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  while :; do
-        acx_option_func_search_save_LIBS="$LIBS"
-   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  acx_option_func_search_save_LIBS=$LIBS
+      while :; do
+        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -28821,9 +28924,9 @@ else
 fi
       if ac_fn_c_try_link "$LINENO"; then :
   if test x"$ac_res" = x"none required"; then :
-          acx_cv_option_search_MPI_Waitall_c="$MPI_C_LIB "
+  acx_cv_option_search_MPI_Waitall_c="$MPI_C_LIB"
 else
-          acx_cv_option_search_MPI_Waitall_c="$MPI_C_LIB -l$ac_lib "
+  acx_cv_option_search_MPI_Waitall_c="$MPI_C_LIB -l$ac_lib"
 fi
 fi
 rm -f core conftest.err conftest.$ac_objext \
@@ -28833,13 +28936,60 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 done
    rm conftest.$ac_ext
-   LIBS="$acx_option_func_search_save_LIBS"
         if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
   break
 fi
+        for acx_libset in ""
+do :
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
 
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char MPI_Waitall ();
+int
+main ()
+{
+return MPI_Waitall ();
+  ;
+  return 0;
+}
+_ACEOF
+   for ac_lib in '' mpi mpich
+do :
+  if test -z "$ac_lib"; then :
+  ac_res="none required"
+         LIBS="$MPI_C_LIB $acx_libset $acx_option_func_search_save_LIBS"
+else
+  ac_res="-l$ac_lib"
+         LIBS="$MPI_C_LIB $ac_res $acx_libset $acx_option_func_search_save_LIBS"
+fi
+      if ac_fn_c_try_link "$LINENO"; then :
+  if test x"$ac_res" = x"none required"; then :
+  acx_cv_option_search_MPI_Waitall_c="$MPI_C_LIB $acx_libset"
+else
+  acx_cv_option_search_MPI_Waitall_c="$MPI_C_LIB -l$ac_lib $acx_libset"
+fi
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+      if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
+  break
+fi
+done
+   rm conftest.$ac_ext
+           if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
+  break
+fi
+
+done
         break
       done
+      LIBS=$acx_option_func_search_save_LIBS
 fi
 
    if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
@@ -28853,11 +29003,7 @@ fi
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
-fi
-   if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
-
-else
-  have_MPI_c_bindings=no
+	have_MPI_c_bindings=no
             { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "Cannot link C MPI programs.
@@ -28865,16 +29011,9 @@ See \`config.log' for more details" "$LINENO" 5; }
         enable_MPI=no
 fi
 
-         acx_temp=$acx_cv_option_search_MPI_Waitall_c
-         acx_temp=`echo "$acx_temp" | sed -e 's/^ *//;s/ *$//'`
-         MPI_C_LIB=$acx_temp
+         MPI_C_LIB=`echo "$acx_cv_option_search_MPI_Waitall_c" | sed -e 's/^ *//;s/ *$//'`
 
 fi
-
-
-
-
-
 
    ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -28904,27 +29043,25 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=FC $ac_compile"
 
 # Check whether --with-mpi-root was given.
 if test "${with_mpi_root+set}" = set; then :
-  withval=$with_mpi_root; MPIROOT="$with_mpi_root"
+  withval=$with_mpi_root; MPIROOT=$withval
 fi
 
    if ${MPIROOT+:} false; then :
   if ${MPI_FC_LIB+:} false; then :
 
 else
-  acx_temp=$MPIROOT
-         MPI_FC_LIB="-L$acx_temp/lib"
+  MPI_FC_LIB="-L$MPIROOT/lib"
 fi
       if ${MPI_FC_INCLUDE+:} false; then :
 
 else
-  acx_temp=$MPIROOT
-         MPI_FC_INCLUDE="$FPP_INCOPT$acx_temp/include"
+  MPI_FC_INCLUDE="$FPP_INCOPT$MPIROOT/include"
 fi
 fi
 
 # Check whether --with-mpi-include was given.
 if test "${with_mpi_include+set}" = set; then :
-  withval=$with_mpi_include; MPI_FC_INCLUDE="$FPP_INCOPT$with_mpi_include"
+  withval=$with_mpi_include; MPI_FC_INCLUDE="$FPP_INCOPT$withval"
 fi
 
 
@@ -28935,17 +29072,17 @@ $as_echo_n "checking for mpif.h extra include path... " >&6; }
   $as_echo_n "(cached) " >&6
 else
        ac_include_search_mpif_h_SAVE="$FCFLAGS"
-      while :; do
-        for ac_incdir in ''
+            while :; do
+	for ac_incdir in ''
 do :
   if test -z "$ac_incdir"; then :
   ac_res="none required"
-                 FCFLAGS="$MPI_FC_INCLUDE $ac_include_search_mpif_h_SAVE"
+	         FCFLAGS="$MPI_FC_INCLUDE $ac_include_search_mpif_h_SAVE"
 else
   ac_res="$FPP_INCOPT$ac_incdir"
-                 FCFLAGS="$MPI_FC_INCLUDE $ac_res $ac_include_search_mpif_h_SAVE"
+	         FCFLAGS="$MPI_FC_INCLUDE $ac_res $ac_include_search_mpif_h_SAVE"
 fi
-              cat > conftest.$ac_ext <<_ACEOF
+	      cat > conftest.$ac_ext <<_ACEOF
       program conftest
       include 'mpif.h'
       end
@@ -28955,45 +29092,42 @@ if ac_fn_fc_try_compile "$LINENO"; then :
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
    if ${acx_cv_fc_include_mpif_h+:} false; then :
-                  if test -z "$ac_incdir"; then :
-                     acx_cv_fc_include_mpif_h="$MPI_FC_INCLUDE"
+  	        if test -z "$ac_incdir"; then :
+  	           acx_cv_fc_include_mpif_h="$MPI_FC_INCLUDE"
 else
-                     acx_cv_fc_include_mpif_h="$MPI_FC_INCLUDE $FPP_INCOPT$ac_incdir"
+  	           acx_cv_fc_include_mpif_h="$MPI_FC_INCLUDE $FPP_INCOPT$ac_incdir"
 fi
 fi
-              if ${acx_cv_fc_include_mpif_h+:} false; then :
+	      if ${acx_cv_fc_include_mpif_h+:} false; then :
   break
 fi
 done
-           if ${acx_cv_fc_include_mpif_h+:} false; then :
+	   if ${acx_cv_fc_include_mpif_h+:} false; then :
   break
 fi
 
-        break
+	break
       done
       FCFLAGS=$ac_include_search_mpif_h_SAVE
 fi
 
    if ${acx_cv_fc_include_mpif_h+:} false; then :
-  acx_temp=$acx_cv_fc_include_mpif_h
-      if test x"$acx_temp" = x; then :
+        if test x"$acx_cv_fc_include_mpif_h" = x; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: (none required)" >&5
 $as_echo "(none required)" >&6; }
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_temp" >&5
-$as_echo "$acx_temp" >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_fc_include_mpif_h" >&5
+$as_echo "$acx_cv_fc_include_mpif_h" >&6; }
 fi
+
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
 fi
    if ${acx_cv_fc_include_mpif_h+:} false; then :
-  acx_temp=$acx_cv_fc_include_mpif_h
-         acx_temp=`echo "$acx_temp" | sed -e 's/^ *//;s/ *$//'`
-         MPI_FC_INCLUDE=$acx_temp
+  MPI_FC_INCLUDE=`echo "$acx_cv_fc_include_mpif_h" | sed -e 's/^ *//;s/ *$//'`
 else
-  have_MPI_fc_bindings=no
-         { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+  have_MPI_fc_bindings=no; { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "Required include mpif.h not found or not compilable.
 See \`config.log' for more details" "$LINENO" 5; }
@@ -29003,20 +29137,18 @@ fi
 
 # Check whether --with-mpi-lib was given.
 if test "${with_mpi_lib+set}" = set; then :
-  withval=$with_mpi_lib; MPI_FC_LIB="-L$with_mpi_lib"
+  withval=$with_mpi_lib; MPI_FC_LIB="-L$withval"
 fi
 
-
-
-      if test "x$have_MPI_fc_bindings" = xyes; then :
+                  if test "x$have_MPI_fc_bindings" = xyes; then :
               { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing mpi_waitall" >&5
 $as_echo_n "checking for library containing mpi_waitall... " >&6; }
    if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  while :; do
-        acx_option_func_search_save_LIBS="$LIBS"
-   cat > conftest.$ac_ext <<_ACEOF
+  acx_option_func_search_save_LIBS=$LIBS
+      while :; do
+        cat > conftest.$ac_ext <<_ACEOF
       program conftest
       call mpi_waitall
       end
@@ -29032,9 +29164,9 @@ else
 fi
       if ac_fn_fc_try_link "$LINENO"; then :
   if test x"$ac_res" = x"none required"; then :
-          acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB "
+  acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB"
 else
-          acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -l$ac_lib "
+  acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -l$ac_lib"
 fi
 fi
 rm -f core conftest.err conftest.$ac_objext \
@@ -29044,12 +29176,12 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 done
    rm conftest.$ac_ext
-   LIBS="$acx_option_func_search_save_LIBS"
         if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
   break
 fi
-        acx_option_func_search_save_LIBS="$LIBS"
-   cat > conftest.$ac_ext <<_ACEOF
+        for acx_libset in "-lmpi_f77 -lmpi" "-lmpi"
+do :
+  cat > conftest.$ac_ext <<_ACEOF
       program conftest
       call mpi_waitall
       end
@@ -29058,16 +29190,16 @@ _ACEOF
 do :
   if test -z "$ac_lib"; then :
   ac_res="none required"
-         LIBS="$MPI_FC_LIB -lmpi_f77 -lmpi $acx_option_func_search_save_LIBS"
+         LIBS="$MPI_FC_LIB $acx_libset $acx_option_func_search_save_LIBS"
 else
   ac_res="-l$ac_lib"
-         LIBS="$MPI_FC_LIB $ac_res -lmpi_f77 -lmpi $acx_option_func_search_save_LIBS"
+         LIBS="$MPI_FC_LIB $ac_res $acx_libset $acx_option_func_search_save_LIBS"
 fi
       if ac_fn_fc_try_link "$LINENO"; then :
   if test x"$ac_res" = x"none required"; then :
-          acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -lmpi_f77 -lmpi"
+  acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB $acx_libset"
 else
-          acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -l$ac_lib -lmpi_f77 -lmpi"
+  acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -l$ac_lib $acx_libset"
 fi
 fi
 rm -f core conftest.err conftest.$ac_objext \
@@ -29077,46 +29209,14 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 done
    rm conftest.$ac_ext
-   LIBS="$acx_option_func_search_save_LIBS"
-           if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
-  break
-fi
-          acx_option_func_search_save_LIBS="$LIBS"
-   cat > conftest.$ac_ext <<_ACEOF
-      program conftest
-      call mpi_waitall
-      end
-_ACEOF
-   for ac_lib in '' mpi mpi_f90 mpi_f77 mpich
-do :
-  if test -z "$ac_lib"; then :
-  ac_res="none required"
-         LIBS="$MPI_FC_LIB -lmpi $acx_option_func_search_save_LIBS"
-else
-  ac_res="-l$ac_lib"
-         LIBS="$MPI_FC_LIB $ac_res -lmpi $acx_option_func_search_save_LIBS"
-fi
-      if ac_fn_fc_try_link "$LINENO"; then :
-  if test x"$ac_res" = x"none required"; then :
-          acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -lmpi"
-else
-          acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -l$ac_lib -lmpi"
-fi
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-      if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
-  break
-fi
-done
-   rm conftest.$ac_ext
-   LIBS="$acx_option_func_search_save_LIBS"
            if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
   break
 fi
 
+done
         break
       done
+      LIBS=$acx_option_func_search_save_LIBS
 fi
 
    if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
@@ -29130,11 +29230,7 @@ fi
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
-fi
-   if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
-
-else
-  have_MPI_fc_bindings=no
+	have_MPI_fc_bindings=no
             { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "Cannot link Fortran MPI programs.
@@ -29142,16 +29238,9 @@ See \`config.log' for more details" "$LINENO" 5; }
            enable_MPI=no
 fi
 
-         acx_temp=$acx_cv_option_search_mpi_waitall_fc
-         acx_temp=`echo "$acx_temp" | sed -e 's/^ *//;s/ *$//'`
-         MPI_FC_LIB=$acx_temp
+         MPI_FC_LIB=`echo "$acx_cv_option_search_mpi_waitall_fc" | sed -e 's/^ *//;s/ *$//'`
 
 fi
-
-
-
-
-
 
    ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -29295,6 +29384,12 @@ if test x"$USE_MPI" = xyes; then :
 
 $as_echo "#define USE_MPI 1" >>confdefs.h
 
+   saved_CFLAGS=$CFLAGS
+   saved_FCFLAGS=$FCFLAGS
+   saved_LIBS=$LIBS
+   CFLAGS="$CFLAGS $MPI_C_INCLUDE"
+   FCFLAGS="$FCFLAGS $MPI_FC_INCLUDE"
+   LIBS="$LIBS $MPI_C_LIB"
    for ac_prog in mpirun mpiexec
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -29341,14 +29436,20 @@ fi
 done
 test -n "$MPI_LAUNCH" || MPI_LAUNCH="true"
 
-   saved_CFLAGS=$CFLAGS
-   saved_LIBS=$LIBS
-   CFLAGS="$CFLAGS $MPI_C_INCLUDE"
-   LIBS="$LIBS $MPI_C_LIB"
-   if test x"$cross_compiling" = xno; then :
+
+   if test x"$cross_compiling" = xno -a x"$MPI_LAUNCH" != xtrue; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $MPI_LAUNCH works" >&5
 $as_echo_n "checking if $MPI_LAUNCH works... " >&6; }
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+      if test -x `echo "$MPI_LAUNCH" | sed -e 's/[ 	].*//'`; then :
+  ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
+
+         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 #include <stdio.h>
@@ -29377,31 +29478,47 @@ main(int argc, char **argv)
 
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  if $MPI_LAUNCH -n 4 ./conftest$EXEEXT 4; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
+  acx_mpirun_test="$MPI_LAUNCH -n 4 ./conftest$EXEEXT 4"
+            if expr "$ac_link" : '.*/libtool --mode=link' >/dev/null; then :
+  acx_mpirun_test=`echo "$ac_link" | sed -e 's@\(.*/libtool --mode=\)link.*@\1@'`"execute $acx_mpirun_test"
+fi
+            { { echo "running $acx_mpirun_test"; } >&5
+  (LIBC_FATAL_STDERR_=1 $acx_mpirun_test >&2) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+            if test $ac_status -eq 0; then :
+
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-             { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "mpirun doesn't work
-See \`config.log' for more details" "$LINENO" 5; }
+  MPI_LAUNCH=true ; MPI_LAUNCH_failMsg="failed to run MPI programs"
 fi
 else
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "Cannot compile simple MPI program
-See \`config.log' for more details" "$LINENO" 5; }
+  MPI_LAUNCH=true ; MPI_LAUNCH_failMsg="Cannot compile or link simple MPI program"
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+         ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
+else
+  MPI_LAUNCH_failMsg="Cannot execute $MPI_LAUNCH" ; MPI_LAUNCH=true
 fi
-   if test "x$MPI_LAUNCH" = xtrue; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: MPI launch command unavailable" >&5
+fi
+   if test x"$MPI_LAUNCH" = xtrue; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: MPI launch command unavailable" >&5
 $as_echo "$as_me: WARNING: MPI launch command unavailable" >&2;}
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
 fi
+
       ac_fn_c_check_decl "$LINENO" "MPI_UINT64_T" "ac_cv_have_decl_MPI_UINT64_T" "$ac_includes_default
 #include <mpi.h>
 "
@@ -29491,6 +29608,7 @@ _ACEOF
 fi
 
    CFLAGS=$saved_CFLAGS
+   FCFLAGS=$saved_FCFLAGS
    LIBS=$saved_LIBS
 
 
@@ -30442,7 +30560,7 @@ fi
 # Check whether --enable-ruby was given.
 if test "${enable_ruby+set}" = set; then :
   enableval=$enable_ruby; RUBY_INCLUDES="$($RUBY $srcdir/config/interface.rb)"
-   save_CPPFLAGS=$CPPFLAGS
+   saved_CPPFLAGS=$CPPFLAGS
    CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
    ac_fn_c_check_header_mongrel "$LINENO" "ruby.h" "ac_cv_header_ruby_h" "$ac_includes_default"
 if test "x$ac_cv_header_ruby_h" = xyes; then :
@@ -30454,7 +30572,7 @@ else
 fi
 
 
-   CPPFLAGS=$save_CPPFLAGS
+   CPPFLAGS=$saved_CPPFLAGS
    if test "x$RUBY" != "x"; then :
   if test "x$SWIG" = "x"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: Ruby bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage" >&5
@@ -30533,7 +30651,7 @@ fi
      "-I`$PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_inc()'`" \
      "-I`$PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_lib(1,1)' | $SED 's/lib/include/'`"
    do
-     save_CPPFLAGS=$CPPFLAGS
+     saved_CPPFLAGS=$CPPFLAGS
      CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
      ac_fn_c_check_header_mongrel "$LINENO" "Python.h" "ac_cv_header_Python_h" "$ac_includes_default"
 if test "x$ac_cv_header_Python_h" = xyes; then :
@@ -30542,7 +30660,7 @@ if test "x$ac_cv_header_Python_h" = xyes; then :
 fi
 
 
-     CPPFLAGS=$save_CPPFLAGS
+     CPPFLAGS=$saved_CPPFLAGS
    done
    if test "x$enable_python" != "xno"; then :
   if test "x$SWIG" = "x"; then :
@@ -30631,10 +30749,9 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=FC $ac_compile"
 
 
 
-   acx_FC=$FC
-   case $host in #(
+         case $host in #(
   x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*) :
-    acx_temp=`$acx_FC -V 2>&1`
+    acx_temp=`$FC -V 2>&1 | sed 5q`
       if echo "$acx_temp" | grep '^Copyright.*\(The Portland Group\|NVIDIA CORPORATION\)' >/dev/null; then :
   acx_cv_fc_cf_flag=-DgFortran
 elif echo "$acx_temp" | grep '^NAG Fortran Compiler Release' >/dev/null; then :
@@ -30643,7 +30760,7 @@ elif echo "$acx_temp" | grep '^Intel(R) Fortran.*Compiler' >/dev/null; then :
   acx_cv_fc_cf_flag=-DgFortran
 elif echo "$acx_temp" | grep '^Cray Fortran' >/dev/null; then :
   acx_cv_fc_cf_flag=-DgFortran
-elif acx_temp=`$acx_FC --version 2>&1` \
+elif acx_temp=`$FC --version 2>&1 | sed 5q` \
          && echo $acx_temp | grep '^GNU Fortran' >/dev/null; then :
   if echo $acx_temp | grep g77 >/dev/null; then :
   acx_cv_fc_cf_flag=-Dg77Fortran
@@ -30656,13 +30773,11 @@ fi
 fi
 elif echo $acx_temp | grep '^G95' >/dev/null; then :
   acx_cv_fc_cf_flag=-DNAGf90Fortran
-elif acx_temp=`$acx_FC -v 2>&1` \
-         && echo $acx_temp | grep '^f2c'; then :
+elif $FC -v 2>&1 | sed 5q | grep '^f2c'; then :
   acx_cv_fc_cf_flag=-Df2cFortran
 fi ;; #(
   powerpc64-*-linux-*|powerpc-*-linux-*) :
-    if acx_temp=`$acx_FC -qversion 2>&1` \
-         && echo $acx_temp | grep '^IBM XL Fortran' >/dev/null; then :
+    if $FC -qversion 2>&1 | sed 5q | grep '^IBM XL Fortran' >/dev/null; then :
   acx_cv_fc_cf_flag=-DIBMR2Fortran
 fi ;; #(
   *-ibm-aix*) :
@@ -30679,6 +30794,7 @@ fi
   *) :
      ;;
 esac
+
 
                ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -30700,10 +30816,9 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=F77 $ac_compile"
 
 
 
-   acx_FC=$F77
-   case $host in #(
+         case $host in #(
   x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*) :
-    acx_temp=`$acx_FC -V 2>&1`
+    acx_temp=`$F77 -V 2>&1 | sed 5q`
       if echo "$acx_temp" | grep '^Copyright.*\(The Portland Group\|NVIDIA CORPORATION\)' >/dev/null; then :
   acx_cv_f77_cf_flag=-DgFortran
 elif echo "$acx_temp" | grep '^NAG Fortran Compiler Release' >/dev/null; then :
@@ -30712,7 +30827,7 @@ elif echo "$acx_temp" | grep '^Intel(R) Fortran.*Compiler' >/dev/null; then :
   acx_cv_f77_cf_flag=-DgFortran
 elif echo "$acx_temp" | grep '^Cray Fortran' >/dev/null; then :
   acx_cv_f77_cf_flag=-DgFortran
-elif acx_temp=`$acx_FC --version 2>&1` \
+elif acx_temp=`$F77 --version 2>&1 | sed 5q` \
          && echo $acx_temp | grep '^GNU Fortran' >/dev/null; then :
   if echo $acx_temp | grep g77 >/dev/null; then :
   acx_cv_f77_cf_flag=-Dg77Fortran
@@ -30725,13 +30840,11 @@ fi
 fi
 elif echo $acx_temp | grep '^G95' >/dev/null; then :
   acx_cv_f77_cf_flag=-DNAGf90Fortran
-elif acx_temp=`$acx_FC -v 2>&1` \
-         && echo $acx_temp | grep '^f2c'; then :
+elif $F77 -v 2>&1 | sed 5q | grep '^f2c'; then :
   acx_cv_f77_cf_flag=-Df2cFortran
 fi ;; #(
   powerpc64-*-linux-*|powerpc-*-linux-*) :
-    if acx_temp=`$acx_FC -qversion 2>&1` \
-         && echo $acx_temp | grep '^IBM XL Fortran' >/dev/null; then :
+    if $F77 -qversion 2>&1 | sed 5q | grep '^IBM XL Fortran' >/dev/null; then :
   acx_cv_f77_cf_flag=-DIBMR2Fortran
 fi ;; #(
   *-ibm-aix*) :
@@ -30748,6 +30861,7 @@ fi
   *) :
      ;;
 esac
+
 
                ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -30778,14 +30892,15 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_cf_flag" >&5
 $as_echo "$acx_cv_cf_flag" >&6; }
    if echo "$acx_cv_cf_flag" | grep ' (probed)$' >/dev/null; then :
-  CPPFLAGS="${CPPFLAGS+$CPPFLAGS }`echo "$acx_cv_cf_flag" | sed 's/ (probed)$//'`"
+  acx_temp=`echo "$acx_cv_cf_flag" | sed 's/ (probed)$//'`
+      CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$acx_temp"
 fi
 
 case $host in #(
   *-ibm-aix*|powerpc64-*-linux-*|powerpc-*-linux-*) :
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking if -Dappendus needs to be added to CPPFLAGS for cfortran.h" >&5
 $as_echo_n "checking if -Dappendus needs to be added to CPPFLAGS for cfortran.h... " >&6; }
-      if $CC -qversion 2>&1 | grep '^IBM XL C' >/dev/null; then :
+      if $CC -qversion 2>&1 | sed 5q | grep '^IBM XL C' >/dev/null; then :
   acx_temp_qextname_f77flags=`echo "$FFLAGS" | sed -n '/-qextname/{ s/^\(.* \)*-qextname\( .*\)*$/-qextname/;p;}'`
          acx_temp_qextname_fcflags=`echo "$FCFLAGS" | sed -n '/-qextname/{ s/^\(.* \)*-qextname\( .*\)*$/-qextname/;p;}'`
 

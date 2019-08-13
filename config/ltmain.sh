@@ -1987,6 +1987,12 @@ func_mode_compile ()
 	continue
 	;;
 
+      skip )
+        lastarg=
+        arg_mode=normal
+        continue
+        ;;
+
       normal )
 	# Accept any command-line options.
 	case $arg in
@@ -2009,6 +2015,11 @@ func_mode_compile ()
 
 	-no-suppress)
 	  suppress_opt=no
+	  continue
+	  ;;
+
+	-Xlinker | -XCClinker)
+	  arg_mode=skip #  the next one is ignored for compile mode
 	  continue
 	  ;;
 
