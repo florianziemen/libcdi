@@ -192,12 +192,13 @@ EXTRA_DIST += \
 libcdi_f2003_la_SOURCES = mo_cdi.f90
 libcdi_f2003_ladir = $(includedir)
 nodist_libcdi_f2003_la_HEADERS =
-if CREATE_ISOC
 if FORTRAN_MOD_UC
-nodist_libcdi_f2003_la_HEADERS += MO_CDI.$(FCMODEXT)
+mo_cdi_modfile = MO_CDI.$(FCMODEXT)
 else
-nodist_libcdi_f2003_la_HEADERS += mo_cdi.$(FCMODEXT)
+mo_cdi_modfile = mo_cdi.$(FCMODEXT)
 endif
+if CREATE_ISOC
+nodist_libcdi_f2003_la_HEADERS += $(mo_cdi_modfile)
 endif
 libcdi_f2003_la_LIBADD = libcdi.la
 
@@ -324,11 +325,7 @@ cdiFortran.c cdi.inc cdipioFortran.c cdipio.inc mo_cdi.f90:
 	} >&2; exit 1
 endif !MAINTAINER_MODE
 
-if FORTRAN_MOD_UC
-MO_CDI.$(FCMODEXT): mo_cdi.lo
-else
-mo_cdi.$(FCMODEXT): mo_cdi.lo
-endif
+$(mo_cdi_modfile): mo_cdi.lo
 	$(AM_V_at)test -f $@ || rm -f $<
 	$(AM_V_at)test -f $@ || $(MAKE) $(AM_MAKEFLAGS) $<
 #
@@ -356,11 +353,7 @@ MOSTLYCLEANFILES = make_fint
 CLEANFILES  := `ls *~`
 #CLEANFILES += cdilib.c
 if CREATE_ISOC
-if FORTRAN_MOD_UC
-CLEANFILES += MO_CDI.$(FCMODEXT)
-else
-CLEANFILES += mo_cdi.$(FCMODEXT)
-endif
+CLEANFILES += $(mo_cdi_modfile)
 endif
 
 if ENABLE_CDI_LIB
