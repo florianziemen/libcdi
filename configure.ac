@@ -54,28 +54,7 @@ AC_PROG_INSTALL
 
 # Set up libtool.
 AC_MSG_NOTICE([setting up libtool])
-dnl before switching on libtool, identify compilers that prevent us from
-dnl certain build configurations
-ACX_LT_PROBLEMS
-LT_INIT([pic-only])
-dnl Clean up after Libtool checks:
-rm -f a.out
-dnl _KPSE_USE_LIBTOOL ensures libtool is also used for configure-time tests,
-dnl which deduces dependent libraries automatically
-_KPSE_USE_LIBTOOL
-_KPSE_CHECK_LIBTOOL
-AS_IF([test -n "$FC" && test "X$FC" != Xno],
-  [AC_LANG_PUSH([Fortran])
-   _KPSE_CHECK_LIBTOOL
-   AC_LANG_POP([Fortran])])
-AS_IF([test -n "$F77" && test "X$F77" != Xno],
-  [AC_LANG_PUSH([Fortran 77])
-   _KPSE_CHECK_LIBTOOL
-   AC_LANG_POP([Fortran 77])])
-AS_IF([test -n "$CXX" && test "X$CXX" != Xno],
-  [AC_LANG_PUSH([C++])
-   _KPSE_CHECK_LIBTOOL
-   AC_LANG_POP([C++])])
+ACX_USE_LIBTOOL_CONFIGURATION([pic-only])
 
 # -----------------------------------------------------------------------
 # Check endianess of system
@@ -213,46 +192,13 @@ enable_ppm=no
 AS_IF([test x"$USE_MPI" = xyes],
   [AC_DEFINE([USE_MPI],[1],[parallel I/O requested and available])
 dnl test properties of MPI system
-   AC_PATH_PROGS([MPI_LAUNCH],[mpirun mpiexec],[true])
    saved_CFLAGS=$CFLAGS
+   saved_FCFLAGS=$FCFLAGS
    saved_LIBS=$LIBS
    CFLAGS="$CFLAGS $MPI_C_INCLUDE"
+   FCFLAGS="$FCFLAGS $MPI_FC_INCLUDE"
    LIBS="$LIBS $MPI_C_LIB"
-   AS_IF([test x"$cross_compiling" = xno],
-     [AC_MSG_CHECKING([if $MPI_LAUNCH works])
-      AC_LINK_IFELSE([AC_LANG_SOURCE([
-@%:@include <stdio.h>
-@%:@include <stdlib.h>
-
-@%:@include <mpi.h>
-
-@%:@define xmpi(ret)           \\
-  do {                      \\
-    if (ret != MPI_SUCCESS) \\
-      exit(EXIT_FAILURE);   \\
-  } while (0)
-
-int
-main(int argc, char **argv)
-{
-  xmpi(MPI_Init(&argc, &argv));
-  char *numarg = argv@<:@1@:>@;
-  int cmdnum = atoi(numarg);
-  int procnum = 1;
-  xmpi(MPI_Allreduce(MPI_IN_PLACE, &procnum, 1, MPI_INT, MPI_SUM,
-                     MPI_COMM_WORLD));
-  xmpi(MPI_Finalize());
-  return (procnum == cmdnum)?EXIT_SUCCESS:EXIT_FAILURE;
-}
-])],
-         [AS_IF([$MPI_LAUNCH -n 4 ./conftest$EXEEXT 4],
-            [AC_MSG_RESULT([yes])],
-            [AC_MSG_RESULT([no])
-             AC_MSG_FAILURE([mpirun doesn't work])])],
-         [AC_MSG_FAILURE([Cannot compile simple MPI program])])
-     ])
-   AS_IF([test "x$MPI_LAUNCH" = xtrue],
-     [AC_MSG_WARN([MPI launch command unavailable])])
+   ACX_MPIRUN(,,[AC_MSG_WARN([MPI launch command unavailable])])
    AH_TEMPLATE([YAXT_UID_DT],[Defined to MPI datatype to be used for Xt_uid])dnl
    AC_CHECK_DECL([MPI_UINT64_T],
      [AC_DEFINE([YAXT_UID_DT],[MPI_UINT64_T])],
@@ -262,6 +208,7 @@ main(int argc, char **argv)
 @%:@include <mpi.h>])],[AC_INCLUDES_DEFAULT
 @%:@include <mpi.h>])
    CFLAGS=$saved_CFLAGS
+   FCFLAGS=$saved_FCFLAGS
    LIBS=$saved_LIBS
 
    AC_ARG_VAR([YAXT_FC_LIB],[Flags needed to link YAXT for the Fortran API])
@@ -415,10 +362,10 @@ AC_ARG_ENABLE([ruby],
   [AS_HELP_STRING([--enable-ruby],[ruby language bindings [default=no] (EXPERIMENTAL)])],
   [AC_CHECK_PROG([RUBY],[ruby],[ruby])
    RUBY_INCLUDES="$($RUBY $srcdir/config/interface.rb)"
-   save_CPPFLAGS=$CPPFLAGS
+   saved_CPPFLAGS=$CPPFLAGS
    CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
    AC_CHECK_HEADER([ruby.h],,[enable_ruby=no], [AC_INCLUDES_DEFAULT])
-   CPPFLAGS=$save_CPPFLAGS
+   CPPFLAGS=$saved_CPPFLAGS
    AS_IF([test "x$RUBY" != "x"],
          [AS_IF([test "x$SWIG" = "x"],
                 [AC_MSG_NOTICE([Ruby bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage])])],
@@ -443,11 +390,11 @@ AC_ARG_ENABLE(python,
      "-I`$PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_inc()'`" \
      "-I`$PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_lib(1,1)' | $SED 's/lib/include/'`"
    do
-     save_CPPFLAGS=$CPPFLAGS
+     saved_CPPFLAGS=$CPPFLAGS
      CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
      AC_CHECK_HEADER([Python.h],[enable_python=yes
        break],,[AC_INCLUDES_DEFAULT])
-     CPPFLAGS=$save_CPPFLAGS
+     CPPFLAGS=$saved_CPPFLAGS
    done
    AS_IF([test "x$enable_python" != "xno"],
          [AS_IF([test "x$SWIG" = "x"],
