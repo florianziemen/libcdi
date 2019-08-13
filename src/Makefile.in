@@ -92,23 +92,21 @@ host_triplet = @host@
 @HAVE_LIBGRIB_API_TRUE@am__append_8 = \
 @HAVE_LIBGRIB_API_TRUE@	$(libcdi_la_HAVE_LIBGRIB_API_extra_sources)
 
-@CREATE_ISOC_TRUE@@FORTRAN_MOD_UC_TRUE@am__append_9 = MO_CDI.$(FCMODEXT)
-@CREATE_ISOC_TRUE@@FORTRAN_MOD_UC_FALSE@am__append_10 = mo_cdi.$(FCMODEXT)
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_11 = libcdipio.la
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_12 = cdipio.h cdipio.inc
-@ENABLE_CDI_LIB_FALSE@@USE_MPI_TRUE@am__append_13 = libcdipio.la
-@HAVE_PARALLEL_NC4_TRUE@@USE_MPI_TRUE@am__append_14 = $(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
-@ENABLE_CDI_LIB_TRUE@am__append_15 = pkgconfig/cdi.pc
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_16 = pkgconfig/cdipio.pc
-@CREATE_ISOC_TRUE@@ENABLE_CDI_LIB_TRUE@am__append_17 = pkgconfig/cdi_f2003.pc
+@CREATE_ISOC_TRUE@am__append_9 = $(mo_cdi_modfile)
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_10 = libcdipio.la
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_11 = cdipio.h cdipio.inc
+@ENABLE_CDI_LIB_FALSE@@USE_MPI_TRUE@am__append_12 = libcdipio.la
+@HAVE_PARALLEL_NC4_TRUE@@USE_MPI_TRUE@am__append_13 = $(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
+@ENABLE_CDI_LIB_TRUE@am__append_14 = pkgconfig/cdi.pc
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_15 = pkgconfig/cdipio.pc
+@CREATE_ISOC_TRUE@@ENABLE_CDI_LIB_TRUE@am__append_16 = pkgconfig/cdi_f2003.pc
 #CLEANFILES += cdilib.c
-@CREATE_ISOC_TRUE@@FORTRAN_MOD_UC_TRUE@am__append_18 = MO_CDI.$(FCMODEXT)
-@CREATE_ISOC_TRUE@@FORTRAN_MOD_UC_FALSE@am__append_19 = mo_cdi.$(FCMODEXT)
-@ENABLE_CDI_LIB_TRUE@am__append_20 = pkgconfig/cdi.pc
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_21 = pkgconfig/cdipio.pc
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_22 = pkgconfig/cdipio.pc
-@CREATE_ISOC_TRUE@@ENABLE_CDI_LIB_TRUE@am__append_23 = pkgconfig/cdi_f2003.pc
-@CREATE_ISOC_TRUE@@ENABLE_CDI_LIB_TRUE@am__append_24 = pkgconfig/cdi_f2003.pc
+@CREATE_ISOC_TRUE@am__append_17 = $(mo_cdi_modfile)
+@ENABLE_CDI_LIB_TRUE@am__append_18 = pkgconfig/cdi.pc
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_19 = pkgconfig/cdipio.pc
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_20 = pkgconfig/cdipio.pc
+@CREATE_ISOC_TRUE@@ENABLE_CDI_LIB_TRUE@am__append_21 = pkgconfig/cdi_f2003.pc
+@CREATE_ISOC_TRUE@@ENABLE_CDI_LIB_TRUE@am__append_22 = pkgconfig/cdi_f2003.pc
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/config.h.in $(top_srcdir)/config/mkinstalldirs \
@@ -554,9 +552,9 @@ EXTRA_DIST = cdilib.c $(libcdi_la_USE_FC_extra_sources) \
 	$(libcdi_la_HAVE_LIBGRIB_API_extra_sources) \
 	$(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
 noinst_LTLIBRARIES = libcdiresunpack.la $(am__append_5) \
-	$(am__append_6) $(am__append_13)
-include_HEADERS = $(am__append_2) $(am__append_3) $(am__append_12)
-lib_LTLIBRARIES = $(am__append_1) $(am__append_4) $(am__append_11)
+	$(am__append_6) $(am__append_12)
+include_HEADERS = $(am__append_2) $(am__append_3) $(am__append_11)
+lib_LTLIBRARIES = $(am__append_1) $(am__append_4) $(am__append_10)
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 libcdi_la_SOURCES = basetime.c basetime.h binary.c binary.h calendar.c \
 	calendar.h cdf.c cdf.h cdf_int.c cdf_int.h cdf_util.c \
@@ -596,7 +594,9 @@ libcdi_la_HAVE_LIBGRIB_API_extra_sources = \
 
 libcdi_f2003_la_SOURCES = mo_cdi.f90
 libcdi_f2003_ladir = $(includedir)
-nodist_libcdi_f2003_la_HEADERS = $(am__append_9) $(am__append_10)
+nodist_libcdi_f2003_la_HEADERS = $(am__append_9)
+@FORTRAN_MOD_UC_FALSE@mo_cdi_modfile = mo_cdi.$(FCMODEXT)
+@FORTRAN_MOD_UC_TRUE@mo_cdi_modfile = MO_CDI.$(FCMODEXT)
 libcdi_f2003_la_LIBADD = libcdi.la
 libcdiresunpack_la_SOURCES = \
 	resource_unpack.c
@@ -612,7 +612,7 @@ libcdipio_la_SOURCES = cdipio.h cdipioFortran.c cfortran.h pio.c pio.h \
 	pio_roles.c pio_rpc.c pio_rpc.h pio_server.c pio_server.h \
 	pio_serialize.h pio_serialize.c pio_util.c pio_util.h \
 	pio_xmap_cache.c pio_xmap_cache.h pio_cdf_int.h \
-	$(am__append_14)
+	$(am__append_13)
 libcdipio_la_HAVE_PARALLEL_NC4_extra_sources = \
 	pio_cdf_int.c
 
@@ -624,12 +624,12 @@ libcdi_la_LIBADD = $(UUID_C_LIB)
 #
 #cdilib.o: cdilib.c
 #	$(COMPILE) -c $<
-LOCALTARGETS = $(am__append_15) $(am__append_16) $(am__append_17)
+LOCALTARGETS = $(am__append_14) $(am__append_15) $(am__append_16)
 #
-CLEANFILES = `ls *~` $(am__append_18) $(am__append_19) \
-	$(am__append_20) $(am__append_22) $(am__append_24)
+CLEANFILES = `ls *~` $(am__append_17) $(am__append_18) \
+	$(am__append_20) $(am__append_22)
 @ENABLE_CDI_LIB_TRUE@PKGCONFIG_FILES = pkgconfig/cdi.pc \
-@ENABLE_CDI_LIB_TRUE@	$(am__append_21) $(am__append_23)
+@ENABLE_CDI_LIB_TRUE@	$(am__append_19) $(am__append_21)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -1035,8 +1035,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@ENABLE_CDI_LIB_FALSE@uninstall-local:
 @ENABLE_CDI_LIB_FALSE@install-exec-local:
+@ENABLE_CDI_LIB_FALSE@uninstall-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
@@ -1139,8 +1139,7 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES \
 mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
 
-@FORTRAN_MOD_UC_TRUE@MO_CDI.$(FCMODEXT): mo_cdi.lo
-@FORTRAN_MOD_UC_FALSE@mo_cdi.$(FCMODEXT): mo_cdi.lo
+$(mo_cdi_modfile): mo_cdi.lo
 	@if test ! -f $@; then rm -f $<; $(MAKE) $<; fi
 #
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status

@@ -177,12 +177,13 @@ EXTRA_DIST += \
 libcdi_f2003_la_SOURCES = mo_cdi.f90
 libcdi_f2003_ladir = $(includedir)
 nodist_libcdi_f2003_la_HEADERS =
-if CREATE_ISOC
 if FORTRAN_MOD_UC
-nodist_libcdi_f2003_la_HEADERS += MO_CDI.$(FCMODEXT)
+mo_cdi_modfile = MO_CDI.$(FCMODEXT)
 else
-nodist_libcdi_f2003_la_HEADERS += mo_cdi.$(FCMODEXT)
+mo_cdi_modfile = mo_cdi.$(FCMODEXT)
 endif
+if CREATE_ISOC
+nodist_libcdi_f2003_la_HEADERS += $(mo_cdi_modfile)
 endif
 libcdi_f2003_la_LIBADD = libcdi.la
 
@@ -276,11 +277,7 @@ endif
 mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
 
-if FORTRAN_MOD_UC
-MO_CDI.$(FCMODEXT): mo_cdi.lo
-else
-mo_cdi.$(FCMODEXT): mo_cdi.lo
-endif
+$(mo_cdi_modfile): mo_cdi.lo
 	@if test ! -f $@; then rm -f $<; $(MAKE) $<; fi
 #
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
@@ -300,11 +297,7 @@ all-local: $(LOCALTARGETS)
 CLEANFILES  = `ls *~`
 #CLEANFILES += cdilib.c
 if CREATE_ISOC
-if FORTRAN_MOD_UC
-CLEANFILES += MO_CDI.$(FCMODEXT)
-else
-CLEANFILES += mo_cdi.$(FCMODEXT)
-endif
+CLEANFILES += $(mo_cdi_modfile)
 endif
 
 if ENABLE_CDI_LIB
