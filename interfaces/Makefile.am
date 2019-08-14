@@ -38,9 +38,12 @@ libcdipp_la_SOURCES = cdi.cpp cdi.hpp
 libcdipp_la_LIBADD  = $(top_builddir)/src/libcdi.la
 libcdipp_la_LDFLAGS = @NETCDF_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
 
-CdiInfo_SOURCES     = CdiInfo.cpp
+CdiInfo_SOURCES     = CdiInfo.cpp mulval.grb mulval.nc
 CdiInfo_LDADD       = libcdipp.la
 CdiInfo_LDFLAGS     = @NETCDF_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
+
+mulval.nc: $(abs_top_srcdir)/interfaces/mulval.nc.gz
+	gunzip -c $< > $@
 #
 #
 if ENABLE_RUBY
@@ -59,7 +62,7 @@ $(RUBY_SHARED_LIB): $(RUBY_WRAPPER_FILE) $(RUBY_MAKEFILE)
 
 ruby-binding: $(RUBY_SHARED_LIB)
 
-rubyTest: $(RUBY_SHARED_LIB)
+rubyTest: $(RUBY_SHARED_LIB) mulval.nc
 	cd ruby && ruby $(abs_top_srcdir)/interfaces/ruby/test.rb
 
 install-ruby: $(RUBY_SHARED_LIB)
@@ -82,7 +85,7 @@ python-binding: $(PYTHON_SHARED_LIB)
 pythonTest: $(abs_top_srcdir)/interfaces/python/test.py
 	@cd python; python $<
 
-install-python: $(PYTHON_SHARED_LIB)
+install-python: $(PYTHON_SHARED_LIB) mulval.nc
 	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I$(abs_top_srcdir)/interfaces" python setup.py install --prefix=$(prefix)
 endif
 #

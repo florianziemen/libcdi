@@ -8,7 +8,7 @@ int main() {
   std::string _name;
   CdiVariable var;
 
-  Cdi info("testdata/mulval.nc");
+  Cdi info("mulval.nc");
  
   std::cout << "#===============================" << std::endl;
   for (int i = 0; i < info.nvars; i++)

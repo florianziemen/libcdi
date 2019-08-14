@@ -358,6 +358,11 @@ CdiVariable::getFValuesWithLevel(int tsID)
  */
 Cdi::Cdi(const char *path)  {
   streamID = streamOpenRead(path);
+
+  if (0 > streamID) {
+    std::cout << "Failed to read input '" << path <<"'";
+    std::cout << "Got streamID = " << streamID;
+  }
   vlistID  = streamInqVlist(streamID);
   nvars    = vlistNvars(vlistID);
 

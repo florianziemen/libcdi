@@ -1,8 +1,11 @@
-import CdiObj
+import sys,os
+sys.path.insert(0,os.getcwd())
+print(sys.path)
+import Cdi
 
-ifile = "../testdata/mulval.grb"
+ifile = "../mulval.nc"
 
-cdi = CdiObj.Cdi(ifile)
+cdi = Cdi.Cdi(ifile)
 
 print('Stream: ',cdi.streamID,' vlistID:',cdi.vlistID,' nvars:{d}', cdi.nvars)
 
