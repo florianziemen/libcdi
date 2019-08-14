@@ -29,41 +29,41 @@ static int activeNamespace = 0;
 
 #ifdef HAVE_LIBNETCDF
 // clang-format off
-#define CDI_NETCDF_SWITCHES                          \
-  { .func = (void (*)()) nc__create },               \
-  { .func = (void (*)()) cdf_def_var_serial },       \
-  { .func = (void (*)()) cdi_nc_enddef_serial },     \
-  { .func = (void (*)()) cdi_nc__enddef_serial },    \
-  { .func = (void (*)()) cdfDefTimestep },           \
-  { .func = (void (*)()) cdfDefCoordinateVars },     \
-  { .func = (void (*)()) cdfPostDefActionGridProp }
+#define CDI_NETCDF_SWITCHES                              \
+  { .func = (void (*)(void)) nc__create },               \
+  { .func = (void (*)(void)) cdf_def_var_serial },       \
+  { .func = (void (*)(void)) cdi_nc_enddef_serial },     \
+  { .func = (void (*)(void)) cdi_nc__enddef_serial },    \
+  { .func = (void (*)(void)) cdfDefTimestep },           \
+  { .func = (void (*)(void)) cdfDefCoordinateVars },     \
+  { .func = (void (*)(void)) cdfPostDefActionGridProp }
 // clang-format on
 #else
 #define CDI_NETCDF_SWITCHES
 #endif
 
 // clang-format off
-#define defaultSwitches {                                   \
-    { .func = (void (*)()) cdiAbortC_serial },              \
-    { .func = (void (*)()) cdiWarning },                    \
-    { .func = (void (*)()) serializeGetSizeInCore },        \
-    { .func = (void (*)()) serializePackInCore },           \
-    { .func = (void (*)()) serializeUnpackInCore },         \
-    { .func = (void (*)()) fileOpen_serial },               \
-    { .func = (void (*)()) fileWrite },                     \
-    { .func = (void (*)()) fileClose_serial },              \
-    { .func = (void (*)()) cdiStreamOpenDefaultDelegate },  \
-    { .func = (void (*)()) cdiStreamDefVlist_ },            \
-    { .func = (void (*)()) cdiStreamSetupVlist_ },          \
-    { .func = (void (*)()) cdiStreamWriteVar_ },            \
-    { .func = (void (*)()) cdiStreamWriteVarChunk_ },       \
-    { .func = (void (*)()) 0 },                             \
-    { .func = (void (*)()) 0 },                             \
-    { .func = (void (*)()) cdiStreamCloseDefaultDelegate }, \
-    { .func = (void (*)()) cdiStreamDefTimestep_ }, \
-    { .func = (void (*)()) cdiStreamSync_ },                \
-    { .func = (void (*)()) cdiVlistDestroy_ },              \
-    CDI_NETCDF_SWITCHES                        \
+#define defaultSwitches {                                       \
+    { .func = (void (*)(void)) cdiAbortC_serial },              \
+    { .func = (void (*)(void)) cdiWarning },                    \
+    { .func = (void (*)(void)) serializeGetSizeInCore },        \
+    { .func = (void (*)(void)) serializePackInCore },           \
+    { .func = (void (*)(void)) serializeUnpackInCore },         \
+    { .func = (void (*)(void)) fileOpen_serial },               \
+    { .func = (void (*)(void)) fileWrite },                     \
+    { .func = (void (*)(void)) fileClose_serial },              \
+    { .func = (void (*)(void)) cdiStreamOpenDefaultDelegate },  \
+    { .func = (void (*)(void)) cdiStreamDefVlist_ },            \
+    { .func = (void (*)(void)) cdiStreamSetupVlist_ },          \
+    { .func = (void (*)(void)) cdiStreamWriteVar_ },            \
+    { .func = (void (*)(void)) cdiStreamWriteVarChunk_ },       \
+    { .func = (void (*)(void)) 0 },                             \
+    { .func = (void (*)(void)) 0 },                             \
+    { .func = (void (*)(void)) cdiStreamCloseDefaultDelegate }, \
+    { .func = (void (*)(void)) cdiStreamDefTimestep_ },         \
+    { .func = (void (*)(void)) cdiStreamSync_ },                \
+    { .func = (void (*)(void)) cdiVlistDestroy_ },              \
+    CDI_NETCDF_SWITCHES                                         \
     }
 // clang-format on
 
