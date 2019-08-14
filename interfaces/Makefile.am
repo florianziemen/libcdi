@@ -82,7 +82,7 @@ $(PYTHON_SHARED_LIB): $(PYTHON_WRAPPER_FILE) $(abs_top_srcdir)/interfaces/python
 
 python-binding: $(PYTHON_SHARED_LIB)
 
-pythonTest: $(abs_top_srcdir)/interfaces/python/test.py
+pythonTest: $(abs_top_srcdir)/interfaces/python/test.py mulval.nc
 	@cd python; python $<
 
 install-python: $(PYTHON_SHARED_LIB) mulval.nc
