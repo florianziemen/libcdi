@@ -48,10 +48,10 @@ enum namespaceSwitch
 union namespaceSwitchValue
 {
   void *data;
-  void (*func)();
+  void (*func)(void);
 };
 
-#define NSSW_FUNC(p) ((union namespaceSwitchValue){ .func = (void (*)())(p) })
+#define NSSW_FUNC(p) ((union namespaceSwitchValue){ .func = (void (*)(void))(p) })
 #define NSSW_DATA(p) ((union namespaceSwitchValue){ .data = (void *)(p) })
 
 //int              namespaceNew();

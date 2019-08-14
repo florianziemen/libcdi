@@ -330,7 +330,7 @@ cdiPioParCdfPostDefActionGridProp(stream_t *streamptr, int gridID, int ncvarid,
       struct cdfPostDefAction addendum;
       addendum.data = put;
       addendum.action = cdiPioDistGridCdfDelayedPutVarDouble;
-      addendum.cleanup = (void (*)(void *))memFree;
+      addendum.cleanup = (void (*)(void *))(void (*)(void))memFree;
       *delayed = cdfPostDefActionAdd(*delayed, addendum);
     }
   else
