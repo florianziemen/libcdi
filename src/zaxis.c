@@ -1406,6 +1406,8 @@ int zaxisDuplicate(int zaxisID)
         }
     }
 
+  cdiCopyAtts(zaxisID, CDI_GLOBAL, zaxisIDnew, CDI_GLOBAL);
+
   return zaxisIDnew;
 }
 

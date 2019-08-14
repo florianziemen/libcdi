@@ -706,6 +706,8 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
                 if ( zaxisType == ZAXIS_GENERIC ) zaxisDefLtype(zaxisID2, zaxisInqLtype(zaxisID));
 
+                cdiCopyAtts(zaxisID, CDI_GLOBAL, zaxisID2, CDI_GLOBAL);
+
 		zaxisID = zaxisID2;
 		vars2[varID2].zaxisID = zaxisID2;
 	      }
