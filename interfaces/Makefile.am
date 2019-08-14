@@ -1,26 +1,28 @@
 ## Process this file with automake to produce Makefile.in
 #
-SWIGCDILIB = cdilib.i
-SWIGCDIOBJ = cdiobj.i
-BINDINGS   =
+SWIG_FILE = $(abs_top_srcdir)/interfaces/cdi.i
+BINDINGS  =
 
-INTERFACES_FILES = ruby/cdilib_wrap.c ruby/cdiobj_wrap.cpp ruby/testLib.rb \
-	ruby/testObj.rb \
-	\
-	python/cdilib_wrap.c python/cdiobj_wrap.cpp python/testLib.py \
-	python/testObj.py python/setupObj.py python/setupLib.py \
-	python/setup.py python/table.py python/CdiLib.py \
-	python/CdiObj.py \
-	\
-	CdiInfo.cpp \
-	\
-	f2003/bindGen.rb
+INTERFACES_FILES = \
+	$(abs_top_srcdir)/interfaces/ruby/test.rb \
+	$(abs_top_srcdir)/interfaces/ruby/setup.rb \
+	$(abs_top_srcdir)/interfaces/python/test.py \
+	$(abs_top_srcdir)/interfaces/python/setup.py \
+	$(abs_top_srcdir)/interfaces/python/table.py \
+	$(abs_top_srcdir)/interfaces/python/Cdi.py \
+	$(abs_top_srcdir)/interfaces/CdiInfo.cpp \
+	$(abs_top_srcdir)/interfaces/f2003/bindGen.rb
 
-EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB) $(INTERFACES_FILES)
+EXTRA_DIST = $(SWIG_FILE) $(INTERFACES_FILES)
 
-if CREATE_INTERFACES
-BINDINGS += help
-endif
+MODULE_NAME         = Cdi
+RUBY_WRAPPER_FILE   = $(abs_top_builddir)/interfaces/ruby/cdi_wrapper.cpp
+RUBY_SHARED_LIB     = $(abs_top_builddir)/interfaces/ruby/$(MODULE_NAME).so
+RUBY_MAKEFILE       = $(abs_top_builddir)/interfaces/ruby/Makefile
+PYTHON_WRAPPER_FILE = $(abs_top_builddir)/interfaces/python/cdi_wrapper.cpp
+PYTHON_SHARED_LIB   = $(abs_top_builddir)/interfaces/python/$(MODULE_NAME).so
+PYTHON_MAKEFILE     = $(abs_top_builddir)/interfaces/python/Makefile
+
 #
 bin_PROGRAMS =
 noinst_PROGRAMS = 
@@ -42,88 +44,50 @@ CdiInfo_LDFLAGS     = @NETCDF_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
 #
 #
 if ENABLE_RUBY
-BINDINGS += rubyObj
+BINDINGS += ruby-binding
 # Ruby ====================================================
-rubyLibMakefile:
-	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(locallibs) $(LDFLAGS)" INCFLAGS="-I../../src" ruby extconfLib.rb
+$(RUBY_WRAPPER_FILE): $(SWIG_FILE)
+	mkdir -p $(dir $@)
+	$(SWIG) -ruby -c++ -globalmodule -debug-classes -o $@ $(AM_CPPFLAGS) $<
 
-rubyLibWrapper: cdilib.i
-if ENABLE_SWIG
-	$(SWIG) -ruby -module CdiLib -o ruby/cdilib_wrap.c $(AM_CPPFLAGS) cdilib.i
-endif
+$(RUBY_MAKEFILE): $(abs_top_srcdir)/interfaces/ruby/setup.rb
+	mkdir -p $(dir $@)
+	cd ruby && CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I$(abs_top_srcdir)/interfaces" ruby $<
 
-rubyLib: rubyLibWrapper rubyLibMakefile
-	@cd ruby; make
+$(RUBY_SHARED_LIB): $(RUBY_WRAPPER_FILE) $(RUBY_MAKEFILE)
+	cd ruby && make
 
-rubyLibTest: rubyLib
-	@cd ruby; ruby testLib.rb
-# =========================================================
-rubyObjMakefile:
-	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../" ruby extconfObj.rb
+ruby-binding: $(RUBY_SHARED_LIB)
 
-rubyObjWrapper: cdiobj.i
-if ENABLE_SWIG
-	$(SWIG) -ruby -c++ -module CdiObj -o ruby/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
-endif
+rubyTest: $(RUBY_SHARED_LIB)
+	cd ruby && ruby $(abs_top_srcdir)/interfaces/ruby/test.rb
 
-rubyObj: rubyObjWrapper rubyObjMakefile
-	@cd ruby; make
-
-rubyObjTest: rubyObj
-	@cd ruby; ruby testObj.rb
-
-rubyObjInstall: rubyObj
-	@cd ruby; make install
+install-ruby: $(RUBY_SHARED_LIB)
+	cd ruby && make install
 endif
 # =========================================================
 if ENABLE_PYTHON
-BINDINGS += pythonObj
+BINDINGS += python-binding
 # Python ==================================================
-pythonLibWrapper: cdilib.i
-if ENABLE_SWIG
-	$(SWIG) -python -module CdiLib -o python/cdilib_wrap.c $(AM_CPPFLAGS) cdilib.i
+$(PYTHON_WRAPPER_FILE): $(SWIG_FILE)
+	mkdir -p $(dir $@)
+	$(SWIG) -python -c++ -debug-classes -o $(PYTHON_WRAPPER_FILE) $(AM_CPPFLAGS) $<
+
+$(PYTHON_SHARED_LIB): $(PYTHON_WRAPPER_FILE) $(abs_top_srcdir)/interfaces/python/setup.py
+	mkdir -p $(dir $@)
+	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I$(abs_top_srcdir)/interfaces" python $(abs_top_srcdir)/interfaces/python/setup.py build_ext --inplace
+
+python-binding: $(PYTHON_SHARED_LIB)
+
+pythonTest: $(abs_top_srcdir)/interfaces/python/test.py
+	@cd python; python $<
+
+install-python: $(PYTHON_SHARED_LIB)
+	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I$(abs_top_srcdir)/interfaces" python setup.py install --prefix=$(prefix)
 endif
-
-pythonLib: pythonLibWrapper
-	@cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../../src" python setupLib.py build_ext --inplace
-
-pythonLibTest: pythonLib
-	@cd python; python testLib.py
-# =========================================================
-python/cdiobj_wrap.cpp: cdiobj.i
-if ENABLE_SWIG
-	$(SWIG) -python -c++ -module CdiObj -o python/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
-endif
-
-pythonObj: python/cdiobj_wrap.cpp
-	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
-
-pythonObjTest: pythonObj
-	@cd python; python testObj.py
-
-pythonObjInstall: pythonObj
-	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py install --prefix=$(prefix)
-endif
-# =========================================================
-help:
-	@echo "#=====================================================#"
-	@echo "# EXPERIMENTAL FEATURE ===============================#"
-	@echo "#=====================================================#"
-	@echo "Bindings for: python ruby"
-	@echo "(please exchange <lang> with the corresponding language)"
-	@echo "#=====================================================#"
-	@echo "  help             - this message"
-	@echo "  <lang>Obj        - create object interface for Ruby"
-	@echo "  <lang>Lib        - create function interface for Ruby"
-	@echo "  <lang>ObjWrapper - create the wrapper files using swig (object interface)"
-	@echo "  <lang>LibWrapper - create the wrapper files using swig (function interface)"
-	@echo "  <lang>ObjTest    - run object interface test (./<lang>/testObj.rb). Accepts input file argument."
-	@echo "  <lang>LibTest    - run function library test (./<lang>/testLib.rb). Accepts input file argument."
-	@echo "  <lang>ObjInstall - install shared libraries and optional language files for <lang>"
-	@echo "  <lang>LibInstall - see <lang>ObjInstall"
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #
-#all-local: $(BINDINGS)
+all-local: $(BINDINGS)
 #
-CLEANFILES  = `ls *~`
+CLEANFILES  = `ls *~ *.o *.so */*.o */*.so`

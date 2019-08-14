@@ -1,4 +1,4 @@
-%module CdiObj
+%module Cdi
 %{
 #define SWIG_FILE_WITH_INIT
 #include "cdi.hpp"
