@@ -297,7 +297,7 @@ AC_ARG_ENABLE([ruby],
    CPPFLAGS=$save_CPPFLAGS
    AS_IF([test "x$RUBY" != "x"],
          [AS_IF([test "x$SWIG" = "x"],
-                [AC_MSG_NOTICE([Ruby bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage])])],
+                [AC_MSG_ERROR([Ruby bindings: Please enable SWIG with '--enable-swig'!])])],
                 [AS_IF([test `$SWIG -help 2>&1 | $GREP -c '\-ruby *- Generate'` = 0],
                        [AC_MSG_NOTICE([No (swig does not support -ruby option)])
                         enable_ruby=no
@@ -323,7 +323,7 @@ AC_ARG_ENABLE(python,
    done
    AS_IF([test "x$enable_python" != "xno"],
          [AS_IF([test "x$SWIG" = "x"],
-                [AC_MSG_NOTICE([Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage])],
+                [AC_MSG_ERROR([Python bindings: Please enable SWIG with '--enable-swig'!])],
                 [PYTHON=])],
                 [AS_IF([test `$SWIG -help 2>&1 | $GREP -c '\-python *- Generate'` = 0],
                        [AC_MSG_NOTICE([No (swig does not support -python option)])
