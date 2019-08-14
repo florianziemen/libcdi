@@ -493,7 +493,7 @@ cdfPostDefActionListDelete(struct cdfPostDefActionList *list)
     {
       void (*cleanup)(void *) = actions[i].cleanup;
       void *data = actions[i].data;
-      if (cleanup == (void (*)(void *))memFree)
+      if (cleanup == (void (*)(void *))(void (*)(void))memFree)
         Free(data);
       else
         cleanup(data);
@@ -716,7 +716,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
               cdfPostDefActionAddPutVal(&delayed, fileID, ncbvarid, pbounds,
                                         genBounds
                                         ? cdfDelayedPutVarDeepCleanup
-                                        : (void (*)(void *))memFree);
+                                        : (void (*)(void *))(void (*)(void))memFree);
             }
         }
 
@@ -842,7 +842,7 @@ cdfPostDefActionGridProp(stream_t *streamptr, int gridID, int ncvarid,
       break;
     }
   cdfPostDefActionAddPutVal(delayed, streamptr->fileID, ncvarid, valsPtr,
-                            (void (*)(void *))memFree);
+                            (void (*)(void *))(void (*)(void))memFree);
 }
 
 static int
@@ -1240,9 +1240,9 @@ cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
       const double *vctptr = zaxisInqVctPtr(zaxisID);
 
       cdfPostDefActionAddPutVal(&delayed, fileID, hyaiid, vctptr,
-                                (void (*)(void *))memFree);
+                                (void (*)(void *))(void (*)(void))memFree);
       cdfPostDefActionAddPutVal(&delayed, fileID, hybiid, vctptr + ilev,
-                                (void (*)(void *))memFree);
+                                (void (*)(void *))(void (*)(void))memFree);
       {
         double *restrict amidVal
           = (double *)Malloc((size_t)mlev * sizeof (*amidVal));
@@ -1483,7 +1483,7 @@ cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int *ncvaridp, int zax
 
   cdfPostDefActionAddPutVal(&delayed, fileID, ncvarid,
                             zaxisInqLevelsPtr(zaxisID),
-                            (void (*)(void *))memFree);
+                            (void (*)(void *))(void (*)(void))memFree);
 
   {
     struct cdfPostDefActionList *delayedVct
@@ -1669,7 +1669,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
 
   struct cdfPostDefActionList *delayed = NULL;
   cdfPostDefActionAddPutVal(&delayed, fileID, ncvarid, levels,
-                            hasLevels ? (void (*)(void *))memFree
+                            hasLevels ? (void (*)(void *))(void (*)(void))memFree
                             : cdfDelayedPutVarDeepCleanup);
 
   if ( ncbvarid != CDI_UNDEFID )
@@ -1844,7 +1844,7 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "Z");
           cdfPostDefActionAddPutVal(&delayed, fileID, ncvarid,
                                     zaxisInqLevelsPtr(zaxisID),
-                                    (void (*)(void *))memFree);
+                                    (void (*)(void *))(void (*)(void))memFree);
 
           if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
             {
@@ -1933,7 +1933,7 @@ cdf_def_mapping(stream_t *streamptr, int gridID)
 
       if ( ncerrcode == NC_NOERR )
         cdfPostDefActionAddPut1Int(&delayed, fileID, ncvarid, 1,
-                                   (void (*)(void *))memFree);
+                                   (void (*)(void *))(void (*)(void))memFree);
     }
   return delayed;
 }
