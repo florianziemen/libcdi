@@ -1,8 +1,8 @@
 import sys,os
 sys.path.insert(0,os.getcwd())
-print(sys.path)
 import Cdi
 
+print("# BEGIN PYTHON TEST ==================================#")
 ifile = "../mulval.nc"
 
 cdi = Cdi.Cdi(ifile)
@@ -45,3 +45,4 @@ print("#========= Var by code ===============================#")
 code = 169
 newvar = cdi.varByCode[code]
 newvar.sinfo()
+print("# END PYTHON TEST ====================================#")
