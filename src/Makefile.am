@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 #
-EXTRA_DIST = cdilib.c
+EXTRA_DIST = cdilib.c $(top_srcdir)/interfaces/f2003/bindGen.rb
 
 noinst_LTLIBRARIES = libcdiresunpack.la
 
