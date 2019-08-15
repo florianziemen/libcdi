@@ -91,7 +91,7 @@ python-test: $(abs_top_srcdir)/interfaces/python/test.py mulval.nc
 	@cd python; python $<
 
 install-python: $(PYTHON_SHARED_LIB) mulval.nc
-	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I$(abs_top_srcdir)/src -I$(abs_top_srcdir)/interfaces" python setup.py install --prefix=$(prefix) -R $(libdir)
+	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I$(abs_top_srcdir)/src -I$(abs_top_srcdir)/interfaces" python $(abs_top_srcdir)/interfaces/python/setup.py install --prefix=$(prefix) -R $(libdir)
 endif
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
