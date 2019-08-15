@@ -5,17 +5,13 @@ BINDINGS  =
 CLEANFILES =
 BINDING_TESTS =
 
+EXTRA_DIST = mulval.nc.gz
+
 INTERFACES_FILES = \
 	$(abs_top_srcdir)/interfaces/ruby/test.rb \
 	$(abs_top_srcdir)/interfaces/ruby/setup.rb \
 	$(abs_top_srcdir)/interfaces/python/test.py \
-	$(abs_top_srcdir)/interfaces/python/setup.py \
-	$(abs_top_srcdir)/interfaces/python/table.py \
-	$(abs_top_srcdir)/interfaces/python/Cdi.py \
-	$(abs_top_srcdir)/interfaces/CdiInfo.cpp \
-	$(abs_top_srcdir)/interfaces/f2003/bindGen.rb
-
-EXTRA_DIST = $(SWIG_FILE) $(INTERFACES_FILES)
+	$(abs_top_srcdir)/interfaces/python/setup.py
 
 MODULE_NAME         = Cdi
 RUBY_WRAPPER_FILE   = $(abs_top_builddir)/interfaces/ruby/cdi_wrapper.cpp
@@ -41,7 +37,7 @@ libcdipp_la_SOURCES = cdi.cpp cdi.hpp
 libcdipp_la_LIBADD  = $(top_builddir)/src/libcdi.la
 libcdipp_la_LDFLAGS = @NETCDF_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
 
-CdiInfo_SOURCES     = CdiInfo.cpp mulval.grb mulval.nc
+CdiInfo_SOURCES     = CdiInfo.cpp mulval.nc
 CdiInfo_LDADD       = libcdipp.la
 CdiInfo_LDFLAGS     = @NETCDF_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
 
