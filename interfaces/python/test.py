@@ -3,7 +3,10 @@ sys.path.insert(0,os.getcwd())
 import Cdi
 
 print("# BEGIN PYTHON TEST ==================================#")
-ifile = "../mulval.nc"
+if ( 1 == len(sys.argv) ):
+    ifile = "../mulval.nc"
+else:
+    ifile = sys.argv[1]
 
 cdi = Cdi.Cdi(ifile)
 
