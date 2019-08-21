@@ -323,11 +323,10 @@ buildVarXmap(struct Xt_offset_ext *restrict partExts, const struct clientBuf *re
  * find subset $F$ of prime divisors of @a composite_div such that the
  * product of $F$ is less than npartMax and maximal
  */
-int
-findMaxDivision(int npartMax, int composite_div)
+unsigned
+findMaxDivision(unsigned npartMax, unsigned composite_div)
 {
   uint32_t factors[31], *factors_ = factors;
-  xassert(composite_div > 0);
   int numFactors = PPM_prime_factorization_32((uint32_t) composite_div, &factors_);
   /* try to use prime factors */
   uint_fast32_t divAttempt, maxDiv = 1;
@@ -362,7 +361,7 @@ findMaxDivision(int npartMax, int composite_div)
         }
       while (pattern <= lastPattern);
     }
-  return maxDiv;
+  return (unsigned) maxDiv;
 }
 
 static void
@@ -375,17 +374,17 @@ queryVarBounds(struct PPM_extent varShape[3], int vlistID, int varID)
 
 struct xyzDims
 {
-  int sizes[3];
+  unsigned sizes[3];
 };
 
 static struct xyzDims
 varDimsCollGridMax(const struct PPM_extent varDims[3])
 {
-  struct xyzDims collGrid = { { 1, 1, 1 } };
-  int collDiv = commInqSizeColl();
+  struct xyzDims collGrid = { { 1U, 1U, 1U } };
+  unsigned collDiv = (unsigned) (commInqSizeColl());
   for (size_t i = 3; i > 0; --i)
     {
-      int usedDiv = collGrid.sizes[i - 1] = findMaxDivision(varDims[i - 1].size, collDiv);
+      unsigned usedDiv = collGrid.sizes[i - 1] = findMaxDivision((unsigned) varDims[i - 1].size, collDiv);
       collDiv /= usedDiv;
     }
   return collGrid;
@@ -401,7 +400,7 @@ varDimsCollGridMatch(const struct PPM_extent varDims[3])
   for (int i = 0; i < numPioPrimes; ++i)
     {
       for (int dim = 2; dim >= 0; --dim)
-        if (collGrid.sizes[dim] * pioPrimes[i] <= varDims[dim].size)
+        if (collGrid.sizes[dim] * pioPrimes[i] <= (unsigned) varDims[dim].size)
           {
             collGrid.sizes[dim] *= pioPrimes[i];
             goto nextPrime;
@@ -419,19 +418,21 @@ myVarPart(struct PPM_extent varShape[3], struct xyzDims collGrid, struct PPM_ext
 {
   int32_t myCollGridCoord[3];
   struct PPM_extent collGridShape[3];
-  int collGridSize = 1;
+  unsigned collGridSize = 1;
   for (size_t i = 0; i < 3; ++i)
     {
       collGridShape[i].first = 0;
-      collGridShape[i].size = collGrid.sizes[i];
+      collGridShape[i].size = (int32_t) collGrid.sizes[i];
       collGridSize *= collGrid.sizes[i];
     }
   int collRank = commInqRankColl();
-  if (collRank < collGridSize)
+  if ((unsigned) collRank < collGridSize)
     {
       PPM_lidx2rlcoord_e(3, collGridShape, collRank, myCollGridCoord);
       xdebug("my coord: (%d, %d, %d)", myCollGridCoord[0], myCollGridCoord[1], myCollGridCoord[2]);
-      PPM_uniform_partition_nd(3, varShape, collGrid.sizes, myCollGridCoord, myPart);
+      int32_t sizes[3];
+      for (size_t i = 0; i < 3; ++i) sizes[i] = (int32_t) collGrid.sizes[i];
+      PPM_uniform_partition_nd(3, varShape, sizes, myCollGridCoord, myPart);
     }
   else
     for (size_t i = 0; i < 3; ++i) myPart[i].first = myPart[i].size = 0;
@@ -955,7 +956,8 @@ writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, void 
 
         {
           /* count missing values if appropriate */
-          size_t nmiss = countVarChunkMissingVals(vlistID, varID, mapping, PPM_extents_size(3, varChunk), conversion, data);
+          size_t nmiss
+              = countVarChunkMissingVals(vlistID, varID, mapping, (size_t) (PPM_extents_size(3, varChunk)), conversion, data);
           /* write chunk */
           if (conversion == DATA_HEADER_DOUBLE)
             streamWriteVarChunk(streamID, varID, (const int(*)[2]) myChunk, data, (int) nmiss);
