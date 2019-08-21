@@ -372,13 +372,15 @@ initSharedFP(struct sharedFP *bfd, int nProcsColl)
 
 /* MPICH 3.3 has a problem in its implementation of MPI_Testany and
  * MPI_Waitany, see commit 0f7be7196cc05bf0c908761e148628e88d635190
- * at https://github.com/pmodels/mpich */
+ * at https://github.com/pmodels/mpich
+ * effectively, the work-around prepends MPI_REQUEST_NULL to the
+ * request array */
 #ifdef MPICH_CALC_VERSION
 #  if MPICH_NUMVERSION >= MPICH_CALC_VERSION(3,3,0,0,0) && \
   MPI_NUMVERSION < MPICH_CALC_VERSION(3,3,1,0,0)
 #    define CDIPIO_MPICH33_WORKAROUND(code) code
 #  else
-#    define CDIPIO_MPICH33_WORKAROUND(code) code
+#    define CDIPIO_MPICH33_WORKAROUND(code)
 #  endif
 #else
 #  define CDIPIO_MPICH33_WORKAROUND(code)
