@@ -12,6 +12,9 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "dmemory.h"
+#ifdef HAVE_LIBGRIB
+#include "gribapi.h"
+#endif
 #include "namespace.h"
 #include "taxis.h"
 #include "vlist.h"
@@ -27,7 +30,6 @@
 #include "pio_rpc.h"
 #include "pio_util.h"
 #include "pio_serialize.h"
-
 
 struct ResHListUpdate
 {
@@ -433,7 +435,6 @@ cdiPioClientStreamNOP(stream_t *streamptr)
 static void
 cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
-  (void)recordBufIsToBeDeleted;
   int streamID = streamptr->self;
   int clientRank = commInqRankModel(),
     numClients = cdiPioCommInqSizeClients(),
@@ -464,6 +465,16 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
   if (needsFlush)
     cdiPioClientStreamWinPost(streamID);
   cdiPioClientStreamWinDestroy(streamID);
+  if (recordBufIsToBeDeleted)
+    switch (streamptr->filetype)
+      {
+#ifdef HAVE_LIBGRIB
+      case CDI_FILETYPE_GRB:
+      case CDI_FILETYPE_GRB2:
+         gribContainersDelete(streamptr);
+         break;
+#endif
+      }
 }
 
 static void
