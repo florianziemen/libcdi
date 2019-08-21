@@ -465,7 +465,16 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   //
   //       I would consider using strdup() (that requires POSIX-2008 compliance, though), or a similar homebrew approach.
   //       I. e. kick the fixed size array and allocate enough space, whatever that may be.
+  /* this is actually as designed, record->varname is only used in
+   * byte-by-byte comparision */
+#if __GNUC__ >= 8
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
   strncpy(record->varname, varname, sizeof(record->varname));
+#if __GNUC__ >= 8
+#pragma GCC diagnostic pop
+#endif
 
   grid_t *grid = (grid_t *)Malloc(sizeof(*grid));
   gribapiGetGrid(gh, grid);
