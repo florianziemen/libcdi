@@ -23,7 +23,11 @@ void var_scale(int datatype, double *mscale, double *mrscale);
 static inline double
 sign_flat(double v)
 {
+#ifdef _CRAYC
+  if (v == 0 && copysign(1.0, v) < 0.0) return 0.0;
+#else
   if (!(v < 0.0 || v > 0.0)) return 0.0;
+#endif
   //    if (v == 0.0) return 0.0;
   return v;
 }
