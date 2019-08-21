@@ -188,7 +188,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
           conversion[varIdx] = varDesc[varIdx].useFloat ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
         }
 #endif
-      }
+    }
 
   taxisID = taxisCreate(setup.taxistype);
   if (setup.taxisunit != -1) taxisDefTunit(taxisID, setup.taxisunit);
