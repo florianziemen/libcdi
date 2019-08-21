@@ -48,7 +48,7 @@ TLS struct cdiPioNcCreateLongJmpRetBuf *cdiPioCdfJmpBuf;
 static int
 cdiPio_nc__create(const char *path, int cmode, size_t initialsz, size_t *chunksizehintp, int *ncidp)
 {
-  int status, ioMode = commInqIOMode();
+  int status = NC_EINVAL, ioMode = commInqIOMode();
   if (ioMode != PIO_NONE)
     {
 #if CDI_PIO_TRY_PNETCDF
@@ -141,6 +141,7 @@ cdiPio_enable_nc_par_access(int ncid, int streamID)
   int statusInq = nc_inq_format_extended(ncid, &formatNC, &modeNC);
   if (statusInq != NC_NOERR) Error("%s", nc_strerror(statusInq));
   setVarParAccess = (modeNC & NC_PNETCDF);
+  (void) streamID;
 #else
   int cf_format, owner = cdiPioStream2Owner(streamID);
   int statusInq = nc_inq_format(ncid, &cf_format);
