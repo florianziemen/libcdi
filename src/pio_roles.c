@@ -95,7 +95,7 @@ cdiPioCSRBalanced(MPI_Comm commSuper, int IOMode, int nProcsIO)
     case PIO_ASYNCH:
       specialRole = PIO_ROLE_WRITER;
       collType = PIO_ROLE_COLLECTOR;
-      /* fallthrough intentional */
+      /*-fallthrough*/
     case PIO_FPGUARD:
       clientsPerCollectorMin = numClients / (nProcsIO - 1);
       rest = numClients % nProcsIO;
