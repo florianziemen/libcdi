@@ -15,8 +15,8 @@
 
 struct CdiFallbackIterator {
   CdiIterator super;
-  int streamId, vlistId, subtypeId;
   char *path;   //needed for clone() & serialize()
+  int streamId, vlistId, subtypeId;
 
   int variableCount, curVariable;
   int curLevelCount, curLevel;
@@ -93,8 +93,8 @@ CdiFallbackIterator *cdiFallbackIterator_clone(CdiIterator *super)
 
   //Make another stream for this file. This yields an unadvanced iterator.
   CdiFallbackIterator *clone
-    = (CdiFallbackIterator *)cdiFallbackIterator_new(me->path,
-                                                     me->super.filetype);
+    = (CdiFallbackIterator *)(void *)
+    cdiFallbackIterator_new(me->path, me->super.filetype);
   if (clone)
     {
       //Point the clone to the same position in the file.
