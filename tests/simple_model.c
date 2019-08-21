@@ -189,8 +189,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
         varDesc[varIdx].partDesc
           = xt_idxstripes_new(&(struct Xt_stripe){ .start = start,
                 .nstrides = chunkSize, .stride = 1 }, 1);
-        partDescriptionSet: ;
       }
+      partDescriptionSet: ;
 #endif
       varDesc[varIdx].code = GRIB_USERDEF + (int)varIdx;
       vlistDefVarCode(vlistID, varDesc[varIdx].id, varDesc[varIdx].code);
