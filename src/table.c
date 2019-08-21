@@ -681,7 +681,7 @@ tableFWriteC(FILE *ptfp, int tableID)
       maxunits = max_length(maxunits, parTable[tableID].pars[item].units);
     }
 
-  strncpy(tablename, parTable[tableID].name, sizeof(tablename));
+  strncpy(tablename, parTable[tableID].name, sizeof(tablename) - 1);
   tablename[sizeof(tablename) - 1] = '\0';
   {
     const size_t len = strlen(tablename);
