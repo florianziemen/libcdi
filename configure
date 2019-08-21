@@ -642,6 +642,8 @@ ENABLE_RUBY_TRUE
 ENABLE_SWIG_FALSE
 ENABLE_SWIG_TRUE
 SWIG
+FORTRAN_MOD_UC_FALSE
+FORTRAN_MOD_UC_TRUE
 FCMODCASE
 FCMODEXT
 CDI_F90_INTERFACE_FCFLAGS
@@ -30501,6 +30503,14 @@ fi
 
 
 fi
+ if test "x$FCMODCASE" = "xuc"; then
+  FORTRAN_MOD_UC_TRUE=
+  FORTRAN_MOD_UC_FALSE='#'
+else
+  FORTRAN_MOD_UC_TRUE='#'
+  FORTRAN_MOD_UC_FALSE=
+fi
+
 # -----------------------------------------------------------------------
 # Check for SWIG - Generator for script-language bindings
 # Check whether --enable-swig was given.
@@ -31487,6 +31497,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CREATE_ISOC_TRUE}" && test -z "${CREATE_ISOC_FALSE}"; then
   as_fn_error $? "conditional \"CREATE_ISOC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${FORTRAN_MOD_UC_TRUE}" && test -z "${FORTRAN_MOD_UC_FALSE}"; then
+  as_fn_error $? "conditional \"FORTRAN_MOD_UC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_SWIG_TRUE}" && test -z "${ENABLE_SWIG_FALSE}"; then
