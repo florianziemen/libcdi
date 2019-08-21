@@ -54,6 +54,7 @@ main(int argc, const char **argv)
         }
     }
   if (countMissingValues) printf("missing values count = %zu\n", allNmissSum);
+  free(buf);
   streamClose(streamID);
   return EXIT_SUCCESS;
 }
