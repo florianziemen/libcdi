@@ -26,55 +26,45 @@ cdiFallbackIterator_getSuper(CdiFallbackIterator *me)
   return &me->super;
 }
 
-// For more information on the condestruct() pattern, see comment in src/iterator_grib.c
-static CdiFallbackIterator *
-cdiFallbackIterator_condestruct(CdiFallbackIterator *me, const char *path, int filetype)
+CdiIterator *
+cdiFallbackIterator_new(const char *path, int filetype)
 {
-  if (me) goto destruct;
-
-  me = (CdiFallbackIterator *) Malloc(sizeof(*me));
+  CdiFallbackIterator *me = (CdiFallbackIterator *) Malloc(sizeof(*me));
   baseIterConstruct(&me->super, filetype);
-
-  me->streamId = streamOpenRead(path);
-  if (me->streamId == CDI_UNDEFID) goto destructSuper;
-  me->vlistId = streamInqVlist(me->streamId);
-  if (me->vlistId == CDI_UNDEFID) goto closeStream;
-  me->variableCount = vlistNvars(me->vlistId);
-  if (me->variableCount <= 0) goto closeStream;
   me->subtypeId = CDI_UNDEFID;  // Will be set in cdiFallbackIterator_nextField()
   me->curSubtypeCount = -1;     // Will be set in cdiFallbackIterator_nextField()
   me->curLevelCount = -1;       // Will be set in cdiFallbackIterator_nextField()
-
   // These values are chosen so that the natural increment at the start of cdiFallbackIterator_nextField() will correctly position
   // us at the first slice.
   me->curTimestep = 0;
-  if (streamInqTimestep(me->streamId, me->curTimestep) <= 0) goto closeStream;
   me->curVariable = -1;
   me->curSubtype = -1;
   me->curLevel = -1;
-  me->path = path ? strdup(path) : NULL;
-  if (!me->path) goto closeStream;
-
-  return me;
-
-  // ^        constructor code        ^
-  // |                                |
-  // v destructor/error-cleanup code  v
-
-destruct:
-  Free(me->path);
-closeStream:
-  streamClose(me->streamId);
-destructSuper:
+  me->streamId = streamOpenRead(path);
+  if (me->streamId != CDI_UNDEFID)
+    {
+      me->vlistId = streamInqVlist(me->streamId);
+      if (me->vlistId != CDI_UNDEFID && (me->variableCount = vlistNvars(me->vlistId)) > 0
+          && streamInqTimestep(me->streamId, me->curTimestep) > 0 && (me->path = strdup(path)))
+        {
+          return (CdiIterator *) me;
+        }
+      Free(me->path);
+      streamClose(me->streamId);
+    }
   baseIterDestruct(&me->super);
   Free(me);
   return NULL;
 }
 
-CdiIterator *
-cdiFallbackIterator_new(const char *path, int filetype)
+void
+cdiFallbackIterator_delete(CdiIterator *super)
 {
-  return &cdiFallbackIterator_condestruct(NULL, path, filetype)->super;
+  CdiFallbackIterator *me = (CdiFallbackIterator *) (void *) super;
+  Free(me->path);
+  streamClose(me->streamId);
+  baseIterDestruct(super);
+  Free(me);
 }
 
 // Fetches the info that is derived from the current variable. Most of this is published by the data members in the base class.
@@ -100,20 +90,21 @@ cdiFallbackIterator_clone(CdiIterator *super)
   CdiFallbackIterator *me = (CdiFallbackIterator *) (void *) super;
 
   // Make another stream for this file. This yields an unadvanced iterator.
-  CdiFallbackIterator *clone = cdiFallbackIterator_condestruct(NULL, me->path, me->super.filetype);
-  if (!clone) return NULL;
+  CdiFallbackIterator *clone = (CdiFallbackIterator *) cdiFallbackIterator_new(me->path, me->super.filetype);
+  if (clone)
+    {
+      // Point the clone to the same position in the file.
+      clone->variableCount = me->variableCount;
+      clone->curVariable = me->curVariable;
+      clone->curLevelCount = me->curLevelCount;
+      clone->curLevel = me->curLevel;
+      clone->curSubtypeCount = me->curSubtypeCount;
+      clone->curSubtype = me->curSubtype;
+      clone->curTimestep = me->curTimestep;
 
-  // Point the clone to the same position in the file.
-  clone->variableCount = me->variableCount;
-  clone->curVariable = me->curVariable;
-  clone->curLevelCount = me->curLevelCount;
-  clone->curLevel = me->curLevel;
-  clone->curSubtypeCount = me->curSubtypeCount;
-  clone->curSubtype = me->curSubtype;
-  clone->curTimestep = me->curTimestep;
-
-  clone->super.isAdvanced = super->isAdvanced;
-  if (super->isAdvanced) fetchVariableInfo(clone);
+      clone->super.isAdvanced = super->isAdvanced;
+      if (super->isAdvanced) fetchVariableInfo(clone);
+    }
 
   return clone;
 }
@@ -425,13 +416,6 @@ cdiFallbackIterator_readFieldF(CdiIterator *super, float *buffer, size_t *nmiss)
   SizeType missingValues = 0;
   streamReadVarSliceF(me->streamId, me->curVariable, me->curLevel, buffer, &missingValues);
   if (nmiss) *nmiss = (size_t) missingValues;
-}
-
-void
-cdiFallbackIterator_delete(CdiIterator *super)
-{
-  CdiFallbackIterator *me = (CdiFallbackIterator *) (void *) super;
-  cdiFallbackIterator_condestruct(me, NULL, 0);
 }
 
 /*
