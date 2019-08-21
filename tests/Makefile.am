@@ -50,7 +50,7 @@ pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
 	pio_write_setup_grid.h pio_write_setup_grid.c
 test_resource_copy_SOURCES = test_resource_copy.c
 test_resource_copy_LDADD = $(UUID_C_LIB) ../src/libcdiresunpack.la $(LDADD)
-test_resource_copy_mpi_SOURCES = test_resource_copy.c
+test_resource_copy_mpi_SOURCES = test_resource_copy_mpi.c
 test_cdf_write_SOURCES = test_cdf_write.c \
 	simple_model_helper.h simple_model_helper.c
 test_cdf_read_SOURCES = test_cdf_read.c
@@ -64,8 +64,6 @@ pio_write_deco2d_LDADD = ../src/libcdipio.la $(UUID_C_LIB) $(MPI_C_LIB)
 TESTS +=  test_resource_copy_mpi_run
 check_PROGRAMS += test_resource_copy_mpi
 test_resource_copy_mpi_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
-test_resource_copy_mpi_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) \
-	-DMPI_MARSHALLING
 else
 pio_write_LDADD = $(LDADD) $(UUID_C_LIB)
 pio_write_deco2d_LDADD = $(LDADD) $(UUID_C_LIB)
@@ -85,3 +83,21 @@ clean-local: clean-local-dirs
 .PHONY: clean-local-dirs
 clean-local-dirs:
 	-rm -rf test_cdf_const.d *.dSYM
+
+# overrides to make regular compilations also use libtool
+# static because the libtool libraries in this directory are meant to
+# be statically linked and there is no use for the PIC object
+COMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(CC) -static $(DEFS) \
+        $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+        $(AM_CFLAGS) $(CFLAGS)
+FCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(FC) -static $(AM_FCFLAGS) $(FCFLAGS)
+CXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(CXX) -static $(DEFS) \
+        $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+        $(AM_CXXFLAGS) $(CXXFLAGS)
+PPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(FC) -static $(DEFS) \
+        $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+        $(AM_FCFLAGS) $(FCFLAGS)
