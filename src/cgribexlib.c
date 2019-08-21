@@ -8,6 +8,9 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic warning "-Wstrict-overflow"
+#if __GNUC__ >= 7
+#pragma GCC diagnostic warning "-Wint-in-bool-context"
+#endif
 #endif
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wmissing-variable-declarations"
@@ -3142,7 +3145,7 @@ static void printQuasi(int *isec2)
       */
       if ( nrepeat >= 1 )
 	{
-	  strncpy(yout+4, " to", 3);
+	  memcpy(yout+4, " to", 3);
 	  sprintf(yout+7, "%5d", nextlat);
         }
       fprintf(grprsm, " %5d                %-12s\n", isec2[nextlat+21], yout);
