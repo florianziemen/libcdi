@@ -225,6 +225,7 @@ vlist_delete(vlist_t *vlistptr)
       if ( vars[varID].stdname )  Free(vars[varID].stdname);
       if ( vars[varID].units )    Free(vars[varID].units);
       if ( vars[varID].ensdata )  Free(vars[varID].ensdata);
+      if ( vars[varID].extra )    Free(vars[varID].extra);
 
       if ( vlistptr->vars[varID].opt_grib_kvpair )
         {
