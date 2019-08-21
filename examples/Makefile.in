@@ -199,8 +199,6 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
 	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
@@ -217,7 +215,6 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
 LTFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
 AM_V_FC = $(am__v_FC_@AM_V@)
@@ -340,6 +337,7 @@ LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+LT_SYS_LIBRARY_PATH = @LT_SYS_LIBRARY_PATH@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
@@ -487,6 +485,23 @@ cdi_write_f2003_LDADD = $(top_builddir)/src/libcdi_f2003.la $(top_builddir)/src/
 @ENABLE_ALL_STATIC_TRUE@cdi_copy_LDFLAGS = -all-static
 @ENABLE_ALL_STATIC_TRUE@cdi_read_f2003_LDFLAGS = -all-static
 @ENABLE_ALL_STATIC_TRUE@cdi_write_f2003_LDFLAGS = -all-static
+
+# overrides to make regular compilations also use libtool
+# static because the libtool libraries in this directory are meant to
+# be statically linked and there is no use for the PIC object
+COMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(CC) -static $(DEFS) \
+        $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+        $(AM_CFLAGS) $(CFLAGS)
+
+FCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(FC) -static $(AM_FCFLAGS) $(FCFLAGS)
+
+CXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(CXX) -static $(DEFS) \
+        $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+        $(AM_CXXFLAGS) $(CXXFLAGS)
+
 all: all-am
 
 .SUFFIXES:
@@ -815,8 +830,9 @@ uninstall-am:
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags tags-am uninstall uninstall-am
 
-cdi_read_f2003.$(OBJEXT): $(top_builddir)/src/mo_cdi.$(FCMODEXT)
-cdi_write_f2003.$(OBJEXT): $(top_builddir)/src/mo_cdi.$(FCMODEXT)
+
+@FORTRAN_MOD_UC_TRUE@cdi_read_f2003.$(OBJEXT) cdi_write_f2003.$(OBJEXT): $(top_builddir)/src/MO_CDI.$(FCMODEXT)
+@FORTRAN_MOD_UC_FALSE@cdi_read_f2003.$(OBJEXT) cdi_write_f2003.$(OBJEXT): $(top_builddir)/src/mo_cdi.$(FCMODEXT)
 #
 clean-local: clean-local-dirs
 .PHONY: clean-local-dirs

@@ -34,11 +34,10 @@ locallibs = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LIBS@ @SZLIB
 
 libcdipp_la_SOURCES = cdi.cpp cdi.hpp
 libcdipp_la_LIBADD  = $(top_builddir)/src/libcdi.la
-libcdipp_la_LDFLAGS = @NETCDF_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
+AM_LDFLAGS = @NETCDF_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
 
 CdiInfo_SOURCES     = CdiInfo.cpp
 CdiInfo_LDADD       = libcdipp.la
-CdiInfo_LDFLAGS     = @NETCDF_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
 #
 #
 if ENABLE_RUBY
@@ -127,3 +126,15 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 #all-local: $(BINDINGS)
 #
 CLEANFILES  = `ls *~`
+
+# overrides to make regular compilations also use libtool
+COMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(CC) -static $(DEFS) \
+        $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+        $(AM_CFLAGS) $(CFLAGS)
+FCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(FC) -static $(AM_FCFLAGS) $(FCFLAGS)
+CXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(CXX) -static $(DEFS) \
+        $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+        $(AM_CXXFLAGS) $(CXXFLAGS)
