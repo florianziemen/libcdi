@@ -48,6 +48,8 @@ main()
       printf("unexpected crc result: 0x%8" PRIx32"\n", cksum_result);
       return EXIT_FAILURE;
     }
+  free(test_data);
+  free(init_block);
   return EXIT_SUCCESS;
 }
 
