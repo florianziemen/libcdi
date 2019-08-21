@@ -1748,7 +1748,9 @@ gribapiDecode(void *gribbuffer, size_t gribsize, void *data, size_t gridsize, in
 static void
 gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
 {
-  int instID = (vlistInqInstitut(vlistID) != CDI_UNDEFID) ? vlistInqInstitut(vlistID) : vlistInqVarInstitut(vlistID, varID);
+  int instID = vlistInqInstitut(vlistID);
+
+  if (instID == CDI_UNDEFID) instID = vlistInqVarInstitut(vlistID, varID);
 
   if (instID != CDI_UNDEFID)
     {
