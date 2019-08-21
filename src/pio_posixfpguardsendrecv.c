@@ -370,6 +370,23 @@ initSharedFP(struct sharedFP *bfd, int nProcsColl)
   bfd->unfinished = nProcsColl;
 }
 
+/* MPICH 3.3 has a problem in its implementation of MPI_Testany and
+ * MPI_Waitany, see commit 0f7be7196cc05bf0c908761e148628e88d635190
+ * at https://github.com/pmodels/mpich
+ * effectively, the work-around prepends MPI_REQUEST_NULL to the
+ * request array */
+#ifdef MPICH_CALC_VERSION
+#  if MPICH_NUMVERSION >= MPICH_CALC_VERSION(3,3,0,0,0) && \
+  MPI_NUMVERSION < MPICH_CALC_VERSION(3,3,1,0,0)
+#    define CDIPIO_MPICH33_WORKAROUND(code) code
+#  else
+#    define CDIPIO_MPICH33_WORKAROUND(code)
+#  endif
+#else
+#  define CDIPIO_MPICH33_WORKAROUND(code)
+#endif
+
+
 static void
 fpgPOSIXFPGUARDSENDRECV(void)
 {
@@ -381,17 +398,21 @@ fpgPOSIXFPGUARDSENDRECV(void)
   size_t nProcsColl = (size_t)(commInqSizeColl()),
     sentFinalize = nProcsColl;
   struct syncMsg *msgWords = Malloc(sizeof (*msgWords) * nProcsColl);
-  MPI_Request *msgReq = Malloc(sizeof (*msgReq) * nProcsColl);
+  size_t numReq = nProcsColl;
+  CDIPIO_MPICH33_WORKAROUND(++numReq);
+  MPI_Request *msgReq = Malloc(sizeof (*msgReq) * numReq);
 
   xdebug("ncollectors=%zu", nProcsColl);
 
+  CDIPIO_MPICH33_WORKAROUND(msgReq[0] = MPI_REQUEST_NULL; ++msgReq);
   for (size_t i = 0; i < nProcsColl; ++i)
     xmpi(MPI_Irecv(msgWords + i, 1, cdiPioSyncMsgDt, (int)i, collGuardTag,
                    commPio, msgReq + i));
-
   for ( ;; )
     {
+      CDIPIO_MPICH33_WORKAROUND(--msgReq; ++nProcsColl);
       xmpiStat(MPI_Waitany((int)nProcsColl, msgReq, &source, &status), &status);
+      CDIPIO_MPICH33_WORKAROUND(++msgReq;--nProcsColl;--source);
       int fileID = msgWords[source].fileID;
       assert(fileID >= 0);
       int opcode = msgWords[source].command;
@@ -450,6 +471,7 @@ fpgPOSIXFPGUARDSENDRECV(void)
               if (sharedFPsFill)
                 xabort("still files open");
               Free(sharedFPs);
+              CDIPIO_MPICH33_WORKAROUND(--msgReq);
               Free(msgReq);
               Free(msgWords);
               cdiPioDestroySyncMsgDt();
