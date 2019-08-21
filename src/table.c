@@ -703,7 +703,7 @@ tableFWriteC(FILE *ptfp, int tableID)
         }
     }
 
-  strncpy(tablename, parTable[tableID].name, sizeof(tablename));
+  strncpy(tablename, parTable[tableID].name, sizeof(tablename) - 1);
   tablename[sizeof(tablename) - 1] = '\0';
   {
     size_t len = strlen(tablename);
