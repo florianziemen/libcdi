@@ -513,7 +513,7 @@ cdiPioDistGridInit(grid_t *gridptr,
       for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx)
         sub_arrays[saIdx].rect[0].size = size;
       irregular = true;
-      /* intended fall-through */
+      /*-fallthrough*/
     case GRID_GENERIC:
     case GRID_GAUSSIAN:
     case GRID_LONLAT:
