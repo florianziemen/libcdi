@@ -331,7 +331,8 @@ void zaxisGetString(char *name, const char *zaxisstrname, size_t len)
   size_t slen = strlen(zaxisstrname)+1;
   if ( slen > len ) slen = len;
   if ( slen > CDI_MAX_NAME ) slen = CDI_MAX_NAME;
-  strncpy(name, zaxisstrname, slen);
+  name[0] = 0;
+  strncat(name, zaxisstrname, slen);
   name[slen-1] = 0;
 }
 
