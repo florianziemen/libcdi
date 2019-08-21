@@ -310,6 +310,18 @@ test -z "$GREP" && {
 # in the command search PATH.
 
 : ${CP="cp -f"}
+# work around bug in libtool which raises an error when running in a
+# parallel make that should have been handled in printf internally
+printf()
+{
+  while ! builtin printf "$@" ; do
+    errcode=$?
+    # errcode might be EAGAIN=11 which means to simply try again
+    if [ $errcode != 11 ]; then
+      return $errcode
+    fi
+  done
+}
 : ${ECHO="printf %s\n"}
 : ${EGREP="$GREP -E"}
 : ${FGREP="$GREP -F"}
@@ -3291,6 +3303,12 @@ func_mode_compile ()
 	continue
 	;;
 
+      skip )
+        lastarg=
+        arg_mode=normal
+        continue
+        ;;
+
       normal )
 	# Accept any command-line options.
 	case $arg in
@@ -3313,6 +3331,11 @@ func_mode_compile ()
 
 	-no-suppress)
 	  suppress_opt=no
+	  continue
+	  ;;
+
+	-Xlinker | -XCClinker)
+	  arg_mode=skip #  the next one is ignored for compile mode
 	  continue
 	  ;;
 
