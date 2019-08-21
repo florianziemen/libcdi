@@ -1444,7 +1444,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
   }
 
   size_t len = 0;
-  char txt[CDI_MAX_NAME];
+  char txt[CDI_MAX_NAME * 2 + 30];
   if (p0status == 0)
     len = (size_t) (snprintf(txt, sizeof(txt), "%s%s %s%s", "a: a b: b p0: ", p0name, "ps: ", psname));
   else
