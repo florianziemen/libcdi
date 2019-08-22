@@ -92,7 +92,8 @@ dnl newer PGI or NAG configurations particularly well
         [  tmp_sharedflag='-Wl,-shared'],
         [  tmp_sharedflag='-Wl,-shared'
 	  tmp_compiler_flags='`echo \$compiler_flags | sed -e '"'"'s/ -W@<:@cl@:>@,-no-pie\\b//g'"'"'`']))dnl
-      m4_pushdef([_LT_SYS_HIDDEN_LIBDEPS],m4_bpatsubst(m4_dquote(
+      m4_pushdef([_LT_SYS_HIDDEN_LIBDEPS],[AS_UNSET([output_verbose_link_cmd])]
+    m4_bpatsubst(m4_dquote(
         m4_defn([_LT_SYS_HIDDEN_LIBDEPS])),[test x-\([LR]\) = "\$p"],
           [test x-\1 = x"$p"]))])dnl
    LT_INIT([$1])
