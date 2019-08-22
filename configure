@@ -16780,6 +16780,7 @@ $as_echo "$ld_shlibs_CXX" >&6; }
     ## There is no encapsulation within the following macros, do not change
     ## the running order or otherwise move them around unless you know exactly
     ## what you are doing...
+    { output_verbose_link_cmd=; unset output_verbose_link_cmd;}
     # Dependencies to place before and after the object being linked:
 predep_objects_CXX=
 postdep_objects_CXX=
@@ -21687,6 +21688,7 @@ $as_echo "$enable_static" >&6; }
     ## There is no encapsulation within the following macros, do not change
     ## the running order or otherwise move them around unless you know exactly
     ## what you are doing...
+    { output_verbose_link_cmd=; unset output_verbose_link_cmd;}
     # Dependencies to place before and after the object being linked:
 predep_objects_FC=
 postdep_objects_FC=
