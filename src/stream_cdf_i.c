@@ -3453,14 +3453,15 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
 }
 
 static
-int find_leadtime(int nvars, ncvar_t *ncvars)
+int find_leadtime(int nvars, ncvar_t *ncvars, int timedimid)
 {
   int leadtime_id = CDI_UNDEFID;
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
-      if ( ncvars[ncvarid].ndims == 1 )
-        if ( ncvars[ncvarid].stdname[0] && strIsEqual(ncvars[ncvarid].stdname, "forecast_period") )
+      ncvar_t *ncvar = &ncvars[ncvarid];
+      if ( ncvar->ndims == 1 && timedimid == ncvar->dimids[0])
+        if ( ncvar->stdname[0] && strIsEqual(ncvar->stdname, "forecast_period") )
           {
             leadtime_id = ncvarid;
             break;
@@ -3482,11 +3483,12 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
 
       for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
         {
-          if ( ncvars[ncvarid].ndims == 0 && strIsEqual(ncvars[ncvarid].name, "time") )
+          ncvar_t *ncvar = &ncvars[ncvarid];
+          if ( ncvar->ndims == 0 && strIsEqual(ncvar->name, "time") )
             {
               if ( ncvars[ncvarid].units[0] )
                 {
-                  strcpy(timeunits, ncvars[ncvarid].units);
+                  strcpy(timeunits, ncvar->units);
                   strToLower(timeunits);
 
                   if ( is_time_units(timeunits) )
@@ -3509,49 +3511,52 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
         }
 
       for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-        if ( ncvarid != streamptr->basetime.ncvarid &&
-             ncvars[ncvarid].ndims == 1 &&
-             timedimid == ncvars[ncvarid].dimids[0] &&
-             !xtypeIsText(ncvars[ncvarid].xtype) &&
-             is_timeaxis_units(ncvars[ncvarid].units) )
-          {
-            ncvars[ncvarid].isvar = FALSE;
+        {
+          ncvar_t *ncvar = &ncvars[ncvarid];
+          if ( ncvarid != streamptr->basetime.ncvarid &&
+               ncvar->ndims == 1 &&
+               timedimid == ncvar->dimids[0] &&
+               !xtypeIsText(ncvar->xtype) &&
+               is_timeaxis_units(ncvar->units) )
+            {
+              ncvar->isvar = FALSE;
 
-            if ( !ltimevar )
-              {
-                streamptr->basetime.ncvarid = ncvarid;
-                ltimevar = true;
-                if ( CDI_Debug ) fprintf(stderr, "timevar %s\n", ncvars[ncvarid].name);
-              }
-            else
-              {
-                Warning("Found more than one time variable, skipped variable %s!", ncvars[ncvarid].name);
-              }
-          }
+              if ( !ltimevar )
+                {
+                  streamptr->basetime.ncvarid = ncvarid;
+                  ltimevar = true;
+                  if ( CDI_Debug ) fprintf(stderr, "timevar %s\n", ncvar->name);
+                }
+              else
+                {
+                  Warning("Found more than one time variable, skipped variable %s!", ncvar->name);
+                }
+            }
+        }
 
       if ( ltimevar == false ) // search for WRF time description
         {
           for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-            if ( ncvarid != streamptr->basetime.ncvarid &&
-                 ncvars[ncvarid].ndims == 2 &&
-                 timedimid == ncvars[ncvarid].dimids[0] &&
-                 xtypeIsText(ncvars[ncvarid].xtype) &&
-                 (ncdims[ncvars[ncvarid].dimids[1]].len == 19 || ncdims[ncvars[ncvarid].dimids[1]].len == 64))
-              {
-                ncvars[ncvarid].istime = true;
-                streamptr->basetime.ncvarid = ncvarid;
-                streamptr->basetime.lwrf    = true;
-                break;
-              }
+            {
+              ncvar_t *ncvar = &ncvars[ncvarid];
+              if ( ncvarid != streamptr->basetime.ncvarid &&
+                   ncvar->ndims == 2 &&
+                   timedimid == ncvar->dimids[0] &&
+                   xtypeIsText(ncvar->xtype) &&
+                   (ncdims[ncvar->dimids[1]].len == 19 || ncdims[ncvar->dimids[1]].len == 64))
+                {
+                  ncvar->istime = true;
+                  streamptr->basetime.ncvarid = ncvarid;
+                  streamptr->basetime.lwrf    = true;
+                  break;
+                }
+            }
         }
 
       // time varID
       ncvarid = streamptr->basetime.ncvarid;
 
-      if ( ncvarid == CDI_UNDEFID )
-        {
-          Warning("Time variable >%s< not found!", ncdims[timedimid].name);
-        }
+      if ( ncvarid == CDI_UNDEFID ) Warning("Time variable >%s< not found!", ncdims[timedimid].name);
     }
 
   // time varID
@@ -3559,19 +3564,20 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
 
   if ( ncvarid != CDI_UNDEFID && streamptr->basetime.lwrf == false )
     {
-      if ( ncvars[ncvarid].units[0] != 0 ) *time_has_units = true;
+      ncvar_t *ncvar = &ncvars[ncvarid];
+      if ( ncvar->units[0] != 0 ) *time_has_units = true;
 
-      if ( ncvars[ncvarid].bounds != CDI_UNDEFID )
+      if ( ncvar->bounds != CDI_UNDEFID )
         {
-          int nbdims = ncvars[ncvars[ncvarid].bounds].ndims;
+          int nbdims = ncvars[ncvar->bounds].ndims;
           if ( nbdims == 2 )
             {
-              int len = (int) ncdims[ncvars[ncvars[ncvarid].bounds].dimids[nbdims-1]].len;
-              if ( len == 2 && timedimid == ncvars[ncvars[ncvarid].bounds].dimids[0] )
+              int len = (int) ncdims[ncvars[ncvar->bounds].dimids[nbdims-1]].len;
+              if ( len == 2 && timedimid == ncvars[ncvar->bounds].dimids[0] )
                 {
                   *time_has_bounds = true;
-                  streamptr->basetime.ncvarboundsid = ncvars[ncvarid].bounds;
-                  if ( ncvars[ncvarid].climatology ) *time_climatology = true;
+                  streamptr->basetime.ncvarboundsid = ncvar->bounds;
+                  if ( ncvar->climatology ) *time_climatology = true;
                 }
             }
         }
@@ -3925,7 +3931,7 @@ int cdfInqContents(stream_t *streamptr)
   // find time vars
   find_time_vars(nvars, ncvars, ncdims, timedimid, streamptr, &time_has_units, &time_has_bounds, &time_climatology);
 
-  leadtime_id = find_leadtime(nvars, ncvars);
+  leadtime_id = find_leadtime(nvars, ncvars, timedimid);
   if ( leadtime_id != CDI_UNDEFID ) ncvars[leadtime_id].isvar = FALSE;
 
   // check ncvars

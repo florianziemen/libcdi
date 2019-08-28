@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.4
 	* Version 1.9.8 released
 
+2019-08-28  Uwe Schulzweida
+
+	* find_leadtime() bug fix
+
 2019-08-14  Uwe Schulzweida
 
 	* vlistCopyFlag: added attribute: positive (bug fix)
