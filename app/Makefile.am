@@ -2,13 +2,18 @@
 #
 bin_PROGRAMS    =
 noinst_PROGRAMS =
+check_PROGRAMS  =
+if ENABLE_CDI_APP
 if ENABLE_CDI_LIB
   bin_PROGRAMS    += cdi
-else
+else !ENABLE_CDI_LIB
   noinst_PROGRAMS += cdi
-endif
+endif !ENABLE_CDI_LIB
+  noinst_PROGRAMS += createtable
+else !ENABLE_CDI_APP
+  check_PROGRAMS += cdi
+endif !ENABLE_CDI_APP
 #
-noinst_PROGRAMS    += createtable
 #
 cdi_SOURCES         = cdi.c printinfo.h printinfo_extern.c
 cdi_LDADD           = $(top_builddir)/src/libcdi.la @LIBS@

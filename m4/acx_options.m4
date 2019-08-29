@@ -295,6 +295,12 @@ AC_ARG_ENABLE([hirlam-extensions],
               [enable_hirlam_extensions=no])
 AC_MSG_RESULT([$enable_hirlam_extensions])
 AM_CONDITIONAL([ENABLE_HIRLAM_EXTENSIONS],[test x$enable_hirlam_extensions = 'xyes'])
+#  ----------------------------------------------------------------------
+#  Build CDI application
+AC_ARG_ENABLE([cdi-app],
+              [AS_HELP_STRING([--enable-cdi-app],[build and install CDI application [default=yes]])],
+              [], [enable_cdi_app=yes])
+AM_CONDITIONAL([ENABLE_CDI_APP], [test x$enable_cdi_app = 'xyes'])
 #
 ])
 dnl
