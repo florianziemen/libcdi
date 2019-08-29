@@ -76,7 +76,7 @@ AC_DEFUN([ACX_SL_FC_MOD_SUFFIX],
      ])
      break
    done
-   rm -f conftest*
+   rm -f conftest* CONFTEST*
    AC_LANG_POP([Fortran])])
 dnl
    AC_MSG_CHECKING([for suffix of module files])

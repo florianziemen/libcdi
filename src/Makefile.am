@@ -12,17 +12,21 @@ if ENABLE_CDI_LIB
   include_HEADERS += cdi.h
 if USE_FC
   include_HEADERS += cdi.inc
-endif
+endif USE_FC
 if CREATE_ISOC
   lib_LTLIBRARIES += libcdi_f2003.la
+if FORTRAN_MOD_UC
+  nodist_include_HEADERS += MO_CDI.$(FCMODEXT)
+else !FORTRAN_MOD_UC
   nodist_include_HEADERS += mo_cdi.$(FCMODEXT)
-endif
-else
+endif !FORTRAN_MOD_UC
+endif CREATE_ISOC
+else !ENABLE_CDI_LIB
   noinst_LTLIBRARIES += libcdi.la
 if CREATE_ISOC
   lib_LTLIBRARIES += libcdi_f2003.la
-endif
-endif
+endif CREATE_ISOC
+endif !ENABLE_CDI_LIB
 
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 
@@ -264,8 +268,13 @@ mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb \
 		$(top_srcdir)/src/cdi.h $@
 #
+if FORTRAN_MOD_UC
+MO_CDI.$(FCMODEXT): mo_cdi.lo
+	@if test ! -f $@; then rm -f $<; $(MAKE) $<; fi
+else
 mo_cdi.$(FCMODEXT): mo_cdi.lo
 	@if test ! -f $@; then rm -f $<; $(MAKE) $<; fi
+endif
 #
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
@@ -280,7 +289,11 @@ all-local: $(LOCALTARGETS)
 CLEANFILES  = `ls *~`
 #CLEANFILES += cdilib.c
 if CREATE_ISOC
+if FORTRAN_MOD_UC
+CLEANFILES += MO_CDI.$(FCMODEXT)
+else
 CLEANFILES += mo_cdi.$(FCMODEXT)
+endif
 endif
 
 if ENABLE_CDI_LIB

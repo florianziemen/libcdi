@@ -362,6 +362,7 @@ AC_SUBST([CDI_F90_INTERFACE_FCFLAGS])
 #  Check the module extension of the fortran compiler
 AS_IF([test -n "$FC" && test "X$FC" != "Xno"],
   [ACX_SL_FC_MOD_SUFFIX(,[FCMODEXT=mod])])
+AM_CONDITIONAL([FORTRAN_MOD_UC],[test "x$FCMODCASE" = "xuc"])
 # -----------------------------------------------------------------------
 # Check for SWIG - Generator for script-language bindings
 AC_ARG_ENABLE(swig,

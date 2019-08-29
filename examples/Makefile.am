@@ -35,6 +35,12 @@ cdi_write_f2003_SOURCES  = cdi_write_f2003.f90
 cdi_write_f2003_LDADD    = $(top_builddir)/src/libcdi_f2003.la $(top_builddir)/src/libcdi.la
 cdi_write_f2003.$(OBJEXT): $(top_builddir)/src/mo_cdi.$(FCMODEXT)
 
+if FORTRAN_MOD_UC
+cdi_read_f2003.$(OBJEXT) cdi_write_f2003.$(OBJEXT): $(top_builddir)/src/MO_CDI.$(FCMODEXT)
+else
+cdi_read_f2003.$(OBJEXT) cdi_write_f2003.$(OBJEXT): $(top_builddir)/src/mo_cdi.$(FCMODEXT)
+endif
+
 #
 if ENABLE_ALL_STATIC
 cdi_write_LDFLAGS        = -all-static
