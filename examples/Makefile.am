@@ -2,13 +2,13 @@
 #
 EXTRA_DIST = cdi_read_f2003.f90 cdi_write_f2003.f90
 #
-noinst_PROGRAMS = cdi_write cdi_write_ens cdi_write_hybrid cdi_read \
+check_PROGRAMS = cdi_write cdi_write_ens cdi_write_hybrid cdi_read \
 	cdi_copy
 if CREATE_ISOC
-  noinst_PROGRAMS += cdi_read_f2003 cdi_write_f2003
+  check_PROGRAMS += cdi_read_f2003 cdi_write_f2003
 endif
 if ENABLE_NETCDF
-  noinst_PROGRAMS += cdi_write_const
+  check_PROGRAMS += cdi_write_const
 endif
 #
 AM_CPPFLAGS              = -I$(top_srcdir)/src

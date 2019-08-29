@@ -1,16 +1,16 @@
-noinst_PROGRAMS=collectData collectDataNStreams
+check_PROGRAMS=collectData collectDataNStreams
 
 AM_CPPFLAGS = -I$(top_srcdir)/src $(YAXT_CFLAGS)
 AM_FCFLAGS  = $(FPP_INCOPT)$(top_srcdir)/src $(MPI_FC_INCLUDE)
 AM_CFLAGS = $(MPI_C_INCLUDE)
 
 if USE_MPI
-noinst_PROGRAMS+=compareResourcesArray
+check_PROGRAMS+=compareResourcesArray
 AM_FCFLAGS += $(FPP_DEFOPT)USE_MPI
 endif
 
 if USE_FC
- noinst_PROGRAMS+=collectData2003
+ check_PROGRAMS+=collectData2003
 endif
 
 collectData_SOURCES=collectData.c
