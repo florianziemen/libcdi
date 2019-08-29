@@ -1,8 +1,11 @@
 #  Process this file with autoconf to produce a configure script.
 #
-#  automake 1.14
-#  autoconf 2.68
-#  libtool  2.4.2
+#  automake 1.16.1
+#  autoconf 2.69
+#  libtool  2.4.6
+
+AC_PREREQ([2.69])
+LT_PREREQ([2.4.6])
 
 AC_INIT([cdi], [1.8.2], [http://mpimet.mpg.de/cdi])
 
@@ -19,7 +22,7 @@ AC_CANONICAL_HOST
 AC_CANONICAL_BUILD
 
 
-AM_INIT_AUTOMAKE([foreign serial-tests])
+AM_INIT_AUTOMAKE([1.16.1 foreign serial-tests])
 AC_CONFIG_HEADERS([src/config.h])
 AM_MAINTAINER_MODE([disable])
 
