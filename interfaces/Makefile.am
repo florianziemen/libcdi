@@ -31,11 +31,11 @@ noinst_PROGRAMS += CdiInfo
 noinst_LTLIBRARIES += libcdipp.la
 endif
 #
-locallibs = $(abs_top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LIBS@ @SZLIB_LIBS@
+locallibs = $(abs_top_builddir)/src/.libs/libcdi.so $(LTLIBOBJS) $(NETCDF_LIBS) $(SZLIB_LIBS)
 
 libcdipp_la_SOURCES = cdi.cpp cdi.hpp
 libcdipp_la_LIBADD  = $(top_builddir)/src/libcdi.la
-AM_LDFLAGS = @NETCDF_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
+AM_LDFLAGS = $(NETCDF_LIBS) $(SZLIB_LIBS) $(LDFLAGS)
 
 CdiInfo_SOURCES     = CdiInfo.cpp
 CdiInfo_LDADD       = libcdipp.la
