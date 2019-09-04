@@ -131,7 +131,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_cdi_OBJECTS = cdi.$(OBJEXT) printinfo_extern.$(OBJEXT)
 cdi_OBJECTS = $(am_cdi_OBJECTS)
-cdi_DEPENDENCIES = $(top_builddir)/src/libcdi.la
+am__DEPENDENCIES_1 =
+cdi_DEPENDENCIES = $(top_builddir)/src/libcdi.la $(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -394,7 +395,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 #
 cdi_SOURCES = cdi.c printinfo.h printinfo_extern.c
-cdi_LDADD = $(top_builddir)/src/libcdi.la @LIBS@
+cdi_LDADD = $(top_builddir)/src/libcdi.la $(LIBS)
 @ENABLE_ALL_STATIC_TRUE@cdi_LDFLAGS = -all-static
 #
 createtable_SOURCES = createtable.c
