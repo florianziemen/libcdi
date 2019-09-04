@@ -30933,7 +30933,9 @@ $as_echo "$acx_temp" >&6; }
 fi
 fi
    if test x"$ENABLE_NC4" = xyes; then :
-  for ac_header in netcdf_par.h
+  saved_CFLAGS=$CFLAGS
+      CFLAGS="$CFLAGS $MPI_C_INCLUDE"
+      for ac_header in netcdf_par.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "netcdf_par.h" "ac_cv_header_netcdf_par_h" "$ac_includes_default"
 if test "x$ac_cv_header_netcdf_par_h" = xyes; then :
@@ -30990,7 +30992,7 @@ $as_echo "$as_me: The supplied netCDF library does not support nc_inq_format_ext
 fi
 
 fi
-
+      CFLAGS=$saved_CFLAGS
 fi
 
 else

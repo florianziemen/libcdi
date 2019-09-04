@@ -258,7 +258,9 @@ dnl test properties of MPI system
               [Defined to 1 if NetCDF parallel open supports NC_PNETCDF])])
       AC_MSG_RESULT([$acx_temp])])])
    AS_IF([test x"$ENABLE_NC4" = xyes],
-     [AC_CHECK_HEADERS([netcdf_par.h],
+     [saved_CFLAGS=$CFLAGS
+      CFLAGS="$CFLAGS $MPI_C_INCLUDE"
+      AC_CHECK_HEADERS([netcdf_par.h],
         [AC_CHECK_DECL([MPI_Bcast],
            [HAVE_PARALLEL_NC4=1],
            [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
@@ -279,7 +281,7 @@ dnl test properties of MPI system
            [AC_MSG_NOTICE([The supplied netCDF library does not support nc_inq_format_extended.])],
            [AC_INCLUDES_DEFAULT
 @%:@include <netcdf.h>])])
-     ])
+      CFLAGS=$saved_CFLAGS])
   ],
   [MPI_LAUNCH="`pwd`/util/serialrun"
    AC_SUBST([MPI_LAUNCH])])
