@@ -80,7 +80,7 @@ void cdfComment(int ncid)
 	strcat(comment, "??");
       else
 	strcat(comment, libvers);
-      strcat(comment, " (http://mpimet.mpg.de/cdi)");
+      strcat(comment, " (https://mpimet.mpg.de/cdi)");
     }
 
   cdf_put_att_text(ncid, NC_GLOBAL, "CDI", strlen(comment), comment);
