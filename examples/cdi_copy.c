@@ -3,10 +3,12 @@
 
 int main(void)
 {
-  const int nlon = 12; // Number of longitudes
-  const int nlat =  6; // Number of latitudes 
-  const int nlev =  5; // Number of levels    
-  const int nts  =  3; // Number of time steps
+  enum {
+    nlon = 12, // Number of longitudes
+    nlat =  6, // Number of latitudes
+    nlev =  5, // Number of levels
+    nts  =  3, // Number of time steps
+  };
   size_t nmiss;
   double var1[nlon*nlat];
   double var2[nlon*nlat*nlev];
