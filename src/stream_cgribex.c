@@ -746,8 +746,8 @@ int cgribexScanTimestep1(stream_t *streamptr)
   unsigned nrecs = 0;
   while (true)
     {
-      size_t recsize = gribGetSize(fileID);
-      recpos  = fileGetPos(fileID);
+      const size_t recsize = gribGetSize(fileID);
+      recpos = fileGetPos(fileID);
 
       if ( recsize == 0 )
 	{
@@ -854,7 +854,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
 
   taxis->unit = tunit;
   taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
-  int taxisID = taxisCreate(taxis->type);
+  const int taxisID = taxisCreate(taxis->type);
   taxis->rdate = rdate;
   taxis->rtime = rtime;
   taxis->vdate = (int64_t)datetime0.date;
@@ -916,7 +916,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
     {
       if ( rindex > nrecords ) break;
 
-      size_t recsize = gribGetSize(fileID);
+      const size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
       if ( recsize == 0 )
 	{
@@ -1112,7 +1112,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  if ( rindex > nrecs ) break;
 
 	  const size_t recsize = gribGetSize(fileID);
-	  recpos  = fileGetPos(fileID);
+	  recpos = fileGetPos(fileID);
 	  if ( recsize == 0 )
 	    {
 	      streamptr->ntsteps = streamptr->rtsteps + 1;
@@ -1148,7 +1148,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  if ( rindex == 0 )
 	    {
               const int vlistID = streamptr->vlistID;
-	      int taxisID = vlistInqTaxis(vlistID);
+	      const int taxisID = vlistInqTaxis(vlistID);
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 		{
 		  taxis->type  = TAXIS_RELATIVE;
@@ -1520,8 +1520,14 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
   if ( timetype == TAXIS_RELATIVE )
     {
       const int calendar = taxisInqCalendar(taxisID);
-      const int rdate    = taxisInqRdate(taxisID);
-      const int rtime    = taxisInqRtime(taxisID);
+
+      int rdate = taxisInqRdate(taxisID);
+      int rtime = taxisInqRtime(taxisID);
+      if (vdate < rdate || (vdate == rdate && vtime < rtime))
+        {
+          rdate = vdate;
+          rtime = vtime;
+        }
 
       int factor = cgribexDefDateTime(isec1, timeunit, rdate, rtime);
       int ip1 = 0, ip2 = 0;
