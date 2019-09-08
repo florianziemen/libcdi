@@ -178,10 +178,10 @@ int gribapiGetValidityDateTime(grib_handle *gh, int64_t *vdate, int *vtime)
         if ( rday > 0 )
           {
             static bool lprint = true;
-            extern int grib_calendar;
+            extern int CGRIBEX_grib_calendar;
             int64_t julday;
             int secofday;
-            encode_caldaysec(grib_calendar, ryear, rmonth, rday, rhour, rminute, rsecond, &julday, &secofday);
+            encode_caldaysec(CGRIBEX_grib_calendar, ryear, rmonth, rday, rhour, rminute, rsecond, &julday, &secofday);
 
             int64_t time_period = endStep;
             int64_t addsec = 0;
@@ -205,7 +205,7 @@ int gribapiGetValidityDateTime(grib_handle *gh, int64_t *vdate, int *vtime)
 
             julday_add_seconds(addsec, &julday, &secofday);
 
-            decode_caldaysec(grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
+            decode_caldaysec(CGRIBEX_grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
           }
 
 	*vdate = cdiEncodeDate(ryear, rmonth, rday);
