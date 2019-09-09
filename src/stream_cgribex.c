@@ -883,7 +883,9 @@ int cgribexScanTimestep2(stream_t * streamptr)
 {
   int lmv = 0, iret = 0;
   off_t recpos = 0;
-  int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
+  int leveltype = 0, level1 = 0, level2 = 0;
+  int vdate = 0, vtime = 0;
+  int sdate = 0, stime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int recID = 0;
   bool warn_numavg = true;
@@ -943,7 +945,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
-      gribDateTime(isec1, &vdate, &vtime);
+      gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
 
       if ( rindex == 0 )
 	{
@@ -960,6 +962,8 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	  taxis->unit  = cgribexGetTimeUnit(isec1);
 	  taxis->vdate = vdate;
 	  taxis->vtime = vtime;
+          taxis->sdate = sdate;
+          taxis->stime = stime;
 
 	  datetime0.date = vdate;
 	  datetime0.time = vtime;
@@ -969,8 +973,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       if ( ISEC1_AvgNum )
 	{
-	  if ( taxis->numavg && warn_numavg &&
-               (taxis->numavg != ISEC1_AvgNum) )
+	  if ( taxis->numavg && warn_numavg && (taxis->numavg != ISEC1_AvgNum) )
 	    {
               // Warning("Changing numavg from %d to %d not supported!", taxis->numavg, ISEC1_AvgNum);
 	      warn_numavg = false;
@@ -1082,7 +1085,9 @@ int cgribexScanTimestep(stream_t * streamptr)
 {
   int lmv = 0, iret = 0;
   off_t recpos = 0;
-  int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
+  int leveltype = 0, level1 = 0, level2 = 0;
+  int vdate = 0, vtime = 0;
+  int sdate = 0, stime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int vrecID, recID = 0;
   bool warn_numavg = true;
@@ -1145,7 +1150,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
           cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
-	  gribDateTime(isec1, &vdate, &vtime);
+	  gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
 
 	  if ( rindex == nrecs ) break;
 
@@ -1166,6 +1171,8 @@ int cgribexScanTimestep(stream_t * streamptr)
 	      taxis->unit  = cgribexGetTimeUnit(isec1);
 	      taxis->vdate = vdate;
 	      taxis->vtime = vtime;
+              taxis->sdate = sdate;
+              taxis->stime = stime;
 
 	      datetime0.date = vdate;
 	      datetime0.time = vtime;
@@ -1173,8 +1180,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
 	  if ( ISEC1_AvgNum )
 	    {
-	      if (  taxis->numavg && warn_numavg &&
-		   (taxis->numavg != ISEC1_AvgNum) )
+	      if (  taxis->numavg && warn_numavg && (taxis->numavg != ISEC1_AvgNum) )
 		{
 	      /*
 	          Warning("Changing numavg from %d to %d not supported!", streamptr->tsteps[tsID].taxis.numavg, ISEC1_AvgNum);
