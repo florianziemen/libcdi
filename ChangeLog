@@ -3,6 +3,14 @@
         * using CGRIBEX library version 1.9.4
 	* Version 1.9.8 released
 
+2019-09-08 Uwe Schulzweida
+
+	* time axis: added support for datatype integer
+
+2019-09-06 Uwe Schulzweida
+
+	* gribapiDefTime: adjust reference time if necessary (bug fix) [report: Helmut Haak]
+
 2019-08-28  Uwe Schulzweida
 
 	* find_leadtime() bug fix

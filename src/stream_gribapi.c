@@ -178,10 +178,10 @@ int gribapiGetValidityDateTime(grib_handle *gh, int64_t *vdate, int *vtime)
         if ( rday > 0 )
           {
             static bool lprint = true;
-            extern int grib_calendar;
+            extern int CGRIBEX_grib_calendar;
             int64_t julday;
             int secofday;
-            encode_caldaysec(grib_calendar, ryear, rmonth, rday, rhour, rminute, rsecond, &julday, &secofday);
+            encode_caldaysec(CGRIBEX_grib_calendar, ryear, rmonth, rday, rhour, rminute, rsecond, &julday, &secofday);
 
             int64_t time_period = endStep;
             int64_t addsec = 0;
@@ -205,7 +205,7 @@ int gribapiGetValidityDateTime(grib_handle *gh, int64_t *vdate, int *vtime)
 
             julday_add_seconds(addsec, &julday, &secofday);
 
-            decode_caldaysec(grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
+            decode_caldaysec(CGRIBEX_grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
           }
 
 	*vdate = cdiEncodeDate(ryear, rmonth, rday);
@@ -953,7 +953,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   while ( true )
     {
       int level1 = 0, level2 = 0;
-      size_t recsize = gribGetSize(fileID);
+      const size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
 
       if ( recsize == 0 )
@@ -1111,7 +1111,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
     {
       if ( rindex > nrecords ) break;
 
-      size_t recsize = gribGetSize(fileID);
+      const size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
       if ( recsize == 0 )
 	{
@@ -1337,7 +1337,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 
 	  if ( rindex == 0 )
 	    {
-              int taxisID = vlistInqTaxis(vlistID);
+              const int taxisID = vlistInqTaxis(vlistID);
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 		{
 		  taxis->type  = TAXIS_RELATIVE;
@@ -1839,10 +1839,16 @@ void gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOf
 
   if ( taxistype == TAXIS_RELATIVE )
     {
-      const int calendar = taxisInqCalendar(taxisID);
-      const int64_t rdate = taxisInqRdate(taxisID);
-      const int rtime    = taxisInqRtime(taxisID);
       const int timeunit = taxisInqTunit(taxisID);
+      const int calendar = taxisInqCalendar(taxisID);
+
+      int64_t rdate = taxisInqRdate(taxisID);
+      int rtime = taxisInqRtime(taxisID);
+      if (vdate < rdate || (vdate == rdate && vtime < rtime))
+        {
+          rdate = vdate;
+          rtime = vtime;
+        }
 
       int status = gribapiDefDateTimeRel(editionNumber, gh, rdate, rtime, vdate, vtime, productDefinitionTemplate,
                                          typeOfGeneratingProcess, tsteptype, timeunit, calendar, gcinit);
@@ -2834,7 +2840,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
 
   if (scanModeIN==00)           // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
   {                             // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
-                               // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
+                                // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
     if (scanModeOUT==64)
       { // flip the data vertically ..
         idxIN= 0; idxOUT= (jDim-1)*iDim;
