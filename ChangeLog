@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.4
 	* Version 1.9.8 released
 
+2019-09-09 Uwe Schulzweida
+
+	* grib: added support for start date for accum, avg, range and diff
+
 2019-09-08 Uwe Schulzweida
 
 	* time axis: added support for datatype integer

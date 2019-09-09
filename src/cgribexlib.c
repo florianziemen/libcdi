@@ -10768,7 +10768,7 @@ void encodePDS(GRIBPACK *lpds, long pdsLen, int *isec1)
   else if ( ISEC1_TimeRange ==   5 || ISEC1_TimeRange ==   4 || 
 	    ISEC1_TimeRange ==   3 || ISEC1_TimeRange ==   2 )
     {
-      Put1Byte(0);
+      Put1Byte(ISEC1_TimePeriod1);
       Put1Byte(ISEC1_TimePeriod2);
     }
   else

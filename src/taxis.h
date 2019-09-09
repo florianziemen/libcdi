@@ -15,6 +15,8 @@ typedef struct {
   short   has_bounds;
   int     datatype;       // datatype
   int     type;           // time type
+  int64_t sdate;          // start date
+  int     stime;          // start time
   int64_t vdate;          // verification date
   int     vtime;          // verification time
   int64_t rdate;          // reference date
@@ -36,6 +38,12 @@ typedef struct {
   char   *units;
 }
 taxis_t;
+
+//      taxisInqSdate: Get the start date
+int64_t taxisInqSdate(int taxisID);
+
+//      taxisInqStime: Get the start time
+int     taxisInqStime(int taxisID);
 
 void     ptaxisInit(taxis_t* taxis);
 void     ptaxisCopy(taxis_t* dest, taxis_t* source);

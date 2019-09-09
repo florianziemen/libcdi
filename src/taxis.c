@@ -111,6 +111,8 @@ void taxisDefaultValue(taxis_t* taxisptr)
   taxisptr->used        = false;
   taxisptr->datatype    = CDI_DATATYPE_FLT64;
   taxisptr->type        = DefaultTimeType;
+  taxisptr->sdate       = 0;
+  taxisptr->stime       = 0;
   taxisptr->vdate       = 0;
   taxisptr->vtime       = 0;
   taxisptr->rdate       = CDI_UNDEFID;
@@ -579,6 +581,9 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
   taxisptr2->rdate = taxisptr1->rdate;
   taxisptr2->rtime = taxisptr1->rtime;
   */
+  taxisptr2->sdate = taxisptr1->sdate;
+  taxisptr2->stime = taxisptr1->stime;
+
   taxisptr2->vdate = taxisptr1->vdate;
   taxisptr2->vtime = taxisptr1->vtime;
 
@@ -620,6 +625,13 @@ int64_t taxisInqVdate(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
   return taxisptr->vdate;
+}
+
+
+int64_t taxisInqSdate(int taxisID)
+{
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
+  return taxisptr->sdate;
 }
 
 
@@ -667,6 +679,13 @@ int taxisInqVtime(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
   return taxisptr->vtime;
+}
+
+
+int taxisInqStime(int taxisID)
+{
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
+  return taxisptr->stime;
 }
 
 
@@ -1360,6 +1379,8 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->used        = source->used;
   dest->datatype    = source->datatype;
   dest->type        = source->type;
+  dest->sdate       = source->sdate;
+  dest->stime       = source->stime;
   dest->vdate       = source->vdate;
   dest->vtime       = source->vtime;
   dest->rdate       = source->rdate;
