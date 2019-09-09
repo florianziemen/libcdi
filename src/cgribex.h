@@ -196,6 +196,7 @@ const char *cgribexLibraryVersion(void);
 void  gribDebug(int debug);
 void  gribSetCalendar(int calendar);
 
+void  gribDateTimeX(int *isec1, int *date, int *time, int *startDate, int *startTime);
 void  gribDateTime(int *isec1, int *date, int *time);
 int   gribRefDate(int *isec1);
 int   gribRefTime(int *isec1);
