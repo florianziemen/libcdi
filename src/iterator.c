@@ -904,7 +904,6 @@ int cdiIterator_inqDatatype(CdiIterator* me)
 */
 int cdiIterator_inqFiletype(CdiIterator* me)
 {
-  sanityCheck(me);
   return me->filetype;
 }
 
