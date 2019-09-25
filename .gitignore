@@ -72,8 +72,14 @@ Makefile
 /tests/cksum_verify
 /tests/cksum_write
 /tests/cksum_write_chunk
+/tests/example.cksum
+/tests/example.ext
 /tests/example.grb
+/tests/example.ieg
 /tests/example.nc
+/tests/example.nc2
+/tests/example.nc4
+/tests/example.svc
 /tests/example_0.cksum
 /tests/example_0.grb
 /tests/example_0.nc4
@@ -83,6 +89,7 @@ Makefile
 /tests/pio_write
 /tests/pio_write_deco2d
 /tests/test_byteswap
+/tests/test_cdf_const.d
 /tests/test_cdf_read
 /tests/test_cdf_write
 /tests/test_grib
