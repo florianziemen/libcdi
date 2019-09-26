@@ -66,9 +66,7 @@ AC_FUNC_MMAP
 AC_CHECK_MEMBERS([struct stat.st_blksize])
 #  ----------------------------------------------------------------------
 # Checks for header files
-AC_CHECK_HEADERS([malloc.h])
-AC_CHECK_HEADERS([unistd.h])
-AC_CHECK_HEADERS([sys/time.h])
+AC_CHECK_HEADERS([malloc.h unistd.h sys/time.h],,,[AC_INCLUDES_DEFAULT])
 AX_EXECINFO
 #  ----------------------------------------------------------------------
 # Checks for the availability of functions
@@ -219,8 +217,7 @@ main(int argc, char **argv)
            [HAVE_PARALLEL_NC4=1],
            [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
            [AC_INCLUDES_DEFAULT
-@%:@include <netcdf.h>])
-])
+@%:@include <netcdf.h>])], [AC_INCLUDES_DEFAULT])
       dnl parallel netCDF support still requires ScalES-PPM and YAXT to
       dnl re-arrange the data when running with more than one collector
       PKG_CHECK_MODULES([PPM_CORE],[scales-ppm-core],
@@ -302,7 +299,7 @@ AC_ARG_ENABLE([ruby],
    CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
    AC_CHECK_HEADER([ruby.h],,[enable_ruby=no
                               RUBY=
-                             ])
+                             ], [AC_INCLUDES_DEFAULT])
    CPPFLAGS=$save_CPPFLAGS
    AS_IF([test "x$RUBY" != "x"],
          [AS_IF([test "x$SWIG" = "x"],
@@ -327,7 +324,7 @@ AC_ARG_ENABLE(python,
      save_CPPFLAGS=$CPPFLAGS
      CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
      AC_CHECK_HEADER([Python.h],[enable_python=yes
-       break])
+       break],,[AC_INCLUDES_DEFAULT])
      CPPFLAGS=$save_CPPFLAGS
    done
    AS_IF([test "x$enable_python" != "xno"],

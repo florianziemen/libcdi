@@ -33,7 +33,7 @@
 #serial 1
 
 AC_DEFUN([AX_EXECINFO],
-  [AC_CHECK_HEADERS([execinfo.h])
+  [AC_CHECK_HEADERS([execinfo.h], [], [], [AC_INCLUDES_DEFAULT])
    AS_IF([test x"$ac_cv_header_execinfo_h" = xyes],
      [AC_CACHE_CHECK([size parameter type for backtrace()],
 	[ax_cv_proto_backtrace_type],

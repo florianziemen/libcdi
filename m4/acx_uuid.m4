@@ -114,7 +114,7 @@ AC_DEFUN([ACX_UUID],
          AC_CHECK_HEADERS([uuid/uuid.h],
            [AC_CHECK_DECLS([uuid_generate],,
               [have_util_linux_uuid_c_bindings=no],[AC_INCLUDES_DEFAULT
-@%:@include <uuid/uuid.h>])],[have_util_linux_uuid_c_bindings=no])
+@%:@include <uuid/uuid.h>])],[have_util_linux_uuid_c_bindings=no],[AC_INCLUDES_DEFAULT])
          CPPFLAGS=$acx_save_CPPFLAGS])],
      [have_util_linux_uuid_c_bindings=no])
    AS_IF([test x"$enable_ossp_uuid" != xno -a x"$have_util_linux_uuid_c_bindings" = xno],
@@ -146,7 +146,7 @@ AC_INCLUDES_DEFAULT])
            [AC_CHECK_DECLS([uuid_create],
               [have_dce_uuid_c_bindings=yes],
               [have_dce_uuid_c_bindings=no],[AC_INCLUDES_DEFAULT
-@%:@include <uuid.h>])],[have_dce_uuid_c_bindings=yes])
+@%:@include <uuid.h>])],[have_dce_uuid_c_bindings=yes], [AC_INCLUDES_DEFAULT])
          CPPFLAGS=$acx_save_CPPFLAGS])])
 
 AS_IF([test x"$have_util_linux_uuid_c_bindings" = xyes],
