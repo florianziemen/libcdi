@@ -35,7 +35,9 @@ AC_ARG_WITH([szlib],
             [AS_CASE(["$with_szlib"],
                      [no],[AC_MSG_CHECKING([for szlib library])
                            AC_MSG_RESULT([suppressed])],
-                     [yes],[AC_CHECK_HEADERS([szlib.h],,,[AC_INCLUDES_DEFAULT])
+                     [yes],[AC_CHECK_HEADERS([szlib.h],,
+                                             [AC_MSG_ERROR([Could not find szlib.h])],
+                                             [AC_INCLUDES_DEFAULT])
                             AC_SEARCH_LIBS([SZ_BufftoBuffCompress],
                                            [sz],
                                            [AC_DEFINE([HAVE_LIBSZ],[1],[Define to 1 for SZIP support])],
@@ -45,7 +47,9 @@ AC_ARG_WITH([szlib],
                           AS_IF([test -d "$SZLIB_ROOT"],
                                 [LDFLAGS="-L$SZLIB_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$SZLIB_ROOT/include $CPPFLAGS"
-                                 AC_CHECK_HEADERS([szlib.h],,,[AC_INCLUDES_DEFAULT])
+                                 AC_CHECK_HEADERS([szlib.h],,
+                                                  [AC_MSG_ERROR([Could not find szlib.h])],
+                                                  [AC_INCLUDES_DEFAULT])
                                  AC_SEARCH_LIBS([SZ_BufftoBuffCompress],
                                                 [sz],
                                                 [AC_DEFINE([HAVE_LIBSZ],[1],[Define to 1 for SZIP support])],
@@ -168,7 +172,9 @@ AC_ARG_WITH([eccodes],
             [AS_CASE(["$with_eccodes"],
                      [no],[AC_MSG_CHECKING([for ECCODES library])
                            AC_MSG_RESULT([suppressed])],
-                     [yes],[AC_CHECK_HEADERS([grib_api.h],,,[AC_INCLUDES_DEFAULT])
+                     [yes],[AC_CHECK_HEADERS([grib_api.h],,
+                                             [AC_MSG_ERROR([Could not find grib_api.h])],
+                                             [AC_INCLUDES_DEFAULT])
                             AC_SEARCH_LIBS([grib_get_message],
                                            [eccodes],
                                            [AC_DEFINE([HAVE_LIBGRIB_API],[1],[ECCODES library is present if defined to 1])],
@@ -177,7 +183,9 @@ AC_ARG_WITH([eccodes],
                           AS_IF([test -d "$ECCODES_ROOT"],
                                 [LDFLAGS="-L$ECCODES_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$ECCODES_ROOT/include $CPPFLAGS"
-                                 AC_CHECK_HEADERS([grib_api.h],,,[AC_INCLUDES_DEFAULT])
+                                 AC_CHECK_HEADERS([grib_api.h],,
+                                             [AC_MSG_ERROR([Could not find grib_api.h])],
+                                             [AC_INCLUDES_DEFAULT])
                                  AC_SEARCH_LIBS([grib_get_message],
                                                 [eccodes],
                                                 [AC_DEFINE([HAVE_LIBGRIB_API],[1],[ECCODES library is present if defined to 1])],
@@ -200,7 +208,9 @@ AC_ARG_WITH([grib_api],
             [AS_CASE(["$with_grib_api"],
                      [no],[AC_MSG_CHECKING([for GRIB_API library])
                            AC_MSG_RESULT([suppressed])],
-                     [yes],[AC_CHECK_HEADERS([grib_api.h],,,[AC_INCLUDES_DEFAULT])
+                     [yes],[AC_CHECK_HEADERS([grib_api.h],,
+                                             [AC_MSG_ERROR([Could not find grib_api.h])],
+                                             [AC_INCLUDES_DEFAULT])
                             AC_SEARCH_LIBS([grib_get_message],
                                            [grib_api],
                                            [AC_DEFINE([HAVE_LIBGRIB_API],[1],[GRIB_API library is present if defined to 1])],
@@ -209,7 +219,9 @@ AC_ARG_WITH([grib_api],
                           AS_IF([test -d "$GRIB_API_ROOT"],
                                 [LDFLAGS="-L$GRIB_API_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$GRIB_API_ROOT/include $CPPFLAGS"
-                                 AC_CHECK_HEADERS([grib_api.h],,,[AC_INCLUDES_DEFAULT])
+                                 AC_CHECK_HEADERS([grib_api.h],,
+                                                  [AC_MSG_ERROR([Could not find grib_api.h])],
+                                                  [AC_INCLUDES_DEFAULT])
                                  AC_SEARCH_LIBS([grib_get_message],
                                                 [grib_api],
                                                 [AC_DEFINE([HAVE_LIBGRIB_API],[1],[GRIB_API library is present if defined to 1])],
