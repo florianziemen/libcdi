@@ -2382,97 +2382,6 @@ $as_echo "$ac_res" >&6; }
 
 } # ac_fn_c_check_member
 
-# ac_fn_c_check_header_mongrel LINENO HEADER VAR INCLUDES
-# -------------------------------------------------------
-# Tests whether HEADER exists, giving a warning if it cannot be compiled using
-# the include files in INCLUDES and setting the cache variable VAR
-# accordingly.
-ac_fn_c_check_header_mongrel ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  if eval \${$3+:} false; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
-$as_echo_n "checking for $2... " >&6; }
-if eval \${$3+:} false; then :
-  $as_echo_n "(cached) " >&6
-fi
-eval ac_res=\$$3
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-else
-  # Is the header compilable?
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 usability" >&5
-$as_echo_n "checking $2 usability... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-#include <$2>
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_header_compiler=yes
-else
-  ac_header_compiler=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_header_compiler" >&5
-$as_echo "$ac_header_compiler" >&6; }
-
-# Is the header present?
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 presence" >&5
-$as_echo_n "checking $2 presence... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <$2>
-_ACEOF
-if ac_fn_c_try_cpp "$LINENO"; then :
-  ac_header_preproc=yes
-else
-  ac_header_preproc=no
-fi
-rm -f conftest.err conftest.i conftest.$ac_ext
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_header_preproc" >&5
-$as_echo "$ac_header_preproc" >&6; }
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in #((
-  yes:no: )
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: accepted by the compiler, rejected by the preprocessor!" >&5
-$as_echo "$as_me: WARNING: $2: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: proceeding with the compiler's result" >&5
-$as_echo "$as_me: WARNING: $2: proceeding with the compiler's result" >&2;}
-    ;;
-  no:yes:* )
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: present but cannot be compiled" >&5
-$as_echo "$as_me: WARNING: $2: present but cannot be compiled" >&2;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2:     check for missing prerequisite headers?" >&5
-$as_echo "$as_me: WARNING: $2:     check for missing prerequisite headers?" >&2;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: see the Autoconf documentation" >&5
-$as_echo "$as_me: WARNING: $2: see the Autoconf documentation" >&2;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2:     section \"Present But Cannot Be Compiled\"" >&5
-$as_echo "$as_me: WARNING: $2:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: proceeding with the compiler's result" >&5
-$as_echo "$as_me: WARNING: $2: proceeding with the compiler's result" >&2;}
-( $as_echo "## --------------------------------------- ##
-## Report this to http://mpimet.mpg.de/cdi ##
-## --------------------------------------- ##"
-     ) | sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
-$as_echo_n "checking for $2... " >&6; }
-if eval \${$3+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  eval "$3=\$ac_header_compiler"
-fi
-eval ac_res=\$$3
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-fi
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-
-} # ac_fn_c_check_header_mongrel
-
 # ac_fn_c_check_decl LINENO SYMBOL VAR INCLUDES
 # ---------------------------------------------
 # Tests whether SYMBOL is declared in INCLUDES, setting cache variable VAR
@@ -26766,7 +26675,8 @@ fi
 for ac_header in malloc.h uuid.h uuid/uuid.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
+"
 if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
@@ -26778,7 +26688,8 @@ done
 
 for ac_header in execinfo.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "execinfo.h" "ac_cv_header_execinfo_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "execinfo.h" "ac_cv_header_execinfo_h" "$ac_includes_default
+"
 if test "x$ac_cv_header_execinfo_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_EXECINFO_H 1
@@ -27765,7 +27676,8 @@ ac_link="./libtool --mode=link --tag=CC $ac_link"
              CPPFLAGS="-I$THREADS_ROOT/include $CPPFLAGS "
              for ac_header in pthread.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "pthread.h" "ac_cv_header_pthread_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "pthread.h" "ac_cv_header_pthread_h" "$ac_includes_default
+"
 if test "x$ac_cv_header_pthread_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_PTHREAD_H 1
@@ -27843,12 +27755,15 @@ $as_echo "suppressed" >&6; } ;; #(
   yes) :
     for ac_header in szlib.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "szlib.h" "ac_cv_header_szlib_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "szlib.h" "ac_cv_header_szlib_h" "$ac_includes_default
+"
 if test "x$ac_cv_header_szlib_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_SZLIB_H 1
 _ACEOF
 
+else
+  as_fn_error $? "Could not find szlib.h" "$LINENO" 5
 fi
 
 done
@@ -27921,12 +27836,15 @@ fi
                                  CPPFLAGS="-I$SZLIB_ROOT/include $CPPFLAGS"
                                  for ac_header in szlib.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "szlib.h" "ac_cv_header_szlib_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "szlib.h" "ac_cv_header_szlib_h" "$ac_includes_default
+"
 if test "x$ac_cv_header_szlib_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_SZLIB_H 1
 _ACEOF
 
+else
+  as_fn_error $? "Could not find szlib.h" "$LINENO" 5
 fi
 
 done
@@ -28030,7 +27948,8 @@ $as_echo "suppressed" >&6; } ;; #(
   yes) :
     for ac_header in netcdf.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "netcdf.h" "ac_cv_header_netcdf_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "netcdf.h" "ac_cv_header_netcdf_h" "$ac_includes_default
+"
 if test "x$ac_cv_header_netcdf_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_NETCDF_H 1
@@ -28148,7 +28067,8 @@ fi
                                  CPPFLAGS="-I$NETCDF_ROOT/include $CPPFLAGS"
                                  for ac_header in netcdf.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "netcdf.h" "ac_cv_header_netcdf_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "netcdf.h" "ac_cv_header_netcdf_h" "$ac_includes_default
+"
 if test "x$ac_cv_header_netcdf_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_NETCDF_H 1
@@ -28502,12 +28422,15 @@ $as_echo "suppressed" >&6; } ;; #(
   yes) :
     for ac_header in grib_api.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "grib_api.h" "ac_cv_header_grib_api_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "grib_api.h" "ac_cv_header_grib_api_h" "$ac_includes_default
+"
 if test "x$ac_cv_header_grib_api_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_GRIB_API_H 1
 _ACEOF
 
+else
+  as_fn_error $? "Could not find grib_api.h" "$LINENO" 5
 fi
 
 done
@@ -28579,12 +28502,15 @@ fi
                                  CPPFLAGS="-I$GRIB_API_ROOT/include $CPPFLAGS"
                                  for ac_header in grib_api.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "grib_api.h" "ac_cv_header_grib_api_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "grib_api.h" "ac_cv_header_grib_api_h" "$ac_includes_default
+"
 if test "x$ac_cv_header_grib_api_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_GRIB_API_H 1
 _ACEOF
 
+else
+  as_fn_error $? "Could not find grib_api.h" "$LINENO" 5
 fi
 
 done
@@ -29732,7 +29658,8 @@ fi
    if test x"$ENABLE_NC4" = xyes; then :
   for ac_header in netcdf_par.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "netcdf_par.h" "ac_cv_header_netcdf_par_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "netcdf_par.h" "ac_cv_header_netcdf_par_h" "$ac_includes_default
+"
 if test "x$ac_cv_header_netcdf_par_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_NETCDF_PAR_H 1
@@ -29757,7 +29684,6 @@ else
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&5
 $as_echo "$as_me: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&2;}
 fi
-
 
 fi
 
@@ -30310,7 +30236,8 @@ if test "${enable_ruby+set}" = set; then :
   enableval=$enable_ruby; RUBY_INCLUDES="$($RUBY $srcdir/config/interface.rb)"
    save_CPPFLAGS=$CPPFLAGS
    CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
-   ac_fn_c_check_header_mongrel "$LINENO" "ruby.h" "ac_cv_header_ruby_h" "$ac_includes_default"
+   ac_fn_c_check_header_compile "$LINENO" "ruby.h" "ac_cv_header_ruby_h" "$ac_includes_default
+"
 if test "x$ac_cv_header_ruby_h" = xyes; then :
 
 else
@@ -30401,7 +30328,8 @@ fi
    do
      save_CPPFLAGS=$CPPFLAGS
      CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
-     ac_fn_c_check_header_mongrel "$LINENO" "Python.h" "ac_cv_header_Python_h" "$ac_includes_default"
+     ac_fn_c_check_header_compile "$LINENO" "Python.h" "ac_cv_header_Python_h" "$ac_includes_default
+"
 if test "x$ac_cv_header_Python_h" = xyes; then :
   enable_python=yes
        break
