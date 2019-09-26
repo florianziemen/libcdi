@@ -20,7 +20,7 @@ AS_CASE([$with_threads],
         [*],[THREADS_ROOT=$with_threads
              LDFLAGS="-L$THREADS_ROOT/lib $LDFLAGS"
              CPPFLAGS="-I$THREADS_ROOT/include $CPPFLAGS "
-             AC_CHECK_HEADERS(pthread.h)
+             AC_CHECK_HEADERS([pthread.h],,,[AC_INCLUDES_DEFAULT])
              AC_CHECK_LIB([pthread],[pthread_create])
              THREADS_LIBS=" -L$THREADS_ROOT/lib -lpthread"
              THREADS_INCLUDE=" -I$THREADS_ROOT/include"])
@@ -35,7 +35,7 @@ AC_ARG_WITH([szlib],
             [AS_CASE(["$with_szlib"],
                      [no],[AC_MSG_CHECKING([for szlib library])
                            AC_MSG_RESULT([suppressed])],
-                     [yes],[AC_CHECK_HEADERS(szlib.h)
+                     [yes],[AC_CHECK_HEADERS([szlib.h],,,[AC_INCLUDES_DEFAULT])
                             AC_SEARCH_LIBS([SZ_BufftoBuffCompress],
                                            [sz],
                                            [AC_DEFINE([HAVE_LIBSZ],[1],[Define to 1 for SZIP support])],
@@ -45,7 +45,7 @@ AC_ARG_WITH([szlib],
                           AS_IF([test -d "$SZLIB_ROOT"],
                                 [LDFLAGS="-L$SZLIB_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$SZLIB_ROOT/include $CPPFLAGS"
-                                 AC_CHECK_HEADERS(szlib.h)
+                                 AC_CHECK_HEADERS([szlib.h],,,[AC_INCLUDES_DEFAULT])
                                  AC_SEARCH_LIBS([SZ_BufftoBuffCompress],
                                                 [sz],
                                                 [AC_DEFINE([HAVE_LIBSZ],[1],[Define to 1 for SZIP support])],
@@ -72,7 +72,8 @@ AC_ARG_WITH([netcdf],
                      [no],[AC_MSG_CHECKING([for NetCDF library])
                            AC_MSG_RESULT([suppressed])],
                      [yes],[AC_CHECK_HEADERS([netcdf.h],,
-                                             [AC_MSG_ERROR([Could not find netcdf.h])])
+                                             [AC_MSG_ERROR([Could not find netcdf.h])],
+                                             [AC_INCLUDES_DEFAULT])
                             AC_SEARCH_LIBS([nc_open],
                                            [netcdf],
                                            [AC_DEFINE([HAVE_LIBNETCDF],[1],[Define to 1 for NetCDF support])
@@ -85,7 +86,8 @@ AC_ARG_WITH([netcdf],
                                  LDFLAGS="-L$NETCDF_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$NETCDF_ROOT/include $CPPFLAGS"
                                  AC_CHECK_HEADERS([netcdf.h],,
-                                             [AC_MSG_ERROR([Could not find netcdf.h])])
+                                                  [AC_MSG_ERROR([Could not find netcdf.h])],
+                                                  [AC_INCLUDES_DEFAULT])
                                  AC_SEARCH_LIBS([nc_open],
                                                 [netcdf],
                                                 [AC_DEFINE([HAVE_LIBNETCDF],[1],[Define to 1 for NetCDF support])
@@ -166,7 +168,7 @@ AC_ARG_WITH([grib_api],
             [AS_CASE(["$with_grib_api"],
                      [no],[AC_MSG_CHECKING([for GRIB_API library])
                            AC_MSG_RESULT([suppressed])],
-                     [yes],[AC_CHECK_HEADERS([grib_api.h])
+                     [yes],[AC_CHECK_HEADERS([grib_api.h],,,[AC_INCLUDES_DEFAULT])
                             AC_SEARCH_LIBS([grib_get_message],
                                            [grib_api],
                                            [AC_DEFINE([HAVE_LIBGRIB_API],[1],[GRIB_API library is present if defined to 1])],
@@ -175,7 +177,7 @@ AC_ARG_WITH([grib_api],
                           AS_IF([test -d "$GRIB_API_ROOT"],
                                 [LDFLAGS="-L$GRIB_API_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$GRIB_API_ROOT/include $CPPFLAGS"
-                                 AC_CHECK_HEADERS([grib_api.h])
+                                 AC_CHECK_HEADERS([grib_api.h],,,[AC_INCLUDES_DEFAULT])
                                  AC_SEARCH_LIBS([grib_get_message],
                                                 [grib_api],
                                                 [AC_DEFINE([HAVE_LIBGRIB_API],[1],[GRIB_API library is present if defined to 1])],
