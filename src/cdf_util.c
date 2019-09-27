@@ -188,6 +188,22 @@ bool is_height_axis(const char *stdname, const char *longname)
   return status;
 }
 
+bool is_altitude_axis(const char *stdname, const char *longname)
+{
+  bool status = false;
+
+  if ( strcmp(stdname, "altitude") == 0 )
+    {
+      status = true;
+    }
+  else if ( strcmp(longname, "altitude") == 0 )
+    {
+      status = true;
+    }
+
+  return status;
+}
+
 
 bool is_lon_axis(const char *units, const char *stdname)
 {

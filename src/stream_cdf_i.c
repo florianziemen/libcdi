@@ -1824,6 +1824,8 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
 		  else if ( is_height_axis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HEIGHT;
+		  else if ( is_altitude_axis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
+		    ncvars[ncvarid].zaxistype = ZAXIS_ALTITUDE;
 		}
 	    }
           else
