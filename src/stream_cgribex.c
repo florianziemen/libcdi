@@ -84,6 +84,7 @@ void cgribexDelete(void *cgribex)
 int grib1Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **pdsp,
 		  unsigned char **gdsp, unsigned char **bmsp, unsigned char **bdsp, long *gribrecsize);
 
+static
 size_t cgribexSection2Length(void *gribbuffer, size_t gribbuffersize)
 {
   long sec2len = 0;
@@ -720,7 +721,9 @@ int cgribexScanTimestep1(stream_t *streamptr)
   off_t recpos = 0;
   void *gribbuffer = NULL;
   size_t buffersize = 0;
-  int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
+  int leveltype = 0, level1 = 0, level2 = 0;
+  int vdate = 0, vtime = 0;
+  int sdate = 0, stime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   unsigned recID;
   int nrecs_scanned = 0;
@@ -746,8 +749,8 @@ int cgribexScanTimestep1(stream_t *streamptr)
   unsigned nrecs = 0;
   while (true)
     {
-      size_t recsize = gribGetSize(fileID);
-      recpos  = fileGetPos(fileID);
+      const size_t recsize = gribGetSize(fileID);
+      recpos = fileGetPos(fileID);
 
       if ( recsize == 0 )
 	{
@@ -781,7 +784,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
 
       cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
-      gribDateTime(isec1, &vdate, &vtime);
+      gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
 
       if ( nrecs == 0 )
 	{
@@ -854,11 +857,13 @@ int cgribexScanTimestep1(stream_t *streamptr)
 
   taxis->unit = tunit;
   taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
-  int taxisID = taxisCreate(taxis->type);
+  const int taxisID = taxisCreate(taxis->type);
   taxis->rdate = rdate;
   taxis->rtime = rtime;
   taxis->vdate = (int64_t)datetime0.date;
   taxis->vtime = (int)datetime0.time;
+  taxis->sdate = sdate;
+  taxis->stime = stime;
 
   const int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
@@ -879,7 +884,9 @@ int cgribexScanTimestep2(stream_t * streamptr)
 {
   int lmv = 0, iret = 0;
   off_t recpos = 0;
-  int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
+  int leveltype = 0, level1 = 0, level2 = 0;
+  int vdate = 0, vtime = 0;
+  int sdate = 0, stime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int recID = 0;
   bool warn_numavg = true;
@@ -916,7 +923,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
     {
       if ( rindex > nrecords ) break;
 
-      size_t recsize = gribGetSize(fileID);
+      const size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
       if ( recsize == 0 )
 	{
@@ -939,7 +946,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
-      gribDateTime(isec1, &vdate, &vtime);
+      gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
 
       if ( rindex == 0 )
 	{
@@ -956,6 +963,8 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	  taxis->unit  = cgribexGetTimeUnit(isec1);
 	  taxis->vdate = vdate;
 	  taxis->vtime = vtime;
+          taxis->sdate = sdate;
+          taxis->stime = stime;
 
 	  datetime0.date = vdate;
 	  datetime0.time = vtime;
@@ -965,8 +974,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       if ( ISEC1_AvgNum )
 	{
-	  if ( taxis->numavg && warn_numavg &&
-               (taxis->numavg != ISEC1_AvgNum) )
+	  if ( taxis->numavg && warn_numavg && (taxis->numavg != ISEC1_AvgNum) )
 	    {
               // Warning("Changing numavg from %d to %d not supported!", taxis->numavg, ISEC1_AvgNum);
 	      warn_numavg = false;
@@ -1078,7 +1086,9 @@ int cgribexScanTimestep(stream_t * streamptr)
 {
   int lmv = 0, iret = 0;
   off_t recpos = 0;
-  int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
+  int leveltype = 0, level1 = 0, level2 = 0;
+  int vdate = 0, vtime = 0;
+  int sdate = 0, stime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int vrecID, recID = 0;
   bool warn_numavg = true;
@@ -1112,7 +1122,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  if ( rindex > nrecs ) break;
 
 	  const size_t recsize = gribGetSize(fileID);
-	  recpos  = fileGetPos(fileID);
+	  recpos = fileGetPos(fileID);
 	  if ( recsize == 0 )
 	    {
 	      streamptr->ntsteps = streamptr->rtsteps + 1;
@@ -1141,14 +1151,14 @@ int cgribexScanTimestep(stream_t * streamptr)
 
           cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
-	  gribDateTime(isec1, &vdate, &vtime);
+	  gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
 
 	  if ( rindex == nrecs ) break;
 
 	  if ( rindex == 0 )
 	    {
               const int vlistID = streamptr->vlistID;
-	      int taxisID = vlistInqTaxis(vlistID);
+	      const int taxisID = vlistInqTaxis(vlistID);
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 		{
 		  taxis->type  = TAXIS_RELATIVE;
@@ -1162,6 +1172,8 @@ int cgribexScanTimestep(stream_t * streamptr)
 	      taxis->unit  = cgribexGetTimeUnit(isec1);
 	      taxis->vdate = vdate;
 	      taxis->vtime = vtime;
+              taxis->sdate = sdate;
+              taxis->stime = stime;
 
 	      datetime0.date = vdate;
 	      datetime0.time = vtime;
@@ -1169,8 +1181,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
 	  if ( ISEC1_AvgNum )
 	    {
-	      if (  taxis->numavg && warn_numavg &&
-		   (taxis->numavg != ISEC1_AvgNum) )
+	      if (  taxis->numavg && warn_numavg && (taxis->numavg != ISEC1_AvgNum) )
 		{
 	      /*
 	          Warning("Changing numavg from %d to %d not supported!", streamptr->tsteps[tsID].taxis.numavg, ISEC1_AvgNum);
@@ -1407,8 +1418,8 @@ void cgribexDefParam(int *isec1, int param)
 }
 
 static
-int cgribexDefTimerange(int tsteptype, int factor, int calendar,
-			int rdate, int rtime, int vdate, int vtime, int *pip1, int *pip2)
+int cgribexDefTimerange(int tsteptype, int factor, int calendar, int rdate, int rtime,
+			int vdate, int vtime, int sdate, int stime, int *pip1, int *pip2)
 {
   int year, month, day, hour, minute, second;
   int64_t julday1, julday2, days;
@@ -1431,15 +1442,27 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
       const int ip = (int) ((days*86400.0 + secs)/factor);
       if ( (ip > 255) && (tsteptype == TSTEP_INSTANT) ) tsteptype = TSTEP_INSTANT3;
 
+      int ipx = 0;
+      if (sdate != 0 && (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF))
+        {
+          cdiDecodeDate(sdate, &year, &month, &day);
+          cdiDecodeTime(stime, &hour, &minute, &second);
+          encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
+
+          (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
+
+          ipx = (int) ((days*86400.0 + secs)/factor);
+        }
+
       // clang-format off
       switch ( tsteptype )
 	{
-	case TSTEP_INSTANT:  timerange =  0; ip1 = ip; ip2 = 0;  break;
-	case TSTEP_INSTANT2: timerange =  1; ip1 = 0;  ip2 = 0;  break;
-	case TSTEP_RANGE:    timerange =  2; ip1 = 0;  ip2 = ip; break;
-	case TSTEP_AVG:      timerange =  3; ip1 = 0;  ip2 = ip; break;
-	case TSTEP_ACCUM:    timerange =  4; ip1 = 0;  ip2 = ip; break;
-	case TSTEP_DIFF:     timerange =  5; ip1 = 0;  ip2 = ip; break;
+	case TSTEP_INSTANT:  timerange =  0; ip1 = ip;  ip2 = 0;  break;
+	case TSTEP_INSTANT2: timerange =  1; ip1 = 0;   ip2 = 0;  break;
+	case TSTEP_RANGE:    timerange =  2; ip1 = 0;   ip2 = ip; break;
+	case TSTEP_AVG:      timerange =  3; ip1 = 0;   ip2 = ip; break;
+	case TSTEP_ACCUM:    timerange =  4; ip1 = ipx; ip2 = ip; break;
+	case TSTEP_DIFF:     timerange =  5; ip1 = 0;   ip2 = ip; break;
 	case TSTEP_INSTANT3:
 	default:             timerange = 10; ip1 = ip/256; ip2 = ip%256; break;
 	}
@@ -1520,18 +1543,27 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
   if ( timetype == TAXIS_RELATIVE )
     {
       const int calendar = taxisInqCalendar(taxisID);
-      const int rdate    = taxisInqRdate(taxisID);
-      const int rtime    = taxisInqRtime(taxisID);
+
+      int rdate = taxisInqRdate(taxisID);
+      int rtime = taxisInqRtime(taxisID);
+      if (vdate < rdate || (vdate == rdate && vtime < rtime))
+        {
+          rdate = vdate;
+          rtime = vtime;
+        }
+
+      int sdate = taxisInqSdate(taxisID);
+      int stime = taxisInqStime(taxisID);
 
       int factor = cgribexDefDateTime(isec1, timeunit, rdate, rtime);
       int ip1 = 0, ip2 = 0;
-      timerange = cgribexDefTimerange(tsteptype, factor, calendar, rdate, rtime, vdate, vtime, &ip1, &ip2);
+      timerange = cgribexDefTimerange(tsteptype, factor, calendar, rdate, rtime, vdate, vtime, sdate, stime, &ip1, &ip2);
 
       if ( ip2 > 0xFF && timeunit < TUNIT_YEAR )
         {
           timeunit++;
           factor = cgribexDefDateTime(isec1, timeunit, rdate, rtime);
-          timerange = cgribexDefTimerange(tsteptype, factor, calendar, rdate, rtime, vdate, vtime, &ip1, &ip2);
+          timerange = cgribexDefTimerange(tsteptype, factor, calendar, rdate, rtime, vdate, vtime, sdate, stime, &ip1, &ip2);
         }
 
       if ( timerange == -1 || timerange == 3 )

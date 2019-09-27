@@ -143,9 +143,35 @@ void gribapiSetDataDateTime(grib_handle *gh, int64_t datadate, int datatime)
 }
 
 static
-int gribapiGetValidityDateTime(grib_handle *gh, int64_t *vdate, int *vtime)
+int gribapiGetTimeUnitFactor(int timeUnits)
 {
-  int tstepRange = 0;
+  static bool lprint = true;
+  switch ( timeUnits )
+    {
+    case TUNIT_SECOND:  return     1; break;
+    case TUNIT_MINUTE:  return    60; break;
+    case TUNIT_HOUR:    return  3600; break;
+    case TUNIT_3HOURS:  return 10800; break;
+    case TUNIT_6HOURS:  return 21600; break;
+    case TUNIT_12HOURS: return 43200; break;
+    case TUNIT_DAY:     return 86400; break;
+    default:
+      if ( lprint )
+        {
+          Warning("Time unit %d unsupported", timeUnits);
+          lprint = false;
+        }
+      break;
+    }
+
+  return 0;
+}
+
+static
+void gribapiGetValidityDateTime(grib_handle *gh, int64_t *vdate, int *vtime, int64_t *startDate, int *startTime)
+{
+  *startDate = 0;
+  *startTime = 0;
 
   long sigofrtime = 3;
   if ( gribEditionNumber(gh) > 1 )
@@ -153,7 +179,7 @@ int gribapiGetValidityDateTime(grib_handle *gh, int64_t *vdate, int *vtime)
   else
     GRIB_CHECK(grib_get_long(gh, "timeRangeIndicator", &sigofrtime), 0);
 
-  if ( sigofrtime == 3 )        //XXX: This looks like a bug to me, because timeRangeIndicator == 3 does not seem to have the same meaning as significanceOfReferenceTime == 3. I would recommend replacing this condition with `if(!gribapiTimeIsFC())`.
+  if ( sigofrtime == 3 ) //XXX: This looks like a bug to me, because timeRangeIndicator == 3 does not seem to have the same meaning as significanceOfReferenceTime == 3. I would recommend replacing this condition with `if(!gribapiTimeIsFC())`.
     {
       gribapiGetDataDateTime(gh, vdate, vtime);
     }
@@ -167,9 +193,6 @@ int gribapiGetValidityDateTime(grib_handle *gh, int64_t *vdate, int *vtime)
       int startStep = 0, endStep = 0;
       gribapiGetSteps(gh, timeUnits, &startStep, &endStep);
 
-      const int range = endStep - startStep;
-      if ( range > 0 ) tstepRange = (startStep == 0) ? -1 : 1;
-
       {
 	int ryear, rmonth, rday, rhour, rminute, rsecond;
 	cdiDecodeDate(rdate, &ryear, &rmonth, &rday);
@@ -177,43 +200,31 @@ int gribapiGetValidityDateTime(grib_handle *gh, int64_t *vdate, int *vtime)
 
         if ( rday > 0 )
           {
-            static bool lprint = true;
-            extern int grib_calendar;
+            extern int CGRIBEX_grib_calendar;
             int64_t julday;
             int secofday;
-            encode_caldaysec(grib_calendar, ryear, rmonth, rday, rhour, rminute, rsecond, &julday, &secofday);
+            encode_caldaysec(CGRIBEX_grib_calendar, ryear, rmonth, rday, rhour, rminute, rsecond, &julday, &secofday);
 
-            int64_t time_period = endStep;
-            int64_t addsec = 0;
-            switch ( timeUnits )
+            int64_t time_unit_factor = gribapiGetTimeUnitFactor(timeUnits);
+
+            if (startStep > 0)
               {
-              case TUNIT_SECOND:  addsec =         time_period; break;
-              case TUNIT_MINUTE:  addsec =    60 * time_period; break;
-              case TUNIT_HOUR:    addsec =  3600 * time_period; break;
-              case TUNIT_3HOURS:  addsec = 10800 * time_period; break;
-              case TUNIT_6HOURS:  addsec = 21600 * time_period; break;
-              case TUNIT_12HOURS: addsec = 43200 * time_period; break;
-              case TUNIT_DAY:     addsec = 86400 * time_period; break;
-              default:
-                if ( lprint )
-                  {
-                    Warning("Time unit %d unsupported", timeUnits);
-                    lprint = false;
-                  }
-                break;
+                int64_t julday_x = julday;
+                int secofday_x = secofday;
+                julday_add_seconds(time_unit_factor * startStep, &julday_x, &secofday_x);
+                decode_caldaysec(CGRIBEX_grib_calendar, julday_x, secofday_x, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
+                *startDate = cdiEncodeDate(ryear, rmonth, rday);
+                *startTime = cdiEncodeTime(rhour, rminute, 0);
               }
 
-            julday_add_seconds(addsec, &julday, &secofday);
-
-            decode_caldaysec(grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
+            julday_add_seconds(time_unit_factor * endStep, &julday, &secofday);
+            decode_caldaysec(CGRIBEX_grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
           }
 
 	*vdate = cdiEncodeDate(ryear, rmonth, rday);
 	*vtime = cdiEncodeTime(rhour, rminute, rsecond);
       }
     }
-
-  return tstepRange;
 }
 
 static
@@ -936,8 +947,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
   int nrecs_scanned = 0;        //Only used for debug output.
   bool warn_time = true;
   // bool warn_numavg = true;
-  int64_t rdate = 0;
-  int rtime = 0, tunit = 0, fcast = 0;
+  int64_t rdate = 0, sdate = 0;
+  int rtime = 0, stime = 0, tunit = 0, fcast = 0;
   grib_handle *gh = NULL;
 
   streamptr->curTsID = 0;
@@ -953,7 +964,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   while ( true )
     {
       int level1 = 0, level2 = 0;
-      size_t recsize = gribGetSize(fileID);
+      const size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
 
       if ( recsize == 0 )
@@ -983,9 +994,9 @@ int gribapiScanTimestep1(stream_t * streamptr)
       varname[0] = 0;
       gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
-      int64_t vdate = 0;
-      int vtime = 0;
-      gribapiGetValidityDateTime(gh, &vdate, &vtime);
+      int64_t vdate;
+      int vtime;
+      gribapiGetValidityDateTime(gh, &vdate, &vtime, &sdate, &stime);
       DateTime datetime = { .date = vdate, .time = vtime };
 
       if ( datetime0.date == 10101 && datetime0.time == 0 )
@@ -1056,6 +1067,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
   int taxisID = taxisCreate(taxis->type);
   taxis->rdate = rdate;
   taxis->rtime = rtime;
+  taxis->sdate = sdate;
+  taxis->stime = stime;
   taxis->vdate = (int64_t)datetime0.date;
   taxis->vtime = (int)datetime0.time;
 
@@ -1111,7 +1124,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
     {
       if ( rindex > nrecords ) break;
 
-      size_t recsize = gribGetSize(fileID);
+      const size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
       if ( recsize == 0 )
 	{
@@ -1139,9 +1152,9 @@ int gribapiScanTimestep2(stream_t * streamptr)
       varname[0] = 0;
       gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
-      int64_t vdate = 0;
-      int vtime = 0;
-      gribapiGetValidityDateTime(gh, &vdate, &vtime);
+      int64_t vdate, sdate;
+      int vtime, stime;
+      gribapiGetValidityDateTime(gh, &vdate, &vtime, &sdate, &stime);
 
       if ( rindex == 0 )
 	{
@@ -1157,6 +1170,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	    }
 	  taxis->vdate = vdate;
 	  taxis->vtime = vtime;
+	  taxis->sdate = sdate;
+	  taxis->stime = stime;
 
 	  datetime0.date = vdate;
 	  datetime0.time = vtime;
@@ -1329,15 +1344,15 @@ int gribapiScanTimestep(stream_t * streamptr)
           varname[0] = 0;
 	  gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
-          int64_t vdate = 0;
-          int vtime = 0;
-	  gribapiGetValidityDateTime(gh, &vdate, &vtime);
+          int64_t vdate, sdate;
+          int vtime, stime;
+	  gribapiGetValidityDateTime(gh, &vdate, &vtime, &sdate, &stime);
 
 	  if ( rindex == nrecs ) break;
 
 	  if ( rindex == 0 )
 	    {
-              int taxisID = vlistInqTaxis(vlistID);
+              const int taxisID = vlistInqTaxis(vlistID);
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 		{
 		  taxis->type  = TAXIS_RELATIVE;
@@ -1350,6 +1365,8 @@ int gribapiScanTimestep(stream_t * streamptr)
 		}
 	      taxis->vdate = vdate;
 	      taxis->vtime = vtime;
+	      taxis->sdate = sdate;
+	      taxis->stime = stime;
 
 	      datetime0.date = vdate;
 	      datetime0.time = vtime;
@@ -1760,7 +1777,7 @@ void gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int64_t date, int
 }
 
 static
-int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t rdate, int rtime, int64_t vdate, int vtime,
+int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t rdate, int rtime, int64_t vdate, int vtime, int64_t sdate, int stime,
                           int productDefinitionTemplate, int typeOfGeneratingProcess, int tsteptype, int timeunit, int calendar, int gcinit)
 {
   int status = -1;
@@ -1793,6 +1810,17 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t rdate, int
       if (endStepF > maxStep) return status;
       const long endStep = (long) endStepF;
 
+      if (sdate != 0 && (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF))
+        {
+          cdiDecodeDate(sdate, &year, &month, &day);
+          cdiDecodeTime(stime, &hour, &minute, &second);
+          encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
+
+          (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
+
+          startStep = (long) ((days*86400.0 + secs)/factor);
+        }
+
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "stepRange", 0), 0);
 
@@ -1808,6 +1836,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t rdate, int
         startStep = endStep;
 
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "forecastTime", startStep), 0);
+      if ( editionNumber == 1 && startStep > 0) GRIB_CHECK(my_grib_set_long(gh, "startStep", startStep), 0);
       GRIB_CHECK(my_grib_set_long(gh, "endStep", endStep), 0);
 
       status = 0;
@@ -1839,12 +1868,21 @@ void gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOf
 
   if ( taxistype == TAXIS_RELATIVE )
     {
-      const int calendar = taxisInqCalendar(taxisID);
-      const int64_t rdate = taxisInqRdate(taxisID);
-      const int rtime    = taxisInqRtime(taxisID);
       const int timeunit = taxisInqTunit(taxisID);
+      const int calendar = taxisInqCalendar(taxisID);
 
-      int status = gribapiDefDateTimeRel(editionNumber, gh, rdate, rtime, vdate, vtime, productDefinitionTemplate,
+      int64_t rdate = taxisInqRdate(taxisID);
+      int rtime = taxisInqRtime(taxisID);
+      if (vdate < rdate || (vdate == rdate && vtime < rtime))
+        {
+          rdate = vdate;
+          rtime = vtime;
+        }
+
+      int64_t sdate = taxisInqSdate(taxisID);
+      int stime = taxisInqStime(taxisID);
+
+      int status = gribapiDefDateTimeRel(editionNumber, gh, rdate, rtime, vdate, vtime, sdate, stime, productDefinitionTemplate,
                                          typeOfGeneratingProcess, tsteptype, timeunit, calendar, gcinit);
       if ( status != 0 ) taxistype = TAXIS_ABSOLUTE;
     }
@@ -2834,7 +2872,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
 
   if (scanModeIN==00)           // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
   {                             // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
-                               // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
+                                // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
     if (scanModeOUT==64)
       { // flip the data vertically ..
         idxIN= 0; idxOUT= (jDim-1)*iDim;

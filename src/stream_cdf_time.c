@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #ifdef HAVE_LIBNETCDF
@@ -12,10 +12,10 @@
 #include "stream_cdf.h"
 #include "cdf_int.h"
 
+
 static
 int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *taxis_name, taxis_t* taxis)
 {
-  int time_bndsid = -1;
   int dims[2];
 
   dims[0] = nctimedimid;
@@ -48,6 +48,8 @@ int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *t
       bndsAttValLen = tmpstrLen;
       bndsAttVal = tmpstr;
     }
+
+  int time_bndsid = -1;
   cdf_def_var(fileID, bndsAttVal, NC_DOUBLE, 2, dims, &time_bndsid);
   cdf_put_att_text(fileID, nctimevarid, bndsAttName, bndsAttValLen, bndsAttVal);
 
@@ -137,9 +139,6 @@ void cdfDefCalendar(int fileID, int ncvarid, int calendar)
 
 void cdfDefTime(stream_t* streamptr)
 {
-  int time_varid;
-  int time_dimid;
-  int time_bndsid = -1;
   static const char default_name[] = "time";
 
   if ( streamptr->basetime.ncvarid != CDI_UNDEFID ) return;
@@ -152,15 +151,18 @@ void cdfDefTime(stream_t* streamptr)
   taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
   const char *taxis_name = (taxis->name && taxis->name[0]) ? taxis->name : default_name ;
+  int time_dimid;
   cdf_def_dim(fileID, taxis_name, NC_UNLIMITED, &time_dimid);
   streamptr->basetime.ncdimid = time_dimid;
 
-  const nc_type xtype = (taxis->datatype == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
-  cdf_def_var(fileID, taxis_name, xtype, 1, &time_dimid, &time_varid);
+  const int datatype = taxis->datatype;
+  const nc_type xtype = (datatype == CDI_DATATYPE_INT32) ? NC_INT : ((datatype == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE);
 
+  int time_varid;
+  cdf_def_var(fileID, taxis_name, xtype, 1, &time_dimid, &time_varid);
   streamptr->basetime.ncvarid = time_varid;
 
-#if  defined  (HAVE_NETCDF4)
+#ifdef  HAVE_NETCDF4
   if ( streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C )
     {
       const size_t chunk = 512;
@@ -176,7 +178,7 @@ void cdfDefTime(stream_t* streamptr)
 
   if ( taxis->has_bounds )
     {
-      time_bndsid = cdfDefTimeBounds(fileID, time_varid, time_dimid, taxis_name, taxis);
+      int time_bndsid = cdfDefTimeBounds(fileID, time_varid, time_dimid, taxis_name, taxis);
       streamptr->basetime.ncvarboundsid = time_bndsid;
     }
 
@@ -184,12 +186,10 @@ void cdfDefTime(stream_t* streamptr)
   cdfDefTimeUnits(unitstr, taxis);
   size_t len = strlen(unitstr);
   if (len) cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
-  // if ( len && taxis->has_bounds ) cdf_put_att_text(fileID, time_bndsid, "units", len, unitstr);
 
   if ( taxis->calendar != -1 )
     {
       cdfDefCalendar(fileID, time_varid, taxis->calendar);
-      // ( taxis->has_bounds ) cdfDefCalendar(fileID, time_bndsid, taxis->calendar);
     }
 
   if ( taxis->type == TAXIS_FORECAST )
@@ -213,7 +213,6 @@ void cdfDefTime(stream_t* streamptr)
 
   if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
 }
-
 
 #endif
 /*

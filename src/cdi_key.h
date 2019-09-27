@@ -1,6 +1,7 @@
 #ifndef  CDI_KEY_H
 #define  CDI_KEY_H
 
+#include "cdi_limits.h"
 
 // CDI key
 typedef struct {

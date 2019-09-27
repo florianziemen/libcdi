@@ -3,10 +3,12 @@
 
 int main(void)
 {
-  const int nlon = 12; // Number of longitudes
-  const int nlat =  6; // Number of latitudes
-  const int nlev =  5; // Number of levels
-  const int nts  =  3; // Number of time steps
+  enum {
+    nlon = 12, // Number of longitudes
+    nlat =  6, // Number of latitudes
+    nlev =  5, // Number of levels
+    nts  =  3, // Number of time steps
+  };
   int nmiss = 0;
   double lons[] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[] = {-75, -45, -15, 15, 45, 75};

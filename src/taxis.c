@@ -104,35 +104,6 @@ const char *tunitNamePtr(int unitID)
   return (unitID > 0 && unitID < size) ? Timeunits[unitID] : Timeunits[0];
 }
 
-#if 0
-static
-void taxis_defaults(void)
-{
-  char *timeunit = getenv("TIMEUNIT");
-  if ( timeunit )
-    {
-      if ( strcmp(timeunit, "minutes") == 0 )
-	DefaultTimeUnit = TUNIT_MINUTE;
-      else if ( strcmp(timeunit, "hours") == 0 )
-	DefaultTimeUnit = TUNIT_HOUR;
-      else if ( strcmp(timeunit, "3hours") == 0 )
-	DefaultTimeUnit = TUNIT_3HOURS;
-      else if ( strcmp(timeunit, "6hours") == 0 )
-	DefaultTimeUnit = TUNIT_6HOURS;
-      else if ( strcmp(timeunit, "12hours") == 0 )
-	DefaultTimeUnit = TUNIT_12HOURS;
-      else if ( strcmp(timeunit, "days") == 0 )
-	DefaultTimeUnit = TUNIT_DAY;
-      else if ( strcmp(timeunit, "months") == 0 )
-	DefaultTimeUnit = TUNIT_MONTH;
-      else if ( strcmp(timeunit, "years") == 0 )
-	DefaultTimeUnit = TUNIT_YEAR;
-      else
-	Warning("Unsupported TIMEUNIT %s!", timeunit);
-    }
-}
-#endif
-
 static
 void taxisDefaultValue(taxis_t* taxisptr)
 {
@@ -140,6 +111,8 @@ void taxisDefaultValue(taxis_t* taxisptr)
   taxisptr->used        = false;
   taxisptr->datatype    = CDI_DATATYPE_FLT64;
   taxisptr->type        = DefaultTimeType;
+  taxisptr->sdate       = 0;
+  taxisptr->stime       = 0;
   taxisptr->vdate       = 0;
   taxisptr->vtime       = 0;
   taxisptr->rdate       = CDI_UNDEFID;
@@ -295,6 +268,7 @@ void taxisDefType(int taxisID, int taxistype)
   if ( taxisptr->type != taxistype )
     {
       taxisptr->type = taxistype;
+      taxisptr->datatype = CDI_DATATYPE_FLT64;
       if ( taxisptr->units )
         {
           delete_refcount_string(taxisptr->units);
@@ -607,6 +581,9 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
   taxisptr2->rdate = taxisptr1->rdate;
   taxisptr2->rtime = taxisptr1->rtime;
   */
+  taxisptr2->sdate = taxisptr1->sdate;
+  taxisptr2->stime = taxisptr1->stime;
+
   taxisptr2->vdate = taxisptr1->vdate;
   taxisptr2->vtime = taxisptr1->vtime;
 
@@ -648,6 +625,13 @@ int64_t taxisInqVdate(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
   return taxisptr->vdate;
+}
+
+
+int64_t taxisInqSdate(int taxisID)
+{
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
+  return taxisptr->sdate;
 }
 
 
@@ -695,6 +679,13 @@ int taxisInqVtime(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
   return taxisptr->vtime;
+}
+
+
+int taxisInqStime(int taxisID)
+{
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
+  return taxisptr->stime;
 }
 
 
@@ -1388,6 +1379,8 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->used        = source->used;
   dest->datatype    = source->datatype;
   dest->type        = source->type;
+  dest->sdate       = source->sdate;
+  dest->stime       = source->stime;
   dest->vdate       = source->vdate;
   dest->vtime       = source->vtime;
   dest->rdate       = source->rdate;

@@ -158,13 +158,11 @@ static
 int setBaseTime(const char *timeunits, taxis_t *taxis)
 {
   int taxistype = TAXIS_ABSOLUTE;
-  int64_t rdate = -1;
-  int rtime = -1;
 
   size_t len = strlen(timeunits);
   while ( isspace(*timeunits) && len ) { timeunits++; len--; }
 
-  char *restrict tu = (char *)Malloc((len+1) * sizeof(char));
+  char *tu = (char *)Malloc((len+1) * sizeof(char));
 
   for ( size_t i = 0; i < len; i++ ) tu[i] = (char)tolower((int)timeunits[i]);
   tu[len] = 0;
@@ -182,8 +180,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
     {
       while ( isspace(tu[pos]) ) ++pos;
 
-      if ( strStartsWith(tu+pos, "since") )
-        taxistype = TAXIS_RELATIVE;
+      if ( strStartsWith(tu+pos, "since") ) taxistype = TAXIS_RELATIVE;
 
       while ( pos < len && !isspace(tu[pos]) ) ++pos;
       if ( tu[pos] )
@@ -211,13 +208,13 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
             }
           else if ( taxistype == TAXIS_RELATIVE )
             {
+              int64_t rdate = -1;
+              int rtime = -1;
               scanTimeString(tu+pos, &rdate, &rtime);
-
               taxis->rdate = rdate;
               taxis->rtime = rtime;
 
-              if ( CDI_Debug )
-                Message("rdate = %lld  rtime = %d", rdate, rtime);
+              if ( CDI_Debug ) Message("rdate = %lld  rtime = %d", rdate, rtime);
             }
         }
     }
@@ -227,8 +224,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
 
   Free(tu);
 
-  if ( CDI_Debug )
-    Message("taxistype = %d  unit = %d", taxistype, timeunit);
+  if ( CDI_Debug ) Message("taxistype = %d  unit = %d", taxistype, timeunit);
 
   return 0;
 }
@@ -4103,7 +4099,8 @@ int cdfInqContents(stream_t *streamptr)
       if ( ncvars[nctimevarid].units[0] )
         ptaxisDefUnits(taxis, ncvars[nctimevarid].units);
 
-      int datatype = (ncvars[nctimevarid].xtype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
+      int xtype = ncvars[nctimevarid].xtype;
+      int datatype = (xtype == NC_INT) ? CDI_DATATYPE_INT32 : ((xtype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64);
       ptaxisDefDatatype(taxis, datatype);
     }
 
