@@ -51,6 +51,19 @@ LT_INIT([pic-only])
 dnl _KPSE_USE_LIBTOOL ensures libtool is also used for configure-time tests,
 dnl which deduces dependent libraries automatically
 _KPSE_USE_LIBTOOL
+_KPSE_CHECK_LIBTOOL
+AS_IF([test -n "$FC" && test "X$FC" != Xno],
+  [AC_LANG_PUSH([Fortran])
+   _KPSE_CHECK_LIBTOOL
+   AC_LANG_POP([Fortran])])
+AS_IF([test -n "$F77" && test "X$F77" != Xno],
+  [AC_LANG_PUSH([Fortran 77])
+   _KPSE_CHECK_LIBTOOL
+   AC_LANG_POP([Fortran 77])])
+AS_IF([test -n "$CXX" && test "X$CXX" != Xno],
+  [AC_LANG_PUSH([C++])
+   _KPSE_CHECK_LIBTOOL
+   AC_LANG_POP([C++])])
 
 # -----------------------------------------------------------------------
 # Check endianess of system
