@@ -319,6 +319,9 @@ void cdiInitialize(void)
       gribFixZSE(1);   // 1: Fix ZeroShiftError of simple packed spherical harmonics
       gribSetConst(1); // 1: Don't pack constant fields on regular grids
 #endif
+#ifdef  HAVE_LIBGRIB_API
+      grib_multi_support_off(NULL);
+#endif
 
       value = cdiGetenvInt("CDI_DEBUG");
       if ( value >= 0 ) CDI_Debug = (int) value;
