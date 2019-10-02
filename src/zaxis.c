@@ -332,17 +332,17 @@ static inline
 void zaxisSetString(char *zaxisstrname, const char *name, size_t len)
 {
   if ( len > CDI_MAX_NAME ) len = CDI_MAX_NAME;
-  strncpy(zaxisstrname, name, len);
+  strncpy(zaxisstrname, name, len - 1);
   zaxisstrname[len-1] = 0;
 }
 
 static inline
 void zaxisGetString(char *name, const char *zaxisstrname, size_t len)
 {
-  size_t slen = strlen(zaxisstrname)+1;
+  size_t slen = strlen(zaxisstrname) + 1;
   if ( slen > len ) slen = len;
   if ( slen > CDI_MAX_NAME ) slen = CDI_MAX_NAME;
-  strncpy(name, zaxisstrname, slen);
+  strncpy(name, zaxisstrname, slen - 1);
   name[slen-1] = 0;
 }
 

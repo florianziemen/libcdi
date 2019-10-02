@@ -368,14 +368,14 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  // institute info
 	  const char *instptr = institutInqNamePtr(vlistInqVarInstitut(vlistID, varID));
 	  strcpy(tmpname, "unknown");
-	  if ( instptr ) strncpy(tmpname, instptr, CDI_MAX_NAME);
+	  if ( instptr ) strncpy(tmpname, instptr, CDI_MAX_NAME-1);
 	  limit_string_length(tmpname, CDI_MAX_NAME);
 	  fprintf(stdout, "%-8s ", tmpname);
 
 	  // source info
 	  const char *modelptr = modelInqNamePtr(vlistInqVarModel(vlistID, varID));
 	  strcpy(tmpname, "unknown");
-	  if ( modelptr ) strncpy(tmpname, modelptr, CDI_MAX_NAME);
+	  if ( modelptr ) strncpy(tmpname, modelptr, CDI_MAX_NAME-1);
 	  limit_string_length(tmpname, CDI_MAX_NAME);
 	  fprintf(stdout, "%-8s ", tmpname);
 

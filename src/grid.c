@@ -266,7 +266,7 @@ static inline
 void gridSetString(char *gridstrname, const char *name, size_t len)
 {
   if ( len > CDI_MAX_NAME ) len = CDI_MAX_NAME;
-  strncpy(gridstrname, name, len);
+  strncpy(gridstrname, name, len - 1);
   gridstrname[len - 1] = 0;
 }
 
