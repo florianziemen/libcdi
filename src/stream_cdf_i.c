@@ -3071,7 +3071,7 @@ int cdf_cmp_varname(const void *s1, const void *s2)
 }
 
 static
-void cdf_sort_varname(int *varids, const int nvars, const ncvar_t *ncvars)
+void cdf_sort_varnames(int *varids, const int nvars, const ncvar_t *ncvars)
 {
   struct cdf_varinfo *varInfo
     = (struct cdf_varinfo *) Malloc((size_t)nvars * sizeof(struct cdf_varinfo));
@@ -3180,7 +3180,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
   if ( CDI_Debug )
     for ( int i = 0; i < nvars; i++ ) Message("varids[%d] = %d", i, varids[i]);
 
-  if ( streamptr->sortname ) cdf_sort_varname(varids, nvars, ncvars);
+  if ( streamptr->sortname ) cdf_sort_varnames(varids, nvars, ncvars);
 
   for ( int varID1 = 0; varID1 < nvars; varID1++ )
     {

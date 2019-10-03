@@ -540,7 +540,6 @@ void cdi_generate_vars(stream_t *streamptr)
   int *varids = (int *) Malloc(varTableUsed*sizeof(int));
   for ( size_t varID = 0; varID < varTableUsed; varID++ ) varids[varID] = (int)varID;
 
-  /*
   if ( streamptr->sortname )
     {
       size_t varID;
@@ -565,7 +564,6 @@ void cdi_generate_vars(stream_t *streamptr)
           Free(varInfo);
         }
     }
-  */
 
   for ( size_t index = 0; index < varTableUsed; index++ )
     {
