@@ -3170,8 +3170,13 @@ void cdf_define_institut_and_model_id(int vlistID, int varID)
 
 // define all input data variables
 static
-void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, int num_ncvars, ncvar_t *ncvars, ncdim_t *ncdims)
+void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int nvars, int num_ncvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
+  int *varids = (int *) Malloc((size_t)nvars * sizeof (int));
+  int n = 0;
+  for ( int ncvarid = 0; ncvarid < num_ncvars; ncvarid++ )
+    if ( ncvars[ncvarid].isvar == TRUE ) varids[n++] = ncvarid;
+
   if ( CDI_Debug )
     for ( int i = 0; i < nvars; i++ ) Message("varids[%d] = %d", i, varids[i]);
 
@@ -3768,7 +3773,6 @@ int cdfInqContents(stream_t *streamptr)
   bool time_has_bounds = false;
   bool time_climatology = false;
   int leadtime_id = CDI_UNDEFID;
-  int nvars_data;
   int instID  = CDI_UNDEFID;
   int modelID = CDI_UNDEFID;
   int calendar = CDI_UNDEFID;
@@ -4022,12 +4026,9 @@ int cdfInqContents(stream_t *streamptr)
   cdfVerifyVars(nvars, ncvars, ncdims);
 
   // select vars
-  int *varids = (int *) Malloc((size_t)nvars * sizeof (int));
-  int nvarids = 0;
+  int nvars_data = 0;
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-    if ( ncvars[ncvarid].isvar == TRUE ) varids[nvarids++] = ncvarid;
-
-  nvars_data = nvarids;
+    if ( ncvars[ncvarid].isvar == TRUE ) nvars_data++;
 
   if ( CDI_Debug ) Message("time varid = %d", streamptr->basetime.ncvarid);
   if ( CDI_Debug ) Message("ntsteps = %zu", ntsteps);
@@ -4046,7 +4047,7 @@ int cdfInqContents(stream_t *streamptr)
   streamptr->ntsteps = (long)ntsteps;
 
   // define all data variables
-  cdf_define_all_vars(streamptr, vlistID, instID, modelID, varids, nvars_data, nvars, ncvars, ncdims);
+  cdf_define_all_vars(streamptr, vlistID, instID, modelID, nvars_data, nvars, ncvars, ncdims);
 
 
   cdiCreateTimesteps(streamptr);
