@@ -255,7 +255,7 @@ void srvScanTimestep1(stream_t *streamptr)
               goto tstepScanLoopFinished;
 
 	  DateTime datetime = { .date = vdate, .time = vtime };
-	  if ( datetimeCmp(datetime, datetime0) )
+	  if ( datetimeDiffer(datetime, datetime0) )
 	    Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
 	}
 

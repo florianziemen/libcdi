@@ -17,7 +17,6 @@
 #include "calendar.h"
 #include "subtype.h"
 
-
 #include "cgribex.h"      /* gribGetSize, gribRead, gribGetZip, GRIB1_LTYPE_99 */
 #include "gribapi.h"
 
@@ -1001,7 +1000,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       if ( datetime0.date == 10101 && datetime0.time == 0 )
         {
-          if ( datetimeCmp(datetime, datetime0) || !nrecs ) //Do we really need this condition? I have included it in order not to change the number of times gribapiGetDataDateTime() etc. get called. But if those are sideeffect-free, this condition should be removed.
+          if ( datetimeDiffer(datetime, datetime0) || !nrecs ) //Do we really need this condition? I have included it in order not to change the number of times gribapiGetDataDateTime() etc. get called. But if those are sideeffect-free, this condition should be removed.
             {
               datetime0 = datetime;
               gribapiGetDataDateTime(gh, &rdate, &rtime);
@@ -1210,7 +1209,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
           if ( CDI_inventory_mode == 1 ) break;
           else
 	    {
-	      if ( datetimeCmp(datetime, datetime0) != 0 ) break;
+	      if ( datetimeDiffer(datetime, datetime0) ) break;
 
               gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, varname, param, level1, level2);
 	      continue;
@@ -1404,7 +1403,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	    {
 	      if ( records[recID].used )
 		{
-		  if ( datetimeCmp(datetime, datetime0) != 0 ) break;
+		  if ( datetimeDiffer(datetime, datetime0) ) break;
 
 		  if ( CDI_Debug )
                     gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, varname, param, level1, level2);

@@ -9,10 +9,10 @@ typedef struct
 DateTime;
 
 static inline int
-datetimeCmp(DateTime dt1, DateTime dt2)
+datetimeDiffer(DateTime dt1, DateTime dt2)
 {
-  return 2 * ((dt1.date > dt2.date) - (dt1.date < dt2.date))
-    + (dt1.time > dt2.time) - (dt1.time < dt2.time);
+  return (2 * ((dt1.date > dt2.date) - (dt1.date < dt2.date))
+          + (dt1.time > dt2.time) - (dt1.time < dt2.time)) != 0;
 }
 
 

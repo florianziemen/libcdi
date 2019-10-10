@@ -810,7 +810,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
 	    {
 	      if ( recID < nrecs ) break;
 	      if ( warn_time )
-		if ( datetimeCmp(datetime, datetime0) != 0 )
+		if ( datetimeDiffer(datetime, datetime0) )
 		  {
                     gribWarning("Inconsistent verification time!", nrecs_scanned, tsID+1, paramstr, level1, level2);
 		    warn_time = false;
@@ -818,7 +818,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
 	    }
 	  else
 	    {
-	      if ( datetimeCmp(datetime, datetime0) != 0 ) break;
+	      if ( datetimeDiffer(datetime, datetime0) ) break;
 
 	      if ( recID < nrecs )
 		{
@@ -1017,7 +1017,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	{
 	  if ( records[recID].used )
 	    {
-	      if ( datetimeCmp(datetime, datetime0) != 0 ) break;
+	      if ( datetimeDiffer(datetime, datetime0) ) break;
 
               gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, paramstr, level1, level2);
 	      continue;
@@ -1227,7 +1227,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 		  char paramstr_[32];
 		  cdiParamToString(param, paramstr_, sizeof(paramstr_));
 
-		  if ( datetimeCmp(datetime, datetime0) != 0 ) break;
+		  if ( datetimeDiffer(datetime, datetime0) ) break;
 
 		  if ( CDI_Debug )
                     gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, paramstr_, level1, level2);
