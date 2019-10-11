@@ -127,18 +127,25 @@ void gribapiGetSteps(grib_handle *gh, int timeunits, int *startStep, int *endSte
 static
 void gribapiGetDataDateTime(grib_handle *gh, int64_t *datadate, int *datatime)
 {
-  long lpar;
-  GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
-  *datadate = (int64_t) lpar;
-  GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);  //FIXME: This looses the seconds in GRIB2 files.
-  *datatime = (int) lpar*100;
+  long date;
+  GRIB_CHECK(grib_get_long(gh, "dataDate", &date), 0);
+  *datadate = (int64_t) date;
+  long hour, minute, second;
+  GRIB_CHECK(grib_get_long(gh, "hour", &hour), 0);
+  GRIB_CHECK(grib_get_long(gh, "minute", &minute), 0);
+  GRIB_CHECK(grib_get_long(gh, "second", &second), 0);
+  *datatime = cdiEncodeTime((int)hour, (int)minute, (int)second);
 }
 
 static
 void gribapiSetDataDateTime(grib_handle *gh, int64_t datadate, int datatime)
 {
   GRIB_CHECK(my_grib_set_long(gh, "dataDate", (long)datadate), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "dataTime", datatime/100), 0);
+  int hour, minute, second;
+  cdiDecodeTime(datatime, &hour, &minute, &second);
+  GRIB_CHECK(my_grib_set_long(gh, "hour", hour), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "minute", minute), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "second", second), 0);
 }
 
 static
@@ -1070,6 +1077,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   taxis->stime = stime;
   taxis->vdate = (int64_t)datetime0.date;
   taxis->vtime = (int)datetime0.time;
+  printf("1: %d %d  %d %d  %d %d  %d %d\n", taxis->rdate, taxis->rtime, taxis->fdate, taxis->ftime, taxis->sdate, taxis->stime, taxis->vdate, taxis->vtime);
 
   const int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
