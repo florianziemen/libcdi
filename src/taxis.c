@@ -581,6 +581,7 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
   taxisptr2->rdate = taxisptr1->rdate;
   taxisptr2->rtime = taxisptr1->rtime;
   */
+
   taxisptr2->sdate = taxisptr1->sdate;
   taxisptr2->stime = taxisptr1->stime;
 

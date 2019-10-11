@@ -5,6 +5,7 @@
 
 2019-10-11 Uwe Schulzweida
 
+	* gribapi: use forecast reference time 
 	* gribapi: added support for seconds
 
 2019-09-09 Uwe Schulzweida
