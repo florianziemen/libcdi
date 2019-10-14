@@ -586,7 +586,7 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int gridindex, int ndims, bool
 static
 void cdfGridCompress(int fileID, int ncvarid, size_t gridsize, int filetype, int comptype)
 {
-#if  defined  (HAVE_NETCDF4)
+#ifdef HAVE_NETCDF4
   if ( gridsize > 1 && comptype == CDI_COMPRESS_ZIP && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C) )
     {
       cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, NULL);

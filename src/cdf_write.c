@@ -167,6 +167,33 @@ void *resizeBuf(void **buf, size_t *bufSize, size_t reqSize)
   return *buf;
 }
 
+static
+void cdfDefineCellMethods(stream_t *streamptr, int cdiID, int varID, int fileID, int ncvarID)
+{
+  taxis_t *taxis = &streamptr->tsteps[0].taxis;
+  if (!taxis->has_bounds) return;
+
+  int time_varid = streamptr->basetime.ncvarid;
+  char timeVarName[CDI_MAX_NAME];
+  cdf_inq_varname(fileID, time_varid, timeVarName);
+
+  int stepType = vlistInqVarTsteptype(cdiID, varID);
+
+  char *cellMethod = NULL;
+  if      (stepType == TSTEP_AVG)   cellMethod = "mean";
+  else if (stepType == TSTEP_SUM)   cellMethod = "sum";
+  else if (stepType == TSTEP_RANGE) cellMethod = "range";
+  else if (stepType == TSTEP_MIN)   cellMethod = "minimum";
+  else if (stepType == TSTEP_MAX)   cellMethod = "maximum";
+
+  if (cellMethod)
+    {
+      char *attname = "cell_methods";
+      char atttxt[CDI_MAX_NAME+1];
+      sprintf(atttxt, "%s: %s", timeVarName, cellMethod);
+      cdf_put_att_text(fileID, ncvarID, attname, strlen(atttxt), atttxt);
+    }
+}
 
 void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
 {
@@ -777,6 +804,9 @@ int cdfDefVar(stream_t *streamptr, int varID)
   if (zid == CDI_UNDEFID) cdfDefineAttrLeveltype(fileID, ncvarID, zaxisID, zaxistype);
 
   cdfDefineAttrEnsemble(fileID, ncvarID, vlistID, varID);
+
+  // Attribute: cell_methods
+  cdfDefineCellMethods(streamptr, vlistID, varID, fileID, ncvarID);
 
   // Attributes
   cdfDefineAttributes(vlistID, varID, fileID, ncvarID);

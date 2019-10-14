@@ -368,7 +368,7 @@ const char *cdf_var_type(nc_type xtype)
   else if ( xtype == NC_INT    )  ctype = "NC_INT";
   else if ( xtype == NC_FLOAT  )  ctype = "NC_FLOAT";
   else if ( xtype == NC_DOUBLE )  ctype = "NC_DOUBLE";
-#if  defined  (HAVE_NETCDF4)
+#ifdef  HAVE_NETCDF4
   else if ( xtype == NC_UBYTE  )  ctype = "NC_UBYTE";
   else if ( xtype == NC_LONG   )  ctype = "NC_LONG";
   else if ( xtype == NC_USHORT )  ctype = "NC_USHORT";
@@ -687,7 +687,7 @@ void cdf_get_att_text(int ncid, int varid, const char *name, char *tp)
 
 void cdf_get_att_string(int ncid, int varid, const char *name, char **tp)
 {
-#if  defined  (HAVE_NETCDF4)
+#ifdef  HAVE_NETCDF4
   int status = nc_get_att_string(ncid, varid, name, tp);
 
   if ( CDF_Debug || status != NC_NOERR )
@@ -711,7 +711,7 @@ void cdf_get_att_int(int ncid, int varid, const char *name, int *ip)
 
 void cdf_get_att_long(int ncid, int varid, const char *name, long *ip)
 {
-#if  defined  (HAVE_NETCDF4)
+#ifdef  HAVE_NETCDF4
   int status = nc_get_att_long(ncid, varid, name, ip);
 
   if ( CDF_Debug || status != NC_NOERR )
@@ -790,7 +790,7 @@ void cdf_inq_attid(int ncid, int varid, const char *name, int *attnump)
 }
 
 
-#if  defined  (HAVE_NETCDF4)
+#ifdef  HAVE_NETCDF4
 void cdf_def_var_chunking(int ncid, int varid, int storage, const size_t *chunksizesp)
 {
   int status = nc_def_var_chunking(ncid, varid, storage, chunksizesp);
