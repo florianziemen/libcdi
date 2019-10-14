@@ -1828,11 +1828,12 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t fdate, int
 
       // printf(">>>>> tsteptype %d  startStep %ld  endStep %ld\n", tsteptype, startStep, endStep);
 
-      // Product Definition Template Number: defined in GRIB_API file 4.0.table
-      // point in time products:
+      // Product Definition Template Number: defined in GRIB_API file 4.0.table point in time products:
       if ( (proDefTempNum >= 0 && proDefTempNum <=  7) ||
            proDefTempNum == 55 || proDefTempNum == 40055 ) // Tile
         startStep = endStep;
+
+      if (endStep < startStep) return status;
 
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "forecastTime", startStep), 0);
       if ( editionNumber == 1 && startStep > 0) GRIB_CHECK(my_grib_set_long(gh, "startStep", startStep), 0);
