@@ -193,7 +193,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
                 {
                   if ( !strStartsWith(tu+pos, "%y%m%d.%f") )
                     {
-                      Message("Unsupported format %s for TIMEUNIT day!", tu+pos);
+                      Warning("Unsupported format %s for TIMEUNIT day!", tu+pos);
                       timeunit = -1;
                     }
                 }
@@ -201,9 +201,13 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
                 {
                   if ( !strStartsWith(tu+pos, "%y%m.%f") )
                     {
-                      Message("Unsupported format %s for TIMEUNIT month!", tu+pos);
+                      Warning("Unsupported format %s for TIMEUNIT month!", tu+pos);
                       timeunit = -1;
                     }
+                }
+              else
+                {
+                  Warning("Unsupported format for time units: %s!", tu);
                 }
             }
           else if ( taxistype == TAXIS_RELATIVE )
