@@ -1041,7 +1041,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	    gridChangeType(gridID, GRID_TRAJECTORY);
 	}
 
-      if ( tsteptype != vlistInqVarTsteptype(vlistID, varID) )
+      if ( tsteptype != TSTEP_INSTANT2 && tsteptype != vlistInqVarTsteptype(vlistID, varID) )
 	vlistDefVarTsteptype(vlistID, varID, tsteptype);
 
       rindex++;
