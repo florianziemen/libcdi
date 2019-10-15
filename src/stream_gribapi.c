@@ -1004,6 +1004,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
       gribapiGetValidityDateTime(gh, &vdate, &vtime, &sdate, &stime);
       DateTime datetime = { .date = vdate, .time = vtime };
 
+      VarScanKeys scanKeys = gribapiGetScanKeys(gh);
+
       if ( nrecs == 0 )
         {
           datetime0 = datetime;
@@ -1017,10 +1019,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
           taxis->vdate = vdate;
           taxis->vtime = vtime;
         }
-
-      VarScanKeys scanKeys = gribapiGetScanKeys(gh);
-
-      if ( nrecs )
+      else
         {
           const int tsteptype = gribapiGetTsteptype(gh);
           const size_t gridsize = gribapiGetGridsize(gh);

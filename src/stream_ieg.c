@@ -707,11 +707,13 @@ void iegScanTimestep1(stream_t *streamptr)
       int64_t vdate = 0;
       int vtime = 0;
       iegDateTime(iegp->ipdb, &vdate, &vtime);
+      DateTime datetime = { .date = vdate, .time = vtime};
 
       if ( nrecs == 0 )
 	{
-	  datetime0.date = vdate;
-	  datetime0.time = vtime;
+	  datetime0 = datetime;
+          taxis->vdate = vdate;
+          taxis->vtime = vtime;
 	}
       else
 	{
@@ -720,7 +722,6 @@ void iegScanTimestep1(stream_t *streamptr)
             if ( param == records[recID].param && rlevel == records[recID].ilevel )
               goto tstepScanLoopFinished;
 
-          DateTime datetime = { .date = vdate, .time = vtime};
 	  if ( datetimeDiffer(datetime, datetime0) )
 	    Warning("Inconsistent verification time for param %d level %d", param, rlevel);
 	}
@@ -740,8 +741,6 @@ void iegScanTimestep1(stream_t *streamptr)
 
   const int taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type  = TAXIS_ABSOLUTE;
-  taxis->vdate = datetime0.date;
-  taxis->vtime = (int)datetime0.time;
   taxis->rdate = taxis->vdate;
   taxis->rtime = taxis->vtime;
 

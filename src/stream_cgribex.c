@@ -722,14 +722,11 @@ int cgribexScanTimestep1(stream_t *streamptr)
   void *gribbuffer = NULL;
   size_t buffersize = 0;
   int leveltype = 0, level1 = 0, level2 = 0;
-  int vdate = 0, vtime = 0;
-  int sdate = 0, stime = 0;
-  DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
+  DateTime datetime0 = { .date = 10101, .time = 0 };
   unsigned recID;
   int nrecs_scanned = 0;
   bool warn_time = true;
   bool warn_numavg = true;
-  int rdate = 0, rtime = 0, tunit = 0;
   bool fcast = false;
   char paramstr[32];
 
@@ -784,21 +781,25 @@ int cgribexScanTimestep1(stream_t *streamptr)
 
       cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
+      int vdate, sdate;
+      int vtime, stime;
       gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
+      DateTime datetime = { .date = vdate, .time = vtime };
 
       if ( nrecs == 0 )
 	{
-	  datetime0.date = vdate;
-	  datetime0.time = vtime;
-	  rdate = gribRefDate(isec1);
-	  rtime = gribRefTime(isec1);
-	  tunit = cgribexGetTimeUnit(isec1);
+          datetime0 = datetime;
 	  fcast = cgribexTimeIsFC(isec1);
+	  taxis->unit = cgribexGetTimeUnit(isec1);
+	  taxis->rdate = gribRefDate(isec1);
+	  taxis->rtime = gribRefTime(isec1);
+          taxis->sdate = sdate;
+          taxis->stime = stime;
+          taxis->vdate = vdate;
+          taxis->vtime = vtime;
 	}
       else
 	{
-	  datetime.date = vdate;
-	  datetime.time = vtime;
 	  compvar_t compVar = cgribexVarSet(param, level1, level2, leveltype, ISEC1_TimeRange);
           record_t *records = streamptr->tsteps[tsID].records;
 	  for ( recID = 0; recID < nrecs; recID++ )
@@ -855,15 +856,8 @@ int cgribexScanTimestep1(stream_t *streamptr)
 
   cdi_generate_vars(streamptr);
 
-  taxis->unit = tunit;
   taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
   const int taxisID = taxisCreate(taxis->type);
-  taxis->rdate = rdate;
-  taxis->rtime = rtime;
-  taxis->vdate = (int64_t)datetime0.date;
-  taxis->vtime = (int)datetime0.time;
-  taxis->sdate = sdate;
-  taxis->stime = stime;
 
   const int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
@@ -885,9 +879,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   int leveltype = 0, level1 = 0, level2 = 0;
-  int vdate = 0, vtime = 0;
-  int sdate = 0, stime = 0;
-  DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
+  DateTime datetime0 = { LONG_MIN, LONG_MIN };
   int recID = 0;
   bool warn_numavg = true;
   char paramstr[32];
@@ -900,7 +892,6 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
   const int fileID  = streamptr->fileID;
   const int vlistID = streamptr->vlistID;
-  const int taxisID = vlistInqTaxis(vlistID);
 
   void *gribbuffer = streamptr->record->buffer;
   size_t buffersize = streamptr->record->buffersize;
@@ -946,10 +937,15 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
+      int vdate, sdate;
+      int vtime, stime;
       gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
+      DateTime datetime = { .date = vdate, .time = vtime };
 
       if ( rindex == 0 )
 	{
+          datetime0 = datetime;
+          const int taxisID = vlistInqTaxis(vlistID);
 	  if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 	    {
 	      taxis->type  = TAXIS_RELATIVE;
@@ -965,9 +961,6 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	  taxis->vtime = vtime;
           taxis->sdate = sdate;
           taxis->stime = stime;
-
-	  datetime0.date = vdate;
-	  datetime0.time = vtime;
 	}
 
       const int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
@@ -984,9 +977,6 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	      taxis->numavg = ISEC1_AvgNum;
 	    }
 	}
-
-      datetime.date = vdate;
-      datetime.time = vtime;
 
       compvar_t compVar = cgribexVarSet(param, level1, level2, leveltype, ISEC1_TimeRange);
 
@@ -1087,9 +1077,7 @@ int cgribexScanTimestep(stream_t * streamptr)
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   int leveltype = 0, level1 = 0, level2 = 0;
-  int vdate = 0, vtime = 0;
-  int sdate = 0, stime = 0;
-  DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
+  DateTime datetime0 = { LONG_MIN, LONG_MIN };
   int vrecID, recID = 0;
   bool warn_numavg = true;
   int nrecs = 0;
@@ -1151,12 +1139,16 @@ int cgribexScanTimestep(stream_t * streamptr)
 
           cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
+          int vdate, sdate;
+          int vtime, stime;
 	  gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
+          DateTime datetime = { .date = vdate, .time = vtime };
 
 	  if ( rindex == nrecs ) break;
 
 	  if ( rindex == 0 )
 	    {
+              datetime0 = datetime;
               const int vlistID = streamptr->vlistID;
 	      const int taxisID = vlistInqTaxis(vlistID);
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
@@ -1174,9 +1166,6 @@ int cgribexScanTimestep(stream_t * streamptr)
 	      taxis->vtime = vtime;
               taxis->sdate = sdate;
               taxis->stime = stime;
-
-	      datetime0.date = vdate;
-	      datetime0.time = vtime;
 	    }
 
 	  if ( ISEC1_AvgNum )
