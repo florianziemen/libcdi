@@ -4803,6 +4803,7 @@ if test "x$ac_cv_prog_cc_c99" != xno; then :
 fi
 
 
+rm -rf conftest.dSYM
 
 acx_prog_cc_posix_version_value=200112
              acx_prog_cc_posix_version_print="POSIX.1-2001"
@@ -4852,7 +4853,6 @@ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "${acx_prog_cc_posix_version_print} profile required
 See \`config.log' for more details" "$LINENO" 5; }
 fi
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for C/C++ restrict keyword" >&5
 $as_echo_n "checking for C/C++ restrict keyword... " >&6; }
 if ${ac_cv_c_restrict+:} false; then :
