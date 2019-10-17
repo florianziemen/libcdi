@@ -179,7 +179,7 @@ void cdfDefineCellMethods(stream_t *streamptr, int cdiID, int varID, int fileID,
 
   int stepType = vlistInqVarTsteptype(cdiID, varID);
 
-  char *cellMethod = NULL;
+  const char *cellMethod = NULL;
   if      (stepType == TSTEP_AVG)   cellMethod = "mean";
   else if (stepType == TSTEP_SUM)   cellMethod = "sum";
   else if (stepType == TSTEP_RANGE) cellMethod = "range";
@@ -188,7 +188,7 @@ void cdfDefineCellMethods(stream_t *streamptr, int cdiID, int varID, int fileID,
 
   if (cellMethod)
     {
-      char *attname = "cell_methods";
+      const char *attname = "cell_methods";
       char atttxt[CDI_MAX_NAME+1];
       sprintf(atttxt, "%s: %s", timeVarName, cellMethod);
       cdf_put_att_text(fileID, ncvarID, attname, strlen(atttxt), atttxt);
