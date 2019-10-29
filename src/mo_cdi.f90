@@ -2325,16 +2325,16 @@ module mo_cdi
       integer(c_size_t) :: f_result
     end function gridInqYboundsPart
 
-    subroutine gridDefReducedPoints(gridID_dummy, reducedPointsSize_dummy, reducedPoints_dummy) bind(c,&
-    & name = 'gridDefReducedPoints')
+    subroutine gridDefReducedPoints(gridID_dummy, reducedPointsSize_dummy,&
+    & reducedPoints_dummy) bind(c, name = 'gridDefReducedPoints')
       import c_int
       integer(c_int), value :: gridID_dummy
       integer(c_int), value :: reducedPointsSize_dummy
       integer(c_int), intent(in) :: reducedPoints_dummy(*)
     end subroutine gridDefReducedPoints
 
-    subroutine gridInqReducedPoints(gridID_dummy, reducedPoints_dummy) bind(c, name =&
-    & 'gridInqReducedPoints')
+    subroutine gridInqReducedPoints(gridID_dummy, reducedPoints_dummy) bind(c,&
+    & name = 'gridInqReducedPoints')
       import c_int
       integer(c_int), value :: gridID_dummy
       integer(c_int), intent(inout) :: reducedPoints_dummy(*)
