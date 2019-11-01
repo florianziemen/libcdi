@@ -481,6 +481,10 @@ void gribapiGetKeys(grib_handle *gh, int varID)
   long backgroundProcess = 0;
   if ( grib_get_long(gh, "backgroundProcess", &backgroundProcess) == 0 )
     varDefKeyInt(varID, CDI_KEY_BACKGROUNDPROCESS, (int) backgroundProcess);
+
+  long typeOfTimeIncrement = 0;
+  if ( grib_get_long(gh, "typeOfTimeIncrement", &typeOfTimeIncrement) == 0 )
+    varDefKeyInt(varID, CDI_KEY_TYPEOFTIMEINCREMENT, (int) typeOfTimeIncrement);
   /*
   long constituentType = 0;
   if ( grib_get_long(gh, "constituentType", &constituentType) == 0 )
@@ -3080,6 +3084,12 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   gribapiDefTime((int)editionNumber, productDefinitionTemplate, typeOfGeneratingProcess,
                  gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
+
+  {
+    int typeOfTimeIncrement = 0;
+    int status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFTIMEINCREMENT, &typeOfTimeIncrement);
+    if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "typeOfTimeIncrement", (long)typeOfTimeIncrement), 0);
+  }
 
   {
     int status, perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
