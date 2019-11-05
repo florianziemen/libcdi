@@ -1624,7 +1624,7 @@ void cdf_def_mapping(stream_t *streamptr, int gridID)
       nc_type gmapvartype = NC_INT;
       int datatype = -1;
       int status = cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, &datatype);
-      if (status == CDI_NOERR) gmapvartype = cdfDefDatatype(datatype, streamptr);
+      if (status == CDI_NOERR) gmapvartype = (nc_type) datatype;
       char gmapvarname[CDI_MAX_NAME]; gmapvarname[0] = 0;
       cdiGridInqKeyStr(gridID, CDI_KEY_GRIDMAP_VARNAME, CDI_MAX_NAME, gmapvarname);
 
@@ -1638,7 +1638,7 @@ void cdf_def_mapping(stream_t *streamptr, int gridID)
 
       cdf_enddef(fileID);
 
-      if ( ncerrcode == NC_NOERR )
+      if ( ncerrcode == NC_NOERR && gmapvartype != NC_CHAR )
         {
           int dummy = 1;
           cdf_put_var_int(fileID, ncvarid, &dummy);

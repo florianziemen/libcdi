@@ -2768,8 +2768,8 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
             {
               const int projID = lgrid ? grid->proj : gridID;
               const int ncid = ncvars[gmapvarid].ncid;
-              const int gmapvartype = cdfInqDatatype(ncvars[gmapvarid].xtype, ncvars[gmapvarid].lunsigned);
-              if (gmapvartype != -1) cdiDefKeyInt(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, gmapvartype);
+              const int gmapvartype = ncvars[gmapvarid].xtype;
+              cdiDefKeyInt(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, gmapvartype);
               const char *gmapvarname = ncvars[gmapvarid].name;
               cdf_read_mapping_atts(ncid, gmapvarid, projID, gmapvarname);
               cdiGridDefKeyStr(projID, CDI_KEY_GRIDMAP_VARNAME, (int)(strlen(gmapvarname)+1), gmapvarname);
