@@ -495,8 +495,8 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_YLONGNAME = 913
   integer(c_int), public, parameter :: CDI_KEY_YUNITS = 914
   integer(c_int), public, parameter :: CDI_KEY_VDIMNAME = 920
-  integer(c_int), public, parameter :: CDI_KEY_MAPPING = 921
-  integer(c_int), public, parameter :: CDI_KEY_MAPNAME = 922
+  integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_VARNAME = 921
+  integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_NAME = 922
   integer(c_int), public, parameter :: CDI_KEY_NAME = 941
   integer(c_int), public, parameter :: CDI_KEY_DIMNAME = 942
   integer(c_int), public, parameter :: CDI_KEY_LONGNAME = 943

@@ -839,8 +839,8 @@ int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
 #define  CDI_KEY_YLONGNAME   913  // Y-axis longname
 #define  CDI_KEY_YUNITS      914  // Y-axis units
 #define  CDI_KEY_VDIMNAME    920  // Vertex dimension name
-#define  CDI_KEY_MAPPING     921  // Grid mapping var name
-#define  CDI_KEY_MAPNAME     922  // Grid mapping name
+#define  CDI_KEY_GRIDMAP_VARNAME     921  // Grid mapping var name
+#define  CDI_KEY_GRIDMAP_NAME     922  // Grid mapping name
 
 // CDI zaxis keys
 #define  CDI_KEY_NAME        941  // Z-axis name

@@ -303,7 +303,7 @@ void cdf_get_gmapvarname(int gridID, char *gmapvarname)
 {
   int pgridID = gridID;
   char mapping[CDI_MAX_NAME]; mapping[0] = 0;
-  cdiGridInqKeyStr(pgridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapping);
+  cdiGridInqKeyStr(pgridID, CDI_KEY_GRIDMAP_NAME, CDI_MAX_NAME, mapping);
 
   if ( !mapping[0] )
     {
@@ -311,12 +311,13 @@ void cdf_get_gmapvarname(int gridID, char *gmapvarname)
       if ( projID != CDI_UNDEFID )
         {
           pgridID = projID;
-          cdiGridInqKeyStr(pgridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapping);
+          cdiGridInqKeyStr(pgridID, CDI_KEY_GRIDMAP_NAME, CDI_MAX_NAME, mapping);
         }
     }
 
   if ( mapping[0] )
-    cdiGridInqKeyStr(pgridID, CDI_KEY_MAPPING, CDI_MAX_NAME, gmapvarname);
+    cdiGridInqKeyStr(pgridID, CDI_KEY_GRIDMAP_VARNAME, CDI_MAX_NAME, gmapvarname);
+  printf("gmapvarname %s\n", gmapvarname);
 }
 
 static
