@@ -317,7 +317,6 @@ void cdf_get_gmapvarname(int gridID, char *gmapvarname)
 
   if ( mapping[0] )
     cdiGridInqKeyStr(pgridID, CDI_KEY_GRIDMAP_VARNAME, CDI_MAX_NAME, gmapvarname);
-  printf("gmapvarname %s\n", gmapvarname);
 }
 
 static
