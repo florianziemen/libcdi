@@ -4,6 +4,7 @@
 #include "cdi.h"
 #include <stdbool.h>
 
+#include "cdi_key.h"
 #include "cdi_att.h"
 
 extern int (*proj_lonlat_to_lcc_func)();
@@ -71,6 +72,7 @@ struct gridaxis_t {
   double  first, last, inc;
   double *vals;
   double *bounds;
+  cdi_keys_t  keys;
 #ifndef USE_MPI
   int clength;
   char  **cvals;
@@ -115,7 +117,8 @@ struct grid_t {
   struct gridaxis_t x;
   struct gridaxis_t y;
   const struct gridVirtTable *vtable;
-  cdi_atts_t atts;
+  cdi_keys_t  keys;
+  cdi_atts_t  atts;
   int  scanningMode;
   bool iScansNegatively, jScansPositively, jPointsAreConsecutive;
   /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;

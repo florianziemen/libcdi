@@ -1,3 +1,7 @@
+2019-11-05  Uwe Schulzweida
+
+	* Added support for datatype of grid mapping var
+
 2019-11-01  Uwe Schulzweida
 
 	* Added support gpt GRIB2 key typeOfTimeIncrement

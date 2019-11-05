@@ -1,12 +1,13 @@
 #include "cdi.h"
 #include "cdi_int.h"
+#include "grid.h"
 #include "vlist.h"
 #include "resource_unpack.h"
 
 enum  {KEY_INT = 1, KEY_FLOAT, KEY_BYTES};
 
 static
-cdi_keys_t *get_keysp(vlist_t *vlistptr, int varID)
+cdi_keys_t *vlist_get_keysp(vlist_t *vlistptr, int varID)
 {
   cdi_keys_t *keysp = NULL;
 
@@ -18,6 +19,19 @@ cdi_keys_t *get_keysp(vlist_t *vlistptr, int varID)
     {
       if ( varID >= 0 && varID < vlistptr->nvars )
 	keysp = &(vlistptr->vars[varID].keys);
+    }
+
+  return keysp;
+}
+
+static
+cdi_keys_t *grid_get_keysp(vlist_t *gridptr, int varID)
+{
+  cdi_keys_t *keysp = NULL;
+
+  if ( varID == CDI_GLOBAL )
+    {
+      keysp = &gridptr->keys;
     }
 
   return keysp;
@@ -64,12 +78,12 @@ cdi_keys_t *cdi_get_keysp(int objID, int varID)
 {
   cdi_keys_t *keysp = NULL;
 
-  /*
-  if ( varID == CDI_GLOBAL && reshGetTxCode(objID) == GRID )
+  if ( reshGetTxCode(objID) == GRID )
     {
       grid_t *gridptr = grid_to_pointer(objID);
       keysp = &gridptr->keys;
     }
+  /*
   else if ( varID == CDI_GLOBAL && reshGetTxCode(objID) == ZAXIS )
     {
       zaxis_t *zaxisptr = zaxis_to_pointer(objID);
@@ -80,7 +94,7 @@ cdi_keys_t *cdi_get_keysp(int objID, int varID)
   if ( reshGetTxCode(objID) == VLIST )
     {
       vlist_t *vlistptr = vlist_to_pointer(objID);
-      keysp = get_keysp(vlistptr, varID);
+      keysp = vlist_get_keysp(vlistptr, varID);
     }
 
   return keysp;
@@ -89,8 +103,8 @@ cdi_keys_t *cdi_get_keysp(int objID, int varID)
 
 int vlist_key_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int keynum)
 {
-  cdi_keys_t *keyspa = get_keysp(a, varIDA),
-             *keyspb = get_keysp(b, varIDB);
+  cdi_keys_t *keyspa = vlist_get_keysp(a, varIDA),
+             *keyspb = vlist_get_keysp(b, varIDB);
   if (keyspa == NULL && keyspb == NULL)
     return 0;
   xassert(keynum >= 0 && keynum < (int)keyspa->nelems

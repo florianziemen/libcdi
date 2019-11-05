@@ -115,22 +115,24 @@ bool cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int
 static
 void grid_axis_init(struct gridaxis_t *axisptr)
 {
-  axisptr->size        = 0;
-  axisptr->vals        = NULL;
-  axisptr->bounds      = NULL;
-  axisptr->flag        = 0;
-  axisptr->first       = 0.0;
-  axisptr->last        = 0.0;
-  axisptr->inc         = 0.0;
+  axisptr->size           = 0;
+  axisptr->vals           = NULL;
+  axisptr->bounds         = NULL;
+  axisptr->flag           = 0;
+  axisptr->first          = 0.0;
+  axisptr->last           = 0.0;
+  axisptr->inc            = 0.0;
 #ifndef USE_MPI
-  axisptr->clength     = 0;
-  axisptr->cvals       = NULL;
+  axisptr->clength        = 0;
+  axisptr->cvals          = NULL;
 #endif
-  axisptr->dimname[0]  = 0;
-  axisptr->name[0]     = 0;
-  axisptr->longname[0] = 0;
-  axisptr->units[0]    = 0;
-  axisptr->stdname     = NULL;
+  axisptr->dimname[0]     = 0;
+  axisptr->name[0]        = 0;
+  axisptr->longname[0]    = 0;
+  axisptr->units[0]       = 0;
+  axisptr->stdname        = NULL;
+  axisptr->keys.nalloc    = MAX_KEYS;
+  axisptr->keys.nelems    = 0;
 }
 
 void grid_init(grid_t *gridptr)
@@ -170,10 +172,12 @@ void grid_init(grid_t *gridptr)
   gridptr->mapname[0]    = 0;
   gridptr->mapping[0]    = 0;
   memset(gridptr->uuid, 0, CDI_UUID_SIZE);
-  gridptr->name          = NULL;
-  gridptr->vtable        = &cdiGridVtable;
-  gridptr->atts.nalloc   = MAX_ATTRIBUTES;
-  gridptr->atts.nelems   = 0;
+  gridptr->name           = NULL;
+  gridptr->vtable         = &cdiGridVtable;
+  gridptr->keys.nalloc    = MAX_KEYS;
+  gridptr->keys.nelems    = 0;
+  gridptr->atts.nalloc    = MAX_ATTRIBUTES;
+  gridptr->atts.nelems    = 0;
   gridptr->iScansNegatively      = 0;
   gridptr->jScansPositively      = 1;
   gridptr->jPointsAreConsecutive = 0;
