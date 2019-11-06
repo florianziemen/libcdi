@@ -86,8 +86,6 @@ struct grid_gme_t {
 
 struct grid_t {
   char    vdimname[CDI_MAX_NAME];
-  char    mapname[CDI_MAX_NAME];
-  char    mapping[CDI_MAX_NAME];
   char   *name;
   int     self;
   size_t  size;

@@ -1617,16 +1617,18 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 static
 void cdf_def_mapping(stream_t *streamptr, int gridID)
 {
-  char mapping[CDI_MAX_NAME]; mapping[0] = 0;
-  cdiGridInqKeyStr(gridID, CDI_KEY_GRIDMAP_NAME, CDI_MAX_NAME, mapping);
-  if ( mapping[0] )
+  char gmapname[CDI_MAX_NAME];
+  int length = CDI_MAX_NAME;
+  cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
+  if ( gmapname[0] )
     {
       nc_type gmapvartype = NC_INT;
       int datatype = -1;
       int status = cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, &datatype);
       if (status == CDI_NOERR) gmapvartype = (nc_type) datatype;
-      char gmapvarname[CDI_MAX_NAME]; gmapvarname[0] = 0;
-      cdiGridInqKeyStr(gridID, CDI_KEY_GRIDMAP_VARNAME, CDI_MAX_NAME, gmapvarname);
+      char gmapvarname[CDI_MAX_NAME];
+      length = CDI_MAX_NAME;
+      cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname, &length);
 
       const int fileID = streamptr->fileID;
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);

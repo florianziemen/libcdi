@@ -169,8 +169,6 @@ void grid_init(grid_t *gridptr)
   gridptr->lcomplex      = false;
   gridptr->hasdims       = true;
   gridptr->vdimname[0]   = 0;
-  gridptr->mapname[0]    = 0;
-  gridptr->mapping[0]    = 0;
   memset(gridptr->uuid, 0, CDI_UUID_SIZE);
   gridptr->name           = NULL;
   gridptr->vtable         = &cdiGridVtable;
@@ -349,7 +347,8 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
         if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "y");
         if ( gridtype == GRID_PROJECTION )
           {
-            gridSetName(gridptr->mapname, "Projection");
+            const char *gmapname = "Projection";
+            cdiDefVarKeyBytes(&gridptr->keys, CDI_KEY_GRIDMAP_NAME, (const unsigned char *)gmapname, (int)sizeof(gmapname)+1);
 
             gridptr->x.stdname = xystdname_tab[grid_xystdname_projection][0];
             gridptr->y.stdname = xystdname_tab[grid_xystdname_projection][1];
@@ -633,8 +632,6 @@ void *grid_key_to_ptr(grid_t *gridptr, int key)
     case CDI_KEY_XDIMNAME:   keyptr = (void*)gridptr->x.dimname; break;
     case CDI_KEY_YDIMNAME:   keyptr = (void*)gridptr->y.dimname; break;
     case CDI_KEY_VDIMNAME:   keyptr = (void*)gridptr->vdimname; break;
-    case CDI_KEY_GRIDMAP_VARNAME:    keyptr = (void*)gridptr->mapname; break;
-    case CDI_KEY_GRIDMAP_NAME:    keyptr = (void*)gridptr->mapping; break;
     }
 
   return keyptr;
@@ -1026,16 +1023,17 @@ int gridInqProjType(int gridID)
   int projtype = gridptr->projtype;
   if ( projtype == -1 )
     {
-      char mapping[CDI_MAX_NAME]; mapping[0] = 0;
-      cdiGridInqKeyStr(gridID, CDI_KEY_GRIDMAP_NAME, CDI_MAX_NAME, mapping);
-      if ( mapping[0] )
+      char gmapname[CDI_MAX_NAME];
+      int length = CDI_MAX_NAME;
+      cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
+      if ( gmapname[0] )
         {
           // clang-format off
-          if      ( strIsEqual(mapping, "rotated_latitude_longitude") )   projtype = CDI_PROJ_RLL;
-          else if ( strIsEqual(mapping, "lambert_azimuthal_equal_area") ) projtype = CDI_PROJ_LAEA;
-          else if ( strIsEqual(mapping, "lambert_conformal_conic") )      projtype = CDI_PROJ_LCC;
-          else if ( strIsEqual(mapping, "sinusoidal") )                   projtype = CDI_PROJ_SINU;
-          else if ( strIsEqual(mapping, "polar_stereographic") )          projtype = CDI_PROJ_STERE;
+          if      ( strIsEqual(gmapname, "rotated_latitude_longitude") )   projtype = CDI_PROJ_RLL;
+          else if ( strIsEqual(gmapname, "lambert_azimuthal_equal_area") ) projtype = CDI_PROJ_LAEA;
+          else if ( strIsEqual(gmapname, "lambert_conformal_conic") )      projtype = CDI_PROJ_LCC;
+          else if ( strIsEqual(gmapname, "sinusoidal") )                   projtype = CDI_PROJ_SINU;
+          else if ( strIsEqual(gmapname, "polar_stereographic") )          projtype = CDI_PROJ_STERE;
           // clang-format on
           gridptr->projtype = projtype;
         }
@@ -1999,9 +1997,10 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
   *xpole = 0; *ypole = 0; *angle = 0;
 
   const char *projection = "rotated_latitude_longitude";
-  char mapping[CDI_MAX_NAME]; mapping[0] = 0;
-  cdiGridInqKeyStr(gridID, CDI_KEY_GRIDMAP_NAME, CDI_MAX_NAME, mapping);
-  if ( mapping[0] && strIsEqual(mapping, projection) )
+  char gmapname[CDI_MAX_NAME];
+  int length = CDI_MAX_NAME;
+  cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
+  if ( gmapname[0] && strIsEqual(gmapname, projection) )
     {
       int atttype, attlen;
       char attname[CDI_MAX_NAME+1];
@@ -2039,11 +2038,11 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
 */
 void gridDefParamRLL(int gridID, double xpole, double ypole, double angle)
 {
-  cdiGridDefKeyStr(gridID, CDI_KEY_GRIDMAP_VARNAME, CDI_MAX_NAME, "rotated_pole");
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, "rotated_pole");
 
-  const char *mapping = "rotated_latitude_longitude";
-  cdiGridDefKeyStr(gridID, CDI_KEY_GRIDMAP_NAME, CDI_MAX_NAME, mapping);
-  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int)(strlen(mapping)), mapping);
+  const char *gmapname = "rotated_latitude_longitude";
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname);
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int)(strlen(gmapname)), gmapname);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_longitude", CDI_DATATYPE_FLT64, 1, &xpole);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_latitude", CDI_DATATYPE_FLT64, 1, &ypole);
   if ( IS_NOT_EQUAL(angle, 0) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "north_pole_grid_longitude", CDI_DATATYPE_FLT64, 1, &angle);
@@ -2612,8 +2611,6 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   if (g1->y.stdname != g2->y.stdname) return differ;
   if (strcmp(g1->x.units, g2->x.units)) return differ;
   if (strcmp(g1->y.units, g2->y.units)) return differ;
-
-  if (strcmp(g1->mapping, g2->mapping)) return differ;
 
   if ( g1->reference )
     {
@@ -3710,11 +3707,11 @@ void gridDefParamLCC(int gridID, double missval, double lon_0, double lat_0, dou
                      double a, double rf, double xval_0, double yval_0, double x_0, double y_0)
 {
   (void)lat_0;
-  cdiGridDefKeyStr(gridID, CDI_KEY_GRIDMAP_VARNAME, CDI_MAX_NAME, "Lambert_Conformal");
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, "Lambert_Conformal");
 
-  const char *mapname = "lambert_conformal_conic";
-  cdiGridDefKeyStr(gridID, CDI_KEY_GRIDMAP_NAME, CDI_MAX_NAME, mapname);
-  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int)(strlen(mapname)), mapname);
+  const char *gmapname = "lambert_conformal_conic";
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname);
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int)(strlen(gmapname)), gmapname);
   int nlats = 0;
   double lats[2];
   lats[nlats++] = lat_1;
@@ -3773,9 +3770,10 @@ int gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, do
 
   status = -2;
   const char *projection = "lambert_conformal_conic";
-  char mapname[CDI_MAX_NAME]; mapname[0] = 0;
-  cdiGridInqKeyStr(gridID, CDI_KEY_GRIDMAP_NAME, CDI_MAX_NAME, mapname);
-  if ( mapname[0] && strIsEqual(mapname, projection) )
+  char gmapname[CDI_MAX_NAME];
+  int length = CDI_MAX_NAME;
+  cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
+  if ( gmapname[0] && strIsEqual(gmapname, projection) )
     {
       int atttype, attlen;
       char attname[CDI_MAX_NAME+1];
@@ -3895,11 +3893,11 @@ The function @func{gridDefParamSTERE} defines the parameter of a Polar stereogra
 void gridDefParamSTERE(int gridID, double missval, double lon_0, double lat_ts, double lat_0,
                        double a, double xval_0, double yval_0, double x_0, double y_0)
 {
-  cdiGridDefKeyStr(gridID, CDI_KEY_GRIDMAP_VARNAME, CDI_MAX_NAME, "Polar_Stereographic");
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, "Polar_Stereographic");
 
-  const char *mapname = "polar_stereographic";
-  cdiGridDefKeyStr(gridID, CDI_KEY_GRIDMAP_NAME, CDI_MAX_NAME, mapname);
-  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int)(strlen(mapname)), mapname);
+  const char *gmapname = "polar_stereographic";
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname);
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int)(strlen(gmapname)), gmapname);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "standard_parallel", CDI_DATATYPE_FLT64, 1, &lat_ts);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "straight_vertical_longitude_from_pole", CDI_DATATYPE_FLT64, 1, &lon_0);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "latitude_of_projection_origin", CDI_DATATYPE_FLT64, 1, &lat_0);
@@ -3949,9 +3947,10 @@ int gridInqParamSTERE(int gridID, double missval, double *lon_0, double *lat_ts,
 
   status = -2;
   const char *projection = "polar_stereographic";
-  char mapname[CDI_MAX_NAME]; mapname[0] = 0;
-  cdiGridInqKeyStr(gridID, CDI_KEY_GRIDMAP_NAME, CDI_MAX_NAME, mapname);
-  if ( mapname[0] && strIsEqual(mapname, projection) )
+  char gmapname[CDI_MAX_NAME];
+  int length = CDI_MAX_NAME;
+  cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
+  if ( gmapname[0] && strIsEqual(gmapname, projection) )
     {
       int atttype, attlen;
       char attname[CDI_MAX_NAME+1];
@@ -4899,8 +4898,7 @@ struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
     {
       struct gridCompareSearchState query;
       query.queryKey = grid;// = { .queryKey = grid };
-      if ( (gridglobdefined = (cdiResHFilterApply(&gridOps, gridCompareSearch, &query)
-              == CDI_APPLY_STOP)) )
+      if ( (gridglobdefined = (cdiResHFilterApply(&gridOps, gridCompareSearch, &query) == CDI_APPLY_STOP)) )
         gridID = query.resIDValue;
 
       if ( mode == 1 && gridglobdefined )

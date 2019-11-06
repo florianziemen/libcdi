@@ -25,7 +25,7 @@ cdi_keys_t *vlist_get_keysp(vlist_t *vlistptr, int varID)
 }
 
 static
-cdi_keys_t *grid_get_keysp(vlist_t *gridptr, int varID)
+cdi_keys_t *grid_get_keysp(grid_t *gridptr, int varID)
 {
   cdi_keys_t *keysp = NULL;
 
@@ -81,7 +81,7 @@ cdi_keys_t *cdi_get_keysp(int objID, int varID)
   if ( reshGetTxCode(objID) == GRID )
     {
       grid_t *gridptr = grid_to_pointer(objID);
-      keysp = &gridptr->keys;
+      keysp = grid_get_keysp(gridptr, varID);
     }
   /*
   else if ( varID == CDI_GLOBAL && reshGetTxCode(objID) == ZAXIS )

@@ -302,21 +302,26 @@ static
 void cdf_get_gmapvarname(int gridID, char *gmapvarname)
 {
   int pgridID = gridID;
-  char mapping[CDI_MAX_NAME]; mapping[0] = 0;
-  cdiGridInqKeyStr(pgridID, CDI_KEY_GRIDMAP_NAME, CDI_MAX_NAME, mapping);
+  char gmapname[CDI_MAX_NAME];
+  int length = CDI_MAX_NAME;
+  cdiInqKeyString(pgridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
 
-  if ( !mapping[0] )
+  if ( !gmapname[0] )
     {
       int projID = gridInqProj(gridID);
       if ( projID != CDI_UNDEFID )
         {
           pgridID = projID;
-          cdiGridInqKeyStr(pgridID, CDI_KEY_GRIDMAP_NAME, CDI_MAX_NAME, mapping);
+          length = CDI_MAX_NAME;
+          cdiInqKeyString(pgridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
         }
     }
 
-  if ( mapping[0] )
-    cdiGridInqKeyStr(pgridID, CDI_KEY_GRIDMAP_VARNAME, CDI_MAX_NAME, gmapvarname);
+  if ( gmapname[0] )
+    {
+      length = CDI_MAX_NAME;
+      cdiInqKeyString(pgridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname, &length);
+    }
 }
 
 static

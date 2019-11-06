@@ -2584,7 +2584,7 @@ void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varn
     {
       char attstring[CDI_MAX_NAME];
       cdfGetAttText(ncid, gmapvarid, "grid_mapping_name", CDI_MAX_NAME, attstring);
-      cdiGridDefKeyStr(projID, CDI_KEY_GRIDMAP_NAME, (int)(strlen(attstring)+1), attstring);
+      cdiDefKeyString(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, attstring);
     }
   else
     {
@@ -2772,7 +2772,7 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
               cdiDefKeyInt(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, gmapvartype);
               const char *gmapvarname = ncvars[gmapvarid].name;
               cdf_read_mapping_atts(ncid, gmapvarid, projID, gmapvarname);
-              cdiGridDefKeyStr(projID, CDI_KEY_GRIDMAP_VARNAME, (int)(strlen(gmapvarname)+1), gmapvarname);
+              cdiDefKeyString(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname);
               gridVerifyProj(projID);
             }
 
