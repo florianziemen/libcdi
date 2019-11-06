@@ -311,7 +311,25 @@ int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *len
   return status;
 }
 
-//  cdiDefKeyString: Define a string value from a key of a CDI variable
+/*
+@Function  cdiDefKeyString
+@Title     Define a CDI grid string value from a key
+
+@Prototype int cdiDefKeyString(int cdiID, int varID, int key, const char *string)
+@Parameter
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate} or @fref{gridCreate}.
+    @Item  varID    Variable identifier or CDI_GLOBAL.
+    @Item  key      The key to be searched.
+    @Item  string   The address of a string where the data will be read.
+
+@Description
+The function @func{cdiDefKeyString} defines a CDI string value from a key.
+
+@Result
+@func{cdiDefKeyString} returns CDI_NOERR if OK.
+
+@EndFunction
+*/
 int cdiDefKeyString(int cdiID, int varID, int key, const char *string)
 {
   xassert(string != NULL);
@@ -322,7 +340,26 @@ int cdiDefKeyString(int cdiID, int varID, int key, const char *string)
   return status;
 }
 
-//  cdiInqKeyString: Get a string value from a key of a CDI variable
+/*
+@Function  cdiInqKeyString
+@Title     Get a CDI grid string value from a key
+
+@Prototype int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
+@Parameter
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate} or @fref{gridCreate}.
+    @Item  varID    Variable identifier or CDI_GLOBAL.
+    @Item  key      The key to be searched.
+    @Item  string   The address of a string where the data will be retrieved.
+                    The caller must allocate space for the returned string.
+    @Item  length   The allocated length of the string on input.
+@Description
+The function @func{cdiInqKeyString} return a CDI grid string value from a key.
+
+@Result
+@func{cdiInqKeyString} returns CDI_NOERR if key is available.
+
+@EndFunction
+*/
 int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
 {
   xassert(string != NULL);
