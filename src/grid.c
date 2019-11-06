@@ -168,7 +168,6 @@ void grid_init(grid_t *gridptr)
 
   gridptr->lcomplex      = false;
   gridptr->hasdims       = true;
-  gridptr->vdimname[0]   = 0;
   memset(gridptr->uuid, 0, CDI_UUID_SIZE);
   gridptr->name           = NULL;
   gridptr->vtable         = &cdiGridVtable;
@@ -631,7 +630,6 @@ void *grid_key_to_ptr(grid_t *gridptr, int key)
     case CDI_KEY_YUNITS:     keyptr = (void*)gridptr->y.units; break;
     case CDI_KEY_XDIMNAME:   keyptr = (void*)gridptr->x.dimname; break;
     case CDI_KEY_YDIMNAME:   keyptr = (void*)gridptr->y.dimname; break;
-    case CDI_KEY_VDIMNAME:   keyptr = (void*)gridptr->vdimname; break;
     }
 
   return keyptr;
@@ -2782,7 +2780,7 @@ void gridComplete(grid_t *grid)
 }
 
 #define GRID_STR_SERIALIZE(gridP) { gridP->x.dimname, gridP->y.dimname,  \
-    gridP->vdimname, gridP->x.name, gridP->y.name,  \
+    gridP->x.name, gridP->y.name,  \
     gridP->x.longname, gridP->y.longname, \
     gridP->x.units, gridP->y.units }
 
@@ -3473,11 +3471,6 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
           if ( attstr[0] )  fprintf(fp, "yunits    = %s\n", attstr);
         }
 
-      if ( type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR )
-        {
-          attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_VDIMNAME, CDI_MAX_NAME, attstr);
-          if ( attstr[0] ) fprintf(fp, "vdimname  = %s\n", attstr);
-        }
       if ( type == GRID_UNSTRUCTURED && nvertex > 0 ) fprintf(fp, "nvertex   = %d\n", nvertex);
     }
 

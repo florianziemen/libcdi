@@ -672,8 +672,9 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID,
   dimIDs[ndims-1] = CDI_UNDEFID;
   if ( setVdimname )
     {
-      char vdimname[CDI_MAX_NAME+3]; vdimname[0] = 0;
-      cdiGridInqKeyStr(gridID, CDI_KEY_VDIMNAME, CDI_MAX_NAME, vdimname);
+      char vdimname[CDI_MAX_NAME+3];
+      int length = CDI_MAX_NAME;
+      cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_VDIMNAME, vdimname, &length);
       if ( vdimname[0] == 0 ) strcpy(vdimname, vdimname_default);
       nvdimID = dimIDs[ndims-1] = checkDimName(fileID, nvertex, vdimname);
       if ( nvdimID == CDI_UNDEFID )
