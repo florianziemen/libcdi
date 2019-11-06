@@ -11,7 +11,7 @@ cdi_keys_t *vlist_get_keysp(vlist_t *vlistptr, int varID)
 {
   cdi_keys_t *keysp = NULL;
 
-  if ( varID == CDI_GLOBAL )
+  if (varID == CDI_GLOBAL)
     {
       keysp = &vlistptr->keys;
     }
@@ -29,9 +29,17 @@ cdi_keys_t *grid_get_keysp(grid_t *gridptr, int varID)
 {
   cdi_keys_t *keysp = NULL;
 
-  if ( varID == CDI_GLOBAL )
+  if (varID == CDI_GLOBAL)
     {
       keysp = &gridptr->keys;
+    }
+  else if (varID == CDI_XAXIS)
+    {
+      keysp = &gridptr->x.keys;
+    }
+  else if (varID == CDI_YAXIS)
+    {
+      keysp = &gridptr->y.keys;
     }
 
   return keysp;
@@ -55,7 +63,6 @@ cdi_key_t *new_key(cdi_keys_t *keysp, int key)
   return keyp;
 }
 
-static
 cdi_key_t *find_key(cdi_keys_t *keysp, int key)
 {
   xassert(keysp != NULL);
@@ -292,7 +299,7 @@ int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *len
   xassert(bytes != NULL);
   xassert(length != NULL);
 
-  if ( varID != CDI_GLOBAL ) status = cdiInqKeyBytes(cdiID, CDI_GLOBAL, key, bytes, length);
+  // if ( varID != CDI_GLOBAL ) status = cdiInqKeyBytes(cdiID, CDI_GLOBAL, key, bytes, length);
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);

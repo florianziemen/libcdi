@@ -133,46 +133,50 @@ void grid_axis_init(struct gridaxis_t *axisptr)
   axisptr->stdname        = NULL;
   axisptr->keys.nalloc    = MAX_KEYS;
   axisptr->keys.nelems    = 0;
+  for ( int i = 0; i < MAX_KEYS; ++i )
+    axisptr->keys.value[i].length = 0;
 }
 
 void grid_init(grid_t *gridptr)
 {
-  gridptr->self          = CDI_UNDEFID;
-  gridptr->type          = CDI_UNDEFID;
-  gridptr->proj          = CDI_UNDEFID;
-  gridptr->projtype      = CDI_UNDEFID;
-  gridptr->mask          = NULL;
-  gridptr->mask_gme      = NULL;
-  gridptr->size          = 0;
+  gridptr->self           = CDI_UNDEFID;
+  gridptr->type           = CDI_UNDEFID;
+  gridptr->proj           = CDI_UNDEFID;
+  gridptr->projtype       = CDI_UNDEFID;
+  gridptr->mask           = NULL;
+  gridptr->mask_gme       = NULL;
+  gridptr->size           = 0;
 
   grid_axis_init(&gridptr->x);
   grid_axis_init(&gridptr->y);
 
-  gridptr->area          = NULL;
-  gridptr->reducedPoints        = NULL;
-  gridptr->reducedPointsSize       = 0;
+  gridptr->area           = NULL;
+  gridptr->reducedPoints  = NULL;
+  gridptr->reducedPointsSize = 0;
 
-  gridptr->gme.nd        = 0;
-  gridptr->gme.ni        = 0;
-  gridptr->gme.ni2       = 0;
-  gridptr->gme.ni3       = 0;
+  gridptr->gme.nd         = 0;
+  gridptr->gme.ni         = 0;
+  gridptr->gme.ni2        = 0;
+  gridptr->gme.ni3        = 0;
 
-  gridptr->trunc         = 0;
-  gridptr->nvertex       = 0;
-  gridptr->number        = 0;
-  gridptr->position      = 0;
-  gridptr->reference     = NULL;
-  gridptr->datatype      = CDI_DATATYPE_FLT64;
-  gridptr->np            = 0;
-  gridptr->isCyclic      = CDI_UNDEFID;
+  gridptr->trunc          = 0;
+  gridptr->nvertex        = 0;
+  gridptr->number         = 0;
+  gridptr->position       = 0;
+  gridptr->reference      = NULL;
+  gridptr->datatype       = CDI_DATATYPE_FLT64;
+  gridptr->np             = 0;
+  gridptr->isCyclic       = CDI_UNDEFID;
 
-  gridptr->lcomplex      = false;
-  gridptr->hasdims       = true;
+  gridptr->lcomplex       = false;
+  gridptr->hasdims        = true;
   memset(gridptr->uuid, 0, CDI_UUID_SIZE);
   gridptr->name           = NULL;
   gridptr->vtable         = &cdiGridVtable;
   gridptr->keys.nalloc    = MAX_KEYS;
   gridptr->keys.nelems    = 0;
+  for ( int i = 0; i < MAX_KEYS; ++i )
+    gridptr->keys.value[i].length = 0;
   gridptr->atts.nalloc    = MAX_ATTRIBUTES;
   gridptr->atts.nelems    = 0;
   gridptr->iScansNegatively      = 0;
@@ -280,6 +284,13 @@ void gridGetString(char *name, const char *gridstrname, size_t len)
 }
 
 static inline
+void gridaxisSetKey(struct gridaxis_t *axisptr, int key, const char *name)
+{
+  if (find_key(&axisptr->keys, key) == NULL)
+    cdiDefVarKeyBytes(&axisptr->keys, key, (const unsigned char*)name, (int)strlen(name)+1);
+}
+
+static inline
 void gridSetName(char *gridstrname, const char *name)
 {
   strncpy(gridstrname, name, CDI_MAX_NAME);
@@ -315,8 +326,8 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
           }
         else
           {
-            if ( !gridptr->x.name[0] ) gridSetName(gridptr->x.name, "lon");
-            if ( !gridptr->y.name[0] ) gridSetName(gridptr->y.name, "lat");
+            gridaxisSetKey(&gridptr->x, CDI_KEY_NAME, "lon");
+            gridaxisSetKey(&gridptr->y, CDI_KEY_NAME, "lat");
           }
 
         if ( !gridptr->x.longname[0] ) gridSetName(gridptr->x.longname, "longitude");
@@ -622,10 +633,8 @@ void *grid_key_to_ptr(grid_t *gridptr, int key)
 
   switch (key)
     {
-    case CDI_KEY_XNAME:      keyptr = (void*)gridptr->x.name; break;
     case CDI_KEY_XLONGNAME:  keyptr = (void*)gridptr->x.longname; break;
     case CDI_KEY_XUNITS:     keyptr = (void*)gridptr->x.units; break;
-    case CDI_KEY_YNAME:      keyptr = (void*)gridptr->y.name; break;
     case CDI_KEY_YLONGNAME:  keyptr = (void*)gridptr->y.longname; break;
     case CDI_KEY_YUNITS:     keyptr = (void*)gridptr->y.units; break;
     case CDI_KEY_XDIMNAME:   keyptr = (void*)gridptr->x.dimname; break;
@@ -728,7 +737,7 @@ The function @func{gridDefXname} defines the name of a X-axis.
 */
 void gridDefXname(int gridID, const char *xname)
 {
-  (void)cdiGridDefKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, xname);
+  (void)cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, xname);
 }
 
 /*
@@ -785,7 +794,7 @@ The function @func{gridDefYname} defines the name of a Y-axis.
 */
 void gridDefYname(int gridID, const char *yname)
 {
-  (void)cdiGridDefKeyStr(gridID, CDI_KEY_YNAME, CDI_MAX_NAME, yname);
+  (void)cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, yname);
 }
 
 /*
@@ -845,9 +854,10 @@ The function @func{gridInqXname} returns the name of a X-axis.
 
 @EndFunction
 */
-void gridInqXname(int gridID, char *xname)
+void gridInqXname(int gridID, char *name)
 {
-  (void)cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, xname);
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, name, &length);
 }
 
 /*
@@ -928,9 +938,10 @@ The function @func{gridInqYname} returns the name of a Y-axis.
 
 @EndFunction
 */
-void gridInqYname(int gridID, char *yname)
+void gridInqYname(int gridID, char *name)
 {
-  (void)cdiGridInqKeyStr(gridID, CDI_KEY_YNAME, CDI_MAX_NAME, yname);
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, name, &length);
 }
 
 /*
@@ -3449,7 +3460,8 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
 
       if ( nxvals > 0 )
         {
-          attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, attstr);
+          int length = CDI_MAX_NAME;
+          cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, attstr, &length);
           if ( attstr[0] )  fprintf(fp, "xname     = %s\n", attstr);
           attstr2[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_XDIMNAME, CDI_MAX_NAME, attstr2);
           if ( attstr2[0] && strcmp(attstr, attstr2) )  fprintf(fp, "xdimname  = %s\n", attstr2);
@@ -3461,7 +3473,8 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
 
       if ( nyvals > 0 )
         {
-          attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_YNAME, CDI_MAX_NAME, attstr);
+          int length = CDI_MAX_NAME;
+          cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, attstr, &length);
           if ( attstr[0] )  fprintf(fp, "yname     = %s\n", attstr);
           attstr2[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_YDIMNAME, CDI_MAX_NAME, attstr2);
           if ( attstr2[0] && strcmp(attstr, attstr2) )  fprintf(fp, "ydimname  = %s\n", attstr2);

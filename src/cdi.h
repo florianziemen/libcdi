@@ -18,7 +18,9 @@ extern "C" {
 #define  CDI_MAX_NAME             256   // Max length of a name
 
 #define  CDI_UNDEFID               -1
-#define  CDI_GLOBAL                -1   // Global var ID for vlist
+#define  CDI_GLOBAL                -1   // Global var ID for vlist and grid
+#define  CDI_XAXIS                  1   // X-axis ID for grid
+#define  CDI_YAXIS                  2   // Y-axis ID for grid
 
 // Byte order
 

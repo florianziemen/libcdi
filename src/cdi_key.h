@@ -25,6 +25,7 @@ typedef struct {
 
 void cdiDefVarKeyInt(cdi_keys_t *keysp, int key, int value);
 void cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, int length);
+cdi_key_t *find_key(cdi_keys_t *keysp, int key);
 
 void cdiCopyVarKeys(cdi_keys_t *keysp, int cdiID2, int varID2);
 void cdiDeleteVarKeys(cdi_keys_t *keysp);
