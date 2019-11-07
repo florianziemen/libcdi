@@ -4,7 +4,6 @@
 #include "vlist.h"
 #include "resource_unpack.h"
 
-enum  {KEY_INT = 1, KEY_FLOAT, KEY_BYTES};
 
 static
 cdi_keys_t *vlist_get_keysp(vlist_t *vlistptr, int varID)
@@ -377,6 +376,17 @@ int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
   int status = cdiInqKeyBytes(cdiID, varID, key, (unsigned char *) string, length);
 
   return status;
+}
+
+const char *cdiInqVarKeyStringPtr(cdi_keys_t *keysp, int key)
+{
+  cdi_key_t *keyp = find_key(keysp, key);
+  if ( keyp != NULL ) // key in use
+    {
+      if ( keyp->type == KEY_BYTES ) return (const char *)keyp->v.s;
+    }
+
+  return NULL;
 }
 
 /*
