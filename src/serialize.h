@@ -11,6 +11,9 @@
 #ifndef  CDI_CKSUM_H_
 #include "cdi_cksum.h"
 #endif
+#ifndef  CDI_KEY_H_
+#include "cdi_key.h"
+#endif
 #ifndef  ERROR_H
 #include "error.h"
 #endif
@@ -23,6 +26,112 @@ void serializePack(const void *data, int count, int datatype,
                    void *buf, int buf_size, int *position, void *context);
 void serializeUnpack(const void *buf, int buf_size, int *position,
                      void *data, int count, int datatype, void *context);
+
+
+/*
+ * (de-)marshalling function for key/value structures
+ */
+static inline int
+serializeKeysGetPackSize(const cdi_keys_t *keysp, void *context)
+{
+  int packBuffSize = 0;
+
+  int nelems = keysp->nelems;
+  packBuffSize += serializeGetSize(1, CDI_DATATYPE_INT, context);
+  for ( int keyid = 0; keyid < nelems; keyid++ )
+    {
+      const cdi_key_t *keyp = &(keysp->value[keyid]);
+      int type = keyp->type;
+      packBuffSize += serializeGetSize(1, CDI_DATATYPE_INT, context); // key
+      packBuffSize += serializeGetSize(1, CDI_DATATYPE_INT, context); // type
+      if (type == KEY_BYTES)
+        {
+          int length = keyp->length;
+          packBuffSize +=
+            serializeGetSize(1, CDI_DATATYPE_INT, context)
+            + serializeGetSize(length, CDI_DATATYPE_TXT, context);
+        }
+      else
+        {
+          packBuffSize += serializeGetSize(1, CDI_DATATYPE_INT, context);
+        }
+    }
+  packBuffSize += serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+  return packBuffSize;
+}
+
+static inline void
+serializeKeysPack(const cdi_keys_t *keysp, void *buf, int buf_size, int *position, void *context)
+{
+  uint32_t d = 0;
+
+  int nelems = keysp->nelems;
+  serializePack(&nelems, 1, CDI_DATATYPE_INT, buf, buf_size, position, context);
+  for ( int keyid = 0; keyid < nelems; keyid++ )
+    {
+      const cdi_key_t *keyp = &(keysp->value[keyid]);
+      int key = keyp->key;
+      int type = keyp->type;
+      serializePack(&key, 1, CDI_DATATYPE_INT, buf, buf_size, position, context);
+      serializePack(&type, 1, CDI_DATATYPE_INT, buf, buf_size, position, context);
+      if (type == KEY_BYTES)
+        {
+          int length = keyp->length;
+          serializePack(&length, 1, CDI_DATATYPE_INT, buf, buf_size, position, context);
+          serializePack(keyp->v.s, length, CDI_DATATYPE_TXT, buf, buf_size, position, context);
+          d ^= cdiCheckSum(CDI_DATATYPE_TXT, length, keyp->v.s);
+        }
+      else if (type == KEY_INT)
+        {
+          serializePack(&keyp->v.i, 1, CDI_DATATYPE_INT, buf, buf_size, position, context);
+        }
+      else if (type == KEY_FLOAT)
+        {
+          serializePack(&keyp->v.d, 1, CDI_DATATYPE_FLT64, buf, buf_size, position, context);
+        }
+    }
+
+  serializePack(&d, 1, CDI_DATATYPE_UINT32, buf, buf_size, position, context);
+}
+
+static inline void
+serializeKeysUnpack(const void *buf, int buf_size, int *position, cdi_keys_t *keysp, void *context)
+{
+  uint32_t d, d2 = 0;
+  void *buffer = NULL;
+  int buffersize = 0;
+
+  int nelems;
+  serializeUnpack(buf, buf_size, position, &nelems, 1, CDI_DATATYPE_INT, context);
+  for (int i = 0; i < nelems; ++i)
+    {
+      int key, type;
+      serializeUnpack(buf, buf_size, position, &key, 1, CDI_DATATYPE_INT, context);
+      serializeUnpack(buf, buf_size, position, &type, 1, CDI_DATATYPE_INT, context);
+      if (type == KEY_BYTES)
+        {
+          int length;
+          serializeUnpack(buf, buf_size, position, &length, 1, CDI_DATATYPE_INT, context);
+          if (length > buffersize)
+            {
+              buffersize = length;
+              buffer = realloc(buffer, buffersize);
+            }
+          serializeUnpack(buf, buf_size, position, buffer, length, CDI_DATATYPE_TXT, context);
+          cdiDefVarKeyBytes(keysp, key, buffer, length);
+          d2 ^= cdiCheckSum(CDI_DATATYPE_TXT, length, buffer);
+        }
+      else if (type == KEY_INT)
+        {
+          int ival;
+          serializeUnpack(buf, buf_size, position, &ival, 1, CDI_DATATYPE_INT, context);
+          cdiDefVarKeyInt(keysp, key, ival);
+        }
+    }
+  serializeUnpack(buf, buf_size, position, &d, 1, CDI_DATATYPE_UINT32, context);
+  xassert(d == d2);
+  if (buffer) free(buffer);
+}
 
 /*
  * (de-)marshalling function for common data structures

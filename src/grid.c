@@ -127,7 +127,6 @@ void grid_axis_init(struct gridaxis_t *axisptr)
   axisptr->cvals          = NULL;
 #endif
   axisptr->dimname[0]     = 0;
-  axisptr->name[0]        = 0;
   axisptr->longname[0]    = 0;
   axisptr->units[0]       = 0;
   axisptr->stdname        = NULL;
@@ -206,6 +205,12 @@ void grid_free_components(grid_t *gridptr)
 
   for ( size_t i = 0; i < sizeof(p2free)/sizeof(p2free[0]); ++i )
     if ( p2free[i] ) Free(p2free[i]);
+
+  int gridID = gridptr->self;
+  cdiDeleteKeys(gridID, CDI_XAXIS);
+  cdiDeleteKeys(gridID, CDI_YAXIS);
+  cdiDeleteKeys(gridID, CDI_GLOBAL);
+  cdiDeleteAtts(gridID, CDI_GLOBAL);
 }
 
 void grid_free(grid_t *gridptr)
@@ -321,8 +326,8 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
       {
         if ( gridtype == GRID_TRAJECTORY )
           {
-            if ( !gridptr->x.name[0] ) gridSetName(gridptr->x.name, "tlon");
-            if ( !gridptr->y.name[0] ) gridSetName(gridptr->y.name, "tlat");
+            gridaxisSetKey(&gridptr->x, CDI_KEY_NAME, "tlon");
+            gridaxisSetKey(&gridptr->y, CDI_KEY_NAME, "tlat");
           }
         else
           {
@@ -353,8 +358,8 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
     case GRID_GENERIC:
     case GRID_PROJECTION:
       {
-        if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "x");
-        if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "y");
+        gridaxisSetKey(&gridptr->x, CDI_KEY_NAME, "x");
+        gridaxisSetKey(&gridptr->y, CDI_KEY_NAME, "y");
         if ( gridtype == GRID_PROJECTION )
           {
             const char *gmapname = "Projection";
@@ -1012,8 +1017,8 @@ void gridDefProj(int gridID, int projID)
   if ( gridptr->type == GRID_CURVILINEAR )
     {
       grid_t *projptr = grid_to_pointer(projID);
-      if ( projptr->x.name[0] ) strcpy(gridptr->x.dimname, projptr->x.name);
-      if ( projptr->y.name[0] ) strcpy(gridptr->y.dimname, projptr->y.name);
+      if (find_key(&projptr->x.keys, CDI_KEY_NAME)) cdiDefKeyString(projID, CDI_XAXIS, CDI_KEY_NAME, gridptr->x.dimname);
+      if (find_key(&projptr->y.keys, CDI_KEY_NAME)) cdiDefKeyString(projID, CDI_YAXIS, CDI_KEY_NAME, gridptr->y.dimname);
     }
 }
 
@@ -2484,6 +2489,14 @@ int gridIsEqual(int gridID1, int gridID2)
 }
 */
 
+static
+const char *gridInqKeyStringPtr(cdi_keys_t *keysp, int key)
+{
+  const char *string = cdiInqVarKeyStringPtr(keysp, key);
+  if (string == NULL) string = "";
+  return string;
+}
+
 int gridCompareP(void *gridptr1, void *gridptr2)
 {
   grid_t *g1 = ( grid_t * ) gridptr1;
@@ -2612,8 +2625,8 @@ int gridCompareP(void *gridptr1, void *gridptr2)
       return differ;
   }
 
-  if (strcmp(g1->x.name, g2->x.name)) return differ;
-  if (strcmp(g1->y.name, g2->y.name)) return differ;
+  if (strcmp(gridInqKeyStringPtr(&g1->x.keys, CDI_KEY_NAME), gridInqKeyStringPtr(&g2->x.keys, CDI_KEY_NAME))) return differ;
+  if (strcmp(gridInqKeyStringPtr(&g1->y.keys, CDI_KEY_NAME), gridInqKeyStringPtr(&g2->y.keys, CDI_KEY_NAME))) return differ;
   if (strcmp(g1->x.longname, g2->x.longname)) return differ;
   if (strcmp(g1->y.longname, g2->y.longname)) return differ;
   if (g1->x.stdname != g2->x.stdname) return differ;
@@ -2698,8 +2711,10 @@ void gridComplete(grid_t *grid)
 
 	if ( grid->projtype == CDI_PROJ_RLL )
 	  {
-	    if ( grid->x.name[0] == 0 || grid->x.name[0] == 'x' ) strcpy(grid->x.name, "rlon");
-	    if ( grid->y.name[0] == 0 || grid->y.name[0] == 'y' ) strcpy(grid->y.name, "rlat");
+            const char *name = gridInqKeyStringPtr(&grid->x.keys, CDI_KEY_NAME);
+	    if ( name[0] == 0 || name[0] == 'x' ) cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, "rlon");
+            name = gridInqKeyStringPtr(&grid->y.keys, CDI_KEY_NAME);
+	    if ( name[0] == 0 || name[0] == 'y' ) cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, "rlat");
 	    if ( grid->x.longname[0] == 0 ) strcpy(grid->x.longname, "longitude in rotated pole grid");
 	    if ( grid->y.longname[0] == 0 ) strcpy(grid->y.longname, "latitude in rotated pole grid");
             grid->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
@@ -2782,19 +2797,13 @@ void gridComplete(grid_t *grid)
       }
     }
 
-  grid->x.name[CDI_MAX_NAME - 1] = 0;
   grid->x.longname[CDI_MAX_NAME - 1] = 0;
   grid->x.units[CDI_MAX_NAME - 1] = 0;
-  grid->y.name[CDI_MAX_NAME - 1] = 0;
   grid->y.longname[CDI_MAX_NAME - 1] = 0;
   grid->y.units[CDI_MAX_NAME - 1] = 0;
 }
 
-#define GRID_STR_SERIALIZE(gridP) { gridP->x.dimname, gridP->y.dimname,  \
-    gridP->x.name, gridP->y.name,  \
-    gridP->x.longname, gridP->y.longname, \
-    gridP->x.units, gridP->y.units }
-
+// Used only in iterator_grib.c
 int gridGenerate(const grid_t *grid)
 {
   int gridtype = grid->type;
@@ -2853,11 +2862,7 @@ int gridGenerate(const grid_t *grid)
   gridptr->gme.ni = grid->gme.ni;
   gridptr->gme.ni2 = grid->gme.ni2;
   gridptr->gme.ni3 = grid->gme.ni3;
-  const char *grid_str_tab[] = GRID_STR_SERIALIZE(grid);
-  char *gridptr_str_tab[] = GRID_STR_SERIALIZE(gridptr);
-  for (size_t i = 0; i < sizeof (grid_str_tab) / sizeof (grid_str_tab[0]); ++i)
-    if ( grid_str_tab[i][0] )
-      memcpy(gridptr_str_tab[i], grid_str_tab[i], CDI_MAX_NAME);
+
   gridComplete(gridptr);
 
   return gridID;
@@ -4343,6 +4348,10 @@ static int gridGetComponentFlags(const grid_t * gridP)
   return flags;
 }
 
+#define GRID_STR_SERIALIZE(gridP) { gridP->x.dimname, gridP->y.dimname,  \
+    gridP->x.longname, gridP->y.longname, \
+    gridP->x.units, gridP->y.units }
+
 static int
 gridGetPackSize(void * voidP, void *context)
 {
@@ -4423,6 +4432,9 @@ gridGetPackSize(void * voidP, void *context)
     packBuffSize
       += serializeStrTabGetPackSize(strTab, numStr, context);
   }
+
+  packBuffSize += serializeKeysGetPackSize(&gridP->x.keys, context);
+  packBuffSize += serializeKeysGetPackSize(&gridP->y.keys, context);
 
   if (gridP->reference)
     {
@@ -4603,6 +4615,9 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     serializeStrTabUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                           strTab, numStr, context);
   }
+
+  serializeKeysUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &gridP->x.keys, context);
+  serializeKeysUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &gridP->y.keys, context);
 
   if (memberMask & gridHasReferenceFlag)
     {
@@ -4808,6 +4823,9 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     serializeStrTabPack(strTab, numStr,
                         packBuffer, packBufferSize, packBufferPos, context);
   }
+
+  serializeKeysPack(&gridP->x.keys, packBuffer, packBufferSize, packBufferPos, context);
+  serializeKeysPack(&gridP->y.keys, packBuffer, packBufferSize, packBufferPos, context);
 
   if (memberMask & gridHasReferenceFlag)
     {

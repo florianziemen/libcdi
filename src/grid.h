@@ -62,7 +62,6 @@ struct gridVirtTable
 };
 
 struct gridaxis_t {
-  char    name[CDI_MAX_NAME];
   char    longname[CDI_MAX_NAME];
   char    units[CDI_MAX_NAME];
   char    dimname[CDI_MAX_NAME];

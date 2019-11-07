@@ -252,6 +252,9 @@ void vlist_delete(vlist_t *vlistptr)
 
   if ( vars ) Free(vars);
 
+  cdiDeleteKeys(vlistID, CDI_GLOBAL);
+  cdiDeleteAtts(vlistID, CDI_GLOBAL);
+
   vlist_delete_entry(vlistptr);
 }
 
