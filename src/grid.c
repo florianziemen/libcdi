@@ -207,10 +207,10 @@ void grid_free_components(grid_t *gridptr)
     if ( p2free[i] ) Free(p2free[i]);
 
   int gridID = gridptr->self;
-  cdiDeleteKeys(gridID, CDI_XAXIS);
-  cdiDeleteKeys(gridID, CDI_YAXIS);
-  cdiDeleteKeys(gridID, CDI_GLOBAL);
-  cdiDeleteAtts(gridID, CDI_GLOBAL);
+  //  cdiDeleteKeys(gridID, CDI_XAXIS);
+  // cdiDeleteKeys(gridID, CDI_YAXIS);
+  // cdiDeleteKeys(gridID, CDI_GLOBAL);
+  // cdiDeleteAtts(gridID, CDI_GLOBAL);
 }
 
 void grid_free(grid_t *gridptr)
