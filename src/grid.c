@@ -126,7 +126,6 @@ void grid_axis_init(struct gridaxis_t *axisptr)
   axisptr->clength        = 0;
   axisptr->cvals          = NULL;
 #endif
-  axisptr->dimname[0]     = 0;
   axisptr->longname[0]    = 0;
   axisptr->units[0]       = 0;
   axisptr->stdname        = NULL;
@@ -642,8 +641,6 @@ void *grid_key_to_ptr(grid_t *gridptr, int key)
     case CDI_KEY_XUNITS:     keyptr = (void*)gridptr->x.units; break;
     case CDI_KEY_YLONGNAME:  keyptr = (void*)gridptr->y.longname; break;
     case CDI_KEY_YUNITS:     keyptr = (void*)gridptr->y.units; break;
-    case CDI_KEY_XDIMNAME:   keyptr = (void*)gridptr->x.dimname; break;
-    case CDI_KEY_YDIMNAME:   keyptr = (void*)gridptr->y.dimname; break;
     }
 
   return keyptr;
@@ -1017,8 +1014,10 @@ void gridDefProj(int gridID, int projID)
   if ( gridptr->type == GRID_CURVILINEAR )
     {
       grid_t *projptr = grid_to_pointer(projID);
-      if (find_key(&projptr->x.keys, CDI_KEY_NAME)) cdiDefKeyString(projID, CDI_XAXIS, CDI_KEY_NAME, gridptr->x.dimname);
-      if (find_key(&projptr->y.keys, CDI_KEY_NAME)) cdiDefKeyString(projID, CDI_YAXIS, CDI_KEY_NAME, gridptr->y.dimname);
+      const char *xdimname = cdiInqVarKeyStringPtr(&gridptr->x.keys, CDI_KEY_DIMNAME);
+      const char *ydimname = cdiInqVarKeyStringPtr(&gridptr->y.keys, CDI_KEY_DIMNAME);
+      if (xdimname && find_key(&projptr->x.keys, CDI_KEY_NAME)) cdiDefKeyString(projID, CDI_XAXIS, CDI_KEY_NAME, xdimname);
+      if (ydimname && find_key(&projptr->y.keys, CDI_KEY_NAME)) cdiDefKeyString(projID, CDI_YAXIS, CDI_KEY_NAME, ydimname);
     }
 }
 
@@ -3468,7 +3467,8 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
           int length = CDI_MAX_NAME;
           cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, attstr, &length);
           if ( attstr[0] )  fprintf(fp, "xname     = %s\n", attstr);
-          attstr2[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_XDIMNAME, CDI_MAX_NAME, attstr2);
+          length = CDI_MAX_NAME;
+          cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_DIMNAME, attstr2, &length);
           if ( attstr2[0] && strcmp(attstr, attstr2) )  fprintf(fp, "xdimname  = %s\n", attstr2);
           attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_XLONGNAME, CDI_MAX_NAME, attstr);
           if ( attstr[0] )  fprintf(fp, "xlongname = %s\n", attstr);
@@ -3481,7 +3481,8 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
           int length = CDI_MAX_NAME;
           cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, attstr, &length);
           if ( attstr[0] )  fprintf(fp, "yname     = %s\n", attstr);
-          attstr2[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_YDIMNAME, CDI_MAX_NAME, attstr2);
+          length = CDI_MAX_NAME;
+          cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_DIMNAME, attstr2, &length);
           if ( attstr2[0] && strcmp(attstr, attstr2) )  fprintf(fp, "ydimname  = %s\n", attstr2);
           attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_YLONGNAME, CDI_MAX_NAME, attstr);
           if ( attstr[0] )  fprintf(fp, "ylongname = %s\n", attstr);
@@ -4348,8 +4349,7 @@ static int gridGetComponentFlags(const grid_t * gridP)
   return flags;
 }
 
-#define GRID_STR_SERIALIZE(gridP) { gridP->x.dimname, gridP->y.dimname,  \
-    gridP->x.longname, gridP->y.longname, \
+#define GRID_STR_SERIALIZE(gridP) {  gridP->x.longname, gridP->y.longname, \
     gridP->x.units, gridP->y.units }
 
 static int

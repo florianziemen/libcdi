@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   October 2019
+! Uwe Schulzweida, MPI-MET, Hamburg,   November 2019
 !
 
       INTEGER    CDI_MAX_NAME
@@ -13,6 +13,10 @@
       PARAMETER (CDI_UNDEFID            = -1)
       INTEGER    CDI_GLOBAL
       PARAMETER (CDI_GLOBAL             = -1)
+      INTEGER    CDI_XAXIS
+      PARAMETER (CDI_XAXIS              =  1)
+      INTEGER    CDI_YAXIS
+      PARAMETER (CDI_YAXIS              =  2)
 !
 !  Byte order
 !
@@ -1604,6 +1608,8 @@
       PARAMETER (CDI_KEY_UVRELATIVETOGRID = 821)
       INTEGER    CDI_KEY_CONSTITUENTTYPE
       PARAMETER (CDI_KEY_CONSTITUENTTYPE = 822)
+      INTEGER    CDI_KEY_TYPEOFTIMEINCREMENT
+      PARAMETER (CDI_KEY_TYPEOFTIMEINCREMENT = 823)
       INTEGER         cdiDefKeyInt
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
@@ -1650,28 +1656,22 @@
 !
 !  CDI grid keys
 !
-      INTEGER    CDI_KEY_XNAME
-      PARAMETER (CDI_KEY_XNAME          = 901)
-      INTEGER    CDI_KEY_XDIMNAME
-      PARAMETER (CDI_KEY_XDIMNAME       = 902)
       INTEGER    CDI_KEY_XLONGNAME
       PARAMETER (CDI_KEY_XLONGNAME      = 903)
       INTEGER    CDI_KEY_XUNITS
       PARAMETER (CDI_KEY_XUNITS         = 904)
-      INTEGER    CDI_KEY_YNAME
-      PARAMETER (CDI_KEY_YNAME          = 911)
-      INTEGER    CDI_KEY_YDIMNAME
-      PARAMETER (CDI_KEY_YDIMNAME       = 912)
       INTEGER    CDI_KEY_YLONGNAME
       PARAMETER (CDI_KEY_YLONGNAME      = 913)
       INTEGER    CDI_KEY_YUNITS
       PARAMETER (CDI_KEY_YUNITS         = 914)
       INTEGER    CDI_KEY_VDIMNAME
       PARAMETER (CDI_KEY_VDIMNAME       = 920)
-      INTEGER    CDI_KEY_MAPPING
-      PARAMETER (CDI_KEY_MAPPING        = 921)
-      INTEGER    CDI_KEY_MAPNAME
-      PARAMETER (CDI_KEY_MAPNAME        = 922)
+      INTEGER    CDI_KEY_GRIDMAP_VARTYPE
+      PARAMETER (CDI_KEY_GRIDMAP_VARTYPE = 921)
+      INTEGER    CDI_KEY_GRIDMAP_VARNAME
+      PARAMETER (CDI_KEY_GRIDMAP_VARNAME = 922)
+      INTEGER    CDI_KEY_GRIDMAP_NAME
+      PARAMETER (CDI_KEY_GRIDMAP_NAME   = 923)
 !
 !  CDI zaxis keys
 !

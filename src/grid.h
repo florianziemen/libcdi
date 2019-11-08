@@ -64,7 +64,6 @@ struct gridVirtTable
 struct gridaxis_t {
   char    longname[CDI_MAX_NAME];
   char    units[CDI_MAX_NAME];
-  char    dimname[CDI_MAX_NAME];
   const char *stdname;
   size_t  size;                  // number of values
   short   flag;                  // 0: undefined 1:vals 2:first+inc

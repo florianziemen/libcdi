@@ -145,16 +145,38 @@ void cdiDeleteVarKeys(cdi_keys_t *keysp)
 }
 
 
-int cdiDeleteKeys(int cdiID, int varID)
+void cdiDeleteKeys(int cdiID, int varID)
 {
-  int status = CDI_NOERR;
-
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
 
   cdiDeleteVarKeys(keysp);
+}
 
-  return status;
+
+void cdiPrintVarKeys(cdi_keys_t *keysp)
+{
+  for ( int keyid = 0; keyid < (int)keysp->nelems; keyid++ )
+    {
+      cdi_key_t *keyp = &(keysp->value[keyid]);
+      if (keyp->type == KEY_BYTES)
+        {
+          printf("%d key %d length %d value %s\n", keyid+1, keyp->key, keyp->length,  keyp->v.s);
+        }
+      else if (keyp->type == KEY_INT)
+        {
+          printf("%d key %d value %d\n", keyid+1, keyp->key, keyp->v.i);
+        }
+    }
+}
+
+
+void cdiPrintKeys(int cdiID, int varID)
+{
+  cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
+  xassert(keysp != NULL);
+
+  cdiPrintVarKeys(keysp);
 }
 
 //  cdiInqKeyLen: Get the length of the string representation of the key
@@ -374,6 +396,8 @@ int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
   string[0] = '\0';
 
   int status = cdiInqKeyBytes(cdiID, varID, key, (unsigned char *) string, length);
+
+  if (status != CDI_NOERR) length = 0;
 
   return status;
 }

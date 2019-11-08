@@ -31,7 +31,8 @@ const char *cdiInqVarKeyStringPtr(cdi_keys_t *keysp, int key);
 
 void cdiCopyVarKeys(cdi_keys_t *keysp, int cdiID2, int varID2);
 void cdiDeleteVarKeys(cdi_keys_t *keysp);
-int cdiDeleteKeys(int cdiID, int varID);
+void cdiDeleteKeys(int cdiID, int varID);
+void cdiPrintKeys(int cdiID, int varID);
 
 #endif
 

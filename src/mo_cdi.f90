@@ -25,6 +25,8 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_MAX_NAME = 256
   integer(c_int), public, parameter :: CDI_UNDEFID = -1
   integer(c_int), public, parameter :: CDI_GLOBAL = -1
+  integer(c_int), public, parameter :: CDI_XAXIS = 1
+  integer(c_int), public, parameter :: CDI_YAXIS = 2
   integer(c_int), public, parameter :: CDI_BIGENDIAN = 0
   integer(c_int), public, parameter :: CDI_LITTLEENDIAN = 1
   integer(c_int), public, parameter :: CDI_PDPENDIAN = 2
@@ -478,6 +480,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_SECTION2PADDING = 820
   integer(c_int), public, parameter :: CDI_KEY_UVRELATIVETOGRID = 821
   integer(c_int), public, parameter :: CDI_KEY_CONSTITUENTTYPE = 822
+  integer(c_int), public, parameter :: CDI_KEY_TYPEOFTIMEINCREMENT = 823
   public :: cdiDefKeyInt
   public :: cdiInqKeyInt
   public :: cdiDefKeyBytes
@@ -486,17 +489,14 @@ module mo_cdi
   public :: cdiInqKeyString
   public :: cdiInqKeyLen
   public :: cdiCopyKeys
-  integer(c_int), public, parameter :: CDI_KEY_XNAME = 901
-  integer(c_int), public, parameter :: CDI_KEY_XDIMNAME = 902
   integer(c_int), public, parameter :: CDI_KEY_XLONGNAME = 903
   integer(c_int), public, parameter :: CDI_KEY_XUNITS = 904
-  integer(c_int), public, parameter :: CDI_KEY_YNAME = 911
-  integer(c_int), public, parameter :: CDI_KEY_YDIMNAME = 912
   integer(c_int), public, parameter :: CDI_KEY_YLONGNAME = 913
   integer(c_int), public, parameter :: CDI_KEY_YUNITS = 914
   integer(c_int), public, parameter :: CDI_KEY_VDIMNAME = 920
-  integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_VARNAME = 921
-  integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_NAME = 922
+  integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_VARTYPE = 921
+  integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_VARNAME = 922
+  integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_NAME = 923
   integer(c_int), public, parameter :: CDI_KEY_NAME = 941
   integer(c_int), public, parameter :: CDI_KEY_DIMNAME = 942
   integer(c_int), public, parameter :: CDI_KEY_LONGNAME = 943
