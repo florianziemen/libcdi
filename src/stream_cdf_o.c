@@ -227,7 +227,7 @@ static const struct cdfDefGridAxisInqs {
   int (*axisDimname)(int cdiID, int varID, int key, char *string, int *length);
   int (*axisName)(int cdiID, int varID, int key, char *string, int *length);
   int (*axisLongname)(int cdiID, int varID, int key, char *string, int *length);
-  int (*axisUnits)(int cdiID, int key, int size, char *mesg);
+  int (*axisUnits)(int cdiID, int varID, int key, char *string, int *length);
   void (*axisStdname)(int cdiID, char *dimstdname);
   double (*axisVal)(int gridID, size_t index);
   const double *(*axisValsPtr)(int gridID);
@@ -237,7 +237,7 @@ static const struct cdfDefGridAxisInqs {
   .axisDimname = cdiInqKeyString,
   .axisName = cdiInqKeyString,
   .axisLongname = cdiInqKeyString,
-  .axisUnits = cdiGridInqKeyStr,
+  .axisUnits = cdiInqKeyString,
   .axisStdname = gridInqXstdname,
   .axisVal = gridInqXval,
   .axisValsPtr = gridInqXvalsPtr,
@@ -247,14 +247,14 @@ static const struct cdfDefGridAxisInqs {
   .axisDimname = cdiInqKeyString,
   .axisName = cdiInqKeyString,
   .axisLongname = cdiInqKeyString,
-  .axisUnits = cdiGridInqKeyStr,
+  .axisUnits = cdiInqKeyString,
   .axisStdname = gridInqYstdname,
   .axisVal = gridInqYval,
   .axisValsPtr = gridInqYvalsPtr,
   .axisBoundsPtr = gridInqYboundsPtr,
 }, gridInqsZ = {
   .axisLongname = cdiInqKeyString,
-  .axisUnits = cdiZaxisInqKeyStr,
+  .axisUnits = cdiInqKeyString,
   .axisStdname = zaxisInqStdname,
 };
 
@@ -275,9 +275,10 @@ void cdfPutGridStdAtts(int fileID, int ncvarid, int gridID, int dimtype, const s
   if ( longname[0] && (len = strlen(longname)) )
     cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
 
-  char units[CDI_MAX_NAME]; units[0] = 0;
-  int keyname = (dimtype == 'Z') ? CDI_KEY_UNITS : (dimtype == 'X') ? CDI_KEY_XUNITS : CDI_KEY_YUNITS;
-  inqs->axisUnits(gridID, keyname, CDI_MAX_NAME, units);
+  char units[CDI_MAX_NAME];
+  length = CDI_MAX_NAME;
+  axisKey = (dimtype == 'Z') ? CDI_GLOBAL : ((dimtype == 'X') ? CDI_XAXIS : CDI_YAXIS);
+  inqs->axisUnits(gridID, axisKey, CDI_KEY_UNITS, units, &length);
   if ( units[0] && (len = strlen(units)) )
     cdf_put_att_text(fileID, ncvarid, "units", len, units);
 }

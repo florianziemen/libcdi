@@ -544,8 +544,6 @@ FCALLSCFUN4 (INT, cdiCopyKeys, CDICOPYKEYS, cdicopykeys, INT, INT, INT, INT)
 
 /*  CDI zaxis keys  */
 
-FCALLSCFUN4 (INT, cdiGridDefKeyStr, CDIGRIDDEFKEYSTR, cdigriddefkeystr, INT, INT, INT, STRING)
-FCALLSCFUN4 (INT, cdiGridInqKeyStr, CDIGRIDINQKEYSTR, cdigridinqkeystr, INT, INT, INT, PSTRING)
 FCALLSCFUN4 (INT, cdiZaxisDefKeyStr, CDIZAXISDEFKEYSTR, cdizaxisdefkeystr, INT, INT, INT, STRING)
 FCALLSCFUN4 (INT, cdiZaxisInqKeyStr, CDIZAXISINQKEYSTR, cdizaxisinqkeystr, INT, INT, INT, PSTRING)
 FCALLSCFUN3 (INT, cdiZaxisDefKeyFlt, CDIZAXISDEFKEYFLT, cdizaxisdefkeyflt, INT, INT, DOUBLE)

@@ -489,21 +489,17 @@ module mo_cdi
   public :: cdiInqKeyString
   public :: cdiInqKeyLen
   public :: cdiCopyKeys
-  integer(c_int), public, parameter :: CDI_KEY_XUNITS = 904
-  integer(c_int), public, parameter :: CDI_KEY_YUNITS = 914
   integer(c_int), public, parameter :: CDI_KEY_VDIMNAME = 920
   integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_VARTYPE = 921
   integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_VARNAME = 922
   integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_NAME = 923
-  integer(c_int), public, parameter :: CDI_KEY_NAME = 941
-  integer(c_int), public, parameter :: CDI_KEY_DIMNAME = 942
+  integer(c_int), public, parameter :: CDI_KEY_DIMNAME = 941
+  integer(c_int), public, parameter :: CDI_KEY_NAME = 942
   integer(c_int), public, parameter :: CDI_KEY_LONGNAME = 943
   integer(c_int), public, parameter :: CDI_KEY_UNITS = 944
   integer(c_int), public, parameter :: CDI_KEY_PSNAME = 950
   integer(c_int), public, parameter :: CDI_KEY_P0NAME = 951
   integer(c_int), public, parameter :: CDI_KEY_P0VALUE = 952
-  public :: cdiGridDefKeyStr
-  public :: cdiGridInqKeyStr
   public :: cdiZaxisDefKeyStr
   public :: cdiZaxisInqKeyStr
   public :: cdiZaxisDefKeyFlt
@@ -5043,73 +5039,6 @@ contains
       string_dummy(string_i:string_i) = ' '
     end do
   end function cdiInqKeyString
-
-  function cdiGridDefKeyStr(gridID_dummy, key_dummy, size_dummy, mesg_dummy)&
-  & result(f_result)
-    integer(c_int) :: f_result
-    integer(c_int), value :: gridID_dummy
-    integer(c_int), value :: key_dummy
-    integer(c_int), value :: size_dummy
-    character(kind = c_char, len = *), intent(in) :: mesg_dummy
-    character(kind = c_char) :: mesg_temp(len(mesg_dummy) + 1)
-    integer :: mesg_i
-    interface
-      function lib_cdiGridDefKeyStr(gridID_dummy, key_dummy, size_dummy,&
-      & mesg_dummy) bind(c, name = 'cdiGridDefKeyStr') result(c_result)
-        import c_char, c_int
-        integer(c_int) :: c_result
-        integer(c_int), value :: gridID_dummy
-        integer(c_int), value :: key_dummy
-        integer(c_int), value :: size_dummy
-        character(kind = c_char) :: mesg_dummy(*)
-      end function lib_cdiGridDefKeyStr
-    end interface
-    do mesg_i = 1, len(mesg_dummy)
-      mesg_temp(mesg_i) = mesg_dummy(mesg_i:mesg_i)
-    end do
-    mesg_temp(len(mesg_dummy) + 1) = c_null_char
-    f_result = lib_cdiGridDefKeyStr(gridID_dummy, key_dummy, size_dummy,&
-    & mesg_temp)
-  end function cdiGridDefKeyStr
-
-  function cdiGridInqKeyStr(gridID_dummy, key_dummy, size_dummy, mesg_dummy)&
-  & result(f_result)
-    integer(c_int) :: f_result
-    integer(c_int), value :: gridID_dummy
-    integer(c_int), value :: key_dummy
-    integer(c_int), value :: size_dummy
-    character(kind = c_char, len = *), intent(inout) :: mesg_dummy
-    character(kind = c_char) :: mesg_temp(len(mesg_dummy) + 1)
-    integer :: mesg_i
-    interface
-      function lib_cdiGridInqKeyStr(gridID_dummy, key_dummy, size_dummy,&
-      & mesg_dummy) bind(c, name = 'cdiGridInqKeyStr') result(c_result)
-        import c_char, c_int
-        integer(c_int) :: c_result
-        integer(c_int), value :: gridID_dummy
-        integer(c_int), value :: key_dummy
-        integer(c_int), value :: size_dummy
-        character(kind = c_char) :: mesg_dummy(*)
-      end function lib_cdiGridInqKeyStr
-    end interface
-    mesg_temp(len(mesg_dummy) + 1) = c_null_char
-    do mesg_i = len(mesg_dummy), 1, -1
-      if(mesg_dummy(mesg_i:mesg_i) /= ' ') exit
-      mesg_temp(mesg_i) = c_null_char
-    end do
-    do mesg_i = mesg_i, 1, -1
-        mesg_temp(mesg_i) = mesg_dummy(mesg_i:mesg_i)
-    end do
-    f_result = lib_cdiGridInqKeyStr(gridID_dummy, key_dummy, size_dummy,&
-    & mesg_temp)
-    do mesg_i = 1, len(mesg_dummy)
-      if(mesg_temp(mesg_i) == c_null_char) exit
-      mesg_dummy(mesg_i:mesg_i) = mesg_temp(mesg_i)
-    end do
-    do mesg_i = mesg_i, len(mesg_dummy)
-      mesg_dummy(mesg_i:mesg_i) = ' '
-    end do
-  end function cdiGridInqKeyStr
 
   function cdiZaxisDefKeyStr(zaxisID_dummy, key_dummy, size_dummy, mesg_dummy)&
   & result(f_result)

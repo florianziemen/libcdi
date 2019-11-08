@@ -832,27 +832,19 @@ int     cdiInqKeyLen(int cdiID, int varID, int key, int *length);
 int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
 
 // CDI grid keys
-#define  CDI_KEY_XUNITS      904  // X-axis units
-#define  CDI_KEY_YUNITS      914  // Y-axis units
 #define  CDI_KEY_VDIMNAME                      920  // Vertex dimension name
 #define  CDI_KEY_GRIDMAP_VARTYPE               921  // Grid mapping var datatype
 #define  CDI_KEY_GRIDMAP_VARNAME               922  // Grid mapping var name
 #define  CDI_KEY_GRIDMAP_NAME                  923  // Grid mapping name
 
 // CDI zaxis keys
-#define  CDI_KEY_NAME                          941  // Variable name
-#define  CDI_KEY_DIMNAME                       942  // Dimension name
+#define  CDI_KEY_DIMNAME                       941  // Dimension name
+#define  CDI_KEY_NAME                          942  // Variable name
 #define  CDI_KEY_LONGNAME                      943  // Long name of the variable
-#define  CDI_KEY_UNITS       944  // Z-axis units
+#define  CDI_KEY_UNITS                         944  // Units of the variable
 #define  CDI_KEY_PSNAME      950  // Z-axis surface pressure name
 #define  CDI_KEY_P0NAME      951  // Z-axis reference pressure name
 #define  CDI_KEY_P0VALUE     952  // Z-axis reference pressure in Pa
-
-//      cdiGridDefKeyStr: Define a CDI grid string value from a key
-int     cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg);
-
-//      cdiGridInqKeyStr: Get a CDI grid string value from a key
-int     cdiGridInqKeyStr(int gridID, int key, int size, char *mesg);
 
 //      cdiZaxisDefKeyStr: Define a CDI Z-axis string value from a key
 int     cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg);

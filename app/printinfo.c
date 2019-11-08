@@ -303,8 +303,8 @@ printGridInfoKernel(int gridID, int index, bool lproj)
         }
 
       char name[CDI_MAX_NAME];
-      name[0] = 0;
-      cdiGridInqKeyStr(gridID, CDI_KEY_GRIDMAP_NAME, CDI_MAX_NAME, name);
+      int length = CDI_MAX_NAME;
+      cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, name, &length);
       if (gridtype == GRID_PROJECTION || name[0])
         {
           if (name[0] == 0) strcpy(name, "undefined");

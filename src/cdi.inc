@@ -1656,10 +1656,6 @@
 !
 !  CDI grid keys
 !
-      INTEGER    CDI_KEY_XUNITS
-      PARAMETER (CDI_KEY_XUNITS         = 904)
-      INTEGER    CDI_KEY_YUNITS
-      PARAMETER (CDI_KEY_YUNITS         = 914)
       INTEGER    CDI_KEY_VDIMNAME
       PARAMETER (CDI_KEY_VDIMNAME       = 920)
       INTEGER    CDI_KEY_GRIDMAP_VARTYPE
@@ -1671,10 +1667,10 @@
 !
 !  CDI zaxis keys
 !
-      INTEGER    CDI_KEY_NAME
-      PARAMETER (CDI_KEY_NAME           = 941)
       INTEGER    CDI_KEY_DIMNAME
-      PARAMETER (CDI_KEY_DIMNAME        = 942)
+      PARAMETER (CDI_KEY_DIMNAME        = 941)
+      INTEGER    CDI_KEY_NAME
+      PARAMETER (CDI_KEY_NAME           = 942)
       INTEGER    CDI_KEY_LONGNAME
       PARAMETER (CDI_KEY_LONGNAME       = 943)
       INTEGER    CDI_KEY_UNITS
@@ -1685,20 +1681,6 @@
       PARAMETER (CDI_KEY_P0NAME         = 951)
       INTEGER    CDI_KEY_P0VALUE
       PARAMETER (CDI_KEY_P0VALUE        = 952)
-      INTEGER         cdiGridDefKeyStr
-!                                    (INTEGER         gridID,
-!                                     INTEGER         key,
-!                                     INTEGER         size,
-!                                     CHARACTER*(*)   mesg)
-      EXTERNAL        cdiGridDefKeyStr
-
-      INTEGER         cdiGridInqKeyStr
-!                                    (INTEGER         gridID,
-!                                     INTEGER         key,
-!                                     INTEGER         size,
-!                                     CHARACTER*(*)   mesg)
-      EXTERNAL        cdiGridInqKeyStr
-
       INTEGER         cdiZaxisDefKeyStr
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         key,

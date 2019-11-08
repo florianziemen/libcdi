@@ -2069,10 +2069,9 @@ void cdf_load_cellarea(size_t size, ncvar_t *ncvar, double **gridarea, struct cd
 static
 void cdf_copy_axis_attr(ncvar_t *ncvar, struct gridaxis_t *gridaxis)
 {
-  //strcpy(gridaxis->name, ncvar->name);
   cdiDefVarKeyBytes(&gridaxis->keys, CDI_KEY_NAME, (const unsigned  char*)ncvar->name, (int)sizeof(ncvar->name)+1);
   cdiDefVarKeyBytes(&gridaxis->keys, CDI_KEY_LONGNAME, (const unsigned  char*)ncvar->longname, (int)sizeof(ncvar->longname)+1);
-  strcpy(gridaxis->units, ncvar->units);
+  cdiDefVarKeyBytes(&gridaxis->keys, CDI_KEY_UNITS, (const unsigned  char*)ncvar->units, (int)sizeof(ncvar->units)+1);
 #ifndef USE_MPI
   if ( gridaxis->cvals )
     gridaxis->stdname = ncvar->stdname;
