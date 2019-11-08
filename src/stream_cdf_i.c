@@ -2071,7 +2071,7 @@ void cdf_copy_axis_attr(ncvar_t *ncvar, struct gridaxis_t *gridaxis)
 {
   //strcpy(gridaxis->name, ncvar->name);
   cdiDefVarKeyBytes(&gridaxis->keys, CDI_KEY_NAME, (const unsigned  char*)ncvar->name, (int)sizeof(ncvar->name)+1);
-  strcpy(gridaxis->longname, ncvar->longname);
+  cdiDefVarKeyBytes(&gridaxis->keys, CDI_KEY_LONGNAME, (const unsigned  char*)ncvar->longname, (int)sizeof(ncvar->longname)+1);
   strcpy(gridaxis->units, ncvar->units);
 #ifndef USE_MPI
   if ( gridaxis->cvals )

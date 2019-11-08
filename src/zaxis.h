@@ -5,6 +5,7 @@
 #include "config.h"
 #endif
 
+#include "cdi_key.h"
 #include "cdi_att.h"
 
 typedef struct {
@@ -45,6 +46,7 @@ typedef struct {
   int      number;   /* Reference number to a generalized Z-axis */
   int      nhlev;
   unsigned char uuid[CDI_UUID_SIZE];
+  cdi_keys_t keys;
   cdi_atts_t atts;
 }
 zaxis_t;

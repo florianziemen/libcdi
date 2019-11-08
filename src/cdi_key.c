@@ -1,5 +1,6 @@
 #include "cdi.h"
 #include "cdi_int.h"
+#include "zaxis.h"
 #include "grid.h"
 #include "vlist.h"
 #include "resource_unpack.h"
@@ -8,40 +9,28 @@
 static
 cdi_keys_t *vlist_get_keysp(vlist_t *vlistptr, int varID)
 {
-  cdi_keys_t *keysp = NULL;
+  if      (varID == CDI_GLOBAL) return &vlistptr->keys;
+  else if (varID >= 0 && varID < vlistptr->nvars) return &(vlistptr->vars[varID].keys);
 
-  if (varID == CDI_GLOBAL)
-    {
-      keysp = &vlistptr->keys;
-    }
-  else
-    {
-      if ( varID >= 0 && varID < vlistptr->nvars )
-	keysp = &(vlistptr->vars[varID].keys);
-    }
-
-  return keysp;
+  return NULL;
 }
 
 static
 cdi_keys_t *grid_get_keysp(grid_t *gridptr, int varID)
 {
-  cdi_keys_t *keysp = NULL;
+  if      (varID == CDI_GLOBAL) return &gridptr->keys;
+  else if (varID == CDI_XAXIS)  return &gridptr->x.keys;
+  else if (varID == CDI_YAXIS)  return &gridptr->y.keys;
 
-  if (varID == CDI_GLOBAL)
-    {
-      keysp = &gridptr->keys;
-    }
-  else if (varID == CDI_XAXIS)
-    {
-      keysp = &gridptr->x.keys;
-    }
-  else if (varID == CDI_YAXIS)
-    {
-      keysp = &gridptr->y.keys;
-    }
+  return NULL;
+}
 
-  return keysp;
+static
+cdi_keys_t *zaxis_get_keysp(zaxis_t *zaxisptr, int varID)
+{
+  if (varID == CDI_GLOBAL) return &zaxisptr->keys;
+
+  return NULL;
 }
 
 static
@@ -89,15 +78,12 @@ cdi_keys_t *cdi_get_keysp(int objID, int varID)
       grid_t *gridptr = grid_to_pointer(objID);
       keysp = grid_get_keysp(gridptr, varID);
     }
-  /*
-  else if ( varID == CDI_GLOBAL && reshGetTxCode(objID) == ZAXIS )
+  else if ( reshGetTxCode(objID) == ZAXIS )
     {
       zaxis_t *zaxisptr = zaxis_to_pointer(objID);
-      keysp = &zaxisptr->keys;
+      keysp = zaxis_get_keysp(zaxisptr, varID);
     }
-  else
-  */
-  if ( reshGetTxCode(objID) == VLIST )
+  else if ( reshGetTxCode(objID) == VLIST )
     {
       vlist_t *vlistptr = vlist_to_pointer(objID);
       keysp = vlist_get_keysp(vlistptr, varID);
@@ -111,18 +97,14 @@ int vlist_key_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int keynum
 {
   cdi_keys_t *keyspa = vlist_get_keysp(a, varIDA),
              *keyspb = vlist_get_keysp(b, varIDB);
-  if (keyspa == NULL && keyspb == NULL)
-    return 0;
-  xassert(keynum >= 0 && keynum < (int)keyspa->nelems
-          && keynum < (int)keyspb->nelems);
+  if (keyspa == NULL && keyspb == NULL) return 0;
+  xassert(keynum >= 0 && keynum < (int)keyspa->nelems && keynum < (int)keyspb->nelems);
   cdi_key_t *keypa = keyspa->value + keynum,
     *keypb = keyspb->value + keynum;
 
-  if ( keypa->key != keypb->key )
-    return 1;
+  if ( keypa->key != keypb->key ) return 1;
 
-  if ( keypa->v.i != keypb->v.i )
-    return 1;
+  if ( keypa->v.i != keypb->v.i ) return 1;
 
   return 0;
 }

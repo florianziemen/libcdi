@@ -489,9 +489,7 @@ module mo_cdi
   public :: cdiInqKeyString
   public :: cdiInqKeyLen
   public :: cdiCopyKeys
-  integer(c_int), public, parameter :: CDI_KEY_XLONGNAME = 903
   integer(c_int), public, parameter :: CDI_KEY_XUNITS = 904
-  integer(c_int), public, parameter :: CDI_KEY_YLONGNAME = 913
   integer(c_int), public, parameter :: CDI_KEY_YUNITS = 914
   integer(c_int), public, parameter :: CDI_KEY_VDIMNAME = 920
   integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_VARTYPE = 921

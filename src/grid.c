@@ -126,7 +126,6 @@ void grid_axis_init(struct gridaxis_t *axisptr)
   axisptr->clength        = 0;
   axisptr->cvals          = NULL;
 #endif
-  axisptr->longname[0]    = 0;
   axisptr->units[0]       = 0;
   axisptr->stdname        = NULL;
   axisptr->keys.nalloc    = MAX_KEYS;
@@ -334,8 +333,8 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
             gridaxisSetKey(&gridptr->y, CDI_KEY_NAME, "lat");
           }
 
-        if ( !gridptr->x.longname[0] ) gridSetName(gridptr->x.longname, "longitude");
-        if ( !gridptr->y.longname[0] ) gridSetName(gridptr->y.longname, "latitude");
+        gridaxisSetKey(&gridptr->x, CDI_KEY_LONGNAME, "longitude");
+        gridaxisSetKey(&gridptr->y, CDI_KEY_LONGNAME, "latitude");
 
         if ( !gridptr->x.units[0] ) gridSetName(gridptr->x.units, "degrees_east");
         if ( !gridptr->y.units[0] ) gridSetName(gridptr->y.units, "degrees_north");
@@ -637,9 +636,7 @@ void *grid_key_to_ptr(grid_t *gridptr, int key)
 
   switch (key)
     {
-    case CDI_KEY_XLONGNAME:  keyptr = (void*)gridptr->x.longname; break;
     case CDI_KEY_XUNITS:     keyptr = (void*)gridptr->x.units; break;
-    case CDI_KEY_YLONGNAME:  keyptr = (void*)gridptr->y.longname; break;
     case CDI_KEY_YUNITS:     keyptr = (void*)gridptr->y.units; break;
     }
 
@@ -737,9 +734,9 @@ The function @func{gridDefXname} defines the name of a X-axis.
 
 @EndFunction
 */
-void gridDefXname(int gridID, const char *xname)
+void gridDefXname(int gridID, const char *name)
 {
-  (void)cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, xname);
+  (void)cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, name);
 }
 
 /*
@@ -756,9 +753,9 @@ The function @func{gridDefXlongname} defines the longname of a X-axis.
 
 @EndFunction
 */
-void gridDefXlongname(int gridID, const char *xlongname)
+void gridDefXlongname(int gridID, const char *longname)
 {
-  (void)cdiGridDefKeyStr(gridID, CDI_KEY_XLONGNAME, CDI_MAX_NAME, xlongname);
+  (void)cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_LONGNAME, longname);
 }
 
 /*
@@ -794,9 +791,9 @@ The function @func{gridDefYname} defines the name of a Y-axis.
 
 @EndFunction
 */
-void gridDefYname(int gridID, const char *yname)
+void gridDefYname(int gridID, const char *name)
 {
-  (void)cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, yname);
+  (void)cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, name);
 }
 
 /*
@@ -813,9 +810,9 @@ The function @func{gridDefYlongname} defines the longname of a Y-axis.
 
 @EndFunction
 */
-void gridDefYlongname(int gridID, const char *ylongname)
+void gridDefYlongname(int gridID, const char *longname)
 {
-  (void)cdiGridDefKeyStr(gridID, CDI_KEY_YLONGNAME, CDI_MAX_NAME, ylongname);
+  (void)cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_LONGNAME, longname);
 }
 
 /*
@@ -881,9 +878,10 @@ The function @func{gridInqXlongname} returns the longname of a X-axis.
 
 @EndFunction
 */
-void gridInqXlongname(int gridID, char *xlongname)
+void gridInqXlongname(int gridID, char *longname)
 {
-  (void)cdiGridInqKeyStr(gridID, CDI_KEY_XLONGNAME, CDI_MAX_NAME, xlongname);
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_LONGNAME, longname, &length);
 }
 
 /*
@@ -965,9 +963,10 @@ The function @func{gridInqYlongname} returns the longname of a Y-axis.
 
 @EndFunction
 */
-void gridInqYlongname(int gridID, char *ylongname)
+void gridInqYlongname(int gridID, char *longname)
 {
-  (void)cdiGridInqKeyStr(gridID, CDI_KEY_YLONGNAME, CDI_MAX_NAME, ylongname);
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_LONGNAME, longname, &length);
 }
 
 /*
@@ -2626,8 +2625,8 @@ int gridCompareP(void *gridptr1, void *gridptr2)
 
   if (strcmp(gridInqKeyStringPtr(&g1->x.keys, CDI_KEY_NAME), gridInqKeyStringPtr(&g2->x.keys, CDI_KEY_NAME))) return differ;
   if (strcmp(gridInqKeyStringPtr(&g1->y.keys, CDI_KEY_NAME), gridInqKeyStringPtr(&g2->y.keys, CDI_KEY_NAME))) return differ;
-  if (strcmp(g1->x.longname, g2->x.longname)) return differ;
-  if (strcmp(g1->y.longname, g2->y.longname)) return differ;
+  if (strcmp(gridInqKeyStringPtr(&g1->x.keys, CDI_KEY_LONGNAME), gridInqKeyStringPtr(&g2->x.keys, CDI_KEY_LONGNAME))) return differ;
+  if (strcmp(gridInqKeyStringPtr(&g1->y.keys, CDI_KEY_LONGNAME), gridInqKeyStringPtr(&g2->y.keys, CDI_KEY_LONGNAME))) return differ;
   if (g1->x.stdname != g2->x.stdname) return differ;
   if (g1->y.stdname != g2->y.stdname) return differ;
   if (strcmp(g1->x.units, g2->x.units)) return differ;
@@ -2714,8 +2713,10 @@ void gridComplete(grid_t *grid)
 	    if ( name[0] == 0 || name[0] == 'x' ) cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, "rlon");
             name = gridInqKeyStringPtr(&grid->y.keys, CDI_KEY_NAME);
 	    if ( name[0] == 0 || name[0] == 'y' ) cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, "rlat");
-	    if ( grid->x.longname[0] == 0 ) strcpy(grid->x.longname, "longitude in rotated pole grid");
-	    if ( grid->y.longname[0] == 0 ) strcpy(grid->y.longname, "latitude in rotated pole grid");
+            name = gridInqKeyStringPtr(&grid->x.keys, CDI_KEY_LONGNAME);
+	    if ( name[0] == 0 ) cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_LONGNAME, "longitude in rotated pole grid");
+            name = gridInqKeyStringPtr(&grid->y.keys, CDI_KEY_LONGNAME);
+	    if ( name[0] == 0 ) cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_LONGNAME, "latitude in rotated pole grid");
             grid->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
             grid->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
 	    if ( grid->x.units[0] == 0 ) strcpy(grid->x.units, "degrees");
@@ -2796,9 +2797,7 @@ void gridComplete(grid_t *grid)
       }
     }
 
-  grid->x.longname[CDI_MAX_NAME - 1] = 0;
   grid->x.units[CDI_MAX_NAME - 1] = 0;
-  grid->y.longname[CDI_MAX_NAME - 1] = 0;
   grid->y.units[CDI_MAX_NAME - 1] = 0;
 }
 
@@ -3470,7 +3469,8 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
           length = CDI_MAX_NAME;
           cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_DIMNAME, attstr2, &length);
           if ( attstr2[0] && strcmp(attstr, attstr2) )  fprintf(fp, "xdimname  = %s\n", attstr2);
-          attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_XLONGNAME, CDI_MAX_NAME, attstr);
+          length = CDI_MAX_NAME;
+          cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_LONGNAME, attstr, &length);
           if ( attstr[0] )  fprintf(fp, "xlongname = %s\n", attstr);
           attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_XUNITS, CDI_MAX_NAME, attstr);
           if ( attstr[0] )  fprintf(fp, "xunits    = %s\n", attstr);
@@ -3484,7 +3484,8 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
           length = CDI_MAX_NAME;
           cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_DIMNAME, attstr2, &length);
           if ( attstr2[0] && strcmp(attstr, attstr2) )  fprintf(fp, "ydimname  = %s\n", attstr2);
-          attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_YLONGNAME, CDI_MAX_NAME, attstr);
+          length = CDI_MAX_NAME;
+          cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_LONGNAME, attstr, &length);
           if ( attstr[0] )  fprintf(fp, "ylongname = %s\n", attstr);
           attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_YUNITS, CDI_MAX_NAME, attstr);
           if ( attstr[0] )  fprintf(fp, "yunits    = %s\n", attstr);
@@ -4349,8 +4350,7 @@ static int gridGetComponentFlags(const grid_t * gridP)
   return flags;
 }
 
-#define GRID_STR_SERIALIZE(gridP) {  gridP->x.longname, gridP->y.longname, \
-    gridP->x.units, gridP->y.units }
+#define GRID_STR_SERIALIZE(gridP) {   gridP->x.units, gridP->y.units }
 
 static int
 gridGetPackSize(void * voidP, void *context)

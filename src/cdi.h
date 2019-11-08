@@ -832,9 +832,7 @@ int     cdiInqKeyLen(int cdiID, int varID, int key, int *length);
 int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
 
 // CDI grid keys
-#define  CDI_KEY_XLONGNAME   903  // X-axis longname
 #define  CDI_KEY_XUNITS      904  // X-axis units
-#define  CDI_KEY_YLONGNAME   913  // Y-axis longname
 #define  CDI_KEY_YUNITS      914  // Y-axis units
 #define  CDI_KEY_VDIMNAME                      920  // Vertex dimension name
 #define  CDI_KEY_GRIDMAP_VARTYPE               921  // Grid mapping var datatype
@@ -844,7 +842,7 @@ int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
 // CDI zaxis keys
 #define  CDI_KEY_NAME                          941  // Variable name
 #define  CDI_KEY_DIMNAME                       942  // Dimension name
-#define  CDI_KEY_LONGNAME    943  // Z-axis longname
+#define  CDI_KEY_LONGNAME                      943  // Long name of the variable
 #define  CDI_KEY_UNITS       944  // Z-axis units
 #define  CDI_KEY_PSNAME      950  // Z-axis surface pressure name
 #define  CDI_KEY_P0NAME      951  // Z-axis reference pressure name

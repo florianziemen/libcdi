@@ -143,8 +143,12 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->number        = 0;
   zaxisptr->nhlev         = 0;
   memset(zaxisptr->uuid, 0, CDI_UUID_SIZE);
-  zaxisptr->atts.nalloc   = MAX_ATTRIBUTES;
-  zaxisptr->atts.nelems   = 0;
+  zaxisptr->keys.nalloc    = MAX_KEYS;
+  zaxisptr->keys.nelems    = 0;
+  for ( int i = 0; i < MAX_KEYS; ++i )
+    zaxisptr->keys.value[i].length = 0;
+  zaxisptr->atts.nalloc    = MAX_ATTRIBUTES;
+  zaxisptr->atts.nelems    = 0;
 }
 
 static
