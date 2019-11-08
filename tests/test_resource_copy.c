@@ -34,14 +34,13 @@ static double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
 
 static int defineGrid (void)
 {
-  int gridID = CDI_UNDEFID;
   int mask_vec[nlon*nlat];
   const int * mp = &mask_vec[0];
   double area_vec[nlon*nlat];
   const double * ap = &area_vec[0];
   int i;
 
-  gridID = gridCreate(GRID_LONLAT, nlon*nlat);
+  int gridID = gridCreate(GRID_LONLAT, nlon*nlat);
   gridDefXsize(gridID, nlon);
   gridDefYsize(gridID, nlat);
   gridDefXvals(gridID, lons);
@@ -85,10 +84,9 @@ static int defineGrid (void)
 
 static int defineZaxis (void)
 {
-  int zaxisID = CDI_UNDEFID;
   double vct[3] = { 3.0, 3.3, 3.6 };
 
-  zaxisID = zaxisCreate(ZAXIS_PRESSURE, nlev);
+  int zaxisID = zaxisCreate(ZAXIS_PRESSURE, nlev);
   zaxisDefLevels(zaxisID, levs);
   zaxisDefLevel ( zaxisID, 2, 8507.3 );
   zaxisDefName ( zaxisID, "myName" );
@@ -111,9 +109,7 @@ static int defineZaxis (void)
 
 static int defineTaxis (void)
 {
-  int taxisID = CDI_UNDEFID;
-
-  taxisID = taxisCreate(TAXIS_ABSOLUTE);
+  int taxisID =  taxisCreate(TAXIS_ABSOLUTE);
 
   taxisDefType  ( taxisID, 0 );
   taxisDefVdate ( taxisID, 1 );
@@ -145,11 +141,10 @@ static struct idPair defineVlist ( int gridID, int zaxisID, int taxisID )
 {
   int vlistID = CDI_UNDEFID;
   int zaxisID2 = zaxisCreate(ZAXIS_SURFACE, 1);
-  int varID1, varID2;
 
   vlistID = vlistCreate();
-  varID1 = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARIABLE);
-  varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TIME_VARIABLE);
+  int varID1 = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARIABLE);
+  int varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TIME_VARIABLE);
   vlistDefVarName(vlistID, varID1, "varname1");
   {
     int globfac[] = { 23, 42 };
@@ -166,19 +161,13 @@ static struct idPair defineVlist ( int gridID, int zaxisID, int taxisID )
 
 static int defineInstitute ()
 {
-  int instID = CDI_UNDEFID;
-
-  instID = institutDef( 0, 0,"MYINSTITUTE", "myInstitute");
-
+  int instID = institutDef( 0, 0,"MYINSTITUTE", "myInstitute");
   return instID;
 }
 
 static int defineModel ( int instID )
 {
-  int modelID = CDI_UNDEFID;
-
-  modelID = modelDef(instID, 0, "resource_copy");
-
+  int modelID = modelDef(instID, 0, "resource_copy");
   return modelID;
 }
 
@@ -186,29 +175,26 @@ static int destNamespace;
 
 static int modelRun(MPI_Comm comm)
 {
-  int gridID, zaxisID, taxisID, instID, vlistID, streamID;
-
   char * recvBuffer, * sendBuffer;
-  int bufferSize, differ;
+  int bufferSize;
 
 #ifdef MPI_MARSHALLING
   cdiPioSerializeSetMPI();
 #endif
 
-  gridID  = defineGrid      ();
-  zaxisID = defineZaxis     ();
-  taxisID = defineTaxis     ();
-  instID  = defineInstitute ();
+  int gridID  = defineGrid      ();
+  int zaxisID = defineZaxis     ();
+  int taxisID = defineTaxis     ();
+  int instID  = defineInstitute ();
   defineModel(instID);
-  {
-    struct idPair temp = defineVlist(gridID, zaxisID, taxisID);
-    vlistID = temp.id1;
-    streamID = streamOpenWrite("example.grb", CDI_FILETYPE_GRB);
-    if ( streamID < 0 ) xabort ( "Could not open file" );
-    defineStream ( streamID, vlistID );
-    vlistDestroy(temp.id1);
-    vlistDestroy(temp.id2);
-  }
+
+  struct idPair temp = defineVlist(gridID, zaxisID, taxisID);
+  int vlistID = temp.id1;
+  int streamID = streamOpenWrite("example.grb", CDI_FILETYPE_GRB);
+  if ( streamID < 0 ) xabort ( "Could not open file" );
+  defineStream ( streamID, vlistID );
+  vlistDestroy(temp.id1);
+  vlistDestroy(temp.id2);
 
   reshPackBufferCreate ( &sendBuffer, &bufferSize, &comm );
   recvBuffer = (char *)malloc((size_t)bufferSize);
@@ -224,7 +210,7 @@ static int modelRun(MPI_Comm comm)
   free(recvBuffer);
   reshPackBufferDestroy(&sendBuffer);
 
-  differ = reshListCompare ( 0, 1 );
+  int differ = reshListCompare ( 0, 1 );
 
   namespaceSetActive(0);
   streamClose(streamID);
