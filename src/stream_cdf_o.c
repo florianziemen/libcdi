@@ -1235,14 +1235,16 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
       cdf_put_att_text(fileID, p0varid, "units", strlen(units), units);
     }
 
-  char zname[CDI_MAX_NAME]; zname[0] = 0;
-  char zlongname[CDI_MAX_NAME]; zlongname[0] = 0;
-  char zunits[CDI_MAX_NAME]; zunits[0] = 0;
-  cdiZaxisInqKeyStr(zaxisID, CDI_KEY_NAME, CDI_MAX_NAME, zname);
-  //cdiZaxisInqKeyStr(zaxisID, CDI_KEY_LONGNAME, CDI_MAX_NAME, zlongname);
-  cdiZaxisInqKeyStr(zaxisID, CDI_KEY_UNITS, CDI_MAX_NAME, zunits);
+  char zname[CDI_MAX_NAME];
+  char zlongname[CDI_MAX_NAME];
+  char zunits[CDI_MAX_NAME];
+  length = CDI_MAX_NAME;
+  cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, zname, &length);
   if ( zname[0] ) strcpy(axisname, zname);
+  zlongname[0] = 0;
   if ( zlongname[0] == 0 ) strcpy(zlongname, "hybrid sigma pressure coordinate");
+  length = CDI_MAX_NAME;
+  cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, zunits, &length);
   if ( zunits[0] == 0 ) strcpy(zunits, "1");
 
   cdf_def_dim(fileID, axisname, dimlen, dimID);
@@ -1413,8 +1415,9 @@ void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimI
   if ( strlenID == CDI_UNDEFID ) cdf_def_dim(fileID, strlen, clen, &strlenID);
 
   /* Check 'areatype'dimID */
-  char dimname[CDI_MAX_NAME+3]; dimname[0] = 0;
-  cdiZaxisInqKeyStr(zaxisID, CDI_KEY_DIMNAME, CDI_MAX_NAME, dimname);
+  char dimname[CDI_MAX_NAME+3];
+  int length = sizeof(dimname);
+  cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_DIMNAME, dimname, &length);
   *dimID = checkDimName(fileID, dimlen, dimname);
   if (dimlen <= 0)
     Error("No strings delivered for a character axis.");
@@ -1516,7 +1519,6 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
       checkZaxisName(axisname, fileID, vlistID, zaxisID, nzaxis);
 
       char dimname[CDI_MAX_NAME+3]; dimname[0] = 0;
-      //cdiZaxisInqKeyStr(zaxisID, CDI_KEY_DIMNAME, CDI_MAX_NAME, dimname);
       if ( dimname[0] == 0 ) strcpy(dimname, axisname);
 
       if ( type == ZAXIS_REFERENCE ) cdfDefZaxisUUID(streamptr, zaxisID);

@@ -534,20 +534,18 @@ FCALLSCFUN1 (INT, gridInqYIsc, GRIDINQYISC, gridinqyisc, INT)
 
 FCALLSCFUN4 (INT, cdiDefKeyInt, CDIDEFKEYINT, cdidefkeyint, INT, INT, INT, INT)
 FCALLSCFUN4 (INT, cdiInqKeyInt, CDIINQKEYINT, cdiinqkeyint, INT, INT, INT, PINT)
+FCALLSCFUN4 (INT, cdiDefKeyFloat, CDIDEFKEYFLOAT, cdidefkeyfloat, INT, INT, INT, DOUBLE)
+
+/*  cdiInqKeyFloat Get a float value from a key of a CDI variable  */
+
+FCALLSCFUN4 (INT, cdiInqKeyFloat, CDIINQKEYFLOAT, cdiinqkeyfloat, INT, INT, INT, PDOUBLE)
 FCALLSCFUN4 (INT, cdiDefKeyString, CDIDEFKEYSTRING, cdidefkeystring, INT, INT, INT, STRING)
 FCALLSCFUN5 (INT, cdiInqKeyString, CDIINQKEYSTRING, cdiinqkeystring, INT, INT, INT, PSTRING, PINT)
 FCALLSCFUN4 (INT, cdiInqKeyLen, CDIINQKEYLEN, cdiinqkeylen, INT, INT, INT, PINT)
 FCALLSCFUN4 (INT, cdiCopyKeys, CDICOPYKEYS, cdicopykeys, INT, INT, INT, INT)
 
-/*  CDI grid keys  */
+/*  GRID routines  */
 
-
-/*  CDI zaxis keys  */
-
-FCALLSCFUN4 (INT, cdiZaxisDefKeyStr, CDIZAXISDEFKEYSTR, cdizaxisdefkeystr, INT, INT, INT, STRING)
-FCALLSCFUN4 (INT, cdiZaxisInqKeyStr, CDIZAXISINQKEYSTR, cdizaxisinqkeystr, INT, INT, INT, PSTRING)
-FCALLSCFUN3 (INT, cdiZaxisDefKeyFlt, CDIZAXISDEFKEYFLT, cdizaxisdefkeyflt, INT, INT, DOUBLE)
-FCALLSCFUN3 (INT, cdiZaxisInqKeyFlt, CDIZAXISINQKEYFLT, cdizaxisinqkeyflt, INT, INT, PDOUBLE)
 FCALLSCSUB2 (gridDefXname, GRIDDEFXNAME, griddefxname, INT, STRING)
 FCALLSCSUB2 (gridInqXname, GRIDINQXNAME, gridinqxname, INT, PSTRING)
 FCALLSCSUB2 (gridDefXlongname, GRIDDEFXLONGNAME, griddefxlongname, INT, STRING)

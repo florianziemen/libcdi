@@ -481,14 +481,6 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_UVRELATIVETOGRID = 821
   integer(c_int), public, parameter :: CDI_KEY_CONSTITUENTTYPE = 822
   integer(c_int), public, parameter :: CDI_KEY_TYPEOFTIMEINCREMENT = 823
-  public :: cdiDefKeyInt
-  public :: cdiInqKeyInt
-  public :: cdiDefKeyBytes
-  public :: cdiInqKeyBytes
-  public :: cdiDefKeyString
-  public :: cdiInqKeyString
-  public :: cdiInqKeyLen
-  public :: cdiCopyKeys
   integer(c_int), public, parameter :: CDI_KEY_VDIMNAME = 920
   integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_VARTYPE = 921
   integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_VARNAME = 922
@@ -496,14 +488,21 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_DIMNAME = 941
   integer(c_int), public, parameter :: CDI_KEY_NAME = 942
   integer(c_int), public, parameter :: CDI_KEY_LONGNAME = 943
-  integer(c_int), public, parameter :: CDI_KEY_UNITS = 944
+  integer(c_int), public, parameter :: CDI_KEY_STDNAME = 944
+  integer(c_int), public, parameter :: CDI_KEY_UNITS = 945
   integer(c_int), public, parameter :: CDI_KEY_PSNAME = 950
   integer(c_int), public, parameter :: CDI_KEY_P0NAME = 951
   integer(c_int), public, parameter :: CDI_KEY_P0VALUE = 952
-  public :: cdiZaxisDefKeyStr
-  public :: cdiZaxisInqKeyStr
-  public :: cdiZaxisDefKeyFlt
-  public :: cdiZaxisInqKeyFlt
+  public :: cdiDefKeyInt
+  public :: cdiInqKeyInt
+  public :: cdiDefKeyFloat
+  public :: cdiInqKeyFloat
+  public :: cdiDefKeyBytes
+  public :: cdiInqKeyBytes
+  public :: cdiDefKeyString
+  public :: cdiInqKeyString
+  public :: cdiInqKeyLen
+  public :: cdiCopyKeys
   public :: gridDefXname
   public :: gridInqXname
   public :: gridDefXlongname
@@ -1957,6 +1956,26 @@ module mo_cdi
       integer(c_int) :: f_result
     end function cdiInqKeyInt
 
+    function cdiDefKeyFloat(cdiID_dummy, varID_dummy, key_dummy, value_dummy)&
+    & bind(c, name = 'cdiDefKeyFloat') result(f_result)
+      import c_double, c_int
+      integer(c_int), value :: cdiID_dummy
+      integer(c_int), value :: varID_dummy
+      integer(c_int), value :: key_dummy
+      real(c_double), value :: value_dummy
+      integer(c_int) :: f_result
+    end function cdiDefKeyFloat
+
+    function cdiInqKeyFloat(cdiID_dummy, varID_dummy, key_dummy, value_dummy)&
+    & bind(c, name = 'cdiInqKeyFloat') result(f_result)
+      import c_double, c_int
+      integer(c_int), value :: cdiID_dummy
+      integer(c_int), value :: varID_dummy
+      integer(c_int), value :: key_dummy
+      real(c_double), intent(inout) :: value_dummy
+      integer(c_int) :: f_result
+    end function cdiInqKeyFloat
+
     function cdiDefKeyBytes(cdiID_dummy, varID_dummy, key_dummy, bytes_dummy,&
     & length_dummy) bind(c, name = 'cdiDefKeyBytes') result(f_result)
       import c_int, c_signed_char
@@ -1998,24 +2017,6 @@ module mo_cdi
       integer(c_int), value :: varID2_dummy
       integer(c_int) :: f_result
     end function cdiCopyKeys
-
-    function cdiZaxisDefKeyFlt(zaxisID_dummy, key_dummy, value_dummy) bind(c,&
-    & name = 'cdiZaxisDefKeyFlt') result(f_result)
-      import c_double, c_int
-      integer(c_int), value :: zaxisID_dummy
-      integer(c_int), value :: key_dummy
-      real(c_double), value :: value_dummy
-      integer(c_int) :: f_result
-    end function cdiZaxisDefKeyFlt
-
-    function cdiZaxisInqKeyFlt(zaxisID_dummy, key_dummy, value_dummy) bind(c,&
-    & name = 'cdiZaxisInqKeyFlt') result(f_result)
-      import c_double, c_int
-      integer(c_int), value :: zaxisID_dummy
-      integer(c_int), value :: key_dummy
-      real(c_double), intent(inout) :: value_dummy
-      integer(c_int) :: f_result
-    end function cdiZaxisInqKeyFlt
 
     subroutine gridDefDatatype(gridID_dummy, prec_dummy) bind(c, name =&
     & 'gridDefDatatype')
@@ -5039,73 +5040,6 @@ contains
       string_dummy(string_i:string_i) = ' '
     end do
   end function cdiInqKeyString
-
-  function cdiZaxisDefKeyStr(zaxisID_dummy, key_dummy, size_dummy, mesg_dummy)&
-  & result(f_result)
-    integer(c_int) :: f_result
-    integer(c_int), value :: zaxisID_dummy
-    integer(c_int), value :: key_dummy
-    integer(c_int), value :: size_dummy
-    character(kind = c_char, len = *), intent(in) :: mesg_dummy
-    character(kind = c_char) :: mesg_temp(len(mesg_dummy) + 1)
-    integer :: mesg_i
-    interface
-      function lib_cdiZaxisDefKeyStr(zaxisID_dummy, key_dummy, size_dummy,&
-      & mesg_dummy) bind(c, name = 'cdiZaxisDefKeyStr') result(c_result)
-        import c_char, c_int
-        integer(c_int) :: c_result
-        integer(c_int), value :: zaxisID_dummy
-        integer(c_int), value :: key_dummy
-        integer(c_int), value :: size_dummy
-        character(kind = c_char) :: mesg_dummy(*)
-      end function lib_cdiZaxisDefKeyStr
-    end interface
-    do mesg_i = 1, len(mesg_dummy)
-      mesg_temp(mesg_i) = mesg_dummy(mesg_i:mesg_i)
-    end do
-    mesg_temp(len(mesg_dummy) + 1) = c_null_char
-    f_result = lib_cdiZaxisDefKeyStr(zaxisID_dummy, key_dummy, size_dummy,&
-    & mesg_temp)
-  end function cdiZaxisDefKeyStr
-
-  function cdiZaxisInqKeyStr(zaxisID_dummy, key_dummy, size_dummy, mesg_dummy)&
-  & result(f_result)
-    integer(c_int) :: f_result
-    integer(c_int), value :: zaxisID_dummy
-    integer(c_int), value :: key_dummy
-    integer(c_int), value :: size_dummy
-    character(kind = c_char, len = *), intent(inout) :: mesg_dummy
-    character(kind = c_char) :: mesg_temp(len(mesg_dummy) + 1)
-    integer :: mesg_i
-    interface
-      function lib_cdiZaxisInqKeyStr(zaxisID_dummy, key_dummy, size_dummy,&
-      & mesg_dummy) bind(c, name = 'cdiZaxisInqKeyStr') result(c_result)
-        import c_char, c_int
-        integer(c_int) :: c_result
-        integer(c_int), value :: zaxisID_dummy
-        integer(c_int), value :: key_dummy
-        integer(c_int), value :: size_dummy
-        character(kind = c_char) :: mesg_dummy(*)
-      end function lib_cdiZaxisInqKeyStr
-    end interface
-    mesg_temp(len(mesg_dummy) + 1) = c_null_char
-    do mesg_i = len(mesg_dummy), 1, -1
-      if(mesg_dummy(mesg_i:mesg_i) /= ' ') exit
-      mesg_temp(mesg_i) = c_null_char
-    end do
-    do mesg_i = mesg_i, 1, -1
-        mesg_temp(mesg_i) = mesg_dummy(mesg_i:mesg_i)
-    end do
-    f_result = lib_cdiZaxisInqKeyStr(zaxisID_dummy, key_dummy, size_dummy,&
-    & mesg_temp)
-    do mesg_i = 1, len(mesg_dummy)
-      if(mesg_temp(mesg_i) == c_null_char) exit
-      mesg_dummy(mesg_i:mesg_i) = mesg_temp(mesg_i)
-    end do
-    do mesg_i = mesg_i, len(mesg_dummy)
-      mesg_dummy(mesg_i:mesg_i) = ' '
-    end do
-  end function cdiZaxisInqKeyStr
 
   subroutine gridDefXname(gridID_dummy, xname_dummy)
     integer(c_int), value :: gridID_dummy

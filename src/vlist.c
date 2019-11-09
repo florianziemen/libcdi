@@ -700,10 +700,11 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
                 if ( zaxisType == ZAXIS_CHAR )
                   {
-                    char dimname[CDI_MAX_NAME+3]; dimname[0] = 0;
-                    cdiZaxisInqKeyStr(zaxisID, CDI_KEY_DIMNAME, CDI_MAX_NAME, dimname);
+                    char dimname[CDI_MAX_NAME+3];
+                    int length = sizeof(dimname);
+                    cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_DIMNAME, dimname, &length);
                     if ( dimname[0] == 0 ) { memcpy(dimname, "area_type", 10); dimname[10] = 0; }
-                    cdiZaxisDefKeyStr(zaxisID2, CDI_KEY_DIMNAME, CDI_MAX_NAME, dimname);
+                    cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_DIMNAME, dimname);
                   }
 
                 if ( zaxisType == ZAXIS_GENERIC ) zaxisDefLtype(zaxisID2, zaxisInqLtype(zaxisID));

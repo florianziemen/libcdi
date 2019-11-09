@@ -113,8 +113,6 @@ static
 void zaxis_init(zaxis_t *zaxisptr)
 {
   zaxisptr->self          = CDI_UNDEFID;
-  zaxisptr->dimname[0]    = 0;
-  zaxisptr->vdimname[0]   = 0;
   zaxisptr->vals          = NULL;
 #ifndef USE_MPI
   zaxisptr->cvals         = NULL;
@@ -325,115 +323,6 @@ const char *zaxisNamePtr(int zaxistype)
 void zaxisName(int zaxistype, char *zaxisname)
 {
   strcpy(zaxisname, zaxisNamePtr(zaxistype));
-}
-
-static inline
-void zaxisSetString(char *zaxisstrname, const char *name, size_t len)
-{
-  if ( len > CDI_MAX_NAME ) len = CDI_MAX_NAME;
-  strncpy(zaxisstrname, name, len - 1);
-  zaxisstrname[len-1] = 0;
-}
-
-static inline
-void zaxisGetString(char *name, const char *zaxisstrname, size_t len)
-{
-  size_t slen = strlen(zaxisstrname) + 1;
-  if ( slen > len ) slen = len;
-  if ( slen > CDI_MAX_NAME ) slen = CDI_MAX_NAME;
-  strncpy(name, zaxisstrname, slen - 1);
-  name[slen-1] = 0;
-}
-
-static
-void *zaxis_key_to_ptr(zaxis_t *zaxisptr, int key)
-{
-  void *keyptr = NULL;
-
-  switch (key)
-    {
-    case CDI_KEY_DIMNAME:   keyptr = (void*)zaxisptr->dimname; break;
-    case CDI_KEY_VDIMNAME:  keyptr = (void*)zaxisptr->vdimname; break;
-    }
-
-  return keyptr;
-}
-
-/*
-@Function  cdiZaxisDefKeyStr
-@Title     Define a CDI Z-axis string value from a key
-
-@Prototype int cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg)
-@Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
-    @Item  key      The key to be searched
-    @Item  size     The allocated length of the string on input
-    @Item  mesg     The address of a string where the data will be read
-
-@Description
-The function @func{cdiZaxisDefKeyStr} defines a CDI Z-axis string value from a key.
-
-@Result
-@func{cdiZaxisDefKeyStr} returns 0 if OK and integer value on error.
-
-@EndFunction
-*/
-int cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg)
-{
-  if ( size < 1 || mesg == NULL ) return -1;
-
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
-  char *keyptr = (char*)zaxis_key_to_ptr(zaxisptr, key);
-  if ( keyptr == NULL)
-    {
-      Warning("CDI zaxis string key %d not supported!", key);
-      return -1;
-    }
-
-  zaxisSetString(keyptr, mesg, (size_t)size);
-  reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
-
-  return 0;
-}
-
-/*
-@Function  cdiZaxisInqKeyStr
-@Title     Get a CDI Z-axis string value from a key
-
-@Prototype int cdiZaxisInqKeyStr(int zaxisID, int key, int size, char *mesg)
-@Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
-    @Item  key      The key to be searched.
-    @Item  size     The allocated length of the string on input.
-    @Item  mesg     The address of a string where the data will be retrieved.
-                    The caller must allocate space for the returned string.
-                    The maximum possible length, in characters, of the string
-                    is given by the predefined constant @func{CDI_MAX_NAME}.
-
-@Description
-The function @func{cdiZaxisInqKeyStr} return a CDI Z-axis string value from a key.
-
-@Result
-@func{cdiZaxisInqKeyStr} returns 0 if OK and integer value on error.
-
-@EndFunction
-*/
-int cdiZaxisInqKeyStr(int zaxisID, int key, int size, char *mesg)
-{
-  if ( size < 1 || mesg == NULL ) return -1;
-
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  const char *keyptr = (const char*)zaxis_key_to_ptr(zaxisptr, key);
-  if ( keyptr == NULL)
-    {
-      Warning("CDI zaxis string key %d not supported!", key);
-      return -1;
-    }
-
-  zaxisGetString(mesg, keyptr, (size_t)size);
-
-  return 0;
 }
 
 /*

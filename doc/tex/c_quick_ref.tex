@@ -51,6 +51,15 @@ Define an integer attribute.
 Define a text attribute.
 
 
+\section*{\tt \htmlref{cdiDefKeyFloat}{cdiDefKeyFloat}}
+
+\begin{verbatim}
+    int cdiDefKeyFloat (int cdiID, int varID, int key, double value);
+\end{verbatim}
+
+Define a float value from a key of a CDI variable.
+
+
 \section*{\tt \htmlref{cdiDefKeyInt}{cdiDefKeyInt}}
 
 \begin{verbatim}
@@ -141,42 +150,6 @@ Get a string value from a key of a CDI variable.
 \end{verbatim}
 
 Get number of attributes assigned to this variable.
-
-
-\section*{\tt \htmlref{cdiZaxisDefKeyFlt}{cdiZaxisDefKeyFlt}}
-
-\begin{verbatim}
-    int cdiZaxisDefKeyFlt (int zaxisID, int key, double value);
-\end{verbatim}
-
-Define a CDI Z-axis floating point value from a key.
-
-
-\section*{\tt \htmlref{cdiZaxisDefKeyStr}{cdiZaxisDefKeyStr}}
-
-\begin{verbatim}
-    int cdiZaxisDefKeyStr (int zaxisID, int key, int size, const char *mesg);
-\end{verbatim}
-
-Define a CDI Z-axis string value from a key.
-
-
-\section*{\tt \htmlref{cdiZaxisInqKeyFlt}{cdiZaxisInqKeyFlt}}
-
-\begin{verbatim}
-    int cdiZaxisInqKeyFlt (int zaxisID, int key, double *value);
-\end{verbatim}
-
-Get a CDI Z-axis floating point value from a key.
-
-
-\section*{\tt \htmlref{cdiZaxisInqKeyStr}{cdiZaxisInqKeyStr}}
-
-\begin{verbatim}
-    int cdiZaxisInqKeyStr (int zaxisID, int key, int size, char *mesg);
-\end{verbatim}
-
-Get a CDI Z-axis string value from a key.
 
 
 \section*{\tt \htmlref{gridCreate}{gridCreate}}

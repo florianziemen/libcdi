@@ -808,6 +808,20 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_CONSTITUENTTYPE               822  // GRIB2 constituentType
 #define  CDI_KEY_TYPEOFTIMEINCREMENT           823  // GRIB2 typeOfTimeIncrement
 
+#define  CDI_KEY_VDIMNAME                      920  // Vertex dimension name
+#define  CDI_KEY_GRIDMAP_VARTYPE               921  // Grid mapping var datatype
+#define  CDI_KEY_GRIDMAP_VARNAME               922  // Grid mapping var name
+#define  CDI_KEY_GRIDMAP_NAME                  923  // Grid mapping name
+
+#define  CDI_KEY_DIMNAME                       941  // Dimension name
+#define  CDI_KEY_NAME                          942  // Variable name
+#define  CDI_KEY_LONGNAME                      943  // Long name of the variable
+#define  CDI_KEY_STDNAME                       944  // CF Standard name of the variable
+#define  CDI_KEY_UNITS                         945  // Units of the variable
+#define  CDI_KEY_PSNAME                        950  // Z-axis surface pressure name
+#define  CDI_KEY_P0NAME                        951  // Z-axis reference pressure name
+#define  CDI_KEY_P0VALUE                       952  // Z-axis reference pressure in Pa
+
 //      cdiDefKeyInt: Define an integer value from a key of a CDI variable
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
 
@@ -837,27 +851,7 @@ int     cdiInqKeyLen(int cdiID, int varID, int key, int *length);
 
 int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
 
-// CDI grid keys
-#define  CDI_KEY_VDIMNAME                      920  // Vertex dimension name
-#define  CDI_KEY_GRIDMAP_VARTYPE               921  // Grid mapping var datatype
-#define  CDI_KEY_GRIDMAP_VARNAME               922  // Grid mapping var name
-#define  CDI_KEY_GRIDMAP_NAME                  923  // Grid mapping name
-
-// CDI zaxis keys
-#define  CDI_KEY_DIMNAME                       941  // Dimension name
-#define  CDI_KEY_NAME                          942  // Variable name
-#define  CDI_KEY_LONGNAME                      943  // Long name of the variable
-#define  CDI_KEY_STDNAME                       944  // CF Standard name of the variable
-#define  CDI_KEY_UNITS                         945  // Units of the variable
-#define  CDI_KEY_PSNAME                        950  // Z-axis surface pressure name
-#define  CDI_KEY_P0NAME                        951  // Z-axis reference pressure name
-#define  CDI_KEY_P0VALUE                       952  // Z-axis reference pressure in Pa
-
-//      cdiZaxisDefKeyStr: Define a CDI Z-axis string value from a key
-int     cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg);
-
-//      cdiZaxisInqKeyStr: Get a CDI Z-axis string value from a key
-int     cdiZaxisInqKeyStr(int zaxisID, int key, int size, char *mesg);
+// GRID routines
 
 //      gridDefXname: Define the name of a X-axis
 void    gridDefXname(int gridID, const char *xname);

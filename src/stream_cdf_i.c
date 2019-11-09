@@ -2997,7 +2997,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
           if ( is_scalar ) zaxisDefScalar(zaxisID);
 
           if ( zdimid != CDI_UNDEFID )
-            cdiZaxisDefKeyStr(zaxisID, CDI_KEY_DIMNAME, (int)(strlen(ncdims[zdimid].name)+1), ncdims[zdimid].name);
+            cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_DIMNAME, ncdims[zdimid].name);
 
 	  if ( zvar ) Free(zvar);
 	  if ( zcvals )

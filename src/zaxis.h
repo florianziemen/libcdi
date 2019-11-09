@@ -10,8 +10,6 @@
 
 
 typedef struct {
-  char     dimname[CDI_MAX_NAME];
-  char     vdimname[CDI_MAX_NAME];
   double  *vals;
 #ifndef USE_MPI
   char   **cvals;

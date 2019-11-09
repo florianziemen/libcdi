@@ -1610,6 +1610,30 @@
       PARAMETER (CDI_KEY_CONSTITUENTTYPE = 822)
       INTEGER    CDI_KEY_TYPEOFTIMEINCREMENT
       PARAMETER (CDI_KEY_TYPEOFTIMEINCREMENT = 823)
+      INTEGER    CDI_KEY_VDIMNAME
+      PARAMETER (CDI_KEY_VDIMNAME       = 920)
+      INTEGER    CDI_KEY_GRIDMAP_VARTYPE
+      PARAMETER (CDI_KEY_GRIDMAP_VARTYPE = 921)
+      INTEGER    CDI_KEY_GRIDMAP_VARNAME
+      PARAMETER (CDI_KEY_GRIDMAP_VARNAME = 922)
+      INTEGER    CDI_KEY_GRIDMAP_NAME
+      PARAMETER (CDI_KEY_GRIDMAP_NAME   = 923)
+      INTEGER    CDI_KEY_DIMNAME
+      PARAMETER (CDI_KEY_DIMNAME        = 941)
+      INTEGER    CDI_KEY_NAME
+      PARAMETER (CDI_KEY_NAME           = 942)
+      INTEGER    CDI_KEY_LONGNAME
+      PARAMETER (CDI_KEY_LONGNAME       = 943)
+      INTEGER    CDI_KEY_STDNAME
+      PARAMETER (CDI_KEY_STDNAME        = 944)
+      INTEGER    CDI_KEY_UNITS
+      PARAMETER (CDI_KEY_UNITS          = 945)
+      INTEGER    CDI_KEY_PSNAME
+      PARAMETER (CDI_KEY_PSNAME         = 950)
+      INTEGER    CDI_KEY_P0NAME
+      PARAMETER (CDI_KEY_P0NAME         = 951)
+      INTEGER    CDI_KEY_P0VALUE
+      PARAMETER (CDI_KEY_P0VALUE        = 952)
       INTEGER         cdiDefKeyInt
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
@@ -1623,6 +1647,23 @@
 !                                     INTEGER         key,
 !                                     INTEGER         value)
       EXTERNAL        cdiInqKeyInt
+
+      INTEGER         cdiDefKeyFloat
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     DOUBLEPRECISION value)
+      EXTERNAL        cdiDefKeyFloat
+
+!
+!  cdiInqKeyFloat Get a float value from a key of a CDI variable
+!
+      INTEGER         cdiInqKeyFloat
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     DOUBLEPRECISION value)
+      EXTERNAL        cdiInqKeyFloat
 
       INTEGER         cdiDefKeyString
 !                                    (INTEGER         cdiID,
@@ -1654,59 +1695,8 @@
       EXTERNAL        cdiCopyKeys
 
 !
-!  CDI grid keys
+!  GRID routines
 !
-      INTEGER    CDI_KEY_VDIMNAME
-      PARAMETER (CDI_KEY_VDIMNAME       = 920)
-      INTEGER    CDI_KEY_GRIDMAP_VARTYPE
-      PARAMETER (CDI_KEY_GRIDMAP_VARTYPE = 921)
-      INTEGER    CDI_KEY_GRIDMAP_VARNAME
-      PARAMETER (CDI_KEY_GRIDMAP_VARNAME = 922)
-      INTEGER    CDI_KEY_GRIDMAP_NAME
-      PARAMETER (CDI_KEY_GRIDMAP_NAME   = 923)
-!
-!  CDI zaxis keys
-!
-      INTEGER    CDI_KEY_DIMNAME
-      PARAMETER (CDI_KEY_DIMNAME        = 941)
-      INTEGER    CDI_KEY_NAME
-      PARAMETER (CDI_KEY_NAME           = 942)
-      INTEGER    CDI_KEY_LONGNAME
-      PARAMETER (CDI_KEY_LONGNAME       = 943)
-      INTEGER    CDI_KEY_UNITS
-      PARAMETER (CDI_KEY_UNITS          = 944)
-      INTEGER    CDI_KEY_PSNAME
-      PARAMETER (CDI_KEY_PSNAME         = 950)
-      INTEGER    CDI_KEY_P0NAME
-      PARAMETER (CDI_KEY_P0NAME         = 951)
-      INTEGER    CDI_KEY_P0VALUE
-      PARAMETER (CDI_KEY_P0VALUE        = 952)
-      INTEGER         cdiZaxisDefKeyStr
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         key,
-!                                     INTEGER         size,
-!                                     CHARACTER*(*)   mesg)
-      EXTERNAL        cdiZaxisDefKeyStr
-
-      INTEGER         cdiZaxisInqKeyStr
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         key,
-!                                     INTEGER         size,
-!                                     CHARACTER*(*)   mesg)
-      EXTERNAL        cdiZaxisInqKeyStr
-
-      INTEGER         cdiZaxisDefKeyFlt
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         key,
-!                                     DOUBLEPRECISION value)
-      EXTERNAL        cdiZaxisDefKeyFlt
-
-      INTEGER         cdiZaxisInqKeyFlt
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         key,
-!                                     DOUBLEPRECISION value)
-      EXTERNAL        cdiZaxisInqKeyFlt
-
 !                     gridDefXname
 !                                    (INTEGER         gridID,
 !                                     CHARACTER*(*)   xname)

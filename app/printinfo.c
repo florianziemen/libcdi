@@ -471,8 +471,8 @@ static void
 printZaxisHybridInfo(const int zaxisID)
 {
   char psname[CDI_MAX_NAME];
-  psname[0] = 0;
-  cdiZaxisInqKeyStr(zaxisID, CDI_KEY_PSNAME, CDI_MAX_NAME, psname);
+  int length = CDI_MAX_NAME;
+  cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_PSNAME, psname, &length);
   const int vctsize = zaxisInqVctSize(zaxisID);
   if (vctsize || psname[0])
     {
