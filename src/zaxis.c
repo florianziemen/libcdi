@@ -113,7 +113,7 @@ static
 void zaxis_init(zaxis_t *zaxisptr)
 {
   zaxisptr->self          = CDI_UNDEFID;
-  zaxisptr->name[0]       = 0;
+  // zaxisptr->name[0]       = 0;
   zaxisptr->longname[0]   = 0;
   zaxisptr->stdname[0]    = 0;
   zaxisptr->dimname[0]    = 0;
@@ -143,6 +143,7 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->number        = 0;
   zaxisptr->nhlev         = 0;
   memset(zaxisptr->uuid, 0, CDI_UUID_SIZE);
+
   zaxisptr->keys.nalloc    = MAX_KEYS;
   zaxisptr->keys.nelems    = 0;
   for ( int i = 0; i < MAX_KEYS; ++i )
@@ -357,7 +358,7 @@ void *zaxis_key_to_ptr(zaxis_t *zaxisptr, int key)
 
   switch (key)
     {
-    case CDI_KEY_NAME:      keyptr = (void*)zaxisptr->name; break;
+      // case CDI_KEY_NAME:      keyptr = (void*)zaxisptr->name; break;
     case CDI_KEY_LONGNAME:  keyptr = (void*)zaxisptr->longname; break;
     case CDI_KEY_UNITS:     keyptr = (void*)zaxisptr->units; break;
     case CDI_KEY_DIMNAME:   keyptr = (void*)zaxisptr->dimname; break;
@@ -536,7 +537,7 @@ The function @func{zaxisDefName} defines the name of a Z-axis.
 */
 void zaxisDefName(int zaxisID, const char *name)
 {
-  (void)cdiZaxisDefKeyStr(zaxisID, CDI_KEY_NAME, CDI_MAX_NAME, name);
+  (void)cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, name);
 }
 
 /*
@@ -598,13 +599,14 @@ The function @func{zaxisInqName} returns the name of a Z-axis.
 */
 void zaxisInqName(int zaxisID, char *name)
 {
-  (void)cdiZaxisInqKeyStr(zaxisID, CDI_KEY_NAME, CDI_MAX_NAME, name);
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, name, &length);
 }
 
 const char *zaxisInqNamePtr(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  return zaxisptr->name;
+  return cdiInqVarKeyString(&zaxisptr->keys, CDI_KEY_NAME);
 }
 
 /*
@@ -1361,6 +1363,14 @@ void zaxisResize(int zaxisID, int size)
     zaxisptr->vals = (double *) Realloc(zaxisptr->vals, (size_t)size*sizeof(double));
 }
 
+static inline
+void zaxisCopyKeyStr(zaxis_t *zaxisptr1, zaxis_t *zaxisptr2, int key)
+{
+  cdi_key_t *keyp = find_key(&zaxisptr1->keys, key);
+  if (keyp && keyp->type == KEY_BYTES)
+    cdiDefVarKeyBytes(&zaxisptr2->keys, key, (const unsigned char*)keyp->v.s, (int)keyp->length);
+}
+
 
 int zaxisDuplicate(int zaxisID)
 {
@@ -1374,7 +1384,8 @@ int zaxisDuplicate(int zaxisID)
 
   zaxis_copy(zaxisptrnew, zaxisptr);
 
-  strcpy(zaxisptrnew->name, zaxisptr->name);
+  zaxisCopyKeyStr(zaxisptr, zaxisptrnew, CDI_KEY_NAME);
+  //strcpy(zaxisptrnew->name, zaxisptr->name);
   strcpy(zaxisptrnew->longname, zaxisptr->longname);
   strcpy(zaxisptrnew->units, zaxisptr->units);
 
@@ -1435,7 +1446,9 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
       const bool zscalar = (bool)zaxisptr->scalar;
       if ( zscalar ) fprintf(fp, "scalar    = true\n");
     }
-  if ( zaxisptr->name[0]     ) fprintf(fp, "name      = %s\n", zaxisptr->name);
+
+  const char *string = cdiInqVarKeyString(&zaxisptr->keys, CDI_KEY_NAME);
+  if ( string[0] ) fprintf(fp, "name      = %s\n", string);
   if ( zaxisptr->longname[0] ) fprintf(fp, "longname  = %s\n", zaxisptr->longname);
   if ( zaxisptr->units[0]    ) fprintf(fp, "units     = %s\n", zaxisptr->units);
 
@@ -1595,7 +1608,7 @@ int zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
   if (anyPresent)
     xassert(size);
 
-  diff |= strcmp(z1->name, z2->name)
+  diff |= strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_NAME), cdiInqVarKeyString(&z2->keys, CDI_KEY_NAME))
     | strcmp(z1->longname, z2->longname)
     | strcmp(z1->stdname, z2->stdname)
     | strcmp(z1->units, z2->units)
@@ -1619,8 +1632,7 @@ enum { zaxisNint     = 8,
        zaxisHasUUIDFlag = 1 << 5,
 };
 
-#define ZAXIS_STR_SERIALIZE { zaxisP->name, zaxisP->longname, \
-                              zaxisP->stdname, zaxisP->units }
+#define ZAXIS_STR_SERIALIZE { zaxisP->longname,  zaxisP->stdname, zaxisP->units }
 
 static
 int zaxisGetMemberMask( zaxis_t * zaxisP )
@@ -1675,6 +1687,8 @@ zaxisGetPackSize(void * voidP, void *context)
     packBufferSize
       += serializeStrTabGetPackSize(strTab, (int)numStr, context);
   }
+
+  packBufferSize += serializeKeysGetPackSize(&zaxisP->keys, context);
 
   packBufferSize += serializeGetSize(1, CDI_DATATYPE_UCHAR, context);
 
@@ -1786,6 +1800,8 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
                           strTab, numStr, context);
   }
 
+  serializeKeysUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &zaxisP->keys, context);
+
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   &zaxisP->positive, 1, CDI_DATATYPE_UINT, context);
 
@@ -1881,6 +1897,8 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
     serializeStrTabPack(strTab, numStr,
                         packBuffer, packBufferSize, packBufferPos, context);
   }
+
+  serializeKeysPack(&zaxisP->keys, packBuffer, packBufferSize, packBufferPos, context);
 
   serializePack(&zaxisP->positive, 1, CDI_DATATYPE_UINT,
                 packBuffer, packBufferSize, packBufferPos, context);

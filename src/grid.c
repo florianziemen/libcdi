@@ -270,22 +270,6 @@ unsigned cdiGridCount(void)
 }
 
 static inline
-void gridSetString(char *gridstrname, const char *name, size_t len)
-{
-  if ( len > CDI_MAX_NAME ) len = CDI_MAX_NAME;
-  strncpy(gridstrname, name, len - 1);
-  gridstrname[len - 1] = 0;
-}
-
-static inline
-void gridGetString(char *name, const char *gridstrname, size_t len)
-{
-  if ( len > CDI_MAX_NAME ) len = CDI_MAX_NAME;
-  strncpy(name, gridstrname, len);
-  name[len - 1] = 0;
-}
-
-static inline
 void gridaxisSetKey(struct gridaxis_t *axisptr, int key, const char *name)
 {
   if (find_key(&axisptr->keys, key) == NULL)
@@ -2389,14 +2373,6 @@ int gridIsEqual(int gridID1, int gridID2)
 }
 */
 
-static
-const char *gridInqKeyStringPtr(cdi_keys_t *keysp, int key)
-{
-  const char *string = cdiInqVarKeyStringPtr(keysp, key);
-  if (string == NULL) string = "";
-  return string;
-}
-
 int gridCompareP(void *gridptr1, void *gridptr2)
 {
   grid_t *g1 = ( grid_t * ) gridptr1;
@@ -2525,12 +2501,12 @@ int gridCompareP(void *gridptr1, void *gridptr2)
       return differ;
   }
 
-  if (strcmp(gridInqKeyStringPtr(&g1->x.keys, CDI_KEY_NAME), gridInqKeyStringPtr(&g2->x.keys, CDI_KEY_NAME))) return differ;
-  if (strcmp(gridInqKeyStringPtr(&g1->y.keys, CDI_KEY_NAME), gridInqKeyStringPtr(&g2->y.keys, CDI_KEY_NAME))) return differ;
-  if (strcmp(gridInqKeyStringPtr(&g1->x.keys, CDI_KEY_LONGNAME), gridInqKeyStringPtr(&g2->x.keys, CDI_KEY_LONGNAME))) return differ;
-  if (strcmp(gridInqKeyStringPtr(&g1->y.keys, CDI_KEY_LONGNAME), gridInqKeyStringPtr(&g2->y.keys, CDI_KEY_LONGNAME))) return differ;
-  if (strcmp(gridInqKeyStringPtr(&g1->x.keys, CDI_KEY_UNITS), gridInqKeyStringPtr(&g2->x.keys, CDI_KEY_UNITS))) return differ;
-  if (strcmp(gridInqKeyStringPtr(&g1->y.keys, CDI_KEY_UNITS), gridInqKeyStringPtr(&g2->y.keys, CDI_KEY_UNITS))) return differ;
+  if (strcmp(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_NAME), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_NAME))) return differ;
+  if (strcmp(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_NAME), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_NAME))) return differ;
+  if (strcmp(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_LONGNAME), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_LONGNAME))) return differ;
+  if (strcmp(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_LONGNAME), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_LONGNAME))) return differ;
+  if (strcmp(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_UNITS), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_UNITS))) return differ;
+  if (strcmp(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_UNITS), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_UNITS))) return differ;
   if (g1->x.stdname != g2->x.stdname) return differ;
   if (g1->y.stdname != g2->y.stdname) return differ;
 
@@ -2611,17 +2587,17 @@ void gridComplete(grid_t *grid)
 
 	if ( grid->projtype == CDI_PROJ_RLL )
 	  {
-            const char *name = gridInqKeyStringPtr(&grid->x.keys, CDI_KEY_NAME);
+            const char *name = cdiInqVarKeyString(&grid->x.keys, CDI_KEY_NAME);
 	    if ( name[0] == 0 || name[0] == 'x' ) cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, "rlon");
-            name = gridInqKeyStringPtr(&grid->y.keys, CDI_KEY_NAME);
+            name = cdiInqVarKeyString(&grid->y.keys, CDI_KEY_NAME);
 	    if ( name[0] == 0 || name[0] == 'y' ) cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, "rlat");
-            name = gridInqKeyStringPtr(&grid->x.keys, CDI_KEY_LONGNAME);
+            name = cdiInqVarKeyString(&grid->x.keys, CDI_KEY_LONGNAME);
 	    if ( name[0] == 0 ) cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_LONGNAME, "longitude in rotated pole grid");
-            name = gridInqKeyStringPtr(&grid->y.keys, CDI_KEY_LONGNAME);
+            name = cdiInqVarKeyString(&grid->y.keys, CDI_KEY_LONGNAME);
 	    if ( name[0] == 0 ) cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_LONGNAME, "latitude in rotated pole grid");
-            name = gridInqKeyStringPtr(&grid->x.keys, CDI_KEY_UNITS);
+            name = cdiInqVarKeyString(&grid->x.keys, CDI_KEY_UNITS);
 	    if ( name[0] == 0 ) cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, "degrees");
-            name = gridInqKeyStringPtr(&grid->y.keys, CDI_KEY_UNITS);
+            name = cdiInqVarKeyString(&grid->y.keys, CDI_KEY_UNITS);
 	    if ( name[0] == 0 ) cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, "degrees");
             grid->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
             grid->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];

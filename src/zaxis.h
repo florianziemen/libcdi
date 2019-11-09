@@ -17,7 +17,7 @@ zkey_double_t;
 typedef struct {
   char     dimname[CDI_MAX_NAME];
   char     vdimname[CDI_MAX_NAME];
-  char     name[CDI_MAX_NAME];
+  // char     name[CDI_MAX_NAME];
   char     longname[CDI_MAX_NAME];
   char     stdname[CDI_MAX_NAME];
   char     units[CDI_MAX_NAME];

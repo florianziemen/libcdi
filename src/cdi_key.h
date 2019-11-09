@@ -29,6 +29,14 @@ void cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, i
 cdi_key_t *find_key(cdi_keys_t *keysp, int key);
 const char *cdiInqVarKeyStringPtr(cdi_keys_t *keysp, int key);
 
+static inline
+const char *cdiInqVarKeyString(cdi_keys_t *keysp, int key)
+{
+  const char *string = cdiInqVarKeyStringPtr(keysp, key);
+  if (string == NULL) string = "";
+  return string;
+}
+
 void cdiCopyVarKeys(cdi_keys_t *keysp, int cdiID2, int varID2);
 void cdiDeleteVarKeys(cdi_keys_t *keysp);
 void cdiDeleteKeys(int cdiID, int varID);
