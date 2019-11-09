@@ -841,7 +841,8 @@ int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
 #define  CDI_KEY_DIMNAME                       941  // Dimension name
 #define  CDI_KEY_NAME                          942  // Variable name
 #define  CDI_KEY_LONGNAME                      943  // Long name of the variable
-#define  CDI_KEY_UNITS                         944  // Units of the variable
+#define  CDI_KEY_STDNAME                       944  // CF Standard name of the variable
+#define  CDI_KEY_UNITS                         945  // Units of the variable
 #define  CDI_KEY_PSNAME      950  // Z-axis surface pressure name
 #define  CDI_KEY_P0NAME      951  // Z-axis reference pressure name
 #define  CDI_KEY_P0VALUE     952  // Z-axis reference pressure in Pa

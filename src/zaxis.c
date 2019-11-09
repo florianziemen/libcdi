@@ -113,12 +113,8 @@ static
 void zaxis_init(zaxis_t *zaxisptr)
 {
   zaxisptr->self          = CDI_UNDEFID;
-  // zaxisptr->name[0]       = 0;
-  zaxisptr->longname[0]   = 0;
-  zaxisptr->stdname[0]    = 0;
   zaxisptr->dimname[0]    = 0;
   zaxisptr->vdimname[0]   = 0;
-  zaxisptr->units[0]      = 0;
   zaxisptr->psname[0]     = 0;
   zaxisptr->p0name[0]     = 0;
   zaxisptr->p0value.defined = false;
@@ -211,8 +207,9 @@ int zaxisCreate_(int zaxistype, int size, int id)
   if ( zaxistype != ZAXIS_GENERIC ) zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
   zaxisDefUnits(zaxisID, ZaxistypeEntry[zaxistype].units);
 
-  if ( *ZaxistypeEntry[zaxistype].stdname )
-    strcpy(zaxisptr->stdname, ZaxistypeEntry[zaxistype].stdname);
+  const char *stdname = ZaxistypeEntry[zaxistype].stdname;
+  if ( *stdname )
+    cdiDefVarKeyBytes(&zaxisptr->keys, CDI_KEY_STDNAME, (const unsigned char*)stdname, (int)stdname+1);
 
   zaxisptr->positive = ZaxistypeEntry[zaxistype].positive;
 
@@ -358,9 +355,6 @@ void *zaxis_key_to_ptr(zaxis_t *zaxisptr, int key)
 
   switch (key)
     {
-      // case CDI_KEY_NAME:      keyptr = (void*)zaxisptr->name; break;
-    case CDI_KEY_LONGNAME:  keyptr = (void*)zaxisptr->longname; break;
-    case CDI_KEY_UNITS:     keyptr = (void*)zaxisptr->units; break;
     case CDI_KEY_DIMNAME:   keyptr = (void*)zaxisptr->dimname; break;
     case CDI_KEY_VDIMNAME:  keyptr = (void*)zaxisptr->vdimname; break;
     case CDI_KEY_PSNAME:    keyptr = (void*)zaxisptr->psname; break;
@@ -556,7 +550,7 @@ The function @func{zaxisDefLongname} defines the longname of a Z-axis.
 */
 void zaxisDefLongname(int zaxisID, const char *longname)
 {
-  (void)cdiZaxisDefKeyStr(zaxisID, CDI_KEY_LONGNAME, CDI_MAX_NAME, longname);
+  (void)cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, longname);
 }
 
 /*
@@ -575,7 +569,7 @@ The function @func{zaxisDefUnits} defines the units of a Z-axis.
 */
 void zaxisDefUnits(int zaxisID, const char *units)
 {
-  (void)cdiZaxisDefKeyStr(zaxisID, CDI_KEY_UNITS, CDI_MAX_NAME, units);
+  (void)cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units);
 }
 
 /*
@@ -630,7 +624,8 @@ The function @func{zaxisInqLongname} returns the longname of a Z-axis.
 */
 void zaxisInqLongname(int zaxisID, char *longname)
 {
-  (void)cdiZaxisInqKeyStr(zaxisID, CDI_KEY_LONGNAME, CDI_MAX_NAME, longname);
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, longname, &length);
 }
 
 /*
@@ -654,14 +649,15 @@ The function @func{zaxisInqUnits} returns the units of a Z-axis.
 */
 void zaxisInqUnits(int zaxisID, char *units)
 {
-  (void)cdiZaxisInqKeyStr(zaxisID, CDI_KEY_UNITS, CDI_MAX_NAME, units);
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
 }
 
 
 void zaxisInqStdname(int zaxisID, char *stdname)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  strcpy(stdname, zaxisptr->stdname);
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_STDNAME, stdname, &length);
 }
 
 
@@ -1385,9 +1381,8 @@ int zaxisDuplicate(int zaxisID)
   zaxis_copy(zaxisptrnew, zaxisptr);
 
   zaxisCopyKeyStr(zaxisptr, zaxisptrnew, CDI_KEY_NAME);
-  //strcpy(zaxisptrnew->name, zaxisptr->name);
-  strcpy(zaxisptrnew->longname, zaxisptr->longname);
-  strcpy(zaxisptrnew->units, zaxisptr->units);
+  zaxisCopyKeyStr(zaxisptr, zaxisptrnew, CDI_KEY_LONGNAME);
+  zaxisCopyKeyStr(zaxisptr, zaxisptrnew, CDI_KEY_UNITS);
 
   if ( zaxisptr->vals )
     {
@@ -1449,8 +1444,10 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 
   const char *string = cdiInqVarKeyString(&zaxisptr->keys, CDI_KEY_NAME);
   if ( string[0] ) fprintf(fp, "name      = %s\n", string);
-  if ( zaxisptr->longname[0] ) fprintf(fp, "longname  = %s\n", zaxisptr->longname);
-  if ( zaxisptr->units[0]    ) fprintf(fp, "units     = %s\n", zaxisptr->units);
+  string = cdiInqVarKeyString(&zaxisptr->keys, CDI_KEY_LONGNAME);
+  if ( string[0] ) fprintf(fp, "longname  = %s\n", string);
+  string = cdiInqVarKeyString(&zaxisptr->keys, CDI_KEY_UNITS);
+  if ( string[0]    ) fprintf(fp, "units     = %s\n", string);
 
   if ( zaxisptr->vals )
     {
@@ -1609,9 +1606,9 @@ int zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
     xassert(size);
 
   diff |= strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_NAME), cdiInqVarKeyString(&z2->keys, CDI_KEY_NAME))
-    | strcmp(z1->longname, z2->longname)
-    | strcmp(z1->stdname, z2->stdname)
-    | strcmp(z1->units, z2->units)
+    | strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_LONGNAME), cdiInqVarKeyString(&z2->keys, CDI_KEY_LONGNAME))
+    | strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_STDNAME), cdiInqVarKeyString(&z2->keys, CDI_KEY_STDNAME))
+    | strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_UNITS), cdiInqVarKeyString(&z2->keys, CDI_KEY_UNITS))
     | memcmp(z1->uuid, z2->uuid, CDI_UUID_SIZE);
   return diff != 0;
 }
@@ -1631,8 +1628,6 @@ enum { zaxisNint     = 8,
        vct      = 1 << 4,
        zaxisHasUUIDFlag = 1 << 5,
 };
-
-#define ZAXIS_STR_SERIALIZE { zaxisP->longname,  zaxisP->stdname, zaxisP->units }
 
 static
 int zaxisGetMemberMask( zaxis_t * zaxisP )
@@ -1680,13 +1675,6 @@ zaxisGetPackSize(void * voidP, void *context)
       packBufferSize += serializeGetSize(zaxisP->vctsize, CDI_DATATYPE_FLT64, context)
         + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
     }
-
-  {
-    const char *strTab[] = ZAXIS_STR_SERIALIZE;
-    size_t numStr = sizeof (strTab) / sizeof (strTab[0]);
-    packBufferSize
-      += serializeStrTabGetPackSize(strTab, (int)numStr, context);
-  }
 
   packBufferSize += serializeKeysGetPackSize(&zaxisP->keys, context);
 
@@ -1793,13 +1781,6 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
       xassert(cdiCheckSum(CDI_DATATYPE_FLT64, size, zaxisP->vct) == d);
     }
 
-  {
-    char *strTab[] = ZAXIS_STR_SERIALIZE;
-    int numStr = sizeof (strTab) / sizeof (strTab[0]);
-    serializeStrTabUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                          strTab, numStr, context);
-  }
-
   serializeKeysUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &zaxisP->keys, context);
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -1891,13 +1872,6 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
-  {
-    const char *strTab[] = ZAXIS_STR_SERIALIZE;
-    int numStr = sizeof (strTab) / sizeof (strTab[0]);
-    serializeStrTabPack(strTab, numStr,
-                        packBuffer, packBufferSize, packBufferPos, context);
-  }
-
   serializeKeysPack(&zaxisP->keys, packBuffer, packBufferSize, packBufferPos, context);
 
   serializePack(&zaxisP->positive, 1, CDI_DATATYPE_UINT,
@@ -1914,8 +1888,6 @@ void cdiZaxisGetIndexList(unsigned nzaxis, int *zaxisResHs)
 {
   reshGetResHListOfType(nzaxis, zaxisResHs, &zaxisOps);
 }
-
-#undef ZAXIS_STR_SERIALIZE
 
 /*
  * Local Variables:

@@ -4149,7 +4149,6 @@ void cdiGridGetIndexList(unsigned ngrids, int * gridIndexList)
   reshGetResHListOfType(ngrids, gridIndexList, &gridOps);
 }
 
-
 static int
 gridTxCode ()
 {
@@ -4378,10 +4377,8 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->y.size        =   intBuffer[GRID_PACK_INT_IDX_Y_SIZE];
     gridP->lcomplex      =   (bool)intBuffer[GRID_PACK_INT_IDX_LCOMPLEX];
     memberMask           =   intBuffer[GRID_PACK_INT_IDX_MEMBERMASK];
-    gridP->x.stdname     =
-      xystdname_tab[intBuffer[GRID_PACK_INT_IDX_XTSTDNNAME]][0];
-    gridP->y.stdname     =
-      xystdname_tab[intBuffer[GRID_PACK_INT_IDX_YTSTDNNAME]][1];
+    gridP->x.stdname     =   xystdname_tab[intBuffer[GRID_PACK_INT_IDX_XTSTDNNAME]][0];
+    gridP->y.stdname     =   xystdname_tab[intBuffer[GRID_PACK_INT_IDX_YTSTDNNAME]][1];
     gridP->iScansNegatively         =   (bool)intBuffer[GRID_PACK_INT_IDX_ISCANSNEGATIVELY];
     gridP->jScansPositively         =   (bool)intBuffer[GRID_PACK_INT_IDX_JSCANSPOSITIVELY];
     gridP->jPointsAreConsecutive    =   (bool)intBuffer[GRID_PACK_INT_IDX_JPOINTSARECONSECUTIVE];
