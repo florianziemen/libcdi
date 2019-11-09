@@ -25,7 +25,9 @@ typedef struct {
 enum  {KEY_INT = 1, KEY_FLOAT, KEY_BYTES};
 
 void cdiDefVarKeyInt(cdi_keys_t *keysp, int key, int value);
+void cdiDefVarKeyFloat(cdi_keys_t *keysp, int key, double value);
 void cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, int length);
+
 cdi_key_t *find_key(cdi_keys_t *keysp, int key);
 const char *cdiInqVarKeyStringPtr(cdi_keys_t *keysp, int key);
 

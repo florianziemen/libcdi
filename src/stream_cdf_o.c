@@ -1214,17 +1214,19 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
   const int fileID = streamptr->fileID;
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-  char psname[CDI_MAX_NAME]; psname[0] = 0;
-  cdiZaxisInqKeyStr(zaxisID, CDI_KEY_PSNAME, CDI_MAX_NAME, psname);
+  char psname[CDI_MAX_NAME];
+  int length = CDI_MAX_NAME;
+  cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_PSNAME, psname, &length);
   if ( psname[0] == 0 ) strcpy(psname, "ps");
 
   char p0name[CDI_MAX_NAME]; p0name[0] = 0;
   double p0value = 1;
   int p0varid = CDI_UNDEFID;
-  const int p0status = cdiZaxisInqKeyFlt(zaxisID, CDI_KEY_P0VALUE, &p0value);
-  if ( p0status == 0 )
+  const int p0status = cdiInqKeyFloat(zaxisID, CDI_GLOBAL, CDI_KEY_P0VALUE, &p0value);
+  if ( p0status == CDI_NOERR )
     {
-      cdiZaxisInqKeyStr(zaxisID, CDI_KEY_P0NAME, CDI_MAX_NAME, p0name);
+      length = CDI_MAX_NAME;
+      cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_P0NAME, p0name, &length);
       if ( p0name[0] == 0 ) strcpy(p0name, "p0");
       cdf_def_var(fileID, p0name, NC_DOUBLE, 0, 0,  &p0varid);
       static const char longname[] = "reference pressure";

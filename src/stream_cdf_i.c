@@ -2983,13 +2983,13 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
           if ( zaxisType == ZAXIS_HYBRID )
             {
               if ( psvarid != -1 )
-                cdiZaxisDefKeyStr(zaxisID, CDI_KEY_PSNAME, (int)(strlen(ncvars[psvarid].name)+1), ncvars[psvarid].name);
+                cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_PSNAME, ncvars[psvarid].name);
               if ( p0varid != -1 )
                 {
                   double px = 1;
                   cdf_get_var_double(ncvars[p0varid].ncid, p0varid, &px);
-                  cdiZaxisDefKeyFlt(zaxisID, CDI_KEY_P0VALUE, px);
-                  cdiZaxisDefKeyStr(zaxisID, CDI_KEY_P0NAME, (int)(strlen(ncvars[p0varid].name)+1), ncvars[p0varid].name);
+                  cdiDefKeyFloat(zaxisID, CDI_GLOBAL, CDI_KEY_P0VALUE, px);
+                  cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_P0NAME, ncvars[p0varid].name);
                 }
             }
 

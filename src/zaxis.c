@@ -115,9 +115,6 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->self          = CDI_UNDEFID;
   zaxisptr->dimname[0]    = 0;
   zaxisptr->vdimname[0]   = 0;
-  zaxisptr->psname[0]     = 0;
-  zaxisptr->p0name[0]     = 0;
-  zaxisptr->p0value.defined = false;
   zaxisptr->vals          = NULL;
 #ifndef USE_MPI
   zaxisptr->cvals         = NULL;
@@ -357,9 +354,6 @@ void *zaxis_key_to_ptr(zaxis_t *zaxisptr, int key)
     {
     case CDI_KEY_DIMNAME:   keyptr = (void*)zaxisptr->dimname; break;
     case CDI_KEY_VDIMNAME:  keyptr = (void*)zaxisptr->vdimname; break;
-    case CDI_KEY_PSNAME:    keyptr = (void*)zaxisptr->psname; break;
-    case CDI_KEY_P0NAME:    keyptr = (void*)zaxisptr->p0name; break;
-    case CDI_KEY_P0VALUE:   keyptr = (void*)&zaxisptr->p0value; break;
     }
 
   return keyptr;
@@ -438,79 +432,6 @@ int cdiZaxisInqKeyStr(int zaxisID, int key, int size, char *mesg)
     }
 
   zaxisGetString(mesg, keyptr, (size_t)size);
-
-  return 0;
-}
-
-
-/*
-@Function  cdiZaxisDefKeyFlt
-@Title     Define a CDI Z-axis floating point value from a key
-
-@Prototype int cdiZaxisDefKeyFlt(int zaxisID, int key, double value)
-@Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
-    @Item  key      The key to be searched
-    @Item  value    A double where the data will be read
-
-@Description
-The function @func{cdiZaxisDefKeyFlt} defines a CDI Z-axis double value from a key.
-
-@Result
-@func{cdiZaxisDefKeyFlt} returns 0 if OK and integer value on error.
-
-@EndFunction
-*/
-int cdiZaxisDefKeyFlt(int zaxisID, int key, double value)
-{
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
-  zkey_double_t *keyptr = (zkey_double_t*)zaxis_key_to_ptr(zaxisptr, key);
-  if ( keyptr == NULL)
-    {
-      Warning("CDI zaxis double key %d not supported!", key);
-      return -1;
-    }
-
-  keyptr->value = value;
-  keyptr->defined = true;
-
-  reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
-
-  return 0;
-}
-
-/*
-@Function  cdiZaxisInqKeyFlt
-@Title     Get a CDI Z-axis floating point value from a key
-
-@Prototype int cdiZaxisInqKeyFlt(int zaxisID, int key, double *value)
-@Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
-    @Item  key      The key to be searched.
-    @Item value     The address of a double where the data will be retrieved.
-
-@Description
-The function @func{cdiZaxisInqKeyFlt} return a CDI Z-axis double value from a key.
-
-@Result
-@func{cdiZaxisInqKeyFlt} returns 0 if OK and integer value on error.
-
-@EndFunction
-*/
-int cdiZaxisInqKeyFlt(int zaxisID, int key, double *value)
-{
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  zkey_double_t *keyptr = (zkey_double_t*)zaxis_key_to_ptr(zaxisptr, key);
-  if ( keyptr == NULL)
-    {
-      Warning("CDI zaxis double key %d not supported!", key);
-      return -1;
-    }
-
-  if ( !keyptr->defined ) return 1;
-
-  *value = keyptr->value;
 
   return 0;
 }

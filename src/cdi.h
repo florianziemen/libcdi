@@ -814,6 +814,12 @@ int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
 //      cdiInqKeyInt: Get an integer value from a key of a CDI variable
 int     cdiInqKeyInt(int cdiID, int varID, int key, int *value);
 
+//      cdiDefKeyFloat: Define a float value from a key of a CDI variable
+int     cdiDefKeyFloat(int cdiID, int varID, int key, double value);
+
+//      cdiInqKeyFloat Get a float value from a key of a CDI variable
+int     cdiInqKeyFloat(int cdiID, int varID, int key, double *value);
+
 //      cdiDefKeyBytes: Define a bytes array from a key of a CDI variable
 int     cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char bytes[], int length);
 
@@ -843,21 +849,15 @@ int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
 #define  CDI_KEY_LONGNAME                      943  // Long name of the variable
 #define  CDI_KEY_STDNAME                       944  // CF Standard name of the variable
 #define  CDI_KEY_UNITS                         945  // Units of the variable
-#define  CDI_KEY_PSNAME      950  // Z-axis surface pressure name
-#define  CDI_KEY_P0NAME      951  // Z-axis reference pressure name
-#define  CDI_KEY_P0VALUE     952  // Z-axis reference pressure in Pa
+#define  CDI_KEY_PSNAME                        950  // Z-axis surface pressure name
+#define  CDI_KEY_P0NAME                        951  // Z-axis reference pressure name
+#define  CDI_KEY_P0VALUE                       952  // Z-axis reference pressure in Pa
 
 //      cdiZaxisDefKeyStr: Define a CDI Z-axis string value from a key
 int     cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg);
 
 //      cdiZaxisInqKeyStr: Get a CDI Z-axis string value from a key
 int     cdiZaxisInqKeyStr(int zaxisID, int key, int size, char *mesg);
-
-//      cdiZaxisDefKeyFlt: Define a CDI Z-axis floating point value from a key
-int     cdiZaxisDefKeyFlt(int zaxisID, int key, double value);
-
-//      cdiZaxisInqKeyFlt: Get a CDI Z-axis floating point value from a key
-int     cdiZaxisInqKeyFlt(int zaxisID, int key, double *value);
 
 //      gridDefXname: Define the name of a X-axis
 void    gridDefXname(int gridID, const char *xname);

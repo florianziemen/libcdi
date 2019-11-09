@@ -145,6 +145,10 @@ void cdiPrintVarKeys(cdi_keys_t *keysp)
         {
           printf("%d key %d length %d value %s\n", keyid+1, keyp->key, keyp->length,  keyp->v.s);
         }
+      else if (keyp->type == KEY_FLOAT)
+        {
+          printf("%d key %d value %g\n", keyid+1, keyp->key, keyp->v.d);
+        }
       else if (keyp->type == KEY_INT)
         {
           printf("%d key %d value %d\n", keyid+1, keyp->key, keyp->v.i);
@@ -222,7 +226,25 @@ void cdiDefVarKeyInt(cdi_keys_t *keysp, int key, int value)
     }
 }
 
-//  cdiDefKeyInt: Define an integer value from a key of a CDI variable
+/*
+@Function  cdiDefKeyInt
+@Title     Define an integer value from a key of a CDI variable
+
+@Prototype int cdiDefKeyInt(int cdiID, int varID, int key, int value)
+@Parameter
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
+    @Item  varID    Variable identifier or CDI_GLOBAL.
+    @Item  key      The key to be searched
+    @Item  value    An integer where the data will be read
+
+@Description
+The function @func{cdiDefKeyInt} defines a CDI integer value from a key.
+
+@Result
+@func{cdiDefKeyInt} returns CDI_NOERR if OK.
+
+@EndFunction
+*/
 int cdiDefKeyInt(int cdiID, int varID, int key, int value)
 {
   int status = CDI_NOERR;
@@ -235,12 +257,30 @@ int cdiDefKeyInt(int cdiID, int varID, int key, int value)
   return status;
 }
 
-//  cdiInqKeyInt: Get an integer value from a key of a CDI variable
+/*
+@Function  cdiInqKeyInt
+@Title     Get a CDI floating point value from a key
+
+@Prototype int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
+@Parameter
+    @Item  cdiID    CDI ID, from a previous call to @fref{zaxisCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
+    @Item  varID    Variable identifier or CDI_GLOBAL.
+    @Item  key      The key to be searched.
+    @Item  value    The address of an integer where the data will be retrieved.
+
+@Description
+The function @func{cdiInqKeyInt} return a CDI integer value from a key.
+
+@Result
+@func{cdiInqKeyInt} returns CDI_NOERR if key is available.
+
+@EndFunction
+*/
 int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
 {
   int status = -1;
 
-  if ( varID != CDI_GLOBAL ) status = cdiInqKeyInt(cdiID, CDI_GLOBAL, key, value);
+  // if ( varID != CDI_GLOBAL ) status = cdiInqKeyInt(cdiID, CDI_GLOBAL, key, value);
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
@@ -251,6 +291,94 @@ int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
       if ( keyp->type == KEY_INT )
 	{
           *value = keyp->v.i;
+          status = CDI_NOERR;
+	}
+    }
+
+  return status;
+}
+
+
+void cdiDefVarKeyFloat(cdi_keys_t *keysp, int key, double value)
+{
+  cdi_key_t *keyp = find_key(keysp, key);
+  if ( keyp == NULL ) keyp = new_key(keysp, key);
+
+  if ( keyp != NULL )
+    {
+      //if ( keyp->v.i != value )
+        {
+          keyp->type = KEY_INT;
+          keyp->v.d = value;
+        }
+    }
+}
+
+/*
+@Function  cdiDefKeyFloat
+@Title     Define a floating point value from a key of a CDI variable
+
+@Prototype int cdiDefKeyFloat(int cdiID, int varID, int key, double value)
+@Parameter
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
+    @Item  varID    Variable identifier or CDI_GLOBAL.
+    @Item  key      The key to be searched
+    @Item  value    A double where the data will be read
+
+@Description
+The function @func{cdiDefKeyFloat} defines a CDI floating point value from a key.
+
+@Result
+@func{cdiDefKeyFloat} returns CDI_NOERR if OK.
+
+@EndFunction
+*/
+int cdiDefKeyFloat(int cdiID, int varID, int key, double value)
+{
+  int status = CDI_NOERR;
+
+  cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
+  xassert(keysp != NULL);
+
+  cdiDefVarKeyFloat(keysp, key, value);
+
+  return status;
+}
+
+/*
+@Function  cdiInqKeyFloat
+@Title     Get a CDI floating point value from a key
+
+@Prototype int cdiInqKeyFloat(int cdiID, int varID, int key, double *value)
+@Parameter
+    @Item  cdiID    CDI ID, from a previous call to @fref{zaxisCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
+    @Item  varID    Variable identifier or CDI_GLOBAL.
+    @Item  key      The key to be searched.
+    @Item  value    The address of a double where the data will be retrieved.
+
+@Description
+The function @func{cdiInqKeyFloat} return a CDI floating point value from a key.
+
+@Result
+@func{cdiInqKeyFloat} returns CDI_NOERR if key is available.
+
+@EndFunction
+*/
+int cdiInqKeyFloat(int cdiID, int varID, int key, double *value)
+{
+  int status = -1;
+
+  // if ( varID != CDI_GLOBAL ) status = cdiInqKeyFloat(cdiID, CDI_GLOBAL, key, value);
+
+  cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
+  xassert(keysp != NULL);
+
+  cdi_key_t *keyp = find_key(keysp, key);
+  if ( keyp != NULL ) // key in use
+    {
+      if ( keyp->type == KEY_FLOAT )
+	{
+          *value = keyp->v.d;
           status = CDI_NOERR;
 	}
     }
@@ -323,11 +451,11 @@ int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *len
 
 /*
 @Function  cdiDefKeyString
-@Title     Define a CDI grid string value from a key
+@Title     Define a string value from a key of a CDI variable
 
 @Prototype int cdiDefKeyString(int cdiID, int varID, int key, const char *string)
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate} or @fref{gridCreate}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
     @Item  varID    Variable identifier or CDI_GLOBAL.
     @Item  key      The key to be searched.
     @Item  string   The address of a string where the data will be read.
@@ -352,18 +480,18 @@ int cdiDefKeyString(int cdiID, int varID, int key, const char *string)
 
 /*
 @Function  cdiInqKeyString
-@Title     Get a CDI grid string value from a key
+@Title     Get a CDI string value from a key
 
 @Prototype int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate} or @fref{gridCreate}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
     @Item  varID    Variable identifier or CDI_GLOBAL.
     @Item  key      The key to be searched.
     @Item  string   The address of a string where the data will be retrieved.
                     The caller must allocate space for the returned string.
     @Item  length   The allocated length of the string on input.
 @Description
-The function @func{cdiInqKeyString} return a CDI grid string value from a key.
+The function @func{cdiInqKeyString} return a CDI string value from a key.
 
 @Result
 @func{cdiInqKeyString} returns CDI_NOERR if key is available.
