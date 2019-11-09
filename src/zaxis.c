@@ -209,7 +209,7 @@ int zaxisCreate_(int zaxistype, int size, int id)
 
   const char *stdname = ZaxistypeEntry[zaxistype].stdname;
   if ( *stdname )
-    cdiDefVarKeyBytes(&zaxisptr->keys, CDI_KEY_STDNAME, (const unsigned char*)stdname, (int)stdname+1);
+    cdiDefVarKeyBytes(&zaxisptr->keys, CDI_KEY_STDNAME, (const unsigned char*)stdname, (int)strlen(stdname)+1);
 
   zaxisptr->positive = ZaxistypeEntry[zaxistype].positive;
 
@@ -1447,7 +1447,7 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
   string = cdiInqVarKeyString(&zaxisptr->keys, CDI_KEY_LONGNAME);
   if ( string[0] ) fprintf(fp, "longname  = %s\n", string);
   string = cdiInqVarKeyString(&zaxisptr->keys, CDI_KEY_UNITS);
-  if ( string[0]    ) fprintf(fp, "units     = %s\n", string);
+  if ( string[0] ) fprintf(fp, "units     = %s\n", string);
 
   if ( zaxisptr->vals )
     {
