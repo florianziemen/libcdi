@@ -826,8 +826,11 @@ bool zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const d
 {
   bool differ = true;
 
-  bool ltype1_is_equal = (ltype1 == zaxisInqLtype(zaxisID));
-  bool ltype2_is_equal = (ltype2 == zaxisInqLtype2(zaxisID));
+  int ltype1_0 = 0, ltype2_0 = -1;
+  cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype1_0);
+  cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFSECONDFIXEDSURFACE, &ltype2_0);
+  bool ltype1_is_equal = (ltype1 == ltype1_0);
+  bool ltype2_is_equal = (ltype2 == ltype2_0);
 
   if ( ltype1_is_equal && ltype2_is_equal && (zaxistype == zaxisInqType(zaxisID) || zaxistype == ZAXIS_GENERIC) )
     {
@@ -972,9 +975,8 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, c
 	  if ( longname && longname[0] ) zaxisDefLongname(zaxisID, longname);
 	  if ( units && units[0] ) zaxisDefUnits(zaxisID, units);
 	  zaxisDefDatatype(zaxisID, prec);
-	  zaxisDefLtype(zaxisID, ltype1);
-          //if ( ltype1 != ltype2 && ltype2 != -1 ) zaxisDefLtype2(zaxisID, ltype2);
-          if ( ltype2 != -1 ) zaxisDefLtype2(zaxisID, ltype2);
+          cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, ltype1);
+          if ( ltype2 != -1 ) cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFSECONDFIXEDSURFACE, ltype2);
 	}
 
       vlistptr->zaxisIDs[nzaxis] = zaxisID;

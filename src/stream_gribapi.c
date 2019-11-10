@@ -2385,8 +2385,9 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
   bool lbounds = false;
 
   int zaxistype = zaxisInqType(zaxisID);
-  long ltype = zaxisInqLtype(zaxisID);
-  long ltype2 = zaxisInqLtype2(zaxisID);
+  int ltype = 0, ltype2 = -1;
+  cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
+  cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFSECONDFIXEDSURFACE, &ltype2);
   double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
 
   double dlevel1 = level, dlevel2 = 0;

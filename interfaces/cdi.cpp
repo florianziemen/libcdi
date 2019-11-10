@@ -214,7 +214,8 @@ CdiZaxis::CdiZaxis(int zaxisid) {
   size    = zaxisInqSize(zaxisID);
   prec    = zaxisInqDatatype(zaxisID);
   type    = zaxisInqType(zaxisID);
-  ltype   = zaxisInqLtype(zaxisID);
+  ltype   = 0;
+  cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
 
   plevels  = (double *) malloc(size*sizeof(double));
   plbounds = (double *) malloc(size*sizeof(double));

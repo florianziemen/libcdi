@@ -1610,6 +1610,10 @@
       PARAMETER (CDI_KEY_CONSTITUENTTYPE = 822)
       INTEGER    CDI_KEY_TYPEOFTIMEINCREMENT
       PARAMETER (CDI_KEY_TYPEOFTIMEINCREMENT = 823)
+      INTEGER    CDI_KEY_TYPEOFFIRSTFIXEDSURFACE
+      PARAMETER (CDI_KEY_TYPEOFFIRSTFIXEDSURFACE = 824)
+      INTEGER    CDI_KEY_TYPEOFSECONDFIXEDSURFACE
+      PARAMETER (CDI_KEY_TYPEOFSECONDFIXEDSURFACE = 825)
       INTEGER    CDI_KEY_VDIMNAME
       PARAMETER (CDI_KEY_VDIMNAME       = 920)
       INTEGER    CDI_KEY_GRIDMAP_VARTYPE
@@ -1693,6 +1697,13 @@
 !                                     INTEGER         cdiID2,
 !                                     INTEGER         varID2)
       EXTERNAL        cdiCopyKeys
+
+      INTEGER         cdiCopyKey
+!                                    (INTEGER         cdiID1,
+!                                     INTEGER         varID1,
+!                                     INTEGER         key,
+!                                     INTEGER         cdiID2)
+      EXTERNAL        cdiCopyKey
 
 !
 !  GRID routines
@@ -2183,24 +2194,6 @@
       INTEGER         zaxisInqScalar
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisInqScalar
-
-!                     zaxisDefLtype
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         ltype)
-      EXTERNAL        zaxisDefLtype
-
-      INTEGER         zaxisInqLtype
-!                                    (INTEGER         zaxisID)
-      EXTERNAL        zaxisInqLtype
-
-!                     zaxisDefLtype2
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         ltype2)
-      EXTERNAL        zaxisDefLtype2
-
-      INTEGER         zaxisInqLtype2
-!                                    (INTEGER         zaxisID)
-      EXTERNAL        zaxisInqLtype2
 
 !                     zaxisDefVct
 !                                    (INTEGER         zaxisID,

@@ -481,6 +481,8 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_UVRELATIVETOGRID = 821
   integer(c_int), public, parameter :: CDI_KEY_CONSTITUENTTYPE = 822
   integer(c_int), public, parameter :: CDI_KEY_TYPEOFTIMEINCREMENT = 823
+  integer(c_int), public, parameter :: CDI_KEY_TYPEOFFIRSTFIXEDSURFACE = 824
+  integer(c_int), public, parameter :: CDI_KEY_TYPEOFSECONDFIXEDSURFACE = 825
   integer(c_int), public, parameter :: CDI_KEY_VDIMNAME = 920
   integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_VARTYPE = 921
   integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_VARNAME = 922
@@ -503,6 +505,7 @@ module mo_cdi
   public :: cdiInqKeyString
   public :: cdiInqKeyLen
   public :: cdiCopyKeys
+  public :: cdiCopyKey
   public :: gridDefXname
   public :: gridInqXname
   public :: gridDefXlongname
@@ -591,10 +594,6 @@ module mo_cdi
   public :: zaxisInqPositive
   public :: zaxisDefScalar
   public :: zaxisInqScalar
-  public :: zaxisDefLtype
-  public :: zaxisInqLtype
-  public :: zaxisDefLtype2
-  public :: zaxisInqLtype2
   public :: zaxisDefVct
   public :: zaxisInqVct
   public :: zaxisInqVctSize
@@ -2018,6 +2017,16 @@ module mo_cdi
       integer(c_int) :: f_result
     end function cdiCopyKeys
 
+    function cdiCopyKey(cdiID1_dummy, varID1_dummy, key_dummy, cdiID2_dummy)&
+    & bind(c, name = 'cdiCopyKey') result(f_result)
+      import c_int
+      integer(c_int), value :: cdiID1_dummy
+      integer(c_int), value :: varID1_dummy
+      integer(c_int), value :: key_dummy
+      integer(c_int), value :: cdiID2_dummy
+      integer(c_int) :: f_result
+    end function cdiCopyKey
+
     subroutine gridDefDatatype(gridID_dummy, prec_dummy) bind(c, name =&
     & 'gridDefDatatype')
       import c_int
@@ -2523,34 +2532,6 @@ module mo_cdi
       integer(c_int), value :: zaxisID_dummy
       integer(c_int) :: f_result
     end function zaxisInqScalar
-
-    subroutine zaxisDefLtype(zaxisID_dummy, ltype_dummy) bind(c, name =&
-    & 'zaxisDefLtype')
-      import c_int
-      integer(c_int), value :: zaxisID_dummy
-      integer(c_int), value :: ltype_dummy
-    end subroutine zaxisDefLtype
-
-    function zaxisInqLtype(zaxisID_dummy) bind(c, name = 'zaxisInqLtype')&
-    & result(f_result)
-      import c_int
-      integer(c_int), value :: zaxisID_dummy
-      integer(c_int) :: f_result
-    end function zaxisInqLtype
-
-    subroutine zaxisDefLtype2(zaxisID_dummy, ltype2_dummy) bind(c, name =&
-    & 'zaxisDefLtype2')
-      import c_int
-      integer(c_int), value :: zaxisID_dummy
-      integer(c_int), value :: ltype2_dummy
-    end subroutine zaxisDefLtype2
-
-    function zaxisInqLtype2(zaxisID_dummy) bind(c, name = 'zaxisInqLtype2')&
-    & result(f_result)
-      import c_int
-      integer(c_int), value :: zaxisID_dummy
-      integer(c_int) :: f_result
-    end function zaxisInqLtype2
 
     subroutine zaxisDefVct(zaxisID_dummy, size_dummy, vct_dummy) bind(c, name =&
     & 'zaxisDefVct')

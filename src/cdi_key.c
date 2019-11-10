@@ -184,16 +184,24 @@ int cdiInqKeyLen(int cdiID, int varID, int key, int *length)
   return status;
 }
 
+static
+void cdi_copy_key(cdi_key_t *keyp, int cdiID, int varID)
+{
+  if ( keyp->type == KEY_INT )
+    cdiDefKeyInt(cdiID, varID, keyp->key, keyp->v.i);
+  else if ( keyp->type == KEY_FLOAT )
+    cdiDefKeyFloat(cdiID, varID, keyp->key, keyp->v.d);
+  else if ( keyp->type == KEY_BYTES )
+    cdiDefKeyBytes(cdiID, varID, keyp->key, keyp->v.s, keyp->length);
+}
+
 
 void cdiCopyVarKeys(cdi_keys_t *keysp, int cdiID2, int varID2)
 {
   for ( size_t keyid = 0; keyid < keysp->nelems; keyid++ )
     {
       cdi_key_t *keyp = &(keysp->value[keyid]);
-      if ( keyp->type == KEY_INT )
-        cdiDefKeyInt(cdiID2, varID2, keyp->key, keyp->v.i);
-      else if ( keyp->type == KEY_BYTES )
-        cdiDefKeyBytes(cdiID2, varID2, keyp->key, keyp->v.s, keyp->length);
+      cdi_copy_key(keyp, cdiID2, varID2);
     }
 }
 
@@ -206,6 +214,22 @@ int cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2)
   xassert(keysp != NULL);
 
   cdiCopyVarKeys(keysp, cdiID2, varID2);
+
+  return status;
+}
+
+
+int cdiCopyKey(int cdiID1, int varID1, int key, int cdiID2)
+{
+  int status = CDI_NOERR;
+
+  cdi_keys_t *keysp = cdi_get_keysp(cdiID1, varID1);
+  xassert(keysp != NULL);
+
+  cdi_key_t *keyp = find_key(keysp, key);
+  if (keyp == NULL) return -1;
+
+  cdi_copy_key(keyp, cdiID2, varID1);
 
   return status;
 }

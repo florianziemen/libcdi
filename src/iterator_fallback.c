@@ -262,7 +262,9 @@ int cdiFallbackIterator_levelType(CdiIterator *super, int levelSelector, char **
   copyString(outStdName, zaxisInqStdname);    //FIXME: zaxisInqStdname is unsafe.
   copyString(outUnit, zaxisInqUnits);    //FIXME: zaxisInqUnits is unsafe.
 #undef copyString
-  return zaxisInqLtype(zaxisId);
+  int ltype = 0;
+  cdiInqKeyInt(zaxisId, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
+  return ltype;
 }
 
 int cdiFallbackIterator_level(CdiIterator *super, int levelSelector, double *outValue1, double *outValue2)
@@ -305,7 +307,9 @@ int cdiFallbackIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *
 {
   CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
   int zaxisId = vlistInqVarZaxis(me->vlistId, me->curVariable);
-  if(zaxisInqLtype(zaxisId) != ZAXIS_HYBRID) return CDI_EINVAL;
+  int ltype = 0;
+  cdiInqKeyInt(zaxisId, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
+  if(ltype != ZAXIS_HYBRID) return CDI_EINVAL;
   if(outVgridNumber) *outVgridNumber = zaxisInqNumber(zaxisId);
   if(outLevelCount) *outLevelCount = zaxisInqNlevRef(zaxisId);
   if(outUuid) zaxisInqUUID(zaxisId, outUuid);

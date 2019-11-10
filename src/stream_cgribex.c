@@ -1849,12 +1849,12 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
   static bool lwarning_vct = true;
 
   int zaxistype = zaxisInqType(zaxisID);
-  int ltype = zaxisInqLtype(zaxisID);
+  int ltype = 0;
+  cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
 
   if ( zaxistype == ZAXIS_GENERIC && ltype == 0 )
     {
-      Message("Changed zaxis type from %s to %s",
-	      zaxisNamePtr(zaxistype), zaxisNamePtr(ZAXIS_PRESSURE));
+      Message("Changed zaxis type from %s to %s", zaxisNamePtr(zaxistype), zaxisNamePtr(ZAXIS_PRESSURE));
       zaxistype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, zaxistype);
       zaxisDefUnits(zaxisID, "Pa");

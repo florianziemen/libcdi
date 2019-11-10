@@ -45,10 +45,10 @@ static int defineGrid()
   gridDefNvertex ( gridID, 1 );
   gridDefXbounds ( gridID, lons );
   gridDefYbounds ( gridID, lats );
-  for ( i = 0; i < nlon*nlat; i++ )    
+  for ( i = 0; i < nlon*nlat; i++ )
     mask_vec[i] = i % 2 ;
   gridDefMaskGME ( gridID, mp );
-  for ( i = 0; i < nlon*nlat; i++ )    
+  for ( i = 0; i < nlon*nlat; i++ )
     mask_vec[i] = 1;
   gridDefMask ( gridID, mp );
   gridDefXname ( gridID, "myXname" );
@@ -90,7 +90,7 @@ static int defineZaxis ()
   zaxisDefLongname ( zaxisID, "myLongname" );
   zaxisDefUnits ( zaxisID, "myUnits" );
   zaxisDefDatatype ( zaxisID, DOUBLE_PRECISION );
-  zaxisDefLtype ( zaxisID, 1 );
+  cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, 1);
   zaxisDefVct ( zaxisID, 3, vct );
   zaxisDefLbounds ( zaxisID, &levs[0] );
   zaxisDefUbounds ( zaxisID, &levs[0] );

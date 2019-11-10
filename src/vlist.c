@@ -707,7 +707,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                     cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_DIMNAME, dimname);
                   }
 
-                if ( zaxisType == ZAXIS_GENERIC ) zaxisDefLtype(zaxisID2, zaxisInqLtype(zaxisID));
+                if ( zaxisType == ZAXIS_GENERIC ) cdiCopyKey(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, zaxisID2);
 
                 cdiCopyAtts(zaxisID, CDI_GLOBAL, zaxisID2, CDI_GLOBAL);
 

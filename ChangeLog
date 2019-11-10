@@ -1,3 +1,15 @@
+2019-11-10  Uwe Schulzweida
+
+	* Replaced zaxisDefLtype()/zaxisInqLtype() by cdiDefKeyInt()/cdiInqKeyInt() with CDI_KEY_TYPEOFFIRSTFIXEDSURFACE
+
+2019-11-09  Uwe Schulzweida
+
+	* Replaced zaxisDefKeyStr()/zaxisInqKeyStr() by cdiDefKeyString()/cdiInqKeyString()
+
+2019-11-09  Uwe Schulzweida
+
+	* Replaced gridDefKeyStr()/gridInqKeyStr() by cdiDefKeyString()/cdiInqKeyString()
+
 2019-11-05  Uwe Schulzweida
 
 	* Added support for datatype of grid mapping var

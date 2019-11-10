@@ -487,13 +487,9 @@ static void
 printZaxisGenericInfo(const int ltype, const int zaxistype, const char *zaxisname)
 {
   if (zaxistype == ZAXIS_GENERIC && ltype != 0)
-    {
-      fprintf(stdout, "%-12s (ltype=%3d)", zaxisname, ltype);
-    }
+    fprintf(stdout, "%-12s (ltype=%3d)", zaxisname, ltype);
   else
-    {
-      fprintf(stdout, "%-24s", zaxisname);
-    }
+    fprintf(stdout, "%-24s", zaxisname);
 }
 
 static void
@@ -533,7 +529,8 @@ printZaxisInfo(int vlistID)
       double zinc = 0;
       const int zaxisID = vlistZaxis(vlistID, index);
       const int zaxistype = zaxisInqType(zaxisID);
-      const int ltype = zaxisInqLtype(zaxisID);
+      int ltype = 0;
+      cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
       const int levelsize = zaxisInqSize(zaxisID);
       // int prec      = zaxisInqDatatype(zaxisID);
       // int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;

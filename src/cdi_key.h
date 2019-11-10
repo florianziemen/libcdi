@@ -32,6 +32,17 @@ cdi_key_t *find_key(cdi_keys_t *keysp, int key);
 const char *cdiInqVarKeyStringPtr(cdi_keys_t *keysp, int key);
 
 static inline
+int cdiInqVarKeyInt(cdi_keys_t *keysp, int key)
+{
+  int value = 0;
+
+  cdi_key_t *keyp = find_key(keysp, key);
+  if (keyp && keyp->type == KEY_INT ) value = keyp->v.i;
+
+  return value;
+}
+
+static inline
 const char *cdiInqVarKeyString(cdi_keys_t *keysp, int key)
 {
   const char *string = cdiInqVarKeyStringPtr(keysp, key);

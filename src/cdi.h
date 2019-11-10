@@ -807,6 +807,8 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_UVRELATIVETOGRID              821  // GRIB  uvRelativeToGrid
 #define  CDI_KEY_CONSTITUENTTYPE               822  // GRIB2 constituentType
 #define  CDI_KEY_TYPEOFTIMEINCREMENT           823  // GRIB2 typeOfTimeIncrement
+#define  CDI_KEY_TYPEOFFIRSTFIXEDSURFACE       824  // GRIB2 typeOfFirstFixedSurface
+#define  CDI_KEY_TYPEOFSECONDFIXEDSURFACE      825  // GRIB2 typeOfSecondFixedSurface
 
 #define  CDI_KEY_VDIMNAME                      920  // Vertex dimension name
 #define  CDI_KEY_GRIDMAP_VARTYPE               921  // Grid mapping var datatype
@@ -850,6 +852,8 @@ int     cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length
 int     cdiInqKeyLen(int cdiID, int varID, int key, int *length);
 
 int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
+
+int     cdiCopyKey(int cdiID1, int varID1, int key, int cdiID2);
 
 // GRID routines
 
@@ -1079,12 +1083,6 @@ int     zaxisInqPositive(int zaxisID);
 
 void    zaxisDefScalar(int zaxisID);
 int     zaxisInqScalar(int zaxisID);
-
-void    zaxisDefLtype(int zaxisID, int ltype);
-int     zaxisInqLtype(int zaxisID);
-
-void    zaxisDefLtype2(int zaxisID, int ltype2);
-int     zaxisInqLtype2(int zaxisID);
 
 void    zaxisDefVct(int zaxisID, int size, const double vct[]);
 void    zaxisInqVct(int zaxisID, double vct[]);

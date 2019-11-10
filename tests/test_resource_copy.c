@@ -93,7 +93,7 @@ static int defineZaxis (void)
   zaxisDefLongname ( zaxisID, "myLongname" );
   zaxisDefUnits ( zaxisID, "myUnits" );
   zaxisDefDatatype ( zaxisID, DOUBLE_PRECISION );
-  zaxisDefLtype ( zaxisID, 1 );
+  cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, 1);
   zaxisDefVct ( zaxisID, 3, vct );
   zaxisDefLbounds ( zaxisID, &levs[0] );
   zaxisDefUbounds ( zaxisID, &levs[0] );

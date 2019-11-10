@@ -22,8 +22,6 @@ typedef struct {
   int      datatype;
   int      scalar;
   int      type;
-  int      ltype;    /* GRIB level type */
-  int      ltype2;
   int      size;
   int      direction;
   int      vctsize;
@@ -50,8 +48,6 @@ void
 zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
             int * unpackBufferPos, int originNamespace, void *context,
             int force_id);
-
-void zaxisDefLtype2(int zaxisID, int ltype2);
 
 const resOps *getZaxisOps(void);
 

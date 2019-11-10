@@ -122,8 +122,6 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->lbounds       = NULL;
   zaxisptr->weights       = NULL;
   zaxisptr->type          = CDI_UNDEFID;
-  zaxisptr->ltype         = 0;
-  zaxisptr->ltype2        = -1;
   zaxisptr->positive      = 0;
   zaxisptr->scalar        = 0;
   zaxisptr->direction     = 0;
@@ -521,44 +519,6 @@ int zaxisInqScalar(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   return zaxisptr->scalar;
-}
-
-
-void zaxisDefLtype(int zaxisID, int ltype)
-{
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
-  if (zaxisptr->ltype != ltype)
-    {
-      zaxisptr->ltype = ltype;
-      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-
-int zaxisInqLtype(int zaxisID)
-{
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  return zaxisptr->ltype;
-}
-
-
-void zaxisDefLtype2(int zaxisID, int ltype2)
-{
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
-  if ( zaxisptr->ltype2 != ltype2 )
-    {
-      zaxisptr->ltype2 = ltype2;
-      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-
-int zaxisInqLtype2(int zaxisID)
-{
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  return zaxisptr->ltype2;
 }
 
 /*
@@ -1350,7 +1310,7 @@ int zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
   xassert(z1 && z2);
 
   diff |= (z1->type != z2->type)
-    | (z1->ltype != z2->ltype)
+    | (cdiInqVarKeyInt(&z1->keys, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE) != cdiInqVarKeyInt(&z2->keys, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE))
     | (z1->direction != z2->direction)
     | (z1->datatype != z2->datatype)
     | (z1->size != z2->size)
@@ -1430,7 +1390,7 @@ int zaxisTxCode(void)
   return ZAXIS;
 }
 
-enum { zaxisNint     = 8,
+enum { zaxisNint     = 7,
        vals     = 1 << 0,
        lbounds  = 1 << 1,
        ubounds  = 1 << 2,
@@ -1520,11 +1480,10 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
   zaxisP->datatype  = intBuffer[1];
   zaxisP->type      = intBuffer[2];
-  zaxisP->ltype     = intBuffer[3];
-  zaxisP->size      = intBuffer[4];
-  zaxisP->direction = intBuffer[5];
-  zaxisP->vctsize   = intBuffer[6];
-  memberMask        = intBuffer[7];
+  zaxisP->size      = intBuffer[3];
+  zaxisP->direction = intBuffer[4];
+  zaxisP->vctsize   = intBuffer[5];
+  memberMask        = intBuffer[6];
 
   if (memberMask & vals)
     {
@@ -1616,11 +1575,10 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
   intBuffer[0]  = zaxisP->self;
   intBuffer[1]  = zaxisP->datatype;
   intBuffer[2]  = zaxisP->type;
-  intBuffer[3]  = zaxisP->ltype;
-  intBuffer[4]  = zaxisP->size;
-  intBuffer[5]  = zaxisP->direction;
-  intBuffer[6]  = zaxisP->vctsize;
-  intBuffer[7]  = memberMask = zaxisGetMemberMask ( zaxisP );
+  intBuffer[3]  = zaxisP->size;
+  intBuffer[4]  = zaxisP->direction;
+  intBuffer[5]  = zaxisP->vctsize;
+  intBuffer[6]  = memberMask = zaxisGetMemberMask ( zaxisP );
 
   serializePack(intBuffer, zaxisNint, CDI_DATATYPE_INT,
                 packBuffer, packBufferSize, packBufferPos, context);

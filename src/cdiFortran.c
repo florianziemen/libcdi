@@ -543,6 +543,7 @@ FCALLSCFUN4 (INT, cdiDefKeyString, CDIDEFKEYSTRING, cdidefkeystring, INT, INT, I
 FCALLSCFUN5 (INT, cdiInqKeyString, CDIINQKEYSTRING, cdiinqkeystring, INT, INT, INT, PSTRING, PINT)
 FCALLSCFUN4 (INT, cdiInqKeyLen, CDIINQKEYLEN, cdiinqkeylen, INT, INT, INT, PINT)
 FCALLSCFUN4 (INT, cdiCopyKeys, CDICOPYKEYS, cdicopykeys, INT, INT, INT, INT)
+FCALLSCFUN4 (INT, cdiCopyKey, CDICOPYKEY, cdicopykey, INT, INT, INT, INT)
 
 /*  GRID routines  */
 
@@ -688,10 +689,6 @@ FCALLSCSUB2 (zaxisDefPositive, ZAXISDEFPOSITIVE, zaxisdefpositive, INT, INT)
 FCALLSCFUN1 (INT, zaxisInqPositive, ZAXISINQPOSITIVE, zaxisinqpositive, INT)
 FCALLSCSUB1 (zaxisDefScalar, ZAXISDEFSCALAR, zaxisdefscalar, INT)
 FCALLSCFUN1 (INT, zaxisInqScalar, ZAXISINQSCALAR, zaxisinqscalar, INT)
-FCALLSCSUB2 (zaxisDefLtype, ZAXISDEFLTYPE, zaxisdefltype, INT, INT)
-FCALLSCFUN1 (INT, zaxisInqLtype, ZAXISINQLTYPE, zaxisinqltype, INT)
-FCALLSCSUB2 (zaxisDefLtype2, ZAXISDEFLTYPE2, zaxisdefltype2, INT, INT)
-FCALLSCFUN1 (INT, zaxisInqLtype2, ZAXISINQLTYPE2, zaxisinqltype2, INT)
 FCALLSCSUB3 (zaxisDefVct, ZAXISDEFVCT, zaxisdefvct, INT, INT, DOUBLEV)
 FCALLSCSUB2 (zaxisInqVct, ZAXISINQVCT, zaxisinqvct, INT, DOUBLEV)
 FCALLSCFUN1 (INT, zaxisInqVctSize, ZAXISINQVCTSIZE, zaxisinqvctsize, INT)
