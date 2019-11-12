@@ -100,9 +100,23 @@ int cdi_key_compare(cdi_keys_t *keyspa, cdi_keys_t *keyspb, int keynum)
   cdi_key_t *keypa = keyspa->value + keynum,
             *keypb = keyspb->value + keynum;
 
-  if ( keypa->key != keypb->key ) return 1;
+  if (keypa->key != keypb->key) return 1;
 
-  if ( keypa->v.i != keypb->v.i ) return 1;
+  if (keypa->type != keypb->type) return 1;
+
+  if (keypa->type == KEY_BYTES)
+    {
+      if (keypa->length != keypb->length) return 1;
+      return memcmp(keypa->v.s, keypb->v.s, keypa->length);
+    }
+  else if (keypa->type == KEY_FLOAT)
+    {
+      if (IS_NOT_EQUAL(keypa->v.d, keypb->v.d)) return 1;
+    }
+  else if (keypa->type == KEY_INT)
+    {
+      if (keypa->v.i != keypb->v.i) return 1;
+    }
 
   return 0;
 }
