@@ -1949,7 +1949,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
   size_t natts = a->vars[varIDA].atts.nelems;
   if (natts != b->vars[varIDB].atts.nelems) return 1;
   for (size_t attID = 0; attID < natts; ++attID)
-    diff |= cdi_att_compare(a, varIDA, b, varIDB, (int)attID);
+    diff |= cdi_att_compare(&a->vars[varIDA].atts, &b->vars[varIDB].atts, (int)attID);
 
   size_t nkeys = a->vars[varIDA].keys.nelems;
   if (nkeys != b->vars[varIDB].keys.nelems) return 1;

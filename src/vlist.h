@@ -141,8 +141,6 @@ int     vlistInqVarValidrange(int vlistID, int varID, double *validrange);
 
 void vlistInqVarDimorder(int vlistID, int varID, int (*outDimorder)[3]);
 
-int cdi_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int attnum);
-
 void resize_opt_grib_entries(var_t *var, int nentries);
 
 

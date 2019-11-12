@@ -51,24 +51,25 @@ vlist_compare(vlist_t *a, vlist_t *b)
     | (a->nzaxis != b->nzaxis) | (a->instID != b->instID)
     | (a->modelID != b->modelID) | (a->tableID != b->tableID)
     | (a->ntsteps != b->ntsteps) | (a->atts.nelems != b->atts.nelems);
+
   int nvars = a->nvars;
   for (int varID = 0; varID < nvars; ++varID)
     diff |= vlistVarCompare(a, varID, b, varID);
+
   size_t natts = a->atts.nelems;
   for (size_t attID = 0; attID < natts; ++attID)
-    diff |= cdi_att_compare(a, CDI_GLOBAL, b, CDI_GLOBAL, (int)attID);
+    diff |= cdi_att_compare(&a->atts, &a->atts, (int)attID);
+
   return diff;
 }
 
-static void
-vlistPrintKernel(vlist_t *vlistptr, FILE * fp );
-static void
-vlist_delete(vlist_t *vlistptr);
+static void vlistPrintKernel(vlist_t *vlistptr, FILE *fp);
+static void vlist_delete(vlist_t *vlistptr);
 
-static int  vlistGetSizeP ( void * vlistptr, void *context);
-static void vlistPackP    ( void * vlistptr, void * buff, int size,
-                            int *position, void *context);
-static int  vlistTxCode   ( void );
+static int  vlistGetSizeP (void *vlistptr, void *context);
+static void vlistPackP    (void *vlistptr, void *buff, int size,
+                           int *position, void *context);
+static int  vlistTxCode   (void);
 
 #if !defined(__cplusplus)
 const

@@ -37,6 +37,8 @@ int cdiAttsGetSize(void *p, int varID, void *context);
 void cdiAttsPack(void *p, int varID, void *buf, int size, int *position, void *context);
 void cdiAttsUnpack(int cdiID, int varID, void *buf, int size, int *position, void *context);
 
+int cdi_att_compare(cdi_atts_t *attspa, cdi_atts_t *attspb, int attnum);
+
 #endif
 
 /*
