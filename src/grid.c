@@ -197,10 +197,12 @@ void grid_free_components(grid_t *gridptr)
     if ( p2free[i] ) Free(p2free[i]);
 
   int gridID = gridptr->self;
+  /*
   cdiDeleteKeys(gridID, CDI_XAXIS);
   cdiDeleteKeys(gridID, CDI_YAXIS);
   cdiDeleteKeys(gridID, CDI_GLOBAL);
   cdiDeleteAtts(gridID, CDI_GLOBAL);
+  */
 }
 
 void grid_free(grid_t *gridptr)
@@ -2757,7 +2759,6 @@ grid_copy_base_array_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
   if ( gridptrOrig->x.vals != NULL )
     {
       size_t size = irregular ? gridsize : gridptrOrig->x.size;
-
       gridptrDup->x.vals = (double *)Malloc(size * sizeof (double));
       memcpy(gridptrDup->x.vals, gridptrOrig->x.vals, size * sizeof (double));
     }
@@ -2765,7 +2766,6 @@ grid_copy_base_array_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
   if ( gridptrOrig->y.vals != NULL )
     {
       size_t size  = irregular ? gridsize : gridptrOrig->y.size;
-
       gridptrDup->y.vals = (double *)Malloc(size * sizeof (double));
       memcpy(gridptrDup->y.vals, gridptrOrig->y.vals, size * sizeof (double));
     }
@@ -2794,7 +2794,6 @@ grid_copy_base_array_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
     if ( gridptrOrig_area != NULL )
       {
         size_t size = gridsize;
-
         gridptrDup->area = (double *)Malloc(size * sizeof (double));
         memcpy(gridptrDup->area, gridptrOrig_area, size * sizeof (double));
       }
@@ -2803,7 +2802,6 @@ grid_copy_base_array_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
   if ( gridptrOrig->mask != NULL )
     {
       size_t size = gridsize;
-
       gridptrDup->mask = (mask_t *)Malloc(size * sizeof(mask_t));
       memcpy(gridptrDup->mask, gridptrOrig->mask, size * sizeof (mask_t));
     }
@@ -2811,7 +2809,6 @@ grid_copy_base_array_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
   if ( gridptrOrig->mask_gme != NULL )
     {
       size_t size = gridsize;
-
       gridptrDup->mask_gme = (mask_t *)Malloc(size * sizeof (mask_t));
       memcpy(gridptrDup->mask_gme, gridptrOrig->mask_gme, size * sizeof(mask_t));
     }
