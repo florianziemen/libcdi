@@ -133,10 +133,7 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->nhlev         = 0;
   memset(zaxisptr->uuid, 0, CDI_UUID_SIZE);
 
-  zaxisptr->keys.nalloc    = MAX_KEYS;
-  zaxisptr->keys.nelems    = 0;
-  for ( int i = 0; i < MAX_KEYS; ++i )
-    zaxisptr->keys.value[i].length = 0;
+  cdiInitKeys(&zaxisptr->keys);
   zaxisptr->atts.nalloc    = MAX_ATTRIBUTES;
   zaxisptr->atts.nelems    = 0;
 }
@@ -175,7 +172,7 @@ void zaxis_copy(zaxis_t *zaxisptr2, zaxis_t *zaxisptr1)
   const int zaxisID2 = zaxisptr2->self;
   memcpy(zaxisptr2, zaxisptr1, sizeof(zaxis_t));
   zaxisptr2->self = zaxisID2;
-  zaxisptr2->keys.nelems = 0;
+  cdiInitKeys(&zaxisptr2->keys);
   cdiCopyVarKeys(&zaxisptr1->keys, &zaxisptr2->keys);
 }
 
@@ -820,6 +817,7 @@ int zaxisInqLevels(int zaxisID, double *levels)
   return size;
 }
 
+
 int zaxisInqCLen(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
@@ -832,6 +830,7 @@ int zaxisInqCLen(int zaxisID)
 
   return clen;
 }
+
 
 int zaxisInqCVals(int zaxisID, char ***clevels)
 {

@@ -56,6 +56,8 @@ void cdiDeleteVarKeys(cdi_keys_t *keysp);
 void cdiDeleteKeys(int cdiID, int varID);
 void cdiPrintKeys(int cdiID, int varID);
 
+void cdiInitKeys(cdi_keys_t *keysp);
+
 #endif
 
 /*

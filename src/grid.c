@@ -127,10 +127,7 @@ void grid_axis_init(struct gridaxis_t *axisptr)
   axisptr->cvals          = NULL;
 #endif
   axisptr->stdname        = NULL;
-  axisptr->keys.nalloc    = MAX_KEYS;
-  axisptr->keys.nelems    = 0;
-  for ( int i = 0; i < MAX_KEYS; ++i )
-    axisptr->keys.value[i].length = 0;
+  cdiInitKeys(&axisptr->keys);
 }
 
 void grid_init(grid_t *gridptr)
@@ -168,10 +165,7 @@ void grid_init(grid_t *gridptr)
   gridptr->hasdims        = true;
   gridptr->name           = NULL;
   gridptr->vtable         = &cdiGridVtable;
-  gridptr->keys.nalloc    = MAX_KEYS;
-  gridptr->keys.nelems    = 0;
-  for ( int i = 0; i < MAX_KEYS; ++i )
-    gridptr->keys.value[i].length = 0;
+  cdiInitKeys(&gridptr->keys);
   gridptr->atts.nalloc    = MAX_ATTRIBUTES;
   gridptr->atts.nelems    = 0;
   gridptr->iScansNegatively      = 0;
@@ -248,11 +242,11 @@ void grid_copy_base_scalar_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
 {
   memcpy(gridptrDup, gridptrOrig, sizeof(grid_t));
   gridptrDup->self = CDI_UNDEFID;
-  gridptrDup->keys.nelems = 0;
+  cdiInitKeys(&gridptrDup->keys);
   cdiCopyVarKeys(&gridptrOrig->keys, &gridptrDup->keys);
-  gridptrDup->x.keys.nelems = 0;
+  cdiInitKeys(&gridptrDup->x.keys);
   cdiCopyVarKeys(&gridptrOrig->x.keys, &gridptrDup->x.keys);
-  gridptrDup->y.keys.nelems = 0;
+  cdiInitKeys(&gridptrDup->y.keys);
   cdiCopyVarKeys(&gridptrOrig->y.keys, &gridptrDup->y.keys);
   if ( gridptrOrig->reference ) gridptrDup->reference = strdupx(gridptrOrig->reference);
 }

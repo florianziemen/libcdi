@@ -113,8 +113,7 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].instID         = CDI_UNDEFID;
   vartable[varID].modelID        = CDI_UNDEFID;
   vartable[varID].tableID        = CDI_UNDEFID;
-  vartable[varID].keys.nalloc    = MAX_KEYS;
-  vartable[varID].keys.nelems    = 0;
+  cdiInitKeys(&vartable[varID].keys);
   vartable[varID].comptype       = CDI_COMPRESS_NONE;
   vartable[varID].complevel      = 1;
   vartable[varID].lmissval       = false;
@@ -515,7 +514,7 @@ int cmpLevelTableInv(const void* s1, const void* s2)
 void varCopyKeys(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  vlistptr->vars[varID].keys.nelems = 0;
+  cdiInitKeys(&vlistptr->vars[varID].keys);
   cdiCopyVarKeys(&vartable[varID].keys, &vlistptr->vars[varID].keys);
 }
 

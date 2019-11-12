@@ -574,6 +574,14 @@ const char *cdiInqVarKeyStringPtr(cdi_keys_t *keysp, int key)
   return NULL;
 }
 
+void cdiInitKeys(cdi_keys_t *keysp)
+{
+  keysp->nalloc = MAX_KEYS;
+  keysp->nelems = 0;
+  for ( int i = 0; i < MAX_KEYS; ++i )
+    keysp->value[i].length = 0;
+}
+
 /*
  * Local Variables:
  * c-file-style: "Java"
