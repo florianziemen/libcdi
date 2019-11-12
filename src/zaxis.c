@@ -131,7 +131,6 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->vct           = NULL;
   zaxisptr->number        = 0;
   zaxisptr->nhlev         = 0;
-  memset(zaxisptr->uuid, 0, CDI_UUID_SIZE);
 
   cdiInitKeys(&zaxisptr->keys);
   zaxisptr->atts.nalloc    = MAX_ATTRIBUTES;
@@ -689,8 +688,8 @@ The function @func{zaxisDefUUID} defines the UUID for a generalized  Z-axis.
 */
 void zaxisDefUUID(int zaxisID, const unsigned char uuid[CDI_UUID_SIZE])
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  memcpy(zaxisptr->uuid, uuid, CDI_UUID_SIZE);
+  cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, CDI_UUID_SIZE);
+
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
@@ -712,8 +711,9 @@ The function @func{zaxisInqUUID} returns the UUID to a generalized Z-axis.
 */
 void zaxisInqUUID(int zaxisID, unsigned char uuid[CDI_UUID_SIZE])
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  memcpy(uuid, zaxisptr->uuid, CDI_UUID_SIZE);
+  memset(uuid, 0, CDI_UUID_SIZE);
+  int length = CDI_UUID_SIZE;
+  cdiInqKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
 }
 
 /*
@@ -1379,8 +1379,8 @@ int zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
   diff |= strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_NAME), cdiInqVarKeyString(&z2->keys, CDI_KEY_NAME))
     | strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_LONGNAME), cdiInqVarKeyString(&z2->keys, CDI_KEY_LONGNAME))
     | strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_STDNAME), cdiInqVarKeyString(&z2->keys, CDI_KEY_STDNAME))
-    | strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_UNITS), cdiInqVarKeyString(&z2->keys, CDI_KEY_UNITS))
-    | memcmp(z1->uuid, z2->uuid, CDI_UUID_SIZE);
+    | strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_UNITS), cdiInqVarKeyString(&z2->keys, CDI_KEY_UNITS));
+
   return diff != 0;
 }
 
@@ -1397,7 +1397,6 @@ enum { zaxisNint     = 7,
        ubounds  = 1 << 2,
        weights  = 1 << 3,
        vct      = 1 << 4,
-       zaxisHasUUIDFlag = 1 << 5,
 };
 
 static
@@ -1410,7 +1409,7 @@ int zaxisGetMemberMask( zaxis_t * zaxisP )
   if ( zaxisP->ubounds )   memberMask |= ubounds;
   if ( zaxisP->weights )   memberMask |= weights;
   if ( zaxisP->vct )       memberMask |= vct;
-  if (!cdiUUIDIsNull(zaxisP->uuid)) memberMask |= zaxisHasUUIDFlag;
+
   return memberMask;
 }
 
@@ -1450,9 +1449,6 @@ zaxisGetPackSize(void * voidP, void *context)
   packBufferSize += serializeKeysGetPackSize(&zaxisP->keys, context);
 
   packBufferSize += serializeGetSize(1, CDI_DATATYPE_UCHAR, context);
-
-  if (!cdiUUIDIsNull(zaxisP->uuid))
-    packBufferSize += serializeGetSize(CDI_UUID_SIZE, CDI_DATATYPE_UCHAR, context);
 
   return packBufferSize;
 }
@@ -1556,10 +1552,6 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   &zaxisP->positive, 1, CDI_DATATYPE_UINT, context);
 
-  if (memberMask & zaxisHasUUIDFlag)
-    serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                    zaxisP->uuid, CDI_UUID_SIZE, CDI_DATATYPE_UCHAR, context);
-
   reshSetStatus(zaxisP->self, &zaxisOps,
                 reshGetStatus(zaxisP->self, &zaxisOps) & ~RESH_SYNC_BIT);
 }
@@ -1645,11 +1637,6 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
 
   serializePack(&zaxisP->positive, 1, CDI_DATATYPE_UINT,
                 packBuffer, packBufferSize, packBufferPos, context);
-
-  if (memberMask & zaxisHasUUIDFlag)
-    serializePack(zaxisP->uuid, CDI_UUID_SIZE, CDI_DATATYPE_UCHAR,
-                  packBuffer, packBufferSize, packBufferPos, context);
-
 }
 
 

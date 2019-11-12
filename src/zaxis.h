@@ -10,26 +10,25 @@
 
 
 typedef struct {
-  double  *vals;
+  double    *vals;
 #ifndef USE_MPI
-  char   **cvals;
-  int      clength;
+  char     **cvals;
+  int        clength;
 #endif
-  double  *lbounds;
-  double  *ubounds;
-  double  *weights;
-  int      self;
-  int      datatype;
-  int      scalar;
-  int      type;
-  int      size;
-  int      direction;
-  int      vctsize;
-  unsigned positive;
-  double  *vct;
-  int      number;   /* Reference number to a generalized Z-axis */
-  int      nhlev;
-  unsigned char uuid[CDI_UUID_SIZE];
+  double    *lbounds;
+  double    *ubounds;
+  double    *weights;
+  int        self;
+  int        datatype;
+  int        scalar;
+  int        type;
+  int        size;
+  int        direction;
+  int        vctsize;
+  unsigned   positive;
+  double    *vct;
+  int        number;   /* Reference number to a generalized Z-axis */
+  int        nhlev;
   cdi_keys_t keys;
   cdi_atts_t atts;
 }
