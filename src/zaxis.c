@@ -278,9 +278,12 @@ void zaxisDestroyKernel( zaxis_t * zaxisptr )
   if ( zaxisptr->weights ) Free( zaxisptr->weights );
   if ( zaxisptr->vct )     Free( zaxisptr->vct );
 
-  Free( zaxisptr );
+  cdiDeleteKeys(id, CDI_GLOBAL);
+  cdiDeleteAtts(id, CDI_GLOBAL);
 
-  reshRemove ( id, &zaxisOps );
+  Free(zaxisptr);
+
+  reshRemove(id, &zaxisOps);
 }
 
 /*
