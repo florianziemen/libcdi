@@ -58,6 +58,8 @@ void cdiPrintKeys(int cdiID, int varID);
 
 void cdiInitKeys(cdi_keys_t *keysp);
 
+int cdi_key_compare(cdi_keys_t *keyspa, cdi_keys_t *keyspb, int keynum);
+
 #endif
 
 /*

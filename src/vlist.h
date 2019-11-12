@@ -118,8 +118,6 @@ typedef struct
 vlist_t;
 
 
-int vlist_key_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int keynum);
-
 vlist_t *vlist_to_pointer(int vlistID);
 void cdiVlistMakeInternal(int vlistID);
 void cdiVlistMakeImmutable(int vlistID);

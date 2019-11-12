@@ -1954,7 +1954,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
   size_t nkeys = a->vars[varIDA].keys.nelems;
   if (nkeys != b->vars[varIDB].keys.nelems) return 1;
   for (size_t keyID = 0; keyID < nkeys; ++keyID)
-    diff |= vlist_key_compare(a, varIDA, b, varIDB, (int)keyID);
+    diff |= cdi_key_compare(&a->vars[varIDA].keys, &b->vars[varIDB].keys, (int)keyID);
 
   return diff;
 }
@@ -2003,8 +2003,7 @@ int vlistVarGetPackSize(vlist_t *p, int varID, void *context)
     varsize += serializeGetSize((int)strlen(var->units), CDI_DATATYPE_TXT, context);
   if (var->extra)
     varsize += serializeGetSize((int)strlen(var->extra), CDI_DATATYPE_TXT, context);
-  varsize += serializeGetSize(4 * zaxisInqSize(var->zaxisID),
-                              CDI_DATATYPE_INT, context);
+  varsize += serializeGetSize(4 * zaxisInqSize(var->zaxisID), CDI_DATATYPE_INT, context);
   varsize += cdiAttsGetSize(p, varID, context);
   return varsize;
 }

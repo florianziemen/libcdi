@@ -1541,12 +1541,11 @@ static int vlistTxCode ( void )
 static
 int  vlistGetSizeP ( void * vlistptr, void *context)
 {
-  int txsize, varID;
   vlist_t *p = (vlist_t*) vlistptr;
-  txsize = serializeGetSize(vlist_nints, CDI_DATATYPE_INT, context);
+  int txsize = serializeGetSize(vlist_nints, CDI_DATATYPE_INT, context);
   txsize += serializeGetSize(1, CDI_DATATYPE_LONG, context);
   txsize += cdiAttsGetSize(p, CDI_GLOBAL, context);
-  for ( varID = 0; varID <  p->nvars; varID++ )
+  for ( int varID = 0; varID <  p->nvars; varID++ )
     txsize += vlistVarGetPackSize(p, varID, context);
   return txsize;
 }
@@ -1556,7 +1555,7 @@ static
 void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
                   void *context )
 {
-  int varID, tempbuf[vlist_nints];
+  int tempbuf[vlist_nints];
   vlist_t *p = (vlist_t*) vlistptr;
   tempbuf[0] = p->self;
   tempbuf[1] = p->nvars;
@@ -1568,7 +1567,7 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
   serializePack(&p->ntsteps, 1, CDI_DATATYPE_LONG, buf, size, position, context);
 
   cdiAttsPack(p, CDI_GLOBAL, buf, size, position, context);
-  for ( varID = 0; varID < p->nvars; varID++ )
+  for ( int varID = 0; varID < p->nvars; varID++ )
     {
       vlistVarPack(p, varID, (char *)buf, size, position, context);
     }
@@ -1594,19 +1593,16 @@ void vlistUnpack(char * buf, int size, int *position, int originNamespace,
   cdiAttsUnpack(targetID, CDI_GLOBAL, buf, size, position, context);
   for (int varID = 0; varID < nvars; varID++ )
     vlistVarUnpack(targetID, buf, size, position, originNamespace, context);
-  reshSetStatus(targetID, &vlistOps,
-                reshGetStatus(targetID, &vlistOps) & ~RESH_SYNC_BIT);
+  reshSetStatus(targetID, &vlistOps, reshGetStatus(targetID, &vlistOps) & ~RESH_SYNC_BIT);
 }
 
 
 void vlist_check_contents(int vlistID)
 {
-  int zaxisID;
   int nzaxis = vlistNzaxis(vlistID);
-
   for ( int index = 0; index < nzaxis; index++ )
     {
-      zaxisID = vlistZaxis(vlistID, index);
+      int zaxisID = vlistZaxis(vlistID, index);
       if ( zaxisInqType(zaxisID) == ZAXIS_GENERIC )
 	cdiCheckZaxis(zaxisID);
     }

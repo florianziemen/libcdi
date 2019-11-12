@@ -19,19 +19,10 @@
 static
 cdi_atts_t *get_attsp(vlist_t *vlistptr, int varID)
 {
-  cdi_atts_t *attsp = NULL;
+  if ( varID == CDI_GLOBAL ) return &vlistptr->atts;
+  else if ( varID >= 0 && varID < vlistptr->nvars ) return &(vlistptr->vars[varID].atts);
 
-  if ( varID == CDI_GLOBAL )
-    {
-      attsp = &vlistptr->atts;
-    }
-  else
-    {
-      if ( varID >= 0 && varID < vlistptr->nvars )
-	attsp = &(vlistptr->vars[varID].atts);
-    }
-
-  return attsp;
+  return NULL;
 }
 
 static
@@ -466,16 +457,13 @@ int cdiAttTypeLookup(cdi_att_t *attp)
 int cdi_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int attnum)
 {
   cdi_atts_t *attspa = get_attsp(a, varIDA),
-    *attspb = get_attsp(b, varIDB);
-  if (attspa == NULL && attspb == NULL)
-    return 0;
-  xassert(attnum >= 0 && attnum < (int)attspa->nelems
-          && attnum < (int)attspb->nelems);
+             *attspb = get_attsp(b, varIDB);
+  if (attspa == NULL && attspb == NULL) return 0;
+  xassert(attnum >= 0 && attnum < (int)attspa->nelems && attnum < (int)attspb->nelems);
   cdi_att_t *attpa = attspa->value + attnum,
-    *attpb = attspb->value + attnum;
+            *attpb = attspb->value + attnum;
   size_t len;
-  if ((len = attpa->namesz) != attpb->namesz)
-    return 1;
+  if ((len = attpa->namesz) != attpb->namesz) return 1;
   int diff;
   if ((diff = memcmp(attpa->name, attpb->name, len)))
     return 1;
@@ -483,6 +471,7 @@ int cdi_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int attnum)
       || attpa->exdtype != attpb->exdtype
       || attpa->nelems != attpb->nelems)
     return 1;
+
   return memcmp(attpa->xvalue, attpb->xvalue, attpa->xsz);
 }
 

@@ -86,36 +86,19 @@ const cdi_key_t *find_key_const(const cdi_keys_t *keysp, int key)
 static
 cdi_keys_t *cdi_get_keysp(int objID, int varID)
 {
-  cdi_keys_t *keysp = NULL;
+  if      ( reshGetTxCode(objID) == GRID )  return grid_get_keysp(grid_to_pointer(objID), varID);
+  else if ( reshGetTxCode(objID) == ZAXIS ) return zaxis_get_keysp(zaxis_to_pointer(objID), varID);
+  else if ( reshGetTxCode(objID) == VLIST ) return vlist_get_keysp(vlist_to_pointer(objID), varID);
 
-  if ( reshGetTxCode(objID) == GRID )
-    {
-      grid_t *gridptr = grid_to_pointer(objID);
-      keysp = grid_get_keysp(gridptr, varID);
-    }
-  else if ( reshGetTxCode(objID) == ZAXIS )
-    {
-      zaxis_t *zaxisptr = zaxis_to_pointer(objID);
-      keysp = zaxis_get_keysp(zaxisptr, varID);
-    }
-  else if ( reshGetTxCode(objID) == VLIST )
-    {
-      vlist_t *vlistptr = vlist_to_pointer(objID);
-      keysp = vlist_get_keysp(vlistptr, varID);
-    }
-
-  return keysp;
+  return NULL;
 }
 
 
-int vlist_key_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int keynum)
+int cdi_key_compare(cdi_keys_t *keyspa, cdi_keys_t *keyspb, int keynum)
 {
-  cdi_keys_t *keyspa = vlist_get_keysp(a, varIDA),
-             *keyspb = vlist_get_keysp(b, varIDB);
-  if (keyspa == NULL && keyspb == NULL) return 0;
   xassert(keynum >= 0 && keynum < (int)keyspa->nelems && keynum < (int)keyspb->nelems);
   cdi_key_t *keypa = keyspa->value + keynum,
-    *keypb = keyspb->value + keynum;
+            *keypb = keyspb->value + keynum;
 
   if ( keypa->key != keypb->key ) return 1;
 
