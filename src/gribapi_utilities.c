@@ -754,7 +754,8 @@ void gribapiGetGridUnstructured(grib_handle *gh, grid_t *grid, size_t numberOfPo
         }
       */
       size_t len = (size_t)CDI_UUID_SIZE;
-      if ( grib_get_bytes(gh, "uuidOfHGrid", uuid, &len) == 0) memcpy(grid->uuid, uuid, CDI_UUID_SIZE);
+      if ( grib_get_bytes(gh, "uuidOfHGrid", uuid, &len) == 0)
+        cdiDefVarKeyBytes(&grid->keys, CDI_KEY_UUID, uuid, CDI_UUID_SIZE);
     }
 }
 

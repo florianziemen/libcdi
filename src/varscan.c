@@ -514,8 +514,9 @@ int cmpLevelTableInv(const void* s1, const void* s2)
 
 void varCopyKeys(int vlistID, int varID)
 {
-  cdi_keys_t *keysp = &(vartable[varID].keys);
-  cdiCopyVarKeys(keysp, vlistID, varID);
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  vlistptr->vars[varID].keys.nelems = 0;
+  cdiCopyVarKeys(&vartable[varID].keys, &vlistptr->vars[varID].keys);
 }
 
 

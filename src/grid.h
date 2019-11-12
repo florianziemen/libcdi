@@ -96,7 +96,6 @@ struct grid_t {
   int     trunc;                  /* parameter for GRID_SPECTEAL    */
   int     nvertex;
   char   *reference;
-  unsigned char uuid[CDI_UUID_SIZE]; /* uuid for grid reference        */
   int    *reducedPoints;
   int     reducedPointsSize;
   int     np;                     /* number of parallels between a pole and the equator */

@@ -51,18 +51,33 @@ cdi_key_t *new_key(cdi_keys_t *keysp, int key)
   return keyp;
 }
 
+
 cdi_key_t *find_key(cdi_keys_t *keysp, int key)
 {
   xassert(keysp != NULL);
 
   if ( keysp->nelems == 0 ) return NULL;
 
-  cdi_key_t *keys = keysp->value;
   for ( size_t keyid = 0; keyid < keysp->nelems; keyid++ )
     {
-      cdi_key_t *keyp = keys + keyid;
-      if ( keyp->key == key )
-        return keyp; // Normal return
+      cdi_key_t *keyp =  &(keysp->value[keyid]);
+      if ( keyp->key == key ) return keyp; // Normal return
+    }
+
+  return NULL;
+}
+
+static
+const cdi_key_t *find_key_const(const cdi_keys_t *keysp, int key)
+{
+  xassert(keysp != NULL);
+
+  if ( keysp->nelems == 0 ) return NULL;
+
+  for ( size_t keyid = 0; keyid < keysp->nelems; keyid++ )
+    {
+      const cdi_key_t *keyp =  &(keysp->value[keyid]);
+      if ( keyp->key == key ) return keyp; // Normal return
     }
 
   return NULL;
@@ -173,7 +188,7 @@ int cdiInqKeyLen(int cdiID, int varID, int key, int *length)
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
 
-  cdi_key_t *keyp = find_key(keysp, key);
+  const cdi_key_t *keyp = find_key(keysp, key);
   if ( keyp != NULL )
     {
       *length = keyp->length;
@@ -185,23 +200,23 @@ int cdiInqKeyLen(int cdiID, int varID, int key, int *length)
 }
 
 static
-void cdi_copy_key(cdi_key_t *keyp, int cdiID, int varID)
+void cdi_define_key(const cdi_key_t *keyp, cdi_keys_t *keysp)
 {
   if ( keyp->type == KEY_INT )
-    cdiDefKeyInt(cdiID, varID, keyp->key, keyp->v.i);
+    cdiDefVarKeyInt(keysp, keyp->key, keyp->v.i);
   else if ( keyp->type == KEY_FLOAT )
-    cdiDefKeyFloat(cdiID, varID, keyp->key, keyp->v.d);
+    cdiDefVarKeyFloat(keysp, keyp->key, keyp->v.d);
   else if ( keyp->type == KEY_BYTES )
-    cdiDefKeyBytes(cdiID, varID, keyp->key, keyp->v.s, keyp->length);
+    cdiDefVarKeyBytes(keysp, keyp->key, keyp->v.s, keyp->length);
 }
 
 
-void cdiCopyVarKeys(cdi_keys_t *keysp, int cdiID2, int varID2)
+void cdiCopyVarKeys(const cdi_keys_t *keysp1, cdi_keys_t *keysp2)
 {
-  for ( size_t keyid = 0; keyid < keysp->nelems; keyid++ )
+  for ( size_t keyid = 0; keyid < keysp1->nelems; keyid++ )
     {
-      cdi_key_t *keyp = &(keysp->value[keyid]);
-      cdi_copy_key(keyp, cdiID2, varID2);
+      const cdi_key_t *keyp = &(keysp1->value[keyid]);
+      cdi_define_key(keyp, keysp2);
     }
 }
 
@@ -210,10 +225,13 @@ int cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2)
 {
   int status = CDI_NOERR;
 
-  cdi_keys_t *keysp = cdi_get_keysp(cdiID1, varID1);
-  xassert(keysp != NULL);
+  cdi_keys_t *keysp1 = cdi_get_keysp(cdiID1, varID1);
+  xassert(keysp1 != NULL);
 
-  cdiCopyVarKeys(keysp, cdiID2, varID2);
+  cdi_keys_t *keysp2 = cdi_get_keysp(cdiID2, varID2);
+  xassert(keysp2 != NULL);
+
+  cdiCopyVarKeys(keysp1, keysp2);
 
   return status;
 }
@@ -223,13 +241,16 @@ int cdiCopyKey(int cdiID1, int varID1, int key, int cdiID2)
 {
   int status = CDI_NOERR;
 
-  cdi_keys_t *keysp = cdi_get_keysp(cdiID1, varID1);
-  xassert(keysp != NULL);
+  cdi_keys_t *keysp1 = cdi_get_keysp(cdiID1, varID1);
+  xassert(keysp1 != NULL);
 
-  cdi_key_t *keyp = find_key(keysp, key);
+  cdi_keys_t *keysp2 = cdi_get_keysp(cdiID2, varID1);
+  xassert(keysp2 != NULL);
+
+  cdi_key_t *keyp = find_key(keysp1, key);
   if (keyp == NULL) return -1;
 
-  cdi_copy_key(keyp, cdiID2, varID1);
+  cdi_define_key(keyp, keysp2);
 
   return status;
 }
@@ -447,19 +468,11 @@ int cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, in
   return status;
 }
 
-//  cdiInqKeyBytes: Get a bytes array from a key of a CDI variable
-int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length)
+int cdiInqVarKeyBytes(const cdi_keys_t *keysp, int key, unsigned char *bytes, int *length)
 {
   int status = -1;
-  xassert(bytes != NULL);
-  xassert(length != NULL);
 
-  // if ( varID != CDI_GLOBAL ) status = cdiInqKeyBytes(cdiID, CDI_GLOBAL, key, bytes, length);
-
-  cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
-  xassert(keysp != NULL);
-
-  cdi_key_t *keyp = find_key(keysp, key);
+  const cdi_key_t *keyp = find_key_const(keysp, key);
   if ( keyp != NULL ) // key in use
     {
       if ( keyp->type == KEY_BYTES )
@@ -471,6 +484,20 @@ int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *len
     }
 
   return status;
+}
+
+//  cdiInqKeyBytes: Get a bytes array from a key of a CDI variable
+int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length)
+{
+  xassert(bytes != NULL);
+  xassert(length != NULL);
+
+  // if ( varID != CDI_GLOBAL ) status = cdiInqKeyBytes(cdiID, CDI_GLOBAL, key, bytes, length);
+
+  const cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
+  xassert(keysp != NULL);
+
+  return cdiInqVarKeyBytes(keysp, key, bytes, length);
 }
 
 /*
@@ -538,7 +565,7 @@ int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
 
 const char *cdiInqVarKeyStringPtr(cdi_keys_t *keysp, int key)
 {
-  cdi_key_t *keyp = find_key(keysp, key);
+  const cdi_key_t *keyp = find_key(keysp, key);
   if ( keyp != NULL ) // key in use
     {
       if ( keyp->type == KEY_BYTES ) return (const char *)keyp->v.s;

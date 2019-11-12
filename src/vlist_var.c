@@ -1942,21 +1942,17 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
     {
       int zaxisID = pva->zaxisID;
       size_t nlevs = (size_t)zaxisInqSize(zaxisID);
-      diff |= (memcmp(pva->levinfo, pvb->levinfo, sizeof (levinfo_t) * nlevs)
-               != 0);
-      if (diff)
-        return 1;
+      diff |= (memcmp(pva->levinfo, pvb->levinfo, sizeof (levinfo_t) * nlevs) != 0);
+      if (diff) return 1;
     }
 
   size_t natts = a->vars[varIDA].atts.nelems;
-  if (natts != b->vars[varIDB].atts.nelems)
-    return 1;
+  if (natts != b->vars[varIDB].atts.nelems) return 1;
   for (size_t attID = 0; attID < natts; ++attID)
     diff |= cdi_att_compare(a, varIDA, b, varIDB, (int)attID);
 
   size_t nkeys = a->vars[varIDA].keys.nelems;
-  if (nkeys != b->vars[varIDB].keys.nelems)
-    return 1;
+  if (nkeys != b->vars[varIDB].keys.nelems) return 1;
   for (size_t keyID = 0; keyID < nkeys; ++keyID)
     diff |= vlist_key_compare(a, varIDA, b, varIDB, (int)keyID);
 

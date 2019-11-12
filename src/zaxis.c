@@ -175,6 +175,8 @@ void zaxis_copy(zaxis_t *zaxisptr2, zaxis_t *zaxisptr1)
   const int zaxisID2 = zaxisptr2->self;
   memcpy(zaxisptr2, zaxisptr1, sizeof(zaxis_t));
   zaxisptr2->self = zaxisID2;
+  zaxisptr2->keys.nelems = 0;
+  cdiCopyVarKeys(&zaxisptr1->keys, &zaxisptr2->keys);
 }
 
 

@@ -166,7 +166,6 @@ void grid_init(grid_t *gridptr)
 
   gridptr->lcomplex       = false;
   gridptr->hasdims        = true;
-  memset(gridptr->uuid, 0, CDI_UUID_SIZE);
   gridptr->name           = NULL;
   gridptr->vtable         = &cdiGridVtable;
   gridptr->keys.nalloc    = MAX_KEYS;
@@ -249,8 +248,13 @@ void grid_copy_base_scalar_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
 {
   memcpy(gridptrDup, gridptrOrig, sizeof(grid_t));
   gridptrDup->self = CDI_UNDEFID;
-  if ( gridptrOrig->reference )
-    gridptrDup->reference = strdupx(gridptrOrig->reference);
+  gridptrDup->keys.nelems = 0;
+  cdiCopyVarKeys(&gridptrOrig->keys, &gridptrDup->keys);
+  gridptrDup->x.keys.nelems = 0;
+  cdiCopyVarKeys(&gridptrOrig->x.keys, &gridptrDup->x.keys);
+  gridptrDup->y.keys.nelems = 0;
+  cdiCopyVarKeys(&gridptrOrig->y.keys, &gridptrDup->y.keys);
+  if ( gridptrOrig->reference ) gridptrDup->reference = strdupx(gridptrOrig->reference);
 }
 
 
@@ -2311,8 +2315,13 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
 	    }
 	  else if ( grid->type == GRID_UNSTRUCTURED )
 	    {
-              /* FIXME: not octet 0 but octet 7 is guaranteed  non-zero for any non-NULL UUID */
-              differ = ((gridRef->uuid[0] || grid->uuid[0]) && memcmp(gridRef->uuid, grid->uuid, CDI_UUID_SIZE));
+              unsigned char uuid1[CDI_UUID_SIZE]; memset(uuid1, 0, CDI_UUID_SIZE);
+              unsigned char uuid2[CDI_UUID_SIZE]; memset(uuid2, 0, CDI_UUID_SIZE);
+              int length = CDI_UUID_SIZE;
+              cdiInqVarKeyBytes(&gridRef->keys, CDI_KEY_UUID, uuid1, &length);
+              length = CDI_UUID_SIZE;
+              cdiInqVarKeyBytes(&grid->keys, CDI_KEY_UUID, uuid2, &length);
+              differ = ((uuid1[0] || uuid2[0]) && memcmp(uuid1, uuid2, CDI_UUID_SIZE));
               if (!differ)
                 {
                   if ( coord_compare )
@@ -2361,17 +2370,6 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
 
   return differ;
 }
-
-/*
-int gridIsEqual(int gridID1, int gridID2)
-{
-  const grid_t *grid2 = grid_to_pointer(gridID2);
-
-  int grid_is_equal = gridCompare(gridID1, grid2, true) == false;
-
-  return grid_is_equal;
-}
-*/
 
 int gridCompareP(void *gridptr1, void *gridptr2)
 {
@@ -2536,8 +2534,13 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   else if ( g2->mask_gme )
     return differ;
 
-  if ( memcmp(g1->uuid, g2->uuid, CDI_UUID_SIZE) )
-    return differ;
+  unsigned char uuid1[CDI_UUID_SIZE]; memset(uuid1, 0, CDI_UUID_SIZE);
+  unsigned char uuid2[CDI_UUID_SIZE]; memset(uuid2, 0, CDI_UUID_SIZE);
+  int length = CDI_UUID_SIZE;
+  cdiInqVarKeyBytes(&g1->keys, CDI_KEY_UUID, uuid1, &length);
+  length = CDI_UUID_SIZE;
+  cdiInqVarKeyBytes(&g2->keys, CDI_KEY_UUID, uuid2, &length);
+  if ( memcmp(uuid1, uuid2, CDI_UUID_SIZE) ) return differ;
 
   return equal;
 }
@@ -2718,13 +2721,14 @@ int gridGenerate(const grid_t *grid)
   gridptr->y.inc = grid->y.inc;
   if ( valdef_group1 && grid->area)
     gridDefArea(gridID, grid->area);
+
   gridptr->number = grid->number;
   gridptr->position = grid->position;
   gridptr->scanningMode           = grid->scanningMode;
   gridptr->iScansNegatively       = grid->iScansNegatively;
   gridptr->jScansPositively       = grid->jScansPositively;
   gridptr->jPointsAreConsecutive  = grid->jPointsAreConsecutive;
-  memcpy(gridptr->uuid, grid->uuid, CDI_UUID_SIZE);
+
   if ( gridtype == GRID_UNSTRUCTURED && grid->reference )
     gridDefReference(gridID, grid->reference);
   if ( gridtype == GRID_PROJECTION )
@@ -3396,13 +3400,7 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
                 fprintf(fp, "number    = %d\n", number);
                 if ( position >= 0 ) fprintf(fp, "position  = %d\n", position);
               }
-            /*
-              gridInqUUID(gridID, uuidOfHGrid);
-              d = (unsigned char *) &uuidOfHGrid;
-              fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
-              d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
-              d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);
-            */
+
             if ( gridInqReference(gridID, NULL) )
               {
                 char reference_link[8192];
@@ -4090,9 +4088,8 @@ The function @func{gridDefUUID} defines the UUID for an unstructured grid.
 */
 void gridDefUUID(int gridID, const unsigned char uuid[CDI_UUID_SIZE])
 {
-  grid_t* gridptr = grid_to_pointer(gridID);
+  cdiDefKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuid, CDI_UUID_SIZE);
 
-  memcpy(gridptr->uuid, uuid, CDI_UUID_SIZE);
   gridMark4Update(gridID);
 }
 
@@ -4113,9 +4110,9 @@ The function @func{gridInqUUID} returns the UUID to an unstructured grid.
 */
 void gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE])
 {
-  grid_t *gridptr = grid_to_pointer(gridID);
-
-  memcpy(uuid, gridptr->uuid, CDI_UUID_SIZE);
+  memset(uuid, 0, CDI_UUID_SIZE);
+  int length = CDI_UUID_SIZE;
+  cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
 }
 
 
@@ -4205,7 +4202,6 @@ enum {
        gridHasYBoundsFlag = 1 << 6,
        gridHasReferenceFlag = 1 << 7,
        gridHasReducedPointsFlag = 1 << 8,
-       gridHasUUIDFlag = 1 << 9,
 };
 
 
@@ -4223,8 +4219,7 @@ static int gridGetComponentFlags(const grid_t * gridP)
     | (gridHasXBoundsFlag & (int)((unsigned)(gridP->x.bounds == NULL) - 1U))
     | (gridHasYBoundsFlag & (int)((unsigned)(gridP->y.bounds == NULL) - 1U))
     | (gridHasReferenceFlag & (int)((unsigned)(gridP->reference == NULL) - 1U))
-    | (gridHasReducedPointsFlag & (int)((unsigned)(gridP->reducedPoints == NULL) - 1U))
-    | (gridHasUUIDFlag & (int)((unsigned)cdiUUIDIsNull(gridP->uuid) - 1U));
+    | (gridHasReducedPointsFlag & (int)((unsigned)(gridP->reducedPoints == NULL) - 1U));
   return flags;
 }
 
@@ -4302,6 +4297,7 @@ gridGetPackSize(void * voidP, void *context)
             + serializeGetSize(1, CDI_DATATYPE_UINT32, context));
     }
 
+  packBuffSize += serializeKeysGetPackSize(&gridP->keys, context);
   packBuffSize += serializeKeysGetPackSize(&gridP->x.keys, context);
   packBuffSize += serializeKeysGetPackSize(&gridP->y.keys, context);
 
@@ -4327,9 +4323,6 @@ gridGetPackSize(void * voidP, void *context)
       packBuffSize += serializeGetSize(gridP->size, CDI_DATATYPE_UCHAR, context)
         + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
     }
-
-  if (!cdiUUIDIsNull(gridP->uuid))
-    packBuffSize += serializeGetSize(CDI_UUID_SIZE, CDI_DATATYPE_UCHAR, context);
 
   return packBuffSize;
 }
@@ -4476,6 +4469,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       xassert(cdiCheckSum(CDI_DATATYPE_FLT, size, gridP->y.bounds) == d);
     }
 
+  serializeKeysUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &gridP->keys, context);
   serializeKeysUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &gridP->x.keys, context);
   serializeKeysUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &gridP->y.keys, context);
 
@@ -4512,11 +4506,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       &d, 1, CDI_DATATYPE_UINT32, context);
       xassert(cdiCheckSum(CDI_DATATYPE_UCHAR, gridP->size, gridP->mask_gme) == d);
-    }
-  if (memberMask & gridHasUUIDFlag)
-    {
-      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->uuid, CDI_UUID_SIZE, CDI_DATATYPE_UCHAR, context);
     }
 
   reshSetStatus(gridP->self, &gridOps,
@@ -4677,6 +4666,7 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
+  serializeKeysPack(&gridP->keys, packBuffer, packBufferSize, packBufferPos, context);
   serializeKeysPack(&gridP->x.keys, packBuffer, packBufferSize, packBufferPos, context);
   serializeKeysPack(&gridP->y.keys, packBuffer, packBufferSize, packBufferPos, context);
 
@@ -4712,10 +4702,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
       serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
-
-  if (memberMask & gridHasUUIDFlag)
-    serializePack(gridP->uuid, CDI_UUID_SIZE, CDI_DATATYPE_UCHAR,
-                  packBuffer, packBufferSize, packBufferPos, context);
 }
 
 
