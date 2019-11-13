@@ -699,7 +699,7 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( zaxisInqType(zaxisID) == ZAXIS_REFERENCE )
         {
           if ( numberOfVerticalLevels > 0 ) zaxisDefNlevRef(zaxisID, numberOfVerticalLevels);
-          if ( numberOfVerticalGrid > 0 ) zaxisDefNumber(zaxisID, numberOfVerticalGrid);
+          if ( numberOfVerticalGrid > 0 ) cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, numberOfVerticalGrid);
           if ( !cdiUUIDIsNull(uuidVGrid) ) zaxisDefUUID(zaxisID, uuidVGrid);
         }
 

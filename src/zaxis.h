@@ -27,7 +27,6 @@ typedef struct {
   int        vctsize;
   unsigned   positive;
   double    *vct;
-  int        number;   /* Reference number to a generalized Z-axis */
   int        nhlev;
   cdi_keys_t keys;
   cdi_atts_t atts;

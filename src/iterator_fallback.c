@@ -309,10 +309,14 @@ int cdiFallbackIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *
   int zaxisId = vlistInqVarZaxis(me->vlistId, me->curVariable);
   int ltype = 0;
   cdiInqKeyInt(zaxisId, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
-  if(ltype != ZAXIS_HYBRID) return CDI_EINVAL;
-  if(outVgridNumber) *outVgridNumber = zaxisInqNumber(zaxisId);
-  if(outLevelCount) *outLevelCount = zaxisInqNlevRef(zaxisId);
-  if(outUuid) zaxisInqUUID(zaxisId, outUuid);
+  if (ltype != ZAXIS_HYBRID) return CDI_EINVAL;
+  if (outVgridNumber)
+    {
+      *outVgridNumber = 0;
+      cdiInqKeyInt(zaxisId, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, outVgridNumber);
+    }
+  if (outLevelCount) *outLevelCount = zaxisInqNlevRef(zaxisId);
+  if (outUuid) zaxisInqUUID(zaxisId, outUuid);
   return CDI_NOERR;
 }
 

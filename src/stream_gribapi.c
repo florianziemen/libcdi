@@ -2588,7 +2588,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
                 grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype2, lbounds, level, dlevel1, dlevel2);
               }
 
-            int number = zaxisInqNumber(zaxisID);
+            int number = 0;
+            cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, &number);
             unsigned char uuid[CDI_UUID_SIZE];
             GRIB_CHECK(my_grib_set_long(gh, "NV", 6), 0);
             GRIB_CHECK(my_grib_set_long(gh, "nlev", zaxisInqNlevRef(zaxisID)), 0);

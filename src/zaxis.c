@@ -129,7 +129,6 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->size          = 0;
   zaxisptr->vctsize       = 0;
   zaxisptr->vct           = NULL;
-  zaxisptr->number        = 0;
   zaxisptr->nhlev         = 0;
 
   cdiInitKeys(&zaxisptr->keys);
@@ -646,12 +645,7 @@ The function @func{zaxisDefNumber} defines the reference number for a generalize
 */
 void zaxisDefNumber(int zaxisID, int number)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  if (zaxisptr->number != number)
-    {
-      zaxisptr->number = number;
-      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
-    }
+  cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, number);
 }
 
 /*
@@ -671,8 +665,9 @@ The function @func{zaxisInqNumber} returns the reference number to a generalized
 */
 int zaxisInqNumber(int zaxisID)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  return zaxisptr->number;
+  int referenceNumber = 0;
+  cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, &referenceNumber);
+  return referenceNumber;
 }
 
 /*

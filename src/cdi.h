@@ -826,6 +826,7 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_P0VALUE                       952  // Z-axis reference pressure in Pa
 
 #define  CDI_KEY_UUID                          960  // UUID for grid/Z-axis reference
+#define  CDI_KEY_NUMBEROFVGRIDUSED             961  // GRIB2 numberOfVGridUsed
 
 //      cdiDefKeyInt: Define an integer value from a key of a CDI variable
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
