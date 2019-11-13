@@ -129,7 +129,6 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->size          = 0;
   zaxisptr->vctsize       = 0;
   zaxisptr->vct           = NULL;
-  zaxisptr->nhlev         = 0;
 
   cdiInitKeys(&zaxisptr->keys);
   zaxisptr->atts.nalloc    = MAX_ATTRIBUTES;
@@ -612,21 +611,17 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
 }
 
 
-void zaxisDefNlevRef(int zaxisID, int nhlev)
+void zaxisDefNlevRef(int zaxisID, int nlev)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  if (zaxisptr->nhlev != nhlev)
-    {
-      zaxisptr->nhlev = nhlev;
-      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
-    }
+  cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NLEV, nlev);
 }
 
 
 int zaxisInqNlevRef(int zaxisID)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  return zaxisptr->nhlev;
+  int nlev = 0;
+  cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NLEV, &nlev);
+  return nlev;
 }
 
 /*

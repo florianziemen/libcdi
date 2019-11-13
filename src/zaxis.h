@@ -27,7 +27,6 @@ typedef struct {
   int        vctsize;
   unsigned   positive;
   double    *vct;
-  int        nhlev;
   cdi_keys_t keys;
   cdi_atts_t atts;
 }

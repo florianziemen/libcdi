@@ -315,7 +315,11 @@ int cdiFallbackIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *
       *outVgridNumber = 0;
       cdiInqKeyInt(zaxisId, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, outVgridNumber);
     }
-  if (outLevelCount) *outLevelCount = zaxisInqNlevRef(zaxisId);
+  if (outLevelCount)
+    {
+      *outLevelCount = 0;
+      cdiInqKeyInt(zaxisId, CDI_GLOBAL, CDI_KEY_NLEV, outLevelCount);
+    }
   if (outUuid) zaxisInqUUID(zaxisId, outUuid);
   return CDI_NOERR;
 }
