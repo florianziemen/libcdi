@@ -2596,8 +2596,10 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
             cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NLEV, &nlev);
             GRIB_CHECK(my_grib_set_long(gh, "nlev", nlev), 0);
             unsigned char uuid[CDI_UUID_SIZE];
+            int length = CDI_UUID_SIZE;
+            memset(uuid, 0, length);
+            cdiInqKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
             size_t len = CDI_UUID_SIZE;
-            zaxisInqUUID(zaxisID, uuid);
             if ( grib_set_bytes(gh, "uuidOfVGrid", uuid, &len) != 0 ) Warning("Can't write UUID!");
           }
 

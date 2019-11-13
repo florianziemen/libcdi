@@ -700,7 +700,7 @@ void cdi_generate_vars(stream_t *streamptr)
         {
           if ( numberOfVerticalLevels > 0 ) cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NLEV, numberOfVerticalLevels);
           if ( numberOfVerticalGrid > 0 ) cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, numberOfVerticalGrid);
-          if ( !cdiUUIDIsNull(uuidVGrid) ) zaxisDefUUID(zaxisID, uuidVGrid);
+          if ( !cdiUUIDIsNull(uuidVGrid) ) cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuidVGrid, CDI_UUID_SIZE);
         }
 
       if ( lbounds ) Free(dlevels1);

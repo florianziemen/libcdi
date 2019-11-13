@@ -1380,8 +1380,9 @@ static
 void cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
 {
   unsigned char uuidOfVGrid[CDI_UUID_SIZE];
-  zaxisInqUUID(zaxisID, uuidOfVGrid);
-
+  int length = CDI_UUID_SIZE;
+  memset(uuidOfVGrid, 0, length);
+  cdiInqKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfVGrid, &length);
   if ( uuidOfVGrid[0] != 0 )
     {
       char uuidOfVGridStr[37];

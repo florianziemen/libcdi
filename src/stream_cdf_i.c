@@ -2978,7 +2978,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
           if ( CDI_cmor_mode && zsize == 1 && zaxisType != ZAXIS_HYBRID ) zaxisDefScalar(zaxisID);
 
           if ( uuidOfVGrid[0] != 0 )
-            zaxisDefUUID(zaxisID, uuidOfVGrid);
+            cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfVGrid, CDI_UUID_SIZE);
 
           if ( zaxisType == ZAXIS_HYBRID )
             {
