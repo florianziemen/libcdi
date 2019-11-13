@@ -112,13 +112,6 @@ struct grid_t {
   cdi_keys_t  keys;
   cdi_atts_t  atts;
   int         scanningMode;
-  bool        iScansNegatively, jScansPositively, jPointsAreConsecutive;
-  /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
-               64  = 128 * 0                + 64 *        1         + 32 * 0
-               00  = 128 * 0                + 64 *        0         + 32 * 0
-               96  = 128 * 0                + 64 *        1         + 32 * 1
-     Default / implicit scanning mode is 64:
-                        i and j scan positively, i points are consecutive (row-major)        */
 };
 
 

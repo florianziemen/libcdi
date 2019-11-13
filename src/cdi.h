@@ -809,6 +809,7 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_TYPEOFTIMEINCREMENT           823  // GRIB2 typeOfTimeIncrement
 #define  CDI_KEY_TYPEOFFIRSTFIXEDSURFACE       824  // GRIB2 typeOfFirstFixedSurface
 #define  CDI_KEY_TYPEOFSECONDFIXEDSURFACE      825  // GRIB2 typeOfSecondFixedSurface
+#define  CDI_KEY_SCANNINGMODE                  826  // GRIB  scanningMode
 
 #define  CDI_KEY_VDIMNAME                      920  // Vertex dimension name
 #define  CDI_KEY_GRIDMAP_VARTYPE               921  // Grid mapping var datatype
@@ -956,12 +957,12 @@ void    gridDefParamGME(int gridID, int nd, int ni, int ni2, int ni3);
 void    gridInqParamGME(int gridID, int *nd, int *ni, int *ni2, int *ni3);
 
 // Lambert Conformal Conic grid
-void gridDefParamLCC(int gridID, double missval, double lon_0, double lat_0, double lat_1, double lat_2, double a, double rf, double xval_0, double yval_0, double x_0, double y_0);
-int gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2, double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0);
+void    gridDefParamLCC(int gridID, double missval, double lon_0, double lat_0, double lat_1, double lat_2, double a, double rf, double xval_0, double yval_0, double x_0, double y_0);
+int     gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2, double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0);
 
 // Polar stereographic grid
-void gridDefParamSTERE(int gridID, double missval, double lon_0, double lat_ts, double lat_0, double a, double xval_0, double yval_0, double x_0, double y_0);
-int gridInqParamSTERE(int gridID, double missval, double *lon_0, double *lat_ts, double *lat_0, double *a, double *xval_0, double *yval_0, double *x_0, double *y_0);
+void    gridDefParamSTERE(int gridID, double missval, double lon_0, double lat_ts, double lat_0, double a, double xval_0, double yval_0, double x_0, double y_0);
+int     gridInqParamSTERE(int gridID, double missval, double *lon_0, double *lat_ts, double *lat_0, double *a, double *xval_0, double *yval_0, double *x_0, double *y_0);
 
 void    gridDefArea(int gridID, const double area[]);
 void    gridInqArea(int gridID, double area[]);
