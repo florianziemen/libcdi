@@ -617,8 +617,9 @@ static
 void cdfDefGridUUID(stream_t *streamptr, int gridID)
 {
   unsigned char uuidOfHGrid[CDI_UUID_SIZE];
-
-  gridInqUUID(gridID, uuidOfHGrid);
+  size_t len = CDI_UUID_SIZE;
+  memset(uuidOfHGrid, 0, len);
+  cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfHGrid, &len);
   if ( !cdiUUIDIsNull(uuidOfHGrid) )
     {
       char uuidOfHGridStr[37];

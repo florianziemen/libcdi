@@ -2164,7 +2164,8 @@ void gribapiDefGridUnstructured(grib_handle *gh, int gridID)
 
       unsigned char uuid[CDI_UUID_SIZE];
       size_t len = CDI_UUID_SIZE;
-      gridInqUUID(gridID, uuid);
+      memset(uuid, 0, len);
+      cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &len);
       if (grib_set_bytes(gh, "uuidOfHGrid", uuid, &len) != 0)
         Warning("Can't write UUID!");
     }

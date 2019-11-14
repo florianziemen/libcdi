@@ -11,6 +11,9 @@ gridInqYname(gridID, yname)         -> cdiInqKeyString(gridID, CDI_YAXIS, CDI_KE
 gridInqYlongname(gridID, ylongname) -> cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_LONGNAME, ylongname, &length)
 gridInqYunits(gridID, yunits)       -> cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, yunits, &length)
 
+gridDefUUID(zaxisID, uuidOfHGrid)   -> cdiDefKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfHGrid, length)
+gridInqUUID(zaxisID)                -> cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfHGrid, &length)
+
 zaxisDefXname(zaxisID, xname)         -> cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, xname)
 zaxisDefXlongname(zaxisID, xlongname) -> cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, xlongname)
 zaxisDefXunits(zaxisID, xunits)       -> cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, xunits)
