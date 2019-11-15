@@ -71,7 +71,7 @@ struct gridaxis_t {
   cdi_keys_t  keys;
 #ifndef USE_MPI
   int         clength;
-  char       **cvals;
+  char      **cvals;
 #endif
 };
 
@@ -81,7 +81,7 @@ struct grid_gme_t {
 };
 
 struct grid_t {
-  char   *name;
+  char       *name;
   int         self;
   size_t      size;
   int         type;                   /* grid type                      */
@@ -94,7 +94,6 @@ struct grid_t {
   struct grid_gme_t  gme;
   int         trunc;                  /* parameter for GRID_SPECTRAL    */
   int         nvertex;
-  char       *reference;
   int        *reducedPoints;
   int         reducedPointsSize;
   int         np;                     /* number of parallels between a pole and the equator */
@@ -133,8 +132,6 @@ const char **gridInqYCvalsPtr(int gridID);
 const double *gridInqXboundsPtr(int gridID);
 const double *gridInqYboundsPtr(int gridID);
 const double *gridInqAreaPtr(int gridID);
-
-const char *gridInqReferencePtr(int gridID);
 
 int gridGenerate(const grid_t *grid);
 

@@ -609,7 +609,8 @@ void cdfDefGridReference(stream_t *streamptr, int gridID)
   cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, &number);
   if ( number > 0 ) cdf_put_att_int(fileID, NC_GLOBAL, "number_of_grid_used", NC_INT, 1, &number);
 
-  const char *gridfile = gridInqReferencePtr(gridID);
+  grid_t *gridptr = grid_to_pointer(gridID);
+  const char *gridfile = cdiInqVarKeyStringPtr(&gridptr->keys, CDI_KEY_REFERENCEURI);
   if ( gridfile && gridfile[0] != 0 )
     cdf_put_att_text(fileID, NC_GLOBAL, "grid_file_uri", strlen(gridfile), gridfile);
 }

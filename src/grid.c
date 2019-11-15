@@ -154,7 +154,6 @@ void grid_init(grid_t *gridptr)
 
   gridptr->trunc          = 0;
   gridptr->nvertex        = 0;
-  gridptr->reference      = NULL;
   gridptr->datatype       = CDI_DATATYPE_FLT64;
   gridptr->np             = 0;
   gridptr->isCyclic       = CDI_UNDEFID;
@@ -180,7 +179,7 @@ void grid_free_components(grid_t *gridptr)
 #endif
                      gridptr->x.bounds, gridptr->y.bounds,
                      gridptr->reducedPoints, gridptr->area,
-                     gridptr->reference, gridptr->name};
+                     gridptr->name};
 
   for ( size_t i = 0; i < sizeof(p2free)/sizeof(p2free[0]); ++i )
     if ( p2free[i] ) Free(p2free[i]);
@@ -239,7 +238,6 @@ void grid_copy_base_scalar_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
   cdiCopyVarKeys(&gridptrOrig->x.keys, &gridptrDup->x.keys);
   cdiInitKeys(&gridptrDup->y.keys);
   cdiCopyVarKeys(&gridptrOrig->y.keys, &gridptrDup->y.keys);
-  if ( gridptrOrig->reference ) gridptrDup->reference = strdupx(gridptrOrig->reference);
 }
 
 
@@ -2506,13 +2504,7 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   if (g1->x.stdname != g2->x.stdname) return differ;
   if (g1->y.stdname != g2->y.stdname) return differ;
 
-  if ( g1->reference )
-    {
-      if ( !g2->reference ) return differ;
-      if ( strcmp(g1->reference, g2->reference) ) return differ;
-    }
-  else if ( g2->reference )
-    return differ;
+  if (strcmp(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_REFERENCEURI), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_REFERENCEURI))) return differ;
 
   if ( g1->mask )
     {
@@ -2725,9 +2717,9 @@ int gridGenerate(const grid_t *grid)
 
   cdiCopyVarKey(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED, &gridptr->keys);
   cdiCopyVarKey(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE, &gridptr->keys);
-  gridptr->scanningMode           = grid->scanningMode;
-  if ( gridtype == GRID_UNSTRUCTURED && grid->reference )
-    gridDefReference(gridID, grid->reference);
+  cdiCopyVarKey(&grid->keys, CDI_KEY_REFERENCEURI, &gridptr->keys);
+
+  gridptr->scanningMode = grid->scanningMode;
   if ( gridtype == GRID_PROJECTION )
     gridptr->name = strdup(grid->name);
   if ( gridtype == GRID_GAUSSIAN_REDUCED )
@@ -3394,10 +3386,12 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
                 if ( position >= 0 ) fprintf(fp, "position  = %d\n", position);
               }
 
-            if ( gridInqReference(gridID, NULL) )
+            int length;
+            if (cdiInqKeyLen(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, &length))
               {
                 char reference_link[8192];
-                gridInqReference(gridID, reference_link);
+                length = sizeof(reference_link);
+                cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, reference_link, &length);
                 fprintf(fp, "uri       = %s\n", reference_link);
               }
           }
@@ -4002,17 +3996,9 @@ The function @func{gridDefReference} defines the reference URI for an unstructur
 */
 void gridDefReference(int gridID, const char *reference)
 {
-  grid_t* gridptr = grid_to_pointer(gridID);
-
-  if ( reference )
+  if (reference)
     {
-      if ( gridptr->reference )
-        {
-          Free(gridptr->reference);
-          gridptr->reference = NULL;
-        }
-
-      gridptr->reference = strdupx(reference);
+      cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, reference);
       gridMark4Update(gridID);
     }
 }
@@ -4034,23 +4020,14 @@ The function @func{gridInqReference} returns the reference URI to an unstructure
 */
 int gridInqReference(int gridID, char *reference)
 {
-  size_t len = 0;
-  grid_t* gridptr = grid_to_pointer(gridID);
-
-  if ( gridptr->reference )
+  int length = 0;
+  if (cdiInqKeyLen(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, &length))
     {
-      len = strlen(gridptr->reference);
-      if ( reference )
-        strcpy(reference, gridptr->reference);
+      if (reference)
+        cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, reference, &length);
     }
 
-  return (int)len;
-}
-
-const char *gridInqReferencePtr(int gridID)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->reference;
+  return length;
 }
 
 /*
@@ -4175,8 +4152,7 @@ enum {
        gridHasAreaFlag = 1 << 4,
        gridHasXBoundsFlag = 1 << 5,
        gridHasYBoundsFlag = 1 << 6,
-       gridHasReferenceFlag = 1 << 7,
-       gridHasReducedPointsFlag = 1 << 8,
+       gridHasReducedPointsFlag = 1 << 7,
 };
 
 
@@ -4184,16 +4160,11 @@ static int gridGetComponentFlags(const grid_t * gridP)
 {
   int flags = (gridHasMaskFlag & (int)((unsigned)(gridP->mask == NULL) - 1U))
     | (gridHasGMEMaskFlag & (int)((unsigned)(gridP->mask_gme == NULL) - 1U))
-    | (gridHasXValsFlag
-       & (int)((unsigned)(gridP->vtable->inqXValsPtr((grid_t *)gridP) == NULL) - 1U))
-    | (gridHasYValsFlag
-       & (int)((unsigned)(gridP->vtable->inqYValsPtr((grid_t *)gridP) == NULL) - 1U))
-    | (gridHasAreaFlag
-       & (int)((unsigned)(gridP->vtable->inqAreaPtr((grid_t *)gridP) == NULL)
-               - 1U))
+    | (gridHasXValsFlag & (int)((unsigned)(gridP->vtable->inqXValsPtr((grid_t *)gridP) == NULL) - 1U))
+    | (gridHasYValsFlag & (int)((unsigned)(gridP->vtable->inqYValsPtr((grid_t *)gridP) == NULL) - 1U))
+    | (gridHasAreaFlag & (int)((unsigned)(gridP->vtable->inqAreaPtr((grid_t *)gridP) == NULL) - 1U))
     | (gridHasXBoundsFlag & (int)((unsigned)(gridP->x.bounds == NULL) - 1U))
     | (gridHasYBoundsFlag & (int)((unsigned)(gridP->y.bounds == NULL) - 1U))
-    | (gridHasReferenceFlag & (int)((unsigned)(gridP->reference == NULL) - 1U))
     | (gridHasReducedPointsFlag & (int)((unsigned)(gridP->reducedPoints == NULL) - 1U));
   return flags;
 }
@@ -4276,14 +4247,6 @@ gridGetPackSize(void * voidP, void *context)
   packBuffSize += serializeKeysGetPackSize(&gridP->x.keys, context);
   packBuffSize += serializeKeysGetPackSize(&gridP->y.keys, context);
 
-  if (gridP->reference)
-    {
-      size_t len = strlen(gridP->reference);
-      packBuffSize += serializeGetSize(1, CDI_DATATYPE_INT, context)
-        + serializeGetSize((int)len + 1, CDI_DATATYPE_TXT, context)
-        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
-    }
-
   if (gridP->mask)
     {
       xassert(gridP->size);
@@ -4337,7 +4300,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->gme.ni3       =   intBuffer[GRID_PACK_INT_IDX_GME_NI3];
     gridP->trunc         =   intBuffer[GRID_PACK_INT_IDX_TRUNC];
     gridP->nvertex       =   intBuffer[GRID_PACK_INT_IDX_NVERTEX];
-    gridP->reducedPointsSize       =   intBuffer[REDUCEDPOINTSSIZE];
+    gridP->reducedPointsSize =   intBuffer[REDUCEDPOINTSSIZE];
     gridP->size          =   intBuffer[GRID_PACK_INT_IDX_SIZE];
     gridP->x.size        =   intBuffer[GRID_PACK_INT_IDX_X_SIZE];
     gridP->y.size        =   intBuffer[GRID_PACK_INT_IDX_Y_SIZE];
@@ -4443,19 +4406,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
   serializeKeysUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &gridP->x.keys, context);
   serializeKeysUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &gridP->y.keys, context);
 
-  if (memberMask & gridHasReferenceFlag)
-    {
-      int referenceSize;
-      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &referenceSize, 1, CDI_DATATYPE_INT, context);
-      gridP->reference = (char *) Malloc(referenceSize);
-      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->reference, referenceSize, CDI_DATATYPE_TXT, context);
-      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, CDI_DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(CDI_DATATYPE_TXT, referenceSize, gridP->reference) == d);
-    }
-
   if (memberMask & gridHasMaskFlag)
     {
       xassert((size = gridP->size));
@@ -4543,12 +4493,12 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
   {
     double doubleBuffer[gridNdouble];
 
-    doubleBuffer[GRID_PACK_DBL_IDX_X_FIRST]        = gridP->x.first;
-    doubleBuffer[GRID_PACK_DBL_IDX_Y_FIRST]        = gridP->y.first;
-    doubleBuffer[GRID_PACK_DBL_IDX_X_LAST]         = gridP->x.last;
-    doubleBuffer[GRID_PACK_DBL_IDX_Y_LAST]         = gridP->y.last;
-    doubleBuffer[GRID_PACK_DBL_IDX_X_INC]          = gridP->x.inc;
-    doubleBuffer[GRID_PACK_DBL_IDX_Y_INC]          = gridP->y.inc;
+    doubleBuffer[GRID_PACK_DBL_IDX_X_FIRST] = gridP->x.first;
+    doubleBuffer[GRID_PACK_DBL_IDX_Y_FIRST] = gridP->y.first;
+    doubleBuffer[GRID_PACK_DBL_IDX_X_LAST]  = gridP->x.last;
+    doubleBuffer[GRID_PACK_DBL_IDX_Y_LAST]  = gridP->y.last;
+    doubleBuffer[GRID_PACK_DBL_IDX_X_INC]   = gridP->x.inc;
+    doubleBuffer[GRID_PACK_DBL_IDX_Y_INC]   = gridP->y.inc;
 
     serializePack(doubleBuffer, gridNdouble, CDI_DATATYPE_FLT64,
                   packBuffer, packBufferSize, packBufferPos, context);
@@ -4634,18 +4584,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
   serializeKeysPack(&gridP->keys, packBuffer, packBufferSize, packBufferPos, context);
   serializeKeysPack(&gridP->x.keys, packBuffer, packBufferSize, packBufferPos, context);
   serializeKeysPack(&gridP->y.keys, packBuffer, packBufferSize, packBufferPos, context);
-
-  if (memberMask & gridHasReferenceFlag)
-    {
-      size = (int)strlen(gridP->reference) + 1;
-      serializePack(&size, 1, CDI_DATATYPE_INT,
-                    packBuffer, packBufferSize, packBufferPos, context);
-      serializePack(gridP->reference, size, CDI_DATATYPE_TXT,
-                    packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(CDI_DATATYPE_TXT, size, gridP->reference);
-      serializePack(&d, 1, CDI_DATATYPE_UINT32,
-                    packBuffer, packBufferSize, packBufferPos, context);
-    }
 
   if (memberMask & gridHasMaskFlag)
     {

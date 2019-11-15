@@ -830,6 +830,7 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_NLEV                          962  // GRIB2 nlev
 #define  CDI_KEY_NUMBEROFGRIDUSED              963  // GRIB2 numberOfGridUsed
 #define  CDI_KEY_NUMBEROFGRIDINREFERENCE       964  // GRIB2 numberOfGridInReference
+#define  CDI_KEY_REFERENCEURI                  965  // reference URI to grid file
 
 //      cdiDefKeyInt: Define an integer value from a key of a CDI variable
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);

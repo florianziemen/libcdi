@@ -199,7 +199,7 @@ int cdiInqKeyLen(int cdiID, int varID, int key, int *length)
 static
 void cdi_define_key(const cdi_key_t *keyp, cdi_keys_t *keysp)
 {
-  if ( keyp->type == KEY_INT )
+  if      ( keyp->type == KEY_INT )
     cdiDefVarKeyInt(keysp, keyp->key, keyp->v.i);
   else if ( keyp->type == KEY_FLOAT )
     cdiDefVarKeyFloat(keysp, keyp->key, keyp->v.d);
@@ -537,7 +537,7 @@ int cdiDefKeyString(int cdiID, int varID, int key, const char *string)
 {
   xassert(string != NULL);
 
-  int length = strlen(string)+1;
+  int length = strlen(string) + 1;
   int status = cdiDefKeyBytes(cdiID, varID, key, (const unsigned char *) string, length);
 
   return status;
@@ -571,7 +571,6 @@ int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
   string[0] = '\0';
 
   int status = cdiInqKeyBytes(cdiID, varID, key, (unsigned char *) string, length);
-
   if (status != CDI_NOERR) length = 0;
 
   return status;
