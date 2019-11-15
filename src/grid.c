@@ -3387,7 +3387,7 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
               }
 
             int length;
-            if (cdiInqKeyLen(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, &length))
+            if (CDI_NOERR == cdiInqKeyLen(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, &length))
               {
                 char reference_link[8192];
                 length = sizeof(reference_link);
@@ -4021,7 +4021,7 @@ The function @func{gridInqReference} returns the reference URI to an unstructure
 int gridInqReference(int gridID, char *reference)
 {
   int length = 0;
-  if (cdiInqKeyLen(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, &length))
+  if (CDI_NOERR == cdiInqKeyLen(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, &length))
     {
       if (reference)
         cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, reference, &length);
