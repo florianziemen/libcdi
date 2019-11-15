@@ -743,7 +743,7 @@ void gribapiGetGridUnstructured(grib_handle *gh, grid_t *grid, size_t numberOfPo
   long lpar;
   if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )
     {
-      grid->number   = (int)lpar;
+      cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED, (int)lpar);
       if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 )
         grid->position = (int)lpar;
       /*

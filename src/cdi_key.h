@@ -27,21 +27,11 @@ enum  {KEY_INT = 1, KEY_FLOAT, KEY_BYTES};
 void cdiDefVarKeyInt(cdi_keys_t *keysp, int key, int value);
 void cdiDefVarKeyFloat(cdi_keys_t *keysp, int key, double value);
 void cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, int length);
+int  cdiInqVarKeyInt(const cdi_keys_t *keysp, int key);
 int  cdiInqVarKeyBytes(const cdi_keys_t *keysp, int key, unsigned char *bytes, int *length);
 
 cdi_key_t *find_key(cdi_keys_t *keysp, int key);
 const char *cdiInqVarKeyStringPtr(cdi_keys_t *keysp, int key);
-
-static inline
-int cdiInqVarKeyInt(cdi_keys_t *keysp, int key)
-{
-  int value = 0;
-
-  cdi_key_t *keyp = find_key(keysp, key);
-  if (keyp && keyp->type == KEY_INT ) value = keyp->v.i;
-
-  return value;
-}
 
 static inline
 const char *cdiInqVarKeyString(cdi_keys_t *keysp, int key)
@@ -51,6 +41,7 @@ const char *cdiInqVarKeyString(cdi_keys_t *keysp, int key)
   return string;
 }
 
+int  cdiCopyVarKey(const cdi_keys_t *keysp1, int key, cdi_keys_t *keysp2);
 void cdiCopyVarKeys(const cdi_keys_t *keysp1, cdi_keys_t *keysp2);
 void cdiDeleteVarKeys(cdi_keys_t *keysp);
 void cdiDeleteKeys(int cdiID, int varID);

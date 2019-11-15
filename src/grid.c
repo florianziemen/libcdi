@@ -154,7 +154,6 @@ void grid_init(grid_t *gridptr)
 
   gridptr->trunc          = 0;
   gridptr->nvertex        = 0;
-  gridptr->number         = 0;
   gridptr->position       = 0;
   gridptr->reference      = NULL;
   gridptr->datatype       = CDI_DATATYPE_FLT64;
@@ -2311,10 +2310,12 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
               differ = ((uuid1[0] || uuid2[0]) && memcmp(uuid1, uuid2, CDI_UUID_SIZE));
               if (!differ)
                 {
+                  int numberA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED);
+                  int numberB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDUSED);
                   if ( coord_compare )
                     {
                       differ = grid->nvertex != gridRef->nvertex
-                        || (grid->number > 0 && grid->position != gridRef->position)
+                        || (numberA > 0 && grid->position != gridRef->position)
                         || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
                     }
                   else
@@ -2322,20 +2323,19 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
                       if ( ((grid->x.vals == NULL) ^ (gridRef->x.vals == NULL)) &&
                            ((grid->y.vals == NULL) ^ (gridRef->y.vals == NULL)) )
                         {
-                          int nvertexA, nvertexB, numberA, numberB;
+                          int nvertexA, nvertexB;
                           differ = ( (nvertexA = grid->nvertex)
                                      && (nvertexB = gridRef->nvertex)
                                      && (nvertexA != nvertexB) )
-                            || (numberA = grid->number, numberB = gridRef->number,
-                                ( numberA && numberB && (numberA != numberB) )
+                            || (( numberA && numberB && (numberA != numberB) )
                                 || ( (numberA && numberB)
                                      && (grid->position) != (gridRef->position) ) );
                         }
                       else
                         {
                           differ = grid->nvertex != gridRef->nvertex
-                            || grid->number != gridRef->number
-                            || (grid->number > 0 && grid->position != gridRef->position)
+                            || numberA != numberB
+                            || (numberA > 0 && grid->position != gridRef->position)
                             || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
                         }
                     }
@@ -2358,6 +2358,16 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
   return differ;
 }
 
+
+int cmp_key_int(const cdi_keys_t *keysp1, const cdi_keys_t *keysp2, int key)
+{
+  int v1 = cdiInqVarKeyInt(keysp1, key);
+  int v2 = cdiInqVarKeyInt(keysp2, key);
+  if (v1 != v2) return 1;
+  return 0;
+}
+
+
 int gridCompareP(void *gridptr1, void *gridptr2)
 {
   grid_t *g1 = ( grid_t * ) gridptr1;
@@ -2378,7 +2388,7 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   if ( g1->gme.ni        != g2->gme.ni       ) return differ;
   if ( g1->gme.ni2       != g2->gme.ni2      ) return differ;
   if ( g1->gme.ni3       != g2->gme.ni3      ) return differ;
-  if ( g1->number        != g2->number       ) return differ;
+  if ( cmp_key_int(&g1->keys, &g2->keys, CDI_KEY_NUMBEROFGRIDUSED) ) return differ;
   if ( g1->position      != g2->position     ) return differ;
   if ( g1->trunc         != g2->trunc        ) return differ;
   if ( g1->nvertex       != g2->nvertex      ) return differ;
@@ -2595,9 +2605,9 @@ void gridComplete(grid_t *grid)
 
         if ( gridtype == GRID_UNSTRUCTURED )
           {
-            const int number = grid->number;
+            int number = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED);
+            if ( number > 0 ) cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, number);
             const int position = grid->position >= 0 ? grid->position : 0;
-            if ( number > 0 ) gridDefNumber(gridID, number);
             gridDefPosition(gridID, position);
           }
 
@@ -2709,7 +2719,7 @@ int gridGenerate(const grid_t *grid)
   if ( valdef_group1 && grid->area)
     gridDefArea(gridID, grid->area);
 
-  gridptr->number = grid->number;
+  cdiCopyVarKey(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED, &gridptr->keys);
   gridptr->position = grid->position;
   gridptr->scanningMode           = grid->scanningMode;
   if ( gridtype == GRID_UNSTRUCTURED && grid->reference )
@@ -3370,7 +3380,8 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
 
 	if ( type == GRID_UNSTRUCTURED )
           {
-            int number = gridInqNumber(gridID);
+            int number = 0;
+            cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, &number);
             int position = gridInqPosition(gridID);
             // const unsigned char *d;
             if ( number > 0 )
@@ -3485,13 +3496,12 @@ void gridPrintP(void *voidptr, FILE *fp)
           "ni        = %d\n"
           "ni2       = %d\n"
           "ni3       = %d\n"
-          "number    = %d\n"
           "position  = %d\n"
           "trunc     = %d\n"
           "lcomplex  = %d\n"
           "reducedPointsSize   = %d\n",
           gridptr->datatype, gridptr->gme.nd, gridptr->gme.ni, gridptr->gme.ni2,
-          gridptr->gme.ni3, gridptr->number, gridptr->position, gridptr->trunc,
+          gridptr->gme.ni3, gridptr->position, gridptr->trunc,
           gridptr->lcomplex, gridptr->reducedPointsSize );
 }
 
@@ -3907,13 +3917,7 @@ The function @func{gridDefNumber} defines the reference number for an unstructur
 */
 void gridDefNumber(int gridID, int number)
 {
-  grid_t *gridptr = grid_to_pointer(gridID);
-
-  if ( gridptr->number != number )
-    {
-      gridptr->number = number;
-      gridMark4Update(gridID);
-    }
+  cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, number);
 }
 
 /*
@@ -3933,8 +3937,9 @@ The function @func{gridInqNumber} returns the reference number to an unstructure
 */
 int gridInqNumber(int gridID)
 {
-  grid_t* gridptr = grid_to_pointer(gridID);
-  return gridptr->number;
+  int number = 0;
+  cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, &number);
+  return number;
 }
 
 /*
@@ -4135,7 +4140,6 @@ enum {
   GRID_PACK_INT_IDX_GME_NI,
   GRID_PACK_INT_IDX_GME_NI2,
   GRID_PACK_INT_IDX_GME_NI3,
-  GRID_PACK_INT_IDX_NUMBER,
   GRID_PACK_INT_IDX_POSITION,
   GRID_PACK_INT_IDX_TRUNC,
   GRID_PACK_INT_IDX_NVERTEX,
@@ -4334,7 +4338,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->gme.ni        =   intBuffer[GRID_PACK_INT_IDX_GME_NI];
     gridP->gme.ni2       =   intBuffer[GRID_PACK_INT_IDX_GME_NI2];
     gridP->gme.ni3       =   intBuffer[GRID_PACK_INT_IDX_GME_NI3];
-    gridP->number        =   intBuffer[GRID_PACK_INT_IDX_NUMBER];
     gridP->position      =   intBuffer[GRID_PACK_INT_IDX_POSITION];
     gridP->trunc         =   intBuffer[GRID_PACK_INT_IDX_TRUNC];
     gridP->nvertex       =   intBuffer[GRID_PACK_INT_IDX_NVERTEX];
@@ -4506,7 +4509,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[GRID_PACK_INT_IDX_GME_NI]       = gridP->gme.ni;
     intBuffer[GRID_PACK_INT_IDX_GME_NI2]      = gridP->gme.ni2;
     intBuffer[GRID_PACK_INT_IDX_GME_NI3]      = gridP->gme.ni3;
-    intBuffer[GRID_PACK_INT_IDX_NUMBER]       = gridP->number;
     intBuffer[GRID_PACK_INT_IDX_POSITION]     = gridP->position;
     intBuffer[GRID_PACK_INT_IDX_TRUNC]        = gridP->trunc;
     intBuffer[GRID_PACK_INT_IDX_NVERTEX]      = gridP->nvertex;

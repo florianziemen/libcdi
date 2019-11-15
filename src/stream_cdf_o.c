@@ -605,7 +605,8 @@ void cdfDefGridReference(stream_t *streamptr, int gridID)
 {
   const int fileID = streamptr->fileID;
 
-  const int number = gridInqNumber(gridID);
+  int number = 0;
+  cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, &number);
   if ( number > 0 ) cdf_put_att_int(fileID, NC_GLOBAL, "number_of_grid_used", NC_INT, 1, &number);
 
   const char *gridfile = gridInqReferencePtr(gridID);
@@ -619,7 +620,8 @@ void cdfDefGridUUID(stream_t *streamptr, int gridID)
   unsigned char uuidOfHGrid[CDI_UUID_SIZE];
   size_t len = CDI_UUID_SIZE;
   memset(uuidOfHGrid, 0, len);
-  cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfHGrid, &len);
+  int length = CDI_UUID_SIZE;
+  cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfHGrid, &length);
   if ( !cdiUUIDIsNull(uuidOfHGrid) )
     {
       char uuidOfHGridStr[37];

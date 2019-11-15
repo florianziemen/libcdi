@@ -234,22 +234,28 @@ int cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2)
 }
 
 
-int cdiCopyKey(int cdiID1, int varID1, int key, int cdiID2)
+int cdiCopyVarKey(const cdi_keys_t *keysp1, int key, cdi_keys_t *keysp2)
 {
   int status = CDI_NOERR;
 
+  const cdi_key_t *keyp = find_key_const (keysp1, key);
+  if (keyp == NULL) return -1;
+
+  cdi_define_key(keyp, keysp2);
+
+  return status;
+}
+
+
+int cdiCopyKey(int cdiID1, int varID1, int key, int cdiID2)
+{
   cdi_keys_t *keysp1 = cdi_get_keysp(cdiID1, varID1);
   xassert(keysp1 != NULL);
 
   cdi_keys_t *keysp2 = cdi_get_keysp(cdiID2, varID1);
   xassert(keysp2 != NULL);
 
-  cdi_key_t *keyp = find_key(keysp1, key);
-  if (keyp == NULL) return -1;
-
-  cdi_define_key(keyp, keysp2);
-
-  return status;
+  return cdiCopyVarKey(keysp1, key, keysp2);
 }
 
 
@@ -338,6 +344,17 @@ int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
     }
 
   return status;
+}
+
+
+int cdiInqVarKeyInt(const cdi_keys_t *keysp, int key)
+{
+  int value = 0;
+
+  const cdi_key_t *keyp = find_key_const(keysp, key);
+  if (keyp && keyp->type == KEY_INT ) value = keyp->v.i;
+
+  return value;
 }
 
 

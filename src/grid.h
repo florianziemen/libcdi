@@ -92,7 +92,7 @@ struct grid_t {
   mask_t     *mask_gme;
   double     *area;
   struct grid_gme_t  gme;
-  int         number, position;       /* parameter for GRID_REFERENCE   */
+  int         position;       /* parameter for GRID_REFERENCE   */
   int         trunc;                  /* parameter for GRID_SPECTRAL    */
   int         nvertex;
   char       *reference;

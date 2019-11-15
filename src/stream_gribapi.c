@@ -2155,17 +2155,20 @@ void gribapiDefGridUnstructured(grib_handle *gh, int gridID)
     }
   else
     {
-      int position = gridInqPosition(gridID);
-      int number = gridInqNumber(gridID);
-      if ( position < 0 ) position = 0;
+      int number = 0;
+      cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, &number);
       if ( number < 0 ) number = 0;
       GRIB_CHECK(my_grib_set_long(gh, "numberOfGridUsed", number), 0);
+
+      int position = gridInqPosition(gridID);
+      if ( position < 0 ) position = 0;
       GRIB_CHECK(my_grib_set_long(gh, "numberOfGridInReference", position), 0);
 
       unsigned char uuid[CDI_UUID_SIZE];
       size_t len = CDI_UUID_SIZE;
       memset(uuid, 0, len);
-      cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &len);
+      int length = CDI_UUID_SIZE;
+      cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
       if (grib_set_bytes(gh, "uuidOfHGrid", uuid, &len) != 0)
         Warning("Can't write UUID!");
     }
