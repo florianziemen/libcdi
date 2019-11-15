@@ -2571,7 +2571,7 @@ bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *yd
     }
 
   if ( number_of_grid_used != CDI_UNDEFID ) cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED, number_of_grid_used);
-  if ( ncvar->position > 0 ) grid->position = ncvar->position;
+  if ( ncvar->position > 0 ) cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE, ncvar->position);
   if ( uuidOfHGrid[0] != 0 ) cdiDefVarKeyBytes(&grid->keys, CDI_KEY_UUID, uuidOfHGrid, CDI_UUID_SIZE);
 
   return false;

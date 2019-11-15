@@ -745,7 +745,7 @@ void gribapiGetGridUnstructured(grib_handle *gh, grid_t *grid, size_t numberOfPo
     {
       cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED, (int)lpar);
       if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 )
-        grid->position = (int)lpar;
+        cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE, (int)lpar);
       /*
         if ( grib_get_string(gh, "gridDescriptionFile", reference_link, &len) == 0 )
         {
