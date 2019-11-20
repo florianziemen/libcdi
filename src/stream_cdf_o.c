@@ -228,7 +228,7 @@ static const struct cdfDefGridAxisInqs {
   int (*axisName)(int cdiID, int varID, int key, char *string, int *length);
   int (*axisLongname)(int cdiID, int varID, int key, char *string, int *length);
   int (*axisUnits)(int cdiID, int varID, int key, char *string, int *length);
-  void (*axisStdname)(int cdiID, char *dimstdname);
+  void (*axisStdname)(int cdiID, int varID, int key, char *string, int *length);
   double (*axisVal)(int gridID, size_t index);
   const double *(*axisValsPtr)(int gridID);
   const double *(*axisBoundsPtr)(int gridID);
@@ -238,7 +238,7 @@ static const struct cdfDefGridAxisInqs {
   .axisName = cdiInqKeyString,
   .axisLongname = cdiInqKeyString,
   .axisUnits = cdiInqKeyString,
-  .axisStdname = gridInqXstdname,
+  .axisStdname = cdiInqKeyString,
   .axisVal = gridInqXval,
   .axisValsPtr = gridInqXvalsPtr,
   .axisBoundsPtr = gridInqXboundsPtr,
@@ -248,14 +248,14 @@ static const struct cdfDefGridAxisInqs {
   .axisName = cdiInqKeyString,
   .axisLongname = cdiInqKeyString,
   .axisUnits = cdiInqKeyString,
-  .axisStdname = gridInqYstdname,
+  .axisStdname = cdiInqKeyString,
   .axisVal = gridInqYval,
   .axisValsPtr = gridInqYvalsPtr,
   .axisBoundsPtr = gridInqYboundsPtr,
 }, gridInqsZ = {
   .axisLongname = cdiInqKeyString,
   .axisUnits = cdiInqKeyString,
-  .axisStdname = zaxisInqStdname,
+  .axisStdname = cdiInqKeyString,
 };
 
 static
@@ -263,14 +263,16 @@ void cdfPutGridStdAtts(int fileID, int ncvarid, int gridID, int dimtype, const s
 {
   size_t len;
 
+  int axisKey = (dimtype == 'Z') ? CDI_GLOBAL : ((dimtype == 'X') ? CDI_XAXIS : CDI_YAXIS);
+
   char stdname[CDI_MAX_NAME];
-  inqs->axisStdname(gridID, stdname);
-  if ( (len = strlen(stdname)) )
+  int length = CDI_MAX_NAME;
+  inqs->axisStdname(gridID, axisKey, CDI_KEY_STDNAME, stdname, &length);
+  if ( stdname[0] && (len = strlen(stdname)) )
     cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
   char longname[CDI_MAX_NAME];
-  int length = CDI_MAX_NAME;
-  int axisKey = (dimtype == 'Z') ? CDI_GLOBAL : ((dimtype == 'X') ? CDI_XAXIS : CDI_YAXIS);
+  length = CDI_MAX_NAME;
   inqs->axisLongname(gridID, axisKey, CDI_KEY_LONGNAME, longname, &length);
   if ( longname[0] && (len = strlen(longname)) )
     cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);

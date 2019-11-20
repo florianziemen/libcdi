@@ -901,12 +901,6 @@ void    gridDefYunits(int gridID, const char *yunits);
 //      gridInqYunits: Get the units of a Y-axis
 void    gridInqYunits(int gridID, char *yunits);
 
-//      gridInqXstdname: Get the standard name of a X-axis
-void    gridInqXstdname(int gridID, char *xstdname);
-
-//      gridInqYstdname: Get the standard name of a Y-axis
-void    gridInqYstdname(int gridID, char *ystdname);
-
 //      gridDefDatatype: Define the data type of a Grid
 void    gridDefDatatype(int gridID, int prec);
 

@@ -7,9 +7,11 @@ gridDefYunits(gridID, yunits)         -> cdiDefKeyString(gridID, CDI_YAXIS, CDI_
 gridInqXname(gridID, xname)           -> cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, xname, &length)
 gridInqXlongname(gridID, xlongname)   -> cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_LONGNAME, xlongname, &length)
 gridInqXunits(gridID, xunits)         -> cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, xunits, &length)
+gridInqXstdname(gridID, xstdname)     -> cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_STDNAME, xstdname, &length)
 gridInqYname(gridID, yname)           -> cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, yname, &length)
 gridInqYlongname(gridID, ylongname)   -> cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_LONGNAME, ylongname, &length)
 gridInqYunits(gridID, yunits)         -> cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, yunits, &length)
+gridInqYstdname(gridID, ylongname)    -> cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_STDNAME, ystdname, &length)
 
 gridDefNumber(zaxisID, number)        -> cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, number)
 gridInqNumber(zaxisID)                -> cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, &number)

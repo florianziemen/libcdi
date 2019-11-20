@@ -126,7 +126,6 @@ void grid_axis_init(struct gridaxis_t *axisptr)
   axisptr->clength        = 0;
   axisptr->cvals          = NULL;
 #endif
-  axisptr->stdname        = NULL;
   cdiInitKeys(&axisptr->keys);
 }
 
@@ -302,16 +301,16 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
         gridaxisSetKey(&gridptr->x, CDI_KEY_UNITS, "degrees_east");
         gridaxisSetKey(&gridptr->y, CDI_KEY_UNITS, "degrees_north");
 
-        gridptr->x.stdname = xystdname_tab[grid_xystdname_latlon][0];
-        gridptr->y.stdname = xystdname_tab[grid_xystdname_latlon][1];
+        gridaxisSetKey(&gridptr->x, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_latlon][0]);
+        gridaxisSetKey(&gridptr->y, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_latlon][1]);
 
         break;
       }
 #ifndef USE_MPI
     case GRID_CHARXY:
       {
-        if ( gridptr->x.cvals ) gridptr->x.stdname = xystdname_tab[grid_xystdname_char][0];
-        if ( gridptr->y.cvals ) gridptr->y.stdname = xystdname_tab[grid_xystdname_char][0];
+        if ( gridptr->x.cvals ) gridaxisSetKey(&gridptr->x, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_char][0]);
+        if ( gridptr->y.cvals ) gridaxisSetKey(&gridptr->y, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_char][1]);
 
         break;
       }
@@ -326,9 +325,8 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
             const char *gmapname = "Projection";
             cdiDefVarKeyBytes(&gridptr->keys, CDI_KEY_GRIDMAP_NAME, (const unsigned char *)gmapname, (int)sizeof(gmapname)+1);
 
-            gridptr->x.stdname = xystdname_tab[grid_xystdname_projection][0];
-            gridptr->y.stdname = xystdname_tab[grid_xystdname_projection][1];
-
+            gridaxisSetKey(&gridptr->x, CDI_KEY_STDNAME,  xystdname_tab[grid_xystdname_projection][0]);
+            gridaxisSetKey(&gridptr->y, CDI_KEY_STDNAME,  xystdname_tab[grid_xystdname_projection][1]);
             gridaxisSetKey(&gridptr->x, CDI_KEY_UNITS, "m");
             gridaxisSetKey(&gridptr->y, CDI_KEY_UNITS, "m");
           }
@@ -781,17 +779,6 @@ void gridInqXunits(int gridID, char *units)
   (void)cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, units, &length);
 }
 
-
-void gridInqXstdname(int gridID, char *xstdname)
-{
-  if ( xstdname )
-    {
-      xstdname[0] = 0;
-      grid_t *gridptr = grid_to_pointer(gridID);
-      if ( gridptr->x.stdname ) strcpy(xstdname, gridptr->x.stdname);
-    }
-}
-
 /*
 @Function  gridInqYname
 @Title     Get the name of a Y-axis
@@ -868,17 +855,6 @@ void gridInqYunits(int gridID, char *units)
 }
 
 
-void gridInqYstdname(int gridID, char *ystdname)
-{
-  if ( ystdname )
-    {
-      ystdname[0] = 0;
-      grid_t *gridptr = grid_to_pointer(gridID);
-      if ( gridptr->y.stdname ) strcpy(ystdname, gridptr->y.stdname);
-    }
-}
-
-
 void gridDefProj(int gridID, int projID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
@@ -936,15 +912,15 @@ void gridVerifyProj(int gridID)
   const int projtype = gridInqProjType(gridID);
   if ( projtype == CDI_PROJ_RLL )
     {
-      gridptr->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
-      gridptr->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
+      gridaxisSetKey(&gridptr->x, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_grid_latlon][0]);
+      gridaxisSetKey(&gridptr->y, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_grid_latlon][1]);
       gridaxisSetKey(&gridptr->x, CDI_KEY_UNITS, "degrees");
       gridaxisSetKey(&gridptr->y, CDI_KEY_UNITS, "degrees");
     }
   else if ( projtype == CDI_PROJ_LCC )
     {
-      gridptr->x.stdname = xystdname_tab[grid_xystdname_projection][0];
-      gridptr->y.stdname = xystdname_tab[grid_xystdname_projection][1];
+      gridaxisSetKey(&gridptr->x, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_projection][0]);
+      gridaxisSetKey(&gridptr->y, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_projection][1]);
       gridaxisSetKey(&gridptr->x, CDI_KEY_UNITS, "m");
       gridaxisSetKey(&gridptr->y, CDI_KEY_UNITS, "m");
     }
@@ -2504,8 +2480,8 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   if (strcmp(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_LONGNAME), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_LONGNAME))) return differ;
   if (strcmp(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_UNITS), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_UNITS))) return differ;
   if (strcmp(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_UNITS), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_UNITS))) return differ;
-  if (g1->x.stdname != g2->x.stdname) return differ;
-  if (g1->y.stdname != g2->y.stdname) return differ;
+  if (strcmp(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_STDNAME), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_STDNAME))) return differ;
+  if (strcmp(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_STDNAME), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_STDNAME))) return differ;
 
   if (strcmp(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_REFERENCEURI), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_REFERENCEURI))) return differ;
 
@@ -2595,8 +2571,8 @@ void gridComplete(grid_t *grid)
 	    if ( name[0] == 0 ) cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, "degrees");
             name = cdiInqVarKeyString(&grid->y.keys, CDI_KEY_UNITS);
 	    if ( name[0] == 0 ) cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, "degrees");
-            grid->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
-            grid->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
+            cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_grid_latlon][0]);
+            cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_grid_latlon][1]);
 	  }
 
         if ( gridtype == GRID_UNSTRUCTURED )
@@ -4290,8 +4266,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->y.size        =   intBuffer[GRID_PACK_INT_IDX_Y_SIZE];
     gridP->lcomplex      =   (bool)intBuffer[GRID_PACK_INT_IDX_LCOMPLEX];
     memberMask           =   intBuffer[GRID_PACK_INT_IDX_MEMBERMASK];
-    gridP->x.stdname     =   xystdname_tab[intBuffer[GRID_PACK_INT_IDX_XTSTDNNAME]][0];
-    gridP->y.stdname     =   xystdname_tab[intBuffer[GRID_PACK_INT_IDX_YTSTDNNAME]][1];
   }
 
   if (memberMask & gridHasReducedPointsFlag)
@@ -4447,11 +4421,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[GRID_PACK_INT_IDX_LCOMPLEX]     = gridP->lcomplex;
     intBuffer[GRID_PACK_INT_IDX_MEMBERMASK]   = memberMask
                                               = gridGetComponentFlags(gridP);
-    intBuffer[GRID_PACK_INT_IDX_XTSTDNNAME]   =
-      (int)((const char (*)[2][24])gridP->x.stdname - xystdname_tab);
-    intBuffer[GRID_PACK_INT_IDX_YTSTDNNAME]   =
-      (int)((const char (*)[2][24])gridP->y.stdname
-            - (const char (*)[2][24])xystdname_tab[0][1]);
 
     serializePack(intBuffer, gridNint, CDI_DATATYPE_INT,
                   packBuffer, packBufferSize, packBufferPos, context);

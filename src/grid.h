@@ -62,9 +62,8 @@ struct gridVirtTable
 };
 
 struct gridaxis_t {
-  const char *stdname;
-  size_t      size;                  // number of values
-  short       flag;                  // 0: undefined 1:vals 2:first+inc
+  size_t      size;                   // number of values
+  short       flag;                   // 0: undefined 1:vals 2:first+inc
   double      first, last, inc;
   double     *vals;
   double     *bounds;
@@ -77,31 +76,30 @@ struct gridaxis_t {
 
 // GME Grid
 struct grid_gme_t {
-  int     nd, ni, ni2, ni3;       /* parameter for GRID_GME         */
+  int     nd, ni, ni2, ni3;           // parameter for GRID_GME
 };
 
 struct grid_t {
   char       *name;
   int         self;
   size_t      size;
-  int         type;                   /* grid type                      */
-  int         datatype;               /* grid data type                 */
-  int         proj;                   /* grid projection                */
-  int         projtype;               /* grid projection type           */
+  int         type;                   // grid type
+  int         datatype;               // grid data type
+  int         proj;                   // grid projection
+  int         projtype;               // grid projection type
   mask_t     *mask;
   mask_t     *mask_gme;
   double     *area;
   struct grid_gme_t  gme;
-  int         trunc;                  /* parameter for GRID_SPECTRAL    */
+  int         trunc;                  // parameter for GRID_SPECTRAL
   int         nvertex;
   int        *reducedPoints;
   int         reducedPointsSize;
-  int         np;                     /* number of parallels between a pole and the equator */
-  signed char isCyclic;               /* three possible states:
-                                       * -1 if unknown,
-                                       *  0 if found not cyclic, or
-                                       *  1 for global cyclic grids
-                                       */
+  int         np;                     // number of parallels between a pole and the equator
+  signed char isCyclic;               // three possible states:
+                                      // -1 if unknown,
+                                      //  0 if found not cyclic, or
+                                      //  1 for global cyclic grids
   bool        lcomplex;
   bool        hasdims;
   struct gridaxis_t x;
