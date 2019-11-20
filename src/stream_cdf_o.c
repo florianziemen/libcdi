@@ -224,42 +224,23 @@ void cdfDefFC(stream_t *streamptr, int gridID, int gridindex)
 
 static const struct cdfDefGridAxisInqs {
   size_t (*axisSize)(int gridID);
-  int (*axisDimname)(int cdiID, int varID, int key, char *string, int *length);
-  int (*axisName)(int cdiID, int varID, int key, char *string, int *length);
-  int (*axisLongname)(int cdiID, int varID, int key, char *string, int *length);
-  int (*axisUnits)(int cdiID, int varID, int key, char *string, int *length);
-  void (*axisStdname)(int cdiID, int varID, int key, char *string, int *length);
   double (*axisVal)(int gridID, size_t index);
   const double *(*axisValsPtr)(int gridID);
   const double *(*axisBoundsPtr)(int gridID);
 } gridInqsX = {
   .axisSize = gridInqXsize,
-  .axisDimname = cdiInqKeyString,
-  .axisName = cdiInqKeyString,
-  .axisLongname = cdiInqKeyString,
-  .axisUnits = cdiInqKeyString,
-  .axisStdname = cdiInqKeyString,
   .axisVal = gridInqXval,
   .axisValsPtr = gridInqXvalsPtr,
   .axisBoundsPtr = gridInqXboundsPtr,
 }, gridInqsY = {
   .axisSize = gridInqYsize,
-  .axisDimname = cdiInqKeyString,
-  .axisName = cdiInqKeyString,
-  .axisLongname = cdiInqKeyString,
-  .axisUnits = cdiInqKeyString,
-  .axisStdname = cdiInqKeyString,
   .axisVal = gridInqYval,
   .axisValsPtr = gridInqYvalsPtr,
   .axisBoundsPtr = gridInqYboundsPtr,
-}, gridInqsZ = {
-  .axisLongname = cdiInqKeyString,
-  .axisUnits = cdiInqKeyString,
-  .axisStdname = cdiInqKeyString,
 };
 
 static
-void cdfPutGridStdAtts(int fileID, int ncvarid, int gridID, int dimtype, const struct cdfDefGridAxisInqs *inqs)
+void cdfPutGridStdAtts(int fileID, int ncvarid, int gridID, int dimtype)
 {
   size_t len;
 
@@ -267,20 +248,20 @@ void cdfPutGridStdAtts(int fileID, int ncvarid, int gridID, int dimtype, const s
 
   char stdname[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
-  inqs->axisStdname(gridID, axisKey, CDI_KEY_STDNAME, stdname, &length);
+  cdiInqKeyString(gridID, axisKey, CDI_KEY_STDNAME, stdname, &length);
   if ( stdname[0] && (len = strlen(stdname)) )
     cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
   char longname[CDI_MAX_NAME];
   length = CDI_MAX_NAME;
-  inqs->axisLongname(gridID, axisKey, CDI_KEY_LONGNAME, longname, &length);
+  cdiInqKeyString(gridID, axisKey, CDI_KEY_LONGNAME, longname, &length);
   if ( longname[0] && (len = strlen(longname)) )
     cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
 
   char units[CDI_MAX_NAME];
   length = CDI_MAX_NAME;
   axisKey = (dimtype == 'Z') ? CDI_GLOBAL : ((dimtype == 'X') ? CDI_XAXIS : CDI_YAXIS);
-  inqs->axisUnits(gridID, axisKey, CDI_KEY_UNITS, units, &length);
+  cdiInqKeyString(gridID, axisKey, CDI_KEY_UNITS, units, &length);
   if ( units[0] && (len = strlen(units)) )
     cdf_put_att_text(fileID, ncvarid, "units", len, units);
 }
@@ -307,9 +288,9 @@ cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex,
       char axisname[CDI_MAX_NAME];
       const int axistype = (dimtype == 'X') ? CDI_XAXIS : CDI_YAXIS;
       int length = CDI_MAX_NAME;
-      inqs->axisName(gridID, axistype, CDI_KEY_NAME, axisname, &length);
+      cdiInqKeyString(gridID, axistype, CDI_KEY_NAME, axisname, &length);
       cdf_def_var(fileID, axisname, xtype, 1, &dimNcID, &ncvarid);
-      cdfPutGridStdAtts(fileID, ncvarid, gridID, dimtype, inqs);
+      cdfPutGridStdAtts(fileID, ncvarid, gridID, dimtype);
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
     }
@@ -486,7 +467,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims, bool
       int ncvarid = CDI_UNDEFID, ncbvarid = CDI_UNDEFID;
       char axisname[CDI_MAX_NAME];
       int length = CDI_MAX_NAME;
-      gridAxisInq->axisName(gridID, axisKey, CDI_KEY_NAME, axisname, &length);
+      cdiInqKeyString(gridID, axisKey, CDI_KEY_NAME, axisname, &length);
       if ( axisname[0] == 0 ) Error("axis name undefined!");
 
       checkGridName(axisname, fileID);
@@ -509,7 +490,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims, bool
         {
           cdf_def_var(fileID, axisname, xtype, ndims, &dimID, &ncvarid);
 
-          cdfPutGridStdAtts(fileID, ncvarid, gridID, axisLetter, gridAxisInq);
+          cdfPutGridStdAtts(fileID, ncvarid, gridID, axisLetter);
           {
             char axisStr[2] = { axisLetter, '\0' };
             cdf_put_att_text(fileID, ncvarid, "axis", 1, axisStr);
@@ -718,7 +699,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID,
       cdf_def_var(fileID, xaxisname, xtype, ndims-1, dimIDs, &ncxvarid);
       cdfGridCompress(fileID, ncxvarid, xdimlen*ydimlen, streamptr->filetype, streamptr->comptype);
 
-      cdfPutGridStdAtts(fileID, ncxvarid, gridID, 'X', &gridInqsX);
+      cdfPutGridStdAtts(fileID, ncxvarid, gridID, 'X');
 
       /* attribute for Panoply */
       if ( ndims == 3 )
@@ -747,7 +728,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID,
       cdf_def_var(fileID, yaxisname, xtype, ndims - 1, dimIDs, &ncyvarid);
       cdfGridCompress(fileID, ncyvarid, xdimlen*ydimlen, streamptr->filetype, streamptr->comptype);
 
-      cdfPutGridStdAtts(fileID, ncyvarid, gridID, 'Y', &gridInqsY);
+      cdfPutGridStdAtts(fileID, ncyvarid, gridID, 'Y');
 
       /* attribute for Panoply */
       if ( ndims == 3 )
@@ -1444,7 +1425,7 @@ void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimI
       /* Define variable and its attributes */
       cdf_def_var(fileID, axisname, NC_CHAR, 2, dimIDs, &ncvarID);
 
-      cdfPutGridStdAtts(fileID, ncvarID, zaxisID, 'Z', &gridInqsZ);
+      cdfPutGridStdAtts(fileID, ncvarID, zaxisID, 'Z');
       cdf_put_att_text(fileID, ncvarID, "axis", 1, "Z");
       cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarID);
 
@@ -1556,7 +1537,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
             {
               cdf_def_var(fileID, axisname, (nc_type) xtype, ndims, &dimID, &ncvarid);
 
-              cdfPutGridStdAtts(fileID, ncvarid, zaxisID, 'Z', &gridInqsZ);
+              cdfPutGridStdAtts(fileID, ncvarid, zaxisID, 'Z');
 
               {
                 const int positive = zaxisInqPositive(zaxisID);
@@ -1737,9 +1718,9 @@ void cdfDefCharacter(stream_t *streamptr, int gridID, int gridindex, int xory, i
     {
       cdf_def_var(fileID, axisname, NC_CHAR, 2, dimIDs, &ncaxisid);
       if ( xory == 0 )
-        cdfPutGridStdAtts(fileID, ncaxisid, gridID, 'X', &gridInqsX);
+        cdfPutGridStdAtts(fileID, ncaxisid, gridID, 'X');
       else
-        cdfPutGridStdAtts(fileID, ncaxisid, gridID, 'Y', &gridInqsY);
+        cdfPutGridStdAtts(fileID, ncaxisid, gridID, 'Y');
     }
   else
     return;
