@@ -109,7 +109,6 @@ struct grid_t {
   const struct gridVirtTable *vtable;
   cdi_keys_t  keys;
   cdi_atts_t  atts;
-  int         scanningMode;
 };
 
 

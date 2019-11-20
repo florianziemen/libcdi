@@ -1000,9 +1000,6 @@ void    gridChangeType(int gridID, int gridtype);
 void    gridDefComplexPacking(int gridID, int lpack);
 int     gridInqComplexPacking(int gridID);
 
-void    gridDefScanningMode(int gridID, int mode);
-int     gridInqScanningMode(int gridID);
-
 // ZAXIS routines
 
 void    zaxisName(int zaxistype, char *zaxisname);

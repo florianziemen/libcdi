@@ -2634,10 +2634,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
 
 int gribapiGetScanningMode(grib_handle *gh)
 {
-  long iScansNegatively;
-  long jScansPositively;
-  long jPointsAreConsecutive;
-
+  long iScansNegatively, jScansPositively, jPointsAreConsecutive;
   GRIB_CHECK(grib_get_long(gh, "iScansNegatively", &iScansNegatively), 0);
   GRIB_CHECK(grib_get_long(gh, "jScansPositively", &jScansPositively), 0);
   GRIB_CHECK(grib_get_long(gh, "jPointsAreConsecutive", &jPointsAreConsecutive), 0);
@@ -2843,7 +2840,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
 #ifdef VERTICAL_FLIP
       { // flip the data vertically ..
         idxIN= 0; idxOUT= (jDim-1)*iDim;
-        if (cdiDebugExt>=30) printf("convertDataScanningMode():  copying rows nr. (%04d : %04d)\n",0,jDim-1);
+        if (cdiDebugExt>=30) printf("convertDataScanningMode():  copying rows nr. (%04d : %04zu)\n",0,jDim-1);
         for (j=0; j<jDim; j++)
         {
           memcpy((void*)&data[idxOUT], (void*)&dataCopy[idxIN], iDim*sizeof(double));
@@ -2995,7 +2992,8 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const doubl
        gridtype == GRID_GAUSSIAN_REDUCED || gridtype == CDI_PROJ_LCC )
     {
 #ifdef HIRLAM_EXTENSIONS
-      int scanModeIN = gridInqScanningMode(gridID);
+      int scanModeIN = 0;
+      cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_SCANNINGMODE, &scanModeIN);
 
       if (cdiDebugExt>=100)
         {

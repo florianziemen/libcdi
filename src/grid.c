@@ -165,7 +165,8 @@ void grid_init(grid_t *gridptr)
   cdiInitKeys(&gridptr->keys);
   gridptr->atts.nalloc    = MAX_ATTRIBUTES;
   gridptr->atts.nelems    = 0;
-  gridptr->scanningMode   = 64;
+
+  cdiDefVarKeyInt(&gridptr->keys, CDI_KEY_SCANNINGMODE, 64);
 }
 
 
@@ -2343,14 +2344,16 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
 	}
     }
 
-  if ( (grid->scanningMode != gridInqScanningMode(gridID)) )
+  int scanningModeA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_SCANNINGMODE);
+  int scanningModeB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_SCANNINGMODE);
+  if ( scanningModeA != scanningModeB )
     {
       // often grid definition may differ in UV-relativeToGrid
       differ = 1;
 #ifdef HIRLAM_EXTENSIONS
       if ( cdiDebugExt>=200 )
-        printf("gridCompare(gridID=%d): Differs: grid.scanningMode [%d] != gridInqScanningMode(gridID) [%d]\n",
-               gridID, grid->scanningMode, gridInqScanningMode(gridID));
+        printf("gridCompare(gridID=%d): Differs: scanningModeA [%d] != scanningModeB(gridID) [%d]\n",
+               gridID, scanningModeA, scanningModeB);
 #endif // HIRLAM_EXTENSIONS
     }
 
@@ -2403,7 +2406,7 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   if ( IS_NOT_EQUAL(g1->y.last        , g2->y.last)        ) return differ;
   if ( IS_NOT_EQUAL(g1->x.inc	      , g2->x.inc)         ) return differ;
   if ( IS_NOT_EQUAL(g1->y.inc	      , g2->y.inc)         ) return differ;
-  if ( IS_NOT_EQUAL(g1->scanningMode  , g2->scanningMode)  ) return differ;
+  if ( cmp_key_int(&g1->keys, &g2->keys, CDI_KEY_SCANNINGMODE) ) return differ;
 
   const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1),
                *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
@@ -2719,7 +2722,8 @@ int gridGenerate(const grid_t *grid)
   cdiCopyVarKey(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE, &gridptr->keys);
   cdiCopyVarKey(&grid->keys, CDI_KEY_REFERENCEURI, &gridptr->keys);
 
-  gridptr->scanningMode = grid->scanningMode;
+  cdiCopyVarKey(&grid->keys, CDI_KEY_SCANNINGMODE, &gridptr->keys);
+
   if ( gridtype == GRID_PROJECTION )
     gridptr->name = strdup(grid->name);
   if ( gridtype == GRID_GAUSSIAN_REDUCED )
@@ -4074,25 +4078,6 @@ void gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE])
 }
 
 
-void gridDefScanningMode(int gridID, int mode)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
-
-  if ( gridptr->scanningMode != mode )
-    {
-      gridMark4Update(gridID);
-      gridptr->scanningMode = mode;
-    }
-}
-
-
-int gridInqScanningMode(int gridID)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->scanningMode;
-}
-
-
 void cdiGridGetIndexList(unsigned ngrids, int * gridIndexList)
 {
   reshGetResHListOfType(ngrids, gridIndexList, &gridOps);
@@ -4130,7 +4115,6 @@ enum {
   GRID_PACK_INT_IDX_JSCANSPOSITIVELY,
   GRID_PACK_INT_IDX_JPOINTSARECONSECUTIVE,
   */
-  GRID_PACK_INT_IDX_SCANNINGMODE,
   gridNint
 };
 
@@ -4308,7 +4292,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     memberMask           =   intBuffer[GRID_PACK_INT_IDX_MEMBERMASK];
     gridP->x.stdname     =   xystdname_tab[intBuffer[GRID_PACK_INT_IDX_XTSTDNNAME]][0];
     gridP->y.stdname     =   xystdname_tab[intBuffer[GRID_PACK_INT_IDX_YTSTDNNAME]][1];
-    gridP->scanningMode  =   intBuffer[GRID_PACK_INT_IDX_SCANNINGMODE];
   }
 
   if (memberMask & gridHasReducedPointsFlag)
@@ -4469,8 +4452,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[GRID_PACK_INT_IDX_YTSTDNNAME]   =
       (int)((const char (*)[2][24])gridP->y.stdname
             - (const char (*)[2][24])xystdname_tab[0][1]);
-
-    intBuffer[GRID_PACK_INT_IDX_SCANNINGMODE] = gridP->scanningMode;
 
     serializePack(intBuffer, gridNint, CDI_DATATYPE_INT,
                   packBuffer, packBufferSize, packBufferPos, context);
