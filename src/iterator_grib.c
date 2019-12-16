@@ -692,14 +692,16 @@ int cdiGribIterator_getLong(CdiGribIterator *me, const char *key, long *result)
 */
 int cdiGribIterator_getLength(CdiGribIterator *me, const char *key, size_t *result)
 {
+#ifdef HAVE_LIBGRIB_API
 #ifdef HAVE_GRIB_GET_LENGTH
   return grib_get_length(me->gribHandle, key, result);
-#elif defined(HAVE_LIBGRIB_API)
+#else
   (void)me;
   (void)key;
   (void)result;
   Error("grib_get_length() is not available, so cdiGribIterator_getLength() can't be used");
   return -1;
+#endif
 #else
   (void)me;
   (void)key;
