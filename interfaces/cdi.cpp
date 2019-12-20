@@ -19,8 +19,8 @@ extern "C" {
 CdiGrid::CdiGrid() { gridID = -1; }
 CdiGrid::CdiGrid(int gridid) {
   char _name[CDI_MAX_NAME];
-  char _xname[CDI_MAX_NAME], _xlongname[CDI_MAX_NAME], _xstdname[CDI_MAX_NAME], _xunits[CDI_MAX_NAME];
-  char _yname[CDI_MAX_NAME], _ylongname[CDI_MAX_NAME], _ystdname[CDI_MAX_NAME], _yunits[CDI_MAX_NAME];
+  char _xname[CDI_MAX_NAME], _xlongname[CDI_MAX_NAME], _xunits[CDI_MAX_NAME];
+  char _yname[CDI_MAX_NAME], _ylongname[CDI_MAX_NAME], _yunits[CDI_MAX_NAME];
 
   gridID = gridid;
   //std::cout << "DEBUG:input gridid =" << gridid << std::endl;
@@ -42,19 +42,15 @@ CdiGrid::CdiGrid(int gridid) {
 
   gridInqXname(gridID    , _xname);
   gridInqXlongname(gridID, _xlongname);
-  gridInqXstdname(gridID , _xstdname);
   gridInqXunits(gridID   , _xunits);
   gridInqYname(gridID    , _yname);
   gridInqYlongname(gridID, _ylongname);
-  gridInqYstdname(gridID , _ystdname);
   gridInqYunits(gridID   , _yunits);
   xname     = _xname;
   xlongname = _xlongname;
-  xstdname  = _xstdname;
   xunits    = _xunits;
   yname     = _yname;
   ylongname = _ylongname;
-  ystdname  = _ystdname;
   yunits    = _yunits;
 
 }
