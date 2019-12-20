@@ -70,7 +70,7 @@ case "${HOSTNAME}" in
                     --enable-iso-c-interface \
                     --enable-swig \
                     --enable-python \
-                    --with-szlib=$HOME/local/lib \
+                    --with-szlib=$HOME/local \
                     --with-eccodes=$HOME/local/eccodes-2.3.0 \
                     --with-netcdf=$HOME/local \
                     LDFLAGS="-Wl,-rpath,$HOME/local/eccodes-2.3.0/lib" \
