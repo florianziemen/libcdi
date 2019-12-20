@@ -483,6 +483,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_TYPEOFTIMEINCREMENT = 823
   integer(c_int), public, parameter :: CDI_KEY_TYPEOFFIRSTFIXEDSURFACE = 824
   integer(c_int), public, parameter :: CDI_KEY_TYPEOFSECONDFIXEDSURFACE = 825
+  integer(c_int), public, parameter :: CDI_KEY_SCANNINGMODE = 826
   integer(c_int), public, parameter :: CDI_KEY_VDIMNAME = 920
   integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_VARTYPE = 921
   integer(c_int), public, parameter :: CDI_KEY_GRIDMAP_VARNAME = 922
@@ -495,6 +496,12 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_PSNAME = 950
   integer(c_int), public, parameter :: CDI_KEY_P0NAME = 951
   integer(c_int), public, parameter :: CDI_KEY_P0VALUE = 952
+  integer(c_int), public, parameter :: CDI_KEY_UUID = 960
+  integer(c_int), public, parameter :: CDI_KEY_NUMBEROFVGRIDUSED = 961
+  integer(c_int), public, parameter :: CDI_KEY_NLEV = 962
+  integer(c_int), public, parameter :: CDI_KEY_NUMBEROFGRIDUSED = 963
+  integer(c_int), public, parameter :: CDI_KEY_NUMBEROFGRIDINREFERENCE = 964
+  integer(c_int), public, parameter :: CDI_KEY_REFERENCEURI = 965
   public :: cdiDefKeyInt
   public :: cdiInqKeyInt
   public :: cdiDefKeyFloat
@@ -518,8 +525,6 @@ module mo_cdi
   public :: gridInqYlongname
   public :: gridDefYunits
   public :: gridInqYunits
-  public :: gridInqXstdname
-  public :: gridInqYstdname
   public :: gridDefDatatype
   public :: gridInqDatatype
   public :: gridInqXval
@@ -561,8 +566,6 @@ module mo_cdi
   public :: gridChangeType
   public :: gridDefComplexPacking
   public :: gridInqComplexPacking
-  public :: gridDefScanningMode
-  public :: gridInqScanningMode
   public :: zaxisName
   public :: zaxisNamePtr
   public :: zaxisCreate
@@ -2364,20 +2367,6 @@ module mo_cdi
       integer(c_int), value :: gridID_dummy
       integer(c_int) :: f_result
     end function gridInqComplexPacking
-
-    subroutine gridDefScanningMode(gridID_dummy, mode_dummy) bind(c, name =&
-    & 'gridDefScanningMode')
-      import c_int
-      integer(c_int), value :: gridID_dummy
-      integer(c_int), value :: mode_dummy
-    end subroutine gridDefScanningMode
-
-    function gridInqScanningMode(gridID_dummy) bind(c, name =&
-    & 'gridInqScanningMode') result(f_result)
-      import c_int
-      integer(c_int), value :: gridID_dummy
-      integer(c_int) :: f_result
-    end function gridInqScanningMode
 
     function zaxisCreate(zaxistype_dummy, size_dummy) bind(c, name =&
     & 'zaxisCreate') result(f_result)
@@ -5327,68 +5316,6 @@ contains
       yunits_dummy(yunits_i:yunits_i) = ' '
     end do
   end subroutine gridInqYunits
-
-  subroutine gridInqXstdname(gridID_dummy, xstdname_dummy)
-    integer(c_int), value :: gridID_dummy
-    character(kind = c_char, len = *), intent(inout) :: xstdname_dummy
-    character(kind = c_char) :: xstdname_temp(len(xstdname_dummy) + 1)
-    integer :: xstdname_i
-    interface
-      subroutine lib_gridInqXstdname(gridID_dummy, xstdname_dummy) bind(c, name&
-      & = 'gridInqXstdname')
-        import c_char, c_int
-        integer(c_int), value :: gridID_dummy
-        character(kind = c_char) :: xstdname_dummy(*)
-      end subroutine lib_gridInqXstdname
-    end interface
-    xstdname_temp(len(xstdname_dummy) + 1) = c_null_char
-    do xstdname_i = len(xstdname_dummy), 1, -1
-      if(xstdname_dummy(xstdname_i:xstdname_i) /= ' ') exit
-      xstdname_temp(xstdname_i) = c_null_char
-    end do
-    do xstdname_i = xstdname_i, 1, -1
-        xstdname_temp(xstdname_i) = xstdname_dummy(xstdname_i:xstdname_i)
-    end do
-    call lib_gridInqXstdname(gridID_dummy, xstdname_temp)
-    do xstdname_i = 1, len(xstdname_dummy)
-      if(xstdname_temp(xstdname_i) == c_null_char) exit
-      xstdname_dummy(xstdname_i:xstdname_i) = xstdname_temp(xstdname_i)
-    end do
-    do xstdname_i = xstdname_i, len(xstdname_dummy)
-      xstdname_dummy(xstdname_i:xstdname_i) = ' '
-    end do
-  end subroutine gridInqXstdname
-
-  subroutine gridInqYstdname(gridID_dummy, ystdname_dummy)
-    integer(c_int), value :: gridID_dummy
-    character(kind = c_char, len = *), intent(inout) :: ystdname_dummy
-    character(kind = c_char) :: ystdname_temp(len(ystdname_dummy) + 1)
-    integer :: ystdname_i
-    interface
-      subroutine lib_gridInqYstdname(gridID_dummy, ystdname_dummy) bind(c, name&
-      & = 'gridInqYstdname')
-        import c_char, c_int
-        integer(c_int), value :: gridID_dummy
-        character(kind = c_char) :: ystdname_dummy(*)
-      end subroutine lib_gridInqYstdname
-    end interface
-    ystdname_temp(len(ystdname_dummy) + 1) = c_null_char
-    do ystdname_i = len(ystdname_dummy), 1, -1
-      if(ystdname_dummy(ystdname_i:ystdname_i) /= ' ') exit
-      ystdname_temp(ystdname_i) = c_null_char
-    end do
-    do ystdname_i = ystdname_i, 1, -1
-        ystdname_temp(ystdname_i) = ystdname_dummy(ystdname_i:ystdname_i)
-    end do
-    call lib_gridInqYstdname(gridID_dummy, ystdname_temp)
-    do ystdname_i = 1, len(ystdname_dummy)
-      if(ystdname_temp(ystdname_i) == c_null_char) exit
-      ystdname_dummy(ystdname_i:ystdname_i) = ystdname_temp(ystdname_i)
-    end do
-    do ystdname_i = ystdname_i, len(ystdname_dummy)
-      ystdname_dummy(ystdname_i:ystdname_i) = ' '
-    end do
-  end subroutine gridInqYstdname
 
   subroutine gridDefReference(gridID_dummy, reference_dummy)
     integer(c_int), value :: gridID_dummy
