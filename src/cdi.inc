@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   November 2019
+! Uwe Schulzweida, MPI-MET, Hamburg,   December 2019
 !
 
       INTEGER    CDI_MAX_NAME
@@ -1614,6 +1614,8 @@
       PARAMETER (CDI_KEY_TYPEOFFIRSTFIXEDSURFACE = 824)
       INTEGER    CDI_KEY_TYPEOFSECONDFIXEDSURFACE
       PARAMETER (CDI_KEY_TYPEOFSECONDFIXEDSURFACE = 825)
+      INTEGER    CDI_KEY_SCANNINGMODE
+      PARAMETER (CDI_KEY_SCANNINGMODE   = 826)
       INTEGER    CDI_KEY_VDIMNAME
       PARAMETER (CDI_KEY_VDIMNAME       = 920)
       INTEGER    CDI_KEY_GRIDMAP_VARTYPE
@@ -1638,6 +1640,18 @@
       PARAMETER (CDI_KEY_P0NAME         = 951)
       INTEGER    CDI_KEY_P0VALUE
       PARAMETER (CDI_KEY_P0VALUE        = 952)
+      INTEGER    CDI_KEY_UUID
+      PARAMETER (CDI_KEY_UUID           = 960)
+      INTEGER    CDI_KEY_NUMBEROFVGRIDUSED
+      PARAMETER (CDI_KEY_NUMBEROFVGRIDUSED = 961)
+      INTEGER    CDI_KEY_NLEV
+      PARAMETER (CDI_KEY_NLEV           = 962)
+      INTEGER    CDI_KEY_NUMBEROFGRIDUSED
+      PARAMETER (CDI_KEY_NUMBEROFGRIDUSED = 963)
+      INTEGER    CDI_KEY_NUMBEROFGRIDINREFERENCE
+      PARAMETER (CDI_KEY_NUMBEROFGRIDINREFERENCE = 964)
+      INTEGER    CDI_KEY_REFERENCEURI
+      PARAMETER (CDI_KEY_REFERENCEURI   = 965)
       INTEGER         cdiDefKeyInt
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
@@ -1767,16 +1781,6 @@
 !                                    (INTEGER         gridID,
 !                                     CHARACTER*(*)   yunits)
       EXTERNAL        gridInqYunits
-
-!                     gridInqXstdname
-!                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   xstdname)
-      EXTERNAL        gridInqXstdname
-
-!                     gridInqYstdname
-!                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   ystdname)
-      EXTERNAL        gridInqYstdname
 
 !                     gridDefDatatype
 !                                    (INTEGER         gridID,
@@ -2038,15 +2042,6 @@
       INTEGER         gridInqComplexPacking
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqComplexPacking
-
-!                     gridDefScanningMode
-!                                    (INTEGER         gridID,
-!                                     INTEGER         mode)
-      EXTERNAL        gridDefScanningMode
-
-      INTEGER         gridInqScanningMode
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqScanningMode
 
 !
 !  ZAXIS routines

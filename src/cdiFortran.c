@@ -559,8 +559,6 @@ FCALLSCSUB2 (gridDefYlongname, GRIDDEFYLONGNAME, griddefylongname, INT, STRING)
 FCALLSCSUB2 (gridInqYlongname, GRIDINQYLONGNAME, gridinqylongname, INT, PSTRING)
 FCALLSCSUB2 (gridDefYunits, GRIDDEFYUNITS, griddefyunits, INT, STRING)
 FCALLSCSUB2 (gridInqYunits, GRIDINQYUNITS, gridinqyunits, INT, PSTRING)
-FCALLSCSUB2 (gridInqXstdname, GRIDINQXSTDNAME, gridinqxstdname, INT, PSTRING)
-FCALLSCSUB2 (gridInqYstdname, GRIDINQYSTDNAME, gridinqystdname, INT, PSTRING)
 FCALLSCSUB2 (gridDefDatatype, GRIDDEFDATATYPE, griddefdatatype, INT, INT)
 FCALLSCFUN1 (INT, gridInqDatatype, GRIDINQDATATYPE, gridinqdatatype, INT)
 static double gridInqXval_fwrap(int gridID, int index)
@@ -653,8 +651,6 @@ FCALLSCSUB2 (gridInqReducedPoints, GRIDINQREDUCEDPOINTS, gridinqreducedpoints, I
 FCALLSCSUB2 (gridChangeType, GRIDCHANGETYPE, gridchangetype, INT, INT)
 FCALLSCSUB2 (gridDefComplexPacking, GRIDDEFCOMPLEXPACKING, griddefcomplexpacking, INT, INT)
 FCALLSCFUN1 (INT, gridInqComplexPacking, GRIDINQCOMPLEXPACKING, gridinqcomplexpacking, INT)
-FCALLSCSUB2 (gridDefScanningMode, GRIDDEFSCANNINGMODE, griddefscanningmode, INT, INT)
-FCALLSCFUN1 (INT, gridInqScanningMode, GRIDINQSCANNINGMODE, gridinqscanningmode, INT)
 
 /*  ZAXIS routines  */
 

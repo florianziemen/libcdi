@@ -1,6 +1,6 @@
 2019-11-20  Uwe Schulzweida
 
-	* Replaced gridInqXstdname()/gridInqYstdname() by cdiInqKeyInt() with CDI_KEY_STDNAME
+	* Replaced gridInqXstdname()/gridInqYstdname() by cdiInqKeyString() with CDI_KEY_STDNAME
 	* Replaced gridDefScannigMode()/gridInqScanningMode() by cdiDefKeyInt()/cdiInqKeyInt() with CDI_KEY_SCANNINGMODE
 
 2019-11-12  Uwe Schulzweida
