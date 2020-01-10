@@ -2447,6 +2447,11 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
         if ( ncvar->cellarea != CDI_UNDEFID )
           cdf_load_cellarea(size, ncvar, &grid->area, &lazyGrid->cellAreaGet);
 
+        if (gridtype == GRID_GAUSSIAN)
+          {
+            if (ncvar->numLPE > 0) grid->np = ncvar->numLPE;
+          }
+
         break;
       }
     case GRID_GAUSSIAN_REDUCED:
