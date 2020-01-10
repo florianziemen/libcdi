@@ -405,7 +405,7 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, 
 {
   const int fileID  = streamptr->fileID;
 
-  if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT && gridtype != GRID_GAUSSIAN &&
+  if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT &&
        gridtype != GRID_PROJECTION && gridtype != GRID_CURVILINEAR && gridtype != GRID_CHARXY )
     {
       const size_t len = strlen(gridNamePtr(gridtype));
@@ -416,12 +416,15 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, 
   cdf_get_gmapvarname(gridID, gmapvarname);
   if ( gmapvarname[0] ) cdf_put_att_text(fileID, ncvarID, "grid_mapping", strlen(gmapvarname), gmapvarname);
 
-  if ( gridtype == GRID_GAUSSIAN_REDUCED )
+  if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
     {
       const int numLPE = gridInqNP(gridID);
       if (numLPE > 0)
         cdf_put_att_int(fileID, ncvarID, "CDI_grid_num_LPE", NC_INT, 1, &numLPE);
+    }
 
+  if ( gridtype == GRID_GAUSSIAN_REDUCED )
+    {
       const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
       if (ncyvarID != CDI_UNDEFID)
         {

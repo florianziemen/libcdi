@@ -198,8 +198,7 @@ bool isGaussGrid(size_t ysize, double yinc, const double *yvals)
         yv[i] = asin(yv[i])/M_PI*180.0;
 
       for ( i = 0; i < ysize; i++ )
-        if ( fabs(yv[i] - yvals[i]) >
-             ((yv[0] - yv[1])/500) ) break;
+        if ( fabs(yv[i] - yvals[i]) > ((yv[0] - yv[1])/500) ) break;
 
       if ( i == ysize ) lgauss = true;
 
@@ -207,8 +206,7 @@ bool isGaussGrid(size_t ysize, double yinc, const double *yvals)
       if ( lgauss == false )
         {
           for ( i = 0; i < ysize; i++ )
-            if ( fabs(yv[i] - yvals[ysize-i-1]) >
-                 ((yv[0] - yv[1])/500) ) break;
+            if ( fabs(yv[i] - yvals[ysize-i-1]) > ((yv[0] - yv[1])/500) ) break;
 
           if ( i == ysize ) lgauss = true;
         }
