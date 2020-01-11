@@ -546,6 +546,66 @@ as_tr_sh="eval sed 'y%*+%pp%;s%[^_$as_cr_alnum]%_%g'"
 
 SHELL=${CONFIG_SHELL-/bin/sh}
 
+as_awk_strverscmp='
+  # Use only awk features that work with 7th edition Unix awk (1978).
+  # My, what an old awk you have, Mr. Solaris!
+  END {
+    while (length(v1) && length(v2)) {
+      # Set d1 to be the next thing to compare from v1, and likewise for d2.
+      # Normally this is a single character, but if v1 and v2 contain digits,
+      # compare them as integers and fractions as strverscmp does.
+      if (v1 ~ /^[0-9]/ && v2 ~ /^[0-9]/) {
+	# Split v1 and v2 into their leading digit string components d1 and d2,
+	# and advance v1 and v2 past the leading digit strings.
+	for (len1 = 1; substr(v1, len1 + 1) ~ /^[0-9]/; len1++) continue
+	for (len2 = 1; substr(v2, len2 + 1) ~ /^[0-9]/; len2++) continue
+	d1 = substr(v1, 1, len1); v1 = substr(v1, len1 + 1)
+	d2 = substr(v2, 1, len2); v2 = substr(v2, len2 + 1)
+	if (d1 ~ /^0/) {
+	  if (d2 ~ /^0/) {
+	    # Compare two fractions.
+	    while (d1 ~ /^0/ && d2 ~ /^0/) {
+	      d1 = substr(d1, 2); len1--
+	      d2 = substr(d2, 2); len2--
+	    }
+	    if (len1 != len2 && ! (len1 && len2 && substr(d1, 1, 1) == substr(d2, 1, 1))) {
+	      # The two components differ in length, and the common prefix
+	      # contains only leading zeros.  Consider the longer to be less.
+	      d1 = -len1
+	      d2 = -len2
+	    } else {
+	      # Otherwise, compare as strings.
+	      d1 = "x" d1
+	      d2 = "x" d2
+	    }
+	  } else {
+	    # A fraction is less than an integer.
+	    exit 1
+	  }
+	} else {
+	  if (d2 ~ /^0/) {
+	    # An integer is greater than a fraction.
+	    exit 2
+	  } else {
+	    # Compare two integers.
+	    d1 += 0
+	    d2 += 0
+	  }
+	}
+      } else {
+	# The normal case, without worrying about digits.
+	d1 = substr(v1, 1, 1); v1 = substr(v1, 2)
+	d2 = substr(v2, 1, 1); v2 = substr(v2, 2)
+      }
+      if (d1 < d2) exit 1
+      if (d1 > d2) exit 2
+    }
+    # Beware Solaris /usr/xgp4/bin/awk (at least through Solaris 10),
+    # which mishandles some comparisons of empty strings to integers.
+    if (length(v2)) exit 1
+    if (length(v1)) exit 2
+  }
+'
 
 test -n "$DJDIR" || exec 7<&0 </dev/null
 exec 6>&1
@@ -31006,7 +31066,7 @@ $as_echo_n "checking for thread local storage (TLS) class... " >&6; }
   if ${ac_cv_tls+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  for ax_tls_keyword in __thread '__declspec(thread)' none; do
+  for ax_tls_keyword in thread_local _Thread_local __thread '__declspec(thread)' none; do
        case $ax_tls_keyword in #(
   none) :
     ac_cv_tls=none ; break ;; #(
@@ -31014,14 +31074,10 @@ else
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <stdlib.h>
-               static void
-               foo(void) {
-               static  $ax_tls_keyword  int bar;
-               exit(1);
-               }
 int
 main ()
 {
+static  $ax_tls_keyword  int bar;
 
   ;
   return 0;
@@ -31033,7 +31089,8 @@ else
   ac_cv_tls=none
 
 fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext ;;
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+         ;;
 esac
     done
 
@@ -31048,7 +31105,7 @@ cat >>confdefs.h <<_ACEOF
 #define TLS $ac_cv_tls
 _ACEOF
 
-
+     :
 else
   ac_cv_tls=`$CC -qversion 2>&1 | sed -n '/^IBM XL C/{
 n
@@ -31058,31 +31115,41 @@ b
 : print
 p
 }'`
-   if test x"$ac_cv_tls" = x; then :
-  ac_cv_tls=none
-elif test "$ac_cv_tls" -gt 7; then :
-  saved_CFLAGS=$CFLAGS
-        CFLAGS=`echo "$CFLAGS" | sed -n '/.*-qtls\(=[^ ]*\)\{0,1\}/{
+     if test x"$ac_cv_tls" = x; then :
+  ac_cv_tls=`$CC -V | sed -n '/^pgcc /{
+s/^pgcc \(0-90-9.*\).*/\1/
 p
-q
-}
-s/$/ -qtls=initial-exec/
-p
-q
-'`
-       if test x"$CFLAGS" = x"$saved_CFLAGS"; then :
+}'`
+# pgcc 18.1 and newer support TLS if switched to C11 mode
+        as_arg_v1=$ac_cv_tls
+as_arg_v2=18.9
+awk "$as_awk_strverscmp" v1="$as_arg_v1" v2="$as_arg_v2" /dev/null
+case $? in #(
+  1) :
+    ac_cv_tls=none ;; #(
+  0) :
+    ac_cv_tls=none ;; #(
+  2) :
+    saved_CFLAGS=$CFLAGS
+   case " $CFLAGS " in #(
+   -c11 ) :
+     ;; #(
+  *) :
+    CFLAGS="$CFLAGS -c11" ;;
+esac
+   if test x"$CFLAGS" = x"$saved_CFLAGS"; then :
   ac_cv_tls=none
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: retrying with -qtls=initial-exec added to CFLAGS" >&5
-$as_echo "$as_me: retrying with -qtls=initial-exec added to CFLAGS" >&6;}
-              { ac_cv_tls=; unset ac_cv_tls;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: retrying with -c11 added to CFLAGS" >&5
+$as_echo "$as_me: retrying with -c11 added to CFLAGS" >&6;}
+      { ac_cv_tls=; unset ac_cv_tls;}
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread local storage (TLS) class" >&5
 $as_echo_n "checking for thread local storage (TLS) class... " >&6; }
   if ${ac_cv_tls+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  for ax_tls_keyword in __thread '__declspec(thread)' none; do
+  for ax_tls_keyword in thread_local _Thread_local __thread '__declspec(thread)' none; do
        case $ax_tls_keyword in #(
   none) :
     ac_cv_tls=none ; break ;; #(
@@ -31090,14 +31157,10 @@ else
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <stdlib.h>
-               static void
-               foo(void) {
-               static  $ax_tls_keyword  int bar;
-               exit(1);
-               }
 int
 main ()
 {
+static  $ax_tls_keyword  int bar;
 
   ;
   return 0;
@@ -31109,7 +31172,8 @@ else
   ac_cv_tls=none
 
 fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext ;;
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+         ;;
 esac
     done
 
@@ -31124,7 +31188,78 @@ cat >>confdefs.h <<_ACEOF
 #define TLS $ac_cv_tls
 _ACEOF
 
+     :
+else
+  CFLAGS=$saved_CFLAGS
+fi
 
+fi ;; #(
+  *) :
+     ;;
+esac
+elif test "$ac_cv_tls" -gt 7; then :
+  # unless the user already set the -qtls option, add it and retry test
+        saved_CFLAGS=$CFLAGS
+   CFLAGS=`echo "$CFLAGS" | sed -n '/.*-qtls\(=[^ ]*\)\{0,1\}/{
+p
+q
+}
+s/$/ -qtls=initial-exec/
+p
+q
+'`
+   if test x"$CFLAGS" = x"$saved_CFLAGS"; then :
+  ac_cv_tls=none
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: retrying with -qtls=initial-exec added to CFLAGS" >&5
+$as_echo "$as_me: retrying with -qtls=initial-exec added to CFLAGS" >&6;}
+      { ac_cv_tls=; unset ac_cv_tls;}
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread local storage (TLS) class" >&5
+$as_echo_n "checking for thread local storage (TLS) class... " >&6; }
+  if ${ac_cv_tls+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  for ax_tls_keyword in thread_local _Thread_local __thread '__declspec(thread)' none; do
+       case $ax_tls_keyword in #(
+  none) :
+    ac_cv_tls=none ; break ;; #(
+  *) :
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdlib.h>
+int
+main ()
+{
+static  $ax_tls_keyword  int bar;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_tls=$ax_tls_keyword ; break
+else
+  ac_cv_tls=none
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+         ;;
+esac
+    done
+
+fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_tls" >&5
+$as_echo "$ac_cv_tls" >&6; }
+
+  if test "$ac_cv_tls" != "none"; then :
+
+cat >>confdefs.h <<_ACEOF
+#define TLS $ac_cv_tls
+_ACEOF
+
+     :
 else
   CFLAGS=$saved_CFLAGS
 fi
