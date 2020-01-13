@@ -1,28 +1,29 @@
-dnl acx_m4_list_to_quoted_strings.m4 --- short description
-dnl 
+dnl acx_m4_list_to_quoted_strings.m4 --- expand m4 quoted list to
+dnl                                      shell list of quoted strings
+dnl
 dnl Copyright  (C)  2019  Thomas Jahns <jahns@dkrz.de>
-dnl 
+dnl
 dnl Version: 1.0
 dnl Author: Thomas Jahns <jahns@dkrz.de>
-dnl Keywords: 
+dnl Keywords:
 dnl Maintainer: Thomas Jahns <jahns@dkrz.de>
 dnl URL: https://www.dkrz.de/redmine/projects/scales-ppm
-dnl 
+dnl
 dnl Redistribution and use in source and binary forms, with or without
 dnl modification, are  permitted provided that the following conditions are
 dnl met:
-dnl 
+dnl
 dnl Redistributions of source code must retain the above copyright notice,
-dnl this list of conditions and the following disclaimer. 
-dnl 
+dnl this list of conditions and the following disclaimer.
+dnl
 dnl Redistributions in binary form must reproduce the above copyright
 dnl notice, this list of conditions and the following disclaimer in the
 dnl documentation and/or other materials provided with the distribution.
-dnl 
+dnl
 dnl Neither the name of the DKRZ GmbH nor the names of its contributors
 dnl may be used to endorse or promote products derived from this software
 dnl without specific prior written permission.
-dnl 
+dnl
 dnl THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
 dnl IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 dnl TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -34,7 +35,7 @@ dnl PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
 dnl LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 dnl NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 dnl SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-dnl 
+dnl
 dnl ACX_M4_LIST_TO_QUOTED_STRINGS
 dnl expand m4 quoted list to shell list of quoted strings
 dnl e.g. converts

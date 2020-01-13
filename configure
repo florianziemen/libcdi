@@ -2760,6 +2760,35 @@ rm -f conftest.val
 
 } # ac_fn_c_compute_int
 
+# ac_fn_mv_obj LINENO FROM TO
+# ---------------------------
+# Rename FROM.$ac_ext to TO.$ac_ext, and return whether this succeeded.
+acx_fn_mv_obj ()
+{
+as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+      acx_path_from=`echo "$2" | sed -e 's!/\{0,1\}[^/]*$!!'`
+      test -z "$acx_path_from" && unset acx_path_from
+      acx_fn_from=`echo "$2" | sed -e 's@^.*/@@'`
+      acx_path_to=`echo "$3" | sed -e 's!/\{0,1\}[^/]*$!!'`
+      test -z "$acx_path_to" && unset acx_path_to
+      acx_fn_to=`echo "$3" | sed -e 's@^.*/@@'`
+      if expr "$ac_compile" : '.*/libtool --mode=compile' >/dev/null; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming object file $2.$ac_objext to $3.$ac_objext." >&5; } >&5
+  (sed 's@\(pic_object='"'\)"'\(\(.libs/\)\{0,1\}\)'"$acx_fn_from"'\.o'"'"'@\1\2'"$acx_fn_to"'.o'"'"'@' "$2.$ac_objext" >"$3.$ac_objext" && rm "$2.$ac_objext" && if test -f "$2.$OBJEXT" ; then mv "$2.$OBJEXT" "$3.$OBJEXT" ; fi && if test -f "${acx_path_from+$acx_path_from/}.libs/$acx_fn_from.$OBJEXT" ; then as_dir="${acx_path_to-.}/.libs" as_fn_mkdir_p ; mv "${acx_path_from+$acx_path_from/}.libs/$acx_fn_from.$OBJEXT" "${acx_path_to+$acx_path_to/}.libs/$acx_fn_to.$OBJEXT" ; fi) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+else
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming object file $2.$ac_objext to $3.$ac_objext." >&5; } >&5
+  (mv "$2.$ac_objext" "$3.$ac_objext") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+fi
+       eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+       as_fn_set_status $ac_status
+} # acx_fn_mv_obj
+
 # ac_fn_fc_try_run LINENO
 # -----------------------
 # Try to link conftest.$ac_ext, and return whether this succeeded. Assumes
@@ -5799,8 +5828,7 @@ else
       # Let the user specify FPP
       if test -n "$FPP"; then :
   rm -f conftest*
-
-   cat > conftest.$ac_ext <<_ACEOF
+      cat > conftest.$ac_ext <<_ACEOF
       program conftest
 #define OK
 #ifdef OK
@@ -5856,17 +5884,19 @@ fi
 
 fi
       if test -z "$FPP"; then :
-  for ac_fpp in `cd $srcdir ; pwd`/util/sxpreproc-wrapper \
-           `cd $srcdir ; pwd`/util/xlfpreproc-wrapper \
-           `cd $srcdir ; pwd`/util/sunf95preproc-wrapper \
-           `cd $srcdir ; pwd`/util/crayftnpreproc-wrapper \
+  ac_fpp=`cd $srcdir ; pwd`
+         for ac_fpp in "$ac_fpp"/util/sxpreproc-wrapper \
+           "$ac_fpp"/util/xlfpreproc-wrapper \
+           "$FC -E -fpp" \
+           "$FC -F -fpp -o - -Wp,-w,-P" \
+           "$ac_fpp"/util/sunf95preproc-wrapper \
+           "$ac_fpp"/util/crayftnpreproc-wrapper \
            "$FC -F" "$FC -F -fpp" "$FC -E" "$FC -E -cpp" \
            "$FC $FCFLAGS -F" "$FC $FCFLAGS -E" "$FC $FCFLAGS -E" \
            "$FC $FCFLAGS -E -cpp" "$FC $FCFLAGS -x f95-cpp-input -E -P"
-         do
-           rm -f conftest*
-
-   cat > conftest.$ac_ext <<_ACEOF
+do :
+  rm -f conftest*
+      cat > conftest.$ac_ext <<_ACEOF
       program conftest
 #define OK
 #ifdef OK
@@ -5898,8 +5928,7 @@ $as_echo "$ac_try_echo"; } >&5
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-            FPP="$ac_fpp"
-              break
+            FPP=$ac_fpp; break
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
@@ -5912,14 +5941,12 @@ else
          $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-
 fi
 fi
    rm -f conftest*
 
-           rm -f conftest*
-
-   cat > conftest.$ac_ext <<_ACEOF
+            rm -f conftest*
+      cat > conftest.$ac_ext <<_ACEOF
       program conftest
 #define OK
 #ifdef OK
@@ -5951,8 +5978,7 @@ $as_echo "$ac_try_echo"; } >&5
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-            FPP="$ac_fpp -P"
-              break
+            FPP="$ac_fpp -P"; break
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
@@ -5965,19 +5991,17 @@ else
          $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-
 fi
 fi
    rm -f conftest*
 
-         done
+done
                   \rm a.out 2>/dev/null
 fi
       if test -z "$FPP"; then :
 
 else
   eval "$as_acx_sl_prog_fpp=\$FPP"
-
 fi
 fi
 eval ac_res=\$$as_acx_sl_prog_fpp
@@ -11547,6 +11571,10 @@ LTCFLAGS=${LTCFLAGS-"$CFLAGS"}
 # Allow CC to be a program name with arguments.
 compiler=$CC
 
+
+
+
+
 # Save the default compiler, since it gets overwritten when the other
 # tags are being tested, and _LT_TAGVAR(compiler, []) is a NOP.
 compiler_DEFAULT=$CC
@@ -12519,6 +12547,9 @@ _LT_EOF
 	  tmp_sharedflag='-G' ;;
 	*Sun\ F*)			# Sun Fortran 8.3
 	  tmp_sharedflag='-G' ;;
+	*NAG\ Fortran\ Compiler*)
+	  tmp_sharedflag='-Wl,-shared'
+	  tmp_compiler_flags='`echo $compiler_flags | sed -e '"'"'s/ -W[cl],-no-pie\b//g'"'"'`' ;;
 	esac
 	archive_cmds='$CC '"$tmp_sharedflag""$tmp_addflag"' $libobjs $deplibs '"$tmp_compiler_flags"' $wl-soname $wl$soname -o $lib'
 
@@ -15330,6 +15361,18 @@ $as_echo_n "checking whether to build static libraries... " >&6; }
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_static" >&5
 $as_echo "$enable_static" >&6; }
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether this is the NAG Fortran compiler" >&5
+$as_echo_n "checking whether this is the NAG Fortran compiler... " >&6; }
+    $CC -V 2>&1 | grep '^NAG Fortran Compiler Release' >/dev/null 2>&1
+    _lt_result=$?
+    if test $_lt_result -eq 0; then :
+  _lt_result=yes
+else
+  _lt_result=no
+fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $_lt_result" >&5
+$as_echo "$_lt_result" >&6; }
+    acx_is_nagfor=$_lt_result
 
 
 
@@ -16841,7 +16884,7 @@ $as_echo "$ld_shlibs_CXX" >&6; }
     ## the running order or otherwise move them around unless you know exactly
     ## what you are doing...
     { output_verbose_link_cmd=; unset output_verbose_link_cmd;}
-    # Dependencies to place before and after the object being linked:
+        # Dependencies to place before and after the object being linked:
 predep_objects_CXX=
 postdep_objects_CXX=
 predeps_CXX=
@@ -16885,7 +16928,8 @@ if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
        # Some compilers place space between "-{L,R}" and the path.
        # Remove the space.
        if test x-L = x"$p" ||
-          test x-R = x"$p"; then
+          test x-R = x"$p" ||
+	   test x-l = x"$p"; then
 	 prev=$p
 	 continue
        fi
@@ -18722,6 +18766,7 @@ LTCFLAGS=${LTCFLAGS-"$CFLAGS"}
 compiler=$CC
 
 
+
   # save warnings/boilerplate of simple test code
   ac_outfile=conftest.$ac_objext
 echo "$lt_simple_compile_test_code" >conftest.$ac_ext
@@ -19667,6 +19712,9 @@ _LT_EOF
 	  tmp_sharedflag='-G' ;;
 	*Sun\ F*)			# Sun Fortran 8.3
 	  tmp_sharedflag='-G' ;;
+	*NAG\ Fortran\ Compiler*)
+	  tmp_sharedflag='-Wl,-shared'
+	  tmp_compiler_flags='`echo $compiler_flags | sed -e '"'"'s/ -W[cl],-no-pie\b//g'"'"'`' ;;
 	esac
 	archive_cmds_F77='$CC '"$tmp_sharedflag""$tmp_addflag"' $libobjs $deplibs '"$tmp_compiler_flags"' $wl-soname $wl$soname -o $lib'
 
@@ -21581,6 +21629,18 @@ fi
 
 
 
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether this is the NAG Fortran compiler" >&5
+$as_echo_n "checking whether this is the NAG Fortran compiler... " >&6; }
+    $CC -V 2>&1 | grep '^NAG Fortran Compiler Release' >/dev/null 2>&1
+    _lt_result=$?
+    if test $_lt_result -eq 0; then :
+  _lt_result=yes
+else
+  _lt_result=no
+fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $_lt_result" >&5
+$as_echo "$_lt_result" >&6; }
+    acx_is_nagfor_F77=$_lt_result
 
 
 
@@ -21673,6 +21733,7 @@ LTCFLAGS=${LTCFLAGS-"$CFLAGS"}
 compiler=$CC
 
 
+
   # save warnings/boilerplate of simple test code
   ac_outfile=conftest.$ac_objext
 echo "$lt_simple_compile_test_code" >conftest.$ac_ext
@@ -21749,7 +21810,7 @@ $as_echo "$enable_static" >&6; }
     ## the running order or otherwise move them around unless you know exactly
     ## what you are doing...
     { output_verbose_link_cmd=; unset output_verbose_link_cmd;}
-    # Dependencies to place before and after the object being linked:
+        # Dependencies to place before and after the object being linked:
 predep_objects_FC=
 postdep_objects_FC=
 predeps_FC=
@@ -21792,7 +21853,8 @@ if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
        # Some compilers place space between "-{L,R}" and the path.
        # Remove the space.
        if test x-L = x"$p" ||
-          test x-R = x"$p"; then
+          test x-R = x"$p" ||
+	   test x-l = x"$p"; then
 	 prev=$p
 	 continue
        fi
@@ -22766,6 +22828,9 @@ _LT_EOF
 	  tmp_sharedflag='-G' ;;
 	*Sun\ F*)			# Sun Fortran 8.3
 	  tmp_sharedflag='-G' ;;
+	*NAG\ Fortran\ Compiler*)
+	  tmp_sharedflag='-Wl,-shared'
+	  tmp_compiler_flags='`echo $compiler_flags | sed -e '"'"'s/ -W[cl],-no-pie\b//g'"'"'`' ;;
 	esac
 	archive_cmds_FC='$CC '"$tmp_sharedflag""$tmp_addflag"' $libobjs $deplibs '"$tmp_compiler_flags"' $wl-soname $wl$soname -o $lib'
 
@@ -24680,6 +24745,18 @@ fi
 
 
 
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether this is the NAG Fortran compiler" >&5
+$as_echo_n "checking whether this is the NAG Fortran compiler... " >&6; }
+    $CC -V 2>&1 | grep '^NAG Fortran Compiler Release' >/dev/null 2>&1
+    _lt_result=$?
+    if test $_lt_result -eq 0; then :
+  _lt_result=yes
+else
+  _lt_result=no
+fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $_lt_result" >&5
+$as_echo "$_lt_result" >&6; }
+    acx_is_nagfor_FC=$_lt_result
 
 
 
@@ -24714,7 +24791,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # Only expand once:
 
 
-                  ## _KPSE_USE_LIBTOOL: Generate a libtool script for use in configure tests
+                           ## _KPSE_USE_LIBTOOL: Generate a libtool script for use in configure tests
 : ${CONFIG_LT=./config.lt}
 { $as_echo "$as_me:${as_lineno-$LINENO}: creating $CONFIG_LT" >&5
 $as_echo "$as_me: creating $CONFIG_LT" >&6;}
@@ -25241,6 +25318,7 @@ lt_sysroot='`$ECHO "$lt_sysroot" | $SED "$delay_single_quote_subst"`'
 lt_cv_truncate_bin='`$ECHO "$lt_cv_truncate_bin" | $SED "$delay_single_quote_subst"`'
 objdir='`$ECHO "$objdir" | $SED "$delay_single_quote_subst"`'
 MAGIC_CMD='`$ECHO "$MAGIC_CMD" | $SED "$delay_single_quote_subst"`'
+acx_is_nagfor='`$ECHO "$acx_is_nagfor" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag='`$ECHO "$lt_prog_compiler_no_builtin_flag" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_pic='`$ECHO "$lt_prog_compiler_pic" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_wl='`$ECHO "$lt_prog_compiler_wl" | $SED "$delay_single_quote_subst"`'
@@ -25335,6 +25413,9 @@ compiler_FC='`$ECHO "$compiler_FC" | $SED "$delay_single_quote_subst"`'
 GCC_CXX='`$ECHO "$GCC_CXX" | $SED "$delay_single_quote_subst"`'
 GCC_F77='`$ECHO "$GCC_F77" | $SED "$delay_single_quote_subst"`'
 GCC_FC='`$ECHO "$GCC_FC" | $SED "$delay_single_quote_subst"`'
+acx_is_nagfor_CXX='`$ECHO "$acx_is_nagfor_CXX" | $SED "$delay_single_quote_subst"`'
+acx_is_nagfor_F77='`$ECHO "$acx_is_nagfor_F77" | $SED "$delay_single_quote_subst"`'
+acx_is_nagfor_FC='`$ECHO "$acx_is_nagfor_FC" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag_CXX='`$ECHO "$lt_prog_compiler_no_builtin_flag_CXX" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag_F77='`$ECHO "$lt_prog_compiler_no_builtin_flag_F77" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag_FC='`$ECHO "$lt_prog_compiler_no_builtin_flag_FC" | $SED "$delay_single_quote_subst"`'
@@ -26060,6 +26141,9 @@ CC=$lt_compiler
 # Is the compiler the GNU compiler?
 with_gcc=$GCC
 
+# Is the compiler the NAG Fortran compiler?
+with_nagfor=$acx_is_nagfor
+
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag
 
@@ -26302,6 +26386,9 @@ CC=$lt_compiler_CXX
 # Is the compiler the GNU compiler?
 with_gcc=$GCC_CXX
 
+# Is the compiler the NAG Fortran compiler?
+with_nagfor=$acx_is_nagfor_CXX
+
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag_CXX
 
@@ -26455,6 +26542,9 @@ CC=$lt_compiler_F77
 # Is the compiler the GNU compiler?
 with_gcc=$GCC_F77
 
+# Is the compiler the NAG Fortran compiler?
+with_nagfor=$acx_is_nagfor_F77
+
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag_F77
 
@@ -26607,6 +26697,9 @@ CC=$lt_compiler_FC
 
 # Is the compiler the GNU compiler?
 with_gcc=$GCC_FC
+
+# Is the compiler the NAG Fortran compiler?
+with_nagfor=$acx_is_nagfor_FC
 
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag_FC
@@ -26767,6 +26860,56 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
 ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
+ac_clean_files_save="$ac_clean_files_save $ac_pwd/$objdir"
+ac_clean_files="$ac_clean_files $ac_pwd/$objdir"
+
+   ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether libtool can link C programs" >&5
+$as_echo_n "checking whether libtool can link C programs... " >&6; }
+if ${acx_cv_libtool_c_works+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  acx_cv_libtool_c_works=no
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  acx_cv_libtool_c_works=yes
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_libtool_c_works" >&5
+$as_echo "$acx_cv_libtool_c_works" >&6; }
+   if test "x$acx_cv_libtool_c_works" = xno; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "unable to link a C program using libtool
+See \`config.log' for more details" "$LINENO" 5; }
+fi
+
+   ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
    if test -n "$FC" -a X"$FC" != Xno; then :
   ac_ext=${ac_fc_srcext-f}
@@ -26800,6 +26943,32 @@ esac
   *) :
      ;;
 esac
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether libtool can link Fortran programs" >&5
+$as_echo_n "checking whether libtool can link Fortran programs... " >&6; }
+if ${acx_cv_libtool_fc_works+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  acx_cv_libtool_fc_works=no
+      cat > conftest.$ac_ext <<_ACEOF
+      program conftest
+
+      end
+_ACEOF
+if ac_fn_fc_try_link "$LINENO"; then :
+  acx_cv_libtool_fc_works=yes
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_libtool_fc_works" >&5
+$as_echo "$acx_cv_libtool_fc_works" >&6; }
+   if test "x$acx_cv_libtool_fc_works" = xno; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "unable to link a Fortran program using libtool
+See \`config.log' for more details" "$LINENO" 5; }
+fi
+
          ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -26836,6 +27005,32 @@ fi ;; #(
      ;;
 esac
 
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether libtool can link Fortran 77 programs" >&5
+$as_echo_n "checking whether libtool can link Fortran 77 programs... " >&6; }
+if ${acx_cv_libtool_f77_works+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  acx_cv_libtool_f77_works=no
+      cat > conftest.$ac_ext <<_ACEOF
+      program main
+
+      end
+_ACEOF
+if ac_fn_f77_try_link "$LINENO"; then :
+  acx_cv_libtool_f77_works=yes
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_libtool_f77_works" >&5
+$as_echo "$acx_cv_libtool_f77_works" >&6; }
+   if test "x$acx_cv_libtool_f77_works" = xno; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "unable to link a Fortran 77 program using libtool
+See \`config.log' for more details" "$LINENO" 5; }
+fi
+
          ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -26851,11 +27046,11 @@ do :
   eval acx_temp="\" \$$acx_flag_var_ \""
          case $acx_temp in #(
   *\ -shared-intel\ *|*\ -static-intel\ *) :
-    acx_temp=`echo "$acx_temp" | sed -e 's/ \(-\(shared\|static\)-intel\) / -Xcompiler \1 -XCClinker \1 /'` ;; #(
+    acx_temp=`echo "$acx_temp" | sed -e 's/ \(-\(shared\|static\)-intel\)\b/ -Xcompiler \1 -XCClinker \1/'` ;; #(
   *) :
      ;;
 esac
-         eval $acx_flag_var_=\"`echo "$acx_temp" | sed -r -e 's/ -(align|allow|assume|ccdefault|check|convert|debug|debug-parameters|diag-type|diag-enable|diag-disable|double-size|dynamic-linker|dyncom|export-dir|extend-source|fp-model|fpscomp|gen-interfaces|heap-arrays|imacros|integer-size|iprefix|iquote|iwithprefixbefore|module|names|opt-report|opt-streaming-stores|pch-dir|pch-use|prof-dir|prof-file|real-size|reentrancy|stand|tcollect-filter|tune|warn|watch) ([^-][^ ]*) / -Xcompiler -\1 -Xcompiler \2 /g' -e 's/^ //;s/ $//'`\"
+         eval $acx_flag_var_=\"`echo "$acx_temp" | sed -E -e 's/ -(align|allow|assume|ccdefault|check|convert|debug|debug-parameters|diag-type|diag-enable|diag-disable|double-size|dynamic-linker|dyncom|export-dir|extend-source|fp-model|fpscomp|gen-interfaces|heap-arrays|imacros|integer-size|iprefix|iquote|iwithprefixbefore|module|names|opt-report|opt-streaming-stores|pch-dir|pch-use|prof-dir|prof-file|real-size|reentrancy|stand|tcollect-filter|tune|warn|watch) ([^-][^ ]*)\b/ -Xcompiler -\1 -Xcompiler \2/g' -e 's/^ //;s/ $//'`\"
 fi
 done
 
@@ -30477,10 +30672,13 @@ done
 test -n "$MPI_LAUNCH" || MPI_LAUNCH="true"
 
 
-   if test x"$cross_compiling" = xno -a x"$MPI_LAUNCH" != xtrue; then :
+   if test x"$MPI_LAUNCH" = xtrue; then :
+  MPI_LAUNCH_failMsg="Failed to find MPI launcher"
+else
+  if test x"$cross_compiling" = xno; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $MPI_LAUNCH works" >&5
 $as_echo_n "checking if $MPI_LAUNCH works... " >&6; }
-      if test -x `echo "$MPI_LAUNCH" | sed -e 's/[ 	].*//'`; then :
+         if test -x `echo "$MPI_LAUNCH" | sed -e 's/[ 	].*//'`; then :
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -30489,7 +30687,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
 ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 #include <stdio.h>
@@ -30519,25 +30717,25 @@ main(int argc, char **argv)
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   acx_mpirun_test="$MPI_LAUNCH -n 4 ./conftest$EXEEXT 4"
-            if expr "$ac_link" : '.*/libtool --mode=link' >/dev/null; then :
+               if expr "$ac_link" : '.*/libtool --mode=link' >/dev/null; then :
   acx_mpirun_test=`echo "$ac_link" | sed -e 's@\(.*/libtool --mode=\)link.*@\1@'`"execute $acx_mpirun_test"
 fi
-            { { echo "running $acx_mpirun_test"; } >&5
+               { { echo "running $acx_mpirun_test"; } >&5
   (LIBC_FATAL_STDERR_=1 $acx_mpirun_test >&2) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-            if test $ac_status -eq 0; then :
+               if test $ac_status -eq 0; then :
 
 else
-  MPI_LAUNCH=true ; MPI_LAUNCH_failMsg="failed to run MPI programs"
+  MPI_LAUNCH=true ; MPI_LAUNCH_failMsg="Failed to run MPI programs"
 fi
 else
   MPI_LAUNCH=true ; MPI_LAUNCH_failMsg="Cannot compile or link simple MPI program"
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-         ac_ext=c
+            ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -30548,15 +30746,20 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 else
   MPI_LAUNCH_failMsg="Cannot execute $MPI_LAUNCH" ; MPI_LAUNCH=true
 fi
-fi
-   if test x"$MPI_LAUNCH" = xtrue; then :
+         if test x"$MPI_LAUNCH" = xtrue; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: MPI launch command unavailable" >&5
-$as_echo "$as_me: WARNING: MPI launch command unavailable" >&2;}
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
+fi
+fi
+fi
+   if test x"$MPI_LAUNCH" = xtrue; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: MPI launch command unavailable" >&5
+$as_echo "$as_me: WARNING: MPI launch command unavailable" >&2;}
+else
+  :
 fi
 
       ac_fn_c_check_decl "$LINENO" "MPI_UINT64_T" "ac_cv_have_decl_MPI_UINT64_T" "$ac_includes_default
@@ -31471,7 +31674,7 @@ else
       cat > conftest.$ac_ext <<_ACEOF
       module cnftst
       implicit none
-      integer :: i
+      integer, public :: i
       end module cnftst
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
@@ -31571,7 +31774,12 @@ fi
 
      break
    done
-   rm -f conftest* CONFTEST*
+   rm -f conftest_module* CONFTEST_MODULE*
+   if expr "$ac_compile" : '.*/libtool --mode=compile' >/dev/null; then :
+  if test -n "$objdir"; then :
+  rm -f "$objdir"/conftest_module* "$objdir"/CONFTEST_MODULE*
+fi
+fi
    ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -31857,8 +32065,9 @@ p'`
   if test x"$acx_cv_cf_flag" = x; then :
   acx_cv_cf_flag="$acx_temp (user-specified)"
 else
-  echo ; echo '"'"$acx_cv_cf_flag $acx_temp"'"'
-               as_fn_error $? "Multiple specification of cfortran.h flags" "$LINENO" 5
+  acx_failure_msg="multiple specification of cfortran.h flags: "`echo "$acx_cv_cf_flag" | sed 's/ (user-specified)$//'`" $acx_temp"
+               acx_cv_cf_flag='error'
+               break
 fi
 fi
 done
@@ -31898,7 +32107,7 @@ fi
 fi
 elif echo $acx_temp | grep '^G95' >/dev/null; then :
   acx_cv_fc_cf_flag=-DNAGf90Fortran
-elif $FC -v 2>&1 | sed 5q | grep '^f2c'; then :
+elif $FC -v 2>&1 | sed 5q | grep '^f2c' >/dev/null; then :
   acx_cv_fc_cf_flag=-Df2cFortran
 fi ;; #(
   powerpc64-*-linux-*|powerpc-*-linux-*) :
@@ -31965,7 +32174,7 @@ fi
 fi
 elif echo $acx_temp | grep '^G95' >/dev/null; then :
   acx_cv_f77_cf_flag=-DNAGf90Fortran
-elif $F77 -v 2>&1 | sed 5q | grep '^f2c'; then :
+elif $F77 -v 2>&1 | sed 5q | grep '^f2c' >/dev/null; then :
   acx_cv_f77_cf_flag=-Df2cFortran
 fi ;; #(
   powerpc64-*-linux-*|powerpc-*-linux-*) :
@@ -32005,20 +32214,20 @@ else
   if test x"$acx_cv_f77_cf_flag" = x"$acx_cv_fc_cf_flag"; then :
   acx_cv_cf_flag="$acx_cv_f77_cf_flag (probed)"
 else
-  as_fn_error $? "cfortran.h flag for $F77 does not match the flag for $FC.
-Have you configured compatible compilers?" "$LINENO" 5
+  acx_failure_msg="cfortran.h flag for $F77 does not match the flag for $FC.
+Did you configure compatible compilers?"
+                     acx_cv_cf_flag='error'
 fi
 fi
-
-
 fi
-
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_cf_flag" >&5
 $as_echo "$acx_cv_cf_flag" >&6; }
+   if test x"$acx_cv_cf_flag" = xerror; then :
+  as_fn_error $? "$acx_failure_msg" "$LINENO" 5
+fi
    if echo "$acx_cv_cf_flag" | grep ' (probed)$' >/dev/null; then :
-  acx_temp=`echo "$acx_cv_cf_flag" | sed 's/ (probed)$//'`
-      CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$acx_temp"
+  CPPFLAGS="${CPPFLAGS+$CPPFLAGS }"`echo "$acx_cv_cf_flag" | sed 's/ (probed)$//'`
 fi
 
 case $host in #(
@@ -32036,7 +32245,10 @@ else
 fi
          case x"$acx_temp_qextname_fcflags$acx_temp_qextname_f77flags" in #(
   x-qextname) :
-    as_fn_error $? "Option -qextname must be provided consistently to F77 and FC" "$LINENO" 5 ;; #(
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: error" >&5
+$as_echo "error" >&6; }
+            acx_failure_msg="option -qextname must be provided consistently to F77 and FC"
+            as_fn_error $? "$acx_failure_msg" "$LINENO" 5 ;; #(
   x-qextname-qextname) :
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -32117,19 +32329,7 @@ FCALLSCSUB0(errExit,ERR_EXIT,err_exit)
 
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-  if expr "$ac_compile" : '.*/libtool --mode=compile' >/dev/null; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming C object file." >&5; } >&5
-  (sed 's@pic_object='"'"'\(.libs/\)\{0,1\}conftest@&_c@' "conftest.$ac_objext" >"conftest_c.$ac_objext"; rm "conftest.$ac_objext" ; if test -f "conftest.$OBJEXT" ; then mv "conftest.$OBJEXT" "conftest_c.$OBJEXT" ; fi ; if test -f ".libs/conftest.$OBJEXT" ; then mv ".libs/conftest.$OBJEXT" ".libs/conftest_c.$OBJEXT" ; fi) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-else
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming C object file." >&5; } >&5
-  (mv "conftest.$ac_objext" "conftest_c.$ac_objext") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-fi
+     acx_fn_mv_obj "$LINENO" conftest conftest_c
          if test -n "$FC" -a X"$FC" != Xno; then :
   ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -32155,19 +32355,7 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=FC $ac_compile"
       END FUNCTION cftstf
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
-  if expr "$ac_compile" : '.*/libtool --mode=compile' >/dev/null; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming Fortran object file." >&5; } >&5
-  (sed 's@pic_object='"'"'\(.libs/\)\{0,1\}conftest@&_f@' "conftest.$ac_objext" >"conftest_f.$ac_objext"; rm "conftest.$ac_objext" ; if test -f "conftest.$OBJEXT" ; then mv "conftest.$OBJEXT" "conftest_f.$OBJEXT" ; fi ; if test -f ".libs/conftest.$OBJEXT" ; then mv ".libs/conftest.$OBJEXT" ".libs/conftest_f.$OBJEXT" ; fi) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-else
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming Fortran object file." >&5; } >&5
-  (mv "conftest.$ac_objext" "conftest_f.$ac_objext") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-fi
+     acx_fn_mv_obj "$LINENO" conftest conftest_f
             save_LIBS=$LIBS
             LIBS="conftest_c.$ac_objext conftest_f.$ac_objext $LIBS"
             if test "$cross_compiling" = yes; then :
@@ -32244,6 +32432,8 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
+	       rm -f "conftest_f.$ac_objext" "conftest_f.$OBJEXT"
+	       rm -f conftest_data* CONFTEST_DATA* 2>/dev/null
 	    LIBS=$save_LIBS
 else
   acx_cv_cfortran_works="error compiling Fortran subroutine"
@@ -32279,19 +32469,7 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=F77 $ac_compile"
       END FUNCTION CFTSTF
 _ACEOF
 if ac_fn_f77_try_compile "$LINENO"; then :
-  if expr "$ac_compile" : '.*/libtool --mode=compile' >/dev/null; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming Fortran object file." >&5; } >&5
-  (sed 's@pic_object='"'"'\(.libs/\)\{0,1\}conftest@&_f@' "conftest.$ac_objext" >"conftest_f.$ac_objext"; rm "conftest.$ac_objext" ; if test -f "conftest.$OBJEXT" ; then mv "conftest.$OBJEXT" "conftest_f.$OBJEXT" ; fi ; if test -f ".libs/conftest.$OBJEXT" ; then mv ".libs/conftest.$OBJEXT" ".libs/conftest_f.$OBJEXT" ; fi) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-else
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming Fortran object file." >&5; } >&5
-  (mv "conftest.$ac_objext" "conftest_f.$ac_objext") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-fi
+     acx_fn_mv_obj "$LINENO" conftest conftest_f
             save_LIBS=$LIBS
             LIBS="conftest_c.$ac_objext conftest_f.$ac_objext $LIBS"
             if test "$cross_compiling" = yes; then :
@@ -32355,6 +32533,7 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
+	       rm -f "conftest_f.$ac_objext" "conftest_f.$OBJEXT"
 	    LIBS=$save_LIBS
 else
   acx_cv_cfortran_works="error compiling Fortran subroutine"
@@ -32369,6 +32548,7 @@ ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
 ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 fi
+         rm -f "conftest_c.$ac_objext" "conftest_c.$OBJEXT"
 
 else
   acx_cv_cfortran_works="compiling with cfortran.h failed"
@@ -33319,6 +33499,7 @@ lt_sysroot='`$ECHO "$lt_sysroot" | $SED "$delay_single_quote_subst"`'
 lt_cv_truncate_bin='`$ECHO "$lt_cv_truncate_bin" | $SED "$delay_single_quote_subst"`'
 objdir='`$ECHO "$objdir" | $SED "$delay_single_quote_subst"`'
 MAGIC_CMD='`$ECHO "$MAGIC_CMD" | $SED "$delay_single_quote_subst"`'
+acx_is_nagfor='`$ECHO "$acx_is_nagfor" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag='`$ECHO "$lt_prog_compiler_no_builtin_flag" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_pic='`$ECHO "$lt_prog_compiler_pic" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_wl='`$ECHO "$lt_prog_compiler_wl" | $SED "$delay_single_quote_subst"`'
@@ -33413,6 +33594,9 @@ compiler_FC='`$ECHO "$compiler_FC" | $SED "$delay_single_quote_subst"`'
 GCC_CXX='`$ECHO "$GCC_CXX" | $SED "$delay_single_quote_subst"`'
 GCC_F77='`$ECHO "$GCC_F77" | $SED "$delay_single_quote_subst"`'
 GCC_FC='`$ECHO "$GCC_FC" | $SED "$delay_single_quote_subst"`'
+acx_is_nagfor_CXX='`$ECHO "$acx_is_nagfor_CXX" | $SED "$delay_single_quote_subst"`'
+acx_is_nagfor_F77='`$ECHO "$acx_is_nagfor_F77" | $SED "$delay_single_quote_subst"`'
+acx_is_nagfor_FC='`$ECHO "$acx_is_nagfor_FC" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag_CXX='`$ECHO "$lt_prog_compiler_no_builtin_flag_CXX" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag_F77='`$ECHO "$lt_prog_compiler_no_builtin_flag_F77" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag_FC='`$ECHO "$lt_prog_compiler_no_builtin_flag_FC" | $SED "$delay_single_quote_subst"`'
@@ -34871,6 +35055,9 @@ CC=$lt_compiler
 # Is the compiler the GNU compiler?
 with_gcc=$GCC
 
+# Is the compiler the NAG Fortran compiler?
+with_nagfor=$acx_is_nagfor
+
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag
 
@@ -35113,6 +35300,9 @@ CC=$lt_compiler_CXX
 # Is the compiler the GNU compiler?
 with_gcc=$GCC_CXX
 
+# Is the compiler the NAG Fortran compiler?
+with_nagfor=$acx_is_nagfor_CXX
+
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag_CXX
 
@@ -35266,6 +35456,9 @@ CC=$lt_compiler_F77
 # Is the compiler the GNU compiler?
 with_gcc=$GCC_F77
 
+# Is the compiler the NAG Fortran compiler?
+with_nagfor=$acx_is_nagfor_F77
+
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag_F77
 
@@ -35418,6 +35611,9 @@ CC=$lt_compiler_FC
 
 # Is the compiler the GNU compiler?
 with_gcc=$GCC_FC
+
+# Is the compiler the NAG Fortran compiler?
+with_nagfor=$acx_is_nagfor_FC
 
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag_FC

@@ -131,7 +131,7 @@ am__aclocal_m4_deps =  \
 	$(top_srcdir)/m4/acx_lang_package.m4 \
 	$(top_srcdir)/m4/acx_lt_problems.m4 \
 	$(top_srcdir)/m4/acx_m4_list_to_quoted_strings.m4 \
-	$(top_srcdir)/m4/acx_mpirun.m4 \
+	$(top_srcdir)/m4/acx_mpirun.m4 $(top_srcdir)/m4/acx_mv_obj.m4 \
 	$(top_srcdir)/m4/acx_option_search_libs.m4 \
 	$(top_srcdir)/m4/acx_options.m4 \
 	$(top_srcdir)/m4/acx_prog_cc_posix.m4 \

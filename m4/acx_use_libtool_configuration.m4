@@ -83,7 +83,8 @@ dnl newer PGI or NAG configurations particularly well
 	  _LT_TAGVAR(lt_prog_compiler_static, $][1)='-Bstatic'
 	  ;;
 	*PGI\\ Compilers\\ and\\ Tools*|*Port][land\\ ]))dnl
-      m4_pushdef([_LT_LINKER_SHLIBS],m4_bpatsubst(m4_dquote(m4_bpatsubst(m4_dquote(
+      m4_pushdef([_LT_LINKER_SHLIBS],m4_bpatsubst(m4_dquote(
+        m4_bpatsubst(m4_dquote(m4_bpatsubst(m4_dquote(
           m4_bpatsubst(m4_dquote(m4_defn(
           [_LT_LINKER_SHLIBS])),[tmp_sharedflag='-shared'],
           [tmp_sharedflag='-shared'
@@ -92,36 +93,65 @@ dnl newer PGI or NAG configurations particularly well
         [$CC '"$tmp_sharedflag""$tmp_addflag"' $libobjs $deplibs '"$tmp_compiler_flags"' $wl-soname])),
         [  tmp_sharedflag='-Wl,-shared'],
         [  tmp_sharedflag='-Wl,-shared'
-	  tmp_compiler_flags='`echo \$compiler_flags | sed -e '"'"'s/ -W@<:@cl@:>@,-no-pie\\b//g'"'"'`']))dnl
+	  tmp_compiler_flags='`echo \$compiler_flags | sed -e '"'"'s/ -W@<:@cl@:>@,-no-pie\\b//g'"'"'`'])),
+        [\*Sun\\ F\*\(.\)[ 	]*# Sun Fortran 8\.3
+[ 	]*tmp_sharedflag='-G' ;;
+],[\&	*NAG\\ Fortran\\ Compiler*\1
+	  tmp_sharedflag='-Wl,-shared'
+	  tmp_compiler_flags='`echo \$compiler_flags | sed -e '"'"'s/ -W@<:@cl@:>@,-no-pie\\b//g'"'"'`' ;;
+]))dnl
       m4_pushdef([_LT_SYS_HIDDEN_LIBDEPS],[AS_UNSET([output_verbose_link_cmd])]
-    m4_bpatsubst(m4_dquote(
-        m4_defn([_LT_SYS_HIDDEN_LIBDEPS])),[test x-\([LR]\) = "\$p"],
-          [test x-\1 = x"$p"]))])dnl
+        m4_bpatsubst(m4_dquote(m4_bpatsubst(m4_dquote(
+          m4_defn([_LT_SYS_HIDDEN_LIBDEPS])),[test x-\([LR]\) = "\$p"],
+            [test x-\1 = x"$p"])),
+          [test x-R = x"\$p"],[\& ||
+	   test x-l = x"$p"]))])dnl
+   m4_foreach([acx_ltconfig],[[[_LT_LANG_C_CONFIG]],[[_LT_LANG_F77_CONFIG]],[[_LT_LANG_FC_CONFIG]]],
+     [m4_pushdef(acx_ltconfig,m4_bpatsubst(m4_dquote(
+        m4_bpatsubst(m4_dquote(m4_defn(acx_ltconfig)),[_LT_TAG_COMPILER
+],
+       [\&  _LT_TAGDECL([with_nagfor], [acx_is_nagfor], [0], [Is the compiler the NAG Fortran compiler?])])),
+       [_LT_CONFIG],
+       [AC_MSG_CHECKING([whether this is the NAG Fortran compiler])
+    $CC -V 2>&1 | grep '^NAG Fortran Compiler Release' >/dev/null 2>&1
+    _lt_result=$?
+    AS_IF([test $_lt_result -eq 0],[_lt_result=yes],[_lt_result=no])
+    AC_MSG_RESULT([$_lt_result])
+    _LT_TAGVAR([acx_is_nagfor], $][1)=$_lt_result
+    \&]))])dnl
    LT_INIT([$1])
+   m4_popdef([_LT_LANG_F77_CONFIG])dnl
+   m4_popdef([_LT_LANG_FC_CONFIG])dnl
+   m4_popdef([_LT_LANG_C_CONFIG])dnl
    m4_if(m4_cmp(m4_version_compare(LT_PACKAGE_VERSION,[2.4.6]),1),-1,
      [m4_popdef([_LT_COMPILER_PIC])m4_popdef([_LT_LINKER_SHLIBS])dnl
       m4_popdef([_LT_SYS_HIDDEN_LIBDEPS])])dnl
    dnl _KPSE_USE_LIBTOOL ensures libtool is also used for configure-time tests,
    dnl which deduces dependent libraries automatically
    _KPSE_USE_LIBTOOL
+   AC_LANG_PUSH([C])
+   _KPSE_CHECK_LIBTOOL
+   AC_LANG_POP([C])
    AC_PROVIDE_IFELSE([AC_PROG_FC],
      [AS_IF([test -n "$FC" -a X"$FC" != Xno],
         [AC_LANG_PUSH([Fortran])
          _ACX_LT_FORT_FLAGS_MANGLE
+         _KPSE_CHECK_LIBTOOL
          AC_LANG_POP([Fortran])])])
    AC_PROVIDE_IFELSE([AC_PROG_F77],
      [AS_IF([test -n "$F77" -a X"$F77" != Xno],
         [AC_LANG_PUSH([Fortran 77])
          _ACX_LT_FORT_FLAGS_MANGLE
+         _KPSE_CHECK_LIBTOOL
          AC_LANG_POP([Fortran 77])])])
 dnl substitute -shared-intel if present
    AS_FOR([acx_flag_var],[acx_flag_var_],[CFLAGS CXXFLAGS FCFLAGS F77FLAGS LDFLAGS FCLDFLAGS],
      [AS_IF([eval test x\$\{acx_flag_var+set\} = xset],
         [eval acx_temp="\" \$$acx_flag_var_ \""
          AS_CASE([$acx_temp],[*\ -shared-intel\ *|*\ -static-intel\ *],
-           [acx_temp=`echo "$acx_temp" | sed -e 's/ \(-\(shared\|static\)-intel\) / -Xcompiler \1 -XCClinker \1 /'`])
+           [acx_temp=`echo "$acx_temp" | sed -e 's/ \(-\(shared\|static\)-intel\)\b/ -Xcompiler \1 -XCClinker \1/'`])
 dnl take care of ifort/icc/icpc two-part options
-         eval acx_flag_var=\"`echo "$acx_temp" | sed -r -e 's/ -(align|allow|assume|ccdefault|check|convert|debug|debug-parameters|diag-type|diag-enable|diag-disable|double-size|dynamic-linker|dyncom|export-dir|extend-source|fp-model|fpscomp|gen-interfaces|heap-arrays|imacros|integer-size|iprefix|iquote|iwithprefixbefore|module|names|opt-report|opt-streaming-stores|pch-dir|pch-use|prof-dir|prof-file|real-size|reentrancy|stand|tcollect-filter|tune|warn|watch) (@<:@^-@:>@@<:@^ @:>@*) / -Xcompiler -\1 -Xcompiler \2 /g' -e 's/^ //;s/ $//'`\"])])])dnl
+         eval acx_flag_var=\"`echo "$acx_temp" | sed -E -e 's/ -(align|allow|assume|ccdefault|check|convert|debug|debug-parameters|diag-type|diag-enable|diag-disable|double-size|dynamic-linker|dyncom|export-dir|extend-source|fp-model|fpscomp|gen-interfaces|heap-arrays|imacros|integer-size|iprefix|iquote|iwithprefixbefore|module|names|opt-report|opt-streaming-stores|pch-dir|pch-use|prof-dir|prof-file|real-size|reentrancy|stand|tcollect-filter|tune|warn|watch) (@<:@^-@:>@@<:@^ @:>@*)\b/ -Xcompiler -\1 -Xcompiler \2/g' -e 's/^ //;s/ $//'`\"])])])dnl
 dnl
 dnl Local Variables:
 dnl mode: autoconf

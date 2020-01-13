@@ -55,11 +55,7 @@ AC_DEFUN([_ACX_CHECK_CFORTRAN_FC],
       r = v * 100.0
       ri = 1.0 / v
       END FUNCTION cftstf])],
-           [AS_IF([expr "$ac_compile" : '.*/libtool --mode=compile' >/dev/null],
-              [_AC_RUN_LOG([sed 's@pic_object='"'"'\(.libs/\)\{0,1\}conftest@&_f@' "conftest.$ac_objext" >"conftest_f.$ac_objext"; rm "conftest.$ac_objext" ; if test -f "conftest.$OBJEXT" ; then mv "conftest.$OBJEXT" "conftest_f.$OBJEXT" ; fi ; if test -f ".libs/conftest.$OBJEXT" ; then mv ".libs/conftest.$OBJEXT" ".libs/conftest_f.$OBJEXT" ; fi],
-                [_AS_ECHO_LOG([Renaming Fortran object file.])])],
-              [_AC_RUN_LOG([mv "conftest.$ac_objext" "conftest_f.$ac_objext"],
-                [_AS_ECHO_LOG([Renaming Fortran object file.])])])
+           [ACX_MV_OBJ([conftest],[conftest_f])
             save_LIBS=$LIBS
             LIBS="conftest_c.$ac_objext conftest_f.$ac_objext $LIBS"
             AC_RUN_IFELSE([AC_LANG_PROGRAM(,
@@ -122,6 +118,11 @@ AC_DEFUN([_ACX_CHECK_CFORTRAN_FC],
               [AC_MSG_NOTICE([Skipping run test for cfortran.h in cross-compilation mode,])
 	       AC_MSG_NOTICE([cfortran.h link test succeeded for $FC.])
                acx_cv_cfortran_works=yes])
+	       rm -f "conftest_f.$ac_objext" "conftest_f.$OBJEXT"
+dnl Some Fortran compilers create module files not in the current
+dnl working directory but in the directory with the object file,
+dnl therefore we try to delete everything:
+	       rm -f conftest_data* CONFTEST_DATA* 2>/dev/null
 	    LIBS=$save_LIBS],
            [acx_cv_cfortran_works="error compiling Fortran subroutine"])
          AC_LANG_POP([Fortran])])
@@ -138,11 +139,7 @@ AC_DEFUN([_ACX_CHECK_CFORTRAN_F77],
       CFTSTF = V * 100.0
       RI = 1.0 / V
       END FUNCTION CFTSTF])],
-           [AS_IF([expr "$ac_compile" : '.*/libtool --mode=compile' >/dev/null],
-              [_AC_RUN_LOG([sed 's@pic_object='"'"'\(.libs/\)\{0,1\}conftest@&_f@' "conftest.$ac_objext" >"conftest_f.$ac_objext"; rm "conftest.$ac_objext" ; if test -f "conftest.$OBJEXT" ; then mv "conftest.$OBJEXT" "conftest_f.$OBJEXT" ; fi ; if test -f ".libs/conftest.$OBJEXT" ; then mv ".libs/conftest.$OBJEXT" ".libs/conftest_f.$OBJEXT" ; fi],
-                [_AS_ECHO_LOG([Renaming Fortran object file.])])],
-              [_AC_RUN_LOG([mv "conftest.$ac_objext" "conftest_f.$ac_objext"],
-                [_AS_ECHO_LOG([Renaming Fortran object file.])])])
+           [ACX_MV_OBJ([conftest],[conftest_f])
             save_LIBS=$LIBS
             LIBS="conftest_c.$ac_objext conftest_f.$ac_objext $LIBS"
             AC_RUN_IFELSE([AC_LANG_PROGRAM(,
@@ -192,6 +189,7 @@ AC_DEFUN([_ACX_CHECK_CFORTRAN_F77],
               [AC_MSG_NOTICE([Skipping run test for cfortran.h in cross-compilation mode,])
 	       AC_MSG_NOTICE([cfortran.h link test succeeded for $F77.])
                acx_cv_cfortran_works=yes])
+	       rm -f "conftest_f.$ac_objext" "conftest_f.$OBJEXT"
 	    LIBS=$save_LIBS],
            [acx_cv_cfortran_works="error compiling Fortran subroutine"])
          AC_LANG_POP([Fortran 77])])
@@ -252,17 +250,14 @@ errExit(void)
 FCALLSCSUB0(errExit,ERR_EXIT,err_exit)
 
 ])],
-        [AS_IF([expr "$ac_compile" : '.*/libtool --mode=compile' >/dev/null],
-              [_AC_RUN_LOG([sed 's@pic_object='"'"'\(.libs/\)\{0,1\}conftest@&_c@' "conftest.$ac_objext" >"conftest_c.$ac_objext"; rm "conftest.$ac_objext" ; if test -f "conftest.$OBJEXT" ; then mv "conftest.$OBJEXT" "conftest_c.$OBJEXT" ; fi ; if test -f ".libs/conftest.$OBJEXT" ; then mv ".libs/conftest.$OBJEXT" ".libs/conftest_c.$OBJEXT" ; fi],
-                [_AS_ECHO_LOG([Renaming C object file.])])],
-              [_AC_RUN_LOG([mv "conftest.$ac_objext" "conftest_c.$ac_objext"],
-                [_AS_ECHO_LOG([Renaming C object file.])])])
+        [ACX_MV_OBJ([conftest],[conftest_c])
          AC_PROVIDE_IFELSE([AC_PROG_FC],
            [AS_IF([test -n "$FC" -a X"$FC" != Xno],
               [_ACX_CHECK_CFORTRAN_FC],
               [acx_cv_cfortran_works=${acx_cv_cfortran_works-yes}])])
          AC_PROVIDE_IFELSE([AC_PROG_F77],
            [AS_IF([test -n "$F77" -a X"$F77" != Xno AC_PROVIDE_IFELSE([AC_PROG_FC],[-a x"$acx_cv_cfortran_works" = xyes])],[_ACX_CHECK_CFORTRAN_F77])])
+         rm -f "conftest_c.$ac_objext" "conftest_c.$OBJEXT"
         ],
         [acx_cv_cfortran_works="compiling with cfortran.h failed"])
       AC_LANG_POP([C])

@@ -41,4 +41,22 @@ AC_PROVIDE_IFELSE([AC_PROG_F77],
 ac_compile="$ac_pwd/libtool --mode=compile --tag=F77 $ac_compile"
 ])])[]dnl
 AC_LANG(_AC_LANG)[]dnl
+dnl After compiling/linking checks, now also $top_builddir/$objdir
+dnl needs to be cleaned.
+ac_clean_files_save="$ac_clean_files_save $ac_pwd/$objdir"
+ac_clean_files="$ac_clean_files $ac_pwd/$objdir"
 ]) # _KPSE_USE_LIBTOOL
+
+# _KPSE_CHECK_LIBTOOL([ACTION-IF-SUCCESS], [ACTION-IF-FAILURE = FAILURE])
+# Check that we can link programs written in the current language with libtool
+# -------------------
+AC_DEFUN([_KPSE_CHECK_LIBTOOL],
+  [m4_pushdef([acx_cache_var], [acx_cv_libtool_[]_AC_LANG_ABBREV[]_works])dnl
+   AC_CACHE_CHECK([whether libtool can link _AC_LANG programs],
+     [acx_cache_var],
+     [acx_cache_var=no
+      AC_LINK_IFELSE([AC_LANG_PROGRAM], [acx_cache_var=yes])])
+   AS_VAR_IF([acx_cache_var], [no], [m4_default([$2],
+     [AC_MSG_FAILURE([unable to link a _AC_LANG program using libtool])])],
+        [$1])
+   m4_popdef([acx_cache_var])])
