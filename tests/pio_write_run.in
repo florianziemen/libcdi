@@ -5,8 +5,9 @@ if [ @ENABLE_GRIB@ != yes ]; then
   # skip tests for unsupported formats
   exit 77
 fi
-mpi_task_num="${mpi_task_num-4}"
-suffix="${suffix-grb}"
+mpi_task_num=${mpi_task_num-4}
+prefix=${CDI_TEST_PREFIX-example}
+suffix=${suffix-grb}
 if [ "@USE_MPI@" = yes ]; then
   variations="-qno-batch-rma -qcache-redists -qcreate-curvilinear-grid -qpreset-decomposition=true"
 else
@@ -15,17 +16,21 @@ fi
 test_variation()
 {
   exec 5>&1 6>&2 >"$LOG" 2>&1
+  if expr "$prefix" : "[^/]*/" >/dev/null ; then
+    mkdir -p `echo ${prefix} | sed -e 's@/[^/]$@@'`
+  fi
   echo "creating data with $1" >&2
   variation=$1
   ../libtool --mode=execute \
     @MPI_LAUNCH@ \
-    -n ${mpi_task_num} ${tool_wrap} ./pio_write ${pio_write_args} -s 7 ${variation}
-  echo "checking example_0.$suffix" >&2
+    -n ${mpi_task_num} ${tool_wrap} ./pio_write ${pio_write_args} -s 7 \
+    ${variation} ${CDI_TEST_PREFIX+"-qprefix=${CDI_TEST_PREFIX}"}
+  echo "checking ${prefix}_0.$suffix" >&2
   ../libtool --mode=execute \
-    ${tool_wrap} ./cksum_read example_0.${suffix} example_0.cksum
-  echo "checking example_1.$suffix" >&2
+    ${tool_wrap} ./cksum_read "${prefix}_0.${suffix}" "${prefix}_0.cksum"
+  echo "checking ${prefix}_1.$suffix" >&2
   ../libtool --mode=execute \
-    ${tool_wrap} ./cksum_read example_1.${suffix} example_1.cksum
+    ${tool_wrap} ./cksum_read "${prefix}_1.${suffix}" "${prefix}_1.cksum"
 }
 
 exec 5>&1 6>&2 >"$LOG" 2>&1
