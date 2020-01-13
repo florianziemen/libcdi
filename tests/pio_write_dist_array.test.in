@@ -34,13 +34,14 @@ variation='-qcreate-curvilinear-grid -quse-dist-grid'
 echo "creating data with ${variation}" >&2
 @top_builddir@/libtool --mode=execute \
   @MPI_LAUNCH@ \
-  -n ${mpi_task_num} ${tool_wrap} ./pio_write_parallel -b ${prefix} -f ${suffix} ${pio_write_args} -s 7 ${variation} || exit 1
+  -n ${mpi_task_num} ${tool_wrap} ./pio_write_parallel "-qprefix=${prefix}" -f ${suffix} \
+  ${pio_write_args} -s 7 ${variation} || exit 1
 echo "checking ${prefix}_0.${suffix}" >&2
 @top_builddir@/libtool --mode=execute \
-  ${tool_wrap} ./cksum_read ${prefix}_0.${suffix} ${prefix}_0.cksum || exit 1
+  ${tool_wrap} ./cksum_read "${prefix}_0.${suffix}" "${prefix}_0.cksum" || exit 1
 echo "checking ${prefix}_1.${suffix}" >&2
 @top_builddir@/libtool --mode=execute \
-  ${tool_wrap} ./cksum_read ${prefix}_1.${suffix} ${prefix}_1.cksum || exit 1
+  ${tool_wrap} ./cksum_read "${prefix}_1.${suffix}" "${prefix}_1.cksum" || exit 1
 
 #
 # Local Variables:

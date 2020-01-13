@@ -31,20 +31,22 @@
 #include "pio_util.h"
 #endif
 
+static const char default_fname_prefix[] = "example";
+
 static const struct model_config default_setup
 #ifdef __cplusplus
   = { 12, 6, 3, 5, 5, CDI_FILETYPE_GRB, CDI_DATATYPE_PACK24,
       PIO_WRITE_CONFIG_CHECKSUM_FLAG,
       TAXIS_ABSOLUTE, -1,
-      "example", "grb"};
+      "grb", default_fname_prefix };
 #else
   = { .nlon = 12, .nts = 3, .nlat = 6, .nvars = 5,
       .filetype = CDI_FILETYPE_GRB, .datatype = CDI_DATATYPE_PACK24,
       .flags = PIO_WRITE_CONFIG_CHECKSUM_FLAG,
       .taxistype = TAXIS_ABSOLUTE,
       .taxisunit = -1,
-      .prefix = "example",
       .suffix = "grb",
+      .prefix = default_fname_prefix,
       .max_nlev = 5,
 };
 #endif
@@ -191,6 +193,7 @@ parse_long_option(struct model_config *restrict setup,
     batchedRmaOptionStr[] = "no-batch-rma",
     presetDecoOptionStr[] = "no-preset-decomposition",
     datatypeOptionStr[] = "datatype",
+    prefixOptionStr[] = "prefix",
     taxistypeOptionStr[] = "taxis-type",
     taxisunitOptionStr[] = "taxis-unit";
   static const struct string2int datatypeArgMap[]
@@ -314,6 +317,17 @@ parse_long_option(struct model_config *restrict setup,
                        pioRoleSchemeOptionStr);
 #endif
     }
+  else if (!strncmp(str, prefixOptionStr,
+                    sizeof (prefixOptionStr) - 1))
+    {
+      if (str[sizeof (prefixOptionStr) - 1] == '=')
+        {
+          setup->prefix = str + sizeof (prefixOptionStr);
+        }
+      else
+        invalidOptionDie("long option %s needs argument\n",
+                         prefixOptionStr);
+    }
   else if ((bop = parseBooleanLongOption(sizeof (useDistGridOptionStr),
                                          useDistGridOptionStr, str)).matched)
     {
@@ -415,7 +429,7 @@ int main(int argc, char *argv[])
 
   {
     int opt;
-    while ((opt = getopt(argc, argv, "b:f:m:n:z:t:y:cs:q:"
+    while ((opt = getopt(argc, argv, "f:m:n:z:t:y:cs:q:"
 #ifdef USE_MPI
                          "p:w:"
 #endif
@@ -445,9 +459,6 @@ int main(int argc, char *argv[])
       case 'q':
         parse_long_option(&setup, pioConfHandle, &pioRoleAssign,
                           optarg, argc, argv);
-        break;
-      case 'b':
-        setup.prefix = optarg;
         break;
       case 'f':
         {
