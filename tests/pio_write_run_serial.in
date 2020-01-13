@@ -30,13 +30,13 @@ test_variation()
   echo "creating data with $1" >&2
   variation=$1
   @top_builddir@/libtool --mode=execute \
-    ${tool_wrap} ./pio_write_serial -b ${prefix} -f ${suffix} ${pio_write_args} -s 7 ${variation} || exit 1
+    ${tool_wrap} ./pio_write_serial "-qprefix=${prefix}" -f ${suffix} ${pio_write_args} -s 7 ${variation} || exit 1
   echo "checking ${prefix}_0.${suffix}" >&2
   @top_builddir@/libtool --mode=execute \
-    ${tool_wrap} ./cksum_read ${prefix}_0.${suffix} ${prefix}_0.cksum || exit 1
+    ${tool_wrap} ./cksum_read "${prefix}_0.${suffix}" "${prefix}_0.cksum" || exit 1
   echo "checking ${prefix}_1.${suffix}" >&2
   @top_builddir@/libtool --mode=execute \
-    ${tool_wrap} ./cksum_read ${prefix}_1.${suffix} ${prefix}_1.cksum || exit 1
+    ${tool_wrap} ./cksum_read "${prefix}_1.${suffix}" "${prefix}_1.cksum" || exit 1
 }
 
 for variation in "" $variations ; do
