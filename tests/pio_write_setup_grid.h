@@ -17,7 +17,7 @@ findPartition2D(int npart[2], int num_parts);
 #endif
 
 int
-setupGrid(struct model_config *setup, MPI_Comm comm);
+setupGrid(const struct model_config *setup, MPI_Comm comm);
 
 #endif
 /*

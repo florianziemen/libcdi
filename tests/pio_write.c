@@ -541,7 +541,7 @@ int main(int argc, char *argv[])
       commModel = -1;
 #endif
 
-      modelRun (setup, commModel);
+      modelRun(&setup, commModel);
 
 #ifdef USE_MPI
     }

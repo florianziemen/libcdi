@@ -39,6 +39,6 @@ struct model_config
 };
 
 void
-modelRun(struct model_config setup, MPI_Comm comm);
+modelRun(const struct model_config *setup, MPI_Comm comm);
 
 #endif

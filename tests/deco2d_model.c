@@ -65,7 +65,7 @@ modelRegionCompute(double region[], int nlev, int nlat, int nlon,
 }
 
 void
-modelRun(struct model_config setup, MPI_Comm comm)
+modelRun(const struct model_config *setup, MPI_Comm comm)
 {
   static const char * const fname_prefix        = "example";
 
@@ -94,8 +94,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
   int vdate = 19850101, vtime = 120000;
   int rank = 0;
   char *filename = NULL;
-  int nlon = setup.nlon, nlat = setup.nlat;
-  size_t nVars = setup.nvars > 0 ? (size_t)setup.nvars : 0;
+  int nlon = setup->nlon, nlat = setup->nlat;
+  size_t nVars = setup->nvars > 0 ? (size_t)setup->nvars : 0;
   size_t varslice_size = 0, varsliceF_size = 0;;
 #if USE_MPI
   int comm_size = 1;
@@ -111,17 +111,17 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
 
 #if USE_MPI
-              bool needsGather = setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG;
+              bool needsGather = setup->flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG;
 #else
               bool needsGather = true;
 #endif
-  if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
+  if (rank == 0 && (setup->flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
     {
       var = (double *)Malloc((size_t)nlon * (size_t)nlat
-                    * (size_t)setup.max_nlev * sizeof(var[0]));
+                    * (size_t)setup->max_nlev * sizeof(var[0]));
 #if ! USE_MPI
       varF = (float *)Malloc((size_t)nlon * (size_t)nlat
-                             * (size_t)setup.max_nlev * sizeof(varF[0]));
+                             * (size_t)setup->max_nlev * sizeof(varF[0]));
 #endif
     }
 
@@ -139,18 +139,18 @@ modelRun(struct model_config setup, MPI_Comm comm)
       rank_coord[0] = rank % npart[0],
         rank_coord[1] = rank / npart[0];
     }
-  blk_displ = Malloc((size_t)setup.max_nlev * sizeof (blk_displ[0]) * 2);
-  blk_lens = blk_displ + setup.max_nlev;
+  blk_displ = Malloc((size_t)setup->max_nlev * sizeof (blk_displ[0]) * 2);
+  blk_lens = blk_displ + setup->max_nlev;
 #endif
 
-  var_scale(setup.datatype, &mscale, &mrscale);
+  var_scale(setup->datatype, &mscale, &mrscale);
 
-  gridID = setupGrid(&setup, comm);
+  gridID = setupGrid(setup, comm);
 
-  levs = (double *)Malloc((size_t)setup.max_nlev * sizeof (levs[0]));
+  levs = (double *)Malloc((size_t)setup->max_nlev * sizeof (levs[0]));
   {
-    double lscale = 1.0/(double)(setup.max_nlev - 1);
-    for (size_t i = 0; i < (size_t)setup.max_nlev; ++i)
+    double lscale = 1.0/(double)(setup->max_nlev - 1);
+    for (size_t i = 0; i < (size_t)setup->max_nlev; ++i)
       levs[i] = 101300.0 - 13000.0 * expm1(2.173 * (double)i * lscale);
   }
   vlistID = vlistCreate ();
@@ -162,13 +162,13 @@ modelRun(struct model_config setup, MPI_Comm comm)
       switch (varLevs)
         {
         case 1:
-          varLevs = setup.max_nlev / 3;
+          varLevs = setup->max_nlev / 3;
           break;
         case 2:
-          varLevs = setup.max_nlev >= 11 ? 11 : setup.max_nlev / 2;
+          varLevs = setup->max_nlev >= 11 ? 11 : setup->max_nlev / 2;
           break;
         case 3:
-          varLevs = setup.max_nlev - 1;
+          varLevs = setup->max_nlev - 1;
           break;
         }
       ++varLevs;
@@ -187,7 +187,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
             = zaxisCreate(ZAXIS_PRESSURE, varDesc[varIdx].nlev);
           zaxisDefLevels(varDesc[varIdx].zaxisID, levs);
         }
-      if (setup.flags & PIO_WRITE_CONFIG_CREATE_UUID_FLAG)
+      if (setup->flags & PIO_WRITE_CONFIG_CREATE_UUID_FLAG)
       {
         unsigned char uuid[16];
         if (rank == 0)
@@ -237,7 +237,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                               chunkSize, varStartXt),
           gather_idxlist;
         varDesc[varIdx].partDesc = part_idxlist;
-        if (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
+        if (setup->flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
           {
             if (rank == 0)
               {
@@ -270,16 +270,16 @@ modelRun(struct model_config setup, MPI_Comm comm)
             Free(src_blocks);
             xt_xmap_delete(xmap4gather);
           }
-        partDescriptionSet: ;
       }
+      partDescriptionSet: ;
 #endif
       varDesc[varIdx].code = GRIB_USERDEF + (int)varIdx;
       vlistDefVarCode(vlistID, varDesc[varIdx].id, varDesc[varIdx].code);
-      vlistDefVarDatatype(vlistID, varDesc[varIdx].id, setup.datatype);
+      vlistDefVarDatatype(vlistID, varDesc[varIdx].id, setup->datatype);
       varDesc[varIdx].useFloat = (bool)(cdi_repeatable_random()&1);
     }
 
-  taxisID = taxisCreate ( setup.taxistype );
+  taxisID = taxisCreate ( setup->taxistype );
   vlistDefTaxis ( vlistID, taxisID );
 
   for ( tfID = 0; tfID < ntfiles; tfID++ )
@@ -287,21 +287,22 @@ modelRun(struct model_config setup, MPI_Comm comm)
       for (size_t varIdx = 0; varIdx < nVars; ++varIdx)
         varDesc[varIdx].checksum_state = 0;
 
-      int streamID = composeStream(&filename, fname_prefix, tfID, setup.suffix,
-                                   setup.filetype);
+      int streamID = composeStream(&filename, fname_prefix, tfID,
+                                   setup->suffix,
+                                   setup->filetype);
       streamDefVlist(streamID, vlistID);
 
       vdate = 19850101;
       vtime = 120000;
       current_time = cditime2time_t(vdate, vtime);
-      for ( tsID = 0; tsID < setup.nts; tsID++ )
+      for ( tsID = 0; tsID < setup->nts; tsID++ )
 	{
           int vdatetime[2];
           time_t2cditime(current_time, &vdatetime[1], &vdatetime[0]);
 	  taxisDefVdate(taxisID, vdatetime[1]);
 	  taxisDefVtime(taxisID, vdatetime[0]);
 	  streamDefTimestep ( streamID, tsID );
-          if (setup.filetype == CDI_FILETYPE_EXT)
+          if (setup->filetype == CDI_FILETYPE_EXT)
             {
               /* EXTRA doesn't store time, only date
                * set the value to 0 before checksumming, because a
@@ -373,7 +374,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                           = (float)var[k * layerSize + i];
 #endif
                 }
-              if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
+              if (rank == 0 && (setup->flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
                 {
                   memcrc_r(&varDesc[varIdx].checksum_state,
                            (const unsigned char *)vdatetime,
@@ -414,7 +415,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
 	}
       streamClose(streamID);
-      if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
+      if (rank == 0 && (setup->flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
         {
           FILE *tablefp;
           composeFilename(&filename, fname_prefix, tfID, "cksum");
@@ -431,7 +432,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                                     (off_t)((varDesc[varIdx].size
                                              * sizeof (var[0])
                                              + sizeof (int) * 2)
-                                            * (size_t)setup.nts));
+                                            * (size_t)setup->nts));
               code = vlistInqVarCode(vlistID, varDesc[varIdx].id);
               if (fprintf(tablefp, "%08lx %d\n", (unsigned long)cksum,
                           code) < 0)
@@ -458,7 +459,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
           zaxisDestroy(zID);
 #if USE_MPI
           xt_idxlist_delete(varDesc[varIdx].partDesc);
-          if (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
+          if (setup->flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
             xt_redist_delete(varDesc[varIdx].redist4gather);
 #endif
           for (size_t j = varIdx + 1; j < nVars; ++j)
