@@ -55,7 +55,7 @@ modelRegionCompute(double region[], size_t offset, size_t len,
 }
 
 void
-modelRun(struct model_config setup, MPI_Comm comm)
+modelRun(const struct model_config *setup, MPI_Comm comm)
 {
   struct varDesc_t
   {
@@ -78,8 +78,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
   int vdate = 19850101, vtime = 120000;
   int rank = 0;
   char *filename = NULL;
-  int nlon = setup.nlon, nlat = setup.nlat;
-  size_t nVars = (size_t)setup.nvars;
+  int nlon = setup->nlon, nlat = setup->nlat;
+  size_t nVars = (size_t)setup->nvars;
   size_t varslice_size = 0, varsliceF_size = 0;
 #if USE_MPI
   int *chunks = NULL, *displs = NULL, comm_size = 1;
@@ -90,32 +90,32 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #if USE_MPI
   xmpi ( MPI_Comm_rank ( comm, &rank ));
   xmpi ( MPI_Comm_size ( comm, &comm_size ));
-  if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
+  if (rank == 0 && (setup->flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
     {
       chunks = Malloc((size_t)comm_size * sizeof (chunks[0]));
       displs = Malloc((size_t)comm_size * sizeof (displs[0]));
       var = Malloc((size_t)nlon * (size_t)nlat
-                    * (size_t)setup.max_nlev * sizeof(var[0]));
+                    * (size_t)setup->max_nlev * sizeof(var[0]));
     }
 #else
   (void)comm;
 #endif
 
-  var_scale(setup.datatype, &mscale, &mrscale);
+  var_scale(setup->datatype, &mscale, &mrscale);
 
-  gridID = setupGrid(&setup, comm);
+  gridID = setupGrid(setup, comm);
 
-  levs = (double *)Malloc((size_t)setup.max_nlev * sizeof (levs[0]));
+  levs = (double *)Malloc((size_t)setup->max_nlev * sizeof (levs[0]));
   {
-    double lscale = 1.0/(double)(setup.max_nlev - 1);
-    for (size_t i = 0; i < (size_t)setup.max_nlev; ++i)
+    double lscale = 1.0/(double)(setup->max_nlev - 1);
+    for (size_t i = 0; i < (size_t)setup->max_nlev; ++i)
       levs[i] = 101300.0 - 13000.0 * expm1(2.173 * (double)i * lscale);
   }
   vlistID = vlistCreate ();
 
   varDesc = (struct varDesc_t *)Malloc(nVars * sizeof (varDesc[0]));
 #if USE_MPI
-  if (setup.flags & PIO_WRITE_CONFIG_PRESET_DECOMPOSITION_FLAG)
+  if (setup->flags & PIO_WRITE_CONFIG_PRESET_DECOMPOSITION_FLAG)
     {
       partDescPreset = (Xt_idxlist *)Malloc(nVars * sizeof (*partDescPreset));
       conversion = (int *)Malloc(nVars * sizeof (*conversion));
@@ -127,13 +127,13 @@ modelRun(struct model_config setup, MPI_Comm comm)
       switch (varLevs)
         {
         case 1:
-          varLevs = setup.max_nlev / 3;
+          varLevs = setup->max_nlev / 3;
           break;
         case 2:
-          varLevs = setup.max_nlev >= 11 ? 11 : setup.max_nlev / 2;
+          varLevs = setup->max_nlev >= 11 ? 11 : setup->max_nlev / 2;
           break;
         case 3:
-          varLevs = setup.max_nlev - 1;
+          varLevs = setup->max_nlev - 1;
           break;
         }
       ++varLevs;
@@ -152,7 +152,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
             = zaxisCreate(ZAXIS_PRESSURE, varDesc[varIdx].nlev);
           zaxisDefLevels(varDesc[varIdx].zaxisID, levs);
         }
-      if (setup.flags & PIO_WRITE_CONFIG_CREATE_UUID_FLAG)
+      if (setup->flags & PIO_WRITE_CONFIG_CREATE_UUID_FLAG)
         {
           unsigned char uuid[16];
           if (rank == 0)
@@ -192,10 +192,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
       varDesc[varIdx].code = GRIB_USERDEF + (int)varIdx;
       vlistDefVarCode(vlistID, varDesc[varIdx].id, varDesc[varIdx].code);
-      vlistDefVarDatatype(vlistID, varDesc[varIdx].id, setup.datatype);
+      vlistDefVarDatatype(vlistID, varDesc[varIdx].id, setup->datatype);
       varDesc[varIdx].useFloat = (bool)(cdi_repeatable_random()&1);
 #ifdef USE_MPI
-      if (setup.flags & PIO_WRITE_CONFIG_PRESET_DECOMPOSITION_FLAG)
+      if (setup->flags & PIO_WRITE_CONFIG_PRESET_DECOMPOSITION_FLAG)
         {
           partDescPreset[varIdx] = varDesc[varIdx].partDesc;
           conversion[varIdx] = varDesc[varIdx].useFloat
@@ -204,9 +204,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
     }
 
-  taxisID = taxisCreate ( setup.taxistype );
-  if ( setup.taxisunit != -1 )
-    taxisDefTunit(taxisID, setup.taxisunit);
+  taxisID = taxisCreate ( setup->taxistype );
+  if ( setup->taxisunit != -1 )
+    taxisDefTunit(taxisID, setup->taxisunit);
   vlistDefTaxis ( vlistID, taxisID );
 
   for ( tfID = 0; tfID < ntfiles; tfID++ )
@@ -214,8 +214,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
       for (size_t varIdx = 0; varIdx < nVars; ++varIdx)
         varDesc[varIdx].checksum_state = 0;
 
-      int streamID = composeStream(&filename, setup.prefix, tfID, setup.suffix,
-                                   setup.filetype);
+      int streamID = composeStream(&filename, setup->prefix, tfID,
+                                   setup->suffix,
+                                   setup->filetype);
 #ifdef USE_MPI
       if (partDescPreset)
         cdiPioStreamDefDecomposedVlist(streamID, vlistID, partDescPreset,
@@ -227,14 +228,14 @@ modelRun(struct model_config setup, MPI_Comm comm)
       vdate = 19850101;
       vtime = 120000;
       current_time = cditime2time_t(vdate, vtime);
-      for ( tsID = 0; tsID < setup.nts; tsID++ )
+      for ( tsID = 0; tsID < setup->nts; tsID++ )
 	{
           int vdatetime[2];
           time_t2cditime(current_time, &vdatetime[1], &vdatetime[0]);
 	  taxisDefVdate(taxisID, vdatetime[1]);
 	  taxisDefVtime(taxisID, vdatetime[0]);
 	  streamDefTimestep ( streamID, tsID );
-          if (setup.filetype == CDI_FILETYPE_EXT)
+          if (setup->filetype == CDI_FILETYPE_EXT)
             {
               /* EXTRA doesn't store time, only date
                * set the value to 0 before checksumming, because a
@@ -273,7 +274,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                     varslice[i] = varsliceF[i] = (float)varslice[i];
                 }
 
-              if (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
+              if (setup->flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
                 {
 #if USE_MPI
                   int chunk = (int)chunkSize;
@@ -294,7 +295,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                   var = varslice;
 #endif
                 }
-              if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
+              if (rank == 0 && (setup->flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
                 {
                   memcrc_r(&varDesc[varIdx].checksum_state,
                            (const unsigned char *)vdatetime,
@@ -324,10 +325,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
 	}
       streamClose(streamID);
-      if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
+      if (rank == 0 && (setup->flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
         {
           FILE *tablefp;
-          composeFilename(&filename, setup.prefix, tfID, "cksum");
+          composeFilename(&filename, setup->prefix, tfID, "cksum");
           if (!(tablefp = fopen(filename, "w")))
             {
               perror("failed to open table file");
@@ -339,7 +340,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                 = memcrc_finish(&varDesc[varIdx].checksum_state,
                                 (off_t)((varDesc[varIdx].size * sizeof (var[0])
                                          + sizeof (int) * 2)
-                                        * (size_t)setup.nts));
+                                        * (size_t)setup->nts));
               int code = vlistInqVarCode(vlistID, varDesc[varIdx].id);
               if (fprintf(tablefp, "%08lx %d\n", (unsigned long)cksum,
                           code) < 0)
