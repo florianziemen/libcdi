@@ -26783,11 +26783,13 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=FC $ac_compile"
   *NAG\ Fortran\ Compiler\ Release*) :
     if test x${FCFLAGS+set} = xset; then :
   FCFLAGS=`echo "$FCFLAGS" | tr ' ' '\n' | sed -e '/^-W[lc]/{' \
--e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}'     | tr '\n' ' '`
+-e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}' \
+   | tr '\n' ' ' | sed -e 's/ $//'`
 fi
       if test x${FCLDFLAGS+set} = xset; then :
   FCLDFLAGS=`echo "$FCLDFLAGS" | tr ' ' '\n' | sed -e '/^-W[lc]/{' \
--e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}'     | tr '\n' ' '`
+-e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}' \
+   | tr '\n' ' ' | sed -e 's/ $//'`
 fi ;; #(
   *) :
      ;;
@@ -26822,11 +26824,13 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=F77 $ac_compile"
   *NAG\ Fortran\ Compiler\ Release*) :
     if test x${FFLAGS+set} = xset; then :
   FFLAGS=`echo "$FFLAGS" | tr ' ' '\n' | sed -e '/^-W[lc]/{' \
--e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}'     | tr '\n' ' '`
+-e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}' \
+   | tr '\n' ' ' | sed -e 's/ $//'`
 fi
       if test x${F77LDFLAGS+set} = xset; then :
   F77LDFLAGS=`echo "$F77LDFLAGS" | tr ' ' '\n' | sed -e '/^-W[lc]/{' \
--e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}'     | tr '\n' ' '`
+-e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}' \
+   | tr '\n' ' ' | sed -e 's/ $//'`
 fi ;; #(
   *) :
      ;;
