@@ -257,15 +257,18 @@ print_xyvals2D(int gridID, int dig)
 static void
 printGridNp(int gridtype, int gridID, size_t gridsize, size_t xsize, size_t ysize)
 {
-
-  size_t xysize = xsize * ysize;
   fprintf(stdout, "points=%zu", gridsize);
   if (gridtype == GRID_GAUSSIAN_REDUCED)
     fprintf(stdout, "  nlat=%zu", ysize);
-  else if (xysize)
+  else if (xsize && ysize)
     fprintf(stdout, " (%zux%zu)", xsize, ysize);
 
-  if (gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED) fprintf(stdout, "  np=%d", gridInqNP(gridID));
+  const int numLPE = gridInqNP(gridID);
+  if (numLPE > 0)
+    {
+      if (gridtype == GRID_GAUSSIAN) fprintf(stdout, "  F%d", numLPE);
+      if (gridtype == GRID_GAUSSIAN_REDUCED) fprintf(stdout, "  N%d", numLPE);
+    }
 
   fprintf(stdout, "\n");
 }
