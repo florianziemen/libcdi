@@ -327,13 +327,13 @@ printGridInfoKernel(int gridID, int index, bool lproj)
     }
   else if (gridtype == GRID_SPECTRAL)
     {
-      fprintf(stdout, "points=%zu  nsp=%zu  truncation=%d", gridsize, gridsize / 2, trunc);
+      fprintf(stdout, "points=%zu  nsp=%zu  T%d", gridsize, gridsize / 2, trunc);
       if (gridInqComplexPacking(gridID)) fprintf(stdout, "  complexPacking");
       fprintf(stdout, "\n");
     }
   else if (gridtype == GRID_FOURIER)
     {
-      fprintf(stdout, "points=%zu  nfc=%zu  truncation=%d\n", gridsize, gridsize / 2, trunc);
+      fprintf(stdout, "points=%zu  nfc=%zu  T%d\n", gridsize, gridsize / 2, trunc);
     }
   else if (gridtype == GRID_GME)
     {
