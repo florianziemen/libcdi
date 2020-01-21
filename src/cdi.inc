@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.9.8
+! Fortran interface for CDI library version 1.9.9
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   December 2019
+! Uwe Schulzweida, MPI-MET, Hamburg,   January 2020
 !
 
       INTEGER    CDI_MAX_NAME
