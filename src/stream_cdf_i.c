@@ -4209,21 +4209,17 @@ double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
       if ( tcache->size == 0 || (tsID < tcache->startid || tsID > (tcache->startid+tcache->size-1)) )
         {
           size_t maxvals = MAX_TIMECACHE_SIZE;
-          tcache->startid = (tsID/MAX_TIMECACHE_SIZE)*MAX_TIMECACHE_SIZE;
-          if ( (tcache->startid + maxvals) > tcache->maxvals ) maxvals = (tcache->maxvals)%MAX_TIMECACHE_SIZE;
+          if (maxvals > tcache->maxvals) maxvals = tcache->maxvals;
+          tcache->startid = tsID;
+          //tcache->startid = (tsID/MAX_TIMECACHE_SIZE)*MAX_TIMECACHE_SIZE;
+          //if ( (tcache->startid + maxvals) > tcache->maxvals ) maxvals = (tcache->maxvals)%MAX_TIMECACHE_SIZE;
           tcache->size = maxvals;
           //fprintf(stderr, "fill time cache: %d %d %d %d %d\n", tcache->maxvals, tsID, tcache->startid, tcache->startid+maxvals-1, maxvals);
-          //cdf_get_vara_double(fileID, nctimevarid, &tcache->startid, &maxvals, tcache->cache);
-          size_t index = tcache->startid;
-          for ( size_t ival = 0; ival < maxvals; ++ival )
-            {
-              cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
-              tcache->cache[ival] = timevalue;
-              index++;
-            }
+          cdf_get_vara_double(fileID, nctimevarid, &tcache->startid, &maxvals, tcache->cache);
         }
 
-      timevalue = tcache->cache[tsID%MAX_TIMECACHE_SIZE];
+      //timevalue = tcache->cache[tsID%MAX_TIMECACHE_SIZE];
+      timevalue = tcache->cache[tsID];
     }
   else
     {
@@ -4268,7 +4264,7 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
 #ifdef USE_TIMECACHE
               if ( streamptr->basetime.timevar_cache == NULL )
                 {
-                  streamptr->basetime.timevar_cache = (timecache_t *) Malloc(MAX_TIMECACHE_SIZE*sizeof(timecache_t));
+                  streamptr->basetime.timevar_cache = (timecache_t *) Malloc(sizeof(timecache_t));
                   streamptr->basetime.timevar_cache->size = 0;
                   streamptr->basetime.timevar_cache->maxvals = streamptr->ntsteps;
                 }

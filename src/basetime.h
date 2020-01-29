@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 //#define USE_TIMECACHE 1
-#define MAX_TIMECACHE_SIZE 1024
+#define MAX_TIMECACHE_SIZE 1024*1024
 
 typedef struct {
   size_t size;
