@@ -205,6 +205,14 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
                       timeunit = -1;
                     }
                 }
+              else if ( timeunit == TUNIT_YEAR )
+                {
+                  if ( !strStartsWith(tu+pos, "%y.%f") )
+                    {
+                      Warning("Unsupported format %s for TIMEUNIT year!", tu+pos);
+                      timeunit = -1;
+                    }
+                }
               else
                 {
                   Warning("Unsupported format for time units: %s!", tu);
