@@ -1203,7 +1203,6 @@ void splitTimevalue(double timevalue, int timeunit, int64_t *date, int *time)
     {
       vdate = (int64_t) timevalue*100 - ((timevalue < 0) * 2 - 1);
       vtime = 0;
-      // printf("%g %ld\n", timevalue, (long)vdate);
     }
   else if ( timeunit == TUNIT_YEAR )
     {
