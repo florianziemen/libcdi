@@ -1206,19 +1206,39 @@ void splitTimevalue(double timevalue, int timeunit, int64_t *date, int *time)
     }
   else if ( timeunit == TUNIT_YEAR )
     {
-      if ( timevalue < -214700 )
-	{
-	  Warning("Year %g out of range, set to -214700", timevalue);
-	  timevalue = -214700;
-	}
-      else if ( timevalue > 214700 )
-	{
-	  Warning("Year %g out of range, set to 214700", timevalue);
-	  timevalue = 214700;
-	}
+      {
+        static bool lwarn = true;
+        if (lwarn && (fabs(timevalue - (int64_t) timevalue) > 0))
+          {
+            Warning("Fraction of a year is not supported!!");
+            lwarn = false;
+          }
+      }
+
+      {
+        static bool lwarn = true;
+        if ( timevalue < -214700 )
+          {
+            if ( lwarn )
+              {
+                Warning("Year %g out of range, set to -214700", timevalue);
+                lwarn = false;
+              }
+            timevalue = -214700;
+          }
+        else if ( timevalue > 214700 )
+          {
+            if ( lwarn )
+              {
+                Warning("Year %g out of range, set to 214700", timevalue);
+                lwarn = false;
+              }
+            timevalue = 214700;
+          }
+      }
 
       vdate = (int64_t) timevalue*10000;
-      vdate += 101;
+      vdate += timevalue < 0 ? -101 : 101;
       vtime = 0;
     }
   else
