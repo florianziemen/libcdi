@@ -322,8 +322,8 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
         gridaxisSetKey(&gridptr->y, CDI_KEY_NAME, "y");
         if ( gridtype == GRID_PROJECTION )
           {
-            const char *gmapname = "Projection";
-            cdiDefVarKeyBytes(&gridptr->keys, CDI_KEY_GRIDMAP_NAME, (const unsigned char *)gmapname, (int)sizeof(gmapname)+1);
+            const char gmapname[] = "Projection";
+            cdiDefVarKeyBytes(&gridptr->keys, CDI_KEY_GRIDMAP_NAME, (const unsigned char *)gmapname, (int)sizeof(gmapname));
 
             gridaxisSetKey(&gridptr->x, CDI_KEY_STDNAME,  xystdname_tab[grid_xystdname_projection][0]);
             gridaxisSetKey(&gridptr->y, CDI_KEY_STDNAME,  xystdname_tab[grid_xystdname_projection][1]);
