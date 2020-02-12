@@ -1143,7 +1143,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             }
         }
 
-      if ( ncvars[ncvarid].natts == 0 )
+      if (ncvars[ncvarid].natts == 0 && nvatts > 0)
         ncvars[ncvarid].atts = (int*) Malloc((size_t)nvatts*sizeof(int));
 
       for ( iatt = 0; iatt < nvatts; iatt++ )
