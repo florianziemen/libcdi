@@ -1,3 +1,7 @@
+2020-02-12  Uwe Schulzweida
+
+	* Preserve NetCDF attribute positive on data variables
+
 2020-01-10  Uwe Schulzweida
 
 	* NetCDF: addes support for non global Gaussian grids

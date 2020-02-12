@@ -1143,6 +1143,9 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             }
         }
 
+      if ( ncvars[ncvarid].natts == 0 )
+        ncvars[ncvarid].atts = (int*) Malloc((size_t)nvatts*sizeof(int));
+
       for ( iatt = 0; iatt < nvatts; iatt++ )
         {
           int nc_cell_id = CDI_UNDEFID;
@@ -1422,10 +1425,14 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
                   cdf_set_dim(ncvars, ncvarid, 0, Z_AXIS);
                   ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
                 }
-              if ( ncvars[ncvarid].ndims == 0 )
+              else if ( ncvars[ncvarid].ndims == 0 )
                 {
                   cdf_set_var(ncvars, ncvarid, FALSE);
                   ncvars[ncvarid].islev = true;
+                }
+              else
+                {
+                  ncvars[ncvarid].atts[ncvars[ncvarid].natts++] = iatt;
                 }
             }
           else if ( isNumber && strIsEqual(attname, "_FillValue") )
@@ -1525,9 +1532,6 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
 	    }
 	  else
 	    {
-	      if ( ncvars[ncvarid].natts == 0 )
-		ncvars[ncvarid].atts = (int*) Malloc((size_t)nvatts*sizeof(int));
-
 	      ncvars[ncvarid].atts[ncvars[ncvarid].natts++] = iatt;
 	    }
 	}
