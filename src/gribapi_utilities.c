@@ -251,7 +251,7 @@ static int addToDate(struct tm* me, long long amount, long unit)
     }
 }
 
-static char* makeDateString(struct tm* me)
+static char *makeDateString(struct tm *me)
 {
   char *result= (char *) Malloc(4+1+ 2+1+ 2+1+ 2+1+ 2+1+ 2+ 4+ 1);
   sprintf(result, "%04d-%02d-%02dT%02d:%02d:%02d.000", me->tm_year + 1900, me->tm_mon + 1, me->tm_mday, me->tm_hour, me->tm_min, me->tm_sec);
@@ -290,40 +290,41 @@ static int getAvailabilityOfRelativeTimes(grib_handle* gh, bool* outHaveForecast
 
 char* gribMakeTimeString(grib_handle* gh, CdiTimeType timeType)
 {
-  //Get the parts of the reference date.
+  // Get the parts of the reference date.
   struct tm date;
-  date.tm_mon = (int)gribGetLong(gh, "month") - 1;   //months are zero based in struct tm and one based in GRIB
+  date.tm_mon = (int)gribGetLong(gh, "month") - 1;   // months are zero based in struct tm and one based in GRIB
   date.tm_mday = (int)gribGetLong(gh, "day");
   date.tm_hour = (int)gribGetLong(gh, "hour");
   date.tm_min = (int)gribGetLong(gh, "minute");
+  date.tm_isdst = 0;
 
   if(gribEditionNumber(gh) == 1)
     {
-      date.tm_year = (int)gribGetLong(gh, "yearOfCentury");  //years are -1900 based both in struct tm and GRIB1
+      date.tm_year = (int)gribGetLong(gh, "yearOfCentury");  // years are -1900 based both in struct tm and GRIB1
     }
   else
     {
-      date.tm_year = (int)gribGetLong(gh, "year") - 1900;   //years are -1900 based in struct tm and zero based in GRIB2
+      date.tm_year = (int)gribGetLong(gh, "year") - 1900;   // years are -1900 based in struct tm and zero based in GRIB2
       date.tm_sec = (int)gribGetLong(gh, "second");
 
-      //If the start or end time are requested, we need to take the relative times into account.
+      // If the start or end time are requested, we need to take the relative times into account.
       if(timeType != kCdiTimeType_referenceTime)
         {
-          //Determine whether we have a forecast time and a time range.
+          // Determine whether we have a forecast time and a time range.
           bool haveForecastTime, haveTimeRange;
           if(getAvailabilityOfRelativeTimes(gh, &haveForecastTime, &haveTimeRange)) return NULL;
           if(timeType == kCdiTimeType_endTime && !haveTimeRange) return NULL;     //tell the caller that the requested time does not exist
 
-          //If we have relative times, apply the relative times to the date
+          // If we have relative times, apply the relative times to the date
           if(haveForecastTime)
             {
-              long offset = gribGetLongDefault(gh, "forecastTime", 0);  //if(stepUnits == indicatorOfUnitOfTimeRange) assert(startStep == forecastTime)
+              long offset = gribGetLongDefault(gh, "forecastTime", 0);  // if(stepUnits == indicatorOfUnitOfTimeRange) assert(startStep == forecastTime)
               long offsetUnit = gribGetLongDefault(gh, "indicatorOfUnitOfTimeRange", 255);
               if(addToDate(&date, offset, offsetUnit)) return NULL;
               if(timeType == kCdiTimeType_endTime)
                 {
                   assert(haveTimeRange);
-                  long range = gribGetLongDefault(gh, "lengthOfTimeRange", 0);       //if(stepUnits == indicatorOfUnitForTimeRange) assert(endStep == startStep + lengthOfTimeRange)
+                  long range = gribGetLongDefault(gh, "lengthOfTimeRange", 0);       // if(stepUnits == indicatorOfUnitForTimeRange) assert(endStep == startStep + lengthOfTimeRange)
                   long rangeUnit = gribGetLongDefault(gh, "indicatorOfUnitForTimeRange", 255);
                   if(addToDate(&date, range, rangeUnit)) return NULL;
                 }

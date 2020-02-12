@@ -1,5 +1,6 @@
 2020-02-12  Uwe Schulzweida
 
+	* cfortran.h: define SXFortran [patch: Florian Prill]
 	* Preserve NetCDF attribute positive on data variables
 
 2020-01-10  Uwe Schulzweida
