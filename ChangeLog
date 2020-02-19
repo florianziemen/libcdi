@@ -1,3 +1,7 @@
+2020-02-19  Uwe Schulzweida
+
+	* NetCDF: read lat bounds of a Gaussian reduced grid
+
 2020-02-12  Uwe Schulzweida
 
 	* cfortran.h: define SXFortran [patch: Florian Prill]

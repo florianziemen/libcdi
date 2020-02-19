@@ -2480,6 +2480,21 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
                 grid->reducedPoints = (int*) Malloc(ysize*sizeof(int));
                 cdf_get_var_int(ncvar->ncid, ncvar->rpvarid, grid->reducedPoints);
                 grid->np = ncvar->numLPE;
+
+                int bvarid = ncvars[yvarid].bounds;
+                if ( bvarid != CDI_UNDEFID )
+                  {
+                    int nbdims = ncvars[bvarid].ndims;
+                    if ( nbdims == 2 || nbdims == 3 )
+                      {
+                        if ( *vdimid == CDI_UNDEFID )
+                          {
+                            *vdimid = ncvars[bvarid].dimids[nbdims-1];
+                            grid->nvertex = (int)ncdims[*vdimid].len;
+                          }
+                        cdf_load_bounds(size*(size_t)grid->nvertex, &ncvars[yvarid], &grid->y.bounds, &lazyGrid->yBoundsGet);
+                      }
+                  }
               }
           }
         break;
