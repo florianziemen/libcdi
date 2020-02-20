@@ -1,3 +1,7 @@
+2020-02-20  Uwe Schulzweida
+
+	* zaxisDuplicate: init target attributes (bug fix) [report: Fabian Wachsmann]
+
 2020-02-19  Uwe Schulzweida
 
 	* NetCDF: read lat bounds of a Gaussian reduced grid

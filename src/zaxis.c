@@ -1180,6 +1180,7 @@ int zaxisDuplicate(int zaxisID)
         }
     }
 
+  zaxisptrnew->atts.nelems = 0;
   cdiCopyAtts(zaxisID, CDI_GLOBAL, zaxisIDnew, CDI_GLOBAL);
 
   return zaxisIDnew;
