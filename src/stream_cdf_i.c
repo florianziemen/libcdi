@@ -4328,40 +4328,6 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
   return (int) nrecs;
 }
 
-
-int cdfInqHistorySize(stream_t *streamptr)
-{
-  size_t size = 0;
-  int ncid = streamptr->fileID;
-  if ( streamptr->historyID != CDI_UNDEFID )
-    cdf_inq_attlen(ncid, NC_GLOBAL, "history", &size);
-
-  return (int) size;
-}
-
-
-void cdfInqHistoryString(stream_t *streamptr, char *history)
-{
-  int ncid = streamptr->fileID;
-  if ( streamptr->historyID != CDI_UNDEFID )
-    {
-      nc_type atttype;
-      cdf_inq_atttype(ncid, NC_GLOBAL, "history", &atttype);
-
-      if ( atttype == NC_CHAR )
-        {
-          cdf_get_att_text(ncid, NC_GLOBAL, "history", history);
-        }
-#ifdef HAVE_NETCDF4
-      else if ( atttype == NC_STRING )
-        {
-          // ToDo
-          Warning("History attribute with type NC_STRING unsupported!");
-        }
-#endif
-    }
-}
-
 #endif
 /*
  * Local Variables:

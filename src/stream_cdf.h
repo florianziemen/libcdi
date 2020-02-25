@@ -7,9 +7,6 @@ void   cdfDefCoordinateVars(stream_t *streamptr);
 void   cdfDefTimestep(stream_t *streamptr, int tsID);
 int    cdfInqTimestep(stream_t *streamptr, int tsID);
 int    cdfInqContents(stream_t *streamptr);
-void   cdfDefHistory(stream_t *streamptr, int size, const char *history);
-int    cdfInqHistorySize(stream_t *streamptr);
-void   cdfInqHistoryString(stream_t *streamptr, char *history);
 
 void   cdfEndDef(stream_t * streamptr);
 void   cdfDefRecord(stream_t * streamptr);

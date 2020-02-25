@@ -282,7 +282,6 @@ typedef struct {
   int         nczvarID[MAX_ZAXES_PS];
   VCT         vct;
 #endif
-  int         historyID;
   int         globalatts;
   int         localatts;
   int         unreduced;

@@ -886,7 +886,6 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->tsteps            = NULL;
   streamptr->tstepsTableSize   = 0;
   streamptr->tstepsNextID      = 0;
-  streamptr->historyID         = CDI_UNDEFID;
   streamptr->vlistID           = CDI_UNDEFID;
   streamptr->globalatts        = 0;
   streamptr->localatts         = 0;
@@ -1764,9 +1763,9 @@ void streamDestroyP ( void * streamptr )
 }
 
 
-void streamPrintP   ( void * streamptr, FILE * fp )
+void streamPrintP(void *streamptr, FILE *fp)
 {
-  stream_t * sp = ( stream_t * ) streamptr;
+  stream_t *sp = (stream_t *) streamptr;
 
   if ( !sp ) return;
 
@@ -1791,7 +1790,6 @@ void streamPrintP   ( void * streamptr, FILE * fp )
           "tstepsNextID  = %d\n"
           "ncmode        = %d\n"
           "vlistID       = %d\n"
-          "historyID     = %d\n"
           "globalatts    = %d\n"
           "localatts     = %d\n"
           "unreduced     = %d\n"
@@ -1803,7 +1801,7 @@ void streamPrintP   ( void * streamptr, FILE * fp )
           sp->filetype, sp->byteorder, sp->fileID, sp->filemode,
           sp->filename, sp->nrecs, sp->nvars, sp->varsAllocated,
           sp->curTsID, sp->rtsteps, sp->ntsteps, sp->tstepsTableSize,
-          sp->tstepsNextID, sp->ncmode, sp->vlistID, sp->historyID,
+          sp->tstepsNextID, sp->ncmode, sp->vlistID,
           sp->globalatts, sp->localatts, sp->unreduced, sp->sortname,
           sp->have_missval, sp->comptype, sp->complevel);
 }

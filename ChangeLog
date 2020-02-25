@@ -2,6 +2,7 @@
 
 	* Added function cdiInqAttLen()
 	* NetCDF: treats global history attribute as a normal attribute
+	* removed CDI functions streamInqHistorySize(), streamInqHistoryString() and streamDefHistory()
 
 2020-02-20  Uwe Schulzweida
 

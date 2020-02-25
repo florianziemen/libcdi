@@ -1978,13 +1978,6 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
 }
 
 
-void cdfDefHistory(stream_t *streamptr, int size, const char *history)
-{
-  const int ncid = streamptr->fileID;
-  cdf_put_att_text(ncid, NC_GLOBAL, "history", (size_t) size, history);
-}
-
-
 void cdfDefCoordinateVars(stream_t *streamptr)
 {
   const int vlistID = streamptr->vlistID;

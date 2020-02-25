@@ -1221,12 +1221,6 @@ int     tableInqModel(int tableID);
 
 void    tableInqEntry(int tableID, int id, int ltype, char *name, char *longname, char *units);
 
-// History routines
-
-void    streamDefHistory(int streamID, int size, const char *history);
-int     streamInqHistorySize(int streamID);
-void    streamInqHistoryString(int streamID, char *history);
-
 // Subtype routines
 
 //      subtypeCreate: Create a variable subtype
