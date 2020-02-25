@@ -420,6 +420,7 @@ module mo_cdi
   public :: vlistInqVarIntKey
   public :: cdiInqNatts
   public :: cdiInqAtt
+  public :: cdiInqAttLen
   public :: cdiDelAtt
   public :: cdiCopyAtts
   public :: cdiDefAttInt
@@ -667,9 +668,6 @@ module mo_cdi
   public :: tableInqNum
   public :: tableInqModel
   public :: tableInqEntry
-  public :: streamDefHistory
-  public :: streamInqHistorySize
-  public :: streamInqHistoryString
   public :: subtypeCreate
   public :: subtypePrint
   public :: subtypeCompare
@@ -2892,13 +2890,6 @@ module mo_cdi
       integer(c_int) :: f_result
     end function tableInqModel
 
-    function streamInqHistorySize(streamID_dummy) bind(c, name =&
-    & 'streamInqHistorySize') result(f_result)
-      import c_int
-      integer(c_int), value :: streamID_dummy
-      integer(c_int) :: f_result
-    end function streamInqHistorySize
-
     function subtypeCreate(subtype_dummy) bind(c, name = 'subtypeCreate')&
     & result(f_result)
       import c_int
@@ -4654,6 +4645,30 @@ contains
     end do
   end function cdiInqAtt
 
+  function cdiInqAttLen(cdiID_dummy, varID_dummy, name_dummy) result(f_result)
+    integer(c_int) :: f_result
+    integer(c_int), value :: cdiID_dummy
+    integer(c_int), value :: varID_dummy
+    character(kind = c_char, len = *), intent(in) :: name_dummy
+    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
+    integer :: name_i
+    interface
+      function lib_cdiInqAttLen(cdiID_dummy, varID_dummy, name_dummy) bind(c,&
+      & name = 'cdiInqAttLen') result(c_result)
+        import c_char, c_int
+        integer(c_int) :: c_result
+        integer(c_int), value :: cdiID_dummy
+        integer(c_int), value :: varID_dummy
+        character(kind = c_char) :: name_dummy(*)
+      end function lib_cdiInqAttLen
+    end interface
+    do name_i = 1, len(name_dummy)
+      name_temp(name_i) = name_dummy(name_i:name_i)
+    end do
+    name_temp(len(name_dummy) + 1) = c_null_char
+    f_result = lib_cdiInqAttLen(cdiID_dummy, varID_dummy, name_temp)
+  end function cdiInqAttLen
+
   function cdiDelAtt(cdiID_dummy, varID_dummy, name_dummy) result(f_result)
     integer(c_int) :: f_result
     integer(c_int), value :: cdiID_dummy
@@ -6084,59 +6099,6 @@ contains
       units_dummy(units_i:units_i) = ' '
     end do
   end subroutine tableInqEntry
-
-  subroutine streamDefHistory(streamID_dummy, size_dummy, history_dummy)
-    integer(c_int), value :: streamID_dummy
-    integer(c_int), value :: size_dummy
-    character(kind = c_char, len = *), intent(in) :: history_dummy
-    character(kind = c_char) :: history_temp(len(history_dummy) + 1)
-    integer :: history_i
-    interface
-      subroutine lib_streamDefHistory(streamID_dummy, size_dummy,&
-      & history_dummy) bind(c, name = 'streamDefHistory')
-        import c_char, c_int
-        integer(c_int), value :: streamID_dummy
-        integer(c_int), value :: size_dummy
-        character(kind = c_char) :: history_dummy(*)
-      end subroutine lib_streamDefHistory
-    end interface
-    do history_i = 1, len(history_dummy)
-      history_temp(history_i) = history_dummy(history_i:history_i)
-    end do
-    history_temp(len(history_dummy) + 1) = c_null_char
-    call lib_streamDefHistory(streamID_dummy, size_dummy, history_temp)
-  end subroutine streamDefHistory
-
-  subroutine streamInqHistoryString(streamID_dummy, history_dummy)
-    integer(c_int), value :: streamID_dummy
-    character(kind = c_char, len = *), intent(inout) :: history_dummy
-    character(kind = c_char) :: history_temp(len(history_dummy) + 1)
-    integer :: history_i
-    interface
-      subroutine lib_streamInqHistoryString(streamID_dummy, history_dummy)&
-      & bind(c, name = 'streamInqHistoryString')
-        import c_char, c_int
-        integer(c_int), value :: streamID_dummy
-        character(kind = c_char) :: history_dummy(*)
-      end subroutine lib_streamInqHistoryString
-    end interface
-    history_temp(len(history_dummy) + 1) = c_null_char
-    do history_i = len(history_dummy), 1, -1
-      if(history_dummy(history_i:history_i) /= ' ') exit
-      history_temp(history_i) = c_null_char
-    end do
-    do history_i = history_i, 1, -1
-        history_temp(history_i) = history_dummy(history_i:history_i)
-    end do
-    call lib_streamInqHistoryString(streamID_dummy, history_temp)
-    do history_i = 1, len(history_dummy)
-      if(history_temp(history_i) == c_null_char) exit
-      history_dummy(history_i:history_i) = history_temp(history_i)
-    end do
-    do history_i = history_i, len(history_dummy)
-      history_dummy(history_i:history_i) = ' '
-    end do
-  end subroutine streamInqHistoryString
 
   function subtypeInqAttribute(subtypeID_dummy, index_dummy, key_dummy,&
   & outValue_dummy) result(f_result)
