@@ -122,7 +122,6 @@ files="basetime.c \
    stream_cdf_i.c \
    stream_cdf_o.c \
    stream_cdf_time.c \
-   stream_history.c \
    stream_record.c \
    stream_var.c \
    cdf_write.c \

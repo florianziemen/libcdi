@@ -99,7 +99,6 @@ libcdi_la_SOURCES = 	 \
 	stream_grb.c     \
 	stream_grb.h     \
 	stream_gribapi.h \
-	stream_history.c \
 	stream_ieg.c     \
 	stream_ieg.h	 \
 	cdi_int.c        \

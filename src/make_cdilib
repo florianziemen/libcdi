@@ -141,7 +141,6 @@ files="async_worker.c \
    stream_ext.c \
    stream_grb.c \
    stream_gribapi.c \
-   stream_history.c \
    stream_ieg.c \
    stream_record.c \
    stream_srv.c \
