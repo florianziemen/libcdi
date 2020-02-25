@@ -501,6 +501,21 @@ double cdiInqGridMissval(void)
   return CDI_default_missval;
 }
 
+int cdiBaseFiletype(int filetype)
+{
+  switch (filetype)
+    {
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:   return CDI_FILETYPE_NETCDF;
+    default:                 return filetype;
+    }
+
+  return filetype;
+}
+
 /*
  * Local Variables:
  * c-file-style: "Java"

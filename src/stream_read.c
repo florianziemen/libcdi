@@ -30,7 +30,7 @@ int cdiStreamReadVar(int streamID, int varID, int memtype, void *data, size_t *n
 
   *nmiss = 0;
 
-  switch (filetype)
+  switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
@@ -65,11 +65,7 @@ int cdiStreamReadVar(int streamID, int varID, int memtype, void *data, size_t *n
       }
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
       {
         cdf_read_var(streamptr, varID, memtype, data, nmiss);
 	break;
@@ -157,7 +153,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
 
   *nmiss = 0;
 
-  switch (filetype)
+  switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
@@ -192,11 +188,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
       }
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
       {
         cdf_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
         break;
@@ -287,7 +279,7 @@ int stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 
   *nmiss = 0;
 
-  switch (streamptr->filetype)
+  switch (cdiBaseFiletype(streamptr->filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
@@ -314,11 +306,7 @@ int stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
       break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
       cdf_read_record(streamptr, memtype, data, nmiss);
       break;
 #endif

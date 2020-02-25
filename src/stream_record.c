@@ -181,7 +181,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
   record->gridID   = gridID;
   record->prec     = vlistInqVarDatatype(vlistID, varID);
 
-  switch (streamptr->filetype)
+  switch (cdiBaseFiletype(streamptr->filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
@@ -205,11 +205,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
       break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
       if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
       cdfDefRecord(streamptr);
       break;
@@ -229,35 +225,12 @@ void streamCopyRecord(int streamID2, int streamID1)
     filetype2 = streamptr2->filetype,
     filetype  = CDI_FILETYPE_UNDEF;
 
-  if ( filetype1 == filetype2 ) filetype = filetype2;
-  else
-    {
-      switch (filetype1)
-        {
-        case CDI_FILETYPE_NC:
-        case CDI_FILETYPE_NC2:
-        case CDI_FILETYPE_NC4:
-        case CDI_FILETYPE_NC4C:
-        case CDI_FILETYPE_NC5:
-          switch (filetype2)
-            {
-            case CDI_FILETYPE_NC:
-            case CDI_FILETYPE_NC2:
-            case CDI_FILETYPE_NC4:
-            case CDI_FILETYPE_NC4C:
-            case CDI_FILETYPE_NC5:
-              // Warning("Streams have different file types (%s -> %s)!", strfiletype(filetype1), strfiletype(filetype2));
-              filetype = filetype2;
-              break;
-            }
-          break;
-        }
-    }
+  if (cdiBaseFiletype(filetype1) == cdiBaseFiletype(filetype2)) filetype = filetype2;
 
   if ( filetype == CDI_FILETYPE_UNDEF )
     Error("Streams have different file types (%s -> %s)!", strfiletype(filetype1), strfiletype(filetype2));
 
-  switch (filetype)
+  switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
@@ -281,11 +254,7 @@ void streamCopyRecord(int streamID2, int streamID1)
       break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
       cdfCopyRecord(streamptr2, streamptr1);
       break;
 #endif

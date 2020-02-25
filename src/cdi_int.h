@@ -17,7 +17,12 @@
 #include "cdi.h"
 #include "cdf_config.h"
 
-/* dummy use of unused parameters to silence compiler warnings */
+// Base file types
+
+#define  CDI_FILETYPE_GRIB        100   // File type GRIB
+#define  CDI_FILETYPE_NETCDF      101   // File type NetCDF
+
+// dummy use of unused parameters to silence compiler warnings
 #ifndef  UNUSED
 #define  UNUSED(x) (void)x
 #endif
@@ -42,7 +47,7 @@ char *strToLower(char *str);
 bool strStartsWith(const char *vstr, const char *cstr);
 
 static inline bool
-strIsEqual(const char *x, const char *y) 
+strIsEqual(const char *x, const char *y)
 {
   return (*x == *y) && strcmp(x, y) == 0;
 }
@@ -511,6 +516,7 @@ void cdi_check_gridsize_int_limit(const char *format, size_t gridsize)
   if ( gridsize > INT_MAX ) Error("%s format grid size (%zu) limit exceeded (%zu)!", format, gridsize, INT_MAX);
 }
 
+int cdiBaseFiletype(int filetype);
 
 #if defined (__cplusplus)
 }

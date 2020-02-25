@@ -33,7 +33,7 @@ int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, s
 
   int filetype = streamptr->filetype;
 
-  switch (filetype)
+  switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
@@ -68,11 +68,7 @@ int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, s
       }
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
       {
         cdf_write_var(streamptr, varID, memtype, data, nmiss);
 	break;
@@ -170,7 +166,7 @@ int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, co
 
   int filetype = streamptr->filetype;
 
-  switch (filetype)
+  switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
@@ -205,11 +201,7 @@ int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, co
       }
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
       cdf_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
       break;
 #endif
@@ -299,7 +291,7 @@ void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
 
   int filetype = streamptr->filetype;
 
-  switch (filetype)
+  switch (cdiBaseFiletype(filetype))
     {
 #if defined (HAVE_LIBGRIB)
     case CDI_FILETYPE_GRB:
@@ -316,16 +308,11 @@ void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
 #endif
 #if  defined (HAVE_LIBGRIB) || defined (HAVE_LIBSERVICE)      \
   || defined (HAVE_LIBEXTRA) || defined (HAVE_LIBIEG)
-      xabort("streamWriteVarChunk not implemented for filetype %s!",
-             strfiletype(filetype));
+      xabort("streamWriteVarChunk not implemented for filetype %s!", strfiletype(filetype));
       break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
       cdf_write_var_chunk(streamptr, varID, memtype, rect, data, nmiss);
       break;
 #endif
@@ -346,7 +333,7 @@ int stream_write_record(int streamID, int memtype, const void *data, size_t nmis
 
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  switch (streamptr->filetype)
+  switch (cdiBaseFiletype(streamptr->filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
@@ -373,11 +360,7 @@ int stream_write_record(int streamID, int memtype, const void *data, size_t nmis
       break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
       {
 	cdf_write_record(streamptr, memtype, data, nmiss);
 	break;

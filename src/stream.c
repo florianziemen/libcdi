@@ -333,19 +333,15 @@ const char *streamFilesuffix(int filetype)
   static const char *extSuffix = ".ext";
   static const char *iegSuffix = ".ieg";
 
-  switch (filetype)
+  switch (cdiBaseFiletype(filetype))
     {
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:   return ncSuffix;
     case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2:  return grbSuffix;
-    case CDI_FILETYPE_SRV:   return srvSuffix;
-    case CDI_FILETYPE_EXT:   return extSuffix;
-    case CDI_FILETYPE_IEG:   return iegSuffix;
-    default:                 return noSuffix;
+    case CDI_FILETYPE_GRB2:    return grbSuffix;
+    case CDI_FILETYPE_SRV:     return srvSuffix;
+    case CDI_FILETYPE_EXT:     return extSuffix;
+    case CDI_FILETYPE_IEG:     return iegSuffix;
+    case CDI_FILETYPE_NETCDF:  return ncSuffix;
+    default:                   return noSuffix;
     }
 }
 
@@ -376,7 +372,7 @@ int cdiInqContents(stream_t *streamptr)
   int status = 0;
   int filetype = streamptr->filetype;
 
-  switch (filetype)
+  switch (cdiBaseFiletype(filetype))
     {
 #ifdef  HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
@@ -408,11 +404,7 @@ int cdiInqContents(stream_t *streamptr)
       }
 #endif
 #ifdef  HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
       {
         status = cdfInqContents(streamptr);
 	break;
@@ -430,8 +422,7 @@ int cdiInqContents(stream_t *streamptr)
 
   if ( status == 0 )
     {
-      int vlistID = streamptr->vlistID;
-      int taxisID = vlistInqTaxis(vlistID);
+      int taxisID = vlistInqTaxis(streamptr->vlistID);
       if ( taxisID != CDI_UNDEFID )
         {
           taxis_t *taxisptr1 = &streamptr->tsteps[0].taxis;
@@ -951,7 +942,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
   if ( fileID == CDI_UNDEFID )
     Warning("File %s not open!", streamptr->filename);
   else
-    switch (filetype)
+    switch (cdiBaseFiletype(filetype))
       {
 #if defined(HAVE_LIBGRIB) && (defined(HAVE_LIBCGRIBEX) || defined(HAVE_LIBGRIB_API))
       case CDI_FILETYPE_GRB:
@@ -995,11 +986,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
         }
 #endif
 #ifdef  HAVE_LIBNETCDF
-      case CDI_FILETYPE_NC:
-      case CDI_FILETYPE_NC2:
-      case CDI_FILETYPE_NC4:
-      case CDI_FILETYPE_NC4C:
-      case CDI_FILETYPE_NC5:
+      case CDI_FILETYPE_NETCDF:
         {
           cdfClose(fileID);
           if (streamptr->ntsteps == 0)
@@ -1143,14 +1130,10 @@ void cdiStreamSync_(stream_t *streamptr)
     {
       if ( streamptr->filemode == 'w' || streamptr->filemode == 'a' )
 	{
-	  switch (filetype)
+	  switch (cdiBaseFiletype(filetype))
 	    {
 #ifdef  HAVE_LIBNETCDF
-	    case CDI_FILETYPE_NC:
-	    case CDI_FILETYPE_NC2:
-	    case CDI_FILETYPE_NC4:
-	    case CDI_FILETYPE_NC4C:
-	    case CDI_FILETYPE_NC5:
+	    case CDI_FILETYPE_NETCDF:
 	      {
 		void cdf_sync(int ncid);
 		if ( streamptr->ncmode == 2 ) cdf_sync(fileID);
@@ -1226,12 +1209,7 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
   streamptr->ntsteps = tsID + 1;
 
 #ifdef HAVE_LIBNETCDF
-  if ((streamptr->filetype == CDI_FILETYPE_NC  ||
-       streamptr->filetype == CDI_FILETYPE_NC2 ||
-       streamptr->filetype == CDI_FILETYPE_NC5 ||
-       streamptr->filetype == CDI_FILETYPE_NC4 ||
-       streamptr->filetype == CDI_FILETYPE_NC4C)
-      && time_is_varying)
+  if (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF  && time_is_varying)
     {
       void (*myCdfDefTimestep)(stream_t *streamptr, int tsID)
         = (void (*)(stream_t *, int))
@@ -1331,7 +1309,7 @@ int streamInqTimestep(int streamID, int tsID)
   if ( CDI_Debug )
     Message("streamID = %d  tsID = %d  filetype = %d", streamID, tsID, filetype);
 
-  switch (filetype)
+  switch (cdiBaseFiletype(filetype))
     {
 #ifdef  HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
@@ -1363,11 +1341,7 @@ int streamInqTimestep(int streamID, int tsID)
       }
 #endif
 #ifdef  HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
       {
         nrecs = cdfInqTimestep(streamptr, tsID);
 	break;
@@ -1654,40 +1628,26 @@ void cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
               vlistDefTaxis(vlistID, taxisID);
             }
 
-          if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
-            switch (streamptr->filetype)
-              {
 #ifdef HAVE_LIBNETCDF
-              case CDI_FILETYPE_NC:
-              case CDI_FILETYPE_NC2:
-              case CDI_FILETYPE_NC4:
-              case CDI_FILETYPE_NC4C:
-              case CDI_FILETYPE_NC5:
-                {
-                  taxis_t *taxisptr = taxisPtr(taxisID);
-                  if ( taxisptr->rdate == -1 )
-                    {
-                      int vdate = taxisInqVdate(taxisID);
-                      if ( vdate == 0 ) vdate = 10101;
-                      taxisDefRdate(taxisID, vdate);
-                    }
-                }
-                break;
-#endif
-              default:
-                ;
+          if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
+            if (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF)
+              {
+                taxis_t *taxisptr = taxisPtr(taxisID);
+                if ( taxisptr->rdate == -1 )
+                  {
+                    int vdate = taxisInqVdate(taxisID);
+                    if ( vdate == 0 ) vdate = 10101;
+                    taxisDefRdate(taxisID, vdate);
+                  }
               }
+#endif
           ptaxisCopy(&streamptr->tsteps[0].taxis, taxisPtr(taxisID));
         }
 
-      switch (streamptr->filetype)
+      switch (cdiBaseFiletype(streamptr->filetype))
         {
 #ifdef HAVE_LIBNETCDF
-        case CDI_FILETYPE_NC:
-        case CDI_FILETYPE_NC2:
-        case CDI_FILETYPE_NC4:
-        case CDI_FILETYPE_NC4C:
-        case CDI_FILETYPE_NC5:
+        case CDI_FILETYPE_NETCDF:
           {
             /* calls cdfDefCoordinateVars in serial mode but
              * cdiPioClientStreamNOP (i.e. nothing) on client ranks
