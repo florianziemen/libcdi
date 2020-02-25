@@ -433,6 +433,7 @@ FCALLSCFUN3 (INT, vlistInqVarIntKey, VLISTINQVARINTKEY, vlistinqvarintkey, INT, 
 
 FCALLSCFUN3 (INT, cdiInqNatts, CDIINQNATTS, cdiinqnatts, INT, INT, PINT)
 FCALLSCFUN6 (INT, cdiInqAtt, CDIINQATT, cdiinqatt, INT, INT, INT, PSTRING, PINT, PINT)
+FCALLSCFUN3 (INT, cdiInqAttLen, CDIINQATTLEN, cdiinqattlen, INT, INT, STRING)
 FCALLSCFUN3 (INT, cdiDelAtt, CDIDELATT, cdidelatt, INT, INT, STRING)
 FCALLSCFUN4 (INT, cdiCopyAtts, CDICOPYATTS, cdicopyatts, INT, INT, INT, INT)
 FCALLSCFUN6 (INT, cdiDefAttInt, CDIDEFATTINT, cdidefattint, INT, INT, STRING, INT, INT, INTV)
@@ -810,12 +811,6 @@ FCALLSCFUN0 (INT, tableInqNumber, TABLEINQNUMBER, tableinqnumber)
 FCALLSCFUN1 (INT, tableInqNum, TABLEINQNUM, tableinqnum, INT)
 FCALLSCFUN1 (INT, tableInqModel, TABLEINQMODEL, tableinqmodel, INT)
 FCALLSCSUB6 (tableInqEntry, TABLEINQENTRY, tableinqentry, INT, INT, INT, PSTRING, PSTRING, PSTRING)
-
-/*  History routines  */
-
-FCALLSCSUB3 (streamDefHistory, STREAMDEFHISTORY, streamdefhistory, INT, INT, STRING)
-FCALLSCFUN1 (INT, streamInqHistorySize, STREAMINQHISTORYSIZE, streaminqhistorysize, INT)
-FCALLSCSUB2 (streamInqHistoryString, STREAMINQHISTORYSTRING, streaminqhistorystring, INT, PSTRING)
 
 /*  Subtype routines  */
 

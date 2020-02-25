@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   January 2020
+! Uwe Schulzweida, MPI-MET, Hamburg,   February 2020
 !
 
       INTEGER    CDI_MAX_NAME
@@ -1359,6 +1359,12 @@
 !                                     INTEGER         lenp)
       EXTERNAL        cdiInqAtt
 
+      INTEGER         cdiInqAttLen
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        cdiInqAttLen
+
       INTEGER         cdiDelAtt
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
@@ -2528,24 +2534,6 @@
 !                                     CHARACTER*(*)   longname,
 !                                     CHARACTER*(*)   units)
       EXTERNAL        tableInqEntry
-
-!
-!  History routines
-!
-!                     streamDefHistory
-!                                    (INTEGER         streamID,
-!                                     INTEGER         size,
-!                                     CHARACTER*(*)   history)
-      EXTERNAL        streamDefHistory
-
-      INTEGER         streamInqHistorySize
-!                                    (INTEGER         streamID)
-      EXTERNAL        streamInqHistorySize
-
-!                     streamInqHistoryString
-!                                    (INTEGER         streamID,
-!                                     CHARACTER*(*)   history)
-      EXTERNAL        streamInqHistoryString
 
 !
 !  Subtype routines
