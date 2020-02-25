@@ -187,6 +187,29 @@ int cdiInqAtt(int cdiID, int varID, int attnum, char *name, int *typep, int *len
 }
 
 
+int cdiInqAttLen(int cdiID, int varID, const char *name)
+{
+  int length = -1;
+
+  xassert(name != NULL);
+
+  cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
+  xassert(attsp != NULL);
+
+  for ( int attid = 0; attid < (int)attsp->nelems; attid++ )
+    {
+      cdi_att_t *attp = &(attsp->value[attid]);
+      if (strcmp(attp->name, name) == 0)
+        {
+          length = (int)attp->nelems;
+          printf("name >%s< >%s< length %d\n", attp->name, name, length);
+        }
+    }
+
+  return length;
+}
+
+
 int cdiDeleteAtts(int cdiID, int varID)
 {
   int status = CDI_NOERR;
