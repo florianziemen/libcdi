@@ -1,6 +1,7 @@
 2020-02-25  Uwe Schulzweida
 
 	* Added function cdiInqAttLen()
+	* NetCDF: treats global history attribute as a normal attribute
 
 2020-02-20  Uwe Schulzweida
 

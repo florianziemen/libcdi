@@ -3409,11 +3409,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
 
 	  if ( attlen > 0 && attstring[0] != 0 )
 	    {
-	      if ( strIsEqual(attname, "history") )
-		{
-		  streamptr->historyID = iatt;
-		}
-	      else if ( strIsEqual(attname, "institution") )
+	      if ( strIsEqual(attname, "institution") )
 		{
 		  *instID = institutInq(0, 0, NULL, attstring);
 		  if ( *instID == CDI_UNDEFID )
