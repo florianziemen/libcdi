@@ -684,6 +684,7 @@ int     cdiInqNatts(int cdiID, int varID, int *nattsp);
 //      cdiInqAtt: Get information about an attribute
 int     cdiInqAtt(int cdiID, int varID, int attrnum, char *name, int *typep, int *lenp);
 int     cdiInqAttLen(int cdiID, int varID, const char *name);
+int     cdiInqAttType(int cdiID, int varID, const char *name);
 int     cdiDelAtt(int cdiID, int varID, const char *name);
 
 int     cdiCopyAtts(int cdiID1, int varID1, int cdiID2, int varID2);

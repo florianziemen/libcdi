@@ -169,7 +169,7 @@ int cdiInqAtt(int cdiID, int varID, int attnum, char *name, int *typep, int *len
   if ( attnum >= 0 && attnum < (int)attsp->nelems )
     attp = &(attsp->value[attnum]);
 
-  if ( attp != NULL ) /* name in use */
+  if ( attp != NULL && attp->name ) /* name in use */
     {
       memcpy(name, attp->name, attp->namesz+1);
       *typep  = attp->exdtype;
@@ -199,10 +199,29 @@ int cdiInqAttLen(int cdiID, int varID, const char *name)
   for ( int attid = 0; attid < (int)attsp->nelems; attid++ )
     {
       cdi_att_t *attp = &(attsp->value[attid]);
-      if (strcmp(attp->name, name) == 0) length = (int)attp->nelems;
+      if (attp->name && strcmp(attp->name, name) == 0) length = (int)attp->nelems;
     }
 
   return length;
+}
+
+
+int cdiInqAttType(int cdiID, int varID, const char *name)
+{
+  int type = -1;
+
+  xassert(name != NULL);
+
+  cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
+  xassert(attsp != NULL);
+
+  for ( int attid = 0; attid < (int)attsp->nelems; attid++ )
+    {
+      cdi_att_t *attp = &(attsp->value[attid]);
+      if (attp->name && strcmp(attp->name, name) == 0) type = attp->exdtype;
+    }
+
+  return type;
 }
 
 
@@ -216,7 +235,12 @@ int cdiDeleteAtts(int cdiID, int varID)
   for ( int attid = 0; attid < (int)attsp->nelems; attid++ )
     {
       cdi_att_t *attp = &(attsp->value[attid]);
-      if ( attp->name   ) Free(attp->name);
+      if ( attp->name   )
+        {
+          Free(attp->name);
+          attp->name = NULL;
+          attp->namesz = 0;
+        }
       if ( attp->xvalue ) Free(attp->xvalue);
     }
 
@@ -230,11 +254,24 @@ int cdiDelAtt(int cdiID, int varID, const char *name)
 {
   int status = CDI_NOERR;
 
-  UNUSED(cdiID);
-  UNUSED(varID);
-  UNUSED(name);
+  cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
+  xassert(attsp != NULL);
 
-  fprintf(stderr, "cdiDelAtt not implemented!\n");
+  for ( int attid = 0; attid < (int)attsp->nelems; attid++ )
+    {
+      cdi_att_t *attp = &(attsp->value[attid]);
+      if (attp->name && strcmp(attp->name, name) == 0)
+        {
+          Free(attp->name);
+          attp->name = NULL;
+          attp->namesz = 0;
+          if ( attp->xvalue )
+            {
+              Free(attp->xvalue);
+              attp->xvalue = NULL;
+            }
+        }
+    }
 
   return status;
 }
@@ -466,8 +503,7 @@ int cdiAttTypeLookup(cdi_att_t *attp)
     type = attp->indtype;
     break;
   default:
-    xabort("Unknown datatype encountered in attribute %s: %d\n",
-            attp->name, attp->indtype);
+    xabort("Unknown datatype encountered in attribute %s: %d\n", attp->name, attp->indtype);
   }
   return type;
 }
@@ -481,7 +517,7 @@ int cdi_att_compare(cdi_atts_t *attspa, cdi_atts_t *attspb, int attnum)
 
   if (attpa->namesz != attpb->namesz) return 1;
 
-  if (memcmp(attpa->name, attpb->name, attpa->namesz)) return 1;
+  if (attpa->name && attpb->name && memcmp(attpa->name, attpb->name, attpa->namesz)) return 1;
 
   if (attpa->indtype != attpb->indtype
       || attpa->exdtype != attpb->exdtype
@@ -524,12 +560,11 @@ void cdiAttPack(vlist_t *vlistptr, int varID, int attnum,
                 void *buf, int size, int *position, void *context)
 {
   cdi_atts_t *attsp;
-  cdi_att_t *attp;
   int tempbuf[cdi_att_nints];
 
   xassert(attsp = get_attsp(vlistptr, varID));
   xassert(attnum >= 0 && attnum < (int)attsp->nelems);
-  attp = &(attsp->value[attnum]);
+  cdi_att_t *attp = &(attsp->value[attnum]);
   tempbuf[0] = (int)attp->namesz;
   tempbuf[1] = attp->exdtype;
   tempbuf[2] = attp->indtype;
