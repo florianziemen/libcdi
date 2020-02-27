@@ -51,6 +51,8 @@ dnl before switching on libtool, identify compilers that prevent us from
 dnl certain build configurations
 ACX_LT_PROBLEMS
 LT_INIT([pic-only])
+dnl Clean up after Libtool checks:
+rm -f a.out
 dnl _KPSE_USE_LIBTOOL ensures libtool is also used for configure-time tests,
 dnl which deduces dependent libraries automatically
 _KPSE_USE_LIBTOOL

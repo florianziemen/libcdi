@@ -48,6 +48,7 @@ Makefile
 *.mod
 *.o
 .libs
+/a.out
 /app/cdi
 /app/createtable
 
