@@ -23935,6 +23935,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # Only expand once:
 
 
+rm -f a.out
 ## _KPSE_USE_LIBTOOL: Generate a libtool script for use in configure tests
 : ${CONFIG_LT=./config.lt}
 { $as_echo "$as_me:${as_lineno-$LINENO}: creating $CONFIG_LT" >&5
