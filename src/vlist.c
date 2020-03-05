@@ -604,7 +604,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                 int zaxisType = zaxisInqType(zaxisID);
 
                 int levID2 = 0;
-                for ( int levID = 0; levID < nlevs; ++levID )
+                for ( int levID = 0; levID < nlevs; levID++ )
                   if ( vars1[varID].levinfo[levID].flag )
                     {
                       vars1[varID].levinfo[levID].flevelID = levID2;
@@ -727,7 +727,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	      if ( vars1[varID].levinfo[levID].flag )
 		{
 		  vars2[varID2].levinfo[levID2].flevelID = levID;
-		  vars2[varID2].levinfo[levID2].mlevelID = levID;
+		  vars2[varID2].levinfo[levID2].mlevelID = levID2;
 		  levID2++;
 		}
 
