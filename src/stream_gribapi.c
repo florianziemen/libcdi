@@ -1810,7 +1810,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t fdate, int
       const double endStepF = (days*86400.0 + secs)/factor;
       const long maxStep = (editionNumber > 1) ? INT_MAX : 65000;
       if (endStepF > maxStep) return status;
-      const long endStep = (long) endStepF;
+      long endStep = (long) endStepF;
 
       if (sdate != 0 && (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF))
         {
@@ -1836,13 +1836,20 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t fdate, int
            proDefTempNum == 55 || proDefTempNum == 40055 ) // Tile
         startStep = endStep;
 
-      if (endStep < startStep) return status;
+      if (endStep < startStep || startStep > 255 || endStep > 255)
+        {
+          startStep = 0;
+          endStep = 0;
+        }
+      else
+        {
+          status = 0;
+        }
 
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "forecastTime", startStep), 0);
-      if ( editionNumber == 1 && startStep > 0) GRIB_CHECK(my_grib_set_long(gh, "startStep", startStep), 0);
+      //if ( editionNumber == 1 && startStep > 0) GRIB_CHECK(my_grib_set_long(gh, "startStep", startStep), 0);
+      if ( editionNumber == 1 ) GRIB_CHECK(my_grib_set_long(gh, "startStep", startStep), 0);
       GRIB_CHECK(my_grib_set_long(gh, "endStep", endStep), 0);
-
-      status = 0;
     }
 
   return status;
