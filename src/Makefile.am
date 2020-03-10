@@ -267,8 +267,10 @@ endif
 endif
 
 #
+if ENABLE_RUBY
 mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
+endif
 
 if FORTRAN_MOD_UC
 MO_CDI.$(FCMODEXT): mo_cdi.lo

@@ -1364,8 +1364,8 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES \
 
 
 #
-mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
-	$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
+@ENABLE_RUBY_TRUE@mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
+@ENABLE_RUBY_TRUE@	$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
 
 @FORTRAN_MOD_UC_TRUE@MO_CDI.$(FCMODEXT): mo_cdi.lo
 @FORTRAN_MOD_UC_FALSE@mo_cdi.$(FCMODEXT): mo_cdi.lo
