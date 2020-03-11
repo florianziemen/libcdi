@@ -51,7 +51,6 @@ extern struct cdiGribScanModeChange cdiGribDataScanningMode;
 // Used in CDO
 void streamGrbChangeParameterIdentification(int code, int ltype, int lev);
 void streamGrbDefDataScanningMode(int scanmode);
-int  streamGrbInqDataScanningMode(void);
 
 #endif  /* STREAM_GRB_H */
 /*

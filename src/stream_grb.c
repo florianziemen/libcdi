@@ -72,11 +72,6 @@ void streamGrbDefDataScanningMode(int scanmode)
   cdiGribDataScanningMode.value = scanmode;
 }
 
-int  streamGrbInqDataScanningMode(void)
-{
-  return cdiGribDataScanningMode.value;
-}
-
 
 int grib1ltypeToZaxisType(int grib_ltype)
 {
