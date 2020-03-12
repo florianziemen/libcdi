@@ -270,8 +270,8 @@ endif
 endif
 
 #
-mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
-	$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
+mo_cdi.f90: @MAINTAINER_MODE_TRUE@ $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
+	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
 
 if FORTRAN_MOD_UC
 MO_CDI.$(FCMODEXT): mo_cdi.lo
