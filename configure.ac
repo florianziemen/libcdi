@@ -294,9 +294,6 @@ AM_COND_IF([USE_MPI],
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
 #
-# the test for ruby itself is unconditional because ruby is also used in
-# the Fortran 2003 ISO C generator
-AC_CHECK_PROG([RUBY],[ruby],[ruby])
 AC_ARG_ENABLE([iso-c-interface],
               [AS_HELP_STRING([--enable-iso-c-interface],
                  [Create Fortran Interface via iso_c_bindings facility of F2003 [default=no].])],
@@ -335,12 +332,11 @@ AM_CONDITIONAL(ENABLE_SWIG,[test "x$SWIG" != "x"])
 #
 AC_ARG_ENABLE([ruby],
   [AS_HELP_STRING([--enable-ruby],[ruby language bindings [default=no] (EXPERIMENTAL)])],
-  [RUBY_INCLUDES="$($RUBY $srcdir/config/interface.rb)"
+  [AC_CHECK_PROG([RUBY],[ruby],[ruby])
+   RUBY_INCLUDES="$($RUBY $srcdir/config/interface.rb)"
    save_CPPFLAGS=$CPPFLAGS
    CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
-   AC_CHECK_HEADER([ruby.h],,[enable_ruby=no
-                              RUBY=
-                             ], [AC_INCLUDES_DEFAULT])
+   AC_CHECK_HEADER([ruby.h],,[enable_ruby=no], [AC_INCLUDES_DEFAULT])
    CPPFLAGS=$save_CPPFLAGS
    AS_IF([test "x$RUBY" != "x"],
          [AS_IF([test "x$SWIG" = "x"],
@@ -352,6 +348,10 @@ AC_ARG_ENABLE([ruby],
   [enable_ruby=no])
 AM_CONDITIONAL(ENABLE_RUBY,[test "x$enable_ruby" != "xno"])
 AS_IF([test "x$enable_ruby" != "xno"],[AC_SUBST([ENABLE_RUBY],[true])],[AC_SUBST([ENABLE_RUBY],[false])])
+# Ruby is also used for the Fortran 2003 ISO C generator in maintainer mode.
+# Report properly if it's missing:
+AS_VAR_IF([RUBY], [], [AS_UNSET([RUBY])])
+AM_MISSING_PROG([RUBY], [ruby])
 #  ----------------------------------------------------------------------
 #  Create the Python Interface via swig
 AC_ARG_ENABLE(python,
