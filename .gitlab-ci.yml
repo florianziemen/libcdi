@@ -23,7 +23,7 @@ build:
     - mpif90 --version
     - mpicc --version
     - mpirun --help
-    - mkdir gcc64 && ../configure CC=mpicc FC=mpif90 --enable-mpi --disable-cdi-app --enable-iso-c-interface 
+    - mkdir gcc64 && cd gcc64 && ../configure CC=mpicc FC=mpif90 --enable-mpi --disable-cdi-app --enable-iso-c-interface 
   artifacts:
     paths:
       - gcc64/config.log
