@@ -24,7 +24,6 @@ build:
     - mpicc --version
     - mpirun --help
     - ulimit -a
-    - sbatch --help
     - mkdir gcc64 && cd gcc64 && ../configure CC=mpicc FC=mpif90 MPI_LAUNCH=true --enable-mpi --disable-cdi-app --enable-iso-c-interface 
   artifacts:
     paths:
