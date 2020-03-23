@@ -2299,13 +2299,10 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
                       if ( ((grid->x.vals == NULL) ^ (gridRef->x.vals == NULL)) &&
                            ((grid->y.vals == NULL) ^ (gridRef->y.vals == NULL)) )
                         {
-                          int nvertexA, nvertexB;
-                          differ = ( (nvertexA = grid->nvertex)
-                                     && (nvertexB = gridRef->nvertex)
-                                     && (nvertexA != nvertexB) )
+                          int nvertexA = grid->nvertex, nvertexB = gridRef->nvertex;
+                          differ = ( nvertexA && nvertexB && (nvertexA != nvertexB) )
                             || (( numberA && numberB && (numberA != numberB) )
-                                || ( (numberA && numberB)
-                                     && positionA != positionB ) );
+                                || ( numberA && numberB && positionA != positionB ) );
                         }
                       else
                         {
