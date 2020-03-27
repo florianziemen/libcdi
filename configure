@@ -30043,7 +30043,13 @@ else
 fi
 
 if test x"$enable_isoc" = xyes; then :
-  ac_ext=${ac_fc_srcext-f}
+  if test -z "$FC" || test "X$FC" = "Xno"; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "Fortran compiler not found or disabled: either disable Fortran 2003 interface (--disable-iso-c-interface) or set FC accordingly
+See \`config.log' for more details" "$LINENO" 5; }
+fi
+   ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
