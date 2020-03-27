@@ -421,6 +421,7 @@ module mo_cdi
   public :: cdiInqNatts
   public :: cdiInqAtt
   public :: cdiInqAttLen
+  public :: cdiInqAttType
   public :: cdiDelAtt
   public :: cdiCopyAtts
   public :: cdiDefAttInt
@@ -4668,6 +4669,30 @@ contains
     name_temp(len(name_dummy) + 1) = c_null_char
     f_result = lib_cdiInqAttLen(cdiID_dummy, varID_dummy, name_temp)
   end function cdiInqAttLen
+
+  function cdiInqAttType(cdiID_dummy, varID_dummy, name_dummy) result(f_result)
+    integer(c_int) :: f_result
+    integer(c_int), value :: cdiID_dummy
+    integer(c_int), value :: varID_dummy
+    character(kind = c_char, len = *), intent(in) :: name_dummy
+    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
+    integer :: name_i
+    interface
+      function lib_cdiInqAttType(cdiID_dummy, varID_dummy, name_dummy) bind(c,&
+      & name = 'cdiInqAttType') result(c_result)
+        import c_char, c_int
+        integer(c_int) :: c_result
+        integer(c_int), value :: cdiID_dummy
+        integer(c_int), value :: varID_dummy
+        character(kind = c_char) :: name_dummy(*)
+      end function lib_cdiInqAttType
+    end interface
+    do name_i = 1, len(name_dummy)
+      name_temp(name_i) = name_dummy(name_i:name_i)
+    end do
+    name_temp(len(name_dummy) + 1) = c_null_char
+    f_result = lib_cdiInqAttType(cdiID_dummy, varID_dummy, name_temp)
+  end function cdiInqAttType
 
   function cdiDelAtt(cdiID_dummy, varID_dummy, name_dummy) result(f_result)
     integer(c_int) :: f_result
