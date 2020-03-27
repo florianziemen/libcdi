@@ -299,7 +299,10 @@ AC_ARG_ENABLE([iso-c-interface],
                  [Create Fortran Interface via iso_c_bindings facility of F2003 [default=no].])],
               [enable_isoc=${enableval}],[enable_isoc=no])
 AS_IF([test x"$enable_isoc" = xyes],
-  [ACX_FC_CHECK_STRPTR_CONVERT([],
+  [AS_IF([test -z "$FC" || test "X$FC" = "Xno"],
+     [AC_MSG_FAILURE([Fortran compiler not found or disabled: either disable dnl
+Fortran 2003 interface (--disable-iso-c-interface) or set FC accordingly])])
+   ACX_FC_CHECK_STRPTR_CONVERT([],
      [AC_MSG_FAILURE([the Fortran compiler cannot handle complex CHARACTER dnl
 interoperability: disable Fortran 2003 interface (--disable-iso-c-interface)])])],
   [enable_isoc=no])
