@@ -4630,7 +4630,8 @@ struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
         }
       if ( mode < 2 )
         {
-          xassert(ngrids < MAX_GRIDS_PS);
+          if (ngrids >= MAX_GRIDS_PS)
+            Error("Internal limit exceeded, MAX_GRIDS_PS=%d needs to be increased!", MAX_GRIDS_PS);
           vlistptr->gridIDs[ngrids] = gridID;
           vlistptr->ngrids++;
         }
