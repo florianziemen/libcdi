@@ -338,7 +338,8 @@ void streamReadRecordF(int streamID, float *data, size_t *nmiss)
       int vrecID = streamptr->tsteps[tsID].curRecID;
       int recID  = streamptr->tsteps[tsID].recIDs[vrecID];
       int varID  = streamptr->tsteps[tsID].records[recID].varID;
-      size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      int nwpv = vlistInqVarNumber(streamInqVlist(streamID), varID);
+      size_t elementCount = nwpv*gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       streamReadRecord(streamID, conversionBuffer, nmiss);
       for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];
