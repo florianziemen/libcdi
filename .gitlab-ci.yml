@@ -7,10 +7,6 @@ stages:
 build:
   stage: build
   before_script:
-    - eval $(ssh-agent -s)
-    - ssh-keyscan git.mpimet.mpg.de >> ~/.ssh/known_hosts
-#   - ssh -vT git@git.mpimet.mpg.de
-    - ls /sw/rhel6-x64
     - . /sw/rhel6-x64/etc/profile.mistral && module list
   script:
     - /sw/rhel6-x64/gcc/gcc-6.4.0/bin/gcc --version
@@ -31,7 +27,7 @@ build:
     expire_in: 5min
 
   tags:
-  - mistral
+  - xen, mistral
 
   only:
   - gitlab-ci
