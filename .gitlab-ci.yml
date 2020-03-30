@@ -20,7 +20,7 @@ build:
     - mpicc --version
     - mpirun --help
     - ulimit -a
-    - mkdir gcc64 && cd gcc64 && ../configure CC=mpicc FC=mpif90 MPI_LAUNCH=true --enable-mpi --disable-cdi-app --enable-iso-c-interface 
+    - mkdir gcc64 && cd gcc64 && ../configure CC=gcc FC=gfortran --disable-cdi-app --enable-iso-c-interface 
   artifacts:
     paths:
       - gcc64/config.log
