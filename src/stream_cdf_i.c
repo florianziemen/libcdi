@@ -1540,7 +1540,6 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
   for ( int i = 0; i < max_check_vars; ++i ) if ( checked_vars[i] ) Free(checked_vars[i]);
 }
 
-
 static
 void cdfVerifyVarAttr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
@@ -2474,10 +2473,10 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
               {
                 grid->size = size;
                 int dimid = ncvars[ncvar->rpvarid].dimids[0];
-                size_t ysize = ncdims[dimid].len;
-                grid->y.size = ysize;
-                grid->reducedPointsSize = ysize;
-                grid->reducedPoints = (int*) Malloc(ysize*sizeof(int));
+                size_t len = ncdims[dimid].len;
+                grid->y.size = len;
+                grid->reducedPointsSize = len;
+                grid->reducedPoints = (int*) Malloc(len*sizeof(int));
                 cdf_get_var_int(ncvar->ncid, ncvar->rpvarid, grid->reducedPoints);
                 grid->np = ncvar->numLPE;
 
@@ -3388,7 +3387,7 @@ void cdf_copy_attflt(int fileID, int vlistID, nc_type xtype, size_t attlen, char
 }
 
 static
-void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngatts, int *instID, int *modelID, bool *ucla_les, unsigned char *uuidOfHGrid, unsigned char *uuidOfVGrid, char *gridfile, int *number_of_grid_used)
+void cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *modelID, bool *ucla_les, unsigned char *uuidOfHGrid, unsigned char *uuidOfVGrid, char *gridfile, int *number_of_grid_used)
 {
   nc_type xtype;
   size_t attlen;
@@ -3896,7 +3895,7 @@ int cdfInqContents(stream_t *streamptr)
 
 
   // scan global attributes
-  cdf_scan_global_attr(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les,
+  cdf_scan_global_attr(fileID, vlistID, ngatts, &instID, &modelID, &ucla_les,
                        uuidOfHGrid, uuidOfVGrid, gridfile, &number_of_grid_used);
 
   // find time dim
@@ -4229,7 +4228,7 @@ double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
 
   if ( tcache )
     {
-      if ( tcache->size == 0 || (tsID < tcache->startid || tsID > (tcache->startid+tcache->size-1)) )
+      if ( tcache->size == 0 || (tsID < (int)tcache->startid || tsID > (int)(tcache->startid+tcache->size-1)) )
         {
           size_t maxvals = MAX_TIMECACHE_SIZE;
           if (maxvals > tcache->maxvals) maxvals = tcache->maxvals;

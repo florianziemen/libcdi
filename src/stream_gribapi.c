@@ -2091,7 +2091,7 @@ void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRel
 }
 
 static
-void gribapiDefGridSTERE(grib_handle *gh, int editionNumber, int gridID)
+void gribapiDefGridSTERE(grib_handle *gh, int gridID)
 {
   const long xsize = (long) gridInqXsize(gridID);
   const long ysize = (long) gridInqYsize(gridID);
@@ -2193,9 +2193,9 @@ void gribapiDefGridSpectral(grib_handle *gh, int gridID)
 
   if ( gridInqComplexPacking(gridID) )
     {
-      static const char truncAttNames[numTruncAtt][3] = { "JS", "KS", "MS" };
+      static const char truncAttNames2[numTruncAtt][3] = { "JS", "KS", "MS" };
       for (size_t i = 0; i < numTruncAtt; ++i)
-        GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], 20), 0);
+        GRIB_CHECK(my_grib_set_long(gh, truncAttNames2[i], 20), 0);
     }
 }
 
@@ -2296,7 +2296,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       }
     case CDI_PROJ_STERE:
       {
-        gribapiDefGridSTERE(gh, editionNumber, gridID);
+        gribapiDefGridSTERE(gh, gridID);
 	break;
       }
     case GRID_SPECTRAL:

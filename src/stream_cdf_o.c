@@ -466,7 +466,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims, bool
     {
       int ncvarid = CDI_UNDEFID, ncbvarid = CDI_UNDEFID;
       char axisname[CDI_MAX_NAME];
-      int length = CDI_MAX_NAME;
+      length = CDI_MAX_NAME;
       cdiInqKeyString(gridID, axisKey, CDI_KEY_NAME, axisname, &length);
       if ( axisname[0] == 0 ) Error("axis name undefined!");
 
@@ -1703,13 +1703,13 @@ void cdfDefCharacter(stream_t *streamptr, int gridID, int gridindex, int xory, i
   int ncaxisid;
   if ( xory == 0 )
     {
-      int length = CDI_MAX_NAME;
+      length = CDI_MAX_NAME;
       cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, axisname, &length);
       gridInqXCvals(gridID, cvals);
     }
   else
     {
-      int length = CDI_MAX_NAME;
+      length = CDI_MAX_NAME;
       cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, axisname, &length);
       gridInqXCvals(gridID, cvals);
     }

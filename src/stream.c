@@ -1616,16 +1616,16 @@ void cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
   if (streamptr->filemode == 'w')
     {
       tstepsNewEntry(streamptr); // timestep 0
-      int vlistID = streamptr->vlistID;
-      int time_is_varying = vlistHasTime(vlistID);
+      int vlistIDw = streamptr->vlistID;
+      int time_is_varying = vlistHasTime(vlistIDw);
       if ( time_is_varying )
         {
-          int taxisID = vlistInqTaxis(vlistID);
+          int taxisID = vlistInqTaxis(vlistIDw);
           if ( taxisID == CDI_UNDEFID )
             {
               Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamptr->self);
               taxisID = taxisCreate(TAXIS_ABSOLUTE);
-              vlistDefTaxis(vlistID, taxisID);
+              vlistDefTaxis(vlistIDw, taxisID);
             }
 
 #ifdef HAVE_LIBNETCDF
