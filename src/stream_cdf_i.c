@@ -1542,7 +1542,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
 
 
 static
-void cdfVerifyVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims)
+void cdfVerifyVarAttr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
   nc_type atttype;
   size_t attlen;
@@ -3929,7 +3929,7 @@ int cdfInqContents(stream_t *streamptr)
   // scan attributes of all variables
   cdfScanVarAttr(nvars, ncvars, ndims, ncdims, timedimid, modelID, format);
 
-  cdfVerifyVarAttr(nvars, ncvars, ndims, ncdims);
+  cdfVerifyVarAttr(nvars, ncvars, ncdims);
 
 
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "find coordinate vars");
