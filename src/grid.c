@@ -184,8 +184,8 @@ void grid_free_components(grid_t *gridptr)
   for ( size_t i = 0; i < sizeof(p2free)/sizeof(p2free[0]); ++i )
     if ( p2free[i] ) Free(p2free[i]);
 
-  int gridID = gridptr->self;
   /*
+  int gridID = gridptr->self;
   cdiDeleteKeys(gridID, CDI_XAXIS);
   cdiDeleteKeys(gridID, CDI_YAXIS);
   cdiDeleteKeys(gridID, CDI_GLOBAL);
