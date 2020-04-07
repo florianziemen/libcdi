@@ -246,7 +246,6 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
 		    const char *functionname, const char *file, int line)
 {
   static int item = 0;
-  size_t memSize = 0;
   size_t memID = 0;
 
   /*
@@ -256,7 +255,7 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
   if ( memTableSize == 0 )
     {
       memTableSize = 8;
-      memSize  = memTableSize * sizeof(MemTable_t);
+      size_t memSize = memTableSize * sizeof(MemTable_t);
       memTable = (MemTable_t *) malloc(memSize);
       if( memTable == NULL ) memError(__func__, __FILE__, __LINE__, memSize);
 
@@ -277,7 +276,7 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
   if ( memID == memTableSize )
     {
       memTableSize = 2*memTableSize;
-      memSize  = memTableSize*sizeof(MemTable_t);
+      size_t memSize = memTableSize*sizeof(MemTable_t);
       memTable = (MemTable_t*) realloc(memTable, memSize);
       if ( memTable == NULL ) memError(__func__, __FILE__, __LINE__, memSize);
 

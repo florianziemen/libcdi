@@ -27,7 +27,7 @@ cdiPioClientStreamOpen(const char *filename, char filemode,
                        int recordBufIsToBeCreated)
 {
   (void)streamptr; (void)recordBufIsToBeCreated;
-  int fileID;
+  int fileID = 0;
   if ( filemode == 'w' )
     {
       MPI_Comm comm = cdiPioInqInterComm();

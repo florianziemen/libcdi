@@ -82,9 +82,10 @@ getline(char **linebuf, size_t *linebuf_size, FILE *fp)
     }
     status = len > SSIZE_MAX ? SSIZE_MAX : (ssize_t)len;
   }
-  if (linebuf_size)
-    *linebuf_size = buf_size;
+
+  *linebuf_size = buf_size;
   *linebuf = buf;
+
   return status;
 }
 

@@ -184,7 +184,7 @@ int main(void)
   int64_t vdate0, vdate;
   int vtime0, vtime;
   int ijulinc;
-  int i, j = 0;
+  int j = 0;
   int year, mon, day, hour, minute, second;
   int64_t julday;
   int secofday;
@@ -196,9 +196,9 @@ int main(void)
   vdate0 = -80001201;
   vtime0 = 120500;
 
-  printf("start time: %8d %4d\n", vdate0, vtime0);
+  printf("start time: %8ld %4d\n", vdate0, vtime0);
 
-  for ( i = 0; i < nmin; i++ )
+  for ( int i = 0; i < nmin; i++ )
     {
       cdiDecodeDate(vdate0, &year, &mon, &day);
       cdiDecodeTime(vtime0, &hour, &minute, &second);
@@ -210,7 +210,7 @@ int main(void)
       vtime = sec_to_time(secofday);
 
       if ( vdate0 != vdate || vtime0 != vtime )
-	printf("%4d %8d %4d %8d %4d %9d %9d\n",
+	printf("%4d %8ld %4d %8ld %4d %9d %9d\n",
 	       ++j, vdate0, vtime0, vdate, vtime, julday, secofday);
 
       year++;
@@ -218,7 +218,7 @@ int main(void)
       vtime0 = cdiEncodeTime(hour, minute, second);
     }
 
-  printf("stop time: %8d %4d\n", vdate0, vtime0);
+  printf("stop time: %8ld %4d\n", vdate0, vtime0);
 
   /* 2 - Check time increment of one minute */
 
@@ -227,11 +227,11 @@ int main(void)
   vdate0 = 20001201;
   vtime0 = 0;
 
-  printf("start time: %8d %4d\n", vdate0, vtime0);
+  printf("start time: %8ld %4d\n", vdate0, vtime0);
 
   julday = date_to_julday(calendar, vdate0);
   secofday = time_to_sec(vtime0);
-  for ( i = 0; i < nmin; i++ )
+  for ( int i = 0; i < nmin; i++ )
     {
       cdiDecodeDate(vdate0, &year, &mon, &day);
       cdiDecodeTime(vtime0, &hour, &minute, &second);
@@ -262,13 +262,13 @@ int main(void)
       vdate = julday_to_date(calendar, julday);
       vtime = sec_to_time(secofday);
       if ( vdate0 != vdate || vtime0 != vtime )
-	printf("%4d %8d %4d %8d %4d %9d %9d\n",
+	printf("%4d %8ld %4d %8ld %4d %9d %9d\n",
 	       ++j, vdate0, vtime0, vdate, vtime, julday, secofday);
     }
 
-  printf("stop time: %8d %4d\n", vdate0, vtime0);
+  printf("stop time: %8ld %4d\n", vdate0, vtime0);
 
-  return (0);
+  return 0;
 }
 #endif
 
@@ -276,7 +276,6 @@ int main(void)
 #ifdef TEST2
 int main(void)
 {
-  int i;
   int julday, secofday;
   int year, month, day, hour, minute, second;
   int value = 30;
@@ -292,7 +291,7 @@ int main(void)
   decode_juldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
   printf("%d/%02d/%02d %02d:%02d:%02d   %d %d\n", year, month, day, hour, minute, second, julday, secofday);
 
-  for ( i = 0; i < 420; i++ )
+  for ( int i = 0; i < 420; i++ )
     {
 
       decode_juldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
@@ -300,7 +299,7 @@ int main(void)
       julday_add_seconds(value*factor, &julday, &secofday);
     }
 
-  return (0);
+  return 0;
 }
 #endif
 /*

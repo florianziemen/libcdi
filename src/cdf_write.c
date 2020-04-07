@@ -472,7 +472,6 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, 
     }
   else if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     {
-      char cellarea[CDI_MAX_NAME] = "area: ";
       const int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
       const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
       const int ncavarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_A];
@@ -490,6 +489,7 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, 
 
       if ( ncavarID != CDI_UNDEFID )
         {
+          char cellarea[CDI_MAX_NAME] = "area: ";
           size_t len = strlen(cellarea);
           cdf_inq_varname(fileID, ncavarID, cellarea+len);
           len = strlen(cellarea);

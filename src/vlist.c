@@ -1085,8 +1085,6 @@ int vlistNtsteps(int vlistID)
 static
 void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
 {
-  char paramstr[32];
-
   fprintf ( fp, "#\n# vlistID %d\n#\n", vlistptr->self);
 
   int nvars = vlistptr->nvars;
@@ -1119,6 +1117,7 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
           int flag = vlistptr->vars[varID].flag;
           int iorank = vlistptr->vars[varID].iorank;
 
+          char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
           fprintf(fp, "%6d %-8s %6d  %6d  %6d  %6d  %5d %6d %-8s %s [%s]\n",
                   varID, paramstr, gridID, zaxisID, subtypeID, tsteptype, flag, iorank,
@@ -1149,8 +1148,7 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
               double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levID) : levID+1;
 
               fprintf(fp, "%6d %6d %6d %6d %6d %6d %6d %6d %5d  %.9g\n",
-                      varID, levID, fvarID, flevID, mvarID, mlevID, index,
-                      dtype, flag, level);
+                      varID, levID, fvarID, flevID, mvarID, mlevID, index, dtype, flag, level);
             }
         }
 
@@ -1158,8 +1156,7 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
             " varID  size iorank\n", fp);
       for ( int varID = 0; varID < nvars; varID++ )
         fprintf(fp, "%3d %8zu %6d\n", varID,
-                zaxisInqSize(vlistptr->vars[varID].zaxisID)
-                * gridInqSize(vlistptr->vars[varID].gridID),
+                zaxisInqSize(vlistptr->vars[varID].zaxisID) * gridInqSize(vlistptr->vars[varID].gridID),
                 vlistptr->vars[varID].iorank);
     }
 }
@@ -1217,7 +1214,6 @@ The function @func{vlistInqTaxis} returns the time axis of a variable list.
 int vlistInqTaxis(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
   return vlistptr->taxisID;
 }
 
@@ -1237,7 +1233,6 @@ void vlistDefTable(int vlistID, int tableID)
 int vlistInqTable(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
   return vlistptr->tableID;
 }
 

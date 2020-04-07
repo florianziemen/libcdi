@@ -55,16 +55,14 @@ void extLibInit()
   char *envString = getenv(envName);
   if ( envString )
     {
-      int pos = 0;
-
       if ( strlen(envString) == 2  )
 	{
-	  switch ( tolower((int) envString[pos]) )
+	  switch ( tolower((int) envString[0]) )
 	    {
 	    case 'r':
 	      {
 		extDefaultNumber = EXT_REAL;
-		switch ( (int) envString[pos+1] )
+		switch ( (int) envString[1] )
 		  {
 		  case '4': extDefaultPrec = EXSE_SINGLE_PRECISION; break;
 		  case '8': extDefaultPrec = EXSE_DOUBLE_PRECISION; break;
@@ -76,7 +74,7 @@ void extLibInit()
 	    case 'c':
 	      {
 		extDefaultNumber = EXT_COMP;
-		switch ( (int) envString[pos+1] )
+		switch ( (int) envString[1] )
 		  {
 		  case '4': extDefaultPrec = EXSE_SINGLE_PRECISION; break;
 		  case '8': extDefaultPrec = EXSE_DOUBLE_PRECISION; break;
@@ -363,11 +361,10 @@ int extDefDataDP(void *ext, const double *data)
 int extRead(int fileID, void *ext)
 {
   extrec_t *extp = (extrec_t *) ext;
-  int status;
 
   if ( ! extp->checked )
     {
-      status = extCheckFiletype(fileID, &extp->byteswap);
+      int status = extCheckFiletype(fileID, &extp->byteswap);
       if ( status == 0 ) Error("Not a EXTRA file!");
       extp->checked = 1;
     }

@@ -727,9 +727,8 @@ The function @func{zaxisInqLevel} returns one level of a Z-axis.
 */
 double zaxisInqLevel(int zaxisID, int levelID)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
   double level = 0;
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if ( zaxisptr->vals && levelID >= 0 && levelID < zaxisptr->size )
     level = zaxisptr->vals[levelID];
 
@@ -739,9 +738,8 @@ double zaxisInqLevel(int zaxisID, int levelID)
 
 double zaxisInqLbound(int zaxisID, int levelID)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
   double level = 0;
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if ( zaxisptr->lbounds && levelID >= 0 && levelID < zaxisptr->size )
     level = zaxisptr->lbounds[levelID];
 
@@ -751,9 +749,8 @@ double zaxisInqLbound(int zaxisID, int levelID)
 
 double zaxisInqUbound(int zaxisID, int levelID)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
   double level = 0;
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if ( zaxisptr->ubounds && levelID >= 0 && levelID < zaxisptr->size )
     level = zaxisptr->ubounds[levelID];
 
@@ -813,10 +810,9 @@ int zaxisInqLevels(int zaxisID, double *levels)
 
 int zaxisInqCLen(int zaxisID)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
   int clen = 0;
 #ifndef USE_MPI
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if ( zaxisptr->cvals && zaxisptr->clength)
     clen = zaxisptr->clength;
 #endif
@@ -827,10 +823,9 @@ int zaxisInqCLen(int zaxisID)
 
 int zaxisInqCVals(int zaxisID, char ***clevels)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
   int size = 0;
 #ifndef USE_MPI
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if ( zaxisptr->cvals )
     {
       size = zaxisptr->size;
@@ -853,9 +848,8 @@ int zaxisInqCVals(int zaxisID, char ***clevels)
 
 int zaxisInqLbounds(int zaxisID, double *lbounds)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
   int size = 0;
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if ( zaxisptr->lbounds )
     {
       size = zaxisptr->size;
@@ -871,9 +865,8 @@ int zaxisInqLbounds(int zaxisID, double *lbounds)
 
 int zaxisInqUbounds(int zaxisID, double *ubounds)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
   int size = 0;
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if ( zaxisptr->ubounds )
     {
       size = zaxisptr->size;
@@ -889,9 +882,8 @@ int zaxisInqUbounds(int zaxisID, double *ubounds)
 
 int zaxisInqWeights(int zaxisID, double *weights)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
   int size = 0;
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if ( zaxisptr->weights )
     {
       size = zaxisptr->size;
@@ -907,9 +899,8 @@ int zaxisInqWeights(int zaxisID, double *weights)
 
 int zaxisInqLevelID(int zaxisID, double level)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
   int levelID = CDI_UNDEFID;
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if ( zaxisptr->vals )
     {
       const int size = zaxisptr->size;
@@ -1024,7 +1015,7 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
       zaxisptr->vct = (double *) Realloc(zaxisptr->vct, (size_t)size*sizeof(double));
     }
 
-  memcpy(zaxisptr->vct, vct, (size_t)size*sizeof(double));
+  if (vct) memcpy(zaxisptr->vct, vct, (size_t)size*sizeof(double));
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
@@ -1057,13 +1048,13 @@ void zaxisDefLbounds(int zaxisID, const double *lbounds)
   const size_t size = (size_t)zaxisptr->size;
 
   if ( CDI_Debug )
-    if ( zaxisptr->lbounds != NULL )
+    if ( zaxisptr->lbounds )
       Warning("Lower bounds already defined for zaxisID = %d", zaxisID);
 
   if ( zaxisptr->lbounds == NULL )
     zaxisptr->lbounds = (double *) Malloc(size*sizeof(double));
 
-  memcpy(zaxisptr->lbounds, lbounds, size*sizeof(double));
+  if (lbounds) memcpy(zaxisptr->lbounds, lbounds, size*sizeof(double));
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
@@ -1075,13 +1066,13 @@ void zaxisDefUbounds(int zaxisID, const double *ubounds)
   const size_t size = (size_t)zaxisptr->size;
 
   if ( CDI_Debug )
-    if ( zaxisptr->ubounds != NULL )
+    if ( zaxisptr->ubounds )
       Warning("Upper bounds already defined for zaxisID = %d", zaxisID);
 
   if ( zaxisptr->ubounds == NULL )
     zaxisptr->ubounds = (double *) Malloc(size*sizeof(double));
 
-  memcpy(zaxisptr->ubounds, ubounds, size*sizeof(double));
+  if (ubounds) memcpy(zaxisptr->ubounds, ubounds, size*sizeof(double));
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
@@ -1197,8 +1188,6 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 
   const int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
 
-  int nbyte;
-  int nbyte0 = 0;
   fprintf(fp, "zaxistype = %s\n", zaxisNamePtr(type));
   fprintf(fp, "size      = %d\n", nlevels);
   if ( nlevels == 1 )
@@ -1216,8 +1205,8 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 
   if ( zaxisptr->vals )
     {
-      nbyte0 = fprintf(fp, "levels    = ");
-      nbyte = nbyte0;
+      int nbyte0 = fprintf(fp, "levels    = ");
+      int nbyte = nbyte0;
       for ( int levelID = 0; levelID < nlevels; levelID++ )
         {
           if ( nbyte > 80 )
@@ -1233,8 +1222,8 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 
   if ( zaxisptr->lbounds && zaxisptr->ubounds )
     {
-      nbyte0 = fprintf(fp, "lbounds   = ");
-      nbyte = nbyte0;
+      int nbyte0 = fprintf(fp, "lbounds   = ");
+      int nbyte = nbyte0;
       for ( int levelID = 0; levelID < nlevels; levelID++ )
 	{
 	  if ( nbyte > 80 )
@@ -1269,8 +1258,8 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
       fprintf(fp, "vctsize   = %d\n", vctsize);
       if ( vctsize )
         {
-          nbyte0 = fprintf(fp, "vct       = ");
-          nbyte = nbyte0;
+          int nbyte0 = fprintf(fp, "vct       = ");
+          int nbyte = nbyte0;
           for ( int i = 0; i < vctsize; i++ )
             {
               if ( nbyte > 70 || i == vctsize/2 )

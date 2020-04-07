@@ -646,12 +646,10 @@ static
 long file_getenv(const char *envName)
 {
   long envValue = -1;
-  long fact = 1;
-
   char *envString = getenv(envName);
-
   if ( envString )
     {
+      long fact = 1;
       for ( int loop = 0; loop < (int) strlen(envString); loop++ )
 	{
 	  if ( ! isdigit((int) envString[loop]) )

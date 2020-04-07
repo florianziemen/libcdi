@@ -223,7 +223,6 @@ int AsyncWorker_finalize(AsyncManager *jobManager)
 
   free(jobManager->communicators);
   free(jobManager);
-  jobManager = NULL;
 
   return result;
 }

@@ -1831,7 +1831,6 @@ static
 void cdfDefGdim(stream_t *streamptr, int gridID, int gridindex)
 {
   ncgrid_t *ncgrid = streamptr->ncgrid;
-  int iz = 0;
   int dimID = CDI_UNDEFID;
 
   const size_t dimlen = gridInqSize(gridID);
@@ -1841,7 +1840,6 @@ void cdfDefGdim(stream_t *streamptr, int gridID, int gridindex)
       struct idSearch search
         = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_X,
                             GRID_GENERIC, (int)dimlen, gridInqType, gridInqSize);
-      iz = search.numNonMatching;
       dimID = search.foundID;
     }
 
@@ -1850,7 +1848,6 @@ void cdfDefGdim(stream_t *streamptr, int gridID, int gridindex)
       struct idSearch search
         = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_Y,
                             GRID_GENERIC, (int)dimlen, gridInqType, gridInqSize);
-      iz += search.numNonMatching;
       dimID = search.foundID;
     }
 

@@ -2317,7 +2317,6 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
     }
   else
     {
-      static bool ltwarn = true;
       size_t start[3], count[3];
       int ntdims = 0;
 
@@ -2336,6 +2335,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
                 {
                   if ( ncvars[xvarid].dimids[0] == timedimid && ncvars[yvarid].dimids[0] == timedimid )
                     {
+                      static bool ltwarn = true;
                       size_t ntsteps = 0;
                       cdf_inq_dimlen(ncvar->ncid, ncdims[timedimid].dimid, &ntsteps);
                       if ( ltwarn && ntsteps > 1 ) Warning("Time varying grids unsupported, using grid at time step 1!");
@@ -3858,7 +3858,6 @@ int cdfInqContents(stream_t *streamptr)
 #ifdef  HAVE_NETCDF4
   if ( format == NC_FORMAT_NETCDF4 )
     {
-      int ncid;
       int numgrps = 0;
       int ncids[NC_MAX_VARS];
       char gname[CDI_MAX_NAME];
@@ -3866,7 +3865,7 @@ int cdfInqContents(stream_t *streamptr)
       nc_inq_grps(fileID, &numgrps, ncids);
       for ( int i = 0; i < numgrps; ++i )
         {
-          ncid = ncids[i];
+          int ncid = ncids[i];
           nc_inq_grpname(ncid, gname);
           cdf_inq(ncid, &gndims , &gnvars, &gngatts, &gunlimdimid);
 
@@ -3888,7 +3887,7 @@ int cdfInqContents(stream_t *streamptr)
     }
 
   // alloc ncvars
-  ncvar_t *ncvars = nvars ? (ncvar_t *) Malloc((size_t)nvars * sizeof (ncvar_t)) : NULL;
+  ncvar_t *ncvars = (ncvar_t *) Malloc((size_t)nvars * sizeof (ncvar_t));
   init_ncvars(nvars, ncvars);
 
   for ( ncvarid = 0; ncvarid < nvars; ++ncvarid ) ncvars[ncvarid].ncid = fileID;

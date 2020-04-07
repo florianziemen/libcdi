@@ -1520,7 +1520,6 @@ static
 void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg, int taxisID)
 {
   int timetype = TAXIS_ABSOLUTE;
-  int timerange = 0;
   int timeunit = TUNIT_HOUR;
 
   if ( taxisID != -1 )
@@ -1546,7 +1545,7 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 
       int factor = cgribexDefDateTime(isec1, timeunit, rdate, rtime);
       int ip1 = 0, ip2 = 0;
-      timerange = cgribexDefTimerange(tsteptype, factor, calendar, rdate, rtime, vdate, vtime, sdate, stime, &ip1, &ip2);
+      int timerange = cgribexDefTimerange(tsteptype, factor, calendar, rdate, rtime, vdate, vtime, sdate, stime, &ip1, &ip2);
 
       if ( ip2 > 0xFF && timeunit < TUNIT_YEAR )
         {
@@ -1846,7 +1845,6 @@ static
 void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
 {
   char units[CDI_MAX_NAME];
-  static bool lwarning_vct = true;
 
   int zaxistype = zaxisInqType(zaxisID);
   int ltype = 0;
@@ -1897,6 +1895,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	int vctsize = zaxisInqVctSize(zaxisID);
 	if ( vctsize > 255 )
 	  {
+            static bool lwarning_vct = true;
 	    ISEC2_NumVCP = 0;
 	    if ( lwarning_vct )
 	      {

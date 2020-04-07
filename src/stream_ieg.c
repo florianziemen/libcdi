@@ -323,7 +323,6 @@ static
 void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 {
   double level;
-  int ilevel;
 
   int leveltype = zaxisInqType(zaxisID);
   if ( leveltype == ZAXIS_GENERIC )
@@ -383,7 +382,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 	if ( memcmp(units, "hPa", 3) == 0 || memcmp(units, "mb",2 ) == 0 )
 	  level = level*100;
 
-	ilevel = (int) level;
+	int ilevel = (int) level;
 	if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )
           pdbDefLevel(pdb, IEG_LTYPE_99, 0, ilevel);
 	else

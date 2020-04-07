@@ -97,6 +97,7 @@ int dbuffer_init ( struct dBuffer **dbuffer, size_t size )
   if ( db->buffer == NULL )
   {
       perror ( "Not enough memory" );
+      free(db);
       return 1 ;
   }
 #endif

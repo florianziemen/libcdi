@@ -190,7 +190,7 @@ int main(void)
   vdate0 = -80001201;
   vtime0 = 120500;
 
-  printf("start time: %8d %4d\n", vdate0, vtime0);
+  printf("start time: %8ld %4d\n", vdate0, vtime0);
 
   for ( i = 0; i < nmin; i++ )
     {
@@ -204,7 +204,7 @@ int main(void)
       vtime = sec_to_time(secofday);
 
       if ( vdate0 != vdate || vtime0 != vtime )
-	printf("%4d %8d %4d %8d %4d %9d %9d\n",
+	printf("%4d %8ld %4d %8ld %4d %9d %9d\n",
 	       ++j, vdate0, vtime0, vdate, vtime, calday, secofday);
 
       year++;
@@ -212,7 +212,7 @@ int main(void)
       vtime0 = cdiEncodeTime(hour, minute, second);
     }
 
-  printf("stop time: %8d %4d\n", vdate0, vtime0);
+  printf("stop time: %8ld %4d\n", vdate0, vtime0);
 
   /* 2 - Check time increment of one minute */
 
@@ -221,7 +221,7 @@ int main(void)
   vdate0 = 20001201;
   vtime0 = 0;
 
-  printf("start time: %8d %4d\n", vdate0, vtime0);
+  printf("start time: %8ld %4d\n", vdate0, vtime0);
 
   calday = date_to_calday(calendar, vdate0);
   secofday = time_to_sec(vtime0);
@@ -256,13 +256,13 @@ int main(void)
       vdate = calday_to_date(calendar, calday);
       vtime = sec_to_time(secofday);
       if ( vdate0 != vdate || vtime0 != vtime )
-	printf("%4d %8d %4d %8d %4d %9d %9d\n",
+	printf("%4d %8ld %4d %8ld %4d %9d %9d\n",
 	       ++j, vdate0, vtime0, vdate, vtime, calday, secofday);
     }
 
-  printf("stop time: %8d %4d\n", vdate0, vtime0);
+  printf("stop time: %8ld %4d\n", vdate0, vtime0);
 
-  return (0);
+  return 0;
 }
 #endif
 
@@ -297,7 +297,7 @@ int main(void)
       julday_add_seconds(value*factor, &calday, &secofday);
     }
 
-  return (0);
+  return 0;
 }
 #endif
 /*

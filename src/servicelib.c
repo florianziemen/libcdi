@@ -372,11 +372,10 @@ int srvRead(int fileID, void *srv)
     INT32 i32[SRV_HEADER_LEN];
     INT64 i64[SRV_HEADER_LEN];
   } tempheader;
-  int status;
 
   if ( ! srvp->checked )
     {
-      status = srvCheckFiletype(fileID, &srvp->byteswap);
+      int status = srvCheckFiletype(fileID, &srvp->byteswap);
       if ( status == 0 ) Error("Not a SERVICE file!");
       srvp->checked = 1;
     }
