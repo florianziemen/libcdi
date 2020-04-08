@@ -1168,6 +1168,10 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             {
               memcpy(ncvars[ncvarid].longname, attstring, attstringsize);
             }
+          else if ( isText && strIsEqual(attname, "standard_name") )
+            {
+              memcpy(ncvars[ncvarid].stdname, attstring, attstringsize);
+            }
           else if ( isText && strIsEqual(attname, "units") )
             {
               memcpy(ncvars[ncvarid].units, attstring, attstringsize);
@@ -1576,10 +1580,12 @@ void cdfVerifyVarAttr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                 {
                   cdfScanAttrAxis(ncvars, ncdims, ncvarid, strToLower(attstring), nvdims, dimidsp);
                 }
+              /*
               else if (strIsEqual(attname, "standard_name"))
                 {
                   memcpy(ncvars[ncvarid].stdname, attstring, attstringsize);
                 }
+              */
             }
         }
     }
@@ -2078,14 +2084,17 @@ void cdf_load_cellarea(size_t size, ncvar_t *ncvar, double **gridarea, struct cd
 }
 
 static
-void cdf_copy_axis_attr(ncvar_t *ncvar, struct gridaxis_t *gridaxis)
+void cdf_copy_grid_axis_attr(ncvar_t *ncvar, struct gridaxis_t *gridaxis)
 {
-  cdiDefVarKeyBytes(&gridaxis->keys, CDI_KEY_NAME, (const unsigned  char*)ncvar->name, (int)sizeof(ncvar->name)+1);
-  cdiDefVarKeyBytes(&gridaxis->keys, CDI_KEY_LONGNAME, (const unsigned  char*)ncvar->longname, (int)sizeof(ncvar->longname)+1);
-  cdiDefVarKeyBytes(&gridaxis->keys, CDI_KEY_UNITS, (const unsigned  char*)ncvar->units, (int)sizeof(ncvar->units)+1);
+  cdiDefVarKeyBytes(&gridaxis->keys, CDI_KEY_NAME, (const unsigned char*)ncvar->name, (int)strlen(ncvar->name)+1);
+  if (ncvar->longname[0])
+    cdiDefVarKeyBytes(&gridaxis->keys, CDI_KEY_LONGNAME, (const unsigned char*)ncvar->longname, (int)strlen(ncvar->longname)+1);
+  if (ncvar->units[0])
+    cdiDefVarKeyBytes(&gridaxis->keys, CDI_KEY_UNITS, (const unsigned char*)ncvar->units, (int)strlen(ncvar->units)+1);
 #ifndef USE_MPI
   if ( gridaxis->cvals )
-    cdiDefVarKeyBytes(&gridaxis->keys, CDI_KEY_STDNAME, (const unsigned  char*)ncvar->stdname, (int)sizeof(ncvar->stdname)+1);
+    if (ncvar->stdname[0])
+      cdiDefVarKeyBytes(&gridaxis->keys, CDI_KEY_STDNAME, (const unsigned  char*)ncvar->stdname, (int)strlen(ncvar->stdname)+1);
 #endif
 }
 
@@ -2225,7 +2234,7 @@ bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
   else
     cdf_load_vals(size, ndims, xvarid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, ntdims, start, count);
 
-  cdf_copy_axis_attr(axisvar, &grid->x);
+  cdf_copy_grid_axis_attr(axisvar, &grid->x);
 
   return false;
 }
@@ -2296,7 +2305,7 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
   else
     cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet, ntdims, start, count);
 
-  cdf_copy_axis_attr(axisvar, &grid->y);
+  cdf_copy_grid_axis_attr(axisvar, &grid->y);
 
   return false;
 }
@@ -3007,6 +3016,9 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
           const int zaxisID = ncvar->zaxisID;
 
           if ( CDI_cmor_mode && zsize == 1 && zaxisType != ZAXIS_HYBRID ) zaxisDefScalar(zaxisID);
+
+          if (ncvar->stdname[0])
+            cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_STDNAME, (const unsigned  char*)ncvar->stdname, (int)strlen(ncvar->stdname)+1);
 
           if ( uuidOfVGrid[0] != 0 )
             cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfVGrid, CDI_UUID_SIZE);
