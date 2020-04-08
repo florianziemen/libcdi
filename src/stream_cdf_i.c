@@ -2869,7 +2869,7 @@ static
 int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                          size_t vctsize_echam, double *vct_echam, unsigned char *uuidOfVGrid)
 {
-  char *pname, *plongname, *punits;
+  char *pname, *plongname, *punits, *pstdname;
   size_t vctsize = vctsize_echam;
   double *vct = vct_echam;
 
@@ -2930,6 +2930,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 	      pname     = ncvars[zvarid].name;
 	      plongname = ncvars[zvarid].longname;
 	      punits    = ncvars[zvarid].units;
+	      pstdname  = ncvars[zvarid].stdname;
 	      if ( ncvars[zvarid].xtype == NC_FLOAT ) zdatatype = CDI_DATATYPE_FLT32;
 	      /* don't change the name !!! */
 	      /*
@@ -2992,6 +2993,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
               pname     = (zdimid != CDI_UNDEFID) ? ncdims[zdimid].name : NULL;
 	      plongname = NULL;
 	      punits    = NULL;
+	      pstdname   = NULL;
 
 	      if ( zsize == 1 && zdimid == CDI_UNDEFID )
 		{
@@ -3017,8 +3019,8 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 
           if ( CDI_cmor_mode && zsize == 1 && zaxisType != ZAXIS_HYBRID ) zaxisDefScalar(zaxisID);
 
-          if (ncvar->stdname[0])
-            cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_STDNAME, (const unsigned  char*)ncvar->stdname, (int)strlen(ncvar->stdname)+1);
+          if (pstdname && *pstdname)
+            cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_STDNAME, (const unsigned  char*)pstdname, (int)strlen(pstdname)+1);
 
           if ( uuidOfVGrid[0] != 0 )
             cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfVGrid, CDI_UUID_SIZE);
