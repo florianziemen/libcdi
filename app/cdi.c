@@ -165,6 +165,7 @@ void usage(void)
   fprintf(stderr, "  Options:\n");
   fprintf(stderr, "    -d             Print debugging information\n");
   fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, nc4c, nc5, srv, ext or ieg)\n");
+  fprintf(stderr, "    -i <num>       Number of worker to decode/decompress GRIB records\n");
   fprintf(stderr, "    -s             give short information if ofile is missing\n");
   fprintf(stderr, "    -t <table>     Parameter table name/file\n");
   fprintf(stderr, "                   Predefined tables: ");

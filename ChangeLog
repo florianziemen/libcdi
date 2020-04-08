@@ -1,3 +1,7 @@
+2020-04-08  Uwe Schulzweida
+
+	* Fix: --without-threads failed (use HAVE_LIBPTHREAD in async_worker.c)
+
 2020-03-05  Uwe Schulzweida
 
 	* vlistCopyFlag: init mlevelID with levID2 (bug fix)

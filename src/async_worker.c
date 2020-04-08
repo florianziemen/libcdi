@@ -1,11 +1,19 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_LIBPTHREAD
+#include <pthread.h>
+#endif
+
 #include "async_worker.h"
 
 #include "cdi.h"
 #include "error.h"
 
-#include <pthread.h>
 #include <stdbool.h>
 
+#ifdef HAVE_LIBPTHREAD
 #ifdef __APPLE__
 #include <dispatch/dispatch.h>
 #else
@@ -20,8 +28,24 @@ typedef struct sema {
   sem_t                   sem;
 #endif
 } sema_t;
+#endif
 
+struct AsyncJob {
+  bool inUse;
+#ifdef HAVE_LIBPTHREAD
+  sema_t request, completion;
+#endif
+  int (*work)(void *data);
+  void *data;
+  int result;
+};
 
+struct AsyncManager {
+  int workerCount, idleWorkerCount;
+  AsyncJob *communicators;
+};
+
+#ifdef HAVE_LIBPTHREAD
 static inline int
 sema_init(sema_t *s, int pshared, uint32_t value)
 {
@@ -63,21 +87,6 @@ sema_post(sema_t *s)
   return 0;
 }
 
-
-struct AsyncJob {
-  bool inUse;
-  sema_t request, completion;
-  int (*work)(void *data);
-  void *data;
-  int result;
-};
-
-struct AsyncManager {
-  int workerCount, idleWorkerCount;
-  AsyncJob *communicators;
-};
-
-
 static
 void *workerMain(void *arg)
 {
@@ -115,6 +124,7 @@ void startWorker(AsyncJob *communicator)
   if (pthread_create(&worker, NULL, workerMain, communicator)) xabort("pthread_create() failed");
   if (pthread_detach(worker)) xabort("pthread_detach() failed");
 }
+#endif
 
 int AsyncWorker_init(AsyncManager **jobManager, int threadCount)
 {
@@ -126,6 +136,7 @@ int AsyncWorker_init(AsyncManager **jobManager, int threadCount)
 
   if (*jobManager) return CDI_NOERR;
 
+#ifdef HAVE_LIBPTHREAD
   *jobManager = malloc(sizeof(AsyncManager));
   if(!*jobManager) return CDI_ESYSTEM;
   (*jobManager)->workerCount = threadCount;
@@ -134,7 +145,11 @@ int AsyncWorker_init(AsyncManager **jobManager, int threadCount)
 
   for (int i = 0; i < threadCount; i++) startWorker(&((*jobManager)->communicators[i]));
   (*jobManager)->idleWorkerCount = threadCount;
+#else
 
+  Error("pthread support not compiled in!");
+#endif
+  
   return CDI_NOERR;
 }
 
@@ -163,8 +178,9 @@ AsyncJob *AsyncWorker_requestWork(AsyncManager *jobManager, int (*work)(void *da
   worker->work = work;
   worker->data = data;
   worker->result = 0;
+#ifdef HAVE_LIBPTHREAD
   if (sema_post(&worker->request)) xabort("sema_post() failed");
-
+#endif
   return worker;
 }
 
@@ -175,7 +191,9 @@ int AsyncWorker_wait(AsyncManager *jobManager, AsyncJob *job)
   if (job >= jobManager->communicators + jobManager->workerCount) return CDI_EINVAL;
   if (!job->inUse) return CDI_EINVAL;
 
+#ifdef HAVE_LIBPTHREAD
   while (sema_wait(&job->completion)) ;
+#endif
   int result = job->result;
 
   // reset the communicator
@@ -215,8 +233,9 @@ int AsyncWorker_finalize(AsyncManager *jobManager)
       curWorker->work = NULL;
       curWorker->data = NULL;
       curWorker->result = 0;
+#ifdef HAVE_LIBPTHREAD
       if (sema_post(&curWorker->request)) xabort("sema_post() failed");
-
+#endif
       // wait for the worker to exit
       AsyncWorker_wait(jobManager, curWorker);
     }
