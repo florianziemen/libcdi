@@ -69,7 +69,7 @@ void tableDefEntry(int tableID, int id, int ltype, const char *name,
     }
 }
 
-static void tableLink(int tableID, const param_type *pars, int npars)
+void tableLink(int tableID, const param_type *pars, int npars)
 {
   for ( int item = 0; item < npars; item++ )
     {

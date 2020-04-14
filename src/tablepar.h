@@ -19,7 +19,7 @@ typedef struct
 param_type;
 
 
-static void tableLink(int tableID, const param_type *pars, int npars);
+void tableLink(int tableID, const param_type *pars, int npars);
 int tableDef(int modelID, int tablegribID, const char *tablename);
 
 int tableInqParCode(int tableID, char *name, int *code);
