@@ -4033,6 +4033,7 @@ int cdfInqContents(stream_t *streamptr)
                   if      (ncvars[cvarid].islon || ncvars[cvarid].isx)   ncvar->xvarid = cvarid;
                   else if (ncvars[cvarid].islat || ncvars[cvarid].isy)   ncvar->yvarid = cvarid;
                   else if (ncvars[cvarid].islev)  ncvar->zvarid = cvarid;
+                  else if (ncvars[cvarid].istime) ncvar->tvarid = cvarid;
                   else if (ncvars[cvarid].isc)    ncvar->cvarids[i] = cvarid;
                   else if (ncvars[cvarid].warn == false)
                     {
