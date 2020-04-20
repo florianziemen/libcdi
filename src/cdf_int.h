@@ -5,32 +5,32 @@
 
 #include <netcdf.h>
 
-void cdf_create (const char *path, int cmode, int *idp);
-int  cdf_open   (const char *path, int omode, int *idp);
-void cdf_close  (int ncid);
+void cdf_create(const char *path, int cmode, int *idp);
+int  cdf_open(const char *path, int omode, int *idp);
+void cdf_close(int ncid);
 
 void cdf_redef(int ncid);
 void cdf_enddef(int ncid);
 void cdf__enddef(const int ncid, const size_t hdr_pad);
 void cdf_sync(int ncid);
 
-void cdf_inq (int ncid, int *ndimsp, int *nvarsp, int *ngattsp, int *unlimdimidp);
+void cdf_inq(int ncid, int *ndimsp, int *nvarsp, int *ngattsp, int *unlimdimidp);
 
-void cdf_def_dim (int ncid, const char *name, size_t len, int *idp);
-void cdf_inq_dimid (int ncid, const char *name, int *dimidp);
-void cdf_inq_dim (int ncid, int dimid, char *name, size_t * lengthp);
-void cdf_inq_dimname (int ncid, int dimid, char *name);
-void cdf_inq_dimlen (int ncid, int dimid, size_t * lengthp);
-void cdf_def_var (int ncid, const char *name, nc_type xtype, int ndims, const int dimids[], int *varidp);
+void cdf_def_dim(int ncid, const char *name, size_t len, int *idp);
+void cdf_inq_dimid(int ncid, const char *name, int *dimidp);
+void cdf_inq_dim(int ncid, int dimid, char *name, size_t * lengthp);
+void cdf_inq_dimname(int ncid, int dimid, char *name);
+void cdf_inq_dimlen(int ncid, int dimid, size_t * lengthp);
+void cdf_def_var(int ncid, const char *name, nc_type xtype, int ndims, const int dimids[], int *varidp);
 void cdf_def_var_serial(int ncid, const char *name, nc_type xtype, int ndims, const int dimids[], int *varidp);
 void cdf_inq_varid(int ncid, const char *name, int *varidp);
 void cdf_inq_nvars(int ncid, int *nvarsp);
 void cdf_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp, int dimids[], int *nattsp);
-void cdf_inq_varname (int ncid, int varid, char *name);
-void cdf_inq_vartype (int ncid, int varid, nc_type *xtypep);
-void cdf_inq_varndims (int ncid, int varid, int *ndimsp);
-void cdf_inq_vardimid (int ncid, int varid, int dimids[]);
-void cdf_inq_varnatts (int ncid, int varid, int *nattsp);
+void cdf_inq_varname(int ncid, int varid, char *name);
+void cdf_inq_vartype(int ncid, int varid, nc_type *xtypep);
+void cdf_inq_varndims(int ncid, int varid, int *ndimsp);
+void cdf_inq_vardimid(int ncid, int varid, int dimids[]);
+void cdf_inq_varnatts(int ncid, int varid, int *nattsp);
 
 void cdf_copy_att (int ncid_in, int varid_in, const char *name, int ncid_out, int varid_out);
 void cdf_put_var_text   (int ncid, int varid, const char *tp);
@@ -64,8 +64,10 @@ void cdf_put_vara_double(int ncid, int varid, const size_t start[], const size_t
 
 void cdf_get_vara_float(int ncid, int varid, const size_t start[], const size_t count[], float *fp);
 void cdf_put_vara_float(int ncid, int varid, const size_t start[], const size_t count[], const float *fp);
-void  cdf_get_vara_int(int ncid, int varid, const size_t start[],
-                       const size_t count[], int *dp);
+
+void cdf_get_vara_int(int ncid, int varid, const size_t start[], const size_t count[], int *dp);
+
+void cdf_put_vara(int ncid, int varid, const size_t start[], const size_t count[], const void *cp);
 
 void cdf_put_att_text(int ncid, int varid, const char *name, size_t len, const char *tp);
 void cdf_put_att_int(int ncid, int varid, const char *name, nc_type xtype, size_t len, const int *ip);

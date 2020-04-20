@@ -38,6 +38,50 @@ void cdfDefVarDeflate(int ncid, int ncvarID, int deflate_level)
 #endif
 }
 
+#ifdef HAVE_NETCDF4
+static
+nc_type cdfTypeComplexFloat(stream_t *streamptr)
+{
+  if (streamptr->nc_complex_float_id == CDI_UNDEFID)
+    {
+      typedef struct complex_float { float r, i; } complex_float;
+      const int fileID  = streamptr->fileID;
+      int nc_complex_id;
+      int status;
+      status = nc_def_compound(fileID, sizeof(complex_float), "complex_float", &nc_complex_id);
+      if (status != NC_NOERR) Error("%s", nc_strerror(status));
+      status = nc_insert_compound(fileID, nc_complex_id, "r", NC_COMPOUND_OFFSET(complex_float, r), NC_FLOAT);
+      if (status != NC_NOERR) Error("%s", nc_strerror(status));
+      status = nc_insert_compound(fileID, nc_complex_id, "i", NC_COMPOUND_OFFSET(complex_float, i), NC_FLOAT);
+      if (status != NC_NOERR) Error("%s", nc_strerror(status));
+      streamptr->nc_complex_float_id = nc_complex_id;
+    }
+
+  return (nc_type) streamptr->nc_complex_float_id;
+}
+
+static
+nc_type cdfTypeComplexDouble(stream_t *streamptr)
+{
+  if (streamptr->nc_complex_double_id == CDI_UNDEFID)
+    {
+      typedef struct complex_double { double r, i; } complex_double;
+      const int fileID  = streamptr->fileID;
+      int nc_complex_id;
+      int status;
+      status = nc_def_compound(fileID, sizeof(complex_double), "complex_double", &nc_complex_id);
+      if (status != NC_NOERR) Error("%s", nc_strerror(status));
+      status = nc_insert_compound(fileID, nc_complex_id, "r", NC_COMPOUND_OFFSET(complex_double, r), NC_DOUBLE);
+      if (status != NC_NOERR) Error("%s", nc_strerror(status));
+      status = nc_insert_compound(fileID, nc_complex_id, "i", NC_COMPOUND_OFFSET(complex_double, i), NC_DOUBLE);
+      if (status != NC_NOERR) Error("%s", nc_strerror(status));
+      streamptr->nc_complex_double_id = nc_complex_id;
+    }
+
+  return (nc_type) streamptr->nc_complex_double_id;
+}
+#endif
+
 nc_type cdfDefDatatype(int datatype, stream_t *streamptr)
 {
   nc_type xtype = NC_FLOAT;
@@ -51,8 +95,8 @@ nc_type cdfDefDatatype(int datatype, stream_t *streamptr)
       else if ( datatype == CDI_DATATYPE_UINT8  ) xtype = NC_UBYTE;
       else if ( datatype == CDI_DATATYPE_UINT16 ) xtype = NC_USHORT;
       else if ( datatype == CDI_DATATYPE_UINT32 ) xtype = NC_UINT;
-      else if ( datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
-        Error("CDI library does not support complex numbers with NetCDF4/HDF5!");
+      else if ( datatype == CDI_DATATYPE_CPX32  ) xtype = cdfTypeComplexFloat(streamptr);
+      else if ( datatype == CDI_DATATYPE_CPX64  ) xtype = cdfTypeComplexDouble(streamptr);
 #else
       else if ( datatype == CDI_DATATYPE_UINT8  ) xtype = NC_SHORT;
       else if ( datatype == CDI_DATATYPE_UINT16 ) xtype = NC_INT;
@@ -93,6 +137,7 @@ void cdfDefVarMissval(stream_t *streamptr, int varID, int dtype, int lcheck)
       if ( lcheck && streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       nc_type xtype = cdfDefDatatype(dtype, streamptr);
+      printf("xtype %d\n", xtype);
       if ( xtype == NC_BYTE && missval > 127 && missval < 256 ) xtype = NC_INT;
 
       if ( lcheck == 0 ||
@@ -1033,10 +1078,43 @@ void cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dty
         }
     }
 
-  if ( memtype == MEMTYPE_FLOAT )
-    cdf_put_vara_float(fileID, ncvarID, start, count, pdata_sp);
+  if (dtype == CDI_DATATYPE_CPX32 || dtype == CDI_DATATYPE_CPX64)
+    {
+      void *pdata = (memtype == MEMTYPE_FLOAT) ? (void*)pdata_sp : (void*)pdata_dp;
+      float *cdata_sp = NULL;
+      double *cdata_dp = NULL;
+      if (memtype == MEMTYPE_FLOAT && dtype == CDI_DATATYPE_CPX64)
+        {
+          cdata_dp = (double *) Malloc(2*nvals*sizeof(double));
+          for (size_t i = 0; i < nvals; i++)
+            {
+              cdata_dp[2*i] = (double)(pdata_sp[2*i]);
+              cdata_dp[2*i+1] = (double)(pdata_sp[2*i+1]);
+            }
+          pdata = cdata_dp;
+        }
+      else if (memtype == MEMTYPE_DOUBLE && dtype == CDI_DATATYPE_CPX32)
+        {
+          cdata_sp = (float *) Malloc(2*nvals*sizeof(float));
+          for (size_t i = 0; i < nvals; i++)
+            {
+              cdata_sp[2*i] = (float)(pdata_dp[2*i]);
+              cdata_sp[2*i+1] = (float)(pdata_dp[2*i+1]);
+            }
+          pdata = cdata_sp;
+        }
+
+      cdf_put_vara(fileID, ncvarID, start, count, pdata);
+      if (cdata_sp) Free(cdata_sp);
+      if (cdata_dp) Free(cdata_dp);
+    }
   else
-    cdf_put_vara_double(fileID, ncvarID, start, count, pdata_dp);
+    {
+      if ( memtype == MEMTYPE_FLOAT )
+        cdf_put_vara_float(fileID, ncvarID, start, count, pdata_sp);
+      else
+        cdf_put_vara_double(fileID, ncvarID, start, count, pdata_dp);
+    }
 
   if ( mdata_dp ) Free(mdata_dp);
   if ( sdata_dp ) Free(sdata_dp);

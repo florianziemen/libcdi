@@ -429,8 +429,8 @@ void cdf_put_vara_double(int ncid, int varid, const size_t start[],
 }
 
 
-void  cdf_put_vara_float(int ncid, int varid, const size_t start[],
-                         const size_t count[], const float *fp)
+void cdf_put_vara_float(int ncid, int varid, const size_t start[],
+                        const size_t count[], const float *fp)
 {
   int status = nc_put_vara_float(ncid, varid, start, count, fp);
 
@@ -454,7 +454,18 @@ void  cdf_put_vara_float(int ncid, int varid, const size_t start[],
 }
 
 
-void  cdf_get_vara_int(int ncid, int varid, const size_t start[], const size_t count[], int *dp)
+void cdf_put_vara(int ncid, int varid, const size_t start[], const size_t count[], const void *cp)
+{
+  int status = nc_put_vara(ncid, varid, start, count, cp);
+
+  if ( CDF_Debug || status != NC_NOERR )
+    Message("ncid = %d varid = %d", ncid, varid);
+
+  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
+}
+
+
+void cdf_get_vara_int(int ncid, int varid, const size_t start[], const size_t count[], int *dp)
 {
   int status = nc_get_vara_int(ncid, varid, start, count, dp);
 
@@ -465,7 +476,7 @@ void  cdf_get_vara_int(int ncid, int varid, const size_t start[], const size_t c
 }
 
 
-void  cdf_get_vara_double(int ncid, int varid, const size_t start[], const size_t count[], double *dp)
+void cdf_get_vara_double(int ncid, int varid, const size_t start[], const size_t count[], double *dp)
 {
   int status = nc_get_vara_double(ncid, varid, start, count, dp);
 
@@ -476,7 +487,7 @@ void  cdf_get_vara_double(int ncid, int varid, const size_t start[], const size_
 }
 
 
-void  cdf_get_vara_float(int ncid, int varid, const size_t start[], const size_t count[], float *fp)
+void cdf_get_vara_float(int ncid, int varid, const size_t start[], const size_t count[], float *fp)
 {
   int status = nc_get_vara_float(ncid, varid, start, count, fp);
 
@@ -487,7 +498,7 @@ void  cdf_get_vara_float(int ncid, int varid, const size_t start[], const size_t
 }
 
 
-void  cdf_get_vara_text(int ncid, int varid, const size_t start[], const size_t count[], char *tp)
+void cdf_get_vara_text(int ncid, int varid, const size_t start[], const size_t count[], char *tp)
 {
   int status = nc_get_vara_text(ncid, varid, start, count, tp);
 
@@ -498,7 +509,7 @@ void  cdf_get_vara_text(int ncid, int varid, const size_t start[], const size_t 
 }
 
 
-void  cdf_get_vara_uchar(int ncid, int varid, const size_t start[], const size_t count[], unsigned char *tp)
+void cdf_get_vara_uchar(int ncid, int varid, const size_t start[], const size_t count[], unsigned char *tp)
 {
   int status = nc_get_vara_uchar(ncid, varid, start, count, tp);
 

@@ -890,6 +890,9 @@ void streamDefaultValue ( stream_t * streamptr )
   basetimeInit(&streamptr->basetime);
 
 #ifdef HAVE_LIBNETCDF
+  streamptr->nc_complex_float_id  = CDI_UNDEFID;
+  streamptr->nc_complex_double_id = CDI_UNDEFID;
+
   for ( int i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->zaxisID[i]  = CDI_UNDEFID;
   for ( int i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->nczvarID[i] = CDI_UNDEFID;
 

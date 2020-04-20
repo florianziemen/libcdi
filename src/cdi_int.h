@@ -282,6 +282,8 @@ typedef struct {
   int         ncmode;
   int         vlistID;
 #ifdef HAVE_LIBNETCDF
+  int         nc_complex_float_id;
+  int         nc_complex_double_id;
   ncgrid_t    ncgrid[MAX_GRIDS_PS];
   int         zaxisID[MAX_ZAXES_PS];	// Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
   int         nczvarID[MAX_ZAXES_PS];
