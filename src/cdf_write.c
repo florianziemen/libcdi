@@ -137,7 +137,6 @@ void cdfDefVarMissval(stream_t *streamptr, int varID, int dtype, int lcheck)
       if ( lcheck && streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       nc_type xtype = cdfDefDatatype(dtype, streamptr);
-      printf("xtype %d\n", xtype);
       if ( xtype == NC_BYTE && missval > 127 && missval < 256 ) xtype = NC_INT;
 
       if ( lcheck == 0 ||
