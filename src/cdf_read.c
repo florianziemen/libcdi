@@ -571,16 +571,32 @@ void cdfReadDataDP(stream_t *streamptr, int varID, size_t length, size_t start[4
   const int vlistID = streamptr->vlistID;
   const int fileID = streamptr->fileID;
   const int ncvarid = streamptr->vars[varID].ncvarid;
+  const int datatype = vlistInqVarDatatype(vlistID, varID);
 
-  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT32 )
+  if (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64)
     {
-      cdfReadDataSliceSP2DP(fileID, ncvarid, length, start, count, data);
+      cdf_get_vara(fileID, ncvarid, start, count, data);
+      if (datatype == CDI_DATATYPE_CPX32)
+        {
+          for (long i = (long)length-1; i >= 0; i--)
+            {
+              data[2*i] = (double)(((float*)data)[2*i]);
+              data[2*i+1] = (double)(((float*)data)[2*i+1]);
+            }
+        }
     }
   else
     {
-      cdf_get_vara_double(fileID, ncvarid, start, count, data);
+      if ( datatype == CDI_DATATYPE_FLT32 )
+        {
+          cdfReadDataSliceSP2DP(fileID, ncvarid, length, start, count, data);
+        }
+      else
+        {
+          cdf_get_vara_double(fileID, ncvarid, start, count, data);
       
-      cdfCheckDataDP_UINT8(fileID, ncvarid, vlistID, varID, length, data);
+          cdfCheckDataDP_UINT8(fileID, ncvarid, vlistID, varID, length, data);
+        }
     }
 }
 
@@ -590,16 +606,38 @@ void cdfReadDataSP(stream_t *streamptr, int varID, size_t length, size_t start[4
   const int vlistID = streamptr->vlistID;
   const int fileID = streamptr->fileID;
   const int ncvarid = streamptr->vars[varID].ncvarid;
+  const int datatype = vlistInqVarDatatype(vlistID, varID);
 
-  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT64 )
+  if (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64)
     {
-      cdfReadDataSliceDP2SP(fileID, ncvarid, length, start, count, data);
+      if (datatype == CDI_DATATYPE_CPX64)
+        {
+          double *cdata = (double *) Malloc(2*length*sizeof(double));
+          cdf_get_vara(fileID, ncvarid, start, count, cdata);
+          for (size_t i = 0; i < length; i++)
+            {
+              data[2*i] = (float)(cdata[2*i]);
+              data[2*i+1] = (float)(cdata[2*i+1]);
+            }
+          Free(cdata);
+        }
+      else
+        {
+          cdf_get_vara(fileID, ncvarid, start, count, data);
+        }
     }
   else
     {
-      cdf_get_vara_float(fileID, ncvarid, start, count, data);
+      if ( datatype == CDI_DATATYPE_FLT64 )
+        {
+          cdfReadDataSliceDP2SP(fileID, ncvarid, length, start, count, data);
+        }
+      else
+        {
+          cdf_get_vara_float(fileID, ncvarid, start, count, data);
       
-      cdfCheckDataSP_UINT8(fileID, ncvarid, vlistID, varID, length, data);
+          cdfCheckDataSP_UINT8(fileID, ncvarid, vlistID, varID, length, data);
+        }
     }
 }
 

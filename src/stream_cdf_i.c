@@ -274,7 +274,7 @@ bool xtypeIsInt(nc_type xtype)
 }
 
 static
-int cdfInqDatatype(int xtype, bool lunsigned)
+int cdfInqDatatype(stream_t *streamptr, int xtype, bool lunsigned)
 {
   int datatype = -1;
 
@@ -295,6 +295,36 @@ int cdfInqDatatype(int xtype, bool lunsigned)
   else if ( xtype == NC_UINT   )  datatype = CDI_DATATYPE_UINT32;
   else if ( xtype == NC_INT64  )  datatype = CDI_DATATYPE_FLT64;
   else if ( xtype == NC_UINT64 )  datatype = CDI_DATATYPE_FLT64;
+  else
+    {
+      if (xtype != streamptr->nc_complex_float_id && xtype != streamptr->nc_complex_double_id)
+        {
+          int isUserDefinedType = false;
+#ifdef NC_FIRSTUSERTYPEID
+          isUserDefinedType = xtype >= NC_FIRSTUSERTYPEID;
+#endif
+          if (isUserDefinedType)
+            {
+              int fileID = streamptr->fileID;
+              size_t nfields = 0, compoundsize = 0;
+              int status = nc_inq_compound(fileID, xtype, NULL, &compoundsize, &nfields);
+              if (status == NC_NOERR && nfields == 2 && (compoundsize == 8 || compoundsize == 16))
+                {
+                  nc_type field_type1 = -1, field_type2 = -1;
+                  int field_dims1 = 0, field_dims2 = 0;
+                  nc_inq_compound_field(fileID, xtype, 0, NULL, NULL, &field_type1, &field_dims1, NULL);
+                  nc_inq_compound_field(fileID, xtype, 1, NULL, NULL, &field_type2, &field_dims2, NULL);
+                  if (field_type1 == field_type2 && field_dims1 == 0 && field_dims2 == 0)
+                    {
+                      if      (field_type1 == NC_FLOAT)  streamptr->nc_complex_float_id = xtype;
+                      else if (field_type1 == NC_DOUBLE) streamptr->nc_complex_double_id = xtype;
+                    }
+                }
+            }
+        }
+      if      ( xtype == streamptr->nc_complex_float_id  )  datatype = CDI_DATATYPE_CPX32;
+      else if ( xtype == streamptr->nc_complex_double_id )  datatype = CDI_DATATYPE_CPX64;
+    }
 #endif
 
   return datatype;
@@ -1889,7 +1919,7 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 
 /* verify coordinate vars - second scan (all other variables) */
 static
-void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
+void verify_coordinate_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
@@ -1953,7 +1983,7 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
             }
           else if ( strcmp(ncvars[ncvarid].stdname, "region") == 0  ||
                     strcmp(ncvars[ncvarid].stdname, "area_type") == 0 ||
-                    cdfInqDatatype(ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned) == CDI_DATATYPE_UINT8 )
+                    cdfInqDatatype(streamptr, ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned) == CDI_DATATYPE_UINT8 )
             {
               ncvars[ncvarid].isc = true;
             }
@@ -2170,7 +2200,7 @@ void cdf_check_gridtype(int *gridtype, bool islon, bool islat, size_t xsize, siz
 }
 
 static
-bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int xvarid, ncvar_t *axisvar,
+bool cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int xvarid, ncvar_t *axisvar,
                      size_t *xsize, size_t ysize, int ntdims, size_t *start, size_t *count, bool *islon)
 {
   grid_t *grid = &lazyGrid->base;
@@ -2178,7 +2208,7 @@ bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
   *islon = axisvar->islon;
   int ndims = axisvar->ndims;
   size_t size = 0;
-  const int datatype = cdfInqDatatype(axisvar->xtype, axisvar->lunsigned);
+  const int datatype = cdfInqDatatype(streamptr, axisvar->xtype, axisvar->lunsigned);
 
   if ( (ndims - ntdims) == 2 )
     {
@@ -2240,7 +2270,7 @@ bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
 }
 
 static
-bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int yvarid, ncvar_t *axisvar,
+bool cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int yvarid, ncvar_t *axisvar,
                      size_t xsize, size_t *ysize, int ntdims, size_t *start, size_t *count, bool *islat)
 {
   grid_t *grid = &lazyGrid->base;
@@ -2248,7 +2278,7 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
   *islat = axisvar->islat;
   int ndims = axisvar->ndims;
   size_t size = 0;
-  const int datatype = cdfInqDatatype(axisvar->xtype, axisvar->lunsigned);
+  const int datatype = cdfInqDatatype(streamptr, axisvar->xtype, axisvar->lunsigned);
 
   if ( (ndims - ntdims) == 2 )
     {
@@ -2311,7 +2341,7 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
 }
 
 static
-bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar, ncvar_t *ncvars, ncdim_t *ncdims,
+bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar, ncvar_t *ncvars, ncdim_t *ncdims,
                           int timedimid, int xvarid, int yvarid, size_t xsize, size_t ysize, int *vdimid)
 {
   grid_t *grid = &lazyGrid->base;
@@ -2386,12 +2416,12 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
       bool islon = false, islat = false;
 
       if ( xvarid != CDI_UNDEFID )
-        if ( cdf_read_xcoord(lazyGrid, ncdims, ncvar, xvarid, &ncvars[xvarid],
+        if ( cdf_read_xcoord(streamptr, lazyGrid, ncdims, ncvar, xvarid, &ncvars[xvarid],
                              &xsize, ysize, ntdims, start, count, &islon) )
           return true;
 
       if ( yvarid != CDI_UNDEFID )
-        if ( cdf_read_ycoord(lazyGrid, ncdims, ncvar, yvarid, &ncvars[yvarid],
+        if ( cdf_read_ycoord(streamptr, lazyGrid, ncdims, ncvar, yvarid, &ncvars[yvarid],
                              xsize, &ysize, ntdims, start, count, &islat) )
           return true;
 
@@ -2695,7 +2725,7 @@ void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype
 }
 
 static
-int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
+int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                          int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ++ncvarid )
@@ -2763,7 +2793,7 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
           xaxisid = (xdimid != CDI_UNDEFID) ? ncdims[xdimid].ncvarid : CDI_UNDEFID;
           yaxisid = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].ncvarid : CDI_UNDEFID;
 
-          if ( cdf_read_coordinates(lazyGrid, ncvar, ncvars, ncdims,
+          if ( cdf_read_coordinates(streamptr, lazyGrid, ncvar, ncvars, ncdims,
                                     timedimid, xvarid, yvarid, xsize, ysize, &vdimid) )
             continue;
 
@@ -2779,7 +2809,7 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
           if ( lproj && lgrid )
             {
               int dimid;
-              cdf_read_coordinates(lazyProj, ncvar, ncvars, ncdims, timedimid,
+              cdf_read_coordinates(streamptr, lazyProj, ncvar, ncvars, ncdims, timedimid,
                                    xaxisid, yaxisid, xsize, ysize, &dimid);
 	    }
 
@@ -3270,7 +3300,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
       if ( IS_NOT_EQUAL(ncvars[ncvarid].scalefactor, 1) )
 	vlistDefVarScalefactor(vlistID, varID, ncvars[ncvarid].scalefactor);
 
-      vlistDefVarDatatype(vlistID, varID, cdfInqDatatype(ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned));
+      vlistDefVarDatatype(vlistID, varID, cdfInqDatatype(streamptr, ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned));
 
       vlistDefVarInstitut(vlistID, varID, instID);
       vlistDefVarModel(vlistID, varID, modelID);
@@ -3695,7 +3725,7 @@ void cdf_set_ucla_dimtype(int ndims, ncdim_t *ncdims, ncvar_t *ncvars)
 }
 
 static
-int cdfCheckVars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
+int cdfCheckVars(stream_t *streamptr, int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
@@ -3749,7 +3779,7 @@ int cdfCheckVars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 	  continue;
 	}
 
-      if ( cdfInqDatatype(ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned) == -1 )
+      if ( cdfInqDatatype(streamptr, ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned) == -1 )
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning("Unsupported data type, skipped variable %s!", ncvars[ncvarid].name);
@@ -3980,14 +4010,14 @@ int cdfInqContents(stream_t *streamptr)
   if ( leadtime_id != CDI_UNDEFID ) ncvars[leadtime_id].isvar = FALSE;
 
   // check ncvars
-  timedimid = cdfCheckVars(nvars, ncvars, ntsteps, timedimid);
+  timedimid = cdfCheckVars(streamptr, nvars, ncvars, ntsteps, timedimid);
 
   // verify coordinate vars - first scan (dimname == varname)
   bool lhybrid_cf = false;
   verify_coordinate_vars_1(fileID, ndims, ncdims, ncvars, timedimid, &lhybrid_cf);
 
   // verify coordinate vars - second scan (all other variables)
-  verify_coordinate_vars_2(nvars, ncvars);
+  verify_coordinate_vars_2(streamptr, nvars, ncvars);
 
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "verify_coordinate_vars");
 
@@ -4058,7 +4088,7 @@ int cdfInqContents(stream_t *streamptr)
 
   // define all grids
   int status;
-  status = cdf_define_all_grids(streamptr->ncgrid, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, gridfile, number_of_grid_used);
+  status = cdf_define_all_grids(streamptr, streamptr->ncgrid, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, gridfile, number_of_grid_used);
   if ( status < 0 ) return status;
 
   // define all zaxes

@@ -1,3 +1,7 @@
+2020-04-21  Uwe Schulzweida
+
+	* NetCDF4: added support for reading complex numbers (status: experimental)
+
 2020-04-20  Uwe Schulzweida
 
 	* NetCDF4: added support for writting complex numbers (status: experimental)

@@ -465,6 +465,17 @@ void cdf_put_vara(int ncid, int varid, const size_t start[], const size_t count[
 }
 
 
+void cdf_get_vara(int ncid, int varid, const size_t start[], const size_t count[], void *cp)
+{
+  int status = nc_get_vara(ncid, varid, start, count, cp);
+
+  if ( CDF_Debug || status != NC_NOERR )
+    Message("ncid = %d varid = %d", ncid, varid);
+
+  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
+}
+
+
 void cdf_get_vara_int(int ncid, int varid, const size_t start[], const size_t count[], int *dp)
 {
   int status = nc_get_vara_int(ncid, varid, start, count, dp);
