@@ -300,6 +300,7 @@ char* gribMakeTimeString(grib_handle* gh, CdiTimeType timeType)
   date.tm_mday = (int)gribGetLong(gh, "day");
   date.tm_hour = (int)gribGetLong(gh, "hour");
   date.tm_min = (int)gribGetLong(gh, "minute");
+  date.tm_isdst = 0;
 
   if(gribEditionNumber(gh) == 1)
     {
