@@ -338,6 +338,35 @@ const char *fileLibraryVersion(void)
 static
 int pagesize(void)
 {
+  static int my_pagesize = -1;
+  static bool _pagesize_init = false;
+  if (! _pagesize_init)
+    {
+      _pagesize_init = true;
+      char *envSize = getenv ("PBIO_PAGESIZE");
+      if (envSize != NULL)
+	{
+	  int loop;
+	  for (loop = 0; loop < (int) strlen(envSize) ; loop++)
+	    {
+	      if ( ! isdigit((int) envSize[loop]) )
+		{
+		  printf("Invalid character in PBIO_PAGESIZE: %s\n", envSize);
+		  printf("PBIO_PAGESIZE must comprise only digits [0-9].\n");
+		  exit(EXIT_FAILURE);
+		}
+	    }
+	  my_pagesize = atol(envSize);
+	  if (my_pagesize <= 0 || (my_pagesize & (my_pagesize-1)) != 0)
+	    {
+	      printf("Invalid value in PBIO_PAGESIZE: %s\n", envSize);
+	      printf("Pagesize defined by PBIO_PAGESIZE must be power of 2.\n");
+	      exit(EXIT_FAILURE);
+	    }
+	}
+    }
+  if (my_pagesize > 0) return my_pagesize;
+
 #ifdef _SC_PAGESIZE
   return (int) sysconf(_SC_PAGESIZE);
 #else
