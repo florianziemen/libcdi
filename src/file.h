@@ -4,13 +4,12 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-
 #define  FILE_UNDEFID      -1
 
 #define  FILE_TYPE_OPEN     1
 #define  FILE_TYPE_FOPEN    2
 
-/* buffer types for FILE_TYPE_OPEN */
+// buffer types for FILE_TYPE_OPEN
 #define  FILE_BUFTYPE_STD   1
 #define  FILE_BUFTYPE_MMAP  2
 
@@ -49,12 +48,3 @@ size_t fileRead(int fileID, void *restrict ptr, size_t size);
 size_t fileWrite(int fileID, const void *restrict ptr, size_t size);
 
 #endif  /* _FILE_H */
-/*
- * Local Variables:
- * c-file-style: "Java"
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * show-trailing-whitespace: t
- * require-trailing-newline: t
- * End:
- */

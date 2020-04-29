@@ -26,28 +26,17 @@
 #include "error.h"
 #include "file.h"
 
+#ifdef CDI
 #include "namespace.h"
+#endif
 
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
 
-#ifndef strdupx
 #ifndef strdup
 char *strdup(const char *s);
 #endif
-#define strdupx  strdup
-/*
-#define strdupx(s)                                \
-({                                                \
-   const char *__old = (s);                       \
-   size_t __len = strlen(__old) + 1;              \
-   char *__new = (char *) Malloc(__len);          \
-   (char *) memcpy(__new, __old, __len);          \
-})
-*/
-#endif
-
 
 #ifdef HAVE_MMAP
 #include <sys/mman.h> /* mmap() is defined in this header */
@@ -148,7 +137,7 @@ static void file_table_print(void);
  * A version string.
  */
 #undef   LIBVERSION
-#define  LIBVERSION      1.8.3
+#define  LIBVERSION      1.9.0
 #define  XSTRING(x)	 #x
 #define  STRING(x) 	 XSTRING(x)
 static const char file_libvers[] = STRING(LIBVERSION);
@@ -383,8 +372,7 @@ double file_time()
 #ifdef HAVE_SYS_TIME_H
   struct timeval mytime;
   gettimeofday(&mytime, NULL);
-  double tseconds = (double) mytime.tv_sec + (double) mytime.tv_usec*1.0e-6;
-  return tseconds;
+  return (double) mytime.tv_sec + (double) mytime.tv_usec*1.0e-6;
 #else
   return 0;
 #endif
@@ -439,6 +427,7 @@ int fileSetBufferType(int fileID, int type)
   return ret;
 }
 
+
 int fileFlush(int fileID)
 {
   int retval = 0;
@@ -479,6 +468,7 @@ int fileEOF(int fileID)
 
   return retval;
 }
+
 
 void fileRewind(int fileID)
 {
@@ -903,7 +893,9 @@ int file_fill_buffer(bfile_t *fileptr)
 	}
       else
 	{
+#ifdef CDI
           xassert(fileptr->bufferSize <= SSIZE_MAX);
+#endif
 	  nread = (ssize_t)fileptr->bufferSize;
 	  if ( (nread + fileptr->bufferPos) > fileptr->size )
 	    nread = fileptr->size - fileptr->bufferPos;
@@ -1043,8 +1035,10 @@ size_t file_read_from_buffer(bfile_t *fileptr, void *ptr, size_t size)
 
 void fileSetBufferSize(int fileID, long buffersize)
 {
-  bfile_t *fileptr = file_to_pointer(fileID);
+#ifdef CDI
   xassert(buffersize >= 0);
+#endif
+  bfile_t *fileptr = file_to_pointer(fileID);
   if ( fileptr ) fileptr->bufferSize = (size_t)buffersize;
 }
 
@@ -1052,6 +1046,7 @@ void fileSetBufferSize(int fileID, long buffersize)
  *   Open a file. Returns file ID, or -1 on error
  */
 int fileOpen(const char *filename, const char *mode)
+#ifdef CDI
 {
   int (*myFileOpen)(const char *filename, const char *mode)
     = (int (*)(const char *, const char *))
@@ -1060,9 +1055,10 @@ int fileOpen(const char *filename, const char *mode)
 }
 
 int fileOpen_serial(const char *filename, const char *mode)
+#endif
 {
-  FILE *fp = NULL;    /* file pointer    (used for write) */
-  int fd = -1;        /* file descriptor (used for read)  */
+  FILE *fp = NULL;    // file pointer    (used for write)
+  int fd = -1;        // file descriptor (used for read)
   int fileID = FILE_UNDEFID;
   struct stat filestat;
   bfile_t *fileptr = NULL;
@@ -1120,7 +1116,7 @@ int fileOpen_serial(const char *filename, const char *mode)
   if ( fileID >= 0 )
     {
       fileptr->mode = fmode;
-      fileptr->name = strdupx(filename);
+      fileptr->name = strdup(filename);
 
 #ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
       fileptr->blockSize = (size_t) filestat.st_blksize;
@@ -1150,6 +1146,7 @@ int fileOpen_serial(const char *filename, const char *mode)
  *   Close a file.
  */
 int fileClose(int fileID)
+#ifdef CDI
 {
   int (*myFileClose)(int fileID)
     = (int (*)(int))namespaceSwitchGet(NSSWITCH_FILE_CLOSE).func;
@@ -1157,6 +1154,7 @@ int fileClose(int fileID)
 }
 
 int fileClose_serial(int fileID)
+#endif
 {
   int ret;
   const char *fbtname[] = {"unknown", "standard", "mmap"};

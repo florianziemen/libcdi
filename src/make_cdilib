@@ -92,6 +92,7 @@ cat > ${PROG} << EOR
 #define  HAVE_LIBSERVICE   1
 #define  HAVE_LIBEXTRA     1
 #define  HAVE_LIBIEG       1
+#define  CDI              -1
 #endif
 
 EOR
