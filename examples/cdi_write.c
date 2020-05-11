@@ -13,7 +13,6 @@ int main(void)
   double lons[] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[] = {-75, -45, -15, 15, 45, 75};
   double levs[] = {101300, 92500, 85000, 50000, 20000};
-  double var1[nlon*nlat];
   double var2[nlon*nlat*nlev];
 
 
@@ -24,9 +23,6 @@ int main(void)
   gridDefXvals(gridID, lons);
   gridDefYvals(gridID, lats);
 
-  // Create a surface level Z-axis
-  int zaxisID1 = zaxisCreate(ZAXIS_SURFACE, 1);
-
   // Create a pressure level Z-axis
   int zaxisID2 = zaxisCreate(ZAXIS_PRESSURE, nlev);
   zaxisDefLevels(zaxisID2, levs);
@@ -35,12 +31,11 @@ int main(void)
   int vlistID = vlistCreate();
 
   // Define the variables
-  int varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TIME_VARYING);
   int varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TIME_VARYING);
 
   // Define the variable names
-  vlistDefVarName(vlistID, varID1, "varname1");
-  vlistDefVarName(vlistID, varID2, "varname2");
+  vlistDefVarName(vlistID, varID2, "QC");
+  vlistDefVarDatatype(vlistID, varID2, 16);
 
   // Create a Time axis
   int taxisID = taxisCreate(TAXIS_ABSOLUTE);
@@ -49,7 +44,7 @@ int main(void)
   vlistDefTaxis(vlistID, taxisID);
 
   // Create a dataset in netCDF format
-  int streamID = streamOpenWrite("example.nc", CDI_FILETYPE_NC);
+  int streamID = streamOpenWrite("example.grb", CDI_FILETYPE_GRB2);
   if ( streamID < 0 )
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID));
@@ -69,12 +64,12 @@ int main(void)
       // Define the time step
       streamDefTimestep(streamID, tsID);
 
-      // Init var1 and var2
-      for ( size_t i = 0; i < nlon*nlat;      i++ ) var1[i] = 1.1;
-      for ( size_t i = 0; i < nlon*nlat*nlev; i++ ) var2[i] = 2.2;
+      // Init var2
+      // for ( size_t i = 0; i < nlon*nlat*2; i++ ) var2[i] = 0.;
+      // for ( size_t i = nlon*nlat*2; i < nlon*nlat*nlev; i++ ) var2[i] = sin((double)i);
+      for ( size_t i = 0; i < nlon*nlat*nlev; i++ ) var2[i] = sin((double)i);
 
       // Write var1 and var2
-      streamWriteVar(streamID, varID1, var1, nmiss);
       streamWriteVar(streamID, varID2, var2, nmiss);
     }
 
@@ -84,7 +79,6 @@ int main(void)
   // Destroy the objects
   vlistDestroy(vlistID);
   taxisDestroy(taxisID);
-  zaxisDestroy(zaxisID1);
   zaxisDestroy(zaxisID2);
   gridDestroy(gridID);
 
