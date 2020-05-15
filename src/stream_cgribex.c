@@ -2010,13 +2010,12 @@ void cgribexDefaultSec4(int *isec4)
 static
 void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 {
-  /* For Ensemble info  */
+  // For Ensemble info
 
-  //Put1Byte(isec1[36]);        /* MPIM local GRIB use definition identifier  */
-                                /*    (extension identifier)                  */
-  //Put1Byte(isec1[37]);        /* type of ensemble forecast                  */
-  //Put2Byte(isec1[38]);        /* individual ensemble member                 */
-  //Put2Byte(isec1[39]);        /* number of forecasts in ensemble            */
+  //Put1Byte(isec1[36]);        // MPIM local GRIB use definition identifier (extension identifier)
+  //Put1Byte(isec1[37]);        // type of ensemble forecast
+  //Put2Byte(isec1[38]);        // individual ensemble member
+  //Put2Byte(isec1[39]);        // number of forecasts in ensemble
 
   int perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
   const int r1 = cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber);
@@ -2029,10 +2028,9 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
         {
           ISEC1_LocalFLag = 1;
           isec1[36] = 1;
-
-          isec1[37] =  typeOfEnsembleForecast;
-          isec1[38] =  perturbationNumber;
-          isec1[39] =  numberOfForecastsInEnsemble;
+          isec1[37] = typeOfEnsembleForecast;
+          isec1[38] = perturbationNumber;
+          isec1[39] = numberOfForecastsInEnsemble;
         }
     }
 }
