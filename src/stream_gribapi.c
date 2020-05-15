@@ -2251,9 +2251,6 @@ void gribapiDefPackingType(grib_handle *gh, bool lieee, bool lspectral, bool lco
 static
 void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int datatype, int uvRelativeToGrid)
 {
-  // bitsPerValue have to be defined first (complex packing)
-  GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", (long)grbBitsPerValue(datatype)), 0);
-
   const size_t gridsize = gridInqSize(gridID);
   bool gridIsRotated = false;
   bool gridIsCurvilinear = false;
@@ -3164,6 +3161,9 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
           Free(section2Padding);
         }
     }
+
+  // bitsPerValue have to be defined first (complex packing)
+  GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", (long)grbBitsPerValue(datatype)), 0);
 
   if ( ! gc->init ) gribapiDefGrid((int)editionNumber, gh, gridID, comptype, datatype, uvRelativeToGrid);
 
