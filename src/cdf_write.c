@@ -18,9 +18,8 @@ void cdfDefVarDeflate(int ncid, int ncvarID, int deflate_level)
 {
 #ifdef HAVE_NETCDF4
   int retval;
-  /* Set chunking, shuffle, and deflate. */
-  const int shuffle = 1;
-  const int deflate = 1;
+  // Set chunking, shuffle, and deflate.
+  const int shuffle = 1, deflate = 1;
 
   if ( deflate_level < 1 || deflate_level > 9 ) deflate_level = 1;
 
@@ -45,7 +44,7 @@ nc_type cdfTypeComplexFloat(stream_t *streamptr)
   if (streamptr->nc_complex_float_id == CDI_UNDEFID)
     {
       typedef struct complex_float { float r, i; } complex_float;
-      const int fileID  = streamptr->fileID;
+      const int fileID = streamptr->fileID;
       int nc_complex_id;
       int status;
       status = nc_def_compound(fileID, sizeof(complex_float), "complex_float", &nc_complex_id);
@@ -272,8 +271,8 @@ void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
           int *attint = (int *)resizeBuf(&attBuf, &attBufSize, attSize);
           cdiInqAttInt(cdiID, varID, attname, attlen, &attint[0]);
           len = (size_t)attlen;
-          nc_type xtype = (atttype == CDI_DATATYPE_INT8)  ? NC_BYTE :
-                          (atttype == CDI_DATATYPE_INT16) ? NC_SHORT :
+          nc_type xtype = (atttype == CDI_DATATYPE_INT8)   ? NC_BYTE :
+                          (atttype == CDI_DATATYPE_INT16)  ? NC_SHORT :
 #ifdef  HAVE_NETCDF4
                           (atttype == CDI_DATATYPE_UINT8)  ? NC_UBYTE :
                           (atttype == CDI_DATATYPE_UINT16) ? NC_USHORT :
@@ -308,14 +307,10 @@ static
 void cdfDefineInstituteName(int vlistID, int varID, int fileID, int ncvarID)
 {
   const int instID = vlistInqVarInstitut(vlistID, varID);
-  if ( instID != CDI_UNDEFID)
+  if (instID != CDI_UNDEFID)
     {
       const char *name = institutInqNamePtr(instID);
-      if ( name )
-        {
-          const size_t len = strlen(name);
-          cdf_put_att_text(fileID, ncvarID, "institution", len, name);
-        }
+      if (name) cdf_put_att_text(fileID, ncvarID, "institution", strlen(name), name);
     }
 }
 
@@ -372,8 +367,8 @@ static
 int nc_grid_index(stream_t *streamptr, int gridID)
 {
   int index = 0;
-  int vlistID = streamptr->vlistID;
-  int ngrids = vlistNgrids(vlistID);
+  const int vlistID = streamptr->vlistID;
+  const int ngrids = vlistNgrids(vlistID);
   for ( index = 0; index < ngrids; ++index )
     if ( streamptr->ncgrid[index].gridID == gridID ) break;
 
@@ -864,7 +859,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   cdfDefineAttributes(vlistID, varID, fileID, ncvarID);
 
   // Institute
-  cdfDefineInstituteName(vlistID, varID, fileID, ncvarID);
+  if (vlistInqInstitut(vlistID) == CDI_UNDEFID) cdfDefineInstituteName(vlistID, varID, fileID, ncvarID);
 
   return ncvarID;
 }
@@ -901,11 +896,10 @@ void cdfWriteGridTraj(stream_t *streamptr, int gridID)
   const int gridindex = nc_grid_index(streamptr, gridID);
   const int lonID = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
   const int latID = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
-  const int tsID = streamptr->curTsID;
-  size_t index = (size_t)tsID;
+  const size_t index = (size_t)streamptr->curTsID;
 
-  double xlon = gridInqXval(gridID, 0);
-  double xlat = gridInqYval(gridID, 0);
+  const double xlon = gridInqXval(gridID, 0);
+  const double xlat = gridInqYval(gridID, 0);
 
   cdf_put_var1_double(streamptr->fileID, lonID, &index, &xlon);
   cdf_put_var1_double(streamptr->fileID, latID, &index, &xlat);
