@@ -109,7 +109,8 @@ print_xvals(int gridID, int dig)
     {
       char xname[CDI_MAX_NAME], xunits[CDI_MAX_NAME];
       gridInqXname(gridID, xname);
-      gridInqXunits(gridID, xunits);
+      int length = CDI_MAX_NAME;
+      cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, xunits, &length);
 
       const double xfirst = gridInqXval(gridID, 0);
       const double xlast = gridInqXval(gridID, xsize - 1);
@@ -134,7 +135,8 @@ print_yvals(int gridID, int dig)
     {
       char yname[CDI_MAX_NAME], yunits[CDI_MAX_NAME];
       gridInqYname(gridID, yname);
-      gridInqYunits(gridID, yunits);
+      int length = CDI_MAX_NAME;
+      cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, yunits, &length);
 
       const double yfirst = gridInqYval(gridID, 0);
       const double ylast = gridInqYval(gridID, ysize - 1);
@@ -160,8 +162,10 @@ print_xyvals2D(int gridID, int dig)
       char xname[CDI_MAX_NAME], yname[CDI_MAX_NAME], xunits[CDI_MAX_NAME], yunits[CDI_MAX_NAME];
       gridInqXname(gridID, xname);
       gridInqYname(gridID, yname);
-      gridInqXunits(gridID, xunits);
-      gridInqYunits(gridID, yunits);
+      int length = CDI_MAX_NAME;
+      cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, xunits, &length);
+      length = CDI_MAX_NAME;
+      cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, yunits, &length);
 
       const size_t gridsize = gridInqSize(gridID);
       double *xvals2D = (double *) malloc(gridsize * sizeof(double));
