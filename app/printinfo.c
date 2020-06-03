@@ -108,8 +108,9 @@ print_xvals(int gridID, int dig)
   if (xsize > 0 && gridInqXvals(gridID, NULL))
     {
       char xname[CDI_MAX_NAME], xunits[CDI_MAX_NAME];
-      gridInqXname(gridID, xname);
       int length = CDI_MAX_NAME;
+      cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, xname, &length);
+      length = CDI_MAX_NAME;
       cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, xunits, &length);
 
       const double xfirst = gridInqXval(gridID, 0);
@@ -134,8 +135,9 @@ print_yvals(int gridID, int dig)
   if (ysize > 0 && gridInqYvals(gridID, NULL))
     {
       char yname[CDI_MAX_NAME], yunits[CDI_MAX_NAME];
-      gridInqYname(gridID, yname);
       int length = CDI_MAX_NAME;
+      cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, yname, &length);
+      length = CDI_MAX_NAME;
       cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, yunits, &length);
 
       const double yfirst = gridInqYval(gridID, 0);
@@ -160,9 +162,11 @@ print_xyvals2D(int gridID, int dig)
   if (gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL))
     {
       char xname[CDI_MAX_NAME], yname[CDI_MAX_NAME], xunits[CDI_MAX_NAME], yunits[CDI_MAX_NAME];
-      gridInqXname(gridID, xname);
-      gridInqYname(gridID, yname);
       int length = CDI_MAX_NAME;
+      cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, xname, &length);
+      length = CDI_MAX_NAME;
+      cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, yname, &length);
+      length = CDI_MAX_NAME;
       cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, xunits, &length);
       length = CDI_MAX_NAME;
       cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, yunits, &length);
