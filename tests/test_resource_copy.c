@@ -54,12 +54,14 @@ static int defineGrid (void)
   for ( i = 0; i < nlon*nlat; i++ )
     mask_vec[i] = 1;
   gridDefMask ( gridID, mp );
-  gridDefXname ( gridID, "myXname" );
-  gridDefXlongname ( gridID, "myXlongname" );
-  gridDefXunits ( gridID, "myXunits" );
-  gridDefYname ( gridID, "myYname" );
-  gridDefYlongname ( gridID, "myYlongname" );
-  gridDefYunits ( gridID, "myYunits" );
+
+  cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, "myXname");
+  cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, "myYname");
+  cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_LONGNAME, "myXlongname");
+  cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_LONGNAME, "myYlongname");
+  cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, "myXunits");
+  cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, "myYunits");
+
   gridDefDatatype ( gridID, DOUBLE_PRECISION );
   gridDefTrunc ( gridID, 1 );
   gridDefParamGME ( gridID, 2, 3, 4, 5 );

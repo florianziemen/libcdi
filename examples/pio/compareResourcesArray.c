@@ -36,7 +36,7 @@ static int defineGrid()
   double area_vec[nlon*nlat];
   const double * ap = &area_vec[0];
   int i;
-  
+
   gridID = gridCreate(GRID_LONLAT, nlon*nlat);
   gridDefXsize(gridID, nlon);
   gridDefYsize(gridID, nlat);
@@ -51,12 +51,14 @@ static int defineGrid()
   for ( i = 0; i < nlon*nlat; i++ )
     mask_vec[i] = 1;
   gridDefMask ( gridID, mp );
-  gridDefXname ( gridID, "myXname" );
-  gridDefXlongname ( gridID, "myXlongname" );
-  gridDefXunits ( gridID, "myXunits" );
-  gridDefYname ( gridID, "myYname" );
-  gridDefYlongname ( gridID, "myYlongname" );
-  gridDefYunits ( gridID, "myYunits" );
+
+  cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, "myXname");
+  cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, "myYname");
+  cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_LONGNAME, "myXlongname");
+  cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_LONGNAME, "myYlongname");
+  cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, "myXunits");
+  cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, "myYunits");
+
   gridDefDatatype ( gridID, DOUBLE_PRECISION );
   gridDefTrunc ( gridID, 1 );
   gridDefNumber ( gridID, 6 );

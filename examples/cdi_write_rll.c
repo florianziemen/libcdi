@@ -22,8 +22,9 @@ int main(void)
   gridDefYsize(gridID, nlat);
   gridDefXvals(gridID, lons);
   gridDefYvals(gridID, lats);
-  gridDefXname(gridID, "rlon");
-  gridDefYname(gridID, "rlat");
+
+  cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, "rlon");
+  cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, "rlat");
 
   // Create a surface level Z-axis
   int zaxisID1 = zaxisCreate(ZAXIS_SURFACE, 1);

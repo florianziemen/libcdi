@@ -31,8 +31,9 @@ int main(void)
     gridDefYsize(gridID, nlat);
     gridDefXvals(gridID, lons2D);
     gridDefYvals(gridID, lats2D);
-    gridDefXname(gridID, "lon");
-    gridDefYname(gridID, "lat");
+
+    cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, "lon");
+    cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, "lat");
   }
 
   // Create a rotated lon/lat grid
@@ -45,8 +46,10 @@ int main(void)
     gridDefYsize(projID, nlat);
     gridDefXvals(projID, rlons);
     gridDefYvals(projID, rlats);
-    gridDefXname(projID, "rlon");
-    gridDefYname(projID, "rlat");
+
+    cdiDefKeyString(projID, CDI_XAXIS, CDI_KEY_NAME, "rlon");
+    cdiDefKeyString(projID, CDI_YAXIS, CDI_KEY_NAME, "rlat");
+
     gridDefParamRLL(projID, -162., 39.25, 0);
 
     gridDefProj(gridID, projID);
