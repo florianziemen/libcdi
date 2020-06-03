@@ -2413,7 +2413,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
       Message("Changed zaxis type from %s to %s", zaxisNamePtr(zaxistype), zaxisNamePtr(ZAXIS_PRESSURE));
       zaxistype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, zaxistype);
-      zaxisDefUnits(zaxisID, "Pa");
+      cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, "Pa");
     }
 
   long grib_ltype = (editionNumber <= 1) ? zaxisTypeToGrib1ltype(zaxistype) : zaxisTypeToGrib2ltype(zaxistype);
@@ -2432,7 +2432,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
         if ( zaxistype == ZAXIS_HEIGHT )
           {
             double sf = 1;
-            zaxisInqUnits(zaxisID, units);
+            int length = CDI_MAX_NAME;
+            cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
             if ( units[1] == 'm' && !units[2] )
               {
                 if      ( units[0] == 'c' ) sf = 0.01;
@@ -2514,7 +2515,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
       {
 	if ( level < 0 ) Warning("Pressure level of %f Pa is below zero!", level);
 
-	zaxisInqUnits(zaxisID, units);
+        int length = CDI_MAX_NAME;
+        cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
         if ( units[0] && (units[0] != 'P') | (units[1] != 'a') )
           {
             level   *= 100;
@@ -2553,7 +2555,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
       }
     case ZAXIS_DEPTH_BELOW_LAND:
       {
-	zaxisInqUnits(zaxisID, units);
+        int length = CDI_MAX_NAME;
+        cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
         double sf; //scalefactor
 
 	if ( editionNumber <= 1 )

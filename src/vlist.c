@@ -696,8 +696,10 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                 length = CDI_MAX_NAME;
                 cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, ctemp, &length);
                 cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_LONGNAME, ctemp);
-                zaxisInqUnits(zaxisID, ctemp);
-                zaxisDefUnits(zaxisID2, ctemp);
+                length = CDI_MAX_NAME;
+                cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, ctemp, &length);
+                cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_UNITS, ctemp);
+
                 zaxisDefDatatype(zaxisID2, zaxisInqDatatype(zaxisID));
                 zaxisDefPositive(zaxisID2, zaxisInqPositive(zaxisID));
 

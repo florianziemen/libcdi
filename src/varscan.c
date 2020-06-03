@@ -855,13 +855,14 @@ bool zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const d
                 {
                   char zlongname[CDI_MAX_NAME];
                   int length = CDI_MAX_NAME;
-                  cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, zlongname, &length)
+                  cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, zlongname, &length);
                   if ( zlongname[0] && (strcmp(longname, zlongname) != 0) ) differ = true;
                 }
               if ( units && units[0] )
                 {
-                  char zunits[CDI_MAX_NAME]; zunits[0] = 0;
-                  zaxisInqUnits(zaxisID, zunits);
+                  char zunits[CDI_MAX_NAME];
+                  int length = CDI_MAX_NAME;
+                  cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, zunits, &length);
                   if ( zunits[0] && (strcmp(units, zunits) != 0) ) differ = true;
                 }
             }
@@ -974,7 +975,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, c
 
 	  if ( name && name[0] ) cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, name);
 	  if ( longname && longname[0] ) cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, longname);
-	  if ( units && units[0] ) zaxisDefUnits(zaxisID, units);
+	  if ( units && units[0] ) cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units);
 	  zaxisDefDatatype(zaxisID, prec);
           cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, ltype1);
           if ( ltype2 != -1 ) cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFSECONDFIXEDSURFACE, ltype2);

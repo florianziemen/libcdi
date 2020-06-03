@@ -31,7 +31,7 @@ int main(void)
   // Create a pressure level Z-axis
   zaxisID2 = zaxisCreate(ZAXIS_DEPTH_BELOW_LAND, nlev);
   zaxisDefLevels(zaxisID2, levs);
-  zaxisDefUnits(zaxisID2, "m");
+  cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, "m");
  
   // Create a variable list
   vlistID = vlistCreate();

@@ -194,7 +194,7 @@ int zaxisCreate_(int zaxistype, int size, int id)
   const int zaxisID = zaxisptr->self;
   cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, ZaxistypeEntry[zaxistype].name);
   if ( zaxistype != ZAXIS_GENERIC ) zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
-  zaxisDefUnits(zaxisID, ZaxistypeEntry[zaxistype].units);
+  cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, ZaxistypeEntry[zaxistype].units);
 
   const char *stdname = ZaxistypeEntry[zaxistype].stdname;
   if ( *stdname )

@@ -331,7 +331,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 	      zaxisNamePtr(leveltype), zaxisNamePtr(ZAXIS_PRESSURE));
       leveltype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, leveltype);
-      zaxisDefUnits(zaxisID, "Pa");
+      cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, "Pa");
     }
 
   /*  IEG_G_NumVCP(gdb) = 0; */
@@ -372,16 +372,16 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
       }
     case ZAXIS_PRESSURE:
       {
-	double dum;
-	char units[CDI_MAX_NAME];
-
 	level = zaxisInqLevel(zaxisID, levelID);
 	if ( level < 0 ) Warning("pressure level of %f Pa is below 0.", level);
 
-	zaxisInqUnits(zaxisID, units);
+ 	char units[CDI_MAX_NAME];
+        int length = CDI_MAX_NAME;
+        cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
 	if ( memcmp(units, "hPa", 3) == 0 || memcmp(units, "mb",2 ) == 0 )
 	  level = level*100;
 
+	double dum;
 	int ilevel = (int) level;
 	if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )
           pdbDefLevel(pdb, IEG_LTYPE_99, 0, ilevel);
