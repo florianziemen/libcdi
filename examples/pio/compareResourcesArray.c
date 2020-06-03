@@ -90,9 +90,11 @@ static int defineZaxis ()
   zaxisID = zaxisCreate(ZAXIS_PRESSURE, nlev);
   zaxisDefLevels(zaxisID, levs);
   zaxisDefLevel ( zaxisID, 2, 8507.3 );
-  zaxisDefName ( zaxisID, "myName" );
-  zaxisDefLongname ( zaxisID, "myLongname" );
-  zaxisDefUnits ( zaxisID, "myUnits" );
+
+  cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, "myName");
+  cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, "myLongname");
+  cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, "myUnits");
+
   zaxisDefDatatype ( zaxisID, DOUBLE_PRECISION );
   cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, 1);
   zaxisDefVct ( zaxisID, 3, vct );

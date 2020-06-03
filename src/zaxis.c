@@ -192,7 +192,7 @@ int zaxisCreate_(int zaxistype, int size, int id)
     Error("Internal problem! zaxistype > CDI_MaxZaxistype");
 
   const int zaxisID = zaxisptr->self;
-  zaxisDefName(zaxisID, ZaxistypeEntry[zaxistype].name);
+  cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, ZaxistypeEntry[zaxistype].name);
   if ( zaxistype != ZAXIS_GENERIC ) zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
   zaxisDefUnits(zaxisID, ZaxistypeEntry[zaxistype].units);
 

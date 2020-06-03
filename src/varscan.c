@@ -971,7 +971,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, c
 	  if ( (zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF) && vctsize > 0 )
             zaxisDefVct(zaxisID, vctsize, vct);
 
-	  if ( name && name[0] ) zaxisDefName(zaxisID, name);
+	  if ( name && name[0] ) cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, name);
 	  if ( longname && longname[0] ) zaxisDefLongname(zaxisID, longname);
 	  if ( units && units[0] ) zaxisDefUnits(zaxisID, units);
 	  zaxisDefDatatype(zaxisID, prec);

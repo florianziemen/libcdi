@@ -691,7 +691,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                   }
 
                 zaxisInqName(zaxisID, ctemp);
-                zaxisDefName(zaxisID2, ctemp);
+                cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_NAME, ctemp);
                 zaxisInqLongname(zaxisID, ctemp);
                 zaxisDefLongname(zaxisID2, ctemp);
                 zaxisInqUnits(zaxisID, ctemp);
