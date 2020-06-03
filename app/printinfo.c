@@ -515,7 +515,8 @@ printZaxisReferenceInfo(const int zaxisID)
     }
 
   unsigned char uuidOfVGrid[CDI_UUID_SIZE];
-  zaxisInqUUID(zaxisID, uuidOfVGrid);
+  int length = CDI_UUID_SIZE;
+  cdiInqKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfVGrid, &length);
   if (!cdiUUIDIsNull(uuidOfVGrid))
     {
       char uuidOfVGridStr[37];

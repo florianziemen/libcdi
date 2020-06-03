@@ -107,7 +107,7 @@ static int defineZaxis (void)
   {
     unsigned char uuid[CDI_UUID_SIZE];
     cdiCreateUUID(uuid);
-    zaxisDefUUID(zaxisID, uuid);
+    cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, CDI_UUID_SIZE)
   }
 
   return zaxisID;

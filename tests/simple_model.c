@@ -168,13 +168,13 @@ modelRun(struct model_config setup, MPI_Comm comm)
         }
       if (setup.create_uuid)
       {
-        unsigned char uuid[16];
+        unsigned char uuid[CDI_UUID_SIZE];
         if (rank == 0)
           cdiCreateUUID(uuid);
 #if USE_MPI
         MPI_Bcast(uuid, CDI_UUID_SIZE, MPI_UNSIGNED_CHAR, 0, comm);
 #endif
-        zaxisDefUUID(varDesc[varIdx].zaxisID, uuid);
+        cdiDefKeyBytes(varDesc[varIdx].zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, CDI_UUID_SIZE)
       }
       zaxisIDset:
       varDesc[varIdx].id

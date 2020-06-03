@@ -15,7 +15,6 @@ int main(void)
   double var1[nlon*nlat];
   double var2[nlon*nlat*nlev];
 
-
   // Create a grid reference
   gridID = gridCreate(GRID_UNSTRUCTURED, nlon*nlat);
   cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, 123);
@@ -30,10 +29,11 @@ int main(void)
   // zaxisID2 = zaxisCreate(ZAXIS_HEIGHT, nlev);
   zaxisID2 = zaxisCreate(ZAXIS_REFERENCE, nlev);
   zaxisDefLevels(zaxisID2, levs);
-  zaxisDefNlevRef(zaxisID2, nlev);
+
+  cdiDefKeyInt(zaxisID2, CDI_GLOBAL, CDI_KEY_NLEV, nlev);
   cdiDefKeyInt(zaxisID2, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, 71);
   //zaxisDefReference(zaxisID2, "http://www.x.y/vgridfile.nc");
-  zaxisDefUUID(zaxisID2, "8765432112345678");
+  cdiDefKeyBytes(zaxisID2, CDI_GLOBAL, CDI_KEY_UUID, "8765432112345678", CDI_UUID_SIZE)
  
   // Create a variable list
   vlistID = vlistCreate();
