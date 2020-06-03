@@ -241,7 +241,7 @@ main(int argc, char *argv[])
     for (int i = 0; i < 2; ++i)
       {
         cdiStr2UUID(zaxisUUIDTxt[i], uuid);
-        cdiDefKeyBytes(zaxisID[i], CDI_GLOBAL, CDI_KEY_UUID, uuid, CDI_UUID_SIZE)
+        cdiDefKeyBytes(zaxisID[i], CDI_GLOBAL, CDI_KEY_UUID, uuid, CDI_UUID_SIZE);
       }
   }
 

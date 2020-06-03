@@ -33,7 +33,7 @@ int main(void)
   cdiDefKeyInt(zaxisID2, CDI_GLOBAL, CDI_KEY_NLEV, nlev);
   cdiDefKeyInt(zaxisID2, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, 71);
   //zaxisDefReference(zaxisID2, "http://www.x.y/vgridfile.nc");
-  cdiDefKeyBytes(zaxisID2, CDI_GLOBAL, CDI_KEY_UUID, "8765432112345678", CDI_UUID_SIZE)
+  cdiDefKeyBytes(zaxisID2, CDI_GLOBAL, CDI_KEY_UUID, "8765432112345678", CDI_UUID_SIZE);
  
   // Create a variable list
   vlistID = vlistCreate();
