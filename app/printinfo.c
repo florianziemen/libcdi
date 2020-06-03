@@ -547,8 +547,10 @@ printZaxisInfo(int vlistID)
       // int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
 
       zaxisName(zaxistype, zaxisname);
-      zaxisInqName(zaxisID, zname);
-      zaxisInqUnits(zaxisID, zunits);
+      int length = CDI_MAX_NAME;
+      cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, zname, &length);
+      length = CDI_MAX_NAME;
+      cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, zunits, &length);
       zunits[12] = 0;
 
       fprintf(stdout, "  %4d : ", vlistZaxisIndex(vlistID, zaxisID) + 1);

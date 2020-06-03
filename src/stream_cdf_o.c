@@ -1452,7 +1452,6 @@ static
 void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 {
   /*  char zaxisname0[CDI_MAX_NAME]; */
-  char axisname[CDI_MAX_NAME];
   int dimID = CDI_UNDEFID;
   int ncvarid = CDI_UNDEFID, ncbvarid = CDI_UNDEFID;
   const int xtype = zaxisInqDatatype(zaxisID) == CDI_DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE;
@@ -1500,7 +1499,9 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
         }
     }
 
-  zaxisInqName(zaxisID, axisname);
+  char axisname[CDI_MAX_NAME];
+  int length = CDI_MAX_NAME;
+  cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, axisname, &length);
 
   if ( dimID == CDI_UNDEFID )
     {

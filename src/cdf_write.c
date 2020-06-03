@@ -655,7 +655,8 @@ void cdfDefineAttrLeveltype(int fileID, int ncvarID, int zaxisID, int zaxistype)
        zaxistype == ZAXIS_ATMOSPHERE )
     {
       char varname[CDI_MAX_NAME];
-      zaxisInqName(zaxisID, varname);
+      int length = CDI_MAX_NAME;
+      cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, varname, &length);
       cdf_put_att_text(fileID, ncvarID, "level_type", strlen(varname), varname);
     }
 }

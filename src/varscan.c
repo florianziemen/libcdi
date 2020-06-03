@@ -853,8 +853,9 @@ bool zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const d
 	    {
               if ( longname && longname[0] )
                 {
-                  char zlongname[CDI_MAX_NAME]; zlongname[0] = 0;
-                  zaxisInqLongname(zaxisID, zlongname);
+                  char zlongname[CDI_MAX_NAME];
+                  int length = CDI_MAX_NAME;
+                  cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, zlongname, &length)
                   if ( zlongname[0] && (strcmp(longname, zlongname) != 0) ) differ = true;
                 }
               if ( units && units[0] )
@@ -972,7 +973,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, c
             zaxisDefVct(zaxisID, vctsize, vct);
 
 	  if ( name && name[0] ) cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, name);
-	  if ( longname && longname[0] ) zaxisDefLongname(zaxisID, longname);
+	  if ( longname && longname[0] ) cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, longname);
 	  if ( units && units[0] ) zaxisDefUnits(zaxisID, units);
 	  zaxisDefDatatype(zaxisID, prec);
           cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, ltype1);

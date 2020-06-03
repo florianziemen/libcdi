@@ -247,20 +247,21 @@ int cdiFallbackIterator_levelType(CdiIterator *super, int levelSelector, char **
   CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
   int zaxisId = vlistInqVarZaxis(me->vlistId, me->curVariable);
   (void)levelSelector;
-#define copyString(outPointer, function) do \
+#define copyString(outPointer, key) do \
     { \
       if(outPointer) \
         { \
           char tempBuffer[CDI_MAX_NAME]; \
-          function(zaxisId, tempBuffer); \
+          int length = CDI_MAX_NAME;     \
+          cdiInqKeyString(zaxisId, CDI_GLOBAL, key, tempBuffer, &length); \
           *outPointer = strdup(tempBuffer); \
         } \
     } \
   while(0)
-  copyString(outName, zaxisInqName);    //FIXME: zaxisInqName is unsafe.
-  copyString(outLongName, zaxisInqLongname);    //FIXME: zaxisInqLongname is unsafe.
-  copyString(outStdName, zaxisInqStdname);    //FIXME: zaxisInqStdname is unsafe.
-  copyString(outUnit, zaxisInqUnits);    //FIXME: zaxisInqUnits is unsafe.
+  copyString(outName, CDI_KEY_NAME);
+  copyString(outLongName, CDI_KEY_LONGNAME);
+  copyString(outStdName, CDI_KEY_STDNAME);
+  copyString(outUnit, CDI_KEY_UNITS);
 #undef copyString
   int ltype = 0;
   cdiInqKeyInt(zaxisId, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);

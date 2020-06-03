@@ -596,7 +596,6 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                 double *levels = NULL;
 		double *lbounds = NULL, *ubounds = NULL;
 		const double *vct = NULL;
-                char ctemp[CDI_MAX_NAME];
 
                 if ( !vars1[varID].levinfo ) cdiVlistCreateVarLevInfo(vlistptr1, varID);
 
@@ -690,10 +689,13 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                     Free(cvals2);
                   }
 
-                zaxisInqName(zaxisID, ctemp);
+                char ctemp[CDI_MAX_NAME];
+                int length = CDI_MAX_NAME;
+                cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, ctemp, &length);
                 cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_NAME, ctemp);
-                zaxisInqLongname(zaxisID, ctemp);
-                zaxisDefLongname(zaxisID2, ctemp);
+                length = CDI_MAX_NAME;
+                cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, ctemp, &length);
+                cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_LONGNAME, ctemp);
                 zaxisInqUnits(zaxisID, ctemp);
                 zaxisDefUnits(zaxisID2, ctemp);
                 zaxisDefDatatype(zaxisID2, zaxisInqDatatype(zaxisID));
@@ -702,7 +704,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                 if ( zaxisType == ZAXIS_CHAR )
                   {
                     char dimname[CDI_MAX_NAME+3];
-                    int length = sizeof(dimname);
+                    length = sizeof(dimname);
                     cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_DIMNAME, dimname, &length);
                     if ( dimname[0] == 0 ) { memcpy(dimname, "area_type", 10); dimname[10] = 0; }
                     cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_DIMNAME, dimname);
