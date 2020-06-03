@@ -31,7 +31,7 @@ int main(void)
   zaxisID2 = zaxisCreate(ZAXIS_REFERENCE, nlev);
   zaxisDefLevels(zaxisID2, levs);
   zaxisDefNlevRef(zaxisID2, nlev);
-  zaxisDefNumber(zaxisID2, 71);
+  cdiDefKeyInt(zaxisID2, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, 71);
   //zaxisDefReference(zaxisID2, "http://www.x.y/vgridfile.nc");
   zaxisDefUUID(zaxisID2, "8765432112345678");
  

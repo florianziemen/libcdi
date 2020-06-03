@@ -506,11 +506,12 @@ printZaxisGenericInfo(const int ltype, const int zaxistype, const char *zaxisnam
 static void
 printZaxisReferenceInfo(const int zaxisID)
 {
-  const int number = zaxisInqNumber(zaxisID);
-  if (number > 0)
+  int referenceNumber = 0;
+  cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, &referenceNumber);
+  if (referenceNumber > 0)
     {
       fprintf(stdout, "%33s : ", "zaxis");
-      fprintf(stdout, "number=%d\n", number);
+      fprintf(stdout, "number=%d\n", referenceNumber);
     }
 
   unsigned char uuidOfVGrid[CDI_UUID_SIZE];
