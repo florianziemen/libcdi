@@ -61,9 +61,11 @@ static int defineGrid()
 
   gridDefDatatype ( gridID, DOUBLE_PRECISION );
   gridDefTrunc ( gridID, 1 );
-  gridDefNumber ( gridID, 6 );
-  gridDefPosition ( gridID, 7 );
-  gridDefReference ( gridID, "myReference" );
+
+  cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, 6);
+  cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDINREFERENCE, 7);
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, "myReference");
+
 /* gridDefLCC ( gridID, double originLon, double originLat,  */
 /* 	   double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag); */
 /* gridDefLcc2 ( gridID, double earth_radius, double lon_0,  */
@@ -103,10 +105,8 @@ static int defineZaxis ()
 
 static int defineTaxis ()
 {
-  int taxisID = CDI_UNDEFID;
+  int taxisID = taxisCreate(TAXIS_ABSOLUTE);
 
-  taxisID = taxisCreate(TAXIS_ABSOLUTE);
-  
   taxisDefType  ( taxisID, 0 );
   taxisDefVdate ( taxisID, 1 );
   taxisDefVtime ( taxisID, 2 );
@@ -200,8 +200,7 @@ static void modelRun ( MPI_Comm comm )
   reshPackBufferCreate(&sendBuffer, &bufferSize, &comm);
   xmpi ( MPI_Send ( sendBuffer, bufferSize, MPI_PACKED, 0, 0, comm ));
   recvBuffer = Malloc((size_t)bufferSize);
-  xmpi ( MPI_Recv ( recvBuffer, bufferSize, MPI_PACKED, 0,
-		    0, comm, &status ));
+  xmpi ( MPI_Recv ( recvBuffer, bufferSize, MPI_PACKED, 0, 0, comm, &status ));
 
   namespaceSetActive ( 1 );
   reshUnpackResources(recvBuffer, bufferSize, &comm);

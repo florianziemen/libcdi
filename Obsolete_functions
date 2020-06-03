@@ -15,7 +15,7 @@ gridInqYstdname(gridID, ylongname)    -> cdiInqKeyString(gridID, CDI_YAXIS, CDI_
 
 gridDefNumber(zaxisID, number)        -> cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, number)
 gridInqNumber(zaxisID)                -> cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, &number)
-gridDefPosition(zaxisID, positio)      > cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDINREFERENCE, position)
+gridDefPosition(zaxisID, position)     > cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDINREFERENCE, position)
 gridInqPosition(zaxisID)              -> cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDINREFERENCE, &position)
 gridDefUUID(zaxisID, uuidOfHGrid)     -> cdiDefKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfHGrid, length)
 gridInqUUID(zaxisID)                  -> cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfHGrid, &length)

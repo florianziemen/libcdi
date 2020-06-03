@@ -18,10 +18,10 @@ int main(void)
 
   // Create a grid reference
   gridID = gridCreate(GRID_UNSTRUCTURED, nlon*nlat);
-  gridDefNumber(gridID, 123);
-  gridDefPosition(gridID, 3);
-  gridDefReference(gridID, "http://www.x.y/gridfile.nc");
-  gridDefUUID(gridID, "1234569887654321");
+  cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, 123);
+  cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDINREFERENCE, 3);
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, "http://www.x.y/gridfile.nc");
+  cdiDefKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, "1234569887654321", CDI_UUID_SIZE);
 
   // Create a surface level Z-axis
   zaxisID1 = zaxisCreate(ZAXIS_SURFACE, 1);

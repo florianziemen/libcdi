@@ -65,9 +65,11 @@ static int defineGrid (void)
   gridDefDatatype ( gridID, DOUBLE_PRECISION );
   gridDefTrunc ( gridID, 1 );
   gridDefParamGME ( gridID, 2, 3, 4, 5 );
-  gridDefNumber ( gridID, 6 );
-  gridDefPosition ( gridID, 7 );
-  gridDefReference ( gridID, "myReference" );
+
+  cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, 6);
+  cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDINREFERENCE, 7);
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, "myReference");
+
   for ( i = 0; i < nlon*nlat; i++ )
     area_vec[i] = 0.1 * i;
   gridDefArea ( gridID, ap );
