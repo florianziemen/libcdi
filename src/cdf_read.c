@@ -434,28 +434,28 @@ int cdfGetSkipDim(int fileId, int ncvarid, int (*dimIds)[3])
 }
 
 static
-void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, bool *outSwapXY, size_t (*start)[4], size_t (*count)[4])
+void cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, bool *outSwapXY, size_t (*start)[4], size_t (*count)[4])
 {
   const int tsID = streamptr->curTsID;
   if ( CDI_Debug ) Message("tsID = %d", tsID);
 
   const int fileId = streamptr->fileID;
-  const int vlistId = streamptr->vlistID;
-  const int ncvarid = streamptr->vars[varId].ncvarid;
+  const int vlistID = streamptr->vlistID;
+  const int ncvarid = streamptr->vars[varID].ncvarid;
 
-  const int gridId = vlistInqVarGrid(vlistId, varId);
-  const int timetype = vlistInqVarTimetype(vlistId, varId);
+  const int gridId = vlistInqVarGrid(vlistID, varID);
+  const int timetype = vlistInqVarTimetype(vlistID, varID);
   const size_t gridsize = gridInqSize(gridId);
 
   streamptr->numvals += gridsize;
 
   int dimIds[3]; // this array joins the old variables xid, yid, and zid
-  cdfInqDimIds(streamptr, varId, &dimIds);
+  cdfInqDimIds(streamptr, varID, &dimIds);
 
   const int skipdim = cdfGetSkipDim(fileId, ncvarid, &dimIds);
 
   int dimorder[3];
-  vlistInqVarDimorder(vlistId, varId, &dimorder);
+  vlistInqVarDimorder(vlistID, varID, &dimorder);
 
   *outSwapXY = (dimorder[2] == 2 || dimorder[0] == 1) && dimIds[0] != CDI_UNDEFID && dimIds[1] != CDI_UNDEFID ;
 
@@ -483,7 +483,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
             addDimension(0, size);
             break;
           case 3:
-            addDimension((size_t)levelId, 1);
+            addDimension((size_t)levelID, 1);
             break;
           default:
             Error("Internal errror: Malformed dimension order encountered. Please report this bug.\n");
@@ -505,7 +505,11 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
 
   if ( nvdims != ndims )
-    Error("Internal error, variable %s has an unsupported array structure!", vlistInqVarNamePtr(vlistId, varId));
+    {
+      char name[CDI_MAX_NAME];
+      vlistInqVarName(vlistID, varID, name);
+      Error("Internal error, variable %s has an unsupported array structure!", name);
+    }
 }
 
 static
