@@ -276,17 +276,17 @@ void cdiDefVarKeyInt(cdi_keys_t *keysp, int key, int value)
 
 /*
 @Function  cdiDefKeyInt
-@Title     Define an integer value from a key of a CDI variable
+@Title     Define an integer value from a key
 
 @Prototype int cdiDefKeyInt(int cdiID, int varID, int key, int value)
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
+    @Item  cdiID    CDI object ID (vlistID, gridID, zaxisID).
     @Item  varID    Variable identifier or CDI_GLOBAL.
-    @Item  key      The key to be searched
-    @Item  value    An integer where the data will be read
+    @Item  key      The key to be searched.
+    @Item  value    An integer where the data will be read.
 
 @Description
-The function @func{cdiDefKeyInt} defines a CDI integer value from a key.
+The function @func{cdiDefKeyInt} defines an integer value from a key.
 
 @Result
 @func{cdiDefKeyInt} returns CDI_NOERR if OK.
@@ -307,17 +307,17 @@ int cdiDefKeyInt(int cdiID, int varID, int key, int value)
 
 /*
 @Function  cdiInqKeyInt
-@Title     Get a CDI floating point value from a key
+@Title     Get an integer value from a key
 
 @Prototype int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{zaxisCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
+    @Item  cdiID    CDI object ID (vlistID, gridID, zaxisID).
     @Item  varID    Variable identifier or CDI_GLOBAL.
-    @Item  key      The key to be searched.
+    @Item  key      The key to be searched..
     @Item  value    The address of an integer where the data will be retrieved.
 
 @Description
-The function @func{cdiInqKeyInt} return a CDI integer value from a key.
+The function @func{cdiInqKeyInt} gets an integer value from a key.
 
 @Result
 @func{cdiInqKeyInt} returns CDI_NOERR if key is available.
@@ -375,11 +375,11 @@ void cdiDefVarKeyFloat(cdi_keys_t *keysp, int key, double value)
 
 /*
 @Function  cdiDefKeyFloat
-@Title     Define a floating point value from a key of a CDI variable
+@Title     Define a floating point value from a key
 
 @Prototype int cdiDefKeyFloat(int cdiID, int varID, int key, double value)
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
+    @Item  cdiID    CDI object ID (vlistID, gridID, zaxisID).
     @Item  varID    Variable identifier or CDI_GLOBAL.
     @Item  key      The key to be searched
     @Item  value    A double where the data will be read
@@ -406,17 +406,17 @@ int cdiDefKeyFloat(int cdiID, int varID, int key, double value)
 
 /*
 @Function  cdiInqKeyFloat
-@Title     Get a CDI floating point value from a key
+@Title     Get a floating point value from a key
 
 @Prototype int cdiInqKeyFloat(int cdiID, int varID, int key, double *value)
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{zaxisCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
+    @Item  cdiID    CDI object ID (vlistID, gridID, zaxisID).
     @Item  varID    Variable identifier or CDI_GLOBAL.
     @Item  key      The key to be searched.
     @Item  value    The address of a double where the data will be retrieved.
 
 @Description
-The function @func{cdiInqKeyFloat} return a CDI floating point value from a key.
+The function @func{cdiInqKeyFloat} gets a floating point value from a key.
 
 @Result
 @func{cdiInqKeyFloat} returns CDI_NOERR if key is available.
@@ -469,7 +469,26 @@ void cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, i
     }
 }
 
-//  cdiDefKeyBytes: Define a bytes array from a key of a CDI variable
+/*
+@Function  cdiDefKeyBytes
+@Title     Define a byte array from a key
+
+@Prototype int cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, int length)
+@Parameter
+    @Item  cdiID    CDI object ID (vlistID, gridID, zaxisID).
+    @Item  varID    Variable identifier or CDI_GLOBAL.
+    @Item  key      The key to be searched.
+    @Item  bytes    The address of a byte array where the data will be read.
+    @Item  length   Length of the byte array
+
+@Description
+The function @func{cdiDefKeyBytes} defines a byte array from a key.
+
+@Result
+@func{cdiDefKeyBytes} returns CDI_NOERR if OK.
+
+@EndFunction
+*/
 int cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, int length)
 {
   int status = CDI_NOERR;
@@ -500,7 +519,27 @@ int cdiInqVarKeyBytes(const cdi_keys_t *keysp, int key, unsigned char *bytes, in
   return status;
 }
 
-//  cdiInqKeyBytes: Get a bytes array from a key of a CDI variable
+//  cdiInqKeyBytes: Get a byte array from a key
+/*
+@Function  cdiInqKeyBytes
+@Title     Get a byte array from a key
+
+@Prototype int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length)
+@Parameter
+    @Item  cdiID    CDI object ID (vlistID, gridID, zaxisID).
+    @Item  varID    Variable identifier or CDI_GLOBAL.
+    @Item  key      The key to be searched.
+    @Item  bytes    The address of a byte array where the data will be retrieved.
+                    The caller must allocate space for the returned byte array.
+    @Item  length   The allocated length of the byte array on input.
+@Description
+The function @func{cdiInqKeyBytes} gets a byte array from a key.
+
+@Result
+@func{cdiInqKeyBytes} returns CDI_NOERR if key is available.
+
+@EndFunction
+*/
 int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length)
 {
   xassert(bytes != NULL);
@@ -516,21 +555,35 @@ int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *len
 
 /*
 @Function  cdiDefKeyString
-@Title     Define a string value from a key of a CDI variable
+@Title     Define a string from a key
 
 @Prototype int cdiDefKeyString(int cdiID, int varID, int key, const char *string)
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
+    @Item  cdiID    CDI object ID (vlistID, gridID, zaxisID).
     @Item  varID    Variable identifier or CDI_GLOBAL.
     @Item  key      The key to be searched.
     @Item  string   The address of a string where the data will be read.
 
 @Description
-The function @func{cdiDefKeyString} defines a CDI string value from a key.
+The function @func{cdiDefKeyString} defines a text string from a key.
 
 @Result
 @func{cdiDefKeyString} returns CDI_NOERR if OK.
 
+@Example
+Here is an example using @func{cdiDefKeyString} to define the name of a variable:
+
+@Source
+#include "cdi.h"
+   ...
+int vlistID, varID, status;
+   ...
+vlistID = vlistCreate();
+varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARYING);
+   ...
+status = cdiDefKeyString(vlistID, varID, CDI_KEY_NAME, "temperature");
+   ...
+@EndSource
 @EndFunction
 */
 int cdiDefKeyString(int cdiID, int varID, int key, const char *string)
@@ -545,22 +598,41 @@ int cdiDefKeyString(int cdiID, int varID, int key, const char *string)
 
 /*
 @Function  cdiInqKeyString
-@Title     Get a CDI string value from a key
+@Title     Get a string from a key
 
 @Prototype int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
+    @Item  cdiID    CDI object ID (vlistID, gridID, zaxisID).
     @Item  varID    Variable identifier or CDI_GLOBAL.
     @Item  key      The key to be searched.
     @Item  string   The address of a string where the data will be retrieved.
                     The caller must allocate space for the returned string.
     @Item  length   The allocated length of the string on input.
 @Description
-The function @func{cdiInqKeyString} return a CDI string value from a key.
+The function @func{cdiInqKeyString} gets a text string from a key.
 
 @Result
 @func{cdiInqKeyString} returns CDI_NOERR if key is available.
 
+@Example
+Here is an example using @func{cdiInqKeyString} to get the name of the first variable:
+
+@Source
+#include "cdi.h"
+   ...
+#define STRLEN 256
+   ...
+int streamID, vlistID, varID, status;
+int length = STRLEN;
+char name[STRLEN];
+   ...
+streamID = streamOpenRead(...);
+vlistID = streamInqVlist(streamID);
+   ...
+varID = 0;
+status = cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
+   ...
+@EndSource
 @EndFunction
 */
 int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)

@@ -50,6 +50,70 @@ Define a text attribute
 
 \section*{\texttt{ 
 \ifpdf
+\hyperref[cdiDefKeyBytes]{cdiDefKeyBytes}
+\else
+cdiDefKeyBytes
+\fi
+}}
+\begin{verbatim}
+    INTEGER FUNCTION cdiDefKeyBytes(INTEGER cdiID, INTEGER varID, INTEGER key, 
+                                    unsigned CHARACTER*(*) bytes, INTEGER length)
+\end{verbatim}
+
+Define a byte array from a key
+\ifpdfoutput{}{(\ref{cdiDefKeyBytes})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiDefKeyFloat]{cdiDefKeyFloat}
+\else
+cdiDefKeyFloat
+\fi
+}}
+\begin{verbatim}
+    INTEGER FUNCTION cdiDefKeyFloat(INTEGER cdiID, INTEGER varID, INTEGER key, 
+                                    REAL*8 value)
+\end{verbatim}
+
+Define a floating point value from a key
+\ifpdfoutput{}{(\ref{cdiDefKeyFloat})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiDefKeyInt]{cdiDefKeyInt}
+\else
+cdiDefKeyInt
+\fi
+}}
+\begin{verbatim}
+    INTEGER FUNCTION cdiDefKeyInt(INTEGER cdiID, INTEGER varID, INTEGER key, 
+                                  INTEGER value)
+\end{verbatim}
+
+Define an integer value from a key
+\ifpdfoutput{}{(\ref{cdiDefKeyInt})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiDefKeyString]{cdiDefKeyString}
+\else
+cdiDefKeyString
+\fi
+}}
+\begin{verbatim}
+    INTEGER FUNCTION cdiDefKeyString(INTEGER cdiID, INTEGER varID, INTEGER key, 
+                                     CHARACTER*(*) string)
+\end{verbatim}
+
+Define a string from a key
+\ifpdfoutput{}{(\ref{cdiDefKeyString})}
+
+
+\section*{\texttt{ 
+\ifpdf
 \hyperref[cdiInqAtt]{cdiInqAtt}
 \else
 cdiInqAtt
@@ -110,6 +174,70 @@ cdiInqAttTxt
 
 Get the value(s) of a text attribute
 \ifpdfoutput{}{(\ref{cdiInqAttTxt})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiInqKeyBytes]{cdiInqKeyBytes}
+\else
+cdiInqKeyBytes
+\fi
+}}
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqKeyBytes(INTEGER cdiID, INTEGER varID, INTEGER key, 
+                                    unsigned CHARACTER*(*) bytes, INTEGER length)
+\end{verbatim}
+
+Get a byte array from a key
+\ifpdfoutput{}{(\ref{cdiInqKeyBytes})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiInqKeyFloat]{cdiInqKeyFloat}
+\else
+cdiInqKeyFloat
+\fi
+}}
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqKeyFloat(INTEGER cdiID, INTEGER varID, INTEGER key, 
+                                    REAL*8 value)
+\end{verbatim}
+
+Get a floating point value from a key
+\ifpdfoutput{}{(\ref{cdiInqKeyFloat})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiInqKeyInt]{cdiInqKeyInt}
+\else
+cdiInqKeyInt
+\fi
+}}
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqKeyInt(INTEGER cdiID, INTEGER varID, INTEGER key, 
+                                  INTEGER value)
+\end{verbatim}
+
+Get an integer value from a key
+\ifpdfoutput{}{(\ref{cdiInqKeyInt})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiInqKeyString]{cdiInqKeyString}
+\else
+cdiInqKeyString
+\fi
+}}
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqKeyString(INTEGER cdiID, INTEGER varID, INTEGER key, 
+                                     CHARACTER*(*) string, INTEGER length)
+\end{verbatim}
+
+Get a string from a key
+\ifpdfoutput{}{(\ref{cdiInqKeyString})}
 
 
 \section*{\texttt{ 

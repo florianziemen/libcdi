@@ -786,6 +786,23 @@ int     gridInqYIsc(int gridID);
 size_t  gridInqYCvals(int gridID, char *ycvals[]);
 
 // CDI var keys
+
+// String keys
+#define  CDI_KEY_NAME                          942  // Variable name
+#define  CDI_KEY_LONGNAME                      943  // Long name of the variable
+#define  CDI_KEY_STDNAME                       944  // CF Standard name of the variable
+#define  CDI_KEY_UNITS                         945  // Units of the variable
+
+// Byte array keys
+#define  CDI_KEY_UUID                          960  // UUID for grid/Z-axis reference [size: CDI_UUID_SIZE]
+
+
+#define  CDI_KEY_DIMNAME                       941  // Dimension name
+
+#define  CDI_KEY_PSNAME                        950  // Z-axis surface pressure name
+#define  CDI_KEY_P0NAME                        951  // Z-axis reference pressure name
+#define  CDI_KEY_P0VALUE                       952  // Z-axis reference pressure in Pa
+
 #define  CDI_KEY_TABLESVERSION                 801  // GRIB2 tablesVersion
 #define  CDI_KEY_LOCALTABLESVERSION            802  // GRIB2 localTablesVersion
 #define  CDI_KEY_TYPEOFGENERATINGPROCESS       803  // GRIB2 typeOfGeneratingProcess
@@ -818,44 +835,34 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_GRIDMAP_VARNAME               922  // Grid mapping var name
 #define  CDI_KEY_GRIDMAP_NAME                  923  // Grid mapping name
 
-#define  CDI_KEY_DIMNAME                       941  // Dimension name
-#define  CDI_KEY_NAME                          942  // Variable name
-#define  CDI_KEY_LONGNAME                      943  // Long name of the variable
-#define  CDI_KEY_STDNAME                       944  // CF Standard name of the variable
-#define  CDI_KEY_UNITS                         945  // Units of the variable
-#define  CDI_KEY_PSNAME                        950  // Z-axis surface pressure name
-#define  CDI_KEY_P0NAME                        951  // Z-axis reference pressure name
-#define  CDI_KEY_P0VALUE                       952  // Z-axis reference pressure in Pa
-
-#define  CDI_KEY_UUID                          960  // UUID for grid/Z-axis reference
 #define  CDI_KEY_NUMBEROFVGRIDUSED             961  // GRIB2 numberOfVGridUsed
 #define  CDI_KEY_NLEV                          962  // GRIB2 nlev
 #define  CDI_KEY_NUMBEROFGRIDUSED              963  // GRIB2 numberOfGridUsed
 #define  CDI_KEY_NUMBEROFGRIDINREFERENCE       964  // GRIB2 numberOfGridInReference
 #define  CDI_KEY_REFERENCEURI                  965  // reference URI to grid file
 
-//      cdiDefKeyInt: Define an integer value from a key of a CDI variable
+//      cdiDefKeyInt: Define an integer value from a key
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
 
-//      cdiInqKeyInt: Get an integer value from a key of a CDI variable
+//      cdiInqKeyInt: Get an integer value from a key
 int     cdiInqKeyInt(int cdiID, int varID, int key, int *value);
 
-//      cdiDefKeyFloat: Define a float value from a key of a CDI variable
+//      cdiDefKeyFloat: Define a float value from a key
 int     cdiDefKeyFloat(int cdiID, int varID, int key, double value);
 
-//      cdiInqKeyFloat Get a float value from a key of a CDI variable
+//      cdiInqKeyFloat Get a float value from a key
 int     cdiInqKeyFloat(int cdiID, int varID, int key, double *value);
 
-//      cdiDefKeyBytes: Define a bytes array from a key of a CDI variable
+//      cdiDefKeyBytes: Define a byte array from a key
 int     cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char bytes[], int length);
 
-//      cdiInqKeyBytes: Get a bytes array from a key of a CDI variable
+//      cdiInqKeyBytes: Get a byte array from a key
 int     cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char bytes[], int *length);
 
-//      cdiDefKeyString: Define a string value from a key of a CDI variable
+//      cdiDefKeyString: Define a string from a key
 int     cdiDefKeyString(int cdiID, int varID, int key, const char *string);
 
-//      cdiInqKeyString: Get a string value from a key of a CDI variable
+//      cdiInqKeyString: Get a string from a key
 int     cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length);
 
 //      cdiInqKeyLen: Get the length of the string representation of the key

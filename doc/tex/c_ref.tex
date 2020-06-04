@@ -49,6 +49,67 @@ Define a text attribute
 
 \section*{\texttt{ 
 \ifpdf
+\hyperref[cdiDefKeyBytes]{cdiDefKeyBytes}
+\else
+cdiDefKeyBytes
+\fi
+}}
+\begin{verbatim}
+    int cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, 
+                       int length);
+\end{verbatim}
+
+Define a byte array from a key
+\ifpdfoutput{}{(\ref{cdiDefKeyBytes})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiDefKeyFloat]{cdiDefKeyFloat}
+\else
+cdiDefKeyFloat
+\fi
+}}
+\begin{verbatim}
+    int cdiDefKeyFloat(int cdiID, int varID, int key, double value);
+\end{verbatim}
+
+Define a floating point value from a key
+\ifpdfoutput{}{(\ref{cdiDefKeyFloat})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiDefKeyInt]{cdiDefKeyInt}
+\else
+cdiDefKeyInt
+\fi
+}}
+\begin{verbatim}
+    int cdiDefKeyInt(int cdiID, int varID, int key, int value);
+\end{verbatim}
+
+Define an integer value from a key
+\ifpdfoutput{}{(\ref{cdiDefKeyInt})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiDefKeyString]{cdiDefKeyString}
+\else
+cdiDefKeyString
+\fi
+}}
+\begin{verbatim}
+    int cdiDefKeyString(int cdiID, int varID, int key, const char *string);
+\end{verbatim}
+
+Define a string from a key
+\ifpdfoutput{}{(\ref{cdiDefKeyString})}
+
+
+\section*{\texttt{ 
+\ifpdf
 \hyperref[cdiInqAtt]{cdiInqAtt}
 \else
 cdiInqAtt
@@ -105,6 +166,66 @@ cdiInqAttTxt
 
 Get the value(s) of a text attribute
 \ifpdfoutput{}{(\ref{cdiInqAttTxt})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiInqKeyBytes]{cdiInqKeyBytes}
+\else
+cdiInqKeyBytes
+\fi
+}}
+\begin{verbatim}
+    int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length);
+\end{verbatim}
+
+Get a byte array from a key
+\ifpdfoutput{}{(\ref{cdiInqKeyBytes})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiInqKeyFloat]{cdiInqKeyFloat}
+\else
+cdiInqKeyFloat
+\fi
+}}
+\begin{verbatim}
+    int cdiInqKeyFloat(int cdiID, int varID, int key, double *value);
+\end{verbatim}
+
+Get a floating point value from a key
+\ifpdfoutput{}{(\ref{cdiInqKeyFloat})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiInqKeyInt]{cdiInqKeyInt}
+\else
+cdiInqKeyInt
+\fi
+}}
+\begin{verbatim}
+    int cdiInqKeyInt(int cdiID, int varID, int key, int *value);
+\end{verbatim}
+
+Get an integer value from a key
+\ifpdfoutput{}{(\ref{cdiInqKeyInt})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[cdiInqKeyString]{cdiInqKeyString}
+\else
+cdiInqKeyString
+\fi
+}}
+\begin{verbatim}
+    int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length);
+\end{verbatim}
+
+Get a string from a key
+\ifpdfoutput{}{(\ref{cdiInqKeyString})}
 
 
 \section*{\texttt{ 

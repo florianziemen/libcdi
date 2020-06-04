@@ -380,8 +380,10 @@ sub printfortran {
   }
   $line =~ s/ < / .LT. /og;
   $line =~ s/;$//og;
+  $line =~ s/&//og;
   $line =~ s/const char \*/CHARACTER\*(\*) /og;
   $line =~ s/char \*/CHARACTER\*(\*) /og;
+  $line =~ s/char /CHARACTER /og;
   $line =~ s/int /INTEGER /og;
   $line =~ s/int64_t /INTEGER /og;
   $line =~ s/size_t /INTEGER /og;

@@ -50,6 +50,14 @@ vlistDefVarDatatype   vlist_var
 vlistInqVarDatatype   vlist_var
 vlistDefVarMissval    vlist_var
 vlistInqVarMissval    vlist_var
+cdiDefKeyString       cdi_key
+cdiInqKeyString       cdi_key
+cdiDefKeyInt          cdi_key
+cdiInqKeyInt          cdi_key
+cdiDefKeyFloat        cdi_key
+cdiInqKeyFloat        cdi_key
+cdiDefKeyBytes        cdi_key
+cdiInqKeyBytes        cdi_key
 cdiInqNatts           cdi_att
 cdiInqAtt             cdi_att
 cdiDelAtt             cdi_att

@@ -71,6 +71,17 @@ Function catalog:
    vlistDefVarMissval   Define the missing value of a Variable
    vlistInqVarMissval   Get the missing value of a Variable
 -------------------------------------------------------------
+   cdi_key
+-------------------------------------------------------------
+   cdiDefKeyString      Define a string from a key
+   cdiInqKeyString      Get a string from a key
+   cdiDefKeyInt         Define an integer value from a key
+   cdiInqKeyInt         Get an integer value from a key
+   cdiDefKeyFloat       Define a floating point value from a key
+   cdiInqKeyFloat       Get a floating point value from a key
+   cdiDefKeyBytes       Define a byte array from a key
+   cdiInqKeyBytes       Get a byte array from a key
+-------------------------------------------------------------
    cdi_att
 -------------------------------------------------------------
    cdiInqNatts          Get number of attributes
