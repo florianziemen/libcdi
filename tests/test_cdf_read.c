@@ -13,11 +13,10 @@ printAtts(int vlistID);
 
 int main(int argc, const char **argv)
 {
-  const char *fname = "test.nc";
+  // todo: handle optional arguments here to increase test coverage
+  const char *fname = (argc > 1) ? argv[1] : "test.nc";
+
   int countMissingValues = 1;
-  /* todo: handle optional arguments here to increase test coverage */
-  if (argc)
-    fname = argv[1];
 
   int streamID = streamOpenRead(fname);
   if (streamID < 0)

@@ -25,12 +25,10 @@ compute_curvilinear(double *coords_,
 
 int main(int argc, const char **argv)
 {
-  /* todo: handle optional arguments here to increase test coverage */
-  const char *fname = "test.nc";
-  if (argc > 1)
-    fname = argv[1];
-  int streamID = streamOpenWrite(fname, CDI_FILETYPE_NC);
+  // todo: handle optional arguments here to increase test coverage
+  const char *fname = (argc > 1) ? argv[1] : "test.nc";
 
+  int streamID = streamOpenWrite(fname, CDI_FILETYPE_NC);
   if ( streamID < 0 )
     {
       fprintf(stderr, "Open failed on %s: %s\n", fname,
