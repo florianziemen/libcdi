@@ -453,6 +453,10 @@ otherwise the result is an empty string.
 */
 void vlistInqVarName(int vlistID, int varID, char *name)
 {
+  /*
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
+  */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -870,6 +874,7 @@ The function @func{vlistDefVarName} defines the name of a variable.
 */
 void vlistDefVarName(int vlistID, int varID, const char *name)
 {
+  //(void)cdiDefKeyString(vlistID, varID, CDI_KEY_NAME, name);
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -2004,12 +2009,15 @@ int vlistVarGetPackSize(vlist_t *p, int varID, void *context)
   if (var->extra)
     varsize += serializeGetSize((int)strlen(var->extra), CDI_DATATYPE_TXT, context);
   varsize += serializeGetSize(4 * zaxisInqSize(var->zaxisID), CDI_DATATYPE_INT, context);
+
+  varsize += serializeKeysGetPackSize(&var->keys, context);
+
   varsize += cdiAttsGetSize(p, varID, context);
+
   return varsize;
 }
 
-void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
-                  void *context)
+void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position, void *context)
 {
   double dtempbuf[vlistvar_ndbls];
   var_t *var = p->vars + varID;
@@ -2063,6 +2071,9 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
       for (int levID = 0; levID < nlevs; ++levID) levbuf[levID] = var->levinfo[levID].flevelID;
       free(levbuf);
     }
+
+  serializeKeysPack(&var->keys, buf, size, position, context);
+
   cdiAttsPack(p, varID, buf, size, position, context);
 }
 
@@ -2150,9 +2161,9 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   vlistDefVarCompType(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_COMPTYPE]);
   vlistDefVarCompLevel(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_COMPLEVEL]);
   int nlevs = tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS];
+  var_t *var = vlistptr->vars + newvar;
   if (nlevs)
     {
-      var_t *var = vlistptr->vars + newvar;
       int i, flagSetLev = 0;
       cdiVlistCreateVarLevInfo(vlistptr, newvar);
 
@@ -2170,6 +2181,9 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
       free(levbuf);
     }
   vlistDefVarIOrank(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_IORANK]);
+
+  serializeKeysUnpack(buf, size, position, &var->keys, context);
+
   cdiAttsUnpack(vlistID, newvar, buf, size, position, context);
 }
 
