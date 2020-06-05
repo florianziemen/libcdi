@@ -5,7 +5,19 @@ User defined attributes are described in the next chapter.
 Key attributes are attributes that are interpreted by CDI.
 An example is the name or the units of a variable.
 
-Key attributes can be defined for data variables and coordinate variables.
+Key attributes can be defined for data variables and coordinate variables
+Use the variable ID or one of the following identifiers for the coordinates:
+
+\vspace*{3mm}
+\hspace*{8mm}\begin{minipage}{15cm}
+\begin{deflist}{\large\texttt{CDI\_KEY\_GLOBAL \ \ }}
+\item[\large\texttt{CDI\_KEY\_XAXIS}]   X-axis ID
+\item[\large\texttt{CDI\_KEY\_YAXIS}]   Y-axis ID 
+\item[\large\texttt{CDI\_KEY\_GLOBAL}]   Global Z-axis
+\end{deflist}
+\end{minipage}
+\vspace*{4mm}
+
 Some keys like name and units can be used for all variables.
 Other keys are very special and should only be used for certain variables.
 The user is also responsible for the data type of the key.
@@ -13,7 +25,7 @@ The user is also responsible for the data type of the key.
 CDI supports string, integer, floating point and byte array key attributes.
 The following key attributes are available:
 
-String keys:
+\textbf{String keys}
 
 \vspace*{3mm}
 \hspace*{8mm}\begin{minipage}{15cm}
@@ -26,7 +38,11 @@ String keys:
 \end{minipage}
 \vspace*{4mm}
 
-Byte array keys:
+\textbf{Integer keys}
+
+\textbf{Floating point keys}
+
+\textbf{Byte array keys}
 
 \vspace*{3mm}
 \hspace*{8mm}\begin{minipage}{15cm}

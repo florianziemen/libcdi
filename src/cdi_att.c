@@ -355,7 +355,7 @@ int cdiCopyAtts(int cdiID1, int varID1, int cdiID2, int varID2)
 @Prototype int cdiDefAttInt(int cdiID, int varID, const char *name, int type, int len, const int *ip)
 
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate} or @fref{gridCreate}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
     @Item  type     External data type (@func{CDI_DATATYPE_INT16} or @func{CDI_DATATYPE_INT32}).
@@ -379,7 +379,7 @@ int cdiDefAttInt(int cdiID, int varID, const char *name, int type, int len, cons
 @Prototype int cdiDefAttFlt(int cdiID, int varID, const char *name, int type, int len, const double *dp)
 
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate} or @fref{gridCreate}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
     @Item  type     External data type (@func{CDI_DATATYPE_FLT32} or @func{CDI_DATATYPE_FLT64}).
@@ -403,7 +403,7 @@ int cdiDefAttFlt(int cdiID, int varID, const char *name, int type, int len, cons
 @Prototype int cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp)
 
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate} or @fref{gridCreate}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
     @Item  len      Number of values provided for the attribute.
@@ -412,6 +412,21 @@ int cdiDefAttFlt(int cdiID, int varID, const char *name, int type, int len, cons
 @Description
 The function @func{cdiDefAttTxt} defines a text attribute.
 
+@Example
+Here is an example using @func{cdiDefAttTxt} to define the attribute "description":
+
+@Source
+#include "cdi.h"
+   ...
+int vlistID, varID, status;
+char text[] = "description of the variable";
+   ...
+vlistID = vlistCreate();
+varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARYING);
+   ...
+status = cdiDefAttTxt(vlistID, varID, "description", LEN(text), text);
+   ...
+@EndSource
 @EndFunction
 */
 int cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp)
@@ -425,7 +440,7 @@ int cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp
 
 @Prototype int cdiInqAttInt(int cdiID, int varID, const char *name, int mlen, int *ip)
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{streamInqVlist}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
     @Item  mlen     Number of allocated values provided for the attribute.
@@ -447,7 +462,7 @@ int cdiInqAttInt(int cdiID, int varID, const char *name, int mlen, int *ip)
 
 @Prototype int cdiInqAttFlt(int cdiID, int varID, const char *name, int mlen, double *dp)
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{streamInqVlist}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
     @Item  mlen     Number of allocated values provided for the attribute.
@@ -469,7 +484,7 @@ int cdiInqAttFlt(int cdiID, int varID, const char *name, int mlen, double *dp)
 
 @Prototype int cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp)
 @Parameter
-    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{streamInqVlist}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{zaxisCreate}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
     @Item  mlen     Number of allocated values provided for the attribute.

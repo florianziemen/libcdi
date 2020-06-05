@@ -1,12 +1,15 @@
-Attributes may be associated with each variable to specify non
-CDI standard properties. CDI standard properties as code, name,
-units, and missing value are directly associated with each variable by
-the corresponding CDI function (e.g. {\htmlref{\texttt{vlistDefVarName}}{vlistDefVarName}}).
+Attributes are metadata used to describe variables or a data set.
+CDI distinguishes between key attributes and user attributes.
+Key attributes are described in the last chapter.
+
+User defined attributes are additional attributes that are not interpreted by CDI.
+These attributes are only available for NetCDF datasets. Here they
+correspond to all attributes that are not used by CDI as key attributes.
+
 A user defined attribute has a variable to which it is assigned, a name, a type,
 a length, and a sequence of one or more values.
 The attributes have to be defined after the variable is created and 
-before the variable list is associated with a stream.
-User defined attributes are only used for NetCDF datasets.
+before the variables list is associated with a stream.
 
 It is also possible to have attributes that are not associated with any variable.
 These are called global attributes and are identified by using CDI\_GLOBAL as a 

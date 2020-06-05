@@ -484,8 +484,8 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 @Prototype int gridCreate(int gridtype, size_t size)
 @Parameter
     @Item  gridtype  The type of the grid, one of the set of predefined CDI grid types.
-                     The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
-                     @func{GRID_LONLAT}, @func{GRID_PROJECTION}, @func{GRID_SPECTRAL},
+                     The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_LONLAT},
+                     @func{GRID_GAUSSIAN}, @func{GRID_PROJECTION}, @func{GRID_SPECTRAL},
                      @func{GRID_GME}, @func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED}.
     @Item  size      Number of gridpoints.
 
@@ -940,8 +940,8 @@ The function @func{gridInqType} returns the type of a Grid.
 @Result
 @func{gridInqType} returns the type of the grid,
 one of the set of predefined CDI grid types.
-The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
-@func{GRID_LONLAT}, @func{GRID_PROJECTION}, @func{GRID_SPECTRAL}, @func{GRID_GME},
+The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_LONLAT},
+@func{GRID_GAUSSIAN}, @func{GRID_PROJECTION}, @func{GRID_SPECTRAL}, @func{GRID_GME},
 @func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED}.
 
 @EndFunction

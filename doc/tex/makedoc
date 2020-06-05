@@ -391,8 +391,9 @@ sub printfortran {
   $line =~ s/float /REAL*4 /og;
   $line =~ s/const //og;
   $line =~ s/if /IF /og;
-  $line =~ s/#include \"/INCLUDE \'/og;
-  $line =~ s/\"$/\'/og;
+  $line =~ s/#include \"cdi.h\"/INCLUDE \'cdi.inc\'/og;
+#  $line =~ s/#include \"/INCLUDE \'/og;
+#  $line =~ s/\"$/\'/og;
   $line =~ s/handle_error/CALL handle_error/og;
   printfsrc ("    $line");
 }

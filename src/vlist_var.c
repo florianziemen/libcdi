@@ -909,6 +909,13 @@ The function @func{vlistDefVarLongname} defines the long name of a variable.
 */
 void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 {
+  /*
+  if (longname)
+    {
+      (void)cdiDefKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname);
+      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+    }
+  */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);

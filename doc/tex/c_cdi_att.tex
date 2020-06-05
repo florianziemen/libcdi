@@ -58,6 +58,82 @@ Pointer to location for returned attribute number.
 \end{minipage}
 
 
+\subsection{Define a text attribute: \texttt{cdiDefAttTxt}}
+\index{cdiDefAttTxt}
+\label{cdiDefAttTxt}
+
+The function {\texttt{cdiDefAttTxt}} defines a text attribute.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\texttt{cdiID}\ }
+\item[\texttt{cdiID}]
+CDI ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}}, {\htmlref{\texttt{gridCreate}}{gridCreate}} or {\htmlref{\texttt{zaxisCreate}}{zaxisCreate}}.
+\item[\texttt{varID}]
+Variable identifier, or {\texttt{CDI\_GLOBAL}} for a global attribute.
+\item[\texttt{name}]
+Attribute name.
+\item[\texttt{len}]
+Number of values provided for the attribute.
+\item[\texttt{tp}]
+Pointer to one or more character values.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Example}
+
+Here is an example using {\texttt{cdiDefAttTxt}} to define the attribute "description":
+
+\begin{lstlisting}[language=C, backgroundcolor=\color{pyellow}, basicstyle=\small, columns=flexible]
+
+    #include "cdi.h"
+       ...
+    int vlistID, varID, status;
+    char text[] = "description of the variable";
+       ...
+    vlistID = vlistCreate();
+    varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARYING);
+       ...
+    status = cdiDefAttTxt(vlistID, varID, "description", LEN(text), text);
+       ...
+\end{lstlisting}
+
+
+\subsection{Get the value(s) of a text attribute: \texttt{cdiInqAttTxt}}
+\index{cdiInqAttTxt}
+\label{cdiInqAttTxt}
+
+The function {\texttt{cdiInqAttTxt}} gets the values(s) of a text attribute.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\texttt{cdiID}\ }
+\item[\texttt{cdiID}]
+CDI ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}}, {\htmlref{\texttt{gridCreate}}{gridCreate}} or {\htmlref{\texttt{zaxisCreate}}{zaxisCreate}}.
+\item[\texttt{varID}]
+Variable identifier, or {\texttt{CDI\_GLOBAL}} for a global attribute.
+\item[\texttt{name}]
+Attribute name.
+\item[\texttt{mlen}]
+Number of allocated values provided for the attribute.
+\item[\texttt{tp}]
+Pointer location for returned text attribute value(s).
+
+\end{deflist}
+\end{minipage}
+
+
 \subsection{Define an integer attribute: \texttt{cdiDefAttInt}}
 \index{cdiDefAttInt}
 \label{cdiDefAttInt}
@@ -74,7 +150,7 @@ The function {\texttt{cdiDefAttInt}} defines an integer attribute.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\texttt{cdiID}\ }
 \item[\texttt{cdiID}]
-CDI ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}} or {\htmlref{\texttt{gridCreate}}{gridCreate}}.
+CDI ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}}, {\htmlref{\texttt{gridCreate}}{gridCreate}} or {\htmlref{\texttt{zaxisCreate}}{zaxisCreate}}.
 \item[\texttt{varID}]
 Variable identifier, or {\texttt{CDI\_GLOBAL}} for a global attribute.
 \item[\texttt{name}]
@@ -105,7 +181,7 @@ The function {\texttt{cdiInqAttInt}} gets the values(s) of an integer attribute.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\texttt{cdiID}\ }
 \item[\texttt{cdiID}]
-CDI ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}}, {\htmlref{\texttt{gridCreate}}{gridCreate}} or {\htmlref{\texttt{streamInqVlist}}{streamInqVlist}}.
+CDI ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}}, {\htmlref{\texttt{gridCreate}}{gridCreate}} or {\htmlref{\texttt{zaxisCreate}}{zaxisCreate}}.
 \item[\texttt{varID}]
 Variable identifier, or {\texttt{CDI\_GLOBAL}} for a global attribute.
 \item[\texttt{name}]
@@ -135,7 +211,7 @@ The function {\texttt{cdiDefAttFlt}} defines a floating point attribute.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\texttt{cdiID}\ }
 \item[\texttt{cdiID}]
-CDI ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}} or {\htmlref{\texttt{gridCreate}}{gridCreate}}.
+CDI ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}}, {\htmlref{\texttt{gridCreate}}{gridCreate}} or {\htmlref{\texttt{zaxisCreate}}{zaxisCreate}}.
 \item[\texttt{varID}]
 Variable identifier, or {\texttt{CDI\_GLOBAL}} for a global attribute.
 \item[\texttt{name}]
@@ -166,7 +242,7 @@ The function {\texttt{cdiInqAttFlt}} gets the values(s) of a floating point attr
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\texttt{cdiID}\ }
 \item[\texttt{cdiID}]
-CDI ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}}, {\htmlref{\texttt{gridCreate}}{gridCreate}} or {\htmlref{\texttt{streamInqVlist}}{streamInqVlist}}.
+CDI ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}}, {\htmlref{\texttt{gridCreate}}{gridCreate}} or {\htmlref{\texttt{zaxisCreate}}{zaxisCreate}}.
 \item[\texttt{varID}]
 Variable identifier, or {\texttt{CDI\_GLOBAL}} for a global attribute.
 \item[\texttt{name}]
@@ -175,64 +251,6 @@ Attribute name.
 Number of allocated values provided for the attribute.
 \item[\texttt{dp}]
 Pointer location for returned floating point attribute value(s).
-
-\end{deflist}
-\end{minipage}
-
-
-\subsection{Define a text attribute: \texttt{cdiDefAttTxt}}
-\index{cdiDefAttTxt}
-\label{cdiDefAttTxt}
-
-The function {\texttt{cdiDefAttTxt}} defines a text attribute.
-
-\subsubsection*{Usage}
-
-\begin{verbatim}
-    int cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp);
-\end{verbatim}
-
-\hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\texttt{cdiID}\ }
-\item[\texttt{cdiID}]
-CDI ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}} or {\htmlref{\texttt{gridCreate}}{gridCreate}}.
-\item[\texttt{varID}]
-Variable identifier, or {\texttt{CDI\_GLOBAL}} for a global attribute.
-\item[\texttt{name}]
-Attribute name.
-\item[\texttt{len}]
-Number of values provided for the attribute.
-\item[\texttt{tp}]
-Pointer to one or more character values.
-
-\end{deflist}
-\end{minipage}
-
-
-\subsection{Get the value(s) of a text attribute: \texttt{cdiInqAttTxt}}
-\index{cdiInqAttTxt}
-\label{cdiInqAttTxt}
-
-The function {\texttt{cdiInqAttTxt}} gets the values(s) of a text attribute.
-
-\subsubsection*{Usage}
-
-\begin{verbatim}
-    int cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp);
-\end{verbatim}
-
-\hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\texttt{cdiID}\ }
-\item[\texttt{cdiID}]
-CDI ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}}, {\htmlref{\texttt{gridCreate}}{gridCreate}} or {\htmlref{\texttt{streamInqVlist}}{streamInqVlist}}.
-\item[\texttt{varID}]
-Variable identifier, or {\texttt{CDI\_GLOBAL}} for a global attribute.
-\item[\texttt{name}]
-Attribute name.
-\item[\texttt{mlen}]
-Number of allocated values provided for the attribute.
-\item[\texttt{tp}]
-Pointer location for returned text attribute value(s).
 
 \end{deflist}
 \end{minipage}

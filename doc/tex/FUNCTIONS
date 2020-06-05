@@ -86,12 +86,12 @@ Function catalog:
 -------------------------------------------------------------
    cdiInqNatts          Get number of attributes
    cdiInqAtt            Get information about an attribute
+   cdiDefAttTxt         Define a text attribute
+   cdiInqAttTxt         Get the value(s) of a text attribute
    cdiDefAttInt         Define an integer attribute
    cdiInqAttInt         Get the value(s) of an integer attribute
    cdiDefAttFlt         Define a floating point attribute
    cdiInqAttFlt         Get the value(s) of a floating point attribute
-   cdiDefAttTxt         Define a text attribute
-   cdiInqAttTxt         Get the value(s) of a text attribute
 -------------------------------------------------------------
    grid
 -------------------------------------------------------------
@@ -114,26 +114,12 @@ Function catalog:
    gridInqXbounds       Get the bounds of a X-axis
    gridDefYbounds       Define the bounds of a Y-axis
    gridInqYbounds       Get the bounds of a Y-axis
-   gridDefXname         Define the name of a X-axis
-   gridInqXname         Get the name of a X-axis
-   gridDefXlongname     Define the longname of a X-axis
-   gridInqXlongname     Get the longname of a X-axis
-   gridDefXunits        Define the units of a X-axis
-   gridInqXunits        Get the units of a X-axis
-   gridDefYname         Define the name of a Y-axis
-   gridInqYname         Get the name of a Y-axis
-   gridDefYlongname     Define the longname of a Y-axis
-   gridInqYlongname     Get the longname of a Y-axis
-   gridDefYunits        Define the units of a Y-axis
-   gridInqYunits        Get the units of a Y-axis
    gridDefNumber        Define the reference number for an unstructured grid
    gridInqNumber        Get the reference number to an unstructured grid
    gridDefPosition      Define the position of grid in the reference file
    gridInqPosition      Get the position of grid in the reference file
    gridDefReference     Define the reference URI for an unstructured grid
    gridInqReference     Get the reference URI to an unstructured grid
-   gridDefUUID          Define the UUID for an unstructured grid
-   gridInqUUID          Get the UUID to an unstructured grid
 -------------------------------------------------------------
    zaxis
 -------------------------------------------------------------
@@ -144,12 +130,6 @@ Function catalog:
    zaxisDefLevels       Define the levels of a Z-axis
    zaxisInqLevels       Get all levels of a Z-axis
    zaxisInqLevel        Get one level of a Z-axis
-   zaxisDefName         Define the name of a Z-axis
-   zaxisInqName         Get the name of a Z-axis
-   zaxisDefLongname     Define the longname of a Z-axis
-   zaxisInqLongname     Get the longname of a Z-axis
-   zaxisDefUnits        Define the units of a Z-axis
-   zaxisInqUnits        Get the units of a Z-axis
 -------------------------------------------------------------
    taxis
 -------------------------------------------------------------
