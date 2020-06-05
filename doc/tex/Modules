@@ -88,16 +88,6 @@ gridDefXbounds        grid
 gridInqXbounds        grid
 gridDefYbounds        grid
 gridInqYbounds        grid
- gridDefXpole          grid
- gridInqXpole          grid
-gridDefLambert        grid
-gridInqLambert        grid
-gridDefNumber         grid
-gridInqNumber         grid
-gridDefPosition       grid
-gridInqPosition       grid
-gridDefReference      grid
-gridInqReference      grid
 zaxisCreate           zaxis
 zaxisDestroy          zaxis
  zaxisDuplicate        zaxis

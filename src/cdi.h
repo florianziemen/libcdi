@@ -18,7 +18,7 @@ extern "C" {
 #define  CDI_MAX_NAME             256   // Max length of a name
 
 #define  CDI_UNDEFID               -1
-#define  CDI_GLOBAL                -1   // Global var ID for vlist and grid
+#define  CDI_GLOBAL                -1   // Global var ID for vlist and Z-axis
 #define  CDI_XAXIS                  1   // X-axis ID for grid
 #define  CDI_YAXIS                  2   // Y-axis ID for grid
 
@@ -792,6 +792,15 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_LONGNAME                      943  // Long name of the variable
 #define  CDI_KEY_STDNAME                       944  // CF Standard name of the variable
 #define  CDI_KEY_UNITS                         945  // Units of the variable
+#define  CDI_KEY_REFERENCEURI                  965  // Reference URI to grid file
+
+// Integer keys
+#define  CDI_KEY_NUMBEROFGRIDUSED              963  // GRIB2 numberOfGridUsed
+#define  CDI_KEY_NUMBEROFGRIDINREFERENCE       964  // GRIB2 numberOfGridInReference
+#define  CDI_KEY_NUMBEROFVGRIDUSED             961  // GRIB2 numberOfVGridUsed
+#define  CDI_KEY_NLEV                          962  // GRIB2 nlev
+
+// Floating point keys
 
 // Byte array keys
 #define  CDI_KEY_UUID                          960  // UUID for grid/Z-axis reference [size: CDI_UUID_SIZE]
@@ -823,23 +832,17 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_GRIB2LOCALSECTIONNUMBER       818  // GRIB2 grib2LocalSectionNumber
 #define  CDI_KEY_SECTION2PADDINGLENGTH         819  // GRIB2 length of section2Padding
 #define  CDI_KEY_SECTION2PADDING               820  // GRIB2 section2Padding
-#define  CDI_KEY_UVRELATIVETOGRID              821  // GRIB  uvRelativeToGrid
-#define  CDI_KEY_CONSTITUENTTYPE               822  // GRIB2 constituentType
-#define  CDI_KEY_TYPEOFTIMEINCREMENT           823  // GRIB2 typeOfTimeIncrement
-#define  CDI_KEY_TYPEOFFIRSTFIXEDSURFACE       824  // GRIB2 typeOfFirstFixedSurface
-#define  CDI_KEY_TYPEOFSECONDFIXEDSURFACE      825  // GRIB2 typeOfSecondFixedSurface
+#define  CDI_KEY_CONSTITUENTTYPE               821  // GRIB2 constituentType
+#define  CDI_KEY_TYPEOFTIMEINCREMENT           822  // GRIB2 typeOfTimeIncrement
+#define  CDI_KEY_TYPEOFFIRSTFIXEDSURFACE       823  // GRIB2 typeOfFirstFixedSurface
+#define  CDI_KEY_TYPEOFSECONDFIXEDSURFACE      824  // GRIB2 typeOfSecondFixedSurface
+#define  CDI_KEY_UVRELATIVETOGRID              825  // GRIB  uvRelativeToGrid
 #define  CDI_KEY_SCANNINGMODE                  826  // GRIB  scanningMode
 
 #define  CDI_KEY_VDIMNAME                      920  // Vertex dimension name
 #define  CDI_KEY_GRIDMAP_VARTYPE               921  // Grid mapping var datatype
 #define  CDI_KEY_GRIDMAP_VARNAME               922  // Grid mapping var name
 #define  CDI_KEY_GRIDMAP_NAME                  923  // Grid mapping name
-
-#define  CDI_KEY_NUMBEROFVGRIDUSED             961  // GRIB2 numberOfVGridUsed
-#define  CDI_KEY_NLEV                          962  // GRIB2 nlev
-#define  CDI_KEY_NUMBEROFGRIDUSED              963  // GRIB2 numberOfGridUsed
-#define  CDI_KEY_NUMBEROFGRIDINREFERENCE       964  // GRIB2 numberOfGridInReference
-#define  CDI_KEY_REFERENCEURI                  965  // reference URI to grid file
 
 //      cdiDefKeyInt: Define an integer value from a key
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);

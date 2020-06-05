@@ -114,12 +114,6 @@ Function catalog:
    gridInqXbounds       Get the bounds of a X-axis
    gridDefYbounds       Define the bounds of a Y-axis
    gridInqYbounds       Get the bounds of a Y-axis
-   gridDefNumber        Define the reference number for an unstructured grid
-   gridInqNumber        Get the reference number to an unstructured grid
-   gridDefPosition      Define the position of grid in the reference file
-   gridInqPosition      Get the position of grid in the reference file
-   gridDefReference     Define the reference URI for an unstructured grid
-   gridInqReference     Get the reference URI to an unstructured grid
 -------------------------------------------------------------
    zaxis
 -------------------------------------------------------------
