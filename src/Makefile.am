@@ -138,6 +138,7 @@ libcdi_la_SOURCES = 	 \
 	cdi_att.h 	 \
 	vlist_var.c 	 \
 	vlist_var.h	 \
+	vlist_var_pack.c \
 	zaxis.c		 \
 	zaxis.h		 \
 	stream.c         \

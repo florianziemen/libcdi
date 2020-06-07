@@ -162,6 +162,7 @@ files="async_worker.c \
    cdi_key.c \
    cdi_att.c \
    vlist_var.c \
+   vlist_var_pack.c \
    zaxis.c"
 
 car () {
