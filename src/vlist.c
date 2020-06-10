@@ -230,7 +230,6 @@ void vlist_delete(vlist_t *vlistptr)
     {
       if ( vars[varID].levinfo )  Free(vars[varID].levinfo);
       if ( vars[varID].stdname )  Free(vars[varID].stdname);
-      if ( vars[varID].units )    Free(vars[varID].units);
 
       if ( vlistptr->vars[varID].opt_grib_kvpair )
         {
@@ -292,7 +291,6 @@ static
 void var_copy_entries(var_t *var2, var_t *var1)
 {
   if ( var1->stdname )  var2->stdname  = strdupx(var1->stdname);
-  if ( var1->units )    var2->units    = strdupx(var1->units);
 
   var2->opt_grib_kvpair_size = 0;
   var2->opt_grib_kvpair      = NULL;
@@ -1117,20 +1115,20 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
           int zaxisID = vlistptr->vars[varID].zaxisID;
           int subtypeID = vlistptr->vars[varID].subtypeID;
 	  int tsteptype = vlistptr->vars[varID].tsteptype;
-          char name[CDI_MAX_NAME], longname[CDI_MAX_NAME];
+          char name[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
           int length = CDI_MAX_NAME;
           (void)cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
           length = CDI_MAX_NAME;
           (void)cdiInqKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname, &length);
-          const char *units = vlistptr->vars[varID].units;
+          length = CDI_MAX_NAME;
+          (void)cdiInqKeyString(vlistID, varID, CDI_KEY_UNITS, units, &length);
           int flag = vlistptr->vars[varID].flag;
           int iorank = vlistptr->vars[varID].iorank;
 
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
           fprintf(fp, "%6d %-8s %6d  %6d  %6d  %6d  %5d %6d %-8s %s [%s]\n",
-                  varID, paramstr, gridID, zaxisID, subtypeID, tsteptype, flag, iorank,
-                  name, longname, units?units:"");
+                  varID, paramstr, gridID, zaxisID, subtypeID, tsteptype, flag, iorank, name, longname, units);
         }
 
       fputs("\n"

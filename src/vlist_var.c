@@ -36,7 +36,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].addoffset     = 0.0;
   vlistptr->vars[varID].scalefactor   = 1.0;
   vlistptr->vars[varID].stdname       = NULL;
-  vlistptr->vars[varID].units         = NULL;
   vlistptr->vars[varID].extra         = NULL;
   vlistptr->vars[varID].levinfo       = NULL;
   vlistptr->vars[varID].comptype      = CDI_COMPRESS_NONE;
@@ -609,14 +608,15 @@ otherwise the result is an empty string.
 */
 void vlistInqVarUnits(int vlistID, int varID, char *units)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(vlistID, varID, CDI_KEY_UNITS, units, &length);
 
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  units[0] = '\0';
-
-  if ( vlistptr->vars[varID].units == NULL )
+  if (!units[0])
     {
+      vlistCheckVarID(__func__, vlistID, varID);
+
+      vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
       int param = vlistptr->vars[varID].param;
       int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
@@ -627,8 +627,6 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
           tableInqEntry(tableID, code, -1, NULL, NULL, units);
 	}
     }
-  else
-    strcpy(units, vlistptr->vars[varID].units);
 
   return;
 }
@@ -900,21 +898,7 @@ The function @func{vlistDefVarUnits} defines the units of a variable.
 */
 void vlistDefVarUnits(int vlistID, int varID, const char *units)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  if ( units )
-    {
-      if ( vlistptr->vars[varID].units )
-	{
-	  Free(vlistptr->vars[varID].units);
-	  vlistptr->vars[varID].units = 0;
-	}
-
-      vlistptr->vars[varID].units = strdupx(units);
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
+  if (units) (void)cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units);
 }
 
 /*
@@ -1188,18 +1172,6 @@ void vlistDestroyVarStdname(int vlistID, int varID)
     {
       Free(vlistptr->vars[varID].stdname);
       vlistptr->vars[varID].stdname = NULL;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-
-void vlistDestroyVarUnits(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if ( vlistptr->vars[varID].units )
-    {
-      Free(vlistptr->vars[varID].units);
-      vlistptr->vars[varID].units = NULL;
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -1591,7 +1563,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
     | FCMP(chunktype) | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID)
     | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
     | FCMPFLT(missval) | FCMPFLT(addoffset) | FCMPFLT(scalefactor)
-    | FCMPSTR(stdname) | FCMPSTR(units) | FCMPSTR(extra)
+    | FCMPSTR(stdname) | FCMPSTR(extra)
     | FCMP(comptype) | FCMP(complevel) | FCMP(lvalidrange)
     | FCMPFLT(validrange[0]) | FCMPFLT(validrange[1]);
 #undef FCMP

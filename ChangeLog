@@ -2,6 +2,7 @@
 
 	* Replaced vlistDefVarName()/vlistInqVarName() by cdiDefKeyString()/cdiInqKeyString() with CDI_KEY_NAME
 	* Replaced vlistDefVarLongname()/vlistInqVarLongname() by cdiDefKeyString()/cdiInqKeyString() with CDI_KEY_LONGNAME
+	* Replaced vlistDefVarUnits()/vlistInqVarUnits() by cdiDefKeyString()/cdiInqKeyString() with CDI_KEY_UNITS
 
 2020-05-15  Uwe Schulzweida
 
