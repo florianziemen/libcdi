@@ -229,7 +229,6 @@ void vlist_delete(vlist_t *vlistptr)
   for ( int varID = 0; varID < nvars; varID++ )
     {
       if ( vars[varID].levinfo )  Free(vars[varID].levinfo);
-      if ( vars[varID].stdname )  Free(vars[varID].stdname);
 
       if ( vlistptr->vars[varID].opt_grib_kvpair )
         {
@@ -290,8 +289,6 @@ void cdiVlistDestroy_(int vlistID)
 static
 void var_copy_entries(var_t *var2, var_t *var1)
 {
-  if ( var1->stdname )  var2->stdname  = strdupx(var1->stdname);
-
   var2->opt_grib_kvpair_size = 0;
   var2->opt_grib_kvpair      = NULL;
   var2->opt_grib_nentries    = 0;

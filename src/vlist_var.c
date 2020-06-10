@@ -35,7 +35,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].missval       = CDI_default_missval;
   vlistptr->vars[varID].addoffset     = 0.0;
   vlistptr->vars[varID].scalefactor   = 1.0;
-  vlistptr->vars[varID].stdname       = NULL;
   vlistptr->vars[varID].extra         = NULL;
   vlistptr->vars[varID].levinfo       = NULL;
   vlistptr->vars[varID].comptype      = CDI_COMPRESS_NONE;
@@ -255,8 +254,6 @@ void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timetyp
   *gridID   = vlistptr->vars[varID].gridID;
   *zaxisID  = vlistptr->vars[varID].zaxisID;
   *timetype = vlistptr->vars[varID].timetype;
-
-  return;
 }
 
 /*
@@ -445,8 +442,6 @@ void vlistInqVarName(int vlistID, int varID, char *name)
 	  sprintf(name, "param%d.%d.%d", pnum, pcat, pdis);
 	}
     }
-
-  return;
 }
 
 /*
@@ -546,8 +541,6 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
           tableInqEntry(tableID, code, -1, NULL, longname, NULL);
 	}
     }
-
-  return;
 }
 
 /*
@@ -573,16 +566,8 @@ otherwise the result is an empty string.
 */
 void vlistInqVarStdname(int vlistID, int varID, char *stdname)
 {
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  if ( vlistptr->vars[varID].stdname == NULL )
-    stdname[0] = '\0';
-  else
-    strcpy(stdname, vlistptr->vars[varID].stdname);
-
-  return;
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, stdname, &length);
 }
 
 /*
@@ -627,8 +612,6 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
           tableInqEntry(tableID, code, -1, NULL, NULL, units);
 	}
     }
-
-  return;
 }
 
 // used in MPIOM !
@@ -864,21 +847,7 @@ The function @func{vlistDefVarStdname} defines the standard name of a variable.
 */
 void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  if ( stdname )
-    {
-      if ( vlistptr->vars[varID].stdname )
-	{
-	  Free(vlistptr->vars[varID].stdname);
-	  vlistptr->vars[varID].stdname = 0;
-	}
-
-      vlistptr->vars[varID].stdname = strdupx(stdname);
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
+  if (stdname) (void)cdiDefKeyString(vlistID, varID, CDI_KEY_STDNAME, stdname);
 }
 
 /*
@@ -1014,8 +983,6 @@ void vlistInqVarExtra(int vlistID, int varID, char *extra)
     sprintf(extra, "-");
   else
     strcpy(extra, vlistptr->vars[varID].extra);
-
-  return;
 }
 
 
@@ -1162,18 +1129,6 @@ int vlistInqVarTimave(int vlistID, int varID)
 {
   const vlist_t *vlistptr = vlist_to_pointer(vlistID);
   return vlistptr->vars[varID].timave;
-}
-
-
-void vlistDestroyVarStdname(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if ( vlistptr->vars[varID].stdname )
-    {
-      Free(vlistptr->vars[varID].stdname);
-      vlistptr->vars[varID].stdname = NULL;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
 }
 
 
@@ -1563,7 +1518,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
     | FCMP(chunktype) | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID)
     | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
     | FCMPFLT(missval) | FCMPFLT(addoffset) | FCMPFLT(scalefactor)
-    | FCMPSTR(stdname) | FCMPSTR(extra)
+    | FCMPSTR(extra)
     | FCMP(comptype) | FCMP(complevel) | FCMP(lvalidrange)
     | FCMPFLT(validrange[0]) | FCMPFLT(validrange[1]);
 #undef FCMP

@@ -66,7 +66,6 @@ typedef struct
   int         xyz;
   bool        missvalused; // true if missval is defined
   bool        lvalidrange;
-  char       *stdname;
   char       *extra;
   double      missval;
   double      scalefactor;
@@ -119,7 +118,6 @@ vlist_t *vlist_to_pointer(int vlistID);
 void cdiVlistMakeInternal(int vlistID);
 void cdiVlistMakeImmutable(int vlistID);
 void vlistCheckVarID(const char *caller, int vlistID, int varID);
-void     vlistDestroyVarStdname(int vlistID, int varID);
 void     cdiVlistDestroy_(int vlistID);
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 int      vlistHasTime(int vlistID);
