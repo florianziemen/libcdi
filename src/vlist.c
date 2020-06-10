@@ -229,8 +229,6 @@ void vlist_delete(vlist_t *vlistptr)
   for ( int varID = 0; varID < nvars; varID++ )
     {
       if ( vars[varID].levinfo )  Free(vars[varID].levinfo);
-      //if ( vars[varID].name )     Free(vars[varID].name);
-      if ( vars[varID].longname ) Free(vars[varID].longname);
       if ( vars[varID].stdname )  Free(vars[varID].stdname);
       if ( vars[varID].units )    Free(vars[varID].units);
 
@@ -293,8 +291,6 @@ void cdiVlistDestroy_(int vlistID)
 static
 void var_copy_entries(var_t *var2, var_t *var1)
 {
-  //if ( var1->name )     var2->name     = strdupx(var1->name);
-  if ( var1->longname ) var2->longname = strdupx(var1->longname);
   if ( var1->stdname )  var2->stdname  = strdupx(var1->stdname);
   if ( var1->units )    var2->units    = strdupx(var1->units);
 
@@ -1113,8 +1109,7 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
 
   if ( nvars > 0 )
     {
-      fprintf(fp, " varID param    gridID zaxisID stypeID tsteptype flag iorank"
-              " name     longname         units\n");
+      fprintf(fp, " varID param    gridID zaxisID stypeID tsteptype flag iorank name     longname         units\n");
       for ( int varID = 0; varID < nvars; varID++ )
         {
           int param = vlistptr->vars[varID].param;
@@ -1122,10 +1117,11 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
           int zaxisID = vlistptr->vars[varID].zaxisID;
           int subtypeID = vlistptr->vars[varID].subtypeID;
 	  int tsteptype = vlistptr->vars[varID].tsteptype;
-          char name[CDI_MAX_NAME];
+          char name[CDI_MAX_NAME], longname[CDI_MAX_NAME];
           int length = CDI_MAX_NAME;
           (void)cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
-          const char *longname = vlistptr->vars[varID].longname;
+          length = CDI_MAX_NAME;
+          (void)cdiInqKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname, &length);
           const char *units = vlistptr->vars[varID].units;
           int flag = vlistptr->vars[varID].flag;
           int iorank = vlistptr->vars[varID].iorank;
@@ -1134,7 +1130,7 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
           cdiParamToString(param, paramstr, sizeof(paramstr));
           fprintf(fp, "%6d %-8s %6d  %6d  %6d  %6d  %5d %6d %-8s %s [%s]\n",
                   varID, paramstr, gridID, zaxisID, subtypeID, tsteptype, flag, iorank,
-                  name, longname?longname:"", units?units:"");
+                  name, longname, units?units:"");
         }
 
       fputs("\n"

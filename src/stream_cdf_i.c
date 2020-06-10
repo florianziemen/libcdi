@@ -3220,7 +3220,7 @@ void cdf_define_institut_and_model_id(int vlistID, int varID)
       if ( name[0] )
         {
           cdiDeleteKey(vlistID, varID, CDI_KEY_NAME);
-          vlistDestroyVarLongname(vlistID, varID);
+          cdiDeleteKey(vlistID, varID, CDI_KEY_LONGNAME);
           vlistDestroyVarUnits(vlistID, varID);
 
           if ( varTableID != CDI_UNDEFID )

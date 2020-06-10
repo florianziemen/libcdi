@@ -35,7 +35,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].missval       = CDI_default_missval;
   vlistptr->vars[varID].addoffset     = 0.0;
   vlistptr->vars[varID].scalefactor   = 1.0;
-  vlistptr->vars[varID].longname      = NULL;
   vlistptr->vars[varID].stdname       = NULL;
   vlistptr->vars[varID].units         = NULL;
   vlistptr->vars[varID].extra         = NULL;
@@ -529,14 +528,15 @@ otherwise the result is an empty string.
 */
 void vlistInqVarLongname(int vlistID, int varID, char *longname)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, longname, &length);
 
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  longname[0] = '\0';
-
-  if ( vlistptr->vars[varID].longname == NULL )
+  if (!longname[0])
     {
+      vlistCheckVarID(__func__, vlistID, varID);
+
+      vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
       int param = vlistptr->vars[varID].param;
       int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
@@ -546,12 +546,6 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
           int tableID = vlistptr->vars[varID].tableID;
           tableInqEntry(tableID, code, -1, NULL, longname, NULL);
 	}
-    }
-  else
-    {
-      // strcpy(longname, vlistptr->vars[varID].longname);
-      strncpy(longname, vlistptr->vars[varID].longname, CDI_MAX_NAME);
-      longname[CDI_MAX_NAME-1] = 0;
     }
 
   return;
@@ -852,28 +846,7 @@ The function @func{vlistDefVarLongname} defines the long name of a variable.
 */
 void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 {
-  /*
-  if (longname)
-    {
-      (void)cdiDefKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname);
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-  */
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  if ( longname )
-    {
-      if ( vlistptr->vars[varID].longname )
-	{
-	  Free(vlistptr->vars[varID].longname);
-	  vlistptr->vars[varID].longname = 0;
-	}
-
-      vlistptr->vars[varID].longname = strdupx(longname);
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
+  if (longname) (void)cdiDefKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname);
 }
 
 /*
@@ -1205,18 +1178,6 @@ int vlistInqVarTimave(int vlistID, int varID)
 {
   const vlist_t *vlistptr = vlist_to_pointer(vlistID);
   return vlistptr->vars[varID].timave;
-}
-
-
-void vlistDestroyVarLongname(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if ( vlistptr->vars[varID].longname )
-    {
-      Free(vlistptr->vars[varID].longname);
-      vlistptr->vars[varID].longname = NULL;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
 }
 
 
@@ -1630,7 +1591,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
     | FCMP(chunktype) | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID)
     | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
     | FCMPFLT(missval) | FCMPFLT(addoffset) | FCMPFLT(scalefactor)
-    | FCMPSTR(longname) | FCMPSTR(stdname) | FCMPSTR(units) | FCMPSTR(extra)
+    | FCMPSTR(stdname) | FCMPSTR(units) | FCMPSTR(extra)
     | FCMP(comptype) | FCMP(complevel) | FCMP(lvalidrange)
     | FCMPFLT(validrange[0]) | FCMPFLT(validrange[1]);
 #undef FCMP

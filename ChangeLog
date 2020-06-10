@@ -1,6 +1,7 @@
 2020-06-10  Uwe Schulzweida
 
 	* Replaced vlistDefVarName()/vlistInqVarName() by cdiDefKeyString()/cdiInqKeyString() with CDI_KEY_NAME
+	* Replaced vlistDefVarLongname()/vlistInqVarLongname() by cdiDefKeyString()/cdiInqKeyString() with CDI_KEY_LONGNAME
 
 2020-05-15  Uwe Schulzweida
 
