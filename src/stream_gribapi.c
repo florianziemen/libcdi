@@ -47,45 +47,40 @@ int gribapiGetZaxisType(long editionNumber, int grib_ltype)
 }
 
 static
-int getTimeunits(long unitsOfTime)
+int getTimeunits(const long unitsOfTime)
 {
-  int timeunits = -1;
-
   switch (unitsOfTime)
     {
-    case 13:  timeunits = TUNIT_SECOND;  break;
-    case  0:  timeunits = TUNIT_MINUTE;  break;
-    case  1:  timeunits = TUNIT_HOUR;    break;
-    case 10:  timeunits = TUNIT_3HOURS;  break;
-    case 11:  timeunits = TUNIT_6HOURS;  break;
-    case 12:  timeunits = TUNIT_12HOURS; break;
-    case  2:  timeunits = TUNIT_DAY;     break;
-    default:  timeunits = TUNIT_HOUR;    break;
+    case 13:  return TUNIT_SECOND;
+    case  0:  return TUNIT_MINUTE;
+    case  1:  return TUNIT_HOUR;
+    case 10:  return TUNIT_3HOURS;
+    case 11:  return TUNIT_6HOURS;
+    case 12:  return TUNIT_12HOURS;
+    case  2:  return TUNIT_DAY;
     }
 
-  return timeunits;
+  return TUNIT_HOUR;
 }
 
 static
-double timeunit_factor(int tu1, int tu2)
+double timeunit_factor(const int tu1, const int tu2)
 {
-  double factor = 1;
-
-  if ( tu2 == TUNIT_HOUR )
+  if (tu2 == TUNIT_HOUR)
     {
       switch (tu1)
         {
-        case TUNIT_SECOND:  factor = 3600;   break;
-        case TUNIT_MINUTE:  factor = 60;     break;
-        case TUNIT_HOUR:    factor = 1;      break;
-        case TUNIT_3HOURS:  factor = 1./3;   break;
-        case TUNIT_6HOURS:  factor = 1./6;   break;
-        case TUNIT_12HOURS: factor = 1./12;  break;
-        case TUNIT_DAY:     factor = 1./24;  break;
+        case TUNIT_SECOND:  return 3600;
+        case TUNIT_MINUTE:  return 60;
+        case TUNIT_HOUR:    return 1;
+        case TUNIT_3HOURS:  return 1./3;
+        case TUNIT_6HOURS:  return 1./6;
+        case TUNIT_12HOURS: return 1./12;
+        case TUNIT_DAY:     return 1./24;
         }
     }
 
-  return factor;
+  return 1;
 }
 
 static
@@ -149,25 +144,24 @@ void gribapiSetDataDateTime(grib_handle *gh, int64_t datadate, int datatime)
 }
 
 static
-int gribapiGetTimeUnitFactor(int timeUnits)
+int gribapiGetTimeUnitFactor(const int timeUnits)
 {
   static bool lprint = true;
-  switch ( timeUnits )
+  switch (timeUnits)
     {
-    case TUNIT_SECOND:  return     1; break;
-    case TUNIT_MINUTE:  return    60; break;
-    case TUNIT_HOUR:    return  3600; break;
-    case TUNIT_3HOURS:  return 10800; break;
-    case TUNIT_6HOURS:  return 21600; break;
-    case TUNIT_12HOURS: return 43200; break;
-    case TUNIT_DAY:     return 86400; break;
+    case TUNIT_SECOND:  return     1;
+    case TUNIT_MINUTE:  return    60;
+    case TUNIT_HOUR:    return  3600;
+    case TUNIT_3HOURS:  return 10800;
+    case TUNIT_6HOURS:  return 21600;
+    case TUNIT_12HOURS: return 43200;
+    case TUNIT_DAY:     return 86400;
     default:
       if ( lprint )
         {
           Warning("Time unit %d unsupported", timeUnits);
           lprint = false;
         }
-      break;
     }
 
   return 0;
@@ -338,7 +332,7 @@ void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lboun
       if ( status == 0 ) *leveltype2 = (int)lpar;
 
       if ( *leveltype1 != 255 && *leveltype2 != 255 && *leveltype2 > 0 ) *lbounds = 1;
-      switch(*leveltype1)
+      switch (*leveltype1)
         {
           case GRIB2_LTYPE_REFERENCE:
             if(*leveltype2 == 1) *lbounds = 0;
@@ -564,11 +558,10 @@ double shapeOfTheEarthToRadius(long shapeOfTheEarth)
 {
   switch (shapeOfTheEarth)
     {
-    case 0:  return 6367470.; break;
-    case 2:  return 6378160.; break;
-    case 6:  return 6371229.; break;
-    case 8:  return 6371200.; break;
-    default: return 6367470.; break;
+    case 0:  return 6367470.;
+    case 2:  return 6378160.;
+    case 6:  return 6371229.;
+    case 8:  return 6371200.;
     }
   return 6367470.;
 }
@@ -730,10 +723,8 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   if ( varname[0] != 0 )
     {
       size_t vlen = CDI_MAX_NAME;
-      gribapiGetString(gh, "name", longname, vlen);
-      vlen = CDI_MAX_NAME;
+      gribapiGetString(gh, "name", longname, vlen); // longname
       gribapiGetString(gh, "units", units, vlen);
-      vlen = CDI_MAX_NAME;
       const int status = grib_get_string(gh, "cfName", stdname, &vlen);
       if ( status != 0 || vlen <= 1 || strncmp(stdname, "unknown", 7) == 0 )
         stdname[0] = 0;
@@ -1000,7 +991,6 @@ int gribapiScanTimestep1(stream_t * streamptr)
       gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
       char varname[256];
-      varname[0] = 0;
       gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
       int64_t vdate, sdate;
@@ -1153,7 +1143,6 @@ int gribapiScanTimestep2(stream_t * streamptr)
       gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
       char varname[256];
-      varname[0] = 0;
       gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
       int64_t vdate, sdate;
@@ -1343,7 +1332,6 @@ int gribapiScanTimestep(stream_t * streamptr)
           var_tile_t tiles = dummy_tiles;
           gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
-          varname[0] = 0;
 	  gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
           int64_t vdate, sdate;
@@ -1648,30 +1636,25 @@ void gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *
 }
 
 static
-int getTimeunitFactor(int timeunit)
+int getTimeunitFactor(const int timeunit)
 {
-  int factor = 1;
-
   switch (timeunit)
     {
-    case TUNIT_SECOND:  factor =     1;  break;
-    case TUNIT_MINUTE:  factor =    60;  break;
-    case TUNIT_HOUR:    factor =  3600;  break;
-    case TUNIT_3HOURS:  factor = 10800;  break;
-    case TUNIT_6HOURS:  factor = 21600;  break;
-    case TUNIT_12HOURS: factor = 43200;  break;
-    case TUNIT_DAY:     factor = 86400;  break;
-    default:            factor =  3600;  break;
+    case TUNIT_SECOND:  return     1;
+    case TUNIT_MINUTE:  return    60;
+    case TUNIT_HOUR:    return  3600;
+    case TUNIT_3HOURS:  return 10800;
+    case TUNIT_6HOURS:  return 21600;
+    case TUNIT_12HOURS: return 43200;
+    case TUNIT_DAY:     return 86400;
     }
 
-  return factor;
+  return 3600;
 }
 
 static
-int grib2ProDefTempHasStatisticalDef(int proDefTempNum)
+int grib2ProDefTempHasStatisticalDef(const int proDefTempNum)
 {
-  int hasStatisticalDef = 0;
-
   switch (proDefTempNum)
     {
       case 8:
@@ -1691,32 +1674,36 @@ int grib2ProDefTempHasStatisticalDef(int proDefTempNum)
       case 1001:
       case 1101:
       case 40034:
-               hasStatisticalDef = 1;  break;
-      default: hasStatisticalDef = 0;  break;
+        return 1;
     }
 
-  return hasStatisticalDef;
+  return 0;
+}
+
+static
+int getUnitsOfTime(const int timeunit)
+{
+  switch (timeunit)
+    {
+    case TUNIT_SECOND:  return 13;
+    case TUNIT_MINUTE:  return  0;
+    case TUNIT_HOUR:    return  1;
+    case TUNIT_3HOURS:  return 10;
+    case TUNIT_6HOURS:  return 11;
+    case TUNIT_12HOURS: return 12;
+    case TUNIT_DAY:     return  2;
+    }
+
+  return 1;
 }
 
 static
 void gribapiDefStepUnits(int editionNumber, grib_handle *gh, int timeunit, int proDefTempNum, int gcinit)
 {
-  long unitsOfTime;
-
-  switch (timeunit)
-    {
-    case TUNIT_SECOND:  unitsOfTime = 13;  break;
-    case TUNIT_MINUTE:  unitsOfTime =  0;  break;
-    case TUNIT_HOUR:    unitsOfTime =  1;  break;
-    case TUNIT_3HOURS:  unitsOfTime = 10;  break;
-    case TUNIT_6HOURS:  unitsOfTime = 11;  break;
-    case TUNIT_12HOURS: unitsOfTime = 12;  break;
-    case TUNIT_DAY:     unitsOfTime =  2;  break;
-    default:            unitsOfTime =  1;  break;
-    }
-
   if ( !gcinit )
     {
+      long unitsOfTime = getUnitsOfTime(timeunit);
+
       GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
       if ( editionNumber == 1 )
         {
@@ -2838,9 +2825,9 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
   double *dataCopy = (double *) malloc(gridsize*sizeof(double));
   memcpy((void*)dataCopy,(void*) data, gridsize*sizeof(double));
 
-  if (scanModeIN==64)           // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
-  {                             // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
-                                // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
+  if (scanModeIN==64)  // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
+  {                    // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
+                       // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
       if (scanModeOUT==00)
       // CHECK:  Looks like that GRIB-API provide (no matter what) data in the scannning mode 00, even it is store in the gribfile as 64 !!
 #define VERTICAL_FLIP
@@ -2894,9 +2881,9 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
       } // end if (scanModeOUT==96)
   } // end if (scanModeIN==64)
 
-  if (scanModeIN==00)           // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
-  {                             // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
-                                // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
+  if (scanModeIN==00)  // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
+  {                    // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
+                       // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
     if (scanModeOUT==64)
       { // flip the data vertically ..
         idxIN= 0; idxOUT= (jDim-1)*iDim;
@@ -2921,9 +2908,9 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
       } // end if (scanModeOUT==96)
   } // end if (scanModeIN==00)
 
-  if (scanModeIN==96)           // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
-  {                             // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
-                                // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
+  if (scanModeIN==96)  // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
+  {                    // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
+                       // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
     if (scanModeOUT==64)
       { // transpose the data
         for (j=0; j<jDim; j++)
@@ -3060,8 +3047,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   int uvRelativeToGrid = -1;
   cdiInqKeyInt(vlistID, varID, CDI_KEY_UVRELATIVETOGRID, &uvRelativeToGrid);
 
-  char name[256];
-  char stdname[256];
+  char name[256], stdname[256];
   vlistInqVarName(vlistID, varID, name);
   vlistInqVarStdname(vlistID, varID, stdname);
 
@@ -3235,8 +3221,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       if ( pdis != 255 )
         {
           char cdi_name[CDI_MAX_NAME]; cdi_name[0] = 0;
-          char grb_name[256];          grb_name[0] = 0;
           vlistInqVarName(vlistID, varID, cdi_name);
+          char grb_name[256];
           gribapiGetString(gh, "shortName", grb_name, sizeof(grb_name));
           strToLower(cdi_name);
           strToLower(grb_name);
@@ -3260,15 +3246,11 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 }
 
 
-void gribapiChangeParameterIdentification(grib_handle *gh, int code, int ltype, int lev)
+void gribapiChangeParameterIdentification(grib_handle *gh, int code, int ltype, int level)
 {
   //  timeRangeIndicator: could be included later
-  const long indicatorOfParameter = code;
-  const long indicatorOfTypeOfLevel = ltype;
-  const long level = lev;
-
-  if (indicatorOfParameter!=-1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", indicatorOfParameter), 0);
-  if (indicatorOfTypeOfLevel!=-1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfTypeOfLevel", indicatorOfTypeOfLevel), 0);
+  if (code!=-1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", code), 0);
+  if (ltype!=-1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfTypeOfLevel", ltype), 0);
   if (level!=-1) GRIB_CHECK(my_grib_set_long(gh, "level", level), 0);
 }
 
