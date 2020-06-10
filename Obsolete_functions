@@ -1,3 +1,6 @@
+vlistDefVarName(vlistID, varID, name) -> cdiDefKeyString(vlistID, varID, CDI_KEY_NAME, name)
+vlistInqVarName(vlistID, varID, name) -> cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length) // partly obsolete
+
 gridDefXname(gridID, xname)           -> cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, xname)
 gridDefXlongname(gridID, xlongname)   -> cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_LONGNAME, xlongname)
 gridDefXunits(gridID, xunits)         -> cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, xunits)

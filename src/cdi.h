@@ -875,6 +875,8 @@ int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
 
 int     cdiCopyKey(int cdiID1, int varID1, int key, int cdiID2);
 
+int     cdiDeleteKey(int cdiID, int varID, int key);
+
 // GRID routines
 
 //      gridDefXname: Define the name of a X-axis

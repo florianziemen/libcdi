@@ -7,9 +7,6 @@
 #include "cdi_int.h"
 
 
-/*int TableDefine = 0; */ /* Define new table also if the entry already exist */
-                          /* This is needed for createtable */
-
 #include "tablepar.h"
 #include "table.h"
 
@@ -97,11 +94,8 @@ static void parTableInitEntry(int tableID)
 static void tableGetPath(void)
 {
   char *path = getenv("TABLEPATH");
-
   if ( path ) tablePath = strdupx(path);
-  /*
-  printf("tablePath = %s\n", tablePath);
-  */
+  // printf("tablePath = %s\n", tablePath);
 }
 
 static void parTableFinalize(void)
@@ -129,8 +123,7 @@ static void parTableInit(void)
   ParTableInit = 1;
 
   atexit(parTableFinalize);
-  if ( cdiPartabIntern )
-    tableDefault();
+  if ( cdiPartabIntern ) tableDefault();
 
   tableGetPath();
 }
@@ -138,8 +131,8 @@ static void parTableInit(void)
 static int tableNewEntry()
 {
   int tableID = 0;
-  static int init = 0;
 
+  static int init = 0;
   if ( ! init )
     {
       for ( tableID = 0; tableID < parTableSize; tableID++ )
@@ -147,16 +140,13 @@ static int tableNewEntry()
       init = 1;
     }
 
-  /*
-    Look for a free slot in parTable.
-  */
+  // Look for a free slot in parTable.
   for ( tableID = 0; tableID < parTableSize; tableID++ )
     {
       if ( ! parTable[tableID].used ) break;
     }
 
-  if ( tableID == parTableSize )
-    Error("no more entries!");
+  if ( tableID == parTableSize ) Error("no more entries!");
 
   parTable[tableID].used = true;
   parTableNum++;
@@ -239,7 +229,7 @@ decodeForm1(char *pline, char *name, char *longname, char *units)
 static int
 decodeForm2(char *pline, char *name, char *longname, char *units)
 {
-  /* Format 2 : code | name | longname | units */
+  // Format 2 : code | name | longname | units
   char *pend;
 
   pline = strchr(pline, '|');
@@ -345,9 +335,7 @@ int tableRead(const char *tablefile)
       if ( len < 4 ) continue;
       while ( isspace((int) *pline) ) pline++;
       id = atoi(pline);
-      /*
-      if ( id > 255 ) id -= 256;
-      */
+      // if ( id > 255 ) id -= 256;
       if ( id == 0 ) continue;
 
       while ( isdigit((int) *pline) ) pline++;
@@ -573,11 +561,9 @@ int tableInqModel(int tableID)
 
 static void partabCheckID(int item)
 {
-  if ( item < 0 || item >= parTableSize )
-    Error("item %d undefined!", item);
+  if ( item < 0 || item >= parTableSize ) Error("item %d undefined!", item);
 
-  if ( ! parTable[item].name )
-    Error("item %d name undefined!", item);
+  if ( ! parTable[item].name ) Error("item %d name undefined!", item);
 }
 
 
@@ -585,8 +571,7 @@ const char *tableInqNamePtr(int tableID)
 {
   const char *tablename = NULL;
 
-  if ( CDI_Debug )
-    Message("tableID = %d", tableID);
+  if ( CDI_Debug ) Message("tableID = %d", tableID);
 
   if ( ! ParTableInit ) parTableInit();
 

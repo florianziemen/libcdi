@@ -11,7 +11,6 @@ enum {
   VLISTVAR_PACK_INT_IDX_GRIDID,
   VLISTVAR_PACK_INT_IDX_ZAXISID,
   VLISTVAR_PACK_INT_IDX_TIMETYPE,
-  VLISTVAR_PACK_INT_IDX_NAMESZ,
   VLISTVAR_PACK_INT_IDX_LONGNAMESZ,
   VLISTVAR_PACK_INT_IDX_STDNAMESZ,
   VLISTVAR_PACK_INT_IDX_UNITSSZ,
@@ -39,8 +38,6 @@ int vlistVarGetPackSize(vlist_t *p, int varID, void *context)
   var_t *var = p->vars + varID;
   int varsize = serializeGetSize(vlistvarNint, CDI_DATATYPE_INT, context)
     + serializeGetSize(vlistvar_ndbls, CDI_DATATYPE_FLT64, context);
-  if (var->name)
-    varsize += serializeGetSize((int)strlen(var->name), CDI_DATATYPE_TXT, context);
   if (var->longname)
     varsize += serializeGetSize((int)strlen(var->longname), CDI_DATATYPE_TXT, context);
   if (var->stdname)
@@ -62,13 +59,12 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position, vo
 {
   double dtempbuf[vlistvar_ndbls];
   var_t *var = p->vars + varID;
-  int tempbuf[vlistvarNint], namesz, longnamesz, stdnamesz, unitssz, extralen;
+  int tempbuf[vlistvarNint], longnamesz, stdnamesz, unitssz, extralen;
 
   tempbuf[VLISTVAR_PACK_INT_IDX_FLAG] = var->flag;
   tempbuf[VLISTVAR_PACK_INT_IDX_GRIDID] = var->gridID;
   tempbuf[VLISTVAR_PACK_INT_IDX_ZAXISID] = var->zaxisID;
   tempbuf[VLISTVAR_PACK_INT_IDX_TIMETYPE] = var->timetype;
-  tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ] = namesz = var->name?(int)strlen(var->name):0;
   tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ] = longnamesz = var->longname?(int)strlen(var->longname):0;
   tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ] = stdnamesz = var->stdname?(int)strlen(var->stdname):0;
   tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ] = unitssz = var->units?(int)strlen(var->units):0;
@@ -90,8 +86,6 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position, vo
   dtempbuf[2] = var->addoffset;
   serializePack(tempbuf, vlistvarNint, CDI_DATATYPE_INT, buf, size, position, context);
   serializePack(dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64,buf, size, position, context);
-  if (namesz)
-    serializePack(var->name, namesz, CDI_DATATYPE_TXT, buf, size, position, context);
   if (longnamesz)
     serializePack(var->longname, longnamesz, CDI_DATATYPE_TXT, buf, size, position, context);
   if (stdnamesz)
@@ -142,20 +136,12 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
 			 namespaceAdaptKey ( tempbuf[VLISTVAR_PACK_INT_IDX_GRIDID], originNamespace ),
 			 namespaceAdaptKey ( tempbuf[VLISTVAR_PACK_INT_IDX_ZAXISID], originNamespace ),
 			 tempbuf[VLISTVAR_PACK_INT_IDX_TIMETYPE]);
-  if (tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ] || tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ] ||
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ] ||
       tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ] || tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ] ||
       tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN])
-    varname = (char *)Malloc((size_t)imax(imax(imax(imax(tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ],
-                                                         tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ]),
+    varname = (char *)Malloc((size_t)imax(imax(imax(tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ],
                                                     tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ]),
                                                tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ]), tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN]) + 1);
-  if (tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ])
-  {
-    serializeUnpack(buf, size, position,
-                    varname, tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ], CDI_DATATYPE_TXT, context);
-    varname[tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ]] = '\0';
-    vlistDefVarName(vlistID, newvar, varname);
-  }
   if (tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ])
   {
     serializeUnpack(buf, size, position,

@@ -208,6 +208,28 @@ void cdi_define_key(const cdi_key_t *keyp, cdi_keys_t *keysp)
 }
 
 
+int cdiDeleteKey(int cdiID, int varID, int key)
+{
+  int status = -1;
+
+  cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
+  xassert(keysp != NULL);
+
+  cdi_key_t *keyp = find_key(keysp, key);
+  if ( keyp != NULL ) // key in use
+    {
+      if ( keyp->length )
+        {
+          free(keyp->v.s);
+          keyp->v.s = NULL;
+          keyp->length = 0;
+        }
+    }
+
+  return status;
+}
+
+
 void cdiCopyVarKeys(const cdi_keys_t *keysp1, cdi_keys_t *keysp2)
 {
   for ( size_t keyid = 0; keyid < keysp1->nelems; keyid++ )

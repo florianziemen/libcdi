@@ -782,8 +782,9 @@ int cdfDefVar(stream_t *streamptr, int varID)
   size_t chunks[4];
   int ndims = cdfDefineDimsAndChunks(streamptr, varID, xid, yid, zid, gridsize, dimorder, dims, lchunk, chunks, axis, &iax);
 
-  char name[CDI_MAX_NAME]; name[0] = 0;
-  if ( vlistInqVarNamePtr(vlistID, varID) ) vlistInqVarName(vlistID, varID, name);
+  char name[CDI_MAX_NAME];
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
 
   char longname[CDI_MAX_NAME]; longname[0] = 0;
   char stdname[CDI_MAX_NAME]; stdname[0] = 0;

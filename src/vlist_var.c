@@ -35,7 +35,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].missval       = CDI_default_missval;
   vlistptr->vars[varID].addoffset     = 0.0;
   vlistptr->vars[varID].scalefactor   = 1.0;
-  vlistptr->vars[varID].name          = NULL;
   vlistptr->vars[varID].longname      = NULL;
   vlistptr->vars[varID].stdname       = NULL;
   vlistptr->vars[varID].units         = NULL;
@@ -388,21 +387,17 @@ int vlistInqVarCode(int vlistID, int varID)
   int code = pnum;
   if ( pdis != 255 ) code = -varID-1; // GRIB2 Parameter
 
-  if ( code < 0 && vlistptr->vars[varID].tableID != -1 && vlistptr->vars[varID].name != NULL )
+  int tableID = vlistptr->vars[varID].tableID;
+  if (code < 0 && tableID != -1)
     {
-      tableInqParCode(vlistptr->vars[varID].tableID, vlistptr->vars[varID].name, &code);
+      char name[CDI_MAX_NAME];
+      int length = CDI_MAX_NAME;
+      (void)cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
+
+      if (name[0]) tableInqParCode(tableID, name, &code);
     }
 
   return code;
-}
-
-
-const char *vlistInqVarNamePtr(int vlistID, int varID)
-{
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].name;
 }
 
 /*
@@ -428,16 +423,15 @@ otherwise the result is an empty string.
 */
 void vlistInqVarName(int vlistID, int varID, char *name)
 {
-  /*
   int length = CDI_MAX_NAME;
   (void)cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
-  */
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  if ( vlistptr->vars[varID].name == NULL )
+  if (!name[0])
     {
+      vlistCheckVarID(__func__, vlistID, varID);
+
+      vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
       int param = vlistptr->vars[varID].param;
       int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
@@ -445,17 +439,14 @@ void vlistInqVarName(int vlistID, int varID, char *name)
 	{
 	  int code = pnum;
 	  int tableID = vlistptr->vars[varID].tableID;
-          name[0] = 0;
           tableInqEntry(tableID, code, -1, name, NULL, NULL);
-	  if ( !name[0] ) sprintf(name, "var%d", code);
+	  if (!name[0]) sprintf(name, "var%d", code);
 	}
       else
 	{
 	  sprintf(name, "param%d.%d.%d", pnum, pcat, pdis);
 	}
     }
-  else
-    strcpy(name, vlistptr->vars[varID].name);   //FIXME: This may overrun the provided buffer.
 
   return;
 }
@@ -477,27 +468,26 @@ The memory for the returned string is allocated to fit the string via Malloc().
 
 @EndFunction
 */
-char* vlistCopyVarName(int vlistId, int varId)
+char *vlistCopyVarName(int vlistID, int varID)
 {
-  vlist_t* vlistptr = vlist_to_pointer(vlistId);
-  vlistCheckVarID(__func__, vlistId, varId);
+  // If a name is set in the variable description, use that.
+  char name[CDI_MAX_NAME];
+  int length = CDI_MAX_NAME;
+  (void)cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
+  if (name[0]) return strdup(name);
 
-  //If a name is set in the variable description, use that.
-  {
-    const char* name = vlistptr->vars[varId].name;
-    if (name) return strdup(name);
-  }
+  vlistCheckVarID(__func__, vlistID, varID);
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  //Otherwise we check if we should use the table of parameter descriptions.
-  int param = vlistptr->vars[varId].param;
+  // Otherwise we check if we should use the table of parameter descriptions.
+  int param = vlistptr->vars[varID].param;
   int discipline, category, number;
   cdiDecodeParam(param, &number, &category, &discipline);
   char *result = NULL;
   if (discipline == 255)
     {
-      int tableId = vlistptr->vars[varId].tableID;
-      char name[CDI_MAX_NAME]; name[0] = 0;
-      tableInqEntry(tableId, number, -1, name, NULL, NULL);
+      int tableID = vlistptr->vars[varID].tableID;
+      tableInqEntry(tableID, number, -1, name, NULL, NULL);
       if ( name[0] )
         result = strdup(name);
       else
@@ -842,22 +832,7 @@ The function @func{vlistDefVarName} defines the name of a variable.
 */
 void vlistDefVarName(int vlistID, int varID, const char *name)
 {
-  //(void)cdiDefKeyString(vlistID, varID, CDI_KEY_NAME, name);
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  if ( name )
-    {
-      if ( vlistptr->vars[varID].name )
-	{
-	  Free(vlistptr->vars[varID].name);
-	  vlistptr->vars[varID].name = NULL;
-	}
-
-      vlistptr->vars[varID].name = strdupx(name);
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
+  (void)cdiDefKeyString(vlistID, varID, CDI_KEY_NAME, name);
 }
 
 /*
@@ -1230,18 +1205,6 @@ int vlistInqVarTimave(int vlistID, int varID)
 {
   const vlist_t *vlistptr = vlist_to_pointer(vlistID);
   return vlistptr->vars[varID].timave;
-}
-
-
-void vlistDestroyVarName(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if ( vlistptr->vars[varID].name )
-    {
-      Free(vlistptr->vars[varID].name);
-      vlistptr->vars[varID].name = NULL;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
 }
 
 
@@ -1666,7 +1629,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
     | FCMP(datatype) | FCMP(timetype) | FCMP(tsteptype) | FCMP(timave)
     | FCMP(chunktype) | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID)
     | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
-    | FCMPFLT(missval) | FCMPFLT(addoffset) | FCMPFLT(scalefactor) | FCMPSTR(name)
+    | FCMPFLT(missval) | FCMPFLT(addoffset) | FCMPFLT(scalefactor)
     | FCMPSTR(longname) | FCMPSTR(stdname) | FCMPSTR(units) | FCMPSTR(extra)
     | FCMP(comptype) | FCMP(complevel) | FCMP(lvalidrange)
     | FCMPFLT(validrange[0]) | FCMPFLT(validrange[1]);

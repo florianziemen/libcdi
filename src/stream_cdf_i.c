@@ -3183,7 +3183,6 @@ void cdf_define_code_and_param(int vlistID, int varID)
           if ( strStartsWith(name, "var") )
             {
               vlistDefVarCode(vlistID, varID, atoi(name+3));
-              // vlistDestroyVarName(vlistID, varID);
             }
         }
       else if ( len > 4 && isdigit((int) name[4]) )
@@ -3191,7 +3190,6 @@ void cdf_define_code_and_param(int vlistID, int varID)
           if ( strStartsWith(name, "code") )
             {
               vlistDefVarCode(vlistID, varID, atoi(name+4));
-              // vlistDestroyVarName(vlistID, varID);
             }
         }
       else if ( len > 5 && isdigit((int) name[5]) )
@@ -3201,7 +3199,6 @@ void cdf_define_code_and_param(int vlistID, int varID)
               int pnum = -1, pcat = 255, pdis = 255;
               sscanf(name+5, "%d.%d.%d", &pnum, &pcat, &pdis);
               vlistDefVarParam(vlistID, varID, cdiEncodeParam(pnum, pcat, pdis));
-              // vlistDestroyVarName(vlistID, varID);
             }
         }
     }
@@ -3222,7 +3219,7 @@ void cdf_define_institut_and_model_id(int vlistID, int varID)
       tableInqEntry(cdiDefaultTableID, code, -1, name, longname, units);
       if ( name[0] )
         {
-          vlistDestroyVarName(vlistID, varID);
+          cdiDeleteKey(vlistID, varID, CDI_KEY_NAME);
           vlistDestroyVarLongname(vlistID, varID);
           vlistDestroyVarUnits(vlistID, varID);
 

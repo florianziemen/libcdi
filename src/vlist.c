@@ -229,7 +229,7 @@ void vlist_delete(vlist_t *vlistptr)
   for ( int varID = 0; varID < nvars; varID++ )
     {
       if ( vars[varID].levinfo )  Free(vars[varID].levinfo);
-      if ( vars[varID].name )     Free(vars[varID].name);
+      //if ( vars[varID].name )     Free(vars[varID].name);
       if ( vars[varID].longname ) Free(vars[varID].longname);
       if ( vars[varID].stdname )  Free(vars[varID].stdname);
       if ( vars[varID].units )    Free(vars[varID].units);
@@ -293,7 +293,7 @@ void cdiVlistDestroy_(int vlistID)
 static
 void var_copy_entries(var_t *var2, var_t *var1)
 {
-  if ( var1->name )     var2->name     = strdupx(var1->name);
+  //if ( var1->name )     var2->name     = strdupx(var1->name);
   if ( var1->longname ) var2->longname = strdupx(var1->longname);
   if ( var1->stdname )  var2->stdname  = strdupx(var1->stdname);
   if ( var1->units )    var2->units    = strdupx(var1->units);
@@ -841,15 +841,21 @@ void vlistMerge(int vlistID2, int vlistID1)
 
   if ( nvars1 == nvars2 )
     {
+      char name1[CDI_MAX_NAME], name2[CDI_MAX_NAME];
       for ( varID = 0; varID < nvars2; varID++ )
 	{
           size_t ngp1 = gridInqSize(vars1[varID].gridID);
           size_t ngp2 = gridInqSize(vars2[varID].gridID);
           if ( ngp1 != ngp2 ) break;
 
-	  if ( vars1[varID].name && vars2[varID].name )
+          int length = CDI_MAX_NAME;
+          (void)cdiInqKeyString(vlistID1, varID, CDI_KEY_NAME, name1, &length);
+          length = CDI_MAX_NAME;
+          (void)cdiInqKeyString(vlistID2, varID, CDI_KEY_NAME, name2, &length);
+
+	  if ( *name1 && *name2 )
 	    {
-	      if ( strcmp(vars1[varID].name, vars2[varID].name) != 0 ) break;
+	      if ( strcmp(name1, name2) != 0 ) break;
 	    }
 	  else
 	    {
@@ -1089,9 +1095,10 @@ int vlistNtsteps(int vlistID)
 static
 void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
 {
-  fprintf ( fp, "#\n# vlistID %d\n#\n", vlistptr->self);
+  const int vlistID = vlistptr->self;
+  fprintf ( fp, "#\n# vlistID %d\n#\n", vlistID);
 
-  int nvars = vlistptr->nvars;
+  const int nvars = vlistptr->nvars;
 
   fprintf(fp, "nvars    : %d\n"
           "ngrids   : %d\n"
@@ -1115,7 +1122,9 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
           int zaxisID = vlistptr->vars[varID].zaxisID;
           int subtypeID = vlistptr->vars[varID].subtypeID;
 	  int tsteptype = vlistptr->vars[varID].tsteptype;
-          const char *name = vlistptr->vars[varID].name;
+          char name[CDI_MAX_NAME];
+          int length = CDI_MAX_NAME;
+          (void)cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
           const char *longname = vlistptr->vars[varID].longname;
           const char *units = vlistptr->vars[varID].units;
           int flag = vlistptr->vars[varID].flag;
@@ -1125,7 +1134,7 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
           cdiParamToString(param, paramstr, sizeof(paramstr));
           fprintf(fp, "%6d %-8s %6d  %6d  %6d  %6d  %5d %6d %-8s %s [%s]\n",
                   varID, paramstr, gridID, zaxisID, subtypeID, tsteptype, flag, iorank,
-                  name?name:"", longname?longname:"", units?units:"");
+                  name, longname?longname:"", units?units:"");
         }
 
       fputs("\n"
