@@ -523,7 +523,7 @@ otherwise the result is an empty string.
 void vlistInqVarLongname(int vlistID, int varID, char *longname)
 {
   int length = CDI_MAX_NAME;
-  (void)cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, longname, &length);
+  (void)cdiInqKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname, &length);
 
   if (!longname[0])
     {
