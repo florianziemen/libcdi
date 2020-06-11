@@ -446,6 +446,24 @@ VarScanKeys gribapiGetScanKeys(grib_handle *gh)
 }
 
 static
+void gribapiGetNameKeys(grib_handle *gh, int varID)
+{
+  char string[CDI_MAX_NAME];
+
+  size_t vlen = CDI_MAX_NAME;
+  gribapiGetString(gh, "name", string, vlen); // longname
+  if (string[0]) varDefKeyString(varID, CDI_KEY_LONGNAME, string);
+
+  gribapiGetString(gh, "units", string, vlen);
+  if (string[0]) varDefKeyString(varID, CDI_KEY_UNITS, string);
+
+  string[0] = 0;
+  const int status = grib_get_string(gh, "cfName", string, &vlen);
+  if ( status != 0 || vlen <= 1 || strncmp(string, "unknown", 7) == 0 ) string[0] = 0;
+  if (string[0]) varDefKeyString(varID, CDI_KEY_STDNAME, string);
+}
+
+static
 void gribapiGetKeys(grib_handle *gh, int varID)
 {
   long tablesVersion = 0;
@@ -637,8 +655,6 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
                       int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf, int level_unit,
                       VarScanKeys *scanKeys, const var_tile_t *tiles, int lread_additional_keys)
 {
-  char stdname[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
-
   const int vlistID = streamptr->vlistID;
   const int tsID    = streamptr->curTsID;
   const int recID   = recordNewEntry(streamptr, tsID);
@@ -716,27 +732,12 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   // if ( datatype > 32 ) datatype = CDI_DATATYPE_PACK32;
   if ( datatype <  0 ) datatype = CDI_DATATYPE_PACK;
 
-  stdname[0] = 0;
-  longname[0] = 0;
-  units[0] = 0;
-
-  if ( varname[0] != 0 )
-    {
-      size_t vlen = CDI_MAX_NAME;
-      gribapiGetString(gh, "name", longname, vlen); // longname
-      gribapiGetString(gh, "units", units, vlen);
-      const int status = grib_get_string(gh, "cfName", stdname, &vlen);
-      if ( status != 0 || vlen <= 1 || strncmp(stdname, "unknown", 7) == 0 )
-        stdname[0] = 0;
-    }
-  // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units);
-
   // add the previously read record data to the (intermediate) list of records
   int tile_index = 0;
   int varID = 0, levelID = 0;
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, level_sf, level_unit,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype1, leveltype2,
-	       varname, stdname, longname, units, scanKeys, tiles, &tile_index);
+	       varname, scanKeys, tiles, &tile_index);
 
   record->varID = (short)varID;
   record->levelID = (short)levelID;
@@ -745,6 +746,7 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
 
   if ( uvRelativeToGrid ) varDefKeyInt(varID, CDI_KEY_UVRELATIVETOGRID, 1);
 
+  if (varname[0]) gribapiGetNameKeys(gh, varID);
   gribapiGetKeys(gh, varID);
 
   if (lread_additional_keys)
@@ -753,7 +755,7 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
       double dval;
       for ( int i = 0; i < cdiNAdditionalGRIBKeys; i++ )
         {
-          /* note: if the key is not defined, we do not throw an error! */
+          // note: if the key is not defined, we do not throw an error!
           if ( grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0 )
             varDefOptGribInt(varID, tile_index, lval, cdiAdditionalGRIBKeys[i]);
           if ( grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0 )

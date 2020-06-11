@@ -190,7 +190,7 @@ void srv_add_record(stream_t *streamptr, int param, int level, size_t xsize, siz
   int varID, levelID = 0;
   varAddRecord(recID, param, gridID, leveltype, 0, level, 0, 0, 0,
 	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1,
-               NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+               NULL, NULL, NULL, NULL);
 
   xassert(varID <= SHRT_MAX && levelID <= SHRT_MAX);
   record->varID   = (short)varID;

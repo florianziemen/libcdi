@@ -71,9 +71,6 @@ typedef struct
   bool           lmissval;
   double         missval;
   char          *name;
-  char          *stdname;
-  char          *longname;
-  char          *units;
 
   /* meta-data for specification of tiles (currently only GRIB-API: */
   subtype_t     *tiles;
@@ -119,9 +116,6 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].lmissval       = false;
   vartable[varID].missval        = 0;
   vartable[varID].name           = NULL;
-  vartable[varID].stdname        = NULL;
-  vartable[varID].longname       = NULL;
-  vartable[varID].units          = NULL;
   vartable[varID].tiles          = NULL;
 }
 
@@ -174,9 +168,6 @@ void varFree(void)
         }
 
       if ( vartable[varID].name )     Free(vartable[varID].name);
-      if ( vartable[varID].stdname )  Free(vartable[varID].stdname);
-      if ( vartable[varID].longname ) Free(vartable[varID].longname);
-      if ( vartable[varID].units )    Free(vartable[varID].units);
       if ( vartable[varID].tiles )    subtypeDestroyPtr(vartable[varID].tiles);
 
       cdi_keys_t *keysp = &(vartable[varID].keys);
@@ -399,8 +390,7 @@ int varInsertTileSubtype(vartable_t *vptr, const var_tile_t *tiles)
 void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int level_sf, int level_unit, int prec,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype1, int ltype2,
-		  const char *name, const char *stdname, const char *longname, const char *units,
-                  const VarScanKeys *scanKeys, const var_tile_t *tiles, int *tile_index)
+		  const char *name, const VarScanKeys *scanKeys, const var_tile_t *tiles, int *tile_index)
 {
   unsigned varID = (cdiSplitLtype105 != 1 || zaxistype != ZAXIS_HEIGHT) ?
     varGetEntry(param, gridID, zaxistype, ltype1, tsteptype, name, scanKeys, tiles) : (unsigned) CDI_UNDEFID;
@@ -422,9 +412,6 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       if ( numavg ) vartable[varID].timave = 1;
 
       if ( name && name[0] )         vartable[varID].name     = strdup(name);
-      if ( stdname && stdname[0] )   vartable[varID].stdname  = strdup(stdname);
-      if ( longname && longname[0] ) vartable[varID].longname = strdup(longname);
-      if ( units && units[0] )       vartable[varID].units    = strdup(units);
     }
   else
     {
@@ -486,9 +473,7 @@ int cmpLevelTable(const void* s1, const void* s2)
   int cmp = 0;
   const leveltable_t *x = (const leveltable_t*) s1;
   const leveltable_t *y = (const leveltable_t*) s2;
-  /*
-  printf("%g %g  %d %d\n", x->leve11, y->level1, x, y);
-  */
+  // printf("%g %g  %d %d\n", x->leve11, y->level1, x, y);
   if      ( x->level1 < y->level1 ) cmp = -1;
   else if ( x->level1 > y->level1 ) cmp =  1;
 
@@ -501,9 +486,7 @@ int cmpLevelTableInv(const void* s1, const void* s2)
   int cmp = 0;
   const leveltable_t *x = (const leveltable_t*) s1;
   const leveltable_t *y = (const leveltable_t*) s2;
-  /*
-  printf("%g %g  %d %d\n", x->leve11, y->level1, x, y);
-  */
+  // printf("%g %g  %d %d\n", x->leve11, y->level1, x, y);
   if      ( x->level1 < y->level1 ) cmp =  1;
   else if ( x->level1 > y->level1 ) cmp = -1;
 
@@ -707,11 +690,11 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( lbounds ) Free(dlevels2);
       Free(dlevels);
 
-      /* define new subtype for tile set */
+      // define new subtype for tile set
       int tilesetID = CDI_UNDEFID;
       if ( vartable[varid].tiles ) tilesetID = vlistDefTileSubtype(vlistID, vartable[varid].tiles);
 
-      /* generate new variable */
+      // generate new variable
       int varID = stream_new_var(streamptr, gridID, zaxisID, tilesetID);
       varID = vlistDefVarTiles(vlistID, gridID, zaxisID, TIME_VARYING, tilesetID);
 
@@ -725,9 +708,6 @@ void cdi_generate_vars(stream_t *streamptr)
 
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
       if ( vartable[varid].name )     vlistDefVarName(vlistID, varID, vartable[varid].name);
-      if ( vartable[varid].stdname )  vlistDefVarStdname(vlistID, varID, vartable[varid].stdname);
-      if ( vartable[varid].longname ) vlistDefVarLongname(vlistID, varID, vartable[varid].longname);
-      if ( vartable[varid].units )    vlistDefVarUnits(vlistID, varID, vartable[varid].units);
 
       vlist_t *vlistptr = vlist_to_pointer(vlistID);
       for ( int i = 0; i < vartable[varid].opt_grib_nentries; i++ )
@@ -743,7 +723,7 @@ void cdi_generate_vars(stream_t *streamptr)
 	      strdupx(vartable[varid].opt_grib_kvpair[i].keyword);
           vlistptr->vars[varID].opt_grib_kvpair[i].update = true;
         }
-      /* note: if the key is not defined, we do not throw an error! */
+      // note: if the key is not defined, we do not throw an error!
 
       if ( cdiDefaultTableID != CDI_UNDEFID )
 	{
@@ -1056,6 +1036,14 @@ void varDefKeyBytes(int varID, int key, const unsigned char *bytes, int length)
 {
   cdi_keys_t *keysp = &(vartable[varID].keys);
   cdiDefVarKeyBytes(keysp, key, bytes, length);
+}
+
+
+void varDefKeyString(int varID, int key, const char *string)
+{
+  int length = strlen(string) + 1;
+  cdi_keys_t *keysp = &(vartable[varID].keys);
+  cdiDefVarKeyBytes(keysp, key, (const unsigned char *) string, length);
 }
 
 

@@ -9,8 +9,7 @@
 void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int level_sf, int level_unit, int prec,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype1, int ltype2,
-		  const char *name, const char *stdname, const char *longname, const char *units,
-                  const VarScanKeys *scanKeys, const var_tile_t *tiles, int *tile_index);
+		  const char *name, const VarScanKeys *scanKeys, const var_tile_t *tiles, int *tile_index);
 
 void varDefVCT(size_t vctsize, double *vctptr);
 void varDefZAxisReference(int nlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZE]);
@@ -31,6 +30,7 @@ int  varInqTable(int varID);
 
 void varDefKeyInt(int varID, int key, int value);
 void varDefKeyBytes(int varID, int key, const unsigned char *bytes, int length);
+void varDefKeyString(int varID, int key, const char *string);
 
 void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword);
 void varDefOptGribDbl(int varID, int tile_index, double dval, const char *keyword);
