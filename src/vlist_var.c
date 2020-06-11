@@ -567,7 +567,7 @@ otherwise the result is an empty string.
 void vlistInqVarStdname(int vlistID, int varID, char *stdname)
 {
   int length = CDI_MAX_NAME;
-  (void)cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, stdname, &length);
+  (void)cdiInqKeyString(vlistID, varID, CDI_KEY_STDNAME, stdname, &length);
 }
 
 /*
