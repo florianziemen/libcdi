@@ -784,14 +784,17 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   char name[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
-  (void)cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
+  cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
 
   char longname[CDI_MAX_NAME]; longname[0] = 0;
-  char stdname[CDI_MAX_NAME]; stdname[0] = 0;
-  char units[CDI_MAX_NAME]; units[0] = 0;
   vlistInqVarLongname(vlistID, varID, longname);
-  vlistInqVarStdname(vlistID, varID, stdname);
+
+  char units[CDI_MAX_NAME]; units[0] = 0;
   vlistInqVarUnits(vlistID, varID, units);
+
+  char stdname[CDI_MAX_NAME];
+  length = CDI_MAX_NAME;
+  cdiInqKeyString(vlistID, varID, CDI_KEY_STDNAME, stdname, &length);
 
   const int tableID  = vlistInqVarTable(vlistID, varID);
   if (!name[0]) tableInqEntry(tableID, code, -1, name, longname, units);

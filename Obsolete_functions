@@ -2,9 +2,9 @@ vlistDefVarName(vlistID, varID, name)         -> cdiDefKeyString(vlistID, varID,
 vlistDefVarLongname(vlistID, varID, longname) -> cdiDefKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname)
 vlistDefVarUnits(vlistID, varID, units)       -> cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units)
 vlistDefVarStdname(vlistID, varID, stdname)   -> cdiDefKeyString(vlistID, varID, CDI_KEY_STDNAME, stdname)
-vlistInqVarName(vlistID, varID, name)         -> cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length)
-vlistInqVarLongname(vlistID, varID, longname) -> cdiInqKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname, &length)
-vlistInqVarUnits(vlistID, varID, units)       -> cdiInqKeyString(vlistID, varID, CDI_KEY_UNITS, units, &length)
+vlistInqVarName(vlistID, varID, name)         -> cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length)          // partly obsolete
+vlistInqVarLongname(vlistID, varID, longname) -> cdiInqKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname, &length)  // partly obsolete
+vlistInqVarUnits(vlistID, varID, units)       -> cdiInqKeyString(vlistID, varID, CDI_KEY_UNITS, units, &length)        // partly obsolete
 vlistInqVarStdname(vlistID, varID, stdname)   -> cdiInqKeyString(vlistID, varID, CDI_KEY_STDNAME, stdname, &length)
 
 gridDefXname(gridID, xname)           -> cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, xname)

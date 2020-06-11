@@ -38,14 +38,6 @@ vlistInqVarZaxis      vlist_var
 vlistInqVarTsteptype  vlist_var
 vlistDefVarCode       vlist_var
 vlistInqVarCode       vlist_var
-vlistDefVarName       vlist_var
-vlistInqVarName       vlist_var
-vlistDefVarLongname   vlist_var
-vlistInqVarLongname   vlist_var
-vlistDefVarStdname    vlist_var
-vlistInqVarStdname    vlist_var
-vlistDefVarUnits      vlist_var
-vlistInqVarUnits      vlist_var
 vlistDefVarDatatype   vlist_var
 vlistInqVarDatatype   vlist_var
 vlistDefVarMissval    vlist_var

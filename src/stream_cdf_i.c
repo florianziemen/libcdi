@@ -3225,9 +3225,9 @@ void cdf_define_institut_and_model_id(int vlistID, int varID)
 
           if ( varTableID != CDI_UNDEFID )
             {
-              vlistDefVarName(vlistID, varID, name);
-              if ( longname[0] ) vlistDefVarLongname(vlistID, varID, longname);
-              if ( units[0] ) vlistDefVarUnits(vlistID, varID, units);
+              cdiDefKeyString(vlistID, varID, CDI_KEY_NAME, name);
+              if ( longname[0] ) cdiDefKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname);
+              if ( units[0] ) cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units);
             }
           else
             {
@@ -3277,7 +3277,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
       streamptr->vars[varID1].defmiss = false;
       streamptr->vars[varID1].ncvarid = ncvarid;
 
-      vlistDefVarName(vlistID, varID, ncvars[ncvarid].name);
+      cdiDefKeyString(vlistID, varID, CDI_KEY_NAME, ncvars[ncvarid].name);
       if ( ncvars[ncvarid].param != CDI_UNDEFID ) vlistDefVarParam(vlistID, varID, ncvars[ncvarid].param);
       if ( ncvars[ncvarid].code != CDI_UNDEFID )  vlistDefVarCode(vlistID, varID, ncvars[ncvarid].code);
       if ( ncvars[ncvarid].code != CDI_UNDEFID )
@@ -3285,9 +3285,9 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 	  int param = cdiEncodeParam(ncvars[ncvarid].code, ncvars[ncvarid].tabnum, 255);
 	  vlistDefVarParam(vlistID, varID, param);
 	}
-      if ( ncvars[ncvarid].longname[0] )  vlistDefVarLongname(vlistID, varID, ncvars[ncvarid].longname);
-      if ( ncvars[ncvarid].stdname[0] )   vlistDefVarStdname(vlistID, varID, ncvars[ncvarid].stdname);
-      if ( ncvars[ncvarid].units[0] )     vlistDefVarUnits(vlistID, varID, ncvars[ncvarid].units);
+      if ( ncvars[ncvarid].longname[0] )  cdiDefKeyString(vlistID, varID, CDI_KEY_LONGNAME, ncvars[ncvarid].longname);
+      if ( ncvars[ncvarid].stdname[0] )   cdiDefKeyString(vlistID, varID, CDI_KEY_STDNAME, ncvars[ncvarid].stdname);
+      if ( ncvars[ncvarid].units[0] )     cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, ncvars[ncvarid].units);
 
       if ( ncvars[ncvarid].lvalidrange )
         vlistDefVarValidrange(vlistID, varID, ncvars[ncvarid].validrange);

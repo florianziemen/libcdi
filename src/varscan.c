@@ -707,7 +707,7 @@ void cdi_generate_vars(stream_t *streamptr)
       varCopyKeys(vlistID, varID);
 
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
-      if ( vartable[varid].name )     vlistDefVarName(vlistID, varID, vartable[varid].name);
+      if ( vartable[varid].name ) cdiDefKeyString(vlistID, varID, CDI_KEY_NAME, vartable[varid].name);
 
       vlist_t *vlistptr = vlist_to_pointer(vlistID);
       for ( int i = 0; i < vartable[varid].opt_grib_nentries; i++ )
@@ -737,9 +737,9 @@ void cdi_generate_vars(stream_t *streamptr)
 	    {
 	      if ( tableID != CDI_UNDEFID )
 		{
-		  vlistDefVarName(vlistID, varID, name);
-                  if ( longname[0] ) vlistDefVarLongname(vlistID, varID, longname);
-                  if ( units[0] ) vlistDefVarUnits(vlistID, varID, units);
+		  cdiDefKeyString(vlistID, varID, CDI_KEY_NAME, name);
+                  if ( longname[0] ) cdiDefKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname);
+                  if ( units[0] ) cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units);
                 }
 	      else
 		tableID = cdiDefaultTableID;

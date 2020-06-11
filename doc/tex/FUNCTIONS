@@ -58,14 +58,6 @@ Function catalog:
    vlistInqVarTsteptype Get the timestep type of a Variable
    vlistDefVarCode      Define the code number of a Variable
    vlistInqVarCode      Get the Code number of a Variable
-   vlistDefVarName      Define the name of a Variable
-   vlistInqVarName      Get the name of a Variable
-   vlistDefVarLongname  Define the long name of a Variable
-   vlistInqVarLongname  Get the longname of a Variable
-   vlistDefVarStdname   Define the standard name of a Variable
-   vlistInqVarStdname   Get the standard name of a Variable
-   vlistDefVarUnits     Define the units of a Variable
-   vlistInqVarUnits     Get the units of a Variable
    vlistDefVarDatatype  Define the data type of a Variable
    vlistInqVarDatatype  Get the data type of a Variable
    vlistDefVarMissval   Define the missing value of a Variable
