@@ -145,9 +145,6 @@ AC_DEFINE_UNQUOTED(COMP_VERSION, ["$COMP_VERSION"], [Compiler version])
 AC_DEFINE_UNQUOTED([SYSTEM_TYPE],["$ac_cv_build"], [System type])
 AC_SUBST([SYSTEM_TYPE],["$ac_cv_build"])
 #  ----------------------------------------------------------------------
-#  Check for math library
-AC_SEARCH_LIBS(floor, m)
-#  ----------------------------------------------------------------------
 # Add basic configure options
 ACX_CDI_OPTIONS
 AM_CONDITIONAL([ENABLE_NETCDF],[test x$ENABLE_NETCDF = xyes])
