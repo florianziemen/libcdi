@@ -544,14 +544,10 @@ int cdi_att_compare(cdi_atts_t *attspa, cdi_atts_t *attspb, int attnum)
 
 
 static
-int cdiAttGetSize(vlist_t *vlistptr, int varID, int attnum, void *context)
+int cdiAttGetSize(cdi_atts_t *attsp, int attnum, void *context)
 {
-  cdi_atts_t *attsp;
-  cdi_att_t *attp;
-
-  xassert(attsp = get_attsp(vlistptr, varID));
   xassert(attnum >= 0 && attnum < (int)attsp->nelems);
-  attp = &(attsp->value[attnum]);
+  cdi_att_t *attp = &(attsp->value[attnum]);
   int txsize = serializeGetSize(cdi_att_nints, CDI_DATATYPE_INT, context)
     + serializeGetSize((int)attp->namesz, CDI_DATATYPE_TXT, context);
   txsize += serializeGetSize((int)attp->nelems, cdiAttTypeLookup(attp), context);
@@ -561,23 +557,20 @@ int cdiAttGetSize(vlist_t *vlistptr, int varID, int attnum, void *context)
 
 int cdiAttsGetSize(void *vp, int varID, void *context)
 {
-  vlist_t *p = (vlist_t*) vp;
-  cdi_atts_t *attsp = get_attsp(p, varID);
+  cdi_atts_t *attsp;
+  xassert(attsp = get_attsp((vlist_t*) vp, varID));
   int txsize = serializeGetSize(1, CDI_DATATYPE_INT, context);
   size_t numAtts = attsp->nelems;
   for (size_t i = 0; i < numAtts; ++i)
-    txsize += cdiAttGetSize(p, varID, (int)i, context);
+    txsize += cdiAttGetSize(attsp, (int)i, context);
   return txsize;
 }
 
 static
-void cdiAttPack(vlist_t *vlistptr, int varID, int attnum,
-                void *buf, int size, int *position, void *context)
+void cdiAttPack(cdi_atts_t *attsp, int attnum, void *buf, int size, int *position, void *context)
 {
-  cdi_atts_t *attsp;
   int tempbuf[cdi_att_nints];
 
-  xassert(attsp = get_attsp(vlistptr, varID));
   xassert(attnum >= 0 && attnum < (int)attsp->nelems);
   cdi_att_t *attp = &(attsp->value[attnum]);
   tempbuf[0] = (int)attp->namesz;
@@ -593,14 +586,14 @@ void cdiAttPack(vlist_t *vlistptr, int varID, int attnum,
 
 void cdiAttsPack(void *vp, int varID, void *buf, int size, int *position, void *context)
 {
-  vlist_t *p = (vlist_t*) vp;
-  cdi_atts_t *attsp = get_attsp(p, varID);
+  cdi_atts_t *attsp;
+  xassert(attsp = get_attsp((vlist_t*) vp, varID));
   size_t numAtts = attsp->nelems;
   int numAttsI = (int)numAtts;
   xassert(numAtts <= INT_MAX);
   serializePack(&numAttsI, 1, CDI_DATATYPE_INT, buf, size, position, context);
   for (size_t i = 0; i < numAtts; ++i)
-    cdiAttPack(p, varID, (int)i, buf, size, position, context);
+    cdiAttPack(attsp, (int)i, buf, size, position, context);
 }
 
 static
