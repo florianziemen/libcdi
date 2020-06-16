@@ -34,7 +34,7 @@ build-parallel:
     - mpicc --version
     - mpirun --help
     - ulimit -a
-    - mkdir gcc64-mpi && cd gcc64-mpi && LD_LIBRARY_PATH=/sw/rhel6-x64/netcdf/parallel_netcdf-1.6.1-openmpi2-intel14/lib:$LD_LIBRARY_PATH ../configure CC=mpicc FC=mpif90  --with-netcdf=/sw/rhel6-x64/netcdf/netcdf_c-4.4.0-parallel-openmpi2-intel14 --with-szlib=/sw/rhel6-x64/sys/libaec-0.3.2-gcc48 --enable-iso-c-interface --with-jasper --with-grib_api=/sw/rhel6-x64/grib_api/grib_api-1.15.0-intel14 --enable-mpi && make -j2
+    - mkdir gcc64-mpi && cd gcc64-mpi && LD_LIBRARY_PATH=/sw/rhel6-x64/netcdf/parallel_netcdf-1.6.1-openmpi2-intel14/lib:$LD_LIBRARY_PATH PKG_CONFIG_PATH=/work/k20200/k202061/icon-cdi-pio/ppm-openmpi/lib/pkgconfig:/work/k20200/k202061/icon-cdi-pio/long_yaxt-openmpi/lib/pkgconfig LIBS='-I/work/k20200/k202061/icon-cdi-pio/ppm-openmpi/include -L/work/k20200/k202061/icon-cdi-pio/ppm-openmpi/lib -lscalesppmcore -Wl,-rpath,/work/k20200/k202061/icon-cdi-pio/ppm-openmpi/lib -L/work/k20200/k202061/icon-cdi-pio/long_yaxt-openmpi/include -L/work/k20200/k202061/icon-cdi-pio/long_yaxt-openmpi/lib -lyaxt -lyaxt_c -Wl,-rpath,/work/k20200/k202061/icon-cdi-pio/long_yaxt-openmpi/lib' ../configure CC=mpicc FC=mpif90  --with-netcdf=/sw/rhel6-x64/netcdf/netcdf_c-4.4.0-parallel-openmpi2-intel14 --with-szlib=/sw/rhel6-x64/sys/libaec-0.3.2-gcc48 --enable-iso-c-interface --with-jasper --with-grib_api=/sw/rhel6-x64/grib_api/grib_api-1.15.0-intel14 --enable-mpi && make -j2
   artifacts:
     paths:
       - gcc64-mpi/config.log
