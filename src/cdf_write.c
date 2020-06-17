@@ -786,10 +786,10 @@ int cdfDefVar(stream_t *streamptr, int varID)
   int length = CDI_MAX_NAME;
   cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
 
-  char longname[CDI_MAX_NAME]; longname[0] = 0;
+  char longname[CDI_MAX_NAME];
   vlistInqVarLongname(vlistID, varID, longname);
 
-  char units[CDI_MAX_NAME]; units[0] = 0;
+  char units[CDI_MAX_NAME];
   vlistInqVarUnits(vlistID, varID, units);
 
   char stdname[CDI_MAX_NAME];

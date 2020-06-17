@@ -405,7 +405,6 @@ FCALLSCFUN2 (DOUBLE, vlistInqVarScalefactor, VLISTINQVARSCALEFACTOR, vlistinqvar
 FCALLSCSUB3 (vlistDefVarAddoffset, VLISTDEFVARADDOFFSET, vlistdefvaraddoffset, INT, INT, DOUBLE)
 FCALLSCFUN2 (DOUBLE, vlistInqVarAddoffset, VLISTINQVARADDOFFSET, vlistinqvaraddoffset, INT, INT)
 FCALLSCSUB3 (vlistDefVarTimave, VLISTDEFVARTIMAVE, vlistdefvartimave, INT, INT, INT)
-FCALLSCFUN2 (INT, vlistInqVarTimave, VLISTINQVARTIMAVE, vlistinqvartimave, INT, INT)
 static int vlistInqVarSize_fwrap(int vlistID, int varID)
 {
   size_t v;
@@ -434,6 +433,7 @@ FCALLSCFUN3 (INT, vlistInqVarIntKey, VLISTINQVARINTKEY, vlistinqvarintkey, INT, 
 FCALLSCFUN3 (INT, cdiInqNatts, CDIINQNATTS, cdiinqnatts, INT, INT, PINT)
 FCALLSCFUN6 (INT, cdiInqAtt, CDIINQATT, cdiinqatt, INT, INT, INT, PSTRING, PINT, PINT)
 FCALLSCFUN3 (INT, cdiInqAttLen, CDIINQATTLEN, cdiinqattlen, INT, INT, STRING)
+FCALLSCFUN3 (INT, cdiInqAttType, CDIINQATTTYPE, cdiinqatttype, INT, INT, STRING)
 FCALLSCFUN3 (INT, cdiDelAtt, CDIDELATT, cdidelatt, INT, INT, STRING)
 FCALLSCFUN4 (INT, cdiCopyAtts, CDICOPYATTS, cdicopyatts, INT, INT, INT, INT)
 FCALLSCFUN6 (INT, cdiDefAttInt, CDIDEFATTINT, cdidefattint, INT, INT, STRING, INT, INT, INTV)
@@ -533,11 +533,23 @@ FCALLSCFUN1 (INT, gridInqYIsc, GRIDINQYISC, gridinqyisc, INT)
 
 /*  CDI var keys  */
 
+
+/*  String keys  */
+
+
+/*  Integer keys  */
+
+
+/*  Floating point keys  */
+
+
+/*  Byte array keys  */
+
 FCALLSCFUN4 (INT, cdiDefKeyInt, CDIDEFKEYINT, cdidefkeyint, INT, INT, INT, INT)
 FCALLSCFUN4 (INT, cdiInqKeyInt, CDIINQKEYINT, cdiinqkeyint, INT, INT, INT, PINT)
 FCALLSCFUN4 (INT, cdiDefKeyFloat, CDIDEFKEYFLOAT, cdidefkeyfloat, INT, INT, INT, DOUBLE)
 
-/*  cdiInqKeyFloat Get a float value from a key of a CDI variable  */
+/*  cdiInqKeyFloat Get a float value from a key  */
 
 FCALLSCFUN4 (INT, cdiInqKeyFloat, CDIINQKEYFLOAT, cdiinqkeyfloat, INT, INT, INT, PDOUBLE)
 FCALLSCFUN4 (INT, cdiDefKeyString, CDIDEFKEYSTRING, cdidefkeystring, INT, INT, INT, STRING)
@@ -545,6 +557,7 @@ FCALLSCFUN5 (INT, cdiInqKeyString, CDIINQKEYSTRING, cdiinqkeystring, INT, INT, I
 FCALLSCFUN4 (INT, cdiInqKeyLen, CDIINQKEYLEN, cdiinqkeylen, INT, INT, INT, PINT)
 FCALLSCFUN4 (INT, cdiCopyKeys, CDICOPYKEYS, cdicopykeys, INT, INT, INT, INT)
 FCALLSCFUN4 (INT, cdiCopyKey, CDICOPYKEY, cdicopykey, INT, INT, INT, INT)
+FCALLSCFUN3 (INT, cdiDeleteKey, CDIDELETEKEY, cdideletekey, INT, INT, INT)
 
 /*  GRID routines  */
 

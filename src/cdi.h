@@ -647,7 +647,6 @@ void    vlistDefVarAddoffset(int vlistID, int varID, double addoffset);
 double  vlistInqVarAddoffset(int vlistID, int varID);
 
 void    vlistDefVarTimave(int vlistID, int varID, int timave);
-int     vlistInqVarTimave(int vlistID, int varID);
 
 size_t  vlistInqVarSize(int vlistID, int varID);
 
@@ -801,6 +800,7 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_NLEV                          962  // GRIB2 nlev
 
 // Floating point keys
+#define  CDI_KEY_MISSVAL                       701  // Missing value
 
 // Byte array keys
 #define  CDI_KEY_UUID                          960  // UUID for grid/Z-axis reference [size: CDI_UUID_SIZE]

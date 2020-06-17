@@ -1125,13 +1125,6 @@ void vlistDefVarTimave(int vlistID, int varID, int timave)
 }
 
 
-int vlistInqVarTimave(int vlistID, int varID)
-{
-  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].timave;
-}
-
-
 int vlistInqVarMissvalUsed(int vlistID, int varID)
 {
   const vlist_t *vlistptr = vlist_to_pointer(vlistID);

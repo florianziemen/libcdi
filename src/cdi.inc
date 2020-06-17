@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   February 2020
+! Uwe Schulzweida, MPI-MET, Hamburg,   June 2020
 !
 
       INTEGER    CDI_MAX_NAME
@@ -1244,11 +1244,6 @@
 !                                     INTEGER         timave)
       EXTERNAL        vlistDefVarTimave
 
-      INTEGER         vlistInqVarTimave
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarTimave
-
       INTEGER         vlistInqVarSize
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
@@ -1364,6 +1359,12 @@
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name)
       EXTERNAL        cdiInqAttLen
+
+      INTEGER         cdiInqAttType
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        cdiInqAttType
 
       INTEGER         cdiDelAtt
 !                                    (INTEGER         cdiID,
@@ -1570,6 +1571,48 @@
 !
 !  CDI var keys
 !
+!
+!  String keys
+!
+      INTEGER    CDI_KEY_NAME
+      PARAMETER (CDI_KEY_NAME           = 942)
+      INTEGER    CDI_KEY_LONGNAME
+      PARAMETER (CDI_KEY_LONGNAME       = 943)
+      INTEGER    CDI_KEY_STDNAME
+      PARAMETER (CDI_KEY_STDNAME        = 944)
+      INTEGER    CDI_KEY_UNITS
+      PARAMETER (CDI_KEY_UNITS          = 945)
+      INTEGER    CDI_KEY_REFERENCEURI
+      PARAMETER (CDI_KEY_REFERENCEURI   = 965)
+!
+!  Integer keys
+!
+      INTEGER    CDI_KEY_NUMBEROFGRIDUSED
+      PARAMETER (CDI_KEY_NUMBEROFGRIDUSED = 963)
+      INTEGER    CDI_KEY_NUMBEROFGRIDINREFERENCE
+      PARAMETER (CDI_KEY_NUMBEROFGRIDINREFERENCE = 964)
+      INTEGER    CDI_KEY_NUMBEROFVGRIDUSED
+      PARAMETER (CDI_KEY_NUMBEROFVGRIDUSED = 961)
+      INTEGER    CDI_KEY_NLEV
+      PARAMETER (CDI_KEY_NLEV           = 962)
+!
+!  Floating point keys
+!
+      INTEGER    CDI_KEY_MISSVAL
+      PARAMETER (CDI_KEY_MISSVAL        = 701)
+!
+!  Byte array keys
+!
+      INTEGER    CDI_KEY_UUID
+      PARAMETER (CDI_KEY_UUID           = 960)
+      INTEGER    CDI_KEY_DIMNAME
+      PARAMETER (CDI_KEY_DIMNAME        = 941)
+      INTEGER    CDI_KEY_PSNAME
+      PARAMETER (CDI_KEY_PSNAME         = 950)
+      INTEGER    CDI_KEY_P0NAME
+      PARAMETER (CDI_KEY_P0NAME         = 951)
+      INTEGER    CDI_KEY_P0VALUE
+      PARAMETER (CDI_KEY_P0VALUE        = 952)
       INTEGER    CDI_KEY_TABLESVERSION
       PARAMETER (CDI_KEY_TABLESVERSION  = 801)
       INTEGER    CDI_KEY_LOCALTABLESVERSION
@@ -1610,16 +1653,16 @@
       PARAMETER (CDI_KEY_SECTION2PADDINGLENGTH = 819)
       INTEGER    CDI_KEY_SECTION2PADDING
       PARAMETER (CDI_KEY_SECTION2PADDING = 820)
-      INTEGER    CDI_KEY_UVRELATIVETOGRID
-      PARAMETER (CDI_KEY_UVRELATIVETOGRID = 821)
       INTEGER    CDI_KEY_CONSTITUENTTYPE
-      PARAMETER (CDI_KEY_CONSTITUENTTYPE = 822)
+      PARAMETER (CDI_KEY_CONSTITUENTTYPE = 821)
       INTEGER    CDI_KEY_TYPEOFTIMEINCREMENT
-      PARAMETER (CDI_KEY_TYPEOFTIMEINCREMENT = 823)
+      PARAMETER (CDI_KEY_TYPEOFTIMEINCREMENT = 822)
       INTEGER    CDI_KEY_TYPEOFFIRSTFIXEDSURFACE
-      PARAMETER (CDI_KEY_TYPEOFFIRSTFIXEDSURFACE = 824)
+      PARAMETER (CDI_KEY_TYPEOFFIRSTFIXEDSURFACE = 823)
       INTEGER    CDI_KEY_TYPEOFSECONDFIXEDSURFACE
-      PARAMETER (CDI_KEY_TYPEOFSECONDFIXEDSURFACE = 825)
+      PARAMETER (CDI_KEY_TYPEOFSECONDFIXEDSURFACE = 824)
+      INTEGER    CDI_KEY_UVRELATIVETOGRID
+      PARAMETER (CDI_KEY_UVRELATIVETOGRID = 825)
       INTEGER    CDI_KEY_SCANNINGMODE
       PARAMETER (CDI_KEY_SCANNINGMODE   = 826)
       INTEGER    CDI_KEY_VDIMNAME
@@ -1630,34 +1673,6 @@
       PARAMETER (CDI_KEY_GRIDMAP_VARNAME = 922)
       INTEGER    CDI_KEY_GRIDMAP_NAME
       PARAMETER (CDI_KEY_GRIDMAP_NAME   = 923)
-      INTEGER    CDI_KEY_DIMNAME
-      PARAMETER (CDI_KEY_DIMNAME        = 941)
-      INTEGER    CDI_KEY_NAME
-      PARAMETER (CDI_KEY_NAME           = 942)
-      INTEGER    CDI_KEY_LONGNAME
-      PARAMETER (CDI_KEY_LONGNAME       = 943)
-      INTEGER    CDI_KEY_STDNAME
-      PARAMETER (CDI_KEY_STDNAME        = 944)
-      INTEGER    CDI_KEY_UNITS
-      PARAMETER (CDI_KEY_UNITS          = 945)
-      INTEGER    CDI_KEY_PSNAME
-      PARAMETER (CDI_KEY_PSNAME         = 950)
-      INTEGER    CDI_KEY_P0NAME
-      PARAMETER (CDI_KEY_P0NAME         = 951)
-      INTEGER    CDI_KEY_P0VALUE
-      PARAMETER (CDI_KEY_P0VALUE        = 952)
-      INTEGER    CDI_KEY_UUID
-      PARAMETER (CDI_KEY_UUID           = 960)
-      INTEGER    CDI_KEY_NUMBEROFVGRIDUSED
-      PARAMETER (CDI_KEY_NUMBEROFVGRIDUSED = 961)
-      INTEGER    CDI_KEY_NLEV
-      PARAMETER (CDI_KEY_NLEV           = 962)
-      INTEGER    CDI_KEY_NUMBEROFGRIDUSED
-      PARAMETER (CDI_KEY_NUMBEROFGRIDUSED = 963)
-      INTEGER    CDI_KEY_NUMBEROFGRIDINREFERENCE
-      PARAMETER (CDI_KEY_NUMBEROFGRIDINREFERENCE = 964)
-      INTEGER    CDI_KEY_REFERENCEURI
-      PARAMETER (CDI_KEY_REFERENCEURI   = 965)
       INTEGER         cdiDefKeyInt
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
@@ -1680,7 +1695,7 @@
       EXTERNAL        cdiDefKeyFloat
 
 !
-!  cdiInqKeyFloat Get a float value from a key of a CDI variable
+!  cdiInqKeyFloat Get a float value from a key
 !
       INTEGER         cdiInqKeyFloat
 !                                    (INTEGER         cdiID,
@@ -1724,6 +1739,12 @@
 !                                     INTEGER         key,
 !                                     INTEGER         cdiID2)
       EXTERNAL        cdiCopyKey
+
+      INTEGER         cdiDeleteKey
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key)
+      EXTERNAL        cdiDeleteKey
 
 !
 !  GRID routines
