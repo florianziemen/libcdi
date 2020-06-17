@@ -22,7 +22,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].datatype      = CDI_UNDEFID;
   vlistptr->vars[varID].timetype      = CDI_UNDEFID;
   vlistptr->vars[varID].tsteptype     = TSTEP_INSTANT;
-  vlistptr->vars[varID].timave        = 0;
   vlistptr->vars[varID].chunktype     = cdiChunkType;
   vlistptr->vars[varID].xyz           = 321;
   vlistptr->vars[varID].gridID        = CDI_UNDEFID;
@@ -1114,17 +1113,6 @@ int vlistInqVarTsteptype(int vlistID, int varID)
 }
 
 
-void vlistDefVarTimave(int vlistID, int varID, int timave)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (vlistptr->vars[varID].timave != timave)
-    {
-      vlistptr->vars[varID].timave = timave;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-
 int vlistInqVarMissvalUsed(int vlistID, int varID)
 {
   const vlist_t *vlistptr = vlist_to_pointer(vlistID);
@@ -1507,7 +1495,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
 #define FCMP2(f) (namespaceResHDecode(pva->f).idx       \
                   != namespaceResHDecode(pvb->f).idx)
   int diff = FCMP(fvarID) | FCMP(mvarID) | FCMP(flag) | FCMP(param)
-    | FCMP(datatype) | FCMP(timetype) | FCMP(tsteptype) | FCMP(timave)
+    | FCMP(datatype) | FCMP(timetype) | FCMP(tsteptype)
     | FCMP(chunktype) | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID)
     | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
     | FCMPFLT(missval) | FCMPFLT(addoffset) | FCMPFLT(scalefactor)

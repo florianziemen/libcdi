@@ -67,7 +67,6 @@ typedef struct
   int            tableID;
   int            comptype;       // compression type
   int            complevel;      // compression level
-  short          timave;
   bool           lmissval;
   double         missval;
   char          *name;
@@ -96,7 +95,6 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].prec           = 0;
   vartable[varID].tsteptype      = TSTEP_INSTANT;
   varScanKeysInit(&vartable[varID].scanKeys);
-  vartable[varID].timave         = 0;
   vartable[varID].gridID         = CDI_UNDEFID;
   vartable[varID].zaxistype      = 0;
   vartable[varID].ltype1         = 0;
@@ -389,7 +387,7 @@ int varInsertTileSubtype(vartable_t *vptr, const var_tile_t *tiles)
 
 void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int level_sf, int level_unit, int prec,
-		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype1, int ltype2,
+		  int *pvarID, int *plevelID, int tsteptype, int ltype1, int ltype2,
 		  const char *name, const VarScanKeys *scanKeys, const var_tile_t *tiles, int *tile_index)
 {
   unsigned varID = (cdiSplitLtype105 != 1 || zaxistype != ZAXIS_HEIGHT) ?
@@ -408,8 +406,6 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       vartable[varID].level_unit = level_unit;
       vartable[varID].tsteptype  = tsteptype;
       if (scanKeys) vartable[varID].scanKeys = *scanKeys;
-
-      if ( numavg ) vartable[varID].timave = 1;
 
       if ( name && name[0] )         vartable[varID].name     = strdup(name);
     }
@@ -565,7 +561,6 @@ void cdi_generate_vars(stream_t *streamptr)
       int modelID    = vartable[varid].modelID;
       int tableID    = vartable[varid].tableID;
       const int tsteptype  = vartable[varid].tsteptype;
-      const int timave     = vartable[varid].timave;
       const int comptype   = vartable[varid].comptype;
 
       double level_sf = 1;
@@ -701,7 +696,6 @@ void cdi_generate_vars(stream_t *streamptr)
       vlistDefVarTsteptype(vlistID, varID, tsteptype);
       vlistDefVarParam(vlistID, varID, param);
       vlistDefVarDatatype(vlistID, varID, prec);
-      vlistDefVarTimave(vlistID, varID, timave);
       vlistDefVarCompType(vlistID, varID, comptype);
 
       varCopyKeys(vlistID, varID);

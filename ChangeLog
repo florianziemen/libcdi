@@ -1,3 +1,7 @@
+2020-06-17  Uwe Schulzweida
+
+	* Removed unsed function vlistInqVarTimave() and  vlistDefVarTimave()
+
 2020-06-10  Uwe Schulzweida
 
 	* Replaced vlistDefVarName()/vlistInqVarName() by cdiDefKeyString()/cdiInqKeyString() with CDI_KEY_NAME

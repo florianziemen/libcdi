@@ -16,7 +16,6 @@ enum {
   VLISTVAR_PACK_INT_IDX_INSTID,
   VLISTVAR_PACK_INT_IDX_MODELID,
   VLISTVAR_PACK_INT_IDX_TABLEID,
-  VLISTVAR_PACK_INT_IDX_TIMAVE,
   VLISTVAR_PACK_INT_IDX_MISSVALUSED,
   VLISTVAR_PACK_INT_IDX_COMPTYPE,
   VLISTVAR_PACK_INT_IDX_COMPLEVEL,
@@ -61,7 +60,6 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position, vo
   tempbuf[VLISTVAR_PACK_INT_IDX_INSTID] = var->instID;
   tempbuf[VLISTVAR_PACK_INT_IDX_MODELID] = var->modelID;
   tempbuf[VLISTVAR_PACK_INT_IDX_TABLEID] = var->tableID;
-  tempbuf[VLISTVAR_PACK_INT_IDX_TIMAVE] = var->timave;
   tempbuf[VLISTVAR_PACK_INT_IDX_MISSVALUSED] = (int)var->missvalused;
   tempbuf[VLISTVAR_PACK_INT_IDX_COMPTYPE] = var->comptype;
   tempbuf[VLISTVAR_PACK_INT_IDX_COMPLEVEL] = var->complevel;
@@ -136,7 +134,6 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   vlistDefVarTable(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_TABLEID]);
   // FIXME: changing the table might change the param code
   vlistDefVarParam(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_PARAM]);
-  vlistDefVarTimave(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_TIMAVE]);
   if (tempbuf[VLISTVAR_PACK_INT_IDX_MISSVALUSED])
     vlistDefVarMissval(vlistID, newvar, dtempbuf[0]);
   vlistDefVarScalefactor(vlistID, newvar, dtempbuf[1]);

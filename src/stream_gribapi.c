@@ -661,7 +661,6 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   record_t *record = &streamptr->tsteps[tsID].records[recID];
 
   const int tsteptype = gribapiGetTsteptype(gh);
-  // numavg  = ISEC1_AvgNum;
   int numavg = 0;
 
   // fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, leveltype1);
@@ -736,7 +735,7 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   int tile_index = 0;
   int varID = 0, levelID = 0;
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, level_sf, level_unit,
-	       datatype, &varID, &levelID, tsteptype, numavg, leveltype1, leveltype2,
+	       datatype, &varID, &levelID, tsteptype, leveltype1, leveltype2,
 	       varname, scanKeys, tiles, &tile_index);
 
   record->varID = (short)varID;
@@ -949,7 +948,6 @@ int gribapiScanTimestep1(stream_t * streamptr)
   DateTime datetime0 = { .date = 10101, .time = 0 };
   int nrecs_scanned = 0;        //Only used for debug output.
   bool warn_time = true;
-  // bool warn_numavg = true;
   int fcast = 0;
   grib_handle *gh = NULL;
 
@@ -1091,7 +1089,6 @@ int gribapiScanTimestep2(stream_t * streamptr)
   DateTime datetime0 = { LONG_MIN, LONG_MIN };
   // int gridID;
   int recID;
-  //  bool warn_numavg = true;
   grib_handle *gh = NULL;
 
   streamptr->curTsID = 1;
@@ -1272,7 +1269,6 @@ int gribapiScanTimestep2(stream_t * streamptr)
 int gribapiScanTimestep(stream_t * streamptr)
 {
   int vrecID, recID = -1;
-  //bool warn_numavg = true;
   int nrecs = 0;
   int vlistID = streamptr->vlistID;
 

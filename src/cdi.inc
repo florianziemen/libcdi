@@ -1238,12 +1238,6 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarAddoffset
 
-!                     vlistDefVarTimave
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         timave)
-      EXTERNAL        vlistDefVarTimave
-
       INTEGER         vlistInqVarSize
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)

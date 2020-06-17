@@ -476,7 +476,6 @@ void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, si
   record_t *record = &streamptr->tsteps[tsID].records[recID];
 
   const int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
-  const int numavg    = ISEC1_AvgNum;
 
   int leveltype, level1, level2;
   cgribexGetLevel(isec1, &leveltype, &level1, &level2);
@@ -554,7 +553,7 @@ void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, si
 
   int varID = 0, levelID = 0;
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0, 0,
-	       datatype, &varID, &levelID, tsteptype, numavg, leveltype, -1,
+	       datatype, &varID, &levelID, tsteptype, leveltype, -1,
                NULL, NULL, NULL, NULL);
 
   record->varID = (short)varID;

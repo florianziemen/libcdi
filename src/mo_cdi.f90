@@ -400,7 +400,6 @@ module mo_cdi
   public :: vlistInqVarScalefactor
   public :: vlistDefVarAddoffset
   public :: vlistInqVarAddoffset
-  public :: vlistDefVarTimave
   public :: vlistInqVarSize
   public :: vlistDefIndex
   public :: vlistInqIndex
@@ -1625,14 +1624,6 @@ module mo_cdi
       integer(c_int), value :: varID_dummy
       real(c_double) :: f_result
     end function vlistInqVarAddoffset
-
-    subroutine vlistDefVarTimave(vlistID_dummy, varID_dummy, timave_dummy)&
-    & bind(c, name = 'vlistDefVarTimave')
-      import c_int
-      integer(c_int), value :: vlistID_dummy
-      integer(c_int), value :: varID_dummy
-      integer(c_int), value :: timave_dummy
-    end subroutine vlistDefVarTimave
 
     function vlistInqVarSize(vlistID_dummy, varID_dummy) bind(c, name =&
     & 'vlistInqVarSize') result(f_result)
