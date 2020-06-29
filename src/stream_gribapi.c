@@ -873,10 +873,9 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
     {
       size_t len = 256;
       char typeOfPacking[256];
-
       if ( grib_get_string(gh, "packingType", typeOfPacking, &len) == 0 )
         {
-          // fprintf(stderr, "packingType %d %s\n", len, typeOfPacking);
+          // fprintf(stderr, "packingType %zu %s\n", len, typeOfPacking);
           if      ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) *outCompressionType = CDI_COMPRESS_JPEG;
           else if ( strncmp(typeOfPacking, "grid_ccsds", len) == 0 ) *outCompressionType = CDI_COMPRESS_AEC;
           else if ( strncmp(typeOfPacking, "grid_ieee", len) == 0 ) lieee = true;
@@ -885,10 +884,9 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
 
   if ( lieee )
     {
-      *outDatatype = CDI_DATATYPE_FLT64;
       long precision;
       const int status = grib_get_long(gh, "precision", &precision);
-      if ( status == 0 && precision == 1 ) *outDatatype = CDI_DATATYPE_FLT32;
+      *outDatatype = (status == 0 && precision == 1) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
     }
   else
     {
@@ -2187,49 +2185,32 @@ void gribapiDefGridSpectral(grib_handle *gh, int gridID)
 static
 void gribapiDefPackingType(grib_handle *gh, bool lieee, bool lspectral, bool lcomplex, int comptype, size_t gridsize)
 {
-  const char *mesg;
-  size_t len;
+  static const char mesg_spectral_complex[] = "spectral_complex";
+  static const char mesg_spectral_simple[] = "spectral_simple";
+  static const char mesg_grid_jpeg[] = "grid_jpeg";
+  static const char mesg_grid_ccsds[] = "grid_ccsds";
+  static const char mesg_ieee[] = "grid_ieee";
+  static const char mesg_simple[] = "grid_simple";
+  const char *mesg = mesg_simple;
 
   if ( lspectral )
     {
-      if ( lcomplex )
-        {
-          static const char mesg_spectral_complex[] = "spectral_complex";
-          len = sizeof (mesg_spectral_complex) - 1;
-          mesg = mesg_spectral_complex;
-        }
-      else
-        {
-          static const char mesg_spectral_simple[] = "spectral_simple";
-          len = sizeof (mesg_spectral_simple) - 1;
-          mesg = mesg_spectral_simple;
-        }
+      mesg = lcomplex ? mesg_spectral_complex : mesg_spectral_simple;
     }
   else if ( comptype == CDI_COMPRESS_JPEG && gridsize > 1 )
     {
-      static const char mesg_grid_jpeg[] = "grid_jpeg";
-      len = sizeof (mesg_grid_jpeg) - 1;
       mesg = mesg_grid_jpeg;
     }
   else if ( (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC) && gridsize > 1 )
     {
-      static const char mesg_grid_ccsds[] = "grid_ccsds";
-      len = sizeof (mesg_grid_ccsds) - 1;
       mesg = mesg_grid_ccsds;
     }
   else if ( lieee )
     {
-      static const char mesg_ieee[] = "grid_ieee";
-      len = sizeof (mesg_ieee) - 1;
       mesg = mesg_ieee;
     }
-  else
-    {
-      static const char mesg_simple[] = "grid_simple";
-      len = sizeof (mesg_simple) - 1;
-      mesg = mesg_simple;
-    }
 
+  size_t len = strlen(mesg);
   GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
 }
 
