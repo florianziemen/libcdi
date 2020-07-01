@@ -92,12 +92,6 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position, vo
   cdiAttsPack(p, varID, buf, size, position, context);
 }
 
-static inline int
-imax(int a, int b)
-{
-  return (a >= b) ? a : b;
-}
-
 void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
 		    int originNamespace, void *context)
 {
