@@ -1289,7 +1289,8 @@ int streamInqTimestep(int streamID, int tsID)
   stream_t *streamptr = stream_to_pointer(streamID);
   int vlistID = streamptr->vlistID;
 
-  if ( tsID < streamptr->rtsteps )
+  if (tsID < streamptr->ntsteps) streamptr->tsteps[tsID].curRecID = CDI_UNDEFID; // fix for netCDF
+  if (tsID < streamptr->rtsteps)
     {
       streamptr->curTsID = tsID;
       nrecs = streamptr->tsteps[tsID].nrecs;
@@ -1302,10 +1303,7 @@ int streamInqTimestep(int streamID, int tsID)
       return nrecs;
     }
 
-  if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID )
-    {
-      return 0;
-    }
+  if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID ) return 0;
 
   int filetype = streamptr->filetype;
 
