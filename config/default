@@ -46,11 +46,10 @@ case "${HOSTNAME}" in
                     --enable-maintainer-mode \
                     --enable-iso-c-interface \
                     --enable-swig \
-                    --enable-python \
-                    --with-eccodes=$HOME/local/eccodes-2.6.0 \
+                    --with-eccodes=$HOME/local/eccodes-2.17.0 \
                     --with-netcdf=$HOME/local/netcdf-4.4.1.1 \
                     --with-szlib=$HOME/local \
-                    LDFLAGS="-Wl,-rpath,$HOME/local/eccodes-2.6.0/lib" \
+                    LDFLAGS="-Wl,-rpath,$HOME/local/eccodes-2.17.0/lib" \
 	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3 -march=native"
 	;;
     cinglung*|feilung*|wanglung*)
