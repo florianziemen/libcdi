@@ -662,10 +662,12 @@ int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
   xassert(string != NULL);
   xassert(length != NULL);
 
-  string[0] = '\0';
+  int maxlength = *length;
+  if (maxlength > 0) string[0] = '\0';
 
   int status = cdiInqKeyBytes(cdiID, varID, key, (unsigned char *) string, length);
   if (status != CDI_NOERR) *length = 0;
+  else string[maxlength-1] = '\0';
 
   return status;
 }
