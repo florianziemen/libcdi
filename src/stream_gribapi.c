@@ -1707,7 +1707,7 @@ void gribapiDefStepUnits(int editionNumber, grib_handle *gh, int timeunit, int p
         }
       else if ( grib2ProDefTempHasStatisticalDef(proDefTempNum) )
         {
-          GRIB_CHECK(my_grib_set_long(gh, "indicatorOfUnitForTimeRange", unitsOfTime), 0);
+          grib_set_long(gh, "indicatorOfUnitForTimeRange", unitsOfTime);
           GRIB_CHECK(my_grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);
         }
       else
