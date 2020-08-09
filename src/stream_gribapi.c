@@ -1700,21 +1700,21 @@ void gribapiDefStepUnits(int editionNumber, grib_handle *gh, int timeunit, int p
     {
       long unitsOfTime = getUnitsOfTime(timeunit);
 
-      GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
+      grib_set_long(gh, "stepUnits", unitsOfTime);
       if ( editionNumber == 1 )
         {
-          GRIB_CHECK(my_grib_set_long(gh, "unitOfTimeRange", unitsOfTime), 0);
+          grib_set_long(gh, "unitOfTimeRange", unitsOfTime);
         }
       else if ( grib2ProDefTempHasStatisticalDef(proDefTempNum) )
         {
           grib_set_long(gh, "indicatorOfUnitForTimeRange", unitsOfTime);
-          GRIB_CHECK(my_grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);
+          grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime);
         }
       else
         {
 	  // NOTE KNMI:  HIRLAM model files LAMH_D11 are in grib1 and do NOT have key indicatorOfUnitForTimeRange
 	  // Watch out for compatibility issues.
-          GRIB_CHECK(my_grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);
+          grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime);
         }
     }
 }
