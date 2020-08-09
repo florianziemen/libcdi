@@ -3070,7 +3070,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   {
     int typeOfTimeIncrement = 0;
     int status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFTIMEINCREMENT, &typeOfTimeIncrement);
-    if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "typeOfTimeIncrement", (long)typeOfTimeIncrement), 0);
+    if ( status == 0 ) grib_set_long(gh, "typeOfTimeIncrement", (long)typeOfTimeIncrement);
   }
 
   {
