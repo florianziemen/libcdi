@@ -227,12 +227,13 @@ main(int argc, char **argv)
            [HAVE_PARALLEL_NC4=1],
            [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
            [AC_INCLUDES_DEFAULT
+@%:@include <netcdf.h>
 @%:@include <netcdf_par.h>])],
-        [AC_CHECK_DECL([MPI_Bcast],
-           [HAVE_PARALLEL_NC4=1],
            [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
            [AC_INCLUDES_DEFAULT
-@%:@include <netcdf.h>])], [AC_INCLUDES_DEFAULT])
+@%:@ifdef HAVE_NETCDF_H
+@%:@include <netcdf.h>
+@%:@endif])
       dnl parallel netCDF support still requires ScalES-PPM and YAXT to
       dnl re-arrange the data when running with more than one collector
       PKG_CHECK_MODULES([PPM_CORE],[scales-ppm-core],
