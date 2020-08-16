@@ -5,6 +5,7 @@
 
 2020-08-16 Matthew Krupcale
 
+	* Missing math library during linking [Bug #9856]
 	* Fix incorrect detection and usage of netcdf_par.h during configure [Bug #9855]
 
 2020-08-09 Uwe Schulzweida

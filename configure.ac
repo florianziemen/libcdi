@@ -144,6 +144,9 @@ AC_DEFINE_UNQUOTED(COMP_VERSION, ["$COMP_VERSION"], [Compiler version])
 # Check for system type
 AC_DEFINE_UNQUOTED([SYSTEM_TYPE],["$ac_cv_build"], [System type])
 AC_SUBST([SYSTEM_TYPE],["$ac_cv_build"])
+# -----------------------------------------------------------------------
+# Check for math library and add -lm to LIBS
+AC_SEARCH_LIBS(floor, m)
 #  ----------------------------------------------------------------------
 # Add basic configure options
 ACX_CDI_OPTIONS
