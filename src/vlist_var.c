@@ -723,6 +723,7 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
           case CDI_DATATYPE_UINT16: vlistptr->vars[varID].missval =  USHRT_MAX; break;
           case CDI_DATATYPE_INT32:  vlistptr->vars[varID].missval = -INT_MAX;   break;
           case CDI_DATATYPE_UINT32: vlistptr->vars[varID].missval =  UINT_MAX;  break;
+          case CDI_DATATYPE_FLT32:  vlistptr->vars[varID].missval =  (float) CDI_default_missval;  break;
           }
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }

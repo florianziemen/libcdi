@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.5
 	* Version 1.9.9 released
 
+2020-08-18 Uwe Schulzweida
+
+	* vlistDefVarDatatype: cast CDI_default_missval to float for CDI_DATATYPE_FLT32
+
 2020-08-16 Matthew Krupcale
 
 	* Missing math library during linking [Bug #9856]
