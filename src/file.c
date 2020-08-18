@@ -403,7 +403,14 @@ int fileFlush(int fileID)
 {
   int retval = 0;
   bfile_t *fileptr = file_to_pointer(fileID);
-  if ( fileptr ) retval = fflush(fileptr->fp);
+  if ( fileptr )
+    {
+      FILE *fp = fileptr->fp;
+      retval = fflush(fp);
+      if (retval == 0)
+        retval = fsync(fileno(fp));
+      if (retval != 0) retval = errno;
+    }
 
   return retval;
 }
