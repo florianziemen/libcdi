@@ -54,7 +54,7 @@ void instituteDefaultEntries(void)
 {
   cdiResH resH[]
     = { institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts"),
-        institutDef(252,   1, "MPIMET",    "Max-Planck-Institute for Meteorology"),
+        institutDef(252,   1, "MPIMET",    "Max Planck Institute for Meteorology"),
         institutDef( 98, 232, "MPIMET",    "Max Planck Institute for Meteorology"),
         institutDef( 98, 255, "MPIMET",    "Max-Planck-Institute for Meteorology"),
         institutDef( 78, 255, "DWD",       "Deutscher Wetterdienst"),
