@@ -21,18 +21,45 @@ void cdfDefVarDeflate(int ncid, int ncvarID, int deflate_level)
   // Set chunking, shuffle, and deflate.
   const int shuffle = 1, deflate = 1;
 
-  if ( deflate_level < 1 || deflate_level > 9 ) deflate_level = 1;
+  if (deflate_level < 1 || deflate_level > 9) deflate_level = 1;
 
-  if ( (retval = nc_def_var_deflate(ncid, ncvarID, shuffle, deflate, deflate_level)) )
+  if ((retval = nc_def_var_deflate(ncid, ncvarID, shuffle, deflate, deflate_level)))
     {
       Error("nc_def_var_deflate failed, status = %d", retval);
     }
 #else
   static bool lwarn = true;
-  if ( lwarn )
+  if (lwarn)
     {
       lwarn = false;
       Warning("Deflate compression failed, NetCDF4 not available!");
+    }
+#endif
+}
+
+void cdfDefVarSzip(int ncid, int ncvarID, int pixels_per_block)
+{
+#ifdef HAVE_NC4SZLIB
+  // Set options_mask.
+  /*
+    H5_SZIP_ALLOW_K13_OPTION_MASK   1
+    H5_SZIP_CHIP_OPTION_MASK        2
+    H5_SZIP_EC_OPTION_MASK          4
+    H5_SZIP_NN_OPTION_MASK          32
+    H5_SZIP_ALL_MASKS (H5_SZIP_CHIP_OPTION_MASK|H5_SZIP_EC_OPTION_MASK|H5_SZIP_NN_OPTION_MASK)
+  */
+  int options_mask = 38;
+  int retval;
+  if ((retval = nc_def_var_szip(ncid, ncvarID, options_mask, pixels_per_block)))
+    {
+      Error("nc_def_var_szip failed, status = %d", retval);
+    }
+#else
+  static bool lwarn = true;
+  if (lwarn)
+    {
+      lwarn = false;
+      Warning("Szip compression failed, NetCDF4/szlib not available!");
     }
 #endif
 }
@@ -378,7 +405,22 @@ int nc_grid_index(stream_t *streamptr, int gridID)
 }
 
 static
-void cdfDefVarCompression(const stream_t *streamptr, int ncvarID, bool lchunk)
+int xtype2ppb(nc_type xtype)
+{
+  int ppb = 32;
+
+  if      (xtype == NC_BYTE)   ppb = 8;
+  else if (xtype == NC_SHORT)  ppb = 16;
+#ifdef  HAVE_NETCDF4
+  else if (xtype == NC_UBYTE)  ppb = 8;
+  else if (xtype == NC_USHORT) ppb = 16;
+#endif
+
+  return ppb;
+}
+
+static
+void cdfDefVarCompression(const stream_t *streamptr, int ncvarID, bool lchunk, nc_type xtype)
 {
   if ( streamptr->comptype == CDI_COMPRESS_ZIP )
     {
@@ -395,6 +437,25 @@ void cdfDefVarCompression(const stream_t *streamptr, int ncvarID, bool lchunk)
                 {
                   lwarn = false;
                   Warning("Deflate compression is only available for NetCDF4!");
+                }
+            }
+        }
+    }
+  else if ( streamptr->comptype == CDI_COMPRESS_SZIP )
+    {
+      if ( lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) )
+        {
+          cdfDefVarSzip(streamptr->fileID, ncvarID, xtype2ppb(xtype));
+        }
+      else
+        {
+          if ( lchunk )
+            {
+              static bool lwarn = true;
+              if ( lwarn )
+                {
+                  lwarn = false;
+                  Warning("SZIP compression is only available for NetCDF4!");
                 }
             }
         }
@@ -808,11 +869,11 @@ int cdfDefVar(stream_t *streamptr, int varID)
   cdf_def_var(fileID, name, xtype, ndims, dims, &ncvarID);
 
 #ifdef  HAVE_NETCDF4
-  if ( lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) )
+  if (lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C))
     cdf_def_var_chunking(fileID, ncvarID, NC_CHUNKED, chunks);
 #endif
 
-  cdfDefVarCompression(streamptr, ncvarID, lchunk);
+  cdfDefVarCompression(streamptr, ncvarID, lchunk, xtype);
 
   if ( *stdname )  cdf_put_att_text(fileID, ncvarID, "standard_name", strlen(stdname), stdname);
   if ( *longname ) cdf_put_att_text(fileID, ncvarID, "long_name", strlen(longname), longname);
