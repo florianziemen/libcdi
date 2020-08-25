@@ -158,6 +158,10 @@ AS_VAR_IF([ENABLE_NETCDF], [yes],
              [AC_DEFINE([HAVE_NC4SZLIB],[1],[Define to 1 for NetCDF4/szlib support])
               ENABLE_NC4SZLIB=yes])])
 
+AS_IF([test "x$ENABLE_NC4SZLIB" = "xyes"],
+      [AC_SEARCH_LIBS([nc_def_var_szip], [netcdf],
+               [AC_DEFINE([HAVE_NC_DEF_VAR_SZIP],[1],[Define to 1 for NetCDF4 nc_def_var_szip support])],,[-lhdf5])])
+
 AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
       [AC_SEARCH_LIBS([H5TS_mutex_lock], [netcdf],
                [AC_DEFINE([HAVE_NC4HDF5_THREADSAFE],[1],[Define to 1 for NetCDF4/HDF5 threadsafe support])],,[-lhdf5])])

@@ -39,7 +39,7 @@ void cdfDefVarDeflate(int ncid, int ncvarID, int deflate_level)
 
 void cdfDefVarSzip(int ncid, int ncvarID, int pixels_per_block)
 {
-#ifdef HAVE_NC4SZLIB
+#ifdef HAVE_NC_DEF_VAR_SZIP
   // Set options_mask.
   /*
     H5_SZIP_ALLOW_K13_OPTION_MASK   1
