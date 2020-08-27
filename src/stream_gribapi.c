@@ -2442,6 +2442,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
     case ZAXIS_CLOUD_BASE:
     case ZAXIS_CLOUD_TOP:
     case ZAXIS_ISOTHERM_ZERO:
+    case ZAXIS_TROPOPAUSE:
     case ZAXIS_TOA:
     case ZAXIS_SEA_BOTTOM:
     case ZAXIS_LAKE_BOTTOM:
