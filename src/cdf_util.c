@@ -1,7 +1,9 @@
 #include <string.h>
 #include <ctype.h>
+
 #include "dmemory.h"
 #include "cdi.h"
+#include "cdi_int.h"
 #include "cdf_util.h"
 #include "error.h"
 
@@ -307,25 +309,25 @@ void set_gridtype(const char *attstring, int *gridtype)
 }
 
 
-void set_zaxistype(const char *attstring, int *zaxistype)
+void cdf_set_zaxistype(const char *attstring, int *zaxistype)
 {
   // clang-format off
-  if      ( strcmp(attstring, "toa") == 0 ) *zaxistype = ZAXIS_TOA;
-  else if ( strcmp(attstring, "tropopause") == 0 ) *zaxistype = ZAXIS_TROPOPAUSE;
-  else if ( strcmp(attstring, "cloudbase") == 0 ) *zaxistype = ZAXIS_CLOUD_BASE;
-  else if ( strcmp(attstring, "cloudtop") == 0 ) *zaxistype = ZAXIS_CLOUD_TOP;
-  else if ( strcmp(attstring, "isotherm0") == 0 ) *zaxistype = ZAXIS_ISOTHERM_ZERO;
-  else if ( strcmp(attstring, "seabottom") == 0 ) *zaxistype = ZAXIS_SEA_BOTTOM;
-  else if ( strcmp(attstring, "lakebottom") == 0 ) *zaxistype = ZAXIS_LAKE_BOTTOM;
-  else if ( strcmp(attstring, "sedimentbottom") == 0 ) *zaxistype = ZAXIS_SEDIMENT_BOTTOM;
-  else if ( strcmp(attstring, "sedimentbottomta") == 0 ) *zaxistype = ZAXIS_SEDIMENT_BOTTOM_TA;
-  else if ( strcmp(attstring, "sedimentbottomtw") == 0 ) *zaxistype = ZAXIS_SEDIMENT_BOTTOM_TW;
-  else if ( strcmp(attstring, "mixlayer") == 0 ) *zaxistype = ZAXIS_MIX_LAYER;
-  else if ( strcmp(attstring, "atmosphere") == 0 ) *zaxistype = ZAXIS_ATMOSPHERE;
+  if      (strIsEqual(attstring, "toa"))              *zaxistype = ZAXIS_TOA;
+  else if (strIsEqual(attstring, "tropopause"))       *zaxistype = ZAXIS_TROPOPAUSE;
+  else if (strIsEqual(attstring, "cloudbase"))        *zaxistype = ZAXIS_CLOUD_BASE;
+  else if (strIsEqual(attstring, "cloudtop"))         *zaxistype = ZAXIS_CLOUD_TOP;
+  else if (strIsEqual(attstring, "isotherm0"))        *zaxistype = ZAXIS_ISOTHERM_ZERO;
+  else if (strIsEqual(attstring, "seabottom"))        *zaxistype = ZAXIS_SEA_BOTTOM;
+  else if (strIsEqual(attstring, "lakebottom"))       *zaxistype = ZAXIS_LAKE_BOTTOM;
+  else if (strIsEqual(attstring, "sedimentbottom"))   *zaxistype = ZAXIS_SEDIMENT_BOTTOM;
+  else if (strIsEqual(attstring, "sedimentbottomta")) *zaxistype = ZAXIS_SEDIMENT_BOTTOM_TA;
+  else if (strIsEqual(attstring, "sedimentbottomtw")) *zaxistype = ZAXIS_SEDIMENT_BOTTOM_TW;
+  else if (strIsEqual(attstring, "mixlayer"))         *zaxistype = ZAXIS_MIX_LAYER;
+  else if (strIsEqual(attstring, "atmosphere"))       *zaxistype = ZAXIS_ATMOSPHERE;
   else
     {
       static bool warn = true;
-      if ( warn )
+      if (warn)
         {
           warn = false;
           Warning("NetCDF attribute level_type='%s' unsupported!", attstring);
@@ -338,15 +340,15 @@ void set_zaxistype(const char *attstring, int *zaxistype)
 void set_calendar(const char *attstring, int *calendar)
 {
   // clang-format off
-  if      ( strStartsWith(attstring, "standard") ) *calendar = CALENDAR_STANDARD;
-  else if ( strStartsWith(attstring, "gregorian") ) *calendar = CALENDAR_GREGORIAN;
-  else if ( strStartsWith(attstring, "none") ) *calendar = CALENDAR_NONE;
-  else if ( strStartsWith(attstring, "proleptic") ) *calendar = CALENDAR_PROLEPTIC;
-  else if ( strStartsWith(attstring, "360") ) *calendar = CALENDAR_360DAYS;
-  else if ( strStartsWith(attstring, "365") ||
-            strStartsWith(attstring, "noleap") ) *calendar = CALENDAR_365DAYS;
-  else if ( strStartsWith(attstring, "366") ||
-            strStartsWith(attstring, "all_leap") ) *calendar = CALENDAR_366DAYS;
+  if      (strStartsWith(attstring, "standard"))  *calendar = CALENDAR_STANDARD;
+  else if (strStartsWith(attstring, "gregorian")) *calendar = CALENDAR_GREGORIAN;
+  else if (strStartsWith(attstring, "none"))      *calendar = CALENDAR_NONE;
+  else if (strStartsWith(attstring, "proleptic")) *calendar = CALENDAR_PROLEPTIC;
+  else if (strStartsWith(attstring, "360"))       *calendar = CALENDAR_360DAYS;
+  else if (strStartsWith(attstring, "365") ||
+           strStartsWith(attstring, "noleap"))    *calendar = CALENDAR_365DAYS;
+  else if (strStartsWith(attstring, "366") ||
+           strStartsWith(attstring, "all_leap"))  *calendar = CALENDAR_366DAYS;
   else Warning("calendar >%s< unsupported!", attstring);
   // clang-format on
 }

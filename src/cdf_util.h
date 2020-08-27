@@ -22,7 +22,7 @@ bool is_x_axis(const char *units, const char *stdname);
 bool is_y_axis(const char *units, const char *stdname);
 
 void set_gridtype(const char *attstring, int *gridtype);
-void set_zaxistype(const char *attstring, int *zaxistype);
+void cdf_set_zaxistype(const char *attstring, int *zaxistype);
 void set_calendar(const char *attstring, int *calendar);
 
 #endif

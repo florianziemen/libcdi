@@ -1282,7 +1282,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
           else if ( isText && strIsEqual(attname, "level_type") )
             {
               strToLower(attstring);
-              set_zaxistype(attstring, &ncvars[ncvarid].zaxistype);
+              cdf_set_zaxistype(attstring, &ncvars[ncvarid].zaxistype);
               cdf_set_var(ncvars, ncvarid, TRUE);
             }
           else if ( isNumber && strIsEqual(attname, "trunc_count") )
