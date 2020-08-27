@@ -83,6 +83,7 @@ int grib1ltypeToZaxisType(int grib_ltype)
     case GRIB1_LTYPE_CLOUD_BASE:         zaxistype = ZAXIS_CLOUD_BASE;             break;
     case GRIB1_LTYPE_CLOUD_TOP:          zaxistype = ZAXIS_CLOUD_TOP;              break;
     case GRIB1_LTYPE_ISOTHERM0:          zaxistype = ZAXIS_ISOTHERM_ZERO;          break;
+    case GRIB1_LTYPE_TROPOPAUSE:         zaxistype = ZAXIS_TROPOPAUSE;             break;
     case GRIB1_LTYPE_TOA:                zaxistype = ZAXIS_TOA;                    break;
     case GRIB1_LTYPE_SEA_BOTTOM:         zaxistype = ZAXIS_SEA_BOTTOM;             break;
     case GRIB1_LTYPE_ATMOSPHERE:         zaxistype = ZAXIS_ATMOSPHERE;             break;
@@ -121,6 +122,7 @@ int grib2ltypeToZaxisType(int grib_ltype)
     case GRIB2_LTYPE_CLOUD_BASE:         zaxistype = ZAXIS_CLOUD_BASE;             break;
     case GRIB2_LTYPE_CLOUD_TOP:          zaxistype = ZAXIS_CLOUD_TOP;              break;
     case GRIB2_LTYPE_ISOTHERM0:          zaxistype = ZAXIS_ISOTHERM_ZERO;          break;
+    case GRIB2_LTYPE_TROPOPAUSE:         zaxistype = ZAXIS_TROPOPAUSE;             break;
     case GRIB2_LTYPE_TOA:                zaxistype = ZAXIS_TOA;                    break;
     case GRIB2_LTYPE_SEA_BOTTOM:         zaxistype = ZAXIS_SEA_BOTTOM;             break;
     case GRIB2_LTYPE_ATMOSPHERE:         zaxistype = ZAXIS_ATMOSPHERE;             break;
@@ -167,6 +169,7 @@ int zaxisTypeToGrib1ltype(int zaxistype)
     case ZAXIS_ALTITUDE:              grib_ltype = GRIB1_LTYPE_ALTITUDE;           break;
     case ZAXIS_SIGMA:                 grib_ltype = GRIB1_LTYPE_SIGMA;              break;
     case ZAXIS_MEANSEA:               grib_ltype = GRIB1_LTYPE_MEANSEA;            break;
+    case ZAXIS_TROPOPAUSE:            grib_ltype = GRIB1_LTYPE_TROPOPAUSE;         break;
     case ZAXIS_TOA:                   grib_ltype = GRIB1_LTYPE_TOA;                break;
     case ZAXIS_SEA_BOTTOM:            grib_ltype = GRIB1_LTYPE_SEA_BOTTOM;         break;
     case ZAXIS_ATMOSPHERE:            grib_ltype = GRIB1_LTYPE_ATMOSPHERE;         break;
@@ -205,6 +208,7 @@ int zaxisTypeToGrib2ltype(int zaxistype)
     case ZAXIS_ALTITUDE:              grib_ltype = GRIB2_LTYPE_ALTITUDE;           break;
     case ZAXIS_SIGMA:                 grib_ltype = GRIB2_LTYPE_SIGMA;              break;
     case ZAXIS_MEANSEA:               grib_ltype = GRIB2_LTYPE_MEANSEA;            break;
+    case ZAXIS_TROPOPAUSE:            grib_ltype = GRIB2_LTYPE_TROPOPAUSE;         break;
     case ZAXIS_TOA:                   grib_ltype = GRIB2_LTYPE_TOA;                break;
     case ZAXIS_SEA_BOTTOM:            grib_ltype = GRIB2_LTYPE_SEA_BOTTOM;         break;
     case ZAXIS_ATMOSPHERE:            grib_ltype = GRIB2_LTYPE_ATMOSPHERE;         break;

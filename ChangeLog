@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.5
 	* Version 1.9.9 released
 
+2020-08-27 Uwe Schulzweida
+
+	* Added support for zaxis type ZAXIS_TROPOPAUSE
+
 2020-08-25 Uwe Schulzweida
 
 	* Added support for szip compression  with NetCDF 4.7.4

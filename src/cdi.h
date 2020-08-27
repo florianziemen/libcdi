@@ -180,6 +180,7 @@ extern "C" {
 #define  ZAXIS_MIX_LAYER           24  // Mixing Layer
 #define  ZAXIS_REFERENCE           25  // zaxis reference number
 #define  ZAXIS_CHAR                26  // Area types
+#define  ZAXIS_TROPOPAUSE          27  // Tropopause
 
 // SUBTYPE types
 

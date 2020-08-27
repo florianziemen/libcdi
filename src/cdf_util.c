@@ -311,6 +311,7 @@ void set_zaxistype(const char *attstring, int *zaxistype)
 {
   // clang-format off
   if      ( strcmp(attstring, "toa") == 0 ) *zaxistype = ZAXIS_TOA;
+  else if ( strcmp(attstring, "tropopause") == 0 ) *zaxistype = ZAXIS_TROPOPAUSE;
   else if ( strcmp(attstring, "cloudbase") == 0 ) *zaxistype = ZAXIS_CLOUD_BASE;
   else if ( strcmp(attstring, "cloudtop") == 0 ) *zaxistype = ZAXIS_CLOUD_TOP;
   else if ( strcmp(attstring, "isotherm0") == 0 ) *zaxistype = ZAXIS_ISOTHERM_ZERO;
