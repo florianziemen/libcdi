@@ -21,7 +21,7 @@ bool is_lat_axis(const char *units, const char *stdname);
 bool is_x_axis(const char *units, const char *stdname);
 bool is_y_axis(const char *units, const char *stdname);
 
-void set_gridtype(const char *attstring, int *gridtype);
+void cdf_set_gridtype(const char *attstring, int *gridtype);
 void cdf_set_zaxistype(const char *attstring, int *zaxistype);
 void cdf_set_calendar(const char *attstring, int *calendar);
 

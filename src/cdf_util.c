@@ -34,20 +34,20 @@ int get_timeunit(size_t len, const char *ptu)
 {
   int timeunit = -1;
 
-  while ( isspace(*ptu) && len ) { ptu++; len--; }
+  while (isspace(*ptu) && len) { ptu++; len--; }
 
   // clang-format off
-  if ( len > 2 )
+  if (len > 2)
     {
-      if      ( strStartsWith(ptu, "sec") )            timeunit = TUNIT_SECOND;
-      else if ( strStartsWith(ptu, "minute") )         timeunit = TUNIT_MINUTE;
-      else if ( strStartsWith(ptu, "hour") )           timeunit = TUNIT_HOUR;
-      else if ( strStartsWith(ptu, "day") )            timeunit = TUNIT_DAY;
-      else if ( strStartsWith(ptu, "month") )          timeunit = TUNIT_MONTH;
-      else if ( strStartsWith(ptu, "calendar_month") ) timeunit = TUNIT_MONTH;
-      else if ( strStartsWith(ptu, "year") )           timeunit = TUNIT_YEAR;
+      if      (strStartsWith(ptu, "sec"))            timeunit = TUNIT_SECOND;
+      else if (strStartsWith(ptu, "minute"))         timeunit = TUNIT_MINUTE;
+      else if (strStartsWith(ptu, "hour"))           timeunit = TUNIT_HOUR;
+      else if (strStartsWith(ptu, "day"))            timeunit = TUNIT_DAY;
+      else if (strStartsWith(ptu, "month"))          timeunit = TUNIT_MONTH;
+      else if (strStartsWith(ptu, "calendar_month")) timeunit = TUNIT_MONTH;
+      else if (strStartsWith(ptu, "year"))           timeunit = TUNIT_YEAR;
     }
-  else if ( len == 1 && ptu[0] == 's' )  timeunit = TUNIT_SECOND;
+  else if (len == 1 && ptu[0] == 's')  timeunit = TUNIT_SECOND;
   // clang-format on
 
   return timeunit;
@@ -79,15 +79,15 @@ bool is_timeaxis_units(const char *timeunits)
   memcpy(tu, timeunits, (len+1) * sizeof(char));
   char *ptu = tu;
 
-  for ( size_t i = 0; i < len; i++ ) ptu[i] = (char)tolower((int)ptu[i]);
+  for (size_t i = 0; i < len; i++) ptu[i] = (char)tolower((int)ptu[i]);
 
   int timeunit = get_timeunit(len, ptu);
-  if ( timeunit != -1 )
+  if (timeunit != -1)
     {
-      while ( ! isspace(*ptu) && *ptu != 0 ) ptu++;
-      if ( *ptu )
+      while (! isspace(*ptu) && *ptu != 0) ptu++;
+      if (*ptu)
         {
-          while ( isspace(*ptu) ) ptu++;
+          while (isspace(*ptu)) ptu++;
 
           int timetype = strStartsWith(ptu, "as") ? TAXIS_ABSOLUTE :
                          strStartsWith(ptu, "since") ? TAXIS_RELATIVE : -1;
@@ -107,12 +107,12 @@ bool is_height_units(const char *units)
   const int u0 = units[0];
 
   bool status
-    = (u0=='m' && (!units[1] || strncmp(units, "meter", 5) == 0))
+    = (u0=='m' && (!units[1] || strStartsWith(units, "meter")))
     || (!units[2] && units[1]=='m' && (u0=='c' || u0=='d' || u0=='k'))
-    || (strncmp(units, "decimeter", 9) == 0)
-    || (strncmp(units, "centimeter", 10) == 0)
-    || (strncmp(units, "millimeter", 10) == 0)
-    || (strncmp(units, "kilometer", 9) == 0);
+    || (strStartsWith(units, "decimeter"))
+    || (strStartsWith(units, "centimeter"))
+    || (strStartsWith(units, "millimeter"))
+    || (strStartsWith(units, "kilometer"));
 
   return status;
 }
@@ -120,36 +120,21 @@ bool is_height_units(const char *units)
 
 bool is_pressure_units(const char *units)
 {
-  bool status = false;
-
-  if ( strncmp(units, "millibar", 8) == 0 ||
-       strncmp(units, "mb", 2)       == 0 ||
-       strncmp(units, "hectopas", 8) == 0 ||
-       strncmp(units, "hPa", 3)      == 0 ||
-       strncmp(units, "Pa", 2)       == 0 )
-    {
-      status = true;
-    }
+  bool status = strStartsWith(units, "millibar")
+             || strStartsWith(units, "mb")
+             || strStartsWith(units, "hectopas")
+             || strStartsWith(units, "hPa")
+             || strStartsWith(units, "Pa");
 
   return status;
 }
 
 
-bool is_DBL_axis(/*const char *units,*/ const char *longname)
+bool is_DBL_axis(const char *longname)
 {
-  bool status = false;
-
-  if ( strcmp(longname, "depth below land")         == 0 ||
-       strcmp(longname, "depth_below_land")         == 0 ||
-       strcmp(longname, "levels below the surface") == 0 )
-    {
-      /*
-      if ( strcmp(ncvars[ncvarid].units, "cm") == 0 ||
-           strcmp(ncvars[ncvarid].units, "dm") == 0 ||
-           strcmp(ncvars[ncvarid].units, "m")  == 0 )
-      */
-        status = true;
-    }
+  bool status = strIsEqual(longname, "depth below land")
+             || strIsEqual(longname, "depth_below_land")
+             || strIsEqual(longname, "levels below the surface");
 
   return status;
 }
@@ -157,17 +142,9 @@ bool is_DBL_axis(/*const char *units,*/ const char *longname)
 
 bool is_depth_axis(const char *stdname, const char *longname)
 {
-  bool status = false;
-
-  if ( strcmp(stdname, "depth") == 0 )
-    {
-      status = true;
-    }
-  else if ( strcmp(longname, "depth_below_sea") == 0 ||
-            strcmp(longname, "depth below sea") == 0 )
-    {
-      status = true;
-    }
+  bool status = strIsEqual(stdname, "depth")
+             || strIsEqual(longname, "depth_below_sea")
+             || strIsEqual(longname, "depth below sea");
 
   return status;
 }
@@ -175,33 +152,17 @@ bool is_depth_axis(const char *stdname, const char *longname)
 
 bool is_height_axis(const char *stdname, const char *longname)
 {
-  bool status = false;
-
-  if ( strcmp(stdname, "height") == 0 )
-    {
-      status = true;
-    }
-  else if ( strcmp(longname, "height") == 0 ||
-            strcmp(longname, "height above the surface") == 0 )
-    {
-      status = true;
-    }
+  bool status = strIsEqual(stdname, "height")
+             || strIsEqual(longname, "height")
+             || strIsEqual(longname, "height above the surface");
 
   return status;
 }
 
 bool is_altitude_axis(const char *stdname, const char *longname)
 {
-  bool status = false;
-
-  if ( strcmp(stdname, "altitude") == 0 )
-    {
-      status = true;
-    }
-  else if ( strcmp(longname, "altitude") == 0 )
-    {
-      status = true;
-    }
+  bool status = strIsEqual(stdname, "altitude")
+             || strIsEqual(longname, "altitude");
 
   return status;
 }
@@ -216,20 +177,20 @@ bool is_lon_axis(const char *units, const char *stdname)
   lc_units[15] = 0;
   strToLower(lc_units);
 
-  if ( (strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian")) &&
-       (strStartsWith(stdname, "grid_longitude") || strStartsWith(stdname, "longitude")) )
+  if ((strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian")) &&
+      (strStartsWith(stdname, "grid_longitude") || strStartsWith(stdname, "longitude")))
     {
       status = true;
     }
-  else if ( strStartsWith(lc_units, "degree")
-            && !strStartsWith(stdname, "grid_latitude")
-            && !strStartsWith(stdname, "latitude") )
+  else if (strStartsWith(lc_units, "degree")
+           && !strStartsWith(stdname, "grid_latitude")
+           && !strStartsWith(stdname, "latitude"))
     {
       int ioff = 6;
-      if ( lc_units[ioff] == 's' ) ioff++;
-      if ( lc_units[ioff] == ' ' ) ioff++;
-      if ( lc_units[ioff] == '_' ) ioff++;
-      if ( lc_units[ioff] == 'e' ) status = true;
+      if (lc_units[ioff] == 's') ioff++;
+      if (lc_units[ioff] == ' ') ioff++;
+      if (lc_units[ioff] == '_') ioff++;
+      if (lc_units[ioff] == 'e') status = true;
     }
 
   return status;
@@ -245,20 +206,20 @@ bool is_lat_axis(const char *units, const char *stdname)
   lc_units[15] = 0;
   strToLower(lc_units);
 
-  if ( (strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian")) &&
-        (strStartsWith(stdname, "grid_latitude") || strStartsWith(stdname, "latitude")) )
+  if ((strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian")) &&
+      (strStartsWith(stdname, "grid_latitude") || strStartsWith(stdname, "latitude")))
     {
       status = true;
     }
-  else if ( strStartsWith(lc_units, "degree")
-            && !strStartsWith(stdname, "grid_longitude")
-            && !strStartsWith(stdname, "longitude") )
+  else if (strStartsWith(lc_units, "degree")
+           && !strStartsWith(stdname, "grid_longitude")
+           && !strStartsWith(stdname, "longitude"))
     {
       int ioff = 6;
-      if ( lc_units[ioff] == 's' ) ioff++;
-      if ( lc_units[ioff] == ' ' ) ioff++;
-      if ( lc_units[ioff] == '_' ) ioff++;
-      if ( lc_units[ioff] == 'n' || lc_units[ioff] == 's' ) status = true;
+      if (lc_units[ioff] == 's') ioff++;
+      if (lc_units[ioff] == ' ') ioff++;
+      if (lc_units[ioff] == '_') ioff++;
+      if (lc_units[ioff] == 'n' || lc_units[ioff] == 's') status = true;
     }
 
   return status;
@@ -268,38 +229,38 @@ bool is_lat_axis(const char *units, const char *stdname)
 bool is_x_axis(const char *units, const char *stdname)
 {
   (void)units;
-  return (strcmp(stdname, "projection_x_coordinate") == 0);
+  return (strIsEqual(stdname, "projection_x_coordinate"));
 }
 
 
 bool is_y_axis(const char *units, const char *stdname)
 {
   (void)units;
-  return (strcmp(stdname, "projection_y_coordinate") == 0);
+  return (strIsEqual(stdname, "projection_y_coordinate"));
 }
 
 
-void set_gridtype(const char *attstring, int *gridtype)
+void cdf_set_gridtype(const char *attstring, int *gridtype)
 {
   // clang-format off
-  if      ( strcmp(attstring, "gaussian_reduced") == 0 ) *gridtype = GRID_GAUSSIAN_REDUCED;
-  else if ( strcmp(attstring, "gaussian") == 0 ) *gridtype = GRID_GAUSSIAN;
-  else if ( strncmp(attstring, "spectral", 8) == 0 ) *gridtype = GRID_SPECTRAL;
-  else if ( strncmp(attstring, "fourier", 7) == 0 ) *gridtype = GRID_FOURIER;
-  else if ( strcmp(attstring, "trajectory") == 0 ) *gridtype = GRID_TRAJECTORY;
-  else if ( strcmp(attstring, "generic") == 0 ) *gridtype = GRID_GENERIC;
-  else if ( strcmp(attstring, "cell") == 0 ) *gridtype = GRID_UNSTRUCTURED;
-  else if ( strcmp(attstring, "unstructured") == 0 ) *gridtype = GRID_UNSTRUCTURED;
-  else if ( strcmp(attstring, "curvilinear") == 0 ) ;
-  else if ( strcmp(attstring, "characterxy") == 0 ) *gridtype = GRID_CHARXY;
-  else if ( strcmp(attstring, "sinusoidal") == 0 ) ;
-  else if ( strcmp(attstring, "laea") == 0 ) ;
-  else if ( strcmp(attstring, "lcc2") == 0 ) ;
-  else if ( strcmp(attstring, "linear") == 0 ) ; // ignore grid type linear
+  if      (strIsEqual(attstring, "gaussian_reduced")) *gridtype = GRID_GAUSSIAN_REDUCED;
+  else if (strIsEqual(attstring, "gaussian"))         *gridtype = GRID_GAUSSIAN;
+  else if (strStartsWith(attstring, "spectral"))      *gridtype = GRID_SPECTRAL;
+  else if (strStartsWith(attstring, "fourier"))       *gridtype = GRID_FOURIER;
+  else if (strIsEqual(attstring, "trajectory"))       *gridtype = GRID_TRAJECTORY;
+  else if (strIsEqual(attstring, "generic"))          *gridtype = GRID_GENERIC;
+  else if (strIsEqual(attstring, "cell"))             *gridtype = GRID_UNSTRUCTURED;
+  else if (strIsEqual(attstring, "unstructured"))     *gridtype = GRID_UNSTRUCTURED;
+  else if (strIsEqual(attstring, "curvilinear")) ;
+  else if (strIsEqual(attstring, "characterxy"))      *gridtype = GRID_CHARXY;
+  else if (strIsEqual(attstring, "sinusoidal")) ;
+  else if (strIsEqual(attstring, "laea")) ;
+  else if (strIsEqual(attstring, "lcc2")) ;
+  else if (strIsEqual(attstring, "linear")) ; // ignore grid type linear
   else
     {
       static bool warn = true;
-      if ( warn )
+      if (warn)
         {
           warn = false;
           Warning("NetCDF attribute grid_type='%s' unsupported!", attstring);

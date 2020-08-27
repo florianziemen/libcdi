@@ -1244,7 +1244,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
           else if ( isText && (strIsEqual(attname, "grid_type") || strIsEqual(attname, "CDI_grid_type")) )
             {
               strToLower(attstring);
-              set_gridtype(attstring, &ncvars[ncvarid].gridtype);
+              cdf_set_gridtype(attstring, &ncvars[ncvarid].gridtype);
               cdf_set_var(ncvars, ncvarid, TRUE);
             }
           else if ( isText && strIsEqual(attname, "CDI_grid_latitudes") )
