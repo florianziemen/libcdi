@@ -706,6 +706,7 @@ void cdfDefineAttrLeveltype(int fileID, int ncvarID, int zaxisID, int zaxistype)
   if ( zaxistype == ZAXIS_CLOUD_BASE          ||
        zaxistype == ZAXIS_CLOUD_TOP           ||
        zaxistype == ZAXIS_ISOTHERM_ZERO       ||
+       zaxistype == ZAXIS_TROPOPAUSE          ||
        zaxistype == ZAXIS_TOA                 ||
        zaxistype == ZAXIS_SEA_BOTTOM          ||
        zaxistype == ZAXIS_LAKE_BOTTOM         ||
