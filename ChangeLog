@@ -2,6 +2,10 @@
 
 	* Backport of  support for zaxis type ZAXIS_TROPOPAUSE
 
+2020-08-28 Uwe Schulzweida
+
+	* getAvailabilityOfRelativeTimes: added PDT 57 and 58 [patch: Jochen Foerstner]
+
 2018-07-19  Florian Prill
 
 	* Added function cdiIterator_inqFiletype()
