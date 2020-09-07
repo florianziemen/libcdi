@@ -58,6 +58,7 @@ ZaxistypeEntry[] = {
   { /* 24 */ 0, "mixlayer",          "mix_layer",              "",               ""},
   { /* 25 */ 0, "height",            "generalized_height",     "height",         ""},
   { /* 26 */ 0, "character",         "area_type",              "",               ""},
+  { /* 27 */ 0, "tropopause",        "tropopause",             "",               ""},
 };
 
 enum {
