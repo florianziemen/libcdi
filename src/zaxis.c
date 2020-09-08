@@ -190,7 +190,7 @@ int zaxisCreate_(int zaxistype, int size, int id)
   zaxisptr->size = size;
 
   if ( zaxistype >= CDI_NumZaxistype || zaxistype < 0 )
-    Error("Internal problem! zaxistype > CDI_MaxZaxistype");
+    Error("Internal problem! zaxistype=%d out of range (min=0/max=%d)!", zaxistype, CDI_NumZaxistype-1);
 
   const int zaxisID = zaxisptr->self;
   cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, ZaxistypeEntry[zaxistype].name);
