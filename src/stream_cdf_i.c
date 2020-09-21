@@ -3472,6 +3472,9 @@ void cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int 
 		{
 		}
 	      */
+	      else if ( strIsEqual(attname, "_NCProperties") )
+		{
+		}
 	      else if ( strIsEqual(attname, "CDI") )
 		{
 		}
