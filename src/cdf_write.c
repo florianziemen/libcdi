@@ -17,15 +17,15 @@
 void cdfDefVarDeflate(int ncid, int ncvarID, int deflate_level)
 {
 #ifdef HAVE_NETCDF4
-  int retval;
   // Set chunking, shuffle, and deflate.
   const int shuffle = 1, deflate = 1;
 
   if (deflate_level < 1 || deflate_level > 9) deflate_level = 1;
 
-  if ((retval = nc_def_var_deflate(ncid, ncvarID, shuffle, deflate, deflate_level)))
+  int status;
+  if ((status = nc_def_var_deflate(ncid, ncvarID, shuffle, deflate, deflate_level)))
     {
-      Error("nc_def_var_deflate failed, status = %d", retval);
+      Error("nc_def_var_deflate failed; %s", nc_strerror(status));
     }
 #else
   static bool lwarn = true;
@@ -49,11 +49,9 @@ void cdfDefVarSzip(int ncid, int ncvarID, int pixels_per_block)
     H5_SZIP_ALL_MASKS (H5_SZIP_CHIP_OPTION_MASK|H5_SZIP_EC_OPTION_MASK|H5_SZIP_NN_OPTION_MASK)
   */
   int options_mask = 38;
-  int retval;
-  if ((retval = nc_def_var_szip(ncid, ncvarID, options_mask, pixels_per_block)))
-    {
-      Error("nc_def_var_szip failed, status = %d", retval);
-    }
+  int status;
+  if ((status = nc_def_var_szip(ncid, ncvarID, options_mask, pixels_per_block)))
+    Error("nc_def_var_szip failed; %s", nc_strerror(status));
 #else
   static bool lwarn = true;
   if (lwarn)
@@ -830,7 +828,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   int dimorder[3]; // ZYX and ZXY
   vlistInqVarDimorder(vlistID, varID, &dimorder);
-  const bool lchunk = (dimorder[0] == 3) ? (gridsize >= 16) : false;
+  const bool lchunk = (dimorder[0] == 3) ? (gridsize >= 32) : false;
 
   if ( ((dimorder[0]>0)+(dimorder[1]>0)+(dimorder[2]>0)) < ((xid!=CDI_UNDEFID)+(yid!=CDI_UNDEFID)+(zid!=CDI_UNDEFID)) )
     {
