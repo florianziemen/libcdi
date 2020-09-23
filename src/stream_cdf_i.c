@@ -94,7 +94,8 @@ typedef struct {
   int      chunked;
   int      chunktype;
   int      natts;
-  int      deflate;
+  bool     ldeflate;
+  bool     lszip;
   bool     lunsigned;
   bool     lvalidrange;
   int     *atts;
@@ -686,7 +687,8 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].scalefactor     = 1;
       ncvars[ncvarid].natts           = 0;
       ncvars[ncvarid].atts            = NULL;
-      ncvars[ncvarid].deflate         = 0;
+      ncvars[ncvarid].ldeflate        = false;
+      ncvars[ncvarid].lszip           = false;
       ncvars[ncvarid].lunsigned       = false;
       ncvars[ncvarid].lvalidrange     = false;
       ncvars[ncvarid].validrange[0]   = VALIDMISS;
@@ -1112,11 +1114,15 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
 #ifdef HAVE_NETCDF4
       if ( format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4 )
         {
-          int shuffle, deflate, deflate_level;
-          size_t chunks[nvdims];
-          int storage_in;
+          int shuffle = 0, deflate = 0, deflate_level = 0;
           nc_inq_var_deflate(ncid, ncvarid, &shuffle, &deflate, &deflate_level);
-          if ( deflate > 0 ) ncvars[ncvarid].deflate = 1;
+          if (deflate > 0) ncvars[ncvarid].ldeflate = true;
+
+#ifdef HAVE_NC_DEF_VAR_SZIP
+          int options_mask = 0, pixels_per_block = 0;
+          nc_inq_var_szip(ncid, ncvarid, &options_mask, &pixels_per_block);
+          if (options_mask && pixels_per_block) ncvars[ncvarid].lszip = true;
+#endif
           /*
           size_t cache_size, nelems;
           float preemption;
@@ -1125,6 +1131,8 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
           nc_get_var_chunk_cache(ncid, ncvarid, &cache_size, &nelems, &preemption);
           printf("varid %d cache_size %lu nelems %lu preemption %g\n", ncvarid, cache_size, nelems, preemption);
           */
+          size_t chunks[nvdims];
+          int storage_in;
           if ( nc_inq_var_chunking(ncid, ncvarid, &storage_in, chunks) == NC_NOERR )
             {
               if ( storage_in == NC_CHUNKED )
@@ -3268,8 +3276,8 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
       const int varID = vlistDefVar(vlistID, gridID, zaxisID, ncvars[ncvarid].timetype);
 
 #ifdef HAVE_NETCDF4
-      if ( ncvars[ncvarid].deflate )
-	vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_ZIP);
+      if (ncvars[ncvarid].ldeflate) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_ZIP);
+      if (ncvars[ncvarid].lszip) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_SZIP);
 
       if ( ncvars[ncvarid].chunked && ncvars[ncvarid].chunktype != CDI_UNDEFID )
         vlistDefVarChunkType(vlistID, varID, ncvars[ncvarid].chunktype);
