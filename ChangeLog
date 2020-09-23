@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.5
 	* Version 1.9.9 released
 
+2020-09-21 Uwe Schulzweida
+
+	* Ignore netCDF attribute _NCProperties
+
 2020-08-28 Uwe Schulzweida
 
 	* getAvailabilityOfRelativeTimes: added PDT 57 and 58 [patch: Jochen Foerstner]
