@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.5
 	* Version 1.9.9 released
 
+2020-09-25 Uwe Schulzweida
+
+	* cdi_generate_vars: set level to level1 if zaxis bounds are available (removed level = (level1 + level2) / 2)
+
 2020-09-21 Uwe Schulzweida
 
 	* Ignore netCDF attribute _NCProperties

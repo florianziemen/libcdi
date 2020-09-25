@@ -552,14 +552,14 @@ void cdi_generate_vars(stream_t *streamptr)
       const int param      = vartable[varid].param;
       const int ltype1     = vartable[varid].ltype1;
       const int ltype2     = vartable[varid].ltype2;
-      int zaxistype  = vartable[varid].zaxistype;
+      int zaxistype        = vartable[varid].zaxistype;
       if ( ltype1 == 0 && zaxistype == ZAXIS_GENERIC && cdiDefaultLeveltype != -1 )
 	zaxistype = cdiDefaultLeveltype;
       const int lbounds    = vartable[varid].lbounds;
       const int prec       = vartable[varid].prec;
-      int instID     = vartable[varid].instID;
-      int modelID    = vartable[varid].modelID;
-      int tableID    = vartable[varid].tableID;
+      int instID           = vartable[varid].instID;
+      int modelID          = vartable[varid].modelID;
+      int tableID          = vartable[varid].tableID;
       const int tsteptype  = vartable[varid].tsteptype;
       const int comptype   = vartable[varid].comptype;
 
@@ -602,11 +602,12 @@ void cdi_generate_vars(stream_t *streamptr)
 
       double *dlevels = (double *) Malloc(nlevels*sizeof(double));
 
+      /*
       if ( lbounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
 	for ( unsigned levelID = 0; levelID < nlevels; levelID++ )
-	  dlevels[levelID] = (level_sf*levelTable[levelID].level1 +
-	                      level_sf*levelTable[levelID].level2)/2;
+	  dlevels[levelID] = (level_sf*levelTable[levelID].level1 + level_sf*levelTable[levelID].level2) / 2.0;
       else
+      */
 	for ( unsigned levelID = 0; levelID < nlevels; levelID++ )
 	  dlevels[levelID] = level_sf*levelTable[levelID].level1;
 
@@ -645,11 +646,12 @@ void cdi_generate_vars(stream_t *streamptr)
 
           if ( lsort )
             {
+              /*
               if ( lbounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
                 for ( unsigned levelID = 0; levelID < nlevels; levelID++ )
-                  dlevels[levelID] = (level_sf*levelTable[levelID].level1 +
-                                      level_sf*levelTable[levelID].level2)/2.;
+                  dlevels[levelID] = (level_sf*levelTable[levelID].level1 + level_sf*levelTable[levelID].level2) / 2.0;
               else
+              */
                 for ( unsigned levelID = 0; levelID < nlevels; levelID++ )
                   dlevels[levelID] = level_sf*levelTable[levelID].level1;
             }
