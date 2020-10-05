@@ -23,7 +23,7 @@ end
 
 function gridCreate(gridtype::GRID, size::Unsigned):Cint
     println("Create Grid")
-    return ccall(Cint, (Cint, Csize_t), gridtype, size)
+    return ccall((:gridCreate, "libcdi"), Cint, (Cint, Csize_t), gridtype, size)
 end
 
 export GRID, LONLAT
