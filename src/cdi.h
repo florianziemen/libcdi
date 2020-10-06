@@ -20,11 +20,13 @@ extern "C" {
 #define  CDI_UNDEFID               -1
 #define  CDI_GLOBAL                -1   // Global var ID for vlist
 
-// Byte order
+// #BEGIN# ByteOrder
 
 #define  CDI_BIGENDIAN              0   // Byte order BIGENDIAN
 #define  CDI_LITTLEENDIAN           1   // Byte order LITTLEENDIAN
 #define  CDI_PDPENDIAN              2
+
+// #END# ByteOrder
 
 #define  CDI_REAL                   1   // Real numbers
 #define  CDI_COMP                   2   // Complex numbers

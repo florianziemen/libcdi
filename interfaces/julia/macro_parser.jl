@@ -1,46 +1,104 @@
-#inputpath = "/home/mpim/m300859/libcdi/interfaces/julia/cdi_macro.h"
+####### local Types ######
+
+@enum ReadState begin
+    waitUntilEnum
+    readEnumValues
+end
+
+struct rawEnumValue
+    name::String
+    value::String
+    comment::String
+end
+
+mutable struct rawEnum 
+    name::String
+    values::Vector{rawEnumValue}
+end
+
+function rawEnum()
+    rawEnum("", Vector{rawEnumValue}(undef, 0))
+end
+
+####### local functions ########
+function readEnumValue(tokens::Vector{String})::rawEnumValue
+    if length(tokens) < 3 || tokens[1] != "#define"
+        return
+    end
+
+    comment = ""
+    if length(tokens) > 4
+        for c in tokens[5:end]
+            comment = comment * " " * c
+        end
+    end
+
+    println(tokens)
+    println(comment)
+
+    return rawEnumValue(tokens[2], tokens[3], comment)
+end
+
+###### Main #######
+
+#inputpath = joinpath(dirname("./../../"), "src", "cdi.h") |> normpath
 inputpath = "/home/mpim/m300859/libcdi/src/cdi.h"
 
+# Read input file
 io = open(inputpath, "r")
-txt = read(io, String)
-lines = split(txt, '\n')
+lines = split(read(io, String), '\n') 
+close(io)
 
-res = Vector{Tuple{String, String, String}}(undef, 0)
+enums = Vector{rawEnum}(undef, 0)
+readState = waitUntilEnum
+tmpEnum = rawEnum()
 
 for line in lines
-    if length(line) > 0 && line[1] == '#'
-        tokens = filter(x -> !isempty(x), split(line, ' '))
+    trimedline = line |> lstrip |> rstrip
 
-        if length(tokens) < 3 || tokens[1] != "#define"
-            continue
-        end
+    # skip empty lines
+    if length(trimedline) == 0
+        continue
+    end
 
-        comment = ""
-        if length(tokens) > 4
-            for c in tokens[5:end]
-                comment = comment * " " * c
-            end
-        end
+    # create clean token stream from line
+    tokens = filter(x -> !isempty(x), split(trimedline, ' '))
 
-        println(tokens)
-        println(comment)
-
-        append!(res, [(tokens[2], tokens[3], comment)])
-        
-        #println(tokens)
+    if tokens[1] == "//" && tokens[2] == "#BEGIN#" && readState == waitUntilEnum
+        global tmpEnum.name = tokens[3]
+        global readState = readEnumValues
+    elseif tokens[1] == "//" && tokens[2] == "#BEGIN#" && readState == readEnumValues
+        println("Sytax Error open enum block twice")
+        return
+    elseif readState == readEnumValues && tokens[1] == "#define"
+        append!(tmpEnum.values, [readEnumValue(convert(Vector{String}, tokens))])
+    elseif tokens[1] == "//" && tokens[2] == "#END#" && readState == waitUntilEnum
+        println("Sytax Error close enum block without open one")
+        return
+    elseif readState == readEnumValues && tokens[1] == "//" && tokens[2] == "#END#"
+        append!(enums, [tmpEnum])
+        global readState = waitUntilEnum
+        global tmpEnum = rawEnum()
     end
 end
 
-close(io)
-
-if length(res) == 0
+println(enums)
+if length(enums) == 0
     exit(0)
 end
 
 io = open("/home/mpim/m300859/libcdi/interfaces/julia/cdi_macro.jl", "w")
-write(io, "@enum enum::Cint begin\n")
-for (name, value, comment) in res 
-    write(io, "  $name = $value # $comment\n")
+for e in enums
+    write(io, "@enum $(e.name)::Cint begin\n")
+    for v in (e.values)
+        if v.comment == ""
+            write(io, "  $(v.name) = $(v.value)\n")
+        else
+            write(io, "  $(v.name) = $(v.value) # $(v.comment)\n")
+        end
+    end
+    write(io, "end\n")
+    write(io, "\n\n\n")
 end
-write(io, "end\n")
+
 close(io)
