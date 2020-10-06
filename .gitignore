@@ -69,6 +69,7 @@ Makefile
 /app/cdi
 /app/createtable
 /build
+/bin
 
 # Documentation stage files:
 /doc/cdi_cman.pdf
@@ -119,3 +120,5 @@ Makefile
 *.dSYM
 .DS_Store
 
+# Data files:
+*.nc
