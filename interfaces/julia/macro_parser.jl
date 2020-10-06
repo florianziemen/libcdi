@@ -26,15 +26,7 @@ function readEnumValue(tokens::Vector{String})::rawEnumValue
         return
     end
 
-    comment = ""
-    if length(tokens) > 4
-        for c in tokens[5:end]
-            comment = comment * " " * c
-        end
-    end
-
-    println(tokens)
-    println(comment)
+    comment = join(tokens[5:end], " ")
 
     return rawEnumValue(tokens[2], tokens[3], comment)
 end
@@ -91,10 +83,18 @@ io = open("/home/mpim/m300859/libcdi/interfaces/julia/cdi_macro.jl", "w")
 for e in enums
     write(io, "@enum $(e.name)::Cint begin\n")
     for v in (e.values)
+        nameparts = split(v.name, "_")
+        name = v.name
+        if length(nameparts) == 2
+            name = nameparts[2]
+        elseif length(nameparts) > 2
+            name = join(nameparts[2:end], "_")
+        end
+
         if v.comment == ""
-            write(io, "  $(v.name) = $(v.value)\n")
+            write(io, "  $name = $(v.value)\n")
         else
-            write(io, "  $(v.name) = $(v.value) # $(v.comment)\n")
+            write(io, "  $name = $(v.value) # $(v.comment)\n")
         end
     end
     write(io, "end\n")
