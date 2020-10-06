@@ -21,19 +21,18 @@ extern "C" {
 #define  CDI_GLOBAL                -1   // Global var ID for vlist
 
 // #BEGIN# ByteOrder
-
 #define  CDI_BIGENDIAN              0   // Byte order BIGENDIAN
 #define  CDI_LITTLEENDIAN           1   // Byte order LITTLEENDIAN
 #define  CDI_PDPENDIAN              2
-
 // #END# ByteOrder
 
+// #BEGIN# NumberType
 #define  CDI_REAL                   1   // Real numbers
 #define  CDI_COMP                   2   // Complex numbers
 #define  CDI_BOTH                   3   // Both numbers
+// #END# NumberType
 
-// Error identifier
-
+// #BEGIN# ErrorIdentifier
 #define	 CDI_NOERR        	    0   // No Error
 #define  CDI_EEOF                  -1   // The end of file was encountered
 #define  CDI_ETMOF                 -9   // Too many open files
@@ -47,9 +46,9 @@ extern "C" {
 #define  CDI_EUNC4                -26   // Unsupported NetCDF4 structure
 #define  CDI_EDIMSIZE             -27   // Invalid dimension size
 #define  CDI_ELIMIT               -99   // Internal limits exceeded
+// #END# ErrorIdentifier
 
-// File types
-
+// #BEGIN# FileTypes
 #define  CDI_FILETYPE_GRB           1   // File type GRIB
 #define  CDI_FILETYPE_GRB2          2   // File type GRIB version 2
 #define  CDI_FILETYPE_NC            3   // File type NetCDF
@@ -60,17 +59,18 @@ extern "C" {
 #define  CDI_FILETYPE_SRV           8   // File type SERVICE
 #define  CDI_FILETYPE_EXT           9   // File type EXTRA
 #define  CDI_FILETYPE_IEG          10   // File type IEG
+// #END# FileTypes
 
-// Compress types
-
+// #BEGIN# CompressTypes
 #define  CDI_COMPRESS_NONE          0
 #define  CDI_COMPRESS_SZIP          1
 #define  CDI_COMPRESS_AEC           2
 #define  CDI_COMPRESS_ZIP           3
 #define  CDI_COMPRESS_JPEG          4
+// #END# CompressTypes
 
+// #BEGIN# dataTypes
 // external data types
-
 #define  CDI_DATATYPE_PACK          0
 #define  CDI_DATATYPE_PACK1         1
 #define  CDI_DATATYPE_PACK2         2
@@ -123,15 +123,16 @@ extern "C" {
 #define  CDI_DATATYPE_UCHAR       255
 #define  CDI_DATATYPE_LONG        256
 #define  CDI_DATATYPE_UINT        257
+// #END# dataTypes
 
-// Chunks
-
+// #BEGIN# Chunks
 #define  CDI_CHUNK_AUTO             1  // use default chunk size
 #define  CDI_CHUNK_GRID             2
 #define  CDI_CHUNK_LINES            3
+// #END# Chunks
 
-// GRID types
-
+// #BEGIN# GRID
+// GRID Types
 #define  GRID_GENERIC               1  // Generic grid
 #define  GRID_GAUSSIAN              2  // Regular Gaussian lon/lat grid
 #define  GRID_GAUSSIAN_REDUCED      3  // Reduced Gaussian lon/lat grid
@@ -150,9 +151,10 @@ extern "C" {
 #define  CDI_PROJ_LAEA             23  // Lambert Azimuthal Equal Area
 #define  CDI_PROJ_SINU             24  // Sinusoidal
 #define  CDI_PROJ_STERE            25  // Polar stereographic
+// #END# GRID
 
+// #BEGIN# ZAXIS
 // ZAXIS types
-
 #define  ZAXIS_SURFACE              0  // Surface level
 #define  ZAXIS_GENERIC              1  // Generic level
 #define  ZAXIS_HYBRID               2  // Hybrid level
@@ -180,6 +182,7 @@ extern "C" {
 #define  ZAXIS_MIX_LAYER           24  // Mixing Layer
 #define  ZAXIS_REFERENCE           25  // zaxis reference number
 #define  ZAXIS_CHAR                26  // Area types
+// #END# ZAXIS
 
 // SUBTYPE types
 
@@ -200,15 +203,15 @@ typedef struct  {
 } subtype_query_t;
 
 
-
+// #BEGIN# TIME
 // TIME types
-
 #define  TIME_CONSTANT            0  // Time constant
 #define  TIME_VARYING             1  // Time varying
 #define  TIME_VARIABLE            1  // obsolate, use TIME_VARYING
+// #END# TIME
 
+// #BEGIN# TimeSteps
 // TSTEP types
-
 #define  TSTEP_INSTANT            1  // Instant
 #define  TSTEP_AVG                2  // Average
 #define  TSTEP_ACCUM              3  // Accumulation
@@ -223,15 +226,17 @@ typedef struct  {
 #define  TSTEP_RANGE             12
 #define  TSTEP_INSTANT2          13
 #define  TSTEP_INSTANT3          14
+// #END# TimeSteps
 
+// #BEGIN# TAXIS
 // TAXIS types
-
 #define  TAXIS_ABSOLUTE           1
 #define  TAXIS_RELATIVE           2
 #define  TAXIS_FORECAST           3
+// #END# TAXIS
 
+// #BEIGN# TimeUnit
 // TUNIT types
-
 #define  TUNIT_SECOND             1
 #define  TUNIT_MINUTE             2
 #define  TUNIT_QUARTER            3
@@ -243,9 +248,10 @@ typedef struct  {
 #define  TUNIT_DAY                9
 #define  TUNIT_MONTH             10
 #define  TUNIT_YEAR              11
+// #END# TimeUnit
 
+// #BEGIN# Calender
 // CALENDAR types
-
 #define  CALENDAR_STANDARD        0  // don't change this value (used also in cgribexlib)!
 #define  CALENDAR_GREGORIAN       1
 #define  CALENDAR_PROLEPTIC       2
@@ -253,6 +259,7 @@ typedef struct  {
 #define  CALENDAR_365DAYS         4
 #define  CALENDAR_366DAYS         5
 #define  CALENDAR_NONE            6
+// #END# Calender
 
 // number of unsigned char needed to store UUID
 #define  CDI_UUID_SIZE           16
