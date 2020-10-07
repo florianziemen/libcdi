@@ -31,6 +31,17 @@ function readEnumValue(tokens::Vector{String})::rawEnumValue
     return rawEnumValue(tokens[2], tokens[3], comment)
 end
 
+function macroName(name::AbstractString)
+    nameparts = split(name, "_")
+    res = name
+    if length(nameparts) == 2
+        res = nameparts[2]
+    elseif length(nameparts) > 2
+        res = join(nameparts[2:end], "_")
+    end
+    return res
+end
+
 ###### Main #######
 
 #inputpath = joinpath(dirname("./../../"), "src", "cdi.h") |> normpath
@@ -80,25 +91,42 @@ if length(enums) == 0
 end
 
 io = open("/home/mpim/m300859/libcdi/interfaces/julia/cdi_macro.jl", "w")
+write(io, "using CEnum #redefine enum elements with the same value\n\n")
 for e in enums
+    # create namespace
+    write(io, "module _$(e.name)\n")
+
+    #create enum
     write(io, "@enum $(e.name)::Cint begin\n")
     for v in (e.values)
-        nameparts = split(v.name, "_")
-        name = v.name
-        if length(nameparts) == 2
-            name = nameparts[2]
-        elseif length(nameparts) > 2
-            name = join(nameparts[2:end], "_")
-        end
+        name = macroName(v.name)
 
         if v.comment == ""
-            write(io, "  $name = $(v.value)\n")
+            write(io, "    $name = $(v.value)\n")
         else
-            write(io, "  $name = $(v.value) # $(v.comment)\n")
+            write(io, "    $name = $(v.value) # $(v.comment)\n")
         end
     end
-    write(io, "end\n")
-    write(io, "\n\n\n")
+    write(io, "end # End of Enum $(e.name)\n")
+    
+    #export enum to namespace
+    write(io, "export $(e.name)\n")
+
+    #export enum values to namespace
+    if length(e.values) == 1
+        write(io, "export " * macroName(e.values[1].name) * "\n")
+    elseif length(e.values) > 1
+        write(io, "export " * macroName(e.values[1].name))
+        for v in e.values[2:end]
+            name = macroName(v.name)
+            write(io, ", $name")
+        end
+        write(io, "\n")
+    end
+
+    write(io, "end # End of Module _$(e.name)\n")
+    write(io, "using ._$(e.name)")
+    write(io, "\n\n")
 end
 
 close(io)
