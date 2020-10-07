@@ -91,7 +91,6 @@ if length(enums) == 0
 end
 
 io = open("/home/mpim/m300859/libcdi/interfaces/julia/cdi_macro.jl", "w")
-write(io, "using CEnum #redefine enum elements with the same value\n\n")
 for e in enums
     modulename = e.name
     enumname = e.name * "_t"
