@@ -93,11 +93,14 @@ end
 io = open("/home/mpim/m300859/libcdi/interfaces/julia/cdi_macro.jl", "w")
 write(io, "using CEnum #redefine enum elements with the same value\n\n")
 for e in enums
+    modulename = e.name
+    enumname = e.name * "_t"
+
     # create namespace
-    write(io, "module _$(e.name)\n")
+    write(io, "module $modulename\n")
 
     #create enum
-    write(io, "@enum $(e.name)::Cint begin\n")
+    write(io, "@enum $enumname::Cint begin\n")
     for v in (e.values)
         name = macroName(v.name)
 
@@ -107,25 +110,13 @@ for e in enums
             write(io, "    $name = $(v.value) # $(v.comment)\n")
         end
     end
-    write(io, "end # End of Enum $(e.name)\n")
+    write(io, "end # End of Enum $enumname\n")
     
     #export enum to namespace
-    write(io, "export $(e.name)\n")
+    write(io, "export $enumname\n")
 
-    #export enum values to namespace
-    if length(e.values) == 1
-        write(io, "export " * macroName(e.values[1].name) * "\n")
-    elseif length(e.values) > 1
-        write(io, "export " * macroName(e.values[1].name))
-        for v in e.values[2:end]
-            name = macroName(v.name)
-            write(io, ", $name")
-        end
-        write(io, "\n")
-    end
-
-    write(io, "end # End of Module _$(e.name)\n")
-    write(io, "using ._$(e.name)")
+    write(io, "end # End of Module $modulename\n")
+    write(io, "using .$modulename")
     write(io, "\n\n")
 end
 
