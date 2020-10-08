@@ -43,12 +43,12 @@ function macroName(name::AbstractString)
 end
 
 ###### Main #######
-
-#inputpath = joinpath(dirname("./../../"), "src", "cdi.h") |> normpath
-inputpath = "/home/mpim/m300859/libcdi/src/cdi.h"
+const BASEPATH = @__DIR__
+const INPUTPATH = BASEPATH * "/../../../../src/cdi.h" |> normpath
+const OUTPUTPATH = BASEPATH * "/../../cdi/src/cdi_macro.jl" |> normpath
 
 # Read input file
-io = open(inputpath, "r")
+io = open(INPUTPATH, "r")
 lines = split(read(io, String), '\n') 
 close(io)
 
@@ -90,7 +90,7 @@ if length(enums) == 0
     exit(0)
 end
 
-io = open("/home/mpim/m300859/libcdi/interfaces/julia/cdi_macro.jl", "w")
+io = open(OUTPUTPATH, "w")
 for e in enums
     modulename = e.name
     enumname = e.name * "_t"
