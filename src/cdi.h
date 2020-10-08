@@ -235,7 +235,7 @@ typedef struct  {
 #define  TAXIS_FORECAST           3
 // #END# TAXIS
 
-// #BEIGN# TimeUnit
+// #BEGIN# TimeUnit
 // TUNIT types
 #define  TUNIT_SECOND             1
 #define  TUNIT_MINUTE             2
