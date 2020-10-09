@@ -142,28 +142,6 @@ int binReadInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
 }
 
 
-int binReadFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
-{
-  if ( sizeof(FLT32) != 4 ) Error("Not implemented for %d byte float!", sizeof(FLT32));
-
-  fileRead(fileID, (void *) ptr, 4*size);
-  if ( byteswap ) swap4byte(ptr, size);
-
-  return 0;
-}
-
-
-int binReadFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
-{
-  if ( sizeof(FLT64) != 8 ) Error("Not implemented for %d byte float!", sizeof(FLT64));
-
-  fileRead(fileID, (void *) ptr, 8*size);
-  if ( byteswap ) swap8byte(ptr, size);
-
-  return 0;
-}
-
-
 int binWriteInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
 {
   if ( sizeof(INT32) != 4 ) Error("Not implemented for %d byte integer!", sizeof(INT32));

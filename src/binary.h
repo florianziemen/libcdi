@@ -2,7 +2,7 @@
 #define BINARY_H
 
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <inttypes.h>
@@ -33,9 +33,6 @@ int binReadInt64(int fileID, int byteswap, size_t size, INT64 *ptr);
 
 int binWriteInt32(int fileID, int byteswap, size_t size, INT32 *ptr);
 int binWriteInt64(int fileID, int byteswap, size_t size, INT64 *ptr);
-
-int binReadFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr);
-int binReadFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr);
 
 int binWriteFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr);
 int binWriteFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr);
