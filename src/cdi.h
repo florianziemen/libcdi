@@ -206,7 +206,7 @@ typedef struct  {
 
 #define  TIME_CONSTANT            0  // Time constant
 #define  TIME_VARYING             1  // Time varying
-#define  TIME_VARIABLE            1  // obsolate, use TIME_VARYING
+#define  TIME_VARIABLE            1  // obsolete, use TIME_VARYING
 
 // TSTEP types
 
