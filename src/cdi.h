@@ -1276,6 +1276,11 @@ void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision
 //FINT_OFF
 void gaussianLatitudes(double *latitudes, double *weights, size_t nlat);
 
+int (*proj_lonlat_to_lcc_func)(double, double, double, double, double, double, double, size_t, double*, double*);
+int (*proj_lcc_to_lonlat_func)(double, double, double, double, double, double, double, double, double, size_t, double*, double*);
+int (*proj_lonlat_to_stere_func)(double, double, double, double, double, size_t, double*, double*);
+int (*proj_stere_to_lonlat_func)(double, double, double, double, double, double, double, size_t, double*, double*);
+
 #ifdef __cplusplus
 }
 #endif
