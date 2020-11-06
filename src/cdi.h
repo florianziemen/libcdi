@@ -658,21 +658,21 @@ int     vlistFindLevel(int vlistID, int fvarID, int flevelID);
 int     vlistMergedVar(int vlistID, int varID);
 int     vlistMergedLevel(int vlistID, int varID, int levelID);
 
-// cdiClearAdditionalKeys: Clear the list of additional GRIB keys
+//      cdiClearAdditionalKeys: Clear the list of additional GRIB keys
 void    cdiClearAdditionalKeys(void);
-// cdiDefAdditionalKey: Register an additional GRIB key which is read when file is opened
+//      cdiDefAdditionalKey: Register an additional GRIB key which is read when file is opened
 void    cdiDefAdditionalKey(const char *string);
 
-// vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API
+//      vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API
 void    vlistDefVarIntKey(int vlistID, int varID, const char *name, int value);
-// vlistDefVarDblKey: Set an arbitrary keyword/double value pair for GRIB API
+//      vlistDefVarDblKey: Set an arbitrary keyword/double value pair for GRIB API
 void    vlistDefVarDblKey(int vlistID, int varID, const char *name, double value);
 
-// vlistHasVarKey: returns 1 if meta-data key was read, 0 otherwise
+//      vlistHasVarKey: returns 1 if meta-data key was read, 0 otherwise
 int     vlistHasVarKey(int vlistID, int varID, const char *name);
-// vlistInqVarDblKey: raw access to GRIB meta-data
+//      vlistInqVarDblKey: raw access to GRIB meta-data
 double  vlistInqVarDblKey(int vlistID, int varID, const char *name);
-// vlistInqVarIntKey: raw access to GRIB meta-data
+//      vlistInqVarIntKey: raw access to GRIB meta-data
 int     vlistInqVarIntKey(int vlistID, int varID, const char *name);
 
 // CDI attributes
@@ -1273,7 +1273,15 @@ int     vlistInqVarSubtype(int vlistID, int varID);
 
 void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision_version);
 
+#ifdef __cplusplus
+}
+#endif
+
 //FINT_OFF  <--- don't change or remove this line!!!
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void gaussianLatitudes(double *latitudes, double *weights, size_t nlat);
 
