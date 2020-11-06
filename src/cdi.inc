@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   June 2020
+! Uwe Schulzweida, MPI-MET, Hamburg,   November 2020
 !
 
       INTEGER    CDI_MAX_NAME
@@ -306,6 +306,8 @@
       PARAMETER (ZAXIS_REFERENCE        = 25)
       INTEGER    ZAXIS_CHAR
       PARAMETER (ZAXIS_CHAR             = 26)
+      INTEGER    ZAXIS_TROPOPAUSE
+      PARAMETER (ZAXIS_TROPOPAUSE       = 27)
 !
 !  SUBTYPE types
 !
@@ -2614,10 +2616,4 @@
 !                                     INTEGER         minor_version,
 !                                     INTEGER         revision_version)
       EXTERNAL        gribapiLibraryVersion
-
-!                     gaussianLatitudes
-!                                    (DOUBLEPRECISION latitudes,
-!                                     DOUBLEPRECISION weights,
-!                                     INTEGER         nlat)
-      EXTERNAL        gaussianLatitudes
 
