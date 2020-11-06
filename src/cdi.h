@@ -1273,13 +1273,15 @@ int     vlistInqVarSubtype(int vlistID, int varID);
 
 void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision_version);
 
-//FINT_OFF
+//FINT_OFF  <--- don't change or remove this line!!!
+
 void gaussianLatitudes(double *latitudes, double *weights, size_t nlat);
 
-int (*proj_lonlat_to_lcc_func)(double, double, double, double, double, double, double, size_t, double*, double*);
-int (*proj_lcc_to_lonlat_func)(double, double, double, double, double, double, double, double, double, size_t, double*, double*);
-int (*proj_lonlat_to_stere_func)(double, double, double, double, double, size_t, double*, double*);
-int (*proj_stere_to_lonlat_func)(double, double, double, double, double, double, double, size_t, double*, double*);
+#define HAVE_CDI_PROJ_FUNCS 1
+extern int (*proj_lonlat_to_lcc_func)(double, double, double, double, double, double, double, size_t, double*, double*);
+extern int (*proj_lcc_to_lonlat_func)(double, double, double, double, double, double, double, double, double, size_t, double*, double*);
+extern int (*proj_lonlat_to_stere_func)(double, double, double, double, double, size_t, double*, double*);
+extern int (*proj_stere_to_lonlat_func)(double, double, double, double, double, double, double, size_t, double*, double*);
 
 #ifdef __cplusplus
 }
