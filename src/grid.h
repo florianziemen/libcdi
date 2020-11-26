@@ -155,6 +155,7 @@ int gridVerifyGribParamSTERE(double missval, double *lon_0, double *lat_ts, doub
                              double *a, double *xval_0, double *yval_0, double *x_0, double *y_0);
 
 bool isGaussLat(size_t ysize, double yinc, const double *yvals);
+void gaussianLatitudes(double *latitudes, double *weights, size_t nlat);
 
 #endif
 /*

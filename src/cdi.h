@@ -1283,8 +1283,6 @@ void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision
 extern "C" {
 #endif
 
-void gaussianLatitudes(double *latitudes, double *weights, size_t nlat);
-
 #define HAVE_CDI_PROJ_FUNCS 1
 extern int (*proj_lonlat_to_lcc_func)(double, double, double, double, double, double, double, size_t, double*, double*);
 extern int (*proj_lcc_to_lonlat_func)(double, double, double, double, double, double, double, double, double, size_t, double*, double*);

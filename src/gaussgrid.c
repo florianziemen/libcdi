@@ -1,7 +1,3 @@
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
@@ -10,9 +6,6 @@
 #ifndef  M_SQRT2
 #define  M_SQRT2  1.41421356237309504880168872420969808
 #endif
-
-#include "cdi_int.h"
-
 
 static
 void cpledn(size_t kn, size_t kodd, double *pfn, double pdx, int kflag,
@@ -71,9 +64,9 @@ void gawl(double *pfn, double *pl, double *pw, size_t kn)
   int iflag  =  0;
   int itemax = 20;
 
-  size_t iodd   = (kn % 2);
+  size_t iodd = (kn % 2);
 
-  double zdlx   =  *pl;
+  double zdlx = *pl;
 
   // 2.0 Newton iteration
 
@@ -118,7 +111,7 @@ void gauaw(size_t kn, double *restrict pl, double *restrict pw)
       for (size_t jgl = 2; jgl <= jn-iodd; jgl += 2)
 	{
 	  zfn[jn*(kn+1)+jn-jgl] = zfn[jn*(kn+1)+jn-jgl+2]
-	    *((double)((jgl-1)*(2*jn-jgl+2)))/((double)(jgl*(2*jn-jgl+1)));
+	    * ((double)((jgl-1)*(2*jn-jgl+2))) / ((double)(jgl*(2*jn-jgl+1)));
 	}
     }
 
@@ -136,12 +129,11 @@ void gauaw(size_t kn, double *restrict pl, double *restrict pw)
   // 2.1 Find first approximation of the roots of the Legendre polynomial of degree kn
 
   size_t ins2 = kn/2+(kn % 2);
-  double z;
 
   for (size_t jgl = 1; jgl <= ins2; jgl++)
     {
-      z = ((double)(4*jgl-1))*M_PI/((double)(4*kn+2));
-      pl[jgl-1] = z+1.0/(tan(z)*((double)(8*kn*kn)));
+      double z = ((double)(4*jgl-1)) * M_PI / ((double)(4*kn+2));
+      pl[jgl-1] = z + 1.0 / (tan(z)*((double)(8*kn*kn)));
     }
 
   // 2.2 Computes roots and weights for transformed theta
@@ -159,8 +151,8 @@ void gauaw(size_t kn, double *restrict pl, double *restrict pw)
   for (size_t jgl = 1; jgl <= kn/2; jgl++)
     {
       size_t jglm1 = jgl-1;
-      size_t isym =  kn-jgl;
-      pl[isym] =  -pl[jglm1];
+      size_t isym  = kn-jgl;
+      pl[isym] = -pl[jglm1];
       pw[isym] =  pw[jglm1];
     }
 
@@ -175,13 +167,3 @@ void gaussianLatitudes(double *latitudes, double *weights, size_t nlat)
 {
   gauaw(nlat, latitudes, weights);
 }
-
-/*
- * Local Variables:
- * c-file-style: "Java"
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * show-trailing-whitespace: t
- * require-trailing-newline: t
- * End:
- */
