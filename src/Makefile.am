@@ -64,7 +64,7 @@ libcdi_la_SOURCES = 	 \
 	extralib.c       \
 	file.c         	 \
 	file.h	 	 \
-	gaussgrid.c      \
+	gaussian_latitudes.c \
 	gribapi.c  	 \
 	gribapi.h	 \
 	gribapi_utilities.h \
