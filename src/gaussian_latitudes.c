@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <float.h>
 #include <math.h>
 
@@ -163,7 +164,43 @@ void gauaw(size_t kn, double *restrict pl, double *restrict pw)
 }
 
 
-void gaussianLatitudes(double *latitudes, double *weights, size_t nlat)
+void gaussianLatitudes(size_t nlats, double *latitudes, double *weights)
 {
-  gauaw(nlat, latitudes, weights);
+  gauaw(nlats, latitudes, weights);
+}
+
+
+bool isGaussianLatitudes(size_t nlats, const double *latitudes)
+{
+  bool is_gauss_lats = false;
+
+  if (nlats > 2) // check if gaussian
+    {
+      size_t i;
+      double *yv = (double *) malloc(nlats*sizeof(double));
+      double *yw = (double *) malloc(nlats*sizeof(double));
+      gaussianLatitudes(nlats, yv, yw);
+      free(yw);
+
+      for (i = 0; i < nlats; i++)
+        yv[i] = asin(yv[i]) / M_PI * 180.0;
+
+      for (i = 0; i < nlats; i++)
+        if (fabs(yv[i] - latitudes[i]) > ((yv[0] - yv[1]) / 500.0)) break;
+
+      if (i == nlats) is_gauss_lats = true;
+
+      // check S->N
+      if (is_gauss_lats == false)
+        {
+          for (i = 0; i < nlats; i++)
+            if (fabs(yv[i] - latitudes[nlats-i-1]) > ((yv[0] - yv[1]) / 500.0)) break;
+
+          if (i == nlats) is_gauss_lats = true;
+        }
+
+      free(yv);
+    }
+
+  return is_gauss_lats;
 }

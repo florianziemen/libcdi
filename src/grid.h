@@ -154,8 +154,8 @@ int gridVerifyGribParamLCC(double missval, double *lon_0, double *lat_0, double 
 int gridVerifyGribParamSTERE(double missval, double *lon_0, double *lat_ts, double *lat_0,
                              double *a, double *xval_0, double *yval_0, double *x_0, double *y_0);
 
-bool isGaussLat(size_t ysize, double yinc, const double *yvals);
-void gaussianLatitudes(double *latitudes, double *weights, size_t nlat);
+bool isGaussianLatitudes(size_t nlats, const double *latitudes);
+void gaussianLatitudes(size_t nlats, double *latitudes, double *weights);
 
 #endif
 /*

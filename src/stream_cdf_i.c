@@ -2190,7 +2190,7 @@ void cdf_check_gridtype(int *gridtype, bool islon, bool islat, size_t xsize, siz
                 break;
               }
         }
-      if ( ysize < 10000 && isGaussLat(ysize, yinc, grid->y.vals) )
+      if ( ysize < 10000 && IS_EQUAL(yinc, 0.0) && isGaussianLatitudes(ysize, grid->y.vals) )
         {
           *gridtype = GRID_GAUSSIAN;
           grid->np = (int)(ysize/2);

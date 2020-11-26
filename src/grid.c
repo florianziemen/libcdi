@@ -359,9 +359,9 @@ void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *r
 static
 void calc_gaussgrid(double *restrict yvals, size_t ysize, double yfirst, double ylast)
 {
-  double *restrict yw = (double *) Malloc(ysize * sizeof(double));
-  gaussianLatitudes(yvals, yw, ysize);
-  Free(yw);
+  double *restrict yw = (double *) malloc(ysize * sizeof(double));
+  gaussianLatitudes(ysize, yvals, yw);
+  free(yw);
   for (size_t i = 0; i < ysize; i++ )
     yvals[i] = asin(yvals[i])/M_PI*180.0;
 
@@ -4048,42 +4048,6 @@ void gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE])
   memset(uuid, 0, CDI_UUID_SIZE);
   int length = CDI_UUID_SIZE;
   cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
-}
-
-
-bool isGaussLat(size_t ysize, double yinc, const double *yvals)
-{
-  bool is_gauss_grid = false;
-
-  if (IS_EQUAL(yinc, 0) && ysize > 2) // check if gaussian
-    {
-      size_t i;
-      double *yv = (double *) malloc(ysize*sizeof(double));
-      double *yw = (double *) malloc(ysize*sizeof(double));
-      gaussianLatitudes(yv, yw, ysize);
-      free(yw);
-
-      for (i = 0; i < ysize; i++)
-        yv[i] = asin(yv[i])/M_PI*180.0;
-
-      for (i = 0; i < ysize; i++)
-        if (fabs(yv[i] - yvals[i]) > ((yv[0] - yv[1]) / 500.0)) break;
-
-      if (i == ysize) is_gauss_grid = true;
-
-      // check S->N
-      if (is_gauss_grid == false)
-        {
-          for (i = 0; i < ysize; i++)
-            if (fabs(yv[i] - yvals[ysize-i-1]) > ((yv[0] - yv[1]) / 500.0)) break;
-
-          if (i == ysize) is_gauss_grid = true;
-        }
-
-      free(yv);
-    }
-
-  return is_gauss_grid;
 }
 
 
