@@ -4051,6 +4051,42 @@ void gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE])
 }
 
 
+bool isGaussLat(size_t ysize, double yinc, const double *yvals)
+{
+  bool is_gauss_grid = false;
+
+  if (IS_EQUAL(yinc, 0) && ysize > 2) // check if gaussian
+    {
+      size_t i;
+      double *yv = (double *) malloc(ysize*sizeof(double));
+      double *yw = (double *) malloc(ysize*sizeof(double));
+      gaussianLatitudes(yv, yw, ysize);
+      free(yw);
+
+      for (i = 0; i < ysize; i++)
+        yv[i] = asin(yv[i])/M_PI*180.0;
+
+      for (i = 0; i < ysize; i++)
+        if (fabs(yv[i] - yvals[i]) > ((yv[0] - yv[1]) / 500.0)) break;
+
+      if (i == ysize) is_gauss_grid = true;
+
+      // check S->N
+      if (is_gauss_grid == false)
+        {
+          for (i = 0; i < ysize; i++)
+            if (fabs(yv[i] - yvals[ysize-i-1]) > ((yv[0] - yv[1]) / 500.0)) break;
+
+          if (i == ysize) is_gauss_grid = true;
+        }
+
+      free(yv);
+    }
+
+  return is_gauss_grid;
+}
+
+
 void cdiGridGetIndexList(unsigned ngrids, int * gridIndexList)
 {
   reshGetResHListOfType(ngrids, gridIndexList, &gridOps);
