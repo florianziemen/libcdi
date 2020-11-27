@@ -194,7 +194,7 @@ void srv_add_record(stream_t *streamptr, int param, int level, size_t xsize, siz
 
   xassert(varID <= SHRT_MAX && levelID <= SHRT_MAX);
   record->varID   = (short)varID;
-  record->levelID = (short)levelID;
+  record->levelID = levelID;
 
   streamptr->tsteps[tsID].nallrecs++;
   streamptr->nrecs++;

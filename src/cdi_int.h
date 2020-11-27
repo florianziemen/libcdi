@@ -183,7 +183,7 @@ typedef struct
   int       ltype;
   short     tsteptype;
   short     varID;
-  short     levelID;
+  int       levelID;
   short     used;
   char      varname[32]; // needed for grib decoding with GRIB_API
   VarScanKeys scanKeys;

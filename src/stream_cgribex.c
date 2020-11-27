@@ -557,7 +557,7 @@ void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, si
                NULL, NULL, NULL, NULL);
 
   record->varID = (short)varID;
-  record->levelID = (short)levelID;
+  record->levelID = levelID;
 
   varDefCompType(varID, comptype);
 

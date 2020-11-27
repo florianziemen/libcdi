@@ -496,7 +496,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
             {
               recordInitEntry(&records[recID]);
               records[recID].varID   = (short)varID;
-              records[recID].levelID = (short)levelID;
+              records[recID].levelID = levelID;
               recID++;
             }
         }

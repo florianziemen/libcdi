@@ -615,7 +615,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
                NULL, NULL, NULL, NULL);
 
   record->varID   = (short)varID;
-  record->levelID = (short)levelID;
+  record->levelID = levelID;
 
   streamptr->tsteps[tsID].nallrecs++;
   streamptr->nrecs++;

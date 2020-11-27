@@ -195,7 +195,7 @@ void extAddRecord(stream_t *streamptr, int param, int level, size_t xysize,
                NULL, NULL, NULL, NULL);
 
   record->varID   = (short)varID;
-  record->levelID = (short)levelID;
+  record->levelID = levelID;
 
   streamptr->tsteps[tsID].nallrecs++;
   streamptr->nrecs++;
