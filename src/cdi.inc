@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.8.1
+! Fortran interface for CDI library version 1.8.3
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   May 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   December 2020
 !
 
       INTEGER    CDI_MAX_NAME
@@ -338,6 +338,8 @@
       PARAMETER (ZAXIS_REFERENCE        = 25)
       INTEGER    ZAXIS_CHAR
       PARAMETER (ZAXIS_CHAR             = 26)
+      INTEGER    ZAXIS_TROPOPAUSE
+      PARAMETER (ZAXIS_TROPOPAUSE       = 27)
 !
 !  SUBTYPE types
 !
