@@ -14,11 +14,12 @@
 
 #define  GRIBAPI_MISSVAL  -9.E33
 
-/* GRIB2 Level Types */
+// GRIB2 Level Types
 #define  GRIB2_LTYPE_SURFACE               1
 #define  GRIB2_LTYPE_CLOUD_BASE            2
 #define  GRIB2_LTYPE_CLOUD_TOP             3
 #define  GRIB2_LTYPE_ISOTHERM0             4
+#define  GRIB2_LTYPE_TROPOPAUSE            7
 #define  GRIB2_LTYPE_TOA                   8
 #define  GRIB2_LTYPE_SEA_BOTTOM            9
 #define  GRIB2_LTYPE_ATMOSPHERE           10

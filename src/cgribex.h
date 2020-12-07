@@ -11,6 +11,7 @@
 #define  GRIB1_LTYPE_CLOUD_BASE            2
 #define  GRIB1_LTYPE_CLOUD_TOP             3
 #define  GRIB1_LTYPE_ISOTHERM0             4
+#define  GRIB1_LTYPE_TROPOPAUSE            7
 #define  GRIB1_LTYPE_TOA                   8
 #define  GRIB1_LTYPE_SEA_BOTTOM            9
 #define  GRIB1_LTYPE_ATMOSPHERE           10

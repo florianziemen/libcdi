@@ -58,6 +58,7 @@ ZaxistypeEntry[] = {
   { /* 24 */ 0, "mixlayer",          "mix_layer",              "",               ""},
   { /* 25 */ 0, "height",            "generalized_height",     "height",         ""},
   { /* 26 */ 0, "character",         "area_type",              "",               ""},
+  { /* 27 */ 0, "tropopause",        "tropopause",             "",               ""},
 };
 
 enum {
@@ -201,7 +202,7 @@ int zaxisCreate_(int zaxistype, int size, int id)
   zaxisptr->size = size;
 
   if ( zaxistype >= CDI_NumZaxistype || zaxistype < 0 )
-    Error("Internal problem! zaxistype > CDI_MaxZaxistype");
+    Error("Internal problem! zaxistype=%d out of range (min=0/max=%d)!", zaxistype, CDI_NumZaxistype-1);
 
   int zaxisID = zaxisptr->self;
   zaxisDefName(zaxisID, ZaxistypeEntry[zaxistype].name);
