@@ -174,6 +174,7 @@ module mo_cdi
   integer(c_int), public, parameter :: ZAXIS_MIX_LAYER = 24
   integer(c_int), public, parameter :: ZAXIS_REFERENCE = 25
   integer(c_int), public, parameter :: ZAXIS_CHAR = 26
+  integer(c_int), public, parameter :: ZAXIS_TROPOPAUSE = 27
   integer(c_int), public, parameter :: MAX_KV_PAIRS_MATCH = 10
   integer(c_int), public, parameter :: TIME_CONSTANT = 0
   integer(c_int), public, parameter :: TIME_VARIABLE = 1
