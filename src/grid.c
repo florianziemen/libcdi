@@ -2159,6 +2159,184 @@ bool compareXYvals2(grid_t *gridRef, grid_t *gridTest)
 }
 
 static
+bool compare_lonlat_and_projection(int gridID, const grid_t *grid, const grid_t *gridRef)
+{
+  bool differ = false;
+  /*
+    printf("gridID      %d\n", gridID);
+    printf("grid.xdef   %d\n", grid->x.flag);
+    printf("grid.ydef   %d\n", grid->y.flag);
+    printf("grid.xsize  %zu\n", grid->x.size);
+    printf("grid.ysize  %zu\n", grid->y.size);
+    printf("grid.xfirst %f\n", grid->x.first);
+    printf("grid.yfirst %f\n", grid->y.first);
+    printf("grid.xfirst %f\n", gridInqXval(gridID, 0));
+    printf("grid.yfirst %f\n", gridInqYval(gridID, 0));
+    printf("grid.xinc   %f\n", grid->x.inc);
+    printf("grid.yinc   %f\n", grid->y.inc);
+    printf("grid.xinc   %f\n", gridInqXinc(gridID));
+    printf("grid.yinc   %f\n", gridInqYinc(gridID));
+  */
+  if ( grid->x.size == gridRef->x.size && grid->y.size == gridRef->y.size )
+    {
+      if ( grid->x.flag == 2 && grid->y.flag == 2 )
+        {
+          if ( ! (IS_EQUAL(grid->x.first, 0) && IS_EQUAL(grid->x.last, 0) && IS_EQUAL(grid->x.inc, 0)) &&
+               ! (IS_EQUAL(grid->y.first, 0) && IS_EQUAL(grid->y.last, 0) && IS_EQUAL(grid->y.inc, 0)) &&
+               IS_NOT_EQUAL(grid->x.first, grid->x.last) && IS_NOT_EQUAL(grid->y.first, grid->y.last) )
+            {
+              if ( IS_NOT_EQUAL(grid->x.first, gridInqXval(gridID, 0)) ||
+                   IS_NOT_EQUAL(grid->y.first, gridInqYval(gridID, 0)))
+                {
+                  differ = true;
+                }
+              if ( !differ && fabs(grid->x.inc) > 0 &&
+                   fabs(fabs(grid->x.inc) - fabs(gridRef->x.inc)) > fabs(grid->x.inc/1000))
+                {
+                  differ = true;
+                }
+              if ( !differ && fabs(grid->y.inc) > 0 &&
+                   fabs(fabs(grid->y.inc) - fabs(gridRef->y.inc)) > fabs(grid->y.inc/1000))
+                {
+                  differ = true;
+                }
+            }
+        }
+      else if ( grid->x.vals && grid->y.vals )
+        differ = gridRef->vtable->compareXYFull((grid_t *)gridRef, (grid_t *)grid);
+    }
+  else
+    differ = true;
+
+  if (!differ && grid->type == GRID_PROJECTION)
+    {
+    }
+
+  return differ;
+}
+
+static
+bool compare_generic(const grid_t *grid, const grid_t *gridRef)
+{
+  bool differ = false;
+
+  if ( grid->x.size == gridRef->x.size && grid->y.size == gridRef->y.size )
+    {
+      if ( grid->x.flag == 1 && grid->y.flag == 1
+           && grid->x.vals && grid->y.vals )
+        differ = gridRef->vtable->compareXYFull((grid_t *)gridRef, (grid_t *)grid);
+    }
+  else if ( (grid->y.size == 0 || grid->y.size == 1) &&
+            grid->x.size == gridRef->x.size*gridRef->y.size )
+    {
+    }
+  else
+    differ = true;
+
+  return differ;
+}
+
+static
+bool compare_gaussian(int gridID, const grid_t *grid, const grid_t *gridRef)
+{
+  bool differ = false;
+
+  if ( grid->x.size == gridRef->x.size && grid->y.size == gridRef->y.size )
+    {
+      if ( grid->x.flag == 2 && grid->y.flag == 2 )
+        {
+          if ( ! (IS_EQUAL(grid->x.first, 0) && IS_EQUAL(grid->x.last, 0) && IS_EQUAL(grid->x.inc, 0)) &&
+               ! (IS_EQUAL(grid->y.first, 0) && IS_EQUAL(grid->y.last, 0)) )
+            if ( fabs(grid->x.first - gridInqXval(gridID, 0)) > 0.0015 ||
+                 fabs(grid->y.first - gridInqYval(gridID, 0)) > 0.0015 ||
+                 (fabs(grid->x.inc)>0 && fabs(fabs(grid->x.inc) - fabs(gridRef->x.inc)) > fabs(grid->x.inc/1000)) )
+              {
+                differ = true;
+              }
+        }
+      else if ( grid->x.vals && grid->y.vals )
+        differ = gridRef->vtable->compareXYFull((grid_t *)gridRef, (grid_t *)grid);
+    }
+  else
+    differ = true;
+
+  return differ;
+}
+
+static
+bool compare_curvilinear(const grid_t *grid, const grid_t *gridRef)
+{
+  bool differ = false;
+
+  /*
+    printf("gridID      %d\n", gridID);
+    printf("grid.xsize  %d\n", grid->x.size);
+    printf("grid.ysize  %d\n", grid->y.size);
+    printf("grid.xfirst %f\n", grid->x.vals[0]);
+    printf("grid.yfirst %f\n", grid->y.vals[0]);
+    printf("grid xfirst %f\n", gridInqXval(gridID, 0));
+    printf("grid yfirst %f\n", gridInqYval(gridID, 0));
+    printf("grid.xlast  %f\n", grid->x.vals[grid->size-1]);
+    printf("grid.ylast  %f\n", grid->y.vals[grid->size-1]);
+    printf("grid xlast  %f\n", gridInqXval(gridID, grid->size-1));
+    printf("grid ylast  %f\n", gridInqYval(gridID, grid->size-1));
+    printf("grid.nv     %d\n", grid->nvertex);
+    printf("grid nv     %d\n", gridInqNvertex(gridID));
+  */
+  if ( grid->x.size == gridRef->x.size && grid->y.size == gridRef->y.size )
+    differ = gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
+
+  return differ;
+}
+
+static
+bool compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool coord_compare)
+{
+  bool differ = false;
+
+  unsigned char uuid1[CDI_UUID_SIZE]; memset(uuid1, 0, CDI_UUID_SIZE);
+  unsigned char uuid2[CDI_UUID_SIZE]; memset(uuid2, 0, CDI_UUID_SIZE);
+  int length = CDI_UUID_SIZE;
+  cdiInqVarKeyBytes(&gridRef->keys, CDI_KEY_UUID, uuid1, &length);
+  length = CDI_UUID_SIZE;
+  cdiInqVarKeyBytes(&grid->keys, CDI_KEY_UUID, uuid2, &length);
+  differ = ((uuid1[0] || uuid2[0]) && memcmp(uuid1, uuid2, CDI_UUID_SIZE));
+  if (!differ)
+    {
+      int numberA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED);
+      int numberB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDUSED);
+      int positionA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
+      int positionB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
+      if ( coord_compare )
+        {
+          differ = grid->nvertex != gridRef->nvertex
+            || (numberA > 0 && positionA != positionB)
+            || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
+        }
+      else
+        {
+          if ( ((grid->x.vals == NULL) ^ (gridRef->x.vals == NULL)) &&
+               ((grid->y.vals == NULL) ^ (gridRef->y.vals == NULL)) )
+            {
+              int nvertexA = grid->nvertex, nvertexB = gridRef->nvertex;
+              differ = ( nvertexA && nvertexB && (nvertexA != nvertexB) )
+                || (( numberA && numberB && (numberA != numberB) )
+                    || ( numberA && numberB && positionA != positionB ) );
+            }
+          else
+            {
+              differ = grid->nvertex != gridRef->nvertex
+                || numberA != numberB
+                || (numberA > 0 && positionA != positionB)
+                || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
+            }
+        }
+    }
+
+  return differ;
+}
+
+static
 bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
 {
   bool differ = true;
@@ -2171,148 +2349,23 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
 	  differ = false;
 	  if ( grid->type == GRID_LONLAT || grid->type == GRID_PROJECTION )
 	    {
-	      /*
-	      printf("gridID      %d\n", gridID);
-	      printf("grid.xdef   %d\n", grid->x.flag);
-	      printf("grid.ydef   %d\n", grid->y.flag);
-	      printf("grid.xsize  %zu\n", grid->x.size);
-	      printf("grid.ysize  %zu\n", grid->y.size);
-	      printf("grid.xfirst %f\n", grid->x.first);
-	      printf("grid.yfirst %f\n", grid->y.first);
-	      printf("grid.xfirst %f\n", gridInqXval(gridID, 0));
-	      printf("grid.yfirst %f\n", gridInqYval(gridID, 0));
-	      printf("grid.xinc   %f\n", grid->x.inc);
-	      printf("grid.yinc   %f\n", grid->y.inc);
-	      printf("grid.xinc   %f\n", gridInqXinc(gridID));
-	      printf("grid.yinc   %f\n", gridInqYinc(gridID));
-	      */
-	      if ( grid->x.size == gridRef->x.size && grid->y.size == gridRef->y.size )
-		{
-		  if ( grid->x.flag == 2 && grid->y.flag == 2 )
-		    {
-		      if ( ! (IS_EQUAL(grid->x.first, 0) && IS_EQUAL(grid->x.last, 0) && IS_EQUAL(grid->x.inc, 0)) &&
-			   ! (IS_EQUAL(grid->y.first, 0) && IS_EQUAL(grid->y.last, 0) && IS_EQUAL(grid->y.inc, 0)) &&
-			   IS_NOT_EQUAL(grid->x.first, grid->x.last) && IS_NOT_EQUAL(grid->y.first, grid->y.last) )
-			{
-			  if ( IS_NOT_EQUAL(grid->x.first, gridInqXval(gridID, 0)) ||
-			       IS_NOT_EQUAL(grid->y.first, gridInqYval(gridID, 0)))
-			    {
-			      differ = true;
-			    }
-			  if ( !differ && fabs(grid->x.inc) > 0 &&
-			       fabs(fabs(grid->x.inc) - fabs(gridRef->x.inc)) > fabs(grid->x.inc/1000))
-			    {
-			      differ = true;
-			    }
-			  if ( !differ && fabs(grid->y.inc) > 0 &&
-			       fabs(fabs(grid->y.inc) - fabs(gridRef->y.inc)) > fabs(grid->y.inc/1000))
-			    {
-			      differ = true;
-			    }
-			}
-		    }
-		  else if ( grid->x.vals && grid->y.vals )
-                    differ = gridRef->vtable->compareXYFull((grid_t *)gridRef, (grid_t *)grid);
-		}
-	      else
-		differ = true;
+              differ = compare_lonlat_and_projection(gridID, grid, gridRef);
 	    }
 	  else if ( grid->type == GRID_GENERIC )
 	    {
-	      if ( grid->x.size == gridRef->x.size && grid->y.size == gridRef->y.size )
-		{
-		  if ( grid->x.flag == 1 && grid->y.flag == 1
-                       && grid->x.vals && grid->y.vals )
-                    differ = gridRef->vtable->compareXYFull((grid_t *)gridRef, (grid_t *)grid);
-		}
-	      else if ( (grid->y.size == 0 || grid->y.size == 1) &&
-			grid->x.size == gridRef->x.size*gridRef->y.size )
-		{
-		}
-	      else
-		differ = true;
+              differ = compare_generic(grid, gridRef);
 	    }
 	  else if ( grid->type == GRID_GAUSSIAN )
 	    {
-	      if ( grid->x.size == gridRef->x.size && grid->y.size == gridRef->y.size )
-		{
-		  if ( grid->x.flag == 2 && grid->y.flag == 2 )
-		    {
-		      if ( ! (IS_EQUAL(grid->x.first, 0) && IS_EQUAL(grid->x.last, 0) && IS_EQUAL(grid->x.inc, 0)) &&
-			   ! (IS_EQUAL(grid->y.first, 0) && IS_EQUAL(grid->y.last, 0)) )
-			if ( fabs(grid->x.first - gridInqXval(gridID, 0)) > 0.0015 ||
-			     fabs(grid->y.first - gridInqYval(gridID, 0)) > 0.0015 ||
-			     (fabs(grid->x.inc)>0 && fabs(fabs(grid->x.inc) - fabs(gridRef->x.inc)) > fabs(grid->x.inc/1000)) )
-			  {
-			    differ = true;
-			  }
-		    }
-		  else if ( grid->x.vals && grid->y.vals )
-                    differ = gridRef->vtable->compareXYFull((grid_t *)gridRef, (grid_t *)grid);
-		}
-	      else
-		differ = true;
+              differ = compare_gaussian(gridID, grid, gridRef);
 	    }
 	  else if ( grid->type == GRID_CURVILINEAR )
 	    {
-	      /*
-	      printf("gridID      %d\n", gridID);
-	      printf("grid.xsize  %d\n", grid->x.size);
-	      printf("grid.ysize  %d\n", grid->y.size);
-	      printf("grid.xfirst %f\n", grid->x.vals[0]);
-	      printf("grid.yfirst %f\n", grid->y.vals[0]);
-	      printf("grid xfirst %f\n", gridInqXval(gridID, 0));
-	      printf("grid yfirst %f\n", gridInqYval(gridID, 0));
-	      printf("grid.xlast  %f\n", grid->x.vals[grid->size-1]);
-	      printf("grid.ylast  %f\n", grid->y.vals[grid->size-1]);
-	      printf("grid xlast  %f\n", gridInqXval(gridID, grid->size-1));
-	      printf("grid ylast  %f\n", gridInqYval(gridID, grid->size-1));
-	      printf("grid.nv     %d\n", grid->nvertex);
-	      printf("grid nv     %d\n", gridInqNvertex(gridID));
-	      */
-	      if ( grid->x.size == gridRef->x.size && grid->y.size == gridRef->y.size )
-                differ = gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
+              differ = compare_curvilinear(grid, gridRef);
 	    }
 	  else if ( grid->type == GRID_UNSTRUCTURED )
 	    {
-              unsigned char uuid1[CDI_UUID_SIZE]; memset(uuid1, 0, CDI_UUID_SIZE);
-              unsigned char uuid2[CDI_UUID_SIZE]; memset(uuid2, 0, CDI_UUID_SIZE);
-              int length = CDI_UUID_SIZE;
-              cdiInqVarKeyBytes(&gridRef->keys, CDI_KEY_UUID, uuid1, &length);
-              length = CDI_UUID_SIZE;
-              cdiInqVarKeyBytes(&grid->keys, CDI_KEY_UUID, uuid2, &length);
-              differ = ((uuid1[0] || uuid2[0]) && memcmp(uuid1, uuid2, CDI_UUID_SIZE));
-              if (!differ)
-                {
-                  int numberA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED);
-                  int numberB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDUSED);
-                  int positionA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
-                  int positionB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
-                  if ( coord_compare )
-                    {
-                      differ = grid->nvertex != gridRef->nvertex
-                        || (numberA > 0 && positionA != positionB)
-                        || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
-                    }
-                  else
-                    {
-                      if ( ((grid->x.vals == NULL) ^ (gridRef->x.vals == NULL)) &&
-                           ((grid->y.vals == NULL) ^ (gridRef->y.vals == NULL)) )
-                        {
-                          int nvertexA = grid->nvertex, nvertexB = gridRef->nvertex;
-                          differ = ( nvertexA && nvertexB && (nvertexA != nvertexB) )
-                            || (( numberA && numberB && (numberA != numberB) )
-                                || ( numberA && numberB && positionA != positionB ) );
-                        }
-                      else
-                        {
-                          differ = grid->nvertex != gridRef->nvertex
-                            || numberA != numberB
-                            || (numberA > 0 && positionA != positionB)
-                            || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
-                        }
-                    }
-                }
+              differ = compare_unstructured(grid, gridRef, coord_compare);
             }
 	}
     }
