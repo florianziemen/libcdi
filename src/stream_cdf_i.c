@@ -2813,7 +2813,7 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
             if ( cdf_set_unstructured_par(ncvar, grid, &xdimid, &ydimid, number_of_grid_used, uuidOfHGrid) )
               continue;
 
-          if ( lproj && lgrid )
+          if ( lgrid && lproj )
             {
               int dimid;
               cdf_read_coordinates(streamptr, lazyProj, ncvar, ncvars, ncdims, timedimid,
@@ -2841,16 +2841,21 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
 
           const int gridID = ncvar->gridID;
 
-          if ( lproj && gmapvarid != CDI_UNDEFID )
+          if (lproj && gmapvarid != CDI_UNDEFID)
             {
-              const int projID = lgrid ? grid->proj : gridID;
-              const int ncid = ncvars[gmapvarid].ncid;
-              const int gmapvartype = ncvars[gmapvarid].xtype;
-              cdiDefKeyInt(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, gmapvartype);
-              const char *gmapvarname = ncvars[gmapvarid].name;
-              cdf_read_mapping_atts(ncid, gmapvarid, projID, gmapvarname);
-              cdiDefKeyString(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname);
-              gridVerifyProj(projID);
+              const bool gridIsNew = lgrid ? projAdded.isNew : gridAdded.isNew;
+              if (gridIsNew)
+                {
+                  const int projID = lgrid ? grid->proj : gridID;
+                  printf("gridID, projID %d %d\n", gridID, projID);
+                  const int ncid = ncvars[gmapvarid].ncid;
+                  const int gmapvartype = ncvars[gmapvarid].xtype;
+                  cdiDefKeyInt(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, gmapvartype);
+                  const char *gmapvarname = ncvars[gmapvarid].name;
+                  cdf_read_mapping_atts(ncid, gmapvarid, projID, gmapvarname);
+                  cdiDefKeyString(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname);
+                  gridVerifyProj(projID);
+                }
             }
 
           if ( grid->type == GRID_UNSTRUCTURED && gridfile[0] != 0 )
