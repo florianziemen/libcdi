@@ -457,6 +457,35 @@ void cgribexGetLevel(int *isec1, int *leveltype, int *level1, int *level2)
 }
 
 static
+void cgribexDefProjLCC(int *isec2, int gridID)
+{
+  const bool earthIsOblate = gribbyte_get_bit(ISEC2_ResFlag, 2);
+  const double a = earthIsOblate ? 6378160. : 6367470.;
+  const double rf = earthIsOblate ? 297.0 : 0;
+  const double xval_0 = ISEC2_FirstLon * 0.001;
+  const double yval_0 = ISEC2_FirstLat * 0.001;
+  const double lon_0  = ISEC2_Lambert_Lov * 0.001;
+  double lat_1  = ISEC2_Lambert_LatS1 * 0.001;
+  double lat_2  = ISEC2_Lambert_LatS2 * 0.001;
+  const bool lsouth = gribbyte_get_bit(ISEC2_Lambert_ProjFlag, 1);
+  if ( lsouth ) { lat_1 = -lat_1; lat_2 = -lat_2; }
+
+  const double lat_0 = lat_2;
+  double x_0 = CDI_grid_missval;
+  double y_0 = CDI_grid_missval;
+
+  if ( proj_lonlat_to_lcc_func )
+    {
+      x_0 = xval_0; y_0 = yval_0;
+      proj_lonlat_to_lcc_func(CDI_grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, (size_t)1, &x_0, &y_0);
+      if ( IS_NOT_EQUAL(x_0, CDI_grid_missval) && IS_NOT_EQUAL(y_0, CDI_grid_missval) )
+        { x_0 = -x_0; y_0 = -y_0; }
+    }
+
+  gridDefParamLCC(gridID, CDI_grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0);
+}
+
+static
 void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t recsize,
                       off_t position, int comptype, int lmv, int iret)
 {
@@ -513,29 +542,7 @@ void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, si
         }
       else if ( gridptr->projtype == CDI_PROJ_LCC )
         {
-          const bool earthIsOblate = gribbyte_get_bit(ISEC2_ResFlag, 2);
-          const double a = earthIsOblate ? 6378160. : 6367470.;
-          const double rf = earthIsOblate ? 297.0 : 0;
-          const double xval_0 = ISEC2_FirstLon * 0.001;
-          const double yval_0 = ISEC2_FirstLat * 0.001;
-          const double lon_0  = ISEC2_Lambert_Lov * 0.001;
-          double lat_1  = ISEC2_Lambert_LatS1 * 0.001;
-          double lat_2  = ISEC2_Lambert_LatS2 * 0.001;
-          const bool lsouth = gribbyte_get_bit(ISEC2_Lambert_ProjFlag, 1);
-          if ( lsouth ) { lat_1 = -lat_1; lat_2 = -lat_2; }
-
-          const double lat_0 = lat_2;
-          double x_0 = CDI_grid_missval;
-          double y_0 = CDI_grid_missval;
-
-          if ( proj_lonlat_to_lcc_func )
-            {
-              x_0 = xval_0; y_0 = yval_0;
-              proj_lonlat_to_lcc_func(CDI_grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, (size_t)1, &x_0, &y_0);
-              if ( IS_NOT_EQUAL(x_0, CDI_grid_missval) && IS_NOT_EQUAL(y_0, CDI_grid_missval) )
-                { x_0 = -x_0; y_0 = -y_0; }
-            }
-          gridDefParamLCC(gridID, CDI_grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0);
+          cgribexDefProjLCC(isec2, gridID);
         }
     }
   else
