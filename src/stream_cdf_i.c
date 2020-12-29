@@ -2847,7 +2847,6 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
               if (gridIsNew)
                 {
                   const int projID = lgrid ? grid->proj : gridID;
-                  printf("gridID, projID %d %d\n", gridID, projID);
                   const int ncid = ncvars[gmapvarid].ncid;
                   const int gmapvartype = ncvars[gmapvarid].xtype;
                   cdiDefKeyInt(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, gmapvartype);
