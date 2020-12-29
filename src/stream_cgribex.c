@@ -1688,9 +1688,16 @@ void cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
   const int xsize = (int)gridInqXsize(gridID);
   const int ysize = (int)gridInqYsize(gridID);
 
+  double missval = CDI_grid_missval;
   double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
-  gridInqParamLCC(gridID, CDI_grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
+  gridInqParamLCC(gridID, missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
+  if (IS_EQUAL(x_0, missval) && IS_EQUAL(y_0, missval) && (IS_EQUAL(xval_0, missval) || IS_EQUAL(yval_0, missval)))
+    {
+      x_0 = gridInqXval(gridID, 0);
+      y_0 = gridInqYval(gridID, 0);
+    }
   gridVerifyGribParamLCC(CDI_grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
+
   bool lsouth = (lat_1 < 0);
   if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }
 
