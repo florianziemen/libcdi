@@ -182,10 +182,10 @@ int cdiInqKeyLen(int cdiID, int varID, int key, int *length)
 {
   int status = -1;
 
-  cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
+  const cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
 
-  const cdi_key_t *keyp = find_key(keysp, key);
+  const cdi_key_t *keyp = find_key_const(keysp, key);
   if ( keyp != NULL )
     {
       *length = keyp->length;
@@ -260,7 +260,7 @@ int cdiCopyVarKey(const cdi_keys_t *keysp1, int key, cdi_keys_t *keysp2)
 {
   int status = CDI_NOERR;
 
-  const cdi_key_t *keyp = find_key_const (keysp1, key);
+  const cdi_key_t *keyp = find_key_const(keysp1, key);
   if (keyp == NULL) return -1;
 
   cdi_define_key(keyp, keysp2);
@@ -352,10 +352,10 @@ int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
 
   // if ( varID != CDI_GLOBAL ) status = cdiInqKeyInt(cdiID, CDI_GLOBAL, key, value);
 
-  cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
+  const cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
 
-  cdi_key_t *keyp = find_key(keysp, key);
+  const cdi_key_t *keyp = find_key_const(keysp, key);
   if ( keyp != NULL ) // key in use
     {
       if ( keyp->type == KEY_INT )
@@ -451,10 +451,10 @@ int cdiInqKeyFloat(int cdiID, int varID, int key, double *value)
 
   // if ( varID != CDI_GLOBAL ) status = cdiInqKeyFloat(cdiID, CDI_GLOBAL, key, value);
 
-  cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
+  const cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
 
-  cdi_key_t *keyp = find_key(keysp, key);
+  const cdi_key_t *keyp = find_key_const(keysp, key);
   if ( keyp != NULL ) // key in use
     {
       if ( keyp->type == KEY_FLOAT )
@@ -672,9 +672,9 @@ int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
   return status;
 }
 
-const char *cdiInqVarKeyStringPtr(cdi_keys_t *keysp, int key)
+const char *cdiInqVarKeyStringPtr(const cdi_keys_t *keysp, int key)
 {
-  const cdi_key_t *keyp = find_key(keysp, key);
+  const cdi_key_t *keyp = find_key_const(keysp, key);
   if ( keyp != NULL ) // key in use
     {
       if ( keyp->type == KEY_BYTES ) return (const char *)keyp->v.s;

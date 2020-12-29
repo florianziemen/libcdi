@@ -31,10 +31,10 @@ int  cdiInqVarKeyInt(const cdi_keys_t *keysp, int key);
 int  cdiInqVarKeyBytes(const cdi_keys_t *keysp, int key, unsigned char *bytes, int *length);
 
 cdi_key_t *find_key(cdi_keys_t *keysp, int key);
-const char *cdiInqVarKeyStringPtr(cdi_keys_t *keysp, int key);
+const char *cdiInqVarKeyStringPtr(const cdi_keys_t *keysp, int key);
 
 static inline
-const char *cdiInqVarKeyString(cdi_keys_t *keysp, int key)
+const char *cdiInqVarKeyString(const cdi_keys_t *keysp, int key)
 {
   const char *string = cdiInqVarKeyStringPtr(keysp, key);
   if (string == NULL) string = "";
