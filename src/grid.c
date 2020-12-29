@@ -2159,7 +2159,7 @@ bool compareXYvals2(grid_t *gridRef, grid_t *gridTest)
 }
 
 static
-bool compare_lonlat_and_projection(int gridID, const grid_t *grid, const grid_t *gridRef)
+bool compare_lonlat(int gridID, const grid_t *grid, const grid_t *gridRef)
 {
   bool differ = false;
   /*
@@ -2208,8 +2208,21 @@ bool compare_lonlat_and_projection(int gridID, const grid_t *grid, const grid_t 
   else
     differ = true;
 
-  if (!differ && grid->type == GRID_PROJECTION)
+  return differ;
+}
+
+
+static
+bool compare_projection(int gridID, const grid_t *grid, const grid_t *gridRef)
+{
+  bool differ = compare_lonlat(gridID, grid, gridRef);
+
+  if (!differ)
     {
+      //printf(">%s< >%s<\n", cdiInqVarKeyString(&grid->keys, CDI_KEY_GRIDMAP_VARNAME), cdiInqVarKeyString(&gridRef->keys, CDI_KEY_GRIDMAP_VARNAME));
+      //printf(">%s< >%s<\n", cdiInqVarKeyString(&grid->keys, CDI_KEY_GRIDMAP_NAME), cdiInqVarKeyString(&gridRef->keys, CDI_KEY_GRIDMAP_NAME));
+      // if (strcmp(cdiInqVarKeyString(&grid->keys, CDI_KEY_GRIDMAP_VARNAME), cdiInqVarKeyString(&gridRef->keys, CDI_KEY_GRIDMAP_VARNAME))) return true;
+      // if (strcmp(cdiInqVarKeyString(&grid->keys, CDI_KEY_GRIDMAP_NAME), cdiInqVarKeyString(&gridRef->keys, CDI_KEY_GRIDMAP_NAME))) return true;
     }
 
   return differ;
@@ -2347,9 +2360,13 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
       if ( grid->size == gridRef->size )
 	{
 	  differ = false;
-	  if ( grid->type == GRID_LONLAT || grid->type == GRID_PROJECTION )
+	  if ( grid->type == GRID_LONLAT )
 	    {
-              differ = compare_lonlat_and_projection(gridID, grid, gridRef);
+              differ = compare_lonlat(gridID, grid, gridRef);
+	    }
+	  else if ( grid->type == GRID_PROJECTION )
+	    {
+              differ = compare_projection(gridID, grid, gridRef);
 	    }
 	  else if ( grid->type == GRID_GENERIC )
 	    {
