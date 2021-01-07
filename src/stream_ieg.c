@@ -74,60 +74,27 @@ void iegReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
 static
 int iegGetZaxisType(int iegleveltype)
 {
-  int leveltype = 0;
-
-  switch ( iegleveltype )
+  // clang-format off
+  switch (iegleveltype)
     {
-    case IEG_LTYPE_SURFACE:
-      {
-	leveltype = ZAXIS_SURFACE;
-	break;
-      }
+    case IEG_LTYPE_SURFACE:         return ZAXIS_SURFACE;
     case IEG_LTYPE_99:
-    case IEG_LTYPE_ISOBARIC:
-      {
-	leveltype = ZAXIS_PRESSURE;
-	break;
-      }
-    case IEG_LTYPE_HEIGHT:
-      {
-	leveltype = ZAXIS_HEIGHT;
-	break;
-      }
-    case IEG_LTYPE_ALTITUDE:
-      {
-	leveltype = ZAXIS_ALTITUDE;
-	break;
-      }
+    case IEG_LTYPE_ISOBARIC:        return ZAXIS_PRESSURE;
+    case IEG_LTYPE_HEIGHT:          return ZAXIS_HEIGHT;
+    case IEG_LTYPE_ALTITUDE:        return ZAXIS_ALTITUDE;
     case IEG_LTYPE_HYBRID:
-    case IEG_LTYPE_HYBRID_LAYER:
-      {
-	leveltype = ZAXIS_HYBRID;
-	break;
-      }
+    case IEG_LTYPE_HYBRID_LAYER:    return ZAXIS_HYBRID;
     case IEG_LTYPE_LANDDEPTH:
-    case IEG_LTYPE_LANDDEPTH_LAYER:
-      {
-	leveltype = ZAXIS_DEPTH_BELOW_LAND;
-	break;
-      }
-    case IEG_LTYPE_SEADEPTH:
-      {
-	leveltype = ZAXIS_DEPTH_BELOW_SEA;
-	break;
-      }
-    default:
-      {
-	leveltype = ZAXIS_GENERIC;
-	break;
-      }
+    case IEG_LTYPE_LANDDEPTH_LAYER: return ZAXIS_DEPTH_BELOW_LAND;
+    case IEG_LTYPE_SEADEPTH:        return ZAXIS_DEPTH_BELOW_SEA;
     }
-
-  return leveltype;
+  // clang-format on
+  return ZAXIS_GENERIC;
 }
 
 
-static void iegDefTime(int *pdb, int64_t date, int time, int taxisID)
+static
+void iegDefTime(int *pdb, int64_t date, int time, int taxisID)
 {
   int timetype = (taxisID != -1) ? taxisInqType(taxisID) : -1;
   if ( timetype == TAXIS_ABSOLUTE || timetype == TAXIS_RELATIVE )
@@ -136,11 +103,11 @@ static void iegDefTime(int *pdb, int64_t date, int time, int taxisID)
       cdiDecodeDate(date, &year, &month, &day);
       cdiDecodeTime(time, &hour, &minute, &second);
 
-      IEG_P_Year(pdb)     = year;
-      IEG_P_Month(pdb)    = month;
-      IEG_P_Day(pdb)      = day;
-      IEG_P_Hour(pdb)     = hour;
-      IEG_P_Minute(pdb)   = minute;
+      IEG_P_Year(pdb)   = year;
+      IEG_P_Month(pdb)  = month;
+      IEG_P_Day(pdb)    = day;
+      IEG_P_Hour(pdb)   = hour;
+      IEG_P_Minute(pdb) = minute;
 
       pdb[15] = 1;
       pdb[16] = 0;
@@ -152,9 +119,8 @@ static void iegDefTime(int *pdb, int64_t date, int time, int taxisID)
   pdb[5] = 128;
 }
 
-/* find smallest power of 10 in [1000,10000000] that upon
- * multiplication results in fractional part close to zero for all
- * arguments */
+/* find smallest power of 10 in [1000,10000000] that upon multiplication results in fractional part
+   close to zero for all arguments */
 static double
 calc_resfac(double xfirst, double xlast, double xinc, double yfirst, double ylast, double yinc)
 {
@@ -334,7 +300,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
       cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, "Pa");
     }
 
-  /*  IEG_G_NumVCP(gdb) = 0; */
+  // IEG_G_NumVCP(gdb) = 0;
 
   switch (leveltype)
     {
@@ -355,7 +321,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 	if ( vctsize > 100 )
 	  {
             static bool vct_warning = true;
-	    /*	    IEG_G_NumVCP(gdb) = 0; */
+	    // IEG_G_NumVCP(gdb) = 0;
 	    if ( vct_warning )
 	      {
 		Warning("VCT size of %d is too large (maximum is 100). Set to 0!", vctsize);
@@ -540,7 +506,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   if ( iresfac == 0 ) iresfac = 1000;
   const double resfac = 1./(double) iresfac;
 
-  /* if ( IEG_G_FirstLon != 0 || IEG_G_LastLon != 0 ) */
+  // if ( IEG_G_FirstLon != 0 || IEG_G_LastLon != 0 )
   {
     if ( xsize > 1 )
       {
@@ -549,11 +515,11 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
 	else
 	  grid->x.inc = (IEG_G_LastLon(gdb) - IEG_G_FirstLon(gdb)) * resfac / (xsize - 1);
 
-	/* correct xinc if necessary */
+	// correct xinc if necessary
 	if ( IEG_G_FirstLon(gdb) == 0 && IEG_G_LastLon(gdb) > 354000 )
 	  {
 	    const double xinc = 360. / xsize;
-            /* FIXME: why not use grid->x.inc != xinc as condition? */
+            // FIXME: why not use grid->x.inc != xinc as condition?
 	    if ( fabs(grid->x.inc-xinc) > 0.0 )
 	      {
 		grid->x.inc = xinc;
@@ -566,7 +532,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
     grid->x.flag  = 2;
   }
   grid->y.flag = 0;
-  /* if ( IEG_G_FirstLat != 0 || IEG_G_LastLat != 0 ) */
+  // if ( IEG_G_FirstLat != 0 || IEG_G_LastLat != 0 )
   {
     if ( ysize > 1 )
       {
@@ -1010,14 +976,14 @@ void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 
   int vlistID  = streamptr->vlistID;
   int fileID   = streamptr->fileID;
-  /* NOTE: tiles are not supported here! */
+  // NOTE: tiles are not supported here!
   double missval = vlistInqVarMissval(vlistID, varID);
   size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   int tsid     = streamptr->curTsID;
 
   off_t currentfilepos = fileGetPos(fileID);
 
-  /* NOTE: tiles are not supported here! */
+  // NOTE: tiles are not supported here!
   int recID = streamptr->vars[varID].recordTable[0].recordID[levID];
   off_t recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);

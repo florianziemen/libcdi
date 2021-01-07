@@ -1900,6 +1900,9 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
 */
 void gridDefParamRLL(int gridID, double xpole, double ypole, double angle)
 {
+  cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, "degrees");
+  cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, "degrees");
+
   cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, "rotated_pole");
 
   const char *gmapname = "rotated_latitude_longitude";

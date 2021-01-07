@@ -1,16 +1,25 @@
-2019-12-03  Uwe Schulzweida
+2021-01-25  Uwe Schulzweida
+
+        * using CGRIBEX library version 1.9.5
+	* Version 1.9.10 released
+
+2021-01-07  Uwe Schulzweida
+
+	* gridDefParamRLL: set x/y units to degrees
+
+2020-12-03  Uwe Schulzweida
 
 	* gridDefParamLCC: write latitude_of_projection_origin to lat_0 (bug fix)
 
-2019-11-27  Uwe Schulzweida
+2020-11-27  Uwe Schulzweida
 
 	* struct record_t: changed data type of levelID from short to int
 
-2019-11-26  Uwe Schulzweida
+2020-11-26  Uwe Schulzweida
 
 	* cdi.h: removed function gaussianLatitudes() from cdi interface
 
-2019-10-09  Uwe Schulzweida
+2020-10-09  Uwe Schulzweida
 
         * using CGRIBEX library version 1.9.5
 	* Version 1.9.9 released
