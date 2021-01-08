@@ -7,6 +7,7 @@
 
 UINT32 get_UINT32(unsigned char *x)
 {
+  // clang-format off
   switch (HOST_ENDIANNESS)
     {
     case CDI_BIGENDIAN:
@@ -17,11 +18,13 @@ UINT32 get_UINT32(unsigned char *x)
       Error("Unhandled endianness %d", HOST_ENDIANNESS);
       return UINT32_C(0xFFFFFFFF);
     }
+  // clang-format on
 }
 
 
 UINT32 get_SUINT32(unsigned char *x)
 {
+  // clang-format off
   switch (HOST_ENDIANNESS)
     {
     case CDI_BIGENDIAN:
@@ -32,11 +35,13 @@ UINT32 get_SUINT32(unsigned char *x)
       Error("Unhandled endianness %d", HOST_ENDIANNESS);
       return UINT32_C(0xFFFFFFFF);
     }
+  // clang-format on
 }
 
 
 UINT64 get_UINT64(unsigned char *x)
 {
+  // clang-format off
   switch (HOST_ENDIANNESS)
     {
     case CDI_BIGENDIAN:
@@ -49,11 +54,13 @@ UINT64 get_UINT64(unsigned char *x)
       Error("Unhandled endianness %d", HOST_ENDIANNESS);
       return UINT64_C(0xFFFFFFFFFFFFFFFF);
     }
+  // clang-format on
 }
 
 
 UINT64 get_SUINT64(unsigned char *x)
 {
+  // clang-format off
   switch (HOST_ENDIANNESS)
     {
     case CDI_BIGENDIAN:
@@ -66,6 +73,7 @@ UINT64 get_SUINT64(unsigned char *x)
       Error("Unhandled endianness %d", HOST_ENDIANNESS);
       return UINT64_C(0xFFFFFFFFFFFFFFFF);
     }
+  // clang-format on
 }
 
 
