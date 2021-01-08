@@ -789,9 +789,8 @@ void cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varT
   const size_t gridsize = gridInqSize(gridId);
 
   unsigned int position = 0; 
-  for (int i=0 ; i<4 ; i++)
-    if (count[i] == gridsize)
-      position = i;
+  for (int i = 0; i < 4; i++)
+    if (count[i] == gridsize) position = i;
 
   start[position] = start[position]+startpoint;
   count[position] = length;
@@ -820,9 +819,8 @@ void cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varT
   size_t gridsize = gridInqSize(gridId);
 
   unsigned int position = 0; 
-  for (int i=0 ; i<4 ; i++)
-    if (count[i] == gridsize)
-      position = i;
+  for (int i = 0; i < 4; i++)
+    if (count[i] == gridsize) position = i;
 
   start[position] = start[position]+startpoint;
   count[position] = length;
@@ -852,7 +850,15 @@ int cdiStreamReadVarSlicePart(int streamID, int varID, int levelID, int varType,
   // currently we only care for netcdf data
   switch (filetype)
     {
-#if defined (HAVE_LIBNETCDF)
+#ifdef HAVE_LIBGRIB
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2:
+      {
+        grb_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
+	break;
+      }
+#endif
+#ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NC:
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
@@ -935,7 +941,15 @@ void cdiStreamReadVarPart(int streamID, int varID, int varType, int start, size_
   // currently we only care for netcdf data
   switch (filetype)
     {
-#if defined (HAVE_LIBNETCDF)
+#ifdef HAVE_LIBGRIB
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2:
+      {
+        grb_read_var(streamptr, varID, memtype, data, nmiss);
+	break;
+      }
+#endif
+#ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NC:
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
@@ -971,5 +985,4 @@ void streamReadVarPart(int streamID, int varID, int varType, int start, size_t s
   cdiStreamReadVarPart(streamID, varID, varType, start, size, memtype, data, nmiss);
 }
 
-#endif
-
+#endif /* HAVE_LIBNETCDF */
