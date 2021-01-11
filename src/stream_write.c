@@ -13,7 +13,7 @@
 #include "namespace.h"
 
 
-/* the single image implementation */
+// the single image implementation
 int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, size_t nmiss)
 {
   // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision writing.
@@ -31,7 +31,7 @@ int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, s
   // check taxis
   if ( streamptr->curTsID == CDI_UNDEFID ) streamDefTimestep(streamID, 0);
 
-  int filetype = streamptr->filetype;
+  const int filetype = streamptr->filetype;
 
   switch (cdiBaseFiletype(filetype))
     {
@@ -134,9 +134,8 @@ void streamWriteVarF(int streamID, int varID, const float *data, size_t nmiss)
   if ( myCdiStreamWriteVar_(streamID, varID, MEMTYPE_FLOAT, (const void *) data, nmiss) )
     {
       // In case the file format does not support single precision writing,
-      // we fall back to double precision writing, converting the data
-      // on the fly.
-      int vlistID = streamInqVlist(streamID);
+      // we fall back to double precision writing, converting the data on the fly.
+      const int vlistID = streamInqVlist(streamID);
       size_t elementCount = gridInqSize(vlistInqVarGrid(vlistID, varID));
       elementCount *= (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
@@ -164,7 +163,7 @@ int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, co
   // check taxis
   if ( streamptr->curTsID == CDI_UNDEFID ) streamDefTimestep(streamID, 0);
 
-  int filetype = streamptr->filetype;
+  const int filetype = streamptr->filetype;
 
   switch (cdiBaseFiletype(filetype))
     {
@@ -260,7 +259,7 @@ void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *dat
     {
       // In case the file format does not support single precision writing,
       // we fall back to double precision writing, converting the data on the fly.
-      size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      const size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       for ( size_t i = elementCount; i--; ) conversionBuffer[i] = (double) data[i];
       streamWriteVarSlice(streamID, varID, levelID, conversionBuffer, nmiss);
@@ -279,7 +278,7 @@ void streamWriteVarChunk(int streamID, int varID,
   myCdiStreamWriteVarChunk_(streamID, varID, MEMTYPE_DOUBLE, rect, data, nmiss);
 }
 
-/* single image implementation */
+// single image implementation
 void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
                              const int rect[][2], const void *data, size_t nmiss)
 {
@@ -289,7 +288,7 @@ void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
 
   // streamDefineTaxis(streamID);
 
-  int filetype = streamptr->filetype;
+  const int filetype = streamptr->filetype;
 
   switch (cdiBaseFiletype(filetype))
     {
@@ -404,8 +403,8 @@ void streamWriteRecordF(int streamID, const float *data, size_t nmiss)
       // In case the file format does not support single precision writing,
       // we fall back to double precision writing, converting the data on the fly.
       stream_t *streamptr = stream_to_pointer(streamID);
-      int varID = streamptr->record->varID;
-      size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      const int varID = streamptr->record->varID;
+      const size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       for ( size_t i = elementCount; i--; ) conversionBuffer[i] = (double) data[i];
       streamWriteRecord(streamID, conversionBuffer, nmiss);

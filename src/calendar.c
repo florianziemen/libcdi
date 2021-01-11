@@ -27,25 +27,12 @@ int days_per_month(int calendar, int year, int month)
 {
   int daysperyear = calendar_dpy(calendar);
 
-  const int *dpm;
-  if      ( daysperyear == 360 ) dpm = month_360;
-  else if ( daysperyear == 365 ) dpm = month_365;
-  else                           dpm = month_366;
+  const int *dpm = (daysperyear == 360) ? month_360 : ((daysperyear == 365) ? month_365 : month_366);
 
-  int dayspermonth = 0;
-  if ( month >= 1 && month <= 12 )
-    dayspermonth = dpm[month-1];
-  /*
-  else
-    fprintf(stderr, "days_per_month: month %d out of range\n", month);
-  */
-  if ( daysperyear == 0 && month == 2 )
-    {
-      if ( (year%4 == 0 && year%100 != 0) || year%400 == 0 )
-	dayspermonth = 29;
-      else
-	dayspermonth = 28;
-    }
+  int dayspermonth = ( month >= 1 && month <= 12 ) ? dpm[month-1] : 0;
+
+  if (daysperyear == 0 && month == 2)
+    dayspermonth = ((year%4 == 0 && year%100 != 0) || year%400 == 0) ? 29 : 28;
 
   return dayspermonth;
 }
@@ -55,11 +42,11 @@ int days_per_year(int calendar, int year)
 {
   int daysperyear = calendar_dpy(calendar);
 
-  if ( daysperyear == 0 )
+  if (daysperyear == 0)
     {
-      if ( year == 1582 && (calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN) )
+      if (year == 1582 && (calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN))
         daysperyear = 355;
-      else if ( (year%4 == 0 && year%100 != 0) || year%400 == 0 )
+      else if ((year%4 == 0 && year%100 != 0) || year%400 == 0)
         daysperyear = 366;
       else
         daysperyear = 365;
@@ -71,8 +58,6 @@ int days_per_year(int calendar, int year)
 
 static void decode_day(int dpy, int days, int *year, int *month, int *day)
 {
-  int i = 0;
-
   *year = (days-1) / dpy;
   days -= (*year*dpy);
 
@@ -81,6 +66,7 @@ static void decode_day(int dpy, int days, int *year, int *month, int *day)
   else if ( dpy == 365 ) dpm = month_365;
   else if ( dpy == 366 ) dpm = month_366;
 
+  int i = 0;
   if ( dpm )
     for ( i = 0; i < 12; i++ )
       {
@@ -112,7 +98,7 @@ static int64_t encode_day(int dpy, int year, int month, int day)
 void encode_caldaysec(int calendar, int year, int month, int day, int hour, int minute, int second,
 		      int64_t *julday, int *secofday)
 {
-  int dpy = calendar_dpy(calendar);
+  const int dpy = calendar_dpy(calendar);
 
   if ( dpy == 360 || dpy == 365 || dpy == 366 )
     *julday = encode_day(dpy, year, month, day);
@@ -126,7 +112,7 @@ void encode_caldaysec(int calendar, int year, int month, int day, int hour, int 
 void decode_caldaysec(int calendar, int64_t julday, int secofday,
 		      int *year, int *month, int *day, int *hour, int *minute, int *second)
 {
-  int dpy = calendar_dpy(calendar);
+  const int dpy = calendar_dpy(calendar);
 
   if ( dpy == 360 || dpy == 365 || dpy == 366 )
     decode_day(dpy, julday, year, month, day);
@@ -142,7 +128,7 @@ void decode_caldaysec(int calendar, int64_t julday, int secofday,
 #ifdef TEST
 static int date_to_calday(int calendar, int date)
 {
-  int dpy = calendar_dpy(calendar);
+  const int dpy = calendar_dpy(calendar);
 
   int year, month, day;
   cdiDecodeDate(date, &year, &month, &day);
@@ -160,14 +146,14 @@ static int date_to_calday(int calendar, int date)
 static int calday_to_date(int calendar, int calday)
 {
   int year, month, day;
-  int dpy = calendar_dpy(calendar);
+  const int dpy = calendar_dpy(calendar);
 
   if ( dpy == 360 || dpy == 365 || dpy == 366 )
     decode_day(dpy, calday, &year, &month, &day);
   else
     decode_julday(calendar, calday, &year, &month, &day);
 
-  int date = cdiEncodeDate(year, month, day);
+  const int date = cdiEncodeDate(year, month, day);
 
   return date;
 }

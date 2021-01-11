@@ -23,8 +23,8 @@ bool strStartsWith(const char *vstr, const char *cstr)
   bool is_equal = false;
   if (vstr && cstr)
     {
-      size_t clen = strlen(cstr);
-      size_t vlen = strlen(vstr);
+      const size_t clen = strlen(cstr);
+      const size_t vlen = strlen(vstr);
       if (clen <= vlen) is_equal = (memcmp(vstr, cstr, clen) == 0);
     }
   return is_equal;
@@ -74,8 +74,8 @@ bool is_timeaxis_units(const char *timeunits)
 {
   bool status = false;
 
-  size_t len = strlen(timeunits);
-  char *tu = (char *) Malloc((len+1)*sizeof(char));
+  const size_t len = strlen(timeunits);
+  char *tu = (char *) malloc((len+1)*sizeof(char));
   memcpy(tu, timeunits, (len+1) * sizeof(char));
   char *ptu = tu;
 
@@ -96,7 +96,7 @@ bool is_timeaxis_units(const char *timeunits)
         }
     }
 
-  Free(tu);
+  free(tu);
 
   return status;
 }

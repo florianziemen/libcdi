@@ -241,11 +241,11 @@ void cdfDefineCellMethods(stream_t *streamptr, int cdiID, int varID, int fileID,
   taxis_t *taxis = &streamptr->tsteps[0].taxis;
   if (!taxis->has_bounds) return;
 
-  int time_varid = streamptr->basetime.ncvarid;
+  const int time_varid = streamptr->basetime.ncvarid;
   char timeVarName[CDI_MAX_NAME];
   cdf_inq_varname(fileID, time_varid, timeVarName);
 
-  int stepType = vlistInqVarTsteptype(cdiID, varID);
+  const int stepType = vlistInqVarTsteptype(cdiID, varID);
 
   const char *cellMethod = NULL;
   if      (stepType == TSTEP_AVG)   cellMethod = "mean";
@@ -282,7 +282,7 @@ void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
 
       if ( atttype == CDI_DATATYPE_TXT )
         {
-          size_t attSize = (size_t)attlen*sizeof(char);
+          const size_t attSize = (size_t)attlen*sizeof(char);
           char *atttxt = (char *)resizeBuf(&attBuf, &attBufSize, attSize);
           cdiInqAttTxt(cdiID, varID, attname, attlen, atttxt);
           len = (size_t)attlen;
@@ -292,7 +292,7 @@ void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
                 atttype == CDI_DATATYPE_INT16 || atttype == CDI_DATATYPE_UINT16 ||
                 atttype == CDI_DATATYPE_INT32 || atttype == CDI_DATATYPE_UINT32 )
         {
-          size_t attSize = (size_t)attlen*sizeof(int);
+          const size_t attSize = (size_t)attlen*sizeof(int);
           int *attint = (int *)resizeBuf(&attBuf, &attBufSize, attSize);
           cdiInqAttInt(cdiID, varID, attname, attlen, &attint[0]);
           len = (size_t)attlen;
@@ -308,7 +308,7 @@ void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
         }
       else if ( atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64 )
         {
-          size_t attSize = (size_t)attlen * sizeof(double);
+          const size_t attSize = (size_t)attlen * sizeof(double);
           double *attflt = (double *)resizeBuf(&attBuf, &attBufSize, attSize);
           cdiInqAttFlt(cdiID, varID, attname, attlen, attflt);
           len = (size_t)attlen;
@@ -372,7 +372,7 @@ void cdf_get_gmapvarname(int gridID, char *gmapvarname)
 
   if ( !gmapname[0] )
     {
-      int projID = gridInqProj(gridID);
+      const int projID = gridInqProj(gridID);
       if ( projID != CDI_UNDEFID )
         {
           pgridID = projID;
@@ -528,7 +528,7 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, 
         {
           char name[CDI_MAX_NAME]; name[0] = 0;
           cdf_inq_varname(fileID, ncyvarID, name);
-          size_t len = strlen(name);
+          const size_t len = strlen(name);
           cdf_put_att_text(fileID, ncvarID, "CDI_grid_latitudes", len, name);
         }
 
@@ -537,7 +537,7 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, 
         {
           char name[CDI_MAX_NAME]; name[0] = 0;
           cdf_inq_varname(fileID, ncrpvarID, name);
-          size_t len = strlen(name);
+          const size_t len = strlen(name);
           cdf_put_att_text(fileID, ncvarID, "CDI_grid_reduced_points", len, name);
         }
     }

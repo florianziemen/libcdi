@@ -103,7 +103,7 @@ static int cdfOpenFile(const char *filename, const char *mode, int *filetype)
 	{
 	case 'r':
           {
-            int status = cdf_open(filename, readmode, &ncid);
+            const int status = cdf_open(filename, readmode, &ncid);
             if ( status > 0 && ncid < 0 ) ncid = CDI_ESYSTEM;
 #ifdef  HAVE_NETCDF4
             else

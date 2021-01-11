@@ -93,8 +93,8 @@ size_t binReadF77Block(int fileID, int byteswap)
 
 void binWriteF77Block(int fileID, int byteswap, size_t blocksize)
 {
-  static unsigned int s[4] = {0, 8, 16, 24};
-  unsigned long ublocksize = (unsigned long) blocksize;
+  static const unsigned int s[4] = {0, 8, 16, 24};
+  const unsigned long ublocksize = (unsigned long) blocksize;
   unsigned char f77block[4];
 
   switch (HOST_ENDIANNESS)
