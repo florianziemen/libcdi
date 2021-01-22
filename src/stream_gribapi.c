@@ -1819,7 +1819,9 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t fdate, int
            proDefTempNum == 55 || proDefTempNum == 40055 ) // Tile
         startStep = endStep;
 
-      if (endStep < startStep || startStep > 255 || endStep > 255)
+      if (endStep < startStep) return status;
+
+      if ( editionNumber == 1 && (startStep > 255 || endStep > 255) )
         {
           startStep = 0;
           endStep = 0;

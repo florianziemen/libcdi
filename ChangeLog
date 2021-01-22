@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.5
 	* Version 1.9.10 released
 
+2021-01-22  Uwe Schulzweida
+
+	* gribapiDefDateTimeRel: check range of startStep and endStep only for editionNumber 1
+
 2021-01-07  Uwe Schulzweida
 
 	* gridDefParamRLL: set x/y units to degrees
