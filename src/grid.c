@@ -1086,8 +1086,7 @@ void gridDefXsize(int gridID, size_t xsize)
 void gridDefDatatype(int gridID, int datatype)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-
-  if ( gridptr->datatype != datatype )
+  if (gridptr->datatype != datatype)
     {
       gridMark4Update(gridID);
       gridptr->datatype = datatype;

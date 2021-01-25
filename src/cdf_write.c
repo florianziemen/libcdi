@@ -804,7 +804,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   if (streamptr->vars[varID].ncvarid != CDI_UNDEFID)
     return streamptr->vars[varID].ncvarid;
 
-  const int fileID  = streamptr->fileID;
+  const int fileID = streamptr->fileID;
   if (CDI_Debug) Message("streamID = %d, fileID = %d, varID = %d", streamptr->self, fileID, varID);
 
   const int vlistID = streamptr->vlistID;

@@ -1,5 +1,9 @@
 2021-01-25  Uwe Schulzweida
 
+	* NetCDF: set datatype to double if not equal float (bug fix)
+
+2021-01-25  Uwe Schulzweida
+
         * using CGRIBEX library version 1.9.5
 	* Version 1.9.10 released
 
