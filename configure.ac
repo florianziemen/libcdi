@@ -7,7 +7,7 @@
 AC_PREREQ([2.69])
 LT_PREREQ([2.4.6])
 
-AC_INIT([cdi], [1.9.10], [https://mpimet.mpg.de/cdi])
+AC_INIT([cdi],[1.9.10],[https://mpimet.mpg.de/cdi])
 
 AC_DEFINE_UNQUOTED(CDI, ["$PACKAGE_VERSION"], [CDI version])
 
@@ -20,7 +20,6 @@ dnl forbid acx macro names from remaining unexpanded
 m4_pattern_forbid([^ACX_])
 AC_CANONICAL_HOST
 AC_CANONICAL_BUILD
-
 
 AM_INIT_AUTOMAKE([1.16.1 foreign serial-tests])
 AC_CONFIG_HEADERS([src/config.h])
@@ -439,10 +438,11 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tables/gen_tableheaderfile \
                  util/serialrun],[chmod a+x "$ac_file"])
 
-AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
+AC_CONFIG_FILES([Makefile src/Makefile interfaces/Makefile app/Makefile \
 	tests/Makefile examples/Makefile cdi.settings \
 	examples/pio/Makefile src/pkgconfig/cdi.pc src/pkgconfig/cdipio.pc \
         src/pkgconfig/cdi_f2003.pc])
+AC_OUTPUT
 
 #  ----------------------------------------------------------------------
 #  Show configuration
