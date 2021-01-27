@@ -22,17 +22,17 @@ static const char bndsName[] = "bnds";
 
 void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 {
-  int vlistID1 = streamptr1->vlistID;
-  int tsID     = streamptr1->curTsID;
-  int vrecID   = streamptr1->tsteps[tsID].curRecID;
-  int recID    = streamptr1->tsteps[tsID].recIDs[vrecID];
-  int ivarID   = streamptr1->tsteps[tsID].records[recID].varID;
-  int gridID   = vlistInqVarGrid(vlistID1, ivarID);
-  size_t datasize = gridInqSize(gridID);
-  int datatype = vlistInqVarDatatype(vlistID1, ivarID);
-  int memtype  = datatype != CDI_DATATYPE_FLT32 ? MEMTYPE_DOUBLE : MEMTYPE_FLOAT;
+  const int vlistID1 = streamptr1->vlistID;
+  const int tsID     = streamptr1->curTsID;
+  const int vrecID   = streamptr1->tsteps[tsID].curRecID;
+  const int recID    = streamptr1->tsteps[tsID].recIDs[vrecID];
+  const int ivarID   = streamptr1->tsteps[tsID].records[recID].varID;
+  const int gridID   = vlistInqVarGrid(vlistID1, ivarID);
+  const size_t datasize = gridInqSize(gridID);
+  const int datatype = vlistInqVarDatatype(vlistID1, ivarID);
+  const int memtype  = (datatype != CDI_DATATYPE_FLT32) ? MEMTYPE_DOUBLE : MEMTYPE_FLOAT;
 
-  void *data = Malloc(datasize * (memtype == MEMTYPE_DOUBLE ? sizeof(double) : sizeof(float)));
+  void *data = Malloc(datasize * ((memtype == MEMTYPE_DOUBLE) ? sizeof(double) : sizeof(float)));
 
   size_t nmiss;
   cdf_read_record(streamptr1, memtype, data, &nmiss);
