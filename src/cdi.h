@@ -790,6 +790,7 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_LONGNAME                      943  // Long name of the variable
 #define  CDI_KEY_STDNAME                       944  // CF Standard name of the variable
 #define  CDI_KEY_UNITS                         945  // Units of the variable
+#define  CDI_KEY_DATATYPE                      946  // Data type
 #define  CDI_KEY_REFERENCEURI                  965  // Reference URI to grid file
 
 // Integer keys

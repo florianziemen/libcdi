@@ -2042,7 +2042,7 @@ void grid_set_chunktype(grid_t *grid, ncvar_t *ncvar)
     }
 }
 
-/* define all input grids */
+// define all input grids
 static
 void cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridvals, struct xyValGet *valsGet,
                    int ntdims, size_t *start, size_t *count)
@@ -2219,7 +2219,7 @@ bool cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *restrict lazyGrid,
 
   if ( (ndims - ntdims) == 2 )
     {
-      /* Check size of 2 dimensional coordinate variables */
+      // Check size of 2 dimensional coordinate variables
       int dimid = axisvar->dimids[ndims-2];
       const size_t dimsize1 = ncdims[dimid].len;
       dimid = axisvar->dimids[ndims-1];
@@ -2241,7 +2241,7 @@ bool cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *restrict lazyGrid,
   else if ( (ndims - ntdims) == 1 )
     {
       size = *xsize;
-      /* Check size of 1 dimensional coordinate variables */
+      // Check size of 1 dimensional coordinate variables
       const int dimid = axisvar->dimids[ndims-1];
       const size_t dimsize = ncdims[dimid].len;
       skipvar = dimsize != size;
@@ -2289,7 +2289,7 @@ bool cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *restrict lazyGrid,
 
   if ( (ndims - ntdims) == 2 )
     {
-      /* Check size of 2 dimensional coordinate variables */
+      // Check size of 2 dimensional coordinate variables
       int dimid = axisvar->dimids[ndims-2];
       const size_t dimsize1 = ncdims[dimid].len;
       dimid = axisvar->dimids[ndims-1];
@@ -2310,9 +2310,7 @@ bool cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *restrict lazyGrid,
     }
   else if ( (ndims - ntdims) == 1 )
     {
-      if ( *ysize == 0 ) size = xsize;
-      else               size = *ysize;
-
+      size = (*ysize) ? *ysize : xsize;
       const int dimid = axisvar->dimids[ndims-1];
       const size_t dimsize = ncdims[dimid].len;
       skipvar = dimsize != size;
