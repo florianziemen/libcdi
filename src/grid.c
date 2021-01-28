@@ -2161,6 +2161,18 @@ bool compareXYvals2(grid_t *gridRef, grid_t *gridTest)
 }
 
 static
+bool compare_bounds(const grid_t *grid, const grid_t *gridRef)
+{
+  bool differ = false;
+
+  if ((grid->x.bounds && !gridRef->x.bounds) || (!grid->x.bounds && gridRef->x.bounds) ||
+      (grid->y.bounds && !gridRef->y.bounds) || (!grid->y.bounds && gridRef->y.bounds))
+    differ = true;
+
+  return differ;
+}
+
+static
 bool compare_lonlat(int gridID, const grid_t *grid, const grid_t *gridRef)
 {
   bool differ = false;
@@ -2206,6 +2218,8 @@ bool compare_lonlat(int gridID, const grid_t *grid, const grid_t *gridRef)
         }
       else if ( grid->x.vals && grid->y.vals )
         differ = gridRef->vtable->compareXYFull((grid_t *)gridRef, (grid_t *)grid);
+
+      if (!differ) differ = compare_bounds(grid, gridRef);
     }
   else
     differ = true;
@@ -2254,6 +2268,7 @@ bool compare_generic(const grid_t *grid, const grid_t *gridRef)
 static
 bool compare_gaussian(int gridID, const grid_t *grid, const grid_t *gridRef)
 {
+  const double cmp_eps = 0.0015;
   bool differ = false;
 
   if ( grid->x.size == gridRef->x.size && grid->y.size == gridRef->y.size )
@@ -2262,8 +2277,8 @@ bool compare_gaussian(int gridID, const grid_t *grid, const grid_t *gridRef)
         {
           if ( ! (IS_EQUAL(grid->x.first, 0) && IS_EQUAL(grid->x.last, 0) && IS_EQUAL(grid->x.inc, 0)) &&
                ! (IS_EQUAL(grid->y.first, 0) && IS_EQUAL(grid->y.last, 0)) )
-            if ( fabs(grid->x.first - gridInqXval(gridID, 0)) > 0.0015 ||
-                 fabs(grid->y.first - gridInqYval(gridID, 0)) > 0.0015 ||
+            if ( fabs(grid->x.first - gridInqXval(gridID, 0)) > cmp_eps ||
+                 fabs(grid->y.first - gridInqYval(gridID, 0)) > cmp_eps ||
                  (fabs(grid->x.inc)>0 && fabs(fabs(grid->x.inc) - fabs(gridRef->x.inc)) > fabs(grid->x.inc/1000)) )
               {
                 differ = true;
@@ -2271,6 +2286,8 @@ bool compare_gaussian(int gridID, const grid_t *grid, const grid_t *gridRef)
         }
       else if ( grid->x.vals && grid->y.vals )
         differ = gridRef->vtable->compareXYFull((grid_t *)gridRef, (grid_t *)grid);
+
+      if (!differ) differ = compare_bounds(grid, gridRef);
     }
   else
     differ = true;
@@ -4647,7 +4664,7 @@ gridCompareSearch(int id, void *res, void *data)
     return CDI_APPLY_GO_ON;
 }
 
-/* Add grid (which must be Malloc'ed to vlist if not already found) */
+// Add grid (which must be Malloc'ed to vlist if not already found)
 struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
 {
   /*

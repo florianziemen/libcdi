@@ -1,3 +1,7 @@
+2021-01-28  Uwe Schulzweida
+
+	* cdiVlistAddGridIfNew(): check bounds for GRID_LONLAT and GRID_GAUSSIAN
+
 2021-01-25  Uwe Schulzweida
 
 	* NetCDF: set datatype to double if not equal float (bug fix)

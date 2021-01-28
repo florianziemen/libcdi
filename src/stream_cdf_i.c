@@ -2468,10 +2468,10 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *restrict lazy
         if ( xvarid != CDI_UNDEFID && CDI_read_cell_corners )
           {
             grid->x.flag = 1;
-            int bvarid = ncvars[xvarid].bounds;
+            const int bvarid = ncvars[xvarid].bounds;
             if ( bvarid != CDI_UNDEFID )
               {
-                int nbdims = ncvars[bvarid].ndims;
+                const int nbdims = ncvars[bvarid].ndims;
                 if ( nbdims == 2 || nbdims == 3 )
                   {
                     *vdimid = ncvars[bvarid].dimids[nbdims-1];
@@ -2483,10 +2483,10 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *restrict lazy
         if ( yvarid != CDI_UNDEFID && CDI_read_cell_corners )
           {
             grid->y.flag = 1;
-            int bvarid = ncvars[yvarid].bounds;
+            const int bvarid = ncvars[yvarid].bounds;
             if ( bvarid != CDI_UNDEFID )
               {
-                int nbdims = ncvars[bvarid].ndims;
+                const int nbdims = ncvars[bvarid].ndims;
                 if ( nbdims == 2 || nbdims == 3 )
                   {
                     if ( *vdimid == CDI_UNDEFID )
@@ -2516,18 +2516,18 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *restrict lazy
             if (ncvars[ncvar->rpvarid].ndims == 1)
               {
                 grid->size = size;
-                int dimid = ncvars[ncvar->rpvarid].dimids[0];
-                size_t len = ncdims[dimid].len;
+                const int dimid = ncvars[ncvar->rpvarid].dimids[0];
+                const size_t len = ncdims[dimid].len;
                 grid->y.size = len;
                 grid->reducedPointsSize = len;
                 grid->reducedPoints = (int*) Malloc(len*sizeof(int));
                 cdf_get_var_int(ncvar->ncid, ncvar->rpvarid, grid->reducedPoints);
                 grid->np = ncvar->numLPE;
 
-                int bvarid = ncvars[yvarid].bounds;
+                const int bvarid = ncvars[yvarid].bounds;
                 if ( bvarid != CDI_UNDEFID )
                   {
-                    int nbdims = ncvars[bvarid].ndims;
+                    const int nbdims = ncvars[bvarid].ndims;
                     if ( nbdims == 2 || nbdims == 3 )
                       {
                         if ( *vdimid == CDI_UNDEFID )
