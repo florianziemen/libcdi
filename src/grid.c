@@ -1388,14 +1388,10 @@ void gridDefMaskGME(int gridID, const int *mask)
 static
 size_t gridInqXValsSerial(grid_t *gridptr, double *xvals)
 {
-  size_t size;
-  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
-    size = gridptr->size;
-  else
-    size = gridptr->x.size;
+  const int gridtype = gridptr->type;
+  size_t size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED) ? gridptr->size : gridptr->x.size;
 
-  if ( CDI_Debug && size == 0 )
-    Warning("size undefined for gridID = %d", gridptr->self);
+  if ( CDI_Debug && size == 0 ) Warning("size undefined for gridID = %d", gridptr->self);
 
   if ( gridptr->x.vals )
     {
@@ -1414,14 +1410,10 @@ size_t gridInqXValsSerial(grid_t *gridptr, double *xvals)
 static
 size_t gridInqXValsPartSerial(grid_t *gridptr, int start, size_t length, double *xvals)
 {
-  size_t size;
-  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
-    size = gridptr->size;
-  else
-    size = gridptr->x.size;
+  const int gridtype = gridptr->type;
+  size_t size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED) ? gridptr->size : gridptr->x.size;
 
-  if ( CDI_Debug && size == 0 )
-    Warning("size undefined for gridID = %d", gridptr->self);
+  if ( CDI_Debug && size == 0 ) Warning("size undefined for gridID = %d", gridptr->self);
 
   if ( gridptr->x.vals )
     {
@@ -1528,17 +1520,11 @@ static
 void gridDefXValsSerial(grid_t *gridptr, const double *xvals)
 {
   const int gridtype = gridptr->type;
-
-  size_t size;
-  if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
-    size = gridptr->size;
-  else
-    size = gridptr->x.size;
+  const size_t size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED) ? gridptr->size : gridptr->x.size;
 
   if ( size == 0 ) Error("Size undefined for gridID = %d", gridptr->self);
 
-  if (gridptr->x.vals && CDI_Debug)
-    Warning("values already defined!");
+  if (gridptr->x.vals && CDI_Debug) Warning("values already defined!");
   gridptr->x.vals = (double *)Realloc(gridptr->x.vals, size * sizeof(double));
   memcpy(gridptr->x.vals, xvals, size * sizeof (double));
 }
@@ -1567,10 +1553,7 @@ size_t gridInqYCvalsSerial(grid_t *gridptr, char **ycvals)
 static
 int gridInqYIscSerial(grid_t *gridptr)
 {
-  /*
-  if ( gridptr->type != GRID_CHARXY )
-    Error("Axis type is 'char' but grid is not type 'GRID_CHARXY'.");
-  */
+  // if ( gridptr->type != GRID_CHARXY ) Error("Axis type is 'char' but grid is not type 'GRID_CHARXY'.");
   return gridptr->y.clength;
 }
 #endif
@@ -1600,11 +1583,9 @@ static
 size_t gridInqYValsSerial(grid_t *gridptr, double *yvals)
 {
   const int gridtype = gridptr->type;
-  size_t size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
-            ? gridptr->size : gridptr->y.size;
+  size_t size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED) ? gridptr->size : gridptr->y.size;
 
-  if ( CDI_Debug && size == 0 )
-    Warning("size undefined for gridID = %d!", gridptr->self);
+  if ( CDI_Debug && size == 0 ) Warning("size undefined for gridID = %d!", gridptr->self);
 
   if ( gridptr->y.vals )
     {
@@ -1624,11 +1605,9 @@ static
 size_t gridInqYValsPartSerial(grid_t *gridptr, int start, size_t length, double *yvals)
 {
   const int gridtype = gridptr->type;
-  size_t size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
-            ? gridptr->size : gridptr->y.size;
+  size_t size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED) ? gridptr->size : gridptr->y.size;
 
-  if ( CDI_Debug && size == 0 )
-    Warning("size undefined for gridID = %d!", gridptr->self);
+  if ( CDI_Debug && size == 0 ) Warning("size undefined for gridID = %d!", gridptr->self);
 
   if ( gridptr->y.vals )
     {
@@ -1703,8 +1682,7 @@ static
 void gridDefYValsSerial(grid_t *gridptr, const double *yvals)
 {
   const int gridtype = gridptr->type;
-  const size_t size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
-                    ? gridptr->size : gridptr->y.size;
+  const size_t size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED) ? gridptr->size : gridptr->y.size;
 
   if ( size == 0 )
     Error("Size undefined for gridID = %d!", gridptr->self);
@@ -1785,14 +1763,14 @@ double grid_calc_increment(size_t size, const double *vals)
       for ( size_t i = 1; i < size; ++i )
         if ( fabs(fabs(vals[i-1] - vals[i]) - abs_inc) > 0.01*abs_inc )
           {
-            inc = 0;
+            inc = 0.0;
             break;
           }
 
       return inc;
     }
 
-  return 0;
+  return 0.0;
 }
 
 /*
@@ -2079,7 +2057,7 @@ void grid_check_cyclic(grid_t *gridptr)
                         goto foundCloseVertices;
 		    }
 		}
-              /* all vertices more than 0.001 degrees apart */
+              // all vertices more than 0.001 degrees apart
               isCyclic = false;
               break;
               foundCloseVertices:
