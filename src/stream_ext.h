@@ -12,7 +12,7 @@ int    extInqRecord(stream_t *streamptr, int *varID, int *levelID);
 void   extDefRecord(stream_t *streamptr);
 void   extCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
 void   ext_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss);
-void   extWriteRecord(stream_t *streamptr, const double *data);
+void   ext_write_record(stream_t *streamptr, int memtype, const void *data);
 
 void   extReadVarDP (stream_t *streamptr, int varID,       double *data, size_t *nmiss);
 void   extWriteVarDP(stream_t *streamptr, int varID, const double *data);

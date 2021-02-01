@@ -347,8 +347,7 @@ int stream_write_record(int streamID, int memtype, const void *data, size_t nmis
 #endif
 #ifdef HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
-      if ( memtype == MEMTYPE_FLOAT ) return 1;
-      extWriteRecord(streamptr, (const double *)data);
+      ext_write_record(streamptr, memtype, data);
       break;
 #endif
 #ifdef HAVE_LIBIEG

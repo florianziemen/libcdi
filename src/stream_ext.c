@@ -180,12 +180,29 @@ void extDefRecord(stream_t *streamptr)
   extDefHeader(extp, header);
 }
 
+static
+void ext_write_recordSP(stream_t *streamptr, const float *data)
+{
+  void *extp = streamptr->record->exsep;
+  extDefDataSP(extp, data);
+  extWrite(streamptr->fileID, extp);
+}
 
-void extWriteRecord(stream_t *streamptr, const double *data)
+static
+void ext_write_recordDP(stream_t *streamptr, const double *data)
 {
   void *extp = streamptr->record->exsep;
   extDefDataDP(extp, data);
   extWrite(streamptr->fileID, extp);
+}
+
+
+void ext_write_record(stream_t *streamptr, int memtype, const void *data)
+{
+  if (memtype == MEMTYPE_DOUBLE)
+    ext_write_recordDP(streamptr, (const double *) data);
+  else
+    ext_write_recordSP(streamptr, (const float *) data);
 }
 
 static
