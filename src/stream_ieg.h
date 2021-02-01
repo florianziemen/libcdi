@@ -12,7 +12,7 @@ int    iegInqRecord(stream_t *streamptr, int *varID, int *levelID);
 void   iegDefRecord(stream_t *streamptr);
 void   iegCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
 void   ieg_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss);
-void   iegWriteRecord(stream_t *streamptr, const double *data);
+void   ieg_write_record(stream_t *streamptr, int memtype, const void *data);
 
 void   iegReadVarDP (stream_t *streamptr, int varID,       double *data, size_t *nmiss);
 void   iegWriteVarDP(stream_t *streamptr, int varID, const double *data);

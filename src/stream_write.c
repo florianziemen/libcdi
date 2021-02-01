@@ -352,8 +352,7 @@ int stream_write_record(int streamID, int memtype, const void *data, size_t nmis
 #endif
 #ifdef HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
-      if ( memtype == MEMTYPE_FLOAT ) return 1;
-      iegWriteRecord(streamptr, (const double *)data);
+      ieg_write_record(streamptr, memtype, data);
       break;
 #endif
 #ifdef HAVE_LIBNETCDF

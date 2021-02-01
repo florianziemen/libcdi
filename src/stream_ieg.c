@@ -475,8 +475,8 @@ void iegDefRecord(stream_t *streamptr)
   iegp->dprec = iegDefDatatype(record->prec);
 }
 
-
-void iegWriteRecord(stream_t *streamptr, const double *data)
+static
+void ieg_write_recordSP(stream_t *streamptr, const float *data)
 {
   Record *record = streamptr->record;
   iegrec_t *iegp = (iegrec_t*) record->exsep;
@@ -485,13 +485,41 @@ void iegWriteRecord(stream_t *streamptr, const double *data)
   size_t gridsize = gridInqSize(record->gridID);
 
   double refval = data[0];
-  for ( size_t i = 1; i < gridsize; i++ )
-    if ( data[i] < refval ) refval = data[i];
+  for (size_t i = 1; i < gridsize; i++)
+    if (data[i] < refval) refval = data[i];
+
+  iegp->refval = refval;
+
+  iegDefDataSP(iegp, data);
+  iegWrite(fileID, iegp);
+}
+
+static
+void ieg_write_recordDP(stream_t *streamptr, const double *data)
+{
+  Record *record = streamptr->record;
+  iegrec_t *iegp = (iegrec_t*) record->exsep;
+
+  int fileID = streamptr->fileID;
+  size_t gridsize = gridInqSize(record->gridID);
+
+  double refval = data[0];
+  for (size_t i = 1; i < gridsize; i++)
+    if (data[i] < refval) refval = data[i];
 
   iegp->refval = refval;
 
   iegDefDataDP(iegp, data);
   iegWrite(fileID, iegp);
+}
+
+
+void ieg_write_record(stream_t *streamptr, int memtype, const void *data)
+{
+  if (memtype == MEMTYPE_DOUBLE)
+    ieg_write_recordDP(streamptr, (const double *) data);
+  else
+    ieg_write_recordSP(streamptr, (const float *) data);
 }
 
 static
@@ -1027,13 +1055,7 @@ void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
-  *nmiss = 0;
-  for ( size_t i = 0; i < gridsize; i++ )
-    if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-      {
-	data[i] = missval;
-	(*nmiss)++;
-      }
+  *nmiss = get_num_missvalsDP(gridsize, data, missval);
 }
 
 
