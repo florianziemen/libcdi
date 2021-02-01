@@ -90,7 +90,7 @@ sema_post(sema_t *s)
 static
 void *workerMain(void *arg)
 {
-  AsyncJob *communicator = arg;
+  AsyncJob *communicator = (AsyncJob *)arg;
 
   while (true)
     {
@@ -137,10 +137,10 @@ int AsyncWorker_init(AsyncManager **jobManager, int threadCount)
   if (*jobManager) return CDI_NOERR;
 
 #ifdef HAVE_LIBPTHREAD
-  *jobManager = malloc(sizeof(AsyncManager));
+  *jobManager = (AsyncManager *)malloc(sizeof(AsyncManager));
   if(!*jobManager) return CDI_ESYSTEM;
   (*jobManager)->workerCount = threadCount;
-  (*jobManager)->communicators = malloc(threadCount*sizeof(AsyncJob));
+  (*jobManager)->communicators = (AsyncJob *)malloc(threadCount*sizeof(AsyncJob));
   if (!(*jobManager)->communicators) xabort("memory allocation failure");
 
   for (int i = 0; i < threadCount; i++) startWorker(&((*jobManager)->communicators[i]));

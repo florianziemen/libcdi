@@ -118,7 +118,7 @@ serializeKeysUnpack(const void *buf, int buf_size, int *position, cdi_keys_t *ke
               buffer = realloc(buffer, buffersize);
             }
           serializeUnpack(buf, buf_size, position, buffer, length, CDI_DATATYPE_TXT, context);
-          cdiDefVarKeyBytes(keysp, key, buffer, length);
+          cdiDefVarKeyBytes(keysp, key, (unsigned char *)buffer, length);
           d2 ^= cdiCheckSum(CDI_DATATYPE_TXT, length, buffer);
         }
       else if (type == KEY_INT)
