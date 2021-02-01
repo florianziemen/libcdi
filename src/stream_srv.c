@@ -73,11 +73,66 @@ int srvInqRecord(stream_t *streamptr, int *varID, int *levelID)
 }
 */
 
-void srvReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
+size_t get_num_missvalsSP(size_t size, float *data, float missval)
+{
+  size_t nmiss = 0;
+
+  if (DBL_IS_NAN(missval))
+    {
+      for (size_t i = 0; i < size; i++)
+        if (DBL_IS_EQUAL(data[i], missval))
+          {
+            data[i] = missval;
+            nmiss++;
+          }
+    }
+  else
+    {
+      for (size_t i = 0; i < size; i++)
+        if (IS_EQUAL(data[i], missval))
+          {
+            data[i] = missval;
+            nmiss++;
+          }
+    }
+
+  return nmiss;
+}
+
+
+size_t get_num_missvalsDP(size_t size, double *data, double missval)
+{
+  size_t nmiss = 0;
+
+  if (DBL_IS_NAN(missval))
+    {
+      for (size_t i = 0; i < size; i++)
+        if (DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval))
+          {
+            data[i] = missval;
+            nmiss++;
+          }
+    }
+  else
+    {
+      for (size_t i = 0; i < size; i++)
+        if (IS_EQUAL(data[i], missval) || IS_EQUAL(data[i], (float)missval))
+          {
+            data[i] = missval;
+            nmiss++;
+          }
+    }
+
+  return nmiss;
+}
+
+
+void srv_read_recordSP(stream_t *streamptr, float *data, size_t *nmiss)
 {
   int vlistID  = streamptr->vlistID;
   int fileID   = streamptr->fileID;
   int tsID     = streamptr->curTsID;
+
   int vrecID   = streamptr->tsteps[tsID].curRecID;
   int recID    = streamptr->tsteps[tsID].recIDs[vrecID];
   int varID    = streamptr->tsteps[tsID].records[recID].varID;
@@ -86,26 +141,56 @@ void srvReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
   fileSetPos(fileID, recpos, SEEK_SET);
 
   void *srvp = streamptr->record->exsep;
-  int status = srvRead(fileID, srvp);
-  if ( status != 0 ) Error("Failed to read record from SRV file");
+  if (srvRead(fileID, srvp) < 0) Error("Failed to read record from SRV file");
+
+  int header[8];
+  srvInqHeader(srvp, header);
+  srvInqDataSP(srvp, data);
+
+  double missval = vlistInqVarMissval(vlistID, varID);
+  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
+
+  *nmiss = get_num_missvalsSP(size, data, (float)missval);
+
+  streamptr->numvals += size;
+}
+
+
+void srv_read_recordDP(stream_t *streamptr, double *data, size_t *nmiss)
+{
+  int vlistID  = streamptr->vlistID;
+  int fileID   = streamptr->fileID;
+  int tsID     = streamptr->curTsID;
+
+  int vrecID   = streamptr->tsteps[tsID].curRecID;
+  int recID    = streamptr->tsteps[tsID].recIDs[vrecID];
+  int varID    = streamptr->tsteps[tsID].records[recID].varID;
+  off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+
+  fileSetPos(fileID, recpos, SEEK_SET);
+
+  void *srvp = streamptr->record->exsep;
+  if (srvRead(fileID, srvp) < 0) Error("Failed to read record from SRV file");
 
   int header[8];
   srvInqHeader(srvp, header);
   srvInqDataDP(srvp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
-  int gridID  = vlistInqVarGrid(vlistID, varID);
-  size_t size = gridInqSize(gridID);
+  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
+
+  *nmiss = get_num_missvalsDP(size, data, missval);
 
   streamptr->numvals += size;
+}
 
-  *nmiss = 0;
-  for ( size_t i = 0; i < size; i++ )
-    if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-      {
-	data[i] = missval;
-	(*nmiss)++;
-      }
+
+void srv_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss)
+{
+  if (memtype == MEMTYPE_DOUBLE)
+    srv_read_recordDP(streamptr, (double*) data, nmiss);
+  else
+    srv_read_recordSP(streamptr, (float*) data, nmiss);
 }
 
 
@@ -153,12 +238,29 @@ void srvDefRecord(stream_t *streamptr)
   srvDefHeader(srvp, header);
 }
 
+static
+void srv_write_recordSP(stream_t *streamptr, const float *data)
+{
+  void *srvp = streamptr->record->exsep;
+  srvDefDataSP(srvp, data);
+  srvWrite(streamptr->fileID, srvp);
+}
 
-void srvWriteRecord(stream_t *streamptr, const double *data)
+static
+void srv_write_recordDP(stream_t *streamptr, const double *data)
 {
   void *srvp = streamptr->record->exsep;
   srvDefDataDP(srvp, data);
   srvWrite(streamptr->fileID, srvp);
+}
+
+
+void srv_write_record(stream_t *streamptr, int memtype, const void *data)
+{
+  if (memtype == MEMTYPE_DOUBLE)
+    srv_write_recordDP(streamptr, (const double *) data);
+  else
+    srv_write_recordSP(streamptr, (const float *) data);
 }
 
 static
@@ -533,35 +635,30 @@ void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
 
-  void *srvp = streamptr->record->exsep;
-
   int vlistID  = streamptr->vlistID;
   int fileID   = streamptr->fileID;
-  /* NOTE: tiles are not supported here! */
-  double missval = vlistInqVarMissval(vlistID, varID);
-  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   int tsid     = streamptr->curTsID;
 
   off_t currentfilepos = fileGetPos(fileID);
 
-  /* NOTE: tiles are not supported here! */
   int recID = streamptr->vars[varID].recordTable[0].recordID[levID];
   off_t recpos = streamptr->tsteps[tsid].records[recID].position;
+
   fileSetPos(fileID, recpos, SEEK_SET);
-  if ( srvRead(fileID, srvp) < 0 ) abort();
+
+  void *srvp = streamptr->record->exsep;
+  if (srvRead(fileID, srvp) < 0) abort();
+
   int header[8];
   srvInqHeader(srvp, header);
   srvInqDataDP(srvp, data);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
-  *nmiss = 0;
-  for ( size_t i = 0; i < gridsize; i++ )
-    if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-      {
-	data[i] = missval;
-	(*nmiss)++;
-      }
+  double missval = vlistInqVarMissval(vlistID, varID);
+  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
+
+  *nmiss = get_num_missvalsDP(size, data, missval);
 }
 
 

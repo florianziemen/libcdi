@@ -1,3 +1,8 @@
+2021-02-01  Uwe Schulzweida
+
+	* srv_read_record: use MEMTYPE_FLOAT for DATATYPE_FLT32
+	* srv_write_record: use MEMTYPE_FLOAT for DATATYPE_FLT32
+
 2021-01-28  Uwe Schulzweida
 
 	* cdiVlistAddGridIfNew(): check bounds for GRID_LONLAT and GRID_GAUSSIAN

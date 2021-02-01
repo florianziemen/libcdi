@@ -342,8 +342,7 @@ int stream_write_record(int streamID, int memtype, const void *data, size_t nmis
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
-      if ( memtype == MEMTYPE_FLOAT ) return 1;
-      srvWriteRecord(streamptr, (const double *)data);
+      srv_write_record(streamptr, memtype, data);
       break;
 #endif
 #ifdef HAVE_LIBEXTRA

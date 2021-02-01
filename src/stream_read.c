@@ -289,8 +289,7 @@ int stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
-      if ( memtype == MEMTYPE_FLOAT ) return 1;
-      srvReadRecord(streamptr, (double *)data, nmiss);
+      srv_read_record(streamptr, memtype, data, nmiss);
       break;
 #endif
 #ifdef HAVE_LIBEXTRA
