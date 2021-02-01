@@ -59,8 +59,7 @@ void ieg_read_recordSP(stream_t *streamptr, float *data, size_t *nmiss)
   iegInqDataSP(iegp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
-  int gridID  = vlistInqVarGrid(vlistID, varID);
-  size_t size = gridInqSize(gridID);
+  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
 
   *nmiss = get_num_missvalsSP(size, data, missval);
 
@@ -87,8 +86,7 @@ void ieg_read_recordDP(stream_t *streamptr, double *data, size_t *nmiss)
   iegInqDataDP(iegp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
-  int gridID  = vlistInqVarGrid(vlistID, varID);
-  size_t size = gridInqSize(gridID);
+  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
 
   *nmiss = get_num_missvalsDP(size, data, missval);
 
@@ -472,6 +470,22 @@ void iegDefRecord(stream_t *streamptr)
 }
 
 static
+double calc_refvalSP(size_t size, const float *data)
+{
+  float refval = data[0];
+  for (size_t i = 1; i < size; ++i) if (data[i] < refval) refval = data[i];
+  return refval;
+}
+
+static
+double calc_refvalDP(size_t size, const double *data)
+{
+  double refval = data[0];
+  for (size_t i = 1; i < size; ++i) if (data[i] < refval) refval = data[i];
+  return refval;
+}
+
+static
 void ieg_write_recordSP(stream_t *streamptr, const float *data)
 {
   Record *record = streamptr->record;
@@ -480,11 +494,7 @@ void ieg_write_recordSP(stream_t *streamptr, const float *data)
   int fileID = streamptr->fileID;
   size_t gridsize = gridInqSize(record->gridID);
 
-  double refval = data[0];
-  for (size_t i = 1; i < gridsize; i++)
-    if (data[i] < refval) refval = data[i];
-
-  iegp->refval = refval;
+  iegp->refval = calc_refvalSP(gridsize, data);
 
   iegDefDataSP(iegp, data);
   iegWrite(fileID, iegp);
@@ -499,11 +509,7 @@ void ieg_write_recordDP(stream_t *streamptr, const double *data)
   int fileID = streamptr->fileID;
   size_t gridsize = gridInqSize(record->gridID);
 
-  double refval = data[0];
-  for (size_t i = 1; i < gridsize; i++)
-    if (data[i] < refval) refval = data[i];
-
-  iegp->refval = refval;
+  iegp->refval = calc_refvalDP(gridsize, data);
 
   iegDefDataDP(iegp, data);
   iegWrite(fileID, iegp);
@@ -1098,11 +1104,7 @@ void iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
 
   size_t gridsize = gridInqSize(gridID);
 
-  double refval = data[0];
-  for ( size_t i = 1; i < gridsize; i++ )
-    if ( data[i] < refval ) refval = data[i];
-
-  iegp->refval = refval;
+  iegp->refval = calc_refvalDP(gridsize, data);
 
   iegDefDataDP(iegp, data);
   iegWrite(fileID, iegp);
@@ -1115,9 +1117,9 @@ void iegWriteVarDP(stream_t *streamptr, int varID, const double *data)
 
   int vlistID = streamptr->vlistID;
   size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
-  size_t nlevs    = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
+  size_t nlevels = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
-  for ( size_t levID = 0;  levID < nlevs; levID++ )
+  for ( size_t levID = 0;  levID < nlevels; levID++ )
     iegWriteVarSliceDP(streamptr, varID, (int)levID, &data[levID*gridsize]);
 }
 
