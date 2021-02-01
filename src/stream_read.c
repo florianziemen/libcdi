@@ -299,8 +299,7 @@ int stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 #endif
 #ifdef HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
-      if ( memtype == MEMTYPE_FLOAT ) return 1;
-      iegReadRecord(streamptr, (double *)data, nmiss);
+      ieg_read_record(streamptr, memtype, data, nmiss);
       break;
 #endif
 #ifdef HAVE_LIBNETCDF

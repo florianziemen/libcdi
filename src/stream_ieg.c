@@ -38,11 +38,18 @@ int iegDefDatatype(int datatype)
   return (datatype == CDI_DATATYPE_FLT64) ? EXSE_DOUBLE_PRECISION : EXSE_SINGLE_PRECISION;
 }
 
-void iegReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
+size_t get_num_missvalsSP(size_t size, float *data, float missval);
+size_t get_num_missvalsDP(size_t size, double *data, double missval);
+size_t get_cplx_num_missvalsSP(size_t size, float *data, float missval);
+size_t get_cplx_num_missvalsDP(size_t size, double *data, double missval);
+
+static
+void ieg_read_recordSP(stream_t *streamptr, float *data, size_t *nmiss)
 {
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
   int tsID    = streamptr->curTsID;
+
   int vrecID  = streamptr->tsteps[tsID].curRecID;
   int recID   = streamptr->tsteps[tsID].recIDs[vrecID];
   int varID   = streamptr->tsteps[tsID].records[recID].varID;
@@ -51,8 +58,35 @@ void iegReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
   fileSetPos(fileID, recpos, SEEK_SET);
 
   void *iegp = streamptr->record->exsep;
-  int status = iegRead(fileID, iegp);
-  if ( status != 0 ) Error("Could not read IEG record!");
+  if (iegRead(fileID, iegp) < 0) Error("Could not read IEG record!");
+
+  iegInqDataSP(iegp, data);
+
+  double missval = vlistInqVarMissval(vlistID, varID);
+  int gridID  = vlistInqVarGrid(vlistID, varID);
+  size_t size = gridInqSize(gridID);
+
+  *nmiss = get_num_missvalsSP(size, data, missval);
+
+  streamptr->numvals += size;
+}
+
+static
+void ieg_read_recordDP(stream_t *streamptr, double *data, size_t *nmiss)
+{
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
+  int tsID    = streamptr->curTsID;
+
+  int vrecID  = streamptr->tsteps[tsID].curRecID;
+  int recID   = streamptr->tsteps[tsID].recIDs[vrecID];
+  int varID   = streamptr->tsteps[tsID].records[recID].varID;
+  off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+
+  fileSetPos(fileID, recpos, SEEK_SET);
+
+  void *iegp = streamptr->record->exsep;
+  if (iegRead(fileID, iegp) < 0) Error("Could not read IEG record!");
 
   iegInqDataDP(iegp, data);
 
@@ -60,15 +94,18 @@ void iegReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
   int gridID  = vlistInqVarGrid(vlistID, varID);
   size_t size = gridInqSize(gridID);
 
-  streamptr->numvals += size;
+  *nmiss = get_num_missvalsDP(size, data, missval);
 
-  *nmiss = 0;
-  for ( size_t i = 0; i < size; i++ )
-    if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-      {
-	data[i] = missval;
-	(*nmiss)++;
-      }
+  streamptr->numvals += size;
+}
+
+
+void ieg_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss)
+{
+  if (memtype == MEMTYPE_DOUBLE)
+    ieg_read_recordDP(streamptr, (double*) data, nmiss);
+  else
+    ieg_read_recordSP(streamptr, (float*) data, nmiss);
 }
 
 static
@@ -129,8 +166,7 @@ calc_resfac(double xfirst, double xlast, double xinc, double yfirst, double ylas
     nPwrOf10 = 5,
     nMultTests = 6,
   };
-  static const double scaleFactors[nPwrOf10]
-    = { 1000, 10000, 100000, 1000000, 10000000 };
+  static const double scaleFactors[nPwrOf10] = { 1000, 10000, 100000, 1000000, 10000000 };
   double vals[nMultTests] = { xfirst, xlast, xinc, yfirst, ylast, yinc };
 
   for (size_t j = 0; j < nPwrOf10; ++j )
@@ -194,8 +230,8 @@ void iegDefGrid(int *gdb, int gridID)
 
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN || projtype == CDI_PROJ_RLL )
     {
-      double xfirst = 0, xlast = 0, xinc = 0;
-      double yfirst = 0, ylast = 0, yinc = 0;
+      double xfirst = 0.0, xlast = 0.0, xinc = 0.0;
+      double yfirst = 0.0, ylast = 0.0, yinc = 0.0;
 
       if ( xsize == 0 ) xsize = 1;
       else
@@ -257,7 +293,7 @@ void iegDefGrid(int *gdb, int gridID)
 
       if ( lrotated )
 	{
-          double xpole = 0, ypole = 0, angle = 0;
+          double xpole = 0.0, ypole = 0.0, angle = 0.0;
           gridInqParamRLL(gridID, &xpole, &ypole, &angle);
 
 	  IEG_G_LatSP(gdb) = - (int)lround(ypole * resfac);
@@ -976,14 +1012,13 @@ void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 
   int vlistID  = streamptr->vlistID;
   int fileID   = streamptr->fileID;
-  // NOTE: tiles are not supported here!
+
   double missval = vlistInqVarMissval(vlistID, varID);
   size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   int tsid     = streamptr->curTsID;
 
   off_t currentfilepos = fileGetPos(fileID);
 
-  // NOTE: tiles are not supported here!
   int recID = streamptr->vars[varID].recordTable[0].recordID[levID];
   off_t recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
