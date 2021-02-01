@@ -13,6 +13,7 @@
 #include "varscan.h"
 #include "datetime.h"
 #include "extra.h"
+#include "get_num_missvals.h"
 #include "exse.h"
 
 
@@ -75,10 +76,6 @@ int extInqRecord(stream_t *streamptr, int *varID, int *levelID)
   return 1;
 }
 */
-size_t get_num_missvalsSP(size_t size, float *data, float missval);
-size_t get_num_missvalsDP(size_t size, double *data, double missval);
-size_t get_cplx_num_missvalsSP(size_t size, float *data, float missval);
-size_t get_cplx_num_missvalsDP(size_t size, double *data, double missval);
 
 static
 void ext_read_recordSP(stream_t *streamptr, float *data, size_t *nmiss)

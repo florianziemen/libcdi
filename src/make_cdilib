@@ -115,7 +115,8 @@ files="async_worker.c \
    error.c \
    extralib.c \
    file.c \
-   gaussgrid.c \
+   gaussian_latitudes.c \
+   get_num_missvals.c \
    gribapi.c \
    gribapi_utilities.c \
    grid.c \

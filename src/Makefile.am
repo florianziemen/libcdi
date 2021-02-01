@@ -48,14 +48,14 @@ libcdi_la_SOURCES = 	 \
 	cdi_util.c       \
 	cgribex.h	 \
 	cgribexlib.c  	 \
+	cksum.c		 \
+	cksum.h		 \
+	cdi_cksum.c	 \
+	cdi_cksum.h 	 \
+	cdi_uuid.h	 \
 	datetime.h	 \
 	dmemory.c      	 \
 	dmemory.h	 \
-	cksum.c		\
-	cksum.h		\
-	cdi_cksum.c	\
-	cdi_cksum.h	\
-	cdi_uuid.h	 \
 	dtypes.h	 \
 	error.c        	 \
 	error.h	 	 \
@@ -64,6 +64,8 @@ libcdi_la_SOURCES = 	 \
 	extralib.c       \
 	file.c         	 \
 	file.h	 	 \
+	get_num_missvals.c \
+	get_num_missvals.h \
 	gaussian_latitudes.c \
 	gribapi.c  	 \
 	gribapi.h	 \
