@@ -294,8 +294,7 @@ int stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 #endif
 #ifdef HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
-      if ( memtype == MEMTYPE_FLOAT ) return 1;
-      extReadRecord(streamptr, (double *)data, nmiss);
+      ext_read_record(streamptr, memtype, data, nmiss);
       break;
 #endif
 #ifdef HAVE_LIBIEG

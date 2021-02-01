@@ -21,20 +21,15 @@
 static
 int extInqDatatype(int prec, int number)
 {
-  int datatype;
-
-  if ( number == 2 )
-    datatype = (prec == EXSE_DOUBLE_PRECISION) ? CDI_DATATYPE_CPX64 : CDI_DATATYPE_CPX32;
+  if (number == 2)
+    return (prec == EXSE_DOUBLE_PRECISION) ? CDI_DATATYPE_CPX64 : CDI_DATATYPE_CPX32;
   else
-    datatype = (prec == EXSE_DOUBLE_PRECISION) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
-
-  return datatype;
+    return (prec == EXSE_DOUBLE_PRECISION) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
 }
 
 static
 void extDefDatatype(int datatype, int *prec, int *number)
 {
-
   if ( datatype != CDI_DATATYPE_FLT32 && datatype != CDI_DATATYPE_FLT64 &&
        datatype != CDI_DATATYPE_CPX32 && datatype != CDI_DATATYPE_CPX64 )
     datatype = CDI_DATATYPE_FLT32;
@@ -80,12 +75,18 @@ int extInqRecord(stream_t *streamptr, int *varID, int *levelID)
   return 1;
 }
 */
+size_t get_num_missvalsSP(size_t size, float *data, float missval);
+size_t get_num_missvalsDP(size_t size, double *data, double missval);
+size_t get_cplx_num_missvalsSP(size_t size, float *data, float missval);
+size_t get_cplx_num_missvalsDP(size_t size, double *data, double missval);
 
-void extReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
+static
+void ext_read_recordSP(stream_t *streamptr, float *data, size_t *nmiss)
 {
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
   int tsID    = streamptr->curTsID;
+
   int vrecID  = streamptr->tsteps[tsID].curRecID;
   int recID   = streamptr->tsteps[tsID].recIDs[vrecID];
   int varID   = streamptr->tsteps[tsID].records[recID].varID;
@@ -94,38 +95,62 @@ void extReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
   fileSetPos(fileID, recpos, SEEK_SET);
 
   void *extp = streamptr->record->exsep;
-  int status = extRead(fileID, extp);
-  if ( status != 0 ) Error("Failed to read EXTRA record");
+  if (extRead(fileID, extp) < 0) Error("Failed to read EXTRA record");
+
+  int header[4];
+  extInqHeader(extp, header);
+  extInqDataSP(extp, data);
+
+  double missval = vlistInqVarMissval(vlistID, varID);
+  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
+
+  if (vlistInqVarNumber(vlistID, varID) == CDI_REAL)
+    *nmiss = get_num_missvalsSP(size, data, missval);
+  else
+    *nmiss = get_cplx_num_missvalsSP(size, data, missval);
+
+  streamptr->numvals += size;
+}
+
+static
+void ext_read_recordDP(stream_t *streamptr, double *data, size_t *nmiss)
+{
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
+  int tsID    = streamptr->curTsID;
+
+  int vrecID  = streamptr->tsteps[tsID].curRecID;
+  int recID   = streamptr->tsteps[tsID].recIDs[vrecID];
+  int varID   = streamptr->tsteps[tsID].records[recID].varID;
+  off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+
+  fileSetPos(fileID, recpos, SEEK_SET);
+
+  void *extp = streamptr->record->exsep;
+  if (extRead(fileID, extp) < 0) Error("Failed to read EXTRA record");
 
   int header[4];
   extInqHeader(extp, header);
   extInqDataDP(extp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
-  int gridID  = vlistInqVarGrid(vlistID, varID);
-  size_t size = gridInqSize(gridID);
+  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
+
+  if (vlistInqVarNumber(vlistID, varID) == CDI_REAL)
+    *nmiss = get_num_missvalsDP(size, data, missval);
+  else
+    *nmiss = get_cplx_num_missvalsDP(size, data, missval);
 
   streamptr->numvals += size;
+}
 
-  *nmiss = 0;
-  if ( vlistInqVarNumber(vlistID, varID) == CDI_REAL )
-    {
-      for ( size_t i = 0; i < size; i++ )
-	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-	  {
-	    data[i] = missval;
-	    (*nmiss)++;
-	  }
-    }
+
+void ext_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss)
+{
+  if (memtype == MEMTYPE_DOUBLE)
+    ext_read_recordDP(streamptr, (double*) data, nmiss);
   else
-    {
-      for ( size_t i = 0; i < 2*size; i+=2 )
-	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-	  {
-	    data[i] = missval;
-	    (*nmiss)++;
-	  }
-    }
+    ext_read_recordSP(streamptr, (float*) data, nmiss);
 }
 
 
@@ -536,14 +561,13 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 
   int vlistID  = streamptr->vlistID;
   int fileID   = streamptr->fileID;
-  /* NOTE: tiles are not supported here! */
+
   double missval = vlistInqVarMissval(vlistID, varID);
   size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   int tsid = streamptr->curTsID;
 
   off_t currentfilepos = fileGetPos(fileID);
 
-  /* NOTE: tiles are not supported here! */
   int recID = streamptr->vars[varID].recordTable[0].recordID[levID];
   off_t recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
@@ -554,25 +578,10 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
-  *nmiss = 0;
-  if ( vlistInqVarNumber(vlistID, varID) == CDI_REAL )
-    {
-      for ( size_t i = 0; i < gridsize; i++ )
-	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-	  {
-	    data[i] = missval;
-	    (*nmiss)++;
-	  }
-    }
+  if (vlistInqVarNumber(vlistID, varID) == CDI_REAL)
+    *nmiss = get_num_missvalsDP(gridsize, data, missval);
   else
-    {
-      for ( size_t i = 0; i < 2*gridsize; i+=2 )
-	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-	  {
-	    data[i] = missval;
-	    (*nmiss)++;
-	  }
-    }
+    *nmiss = get_cplx_num_missvalsDP(gridsize, data, missval);
 }
 
 
