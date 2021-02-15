@@ -313,29 +313,6 @@ int nc_grid_index(stream_t *streamptr, int gridID)
 }
 
 static
-void cdfDefineAttrLeveltype(int fileID, int ncvarID, int zaxisID, int zaxistype)
-{
-  if ( zaxistype == ZAXIS_CLOUD_BASE          ||
-       zaxistype == ZAXIS_CLOUD_TOP           ||
-       zaxistype == ZAXIS_ISOTHERM_ZERO       ||
-       zaxistype == ZAXIS_TROPOPAUSE          ||
-       zaxistype == ZAXIS_TOA                 ||
-       zaxistype == ZAXIS_SEA_BOTTOM          ||
-       zaxistype == ZAXIS_LAKE_BOTTOM         ||
-       zaxistype == ZAXIS_SEDIMENT_BOTTOM     ||
-       zaxistype == ZAXIS_SEDIMENT_BOTTOM_TA  ||
-       zaxistype == ZAXIS_SEDIMENT_BOTTOM_TW  ||
-       zaxistype == ZAXIS_MIX_LAYER           ||
-       zaxistype == ZAXIS_ATMOSPHERE )
-    {
-      char varname[CDI_MAX_NAME];
-      int length = CDI_MAX_NAME;
-      cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, varname, &length);
-      cdf_put_att_text(fileID, ncvarID, "level_type", strlen(varname), varname);
-    }
-}
-
-static
 int cdfDefVar(stream_t *streamptr, int varID)
 {
   int ncvarid = -1;
