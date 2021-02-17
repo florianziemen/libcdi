@@ -715,6 +715,7 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
       vlistptr->vars[varID].datatype = datatype;
 
       if ( !vlistptr->vars[varID].missvalused )
+        // clang-format off
         switch (datatype)
           {
           case CDI_DATATYPE_INT8:   vlistptr->vars[varID].missval = -SCHAR_MAX; break;
@@ -725,6 +726,7 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
           case CDI_DATATYPE_UINT32: vlistptr->vars[varID].missval =  UINT_MAX;  break;
           case CDI_DATATYPE_FLT32:  vlistptr->vars[varID].missval =  (float) CDI_default_missval;  break;
           }
+      // clang-format on
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
