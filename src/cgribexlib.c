@@ -1259,8 +1259,15 @@ static
 void avx_encode_array_2byte_double(size_t datasize, 
 				   unsigned char * restrict lGrib,
 				   const double * restrict data, 
-				   double zref, double factor, size_t *gz) 
+				   double zref, double factor, size_t *gz)
+  __attribute__((optimize(2)));
+static
+void avx_encode_array_2byte_double(size_t datasize, 
+				   unsigned char * restrict lGrib,
+				   const double * restrict data, 
+				   double zref, double factor, size_t *gz)
 {
+
   size_t i, j, residual;
   const double *dval = data;
   __m128i *sgrib = (__m128i *) (lGrib+(*gz));
