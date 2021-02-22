@@ -210,6 +210,7 @@ void cdiPioDistGridEnableIndividualQueries(int gridID)
   bool switched
     = cdiPioDistGridSwitchSyncMode(gridID, PPM_dma_sync_mode_passive_target);
 #else
+  (void)gridID;
   bool switched = false;
 #endif
   if (!switched)
