@@ -193,6 +193,7 @@ cdiPioDistGridEnableIndividualQueries(int gridID)
 #ifdef HAVE_PPM_DIST_ARRAY_H
   bool switched = cdiPioDistGridSwitchSyncMode(gridID, PPM_dma_sync_mode_passive_target);
 #else
+  (void) gridID;
   bool switched = false;
 #endif
   if (!switched) Error("called for non-distributed grid gridID=%d", gridID);
