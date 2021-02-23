@@ -31204,12 +31204,15 @@ fi
       CFLAGS="$CFLAGS $MPI_C_INCLUDE"
       for ac_header in netcdf_par.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "netcdf_par.h" "ac_cv_header_netcdf_par_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "netcdf_par.h" "ac_cv_header_netcdf_par_h" "$ac_includes_default
+#include <netcdf.h>
+"
 if test "x$ac_cv_header_netcdf_par_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_NETCDF_PAR_H 1
 _ACEOF
  ac_fn_c_check_decl "$LINENO" "MPI_Bcast" "ac_cv_have_decl_MPI_Bcast" "$ac_includes_default
+#include <netcdf.h>
 #include <netcdf_par.h>
 "
 if test "x$ac_cv_have_decl_MPI_Bcast" = xyes; then :

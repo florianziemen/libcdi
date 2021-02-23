@@ -265,13 +265,15 @@ dnl test properties of MPI system
            [HAVE_PARALLEL_NC4=1],
            [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
            [AC_INCLUDES_DEFAULT
+@%:@include <netcdf.h>
 @%:@include <netcdf_par.h>])],
         [AC_CHECK_DECL([MPI_Bcast],
            [HAVE_PARALLEL_NC4=1],
            [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
            [AC_INCLUDES_DEFAULT
 @%:@include <netcdf.h>])
-])
+],[AC_INCLUDES_DEFAULT
+@%:@include <netcdf.h>])
       dnl if not both scales-ppm and yaxt are available, netcdf can only be
       dnl used in serial mode
       AS_IF([test x$enable_ppm != xyes],
