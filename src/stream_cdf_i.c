@@ -2402,7 +2402,7 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *restrict lazy
         {
           if ( (ncvars[xvarid].ndims - ntdims) > 2 )
             {
-              Warning("Coordinate variable %s has to many dimensions (%d), skipped!", ncvars[xvarid].name, ncvars[xvarid].ndims);
+              Warning("Coordinate variable %s has too many dimensions (%d), skipped!", ncvars[xvarid].name, ncvars[xvarid].ndims);
               //ncvar->xvarid = CDI_UNDEFID;
               xvarid = CDI_UNDEFID;
             }
@@ -2412,7 +2412,7 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *restrict lazy
         {
           if ( (ncvars[yvarid].ndims - ntdims) > 2 )
             {
-              Warning("Coordinate variable %s has to many dimensions (%d), skipped!", ncvars[yvarid].name, ncvars[yvarid].ndims);
+              Warning("Coordinate variable %s has too many dimensions (%d), skipped!", ncvars[yvarid].name, ncvars[yvarid].ndims);
               //ncvar->yvarid = CDI_UNDEFID;
               yvarid = CDI_UNDEFID;
             }

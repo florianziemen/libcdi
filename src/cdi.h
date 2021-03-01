@@ -136,8 +136,8 @@ extern "C" {
 #define  GRID_GAUSSIAN              2  // Regular Gaussian lon/lat grid
 #define  GRID_GAUSSIAN_REDUCED      3  // Reduced Gaussian lon/lat grid
 #define  GRID_LONLAT                4  // Regular longitude/latitude grid
-#define  GRID_SPECTRAL              5  // Spherical harmonic coefficients
-#define  GRID_FOURIER               6  // Fourier coefficients
+#define  GRID_SPECTRAL              5  // Spherical harmonic coefficients (spectral gaussian)
+#define  GRID_FOURIER               6  // Fourier coefficients (spectral gaussian)
 #define  GRID_GME                   7  // Icosahedral-hexagonal GME grid
 #define  GRID_TRAJECTORY            8  // Trajectory
 #define  GRID_UNSTRUCTURED          9  // General unstructured grid
