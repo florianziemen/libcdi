@@ -169,7 +169,7 @@ int cdiInqAtt(int cdiID, int varID, int attnum, char *name, int *typep, int *len
   if ( attnum >= 0 && attnum < (int)attsp->nelems )
     attp = &(attsp->value[attnum]);
 
-  if ( attp != NULL && attp->name ) /* name in use */
+  if ( attp != NULL && attp->name ) // name in use
     {
       memcpy(name, attp->name, attp->namesz+1);
       *typep  = attp->exdtype;

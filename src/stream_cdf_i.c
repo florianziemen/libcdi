@@ -3437,6 +3437,27 @@ void cdf_copy_attflt(int fileID, int vlistID, nc_type xtype, size_t attlen, char
 }
 
 static
+bool is_geos_data(int vlistID)
+{
+  const int numNames = 4;
+  const char *attnames[] = { "additional_vars", "file_format_version", "gridspec_file", "grid_mapping_name" };
+  const char *grid_mapping = "gnomonic cubed-sphere";
+  char attstring[256];
+
+  int numFound = 0;
+  for (int i = 0; i < numNames; ++i)
+    if (0 == cdiInqAttTxt(vlistID, CDI_GLOBAL, attnames[i], (int)sizeof(attstring), attstring)) numFound++;
+
+  if (numFound == numNames && strncmp(attstring, attstring, strlen(grid_mapping)) == 0)
+    {
+      for (int i = 0; i < numNames; ++i) cdiDelAtt(vlistID, CDI_GLOBAL, attnames[i]);
+      return true;
+    }
+
+  return false;
+}
+
+static
 void cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *modelID, bool *ucla_les, unsigned char *uuidOfHGrid, unsigned char *uuidOfVGrid, char *gridfile, int *number_of_grid_used)
 {
   nc_type xtype;
@@ -3949,6 +3970,9 @@ int cdfInqContents(stream_t *streamptr)
   // scan global attributes
   cdf_scan_global_attr(fileID, vlistID, ngatts, &instID, &modelID, &ucla_les,
                        uuidOfHGrid, uuidOfVGrid, gridfile, &number_of_grid_used);
+
+  bool isGeosData = is_geos_data(vlistID);
+  if (CDI_Debug) Message("isGeosData %d", isGeosData);
 
   // find time dim
   int timedimid = (unlimdimid >= 0) ? unlimdimid : cdf_time_dimid(fileID, ndims, nvars, ncdims);
