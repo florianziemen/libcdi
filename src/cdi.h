@@ -1193,6 +1193,7 @@ double  taxisInqForecastPeriod(int taxisID);
 void    taxisDefNumavg(int taxisID, int numavg);
 int     taxisInqNumavg(int taxisID);
 
+const char *taxisNamePtr(int taxisID);
 const char *tunitNamePtr(int tunitID);
 
 

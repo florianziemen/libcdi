@@ -98,6 +98,12 @@ dup_refcount_string(char *p)
 static int  TAXIS_Debug = 0;   /* If set to 1, debugging */
 
 
+const char *taxisNamePtr(int taxisID)
+{
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
+  return taxisptr->name;
+}
+
 const char *tunitNamePtr(int unitID)
 {
   int size = sizeof(Timeunits)/sizeof(*Timeunits);
@@ -131,7 +137,7 @@ void taxisDefaultValue(taxis_t* taxisptr)
   taxisptr->fc_unit     = DefaultTimeUnit;
   taxisptr->fc_period   = 0;
   taxisptr->name        = NULL;
-  taxisptr->longname    = NULL;
+  taxisptr->longname     = NULL;
   taxisptr->units       = NULL;
 }
 
