@@ -7,6 +7,7 @@
 	* GRIB key shapeOfTheEarth=2 (bug fix)
 	* gridDefParamsLCC()/gridInqParamsLCC(): changed interface
 	* gridDefParamsSTERE()/gridInqParamsSTERE(): changed interface
+	* Changed interface to proj_XXX_to_YYY_func()
 
 2021-02-01  Uwe Schulzweida
 
