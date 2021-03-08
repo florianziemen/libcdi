@@ -1284,7 +1284,7 @@ struct CDI_GridProjParams
   double lat_0;  // Latitude of the projection origin
   double lat_1;  // First latitude from the pole at which the secant cone cuts the sphere
   double lat_2;  // Second latitude at which the secant cone cuts the sphere
-  double lat_ts;
+  // lat_ts = lat_1;
   double a;      // Semi-major axis or earth radius in metres (optional)
   double b;      // Semi-minor axis in metres (optional)
   double rf;     // Inverse flattening (1/f) (optional)

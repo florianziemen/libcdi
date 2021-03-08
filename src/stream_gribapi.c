@@ -633,7 +633,7 @@ void gribapiDefProjSTERE(grib_handle *gh, int gridID)
 
   grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &gpp.xval_0);
   grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &gpp.yval_0);
-  grib_get_double(gh, "LaDInDegrees", &gpp.lat_ts);
+  grib_get_double(gh, "LaDInDegrees", &gpp.lat_1);
   grib_get_double(gh, "orientationOfTheGridInDegrees", &gpp.lon_0);
 
   long southPoleOnProjectionPlane;
@@ -643,7 +643,7 @@ void gribapiDefProjSTERE(grib_handle *gh, int gridID)
   if ( proj_lonlat_to_stere_func )
     {
       double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
-      proj_lonlat_to_stere_func(gpp.mv, gpp.lon_0, gpp.lat_ts, gpp.lat_0, gpp.a, (size_t)1, &x_0, &y_0);
+      proj_lonlat_to_stere_func(gpp.mv, gpp.lon_0, gpp.lat_1, gpp.lat_0, gpp.a, (size_t)1, &x_0, &y_0);
       if (IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv))
         { gpp.x_0 = -x_0; gpp.y_0 = -y_0; }
     }
@@ -2108,7 +2108,7 @@ void gribapiDefGridSTERE(grib_handle *gh, int gridID)
   GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(yinc)), 0);
   GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", gpp.xval_0), 0);
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", gpp.yval_0), 0);
-  GRIB_CHECK(my_grib_set_double(gh, "LaDInDegrees", gpp.lat_ts), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "LaDInDegrees", gpp.lat_1), 0);
   GRIB_CHECK(my_grib_set_double(gh, "orientationOfTheGridInDegrees", gpp.lon_0), 0);
   const long southPoleOnProjectionPlane = IS_EQUAL(gpp.lat_0, -90.0);
   GRIB_CHECK(my_grib_set_double(gh, "southPoleOnProjectionPlane", southPoleOnProjectionPlane), 0);
