@@ -3761,7 +3761,7 @@ int gridVerifyGribParamLCC(struct CDI_GridProjParams *gpp)
           if (proj_lcc_to_lonlat_func)
             {
               gpp->xval_0 = -gpp->x_0; gpp->yval_0 = -gpp->y_0;
-              proj_lcc_to_lonlat_func(gpp->mv, gpp->lon_0, gpp->lat_0, gpp->lat_1, gpp->lat_2, gpp->a, gpp->rf, 0.0, 0.0, (size_t)1, &gpp->xval_0, &gpp->yval_0);
+              proj_lcc_to_lonlat_func(gpp, 0.0, 0.0, (size_t)1, &gpp->xval_0, &gpp->yval_0);
             }
           if (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv))
             Warning("%s mapping parameter %s missing!", projection, "longitudeOfFirstGridPointInDegrees and latitudeOfFirstGridPointInDegrees");
@@ -3788,7 +3788,7 @@ int gridVerifyGribParamdSTERE(struct CDI_GridProjParams *gpp)
           if (proj_stere_to_lonlat_func)
             {
               gpp->xval_0 = -gpp->x_0; gpp->xval_0 = -gpp->y_0;
-              proj_stere_to_lonlat_func(gpp->mv, gpp->lon_0, gpp->lat_1, gpp->lat_0, gpp->a, 0.0, 0.0, (size_t)1, &gpp->xval_0, &gpp->yval_0);
+              proj_stere_to_lonlat_func(gpp, 0.0, 0.0, (size_t)1, &gpp->xval_0, &gpp->yval_0);
             }
           if (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv))
             Warning("%s mapping parameter %s missing!", projection, "longitudeOfFirstGridPointInDegrees and latitudeOfFirstGridPointInDegrees");

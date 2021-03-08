@@ -605,14 +605,14 @@ void gribapiDefProjLCC(grib_handle *gh, int gridID)
   grib_get_double(gh, "Latin2InDegrees", &gpp.lat_2);
   grib_get_long(gh, "projectionCentreFlag", &projflag);
   bool lsouth = gribbyte_get_bit((int)projflag, 1);
-  if ( lsouth ) { gpp.lat_1 = -gpp.lat_1; gpp.lat_2 = -gpp.lat_2; }
+  if (lsouth) { gpp.lat_1 = -gpp.lat_1; gpp.lat_2 = -gpp.lat_2; }
 
   gpp.lat_0 = gpp.lat_2;
 
-  if ( proj_lonlat_to_lcc_func )
+  if (proj_lonlat_to_lcc_func)
     {
       double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
-      proj_lonlat_to_lcc_func(gpp.mv, gpp.lon_0, gpp.lat_0, gpp.lat_1, gpp.lat_2, gpp.a, gpp.rf, (size_t)1, &x_0, &y_0);
+      proj_lonlat_to_lcc_func(gpp, (size_t)1, &x_0, &y_0);
       if (IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv))
         { gpp.x_0 = -x_0; gpp.y_0 = -y_0; }
     }
@@ -640,10 +640,10 @@ void gribapiDefProjSTERE(grib_handle *gh, int gridID)
   grib_get_long(gh, "southPoleOnProjectionPlane", &southPoleOnProjectionPlane);
   gpp.lat_0 = southPoleOnProjectionPlane ? -90.0 : 90.0;
 
-  if ( proj_lonlat_to_stere_func )
+  if (proj_lonlat_to_stere_func)
     {
       double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
-      proj_lonlat_to_stere_func(gpp.mv, gpp.lon_0, gpp.lat_1, gpp.lat_0, gpp.a, (size_t)1, &x_0, &y_0);
+      proj_lonlat_to_stere_func(gpp, (size_t)1, &x_0, &y_0);
       if (IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv))
         { gpp.x_0 = -x_0; gpp.y_0 = -y_0; }
     }

@@ -487,7 +487,7 @@ void cgribexDefProjLCC(int *isec2, int gridID)
   if ( proj_lonlat_to_lcc_func )
     {
       double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
-      proj_lonlat_to_lcc_func(gpp.mv, gpp.lon_0, gpp.lat_0, gpp.lat_1, gpp.lat_2, gpp.a, gpp.rf, (size_t)1, &x_0, &y_0);
+      proj_lonlat_to_lcc_func(gpp, (size_t)1, &x_0, &y_0);
       if ( IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv) )
         { gpp.x_0 = -x_0; gpp.y_0 = -y_0; }
     }
