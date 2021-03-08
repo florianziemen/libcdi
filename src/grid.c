@@ -3745,7 +3745,7 @@ int gridInqParamsLCC(int gridID, struct CDI_GridProjParams *gpp)
 }
 
 
-int gridVerifyGribParamLCC(struct CDI_GridProjParams *gpp)
+int gridVerifyProjParamsLCC(struct CDI_GridProjParams *gpp)
 {
   static bool lwarn = true;
 
@@ -3772,7 +3772,7 @@ int gridVerifyGribParamLCC(struct CDI_GridProjParams *gpp)
 }
 
 
-int gridVerifyGribParamdSTERE(struct CDI_GridProjParams *gpp)
+int gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp)
 {
   static bool lwarn = true;
 
