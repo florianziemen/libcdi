@@ -590,7 +590,8 @@ void shapeOfTheEarthToRadius(long shapeOfTheEarth, double *a, double *b, double 
   // clang-format off
   switch (shapeOfTheEarth)
     {
-    case 2:   *a = 6378160.0; *rf = 297.0; break;
+    case 2:   *a = 6378160.0; *b = 6356775.0;   *rf = 297.0; break;
+    case 4:   *a = 6378137.0; *b = 6356752.314; *rf = 298.257222101; break;
     case 6:   *a = 6371229.0; break;
     case 8:   *a = 6371200.0; break;
     case 0:   *a = 6367470.0; break;
@@ -2047,20 +2048,19 @@ void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRel
   const long xsize = (long) gridInqXsize(gridID);
   const long ysize = (long) gridInqYsize(gridID);
 
-  double missval = CDI_grid_missval;
-  double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
-  gridInqParamLCC(gridID, missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
-  if (IS_EQUAL(x_0, missval) && IS_EQUAL(y_0, missval) && (IS_EQUAL(xval_0, missval) || IS_EQUAL(yval_0, missval)))
+  struct CDI_GridProjParams gpp;
+  gridInqParamsLCC(gridID, &gpp);
+  if (IS_EQUAL(gpp.x_0, gpp.mv) && IS_EQUAL(gpp.y_0, gpp.mv) && (IS_EQUAL(gpp.xval_0, gpp.mv) || IS_EQUAL(gpp.yval_0, gpp.mv)))
     {
-      x_0 = gridInqXval(gridID, 0);
-      y_0 = gridInqYval(gridID, 0);
+      gpp.x_0 = gridInqXval(gridID, 0);
+      gpp.y_0 = gridInqYval(gridID, 0);
     }
-  gridVerifyGribParamLCC(CDI_grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
-  if ( xval_0 < 0 ) xval_0 += 360;
-  if ( lon_0 < 0 ) lon_0 += 360;
+  gridVerifyGribParamLCC(&gpp);
+  if ( gpp.xval_0 < 0 ) gpp.xval_0 += 360;
+  if ( gpp.lon_0 < 0 ) gpp.lon_0 += 360;
 
-  const bool lsouth = (lat_1 < 0);
-  if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }
+  const bool lsouth = (gpp.lat_1 < 0);
+  if ( lsouth ) { gpp.lat_1 = -gpp.lat_2; gpp.lat_2 = -gpp.lat_2; }
   int projflag = 0;
   if ( lsouth ) gribbyte_set_bit(&projflag, 1);
 
@@ -2075,21 +2075,21 @@ void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRel
   GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
   GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(fabs(xinc))), 0);
   GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(fabs(yinc))), 0);
-  GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xval_0), 0);
-  GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", yval_0), 0);
-  GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", lon_0), 0);
-  GRIB_CHECK(my_grib_set_double(gh, "Latin1InDegrees", lat_1), 0);
-  GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", lat_2), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", gpp.xval_0), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", gpp.yval_0), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", gpp.lon_0), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "Latin1InDegrees", gpp.lat_1), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", gpp.lat_2), 0);
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
 
-  const long shapeOfTheEarth = radiusToShapeOfTheEarth(a);
-  if ( shapeOfTheEarth ) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
+  const long shapeOfTheEarth = radiusToShapeOfTheEarth(gpp.a);
+  if (shapeOfTheEarth) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
 
-  if ( uvRelativeToGrid >= 0 ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+  if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
 
-  const long earthIsOblate = (IS_EQUAL(a, 6378160.) && IS_EQUAL(rf, 297.));
-  if ( earthIsOblate ) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
+  const long earthIsOblate = (IS_EQUAL(gpp.a, 6378160.0) && IS_EQUAL(gpp.rf, 297.0));
+  if (earthIsOblate) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
 
   int scanflag = 0;
   gribbyte_set_bit(&scanflag, 2);

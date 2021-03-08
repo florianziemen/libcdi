@@ -1279,25 +1279,25 @@ extern "C" {
 
 struct CDI_GridProjParams
 {
-  double missval;
-  double lon_0;
-  double lat_0;
-  double lat_1;
-  double lat_2;
-  double a;
-  double b;
-  double rf;
-  double xval_0;
-  double yval_0;
-  double x_0;
-  double y_0;
+  double mv;     // Missing value
+  double lon_0;  // The East longitude of the meridian which is parallel to the Y-axis
+  double lat_0;  // Latitude of the projection origin
+  double lat_1;  // First latitude from the pole at which the secant cone cuts the sphere
+  double lat_2;  // Second latitude at which the secant cone cuts the sphere
+  double a;      // Semi-major axis or earth radius in metres (optional)
+  double b;      // Semi-minor axis in metres (optional)
+  double rf;     // Inverse flattening (1/f) (optional)
+  double xval_0; // Longitude of the first grid point in degree (optional)
+  double yval_0; // Latitude of the first grid point in degree (optional)
+  double x_0;    // False easting (optional)
+  double y_0;    // False northing (optional)
 };
 
 void gridProjParamsInit(struct CDI_GridProjParams *gridProjParams);
 
 // Lambert Conformal Conic grid
 void gridDefParamsLCC(int gridID, struct CDI_GridProjParams gridProjParams);
-int  gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2, double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0);
+int  gridInqParamsLCC(int gridID, struct CDI_GridProjParams *gridProjParams);
 
 // Polar stereographic grid
 void gridDefParamSTERE(int gridID, double missval, double lon_0, double lat_ts, double lat_0, double a, double xval_0, double yval_0, double x_0, double y_0);

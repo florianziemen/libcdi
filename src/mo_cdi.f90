@@ -678,7 +678,6 @@ module mo_cdi
   public :: subtypeInqAttribute
   public :: vlistInqVarSubtype
   public :: gribapiLibraryVersion
-  public :: gridInqParamLCC
   public :: gridDefParamSTERE
   public :: gridInqParamSTERE
   integer(c_int), public, parameter :: HAVE_CDI_PROJ_FUNCS = 1
@@ -2879,26 +2878,6 @@ module mo_cdi
       integer(c_int), intent(inout) :: minor_version_dummy
       integer(c_int), intent(inout) :: revision_version_dummy
     end subroutine gribapiLibraryVersion
-
-    function gridInqParamLCC(gridID_dummy, missval_dummy, lon_0_dummy,&
-    & lat_0_dummy, lat_1_dummy, lat_2_dummy, a_dummy, rf_dummy, xval_0_dummy,&
-    & yval_0_dummy, x_0_dummy, y_0_dummy) bind(c, name = 'gridInqParamLCC')&
-    & result(f_result)
-      import c_double, c_int
-      integer(c_int), value :: gridID_dummy
-      real(c_double), value :: missval_dummy
-      real(c_double), intent(inout) :: lon_0_dummy
-      real(c_double), intent(inout) :: lat_0_dummy
-      real(c_double), intent(inout) :: lat_1_dummy
-      real(c_double), intent(inout) :: lat_2_dummy
-      real(c_double), intent(inout) :: a_dummy
-      real(c_double), intent(inout) :: rf_dummy
-      real(c_double), intent(inout) :: xval_0_dummy
-      real(c_double), intent(inout) :: yval_0_dummy
-      real(c_double), intent(inout) :: x_0_dummy
-      real(c_double), intent(inout) :: y_0_dummy
-      integer(c_int) :: f_result
-    end function gridInqParamLCC
 
     subroutine gridDefParamSTERE(gridID_dummy, missval_dummy, lon_0_dummy,&
     & lat_ts_dummy, lat_0_dummy, a_dummy, xval_0_dummy, yval_0_dummy,&

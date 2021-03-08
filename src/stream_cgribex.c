@@ -466,6 +466,7 @@ void cgribexDefProjLCC(int *isec2, int gridID)
   if (earthIsOblate)
     {
       gpp.a = 6378160.0;
+      gpp.b = 6356775.0;
       gpp.rf = 297.0;
     }
   else
@@ -486,8 +487,8 @@ void cgribexDefProjLCC(int *isec2, int gridID)
   if ( proj_lonlat_to_lcc_func )
     {
       double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
-      proj_lonlat_to_lcc_func(CDI_grid_missval, gpp.lon_0, gpp.lat_0, gpp.lat_1, gpp.lat_2, gpp.a, gpp.rf, (size_t)1, &x_0, &y_0);
-      if ( IS_NOT_EQUAL(x_0, CDI_grid_missval) && IS_NOT_EQUAL(y_0, CDI_grid_missval) )
+      proj_lonlat_to_lcc_func(gpp.mv, gpp.lon_0, gpp.lat_0, gpp.lat_1, gpp.lat_2, gpp.a, gpp.rf, (size_t)1, &x_0, &y_0);
+      if ( IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv) )
         { gpp.x_0 = -x_0; gpp.y_0 = -y_0; }
     }
 
@@ -1704,18 +1705,17 @@ void cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
   const int xsize = (int)gridInqXsize(gridID);
   const int ysize = (int)gridInqYsize(gridID);
 
-  double missval = CDI_grid_missval;
-  double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
-  gridInqParamLCC(gridID, missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
-  if (IS_EQUAL(x_0, missval) && IS_EQUAL(y_0, missval) && (IS_EQUAL(xval_0, missval) || IS_EQUAL(yval_0, missval)))
+  struct CDI_GridProjParams gpp;
+  gridInqParamsLCC(gridID, &gpp);
+  if (IS_EQUAL(gpp.x_0, gpp.mv) && IS_EQUAL(gpp.y_0, gpp.mv) && (IS_EQUAL(gpp.xval_0, gpp.mv) || IS_EQUAL(gpp.yval_0, gpp.mv)))
     {
-      x_0 = gridInqXval(gridID, 0);
-      y_0 = gridInqYval(gridID, 0);
+      gpp.x_0 = gridInqXval(gridID, 0);
+      gpp.y_0 = gridInqYval(gridID, 0);
     }
-  gridVerifyGribParamLCC(CDI_grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
+  gridVerifyGribParamLCC(&gpp);
 
-  bool lsouth = (lat_1 < 0);
-  if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }
+  const bool lsouth = (gpp.lat_1 < 0);
+  if (lsouth) { gpp.lat_1 = -gpp.lat_2; gpp.lat_2 = -gpp.lat_2; }
 
   const double xinc = gridInqXinc(gridID);
   const double yinc = gridInqYinc(gridID);
@@ -1723,23 +1723,23 @@ void cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
   ISEC2_GridType = GRIB1_GTYPE_LCC;
   ISEC2_NumLon   = xsize;
   ISEC2_NumLat   = ysize;
-  ISEC2_FirstLon       = (int)lround(xval_0 * 1000);
-  ISEC2_FirstLat       = (int)lround(yval_0 * 1000);
-  ISEC2_Lambert_Lov    = (int)lround(lon_0 * 1000);
-  ISEC2_Lambert_LatS1  = (int)lround(lat_1 * 1000);
-  ISEC2_Lambert_LatS2  = (int)lround(lat_2 * 1000);
+  ISEC2_FirstLon       = (int)lround(gpp.xval_0 * 1000);
+  ISEC2_FirstLat       = (int)lround(gpp.yval_0 * 1000);
+  ISEC2_Lambert_Lov    = (int)lround(gpp.lon_0 * 1000);
+  ISEC2_Lambert_LatS1  = (int)lround(gpp.lat_1 * 1000);
+  ISEC2_Lambert_LatS2  = (int)lround(gpp.lat_2 * 1000);
   ISEC2_Lambert_dx     = (int)lround(xinc);
   ISEC2_Lambert_dy     = (int)lround(yinc);
   ISEC2_Lambert_LatSP  = 0;
   ISEC2_Lambert_LonSP  = 0;
   ISEC2_Lambert_ProjFlag = 0;
-  if ( lsouth ) gribbyte_set_bit(&ISEC2_Lambert_ProjFlag, 1);
+  if (lsouth) gribbyte_set_bit(&ISEC2_Lambert_ProjFlag, 1);
 
-  const bool earthIsOblate = (IS_EQUAL(a, 6378160.) && IS_EQUAL(rf, 297.));
+  const bool earthIsOblate = (IS_EQUAL(gpp.a, 6378160.0) && IS_EQUAL(gpp.rf, 297.0));
   ISEC2_ResFlag = 0;
-  if ( ISEC2_Lambert_dx && ISEC2_Lambert_dy ) gribbyte_set_bit(&ISEC2_ResFlag, 1);
-  if ( earthIsOblate ) gribbyte_set_bit(&ISEC2_ResFlag, 2);
-  if ( uvRelativeToGrid > 0 ) gribbyte_set_bit(&ISEC2_ResFlag, 5);
+  if (ISEC2_Lambert_dx && ISEC2_Lambert_dy) gribbyte_set_bit(&ISEC2_ResFlag, 1);
+  if (earthIsOblate) gribbyte_set_bit(&ISEC2_ResFlag, 2);
+  if (uvRelativeToGrid > 0) gribbyte_set_bit(&ISEC2_ResFlag, 5);
 
   ISEC2_ScanFlag = 0;
   gribbyte_set_bit(&ISEC2_ScanFlag, 2); // South -> North
