@@ -4,6 +4,7 @@
 
 2021-03-08  Uwe Schulzweida
 
+	* GRIB key shapeOfTheEarth=2 (bug fix)
 	* gridDefParamsLCC: changed interface
 
 2021-02-01  Uwe Schulzweida
