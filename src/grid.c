@@ -3598,34 +3598,41 @@ const char **gridInqYCvalsPtr(int gridID)
 }
 #endif
 
-/*
-@Function  gridDefParamLCC
-@Title     Define the parameter of a Lambert Conformal Conic grid
 
-@Prototype void gridDefParamLCC(int gridID, double missval, double lon_0, double lat_0, double lat_1, double lat_2, double a, double rf, double xval_0, double yval_0, double x_0, double y_0)
+void gridProjParamsInit(struct CDI_GridProjParams *gpp)
+{
+  // clang-format off
+  gpp->missval = CDI_grid_missval;   // Missing value
+  gpp->lon_0   = CDI_grid_missval;   // The East longitude of the meridian which is parallel to the Y-axis
+  gpp->lat_0   = CDI_grid_missval;   // Latitude of the projection origin
+  gpp->lat_1   = CDI_grid_missval;   // First latitude from the pole at which the secant cone cuts the sphere
+  gpp->lat_2   = CDI_grid_missval;   // Second latitude at which the secant cone cuts the sphere
+  gpp->a       = CDI_grid_missval;   // Earth radius in metres (optional)
+  gpp->b       = CDI_grid_missval;   // Specifies the length, in metres, of the semi-minor axis (optional)
+  gpp->rf      = CDI_grid_missval;   // Inverse flattening (1/f) (optional)
+  gpp->xval_0  = CDI_grid_missval;   // Longitude of the first grid point in degree (optional)
+  gpp->yval_0  = CDI_grid_missval;   // Latitude of the first grid point in degree (optional)
+  gpp->x_0     = CDI_grid_missval;   // False easting (optional)
+  gpp->y_0     = CDI_grid_missval;   // False northing (optional)
+  // clang-format on
+}
+
+/*
+@Function  gridDefParamsLCC
+@Title     Define the parameters of a Lambert Conformal Conic grid
+
+@Prototype void gridDefParamsLCC(int gridID, struct CDI_GridProjParams gridProjParams)
 @Parameter
-    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  missval   Missing value.
-    @Item  lon_0     The East longitude of the meridian which is parallel to the Y-axis.
-    @Item  lat_0     Latitude of the projection origin.
-    @Item  lat_1     First latitude from the pole at which the secant cone cuts the sphere.
-    @Item  lat_2     Second latitude at which the secant cone cuts the sphere.
-    @Item  a         Earth radius in metres (optional).
-    @Item  rf        Inverse flattening (1/f) (optional).
-    @Item  xval_0    Longitude of the first grid point in degree (optional).
-    @Item  yval_0    Latitude of the first grid point in degree (optional).
-    @Item  x_0       False easting (optional).
-    @Item  y_0       False northing (optional).
+    @Item  gridID          Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridProjParams  Grid projection parameters.
 
 @Description
-The function @func{gridDefParamLCC} defines the parameter of a Lambert Conformal Conic grid.
+The function @func{gridDefParamsLCC} defines the parameters of a Lambert Conformal Conic grid.
 
 @EndFunction
 */
-void gridDefParamLCC(int gridID, double missval, double lon_0, double lat_0, double lat_1, double lat_2,
-                     double a, double rf, double xval_0, double yval_0, double x_0, double y_0)
+void gridDefParamsLCC(int gridID, struct CDI_GridProjParams gpp)
 {
-  (void)lat_0;
   cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, "Lambert_Conformal");
 
   const char *gmapname = "lambert_conformal_conic";
@@ -3633,17 +3640,17 @@ void gridDefParamLCC(int gridID, double missval, double lon_0, double lat_0, dou
   cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int)(strlen(gmapname)), gmapname);
   int nlats = 0;
   double lats[2];
-  lats[nlats++] = lat_1;
-  if ( IS_NOT_EQUAL(lat_1, lat_2) ) lats[nlats++] = lat_2;
+  lats[nlats++] = gpp.lat_1;
+  if (IS_NOT_EQUAL(gpp.lat_1, gpp.lat_2)) lats[nlats++] = gpp.lat_2;
   cdiDefAttFlt(gridID, CDI_GLOBAL, "standard_parallel", CDI_DATATYPE_FLT64, nlats, lats);
-  cdiDefAttFlt(gridID, CDI_GLOBAL, "longitude_of_central_meridian", CDI_DATATYPE_FLT64, 1, &lon_0);
-  cdiDefAttFlt(gridID, CDI_GLOBAL, "latitude_of_projection_origin", CDI_DATATYPE_FLT64, 1, &lat_0);
-  if ( a > 0 ) cdiDefAttFlt(gridID, CDI_GLOBAL, "earth_radius", CDI_DATATYPE_FLT64, 1, &a);
-  if ( rf > 0 ) cdiDefAttFlt(gridID, CDI_GLOBAL, "inverse_flattening", CDI_DATATYPE_FLT64, 1, &rf);
-  if ( IS_NOT_EQUAL(x_0, missval) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_easting", CDI_DATATYPE_FLT64, 1, &x_0);
-  if ( IS_NOT_EQUAL(y_0, missval) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_northing", CDI_DATATYPE_FLT64, 1, &y_0);
-  if ( IS_NOT_EQUAL(xval_0, missval) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &xval_0);
-  if ( IS_NOT_EQUAL(yval_0, missval) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &yval_0);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "longitude_of_central_meridian", CDI_DATATYPE_FLT64, 1, &gpp.lon_0);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "latitude_of_projection_origin", CDI_DATATYPE_FLT64, 1, &gpp.lat_0);
+  if (IS_NOT_EQUAL(gpp.a, gpp.missval)) cdiDefAttFlt(gridID, CDI_GLOBAL, "earth_radius", CDI_DATATYPE_FLT64, 1, &gpp.a);
+  if (IS_NOT_EQUAL(gpp.rf, gpp.missval)) cdiDefAttFlt(gridID, CDI_GLOBAL, "inverse_flattening", CDI_DATATYPE_FLT64, 1, &gpp.rf);
+  if (IS_NOT_EQUAL(gpp.x_0, gpp.missval)) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_easting", CDI_DATATYPE_FLT64, 1, &gpp.x_0);
+  if (IS_NOT_EQUAL(gpp.y_0, gpp.missval)) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_northing", CDI_DATATYPE_FLT64, 1, &gpp.y_0);
+  if (IS_NOT_EQUAL(gpp.xval_0, gpp.missval)) cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.xval_0);
+  if (IS_NOT_EQUAL(gpp.yval_0, gpp.missval)) cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.yval_0);
 
   grid_t *gridptr = grid_to_pointer(gridID);
   gridptr->projtype = CDI_PROJ_LCC;

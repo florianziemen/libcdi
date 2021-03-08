@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.9.9
+! Fortran interface for CDI library version 2.0.0
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   January 2021
+! Uwe Schulzweida, MPI-MET, Hamburg,   March 2021
 !
 
       INTEGER    CDI_MAX_NAME
@@ -1578,6 +1578,8 @@
       PARAMETER (CDI_KEY_STDNAME        = 944)
       INTEGER    CDI_KEY_UNITS
       PARAMETER (CDI_KEY_UNITS          = 945)
+      INTEGER    CDI_KEY_DATATYPE
+      PARAMETER (CDI_KEY_DATATYPE       = 946)
       INTEGER    CDI_KEY_REFERENCEURI
       PARAMETER (CDI_KEY_REFERENCEURI   = 965)
 !
@@ -1921,68 +1923,6 @@
 !                                     INTEGER         ni2,
 !                                     INTEGER         ni3)
       EXTERNAL        gridInqParamGME
-
-!
-!  Lambert Conformal Conic grid
-!
-!                     gridDefParamLCC
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION missval,
-!                                     DOUBLEPRECISION lon_0,
-!                                     DOUBLEPRECISION lat_0,
-!                                     DOUBLEPRECISION lat_1,
-!                                     DOUBLEPRECISION lat_2,
-!                                     DOUBLEPRECISION a,
-!                                     DOUBLEPRECISION rf,
-!                                     DOUBLEPRECISION xval_0,
-!                                     DOUBLEPRECISION yval_0,
-!                                     DOUBLEPRECISION x_0,
-!                                     DOUBLEPRECISION y_0)
-      EXTERNAL        gridDefParamLCC
-
-      INTEGER         gridInqParamLCC
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION missval,
-!                                     DOUBLEPRECISION lon_0,
-!                                     DOUBLEPRECISION lat_0,
-!                                     DOUBLEPRECISION lat_1,
-!                                     DOUBLEPRECISION lat_2,
-!                                     DOUBLEPRECISION a,
-!                                     DOUBLEPRECISION rf,
-!                                     DOUBLEPRECISION xval_0,
-!                                     DOUBLEPRECISION yval_0,
-!                                     DOUBLEPRECISION x_0,
-!                                     DOUBLEPRECISION y_0)
-      EXTERNAL        gridInqParamLCC
-
-!
-!  Polar stereographic grid
-!
-!                     gridDefParamSTERE
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION missval,
-!                                     DOUBLEPRECISION lon_0,
-!                                     DOUBLEPRECISION lat_ts,
-!                                     DOUBLEPRECISION lat_0,
-!                                     DOUBLEPRECISION a,
-!                                     DOUBLEPRECISION xval_0,
-!                                     DOUBLEPRECISION yval_0,
-!                                     DOUBLEPRECISION x_0,
-!                                     DOUBLEPRECISION y_0)
-      EXTERNAL        gridDefParamSTERE
-
-      INTEGER         gridInqParamSTERE
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION missval,
-!                                     DOUBLEPRECISION lon_0,
-!                                     DOUBLEPRECISION lat_ts,
-!                                     DOUBLEPRECISION lat_0,
-!                                     DOUBLEPRECISION a,
-!                                     DOUBLEPRECISION xval_0,
-!                                     DOUBLEPRECISION yval_0,
-!                                     DOUBLEPRECISION x_0,
-!                                     DOUBLEPRECISION y_0)
-      EXTERNAL        gridInqParamSTERE
 
 !                     gridDefArea
 !                                    (INTEGER         gridID,
@@ -2436,6 +2376,10 @@
       INTEGER         taxisInqNumavg
 !                                    (INTEGER         taxisID)
       EXTERNAL        taxisInqNumavg
+
+      CHARACTER(80)   taxisNamePtr
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisNamePtr
 
       CHARACTER(80)   tunitNamePtr
 !                                    (INTEGER         tunitID)

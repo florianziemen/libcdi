@@ -572,7 +572,7 @@ void gribapiDefProjRLL(grib_handle *gh, int gridID)
 }
 
 static
-double shapeOfTheEarthToRadius(long shapeOfTheEarth)
+double shapeOfTheEarthToRadius_old(long shapeOfTheEarth)
 {
   switch (shapeOfTheEarth)
     {
@@ -585,36 +585,51 @@ double shapeOfTheEarthToRadius(long shapeOfTheEarth)
 }
 
 static
+void shapeOfTheEarthToRadius(long shapeOfTheEarth, double *a, double *b, double *rf)
+{
+  // clang-format off
+  switch (shapeOfTheEarth)
+    {
+    case 2:   *a = 6378160.0; *rf = 297.0; break;
+    case 6:   *a = 6371229.0; break;
+    case 8:   *a = 6371200.0; break;
+    case 0:   *a = 6367470.0; break;
+    default:  *a = 6367470.0;
+    }
+  // clang-format on
+}
+
+static
 void gribapiDefProjLCC(grib_handle *gh, int gridID)
 {
+  struct CDI_GridProjParams gpp;
+  gridProjParamsInit(&gpp);
+
   long shapeOfTheEarth;
   grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth);
-  const double a = shapeOfTheEarthToRadius(shapeOfTheEarth);
-  const double rf = (shapeOfTheEarth == 2) ? 297.0 : 0;
-  double lon_0, lat_1, lat_2, xval_0, yval_0;
+  shapeOfTheEarthToRadius(shapeOfTheEarth, &gpp.a, &gpp.b, &gpp.rf);
+
   long projflag = 0;
-  grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &xval_0);
-  grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &yval_0);
-  grib_get_double(gh, "LoVInDegrees", &lon_0);
-  grib_get_double(gh, "Latin1InDegrees", &lat_1);
-  grib_get_double(gh, "Latin2InDegrees", &lat_2);
+  grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &gpp.xval_0);
+  grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &gpp.yval_0);
+  grib_get_double(gh, "LoVInDegrees", &gpp.lon_0);
+  grib_get_double(gh, "Latin1InDegrees", &gpp.lat_1);
+  grib_get_double(gh, "Latin2InDegrees", &gpp.lat_2);
   grib_get_long(gh, "projectionCentreFlag", &projflag);
   bool lsouth = gribbyte_get_bit((int)projflag, 1);
-  if ( lsouth ) { lat_1 = -lat_1; lat_2 = -lat_2; }
+  if ( lsouth ) { gpp.lat_1 = -gpp.lat_1; gpp.lat_2 = -gpp.lat_2; }
 
-  double lat_0 = lat_2;
-  double x_0 = CDI_grid_missval;
-  double y_0 = CDI_grid_missval;
+  gpp.lat_0 = gpp.lat_2;
 
   if ( proj_lonlat_to_lcc_func )
     {
-      x_0 = xval_0; y_0 = yval_0;
-      proj_lonlat_to_lcc_func(CDI_grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, (size_t)1, &x_0, &y_0);
-      if ( IS_NOT_EQUAL(x_0, CDI_grid_missval) && IS_NOT_EQUAL(y_0, CDI_grid_missval) )
-        { x_0 = -x_0; y_0 = -y_0; }
+      double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
+      proj_lonlat_to_lcc_func(CDI_grid_missval, gpp.lon_0, gpp.lat_0, gpp.lat_1, gpp.lat_2, gpp.a, gpp.rf, (size_t)1, &x_0, &y_0);
+      if (IS_NOT_EQUAL(x_0, CDI_grid_missval) && IS_NOT_EQUAL(y_0, CDI_grid_missval))
+        { gpp.x_0 = -x_0; gpp.y_0 = -y_0; }
     }
 
-  gridDefParamLCC(gridID, CDI_grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0);
+  gridDefParamsLCC(gridID, gpp);
 }
 
 
@@ -623,7 +638,7 @@ void gribapiDefProjSTERE(grib_handle *gh, int gridID)
 {
   long shapeOfTheEarth;
   grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth);
-  const double a = shapeOfTheEarthToRadius(shapeOfTheEarth);
+  const double a = shapeOfTheEarthToRadius_old(shapeOfTheEarth);
 
   double lon_0, lat_ts, xval_0, yval_0;
   grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &xval_0);

@@ -969,14 +969,6 @@ void    gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
 void    gridDefParamGME(int gridID, int nd, int ni, int ni2, int ni3);
 void    gridInqParamGME(int gridID, int *nd, int *ni, int *ni2, int *ni3);
 
-// Lambert Conformal Conic grid
-void    gridDefParamLCC(int gridID, double missval, double lon_0, double lat_0, double lat_1, double lat_2, double a, double rf, double xval_0, double yval_0, double x_0, double y_0);
-int     gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2, double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0);
-
-// Polar stereographic grid
-void    gridDefParamSTERE(int gridID, double missval, double lon_0, double lat_ts, double lat_0, double a, double xval_0, double yval_0, double x_0, double y_0);
-int     gridInqParamSTERE(int gridID, double missval, double *lon_0, double *lat_ts, double *lat_0, double *a, double *xval_0, double *yval_0, double *x_0, double *y_0);
-
 void    gridDefArea(int gridID, const double area[]);
 void    gridInqArea(int gridID, double area[]);
 int     gridHasArea(int gridID);
@@ -1284,6 +1276,32 @@ void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct CDI_GridProjParams
+{
+  double missval;
+  double lon_0;
+  double lat_0;
+  double lat_1;
+  double lat_2;
+  double a;
+  double b;
+  double rf;
+  double xval_0;
+  double yval_0;
+  double x_0;
+  double y_0;
+};
+
+void gridProjParamsInit(struct CDI_GridProjParams *gridProjParams);
+
+// Lambert Conformal Conic grid
+void gridDefParamsLCC(int gridID, struct CDI_GridProjParams gridProjParams);
+int  gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2, double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0);
+
+// Polar stereographic grid
+void gridDefParamSTERE(int gridID, double missval, double lon_0, double lat_ts, double lat_0, double a, double xval_0, double yval_0, double x_0, double y_0);
+int  gridInqParamSTERE(int gridID, double missval, double *lon_0, double *lat_ts, double *lat_0, double *a, double *xval_0, double *yval_0, double *x_0, double *y_0);
 
 #define HAVE_CDI_PROJ_FUNCS 1
 extern int (*proj_lonlat_to_lcc_func)(double, double, double, double, double, double, double, size_t, double*, double*);

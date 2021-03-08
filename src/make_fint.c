@@ -15,7 +15,7 @@
 #endif
 
 //#include "config.h"
-#define VERSION "1.9.9"
+#define VERSION "2.0.0"
 
 typedef struct
 {

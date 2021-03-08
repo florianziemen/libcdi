@@ -158,6 +158,7 @@ module mo_cdi
   integer(c_int), public, parameter :: ZAXIS_MIX_LAYER = 24
   integer(c_int), public, parameter :: ZAXIS_REFERENCE = 25
   integer(c_int), public, parameter :: ZAXIS_CHAR = 26
+  integer(c_int), public, parameter :: ZAXIS_TROPOPAUSE = 27
   integer(c_int), public, parameter :: MAX_KV_PAIRS_MATCH = 10
   integer(c_int), public, parameter :: TIME_CONSTANT = 0
   integer(c_int), public, parameter :: TIME_VARYING = 1
@@ -461,6 +462,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_LONGNAME = 943
   integer(c_int), public, parameter :: CDI_KEY_STDNAME = 944
   integer(c_int), public, parameter :: CDI_KEY_UNITS = 945
+  integer(c_int), public, parameter :: CDI_KEY_DATATYPE = 946
   integer(c_int), public, parameter :: CDI_KEY_REFERENCEURI = 965
   integer(c_int), public, parameter :: CDI_KEY_NUMBEROFGRIDUSED = 963
   integer(c_int), public, parameter :: CDI_KEY_NUMBEROFGRIDINREFERENCE = 964
@@ -548,10 +550,6 @@ module mo_cdi
   public :: gridInqParamRLL
   public :: gridDefParamGME
   public :: gridInqParamGME
-  public :: gridDefParamLCC
-  public :: gridInqParamLCC
-  public :: gridDefParamSTERE
-  public :: gridInqParamSTERE
   public :: gridDefArea
   public :: gridInqArea
   public :: gridHasArea
@@ -647,6 +645,7 @@ module mo_cdi
   public :: taxisInqForecastPeriod
   public :: taxisDefNumavg
   public :: taxisInqNumavg
+  public :: taxisNamePtr
   public :: tunitNamePtr
   public :: institutDef
   public :: institutInq
@@ -679,7 +678,10 @@ module mo_cdi
   public :: subtypeInqAttribute
   public :: vlistInqVarSubtype
   public :: gribapiLibraryVersion
-  public :: gaussianLatitudes
+  public :: gridInqParamLCC
+  public :: gridDefParamSTERE
+  public :: gridInqParamSTERE
+  integer(c_int), public, parameter :: HAVE_CDI_PROJ_FUNCS = 1
 
   interface
     subroutine cdiReset() bind(c, name = 'cdiReset')
@@ -2167,78 +2169,6 @@ module mo_cdi
       integer(c_int), intent(inout) :: ni3_dummy
     end subroutine gridInqParamGME
 
-    subroutine gridDefParamLCC(gridID_dummy, missval_dummy, lon_0_dummy,&
-    & lat_0_dummy, lat_1_dummy, lat_2_dummy, a_dummy, rf_dummy, xval_0_dummy,&
-    & yval_0_dummy, x_0_dummy, y_0_dummy) bind(c, name = 'gridDefParamLCC')
-      import c_double, c_int
-      integer(c_int), value :: gridID_dummy
-      real(c_double), value :: missval_dummy
-      real(c_double), value :: lon_0_dummy
-      real(c_double), value :: lat_0_dummy
-      real(c_double), value :: lat_1_dummy
-      real(c_double), value :: lat_2_dummy
-      real(c_double), value :: a_dummy
-      real(c_double), value :: rf_dummy
-      real(c_double), value :: xval_0_dummy
-      real(c_double), value :: yval_0_dummy
-      real(c_double), value :: x_0_dummy
-      real(c_double), value :: y_0_dummy
-    end subroutine gridDefParamLCC
-
-    function gridInqParamLCC(gridID_dummy, missval_dummy, lon_0_dummy,&
-    & lat_0_dummy, lat_1_dummy, lat_2_dummy, a_dummy, rf_dummy, xval_0_dummy,&
-    & yval_0_dummy, x_0_dummy, y_0_dummy) bind(c, name = 'gridInqParamLCC')&
-    & result(f_result)
-      import c_double, c_int
-      integer(c_int), value :: gridID_dummy
-      real(c_double), value :: missval_dummy
-      real(c_double), intent(inout) :: lon_0_dummy
-      real(c_double), intent(inout) :: lat_0_dummy
-      real(c_double), intent(inout) :: lat_1_dummy
-      real(c_double), intent(inout) :: lat_2_dummy
-      real(c_double), intent(inout) :: a_dummy
-      real(c_double), intent(inout) :: rf_dummy
-      real(c_double), intent(inout) :: xval_0_dummy
-      real(c_double), intent(inout) :: yval_0_dummy
-      real(c_double), intent(inout) :: x_0_dummy
-      real(c_double), intent(inout) :: y_0_dummy
-      integer(c_int) :: f_result
-    end function gridInqParamLCC
-
-    subroutine gridDefParamSTERE(gridID_dummy, missval_dummy, lon_0_dummy,&
-    & lat_ts_dummy, lat_0_dummy, a_dummy, xval_0_dummy, yval_0_dummy,&
-    & x_0_dummy, y_0_dummy) bind(c, name = 'gridDefParamSTERE')
-      import c_double, c_int
-      integer(c_int), value :: gridID_dummy
-      real(c_double), value :: missval_dummy
-      real(c_double), value :: lon_0_dummy
-      real(c_double), value :: lat_ts_dummy
-      real(c_double), value :: lat_0_dummy
-      real(c_double), value :: a_dummy
-      real(c_double), value :: xval_0_dummy
-      real(c_double), value :: yval_0_dummy
-      real(c_double), value :: x_0_dummy
-      real(c_double), value :: y_0_dummy
-    end subroutine gridDefParamSTERE
-
-    function gridInqParamSTERE(gridID_dummy, missval_dummy, lon_0_dummy,&
-    & lat_ts_dummy, lat_0_dummy, a_dummy, xval_0_dummy, yval_0_dummy,&
-    & x_0_dummy, y_0_dummy) bind(c, name = 'gridInqParamSTERE')&
-    & result(f_result)
-      import c_double, c_int
-      integer(c_int), value :: gridID_dummy
-      real(c_double), value :: missval_dummy
-      real(c_double), intent(inout) :: lon_0_dummy
-      real(c_double), intent(inout) :: lat_ts_dummy
-      real(c_double), intent(inout) :: lat_0_dummy
-      real(c_double), intent(inout) :: a_dummy
-      real(c_double), intent(inout) :: xval_0_dummy
-      real(c_double), intent(inout) :: yval_0_dummy
-      real(c_double), intent(inout) :: x_0_dummy
-      real(c_double), intent(inout) :: y_0_dummy
-      integer(c_int) :: f_result
-    end function gridInqParamSTERE
-
     subroutine gridDefArea(gridID_dummy, area_dummy) bind(c, name =&
     & 'gridDefArea')
       import c_double, c_int
@@ -2950,13 +2880,59 @@ module mo_cdi
       integer(c_int), intent(inout) :: revision_version_dummy
     end subroutine gribapiLibraryVersion
 
-    subroutine gaussianLatitudes(latitudes_dummy, weights_dummy, nlat_dummy)&
-    & bind(c, name = 'gaussianLatitudes')
-      import c_double, c_size_t
-      real(c_double), intent(inout) :: latitudes_dummy
-      real(c_double), intent(inout) :: weights_dummy
-      integer(c_size_t), value :: nlat_dummy
-    end subroutine gaussianLatitudes
+    function gridInqParamLCC(gridID_dummy, missval_dummy, lon_0_dummy,&
+    & lat_0_dummy, lat_1_dummy, lat_2_dummy, a_dummy, rf_dummy, xval_0_dummy,&
+    & yval_0_dummy, x_0_dummy, y_0_dummy) bind(c, name = 'gridInqParamLCC')&
+    & result(f_result)
+      import c_double, c_int
+      integer(c_int), value :: gridID_dummy
+      real(c_double), value :: missval_dummy
+      real(c_double), intent(inout) :: lon_0_dummy
+      real(c_double), intent(inout) :: lat_0_dummy
+      real(c_double), intent(inout) :: lat_1_dummy
+      real(c_double), intent(inout) :: lat_2_dummy
+      real(c_double), intent(inout) :: a_dummy
+      real(c_double), intent(inout) :: rf_dummy
+      real(c_double), intent(inout) :: xval_0_dummy
+      real(c_double), intent(inout) :: yval_0_dummy
+      real(c_double), intent(inout) :: x_0_dummy
+      real(c_double), intent(inout) :: y_0_dummy
+      integer(c_int) :: f_result
+    end function gridInqParamLCC
+
+    subroutine gridDefParamSTERE(gridID_dummy, missval_dummy, lon_0_dummy,&
+    & lat_ts_dummy, lat_0_dummy, a_dummy, xval_0_dummy, yval_0_dummy,&
+    & x_0_dummy, y_0_dummy) bind(c, name = 'gridDefParamSTERE')
+      import c_double, c_int
+      integer(c_int), value :: gridID_dummy
+      real(c_double), value :: missval_dummy
+      real(c_double), value :: lon_0_dummy
+      real(c_double), value :: lat_ts_dummy
+      real(c_double), value :: lat_0_dummy
+      real(c_double), value :: a_dummy
+      real(c_double), value :: xval_0_dummy
+      real(c_double), value :: yval_0_dummy
+      real(c_double), value :: x_0_dummy
+      real(c_double), value :: y_0_dummy
+    end subroutine gridDefParamSTERE
+
+    function gridInqParamSTERE(gridID_dummy, missval_dummy, lon_0_dummy,&
+    & lat_ts_dummy, lat_0_dummy, a_dummy, xval_0_dummy, yval_0_dummy,&
+    & x_0_dummy, y_0_dummy) bind(c, name = 'gridInqParamSTERE')&
+    & result(f_result)
+      import c_double, c_int
+      integer(c_int), value :: gridID_dummy
+      real(c_double), value :: missval_dummy
+      real(c_double), intent(inout) :: lon_0_dummy
+      real(c_double), intent(inout) :: lat_ts_dummy
+      real(c_double), intent(inout) :: lat_0_dummy
+      real(c_double), intent(inout) :: a_dummy
+      real(c_double), intent(inout) :: xval_0_dummy
+      real(c_double), intent(inout) :: yval_0_dummy
+      real(c_double), intent(inout) :: x_0_dummy
+      real(c_double), intent(inout) :: y_0_dummy
+      integer(c_int) :: f_result
+    end function gridInqParamSTERE
 
   end interface
 
@@ -5728,6 +5704,27 @@ contains
     if(present(weights)) weights_cptr = c_loc(weights)
     f_result = lib_zaxisInqWeights(zaxisID_dummy, weights_cptr)
   end function zaxisInqWeights
+
+  function taxisNamePtr(taxisID_dummy) result(f_result)
+    character(kind = c_char), dimension(:), pointer :: f_result
+    integer(c_int), value :: taxisID_dummy
+    type(c_ptr) :: ptr
+    integer :: rv_shape(1)
+    interface
+      function lib_taxisNamePtr(taxisID_dummy) bind(c, name = 'taxisNamePtr')&
+      & result(c_result)
+        import c_int, c_ptr
+        type(c_ptr) :: c_result
+        integer(c_int), value :: taxisID_dummy
+      end function lib_taxisNamePtr
+    end interface
+    f_result => null()
+    ptr = lib_taxisNamePtr(taxisID_dummy)
+    if(c_associated(ptr)) then
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
+    end if
+  end function taxisNamePtr
 
   function tunitNamePtr(tunitID_dummy) result(f_result)
     character(kind = c_char), dimension(:), pointer :: f_result
