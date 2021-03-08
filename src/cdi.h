@@ -1284,6 +1284,7 @@ struct CDI_GridProjParams
   double lat_0;  // Latitude of the projection origin
   double lat_1;  // First latitude from the pole at which the secant cone cuts the sphere
   double lat_2;  // Second latitude at which the secant cone cuts the sphere
+  double lat_ts;
   double a;      // Semi-major axis or earth radius in metres (optional)
   double b;      // Semi-minor axis in metres (optional)
   double rf;     // Inverse flattening (1/f) (optional)
@@ -1300,8 +1301,8 @@ void gridDefParamsLCC(int gridID, struct CDI_GridProjParams gridProjParams);
 int  gridInqParamsLCC(int gridID, struct CDI_GridProjParams *gridProjParams);
 
 // Polar stereographic grid
-void gridDefParamSTERE(int gridID, double missval, double lon_0, double lat_ts, double lat_0, double a, double xval_0, double yval_0, double x_0, double y_0);
-int  gridInqParamSTERE(int gridID, double missval, double *lon_0, double *lat_ts, double *lat_0, double *a, double *xval_0, double *yval_0, double *x_0, double *y_0);
+void gridDefParamsSTERE(int gridID, struct CDI_GridProjParams gridProjParams);
+int  gridInqParamsSTERE(int gridID, struct CDI_GridProjParams *gridProjParams);
 
 #define HAVE_CDI_PROJ_FUNCS 1
 extern int (*proj_lonlat_to_lcc_func)(double, double, double, double, double, double, double, size_t, double*, double*);

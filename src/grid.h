@@ -145,9 +145,8 @@ struct addIfNewRes
 
 struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode);
 
-int gridVerifyGribParamLCC(struct CDI_GridProjParams *gpp);
-int gridVerifyGribParamSTERE(double missval, double *lon_0, double *lat_ts, double *lat_0,
-                             double *a, double *xval_0, double *yval_0, double *x_0, double *y_0);
+int gridVerifyProjParamsLCC(struct CDI_GridProjParams *gpp);
+int gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp);
 
 bool isGaussianLatitudes(size_t nlats, const double *latitudes);
 void gaussianLatitudes(size_t nlats, double *latitudes, double *weights);

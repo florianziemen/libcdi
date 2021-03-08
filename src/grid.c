@@ -3607,6 +3607,7 @@ void gridProjParamsInit(struct CDI_GridProjParams *gpp)
   gpp->lat_0   = CDI_grid_missval;   // Latitude of the projection origin
   gpp->lat_1   = CDI_grid_missval;   // First latitude from the pole at which the secant cone cuts the sphere
   gpp->lat_2   = CDI_grid_missval;   // Second latitude at which the secant cone cuts the sphere
+  gpp->lat_ts  = CDI_grid_missval;
   gpp->a       = CDI_grid_missval;   // Semi-major axis or earth radius in metres (optional)
   gpp->b       = CDI_grid_missval;   // Semi-minor axis in metres (optional)
   gpp->rf      = CDI_grid_missval;   // Inverse flattening (1/f) (optional)
@@ -3615,6 +3616,28 @@ void gridProjParamsInit(struct CDI_GridProjParams *gpp)
   gpp->x_0     = CDI_grid_missval;   // False easting (optional)
   gpp->y_0     = CDI_grid_missval;   // False northing (optional)
   // clang-format on
+}
+
+static
+void gridDefParamsCommon(int gridID, struct CDI_GridProjParams gpp)
+{
+  if (IS_NOT_EQUAL(gpp.a, gpp.mv))
+    {
+      if (IS_NOT_EQUAL(gpp.b, gpp.mv))
+        {
+          cdiDefAttFlt(gridID, CDI_GLOBAL, "semi_major_axis", CDI_DATATYPE_FLT64, 1, &gpp.a);
+          cdiDefAttFlt(gridID, CDI_GLOBAL, "semi_minor_axis", CDI_DATATYPE_FLT64, 1, &gpp.b);
+        }
+      else
+        {
+          cdiDefAttFlt(gridID, CDI_GLOBAL, "earth_radius", CDI_DATATYPE_FLT64, 1, &gpp.a);
+        }
+    }
+  if (IS_NOT_EQUAL(gpp.rf, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "inverse_flattening", CDI_DATATYPE_FLT64, 1, &gpp.rf);
+  if (IS_NOT_EQUAL(gpp.x_0, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_easting", CDI_DATATYPE_FLT64, 1, &gpp.x_0);
+  if (IS_NOT_EQUAL(gpp.y_0, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_northing", CDI_DATATYPE_FLT64, 1, &gpp.y_0);
+  if (IS_NOT_EQUAL(gpp.xval_0, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.xval_0);
+  if (IS_NOT_EQUAL(gpp.yval_0, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.yval_0);
 }
 
 /*
@@ -3645,23 +3668,8 @@ void gridDefParamsLCC(int gridID, struct CDI_GridProjParams gpp)
   cdiDefAttFlt(gridID, CDI_GLOBAL, "standard_parallel", CDI_DATATYPE_FLT64, nlats, lats);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "longitude_of_central_meridian", CDI_DATATYPE_FLT64, 1, &gpp.lon_0);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "latitude_of_projection_origin", CDI_DATATYPE_FLT64, 1, &gpp.lat_0);
-  if (IS_NOT_EQUAL(gpp.a, gpp.mv))
-    {
-      if (IS_NOT_EQUAL(gpp.b, gpp.mv))
-        {
-          cdiDefAttFlt(gridID, CDI_GLOBAL, "semi_major_axis", CDI_DATATYPE_FLT64, 1, &gpp.a);
-          cdiDefAttFlt(gridID, CDI_GLOBAL, "semi_minor_axis", CDI_DATATYPE_FLT64, 1, &gpp.b);
-        }
-      else
-        {
-          cdiDefAttFlt(gridID, CDI_GLOBAL, "earth_radius", CDI_DATATYPE_FLT64, 1, &gpp.a);
-        }
-    }
-  if (IS_NOT_EQUAL(gpp.rf, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "inverse_flattening", CDI_DATATYPE_FLT64, 1, &gpp.rf);
-  if (IS_NOT_EQUAL(gpp.x_0, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_easting", CDI_DATATYPE_FLT64, 1, &gpp.x_0);
-  if (IS_NOT_EQUAL(gpp.y_0, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_northing", CDI_DATATYPE_FLT64, 1, &gpp.y_0);
-  if (IS_NOT_EQUAL(gpp.xval_0, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.xval_0);
-  if (IS_NOT_EQUAL(gpp.yval_0, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.yval_0);
+
+  gridDefParamsCommon(gridID, gpp);
 
   grid_t *gridptr = grid_to_pointer(gridID);
   gridptr->projtype = CDI_PROJ_LCC;
@@ -3713,19 +3721,19 @@ int gridInqParamsLCC(int gridID, struct CDI_GridProjParams *gpp)
           if ( attlen > 2 ) continue;
 
           double attflt[2];
-          if ( cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, attflt) )
+          if (cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, attflt))
             {
-              if      ( strIsEqual(attname, "earth_radius") )                       gpp->a      = attflt[0];
-              else if ( strIsEqual(attname, "semi_major_axis") )                    gpp->a      = attflt[0];
-              else if ( strIsEqual(attname, "semi_minor_axis") )                    gpp->b      = attflt[0];
-              else if ( strIsEqual(attname, "inverse_flattening") )                 gpp->rf     = attflt[0];
-              else if ( strIsEqual(attname, "longitude_of_central_meridian") )      gpp->lon_0  = attflt[0];
-              else if ( strIsEqual(attname, "latitude_of_projection_origin") )      gpp->lat_0  = attflt[0];
-              else if ( strIsEqual(attname, "false_easting")  )                     gpp->x_0    = attflt[0];
-              else if ( strIsEqual(attname, "false_northing") )                     gpp->y_0    = attflt[0];
-              else if ( strIsEqual(attname, "longitudeOfFirstGridPointInDegrees") ) gpp->xval_0 = attflt[0];
-              else if ( strIsEqual(attname, "latitudeOfFirstGridPointInDegrees")  ) gpp->yval_0 = attflt[0];
-              else if ( strIsEqual(attname, "standard_parallel") )
+              if      (strIsEqual(attname, "earth_radius"))                       gpp->a      = attflt[0];
+              else if (strIsEqual(attname, "semi_major_axis"))                    gpp->a      = attflt[0];
+              else if (strIsEqual(attname, "semi_minor_axis"))                    gpp->b      = attflt[0];
+              else if (strIsEqual(attname, "inverse_flattening"))                 gpp->rf     = attflt[0];
+              else if (strIsEqual(attname, "longitude_of_central_meridian"))      gpp->lon_0  = attflt[0];
+              else if (strIsEqual(attname, "latitude_of_projection_origin"))      gpp->lat_0  = attflt[0];
+              else if (strIsEqual(attname, "false_easting"))                      gpp->x_0    = attflt[0];
+              else if (strIsEqual(attname, "false_northing"))                     gpp->y_0    = attflt[0];
+              else if (strIsEqual(attname, "longitudeOfFirstGridPointInDegrees")) gpp->xval_0 = attflt[0];
+              else if (strIsEqual(attname, "latitudeOfFirstGridPointInDegrees"))  gpp->yval_0 = attflt[0];
+              else if (strIsEqual(attname, "standard_parallel"))
                 {
                   gpp->lat_1 = attflt[0];
                   gpp->lat_2 = (attlen == 2) ? attflt[1] : attflt[0];
@@ -3742,21 +3750,21 @@ int gridVerifyGribParamLCC(struct CDI_GridProjParams *gpp)
 {
   static bool lwarn = true;
 
-  if ( lwarn )
+  if (lwarn)
     {
       // lwarn = false;
       const char *projection = "lambert_conformal_conic";
-      if ( IS_EQUAL(gpp->lon_0, gpp->mv) ) { Warning("%s mapping parameter %s missing!", projection, "longitude_of_central_meridian"); }
-      if ( IS_EQUAL(gpp->lat_0, gpp->mv) ) { Warning("%s mapping parameter %s missing!", projection, "latitude_of_central_meridian"); }
-      if ( IS_EQUAL(gpp->lat_1, gpp->mv) ) { Warning("%s mapping parameter %s missing!", projection, "standard_parallel"); }
-      if ( IS_NOT_EQUAL(gpp->x_0, gpp->mv) && IS_NOT_EQUAL(gpp->y_0, gpp->mv) && (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv)) )
+      if (IS_EQUAL(gpp->lon_0, gpp->mv)) { Warning("%s mapping parameter %s missing!", projection, "longitude_of_central_meridian"); }
+      if (IS_EQUAL(gpp->lat_0, gpp->mv)) { Warning("%s mapping parameter %s missing!", projection, "latitude_of_central_meridian"); }
+      if (IS_EQUAL(gpp->lat_1, gpp->mv)) { Warning("%s mapping parameter %s missing!", projection, "standard_parallel"); }
+      if (IS_NOT_EQUAL(gpp->x_0, gpp->mv) && IS_NOT_EQUAL(gpp->y_0, gpp->mv) && (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv)))
         {
-          if ( proj_lcc_to_lonlat_func )
+          if (proj_lcc_to_lonlat_func)
             {
-              gpp->xval_0 = -(gpp->x_0); gpp->yval_0 = -(gpp->y_0);
+              gpp->xval_0 = -gpp->x_0; gpp->yval_0 = -gpp->y_0;
               proj_lcc_to_lonlat_func(gpp->mv, gpp->lon_0, gpp->lat_0, gpp->lat_1, gpp->lat_2, gpp->a, gpp->rf, 0.0, 0.0, (size_t)1, &gpp->xval_0, &gpp->yval_0);
             }
-          if ( IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv) )
+          if (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv))
             Warning("%s mapping parameter %s missing!", projection, "longitudeOfFirstGridPointInDegrees and latitudeOfFirstGridPointInDegrees");
         }
     }
@@ -3765,26 +3773,25 @@ int gridVerifyGribParamLCC(struct CDI_GridProjParams *gpp)
 }
 
 
-int gridVerifyGribParamSTERE(double missval, double *lon_0, double *lat_ts, double *lat_0,
-                             double *a, double *xval_0, double *yval_0, double *x_0, double *y_0)
+int gridVerifyGribParamdSTERE(struct CDI_GridProjParams *gpp)
 {
   static bool lwarn = true;
 
-  if ( lwarn )
+  if (lwarn)
     {
       // lwarn = false;
       const char *projection = "lambert_conformal_conic";
-      if ( IS_EQUAL(*lon_0, missval) ) { Warning("%s mapping parameter %s missing!", projection, "straight_vertical_longitude_from_pole"); }
-      if ( IS_EQUAL(*lat_0, missval) ) { Warning("%s mapping parameter %s missing!", projection, "latitude_of_projection_origin"); }
-      if ( IS_EQUAL(*lat_ts, missval) ) { Warning("%s mapping parameter %s missing!", projection, "standard_parallel"); }
-      if ( IS_NOT_EQUAL(*x_0, missval) && IS_NOT_EQUAL(*y_0, missval) && (IS_EQUAL(*xval_0, missval) || IS_EQUAL(*yval_0, missval)) )
+      if (IS_EQUAL(gpp->lon_0, gpp->mv)) { Warning("%s mapping parameter %s missing!", projection, "straight_vertical_longitude_from_pole"); }
+      if (IS_EQUAL(gpp->lat_0, gpp->mv)) { Warning("%s mapping parameter %s missing!", projection, "latitude_of_projection_origin"); }
+      if (IS_EQUAL(gpp->lat_ts, gpp->mv)) { Warning("%s mapping parameter %s missing!", projection, "standard_parallel"); }
+      if (IS_NOT_EQUAL(gpp->x_0, gpp->mv) && IS_NOT_EQUAL(gpp->y_0, gpp->mv) && (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv)))
         {
-          if ( proj_stere_to_lonlat_func )
+          if (proj_stere_to_lonlat_func)
             {
-              *xval_0 = -(*x_0); *yval_0 = -(*y_0);
-              proj_stere_to_lonlat_func(missval, *lon_0, *lat_ts, *lat_0, *a, 0.0, 0.0, (size_t)1, xval_0, yval_0);
+              gpp->xval_0 = -gpp->x_0; gpp->xval_0 = -gpp->y_0;
+              proj_stere_to_lonlat_func(gpp->mv, gpp->lon_0, gpp->lat_ts, gpp->lat_0, gpp->a, 0.0, 0.0, (size_t)1, &gpp->xval_0, &gpp->yval_0);
             }
-          if ( IS_EQUAL(*xval_0, missval) || IS_EQUAL(*yval_0, missval) )
+          if (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv))
             Warning("%s mapping parameter %s missing!", projection, "longitudeOfFirstGridPointInDegrees and latitudeOfFirstGridPointInDegrees");
         }
     }
@@ -3793,43 +3800,31 @@ int gridVerifyGribParamSTERE(double missval, double *lon_0, double *lat_ts, doub
 }
 
 /*
-@Function  gridDefParamSTERE
+@Function  gridDefParamsSTERE
 @Title     Define the parameter of a Polar stereographic grid
 
-@Prototype void gridDefParamSTERE(int gridID, double missval, double lon_0, double lat_ts, double lat_0, double a, double xval_0, double yval_0, double x_0, double y_0)
+@Prototype void gridDefParamsSTERE(int gridID, struct CDI_GridProjParams gridProjParams)
 @Parameter
-    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  missval   Missing value.
-    @Item  lon_0     Longitude at natural origin.
-    @Item  lat_ts    Latitude of the projection origin.
-    @Item  lat_0     First latitude from the pole at which the secant cone cuts the sphere.
-    @Item  a         Earth radius in metres (optional).
-    @Item  xval_0    Longitude of the first grid point in degree (optional).
-    @Item  yval_0    Latitude of the first grid point in degree (optional).
-    @Item  x_0       False easting (optional).
-    @Item  y_0       False northing (optional).
+    @Item  gridID          Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridProjParams  Grid projection parameters.
 
 @Description
-The function @func{gridDefParamSTERE} defines the parameter of a Polar stereographic grid.
+The function @func{gridDefParamsSTERE} defines the parameter of a Polar stereographic grid.
 
 @EndFunction
 */
-void gridDefParamSTERE(int gridID, double missval, double lon_0, double lat_ts, double lat_0,
-                       double a, double xval_0, double yval_0, double x_0, double y_0)
+void gridDefParamsSTERE(int gridID, struct CDI_GridProjParams gpp)
 {
   cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, "Polar_Stereographic");
 
   const char *gmapname = "polar_stereographic";
   cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname);
   cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int)(strlen(gmapname)), gmapname);
-  cdiDefAttFlt(gridID, CDI_GLOBAL, "standard_parallel", CDI_DATATYPE_FLT64, 1, &lat_ts);
-  cdiDefAttFlt(gridID, CDI_GLOBAL, "straight_vertical_longitude_from_pole", CDI_DATATYPE_FLT64, 1, &lon_0);
-  cdiDefAttFlt(gridID, CDI_GLOBAL, "latitude_of_projection_origin", CDI_DATATYPE_FLT64, 1, &lat_0);
-  if ( a > 0 ) cdiDefAttFlt(gridID, CDI_GLOBAL, "earth_radius", CDI_DATATYPE_FLT64, 1, &a);
-  if ( IS_NOT_EQUAL(x_0, missval) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_easting", CDI_DATATYPE_FLT64, 1, &x_0);
-  if ( IS_NOT_EQUAL(y_0, missval) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_northing", CDI_DATATYPE_FLT64, 1, &y_0);
-  if ( IS_NOT_EQUAL(xval_0, missval) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &xval_0);
-  if ( IS_NOT_EQUAL(yval_0, missval) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &yval_0);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "standard_parallel", CDI_DATATYPE_FLT64, 1, &gpp.lat_ts);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "straight_vertical_longitude_from_pole", CDI_DATATYPE_FLT64, 1, &gpp.lon_0);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "latitude_of_projection_origin", CDI_DATATYPE_FLT64, 1, &gpp.lat_0);
+
+  gridDefParamsCommon(gridID, gpp);
 
   grid_t *gridptr = grid_to_pointer(gridID);
   gridptr->projtype = CDI_PROJ_STERE;
@@ -3838,43 +3833,32 @@ void gridDefParamSTERE(int gridID, double missval, double lon_0, double lat_ts, 
 }
 
 /*
-@Function  gridInqParamSTERE
+@Function  gridInqParamsSTERE
 @Title     Get the parameter of a Polar stereographic grid
 
-@Prototype void gridInqParamSTERE(int gridID, double missval, double *lon_0, double *lat_ts, double *lat_0, double *a, double *xval_0, double *yval_0, double *x_0, double *y_0)
+@Prototype void gridInqParamsSTERE(int gridID, struct CDI_GridProjParams *gpp)
 @Parameter
     @Item  gridID    Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
-    @Item  missval   Missing value
-    @Item  lon_0     Longitude at natural origin.
-    @Item  lat_ts    Latitude of the projection origin.
-    @Item  lat_0     First latitude from the pole at which the secant cone cuts the sphere.
-    @Item  a         Earth radius in metres (optional).
-    @Item  xval_0    Longitude of the first grid point in degree (optional).
-    @Item  yval_0    Latitude of the first grid point in degree (optional).
-    @Item  x_0       False easting (optional).
-    @Item  y_0       False northing (optional).
+    @Item  gridProjParams  Grid projection parameters.
 
 @Description
-The function @func{gridInqParamSTERE} returns the parameter of a Polar stereographic grid.
+The function @func{gridInqParamsSTERE} returns the parameter of a Polar stereographic grid.
 
 @EndFunction
 */
-int gridInqParamSTERE(int gridID, double missval, double *lon_0, double *lat_ts, double *lat_0,
-                      double *a, double *xval_0, double *yval_0, double *x_0, double *y_0)
+int gridInqParamsSTERE(int gridID, struct CDI_GridProjParams *gpp)
 {
-  *a = 0;
-  *lon_0 = missval; *lat_ts = missval, *lat_0 = missval;
-  *xval_0 = missval; *yval_0 = missval; *x_0 = missval, *y_0 = missval;
-
   int status = -1;
   if ( gridInqType(gridID) != GRID_PROJECTION ) return status;
+
+  gridProjParamsInit(gpp);
 
   status = -2;
   const char *projection = "polar_stereographic";
   char gmapname[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
   cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
-  if ( gmapname[0] && strIsEqual(gmapname, projection) )
+  if (gmapname[0] && strIsEqual(gmapname, projection))
     {
       int atttype, attlen;
       char attname[CDI_MAX_NAME+1];
@@ -3882,24 +3866,27 @@ int gridInqParamSTERE(int gridID, double missval, double *lon_0, double *lat_ts,
       int natts;
       cdiInqNatts(gridID, CDI_GLOBAL, &natts);
 
-      if ( natts ) status = 0;
+      if (natts) status = 0;
 
-      for ( int iatt = 0; iatt < natts; ++iatt )
+      for (int iatt = 0; iatt < natts; ++iatt)
         {
           cdiInqAtt(gridID, CDI_GLOBAL, iatt, attname, &atttype, &attlen);
-          if ( attlen > 2 ) continue;
+          if (attlen > 2) continue;
 
           double attflt[2];
-          if ( cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, attflt) )
+          if (cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, attflt))
             {
-              if      ( strIsEqual(attname, "earth_radius") )                          *a      = attflt[0];
-              else if ( strIsEqual(attname, "standard_parallel") )                     *lat_ts = attflt[0];
-              else if ( strIsEqual(attname, "straight_vertical_longitude_from_pole") ) *lon_0  = attflt[0];
-              else if ( strIsEqual(attname, "latitude_of_projection_origin") )         *lat_0  = attflt[0];
-              else if ( strIsEqual(attname, "false_easting")  )                        *x_0    = attflt[0];
-              else if ( strIsEqual(attname, "false_northing") )                        *y_0    = attflt[0];
-              else if ( strIsEqual(attname, "longitudeOfFirstGridPointInDegrees") )    *xval_0 = attflt[0];
-              else if ( strIsEqual(attname, "latitudeOfFirstGridPointInDegrees")  )    *yval_0 = attflt[0];
+              if      (strIsEqual(attname, "earth_radius"))                          gpp->a      = attflt[0];
+              else if (strIsEqual(attname, "semi_major_axis"))                       gpp->a      = attflt[0];
+              else if (strIsEqual(attname, "semi_minor_axis"))                       gpp->b      = attflt[0];
+              else if (strIsEqual(attname, "inverse_flattening"))                    gpp->rf     = attflt[0];
+              else if (strIsEqual(attname, "standard_parallel"))                     gpp->lat_ts = attflt[0];
+              else if (strIsEqual(attname, "straight_vertical_longitude_from_pole")) gpp->lon_0  = attflt[0];
+              else if (strIsEqual(attname, "latitude_of_projection_origin"))         gpp->lat_0  = attflt[0];
+              else if (strIsEqual(attname, "false_easting"))                         gpp->x_0    = attflt[0];
+              else if (strIsEqual(attname, "false_northing"))                        gpp->y_0    = attflt[0];
+              else if (strIsEqual(attname, "longitudeOfFirstGridPointInDegrees"))    gpp->xval_0 = attflt[0];
+              else if (strIsEqual(attname, "latitudeOfFirstGridPointInDegrees"))     gpp->yval_0 = attflt[0];
             }
         }
     }

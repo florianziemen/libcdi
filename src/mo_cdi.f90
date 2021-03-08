@@ -678,8 +678,6 @@ module mo_cdi
   public :: subtypeInqAttribute
   public :: vlistInqVarSubtype
   public :: gribapiLibraryVersion
-  public :: gridDefParamSTERE
-  public :: gridInqParamSTERE
   integer(c_int), public, parameter :: HAVE_CDI_PROJ_FUNCS = 1
 
   interface
@@ -2878,40 +2876,6 @@ module mo_cdi
       integer(c_int), intent(inout) :: minor_version_dummy
       integer(c_int), intent(inout) :: revision_version_dummy
     end subroutine gribapiLibraryVersion
-
-    subroutine gridDefParamSTERE(gridID_dummy, missval_dummy, lon_0_dummy,&
-    & lat_ts_dummy, lat_0_dummy, a_dummy, xval_0_dummy, yval_0_dummy,&
-    & x_0_dummy, y_0_dummy) bind(c, name = 'gridDefParamSTERE')
-      import c_double, c_int
-      integer(c_int), value :: gridID_dummy
-      real(c_double), value :: missval_dummy
-      real(c_double), value :: lon_0_dummy
-      real(c_double), value :: lat_ts_dummy
-      real(c_double), value :: lat_0_dummy
-      real(c_double), value :: a_dummy
-      real(c_double), value :: xval_0_dummy
-      real(c_double), value :: yval_0_dummy
-      real(c_double), value :: x_0_dummy
-      real(c_double), value :: y_0_dummy
-    end subroutine gridDefParamSTERE
-
-    function gridInqParamSTERE(gridID_dummy, missval_dummy, lon_0_dummy,&
-    & lat_ts_dummy, lat_0_dummy, a_dummy, xval_0_dummy, yval_0_dummy,&
-    & x_0_dummy, y_0_dummy) bind(c, name = 'gridInqParamSTERE')&
-    & result(f_result)
-      import c_double, c_int
-      integer(c_int), value :: gridID_dummy
-      real(c_double), value :: missval_dummy
-      real(c_double), intent(inout) :: lon_0_dummy
-      real(c_double), intent(inout) :: lat_ts_dummy
-      real(c_double), intent(inout) :: lat_0_dummy
-      real(c_double), intent(inout) :: a_dummy
-      real(c_double), intent(inout) :: xval_0_dummy
-      real(c_double), intent(inout) :: yval_0_dummy
-      real(c_double), intent(inout) :: x_0_dummy
-      real(c_double), intent(inout) :: y_0_dummy
-      integer(c_int) :: f_result
-    end function gridInqParamSTERE
 
   end interface
 

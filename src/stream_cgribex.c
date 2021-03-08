@@ -1712,7 +1712,7 @@ void cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
       gpp.x_0 = gridInqXval(gridID, 0);
       gpp.y_0 = gridInqYval(gridID, 0);
     }
-  gridVerifyGribParamLCC(&gpp);
+  gridVerifyProjParamsLCC(&gpp);
 
   const bool lsouth = (gpp.lat_1 < 0);
   if (lsouth) { gpp.lat_1 = -gpp.lat_2; gpp.lat_2 = -gpp.lat_2; }
