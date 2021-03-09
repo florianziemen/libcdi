@@ -452,9 +452,6 @@
       DOUBLEPRECISION cdiInqMissval
       EXTERNAL        cdiInqMissval
 
-      DOUBLEPRECISION cdiInqGridMissval
-      EXTERNAL        cdiInqGridMissval
-
 !                     cdiDefGlobal
 !                                    (CHARACTER*(*)   string,
 !                                     INTEGER         val)

@@ -3706,7 +3706,6 @@ int gridInqParamsLCC(int gridID, struct CDI_GridProjParams *gpp)
   cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
   if (gmapname[0] && strIsEqual(gmapname, projection))
     {
-      int atttype, attlen;
       char attname[CDI_MAX_NAME+1];
 
       int natts;
@@ -3716,12 +3715,14 @@ int gridInqParamsLCC(int gridID, struct CDI_GridProjParams *gpp)
 
       for (int iatt = 0; iatt < natts; ++iatt)
         {
+          int atttype, attlen;
           cdiInqAtt(gridID, CDI_GLOBAL, iatt, attname, &atttype, &attlen);
-          if ( attlen > 2 ) continue;
+          if (attlen > 2) continue;
 
           double attflt[2];
           if (cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, attflt))
             {
+              // clang-format off
               if      (strIsEqual(attname, "earth_radius"))                       gpp->a      = attflt[0];
               else if (strIsEqual(attname, "semi_major_axis"))                    gpp->a      = attflt[0];
               else if (strIsEqual(attname, "semi_minor_axis"))                    gpp->b      = attflt[0];
@@ -3737,6 +3738,7 @@ int gridInqParamsLCC(int gridID, struct CDI_GridProjParams *gpp)
                   gpp->lat_1 = attflt[0];
                   gpp->lat_2 = (attlen == 2) ? attflt[1] : attflt[0];
                 }
+              // clang-format on
             }
         }
     }
@@ -3879,7 +3881,7 @@ int gridInqParamsSTERE(int gridID, struct CDI_GridProjParams *gpp)
               else if (strIsEqual(attname, "semi_major_axis"))                       gpp->a      = attflt[0];
               else if (strIsEqual(attname, "semi_minor_axis"))                       gpp->b      = attflt[0];
               else if (strIsEqual(attname, "inverse_flattening"))                    gpp->rf     = attflt[0];
-              else if (strIsEqual(attname, "standard_parallel"))                     gpp->lat_1 = attflt[0];
+              else if (strIsEqual(attname, "standard_parallel"))                     gpp->lat_1  = attflt[0];
               else if (strIsEqual(attname, "straight_vertical_longitude_from_pole")) gpp->lon_0  = attflt[0];
               else if (strIsEqual(attname, "latitude_of_projection_origin"))         gpp->lat_0  = attflt[0];
               else if (strIsEqual(attname, "false_easting"))                         gpp->x_0    = attflt[0];

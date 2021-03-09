@@ -224,7 +224,6 @@ module mo_cdi
   public :: cdiHaveFiletype
   public :: cdiDefMissval
   public :: cdiInqMissval
-  public :: cdiInqGridMissval
   public :: cdiDefGlobal
   public :: namespaceNew
   public :: namespaceSetActive
@@ -708,12 +707,6 @@ module mo_cdi
       import c_double
       real(c_double) :: f_result
     end function cdiInqMissval
-
-    function cdiInqGridMissval() bind(c, name = 'cdiInqGridMissval')&
-    & result(f_result)
-      import c_double
-      real(c_double) :: f_result
-    end function cdiInqGridMissval
 
     function namespaceNew() bind(c, name = 'namespaceNew') result(f_result)
       import c_int
