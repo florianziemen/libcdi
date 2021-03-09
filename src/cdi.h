@@ -282,7 +282,6 @@ int     cdiHaveFiletype(int filetype);
 
 void    cdiDefMissval(double missval);
 double  cdiInqMissval(void);
-double  cdiInqGridMissval(void);
 void    cdiDefGlobal(const char *string, int val);
 
 int     namespaceNew(void);

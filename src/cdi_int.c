@@ -278,9 +278,9 @@ void cdiSetChunk(const char *chunkAlgo)
 {
   int algo = -1;
 
-  if      ( strcmp("auto",  chunkAlgo) == 0 ) algo = CDI_CHUNK_AUTO;
-  else if ( strcmp("grid",  chunkAlgo) == 0 ) algo = CDI_CHUNK_GRID;
-  else if ( strcmp("lines", chunkAlgo) == 0 ) algo = CDI_CHUNK_LINES;
+  if      (strIsEqual("auto",  chunkAlgo)) algo = CDI_CHUNK_AUTO;
+  else if (strIsEqual("grid",  chunkAlgo)) algo = CDI_CHUNK_GRID;
+  else if (strIsEqual("lines", chunkAlgo)) algo = CDI_CHUNK_LINES;
   else
     Warning("Invalid environment variable CDI_CHUNK_ALGO: %s", chunkAlgo);
 
@@ -461,18 +461,18 @@ const char *strfiletype(int filetype)
 void cdiDefGlobal(const char *string, int value)
 {
   // clang-format off
-  if      (strcmp(string, "REGULARGRID")           == 0) cdiDataUnreduced = value;
-  else if (strcmp(string, "ECCODES_DEBUG")         == 0) CDI_gribapi_debug = (bool) value;
-  else if (strcmp(string, "ECCODES_GRIB1")         == 0) cdiSetEccodesGrib1((bool) value);
-  else if (strcmp(string, "SORTNAME")              == 0) cdiSortName = value;
-  else if (strcmp(string, "SORTPARAM")             == 0) cdiSortParam = value;
-  else if (strcmp(string, "HAVE_MISSVAL")          == 0) cdiHaveMissval = value;
-  else if (strcmp(string, "NC_CHUNKSIZEHINT")      == 0) cdiNcChunksizehint = value;
-  else if (strcmp(string, "READ_CELL_CORNERS")     == 0) CDI_read_cell_corners = value;
-  else if (strcmp(string, "CMOR_MODE")             == 0) CDI_cmor_mode = value;
-  else if (strcmp(string, "REDUCE_DIM")            == 0) CDI_reduce_dim = value;
-  else if (strcmp(string, "NETCDF_HDR_PAD")        == 0) CDI_netcdf_hdr_pad = (size_t) value;
-  else if (strcmp(string, "NETCDF_LAZY_GRID_LOAD") == 0) CDI_netcdf_lazy_grid_load = (bool) value;
+  if      (strIsEqual(string, "REGULARGRID")          ) cdiDataUnreduced = value;
+  else if (strIsEqual(string, "ECCODES_DEBUG")        ) CDI_gribapi_debug = (bool) value;
+  else if (strIsEqual(string, "ECCODES_GRIB1")        ) cdiSetEccodesGrib1((bool) value);
+  else if (strIsEqual(string, "SORTNAME")             ) cdiSortName = value;
+  else if (strIsEqual(string, "SORTPARAM")            ) cdiSortParam = value;
+  else if (strIsEqual(string, "HAVE_MISSVAL")         ) cdiHaveMissval = value;
+  else if (strIsEqual(string, "NC_CHUNKSIZEHINT")     ) cdiNcChunksizehint = value;
+  else if (strIsEqual(string, "READ_CELL_CORNERS")    ) CDI_read_cell_corners = value;
+  else if (strIsEqual(string, "CMOR_MODE")            ) CDI_cmor_mode = value;
+  else if (strIsEqual(string, "REDUCE_DIM")           ) CDI_reduce_dim = value;
+  else if (strIsEqual(string, "NETCDF_HDR_PAD")       ) CDI_netcdf_hdr_pad = (size_t) value;
+  else if (strIsEqual(string, "NETCDF_LAZY_GRID_LOAD")) CDI_netcdf_lazy_grid_load = (bool) value;
   else Warning("Unsupported global key: %s", string);
   // clang-format on
 }
@@ -493,13 +493,6 @@ double cdiInqMissval(void)
   return CDI_default_missval;
 }
 
-
-double cdiInqGridMissval(void)
-{
-  cdiInitialize();
-
-  return CDI_default_missval;
-}
 
 int cdiBaseFiletype(int filetype)
 {
