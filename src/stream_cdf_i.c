@@ -3893,10 +3893,10 @@ int cdfInqContents(stream_t *streamptr)
   gridfile[0] = 0;
   fcreftime[0] = 0;
 
-  int vlistID = streamptr->vlistID;
-  int fileID  = streamptr->fileID;
+  const int vlistID = streamptr->vlistID;
+  const int fileID  = streamptr->fileID;
 
-  if ( CDI_Debug ) Message("streamID = %d, fileID = %d", streamptr->self, fileID);
+  if (CDI_Debug) Message("streamID = %d, fileID = %d", streamptr->self, fileID);
 
 #ifdef HAVE_NETCDF4
   nc_inq_format(fileID, &format);
@@ -3904,8 +3904,7 @@ int cdfInqContents(stream_t *streamptr)
 
   cdf_inq(fileID, &ndims , &nvars, &ngatts, &unlimdimid);
 
-  if ( CDI_Debug )
-    Message("root: ndims %d, nvars %d, ngatts %d", ndims, nvars, ngatts);
+  if (CDI_Debug) Message("root: ndims %d, nvars %d, ngatts %d", ndims, nvars, ngatts);
   /*
   if ( ndims == 0 )
     {
@@ -3918,43 +3917,45 @@ int cdfInqContents(stream_t *streamptr)
   init_ncdims(ndims, ncdims);
 
   int ncdimid = 0;
-  size_t dimlen;
-  for ( int dimid = 0; dimid < NC_MAX_DIMS; ++dimid )
+  if (ndims)
     {
-      int status = nc_inq_dimlen(fileID, dimid, &dimlen);
-      if ( status == NC_NOERR )
+      for (int dimid = 0; dimid < NC_MAX_DIMS; ++dimid)
         {
-          ncdims[ncdimid++].dimid = dimid;
-          if ( ncdimid == ndims ) break;
+          size_t dimlen;
+          int status = nc_inq_dimlen(fileID, dimid, &dimlen);
+          if (status == NC_NOERR)
+            {
+              ncdims[ncdimid++].dimid = dimid;
+              if (ncdimid == ndims) break;
+            }
         }
     }
 
 #ifdef  HAVE_NETCDF4
-  if ( format == NC_FORMAT_NETCDF4 )
+  if (format == NC_FORMAT_NETCDF4)
     {
       int numgrps = 0;
       int ncids[NC_MAX_VARS];
       char gname[CDI_MAX_NAME];
-      int gndims, gnvars, gngatts, gunlimdimid;
       nc_inq_grps(fileID, &numgrps, ncids);
-      for ( int i = 0; i < numgrps; ++i )
+      for (int i = 0; i < numgrps; ++i)
         {
           int ncid = ncids[i];
           nc_inq_grpname(ncid, gname);
+          int gndims, gnvars, gngatts, gunlimdimid;
           cdf_inq(ncid, &gndims , &gnvars, &gngatts, &gunlimdimid);
 
-          if ( CDI_Debug )
-            Message("%s: ndims %d, nvars %d, ngatts %d", gname, gndims, gnvars, gngatts);
+          if (CDI_Debug) Message("%s: ndims %d, nvars %d, ngatts %d", gname, gndims, gnvars, gngatts);
 
-          if ( gndims == 0 )
+          if (gndims == 0)
             {
             }
         }
-      if ( numgrps ) Warning("NetCDF4 groups not supported! Found %d root group%s.", numgrps, numgrps>1?"s":"");
+      if (numgrps) Warning("NetCDF4 groups not supported! Found %d root group%s.", numgrps, (numgrps > 1) ? "s" : "");
     }
 #endif
 
-  if ( nvars == 0 )
+  if (nvars == 0)
     {
       Warning("No arrays found!");
       return CDI_EUFSTRUCT;
