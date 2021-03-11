@@ -1018,12 +1018,12 @@ cdiPioCloseFileOnRank(int rank)
 static void
 cdiPioServerCdfDefVars(stream_t *streamptr)
 {
-  int rank, rankOpen = cdiPioStream2Owner(streamptr->self);
+  int rankOpen = cdiPioStream2Owner(streamptr->self);
   if (commInqIOMode() == PIO_NONE
 #ifdef HAVE_PARALLEL_NC4
       || rankOpen == CDI_PIO_COLLECTIVE_OPEN
 #endif
-      || (rank = commInqRankColl()) == rankOpen)
+      || commInqRankColl() == rankOpen)
     cdfDefCoordinateVars(streamptr);
 }
 
@@ -1728,12 +1728,12 @@ getMaxNumStreamWrites(stream_t *streamptr)
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
       {
-        int rank, rankOpen = cdiPioStream2Owner(streamptr->self);
+        int rankOpen = cdiPioStream2Owner(streamptr->self);
         if (commInqIOMode() == PIO_NONE
 #ifdef HAVE_PARALLEL_NC4
             || rankOpen == CDI_PIO_COLLECTIVE_OPEN
 #endif
-            || ((rank = commInqRankColl()) == rankOpen))
+            || (commInqRankColl() == rankOpen))
           maxNumStreamWrites = (numVars + numColl - 1) / numColl;
       }
       break;
@@ -1770,12 +1770,12 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
 #ifdef HAVE_LIBNETCDF
         case CDI_FILETYPE_NETCDF:
           {
-            int rank, rankOpen = cdiPioStream2Owner(streamptr->self);
+            int rankOpen = cdiPioStream2Owner(streamptr->self);
             if (commInqIOMode() == PIO_NONE
 #ifdef HAVE_PARALLEL_NC4
                 || rankOpen == CDI_PIO_COLLECTIVE_OPEN
 #endif
-                || ((rank = commInqRankColl()) == rankOpen))
+                || commInqRankColl() == rankOpen)
               cdiStreamCloseDefaultDelegate(streamptr, recordBufIsToBeDeleted);
 #ifdef HAVE_PARALLEL_NC4
             if (rankOpen != CDI_PIO_COLLECTIVE_OPEN)
@@ -1804,12 +1804,12 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
 static void
 cdiPioCdfDefTimestep(stream_t *streamptr, int tsID)
 {
-  int rank, streamID = streamptr->self, rankOpen = cdiPioStream2Owner(streamID);
+  int streamID = streamptr->self, rankOpen = cdiPioStream2Owner(streamID);
   if (commInqIOMode() == PIO_NONE
 #ifdef HAVE_PARALLEL_NC4
       || rankOpen == CDI_PIO_COLLECTIVE_OPEN
 #endif
-      || (rank = commInqRankColl()) == rankOpen)
+      || commInqRankColl() == rankOpen)
     cdfDefTimestep(streamptr, tsID);
 }
 #endif
@@ -1866,9 +1866,6 @@ static void
 cdiPioCdfGridAccess(int streamID, int vlistID)
 {
   int filetype = streamInqFiletype(streamID);
-#ifdef HAVE_PARALLEL_NC4
-  int rankOpen;
-#endif
   switch (filetype)
     {
     case CDI_FILETYPE_NC:
@@ -1876,7 +1873,7 @@ cdiPioCdfGridAccess(int streamID, int vlistID)
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
 #ifdef HAVE_PARALLEL_NC4
-      if ((rankOpen = cdiPioStream2Owner(streamID)) != CDI_PIO_COLLECTIVE_OPEN)
+      if (cdiPioStream2Owner(streamID) != CDI_PIO_COLLECTIVE_OPEN)
 #endif
         {
           int nGrids = vlistNgrids(vlistID);
