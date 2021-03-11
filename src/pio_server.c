@@ -1498,12 +1498,17 @@ planPasses(const struct streamMapping *mapping,
        * recordAggLim data bytes, but use at least one, unless none
        * remain */
       size_t firstRecordOfPass = 0, curRecord;
+#if ! defined __PGI || __PGIC__ != 20
       struct passPlan (*passes)[collSize] = NULL;
+#else
+      struct passPlan *passes = NULL;
+#endif
+      size_t sizeof_pass = collSize * sizeof (struct passPlan);
       do
         {
           size_t taskBegin = firstRecordOfPass;
           curRecord = firstRecordOfPass - 1;
-          passes = Realloc(passes, sizeof (*passes) * (numPasses + 1));
+          passes = Realloc(passes, sizeof_pass * (numPasses + 1));
           for (size_t rank = 0; rank < collSize; ++rank)
             {
               size_t recordAggBufSize = 0;
@@ -1515,7 +1520,12 @@ planPasses(const struct streamMapping *mapping,
               if (curRecord == taskBegin - 1
                   && curRecord + 1 < numWrittenRecords)
                 ++curRecord;
-              passes[numPasses][rank] = (struct passPlan){
+#if ! defined __PGI || __PGIC__ != 20
+              passes[numPasses][rank]
+#else
+              passes[numPasses*collSize+rank]
+#endif
+                = (struct passPlan){
                 .recordAggStart = (unsigned)taskBegin,
                 .recordAggEnd = (unsigned)curRecord,
                 .varStart = writtenRecords[taskBegin].varID,
@@ -1526,7 +1536,11 @@ planPasses(const struct streamMapping *mapping,
           ++numPasses, firstRecordOfPass = curRecord + 1;
         }
       while (curRecord + 1 < numWrittenRecords);
+#if ! defined __PGI || __PGIC__ != 20
       *passes_ = passes;
+#else
+      *passes_ = (struct passPlan(*)[collSize])passes;
+#endif
     }
   Free(recordDataSizePfxSums);
   return numPasses;
