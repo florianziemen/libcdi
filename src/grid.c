@@ -2321,7 +2321,7 @@ bool compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool coord_
         {
           differ = grid->nvertex != gridRef->nvertex
             || (numberA > 0 && positionA != positionB)
-            || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
+            || gridRef->vtable->compareXYFull((grid_t *)gridRef, (grid_t *)grid);
         }
       else
         {

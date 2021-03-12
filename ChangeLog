@@ -2,6 +2,10 @@
 
 	* Version 2.0.0 released
 
+2021-03-12  Uwe Schulzweida
+
+	* compare_unstructured: replaced compareXYAO() by compareXYFull()
+
 2021-03-08  Uwe Schulzweida
 
 	* GRIB key shapeOfTheEarth=2 (bug fix)
