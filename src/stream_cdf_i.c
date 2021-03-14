@@ -18,10 +18,13 @@
 #include "cdf_lazy_grid.h"
 
 
-#define  X_AXIS  1
-#define  Y_AXIS  2
-#define  Z_AXIS  3
-#define  T_AXIS  4
+enum AxisType {
+  X_AXIS = 1,
+  Y_AXIS = 2,
+  Z_AXIS = 3,
+  T_AXIS = 4,
+  E_AXIS = 5,
+};
 
 #define  POSITIVE_UP    1
 #define  POSITIVE_DOWN  2
@@ -35,7 +38,7 @@ typedef struct {
 }
 ncdim_t;
 
-#define  MAX_COORDVARS  4
+#define  MAX_COORDVARS  5
 #define  MAX_AUXVARS    4
 
 typedef struct {
@@ -1676,7 +1679,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	      lydim = lydim | (dimtype == Y_AXIS);
 	      lzdim = lzdim | (dimtype == Z_AXIS);
               if ( ncvars[ncvarid].cvarids[i] != CDI_UNDEFID ) lcdim++;
-	      /* else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = true; */
+	      // else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = true;
 	    }
 
           int allcdims = lcdim;
@@ -1746,7 +1749,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	      else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) lydim = true;
 	      else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) lzdim = true;
               else if ( ncvars[ncvarid].cvarids[i] != CDI_UNDEFID ) lcdim++;
-	      /* else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = true; */
+	      // else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = true;
 	    }
 
           int allcdims = lcdim;
