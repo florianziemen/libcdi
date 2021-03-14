@@ -117,6 +117,13 @@ typedef struct {
 }
 ncvar_t;
 
+typedef struct {
+  char gridfile[8912];
+  unsigned char uuid[CDI_UUID_SIZE];
+  int number_of_grid_used;
+  int timedimid;
+}
+GridInfo;
 
 static
 void scanTimeString(const char *ptu, int64_t *rdate, int *rtime)
@@ -2207,7 +2214,7 @@ void cdf_check_gridtype(int *gridtype, bool islon, bool islat, size_t xsize, siz
 }
 
 static
-bool cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int xvarid, ncvar_t *axisvar,
+bool cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int xvarid, ncvar_t *axisvar,
                      size_t *xsize, size_t ysize, int ntdims, size_t *start, size_t *count, bool *islon)
 {
   grid_t *grid = &lazyGrid->base;
@@ -2277,7 +2284,7 @@ bool cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *restrict lazyGrid,
 }
 
 static
-bool cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int yvarid, ncvar_t *axisvar,
+bool cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int yvarid, ncvar_t *axisvar,
                      size_t xsize, size_t *ysize, int ntdims, size_t *start, size_t *count, bool *islat)
 {
   grid_t *grid = &lazyGrid->base;
@@ -2346,7 +2353,7 @@ bool cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *restrict lazyGrid,
 }
 
 static
-bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar, ncvar_t *ncvars, ncdim_t *ncdims,
+bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t *ncvar, ncvar_t *ncvars, ncdim_t *ncdims,
                           int timedimid, int xvarid, int yvarid, size_t xsize, size_t ysize, int *vdimid)
 {
   grid_t *grid = &lazyGrid->base;
@@ -2421,13 +2428,13 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *restrict lazy
       bool islon = false, islat = false;
 
       if ( xvarid != CDI_UNDEFID )
-        if ( cdf_read_xcoord(streamptr, lazyGrid, ncdims, ncvar, xvarid, &ncvars[xvarid],
-                             &xsize, ysize, ntdims, start, count, &islon) )
+        if (cdf_read_xcoord(streamptr, lazyGrid, ncdims, ncvar, xvarid, &ncvars[xvarid],
+                            &xsize, ysize, ntdims, start, count, &islon))
           return true;
 
       if ( yvarid != CDI_UNDEFID )
-        if ( cdf_read_ycoord(streamptr, lazyGrid, ncdims, ncvar, yvarid, &ncvars[yvarid],
-                             xsize, &ysize, ntdims, start, count, &islat) )
+        if (cdf_read_ycoord(streamptr, lazyGrid, ncdims, ncvar, yvarid, &ncvars[yvarid],
+                             xsize, &ysize, ntdims, start, count, &islat))
           return true;
 
       if      ( ncvar->gridtype == GRID_UNSTRUCTURED ) size = xsize;
@@ -2603,7 +2610,7 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *restrict lazy
 }
 
 static
-bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *ydimid, int number_of_grid_used, unsigned char *uuidOfHGrid)
+bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *ydimid, GridInfo *gridInfo)
 {
   int ndims = ncvar->ndims;
   int *dimtype = ncvar->dimtype;
@@ -2645,9 +2652,9 @@ bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *yd
       return true;
     }
 
-  if ( number_of_grid_used != CDI_UNDEFID ) cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED, number_of_grid_used);
-  if ( ncvar->position > 0 ) cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE, ncvar->position);
-  if ( uuidOfHGrid[0] != 0 ) cdiDefVarKeyBytes(&grid->keys, CDI_KEY_UUID, uuidOfHGrid, CDI_UUID_SIZE);
+  if (gridInfo->number_of_grid_used != CDI_UNDEFID ) cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED, gridInfo->number_of_grid_used);
+  if (ncvar->position > 0 ) cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE, ncvar->position);
+  if (gridInfo->uuid[0] != 0 ) cdiDefVarKeyBytes(&grid->keys, CDI_KEY_UUID, gridInfo->uuid, CDI_UUID_SIZE);
 
   return false;
 }
@@ -2708,18 +2715,14 @@ void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype
 
       if ( xdimid == xdimid2 && (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == CDI_UNDEFID)) )
         {
-          bool same_grid = ncvar1->xvarid == ncvar2->xvarid
-                        && ncvar1->yvarid == ncvar2->yvarid
-                        && ncvar1->position == ncvar2->position;
-          /*
-            if ( xvarid != -1 && ncvar2->xvarid != CDI_UNDEFID &&
-            xvarid != ncvar2->xvarid ) same_grid = false;
+          bool is_same_grid = ncvar1->xvarid == ncvar2->xvarid
+                           && ncvar1->yvarid == ncvar2->yvarid
+                           && ncvar1->position == ncvar2->position;
 
-            if ( yvarid != -1 && ncvar2->yvarid != CDI_UNDEFID &&
-            yvarid != ncvar2->yvarid ) same_grid = false;
-          */
+          // if ( xvarid != -1 && ncvar2->xvarid != CDI_UNDEFID && xvarid != ncvar2->xvarid ) is_same_grid = false;
+          // if ( yvarid != -1 && ncvar2->yvarid != CDI_UNDEFID && yvarid != ncvar2->yvarid ) is_same_grid = false;
 
-          if ( same_grid )
+          if (is_same_grid)
             {
               if ( CDI_Debug ) Message("Same gridID %d %s", ncvar1->gridID, ncvar2->name);
               ncvar2->gridID = ncvar1->gridID;
@@ -2730,8 +2733,7 @@ void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype
 }
 
 static
-int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
-                         int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
+int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, GridInfo *gridInfo)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
@@ -2777,7 +2779,7 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
 	  if ( (ncvar->gridtype == CDI_UNDEFID || ncvar->gridtype == GRID_GENERIC) && lunstructured )
             ncvar->gridtype = GRID_UNSTRUCTURED;
 
-          struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
+          struct cdfLazyGrid *lazyGrid = NULL, *lazyProj = NULL;
 
           {
             const int gridtype = !lgrid ? GRID_PROJECTION : ncvar->gridtype;
@@ -2799,22 +2801,22 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
           yaxisid = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].ncvarid : CDI_UNDEFID;
 
           if ( cdf_read_coordinates(streamptr, lazyGrid, ncvar, ncvars, ncdims,
-                                    timedimid, xvarid, yvarid, xsize, ysize, &vdimid) )
+                                    gridInfo->timedimid, xvarid, yvarid, xsize, ysize, &vdimid) )
             continue;
 
-	  if ( number_of_grid_used != CDI_UNDEFID &&
+	  if ( gridInfo->number_of_grid_used != CDI_UNDEFID &&
                (grid->type == CDI_UNDEFID || grid->type == GRID_GENERIC) &&
                xdimid != CDI_UNDEFID && xsize > 999 )
             grid->type = GRID_UNSTRUCTURED;
 
           if ( grid->type == GRID_UNSTRUCTURED )
-            if ( cdf_set_unstructured_par(ncvar, grid, &xdimid, &ydimid, number_of_grid_used, uuidOfHGrid) )
+            if ( cdf_set_unstructured_par(ncvar, grid, &xdimid, &ydimid, gridInfo) )
               continue;
 
           if ( lgrid && lproj )
             {
               int dimid;
-              cdf_read_coordinates(streamptr, lazyProj, ncvar, ncvars, ncdims, timedimid,
+              cdf_read_coordinates(streamptr, lazyProj, ncvar, ncvars, ncdims, gridInfo->timedimid,
                                    xaxisid, yaxisid, xsize, ysize, &dimid);
 	    }
 
@@ -2855,8 +2857,8 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
                 }
             }
 
-          if ( grid->type == GRID_UNSTRUCTURED && gridfile[0] != 0 )
-            gridDefReference(gridID, gridfile);
+          if ( grid->type == GRID_UNSTRUCTURED && gridInfo->gridfile[0] != 0 )
+            gridDefReference(gridID, gridInfo->gridfile);
 
           if ( ncvar->chunked ) grid_set_chunktype(grid, ncvar);
 
@@ -2903,7 +2905,7 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
   return 0;
 }
 
-/* define all input zaxes */
+// define all input zaxes
 static
 int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                          size_t vctsize_echam, double *vct_echam, unsigned char *uuidOfVGrid)
@@ -2960,8 +2962,8 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 	  if ( zaxisType == CDI_UNDEFID ) zaxisType = ZAXIS_GENERIC;
 
           int zdatatype = CDI_DATATYPE_FLT64;
-	  double *restrict lbounds = NULL;
-	  double *restrict ubounds = NULL;
+	  double *lbounds = NULL;
+	  double *ubounds = NULL;
 
 	  if ( zvarid != CDI_UNDEFID )
 	    {
@@ -3016,7 +3018,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 			  with_bounds = true;
 			  lbounds = (double *) Malloc(4 * nlevel*sizeof(double));
 			  ubounds = lbounds + nlevel;
-			  double *restrict zbounds = lbounds + 2 * nlevel;
+			  double *zbounds = lbounds + 2 * nlevel;
 			  cdf_get_var_double(ncvars[zvarid].ncid, ncvars[zvarid].bounds, zbounds);
 			  for ( size_t i = 0; i < nlevel; ++i )
 			    {
@@ -3458,7 +3460,7 @@ bool is_geos_data(int vlistID)
 }
 
 static
-void cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *modelID, bool *ucla_les, unsigned char *uuidOfHGrid, unsigned char *uuidOfVGrid, char *gridfile, int *number_of_grid_used)
+void cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *modelID, bool *ucla_les, unsigned char *uuidOfVGrid, GridInfo *gridInfo)
 {
   nc_type xtype;
   size_t attlen;
@@ -3518,12 +3520,12 @@ void cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int 
               */
 	      else if ( strIsEqual(attname, "grid_file_uri") )
 		{
-                  memcpy(gridfile, attstring, attstrlen+1);
+                  memcpy(gridInfo->gridfile, attstring, attstrlen+1);
 		}
 	      else if ( strIsEqual(attname, "uuidOfHGrid") && attstrlen == 36 )
 		{
                   attstring[36] = 0;
-                  cdiStr2UUID(attstring, uuidOfHGrid);
+                  cdiStr2UUID(attstring, gridInfo->uuid);
                   //   printf("uuid: %d %s\n", attlen, attstring);
 		}
 	      else if ( strIsEqual(attname, "uuidOfVGrid") && attstrlen == 36 )
@@ -3533,8 +3535,8 @@ void cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int 
 		}
 	      else
 		{
-                  if ( strIsEqual(attname, "ICON_grid_file_uri") && gridfile[0] == 0 )
-                    memcpy(gridfile, attstring, attstrlen+1);
+                  if ( strIsEqual(attname, "ICON_grid_file_uri") && gridInfo->gridfile[0] == 0 )
+                    memcpy(gridInfo->gridfile, attstring, attstrlen+1);
 
 		  cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int)attstrlen, attstring);
 		}
@@ -3544,8 +3546,8 @@ void cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int 
 	{
 	  if ( strIsEqual(attname, "number_of_grid_used") )
 	    {
-	      (*number_of_grid_used) = CDI_UNDEFID;
-	      cdfGetAttInt(fileID, NC_GLOBAL, attname, 1, number_of_grid_used);
+	      gridInfo->number_of_grid_used = CDI_UNDEFID;
+	      cdfGetAttInt(fileID, NC_GLOBAL, attname, 1, &gridInfo->number_of_grid_used);
 	    }
  	  else
             {
@@ -3755,7 +3757,7 @@ void cdf_set_ucla_dimtype(int ndims, ncdim_t *ncdims, ncvar_t *ncvars)
 }
 
 static
-int cdfCheckVars(stream_t *streamptr, int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
+int cdf_check_variables(stream_t *streamptr, int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
@@ -3882,15 +3884,15 @@ int cdfInqContents(stream_t *streamptr)
   int calendar = CDI_UNDEFID;
   int format = 0;
   bool ucla_les = false;
-  char gridfile[8912];
   char fcreftime[CDI_MAX_NAME];
-  int number_of_grid_used = CDI_UNDEFID;
+  GridInfo gridInfo;
+  gridInfo.gridfile[0] = 0;
+  memset(gridInfo.uuid, 0, CDI_UUID_SIZE);
+  gridInfo.number_of_grid_used = CDI_UNDEFID;
+  gridInfo.timedimid = CDI_UNDEFID;
 
-  unsigned char uuidOfHGrid[CDI_UUID_SIZE];
   unsigned char uuidOfVGrid[CDI_UUID_SIZE];
-  memset(uuidOfHGrid, 0, CDI_UUID_SIZE);
   memset(uuidOfVGrid, 0, CDI_UUID_SIZE);
-  gridfile[0] = 0;
   fcreftime[0] = 0;
 
   const int vlistID = streamptr->vlistID;
@@ -3969,8 +3971,7 @@ int cdfInqContents(stream_t *streamptr)
 
 
   // scan global attributes
-  cdf_scan_global_attr(fileID, vlistID, ngatts, &instID, &modelID, &ucla_les,
-                       uuidOfHGrid, uuidOfVGrid, gridfile, &number_of_grid_used);
+  cdf_scan_global_attr(fileID, vlistID, ngatts, &instID, &modelID, &ucla_les, uuidOfVGrid, &gridInfo);
 
   bool isGeosData = is_geos_data(vlistID);
   if (CDI_Debug) Message("isGeosData %d", isGeosData);
@@ -4044,7 +4045,7 @@ int cdfInqContents(stream_t *streamptr)
   if ( leadtime_id != CDI_UNDEFID ) ncvars[leadtime_id].isvar = FALSE;
 
   // check ncvars
-  timedimid = cdfCheckVars(streamptr, nvars, ncvars, ntsteps, timedimid);
+  timedimid = cdf_check_variables(streamptr, nvars, ncvars, ntsteps, timedimid);
 
   // verify coordinate vars - first scan (dimname == varname)
   bool lhybrid_cf = false;
@@ -4115,20 +4116,20 @@ int cdfInqContents(stream_t *streamptr)
   // read ECHAM VCT if present
   size_t vctsize = 0;
   double *vct = NULL;
-  if ( !lhybrid_cf ) read_vct_echam(fileID, nvars, ncvars, ncdims, &vct, &vctsize);
+  if (!lhybrid_cf) read_vct_echam(fileID, nvars, ncvars, ncdims, &vct, &vctsize);
 
 
-  if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "cdf_define_all_grids");
+  if (CDI_Debug) cdf_print_vars(ncvars, nvars, "cdf_define_all_grids");
 
   // define all grids
-  int status;
-  status = cdf_define_all_grids(streamptr, streamptr->ncgrid, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, gridfile, number_of_grid_used);
-  if ( status < 0 ) return status;
+  gridInfo.timedimid = timedimid;
+  int status = cdf_define_all_grids(streamptr, streamptr->ncgrid, vlistID, ncdims, nvars, ncvars, &gridInfo);
+  if (status < 0) return status;
 
   // define all zaxes
   status = cdf_define_all_zaxes(streamptr, vlistID, ncdims, nvars, ncvars, vctsize, vct, uuidOfVGrid);
-  if ( vct ) Free(vct);
-  if ( status < 0 ) return status;
+  if (vct) Free(vct);
+  if (status < 0) return status;
 
   // verify vars
   cdfVerifyVars(nvars, ncvars, ncdims);
