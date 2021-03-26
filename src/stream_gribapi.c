@@ -1899,41 +1899,34 @@ static
 void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRotated, bool gridIsCurvilinear, int uvRelativeToGrid)
 {
   const char *mesg;
-  size_t len;
-  if ( gridtype == GRID_GAUSSIAN )
-    {
-      static const char mesg_gaussian[] = "regular_gg";
-      len = sizeof(mesg_gaussian) - 1;
-      mesg = mesg_gaussian;
-    }
-  else if ( gridtype == GRID_GAUSSIAN_REDUCED )
-    {
-      static const char mesg_gaussian_reduced[] = "reduced_gg";
-      len = sizeof(mesg_gaussian_reduced) - 1;
-      mesg = mesg_gaussian_reduced;
-    }
-  else if ( gridIsRotated )
-    {
-      static const char mesg_rot_lonlat[] = "rotated_ll";
-      len = sizeof(mesg_rot_lonlat) - 1;
-      mesg = mesg_rot_lonlat;
-    }
-  else
-    {
-      static const char mesg_regular_ll[] = "regular_ll";
-      len = sizeof(mesg_regular_ll) - 1;
-      mesg = mesg_regular_ll;
-    }
+  // clang-format off
+  if      (gridtype == GRID_GAUSSIAN)         mesg = "regular_gg";
+  else if (gridtype == GRID_GAUSSIAN_REDUCED) mesg = "reduced_gg";
+  else if (gridIsRotated)                     mesg = "rotated_ll";
+  else                                        mesg = "regular_ll";
+  // clang-format on
+  size_t len = strlen(mesg);
   GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
-  double xfirst = 0, xlast = 0, xinc = 0;
-  double yfirst = 0, ylast = 0, yinc = 0;
+  double xfirst = 0.0, xlast = 0.0, xinc = 0.0;
+  double yfirst = 0.0, ylast = 0.0, yinc = 0.0;
 
   size_t nlon = gridInqXsize(gridID);
   size_t nlat = gridInqYsize(gridID);
 
   if ( gridtype == GRID_GAUSSIAN_REDUCED )
     {
+      if (nlon == 2)
+        {
+          xfirst = gridInqXval(gridID, 0);
+          xlast  = gridInqXval(gridID, 1);
+        }
+      else
+        {
+          xfirst = 0.0;
+          xlast  = 360.0 - 360.0 * 0.5 / (double)nlat;
+        }
+
       nlon = 0;
 
       int *reducedPoints = (int *) Malloc(nlat*sizeof(int));
@@ -1945,10 +1938,6 @@ void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridI
 
       Free(pl);
       Free(reducedPoints);
-
-      xfirst = 0;
-      xinc   =        360. * 0.5 / (double)nlat;
-      xlast  = 360. - 360. * 0.5 / (double)nlat;
     }
   else
     {
@@ -1971,8 +1960,8 @@ void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridI
 
   double xfirsto = xfirst;
   double xlasto = xlast;
-  while ( xfirsto > 360 ) xfirsto -= 360;
-  while ( xlasto  > 360 ) xlasto  -= 360;
+  while ( xfirsto > 360.0 ) xfirsto -= 360.0;
+  while ( xlasto  > 360.0 ) xlasto  -= 360.0;
 
   if ( gridtype != GRID_GAUSSIAN_REDUCED ) GRIB_CHECK(my_grib_set_long(gh, "Ni", nlon), 0);
   GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xfirsto), 0);
@@ -2001,12 +1990,12 @@ void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridI
 
   if ( gridIsRotated )
     {
-      double xpole = 0, ypole = 0, angle = 0;
+      double xpole = 0.0, ypole = 0.0, angle = 0.0;
       gridInqParamRLL(gridID, &xpole, &ypole, &angle);
 
-      xpole += 180;
-      if ( fabs(ypole) > 0 ) ypole = -ypole; // change from north to south pole
-      if ( fabs(angle) > 0 ) angle = -angle;
+      xpole += 180.0;
+      if ( fabs(ypole) > 0.0 ) ypole = -ypole; // change from north to south pole
+      if ( fabs(angle) > 0.0 ) angle = -angle;
       GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees",  ypole), 0);
       GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", xpole), 0);
       GRIB_CHECK(my_grib_set_double(gh, "angleOfRotation", angle), 0);
@@ -2020,10 +2009,10 @@ long radiusToShapeOfTheEarth(double radius)
 {
   long shapeOfTheEarth = 0;
 
-  if      (IS_EQUAL(radius, 6367470.)) shapeOfTheEarth = 0;
-  else if (IS_EQUAL(radius, 6378160.)) shapeOfTheEarth = 2;
-  else if (IS_EQUAL(radius, 6371229.)) shapeOfTheEarth = 6;
-  else if (IS_EQUAL(radius, 6371200.)) shapeOfTheEarth = 8;
+  if      (IS_EQUAL(radius, 6367470.0)) shapeOfTheEarth = 0;
+  else if (IS_EQUAL(radius, 6378160.0)) shapeOfTheEarth = 2;
+  else if (IS_EQUAL(radius, 6371229.0)) shapeOfTheEarth = 6;
+  else if (IS_EQUAL(radius, 6371200.0)) shapeOfTheEarth = 8;
 
   return shapeOfTheEarth;
 }
@@ -2042,16 +2031,16 @@ void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRel
       gpp.y_0 = gridInqYval(gridID, 0);
     }
   gridVerifyProjParamsLCC(&gpp);
-  if (gpp.xval_0 < 0) gpp.xval_0 += 360;
-  if (gpp.lon_0 < 0) gpp.lon_0 += 360;
+  if (gpp.xval_0 < 0.0) gpp.xval_0 += 360.0;
+  if (gpp.lon_0 < 0.0) gpp.lon_0 += 360.0;
 
-  const bool lsouth = (gpp.lat_1 < 0);
+  const bool lsouth = (gpp.lat_1 < 0.0);
   if (lsouth) { gpp.lat_1 = -gpp.lat_2; gpp.lat_2 = -gpp.lat_2; }
   int projflag = 0;
   if (lsouth) gribbyte_set_bit(&projflag, 1);
 
-  double xinc = gridInqXinc(gridID);
-  double yinc = gridInqYinc(gridID);
+  const double xinc = gridInqXinc(gridID);
+  const double yinc = gridInqYinc(gridID);
 
   static const char mesg[] = "lambert";
   size_t len = sizeof(mesg) -1;
@@ -2092,7 +2081,7 @@ void gribapiDefGridSTERE(grib_handle *gh, int gridID)
   struct CDI_GridProjParams gpp;
   gridInqParamsSTERE(gridID, &gpp);
   gridVerifyProjParamsSTERE(&gpp);
-  if (gpp.xval_0 < 0) gpp.xval_0 += 360;
+  if (gpp.xval_0 < 0.0) gpp.xval_0 += 360.0;
   int projflag = 0;
 
   const double xinc = gridInqXinc(gridID);

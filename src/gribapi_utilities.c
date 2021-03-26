@@ -535,16 +535,16 @@ void gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, int editionNum
 
   grid->reducedPointsSize = (int)nlat;
   grid->reducedPoints = (int *) Malloc(nlat * sizeof(int));
-  long *pl     = (long *) Malloc(nlat * sizeof(long));
+  long *pl = (long *) Malloc(nlat * sizeof(long));
   size_t dummy = nlat;
   FAIL_ON_GRIB_ERROR(grib_get_long_array, gh, "pl", pl, &dummy);
   for ( size_t i = 0; i < nlat; ++i ) grid->reducedPoints[i] = (int)pl[i];
   Free(pl);
 
-  grid->y.size  = nlat;
-  grid->x.inc   = 0;
-  grid->y.inc   = 0;
-  grid->x.flag  = 0;
+  grid->y.size = nlat;
+  grid->x.inc  = 0;
+  grid->y.inc  = 0;
+  grid->x.flag = 0;
   FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->x.first);
   FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfLastGridPointInDegrees",  &grid->x.last);
   FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees",  &grid->y.first);
@@ -553,30 +553,18 @@ void gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, int editionNum
   // FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->x.inc);
   // if ( IS_EQUAL(grid->x.inc, GRIB_MISSING_DOUBLE) ) grid->x.inc = 0;
 
-  /* if ( IS_NOT_EQUAL(grid->x.first, 0) || IS_NOT_EQUAL(grid->x.last, 0) ) */
-  {
-    if ( grid->x.size > 1 )
-      {
-        if ( (grid->x.first > grid->x.last) && (grid->x.first >= 180) ) grid->x.first -= 360;
+  if ( grid->x.last < grid->x.first )
+    {
+      if ( grid->x.first >= 180.0 )
+        grid->x.first -= 360.0;
+      else
+        grid->x.last += 360.0;
+    }
 
-        if ( editionNumber <= 1 )
-          {
-            /* correct xinc if necessary */
-            if ( IS_EQUAL(grid->x.first, 0) && grid->x.last > 354 )
-              {
-                double xinc = 360. / grid->x.size;
-                if ( fabs(grid->x.inc-xinc) > 0.0 )
-                  {
-                    grid->x.inc = xinc;
-                    if ( CDI_Debug ) Message("set xinc to %g", grid->x.inc);
-                  }
-              }
-          }
-      }
-    grid->x.flag = 2;
-  }
+  grid->x.flag = 2;
+
   grid->y.flag = 0;
-  /* if ( IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0) ) */
+  // if (IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0))
   {
     if ( grid->y.size > 1 )
       {
@@ -630,7 +618,7 @@ void gribapiGetGridRegular(grib_handle *gh, grid_t *grid, int editionNumber, int
   if ( grid->x.inc < -999 || grid->x.inc > 999 ) grid->x.inc = 0;
   if ( grid->y.inc < -999 || grid->y.inc > 999 ) grid->y.inc = 0;
 
-  /* if ( IS_NOT_EQUAL(grid->x.first, 0) || IS_NOT_EQUAL(grid->x.last, 0) ) */
+  // if ( IS_NOT_EQUAL(grid->x.first, 0) || IS_NOT_EQUAL(grid->x.last, 0) )
   {
     if ( grid->x.size > 1 )
       {
@@ -660,7 +648,7 @@ void gribapiGetGridRegular(grib_handle *gh, grid_t *grid, int editionNumber, int
   }
 
   grid->y.flag = 0;
-  /* if ( IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0) ) */
+  // if ( IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0) )
   {
     if ( grid->y.size > 1 )
       {
