@@ -53,6 +53,11 @@ typedef struct
 } cgribex_handle;
 
 
+static
+void fill_intarr(int *iarr, int val, int n)
+{
+  for (int i = 0; i < n; ++i) iarr[i] = val;
+}
 
 static
 void cgribexInit(cgribexrec_t *cgribexp)
@@ -663,8 +668,8 @@ void cgribexDecodeHeader(cgribexrec_t *cgribexp, int *gribbuffer, int recsize, i
 
   int ipunp = 0, iword = 0;
 
-  memset(isec1, 0, 256*sizeof(int));
-  memset(isec2, 0, 32*sizeof(int));
+  fill_intarr(isec1, 0, 256);
+  fill_intarr(isec2, 0, 32);
 
   double *fsec4 = NULL;
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
@@ -1790,16 +1795,16 @@ void cgribexDefGridGME(int *isec2, int gridID)
 static
 void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID, int uvRelativeToGrid)
 {
-  memset(isec2, 0, 16*sizeof(int));
+  fill_intarr(isec2, 0, 16);
   ISEC1_Sec2Or3Flag = 128;
   ISEC1_GridDefinition = 255;
   ISEC2_Reduced  = false;
   ISEC2_ScanFlag = 0;
 
-  int gridsize = (int) gridInqSize(gridID);
-  bool gridIsRotated = false;
-  bool gridIsCurvilinear = false;
-  int gridtype = grbGetGridtype(&gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
+  const int gridsize = (int) gridInqSize(gridID);
+  const bool gridIsRotated = false;
+  const bool gridIsCurvilinear = false;
+  const int gridtype = grbGetGridtype(&gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
 
   switch (gridtype)
     {
@@ -2073,7 +2078,7 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
   float fsec2f[sizeof(cgribexp->fsec2)/sizeof(double)];
   float fsec3f[sizeof(cgribexp->fsec3)/sizeof(double)];
 
-  memset(isec1, 0, 256*sizeof(int));
+  fill_intarr(isec1, 0, 256);
   fsec2[0] = 0; fsec2[1] = 0;
   fsec2f[0] = 0; fsec2f[1] = 0;
 
