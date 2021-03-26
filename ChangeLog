@@ -2,6 +2,10 @@
 
 	* Version 2.0.0 released
 
+2021-03-26  Uwe Schulzweida
+
+	* cgribexDefGridRegular: use defined values for xfirst and xlast for Gaussian reduced longitudes
+
 2021-03-12  Uwe Schulzweida
 
 	* compare_unstructured: replaced compareXYAO() by compareXYFull()

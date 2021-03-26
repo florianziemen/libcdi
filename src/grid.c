@@ -2434,7 +2434,7 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   if ( cmp_key_int(&g1->keys, &g2->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE) ) return differ;
   if ( g1->trunc         != g2->trunc        ) return differ;
   if ( g1->nvertex       != g2->nvertex      ) return differ;
-  if ( g1->reducedPointsSize       != g2->reducedPointsSize      ) return differ;
+  if ( g1->reducedPointsSize != g2->reducedPointsSize      ) return differ;
   if ( g1->size          != g2->size         ) return differ;
   if ( g1->x.size        != g2->x.size       ) return differ;
   if ( g1->y.size        != g2->y.size       ) return differ;
@@ -2668,9 +2668,7 @@ void gridComplete(grid_t *grid)
 	    double *yvals = (double *) Malloc(grid->y.size * sizeof (double));
 	    gridGenYvals(gridtype, grid->y.size, grid->y.first, grid->y.last, grid->y.inc, yvals);
             grid->y.vals = yvals;
-	    /*
-	    gridDefYinc(gridID, grid->y.inc);
-	    */
+	    // gridDefYinc(gridID, grid->y.inc);
 	  }
 	break;
       }

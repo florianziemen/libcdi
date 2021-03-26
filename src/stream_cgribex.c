@@ -1619,8 +1619,8 @@ void cgribexDefGridRegular(int *isec2, double *fsec2, int gridID, int gridtype, 
   else
     ISEC2_GridType = GRIB1_GTYPE_LATLON;
 
-  double xfirst = 0, xlast = 0, xinc = 0;
-  double yfirst = 0, ylast = 0, yinc = 0;
+  double xfirst = 0.0, xlast = 0.0, xinc = 0.0;
+  double yfirst = 0.0, ylast = 0.0, yinc = 0.0;
 
   int nlon = (int)gridInqXsize(gridID);
   int nlat = (int)gridInqYsize(gridID);
@@ -1628,6 +1628,16 @@ void cgribexDefGridRegular(int *isec2, double *fsec2, int gridID, int gridtype, 
   if ( gridtype == GRID_GAUSSIAN_REDUCED )
     {
       ISEC2_Reduced = true;
+      if (nlon == 2)
+        {
+          xfirst = gridInqXval(gridID, 0);
+          xlast  = gridInqXval(gridID, 1);
+        }
+      else
+        {
+          xlast = 360.0 - 360.0 / (nlat*2);
+        }
+
       nlon = 0;
       gridInqReducedPoints(gridID, ISEC2_ReducedPointsPtr);
     }
@@ -1654,18 +1664,10 @@ void cgribexDefGridRegular(int *isec2, double *fsec2, int gridID, int gridtype, 
   ISEC2_NumLat   = nlat;
   ISEC2_FirstLat = (int)lround(yfirst*1000);
   ISEC2_LastLat  = (int)lround(ylast*1000);
-  if ( gridtype == GRID_GAUSSIAN_REDUCED )
-    {
-      ISEC2_FirstLon = 0;
-      ISEC2_LastLon  = (int)lround(1000*(360.-360./(nlat*2)));
-      //ISEC2_LonIncr  = (int)lround(1000*360./(nlat*2)); // gribapi gridType detector doesn't like lonIncr
-    }
-  else
-    {
-      ISEC2_FirstLon = (int)lround(xfirst*1000);
-      ISEC2_LastLon  = (int)lround(xlast*1000);
-      ISEC2_LonIncr  = (int)lround(xinc*1000);
-    }
+  ISEC2_FirstLon = (int)lround(xfirst*1000);
+  ISEC2_LastLon  = (int)lround(xlast*1000);
+  // gribapi gridType detector doesn't like lonIncr for Gaussian reduced longitides
+  if ( gridtype != GRID_GAUSSIAN_REDUCED ) ISEC2_LonIncr  = (int)lround(xinc*1000);
 
   if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
     {
@@ -1802,8 +1804,8 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
   ISEC2_ScanFlag = 0;
 
   const int gridsize = (int) gridInqSize(gridID);
-  const bool gridIsRotated = false;
-  const bool gridIsCurvilinear = false;
+  bool gridIsRotated = false;
+  bool gridIsCurvilinear = false;
   const int gridtype = grbGetGridtype(&gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
 
   switch (gridtype)
