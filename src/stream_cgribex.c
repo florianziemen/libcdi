@@ -246,6 +246,163 @@ int cgribexGetTsteptype(int timerange)
 }
 
 static
+bool cgribexGetGridRegular(int *isec2, int *isec4, grid_t *grid, int gridtype, bool compyinc)
+{
+  const bool ijDirectionIncrementGiven = gribbyte_get_bit(ISEC2_ResFlag, 1);
+  const bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
+
+  const size_t nvalues = (size_t) ISEC4_NumValues;
+  const size_t nlon = (size_t) ISEC2_NumLon;
+  const size_t nlat = (size_t) ISEC2_NumLat;
+  if (nvalues != nlon*nlat) Error("numberOfPoints (%zu) and gridSize (%zu) differ!", nvalues, nlon*nlat);
+
+  grid->size   = nvalues;
+  grid->x.size = nlon;
+  grid->y.size = nlat;
+
+  if ( gridtype == GRID_GAUSSIAN ) grid->np = ISEC2_NumPar;
+  grid->x.inc  = 0;
+  grid->y.inc  = 0;
+  grid->x.flag = 0;
+  // if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 )
+  {
+    if ( grid->x.size > 1 )
+      {
+        bool recompinc = true;
+
+        if ( ISEC2_LastLon < ISEC2_FirstLon )
+          {
+            if ( ISEC2_FirstLon >= 180000 )
+              ISEC2_FirstLon -= 360000;
+            else
+              ISEC2_LastLon += 360000;
+          }
+
+        if ( ijDirectionIncrementGiven && ISEC2_LonIncr > 0 )
+          {
+            if ( labs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*((long)grid->x.size-1))) <= 2 )
+              {
+                recompinc = false;
+                grid->x.inc = ISEC2_LonIncr * 0.001;
+              }
+          }
+
+        // recompute xinc if necessary
+        if ( recompinc ) grid->x.inc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->x.size-1);
+
+        // correct xinc if necessary
+        if ( ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 && ISEC2_LastLon < 360000 )
+          {
+            double xinc = 360. / grid->x.size;
+            if ( fabs(grid->x.inc-xinc) > 0.0 )
+              {
+                grid->x.inc = xinc;
+                if ( CDI_Debug ) Message("set xinc to %g", grid->x.inc);
+              }
+          }
+      }
+    grid->x.first = ISEC2_FirstLon * 0.001;
+    grid->x.last  = ISEC2_LastLon  * 0.001;
+    grid->x.flag  = 2;
+  }
+  grid->y.flag = 0;
+  // if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 )
+  {
+    if ( grid->y.size > 1 && compyinc )
+      {
+        bool recompinc = true;
+        if ( ijDirectionIncrementGiven && ISEC2_LatIncr > 0 )
+          {
+            if ( labs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*((long)grid->y.size-1))) <= 2 )
+              {
+                recompinc = false;
+                grid->y.inc = ISEC2_LatIncr * 0.001;
+              }
+          }
+
+        // recompute yinc if necessary
+        if ( recompinc ) grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->y.size - 1);
+      }
+    grid->y.first = ISEC2_FirstLat * 0.001;
+    grid->y.last  = ISEC2_LastLat  * 0.001;
+    grid->y.flag  = 2;
+  }
+
+  return uvRelativeToGrid;
+}
+
+static
+bool cgribexGetGridReduced(int *isec2, int *isec4, grid_t *grid)
+{
+  const bool ijDirectionIncrementGiven = gribbyte_get_bit(ISEC2_ResFlag, 1);
+  const bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
+  grid->np      = ISEC2_NumPar;
+  grid->size    = (size_t)ISEC4_NumValues;
+  grid->reducedPoints  = ISEC2_ReducedPointsPtr;
+  grid->reducedPointsSize = (size_t)ISEC2_NumLat;
+  grid->y.size  = (size_t)ISEC2_NumLat;
+  grid->x.inc   = 0;
+  grid->y.inc   = 0;
+  grid->x.flag  = 0;
+  // if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 )
+  {
+    if ( ISEC2_LastLon < ISEC2_FirstLon )
+      {
+        if ( ISEC2_FirstLon >= 180000 )
+          ISEC2_FirstLon -= 360000;
+        else
+          ISEC2_LastLon += 360000;
+      }
+
+    grid->x.first = ISEC2_FirstLon * 0.001;
+    grid->x.last  = ISEC2_LastLon  * 0.001;
+    grid->x.flag  = 2;
+  }
+  grid->y.flag = 0;
+  // if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 )
+  {
+    if ( grid->y.size > 1 )
+      {
+        if ( ijDirectionIncrementGiven && ISEC2_LatIncr > 0 )
+          grid->y.inc = ISEC2_LatIncr * 0.001;
+        else
+          grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->y.size - 1);
+      }
+    grid->y.first = ISEC2_FirstLat * 0.001;
+    grid->y.last  = ISEC2_LastLat  * 0.001;
+    grid->y.flag  = 2;
+  }
+
+  return uvRelativeToGrid;
+}
+
+static
+bool cgribexGetGridLCC(int *isec2, int *isec4, grid_t *grid)
+{
+  const bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
+
+  const size_t nvalues = (size_t) ISEC4_NumValues;
+  const size_t nlon = (size_t) ISEC2_NumLon;
+  const size_t nlat = (size_t) ISEC2_NumLat;
+  if ( nvalues != nlon*nlat ) Error("numberOfPoints (%zu) and gridSize (%zu) differ!", nvalues, nlon*nlat);
+
+  grid->size   = nvalues;
+  grid->x.size = nlon;
+  grid->y.size = nlat;
+
+  grid->x.first = 0;
+  grid->x.last  = 0;
+  grid->x.inc   = ISEC2_Lambert_dx;
+  grid->y.first = 0;
+  grid->y.last  = 0;
+  grid->y.inc   = ISEC2_Lambert_dy;
+  grid->x.flag  = 2;
+  grid->y.flag  = 2;
+
+  return uvRelativeToGrid;
+}
+
+static
 bool cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, int iret)
 {
   bool uvRelativeToGrid = false;
@@ -272,161 +429,25 @@ bool cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
   grid_init(grid);
   cdiGridTypeInit(grid, gridtype, 0);
 
-  if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN || projtype == CDI_PROJ_RLL )
+  if (gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN || projtype == CDI_PROJ_RLL)
     {
-      const bool ijDirectionIncrementGiven = gribbyte_get_bit(ISEC2_ResFlag, 1);
-      uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
-
-      const size_t nvalues = (size_t) ISEC4_NumValues;
-      const size_t nlon = (size_t) ISEC2_NumLon;
-      const size_t nlat = (size_t) ISEC2_NumLat;
-      if ( nvalues != nlon*nlat )
-        Error("numberOfPoints (%zu) and gridSize (%zu) differ!", nvalues, nlon*nlat);
-
-      grid->size   = nvalues;
-      grid->x.size = nlon;
-      grid->y.size = nlat;
-
-      if ( gridtype == GRID_GAUSSIAN ) grid->np = ISEC2_NumPar;
-      grid->x.inc  = 0;
-      grid->y.inc  = 0;
-      grid->x.flag = 0;
-      /* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
-      {
-        if ( grid->x.size > 1 )
-          {
-            bool recompinc = true;
-
-            if ( ISEC2_LastLon < ISEC2_FirstLon )
-              {
-                if ( ISEC2_FirstLon >= 180000 )
-                  ISEC2_FirstLon -= 360000;
-                else
-                  ISEC2_LastLon += 360000;
-              }
-
-            if ( ijDirectionIncrementGiven && ISEC2_LonIncr > 0 )
-              {
-                if ( labs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*((long)grid->x.size-1))) <= 2 )
-                  {
-                    recompinc = false;
-                    grid->x.inc = ISEC2_LonIncr * 0.001;
-                  }
-              }
-
-            /* recompute xinc if necessary */
-            if ( recompinc ) grid->x.inc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->x.size-1);
-
-            /* correct xinc if necessary */
-            if ( ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 && ISEC2_LastLon < 360000 )
-              {
-                double xinc = 360. / grid->x.size;
-                if ( fabs(grid->x.inc-xinc) > 0.0 )
-                  {
-                    grid->x.inc = xinc;
-                    if ( CDI_Debug ) Message("set xinc to %g", grid->x.inc);
-                  }
-              }
-          }
-        grid->x.first = ISEC2_FirstLon * 0.001;
-        grid->x.last  = ISEC2_LastLon  * 0.001;
-        grid->x.flag  = 2;
-      }
-      grid->y.flag = 0;
-      /* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
-      {
-        if ( grid->y.size > 1 && compyinc )
-          {
-            bool recompinc = true;
-            if ( ijDirectionIncrementGiven && ISEC2_LatIncr > 0 )
-              {
-                if ( labs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*((long)grid->y.size-1))) <= 2 )
-                  {
-                    recompinc = false;
-                    grid->y.inc = ISEC2_LatIncr * 0.001;
-                  }
-              }
-
-            /* recompute yinc if necessary */
-            if ( recompinc ) grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->y.size - 1);
-          }
-        grid->y.first = ISEC2_FirstLat * 0.001;
-        grid->y.last  = ISEC2_LastLat  * 0.001;
-        grid->y.flag  = 2;
-      }
+      uvRelativeToGrid = cgribexGetGridRegular(isec2, isec4, grid, gridtype, compyinc);
     }
-  else if ( gridtype == GRID_GAUSSIAN_REDUCED )
+  else if (gridtype == GRID_GAUSSIAN_REDUCED)
     {
-      const bool ijDirectionIncrementGiven = gribbyte_get_bit(ISEC2_ResFlag, 1);
-      uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
-      grid->np      = ISEC2_NumPar;
-      grid->size    = (size_t)ISEC4_NumValues;
-      grid->reducedPoints  = ISEC2_ReducedPointsPtr;
-      grid->reducedPointsSize = (size_t)ISEC2_NumLat;
-      grid->y.size  = (size_t)ISEC2_NumLat;
-      grid->x.inc   = 0;
-      grid->y.inc   = 0;
-      grid->x.flag  = 0;
-      /* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
-      {
-        if ( grid->x.size > 1 )
-          {
-            if ( ISEC2_LastLon < ISEC2_FirstLon && ISEC2_LastLon < 0 ) ISEC2_LastLon += 360000;
-
-            if ( ijDirectionIncrementGiven && ISEC2_LonIncr > 0 )
-              grid->x.inc = ISEC2_LonIncr * 0.001;
-            else
-              grid->x.inc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->x.size - 1);
-          }
-        grid->x.first = ISEC2_FirstLon * 0.001;
-        grid->x.last  = ISEC2_LastLon  * 0.001;
-        grid->x.flag  = 2;
-      }
-      grid->y.flag = 0;
-      /* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
-      {
-        if ( grid->y.size > 1 )
-          {
-            if ( ijDirectionIncrementGiven && ISEC2_LatIncr > 0 )
-              grid->y.inc = ISEC2_LatIncr * 0.001;
-            else
-              grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->y.size - 1);
-          }
-        grid->y.first = ISEC2_FirstLat * 0.001;
-        grid->y.last  = ISEC2_LastLat  * 0.001;
-        grid->y.flag  = 2;
-      }
+      uvRelativeToGrid = cgribexGetGridReduced(isec2, isec4, grid);
     }
-  else if ( projtype == CDI_PROJ_LCC )
+  else if (projtype == CDI_PROJ_LCC)
     {
-      uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
-
-      const size_t nvalues = (size_t) ISEC4_NumValues;
-      const size_t nlon = (size_t) ISEC2_NumLon;
-      const size_t nlat = (size_t) ISEC2_NumLat;
-      if ( nvalues != nlon*nlat )
-        Error("numberOfPoints (%zu) and gridSize (%zu) differ!", nvalues, nlon*nlat);
-
-      grid->size   = nvalues;
-      grid->x.size = nlon;
-      grid->y.size = nlat;
-
-      grid->x.first = 0;
-      grid->x.last  = 0;
-      grid->x.inc   = ISEC2_Lambert_dx;
-      grid->y.first = 0;
-      grid->y.last  = 0;
-      grid->y.inc   = ISEC2_Lambert_dy;
-      grid->x.flag  = 2;
-      grid->y.flag  = 2;
+      uvRelativeToGrid = cgribexGetGridLCC(isec2, isec4, grid);
     }
-  else if ( gridtype == GRID_SPECTRAL )
+  else if (gridtype == GRID_SPECTRAL)
     {
       grid->size  = (size_t) ISEC4_NumValues;
       grid->trunc = ISEC2_PentaJ;
       grid->lcomplex = (ISEC2_RepMode == 2) ? 1 : 0;
-   }
-  else if ( gridtype == GRID_GME )
+    }
+  else if (gridtype == GRID_GME)
     {
       grid->size  = (size_t) ISEC4_NumValues;
       grid->gme.nd  = ISEC2_GME_ND;
@@ -434,7 +455,7 @@ bool cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
       grid->gme.ni2 = ISEC2_GME_NI2;
       grid->gme.ni3 = ISEC2_GME_NI3;
     }
-  else if ( gridtype == GRID_GENERIC )
+  else if (gridtype == GRID_GENERIC)
     {
       grid->size  = (size_t) ISEC4_NumValues;
       grid->x.size = 0;
