@@ -1865,17 +1865,17 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 		{
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
 		}
-	      else if ( strcmp(ncvars[ncvarid].units, "level") == 0 || strcmp(ncvars[ncvarid].units, "1") == 0 )
+	      else if (strIsEqual(ncvars[ncvarid].units, "level") || strIsEqual(ncvars[ncvarid].units, "1"))
 		{
-		  if      ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer midpoints") == 0 )
+		  if      (strIsEqual(ncvars[ncvarid].longname, "hybrid level at layer midpoints"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
-		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
+		  else if (strIsEqual(ncvars[ncvarid].longname, "hybrid level at midpoints", 25))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
-		  else if ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer interfaces") == 0 )
+		  else if (strIsEqual(ncvars[ncvarid].longname, "hybrid level at layer interfaces"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
-		  else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
+		  else if (strIsEqual(ncvars[ncvarid].units, "level"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
 		}
 	      else if ( is_DBL_axis(ncvars[ncvarid].longname) )
@@ -1894,11 +1894,11 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 	    }
           else
             {
-              if ( (strcmp(ncvars[ncvarid].longname, "generalized_height") == 0 ||
-                    strcmp(ncvars[ncvarid].longname, "generalized height") == 0) &&
-                   strcmp(ncvars[ncvarid].stdname, "height") == 0 )
+              if ( (strIsEqual(ncvars[ncvarid].longname, "generalized_height") ||
+                    strIsEqual(ncvars[ncvarid].longname, "generalized height")) &&
+                   strIsEqual(ncvars[ncvarid].stdname, "height"))
                   ncvars[ncvarid].zaxistype = ZAXIS_REFERENCE;
-              else if ( strIsEqual(ncvars[ncvarid].stdname, "air_pressure") )
+              else if (strIsEqual(ncvars[ncvarid].stdname, "air_pressure"))
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
             }
 
@@ -1965,17 +1965,17 @@ void verify_coordinate_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
 		  continue;
 		}
 	      else if ( ncvars[ncvarid].zaxistype == CDI_UNDEFID &&
-                        (strcmp(ncvars[ncvarid].units, "level") == 0 || strcmp(ncvars[ncvarid].units, "1") == 0) )
+                        (strIsEqual(ncvars[ncvarid].units, "level") || strIsEqual(ncvars[ncvarid].units, "1")) )
 		{
-		  if      ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer midpoints") == 0 )
+		  if      (strIsEqual(ncvars[ncvarid].longname, "hybrid level at layer midpoints"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
 		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
-		  else if ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer interfaces") == 0 )
+		  else if (strIsEqual(ncvars[ncvarid].longname, "hybrid level at layer interfaces"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
-		  else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
+		  else if (strIsEqual(ncvars[ncvarid].units, "level"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
 		  continue;
 		}
@@ -1998,8 +1998,8 @@ void verify_coordinate_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
 		  continue;
 		}
             }
-          else if ( strcmp(ncvars[ncvarid].stdname, "region") == 0  ||
-                    strcmp(ncvars[ncvarid].stdname, "area_type") == 0 ||
+          else if (strIsEqual(ncvars[ncvarid].stdname, "region") ||
+                   strIsEqual(ncvars[ncvarid].stdname, "area_type") ||
                     cdfInqDatatype(streamptr, ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned) == CDI_DATATYPE_UINT8 )
             {
               ncvars[ncvarid].isc = true;
