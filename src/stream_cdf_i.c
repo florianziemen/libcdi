@@ -2864,17 +2864,18 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
 
 	  const int gridindex = vlistGridIndex(vlistID, gridID);
           ncgrid[gridindex].gridID = gridID;
-          if (xdimid != CDI_UNDEFID) ncgrid[gridindex].ncIDs[CDF_DIMID_X] = ncdims[xdimid].dimid;
-          if (ydimid != CDI_UNDEFID) ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ncdims[ydimid].dimid;
-
           if (grid->type == GRID_TRAJECTORY)
             {
               ncgrid[gridindex].ncIDs[CDF_VARID_X] = xvarid;
               ncgrid[gridindex].ncIDs[CDF_VARID_Y] = yvarid;
             }
+          else
+            {
+              if (xdimid != CDI_UNDEFID) ncgrid[gridindex].ncIDs[CDF_DIMID_X] = ncdims[xdimid].dimid;
+              if (ydimid != CDI_UNDEFID) ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ncdims[ydimid].dimid;
+            }
 
-          if ( xdimid == CDI_UNDEFID && ydimid == CDI_UNDEFID && grid->size == 1 )
-            gridDefHasDims(gridID, FALSE);
+          if (xdimid == CDI_UNDEFID && ydimid == CDI_UNDEFID && grid->size == 1) gridDefHasDims(gridID, FALSE);
 
           if ( xdimid != CDI_UNDEFID ) cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_DIMNAME, ncdims[xdimid].name);
           if ( ydimid != CDI_UNDEFID ) cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_DIMNAME, ncdims[ydimid].name);
@@ -3263,8 +3264,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
   for (int ncvarid = 0; ncvarid < num_ncvars; ncvarid++)
     if (ncvars[ncvarid].isvar) varids[n++] = ncvarid;
 
-  if (CDI_Debug)
-    for ( int i = 0; i < nvars; i++ ) Message("varids[%d] = %d", i, varids[i]);
+  if (CDI_Debug) for (int i = 0; i < nvars; i++) Message("varids[%d] = %d", i, varids[i]);
 
   if (streamptr->sortname) cdf_sort_varnames(varids, nvars, ncvars);
 

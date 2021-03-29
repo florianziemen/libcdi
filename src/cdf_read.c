@@ -393,8 +393,10 @@ void transpose2dArraySP(size_t gridId, float *data)
 static
 void cdfInqDimIds(stream_t *streamptr, int varId, int (*outDimIds)[3])
 {
-  const int gridId = vlistInqVarGrid(streamptr->vlistID, varId);
-  const int gridindex = vlistGridIndex(streamptr->vlistID, gridId);
+  const int vlistID = streamptr->vlistID;
+  const int gridId = vlistInqVarGrid(vlistID, varId);
+  const int gridindex = vlistGridIndex(vlistID, gridId);
+  const int *ncIDs = streamptr->ncgrid[gridindex].ncIDs;
 
   (*outDimIds)[0] = (*outDimIds)[1] = (*outDimIds)[2] = CDI_UNDEFID;
   switch (gridInqType(gridId))
@@ -402,31 +404,27 @@ void cdfInqDimIds(stream_t *streamptr, int varId, int (*outDimIds)[3])
       case GRID_TRAJECTORY:
         cdfReadGridTraj(streamptr, gridId);
         break;
-
       case GRID_UNSTRUCTURED:
-        (*outDimIds)[0] = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
+        (*outDimIds)[0] = ncIDs[CDF_DIMID_X];
         break;
-
       case GRID_GAUSSIAN_REDUCED:
-        (*outDimIds)[0] = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
+        (*outDimIds)[0] = ncIDs[CDF_DIMID_X];
         break;
-
       default:
-        (*outDimIds)[0] = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
-        (*outDimIds)[1] = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
+        (*outDimIds)[0] = ncIDs[CDF_DIMID_X];
+        (*outDimIds)[1] = ncIDs[CDF_DIMID_Y];
         break;
     }
 
-  const int zaxisID = vlistInqVarZaxis(streamptr->vlistID, varId);
-  const int zaxisindex = vlistZaxisIndex(streamptr->vlistID, zaxisID);
+  const int zaxisID = vlistInqVarZaxis(vlistID, varId);
+  const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   (*outDimIds)[2] = streamptr->zaxisID[zaxisindex];
 }
 
 static
-int cdfGetSkipDim(int fileId, int ncvarid, int (*dimIds)[3])
+int cdfGetSkipDim(int fileId, int ncvarid, int dimIds[3])
 {
-  if((*dimIds)[0] != CDI_UNDEFID) return 0;
-  if((*dimIds)[1] != CDI_UNDEFID) return 0;
+  if (dimIds[0] != CDI_UNDEFID || dimIds[1] != CDI_UNDEFID) return 0;
 
   int nvdims;
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
@@ -436,15 +434,15 @@ int cdfGetSkipDim(int fileId, int ncvarid, int (*dimIds)[3])
   cdf_inq_vardimid(fileId, ncvarid, varDimIds);
 
   size_t size = 0;
-  if ( (*dimIds)[2] == varDimIds[2] )
+  if (dimIds[2] == varDimIds[2])
     {
       cdf_inq_dimlen(fileId, varDimIds[1], &size);
-      if ( size == 1 ) return 1;
+      if (size == 1) return 1;
     }
-  else if ( (*dimIds)[2] == varDimIds[1] )
+  else if (dimIds[2] == varDimIds[1])
     {
       cdf_inq_dimlen(fileId, varDimIds[2], &size);
-      if ( size == 1 ) return 2;
+      if (size == 1) return 2;
     }
 
   return 0;
@@ -469,7 +467,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, boo
   int dimIds[3]; // this array joins the old variables xid, yid, and zid
   cdfInqDimIds(streamptr, varID, &dimIds);
 
-  const int skipdim = cdfGetSkipDim(fileId, ncvarid, &dimIds);
+  const int skipdim = cdfGetSkipDim(fileId, ncvarid, dimIds);
 
   int dimorder[3];
   vlistInqVarDimorder(vlistID, varID, &dimorder);
@@ -484,15 +482,15 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, boo
       ndims++; \
   } while(0)
 
-  if ( timetype != TIME_CONSTANT ) addDimension((size_t)tsID, 1);
-  if ( skipdim == 1 ) addDimension(0, 1);
+  if (timetype != TIME_CONSTANT) addDimension((size_t)tsID, 1);
+  if (skipdim == 1) addDimension(0, 1);
 
-  for ( int id = 0; id < 3; ++id )
+  for (int id = 0; id < 3; ++id)
     {
       size_t size;
       const int curDimId = dimIds[dimorder[id]-1];
-      if ( curDimId == CDI_UNDEFID ) continue;
-      switch ( dimorder[id] )
+      if (curDimId == CDI_UNDEFID) continue;
+      switch (dimorder[id])
         {
           case 1:
           case 2:
@@ -507,7 +505,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, boo
         }
     }
 
-  if ( skipdim == 2 ) addDimension(0, 1);
+  if (skipdim == 2) addDimension(0, 1);
 
   assert(ndims <= (int)(sizeof(*start)/sizeof(**start)));
   assert(ndims <= (int)(sizeof(*count)/sizeof(**count)));
@@ -521,7 +519,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, boo
   int nvdims;
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
 
-  if ( nvdims != ndims )
+  if (nvdims != ndims)
     {
       char name[CDI_MAX_NAME];
       vlistInqVarName(vlistID, varID, name);
