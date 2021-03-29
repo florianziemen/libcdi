@@ -934,7 +934,7 @@ static
 void cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
 {
   char axis[7];
-  static const char iaxis[] = {'t', 'z', 'y', 'x'};
+  enum { TAXIS = 't', ZAXIS = 'z', EAXIS = 'e', YAXIS = 'y', XAXIS = 'x'};
 
   fprintf(stderr, "%s:\n", oname);
 
@@ -947,16 +947,17 @@ void cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
           axis[ndim++] = ':';
           for ( int i = 0; i < ncvars[ncvarid].ndims; i++ )
             {/*
-              if      ( ncvars[ncvarid].tvarid != -1 ) axis[ndim++] = iaxis[0];
-              else if ( ncvars[ncvarid].zvarid != -1 ) axis[ndim++] = iaxis[1];
-              else if ( ncvars[ncvarid].yvarid != -1 ) axis[ndim++] = iaxis[2];
-              else if ( ncvars[ncvarid].xvarid != -1 ) axis[ndim++] = iaxis[3];
+              if      ( ncvars[ncvarid].tvarid != -1 ) axis[ndim++] = TAXIS;
+              else if ( ncvars[ncvarid].zvarid != -1 ) axis[ndim++] = ZAXIS;
+              else if ( ncvars[ncvarid].yvarid != -1 ) axis[ndim++] = YAXIS;
+              else if ( ncvars[ncvarid].xvarid != -1 ) axis[ndim++] = XAXIS;
               else
              */
-              if      ( ncvars[ncvarid].dimtype[i] == T_AXIS ) axis[ndim++] = iaxis[0];
-              else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) axis[ndim++] = iaxis[1];
-              else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) axis[ndim++] = iaxis[2];
-              else if ( ncvars[ncvarid].dimtype[i] == X_AXIS ) axis[ndim++] = iaxis[3];
+              if      ( ncvars[ncvarid].dimtype[i] == T_AXIS ) axis[ndim++] = TAXIS;
+              else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) axis[ndim++] = ZAXIS;
+              else if ( ncvars[ncvarid].dimtype[i] == E_AXIS ) axis[ndim++] = EAXIS;
+              else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) axis[ndim++] = YAXIS;
+              else if ( ncvars[ncvarid].dimtype[i] == X_AXIS ) axis[ndim++] = XAXIS;
               else                                             axis[ndim++] = '?';
             }
         }
@@ -964,12 +965,12 @@ void cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
         {
           axis[ndim++] = 'c';
           axis[ndim++] = ':';
-          if      ( ncvars[ncvarid].istime ) axis[ndim++] = iaxis[0];
-          else if ( ncvars[ncvarid].islev  ) axis[ndim++] = iaxis[1];
-          else if ( ncvars[ncvarid].islat  ) axis[ndim++] = iaxis[2];
-          else if ( ncvars[ncvarid].isy    ) axis[ndim++] = iaxis[2];
-          else if ( ncvars[ncvarid].islon  ) axis[ndim++] = iaxis[3];
-          else if ( ncvars[ncvarid].isx    ) axis[ndim++] = iaxis[3];
+          if      ( ncvars[ncvarid].istime ) axis[ndim++] = TAXIS;
+          else if ( ncvars[ncvarid].islev  ) axis[ndim++] = ZAXIS;
+          else if ( ncvars[ncvarid].islat  ) axis[ndim++] = YAXIS;
+          else if ( ncvars[ncvarid].isy    ) axis[ndim++] = YAXIS;
+          else if ( ncvars[ncvarid].islon  ) axis[ndim++] = XAXIS;
+          else if ( ncvars[ncvarid].isx    ) axis[ndim++] = XAXIS;
           else                               axis[ndim++] = '?';
         }
 
@@ -1740,7 +1741,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
     {
       if ( ncvars[ncvarid].isvar == TRUE )
 	{
-	  bool lxdim = false, lydim = false, lzdim = false/* , ltdim = false */;
+	  bool lxdim = false, lydim = false, lzdim = false /*, ltdim = false */;
           int lcdim = 0;
 	  int ndims = ncvars[ncvarid].ndims;
 	  for ( int i = 0; i < ndims; i++ )
@@ -3482,7 +3483,7 @@ bool is_geos_data(int vlistID, int nvars, ncvar_t *ncvars, int ndims, ncdim_t *n
 
   if (isGeosData)
     {
-      //ncdims[nf_dimid].dimtype = E_AXIS;
+      ncdims[nf_dimid].dimtype = E_AXIS;
       for (int varid = 0; varid < nvars; ++varid)
         {
           if (strIsEqual("orientation", ncvars[varid].name) ||
@@ -3878,6 +3879,7 @@ void cdfVerifyVars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
           for (int i = 0; i < ncvars[ncvarid].ndims; ++i)
             {
               if      (ncvars[ncvarid].dimtype[i] == T_AXIS) ndims++;
+              else if (ncvars[ncvarid].dimtype[i] == E_AXIS) ndims++;
               else if (ncvars[ncvarid].dimtype[i] == Z_AXIS) ndims++;
               else if (ncvars[ncvarid].dimtype[i] == Y_AXIS) ndims++;
               else if (ncvars[ncvarid].dimtype[i] == X_AXIS) ndims++;
