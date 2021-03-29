@@ -217,9 +217,9 @@ typedef struct {
 
 
 typedef struct {
+  sleveltable_t *recordTable; // record IDs for each subtype
   int            ncvarid;
   int            subtypeSize;
-  sleveltable_t *recordTable; // record IDs for each subtype
   bool           defmiss;     // true: if missval is defined in file
   bool           isUsed;
 
@@ -232,10 +232,10 @@ svarinfo_t;
 
 
 typedef struct {
-  int       ilev;
-  int       mlev;
-  int       ilevID;
-  int       mlevID;
+  int ilev;
+  int mlev;
+  int ilevID;
+  int mlevID;
 }
 VCT;
 
@@ -250,9 +250,10 @@ enum {
   CDF_VARID_A,
   CDF_SIZE_ncIDs,
 };
+
 typedef struct {
-  int gridID;
   int ncIDs[CDF_SIZE_ncIDs];
+  int gridID;
 }
 ncgrid_t;
 #endif

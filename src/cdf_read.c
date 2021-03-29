@@ -397,7 +397,7 @@ void cdfInqDimIds(stream_t *streamptr, int varId, int (*outDimIds)[3])
   const int gridindex = vlistGridIndex(streamptr->vlistID, gridId);
 
   (*outDimIds)[0] = (*outDimIds)[1] = (*outDimIds)[2] = CDI_UNDEFID;
-  switch ( gridInqType(gridId) )
+  switch (gridInqType(gridId))
     {
       case GRID_TRAJECTORY:
         cdfReadGridTraj(streamptr, gridId);
