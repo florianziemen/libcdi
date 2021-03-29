@@ -4257,7 +4257,7 @@ int cdfInqContents(stream_t *streamptr)
         char attstring[1024];
 	cdfGetAttText(fileID, nctimevarid, "calendar", sizeof(attstring), attstring);
 	strToLower(attstring);
-        calendar = cdf_set_calendar(attstring);
+        calendar = attribute_to_calendar(attstring);
       }
 
   int taxisID;

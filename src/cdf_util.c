@@ -298,7 +298,7 @@ void cdf_set_zaxistype(const char *attstring, int *zaxistype)
 }
 
 
-int cdf_set_calendar(const char *attstring)
+int attribute_to_calendar(const char *attstring)
 {
   int calendar = CALENDAR_STANDARD;
   // clang-format off
