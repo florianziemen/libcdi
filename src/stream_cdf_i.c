@@ -1869,7 +1869,7 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 		{
 		  if      (strIsEqual(ncvars[ncvarid].longname, "hybrid level at layer midpoints"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
-		  else if (strIsEqual(ncvars[ncvarid].longname, "hybrid level at midpoints", 25))
+		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
 		  else if (strIsEqual(ncvars[ncvarid].longname, "hybrid level at layer interfaces"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
@@ -3917,7 +3917,6 @@ int cdfInqContents(stream_t *streamptr)
   int leadtime_id = CDI_UNDEFID;
   int instID  = CDI_UNDEFID;
   int modelID = CDI_UNDEFID;
-  int calendar = CDI_UNDEFID;
   int format = 0;
   bool ucla_les = false;
   char fcreftime[CDI_MAX_NAME];
@@ -4251,13 +4250,14 @@ int cdfInqContents(stream_t *streamptr)
       ptaxisDefDatatype(taxis, datatype);
     }
 
-  if ( nctimevarid != CDI_UNDEFID )
-    if ( ncvars[nctimevarid].calendar == true )
+  int calendar = CDI_UNDEFID;
+  if (nctimevarid != CDI_UNDEFID)
+    if (ncvars[nctimevarid].calendar == true)
       {
         char attstring[1024];
 	cdfGetAttText(fileID, nctimevarid, "calendar", sizeof(attstring), attstring);
 	strToLower(attstring);
-        cdf_set_calendar(attstring, &calendar);
+        calendar = cdf_set_calendar(attstring);
       }
 
   int taxisID;

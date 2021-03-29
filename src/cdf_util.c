@@ -298,18 +298,20 @@ void cdf_set_zaxistype(const char *attstring, int *zaxistype)
 }
 
 
-void cdf_set_calendar(const char *attstring, int *calendar)
+int cdf_set_calendar(const char *attstring)
 {
+  int calendar = CALENDAR_STANDARD;
   // clang-format off
-  if      (strStartsWith(attstring, "standard"))  *calendar = CALENDAR_STANDARD;
-  else if (strStartsWith(attstring, "gregorian")) *calendar = CALENDAR_GREGORIAN;
-  else if (strStartsWith(attstring, "none"))      *calendar = CALENDAR_NONE;
-  else if (strStartsWith(attstring, "proleptic")) *calendar = CALENDAR_PROLEPTIC;
-  else if (strStartsWith(attstring, "360"))       *calendar = CALENDAR_360DAYS;
+  if      (strStartsWith(attstring, "standard"))  calendar = CALENDAR_STANDARD;
+  else if (strStartsWith(attstring, "gregorian")) calendar = CALENDAR_GREGORIAN;
+  else if (strStartsWith(attstring, "none"))      calendar = CALENDAR_NONE;
+  else if (strStartsWith(attstring, "proleptic")) calendar = CALENDAR_PROLEPTIC;
+  else if (strStartsWith(attstring, "360"))       calendar = CALENDAR_360DAYS;
   else if (strStartsWith(attstring, "365") ||
-           strStartsWith(attstring, "noleap"))    *calendar = CALENDAR_365DAYS;
+           strStartsWith(attstring, "noleap"))    calendar = CALENDAR_365DAYS;
   else if (strStartsWith(attstring, "366") ||
-           strStartsWith(attstring, "all_leap"))  *calendar = CALENDAR_366DAYS;
+           strStartsWith(attstring, "all_leap"))  calendar = CALENDAR_366DAYS;
   else Warning("calendar >%s< unsupported!", attstring);
   // clang-format on
+  return calendar;
 }
