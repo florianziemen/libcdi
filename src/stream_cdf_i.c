@@ -22,8 +22,8 @@ enum AxisType {
   X_AXIS = 1,
   Y_AXIS = 2,
   Z_AXIS = 3,
-  T_AXIS = 4,
-  E_AXIS = 5,
+  E_AXIS = 4,
+  T_AXIS = 5,
 };
 
 #define  POSITIVE_UP    1
@@ -1809,7 +1809,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
     }
 }
 
-/* verify coordinate vars - first scan (dimname == varname) */
+// verify coordinate vars - first scan (dimname == varname)
 static
 void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int timedimid, bool *lhybrid_cf)
 {
@@ -3442,12 +3442,14 @@ void cdf_copy_attflt(int fileID, int vlistID, nc_type xtype, size_t attlen, char
 }
 
 static
-bool is_geos_data(int vlistID)
+bool is_geos_data(int vlistID, int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims)
 {
+  bool isGeosData = false;
   const int numNames = 4;
   const char *attnames[] = { "additional_vars", "file_format_version", "gridspec_file", "grid_mapping_name" };
   const char *grid_mapping = "gnomonic cubed-sphere";
   char attstring[256];
+  int nf_dimid = -1, ncontact_dimid = -1;
 
   int numFound = 0;
   for (int i = 0; i < numNames; ++i)
@@ -3456,10 +3458,41 @@ bool is_geos_data(int vlistID)
   if (numFound == numNames && strncmp(attstring, attstring, strlen(grid_mapping)) == 0)
     {
       for (int i = 0; i < numNames; ++i) cdiDelAtt(vlistID, CDI_GLOBAL, attnames[i]);
-      return true;
+
+      const char *nf_name = "nf";
+      const char *ncontact_name = "ncontact";
+      for (int varid = 0; varid < nvars; ++varid)
+        {
+          if (ncvars[varid].ndims == 1)
+            {
+              int dimid = ncvars[varid].dimids[0];
+              if (ncdims[dimid].len == 6 && strIsEqual(nf_name, ncvars[varid].name))
+                {
+                  isGeosData = true;
+                  nf_dimid = ncvars[varid].dimids[0];
+                }
+              if (ncdims[dimid].len == 4 && strIsEqual(ncontact_name, ncvars[varid].name))
+                {
+                  ncontact_dimid = ncvars[varid].dimids[0];
+                }
+            }
+          if (isGeosData && ncontact_dimid != -1) break;
+        }
     }
 
-  return false;
+  if (isGeosData)
+    {
+      //ncdims[nf_dimid].dimtype = E_AXIS;
+      for (int varid = 0; varid < nvars; ++varid)
+        {
+          if (strIsEqual("orientation", ncvars[varid].name) ||
+              strIsEqual("anchor", ncvars[varid].name) ||
+              strIsEqual("contacts", ncvars[varid].name))
+            cdf_set_var(ncvars, varid, FALSE);
+        }
+    }
+
+  return isGeosData;
 }
 
 static
@@ -3976,9 +4009,6 @@ int cdfInqContents(stream_t *streamptr)
   // scan global attributes
   cdf_scan_global_attr(fileID, vlistID, ngatts, &instID, &modelID, &ucla_les, uuidOfVGrid, &gridInfo);
 
-  bool isGeosData = is_geos_data(vlistID);
-  if (CDI_Debug) Message("isGeosData %d", isGeosData);
-
   // find time dim
   int timedimid = (unlimdimid >= 0) ? unlimdimid : cdf_time_dimid(fileID, ndims, nvars, ncdims);
 
@@ -4010,6 +4040,10 @@ int cdfInqContents(stream_t *streamptr)
   cdfScanVarAttr(nvars, ncvars, ndims, ncdims, timedimid, modelID, format);
 
   cdfVerifyVarAttr(nvars, ncvars, ncdims);
+
+
+  bool isGeosData = is_geos_data(vlistID, nvars, ncvars, ndims, ncdims);
+  if (CDI_Debug) Message("isGeosData %d", isGeosData);
 
 
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "find coordinate vars");
