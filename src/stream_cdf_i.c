@@ -600,7 +600,7 @@ int cdf_time_dimid(int fileID, int ndims, int nvars, ncdim_t *ncdims)
             {
               sbuf[0] = 0;
               cdf_inq_attname(fileID, varid, iatt, sbuf);
-              if ( strncmp(sbuf, "units", 5) == 0 )
+              if (strStartsWith(sbuf, "units"))
                 {
                   cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
                   strToLower(sbuf);
@@ -1869,11 +1869,11 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 		{
 		  if      (strIsEqual(ncvars[ncvarid].longname, "hybrid level at layer midpoints"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
-		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
+		  else if (strStartsWith(ncvars[ncvarid].longname, "hybrid level at midpoints"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
 		  else if (strIsEqual(ncvars[ncvarid].longname, "hybrid level at layer interfaces"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
-		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
+		  else if (strStartsWith(ncvars[ncvarid].longname, "hybrid level at interfaces"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else if (strIsEqual(ncvars[ncvarid].units, "level"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
@@ -1969,11 +1969,11 @@ void verify_coordinate_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
 		{
 		  if      (strIsEqual(ncvars[ncvarid].longname, "hybrid level at layer midpoints"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
-		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
+		  else if (strStartsWith(ncvars[ncvarid].longname, "hybrid level at midpoints"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
 		  else if (strIsEqual(ncvars[ncvarid].longname, "hybrid level at layer interfaces"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
-		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
+		  else if (strStartsWith(ncvars[ncvarid].longname, "hybrid level at interfaces"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else if (strIsEqual(ncvars[ncvarid].units, "level"))
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
@@ -3455,7 +3455,7 @@ bool is_geos_data(int vlistID, int nvars, ncvar_t *ncvars, int ndims, ncdim_t *n
   for (int i = 0; i < numNames; ++i)
     if (0 == cdiInqAttTxt(vlistID, CDI_GLOBAL, attnames[i], (int)sizeof(attstring), attstring)) numFound++;
 
-  if (numFound == numNames && strncmp(attstring, attstring, strlen(grid_mapping)) == 0)
+  if (numFound == numNames && strStartsWith(attstring, grid_mapping))
     {
       for (int i = 0; i < numNames; ++i) cdiDelAtt(vlistID, CDI_GLOBAL, attnames[i]);
 
@@ -3531,8 +3531,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int 
 		}
 	      else if ( strIsEqual(attname, "Source") )
 		{
-		  if ( strncmp(attstring, "UCLA-LES", 8) == 0 )
-		    *ucla_les = true;
+		  if (strStartsWith(attstring, "UCLA-LES")) *ucla_les = true;
 		}
 	      /*
 	      else if ( strIsEqual(attname, "Conventions") )
@@ -3910,15 +3909,11 @@ void cdfVerifyVars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 int cdfInqContents(stream_t *streamptr)
 {
   int ndims, nvars, ngatts, unlimdimid;
-  int ncvarid;
   bool time_has_units = false;
   bool time_has_bounds = false;
   bool time_climatology = false;
   int leadtime_id = CDI_UNDEFID;
-  int instID  = CDI_UNDEFID;
-  int modelID = CDI_UNDEFID;
   int format = 0;
-  bool ucla_les = false;
   char fcreftime[CDI_MAX_NAME];
   GridInfo gridInfo;
   gridInfo.gridfile[0] = 0;
@@ -3926,8 +3921,6 @@ int cdfInqContents(stream_t *streamptr)
   gridInfo.number_of_grid_used = CDI_UNDEFID;
   gridInfo.timedimid = CDI_UNDEFID;
 
-  unsigned char uuidOfVGrid[CDI_UUID_SIZE];
-  memset(uuidOfVGrid, 0, CDI_UUID_SIZE);
   fcreftime[0] = 0;
 
   const int vlistID = streamptr->vlistID;
@@ -3953,9 +3946,9 @@ int cdfInqContents(stream_t *streamptr)
   ncdim_t *ncdims = ndims ? (ncdim_t *) Malloc((size_t)ndims * sizeof(ncdim_t)) : NULL;
   init_ncdims(ndims, ncdims);
 
-  int ncdimid = 0;
   if (ndims)
     {
+      int ncdimid = 0;
       for (int dimid = 0; dimid < NC_MAX_DIMS; ++dimid)
         {
           size_t dimlen;
@@ -4002,10 +3995,15 @@ int cdfInqContents(stream_t *streamptr)
   ncvar_t *ncvars = (ncvar_t *) Malloc((size_t)nvars * sizeof (ncvar_t));
   init_ncvars(nvars, ncvars);
 
-  for ( ncvarid = 0; ncvarid < nvars; ++ncvarid ) ncvars[ncvarid].ncid = fileID;
+  for (int ncvarid = 0; ncvarid < nvars; ++ncvarid) ncvars[ncvarid].ncid = fileID;
 
 
   // scan global attributes
+  int instID  = CDI_UNDEFID;
+  int modelID = CDI_UNDEFID;
+  bool ucla_les = false;
+  unsigned char uuidOfVGrid[CDI_UUID_SIZE];
+  memset(uuidOfVGrid, 0, CDI_UUID_SIZE);
   cdf_scan_global_attr(fileID, vlistID, ngatts, &instID, &modelID, &ucla_les, uuidOfVGrid, &gridInfo);
 
   // find time dim
@@ -4025,7 +4023,7 @@ int cdfInqContents(stream_t *streamptr)
   if ( CDI_Debug ) Message("Time dimid = %d", streamptr->basetime.ncdimid);
 
   // read ncdims
-  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+  for (int ncdimid = 0; ncdimid < ndims; ncdimid++)
     {
       cdf_inq_dimlen(fileID, ncdims[ncdimid].dimid, &ncdims[ncdimid].len);
       cdf_inq_dimname(fileID, ncdims[ncdimid].dimid, ncdims[ncdimid].name);
@@ -4048,9 +4046,9 @@ int cdfInqContents(stream_t *streamptr)
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "find coordinate vars");
 
   // find coordinate vars
-  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+  for (int ncdimid = 0; ncdimid < ndims; ncdimid++)
     {
-      for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+      for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
 	{
 	  if ( ncvars[ncvarid].ndims == 1 )
 	    {
@@ -4064,8 +4062,8 @@ int cdfInqContents(stream_t *streamptr)
 		}
 	      // if ( ncvars[ncvarid].isvar != TRUE ) cdf_set_var(ncvars, ncvarid, FALSE);
 
-	      if ( ncdimid == ncvars[ncvarid].dimids[0] && ncdims[ncdimid].ncvarid == CDI_UNDEFID )
-		if ( strIsEqual(ncvars[ncvarid].name, ncdims[ncdimid].name) )
+	      if (ncdimid == ncvars[ncvarid].dimids[0] && ncdims[ncdimid].ncvarid == CDI_UNDEFID)
+		if (strIsEqual(ncvars[ncvarid].name, ncdims[ncdimid].name))
 		  {
 		    ncdims[ncdimid].ncvarid = ncvarid;
 		    ncvars[ncvarid].isvar = FALSE;
@@ -4095,9 +4093,9 @@ int cdfInqContents(stream_t *streamptr)
   if ( ucla_les ) cdf_set_ucla_dimtype(ndims, ncdims, ncvars);
 
   /*
-  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+  for (int ncdimid = 0; ncdimid < ndims; ncdimid++)
     {
-      ncvarid = ncdims[ncdimid].ncvarid;
+      int ncvarid = ncdims[ncdimid].ncvarid;
       if ( ncvarid != -1 )
 	{
 	  printf("coord var %d %s %s\n", ncvarid, ncvars[ncvarid].name, ncvars[ncvarid].units);
@@ -4121,15 +4119,15 @@ int cdfInqContents(stream_t *streamptr)
   */
 
   // Set coordinate varids (att: associate)
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
-      if ( ncvar->isvar == TRUE && ncvar->ncoordvars )
+      if (ncvar->isvar == TRUE && ncvar->ncoordvars)
 	{
-	  for ( int i = 0; i < ncvar->ncoordvars; i++ )
+	  for (int i = 0; i < ncvar->ncoordvars; i++)
 	    {
               const int cvarid = ncvar->coordvarids[i];
-              if ( ncvar->coordvarids[i] != CDI_UNDEFID )
+              if (ncvar->coordvarids[i] != CDI_UNDEFID)
                 {
                   if      (ncvars[cvarid].islon || ncvars[cvarid].isx)   ncvar->xvarid = cvarid;
                   else if (ncvars[cvarid].islat || ncvars[cvarid].isy)   ncvar->yvarid = cvarid;
@@ -4172,12 +4170,12 @@ int cdfInqContents(stream_t *streamptr)
 
   // select vars
   int nvars_data = 0;
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-    if ( ncvars[ncvarid].isvar == TRUE ) nvars_data++;
+  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+    if (ncvars[ncvarid].isvar == TRUE) nvars_data++;
 
-  if ( CDI_Debug ) Message("time varid = %d", streamptr->basetime.ncvarid);
-  if ( CDI_Debug ) Message("ntsteps = %zu", ntsteps);
-  if ( CDI_Debug ) Message("nvars_data = %d", nvars_data);
+  if (CDI_Debug) Message("time varid = %d", streamptr->basetime.ncvarid);
+  if (CDI_Debug) Message("ntsteps = %zu", ntsteps);
+  if (CDI_Debug) Message("nvars_data = %d", nvars_data);
 
   if ( nvars_data == 0 )
     {
