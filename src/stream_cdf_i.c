@@ -3872,7 +3872,7 @@ void cdf_set_ucla_dimtype(int ndims, ncdim_t *ncdims, ncvar_t *ncvars)
 static
 int cdf_check_variables(stream_t *streamptr, int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 {
-  for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
+  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
       if (ncvars[ncvarid].istime && ncvars[ncvarid].ndims == 2)
         {
@@ -3880,17 +3880,17 @@ int cdf_check_variables(stream_t *streamptr, int nvars, ncvar_t *ncvars, size_t 
           continue;
         }
 
-      if ( timedimid != CDI_UNDEFID )
-	if ( ncvars[ncvarid].isvar == -1 &&
-	     ncvars[ncvarid].ndims > 1   &&
-	     timedimid == ncvars[ncvarid].dimids[0] )
+      if (timedimid != CDI_UNDEFID)
+	if (ncvars[ncvarid].isvar == -1 &&
+            ncvars[ncvarid].ndims > 1   &&
+            timedimid == ncvars[ncvarid].dimids[0])
 	  cdf_set_var(ncvars, ncvarid, TRUE);
 
-      if ( ncvars[ncvarid].isvar == -1 )
+      if (ncvars[ncvarid].isvar == -1)
         {
-          if ( ncvars[ncvarid].ndims == 0 )
+          if (ncvars[ncvarid].ndims == 0)
             cdf_set_var(ncvars, ncvarid, nvars == 1 ? TRUE : FALSE);
-          else if ( ncvars[ncvarid].ndims > 0 )
+          else if (ncvars[ncvarid].ndims > 0)
             cdf_set_var(ncvars, ncvarid, TRUE);
           else
             {
@@ -3899,9 +3899,9 @@ int cdf_check_variables(stream_t *streamptr, int nvars, ncvar_t *ncvars, size_t 
             }
         }
 
-      if ( ncvars[ncvarid].isvar == 0 ) continue;
+      if (ncvars[ncvarid].isvar == 0) continue;
 
-      if ( ncvars[ncvarid].ndims > 4 )
+      if ((ncvars[ncvarid].ndims > 4 && !ncvars[ncvarid].cube_sphere) || ncvars[ncvarid].ndims > 5)
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning("%d dimensional variables are not supported, skipped variable %s!",
@@ -3909,7 +3909,7 @@ int cdf_check_variables(stream_t *streamptr, int nvars, ncvar_t *ncvars, size_t 
 	  continue;
 	}
 
-      if ( ncvars[ncvarid].ndims == 4 && timedimid == CDI_UNDEFID )
+      if (((ncvars[ncvarid].ndims == 4 && !ncvars[ncvarid].cube_sphere) || ncvars[ncvarid].ndims == 5) && timedimid == CDI_UNDEFID)
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning("%d dimensional variables without time dimension are not supported, skipped variable %s!",
@@ -3917,23 +3917,23 @@ int cdf_check_variables(stream_t *streamptr, int nvars, ncvar_t *ncvars, size_t 
 	  continue;
 	}
 
-      if ( xtypeIsText(ncvars[ncvarid].xtype) )
+      if (xtypeIsText(ncvars[ncvarid].xtype))
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning("Unsupported data type (char/string), skipped variable %s!", ncvars[ncvarid].name);
 	  continue;
 	}
 
-      if ( cdfInqDatatype(streamptr, ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned) == -1 )
+      if (cdfInqDatatype(streamptr, ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned) == -1)
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning("Unsupported data type, skipped variable %s!", ncvars[ncvarid].name);
 	  continue;
 	}
 
-      if ( timedimid != CDI_UNDEFID && ntsteps == 0 && ncvars[ncvarid].ndims > 0 )
+      if (timedimid != CDI_UNDEFID && ntsteps == 0 && ncvars[ncvarid].ndims > 0)
 	{
-	  if ( timedimid == ncvars[ncvarid].dimids[0] )
+	  if (timedimid == ncvars[ncvarid].dimids[0])
 	    {
 	      ncvars[ncvarid].isvar = 0;
 	      Warning("Number of time steps undefined, skipped variable %s!", ncvars[ncvarid].name);
