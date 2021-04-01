@@ -3342,9 +3342,9 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
   if (streamptr->sortname) cdf_sort_varnames(varids, nvars, ncvars);
 
-  for (int varID = 0; varID < nvars; varID++)
+  for (int varID1 = 0; varID1 < nvars; varID1++)
     {
-      const int ncvarid = varids[varID];
+      const int ncvarid = varids[varID1];
       ncvar_t *ncvar = &ncvars[ncvarid];
       const int gridID  = ncvar->gridID;
       const int zaxisID = ncvar->zaxisID;
@@ -3358,8 +3358,8 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
       if (ncvar->chunked && ncvar->chunktype != CDI_UNDEFID) vlistDefVarChunkType(vlistID, varID, ncvar->chunktype);
 #endif
 
-      streamptr->vars[varID].defmiss = false;
-      streamptr->vars[varID].ncvarid = ncvarid;
+      streamptr->vars[varID1].defmiss = false;
+      streamptr->vars[varID1].ncvarid = ncvarid;
 
       cdiDefKeyString(vlistID, varID, CDI_KEY_NAME, ncvar->name);
       if (ncvar->param != CDI_UNDEFID) vlistDefVarParam(vlistID, varID, ncvar->param);
@@ -3490,7 +3490,7 @@ void cdf_copy_attflt(int fileID, int vlistID, nc_type xtype, size_t attlen, char
 }
 
 static
-bool check_cube_sphere(int vlistID, int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims)
+bool check_cube_sphere(int vlistID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
   bool isGeosData = false;
   const int numNames = 4;
@@ -4120,7 +4120,7 @@ int cdfInqContents(stream_t *streamptr)
 
   if (CDI_convert_cubesphere)
     {
-      bool isGeosData = check_cube_sphere(vlistID, nvars, ncvars, ndims, ncdims);
+      bool isGeosData = check_cube_sphere(vlistID, nvars, ncvars, ncdims);
       if (CDI_Debug) Message("isGeosData %d", isGeosData);
     }
 
