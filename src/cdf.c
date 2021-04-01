@@ -128,7 +128,7 @@ static int cdfOpenFile(const char *filename, const char *mode, int *filetype)
 	  else if ( *filetype == CDI_FILETYPE_NC4C ) writemode |= NC_NETCDF4 | NC_CLASSIC_MODEL;
 #endif
 	  cdf_create(filename, writemode, &ncid);
-	  if ( CDO_version_info ) cdfComment(ncid);
+	  if (CDI_version_info) cdfComment(ncid);
           cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.6");
 	  break;
 	case 'a':

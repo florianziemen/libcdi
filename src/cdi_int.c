@@ -32,7 +32,8 @@ bool cdiIgnoreValidRange     = false;
 int cdiSkipRecords           = 0;
 int CDI_convention           = CDI_CONVENTION_ECHAM;
 int CDI_inventory_mode       = 1;
-int CDO_version_info         = 1;
+int CDI_version_info         = 1;
+int CDI_convert_cubesphere   = 1;
 int CDI_read_cell_corners    = 1;
 int CDI_cmor_mode            = 0;
 int CDI_reduce_dim           = 0;
@@ -396,31 +397,39 @@ void cdiInitialize(void)
 	  if ( strcmp(envstr, "CF") == 0 || strcmp(envstr, "cf") == 0 )
 	    {
 	      CDI_convention = CDI_CONVENTION_CF;
-	      if ( CDI_Debug )
-		Message("CDI convention was set to CF!");
+	      if (CDI_Debug) Message("CDI convention was set to CF!");
 	    }
 	}
 
       envstr = getenv("CDI_INVENTORY_MODE");
-      if ( envstr )
+      if (envstr)
 	{
-	  if ( strncmp(envstr, "time", 4) == 0 )
+	  if (strncmp(envstr, "time", 4) == 0)
 	    {
 	      CDI_inventory_mode = 2;
-	      if ( CDI_Debug )
-		Message("Inventory mode was set to timestep!");
+	      if (CDI_Debug) Message("Inventory mode was set to timestep!");
 	    }
 	}
 
       envstr = getenv("CDI_VERSION_INFO");
-      if ( envstr )
+      if (envstr)
         {
-          int ival = atoi(envstr);
-          if ( ival == 0 || ival == 1 )
+          const int ival = atoi(envstr);
+          if (ival == 0 || ival == 1)
             {
-              CDO_version_info = ival;
-              if ( CDI_Debug )
-                Message("CDO_version_info = %s", envstr);
+              CDI_version_info = ival;
+              if (CDI_Debug) Message("CDI_version_info = %s", envstr);
+            }
+        }
+
+      envstr = getenv("CDI_CONVERT_CUBESPHERE");
+      if (envstr)
+        {
+          const int ival = atoi(envstr);
+          if (ival == 0 || ival == 1)
+            {
+              CDI_convert_cubesphere = ival;
+              if (CDI_Debug) Message("CDI_convert_cubesphere = %s", envstr);
             }
         }
 

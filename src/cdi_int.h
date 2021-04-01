@@ -241,6 +241,7 @@ VCT;
 
 #ifdef HAVE_LIBNETCDF
 enum {
+  CDF_DIMID_E,  // 3rd dimID of cube sphere grid (len=6)
   CDF_DIMID_X,
   CDF_DIMID_Y,
   CDF_DIMID_RP, // reducedPoints
@@ -374,7 +375,8 @@ extern bool cdiIgnoreValidRange;
 extern int cdiSkipRecords;
 extern int CDI_convention;
 extern int CDI_inventory_mode;
-extern int CDO_version_info;
+extern int CDI_version_info;
+extern int CDI_convert_cubesphere;
 extern int CDI_read_cell_corners;
 extern int CDI_cmor_mode;
 extern int CDI_reduce_dim;
