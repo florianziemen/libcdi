@@ -42,42 +42,33 @@ void cdf_create(const char *path, int cmode, int *ncidp)
 int cdf_open(const char *path, int omode, int *ncidp)
 {
   int status = 0;
-  bool dapfile = false;
 
-#ifdef HAVE_LIBNC_DAP
-  if ( strncmp(path, "http:", 5) == 0 || strncmp(path, "https:", 6) == 0 ) dapfile = true;
-#endif
-
-  if ( dapfile )
+  if (strstr(path, ":/")) // ESDM and DAP
     {
       status = nc_open(path, omode, ncidp);
     }
   else
     {
       struct stat filestat;
-      if ( stat(path, &filestat) != 0 ) SysError(path);
+      if (stat(path, &filestat) != 0) SysError(path);
 
       size_t chunksizehint = 0;
 #ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
       chunksizehint = (size_t) filestat.st_blksize * 4;
-      if ( chunksizehint > (size_t) filestat.st_size ) chunksizehint = (size_t) filestat.st_size;
+      if (chunksizehint > (size_t) filestat.st_size) chunksizehint = (size_t) filestat.st_size;
 #endif
-      /*
-      if ( chunksizehint < ChunkSizeMin ) chunksizehint = ChunkSizeMin;
-      */
-      if ( cdiNcChunksizehint != CDI_UNDEFID )
-        chunksizehint = (size_t)cdiNcChunksizehint;
+      // if (chunksizehint < ChunkSizeMin) chunksizehint = ChunkSizeMin;
+      if (cdiNcChunksizehint != CDI_UNDEFID) chunksizehint = (size_t)cdiNcChunksizehint;
 
-      /* FIXME: parallel part missing */
+      // FIXME: parallel part missing
       status = nc__open(path, omode, &chunksizehint, ncidp);
 
-      if ( CDF_Debug ) Message("chunksizehint %zu", chunksizehint);
+      if (CDF_Debug) Message("chunksizehint %zu", chunksizehint);
     }
 
-  if ( CDF_Debug )
-    Message("ncid=%d  mode=%d  file=%s", *ncidp, omode, path);
+  if (CDF_Debug) Message("ncid=%d  mode=%d  file=%s", *ncidp, omode, path);
 
-  if ( CDF_Debug && status != NC_NOERR ) Message("%s", nc_strerror(status));
+  if (CDF_Debug && status != NC_NOERR) Message("%s", nc_strerror(status));
 
   return status;
 }
