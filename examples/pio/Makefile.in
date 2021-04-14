@@ -139,7 +139,7 @@ am__DEPENDENCIES_1 =
 @USE_MPI_FALSE@	$(top_builddir)/src/libcdi.la
 @USE_MPI_TRUE@collectData_DEPENDENCIES =  \
 @USE_MPI_TRUE@	$(top_builddir)/src/libcdipio.la \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -150,7 +150,7 @@ collectData2003_OBJECTS = $(am_collectData2003_OBJECTS)
 @USE_MPI_FALSE@	$(top_builddir)/src/libcdi.la
 @USE_MPI_TRUE@collectData2003_DEPENDENCIES =  \
 @USE_MPI_TRUE@	$(top_builddir)/src/libcdipio.la \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_1)
 am_collectDataNStreams_OBJECTS = collectDataNStreams.$(OBJEXT)
 collectDataNStreams_OBJECTS = $(am_collectDataNStreams_OBJECTS)
 collectDataNStreams_LDADD = $(LDADD)
@@ -158,7 +158,7 @@ collectDataNStreams_LDADD = $(LDADD)
 @USE_MPI_FALSE@	$(top_builddir)/src/libcdi.la
 @USE_MPI_TRUE@collectDataNStreams_DEPENDENCIES =  \
 @USE_MPI_TRUE@	$(top_builddir)/src/libcdipio.la \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_1)
 am_compareResourcesArray_OBJECTS = compareResourcesArray.$(OBJEXT)
 compareResourcesArray_OBJECTS = $(am_compareResourcesArray_OBJECTS)
 compareResourcesArray_LDADD = $(LDADD)
@@ -166,7 +166,7 @@ compareResourcesArray_LDADD = $(LDADD)
 @USE_MPI_FALSE@	$(top_builddir)/src/libcdi.la
 @USE_MPI_TRUE@compareResourcesArray_DEPENDENCIES =  \
 @USE_MPI_TRUE@	$(top_builddir)/src/libcdipio.la \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -447,9 +447,9 @@ AM_FCFLAGS = $(FPP_INCOPT)$(top_srcdir)/src $(MPI_FC_INCLUDE) \
 AM_CFLAGS = $(MPI_C_INCLUDE)
 collectData_SOURCES = collectData.c
 @USE_MPI_FALSE@LDADD = $(top_builddir)/src/libcdi.la
-@USE_MPI_TRUE@LDADD = $(top_builddir)/src/libcdipio.la $(LIBRT) $(MPI_C_LIB)
+@USE_MPI_TRUE@LDADD = $(top_builddir)/src/libcdipio.la $(MPI_C_LIB)
 @USE_MPI_FALSE@collectData2003_LDADD = $(top_builddir)/src/libcdi.la
-@USE_MPI_TRUE@collectData2003_LDADD = $(top_builddir)/src/libcdipio.la $(LIBRT) $(MPI_FC_LIB)
+@USE_MPI_TRUE@collectData2003_LDADD = $(top_builddir)/src/libcdipio.la $(MPI_FC_LIB)
 collectData2003_SOURCES = collectData2003.F90
 collectDataNStreams_SOURCES = collectDataNStreams.c
 compareResourcesArray_SOURCES = compareResourcesArray.c

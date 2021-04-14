@@ -180,16 +180,14 @@ pio_write_OBJECTS = $(am_pio_write_OBJECTS)
 am__DEPENDENCIES_1 =
 @USE_MPI_FALSE@pio_write_DEPENDENCIES = $(LDADD) $(am__DEPENDENCIES_1)
 @USE_MPI_TRUE@pio_write_DEPENDENCIES = ../src/libcdipio.la \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_1)
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_pio_write_deco2d_OBJECTS = pio_write.$(OBJEXT) \
 	deco2d_model.$(OBJEXT) simple_model_helper.$(OBJEXT)
 pio_write_deco2d_OBJECTS = $(am_pio_write_deco2d_OBJECTS)
 @USE_MPI_FALSE@pio_write_deco2d_DEPENDENCIES = $(LDADD) \
 @USE_MPI_FALSE@	$(am__DEPENDENCIES_1)
 @USE_MPI_TRUE@pio_write_deco2d_DEPENDENCIES = ../src/libcdipio.la \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_1)
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_byteswap_OBJECTS = test_byteswap.$(OBJEXT)
 test_byteswap_OBJECTS = $(am_test_byteswap_OBJECTS)
 test_byteswap_LDADD = $(LDADD)
@@ -560,9 +558,9 @@ test_byteswap_SOURCES = test_byteswap.c
 #
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 @USE_MPI_FALSE@pio_write_LDADD = $(LDADD) $(UUID_C_LIB)
-@USE_MPI_TRUE@pio_write_LDADD = ../src/libcdipio.la $(LIBRT) $(UUID_C_LIB) $(MPI_C_LIB)
+@USE_MPI_TRUE@pio_write_LDADD = ../src/libcdipio.la $(UUID_C_LIB) $(MPI_C_LIB)
 @USE_MPI_FALSE@pio_write_deco2d_LDADD = $(LDADD) $(UUID_C_LIB)
-@USE_MPI_TRUE@pio_write_deco2d_LDADD = ../src/libcdipio.la $(LIBRT) $(UUID_C_LIB) $(MPI_C_LIB)
+@USE_MPI_TRUE@pio_write_deco2d_LDADD = ../src/libcdipio.la $(UUID_C_LIB) $(MPI_C_LIB)
 @USE_MPI_FALSE@test_resource_copy_mpi_LDADD = $(LDADD) $(UUID_C_LIB)
 @USE_MPI_TRUE@test_resource_copy_mpi_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
 @USE_MPI_TRUE@test_resource_copy_mpi_CFLAGS = $(AM_CFLAGS) $(CFLAGS) \

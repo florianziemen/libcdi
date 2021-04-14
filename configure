@@ -29965,11 +29965,15 @@ fi
 
 ENABLE_MPI=`test x"$enable_mpi" = xyes && echo true || echo false`
 
+LIBRT=''
 
 if test -z "$USE_MPI_TRUE"; then :
-  LIBRT=
-   LIBS_save=$LIBS
-   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing aio_suspend" >&5
+  ac_fn_c_check_decl "$LINENO" "_SX" "ac_cv_have_decl__SX" "$ac_includes_default"
+if test "x$ac_cv_have_decl__SX" = xyes; then :
+
+else
+  LIBS_save=$LIBS
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing aio_suspend" >&5
 $as_echo_n "checking for library containing aio_suspend... " >&6; }
 if ${ac_cv_search_aio_suspend+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -30025,7 +30029,9 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBRT=$ac_res
 fi
 
-   LIBS=$LIBS_save
+      LIBS=$LIBS_save
+fi
+
 fi
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)

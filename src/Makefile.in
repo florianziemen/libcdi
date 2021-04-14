@@ -248,7 +248,8 @@ libcdi_f2003_la_OBJECTS = $(am_libcdi_f2003_la_OBJECTS)
 @CREATE_ISOC_TRUE@@ENABLE_CDI_LIB_TRUE@am_libcdi_f2003_la_rpath =  \
 @CREATE_ISOC_TRUE@@ENABLE_CDI_LIB_TRUE@	-rpath $(libdir)
 libcdipio_la_DEPENDENCIES = libcdi.la $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am__libcdipio_la_SOURCES_DIST = cdipio.h cdipioFortran.c cfortran.h \
 	pio.c pio.h pio_comm.c pio_comm.h pio_conf.c pio_conf.h \
 	pio_dbuffer.c pio_id_set.h pio_impl.h pio_interface.c \
@@ -660,7 +661,7 @@ libcdipio_la_SOURCES = cdipio.h cdipioFortran.c cfortran.h pio.c pio.h \
 libcdipio_la_HAVE_PARALLEL_NC4_extra_sources = \
 	pio_cdf_int.c
 
-libcdipio_la_LIBADD = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
+libcdipio_la_LIBADD = libcdi.la $(LIBRT) $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
 libcdi_la_LIBADD = $(UUID_C_LIB)
 #
 #cdilib.c:
