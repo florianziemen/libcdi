@@ -20,6 +20,53 @@ int cdiGribUseTimeRangeIndicator        = 0;       // normaly cdo looks in grib 
                                                    // where:  0: for instanteneous fields; 4: for accumulated fields
 #endif // HIRLAM_EXTENSIONS
 
+double zaxis_units_to_centimeter(int zaxisID)
+{
+  char units[CDI_MAX_NAME];
+  int length = CDI_MAX_NAME;
+  cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
+
+  double sf = 100.0; // default: meter
+  // clang-format off
+  if (units[1] == 'm' && !units[2])
+    {
+      if      (units[0] == 'm') sf =   0.1;
+      else if (units[0] == 'c') sf =   1;
+      else if (units[0] == 'd') sf =  10;
+    }
+  // clang-format on
+
+  return sf;
+}
+
+double zaxis_units_to_meter(int zaxisID)
+{
+  char units[CDI_MAX_NAME];
+  int length = CDI_MAX_NAME;
+  cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
+
+  double sf = 1.0; // default: meter
+  // clang-format off
+  if (units[1] == 'm' && !units[2])
+    {
+      if      (units[0] == 'm') sf /= 1000.0;
+      else if (units[0] == 'c') sf /= 100.0;
+      else if (units[0] == 'd') sf /= 10.0;
+      else if (units[0] == 'k') sf *= 1000.0;
+    }
+  // clang-format on
+
+  return sf;
+}
+
+bool zaxis_units_is_Pa(int zaxisID)
+{
+  char units[CDI_MAX_NAME];
+  int length = CDI_MAX_NAME;
+  cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
+
+  return (units[0] && (units[0] == 'P') && (units[1] == 'a'));
+}
 
 void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer)
 {

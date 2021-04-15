@@ -2356,8 +2356,6 @@ void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2
 static
 void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, int gcinit, int proddef_template_num)
 {
-  char units[CDI_MAX_NAME];
-
   int zaxistype = zaxisInqType(zaxisID);
   int ltype = 0, ltype2 = -1;
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
@@ -2391,21 +2389,10 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
       {
         if (zaxistype == ZAXIS_HEIGHT)
           {
-            double sf = 1;
-            int length = CDI_MAX_NAME;
-            cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
-            if (units[1] == 'm' && !units[2])
-              {
-                if      ( units[0] == 'c' ) sf = 0.01;
-                else if ( units[0] == 'd' ) sf = 0.1;
-                else if ( units[0] == 'k' ) sf = 1000;
-              }
-            if (IS_NOT_EQUAL(sf, 1))
-              {
-                level   *= sf;
-                dlevel1 *= sf;
-                dlevel2 *= sf;
-              }
+            double sf = zaxis_units_to_meter(zaxisID);
+            level   *= sf;
+            dlevel1 *= sf;
+            dlevel2 *= sf;
           }
 
         if (editionNumber <= 1)
@@ -2476,9 +2463,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
       {
 	if (level < 0) Warning("Pressure level of %f Pa is below zero!", level);
 
-        int length = CDI_MAX_NAME;
-        cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
-        if ( units[0] && (units[0] != 'P') | (units[1] != 'a') )
+        if (!zaxis_units_is_Pa(zaxisID))
           {
             level   *= 100;
             dlevel1 *= 100;
@@ -2514,26 +2499,15 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
       }
     case ZAXIS_DEPTH_BELOW_LAND:
       {
-        int length = CDI_MAX_NAME;
-        cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
-
-	if (editionNumber <= 1)
+ 	if (editionNumber <= 1)
 	  {
-            double sf = 100; // scalefactor: meter to cm
-	    if      ( memcmp(units, "mm", 2) == 0 ) sf =   0.1;
-	    else if ( memcmp(units, "cm", 2) == 0 ) sf =   1;
-	    else if ( memcmp(units, "dm", 2) == 0 ) sf =  10;
-
             grib_ltype = hasBounds ? GRIB1_LTYPE_LANDDEPTH_LAYER : GRIB1_LTYPE_LANDDEPTH;
+            double sf = zaxis_units_to_centimeter(zaxisID);
             grib1DefLevel(gh, gcinit, grib_ltype, hasBounds, level*sf, dlevel1*sf, dlevel2*sf);
 	  }
 	else
 	  {
-            double sf = 1; // scalefactor meter to meter
-	    if      ( memcmp(units, "mm", 2) == 0 ) sf = 0.001;
-	    else if ( memcmp(units, "cm", 2) == 0 ) sf = 0.01;
-	    else if ( memcmp(units, "dm", 2) == 0 ) sf = 0.1;
-
+            double sf = zaxis_units_to_meter(zaxisID);
             grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, hasBounds, level*sf, dlevel1*sf, dlevel2*sf);
 	  }
 

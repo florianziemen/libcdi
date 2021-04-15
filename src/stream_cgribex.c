@@ -1882,8 +1882,6 @@ void isec1DefLevel(int *isec1, int leveltype, int level1, int level2)
 static
 void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
 {
-  char units[CDI_MAX_NAME];
-
   int zaxistype = zaxisInqType(zaxisID);
   int ltype = 0;
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
@@ -1955,9 +1953,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       {
 	if (level < 0) Warning("Pressure level of %f Pa is below zero!", level);
 
-        int length = CDI_MAX_NAME;
-        cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
-	if (units[0] && (units[0] != 'P') | (units[1] != 'a')) level *= 100;
+	if (!zaxis_units_is_Pa(zaxisID)) level *= 100.0;
 
 	double dum;
 	if (level < 32768 && (level < 100 || modf(level/100, &dum) > 0))
@@ -1970,18 +1966,8 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     case ZAXIS_HEIGHT:
       {
-        int length = CDI_MAX_NAME;
-        cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
-        if ( units[1] == 'm' && !units[2] )
-          {
-            // clang-format off
-            if      ( units[0] == 'c' ) level *= 0.01;
-            else if ( units[0] == 'd' ) level *= 0.1;
-            else if ( units[0] == 'k' ) level *= 1000;
-            // clang-format on
-          }
-
-        isec1DefLevel(isec1, grib_ltype, (int)level, 0);
+        double sf = zaxis_units_to_meter(zaxisID);
+        isec1DefLevel(isec1, grib_ltype, (int)(level*sf), 0);
 	break;
       }
     case ZAXIS_SIGMA:
@@ -1992,19 +1978,9 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     case ZAXIS_DEPTH_BELOW_LAND:
       {
-        int length = CDI_MAX_NAME;
-        cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
-
-	double sf = 100; // default: meter
-        // clang-format off
-        if      ( units[0] == 'm' && units[1] == 'm' ) sf =   0.1;
-        else if ( units[0] == 'c' && units[1] == 'm' ) sf =   1;
-        else if ( units[0] == 'd' && units[1] == 'm' ) sf =  10;
-        // clang-format on
-
         grib_ltype = hasBounds ? GRIB1_LTYPE_LANDDEPTH_LAYER : GRIB1_LTYPE_LANDDEPTH;
+        double sf = zaxis_units_to_centimeter(zaxisID);
         isec1DefLevel(isec1, grib_ltype, (int) (sf*dlevel1), (int) (sf*dlevel2));
-
 	break;
       }
     case ZAXIS_GENERIC:

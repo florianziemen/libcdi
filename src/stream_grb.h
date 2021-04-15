@@ -1,6 +1,10 @@
 #ifndef STREAM_GRB_H
 #define STREAM_GRB_H
 
+double zaxis_units_to_centimeter(int zaxisID);
+double zaxis_units_to_meter(int zaxisID);
+bool zaxis_units_is_Pa(int zaxisID);
+
 void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer);
 int grbDecompress(size_t recsize, size_t *buffersize, void **gribbuffer);
 
