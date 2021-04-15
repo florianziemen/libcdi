@@ -2,6 +2,10 @@
 
 	* Version 2.0.0 released
 
+2021-04-15  Uwe Schulzweida
+
+	* gribapiDefLevel: added support for GRIB1_LTYPE_LANDDEPTH_LAYER
+
 2021-04-01  Uwe Schulzweida
 
 	* Added env var CDI_CONVERT_CUBESPHERE (default 1) to convert cubed-sphere data to unstructured grid

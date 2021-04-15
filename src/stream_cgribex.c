@@ -1888,6 +1888,11 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
   int ltype = 0;
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
 
+  bool hasBounds = (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL));
+  double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
+  double dlevel1 = hasBounds ? zaxisInqLbound(zaxisID, levelID) : level;
+  double dlevel2 = hasBounds ? zaxisInqUbound(zaxisID, levelID) : 0.0;
+
   if ( zaxistype == ZAXIS_GENERIC && ltype == 0 )
     {
       Message("Changed zaxis type from %s to %s", zaxisNamePtr(zaxistype), zaxisNamePtr(ZAXIS_PRESSURE));
@@ -1908,7 +1913,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     case ZAXIS_DEPTH_BELOW_SEA:
     case ZAXIS_ISENTROPIC:
       {
-        isec1DefLevel(isec1, grib_ltype, (int)(zaxisInqLevel(zaxisID, levelID)), 0);
+        isec1DefLevel(isec1, grib_ltype, (int)level, 0);
 	break;
       }
     case ZAXIS_CLOUD_BASE:
@@ -1925,11 +1930,8 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     case ZAXIS_HYBRID:
     case ZAXIS_HYBRID_HALF:
       {
-	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
-          isec1DefLevel(isec1, GRIB1_LTYPE_HYBRID_LAYER, (int)(zaxisInqLbound(zaxisID, levelID)),
-                        (int)(zaxisInqUbound(zaxisID, levelID)));
-	else
-          isec1DefLevel(isec1, GRIB1_LTYPE_HYBRID, (int)(zaxisInqLevel(zaxisID, levelID)), 0);
+        grib_ltype = hasBounds ? GRIB1_LTYPE_HYBRID_LAYER : GRIB1_LTYPE_HYBRID;
+        isec1DefLevel(isec1, grib_ltype, (int)dlevel1, (int)dlevel2);
 
 	int vctsize = zaxisInqVctSize(zaxisID);
 	if ( vctsize > 255 )
@@ -1951,15 +1953,14 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     case ZAXIS_PRESSURE:
       {
-	double level = zaxisInqLevel(zaxisID, levelID);
-	if ( level < 0 ) Warning("Pressure level of %f Pa is below zero!", level);
+	if (level < 0) Warning("Pressure level of %f Pa is below zero!", level);
 
         int length = CDI_MAX_NAME;
         cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
-	if ( units[0] && (units[0] != 'P') | (units[1] != 'a') ) level *= 100;
+	if (units[0] && (units[0] != 'P') | (units[1] != 'a')) level *= 100;
 
 	double dum;
-	if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )
+	if (level < 32768 && (level < 100 || modf(level/100, &dum) > 0))
           grib_ltype = GRIB1_LTYPE_ISOBARIC_PA;
 	else
           level = level/100;
@@ -1969,8 +1970,6 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     case ZAXIS_HEIGHT:
       {
-	double level = zaxisInqLevel(zaxisID, levelID);
-
         int length = CDI_MAX_NAME;
         cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
         if ( units[1] == 'm' && !units[2] )
@@ -1982,17 +1981,13 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
             // clang-format on
           }
 
-        isec1DefLevel(isec1, grib_ltype, (int) level, 0);
+        isec1DefLevel(isec1, grib_ltype, (int)level, 0);
 	break;
       }
     case ZAXIS_SIGMA:
       {
-	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
-          isec1DefLevel(isec1, GRIB1_LTYPE_SIGMA_LAYER, (int)(zaxisInqLbound(zaxisID, levelID)),
-                        (int)(zaxisInqUbound(zaxisID, levelID)));
-	else
-          isec1DefLevel(isec1, GRIB1_LTYPE_SIGMA, (int)(zaxisInqLevel(zaxisID, levelID)), 0);
-
+        grib_ltype = hasBounds ? GRIB1_LTYPE_SIGMA_LAYER : GRIB1_LTYPE_SIGMA;
+        isec1DefLevel(isec1, grib_ltype, (int)dlevel1, (int)dlevel2);
 	break;
       }
     case ZAXIS_DEPTH_BELOW_LAND:
@@ -2000,24 +1995,21 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
         int length = CDI_MAX_NAME;
         cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
 
-	double factor = 100; // default: meter
+	double sf = 100; // default: meter
         // clang-format off
-        if      ( units[0] == 'm' && units[1] == 'm' ) factor =   0.1;
-        else if ( units[0] == 'c' && units[1] == 'm' ) factor =   1;
-        else if ( units[0] == 'd' && units[1] == 'm' ) factor =  10;
+        if      ( units[0] == 'm' && units[1] == 'm' ) sf =   0.1;
+        else if ( units[0] == 'c' && units[1] == 'm' ) sf =   1;
+        else if ( units[0] == 'd' && units[1] == 'm' ) sf =  10;
         // clang-format on
 
-	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
-          isec1DefLevel(isec1, GRIB1_LTYPE_LANDDEPTH_LAYER, (int) (factor*zaxisInqLbound(zaxisID, levelID)),
-                        (int) (factor*zaxisInqUbound(zaxisID, levelID)));
-	else
-          isec1DefLevel(isec1, GRIB1_LTYPE_LANDDEPTH, (int) (factor*zaxisInqLevel(zaxisID, levelID)), 0);
+        grib_ltype = hasBounds ? GRIB1_LTYPE_LANDDEPTH_LAYER : GRIB1_LTYPE_LANDDEPTH;
+        isec1DefLevel(isec1, grib_ltype, (int) (sf*dlevel1), (int) (sf*dlevel2));
 
 	break;
       }
     case ZAXIS_GENERIC:
       {
-        isec1DefLevel(isec1, ltype, (int)(zaxisInqLevel(zaxisID, levelID)), 0);
+        isec1DefLevel(isec1, ltype, (int)level, 0);
 	break;
       }
     default:
