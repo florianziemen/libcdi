@@ -2,6 +2,10 @@
 
 	* Version 2.0.0 released
 
+2021-04-15  Uwe Schulzweida
+
+	* gribapiDefLevel: added support for GRIB1_LTYPE_LANDDEPTH_LAYER
+
 2021-04-06  Uwe Schulzweida
 
 	* Apply patch from Julian Kunkel (support for ESDM URL)
