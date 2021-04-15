@@ -2,6 +2,10 @@
 
 	* Version 2.0.0 released
 
+2021-04-06  Uwe Schulzweida
+
+	* Apply patch from Julian Kunkel (support for ESDM URL)
+
 2021-04-01  Uwe Schulzweida
 
 	* Added env var CDI_CONVERT_CUBESPHERE (default 1) to convert cubed-sphere data to unstructured grid
