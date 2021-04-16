@@ -92,7 +92,7 @@ bool cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int
 {
   bool status = true;
 
-  if ( atttype == CDI_DATATYPE_INT32 )
+  if (atttype == CDI_DATATYPE_INT32)
     {
       int attint;
       int *pattint = attlen > 1 ? (int*) malloc(attlen*sizeof(int)) : &attint;
@@ -100,7 +100,7 @@ bool cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int
       for ( int i = 0; i < attlen; ++i ) attflt[i] = (double)pattint[i];
       if (attlen > 1) free(pattint);
     }
-  else if ( atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64 )
+  else if (atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64)
     {
       cdiInqAttFlt(gridID, CDI_GLOBAL, attname, attlen, attflt);
     }
@@ -153,7 +153,6 @@ void grid_init(grid_t *gridptr)
 
   gridptr->trunc          = 0;
   gridptr->nvertex        = 0;
-  gridptr->datatype       = CDI_DATATYPE_FLT64;
   gridptr->np             = 0;
   gridptr->isCyclic       = CDI_UNDEFID;
 
@@ -161,10 +160,12 @@ void grid_init(grid_t *gridptr)
   gridptr->hasdims        = true;
   gridptr->name           = NULL;
   gridptr->vtable         = &cdiGridVtable;
+
   cdiInitKeys(&gridptr->keys);
   gridptr->atts.nalloc    = MAX_ATTRIBUTES;
   gridptr->atts.nelems    = 0;
 
+  cdiDefVarKeyInt(&gridptr->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
   cdiDefVarKeyInt(&gridptr->keys, CDI_KEY_SCANNINGMODE, 64);
 }
 
@@ -860,7 +861,7 @@ void gridDefProj(int gridID, int projID)
   grid_t *gridptr = grid_to_pointer(gridID);
   gridptr->proj = projID;
 
-  if ( gridptr->type == GRID_CURVILINEAR )
+  if (gridptr->type == GRID_CURVILINEAR)
     {
       grid_t *projptr = grid_to_pointer(projID);
       const char *xdimname = cdiInqVarKeyStringPtr(&gridptr->x.keys, CDI_KEY_DIMNAME);
@@ -883,19 +884,19 @@ int gridInqProjType(int gridID)
   grid_t *gridptr = grid_to_pointer(gridID);
 
   int projtype = gridptr->projtype;
-  if ( projtype == -1 )
+  if (projtype == -1)
     {
       char gmapname[CDI_MAX_NAME];
       int length = CDI_MAX_NAME;
       cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
-      if ( gmapname[0] )
+      if (gmapname[0])
         {
           // clang-format off
-          if      ( strIsEqual(gmapname, "rotated_latitude_longitude") )   projtype = CDI_PROJ_RLL;
-          else if ( strIsEqual(gmapname, "lambert_azimuthal_equal_area") ) projtype = CDI_PROJ_LAEA;
-          else if ( strIsEqual(gmapname, "lambert_conformal_conic") )      projtype = CDI_PROJ_LCC;
-          else if ( strIsEqual(gmapname, "sinusoidal") )                   projtype = CDI_PROJ_SINU;
-          else if ( strIsEqual(gmapname, "polar_stereographic") )          projtype = CDI_PROJ_STERE;
+          if      (strIsEqual(gmapname, "rotated_latitude_longitude"))   projtype = CDI_PROJ_RLL;
+          else if (strIsEqual(gmapname, "lambert_azimuthal_equal_area")) projtype = CDI_PROJ_LAEA;
+          else if (strIsEqual(gmapname, "lambert_conformal_conic"))      projtype = CDI_PROJ_LCC;
+          else if (strIsEqual(gmapname, "sinusoidal"))                   projtype = CDI_PROJ_SINU;
+          else if (strIsEqual(gmapname, "polar_stereographic"))          projtype = CDI_PROJ_STERE;
           // clang-format on
           gridptr->projtype = projtype;
         }
@@ -910,14 +911,14 @@ void gridVerifyProj(int gridID)
   grid_t *gridptr = grid_to_pointer(gridID);
 
   const int projtype = gridInqProjType(gridID);
-  if ( projtype == CDI_PROJ_RLL )
+  if (projtype == CDI_PROJ_RLL)
     {
       gridaxisSetKey(&gridptr->x, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_grid_latlon][0]);
       gridaxisSetKey(&gridptr->y, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_grid_latlon][1]);
       gridaxisSetKey(&gridptr->x, CDI_KEY_UNITS, "degrees");
       gridaxisSetKey(&gridptr->y, CDI_KEY_UNITS, "degrees");
     }
-  else if ( projtype == CDI_PROJ_LCC )
+  else if (projtype == CDI_PROJ_LCC)
     {
       gridaxisSetKey(&gridptr->x, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_projection][0]);
       gridaxisSetKey(&gridptr->y, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_projection][1]);
@@ -1073,40 +1074,16 @@ void gridDefXsize(int gridID, size_t xsize)
     }
 }
 
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
 void gridDefDatatype(int gridID, int datatype)
 {
-  grid_t *gridptr = grid_to_pointer(gridID);
-  if (gridptr->datatype != datatype)
-    {
-      gridMark4Update(gridID);
-      gridptr->datatype = datatype;
-    }
+  cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, datatype);
 }
 
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
 int gridInqDatatype(int gridID)
 {
-  grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->datatype;
+  int datatype = 0;
+  cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
+  return datatype;
 }
 
 /*
@@ -2582,7 +2559,8 @@ static
 void gridComplete(grid_t *grid)
 {
   const int gridID = grid->self;
-  gridDefDatatype(gridID, grid->datatype);
+
+  cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, grid->datatype);
 
   const int gridtype = grid->type;
   switch (gridtype)
@@ -2639,14 +2617,14 @@ void gridComplete(grid_t *grid)
             cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_grid_latlon][1]);
 	  }
 
-        if ( gridtype == GRID_UNSTRUCTURED )
+        if (gridtype == GRID_UNSTRUCTURED)
           {
             int number = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED);
-            if ( number > 0 )
+            if (number > 0)
               {
                 cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, number);
                 int position = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
-                if ( position > 0 ) cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDINREFERENCE, position);
+                if (position > 0) cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDINREFERENCE, position);
               }
           }
 
@@ -3349,12 +3327,13 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
   size_t nxvals = gridInqXvals(gridID, NULL);
   size_t nyvals = gridInqYvals(gridID, NULL);
 
-  int type     = gridInqType(gridID);
+  int type = gridInqType(gridID);
   size_t gridsize = gridInqSize(gridID);
-  size_t xsize    = gridInqXsize(gridID);
-  size_t ysize    = gridInqYsize(gridID);
+  size_t xsize = gridInqXsize(gridID);
+  size_t ysize = gridInqYsize(gridID);
   int nvertex  = gridInqNvertex(gridID);
-  int datatype = gridInqDatatype(gridID);
+  int datatype;
+  cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
 
   int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
 

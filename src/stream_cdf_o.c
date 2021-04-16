@@ -266,10 +266,18 @@ void cdfPutGridStdAtts(int fileID, int ncvarid, int gridID, int dimtype)
     cdf_put_att_text(fileID, ncvarid, "units", len, units);
 }
 
+static int
+grid_inq_xtype(int gridID)
+{
+  int datatype = CDI_UNDEFID;
+  cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
+  return (datatype == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+}
+
 static void
 cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex, const struct cdfDefGridAxisInqs *inqs, int dimtype)
 {
-  const nc_type xtype = (gridInqDatatype(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+  const nc_type xtype = grid_inq_xtype(gridID);
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   const size_t dimlen = inqs->axisSize(gridID);
@@ -423,7 +431,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims, bool
   int dimID = CDI_UNDEFID;
   const int fileID  = streamptr->fileID;
   const size_t dimlen = gridAxisInq->axisSize(gridID);
-  const nc_type xtype = (gridInqDatatype(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+  const nc_type xtype = grid_inq_xtype(gridID);
 
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
@@ -630,7 +638,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID,
                           size_t nvertex, const char *vdimname_default,
                           bool setVdimname)
 {
-  const nc_type xtype = (gridInqDatatype(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+  const nc_type xtype = grid_inq_xtype(gridID);
   int xdimID = CDI_UNDEFID;
   int ydimID = CDI_UNDEFID;
   int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;

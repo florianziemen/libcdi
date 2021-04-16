@@ -914,10 +914,7 @@ void    gridDefYunits(int gridID, const char *yunits);
 //      gridInqYunits: Get the units of a Y-axis
 void    gridInqYunits(int gridID, char *yunits);
 
-//      gridDefDatatype: Define the data type of a Grid
 void    gridDefDatatype(int gridID, int prec);
-
-//      gridInqDatatype: Get the data type of a Grid
 int     gridInqDatatype(int gridID);
 
 //      gridInqXval: Get one value of a X-axis

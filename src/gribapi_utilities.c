@@ -445,7 +445,7 @@ int gribapiGetTsteptype(grib_handle *gh)
 int gribGetDatatype(grib_handle* gribHandle)
 {
   int datatype;
-  if(gribEditionNumber(gribHandle) > 1 && gribCheckString(gribHandle, "packingType", "grid_ieee"))
+  if (gribEditionNumber(gribHandle) > 1 && gribCheckString(gribHandle, "packingType", "grid_ieee"))
     {
       datatype = gribCheckLong(gribHandle, "precision", 1) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
     }
@@ -470,8 +470,8 @@ int gribapiGetParam(grib_handle *gh)
   else
     {
       FAIL_ON_GRIB_ERROR(grib_get_long, gh, "discipline", &pdis);
-      if(grib_get_long(gh, "parameterCategory", &pcat)) pcat = 0;
-      if(grib_get_long(gh, "parameterNumber", &pnum)) pnum = 0;
+      if (grib_get_long(gh, "parameterCategory", &pcat)) pcat = 0;
+      if (grib_get_long(gh, "parameterNumber", &pnum)) pnum = 0;
     }
   return cdiEncodeParam((int)pnum, (int)pcat, (int)pdis);
 }
