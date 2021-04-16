@@ -19,7 +19,6 @@ typedef struct {
   double    *ubounds;
   double    *weights;
   int        self;
-  int        datatype;
   int        scalar;
   int        type;
   int        size;

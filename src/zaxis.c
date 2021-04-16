@@ -62,11 +62,11 @@ enum {
 
 
 static int    zaxisCompareP    (zaxis_t *z1, zaxis_t *z2);
-static void   zaxisDestroyP    ( void * zaxisptr );
-static void   zaxisPrintP      ( void * zaxisptr, FILE * fp );
-static int    zaxisGetPackSize ( void * zaxisptr, void *context);
-static void   zaxisPack        ( void * zaxisptr, void * buffer, int size, int *pos, void *context);
-static int    zaxisTxCode      ( void );
+static void   zaxisDestroyP    (void *zaxisptr);
+static void   zaxisPrintP      (void *zaxisptr, FILE *fp);
+static int    zaxisGetPackSize (void *zaxisptr, void *context);
+static void   zaxisPack        (void *zaxisptr, void *buffer, int size, int *pos, void *context);
+static int    zaxisTxCode      (void);
 
 static const resOps zaxisOps = {
   (int (*)(void *, void *))zaxisCompareP,
@@ -113,27 +113,28 @@ zaxis_t *zaxis_to_pointer(int id)
 static
 void zaxis_init(zaxis_t *zaxisptr)
 {
-  zaxisptr->self          = CDI_UNDEFID;
-  zaxisptr->vals          = NULL;
+  zaxisptr->self           = CDI_UNDEFID;
+  zaxisptr->vals           = NULL;
 #ifndef USE_MPI
-  zaxisptr->cvals         = NULL;
-  zaxisptr->clength       = 0;
+  zaxisptr->cvals          = NULL;
+  zaxisptr->clength        = 0;
 #endif
-  zaxisptr->ubounds       = NULL;
-  zaxisptr->lbounds       = NULL;
-  zaxisptr->weights       = NULL;
-  zaxisptr->type          = CDI_UNDEFID;
-  zaxisptr->positive      = 0;
-  zaxisptr->scalar        = 0;
-  zaxisptr->direction     = 0;
-  zaxisptr->datatype      = CDI_DATATYPE_FLT64;
-  zaxisptr->size          = 0;
-  zaxisptr->vctsize       = 0;
-  zaxisptr->vct           = NULL;
+  zaxisptr->ubounds        = NULL;
+  zaxisptr->lbounds        = NULL;
+  zaxisptr->weights        = NULL;
+  zaxisptr->type           = CDI_UNDEFID;
+  zaxisptr->positive       = 0;
+  zaxisptr->scalar         = 0;
+  zaxisptr->direction      = 0;
+  zaxisptr->size           = 0;
+  zaxisptr->vctsize        = 0;
+  zaxisptr->vct            = NULL;
 
   cdiInitKeys(&zaxisptr->keys);
   zaxisptr->atts.nalloc    = MAX_ATTRIBUTES;
   zaxisptr->atts.nelems    = 0;
+
+  cdiDefVarKeyInt(&zaxisptr->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
 }
 
 static
@@ -471,20 +472,15 @@ void zaxisInqStdname(int zaxisID, char *stdname)
 
 void zaxisDefDatatype(int zaxisID, int datatype)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
-  if ( zaxisptr->datatype != datatype )
-    {
-      zaxisptr->datatype = datatype;
-      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
-    }
+  cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_DATATYPE, datatype);
 }
 
 
 int zaxisInqDatatype(int zaxisID)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  return zaxisptr->datatype;
+  int datatype = 0;
+  cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
+  return datatype;
 }
 
 
@@ -1183,9 +1179,12 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 {
   xassert(zaxisptr);
 
+  int zaxisID = zaxisptr->self;
+  int datatype = CDI_UNDEFID;
+  cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
+
   const int type    = zaxisptr->type;
   const int nlevels = zaxisptr->size;
-  const int datatype = zaxisptr->datatype;
 
   const int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
 
@@ -1277,11 +1276,11 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 
 
 static
-void zaxisPrintP(void * voidptr, FILE * fp)
+void zaxisPrintP(void *voidptr, FILE *fp)
 {
-  zaxis_t *zaxisptr = ( zaxis_t * ) voidptr;
+  zaxis_t *zaxisptr = (zaxis_t *) voidptr;
 
-  xassert ( zaxisptr );
+  xassert(zaxisptr);
 
   zaxisPrintKernel(zaxisptr, fp);
 }
@@ -1296,8 +1295,8 @@ int zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
 
   diff |= (z1->type != z2->type)
     | (cdiInqVarKeyInt(&z1->keys, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE) != cdiInqVarKeyInt(&z2->keys, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE))
+    | (cdiInqVarKeyInt(&z1->keys, CDI_KEY_DATATYPE) != cdiInqVarKeyInt(&z2->keys, CDI_KEY_DATATYPE))
     | (z1->direction != z2->direction)
-    | (z1->datatype != z2->datatype)
     | (z1->size != z2->size)
     | (z1->vctsize != z2->vctsize)
     | (z1->positive != z2->positive);
@@ -1375,7 +1374,7 @@ int zaxisTxCode(void)
   return ZAXIS;
 }
 
-enum { zaxisNint     = 7,
+enum { zaxisNint     = 6,
        vals     = 1 << 0,
        lbounds  = 1 << 1,
        ubounds  = 1 << 2,
@@ -1459,12 +1458,11 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
     = zaxisNewEntry(force_id ? namespaceAdaptKey(intBuffer[0], originNamespace)
                     : CDI_UNDEFID);
 
-  zaxisP->datatype  = intBuffer[1];
-  zaxisP->type      = intBuffer[2];
-  zaxisP->size      = intBuffer[3];
-  zaxisP->direction = intBuffer[4];
-  zaxisP->vctsize   = intBuffer[5];
-  memberMask        = intBuffer[6];
+  zaxisP->type      = intBuffer[1];
+  zaxisP->size      = intBuffer[2];
+  zaxisP->direction = intBuffer[3];
+  zaxisP->vctsize   = intBuffer[4];
+  memberMask        = intBuffer[5];
 
   if (memberMask & vals)
     {
@@ -1518,7 +1516,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
       xassert(cdiCheckSum(CDI_DATATYPE_FLT, size, zaxisP->weights) == d);
     }
 
-  if ( memberMask & vct )
+  if (memberMask & vct)
     {
       int size = zaxisP->vctsize;
       xassert(size >= 0);
@@ -1550,12 +1548,11 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
   uint32_t d;
 
   intBuffer[0]  = zaxisP->self;
-  intBuffer[1]  = zaxisP->datatype;
-  intBuffer[2]  = zaxisP->type;
-  intBuffer[3]  = zaxisP->size;
-  intBuffer[4]  = zaxisP->direction;
-  intBuffer[5]  = zaxisP->vctsize;
-  intBuffer[6]  = memberMask = zaxisGetMemberMask ( zaxisP );
+  intBuffer[1]  = zaxisP->type;
+  intBuffer[2]  = zaxisP->size;
+  intBuffer[3]  = zaxisP->direction;
+  intBuffer[4]  = zaxisP->vctsize;
+  intBuffer[5]  = memberMask = zaxisGetMemberMask ( zaxisP );
 
   serializePack(intBuffer, zaxisNint, CDI_DATATYPE_INT,
                 packBuffer, packBufferSize, packBufferPos, context);

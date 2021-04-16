@@ -80,7 +80,7 @@ struct grid_t {
   int         self;
   size_t      size;
   int         type;                   // grid type
-  int         datatype;               // grid data type
+  int         datatype;               // grid data type (used only internal in gridComplete())
   int         proj;                   // grid projection
   int         projtype;               // grid projection type
   mask_t     *mask;

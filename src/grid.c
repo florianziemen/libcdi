@@ -133,6 +133,7 @@ void grid_init(grid_t *gridptr)
 {
   gridptr->self           = CDI_UNDEFID;
   gridptr->type           = CDI_UNDEFID;
+  gridptr->datatype       = CDI_UNDEFID;
   gridptr->proj           = CDI_UNDEFID;
   gridptr->projtype       = CDI_UNDEFID;
   gridptr->mask           = NULL;
@@ -1081,7 +1082,7 @@ void gridDefDatatype(int gridID, int datatype)
 
 int gridInqDatatype(int gridID)
 {
-  int datatype = 0;
+  int datatype = CDI_UNDEFID;
   cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
   return datatype;
 }
@@ -2398,8 +2399,8 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   xassert ( g1 );
   xassert ( g2 );
 
+  if (cdiInqVarKeyInt(&g1->keys, CDI_KEY_DATATYPE) != cdiInqVarKeyInt(&g2->keys, CDI_KEY_DATATYPE)) return differ;
   if ( g1->type          != g2->type         ) return differ;
-  if ( g1->datatype      != g2->datatype     ) return differ;
   if ( g1->isCyclic      != g2->isCyclic     ) return differ;
   if ( g1->x.flag        != g2->x.flag       ) return differ;
   if ( g1->y.flag        != g2->y.flag       ) return differ;
@@ -2560,7 +2561,7 @@ void gridComplete(grid_t *grid)
 {
   const int gridID = grid->self;
 
-  cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, grid->datatype);
+  if (grid->datatype != CDI_UNDEFID) cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, grid->datatype);
 
   const int gridtype = grid->type;
   switch (gridtype)
@@ -2699,7 +2700,7 @@ int gridGenerate(const grid_t *grid)
   int gridtype = grid->type;
   int gridID = gridCreate(gridtype, grid->size);
   grid_t *restrict gridptr = grid_to_pointer(gridID);
-  gridptr->datatype = grid->datatype;
+  cdiCopyVarKey(&grid->keys, CDI_KEY_DATATYPE, &gridptr->keys);
   gridptr->x.size = grid->x.size;
   gridptr->y.size = grid->y.size;
   gridptr->np = grid->np;
@@ -2707,8 +2708,7 @@ int gridGenerate(const grid_t *grid)
   gridptr->x.flag = grid->x.flag;
   int valdef_group1 = 0;
   static const int valdef_group1_tab[] = {
-    GRID_LONLAT, GRID_GAUSSIAN, GRID_UNSTRUCTURED, GRID_CURVILINEAR,
-    GRID_GENERIC, GRID_PROJECTION
+    GRID_LONLAT, GRID_GAUSSIAN, GRID_UNSTRUCTURED, GRID_CURVILINEAR, GRID_GENERIC, GRID_PROJECTION
   };
   for ( size_t i = 0; i < sizeof (valdef_group1_tab) / sizeof (valdef_group1_tab[0]); ++i)
     valdef_group1 |= (gridtype == valdef_group1_tab[i]);
@@ -2731,8 +2731,7 @@ int gridGenerate(const grid_t *grid)
   gridptr->y.first = grid->y.first;
   gridptr->y.last = grid->y.last;
   gridptr->y.inc = grid->y.inc;
-  if ( valdef_group1 && grid->area)
-    gridDefArea(gridID, grid->area);
+  if ( valdef_group1 && grid->area) gridDefArea(gridID, grid->area);
 
   cdiCopyVarKey(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED, &gridptr->keys);
   cdiCopyVarKey(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE, &gridptr->keys);
@@ -2740,10 +2739,8 @@ int gridGenerate(const grid_t *grid)
 
   cdiCopyVarKey(&grid->keys, CDI_KEY_SCANNINGMODE, &gridptr->keys);
 
-  if ( gridtype == GRID_PROJECTION )
-    gridptr->name = strdup(grid->name);
-  if ( gridtype == GRID_GAUSSIAN_REDUCED )
-    gridDefReducedPoints(gridID, grid->y.size, grid->reducedPoints);
+  if (gridtype == GRID_PROJECTION) gridptr->name = strdup(grid->name);
+  if (gridtype == GRID_GAUSSIAN_REDUCED) gridDefReducedPoints(gridID, grid->y.size, grid->reducedPoints);
   gridptr->trunc = grid->trunc;
   gridptr->lcomplex = grid->lcomplex;
   gridptr->gme.nd = grid->gme.nd;
@@ -3509,6 +3506,9 @@ void gridPrintP(void *voidptr, FILE *fp)
 
   gridPrintKernel(gridID, 0, fp);
 
+  int datatype = CDI_UNDEFID;
+  cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
+
   fprintf(fp,
           "datatype  = %d\n"
           "nd        = %d\n"
@@ -3518,7 +3518,7 @@ void gridPrintP(void *voidptr, FILE *fp)
           "trunc     = %d\n"
           "lcomplex  = %d\n"
           "reducedPointsSize   = %d\n",
-          gridptr->datatype, gridptr->gme.nd, gridptr->gme.ni, gridptr->gme.ni2,
+          datatype, gridptr->gme.nd, gridptr->gme.ni, gridptr->gme.ni2,
           gridptr->gme.ni3, gridptr->trunc,
           gridptr->lcomplex, gridptr->reducedPointsSize );
 }
@@ -4102,7 +4102,6 @@ gridTxCode ()
 enum {
   GRID_PACK_INT_IDX_SELF,
   GRID_PACK_INT_IDX_TYPE,
-  GRID_PACK_INT_IDX_DATATYPE,
   GRID_PACK_INT_IDX_IS_CYCLIC,
   GRID_PACK_INT_IDX_X_FLAG,
   GRID_PACK_INT_IDX_Y_FLAG,
@@ -4284,7 +4283,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     xassert(!force_id || targetID == gridP->self);
 
     gridP->type          =   intBuffer[GRID_PACK_INT_IDX_TYPE];
-    gridP->datatype      =   intBuffer[GRID_PACK_INT_IDX_DATATYPE];
     gridP->isCyclic      =   (signed char)intBuffer[GRID_PACK_INT_IDX_IS_CYCLIC];
     gridP->x.flag        =   (short)intBuffer[GRID_PACK_INT_IDX_X_FLAG];
     gridP->y.flag        =   (short)intBuffer[GRID_PACK_INT_IDX_Y_FLAG];
@@ -4438,7 +4436,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
 
     intBuffer[GRID_PACK_INT_IDX_SELF]         = gridP->self;
     intBuffer[GRID_PACK_INT_IDX_TYPE]         = gridP->type;
-    intBuffer[GRID_PACK_INT_IDX_DATATYPE]     = gridP->datatype;
     intBuffer[GRID_PACK_INT_IDX_IS_CYCLIC]    = gridP->isCyclic;
     intBuffer[GRID_PACK_INT_IDX_X_FLAG]       = gridP->x.flag;
     intBuffer[GRID_PACK_INT_IDX_Y_FLAG]       = gridP->y.flag;

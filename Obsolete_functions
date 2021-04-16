@@ -40,6 +40,8 @@ zaxisInqName(zaxisID, name)           -> cdiInqKeyString(zaxisID, CDI_GLOBAL, CD
 zaxisInqLongname(zaxisID, longname)   -> cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, longname, &length)
 zaxisInqUnits(zaxisID, units)         -> cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length)
 
+zaxisDefDatatype(zaxisID, datatype)   -> cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_DATATYPE, datatype)
+zaxisInqDatatype(zaxisID)             -> cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype)
 zaxisDefNumber(zaxisID, number)       -> cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, number)
 zaxisInqNumber(zaxisID)               -> cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, &number)
 zaxisDefNlevRef(zaxisID, nlev)        -> cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NLEV, nlev)

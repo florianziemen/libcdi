@@ -4,6 +4,7 @@
 
 2021-04-16  Uwe Schulzweida
 
+	* Replaced zaxisDefDatatype()/zaxisInqDatatype() by cdiDefKeyInt()/cdiInqKeyInt() with CDI_KEY_DATATYPE
 	* Replaced gridDefDatatype()/gridInqDatatype() by cdiDefKeyInt()/cdiInqKeyInt() with CDI_KEY_DATATYPE
 
 2021-04-15  Uwe Schulzweida

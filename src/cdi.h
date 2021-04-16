@@ -914,7 +914,7 @@ void    gridDefYunits(int gridID, const char *yunits);
 //      gridInqYunits: Get the units of a Y-axis
 void    gridInqYunits(int gridID, char *yunits);
 
-void    gridDefDatatype(int gridID, int prec);
+void    gridDefDatatype(int gridID, int datatype);
 int     gridInqDatatype(int gridID);
 
 //      gridInqXval: Get one value of a X-axis
@@ -1076,7 +1076,7 @@ void    zaxisInqUnits(int zaxisID, char *units);
 //      zaxisInqStdname: Get the standard name of a Z-axis
 void    zaxisInqStdname(int zaxisID, char *stdname);
 
-void    zaxisDefDatatype(int zaxisID, int prec);
+void    zaxisDefDatatype(int zaxisID, int datatype);
 int     zaxisInqDatatype(int zaxisID);
 
 void    zaxisDefPositive(int zaxisID, int positive);
