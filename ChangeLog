@@ -2,6 +2,10 @@
 
 	* Version 2.0.0 released
 
+2021-04-17  Uwe Schulzweida
+
+	* zaxis: added support for datatype int and short
+
 2021-04-16  Uwe Schulzweida
 
 	* Replaced zaxisDefDatatype()/zaxisInqDatatype() by cdiDefKeyInt()/cdiInqKeyInt() with CDI_KEY_DATATYPE

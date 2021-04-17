@@ -3014,11 +3014,10 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
             {
               for ( int i = 0; i < ndims; i++ )
                 {
-                  if ( ncvar->dimtype[i] == Z_AXIS )
-                    zdimid = ncvar->dimids[i];
+                  if (ncvar->dimtype[i] == Z_AXIS) zdimid = ncvar->dimids[i];
                 }
 
-              if ( zdimid != CDI_UNDEFID )
+              if (zdimid != CDI_UNDEFID)
                 {
                   // zvarid = ncdims[zdimid].ncvarid;
                   zvarid = (ncvar->zvarid != CDI_UNDEFID) ? ncvar->zvarid : ncdims[zdimid].ncvarid;
@@ -3026,56 +3025,54 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
                 }
             }
 
-	  if ( CDI_Debug ) Message("nlevs = %zu", zsize);
+	  if (CDI_Debug) Message("nlevs = %zu", zsize);
 
 	  double *zvar = NULL;
           char **zcvals = NULL;
           size_t zclength = 0;
 
 	  int zaxisType = CDI_UNDEFID;
-	  if ( zvarid != CDI_UNDEFID ) zaxisType = ncvars[zvarid].zaxistype;
-	  if ( zaxisType == CDI_UNDEFID ) zaxisType = ZAXIS_GENERIC;
+	  if (zvarid != CDI_UNDEFID) zaxisType = ncvars[zvarid].zaxistype;
+	  if (zaxisType == CDI_UNDEFID) zaxisType = ZAXIS_GENERIC;
 
           int zdatatype = CDI_DATATYPE_FLT64;
 	  double *lbounds = NULL;
 	  double *ubounds = NULL;
 
-	  if ( zvarid != CDI_UNDEFID )
+	  if (zvarid != CDI_UNDEFID)
 	    {
 	      positive  = ncvars[zvarid].positive;
 	      pname     = ncvars[zvarid].name;
 	      plongname = ncvars[zvarid].longname;
 	      punits    = ncvars[zvarid].units;
 	      pstdname  = ncvars[zvarid].stdname;
-	      if ( ncvars[zvarid].xtype == NC_FLOAT ) zdatatype = CDI_DATATYPE_FLT32;
-	      /* don't change the name !!! */
+	      if      (ncvars[zvarid].xtype == NC_FLOAT) zdatatype = CDI_DATATYPE_FLT32;
+	      else if (ncvars[zvarid].xtype == NC_INT)   zdatatype = CDI_DATATYPE_INT32;
+	      else if (ncvars[zvarid].xtype == NC_SHORT) zdatatype = CDI_DATATYPE_INT16;
+	      // don't change the name !!!
 	      /*
-	      if ( (len = strlen(pname)) > 2 )
-		if ( pname[len-2] == '_' && isdigit((int) pname[len-1]) )
-		  pname[len-2] = 0;
+	      if ((len = strlen(pname)) > 2)
+		if (pname[len-2] == '_' && isdigit((int) pname[len-1])) pname[len-2] = 0;
 	      */
 #ifndef USE_MPI
-              if ( zaxisType == ZAXIS_CHAR )
+              if (zaxisType == ZAXIS_CHAR && ncvars[zvarid].ndims == 2)
                 {
-                  if ( ncvars[zvarid].ndims == 2 )
-                    {
-                      zdatatype = CDI_DATATYPE_UINT8;
-                      zclength = ncdims[ncvars[zvarid].dimids[1]].len;
-                      cdf_load_cvals(zsize*zclength, zvarid, ncvar, &zcvals, zsize);
-                    }
+                  zdatatype = CDI_DATATYPE_UINT8;
+                  zclength = ncdims[ncvars[zvarid].dimids[1]].len;
+                  cdf_load_cvals(zsize*zclength, zvarid, ncvar, &zcvals, zsize);
                 }
 #endif
 
-              if ( zaxisType == ZAXIS_HYBRID && ncvars[zvarid].vct )
+              if (zaxisType == ZAXIS_HYBRID && ncvars[zvarid].vct)
                 {
                   vct = ncvars[zvarid].vct;
                   vctsize = ncvars[zvarid].vctsize;
 
-                  if ( ncvars[zvarid].psvarid != -1 ) psvarid = ncvars[zvarid].psvarid;
-                  if ( ncvars[zvarid].p0varid != -1 ) p0varid = ncvars[zvarid].p0varid;
+                  if (ncvars[zvarid].psvarid != -1) psvarid = ncvars[zvarid].psvarid;
+                  if (ncvars[zvarid].p0varid != -1) p0varid = ncvars[zvarid].p0varid;
                 }
 
-              if ( zaxisType != ZAXIS_CHAR )
+              if (zaxisType != ZAXIS_CHAR)
                 {
                   zvar = (double*) Malloc(zsize*sizeof(double));
                   cdf_get_var_double(ncvars[zvarid].ncid, zvarid, zvar);
@@ -3109,7 +3106,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
               pname     = (zdimid != CDI_UNDEFID) ? ncdims[zdimid].name : NULL;
 	      plongname = NULL;
 	      punits    = NULL;
-	      pstdname   = NULL;
+	      pstdname  = NULL;
 
 	      if ( zsize == 1 && zdimid == CDI_UNDEFID )
 		{
@@ -3133,19 +3130,18 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 
           const int zaxisID = ncvar->zaxisID;
 
-          if ( CDI_cmor_mode && zsize == 1 && zaxisType != ZAXIS_HYBRID ) zaxisDefScalar(zaxisID);
+          if (CDI_cmor_mode && zsize == 1 && zaxisType != ZAXIS_HYBRID) zaxisDefScalar(zaxisID);
 
           if (pstdname && *pstdname)
             cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_STDNAME, (const unsigned  char*)pstdname, (int)strlen(pstdname)+1);
 
-          if ( uuidOfVGrid[0] != 0 )
+          if (uuidOfVGrid[0] != 0)
             cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfVGrid, CDI_UUID_SIZE);
 
-          if ( zaxisType == ZAXIS_HYBRID )
+          if (zaxisType == ZAXIS_HYBRID)
             {
-              if ( psvarid != -1 )
-                cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_PSNAME, ncvars[psvarid].name);
-              if ( p0varid != -1 )
+              if (psvarid != -1) cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_PSNAME, ncvars[psvarid].name);
+              if (p0varid != -1)
                 {
                   double px = 1;
                   cdf_get_var_double(ncvars[p0varid].ncid, p0varid, &px);
@@ -3154,25 +3150,25 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
                 }
             }
 
-          if ( positive > 0 ) zaxisDefPositive(zaxisID, positive);
-          if ( is_scalar ) zaxisDefScalar(zaxisID);
+          if (positive > 0) zaxisDefPositive(zaxisID, positive);
+          if (is_scalar) zaxisDefScalar(zaxisID);
 
-          if ( zdimid != CDI_UNDEFID )
+          if (zdimid != CDI_UNDEFID)
             cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_DIMNAME, ncdims[zdimid].name);
 
-	  if ( zvar ) Free(zvar);
-	  if ( zcvals )
+	  if (zvar) Free(zvar);
+	  if (zcvals)
             {
-              for ( size_t i = 0; i < zsize; i++ ) Free(zcvals[i]);
+              for (size_t i = 0; i < zsize; i++) Free(zcvals[i]);
               Free(zcvals);
             }
-	  if ( lbounds ) Free(lbounds);
+	  if (lbounds) Free(lbounds);
 
-          if ( zvarid != CDI_UNDEFID )
+          if (zvarid != CDI_UNDEFID)
             {
               const int ncid = ncvars[zvarid].ncid;
               const int nvatts = ncvars[zvarid].natts;
-              for ( int iatt = 0; iatt < nvatts; ++iatt )
+              for (int iatt = 0; iatt < nvatts; ++iatt)
                 {
                   const int attnum = ncvars[zvarid].atts[iatt];
                   cdf_set_cdi_attr(ncid, zvarid, attnum, zaxisID, CDI_GLOBAL);
@@ -3182,33 +3178,31 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
           const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
 	  streamptr->zaxisID[zaxisindex] = zdimid >= 0 ? ncdims[zdimid].dimid : zdimid;
 
-	  if ( CDI_Debug )
-	    Message("zaxisID %d %d %s", zaxisID, ncvarid, ncvar->name);
+	  if (CDI_Debug) Message("zaxisID %d %d %s", zaxisID, ncvarid, ncvar->name);
 
-	  for ( int ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
-	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].zaxisID == CDI_UNDEFID /*&& ncvars[ncvarid2].zaxistype == CDI_UNDEFID*/ )
+	  for (int ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++)
+	    if (ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].zaxisID == CDI_UNDEFID /*&& ncvars[ncvarid2].zaxistype == CDI_UNDEFID*/)
 	      {
                 int zvarid2 = CDI_UNDEFID;
-                if ( ncvars[ncvarid2].zvarid != CDI_UNDEFID && ncvars[ncvars[ncvarid2].zvarid].ndims == 0 )
+                if (ncvars[ncvarid2].zvarid != CDI_UNDEFID && ncvars[ncvars[ncvarid2].zvarid].ndims == 0)
                   zvarid2 = ncvars[ncvarid2].zvarid;
 
 		int zdimid2 = CDI_UNDEFID;
 		ndims = ncvars[ncvarid2].ndims;
-		for ( int i = 0; i < ndims; i++ )
+		for (int i = 0; i < ndims; i++)
 		  {
-		    if ( ncvars[ncvarid2].dimtype[i] == Z_AXIS )
+		    if (ncvars[ncvarid2].dimtype[i] == Z_AXIS)
 		      zdimid2 = ncvars[ncvarid2].dimids[i];
 		  }
 
-		if ( zdimid == zdimid2 /* && zvarid == zvarid2 */)
+		if (zdimid == zdimid2 /* && zvarid == zvarid2 */)
 		  {
-                    if ( (zdimid != CDI_UNDEFID && ncvars[ncvarid2].zaxistype == CDI_UNDEFID) ||
-                         (zdimid == CDI_UNDEFID && zvarid != CDI_UNDEFID && zvarid == zvarid2) ||
-                         (zdimid == CDI_UNDEFID && zaxisType == ncvars[ncvarid2].zaxistype) ||
-                         (zdimid == CDI_UNDEFID && zvarid2 == CDI_UNDEFID && ncvars[ncvarid2].zaxistype == CDI_UNDEFID) )
+                    if ((zdimid != CDI_UNDEFID && ncvars[ncvarid2].zaxistype == CDI_UNDEFID) ||
+                        (zdimid == CDI_UNDEFID && zvarid != CDI_UNDEFID && zvarid == zvarid2) ||
+                        (zdimid == CDI_UNDEFID && zaxisType == ncvars[ncvarid2].zaxistype) ||
+                        (zdimid == CDI_UNDEFID && zvarid2 == CDI_UNDEFID && ncvars[ncvarid2].zaxistype == CDI_UNDEFID))
                       {
-                        if ( CDI_Debug )
-                          Message("zaxisID %d %d %s", zaxisID, ncvarid2, ncvars[ncvarid2].name);
+                        if (CDI_Debug) Message("zaxisID %d %d %s", zaxisID, ncvarid2, ncvars[ncvarid2].name);
                         ncvars[ncvarid2].zaxisID = zaxisID;
                       }
                   }

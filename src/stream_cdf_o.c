@@ -1452,13 +1452,25 @@ void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimI
 }
 #endif
 
+static int
+zaxis_inq_xtype(int zaxisID)
+{
+  int datatype = CDI_UNDEFID;
+  cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
+  int xtype = NC_DOUBLE;
+  if      (datatype == CDI_DATATYPE_FLT32) xtype = NC_FLOAT;
+  else if (datatype == CDI_DATATYPE_INT32) xtype = NC_INT;
+  else if (datatype == CDI_DATATYPE_INT16) xtype = NC_SHORT;
+  return xtype;
+}
+
 static
 void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 {
   // char zaxisname0[CDI_MAX_NAME];
   int dimID = CDI_UNDEFID;
   int ncvarid = CDI_UNDEFID, ncbvarid = CDI_UNDEFID;
-  const int xtype = zaxisInqDatatype(zaxisID) == CDI_DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE;
+  const int xtype = zaxis_inq_xtype(zaxisID);
 
   const int vlistID = streamptr->vlistID;
   const int fileID  = streamptr->fileID;
