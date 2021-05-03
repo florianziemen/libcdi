@@ -11886,7 +11886,7 @@ lt_prog_compiler_static=
 	lt_prog_compiler_static='-qstaticlink'
 	;;
       *)
-	case `$CC -V 2>&1 | sed 5q` in
+	case `$CC -V 2>&1 | sed -n 1,5p` in
 	*Sun\ Ceres\ Fortran* | *Sun*Fortran*\ [1-7].* | *Sun*Fortran*\ 8.[0-3]*)
 	  # Sun Fortran 8.3 passes all unrecognized flags to the linker
 	  lt_prog_compiler_pic='-KPIC'
@@ -11914,7 +11914,7 @@ lt_prog_compiler_static=
 	  lt_prog_compiler_pic='-PIC'
 	  lt_prog_compiler_static='-Bstatic'
 	  ;;
-	*PGI\ Compilers\ and\ Tools*|*Portland\ Group*)
+	*PGI\ Compilers\ and\ Tools*|*NVIDIA\ Compilers\ and\ Tools*|*Portland\ Group*)
 	  lt_prog_compiler_wl='-Wl,'
 	  lt_prog_compiler_pic='-fpic'
 	  lt_prog_compiler_static='-Bstatic'
@@ -12540,7 +12540,7 @@ _LT_EOF
 	  compiler_needs_object=yes
 	  ;;
 	esac
-	case `$CC -V 2>&1 | sed 5q` in
+	case `$CC -V 2>&1 | sed -n 1,5p` in
 	*Sun\ C*)			# Sun C 5.9
 	  whole_archive_flag_spec='$wl--whole-archive`new_convenience=; for conv in $convenience\"\"; do test -z \"$conv\" || new_convenience=\"$new_convenience,$conv\"; done; func_echo_all \"$new_convenience\"` $wl--no-whole-archive'
 	  compiler_needs_object=yes
@@ -16530,7 +16530,7 @@ fi
 	    fi
 	    ;;
 	  *)
-	    case `$CC -V 2>&1 | sed 5q` in
+	    case `$CC -V 2>&1 | sed -n 1,5p` in
 	    *Sun\ C*)
 	      # Sun C++ 5.9
 	      no_undefined_flag_CXX=' -zdefs'
@@ -17272,7 +17272,7 @@ lt_prog_compiler_static_CXX=
 	    lt_prog_compiler_static_CXX='-qstaticlink'
 	    ;;
 	  *)
-	    case `$CC -V 2>&1 | sed 5q` in
+	    case `$CC -V 2>&1 | sed -n 1,5p` in
 	    *Sun\ C*)
 	      # Sun C++ 5.9
 	      lt_prog_compiler_pic_CXX='-KPIC'
@@ -19066,7 +19066,7 @@ lt_prog_compiler_static_F77=
 	lt_prog_compiler_static_F77='-qstaticlink'
 	;;
       *)
-	case `$CC -V 2>&1 | sed 5q` in
+	case `$CC -V 2>&1 | sed -n 1,5p` in
 	*Sun\ Ceres\ Fortran* | *Sun*Fortran*\ [1-7].* | *Sun*Fortran*\ 8.[0-3]*)
 	  # Sun Fortran 8.3 passes all unrecognized flags to the linker
 	  lt_prog_compiler_pic_F77='-KPIC'
@@ -19094,7 +19094,7 @@ lt_prog_compiler_static_F77=
 	  lt_prog_compiler_pic_F77='-PIC'
 	  lt_prog_compiler_static_F77='-Bstatic'
 	  ;;
-	*PGI\ Compilers\ and\ Tools*|*Portland\ Group*)
+	*PGI\ Compilers\ and\ Tools*|*NVIDIA\ Compilers\ and\ Tools*|*Portland\ Group*)
 	  lt_prog_compiler_wl_F77='-Wl,'
 	  lt_prog_compiler_pic_F77='-fpic'
 	  lt_prog_compiler_static_F77='-Bstatic'
@@ -19705,7 +19705,7 @@ _LT_EOF
 	  compiler_needs_object_F77=yes
 	  ;;
 	esac
-	case `$CC -V 2>&1 | sed 5q` in
+	case `$CC -V 2>&1 | sed -n 1,5p` in
 	*Sun\ C*)			# Sun C 5.9
 	  whole_archive_flag_spec_F77='$wl--whole-archive`new_convenience=; for conv in $convenience\"\"; do test -z \"$conv\" || new_convenience=\"$new_convenience,$conv\"; done; func_echo_all \"$new_convenience\"` $wl--no-whole-archive'
 	  compiler_needs_object_F77=yes
@@ -22182,7 +22182,7 @@ lt_prog_compiler_static_FC=
 	lt_prog_compiler_static_FC='-qstaticlink'
 	;;
       *)
-	case `$CC -V 2>&1 | sed 5q` in
+	case `$CC -V 2>&1 | sed -n 1,5p` in
 	*Sun\ Ceres\ Fortran* | *Sun*Fortran*\ [1-7].* | *Sun*Fortran*\ 8.[0-3]*)
 	  # Sun Fortran 8.3 passes all unrecognized flags to the linker
 	  lt_prog_compiler_pic_FC='-KPIC'
@@ -22210,7 +22210,7 @@ lt_prog_compiler_static_FC=
 	  lt_prog_compiler_pic_FC='-PIC'
 	  lt_prog_compiler_static_FC='-Bstatic'
 	  ;;
-	*PGI\ Compilers\ and\ Tools*|*Portland\ Group*)
+	*PGI\ Compilers\ and\ Tools*|*NVIDIA\ Compilers\ and\ Tools*|*Portland\ Group*)
 	  lt_prog_compiler_wl_FC='-Wl,'
 	  lt_prog_compiler_pic_FC='-fpic'
 	  lt_prog_compiler_static_FC='-Bstatic'
@@ -22821,7 +22821,7 @@ _LT_EOF
 	  compiler_needs_object_FC=yes
 	  ;;
 	esac
-	case `$CC -V 2>&1 | sed 5q` in
+	case `$CC -V 2>&1 | sed -n 1,5p` in
 	*Sun\ C*)			# Sun C 5.9
 	  whole_archive_flag_spec_FC='$wl--whole-archive`new_convenience=; for conv in $convenience\"\"; do test -z \"$conv\" || new_convenience=\"$new_convenience,$conv\"; done; func_echo_all \"$new_convenience\"` $wl--no-whole-archive'
 	  compiler_needs_object_FC=yes
@@ -26863,7 +26863,21 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 ac_clean_files_save="$ac_clean_files_save $ac_pwd/$objdir"
 ac_clean_files="$ac_clean_files $ac_pwd/$objdir"
 
-   ac_ext=c
+   for acx_flag_var_ in CFLAGS CXXFLAGS FCFLAGS F77FLAGS LDFLAGS FCLDFLAGS
+do :
+  if eval test x\$\{$acx_flag_var_+set\} = xset; then :
+  eval acx_temp="\" \$$acx_flag_var_ \""
+         case $acx_temp in #(
+  *\ -shared-intel\ *|*\ -static-intel\ *) :
+    acx_temp=`echo "$acx_temp" | sed -e 's/ \(-\(shared\|static\)-intel\)\b/ -Xcompiler \1 -XCClinker \1/'` ;; #(
+  *) :
+     ;;
+esac
+         eval $acx_flag_var_=\"`echo "$acx_temp" | sed -e 's/ -\(align\|allow\|assume\|ccdefault\|check\|convert\|debug\|debug-parameters\|diag-type\|diag-enable\|diag-disable\|double-size\|dynamic-linker\|dyncom\|export-dir\|extend-source\|fp-model\|fpscomp\|gen-interfaces\|heap-arrays\|imacros\|integer-size\|iprefix\|iquote\|iwithprefixbefore\|module\|names\|opt-report\|opt-streaming-stores\|pch-dir\|pch-use\|prof-dir\|prof-file\|real-size\|reentrancy\|stand\|tcollect-filter\|tune\|warn\|watch\) \([^-][^ ]*\)\b/ -Xcompiler -\1 -Xcompiler \2/g' -e 's/^ //;s/ $//'`\"
+fi
+done
+   if test -n "$CC" -a X"$CC" != Xno; then :
+  ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -26871,7 +26885,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
 ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether libtool can link C programs" >&5
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether libtool can link C programs" >&5
 $as_echo_n "checking whether libtool can link C programs... " >&6; }
 if ${acx_cv_libtool_c_works+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -26903,7 +26917,7 @@ as_fn_error $? "unable to link a C program using libtool
 See \`config.log' for more details" "$LINENO" 5; }
 fi
 
-   ac_ext=c
+         ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -26911,6 +26925,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
 ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
+fi
    if test -n "$FC" -a X"$FC" != Xno; then :
   ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -26921,17 +26936,19 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=FC $ac_compile"
 
 
 
-   acx_temp=`$FC -V 2>&1 | sed 5q`
+   acx_temp=`$FC -V 2>&1 | sed -n 1,5p`
    case "$acx_temp" in #(
   *NAG\ Fortran\ Compiler\ Release*) :
     if test x${FCFLAGS+set} = xset; then :
   FCFLAGS=`echo "$FCFLAGS" | tr ' ' '\n' | sed -e '/^-W[lc]/{' \
--e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}' \
+-e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc,\)/-Xcompiler \1/' \
+-e 's/^\(-Wc=.*\)/-Xcompiler \1 -XCClinker \1/' -e '}' \
    | tr '\n' ' ' | sed -e 's/ $//'`
 fi
       if test x${FCLDFLAGS+set} = xset; then :
   FCLDFLAGS=`echo "$FCLDFLAGS" | tr ' ' '\n' | sed -e '/^-W[lc]/{' \
--e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}' \
+-e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc,\)/-Xcompiler \1/' \
+-e 's/^\(-Wc=.*\)/-Xcompiler \1 -XCClinker \1/' -e '}' \
    | tr '\n' ' ' | sed -e 's/ $//'`
 fi ;; #(
   *) :
@@ -26988,17 +27005,19 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=F77 $ac_compile"
 
 
 
-   acx_temp=`$F77 -V 2>&1 | sed 5q`
+   acx_temp=`$F77 -V 2>&1 | sed -n 1,5p`
    case "$acx_temp" in #(
   *NAG\ Fortran\ Compiler\ Release*) :
     if test x${FFLAGS+set} = xset; then :
   FFLAGS=`echo "$FFLAGS" | tr ' ' '\n' | sed -e '/^-W[lc]/{' \
--e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}' \
+-e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc,\)/-Xcompiler \1/' \
+-e 's/^\(-Wc=.*\)/-Xcompiler \1 -XCClinker \1/' -e '}' \
    | tr '\n' ' ' | sed -e 's/ $//'`
 fi
       if test x${F77LDFLAGS+set} = xset; then :
   F77LDFLAGS=`echo "$F77LDFLAGS" | tr ' ' '\n' | sed -e '/^-W[lc]/{' \
--e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc\)/-Xcompiler \1/' -e '}' \
+-e 's/^\(-Wl\)/-XCClinker \1/;s/^\(-Wc,\)/-Xcompiler \1/' \
+-e 's/^\(-Wc=.*\)/-Xcompiler \1 -XCClinker \1/' -e '}' \
    | tr '\n' ' ' | sed -e 's/ $//'`
 fi ;; #(
   *) :
@@ -27040,19 +27059,56 @@ ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
 ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 fi
-   for acx_flag_var_ in CFLAGS CXXFLAGS FCFLAGS F77FLAGS LDFLAGS FCLDFLAGS
-do :
-  if eval test x\$\{$acx_flag_var_+set\} = xset; then :
-  eval acx_temp="\" \$$acx_flag_var_ \""
-         case $acx_temp in #(
-  *\ -shared-intel\ *|*\ -static-intel\ *) :
-    acx_temp=`echo "$acx_temp" | sed -e 's/ \(-\(shared\|static\)-intel\)\b/ -Xcompiler \1 -XCClinker \1/'` ;; #(
-  *) :
-     ;;
-esac
-         eval $acx_flag_var_=\"`echo "$acx_temp" | sed -E -e 's/ -(align|allow|assume|ccdefault|check|convert|debug|debug-parameters|diag-type|diag-enable|diag-disable|double-size|dynamic-linker|dyncom|export-dir|extend-source|fp-model|fpscomp|gen-interfaces|heap-arrays|imacros|integer-size|iprefix|iquote|iwithprefixbefore|module|names|opt-report|opt-streaming-stores|pch-dir|pch-use|prof-dir|prof-file|real-size|reentrancy|stand|tcollect-filter|tune|warn|watch) ([^-][^ ]*)\b/ -Xcompiler -\1 -Xcompiler \2/g' -e 's/^ //;s/ $//'`\"
+   if test -n "$CXX" -a X"$CXX" != Xno; then :
+  ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+ac_link="$ac_pwd/libtool --mode=link --tag=CXX $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CXX $ac_compile"
+
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether libtool can link C++ programs" >&5
+$as_echo_n "checking whether libtool can link C++ programs... " >&6; }
+if ${acx_cv_libtool_cxx_works+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  acx_cv_libtool_cxx_works=no
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  acx_cv_libtool_cxx_works=yes
 fi
-done
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_libtool_cxx_works" >&5
+$as_echo "$acx_cv_libtool_cxx_works" >&6; }
+   if test "x$acx_cv_libtool_cxx_works" = xno; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "unable to link a C++ program using libtool
+See \`config.log' for more details" "$LINENO" 5; }
+fi
+
+         ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
+
+fi
 
 # -----------------------------------------------------------------------
 # Check endianess of system
