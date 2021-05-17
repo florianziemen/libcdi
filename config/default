@@ -71,7 +71,7 @@ case "${HOSTNAME}" in
                     --enable-python \
                     --with-szlib=$HOME/local \
                     --with-eccodes=$HOME/local/eccodes-2.17.0 \
-                    --with-netcdf=$HOME/local/netcdf-c-4.7.4 \
+                    --with-netcdf=$HOME/local/netcdf-c-4.8.0 \
                     LDFLAGS="-Wl,-rpath,$HOME/local/eccodes-2.17.0/lib" \
 	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3"
 	;;
