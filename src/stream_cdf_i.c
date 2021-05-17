@@ -725,7 +725,7 @@ void cdf_set_var(ncvar_t *ncvars, int ncvarid, short isvar)
         Warning("Inconsistent variable definition for %s!", ncvars[ncvarid].name);
 
       ncvars[ncvarid].warn = true;
-      isvar = FALSE;
+      isvar = 0;
     }
 
   ncvars[ncvarid].isvar = isvar;
@@ -843,8 +843,8 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
       if ( ncvars[ncfvarid].lformulaterms )
         scan_hybrid_formulaterms(ncid, ncfvarid, &avarid1, &bvarid1, &psvarid1, &p0varid1);
       // printf("avarid1, bvarid1, psvarid1, p0varid1 %d %d %d %d\n", avarid1, bvarid1, psvarid1, p0varid1);
-      if ( avarid1  != -1 ) ncvars[avarid1].isvar = FALSE;
-      if ( bvarid1  != -1 ) ncvars[bvarid1].isvar = FALSE;
+      if ( avarid1  != -1 ) ncvars[avarid1].isvar = 0;
+      if ( bvarid1  != -1 ) ncvars[bvarid1].isvar = 0;
       if ( psvarid1 != -1 ) ncvar->psvarid = psvarid1;
       if ( p0varid1 != -1 ) ncvar->p0varid = p0varid1;
 
@@ -857,8 +857,8 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
           // printf("avarid2, bvarid2, psvarid2, p0varid2 %d %d %d %d\n", avarid2, bvarid2, psvarid2, p0varid2);
           if ( avarid2 != -1 && bvarid2 != -1 )
             {
-              ncvars[avarid2].isvar = FALSE;
-              ncvars[bvarid2].isvar = FALSE;
+              ncvars[avarid2].isvar = 0;
+              ncvars[bvarid2].isvar = 0;
 
               const int ndims2 = ncvars[avarid2].ndims;
               const int dimid2 = ncvars[avarid2].dimids[0];
@@ -940,10 +940,10 @@ void cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
 
   fprintf(stderr, "%s:\n", oname);
 
-  for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
+  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
       int ndim = 0;
-      if ( ncvars[ncvarid].isvar )
+      if (ncvars[ncvarid].isvar == 1)
         {
           axis[ndim++] = 'v';
           axis[ndim++] = ':';
@@ -1187,7 +1187,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
                   if ( timedimid == dimidsp[ncdimid] )
                     {
                       Warning("Time must be the first dimension! Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
-                      ncvars[ncvarid].isvar = FALSE;
+                      ncvars[ncvarid].isvar = 0;
                     }
                 }
             }
@@ -1370,7 +1370,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
           else if ( isText && strIsEqual(attname, "cell_measures") && (nc_cell_id=cdf_get_cell_varid(attstring, ncid)) != CDI_UNDEFID )
             {
               ncvars[ncvarid].cellarea = nc_cell_id;
-              ncvars[nc_cell_id].isvar = FALSE;
+              ncvars[nc_cell_id].isvar = 0;
               cdf_set_var(ncvars, ncvarid, TRUE);
             }
           else if ( isText && (strIsEqual(attname, "associate") || strIsEqual(attname, "coordinates")) )
@@ -1645,16 +1645,16 @@ void cdfVerifyVarAttr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 static
 void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
-  for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
+  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
-      if ( ncvars[ncvarid].isvar == TRUE )
+      if (ncvars[ncvarid].isvar == 1)
 	{
 	  int ndims = ncvars[ncvarid].ndims;
-	  for ( int i = 0; i < ndims; i++ )
+	  for (int i = 0; i < ndims; i++)
 	    {
 	      int ncdimid = ncvars[ncvarid].dimids[i];
               int dimtype = ncdims[ncdimid].dimtype;
-	      if ( dimtype >= X_AXIS && dimtype <= T_AXIS )
+	      if (dimtype >= X_AXIS && dimtype <= T_AXIS)
                 cdf_set_dim(ncvars, ncvarid, i, dimtype);
 	    }
 
@@ -1670,7 +1670,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
-      if ( ncvars[ncvarid].isvar == TRUE )
+      if (ncvars[ncvarid].isvar == 1)
 	{
 	  bool lxdim = false, lydim = false, lzdim = false/* , ltdim = false */;
           int lcdim = 0;
@@ -1741,7 +1741,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
-      if ( ncvars[ncvarid].isvar == TRUE )
+      if (ncvars[ncvarid].isvar == 1)
 	{
 	  bool lxdim = false, lydim = false, lzdim = false /*, ltdim = false */;
           int lcdim = 0;
@@ -1943,7 +1943,7 @@ void verify_coordinates_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
-      if ( ncvars[ncvarid].isvar == 0 )
+      if (ncvars[ncvarid].isvar == 0)
 	{
 	  if ( ncvars[ncvarid].units[0] != 0 )
 	    {
@@ -2750,7 +2750,7 @@ void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varn
 static
 void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int xdimid, int ydimid)
 {
-  if (ncvar2->isvar == TRUE && ncvar2->gridID == CDI_UNDEFID)
+  if (ncvar2->isvar == 1 && ncvar2->gridID == CDI_UNDEFID)
     {
       int xdimid2 = CDI_UNDEFID, ydimid2 = CDI_UNDEFID, zdimid2 = CDI_UNDEFID;
       int xdimidx = CDI_UNDEFID, ydimidx = CDI_UNDEFID;
@@ -2806,7 +2806,7 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
   for (int ncvarid = 0; ncvarid < nvars; ++ncvarid)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
-      if (ncvar->isvar && ncvar->gridID == CDI_UNDEFID)
+      if (ncvar->isvar == 1 && ncvar->gridID == CDI_UNDEFID)
 	{
           int ndims = ncvar->ndims;
           int *dimtype = ncvar->dimtype;
@@ -2992,7 +2992,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
-      if ( ncvar->isvar == TRUE && ncvar->zaxisID == CDI_UNDEFID )
+      if ( ncvar->isvar == 1 && ncvar->zaxisID == CDI_UNDEFID )
 	{
           bool is_scalar = false;
 	  bool with_bounds = false;
@@ -3181,7 +3181,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 	  if (CDI_Debug) Message("zaxisID %d %d %s", zaxisID, ncvarid, ncvar->name);
 
 	  for (int ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++)
-	    if (ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].zaxisID == CDI_UNDEFID /*&& ncvars[ncvarid2].zaxistype == CDI_UNDEFID*/)
+	    if (ncvars[ncvarid2].isvar == 1 && ncvars[ncvarid2].zaxisID == CDI_UNDEFID /*&& ncvars[ncvarid2].zaxistype == CDI_UNDEFID*/)
 	      {
                 int zvarid2 = CDI_UNDEFID;
                 if (ncvars[ncvarid2].zvarid != CDI_UNDEFID && ncvars[ncvars[ncvarid2].zvarid].ndims == 0)
@@ -3330,7 +3330,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
   int *varids = (int *) Malloc((size_t)nvars * sizeof (int));
   int n = 0;
   for (int ncvarid = 0; ncvarid < num_ncvars; ncvarid++)
-    if (ncvars[ncvarid].isvar) varids[n++] = ncvarid;
+    if (ncvars[ncvarid].isvar == 1) varids[n++] = ncvarid;
 
   if (CDI_Debug) for (int i = 0; i < nvars; i++) Message("varids[%d] = %d", i, varids[i]);
 
@@ -3735,7 +3735,7 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
                !xtypeIsText(ncvar->xtype) &&
                is_timeaxis_units(ncvar->units) )
             {
-              ncvar->isvar = FALSE;
+              ncvar->isvar = 0;
 
               if ( !ltimevar )
                 {
@@ -3817,17 +3817,17 @@ void read_vct_echam(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims, dou
                 {
                   vcta_id = ncvarid;
                   nvcth_id = ncvars[ncvarid].dimids[0];
-                  ncvars[ncvarid].isvar = FALSE;
+                  ncvars[ncvarid].isvar = 0;
                 }
               else if ( ncvars[ncvarid].name[2] == 'b' && ncvars[ncvarid].name[3] == 'i' ) //hybi
                 {
                   vctb_id = ncvarid;
                   nvcth_id = ncvars[ncvarid].dimids[0];
-                  ncvars[ncvarid].isvar = FALSE;
+                  ncvars[ncvarid].isvar = 0;
                 }
               else if ( (ncvars[ncvarid].name[2] == 'a' || ncvars[ncvarid].name[2] == 'b') && ncvars[ncvarid].name[3] == 'm' )
                 {
-                  ncvars[ncvarid].isvar = FALSE; // hyam or hybm
+                  ncvars[ncvarid].isvar = 0; // hyam or hybm
                 }
             }
 	}
@@ -4129,19 +4129,19 @@ int cdfInqContents(stream_t *streamptr)
 	    {
 	      if ( timedimid != CDI_UNDEFID && timedimid == ncvars[ncvarid].dimids[0] )
 		{
-		  if ( ncvars[ncvarid].isvar != FALSE ) cdf_set_var(ncvars, ncvarid, TRUE);
+		  if ( ncvars[ncvarid].isvar != 0 ) cdf_set_var(ncvars, ncvarid, TRUE);
 		}
 	      else
 		{
-                  //  if ( ncvars[ncvarid].isvar != TRUE ) cdf_set_var(ncvars, ncvarid, FALSE);
+                  //  if ( ncvars[ncvarid].isvar != 1 ) cdf_set_var(ncvars, ncvarid, FALSE);
 		}
-	      // if ( ncvars[ncvarid].isvar != TRUE ) cdf_set_var(ncvars, ncvarid, FALSE);
+	      // if ( ncvars[ncvarid].isvar != 1 ) cdf_set_var(ncvars, ncvarid, FALSE);
 
 	      if (ncdimid == ncvars[ncvarid].dimids[0] && ncdims[ncdimid].ncvarid == CDI_UNDEFID)
 		if (strIsEqual(ncvars[ncvarid].name, ncdims[ncdimid].name))
 		  {
 		    ncdims[ncdimid].ncvarid = ncvarid;
-		    ncvars[ncvarid].isvar = FALSE;
+		    ncvars[ncvarid].isvar = 0;
 		  }
 	    }
 	}
@@ -4151,7 +4151,7 @@ int cdfInqContents(stream_t *streamptr)
   find_time_vars(nvars, ncvars, ncdims, timedimid, streamptr, &time_has_units, &time_has_bounds, &time_climatology);
 
   leadtime_id = find_leadtime(nvars, ncvars, timedimid);
-  if ( leadtime_id != CDI_UNDEFID ) ncvars[leadtime_id].isvar = FALSE;
+  if ( leadtime_id != CDI_UNDEFID ) ncvars[leadtime_id].isvar = 0;
 
   // check ncvars
   timedimid = cdf_check_variables(streamptr, nvars, ncvars, ntsteps, timedimid);
@@ -4197,7 +4197,7 @@ int cdfInqContents(stream_t *streamptr)
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
-      if (ncvar->isvar == TRUE && ncvar->ncoordvars)
+      if (ncvar->isvar == 1 && ncvar->ncoordvars)
 	{
 	  for (int i = 0; i < ncvar->ncoordvars; i++)
 	    {
@@ -4246,7 +4246,7 @@ int cdfInqContents(stream_t *streamptr)
   // select vars
   int nvars_data = 0;
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
-    if (ncvars[ncvarid].isvar == TRUE) nvars_data++;
+    if (ncvars[ncvarid].isvar == 1) nvars_data++;
 
   if (CDI_Debug) Message("time varid = %d", streamptr->basetime.ncvarid);
   if (CDI_Debug) Message("ntsteps = %zu", ntsteps);
