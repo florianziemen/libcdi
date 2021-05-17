@@ -476,35 +476,40 @@ int gribapiGetParam(grib_handle *gh)
   return cdiEncodeParam((int)pnum, (int)pcat, (int)pdis);
 }
 
+static bool
+has_ni(grib_handle *gh)
+{
+  return (gribGetLong(gh, "Ni") != (long) GRIB_MISSING_LONG);
+}
 
 int gribapiGetGridType(grib_handle *gh)
 {
-  int gridtype = GRID_GENERIC;
   const long gridDefinitionTemplateNumber = gribGetLongDefault(gh, "gridDefinitionTemplateNumber", -1);
   switch (gridDefinitionTemplateNumber)
     {
-      case  GRIB2_GTYPE_LATLON:
-        gridtype = ( gribGetLong(gh, "Ni") == (long) GRIB_MISSING_LONG ) ? GRID_GENERIC : GRID_LONLAT;
-        break;
-      case  GRIB2_GTYPE_GAUSSIAN:
-        gridtype = ( gribGetLong(gh, "Ni") == (long) GRIB_MISSING_LONG ) ? GRID_GAUSSIAN_REDUCED : GRID_GAUSSIAN;
-        break;
-      case GRIB2_GTYPE_LATLON_ROT:   gridtype = GRID_PROJECTION; break;
-      case GRIB2_GTYPE_LCC:          gridtype = CDI_PROJ_LCC; break;
-      case GRIB2_GTYPE_STERE:        gridtype = CDI_PROJ_STERE; break;
-      case GRIB2_GTYPE_SPECTRAL:     gridtype = GRID_SPECTRAL; break;
-      case GRIB2_GTYPE_GME:          gridtype = GRID_GME; break;
-      case GRIB2_GTYPE_UNSTRUCTURED: gridtype = GRID_UNSTRUCTURED; break;
+      case GRIB2_GTYPE_LATLON:       return has_ni(gh) ? GRID_LONLAT : GRID_GENERIC;
+      case GRIB2_GTYPE_GAUSSIAN:     return has_ni(gh) ? GRID_GAUSSIAN : GRID_GAUSSIAN_REDUCED;
+      case GRIB2_GTYPE_LATLON_ROT:   return GRID_PROJECTION;
+      case GRIB2_GTYPE_LCC:          return CDI_PROJ_LCC;
+      case GRIB2_GTYPE_STERE:        return CDI_PROJ_STERE;
+      case GRIB2_GTYPE_SPECTRAL:     return GRID_SPECTRAL;
+      case GRIB2_GTYPE_GME:          return GRID_GME;
+      case GRIB2_GTYPE_UNSTRUCTURED: return GRID_UNSTRUCTURED;
       default:
         {
-          char mesg[256];
-          size_t len = sizeof(mesg);
-          if (grib_get_string(gh, "gridType", mesg, &len) != 0) mesg[0] = 0;
-          Warning("gridDefinitionTemplateNumber %d unsupported (gridType=%s)!", gridDefinitionTemplateNumber, mesg);
+          static bool lwarn = true;
+          if (lwarn)
+            {
+              lwarn = false;
+              char mesg[256];
+              size_t len = sizeof(mesg);
+              if (grib_get_string(gh, "gridType", mesg, &len) != 0) mesg[0] = 0;
+              Warning("gridDefinitionTemplateNumber %d unsupported (gridType=%s)!", gridDefinitionTemplateNumber, mesg);
+            }
         }
     }
 
-  return gridtype;
+  return GRID_GENERIC;
 }
 
 static
