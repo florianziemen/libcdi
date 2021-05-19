@@ -19,8 +19,8 @@
 static
 cdi_atts_t *get_attsp(vlist_t *vlistptr, int varID)
 {
-  if ( varID == CDI_GLOBAL ) return &vlistptr->atts;
-  else if ( varID >= 0 && varID < vlistptr->nvars ) return &(vlistptr->vars[varID].atts);
+  if (varID == CDI_GLOBAL) return &vlistptr->atts;
+  else if (varID >= 0 && varID < vlistptr->nvars) return &(vlistptr->vars[varID].atts);
 
   return NULL;
 }
@@ -30,17 +30,16 @@ cdi_att_t *find_att(cdi_atts_t *attsp, const char *name)
 {
   xassert(attsp != NULL);
 
-  if ( attsp->nelems == 0 ) return NULL;
+  if (attsp->nelems == 0) return NULL;
 
   size_t slen = strlen(name);
-  if ( slen > CDI_MAX_NAME ) slen = CDI_MAX_NAME;
+  if (slen > CDI_MAX_NAME) slen = CDI_MAX_NAME;
 
   cdi_att_t *atts = attsp->value;
-  for ( size_t attid = 0; attid < attsp->nelems; attid++ )
+  for (size_t attid = 0; attid < attsp->nelems; attid++)
     {
       cdi_att_t *attp = atts + attid;
-      if ( attp->namesz == slen && memcmp(attp->name, name, slen) == 0 )
-        return attp; // Normal return
+      if (attp->namesz == slen && memcmp(attp->name, name, slen) == 0) return attp; // Normal return
     }
 
   return NULL;
@@ -257,7 +256,7 @@ int cdiDelAtt(int cdiID, int varID, const char *name)
   cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
   xassert(attsp != NULL);
 
-  for ( int attid = 0; attid < (int)attsp->nelems; attid++ )
+  for (int attid = 0; attid < (int)attsp->nelems; attid++)
     {
       cdi_att_t *attp = &(attsp->value[attid]);
       if (attp->name && strcmp(attp->name, name) == 0)
@@ -281,16 +280,15 @@ int cdi_def_att(int indtype, int exdtype, int cdiID, int varID, const char *name
 {
   int status = CDI_NOERR;
 
-  if ( len != 0 && xp == NULL ) // Null arg
-    return CDI_EINVAL;
+  if (len != 0 && xp == NULL) return CDI_EINVAL; // Null arg
 
   cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
   xassert(attsp != NULL);
 
   cdi_att_t *attp = find_att(attsp, name);
-  if ( attp == NULL ) attp = new_att(attsp, name);
+  if (attp == NULL) attp = new_att(attsp, name);
 
-  if ( attp != NULL ) fill_att(attp, indtype, exdtype, len, xsz, xp);
+  if (attp != NULL) fill_att(attp, indtype, exdtype, len, xsz, xp);
 
   return status;
 }
@@ -300,21 +298,19 @@ int cdi_inq_att(int indtype, int cdiID, int varID, const char *name, size_t mxsz
 {
   int status = CDI_NOERR;
 
-  if ( mxsz != 0 && xp == NULL ) // Null arg
-    return CDI_EINVAL;
+  if (mxsz != 0 && xp == NULL) return CDI_EINVAL; // Null arg
 
   cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
   xassert(attsp != NULL);
 
   cdi_att_t *attp = find_att(attsp, name);
-  if ( attp != NULL ) // name in use
+  if (attp != NULL) // name in use
     {
-      if ( attp->indtype == indtype )
+      if (attp->indtype == indtype)
 	{
 	  size_t xsz = attp->xsz;
-	  if ( mxsz < xsz ) xsz = mxsz;
-	  if ( xsz > 0 )
-	    memcpy(xp, attp->xvalue, xsz);
+	  if (mxsz < xsz) xsz = mxsz;
+	  if (xsz > 0) memcpy(xp, attp->xvalue, xsz);
 	}
       else
 	{
