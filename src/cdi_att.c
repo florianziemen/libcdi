@@ -251,7 +251,7 @@ int cdiDeleteAtts(int cdiID, int varID)
 
 int cdiDelAtt(int cdiID, int varID, const char *name)
 {
-  int status = CDI_NOERR;
+  int status = -1;
 
   cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
   xassert(attsp != NULL);
@@ -261,10 +261,11 @@ int cdiDelAtt(int cdiID, int varID, const char *name)
       cdi_att_t *attp = &(attsp->value[attid]);
       if (attp->name && strcmp(attp->name, name) == 0)
         {
+          status = CDI_NOERR;
           Free(attp->name);
           attp->name = NULL;
           attp->namesz = 0;
-          if ( attp->xvalue )
+          if (attp->xvalue)
             {
               Free(attp->xvalue);
               attp->xvalue = NULL;
