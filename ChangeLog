@@ -2,6 +2,10 @@
 
 	* Version 2.0.0 released
 
+2021-05-27  Uwe Schulzweida
+
+	* Add support for ecCodes key typeOfStatisticalProcessing
+
 2021-04-17  Uwe Schulzweida
 
 	* zaxis: added support for datatype int and short

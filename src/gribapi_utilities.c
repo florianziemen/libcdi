@@ -365,7 +365,7 @@ struct cdiGribAPI_ts_str_map_elem cdiGribAPI_ts_str_map[] = {
 };
 
 
-//Fetches the value of the "stepType" key and converts it into a constant in the TSTEP_* range.
+// Fetches the value of the "stepType" key and converts it into a constant in the TSTEP_* range.
 int gribapiGetTsteptype(grib_handle *gh)
 {
   size_t len = 256;
@@ -373,24 +373,43 @@ int gribapiGetTsteptype(grib_handle *gh)
   int tsteptype = TSTEP_INSTANT;
   static bool lprint = true;
 
-  if ( gribapiTimeIsFC(gh) )
+  if (gribapiTimeIsFC(gh))
     {
-      const int status = grib_get_string(gh, "stepType", stepType, &len);
-      if ( status == 0 && len > 1 && len < 256 )
+      int status = grib_get_string(gh, "stepType", stepType, &len);
+      if (status == 0 && len > 1 && len < 256)
         {
           for (int i = TSTEP_INSTANT; cdiGribAPI_ts_str_map[i].sname[0]; ++i)
-            if ( strncmp(cdiGribAPI_ts_str_map[i].sname, stepType, len) == 0 )
+            if (strncmp(cdiGribAPI_ts_str_map[i].sname, stepType, len) == 0)
               {
                 tsteptype = i;
                 goto tsteptypeFound;
               }
 
-          if ( lprint )
+          if (lprint)
             {
               Message("Time stepType %s unsupported, set to instant!", stepType);
               lprint = false;
             }
           // printf("stepType: %s %ld %d\n", stepType, len, tsteptype);
+        }
+
+      long typeOfStat;
+      status = grib_get_long(gh, "typeOfStatisticalProcessing", &typeOfStat);
+      if (status == 0)
+        {
+          switch (typeOfStat)
+            {
+            case 0: return TSTEP_AVG;
+            case 1: return TSTEP_ACCUM;
+            case 2: return TSTEP_MAX;
+            case 3: return TSTEP_MIN;
+            case 4: return TSTEP_DIFF;
+            case 5: return TSTEP_RMS;
+            case 6: return TSTEP_SD;
+            case 7: return TSTEP_COV;
+            case 9: return TSTEP_RATIO;
+            case 11: return TSTEP_SUM;
+            }
         }
 
 #ifdef HIRLAM_EXTENSIONS
@@ -407,32 +426,31 @@ int gribapiGetTsteptype(grib_handle *gh)
       //tsteptype = TSTEP_INSTANT;  // default value for any case
       long timeRangeIND = 0; // typically 0: for instanteneous fields; 4: for accumulated fields
       int rc = grib_get_long(gh, "timeRangeIndicator", &timeRangeIND);
-      if (rc != 0) {
-            //if ( lprint )
-            Warning("Could not get 'stepType' either 'timeRangeIndicator'. Using default!");
-            return tsteptype;
-      }
+      if (rc != 0)
+        {
+          // if ( lprint )
+          Warning("Could not get 'stepType' either 'timeRangeIndicator'. Using default!");
+          return tsteptype;
+        }
       extern int cdiGribUseTimeRangeIndicator;
       cdiGribUseTimeRangeIndicator = 1;
-      switch ( timeRangeIND )
-          {
-              case 0:  tsteptype = TSTEP_INSTANT; break;
-              case 2:  tsteptype = TSTEP_INSTANT2;
-                       strcpy(stepType, "instant2");  // was incorrectly set before into accum
-                       break;
-              case 4:  tsteptype = TSTEP_ACCUM; break;
-              case 5:  tsteptype = TSTEP_DIFF; break;
-              default:
-                if ( lprint )
-                {
-                  if (CDI_Debug)
-                      Warning("timeRangeIND = %d;  stepType= %s; tsteptype=%d unsupported timeRangeIND at the moment, set to instant!", timeRangeIND, stepType, tsteptype);
-                  lprint = false;
-                }
-                break;
-          }
+      switch (timeRangeIND)
+        {
+        case 0:  tsteptype = TSTEP_INSTANT; break;
+        case 2:  tsteptype = TSTEP_INSTANT2; strcpy(stepType, "instant2"); break; // was incorrectly set before into accum
+        case 4:  tsteptype = TSTEP_ACCUM; break;
+        case 5:  tsteptype = TSTEP_DIFF; break;
+        default:
+          if ( lprint )
+            {
+              if (CDI_Debug)
+                Warning("timeRangeIND = %d;  stepType= %s; tsteptype=%d unsupported timeRangeIND at the moment, set to instant!", timeRangeIND, stepType, tsteptype);
+              lprint = false;
+            }
+          break;
+        }
       if (CDI_Debug)
-          Warning("timeRangeIND = %d;  stepType= %s; tsteptype=%d", timeRangeIND, stepType, tsteptype);
+        Warning("timeRangeIND = %d;  stepType= %s; tsteptype=%d", timeRangeIND, stepType, tsteptype);
       }
 #endif // HIRLAM_EXTENSIONS
     }
