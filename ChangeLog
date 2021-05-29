@@ -2,6 +2,10 @@
 
 	* Version 2.0.0 released
 
+2021-05-29  Uwe Schulzweida
+
+	* taxisInqFdate: set default value to taxisInqRdate()
+
 2021-05-27  Uwe Schulzweida
 
 	* Add support for ecCodes key typeOfStatisticalProcessing

@@ -800,10 +800,10 @@ int64_t taxisInqFdate(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
-  if ( taxisptr->fdate == -1 )
+  if (taxisptr->fdate == -1)
     {
-      taxisptr->fdate = taxisptr->vdate;
-      taxisptr->ftime = taxisptr->vtime;
+      taxisptr->fdate = taxisInqRdate(taxisID);
+      taxisptr->ftime = taxisInqRtime(taxisID);
     }
 
   return taxisptr->fdate;
