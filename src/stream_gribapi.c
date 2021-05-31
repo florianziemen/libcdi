@@ -2118,8 +2118,8 @@ void gribapiDefGridUnstructured(grib_handle *gh, int gridID)
 {
   static bool warning = true;
 
-  const int status = my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
-  if ( status != 0 && warning )
+  int status = my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
+  if (status != 0 && warning)
     {
       warning = false;
       Warning("Can't write reference grid!");
@@ -2128,23 +2128,32 @@ void gribapiDefGridUnstructured(grib_handle *gh, int gridID)
     }
   else
     {
+      int errCount = 0;
       int number = 0;
-      cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, &number);
-      if ( number < 0 ) number = 0;
+      status = cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, &number);
+      if (status < 0) errCount++;
+      if (number < 0) number = 0;
       GRIB_CHECK(my_grib_set_long(gh, "numberOfGridUsed", number), 0);
 
       int position = 0;
-      cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDINREFERENCE, &position);
-      if ( position < 0 ) position = 0;
+      status = cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDINREFERENCE, &position);
+      if (status < 0) errCount++;
+      if (position < 0) position = 0;
       GRIB_CHECK(my_grib_set_long(gh, "numberOfGridInReference", position), 0);
 
       unsigned char uuid[CDI_UUID_SIZE];
       size_t len = CDI_UUID_SIZE;
       memset(uuid, 0, len);
       int length = CDI_UUID_SIZE;
-      cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
-      if (grib_set_bytes(gh, "uuidOfHGrid", uuid, &len) != 0)
-        Warning("Can't write UUID!");
+      status = cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
+      if (status < 0) errCount++;
+      if (grib_set_bytes(gh, "uuidOfHGrid", uuid, &len) != 0) Warning("Can't write UUID!");
+
+      if (warning && errCount > 0)
+        {
+          warning = false;
+          Warning("GRIB library doesn't support unstructured grids, grid information will be lost!");
+        }
     }
 }
 

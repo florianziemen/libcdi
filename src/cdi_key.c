@@ -347,15 +347,15 @@ int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
 {
   int status = -1;
 
-  // if ( varID != CDI_GLOBAL ) status = cdiInqKeyInt(cdiID, CDI_GLOBAL, key, value);
+  // if (varID != CDI_GLOBAL) status = cdiInqKeyInt(cdiID, CDI_GLOBAL, key, value);
 
   const cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
 
   const cdi_key_t *keyp = find_key_const(keysp, key);
-  if ( keyp != NULL ) // key in use
+  if (keyp != NULL) // key in use
     {
-      if ( keyp->type == KEY_INT )
+      if (keyp->type == KEY_INT)
 	{
           *value = keyp->v.i;
           status = CDI_NOERR;
@@ -525,11 +525,11 @@ int cdiInqVarKeyBytes(const cdi_keys_t *keysp, int key, unsigned char *bytes, in
   int status = -1;
 
   const cdi_key_t *keyp = find_key_const(keysp, key);
-  if ( keyp != NULL ) // key in use
+  if (keyp != NULL) // key in use
     {
-      if ( keyp->type == KEY_BYTES )
+      if (keyp->type == KEY_BYTES)
 	{
-          if ( keyp->length < *length ) *length = keyp->length;
+          if (keyp->length < *length) *length = keyp->length;
           memcpy(bytes, keyp->v.s, *length);
           status = CDI_NOERR;
 	}
