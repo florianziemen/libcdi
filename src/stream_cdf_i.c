@@ -2262,6 +2262,14 @@ bool cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t 
   *islon = axisvar->islon;
   int ndims = axisvar->ndims;
   size_t size = 0;
+
+  if (xtypeIsText(axisvar->xtype))
+    {
+      ncvar->isvar = 0;
+      Warning("Unsupported coordinate type (char/string), skipped variable %s!", ncvar->name);
+      return true;
+    }
+
   const int datatype = cdfInqDatatype(streamptr, axisvar->xtype, axisvar->lunsigned);
 
   if ((ndims - ntdims) == 2)
@@ -2337,6 +2345,14 @@ bool cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t 
   *islat = axisvar->islat;
   int ndims = axisvar->ndims;
   size_t size = 0;
+
+  if (xtypeIsText(axisvar->xtype))
+    {
+      ncvar->isvar = 0;
+      Warning("Unsupported coordinate type (char/string), skipped variable %s!", ncvar->name);
+      return true;
+    }
+
   const int datatype = cdfInqDatatype(streamptr, axisvar->xtype, axisvar->lunsigned);
 
   if ((ndims - ntdims) == 2)
@@ -2483,7 +2499,7 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncv
 
       if (yvarid != CDI_UNDEFID)
         if (cdf_read_ycoord(streamptr, lazyGrid, ncdims, ncvar, yvarid, &ncvars[yvarid],
-                             xsize, &ysize, ntdims, start, count, &islat))
+                            xsize, &ysize, ntdims, start, count, &islat))
           return true;
 
       if (ncvar->gridtype == GRID_UNSTRUCTURED) size = xsize;
