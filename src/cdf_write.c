@@ -365,26 +365,15 @@ void cdfDefGlobalAtts(stream_t *streamptr)
 static
 void cdf_get_gmapvarname(int gridID, char *gmapvarname)
 {
-  int pgridID = gridID;
-  char gmapname[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
-  cdiInqKeyString(pgridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
+  int pgridID = gridID;
+  cdiInqKeyString(pgridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname, &length);
 
-  if ( !gmapname[0] )
-    {
-      const int projID = gridInqProj(gridID);
-      if ( projID != CDI_UNDEFID )
-        {
-          pgridID = projID;
-          length = CDI_MAX_NAME;
-          cdiInqKeyString(pgridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
-        }
-    }
-
-  if ( gmapname[0] )
+  if (!gmapvarname[0])
     {
       length = CDI_MAX_NAME;
-      cdiInqKeyString(pgridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname, &length);
+      pgridID = gridInqProj(gridID);
+      if (pgridID != CDI_UNDEFID) cdiInqKeyString(pgridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname, &length);
     }
 }
 

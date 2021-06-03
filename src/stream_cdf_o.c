@@ -1634,34 +1634,27 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 static
 void cdf_def_mapping(stream_t *streamptr, int gridID)
 {
-  char gmapname[CDI_MAX_NAME];
+  int datatype = -1;
+  int status = cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, &datatype);
+  nc_type gmapvartype = (status == CDI_NOERR) ? (nc_type) datatype : NC_INT;
+  char gmapvarname[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
-  cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
-  if ( gmapname[0] )
+  cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname, &length);
+  if (!gmapvarname[0]) strcpy(gmapvarname, "crs");
+
+  const int fileID = streamptr->fileID;
+  if (streamptr->ncmode == 2) cdf_redef(fileID);
+
+  int ncvarid;
+  const int ncerrcode = nc_def_var(fileID, gmapvarname, (nc_type) gmapvartype, 0, NULL, &ncvarid);
+  if (ncerrcode == NC_NOERR) cdfDefineAttributes(gridID, CDI_GLOBAL, fileID, ncvarid);
+
+  cdf_enddef(fileID);
+
+  if (ncerrcode == NC_NOERR && gmapvartype != NC_CHAR)
     {
-      nc_type gmapvartype = NC_INT;
-      int datatype = -1;
-      int status = cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, &datatype);
-      if (status == CDI_NOERR) gmapvartype = (nc_type) datatype;
-      char gmapvarname[CDI_MAX_NAME];
-      length = CDI_MAX_NAME;
-      cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname, &length);
-
-      const int fileID = streamptr->fileID;
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-
-      int ncvarid;
-      const int ncerrcode = nc_def_var(fileID, gmapvarname, (nc_type) gmapvartype, 0, NULL, &ncvarid);
-      if ( ncerrcode == NC_NOERR )
-        cdfDefineAttributes(gridID, CDI_GLOBAL, fileID, ncvarid);
-
-      cdf_enddef(fileID);
-
-      if ( ncerrcode == NC_NOERR && gmapvartype != NC_CHAR )
-        {
-          int dummy = 1;
-          cdf_put_var_int(fileID, ncvarid, &dummy);
-        }
+      int dummy = 1;
+      cdf_put_var_int(fileID, ncvarid, &dummy);
     }
 }
 
@@ -1940,8 +1933,8 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
         {
           const int ndims = !(gridtype == GRID_LONLAT && size == 1 && !gridInqHasDims(gridID));
 
-          if ( gridInqXsize(gridID) ) cdfDefXaxis(streamptr, gridID, gridindex, ndims, false);
-          if ( gridInqYsize(gridID) ) cdfDefYaxis(streamptr, gridID, gridindex, ndims, false);
+          if (gridInqXsize(gridID)) cdfDefXaxis(streamptr, gridID, gridindex, ndims, false);
+          if (gridInqYsize(gridID)) cdfDefYaxis(streamptr, gridID, gridindex, ndims, false);
 
           cdf_def_mapping(streamptr, gridID);
         }
