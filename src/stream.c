@@ -993,7 +993,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       case CDI_FILETYPE_NETCDF:
         {
           cdfClose(fileID);
-          if (streamptr->ntsteps == 0)
+          if (streamptr->ntsteps == 0 && streamptr->tsteps != NULL)
             {
               if ( streamptr->tsteps[0].records )
                 {
