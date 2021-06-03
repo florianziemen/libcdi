@@ -2746,20 +2746,17 @@ bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *yd
 static
 void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varname)
 {
-  if ( cdfCheckAttText(ncid, gmapvarid, "grid_mapping_name") )
+  if (cdfCheckAttText(ncid, gmapvarid, "grid_mapping_name"))
     {
       char attstring[CDI_MAX_NAME];
       cdfGetAttText(ncid, gmapvarid, "grid_mapping_name", CDI_MAX_NAME, attstring);
       cdiDefKeyString(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, attstring);
     }
-  else
-    {
-      Warning("Text attribute %s:grid_mapping_name missing!", varname);
-    }
+  // else Warning("Text attribute %s:grid_mapping_name missing!", varname);
 
   int nvatts;
   cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
-  for ( int attnum = 0; attnum < nvatts; ++attnum )
+  for (int attnum = 0; attnum < nvatts; ++attnum)
     cdf_set_cdi_attr(ncid, gmapvarid, attnum, projID, CDI_GLOBAL);
 }
 
