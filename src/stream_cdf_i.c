@@ -2744,7 +2744,7 @@ bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *yd
 }
 
 static
-void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varname)
+void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID)
 {
   if (cdfCheckAttText(ncid, gmapvarid, "grid_mapping_name"))
     {
@@ -2752,7 +2752,6 @@ void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varn
       cdfGetAttText(ncid, gmapvarid, "grid_mapping_name", CDI_MAX_NAME, attstring);
       cdiDefKeyString(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, attstring);
     }
-  // else Warning("Text attribute %s:grid_mapping_name missing!", varname);
 
   int nvatts;
   cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
@@ -2937,7 +2936,7 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
                   const int gmapvartype = ncvars[gmapvarid].xtype;
                   cdiDefKeyInt(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, gmapvartype);
                   const char *gmapvarname = ncvars[gmapvarid].name;
-                  cdf_read_mapping_atts(ncid, gmapvarid, projID, gmapvarname);
+                  cdf_read_mapping_atts(ncid, gmapvarid, projID);
                   cdiDefKeyString(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname);
                   gridVerifyProj(projID);
                 }
