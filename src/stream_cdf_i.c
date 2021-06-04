@@ -268,8 +268,7 @@ bool xtypeIsText(int xtype)
 static
 bool xtypeIsFloat(nc_type xtype)
 {
-  const bool isFloat = xtype == NC_FLOAT || xtype == NC_DOUBLE;
-  return isFloat;
+  return (xtype == NC_FLOAT || xtype == NC_DOUBLE);
 }
 
 static
@@ -310,9 +309,9 @@ int cdfInqDatatype(stream_t *streamptr, int xtype, bool lunsigned)
     {
       if (xtype != streamptr->nc_complex_float_id && xtype != streamptr->nc_complex_double_id)
         {
-          int isUserDefinedType = false;
+          bool isUserDefinedType = false;
 #ifdef NC_FIRSTUSERTYPEID
-          isUserDefinedType = xtype >= NC_FIRSTUSERTYPEID;
+          isUserDefinedType = (xtype >= NC_FIRSTUSERTYPEID);
 #endif
           if (isUserDefinedType)
             {
@@ -351,12 +350,12 @@ void cdfGetAttInt(int fileID, int ncvarid, const char *attname, size_t attlen, i
   cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
   cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
 
-  if ( xtypeIsFloat(atttype) || xtypeIsInt(atttype) )
+  if (xtypeIsFloat(atttype) || xtypeIsInt(atttype))
     {
-      const bool lalloc = nc_attlen > attlen;
+      const bool lalloc = (nc_attlen > attlen);
       int *pintatt = lalloc ? (int *)(Malloc(nc_attlen*sizeof(int))) : attint;
       cdf_get_att_int(fileID, ncvarid, attname, pintatt);
-      if ( lalloc )
+      if (lalloc)
         {
           memcpy(attint, pintatt, attlen*sizeof(int));
           Free(pintatt);
@@ -367,19 +366,19 @@ void cdfGetAttInt(int fileID, int ncvarid, const char *attname, size_t attlen, i
 static
 void cdfGetAttDouble(int fileID, int ncvarid, char *attname, size_t attlen, double *attdouble)
 {
-  *attdouble = 0;
+  *attdouble = 0.0;
 
   nc_type atttype;
   size_t nc_attlen;
   cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
   cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
 
-  if ( xtypeIsFloat(atttype) || xtypeIsInt(atttype) )
+  if (xtypeIsFloat(atttype) || xtypeIsInt(atttype))
     {
-      const bool lalloc = nc_attlen > attlen;
+      const bool lalloc = (nc_attlen > attlen);
       double *pdoubleatt = lalloc ? (double*)Malloc(nc_attlen*sizeof(double)) : attdouble;
       cdf_get_att_double(fileID, ncvarid, attname, pdoubleatt);
-      if ( lalloc )
+      if (lalloc)
         {
           memcpy(attdouble, pdoubleatt, attlen*sizeof(double));
           Free(pdoubleatt);
@@ -899,10 +898,10 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
   cdf_inq_attname(ncid, ncvarid, attnum, attname);
   cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
   cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
-  if ( xtypeIsInt(atttype) )
+  if (xtypeIsInt(atttype))
     {
       int attint;
-      int *pattint = attlen > 1 ? (int*) malloc(attlen*sizeof(int)) : &attint;
+      int *pattint = (attlen > 1) ? (int*) malloc(attlen*sizeof(int)) : &attint;
       cdfGetAttInt(ncid, ncvarid, attname, attlen, pattint);
       int datatype = (atttype == NC_SHORT)  ? CDI_DATATYPE_INT16 :
                      (atttype == NC_BYTE)   ? CDI_DATATYPE_INT8 :
@@ -915,16 +914,16 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
       cdiDefAttInt(cdiID, varID, attname, datatype, (int)attlen, pattint);
       if (attlen > 1) free(pattint);
     }
-  else if ( xtypeIsFloat(atttype) )
+  else if (xtypeIsFloat(atttype))
     {
       double attflt;
-      double *pattflt = attlen > 1 ? (double*) malloc(attlen*sizeof(double)) : &attflt;
+      double *pattflt = (attlen > 1) ? (double*) malloc(attlen*sizeof(double)) : &attflt;
       cdfGetAttDouble(ncid, ncvarid, attname, attlen, pattflt);
       const int datatype = (atttype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
       cdiDefAttFlt(cdiID, varID, attname, datatype, (int)attlen, pattflt);
       if (attlen > 1) free(pattflt);
     }
-  else if ( xtypeIsText(atttype) )
+  else if (xtypeIsText(atttype))
     {
       char attstring[8192];
       cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
@@ -1206,7 +1205,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
 
           size_t attstringsize = sizeof(attstring);
           const bool isText = xtypeIsText(atttype);
-          const bool isNumber = xtypeIsFloat(atttype) || xtypeIsInt(atttype);
+          const bool isNumber = (xtypeIsFloat(atttype) || xtypeIsInt(atttype));
           if (isText)
             {
               cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
@@ -1505,7 +1504,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             {
               if ( ncvars[ncvarid].lvalidrange == false )
                 {
-                  bool lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
+                  bool lignore = (xtypeIsFloat(atttype) != xtypeIsFloat(xtype));
                   if ( !cdiIgnoreValidRange && lignore == false )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 2, ncvars[ncvarid].validrange);
@@ -1522,7 +1521,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             }
           else if ( isNumber && strIsEqual(attname, "valid_min") && attlen == 1 )
             {
-              bool lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
+              bool lignore = (xtypeIsFloat(atttype) != xtypeIsFloat(xtype));
               if ( !cdiIgnoreValidRange && lignore == false )
                 {
                   cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
@@ -1535,7 +1534,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             }
           else if ( isNumber && strIsEqual(attname, "valid_max") && attlen == 1 )
             {
-              bool lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
+              bool lignore = (xtypeIsFloat(atttype) != xtypeIsFloat(xtype));
               if ( !cdiIgnoreValidRange && lignore == false )
                 {
                   cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);
@@ -1618,7 +1617,7 @@ void cdfVerifyVarAttr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 
           size_t attstringsize = sizeof(attstring);
           const bool isText = xtypeIsText(atttype);
-          // const bool isNumber = xtypeIsFloat(atttype) || xtypeIsInt(atttype);
+          // const bool isNumber = (xtypeIsFloat(atttype) || xtypeIsInt(atttype));
 
           if (isText)
             {
@@ -2795,9 +2794,9 @@ void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype
 
       if (xdimid == xdimid2 && (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == CDI_UNDEFID)))
         {
-          bool is_same_grid = ncvar1->xvarid == ncvar2->xvarid
-                           && ncvar1->yvarid == ncvar2->yvarid
-                           && ncvar1->position == ncvar2->position;
+          bool is_same_grid = (ncvar1->xvarid == ncvar2->xvarid
+                            && ncvar1->yvarid == ncvar2->yvarid
+                            && ncvar1->position == ncvar2->position);
 
           // if ( xvarid != -1 && ncvar2->xvarid != CDI_UNDEFID && xvarid != ncvar2->xvarid ) is_same_grid = false;
           // if ( yvarid != -1 && ncvar2->yvarid != CDI_UNDEFID && yvarid != ncvar2->yvarid ) is_same_grid = false;
