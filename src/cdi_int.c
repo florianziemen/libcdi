@@ -30,6 +30,8 @@ bool cdiIgnoreAttCoordinates = false;
 bool cdiCoordinatesLonLat    = false;
 bool cdiIgnoreValidRange     = false;
 int cdiSkipRecords           = 0;
+const char *CDI_GRIB1_Template = NULL;
+const char *CDI_GRIB2_Template = NULL;
 int CDI_convention           = CDI_CONVENTION_ECHAM;
 int CDI_inventory_mode       = 1;
 int CDI_version_info         = 1;
@@ -359,6 +361,12 @@ void cdiInitialize(void)
 
       value = cdiGetenvInt("CDI_NETCDF_HDR_PAD");
       if ( value >= 0 ) CDI_netcdf_hdr_pad = (size_t) value;
+
+      envstr = getenv("CDI_GRIB1_TEMPLATE");
+      if ( envstr ) CDI_GRIB1_Template = envstr;
+
+      envstr = getenv("CDI_GRIB2_TEMPLATE");
+      if ( envstr ) CDI_GRIB2_Template = envstr;
 
       envstr = getenv("CDI_MISSVAL");
       if ( envstr ) CDI_default_missval = atof(envstr);

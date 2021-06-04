@@ -373,6 +373,8 @@ extern bool cdiIgnoreAttCoordinates;
 extern bool cdiCoordinatesLonLat;
 extern bool cdiIgnoreValidRange;
 extern int cdiSkipRecords;
+extern const char *CDI_GRIB1_Template;
+extern const char *CDI_GRIB2_Template;
 extern int CDI_convention;
 extern int CDI_inventory_mode;
 extern int CDI_version_info;

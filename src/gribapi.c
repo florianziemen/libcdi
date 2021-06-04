@@ -39,7 +39,6 @@ const char *gribapiLibraryVersionString(void)
   if (!gribapi_libvers_init)
     {
       int major_version, minor_version, revision_version;
-
       gribapiLibraryVersion(&major_version, &minor_version, &revision_version);
 
       sprintf(gribapi_libvers, "%d.%d.%d", major_version, minor_version, revision_version);
@@ -47,9 +46,52 @@ const char *gribapiLibraryVersionString(void)
     }
 #endif
 
-  return (gribapi_libvers);
+  return gribapi_libvers;
 }
 
+void *gribHandleNew(int editionNumber)
+{
+#ifdef HAVE_LIBGRIB_API
+  grib_handle *gh = NULL;
+  const char *fname = (editionNumber == 1) ? CDI_GRIB1_Template : CDI_GRIB2_Template;
+  if (fname)
+    {
+      FILE *fp = fopen(fname, "r");
+      if (fp)
+        {
+          int error;
+          gh = grib_handle_new_from_file(NULL, fp, &error);
+          fclose(fp);
+          if (gh == NULL) Error("grib_handle_new_from_file failed!");
+        }
+      else
+        {
+          Error("Open failed on >%s<!", fname);
+        }
+    }
+
+  if (gh == NULL)
+    {
+      gh = grib_handle_new_from_samples(NULL, (editionNumber == 1) ? "GRIB1" : "GRIB2");
+      if (gh == NULL) Error("grib_handle_new_from_samples failed!");
+    }
+
+  if (editionNumber == 1) GRIB_CHECK(my_grib_set_long(gh, "deleteLocalDefinition", 1L), 0);
+  if (editionNumber == 2) GRIB_CHECK(my_grib_set_long(gh, "grib2LocalSectionPresent", 0L), 0);
+  if (editionNumber == 2) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", 0L), 0);
+
+  return gh;
+#else
+  return NULL;
+#endif
+}
+
+void gribHandleDelete(void *gh)
+{
+#ifdef HAVE_LIBGRIB_API
+  grib_handle_delete((struct grib_handle *)gh);
+#endif
+}
 
 void gribContainersNew(stream_t * streamptr)
 {

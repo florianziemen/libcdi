@@ -4,6 +4,7 @@
 
 2021-06-04  Uwe Schulzweida
 
+	* Add environment variables CDI_GRIB1_TEMPLATE and CDI_GRIB2_TEMPLATE
 	* cdf_put_att_int()/cdf_get_att_int(): change NC_ERANGE to NC_NOERR
 
 2021-05-29  Uwe Schulzweida

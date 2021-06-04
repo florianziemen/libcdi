@@ -40,7 +40,7 @@
 #define  GRIB2_LTYPE_SEDIMENT_BOTTOM_TW  165  // Bottom Of Sediment Layer Penetrated By Thermal Wave
 #define  GRIB2_LTYPE_MIX_LAYER           166  // Mixing Layer
 
-/* GRIB2 Data representation type (Grid Type) */
+// GRIB2 Data representation type (Grid Type)
 #define  GRIB2_GTYPE_LATLON                0  // Latitude/longitude (or equidistant cylindrical, or Plate Carree)
 #define  GRIB2_GTYPE_LATLON_ROT            1  // Rotated Latitude/longitude
 #define  GRIB2_GTYPE_LATLON_STR            2  // Stretched Latitude/longitude
@@ -56,13 +56,13 @@
 #define  GRIB2_GTYPE_UNSTRUCTURED        101  // General Unstructured Grid
 
 const char *gribapiLibraryVersionString(void);
-void gribContainersNew(stream_t * streamptr);
-void gribContainersDelete(stream_t * streamptr);
+void gribContainersNew(stream_t *streamptr);
+void gribContainersDelete(stream_t *streamptr);
 
 #ifdef HAVE_LIBGRIB_API
 static inline int my_grib_set_double(grib_handle* h, const char* key, double val)
 {
-  if ( CDI_gribapi_debug )
+  if (CDI_gribapi_debug)
     fprintf(stderr, "grib_set_double(\tgrib_handle* h, \"%s\", %f)\n", key, val);
 
   int ret_val = grib_set_double(h, key, val);
@@ -73,7 +73,7 @@ static inline int my_grib_set_double(grib_handle* h, const char* key, double val
 
 static inline int my_grib_set_long(grib_handle* h, const char* key, long val)
 {
-  if ( CDI_gribapi_debug )
+  if (CDI_gribapi_debug)
     fprintf(stderr, "grib_set_long(  \tgrib_handle* h, \"%s\", %ld)\n", key, val);
 
   int ret_val = grib_set_long(h, key, val);
@@ -84,7 +84,7 @@ static inline int my_grib_set_long(grib_handle* h, const char* key, long val)
 
 static inline int my_grib_set_string(grib_handle* h, const char* key, const char* val, size_t* length)
 {
-  if ( CDI_gribapi_debug )
+  if (CDI_gribapi_debug)
     fprintf(stderr, "grib_set_string(\tgrib_handle* h, \"%s\", \"%s\")\n", key, val);
 
   int ret_val = grib_set_string(h, key, val, length);
@@ -92,26 +92,6 @@ static inline int my_grib_set_string(grib_handle* h, const char* key, const char
     fprintf(stderr, "!!! grib_set_string(\tgrib_handle* h, \"%s\", \"%s\") !!!\n", key, val);
   return ret_val;
 }
-
-static inline void *gribHandleNew(int editionNumber)
-{
-  grib_handle *gh = grib_handle_new_from_samples(NULL, (editionNumber == 1) ? "GRIB1" : "GRIB2");
-  if ( gh == NULL ) Error("grib_handle_new_from_samples failed!");
-
-  if ( editionNumber == 1 ) GRIB_CHECK(my_grib_set_long(gh, "deleteLocalDefinition", 1L), 0);
-  if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "grib2LocalSectionPresent", 0L), 0);
-  if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", 0L), 0);
-
-  return gh;
-}
-
-static inline void gribHandleDelete(void *gh)
-{
-  grib_handle_delete((struct grib_handle *)gh);
-}
-#else
-#define gribHandleNew(editionNumber) (NULL)
-#define gribHandleDelete(gh)
 #endif
 
 typedef struct {
