@@ -72,14 +72,12 @@ void cdf_put_vara(int ncid, int varid, const size_t start[], const size_t count[
 
 void cdf_put_att_text(int ncid, int varid, const char *name, size_t len, const char *tp);
 void cdf_put_att_int(int ncid, int varid, const char *name, nc_type xtype, size_t len, const int *ip);
-void cdf_put_att_uint(int ncid, int varid, const char *name, nc_type xtype, size_t len, const unsigned int *ip);
 void cdf_put_att_float(int ncid, int varid, const char *name, nc_type xtype, size_t len, const float *dp);
 void cdf_put_att_double(int ncid, int varid, const char *name, nc_type xtype, size_t len, const double *dp);
 
 void cdf_get_att_string(int ncid, int varid, const char *name, char **tp);
 void cdf_get_att_text  (int ncid, int varid, const char *name, char *tp);
 void cdf_get_att_int   (int ncid, int varid, const char *name, int *ip);
-void cdf_get_att_uint  (int ncid, int varid, const char *name, unsigned int *ip);
 void cdf_get_att_long  (int ncid, int varid, const char *name, long *ip);
 void cdf_get_att_double(int ncid, int varid, const char *name, double *dp);
 

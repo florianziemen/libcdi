@@ -664,19 +664,6 @@ void cdf_put_att_int(int ncid, int varid, const char *name, nc_type xtype, size_
 }
 
 
-void cdf_put_att_uint(int ncid, int varid, const char *name, nc_type xtype, size_t len, const unsigned int *ip)
-{
-#ifdef  HAVE_NETCDF4
-  const int status = nc_put_att_uint(ncid, varid, name, xtype, len, ip);
-
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  att=%s  val=%u", ncid, varid, name, *ip);
-
-  if (status != NC_NOERR) Error("%s", nc_strerror(status));
-#endif
-}
-
-
 void cdf_put_att_float(int ncid, int varid, const char *name, nc_type xtype, size_t len, const float *dp)
 {
   const int status = nc_put_att_float(ncid, varid, name, xtype, len, dp);
@@ -731,19 +718,6 @@ void cdf_get_att_int(int ncid, int varid, const char *name, int *ip)
     Message("ncid=%d  varid=%d  att=%s  val=%d", ncid, varid, name, *ip);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
-}
-
-
-void cdf_get_att_uint(int ncid, int varid, const char *name, unsigned int *ip)
-{
-#ifdef  HAVE_NETCDF4
-  const int status = nc_get_att_uint(ncid, varid, name, ip);
-
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  att=%s  val=%u", ncid, varid, name, *ip);
-
-  if (status != NC_NOERR) Error("%s", nc_strerror(status));
-#endif
 }
 
 
