@@ -3576,18 +3576,18 @@ const char **gridInqYCvalsPtr(int gridID)
 void gridProjParamsInit(struct CDI_GridProjParams *gpp)
 {
   // clang-format off
-  gpp->mv      = CDI_grid_missval;   // Missing value
-  gpp->lon_0   = CDI_grid_missval;   // The East longitude of the meridian which is parallel to the Y-axis
-  gpp->lat_0   = CDI_grid_missval;   // Latitude of the projection origin
-  gpp->lat_1   = CDI_grid_missval;   // First latitude from the pole at which the secant cone cuts the sphere
-  gpp->lat_2   = CDI_grid_missval;   // Second latitude at which the secant cone cuts the sphere
-  gpp->a       = CDI_grid_missval;   // Semi-major axis or earth radius in metres (optional)
-  gpp->b       = CDI_grid_missval;   // Semi-minor axis in metres (optional)
-  gpp->rf      = CDI_grid_missval;   // Inverse flattening (1/f) (optional)
-  gpp->xval_0  = CDI_grid_missval;   // Longitude of the first grid point in degree (optional)
-  gpp->yval_0  = CDI_grid_missval;   // Latitude of the first grid point in degree (optional)
-  gpp->x_0     = CDI_grid_missval;   // False easting (optional)
-  gpp->y_0     = CDI_grid_missval;   // False northing (optional)
+  gpp->mv      = CDI_Grid_Missval;   // Missing value
+  gpp->lon_0   = CDI_Grid_Missval;   // The East longitude of the meridian which is parallel to the Y-axis
+  gpp->lat_0   = CDI_Grid_Missval;   // Latitude of the projection origin
+  gpp->lat_1   = CDI_Grid_Missval;   // First latitude from the pole at which the secant cone cuts the sphere
+  gpp->lat_2   = CDI_Grid_Missval;   // Second latitude at which the secant cone cuts the sphere
+  gpp->a       = CDI_Grid_Missval;   // Semi-major axis or earth radius in metres (optional)
+  gpp->b       = CDI_Grid_Missval;   // Semi-minor axis in metres (optional)
+  gpp->rf      = CDI_Grid_Missval;   // Inverse flattening (1/f) (optional)
+  gpp->xval_0  = CDI_Grid_Missval;   // Longitude of the first grid point in degree (optional)
+  gpp->yval_0  = CDI_Grid_Missval;   // Latitude of the first grid point in degree (optional)
+  gpp->x_0     = CDI_Grid_Missval;   // False easting (optional)
+  gpp->y_0     = CDI_Grid_Missval;   // False northing (optional)
   // clang-format on
 }
 

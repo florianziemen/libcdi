@@ -101,9 +101,9 @@ void vlist_init_entry(vlist_t *vlistptr)
   vlistptr->ngrids         = 0;
   vlistptr->nzaxis         = 0;
   vlistptr->taxisID        = CDI_UNDEFID;
-  vlistptr->instID         = cdiDefaultInstID;
-  vlistptr->modelID        = cdiDefaultModelID;
-  vlistptr->tableID        = cdiDefaultTableID;
+  vlistptr->instID         = CDI_Default_InstID;
+  vlistptr->modelID        = CDI_Default_ModelID;
+  vlistptr->tableID        = CDI_Default_TableID;
   vlistptr->varsAllocated  = 0;
   vlistptr->ntsteps        = CDI_UNDEFID;
   vlistptr->keys.nalloc    = MAX_KEYS;
@@ -1515,7 +1515,7 @@ int vlistHasTime(int vlistID)
   bool hastime = false;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  if ( !(CDI_reduce_dim && vlistptr->ntsteps == 1) )
+  if ( !(CDI_Reduce_Dim && vlistptr->ntsteps == 1) )
     {
       for ( int varID = 0; varID <  vlistptr->nvars; varID++ )
         if ( vlistptr->vars[varID].timetype != TIME_CONSTANT )

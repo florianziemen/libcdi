@@ -22,7 +22,7 @@
 
 #include <grib_api.h>
 
-extern int CDI_inventory_mode;
+extern int CDI_Inventory_Mode;
 
 static const var_tile_t dummy_tiles = { 0, -1, -1, -1, -1, -1 };
 
@@ -918,7 +918,7 @@ static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const 
   const bool consistentTime = !memcmp(verificationTime, expectedVTime, sizeof(*verificationTime));
 
   // Finally, we make a decision.
-  if ( CDI_inventory_mode == 1 )
+  if ( CDI_Inventory_Mode == 1 )
     {
       if ( recordExists ) return CHECKTIME_STOP;
       if ( !consistentTime ) return CHECKTIME_INCONSISTENT;
@@ -983,7 +983,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype);
 
       nrecs_scanned++;
-      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_default_missval), 0);
+      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
 
       const int param = gribapiGetParam(gh);
       int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
@@ -1134,7 +1134,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       nrecs_scanned++;
       gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
-      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_default_missval), 0);
+      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
 
       const int param = gribapiGetParam(gh);
       int level1 = 0, level2 = 0, leveltype1, leveltype2, lbounds, level_sf, level_unit;
@@ -1183,7 +1183,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       if ( recID == nrecords )
 	{
-          if ( CDI_inventory_mode == 1 )
+          if ( CDI_Inventory_Mode == 1 )
             {
               gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, varname, param, level1, level2);
               return CDI_EUFSTRUCT;
@@ -1197,7 +1197,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       if ( records[recID].used )
         {
-          if ( CDI_inventory_mode == 1 ) break;
+          if ( CDI_Inventory_Mode == 1 ) break;
           else
 	    {
 	      if ( datetimeDiffer(datetime, datetime0) ) break;
@@ -1323,7 +1323,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 
           nrecs_scanned++;
 	  gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
-	  GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_default_missval), 0);
+	  GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
 
           const int param = gribapiGetParam(gh);
           int level1 = 0, level2 = 0, leveltype1, leveltype2 = -1, lbounds, level_sf, level_unit;
@@ -1376,7 +1376,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 
 	  if ( vrecID == nrecs )
 	    {
-              if ( CDI_inventory_mode == 1 )
+              if ( CDI_Inventory_Mode == 1 )
                 {
                   gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, varname, param, level1, level2);
                   return CDI_EUFSTRUCT;
@@ -1388,7 +1388,7 @@ int gribapiScanTimestep(stream_t * streamptr)
                 }
 	    }
 
-	  if ( CDI_inventory_mode != 1 )
+	  if ( CDI_Inventory_Mode != 1 )
 	    {
 	      if ( records[recID].used )
 		{

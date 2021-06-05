@@ -1808,7 +1808,7 @@ streamPack(void * streamptr, void * packBuffer, int packBufferSize,
   uint32_t d = cdiCheckSum(CDI_DATATYPE_INT, streamNint, intBuffer);
   serializePack(&d, 1, CDI_DATATYPE_UINT32, packBuffer, packBufferSize, packBufferPos, context);
 
-  serializePack(&CDI_default_missval, 1, CDI_DATATYPE_FLT64, packBuffer, packBufferSize, packBufferPos, context);
+  serializePack(&CDI_Default_Missval, 1, CDI_DATATYPE_FLT64, packBuffer, packBufferSize, packBufferPos, context);
   serializePack(streamP->filename, intBuffer[2], CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
   d = cdiCheckSum(CDI_DATATYPE_TXT, intBuffer[2], streamP->filename);
   serializePack(&d, 1, CDI_DATATYPE_UINT32, packBuffer, packBufferSize, packBufferPos, context);
@@ -1829,7 +1829,7 @@ streamUnpack(char * unpackBuffer, int unpackBufferSize,
   xassert(cdiCheckSum(CDI_DATATYPE_INT, streamNint, intBuffer) == d);
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  &CDI_default_missval, 1, CDI_DATATYPE_FLT64, context);
+                  &CDI_Default_Missval, 1, CDI_DATATYPE_FLT64, context);
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   &filename, intBuffer[2], CDI_DATATYPE_TXT, context);
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,

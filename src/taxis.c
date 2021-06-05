@@ -125,7 +125,7 @@ void taxisDefaultValue(taxis_t* taxisptr)
   taxisptr->rtime       = 0;
   taxisptr->fdate       = CDI_UNDEFID;
   taxisptr->ftime       = 0;
-  taxisptr->calendar    = cdiDefaultCalendar;
+  taxisptr->calendar    = CDI_Default_Calendar;
   taxisptr->unit        = DefaultTimeUnit;
   taxisptr->numavg      = 0;
   taxisptr->climatology = false;

@@ -563,7 +563,7 @@ void cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, 
       const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
       const int ncavarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_A];
       // CMOR order: coordinates = "lat lon"
-      if ( cdiCoordinatesLonLat )
+      if ( CDI_Coordinates_Lon_Lat )
         {
           cdfAppendCoordinates(fileID, ncxvarID, coordinates);
           cdfAppendCoordinates(fileID, ncyvarID, coordinates);
@@ -934,10 +934,10 @@ void cdfEndDef(stream_t *streamptr)
 
       if ( streamptr->ncmode == 2 )
         {
-          if ( CDI_netcdf_hdr_pad == 0UL )
+          if ( CDI_Netcdf_Hdr_Pad == 0UL )
             cdf_enddef(fileID);
           else
-            cdf__enddef(fileID, CDI_netcdf_hdr_pad);
+            cdf__enddef(fileID, CDI_Netcdf_Hdr_Pad);
         }
 
       streamptr->accessmode = 1;

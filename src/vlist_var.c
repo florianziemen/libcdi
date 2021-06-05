@@ -22,7 +22,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].datatype      = CDI_UNDEFID;
   vlistptr->vars[varID].timetype      = CDI_UNDEFID;
   vlistptr->vars[varID].tsteptype     = TSTEP_INSTANT;
-  vlistptr->vars[varID].chunktype     = cdiChunkType;
+  vlistptr->vars[varID].chunktype     = CDI_Chunk_Type;
   vlistptr->vars[varID].xyz           = 321;
   vlistptr->vars[varID].gridID        = CDI_UNDEFID;
   vlistptr->vars[varID].zaxisID       = CDI_UNDEFID;
@@ -31,7 +31,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].modelID       = CDI_UNDEFID;
   vlistptr->vars[varID].tableID       = CDI_UNDEFID;
   vlistptr->vars[varID].missvalused   = false;
-  vlistptr->vars[varID].missval       = CDI_default_missval;
+  vlistptr->vars[varID].missval       = CDI_Default_Missval;
   vlistptr->vars[varID].addoffset     = 0.0;
   vlistptr->vars[varID].scalefactor   = 1.0;
   vlistptr->vars[varID].extra         = NULL;
@@ -724,7 +724,7 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
           case CDI_DATATYPE_UINT16: vlistptr->vars[varID].missval =  USHRT_MAX; break;
           case CDI_DATATYPE_INT32:  vlistptr->vars[varID].missval = -INT_MAX;   break;
           case CDI_DATATYPE_UINT32: vlistptr->vars[varID].missval =  UINT_MAX;  break;
-          case CDI_DATATYPE_FLT32:  vlistptr->vars[varID].missval =  (float) CDI_default_missval;  break;
+          case CDI_DATATYPE_FLT32:  vlistptr->vars[varID].missval =  (float) CDI_Default_Missval;  break;
           }
       // clang-format on
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);

@@ -390,7 +390,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int *pvarID, int *plevelID, int tsteptype, int ltype1, int ltype2,
 		  const char *name, const VarScanKeys *scanKeys, const var_tile_t *tiles, int *tile_index)
 {
-  unsigned varID = (cdiSplitLtype105 != 1 || zaxistype != ZAXIS_HEIGHT) ?
+  unsigned varID = (CDI_Split_Ltype105 != 1 || zaxistype != ZAXIS_HEIGHT) ?
     varGetEntry(param, gridID, zaxistype, ltype1, tsteptype, name, scanKeys, tiles) : (unsigned) CDI_UNDEFID;
 
   if ( varID == (unsigned) CDI_UNDEFID )
@@ -674,7 +674,7 @@ void cdi_generate_vars(stream_t *streamptr)
       int zaxisID = varDefZaxis(vlistID, zaxistype, (int)nlevels, dlevels, cvals, 0, lbounds, dlevels1, dlevels2,
                                 (int)Vctsize, Vct, NULL, NULL, unitptr, 0, 0, ltype1, ltype2);
 
-      if ( CDI_cmor_mode && nlevels == 1 && zaxistype != ZAXIS_HYBRID ) zaxisDefScalar(zaxisID);
+      if ( CDI_CMOR_Mode && nlevels == 1 && zaxistype != ZAXIS_HYBRID ) zaxisDefScalar(zaxisID);
 
       if ( zaxisInqType(zaxisID) == ZAXIS_REFERENCE )
         {
@@ -721,14 +721,14 @@ void cdi_generate_vars(stream_t *streamptr)
         }
       // note: if the key is not defined, we do not throw an error!
 
-      if ( cdiDefaultTableID != CDI_UNDEFID )
+      if ( CDI_Default_TableID != CDI_UNDEFID )
 	{
 	  int pdis, pcat, pnum;
 	  cdiDecodeParam(param, &pnum, &pcat, &pdis);
           char name[CDI_MAX_NAME]; name[0] = 0;
           char longname[CDI_MAX_NAME]; longname[0] = 0;
           char units[CDI_MAX_NAME]; units[0] = 0;
-          tableInqEntry(cdiDefaultTableID, pnum, -1, name, longname, units);
+          tableInqEntry(CDI_Default_TableID, pnum, -1, name, longname, units);
 	  if ( name[0] )
 	    {
 	      if ( tableID != CDI_UNDEFID )
@@ -738,10 +738,10 @@ void cdi_generate_vars(stream_t *streamptr)
                   if ( units[0] ) cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units);
                 }
 	      else
-		tableID = cdiDefaultTableID;
+		tableID = CDI_Default_TableID;
 	    }
-	  if ( cdiDefaultModelID != CDI_UNDEFID ) modelID = cdiDefaultModelID;
-	  if ( cdiDefaultInstID  != CDI_UNDEFID )  instID = cdiDefaultInstID;
+	  if ( CDI_Default_ModelID != CDI_UNDEFID ) modelID = CDI_Default_ModelID;
+	  if ( CDI_Default_InstID  != CDI_UNDEFID )  instID = CDI_Default_InstID;
 	}
 
       if ( instID  != CDI_UNDEFID ) vlistDefVarInstitut(vlistID, varID, instID);

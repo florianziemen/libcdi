@@ -830,7 +830,7 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
 
   if ( strIsEqual(ncvar->stdname, "atmosphere_hybrid_sigma_pressure_coordinate") )
     {
-      CDI_convention = CDI_CONVENTION_CF;
+      CDI_Convention = CDI_CONVENTION_CF;
 
       status = true;
       ncvar->zaxistype = ZAXIS_HYBRID;
@@ -1392,7 +1392,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
                   if ( status == NC_NOERR )
                     {
                       cdf_set_var(ncvars, dimvarid, FALSE);
-                      if ( !cdiIgnoreAttCoordinates )
+                      if ( !CDI_Ignore_Att_Coordinates )
                         {
                           ncvars[ncvarid].coordvarids[i] = dimvarid;
                           ncvars[ncvarid].ncoordvars++;
@@ -1400,7 +1400,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
                     }
                   else
                     {
-                      if ( !cdiIgnoreAttCoordinates ) ncvars[ncvarid].ncoordvars++;
+                      if ( !CDI_Ignore_Att_Coordinates ) ncvars[ncvarid].ncoordvars++;
 
                       int k;
                       for ( k = 0; k < nchecked_vars; ++k )
@@ -1437,7 +1437,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
                   if ( status == NC_NOERR )
                     {
                       cdf_set_var(ncvars, dimvarid, FALSE);
-                      //  if ( !cdiIgnoreAttCoordinates )
+                      //  if ( !CDI_Ignore_Att_Coordinates )
                         {
                           ncvars[ncvarid].auxvarids[i] = dimvarid;
                           ncvars[ncvarid].nauxvars++;
@@ -1505,7 +1505,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
               if ( ncvars[ncvarid].lvalidrange == false )
                 {
                   bool lignore = (xtypeIsFloat(atttype) != xtypeIsFloat(xtype));
-                  if ( !cdiIgnoreValidRange && lignore == false )
+                  if ( !CDI_Ignore_Valid_Range && lignore == false )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 2, ncvars[ncvarid].validrange);
                       ncvars[ncvarid].lvalidrange = (ncvars[ncvarid].validrange[0] <= ncvars[ncvarid].validrange[1]);
@@ -1522,7 +1522,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
           else if ( isNumber && strIsEqual(attname, "valid_min") && attlen == 1 )
             {
               bool lignore = (xtypeIsFloat(atttype) != xtypeIsFloat(xtype));
-              if ( !cdiIgnoreValidRange && lignore == false )
+              if ( !CDI_Ignore_Valid_Range && lignore == false )
                 {
                   cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
                   ncvars[ncvarid].lvalidrange = true;
@@ -1535,7 +1535,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
           else if ( isNumber && strIsEqual(attname, "valid_max") && attlen == 1 )
             {
               bool lignore = (xtypeIsFloat(atttype) != xtypeIsFloat(xtype));
-              if ( !cdiIgnoreValidRange && lignore == false )
+              if ( !CDI_Ignore_Valid_Range && lignore == false )
                 {
                   cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);
                   ncvars[ncvarid].lvalidrange = true;
@@ -2059,7 +2059,7 @@ static
 void cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridvals, struct xyValGet *valsGet,
                    int ntdims, size_t *start, size_t *count)
 {
-  if (CDI_netcdf_lazy_grid_load)
+  if (CDI_Netcdf_Lazy_Grid_Load)
     {
       *valsGet = (struct xyValGet){
         .scalefactor = ncvar->scalefactor,
@@ -2103,7 +2103,7 @@ void cdf_load_cvals(size_t size, int varid, ncvar_t *ncvar, char ***gridvals, si
 static
 void cdf_load_bounds(size_t size, ncvar_t *ncvar, double **gridbounds, struct cdfLazyGridIds *cellBoundsGet)
 {
-  if (CDI_netcdf_lazy_grid_load)
+  if (CDI_Netcdf_Lazy_Grid_Load)
     {
       cellBoundsGet->datasetNCId = ncvar->ncid;
       cellBoundsGet->varNCId  = ncvar->bounds;
@@ -2119,7 +2119,7 @@ void cdf_load_bounds(size_t size, ncvar_t *ncvar, double **gridbounds, struct cd
 static
 void cdf_load_bounds_cube_sphere(size_t bxsize, size_t bysize, size_t size, ncvar_t *ncvar, double **gridbounds, struct cdfLazyGridIds *cellBoundsGet)
 {
-  if (CDI_netcdf_lazy_grid_load)
+  if (CDI_Netcdf_Lazy_Grid_Load)
     {
       cellBoundsGet->datasetNCId = ncvar->ncid;
       cellBoundsGet->varNCId  = ncvar->bounds;
@@ -2153,7 +2153,7 @@ void cdf_load_bounds_cube_sphere(size_t bxsize, size_t bysize, size_t size, ncva
 static
 void cdf_load_cellarea(size_t size, ncvar_t *ncvar, double **gridarea, struct cdfLazyGridIds *cellAreaGet)
 {
-  if ( CDI_netcdf_lazy_grid_load )
+  if ( CDI_Netcdf_Lazy_Grid_Load )
     {
       cellAreaGet->datasetNCId = ncvar->ncid;
       cellAreaGet->varNCId = ncvar->cellarea;
@@ -2320,7 +2320,7 @@ bool cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t 
 
   if (datatype != -1)  grid->datatype = datatype;
 
-  if (datatype == CDI_DATATYPE_UINT8 && !CDI_netcdf_lazy_grid_load)
+  if (datatype == CDI_DATATYPE_UINT8 && !CDI_Netcdf_Lazy_Grid_Load)
     {
 #ifndef USE_MPI
       cdf_load_cvals(size, xvarid, axisvar, &grid->x.cvals, *xsize);
@@ -2402,7 +2402,7 @@ bool cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t 
 
   if (datatype != -1)  grid->datatype = datatype;
 
-  if (datatype == CDI_DATATYPE_UINT8 && !CDI_netcdf_lazy_grid_load)
+  if (datatype == CDI_DATATYPE_UINT8 && !CDI_Netcdf_Lazy_Grid_Load)
     {
 #ifndef USE_MPI
       cdf_load_cvals(size, yvarid, axisvar, &grid->y.cvals, *ysize);
@@ -2536,7 +2536,7 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncv
         grid->size  = size;
         grid->x.size = xsize;
         grid->y.size = ysize;
-        if (xvarid != CDI_UNDEFID && CDI_read_cell_corners)
+        if (xvarid != CDI_UNDEFID && CDI_Read_Cell_Corners)
           {
             grid->x.flag = 1;
             const int bvarid = ncvars[xvarid].bounds;
@@ -2561,7 +2561,7 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncv
                   }
               }
           }
-        if (yvarid != CDI_UNDEFID && CDI_read_cell_corners)
+        if (yvarid != CDI_UNDEFID && CDI_Read_Cell_Corners)
           {
             grid->y.flag = 1;
             const int bvarid = ncvars[yvarid].bounds;
@@ -2867,7 +2867,7 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
 
           {
             const int gridtype = (!lgrid) ? GRID_PROJECTION : ncvar->gridtype;
-            if (CDI_netcdf_lazy_grid_load)
+            if (CDI_Netcdf_Lazy_Grid_Load)
               {
                 cdfLazyGridRenew(&lazyGrid, gridtype);
                 if (lgrid && lproj) cdfLazyGridRenew(&lazyProj, GRID_PROJECTION);
@@ -2976,13 +2976,13 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
 
           if (lazyGrid)
             {
-              if (CDI_netcdf_lazy_grid_load) cdfLazyGridDestroy(lazyGrid);
+              if (CDI_Netcdf_Lazy_Grid_Load) cdfLazyGridDestroy(lazyGrid);
               if (grid) { grid_free(grid); Free(grid); }
             }
 
           if (lazyProj)
             {
-              if (CDI_netcdf_lazy_grid_load) cdfLazyGridDestroy(lazyProj);
+              if (CDI_Netcdf_Lazy_Grid_Load) cdfLazyGridDestroy(lazyProj);
               if (proj) { grid_free(proj); Free(proj); }
             }
 	}
@@ -3141,7 +3141,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 
           const int zaxisID = ncvar->zaxisID;
 
-          if (CDI_cmor_mode && zsize == 1 && zaxisType != ZAXIS_HYBRID) zaxisDefScalar(zaxisID);
+          if (CDI_CMOR_Mode && zsize == 1 && zaxisType != ZAXIS_HYBRID) zaxisDefScalar(zaxisID);
 
           if (pstdname && *pstdname)
             cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_STDNAME, (const unsigned  char*)pstdname, (int)strlen(pstdname)+1);
@@ -3302,12 +3302,12 @@ void cdf_define_institut_and_model_id(int vlistID, int varID)
   int varModelID = vlistInqVarModel(vlistID, varID);
   int varTableID = vlistInqVarTable(vlistID, varID);
   const int code = vlistInqVarCode(vlistID, varID);
-  if ( cdiDefaultTableID != CDI_UNDEFID )
+  if ( CDI_Default_TableID != CDI_UNDEFID )
     {
       char name[CDI_MAX_NAME]; name[0] = 0;
       char longname[CDI_MAX_NAME]; longname[0] = 0;
       char units[CDI_MAX_NAME]; units[0] = 0;
-      tableInqEntry(cdiDefaultTableID, code, -1, name, longname, units);
+      tableInqEntry(CDI_Default_TableID, code, -1, name, longname, units);
       if ( name[0] )
         {
           cdiDeleteKey(vlistID, varID, CDI_KEY_NAME);
@@ -3322,12 +3322,12 @@ void cdf_define_institut_and_model_id(int vlistID, int varID)
             }
           else
             {
-              varTableID = cdiDefaultTableID;
+              varTableID = CDI_Default_TableID;
             }
         }
 
-      if ( cdiDefaultModelID != CDI_UNDEFID ) varModelID = cdiDefaultModelID;
-      if ( cdiDefaultInstID  != CDI_UNDEFID ) varInstID  = cdiDefaultInstID;
+      if ( CDI_Default_ModelID != CDI_UNDEFID ) varModelID = CDI_Default_ModelID;
+      if ( CDI_Default_InstID  != CDI_UNDEFID ) varInstID  = CDI_Default_InstID;
     }
   if ( varInstID  != CDI_UNDEFID ) vlistDefVarInstitut(vlistID, varID, varInstID);
   if ( varModelID != CDI_UNDEFID ) vlistDefVarModel(vlistID, varID, varModelID);
@@ -4123,7 +4123,7 @@ int cdfInqContents(stream_t *streamptr)
   cdfVerifyVarAttr(nvars, ncvars, ncdims);
 
 
-  if (CDI_convert_cubesphere)
+  if (CDI_Convert_Cubesphere)
     {
       bool isGeosData = check_cube_sphere(vlistID, nvars, ncvars, ncdims);
       if (CDI_Debug) Message("isGeosData %d", isGeosData);

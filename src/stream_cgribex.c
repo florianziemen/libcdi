@@ -746,11 +746,11 @@ int cgribexVarCompare(compvar_t compVar, record_t record, int flag)
 static
 void cgribexSkipRecords(const int fileID)
 {
-  int nskip = cdiSkipRecords;
+  int nskip = CDI_Skip_Records;
   while (nskip-- > 0)
     {
       const size_t recsize = gribGetSize(fileID);
-      if (recsize == 0) Error("Skipping of %d records failed!", cdiSkipRecords);
+      if (recsize == 0) Error("Skipping of %d records failed!", CDI_Skip_Records);
 
       const off_t recpos = fileGetPos(fileID);
       fileSetPos(fileID, recpos, SEEK_CUR);
@@ -783,7 +783,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
 
   const int fileID = streamptr->fileID;
 
-  if (cdiSkipRecords) cgribexSkipRecords(fileID);
+  if (CDI_Skip_Records) cgribexSkipRecords(fileID);
 
   unsigned nrecs = 0;
   while (true)
@@ -849,7 +849,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
 	      if ( cgribexVarCompare(compVar, records[recID], 0) == 0 ) break;
 	    }
 
-	  if ( CDI_inventory_mode == 1 )
+	  if ( CDI_Inventory_Mode == 1 )
 	    {
 	      if ( recID < nrecs ) break;
 	      if ( warn_time )
@@ -1028,7 +1028,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	  return CDI_EUFSTRUCT;
 	}
 
-      if ( CDI_inventory_mode == 1 )
+      if ( CDI_Inventory_Mode == 1 )
 	{
 	  if ( records[recID].used )
 	    {
@@ -1228,13 +1228,13 @@ int cgribexScanTimestep(stream_t * streamptr)
 	    {
 	      gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, paramstr, level1, level2);
 
-	      if ( CDI_inventory_mode == 1 )
+	      if ( CDI_Inventory_Mode == 1 )
 		return CDI_EUFSTRUCT;
 	      else
 		continue;
 	    }
 
-	  if ( CDI_inventory_mode == 1 )
+	  if ( CDI_Inventory_Mode == 1 )
 	    {
 	      records[recID].used = true;
 	      streamptr->tsteps[tsID].recIDs[rindex] = recID;

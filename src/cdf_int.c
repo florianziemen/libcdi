@@ -20,8 +20,8 @@ void cdf_create(const char *path, int cmode, int *ncidp)
   chunksizehint = 16777216; /* 16 MB */
 #endif
 
-  if (cdiNcChunksizehint != CDI_UNDEFID)
-    chunksizehint = (size_t)cdiNcChunksizehint;
+  if (CDI_Netcdf_Chunksizehint != CDI_UNDEFID)
+    chunksizehint = (size_t)CDI_Netcdf_Chunksizehint;
 
   cdi_nc__create_funcp my_nc__create =
     (cdi_nc__create_funcp)namespaceSwitchGet(NSSWITCH_NC__CREATE).func;
@@ -58,7 +58,7 @@ int cdf_open(const char *path, int omode, int *ncidp)
       if (chunksizehint > (size_t) filestat.st_size) chunksizehint = (size_t) filestat.st_size;
 #endif
       // if (chunksizehint < ChunkSizeMin) chunksizehint = ChunkSizeMin;
-      if (cdiNcChunksizehint != CDI_UNDEFID) chunksizehint = (size_t)cdiNcChunksizehint;
+      if (CDI_Netcdf_Chunksizehint != CDI_UNDEFID) chunksizehint = (size_t)CDI_Netcdf_Chunksizehint;
 
       // FIXME: parallel part missing
       status = nc__open(path, omode, &chunksizehint, ncidp);

@@ -505,7 +505,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims, bool
           size_t nvertex = gridInqNvertex(gridID);
           pbounds = (double *)gridAxisInq->axisBoundsPtr(gridID);
 
-          if ( CDI_cmor_mode && grid_is_cyclic && !pbounds )
+          if ( CDI_CMOR_Mode && grid_is_cyclic && !pbounds )
             {
               gen_bounds = true;
               nvertex = 2;
@@ -1361,7 +1361,7 @@ static
 void cdf_def_zaxis_hybrid(stream_t *streamptr, int type, int *ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
 {
   void (*def_zaxis_hybrid_delegate)(stream_t *streamptr, int type, int *ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
-    = ( (!CDI_cmor_mode && CDI_convention == CDI_CONVENTION_ECHAM)
+    = ( (!CDI_CMOR_Mode && CDI_Convention == CDI_CONVENTION_ECHAM)
         || type == ZAXIS_HYBRID_HALF )
     ? cdf_def_zaxis_hybrid_echam : cdf_def_zaxis_hybrid_cf;
   def_zaxis_hybrid_delegate(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, dimID, axisname);
@@ -1487,14 +1487,14 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   if ( dimlen == 1 )
     {
       bool is_scalar = zaxisInqScalar(zaxisID) > 0;
-      if ( !is_scalar && CDI_cmor_mode )
+      if ( !is_scalar && CDI_CMOR_Mode )
         {
           is_scalar = true;
           zaxisDefScalar(zaxisID);
         }
 
       if ( is_scalar ) ndims = 0;
-      if ( CDI_reduce_dim ) return;
+      if ( CDI_Reduce_Dim ) return;
 
       switch (type)
         {
@@ -1893,7 +1893,7 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
   if ( CDI_Debug )
     Message("gridtype = %d  size = %zu", gridtype, size);
 
-  if ( CDI_reduce_dim && size == 1 ) // no grid information
+  if ( CDI_Reduce_Dim && size == 1 ) // no grid information
     {
       streamptr->ncgrid[gridindex].gridID = gridID;
       return;
