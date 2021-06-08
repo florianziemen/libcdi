@@ -1634,6 +1634,10 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 static
 void cdf_def_mapping(stream_t *streamptr, int gridID)
 {
+  int natts;
+  cdiInqNatts(gridID, CDI_GLOBAL, &natts);
+  if (natts == 0) return;
+
   int datatype = -1;
   int status = cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, &datatype);
   nc_type gmapvartype = (status == CDI_NOERR) ? (nc_type) datatype : NC_INT;
