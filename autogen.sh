@@ -1,17 +1,29 @@
 #!/bin/sh
 
 autoreconf -fvi || exit $?
-patch -p 1 --no-backup-if-mismatch --forward -r - -i patch/libtool.m4.arg_spaces.patch -d .
-# The program 'patch' exits with exitcode=1 if the patch has already been applied.
-# Consider this a normal scenario:
-exitcode=$?; if test $exitcode -ne 0 && test $exitcode -ne 1; then exit $exitcode; fi
 
-patch -p 1 --no-backup-if-mismatch --forward -r - -i patch/libtool.m4.nag_wrapper.patch -d .
-exitcode=$?; if test $exitcode -ne 0 && test $exitcode -ne 1; then exit $exitcode; fi
+# Patch libtool.m4:
+for patch in \
+  ; do
+    echo "applying $patch"
+    patch -p 1 --no-backup-if-mismatch --forward -r - -i $patch -d .
+    # The program 'patch' exits with exitcode=1 if the patch has already been applied.
+    # Consider this a normal scenario:
+    exitcode=$?; if test $exitcode -ne 0 && test $exitcode -ne 1; then exit $exitcode; fi
+done
 
-autoconf -f || exit $?
-# Reset libtool.m4 timestamps to avoid confusing make
-touch -r m4/ltversion.m4 m4/libtool.m4 || exit $?
+# The following is not needed as long as we do not patch libtool.m4:
+# autoconf -f || exit $?
+# # Reset libtool.m4 timestamps to avoid confusing make:
+# touch -r m4/ltversion.m4 m4/libtool.m4 || exit $?
 
-patch -p 1 --no-backup-if-mismatch --forward -r - -i patch/ltmain.sh.nag_pthread.patch -d .
-exitcode=$?; if test $exitcode -ne 0 && test $exitcode -ne 1; then exit $exitcode; fi
+# Patch the rest of the files:
+for patch in \
+  contrib/00nagfor-libtool-patch/nagfor-libtool-2.4.6.patch \
+  contrib/05macos-nagfor-patch/macos-nagfor.patch \
+  contrib/06ltmain_nag_pthread-patch/ltmain_nag_pthread.patch \
+  ; do
+    echo "applying $patch"
+    patch -p 1 --no-backup-if-mismatch --forward -r - -i $patch -d .
+    exitcode=$?; if test $exitcode -ne 0 && test $exitcode -ne 1; then exit $exitcode; fi
+done
