@@ -22,6 +22,7 @@ for patch in \
   contrib/00nagfor-libtool-patch/nagfor-libtool-2.4.6.patch \
   contrib/05macos-nagfor-patch/macos-nagfor.patch \
   contrib/06ltmain_nag_pthread-patch/ltmain_nag_pthread.patch \
+  contrib/08ltmain-parallel-printf-patch/ltmain-parallel-printf.patch \
   ; do
     echo "applying $patch"
     patch -p 1 --no-backup-if-mismatch --forward -r - -i $patch -d .
