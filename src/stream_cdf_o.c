@@ -2013,13 +2013,13 @@ void cdfDefCharacter(stream_t *streamptr, int gridID, int gridindex, int xory, i
     {
       cdf_def_var(fileID, axisname, NC_CHAR, 2, dimIDs, &ncaxisid);
       if ( xory == 0 )
-        cdfPutGridStdAtts(fileID, ncaxisid, gridID, 'X', &gridInqsX);
+        cdfPutGridStdAtts(fileID, ncaxisid, gridID, &gridInqsX);
       else
-        cdfPutGridStdAtts(fileID, ncaxisid, gridID, 'Y', &gridInqsY);
+        cdfPutGridStdAtts(fileID, ncaxisid, gridID, &gridInqsY);
     }
   else
     return;
-  cdf_enddef(fileID);
+  cdf_enddef(fileID, streamptr->self);
 
 /* Write Var */
 
