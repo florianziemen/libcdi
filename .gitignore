@@ -2,6 +2,24 @@
 /autom4te.cache
 /src/config.h.in~
 
+# Distributed autoreconf stage files:
+/aclocal.m4
+/config/compile
+/config/config.guess
+/config/config.sub
+/config/depcomp
+/config/install-sh
+/config/ltmain.sh
+/config/missing
+/configure
+/m4/libtool.m4
+/m4/ltoptions.m4
+/m4/ltsugar.m4
+/m4/ltversion.m4
+/m4/lt~obsolete.m4
+/src/config.h.in
+Makefile.in
+
 # Configure stage files:
 .deps
 /cdi.settings
@@ -18,6 +36,7 @@
 /tests/pio_cksum_asynch
 /tests/pio_cksum_cdf
 /tests/pio_cksum_fpguard
+/tests/pio_cksum_grb2
 /tests/pio_cksum_mpi_fw_at_all
 /tests/pio_cksum_mpi_fw_at_reblock
 /tests/pio_cksum_mpi_fw_ordered
@@ -30,6 +49,7 @@
 /tests/test_chunk_cksum
 /tests/test_cksum_extra
 /tests/test_cksum_grib
+/tests/test_cksum_grib2
 /tests/test_cksum_ieg
 /tests/test_cksum_nc
 /tests/test_cksum_nc2
@@ -37,7 +57,6 @@
 /tests/test_cksum_service
 /tests/test_f2003
 /tests/test_resource_copy_mpi_run
-/tests/*.log
 /util/serialrun
 Makefile
 
@@ -47,10 +66,13 @@ Makefile
 *.lo
 *.mod
 *.o
-.libs
-/a.out
+/*/**/.libs
 /app/cdi
 /app/createtable
+# We do not add the following because that is supposed to be deleted by the
+# configure script and we want to notice if it is not the case:
+#/.libs
+#/a.out
 
 # Documentation stage files:
 /doc/cdi_cman.pdf
@@ -69,31 +91,33 @@ Makefile
 /examples/pio/collectData2003
 /examples/pio/collectDataNStreams
 /examples/pio/compareResourcesArray
+/tests/*.log
+/tests/calendar_test1
 /tests/cksum_read
 /tests/cksum_verify
 /tests/cksum_write
 /tests/cksum_write_chunk
-/tests/example.cksum
-/tests/example.ext
 /tests/example.grb
-/tests/example.ieg
 /tests/example.nc
-/tests/example.nc2
-/tests/example.nc4
-/tests/example.svc
 /tests/example_0.cksum
 /tests/example_0.grb
+/tests/example_0.grb2
+/tests/example_0.nc
+/tests/example_0.nc2
 /tests/example_0.nc4
 /tests/example_1.cksum
 /tests/example_1.grb
+/tests/example_1.grb2
+/tests/example_1.nc
+/tests/example_1.nc2
 /tests/example_1.nc4
 /tests/pio_write
 /tests/pio_write_deco2d
 /tests/test_byteswap
-/tests/test_cdf_const.d
 /tests/test_cdf_read
 /tests/test_cdf_write
 /tests/test_grib
+/tests/test_month_adjust
 /tests/test_resource_copy
 /tests/test_resource_copy_mpi
 /tests/test_table
