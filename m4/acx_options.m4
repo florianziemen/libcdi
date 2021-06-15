@@ -235,8 +235,8 @@ AC_ARG_WITH([eccodes],
                                 [LDFLAGS="-L$ECCODES_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$ECCODES_ROOT/include $CPPFLAGS"
                                  AC_CHECK_HEADERS([grib_api.h],,
-                                             [AC_MSG_ERROR([Could not find grib_api.h])],
-                                             [AC_INCLUDES_DEFAULT])
+                                                  [AC_MSG_ERROR([Could not find grib_api.h])],
+                                                  [AC_INCLUDES_DEFAULT])
                                  AC_SEARCH_LIBS([grib_get_message],
                                                 [eccodes],
                                                 [AC_DEFINE([HAVE_LIBGRIB_API],[1],[ECCODES library is present if defined to 1])],
