@@ -266,28 +266,28 @@ dnl test properties of MPI system
    dnl
    dnl NC_HAS_PNETCDF is useful when available to short-circuit some tests
    AS_IF([test x"$ENABLE_NETCDF" = xyes],
-     [AC_CHECK_HEADERS([netcdf_meta.h])
+     [AC_CHECK_HEADERS([netcdf_meta.h],,,[AC_INCLUDES_DEFAULT
+@%:@include <netcdf.h>])
       AS_IF([test "x$NC_CONFIG" != "x"],
         [AC_MSG_CHECKING([parallel netcdf's pnetcdf support])
          acx_temp=`$NC_CONFIG --has-pnetcdf`
          AS_IF([test "x$acx_temp" = "xyes"],
            [AC_DEFINE([HAVE_NETCDF_PAR_PNETCDF],[1],
               [Defined to 1 if NetCDF parallel open supports NC_PNETCDF])])
-      AC_MSG_RESULT([$acx_temp])])])
+         AC_MSG_RESULT([$acx_temp])])])
    AS_IF([test x"$ENABLE_NC4" = xyes],
      [saved_CFLAGS=$CFLAGS
       CFLAGS="$CFLAGS $MPI_C_INCLUDE"
-      AC_CHECK_HEADERS([netcdf_par.h],
-        [AC_CHECK_DECL([MPI_Bcast],
-           [HAVE_PARALLEL_NC4=1],
-           [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
-           [AC_INCLUDES_DEFAULT
-@%:@include <netcdf_par.h>])],
-        [AC_CHECK_DECL([MPI_Bcast],
-           [HAVE_PARALLEL_NC4=1],
-           [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
-           [AC_INCLUDES_DEFAULT
-@%:@include <netcdf.h>])], [AC_INCLUDES_DEFAULT])
+      AC_CHECK_HEADERS([netcdf_par.h],,,[AC_INCLUDES_DEFAULT
+@%:@include <netcdf.h>])
+      AC_CHECK_DECL([MPI_Bcast],
+        [HAVE_PARALLEL_NC4=1],
+        [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
+        [AC_INCLUDES_DEFAULT
+@%:@include <netcdf.h>
+@%:@ifdef HAVE_NETCDF_PAR_H
+@%:@include <netcdf_par.h>
+@%:@endif])
       dnl if not both scales-ppm and yaxt are available, netcdf can only be
       dnl used in serial mode
       AS_IF([test x$enable_ppm != xyes],
