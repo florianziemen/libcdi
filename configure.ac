@@ -188,30 +188,109 @@ dnl test properties of MPI system
    FCFLAGS=$saved_FCFLAGS
    LIBS=$saved_LIBS
 
-   AC_ARG_VAR([YAXT_FC_LIB],[Flags needed to link YAXT for the Fortran API])
-   AC_ARG_VAR([YAXT_FC_INCLUDE],
-     [Flags needed to compile for the Fortran API of YAXT])
-   PKG_CHECK_MODULES([YAXT],[yaxt],
-     [AC_DEFINE([HAVE_YAXT],,[yaxt library is available])],
-     [AC_MSG_FAILURE([Required yaxt library unavailable.])])
-   AS_IF([test x${YAXT_FC_LIB+set} != xset],
-     [YAXT_FC_LIB=$YAXT_LIBS])
-   AS_IF([test x${YAXT_FC_INCLUDE+set} != xset],
-     [YAXT_FC_INCLUDE=$YAXT_CFLAGS])
-   PKG_CHECK_MODULES([YAXT_C],[yaxt_c],
-     [YAXT_LIBS=$YAXT_C_LIBS
-      YAXT_CFLAGS=$YAXT_C_CFLAGS],
-     [YAXT_VERSION=`pkg-config --modversion yaxt`
-      YAXT_MAJOR_VERSION=`expr "$YAXT_VERSION" : "@<:@0-9@:>@*"`
-      YAXT_MINOR_VERSION=`echo "$YAXT_VERSION" | sed -e 's/^@<:@0-9@:>@*\.\(@<:@0-9@:>@*\).*/\1/'`
-      AS_IF([test "$YAXT_MAJOR_VERSION" -gt 0 -o "$YAXT_MINOR_VERSION" -gt 4],
-        [YAXT_LIBS=`echo "$YAXT_LIBS" | sed -e 's/-lyaxt *$/-lyaxt_c/'`])])
+dnl Declare pkg-config precious variables:
+   PKG_PROG_PKG_CONFIG
+dnl Set precious variables following the naming convention of ACX_C_PACKAGE:
+   AC_ARG_VAR([YAXT_C_INCLUDE],
+     [specifically set flags to use when compiling sources using YAXT ]dnl
+[includes.])dnl
+   AC_ARG_VAR([YAXT_C_LIB],
+     [specifically set flags to use when linking YAXT.])dnl
+dnl Prevent PKG_CHECK_MODULES from declaring package-specific precious
+dnl variables, which names do not follow our convention:
+   m4_pushdef([AC_ARG_VAR])dnl
+dnl PKG_CHECK_MODULES relies on yaxt_c_CFLAGS and yaxt_c_LIBS, which in our case
+dnl have names YAXT_C_INCLUDE and YAXT_C_LIB, respectively:
+   yaxt_c_CFLAGS=$YAXT_C_INCLUDE
+   yaxt_c_LIBS=$YAXT_C_LIB
+   PKG_CHECK_MODULES([yaxt_c],[yaxt_c],
+     [YAXT_C_INCLUDE=$yaxt_c_CFLAGS
+      YAXT_C_LIB=$yaxt_c_LIBS],
+     [dnl
+dnl There was no yaxt_c.pc before version 0.5.2, therefore we try with yaxt.pc.
+dnl PKG_CHECK_MODULES relies on yaxt_CFLAGS and yaxt_LIBS, which in our case
+dnl have names YAXT_C_INCLUDE and YAXT_C_LIB, respectively:
+      yaxt_CFLAGS=$YAXT_C_INCLUDE
+      yaxt_LIBS=$YAXT_C_LIB
+      PKG_CHECK_MODULES([yaxt], [yaxt],
+        [YAXT_VERSION=`$PKG_CONFIG --modversion yaxt`
+         YAXT_MAJOR_VERSION=`expr X"$YAXT_VERSION" : "X\(@<:@0-9@:>@*\)"`
+         YAXT_MINOR_VERSION=`echo "$YAXT_VERSION" | sed -e 's/^@<:@0-9@:>@*\.\(@<:@0-9@:>@*\).*/\1/'`
+         AS_IF([test "$YAXT_MAJOR_VERSION" -gt 0 -o "$YAXT_MINOR_VERSION" -gt 4],
+           [YAXT_C_INCLUDE=$yaxt_CFLAGS
+            YAXT_C_LIB=`echo "$yaxt_LIBS" | sed -e 's/-lyaxt *$/-lyaxt_c/'`])],
+        [:])])
+   m4_popdef([AC_ARG_VAR])dnl
+   saved_CFLAGS=$CFLAGS
+   saved_LIBS=$LIBS
+   CFLAGS="$CFLAGS $MPI_C_INCLUDE"
+   LIBS="$LIBS $MPI_C_LIB"
+dnl The following is extracted from ACX_GENERIC_PACKAGE, which is expanded by
+dnl ACX_C_PACKAGE. We do not use the latter macro here to avoid introduction of
+dnl the '--with-yaxt-XXX' configure options, which might be very confusing since
+dnl whatever pkg-config finds will be used instead.
+   ACX_LANG_CHECK_INCLUDE_PATHS_IFELSE([yaxt.h],,
+     [YAXT_C_INCLUDE=`echo "$acx_cv_c_include_yaxt_h" | sed -e 's/^ *//;s/ *$//'`],
+     [AC_MSG_FAILURE(
+        [Required include yaxt.h not found or not compilable.])],,
+     [$YAXT_C_INCLUDE],[[]])
+   ACX_OPTION_SEARCH_LIBS_MULTI([xt_initialized], [yaxt_c yaxt],,
+      [AC_MSG_FAILURE([Cannot link to yaxt.])],,[$YAXT_C_LIB])
+   YAXT_C_LIB=`echo "$acx_cv_option_search_xt_initialized_c" | sed -e 's/^ *//;s/ *$//'`
+   CFLAGS=$saved_CFLAGS
+   LIBS=$saved_LIBS
+dnl
+   AS_IF([test -n "$FC" && test "X$FC" != Xno],
+     [dnl
+dnl Set precious variables following the naming convention of ACX_F90_PACKAGE:
+      AC_ARG_VAR([YAXT_FC_MOD],
+        [flags to enable 'USE YAXT' in Fortran program.])dnl
+      AC_ARG_VAR([YAXT_FC_LIB],
+        [specifically set flags to use when linking YAXT.])dnl
+dnl Prevent PKG_CHECK_MODULES from declaring package-specific precious
+dnl variables, which names do not follow our convention:
+      m4_pushdef([AC_ARG_VAR])dnl
+dnl PKG_CHECK_MODULES relies on yaxt_CFLAGS and yaxt_LIBS, which in our case
+dnl have names YAXT_FC_MOD and YAXT_FC_LIB, respectively:
+      yaxt_CFLAGS=$YAXT_FC_MOD
+      yaxt_LIBS=$YAXT_FC_LIB
+      PKG_CHECK_MODULES([yaxt],[yaxt],
+        [YAXT_FC_MOD=$yaxt_CFLAGS
+         YAXT_FC_LIB=$yaxt_LIBS], [:])
+      m4_popdef([AC_ARG_VAR])dnl
+      saved_LIBS=$LIBS
+      LIBS="$LIBS $MPI_FC_LIB"
+dnl The following is extracted from ACX_F90_PACKAGE. We do not use the
+dnl aforementioned macro here to avoid introduction of the '--with-yaxt-XXX'
+dnl configure options, which might be very confusing since whatever pkg-config
+dnl finds will be used instead.
+      AC_LANG_PUSH([Fortran])dnl
+      ACX_SL_FC_CHECK_MOD_PATH_FLAG
+      ACX_FORTRAN_CHECK_MOD_PATHS_IFELSE([yaxt],,
+        [YAXT_FC_MOD=$acx_cv_fortran_mod_yaxt],
+        [AC_MSG_FAILURE([Required module yaxt not found or not compilable.])],,
+        [$YAXT_FC_MOD])
+      saved_FCFLAGS=$FCFLAGS
+      FCFLAGS="$YAXT_FC_MOD $FCFLAGS"
+      ACX_OPTION_SEARCH_LIBS_MULTI([xt_initialized],[yaxt],,
+        [AC_MSG_FAILURE([Cannot link to yaxt.])],[[-lyaxt_c]],
+        [$YAXT_FC_LIB],
+        [[      use yaxt
+      logical is_initialized]],
+        [[      is_initialized = xt_initialized()
+      call xt_finalize()]])
+      FCFLAGS=$saved_FCFLAGS
+      YAXT_FC_LIB=`echo "$acx_cv_option_search_xt_initialized_fc" | sed -e 's/^ *//;s/ *$//'`
+      AC_LANG_POP([Fortran])dnl
+      LIBS=$saved_LIBS])
+dnl The configure script fails above if YAXT is not available:
+   AC_DEFINE([HAVE_YAXT],,[yaxt library is available])
 
    AS_IF([test "x$ac_cv_have_decl_MPI_UINT64_T" != xyes],
      [saved_CFLAGS=$CFLAGS
       saved_LIBS=$LIBS
-      CFLAGS="$CFLAGS $YAXT_CFLAGS"
-      LIBS="$LIBS $YAXT_LIBS"
+      CFLAGS="$CFLAGS $YAXT_C_INCLUDE $MPI_C_INCLUDE"
+      LIBS="$LIBS $YAXT_C_LIB $MPI_C_LIB"
       AC_CHECK_SIZEOF([Xt_uid],,[AC_INCLUDES_DEFAULT
 @%:@include <yaxt.h>])
       AS_IF([test "$ac_cv_sizeof_unsigned_long" -eq "$ac_cv_sizeof_Xt_uid"],

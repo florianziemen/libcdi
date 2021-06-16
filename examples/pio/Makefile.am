@@ -1,6 +1,6 @@
 check_PROGRAMS=collectData collectDataNStreams
 
-AM_CPPFLAGS = -I$(top_srcdir)/src $(YAXT_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/src $(YAXT_C_INCLUDE)
 AM_FCFLAGS  = $(FPP_INCOPT)$(top_srcdir)/src $(MPI_FC_INCLUDE)
 AM_CFLAGS = $(MPI_C_INCLUDE)
 
