@@ -57,7 +57,7 @@ test_cdf_read_SOURCES = test_cdf_read.c
 test_table_SOURCES = test_table.c
 test_byteswap_SOURCES = test_byteswap.c
 #
-AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
+AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 if USE_MPI
 pio_write_LDADD = ../src/libcdipio.la $(UUID_C_LIB) $(MPI_C_LIB)
 pio_write_deco2d_LDADD = ../src/libcdipio.la $(UUID_C_LIB) $(MPI_C_LIB)

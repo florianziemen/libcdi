@@ -25,7 +25,7 @@ endif
 endif
 
 
-AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
+AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 
 libcdi_la_SOURCES = 	 \
 	basetime.c     	 \
@@ -253,7 +253,7 @@ libcdipio_la_SOURCES += $(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
 endif
 endif
 
-libcdipio_la_LIBADD    = libcdi.la $(LIBRT) $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
+libcdipio_la_LIBADD    = libcdi.la $(LIBRT) $(PPM_CORE_LIBS) $(YAXT_C_LIB) $(MPI_C_LIB)
 
 libcdi_la_LIBADD    = $(UUID_C_LIB)
 #
