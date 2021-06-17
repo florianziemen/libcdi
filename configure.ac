@@ -397,49 +397,46 @@ dnl overrides the result of the test.
       AS_VAR_IF([acx_cv_have_pnetcdf], [yes],
         [AC_DEFINE([HAVE_NETCDF_PAR_PNETCDF],[1],
            [Defined to 1 if NetCDF parallel open supports NC_PNETCDF])])])
-   AS_IF([test x"$ENABLE_NC4" = xyes],
+dnl
+dnl If not both scales-ppm and yaxt are available, netcdf can only be used in
+dnl serial mode:
+   AS_IF([test x"$ENABLE_NC4" = xyes && test x"$enable_ppm" = xyes],
      [saved_CFLAGS=$CFLAGS
       CFLAGS="$CFLAGS $MPI_C_INCLUDE"
       AC_CHECK_HEADERS([netcdf_par.h],,,[AC_INCLUDES_DEFAULT
 @%:@include <netcdf.h>])
       AC_CHECK_DECL([MPI_Bcast],
-        [HAVE_PARALLEL_NC4=1],
+        [HAVE_PARALLEL_NC4=1
+         AC_CHECK_DECLS([nc_inq_format_extended],,
+           [AC_MSG_NOTICE([The supplied netCDF library does not support nc_inq_format_extended.])],
+           [AC_INCLUDES_DEFAULT
+@%:@include <netcdf.h>])
+         ACX_TLS_XLC_RETRY
+         AC_DEFINE([HAVE_PARALLEL_NC4],[1],
+           [netCDF library does support MPI parallel invocations])],
         [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
         [AC_INCLUDES_DEFAULT
 @%:@include <netcdf.h>
 @%:@ifdef HAVE_NETCDF_PAR_H
 @%:@include <netcdf_par.h>
 @%:@endif])
-      dnl if not both scales-ppm and yaxt are available, netcdf can only be
-      dnl used in serial mode
-      AS_IF([test x$enable_ppm != xyes],
-        [HAVE_PARALLEL_NC4=0])
-      AS_IF([test $HAVE_PARALLEL_NC4 -gt 0],
-        [AC_CHECK_DECLS([nc_inq_format_extended],,
-           [AC_MSG_NOTICE([The supplied netCDF library does not support nc_inq_format_extended.])],
-           [AC_INCLUDES_DEFAULT
-@%:@include <netcdf.h>])])
       CFLAGS=$saved_CFLAGS])
-  ],
+dnl
+   AC_SUBST([LIBRT], [''])
+   AC_CHECK_DECL([_POSIX_ASYNCHRONOUS_IO],
+     [saved_LIBS=$LIBS
+      AC_SEARCH_LIBS([aio_suspend], [rt],
+        [test "$ac_res" = "none required" || LIBRT=$ac_res])
+      LIBS=$saved_LIBS])],
+dnl
   [MPI_LAUNCH="`pwd`/util/serialrun"
    AC_SUBST([MPI_LAUNCH])])
-AS_IF([test $HAVE_PARALLEL_NC4 -gt 0],
-  [ACX_TLS_XLC_RETRY
-   AC_DEFINE([HAVE_PARALLEL_NC4],[1],
-             [netCDF library does support MPI parallel invocations])])
 AC_SUBST([HAVE_PARALLEL_NC4])
 AM_CONDITIONAL([USE_MPI],[test x"$USE_MPI" = xyes])
 AM_CONDITIONAL([USE_PPM_CORE],[test $enable_ppm = yes])
 AM_CONDITIONAL([HAVE_PARALLEL_NC4],[test $HAVE_PARALLEL_NC4 -gt 0])
 AC_SUBST([USE_MPI])
 AC_SUBST([ENABLE_MPI],[`test x"$enable_mpi" = xyes && echo true || echo false`])
-AC_SUBST([LIBRT], [''])
-AS_VAR_IF([USE_MPI], [yes],
-  [AC_CHECK_DECL([_POSIX_ASYNCHRONOUS_IO],
-     [saved_LIBS=$LIBS
-      AC_SEARCH_LIBS([aio_suspend], [rt],
-        [test "$ac_res" = "none required" || LIBRT=$ac_res])
-      LIBS=$saved_LIBS])])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
 #
