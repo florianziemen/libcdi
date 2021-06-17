@@ -306,25 +306,59 @@ dnl The configure script fails above if YAXT is not available:
       CFLAGS=$saved_CFLAGS
       LIBS=$saved_LIBS])
 
-   dnl parallel netCDF support still requires ScalES-PPM and YAXT to
-   dnl re-arrange the data when running with more than one collector
-   PKG_CHECK_MODULES([PPM_CORE],[scales-ppm-core],
-     [enable_ppm=yes
-      AC_DEFINE([HAVE_PPM_CORE],,
-        [ScalES PPM C core library is available])
-      saved_CPPFLAGS=$CPPFLAGS
-      CPPFLAGS="$CPPFLAGS $PPM_CORE_CFLAGS"
-      AC_CHECK_HEADERS(
-        [ppm/dist_array.h],
-        [HAVE_PPM_DIST_ARRAY=yes],,
-        [AC_INCLUDES_DEFAULT])
-      AC_SUBST([HAVE_PPM_DIST_ARRAY])
-      AM_SUBST_NOTMAKE([HAVE_PPM_DIST_ARRAY])
-      CPPFLAGS=$saved_CPPFLAGS
-     ],
-     [enable_ppm=no])
-   dnl
-   dnl NC_HAS_PNETCDF is useful when available to short-circuit some tests
+dnl Parallel netCDF support still requires ScalES-PPM and YAXT to re-arrange the
+dnl data when running with more than one collector.
+dnl
+dnl Set precious variables following the naming convention of ACX_C_PACKAGE:
+   AC_ARG_VAR([PPM_CORE_C_INCLUDE],
+     [specifically set flags to use when compiling sources using PPM_CORE ]dnl
+[includes.])dnl
+   AC_ARG_VAR([PPM_CORE_C_LIB],
+     [specifically set flags to use when linking PPM_CODE.])dnl
+dnl Prevent PKG_CHECK_MODULES from declaring package-specific precious
+dnl variables, which names do not follow our convention:
+   m4_pushdef([AC_ARG_VAR])dnl
+dnl PKG_CHECK_MODULES relies on ppm_core_CFLAGS and ppm_core_LIBS, which in our
+dnl case have names PPM_CORE_C_INCLUDE and PPM_CORE_C_LIB, respectively:
+   ppm_core_CFLAGS=$PPM_CORE_C_INCLUDE
+   ppm_core_LIBS=$PPM_CORE_C_LIB
+   PKG_CHECK_MODULES([ppm_core],[scales-ppm-core],
+     [PPM_CORE_C_INCLUDE=$ppm_core_CFLAGS
+      PPM_CORE_C_LIB=$ppm_core_LIBS], [:])
+   m4_popdef([AC_ARG_VAR])dnl
+   saved_CFLAGS=$CFLAGS
+   saved_LIBS=$LIBS
+   CFLAGS="$CFLAGS $MPI_C_INCLUDE"
+   LIBS="$LIBS $MPI_C_LIB"
+dnl The following is extracted from ACX_GENERIC_PACKAGE, which is expanded by
+dnl ACX_C_PACKAGE. We do not use the latter macro here to avoid introduction of
+dnl the '--with-ppm-core-XXX' configure options, which might be very confusing
+dnl since whatever pkg-config finds will be used instead.
+   ACX_LANG_CHECK_INCLUDE_PATHS_IFELSE([ppm/ppm.h],,
+     [PPM_CORE_C_INCLUDE=$acx_cv_c_include_ppm_ppm_h
+      ACX_OPTION_SEARCH_LIBS_MULTI([PPM_initialize], [scalesppmcore],
+        [PPM_CORE_C_LIB=$acx_cv_option_search_PPM_initialize_c
+         enable_ppm=yes
+         AC_DEFINE([HAVE_PPM_CORE],,[ScalES PPM C core library is available])
+         saved_CPPFLAGS=$CPPFLAGS
+         CPPFLAGS="$CPPFLAGS $PPM_CORE_C_INCLUDE"
+         AC_CHECK_HEADERS([ppm/dist_array.h],
+            [HAVE_PPM_DIST_ARRAY=yes],,
+            [AC_INCLUDES_DEFAULT])
+         CPPFLAGS=$saved_CPPFLAGS
+         AC_SUBST([HAVE_PPM_DIST_ARRAY])
+         AM_SUBST_NOTMAKE([HAVE_PPM_DIST_ARRAY])],
+        [AC_MSG_WARN([Cannot link to scales-ppm-core library.])],,
+        [$PPM_CORE_C_LIB])],
+     [AC_MSG_WARN([Include ppm/ppm.h not found or not compilable.])],,
+     [$PPM_CORE_C_INCLUDE],[[]])
+   CFLAGS=$saved_CFLAGS
+   LIBS=$saved_LIBS
+   AS_VAR_IF([enable_ppm], [no],
+     [PPM_CORE_C_INCLUDE=
+      PPM_CORE_C_LIB=])
+dnl
+dnl NC_HAS_PNETCDF is useful when available to short-circuit some tests
    AS_IF([test x"$ENABLE_NETCDF" = xyes],
      [AC_CHECK_HEADERS([netcdf_meta.h],,,[AC_INCLUDES_DEFAULT
 @%:@include <netcdf.h>])

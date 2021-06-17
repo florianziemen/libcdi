@@ -25,7 +25,7 @@ if CREATE_ISOC
 endif
 endif
 
-AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
+AM_CFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 
 libcdi_la_SOURCES = 	 \
 	async_worker.c   \
@@ -269,7 +269,7 @@ libcdipio_la_SOURCES += $(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
 endif
 endif
 
-libcdipio_la_LIBADD   = libcdi.la $(LIBRT) $(PPM_CORE_LIBS) $(YAXT_C_LIB) $(MPI_C_LIB)
+libcdipio_la_LIBADD   = libcdi.la $(LIBRT) $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(MPI_C_LIB)
 
 #
 #cdilib.c:
