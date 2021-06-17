@@ -230,13 +230,12 @@ dnl ACX_C_PACKAGE. We do not use the latter macro here to avoid introduction of
 dnl the '--with-yaxt-XXX' configure options, which might be very confusing since
 dnl whatever pkg-config finds will be used instead.
    ACX_LANG_CHECK_INCLUDE_PATHS_IFELSE([yaxt.h],,
-     [YAXT_C_INCLUDE=`echo "$acx_cv_c_include_yaxt_h" | sed -e 's/^ *//;s/ *$//'`],
-     [AC_MSG_FAILURE(
-        [Required include yaxt.h not found or not compilable.])],,
+     [YAXT_C_INCLUDE=$acx_cv_c_include_yaxt_h
+      ACX_OPTION_SEARCH_LIBS_MULTI([xt_initialized], [yaxt_c yaxt],
+        [YAXT_C_LIB=$acx_cv_option_search_xt_initialized_c],
+        [AC_MSG_FAILURE([Cannot link to yaxt.])],,[$YAXT_C_LIB])],
+     [AC_MSG_FAILURE([Required include yaxt.h not found or not compilable.])],,
      [$YAXT_C_INCLUDE],[[]])
-   ACX_OPTION_SEARCH_LIBS_MULTI([xt_initialized], [yaxt_c yaxt],,
-      [AC_MSG_FAILURE([Cannot link to yaxt.])],,[$YAXT_C_LIB])
-   YAXT_C_LIB=`echo "$acx_cv_option_search_xt_initialized_c" | sed -e 's/^ *//;s/ *$//'`
    CFLAGS=$saved_CFLAGS
    LIBS=$saved_LIBS
 dnl
@@ -258,7 +257,9 @@ dnl have names YAXT_FC_MOD and YAXT_FC_LIB, respectively:
         [YAXT_FC_MOD=$yaxt_CFLAGS
          YAXT_FC_LIB=$yaxt_LIBS], [:])
       m4_popdef([AC_ARG_VAR])dnl
+      saved_FCFLAGS=$FCFLAGS
       saved_LIBS=$LIBS
+      FCFLAGS="$FCFLAGS $MPI_FC_INCLUDE"
       LIBS="$LIBS $MPI_FC_LIB"
 dnl The following is extracted from ACX_F90_PACKAGE. We do not use the
 dnl aforementioned macro here to avoid introduction of the '--with-yaxt-XXX'
@@ -267,21 +268,24 @@ dnl finds will be used instead.
       AC_LANG_PUSH([Fortran])dnl
       ACX_SL_FC_CHECK_MOD_PATH_FLAG
       ACX_FORTRAN_CHECK_MOD_PATHS_IFELSE([yaxt],,
-        [YAXT_FC_MOD=$acx_cv_fortran_mod_yaxt],
+        [YAXT_FC_MOD=$acx_cv_fortran_mod_yaxt
+dnl The original FCFLAGS are already saved above:
+         FCFLAGS="$FCFLAGS $YAXT_FC_MOD"
+dnl Note that the following test must check for a function implemented in the
+dnl Fortran library, as well as for a function implemented in the C library and
+dnl available via C bindings:
+         ACX_OPTION_SEARCH_LIBS_MULTI([xt_initialized],[yaxt],
+           [YAXT_FC_LIB=$acx_cv_option_search_xt_initialized_fc],
+           [AC_MSG_FAILURE([Cannot link to yaxt.])],[[-lyaxt_c]],
+           [$YAXT_FC_LIB],
+           [[      use yaxt
+      logical is_initialized]],
+           [[      is_initialized = xt_initialized()
+      call xt_finalize()]])],
         [AC_MSG_FAILURE([Required module yaxt not found or not compilable.])],,
         [$YAXT_FC_MOD])
-      saved_FCFLAGS=$FCFLAGS
-      FCFLAGS="$YAXT_FC_MOD $FCFLAGS"
-      ACX_OPTION_SEARCH_LIBS_MULTI([xt_initialized],[yaxt],,
-        [AC_MSG_FAILURE([Cannot link to yaxt.])],[[-lyaxt_c]],
-        [$YAXT_FC_LIB],
-        [[      use yaxt
-      logical is_initialized]],
-        [[      is_initialized = xt_initialized()
-      call xt_finalize()]])
-      FCFLAGS=$saved_FCFLAGS
-      YAXT_FC_LIB=`echo "$acx_cv_option_search_xt_initialized_fc" | sed -e 's/^ *//;s/ *$//'`
       AC_LANG_POP([Fortran])dnl
+      FCFLAGS=$saved_FCFLAGS
       LIBS=$saved_LIBS])
 dnl The configure script fails above if YAXT is not available:
    AC_DEFINE([HAVE_YAXT],,[yaxt library is available])
