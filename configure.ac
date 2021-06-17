@@ -362,13 +362,18 @@ dnl NC_HAS_PNETCDF is useful when available to short-circuit some tests
    AS_IF([test x"$ENABLE_NETCDF" = xyes],
      [AC_CHECK_HEADERS([netcdf_meta.h],,,[AC_INCLUDES_DEFAULT
 @%:@include <netcdf.h>])
-      AS_IF([test "x$NC_CONFIG" != "x"],
-        [AC_MSG_CHECKING([parallel netcdf's pnetcdf support])
-         acx_temp=`$NC_CONFIG --has-pnetcdf`
-         AS_IF([test "x$acx_temp" = "xyes"],
-           [AC_DEFINE([HAVE_NETCDF_PAR_PNETCDF],[1],
-              [Defined to 1 if NetCDF parallel open supports NC_PNETCDF])])
-         AC_MSG_RESULT([$acx_temp])])])
+dnl The following test is relevant only for older versions of netCDF. Starting
+dnl version 4.3.3, netCDF provides the NC_HAS_PNETCDF macro and its value
+dnl overrides the result of the test.
+      AC_CACHE_CHECK([parallel netcdf's pnetcdf support],
+        [acx_cv_have_pnetcdf],
+        [acx_cv_have_pnetcdf=no
+         test "x$NC_CONFIG" != "x" && \
+         test "x$($NC_CONFIG --has-pnetcdf)" = "xyes" && \
+         acx_cv_have_pnetcdf=yes])
+      AS_VAR_IF([acx_cv_have_pnetcdf], [yes],
+        [AC_DEFINE([HAVE_NETCDF_PAR_PNETCDF],[1],
+           [Defined to 1 if NetCDF parallel open supports NC_PNETCDF])])])
    AS_IF([test x"$ENABLE_NC4" = xyes],
      [saved_CFLAGS=$CFLAGS
       CFLAGS="$CFLAGS $MPI_C_INCLUDE"
