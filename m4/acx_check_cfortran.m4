@@ -204,8 +204,7 @@ dnl
 AC_DEFUN([ACX_CHECK_CFORTRAN],
   [AC_CACHE_CHECK([if C externals constructed with cfortran.h work],
      [acx_cv_cfortran_works],
-     [acx_cv_cfortran_works=no
-      save_CPPFLAGS=$CPPFLAGS
+     [save_CPPFLAGS=$CPPFLAGS
       CPPFLAGS="-I]m4_ifval([$1],[$1],[$srcdir/include])[ $CPPFLAGS"
 dnl build C function
       AC_LANG_PUSH([C])
