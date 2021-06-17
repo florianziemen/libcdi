@@ -3,6 +3,8 @@ PROGRAM collectdata2003
   USE yaxt, ONLY: xt_initialize, xt_finalize, xt_idxlist, xt_idxstripes_new, &
        xt_idxlist_delete, xi => xt_int_kind, xt_stripe
   USE iso_c_binding, ONLY: c_int
+  USE mpi, ONLY: mpi_init, mpi_comm_rank, mpi_comm_size, mpi_barrier, &
+       mpi_finalize, mpi_comm_world, mpi_comm_null, mpi_success
 #endif
 
   IMPLICIT NONE
@@ -11,8 +13,6 @@ PROGRAM collectdata2003
   INCLUDE 'cdipio.inc'
 
 #ifdef USE_MPI
-  INCLUDE 'mpif.h'
-
   INTEGER, PARAMETER :: i4 = SELECTED_INT_KIND(9)
   INTEGER, PARAMETER :: i8 = SELECTED_INT_KIND(14)
 #endif
