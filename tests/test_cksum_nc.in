@@ -1,14 +1,9 @@
-#! /bin/sh
+#!@SHELL@
 
-set -e
+test 'x@ENABLE_NETCDF@' = xyes || exit 77
+
+prefix=${0##*/}
 format=nc
-if [ @ENABLE_NETCDF@ = yes ]; then
-  exec >test_cksum_$format.log 2>&1
-  ./cksum_write -f $format
-  ./cksum_read example.$format
-  \rm example.cksum example.$format
-  \rm test_cksum_$format.log
-else
-  # skip tests for unsupported formats
-  exit 77
-fi
+@builddir@/cksum_write -b ${prefix} -f ${format} || exit 1
+@builddir@/cksum_read ${prefix}.${format} ${prefix}.cksum || exit 1
+

@@ -1,37 +1,70 @@
-check_PROGRAMS=collectData collectDataNStreams
+noinst_PROGRAMS =
 
-AM_CPPFLAGS = -I$(top_srcdir)/src $(YAXT_C_INCLUDE)
-AM_FCFLAGS  = $(FPP_INCOPT)$(top_srcdir)/src $(MPI_FC_INCLUDE)
-AM_CFLAGS = $(MPI_C_INCLUDE)
+EXTRA_PROGRAMS =             \
+  collectDataNStreams_serial \
+  collectData_serial
 
-if USE_MPI
-check_PROGRAMS+=compareResourcesArray
-AM_FCFLAGS += $(FPP_DEFOPT)USE_MPI
+if ENABLE_MPI
+EXTRA_PROGRAMS +=              \
+  collectDataNStreams_parallel \
+  collectData_parallel         \
+  compareResourcesArray
+endif ENABLE_MPI
+
+if ENABLE_CF_INTERFACE
+EXTRA_PROGRAMS += collectData2003_serial
+if BUILD_PIO_FC_PROGRAMS
+EXTRA_PROGRAMS += collectData2003_parallel
+endif BUILD_PIO_FC_PROGRAMS
+endif ENABLE_CF_INTERFACE
+
+if with_example_programs
+noinst_PROGRAMS += $(EXTRA_PROGRAMS)
+endif with_example_programs
+examples: $(EXTRA_PROGRAMS)
+
+AM_CPPFLAGS = -I$(top_srcdir)/src
+AM_CFLAGS = $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
+
+AM_FCFLAGS =
+if ENABLE_CF_INTERFACE
+AM_FCFLAGS += $(FC_OPTINC)$(top_srcdir)/src
+endif ENABLE_CF_INTERFACE
+AM_FCFLAGS += $(YAXT_FC_MOD) $(MPI_FC_MOD)
+
+AM_LDFLAGS =
+if ENABLE_ALL_STATIC
+AM_LDFLAGS += -all-static
 endif
 
-if USE_FC
-check_PROGRAMS+=collectData2003
-endif
+LDADD = $(top_builddir)/src/libcdi.la
 
-collectData_SOURCES=collectData.c
+collectDataNStreams_serial_SOURCES = \
+  collectDataNStreams.c
 
-if USE_MPI
-LDADD=$(top_builddir)/src/libcdipio.la $(MPI_C_LIB)
-collectData2003_LDADD=$(top_builddir)/src/libcdipio.la $(YAXT_FC_LIB) $(MPI_FC_LIB)
-else
-LDADD=$(top_builddir)/src/libcdi.la
-collectData2003_LDADD=$(top_builddir)/src/libcdi.la
-endif
+collectDataNStreams_parallel_SOURCES = \
+  $(collectDataNStreams_serial_SOURCES)
+collectDataNStreams_parallel_CPPFLAGS = -DUSE_MPI $(AM_CPPFLAGS)
+collectDataNStreams_parallel_LDADD = $(top_builddir)/src/libcdipio.la
 
-collectData2003_SOURCES=collectData2003.F90
+collectData_serial_SOURCES = collectData.c
 
-collectDataNStreams_SOURCES = collectDataNStreams.c
+collectData_parallel_SOURCES = $(collectData_serial_SOURCES)
+collectData_parallel_CPPFLAGS = -DUSE_MPI $(AM_CPPFLAGS)
+collectData_parallel_LDADD = $(top_builddir)/src/libcdipio.la
 
 compareResourcesArray_SOURCES = compareResourcesArray.c
-#
-clean-local: clean-local-dirs
-.PHONY: clean-local-dirs
-clean-local-dirs:
+compareResourcesArray_LDADD = $(top_builddir)/src/libcdipio.la
+
+collectData2003_serial_SOURCES = collectData2003.F90
+
+collectData2003_parallel_SOURCES = \
+  $(collectData2003_serial_SOURCES)
+collectData2003_parallel_FCFLAGS = $(FC_DEFINE)USE_MPI $(AM_FCFLAGS)
+collectData2003_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(YAXT_FC_LIB) $(MPI_FC_LIB)
+
+clean-local:
+	-rm -f *.grb
 	-rm -rf *.dSYM
 
 # overrides to make regular compilations also use libtool
@@ -47,7 +80,4 @@ CXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
         $(LIBTOOLFLAGS) --mode=compile $(CXX) -static $(DEFS) \
         $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
         $(AM_CXXFLAGS) $(CXXFLAGS)
-PPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=compile $(FC) -static $(DEFS) \
-        $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
-        $(AM_FCFLAGS) $(FCFLAGS)
+PPFCCOMPILE = $(FCCOMPILE)

@@ -1,0 +1,11 @@
+#!@SHELL@
+
+pio_write_args='-p PIO_MPI -w 2'
+mpi_task_num=4
+. @builddir@/pio_write_run_parallel.test
+
+#
+# Local Variables:
+# mode: sh
+# End:
+#

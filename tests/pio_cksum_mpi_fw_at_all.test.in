@@ -1,0 +1,5 @@
+#!@SHELL@
+
+pio_write_args='-p PIO_MPI_FW_AT_ALL -w 2'
+mpi_task_num=5
+. @builddir@/pio_write_run_parallel.test

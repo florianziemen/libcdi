@@ -1,0 +1,12 @@
+#!@SHELL@
+
+suffix=nc4
+mpi_task_num=7
+pio_write_args='-w 3 -qtaxis-type=relative'
+. @builddir@/pio_write_run_parallel.test
+
+#
+# Local Variables:
+# mode: sh
+# End:
+#

@@ -1,88 +1,183 @@
-## Process this file with automake to produce Makefile.in
-#
-#TESTS = test_grib.sh
-TESTS = cksum_verify \
-	test_cksum_grib \
-	test_cksum_grib2 \
-	test_cksum_nc test_cksum_extra \
-	test_cksum_service test_cksum_nc2 test_cksum_nc4 test_cksum_ieg \
-	test_chunk_cksum \
-	calendar_test1 \
-	test_month_adjust \
-	pio_write_run pio_cksum_mpinonb pio_cksum_fpguard \
-	pio_cksum_asynch pio_cksum_writer \
-	pio_cksum_cdf \
-	pio_cksum_grb2 \
-	pio_cksum_mpi_fw_ordered \
-	pio_cksum_mpi_fw_at_all \
-	pio_cksum_mpi_fw_at_reblock \
-	test_resource_copy pio_write_deco2d_run \
-	test_f2003 test_cdf_transformation test_cdf_const \
-	test_table test_byteswap
+TESTS =                       \
+  calendar_test1              \
+  cksum_verify                \
+  pio_write_deco2d_run_serial \
+  pio_write_run_serial        \
+  test_byteswap               \
+  test_cdf_const              \
+  test_cdf_transformation     \
+  test_cksum_extra            \
+  test_cksum_grib             \
+  test_cksum_grib2            \
+  test_cksum_ieg              \
+  test_cksum_nc               \
+  test_cksum_nc2              \
+  test_cksum_nc4              \
+  test_cksum_nc_chunk         \
+  test_cksum_service          \
+  test_f2003                  \
+  test_month_adjust           \
+  test_resource_copy          \
+  test_table
 
-check_PROGRAMS = cksum_verify test_grib cksum_write cksum_read \
-	calendar_test1 \
-	test_month_adjust \
-	pio_write \
-	test_resource_copy cksum_write_chunk pio_write_deco2d test_table \
-	test_byteswap
+# MPI test must have prefix *.test:
+TESTS +=                             \
+  pio_cksum_asynch.test              \
+  pio_cksum_fpguard.test             \
+  pio_cksum_grb2.test                \
+  pio_cksum_mpi_fw_at_all.test       \
+  pio_cksum_mpi_fw_at_reblock.test   \
+  pio_cksum_mpi_fw_ordered.test      \
+  pio_cksum_mpinonb.test             \
+  pio_cksum_nc.test                  \
+  pio_cksum_nc2.test                 \
+  pio_cksum_nc4.test                 \
+  pio_cksum_writer.test              \
+  pio_write_deco2d_run_parallel.test \
+  pio_write_run_parallel.test        \
+  test_resource_copy_mpi_run.test
+
+if !with_concurrent_mpi_checks
+pio_cksum_fpguard.log: pio_cksum_asynch.log
+pio_cksum_grb2.log: pio_cksum_fpguard.log
+pio_cksum_mpi_fw_at_all.log: pio_cksum_grb2.log
+pio_cksum_mpi_fw_at_reblock.log: pio_cksum_mpi_fw_at_all.log
+pio_cksum_mpi_fw_ordered.log: pio_cksum_mpi_fw_at_reblock.log
+pio_cksum_mpinonb.log: pio_cksum_mpi_fw_ordered.log
+pio_cksum_nc.log: pio_cksum_mpinonb.log
+pio_cksum_nc2.log: pio_cksum_nc.log
+pio_cksum_nc4.log: pio_cksum_nc2.log
+pio_cksum_writer.log: pio_cksum_nc4.log
+pio_write_deco2d_run_parallel.log: pio_cksum_writer.log
+pio_write_run_parallel.log: pio_write_deco2d_run_parallel.log
+test_resource_copy_mpi_run.log: pio_write_run_parallel.log
+endif !with_concurrent_mpi_checks
+
+test_PROGRAMS_ =          \
+  calendar_test1          \
+  cksum_read              \
+  cksum_verify            \
+  cksum_write             \
+  cksum_write_chunk       \
+  pio_write_deco2d_serial \
+  pio_write_serial        \
+  test_byteswap           \
+  test_month_adjust       \
+  test_resource_copy      \
+  test_table
 
 if ENABLE_NETCDF
-check_PROGRAMS += test_cdf_write test_cdf_read
+test_PROGRAMS_ += \
+  test_cdf_read   \
+  test_cdf_write
 endif
 
-#
-test_grib_SOURCES = test_grib.c
-cksum_verify_SOURCES = cksum_verify.c
-cksum_write_SOURCES = cksum_write.c simple_model_helper.h simple_model_helper.c
-cksum_write_chunk_SOURCES = cksum_write_chunk.c simple_model_helper.h simple_model_helper.c
-cksum_read_SOURCES = cksum_read.c \
-	var_cksum.c var_cksum.h \
-	stream_cksum.c stream_cksum.h \
-	ensure_array_size.h ensure_array_size.c
-calendar_test1_SOURCES = calendar_test1.c
-test_month_adjust_SOURCES = test_month_adjust.c
-pio_write_SOURCES = pio_write.c pio_write.h simple_model.c \
-	simple_model_helper.h simple_model_helper.c \
-	pio_write_setup_grid.h pio_write_setup_grid.c
-pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
-	simple_model_helper.h simple_model_helper.c \
-	pio_write_setup_grid.h pio_write_setup_grid.c
-test_resource_copy_SOURCES = test_resource_copy.c
-test_resource_copy_LDADD = $(UUID_C_LIB) ../src/libcdiresunpack.la $(LDADD)
-test_resource_copy_mpi_SOURCES = test_resource_copy_mpi.c
-test_cdf_write_SOURCES = test_cdf_write.c \
-	simple_model_helper.h simple_model_helper.c
-test_cdf_read_SOURCES = test_cdf_read.c
-test_table_SOURCES = test_table.c
-test_byteswap_SOURCES = test_byteswap.c
-#
-AM_CFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
-if USE_MPI
-pio_write_LDADD = ../src/libcdipio.la $(UUID_C_LIB) $(MPI_C_LIB)
-pio_write_deco2d_LDADD = ../src/libcdipio.la $(UUID_C_LIB) $(MPI_C_LIB)
-TESTS +=  test_resource_copy_mpi_run
-check_PROGRAMS += test_resource_copy_mpi
-test_resource_copy_mpi_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
-else
-pio_write_LDADD = $(LDADD) $(UUID_C_LIB)
-pio_write_deco2d_LDADD = $(LDADD) $(UUID_C_LIB)
-test_resource_copy_mpi_LDADD = $(LDADD) $(UUID_C_LIB)
-endif
+if ENABLE_MPI
+test_PROGRAMS_ +=           \
+  pio_write_deco2d_parallel \
+  pio_write_parallel        \
+  test_resource_copy_mpi
+endif ENABLE_MPI
 
-LDADD = ../src/libcdi.la
+if with_on_demand_check_programs
+check_PROGRAMS = $(test_PROGRAMS_)
+else !with_on_demand_check_programs
+noinst_PROGRAMS = $(test_PROGRAMS_)
+endif !with_on_demand_check_programs
+
 AM_CPPFLAGS = -I$(top_srcdir)/src
-#
-EXTRA_DIST = test_cdf_write.c test_cdf_read.c
-#
-AUTOMAKE_OPTIONS = color-tests
-#
-clean-local: clean-local-dirs
-	-rm -f *~ *.grb *.grb2 *.nc *.nc2 *.nc4 *.srv *.svc *.ext *.cksum *.ieg *.log
+AM_CFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 
-.PHONY: clean-local-dirs
-clean-local-dirs:
-	-rm -rf test_cdf_const.d *.dSYM
+AM_LDFLAGS =
+if ENABLE_ALL_STATIC
+AM_LDFLAGS += -all-static
+endif
+
+LDADD = $(top_builddir)/src/libcdi.la
+
+calendar_test1_SOURCES = \
+  calendar_test1.c
+
+cksum_read_SOURCES =  \
+  cksum_read.c        \
+  ensure_array_size.c \
+  ensure_array_size.h \
+  stream_cksum.c      \
+  stream_cksum.h      \
+  var_cksum.c         \
+  var_cksum.h
+
+cksum_verify_SOURCES = \
+  cksum_verify.c
+
+cksum_write_SOURCES =   \
+  cksum_write.c         \
+  simple_model_helper.c \
+  simple_model_helper.h
+
+cksum_write_chunk_SOURCES = \
+  cksum_write_chunk.c       \
+  simple_model_helper.c     \
+  simple_model_helper.h
+
+pio_write_deco2d_serial_SOURCES = \
+  deco2d_model.c                  \
+  pio_write.c                     \
+  pio_write.h                     \
+  pio_write_setup_grid.c          \
+  pio_write_setup_grid.h          \
+  simple_model_helper.c           \
+  simple_model_helper.h
+
+pio_write_serial_SOURCES = \
+  pio_write.c              \
+  pio_write.h              \
+  pio_write_setup_grid.c   \
+  pio_write_setup_grid.h   \
+  simple_model.c           \
+  simple_model_helper.c    \
+  simple_model_helper.h
+
+test_byteswap_SOURCES = \
+  test_byteswap.c
+
+test_month_adjust_SOURCES = \
+  test_month_adjust.c
+
+test_resource_copy_SOURCES = \
+  test_resource_copy.c
+test_resource_copy_LDADD = $(top_builddir)/src/libcdiresunpack.la
+
+test_table_SOURCES = \
+  test_table.c
+
+test_cdf_read_SOURCES = \
+  test_cdf_read.c
+
+test_cdf_write_SOURCES = \
+  simple_model_helper.c  \
+  simple_model_helper.h  \
+  test_cdf_write.c
+
+pio_write_deco2d_parallel_SOURCES =  \
+  $(pio_write_deco2d_serial_SOURCES)
+pio_write_deco2d_parallel_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_MPI
+pio_write_deco2d_parallel_LDADD = $(top_builddir)/src/libcdipio.la
+
+pio_write_parallel_SOURCES =  \
+  $(pio_write_serial_SOURCES)
+pio_write_parallel_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_MPI
+pio_write_parallel_LDADD = $(top_builddir)/src/libcdipio.la
+
+test_resource_copy_mpi_SOURCES = \
+  test_resource_copy_mpi.c
+test_resource_copy_mpi_LDADD = $(top_builddir)/src/libcdipio.la
+
+clean-local:
+	-rm -f *.cksum *.ext *.grb *.grb2 *.ieg *.nc *.nc2 *.nc4 *.stderr *.stdout *.svc
+	-rm -rf *.dSYM
+
+AUTOMAKE_OPTIONS = color-tests
 
 # overrides to make regular compilations also use libtool
 # static because the libtool libraries in this directory are meant to
@@ -97,7 +192,4 @@ CXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
         $(LIBTOOLFLAGS) --mode=compile $(CXX) -static $(DEFS) \
         $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
         $(AM_CXXFLAGS) $(CXXFLAGS)
-PPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=compile $(FC) -static $(DEFS) \
-        $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
-        $(AM_FCFLAGS) $(FCFLAGS)
+PPFCCOMPILE = $(FCCOMPILE)
