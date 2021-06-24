@@ -544,7 +544,6 @@ dnl If scales-ppm is not available, netcdf can only be used in serial mode:
 [nc_inq_format_extended.])],
            [AC_INCLUDES_DEFAULT
 @%:@include <netcdf.h>])
-         ACX_TLS_XLC_RETRY
          AC_DEFINE([HAVE_PARALLEL_NC4], [1],
            [netCDF library does support MPI parallel invocations])],
         [AC_MSG_WARN([the supplied netCDF library does not support MPI ]dnl
@@ -554,7 +553,10 @@ dnl If scales-ppm is not available, netcdf can only be used in serial mode:
 @%:@ifdef HAVE_NETCDF_PAR_H
 @%:@include <netcdf_par.h>
 @%:@endif])
-      CFLAGS=$saved_CFLAGS])
+      CFLAGS=$saved_CFLAGS
+dnl WARNING: the following macro overwrites saved_CFLAGS shell variable and
+dnl modifies CFLAGS:
+      ACX_TLS_XLC_RETRY])
 
 dnl Check for librt:
    AC_SUBST([LIBRT], [''])
