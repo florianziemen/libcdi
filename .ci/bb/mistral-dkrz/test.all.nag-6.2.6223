@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+script_dir=$(cd "$(dirname "$0")"; pwd)
+top_srcdir=$(cd "${script_dir}/../../.."; pwd)
+
+. "${script_dir}/utils.sh"
+init_nag626223
+
+# Use GCC from the path when compiling/linking Fortran code:
+FCFLAGS="-Wc=$(which gcc)"
+
+# MPI library is built with -kind=byte, therefore we have to specify it here:
+FCFLAGS+=' -g -kind=byte'
+
+"${top_srcdir}/configure" \
+--enable-cf-interface \
+--enable-iso-c-interface \
+--enable-mpi \
+--enable-option-checking=fatal \
+--with-eccodes="${ECCODES_ROOT}" \
+--with-netcdf="${NETCDF_ROOT}" \
+CC="${MPICC}" \
+FC="${MPIFC}" \
+FCFLAGS="${FCFLAGS}" \
+MPI_LAUNCH="$(which "${MPI_LAUNCH%% *}") ${MPI_LAUNCH#* }" \
+PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
+
+make -j8
+
+make -j8 check | tee check.log
+
+check_all_tests_passed check.log
