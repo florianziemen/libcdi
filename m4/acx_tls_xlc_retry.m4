@@ -35,6 +35,15 @@ dnl LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 dnl NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 dnl SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 dnl
+dnl _ACX_TLS_NEWFLAG run AX_TLS with compiler option
+m4_define([_ACX_TLS_RETRY],
+  [saved_CFLAGS=$CFLAGS
+   $2
+   AS_IF([test x"$CFLAGS" = x"$saved_CFLAGS"],
+     [ac_cv_tls=none],
+     [AC_MSG_NOTICE([retrying with $1 added to CFLAGS])
+      AS_UNSET([ac_cv_tls])
+      AX_TLS(,[CFLAGS=$saved_CFLAGS])])])
 dnl
 dnl ACX_TLS_XLC_RETRY([ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
 dnl
@@ -50,24 +59,26 @@ b
 : print
 p
 }'`
-   AS_IF([test x"$ac_cv_tls" = x],
-       [ac_cv_tls=none],
-     [test "$ac_cv_tls" -gt 7],
-       [saved_CFLAGS=$CFLAGS
-        CFLAGS=`echo "$CFLAGS" | sed -n '/.*-qtls\(=@<:@^ @:>@*\)\{0,1\}/{
+     AS_IF([test x"$ac_cv_tls" = x],
+       [ac_cv_tls=`$CC -V | sed -n '/^pgcc /{
+s/^pgcc \([0-9][0-9.]*\).*/\1/
+p
+}'`
+# pgcc 18.1 and newer support TLS if switched to C11 mode
+        AS_VERSION_COMPARE([$ac_cv_tls],[18.9],
+          [ac_cv_tls=none],[ac_cv_tls=none],
+          [_ACX_TLS_RETRY([-c11],
+             [AS_CASE([" $CFLAGS "],[ -c11 ],,[CFLAGS="$CFLAGS -c11"])])])],
+       [test "$ac_cv_tls" -gt 7],
+       [# unless the user already set the -qtls option, add it and retry test
+        _ACX_TLS_RETRY([-qtls=initial-exec],[CFLAGS=`echo "$CFLAGS" | sed -n '/.*-qtls\(=@<:@^ @:>@*\)\{0,1\}/{
 p
 q
 }
 s/$/ -qtls=initial-exec/
 p
 q
-'`
-dnl unless the user already set the -qtls option, add it and retry test
-       AS_IF([test x"$CFLAGS" = x"$saved_CFLAGS"],
-             [ac_cv_tls=none],
-             [AC_MSG_NOTICE([retrying with -qtls=initial-exec added to CFLAGS])
-              AS_UNSET([ac_cv_tls])
-              AX_TLS(,[CFLAGS=$saved_CFLAGS])])
+'`])
 ],[ac_cv_tls=none])])
    m4_ifnblank([$1$2],
      [AS_IF([test "$ac_cv_tls" != "none"],

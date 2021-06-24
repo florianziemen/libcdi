@@ -76,12 +76,17 @@ AC_DEFUN([ACX_SL_FC_MOD_SUFFIX],
      ])
      break
    done
-   rm -f conftest* CONFTEST*
+   rm -f conftest_module* CONFTEST_MODULE*
+dnl Some Fortran compilers create module files not in the current working directory but
+dnl in the directory with the object file, therefore we try to delete everything:
+   AS_IF([expr "$ac_compile" : '.*/libtool --mode=compile' >/dev/null],
+     [AS_IF([test -n "$objdir"],
+        [rm -f "$objdir"/conftest_module* "$objdir"/CONFTEST_MODULE*])])
    AC_LANG_POP([Fortran])])
 dnl
    AC_MSG_CHECKING([for suffix of module files])
    ac_fc_mod_uppercase=no
-   AS_CASE(["$acx_cv_fc_mod_name"],
+   AS_CASE([$acx_cv_fc_mod_name],
      [conftest_module.$FCMODEXT], [:],
      [CONFTEST_MODULE.$FCMODEXT], [ac_fc_mod_uppercase=yes],
      [conftest_module.mod], [FCMODEXT=mod],
