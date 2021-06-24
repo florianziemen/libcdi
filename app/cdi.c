@@ -905,7 +905,7 @@ int main(int argc, char *argv[])
 	  const int vtime = taxisInqVtime(taxisID1);
 
 	  if ( Debug )
-	    fprintf(stdout, "tsID = %d nrecs = %d date = %lld time = %d\n", tsID, nrecs, vdate, vtime);
+	    fprintf(stdout, "tsID = %d nrecs = %d date = %ld time = %d\n", tsID, nrecs, vdate, vtime);
 
 	  if ( Record )
 	    {
