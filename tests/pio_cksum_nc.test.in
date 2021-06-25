@@ -4,6 +4,7 @@ suffix=nc
 mpi_task_num=5
 pio_write_args='-w 2 -qtaxis-type=relative'
 . @builddir@/pio_write_run_parallel.test
+( . @builddir@/pio_write_dist_array.test ) || test $? -eq 77
 
 #
 # Local Variables:
