@@ -43,22 +43,22 @@ collectDataNStreams_serial_SOURCES = collectDataNStreams.c
 
 collectDataNStreams_parallel_SOURCES = $(collectDataNStreams_serial_SOURCES)
 collectDataNStreams_parallel_CPPFLAGS = -DUSE_MPI $(AM_CPPFLAGS)
-collectDataNStreams_parallel_LDADD = $(top_builddir)/src/libcdipio.la
+collectDataNStreams_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 collectData_serial_SOURCES = collectData.c
 
 collectData_parallel_SOURCES = $(collectData_serial_SOURCES)
 collectData_parallel_CPPFLAGS = -DUSE_MPI $(AM_CPPFLAGS)
-collectData_parallel_LDADD = $(top_builddir)/src/libcdipio.la
+collectData_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 compareResourcesArray_SOURCES = compareResourcesArray.c
-compareResourcesArray_LDADD = $(top_builddir)/src/libcdipio.la
+compareResourcesArray_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 collectData2003_serial_SOURCES = collectData2003.F90
 
 collectData2003_parallel_SOURCES = $(collectData2003_serial_SOURCES)
 collectData2003_parallel_FCFLAGS = $(FC_DEFINE)USE_MPI $(AM_FCFLAGS)
-collectData2003_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(YAXT_FC_LIB) $(MPI_FC_LIB)
+collectData2003_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_FC_LIB) $(MPI_FC_LIB)
 
 clean-local:
 	-rm -f *.grb
