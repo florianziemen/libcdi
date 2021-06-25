@@ -157,15 +157,15 @@ test_cdf_write_SOURCES = \
 pio_write_deco2d_parallel_SOURCES = \
   $(pio_write_deco2d_serial_SOURCES)
 pio_write_deco2d_parallel_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_MPI
-pio_write_deco2d_parallel_LDADD = $(top_builddir)/src/libcdipio.la
+pio_write_deco2d_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 pio_write_parallel_SOURCES = \
   $(pio_write_serial_SOURCES)
 pio_write_parallel_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_MPI
-pio_write_parallel_LDADD = $(top_builddir)/src/libcdipio.la
+pio_write_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 test_resource_copy_mpi_SOURCES = test_resource_copy_mpi.c
-test_resource_copy_mpi_LDADD = $(top_builddir)/src/libcdipio.la
+test_resource_copy_mpi_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 clean-local:
 	-rm -f *.grb *.grb2 *.nc *.nc2 *.nc4 *.srv *.ext *.cksum *.ieg *.stderr *.stdout
