@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -eu
+
+script_dir=$(cd "$(dirname "$0")"; pwd)
+top_srcdir=$(cd "${script_dir}/../../.."; pwd)
+
+. "${script_dir}/utils.sh"
+init_pgi2011
+
+"${top_srcdir}/configure" \
+--enable-cf-interface \
+--enable-iso-c-interface \
+--enable-option-checking=fatal \
+--with-netcdf \
+CC="${CC}" \
+FC="${FC}" \
+
+make -j8
+
+make -j8 check
+
+# TODO: install YAXT and PPM and enable building with MPI:
+# set -o pipefail
+# --enable-mpi
+# MPI_LAUNCH="$(which "${MPI_LAUNCH%% *}") ${MPI_LAUNCH#* }"
+# PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
+# make -j8 check | tee check.log
+# check_all_tests_passed check.log
