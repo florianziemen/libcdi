@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -eu
+
+script_dir=$(cd "$(dirname "$0")"; pwd)
+top_srcdir=$(cd "${script_dir}/../../.."; pwd)
+
+. "${script_dir}/utils.sh"
+init_gcc640
+
+# The configure wrappers of ICON export LD_LIBRARY_PATH:
+export LD_LIBRARY_PATH="${NETCDF_ROOT}/lib:${GRIBAPI_ROOT}/lib:${LD_LIBRARY_PATH-}"
+
+"${top_srcdir}/configure" \
+--disable-cdi-app \
+--disable-cf-interface \
+--disable-maintainer-mode \
+--disable-mpi \
+--disable-shared \
+--enable-cgribex \
+--enable-grib \
+--enable-iso-c-interface \
+--enable-option-checking=fatal \
+--enable-static \
+--with-grib-api="${GRIBAPI_ROOT}" \
+--with-netcdf \
+--without-eccodes \
+--without-threads \
+CC="${MPICC}" \
+CFLAGS='-g -march=native -mpc64 -O2' \
+CPPFLAGS="-I${NETCDF_ROOT}/include -I${GRIBAPI_ROOT}/include" \
+CXX=no \
+F77=no \
+FC="${MPIFC}" \
+FCFLAGS='-std=f2008 -fmodule-private -fimplicit-none -fmax-identifier-length=63 -Wall -Wcharacter-truncation -Wconversion -Wunderflow -Wunused-parameter -Wno-surprising -fall-intrinsics -g -march=native -mpc64' \
+LDFLAGS="-L${NETCDF_ROOT}/lib -L${GRIBAPI_ROOT}/lib" \
+LIBS='-lgrib_api -lnetcdf' \
+MPI_LAUNCH="$(which "${MPI_LAUNCH%% *}") ${MPI_LAUNCH#* }" \
+ac_cv_func_uuid_create=no \
+ac_cv_lib_uuid_uuid_generate=no \
+acx_cv_have_libnc_dap=no \
+acx_cv_have_nc4hdf5=no \
+acx_cv_have_netcdf2=yes \
+acx_cv_have_netcdf4=yes
+
+make -j8
+
+make -j8 check
