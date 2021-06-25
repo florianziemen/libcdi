@@ -5,6 +5,7 @@ mpi_task_num=8
 suffix=grb2
 
 . ./pio_write_run_parallel.test
+( . ./pio_write_dist_array.test ) || test $? -eq 77
 #
 # Local Variables:
 # mode: sh
