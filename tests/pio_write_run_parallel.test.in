@@ -48,10 +48,6 @@ for variation in "" $variations ; do
   test_variation "$variation"
 done
 
-if test 'x@HAVE_PPM_DIST_ARRAY@' = xyes; then
-  test_variation "-qcreate-curvilinear-grid -quse-dist-grid"
-fi
-
 #
 # Local Variables:
 # mode: sh

@@ -34,6 +34,7 @@ TESTS += \
   pio_cksum_nc4.test \
   pio_cksum_writer.test \
   pio_write_deco2d_run_parallel.test \
+  pio_write_dist_array.test \
   pio_write_run_parallel.test \
   test_resource_copy_mpi_run.test
 
@@ -49,7 +50,8 @@ pio_cksum_nc2.log: pio_cksum_nc.log
 pio_cksum_nc4.log: pio_cksum_nc2.log
 pio_cksum_writer.log: pio_cksum_nc4.log
 pio_write_deco2d_run_parallel.log: pio_cksum_writer.log
-pio_write_run_parallel.log: pio_write_deco2d_run_parallel.log
+pio_write_dist_array.log: pio_write_deco2d_run_parallel.log
+pio_write_run_parallel.log: pio_write_dist_array.log
 test_resource_copy_mpi_run.log: pio_write_run_parallel.log
 endif !with_concurrent_mpi_checks
 
