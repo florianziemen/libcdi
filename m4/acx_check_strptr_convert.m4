@@ -91,6 +91,7 @@ end program conftest])],
 m4_ifval([$1],[$1])],
      [AC_MSG_RESULT([no])
 m4_ifval([$2],[$2])])
+   rm -f conftest_mod* CONFTEST_MOD*
    AC_LANG_POP([Fortran])])
 
 dnl
