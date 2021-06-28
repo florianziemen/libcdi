@@ -1,0 +1,40 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+script_dir=$(cd "$(dirname "$0")"; pwd)
+top_srcdir=$(cd "${script_dir}/../../.."; pwd)
+
+. "${script_dir}/utils.sh"
+init_pgi2011
+
+# The configure script does not check the 'lib64' subdirectory, therefore we
+# run it with '--with-eccodes' and the following flags. Note that fixing this
+# in the configure script might be tricky: the 'lib64' subdirectory should be
+# checked first but if it does not exist or does not contain the library, we
+# might end up linking to a library from the linker's default search path
+# (e.g. /usr/lib) instead of the one from "$with_eccodes/lib" because
+# "-L${with_eccodes}/lib64" would be ignored in that case:
+CPPFLAGS="-I${ECCODES_ROOT}/include"
+LDFLAGS="-L${ECCODES_ROOT}/lib64"
+
+"${top_srcdir}/configure" \
+--enable-cf-interface \
+--enable-iso-c-interface \
+--enable-mpi \
+--enable-option-checking=fatal \
+--with-eccodes \
+--with-netcdf \
+CC="${CC}" \
+CPPFLAGS="${CPPFLAGS}" \
+FC="${FC}" \
+LDFLAGS="${LDFLAGS}" \
+MPI_LAUNCH="$(which "${MPI_LAUNCH%% *}") ${MPI_LAUNCH#* }" \
+PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig:${PKG_CONFIG_PATH}"
+
+make -j8
+
+make -j8 check | tee check.log
+
+check_all_tests_passed check.log
