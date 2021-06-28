@@ -110,10 +110,13 @@ init_cray1100()
   FC=ftn
   MPI_LAUNCH='srun -p debug -C gpu -A d56'
 
-#  GRIBAPI_ROOT='N/A'
-#  NETCDF_ROOT='none needed'
-#  PPM_ROOT='N/A'
-#  YAXT_ROOT='N/A'
+  ECCODES_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/eccodes-20.20.0-cray11'
+  PPM_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/ppm-1.0.6-cray11'
+  YAXT_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/yaxt-0.9.0-cray11'
+
+  # Here we fix a never-ending story with Libtool overlinkning, absence of
+  # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
+  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib64:${LD_LIBRARY_PATH-}"
 }
 
 #
@@ -129,10 +132,14 @@ init_pgi2011()
   FC=ftn
   MPI_LAUNCH='srun -p debug -C gpu -A d56'
 
-#  GRIBAPI_ROOT='N/A'
-#  NETCDF_ROOT='none needed'
-#  PPM_ROOT='N/A'
-#  YAXT_ROOT='N/A'
+  ECCODES_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/eccodes-20.20.0-pgi20'
+  PPM_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/ppm-1.0.6-pgi20'
+  # YAXT 0.9.0 cannot be built with PGI 20.1.1:
+  YAXT_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/yaxt-0.7.0-p1-pgi20'
+
+  # Here we fix a never-ending story with Libtool overlinkning, absence of
+  # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
+  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib64:${LD_LIBRARY_PATH-}"
 }
 
 #
