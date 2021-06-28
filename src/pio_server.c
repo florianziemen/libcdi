@@ -1499,12 +1499,22 @@ planPasses(const struct streamMapping *mapping,
        * recordAggLim data bytes, but use at least one, unless none
        * remain */
       size_t firstRecordOfPass = 0, curRecord;
+#if defined(__PGI) && __PGIC__ == 20
+      /* we need the following workaround because pggpp2 fails to produce
+       * LLVM IR assembly file with -O2 optimization level */
+      struct passPlan* passes = NULL;
+#else
       struct passPlan (*passes)[collSize] = NULL;
+#endif
       do
         {
           size_t taskBegin = firstRecordOfPass;
           curRecord = firstRecordOfPass - 1;
+#if defined(__PGI) && __PGIC__ == 20
+          passes = Realloc(passes, sizeof (*passes) * collSize * (numPasses + 1));
+#else
           passes = Realloc(passes, sizeof (*passes) * (numPasses + 1));
+#endif
           for (size_t rank = 0; rank < collSize; ++rank)
             {
               size_t recordAggBufSize = 0;
@@ -1516,7 +1526,11 @@ planPasses(const struct streamMapping *mapping,
               if (curRecord == taskBegin - 1
                   && curRecord + 1 < numWrittenRecords)
                 ++curRecord;
+#if defined(__PGI) && __PGIC__ == 20
+              passes[collSize * numPasses + rank] = (struct passPlan){
+#else
               passes[numPasses][rank] = (struct passPlan){
+#endif
                 .recordAggStart = (unsigned)taskBegin,
                 .recordAggEnd = (unsigned)curRecord,
                 .varStart = writtenRecords[taskBegin].varID,
@@ -1527,7 +1541,11 @@ planPasses(const struct streamMapping *mapping,
           ++numPasses, firstRecordOfPass = curRecord + 1;
         }
       while (curRecord + 1 < numWrittenRecords);
+#if defined(__PGI) && __PGIC__ == 20
+      *passes_ = (struct passPlan (*)[])passes;
+#else
       *passes_ = passes;
+#endif
     }
   Free(recordDataSizePfxSums);
   return numPasses;
