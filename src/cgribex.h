@@ -230,8 +230,8 @@ int   gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sb
 int   gribOpen(const char *filename, const char *mode);
 void  gribClose(int fileID);
 
-int   gribRead(int fileID, unsigned char *buffer, size_t *buffersize);
-int   gribWrite(int fileID, unsigned char *buffer, size_t buffersize);
+int   gribRead(int fileID, void *buffer, size_t *buffersize);
+int   gribWrite(int fileID, void *buffer, size_t buffersize);
 off_t gribGetPos(int fileID);
 size_t gribGetSize(int fileID);
 int   gribCheckSeek(int fileID, long *offset, int *version);
