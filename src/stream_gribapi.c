@@ -1473,7 +1473,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 #undef gribWarning
 #endif
 
-int gribapiDecode(void *gribbuffer, size_t gribsize, double *data, size_t gridsize,
+int gribapiDecode(void *gribbuffer, size_t gribsize, void *data, size_t gridsize,
 		  int unreduced, size_t *nmiss, double missval)
 {
   int status = 0;
@@ -1502,7 +1502,7 @@ int gribapiDecode(void *gribbuffer, size_t gribsize, double *data, size_t gridsi
   if ( gridsize != datasize )
     Error("Internal problem: gridsize(%zu) != datasize(%zu)!", gridsize, datasize);
   size_t dummy = datasize;
-  GRIB_CHECK(grib_get_double_array(gh, "values", data, &dummy), 0);
+  GRIB_CHECK(grib_get_double_array(gh, "values", (double*)data, &dummy), 0);
 
   long lpar;
   GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
@@ -2892,7 +2892,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
 #endif //HIRLAM_EXTENSIONS
 
 static
-void gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const double *data)
+void gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const void *data)
 {
 #ifndef HIRLAM_EXTENSIONS
   (void)data;
@@ -2952,7 +2952,7 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const doubl
 
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int64_t vdate, int vtime, int tsteptype, int numavg,
-		     size_t datasize, const double *data, size_t nmiss, void **gribbuffer, size_t *gribbuffersize,
+		     size_t datasize, const void *data, size_t nmiss, void **gribbuffer, size_t *gribbuffersize,
 		     int comptype, void *gribContainer)
 {
   void *dummy = NULL;
@@ -3129,7 +3129,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   gribapiSetExtMode(gh, gridID, datasize, data);
 
-  GRIB_CHECK(grib_set_double_array(gh, "values", data, datasize), 0);
+  GRIB_CHECK(grib_set_double_array(gh, "values", (const double*)data, datasize), 0);
 
   // get the size of coded message
   size_t recsize = 0;

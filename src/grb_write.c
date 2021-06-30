@@ -135,7 +135,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
       if ( cdiGribChangeParameterID.active )
         {
           // Even if you are stream-copy records you might need to change a bit of grib-header !
-          void *gh = (void*)grib_handle_new_from_message(NULL, (void*) gribbuffer, recsize);
+          grib_handle *gh = grib_handle_new_from_message(NULL, (void*) gribbuffer, recsize);
           gribapiChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype, cdiGribChangeParameterID.lev);
           grib_handle_delete(gh);
           cdiGribChangeParameterID.active = false; // after grib attributes have been changed turn it off again

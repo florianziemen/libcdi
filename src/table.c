@@ -312,8 +312,8 @@ int tableRead(const char *tablefile)
   FILE *tablefp = fopen(tablefile, "r");
   if ( tablefp == NULL ) return tableID;
 
-  char *tablename = strrchr(tablefile, '/');
-  if ( tablename == 0 ) tablename = (char *) tablefile;
+  const char *tablename = strrchr(tablefile, '/');
+  if ( tablename == 0 ) tablename = tablefile;
   else                  tablename++;
 
   tableID = tableDef(-1, 0, tablename);

@@ -83,7 +83,7 @@ int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
 	  void *buffer = Malloc(igribsize);
 	  memcpy(buffer, gribbuffer, igribsize);
 
-	  ogribsize = (size_t)gribUnzip(gribbuffer, (long)unzipsize, buffer, (long)igribsize);
+	  ogribsize = (size_t)gribUnzip((unsigned char*)gribbuffer, (long)unzipsize, (unsigned char*)buffer, (long)igribsize);
 
           Free(buffer);
 
@@ -112,7 +112,7 @@ typedef struct DecodeArgs {
 static
 int grb_decode_record(void *untypedArgs)
 {
-  DecodeArgs *args = untypedArgs;
+  DecodeArgs *args = (DecodeArgs *)untypedArgs;
   *args->outZip = grbUnzipRecord(args->gribbuffer, &args->recsize);
   grbDecode(args->filetype, args->memtype, args->cgribexp, args->gribbuffer, args->recsize, args->data, args->gridsize,
             args->unreduced, &args->nmiss, args->missval);
@@ -212,7 +212,7 @@ void grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *dat
 
       if (!jobs)
         {
-          jobs = malloc(workerCount*sizeof*jobs);
+          jobs = (JobDescriptor *)malloc(workerCount*sizeof*jobs);
           streamptr->jobs = jobs;
           for (int i = 0; i < workerCount; i++) jobs[i].args.recID = -1;
           if (AsyncWorker_init(&jobManager, workerCount)) xabort("error while trying to start worker threads");

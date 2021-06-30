@@ -1101,7 +1101,7 @@ void streamClose(int streamID)
     }
 
   if (streamptr->jobs) free(streamptr->jobs);
-  if (streamptr->jobManager) AsyncWorker_finalize(streamptr->jobManager);
+  if (streamptr->jobManager) AsyncWorker_finalize((AsyncManager *)streamptr->jobManager);
 
   stream_delete_entry(streamptr);
 }
