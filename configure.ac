@@ -65,6 +65,11 @@ if test "x$enable_iso_c_interface" = xyes || \
        AC_MSG_RESULT([$works_FC])
        AS_VAR_IF([works_FC], [no], [FC=no])
        AS_UNSET([works_FC])])
+dnl Additional tests with fallback values:
+    AS_IF([test "x$FC" != xno],
+      [AC_LANG_PUSH([Fortran])
+       ACX_SL_FC_CHECK_MOD_PATH_FLAG([], [FC_MOD_FLAG=-I])
+       AC_LANG_POP([Fortran])])
   fi
 else
   FC=no
@@ -76,11 +81,7 @@ AS_VAR_IF([enable_iso_c_interface], [yes],
      [AC_MSG_FAILURE([the Fortran 90 interface is requested but the Fortran ]dnl
 [compiler is disabled, missing or lacks the required features])])
 dnl Additional tests with fallback values:
-   AS_IF([test "x$FC" != xno],
-     [AC_LANG_PUSH([Fortran])
-      ACX_SL_FC_CHECK_MOD_PATH_FLAG([], [FC_MOD_FLAG=-I])
-      ACX_SL_FC_MOD_SUFFIX([], [FCMODEXT=mod])
-      AC_LANG_POP([Fortran])])])
+   AS_IF([test "x$FC" != xno], [ACX_SL_FC_MOD_SUFFIX([], [FCMODEXT=mod])])])
 AM_CONDITIONAL([FC_MOD_UPPERCASE], [test "x$FCMODCASE" = xuc])
 
 dnl We need Fortran 77 if either FC is not available or the user has specified
