@@ -118,7 +118,7 @@ init_nv2130()
   FC=nvfortran
   MPICC=mpicc
   MPIFC=mpif90
-  MPI_LAUNCH='mpirun --mca mpi_cuda_support 0 --oversubscribe'
+  MPI_LAUNCH="$(which mpirun) --mca mpi_cuda_support 0 --oversubscribe"
 
   GRIBAPI_ROOT='/sw/stretch-x64/grib_api/grib_api-1.21.0-gccsys'
   NETCDF_ROOT='/sw/stretch-x64/netcdf/netcdf_c-4.6.1'
