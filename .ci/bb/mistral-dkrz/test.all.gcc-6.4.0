@@ -14,6 +14,7 @@ init_gcc640
 --enable-iso-c-interface \
 --enable-mpi \
 --enable-option-checking=fatal \
+--enable-ppm-dist-array \
 --with-grib-api="${GRIBAPI_ROOT}" \
 --with-netcdf="${NETCDF_ROOT}" \
 CC="${MPICC}" \
