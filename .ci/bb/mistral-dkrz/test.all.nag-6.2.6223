@@ -26,7 +26,7 @@ FCFLAGS+=' -g -kind=byte'
 CC="${MPICC}" \
 FC="${MPIFC}" \
 FCFLAGS="${FCFLAGS}" \
-MPI_LAUNCH="$(which "${MPI_LAUNCH%% *}") ${MPI_LAUNCH#* }" \
+MPI_LAUNCH="${MPI_LAUNCH}" \
 PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 
 make -j8
