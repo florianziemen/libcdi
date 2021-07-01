@@ -28,6 +28,7 @@ LDFLAGS+=" -L${HDF5_ROOT}/lib"
 --enable-iso-c-interface \
 --enable-mpi \
 --enable-option-checking=fatal \
+--enable-ppm-dist-array \
 --with-eccodes \
 --with-netcdf="${NETCDF_ROOT}" \
 CC="${MPICC}" \

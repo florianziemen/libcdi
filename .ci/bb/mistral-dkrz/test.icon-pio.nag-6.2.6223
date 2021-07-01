@@ -9,11 +9,9 @@ top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 . "${script_dir}/utils.sh"
 init_nag626223
 
-# When configure as part of ICON, the C headers of YAXT and PPM are available
-# but the libraries and Fortran modules are not. The following imitates that.
-# Note that the configure script of ICON calls the configure script of CDI with
-# an additional argument 'PKG_CONFIG=' to make sure that neither YAXT nor PPM
-# are picked up by pkg-config. However, here we check that it is not needed.
+# When configured as part of ICON, C headers, Fortran modules and library files
+# of YAXT and PPM become available only at the build time. The following
+# imitates that.
 
 WRONG_YAXT_ROOT=$(init_pgi1990 >/dev/null && echo "${YAXT_ROOT}")
 export PKG_CONFIG_PATH="${WRONG_YAXT_ROOT}/lib/pkgconfig"
@@ -38,16 +36,20 @@ export LD_LIBRARY_PATH="${MPICH_ROOT}/lib:${NETCDF_ROOT}/lib:${ECCODES_ROOT}/lib
 --disable-cdi-app \
 --disable-maintainer-mode \
 --disable-shared \
---enable-cf-interface \
+--enable-cf-interface=yes \
 --enable-cgribex \
 --enable-grib \
 --enable-iso-c-interface \
---enable-mpi \
---enable-option-checking=fatal \
+--enable-mpi=yes \
+--enable-ppm-dist-array=yes \
+--enable-silent-rules=no \
 --enable-static \
---with-grib-api="${ECCODES_ROOT}" \
+--with-eccodes=yes \
 --with-netcdf \
---without-eccodes \
+--with-on-demand-check-programs \
+--without-example-programs \
+--without-grib-api \
+--without-szlib \
 --without-threads \
 CC="${CC}" \
 CFLAGS='-g -march=native -O2' \
@@ -58,15 +60,24 @@ FC="${FC}" \
 FCFLAGS="-I${MPICH_ROOT}/include -kind=byte -colour -f2008 -Wc=$(which gcc) -w=uep -O0 -Wc,-g -float-store -nan -gline -g" \
 LDFLAGS="-L${MPICH_ROOT}/lib -L${NETCDF_ROOT}/lib -L${ECCODES_ROOT}/lib" \
 LIBS='-leccodes -lnetcdf -lmpifort -lmpi -lubsan' \
+MPIROOT= \
+MPI_C_INCLUDE= \
+MPI_C_LIB= \
+MPI_FC_LIB= \
+MPI_FC_MOD= \
 MPI_LAUNCH="$(which "${MPI_LAUNCH%% *}") ${MPI_LAUNCH#* }" \
-PPM_CODE_C_LIB=' ' \
-PPM_CORE_C_INCLUDE="-I${PPM_ROOT}/include" \
-YAXT_C_INCLUDE="-I${YAXT_ROOT}/include" \
-YAXT_C_LIB=' ' \
-YAXT_FC_LIB=' ' \
-YAXT_FC_MOD=' ' \
+PKG_CONFIG= \
+PPM_CORE_C_INCLUDE= \
+PPM_CORE_C_LIB= \
+YAXT_C_INCLUDE= \
+YAXT_C_LIB= \
+YAXT_FC_LIB= \
+YAXT_FC_MOD= \
 ac_cv_func_uuid_create=no \
+ac_cv_header_ppm_dist_array_h=yes \
 ac_cv_lib_uuid_uuid_generate=no \
+acx_cv_c_include_ppm_ppm_h="-I${LOCAL_PPM_ROOT}/include" \
+acx_cv_c_include_yaxt_h="-I${LOCAL_YAXT_ROOT}/include" \
 acx_cv_fortran_mod_yaxt="-I${LOCAL_YAXT_ROOT}/include" \
 acx_cv_have_libnc_dap=no \
 acx_cv_have_nc4hdf5=no \
@@ -77,8 +88,8 @@ acx_cv_option_search_PPM_initialize_c="${LOCAL_PPM_ROOT}/lib/libscalesppmcore.a"
 acx_cv_option_search_xt_initialized_c="${LOCAL_YAXT_ROOT}/lib/libyaxt_c.a" \
 acx_cv_option_search_xt_initialized_fc="${LOCAL_YAXT_ROOT}/lib/libyaxt.a ${LOCAL_YAXT_ROOT}/lib/libyaxt_c.a"
 
-rsync -uavz "${YAXT_ROOT}/" "${LOCAL_YAXT_ROOT}" --exclude='*.h' --exclude='*.la' --exclude='*.pc' --exclude='*.so' --exclude='*.so.*'
-rsync -uavz "${PPM_ROOT}/" "${LOCAL_PPM_ROOT}" --exclude='*.h' --exclude='*.la' --exclude='*.pc' --exclude='*.so' --exclude='*.so.*'
+rsync -uavz "${YAXT_ROOT}/" "${LOCAL_YAXT_ROOT}" --exclude='*.la' --exclude='*.pc' --exclude='*.so' --exclude='*.so.*'
+rsync -uavz "${PPM_ROOT}/" "${LOCAL_PPM_ROOT}" --exclude='*.la' --exclude='*.pc' --exclude='*.so' --exclude='*.so.*'
 
 make -j8
 
