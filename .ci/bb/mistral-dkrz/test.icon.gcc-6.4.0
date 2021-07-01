@@ -13,18 +13,22 @@ export LD_LIBRARY_PATH="${NETCDF_ROOT}/lib:${GRIBAPI_ROOT}/lib:${LD_LIBRARY_PATH
 
 "${top_srcdir}/configure" \
 --disable-cdi-app \
---disable-cf-interface \
 --disable-maintainer-mode \
---disable-mpi \
 --disable-shared \
+--enable-cf-interface=no \
 --enable-cgribex \
 --enable-grib \
 --enable-iso-c-interface \
---enable-option-checking=fatal \
+--enable-mpi=no \
+--enable-ppm-dist-array=no \
+--enable-silent-rules=no \
 --enable-static \
---with-grib-api="${GRIBAPI_ROOT}" \
+--with-eccodes=yes \
 --with-netcdf \
---without-eccodes \
+--with-on-demand-check-programs \
+--without-example-programs \
+--without-grib_api \
+--without-szlib \
 --without-threads \
 CC="${MPICC}" \
 CFLAGS='-g -march=native -mpc64 -O2' \
@@ -35,13 +39,26 @@ FC="${MPIFC}" \
 FCFLAGS='-std=f2008 -fmodule-private -fimplicit-none -fmax-identifier-length=63 -Wall -Wcharacter-truncation -Wconversion -Wunderflow -Wunused-parameter -Wno-surprising -fall-intrinsics -g -march=native -mpc64' \
 LDFLAGS="-L${NETCDF_ROOT}/lib -L${GRIBAPI_ROOT}/lib" \
 LIBS='-lgrib_api -lnetcdf' \
+MPIROOT= \
+MPI_C_INCLUDE= \
+MPI_C_LIB= \
+MPI_FC_LIB= \
+MPI_FC_MOD= \
 MPI_LAUNCH="$(which "${MPI_LAUNCH%% *}") ${MPI_LAUNCH#* }" \
+PKG_CONFIG= \
+PPM_CORE_C_INCLUDE= \
+PPM_CORE_C_LIB= \
+YAXT_C_INCLUDE= \
+YAXT_C_LIB= \
+YAXT_FC_LIB= \
+YAXT_FC_MOD= \
 ac_cv_func_uuid_create=no \
 ac_cv_lib_uuid_uuid_generate=no \
 acx_cv_have_libnc_dap=no \
 acx_cv_have_nc4hdf5=no \
 acx_cv_have_netcdf2=yes \
-acx_cv_have_netcdf4=yes
+acx_cv_have_netcdf4=yes \
+acx_cv_have_pnetcdf=no
 
 make -j8
 
