@@ -329,8 +329,22 @@ AC_ARG_ENABLE([mpi],
   [test "x$enableval" != xno && enable_mpi=yes],
   [enable_mpi=no])
 
+AC_ARG_ENABLE([ppm-dist-array],
+  [AS_HELP_STRING([--enable-ppm-dist-array],
+     [enable usage of the PPM distributed array @<:@default=auto@:>@])],
+  [AS_CASE([$enableval],
+     [no|auto], [],
+     [AS_VAR_IF([enable_mpi], [no],
+        [AC_MSG_ERROR([usage of the PPM distributed array can be enabled dnl
+(--enable-ppm-dist-array) only if the parallel I/O with MPI is enabled dnl
+(--enable-mpi)])])
+      enable_ppm_dist_array=yes])],
+  [enable_ppm_dist_array=auto])
+
 build_pio_fc_programs=no
 have_ppm=no
+AC_SUBST([HAVE_PPM_DIST_ARRAY], [no])
+AM_SUBST_NOTMAKE([HAVE_PPM_DIST_ARRAY])dnl
 have_parallel_nc4=no
 AS_VAR_IF([enable_mpi], [yes],
   [dnl
@@ -496,6 +510,9 @@ dnl available via C bindings:
 dnl Parallel netCDF support still requires ScalES-PPM and YAXT to re-arrange the
 dnl data when running with more than one collector.
 dnl
+dnl TODO: check whether it makes sense to check for PPM when configuring with
+dnl --disable-ppm-dist-array.
+dnl
 dnl Set precious variables following the naming convention of ACX_C_PACKAGE:
    AC_ARG_VAR([PPM_CORE_C_INCLUDE],
      [specifically set flags to use when compiling sources using PPM_CORE ]dnl
@@ -528,12 +545,9 @@ dnl since whatever pkg-config finds will be used instead.
          have_ppm=yes
          AC_DEFINE([HAVE_PPM_CORE],,[ScalES PPM C core library is available])
          AS_VAR_APPEND([CFLAGS], [" $PPM_CORE_C_INCLUDE"])
-         AC_CHECK_HEADERS([ppm/dist_array.h],
-           [HAVE_PPM_DIST_ARRAY=yes],
-           [HAVE_PPM_DIST_ARRAY=no],
-           [AC_INCLUDES_DEFAULT])
-         AC_SUBST([HAVE_PPM_DIST_ARRAY])
-         AM_SUBST_NOTMAKE([HAVE_PPM_DIST_ARRAY])],
+         AS_IF([test "x$enable_ppm_dist_array" != xno],
+           [AC_CHECK_HEADERS([ppm/dist_array.h],
+              [HAVE_PPM_DIST_ARRAY=yes], [], [AC_INCLUDES_DEFAULT])])],
         [AC_MSG_WARN([cannot link C SCALES-PPM-CORE programs])],,
         [$PPM_CORE_C_LIB])],
      [AC_MSG_WARN([required header ppm/ppm.h not found or not compilable])],,
@@ -560,7 +574,7 @@ dnl overrides the result of the test.
            [Defined to 1 if NetCDF parallel open supports NC_PNETCDF])])])
 
 dnl If scales-ppm is not available, netcdf can only be used in serial mode:
-   AS_IF([test x"$ENABLE_NC4" = xyes && test x"$have_ppm" = xyes],
+   AS_IF([test "x$ENABLE_NC4" = xyes && test "x$have_ppm" = xyes],
      [saved_CFLAGS=$CFLAGS
       CFLAGS="$CFLAGS $MPI_C_INCLUDE"
       AC_CHECK_HEADERS([netcdf_par.h],,,
@@ -596,6 +610,11 @@ dnl Check for librt:
       LIBS=$saved_LIBS])],
   [YAXT_C_INCLUDE=; YAXT_C_LIB=
    MPI_C_INCLUDE=; MPI_C_LIB=])
+AS_CASE(["$enable_ppm_dist_array$HAVE_PPM_DIST_ARRAY"],
+  [yesyes|no*], [],
+  [auto*], [enable_ppm_dist_array=$HAVE_PPM_DIST_ARRAY],
+  [AC_MSG_FAILURE([usage of the PPM distributed array is requested but the ]dnl
+[required headers and libraries are not found])])
 AS_VAR_IF([have_ppm], [no], [PPM_CORE_C_INCLUDE=; PPM_CORE_C_LIB=])
 AS_VAR_IF([build_pio_fc_programs], [no],
   [YAXT_FC_MOD=; YAXT_FC_LIB=
