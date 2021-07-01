@@ -32,7 +32,7 @@ CC="${CC}" \
 CPPFLAGS="${CPPFLAGS}" \
 FC="${FC}" \
 LDFLAGS="${LDFLAGS}" \
-MPI_LAUNCH="$(which "${MPI_LAUNCH%% *}") ${MPI_LAUNCH#* }" \
+MPI_LAUNCH="${MPI_LAUNCH}" \
 PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig:${PKG_CONFIG_PATH}"
 
 make -j8

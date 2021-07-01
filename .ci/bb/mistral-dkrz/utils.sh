@@ -114,7 +114,7 @@ init_gcc640()
   FC=gfortran
   MPICC=mpicc
   MPIFC=mpif90
-  MPI_LAUNCH=mpirun
+  MPI_LAUNCH="$(which mpirun)"
 
   GRIBAPI_ROOT='/sw/rhel6-x64/grib_api/grib_api-1.15.0-gcc48'
   NETCDF_ROOT='/sw/rhel6-x64/netcdf/netcdf_c-4.4.0-parallel-openmpi2-gcc64'
@@ -135,7 +135,7 @@ init_intel1706()
   FC=ifort
   MPICC=mpicc
   MPIFC=mpif90
-  MPI_LAUNCH=mpirun
+  MPI_LAUNCH="$(which mpirun)"
 
   GRIBAPI_ROOT='/sw/rhel6-x64/grib_api/grib_api-1.15.0-gcc48'
   NETCDF_ROOT='/sw/rhel6-x64/netcdf/netcdf_c-4.4.0-parallel-openmpi2-intel14'
@@ -165,7 +165,7 @@ init_nag626223()
   FC=nagfor
   MPICC=mpicc
   MPIFC=mpif90
-  MPI_LAUNCH=mpirun
+  MPI_LAUNCH="$(which mpirun)"
 
   ECCODES_ROOT='/mnt/lustre01/work/k20200/sw/spack/opt/spack/linux-rhel6-x86_64/nag-6.2/eccodes-2.5.0-givay23bqhgzreuk5um2wtjsumebwbt4'
   NETCDF_ROOT='/mnt/lustre01/work/k20200/sw/spack/opt/spack/linux-rhel6-x86_64/gcc-8.3.0-works/netcdf-4.7.0-eftv5u36ogb5awbb27hffiiv5rib4kqj'
@@ -190,7 +190,7 @@ init_pgi1990()
   FC=pgfortran
   MPICC=mpicc
   MPIFC=mpif90
-  MPI_LAUNCH=orterun
+  MPI_LAUNCH="$(which orterun)"
 
   ECCODES_ROOT='/sw/spack-rhel6/eccodes-2.19.1-cqlkd7'
   NETCDF_ROOT='/sw/spack-rhel6/netcdf-c-4.7.4-22ody2'

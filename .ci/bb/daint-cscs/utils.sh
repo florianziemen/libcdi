@@ -108,7 +108,7 @@ init_cray1100()
   CC=cc
   CXX=CC
   FC=ftn
-  MPI_LAUNCH='srun -p cscsci -C gpu -A d56 -t 05:00'
+  MPI_LAUNCH="$(which srun) -p cscsci -C gpu -A d56 -t 05:00"
 
   ECCODES_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/eccodes-20.20.0-cray11'
   PPM_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/ppm-1.0.6-cray11'
@@ -130,7 +130,7 @@ init_pgi2011()
   CC=cc
   CXX=CC
   FC=ftn
-  MPI_LAUNCH='srun -p cscsci -C gpu -A d56 -t 05:00'
+  MPI_LAUNCH="$(which srun) -p cscsci -C gpu -A d56 -t 05:00"
 
   ECCODES_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/eccodes-20.20.0-pgi20'
   PPM_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/ppm-1.0.6-pgi20'
