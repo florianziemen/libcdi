@@ -687,7 +687,7 @@ AC_ARG_WITH([example-programs],
   [with_example_programs=yes])
 AM_CONDITIONAL([with_example_programs], [test "x$with_example_programs" = xyes])
 
-m4_foreach([build_flag_var],[[BUILD_CFLAGS],[BUILD_FCFLAGS],[BUILD_LDFLAGS],[BUILD_LIBS],[BUILD_MPI_C_LIB],[BUILD_MPI_FC_LIB],[BUILD_C_INCLUDE],[BUILD_FC_INCLUDE]],
+m4_foreach([build_flag_var],[[BUILD_CFLAGS],[BUILD_FCFLAGS],[BUILD_LDFLAGS],[BUILD_LIBS],[BUILD_MPI_C_LIB],[BUILD_MPI_FC_LIB]],
   [AC_ARG_VAR(build_flag_var,
      [append to ]m4_bpatsubst(build_flag_var, [BUILD_], [])[ during build but not in configure phase])dnl
 AC_CONFIG_COMMANDS_PRE(m4_bpatsubst(build_flag_var, [BUILD_], [])[="$]m4_bpatsubst(build_flag_var, [BUILD_], [])[$]{build_flag_var+ $build_flag_var[}"])dnl
