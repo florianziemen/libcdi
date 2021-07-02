@@ -665,13 +665,13 @@ AM_CONDITIONAL([with_example_programs], [test "x$with_example_programs" = xyes])
 m4_foreach([build_flag_var],[[BUILD_CFLAGS],[BUILD_FCFLAGS],[BUILD_LDFLAGS],[BUILD_LIBS],[BUILD_MPI_C_LIB],[BUILD_MPI_FC_LIB]],
   [AC_ARG_VAR(build_flag_var,
      [append to ]m4_bpatsubst(build_flag_var, [BUILD_], [])[ during build but not in configure phase])dnl
-AC_CONFIG_COMMANDS_PRE(m4_bpatsubst(build_flag_var, [BUILD_], [])[="$]m4_bpatsubst(build_flag_var, [BUILD_], [])[$]{build_flag_var+ $build_flag_var[}"])dnl
+AC_CONFIG_COMMANDS_PRE(m4_bpatsubst(build_flag_var, [BUILD_], [])[="$]m4_bpatsubst(build_flag_var, [BUILD_], [])[$]{build_flag_var:+ $build_flag_var[}"])dnl
 AM_SUBST_NOTMAKE(build_flag_var)])dnl
 
 m4_foreach([build_tool_var],[[BUILD_CC],[BUILD_CXX],[BUILD_FC],[BUILD_F77]],
   [AC_ARG_VAR(build_tool_var,
      [replace ]m4_bpatsubst(build_tool_var, [BUILD_], [])[ with expansion of $]build_tool_var[ during build but not in configure phase])dnl
-AC_CONFIG_COMMANDS_PRE(m4_bpatsubst(build_tool_var, [BUILD_], [])[="$]{build_tool_var-$[]m4_bpatsubst(build_tool_var, [BUILD_], [])}["])dnl
+AC_CONFIG_COMMANDS_PRE(m4_bpatsubst(build_tool_var, [BUILD_], [])[="$]{build_tool_var:-$[]m4_bpatsubst(build_tool_var, [BUILD_], [])}["])dnl
 AM_SUBST_NOTMAKE(build_tool_var)])dnl
 
 dnl Additional output variables for cdi.settings:
