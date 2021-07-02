@@ -21,9 +21,11 @@ AM_INIT_AUTOMAKE([foreign])
 AM_MAINTAINER_MODE([enable])
 AM_EXTRA_RECURSIVE_TARGETS([examples])
 
-AC_PROG_CC_C99
-AS_VAR_IF([ac_cv_prog_cc_c99], [no],
-  [AC_MSG_FAILURE([C compiler does not support ISO C99])])
+m4_pushdef([_AC_PROG_CC_C89],
+  [rm -rf conftest.dSYM # needed when configured on MacOS with CFLAGS='-g'
+   _AC_PROG_CC_C99([], [AC_MSG_FAILURE([C compiler does not support ISO C99])])])dnl
+AC_PROG_CC
+m4_popdef([_AC_PROG_CC_C89])dnl
 ACX_PROG_CC_POSIX([2001])
 AC_C_RESTRICT
 
