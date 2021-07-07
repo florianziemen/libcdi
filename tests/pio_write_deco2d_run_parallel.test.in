@@ -1,38 +1,9 @@
 #!@SHELL@
-@ENABLE_MPI_FALSE@exit 77
-test 'x@MPI_LAUNCH@' != xtrue || exit 77
-
-mpi_task_num="${mpi_task_num-6}"
-
-prefix=${0##*/}
 suffix="${suffix-grb}"
+mpi_task_num="${mpi_task_num-6}"
+pio_write=./pio_write_deco2d_parallel
 
-case ${suffix} in
-  grb)
-    test 'x@ENABLE_GRIB@' = xyes || exit 77
-    ;;
-  grb2)
-    @HAVE_LIBGRIB_API_FALSE@exit 77
-    ;;
-  nc|nc2)
-    test 'x@ENABLE_NETCDF@' = xyes || exit 77
-    ;;
-  nc4)
-    test 'x@ENABLE_NETCDF@' = xyes || exit 77
-    test 'x@ENABLE_NC4@' = xyes || exit 77
-    ;;
-  *)
-    echo "Unsupported suffix '${suffix}'" >&2
-    exit 1
-    ;;
-esac
-
-@top_builddir@/libtool --mode=execute @MPI_LAUNCH@ -n ${mpi_task_num} \
-  ${tool_wrap} ./pio_write_deco2d_parallel "-qprefix=${prefix}" -f ${suffix} ${pio_write_args} || exit 1
-@top_builddir@/libtool --mode=execute \
-  ${tool_wrap} ./cksum_read "${prefix}_0.${suffix}" "${prefix}_0.cksum" || exit 1
-@top_builddir@/libtool --mode=execute \
-  ${tool_wrap} ./cksum_read "${prefix}_1.${suffix}" "${prefix}_1.cksum" || exit 1
+. ./pio_write_run_parallel.test
 #
 # Local Variables:
 # mode: sh
