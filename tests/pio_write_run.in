@@ -1,13 +1,18 @@
 #! @SHELL@
 set -e
 LOG=${LOG-pio_write.log}
-if [ @ENABLE_GRIB@ != yes ]; then
-  # skip tests for unsupported formats
-  exit 77
-fi
 mpi_task_num=${mpi_task_num-4}
 prefix=${CDI_TEST_PREFIX-example}
 suffix=${suffix-grb}
+pio_write=${pio_write-./pio_write}
+case $suffix in
+  grb)
+    if [ @ENABLE_GRIB@ != yes ]; then
+      # skip tests for unsupported formats
+      exit 77
+    fi
+    ;;
+esac
 if [ "@USE_MPI@" = yes ]; then
   variations="-qno-batch-rma -qcache-redists -qcreate-curvilinear-grid -qpreset-decomposition=true"
 else
@@ -23,7 +28,7 @@ test_variation()
   variation=$1
   ../libtool --mode=execute \
     @MPI_LAUNCH@ \
-    -n ${mpi_task_num} ${tool_wrap} ./pio_write ${pio_write_args} -s 7 \
+    -n ${mpi_task_num} ${tool_wrap} ${pio_write} ${pio_write_args} -s 7 \
     ${variation} ${CDI_TEST_PREFIX+"-qprefix=${CDI_TEST_PREFIX}"}
   echo "checking ${prefix}_0.$suffix" >&2
   ../libtool --mode=execute \
