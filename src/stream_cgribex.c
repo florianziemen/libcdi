@@ -384,7 +384,7 @@ bool cgribexGetGridLCC(int *isec2, int *isec4, grid_t *grid)
   const size_t nvalues = (size_t) ISEC4_NumValues;
   const size_t nlon = (size_t) ISEC2_NumLon;
   const size_t nlat = (size_t) ISEC2_NumLat;
-  if ( nvalues != nlon*nlat ) Error("numberOfPoints (%zu) and gridSize (%zu) differ!", nvalues, nlon*nlat);
+  if (nvalues != nlon*nlat) Error("numberOfPoints (%zu) and gridSize (%zu) differ!", nvalues, nlon*nlat);
 
   grid->size   = nvalues;
   grid->x.size = nlon;
@@ -545,7 +545,7 @@ void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, si
   int leveltype, level1, level2;
   cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
-  /* fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, leveltype); */
+  // fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, leveltype);
 
   record->size      = recsize;
   record->position  = position;
@@ -1745,8 +1745,10 @@ void cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
   const bool lsouth = (gpp.lat_1 < 0);
   if (lsouth) { gpp.lat_1 = -gpp.lat_2; gpp.lat_2 = -gpp.lat_2; }
 
-  const double xinc = gridInqXinc(gridID);
-  const double yinc = gridInqYinc(gridID);
+  double xinc = gridInqXinc(gridID);
+  double yinc = gridInqYinc(gridID);
+  if (IS_EQUAL(xinc, 0.0)) xinc = gridInqXincInMeter(gridID);
+  if (IS_EQUAL(yinc, 0.0)) yinc = gridInqYincInMeter(gridID);
 
   ISEC2_GridType = GRIB1_GTYPE_LCC;
   ISEC2_NumLon   = xsize;

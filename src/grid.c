@@ -1731,18 +1731,30 @@ double gridInqYval(int gridID, size_t index)
 static
 double grid_calc_increment(size_t size, const double *vals)
 {
-  if ( size > 1 )
+  if (size > 1)
     {
       double inc = (vals[size-1] - vals[0])/(size-1);
       const double abs_inc = fabs(inc);
-      for ( size_t i = 1; i < size; ++i )
-        if ( fabs(fabs(vals[i-1] - vals[i]) - abs_inc) > 0.01*abs_inc )
+      for (size_t i = 1; i < size; ++i)
+        if (fabs(fabs(vals[i-1] - vals[i]) - abs_inc) > 0.01*abs_inc)
           {
             inc = 0.0;
             break;
           }
 
       return inc;
+    }
+
+  return 0.0;
+}
+
+static
+double grid_calc_increment_in_meter(size_t size, const double *vals)
+{
+  if (size > 1)
+    {
+      const double inc = (vals[size-1] - vals[0])/(size-1);
+      return round(fabs(inc));
     }
 
   return 0.0;
@@ -1766,7 +1778,21 @@ double gridInqXinc(int gridID)
   if (fabs(gridptr->x.inc) <= 0 && xvals)
     {
       const size_t xsize = gridptr->x.size;
-      if ( xsize > 1 ) gridptr->x.inc = grid_calc_increment(xsize, xvals);
+      if (xsize > 1) gridptr->x.inc = grid_calc_increment(xsize, xvals);
+    }
+
+  return gridptr->x.inc;
+}
+
+double gridInqXincInMeter(int gridID)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  const double *restrict xvals = gridptr->vtable->inqXValsPtr(gridptr);
+
+  if (fabs(gridptr->x.inc) <= 0 && xvals)
+    {
+      const size_t xsize = gridptr->x.size;
+      if (xsize > 1) gridptr->x.inc = grid_calc_increment_in_meter(xsize, xvals);
     }
 
   return gridptr->x.inc;
@@ -1790,7 +1816,21 @@ double gridInqYinc(int gridID)
   if (fabs(gridptr->y.inc) <= 0 && yvals)
     {
       const size_t ysize = gridptr->y.size;
-      if ( ysize > 1 ) gridptr->y.inc = grid_calc_increment(ysize, yvals);
+      if (ysize > 1) gridptr->y.inc = grid_calc_increment(ysize, yvals);
+    }
+
+  return gridptr->y.inc;
+}
+
+double gridInqYincInMeter(int gridID)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  const double *yvals = gridptr->vtable->inqYValsPtr(gridptr);
+
+  if (fabs(gridptr->y.inc) <= 0 && yvals)
+    {
+      const size_t ysize = gridptr->y.size;
+      if (ysize > 1) gridptr->y.inc = grid_calc_increment_in_meter(ysize, yvals);
     }
 
   return gridptr->y.inc;
@@ -1814,7 +1854,7 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
   char gmapname[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
   cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
-  if ( gmapname[0] && strIsEqual(gmapname, projection) )
+  if (gmapname[0] && strIsEqual(gmapname, projection))
     {
       int atttype, attlen;
       char attname[CDI_MAX_NAME+1];
@@ -1822,13 +1862,13 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
       int natts;
       cdiInqNatts(gridID, CDI_GLOBAL, &natts);
 
-      for ( int iatt = 0; iatt < natts; ++iatt )
+      for (int iatt = 0; iatt < natts; ++iatt)
         {
           cdiInqAtt(gridID, CDI_GLOBAL, iatt, attname, &atttype, &attlen);
-          if ( attlen != 1 ) continue;
+          if (attlen != 1) continue;
 
           double attflt;
-          if ( cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, &attflt) )
+          if (cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, &attflt))
             {
               if      ( strIsEqual(attname, "grid_north_pole_longitude") ) *xpole = attflt;
               else if ( strIsEqual(attname, "grid_north_pole_latitude")  ) *ypole = attflt;

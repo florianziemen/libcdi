@@ -2023,8 +2023,10 @@ void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRel
   int projflag = 0;
   if (lsouth) gribbyte_set_bit(&projflag, 1);
 
-  const double xinc = gridInqXinc(gridID);
-  const double yinc = gridInqYinc(gridID);
+  double xinc = gridInqXinc(gridID);
+  double yinc = gridInqYinc(gridID);
+  if (IS_EQUAL(xinc, 0.0)) xinc = gridInqXincInMeter(gridID);
+  if (IS_EQUAL(yinc, 0.0)) yinc = gridInqYincInMeter(gridID);
 
   static const char mesg[] = "lambert";
   size_t len = sizeof(mesg) -1;

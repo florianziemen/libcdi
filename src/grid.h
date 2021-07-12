@@ -116,6 +116,9 @@ unsigned cdiGridCount(void);
 
 void gridVerifyProj(int gridID);
 
+double gridInqXincInMeter(int gridID);
+double gridInqYincInMeter(int gridID);
+
 const double *gridInqXvalsPtr(int gridID);
 const double *gridInqYvalsPtr(int gridID);
 
