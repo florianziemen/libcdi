@@ -120,154 +120,103 @@ void streamGrbDefDataScanningMode(int scanmode)
 }
 
 
+enum { MapKey = 0, MapValue = 1 };
+
+static const int grib1ltypeMap[][2] =
+{
+  // clang-format off
+  {  GRIB1_LTYPE_SURFACE,             ZAXIS_SURFACE            },
+  {  GRIB1_LTYPE_CLOUD_BASE,          ZAXIS_CLOUD_BASE         },
+  {  GRIB1_LTYPE_CLOUD_TOP,           ZAXIS_CLOUD_TOP          },
+  {  GRIB1_LTYPE_ISOTHERM0,           ZAXIS_ISOTHERM_ZERO      },
+  {  GRIB1_LTYPE_TROPOPAUSE,          ZAXIS_TROPOPAUSE         },
+  {  GRIB1_LTYPE_TOA,                 ZAXIS_TOA                },
+  {  GRIB1_LTYPE_SEA_BOTTOM,          ZAXIS_SEA_BOTTOM         },
+  {  GRIB1_LTYPE_ATMOSPHERE,          ZAXIS_ATMOSPHERE         },
+  {  GRIB1_LTYPE_ISOBARIC,            ZAXIS_PRESSURE           },
+  {  GRIB1_LTYPE_99,                  ZAXIS_PRESSURE           },
+  {  GRIB1_LTYPE_ISOBARIC_PA,         ZAXIS_PRESSURE           },
+  {  GRIB1_LTYPE_MEANSEA,             ZAXIS_MEANSEA            },
+  {  GRIB1_LTYPE_ALTITUDE,            ZAXIS_ALTITUDE           },
+  {  GRIB1_LTYPE_HEIGHT,              ZAXIS_HEIGHT             },
+  {  GRIB1_LTYPE_SIGMA,               ZAXIS_SIGMA              },
+  {  GRIB1_LTYPE_SIGMA_LAYER,         ZAXIS_SIGMA              },
+  {  GRIB1_LTYPE_HYBRID,              ZAXIS_HYBRID             },
+  {  GRIB1_LTYPE_HYBRID_LAYER,        ZAXIS_HYBRID             },
+  {  GRIB1_LTYPE_LANDDEPTH,           ZAXIS_DEPTH_BELOW_LAND   },
+  {  GRIB1_LTYPE_LANDDEPTH_LAYER,     ZAXIS_DEPTH_BELOW_LAND   },
+  {  GRIB1_LTYPE_ISENTROPIC,          ZAXIS_ISENTROPIC         },
+  {  GRIB1_LTYPE_SEADEPTH,            ZAXIS_DEPTH_BELOW_SEA    },
+  {  GRIB1_LTYPE_LAKE_BOTTOM,         ZAXIS_LAKE_BOTTOM        },
+  {  GRIB1_LTYPE_SEDIMENT_BOTTOM,     ZAXIS_SEDIMENT_BOTTOM    },
+  {  GRIB1_LTYPE_SEDIMENT_BOTTOM_TA,  ZAXIS_SEDIMENT_BOTTOM_TA },
+  {  GRIB1_LTYPE_SEDIMENT_BOTTOM_TW,  ZAXIS_SEDIMENT_BOTTOM_TW },
+  {  GRIB1_LTYPE_MIX_LAYER,           ZAXIS_MIX_LAYER          },
+  // clang-format on
+};
+
+static const size_t grib1ltypeMapSize = sizeof(grib1ltypeMap) / (2 * sizeof(int));
+
+static const int grib2ltypeMap[][2] =
+{
+  // clang-format off
+  {  GRIB2_LTYPE_SURFACE,             ZAXIS_SURFACE            },
+  {  GRIB2_LTYPE_CLOUD_BASE,          ZAXIS_CLOUD_BASE         },
+  {  GRIB2_LTYPE_CLOUD_TOP,           ZAXIS_CLOUD_TOP          },
+  {  GRIB2_LTYPE_ISOTHERM0,           ZAXIS_ISOTHERM_ZERO      },
+  {  GRIB2_LTYPE_TROPOPAUSE,          ZAXIS_TROPOPAUSE         },
+  {  GRIB2_LTYPE_TOA,                 ZAXIS_TOA                },
+  {  GRIB2_LTYPE_SEA_BOTTOM,          ZAXIS_SEA_BOTTOM         },
+  {  GRIB2_LTYPE_ATMOSPHERE,          ZAXIS_ATMOSPHERE         },
+  {  GRIB2_LTYPE_ISOBARIC,            ZAXIS_PRESSURE           },
+  {  GRIB2_LTYPE_MEANSEA,             ZAXIS_MEANSEA            },
+  {  GRIB2_LTYPE_ALTITUDE,            ZAXIS_ALTITUDE           },
+  {  GRIB2_LTYPE_HEIGHT,              ZAXIS_HEIGHT             },
+  {  GRIB2_LTYPE_SIGMA,               ZAXIS_SIGMA              },
+  {  GRIB2_LTYPE_HYBRID,              ZAXIS_HYBRID             },
+  {  GRIB2_LTYPE_HYBRID,              ZAXIS_HYBRID_HALF        },
+  {  GRIB2_LTYPE_LANDDEPTH,           ZAXIS_DEPTH_BELOW_LAND   },
+  {  GRIB2_LTYPE_ISENTROPIC,          ZAXIS_ISENTROPIC         },
+  {  GRIB2_LTYPE_SEADEPTH,            ZAXIS_DEPTH_BELOW_SEA    },
+  {  GRIB2_LTYPE_LAKE_BOTTOM,         ZAXIS_LAKE_BOTTOM        },
+  {  GRIB2_LTYPE_SEDIMENT_BOTTOM,     ZAXIS_SEDIMENT_BOTTOM    },
+  {  GRIB2_LTYPE_SEDIMENT_BOTTOM_TA,  ZAXIS_SEDIMENT_BOTTOM_TA },
+  {  GRIB2_LTYPE_SEDIMENT_BOTTOM_TW,  ZAXIS_SEDIMENT_BOTTOM_TW },
+  {  GRIB2_LTYPE_MIX_LAYER,           ZAXIS_MIX_LAYER          },
+  {  GRIB2_LTYPE_SNOW,                ZAXIS_SNOW               },
+  {  GRIB2_LTYPE_REFERENCE,           ZAXIS_REFERENCE          },
+  // clang-format on
+};
+
+static const size_t grib2ltypeMapSize = sizeof(grib2ltypeMap) / (2 * sizeof(int));
+
+static int
+getInt2IntMap(int searchKey, bool keyValue, size_t tableSize, const int grib1ltypeMap2[][2], int defaultValue)
+{
+  for (size_t i = 0; i < tableSize; ++i)
+    if (grib1ltypeMap[i][keyValue] == searchKey) return grib1ltypeMap2[i][!keyValue];
+
+  return defaultValue;
+}
+
 int grib1ltypeToZaxisType(int grib_ltype)
 {
-  // clang-format off
-  switch ( grib_ltype )
-    {
-    case GRIB1_LTYPE_SURFACE:            return ZAXIS_SURFACE;
-    case GRIB1_LTYPE_CLOUD_BASE:         return ZAXIS_CLOUD_BASE;
-    case GRIB1_LTYPE_CLOUD_TOP:          return ZAXIS_CLOUD_TOP;
-    case GRIB1_LTYPE_ISOTHERM0:          return ZAXIS_ISOTHERM_ZERO;
-    case GRIB1_LTYPE_TROPOPAUSE:         return ZAXIS_TROPOPAUSE;
-    case GRIB1_LTYPE_TOA:                return ZAXIS_TOA;
-    case GRIB1_LTYPE_SEA_BOTTOM:         return ZAXIS_SEA_BOTTOM;
-    case GRIB1_LTYPE_ATMOSPHERE:         return ZAXIS_ATMOSPHERE;
-    case GRIB1_LTYPE_MEANSEA:            return ZAXIS_MEANSEA;
-    case GRIB1_LTYPE_99:
-    case GRIB1_LTYPE_ISOBARIC_PA:
-    case GRIB1_LTYPE_ISOBARIC:           return ZAXIS_PRESSURE;
-    case GRIB1_LTYPE_HEIGHT:             return ZAXIS_HEIGHT;
-    case GRIB1_LTYPE_ALTITUDE:           return ZAXIS_ALTITUDE;
-    case GRIB1_LTYPE_SIGMA:
-    case GRIB1_LTYPE_SIGMA_LAYER:        return ZAXIS_SIGMA;
-    case GRIB1_LTYPE_HYBRID:
-    case GRIB1_LTYPE_HYBRID_LAYER:       return ZAXIS_HYBRID;
-    case GRIB1_LTYPE_LANDDEPTH:
-    case GRIB1_LTYPE_LANDDEPTH_LAYER:    return ZAXIS_DEPTH_BELOW_LAND;
-    case GRIB1_LTYPE_ISENTROPIC:         return ZAXIS_ISENTROPIC;
-    case GRIB1_LTYPE_SEADEPTH:           return ZAXIS_DEPTH_BELOW_SEA;
-    case GRIB1_LTYPE_LAKE_BOTTOM:        return ZAXIS_LAKE_BOTTOM;
-    case GRIB1_LTYPE_SEDIMENT_BOTTOM:    return ZAXIS_SEDIMENT_BOTTOM;
-    case GRIB1_LTYPE_SEDIMENT_BOTTOM_TA: return ZAXIS_SEDIMENT_BOTTOM_TA;
-    case GRIB1_LTYPE_SEDIMENT_BOTTOM_TW: return ZAXIS_SEDIMENT_BOTTOM_TW;
-    case GRIB1_LTYPE_MIX_LAYER:          return ZAXIS_MIX_LAYER;
-    }
-  // clang-format on
-  return ZAXIS_GENERIC;
+  return getInt2IntMap(grib_ltype, MapKey, grib1ltypeMapSize, grib1ltypeMap, ZAXIS_GENERIC);
 }
-
-
-int grib2ltypeToZaxisType(int grib_ltype)
-{
-  // clang-format off
-  switch ( grib_ltype )
-    {
-    case GRIB2_LTYPE_SURFACE:            return ZAXIS_SURFACE;
-    case GRIB2_LTYPE_CLOUD_BASE:         return ZAXIS_CLOUD_BASE;
-    case GRIB2_LTYPE_CLOUD_TOP:          return ZAXIS_CLOUD_TOP;
-    case GRIB2_LTYPE_ISOTHERM0:          return ZAXIS_ISOTHERM_ZERO;
-    case GRIB2_LTYPE_TROPOPAUSE:         return ZAXIS_TROPOPAUSE;
-    case GRIB2_LTYPE_TOA:                return ZAXIS_TOA;
-    case GRIB2_LTYPE_SEA_BOTTOM:         return ZAXIS_SEA_BOTTOM;
-    case GRIB2_LTYPE_ATMOSPHERE:         return ZAXIS_ATMOSPHERE;
-    case GRIB2_LTYPE_MEANSEA:            return ZAXIS_MEANSEA;
-    case GRIB2_LTYPE_ISOBARIC:           return ZAXIS_PRESSURE;
-    case GRIB2_LTYPE_HEIGHT:             return ZAXIS_HEIGHT;
-    case GRIB2_LTYPE_ALTITUDE:           return ZAXIS_ALTITUDE;
-    case GRIB2_LTYPE_SIGMA:              return ZAXIS_SIGMA;
-    case GRIB2_LTYPE_HYBRID:
- /* case GRIB2_LTYPE_HYBRID_LAYER: */    return ZAXIS_HYBRID;
-    case GRIB2_LTYPE_LANDDEPTH:
- /* case GRIB2_LTYPE_LANDDEPTH_LAYER: */ return ZAXIS_DEPTH_BELOW_LAND;
-    case GRIB2_LTYPE_ISENTROPIC:         return ZAXIS_ISENTROPIC;
-    case GRIB2_LTYPE_SNOW:               return ZAXIS_SNOW;
-    case GRIB2_LTYPE_SEADEPTH:           return ZAXIS_DEPTH_BELOW_SEA;
-    case GRIB2_LTYPE_LAKE_BOTTOM:        return ZAXIS_LAKE_BOTTOM;
-    case GRIB2_LTYPE_SEDIMENT_BOTTOM:    return ZAXIS_SEDIMENT_BOTTOM;
-    case GRIB2_LTYPE_SEDIMENT_BOTTOM_TA: return ZAXIS_SEDIMENT_BOTTOM_TA;
-    case GRIB2_LTYPE_SEDIMENT_BOTTOM_TW: return ZAXIS_SEDIMENT_BOTTOM_TW;
-    case GRIB2_LTYPE_MIX_LAYER:          return ZAXIS_MIX_LAYER;
-    case GRIB2_LTYPE_REFERENCE:          return ZAXIS_REFERENCE;
-    }
-  // clang-format on
-  return ZAXIS_GENERIC;
-}
-
 
 int zaxisTypeToGrib1ltype(int zaxistype)
 {
-  // clang-format off
-  switch (zaxistype)
-    {
-    case ZAXIS_SURFACE:               return GRIB1_LTYPE_SURFACE;
-    case ZAXIS_GENERIC:               return -1;
-    case ZAXIS_HYBRID:                return -1;
-    case ZAXIS_HYBRID_HALF:           return -1;
-    case ZAXIS_PRESSURE:              return GRIB1_LTYPE_ISOBARIC;
-    case ZAXIS_HEIGHT:                return GRIB1_LTYPE_HEIGHT;
-    case ZAXIS_DEPTH_BELOW_SEA:       return GRIB1_LTYPE_SEADEPTH;
-    case ZAXIS_DEPTH_BELOW_LAND:      return GRIB1_LTYPE_LANDDEPTH;
-    case ZAXIS_ISENTROPIC:            return GRIB1_LTYPE_ISENTROPIC;
-    case ZAXIS_TRAJECTORY:            return -1;
-    case ZAXIS_ALTITUDE:              return GRIB1_LTYPE_ALTITUDE;
-    case ZAXIS_SIGMA:                 return GRIB1_LTYPE_SIGMA;
-    case ZAXIS_MEANSEA:               return GRIB1_LTYPE_MEANSEA;
-    case ZAXIS_TROPOPAUSE:            return GRIB1_LTYPE_TROPOPAUSE;
-    case ZAXIS_TOA:                   return GRIB1_LTYPE_TOA;
-    case ZAXIS_SEA_BOTTOM:            return GRIB1_LTYPE_SEA_BOTTOM;
-    case ZAXIS_ATMOSPHERE:            return GRIB1_LTYPE_ATMOSPHERE;
-    case ZAXIS_CLOUD_BASE:            return GRIB1_LTYPE_CLOUD_BASE;
-    case ZAXIS_CLOUD_TOP:             return GRIB1_LTYPE_CLOUD_TOP;
-    case ZAXIS_ISOTHERM_ZERO:         return GRIB1_LTYPE_ISOTHERM0;
-    case ZAXIS_SNOW:                  return -1;
-    case ZAXIS_LAKE_BOTTOM:           return GRIB1_LTYPE_LAKE_BOTTOM;
-    case ZAXIS_SEDIMENT_BOTTOM:       return GRIB1_LTYPE_SEDIMENT_BOTTOM;
-    case ZAXIS_SEDIMENT_BOTTOM_TA:    return GRIB1_LTYPE_SEDIMENT_BOTTOM_TA;
-    case ZAXIS_SEDIMENT_BOTTOM_TW:    return GRIB1_LTYPE_SEDIMENT_BOTTOM_TW;
-    case ZAXIS_MIX_LAYER:             return GRIB1_LTYPE_MIX_LAYER;
-    case ZAXIS_REFERENCE:             return -1;
-    }
-  // clang-format on
-  return -1;
+  return getInt2IntMap(zaxistype, MapValue, grib1ltypeMapSize, grib1ltypeMap, -1);
 }
 
+int grib2ltypeToZaxisType(int grib_ltype)
+{
+  return getInt2IntMap(grib_ltype, MapKey, grib2ltypeMapSize, grib2ltypeMap, ZAXIS_GENERIC);
+}
 
 int zaxisTypeToGrib2ltype(int zaxistype)
 {
-  // clang-format off
-  switch (zaxistype)
-    {
-    case ZAXIS_SURFACE:               return GRIB2_LTYPE_SURFACE;
-    case ZAXIS_GENERIC:               return -1;
-    case ZAXIS_HYBRID:                return GRIB2_LTYPE_HYBRID;
-    case ZAXIS_HYBRID_HALF:           return GRIB2_LTYPE_HYBRID;
-    case ZAXIS_PRESSURE:              return GRIB2_LTYPE_ISOBARIC;
-    case ZAXIS_HEIGHT:                return GRIB2_LTYPE_HEIGHT;
-    case ZAXIS_DEPTH_BELOW_SEA:       return GRIB2_LTYPE_SEADEPTH;
-    case ZAXIS_DEPTH_BELOW_LAND:      return GRIB2_LTYPE_LANDDEPTH;
-    case ZAXIS_ISENTROPIC:            return GRIB2_LTYPE_ISENTROPIC;
-    case ZAXIS_TRAJECTORY:            return -1;
-    case ZAXIS_ALTITUDE:              return GRIB2_LTYPE_ALTITUDE;
-    case ZAXIS_SIGMA:                 return GRIB2_LTYPE_SIGMA;
-    case ZAXIS_MEANSEA:               return GRIB2_LTYPE_MEANSEA;
-    case ZAXIS_TROPOPAUSE:            return GRIB2_LTYPE_TROPOPAUSE;
-    case ZAXIS_TOA:                   return GRIB2_LTYPE_TOA;
-    case ZAXIS_SEA_BOTTOM:            return GRIB2_LTYPE_SEA_BOTTOM;
-    case ZAXIS_ATMOSPHERE:            return GRIB2_LTYPE_ATMOSPHERE;
-    case ZAXIS_CLOUD_BASE:            return GRIB2_LTYPE_CLOUD_BASE;
-    case ZAXIS_CLOUD_TOP:             return GRIB2_LTYPE_CLOUD_TOP;
-    case ZAXIS_ISOTHERM_ZERO:         return GRIB2_LTYPE_ISOTHERM0;
-    case ZAXIS_SNOW:                  return GRIB2_LTYPE_SNOW;
-    case ZAXIS_LAKE_BOTTOM:           return GRIB2_LTYPE_LAKE_BOTTOM;
-    case ZAXIS_SEDIMENT_BOTTOM:       return GRIB2_LTYPE_SEDIMENT_BOTTOM;
-    case ZAXIS_SEDIMENT_BOTTOM_TA:    return GRIB2_LTYPE_SEDIMENT_BOTTOM_TA;
-    case ZAXIS_SEDIMENT_BOTTOM_TW:    return GRIB2_LTYPE_SEDIMENT_BOTTOM_TW;
-    case ZAXIS_MIX_LAYER:             return GRIB2_LTYPE_MIX_LAYER;
-    case ZAXIS_REFERENCE:             return GRIB2_LTYPE_REFERENCE;
-    }
-  // clang-format on
-  return -1;
+  return getInt2IntMap(zaxistype, MapValue, grib2ltypeMapSize, grib2ltypeMap, -1);
 }
 
 
