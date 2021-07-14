@@ -48,7 +48,7 @@ typedef struct {
   bool     ignore;
   bool     isx;
   bool     isy;
-  bool     isc;
+  bool     isCharAxis;
   bool     islon;
   bool     islat;
   bool     islev;
@@ -638,7 +638,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].cube_sphere     = false;
       ncvars[ncvarid].isx             = false;
       ncvars[ncvarid].isy             = false;
-      ncvars[ncvarid].isc             = false;
+      ncvars[ncvarid].isCharAxis      = false;
       ncvars[ncvarid].islon           = false;
       ncvars[ncvarid].islat           = false;
       ncvars[ncvarid].islev           = false;
@@ -1988,7 +1988,7 @@ void verify_coordinates_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
                    strIsEqual(ncvars[ncvarid].stdname, "area_type") ||
                    cdfInqDatatype(streamptr, ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned) == CDI_DATATYPE_UINT8 )
             {
-              ncvars[ncvarid].isc = true;
+              ncvars[ncvarid].isCharAxis = true;
             }
           else if (strIsEqual(ncvars[ncvarid].stdname, "air_pressure"))
 	    ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
@@ -2423,7 +2423,7 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncv
       if (xvarid != CDI_UNDEFID && yvarid != CDI_UNDEFID)
         {
           const int ndims = ncvars[xvarid].ndims;
-          if ( ndims != ncvars[yvarid].ndims && !ncvars[xvarid].isc && !ncvars[yvarid].isc )
+          if ( ndims != ncvars[yvarid].ndims && !ncvars[xvarid].isCharAxis && !ncvars[yvarid].isCharAxis )
             {
               Warning("Inconsistent grid structure for variable %s!", ncvar->name);
               ncvar->xvarid = xvarid = CDI_UNDEFID;
@@ -4199,11 +4199,11 @@ int cdfInqContents(stream_t *streamptr)
               const int cvarid = ncvar->coordvarids[i];
               if (ncvar->coordvarids[i] != CDI_UNDEFID)
                 {
-                  if      (ncvars[cvarid].islon || ncvars[cvarid].isx)   ncvar->xvarid = cvarid;
-                  else if (ncvars[cvarid].islat || ncvars[cvarid].isy)   ncvar->yvarid = cvarid;
+                  if      (ncvars[cvarid].islon || ncvars[cvarid].isx) ncvar->xvarid = cvarid;
+                  else if (ncvars[cvarid].islat || ncvars[cvarid].isy) ncvar->yvarid = cvarid;
                   else if (ncvars[cvarid].islev)  ncvar->zvarid = cvarid;
                   else if (ncvars[cvarid].istime) ncvar->tvarid = cvarid;
-                  else if (ncvars[cvarid].isc)    ncvar->cvarids[i] = cvarid;
+                  else if (ncvars[cvarid].isCharAxis) ncvar->cvarids[i] = cvarid;
                   else if (ncvars[cvarid].warn == false)
                     {
                       Warning("Coordinates variable %s can't be assigned!", ncvars[cvarid].name);
