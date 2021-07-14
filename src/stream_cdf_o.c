@@ -13,9 +13,10 @@
 #include "zaxis.h"
 
 
-#define  POSITIVE_UP    1
-#define  POSITIVE_DOWN  2
-
+enum {
+  POSITIVE_UP  = 1,
+  POSITIVE_DOWN = 2,
+};
 
 static const char bndsName[] = "bnds";
 
@@ -1571,7 +1572,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
                 };
                 if ( positive == POSITIVE_UP || positive == POSITIVE_DOWN )
                   {
-                    const size_t select = positive == POSITIVE_DOWN;
+                    const size_t select = (positive == POSITIVE_DOWN);
                     cdf_put_att_text(fileID, ncvarid, "positive", tab[select].txtLen, tab[select].txt);
                   }
               }
@@ -1700,15 +1701,15 @@ void cdfDefCharacter(stream_t *streamptr, int gridID, int gridindex, int cdiAxis
   char dimname[CDI_MAX_NAME+3];
   int length = sizeof(dimname);
   cdiInqKeyString(gridID, cdiAxisID, CDI_KEY_DIMNAME, dimname, &length);
-  if ( dimname[0] == 0 ) { memcpy(dimname, "region", 7); dimname[6] = 0; }
+  if (dimname[0] == 0) { memcpy(dimname, "region", 7); dimname[6] = 0; }
   int dimID = checkDimName(fileID, dimlen, dimname);
-  if ( dimID == CDI_UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
+  if (dimID == CDI_UNDEFID) cdf_def_dim(fileID, dimname, dimlen, &dimID);
 
   // Define strlength dim
 
   strcpy(dimname, "strlen");
   int strlenID = checkDimName(fileID, strlen, dimname);
-  if ( strlenID == CDI_UNDEFID ) cdf_def_dim(fileID, dimname, strlen, &strlenID);
+  if (strlenID == CDI_UNDEFID) cdf_def_dim(fileID, dimname, strlen, &strlenID);
 
   // Define Variable
 
@@ -1718,8 +1719,7 @@ void cdfDefCharacter(stream_t *streamptr, int gridID, int gridindex, int cdiAxis
 
   char axisname[CDI_MAX_NAME];
   char **cvals = (char **) Malloc(dimlen * sizeof(char *));
-  for ( size_t i = 0; i < dimlen; i++ )
-    cvals[i] = (char*) Malloc(strlen * sizeof(char));
+  for (size_t i = 0; i < dimlen; i++) cvals[i] = (char*) Malloc(strlen * sizeof(char));
   int ncaxisid;
   length = CDI_MAX_NAME;
   cdiInqKeyString(gridID, cdiAxisID, CDI_KEY_NAME, axisname, &length);
@@ -1963,6 +1963,7 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
         cdfDefCharacter(streamptr, gridID, gridindex, CDI_XAXIS, strlen);
       else
         if ( gridInqXsize(gridID) ) cdfDefXaxis(streamptr, gridID, gridindex, 1, false);
+
       if ( (strlen = gridInqYIsc(gridID)) )
         cdfDefCharacter(streamptr, gridID, gridindex, CDI_YAXIS, strlen);
       else
