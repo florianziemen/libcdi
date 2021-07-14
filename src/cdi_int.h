@@ -115,11 +115,10 @@ strIsEqual(const char *x, const char *y)
 #  define IS_EQUAL(x,y)     (!IS_NOT_EQUAL(x,y))
 #endif
 
-#define  FALSE  0
-#define  TRUE   1
-
-#define  TYPE_REC  0
-#define  TYPE_VAR  1
+enum {
+  TYPE_REC,
+  TYPE_VAR,
+};
 
 #define  MEMTYPE_DOUBLE  1
 #define  MEMTYPE_FLOAT   2
@@ -476,8 +475,7 @@ cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
                              int recordBufIsToBeCreated);
 
 int
-streamOpenID(const char *filename, char filemode, int filetype,
-             int resH);
+streamOpenID(const char *filename, char filemode, int filetype, int resH);
 
 void
 cdiStreamDefVlist_(int streamID, int vlistID);
@@ -489,8 +487,7 @@ void
 cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
                         const int rect[][2], const void *data, size_t nmiss);
 void
-cdiStreamCloseDefaultDelegate(stream_t *streamptr,
-                              int recordBufIsToBeDeleted);
+cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted);
 
 int cdiStreamDefTimestep_(stream_t *streamptr, int tsID);
 

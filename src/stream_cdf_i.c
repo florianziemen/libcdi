@@ -18,6 +18,9 @@
 #include "cdf_lazy_grid.h"
 
 
+#define  FALSE  0
+#define  TRUE   1
+
 enum AxisType {
   X_AXIS = 1,
   Y_AXIS = 2,
