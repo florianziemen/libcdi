@@ -323,13 +323,13 @@ void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lboun
 
   long lpar;
   int status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar); //1 byte
-  if ( status == 0 )
+  if (status == 0)
     {
       *leveltype1 = (int) lpar;
 
       status = grib_get_long(gh, "typeOfSecondFixedSurface", &lpar); //1 byte
       /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-      if ( status == 0 ) *leveltype2 = (int)lpar;
+      if (status == 0) *leveltype2 = (int)lpar;
 
       if ( *leveltype1 != 255 && *leveltype2 != 255 && *leveltype2 > 0 ) *lbounds = 1;
       switch (*leveltype1)
@@ -337,17 +337,14 @@ void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lboun
           case GRIB2_LTYPE_REFERENCE:
             if(*leveltype2 == 1) *lbounds = 0;
             break;
-
           case GRIB2_LTYPE_LANDDEPTH:
             *level_sf = 1000;
             *level_unit = CDI_UNIT_M;
             break;
-
           case GRIB2_LTYPE_ISOBARIC:
             *level_sf = 1000;
             *level_unit = CDI_UNIT_PA;
             break;
-
           case GRIB2_LTYPE_SIGMA:
             *level_sf = 1000;
             *level_unit = 0;
@@ -382,7 +379,7 @@ void gribGetLevel(grib_handle *gh, int* leveltype1, int* leveltype2, int* lbound
     {
       grib2GetLevel(gh, leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit);
 
-      /* read in tiles attributes (if there are any) */
+      // read in tiles attributes (if there are any)
       tiles->tileindex = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILEINDEX], 0);
       tiles->totalno_of_tileattr_pairs = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS], -1);
       tiles->tileClassification = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILE_CLASSIFICATION], -1);

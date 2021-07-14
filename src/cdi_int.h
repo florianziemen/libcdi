@@ -89,7 +89,7 @@ strIsEqual(const char *x, const char *y)
 
 #define check_parg(arg)  if ( arg == 0 ) Warning("Argument '" #arg "' not allocated!")
 
-#if defined (__xlC__) /* performance problems on IBM */
+#ifdef __xlC__ /* performance problems on IBM */
 #ifndef DBL_IS_NAN
 #  define DBL_IS_NAN(x)     ((x) != (x))
 #endif
@@ -106,7 +106,7 @@ strIsEqual(const char *x, const char *y)
 #endif
 
 #ifndef DBL_IS_EQUAL
-/*#define DBL_IS_EQUAL(x,y) (!(x < y || y < x)) */
+//#define DBL_IS_EQUAL(x,y) (!(x < y || y < x))
 #  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)):!(x < y || y < x))
 #endif
 
@@ -400,8 +400,7 @@ stream_to_pointer(int idx)
 static inline void
 stream_check_ptr(const char *caller, stream_t *streamptr)
 {
-  if ( streamptr == NULL )
-    Errorc("stream undefined!");
+  if (streamptr == NULL) Errorc("stream undefined!");
 }
 
 int     streamInqFileID(int streamID);
@@ -453,12 +452,14 @@ void  cdiInitialize(void);
 char *cdiEscapeSpaces(const char *string);
 char *cdiUnescapeSpaces(const char *string, const char **outStringEnd);
 
-#define CDI_UNIT_PA   1
-#define CDI_UNIT_HPA  2
-#define CDI_UNIT_MM   3
-#define CDI_UNIT_CM   4
-#define CDI_UNIT_DM   5
-#define CDI_UNIT_M    6
+enum {
+  CDI_UNIT_PA = 1,
+  CDI_UNIT_HPA,
+  CDI_UNIT_MM,
+  CDI_UNIT_CM,
+  CDI_UNIT_DM,
+  CDI_UNIT_M,
+};
 
 struct streamAssoc
 {
@@ -520,12 +521,12 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 static inline
 void cdi_check_gridsize_int_limit(const char *format, size_t gridsize)
 {
-  if ( gridsize > INT_MAX ) Error("%s format grid size (%zu) limit exceeded (%zu)!", format, gridsize, INT_MAX);
+  if (gridsize > INT_MAX) Error("%s format grid size (%zu) limit exceeded (%zu)!", format, gridsize, INT_MAX);
 }
 
 int cdiBaseFiletype(int filetype);
 
-#if defined (__cplusplus)
+#ifdef __cplusplus
 }
 #endif
 
