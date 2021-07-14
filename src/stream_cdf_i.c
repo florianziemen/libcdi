@@ -29,9 +29,6 @@ enum AxisType {
   T_AXIS = 5,
 };
 
-#define  POSITIVE_UP    1
-#define  POSITIVE_DOWN  2
-
 typedef struct {
   int     dimid;
   int     ncvarid;
@@ -478,8 +475,8 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
   int vlistID  = streamptr->vlistID;
 
-  tsteps_t* sourceTstep = streamptr->tsteps;
-  tsteps_t* destTstep = sourceTstep + tsID;
+  tsteps_t *sourceTstep = streamptr->tsteps;
+  tsteps_t *destTstep = sourceTstep + tsID;
 
   const int nvars = vlistNvars(vlistID);
   const int nrecs = vlistNrecs(vlistID);
@@ -950,13 +947,7 @@ void cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
           axis[ndim++] = 'v';
           axis[ndim++] = ':';
           for ( int i = 0; i < ncvars[ncvarid].ndims; i++ )
-            {/*
-              if      ( ncvars[ncvarid].tvarid != -1 ) axis[ndim++] = TAXIS;
-              else if ( ncvars[ncvarid].zvarid != -1 ) axis[ndim++] = ZAXIS;
-              else if ( ncvars[ncvarid].yvarid != -1 ) axis[ndim++] = YAXIS;
-              else if ( ncvars[ncvarid].xvarid != -1 ) axis[ndim++] = XAXIS;
-              else
-             */
+            {
               if      ( ncvars[ncvarid].dimtype[i] == T_AXIS ) axis[ndim++] = TAXIS;
               else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) axis[ndim++] = ZAXIS;
               else if ( ncvars[ncvarid].dimtype[i] == E_AXIS ) axis[ndim++] = EAXIS;

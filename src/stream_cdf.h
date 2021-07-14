@@ -3,6 +3,11 @@
 
 #include "cdi_int.h"
 
+enum {
+  POSITIVE_UP   = 1,
+  POSITIVE_DOWN = 2,
+};
+
 void   cdfDefCoordinateVars(stream_t *streamptr);
 void   cdfDefTimestep(stream_t *streamptr, int tsID);
 int    cdfInqTimestep(stream_t *streamptr, int tsID);

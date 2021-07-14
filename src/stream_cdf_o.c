@@ -13,11 +13,6 @@
 #include "zaxis.h"
 
 
-enum {
-  POSITIVE_UP  = 1,
-  POSITIVE_DOWN = 2,
-};
-
 static const char bndsName[] = "bnds";
 
 
