@@ -44,7 +44,7 @@ ncdim_t;
 typedef struct {
   int      ncid;
   int      isvar;
-  bool     cube_sphere;
+  bool     isCubeSphere;
   bool     ignore;
   bool     isx;
   bool     isy;
@@ -635,7 +635,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].ncid            = CDI_UNDEFID;
       ncvars[ncvarid].isvar           = CDI_UNDEFID;
       ncvars[ncvarid].ignore          = false;
-      ncvars[ncvarid].cube_sphere     = false;
+      ncvars[ncvarid].isCubeSphere     = false;
       ncvars[ncvarid].isx             = false;
       ncvars[ncvarid].isy             = false;
       ncvars[ncvarid].isCharAxis      = false;
@@ -2289,7 +2289,7 @@ bool cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t 
       size = *xsize = 1;
       skipvar = false;
     }
-  else if (ncvar->cube_sphere)
+  else if (ncvar->isCubeSphere)
     {
       size = *xsize;
       skipvar = false;
@@ -2371,7 +2371,7 @@ bool cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t 
       size = *ysize = 1;
       skipvar = false;
     }
-  else if (ncvar->cube_sphere)
+  else if (ncvar->isCubeSphere)
     {
       size = *ysize;
       skipvar = false;
@@ -2455,7 +2455,7 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncv
 
       if (xvarid != CDI_UNDEFID)
         {
-          if (!ncvar->cube_sphere && (ncvars[xvarid].ndims - ntdims) > 2)
+          if (!ncvar->isCubeSphere && (ncvars[xvarid].ndims - ntdims) > 2)
             {
               Warning("Coordinates variable %s has too many dimensions (%d), skipped!", ncvars[xvarid].name, ncvars[xvarid].ndims);
               //ncvar->xvarid = CDI_UNDEFID;
@@ -2465,7 +2465,7 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncv
 
       if (yvarid != CDI_UNDEFID)
         {
-          if (!ncvar->cube_sphere && (ncvars[yvarid].ndims - ntdims) > 2)
+          if (!ncvar->isCubeSphere && (ncvars[yvarid].ndims - ntdims) > 2)
             {
               Warning("Coordinates variable %s has too many dimensions (%d), skipped!", ncvars[yvarid].name, ncvars[yvarid].ndims);
               //ncvar->yvarid = CDI_UNDEFID;
@@ -2529,7 +2529,7 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncv
                 const int nbdims = ncvars[bvarid].ndims;
                 if (nbdims == 2 || nbdims == 3)
                   {
-                    if (ncvar->cube_sphere)
+                    if (ncvar->isCubeSphere)
                       {
                         grid->nvertex = 4;
                         size_t bxsize = ncdims[ncvars[bvarid].dimids[2]].len;
@@ -2554,7 +2554,7 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncv
                 const int nbdims = ncvars[bvarid].ndims;
                 if (nbdims == 2 || nbdims == 3)
                   {
-                    if (ncvar->cube_sphere)
+                    if (ncvar->isCubeSphere)
                       {
                         grid->nvertex = 4;
                         size_t bxsize = ncdims[ncvars[bvarid].dimids[2]].len;
@@ -2760,7 +2760,7 @@ void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype
           else if (dimtype2[i] == Z_AXIS) { zdimid2 = dimids2[i]; }
         }
 
-      if (!ncvar2->cube_sphere && ncvar2->gridtype == CDI_UNDEFID && gridtype == GRID_UNSTRUCTURED)
+      if (!ncvar2->isCubeSphere && ncvar2->gridtype == CDI_UNDEFID && gridtype == GRID_UNSTRUCTURED)
         {
           if (xdimid == xdimid2 && ydimid2 != CDI_UNDEFID && zdimid2 == CDI_UNDEFID)
             {
@@ -2833,7 +2833,7 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
 
           if (!lproj && xaxisid != CDI_UNDEFID && xaxisid != xvarid && yaxisid != CDI_UNDEFID && yaxisid != yvarid) lproj = true;
 
-          if (ncvar->cube_sphere && lproj && xvarid != CDI_UNDEFID && yvarid != CDI_UNDEFID && ncvars[xvarid].ndims == 3 && ncvars[yvarid].ndims == 3)
+          if (ncvar->isCubeSphere && lproj && xvarid != CDI_UNDEFID && yvarid != CDI_UNDEFID && ncvars[xvarid].ndims == 3 && ncvars[yvarid].ndims == 3)
             {
               lproj = false;
               ncvar->gridtype = GRID_UNSTRUCTURED;
@@ -2877,7 +2877,7 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
               xdimid != CDI_UNDEFID && xsize > 999)
             grid->type = GRID_UNSTRUCTURED;
 
-          if (!ncvar->cube_sphere && grid->type == GRID_UNSTRUCTURED)
+          if (!ncvar->isCubeSphere && grid->type == GRID_UNSTRUCTURED)
             if (cdf_set_unstructured_par(ncvar, grid, &xdimid, &ydimid, gridInfo))
               continue;
 
@@ -2941,7 +2941,7 @@ int cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncd
             {
               if (xdimid != CDI_UNDEFID) ncgrid[gridindex].ncIDs[CDF_DIMID_X] = ncdims[xdimid].dimid;
               if (ydimid != CDI_UNDEFID) ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ncdims[ydimid].dimid;
-              if (ncvar->cube_sphere)    ncgrid[gridindex].ncIDs[CDF_DIMID_E] = ncdims[ncvar->dimids[ndims-3]].dimid;
+              if (ncvar->isCubeSphere)    ncgrid[gridindex].ncIDs[CDF_DIMID_E] = ncdims[ncvar->dimids[ndims-3]].dimid;
             }
 
           if (xdimid == CDI_UNDEFID && ydimid == CDI_UNDEFID && grid->size == 1) gridDefHasDims(gridID, FALSE);
@@ -3412,7 +3412,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
             }
         }
 
-      if (ncvar->cube_sphere) ixyz = 0;
+      if (ncvar->isCubeSphere) ixyz = 0;
       vlistDefVarXYZ(vlistID, varID, ixyz);
       /*
       printf("ixyz %d\n", ixyz);
@@ -3533,7 +3533,7 @@ bool check_cube_sphere(int vlistID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
           const int ndims = ncvars[varid].ndims;
           if (ndims >= 3 && ncvars[varid].dimids[ndims - 3] == nf_dimid &&
               ncvars[varid].ncoordvars == 2 && ncvars[varid].gmapid != -1)
-            ncvars[varid].cube_sphere = true;
+            ncvars[varid].isCubeSphere = true;
         }
 
       int xvarid = -1, yvarid = -1;
@@ -3890,7 +3890,7 @@ int cdf_check_variables(stream_t *streamptr, int nvars, ncvar_t *ncvars, size_t 
 
       if (ncvars[ncvarid].isvar == 0) continue;
 
-      if ((ncvars[ncvarid].ndims > 4 && !ncvars[ncvarid].cube_sphere) || ncvars[ncvarid].ndims > 5)
+      if ((ncvars[ncvarid].ndims > 4 && !ncvars[ncvarid].isCubeSphere) || ncvars[ncvarid].ndims > 5)
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning("%d dimensional variables are not supported, skipped variable %s!",
@@ -3898,7 +3898,7 @@ int cdf_check_variables(stream_t *streamptr, int nvars, ncvar_t *ncvars, size_t 
 	  continue;
 	}
 
-      if (((ncvars[ncvarid].ndims == 4 && !ncvars[ncvarid].cube_sphere) || ncvars[ncvarid].ndims == 5) && timedimid == CDI_UNDEFID)
+      if (((ncvars[ncvarid].ndims == 4 && !ncvars[ncvarid].isCubeSphere) || ncvars[ncvarid].ndims == 5) && timedimid == CDI_UNDEFID)
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning("%d dimensional variables without time dimension are not supported, skipped variable %s!",
