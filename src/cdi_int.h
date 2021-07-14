@@ -120,8 +120,10 @@ enum {
   TYPE_VAR,
 };
 
-#define  MEMTYPE_DOUBLE  1
-#define  MEMTYPE_FLOAT   2
+enum {
+  MEMTYPE_DOUBLE = 1,
+  MEMTYPE_FLOAT,
+};
 
 typedef struct
 {
