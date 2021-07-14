@@ -227,16 +227,24 @@ static const struct cdfDefGridAxisInqs {
   double (*axisVal)(int gridID, size_t index);
   const double *(*axisValsPtr)(int gridID);
   const double *(*axisBoundsPtr)(int gridID);
+  enum cdfIDIdx dimIdx, varIdx;
+  char axisSym;
 } gridInqsX = {
   .axisSize = gridInqXsize,
   .axisVal = gridInqXval,
   .axisValsPtr = gridInqXvalsPtr,
   .axisBoundsPtr = gridInqXboundsPtr,
+  .dimIdx = CDF_DIMID_X,
+  .varIdx = CDF_VARID_X,
+  .axisSym = 'X',
 }, gridInqsY = {
   .axisSize = gridInqYsize,
   .axisVal = gridInqYval,
   .axisValsPtr = gridInqYvalsPtr,
   .axisBoundsPtr = gridInqYboundsPtr,
+  .dimIdx = CDF_DIMID_Y,
+  .varIdx = CDF_VARID_Y,
+  .axisSym = 'Y',
 };
 
 static
@@ -249,20 +257,19 @@ void cdfPutGridStdAtts(int fileID, int ncvarid, int gridID, int dimtype)
   char stdname[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
   cdiInqKeyString(gridID, axisKey, CDI_KEY_STDNAME, stdname, &length);
-  if ( stdname[0] && (len = strlen(stdname)) )
+  if (stdname[0] && (len = strlen(stdname)))
     cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
   char longname[CDI_MAX_NAME];
   length = CDI_MAX_NAME;
   cdiInqKeyString(gridID, axisKey, CDI_KEY_LONGNAME, longname, &length);
-  if ( longname[0] && (len = strlen(longname)) )
+  if (longname[0] && (len = strlen(longname)))
     cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
 
   char units[CDI_MAX_NAME];
   length = CDI_MAX_NAME;
-  axisKey = (dimtype == 'Z') ? CDI_GLOBAL : ((dimtype == 'X') ? CDI_XAXIS : CDI_YAXIS);
   cdiInqKeyString(gridID, axisKey, CDI_KEY_UNITS, units, &length);
-  if ( units[0] && (len = strlen(units)) )
+  if (units[0] && (len = strlen(units)))
     cdf_put_att_text(fileID, ncvarid, "units", len, units);
 }
 
@@ -275,17 +282,15 @@ grid_inq_xtype(int gridID)
 }
 
 static void
-cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex, const struct cdfDefGridAxisInqs *inqs, int dimtype)
+cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex, const struct cdfDefGridAxisInqs *inqs)
 {
   const nc_type xtype = grid_inq_xtype(gridID);
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   const size_t dimlen = inqs->axisSize(gridID);
-  if ( dimlen != 1 )
-    Error("%c size isn't 1 for %s grid!", dimtype, gridNamePtr(gridInqType(gridID)));
+  if (dimlen != 1) Error("%c size isn't 1 for %s grid!", inqs->axisSym, gridNamePtr(gridInqType(gridID)));
 
-  int ncvarid = ncgrid[gridindex].ncIDs[dimtype == 'X' ? CDF_DIMID_X : CDF_DIMID_Y];
-
+  int ncvarid = ncgrid[gridindex].ncIDs[inqs->dimIdx];
   if ( ncvarid == CDI_UNDEFID )
     {
       int dimNcID = streamptr->basetime.ncvarid;
@@ -293,31 +298,30 @@ cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex, const struct cd
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       char axisname[CDI_MAX_NAME];
-      const int axistype = (dimtype == 'X') ? CDI_XAXIS : CDI_YAXIS;
+      const int axistype = (inqs->axisSym == 'X') ? CDI_XAXIS : CDI_YAXIS;
       int length = CDI_MAX_NAME;
       cdiInqKeyString(gridID, axistype, CDI_KEY_NAME, axisname, &length);
       cdf_def_var(fileID, axisname, xtype, 1, &dimNcID, &ncvarid);
-      cdfPutGridStdAtts(fileID, ncvarid, gridID, dimtype);
+      cdfPutGridStdAtts(fileID, ncvarid, gridID, inqs->axisSym);
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
     }
 
   ncgrid[gridindex].gridID = gridID;
   // var ID for trajectory !!!
-  ncgrid[gridindex].ncIDs[dimtype == 'X' ? CDF_DIMID_X : CDF_DIMID_Y] = ncvarid;
+  ncgrid[gridindex].ncIDs[inqs->dimIdx] = ncvarid;
 }
 
 static
 void cdfDefTrajLon(stream_t *streamptr, int gridID, int gridindex)
 {
-  cdfDefTrajLatLon(streamptr, gridID, gridindex, &gridInqsX, 'X');
+  cdfDefTrajLatLon(streamptr, gridID, gridindex, &gridInqsX);
 }
-
 
 static
 void cdfDefTrajLat(stream_t *streamptr, int gridID, int gridindex)
 {
-  cdfDefTrajLatLon(streamptr, gridID, gridindex, &gridInqsY, 'Y');
+  cdfDefTrajLatLon(streamptr, gridID, gridindex, &gridInqsY);
 }
 
 static
@@ -1716,29 +1720,16 @@ void cdfDefCharacter(stream_t *streamptr, int gridID, int gridindex, int xory, i
   for ( size_t i = 0; i < dimlen; i++ )
     cvals[i] = (char*) Malloc(strlen * sizeof(char));
   int ncaxisid;
-  if ( xory == 0 )
-    {
-      length = CDI_MAX_NAME;
-      cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, axisname, &length);
-      gridInqXCvals(gridID, cvals);
-    }
-  else
-    {
-      length = CDI_MAX_NAME;
-      cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_NAME, axisname, &length);
-      gridInqXCvals(gridID, cvals);
-    }
+  length = CDI_MAX_NAME;
+  cdiInqKeyString(gridID, (xory == 0) ? CDI_XAXIS : CDI_YAXIS, CDI_KEY_NAME, axisname, &length);
+  gridInqXCvals(gridID, cvals);
+
   int status = nc_inq_varid(fileID, axisname, &ncaxisid);
-  if ( status != NC_NOERR )
-    {
-      cdf_def_var(fileID, axisname, NC_CHAR, 2, dimIDs, &ncaxisid);
-      if ( xory == 0 )
-        cdfPutGridStdAtts(fileID, ncaxisid, gridID, 'X');
-      else
-        cdfPutGridStdAtts(fileID, ncaxisid, gridID, 'Y');
-    }
-  else
-    return;
+  if (status == NC_NOERR ) return;
+
+  cdf_def_var(fileID, axisname, NC_CHAR, 2, dimIDs, &ncaxisid);
+  cdfPutGridStdAtts(fileID, ncaxisid, gridID, (xory == 0) ? 'X' : 'Y');
+
   cdf_enddef(fileID);
 
   // Write Var
@@ -1754,16 +1745,9 @@ void cdfDefCharacter(stream_t *streamptr, int gridID, int gridindex, int xory, i
     }
 
   ncgrid[gridindex].gridID = gridID;
-  if ( xory == 0 )
-    {
-      ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
-      ncgrid[gridindex].ncIDs[CDF_VARID_X] = ncaxisid;
-    }
-  else
-    {
-      ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = dimID;
-      ncgrid[gridindex].ncIDs[CDF_VARID_Y] = ncaxisid;
-    }
+  ncgrid[gridindex].ncIDs[(xory == 0) ? CDF_DIMID_X : CDF_DIMID_Y] = dimID;
+  ncgrid[gridindex].ncIDs[(xory == 0) ? CDF_VARID_X : CDF_VARID_Y] = ncaxisid;
+
   streamptr->ncmode = 2;
 }
 

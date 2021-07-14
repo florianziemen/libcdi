@@ -240,7 +240,7 @@ typedef struct {
 VCT;
 
 #ifdef HAVE_LIBNETCDF
-enum {
+enum cdfIDIdx {
   CDF_DIMID_E,  // 3rd dimID of cube sphere grid (len=6)
   CDF_DIMID_X,
   CDF_DIMID_Y,
@@ -299,7 +299,7 @@ typedef struct {
   int         complevel;     // compression level
   bool        sortname;
   bool        sortparam;
-#if defined (GRIBCONTAINER2D)
+#ifdef GRIBCONTAINER2D
   void      **gribContainers;
 #else
   void       *gribContainers;
@@ -316,7 +316,7 @@ typedef struct {
 stream_t;
 
 
-/* Length of optional keyword/value pair list */
+// Length of optional keyword/value pair list
 #define MAX_OPT_GRIB_ENTRIES 500
 
 enum cdi_convention {CDI_CONVENTION_ECHAM, CDI_CONVENTION_CF};

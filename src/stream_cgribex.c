@@ -1934,7 +1934,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
         isec1DefLevel(isec1, grib_ltype, (int)dlevel1, (int)dlevel2);
 
 	int vctsize = zaxisInqVctSize(zaxisID);
-	if ( vctsize > 255 )
+	if (vctsize > 255)
 	  {
             static bool lwarning_vct = true;
 	    ISEC2_NumVCP = 0;
