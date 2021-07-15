@@ -615,101 +615,99 @@ int cdf_time_dimid(int fileID, int ndims, int nvars, ncdim_t *ncdims)
 }
 
 static
-void init_ncdims(long ndims, ncdim_t *ncdims)
+void init_ncdims(int ndims, ncdim_t *ncdims)
 {
-  for ( long ncdimid = 0; ncdimid < ndims; ncdimid++ )
+  for (int ncdimid = 0; ncdimid < ndims; ncdimid++)
     {
-      ncdims[ncdimid].dimid        = CDI_UNDEFID;
-      ncdims[ncdimid].ncvarid      = CDI_UNDEFID;
-      ncdims[ncdimid].dimtype      = CDI_UNDEFID;
-      ncdims[ncdimid].len          = 0;
-      ncdims[ncdimid].name[0]      = 0;
+      ncdim_t *ncdim = &ncdims[ncdimid];
+      ncdim->dimid        = CDI_UNDEFID;
+      ncdim->ncvarid      = CDI_UNDEFID;
+      ncdim->dimtype      = CDI_UNDEFID;
+      ncdim->len          = 0;
+      ncdim->name[0]      = 0;
     }
 }
 
 static
-void init_ncvars(long nvars, ncvar_t *ncvars)
+void init_ncvars(int nvars, ncvar_t *ncvars)
 {
-  for ( long ncvarid = 0; ncvarid < nvars; ++ncvarid )
+  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
-      ncvars[ncvarid].ncid            = CDI_UNDEFID;
-      ncvars[ncvarid].isvar           = CDI_UNDEFID;
-      ncvars[ncvarid].ignoreVar       = false;
-      ncvars[ncvarid].isCubeSphere    = false;
-      ncvars[ncvarid].isCharAxis      = false;
-      ncvars[ncvarid].isXaxis         = false;
-      ncvars[ncvarid].isYaxis         = false;
-      ncvars[ncvarid].isZaxis         = false;
-      ncvars[ncvarid].isTaxis         = false;
-      ncvars[ncvarid].isLon           = false;
-      ncvars[ncvarid].isLat           = false;
-      ncvars[ncvarid].isClimatology   = false;
-      ncvars[ncvarid].hasCalendar     = false;
-      ncvars[ncvarid].hasFormulaterms = false;
-      ncvars[ncvarid].printWarning    = true;
-      ncvars[ncvarid].timetype        = TIME_CONSTANT;
-      ncvars[ncvarid].param           = CDI_UNDEFID;
-      ncvars[ncvarid].code            = CDI_UNDEFID;
-      ncvars[ncvarid].tabnum          = 0;
-      ncvars[ncvarid].bounds          = CDI_UNDEFID;
-      ncvars[ncvarid].gridID          = CDI_UNDEFID;
-      ncvars[ncvarid].zaxisID         = CDI_UNDEFID;
-      ncvars[ncvarid].gridtype        = CDI_UNDEFID;
-      ncvars[ncvarid].zaxistype       = CDI_UNDEFID;
-      ncvars[ncvarid].xdim            = CDI_UNDEFID;
-      ncvars[ncvarid].ydim            = CDI_UNDEFID;
-      ncvars[ncvarid].zdim            = CDI_UNDEFID;
-      ncvars[ncvarid].xvarid          = CDI_UNDEFID;
-      ncvars[ncvarid].yvarid          = CDI_UNDEFID;
-      ncvars[ncvarid].rpvarid         = CDI_UNDEFID;
-      ncvars[ncvarid].zvarid          = CDI_UNDEFID;
-      ncvars[ncvarid].tvarid          = CDI_UNDEFID;
-      ncvars[ncvarid].psvarid         = CDI_UNDEFID;
-      ncvars[ncvarid].p0varid         = CDI_UNDEFID;
-      ncvars[ncvarid].ncoordvars      = 0;
-      for ( int i = 0; i < MAX_COORDVARS; ++i )
-        {
-          ncvars[ncvarid].coordvarids[i]  = CDI_UNDEFID;
-          ncvars[ncvarid].cvarids[i]      = CDI_UNDEFID;
-        }
-      ncvars[ncvarid].nauxvars      = 0;
-      for ( int i = 0; i < MAX_AUXVARS; ++i )
-        ncvars[ncvarid].auxvarids[i]  = CDI_UNDEFID;
-      ncvars[ncvarid].cellarea        = CDI_UNDEFID;
-      ncvars[ncvarid].tableID         = CDI_UNDEFID;
-      ncvars[ncvarid].xtype           = 0;
-      ncvars[ncvarid].ndims           = 0;
-      ncvars[ncvarid].gmapid          = CDI_UNDEFID;
-      ncvars[ncvarid].vctsize         = 0;
-      ncvars[ncvarid].vct             = NULL;
-      ncvars[ncvarid].truncation      = 0;
-      ncvars[ncvarid].position        = 0;
-      ncvars[ncvarid].numLPE          = 0;
-      ncvars[ncvarid].positive        = 0;
-      ncvars[ncvarid].chunked         = 0;
-      ncvars[ncvarid].chunktype       = CDI_UNDEFID;
-      ncvars[ncvarid].defmissval      = false;
-      ncvars[ncvarid].deffillval      = false;
-      ncvars[ncvarid].missval         = 0;
-      ncvars[ncvarid].fillval         = 0;
-      ncvars[ncvarid].addoffset       = 0;
-      ncvars[ncvarid].scalefactor     = 1;
-      ncvars[ncvarid].natts           = 0;
-      ncvars[ncvarid].atts            = NULL;
-      ncvars[ncvarid].ldeflate        = false;
-      ncvars[ncvarid].lszip           = false;
-      ncvars[ncvarid].lunsigned       = false;
-      ncvars[ncvarid].lvalidrange     = false;
-      ncvars[ncvarid].validrange[0]   = VALIDMISS;
-      ncvars[ncvarid].validrange[1]   = VALIDMISS;
-      ncvars[ncvarid].typeOfEnsembleForecast      = -1;
-      ncvars[ncvarid].numberOfForecastsInEnsemble = -1;
-      ncvars[ncvarid].perturbationNumber          = -1;
-      memset(ncvars[ncvarid].name, 0, CDI_MAX_NAME);
-      memset(ncvars[ncvarid].longname, 0, CDI_MAX_NAME);
-      memset(ncvars[ncvarid].stdname, 0, CDI_MAX_NAME);
-      memset(ncvars[ncvarid].units, 0, CDI_MAX_NAME);
-      memset(ncvars[ncvarid].extra, 0, CDI_MAX_NAME);
+      ncvar_t *ncvar = &ncvars[ncvarid];
+      ncvar->ncid            = CDI_UNDEFID;
+      ncvar->isvar           = CDI_UNDEFID;
+      ncvar->ignoreVar       = false;
+      ncvar->isCubeSphere    = false;
+      ncvar->isCharAxis      = false;
+      ncvar->isXaxis         = false;
+      ncvar->isYaxis         = false;
+      ncvar->isZaxis         = false;
+      ncvar->isTaxis         = false;
+      ncvar->isLon           = false;
+      ncvar->isLat           = false;
+      ncvar->isClimatology   = false;
+      ncvar->hasCalendar     = false;
+      ncvar->hasFormulaterms = false;
+      ncvar->printWarning    = true;
+      ncvar->timetype        = TIME_CONSTANT;
+      ncvar->param           = CDI_UNDEFID;
+      ncvar->code            = CDI_UNDEFID;
+      ncvar->tabnum          = 0;
+      ncvar->bounds          = CDI_UNDEFID;
+      ncvar->gridID          = CDI_UNDEFID;
+      ncvar->zaxisID         = CDI_UNDEFID;
+      ncvar->gridtype        = CDI_UNDEFID;
+      ncvar->zaxistype       = CDI_UNDEFID;
+      ncvar->xdim            = CDI_UNDEFID;
+      ncvar->ydim            = CDI_UNDEFID;
+      ncvar->zdim            = CDI_UNDEFID;
+      ncvar->xvarid          = CDI_UNDEFID;
+      ncvar->yvarid          = CDI_UNDEFID;
+      ncvar->rpvarid         = CDI_UNDEFID;
+      ncvar->zvarid          = CDI_UNDEFID;
+      ncvar->tvarid          = CDI_UNDEFID;
+      ncvar->psvarid         = CDI_UNDEFID;
+      ncvar->p0varid         = CDI_UNDEFID;
+      ncvar->ncoordvars      = 0;
+      for (int i = 0; i < MAX_COORDVARS; ++i) ncvar->coordvarids[i]  = CDI_UNDEFID;
+      for (int i = 0; i < MAX_COORDVARS; ++i) ncvar->cvarids[i]      = CDI_UNDEFID;
+      ncvar->nauxvars      = 0;
+      for (int i = 0; i < MAX_AUXVARS; ++i) ncvar->auxvarids[i]  = CDI_UNDEFID;
+      ncvar->cellarea        = CDI_UNDEFID;
+      ncvar->tableID         = CDI_UNDEFID;
+      ncvar->xtype           = 0;
+      ncvar->ndims           = 0;
+      ncvar->gmapid          = CDI_UNDEFID;
+      ncvar->vctsize         = 0;
+      ncvar->vct             = NULL;
+      ncvar->truncation      = 0;
+      ncvar->position        = 0;
+      ncvar->numLPE          = 0;
+      ncvar->positive        = 0;
+      ncvar->chunked         = 0;
+      ncvar->chunktype       = CDI_UNDEFID;
+      ncvar->defmissval      = false;
+      ncvar->deffillval      = false;
+      ncvar->missval         = 0;
+      ncvar->fillval         = 0;
+      ncvar->addoffset       = 0;
+      ncvar->scalefactor     = 1;
+      ncvar->natts           = 0;
+      ncvar->atts            = NULL;
+      ncvar->ldeflate        = false;
+      ncvar->lszip           = false;
+      ncvar->lunsigned       = false;
+      ncvar->lvalidrange     = false;
+      ncvar->validrange[0]   = VALIDMISS;
+      ncvar->validrange[1]   = VALIDMISS;
+      ncvar->typeOfEnsembleForecast      = -1;
+      ncvar->numberOfForecastsInEnsemble = -1;
+      ncvar->perturbationNumber          = -1;
+      memset(ncvar->name, 0, CDI_MAX_NAME);
+      memset(ncvar->longname, 0, CDI_MAX_NAME);
+      memset(ncvar->stdname, 0, CDI_MAX_NAME);
+      memset(ncvar->units, 0, CDI_MAX_NAME);
+      memset(ncvar->extra, 0, CDI_MAX_NAME);
     }
 }
 
@@ -728,16 +726,15 @@ void cdf_set_var(ncvar_t *ncvar, short isvar)
 }
 
 static
-void cdf_set_dim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
+void cdf_set_dim(ncvar_t *ncvar, int dimid, int dimtype)
 {
-  if ( ncvars[ncvarid].dimtype[dimid] != CDI_UNDEFID &&
-       ncvars[ncvarid].dimtype[dimid] != dimtype )
+  if (ncvar->dimtype[dimid] != CDI_UNDEFID && ncvar->dimtype[dimid] != dimtype)
     {
       Warning("Inconsistent dimension definition for %s! dimid = %d;  type = %d;  newtype = %d",
-              ncvars[ncvarid].name, dimid, ncvars[ncvarid].dimtype[dimid], dimtype);
+              ncvar->name, dimid, ncvar->dimtype[dimid], dimtype);
     }
 
-  ncvars[ncvarid].dimtype[dimid] = dimtype;
+  ncvar->dimtype[dimid] = dimtype;
 }
 
 static
@@ -1001,12 +998,12 @@ void cdfScanAttrAxis(ncvar_t *ncvars, ncdim_t *ncdims, int ncvarid, const char *
       if (attchr == 't')
         {
           if (attlen != 0) Warning("axis attribute 't' not on first position!");
-          cdf_set_dim(ncvars, ncvarid, attlen, T_AXIS);
+          cdf_set_dim(ncvar, attlen, T_AXIS);
         }
       else if (attchr == 'z')
         {
           ncvar->zdim = dimidsp[attlen];
-          cdf_set_dim(ncvars, ncvarid, attlen, Z_AXIS);
+          cdf_set_dim(ncvar, attlen, Z_AXIS);
 
           if (ncvar->ndims == 1)
             {
@@ -1017,7 +1014,7 @@ void cdfScanAttrAxis(ncvar_t *ncvars, ncdim_t *ncdims, int ncvarid, const char *
       else if (attchr == 'y')
         {
           ncvar->ydim = dimidsp[attlen];
-          cdf_set_dim(ncvars, ncvarid, attlen, Y_AXIS);
+          cdf_set_dim(ncvar, attlen, Y_AXIS);
 
           if (ncvar->ndims == 1)
             {
@@ -1028,7 +1025,7 @@ void cdfScanAttrAxis(ncvar_t *ncvars, ncdim_t *ncdims, int ncvarid, const char *
       else if (attchr == 'x')
         {
           ncvar->xdim = dimidsp[attlen];
-          cdf_set_dim(ncvars, ncvarid, attlen, X_AXIS);
+          cdf_set_dim(ncvar, attlen, X_AXIS);
 
           if (ncvar->ndims == 1)
             {
@@ -1167,7 +1164,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
           if ( timedimid == dimidsp[0] )
             {
               ncvar->timetype = TIME_VARYING;
-              cdf_set_dim(ncvars, ncvarid, 0, T_AXIS);
+              cdf_set_dim(ncvar, 0, T_AXIS);
             }
           else
             {
@@ -1465,7 +1462,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
               if ( ncvar->ndims == 1 )
                 {
                   cdf_set_var(ncvar, FALSE);
-                  cdf_set_dim(ncvars, ncvarid, 0, Z_AXIS);
+                  cdf_set_dim(ncvar, 0, Z_AXIS);
                   ncdims[ncvar->dimids[0]].dimtype = Z_AXIS;
                 }
               else if ( ncvar->ndims == 0 )
@@ -1646,7 +1643,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	      int ncdimid = ncvar->dimids[i];
               int dimtype = ncdims[ncdimid].dimtype;
 	      if (dimtype >= X_AXIS && dimtype <= T_AXIS)
-                cdf_set_dim(ncvars, ncvarid, i, dimtype);
+                cdf_set_dim(ncvar, i, dimtype);
 	    }
 
 	  if ( CDI_Debug )
@@ -1697,7 +1694,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                         lcdim--;
                         ncvars[cdimvar].zaxistype = ZAXIS_CHAR;
                       }
-                    cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
+                    cdf_set_dim(ncvar, i, Z_AXIS);
                     lzdim = true;
                     int ncdimid = ncvar->dimids[i];
                     if ( ncdims[ncdimid].dimtype == CDI_UNDEFID )
@@ -1719,7 +1716,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
               if ( ncdims[ncdimid].dimtype == Z_AXIS )
                 {
                   ncvar->isZaxis = true;
-                  cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
+                  cdf_set_dim(ncvar, i, Z_AXIS);
                 }
             }
         }
@@ -1764,7 +1761,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                             ncvar->xvarid = cdimvar;
                             lcdim--;
                           }
-                        cdf_set_dim(ncvars, ncvarid, i, X_AXIS);
+                        cdf_set_dim(ncvar, i, X_AXIS);
                         lxdim = true;
                       }
                     else if ( !lydim && ncvar->gridtype != GRID_UNSTRUCTURED )
@@ -1775,7 +1772,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                             ncvar->yvarid = cdimvar;
                             lcdim--;
                           }
-                        cdf_set_dim(ncvars, ncvarid, i, Y_AXIS);
+                        cdf_set_dim(ncvar, i, Y_AXIS);
                         lydim = true;
                       }
                     else if ( !lzdim )
@@ -1787,7 +1784,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                             lcdim--;
 		            ncvars[cdimvar].zaxistype = ZAXIS_CHAR;
                           }
-                        cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
+                        cdf_set_dim(ncvar, i, Z_AXIS);
                         lzdim = true;
                       }
                   }
@@ -1825,28 +1822,28 @@ void verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *nc
 		{
 		  ncvar->isLon = true;
 		  cdf_set_var(ncvar, FALSE);
-		  cdf_set_dim(ncvars, ncvarid, 0, X_AXIS);
+		  cdf_set_dim(ncvar, 0, X_AXIS);
 		  ncdims[ncdimid].dimtype = X_AXIS;
 		}
 	      else if ( is_lat_axis(ncvar->units, ncvar->stdname) )
 		{
 		  ncvar->isLat = true;
 		  cdf_set_var(ncvar, FALSE);
-		  cdf_set_dim(ncvars, ncvarid, 0, Y_AXIS);
+		  cdf_set_dim(ncvar, 0, Y_AXIS);
 		  ncdims[ncdimid].dimtype = Y_AXIS;
 		}
 	      else if ( is_x_axis(ncvar->units, ncvar->stdname) )
 		{
 		  ncvar->isXaxis = true;
 		  cdf_set_var(ncvar, FALSE);
-		  cdf_set_dim(ncvars, ncvarid, 0, X_AXIS);
+		  cdf_set_dim(ncvar, 0, X_AXIS);
 		  ncdims[ncdimid].dimtype = X_AXIS;
 		}
 	      else if ( is_y_axis(ncvar->units, ncvar->stdname) )
 		{
 		  ncvar->isYaxis = true;
 		  cdf_set_var(ncvar, FALSE);
-		  cdf_set_dim(ncvars, ncvarid, 0, Y_AXIS);
+		  cdf_set_dim(ncvar, 0, Y_AXIS);
 		  ncdims[ncdimid].dimtype = Y_AXIS;
 		}
 	      else if ( is_pressure_units(ncvar->units) )
@@ -1897,7 +1894,7 @@ void verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *nc
 		{
 		  ncvar->isLon = true;
 		  cdf_set_var(ncvar, FALSE);
-		  cdf_set_dim(ncvars, ncvarid, 0, X_AXIS);
+		  cdf_set_dim(ncvar, 0, X_AXIS);
 		  ncdims[ncdimid].dimtype = X_AXIS;
 		  continue;
 		}
@@ -1905,7 +1902,7 @@ void verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *nc
 		{
 		  ncvar->isLat = true;
 		  cdf_set_var(ncvar, FALSE);
-		  cdf_set_dim(ncvars, ncvarid, 0, Y_AXIS);
+		  cdf_set_dim(ncvar, 0, Y_AXIS);
 		  ncdims[ncdimid].dimtype = Y_AXIS;
 		  continue;
 		}
@@ -1915,7 +1912,7 @@ void verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *nc
 	    {
               ncvar->isZaxis = true;
 	      cdf_set_var(ncvar, FALSE);
-	      cdf_set_dim(ncvars, ncvarid, 0, Z_AXIS);
+	      cdf_set_dim(ncvar, 0, Z_AXIS);
 	      ncdims[ncdimid].dimtype = Z_AXIS;
 	    }
 	}
