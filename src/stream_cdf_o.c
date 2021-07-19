@@ -607,21 +607,18 @@ void cdfDefGridReference(stream_t *streamptr, int gridID)
 static
 void cdfDefGridUUID(stream_t *streamptr, int gridID)
 {
-  unsigned char uuidOfHGrid[CDI_UUID_SIZE];
-  size_t len = CDI_UUID_SIZE;
-  memset(uuidOfHGrid, 0, len);
+  unsigned char uuid[CDI_UUID_SIZE] = { 0 };
   int length = CDI_UUID_SIZE;
-  cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfHGrid, &length);
-  if ( !cdiUUIDIsNull(uuidOfHGrid) )
+  cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
+  if (!cdiUUIDIsNull(uuid))
     {
-      char uuidOfHGridStr[37];
-      cdiUUID2Str(uuidOfHGrid, uuidOfHGridStr);
-      if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
+      char uuidStr[uuidNumHexChars + 1] = { 0 };
+      if (cdiUUID2Str(uuid, uuidStr) == uuidNumHexChars)
         {
-          int fileID  = streamptr->fileID;
-          //if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfHGrid", 36, uuidOfHGridStr);
-          //if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+          const int fileID  = streamptr->fileID;
+          //if (streamptr->ncmode == 2) cdf_redef(fileID);
+          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfHGrid", uuidNumHexChars, uuidStr);
+          //if (streamptr->ncmode == 2  cdf_enddef(fileID);
         }
     }
 }
@@ -1370,20 +1367,18 @@ void cdf_def_zaxis_hybrid(stream_t *streamptr, int type, int *ncvarid, int zaxis
 static
 void cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
 {
-  unsigned char uuidOfVGrid[CDI_UUID_SIZE];
+  unsigned char uuid[CDI_UUID_SIZE] = { 0 };
   int length = CDI_UUID_SIZE;
-  memset(uuidOfVGrid, 0, length);
-  cdiInqKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfVGrid, &length);
-  if ( uuidOfVGrid[0] != 0 )
+  cdiInqKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
+  if (!cdiUUIDIsNull(uuid))
     {
-      char uuidOfVGridStr[37];
-      cdiUUID2Str(uuidOfVGrid, uuidOfVGridStr);
-      if ( uuidOfVGridStr[0] != 0 && strlen(uuidOfVGridStr) == 36 )
+      char uuidStr[uuidNumHexChars + 1] = { 0 };
+      if (cdiUUID2Str(uuid, uuidStr) == uuidNumHexChars)
         {
           const int fileID  = streamptr->fileID;
-          if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfVGrid", 36, uuidOfVGridStr);
-          if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+          if (streamptr->ncmode == 2) cdf_redef(fileID);
+          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfVGrid", uuidNumHexChars, uuidStr);
+          if (streamptr->ncmode == 2) cdf_enddef(fileID);
         }
     }
 }

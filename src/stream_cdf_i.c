@@ -2724,7 +2724,7 @@ bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *yd
 
   if (gridInfo->number_of_grid_used != CDI_UNDEFID) cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED, gridInfo->number_of_grid_used);
   if (ncvar->position > 0) cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE, ncvar->position);
-  if (gridInfo->uuid[0] != 0) cdiDefVarKeyBytes(&grid->keys, CDI_KEY_UUID, gridInfo->uuid, CDI_UUID_SIZE);
+  if (!cdiUUIDIsNull(gridInfo->uuid)) cdiDefVarKeyBytes(&grid->keys, CDI_KEY_UUID, gridInfo->uuid, CDI_UUID_SIZE);
 
   return false;
 }
@@ -3133,7 +3133,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
           if (pstdname && *pstdname)
             cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_STDNAME, (const unsigned  char*)pstdname, (int)strlen(pstdname)+1);
 
-          if (uuidOfVGrid[0] != 0)
+          if (!cdiUUIDIsNull(uuidOfVGrid))
             cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuidOfVGrid, CDI_UUID_SIZE);
 
           if (zaxisType == ZAXIS_HYBRID)
@@ -3631,7 +3631,6 @@ void cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int 
 		{
                   attstring[36] = 0;
                   cdiStr2UUID(attstring, gridInfo->uuid);
-                  //   printf("uuid: %d %s\n", attlen, attstring);
 		}
 	      else if ( strIsEqual(attname, "uuidOfVGrid") && attstrlen == 36 )
 		{
@@ -4074,8 +4073,7 @@ int cdfInqContents(stream_t *streamptr)
   int instID  = CDI_UNDEFID;
   int modelID = CDI_UNDEFID;
   bool ucla_les = false;
-  unsigned char uuidOfVGrid[CDI_UUID_SIZE];
-  memset(uuidOfVGrid, 0, CDI_UUID_SIZE);
+  unsigned char uuidOfVGrid[CDI_UUID_SIZE] = { 0 };
   cdf_scan_global_attr(fileID, vlistID, ngatts, &instID, &modelID, &ucla_les, uuidOfVGrid, &gridInfo);
 
   // find time dim

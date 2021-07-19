@@ -19,15 +19,10 @@ static const char uuidFmt[] = "%02hhx%02hhx%02hhx%02hhx-"
   "%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-"
   "%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx";
 
-enum {
-  uuidNumHexChars = 36,
-};
 
-
-void cdiUUID2Str(const unsigned char *uuid, char *uuidstr)
+int cdiUUID2Str(const unsigned char *uuid, char *uuidstr)
 {
-
-  if ( uuid == NULL || uuidstr == NULL ) return;
+  if (uuid == NULL || uuidstr == NULL) return 0;
 
   int iret = sprintf(uuidstr, uuidFmt,
                      uuid[0], uuid[1], uuid[2], uuid[3],
@@ -35,21 +30,27 @@ void cdiUUID2Str(const unsigned char *uuid, char *uuidstr)
                      uuid[8], uuid[9], uuid[10], uuid[11],
                      uuid[12], uuid[13], uuid[14], uuid[15]);
 
-  if ( iret != uuidNumHexChars ) uuidstr[0] = 0;
+  if (iret != uuidNumHexChars)
+    {
+      uuidstr[0] = 0;
+      iret = -1;
+    }
+
+  return iret;
 }
 
 
 int cdiStr2UUID(const char *uuidstr, unsigned char *uuid)
 {
-  if ( uuid == NULL || uuidstr == NULL || strlen(uuidstr) != uuidNumHexChars)
-    return -1;
+  if (uuid == NULL || uuidstr == NULL || strlen(uuidstr) != uuidNumHexChars) return -1;
 
   int iret = sscanf(uuidstr, uuidFmt,
                     &uuid[0], &uuid[1], &uuid[2], &uuid[3],
                     &uuid[4], &uuid[5], &uuid[6], &uuid[7],
                     &uuid[8], &uuid[9], &uuid[10], &uuid[11],
                     &uuid[12], &uuid[13], &uuid[14], &uuid[15]);
-  if ( iret != CDI_UUID_SIZE ) return -1;
+  if (iret != CDI_UUID_SIZE) return -1;
+
   return iret;
 }
 

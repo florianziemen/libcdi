@@ -2,41 +2,36 @@
 #define CDI_UUID_H
 
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include "cdi.h"
 
-
+// clang-format off
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-static inline int cdiUUIDIsNull(const unsigned char uuid[])
+enum {
+  uuidNumHexChars = 36,
+};
+
+static inline
+int cdiUUIDIsNull(const unsigned char uuid[])
 {
   int isNull = 1;
-  for (size_t i = 0; i < CDI_UUID_SIZE; ++i)
-    isNull &= (uuid[i] == 0);
+  for (size_t i = 0; i < CDI_UUID_SIZE; ++i) isNull &= (uuid[i] == 0);
   return isNull;
 }
 
 void cdiCreateUUID(unsigned char uuid[CDI_UUID_SIZE]);
 
-void cdiUUID2Str(const unsigned char uuid[], char uuidstr[]);
+int cdiUUID2Str(const unsigned char uuid[], char uuidstr[]);
 int cdiStr2UUID(const char *uuidstr, unsigned char uuid[]);
 
-#if defined (__cplusplus)
+#ifdef __cplusplus
 }
 #endif
+// clang-format on
 
 #endif
-
-/*
- * Local Variables:
- * c-file-style: "Java"
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * show-trailing-whitespace: t
- * require-trailing-newline: t
- * End:
- */

@@ -2319,13 +2319,13 @@ bool compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool coord_
 {
   bool differ = false;
 
-  unsigned char uuid1[CDI_UUID_SIZE]; memset(uuid1, 0, CDI_UUID_SIZE);
-  unsigned char uuid2[CDI_UUID_SIZE]; memset(uuid2, 0, CDI_UUID_SIZE);
+  unsigned char uuid1[CDI_UUID_SIZE] = { 0 };
+  unsigned char uuid2[CDI_UUID_SIZE] = { 0 };
   int length = CDI_UUID_SIZE;
   cdiInqVarKeyBytes(&gridRef->keys, CDI_KEY_UUID, uuid1, &length);
   length = CDI_UUID_SIZE;
   cdiInqVarKeyBytes(&grid->keys, CDI_KEY_UUID, uuid2, &length);
-  differ = ((uuid1[0] || uuid2[0]) && memcmp(uuid1, uuid2, CDI_UUID_SIZE));
+  differ = ((!cdiUUIDIsNull(uuid1) || !cdiUUIDIsNull(uuid2)) && memcmp(uuid1, uuid2, CDI_UUID_SIZE));
   if (!differ)
     {
       int numberA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED);
@@ -2582,8 +2582,8 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   else if ( g2->mask_gme )
     return differ;
 
-  unsigned char uuid1[CDI_UUID_SIZE]; memset(uuid1, 0, CDI_UUID_SIZE);
-  unsigned char uuid2[CDI_UUID_SIZE]; memset(uuid2, 0, CDI_UUID_SIZE);
+  unsigned char uuid1[CDI_UUID_SIZE] = { 0 };
+  unsigned char uuid2[CDI_UUID_SIZE] = { 0 };
   int length = CDI_UUID_SIZE;
   cdiInqVarKeyBytes(&g1->keys, CDI_KEY_UUID, uuid1, &length);
   length = CDI_UUID_SIZE;
