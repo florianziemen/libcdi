@@ -5,6 +5,10 @@
 
 2021-07-19  Uwe Schulzweida
 
+	* instituteCompareKernel(): compare full lenght of longnames
+
+2021-07-19  Uwe Schulzweida
+
 	* Allow UUID starting with zero (bug fix)
 
 2021-07-12  Uwe Schulzweida
