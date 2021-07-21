@@ -102,7 +102,7 @@ instituteCompareKernel(institute_t *ip1, institute_t *ip2)
         {
           const size_t len1 = strlen(ip1->longname);
           const size_t len2 = strlen(ip2->longname);
-          if ( (len1 < len2) || memcmp(ip2->longname, ip1->longname, len2) ) differ = 1;
+          if ( (len1 != len2) || memcmp(ip2->longname, ip1->longname, len2) ) differ = 1;
         }
     }
   else
