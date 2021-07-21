@@ -125,8 +125,8 @@ struct instLoc
 static enum cdiApplyRet
 findInstitute(int id, void *res, void *data)
 {
-  institute_t * ip1 = ((struct instLoc *)data)->ip;
-  institute_t * ip2 = (institute_t*) res;
+  institute_t *ip1 = ((struct instLoc *)data)->ip;
+  institute_t *ip2 = (institute_t*) res;
   if (ip2->used && !instituteCompareKernel(ip1, ip2))
     {
       ((struct instLoc *)data)->id = id;
@@ -139,18 +139,16 @@ findInstitute(int id, void *res, void *data)
 
 int institutInq(int center, int subcenter, const char *name, const char *longname)
 {
-  institute_t * ip_ref = (institute_t *) Malloc(sizeof (*ip_ref));
-  ip_ref->self       = CDI_UNDEFID;
-  ip_ref->used       = 0;
-  ip_ref->center     = center;
-  ip_ref->subcenter  = subcenter;
-  ip_ref->name       = name && name[0] ? (char *)name : NULL;
-  ip_ref->longname   = longname && longname[0] ? (char *)longname : NULL;
+  institute_t ip_ref;
+  ip_ref.self       = CDI_UNDEFID;
+  ip_ref.used       = 0;
+  ip_ref.center     = center;
+  ip_ref.subcenter  = subcenter;
+  ip_ref.name       = (name && name[0]) ? (char *)name : NULL;
+  ip_ref.longname   = (longname && longname[0]) ? (char *)longname : NULL;
 
-  struct instLoc state = { .ip = ip_ref, .id = CDI_UNDEFID };
+  struct instLoc state = { .ip = &ip_ref, .id = CDI_UNDEFID };
   cdiResHFilterApply(&instituteOps, findInstitute, &state);
-
-  Free(ip_ref);
 
   return state.id;
 }
