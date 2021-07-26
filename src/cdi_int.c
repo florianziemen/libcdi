@@ -122,6 +122,10 @@ void cdiPrintDefaults(void)
           CDI_Default_ModelID, CDI_Default_TableID, CDI_Default_Missval);
 }
 
+#ifdef  HAVE_LIBFDB5
+#include <fdb5/fdb5_config.h>
+#endif
+
 void cdiPrintVersion(void)
 {
   fprintf(stderr, "     CDI library version : %s\n", cdiLibraryVersion());
@@ -141,6 +145,9 @@ void cdiPrintVersion(void)
   fprintf(stderr, "    exse library version : %s\n", srvLibraryVersion());
 #endif
   fprintf(stderr, "    FILE library version : %s\n", fileLibraryVersion());
+#ifdef  HAVE_LIBFDB5
+  fprintf(stderr, "    FDB5 library version : %s\n", fdb5_version());
+#endif
 }
 
 static

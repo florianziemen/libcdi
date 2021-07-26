@@ -31,6 +31,10 @@
         "fclibs"   : "@MPI_FC_LIB@",
         "fcflags"  : "@MPI_FC_INCLUDE@"
       },
+      "fdb5"    : {
+        "lib"      : "@FDB5_LIBS@",
+        "include"  : "@FDB5_INCLUDE@"
+      },
       "szlib"    : {
         "lib"      : "@SZLIB_LIBS@",
         "include"  : "@SZLIB_INCLUDE@"
