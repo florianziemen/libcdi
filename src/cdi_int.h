@@ -313,6 +313,9 @@ typedef struct {
   void       *jobManager;
 
   void *gh; // grib handle
+
+  bool        fdbRetrieve;
+  bool        fdbStore;
 }
 stream_t;
 

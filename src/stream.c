@@ -6,6 +6,10 @@
 #define _XOPEN_SOURCE 600
 #endif
 
+#ifdef HAVE_LIBFDB5
+#include <fdb5/api/fdb_c.h>
+#endif
+
 #include <sys/stat.h> // struct stat
 #include <ctype.h>
 
@@ -441,6 +445,37 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
   int fileID;
   char temp[2] = { filemode, 0 };
 
+  int pathlen = (int)strlen(filename);
+  const bool fdbRetrieve = (pathlen > 4 && filemode == 'r' && memcmp(filename, "fdb:", 4) == 0);
+  const bool fdbStore    = (pathlen > 4 && filemode == 'w' && memcmp(filename, "fdb:", 4) == 0);
+
+#ifndef HAVE_LIBFDB5
+  if (fdbRetrieve || fdbStore)
+    {
+      Message("FDB5 support not compiled in!");
+      return CDI_ELIBNAVAIL;
+    }
+#endif
+
+  if (fdbStore)
+    {
+      if (filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_GRB2)
+        {
+#ifdef HAVE_LIBFDB5
+          Message("fdb_initialise()");
+          fdb_initialise();
+          streamptr->fdbStore = true;
+#endif
+          streamptr->filetype = filetype;
+          return 99;
+        }
+      else
+        {
+          Message("Output format must be GRIB to store data to FDB.");
+          return -2;
+        }
+    }
+
   switch (filetype)
     {
 #if defined(HAVE_LIBGRIB) && (defined(HAVE_LIBCGRIBEX) || defined(HAVE_LIBGRIB_API))
@@ -547,7 +582,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
 int streamOpenID(const char *filename, char filemode, int filetype, int resH)
 {
   if ( CDI_Debug )
-    Message("Open %s mode %c file %s", strfiletype(filetype), filemode, filename?filename:"(NUL)");
+    Message("Open %s mode %c file %s", strfiletype(filetype), filemode, filename ? filename : "(NUL)");
 
   if ( ! filename || filetype < 0 ) return CDI_EINVAL;
 
@@ -580,7 +615,7 @@ int streamOpenID(const char *filename, char filemode, int filetype, int resH)
 
           cdiVlistMakeInternal(vlistID);
           streamptr->vlistID = vlistID;
-          /* cdiReadByteorder(streamID); */
+          // cdiReadByteorder(streamID);
           int status = cdiInqContents(streamptr);
           if ( status < 0 )
             {
@@ -855,7 +890,7 @@ int streamOpenWrite(const char *filename, int filetype)
 }
 
 static
-void streamDefaultValue ( stream_t * streamptr )
+void streamDefaultValue(stream_t * streamptr)
 {
   streamptr->self              = CDI_UNDEFID;
   streamptr->accesstype        = CDI_UNDEFID;
@@ -917,6 +952,9 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->cachedTsID        = -1;
   streamptr->jobs              = NULL;
   streamptr->jobManager        = NULL;
+
+  streamptr->fdbRetrieve       = false;
+  streamptr->fdbStore          = false;
 }
 
 static
@@ -941,9 +979,12 @@ stream_t *stream_new_entry(int resH)
 
 void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
+  if (streamptr->fdbStore || streamptr->fdbRetrieve) return;
+
   int fileID   = streamptr->fileID;
   int filetype = streamptr->filetype;
-  if ( fileID == CDI_UNDEFID )
+
+  if (fileID == CDI_UNDEFID)
     Warning("File %s not open!", streamptr->filename);
   else
     switch (cdiBaseFiletype(filetype))
@@ -1045,8 +1086,7 @@ void streamClose(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  if ( CDI_Debug )
-    Message("streamID = %d filename = %s", streamID, streamptr->filename);
+  if (CDI_Debug) Message("streamID = %d filename = %s", streamID, streamptr->filename);
 
   const int vlistID  = streamptr->vlistID;
 

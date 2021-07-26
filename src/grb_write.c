@@ -4,6 +4,10 @@
 
 #ifdef HAVE_LIBGRIB
 
+#ifdef HAVE_LIBFDB5
+#include <fdb5/api/fdb_c.h>
+#endif
+
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -90,6 +94,36 @@ size_t grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
   Free(buffer);
 
   return nbytes;
+}
+
+
+void cdi_fdb_store(void *gribbuffer, size_t nbytes)
+{
+#ifdef HAVE_LIBFDB5
+  Message("cdi_fdb_store()");
+  fdb_handle_t *fdb;
+  fdb_new_handle(&fdb);
+
+  fdb_key_t *key;
+  fdb_new_key(&key);
+  fdb_key_add(key, "class", "ea");
+  fdb_key_add(key, "expver", "0001");
+  fdb_key_add(key, "stream", "oper");
+  fdb_key_add(key, "date", "20180603");
+  fdb_key_add(key, "time", "0000");
+  fdb_key_add(key, "type", "an");
+  fdb_key_add(key, "levtype", "ml");
+  fdb_key_add(key, "step", "0");
+  fdb_key_add(key, "param", "8");
+  fdb_key_add(key, "domain", "g");
+  fdb_key_add(key, "levelist", "1");
+
+  // Message("fdb_archive()");
+  // fdb_archive(fdb, key, gribbuffer, nbytes);
+
+  fdb_delete_key(key);
+  fdb_delete_handle(fdb);
+#endif
 }
 
 
@@ -187,22 +221,29 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 #endif // HIRLAM_EXTENSIONS
 #endif
 
-  if ( filetype == CDI_FILETYPE_GRB )
+  if (filetype == CDI_FILETYPE_GRB)
     {
       size_t unzipsize;
       const int izip = gribGetZip(recsize, gribbuffer, &unzipsize);
 
-      if ( izip == 0 && (streamptr2->comptype == CDI_COMPRESS_SZIP || streamptr2->comptype == CDI_COMPRESS_AEC) )
-          nbytes = grbSzip(filetype, gribbuffer, nbytes);
+      if (izip == 0 && (streamptr2->comptype == CDI_COMPRESS_SZIP || streamptr2->comptype == CDI_COMPRESS_AEC))
+        nbytes = grbSzip(filetype, gribbuffer, nbytes);
     }
 
-  while ( nbytes & 7 ) gribbuffer[nbytes++] = 0;
+  while (nbytes & 7) gribbuffer[nbytes++] = 0;
 
-  const size_t nwrite = fileWrite(fileID2, gribbuffer, nbytes);
-  if ( nwrite != nbytes )
+  if (streamptr2->fdbStore)
     {
-      perror(__func__);
-      Error("Could not write record for copying!");
+      cdi_fdb_store(gribbuffer, nbytes);
+    }
+  else
+    {
+      const size_t nwrite = fileWrite(fileID2, gribbuffer, nbytes);
+      if (nwrite != nbytes)
+        {
+          perror(__func__);
+          Error("Could not write record for copying!");
+        }
     }
 
   Free(gribbuffer);
@@ -226,8 +267,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   int time      = streamptr->tsteps[tsID].taxis.vtime;
   int numavg    = (tsteptype == TSTEP_AVG) ? streamptr->tsteps[tsID].taxis.numavg : 0;
 
-  if ( CDI_Debug )
-    Message("gridID = %d zaxisID = %d", gridID, zaxisID);
+  if (CDI_Debug) Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
   size_t datasize = gridInqSize(gridID);
 
@@ -262,18 +302,25 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   if ( filetype == CDI_FILETYPE_GRB && (streamptr->comptype == CDI_COMPRESS_SZIP || streamptr->comptype == CDI_COMPRESS_AEC) )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
-  size_t (*myFileWrite)(int fileID, const void *restrict buffer, size_t len, int tsID)
-    = (size_t (*)(int, const void *restrict, size_t, int))
+  size_t (*myFileWrite)(int fileID, const void *restrict buffer, size_t len)
+    = (size_t (*)(int, const void *restrict, size_t))
     namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
 
-  const size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes, tsID);
-  if ( nwrite != nbytes )
+  if (streamptr->fdbStore)
     {
-      perror(__func__);
-      Error("Failed to write GRIB slice!");
+      cdi_fdb_store(gribbuffer, nbytes);
+    }
+  else
+    {
+      const size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes);
+      if (nwrite != nbytes)
+        {
+          perror(__func__);
+          Error("Failed to write GRIB slice!");
+        }
     }
 
-  if ( gribbuffer ) Free(gribbuffer);
+  if (gribbuffer) Free(gribbuffer);
 }
 
 
