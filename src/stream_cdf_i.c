@@ -1767,9 +1767,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                         cdf_set_dim(ncvar, i, X_AXIS);
                         lxdim = true;
                       }
-                  // Use second condition for GRID_UNSTRUCTURED check:
-                    else if ( !lydim && 
-                               ncvars[ncvar->xvarid].dimids[0] != ncvars[ncvar->yvarid].dimids[0])
+                    else if ( !lydim && ncvar->gridtype != GRID_UNSTRUCTURED )
                       {
                         if ( lcdim && ncvar->yvarid == CDI_UNDEFID )
                           {
