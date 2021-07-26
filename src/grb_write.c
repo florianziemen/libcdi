@@ -262,11 +262,11 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   if ( filetype == CDI_FILETYPE_GRB && (streamptr->comptype == CDI_COMPRESS_SZIP || streamptr->comptype == CDI_COMPRESS_AEC) )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
-  size_t (*myFileWrite)(int fileID, const void *restrict buffer, size_t len, int tsID)
-    = (size_t (*)(int, const void *restrict, size_t, int))
+  size_t (*myFileWrite)(int fileID, const void *restrict buffer, size_t len)
+    = (size_t (*)(int, const void *restrict, size_t))
     namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
 
-  const size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes, tsID);
+  const size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes);
   if ( nwrite != nbytes )
     {
       perror(__func__);
