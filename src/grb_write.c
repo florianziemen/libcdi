@@ -81,7 +81,7 @@ size_t grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
   size_t buffersize = gribbuffersize + 1000; /* compressed record can be greater than source record */
   void *buffer = Malloc(buffersize);
 
-  /*  memcpy(buffer, gribbuffer, gribbuffersize); */
+  // memcpy(buffer, gribbuffer, gribbuffersize);
 
   size_t nbytes = 0;
   if ( filetype == CDI_FILETYPE_GRB )
@@ -104,7 +104,7 @@ size_t grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
 
 typedef struct
 {
-  char date[8];
+  char date[16];
   char time[8];
   char param[8];
   char levtype[8];
@@ -142,7 +142,7 @@ void cdi_fdb_store(void *gribbuffer, size_t nbytes, const FDB_Keys *fdbKeys)
   if (fdbKeys->levelist[0]) fdb_key_add(key, "levelist", fdbKeys->levelist);
 
   // Message("fdb_archive()");
-  // fdb_archive(fdb, key, gribbuffer, nbytes);
+  fdb_archive(fdb, key, gribbuffer, nbytes);
 
   fdb_delete_key(key);
   fdb_delete_handle(fdb);
