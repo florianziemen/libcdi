@@ -706,7 +706,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 #endif
       {
         fileID = gribOpen(filename, filemode);
-        if ( fileID != CDI_UNDEFID ) gribContainersNew(streamptr);
+        if (fileID != CDI_UNDEFID) gribContainersNew(streamptr);
 	break;
       }
 #endif

@@ -24,7 +24,7 @@ static
 size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		 int date, int time, int tsteptype, int numavg,
 		 size_t datasize, const void *data, size_t nmiss, void **gribbuffer,
-		 int comptype, void *gribContainer)
+		 int comptype, void *gribContainers)
 {
   size_t nbytes = 0;
 
@@ -42,6 +42,11 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
 #endif
 #ifdef HAVE_LIBGRIB_API
     {
+#ifdef GRIBCONTAINER2D
+      void *gribContainer = (void *) &((gribContainer_t **)gribContainers)[varID][levelID];
+#else
+      void *gribContainer = (void *) &((gribContainer_t *)gribContainers)[varID];
+#endif
       const void *datap = data;
       if ( memtype == MEMTYPE_FLOAT )
         {
@@ -62,7 +67,7 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
 #else
     {
       Error("ecCodes support not compiled in!");
-      (void)gribContainer;
+      (void)gribContainers;
       (void)comptype;
     }
 #endif
@@ -314,9 +319,6 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 
 void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t nmiss)
 {
-  void *gribbuffer = NULL;
-  void *gc = NULL;
-
   const int filetype = streamptr->filetype;
   const int fileID = streamptr->fileID;
   const int vlistID = streamptr->vlistID;
@@ -331,37 +333,22 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 
   if (CDI_Debug) Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
-  size_t datasize = gridInqSize(gridID);
+  const size_t datasize = gridInqSize(gridID);
 
-#ifdef HAVE_LIBCGRIBEX
-  if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
+  if (comptype != CDI_COMPRESS_JPEG && comptype != CDI_COMPRESS_SZIP && comptype != CDI_COMPRESS_AEC) comptype = CDI_COMPRESS_NONE;
+
+  if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 && comptype == CDI_COMPRESS_JPEG)
     {
-    }
-  else
-#endif
-    {
-#ifdef GRIBCONTAINER2D
-      gribContainer_t **gribContainers =  (gribContainer_t **) streamptr->gribContainers;
-      gc = (void *) &gribContainers[varID][levelID];
-#else
-      gribContainer_t *gribContainers =  (gribContainer_t *) streamptr->gribContainers;
-      gc = (void *) &gribContainers[varID];
-#endif
+      static bool ljpeg_warn = true;
+      if (ljpeg_warn) Warning("JPEG compression of GRIB1 records not available!");
+      ljpeg_warn = false;
     }
 
-  if ( comptype != CDI_COMPRESS_JPEG && comptype != CDI_COMPRESS_SZIP && comptype != CDI_COMPRESS_AEC ) comptype = CDI_COMPRESS_NONE;
-
-  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 && comptype == CDI_COMPRESS_JPEG )
-    {
-      static int ljpeg_warn = 1;
-      if ( ljpeg_warn ) Warning("JPEG compression of GRIB1 records not available!");
-      ljpeg_warn = 0;
-    }
-
+  void *gribbuffer = NULL;
   size_t nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg,
-                            datasize, data, nmiss, &gribbuffer, comptype, gc);
+                            datasize, data, nmiss, &gribbuffer, comptype, streamptr->gribContainers);
 
-  if ( filetype == CDI_FILETYPE_GRB && (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC) )
+  if (filetype == CDI_FILETYPE_GRB && (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC))
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
   if (streamptr->fdbStore)
@@ -401,14 +388,14 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 
 void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t nmiss)
 {
-  int vlistID  = streamptr->vlistID,
+  const int vlistID  = streamptr->vlistID,
     gridID   = vlistInqVarGrid(vlistID, varID),
     zaxisID  = vlistInqVarZaxis(vlistID, varID),
     nlevs    = zaxisInqSize(zaxisID);
-  size_t gridsize = gridInqSize(gridID);
-  double missval = vlistInqVarMissval(vlistID, varID);
+  const size_t gridsize = gridInqSize(gridID);
+  const double missval = vlistInqVarMissval(vlistID, varID);
 
-  size_t chunkLen = gridsize;
+  const size_t chunkLen = gridsize;
   if ( memtype == MEMTYPE_FLOAT )
     for ( int levelID = 0; levelID < nlevs; levelID++ )
       {
@@ -438,9 +425,8 @@ void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 
 void grb_write_record(stream_t *streamptr, int memtype, const void *data, size_t nmiss)
 {
-  int varID   = streamptr->record->varID;
-  int levelID = streamptr->record->levelID;
-
+  const int varID   = streamptr->record->varID;
+  const int levelID = streamptr->record->levelID;
   grb_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 }
 

@@ -300,11 +300,7 @@ typedef struct {
   int         complevel;     // compression level
   bool        sortname;
   bool        sortparam;
-#ifdef GRIBCONTAINER2D
-  void      **gribContainers;
-#else
   void       *gribContainers;
-#endif
 
   int         numWorker;
   int         nextRecID;
