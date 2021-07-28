@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-# include "config.h"
+#include "config.h"
 #endif
 
 #include <errno.h>
@@ -104,7 +104,7 @@ static const struct {
   { "nc2", CDI_FILETYPE_NC2, CDI_DATATYPE_FLT64, GRID_LONLAT },
   { "nc4", CDI_FILETYPE_NC4, CDI_DATATYPE_FLT64, GRID_LONLAT },
   { "ext", CDI_FILETYPE_EXT, CDI_DATATYPE_FLT64, GRID_GENERIC, },
-  { "svc", CDI_FILETYPE_SRV, CDI_DATATYPE_FLT64, GRID_GENERIC, },
+  { "srv", CDI_FILETYPE_SRV, CDI_DATATYPE_FLT64, GRID_GENERIC, },
   { "ieg", CDI_FILETYPE_IEG, CDI_DATATYPE_FLT64, GRID_LONLAT },
 };
 #endif
