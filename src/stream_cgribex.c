@@ -86,8 +86,14 @@ void cgribexDelete(void *cgribex)
 }
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 int grib1Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **pdsp,
 		  unsigned char **gdsp, unsigned char **bmsp, unsigned char **bdsp, long *gribrecsize);
+#ifdef __cplusplus
+}
+#endif
 
 static
 size_t cgribexSection2Length(void *gribbuffer, size_t gribbuffersize)
