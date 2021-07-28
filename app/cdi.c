@@ -166,12 +166,13 @@ void usage(void)
   fprintf(stderr, "    -d             Print debugging information\n");
   fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, nc4c, nc5, srv, ext or ieg)\n");
   fprintf(stderr, "    -i <num>       Number of worker to decode/decompress GRIB records\n");
+  fprintf(stderr, "    -m             Move records\n");
+  fprintf(stderr, "    -r             Use CDI record API\n");
   fprintf(stderr, "    -s             give short information if ofile is missing\n");
   fprintf(stderr, "    -t <table>     Parameter table name/file\n");
   fprintf(stderr, "                   Predefined tables: ");
-  for ( int id = 0; id < tableInqNumber(); id++ )
-    if ( (name = tableInqNamePtr(id)) )
-      fprintf(stderr, " %s", name);
+  for (int id = 0; id < tableInqNumber(); id++)
+    if ((name = tableInqNamePtr(id))) fprintf(stderr, " %s", name);
   fprintf(stderr, "\n");
 
   fprintf(stderr, "    -V             Print version number\n");
@@ -905,7 +906,7 @@ int main(int argc, char *argv[])
 	  const int vtime = taxisInqVtime(taxisID1);
 
 	  if ( Debug )
-	    fprintf(stdout, "tsID = %d nrecs = %d date = %ld time = %d\n", tsID, nrecs, vdate, vtime);
+	    fprintf(stdout, "tsID = %d nrecs = %d date = %ld time = %d\n", tsID, nrecs, (long)vdate, vtime);
 
 	  if ( Record )
 	    {
@@ -961,8 +962,7 @@ int main(int argc, char *argv[])
 		  else          strcpy(varname, paramstr);
 
 		  if ( Debug )
-		    fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n",
-			    varID, param, gridID, zaxisID);
+		    fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
 
 		  const size_t gridsize = gridInqSize(gridID);
 		  const double missval = vlistInqVarMissval(vlistID1, varID);
@@ -997,8 +997,7 @@ int main(int argc, char *argv[])
 		  else          strcpy(varname, paramstr);
 
 		  if ( Debug )
-		    fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n",
-			    varID, param, gridID, zaxisID);
+		    fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
 
 		  const size_t gridsize = gridInqSize(gridID);
 		  const double missval = vlistInqVarMissval(vlistID1, varID);
@@ -1021,7 +1020,7 @@ int main(int argc, char *argv[])
 
       free(data);
 
-      /* fprintf(stderr, "%ld\n", (long) streamNvals(streamID1)); */
+      // fprintf(stderr, "%ld\n", (long) streamNvals(streamID1));
 
       if ( fname2 )
 	{
