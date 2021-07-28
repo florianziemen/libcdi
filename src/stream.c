@@ -356,13 +356,15 @@ const char *streamFilename(int streamID)
 static
 long cdiInqTimeSize(int streamID)
 {
-  int tsID = 0, nrecs;
   stream_t *streamptr = stream_to_pointer(streamID);
   long ntsteps = streamptr->ntsteps;
 
-  if ( ntsteps == (long)CDI_UNDEFID )
-    while ( (nrecs = streamInqTimestep(streamID, tsID++)) )
-      ntsteps = streamptr->ntsteps;
+  if (ntsteps == (long)CDI_UNDEFID)
+    {
+      int tsID = 0;
+      while (streamInqTimestep(streamID, tsID++))
+        ntsteps = streamptr->ntsteps;
+    }
 
   return ntsteps;
 }
@@ -371,7 +373,7 @@ static
 int cdiInqContents(stream_t *streamptr)
 {
   int status = 0;
-  int filetype = streamptr->filetype;
+  const int filetype = streamptr->filetype;
 
   switch (cdiBaseFiletype(filetype))
     {
@@ -547,7 +549,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
 int streamOpenID(const char *filename, char filemode, int filetype, int resH)
 {
   if ( CDI_Debug )
-    Message("Open %s mode %c file %s", strfiletype(filetype), filemode, filename?filename:"(NUL)");
+    Message("Open %s mode %c file %s", strfiletype(filetype), filemode, filename ? filename : "(NUL)");
 
   if ( ! filename || filetype < 0 ) return CDI_EINVAL;
 
@@ -560,29 +562,29 @@ int streamOpenID(const char *filename, char filemode, int filetype, int resH)
     namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
 
   int fileID = streamOpenDelegate(filename, filemode, filetype, streamptr, 1);
-  if ( fileID < 0 )
+  if (fileID < 0)
     {
       streamID = fileID;
     }
   else
     {
       streamID = streamptr->self;
-      if ( streamID < 0 ) return CDI_ELIMIT;
+      if (streamID < 0) return CDI_ELIMIT;
 
       streamptr->filemode = filemode;
       streamptr->filename = strdupx(filename);
-      streamptr->fileID   = fileID;
+      streamptr->fileID = fileID;
 
-      if ( filemode == 'r' )
+      if (filemode == 'r')
         {
           int vlistID = vlistCreate();
-          if ( vlistID < 0 ) return CDI_ELIMIT;
+          if (vlistID < 0) return CDI_ELIMIT;
 
           cdiVlistMakeInternal(vlistID);
           streamptr->vlistID = vlistID;
-          /* cdiReadByteorder(streamID); */
+          // cdiReadByteorder(streamID);
           int status = cdiInqContents(streamptr);
-          if ( status < 0 )
+          if (status < 0)
             {
               streamID = status;
             }
@@ -595,7 +597,7 @@ int streamOpenID(const char *filename, char filemode, int filetype, int resH)
         }
     }
 
-  if ( streamID < 0 )
+  if (streamID < 0)
     {
       Free(streamptr->record);
       stream_delete_entry(streamptr);
@@ -671,7 +673,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 #endif
       {
         fileID = gribOpen(filename, filemode);
-        if ( fileID != CDI_UNDEFID ) gribContainersNew(streamptr);
+        if (fileID != CDI_UNDEFID) gribContainersNew(streamptr);
 	break;
       }
 #endif
@@ -715,12 +717,12 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 #endif
     default:
       {
-	if ( CDI_Debug ) Message("%s support not compiled in!", strfiletype(filetype));
+	if (CDI_Debug) Message("%s support not compiled in!", strfiletype(filetype));
 	return CDI_ELIBNAVAIL;
       }
     }
 
-  if ( fileID == CDI_UNDEFID )
+  if (fileID == CDI_UNDEFID)
     streamID = CDI_UNDEFID;
   else
     streamptr->fileID = fileID;
@@ -771,13 +773,11 @@ int streamOpenRead(const char *filename)
   cdiInitialize();
 
   int byteorder = 0;
-  int filetype = cdiGetFiletype(filename, &byteorder);
+  const int filetype = cdiGetFiletype(filename, &byteorder);
+  if (filetype < 0) return filetype;
 
-  if ( filetype < 0 ) return filetype;
-
-  int streamID = streamOpen(filename, "r", filetype);
-
-  if ( streamID >= 0 )
+  const int streamID = streamOpen(filename, "r", filetype);
+  if (streamID >= 0)
     {
       stream_t *streamptr = stream_to_pointer(streamID);
       streamptr->byteorder = byteorder;
@@ -792,13 +792,11 @@ int streamOpenAppend(const char *filename)
   cdiInitialize();
 
   int byteorder = 0;
-  int filetype = cdiGetFiletype(filename, &byteorder);
+  const int filetype = cdiGetFiletype(filename, &byteorder);
+  if (filetype < 0) return filetype;
 
-  if ( filetype < 0 ) return filetype;
-
-  int streamID = streamOpenA(filename, "a", filetype);
-
-  if ( streamID >= 0 )
+  const int streamID = streamOpenA(filename, "a", filetype);
+  if (streamID >= 0)
     {
       stream_t *streamptr = stream_to_pointer(streamID);
       streamptr->byteorder = byteorder;
@@ -925,7 +923,7 @@ stream_t *stream_new_entry(int resH)
   cdiInitialize(); /* ***************** make MT version !!! */
 
   stream_t *streamptr = (stream_t *) Malloc(sizeof(stream_t));
-  streamDefaultValue ( streamptr );
+  streamDefaultValue(streamptr);
 
   if (resH == CDI_UNDEFID)
     streamptr->self = reshPut(streamptr, &streamOps);
@@ -941,9 +939,9 @@ stream_t *stream_new_entry(int resH)
 
 void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
-  int fileID   = streamptr->fileID;
-  int filetype = streamptr->filetype;
-  if ( fileID == CDI_UNDEFID )
+  const int fileID = streamptr->fileID;
+  const int filetype = streamptr->filetype;
+  if (fileID == CDI_UNDEFID)
     Warning("File %s not open!", streamptr->filename);
   else
     switch (cdiBaseFiletype(filetype))
@@ -1045,8 +1043,7 @@ void streamClose(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  if ( CDI_Debug )
-    Message("streamID = %d filename = %s", streamID, streamptr->filename);
+  if (CDI_Debug) Message("streamID = %d filename = %s", streamID, streamptr->filename);
 
   const int vlistID  = streamptr->vlistID;
 
@@ -1054,11 +1051,11 @@ void streamClose(int streamID)
     = (void (*)(stream_t *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
 
-  if ( streamptr->filetype != -1 ) streamCloseDelegate(streamptr, 1);
+  if (streamptr->filetype != -1) streamCloseDelegate(streamptr, 1);
 
-  if ( streamptr->record )
+  if (streamptr->record)
     {
-      if ( streamptr->record->buffer )
+      if (streamptr->record->buffer)
         Free(streamptr->record->buffer);
 
       Free(streamptr->record);
@@ -1286,7 +1283,6 @@ to read the timestamp for this timestep. All calls to read the data refer to thi
 int streamInqTimestep(int streamID, int tsID)
 {
   int nrecs = 0;
-  int taxisID;
   stream_t *streamptr = stream_to_pointer(streamID);
   int vlistID = streamptr->vlistID;
 
@@ -1296,15 +1292,14 @@ int streamInqTimestep(int streamID, int tsID)
       streamptr->curTsID = tsID;
       nrecs = streamptr->tsteps[tsID].nrecs;
       streamptr->tsteps[tsID].curRecID = CDI_UNDEFID;
-      taxisID = vlistInqTaxis(vlistID);
-      if ( taxisID == -1 )
-	Error("Timestep undefined for fileID = %d", streamID);
+      const int taxisID = vlistInqTaxis(vlistID);
+      if (taxisID == -1) Error("Timestep undefined for fileID = %d", streamID);
       ptaxisCopy(taxisPtr(taxisID), &streamptr->tsteps[tsID].taxis);
 
       return nrecs;
     }
 
-  if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID ) return 0;
+  if (tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID) return 0;
 
   int filetype = streamptr->filetype;
 
@@ -1356,9 +1351,8 @@ int streamInqTimestep(int streamID, int tsID)
       }
     }
 
-  taxisID = vlistInqTaxis(vlistID);
-  if ( taxisID == -1 )
-    Error("Timestep undefined for fileID = %d", streamID);
+  const int taxisID = vlistInqTaxis(vlistID);
+  if (taxisID == -1) Error("Timestep undefined for fileID = %d", streamID);
 
   ptaxisCopy(taxisPtr(taxisID), &streamptr->tsteps[tsID].taxis);
 

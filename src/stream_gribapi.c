@@ -937,7 +937,7 @@ static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const 
   } \
 while(0)
 
-int gribapiScanTimestep1(stream_t * streamptr)
+int gribapiScanTimestep1(stream_t *streamptr)
 {
   off_t recpos = 0;
   void *gribbuffer = NULL;
@@ -951,20 +951,20 @@ int gribapiScanTimestep1(stream_t * streamptr)
   streamptr->curTsID = 0;
 
   const int tsID  = tstepsNewEntry(streamptr);
-  if ( tsID != 0 ) Error("Internal problem! tstepsNewEntry returns %d", tsID);
+  if (tsID != 0)  Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   const int fileID = streamptr->fileID;
 
   unsigned nrecs = 0;
-  while ( true )
+  while (true)
     {
       int level1 = 0, level2 = 0;
       const size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
 
-      if ( recsize == 0 )
+      if (recsize == 0)
         {
           streamptr->ntsteps = 1;
           break;
@@ -997,7 +997,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
-      if ( nrecs == 0 )
+      if (nrecs == 0)
         {
           datetime0 = datetime;
           gribapiGetDataDateTime(gh, &(taxis->rdate), &(taxis->rtime));
@@ -1017,16 +1017,16 @@ int gribapiScanTimestep1(stream_t * streamptr)
           checkTimeResult result = checkTime(streamptr,
                                              gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles),
                                              &datetime, &datetime0);
-          if ( result == CHECKTIME_STOP )
+          if (result == CHECKTIME_STOP)
             {
               break;
             }
-          else if ( result == CHECKTIME_SKIP )
+          else if (result == CHECKTIME_SKIP)
             {
               gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, varname, param, level1, level2);
               continue;
             }
-          else if ( result == CHECKTIME_INCONSISTENT && warn_time )
+          else if (result == CHECKTIME_INCONSISTENT && warn_time)
             {
               gribWarning("Inconsistent verification time!", nrecs_scanned, tsID+1, varname, param, level1, level2);
               warn_time = false;
@@ -1036,7 +1036,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       nrecs++;
 
-      if ( CDI_Debug )
+      if (CDI_Debug)
         {
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
@@ -1052,11 +1052,11 @@ int gribapiScanTimestep1(stream_t * streamptr)
       gh = NULL;
     }
 
-  if ( gh ) grib_handle_delete(gh);
+  if (gh) grib_handle_delete(gh);
 
   streamptr->rtsteps = 1;
 
-  if ( nrecs == 0 ) return CDI_EUFSTRUCT;
+  if (nrecs == 0) return CDI_EUFSTRUCT;
 
   cdi_generate_vars(streamptr);
 
@@ -1079,7 +1079,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 }
 
 
-int gribapiScanTimestep2(stream_t * streamptr)
+int gribapiScanTimestep2(stream_t *streamptr)
 {
   int rstatus = 0;
   off_t recpos = 0;
@@ -1097,7 +1097,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
   size_t buffersize = streamptr->record->buffersize;
 
   int tsID = streamptr->rtsteps;
-  if ( tsID != 1 ) Error("Internal problem! unexpected timestep %d", tsID+1);
+  if (tsID != 1) Error("Internal problem! unexpected timestep %d", tsID+1);
 
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -1110,13 +1110,13 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
   int nrecs_scanned = nrecords; //Only used for debug output
   int rindex = 0;
-  while ( true )
+  while (true)
     {
-      if ( rindex > nrecords ) break;
+      if (rindex > nrecords) break;
 
       const size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
-      if ( recsize == 0 )
+      if (recsize == 0)
 	{
 	  streamptr->ntsteps = 2;
 	  break;
@@ -1146,11 +1146,11 @@ int gribapiScanTimestep2(stream_t * streamptr)
       gribapiGetValidityDateTime(gh, &vdate, &vtime, &sdate, &stime);
       DateTime datetime = { .date = vdate, .time = vtime };
 
-      if ( rindex == 0 )
+      if (rindex == 0)
 	{
           datetime0 = datetime;
           const int taxisID = vlistInqTaxis(vlistID);
-	  if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
+	  if (taxisInqType(taxisID) == TAXIS_RELATIVE)
 	    {
 	      taxis->type = TAXIS_RELATIVE;
 	      taxis->unit = gribapiGetTimeUnits(gh);
@@ -1175,12 +1175,12 @@ int gribapiScanTimestep2(stream_t * streamptr)
       const size_t gridsize = gribapiGetGridsize(gh);
       compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
 
-      for ( recID = 0; recID < nrecords; recID++ )
-        if ( gribapiVarCompare(compVar, records[recID], 0) == 0 ) break;
+      for (recID = 0; recID < nrecords; recID++)
+        if (gribapiVarCompare(compVar, records[recID], 0) == 0) break;
 
-      if ( recID == nrecords )
+      if (recID == nrecords)
 	{
-          if ( CDI_Inventory_Mode == 1 )
+          if (CDI_Inventory_Mode == 1)
             {
               gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, varname, param, level1, level2);
               return CDI_EUFSTRUCT;
@@ -1192,12 +1192,12 @@ int gribapiScanTimestep2(stream_t * streamptr)
             }
         }
 
-      if ( records[recID].used )
+      if (records[recID].used)
         {
-          if ( CDI_Inventory_Mode == 1 ) break;
+          if (CDI_Inventory_Mode == 1) break;
           else
 	    {
-	      if ( datetimeDiffer(datetime, datetime0) ) break;
+	      if (datetimeDiffer(datetime, datetime0)) break;
 
               gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, varname, param, level1, level2);
 	      continue;
@@ -1207,7 +1207,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
       records[recID].used = true;
       streamptr->tsteps[tsID].recIDs[rindex] = recID;
 
-      if ( CDI_Debug )
+      if (CDI_Debug)
         {
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
@@ -1215,7 +1215,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
                   nrecs_scanned, (int)recpos, varname, paramstr, leveltype1, level1, level2, vdate, vtime);
         }
 
-      if ( gribapiVarCompare(compVar, records[recID], 0) != 0 )
+      if (gribapiVarCompare(compVar, records[recID], 0) != 0)
 	{
 	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID, records[recID].param, param, records[recID].ilevel, level1);
@@ -1227,7 +1227,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       const int varID = records[recID].varID;
 
-      if ( tsteptype != vlistInqVarTsteptype(vlistID, varID) )
+      if (tsteptype != vlistInqVarTsteptype(vlistID, varID))
 	vlistDefVarTsteptype(vlistID, varID, tsteptype);
 
       grib_handle_delete(gh);
@@ -1236,12 +1236,12 @@ int gribapiScanTimestep2(stream_t * streamptr)
       rindex++;
     }
 
-  if ( gh ) grib_handle_delete(gh);
+  if (gh) grib_handle_delete(gh);
 
   int nrecs = 0;
-  for ( recID = 0; recID < nrecords; recID++ )
+  for (recID = 0; recID < nrecords; recID++)
     {
-      if ( ! records[recID].used )
+      if (! records[recID].used)
 	{
 	  vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
 	}
@@ -1263,16 +1263,16 @@ int gribapiScanTimestep2(stream_t * streamptr)
 }
 
 
-int gribapiScanTimestep(stream_t * streamptr)
+int gribapiScanTimestep(stream_t *streamptr)
 {
   int vrecID, recID = -1;
   int nrecs = 0;
   int vlistID = streamptr->vlistID;
 
-  int tsID  = streamptr->rtsteps;
+  int tsID = streamptr->rtsteps;
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
-  if ( streamptr->tsteps[tsID].recordSize == 0 )
+  if (streamptr->tsteps[tsID].recordSize == 0)
     {
       void *gribbuffer = streamptr->record->buffer;
       size_t buffersize = streamptr->record->buffersize;
@@ -1292,19 +1292,19 @@ int gribapiScanTimestep(stream_t * streamptr)
       DateTime datetime0 = { LONG_MIN, LONG_MIN };
       grib_handle *gh = NULL;
       char varname[256];
-      while ( true )
+      while (true)
 	{
-	  if ( rindex > nrecs ) break;
+	  if (rindex > nrecs) break;
 
 	  const size_t recsize = gribGetSize(fileID);
 	  recpos = fileGetPos(fileID);
-	  if ( recsize == 0 )
+	  if (recsize == 0)
 	    {
 	      streamptr->ntsteps = streamptr->rtsteps + 1;
 	      break;
 	    }
 
-	  if ( rindex >= nrecs ) break;
+	  if (rindex >= nrecs) break;
 
           ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
@@ -1334,13 +1334,13 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  gribapiGetValidityDateTime(gh, &vdate, &vtime, &sdate, &stime);
           DateTime datetime = { .date  = vdate, .time  = vtime };
 
-	  if ( rindex == nrecs ) break;
+	  if (rindex == nrecs) break;
 
-	  if ( rindex == 0 )
+	  if (rindex == 0)
 	    {
               datetime0 = datetime;
               const int taxisID = vlistInqTaxis(vlistID);
-	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
+	      if (taxisInqType(taxisID) == TAXIS_RELATIVE)
 		{
 		  taxis->type = TAXIS_RELATIVE;
 		  taxis->unit = gribapiGetTimeUnits(gh);
@@ -1365,15 +1365,15 @@ int gribapiScanTimestep(stream_t * streamptr)
           const size_t gridsize = gribapiGetGridsize(gh);
           compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
 
-	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
+	  for (vrecID = 0; vrecID < nrecs; vrecID++)
 	    {
 	      recID = streamptr->tsteps[1].recIDs[vrecID];
-	      if ( gribapiVarCompare(compVar, records[recID], 0) == 0 ) break;
+	      if (gribapiVarCompare(compVar, records[recID], 0) == 0) break;
 	    }
 
-	  if ( vrecID == nrecs )
+	  if (vrecID == nrecs)
 	    {
-              if ( CDI_Inventory_Mode == 1 )
+              if (CDI_Inventory_Mode == 1)
                 {
                   gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, varname, param, level1, level2);
                   return CDI_EUFSTRUCT;
@@ -1385,13 +1385,13 @@ int gribapiScanTimestep(stream_t * streamptr)
                 }
 	    }
 
-	  if ( CDI_Inventory_Mode != 1 )
+	  if (CDI_Inventory_Mode != 1)
 	    {
-	      if ( records[recID].used )
+	      if (records[recID].used)
 		{
-		  if ( datetimeDiffer(datetime, datetime0) ) break;
+		  if (datetimeDiffer(datetime, datetime0)) break;
 
-		  if ( CDI_Debug )
+		  if (CDI_Debug)
                     gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, varname, param, level1, level2);
 
 		  continue;
@@ -1401,10 +1401,10 @@ int gribapiScanTimestep(stream_t * streamptr)
           records[recID].used = true;
           streamptr->tsteps[tsID].recIDs[rindex] = recID;
 
-	  if ( CDI_Debug )
+	  if (CDI_Debug)
 	    Message("%4d %8d %4d %8d %8lld %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
 
-	  if ( gribapiVarCompare(compVar, records[recID], 0) != 0 )
+	  if (gribapiVarCompare(compVar, records[recID], 0) != 0)
 	    {
 	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID, records[recID].param, param, records[recID].ilevel, level1);
@@ -1414,7 +1414,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  records[recID].position = recpos;
 	  records[recID].size = recsize;
 
-	  if ( CDI_Debug )
+	  if (CDI_Debug)
 	    Message("%4d %8d %4d %8d %8lld %6d", rindex, (int)recpos, param, level1, vdate, vtime);
 
           grib_handle_delete(gh);
@@ -1423,15 +1423,15 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  rindex++;
 	}
 
-      if ( gh ) grib_handle_delete(gh);
+      if (gh) grib_handle_delete(gh);
 
-      for ( vrecID = 0; vrecID < nrecs; vrecID++ )
+      for (vrecID = 0; vrecID < nrecs; vrecID++)
 	{
-	  recID   = streamptr->tsteps[tsID].recIDs[vrecID];
+	  recID = streamptr->tsteps[tsID].recIDs[vrecID];
 	  if ( ! records[recID].used ) break;
 	}
 
-      if ( vrecID < nrecs )
+      if (vrecID < nrecs)
 	{
 	  gribWarning("Paramameter not found!", nrecs_scanned, tsID+1, varname, records[recID].param,
                       records[recID].ilevel, records[recID].ilevel2);
@@ -1440,11 +1440,10 @@ int gribapiScanTimestep(stream_t * streamptr)
 
       streamptr->rtsteps++;
 
-      if ( streamptr->ntsteps != streamptr->rtsteps )
+      if (streamptr->ntsteps != streamptr->rtsteps)
 	{
 	  tsID = tstepsNewEntry(streamptr);
-	  if ( tsID != streamptr->rtsteps )
-	    Error("Internal error. tsID = %d", tsID);
+	  if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
 
 	  streamptr->tsteps[tsID-1].next   = true;
 	  streamptr->tsteps[tsID].position = recpos;
@@ -1457,7 +1456,7 @@ int gribapiScanTimestep(stream_t * streamptr)
       streamptr->record->buffersize = buffersize;
     }
 
-  if ( nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs )
+  if (nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs)
     {
       Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
       streamptr->ntsteps = tsID;

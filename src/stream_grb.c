@@ -263,16 +263,16 @@ int grbScanTimestep1(stream_t * streamptr)
   int status = CDI_EUFTYPE;
 
 #ifdef HAVE_LIBCGRIBEX
-  int filetype  = streamptr->filetype;
+  const int filetype = streamptr->filetype;
 
-  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
+  if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
     status = cgribexScanTimestep1(streamptr);
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
     status = gribapiScanTimestep1(streamptr);
 #else
-    Error("Sufficient GRIB support unavailable!");
+    Error("GRIB_API support unavailable!");
 #endif
 
   return status;
@@ -284,16 +284,16 @@ int grbScanTimestep2(stream_t * streamptr)
   int status = CDI_EUFTYPE;
 
 #ifdef HAVE_LIBCGRIBEX
-  int filetype = streamptr->filetype;
+  const int filetype = streamptr->filetype;
 
-  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
+  if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
     status = cgribexScanTimestep2(streamptr);
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
     status = gribapiScanTimestep2(streamptr);
 #else
-    Error("Sufficient GRIB support unavailable!");
+    Error("GRIB_API support unavailable!");
 #endif
 
   return status;
@@ -305,16 +305,16 @@ int grbScanTimestep(stream_t * streamptr)
   int status = CDI_EUFTYPE;
 
 #ifdef HAVE_LIBCGRIBEX
-  int filetype  = streamptr->filetype;
+  const int filetype = streamptr->filetype;
 
-  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
+  if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
     status = cgribexScanTimestep(streamptr);
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
     status = gribapiScanTimestep(streamptr);
 #else
-    Error("Sufficient GRIB support unavailable!");
+    Error("GRIB_API support unavailable!");
 #endif
 
   return status;
@@ -327,28 +327,27 @@ int grbInqContents(stream_t * streamptr)
   streamptr->curTsID = 0;
 
   int status = grbScanTimestep1(streamptr);
-  if ( status == 0 && streamptr->ntsteps == -1 ) status = grbScanTimestep2(streamptr);
+  if (status == 0 && streamptr->ntsteps == -1) status = grbScanTimestep2(streamptr);
 
-  int fileID = streamptr->fileID;
+  const int fileID = streamptr->fileID;
   fileSetPos(fileID, 0, SEEK_SET);
 
   return status;
 }
 #endif
 
-int grbInqTimestep(stream_t * streamptr, int tsID)
+int grbInqTimestep(stream_t *streamptr, int tsID)
 {
-  if ( tsID == 0 && streamptr->rtsteps == 0 )
+  if (tsID == 0 && streamptr->rtsteps == 0)
     Error("Call to cdiInqContents missing!");
 
-  if ( CDI_Debug )
-    Message("tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
+  if (CDI_Debug) Message("tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
 
   int ntsteps = CDI_UNDEFID;
-  while ( (tsID + 1) > streamptr->rtsteps && ntsteps == CDI_UNDEFID )
+  while ((tsID + 1) > streamptr->rtsteps && ntsteps == CDI_UNDEFID)
     {
       ntsteps = grbScanTimestep(streamptr);
-      if ( ntsteps == CDI_EUFSTRUCT )
+      if (ntsteps == CDI_EUFSTRUCT)
 	{
 	  streamptr->ntsteps = streamptr->rtsteps;
 	  break;
@@ -357,7 +356,7 @@ int grbInqTimestep(stream_t * streamptr, int tsID)
 
   int nrecs;
 
-  if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID )
+  if (tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID)
     {
       nrecs = 0;
     }
