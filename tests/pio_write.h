@@ -1,8 +1,8 @@
 #ifndef PIO_WRITE_H
 #define PIO_WRITE_H
 
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include <stdbool.h>
