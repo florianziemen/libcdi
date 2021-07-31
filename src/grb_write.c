@@ -118,10 +118,10 @@ void cdi_fdb_store(void *gribbuffer, size_t nbytes, const FDB_Keys *fdbKeys)
 #ifdef HAVE_LIBFDB5
   //if ( CDI_Debug )
     {
-     printf("{class=ea,expver=0001,stream=oper,date=%s,time=%s,domain=g}", fdbKeys->date, fdbKeys->time);
-     printf("{type=an,levtype=%s}{step=0,", fdbKeys->levtype);
-     if (fdbKeys->levelist[0]) printf("levelist=%s,", fdbKeys->levelist);
-     printf("param=%s},length=%zu\n", fdbKeys->param, nbytes);
+      printf("{class=ea,expver=0001,stream=oper,date=%s,time=%s,domain=g}", fdbKeys->date, fdbKeys->time);
+      printf("{type=an,levtype=%s}{step=0,", fdbKeys->levtype);
+      if (fdbKeys->levelist[0]) printf("levelist=%s,", fdbKeys->levelist);
+      printf("param=%s},length=%zu\n", fdbKeys->param, nbytes);
     }
 
   fdb_handle_t *fdb;
@@ -142,7 +142,8 @@ void cdi_fdb_store(void *gribbuffer, size_t nbytes, const FDB_Keys *fdbKeys)
   if (fdbKeys->levelist[0]) fdb_key_add(key, "levelist", fdbKeys->levelist);
 
   // Message("fdb_archive()");
-  fdb_archive(fdb, key, gribbuffer, nbytes);
+  //fdb_archive(fdb, key, gribbuffer, nbytes);
+  // alternative: write to tmpfile and use C++ code from fdb_write
 
   fdb_delete_key(key);
   fdb_delete_handle(fdb);

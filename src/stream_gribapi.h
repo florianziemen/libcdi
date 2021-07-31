@@ -5,9 +5,13 @@
 
 #include "gribapi.h"
 
-int gribapiScanTimestep1(stream_t * streamptr);
-int gribapiScanTimestep2(stream_t * streamptr);
-int gribapiScanTimestep(stream_t * streamptr);
+int fdbScanTimestep1(stream_t *streamptr);
+int fdbScanTimestep2(stream_t *streamptr);
+int fdbScanTimestep(stream_t *streamptr);
+
+int gribapiScanTimestep1(stream_t *streamptr);
+int gribapiScanTimestep2(stream_t *streamptr);
+int gribapiScanTimestep(stream_t *streamptr);
 
 int gribapiDecode(void *gribbuffer, size_t gribsize, void *data, size_t datasize,
 		  int unreduced, size_t *nmiss, double missval);

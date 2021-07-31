@@ -360,13 +360,15 @@ const char *streamFilename(int streamID)
 static
 long cdiInqTimeSize(int streamID)
 {
-  int tsID = 0, nrecs;
   stream_t *streamptr = stream_to_pointer(streamID);
   long ntsteps = streamptr->ntsteps;
 
-  if ( ntsteps == (long)CDI_UNDEFID )
-    while ( (nrecs = streamInqTimestep(streamID, tsID++)) )
-      ntsteps = streamptr->ntsteps;
+  if (ntsteps == (long)CDI_UNDEFID)
+    {
+      int tsID = 0;
+      while (streamInqTimestep(streamID, tsID++))
+        ntsteps = streamptr->ntsteps;
+    }
 
   return ntsteps;
 }
@@ -375,7 +377,7 @@ static
 int cdiInqContents(stream_t *streamptr)
 {
   int status = 0;
-  int filetype = streamptr->filetype;
+  const int filetype = streamptr->filetype;
 
   switch (cdiBaseFiletype(filetype))
     {
@@ -383,7 +385,10 @@ int cdiInqContents(stream_t *streamptr)
     case CDI_FILETYPE_GRB:
     case CDI_FILETYPE_GRB2:
       {
-        status = grbInqContents(streamptr);
+        if (streamptr->fdbRetrieve)
+          status = fdbInqContents(streamptr);
+        else
+          status = grbInqContents(streamptr);
 	break;
       }
 #endif
@@ -445,9 +450,9 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
   int fileID;
   char temp[2] = { filemode, 0 };
 
-  int pathlen = (int)strlen(filename);
-  const bool fdbRetrieve = (pathlen > 4 && filemode == 'r' && memcmp(filename, "fdb:", 4) == 0);
-  const bool fdbStore    = (pathlen > 4 && filemode == 'w' && memcmp(filename, "fdb:", 4) == 0);
+  const int pathlen = (int)strlen(filename);
+  const bool fdbRetrieve = (pathlen >= 4 && filemode == 'r' && memcmp(filename, "fdb:", 4) == 0);
+  const bool fdbStore    = (pathlen >= 4 && filemode == 'w' && memcmp(filename, "fdb:", 4) == 0);
 
 #ifndef HAVE_LIBFDB5
   if (fdbRetrieve || fdbStore)
@@ -456,6 +461,25 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
       return CDI_ELIBNAVAIL;
     }
 #endif
+
+  if (fdbRetrieve)
+    {
+      if (filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_GRB2)
+        {
+#ifdef HAVE_LIBFDB5
+          Message("fdb_initialise()");
+          fdb_initialise();
+          streamptr->fdbRetrieve = true;
+#endif
+          streamptr->filetype = filetype;
+          return 88;
+        }
+      else
+        {
+          Message("Input format must be GRIB to retrieve data to FDB.");
+          return -2;
+        }
+    }
 
   if (fdbStore)
     {
@@ -595,29 +619,29 @@ int streamOpenID(const char *filename, char filemode, int filetype, int resH)
     namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
 
   int fileID = streamOpenDelegate(filename, filemode, filetype, streamptr, 1);
-  if ( fileID < 0 )
+  if (fileID < 0)
     {
       streamID = fileID;
     }
   else
     {
       streamID = streamptr->self;
-      if ( streamID < 0 ) return CDI_ELIMIT;
+      if (streamID < 0) return CDI_ELIMIT;
 
       streamptr->filemode = filemode;
       streamptr->filename = strdupx(filename);
-      streamptr->fileID   = fileID;
+      streamptr->fileID = fileID;
 
-      if ( filemode == 'r' )
+      if (filemode == 'r')
         {
           int vlistID = vlistCreate();
-          if ( vlistID < 0 ) return CDI_ELIMIT;
+          if (vlistID < 0) return CDI_ELIMIT;
 
           cdiVlistMakeInternal(vlistID);
           streamptr->vlistID = vlistID;
           // cdiReadByteorder(streamID);
           int status = cdiInqContents(streamptr);
-          if ( status < 0 )
+          if (status < 0)
             {
               streamID = status;
             }
@@ -630,7 +654,7 @@ int streamOpenID(const char *filename, char filemode, int filetype, int resH)
         }
     }
 
-  if ( streamID < 0 )
+  if (streamID < 0)
     {
       Free(streamptr->record);
       stream_delete_entry(streamptr);
@@ -805,14 +829,15 @@ int streamOpenRead(const char *filename)
 {
   cdiInitialize();
 
+  const int pathlen = (int)strlen(filename);
+  const bool fdbRetrieve = (pathlen >= 4 && memcmp(filename, "fdb:", 4) == 0);
+
   int byteorder = 0;
-  int filetype = cdiGetFiletype(filename, &byteorder);
+  int filetype = fdbRetrieve ? CDI_FILETYPE_GRB2 : cdiGetFiletype(filename, &byteorder);
+  if (filetype < 0) return filetype;
 
-  if ( filetype < 0 ) return filetype;
-
-  int streamID = streamOpen(filename, "r", filetype);
-
-  if ( streamID >= 0 )
+  const int streamID = streamOpen(filename, "r", filetype);
+  if (streamID >= 0)
     {
       stream_t *streamptr = stream_to_pointer(streamID);
       streamptr->byteorder = byteorder;
@@ -827,13 +852,12 @@ int streamOpenAppend(const char *filename)
   cdiInitialize();
 
   int byteorder = 0;
-  int filetype = cdiGetFiletype(filename, &byteorder);
+  const int filetype = cdiGetFiletype(filename, &byteorder);
 
-  if ( filetype < 0 ) return filetype;
+  if (filetype < 0) return filetype;
 
-  int streamID = streamOpenA(filename, "a", filetype);
-
-  if ( streamID >= 0 )
+  const int streamID = streamOpenA(filename, "a", filetype);
+  if (streamID >= 0)
     {
       stream_t *streamptr = stream_to_pointer(streamID);
       streamptr->byteorder = byteorder;
@@ -1326,7 +1350,6 @@ to read the timestamp for this timestep. All calls to read the data refer to thi
 int streamInqTimestep(int streamID, int tsID)
 {
   int nrecs = 0;
-  int taxisID;
   stream_t *streamptr = stream_to_pointer(streamID);
   int vlistID = streamptr->vlistID;
 
@@ -1336,19 +1359,18 @@ int streamInqTimestep(int streamID, int tsID)
       streamptr->curTsID = tsID;
       nrecs = streamptr->tsteps[tsID].nrecs;
       streamptr->tsteps[tsID].curRecID = CDI_UNDEFID;
-      taxisID = vlistInqTaxis(vlistID);
-      if ( taxisID == -1 )
-	Error("Timestep undefined for fileID = %d", streamID);
+      const int taxisID = vlistInqTaxis(vlistID);
+      if (taxisID == -1) Error("Timestep undefined for fileID = %d", streamID);
       ptaxisCopy(taxisPtr(taxisID), &streamptr->tsteps[tsID].taxis);
 
       return nrecs;
     }
 
-  if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID ) return 0;
+  if (tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID) return 0;
 
   int filetype = streamptr->filetype;
 
-  if ( CDI_Debug )
+  if (CDI_Debug)
     Message("streamID = %d  tsID = %d  filetype = %d", streamID, tsID, filetype);
 
   switch (cdiBaseFiletype(filetype))
@@ -1357,7 +1379,10 @@ int streamInqTimestep(int streamID, int tsID)
     case CDI_FILETYPE_GRB:
     case CDI_FILETYPE_GRB2:
       {
-        nrecs = grbInqTimestep(streamptr, tsID);
+        if (streamptr->fdbRetrieve)
+          nrecs = fdbInqTimestep(streamptr, tsID);
+        else
+          nrecs = grbInqTimestep(streamptr, tsID);
 	break;
       }
 #endif
@@ -1396,9 +1421,8 @@ int streamInqTimestep(int streamID, int tsID)
       }
     }
 
-  taxisID = vlistInqTaxis(vlistID);
-  if ( taxisID == -1 )
-    Error("Timestep undefined for fileID = %d", streamID);
+  const int taxisID = vlistInqTaxis(vlistID);
+  if (taxisID == -1) Error("Timestep undefined for fileID = %d", streamID);
 
   ptaxisCopy(taxisPtr(taxisID), &streamptr->tsteps[tsID].taxis);
 
