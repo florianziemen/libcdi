@@ -657,11 +657,11 @@ static
 void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
                       size_t recsize, off_t position, int datatype, int comptype, const char *varname,
                       int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf, int level_unit,
-                      VarScanKeys *scanKeys, const var_tile_t *tiles, int lread_additional_keys)
+                      VarScanKeys *scanKeys, const var_tile_t *tiles, int lread_additional_keys, void *fdbItem)
 {
   const int vlistID = streamptr->vlistID;
-  const int tsID    = streamptr->curTsID;
-  const int recID   = recordNewEntry(streamptr, tsID);
+  const int tsID = streamptr->curTsID;
+  const int recID = recordNewEntry(streamptr, tsID);
   record_t *record = &streamptr->tsteps[tsID].records[recID];
 
   const int tsteptype = gribapiGetTsteptype(gh);
@@ -679,6 +679,7 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   record->gridsize  = gribapiGetGridsize(gh);
   record->scanKeys  = *scanKeys;
   record->tiles     = tiles ? *tiles : dummy_tiles;
+  record->fdbItem   = fdbItem;
 
   strncpy(record->varname, varname, sizeof(record->varname)-1);
   record->varname[sizeof(record->varname) - 1] = 0;
@@ -944,6 +945,22 @@ while(0)
 
 
 #ifdef HAVE_LIBFDB5
+typedef struct
+{
+  char *item;
+  char *keys[32];
+  char *values[32];
+  int numKeys;
+} KeyValueEntry;
+
+typedef struct
+{
+  int date;
+  int time;
+  int param;
+  int levtype;
+} RecordInfoEntry;
+
 static
 int fdb_request_add1(fdb_request_t *req, const char *param, const char *value)
 {
@@ -951,81 +968,75 @@ int fdb_request_add1(fdb_request_t *req, const char *param, const char *value)
 }
 
 static
-void listitem_to_request(const char *item, fdb_request_t *request)
+void decode_fdbitem(const char *fdbItem, KeyValueEntry *keyValue)
 {
-  char *tmpItem = strdup(item);
-  int itemArgc = 0;
-  char *itemArgv[32];
-  int len = strlen(tmpItem);
-  int start = (*tmpItem == '{');
-  itemArgv[0] = tmpItem + start;
+  keyValue->item = strdup(fdbItem);
+  char *pItem = keyValue->item;
+  int numKeys = 0;
+  char **itemKeys = keyValue->keys;
+  char **itemValues = keyValue->values;
+  int len = strlen(pItem);
+  int start = (*pItem == '{');
+  itemKeys[0] = pItem + start;
   for (int i = start; i < len; i++)
     {
-      if (tmpItem[i] == ',')
+      if (pItem[i] == ',')
         {
-          tmpItem[i] = 0;
-          itemArgc++;
-          itemArgv[itemArgc] = &tmpItem[++i];
+          pItem[i] = 0;
+          numKeys++;
+          itemKeys[numKeys] = &pItem[++i];
         }
-      else if (tmpItem[i] == '}')
+      else if (pItem[i] == '}')
         {
-          tmpItem[i] = 0;
-          itemArgc++;
-          if (tmpItem[i + 1] == '{')
+          pItem[i] = 0;
+          numKeys++;
+          if (pItem[i + 1] == '{')
             {
-              itemArgv[itemArgc] = &tmpItem[i + 2];
+              itemKeys[numKeys] = &pItem[i + 2];
               i += 2;
             }
         }
     }
 
-  //for (int i = 0; i < itemArgc; i++)  printf("%d <%s>\n", i, itemArgv[i]);
+  keyValue->numKeys = numKeys;
+  //for (int i = 0; i < numKeys; i++)  printf("%d <%s>\n", i, itemKeys[i]);
 
-  for (int i = 0; i < itemArgc; i++)
+  for (int i = 0; i < numKeys; i++)
     {
-      char *value = NULL;
-      char *keyValue = itemArgv[i];
+      char *keyValue = itemKeys[i];
       len = strlen(keyValue);
       for (int k = 0; k < len; k++)
         if (keyValue[k] == '=')
           {
             keyValue[k] = 0;
-            value = &keyValue[k + 1];
+            itemValues[i] = &keyValue[k + 1];
             break;
           }
 
-      //printf("key <%s> value <%s>\n", keyValue, value);
-      fdb_request_add1(request, keyValue, value);
+      //printf("key <%s> value <%s>\n", itemKeys[i], itemValues[i]);
+    }
+}
+
+static
+void fdbitem_to_request(const char *fdbItem, fdb_request_t *request)
+{
+  KeyValueEntry keyValue;
+  keyValue.item = NULL;
+  decode_fdbitem(fdbItem, &keyValue);
+
+  int numKeys = keyValue.numKeys;
+  for (int i = 0; i < numKeys; i++)
+    {
+      // printf("key <%s> value <%s>\n", keyValue.keys[i], keyValue.values[i]);
+      fdb_request_add1(request, keyValue.keys[i], keyValue.values[i]);
     }
 
-  free(tmpItem);
+  if (keyValue.item) free(keyValue.item);
 }
-#endif
 
-int fdbScanTimestep1(stream_t *streamptr)
+static
+int fdb_fill_itemlist(fdb_handle_t *fdb, fdb_request_t *request, char ***itemList)
 {
-#ifdef HAVE_LIBFDB5
-  const bool readRecords= true;
-  long gribbuffersize = 0;
-  unsigned char *gribbuffer = NULL;
-
-  fdb_handle_t *fdb;
-  fdb_new_handle(&fdb);
-
-  fdb_request_t *request;
-  fdb_new_request(&request);
-  fdb_request_add1(request, "class", "ea");
-  fdb_request_add1(request, "expver", "0001");
-  fdb_request_add1(request, "stream", "oper");
-  fdb_request_add1(request, "domain", "g");
-  //fdb_request_add1(request, "date", "20180601");
-  //fdb_request_add1(request, "time", "0000");
-  fdb_request_add1(request, "type", "an");
-  fdb_request_add1(request, "levtype", "sfc");
-  fdb_request_add1(request, "step", "0");
-  // fdb_request_add1(request, "param", "129");
-  // fdb_request_add1(request, "levelist", "300");
-
   const char **item = (const char **) malloc(sizeof(const char*));
 
   fdb_listiterator_t *it;
@@ -1033,70 +1044,379 @@ int fdbScanTimestep1(stream_t *streamptr)
 
   fdb_list(fdb, request, it);
 
-  Next:
-
-  {
-    bool exist;
-    fdb_listiterator_next(it, &exist, item);
-    if (!exist) goto Cleanup;
-  }
-
-  printf("fdb_listiterator_next: item = %s\n", *item);
-
-  if (readRecords)
+  int numItems = 0;
+  while (true)
     {
-      fdb_datareader_t *dr;
-      fdb_new_datareader(&dr);
-      fdb_request_t *singleRequest;
-      fdb_new_request(&singleRequest);
-      listitem_to_request(*item, singleRequest);
-      int status = fdb_retrieve(fdb, singleRequest, dr);
-      fdb_delete_request(singleRequest);
-      if (status != FDB_SUCCESS)
-        {
-          printf("fdb_retrieve failed!\n");
-          return 1;
-        }
+      bool exist;
+      fdb_listiterator_next(it, &exist, item);
+      if (!exist) break;
 
-      long size;
-      fdb_datareader_open(dr, &size);
-      if (size == 0)
-        {
-          printf("fdb_datareader empty!\n");
-          return 1;
-        }
+      numItems++;
+    }
+  Message("numItems = %d", numItems);
 
-      if (gribbuffersize < size)
-        {
-          gribbuffersize = size;
-          gribbuffer = (unsigned char *) realloc(gribbuffer, gribbuffersize);
-        }
+  if (*itemList == NULL) *itemList = (char **) malloc(numItems * sizeof(char*));
 
-      long read = 0;
-      fdb_datareader_read(dr, gribbuffer, size, &read);
-      // printf("fdb_datareader_read: size=%ld/%ld\n", size, read);
-      if (read != size)
-        {
-          printf("fdb_datareader_read failed!\n");
-          return 1;
-        }
-      // irecsize = size;
+  fdb_list(fdb, request, it);
 
-      fdb_datareader_close(dr);
-      fdb_delete_datareader(dr);
+  int itemNum = 0;
+  while (true)
+    {
+      bool exist;
+      fdb_listiterator_next(it, &exist, item);
+      if (!exist) break;
+
+      (*itemList)[itemNum++] = strdup(*item);
     }
 
-  goto Next;
-  Cleanup:
-
   fdb_delete_listiterator(it);
-  fdb_delete_request(request);
-  fdb_delete_handle(fdb);
 
   free(item);
+
+  return numItems;
+}
+
+static
+long fdb_read_record(fdb_handle_t *fdb, char *item, size_t *buffersize, void **gribbuffer)
+{
+  Message("item = %s", item);
+
+  fdb_datareader_t *dr = NULL;
+  fdb_new_datareader(&dr);
+  fdb_request_t *singleRequest = NULL;
+  fdb_new_request(&singleRequest);
+  fdbitem_to_request(item, singleRequest);
+  int status = fdb_retrieve(fdb, singleRequest, dr);
+  fdb_delete_request(singleRequest);
+  if (status != FDB_SUCCESS) Error("fdb_retrieve failed!");
+
+  long recsize = 0;
+  fdb_datareader_open(dr, &recsize);
+  if (recsize == 0) Error("fdb_datareader empty!");
+
+  ensureBufferSize(recsize, buffersize, gribbuffer);
+
+  long read = 0;
+  fdb_datareader_read(dr, *gribbuffer, recsize, &read);
+  // printf("fdb_datareader_read: size=%ld/%ld\n", recsize, read);
+  if (read != recsize) Error("fdb_datareader_read failed!");
+
+  fdb_datareader_close(dr);
+  fdb_delete_datareader(dr);
+
+  return recsize;
+}
+
+static
+int check_numKey(const char *key, int numKeys, int numItems)
+{
+  if (numKeys == 0)
+    {
+      Warning("Key %s is missing in all of the FDB records!", key);
+      return -1;
+    }
+  else if (numKeys < numItems)
+    {
+      Warning("Key %s is missing in some of the FDB records!", key);
+      return -2;
+    }
+
+  return 0;
+}
+
+static
+int check_keyvalueList(int numItems, KeyValueEntry *keyValueList)
+{
+  const char *searchKeys[] = {"date", "time", "param", "levtype"};
+  const int numSearchKeys = sizeof(searchKeys) / sizeof(searchKeys[0]);
+  int searchKeysCount[numSearchKeys];
+  for (int k = 0; k < numSearchKeys; k++) searchKeysCount[k] = 0;
+
+  for (int i = 0; i < numItems; i++)
+    {
+      int numKeys = keyValueList[i].numKeys;
+      char **itemKeys = keyValueList[i].keys;
+      for (int k = 0; k < numSearchKeys; k++)
+        {
+          for (int j = 0; j < numKeys; j++)
+            {
+              if (strcmp(itemKeys[j], searchKeys[k]) == 0)
+                {
+                  searchKeysCount[k]++;
+                  break;
+                }
+            }
+        }
+    }
+
+  int status = 0;
+  for (int k = 0; k < numSearchKeys; k++)
+    if (check_numKey(searchKeys[k], searchKeysCount[k], numItems) != 0)
+      status = -1;
+
+  return status;
+}
+
+typedef struct
+{
+  int date, time, param, levtype;
+} CmpKeys;
+
+static
+CmpKeys set_cmpkeys(RecordInfoEntry *recordInfoList)
+{
+  CmpKeys cmpKeys;
+  cmpKeys.date = recordInfoList->date;
+  cmpKeys.time = recordInfoList->time;
+  cmpKeys.param = recordInfoList->param;
+  cmpKeys.levtype = recordInfoList->levtype;
+  return cmpKeys;
+}
+
+static
+int compare_cmpkeys(const CmpKeys *cmpKeys1, const CmpKeys *cmpKeys2)
+{
+  if (cmpKeys1->date == cmpKeys2->date &&
+      cmpKeys1->time == cmpKeys2->time &&
+      cmpKeys1->param == cmpKeys2->param &&
+      cmpKeys1->levtype == cmpKeys2->levtype)
+    return 0;
+
+  return -1;
+}
+
+static
+int get_num_records(int numItems, RecordInfoEntry *recordInfoList)
+{
+  const int date = recordInfoList[0].date;
+  const int time = recordInfoList[0].time;
+
+  int numRecords = 0;
+  for (int i = 0; i < numItems; i++)
+    {
+      if (date == recordInfoList[i].date && time == recordInfoList[i].time)
+        numRecords++;
+      else
+        break;
+    }
+
+  CmpKeys cmpKeys0 = set_cmpkeys(&recordInfoList[0]);
+  for (int i = 1; i < numRecords; i++)
+    {
+      CmpKeys cmpKeys = set_cmpkeys(&recordInfoList[i]);
+      if (compare_cmpkeys(&cmpKeys0, &cmpKeys) == 0)
+        {
+          numRecords = i;
+          break;
+        }
+    }
+
+  return numRecords;
+}
+
+enum {levTypeUndef = 0, levTypeSFC, levTypeML, levTypePL};
+
+static
+int get_ilevtype(const char *levtype)
+{
+  int ilevtype = levTypeUndef;
+
+  if      (strcmp(levtype, "sfc") == 0) ilevtype = levTypeSFC;
+  else if (strcmp(levtype, "ml") == 0) ilevtype = levTypeML;
+  else if (strcmp(levtype, "pl") == 0) ilevtype = levTypeML;
+
+  return ilevtype;
+}
+
+static
+void decode_keyvalue(KeyValueEntry *keyValue, RecordInfoEntry *recordInfo)
+{
+  char **itemKeys = keyValue->keys;
+  char **itemValues = keyValue->values;
+  int numKeys = keyValue->numKeys;
+  for (int i = 0; i < numKeys; i++)
+    {
+      //printf("key <%s> value <%s>\n", itemKeys[i], itemValues[i]);
+      if      (strcmp(itemKeys[i], "date") == 0) recordInfo->date = atoi(itemValues[i]);
+      else if (strcmp(itemKeys[i], "time") == 0) recordInfo->time = atoi(itemValues[i]);
+      else if (strcmp(itemKeys[i], "param") == 0) recordInfo->param = atoi(itemValues[i]);
+      else if (strcmp(itemKeys[i], "levtype") == 0) recordInfo->levtype = get_ilevtype(itemValues[i]);
+   }
+}
+
+static
+int remove_duplicate_timesteps(RecordInfoEntry *recordInfoList, int numRecords, int numTimesteps, int *timestepRecordOffset)
+{
+  int numTimestepsNew = numTimesteps;
+
+  int date = recordInfoList[0].date;
+  int time = recordInfoList[0].time;
+
+  for (int i = 1; i < numTimesteps; ++i)
+    {
+      int index = i * numRecords;
+      if (date == recordInfoList[index].date && time == recordInfoList[index].time)
+        {
+          Message("Skip timestep %d", i + 1);
+          numTimestepsNew--;
+          for (int j = i; j < numTimestepsNew; j++) timestepRecordOffset[j] = timestepRecordOffset[j + 1];
+        }
+
+      date = recordInfoList[index].date;
+      time = recordInfoList[index].time;
+    }
+
+  return numTimestepsNew;
+}
+
 #endif
 
-  Error("Function not implemented!");
+int fdbScanTimestep1(stream_t *streamptr)
+{
+#ifdef HAVE_LIBFDB5
+  void *gribbuffer = NULL;
+  size_t buffersize = 0;
+  grib_handle *gh = NULL;
+
+  fdb_handle_t *fdb = NULL;
+  fdb_new_handle(&fdb);
+
+  fdb_request_t *request = NULL;
+  fdb_new_request(&request);
+  fdb_request_add1(request, "class", "ea");
+  fdb_request_add1(request, "expver", "0001");
+  fdb_request_add1(request, "stream", "oper");
+  fdb_request_add1(request, "domain", "g");
+  fdb_request_add1(request, "date", "20180601");
+  // fdb_request_add1(request, "time", "1800");
+  fdb_request_add1(request, "type", "an");
+  fdb_request_add1(request, "levtype", "sfc");
+  fdb_request_add1(request, "step", "0");
+  fdb_request_add1(request, "param", "139");
+  // fdb_request_add1(request, "levelist", "300");
+
+  char **fdbItemList = NULL;
+  int numItems = fdb_fill_itemlist(fdb, request, &fdbItemList);
+  fdb_delete_request(request);
+  for (int i = 0; i < numItems; ++i) printf("item[%d] = %s\n", i, fdbItemList[i]);
+
+  KeyValueEntry *keyValueList = (KeyValueEntry *) malloc(numItems * sizeof(KeyValueEntry));
+  for (int i = 0; i < numItems; ++i) keyValueList[i].item = NULL;
+
+  RecordInfoEntry *recordInfoList = (RecordInfoEntry *) malloc(numItems * sizeof(RecordInfoEntry));
+
+  for (int i = 0; i < numItems; ++i) decode_fdbitem(fdbItemList[i], &keyValueList[i]);
+  if (check_keyvalueList(numItems, keyValueList) != 0) return 1;
+  for (int i = 0; i < numItems; ++i) decode_keyvalue(&keyValueList[i], &recordInfoList[i]);
+
+  int numRecords = get_num_records(numItems, recordInfoList);
+  int numTimesteps = numItems / numRecords;
+  Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
+
+  for (int i = 0; i < numItems; ++i) if (keyValueList[i].item) free(keyValueList[i].item);
+  free(recordInfoList);
+  free(keyValueList);
+
+  if (numRecords == 0) return CDI_EUFSTRUCT;
+
+  int *timestepRecordOffset = (int *) malloc(numTimesteps * sizeof(int));
+  for (int i = 0; i < numTimesteps; i++) timestepRecordOffset[i] = i * numRecords;
+  numTimesteps = remove_duplicate_timesteps(recordInfoList, numRecords, numTimesteps, timestepRecordOffset);
+  Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
+
+  DateTime datetime0 = { .date = 10101, .time = 0 };
+  int fcast = 0;
+
+  streamptr->curTsID = 0;
+
+  const int tsID = tstepsNewEntry(streamptr);
+  if (tsID != 0) Error("Internal problem! tstepsNewEntry returns %d", tsID);
+
+  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+
+  for (int recID = 0; recID < numRecords; recID++)
+    {
+      long recsize = fdb_read_record(fdb, fdbItemList[recID], &buffersize, &gribbuffer);
+
+      int datatype, comptype = 0;
+      gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype);
+
+      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
+
+      const int param = gribapiGetParam(gh);
+      int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
+      var_tile_t tiles = dummy_tiles;
+      int level1 = 0, level2 = 0;
+      gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
+
+      char varname[256];
+      gribapiGetString(gh, "shortName", varname, sizeof(varname));
+
+      int64_t vdate, sdate;
+      int vtime, stime;
+      gribapiGetValidityDateTime(gh, &vdate, &vtime, &sdate, &stime);
+      DateTime datetime = { .date = vdate, .time = vtime };
+
+      VarScanKeys scanKeys = gribapiGetScanKeys(gh);
+
+      if (recID == 0)
+        {
+          datetime0 = datetime;
+          gribapiGetDataDateTime(gh, &(taxis->rdate), &(taxis->rtime));
+          fcast = gribapiTimeIsFC(gh);
+          if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
+          taxis->fdate = taxis->rdate;
+          taxis->ftime = taxis->rtime;
+          taxis->sdate = sdate;
+          taxis->stime = stime;
+          taxis->vdate = vdate;
+          taxis->vtime = vtime;
+        }
+
+      if (CDI_Debug)
+        {
+          char paramstr[32];
+          cdiParamToString(param, paramstr, sizeof(paramstr));
+          Message("%4d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%lld vtime=%d",
+                  recID + 1, varname, paramstr, leveltype1, level1, level2, vdate, vtime);
+        }
+
+      var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
+      int recpos = 0;
+      gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2,
+                       lbounds, level1, level2, level_sf, level_unit, &scanKeys, ptiles, 1, fdbItemList[recID]);
+
+      grib_handle_delete(gh);
+      gh = NULL;
+    }
+
+  if (gh) grib_handle_delete(gh);
+
+  fdb_delete_handle(fdb);
+
+  if (fdbItemList) free(fdbItemList);
+
+  streamptr->rtsteps = 1;
+
+  cdi_generate_vars(streamptr);
+
+  taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
+  int taxisID = taxisCreate(taxis->type);
+  // printf("1: %d %6d  %d %6d  %d %6d\n", taxis->rdate, taxis->rtime, taxis->sdate, taxis->stime, taxis->vdate, taxis->vtime);
+
+  vlistDefTaxis(streamptr->vlistID, taxisID);
+
+  streamScanResizeRecords1(streamptr);
+
+  streamptr->record->buffer     = gribbuffer;
+  streamptr->record->buffersize = buffersize;
+
+  streamptr->ntsteps = 1;
+  //streamScanTsFixNtsteps(streamptr, recpos);
+  streamScanTimeConstAdjust(streamptr, taxis);
+
+  if (timestepRecordOffset) free(timestepRecordOffset);
+#endif
 
   return 0;
 }
@@ -1122,7 +1442,7 @@ int gribapiScanTimestep1(stream_t *streamptr)
   void *gribbuffer = NULL;
   size_t buffersize = 0;
   DateTime datetime0 = { .date = 10101, .time = 0 };
-  int nrecs_scanned = 0;        //Only used for debug output.
+  int nrecs_scanned = 0;        // Only used for debug output.
   bool warn_time = true;
   int fcast = 0;
   grib_handle *gh = NULL;
@@ -1130,7 +1450,7 @@ int gribapiScanTimestep1(stream_t *streamptr)
   streamptr->curTsID = 0;
 
   const int tsID = tstepsNewEntry(streamptr);
-  if ( tsID != 0 ) Error("Internal problem! tstepsNewEntry returns %d", tsID);
+  if (tsID != 0) Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -1139,7 +1459,6 @@ int gribapiScanTimestep1(stream_t *streamptr)
   unsigned nrecs = 0;
   while (true)
     {
-      int level1 = 0, level2 = 0;
       const size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
 
@@ -1164,6 +1483,7 @@ int gribapiScanTimestep1(stream_t *streamptr)
       const int param = gribapiGetParam(gh);
       int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
       var_tile_t tiles = dummy_tiles;
+      int level1 = 0, level2 = 0;
       gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
       char varname[256];
@@ -1181,7 +1501,7 @@ int gribapiScanTimestep1(stream_t *streamptr)
           datetime0 = datetime;
           gribapiGetDataDateTime(gh, &(taxis->rdate), &(taxis->rtime));
           fcast = gribapiTimeIsFC(gh);
-          if ( fcast ) taxis->unit = gribapiGetTimeUnits(gh);
+          if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
           taxis->fdate = taxis->rdate;
           taxis->ftime = taxis->rtime;
           taxis->sdate = sdate;
@@ -1224,8 +1544,8 @@ int gribapiScanTimestep1(stream_t *streamptr)
         }
 
       var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
-      gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname,
-                       leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit, &scanKeys, ptiles, 1);
+      gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2,
+                       lbounds, level1, level2, level_sf, level_unit, &scanKeys, ptiles, 1, NULL);
 
       grib_handle_delete(gh);
       gh = NULL;

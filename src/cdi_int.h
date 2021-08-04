@@ -189,6 +189,7 @@ typedef struct
   char      varname[32]; // needed for grib decoding with GRIB_API
   VarScanKeys scanKeys;
   var_tile_t tiles;      // tile-related meta-data, currently for GRIB-API only.
+  void     *fdbItem;
 }
 record_t;
 
@@ -300,15 +301,15 @@ typedef struct {
   int         complevel;     // compression level
   bool        sortname;
   bool        sortparam;
+
   void       *gribContainers;
+  void       *gh;            // grib handle
 
   int         numWorker;
   int         nextRecID;
   int         cachedTsID;
   void       *jobs;
   void       *jobManager;
-
-  void *gh; // grib handle
 
   bool        fdbRetrieve;
   bool        fdbStore;

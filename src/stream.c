@@ -472,6 +472,11 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
           streamptr->fdbRetrieve = true;
 #endif
           streamptr->filetype = filetype;
+          if (recordBufIsToBeCreated)
+            {
+              streamptr->record = (Record *) Malloc(sizeof(Record));
+              streamptr->record->buffer = NULL;
+            }
           return 88;
         }
       else
@@ -506,7 +511,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
     case CDI_FILETYPE_GRB:
       {
         fileID = gribOpen(filename, temp);
-        if ( fileID < 0 ) return CDI_ESYSTEM;
+        if (fileID < 0) return CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
@@ -523,7 +528,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
     case CDI_FILETYPE_GRB2:
       {
         fileID = gribOpen(filename, temp);
-        if ( fileID < 0 ) return CDI_ESYSTEM;
+        if (fileID < 0) return CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
@@ -970,6 +975,7 @@ void streamDefaultValue(stream_t * streamptr)
 #endif
 
   streamptr->gribContainers    = NULL;
+  streamptr->gh                = NULL;
 
   streamptr->numWorker         = 0;
   streamptr->nextRecID         = 0;

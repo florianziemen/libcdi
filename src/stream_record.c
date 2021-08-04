@@ -31,6 +31,7 @@ void recordInitEntry(record_t *record)
   memset(record->varname, 0, sizeof(record->varname));
   varScanKeysInit(&record->scanKeys);
   memset(&record->tiles, 0, sizeof(record->tiles));
+  record->fdbItem   = NULL;
 }
 
 
