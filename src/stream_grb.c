@@ -338,34 +338,16 @@ int grbInqContents(stream_t * streamptr)
 int fdbInqContents(stream_t * streamptr)
 {
   streamptr->curTsID = 0;
-
-  int status = fdbScanTimestep1(streamptr);
-  if (status == 0 && streamptr->ntsteps == -1) status = fdbScanTimestep2(streamptr);
-
-  // const int fileID = streamptr->fileID;
-  // fileSetPos(fileID, 0, SEEK_SET);
-
+  int status = fdbScanTimesteps(streamptr);
   return status;
 }
 #endif
 
 int fdbInqTimestep(stream_t *streamptr, int tsID)
 {
-  if (tsID == 0 && streamptr->rtsteps == 0)
-    Error("Call to cdiInqContents missing!");
+  if (tsID == 0 && streamptr->rtsteps == 0) Error("Call to cdiInqContents missing!");
 
   if (CDI_Debug) Message("tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
-
-  int ntsteps = CDI_UNDEFID;
-  while ((tsID + 1) > streamptr->rtsteps && ntsteps == CDI_UNDEFID)
-    {
-      ntsteps = fdbScanTimestep(streamptr);
-      if (ntsteps == CDI_EUFSTRUCT)
-	{
-	  streamptr->ntsteps = streamptr->rtsteps;
-	  break;
-	}
-    }
 
   int nrecs;
   if (tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID)

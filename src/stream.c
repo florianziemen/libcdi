@@ -1011,8 +1011,8 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
 {
   if (streamptr->fdbStore || streamptr->fdbRetrieve) return;
 
-  int fileID   = streamptr->fileID;
-  int filetype = streamptr->filetype;
+  const int fileID   = streamptr->fileID;
+  const int filetype = streamptr->filetype;
 
   if (fileID == CDI_UNDEFID)
     Warning("File %s not open!", streamptr->filename);
@@ -1151,22 +1151,22 @@ void streamClose(int streamID)
   Free(streamptr->vars);
   streamptr->vars = NULL;
 
-  for ( int index = 0; index < streamptr->ntsteps; ++index )
+  for (int index = 0; index < streamptr->ntsteps; ++index)
     {
-      if ( streamptr->tsteps[index].records ) Free(streamptr->tsteps[index].records);
-      if ( streamptr->tsteps[index].recIDs  ) Free(streamptr->tsteps[index].recIDs);
-      taxisDestroyKernel(&streamptr->tsteps[index].taxis);
+      tsteps_t *tstep = &(streamptr->tsteps[index]);
+      if (tstep->records->fdbItem) free(tstep->records->fdbItem);
+      if (tstep->records) Free(tstep->records);
+      if (tstep->recIDs) Free(tstep->recIDs);
+      taxisDestroyKernel(&(tstep->taxis));
     }
 
-  if ( streamptr->tsteps ) Free(streamptr->tsteps);
+  if (streamptr->tsteps) Free(streamptr->tsteps);
 
-  if ( streamptr->basetime.timevar_cache ) Free(streamptr->basetime.timevar_cache);
+  if (streamptr->basetime.timevar_cache) Free(streamptr->basetime.timevar_cache);
 
-  if ( vlistID != -1 )
+  if (vlistID != -1)
     {
-      if ( streamptr->filemode != 'w' && vlistInqTaxis(vlistID) != -1 )
-        taxisDestroy(vlistInqTaxis(vlistID));
-
+      if (streamptr->filemode != 'w' && vlistInqTaxis(vlistID) != -1) taxisDestroy(vlistInqTaxis(vlistID));
       cdiVlistDestroy_(vlistID);
     }
 

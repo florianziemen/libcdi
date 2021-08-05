@@ -123,78 +123,17 @@ int grb_decode_record(void *untypedArgs)
   return 0;
 }
 
-#ifdef HAVE_LIBFDB5
-static
-int fdb_request_add1(fdb_request_t *req, const char *param, const char *value)
-{
-  return fdb_request_add(req, param, &value, 1);
-}
-
-static
-void listitem_to_request(const char *item, fdb_request_t *request)
-{
-  char *tmpItem = strdup(item);
-  int itemArgc = 0;
-  char *itemArgv[32];
-  int len = strlen(tmpItem);
-  int start = (*tmpItem == '{');
-  itemArgv[0] = tmpItem + start;
-  for (int i = start; i < len; i++)
-    {
-      if (tmpItem[i] == ',')
-        {
-          tmpItem[i] = 0;
-          itemArgc++;
-          itemArgv[itemArgc] = &tmpItem[++i];
-        }
-      else if (tmpItem[i] == '}')
-        {
-          tmpItem[i] = 0;
-          itemArgc++;
-          if (tmpItem[i + 1] == '{')
-            {
-              itemArgv[itemArgc] = &tmpItem[i + 2];
-              i += 2;
-            }
-        }
-    }
-
-  //for (int i = 0; i < itemArgc; i++)  printf("%d <%s>\n", i, itemArgv[i]);
-
-  for (int i = 0; i < itemArgc; i++)
-    {
-      char *value = NULL;
-      char *keyValue = itemArgv[i];
-      len = strlen(keyValue);
-      for (int k = 0; k < len; k++)
-        if (keyValue[k] == '=')
-          {
-            keyValue[k] = 0;
-            value = &keyValue[k + 1];
-            break;
-          }
-
-      //printf("key <%s> value <%s>\n", keyValue, value);
-      fdb_request_add1(request, keyValue, value);
-    }
-
-  free(tmpItem);
-}
-#endif
-
 static
 DecodeArgs grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *gribbuffer, void *data, bool resetFilePos)
 {
   const int vlistID = streamptr->vlistID;
   const int tsID = streamptr->curTsID;	// FIXME: This should be looked up from the given recID
   const int varID = streamptr->tsteps[tsID].records[recID].varID;
-  const size_t recsize = streamptr->tsteps[tsID].records[recID].size;
+  size_t recsize = streamptr->tsteps[tsID].records[recID].size;
 
   const int gridID = vlistInqVarGrid(vlistID, varID);
   const size_t gridsize = gridInqSize(gridID);
   if (CDI_Debug) Message("gridID = %d gridsize = %zu", gridID, gridsize);
-
-  if (recsize == 0) Error("Internal problem! Recordsize is zero for record %d at timestep %d", recID+1, tsID+1);
 
   void *cgribexp = (gribbuffer && streamptr->record->cgribexp) ? streamptr->record->cgribexp : NULL;
   if (!gribbuffer) gribbuffer = Malloc(streamptr->record->buffersize);
@@ -203,33 +142,14 @@ DecodeArgs grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *
   if (streamptr->fdbRetrieve)
     {
       void *fdbItem = streamptr->tsteps[tsID].records[recID].fdbItem;
-      printf("fdbItem = %s\n", (char*)fdbItem);
+      if (!fdbItem) Error("fdbItem not available!");
 
 #ifdef HAVE_LIBFDB5
       fdb_handle_t *fdb;
       fdb_new_handle(&fdb);
 
-      fdb_datareader_t *dr;
-      fdb_new_datareader(&dr);
-      fdb_request_t *singleRequest;
-      fdb_new_request(&singleRequest);
-      listitem_to_request(fdbItem, singleRequest);
-      int status = fdb_retrieve(fdb, singleRequest, dr);
-      fdb_delete_request(singleRequest);
-      if (status != FDB_SUCCESS) Error("fdb_retrieve failed!");
-
-      long drRecsize;
-      fdb_datareader_open(dr, &drRecsize);
-      if (drRecsize == 0) Error("fdb_datareader empty!");
-      if (drRecsize > recsize) Error("internal problem: wrong recsize"); 
-
-      long read = 0;
-      fdb_datareader_read(dr, gribbuffer, drRecsize, &read);
-      // printf("fdb_datareader_read: size=%ld/%ld\n", recsize, read);
-      if (read != drRecsize)  Error("fdb_datareader_read failed!");
-
-      fdb_datareader_close(dr);
-      fdb_delete_datareader(dr);
+      long fdb_read_record(fdb_handle_t *fdb, char *item, size_t *buffersize, void **gribbuffer);
+      recsize = fdb_read_record(fdb, fdbItem, &(streamptr->record->buffersize), &gribbuffer);
 
       fdb_delete_handle(fdb);
 #endif
@@ -238,6 +158,8 @@ DecodeArgs grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *
     {
       const int fileID = streamptr->fileID;
       const off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+
+      if (recsize == 0) Error("Internal problem! Recordsize is zero for record %d at timestep %d", recID+1, tsID+1);
 
       if (resetFilePos)
         {

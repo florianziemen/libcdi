@@ -5,9 +5,7 @@
 
 #include "gribapi.h"
 
-int fdbScanTimestep1(stream_t *streamptr);
-int fdbScanTimestep2(stream_t *streamptr);
-int fdbScanTimestep(stream_t *streamptr);
+int fdbScanTimesteps(stream_t *streamptr);
 
 int gribapiScanTimestep1(stream_t *streamptr);
 int gribapiScanTimestep2(stream_t *streamptr);

@@ -1076,35 +1076,35 @@ int fdb_fill_itemlist(fdb_handle_t *fdb, fdb_request_t *request, char ***itemLis
   return numItems;
 }
 
-static
+
 long fdb_read_record(fdb_handle_t *fdb, char *item, size_t *buffersize, void **gribbuffer)
 {
-  Message("item = %s", item);
+  //Message("%s", item);
 
-  fdb_datareader_t *dr = NULL;
-  fdb_new_datareader(&dr);
+  fdb_datareader_t *dataReader = NULL;
+  fdb_new_datareader(&dataReader);
   fdb_request_t *singleRequest = NULL;
   fdb_new_request(&singleRequest);
   fdbitem_to_request(item, singleRequest);
-  int status = fdb_retrieve(fdb, singleRequest, dr);
+  int status = fdb_retrieve(fdb, singleRequest, dataReader);
   fdb_delete_request(singleRequest);
   if (status != FDB_SUCCESS) Error("fdb_retrieve failed!");
 
-  long recsize = 0;
-  fdb_datareader_open(dr, &recsize);
-  if (recsize == 0) Error("fdb_datareader empty!");
+  long recordSize = 0;
+  fdb_datareader_open(dataReader, &recordSize);
+  if (recordSize == 0) Error("fdb_datareader empty!");
 
-  ensureBufferSize(recsize, buffersize, gribbuffer);
+  ensureBufferSize(recordSize, buffersize, gribbuffer);
 
-  long read = 0;
-  fdb_datareader_read(dr, *gribbuffer, recsize, &read);
-  // printf("fdb_datareader_read: size=%ld/%ld\n", recsize, read);
-  if (read != recsize) Error("fdb_datareader_read failed!");
+  long readSize = 0;
+  fdb_datareader_read(dataReader, *gribbuffer, recordSize, &readSize);
+  // printf("fdb_datareader_read: size=%ld/%ld\n", recordSize, readSize);
+  if (readSize != recordSize) Error("fdb_datareader_read failed!");
 
-  fdb_datareader_close(dr);
-  fdb_delete_datareader(dr);
+  fdb_datareader_close(dataReader);
+  fdb_delete_datareader(dataReader);
 
-  return recsize;
+  return recordSize;
 }
 
 static
@@ -1271,7 +1271,7 @@ int remove_duplicate_timesteps(RecordInfoEntry *recordInfoList, int numRecords, 
 
 #endif
 
-int fdbScanTimestep1(stream_t *streamptr)
+int fdbScanTimesteps(stream_t *streamptr)
 {
 #ifdef HAVE_LIBFDB5
   void *gribbuffer = NULL;
@@ -1314,7 +1314,6 @@ int fdbScanTimestep1(stream_t *streamptr)
   Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
 
   for (int i = 0; i < numItems; ++i) if (keyValueList[i].item) free(keyValueList[i].item);
-  free(recordInfoList);
   free(keyValueList);
 
   if (numRecords == 0) return CDI_EUFSTRUCT;
@@ -1336,7 +1335,7 @@ int fdbScanTimestep1(stream_t *streamptr)
 
   for (int recID = 0; recID < numRecords; recID++)
     {
-      long recsize = fdb_read_record(fdb, fdbItemList[recID], &buffersize, &gribbuffer);
+      const long recsize = fdb_read_record(fdb, fdbItemList[recID], &buffersize, &gribbuffer);
 
       int datatype, comptype = 0;
       gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype);
@@ -1385,6 +1384,7 @@ int fdbScanTimestep1(stream_t *streamptr)
       int recpos = 0;
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2,
                        lbounds, level1, level2, level_sf, level_unit, &scanKeys, ptiles, 1, fdbItemList[recID]);
+      fdbItemList[recID] = NULL;
 
       grib_handle_delete(gh);
       gh = NULL;
@@ -1394,9 +1394,7 @@ int fdbScanTimestep1(stream_t *streamptr)
 
   fdb_delete_handle(fdb);
 
-  if (fdbItemList) free(fdbItemList);
-
-  streamptr->rtsteps = 1;
+  //streamptr->rtsteps = 1;
 
   cdi_generate_vars(streamptr);
 
@@ -1411,27 +1409,60 @@ int fdbScanTimestep1(stream_t *streamptr)
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
 
-  streamptr->ntsteps = 1;
-  //streamScanTsFixNtsteps(streamptr, recpos);
+  if (numTimesteps == 1) streamptr->ntsteps = 1;
   streamScanTimeConstAdjust(streamptr, taxis);
 
+  for (int tsID = 1; tsID < numTimesteps; tsID++)
+    {
+      const int recordOffset = timestepRecordOffset[tsID];
+      const int vdate = recordInfoList[recordOffset].date;
+      const int vtime = recordInfoList[recordOffset].time * 100;
+      // printf("timestep=%d recOffset=%d date=%d time=%d\n", tsID + 1, recordOffset, vdate, vtime);
+
+      const int tsIDnew = tstepsNewEntry(streamptr);
+      if (tsIDnew != tsID) Error("Internal error. tsID = %d", tsID);
+
+      streamptr->tsteps[tsID-1].next   = true;
+      streamptr->tsteps[tsID].position = 0;
+
+      taxis = &streamptr->tsteps[tsID].taxis;
+
+      cdi_create_records(streamptr, tsID);
+      record_t *records = streamptr->tsteps[tsID].records;
+
+      int nrecs = (tsID == 1) ? streamScanInitRecords2(streamptr) : streamScanInitRecords(streamptr, tsID);
+      if (nrecs != numRecords) Error("Internal error. nrecs = %d", nrecs);
+
+      taxis->vdate = vdate;
+      taxis->vtime = vtime;
+
+      int rindex = 0;
+      for (int recID = 0; recID < numRecords; recID++)
+        {
+          records[recID].used = true;
+          streamptr->tsteps[tsID].recIDs[rindex] = recID;
+          rindex++;
+
+          records[recID].position = 0;
+          records[recID].size = 0;
+          records[recID].fdbItem = fdbItemList[recordOffset + recID];
+          fdbItemList[recordOffset + recID] = NULL;
+        }
+
+      if (tsID == 1) streamptr->tsteps[1].nrecs = numRecords;
+    }
+
+  streamptr->rtsteps = numTimesteps;
+  streamptr->ntsteps = numTimesteps;
+
+  for (int i = 0; i < numItems; ++i)
+    if (fdbItemList[i]) free(fdbItemList[i]);
+
+  if (fdbItemList) free(fdbItemList);
+  if (recordInfoList) free(recordInfoList);
   if (timestepRecordOffset) free(timestepRecordOffset);
 #endif
 
-  return 0;
-}
-
-
-int fdbScanTimestep2(stream_t *streamptr)
-{
-  Error("Function not implemented!");
-  return 0;
-}
-
-
-int fdbScanTimestep(stream_t *streamptr)
-{
-  Error("Function not implemented!");
   return 0;
 }
 
@@ -1768,7 +1799,7 @@ int gribapiScanTimestep(stream_t *streamptr)
   int nrecs = 0;
   int vlistID = streamptr->vlistID;
 
-  int tsID  = streamptr->rtsteps;
+  int tsID = streamptr->rtsteps;
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   if (streamptr->tsteps[tsID].recordSize == 0)
@@ -1785,7 +1816,7 @@ int gribapiScanTimestep(stream_t *streamptr)
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
-      int nrecs_scanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs*(tsID-1);    //Only used for debug output.
+      int nrecs_scanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs*(tsID-1); // Only used for debug output.
       int rindex = 0;
       off_t recpos = 0;
       DateTime datetime0 = { LONG_MIN, LONG_MIN };
