@@ -181,6 +181,12 @@ int get_fdb_param(int cdiParam)
   return fdbParam;
 }
 
+static
+void fillup_gribbuffer(size_t nbytes, unsigned char *gribbuffer)
+{
+  while (nbytes & 7) gribbuffer[nbytes++] = 0;
+}
+
 void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 {
   const int filetype = streamptr1->filetype;
@@ -191,17 +197,43 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   const int recID = streamptr1->tsteps[tsID].recIDs[vrecID];
   const record_t *record = &streamptr1->tsteps[tsID].records[recID];
   const off_t recpos = record->position;
-  const size_t recsize = record->size;
+  size_t recsize = record->size;
 
-  fileSetPos(fileID1, recpos, SEEK_SET);
+  void *gribbuffer = NULL;
 
-  // round up recsize to next multiple of 8
-  const size_t gribbuffersize = ((recsize + 7U) & ~7U);
+  if (streamptr1->fdbRetrieve)
+    {
+#ifdef HAVE_LIBFDB5
+      void *fdbItem = streamptr1->tsteps[tsID].records[recID].fdbItem;
+      if (!fdbItem) Error("fdbItem not available!");
 
-  unsigned char *gribbuffer = (unsigned char *) Malloc(gribbuffersize);
+      fdb_handle_t *fdb;
+      fdb_new_handle(&fdb);
 
-  if (fileRead(fileID1, gribbuffer, recsize) != recsize)
-    Error("Could not read GRIB record for copying!");
+      size_t buffersize = 0;
+      long fdb_read_record(fdb_handle_t *fdb, char *item, size_t *buffersize, void **gribbuffer);
+      recsize = fdb_read_record(fdb, fdbItem, &buffersize, &gribbuffer);
+
+      fdb_delete_handle(fdb);
+
+      // round up recsize to next multiple of 8
+      const size_t gribbuffersize = ((recsize + 7U) & ~7U);
+
+      gribbuffer = (unsigned char *) Realloc(gribbuffer, gribbuffersize);
+#endif
+    }
+  else
+    {
+      fileSetPos(fileID1, recpos, SEEK_SET);
+
+      // round up recsize to next multiple of 8
+      const size_t gribbuffersize = ((recsize + 7U) & ~7U);
+
+      gribbuffer = (unsigned char *) Malloc(gribbuffersize);
+
+      if (fileRead(fileID1, gribbuffer, recsize) != recsize)
+        Error("Could not read GRIB record for copying!");
+    }
 
   size_t nbytes = recsize;
 
@@ -284,7 +316,7 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
         nbytes = grbSzip(filetype, gribbuffer, nbytes);
     }
 
-  while (nbytes & 7) gribbuffer[nbytes++] = 0;
+  fillup_gribbuffer(nbytes, gribbuffer);
 
   if (streamptr2->fdbStore)
     {
