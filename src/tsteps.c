@@ -1,76 +1,73 @@
 #include <limits.h>
 
-#include "dmemory.h"
-
 #include "cdi.h"
 #include "cdi_int.h"
-
+#include "dmemory.h"
 
 static
-void tstepsInitEntry(stream_t *streamptr, size_t tsID)
+void tstepsInitEntry(tsteps_t *tstep)
 {
-  streamptr->tsteps[tsID].curRecID     = CDI_UNDEFID;
-  streamptr->tsteps[tsID].position     = 0;
-  streamptr->tsteps[tsID].records      = NULL;
-  streamptr->tsteps[tsID].recordSize   = 0;
-  streamptr->tsteps[tsID].nallrecs     = 0;
-  streamptr->tsteps[tsID].recIDs       = NULL;
-  streamptr->tsteps[tsID].nrecs        = 0;
-  streamptr->tsteps[tsID].next         = 0;
+  tstep->curRecID     = CDI_UNDEFID;
+  tstep->position     = 0;
+  tstep->records      = NULL;
+  tstep->recordSize   = 0;
+  tstep->nallrecs     = 0;
+  tstep->recIDs       = NULL;
+  tstep->nrecs        = 0;
+  tstep->next         = 0;
 
-  ptaxisInit(&streamptr->tsteps[tsID].taxis);
+  ptaxisInit(&(tstep->taxis));
 }
 
 
 int tstepsNewEntry(stream_t *streamptr)
 {
-  size_t tsID            = (size_t)streamptr->tstepsNextID++;
-  size_t tstepsTableSize = (size_t)streamptr->tstepsTableSize;
-  tsteps_t *tstepsTable  = streamptr->tsteps;
+  const int tsID = streamptr->tstepsNextID++;
+  int tstepsTableSize = streamptr->tstepsTableSize;
+  tsteps_t *tstepsTable = streamptr->tsteps;
 
-  /*
-    If the table overflows, double its size.
-  */
-  if ( tsID == tstepsTableSize )
+  // If the table overflows, double its size.
+  if (tsID == tstepsTableSize)
     {
-      if ( tstepsTableSize == 0 ) tstepsTableSize = 1;
-      if ( tstepsTableSize <= INT_MAX / 2)
+      if (tstepsTableSize == 0) tstepsTableSize = 1;
+      if (tstepsTableSize <= INT_MAX / 2)
         tstepsTableSize *= 2;
-      else if ( tstepsTableSize < INT_MAX)
+      else if (tstepsTableSize < INT_MAX)
         tstepsTableSize = INT_MAX;
       else
         Error("Resizing of tstep table failed!");
-      tstepsTable = (tsteps_t *) Realloc(tstepsTable,
-                                         tstepsTableSize * sizeof (tsteps_t));
+
+      tstepsTable = (tsteps_t *) Realloc(tstepsTable, (size_t)tstepsTableSize * sizeof(tsteps_t));
     }
 
-  streamptr->tstepsTableSize = (int)tstepsTableSize;
-  streamptr->tsteps          = tstepsTable;
+  streamptr->tstepsTableSize = tstepsTableSize;
+  streamptr->tsteps = tstepsTable;
 
-  tstepsInitEntry(streamptr, tsID);
+  tsteps_t *curTstep = &streamptr->tsteps[tsID];
+  tstepsInitEntry(curTstep);
 
-  streamptr->tsteps[tsID].taxis.used = true;
+  curTstep->taxis.used = true;
 
-  return (int)tsID;
+  return tsID;
 }
 
 
 void cdiCreateTimesteps(stream_t *streamptr)
 {
-  if ( streamptr->ntsteps < 0 || streamptr->tstepsTableSize > 0 )
-    return;
+  if (streamptr->ntsteps < 0 || streamptr->tstepsTableSize > 0) return;
 
-  long ntsteps = (streamptr->ntsteps == 0) ? 1 : streamptr->ntsteps;
+  const int ntsteps = (streamptr->ntsteps == 0) ? 1 : (int)streamptr->ntsteps;
 
-  streamptr->tsteps = (tsteps_t *) Malloc((size_t)ntsteps*sizeof(tsteps_t));
+  streamptr->tsteps = (tsteps_t *) Malloc((size_t)ntsteps * sizeof(tsteps_t));
 
-  streamptr->tstepsTableSize = (int)ntsteps;
-  streamptr->tstepsNextID    = (int)ntsteps;
+  streamptr->tstepsTableSize = ntsteps;
+  streamptr->tstepsNextID    = ntsteps;
 
-  for ( long tsID = 0; tsID < ntsteps; tsID++ )
+  for (int tsID = 0; tsID < ntsteps; tsID++)
     {
-      tstepsInitEntry(streamptr, (size_t)tsID);
-      streamptr->tsteps[tsID].taxis.used = true;
+      tsteps_t *curTstep = &streamptr->tsteps[tsID];
+      tstepsInitEntry(curTstep);
+      curTstep->taxis.used = true;
     }
 }
 /*
