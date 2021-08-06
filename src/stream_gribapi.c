@@ -2380,7 +2380,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
       {
         if (zaxistype == ZAXIS_HEIGHT)
           {
-            double sf = zaxis_units_to_meter(zaxisID);
+            const double sf = zaxis_units_to_meter(zaxisID);
             level   *= sf;
             dlevel1 *= sf;
             dlevel2 *= sf;
