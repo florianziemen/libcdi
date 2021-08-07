@@ -385,10 +385,7 @@ int cdiInqContents(stream_t *streamptr)
     case CDI_FILETYPE_GRB:
     case CDI_FILETYPE_GRB2:
       {
-        if (streamptr->fdbRetrieve)
-          status = fdbInqContents(streamptr);
-        else
-          status = grbInqContents(streamptr);
+        status = (streamptr->fdbRetrieve) ? fdbInqContents(streamptr) : grbInqContents(streamptr);
 	break;
       }
 #endif
@@ -610,10 +607,10 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
 
 int streamOpenID(const char *filename, char filemode, int filetype, int resH)
 {
-  if ( CDI_Debug )
+  if (CDI_Debug)
     Message("Open %s mode %c file %s", strfiletype(filetype), filemode, filename ? filename : "(NUL)");
 
-  if ( ! filename || filetype < 0 ) return CDI_EINVAL;
+  if (! filename || filetype < 0) return CDI_EINVAL;
 
   stream_t *streamptr = stream_new_entry(resH);
   int streamID = CDI_ESYSTEM;
@@ -623,7 +620,7 @@ int streamOpenID(const char *filename, char filemode, int filetype, int resH)
     = (int (*)(const char *, char, int, stream_t *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
 
-  int fileID = streamOpenDelegate(filename, filemode, filetype, streamptr, 1);
+  const int fileID = streamOpenDelegate(filename, filemode, filetype, streamptr, 1);
   if (fileID < 0)
     {
       streamID = fileID;
@@ -639,13 +636,13 @@ int streamOpenID(const char *filename, char filemode, int filetype, int resH)
 
       if (filemode == 'r')
         {
-          int vlistID = vlistCreate();
+          const int vlistID = vlistCreate();
           if (vlistID < 0) return CDI_ELIMIT;
 
           cdiVlistMakeInternal(vlistID);
           streamptr->vlistID = vlistID;
           // cdiReadByteorder(streamID);
-          int status = cdiInqContents(streamptr);
+          const int status = cdiInqContents(streamptr);
           if (status < 0)
             {
               streamID = status;

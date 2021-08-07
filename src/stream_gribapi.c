@@ -996,6 +996,10 @@ void decode_fdbitem(const char *fdbItem, KeyValueEntry *keyValue)
               i += 2;
             }
         }
+      else if (i > start && i == (len - 1))
+        {
+          numKeys++;
+        }
     }
 
   keyValue->numKeys = numKeys;
@@ -1024,8 +1028,7 @@ void fdbitem_to_request(const char *fdbItem, fdb_request_t *request)
   keyValue.item = NULL;
   decode_fdbitem(fdbItem, &keyValue);
 
-  int numKeys = keyValue.numKeys;
-  for (int i = 0; i < numKeys; i++)
+  for (int i = 0; i < keyValue.numKeys; i++)
     {
       // printf("key <%s> value <%s>\n", keyValue.keys[i], keyValue.values[i]);
       fdb_request_add1(request, keyValue.keys[i], keyValue.values[i]);
@@ -1254,12 +1257,26 @@ int remove_duplicate_timesteps(RecordInfoEntry *recordInfoList, int numRecords, 
 
   for (int i = 1; i < numTimesteps; ++i)
     {
-      int index = i * numRecords;
-      if (date == recordInfoList[index].date && time == recordInfoList[index].time)
+      int k = 0;
+      for (k = 0; k < numTimesteps; k++)
         {
-          Message("Skip timestep %d", i + 1);
-          numTimestepsNew--;
-          for (int j = i; j < numTimestepsNew; j++) timestepRecordOffset[j] = timestepRecordOffset[j + 1];
+          const int index = (i + k) * numRecords;
+          if (date != recordInfoList[index].date || time != recordInfoList[index].time) break;
+        }
+
+      int index = i * numRecords;
+      if (k > 0 && k < numTimesteps)
+        {
+          index = (i + k) * numRecords;
+          int n = k;
+          for (k = 0; k < n; k++)
+            {
+              Message("Skip timestep %d", i + k + 1);
+              numTimestepsNew--;
+              for (int j = i; j < numTimestepsNew; j++) timestepRecordOffset[j] = timestepRecordOffset[j + 1];
+            }
+          i += k;
+          if (i >= numTimesteps) break;
         }
 
       date = recordInfoList[index].date;
@@ -1269,20 +1286,38 @@ int remove_duplicate_timesteps(RecordInfoEntry *recordInfoList, int numRecords, 
   return numTimestepsNew;
 }
 
-#endif
-
-int fdbScanTimesteps(stream_t *streamptr)
+static
+fdb_request_t *create_fdb_request(const char *filename)
 {
-#ifdef HAVE_LIBFDB5
-  void *gribbuffer = NULL;
-  size_t buffersize = 0;
-  grib_handle *gh = NULL;
+  size_t len = strlen(filename);
+  if (len == 4) Error("Empty FDB request!");
 
-  fdb_handle_t *fdb = NULL;
-  fdb_new_handle(&fdb);
+  KeyValueEntry keyValue;
+  keyValue.item = NULL;
+  decode_fdbitem(filename + 4, &keyValue);
+
+  if (keyValue.numKeys == 0) Error("Empty FDB request!");
 
   fdb_request_t *request = NULL;
   fdb_new_request(&request);
+
+  bool classDefined = false;
+  bool streamDefined = false;
+  bool expverDefined = false;
+  for (int i = 0; i < keyValue.numKeys; i++)
+    {
+      if      (strcmp(keyValue.keys[i], "class") == 0) classDefined = true;
+      else if (strcmp(keyValue.keys[i], "stream") == 0) streamDefined = true;
+      else if (strcmp(keyValue.keys[i], "expver") == 0) expverDefined = true;
+
+      fdb_request_add1(request, keyValue.keys[i], keyValue.values[i]);
+    }
+
+  if (!classDefined) Error("FDB parameter <class> undefined!");
+  if (!streamDefined) Error("FDB parameter <stream> undefined!");
+  if (!expverDefined) Error("FDB parameter <expver> undefined!");
+
+  /*
   fdb_request_add1(request, "class", "ea");
   fdb_request_add1(request, "expver", "0001");
   fdb_request_add1(request, "stream", "oper");
@@ -1294,10 +1329,30 @@ int fdbScanTimesteps(stream_t *streamptr)
   fdb_request_add1(request, "step", "0");
   fdb_request_add1(request, "param", "139");
   // fdb_request_add1(request, "levelist", "300");
+  */
+  if (keyValue.item) free(keyValue.item);
+
+  return request;
+}
+
+#endif
+
+int fdbScanTimesteps(stream_t *streamptr)
+{
+#ifdef HAVE_LIBFDB5
+  void *gribbuffer = NULL;
+  size_t buffersize = 0;
+  grib_handle *gh = NULL;
+
+  fdb_request_t *request = create_fdb_request(streamptr->filename);
+
+  fdb_handle_t *fdb = NULL;
+  fdb_new_handle(&fdb);
 
   char **fdbItemList = NULL;
   int numItems = fdb_fill_itemlist(fdb, request, &fdbItemList);
   fdb_delete_request(request);
+  if (numItems == 0) Error("FDB request does not find any database entries!");
   for (int i = 0; i < numItems; ++i) printf("item[%d] = %s\n", i, fdbItemList[i]);
 
   KeyValueEntry *keyValueList = (KeyValueEntry *) malloc(numItems * sizeof(KeyValueEntry));
@@ -1430,7 +1485,7 @@ int fdbScanTimesteps(stream_t *streamptr)
       cdi_create_records(streamptr, tsID);
       record_t *records = streamptr->tsteps[tsID].records;
 
-      int nrecs = (tsID == 1) ? streamScanInitRecords2(streamptr) : streamScanInitRecords(streamptr, tsID);
+      const int nrecs = (tsID == 1) ? streamScanInitRecords2(streamptr) : streamScanInitRecords(streamptr, tsID);
       if (nrecs != numRecords) Error("Internal error. nrecs = %d", nrecs);
 
       taxis->vdate = vdate;

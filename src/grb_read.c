@@ -141,10 +141,10 @@ DecodeArgs grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *
 
   if (streamptr->fdbRetrieve)
     {
+#ifdef HAVE_LIBFDB5
       void *fdbItem = streamptr->tsteps[tsID].records[recID].fdbItem;
       if (!fdbItem) Error("fdbItem not available!");
 
-#ifdef HAVE_LIBFDB5
       fdb_handle_t *fdb;
       fdb_new_handle(&fdb);
 
