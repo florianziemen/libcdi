@@ -5,7 +5,7 @@
 #ifdef HAVE_LIBGRIB
 
 #ifdef HAVE_LIBFDB5
-#include <fdb5/api/fdb_c.h>
+#include "cdi_fdb.h"
 #endif
 
 #include "async_worker.h"
@@ -148,7 +148,6 @@ DecodeArgs grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *
       fdb_handle_t *fdb;
       fdb_new_handle(&fdb);
 
-      long fdb_read_record(fdb_handle_t *fdb, char *item, size_t *buffersize, void **gribbuffer);
       recsize = fdb_read_record(fdb, fdbItem, &(streamptr->record->buffersize), &gribbuffer);
 
       fdb_delete_handle(fdb);

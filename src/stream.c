@@ -7,7 +7,7 @@
 #endif
 
 #ifdef HAVE_LIBFDB5
-#include <fdb5/api/fdb_c.h>
+#include "cdi_fdb.h"
 #endif
 
 #include <sys/stat.h> // struct stat

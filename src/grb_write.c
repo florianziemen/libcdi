@@ -5,7 +5,7 @@
 #ifdef HAVE_LIBGRIB
 
 #ifdef HAVE_LIBFDB5
-#include <fdb5/api/fdb_c.h>
+#include "cdi_fdb.h"
 #endif
 
 #include "dmemory.h"
@@ -102,6 +102,8 @@ size_t grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
 }
 
 
+#ifdef HAVE_LIBFDB5
+
 typedef struct
 {
   char date[16];
@@ -112,26 +114,49 @@ typedef struct
 }
 FDB_Keys;
 
+#endif
 
-void cdi_fdb_store(void *gribbuffer, size_t nbytes, const FDB_Keys *fdbKeys)
+
+void cdi_fdb_store(const char *filename, void *gribbuffer, size_t nbytes, const FDB_Keys *fdbKeys)
 {
 #ifdef HAVE_LIBFDB5
+  size_t len = strlen(filename);
+  if (len == 4) Error("FDB keys missing!");
+
+  KeyValueEntry keyValue;
+  keyValue.item = NULL;
+  decode_fdbitem(filename + 4, &keyValue);
+
+  if (keyValue.numKeys == 0) Error("FDB keys missing!");
+
+  const char *class = NULL;
+  const char *stream = NULL;
+  const char *expver = NULL;
+  for (int i = 0; i < keyValue.numKeys; i++)
+    {
+      if      (strcmp(keyValue.keys[i], "class") == 0) class = keyValue.values[i];
+      else if (strcmp(keyValue.keys[i], "stream") == 0) stream = keyValue.values[i];
+      else if (strcmp(keyValue.keys[i], "expver") == 0) expver = keyValue.values[i];
+      else Error("Unsupported FDB parameter: %s=%s", keyValue.keys[i], keyValue.values[i]);
+    }
+
+  if (!class) Error("FDB parameter <class> undefined!");
+  if (!stream) Error("FDB parameter <stream> undefined!");
+  if (!expver) Error("FDB parameter <expver> undefined!");
+
   //if ( CDI_Debug )
     {
-      printf("{class=ea,expver=0001,stream=oper,date=%s,time=%s,domain=g}", fdbKeys->date, fdbKeys->time);
+      printf("{class=%s,expver=%s,stream=%s,date=%s,time=%s,domain=g}", class, expver, stream, fdbKeys->date, fdbKeys->time);
       printf("{type=an,levtype=%s}{step=0,", fdbKeys->levtype);
       if (fdbKeys->levelist[0]) printf("levelist=%s,", fdbKeys->levelist);
       printf("param=%s},length=%zu\n", fdbKeys->param, nbytes);
     }
 
-  fdb_handle_t *fdb;
-  fdb_new_handle(&fdb);
-
   fdb_key_t *key;
   fdb_new_key(&key);
-  fdb_key_add(key, "class", "ea");
-  fdb_key_add(key, "expver", "0001");
-  fdb_key_add(key, "stream", "oper");
+  fdb_key_add(key, "class", class);
+  fdb_key_add(key, "expver", expver);
+  fdb_key_add(key, "stream", stream);
   fdb_key_add(key, "domain", "g");
   fdb_key_add(key, "date", fdbKeys->date);
   fdb_key_add(key, "time", fdbKeys->time);
@@ -141,12 +166,16 @@ void cdi_fdb_store(void *gribbuffer, size_t nbytes, const FDB_Keys *fdbKeys)
   fdb_key_add(key, "param", fdbKeys->param);
   if (fdbKeys->levelist[0]) fdb_key_add(key, "levelist", fdbKeys->levelist);
 
-  // Message("fdb_archive()");
-  //fdb_archive(fdb, key, gribbuffer, nbytes);
+  fdb_handle_t *fdb;
+  fdb_new_handle(&fdb);
+
+  Message("fdb_archive()");
+  fdb_archive(fdb, key, gribbuffer, nbytes);
   // alternative: write to tmpfile and use C++ code from fdb_write
 
-  fdb_delete_key(key);
   fdb_delete_handle(fdb);
+
+  fdb_delete_key(key);
 #endif
 }
 
@@ -211,7 +240,6 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
       fdb_new_handle(&fdb);
 
       size_t buffersize = 0;
-      long fdb_read_record(fdb_handle_t *fdb, char *item, size_t *buffersize, void **gribbuffer);
       recsize = fdb_read_record(fdb, fdbItem, &buffersize, &gribbuffer);
 
       fdb_delete_handle(fdb);
@@ -334,7 +362,7 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
       fdbKeys.levelist[0] = 0;
       if (isML) snprintf(fdbKeys.levelist, sizeof(fdbKeys.levelist), "%d", isML ? record->ilevel : 0);
 
-      cdi_fdb_store(gribbuffer, nbytes, &fdbKeys);
+      cdi_fdb_store(streamptr2->filename, gribbuffer, nbytes, &fdbKeys);
     }
   else
     {
@@ -399,7 +427,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
       int ilevel = (isML) ? (int)level : 0;
       if (isML) snprintf(fdbKeys.levelist, sizeof(fdbKeys.levelist), "%d", isML ? ilevel : 0);
 
-      cdi_fdb_store(gribbuffer, nbytes, &fdbKeys);
+      cdi_fdb_store(streamptr->filename, gribbuffer, nbytes, &fdbKeys);
     }
   else
     {
