@@ -966,6 +966,7 @@ int fdbScanTimesteps(stream_t *streamptr)
   for (int i = 0; i < numItems; ++i) keyValueList[i].item = NULL;
 
   RecordInfoEntry *recordInfoList = (RecordInfoEntry *) malloc(numItems * sizeof(RecordInfoEntry));
+  for (int i = 0; i < numItems; ++i) record_info_entry_init(&recordInfoList[i]);
 
   for (int i = 0; i < numItems; ++i) decode_fdbitem(fdbItemList[i], &keyValueList[i]);
   if (check_keyvalueList(numItems, keyValueList) != 0) return 1;
