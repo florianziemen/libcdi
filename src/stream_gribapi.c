@@ -953,11 +953,11 @@ int fdbScanTimesteps(stream_t *streamptr)
 
   fdb_request_t *request = create_fdb_request(streamptr->filename);
 
-  fdb_handle_t *fdb = NULL;
-  fdb_new_handle(&fdb);
+  fdb_handle_t *fdbHandle = streamptr->fdbHandle;
+  if (!fdbHandle) fdb_new_handle(&fdbHandle);
 
   char **fdbItemList = NULL;
-  int numItems = fdb_fill_itemlist(fdb, request, &fdbItemList);
+  int numItems = fdb_fill_itemlist(fdbHandle, request, &fdbItemList);
   fdb_delete_request(request);
   if (numItems == 0) Error("FDB request does not find any database entries!");
   for (int i = 0; i < numItems; ++i) printf("item[%d] = %s\n", i, fdbItemList[i]);
@@ -998,7 +998,7 @@ int fdbScanTimesteps(stream_t *streamptr)
 
   for (int recID = 0; recID < numRecords; recID++)
     {
-      const long recsize = fdb_read_record(fdb, fdbItemList[recID], &buffersize, &gribbuffer);
+      const long recsize = fdb_read_record(fdbHandle, fdbItemList[recID], &buffersize, &gribbuffer);
 
       int datatype, comptype = 0;
       gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype);
@@ -1055,7 +1055,7 @@ int fdbScanTimesteps(stream_t *streamptr)
 
   if (gh) grib_handle_delete(gh);
 
-  fdb_delete_handle(fdb);
+  if (!streamptr->fdbHandle) fdb_delete_handle(fdbHandle);
 
   cdi_generate_vars(streamptr);
 

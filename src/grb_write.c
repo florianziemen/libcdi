@@ -236,13 +236,13 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
       void *fdbItem = streamptr1->tsteps[tsID].records[recID].fdbItem;
       if (!fdbItem) Error("fdbItem not available!");
 
-      fdb_handle_t *fdb;
-      fdb_new_handle(&fdb);
+      fdb_handle_t *fdbHandle = streamptr1->fdbHandle;
+      if (!fdbHandle) fdb_new_handle(&fdbHandle);
 
       size_t buffersize = 0;
-      recsize = fdb_read_record(fdb, fdbItem, &buffersize, &gribbuffer);
+      recsize = fdb_read_record(fdbHandle, fdbItem, &buffersize, &gribbuffer);
 
-      fdb_delete_handle(fdb);
+      if (!streamptr1->fdbHandle) fdb_delete_handle(fdbHandle);
 
       // round up recsize to next multiple of 8
       const size_t gribbuffersize = ((recsize + 7U) & ~7U);

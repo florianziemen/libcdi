@@ -464,9 +464,12 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
       if (filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_GRB2)
         {
 #ifdef HAVE_LIBFDB5
+          streamptr->fdbRetrieve = true;
           Message("fdb_initialise()");
           fdb_initialise();
-          streamptr->fdbRetrieve = true;
+          fdb_handle_t *fdbHandle = NULL;
+          fdb_new_handle(&fdbHandle);
+          streamptr->fdbHandle = fdbHandle;
 #endif
           streamptr->filetype = filetype;
           if (recordBufIsToBeCreated)
@@ -982,6 +985,9 @@ void streamDefaultValue(stream_t * streamptr)
 
   streamptr->fdbRetrieve       = false;
   streamptr->fdbStore          = false;
+#ifdef HAVE_LIBFDB5
+  streamptr->fdbHandle         = NULL;
+#endif
 }
 
 static
@@ -1006,7 +1012,14 @@ stream_t *stream_new_entry(int resH)
 
 void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
-  if (streamptr->fdbStore || streamptr->fdbRetrieve) return;
+  if (streamptr->fdbStore || streamptr->fdbRetrieve)
+    {
+#ifdef HAVE_LIBFDB5
+      if (streamptr->fdbHandle) fdb_delete_handle(streamptr->fdbHandle);
+      streamptr->fdbHandle = NULL;
+#endif
+      return;
+    }
 
   const int fileID   = streamptr->fileID;
   const int filetype = streamptr->filetype;

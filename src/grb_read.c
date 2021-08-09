@@ -145,12 +145,12 @@ DecodeArgs grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *
       void *fdbItem = streamptr->tsteps[tsID].records[recID].fdbItem;
       if (!fdbItem) Error("fdbItem not available!");
 
-      fdb_handle_t *fdb;
-      fdb_new_handle(&fdb);
+      fdb_handle_t *fdbHandle = streamptr->fdbHandle;
+      if (!fdbHandle) fdb_new_handle(&fdbHandle);
 
-      recsize = fdb_read_record(fdb, fdbItem, &(streamptr->record->buffersize), &gribbuffer);
+      recsize = fdb_read_record(fdbHandle, fdbItem, &(streamptr->record->buffersize), &gribbuffer);
 
-      fdb_delete_handle(fdb);
+      if (!streamptr->fdbHandle) fdb_delete_handle(fdbHandle);
 #endif
     }
   else

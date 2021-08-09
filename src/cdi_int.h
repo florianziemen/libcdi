@@ -189,7 +189,9 @@ typedef struct
   char      varname[32]; // needed for grib decoding with GRIB_API
   VarScanKeys scanKeys;
   var_tile_t tiles;      // tile-related meta-data, currently for GRIB-API only.
+#ifdef  HAVE_LIBFDB5
   void     *fdbItem;
+#endif
 }
 record_t;
 
@@ -313,6 +315,9 @@ typedef struct {
 
   bool        fdbRetrieve;
   bool        fdbStore;
+#ifdef  HAVE_LIBFDB5
+  void       *fdbHandle;
+#endif
 }
 stream_t;
 
