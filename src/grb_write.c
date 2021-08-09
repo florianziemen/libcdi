@@ -102,8 +102,6 @@ size_t grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
 }
 
 
-#ifdef HAVE_LIBFDB5
-
 typedef struct
 {
   char date[16];
@@ -114,10 +112,8 @@ typedef struct
 }
 FDB_Keys;
 
-#endif
 
-
-void cdi_fdb_store(const char *filename, void *gribbuffer, size_t nbytes, const FDB_Keys *fdbKeys)
+void cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nbytes, const FDB_Keys *fdbKeys)
 {
 #ifdef HAVE_LIBFDB5
   size_t len = strlen(filename);
@@ -166,14 +162,9 @@ void cdi_fdb_store(const char *filename, void *gribbuffer, size_t nbytes, const 
   fdb_key_add(key, "param", fdbKeys->param);
   if (fdbKeys->levelist[0]) fdb_key_add(key, "levelist", fdbKeys->levelist);
 
-  fdb_handle_t *fdb;
-  fdb_new_handle(&fdb);
-
   Message("fdb_archive()");
-  fdb_archive(fdb, key, gribbuffer, nbytes);
+  fdb_archive(fdbHandle, key, gribbuffer, nbytes);
   // alternative: write to tmpfile and use C++ code from fdb_write
-
-  fdb_delete_handle(fdb);
 
   fdb_delete_key(key);
 #endif
@@ -236,13 +227,8 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
       void *fdbItem = streamptr1->tsteps[tsID].records[recID].fdbItem;
       if (!fdbItem) Error("fdbItem not available!");
 
-      fdb_handle_t *fdbHandle = streamptr1->fdbHandle;
-      if (!fdbHandle) fdb_new_handle(&fdbHandle);
-
       size_t buffersize = 0;
-      recsize = fdb_read_record(fdbHandle, fdbItem, &buffersize, &gribbuffer);
-
-      if (!streamptr1->fdbHandle) fdb_delete_handle(fdbHandle);
+      recsize = fdb_read_record(streamptr1->fdbHandle, fdbItem, &buffersize, &gribbuffer);
 
       // round up recsize to next multiple of 8
       const size_t gribbuffersize = ((recsize + 7U) & ~7U);
@@ -362,7 +348,7 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
       fdbKeys.levelist[0] = 0;
       if (isML) snprintf(fdbKeys.levelist, sizeof(fdbKeys.levelist), "%d", isML ? record->ilevel : 0);
 
-      cdi_fdb_store(streamptr2->filename, gribbuffer, nbytes, &fdbKeys);
+      cdi_fdb_store(streamptr2->fdbHandle, streamptr2->filename, gribbuffer, nbytes, &fdbKeys);
     }
   else
     {
@@ -427,7 +413,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
       int ilevel = (isML) ? (int)level : 0;
       if (isML) snprintf(fdbKeys.levelist, sizeof(fdbKeys.levelist), "%d", isML ? ilevel : 0);
 
-      cdi_fdb_store(streamptr->filename, gribbuffer, nbytes, &fdbKeys);
+      cdi_fdb_store(streamptr->fdbHandle, streamptr->filename, gribbuffer, nbytes, &fdbKeys);
     }
   else
     {

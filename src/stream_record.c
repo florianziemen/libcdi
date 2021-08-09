@@ -31,7 +31,9 @@ void recordInitEntry(record_t *record)
   memset(record->varname, 0, sizeof(record->varname));
   varScanKeysInit(&record->scanKeys);
   memset(&record->tiles, 0, sizeof(record->tiles));
+#ifdef HAVE_LIBFDB5
   record->fdbItem   = NULL;
+#endif
 }
 
 

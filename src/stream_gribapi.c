@@ -675,7 +675,9 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   record->gridsize  = gribapiGetGridsize(gh);
   record->scanKeys  = *scanKeys;
   record->tiles     = tiles ? *tiles : dummy_tiles;
+#ifdef HAVE_LIBFDB5
   record->fdbItem   = fdbItem;
+#endif
 
   strncpy(record->varname, varname, sizeof(record->varname)-1);
   record->varname[sizeof(record->varname) - 1] = 0;
@@ -954,7 +956,6 @@ int fdbScanTimesteps(stream_t *streamptr)
   fdb_request_t *request = create_fdb_request(streamptr->filename);
 
   fdb_handle_t *fdbHandle = streamptr->fdbHandle;
-  if (!fdbHandle) fdb_new_handle(&fdbHandle);
 
   char **fdbItemList = NULL;
   int numItems = fdb_fill_itemlist(fdbHandle, request, &fdbItemList);
@@ -1054,8 +1055,6 @@ int fdbScanTimesteps(stream_t *streamptr)
     }
 
   if (gh) grib_handle_delete(gh);
-
-  if (!streamptr->fdbHandle) fdb_delete_handle(fdbHandle);
 
   cdi_generate_vars(streamptr);
 

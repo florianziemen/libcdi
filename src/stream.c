@@ -464,12 +464,10 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
       if (filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_GRB2)
         {
 #ifdef HAVE_LIBFDB5
-          streamptr->fdbRetrieve = true;
           Message("fdb_initialise()");
           fdb_initialise();
-          fdb_handle_t *fdbHandle = NULL;
-          fdb_new_handle(&fdbHandle);
-          streamptr->fdbHandle = fdbHandle;
+          fdb_new_handle((fdb_handle_t **)&(streamptr->fdbHandle));
+          streamptr->fdbRetrieve = true;
 #endif
           streamptr->filetype = filetype;
           if (recordBufIsToBeCreated)
@@ -493,6 +491,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
 #ifdef HAVE_LIBFDB5
           Message("fdb_initialise()");
           fdb_initialise();
+          fdb_new_handle((fdb_handle_t **)&(streamptr->fdbHandle));
           streamptr->fdbStore = true;
 #endif
           streamptr->filetype = filetype;
@@ -1164,7 +1163,9 @@ void streamClose(int streamID)
   for (int index = 0; index < streamptr->ntsteps; ++index)
     {
       tsteps_t *tstep = &(streamptr->tsteps[index]);
+#ifdef HAVE_LIBFDB5
       if (tstep->records->fdbItem) free(tstep->records->fdbItem);
+#endif
       if (tstep->records) Free(tstep->records);
       if (tstep->recIDs) Free(tstep->recIDs);
       taxisDestroyKernel(&(tstep->taxis));
