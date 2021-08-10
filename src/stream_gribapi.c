@@ -953,15 +953,14 @@ int fdbScanTimesteps(stream_t *streamptr)
   size_t buffersize = 0;
   grib_handle *gh = NULL;
 
-  fdb_request_t *request = create_fdb_request(streamptr->filename);
-
   fdb_handle_t *fdbHandle = streamptr->fdbHandle;
 
   char **fdbItemList = NULL;
+  fdb_request_t *request = create_fdb_request(streamptr->filename);
   int numItems = fdb_fill_itemlist(fdbHandle, request, &fdbItemList);
   fdb_delete_request(request);
   if (numItems == 0) Error("FDB request does not find any database entries!");
-  for (int i = 0; i < numItems; ++i) printf("item[%d] = %s\n", i, fdbItemList[i]);
+  if (CDI_Debug) for (int i = 0; i < numItems; ++i) printf("item[%d] = %s\n", i + 1, fdbItemList[i]);
 
   KeyValueEntry *keyValueList = (KeyValueEntry *) malloc(numItems * sizeof(KeyValueEntry));
   for (int i = 0; i < numItems; ++i) keyValueList[i].item = NULL;
@@ -975,7 +974,7 @@ int fdbScanTimesteps(stream_t *streamptr)
 
   int numRecords = get_num_records(numItems, recordInfoList);
   int numTimesteps = numItems / numRecords;
-  Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
+  if (CDI_Debug) Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
 
   for (int i = 0; i < numItems; ++i) if (keyValueList[i].item) free(keyValueList[i].item);
   free(keyValueList);
@@ -985,7 +984,7 @@ int fdbScanTimesteps(stream_t *streamptr)
   int *timestepRecordOffset = (int *) malloc(numTimesteps * sizeof(int));
   for (int i = 0; i < numTimesteps; i++) timestepRecordOffset[i] = i * numRecords;
   numTimesteps = remove_duplicate_timesteps(recordInfoList, numRecords, numTimesteps, timestepRecordOffset);
-  Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
+  if (CDI_Debug) Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
 
   DateTime datetime0 = { .date = 10101, .time = 0 };
   int fcast = 0;

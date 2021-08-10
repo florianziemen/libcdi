@@ -464,7 +464,6 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
       if (filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_GRB2)
         {
 #ifdef HAVE_LIBFDB5
-          Message("fdb_initialise()");
           fdb_initialise();
           fdb_new_handle((fdb_handle_t **)&(streamptr->fdbHandle));
           streamptr->fdbRetrieve = true;
@@ -489,7 +488,6 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
       if (filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_GRB2)
         {
 #ifdef HAVE_LIBFDB5
-          Message("fdb_initialise()");
           fdb_initialise();
           fdb_new_handle((fdb_handle_t **)&(streamptr->fdbHandle));
           streamptr->fdbStore = true;

@@ -140,7 +140,7 @@ void cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size
   if (!stream) Error("FDB parameter <stream> undefined!");
   if (!expver) Error("FDB parameter <expver> undefined!");
 
-  //if ( CDI_Debug )
+  if (CDI_Debug)
     {
       printf("{class=%s,expver=%s,stream=%s,date=%s,time=%s,domain=g}", class, expver, stream, fdbKeys->date, fdbKeys->time);
       printf("{type=an,levtype=%s}{step=0,", fdbKeys->levtype);
@@ -162,7 +162,6 @@ void cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size
   fdb_key_add(key, "param", fdbKeys->param);
   if (fdbKeys->levelist[0]) fdb_key_add(key, "levelist", fdbKeys->levelist);
 
-  Message("fdb_archive()");
   fdb_archive(fdbHandle, key, gribbuffer, nbytes);
   // alternative: write to tmpfile and use C++ code from fdb_write
 

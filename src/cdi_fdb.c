@@ -8,6 +8,7 @@ int cdi_fdb_dummy;
 #include <stdlib.h>
 
 #include "error.h"
+#include "cdi_int.h"
 
 void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer);
 
@@ -105,7 +106,7 @@ int fdb_fill_itemlist(fdb_handle_t *fdb, fdb_request_t *request, char ***itemLis
 
       numItems++;
     }
-  Message("numItems = %d", numItems);
+  if (CDI_Debug) Message("numItems = %d", numItems);
 
   if (*itemList == NULL) *itemList = (char **) malloc(numItems * sizeof(char*));
 
