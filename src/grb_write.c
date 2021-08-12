@@ -347,7 +347,9 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
       fdbKeys.levelist[0] = 0;
       if (isML) snprintf(fdbKeys.levelist, sizeof(fdbKeys.levelist), "%d", isML ? record->ilevel : 0);
 
+#ifdef HAVE_LIBFDB5
       cdi_fdb_store(streamptr2->fdbHandle, streamptr2->filename, gribbuffer, nbytes, &fdbKeys);
+#endif
     }
   else
     {
@@ -412,7 +414,9 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
       int ilevel = (isML) ? (int)level : 0;
       if (isML) snprintf(fdbKeys.levelist, sizeof(fdbKeys.levelist), "%d", isML ? ilevel : 0);
 
-      cdi_fdb_store(streamptr->fdbHandle, streamptr->filename, gribbuffer, nbytes, &fdbKeys);
+#ifdef HAVE_LIBFDB5
+     cdi_fdb_store(streamptr->fdbHandle, streamptr->filename, gribbuffer, nbytes, &fdbKeys);
+#endif
     }
   else
     {
