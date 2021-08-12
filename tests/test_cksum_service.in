@@ -1,7 +1,7 @@
 #! /bin/sh
 
 set -e
-format=svc
+format=srv
 if [ @ENABLE_SERVICE@ = yes ]; then
   . ${srcdir}/test_cksum_base
 else

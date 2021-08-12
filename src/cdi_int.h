@@ -303,9 +303,7 @@ typedef struct {
   int         complevel;     // compression level
   bool        sortname;
   bool        sortparam;
-
   void       *gribContainers;
-  void       *gh;            // grib handle
 
   int         numWorker;
   int         nextRecID;

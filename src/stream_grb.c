@@ -191,10 +191,10 @@ static const int grib2ltypeMap[][2] =
 static const size_t grib2ltypeMapSize = sizeof(grib2ltypeMap) / (2 * sizeof(int));
 
 static int
-getInt2IntMap(int searchKey, bool keyValue, size_t tableSize, const int grib1ltypeMap2[][2], int defaultValue)
+getInt2IntMap(int searchKey, bool keyValue, size_t mapSize, const int gribltypeMap[][2], int defaultValue)
 {
-  for (size_t i = 0; i < tableSize; ++i)
-    if (grib1ltypeMap[i][keyValue] == searchKey) return grib1ltypeMap2[i][!keyValue];
+  for (size_t i = 0; i < mapSize; ++i)
+    if (gribltypeMap[i][keyValue] == searchKey) return gribltypeMap[i][!keyValue];
 
   return defaultValue;
 }
@@ -307,7 +307,7 @@ int grbScanTimestep(stream_t * streamptr)
 #ifdef HAVE_LIBCGRIBEX
   const int filetype = streamptr->filetype;
 
-  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
+  if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
     status = cgribexScanTimestep(streamptr);
   else
 #endif

@@ -1300,11 +1300,11 @@ int gribapiScanTimestep2(stream_t *streamptr)
   int rindex = 0;
   while (true)
     {
-      if ( rindex > nrecords ) break;
+      if (rindex > nrecords) break;
 
       const size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
-      if ( recsize == 0 )
+      if (recsize == 0)
 	{
 	  streamptr->ntsteps = 2;
 	  break;
@@ -1338,7 +1338,7 @@ int gribapiScanTimestep2(stream_t *streamptr)
 	{
           datetime0 = datetime;
           const int taxisID = vlistInqTaxis(vlistID);
-	  if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
+	  if (taxisInqType(taxisID) == TAXIS_RELATIVE)
 	    {
 	      taxis->type = TAXIS_RELATIVE;
 	      taxis->unit = gribapiGetTimeUnits(gh);
@@ -1631,8 +1631,7 @@ int gribapiScanTimestep(stream_t *streamptr)
       if (streamptr->ntsteps != streamptr->rtsteps)
 	{
 	  tsID = tstepsNewEntry(streamptr);
-	  if (tsID != streamptr->rtsteps)
-	    Error("Internal error. tsID = %d", tsID);
+	  if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
 
 	  streamptr->tsteps[tsID-1].next   = true;
 	  streamptr->tsteps[tsID].position = recpos;
@@ -2569,7 +2568,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
       {
         if (zaxistype == ZAXIS_HEIGHT)
           {
-            double sf = zaxis_units_to_meter(zaxisID);
+            const double sf = zaxis_units_to_meter(zaxisID);
             level   *= sf;
             dlevel1 *= sf;
             dlevel2 *= sf;

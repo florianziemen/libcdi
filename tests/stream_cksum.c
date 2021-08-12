@@ -155,7 +155,7 @@ cksum_stream(const char *fname, size_t *table_len)
     while (streamInqTimestep(streamID, tsID))
       {
         // Get the verification date and time
-        int vdatetime[2] = { taxisInqVtime(taxisID), taxisInqVdate(taxisID) };
+        int vdatetime[2] = { taxisInqVtime(taxisID), (int) taxisInqVdate(taxisID) };
         // Read var1 and var2
         for (int varIdx = 0; varIdx < nvars; ++varIdx)
           {

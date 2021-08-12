@@ -289,7 +289,7 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
     // allowed modes: <0, 64, 96>; Default is 64
     // This will overrule the old scanning mode of the given grid
     {
-      grib_handle *gh =  grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
+      grib_handle *gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
 
       const int scanModeIN = gribapiGetScanningMode(gh);
 

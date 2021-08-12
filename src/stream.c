@@ -776,12 +776,12 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 #endif
     default:
       {
-	if ( CDI_Debug ) Message("%s support not compiled in!", strfiletype(filetype));
+	if (CDI_Debug) Message("%s support not compiled in!", strfiletype(filetype));
 	return CDI_ELIBNAVAIL;
       }
     }
 
-  if ( fileID == CDI_UNDEFID )
+  if (fileID == CDI_UNDEFID)
     streamID = CDI_UNDEFID;
   else
     streamptr->fileID = fileID;
@@ -835,7 +835,7 @@ int streamOpenRead(const char *filename)
   const bool fdbRetrieve = (pathlen >= 4 && memcmp(filename, "fdb:", 4) == 0);
 
   int byteorder = 0;
-  int filetype = fdbRetrieve ? CDI_FILETYPE_GRB2 : cdiGetFiletype(filename, &byteorder);
+  const int filetype = fdbRetrieve ? CDI_FILETYPE_GRB2 : cdiGetFiletype(filename, &byteorder);
   if (filetype < 0) return filetype;
 
   const int streamID = streamOpen(filename, "r", filetype);
@@ -855,7 +855,6 @@ int streamOpenAppend(const char *filename)
 
   int byteorder = 0;
   const int filetype = cdiGetFiletype(filename, &byteorder);
-
   if (filetype < 0) return filetype;
 
   const int streamID = streamOpenA(filename, "a", filetype);
@@ -972,7 +971,6 @@ void streamDefaultValue(stream_t * streamptr)
 #endif
 
   streamptr->gribContainers    = NULL;
-  streamptr->gh                = NULL;
 
   streamptr->numWorker         = 0;
   streamptr->nextRecID         = 0;
@@ -993,7 +991,7 @@ stream_t *stream_new_entry(int resH)
   cdiInitialize(); /* ***************** make MT version !!! */
 
   stream_t *streamptr = (stream_t *) Malloc(sizeof(stream_t));
-  streamDefaultValue ( streamptr );
+  streamDefaultValue(streamptr);
 
   if (resH == CDI_UNDEFID)
     streamptr->self = reshPut(streamptr, &streamOps);
@@ -1018,7 +1016,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       return;
     }
 
-  const int fileID   = streamptr->fileID;
+  const int fileID = streamptr->fileID;
   const int filetype = streamptr->filetype;
 
   if (fileID == CDI_UNDEFID)
@@ -1131,11 +1129,11 @@ void streamClose(int streamID)
     = (void (*)(stream_t *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
 
-  if ( streamptr->filetype != -1 ) streamCloseDelegate(streamptr, 1);
+  if (streamptr->filetype != -1) streamCloseDelegate(streamptr, 1);
 
-  if ( streamptr->record )
+  if (streamptr->record)
     {
-      if ( streamptr->record->buffer )
+      if (streamptr->record->buffer)
         Free(streamptr->record->buffer);
 
       Free(streamptr->record);
