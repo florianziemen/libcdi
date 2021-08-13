@@ -338,8 +338,12 @@ int grbInqContents(stream_t * streamptr)
 int fdbInqContents(stream_t * streamptr)
 {
   streamptr->curTsID = 0;
+#ifdef  HAVE_LIBGRIB_API
   int status = fdbScanTimesteps(streamptr);
   return status;
+#else
+  return -1;
+#endif
 }
 #endif
 

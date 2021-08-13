@@ -459,6 +459,14 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
     }
 #endif
 
+#ifndef HAVE_LIBGRIB_API
+  if (fdbRetrieve || fdbStore)
+    {
+      Message("ecCodes support not compiled in (Needed for FDB5)!");
+      return CDI_ELIBNAVAIL;
+    }
+#endif
+
   if (fdbRetrieve)
     {
       if (filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_GRB2)
