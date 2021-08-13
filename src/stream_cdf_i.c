@@ -43,6 +43,7 @@ ncdim_t;
 
 #define  MAX_COORDVARS  5
 #define  MAX_AUXVARS    4
+#define  MAX_DIMS_CDF   8
 
 typedef struct {
   int      ncid;
@@ -60,13 +61,13 @@ typedef struct {
   bool     hasCalendar;
   bool     hasFormulaterms;
   bool     printWarning;
+  int      timetype;
   int      param;
   int      code;
   int      tabnum;
   int      bounds;
   int      gridID;
   int      zaxisID;
-  int      timetype;
   int      gridtype;
   int      zaxistype;
   int      xdim;
@@ -76,14 +77,14 @@ typedef struct {
   int      yvarid;
   int      rpvarid;
   int      zvarid;
-  int      cvarids[MAX_COORDVARS];
   int      tvarid;
   int      psvarid;
   int      p0varid;
   int      ncoordvars;
+  int      cvarids[MAX_COORDVARS];
   int      coordvarids[MAX_COORDVARS];
-  int      nauxvars;
   int      auxvarids[MAX_AUXVARS];
+  int      nauxvars;
   int      cellarea;
   int      tableID;
   int      truncation;
@@ -95,16 +96,12 @@ typedef struct {
   int      gmapid;
   int      positive;
   int      ndims;
-  int      dimids[8];
-  int      dimtype[8];
-  size_t   chunks[8];
-  int      chunked;
+  int      dimids[MAX_DIMS_CDF];
+  int      dimtype[MAX_DIMS_CDF];
+  size_t   chunks[MAX_DIMS_CDF];
+  bool     chunked;
   int      chunktype;
   int      natts;
-  bool     ldeflate;
-  bool     lszip;
-  bool     lunsigned;
-  bool     lvalidrange;
   int     *atts;
   size_t   vctsize;
   double  *vct;
@@ -112,15 +109,19 @@ typedef struct {
   double   fillval;
   double   addoffset;
   double   scalefactor;
+  bool     ldeflate;
+  bool     lszip;
+  bool     lunsigned;
+  bool     lvalidrange;
   double   validrange[2];
+  int      typeOfEnsembleForecast;
+  int      numberOfForecastsInEnsemble;
+  int      perturbationNumber;
   char     name[CDI_MAX_NAME];
   char     longname[CDI_MAX_NAME];
   char     stdname[CDI_MAX_NAME];
   char     units[CDI_MAX_NAME];
   char     extra[CDI_MAX_NAME];
-  int      typeOfEnsembleForecast;
-  int      numberOfForecastsInEnsemble;
-  int      perturbationNumber;
 }
 ncvar_t;
 
@@ -623,11 +624,11 @@ void init_ncdims(int ndims, ncdim_t *ncdims)
   for (int ncdimid = 0; ncdimid < ndims; ncdimid++)
     {
       ncdim_t *ncdim = &ncdims[ncdimid];
-      ncdim->dimid        = CDI_UNDEFID;
-      ncdim->ncvarid      = CDI_UNDEFID;
-      ncdim->dimtype      = CDI_UNDEFID;
-      ncdim->len          = 0;
-      ncdim->name[0]      = 0;
+      ncdim->dimid   = CDI_UNDEFID;
+      ncdim->ncvarid = CDI_UNDEFID;
+      ncdim->dimtype = CDI_UNDEFID;
+      ncdim->len     = 0;
+      ncdim->name[0] = 0;
     }
 }
 
@@ -672,31 +673,34 @@ void init_ncvars(int nvars, ncvar_t *ncvars)
       ncvar->psvarid         = CDI_UNDEFID;
       ncvar->p0varid         = CDI_UNDEFID;
       ncvar->ncoordvars      = 0;
-      for (int i = 0; i < MAX_COORDVARS; ++i) ncvar->coordvarids[i]  = CDI_UNDEFID;
-      for (int i = 0; i < MAX_COORDVARS; ++i) ncvar->cvarids[i]      = CDI_UNDEFID;
-      ncvar->nauxvars      = 0;
-      for (int i = 0; i < MAX_AUXVARS; ++i) ncvar->auxvarids[i]  = CDI_UNDEFID;
+      for (int i = 0; i < MAX_COORDVARS; ++i) ncvar->cvarids[i] = CDI_UNDEFID;
+      for (int i = 0; i < MAX_COORDVARS; ++i) ncvar->coordvarids[i] = CDI_UNDEFID;
+      for (int i = 0; i < MAX_AUXVARS; ++i) ncvar->auxvarids[i] = CDI_UNDEFID;
+      ncvar->nauxvars        = 0;
       ncvar->cellarea        = CDI_UNDEFID;
       ncvar->tableID         = CDI_UNDEFID;
-      ncvar->xtype           = 0;
-      ncvar->ndims           = 0;
-      ncvar->gmapid          = CDI_UNDEFID;
-      ncvar->vctsize         = 0;
-      ncvar->vct             = NULL;
       ncvar->truncation      = 0;
       ncvar->position        = 0;
       ncvar->numLPE          = 0;
-      ncvar->positive        = 0;
-      ncvar->chunked         = 0;
-      ncvar->chunktype       = CDI_UNDEFID;
       ncvar->defmissval      = false;
       ncvar->deffillval      = false;
+      ncvar->xtype           = 0;
+      ncvar->gmapid          = CDI_UNDEFID;
+      ncvar->positive        = 0;
+      ncvar->ndims           = 0;
+      for (int i = 0; i < MAX_DIMS_CDF; ++i) ncvar->dimids[i] = CDI_UNDEFID;
+      for (int i = 0; i < MAX_DIMS_CDF; ++i) ncvar->dimtype[i] = CDI_UNDEFID;
+      for (int i = 0; i < MAX_DIMS_CDF; ++i) ncvar->chunks[i] = 0;
+      ncvar->chunked         = false;
+      ncvar->chunktype       = CDI_UNDEFID;
+      ncvar->natts           = 0;
+      ncvar->atts            = NULL;
+      ncvar->vctsize         = 0;
+      ncvar->vct             = NULL;
       ncvar->missval         = 0;
       ncvar->fillval         = 0;
       ncvar->addoffset       = 0;
       ncvar->scalefactor     = 1;
-      ncvar->natts           = 0;
-      ncvar->atts            = NULL;
       ncvar->ldeflate        = false;
       ncvar->lszip           = false;
       ncvar->lunsigned       = false;
@@ -946,12 +950,12 @@ void cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
           axis[ndim++] = ':';
           for (int i = 0; i < ncvar->ndims; i++)
             {
-              if      ( ncvar->dimtype[i] == T_AXIS ) axis[ndim++] = TAXIS;
-              else if ( ncvar->dimtype[i] == Z_AXIS ) axis[ndim++] = ZAXIS;
-              else if ( ncvar->dimtype[i] == E_AXIS ) axis[ndim++] = EAXIS;
-              else if ( ncvar->dimtype[i] == Y_AXIS ) axis[ndim++] = YAXIS;
-              else if ( ncvar->dimtype[i] == X_AXIS ) axis[ndim++] = XAXIS;
-              else                                    axis[ndim++] = '?';
+              if      (ncvar->dimtype[i] == T_AXIS) axis[ndim++] = TAXIS;
+              else if (ncvar->dimtype[i] == Z_AXIS) axis[ndim++] = ZAXIS;
+              else if (ncvar->dimtype[i] == E_AXIS) axis[ndim++] = EAXIS;
+              else if (ncvar->dimtype[i] == Y_AXIS) axis[ndim++] = YAXIS;
+              else if (ncvar->dimtype[i] == X_AXIS) axis[ndim++] = XAXIS;
+              else                                  axis[ndim++] = '?';
             }
         }
       else
@@ -1133,16 +1137,16 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
           */
           size_t chunks[nvdims];
           int storage_in;
-          if ( nc_inq_var_chunking(ncid, ncvarid, &storage_in, chunks) == NC_NOERR )
+          if (nc_inq_var_chunking(ncid, ncvarid, &storage_in, chunks) == NC_NOERR)
             {
-              if ( storage_in == NC_CHUNKED )
+              if (storage_in == NC_CHUNKED)
                 {
-                  ncvar->chunked = 1;
-                  for ( int i = 0; i < nvdims; ++i ) ncvar->chunks[i] = chunks[i];
-                  if ( CDI_Debug )
+                  ncvar->chunked = true;
+                  for (int i = 0; i < nvdims; ++i) ncvar->chunks[i] = chunks[i];
+                  if (CDI_Debug)
                     {
                       fprintf(stderr, "%s: chunking %d %d %d  chunks ", name, storage_in, NC_CONTIGUOUS, NC_CHUNKED);
-                      for ( int i = 0; i < nvdims; ++i ) fprintf(stderr, "%zu ", chunks[i]);
+                      for (int i = 0; i < nvdims; ++i) fprintf(stderr, "%zu ", chunks[i]);
                       fprintf(stderr, "\n");
                     }
                   {
@@ -1732,7 +1736,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	{
 	  bool lxdim = false, lydim = false, lzdim = false /*, ltdim = false */;
           int lcdim = 0;
-	  int ndims = ncvar->ndims;
+	  const int ndims = ncvar->ndims;
 	  for (int i = 0; i < ndims; i++)
 	    {
               int dimtype = ncvar->dimtype[i];
@@ -1743,13 +1747,10 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	      // ltdim |= (dimtype == T_AXIS);
 	    }
 
-          int allcdims = lcdim;
+          const int allcdims = lcdim;
 
-          if ( !lxdim && ncvar->xvarid != CDI_UNDEFID
-               && ncvars[ncvar->xvarid].ndims == 0 ) lxdim = true;
-
-          if ( !lydim && ncvar->yvarid != CDI_UNDEFID
-               && ncvars[ncvar->yvarid].ndims == 0 ) lydim = true;
+          if (!lxdim && ncvar->xvarid != CDI_UNDEFID && ncvars[ncvar->xvarid].ndims == 0) lxdim = true;
+          if (!lydim && ncvar->yvarid != CDI_UNDEFID && ncvars[ncvar->yvarid].ndims == 0) lydim = true;
 
           //   if ( ndims > 1 )
             for ( int i = ndims-1; i >= 0; i-- )
@@ -1767,8 +1768,8 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                         cdf_set_dim(ncvar, i, X_AXIS);
                         lxdim = true;
                       }
-                    else if ( !lydim && ! (ncvars[ncvar->xvarid].dimids[0] ==
-ncvars[ncvar->yvarid].dimids[0] && ncvars[ncvar->xvarid].ndims == 1 && ncvars[ncvar->yvarid].ndims == 1))
+                    else if ( !lydim && ! (ncvars[ncvar->xvarid].dimids[0] == ncvars[ncvar->yvarid].dimids[0] &&
+                                           ncvars[ncvar->xvarid].ndims == 1 && ncvars[ncvar->yvarid].ndims == 1))
                       {
                         if ( lcdim && ncvar->yvarid == CDI_UNDEFID )
                           {
@@ -2021,7 +2022,7 @@ void verify_coordinates_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
 static
 void grid_set_chunktype(grid_t *grid, ncvar_t *ncvar)
 {
-  if ( ncvar->chunked )
+  if (ncvar->chunked)
     {
       int ndims = ncvar->ndims;
 
@@ -4377,10 +4378,10 @@ int cdfInqContents(stream_t *streamptr)
   cdfCreateRecords(streamptr, 0);
 
   // free ncdims
-  if ( ncdims ) Free(ncdims);
+  if (ncdims) Free(ncdims);
 
   // free ncvars
-  if ( ncvars ) Free(ncvars);
+  if (ncvars) Free(ncvars);
 
   return 0;
 }
