@@ -1155,10 +1155,7 @@ void streamClose(int streamID)
       sleveltable_t *pslev = streamptr->vars[index].recordTable;
       const unsigned nsub = streamptr->vars[index].subtypeSize >= 0
         ? (unsigned)streamptr->vars[index].subtypeSize : 0U;
-      for (size_t isub=0; isub < nsub; isub++)
-        {
-          deallocate_sleveltable_t(pslev + isub);
-        }
+      for (size_t isub=0; isub < nsub; isub++) deallocate_sleveltable_t(pslev + isub);
       if (pslev) Free(pslev);
     }
   Free(streamptr->vars);
@@ -1168,7 +1165,7 @@ void streamClose(int streamID)
     {
       tsteps_t *tstep = &(streamptr->tsteps[index]);
 #ifdef HAVE_LIBFDB5
-      if (tstep->records->fdbItem) free(tstep->records->fdbItem);
+      if (tstep->records && tstep->records->fdbItem) free(tstep->records->fdbItem);
 #endif
       if (tstep->records) Free(tstep->records);
       if (tstep->recIDs) Free(tstep->recIDs);
