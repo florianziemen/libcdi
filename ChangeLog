@@ -3,6 +3,10 @@
         * using CGRIBEX library version 2.0.0
 	* Version 2.0.0 released
 
+2021-08-13  Uwe Schulzweida
+
+	* Add FDB support (experimental)
+
 2021-07-19  Uwe Schulzweida
 
 	* instituteCompareKernel(): compare full lenght of longnames

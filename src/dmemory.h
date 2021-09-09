@@ -21,7 +21,7 @@ extern void    memExitOnError(void);
 #if  defined  DEBUG_MEMORY
 
 extern void   *memRealloc(void *ptr, size_t size, const char *file, const char *functionname, int line);
-extern void   *memCalloc (size_t nmemb, size_t size, const char *file, const char *functionname, int line);
+extern void   *memCalloc (size_t nobjs, size_t size, const char *file, const char *functionname, int line);
 extern void   *memMalloc (size_t size, const char *file, const char *functionname, int line);
 extern void    memFree   (void *ptr, const char *file, const char *functionname, int line);
 

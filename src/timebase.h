@@ -7,8 +7,8 @@
 extern "C" {
 #endif
 
-/* date format:  YYYYMMDD */
-/* time format:  hhmmss   */
+// date format:  YYYYMMDD
+// time format:  hhmmss
 
 void decode_julday(int calendar, int64_t julday, int *year, int *mon, int *day);
 int64_t encode_julday(int calendar, int year, int month, int day);
@@ -31,13 +31,3 @@ void decode_juldaysec(int calendar, int64_t julday, int secofday, int *year, int
 #endif
 
 #endif /* TIMEBASE_H */
-
-/*
- * Local Variables:
- * c-file-style: "Java"
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * show-trailing-whitespace: t
- * require-trailing-newline: t
- * End:
- */

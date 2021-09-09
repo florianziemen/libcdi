@@ -3,12 +3,12 @@
 #include "cdi.h"
 #include "timebase.h"
 
-/* convert Julian date into year, months, day */
+// convert Julian date into year, months, day
 void decode_julday(int calendar,
 		   int64_t julday, /* Julian day number to convert */
-		   int *year,	   /* Gregorian year (out)         */
+                   int *year,      /* Gregorian year (out)         */
 		   int *mon,	   /* Gregorian month (1-12) (out) */
-		   int *day)       /* Gregorian day (1-31) (out)   */
+                   int *day)       /* Gregorian day (1-31) (out)   */
 {
   int64_t a = julday;
 
@@ -198,7 +198,7 @@ int main(void)
 
   printf("start time: %8ld %4d\n", vdate0, vtime0);
 
-  for ( int i = 0; i < nmin; i++ )
+  for (int i = 0; i < nmin; i++)
     {
       cdiDecodeDate(vdate0, &year, &mon, &day);
       cdiDecodeTime(vtime0, &hour, &minute, &second);
@@ -231,7 +231,7 @@ int main(void)
 
   julday = date_to_julday(calendar, vdate0);
   secofday = time_to_sec(vtime0);
-  for ( int i = 0; i < nmin; i++ )
+  for (int i = 0; i < nmin; i++)
     {
       cdiDecodeDate(vdate0, &year, &mon, &day);
       cdiDecodeTime(vtime0, &hour, &minute, &second);
@@ -291,7 +291,7 @@ int main(void)
   decode_juldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
   printf("%d/%02d/%02d %02d:%02d:%02d   %d %d\n", year, month, day, hour, minute, second, julday, secofday);
 
-  for ( int i = 0; i < 420; i++ )
+  for (int i = 0; i < 420; i++)
     {
 
       decode_juldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);

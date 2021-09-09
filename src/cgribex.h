@@ -199,9 +199,9 @@ void  gribSetCalendar(int calendar);
 
 void  gribDateTimeX(int *isec1, int *date, int *time, int *startDate, int *startTime);
 void  gribDateTime(int *isec1, int *date, int *time);
-int   gribRefDate(int *isec1);
-int   gribRefTime(int *isec1);
-bool  gribTimeIsFC(int *isec1);
+int   gribRefDate(const int *isec1);
+int   gribRefTime(const int *isec1);
+bool  gribTimeIsFC(const int *isec1);
 
 void  gribPrintSec0(int *isec0);
 void  gribPrintSec1(int *isec0, int *isec1);
