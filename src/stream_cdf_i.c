@@ -1803,7 +1803,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 
 // verify coordinates vars - first scan (dimname == varname)
 static
-void verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int timedimid, bool *lhybrid_cf)
+void verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int timedimid, bool *isHybridCF)
 {
   for ( int ncdimid = 0; ncdimid < ndims; ncdimid++ )
     {
@@ -1820,7 +1820,7 @@ void verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *nc
 
           if ( isHybridSigmaPressureCoordinate(ncid, ncvarid, ncvars, ncdims) )
             {
-              *lhybrid_cf = true;
+              *isHybridCF = true;
               continue;
             }
 
@@ -3805,46 +3805,61 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
 static
 void read_vct_echam(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims, double **vct, size_t *pvctsize)
 {
-  /* find ECHAM VCT */
+  // find ECHAM VCT
   int nvcth_id = CDI_UNDEFID, vcta_id = CDI_UNDEFID, vctb_id = CDI_UNDEFID;
+  // int p0_id = CDI_UNDEFID;
 
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
-      if ( ncvar->ndims == 1 )
+      const char *name = ncvar->name;
+      if (ncvar->ndims == 1)
         {
-          size_t len = strlen(ncvar->name);
-          if ( len == 4 && ncvar->name[0] == 'h' && ncvar->name[1] == 'y' )
+          const size_t len = strlen(name);
+          if (len == 4 && name[0] == 'h' && name[1] == 'y')
             {
-              if ( ncvar->name[2] == 'a' && ncvar->name[3] == 'i' ) // hyai
+              if (name[2] == 'a' && name[3] == 'i') // hyai
                 {
                   vcta_id = ncvarid;
                   nvcth_id = ncvar->dimids[0];
                   ncvar->varStatus = CoordVar;
                 }
-              else if ( ncvar->name[2] == 'b' && ncvar->name[3] == 'i' ) //hybi
+              else if (name[2] == 'b' && name[3] == 'i') // hybi
                 {
                   vctb_id = ncvarid;
                   nvcth_id = ncvar->dimids[0];
                   ncvar->varStatus = CoordVar;
                 }
-              else if ( (ncvar->name[2] == 'a' || ncvar->name[2] == 'b') && ncvar->name[3] == 'm' )
+              else if ((name[2] == 'a' || name[2] == 'b') && name[3] == 'm' )
                 {
                   ncvar->varStatus = CoordVar; // hyam or hybm
                 }
             }
 	}
+      /*
+      else if (ncvar->ndims == 0)
+        {
+          const size_t len = strlen(name);
+          if (len == 2 && name[0] == 'P' && name[1] == '0') p0_id = ncvarid;
+        }
+      */
     }
 
-  /* read VCT */
-  if ( nvcth_id != CDI_UNDEFID && vcta_id != CDI_UNDEFID && vctb_id != CDI_UNDEFID )
+  // read VCT
+  if (nvcth_id != CDI_UNDEFID && vcta_id != CDI_UNDEFID && vctb_id != CDI_UNDEFID)
     {
-      size_t vctsize = ncdims[nvcth_id].len;
-      vctsize *= 2;
-      *vct = (double *) Malloc(vctsize*sizeof(double));
+      const size_t vctsize = 2 * ncdims[nvcth_id].len;
+      *vct = (double *) Malloc(vctsize * sizeof(double));
       cdf_get_var_double(fileID, vcta_id, *vct);
-      cdf_get_var_double(fileID, vctb_id, *vct+vctsize/2);
+      cdf_get_var_double(fileID, vctb_id, *vct + vctsize/2);
       *pvctsize = vctsize;
+      /*
+      if (p0_id != CDI_UNDEFID)
+        {
+          double p0;
+          cdf_get_var_double(fileID, p0_id, &p0);
+        }
+      */
     }
 }
 
@@ -4160,8 +4175,8 @@ int cdfInqContents(stream_t *streamptr)
   timedimid = cdf_check_variables(streamptr, nvars, ncvars, ntsteps, timedimid);
 
   // verify coordinates vars - first scan (dimname == varname)
-  bool lhybrid_cf = false;
-  verify_coordinates_vars_1(fileID, ndims, ncdims, ncvars, timedimid, &lhybrid_cf);
+  bool isHybridCF = false;
+  verify_coordinates_vars_1(fileID, ndims, ncdims, ncvars, timedimid, &isHybridCF);
 
   // verify coordinates vars - second scan (all other variables)
   verify_coordinates_vars_2(streamptr, nvars, ncvars);
@@ -4229,7 +4244,7 @@ int cdfInqContents(stream_t *streamptr)
   // read ECHAM VCT if present
   size_t vctsize = 0;
   double *vct = NULL;
-  if (!lhybrid_cf) read_vct_echam(fileID, nvars, ncvars, ncdims, &vct, &vctsize);
+  if (!isHybridCF) read_vct_echam(fileID, nvars, ncvars, ncdims, &vct, &vctsize);
 
 
   if (CDI_Debug) cdf_print_vars(ncvars, nvars, "cdf_define_all_grids");

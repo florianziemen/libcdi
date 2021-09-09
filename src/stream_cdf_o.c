@@ -911,23 +911,22 @@ static
 void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
 {
   const int type = zaxisInqType(zaxisID);
-  if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
+  if (type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF)
     {
       const int ilev = zaxisInqVctSize(zaxisID)/2;
-      if ( ilev == 0 ) return;
+      if (ilev == 0) return;
 
       const int mlev = ilev - 1;
 
-      if ( streamptr->vct.ilev > 0 )
+      if (streamptr->vct.ilev > 0)
         {
-          if ( streamptr->vct.ilev != ilev )
-            Error("More than one VCT for each file unsupported!");
+          if (streamptr->vct.ilev != ilev) Error("More than one VCT for each file unsupported!");
           return;
         }
 
       const int fileID = streamptr->fileID;
 
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+      if (streamptr->ncmode == 2) cdf_redef(fileID);
 
       int ncdimid = -1, ncdimid2 = -1;
       int hyaiid, hybiid, hyamid = -1, hybmid = -1;
@@ -935,7 +934,7 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
       cdf_def_dim(fileID, "nhyi", (size_t)ilev, &ncdimid2);
       cdf_def_var(fileID, "hyai", NC_DOUBLE, 1, &ncdimid2, &hyaiid);
       cdf_def_var(fileID, "hybi", NC_DOUBLE, 1, &ncdimid2, &hybiid);
-      if ( mlev > 0 )
+      if (mlev > 0)
         {
           cdf_def_dim(fileID, "nhym", (size_t)mlev, &ncdimid);
           cdf_def_var(fileID, "hyam", NC_DOUBLE, 1, &ncdimid,  &hyamid);
@@ -963,7 +962,7 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
         };
         enum { tabLen = sizeof (tab) / sizeof (tab[0]) };
         const int ids[tabLen] = { hyaiid, hyaiid, hybiid, hybiid };
-        for ( size_t i = 0; i < tabLen; ++i )
+        for (size_t i = 0; i < tabLen; ++i)
           cdf_put_att_text(fileID, ids[i], tab[i].attName, tab[i].valLen, tab[i].attVal);
       }
 
@@ -983,7 +982,7 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
         };
         enum { tabLen = sizeof (tab) / sizeof (tab[0]) };
         const int ids[tabLen] = { hyamid, hyamid, hybmid, hybmid };
-        for ( size_t i = 0; i < tabLen; ++i )
+        for (size_t i = 0; i < tabLen; ++i)
           cdf_put_att_text(fileID, ids[i], tab[i].attName, tab[i].valLen, tab[i].attVal);
       }
 
@@ -995,13 +994,11 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
       cdf_put_var_double(fileID, hyaiid, vctptr);
       cdf_put_var_double(fileID, hybiid, vctptr+ilev);
 
-      size_t start;
       size_t count = 1;
-      double mval;
-      for ( int i = 0; i < mlev; i++ )
+      for (int i = 0; i < mlev; i++)
         {
-          start = (size_t)i;
-          mval = (vctptr[i] + vctptr[i+1]) * 0.5;
+          size_t start = (size_t)i;
+          double mval = (vctptr[i] + vctptr[i+1]) * 0.5;
           cdf_put_vara_double(fileID, hyamid, &start, &count, &mval);
           mval = (vctptr[ilev+i] + vctptr[ilev+i+1]) * 0.5;
           cdf_put_vara_double(fileID, hybmid, &start, &count, &mval);
@@ -1013,24 +1010,23 @@ static
 void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID, int p0status, double p0value)
 {
   const int type = zaxisInqType(zaxisID);
-  if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
+  if (type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF)
     {
       const int ilev = zaxisInqVctSize(zaxisID)/2;
-      if ( ilev == 0 ) return;
+      if (ilev == 0) return;
 
       const int mlev = ilev - 1;
       int hyaiid = 0, hybiid = 0, hyamid, hybmid;
 
-      if ( streamptr->vct.ilev > 0 )
+      if (streamptr->vct.ilev > 0)
         {
-          if ( streamptr->vct.ilev != ilev )
-            Error("more than one VCT for each file unsupported!");
+          if (streamptr->vct.ilev != ilev) Error("more than one VCT for each file unsupported!");
           return;
         }
 
       const int fileID = streamptr->fileID;
 
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+      if (streamptr->ncmode == 2) cdf_redef(fileID);
 
       int dimIDs[2];
       dimIDs[0] = nclevID;
@@ -1041,10 +1037,7 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID,
       streamptr->vct.mlevID = nclevID;
       streamptr->vct.ilevID = nclevID;
 
-      if ( p0status == 0 )
-        cdf_def_var(fileID, "a", NC_DOUBLE, 1, dimIDs,  &hyamid);
-      else
-        cdf_def_var(fileID, "ap", NC_DOUBLE, 1, dimIDs,  &hyamid);
+      cdf_def_var(fileID, (p0status == 0) ? "a" : "ap", NC_DOUBLE, 1, dimIDs,  &hyamid);
       cdf_def_var(fileID, "b",  NC_DOUBLE, 1, dimIDs,  &hybmid);
 
       {
@@ -1064,10 +1057,7 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID,
 
       if ( ncbndsID != -1 )
         {
-          if ( p0status == 0 )
-            cdf_def_var(fileID, "a_bnds", NC_DOUBLE, 2, dimIDs, &hyaiid);
-          else
-            cdf_def_var(fileID, "ap_bnds", NC_DOUBLE, 2, dimIDs, &hyaiid);
+          cdf_def_var(fileID, (p0status == 0) ? "a_bnds" : "ap_bnds", NC_DOUBLE, 2, dimIDs, &hyaiid);
           cdf_def_var(fileID, "b_bnds",  NC_DOUBLE, 2, dimIDs, &hybiid);
 
           {
@@ -1093,21 +1083,21 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID,
       double *vct = (double*) malloc(vctsize*sizeof(double));;
       zaxisInqVct(zaxisID, vct);
 
-      if ( p0status == 0 && IS_NOT_EQUAL(p0value,0) )
-        for ( int i = 0; i < vctsize/2; ++i ) vct[i] /= p0value;
+      if (p0status == 0 && IS_NOT_EQUAL(p0value,0))
+        for (int i = 0; i < vctsize/2; ++i) vct[i] /= p0value;
 
-      double *tarray = (double*) malloc(ilev*2*sizeof(double));
+      double *tarray = (double*) malloc(ilev * 2 * sizeof(double));
 
-      if ( ncbndsID != -1 )
+      if (ncbndsID != -1)
         {
-          for ( int i = 0; i < mlev; ++i )
+          for (int i = 0; i < mlev; ++i)
             {
               tarray[2*i  ] = vct[i];
               tarray[2*i+1] = vct[i+1];
             }
           cdf_put_var_double(fileID, hyaiid, tarray);
 
-          for ( int i = 0; i < mlev; ++i )
+          for (int i = 0; i < mlev; ++i)
             {
               tarray[2*i  ] = vct[ilev+i];
               tarray[2*i+1] = vct[ilev+i+1];
