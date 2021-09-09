@@ -31,12 +31,13 @@ get_dayspermonth_array(int daysPerYear)
           (daysPerYear == 366) ? month_366 : NULL;
 }
 
+
 int days_per_month(int calendar, int year, int month)
 {
   const int daysPerYear = calendar_dpy(calendar);
-  const int *daysPerMonthArray = get_dayspermonth_array(daysPerYear);
+  const int *daysPerMonthArray = (daysPerYear == 360) ? month_360 : ((daysPerYear == 365) ? month_365 : month_366);
 
-  int daysPerMonth = (daysPerMonthArray && month >= 1 && month <= 12 ) ? daysPerMonthArray[month-1] : 0;
+  int daysPerMonth = (month >= 1 && month <= 12) ? daysPerMonthArray[month-1] : 0;
 
   if (daysPerYear == 0 && month == 2)
     daysPerMonth = ((year%4 == 0 && year%100 != 0) || year%400 == 0) ? 29 : 28;
