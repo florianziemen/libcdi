@@ -46,11 +46,10 @@ case "${HOSTNAME}" in
                     --enable-maintainer-mode \
                     --enable-iso-c-interface \
                     --enable-swig \
-                    --with-eccodes=$HOME/local/eccodes-2.17.0 \
-                    --with-netcdf=$HOME/local/netcdf-4.4.1.1 \
-                    --with-szlib=$HOME/local \
-                    LDFLAGS="-Wl,-rpath,$HOME/local/eccodes-2.17.0/lib" \
-	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3 -march=native"
+                    --with-eccodes=/opt/local \
+                    --with-netcdf=/opt/local \
+                    --with-szlib=/opt/local/lib/libaec \
+	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3"
 	;;
     cinglung*|feilung*|wanglung*)
 	${CONFPATH}configure --prefix=$HOME/local \
@@ -94,17 +93,6 @@ case "${HOSTNAME}" in
                     CC=icc CFLAGS="-g -O2 -Wall -fno-alias -DMIN_BUF_SIZE=4194304"
 	;;
 # i686-linux
-    etch-ia32 | gata)
-	${CONFPATH}configure --prefix=$HOME/local/etch-ia32 \
-                    --enable-maintainer-mode \
-                    --enable-all-static \
-                    --enable-swig \
-                    --enable-python \
-                    --with-grib_api=$HOME/local/etch-ia32/grib_api-1.9.8 \
-	            --with-netcdf=/sw/etch-ia32/netcdf-4.0.1 \
-                    --with-szlib=$HOME/local/etch-ia32 \
-	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -pedantic"
-	;;
     melian)
       ${CONFPATH}configure --prefix=`pwd`/build \
 	            --with-netcdf \
@@ -112,13 +100,6 @@ case "${HOSTNAME}" in
                   --with-eccodes \
                       --with-pic --enable-swig --enable-ruby --enable-python \
                       CC=gcc CFLAGS="-g -O2 -Wall" LIBS=-lopenjpeg
-	;;
-# sparc-sun-solaris2.9
-    executor | yang | yin)
-	${CONFPATH}configure --prefix=$HOME/local/SUN64 \
-                    --with-netcdf=/scratch/small/m214/m214089/local/SunOS64 \
-                    --with-szlib=$HOME/local/solaris10 \
-                    CC=cc CFLAGS="-g -mt -xO3 -xtarget=native -m64"
 	;;
 # sx6-nec-superux12.2
     cs*)
@@ -140,17 +121,6 @@ case "${HOSTNAME}" in
               --with-grib_api=/usr/local/pkg-sx9/grib_api   CC=sxc++ FC=sxf90 \
               LD=/SX/opt/crosskit/inst/bin/sxld AR=/SX/opt/crosskit/inst/bin/sxar \
               RANLIB=echo
-	;;
-# mips-sgi-irix6.5
-    ecgate1)
-	${CONFPATH}configure --prefix=$HOME/local \
- 	            --with-netcdf=/home/ms/spdekplb/hmk/include,/home/ms/spdekplb/hmk/lib64 \
-	            CC=cc CFLAGS="-O -n32"
-	;;
-# 5000-fujitsu-uxpv4.1_ES
-    vpp5)
-	${CONFPATH}configure --prefix=$HOME \
-	            CC=vcc CFLAGS="-O -Wv,-m3 -K4"
 	;;
 # powerpc-ibm-aix6.1.0.0
     blizzard*)
