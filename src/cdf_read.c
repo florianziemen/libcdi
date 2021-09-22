@@ -190,7 +190,7 @@ size_t cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount,
       else
         {
           for ( size_t i = 0; i < valueCount; i++ )
-            missValCount += (size_t)IS_EQUAL(data[i], missVal);
+            missValCount += (size_t)DBL_IS_EQUAL(data[i], missVal);
         }
       break;
     }
@@ -302,7 +302,7 @@ size_t cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount,
       else
         {
           for ( size_t i = 0; i < valueCount; i++ )
-            missValCount += (size_t)IS_EQUAL(data[i], missVal);
+            missValCount += (size_t)DBL_IS_EQUAL(data[i], missVal);
         }
       break;
     }
