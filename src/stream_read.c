@@ -266,12 +266,8 @@ void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, size
 }
 
 static
-int stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
+void stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 {
-  // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision reading.
-  // A value > 0 is returned in this case, otherwise it returns zero.
-  int status = 0;
-
   check_parg(data);
   check_parg(nmiss);
 
@@ -313,8 +309,6 @@ int stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 	break;
       }
     }
-
-  return status;
 }
 
 
@@ -326,20 +320,5 @@ void streamReadRecord(int streamID, double *data, size_t *nmiss)
 
 void streamReadRecordF(int streamID, float *data, size_t *nmiss)
 {
-  if ( stream_read_record(streamID, MEMTYPE_FLOAT, (void *) data, nmiss) )
-    {
-      // In case the file format does not support single precision reading,
-      // we fall back to double precision reading, converting the data on the fly.
-      stream_t *streamptr = stream_to_pointer(streamID);
-      int tsID   = streamptr->curTsID;
-      int vrecID = streamptr->tsteps[tsID].curRecID;
-      int recID  = streamptr->tsteps[tsID].recIDs[vrecID];
-      int varID  = streamptr->tsteps[tsID].records[recID].varID;
-      int nwpv = vlistInqVarNumber(streamInqVlist(streamID), varID);
-      size_t elementCount = nwpv*gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
-      double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
-      streamReadRecord(streamID, conversionBuffer, nmiss);
-      for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];
-      Free(conversionBuffer);
-    }
+  stream_read_record(streamID, MEMTYPE_FLOAT, (void *) data, nmiss);
 }
