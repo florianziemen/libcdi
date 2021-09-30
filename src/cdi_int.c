@@ -128,25 +128,25 @@ void cdiPrintDefaults(void)
 
 void cdiPrintVersion(void)
 {
-  fprintf(stderr, "     CDI library version : %s\n", cdiLibraryVersion());
+  fprintf(stdout, "     CDI library version : %s\n", cdiLibraryVersion());
 #ifdef  HAVE_LIBCGRIBEX
-  fprintf(stderr, " cgribex library version : %s\n", cgribexLibraryVersion());
+  fprintf(stdout, " cgribex library version : %s\n", cgribexLibraryVersion());
 #endif
 #ifdef  HAVE_LIBGRIB_API
-  fprintf(stderr, " ecCodes library version : %s\n", gribapiLibraryVersionString());
+  fprintf(stdout, " ecCodes library version : %s\n", gribapiLibraryVersionString());
 #endif
 #ifdef  HAVE_LIBNETCDF
-  fprintf(stderr, "  NetCDF library version : %s\n", cdfLibraryVersion());
+  fprintf(stdout, "  NetCDF library version : %s\n", cdfLibraryVersion());
 #endif
 #ifdef  HAVE_NC4HDF5
-  fprintf(stderr, "    hdf5 library version : %s\n", hdfLibraryVersion());
+  fprintf(stdout, "    hdf5 library version : %s\n", hdfLibraryVersion());
 #endif
 #ifdef  HAVE_LIBSERVICE
-  fprintf(stderr, "    exse library version : %s\n", srvLibraryVersion());
+  fprintf(stdout, "    exse library version : %s\n", srvLibraryVersion());
 #endif
-  fprintf(stderr, "    FILE library version : %s\n", fileLibraryVersion());
+  fprintf(stdout, "    FILE library version : %s\n", fileLibraryVersion());
 #ifdef  HAVE_LIBFDB5
-  fprintf(stderr, "    FDB5 library version : %s\n", fdb5_version());
+  fprintf(stdout, "    FDB5 library version : %s\n", fdb5_version());
 #endif
 }
 
