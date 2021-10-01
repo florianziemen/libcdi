@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2021
+! Uwe Schulzweida, MPI-MET, Hamburg,   October 2021
 !
 
       INTEGER    CDI_MAX_NAME
@@ -1806,7 +1806,7 @@
 
 !                     gridDefDatatype
 !                                    (INTEGER         gridID,
-!                                     INTEGER         prec)
+!                                     INTEGER         datatype)
       EXTERNAL        gridDefDatatype
 
       INTEGER         gridInqDatatype
@@ -2126,7 +2126,7 @@
 
 !                     zaxisDefDatatype
 !                                    (INTEGER         zaxisID,
-!                                     INTEGER         prec)
+!                                     INTEGER         datatype)
       EXTERNAL        zaxisDefDatatype
 
       INTEGER         zaxisInqDatatype
