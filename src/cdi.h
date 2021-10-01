@@ -726,7 +726,7 @@ void    gridDefMask(int gridID, const int mask[]);
 int     gridInqMask(int gridID, int mask[]);
 
 //      gridCreate: Create a horizontal Grid
-int     gridCreate(int gridtype, size_t size);
+int     gridCreate(int gridtype, SizeType size);
 
 //      gridDestroy: Destroy a horizontal Grid
 void    gridDestroy(int gridID);
@@ -747,19 +747,19 @@ int     gridInqProjType(int gridID);
 int     gridInqType(int gridID);
 
 //      gridInqSize: Get the size of a Grid
-size_t  gridInqSize(int gridID);
+SizeType gridInqSize(int gridID);
 
 //      gridDefXsize: Define the size of a X-axis
-void    gridDefXsize(int gridID, size_t xsize);
+void    gridDefXsize(int gridID, SizeType xsize);
 
 //      gridInqXsize: Get the size of a X-axis
-size_t  gridInqXsize(int gridID);
+SizeType gridInqXsize(int gridID);
 
 //      gridDefYsize: Define the size of a Y-axis
-void    gridDefYsize(int gridID, size_t ysize);
+void    gridDefYsize(int gridID, SizeType ysize);
 
 //      gridInqYsize: Get the size of a Y-axis
-size_t  gridInqYsize(int gridID);
+SizeType gridInqYsize(int gridID);
 
 //      gridDefNP: Define the number of parallels between a pole and the equator
 void    gridDefNP(int gridID, int np);
@@ -771,27 +771,27 @@ int     gridInqNP(int gridID);
 void    gridDefXvals(int gridID, const double xvals[]);
 
 //      gridInqXvals: Get all values of a X-axis
-size_t  gridInqXvals(int gridID, double xvals[]);
-size_t  gridInqXvalsPart(int gridID, int start, size_t size, double xvals[]);
+SizeType gridInqXvals(int gridID, double xvals[]);
+SizeType gridInqXvalsPart(int gridID, int start, SizeType size, double xvals[]);
 
 //      gridInqXIsc: Find out whether X-coordinate is of type CHAR
 int     gridInqXIsc(int gridID);
 
 //      gridInqXCvals: Get strings from X-axis in case grid is of type GRID_CHARXY
-size_t  gridInqXCvals(int gridID, char *xcvals[]);
+SizeType gridInqXCvals(int gridID, char *xcvals[]);
 
 //      gridDefYvals: Define the values of a Y-axis
 void    gridDefYvals(int gridID, const double yvals[]);
 
 //      gridInqYvals: Get all values of a Y-axis
-size_t  gridInqYvals(int gridID, double yvals[]);
-size_t  gridInqYvalsPart(int gridID, int start, size_t size, double yvals[]);
+SizeType gridInqYvals(int gridID, double yvals[]);
+SizeType gridInqYvalsPart(int gridID, int start, SizeType size, double yvals[]);
 
 //      gridInqYIsc: Find out whether Y-coordinate is of type CHAR
 int     gridInqYIsc(int gridID);
 
 //      gridInqYCvals: Get strings from Y-axis in case grid is of type GRID_CHARXY
-size_t  gridInqYCvals(int gridID, char *ycvals[]);
+SizeType gridInqYCvals(int gridID, char *ycvals[]);
 
 // CDI var keys
 
@@ -929,10 +929,10 @@ void    gridDefDatatype(int gridID, int datatype);
 int     gridInqDatatype(int gridID);
 
 //      gridInqXval: Get one value of a X-axis
-double  gridInqXval(int gridID, size_t index);
+double  gridInqXval(int gridID, SizeType index);
 
 //      gridInqYval: Get one value of a Y-axis
-double  gridInqYval(int gridID, size_t index);
+double  gridInqYval(int gridID, SizeType index);
 
 double  gridInqXinc(int gridID);
 double  gridInqYinc(int gridID);
@@ -990,15 +990,15 @@ int     gridInqNvertex(int gridID);
 void    gridDefXbounds(int gridID, const double xbounds[]);
 
 //      gridInqXbounds: Get the bounds of a X-axis
-size_t  gridInqXbounds(int gridID, double xbounds[]);
-size_t  gridInqXboundsPart(int gridID, int start, size_t size, double xbounds[]);
+SizeType gridInqXbounds(int gridID, double xbounds[]);
+SizeType gridInqXboundsPart(int gridID, int start, SizeType size, double xbounds[]);
 
 //      gridDefYbounds: Define the bounds of a Y-axis
 void    gridDefYbounds(int gridID, const double ybounds[]);
 
 //      gridInqYbounds: Get the bounds of a Y-axis
-size_t  gridInqYbounds(int gridID, double ybounds[]);
-size_t  gridInqYboundsPart(int gridID, int start, size_t size, double ybounds[]);
+SizeType gridInqYbounds(int gridID, double ybounds[]);
+SizeType gridInqYboundsPart(int gridID, int start, SizeType size, double ybounds[]);
 
 void    gridDefReducedPoints(int gridID, int reducedPointsSize, const int reducedPoints[]);
 void    gridInqReducedPoints(int gridID, int reducedPoints[]);
@@ -1312,10 +1312,10 @@ void gridDefParamsSTERE(int gridID, struct CDI_GridProjParams gridProjParams);
 int  gridInqParamsSTERE(int gridID, struct CDI_GridProjParams *gridProjParams);
 
 #define HAVE_CDI_PROJ_FUNCS 1
-extern int (*proj_lonlat_to_lcc_func)(struct CDI_GridProjParams gpp, size_t, double*, double*);
-extern int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, size_t, double*, double*);
-extern int (*proj_lonlat_to_stere_func)(struct CDI_GridProjParams gpp, size_t, double*, double*);
-extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, size_t, double*, double*);
+extern int (*proj_lonlat_to_lcc_func)(struct CDI_GridProjParams gpp, SizeType, double*, double*);
+extern int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, SizeType, double*, double*);
+extern int (*proj_lonlat_to_stere_func)(struct CDI_GridProjParams gpp, SizeType, double*, double*);
+extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, SizeType, double*, double*);
 
 #ifdef __cplusplus
 }

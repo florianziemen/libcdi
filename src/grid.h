@@ -25,40 +25,39 @@ struct gridVirtTable
   void (*defXBounds)(grid_t *gridptr, const double *xbounds);
   void (*defYBounds)(grid_t *gridptr, const double *ybounds);
   void (*defArea)(grid_t *gridptr, const double *area);
-  double (*inqXVal)(grid_t *gridptr, size_t index);
-  double (*inqYVal)(grid_t *gridptr, size_t index);
-  size_t (*inqXVals)(grid_t *gridptr, double *xvals);
-  size_t (*inqXValsPart)(grid_t *gridptr, int start, size_t length, double *xvals);
-  size_t (*inqYVals)(grid_t *gridptr, double *yvals);
-  size_t (*inqYValsPart)(grid_t *gridptr, int start, size_t length, double *yvals);
+  double (*inqXVal)(grid_t *gridptr, SizeType index);
+  double (*inqYVal)(grid_t *gridptr, SizeType index);
+  SizeType (*inqXVals)(grid_t *gridptr, double *xvals);
+  SizeType (*inqXValsPart)(grid_t *gridptr, int start, SizeType length, double *xvals);
+  SizeType (*inqYVals)(grid_t *gridptr, double *yvals);
+  SizeType (*inqYValsPart)(grid_t *gridptr, int start, SizeType length, double *yvals);
   const double *(*inqXValsPtr)(grid_t *gridptr);
   const double *(*inqYValsPtr)(grid_t *gridptr);
 #ifndef USE_MPI
   int (*inqXIsc)(grid_t *gridptr);
   int (*inqYIsc)(grid_t *gridptr);
-  size_t (*inqXCvals)(grid_t *gridptr, char **xcvals);
-  size_t (*inqYCvals)(grid_t *gridptr, char **ycvals);
+  SizeType (*inqXCvals)(grid_t *gridptr, char **xcvals);
+  SizeType (*inqYCvals)(grid_t *gridptr, char **ycvals);
   const char **(*inqXCvalsPtr)(grid_t *gridptr);
   const char **(*inqYCvalsPtr)(grid_t *gridptr);
 #endif
-  /* return if for both grids, all xval and all yval are equal */
+  // return if for both grids, all xval and all yval are equal
   bool (*compareXYFull)(grid_t *gridRef, grid_t *gridTest);
-  /* return if for both grids, x[0], y[0], x[size-1] and y[size-1] are
-   * respectively equal */
+  // return if for both grids, x[0], y[0], x[size-1] and y[size-1] are respectively equal
   bool (*compareXYAO)(grid_t *gridRef, grid_t *gridTest);
   void (*inqArea)(grid_t *gridptr, double *area);
   const double *(*inqAreaPtr)(grid_t *gridptr);
   int (*hasArea)(grid_t *gridptr);
-  size_t (*inqMask)(grid_t *gridptr, int *mask);
+  SizeType (*inqMask)(grid_t *gridptr, int *mask);
   int (*inqMaskGME)(grid_t *gridptr, int *mask_gme);
-  size_t (*inqXBounds)(grid_t *gridptr, double *xbounds);
-  size_t (*inqYBounds)(grid_t *gridptr, double *ybounds);
+  SizeType (*inqXBounds)(grid_t *gridptr, double *xbounds);
+  SizeType (*inqYBounds)(grid_t *gridptr, double *ybounds);
   const double *(*inqXBoundsPtr)(grid_t *gridptr);
   const double *(*inqYBoundsPtr)(grid_t *gridptr);
 };
 
 struct gridaxis_t {
-  size_t      size;                   // number of values
+  SizeType    size;                   // number of values
   short       flag;                   // 0: undefined 1:vals 2:first+inc
   double      first, last, inc;
   double     *vals;
@@ -78,7 +77,7 @@ struct grid_gme_t {
 struct grid_t {
   char       *name;
   int         self;
-  size_t      size;
+  SizeType    size;
   int         type;                   // grid type
   int         datatype;               // grid data type (used only internal in gridComplete())
   int         proj;                   // grid projection
@@ -107,7 +106,7 @@ struct grid_t {
 
 
 void grid_init(grid_t *gridptr);
-void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size);
+void cdiGridTypeInit(grid_t *gridptr, int gridtype, SizeType size);
 void grid_free(grid_t *gridptr);
 grid_t *grid_to_pointer(int gridID);
 extern const struct gridVirtTable cdiGridVtable;
@@ -151,8 +150,8 @@ struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode);
 int gridVerifyProjParamsLCC(struct CDI_GridProjParams *gpp);
 int gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp);
 
-bool isGaussianLatitudes(size_t nlats, const double *latitudes);
-void gaussianLatitudes(size_t nlats, double *latitudes, double *weights);
+bool isGaussianLatitudes(SizeType nlats, const double *latitudes);
+void gaussianLatitudes(SizeType nlats, double *latitudes, double *weights);
 
 #endif
 /*
