@@ -15,7 +15,12 @@
 #define CDI_SIZE_TYPE size_t
 #endif
 
+#ifndef CDI_DATE_TYPE
+#define CDI_DATE_TYPE int64_t
+#endif
+
 typedef CDI_SIZE_TYPE SizeType;
+typedef CDI_DATE_TYPE DateType;
 
 #ifdef __cplusplus
 extern "C" {
