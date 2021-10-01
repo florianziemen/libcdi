@@ -11,6 +11,12 @@
 #include <stdint.h>    // int64_t
 #include <sys/types.h>
 
+#ifndef CDI_SIZE_TYPE
+#define CDI_SIZE_TYPE size_t
+#endif
+
+typedef CDI_SIZE_TYPE SizeType;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
