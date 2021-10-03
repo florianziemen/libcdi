@@ -41,15 +41,22 @@
 void pioEndDef(void);
 void pioEndTimestepping(void);
 void pioFinalize(void);
-/* cdiPioNoPostCommSetup: Dummy function to use as argument to pioInit
+/* cdiPioNoPostCommSetup: Dummy default function to use as argument to
+ * cdiPioConfSetCallBackActions or pioInit
  * if no actions are necessary after I/O servers initialize communication */
 void cdiPioNoPostCommSetup(void);
-/*      pioInit: initialize I/O server processes and communication */
+/* pioInit: initialize I/O server processes and communication
+ * Deprecated, use cdiPioInit instead! */
 MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode, int *pioNamespace, float partInflate,
                  void (*postCommSetupActions)(void));
 /*      cdiPioInit: initialize I/O server processes and communication */
 MPI_Comm cdiPioInit(MPI_Comm commSuper, int confResH, int *pioNamespace);
+/* pioWriteTimestep: flush data from all client RMA buffers to server */
 void pioWriteTimestep(void);
+/* cdiPioRDMAProgress: devote some resources to make RMA progress This
+ * call is meant for systems where the hardware and/or MPI make
+ * insufficient progress when only calling
+ * MPI_Win_post/MPI_Win_wait+MPI_Win_start/MPI_Win_get/MPI_Win_complete */
 void cdiPioRDMAProgress(void);
 
 /* cdiPioStreamDefDecomposedVlist: collectively define the vlist assigned to a
@@ -148,7 +155,7 @@ int cdiPioConfGetCSRole(int confResH);
 /* cdiPioConfSetPostCommSetupActions: set function to be called after
  * setup of client/server communications of configuration object.
  * Deprecated: use cdiPioConfSetCallBackActions with
- * trigger == CDIPIO_CALLBACK_POSTCOMMSETUP in new programs */
+ * trigger == CDIPIO_CALLBACK_POSTCOMMSETUP in new programs! */
 void cdiPioConfSetPostCommSetupActions(int confResH, void (*postCommSetupActions)(void));
 
 /* cdiPioConfGetPostCommSetupActions: get function to be called after
