@@ -255,8 +255,8 @@ void cdfDefTime(stream_t* streamptr)
 }
 
 
-static
-void cdfDefTimeValue(stream_t *streamptr, int tsID)
+static void
+cdfDefTimeValue(stream_t *streamptr, int tsID)
 {
   int fileID = streamptr->fileID;
 
@@ -271,27 +271,30 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
       streamptr->ncmode = 2;
     }
 
-  double timevalue = cdiEncodeTimeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis);
-  if ( CDI_Debug ) Message("tsID = %d  timevalue = %f", tsID, timevalue);
+  const size_t start[2] = { [0] = (size_t)tsID, [1] = 0 },
+    count[2] = { [0] = 1, [1] = 2 };
+
+  double timevalue[2] = {
+    cdiEncodeTimeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis)
+  };
+  if ( CDI_Debug ) Message("tsID = %d  timevalue = %f", tsID, timevalue[0]);
 
   int ncvarid = streamptr->basetime.ncvarid;
-  size_t index = (size_t)tsID;
-  cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
+  cdf_put_vara_double(fileID, ncvarid, start, count, timevalue);
 
   if ( taxis->has_bounds )
     {
-      const size_t start[2] = { [0] = (size_t)tsID, [1] = 0 },
-        count[2] = { [0] = 1, [1] = 2 };
-      double timebounds[2] = {
-        cdiEncodeTimeval(taxis->vdate_lb, taxis->vtime_lb, &streamptr->tsteps[0].taxis),
-        cdiEncodeTimeval(taxis->vdate_ub, taxis->vtime_ub, &streamptr->tsteps[0].taxis) };
+      timevalue[0]
+        = cdiEncodeTimeval(taxis->vdate_lb, taxis->vtime_lb, &streamptr->tsteps[0].taxis);
+      timevalue[1]
+        = cdiEncodeTimeval(taxis->vdate_ub, taxis->vtime_ub, &streamptr->tsteps[0].taxis);
       ncvarid = streamptr->basetime.ncvarboundsid;
-      cdf_put_vara_double(fileID, ncvarid, start, count, timebounds);
+      cdf_put_vara_double(fileID, ncvarid, start, count, timevalue);
     }
 
   ncvarid = streamptr->basetime.leadtimeid;
   if ( taxis->type == TAXIS_FORECAST && ncvarid != CDI_UNDEFID )
-    cdf_put_var1_double(fileID, ncvarid, &index, &taxis->fc_period);
+    cdf_put_vara_double(fileID, ncvarid, start, count, &taxis->fc_period);
 }
 
 
