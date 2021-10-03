@@ -229,7 +229,7 @@ configuration object.
 set function to be called after
 setup of client/server communications of configuration object.
 Deprecated: use cdiPioConfSetCallBackActions with
-trigger == CDIPIO_CALLBACK_POSTCOMMSETUP in new programs.
+trigger == CDIPIO_CALLBACK_POSTCOMMSETUP in new programs!.
 
 
 \section*{\tt \htmlref{cdiPioConfSetRecordAggBufLim}{cdiPioConfSetRecordAggBufLim}}
@@ -392,8 +392,21 @@ namespace.
     SUBROUTINE cdiPioNoPostCommSetup
 \end{verbatim}
 
-Dummy function to use as argument to pioInit
+Dummy default function to use as argument to
+cdiPioConfSetCallBackActions or pioInit
 if no actions are necessary after I/O servers initialize communication.
+
+
+\section*{\tt \htmlref{cdiPioRDMAProgress}{cdiPioRDMAProgress}}
+
+\begin{verbatim}
+    SUBROUTINE cdiPioRDMAProgress
+\end{verbatim}
+
+devote some resources to make RMA progress This
+call is meant for systems where the hardware and/or MPI make
+insufficient progress when only calling
+MPI_Win_post/MPI_Win_wait+MPI_Win_start/MPI_Win_get/MPI_Win_complete.
 
 
 \section*{\tt \htmlref{cdiPioStr2IOMode}{cdiPioStr2IOMode}}
@@ -431,7 +444,17 @@ conversion[varID] == CDI_DATATYPE_FLT64 or with streamWriteVarF
                               PROCEDURE postCommSetupActions)
 \end{verbatim}
 
-initialize I/O server processes and communication.
+initialize I/O server processes and communication
+Deprecated, use cdiPioInit instead!.
+
+
+\section*{\tt \htmlref{pioWriteTimestep}{pioWriteTimestep}}
+
+\begin{verbatim}
+    SUBROUTINE pioWriteTimestep
+\end{verbatim}
+
+flush data from all client RMA buffers to server.
 
 
 \section*{\tt \htmlref{streamWriteScatteredVarPart}{streamWriteScatteredVarPart}}
