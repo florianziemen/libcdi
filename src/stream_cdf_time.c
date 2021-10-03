@@ -279,10 +279,9 @@ cdfDefTimestep(stream_t *streamptr, int tsID)
       ncvarid = streamptr->basetime.ncvarboundsid;
       if (ncvarid == CDI_UNDEFID) Error("Call to taxisWithBounds() missing!");
 
-      double timebounds[2];
-      timebounds[0] = cdi_encode_timeval(taxis->vDateTime_lb, &streamptr->tsteps[0].taxis);
-      timebounds[1] = cdi_encode_timeval(taxis->vDateTime_ub, &streamptr->tsteps[0].taxis);
-      size_t start[2] = { tsID, 0 }, count[2] = { 1, 2 };
+      size_t start[2] = { [0] = (size_t) tsID, [1] = 0 }, count[2] = { [0] = 1, [1] = 2 };
+      double timebounds[2] = { timebounds[0] = cdi_encode_timeval(taxis->vDateTime_lb, &streamptr->tsteps[0].taxis),
+                               timebounds[1] = cdi_encode_timeval(taxis->vDateTime_ub, &streamptr->tsteps[0].taxis) };
       cdf_put_vara_double(fileID, ncvarid, start, count, timebounds);
     }
 
