@@ -280,14 +280,12 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
 
   if ( taxis->has_bounds )
     {
-      size_t start[2], count[2];
-
+      const size_t start[2] = { [0] = (size_t)tsID, [1] = 0 },
+        count[2] = { [0] = 1, [1] = 2 };
+      double timebounds[2] = {
+        cdiEncodeTimeval(taxis->vdate_lb, taxis->vtime_lb, &streamptr->tsteps[0].taxis),
+        cdiEncodeTimeval(taxis->vdate_ub, taxis->vtime_ub, &streamptr->tsteps[0].taxis) };
       ncvarid = streamptr->basetime.ncvarboundsid;
-
-      double timebounds[2];
-      timebounds[0] = cdiEncodeTimeval(taxis->vdate_lb, taxis->vtime_lb, &streamptr->tsteps[0].taxis);
-      timebounds[1] = cdiEncodeTimeval(taxis->vdate_ub, taxis->vtime_ub, &streamptr->tsteps[0].taxis);
-      start[0] = (size_t)tsID; count[0] = 1; start[1] = 0; count[1] = 2;
       cdf_put_vara_double(fileID, ncvarid, start, count, timebounds);
     }
 
