@@ -17,10 +17,10 @@
 #include "serialize.h"
 #include "vlist.h"
 
-int (*proj_lonlat_to_lcc_func)(struct CDI_GridProjParams gpp, SizeType, double*, double*) = NULL;
-int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, SizeType, double*, double*) = NULL;
-int (*proj_lonlat_to_stere_func)(struct CDI_GridProjParams gpp, SizeType, double*, double*) = NULL;
-int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, SizeType, double*, double*) = NULL;
+int (*proj_lonlat_to_lcc_func)(struct CDI_GridProjParams gpp, size_t, double*, double*) = NULL;
+int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, size_t, double*, double*) = NULL;
+int (*proj_lonlat_to_stere_func)(struct CDI_GridProjParams gpp, size_t, double*, double*) = NULL;
+int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, size_t, double*, double*) = NULL;
 
 /* the value in the second pair of brackets must match the length of
  * the longest string (including terminating NUL) */
