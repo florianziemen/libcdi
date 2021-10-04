@@ -42,8 +42,9 @@ computeClientStreamBufSize(int streamID, const struct collSpec *collector)
   if (collector->partDesc)
     {
       /* the distribution of data is fully prescribed in this case,
-       * i.e. memory needed can be computed exactly for the double
-       * precision case */
+       * i.e. memory needed can be computed exactly if the clients
+       * also specified the element type as float or double, otherwise
+       * plan for the double precision case */
       const Xt_idxlist *partDesc = collector->partDesc;
       const int *conversion = collector->conversion;
       for (size_t varID = 0; varID < nvars; ++varID)
