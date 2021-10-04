@@ -802,7 +802,7 @@ int main(int argc, char *argv[])
 
   if ( fname1 )
     {
-      size_t nmiss;
+      SizeType nmiss;
       size_t datasize = 0;
       size_t maxlev = 0;
       int streamID2 = CDI_UNDEFID;
@@ -924,21 +924,19 @@ int main(int argc, char *argv[])
 
 		  if ( Vardis ) vlistInqVarName(vlistID1, varID, varname);
 		  else          strcpy(varname, paramstr);
-		  /*
-		  printf("varID=%d, param=%d, gridID=%d, zaxisID=%d levelID=%d\n",
-			 varID, param, gridID, zaxisID, levelID);
-		  */
-		  const size_t gridsize = gridInqSize(gridID);
+
+		  // printf("varID=%d, param=%d, gridID=%d, zaxisID=%d levelID=%d\n", varID, param, gridID, zaxisID, levelID);
+
+		  const SizeType gridsize = gridInqSize(gridID);
 		  const double level   = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
                   const double missval = vlistInqVarMissval(vlistID1, varID);
 
-		  if ( Info )
-		    printInfo(vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
+		  if (Info) printInfo(vdate, vtime, varname, level, (size_t)gridsize, number, (size_t)nmiss, missval, data, Vardis);
 
-		  if ( fname2 )
+		  if (fname2)
 		    {
 		      streamDefRecord(streamID2, varID, levelID);
-		      if ( Move )
+		      if (Move)
 			streamCopyRecord(streamID2, streamID1);
 		      else
 			streamWriteRecord(streamID2, data, nmiss);

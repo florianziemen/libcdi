@@ -155,7 +155,7 @@ Get number of attributes assigned to this variable.
 \section*{\tt \htmlref{gridCreate}{gridCreate}}
 
 \begin{verbatim}
-    int gridCreate (int gridtype, size_t size);
+    int gridCreate (int gridtype, SizeType size);
 \end{verbatim}
 
 Create a horizontal Grid.
@@ -254,7 +254,7 @@ Define the name of a X-axis.
 \section*{\tt \htmlref{gridDefXsize}{gridDefXsize}}
 
 \begin{verbatim}
-    void gridDefXsize (int gridID, size_t xsize);
+    void gridDefXsize (int gridID, SizeType xsize);
 \end{verbatim}
 
 Define the size of a X-axis.
@@ -308,7 +308,7 @@ Define the name of a Y-axis.
 \section*{\tt \htmlref{gridDefYsize}{gridDefYsize}}
 
 \begin{verbatim}
-    void gridDefYsize (int gridID, size_t ysize);
+    void gridDefYsize (int gridID, SizeType ysize);
 \end{verbatim}
 
 Define the size of a Y-axis.
@@ -416,7 +416,7 @@ Get the reference URI to an unstructured grid.
 \section*{\tt \htmlref{gridInqSize}{gridInqSize}}
 
 \begin{verbatim}
-    size_t gridInqSize (int gridID);
+    SizeType gridInqSize (int gridID);
 \end{verbatim}
 
 Get the size of a Grid.
@@ -452,7 +452,7 @@ Find out whether X-coordinate is of type CHAR.
 \section*{\tt \htmlref{gridInqXbounds}{gridInqXbounds}}
 
 \begin{verbatim}
-    size_t gridInqXbounds (int gridID, double xbounds[]);
+    SizeType gridInqXbounds (int gridID, double xbounds[]);
 \end{verbatim}
 
 Get the bounds of a X-axis.
@@ -479,7 +479,7 @@ Get the name of a X-axis.
 \section*{\tt \htmlref{gridInqXsize}{gridInqXsize}}
 
 \begin{verbatim}
-    size_t gridInqXsize (int gridID);
+    SizeType gridInqXsize (int gridID);
 \end{verbatim}
 
 Get the size of a X-axis.
@@ -497,7 +497,7 @@ Get the units of a X-axis.
 \section*{\tt \htmlref{gridInqXval}{gridInqXval}}
 
 \begin{verbatim}
-    double gridInqXval (int gridID, size_t index);
+    double gridInqXval (int gridID, SizeType index);
 \end{verbatim}
 
 Get one value of a X-axis.
@@ -506,7 +506,7 @@ Get one value of a X-axis.
 \section*{\tt \htmlref{gridInqXvals}{gridInqXvals}}
 
 \begin{verbatim}
-    size_t gridInqXvals (int gridID, double xvals[]);
+    SizeType gridInqXvals (int gridID, double xvals[]);
 \end{verbatim}
 
 Get all values of a X-axis.
@@ -524,7 +524,7 @@ Find out whether Y-coordinate is of type CHAR.
 \section*{\tt \htmlref{gridInqYbounds}{gridInqYbounds}}
 
 \begin{verbatim}
-    size_t gridInqYbounds (int gridID, double ybounds[]);
+    SizeType gridInqYbounds (int gridID, double ybounds[]);
 \end{verbatim}
 
 Get the bounds of a Y-axis.
@@ -551,7 +551,7 @@ Get the name of a Y-axis.
 \section*{\tt \htmlref{gridInqYsize}{gridInqYsize}}
 
 \begin{verbatim}
-    size_t gridInqYsize (int gridID);
+    SizeType gridInqYsize (int gridID);
 \end{verbatim}
 
 Get the size of a Y-axis.
@@ -569,7 +569,7 @@ Get the units of a Y-axis.
 \section*{\tt \htmlref{gridInqYval}{gridInqYval}}
 
 \begin{verbatim}
-    double gridInqYval (int gridID, size_t index);
+    double gridInqYval (int gridID, SizeType index);
 \end{verbatim}
 
 Get one value of a Y-axis.
@@ -578,7 +578,7 @@ Get one value of a Y-axis.
 \section*{\tt \htmlref{gridInqYvals}{gridInqYvals}}
 
 \begin{verbatim}
-    size_t gridInqYvals (int gridID, double yvals[]);
+    SizeType gridInqYvals (int gridID, double yvals[]);
 \end{verbatim}
 
 Get all values of a Y-axis.
@@ -713,7 +713,7 @@ Create a new dataset.
 \section*{\tt \htmlref{streamReadVar}{streamReadVar}}
 
 \begin{verbatim}
-    void streamReadVar (int streamID, int varID, double data[], size_t *nmiss);
+    void streamReadVar (int streamID, int varID, double data[], SizeType *nmiss);
 \end{verbatim}
 
 Read a variable.
@@ -723,7 +723,7 @@ Read a variable.
 
 \begin{verbatim}
     void streamReadVarSlice (int streamID, int varID, int levelID, double data[],
-                             size_t *nmiss);
+                             SizeType *nmiss);
 \end{verbatim}
 
 Read a horizontal slice of a variable.
@@ -741,7 +741,8 @@ Synchronize an Open Dataset to Disk.
 \section*{\tt \htmlref{streamWriteVar}{streamWriteVar}}
 
 \begin{verbatim}
-    void streamWriteVar (int streamID, int varID, const double data[], size_t nmiss);
+    void streamWriteVar (int streamID, int varID, const double data[],
+                         SizeType nmiss);
 \end{verbatim}
 
 Write a variable.
@@ -751,7 +752,7 @@ Write a variable.
 
 \begin{verbatim}
     void streamWriteVarSlice (int streamID, int varID, int levelID,
-                              const double data[], size_t nmiss);
+                              const double data[], SizeType nmiss);
 \end{verbatim}
 
 Write a horizontal slice of a variable.

@@ -5,6 +5,7 @@
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sys/types.h>
 #include <time.h>
@@ -107,13 +108,13 @@ static int cfMPICommConvert(FILE *outfp, const char *argName,
 static int cfInt64tConvert(FILE *outfp, const char *argName,
                           size_t argNameLen, enum conversionType part);
 
-static int cfSizetConvert(FILE *outfp, const char *argName,
+static int cfSizeTypeConvert(FILE *outfp, const char *argName,
                           size_t argNameLen, enum conversionType part);
 
 static int cfInt64tpConvert(FILE *outfp, const char *argName,
                            size_t argNameLen, enum conversionType part);
 
-static int cfSizetpConvert(FILE *outfp, const char *argName,
+static int cfSizeTypepConvert(FILE *outfp, const char *argName,
                            size_t argNameLen, enum conversionType part);
 
 static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
@@ -168,9 +169,9 @@ static struct symbol funArgSym[]
       { "INTEGER",         "INT",     "%sint64_t %.*s",
         "^"WS"*(const"WS"+)?int64_t("WS"+"SYMRE")?"WS"*[,\\)]", 3, 1, 0,
         cfInt64tConvert, "%sint %.*s" },
-      { "INTEGER",         "INT",     "%ssize_t %.*s",
-        "^"WS"*(const"WS"+)?size_t("WS"+"SYMRE")?"WS"*[,\\)]", 3, 1, 0,
-        cfSizetConvert, "%sint %.*s" },
+      { "INTEGER",         "INT",     "%sSizeType %.*s",
+        "^"WS"*(const"WS"+)?SizeType("WS"+"SYMRE")?"WS"*[,\\)]", 3, 1, 0,
+        cfSizeTypeConvert, "%sint %.*s" },
       { "INTEGER",         "INT", "%sMPI_Comm %.*s",
         "^"WS"*MPI_Comm"WS"+"SYMRE"?"WS"*[,\\)]", 1, 1, 0,
         cfMPICommConvert, "%sint %.*s" },
@@ -184,9 +185,9 @@ static struct symbol funArgSym[]
       { "INTEGER",         "PINT",    "%sint64_t *%.*s",
         "^"WS"*(const"WS"+)?int64_t"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 1, 0,
         cfInt64tpConvert, "%sint *%.*s"},
-      { "INTEGER",         "PINT",    "%ssize_t *%.*s",
-        "^"WS"*(const"WS"+)?size_t"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 1, 0,
-        cfSizetpConvert, "%sint *%.*s"},
+      { "INTEGER",         "PINT",    "%sSizeType *%.*s",
+        "^"WS"*(const"WS"+)?SizeType"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 1, 0,
+        cfSizeTypepConvert, "%sint *%.*s"},
       { "REAL",            "FLOATV",  "%sfloat %.*s[]",
         "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
         "[,\\)]", 3, 0, 0 },
@@ -244,8 +245,8 @@ static struct symbol funRet[] = {
     "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, 0, 0, cfMPICommConvert, "%sint %.*s" },
   { "INTEGER",         "INT",    "%sint64_t %.*s",
     "(const"WS"+)?int64_t"WS"+"SYMRE WS"*\\(", 2, 1, 0, cfInt64tConvert, "%sint %.*s" },
-  { "INTEGER",         "INT",    "%ssize_t %.*s",
-    "(const"WS"+)?size_t"WS"+"SYMRE WS"*\\(", 2, 1, 0, cfSizetConvert, "%sint %.*s" },
+  { "INTEGER",         "INT",    "%sSizeType %.*s",
+    "(const"WS"+)?SizeType"WS"+"SYMRE WS"*\\(", 2, 1, 0, cfSizeTypeConvert, "%sint %.*s" },
 };
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
 #pragma GCC diagnostic pop
@@ -265,6 +266,7 @@ compress_whitespace(size_t len, char str[]);
 static int
 reCompile(regex_t *restrict RE, const char *restrict REstring,
           char * restrict *restrict lineBuf, size_t * restrict lineBufSize);
+
 static size_t
 symRegexCompile(size_t numSyms, struct symbol symList[],
                 char **line, size_t *lineBufSize);
@@ -342,8 +344,8 @@ function_fwrap(FILE *fpint, enum cftype functype, const char *delegateName, size
         }
       if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETP)
         {
-          // create temporary size_t variable
-          fprintf(fpint, "  size_t %.*s_size_t;\n",
+          // create temporary SizeType variable
+          fprintf(fpint, "  SizeType %.*s_SizeType;\n",
                   (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
         }
     }
@@ -382,10 +384,10 @@ function_fwrap(FILE *fpint, enum cftype functype, const char *delegateName, size
         }
       if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETP)
         {
-          fprintf(fpint, "  assert(%.*s_size_t < INT_MAX);\n",
+          fprintf(fpint, "  assert(%.*s_SizeType < INT_MAX);\n",
                   (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-          // copy temporary size_t variable
-          fprintf(fpint, "  *%.*s = %.*s_size_t;\n",
+          // copy temporary SizeType variable
+          fprintf(fpint, "  *%.*s = %.*s_SizeType;\n",
                   (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so,
                   (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
         }
@@ -503,7 +505,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
     if (reCompile(&emptyStringRE, emptyStringREString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
   }
-  /* fortran include */
+
+  // fortran include
 
   fprintf(fpinc, "! This file was automatically generated, don't edit!\n");
   fprintf(fpinc, "!\n");
@@ -514,7 +517,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
   fprintf(fpinc, "! Uwe Schulzweida, MPI-MET, Hamburg,   %s\n", timestr);
   fprintf(fpinc, "!\n\n");
 
-  /* fortran interface */
+  // fortran interface
 
   fprintf(fpint, "/* Automatically generated by make_fint.c, don't edit! */\n");
   fprintf(fpint, "\n");
@@ -532,7 +535,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
     cppHeaderSentinelMacro = (char *)malloc(fbasenameLen + 2);
     build_header_name(fbasenameLen, fbasename, cppHeaderSentinelMacro);
     fprintf(fpint, "#ifndef %s\n"
-            "#  include \"%s\"\n"
+            "#include \"%s\"\n"
             "#endif\n"
             "\n", cppHeaderSentinelMacro, fbasename);
   }
@@ -567,19 +570,26 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         "\n", fpint);
 
   fputs("static inline\n"
-        "int size_t_c2f(size_t value_size_t)\n"
+        "int SizeType_c2f(SizeType value_SizeType)\n"
         "{\n"
-        "  assert(value_size_t < INT_MAX);\n"
-        "  return (int) value_size_t;\n"
+        "  assert(value_SizeType < INT_MAX);\n"
+        "  return (int) value_SizeType;\n"
         "}\n"
         "\n", fpint);
 
+  bool startFortran = false;
   ssize_t lineLen;
   while ((lineLen = getline(&line, &lineBufSize, fpin)) >= 0)
     {
       static const char cplusplus_macro[] = "__cplusplus";
       lineno++;
       if (line[0] == '\n') continue;
+      if (strncmp(line, "//FINT_ON", 9) == 0)
+        {
+          startFortran = true;
+          continue;
+        }
+      if (!startFortran) continue;
       if (strncmp(line, "//FINT_OFF", 10) == 0) break;
       functype = ISVOID;
       pline = line;
@@ -711,7 +721,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 
 	  strcpy(sname, funcname);
 
-	  /* fortran include */
+	  // fortran include
 
 	  if ( functype == ISVOID )
 	    fprintf(fpinc, "!     %-16s", "");
@@ -723,10 +733,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 	  if ( (funcargc == 1 && funcargtype[0] == ISVOID) ) funcargc = 0;
 	  for (size_t i = 0; i < funcargc; i++ )
 	    {
-	      if ( i == 0 )
-		fprintf(fpinc, "!%36s(", "");
-	      else
-		fprintf(fpinc, ",\n!%36s ", "");
+              fprintf(fpinc, (i == 0) ? "!%36s(" : ",\n!%36s ", "");
               const int argType = funcargtype[i];
               const int isArray = isArrayArgType(argType);
               enum { argDimsFSize = 128 };
@@ -773,10 +780,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
           else
             delegateName = funcname;
 
-	  if ( functype == ISVOID )
-	    fprintf(fpint, "FCALLSCSUB");
-	  else
-	    fprintf(fpint, "FCALLSCFUN");
+          fprintf(fpint, (functype == ISVOID) ? "FCALLSCSUB" : "FCALLSCFUN");
 	  fprintf(fpint, "%zd ", funcargc);
 	  fprintf(fpint, "(");
 	  if ( functype != ISVOID )
@@ -797,7 +801,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 
 	  if ( funcnameLen == xnameLen && memcmp(funcname, xname, funcnameLen) == 0 )
 	    {
-	      char xline[128];
+	      char xline[256];
               size_t xlineLen = 0;
 	      int nch;
 
@@ -1237,26 +1241,26 @@ static int cfInt64tConvert(FILE *outfp, const char *argName,
   return retval;
 }
 
-/* emit conversion code for size_t argument */
-static int cfSizetConvert(FILE *outfp, const char *argName,
-                          size_t argNameLen, enum conversionType part)
+// emit conversion code for SizeType argument
+static int cfSizeTypeConvert(FILE *outfp, const char *argName,
+                             size_t argNameLen, enum conversionType part)
 {
   int retval = 0;
   switch (part)
     {
     case CONV_ARG:
-      retval = fprintf(outfp, "(size_t)%.*s", (int)argNameLen, argName);
+      retval = fprintf(outfp, "(SizeType)%.*s", (int)argNameLen, argName);
       break;
     case CONV_RET:
-      retval = fprintf(outfp, "size_t_c2f(%.*s)", (int)argNameLen, argName);
+      retval = fprintf(outfp, "SizeType_c2f(%.*s)", (int)argNameLen, argName);
       break;
     }
   return retval;
 }
 
-/* emit conversion code for size_t* argument */
+// emit conversion code for size_t* argument
 static int cfInt64tpConvert(FILE *outfp, const char *argName,
-                           size_t argNameLen, enum conversionType part)
+                            size_t argNameLen, enum conversionType part)
 {
   int retval = 0;
   switch (part)
@@ -1272,15 +1276,15 @@ static int cfInt64tpConvert(FILE *outfp, const char *argName,
   return retval;
 }
 
-/* emit conversion code for size_t* argument */
-static int cfSizetpConvert(FILE *outfp, const char *argName,
-                           size_t argNameLen, enum conversionType part)
+// emit conversion code for SizeType* argument
+static int cfSizeTypepConvert(FILE *outfp, const char *argName,
+                              size_t argNameLen, enum conversionType part)
 {
   int retval = 0;
   switch (part)
     {
     case CONV_ARG:
-      retval = fprintf(outfp, "&%.*s_size_t", (int)argNameLen, argName);
+      retval = fprintf(outfp, "&%.*s_SizeType", (int)argNameLen, argName);
       break;
     case CONV_RET:
       abort();

@@ -580,9 +580,10 @@ void cdiGribIterator_readField(CdiIterator *super, double *buffer, size_t *nmiss
   GRIB_CHECK(my_grib_set_double(me->gribHandle, "missingValue", CDI_Default_Missval), 0);
   gribGetDoubleArray(me->gribHandle, "values", buffer);
   long gridType = gribGetLong(me->gribHandle, "gridDefinitionTemplateNumber");
-  if(nmiss)
+  if (nmiss)
     {
-      *nmiss = (gridType >= 50 && gridType <= 53) ? (size_t)0 : (size_t)gribGetLong(me->gribHandle, "numberOfMissing");        //The condition excludes harmonic data.
+      // The condition excludes harmonic data.
+      *nmiss = (gridType >= 50 && gridType <= 53) ? (size_t)0 : (size_t)gribGetLong(me->gribHandle, "numberOfMissing");
     }
 }
 

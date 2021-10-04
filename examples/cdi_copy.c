@@ -9,14 +9,14 @@ int main(void)
     nlev =  5, // Number of levels
     nts  =  3, // Number of time steps
   };
-  size_t nmiss;
+  SizeType nmiss;
   double var1[nlon*nlat];
   double var2[nlon*nlat*nlev];
 
 
   // Open the input dataset
   int streamID1  = streamOpenRead("example.nc");
-  if ( streamID1 < 0 )
+  if (streamID1 < 0)
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID1));
       return 1;
@@ -31,7 +31,7 @@ int main(void)
 
   // Open the output dataset (GRIB format)
   int streamID2  = streamOpenWrite("example.grb", CDI_FILETYPE_GRB);
-  if ( streamID2 < 0 )
+  if (streamID2 < 0)
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID2));
       return 1;
@@ -42,7 +42,7 @@ int main(void)
   streamDefVlist(streamID2, vlistID2);
 
   // Loop over the number of time steps
-  for ( int tsID = 0; tsID < nts; tsID++ )
+  for (int tsID = 0; tsID < nts; tsID++)
     {
       // Inquire the input time step
       streamInqTimestep(streamID1, tsID);

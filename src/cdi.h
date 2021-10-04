@@ -12,7 +12,7 @@
 #include <sys/types.h>
 
 #ifndef CDI_SIZE_TYPE
-#define CDI_SIZE_TYPE size_t
+#define CDI_SIZE_TYPE int
 #endif
 
 #ifndef CDI_DATE_TYPE
@@ -21,6 +21,8 @@
 
 typedef CDI_SIZE_TYPE SizeType;
 typedef CDI_DATE_TYPE DateType;
+
+//FINT_ON  <--- don't change or remove this line!!!
 
 #ifdef __cplusplus
 extern "C" {
@@ -379,41 +381,41 @@ int     streamInqCurTimestepID(int streamID);
 const char *streamFilename(int streamID);
 const char *streamFilesuffix(int filetype);
 
-size_t  streamNvals(int streamID);
+SizeType streamNvals(int streamID);
 
 int     streamInqNvars(int streamID);
 
 // STREAM var I/O routines (random access)
 
 //      streamWriteVar: Write a variable
-void    streamWriteVar(int streamID, int varID, const double data[], size_t nmiss);
-void    streamWriteVarF(int streamID, int varID, const float data[], size_t nmiss);
+void    streamWriteVar(int streamID, int varID, const double data[], SizeType nmiss);
+void    streamWriteVarF(int streamID, int varID, const float data[], SizeType nmiss);
 
 //      streamReadVar: Read a variable
-void    streamReadVar(int streamID, int varID, double data[], size_t *nmiss);
-void    streamReadVarF(int streamID, int varID, float data[], size_t *nmiss);
-void    streamReadVarPart(int streamID, int varID, int varType, int start, size_t size, void *data, size_t *nmiss, int memtype);
+void    streamReadVar(int streamID, int varID, double data[], SizeType *nmiss);
+void    streamReadVarF(int streamID, int varID, float data[], SizeType *nmiss);
+void    streamReadVarPart(int streamID, int varID, int varType, int start, SizeType size, void *data, SizeType *nmiss, int memtype);
 
 //      streamWriteVarSlice: Write a horizontal slice of a variable
-void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], size_t nmiss);
-void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], size_t nmiss);
-void    streamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, size_t size, void *data, size_t *nmiss, int memtype);
+void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], SizeType nmiss);
+void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], SizeType nmiss);
+void    streamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, SizeType size, void *data, SizeType *nmiss, int memtype);
 
 //      streamReadVarSlice: Read a horizontal slice of a variable
-void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], size_t *nmiss);
-void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], size_t *nmiss);
+void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], SizeType *nmiss);
+void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], SizeType *nmiss);
 
-void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], size_t nmiss);
+void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], SizeType nmiss);
 
 
 // STREAM record I/O routines (sequential access)
 
 void    streamDefRecord(int streamID, int  varID, int  levelID);
 void    streamInqRecord(int streamID, int *varID, int *levelID);
-void    streamWriteRecord(int streamID, const double data[], size_t nmiss);
-void    streamWriteRecordF(int streamID, const float data[], size_t nmiss);
-void    streamReadRecord(int streamID, double data[], size_t *nmiss);
-void    streamReadRecordF(int streamID, float data[], size_t *nmiss);
+void    streamWriteRecord(int streamID, const double data[], SizeType nmiss);
+void    streamWriteRecordF(int streamID, const float data[], SizeType nmiss);
+void    streamReadRecord(int streamID, double data[], SizeType *nmiss);
+void    streamReadRecordF(int streamID, float data[], SizeType *nmiss);
 void    streamCopyRecord(int streamIDdest, int streamIDsrc);
 
 void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);
@@ -452,8 +454,8 @@ char *cdiIterator_inqVariableName(CdiIterator *me);     // The caller is respons
 int cdiIterator_inqGridId(CdiIterator *me);             // The returned id is only valid until the next call to cdiIteratorNextField().
 
 // Reading data
-void cdiIterator_readField(CdiIterator *me, double data[], size_t *nmiss_optional);
-void cdiIterator_readFieldF(CdiIterator *me, float data[], size_t *nmiss_optional);
+void cdiIterator_readField(CdiIterator *me, double data[], SizeType *nmiss_optional);
+void cdiIterator_readFieldF(CdiIterator *me, float data[], SizeType *nmiss_optional);
 // TODO[NH]: Add functions to read partial fields.
 
 
@@ -522,7 +524,7 @@ int     vlistNsubtypes(int vlistID);
 
 void    vlistDefNtsteps(int vlistID, int nts);
 int     vlistNtsteps(int vlistID);
-size_t  vlistGridsizeMax(int vlistID);
+SizeType vlistGridsizeMax(int vlistID);
 int     vlistGrid(int vlistID, int index);
 int     vlistGridIndex(int vlistID, int gridID);
 void    vlistChangeGridIndex(int vlistID, int index, int gridID);
@@ -657,7 +659,7 @@ double  vlistInqVarScalefactor(int vlistID, int varID);
 void    vlistDefVarAddoffset(int vlistID, int varID, double addoffset);
 double  vlistInqVarAddoffset(int vlistID, int varID);
 
-size_t  vlistInqVarSize(int vlistID, int varID);
+SizeType vlistInqVarSize(int vlistID, int varID);
 
 void    vlistDefIndex(int vlistID, int varID, int levID, int index);
 int     vlistInqIndex(int vlistID, int varID, int levID);

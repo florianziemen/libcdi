@@ -9,7 +9,7 @@ The function {\texttt{gridCreate}} creates a horizontal Grid.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    int gridCreate(int gridtype, size_t size);
+    int gridCreate(int gridtype, SizeType size);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -137,7 +137,7 @@ The function {\texttt{gridInqSize}} returns the size of a Grid.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    size_t gridInqSize(int gridID);
+    SizeType gridInqSize(int gridID);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -163,7 +163,7 @@ The function {\texttt{gridDefXsize}} defines the number of values of a X-axis.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    void gridDefXsize(int gridID, size_t xsize);
+    void gridDefXsize(int gridID, SizeType xsize);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -186,7 +186,7 @@ The function {\texttt{gridInqXsize}} returns the number of values of a X-axis.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    size_t gridInqXsize(int gridID);
+    SizeType gridInqXsize(int gridID);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -212,7 +212,7 @@ The function {\texttt{gridDefYsize}} defines the number of values of a Y-axis.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    void gridDefYsize(int gridID, size_t ysize);
+    void gridDefYsize(int gridID, SizeType ysize);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -235,7 +235,7 @@ The function {\texttt{gridInqYsize}} returns the number of values of a Y-axis.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    size_t gridInqYsize(int gridID);
+    SizeType gridInqYsize(int gridID);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -335,7 +335,7 @@ The function {\texttt{gridInqXvals}} returns all values of the X-axis.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    size_t gridInqXvals(int gridID, double *xvals);
+    SizeType gridInqXvals(int gridID, double *xvals);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -389,7 +389,7 @@ The function {\texttt{gridInqYvals}} returns all values of the Y-axis.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    size_t gridInqYvals(int gridID, double *yvals);
+    SizeType gridInqYvals(int gridID, double *yvals);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -443,7 +443,7 @@ The function {\texttt{gridInqXbounds}} returns the bounds of the X-axis.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    size_t gridInqXbounds(int gridID, double *xbounds);
+    SizeType gridInqXbounds(int gridID, double *xbounds);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -497,7 +497,7 @@ The function {\texttt{gridInqYbounds}} returns the bounds of the Y-axis.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    size_t gridInqYbounds(int gridID, double *ybounds);
+    SizeType gridInqYbounds(int gridID, double *ybounds);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}

@@ -170,7 +170,7 @@ void srvDefRecord(stream_t *streamptr)
       ysize = 1;
     }
   if ( gridInqType(gridID) == GRID_UNSTRUCTURED ) ysize = 1;
-  if ( gridInqSize(gridID) != xsize*ysize )
+  if ( (size_t)gridInqSize(gridID) != xsize*ysize )
     Error("Internal problem with gridsize!");
 
   cdi_check_gridsize_int_limit("SERVICE", gridInqSize(gridID));
@@ -649,7 +649,7 @@ void srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
       ysize = 1;
     }
   if ( gridInqType(gridID) == GRID_UNSTRUCTURED ) ysize = 1;
-  if ( gridInqSize(gridID) != xsize*ysize )
+  if ( (size_t)gridInqSize(gridID) != xsize*ysize )
     Error("Internal problem with gridsize!");
 
   cdi_check_gridsize_int_limit("SERVICE", gridInqSize(gridID));

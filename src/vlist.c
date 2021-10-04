@@ -1160,7 +1160,7 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
             " varID  size iorank\n", fp);
       for ( int varID = 0; varID < nvars; varID++ )
         fprintf(fp, "%3d %8zu %6d\n", varID,
-                zaxisInqSize(vlistptr->vars[varID].zaxisID) * gridInqSize(vlistptr->vars[varID].gridID),
+                (size_t)zaxisInqSize(vlistptr->vars[varID].zaxisID) * gridInqSize(vlistptr->vars[varID].gridID),
                 vlistptr->vars[varID].iorank);
     }
 }
@@ -1312,15 +1312,15 @@ int vlistInqModel(int vlistID)
 }
 
 
-size_t vlistGridsizeMax(int vlistID)
+SizeType vlistGridsizeMax(int vlistID)
 {
-  size_t gridsizemax = 0;
+  SizeType gridsizemax = 0;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   for ( int index = 0 ; index < vlistptr->ngrids ; index++ )
     {
       int gridID = vlistptr->gridIDs[index];
-      size_t gridsize = gridInqSize(gridID);
+      SizeType gridsize = gridInqSize(gridID);
       if ( gridsize > gridsizemax ) gridsizemax = gridsize;
     }
 

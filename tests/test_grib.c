@@ -26,7 +26,7 @@ int main()
   int tsID;
   int levelID;
   int vlistID, taxisID;
-  size_t nmiss;
+  SizeType nmiss;
 
 
   size_t datasize = (size_t)nlon * (size_t)nlat;

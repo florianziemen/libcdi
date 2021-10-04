@@ -5,7 +5,7 @@
 #endif
 
 #ifndef CDI_H_
-#  include "cdi.h"
+#include "cdi.h"
 #endif
 
 #ifdef HAVE_CF_INTERFACE
@@ -37,10 +37,10 @@ int int64_t_c2f(int64_t value_int64_t)
 }
 
 static inline
-int size_t_c2f(size_t value_size_t)
+int SizeType_c2f(SizeType value_SizeType)
 {
-  assert(value_size_t < INT_MAX);
-  return (int) value_size_t;
+  assert(value_SizeType < INT_MAX);
+  return (int) value_SizeType;
 }
 
 
@@ -174,9 +174,9 @@ FCALLSCFUN1 (STRING, streamFilename, STREAMFILENAME, streamfilename, INT)
 FCALLSCFUN1 (STRING, streamFilesuffix, STREAMFILESUFFIX, streamfilesuffix, INT)
 static int streamNvals_fwrap(int streamID)
 {
-  size_t v;
+  SizeType v;
   v = streamNvals(streamID);
-  return size_t_c2f(v);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN1 (INT, streamNvals_fwrap, STREAMNVALS, streamnvals, INT)
 FCALLSCFUN1 (INT, streamInqNvars, STREAMINQNVARS, streaminqnvars, INT)
@@ -185,59 +185,59 @@ FCALLSCFUN1 (INT, streamInqNvars, STREAMINQNVARS, streaminqnvars, INT)
 
 static void streamWriteVar_fwrap(int streamID, int varID, const double data[], int nmiss)
 {
-  streamWriteVar(streamID, varID, data, (size_t)nmiss);
+  streamWriteVar(streamID, varID, data, (SizeType)nmiss);
 }
 FCALLSCSUB4 (streamWriteVar_fwrap, STREAMWRITEVAR, streamwritevar, INT, INT, DOUBLEV, INT)
 static void streamWriteVarF_fwrap(int streamID, int varID, const float data[], int nmiss)
 {
-  streamWriteVarF(streamID, varID, data, (size_t)nmiss);
+  streamWriteVarF(streamID, varID, data, (SizeType)nmiss);
 }
 FCALLSCSUB4 (streamWriteVarF_fwrap, STREAMWRITEVARF, streamwritevarf, INT, INT, FLOATV, INT)
 static void streamReadVar_fwrap(int streamID, int varID, double data[], int *nmiss)
 {
-  size_t nmiss_size_t;
-  streamReadVar(streamID, varID, data, &nmiss_size_t);
-  assert(nmiss_size_t < INT_MAX);
-  *nmiss = nmiss_size_t;
+  SizeType nmiss_SizeType;
+  streamReadVar(streamID, varID, data, &nmiss_SizeType);
+  assert(nmiss_SizeType < INT_MAX);
+  *nmiss = nmiss_SizeType;
 }
 FCALLSCSUB4 (streamReadVar_fwrap, STREAMREADVAR, streamreadvar, INT, INT, DOUBLEV, PINT)
 static void streamReadVarF_fwrap(int streamID, int varID, float data[], int *nmiss)
 {
-  size_t nmiss_size_t;
-  streamReadVarF(streamID, varID, data, &nmiss_size_t);
-  assert(nmiss_size_t < INT_MAX);
-  *nmiss = nmiss_size_t;
+  SizeType nmiss_SizeType;
+  streamReadVarF(streamID, varID, data, &nmiss_SizeType);
+  assert(nmiss_SizeType < INT_MAX);
+  *nmiss = nmiss_SizeType;
 }
 FCALLSCSUB4 (streamReadVarF_fwrap, STREAMREADVARF, streamreadvarf, INT, INT, FLOATV, PINT)
 static void streamWriteVarSlice_fwrap(int streamID, int varID, int levelID, const double data[], int nmiss)
 {
-  streamWriteVarSlice(streamID, varID, levelID, data, (size_t)nmiss);
+  streamWriteVarSlice(streamID, varID, levelID, data, (SizeType)nmiss);
 }
 FCALLSCSUB5 (streamWriteVarSlice_fwrap, STREAMWRITEVARSLICE, streamwritevarslice, INT, INT, INT, DOUBLEV, INT)
 static void streamWriteVarSliceF_fwrap(int streamID, int varID, int levelID, const float data[], int nmiss)
 {
-  streamWriteVarSliceF(streamID, varID, levelID, data, (size_t)nmiss);
+  streamWriteVarSliceF(streamID, varID, levelID, data, (SizeType)nmiss);
 }
 FCALLSCSUB5 (streamWriteVarSliceF_fwrap, STREAMWRITEVARSLICEF, streamwritevarslicef, INT, INT, INT, FLOATV, INT)
 static void streamReadVarSlice_fwrap(int streamID, int varID, int levelID, double data[], int *nmiss)
 {
-  size_t nmiss_size_t;
-  streamReadVarSlice(streamID, varID, levelID, data, &nmiss_size_t);
-  assert(nmiss_size_t < INT_MAX);
-  *nmiss = nmiss_size_t;
+  SizeType nmiss_SizeType;
+  streamReadVarSlice(streamID, varID, levelID, data, &nmiss_SizeType);
+  assert(nmiss_SizeType < INT_MAX);
+  *nmiss = nmiss_SizeType;
 }
 FCALLSCSUB5 (streamReadVarSlice_fwrap, STREAMREADVARSLICE, streamreadvarslice, INT, INT, INT, DOUBLEV, PINT)
 static void streamReadVarSliceF_fwrap(int streamID, int varID, int levelID, float data[], int *nmiss)
 {
-  size_t nmiss_size_t;
-  streamReadVarSliceF(streamID, varID, levelID, data, &nmiss_size_t);
-  assert(nmiss_size_t < INT_MAX);
-  *nmiss = nmiss_size_t;
+  SizeType nmiss_SizeType;
+  streamReadVarSliceF(streamID, varID, levelID, data, &nmiss_SizeType);
+  assert(nmiss_SizeType < INT_MAX);
+  *nmiss = nmiss_SizeType;
 }
 FCALLSCSUB5 (streamReadVarSliceF_fwrap, STREAMREADVARSLICEF, streamreadvarslicef, INT, INT, INT, FLOATV, PINT)
 static void streamWriteVarChunk_fwrap(int streamID, int varID, const int rect[3][2], const double data[], int nmiss)
 {
-  streamWriteVarChunk(streamID, varID, rect, data, (size_t)nmiss);
+  streamWriteVarChunk(streamID, varID, rect, data, (SizeType)nmiss);
 }
 FCALLSCSUB5 (streamWriteVarChunk_fwrap, STREAMWRITEVARCHUNK, streamwritevarchunk, INT, INT, INTVV, DOUBLEV, INT)
 
@@ -247,28 +247,28 @@ FCALLSCSUB3 (streamDefRecord, STREAMDEFRECORD, streamdefrecord, INT, INT, INT)
 FCALLSCSUB3 (streamInqRecord, STREAMINQRECORD, streaminqrecord, INT, PINT, PINT)
 static void streamWriteRecord_fwrap(int streamID, const double data[], int nmiss)
 {
-  streamWriteRecord(streamID, data, (size_t)nmiss);
+  streamWriteRecord(streamID, data, (SizeType)nmiss);
 }
 FCALLSCSUB3 (streamWriteRecord_fwrap, STREAMWRITERECORD, streamwriterecord, INT, DOUBLEV, INT)
 static void streamWriteRecordF_fwrap(int streamID, const float data[], int nmiss)
 {
-  streamWriteRecordF(streamID, data, (size_t)nmiss);
+  streamWriteRecordF(streamID, data, (SizeType)nmiss);
 }
 FCALLSCSUB3 (streamWriteRecordF_fwrap, STREAMWRITERECORDF, streamwriterecordf, INT, FLOATV, INT)
 static void streamReadRecord_fwrap(int streamID, double data[], int *nmiss)
 {
-  size_t nmiss_size_t;
-  streamReadRecord(streamID, data, &nmiss_size_t);
-  assert(nmiss_size_t < INT_MAX);
-  *nmiss = nmiss_size_t;
+  SizeType nmiss_SizeType;
+  streamReadRecord(streamID, data, &nmiss_SizeType);
+  assert(nmiss_SizeType < INT_MAX);
+  *nmiss = nmiss_SizeType;
 }
 FCALLSCSUB3 (streamReadRecord_fwrap, STREAMREADRECORD, streamreadrecord, INT, DOUBLEV, PINT)
 static void streamReadRecordF_fwrap(int streamID, float data[], int *nmiss)
 {
-  size_t nmiss_size_t;
-  streamReadRecordF(streamID, data, &nmiss_size_t);
-  assert(nmiss_size_t < INT_MAX);
-  *nmiss = nmiss_size_t;
+  SizeType nmiss_SizeType;
+  streamReadRecordF(streamID, data, &nmiss_SizeType);
+  assert(nmiss_SizeType < INT_MAX);
+  *nmiss = nmiss_SizeType;
 }
 FCALLSCSUB3 (streamReadRecordF_fwrap, STREAMREADRECORDF, streamreadrecordf, INT, FLOATV, PINT)
 FCALLSCSUB2 (streamCopyRecord, STREAMCOPYRECORD, streamcopyrecord, INT, INT)
@@ -323,9 +323,9 @@ FCALLSCSUB2 (vlistDefNtsteps, VLISTDEFNTSTEPS, vlistdefntsteps, INT, INT)
 FCALLSCFUN1 (INT, vlistNtsteps, VLISTNTSTEPS, vlistntsteps, INT)
 static int vlistGridsizeMax_fwrap(int vlistID)
 {
-  size_t v;
+  SizeType v;
   v = vlistGridsizeMax(vlistID);
-  return size_t_c2f(v);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN1 (INT, vlistGridsizeMax_fwrap, VLISTGRIDSIZEMAX, vlistgridsizemax, INT)
 FCALLSCFUN2 (INT, vlistGrid, VLISTGRID, vlistgrid, INT, INT)
@@ -405,9 +405,9 @@ FCALLSCSUB3 (vlistDefVarAddoffset, VLISTDEFVARADDOFFSET, vlistdefvaraddoffset, I
 FCALLSCFUN2 (DOUBLE, vlistInqVarAddoffset, VLISTINQVARADDOFFSET, vlistinqvaraddoffset, INT, INT)
 static int vlistInqVarSize_fwrap(int vlistID, int varID)
 {
-  size_t v;
+  SizeType v;
   v = vlistInqVarSize(vlistID, varID);
-  return size_t_c2f(v);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN2 (INT, vlistInqVarSize_fwrap, VLISTINQVARSIZE, vlistinqvarsize, INT, INT)
 FCALLSCSUB4 (vlistDefIndex, VLISTDEFINDEX, vlistdefindex, INT, INT, INT, INT)
@@ -453,7 +453,7 @@ FCALLSCFUN2 (INT, gridInqMask, GRIDINQMASK, gridinqmask, INT, INTV)
 static int gridCreate_fwrap(int gridtype, int size)
 {
   int v;
-  v = gridCreate(gridtype, (size_t)size);
+  v = gridCreate(gridtype, (SizeType)size);
   return v;
 }
 FCALLSCFUN2 (INT, gridCreate_fwrap, GRIDCREATE, gridcreate, INT, INT)
@@ -465,33 +465,33 @@ FCALLSCFUN1 (INT, gridInqProjType, GRIDINQPROJTYPE, gridinqprojtype, INT)
 FCALLSCFUN1 (INT, gridInqType, GRIDINQTYPE, gridinqtype, INT)
 static int gridInqSize_fwrap(int gridID)
 {
-  size_t v;
+  SizeType v;
   v = gridInqSize(gridID);
-  return size_t_c2f(v);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN1 (INT, gridInqSize_fwrap, GRIDINQSIZE, gridinqsize, INT)
 static void gridDefXsize_fwrap(int gridID, int xsize)
 {
-  gridDefXsize(gridID, (size_t)xsize);
+  gridDefXsize(gridID, (SizeType)xsize);
 }
 FCALLSCSUB2 (gridDefXsize_fwrap, GRIDDEFXSIZE, griddefxsize, INT, INT)
 static int gridInqXsize_fwrap(int gridID)
 {
-  size_t v;
+  SizeType v;
   v = gridInqXsize(gridID);
-  return size_t_c2f(v);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN1 (INT, gridInqXsize_fwrap, GRIDINQXSIZE, gridinqxsize, INT)
 static void gridDefYsize_fwrap(int gridID, int ysize)
 {
-  gridDefYsize(gridID, (size_t)ysize);
+  gridDefYsize(gridID, (SizeType)ysize);
 }
 FCALLSCSUB2 (gridDefYsize_fwrap, GRIDDEFYSIZE, griddefysize, INT, INT)
 static int gridInqYsize_fwrap(int gridID)
 {
-  size_t v;
+  SizeType v;
   v = gridInqYsize(gridID);
-  return size_t_c2f(v);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN1 (INT, gridInqYsize_fwrap, GRIDINQYSIZE, gridinqysize, INT)
 FCALLSCSUB2 (gridDefNP, GRIDDEFNP, griddefnp, INT, INT)
@@ -499,32 +499,32 @@ FCALLSCFUN1 (INT, gridInqNP, GRIDINQNP, gridinqnp, INT)
 FCALLSCSUB2 (gridDefXvals, GRIDDEFXVALS, griddefxvals, INT, DOUBLEV)
 static int gridInqXvals_fwrap(int gridID, double xvals[])
 {
-  size_t v;
+  SizeType v;
   v = gridInqXvals(gridID, xvals);
-  return size_t_c2f(v);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN2 (INT, gridInqXvals_fwrap, GRIDINQXVALS, gridinqxvals, INT, DOUBLEV)
 static int gridInqXvalsPart_fwrap(int gridID, int start, int size, double xvals[])
 {
-  size_t v;
-  v = gridInqXvalsPart(gridID, start, (size_t)size, xvals);
-  return size_t_c2f(v);
+  SizeType v;
+  v = gridInqXvalsPart(gridID, start, (SizeType)size, xvals);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN4 (INT, gridInqXvalsPart_fwrap, GRIDINQXVALSPART, gridinqxvalspart, INT, INT, INT, DOUBLEV)
 FCALLSCFUN1 (INT, gridInqXIsc, GRIDINQXISC, gridinqxisc, INT)
 FCALLSCSUB2 (gridDefYvals, GRIDDEFYVALS, griddefyvals, INT, DOUBLEV)
 static int gridInqYvals_fwrap(int gridID, double yvals[])
 {
-  size_t v;
+  SizeType v;
   v = gridInqYvals(gridID, yvals);
-  return size_t_c2f(v);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN2 (INT, gridInqYvals_fwrap, GRIDINQYVALS, gridinqyvals, INT, DOUBLEV)
 static int gridInqYvalsPart_fwrap(int gridID, int start, int size, double yvals[])
 {
-  size_t v;
-  v = gridInqYvalsPart(gridID, start, (size_t)size, yvals);
-  return size_t_c2f(v);
+  SizeType v;
+  v = gridInqYvalsPart(gridID, start, (SizeType)size, yvals);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN4 (INT, gridInqYvalsPart_fwrap, GRIDINQYVALSPART, gridinqyvalspart, INT, INT, INT, DOUBLEV)
 FCALLSCFUN1 (INT, gridInqYIsc, GRIDINQYISC, gridinqyisc, INT)
@@ -576,14 +576,14 @@ FCALLSCFUN1 (INT, gridInqDatatype, GRIDINQDATATYPE, gridinqdatatype, INT)
 static double gridInqXval_fwrap(int gridID, int index)
 {
   double v;
-  v = gridInqXval(gridID, (size_t)index);
+  v = gridInqXval(gridID, (SizeType)index);
   return v;
 }
 FCALLSCFUN2 (DOUBLE, gridInqXval_fwrap, GRIDINQXVAL, gridinqxval, INT, INT)
 static double gridInqYval_fwrap(int gridID, int index)
 {
   double v;
-  v = gridInqYval(gridID, (size_t)index);
+  v = gridInqYval(gridID, (SizeType)index);
   return v;
 }
 FCALLSCFUN2 (DOUBLE, gridInqYval_fwrap, GRIDINQYVAL, gridinqyval, INT, INT)
@@ -621,31 +621,31 @@ FCALLSCFUN1 (INT, gridInqNvertex, GRIDINQNVERTEX, gridinqnvertex, INT)
 FCALLSCSUB2 (gridDefXbounds, GRIDDEFXBOUNDS, griddefxbounds, INT, DOUBLEV)
 static int gridInqXbounds_fwrap(int gridID, double xbounds[])
 {
-  size_t v;
+  SizeType v;
   v = gridInqXbounds(gridID, xbounds);
-  return size_t_c2f(v);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN2 (INT, gridInqXbounds_fwrap, GRIDINQXBOUNDS, gridinqxbounds, INT, DOUBLEV)
 static int gridInqXboundsPart_fwrap(int gridID, int start, int size, double xbounds[])
 {
-  size_t v;
-  v = gridInqXboundsPart(gridID, start, (size_t)size, xbounds);
-  return size_t_c2f(v);
+  SizeType v;
+  v = gridInqXboundsPart(gridID, start, (SizeType)size, xbounds);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN4 (INT, gridInqXboundsPart_fwrap, GRIDINQXBOUNDSPART, gridinqxboundspart, INT, INT, INT, DOUBLEV)
 FCALLSCSUB2 (gridDefYbounds, GRIDDEFYBOUNDS, griddefybounds, INT, DOUBLEV)
 static int gridInqYbounds_fwrap(int gridID, double ybounds[])
 {
-  size_t v;
+  SizeType v;
   v = gridInqYbounds(gridID, ybounds);
-  return size_t_c2f(v);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN2 (INT, gridInqYbounds_fwrap, GRIDINQYBOUNDS, gridinqybounds, INT, DOUBLEV)
 static int gridInqYboundsPart_fwrap(int gridID, int start, int size, double ybounds[])
 {
-  size_t v;
-  v = gridInqYboundsPart(gridID, start, (size_t)size, ybounds);
-  return size_t_c2f(v);
+  SizeType v;
+  v = gridInqYboundsPart(gridID, start, (SizeType)size, ybounds);
+  return SizeType_c2f(v);
 }
 FCALLSCFUN4 (INT, gridInqYboundsPart_fwrap, GRIDINQYBOUNDSPART, gridinqyboundspart, INT, INT, INT, DOUBLEV)
 FCALLSCSUB3 (gridDefReducedPoints, GRIDDEFREDUCEDPOINTS, griddefreducedpoints, INT, INT, INTV)

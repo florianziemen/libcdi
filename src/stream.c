@@ -1537,7 +1537,7 @@ void streamWriteContents(int streamID, char *cname)
 #endif
 
 // This function is used in CDO!
-size_t streamNvals(int streamID)
+SizeType streamNvals(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
   return streamptr->numvals;

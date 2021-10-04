@@ -57,7 +57,7 @@ struct gridVirtTable
 };
 
 struct gridaxis_t {
-  SizeType    size;                   // number of values
+  size_t      size;                   // number of values
   short       flag;                   // 0: undefined 1:vals 2:first+inc
   double      first, last, inc;
   double     *vals;
@@ -77,7 +77,7 @@ struct grid_gme_t {
 struct grid_t {
   char       *name;
   int         self;
-  SizeType    size;
+  size_t      size;
   int         type;                   // grid type
   int         datatype;               // grid data type (used only internal in gridComplete())
   int         proj;                   // grid projection
@@ -106,7 +106,7 @@ struct grid_t {
 
 
 void grid_init(grid_t *gridptr);
-void cdiGridTypeInit(grid_t *gridptr, int gridtype, SizeType size);
+void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size);
 void grid_free(grid_t *gridptr);
 grid_t *grid_to_pointer(int gridID);
 extern const struct gridVirtTable cdiGridVtable;
@@ -132,7 +132,7 @@ int gridGenerate(const grid_t *grid);
 
 //int gridIsEqual(int gridID1, int gridID2);
 
-void cdiGridGetIndexList(unsigned, int * );
+void cdiGridGetIndexList(unsigned, int *);
 
 void
 gridUnpack(char * unpackBuffer, int unpackBufferSize,

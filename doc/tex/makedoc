@@ -324,7 +324,7 @@ sub printproto {
   if ( "$ftype" eq "void"    ) { $ftype = "SUBROUTINE"; }
   if ( "$ftype" eq "int"     ) { $ftype = "INTEGER FUNCTION"; }
   if ( "$ftype" eq "int64_t" ) { $ftype = "INTEGER FUNCTION"; }
-  if ( "$ftype" eq "size_t"  ) { $ftype = "INTEGER FUNCTION"; }
+  if ( "$ftype" eq "SizeType") { $ftype = "INTEGER FUNCTION"; }
   if ( "$ftype" eq "double"  ) { $ftype = "REAL*8 FUNCTION"; }
   if ( "$ftype" eq "float"   ) { $ftype = "REAL*4 FUNCTION"; }
   $klen = 0;
@@ -343,8 +343,8 @@ sub printproto {
     $tag =~ s/int /INTEGER /og;
     $tag =~ s/int64_t \*/INTEGER /og;
     $tag =~ s/int64_t /INTEGER /og;
-    $tag =~ s/size_t \*/INTEGER /og;
-    $tag =~ s/size_t /INTEGER /og;
+    $tag =~ s/SizeType \*/INTEGER /og;
+    $tag =~ s/SizeType /INTEGER /og;
     $tag =~ s/double \*/REAL*8 /og;
     $tag =~ s/double /REAL*8 /og;
     $tag =~ s/float \*/REAL*4 /og;
@@ -386,7 +386,7 @@ sub printfortran {
   $line =~ s/char /CHARACTER /og;
   $line =~ s/int /INTEGER /og;
   $line =~ s/int64_t /INTEGER /og;
-  $line =~ s/size_t /INTEGER /og;
+  $line =~ s/SizeType /INTEGER /og;
   $line =~ s/double /REAL*8 /og;
   $line =~ s/float /REAL*4 /og;
   $line =~ s/const //og;

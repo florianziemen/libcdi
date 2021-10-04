@@ -8,7 +8,7 @@
 #define INCLUDE_GUARD_CDI_ITERATOR_GRIB_H
 
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include "cdi.h"

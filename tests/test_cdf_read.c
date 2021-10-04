@@ -40,7 +40,7 @@ int main(int argc, const char **argv)
         {
           size_t memSize = (size_t)vlistInqVarSize(vlistID, (int)varID)
             * sizeof (double);
-          size_t nmiss;
+          SizeType nmiss;
           if (memSize > bufSize)
             {
               double *temp = (double *)realloc(buf, memSize);

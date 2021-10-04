@@ -137,7 +137,7 @@ struct idSearch
 static inline struct idSearch
 cdfSearchIDBySize(size_t startIdx, size_t numIDs, const ncgrid_t ncgrid[/*numIDs*/],
                   int ncIDType, int searchType, int searchSize,
-                  int (*typeInq)(int id), size_t (*sizeInq)(int id))
+                  int (*typeInq)(int id), SizeType (*sizeInq)(int id))
 {
   int numNonMatching = 0,
     foundID = CDI_UNDEFID;
@@ -165,7 +165,7 @@ cdfSearchIDBySize(size_t startIdx, size_t numIDs, const ncgrid_t ncgrid[/*numIDs
       .foundID = foundID, .foundIdx = foundIdx };
 }
 
-static size_t
+static SizeType
 cdfGridInqHalfSize(int gridID)
 {
   return gridInqSize(gridID)/2;
@@ -219,8 +219,8 @@ void cdfDefFC(stream_t *streamptr, int gridID, int gridindex)
 }
 
 static const struct cdfDefGridAxisInqs {
-  size_t (*axisSize)(int gridID);
-  double (*axisVal)(int gridID, size_t index);
+  SizeType (*axisSize)(int gridID);
+  double (*axisVal)(int gridID, SizeType index);
   const double *(*axisValsPtr)(int gridID);
   const double *(*axisBoundsPtr)(int gridID);
   enum cdfIDIdx dimIdx, varIdx;
@@ -457,7 +457,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims, bool
           const bool lname = dimname0[0] ? strcmp(dimname, dimname0) == 0 : true;
           if ( dimlen == dimlen0 && lname )
             {
-              double (*inqVal)(int gridID, size_t index) = gridAxisInq->axisVal;
+              double (*inqVal)(int gridID, SizeType index) = gridAxisInq->axisVal;
               if ( IS_EQUAL(inqVal(gridID0, 0), inqVal(gridID, 0)) &&
                    IS_EQUAL(inqVal(gridID0, dimlen-1), inqVal(gridID, dimlen-1)) )
                 {
@@ -1665,9 +1665,9 @@ void cdfDefCharacter(stream_t *streamptr, int gridID, int gridindex, int cdiAxis
       const int gridtype0 = gridInqType(gridID0);
       if ( gridtype0 == GRID_CHARXY )
         {
-          if ( gridInqXIsc(gridID0) == strlen && gridInqXsize(gridID0) == dimlen )
+          if ( gridInqXIsc(gridID0) == strlen && (size_t)gridInqXsize(gridID0) == dimlen )
             return;
-          else if ( gridInqYIsc(gridID0) == strlen && gridInqYsize(gridID0) == dimlen )
+          else if ( gridInqYIsc(gridID0) == strlen && (size_t)gridInqYsize(gridID0) == dimlen )
             return;
         }
     }

@@ -272,7 +272,7 @@ typedef struct {
   int         fileID;
   int         filemode;
   int         nrecs;        // number of records
-  size_t      numvals;
+  SizeType    numvals;
   char       *filename;
   Record     *record;
   svarinfo_t *vars;
@@ -486,11 +486,11 @@ void
 cdiStreamDefVlist_(int streamID, int vlistID);
 
 int
-cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, size_t nmiss);
+cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, SizeType nmiss);
 
 void
 cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
-                        const int rect[][2], const void *data, size_t nmiss);
+                        const int rect[][2], const void *data, SizeType nmiss);
 void
 cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted);
 
@@ -521,7 +521,7 @@ void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *x
 void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals);
 
 static inline
-void cdi_check_gridsize_int_limit(const char *format, size_t gridsize)
+void cdi_check_gridsize_int_limit(const char *format, SizeType gridsize)
 {
   if (gridsize > INT_MAX) Error("%s format grid size (%zu) limit exceeded (%zu)!", format, gridsize, INT_MAX);
 }

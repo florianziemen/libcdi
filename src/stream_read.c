@@ -12,7 +12,7 @@
 #include "dmemory.h"
 
 
-/* the single image implementation */
+// the single image implementation
 static
 int cdiStreamReadVar(int streamID, int varID, int memtype, void *data, size_t *nmiss)
 {
@@ -85,7 +85,7 @@ int cdiStreamReadVar(int streamID, int varID, int memtype, void *data, size_t *n
 @Function  streamReadVar
 @Title     Read a variable
 
-@Prototype void streamReadVar(int streamID, int varID, double *data, size_t *nmiss)
+@Prototype void streamReadVar(int streamID, int varID, double *data, SizeType *nmiss)
 @Parameter
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
     @Item  varID     Variable identifier.
@@ -98,16 +98,18 @@ The function streamReadVar reads all the values of one time step of a variable
 from an open dataset.
 @EndFunction
 */
-void streamReadVar(int streamID, int varID, double *data, size_t *nmiss)
+void streamReadVar(int streamID, int varID, double *data, SizeType *nmiss)
 {
-  cdiStreamReadVar(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
+  size_t numMiss = 0;
+  cdiStreamReadVar(streamID, varID, MEMTYPE_DOUBLE, data, &numMiss);
+  *nmiss = (SizeType)numMiss;
 }
 
 /*
 @Function  streamReadVarF
 @Title     Read a variable
 
-@Prototype void streamReadVar(int streamID, int varID, float *data, size_t *nmiss)
+@Prototype void streamReadVar(int streamID, int varID, float *data, SizeType *nmiss)
 @Parameter
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
     @Item  varID     Variable identifier.
@@ -120,9 +122,10 @@ The function streamReadVar reads all the values of one time step of a variable
 from an open dataset.
 @EndFunction
 */
-void streamReadVarF(int streamID, int varID, float *data, size_t *nmiss)
+void streamReadVarF(int streamID, int varID, float *data, SizeType *nmiss)
 {
-  if ( cdiStreamReadVar(streamID, varID, MEMTYPE_FLOAT, data, nmiss) )
+  size_t numMiss = 0;
+  if (cdiStreamReadVar(streamID, varID, MEMTYPE_FLOAT, data, &numMiss))
     {
       // In case the file format does not support single precision reading,
       // we fall back to double precision reading, converting the data on the fly.
@@ -130,9 +133,10 @@ void streamReadVarF(int streamID, int varID, float *data, size_t *nmiss)
       elementCount *= (size_t) zaxisInqSize(vlistInqVarZaxis(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       streamReadVar(streamID, varID, conversionBuffer, nmiss);
-      for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];
+      for (size_t i = elementCount; i--;) data[i] = (float) conversionBuffer[i];
       Free(conversionBuffer);
     }
+  *nmiss = (SizeType)numMiss;
 }
 
 
@@ -143,7 +147,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
   // A value > 0 is returned in this case, otherwise it returns zero.
   int status = 0;
 
-  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
+  if (CDI_Debug) Message("streamID = %d  varID = %d", streamID, varID);
 
   check_parg(data);
   check_parg(nmiss);
@@ -209,7 +213,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
 @Function  streamReadVarSlice
 @Title     Read a horizontal slice of a variable
 
-@Prototype void streamReadVarSlice(int streamID, int varID, int levelID, double *data, size_t *nmiss)
+@Prototype void streamReadVarSlice(int streamID, int varID, int levelID, double *data, SizeType *nmiss)
 @Parameter
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
     @Item  varID     Variable identifier.
@@ -223,21 +227,23 @@ The function streamReadVarSlice reads all the values of a horizontal slice of a 
 from an open dataset.
 @EndFunction
 */
-void streamReadVarSlice(int streamID, int varID, int levelID, double *data, size_t *nmiss)
+void streamReadVarSlice(int streamID, int varID, int levelID, double *data, SizeType *nmiss)
 {
-  if ( cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss) )
+  size_t numMiss = 0;
+  if (cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, &numMiss))
     {
       Warning("Unexpected error returned from cdiStreamReadVarSlice()!");
       size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       memset(data, 0, elementCount * sizeof(*data));
     }
+  *nmiss = (SizeType)numMiss;
 }
 
 /*
 @Function  streamReadVarSliceF
 @Title     Read a horizontal slice of a variable
 
-@Prototype void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, size_t *nmiss)
+@Prototype void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, SizeType *nmiss)
 @Parameter
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
     @Item  varID     Variable identifier.
@@ -251,18 +257,20 @@ The function streamReadVarSliceF reads all the values of a horizontal slice of a
 from an open dataset.
 @EndFunction
 */
-void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, size_t *nmiss)
+void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, SizeType *nmiss)
 {
-  if ( cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_FLOAT, data, nmiss) )
+  size_t numMiss = 0;
+  if (cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_FLOAT, data, &numMiss))
     {
       // In case the file format does not support single precision reading,
       // we fall back to double precision reading, converting the data on the fly.
       size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       streamReadVarSlice(streamID, varID, levelID, conversionBuffer, nmiss);
-      for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];
+      for (size_t i = elementCount; i--;) data[i] = (float) conversionBuffer[i];
       Free(conversionBuffer);
     }
+  *nmiss = (SizeType)numMiss;
 }
 
 static
@@ -312,13 +320,17 @@ void stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 }
 
 
-void streamReadRecord(int streamID, double *data, size_t *nmiss)
+void streamReadRecord(int streamID, double *data, SizeType *nmiss)
 {
-  stream_read_record(streamID, MEMTYPE_DOUBLE, (void *) data, nmiss);
+  size_t numMiss = 0;
+  stream_read_record(streamID, MEMTYPE_DOUBLE, (void *) data, &numMiss);
+  *nmiss = (SizeType)numMiss;
 }
 
 
-void streamReadRecordF(int streamID, float *data, size_t *nmiss)
+void streamReadRecordF(int streamID, float *data, SizeType *nmiss)
 {
-  stream_read_record(streamID, MEMTYPE_FLOAT, (void *) data, nmiss);
+  size_t numMiss = 0;
+  stream_read_record(streamID, MEMTYPE_FLOAT, (void *) data, &numMiss);
+  *nmiss = (SizeType)numMiss;
 }

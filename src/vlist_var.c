@@ -630,15 +630,15 @@ int vlistInqVarID(int vlistID, int code)
 }
 
 
-size_t vlistInqVarSize(int vlistID, int varID)
+SizeType vlistInqVarSize(int vlistID, int varID)
 {
   vlistCheckVarID(__func__, vlistID, varID);
 
   int zaxisID, gridID, timetype;
   vlistInqVar(vlistID, varID, &gridID, &zaxisID, &timetype);
 
-  const size_t nlevs = (size_t)zaxisInqSize(zaxisID);
-  const size_t gridsize = gridInqSize(gridID);
+  const SizeType nlevs = (SizeType)zaxisInqSize(zaxisID);
+  const SizeType gridsize = gridInqSize(gridID);
 
   return gridsize*nlevs;
 }

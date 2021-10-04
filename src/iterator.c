@@ -1012,7 +1012,7 @@ int cdiIterator_inqGridId(CdiIterator* me)
 @Function cdiIterator_readField
 @Title Read the whole field into a double buffer
 
-@Prototype void cdiIterator_readField(CdiIterator* me, double* buffer, size_t* nmiss)
+@Prototype void cdiIterator_readField(CdiIterator *me, double *buffer, SizeType *nmiss)
 @Parameter
     @item iterator The iterator to operate on.
     @item buffer A pointer to the double array that the data should be written to.
@@ -1022,8 +1022,9 @@ int cdiIterator_inqGridId(CdiIterator* me)
     It is assumed that the caller first analyses the return value of cdiIterator_inqGridId to determine the required size of the buffer.
     Failing to do so results in undefined behavior. You have been warned.
 */
-void cdiIterator_readField(CdiIterator* me, double* buffer, size_t* nmiss)
+void cdiIterator_readField(CdiIterator *me, double *buffer, SizeType *nmiss)
 {
+  size_t numMiss = 0;
   sanityCheck(me);
   if(!buffer) xabort("NULL was passed in a buffer. Please provide a suitable buffer.");
   switch(me->filetype)
@@ -1031,7 +1032,7 @@ void cdiIterator_readField(CdiIterator* me, double* buffer, size_t* nmiss)
 #ifdef HAVE_LIBGRIB_API
         case CDI_FILETYPE_GRB:
         case CDI_FILETYPE_GRB2:
-          cdiGribIterator_readField(me, buffer, nmiss);
+          cdiGribIterator_readField(me, buffer, &numMiss);
 	  return;
 #endif
 
@@ -1051,29 +1052,32 @@ void cdiIterator_readField(CdiIterator* me, double* buffer, size_t* nmiss)
 #ifdef HAVE_LIBIEG
         case CDI_FILETYPE_IEG:
 #endif
-          cdiFallbackIterator_readField(me, buffer, nmiss);
+          cdiFallbackIterator_readField(me, buffer, &numMiss);
           return;
       default:
         Error(kUnexpectedFileTypeMessage);
     }
+
+  *nmiss = (SizeType)numMiss;
 }
 
 /*
 @Function cdiIterator_readFieldF
 @Title Read the whole field into a double buffer
 
-@Prototype void cdiIterator_readFieldF(CdiIterator* me, float* buffer, size_t* nmiss)
+@Prototype void cdiIterator_readFieldF(CdiIterator  me, float *buffer, SizeType *nmiss)
 @Parameter
     @item iterator The iterator to operate on.
-    @item buffer A pointer to the double array that the data should be written to.
-    @item nmiss A pointer to a variable where the count of missing values will be stored. May be NULL.
+    @item buffer   A pointer to the double array that the data should be written to.
+    @item nmiss    A pointer to a variable where the count of missing values will be stored. May be NULL.
 
 @Description
     It is assumed that the caller first analyses the return value of cdiIterator_inqGridId to determine the required size of the buffer.
     Failing to do so results in undefined behavior. You have been warned.
 */
-void cdiIterator_readFieldF(CdiIterator* me, float* buffer, size_t* nmiss)
+void cdiIterator_readFieldF(CdiIterator *me, float *buffer, SizeType *nmiss)
 {
+  size_t numMiss = 0;
   sanityCheck(me);
   if(!buffer) xabort("NULL was passed in a buffer. Please provide a suitable buffer.");
   switch(me->filetype)
@@ -1081,7 +1085,7 @@ void cdiIterator_readFieldF(CdiIterator* me, float* buffer, size_t* nmiss)
 #ifdef HAVE_LIBGRIB_API
         case CDI_FILETYPE_GRB:
         case CDI_FILETYPE_GRB2:
-          cdiGribIterator_readFieldF(me, buffer, nmiss);
+          cdiGribIterator_readFieldF(me, buffer, &numMiss);
 	  return;
 #endif
 
@@ -1101,11 +1105,13 @@ void cdiIterator_readFieldF(CdiIterator* me, float* buffer, size_t* nmiss)
 #ifdef HAVE_LIBIEG
         case CDI_FILETYPE_IEG:
 #endif
-          cdiFallbackIterator_readFieldF(me, buffer, nmiss);
+          cdiFallbackIterator_readFieldF(me, buffer, &numMiss);
           return;
       default:
         Error(kUnexpectedFileTypeMessage);
     }
+
+  *nmiss = (SizeType)numMiss;
 }
 
 /*
