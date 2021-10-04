@@ -2153,19 +2153,27 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
     = (void (*)(int))conf->callbacks[CDIPIO_CALLBACK_POSTSTREAMCLOSE];
   streamCloseCallBack(streamptr->self);
 }
+#if defined HAVE_NC4HDF5 && defined HAVE_PARALLEL_NC4
+bool parH5ZeroCountProblem = false;
+#endif
 
 #ifdef HAVE_LIBNETCDF
 static void
-cdiPioCdfDefTimestep(stream_t *streamptr, int tsID)
+cdiPioCdfDefTimestep(stream_t *streamptr, int tsID, size_t valCount)
 {
   int streamID = streamptr->self,
     rankOpen = cdiPioStream2Owner(streamID);
+#ifdef HAVE_PARALLEL_NC4
+  valCount = rankOpen != CDI_PIO_COLLECTIVE_OPEN
+    || parH5ZeroCountProblem
+    || commInqRankColl() == 0;
+#endif
   if (commInqIOMode() == PIO_NONE
 #ifdef HAVE_PARALLEL_NC4
       || rankOpen == CDI_PIO_COLLECTIVE_OPEN
 #endif
       || commInqRankColl() == rankOpen)
-    cdfDefTimestep(streamptr, tsID);
+    cdfDefTimestep(streamptr, tsID, valCount);
 }
 #endif
 
@@ -2380,6 +2388,15 @@ void cdiPioCollectorMessageLoop()
   cdiPioEnableNetCDFParAccess();
   numPioPrimes = PPM_prime_factorization_32((uint32_t)commInqSizeColl(),
                                             &pioPrimes);
+#  ifdef HAVE_NC4HDF5
+  {
+    unsigned majnum, minnum, relnum;
+    extern int H5get_libversion(unsigned *, unsigned *, unsigned *);
+    H5get_libversion(&majnum, &minnum, &relnum);
+    parH5ZeroCountProblem = (majnum == 1 && ((minnum == 8 && relnum <= 8)
+                                             || (minnum < 8)));
+  }
+#  endif
 #endif
 #ifdef HAVE_LIBNETCDF
   cdiSerialOpenFileCount = Calloc(sizeof (cdiSerialOpenFileCount[0]),

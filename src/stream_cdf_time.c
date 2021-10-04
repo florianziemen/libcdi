@@ -256,7 +256,7 @@ void cdfDefTime(stream_t* streamptr)
 
 
 static void
-cdfDefTimeValue(stream_t *streamptr, int tsID)
+cdfDefTimeValue(stream_t *streamptr, int tsID, size_t valCount)
 {
   int fileID = streamptr->fileID;
 
@@ -272,7 +272,7 @@ cdfDefTimeValue(stream_t *streamptr, int tsID)
     }
 
   const size_t start[2] = { [0] = (size_t)tsID, [1] = 0 },
-    count[2] = { [0] = 1, [1] = 2 };
+    count[2] = { [0] = valCount, [1] = 2 * valCount };
 
   double timevalue[2] = {
     cdiEncodeTimeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis)
@@ -298,7 +298,7 @@ cdfDefTimeValue(stream_t *streamptr, int tsID)
 }
 
 
-void cdfDefTimestep(stream_t *streamptr, int tsID)
+void cdfDefTimestep(stream_t *streamptr, int tsID, size_t valCount)
 {
   int vlistID = streamptr->vlistID;
 
@@ -319,7 +319,7 @@ void cdfDefTimestep(stream_t *streamptr, int tsID)
           */
         }
     }
-  cdfDefTimeValue(streamptr, tsID);
+  cdfDefTimeValue(streamptr, tsID, valCount);
 }
 
 #endif
