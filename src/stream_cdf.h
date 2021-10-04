@@ -19,7 +19,7 @@ enum {
 
 int    cdfDefVar(stream_t *streamptr, int varID);
 void   cdfDefVars(stream_t *streamptr);
-void   cdfDefTimestep(stream_t *streamptr, int tsID);
+void   cdfDefTimestep(stream_t *streamptr, int tsID, size_t valCount);
 int    cdfInqTimestep(stream_t *streamptr, int tsID);
 int    cdfInqContents(stream_t *streamptr);
 void   cdfDefHistory(stream_t *streamptr, int size, const char *history);
