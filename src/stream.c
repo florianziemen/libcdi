@@ -1332,9 +1332,9 @@ cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
       /* usually points to cdfDefTimestep in serial mode but
        * to cdiPioCdfDefTimestep on servers and to a null-op on
        * clients in client/server mode */
-      void (*myCdfDefTimestep)(stream_t * streamptr, int tsID)
-          = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_CDF_DEF_TIMESTEP).func;
-      myCdfDefTimestep(streamptr, tsID);
+      void (*myCdfDefTimestep)(stream_t * streamptr, int tsID, size_t)
+          = (void (*)(stream_t *, int, size_t)) namespaceSwitchGet(NSSWITCH_CDF_DEF_TIMESTEP).func;
+      myCdfDefTimestep(streamptr, tsID, 1);
     }
 #endif
 

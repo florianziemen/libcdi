@@ -238,7 +238,7 @@ cdfDefTime(stream_t *streamptr)
 }
 
 void
-cdfDefTimestep(stream_t *streamptr, int tsID)
+cdfDefTimestep(stream_t *streamptr, int tsID, size_t valCount)
 {
   const int time_varid = streamptr->basetime.ncvarid;
   if (time_varid != CDI_UNDEFID && tsID == 0)
@@ -267,7 +267,7 @@ cdfDefTimestep(stream_t *streamptr, int tsID)
       cdfEndDef(streamptr);
     }
 
-  const size_t start[2] = { [0] = (size_t) tsID, [1] = 0 }, count[2] = { [0] = 1, [1] = 2 };
+  const size_t start[2] = { [0] = (size_t) tsID, [1] = 0 }, count[2] = { [0] = valCount, [1] = 2 * valCount };
 
   double timeValue[2] = { cdi_encode_timeval(taxis->vDateTime, &streamptr->tsteps[0].taxis) };
   if (CDI_Debug) Message("tsID = %d  timeValue = %f", tsID, timeValue);
