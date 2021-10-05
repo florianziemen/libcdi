@@ -3,6 +3,10 @@
         * using CGRIBEX library version 2.0.0
 	* Version 2.0.0 released
 
+2021-10-05  Uwe Schulzweida
+
+	* Changed type of date from int64_t to DateType
+
 2021-10-01  Uwe Schulzweida
 
 	* Changed type of gridsize to SizeType

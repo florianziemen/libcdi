@@ -284,7 +284,7 @@ void taxisDefType(int taxisID, int taxistype)
 @Function  taxisDefVdate
 @Title     Define the verification date
 
-@Prototype void taxisDefVdate(int taxisID, int64_t vdate)
+@Prototype void taxisDefVdate(int taxisID, DateType vdate)
 @Parameter
     @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
     @Item  vdate    Verification date (YYYYMMDD)
@@ -294,13 +294,13 @@ The function @func{taxisDefVdate} defines the verification date of a Time axis.
 
 @EndFunction
 */
-void taxisDefVdate(int taxisID, int64_t vdate)
+void taxisDefVdate(int taxisID, DateType vdate)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->vdate != vdate)
+  if (taxisptr->vdate != (int64_t)vdate)
     {
-      taxisptr->vdate = vdate;
+      taxisptr->vdate = (int64_t)vdate;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -334,7 +334,7 @@ void taxisDefVtime(int taxisID, int vtime)
 @Function  taxisDefRdate
 @Title     Define the reference date
 
-@Prototype void taxisDefRdate(int taxisID, int64_t rdate)
+@Prototype void taxisDefRdate(int taxisID, DateType rdate)
 @Parameter
     @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
     @Item  rdate    Reference date (YYYYMMDD)
@@ -344,13 +344,13 @@ The function @func{taxisDefRdate} defines the reference date of a Time axis.
 
 @EndFunction
 */
-void taxisDefRdate(int taxisID, int64_t rdate)
+void taxisDefRdate(int taxisID, DateType rdate)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->rdate != rdate)
+  if (taxisptr->rdate != (int64_t)rdate)
     {
-      taxisptr->rdate = rdate;
+      taxisptr->rdate = (int64_t)rdate;
 
       if ( taxisptr->units )
         {
@@ -395,7 +395,7 @@ void taxisDefRtime(int taxisID, int rtime)
 @Function  taxisDefFdate
 @Title     Define the forecast reference date
 
-@Prototype void taxisDefFdate(int taxisID, int64_t fdate)
+@Prototype void taxisDefFdate(int taxisID, DateType fdate)
 @Parameter
     @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
     @Item  fdate    Forecast reference date (YYYYMMDD)
@@ -405,13 +405,13 @@ The function @func{taxisDefFdate} defines the forecast reference date of a Time 
 
 @EndFunction
 */
-void taxisDefFdate(int taxisID, int64_t fdate)
+void taxisDefFdate(int taxisID, DateType fdate)
 {
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
-  if (taxisptr->fdate != fdate)
+  if (taxisptr->fdate != (int64_t)fdate)
     {
-      taxisptr->fdate = fdate;
+      taxisptr->fdate = (int64_t)fdate;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -612,7 +612,7 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
 @Function  taxisInqVdate
 @Title     Get the verification date
 
-@Prototype int64_t taxisInqVdate(int taxisID)
+@Prototype DateType taxisInqVdate(int taxisID)
 @Parameter
     @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate} or @fref{vlistInqTaxis}
 
@@ -624,39 +624,39 @@ The function @func{taxisInqVdate} returns the verification date of a Time axis.
 
 @EndFunction
 */
-int64_t taxisInqVdate(int taxisID)
+DateType taxisInqVdate(int taxisID)
 {
   const taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
-  return taxisptr->vdate;
+  return (DateType)taxisptr->vdate;
 }
 
 
 int64_t taxisInqSdate(int taxisID)
 {
   const taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
-  return taxisptr->sdate;
+  return (DateType)taxisptr->sdate;
 }
 
 
-void taxisInqVdateBounds(int taxisID, int64_t *vdate_lb, int64_t *vdate_ub)
+void taxisInqVdateBounds(int taxisID, DateType *vdate_lb, DateType *vdate_ub)
 {
   const taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
-  *vdate_lb = taxisptr->vdate_lb;
-  *vdate_ub = taxisptr->vdate_ub;
+  *vdate_lb = (DateType)taxisptr->vdate_lb;
+  *vdate_ub = (DateType)taxisptr->vdate_ub;
 }
 
 
-void taxisDefVdateBounds(int taxisID, int64_t vdate_lb, int64_t vdate_ub)
+void taxisDefVdateBounds(int taxisID, DateType vdate_lb, DateType vdate_ub)
 {
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
-  if ( taxisptr->vdate_lb != vdate_lb
-       || taxisptr->vdate_ub != vdate_ub
+  if ( taxisptr->vdate_lb != (int64_t)vdate_lb
+       || taxisptr->vdate_ub != (int64_t)vdate_ub
        || taxisptr->has_bounds == false )
     {
-      taxisptr->vdate_lb = vdate_lb;
-      taxisptr->vdate_ub = vdate_ub;
+      taxisptr->vdate_lb = (int64_t)vdate_lb;
+      taxisptr->vdate_ub = (int64_t)vdate_ub;
       taxisptr->has_bounds = true;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
@@ -720,7 +720,7 @@ void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 @Function  taxisInqRdate
 @Title     Get the reference date
 
-@Prototype int64_t taxisInqRdate(int taxisID)
+@Prototype DateType taxisInqRdate(int taxisID)
 @Parameter
     @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate} or @fref{vlistInqTaxis}
 
@@ -732,18 +732,18 @@ The function @func{taxisInqRdate} returns the reference date of a Time axis.
 
 @EndFunction
 */
-int64_t taxisInqRdate(int taxisID)
+DateType taxisInqRdate(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
-  if ( taxisptr->rdate == -1 )
+  if (taxisptr->rdate == -1)
     {
       taxisptr->rdate = taxisptr->vdate;
       taxisptr->rtime = taxisptr->vtime;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 
-  return taxisptr->rdate;
+  return (DateType)taxisptr->rdate;
 }
 
 /*
@@ -780,7 +780,7 @@ int taxisInqRtime(int taxisID)
 @Function  taxisInqFdate
 @Title     Get the forecast reference date
 
-@Prototype int64_t taxisInqFdate(int taxisID)
+@Prototype DateType taxisInqFdate(int taxisID)
 @Parameter
     @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate} or @fref{vlistInqTaxis}
 
@@ -792,7 +792,7 @@ The function @func{taxisInqFdate} returns the forecast reference date of a Time 
 
 @EndFunction
 */
-int64_t taxisInqFdate(int taxisID)
+DateType taxisInqFdate(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
@@ -802,7 +802,7 @@ int64_t taxisInqFdate(int taxisID)
       taxisptr->ftime = taxisInqRtime(taxisID);
     }
 
-  return taxisptr->fdate;
+  return (DateType)taxisptr->fdate;
 }
 
 /*
@@ -938,7 +938,7 @@ void ptaxisDefUnits(taxis_t *taxisptr, const char *units)
 
 
 static void
-cdiDecodeTimevalue(int timeunit, double timevalue, int64_t *days, int *secs)
+cdi_decode_timevalue(int timeunit, double timevalue, int64_t *days, int *secs)
 {
   *days = 0;
   *secs = 0;
@@ -1028,7 +1028,7 @@ void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
     }
 }
 
-
+static
 void timeval2vtime(double timevalue, taxis_t *taxis, int64_t *vdate, int *vtime)
 {
   int64_t rdate = taxis->rdate;
@@ -1075,7 +1075,7 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int64_t *vdate, int *vtime)
   int secofday, secs;
   encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday, &secofday);
 
-  cdiDecodeTimevalue(timeunit, timevalue, &days, &secs);
+  cdi_decode_timevalue(timeunit, timevalue, &days, &secs);
 
   julday_add(days, secs, &julday, &secofday);
 
@@ -1085,7 +1085,7 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int64_t *vdate, int *vtime)
   *vtime = cdiEncodeTime(hour, minute, second);
 }
 
-
+static
 double vtime2timeval(int64_t vdate, int vtime, taxis_t *taxis)
 {
   double value = 0;
@@ -1175,7 +1175,7 @@ void conv_timeval(double timevalue, int64_t *rvdate, int *rvtime)
 
 
 static
-void splitTimevalue(double timevalue, int timeunit, int64_t *date, int *time)
+void split_timevalue(double timevalue, int timeunit, int64_t *date, int *time)
 {
   int64_t vdate = 0;
   int vtime = 0;
@@ -1323,7 +1323,7 @@ void cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
 
   encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday, &secofday);
 
-  cdiDecodeTimevalue(timeunit, timevalue, &days, &secs);
+  cdi_decode_timevalue(timeunit, timevalue, &days, &secs);
 
   julday_add(-days, -secs, &julday, &secofday);
 
@@ -1337,7 +1337,7 @@ void cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
 void cdiDecodeTimeval(double timevalue, taxis_t *taxis, int64_t *date, int *time)
 {
   if ( taxis->type == TAXIS_ABSOLUTE )
-    splitTimevalue(timevalue, taxis->unit, date, time);
+    split_timevalue(timevalue, taxis->unit, date, time);
   else
     timeval2vtime(timevalue, taxis, date, time);
 }
@@ -1428,7 +1428,7 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
 static void
 taxisPrintKernel(taxis_t * taxisptr, FILE * fp)
 {
-  int64_t vdate_lb, vdate_ub;
+  DateType vdate_lb, vdate_ub;
   int vtime_lb, vtime_ub;
 
   taxisInqVdateBounds ( taxisptr->self, &vdate_lb, &vdate_ub);
@@ -1452,9 +1452,9 @@ taxisPrintKernel(taxis_t * taxisptr, FILE * fp)
           "numavg      = %d\n"
           "climatology = %d\n"
           "has_bounds  = %d\n"
-          "vdate_lb    = %lld\n"
+          "vdate_lb    = %ld\n"
           "vtime_lb    = %d\n"
-          "vdate_ub    = %lld\n"
+          "vdate_ub    = %ld\n"
           "vtime_ub    = %d\n"
           "fc_unit     = %d\n"
           "fc_period   = %g\n"
@@ -1466,7 +1466,7 @@ taxisPrintKernel(taxis_t * taxisptr, FILE * fp)
           taxisptr->calendar, taxisptr->unit,
           taxisptr->numavg, (int)taxisptr->climatology,
           (int) taxisptr->has_bounds,
-          vdate_lb, vtime_lb, vdate_ub, vtime_ub,
+          (long)vdate_lb, vtime_lb, (long)vdate_ub, vtime_ub,
           taxisptr->fc_unit, taxisptr->fc_period );
 }
 

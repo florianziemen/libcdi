@@ -8,8 +8,8 @@
 #endif
 
 typedef struct {
-  /* Date format  YYYYMMDD */
-  /* Time format    hhmmss */
+  // Date format  YYYYMMDD
+  // Time format    hhmmss
   int     self;
   bool    used;
   short   has_bounds;
@@ -51,8 +51,6 @@ taxis_t* taxisPtr(int taxisID);
 void     cdiSetForecastPeriod(double timevalue, taxis_t *taxis);
 void     cdiDecodeTimeval(double timevalue, taxis_t* taxis, int64_t* date, int* time);
 double   cdiEncodeTimeval(int64_t date, int time, taxis_t* taxis);
-void     timeval2vtime(double timevalue, taxis_t* taxis, int64_t* vdate, int* vtime);
-double   vtime2timeval(int64_t vdate, int vtime, taxis_t *taxis);
 
 void    ptaxisDefDatatype(taxis_t *taxisptr, int datatype);
 void    ptaxisDefName(taxis_t *taxisptr, const char *name);

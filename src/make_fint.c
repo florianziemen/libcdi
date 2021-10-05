@@ -84,8 +84,8 @@ static void doctotxt(FILE *fp, const Docu *doc, const size_t ndoc)
     }
 }
 
-enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISINT64T, ISSIZET, ISMPI_COMM,
-             ISXT_IDXLIST, ISCHOICE, ISINTP, ISINT64TP, ISSIZETP, ISFLOATV, ISFLOATVV,
+enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISDATETYPE, ISSIZETYPE, ISMPI_COMM,
+             ISXT_IDXLIST, ISCHOICE, ISINTP, ISDATETYPEP, ISSIZETYPEP, ISFLOATV, ISFLOATVV,
              ISDOUBLEV, ISDOUBLEVV, ISINTV, ISINTVV, ISINTVVV, ISREALP,
              ISDOUBLEP, ISCBUF, ISUUID, ISUCHAR, ISSTRING, ISSTRINGP,
              VOIDFUNCVOID,
@@ -97,34 +97,21 @@ isArrayArgType(int argType);
 enum conversionType { CONV_ARG, CONV_RET };
 
 
-typedef int (*cfConversionEmitter)(FILE *outfp, const char *argName,
-                                   size_t argNameLen, enum conversionType part);
+typedef int (*cfConversionEmitter)(FILE *outfp, const char *argName, size_t argNameLen, enum conversionType part);
 typedef int (*cfPrologueEmitter)(FILE *outfp, size_t argNum);
 
 
-static int cfMPICommConvert(FILE *outfp, const char *argName,
-                            size_t argNameLen, enum conversionType part);
-
-static int cfInt64tConvert(FILE *outfp, const char *argName,
-                          size_t argNameLen, enum conversionType part);
-
-static int cfSizeTypeConvert(FILE *outfp, const char *argName,
-                          size_t argNameLen, enum conversionType part);
-
-static int cfInt64tpConvert(FILE *outfp, const char *argName,
-                           size_t argNameLen, enum conversionType part);
-
-static int cfSizeTypepConvert(FILE *outfp, const char *argName,
-                           size_t argNameLen, enum conversionType part);
-
-static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
-                              size_t argNameLen, enum conversionType part);
-
+static int cfMPICommConvert(FILE *outfp, const char *argName, size_t argNameLen, enum conversionType part);
+static int cfDateTypeConvert(FILE *outfp, const char *argName, size_t argNameLen, enum conversionType part);
+static int cfSizeTypeConvert(FILE *outfp, const char *argName, size_t argNameLen, enum conversionType part);
+static int cfDateTypepConvert(FILE *outfp, const char *argName, size_t argNameLen, enum conversionType part);
+static int cfSizeTypepConvert(FILE *outfp, const char *argName, size_t argNameLen, enum conversionType part);
+static int cfXtIdxlistConvert(FILE *outfp, const char *argName, size_t argNameLen, enum conversionType part);
 static int cfVoidFuncPrologue(FILE *outfp, size_t argNum);
 
 struct symbol {
   const char *f77name, *cfint, *cfmt, *parseRE;
-  /* pair of parentheses which matches the argument name */
+  // pair of parentheses which matches the argument name
   size_t nameMatch;
   int needsExtraWrapper, needsPrologue;
   cfConversionEmitter convert;
@@ -133,7 +120,7 @@ struct symbol {
   regex_t preg;
 };
 
-/* C symbol names */
+// C symbol names
 #define SYMRE "([A-Za-z_][A-Za-z_0-9]*)"
 static inline int isSymStart(const int c)
 {
@@ -166,9 +153,9 @@ static struct symbol funArgSym[]
         "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
       { "DOUBLEPRECISION", "DOUBLE",  "%sdouble %.*s",
         "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
-      { "INTEGER",         "INT",     "%sint64_t %.*s",
-        "^"WS"*(const"WS"+)?int64_t("WS"+"SYMRE")?"WS"*[,\\)]", 3, 1, 0,
-        cfInt64tConvert, "%sint %.*s" },
+      { "INTEGER",         "INT",     "%sDateType %.*s",
+        "^"WS"*(const"WS"+)?DateType("WS"+"SYMRE")?"WS"*[,\\)]", 3, 1, 0,
+        cfDateTypeConvert, "%sint %.*s" },
       { "INTEGER",         "INT",     "%sSizeType %.*s",
         "^"WS"*(const"WS"+)?SizeType("WS"+"SYMRE")?"WS"*[,\\)]", 3, 1, 0,
         cfSizeTypeConvert, "%sint %.*s" },
@@ -182,9 +169,9 @@ static struct symbol funArgSym[]
         "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
       { "INTEGER",         "PINT",    "%sint *%.*s",
         "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
-      { "INTEGER",         "PINT",    "%sint64_t *%.*s",
-        "^"WS"*(const"WS"+)?int64_t"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 1, 0,
-        cfInt64tpConvert, "%sint *%.*s"},
+      { "INTEGER",         "PINT",    "%sDateType *%.*s",
+        "^"WS"*(const"WS"+)?DateType"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 1, 0,
+        cfDateTypepConvert, "%sint *%.*s"},
       { "INTEGER",         "PINT",    "%sSizeType *%.*s",
         "^"WS"*(const"WS"+)?SizeType"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 1, 0,
         cfSizeTypepConvert, "%sint *%.*s"},
@@ -243,8 +230,8 @@ static struct symbol funRet[] = {
     "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
   { "INTEGER",         "INT",     "%sMPI_Comm %.*s",
     "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, 0, 0, cfMPICommConvert, "%sint %.*s" },
-  { "INTEGER",         "INT",    "%sint64_t %.*s",
-    "(const"WS"+)?int64_t"WS"+"SYMRE WS"*\\(", 2, 1, 0, cfInt64tConvert, "%sint %.*s" },
+  { "INTEGER",         "INT",    "%sDateType %.*s",
+    "(const"WS"+)?DateType"WS"+"SYMRE WS"*\\(", 2, 1, 0, cfDateTypeConvert, "%sint %.*s" },
   { "INTEGER",         "INT",    "%sSizeType %.*s",
     "(const"WS"+)?SizeType"WS"+"SYMRE WS"*\\(", 2, 1, 0, cfSizeTypeConvert, "%sint %.*s" },
 };
@@ -336,13 +323,13 @@ function_fwrap(FILE *fpint, enum cftype functype, const char *delegateName, size
   fputs(")\n{\n", fpint);
   for (size_t i = 0; i < funcargc; i++ )
     {
-      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISINT64TP)
+      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISDATETYPEP)
         {
-          // create temporary int64_t variable
-          fprintf(fpint, "  int64_t %.*s_int64_t;\n",
+          // create temporary DateType variable
+          fprintf(fpint, "  DateType %.*s_DateType;\n",
                   (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
         }
-      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETP)
+      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETYPEP)
         {
           // create temporary SizeType variable
           fprintf(fpint, "  SizeType %.*s_SizeType;\n",
@@ -360,8 +347,7 @@ function_fwrap(FILE *fpint, enum cftype functype, const char *delegateName, size
     fprintf(fpint, "  %s(", funcname);
   for (size_t i = 0; i < funcargc; i++ )
     {
-      if (i > 0)
-        fputs(", ", fpint);
+      if (i > 0) fputs(", ", fpint);
       if (funArgSym[funcargtype[i]].convert)
         {
           funArgSym[funcargtype[i]].convert(fpint, line + funcargname[i].rm_so,
@@ -373,16 +359,16 @@ function_fwrap(FILE *fpint, enum cftype functype, const char *delegateName, size
   fputs(");\n", fpint);
   for (size_t i = 0; i < funcargc; i++ )
     {
-      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISINT64TP)
+      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISDATETYPEP)
         {
-          fprintf(fpint, "  assert(%.*s_int64_t < INT_MAX);\n",
+          fprintf(fpint, "  assert(%.*s_DateType < INT_MAX);\n",
                   (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-          // copy temporary int64_t variable
-          fprintf(fpint, "  *%.*s = %.*s_int64_t;\n",
+          // copy temporary DateType variable
+          fprintf(fpint, "  *%.*s = %.*s_DateType;\n",
                   (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so,
                   (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
         }
-      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETP)
+      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETYPEP)
         {
           fprintf(fpint, "  assert(%.*s_SizeType < INT_MAX);\n",
                   (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
@@ -562,10 +548,10 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         "\n", fpint);
 
   fputs("static inline\n"
-        "int int64_t_c2f(int64_t value_int64_t)\n"
+        "int DateType_c2f(DateType value_DateType)\n"
         "{\n"
-        "  assert(value_int64_t < INT_MAX);\n"
-        "  return (int) value_int64_t;\n"
+        "  assert(value_DateType < INT_MAX);\n"
+        "  return (int) value_DateType;\n"
         "}\n"
         "\n", fpint);
 
@@ -1224,18 +1210,18 @@ reCompile(regex_t *restrict RE, const char *restrict REstring,
   return errcode;
 }
 
-/* emit conversion code for int64_t argument */
-static int cfInt64tConvert(FILE *outfp, const char *argName,
-                           size_t argNameLen, enum conversionType part)
+// emit conversion code for DateType argument
+static int cfDateTypeConvert(FILE *outfp, const char *argName,
+                             size_t argNameLen, enum conversionType part)
 {
   int retval = 0;
   switch (part)
     {
     case CONV_ARG:
-      retval = fprintf(outfp, "(int64_t)%.*s", (int)argNameLen, argName);
+      retval = fprintf(outfp, "(DateType)%.*s", (int)argNameLen, argName);
       break;
     case CONV_RET:
-      retval = fprintf(outfp, "int64_t_c2f(%.*s)", (int)argNameLen, argName);
+      retval = fprintf(outfp, "DateType_c2f(%.*s)", (int)argNameLen, argName);
       break;
     }
   return retval;
@@ -1258,15 +1244,15 @@ static int cfSizeTypeConvert(FILE *outfp, const char *argName,
   return retval;
 }
 
-// emit conversion code for size_t* argument
-static int cfInt64tpConvert(FILE *outfp, const char *argName,
-                            size_t argNameLen, enum conversionType part)
+// emit conversion code for DateType* argument
+static int cfDateTypepConvert(FILE *outfp, const char *argName,
+                              size_t argNameLen, enum conversionType part)
 {
   int retval = 0;
   switch (part)
     {
     case CONV_ARG:
-      retval = fprintf(outfp, "&%.*s_int64_t", (int)argNameLen, argName);
+      retval = fprintf(outfp, "&%.*s_DateType", (int)argNameLen, argName);
       break;
     case CONV_RET:
       abort();

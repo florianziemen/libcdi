@@ -15,8 +15,8 @@
 #define CDI_SIZE_TYPE int
 #endif
 
-#ifndef CDI_DATE_TYPE
-#define CDI_DATE_TYPE int64_t
+#ifndef CDI_DATE_TYPE // Must be signed integer (int32_t or int64_t)!
+#define CDI_DATE_TYPE int
 #endif
 
 typedef CDI_SIZE_TYPE SizeType;
@@ -315,8 +315,8 @@ int     cdiEncodeParam(int pnum, int pcat, int pdis);
 // date format:  YYYYMMDD
 // time format:    hhmmss
 
-void    cdiDecodeDate(int64_t date, int *year, int *month, int *day);
-int64_t cdiEncodeDate(int year, int month, int day);
+void    cdiDecodeDate(DateType date, int *year, int *month, int *day);
+DateType cdiEncodeDate(int year, int month, int day);
 
 void    cdiDecodeTime(int time, int *hour, int *minute, int *second);
 int     cdiEncodeTime(int hour, int minute, int second);
@@ -1128,37 +1128,37 @@ void    taxisDefType(int taxisID, int taxistype);
 int     taxisInqType(int taxisID);
 
 //      taxisDefVdate: Define the verification date
-void    taxisDefVdate(int taxisID, int64_t date);
+void    taxisDefVdate(int taxisID, DateType date);
 
 //      taxisDefVtime: Define the verification time
 void    taxisDefVtime(int taxisID, int time);
 
 //      taxisInqVdate: Get the verification date
-int64_t taxisInqVdate(int taxisID);
+DateType taxisInqVdate(int taxisID);
 
 //      taxisInqVtime: Get the verification time
 int     taxisInqVtime(int taxisID);
 
 //      taxisDefRdate: Define the reference date
-void    taxisDefRdate(int taxisID, int64_t date);
+void    taxisDefRdate(int taxisID, DateType date);
 
 //      taxisDefRtime: Define the reference time
 void    taxisDefRtime(int taxisID, int time);
 
 //      taxisInqRdate: Get the reference date
-int64_t taxisInqRdate(int taxisID);
+DateType taxisInqRdate(int taxisID);
 
 //      taxisInqRtime: Get the reference time
 int     taxisInqRtime(int taxisID);
 
 //      taxisDefFdate: Define the forecast reference date
-void    taxisDefFdate(int taxisID, int64_t date);
+void    taxisDefFdate(int taxisID, DateType date);
 
 //      taxisDefFtime: Define the forecast reference time
 void    taxisDefFtime(int taxisID, int time);
 
 //      taxisInqFdate: Get the forecast reference date
-int64_t taxisInqFdate(int taxisID);
+DateType taxisInqFdate(int taxisID);
 
 //      taxisInqFtime: Get the forecast reference time
 int     taxisInqFtime(int taxisID);
@@ -1168,11 +1168,11 @@ void    taxisWithBounds(int taxisID);
 
 void    taxisDeleteBounds(int taxisID);
 
-void    taxisDefVdateBounds(int taxisID, int64_t vdate_lb, int64_t vdate_ub);
+void    taxisDefVdateBounds(int taxisID, DateType vdate_lb, DateType vdate_ub);
 
 void    taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub);
 
-void    taxisInqVdateBounds(int taxisID, int64_t *vdate_lb, int64_t *vdate_ub);
+void    taxisInqVdateBounds(int taxisID, DateType *vdate_lb, DateType *vdate_ub);
 
 void    taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub);
 

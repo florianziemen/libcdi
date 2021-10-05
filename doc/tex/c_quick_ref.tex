@@ -852,7 +852,7 @@ Define the calendar.
 \section*{\tt \htmlref{taxisDefFdate}{taxisDefFdate}}
 
 \begin{verbatim}
-    void taxisDefFdate (int taxisID, int64_t date);
+    void taxisDefFdate (int taxisID, DateType date);
 \end{verbatim}
 
 Define the forecast reference date.
@@ -870,7 +870,7 @@ Define the forecast reference time.
 \section*{\tt \htmlref{taxisDefRdate}{taxisDefRdate}}
 
 \begin{verbatim}
-    void taxisDefRdate (int taxisID, int64_t date);
+    void taxisDefRdate (int taxisID, DateType date);
 \end{verbatim}
 
 Define the reference date.
@@ -888,7 +888,7 @@ Define the reference time.
 \section*{\tt \htmlref{taxisDefVdate}{taxisDefVdate}}
 
 \begin{verbatim}
-    void taxisDefVdate (int taxisID, int64_t date);
+    void taxisDefVdate (int taxisID, DateType date);
 \end{verbatim}
 
 Define the verification date.
@@ -924,7 +924,7 @@ Get the calendar.
 \section*{\tt \htmlref{taxisInqFdate}{taxisInqFdate}}
 
 \begin{verbatim}
-    int64_t taxisInqFdate (int taxisID);
+    DateType taxisInqFdate (int taxisID);
 \end{verbatim}
 
 Get the forecast reference date.
@@ -942,7 +942,7 @@ Get the forecast reference time.
 \section*{\tt \htmlref{taxisInqRdate}{taxisInqRdate}}
 
 \begin{verbatim}
-    int64_t taxisInqRdate (int taxisID);
+    DateType taxisInqRdate (int taxisID);
 \end{verbatim}
 
 Get the reference date.
@@ -960,7 +960,7 @@ Get the reference time.
 \section*{\tt \htmlref{taxisInqVdate}{taxisInqVdate}}
 
 \begin{verbatim}
-    int64_t taxisInqVdate (int taxisID);
+    DateType taxisInqVdate (int taxisID);
 \end{verbatim}
 
 Get the verification date.

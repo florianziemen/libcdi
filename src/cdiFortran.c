@@ -30,10 +30,10 @@
 #endif
 
 static inline
-int int64_t_c2f(int64_t value_int64_t)
+int DateType_c2f(DateType value_DateType)
 {
-  assert(value_int64_t < INT_MAX);
-  return (int) value_int64_t;
+  assert(value_DateType < INT_MAX);
+  return (int) value_DateType;
 }
 
 static inline
@@ -136,14 +136,14 @@ FCALLSCFUN3 (INT, cdiEncodeParam, CDIENCODEPARAM, cdiencodeparam, INT, INT, INT)
 
 static void cdiDecodeDate_fwrap(int date, int *year, int *month, int *day)
 {
-  cdiDecodeDate((int64_t)date, year, month, day);
+  cdiDecodeDate((DateType)date, year, month, day);
 }
 FCALLSCSUB4 (cdiDecodeDate_fwrap, CDIDECODEDATE, cdidecodedate, INT, PINT, PINT, PINT)
 static int cdiEncodeDate_fwrap(int year, int month, int day)
 {
-  int64_t v;
+  DateType v;
   v = cdiEncodeDate(year, month, day);
-  return int64_t_c2f(v);
+  return DateType_c2f(v);
 }
 FCALLSCFUN3 (INT, cdiEncodeDate_fwrap, CDIENCODEDATE, cdiencodedate, INT, INT, INT)
 FCALLSCSUB4 (cdiDecodeTime, CDIDECODETIME, cdidecodetime, INT, PINT, PINT, PINT)
@@ -710,43 +710,43 @@ FCALLSCSUB2 (taxisDefType, TAXISDEFTYPE, taxisdeftype, INT, INT)
 FCALLSCFUN1 (INT, taxisInqType, TAXISINQTYPE, taxisinqtype, INT)
 static void taxisDefVdate_fwrap(int taxisID, int date)
 {
-  taxisDefVdate(taxisID, (int64_t)date);
+  taxisDefVdate(taxisID, (DateType)date);
 }
 FCALLSCSUB2 (taxisDefVdate_fwrap, TAXISDEFVDATE, taxisdefvdate, INT, INT)
 FCALLSCSUB2 (taxisDefVtime, TAXISDEFVTIME, taxisdefvtime, INT, INT)
 static int taxisInqVdate_fwrap(int taxisID)
 {
-  int64_t v;
+  DateType v;
   v = taxisInqVdate(taxisID);
-  return int64_t_c2f(v);
+  return DateType_c2f(v);
 }
 FCALLSCFUN1 (INT, taxisInqVdate_fwrap, TAXISINQVDATE, taxisinqvdate, INT)
 FCALLSCFUN1 (INT, taxisInqVtime, TAXISINQVTIME, taxisinqvtime, INT)
 static void taxisDefRdate_fwrap(int taxisID, int date)
 {
-  taxisDefRdate(taxisID, (int64_t)date);
+  taxisDefRdate(taxisID, (DateType)date);
 }
 FCALLSCSUB2 (taxisDefRdate_fwrap, TAXISDEFRDATE, taxisdefrdate, INT, INT)
 FCALLSCSUB2 (taxisDefRtime, TAXISDEFRTIME, taxisdefrtime, INT, INT)
 static int taxisInqRdate_fwrap(int taxisID)
 {
-  int64_t v;
+  DateType v;
   v = taxisInqRdate(taxisID);
-  return int64_t_c2f(v);
+  return DateType_c2f(v);
 }
 FCALLSCFUN1 (INT, taxisInqRdate_fwrap, TAXISINQRDATE, taxisinqrdate, INT)
 FCALLSCFUN1 (INT, taxisInqRtime, TAXISINQRTIME, taxisinqrtime, INT)
 static void taxisDefFdate_fwrap(int taxisID, int date)
 {
-  taxisDefFdate(taxisID, (int64_t)date);
+  taxisDefFdate(taxisID, (DateType)date);
 }
 FCALLSCSUB2 (taxisDefFdate_fwrap, TAXISDEFFDATE, taxisdeffdate, INT, INT)
 FCALLSCSUB2 (taxisDefFtime, TAXISDEFFTIME, taxisdefftime, INT, INT)
 static int taxisInqFdate_fwrap(int taxisID)
 {
-  int64_t v;
+  DateType v;
   v = taxisInqFdate(taxisID);
-  return int64_t_c2f(v);
+  return DateType_c2f(v);
 }
 FCALLSCFUN1 (INT, taxisInqFdate_fwrap, TAXISINQFDATE, taxisinqfdate, INT)
 FCALLSCFUN1 (INT, taxisInqFtime, TAXISINQFTIME, taxisinqftime, INT)
@@ -755,19 +755,19 @@ FCALLSCSUB1 (taxisWithBounds, TAXISWITHBOUNDS, taxiswithbounds, INT)
 FCALLSCSUB1 (taxisDeleteBounds, TAXISDELETEBOUNDS, taxisdeletebounds, INT)
 static void taxisDefVdateBounds_fwrap(int taxisID, int vdate_lb, int vdate_ub)
 {
-  taxisDefVdateBounds(taxisID, (int64_t)vdate_lb, (int64_t)vdate_ub);
+  taxisDefVdateBounds(taxisID, (DateType)vdate_lb, (DateType)vdate_ub);
 }
 FCALLSCSUB3 (taxisDefVdateBounds_fwrap, TAXISDEFVDATEBOUNDS, taxisdefvdatebounds, INT, INT, INT)
 FCALLSCSUB3 (taxisDefVtimeBounds, TAXISDEFVTIMEBOUNDS, taxisdefvtimebounds, INT, INT, INT)
 static void taxisInqVdateBounds_fwrap(int taxisID, int *vdate_lb, int *vdate_ub)
 {
-  int64_t vdate_lb_int64_t;
-  int64_t vdate_ub_int64_t;
-  taxisInqVdateBounds(taxisID, &vdate_lb_int64_t, &vdate_ub_int64_t);
-  assert(vdate_lb_int64_t < INT_MAX);
-  *vdate_lb = vdate_lb_int64_t;
-  assert(vdate_ub_int64_t < INT_MAX);
-  *vdate_ub = vdate_ub_int64_t;
+  DateType vdate_lb_DateType;
+  DateType vdate_ub_DateType;
+  taxisInqVdateBounds(taxisID, &vdate_lb_DateType, &vdate_ub_DateType);
+  assert(vdate_lb_DateType < INT_MAX);
+  *vdate_lb = vdate_lb_DateType;
+  assert(vdate_ub_DateType < INT_MAX);
+  *vdate_ub = vdate_ub_DateType;
 }
 FCALLSCSUB3 (taxisInqVdateBounds_fwrap, TAXISINQVDATEBOUNDS, taxisinqvdatebounds, INT, PINT, PINT)
 FCALLSCSUB3 (taxisInqVtimeBounds, TAXISINQVTIMEBOUNDS, taxisinqvtimebounds, INT, PINT, PINT)

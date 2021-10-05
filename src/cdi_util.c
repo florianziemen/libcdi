@@ -38,25 +38,25 @@ int cdiEncodeParam(int pnum, int pcat, int pdis)
 }
 
 
-void cdiDecodeDate(int64_t date, int *year, int *month, int *day)
+void cdiDecodeDate(DateType date, int *year, int *month, int *day)
 {
   int64_t iyear = (int)(date / 10000);
   *year = (int)iyear;
   int64_t idate = date - iyear * 10000;
-  if ( idate < 0 ) idate = -idate;
+  if (idate < 0) idate = -idate;
   int64_t imonth = idate / 100;
   *month = (int)imonth;
   *day   = (int)(idate - imonth * 100);
 }
 
 
-int64_t cdiEncodeDate(int year, int month, int day)
+DateType cdiEncodeDate(int year, int month, int day)
 {
   int64_t iyear = abs(year);
   int64_t date = iyear * 10000 + month * 100 + day;
-  if ( year < 0 ) date = -date;
+  if (year < 0) date = -date;
 
-  return date;
+  return (DateType)date;
 }
 
 

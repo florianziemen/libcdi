@@ -323,7 +323,7 @@ sub printproto {
   # fortran proto
   if ( "$ftype" eq "void"    ) { $ftype = "SUBROUTINE"; }
   if ( "$ftype" eq "int"     ) { $ftype = "INTEGER FUNCTION"; }
-  if ( "$ftype" eq "int64_t" ) { $ftype = "INTEGER FUNCTION"; }
+  if ( "$ftype" eq "DateType") { $ftype = "INTEGER FUNCTION"; }
   if ( "$ftype" eq "SizeType") { $ftype = "INTEGER FUNCTION"; }
   if ( "$ftype" eq "double"  ) { $ftype = "REAL*8 FUNCTION"; }
   if ( "$ftype" eq "float"   ) { $ftype = "REAL*4 FUNCTION"; }
@@ -341,8 +341,8 @@ sub printproto {
     $tag =~ s/char \*/CHARACTER*(*) /og;
     $tag =~ s/int \*/INTEGER /og;
     $tag =~ s/int /INTEGER /og;
-    $tag =~ s/int64_t \*/INTEGER /og;
-    $tag =~ s/int64_t /INTEGER /og;
+    $tag =~ s/DateType \*/INTEGER /og;
+    $tag =~ s/DateType /INTEGER /og;
     $tag =~ s/SizeType \*/INTEGER /og;
     $tag =~ s/SizeType /INTEGER /og;
     $tag =~ s/double \*/REAL*8 /og;
@@ -385,7 +385,7 @@ sub printfortran {
   $line =~ s/char \*/CHARACTER\*(\*) /og;
   $line =~ s/char /CHARACTER /og;
   $line =~ s/int /INTEGER /og;
-  $line =~ s/int64_t /INTEGER /og;
+  $line =~ s/DateType /INTEGER /og;
   $line =~ s/SizeType /INTEGER /og;
   $line =~ s/double /REAL*8 /og;
   $line =~ s/float /REAL*4 /og;
