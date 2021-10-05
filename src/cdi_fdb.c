@@ -51,13 +51,13 @@ void decode_fdbitem(const char *fdbItem, KeyValueEntry *keyValue)
 
   for (int i = 0; i < numKeys; i++)
     {
-      char *keyValue = itemKeys[i];
-      len = strlen(keyValue);
+      char *itemKey = itemKeys[i];
+      len = strlen(itemKey);
       for (int k = 0; k < len; k++)
-        if (keyValue[k] == '=')
+        if (itemKey[k] == '=')
           {
-            keyValue[k] = 0;
-            itemValues[i] = &keyValue[k + 1];
+            itemKey[k] = 0;
+            itemValues[i] = &itemKey[k + 1];
             break;
           }
 

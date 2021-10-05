@@ -991,10 +991,10 @@ int fdbScanTimesteps(stream_t *streamptr)
 
   streamptr->curTsID = 0;
 
-  const int tsID = tstepsNewEntry(streamptr);
-  if (tsID != 0) Error("Internal problem! tstepsNewEntry returns %d", tsID);
+  const int tsIDnew = tstepsNewEntry(streamptr);
+  if (tsIDnew != 0) Error("Internal problem! tstepsNewEntry returns %d", tsIDnew);
 
-  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+  taxis_t *taxis = &streamptr->tsteps[tsIDnew].taxis;
 
   for (int recID = 0; recID < numRecords; recID++)
     {
@@ -1077,8 +1077,8 @@ int fdbScanTimesteps(stream_t *streamptr)
       const int vtime = recordInfoList[recordOffset].time * 100;
       // printf("timestep=%d recOffset=%d date=%d time=%d\n", tsID + 1, recordOffset, vdate, vtime);
 
-      const int tsIDnew = tstepsNewEntry(streamptr);
-      if (tsIDnew != tsID) Error("Internal error. tsID = %d", tsID);
+      const int tsIDnext = tstepsNewEntry(streamptr);
+      if (tsIDnext != tsID) Error("Internal error. tsID = %d", tsID);
 
       streamptr->tsteps[tsID-1].next   = true;
       streamptr->tsteps[tsID].position = 0;
