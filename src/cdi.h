@@ -12,11 +12,11 @@
 #include <sys/types.h>
 
 #ifndef CDI_SIZE_TYPE
-#define CDI_SIZE_TYPE int
+#define CDI_SIZE_TYPE size_t
 #endif
 
 #ifndef CDI_DATE_TYPE // Must be signed integer (int32_t or int64_t)!
-#define CDI_DATE_TYPE int
+#define CDI_DATE_TYPE int64_t
 #endif
 
 typedef CDI_SIZE_TYPE SizeType;
