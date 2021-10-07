@@ -2014,11 +2014,11 @@ module mo_cdi
       integer(c_int) :: f_result
     end function cdiDeleteKey
 
-    subroutine gridDefDatatype(gridID_dummy, prec_dummy) bind(c, name =&
+    subroutine gridDefDatatype(gridID_dummy, datatype_dummy) bind(c, name =&
     & 'gridDefDatatype')
       import c_int
       integer(c_int), value :: gridID_dummy
-      integer(c_int), value :: prec_dummy
+      integer(c_int), value :: datatype_dummy
     end subroutine gridDefDatatype
 
     function gridInqDatatype(gridID_dummy) bind(c, name = 'gridInqDatatype')&
@@ -2394,11 +2394,11 @@ module mo_cdi
       integer(kind = c_signed_char), intent(inout) :: uuid_dummy(CDI_UUID_SIZE)
     end subroutine zaxisInqUUID
 
-    subroutine zaxisDefDatatype(zaxisID_dummy, prec_dummy) bind(c, name =&
+    subroutine zaxisDefDatatype(zaxisID_dummy, datatype_dummy) bind(c, name =&
     & 'zaxisDefDatatype')
       import c_int
       integer(c_int), value :: zaxisID_dummy
-      integer(c_int), value :: prec_dummy
+      integer(c_int), value :: datatype_dummy
     end subroutine zaxisDefDatatype
 
     function zaxisInqDatatype(zaxisID_dummy) bind(c, name = 'zaxisInqDatatype')&
