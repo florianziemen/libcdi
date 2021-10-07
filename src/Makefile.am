@@ -255,7 +255,7 @@ libcdipio_la_SOURCES += $(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
 endif
 endif
 
-libcdipio_la_LIBADD    = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
+libcdipio_la_LIBADD   = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
 
 #
 #cdilib.c:
@@ -277,7 +277,9 @@ endif
 
 #
 mo_cdi.f90: @MAINTAINER_MODE_TRUE@ $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
-	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
+	cat $(top_srcdir)/src/cdi.h |sed -e 's/SizeType/size_t/g' -e s/DateType/int64_t/g > cditmp.h
+	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb cditmp.h $@
+	rm cditmp.h
 
 if FORTRAN_MOD_UC
 MO_CDI.$(FCMODEXT): mo_cdi.lo
