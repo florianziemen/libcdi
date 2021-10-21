@@ -1,6 +1,23 @@
 CDI NEWS
 --------
 
+Version 2.0.0 (11 October 2021):
+
+   New features:
+     * Changed to 3-clause BSD license
+     * Changed type of gridsize for size_t to SizeType
+     * Changed type of date from int64_t to DateType
+     * Added FDB5 support (experimental)
+     * Added environment variables CDI_GRIB1_TEMPLATE and CDI_GRIB2_TEMPLATE
+   Changes:
+     * gridDefParamsLCC()/gridInqParamsLCC(): changed interface
+     * gridDefParamsSTERE()/gridInqParamsSTERE(): changed interface
+     * Replaced zaxisDefDatatype()/zaxisInqDatatype() by cdiDefKeyInt()/cdiInqKeyInt() with CDI_KEY_DATATYPE
+     * Replaced gridDefDatatype()/gridInqDatatype() by cdiDefKeyInt()/cdiInqKeyInt() with CDI_KEY_DATATYPE
+   Fixed bugs:
+     * Allow UUID starting with zero
+     * cgribexDefGridLambert(): recalculate xinc/yinc in meter
+
 Version 1.9.6 (07 February 2019):
 
    New features:
