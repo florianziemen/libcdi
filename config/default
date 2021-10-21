@@ -64,6 +64,7 @@ case "${HOSTNAME}" in
 	;;
     hama*)
         CDILIBS="--disable-iso-c-interface \
+                 --enable-maintainer-mode \
                  --with-szlib=$HOME/local \
                  --with-fdb5=$HOME/src/fdb \
                  --with-eccodes=$HOME/local/eccodes-2.22.0 \
