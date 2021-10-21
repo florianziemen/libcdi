@@ -2606,13 +2606,13 @@ bool cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncv
                 cdf_get_var_int(ncvar->ncid, ncvar->rpvarid, grid->reducedPoints);
                 grid->np = ncvar->numLPE;
 
-                const int bvarid = ncvars[yvarid].bounds;
-                if ( bvarid != CDI_UNDEFID )
+                const int bvarid = (yvarid == CDI_UNDEFID) ? CDI_UNDEFID : ncvars[yvarid].bounds;
+                if (bvarid != CDI_UNDEFID)
                   {
                     const int nbdims = ncvars[bvarid].ndims;
-                    if ( nbdims == 2 || nbdims == 3 )
+                    if (nbdims == 2 || nbdims == 3)
                       {
-                        if ( *vdimid == CDI_UNDEFID )
+                        if (*vdimid == CDI_UNDEFID)
                           {
                             *vdimid = ncvars[bvarid].dimids[nbdims-1];
                             grid->nvertex = (int)ncdims[*vdimid].len;
