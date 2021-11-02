@@ -85,6 +85,8 @@ Makefile
 /examples/cdi_write_hybrid
 /examples/cdi_write_local
 /examples/cdi_write_relativ
+/examples/pio/*.parallel.F90
+/examples/pio/*.parallel.c
 /examples/pio/collectData2003_parallel
 /examples/pio/collectData2003_serial
 /examples/pio/collectDataNStreams_parallel
@@ -104,6 +106,7 @@ Makefile
 /interfaces/ruby/cdi_wrapper.cpp
 /src/.fint
 /src/make_fint
+/tests/*.parallel.c
 
 # Test stage files:
 /examples/**/*.grb
