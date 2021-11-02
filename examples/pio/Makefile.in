@@ -148,10 +148,10 @@ CONFIG_CLEAN_VPATH_FILES =
 @ENABLE_CF_INTERFACE_TRUE@	collectData2003_serial$(EXEEXT)
 @BUILD_PIO_FC_PROGRAMS_TRUE@@ENABLE_CF_INTERFACE_TRUE@am__EXEEXT_3 = collectData2003_parallel$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
-am__objects_1 = collectData2003_parallel-collectData2003.$(OBJEXT)
-am_collectData2003_parallel_OBJECTS = $(am__objects_1)
+nodist_collectData2003_parallel_OBJECTS =  \
+	collectData2003.parallel.$(OBJEXT)
 collectData2003_parallel_OBJECTS =  \
-	$(am_collectData2003_parallel_OBJECTS)
+	$(nodist_collectData2003_parallel_OBJECTS)
 am__DEPENDENCIES_1 =
 collectData2003_parallel_DEPENDENCIES =  \
 	$(top_builddir)/src/libcdipio.la $(am__DEPENDENCIES_1) \
@@ -160,19 +160,14 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-collectData2003_parallel_LINK = $(LIBTOOL) $(AM_V_lt) --tag=FC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(FCLD) \
-	$(collectData2003_parallel_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
 am_collectData2003_serial_OBJECTS = collectData2003.$(OBJEXT)
 collectData2003_serial_OBJECTS = $(am_collectData2003_serial_OBJECTS)
 collectData2003_serial_LDADD = $(LDADD)
 collectData2003_serial_DEPENDENCIES = $(top_builddir)/src/libcdi.la
-am__objects_2 =  \
-	collectDataNStreams_parallel-collectDataNStreams.$(OBJEXT)
-am_collectDataNStreams_parallel_OBJECTS = $(am__objects_2)
+nodist_collectDataNStreams_parallel_OBJECTS =  \
+	collectDataNStreams.parallel.$(OBJEXT)
 collectDataNStreams_parallel_OBJECTS =  \
-	$(am_collectDataNStreams_parallel_OBJECTS)
+	$(nodist_collectDataNStreams_parallel_OBJECTS)
 collectDataNStreams_parallel_DEPENDENCIES =  \
 	$(top_builddir)/src/libcdipio.la $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
@@ -182,9 +177,8 @@ collectDataNStreams_serial_OBJECTS =  \
 collectDataNStreams_serial_LDADD = $(LDADD)
 collectDataNStreams_serial_DEPENDENCIES =  \
 	$(top_builddir)/src/libcdi.la
-am__objects_3 = collectData_parallel-collectData.$(OBJEXT)
-am_collectData_parallel_OBJECTS = $(am__objects_3)
-collectData_parallel_OBJECTS = $(am_collectData_parallel_OBJECTS)
+nodist_collectData_parallel_OBJECTS = collectData.parallel.$(OBJEXT)
+collectData_parallel_OBJECTS = $(nodist_collectData_parallel_OBJECTS)
 collectData_parallel_DEPENDENCIES = $(top_builddir)/src/libcdipio.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_collectData_serial_OBJECTS = collectData.$(OBJEXT)
@@ -211,9 +205,9 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/collectData.Po \
+	./$(DEPDIR)/collectData.parallel.Po \
 	./$(DEPDIR)/collectDataNStreams.Po \
-	./$(DEPDIR)/collectDataNStreams_parallel-collectDataNStreams.Po \
-	./$(DEPDIR)/collectData_parallel-collectData.Po \
+	./$(DEPDIR)/collectDataNStreams.parallel.Po \
 	./$(DEPDIR)/compareResourcesArray.Po
 am__mv = mv -f
 AM_V_PPFC = $(am__v_PPFC_@AM_V@)
@@ -240,18 +234,15 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(collectData2003_parallel_SOURCES) \
+SOURCES = $(nodist_collectData2003_parallel_SOURCES) \
 	$(collectData2003_serial_SOURCES) \
-	$(collectDataNStreams_parallel_SOURCES) \
+	$(nodist_collectDataNStreams_parallel_SOURCES) \
 	$(collectDataNStreams_serial_SOURCES) \
-	$(collectData_parallel_SOURCES) $(collectData_serial_SOURCES) \
-	$(compareResourcesArray_SOURCES)
-DIST_SOURCES = $(collectData2003_parallel_SOURCES) \
-	$(collectData2003_serial_SOURCES) \
-	$(collectDataNStreams_parallel_SOURCES) \
+	$(nodist_collectData_parallel_SOURCES) \
+	$(collectData_serial_SOURCES) $(compareResourcesArray_SOURCES)
+DIST_SOURCES = $(collectData2003_serial_SOURCES) \
 	$(collectDataNStreams_serial_SOURCES) \
-	$(collectData_parallel_SOURCES) $(collectData_serial_SOURCES) \
-	$(compareResourcesArray_SOURCES)
+	$(collectData_serial_SOURCES) $(compareResourcesArray_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -471,25 +462,16 @@ AM_CFLAGS = $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 AM_FCFLAGS = $(am__append_5) $(YAXT_FC_MOD) $(MPI_FC_MOD)
 AM_LDFLAGS = $(am__append_6)
 LDADD = $(top_builddir)/src/libcdi.la
-collectDataNStreams_serial_SOURCES = \
-  collectDataNStreams.c
-
-collectDataNStreams_parallel_SOURCES = \
-  $(collectDataNStreams_serial_SOURCES)
-
-collectDataNStreams_parallel_CPPFLAGS = -DUSE_MPI $(AM_CPPFLAGS)
+collectDataNStreams_serial_SOURCES = collectDataNStreams.c
+nodist_collectDataNStreams_parallel_SOURCES = collectDataNStreams.parallel.c
 collectDataNStreams_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 collectData_serial_SOURCES = collectData.c
-collectData_parallel_SOURCES = $(collectData_serial_SOURCES)
-collectData_parallel_CPPFLAGS = -DUSE_MPI $(AM_CPPFLAGS)
+nodist_collectData_parallel_SOURCES = collectData.parallel.c
 collectData_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 compareResourcesArray_SOURCES = compareResourcesArray.c
 compareResourcesArray_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 collectData2003_serial_SOURCES = collectData2003.F90
-collectData2003_parallel_SOURCES = \
-  $(collectData2003_serial_SOURCES)
-
-collectData2003_parallel_FCFLAGS = $(FC_DEFINE)USE_MPI $(AM_FCFLAGS)
+nodist_collectData2003_parallel_SOURCES = collectData2003.parallel.F90
 collectData2003_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_FC_LIB) $(MPI_FC_LIB)
 
 # Compile programs using Libtool:
@@ -521,10 +503,15 @@ LTCXXCOMPILE_prefix = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
         $(DEFAULT_INCLUDES) $(INCLUDES)
 
 LTCXXCOMPILE = $(LTCXXCOMPILE_prefix) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+
+# Generate source files for parallel versions of the programs. We do this to
+# avoid target-specific flags, which result into rules that do not use the
+# compilation commands above.
+SUFFIXES = .parallel.c .parallel.F90
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .F90 .c .lo .o .obj
+.SUFFIXES: .parallel.c .parallel.F90 .F90 .c .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -566,7 +553,7 @@ clean-noinstPROGRAMS:
 
 collectData2003_parallel$(EXEEXT): $(collectData2003_parallel_OBJECTS) $(collectData2003_parallel_DEPENDENCIES) $(EXTRA_collectData2003_parallel_DEPENDENCIES) 
 	@rm -f collectData2003_parallel$(EXEEXT)
-	$(AM_V_FCLD)$(collectData2003_parallel_LINK) $(collectData2003_parallel_OBJECTS) $(collectData2003_parallel_LDADD) $(LIBS)
+	$(AM_V_FCLD)$(FCLINK) $(collectData2003_parallel_OBJECTS) $(collectData2003_parallel_LDADD) $(LIBS)
 
 collectData2003_serial$(EXEEXT): $(collectData2003_serial_OBJECTS) $(collectData2003_serial_DEPENDENCIES) $(EXTRA_collectData2003_serial_DEPENDENCIES) 
 	@rm -f collectData2003_serial$(EXEEXT)
@@ -599,9 +586,9 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/collectData.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/collectData.parallel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/collectDataNStreams.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/collectDataNStreams_parallel-collectDataNStreams.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/collectData_parallel-collectData.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/collectDataNStreams.parallel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compareResourcesArray.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -773,9 +760,9 @@ clean-am: clean-generic clean-libtool clean-local clean-noinstPROGRAMS \
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/collectData.Po
+	-rm -f ./$(DEPDIR)/collectData.parallel.Po
 	-rm -f ./$(DEPDIR)/collectDataNStreams.Po
-	-rm -f ./$(DEPDIR)/collectDataNStreams_parallel-collectDataNStreams.Po
-	-rm -f ./$(DEPDIR)/collectData_parallel-collectData.Po
+	-rm -f ./$(DEPDIR)/collectDataNStreams.parallel.Po
 	-rm -f ./$(DEPDIR)/compareResourcesArray.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -825,9 +812,9 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/collectData.Po
+	-rm -f ./$(DEPDIR)/collectData.parallel.Po
 	-rm -f ./$(DEPDIR)/collectDataNStreams.Po
-	-rm -f ./$(DEPDIR)/collectDataNStreams_parallel-collectDataNStreams.Po
-	-rm -f ./$(DEPDIR)/collectData_parallel-collectData.Po
+	-rm -f ./$(DEPDIR)/collectDataNStreams.parallel.Po
 	-rm -f ./$(DEPDIR)/compareResourcesArray.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
@@ -869,47 +856,15 @@ uninstall-am:
 examples: $(EXTRA_PROGRAMS)
 
 clean-local:
+	-rm -f *.parallel.c *.parallel.F90
 	-rm -f *.grb
 	-rm -rf *.dSYM
 
-#
-# TODO: the following is too hard to maintain, we should try to eliminate the
-# need for this:
-#
+.c.parallel.c:
+	$(AM_V_GEN):;{ echo '#define USE_MPI 1' && cat $<; }>$@
 
-collectDataNStreams_parallel-collectDataNStreams.o: collectDataNStreams.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(collectDataNStreams_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT collectDataNStreams_parallel-collectDataNStreams.o -MD -MP -MF $(DEPDIR)/collectDataNStreams_parallel-collectDataNStreams.Tpo -c -o collectDataNStreams_parallel-collectDataNStreams.o `test -f 'collectDataNStreams.c' || echo '$(srcdir)/'`collectDataNStreams.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/collectDataNStreams_parallel-collectDataNStreams.Tpo $(DEPDIR)/collectDataNStreams_parallel-collectDataNStreams.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='collectDataNStreams.c' object='collectDataNStreams_parallel-collectDataNStreams.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(collectDataNStreams_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o collectDataNStreams_parallel-collectDataNStreams.o `test -f 'collectDataNStreams.c' || echo '$(srcdir)/'`collectDataNStreams.c
-
-collectDataNStreams_parallel-collectDataNStreams.obj: collectDataNStreams.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(collectDataNStreams_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT collectDataNStreams_parallel-collectDataNStreams.obj -MD -MP -MF $(DEPDIR)/collectDataNStreams_parallel-collectDataNStreams.Tpo -c -o collectDataNStreams_parallel-collectDataNStreams.obj `if test -f 'collectDataNStreams.c'; then $(CYGPATH_W) 'collectDataNStreams.c'; else $(CYGPATH_W) '$(srcdir)/collectDataNStreams.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/collectDataNStreams_parallel-collectDataNStreams.Tpo $(DEPDIR)/collectDataNStreams_parallel-collectDataNStreams.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='collectDataNStreams.c' object='collectDataNStreams_parallel-collectDataNStreams.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(collectDataNStreams_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o collectDataNStreams_parallel-collectDataNStreams.obj `if test -f 'collectDataNStreams.c'; then $(CYGPATH_W) 'collectDataNStreams.c'; else $(CYGPATH_W) '$(srcdir)/collectDataNStreams.c'; fi`
-
-collectData_parallel-collectData.o: collectData.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(collectData_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT collectData_parallel-collectData.o -MD -MP -MF $(DEPDIR)/collectData_parallel-collectData.Tpo -c -o collectData_parallel-collectData.o `test -f 'collectData.c' || echo '$(srcdir)/'`collectData.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/collectData_parallel-collectData.Tpo $(DEPDIR)/collectData_parallel-collectData.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='collectData.c' object='collectData_parallel-collectData.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(collectData_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o collectData_parallel-collectData.o `test -f 'collectData.c' || echo '$(srcdir)/'`collectData.c
-
-collectData_parallel-collectData.obj: collectData.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(collectData_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT collectData_parallel-collectData.obj -MD -MP -MF $(DEPDIR)/collectData_parallel-collectData.Tpo -c -o collectData_parallel-collectData.obj `if test -f 'collectData.c'; then $(CYGPATH_W) 'collectData.c'; else $(CYGPATH_W) '$(srcdir)/collectData.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/collectData_parallel-collectData.Tpo $(DEPDIR)/collectData_parallel-collectData.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='collectData.c' object='collectData_parallel-collectData.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(collectData_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o collectData_parallel-collectData.obj `if test -f 'collectData.c'; then $(CYGPATH_W) 'collectData.c'; else $(CYGPATH_W) '$(srcdir)/collectData.c'; fi`
-
-collectData2003_parallel-collectData2003.o: collectData2003.F90
-	$(AM_V_PPFC)$(LTFCCOMPILE_prefix) $(collectData2003_parallel_FCFLAGS) $(FCFLAGS) -c -o collectData2003_parallel-collectData2003.o `test -f 'collectData2003.F90' || echo '$(srcdir)/'`collectData2003.F90
-
-collectData2003_parallel-collectData2003.obj: collectData2003.F90
-	$(AM_V_PPFC)$(LTFCCOMPILE_prefix) $(collectData2003_parallel_FCFLAGS) $(FCFLAGS) -c -o collectData2003_parallel-collectData2003.obj `if test -f 'collectData2003.F90'; then $(CYGPATH_W) 'collectData2003.F90'; else $(CYGPATH_W) '$(srcdir)/collectData2003.F90'; fi`
+.F90.parallel.F90:
+	$(AM_V_GEN):;{ echo '#define USE_MPI 1' && cat $<; }>$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
