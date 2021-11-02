@@ -128,6 +128,12 @@ pio_write_deco2d_serial_SOURCES = \
   pio_write_setup_grid.h \
   simple_model_helper.c \
   simple_model_helper.h
+nodist_pio_write_deco2d_parallel_SOURCES = \
+  deco2d_model.parallel.c \
+  pio_write.parallel.c \
+  pio_write_setup_grid.parallel.c \
+  simple_model_helper.parallel.c
+pio_write_deco2d_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 pio_write_serial_SOURCES = \
   pio_write.c \
@@ -137,6 +143,12 @@ pio_write_serial_SOURCES = \
   simple_model.c \
   simple_model_helper.c \
   simple_model_helper.h
+nodist_pio_write_parallel_SOURCES = \
+  pio_write.parallel.c \
+  pio_write_setup_grid.parallel.c \
+  simple_model.parallel.c \
+  simple_model_helper.parallel.c
+pio_write_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 test_byteswap_SOURCES = test_byteswap.c
 
@@ -154,20 +166,11 @@ test_cdf_write_SOURCES = \
   simple_model_helper.h \
   test_cdf_write.c
 
-pio_write_deco2d_parallel_SOURCES = \
-  $(pio_write_deco2d_serial_SOURCES)
-pio_write_deco2d_parallel_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_MPI
-pio_write_deco2d_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
-
-pio_write_parallel_SOURCES = \
-  $(pio_write_serial_SOURCES)
-pio_write_parallel_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_MPI
-pio_write_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
-
 test_resource_copy_mpi_SOURCES = test_resource_copy_mpi.c
 test_resource_copy_mpi_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 clean-local:
+	-rm -f *.parallel.c
 	-rm -f *.cksum *.ext *.grb *.grb2 *.ieg *.nc *.nc2 *.nc4 *.stderr *.stdout *.svc
 	-rm -rf *.dSYM
 
@@ -203,119 +206,10 @@ LTCXXCOMPILE_prefix = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
         $(DEFAULT_INCLUDES) $(INCLUDES)
 LTCXXCOMPILE = $(LTCXXCOMPILE_prefix) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 
-#
-# TODO: the following is too hard to maintain, we should try to eliminate the
-# need for this:
-#
+# Generate source files for parallel versions of the programs. We do this to
+# avoid target-specific flags, which result into rules that do not use the
+# compilation commands above.
+SUFFIXES = .parallel.c
 
-pio_write_deco2d_parallel-deco2d_model.o: deco2d_model.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_deco2d_parallel-deco2d_model.o -MD -MP -MF $(DEPDIR)/pio_write_deco2d_parallel-deco2d_model.Tpo -c -o pio_write_deco2d_parallel-deco2d_model.o `test -f 'deco2d_model.c' || echo '$(srcdir)/'`deco2d_model.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_deco2d_parallel-deco2d_model.Tpo $(DEPDIR)/pio_write_deco2d_parallel-deco2d_model.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='deco2d_model.c' object='pio_write_deco2d_parallel-deco2d_model.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_deco2d_parallel-deco2d_model.o `test -f 'deco2d_model.c' || echo '$(srcdir)/'`deco2d_model.c
-
-pio_write_deco2d_parallel-deco2d_model.obj: deco2d_model.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_deco2d_parallel-deco2d_model.obj -MD -MP -MF $(DEPDIR)/pio_write_deco2d_parallel-deco2d_model.Tpo -c -o pio_write_deco2d_parallel-deco2d_model.obj `if test -f 'deco2d_model.c'; then $(CYGPATH_W) 'deco2d_model.c'; else $(CYGPATH_W) '$(srcdir)/deco2d_model.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_deco2d_parallel-deco2d_model.Tpo $(DEPDIR)/pio_write_deco2d_parallel-deco2d_model.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='deco2d_model.c' object='pio_write_deco2d_parallel-deco2d_model.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_deco2d_parallel-deco2d_model.obj `if test -f 'deco2d_model.c'; then $(CYGPATH_W) 'deco2d_model.c'; else $(CYGPATH_W) '$(srcdir)/deco2d_model.c'; fi`
-
-pio_write_deco2d_parallel-pio_write.o: pio_write.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_deco2d_parallel-pio_write.o -MD -MP -MF $(DEPDIR)/pio_write_deco2d_parallel-pio_write.Tpo -c -o pio_write_deco2d_parallel-pio_write.o `test -f 'pio_write.c' || echo '$(srcdir)/'`pio_write.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_deco2d_parallel-pio_write.Tpo $(DEPDIR)/pio_write_deco2d_parallel-pio_write.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='pio_write.c' object='pio_write_deco2d_parallel-pio_write.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_deco2d_parallel-pio_write.o `test -f 'pio_write.c' || echo '$(srcdir)/'`pio_write.c
-
-pio_write_deco2d_parallel-pio_write.obj: pio_write.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_deco2d_parallel-pio_write.obj -MD -MP -MF $(DEPDIR)/pio_write_deco2d_parallel-pio_write.Tpo -c -o pio_write_deco2d_parallel-pio_write.obj `if test -f 'pio_write.c'; then $(CYGPATH_W) 'pio_write.c'; else $(CYGPATH_W) '$(srcdir)/pio_write.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_deco2d_parallel-pio_write.Tpo $(DEPDIR)/pio_write_deco2d_parallel-pio_write.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='pio_write.c' object='pio_write_deco2d_parallel-pio_write.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_deco2d_parallel-pio_write.obj `if test -f 'pio_write.c'; then $(CYGPATH_W) 'pio_write.c'; else $(CYGPATH_W) '$(srcdir)/pio_write.c'; fi`
-
-pio_write_deco2d_parallel-pio_write_setup_grid.o: pio_write_setup_grid.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_deco2d_parallel-pio_write_setup_grid.o -MD -MP -MF $(DEPDIR)/pio_write_deco2d_parallel-pio_write_setup_grid.Tpo -c -o pio_write_deco2d_parallel-pio_write_setup_grid.o `test -f 'pio_write_setup_grid.c' || echo '$(srcdir)/'`pio_write_setup_grid.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_deco2d_parallel-pio_write_setup_grid.Tpo $(DEPDIR)/pio_write_deco2d_parallel-pio_write_setup_grid.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='pio_write_setup_grid.c' object='pio_write_deco2d_parallel-pio_write_setup_grid.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_deco2d_parallel-pio_write_setup_grid.o `test -f 'pio_write_setup_grid.c' || echo '$(srcdir)/'`pio_write_setup_grid.c
-
-pio_write_deco2d_parallel-pio_write_setup_grid.obj: pio_write_setup_grid.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_deco2d_parallel-pio_write_setup_grid.obj -MD -MP -MF $(DEPDIR)/pio_write_deco2d_parallel-pio_write_setup_grid.Tpo -c -o pio_write_deco2d_parallel-pio_write_setup_grid.obj `if test -f 'pio_write_setup_grid.c'; then $(CYGPATH_W) 'pio_write_setup_grid.c'; else $(CYGPATH_W) '$(srcdir)/pio_write_setup_grid.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_deco2d_parallel-pio_write_setup_grid.Tpo $(DEPDIR)/pio_write_deco2d_parallel-pio_write_setup_grid.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='pio_write_setup_grid.c' object='pio_write_deco2d_parallel-pio_write_setup_grid.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_deco2d_parallel-pio_write_setup_grid.obj `if test -f 'pio_write_setup_grid.c'; then $(CYGPATH_W) 'pio_write_setup_grid.c'; else $(CYGPATH_W) '$(srcdir)/pio_write_setup_grid.c'; fi`
-
-pio_write_deco2d_parallel-simple_model_helper.o: simple_model_helper.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_deco2d_parallel-simple_model_helper.o -MD -MP -MF $(DEPDIR)/pio_write_deco2d_parallel-simple_model_helper.Tpo -c -o pio_write_deco2d_parallel-simple_model_helper.o `test -f 'simple_model_helper.c' || echo '$(srcdir)/'`simple_model_helper.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_deco2d_parallel-simple_model_helper.Tpo $(DEPDIR)/pio_write_deco2d_parallel-simple_model_helper.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='simple_model_helper.c' object='pio_write_deco2d_parallel-simple_model_helper.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_deco2d_parallel-simple_model_helper.o `test -f 'simple_model_helper.c' || echo '$(srcdir)/'`simple_model_helper.c
-
-pio_write_deco2d_parallel-simple_model_helper.obj: simple_model_helper.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_deco2d_parallel-simple_model_helper.obj -MD -MP -MF $(DEPDIR)/pio_write_deco2d_parallel-simple_model_helper.Tpo -c -o pio_write_deco2d_parallel-simple_model_helper.obj `if test -f 'simple_model_helper.c'; then $(CYGPATH_W) 'simple_model_helper.c'; else $(CYGPATH_W) '$(srcdir)/simple_model_helper.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_deco2d_parallel-simple_model_helper.Tpo $(DEPDIR)/pio_write_deco2d_parallel-simple_model_helper.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='simple_model_helper.c' object='pio_write_deco2d_parallel-simple_model_helper.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_deco2d_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_deco2d_parallel-simple_model_helper.obj `if test -f 'simple_model_helper.c'; then $(CYGPATH_W) 'simple_model_helper.c'; else $(CYGPATH_W) '$(srcdir)/simple_model_helper.c'; fi`
-
-pio_write_parallel-pio_write.o: pio_write.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_parallel-pio_write.o -MD -MP -MF $(DEPDIR)/pio_write_parallel-pio_write.Tpo -c -o pio_write_parallel-pio_write.o `test -f 'pio_write.c' || echo '$(srcdir)/'`pio_write.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_parallel-pio_write.Tpo $(DEPDIR)/pio_write_parallel-pio_write.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='pio_write.c' object='pio_write_parallel-pio_write.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_parallel-pio_write.o `test -f 'pio_write.c' || echo '$(srcdir)/'`pio_write.c
-
-pio_write_parallel-pio_write.obj: pio_write.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_parallel-pio_write.obj -MD -MP -MF $(DEPDIR)/pio_write_parallel-pio_write.Tpo -c -o pio_write_parallel-pio_write.obj `if test -f 'pio_write.c'; then $(CYGPATH_W) 'pio_write.c'; else $(CYGPATH_W) '$(srcdir)/pio_write.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_parallel-pio_write.Tpo $(DEPDIR)/pio_write_parallel-pio_write.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='pio_write.c' object='pio_write_parallel-pio_write.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_parallel-pio_write.obj `if test -f 'pio_write.c'; then $(CYGPATH_W) 'pio_write.c'; else $(CYGPATH_W) '$(srcdir)/pio_write.c'; fi`
-
-pio_write_parallel-pio_write_setup_grid.o: pio_write_setup_grid.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_parallel-pio_write_setup_grid.o -MD -MP -MF $(DEPDIR)/pio_write_parallel-pio_write_setup_grid.Tpo -c -o pio_write_parallel-pio_write_setup_grid.o `test -f 'pio_write_setup_grid.c' || echo '$(srcdir)/'`pio_write_setup_grid.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_parallel-pio_write_setup_grid.Tpo $(DEPDIR)/pio_write_parallel-pio_write_setup_grid.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='pio_write_setup_grid.c' object='pio_write_parallel-pio_write_setup_grid.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_parallel-pio_write_setup_grid.o `test -f 'pio_write_setup_grid.c' || echo '$(srcdir)/'`pio_write_setup_grid.c
-
-pio_write_parallel-pio_write_setup_grid.obj: pio_write_setup_grid.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_parallel-pio_write_setup_grid.obj -MD -MP -MF $(DEPDIR)/pio_write_parallel-pio_write_setup_grid.Tpo -c -o pio_write_parallel-pio_write_setup_grid.obj `if test -f 'pio_write_setup_grid.c'; then $(CYGPATH_W) 'pio_write_setup_grid.c'; else $(CYGPATH_W) '$(srcdir)/pio_write_setup_grid.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_parallel-pio_write_setup_grid.Tpo $(DEPDIR)/pio_write_parallel-pio_write_setup_grid.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='pio_write_setup_grid.c' object='pio_write_parallel-pio_write_setup_grid.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_parallel-pio_write_setup_grid.obj `if test -f 'pio_write_setup_grid.c'; then $(CYGPATH_W) 'pio_write_setup_grid.c'; else $(CYGPATH_W) '$(srcdir)/pio_write_setup_grid.c'; fi`
-
-pio_write_parallel-simple_model.o: simple_model.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_parallel-simple_model.o -MD -MP -MF $(DEPDIR)/pio_write_parallel-simple_model.Tpo -c -o pio_write_parallel-simple_model.o `test -f 'simple_model.c' || echo '$(srcdir)/'`simple_model.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_parallel-simple_model.Tpo $(DEPDIR)/pio_write_parallel-simple_model.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='simple_model.c' object='pio_write_parallel-simple_model.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_parallel-simple_model.o `test -f 'simple_model.c' || echo '$(srcdir)/'`simple_model.c
-
-pio_write_parallel-simple_model.obj: simple_model.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_parallel-simple_model.obj -MD -MP -MF $(DEPDIR)/pio_write_parallel-simple_model.Tpo -c -o pio_write_parallel-simple_model.obj `if test -f 'simple_model.c'; then $(CYGPATH_W) 'simple_model.c'; else $(CYGPATH_W) '$(srcdir)/simple_model.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_parallel-simple_model.Tpo $(DEPDIR)/pio_write_parallel-simple_model.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='simple_model.c' object='pio_write_parallel-simple_model.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_parallel-simple_model.obj `if test -f 'simple_model.c'; then $(CYGPATH_W) 'simple_model.c'; else $(CYGPATH_W) '$(srcdir)/simple_model.c'; fi`
-
-pio_write_parallel-simple_model_helper.o: simple_model_helper.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_parallel-simple_model_helper.o -MD -MP -MF $(DEPDIR)/pio_write_parallel-simple_model_helper.Tpo -c -o pio_write_parallel-simple_model_helper.o `test -f 'simple_model_helper.c' || echo '$(srcdir)/'`simple_model_helper.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_parallel-simple_model_helper.Tpo $(DEPDIR)/pio_write_parallel-simple_model_helper.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='simple_model_helper.c' object='pio_write_parallel-simple_model_helper.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_parallel-simple_model_helper.o `test -f 'simple_model_helper.c' || echo '$(srcdir)/'`simple_model_helper.c
-
-pio_write_parallel-simple_model_helper.obj: simple_model_helper.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pio_write_parallel-simple_model_helper.obj -MD -MP -MF $(DEPDIR)/pio_write_parallel-simple_model_helper.Tpo -c -o pio_write_parallel-simple_model_helper.obj `if test -f 'simple_model_helper.c'; then $(CYGPATH_W) 'simple_model_helper.c'; else $(CYGPATH_W) '$(srcdir)/simple_model_helper.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pio_write_parallel-simple_model_helper.Tpo $(DEPDIR)/pio_write_parallel-simple_model_helper.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='simple_model_helper.c' object='pio_write_parallel-simple_model_helper.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE_prefix) $(pio_write_parallel_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pio_write_parallel-simple_model_helper.obj `if test -f 'simple_model_helper.c'; then $(CYGPATH_W) 'simple_model_helper.c'; else $(CYGPATH_W) '$(srcdir)/simple_model_helper.c'; fi`
+.c.parallel.c:
+	$(AM_V_GEN):;{ echo '#define USE_MPI 1' && cat $<; }>$@
