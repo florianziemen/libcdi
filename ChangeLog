@@ -1,3 +1,7 @@
+2021-11-08  Uwe Schulzweida
+
+	* changed chunk_size_lim from 1073741823 to 16777216 (bug fix)
+
 2021-10-21  Uwe Schulzweida
 
 	* Version 2.0.1 released
