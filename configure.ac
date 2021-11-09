@@ -43,7 +43,7 @@ AS_IF([test -n "$FC" && test "X$FC" != Xno],
 AC_PROG_F77
 AC_PROG_CXX
 AC_PROG_INSTALL
-
+AC_OPENMP
 # Set up libtool.
 AC_MSG_NOTICE([setting up libtool])
 dnl before switching on libtool, identify compilers that prevent us from
