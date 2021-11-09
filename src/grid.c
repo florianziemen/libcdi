@@ -1359,6 +1359,15 @@ void gridDefMaskGME(int gridID, const int *mask)
   gridMark4Update(gridID);
 }
 
+static void
+copy_darray(size_t n, const double *restrict in, double *restrict out)
+{
+#ifdef _OPENMP
+#pragma omp parallel for if (n > 10000000) default(none) shared(n, in, out) schedule(static)
+#endif
+  for (size_t i = 0; i < n; ++i) out[i] = in[i];
+}
+
 static
 SizeType gridInqXValsSerial(grid_t *gridptr, double *xvals)
 {
@@ -1372,7 +1381,7 @@ SizeType gridInqXValsSerial(grid_t *gridptr, double *xvals)
       if (size && xvals)
         {
           const double *gridptr_xvals = gridptr->vtable->inqXValsPtr(gridptr);
-          memcpy(xvals, gridptr_xvals, size * sizeof (double));
+          copy_darray(size, gridptr_xvals, xvals);
         }
     }
   else
@@ -1566,7 +1575,7 @@ SizeType gridInqYValsSerial(grid_t *gridptr, double *yvals)
       if (size && yvals)
         {
           const double *gridptr_yvals = gridptr->vtable->inqYValsPtr(gridptr);
-          memcpy(yvals, gridptr_yvals, size * sizeof (double));
+          copy_darray(size, gridptr_yvals, yvals);
         }
     }
   else
@@ -3095,7 +3104,7 @@ gridInqXBoundsSerial(grid_t *gridptr, double *xbounds)
   const double *gridptr_xbounds = gridptr->vtable->inqXBoundsPtr(gridptr);
   if (gridptr_xbounds)
     {
-      if (size && xbounds) memcpy(xbounds, gridptr_xbounds, size * sizeof (double));
+      if (size && xbounds) copy_darray(size, gridptr_xbounds, xbounds);
     }
   else
     size = 0;
@@ -3204,7 +3213,7 @@ gridInqYBoundsSerial(grid_t *gridptr, double *ybounds)
   const double *gridptr_ybounds = gridptr->vtable->inqYBoundsPtr(gridptr);
   if (gridptr_ybounds)
     {
-      if (size && ybounds) memcpy(ybounds, gridptr_ybounds, size * sizeof (double));
+      if (size && ybounds) copy_darray(size, gridptr_ybounds, ybounds);
     }
   else
     size = 0;
