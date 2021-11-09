@@ -1781,7 +1781,7 @@ double grid_calc_increment_in_meter(SizeType size, const double *vals)
 double gridInqXinc(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-  const double *restrict xvals = gridptr->vtable->inqXValsPtr(gridptr);
+  const double *xvals = gridptr->vtable->inqXValsPtr(gridptr);
 
   if (fabs(gridptr->x.inc) <= 0 && xvals)
     {
@@ -1795,7 +1795,7 @@ double gridInqXinc(int gridID)
 double gridInqXincInMeter(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-  const double *restrict xvals = gridptr->vtable->inqXValsPtr(gridptr);
+  const double *xvals = gridptr->vtable->inqXValsPtr(gridptr);
 
   if (fabs(gridptr->x.inc) <= 0 && xvals)
     {

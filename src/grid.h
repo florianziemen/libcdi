@@ -118,14 +118,14 @@ void gridVerifyProj(int gridID);
 double gridInqXincInMeter(int gridID);
 double gridInqYincInMeter(int gridID);
 
-const double *gridInqXvalsPtr(int gridID);
-const double *gridInqYvalsPtr(int gridID);
+//const double *gridInqXvalsPtr(int gridID);
+//const double *gridInqYvalsPtr(int gridID);
 
 const char **gridInqXCvalsPtr(int gridID);
 const char **gridInqYCvalsPtr(int gridID);
 
-const double *gridInqXboundsPtr(int gridID);
-const double *gridInqYboundsPtr(int gridID);
+//const double *gridInqXboundsPtr(int gridID);
+//const double *gridInqYboundsPtr(int gridID);
 const double *gridInqAreaPtr(int gridID);
 
 int gridGenerate(const grid_t *grid);

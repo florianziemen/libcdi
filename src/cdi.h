@@ -775,6 +775,7 @@ void    gridDefXvals(int gridID, const double xvals[]);
 //      gridInqXvals: Get all values of a X-axis
 SizeType gridInqXvals(int gridID, double xvals[]);
 SizeType gridInqXvalsPart(int gridID, int start, SizeType size, double xvals[]);
+const double *gridInqXvalsPtr(int gridID);
 
 //      gridInqXIsc: Find out whether X-coordinate is of type CHAR
 int     gridInqXIsc(int gridID);
@@ -788,6 +789,7 @@ void    gridDefYvals(int gridID, const double yvals[]);
 //      gridInqYvals: Get all values of a Y-axis
 SizeType gridInqYvals(int gridID, double yvals[]);
 SizeType gridInqYvalsPart(int gridID, int start, SizeType size, double yvals[]);
+const double *gridInqYvalsPtr(int gridID);
 
 //      gridInqYIsc: Find out whether Y-coordinate is of type CHAR
 int     gridInqYIsc(int gridID);
@@ -994,6 +996,7 @@ void    gridDefXbounds(int gridID, const double xbounds[]);
 //      gridInqXbounds: Get the bounds of a X-axis
 SizeType gridInqXbounds(int gridID, double xbounds[]);
 SizeType gridInqXboundsPart(int gridID, int start, SizeType size, double xbounds[]);
+const double *gridInqXboundsPtr(int gridID);
 
 //      gridDefYbounds: Define the bounds of a Y-axis
 void    gridDefYbounds(int gridID, const double ybounds[]);
@@ -1001,6 +1004,7 @@ void    gridDefYbounds(int gridID, const double ybounds[]);
 //      gridInqYbounds: Get the bounds of a Y-axis
 SizeType gridInqYbounds(int gridID, double ybounds[]);
 SizeType gridInqYboundsPart(int gridID, int start, SizeType size, double ybounds[]);
+const double *gridInqYboundsPtr(int gridID);
 
 void    gridDefReducedPoints(int gridID, int reducedPointsSize, const int reducedPoints[]);
 void    gridInqReducedPoints(int gridID, int reducedPoints[]);
