@@ -1363,7 +1363,7 @@ static void
 copy_darray(size_t n, const double *restrict in, double *restrict out)
 {
 #ifdef _OPENMP
-#pragma omp parallel for if (n > 10000000) default(none) shared(n, in, out) schedule(static)
+#pragma omp parallel for if (n > 80000000) default(shared) schedule(static)
 #endif
   for (size_t i = 0; i < n; ++i) out[i] = in[i];
 }
@@ -1509,7 +1509,7 @@ void gridDefXValsSerial(grid_t *gridptr, const double *xvals)
 
   if (gridptr->x.vals && CDI_Debug) Warning("values already defined!");
   gridptr->x.vals = (double *)Realloc(gridptr->x.vals, size * sizeof(double));
-  memcpy(gridptr->x.vals, xvals, size * sizeof (double));
+  copy_darray(size, xvals, gridptr->x.vals);
 }
 
 #ifndef USE_MPI
@@ -1667,14 +1667,12 @@ void gridDefYValsSerial(grid_t *gridptr, const double *yvals)
   const int gridtype = gridptr->type;
   const size_t size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED) ? gridptr->size : gridptr->y.size;
 
-  if (size == 0)
-    Error("Size undefined for gridID = %d!", gridptr->self);
+  if (size == 0) Error("Size undefined for gridID = %d!", gridptr->self);
 
-  if (gridptr->y.vals && CDI_Debug)
-    Warning("Values already defined!");
+  if (gridptr->y.vals && CDI_Debug) Warning("Values already defined!");
 
   gridptr->y.vals = (double *)Realloc(gridptr->y.vals, size * sizeof(double));
-  memcpy(gridptr->y.vals, yvals, size * sizeof(double));
+  copy_darray(size, yvals, gridptr->y.vals);
 }
 
 
@@ -3027,7 +3025,6 @@ const double *gridInqAreaPtr(int gridID)
 void gridDefNvertex(int gridID, int nvertex)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-
   if (gridptr->nvertex != nvertex)
     {
       gridptr->nvertex = nvertex;
@@ -3054,15 +3051,14 @@ gridDefBoundsGeneric(grid_t *gridptr, const double *bounds, size_t regularSize, 
     }
 
   const size_t size = nvertex * (irregular ? gridptr->size : regularSize);
-  if (size == 0)
-    Error("size undefined for gridID = %d", gridptr->self);
+  if (size == 0) Error("size undefined for gridID = %d", gridptr->self);
 
   if (*field == NULL && size)
     *field = (double *)Malloc(size * sizeof (double));
   else if (CDI_Debug)
     Warning("values already defined!");
 
-  memcpy(*field, bounds, size * sizeof (double));
+  copy_darray(size, bounds, *field);
 }
 
 
