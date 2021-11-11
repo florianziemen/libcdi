@@ -3,7 +3,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 include_HEADERS =
 nodist_include_HEADERS =
 lib_LTLIBRARIES =
-check_LTLIBRARIES = libcdiresunpack.la
+check_LTLIBRARIES =
 noinst_LTLIBRARIES =
 nodist_pkgconfig_DATA =
 
@@ -42,6 +42,12 @@ if ENABLE_MPI
 noinst_LTLIBRARIES += libcdipio.la
 endif ENABLE_MPI
 endif !ENABLE_CDI_LIB
+
+if with_on_demand_check_programs
+check_LTLIBRARIES += libcdiresunpack.la
+else !with_on_demand_check_programs
+noinst_LTLIBRARIES += libcdiresunpack.la
+endif !with_on_demand_check_programs
 
 AM_CFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 

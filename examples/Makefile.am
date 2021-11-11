@@ -9,13 +9,22 @@ noinst_PROGRAMS = \
 
 check_PROGRAMS =
 
+# Examples that are part of the test suite:
+test_PROGRAMS_ =
+
 if ENABLE_NETCDF
-check_PROGRAMS += cdi_write_const
+test_PROGRAMS_ += cdi_write_const
 endif
 
 if ENABLE_ISOC_INTERFACE
-check_PROGRAMS += cdi_read_f2003 cdi_write_f2003
+test_PROGRAMS_ += cdi_read_f2003 cdi_write_f2003
 endif ENABLE_ISOC_INTERFACE
+
+if with_on_demand_check_programs
+check_PROGRAMS += $(test_PROGRAMS_)
+else !with_on_demand_check_programs
+noinst_PROGRAMS += $(test_PROGRAMS_)
+endif !with_on_demand_check_programs
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
 

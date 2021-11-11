@@ -10,7 +10,11 @@ noinst_PROGRAMS += cdi
 endif !ENABLE_CDI_LIB
 noinst_PROGRAMS += createtable
 else !ENABLE_CDI_APP
+if with_on_demand_check_programs
 check_PROGRAMS += cdi
+else !with_on_demand_check_programs
+noinst_PROGRAMS += cdi
+endif !with_on_demand_check_programs
 endif !ENABLE_CDI_APP
 
 AM_CPPFLAGS = -I$(top_srcdir)/src

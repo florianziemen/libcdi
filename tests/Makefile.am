@@ -53,7 +53,7 @@ pio_write_run_parallel.log: pio_write_deco2d_run_parallel.log
 test_resource_copy_mpi_run.log: pio_write_run_parallel.log
 endif !with_concurrent_mpi_checks
 
-check_PROGRAMS = \
+test_PROGRAMS_ = \
   calendar_test1 \
   cksum_read \
   cksum_verify \
@@ -67,17 +67,23 @@ check_PROGRAMS = \
   test_table
 
 if ENABLE_NETCDF
-check_PROGRAMS += \
+test_PROGRAMS_ += \
   test_cdf_read \
   test_cdf_write
 endif
 
 if ENABLE_MPI
-check_PROGRAMS += \
+test_PROGRAMS_ += \
   pio_write_deco2d_parallel \
   pio_write_parallel \
   test_resource_copy_mpi
 endif ENABLE_MPI
+
+if with_on_demand_check_programs
+check_PROGRAMS = $(test_PROGRAMS_)
+else !with_on_demand_check_programs
+noinst_PROGRAMS = $(test_PROGRAMS_)
+endif !with_on_demand_check_programs
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
 AM_CFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)

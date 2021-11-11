@@ -636,6 +636,15 @@ AS_VAR_IF([enable_python_interface], [yes],
    CPPFLAGS=$saved_CPPFLAGS])
 AM_MISSING_PROG([PYTHON], [python])
 
+AC_ARG_WITH([on-demand-check-programs],
+  [AS_HELP_STRING([--with-on-demand-check-programs],
+     [only build test programs when calling 'make check' @<:@default: build ]dnl
+[during 'make all'@:>@])],
+  [test "x$withval" != xno && with_on_demand_check_programs=yes],
+  [with_on_demand_check_programs=no])
+AM_CONDITIONAL([with_on_demand_check_programs],
+  [test "x$with_on_demand_check_programs" = xyes])
+
 AC_ARG_WITH([concurrent-mpi-checks],
   [AS_HELP_STRING([--with-concurrent-mpi-checks],
      [allow for simultaneous runs of MPI tests @<:@default: run MPI test ]dnl
