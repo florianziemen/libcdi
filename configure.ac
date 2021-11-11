@@ -611,6 +611,15 @@ AM_MISSING_PROG([PYTHON], [python])
 AM_CONDITIONAL([ENABLE_PYTHON_INTERFACE],
   [test "x$enable_python_interface" = xyes])
 
+AC_ARG_WITH([concurrent-mpi-checks],
+  [AS_HELP_STRING([--with-concurrent-mpi-checks],
+     [allow for simultaneous runs of MPI tests @<:@default: run MPI test ]dnl
+[programs one after another@:>@])],
+  [test "x$withval" != xno && with_concurrent_mpi_checks=yes],
+  [with_concurrent_mpi_checks=no])
+AM_CONDITIONAL([with_concurrent_mpi_checks],
+  [test "x$with_concurrent_mpi_checks" = xyes])
+
 m4_foreach([build_flag_var],[[BUILD_CFLAGS],[BUILD_FCFLAGS],[BUILD_LDFLAGS],[BUILD_LIBS],[BUILD_MPI_C_LIB],[BUILD_MPI_FC_LIB],[BUILD_C_INCLUDE],[BUILD_FC_INCLUDE]],
   [AC_ARG_VAR(build_flag_var,
      [append to ]m4_bpatsubst(build_flag_var, [BUILD_], [])[ during build but not in configure phase])dnl
@@ -651,20 +660,20 @@ AC_CONFIG_FILES([
 ])
 AC_CONFIG_FILES([
   tables/gen_tableheaderfile
-  tests/pio_cksum_asynch
-  tests/pio_cksum_fpguard
-  tests/pio_cksum_grb2
-  tests/pio_cksum_mpi_fw_at_all
-  tests/pio_cksum_mpi_fw_at_reblock
-  tests/pio_cksum_mpi_fw_ordered
-  tests/pio_cksum_mpinonb
-  tests/pio_cksum_nc
-  tests/pio_cksum_nc2
-  tests/pio_cksum_nc4
-  tests/pio_cksum_writer
-  tests/pio_write_deco2d_run_parallel
+  tests/pio_cksum_asynch.test
+  tests/pio_cksum_fpguard.test
+  tests/pio_cksum_grb2.test
+  tests/pio_cksum_mpi_fw_at_all.test
+  tests/pio_cksum_mpi_fw_at_reblock.test
+  tests/pio_cksum_mpi_fw_ordered.test
+  tests/pio_cksum_mpinonb.test
+  tests/pio_cksum_nc.test
+  tests/pio_cksum_nc2.test
+  tests/pio_cksum_nc4.test
+  tests/pio_cksum_writer.test
+  tests/pio_write_deco2d_run_parallel.test
   tests/pio_write_deco2d_run_serial
-  tests/pio_write_run_parallel
+  tests/pio_write_run_parallel.test
   tests/pio_write_run_serial
   tests/test_byteswap_run
   tests/test_cdf_const
@@ -679,7 +688,7 @@ AC_CONFIG_FILES([
   tests/test_cksum_nc_chunk
   tests/test_cksum_service
   tests/test_f2003
-  tests/test_resource_copy_mpi_run
+  tests/test_resource_copy_mpi_run.test
   tests/test_resource_copy_run
   tests/test_table_run
 ],
