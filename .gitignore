@@ -79,6 +79,8 @@ Makefile
 /examples/cdi_write_ens
 /examples/cdi_write_f2003
 /examples/cdi_write_hybrid
+/examples/pio/*.parallel.F90
+/examples/pio/*.parallel.c
 /examples/pio/collectData2003_parallel
 /examples/pio/collectData2003_serial
 /examples/pio/collectDataNStreams_parallel
@@ -95,6 +97,7 @@ Makefile
 /interfaces/python/build
 /interfaces/ruby/CdiLib.so
 /interfaces/ruby/CdiObj.so
+/tests/*.parallel.c
 /tests/calendar_test1
 /tests/cksum_read
 /tests/cksum_verify
