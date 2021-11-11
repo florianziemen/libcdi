@@ -3,7 +3,7 @@
 pio_write_args="-p PIO_ASYNCH -w 3"
 mpi_task_num=7
 
-. ./pio_write_run_parallel
+. ./pio_write_run_parallel.test
 #
 # Local Variables:
 # mode: sh

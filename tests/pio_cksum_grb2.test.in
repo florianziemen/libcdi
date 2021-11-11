@@ -4,7 +4,7 @@ pio_write_args="-w 3"
 mpi_task_num=8
 suffix=grb2
 
-. ./pio_write_run_parallel
+. ./pio_write_run_parallel.test
 #
 # Local Variables:
 # mode: sh
