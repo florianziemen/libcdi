@@ -1,6 +1,9 @@
 SUBDIRS = pio
 
-noinst_PROGRAMS = \
+noinst_PROGRAMS =
+check_PROGRAMS =
+
+EXTRA_PROGRAMS = \
   cdi_append \
   cdi_copy \
   cdi_read \
@@ -9,8 +12,6 @@ noinst_PROGRAMS = \
   cdi_write_hybrid \
   cdi_write_local \
   cdi_write_relativ
-
-check_PROGRAMS =
 
 # Examples that are part of the test suite:
 test_PROGRAMS_ =
@@ -28,6 +29,11 @@ check_PROGRAMS += $(test_PROGRAMS_)
 else !with_on_demand_check_programs
 noinst_PROGRAMS += $(test_PROGRAMS_)
 endif !with_on_demand_check_programs
+
+if with_example_programs
+noinst_PROGRAMS += $(EXTRA_PROGRAMS)
+endif with_example_programs
+examples: $(test_PROGRAMS_) $(EXTRA_PROGRAMS)
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
 
