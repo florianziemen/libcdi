@@ -1,20 +1,27 @@
-noinst_PROGRAMS = \
+noinst_PROGRAMS =
+
+EXTRA_PROGRAMS = \
   collectDataNStreams_serial \
   collectData_serial
 
 if ENABLE_MPI
-noinst_PROGRAMS += \
+EXTRA_PROGRAMS += \
   collectDataNStreams_parallel \
   collectData_parallel \
   compareResourcesArray
 endif ENABLE_MPI
 
 if ENABLE_CF_INTERFACE
-noinst_PROGRAMS += collectData2003_serial
+EXTRA_PROGRAMS += collectData2003_serial
 if BUILD_PIO_FC_PROGRAMS
-noinst_PROGRAMS += collectData2003_parallel
+EXTRA_PROGRAMS += collectData2003_parallel
 endif BUILD_PIO_FC_PROGRAMS
 endif ENABLE_CF_INTERFACE
+
+if with_example_programs
+noinst_PROGRAMS += $(EXTRA_PROGRAMS)
+endif with_example_programs
+examples: $(EXTRA_PROGRAMS)
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
 AM_CFLAGS = $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
