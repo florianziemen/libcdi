@@ -19,6 +19,7 @@ AC_CANONICAL_BUILD
 
 AM_INIT_AUTOMAKE([foreign])
 AM_MAINTAINER_MODE([enable])
+AM_EXTRA_RECURSIVE_TARGETS([examples])
 
 AC_PROG_CC_C99
 AS_VAR_IF([ac_cv_prog_cc_c99], [no],
@@ -653,6 +654,14 @@ AC_ARG_WITH([concurrent-mpi-checks],
   [with_concurrent_mpi_checks=no])
 AM_CONDITIONAL([with_concurrent_mpi_checks],
   [test "x$with_concurrent_mpi_checks" = xyes])
+
+AC_ARG_WITH([example-programs],
+  [AS_HELP_STRING([--without-example-programs],
+     [only build example programs when calling 'make examples' ]dnl
+[@<:@default: build during 'make all'@:>@])],
+  [test "x$withval" != xno && with_example_programs=yes],
+  [with_example_programs=yes])
+AM_CONDITIONAL([with_example_programs], [test "x$with_example_programs" = xyes])
 
 m4_foreach([build_flag_var],[[BUILD_CFLAGS],[BUILD_FCFLAGS],[BUILD_LDFLAGS],[BUILD_LIBS],[BUILD_MPI_C_LIB],[BUILD_MPI_FC_LIB],[BUILD_C_INCLUDE],[BUILD_FC_INCLUDE]],
   [AC_ARG_VAR(build_flag_var,
