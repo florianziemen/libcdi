@@ -1,20 +1,7 @@
 TESTS = \
   calendar_test1 \
   cksum_verify \
-  pio_cksum_asynch \
-  pio_cksum_fpguard \
-  pio_cksum_grb2 \
-  pio_cksum_mpi_fw_at_all \
-  pio_cksum_mpi_fw_at_reblock \
-  pio_cksum_mpi_fw_ordered \
-  pio_cksum_mpinonb \
-  pio_cksum_nc \
-  pio_cksum_nc2 \
-  pio_cksum_nc4 \
-  pio_cksum_writer \
-  pio_write_deco2d_run_parallel \
   pio_write_deco2d_run_serial \
-  pio_write_run_parallel \
   pio_write_run_serial \
   test_byteswap \
   test_cdf_const \
@@ -31,8 +18,40 @@ TESTS = \
   test_f2003 \
   test_month_adjust \
   test_resource_copy \
-  test_resource_copy_mpi_run \
   test_table
+
+# MPI test must have prefix *.test:
+TESTS += \
+  pio_cksum_asynch.test \
+  pio_cksum_fpguard.test \
+  pio_cksum_grb2.test \
+  pio_cksum_mpi_fw_at_all.test \
+  pio_cksum_mpi_fw_at_reblock.test \
+  pio_cksum_mpi_fw_ordered.test \
+  pio_cksum_mpinonb.test \
+  pio_cksum_nc.test \
+  pio_cksum_nc2.test \
+  pio_cksum_nc4.test \
+  pio_cksum_writer.test \
+  pio_write_deco2d_run_parallel.test \
+  pio_write_run_parallel.test \
+  test_resource_copy_mpi_run.test
+
+if !with_concurrent_mpi_checks
+pio_cksum_fpguard.log: pio_cksum_asynch.log
+pio_cksum_grb2.log: pio_cksum_fpguard.log
+pio_cksum_mpi_fw_at_all.log: pio_cksum_grb2.log
+pio_cksum_mpi_fw_at_reblock.log: pio_cksum_mpi_fw_at_all.log
+pio_cksum_mpi_fw_ordered.log: pio_cksum_mpi_fw_at_reblock.log
+pio_cksum_mpinonb.log: pio_cksum_mpi_fw_ordered.log
+pio_cksum_nc.log: pio_cksum_mpinonb.log
+pio_cksum_nc2.log: pio_cksum_nc.log
+pio_cksum_nc4.log: pio_cksum_nc2.log
+pio_cksum_writer.log: pio_cksum_nc4.log
+pio_write_deco2d_run_parallel.log: pio_cksum_writer.log
+pio_write_run_parallel.log: pio_write_deco2d_run_parallel.log
+test_resource_copy_mpi_run.log: pio_write_run_parallel.log
+endif !with_concurrent_mpi_checks
 
 check_PROGRAMS = \
   calendar_test1 \
