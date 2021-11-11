@@ -4,7 +4,7 @@ cmakedir = $(libdir)/cmake
 include_HEADERS =
 nodist_include_HEADERS =
 lib_LTLIBRARIES =
-check_LTLIBRARIES = libcdiresunpack.la
+check_LTLIBRARIES =
 noinst_LTLIBRARIES =
 EXTRA_PROGRAMS = make_fint
 EXTRA_DIST = cdilib.c
@@ -53,6 +53,12 @@ if ENABLE_MPI
 noinst_LTLIBRARIES += libcdipio.la
 endif ENABLE_MPI
 endif !ENABLE_CDI_LIB
+
+if with_on_demand_check_programs
+check_LTLIBRARIES += libcdiresunpack.la
+else !with_on_demand_check_programs
+noinst_LTLIBRARIES += libcdiresunpack.la
+endif !with_on_demand_check_programs
 
 AM_CPPFLAGS =
 if ENABLE_MPI
