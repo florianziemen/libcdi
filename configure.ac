@@ -668,7 +668,6 @@ AC_CONFIG_FILES([
   tests/test_byteswap_run
   tests/test_cdf_const
   tests/test_cdf_transformation
-  tests/test_chunk_cksum
   tests/test_cksum_extra
   tests/test_cksum_grib
   tests/test_cksum_grib2
@@ -676,6 +675,7 @@ AC_CONFIG_FILES([
   tests/test_cksum_nc
   tests/test_cksum_nc2
   tests/test_cksum_nc4
+  tests/test_cksum_nc_chunk
   tests/test_cksum_service
   tests/test_f2003
   tests/test_resource_copy_mpi_run
