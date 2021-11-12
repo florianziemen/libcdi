@@ -17,7 +17,6 @@ TESTS = \
   test_byteswap_run \
   test_cdf_const \
   test_cdf_transformation \
-  test_chunk_cksum \
   test_cksum_extra \
   test_cksum_grib \
   test_cksum_grib2 \
@@ -25,6 +24,7 @@ TESTS = \
   test_cksum_nc \
   test_cksum_nc2 \
   test_cksum_nc4 \
+  test_cksum_nc_chunk \
   test_cksum_service \
   test_f2003 \
   test_month_adjust \
