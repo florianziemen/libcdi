@@ -11,14 +11,9 @@ doc/cdi_fman.pdf:
 	$(AM_V_GEN)$(am__cd) $(top_srcdir)/doc/tex && ./makepdf_f && mv cdi_fman.pdf .. && ./cleanup
 
 EXTRA_DIST = \
-  config/default \
   config/interface.rb \
   doc/cdi_cman.pdf \
   doc/cdi_fman.pdf \
-  src/cfortran.doc \
-  util/crayftnpreproc-wrapper \
-  util/sunf95preproc-wrapper \
-  util/sxpreproc-wrapper \
-  util/xlfpreproc-wrapper
+  src/cfortran.doc
 
 ACLOCAL_AMFLAGS = -I m4
