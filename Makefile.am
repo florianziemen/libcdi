@@ -11,14 +11,9 @@ doc/cdi_fman.pdf:
 
 EXTRA_DIST = \
   LICENSE \
-  config/default \
   config/interface.rb \
   doc/cdi_cman.pdf \
   doc/cdi_fman.pdf \
-  src/cfortran.doc \
-  util/crayftnpreproc-wrapper \
-  util/sunf95preproc-wrapper \
-  util/sxpreproc-wrapper \
-  util/xlfpreproc-wrapper
+  src/cfortran.doc
 
 ACLOCAL_AMFLAGS = -I m4
