@@ -3,7 +3,6 @@
 
 pio_write_args="-p PIO_MPI -w 2"
 mpi_task_num=4
-LOG=pio_cksum_mpinonb.log
 
 . ./pio_write_run
 #

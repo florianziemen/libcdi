@@ -4,13 +4,10 @@ test 'x@ENABLE_NETCDF@' = xyes || exit 77
 cdi_app_stdout="$0.cdi_app.stdout"
 cdi_app_stderr="$0.cdi_app.stderr"
 
-exec >test_cdf_const.log 2>&1
-
 @top_builddir@/examples/cdi_write_const || exit 1
 @top_builddir@/app/cdi -s example_const.nc >${cdi_app_stdout} 2>${cdi_app_stderr} || exit 1
 @top_builddir@/app/cdi example_const.nc >>${cdi_app_stdout} 2>>${cdi_app_stderr} || exit 1
 
-echo "$0"
 exec 6<${cdi_app_stdout} 7<"$0"
 
 while read pattern <&7 ; do

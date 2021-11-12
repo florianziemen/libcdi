@@ -1,7 +1,7 @@
 #!@SHELL@
 test 'x@ENABLE_NETCDF@' = xyes || exit 77
 
+prefix=${0##*/}
 format=nc
-exec >test_cksum_$format.log 2>&1
-./cksum_write -f $format || exit 1
-./cksum_read example.$format || exit 1
+./cksum_write -b ${prefix} -f ${format} || exit 1
+./cksum_read ${prefix}.${format} ${prefix}.cksum || exit 1
