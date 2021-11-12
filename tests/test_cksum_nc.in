@@ -1,5 +1,6 @@
 #!@SHELL@
 test 'x@ENABLE_NETCDF@' = xyes || exit 77
 
+prefix=${0##*/}
 format=nc
 . @srcdir@/test_cksum_base

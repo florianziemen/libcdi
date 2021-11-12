@@ -17,7 +17,7 @@ m4_pattern_forbid([^ACX_])
 AC_CANONICAL_HOST
 AC_CANONICAL_BUILD
 
-AM_INIT_AUTOMAKE([1.16.1 foreign serial-tests])
+AM_INIT_AUTOMAKE([1.16.1 foreign])
 AM_MAINTAINER_MODE([disable])
 
 AC_PROG_CC_C99

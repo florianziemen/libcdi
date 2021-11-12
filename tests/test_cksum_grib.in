@@ -1,6 +1,7 @@
 #!@SHELL@
 test 'x@ENABLE_GRIB@' = xyes || exit 77
 
+prefix=${0##*/}
 format=grb
 . @srcdir@/test_cksum_base
 

@@ -1,8 +1,6 @@
 #!@SHELL@
 @ENABLE_MPI_FALSE@exit 77
 
-LOG=pio_cksum_cdf.log
-
 suffix=nc4
 mpi_task_num=7
 pio_write_args="-w 3 -qtaxis-type=relative"
