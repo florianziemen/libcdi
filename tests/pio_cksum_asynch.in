@@ -3,7 +3,6 @@
 
 pio_write_args="-p PIO_ASYNCH -w 3"
 mpi_task_num=7
-LOG=pio_cksum_asynch.log
 
 . ./pio_write_run
 #

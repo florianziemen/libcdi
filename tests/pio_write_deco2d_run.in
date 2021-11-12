@@ -1,8 +1,9 @@
 #!@SHELL@
 test 'x@MPI_LAUNCH@' != xtrue || exit 77
 
-LOG="${LOG-pio_write_deco2d.log}"
 mpi_task_num="${mpi_task_num-6}"
+
+prefix=${0##*/}
 suffix="${suffix-grb}"
 
 case ${suffix} in
@@ -25,14 +26,12 @@ case ${suffix} in
     ;;
 esac
 
-exec 5>&1 6>&2 >"$LOG" 2>&1
 @top_builddir@/libtool --mode=execute @MPI_LAUNCH@ -n ${mpi_task_num} \
-  ${tool_wrap_mpi} ./pio_write_deco2d -f ${suffix} ${pio_write_args} || exit 1
-exec 2>&6 1>&5 5>&- 6>&-
+  ${tool_wrap_mpi} ./pio_write_deco2d -b ${prefix} -f ${suffix} ${pio_write_args} || exit 1
 @top_builddir@/libtool --mode=execute \
-  ${tool_wrap} ./cksum_read example_0.${suffix} example_0.cksum || exit 1
+  ${tool_wrap} ./cksum_read ${prefix}_0.${suffix} ${prefix}_0.cksum || exit 1
 @top_builddir@/libtool --mode=execute \
-  ${tool_wrap} ./cksum_read example_1.${suffix} example_1.cksum || exit 1
+  ${tool_wrap} ./cksum_read ${prefix}_1.${suffix} ${prefix}_1.cksum || exit 1
 #
 # Local Variables:
 # mode: sh

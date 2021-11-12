@@ -4,7 +4,6 @@ test 'x@ENABLE_GRIB@' = xyes || exit 77
 
 pio_write_args="-p PIO_WRITER -w 4"
 mpi_task_num=8
-LOG=pio_cksum_writer.log
 
 . ./pio_write_run
 #

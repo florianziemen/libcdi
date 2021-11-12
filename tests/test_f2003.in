@@ -5,12 +5,9 @@ test 'x@ENABLE_NETCDF@' = xyes || exit 77
 cdi_read_f2003_stdout="$0.cdi_read_f2003.stdout"
 cdi_read_f2003_stderr="$0.cdi_read_f2003.stderr"
 
-format=nc
-exec >test_f2003_$format.log 2>&1
 @top_builddir@/libtool --mode=execute ${tool_wrap} @top_builddir@/examples/cdi_write_f2003 || exit 1
 @top_builddir@/libtool --mode=execute ${tool_wrap} @top_builddir@/examples/cdi_read_f2003 >${cdi_read_f2003_stdout} 2>${cdi_read_f2003_stderr} || exit 1
 
-echo "$0"
 exec 5<${cdi_read_f2003_stdout} 6<${cdi_read_f2003_stderr} 7<"$0"
 while read pattern <&7 ; do
   test "x$pattern" != 'x#PATTERNS' || break
