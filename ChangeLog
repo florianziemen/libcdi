@@ -2,6 +2,10 @@
 
 	* Version 2.0.2 released
 
+2021-11-12  Uwe Schulzweida
+
+	* grib2: fix unsigned integer overflow for key scaledValueOfFirstFixedSurface
+
 2021-11-08  Uwe Schulzweida
 
 	* changed chunk_size_lim from 1073741823 to 16777216 (bug fix)

@@ -2468,14 +2468,15 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 static
 void getLevelFactor(double level, long *factor, long *out_scaled_value)
 {
+  const double eps = 1.0e-7;
+
   double scaled_value  = level;
   long   iscaled_value = lround(scaled_value);
-  long   i;
 
-  const double eps = 1.e-8;
-  for ( i=0; (fabs(scaled_value - (double) iscaled_value) >= eps) && i < 7; i++ )
+  long i;
+  for (i = 0; (iscaled_value < (4294967295/10)) && (fabs(scaled_value - (double) iscaled_value) >= eps) && i < 7; i++)
     {
-      scaled_value *= 10.;
+      scaled_value *= 10.0;
       iscaled_value = lround(scaled_value);
     }
 
@@ -2587,7 +2588,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
 
                The key/value pairs that are set in "grib2DefLevel" do not exist for this template.
             */
-            if ( proddef_template_num != 32 )
+            if (proddef_template_num != 32)
               grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype2, hasBounds, level, dlevel1, dlevel2);
           }
 
