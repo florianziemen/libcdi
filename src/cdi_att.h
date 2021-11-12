@@ -41,13 +41,3 @@ void cdiAttsPack(void *p, int varID, void *buf, int size, int *position, void *c
 void cdiAttsUnpack(int cdiID, int varID, void *buf, int size, int *position, void *context);
 
 #endif
-
-/*
- * Local Variables:
- * c-file-style: "Java"
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * show-trailing-whitespace: t
- * require-trailing-newline: t
- * End:
- */
