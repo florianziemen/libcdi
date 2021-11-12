@@ -3,7 +3,6 @@
 
 pio_write_args="-w 3"
 mpi_task_num=8
-LOG=pio_cksum_grb2.log
 suffix=grb2
 
 . ./pio_write_run
