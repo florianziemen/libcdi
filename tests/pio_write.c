@@ -33,7 +33,9 @@
 
 static const struct model_config default_setup
 #ifdef __cplusplus
-    = { 12, 6, 3, 5, 5, CDI_FILETYPE_GRB, CDI_DATATYPE_PACK24, PIO_WRITE_CONFIG_CHECKSUM_FLAG, TAXIS_ABSOLUTE, -1, "grb" };
+    = {
+        12, 6, 3, 5, 5, CDI_FILETYPE_GRB, CDI_DATATYPE_PACK24, PIO_WRITE_CONFIG_CHECKSUM_FLAG, TAXIS_ABSOLUTE, -1, "example", "grb"
+      };
 #else
     = {
         .nlon = 12,
@@ -46,6 +48,7 @@ static const struct model_config default_setup
         .flags = PIO_WRITE_CONFIG_CHECKSUM_FLAG,
         .taxistype = TAXIS_ABSOLUTE,
         .taxisunit = -1,
+        .prefix = "example",
         .suffix = "grb",
       };
 #endif
@@ -350,7 +353,7 @@ main(int argc, char *argv[])
   {
     int opt;
     while ((opt = getopt(argc, argv,
-                         "f:m:n:z:t:y:cs:q:"
+                         "b:f:m:n:z:t:y:cs:q:"
 #ifdef USE_MPI
                          "p:w:"
 #endif
@@ -380,6 +383,7 @@ main(int argc, char *argv[])
           break;
 #endif
         case 'q': parse_long_option(&setup, pioConfHandle, &pioRoleAssign, optarg, argc, argv); break;
+        case 'b': setup.prefix = optarg; break;
         case 'f':
           {
             int found = 0;
