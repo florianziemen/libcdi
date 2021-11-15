@@ -1,6 +1,5 @@
 #!@SHELL@
 @USE_MPI_FALSE@exit 77
-@HAVE_LIBGRIB_API_FALSE@exit 77
 
 pio_write_args="-f grb2 -w 3"
 mpi_task_num=8
