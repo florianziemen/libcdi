@@ -1,7 +1,7 @@
 #!@SHELL@
 test 'x@ENABLE_NETCDF@' = xyes || exit 77
 
-ncdatafile="test$$.nc"
+ncdatafile="$0.nc"
 tempfiles="${ncdatafile}"
 trap "EC=\$? ; \rm -f ${tempfiles}; exit \$EC" EXIT
 
