@@ -3,9 +3,9 @@ test 'x@ENABLE_NETCDF@' = xyes || exit 77
 
 ncdatafile="$0.nc"
 
-../libtool --mode=execute ${tool_wrap} ./test_cdf_write "${ncdatafile}" || exit 1
+@top_builddir@/libtool --mode=execute ${tool_wrap} ./test_cdf_write "${ncdatafile}" || exit 1
 
-digest=`../libtool --mode=execute ${tool_wrap} ./test_cdf_read "${ncdatafile}"` || exit 1
+digest=`@top_builddir@/libtool --mode=execute ${tool_wrap} ./test_cdf_read "${ncdatafile}"` || exit 1
 missValueCount=`echo "$digest" | @SED@ -n '/^missing values count =/{
 s/^missing values count *= *//
 p
