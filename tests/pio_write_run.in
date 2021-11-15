@@ -12,14 +12,14 @@ test_variation()
   exec 5>&1 6>&2 >"$LOG" 2>&1
   echo "creating data with $1" >&2
   variation=$1
-  ../libtool --mode=execute \
+  @top_builddir@/libtool --mode=execute \
     @MPI_LAUNCH@ \
     -n ${mpi_task_num} ${tool_wrap} ./pio_write ${pio_write_args} -s 7 ${variation} || exit 1
   echo "checking example_0.$suffix" >&2
-  ../libtool --mode=execute \
+  @top_builddir@/libtool --mode=execute \
     ${tool_wrap} ./cksum_read example_0.${suffix} example_0.cksum || exit 1
   echo "checking example_1.$suffix" >&2
-  ../libtool --mode=execute \
+  @top_builddir@/libtool --mode=execute \
     ${tool_wrap} ./cksum_read example_1.${suffix} example_1.cksum || exit 1
 }
 

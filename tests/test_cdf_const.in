@@ -6,9 +6,9 @@ cdi_app_stderr="$0.cdi_app.stderr"
 
 exec >test_cdf_const.log 2>&1
 
-@abs_top_builddir@/examples/cdi_write_const || exit 1
-@abs_top_builddir@/app/cdi -s example_const.nc >${cdi_app_stdout} 2>${cdi_app_stderr} || exit 1
-@abs_top_builddir@/app/cdi example_const.nc >>${cdi_app_stdout} 2>>${cdi_app_stderr} || exit 1
+@top_builddir@/examples/cdi_write_const || exit 1
+@top_builddir@/app/cdi -s example_const.nc >${cdi_app_stdout} 2>${cdi_app_stderr} || exit 1
+@top_builddir@/app/cdi example_const.nc >>${cdi_app_stdout} 2>>${cdi_app_stderr} || exit 1
 
 echo "$0"
 exec 6<${cdi_app_stdout} 7<"$0"
@@ -25,7 +25,7 @@ while read line <&6 ; do
 done
 
 if test -s ${cdi_app_stderr}; then
-  echo "unexpected error message from @abs_top_builddir@/app/cdi:"
+  echo "unexpected error message from @top_builddir@/app/cdi:"
   cat ${cdi_app_stderr}
   exit 1
 fi
