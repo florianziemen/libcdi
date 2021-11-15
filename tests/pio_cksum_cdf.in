@@ -1,24 +1,24 @@
 #!@SHELL@
 @USE_MPI_FALSE@exit 77
-@ENABLE_NETCDF_FALSE@exit 77
 
 LOG=pio_cksum_cdf.log
 
-if test 'x@ENABLE_NC4' = xyes; then
-  suffix=nc4
-  mpi_task_num=7
-  pio_write_args="-f $suffix -w 3 -qtaxis-type=relative"
-  . ./pio_write_run
-fi
+suffix=nc4
+mpi_task_num=7
+pio_write_args="-f $suffix -w 3 -qtaxis-type=relative"
+(. ./pio_write_run) || test $? -eq 77 || exit 1
 
 mpi_task_num=8
 suffix=nc2
 pio_write_args="-f $suffix -w 3 -qtaxis-type=relative"
-. ./pio_write_run
+(. ./pio_write_run) || test $? -eq 77 || exit 1
 
 mpi_task_num=5
 suffix=nc
 pio_write_args="-f $suffix -w 2 -qtaxis-type=relative"
+# TODO: This script should be splitted into three ones. In the meantime, we
+# assume that if this test is skipped, the two above are skipped as well and we
+# can 'exit 77'.
 . ./pio_write_run
 
 #
