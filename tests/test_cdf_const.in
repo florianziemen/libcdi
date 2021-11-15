@@ -1,14 +1,17 @@
 #!@SHELL@
 test 'x@ENABLE_NETCDF@' = xyes || exit 77
 
+cdi_app_stdout="$0.cdi_app.stdout"
+cdi_app_stderr="$0.cdi_app.stderr"
+
 exec >test_cdf_const.log 2>&1
 
 ../libtool --mode=execute ${tool_wrap} @abs_top_builddir@/examples/cdi_write_const || exit 1
-../libtool --mode=execute ${tool_wrap} @abs_top_builddir@/app/cdi -s example_const.nc >cdi.$$.stdout 2>cdi.$$.stderr || exit 1
-../libtool --mode=execute ${tool_wrap} @abs_top_builddir@/app/cdi example_const.nc >>cdi.$$.stdout 2>>cdi.$$.stderr || exit 1
+../libtool --mode=execute ${tool_wrap} @abs_top_builddir@/app/cdi -s example_const.nc >${cdi_app_stdout} 2>${cdi_app_stderr} || exit 1
+../libtool --mode=execute ${tool_wrap} @abs_top_builddir@/app/cdi example_const.nc >>${cdi_app_stdout} 2>>${cdi_app_stderr} || exit 1
 
 echo "$0"
-exec 6<cdi.$$.stdout 7<"$0"
+exec 6<${cdi_app_stdout} 7<"$0"
 
 while read pattern <&7 ; do
   test "x$pattern" != 'x#PATTERNS' || break
@@ -21,9 +24,9 @@ while read line <&6 ; do
   echo "$line" | grep "$pattern" || exit 1
 done
 
-if test -s cdi.$$.stderr; then
+if test -s ${cdi_app_stderr}; then
   echo "unexpected error message from @abs_top_builddir@/app/cdi:"
-  cat cdi.$$.stderr
+  cat ${cdi_app_stderr}
   exit 1
 fi
 
@@ -31,7 +34,7 @@ read pattern <&7
 test "x$pattern" = 'x#END PATTERNS' || exit 1
 
 exec 5<&- 6<&-
-\rm cdi.$$.stdout cdi.$$.stderr example_const.nc
+\rm ${cdi_app_stdout} ${cdi_app_stderr} example_const.nc
 \rm test_cdf_const.log
 
 #PATTERNS
