@@ -5,5 +5,3 @@ format=nc
 exec >test_chunk_cksum_$format.log 2>&1
 ./cksum_write_chunk -m 17 || exit 1
 ./cksum_read example.$format || exit 1
-\rm example.cksum example.$format
-\rm test_chunk_cksum_$format.log
