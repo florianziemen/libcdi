@@ -58,8 +58,6 @@ modelRegionCompute(double region[], int nlev, int nlat, int nlon, const int chun
 void
 modelRun(struct model_config setup, MPI_Comm comm)
 {
-  static const char * const fname_prefix        = "example";
-
   struct varDesc_t
   {
     size_t size;
@@ -277,7 +275,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
       for (size_t varIdx = 0; varIdx < nVars; ++varIdx)
         varDesc[varIdx].checksum_state = 0;
 
-      int streamID = composeStream(&filename, fname_prefix, tfID, setup.suffix, setup.filetype);
+      int streamID = composeStream(&filename, setup.prefix, tfID, setup.suffix, setup.filetype);
       streamDefVlist(streamID, vlistID);
 
       vdate = 19850101;
@@ -396,7 +394,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
       if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
         {
           FILE *tablefp;
-          composeFilename(&filename, fname_prefix, tfID, "cksum");
+          composeFilename(&filename, setup.prefix, tfID, "cksum");
           if (!(tablefp = fopen(filename, "w")))
             {
               perror("failed to open table file");
