@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef HAVE_PPM_CORE
+#if defined USE_MPI && defined HAVE_PPM_CORE
 #include <ppm/ppm_uniform_partition.h>
 #include <core/ppm_combinatorics.h>
 #endif
@@ -277,7 +277,7 @@ PPM_prime_factorization_32(uint32_t n, uint32_t **factors)
 
 #endif
 
-#ifndef HAVE_PPM_CORE
+#if !defined USE_MPI || !defined HAVE_PPM_CORE
 static char repeatable_rand_state[31 * sizeof(long)];
 
 long
