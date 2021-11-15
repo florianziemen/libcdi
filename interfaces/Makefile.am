@@ -1,16 +1,14 @@
 AM_CPPFLAGS = -I$(top_srcdir)/src
-AM_LDFLAGS = $(NETCDF_LIBS) $(SZLIB_LIBS) $(LDFLAGS)
-locallibs = $(top_builddir)/src/.libs/libcdi.so $(LTLIBOBJS) $(NETCDF_LIBS) $(SZLIB_LIBS)
 
-bin_PROGRAMS =
-noinst_PROGRAMS = 
-noinst_LTLIBRARIES = 
+.PHONY: help rubyObj rubyLib pythonObj pythonLib \
+  rubyObjWrapper rubyLibWrapper pythonObjWrapper pythonLibWrapper \
+  rubyObjTest rubyLibTest pythonObjTest pythonLibTest \
+  rubyObjInstall rubyLibInstall pythonObjInstall pythonLibInstall \
+  rubyObjMakefile rubyLibMakefile
+.NOTPARALLEL:
 
-if CREATE_INTERFACES
-noinst_PROGRAMS += CdiInfo
-noinst_LTLIBRARIES += libcdipp.la
-endif
-
+EXTRA_LTLIBRARIES = libcdipp.la
+EXTRA_PROGRAMS = CdiInfo
 EXTRA_DIST = \
   cdilib.i \
   cdiobj.i \
@@ -27,6 +25,9 @@ EXTRA_DIST = \
   python/testObj.py \
   ruby/cdilib_wrap.c \
   ruby/cdiobj_wrap.cpp \
+  ruby/extconf.rb \
+  ruby/extconfLib.rb \
+  ruby/extconfObj.rb \
   ruby/testLib.rb \
   ruby/testObj.rb
 
@@ -53,65 +54,79 @@ help:
 	@echo "  <lang>ObjInstall - install shared libraries and optional language files for <lang>"
 	@echo "  <lang>LibInstall - see <lang>ObjInstall"
 
-if ENABLE_RUBY
-rubyObj: rubyObjWrapper rubyObjMakefile
-	@cd ruby; make
+# RUBY
+rubyObj: rubyObjWrapper rubyObjMakefile libcdipp.la
+	@$(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS)
 
 rubyLib: rubyLibWrapper rubyLibMakefile
-	@cd ruby; make
+	@$(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS)
 
-rubyObjWrapper: cdiobj.i
-if ENABLE_SWIG
-	$(SWIG) -ruby -c++ -module CdiObj -o ruby/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
-endif
+rubyObjWrapper: ruby/cdiobj_wrap.cpp
 
-rubyLibWrapper: cdilib.i
-if ENABLE_SWIG
-	$(SWIG) -ruby -module CdiLib -o ruby/cdilib_wrap.c $(AM_CPPFLAGS) cdilib.i
-endif
+rubyLibWrapper: ruby/cdilib_wrap.c
 
 rubyObjTest: rubyObj
-	@cd ruby; ruby testObj.rb
+	@$(am__cd) ruby && $(RUBY) testObj.rb
 
 rubyLibTest: rubyLib
-	@cd ruby; ruby testLib.rb
+	@$(am__cd) ruby && $(RUBY) testLib.rb
 
-rubyObjInstall: rubyObj
-	@cd ruby; make install
+rubyObjInstall: rubyObjMakefile
+	@$(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS) install
+
+rubyLibInstall: rubyLibMakefile
+	@$(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS) install
 
 rubyObjMakefile:
-	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../" ruby extconfObj.rb
+	$(AM_V_GEN)$(am__cd) ruby && \
+	INCFLAGS='-I$(abs_srcdir)' CFLAGS='$(CFLAGS)' LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' $(RUBY) extconfObj.rb
 
 rubyLibMakefile:
-	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(locallibs) $(LDFLAGS)" INCFLAGS="-I../../src" ruby extconfLib.rb
-endif
+	$(AM_V_GEN)$(am__cd) ruby && \
+	INCFLAGS='-I$(abs_top_srcdir)/src' CFLAGS='$(CFLAGS)' LDFLAGS='$(LDFLAGS) -L$(abs_top_builddir)/src/.libs' LIBS='-lcdi $(LIBS)' $(RUBY) extconfLib.rb
 
-if ENABLE_PYTHON
-pythonObj: python/cdiobj_wrap.cpp
-	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
+ruby/cdiobj_wrap.cpp: @MAINTAINER_MODE_TRUE@ cdiobj.i
+	$(AM_V_GEN)$(SWIG) -ruby -c++ -module CdiObj -o $@ $(AM_CPPFLAGS) $<
 
-pythonLib: pythonLibWrapper
-	@cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../../src" python setupLib.py build_ext --inplace
+ruby/cdilib_wrap.c: @MAINTAINER_MODE_TRUE@ cdilib.i
+	$(AM_V_GEN)$(SWIG) -ruby -module CdiLib -o $@ $(AM_CPPFLAGS) $<
 
-pythonLibWrapper: cdilib.i
-if ENABLE_SWIG
-	$(SWIG) -python -module CdiLib -o python/cdilib_wrap.c $(AM_CPPFLAGS) cdilib.i
-endif
+# PYTHON
+pythonObj: pythonObjWrapper cdi.lo
+	@$(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_srcdir)' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS) -L$(abs_top_builddir)/src/.libs' LIBS='$(LIBS)' BUILDLIBDIR='$(abs_top_builddir)/src/.libs' LIBDIR='$(libdir)' $(PYTHON) setupObj.py build_ext --inplace
+
+pythonLib: pythonLibWrapper $(top_builddir)/src/cdilib.lo
+	@$(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_top_srcdir)/src' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' $(PYTHON) setupLib.py build_ext --inplace
+
+pythonObjWrapper: python/cdiobj_wrap.cpp
+
+pythonLibWrapper: python/cdilib_wrap.c
 
 pythonObjTest: pythonObj
-	@cd python; python testObj.py
+	@$(am__cd) python && $(PYTHON) testObj.py
 
 pythonLibTest: pythonLib
-	@cd python; python testLib.py
+	@$(am__cd) python && $(PYTHON) testLib.py
 
 pythonObjInstall: pythonObj
-	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py install --prefix=$(prefix)
+	@$(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_srcdir)' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS) -L$(abs_top_builddir)/src/.libs' LIBS='$(LIBS)' BUILDLIBDIR='$(abs_top_builddir)/src/.libs' LIBDIR='$(libdir)' $(PYTHON) setupObj.py install --prefix='$(prefix)'
 
-python/cdiobj_wrap.cpp: cdiobj.i
-if ENABLE_SWIG
-	$(SWIG) -python -c++ -module CdiObj -o python/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
-endif
-endif
+pythonLibInstall: pythonLib
+	@$(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_top_srcdir)/src' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' $(PYTHON) setupLib.py install --prefix='$(prefix)'
+
+python/cdiobj_wrap.cpp: @MAINTAINER_MODE_TRUE@ cdiobj.i
+	$(AM_V_GEN)$(SWIG) -python -c++ -module CdiObj -o $@ $(AM_CPPFLAGS) $<
+
+python/cdilib_wrap.c: @MAINTAINER_MODE_TRUE@ cdilib.i
+	$(AM_V_GEN)$(SWIG) -python -module CdiLib -o $@ $(AM_CPPFLAGS) $<
+
+$(top_builddir)/src/cdilib.lo:
+	@$(am__cd) $(top_builddir)/src && $(MAKE) $(AM_MAKEFLAGS) cdilib.lo
+
+clean-local:
+	-rm -f CdiInfo libcdipp.la
+	-$(am__cd) ruby && rm -rf *.o *.so Makefile .sitearchdir.time
+	-$(am__cd) python && rm -rf *.pyc *.pyo *.so __pycache__ build
 
 # overrides to make regular compilations also use libtool
 COMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \

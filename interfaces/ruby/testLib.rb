@@ -1,4 +1,4 @@
-require 'CdiLib'
+require './CdiLib'
 include CdiLib
 ifile = ARGV[0].nil? ? "../testdata/mulval.nc" : ARGV[0]
 streamID = streamOpenRead(ifile)

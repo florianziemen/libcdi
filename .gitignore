@@ -78,6 +78,15 @@ Makefile
 /examples/pio/collectData2003
 /examples/pio/collectDataNStreams
 /examples/pio/compareResourcesArray
+/interfaces/CdiInfo
+/interfaces/python/*.pyc
+/interfaces/python/*.pyo
+/interfaces/python/_CdiLib.so
+/interfaces/python/_CdiObj.so
+/interfaces/python/__pychache__
+/interfaces/python/build
+/interfaces/ruby/CdiLib.so
+/interfaces/ruby/CdiObj.so
 /tests/calendar_test1
 /tests/cksum_read
 /tests/cksum_verify
@@ -122,6 +131,9 @@ Makefile
 # Dist stage files:
 /cdi-*.tar.gz
 /src/cdilib.c
+
+# Install stage files:
+/interfaces/ruby/.sitearchdir.time
 
 # Mac OS files:
 *.dSYM
