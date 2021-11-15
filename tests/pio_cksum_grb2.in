@@ -1,7 +1,7 @@
 #!@SHELL@
 @USE_MPI_FALSE@exit 77
 
-pio_write_args="-f grb2 -w 3"
+pio_write_args="-w 3"
 mpi_task_num=8
 LOG=pio_cksum_grb2.log
 suffix=grb2
