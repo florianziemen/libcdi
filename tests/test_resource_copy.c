@@ -203,7 +203,11 @@ static int modelRun(MPI_Comm comm)
   {
     struct idPair temp = defineVlist(gridID, zaxisID, taxisID);
     vlistID = temp.id1;
-    streamID = streamOpenWrite("example.grb", CDI_FILETYPE_GRB);
+#ifdef MPI_MARSHALLING
+    streamID = streamOpenWrite("example_resource_copy_mpi.grb", CDI_FILETYPE_GRB);
+#else
+    streamID = streamOpenWrite("example_resource_copy.grb", CDI_FILETYPE_GRB);
+#endif
     if ( streamID < 0 ) xabort ( "Could not open file" );
     defineStream ( streamID, vlistID );
     vlistDestroy(temp.id1);

@@ -119,7 +119,7 @@ main(int argc, char *argv[])
 #ifndef TEST_CHUNK_WRITE
                          "f:"
 #endif
-                         "m:n:o:t:")) != -1)
+                         "b:m:n:o:t:")) != -1)
       switch (opt) {
 #ifndef TEST_CHUNK_WRITE
       case 'f':
@@ -144,6 +144,9 @@ main(int argc, char *argv[])
         }
         break;
 #endif
+      case 'b':
+        prefix = optarg;
+        break;
       case 'm':
         nlon = parse_intarg("error parsing number of longitudes");
         check_positive(nlon, "longitudes");

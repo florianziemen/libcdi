@@ -35,6 +35,7 @@ struct model_config
   int filetype, datatype;
   int flags;
   int taxistype, taxisunit;
+  const char *prefix;
   const char *suffix;
 };
 

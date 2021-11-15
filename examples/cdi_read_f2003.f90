@@ -20,7 +20,7 @@ PROGRAM CDIREADF2003
   WRITE (0, '(a,132a)') 'cdi version: ', cdi_version
 
   ! Open the dataset
-  streamID = streamOpenRead(C_CHAR_"example.nc"//C_NULL_CHAR)
+  streamID = streamOpenRead(C_CHAR_"example_f2003.nc"//C_NULL_CHAR)
   IF ( streamID < 0 ) THEN
     PRINT *,  'Could not Read the file.'
     msg => cdiStringError(streamID)
