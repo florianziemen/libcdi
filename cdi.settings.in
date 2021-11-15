@@ -64,6 +64,8 @@
     "ieg"            : "@ENABLE_IEG@",
     "enable_mpi"     : "@ENABLE_MPI@",
     "parallel_nc4"   : "@HAVE_PARALLEL_NC4@"
+    "enable_python"  : "@ENABLE_PYTHON_INTERFACE@",
+    "enable_ruby"    : "@ENABLE_RUBY_INTERFACE@",
     "across"         : "@ENABLE_ACROSS@",
   }
 }

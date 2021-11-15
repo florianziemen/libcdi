@@ -84,6 +84,16 @@ Makefile
 /examples/pio/collectData2003
 /examples/pio/collectDataNStreams
 /examples/pio/compareResourcesArray
+/interfaces/CdiInfo
+/interfaces/python/*.pyc
+/interfaces/python/*.pyo
+/interfaces/python/Cdi.py
+/interfaces/python/_Cdi.so
+/interfaces/python/__pychache__
+/interfaces/python/build
+/interfaces/python/cdi_wrapper.cpp
+/interfaces/ruby/Cdi.so
+/interfaces/ruby/cdi_wrapper.cpp
 /src/.fint
 /src/cdi.inc
 /src/cdiFortran.c
@@ -100,6 +110,7 @@ Makefile
 /examples/cdi_read_f2003
 /examples/cdi_write_const
 /examples/cdi_write_f2003
+/interfaces/mulval.nc
 /tests/*.cksum
 /tests/*.ext
 /tests/*.grb
@@ -135,6 +146,9 @@ Makefile
 # Dist stage files:
 /cdi-*.tar.gz
 /src/cdilib.c
+
+# Install stage files:
+/interfaces/ruby/.sitearchdir.time
 
 # Mac OS files:
 *.dSYM

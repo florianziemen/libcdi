@@ -165,6 +165,42 @@ dnl definition for *.F90 source files:
       ac_fc_srcext=$saved_ac_fc_srcext
       m4_popdef([AC_FC_PP_DEFINE])])])
 
+AC_ARG_ENABLE([ruby-interface],
+  [AS_HELP_STRING([--enable-ruby-interface],
+     [create Ruby language interface (EXPERIMENTAL) @<:@default=no@:>@])],
+  [test "x$enableval" != xno && enable_ruby_interface=yes],
+  [enable_ruby_interface=no])
+
+AC_ARG_ENABLE([python-interface],
+  [AS_HELP_STRING([--enable-python-interface],
+     [create Python language interface (EXPERIMENTAL) @<:@default=no@:>@])],
+  [test "x$enableval" != xno && enable_python_interface=yes],
+  [enable_python_interface=no])
+
+if test "x$enable_ruby_interface" = xyes || \
+   test "x$enable_python_interface" = xyes; then
+  if test "x$CXX" != xno; then
+    AC_PROG_CXX
+    test -z $CXX 2>/dev/null && CXX=no
+    AS_IF([test "x$CXX" != xno],
+      [AC_MSG_CHECKING([whether the C++ compiler works])
+       AC_LANG_PUSH([C++])
+       AC_LINK_IFELSE([AC_LANG_PROGRAM],
+         [AC_MSG_RESULT([yes])],
+         [AC_MSG_RESULT([no])
+          CXX=no])
+       AC_LANG_POP([C++])])
+  fi
+  AS_VAR_IF([CXX], [no],
+    [AC_MSG_FAILURE([either the Ruby or the Python interface is requested ]dnl
+[but the C++ compiler is disabled, missing or lacks the required features])])
+else
+  CXX=no
+dnl The Automake conditional "am__fastdepCXX" is not set in this case because
+dnl we skipped the check for CXX. Prevent the configure script from failing:
+  AM_CONDITIONAL([am__fastdepCXX], [false])
+fi
+
 AC_PROG_INSTALL
 AC_OPENMP
 
@@ -537,7 +573,44 @@ AM_CONDITIONAL([BUILD_PIO_FC_PROGRAMS], [test "x$build_pio_fc_programs" = xyes])
 AM_CONDITIONAL([ENABLE_MPI], [test "x$enable_mpi" = xyes])
 AM_CONDITIONAL([HAVE_PARALLEL_NC4], [test "x$have_parallel_nc4" = xyes])
 
+AS_IF([test "x$enable_ruby_interface" = xyes || \
+       test "x$enable_python_interface" = xyes],
+  [AC_CHECK_PROGS([SWIG], [swig])
+   AS_VAR_IF([SWIG], [], [AS_UNSET([SWIG])])])
+AM_MISSING_PROG([SWIG], [swig])
+
+AS_VAR_IF([enable_ruby_interface], [yes],
+  [AC_CHECK_PROGS([RUBY], [ruby])
+   AS_VAR_IF([RUBY], [],
+     [AC_MSG_FAILURE([Ruby interface is requested but the Ruby interpreter ]dnl
+[is not found])])
+   saved_CPPFLAGS=$CPPFLAGS
+   AS_VAR_APPEND([CPPFLAGS],
+     [" `${RUBY} $srcdir/config/interface.rb 2>/dev/null`"])
+   AC_CHECK_HEADER([ruby.h], [],
+     [AC_MSG_FAILURE([Ruby interface is requested but the required header ]dnl
+[ruby.h not found or not compilable])],
+     [AC_INCLUDES_DEFAULT])
+   CPPFLAGS=$saved_CPPFLAGS])
 AM_MISSING_PROG([RUBY], [ruby])
+AM_CONDITIONAL([ENABLE_RUBY_INTERFACE], [test "x$enable_ruby_interface" = xyes])
+
+AS_VAR_IF([enable_python_interface], [yes],
+  [AC_CHECK_PROGS([PYTHON], [python])
+   AS_VAR_IF([PYTHON], [],
+     [AC_MSG_FAILURE([Python interface is requested but the Python ]dnl
+[interpreter is not found])])
+   saved_CPPFLAGS=$CPPFLAGS
+   AS_VAR_APPEND([CPPFLAGS],
+     [" `${PYTHON} -c 'from distutils import sysconfig;print(\"-I\" + sysconfig.get_python_inc())'`"])
+   AC_CHECK_HEADER([Python.h], [],
+     [AC_MSG_FAILURE([Python interface is requested but the required header ]dnl
+[Python.h not found or not compilable])],
+     [AC_INCLUDES_DEFAULT])
+   CPPFLAGS=$saved_CPPFLAGS])
+AM_MISSING_PROG([PYTHON], [python])
+AM_CONDITIONAL([ENABLE_PYTHON_INTERFACE],
+  [test "x$enable_python_interface" = xyes])
 
 m4_foreach([build_flag_var],[[BUILD_CFLAGS],[BUILD_FCFLAGS],[BUILD_LDFLAGS],[BUILD_LIBS],[BUILD_MPI_C_LIB],[BUILD_MPI_FC_LIB],[BUILD_C_INCLUDE],[BUILD_FC_INCLUDE]],
   [AC_ARG_VAR(build_flag_var,
@@ -556,6 +629,10 @@ AC_SUBST([ENABLE_MPI], [$enable_mpi])
 AM_SUBST_NOTMAKE([ENABLE_MPI)])dnl
 AC_SUBST([HAVE_PARALLEL_NC4], [$have_parallel_nc4])
 AM_SUBST_NOTMAKE([HAVE_PARALLEL_NC4)])dnl
+AC_SUBST([ENABLE_RUBY_INTERFACE], [$enable_ruby_interface])
+AM_SUBST_NOTMAKE([ENABLE_RUBY_INTERFACE)])dnl
+AC_SUBST([ENABLE_PYTHON_INTERFACE], [$enable_python_interface])
+AM_SUBST_NOTMAKE([ENABLE_PYTHON_INTERFACE)])dnl
 
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES([
@@ -564,6 +641,7 @@ AC_CONFIG_FILES([
   cdi.settings
   examples/Makefile
   examples/pio/Makefile
+  interfaces/Makefile
   src/Makefile
   src/cmake/cdi/cdi-config-version.cmake
   src/cmake/cdi/cdi-config.cmake
