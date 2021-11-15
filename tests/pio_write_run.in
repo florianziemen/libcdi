@@ -1,9 +1,8 @@
 #!@SHELL@
-test 'x@ENABLE_GRIB@' = xyes || exit 77
-
 LOG=${LOG-pio_write.log}
 mpi_task_num="${mpi_task_num-4}"
 suffix="${suffix-grb}"
+test "x${suffix}" != xgrb || test 'x@ENABLE_GRIB@' = xyes || exit 77
 
 @USE_MPI_TRUE@variations="-qno-batch-rma -qcache-redists -qcreate-curvilinear-grid -qpreset-decomposition=true"
 @USE_MPI_FALSE@variations="-qcreate-curvilinear-grid"
