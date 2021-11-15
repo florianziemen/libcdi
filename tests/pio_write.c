@@ -16,9 +16,9 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #include <yaxt.h>
-#endif
 #ifdef HAVE_PPM_CORE
 #include <ppm/ppm.h>
+#endif
 #endif
 
 #include "cdi.h"
