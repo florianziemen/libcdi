@@ -13,7 +13,7 @@
 #endif
 #include "dmemory.h"
 
-#ifdef HAVE_PPM_CORE
+#if defined USE_MPI && defined HAVE_PPM_CORE
 #include <ppm/ppm_uniform_partition.h>
 #include <core/ppm_combinatorics.h>
 #endif
