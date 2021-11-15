@@ -34,8 +34,6 @@ read pattern <&7
 test "x$pattern" = 'x#END PATTERNS' || exit 1
 
 exec 5<&- 6<&-
-\rm ${cdi_app_stdout} ${cdi_app_stderr} example_const.nc
-\rm test_cdf_const.log
 
 #PATTERNS
 #^   File format : NetCDF
