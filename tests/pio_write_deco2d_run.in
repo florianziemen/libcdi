@@ -13,7 +13,6 @@ exec 2>&6 1>&5 5>&- 6>&-
   ${tool_wrap} ./cksum_read example_0.${suffix} example_0.cksum || exit 1
 ../libtool --mode=execute \
   ${tool_wrap} ./cksum_read example_1.${suffix} example_1.cksum || exit 1
-\rm "$LOG"
 #
 # Local Variables:
 # mode: sh

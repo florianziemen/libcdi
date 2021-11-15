@@ -2,8 +2,6 @@
 test 'x@ENABLE_NETCDF@' = xyes || exit 77
 
 ncdatafile="$0.nc"
-tempfiles="${ncdatafile}"
-trap "EC=\$? ; \rm -f ${tempfiles}; exit \$EC" EXIT
 
 ../libtool --mode=execute ${tool_wrap} ./test_cdf_write "${ncdatafile}" || exit 1
 

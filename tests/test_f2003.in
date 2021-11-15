@@ -33,8 +33,6 @@ read pattern <&7
 test "x$pattern" = 'x#END PATTERNS' || exit 1
 
 exec 5<&- 6<&-
-\rm ${cdi_read_f2003_stdout} ${cdi_read_f2003_stderr}
-\rm test_f2003_$format.log
 
 #PATTERNS
 #^cdi version: @VERSION@$
