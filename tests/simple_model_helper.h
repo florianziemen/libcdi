@@ -97,7 +97,7 @@ PPM_prime_factorization_32(uint32_t n, uint32_t **factors);
 
 #endif
 
-#ifdef HAVE_PPM_CORE
+#if defined USE_MPI && defined HAVE_PPM_CORE
 #  include <ppm/ppm.h>
 #  include <core/ppm_random.h>
 #  ifdef _OPENMP
