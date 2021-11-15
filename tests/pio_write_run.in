@@ -2,7 +2,26 @@
 LOG=${LOG-pio_write.log}
 mpi_task_num="${mpi_task_num-4}"
 suffix="${suffix-grb}"
-test "x${suffix}" != xgrb || test 'x@ENABLE_GRIB@' = xyes || exit 77
+
+case ${suffix} in
+  grb)
+    test 'x@ENABLE_GRIB@' = xyes || exit 77
+    ;;
+  grb2)
+    @HAVE_LIBGRIB_API_FALSE@exit 77
+    ;;
+  nc|nc2)
+    test 'x@ENABLE_NETCDF@' = xyes || exit 77
+    ;;
+  nc4)
+    test 'x@ENABLE_NETCDF@' = xyes || exit 77
+    test 'x@ENABLE_NC4@' = xyes || exit 77
+    ;;
+  *)
+    echo "Unsupported suffix '${suffix}'" >&2
+    exit 1
+    ;;
+esac
 
 @USE_MPI_TRUE@variations="-qno-batch-rma -qcache-redists -qcreate-curvilinear-grid -qpreset-decomposition=true"
 @USE_MPI_FALSE@variations="-qcreate-curvilinear-grid"
