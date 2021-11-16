@@ -653,13 +653,15 @@ AC_CONFIG_FILES([
 AC_CONFIG_FILES([
   tables/gen_tableheaderfile
   tests/pio_cksum_asynch
-  tests/pio_cksum_cdf
   tests/pio_cksum_fpguard
   tests/pio_cksum_grb2
   tests/pio_cksum_mpi_fw_at_all
   tests/pio_cksum_mpi_fw_at_reblock
   tests/pio_cksum_mpi_fw_ordered
   tests/pio_cksum_mpinonb
+  tests/pio_cksum_nc
+  tests/pio_cksum_nc2
+  tests/pio_cksum_nc4
   tests/pio_cksum_writer
   tests/pio_write_deco2d_run
   tests/pio_write_run
