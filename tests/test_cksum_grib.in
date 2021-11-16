@@ -1,13 +1,8 @@
-#! @SHELL@
+#!@SHELL@
+test 'x@ENABLE_GRIB@' = xyes || exit 77
 
-set -e
 format=grb
-if [ @ENABLE_GRIB@ = yes ]; then
-  . ${srcdir}/test_cksum_base
-else
-  # skip tests for unsupported formats
-  exit 77
-fi
+. ${srcdir}/test_cksum_base
 
 #
 # Local Variables:

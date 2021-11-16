@@ -1,6 +1,6 @@
-#! @SHELL@
+#!@SHELL@
 
-../libtool --mode=execute ${tool_wrap} ./test_byteswap
+../libtool --mode=execute ${tool_wrap} ./test_byteswap || exit 1
 #
 # Local Variables:
 # mode: sh

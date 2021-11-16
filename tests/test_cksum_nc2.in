@@ -1,10 +1,5 @@
-#! /bin/sh
+#!@SHELL@
+test 'x@ENABLE_NC2@' = xyes || exit 77
 
-set -e
 format=nc2
-if [ @ENABLE_NC2@ = yes ]; then
-  . ${srcdir}/test_cksum_base
-else
-  # skip tests for unsupported formats
-  exit 77
-fi
+. ${srcdir}/test_cksum_base
