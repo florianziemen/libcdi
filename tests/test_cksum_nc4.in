@@ -1,10 +1,5 @@
-#! /bin/sh
+#!@SHELL@
+test 'x@ENABLE_NC4@' = xyes || exit 77
 
-set -e
 format=nc4
-if [ @ENABLE_NC4@ = yes ]; then
-  . ${srcdir}/test_cksum_base
-else
-  # skip tests for unsupported formats
-  exit 77
-fi
+. ${srcdir}/test_cksum_base

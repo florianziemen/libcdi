@@ -1,13 +1,13 @@
-#! @SHELL@
+#!@SHELL@
+@USE_MPI_FALSE@exit 77
+@HAVE_LIBGRIB_API_FALSE@exit 77
+
 pio_write_args="-f grb2 -w 3"
 mpi_task_num=8
 LOG=pio_cksum_grb2.log
 suffix=grb2
-if [ "@USE_MPI@" = yes -a "@ENABLE_LIBGRIB_API@" = yes ]; then
-  . ./pio_write_run
-else
-  exit 77
-fi
+
+. ./pio_write_run
 #
 # Local Variables:
 # mode: sh
