@@ -1,14 +1,9 @@
-#! /bin/sh
+#!@SHELL@
+test 'x@ENABLE_SERVICE@' = xyes || exit 77
 
-set -e
 format=svc
-if [ @ENABLE_SERVICE@ = yes ]; then
-  exec >test_cksum_$format.log 2>&1
-  ./cksum_write -f $format
-  ./cksum_read example.$format
-  \rm example.cksum example.$format
-  \rm test_cksum_$format.log
-else
-  # skip tests for unsupported formats
-  exit 77
-fi
+exec >test_cksum_$format.log 2>&1
+./cksum_write -f $format || exit 1
+./cksum_read example.$format || exit 1
+\rm example.cksum example.$format
+\rm test_cksum_$format.log
