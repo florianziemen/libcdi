@@ -2,8 +2,8 @@
 # this file is meant to be included for the supported file formats
 
 exec >test_cksum_$format.log 2>&1
-../libtool --mode=execute ${tool_wrap} ./cksum_write -f $format
-../libtool --mode=execute ${tool_wrap} ./cksum_read example.$format
+../libtool --mode=execute ${tool_wrap} ./cksum_write -f $format || exit 1
+../libtool --mode=execute ${tool_wrap} ./cksum_read example.$format || exit 1
 \rm example.cksum example.$format
 \rm test_cksum_$format.log
 

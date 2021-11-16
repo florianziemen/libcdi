@@ -1,17 +1,13 @@
-#! @SHELL@
-set -e
+#!@SHELL@
+test 'x@ENABLE_GRIB@' = xyes || exit 77
+
 LOG=${LOG-pio_write.log}
-if [ @ENABLE_GRIB@ != yes ]; then
-  # skip tests for unsupported formats
-  exit 77
-fi
 mpi_task_num="${mpi_task_num-4}"
 suffix="${suffix-grb}"
-if [ "@USE_MPI@" = yes ]; then
-  variations="-qno-batch-rma -qcache-redists -qcreate-curvilinear-grid -qpreset-decomposition=true"
-else
-  variations="-qcreate-curvilinear-grid"
-fi
+
+@USE_MPI_TRUE@variations="-qno-batch-rma -qcache-redists -qcreate-curvilinear-grid -qpreset-decomposition=true"
+@USE_MPI_FALSE@variations="-qcreate-curvilinear-grid"
+
 test_variation()
 {
   exec 5>&1 6>&2 >"$LOG" 2>&1
@@ -20,13 +16,13 @@ test_variation()
   ../libtool --mode=execute \
     @MPI_LAUNCH@ \
     -n ${mpi_task_num} ${tool_wrap_mpi} \
-    ./pio_write ${pio_write_args} -s 7 ${variation}
+    ./pio_write ${pio_write_args} -s 7 ${variation} || exit 1
   echo "checking example_0.$suffix" >&2
   ../libtool --mode=execute \
-    ${tool_wrap} ./cksum_read example_0.${suffix} example_0.cksum
+    ${tool_wrap} ./cksum_read example_0.${suffix} example_0.cksum || exit 1
   echo "checking example_1.$suffix" >&2
   ../libtool --mode=execute \
-    ${tool_wrap} ./cksum_read example_1.${suffix} example_1.cksum
+    ${tool_wrap} ./cksum_read example_1.${suffix} example_1.cksum || exit 1
 }
 
 exec 5>&1 6>&2 >"$LOG" 2>&1
@@ -34,9 +30,8 @@ for variation in "" $variations ; do
   test_variation "$variation"
 done
 
-if [ x"@USE_MPI@" = xyes -a x"@HAVE_PPM_DIST_ARRAY@" = xyes ]; then
-  test_variation "-qcreate-curvilinear-grid -quse-dist-grid"
-fi
+@USE_MPI_TRUE@@USE_PPM_CORE_TRUE@test_variation "-qcreate-curvilinear-grid -quse-dist-grid"
+
 exec 2>&6 1>&5 5>&- 6>&-
 \rm "$LOG"
 #

@@ -1,23 +1,25 @@
-#! @SHELL@
+#!@SHELL@
+@USE_MPI_FALSE@exit 77
+@ENABLE_NETCDF_FALSE@exit 77
+
 LOG=pio_cksum_cdf.log
-if [ "@USE_MPI@" = yes -a "@ENABLE_NETCDF@" = yes ]; then
-  if [ "@ENABLE_NC4@" = yes ]; then
-    suffix=nc4
-    mpi_task_num=7
-    pio_write_args="-f $suffix -w 3 -qtaxis-type=relative"
-    . ./pio_write_run
-  fi
-  mpi_task_num=8
-  suffix=nc2
+
+if test 'x@ENABLE_NC4' = xyes; then
+  suffix=nc4
+  mpi_task_num=7
   pio_write_args="-f $suffix -w 3 -qtaxis-type=relative"
   . ./pio_write_run
-  mpi_task_num=5
-  suffix=nc
-  pio_write_args="-f $suffix -w 2 -qtaxis-type=relative"
-  . ./pio_write_run
-else
-  exit 77
 fi
+
+mpi_task_num=8
+suffix=nc2
+pio_write_args="-f $suffix -w 3 -qtaxis-type=relative"
+. ./pio_write_run
+
+mpi_task_num=5
+suffix=nc
+pio_write_args="-f $suffix -w 2 -qtaxis-type=relative"
+. ./pio_write_run
 
 #
 # Local Variables:
