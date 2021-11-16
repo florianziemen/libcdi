@@ -2,13 +2,15 @@ TESTS = \
   calendar_test1 \
   cksum_verify \
   pio_cksum_asynch \
-  pio_cksum_cdf \
   pio_cksum_fpguard \
   pio_cksum_grb2 \
   pio_cksum_mpi_fw_at_all \
   pio_cksum_mpi_fw_at_reblock \
   pio_cksum_mpi_fw_ordered \
   pio_cksum_mpinonb \
+  pio_cksum_nc \
+  pio_cksum_nc2 \
+  pio_cksum_nc4 \
   pio_cksum_writer \
   pio_write_deco2d_run \
   pio_write_run \
