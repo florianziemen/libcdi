@@ -2,7 +2,7 @@
 
 prefix=${0##*/}
 suffix="${suffix-grb}"
-pio_write=${pio_write-./pio_write_serial}
+pio_write=${pio_write-./pio_write}
 
 case ${suffix} in
   grb)
