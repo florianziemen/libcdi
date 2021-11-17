@@ -1,8 +1,19 @@
 #!@SHELL@
 
 prefix=${0##*/}
-suffix="${suffix-grb}"
-pio_write=${pio_write-./pio_write}
+suffix=${suffix-grb}
+
+if ${mpi_task_num+:} false; then
+  @ENABLE_MPI_FALSE@exit 77
+  test 'x@MPI_LAUNCH@' != xtrue || exit 77
+  pio_write=${pio_write-'./pio_write_parallel'}
+  variations=${variations-"'' -qno-batch-rma -qcache-redists -qcreate-curvilinear-grid -qpreset-decomposition=true"}
+  mpi_launch="@MPI_LAUNCH@ -n ${mpi_task_num}"
+else
+  pio_write=${pio_write-'./pio_write'}
+  variations=${variations-"'' -qcreate-curvilinear-grid"}
+  mpi_launch=
+fi
 
 case ${suffix} in
   grb)
@@ -24,14 +35,14 @@ case ${suffix} in
     ;;
 esac
 
-variations='-qcreate-curvilinear-grid'
-
-test_variation()
+test_variation ()
 {
   echo "creating data with $1" >&2
   variation=$1
   @top_builddir@/libtool --mode=execute \
-    ${tool_wrap} ${pio_write} "-qprefix=${prefix}" -f ${suffix} ${pio_write_args} -s 7 ${variation} || exit 1
+    ${mpi_launch} ${tool_wrap} \
+    ${pio_write} "-qprefix=${prefix}" -f ${suffix} \
+    ${pio_write_args} -s 7 ${variation} || exit 1
   echo "checking ${prefix}_0.${suffix}" >&2
   @top_builddir@/libtool --mode=execute \
     ${tool_wrap} ./cksum_read "${prefix}_0.${suffix}" "${prefix}_0.cksum" || exit 1
@@ -40,10 +51,10 @@ test_variation()
     ${tool_wrap} ./cksum_read "${prefix}_1.${suffix}" "${prefix}_1.cksum" || exit 1
 }
 
-for variation in "" $variations ; do
+eval "set dummy $variations"; shift
+for variation in "$@"; do
   test_variation "$variation" || exit 1
 done
-
 #
 # Local Variables:
 # mode: sh
