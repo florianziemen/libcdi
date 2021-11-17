@@ -1,9 +1,9 @@
 TESTS = \
   calendar_test1 \
   cksum_verify \
-  pio_write_deco2d_run_serial \
-  pio_write_run_serial \
   test_byteswap_run \
+  pio_write_deco2d_run \
+  pio_write_run \
   test_cdf_const \
   test_cdf_transformation \
   test_cksum_extra \
@@ -61,8 +61,8 @@ test_PROGRAMS_ = \
   cksum_verify \
   cksum_write \
   cksum_write_chunk \
-  pio_write_deco2d_serial \
-  pio_write_serial \
+  pio_write \
+  pio_write_deco2d \
   test_byteswap \
   test_month_adjust \
   test_resource_copy \
@@ -120,22 +120,7 @@ cksum_write_chunk_SOURCES = \
   simple_model_helper.c \
   simple_model_helper.h
 
-pio_write_deco2d_serial_SOURCES = \
-  deco2d_model.c \
-  pio_write.c \
-  pio_write.h \
-  pio_write_setup_grid.c \
-  pio_write_setup_grid.h \
-  simple_model_helper.c \
-  simple_model_helper.h
-nodist_pio_write_deco2d_parallel_SOURCES = \
-  deco2d_model.parallel.c \
-  pio_write.parallel.c \
-  pio_write_setup_grid.parallel.c \
-  simple_model_helper.parallel.c
-pio_write_deco2d_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
-
-pio_write_serial_SOURCES = \
+pio_write_SOURCES = \
   pio_write.c \
   pio_write.h \
   pio_write_setup_grid.c \
@@ -149,6 +134,21 @@ nodist_pio_write_parallel_SOURCES = \
   simple_model.parallel.c \
   simple_model_helper.parallel.c
 pio_write_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
+
+pio_write_deco2d_SOURCES = \
+  deco2d_model.c \
+  pio_write.c \
+  pio_write.h \
+  pio_write_setup_grid.c \
+  pio_write_setup_grid.h \
+  simple_model_helper.c \
+  simple_model_helper.h
+nodist_pio_write_deco2d_parallel_SOURCES = \
+  deco2d_model.parallel.c \
+  pio_write.parallel.c \
+  pio_write_setup_grid.parallel.c \
+  simple_model_helper.parallel.c
+pio_write_deco2d_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 test_byteswap_SOURCES = test_byteswap.c
 

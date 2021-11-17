@@ -681,11 +681,11 @@ AC_CONFIG_FILES([
   tests/pio_cksum_nc2.test
   tests/pio_cksum_nc4.test
   tests/pio_cksum_writer.test
+  tests/pio_write_deco2d_run
   tests/pio_write_deco2d_run_parallel.test
-  tests/pio_write_deco2d_run_serial
   tests/pio_write_dist_array.test
+  tests/pio_write_run
   tests/pio_write_run_parallel.test
-  tests/pio_write_run_serial
   tests/test_byteswap_run
   tests/test_cdf_const
   tests/test_cdf_transformation
