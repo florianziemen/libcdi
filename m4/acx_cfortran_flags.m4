@@ -44,7 +44,7 @@ AC_DEFUN([ACX_XLF_QEXTNAME_ADD_APPENDUS],
   [AS_CASE([$host],
      [*-ibm-aix*|powerpc64-*-linux-*|powerpc-*-linux-*],
      [AC_MSG_CHECKING([if -Dappendus needs to be added to CPPFLAGS for cfortran.h])
-      AS_IF([$CC -qversion 2>&1 | sed 5q | grep '^IBM XL C' >/dev/null],
+      AS_IF([$CC -qversion 2>&1 | sed -n 1,5p | grep '^IBM XL C' >/dev/null],
         [acx_temp_qextname_f77flags=`echo "$FFLAGS" | sed -n '/-qextname/{ s/^\(.* \)*-qextname\( .*\)*$/-qextname/;p;}'`
          acx_temp_qextname_fcflags=`echo "$FCFLAGS" | sed -n '/-qextname/{ s/^\(.* \)*-qextname\( .*\)*$/-qextname/;p;}'`
       dnl pretend the same option as for FC was used if F77 isn't used at all
@@ -80,7 +80,7 @@ AC_DEFUN([_ACX_FIND_CFORTRAN_DEF],
    AS_VAR_PUSHDEF([acx_FCFLAGS],[AC_LANG_CASE([Fortran],[FCFLAGS],[Fortran 77],[FFLAGS])])dnl
    AS_CASE([$host],
      [x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*],
-     [acx_temp=`$acx_FC -V 2>&1 | sed 5q`
+     [acx_temp=`$acx_FC -V 2>&1 | sed -n 1,5p`
       AS_IF([echo "$acx_temp" | grep '^Copyright.*\(The Portland Group\|NVIDIA CORPORATION\)' >/dev/null],
         [AS_VAR_SET([acx_cf_flag],[-DgFortran])],
         [echo "$acx_temp" | grep '^NAG Fortran Compiler Release' >/dev/null],
@@ -89,7 +89,7 @@ AC_DEFUN([_ACX_FIND_CFORTRAN_DEF],
         [AS_VAR_SET([acx_cf_flag],[-DgFortran])],
         [echo "$acx_temp" | grep '^Cray Fortran' >/dev/null],
         [AS_VAR_SET([acx_cf_flag],[-DgFortran])],
-        [acx_temp=`$acx_FC --version 2>&1 | sed 5q` \
+        [acx_temp=`$acx_FC --version 2>&1 | sed -n 1,5p` \
          && echo $acx_temp | grep '^GNU Fortran' >/dev/null],
         [AS_IF([echo $acx_temp | grep g77 >/dev/null],
            [AS_VAR_SET([acx_cf_flag],[-Dg77Fortran])],
@@ -100,10 +100,10 @@ dnl check if compiling with f2c bindings or with default bindings
               [AS_VAR_SET([acx_cf_flag],[-DgFortran])])])],
         [echo $acx_temp | grep '^G95' >/dev/null],
         [AS_VAR_SET([acx_cf_flag],[-DNAGf90Fortran])],
-        [$acx_FC -v 2>&1 | sed 5q | grep '^f2c' >/dev/null],
+        [$acx_FC -v 2>&1 | sed -n 1,5p | grep '^f2c' >/dev/null],
         [AS_VAR_SET([acx_cf_flag],[-Df2cFortran])])],
      [powerpc64-*-linux-*|powerpc-*-linux-*],
-     [AS_IF([$acx_FC -qversion 2>&1 | sed 5q | grep '^IBM XL Fortran' >/dev/null],
+     [AS_IF([$acx_FC -qversion 2>&1 | sed -n 1,5p | grep '^IBM XL Fortran' >/dev/null],
         [AS_VAR_SET([acx_cf_flag],[-DIBMR2Fortran])])],
      [*-ibm-aix*],
      [dnl xlc set _IBMR2 so nothing needs to be done
