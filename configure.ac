@@ -269,15 +269,7 @@ AS_CASE([$CC],
   [clang*], [COMP_VERSION=`$CC --version | head -n 1`],
   [sxc*], [COMP_VERSION=`$CC -V 2>&1   | tail -n 1`],
   [xlc*], [COMP_VERSION=`$CC -qversion 2>&1   | head -n 1`],
-  [dnl
-dnl 'head -n 1' exits after printing the first line, which closes the pipe and
-dnl kills the compiler's process leaving it no chance to clean any temporary
-dnl files it might have created (e.g. Intel compiler creates 'a.out' when it is
-dnl called with additional flags like -I, -L, etc., which is the case when $CC
-dnl is an MPI wrapper). Therefore, we have to run the processes one after
-dnl another:
-   COMP_VERSION=`$CC -V 2>&1`
-   COMP_VERSION=`echo "$COMP_VERSION" | head -n 1`])
+  [COMP_VERSION=`$CC -V 2>&1 | sed -n 1p`])
 test -z "$COMP_VERSION" && COMP_VERSION=unknown
 AC_DEFINE_UNQUOTED([COMP_VERSION], ["$COMP_VERSION"], [Compiler version])
 dnl
