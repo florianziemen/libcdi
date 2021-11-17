@@ -1,8 +1,8 @@
 noinst_PROGRAMS =
 
 EXTRA_PROGRAMS = \
-  collectDataNStreams_serial \
-  collectData_serial
+  collectData \
+  collectDataNStreams
 
 if ENABLE_MPI
 EXTRA_PROGRAMS += \
@@ -13,7 +13,7 @@ endif ENABLE_MPI
 
 if ENABLE_CF_INTERFACE
 if BUILD_FC_PROGRAMS
-EXTRA_PROGRAMS += collectData2003_serial
+EXTRA_PROGRAMS += collectData2003
 endif BUILD_FC_PROGRAMS
 if BUILD_PIO_FC_PROGRAMS
 EXTRA_PROGRAMS += collectData2003_parallel
@@ -41,18 +41,18 @@ endif
 
 LDADD = $(top_builddir)/src/libcdi.la
 
-collectDataNStreams_serial_SOURCES = collectDataNStreams.c
-nodist_collectDataNStreams_parallel_SOURCES = collectDataNStreams.parallel.c
-collectDataNStreams_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
-
-collectData_serial_SOURCES = collectData.c
+collectData_SOURCES = collectData.c
 nodist_collectData_parallel_SOURCES = collectData.parallel.c
 collectData_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
+
+collectDataNStreams_SOURCES = collectDataNStreams.c
+nodist_collectDataNStreams_parallel_SOURCES = collectDataNStreams.parallel.c
+collectDataNStreams_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 compareResourcesArray_SOURCES = compareResourcesArray.c
 compareResourcesArray_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
-collectData2003_serial_SOURCES = collectData2003.F90
+collectData2003_SOURCES = collectData2003.F90
 nodist_collectData2003_parallel_SOURCES = collectData2003.parallel.F90
 collectData2003_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_FC_LIB) $(MPI_FC_LIB)
 
