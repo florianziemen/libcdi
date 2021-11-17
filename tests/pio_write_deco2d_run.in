@@ -1,5 +1,6 @@
 #!@SHELL@
-suffix="${suffix-grb}"
+
+suffix=grb
 pio_write=./pio_write_deco2d
 
 . ./pio_write_run

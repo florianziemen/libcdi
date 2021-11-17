@@ -3,7 +3,7 @@
 pio_write_args="-p PIO_MPI -w 2"
 mpi_task_num=4
 
-. ./pio_write_run_parallel.test
+. ./pio_write_run
 ( . ./pio_write_dist_array.test ) || test $? -eq 77
 #
 # Local Variables:
