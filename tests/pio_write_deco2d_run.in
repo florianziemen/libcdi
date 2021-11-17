@@ -1,8 +1,8 @@
 #!@SHELL@
 suffix="${suffix-grb}"
-pio_write=./pio_write_deco2d_serial
+pio_write=./pio_write_deco2d
 
-. ./pio_write_run_serial
+. ./pio_write_run
 #
 # Local Variables:
 # mode: sh
