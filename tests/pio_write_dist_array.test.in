@@ -1,48 +1,10 @@
 #!@SHELL@
-
-@ENABLE_MPI_FALSE@exit 77
-test 'x@MPI_LAUNCH@' != xtrue || exit 77
 test 'x@HAVE_PPM_DIST_ARRAY@' = xyes || exit 77
 
-prefix=${0##*/}
-suffix=${suffix-grb}
-
-case ${suffix} in
-  grb)
-    test 'x@ENABLE_GRIB@' = xyes || exit 77
-    ;;
-  grb2)
-    @HAVE_LIBGRIB_API_FALSE@exit 77
-    ;;
-  nc|nc2)
-    test 'x@ENABLE_NETCDF@' = xyes || exit 77
-    ;;
-  nc4)
-    test 'x@ENABLE_NETCDF@' = xyes || exit 77
-    test 'x@ENABLE_NC4@' = xyes || exit 77
-    ;;
-  *)
-    echo "Unsupported suffix '${suffix}'" >&2
-    exit 1
-    ;;
-esac
-
 mpi_task_num=${mpi_task_num-4}
+variations="'-qcreate-curvilinear-grid -quse-dist-grid'"
 
-variation='-qcreate-curvilinear-grid -quse-dist-grid'
-
-echo "creating data with ${variation}" >&2
-@top_builddir@/libtool --mode=execute \
-  @MPI_LAUNCH@ \
-  -n ${mpi_task_num} ${tool_wrap} ./pio_write_parallel "-qprefix=${prefix}" -f ${suffix} \
-  ${pio_write_args} -s 7 ${variation} || exit 1
-echo "checking ${prefix}_0.${suffix}" >&2
-@top_builddir@/libtool --mode=execute \
-  ${tool_wrap} ./cksum_read "${prefix}_0.${suffix}" "${prefix}_0.cksum" || exit 1
-echo "checking ${prefix}_1.${suffix}" >&2
-@top_builddir@/libtool --mode=execute \
-  ${tool_wrap} ./cksum_read "${prefix}_1.${suffix}" "${prefix}_1.cksum" || exit 1
-
+. ./pio_write_run
 #
 # Local Variables:
 # mode: sh
