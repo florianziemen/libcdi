@@ -1,4 +1,4 @@
-SUBDIRS = src interfaces app examples examples/pio tests
+SUBDIRS = src interfaces app examples tests
 
 # The pdf files below cannot be created in parallel:
 doc/cdi_cman.pdf: doc/cdi_fman.pdf
