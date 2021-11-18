@@ -1,34 +1,39 @@
-check_PROGRAMS=collectData collectDataNStreams
-
-AM_CPPFLAGS = -I$(top_srcdir)/src $(YAXT_C_INCLUDE)
-AM_FCFLAGS  = $(FPP_INCOPT)$(top_srcdir)/src $(MPI_FC_INCLUDE)
-AM_CFLAGS = $(MPI_C_INCLUDE)
+check_PROGRAMS = \
+  collectData \
+  collectDataNStreams
 
 if USE_MPI
-check_PROGRAMS+=compareResourcesArray
-AM_FCFLAGS += $(FPP_DEFOPT)USE_MPI
+check_PROGRAMS += compareResourcesArray
 endif
 
 if USE_FC
-check_PROGRAMS+=collectData2003
+check_PROGRAMS += collectData2003
 endif
 
-collectData_SOURCES=collectData.c
+AM_CPPFLAGS = -I$(top_srcdir)/src $(YAXT_C_INCLUDE)
+AM_CFLAGS = $(MPI_C_INCLUDE)
+
+AM_FCFLAGS = $(FPP_INCOPT)$(top_srcdir)/src $(MPI_FC_INCLUDE)
+if USE_MPI
+AM_FCFLAGS += $(FPP_DEFOPT)USE_MPI
+endif
 
 if USE_MPI
-LDADD=$(top_builddir)/src/libcdipio.la $(top_builddir)/src/libcdi.la $(YAXT_LIBS) $(MPI_C_LIB)
-collectData2003_LDADD=$(top_builddir)/src/libcdipio.la $(top_builddir)/src/libcdi.la $(YAXT_FC_LIB) $(MPI_FC_LIB)
+LDADD = $(top_builddir)/src/libcdipio.la $(top_builddir)/src/libcdi.la $(YAXT_LIBS) $(MPI_C_LIB)
+collectData2003_LDADD = $(top_builddir)/src/libcdipio.la $(top_builddir)/src/libcdi.la $(YAXT_FC_LIB) $(MPI_FC_LIB)
 else
-LDADD=$(top_builddir)/src/libcdi.la
-collectData2003_LDADD=$(top_builddir)/src/libcdi.la
+LDADD = $(top_builddir)/src/libcdi.la
+collectData2003_LDADD = $(top_builddir)/src/libcdi.la
 endif
 
-collectData2003_SOURCES=collectData2003.F90
+collectData_SOURCES = collectData.c
 
 collectDataNStreams_SOURCES = collectDataNStreams.c
 
 compareResourcesArray_SOURCES = compareResourcesArray.c
-#
+
+collectData2003_SOURCES = collectData2003.F90
+
 clean-local: clean-local-dirs
 .PHONY: clean-local-dirs
 clean-local-dirs:
