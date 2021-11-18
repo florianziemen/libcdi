@@ -137,10 +137,8 @@ else
 test_resource_copy_mpi_LDADD = $(LDADD) $(UUID_C_LIB)
 endif
 
-clean-local: clean-local-dirs
+clean-local:
 	-rm -f *.grb *.grb2 *.nc *.nc2 *.nc4 *.srv *.svc *.ext *.cksum *.ieg *.log *.stderr *.stdout
-.PHONY: clean-local-dirs
-clean-local-dirs:
 	-rm -rf test_cdf_const.d *.dSYM
 
 AUTOMAKE_OPTIONS = color-tests
