@@ -1,7 +1,5 @@
-libcdi_f2003_ladir = $(includedir)
-
 include_HEADERS =
-nodist_libcdi_f2003_la_HEADERS =
+nodist_include_HEADERS =
 lib_LTLIBRARIES =
 noinst_LTLIBRARIES = libcdiresunpack.la
 EXTRA_PROGRAMS = make_fint
@@ -27,7 +25,7 @@ if USE_FC
 include_HEADERS += cdi.inc
 endif
 if CREATE_ISOC
-nodist_libcdi_f2003_la_HEADERS += $(mo_cdi_modfile)
+nodist_include_HEADERS += $(mo_cdi_modfile)
 lib_LTLIBRARIES += libcdi_f2003.la
 PKGCONFIG_FILES += pkgconfig/cdi_f2003.pc
 endif
