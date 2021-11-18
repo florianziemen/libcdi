@@ -327,8 +327,3 @@ MOSTLYCLEANFILES += $(mo_cdi_mod)
 endif
 
 MAINTAINERCLEANFILES = cdi.inc cdiFortran.c cdipio.inc cdipioFortran.c mo_cdi.f90
-
-install-exec-hook:
-	-@rmdir "$(DESTDIR)$(libdir)"
-install-data-hook:
-	-@rmdir "$(DESTDIR)$(includedir)"
