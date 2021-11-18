@@ -38,10 +38,13 @@ LOCALTARGETS += pkgconfig/cdi_f2003.pc
 PKGCONFIG_FILES += pkgconfig/cdi_f2003.pc
 endif
 if USE_MPI
-include_HEADERS += cdipio.h cdipio.inc
+include_HEADERS += cdipio.h
 lib_LTLIBRARIES += libcdipio.la
 LOCALTARGETS += pkgconfig/cdipio.pc
 PKGCONFIG_FILES += pkgconfig/cdipio.pc
+if USE_FC
+include_HEADERS += cdipio.inc
+endif
 endif
 else
 noinst_LTLIBRARIES += libcdi.la
