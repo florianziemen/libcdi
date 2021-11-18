@@ -256,14 +256,11 @@ pkgconfig/cdi_f2003.pc: pkgconfig/cdi_f2003.pc.in ../config.status
 cdilib.c:
 	$(AM_V_GEN)(cd $(top_srcdir)/src ; ./make_cdilib)
 
-CLEANFILES =
-if CREATE_ISOC
-CLEANFILES += $(mo_cdi_mod)
-endif
-
 install-exec-hook:
 	-@rmdir "$(DESTDIR)$(libdir)"
 install-data-hook:
 	-@rmdir "$(DESTDIR)$(includedir)"
 
 EXTRA_DIST = cdilib.c
+CLEANFILES = cdilib.c
+MOSTLYCLEANFILES = $(mo_cdi_mod)
