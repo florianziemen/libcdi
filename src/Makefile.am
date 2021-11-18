@@ -1,8 +1,10 @@
+pkgconfigdir = $(libdir)/pkgconfig
+
 include_HEADERS =
 nodist_include_HEADERS =
 lib_LTLIBRARIES =
 noinst_LTLIBRARIES = libcdiresunpack.la
-PKGCONFIG_FILES =
+nodist_pkgconfig_DATA =
 
 if FORTRAN_MOD_UC
 mo_cdi_modfile = MO_CDI.$(FCMODEXT)
@@ -13,7 +15,7 @@ endif
 if ENABLE_CDI_LIB
 include_HEADERS += cdi.h
 lib_LTLIBRARIES += libcdi.la
-PKGCONFIG_FILES += pkgconfig/cdi.pc
+nodist_pkgconfig_DATA += pkgconfig/cdi.pc
 # add cdi.inc only if cfortran interface is required
 if USE_FC
 include_HEADERS += cdi.inc
@@ -21,12 +23,12 @@ endif
 if CREATE_ISOC
 nodist_include_HEADERS += $(mo_cdi_modfile)
 lib_LTLIBRARIES += libcdi_f2003.la
-PKGCONFIG_FILES += pkgconfig/cdi_f2003.pc
+nodist_pkgconfig_DATA += pkgconfig/cdi_f2003.pc
 endif
 if USE_MPI
 include_HEADERS += cdipio.h
 lib_LTLIBRARIES += libcdipio.la
-PKGCONFIG_FILES += pkgconfig/cdipio.pc
+nodist_pkgconfig_DATA += pkgconfig/cdipio.pc
 if USE_FC
 include_HEADERS += cdipio.inc
 endif
@@ -242,50 +244,21 @@ mo_cdi.f90: @MAINTAINER_MODE_TRUE@ $(top_srcdir)/src/cdi.h $(top_srcdir)/interfa
 $(mo_cdi_modfile): mo_cdi.lo
 	@if test ! -f $@; then rm -f $<; $(MAKE) $<; fi
 
-pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
-	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
+pkgconfig/cdi.pc: pkgconfig/cdi.pc.in $(top_builddir)/config.status
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 pkgconfig/cdipio.pc: pkgconfig/cdipio.pc.in ../config.status
-	(cd .. ; ./config.status src/pkgconfig/cdipio.pc)
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 pkgconfig/cdi_f2003.pc: pkgconfig/cdi_f2003.pc.in ../config.status
-	(cd .. ; ./config.status src/pkgconfig/cdi_f2003.pc)
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 cdilib.c:
 	(cd $(top_srcdir)/src ; ./make_cdilib )
 
-all-local: $(PKGCONFIG_FILES)
 CLEANFILES =
 if CREATE_ISOC
 CLEANFILES += $(mo_cdi_modfile)
-endif
-if ENABLE_CDI_LIB
-CLEANFILES += pkgconfig/cdi.pc
-if USE_MPI
-CLEANFILES += pkgconfig/cdipio.pc
-endif
-if CREATE_ISOC
-CLEANFILES += pkgconfig/cdi_f2003.pc
-endif
-endif
-
-if ENABLE_CDI_LIB
-install-exec-local: $(PKGCONFIG_FILES)
-	$(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig"
-	@for pkgconfigfile in $(PKGCONFIG_FILES) ; do \
-		echo $(install_sh_DATA) $$pkgconfigfile \
-		"$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
-		$(install_sh_DATA) $$pkgconfigfile \
-		"$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
-	done
-
-uninstall-local:
-	@for pkgconfigfile in $(PKGCONFIG_FILES) ; do \
-		echo rm -f "$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
-		rm -f "$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
-	done
-	-@rmdir "$(DESTDIR)$(libdir)/pkgconfig"
-
 endif
 
 install-exec-hook:
