@@ -1,5 +1,9 @@
 SUBDIRS = src interfaces app examples examples/pio tests
 
+# The pdf files below cannot be created in parallel. The following helps with
+# GNU Make and hopefully will not make it worse with other make programs:
+.NOTPARALLEL:
+
 doc/cdi_cman.pdf:
 	(cd $(top_srcdir)/doc/tex ; ./makepdf_c ; mv cdi_cman.pdf .. ; ./cleanup)
 
