@@ -18,6 +18,11 @@ if USE_MPI
 AM_FCFLAGS += $(FPP_DEFOPT)USE_MPI
 endif
 
+AM_LDFLAGS =
+if ENABLE_ALL_STATIC
+AM_LDFLAGS += -all-static
+endif
+
 if USE_MPI
 LDADD = $(top_builddir)/src/libcdipio.la $(top_builddir)/src/libcdi.la $(YAXT_LIBS) $(MPI_C_LIB)
 collectData2003_LDADD = $(top_builddir)/src/libcdipio.la $(top_builddir)/src/libcdi.la $(YAXT_FC_LIB) $(MPI_FC_LIB)
