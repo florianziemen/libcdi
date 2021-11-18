@@ -2,7 +2,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 AM_LDFLAGS = $(NETCDF_LIBS) $(SZLIB_LIBS) $(LDFLAGS)
 locallibs = $(abs_top_builddir)/src/.libs/libcdi.so $(LTLIBOBJS) $(NETCDF_LIBS) $(SZLIB_LIBS)
 
-bin_PROGRAMS =
 noinst_PROGRAMS =
 noinst_LTLIBRARIES =
 
@@ -35,12 +34,6 @@ libcdipp_la_LIBADD = $(top_builddir)/src/libcdi.la
 
 CdiInfo_SOURCES = CdiInfo.cpp mulval.nc
 CdiInfo_LDADD = libcdipp.la
-
-INTERFACES_FILES = \
-  $(abs_top_srcdir)/interfaces/ruby/test.rb \
-  $(abs_top_srcdir)/interfaces/ruby/setup.rb \
-  $(abs_top_srcdir)/interfaces/python/test.py \
-  $(abs_top_srcdir)/interfaces/python/setup.py
 
 MODULE_NAME = Cdi
 RUBY_WRAPPER_FILE = $(abs_top_builddir)/interfaces/ruby/cdi_wrapper.cpp
