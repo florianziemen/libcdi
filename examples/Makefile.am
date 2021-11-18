@@ -1,3 +1,5 @@
+SUBDIRS = pio
+
 check_PROGRAMS = \
   cdi_copy \
   cdi_read \
