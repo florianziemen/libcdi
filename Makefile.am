@@ -4,10 +4,10 @@ SUBDIRS = src interfaces app examples examples/pio tests
 doc/cdi_cman.pdf: doc/cdi_fman.pdf
 
 doc/cdi_cman.pdf:
-	(cd $(top_srcdir)/doc/tex ; ./makepdf_c ; mv cdi_cman.pdf .. ; ./cleanup)
+	$(AM_V_GEN)$(am__cd) $(top_srcdir)/doc/tex && ./makepdf_c && mv cdi_cman.pdf .. && ./cleanup
 
 doc/cdi_fman.pdf:
-	(cd $(top_srcdir)/doc/tex ; ./makepdf_f ; mv cdi_fman.pdf .. ; ./cleanup)
+	$(AM_V_GEN)$(am__cd) $(top_srcdir)/doc/tex && ./makepdf_f && mv cdi_fman.pdf .. && ./cleanup
 
 EXTRA_DIST = \
   LICENSE \
