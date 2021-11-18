@@ -57,7 +57,9 @@ endif
 
 AM_CFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 
-libcdiresunpack_la_SOURCES = resource_unpack.c
+libcdiresunpack_la_SOURCES = \
+  resource_unpack.c \
+  resource_unpack.h
 
 make_fint_SOURCES = make_fint.c
 make_fint_LDADD = $(LIBOBJS)
