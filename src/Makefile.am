@@ -198,26 +198,18 @@ libcdi_la_SOURCES = \
   zaxis.h
 
 # cfortran.h is an optional part of libcdi
-libcdi_la_USE_FC_extra_sources = \
-  cdiFortran.c \
-  cfortran.h
-
 if USE_FC
 libcdi_la_SOURCES += \
-  $(libcdi_la_USE_FC_extra_sources)
+  cdiFortran.c \
+  cfortran.h
 endif
-EXTRA_DIST += $(libcdi_la_USE_FC_extra_sources)
 
 # these only contain code if grib_api is available
-libcdi_la_HAVE_LIBGRIB_API_extra_sources = \
-  gribapi_utilities.c \
-  stream_gribapi.c
-
 if HAVE_LIBGRIB_API
 libcdi_la_SOURCES += \
-  $(libcdi_la_HAVE_LIBGRIB_API_extra_sources)
+  gribapi_utilities.c \
+  stream_gribapi.c
 endif
-EXTRA_DIST += $(libcdi_la_HAVE_LIBGRIB_API_extra_sources)
 
 libcdi_la_LIBADD = $(UUID_C_LIB)
 
@@ -269,14 +261,11 @@ libcdipio_la_SOURCES = \
   resource_unpack.c \
   resource_unpack.h
 
-libcdipio_la_HAVE_PARALLEL_NC4_extra_sources = pio_cdf_int.c
-
 if USE_MPI
 if HAVE_PARALLEL_NC4
-libcdipio_la_SOURCES += $(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
+libcdipio_la_SOURCES += pio_cdf_int.c
 endif
 endif
-EXTRA_DIST += $(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
 
 libcdipio_la_LIBADD = libcdi.la $(LIBRT) $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(MPI_C_LIB)
 
