@@ -257,7 +257,7 @@ cdilib.c:
 	(cd $(top_srcdir)/src ; ./make_cdilib )
 
 all-local: $(PKGCONFIG_FILES)
-CLEANFILES = `ls *~`
+CLEANFILES =
 if CREATE_ISOC
 CLEANFILES += $(mo_cdi_modfile)
 endif

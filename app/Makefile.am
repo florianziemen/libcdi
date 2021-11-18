@@ -30,8 +30,6 @@ if ENABLE_ALL_STATIC
 createtable_LDFLAGS = -all-static
 endif
 
-CLEANFILES = `ls *~`
-
 clean-local: clean-local-dirs
 .PHONY: clean-local-dirs
 clean-local-dirs:

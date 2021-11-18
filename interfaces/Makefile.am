@@ -113,8 +113,6 @@ if ENABLE_SWIG
 endif
 endif
 
-CLEANFILES  = `ls *~`
-
 # overrides to make regular compilations also use libtool
 COMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
         $(LIBTOOLFLAGS) --mode=compile $(CC) -static $(DEFS) \
