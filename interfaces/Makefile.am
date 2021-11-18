@@ -95,7 +95,7 @@ CLEANFILES = \
   $(PYTHON_MAKEFILE) \
   $(PYTHON_SHARED_LIB) \
   $(PYTHON_WRAPPER_FILE) \
-  `ls *~ *.o *.la`
+  `ls *.o *.la`
 
 # overrides to make regular compilations also use libtool
 COMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \

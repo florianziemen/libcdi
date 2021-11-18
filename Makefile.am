@@ -9,8 +9,6 @@ doc/cdi_cman.pdf:
 doc/cdi_fman.pdf:
 	(cd $(top_srcdir)/doc/tex ; ./makepdf_f ; mv cdi_fman.pdf .. ; ./cleanup)
 
-CLEANFILES  = `ls *~`
-
 EXTRA_DIST = \
   LICENSE \
   config/default \
