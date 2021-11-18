@@ -1,10 +1,12 @@
+pkgconfigdir = $(libdir)/pkgconfig
+
 include_HEADERS =
 nodist_include_HEADERS =
 lib_LTLIBRARIES =
 noinst_LTLIBRARIES = libcdiresunpack.la
 EXTRA_PROGRAMS = make_fint
 EXTRA_DIST = cdilib.c
-PKGCONFIG_FILES =
+nodist_pkgconfig_DATA =
 CMAKECONFIG_FILES =
 
 if FORTRAN_MOD_UC
@@ -16,10 +18,10 @@ endif
 if ENABLE_CDI_LIB
 include_HEADERS += cdi.h
 lib_LTLIBRARIES += libcdi.la
+nodist_pkgconfig_DATA += pkgconfig/cdi.pc
 CMAKECONFIG_FILES += \
   cmake/cdi-config-version.cmake \
   cmake/cdi-config.cmake
-PKGCONFIG_FILES += pkgconfig/cdi.pc
 # add cdi.inc only if cfortran interface is required
 if USE_FC
 include_HEADERS += cdi.inc
@@ -27,12 +29,12 @@ endif
 if CREATE_ISOC
 nodist_include_HEADERS += $(mo_cdi_modfile)
 lib_LTLIBRARIES += libcdi_f2003.la
-PKGCONFIG_FILES += pkgconfig/cdi_f2003.pc
+nodist_pkgconfig_DATA += pkgconfig/cdi_f2003.pc
 endif
 if USE_MPI
 include_HEADERS += cdipio.h
 lib_LTLIBRARIES += libcdipio.la
-PKGCONFIG_FILES += pkgconfig/cdipio.pc
+nodist_pkgconfig_DATA += pkgconfig/cdipio.pc
 if USE_FC
 include_HEADERS += cdipio.inc
 endif
@@ -339,19 +341,19 @@ cmake/cdi-config.cmake: cmake/cdi-config.cmake.in ../config.status
 cmake/cdi-config-version.cmake: cmake/cdi-config-version.cmake.in ../config.status
 	(cd .. ; ./config.status src/cmake/cdi-config-version.cmake)
 
-pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
-	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
+pkgconfig/cdi.pc: pkgconfig/cdi.pc.in $(top_builddir)/config.status
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 pkgconfig/cdipio.pc: pkgconfig/cdipio.pc.in ../config.status
-	(cd .. ; ./config.status src/pkgconfig/cdipio.pc)
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 pkgconfig/cdi_f2003.pc: pkgconfig/cdi_f2003.pc.in ../config.status
-	(cd .. ; ./config.status src/pkgconfig/cdi_f2003.pc)
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 cdilib.c:
 	(cd $(top_srcdir)/src ; ./make_cdilib )
 
-all-local: $(PKGCONFIG_FILES) $(CMAKECONFIG_FILES)
+all-local: $(CMAKECONFIG_FILES)
 
 MOSTLYCLEANFILES = make_fint
 CLEANFILES =
@@ -361,14 +363,7 @@ endif
 if ENABLE_CDI_LIB
 CLEANFILES += \
   cmake/cdi-config-version.cmake \
-  cmake/cdi-config.cmake \
-  pkgconfig/cdi.pc
-if USE_MPI
-CLEANFILES += pkgconfig/cdipio.pc
-endif
-if CREATE_ISOC
-CLEANFILES += pkgconfig/cdi_f2003.pc
-endif
+  cmake/cdi-config.cmake
 endif
 
 clean-local:
@@ -376,12 +371,7 @@ clean-local:
 	-test '.' = '$(srcdir)' || rm -f cdi.inc cdiFortran.c cdipio.inc cdipioFortran.c mo_cdi.f90
 
 if ENABLE_CDI_LIB
-install-exec-local: $(PKGCONFIG_FILES) $(CMAKECONFIG_FILES)
-	$(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig"
-	@for pkgconfigfile in $(PKGCONFIG_FILES) ; do \
-		echo $(install_sh_DATA) $$pkgconfigfile "$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
-		$(install_sh_DATA) $$pkgconfigfile "$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
-	done
+install-exec-local: $(CMAKECONFIG_FILES)
 	$(mkinstalldirs) "$(DESTDIR)$(libdir)/cmake"
 	@for cmakeconfigfile in $(CMAKECONFIG_FILES) ; do \
 		echo $(install_sh_DATA) $$cmakeconfigfile "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
@@ -389,11 +379,6 @@ install-exec-local: $(PKGCONFIG_FILES) $(CMAKECONFIG_FILES)
 	done
 
 uninstall-local:
-	@for pkgconfigfile in $(PKGCONFIG_FILES) ; do \
-		echo rm -f "$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
-		rm -f "$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
-	done
-	-@rmdir "$(DESTDIR)$(libdir)/pkgconfig"
 	@for cmakeconfigfile in $(CMAKECONFIG_FILES) ; do \
 		echo rm -f "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
 		rm -f "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
