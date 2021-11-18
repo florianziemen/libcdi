@@ -343,16 +343,16 @@ cmake/cdi-config-version.cmake: cmake/cdi-config-version.cmake.in $(top_builddir
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in $(top_builddir)/config.status
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+	$(AM_V_GEN)cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 pkgconfig/cdipio.pc: pkgconfig/cdipio.pc.in ../config.status
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+	$(AM_V_GEN)cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 pkgconfig/cdi_f2003.pc: pkgconfig/cdi_f2003.pc.in ../config.status
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+	$(AM_V_GEN)cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 cdilib.c:
-	(cd $(top_srcdir)/src ; ./make_cdilib )
+	$(AM_V_GEN)(cd $(top_srcdir)/src ; ./make_cdilib)
 
 MOSTLYCLEANFILES = make_fint
 CLEANFILES =
