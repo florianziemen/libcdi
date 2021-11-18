@@ -320,10 +320,10 @@ pkgconfig/cdi_f2003.pc: pkgconfig/cdi_f2003.pc.in ../config.status
 cdilib.c:
 	$(AM_V_GEN)(cd $(top_srcdir)/src ; ./make_cdilib)
 
+CLEANFILES = cdilib.c
 MOSTLYCLEANFILES = make_fint
-CLEANFILES =
 if CREATE_ISOC
-CLEANFILES += $(mo_cdi_mod)
+MOSTLYCLEANFILES += $(mo_cdi_mod)
 endif
 
 MAINTAINERCLEANFILES = cdi.inc cdiFortran.c cdipio.inc cdipioFortran.c mo_cdi.f90
