@@ -7,9 +7,9 @@ noinst_LTLIBRARIES = libcdiresunpack.la
 nodist_pkgconfig_DATA =
 
 if FORTRAN_MOD_UC
-mo_cdi_modfile = MO_CDI.$(FCMODEXT)
+mo_cdi_mod = MO_CDI.$(FCMODEXT)
 else
-mo_cdi_modfile = mo_cdi.$(FCMODEXT)
+mo_cdi_mod = mo_cdi.$(FCMODEXT)
 endif
 
 if ENABLE_CDI_LIB
@@ -21,7 +21,7 @@ if USE_FC
 include_HEADERS += cdi.inc
 endif
 if CREATE_ISOC
-nodist_include_HEADERS += $(mo_cdi_modfile)
+nodist_include_HEADERS += $(mo_cdi_mod)
 lib_LTLIBRARIES += libcdi_f2003.la
 nodist_pkgconfig_DATA += pkgconfig/cdi_f2003.pc
 endif
@@ -241,7 +241,7 @@ libcdiresunpack_la_SOURCES = resource_unpack.c
 mo_cdi.f90: @MAINTAINER_MODE_TRUE@ $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
 
-$(mo_cdi_modfile): mo_cdi.lo
+$(mo_cdi_mod): mo_cdi.lo
 	@if test ! -f $@; then rm -f $<; $(MAKE) $<; fi
 
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in $(top_builddir)/config.status
@@ -258,7 +258,7 @@ cdilib.c:
 
 CLEANFILES =
 if CREATE_ISOC
-CLEANFILES += $(mo_cdi_modfile)
+CLEANFILES += $(mo_cdi_mod)
 endif
 
 install-exec-hook:
