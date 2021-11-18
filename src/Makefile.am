@@ -212,8 +212,6 @@ libcdi_f2003_la_LIBADD = libcdi.la
 
 libcdipio_la_SOURCES = \
   cdipio.h \
-  cdipioFortran.c \
-  cfortran.h \
   pio.c \
   pio.h \
   pio_cdf_int.h \
@@ -254,6 +252,12 @@ libcdipio_la_SOURCES = \
   pio_xmap_cache.h \
   resource_unpack.c \
   resource_unpack.h
+
+if USE_FC
+libcdipio_la_SOURCES += \
+  cdipioFortran.c \
+  cfortran.h
+endif
 
 if HAVE_PARALLEL_NC4
 libcdipio_la_SOURCES += pio_cdf_int.c
