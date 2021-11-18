@@ -352,20 +352,20 @@ endif
 $(mo_cdi_mod): mo_cdi.lo
 	$(AM_V_at)test -f $@ || { rm -f $<; $(MAKE) $(AM_MAKEFLAGS) $<; }
 
-cmake/cdi-config.cmake: cmake/cdi-config.cmake.in $(top_builddir)/config.status
+cmake/cdi-config.cmake: $(top_builddir)/config.status cmake/cdi-config.cmake.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-cmake/cdi-config-version.cmake: cmake/cdi-config-version.cmake.in $(top_builddir)/config.status
+cmake/cdi-config-version.cmake: $(top_builddir)/config.status cmake/cdi-config-version.cmake.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-pkgconfig/cdi.pc: pkgconfig/cdi.pc.in $(top_builddir)/config.status
-	$(AM_V_GEN)cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+pkgconfig/cdi.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdi.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-pkgconfig/cdipio.pc: pkgconfig/cdipio.pc.in ../config.status
-	$(AM_V_GEN)cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+pkgconfig/cdipio.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdipio.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-pkgconfig/cdi_f2003.pc: pkgconfig/cdi_f2003.pc.in ../config.status
-	$(AM_V_GEN)cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+pkgconfig/cdi_f2003.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdi_f2003.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 cdilib.c:
 	$(AM_V_GEN)(cd $(top_srcdir)/src ; ./make_cdilib)
