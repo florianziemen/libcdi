@@ -34,9 +34,7 @@ compareResourcesArray_SOURCES = compareResourcesArray.c
 
 collectData2003_SOURCES = collectData2003.F90
 
-clean-local: clean-local-dirs
-.PHONY: clean-local-dirs
-clean-local-dirs:
+clean-local:
 	-rm -rf *.dSYM
 
 # overrides to make regular compilations also use libtool
