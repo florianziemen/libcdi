@@ -6,7 +6,6 @@ lib_LTLIBRARIES =
 noinst_LTLIBRARIES = libcdiresunpack.la
 EXTRA_PROGRAMS = make_fint
 EXTRA_DIST = cdilib.c
-LOCALTARGETS  =
 PKGCONFIG_FILES =
 CMAKECONFIG_FILES =
 
@@ -23,10 +22,6 @@ include_HEADERS += \
   cdi_datetime.h \
   julian_date.h
 lib_LTLIBRARIES += libcdi.la
-LOCALTARGETS += \
-  cmake/cdi/cdi-config-version.cmake \
-  cmake/cdi/cdi-config.cmake \
-  pkgconfig/cdi.pc
 CMAKECONFIG_FILES += \
   cmake/cdi/cdi-config-version.cmake \
   cmake/cdi/cdi-config.cmake
@@ -38,13 +33,11 @@ endif
 if CREATE_ISOC
 nodist_libcdi_f2003_la_HEADERS += $(mo_cdi_modfile)
 lib_LTLIBRARIES += libcdi_f2003.la
-LOCALTARGETS += pkgconfig/cdi_f2003.pc
 PKGCONFIG_FILES += pkgconfig/cdi_f2003.pc
 endif
 if USE_MPI
 include_HEADERS += cdipio.h
 lib_LTLIBRARIES += libcdipio.la
-LOCALTARGETS += pkgconfig/cdipio.pc
 PKGCONFIG_FILES += pkgconfig/cdipio.pc
 # add cdipio.inc only if cfortran interface is required
 if USE_FC
@@ -326,7 +319,7 @@ pkgconfig/cdi_f2003.pc: pkgconfig/cdi_f2003.pc.in ../config.status
 cdilib.c:
 	(cd $(top_srcdir)/src ; ./make_cdilib )
 
-all-local: $(LOCALTARGETS)
+all-local: $(PKGCONFIG_FILES) $(CMAKECONFIG_FILES)
 
 MOSTLYCLEANFILES = make_fint
 CLEANFILES = `ls *~`
