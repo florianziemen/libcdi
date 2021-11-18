@@ -138,7 +138,7 @@ test_resource_copy_mpi_LDADD = $(LDADD)
 endif
 
 clean-local: clean-local-dirs
-	-rm -f *~ *.grb *.grb2 *.nc *.nc2 *.nc4 *.srv *.ext *.cksum *.ieg *.log *.stderr *.stdout
+	-rm -f *.grb *.grb2 *.nc *.nc2 *.nc4 *.srv *.ext *.cksum *.ieg *.log *.stderr *.stdout
 .PHONY: clean-local-dirs
 clean-local-dirs:
 	-rm -rf test_cdf_const.d *.dSYM
