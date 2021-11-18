@@ -1,88 +1,154 @@
-## Process this file with automake to produce Makefile.in
-#
-#TESTS = test_grib.sh
-TESTS = cksum_verify \
-	test_cksum_grib \
-	test_cksum_grib2 \
-	test_cksum_nc test_cksum_extra \
-	test_cksum_service test_cksum_nc2 test_cksum_nc4 test_cksum_ieg \
-	test_chunk_cksum \
-	calendar_test1 \
-	test_month_adjust \
-	pio_write_run pio_cksum_mpinonb pio_cksum_fpguard \
-	pio_cksum_asynch pio_cksum_writer \
-	pio_cksum_cdf \
-	pio_cksum_grb2 \
-	pio_cksum_mpi_fw_ordered \
-	pio_cksum_mpi_fw_at_all \
-	pio_cksum_mpi_fw_at_reblock \
-	test_resource_copy_run pio_write_deco2d_run \
-	test_f2003 test_cdf_transformation test_cdf_const \
-	test_table_run test_byteswap_run
+TESTS = \
+  calendar_test1 \
+  cksum_verify \
+  pio_cksum_asynch \
+  pio_cksum_cdf \
+  pio_cksum_fpguard \
+  pio_cksum_grb2 \
+  pio_cksum_mpi_fw_at_all \
+  pio_cksum_mpi_fw_at_reblock \
+  pio_cksum_mpi_fw_ordered \
+  pio_cksum_mpinonb \
+  pio_cksum_writer \
+  pio_write_deco2d_run \
+  pio_write_run \
+  test_byteswap_run \
+  test_cdf_const \
+  test_cdf_transformation \
+  test_chunk_cksum \
+  test_cksum_extra \
+  test_cksum_grib \
+  test_cksum_grib2 \
+  test_cksum_ieg \
+  test_cksum_nc \
+  test_cksum_nc2 \
+  test_cksum_nc4 \
+  test_cksum_service \
+  test_f2003 \
+  test_month_adjust \
+  test_resource_copy_run \
+  test_table_run
 
-check_PROGRAMS = cksum_verify test_grib cksum_write cksum_read \
-	calendar_test1 \
-	test_month_adjust \
-	pio_write \
-	test_resource_copy cksum_write_chunk pio_write_deco2d test_table \
-	test_byteswap
-
-if ENABLE_NETCDF
-check_PROGRAMS += test_cdf_write test_cdf_read
+if USE_MPI
+TESTS += test_resource_copy_mpi_run
 endif
 
-#
-test_grib_SOURCES = test_grib.c
-cksum_verify_SOURCES = cksum_verify.c
-cksum_write_SOURCES = cksum_write.c simple_model_helper.h simple_model_helper.c
-cksum_write_chunk_SOURCES = cksum_write_chunk.c simple_model_helper.h simple_model_helper.c
-cksum_read_SOURCES = cksum_read.c \
-	var_cksum.c var_cksum.h \
-	stream_cksum.c stream_cksum.h \
-	ensure_array_size.h ensure_array_size.c
-calendar_test1_SOURCES = calendar_test1.c
-test_month_adjust_SOURCES = test_month_adjust.c
-pio_write_SOURCES = pio_write.c pio_write.h simple_model.c \
-	simple_model_helper.h simple_model_helper.c \
-	pio_write_setup_grid.h pio_write_setup_grid.c
-pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
-	simple_model_helper.h simple_model_helper.c \
-	pio_write_setup_grid.h pio_write_setup_grid.c
-test_resource_copy_SOURCES = test_resource_copy.c
-test_resource_copy_LDADD = ../src/libcdiresunpack.la $(LDADD)
-test_resource_copy_mpi_SOURCES = test_resource_copy_mpi.c
-test_cdf_write_SOURCES = test_cdf_write.c \
-	simple_model_helper.h simple_model_helper.c
-test_cdf_read_SOURCES = test_cdf_read.c
-test_table_SOURCES = test_table.c
-test_byteswap_SOURCES = test_byteswap.c
-#
+check_PROGRAMS = \
+  calendar_test1 \
+  cksum_read \
+  cksum_verify \
+  cksum_write \
+  cksum_write_chunk \
+  pio_write \
+  pio_write_deco2d \
+  test_byteswap \
+  test_grib \
+  test_month_adjust \
+  test_resource_copy \
+  test_table
+
+if ENABLE_NETCDF
+check_PROGRAMS += \
+  test_cdf_read \
+  test_cdf_write
+endif
+
+if USE_MPI
+check_PROGRAMS += test_resource_copy_mpi
+endif
+
+AM_CPPFLAGS = -I$(top_srcdir)/src
 AM_CFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
+LDADD = ../src/libcdi.la
+
+calendar_test1_SOURCES = calendar_test1.c
+
+cksum_read_SOURCES = \
+  cksum_read.c \
+  ensure_array_size.c \
+  ensure_array_size.h \
+  stream_cksum.c \
+  stream_cksum.h \
+  var_cksum.c \
+  var_cksum.h
+
+cksum_verify_SOURCES = cksum_verify.c
+
+cksum_write_SOURCES = \
+  cksum_write.c \
+  simple_model_helper.c \
+  simple_model_helper.h
+
+cksum_write_chunk_SOURCES = \
+  cksum_write_chunk.c \
+  simple_model_helper.c \
+  simple_model_helper.h
+
+pio_write_SOURCES = \
+  pio_write.c \
+  pio_write.h \
+  pio_write_setup_grid.c \
+  pio_write_setup_grid.h \
+  simple_model.c \
+  simple_model_helper.c \
+  simple_model_helper.h
 if USE_MPI
 pio_write_LDADD = ../src/libcdipio.la $(MPI_C_LIB)
-pio_write_deco2d_LDADD = ../src/libcdipio.la $(MPI_C_LIB)
-TESTS +=  test_resource_copy_mpi_run
-check_PROGRAMS += test_resource_copy_mpi
-test_resource_copy_mpi_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
 else
 pio_write_LDADD = $(LDADD)
+endif
+
+pio_write_deco2d_SOURCES = \
+  deco2d_model.c \
+  pio_write.c \
+  pio_write.h \
+  pio_write_setup_grid.c \
+  pio_write_setup_grid.h \
+  simple_model_helper.c \
+  simple_model_helper.h
+if USE_MPI
+pio_write_deco2d_LDADD = ../src/libcdipio.la $(MPI_C_LIB)
+else
 pio_write_deco2d_LDADD = $(LDADD)
+endif
+
+test_byteswap_SOURCES = test_byteswap.c
+
+test_grib_SOURCES = test_grib.c
+
+test_month_adjust_SOURCES = test_month_adjust.c
+
+test_resource_copy_SOURCES = test_resource_copy.c
+test_resource_copy_LDADD = ../src/libcdiresunpack.la $(LDADD)
+
+test_table_SOURCES = test_table.c
+
+test_cdf_read_SOURCES = test_cdf_read.c
+
+test_cdf_write_SOURCES = \
+  simple_model_helper.c \
+  simple_model_helper.h \
+  test_cdf_write.c
+
+test_resource_copy_mpi_SOURCES = test_resource_copy_mpi.c
+if USE_MPI
+test_resource_copy_mpi_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
+else
 test_resource_copy_mpi_LDADD = $(LDADD)
 endif
 
-LDADD = ../src/libcdi.la
-AM_CPPFLAGS = -I$(top_srcdir)/src
-#
-EXTRA_DIST = test_cdf_write.c test_cdf_read.c test_cksum_base
-#
-AUTOMAKE_OPTIONS = color-tests
-#
 clean-local: clean-local-dirs
 	-rm -f *~ *.grb *.grb2 *.nc *.nc2 *.nc4 *.srv *.ext *.cksum *.ieg *.log *.stderr *.stdout
-
 .PHONY: clean-local-dirs
 clean-local-dirs:
 	-rm -rf test_cdf_const.d *.dSYM
+
+AUTOMAKE_OPTIONS = color-tests
+
+EXTRA_DIST = \
+  test_cdf_read.c \
+  test_cdf_write.c \
+  test_cksum_base
 
 # overrides to make regular compilations also use libtool
 # static because the libtool libraries in this directory are meant to
