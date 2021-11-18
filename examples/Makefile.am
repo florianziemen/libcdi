@@ -69,9 +69,7 @@ else
 cdi_read_f2003.$(OBJEXT) cdi_write_f2003.$(OBJEXT): $(top_builddir)/src/mo_cdi.$(FCMODEXT)
 endif
 
-clean-local: clean-local-dirs
-.PHONY: clean-local-dirs
-clean-local-dirs:
+clean-local:
 	-rm -rf *.dSYM
 
 # overrides to make regular compilations also use libtool
