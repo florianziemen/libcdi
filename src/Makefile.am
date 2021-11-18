@@ -363,8 +363,3 @@ endif
 clean-local:
 @MAINTAINER_MODE_FALSE@	-rm -rf .fint
 	-test '.' = '$(srcdir)' || rm -f cdi.inc cdiFortran.c cdipio.inc cdipioFortran.c mo_cdi.f90
-
-install-exec-hook:
-	-@rmdir "$(DESTDIR)$(libdir)"
-install-data-hook:
-	-@rmdir "$(DESTDIR)$(includedir)"
