@@ -1363,7 +1363,7 @@ static void
 copy_darray(size_t n, const double *restrict in, double *restrict out)
 {
 #ifdef _OPENMP
-#pragma omp parallel for if (n > 80000000) default(shared) schedule(static)
+#pragma omp parallel for if (n > 99999) default(shared) schedule(static)
 #endif
   for (size_t i = 0; i < n; ++i) out[i] = in[i];
 }
