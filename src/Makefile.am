@@ -240,7 +240,9 @@ libcdipio_la_LIBADD = libcdi.la $(LIBRT) $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(MPI_C
 libcdi_f2003_la_SOURCES = mo_cdi.f90
 libcdi_f2003_la_LIBADD = libcdi.la
 
-libcdiresunpack_la_SOURCES = resource_unpack.c
+libcdiresunpack_la_SOURCES = \
+  resource_unpack.c \
+  resource_unpack.h
 
 mo_cdi.f90: @MAINTAINER_MODE_TRUE@ $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
