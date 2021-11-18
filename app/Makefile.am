@@ -20,14 +20,14 @@ if ENABLE_ALL_STATIC
 AM_LDFLAGS += -all-static
 endif
 
+LDADD = $(top_builddir)/src/libcdi.la $(LIBS)
+
 cdi_SOURCES = \
   cdi.c \
   printinfo.c \
   printinfo.h
-cdi_LDADD = $(top_builddir)/src/libcdi.la $(LIBS)
 
 createtable_SOURCES = createtable.c
-createtable_LDADD = $(top_builddir)/src/libcdi.la
 
 clean-local:
 	-rm -rf *.dSYM
