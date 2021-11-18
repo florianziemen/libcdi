@@ -254,10 +254,8 @@ libcdipio_la_SOURCES = \
   resource_unpack.c \
   resource_unpack.h
 
-if USE_MPI
 if HAVE_PARALLEL_NC4
 libcdipio_la_SOURCES += pio_cdf_int.c
-endif
 endif
 
 libcdipio_la_LIBADD = libcdi.la $(LIBRT) $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(MPI_C_LIB)
