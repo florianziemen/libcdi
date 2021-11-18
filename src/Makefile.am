@@ -356,7 +356,7 @@ cdilib.c:
 all-local: $(PKGCONFIG_FILES) $(CMAKECONFIG_FILES)
 
 MOSTLYCLEANFILES = make_fint
-CLEANFILES = `ls *~`
+CLEANFILES =
 if CREATE_ISOC
 CLEANFILES += $(mo_cdi_modfile)
 endif
