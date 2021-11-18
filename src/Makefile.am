@@ -11,9 +11,9 @@ nodist_pkgconfig_DATA =
 nodist_cmake_DATA =
 
 if FORTRAN_MOD_UC
-mo_cdi_modfile = MO_CDI.$(FCMODEXT)
+mo_cdi_mod = MO_CDI.$(FCMODEXT)
 else
-mo_cdi_modfile = mo_cdi.$(FCMODEXT)
+mo_cdi_mod = mo_cdi.$(FCMODEXT)
 endif
 
 if ENABLE_CDI_LIB
@@ -28,7 +28,7 @@ if USE_FC
 include_HEADERS += cdi.inc
 endif
 if CREATE_ISOC
-nodist_include_HEADERS += $(mo_cdi_modfile)
+nodist_include_HEADERS += $(mo_cdi_mod)
 lib_LTLIBRARIES += libcdi_f2003.la
 nodist_pkgconfig_DATA += pkgconfig/cdi_f2003.pc
 endif
@@ -333,7 +333,7 @@ $(srcdir)/cdipioFortran.c $(srcdir)/cdipio.inc:
 $(srcdir)/mo_cdi.f90:
 endif
 
-$(mo_cdi_modfile): mo_cdi.lo
+$(mo_cdi_mod): mo_cdi.lo
 	$(AM_V_at)test -f $@ || { rm -f $<; $(MAKE) $(AM_MAKEFLAGS) $<; }
 
 cmake/cdi-config.cmake: cmake/cdi-config.cmake.in $(top_builddir)/config.status
@@ -357,7 +357,7 @@ cdilib.c:
 MOSTLYCLEANFILES = make_fint
 CLEANFILES =
 if CREATE_ISOC
-CLEANFILES += $(mo_cdi_modfile)
+CLEANFILES += $(mo_cdi_mod)
 endif
 
 clean-local:
