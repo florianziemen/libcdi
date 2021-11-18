@@ -15,20 +15,19 @@ endif !ENABLE_CDI_APP
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
 
+AM_LDFLAGS =
+if ENABLE_ALL_STATIC
+AM_LDFLAGS += -all-static
+endif
+
 cdi_SOURCES = \
   cdi.c \
   printinfo.h \
   printinfo_extern.c
 cdi_LDADD = $(top_builddir)/src/libcdi.la $(LIBS)
-if ENABLE_ALL_STATIC
-cdi_LDFLAGS = -all-static
-endif
 
 createtable_SOURCES = createtable.c
 createtable_LDADD = $(top_builddir)/src/libcdi.la
-if ENABLE_ALL_STATIC
-createtable_LDFLAGS = -all-static
-endif
 
 clean-local:
 	-rm -rf *.dSYM

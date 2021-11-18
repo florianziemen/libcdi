@@ -59,6 +59,12 @@ endif
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
 AM_CFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
+
+AM_LDFLAGS =
+if ENABLE_ALL_STATIC
+AM_LDFLAGS += -all-static
+endif
+
 LDADD = ../src/libcdi.la
 
 calendar_test1_SOURCES = calendar_test1.c
