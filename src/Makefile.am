@@ -265,7 +265,7 @@ pkgconfig/cdi_f2003.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdi_f2
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 cdilib.c:
-	$(AM_V_GEN)(cd $(top_srcdir)/src ; ./make_cdilib)
+	$(AM_V_GEN)$(am__cd) $(top_srcdir)/src && ./make_cdilib
 
 EXTRA_DIST = cdilib.c
 CLEANFILES = cdilib.c
