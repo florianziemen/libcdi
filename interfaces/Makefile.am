@@ -5,28 +5,15 @@ locallibs = $(top_builddir)/src/.libs/libcdi.so $(LTLIBOBJS) $(NETCDF_LIBS) $(SZ
 bin_PROGRAMS =
 noinst_PROGRAMS = 
 noinst_LTLIBRARIES = 
-BINDINGS =
 
 if CREATE_INTERFACES
 noinst_PROGRAMS += CdiInfo
 noinst_LTLIBRARIES += libcdipp.la
-BINDINGS += help
 endif
-
-if ENABLE_RUBY
-BINDINGS += rubyObj
-endif
-
-if ENABLE_PYTHON
-BINDINGS += pythonObj
-endif
-
-SWIGCDILIB = cdilib.i
-SWIGCDIOBJ = cdiobj.i
 
 EXTRA_DIST = \
-  $(SWIGCDILIB) \
-  $(SWIGCDIOBJ) \
+  cdilib.i \
+  cdiobj.i \
   f2003/bindGen.rb \
   python/CdiLib.py \
   python/CdiObj.py \

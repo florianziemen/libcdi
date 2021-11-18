@@ -4,7 +4,6 @@ include_HEADERS =
 nodist_libcdi_f2003_la_HEADERS =
 lib_LTLIBRARIES =
 noinst_LTLIBRARIES = libcdiresunpack.la
-LOCALTARGETS  =
 PKGCONFIG_FILES =
 
 if FORTRAN_MOD_UC
@@ -16,7 +15,6 @@ endif
 if ENABLE_CDI_LIB
 include_HEADERS += cdi.h
 lib_LTLIBRARIES += libcdi.la
-LOCALTARGETS += pkgconfig/cdi.pc
 PKGCONFIG_FILES += pkgconfig/cdi.pc
 # add cdi.inc only if cfortran interface is required
 if USE_FC
@@ -25,13 +23,11 @@ endif
 if CREATE_ISOC
 nodist_libcdi_f2003_la_HEADERS += $(mo_cdi_modfile)
 lib_LTLIBRARIES += libcdi_f2003.la
-LOCALTARGETS += pkgconfig/cdi_f2003.pc
 PKGCONFIG_FILES += pkgconfig/cdi_f2003.pc
 endif
 if USE_MPI
 include_HEADERS += cdipio.h
 lib_LTLIBRARIES += libcdipio.la
-LOCALTARGETS += pkgconfig/cdipio.pc
 PKGCONFIG_FILES += pkgconfig/cdipio.pc
 if USE_FC
 include_HEADERS += cdipio.inc
@@ -262,7 +258,7 @@ pkgconfig/cdi_f2003.pc: pkgconfig/cdi_f2003.pc.in ../config.status
 cdilib.c:
 	(cd $(top_srcdir)/src ; ./make_cdilib )
 
-all-local: $(LOCALTARGETS)
+all-local: $(PKGCONFIG_FILES)
 CLEANFILES = `ls *~`
 if CREATE_ISOC
 CLEANFILES += $(mo_cdi_modfile)
