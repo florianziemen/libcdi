@@ -27,7 +27,6 @@ SWIGCDIOBJ = cdiobj.i
 EXTRA_DIST = \
   $(SWIGCDILIB) \
   $(SWIGCDIOBJ) \
-  CdiInfo.cpp \
   f2003/bindGen.rb \
   python/CdiLib.py \
   python/CdiObj.py \

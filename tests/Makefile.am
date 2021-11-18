@@ -145,10 +145,6 @@ clean-local-dirs:
 
 AUTOMAKE_OPTIONS = color-tests
 
-EXTRA_DIST = \
-  test_cdf_read.c \
-  test_cdf_write.c
-
 # overrides to make regular compilations also use libtool
 # static because the libtool libraries in this directory are meant to
 # be statically linked and there is no use for the PIC object

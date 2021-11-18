@@ -62,10 +62,6 @@ clean-local: clean-local-dirs
 clean-local-dirs:
 	-rm -rf *.dSYM
 
-EXTRA_DIST = \
-  cdi_read_f2003.f90  \
-  cdi_write_f2003.f90
-
 # overrides to make regular compilations also use libtool
 # static because the libtool libraries in this directory are meant to
 # be statically linked and there is no use for the PIC object
