@@ -19,27 +19,20 @@ endif
 AM_CPPFLAGS = -I$(top_srcdir)/src
 AM_FCFLAGS  = $(FPP_INCOPT)$(top_srcdir)/src $(FC_MOD_FLAG)../src
 
+AM_LDFLAGS =
+if ENABLE_ALL_STATIC
+AM_LDFLAGS += -all-static
+endif
+
 LDADD = $(top_builddir)/src/libcdi.la
 
 cdi_append_SOURCES = cdi_append.c
-if ENABLE_ALL_STATIC
-cdi_append_LDFLAGS = -all-static
-endif
 
 cdi_copy_SOURCES = cdi_copy.c
-if ENABLE_ALL_STATIC
-cdi_copy_LDFLAGS = -all-static
-endif
 
 cdi_read_SOURCES = cdi_read.c
-if ENABLE_ALL_STATIC
-cdi_read_LDFLAGS = -all-static
-endif
 
 cdi_write_SOURCES = cdi_write.c
-if ENABLE_ALL_STATIC
-cdi_write_LDFLAGS = -all-static
-endif
 
 cdi_write_ens_SOURCES = cdi_write_ens.c
 
@@ -52,15 +45,9 @@ cdi_write_relativ_SOURCES = cdi_write_relativ.c
 cdi_write_const_SOURCES = cdi_write_const.c
 
 cdi_read_f2003_SOURCES = cdi_read_f2003.f90
-if ENABLE_ALL_STATIC
-cdi_read_f2003_LDFLAGS = -all-static
-endif
 cdi_read_f2003_LDADD = $(top_builddir)/src/libcdi_f2003.la $(top_builddir)/src/libcdi.la
 
 cdi_write_f2003_SOURCES = cdi_write_f2003.f90
-if ENABLE_ALL_STATIC
-cdi_write_f2003_LDFLAGS = -all-static
-endif
 cdi_write_f2003_LDADD = $(top_builddir)/src/libcdi_f2003.la $(top_builddir)/src/libcdi.la
 
 if FORTRAN_MOD_UC
