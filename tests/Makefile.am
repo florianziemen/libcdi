@@ -150,7 +150,4 @@ CXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
         $(LIBTOOLFLAGS) --mode=compile $(CXX) -static $(DEFS) \
         $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
         $(AM_CXXFLAGS) $(CXXFLAGS)
-PPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=compile $(FC) -static $(DEFS) \
-        $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
-        $(AM_FCFLAGS) $(FCFLAGS)
+PPFCCOMPILE = $(FCCOMPILE)
