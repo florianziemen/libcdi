@@ -3,7 +3,7 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 cflags=-I@includedir@
-fcflags=@FPP_INCOPT@@includedir@ @CDI_F90_INTERFACE_FCFLAGS@
+@ENABLE_CF_INTERFACE_TRUE@fcflags=@FC_OPTINC@@includedir@
 libs=-L@libdir@ -lcdi @GRIB_API_LIBS@ @NETCDF_LIBS@ @SZLIB_LIBS@ @THREADS_LIBS@ @LIBS@
 threads_libs=@THREADS_LIBS@
 threads_cflags=@THREADS_INCLUDE@
@@ -39,5 +39,5 @@ Version: @VERSION@
 Requires: 
 Libs: ${libs}
 Cflags: ${cflags}
-FCflags: ${fcflags}
+@ENABLE_CF_INTERFACE@FCflags: ${fcflags}
 
