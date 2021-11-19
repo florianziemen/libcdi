@@ -1,11 +1,13 @@
 SUBDIRS = pio
 
-check_PROGRAMS = \
+noinst_PROGRAMS = \
   cdi_copy \
   cdi_read \
   cdi_write \
   cdi_write_ens \
   cdi_write_hybrid
+
+check_PROGRAMS =
 
 if ENABLE_NETCDF
 check_PROGRAMS += cdi_write_const
