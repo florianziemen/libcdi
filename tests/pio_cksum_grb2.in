@@ -1,11 +1,10 @@
 #!@SHELL@
-@ENABLE_MPI_FALSE@exit 77
 
 pio_write_args="-w 3"
 mpi_task_num=8
 suffix=grb2
 
-. ./pio_write_run
+. ./pio_write_run_parallel
 #
 # Local Variables:
 # mode: sh

@@ -563,8 +563,7 @@ dnl Check for librt:
         [test "$ac_res" = "none required" || LIBRT=$ac_res])
       LIBS=$saved_LIBS])],
   [YAXT_C_INCLUDE=; YAXT_C_LIB=
-   MPI_C_INCLUDE=; MPI_C_LIB=
-   MPI_LAUNCH="`pwd`/util/serialrun"])
+   MPI_C_INCLUDE=; MPI_C_LIB=])
 AS_VAR_IF([have_ppm], [no], [PPM_CORE_C_INCLUDE=; PPM_CORE_C_LIB=])
 AS_VAR_IF([build_pio_fc_programs], [no],
   [YAXT_FC_MOD=; YAXT_FC_LIB=
@@ -663,8 +662,10 @@ AC_CONFIG_FILES([
   tests/pio_cksum_nc2
   tests/pio_cksum_nc4
   tests/pio_cksum_writer
-  tests/pio_write_deco2d_run
-  tests/pio_write_run
+  tests/pio_write_deco2d_run_parallel
+  tests/pio_write_deco2d_run_serial
+  tests/pio_write_run_parallel
+  tests/pio_write_run_serial
   tests/test_byteswap_run
   tests/test_cdf_const
   tests/test_cdf_transformation
@@ -681,7 +682,6 @@ AC_CONFIG_FILES([
   tests/test_resource_copy_mpi_run
   tests/test_resource_copy_run
   tests/test_table_run
-  util/serialrun
 ],
 [chmod a+x "$ac_file"])
 
