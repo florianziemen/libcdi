@@ -1,0 +1,13 @@
+builders:
+  mpim:
+    - mpim/all.nv-21.3.0      : '.ci/bb/breeze-mpim/test.all.nv-21.3.0'
+  dkrz:
+    - dkrz/icon-pio.nag-6.2   : '.ci/bb/mistral-dkrz/test.icon-pio.nag-6.2.6223'
+    - dkrz/all.pgi-19.9       : '.ci/bb/mistral-dkrz/test.all.pgi-19.9.0'
+    - dkrz/all.intel-17       : '.ci/bb/mistral-dkrz/test.all.intel-17.0.6'
+    - dkrz/icon.gcc-6.4       : '.ci/bb/mistral-dkrz/test.icon.gcc-6.4.0'
+    - dkrz/all.nag-6.2        : '.ci/bb/mistral-dkrz/test.all.nag-6.2.6223'
+    - dkrz/all.gcc-6.4        : '.ci/bb/mistral-dkrz/test.all.gcc-6.4.0'
+  cscs:
+    - cscs/all.cray-11.0      : '.ci/bb/daint-cscs/test.all.cray-11.0.0'
+    - cscs/all.pgi-20.1.1     : '.ci/bb/daint-cscs/test.all.pgi-20.1.1'
