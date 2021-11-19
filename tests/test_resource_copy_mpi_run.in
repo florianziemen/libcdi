@@ -1,4 +1,5 @@
 #!@SHELL@
+@ENABLE_MPI_FALSE@exit 77
 test 'x@MPI_LAUNCH@' != xtrue || exit 77
 
 mpi_task_num="${mpi_task_num-1}"
