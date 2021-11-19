@@ -16,7 +16,11 @@ check_PROGRAMS += cdi_read_f2003 cdi_write_f2003
 endif ENABLE_ISOC_INTERFACE
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
-AM_FCFLAGS  = $(FC_OPTINC)$(top_srcdir)/src $(FC_MOD_FLAG)../src
+
+AM_FCFLAGS =
+if ENABLE_ISOC_INTERFACE
+AM_FCFLAGS += $(FC_MOD_FLAG)$(top_builddir)/src
+endif ENABLE_ISOC_INTERFACE
 
 AM_LDFLAGS =
 if ENABLE_ALL_STATIC
