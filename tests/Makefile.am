@@ -29,7 +29,7 @@ TESTS = \
   test_resource_copy \
   test_table
 
-if USE_MPI
+if ENABLE_MPI
 TESTS += test_resource_copy_mpi_run
 endif
 
@@ -53,11 +53,14 @@ check_PROGRAMS += \
   test_cdf_write
 endif
 
-if USE_MPI
+if ENABLE_MPI
 check_PROGRAMS += test_resource_copy_mpi
-endif
+endif ENABLE_MPI
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
+if ENABLE_MPI
+AM_CPPFLAGS += -DUSE_MPI
+endif ENABLE_MPI
 AM_CFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 
 AM_LDFLAGS =
@@ -98,7 +101,7 @@ pio_write_SOURCES = \
   simple_model.c \
   simple_model_helper.c \
   simple_model_helper.h
-if USE_MPI
+if ENABLE_MPI
 pio_write_LDADD = ../src/libcdipio.la $(UUID_C_LIB) $(MPI_C_LIB)
 else
 pio_write_LDADD = $(LDADD) $(UUID_C_LIB)
@@ -112,7 +115,7 @@ pio_write_deco2d_SOURCES = \
   pio_write_setup_grid.h \
   simple_model_helper.c \
   simple_model_helper.h
-if USE_MPI
+if ENABLE_MPI
 pio_write_deco2d_LDADD = ../src/libcdipio.la $(UUID_C_LIB) $(MPI_C_LIB)
 else
 pio_write_deco2d_LDADD = $(LDADD) $(UUID_C_LIB)
@@ -137,7 +140,7 @@ test_cdf_write_SOURCES = \
   test_cdf_write.c
 
 test_resource_copy_mpi_SOURCES = test_resource_copy_mpi.c
-if USE_MPI
+if ENABLE_MPI
 test_resource_copy_mpi_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
 else
 test_resource_copy_mpi_LDADD = $(LDADD) $(UUID_C_LIB)

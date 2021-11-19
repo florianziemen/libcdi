@@ -2,34 +2,37 @@ check_PROGRAMS = \
   collectData \
   collectDataNStreams
 
-if USE_MPI
+if ENABLE_MPI
 check_PROGRAMS += compareResourcesArray
-endif
+endif ENABLE_MPI
 
-if USE_FC
+if ENABLE_CF_INTERFACE
 check_PROGRAMS += collectData2003
-endif
+endif ENABLE_CF_INTERFACE
 
 AM_CPPFLAGS = -I$(top_srcdir)/src $(YAXT_C_INCLUDE)
+if ENABLE_MPI
+AM_CPPFLAGS += -DUSE_MPI
+endif ENABLE_MPI
 AM_CFLAGS = $(MPI_C_INCLUDE)
 
-AM_FCFLAGS = $(FPP_INCOPT)$(top_srcdir)/src $(MPI_FC_INCLUDE)
-if USE_MPI
-AM_FCFLAGS += $(FPP_DEFOPT)USE_MPI
-endif
+AM_FCFLAGS = $(FC_OPTINC)$(top_srcdir)/src $(MPI_FC_INCLUDE)
+if ENABLE_MPI
+AM_FCFLAGS += $(FC_DEFINE)USE_MPI
+endif ENABLE_MPI
 
 AM_LDFLAGS =
 if ENABLE_ALL_STATIC
 AM_LDFLAGS += -all-static
 endif
 
-if USE_MPI
+if ENABLE_MPI
 LDADD = $(top_builddir)/src/libcdipio.la $(MPI_C_LIB)
 collectData2003_LDADD = $(top_builddir)/src/libcdipio.la $(YAXT_FC_LIB) $(MPI_FC_LIB)
-else
+else !ENABLE_MPI
 LDADD = $(top_builddir)/src/libcdi.la
 collectData2003_LDADD = $(top_builddir)/src/libcdi.la
-endif
+endif !ENABLE_MPI
 
 collectData_SOURCES = collectData.c
 

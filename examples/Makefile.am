@@ -11,12 +11,12 @@ if ENABLE_NETCDF
 check_PROGRAMS += cdi_write_const
 endif
 
-if CREATE_ISOC
+if ENABLE_ISOC_INTERFACE
 check_PROGRAMS += cdi_read_f2003 cdi_write_f2003
-endif
+endif ENABLE_ISOC_INTERFACE
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
-AM_FCFLAGS  = $(FPP_INCOPT)$(top_srcdir)/src $(FC_MOD_FLAG)../src
+AM_FCFLAGS  = $(FC_OPTINC)$(top_srcdir)/src $(FC_MOD_FLAG)../src
 
 AM_LDFLAGS =
 if ENABLE_ALL_STATIC
@@ -43,7 +43,7 @@ cdi_read_f2003_LDADD = $(top_builddir)/src/libcdi_f2003.la $(top_builddir)/src/l
 cdi_write_f2003_SOURCES = cdi_write_f2003.f90
 cdi_write_f2003_LDADD = $(top_builddir)/src/libcdi_f2003.la $(top_builddir)/src/libcdi.la
 
-if FORTRAN_MOD_UC
+if FC_MOD_UPPERCASE
 cdi_read_f2003.$(OBJEXT) cdi_write_f2003.$(OBJEXT): $(top_builddir)/src/MO_CDI.$(FCMODEXT)
 else
 cdi_read_f2003.$(OBJEXT) cdi_write_f2003.$(OBJEXT): $(top_builddir)/src/mo_cdi.$(FCMODEXT)
