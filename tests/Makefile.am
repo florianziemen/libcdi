@@ -27,11 +27,8 @@ TESTS = \
   test_f2003 \
   test_month_adjust \
   test_resource_copy \
+  test_resource_copy_mpi_run \
   test_table
-
-if ENABLE_MPI
-TESTS += test_resource_copy_mpi_run
-endif
 
 check_PROGRAMS = \
   calendar_test1 \
