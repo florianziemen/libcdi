@@ -3,7 +3,8 @@ pkgconfigdir = $(libdir)/pkgconfig
 include_HEADERS =
 nodist_include_HEADERS =
 lib_LTLIBRARIES =
-noinst_LTLIBRARIES = libcdiresunpack.la
+check_LTLIBRARIES = libcdiresunpack.la
+noinst_LTLIBRARIES =
 nodist_pkgconfig_DATA =
 
 if FC_MOD_UPPERCASE
