@@ -52,6 +52,7 @@ endif !FC_MOD_UPPERCASE
 cdi_read_f2003.$(OBJEXT) cdi_write_f2003.$(OBJEXT): $(top_builddir)/src/$(mo_cdi_mod)
 
 clean-local:
+	-rm -f *.grb *.grb2 *.nc
 	-rm -rf *.dSYM
 
 # overrides to make regular compilations also use libtool
