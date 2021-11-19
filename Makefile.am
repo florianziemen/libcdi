@@ -1,4 +1,4 @@
-SUBDIRS = src interfaces app examples tests
+SUBDIRS = src app examples tests
 
 # The pdf files below cannot be created in parallel. The following helps with
 # GNU Make and hopefully will not make it worse with other make programs:

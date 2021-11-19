@@ -1,5 +1,5 @@
 #!@SHELL@
-@USE_MPI_FALSE@exit 77
+@ENABLE_MPI_FALSE@exit 77
 
 LOG=pio_cksum_cdf.log
 

@@ -10,11 +10,11 @@ EXTRA_DIST = cdilib.c
 nodist_pkgconfig_DATA =
 nodist_cmake_DATA =
 
-if FORTRAN_MOD_UC
+if FC_MOD_UPPERCASE
 mo_cdi_mod = MO_CDI.$(FCMODEXT)
-else
+else !FC_MOD_UPPERCASE
 mo_cdi_mod = mo_cdi.$(FCMODEXT)
-endif
+endif !FC_MOD_UPPERCASE
 
 if ENABLE_CDI_LIB
 include_HEADERS += cdi.h
@@ -23,35 +23,34 @@ nodist_pkgconfig_DATA += pkgconfig/cdi.pc
 nodist_cmake_DATA += \
   cmake/cdi-config-version.cmake \
   cmake/cdi-config.cmake
-# add cdi.inc only if cfortran interface is required
-if USE_FC
+if ENABLE_CF_INTERFACE
 include_HEADERS += cdi.inc
-endif
-if CREATE_ISOC
+endif ENABLE_CF_INTERFACE
+if ENABLE_ISOC_INTERFACE
 nodist_include_HEADERS += $(mo_cdi_mod)
 lib_LTLIBRARIES += libcdi_f2003.la
 nodist_pkgconfig_DATA += pkgconfig/cdi_f2003.pc
-endif
-if USE_MPI
+endif ENABLE_ISOC_INTERFACE
+if ENABLE_MPI
 include_HEADERS += cdipio.h
 lib_LTLIBRARIES += libcdipio.la
 nodist_pkgconfig_DATA += pkgconfig/cdipio.pc
-if USE_FC
+if ENABLE_CF_INTERFACE
 include_HEADERS += cdipio.inc
-endif
-endif
-else
+endif ENABLE_CF_INTERFACE
+endif ENABLE_MPI
+else !ENABLE_CDI_LIB
 noinst_LTLIBRARIES += libcdi.la
-if CREATE_ISOC
+if ENABLE_ISOC_INTERFACE
 noinst_LTLIBRARIES += libcdi_f2003.la
-endif
-if USE_MPI
+endif ENABLE_ISOC_INTERFACE
+if ENABLE_MPI
 noinst_LTLIBRARIES += libcdipio.la
-endif
-endif
+endif ENABLE_MPI
+endif !ENABLE_CDI_LIB
 
 AM_CPPFLAGS =
-if USE_MPI
+if ENABLE_MPI
 # TODO: this needs a refactoring but for now we set this macro here and not in
 # config.h because the macro is used in several files that do not include the
 # header file directly.
@@ -201,21 +200,17 @@ libcdi_la_SOURCES = \
   zaxis.c \
   zaxis.h
 
-# cfortran.h is an optional part of libcdi
-if USE_FC
+if ENABLE_CF_INTERFACE
 libcdi_la_SOURCES += \
   cdiFortran.c \
   cfortran.h
-endif
+endif ENABLE_CF_INTERFACE
 
-# these only contain code if grib_api is available
 if HAVE_LIBGRIB_API
 libcdi_la_SOURCES += \
   gribapi_utilities.c \
   stream_gribapi.c
-endif
-
-libcdi_la_LIBADD = $(UUID_C_LIB)
+endif HAVE_LIBGRIB_API
 
 libcdi_f2003_la_SOURCES = mo_cdi.f90
 libcdi_f2003_la_LIBADD = libcdi.la
@@ -263,15 +258,15 @@ libcdipio_la_SOURCES = \
   resource_unpack.c \
   resource_unpack.h
 
-if USE_FC
+if ENABLE_CF_INTERFACE
 libcdipio_la_SOURCES += \
   cdipioFortran.c \
   cfortran.h
-endif
+endif ENABLE_CF_INTERFACE
 
 if HAVE_PARALLEL_NC4
 libcdipio_la_SOURCES += pio_cdf_int.c
-endif
+endif HAVE_PARALLEL_NC4
 
 libcdipio_la_LIBADD = libcdi.la $(LIBRT) $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(MPI_C_LIB)
 
@@ -370,7 +365,7 @@ cdilib.c:
 
 CLEANFILES = cdilib.c
 MOSTLYCLEANFILES = make_fint
-if CREATE_ISOC
+if ENABLE_ISOC_INTERFACE
 MOSTLYCLEANFILES += $(mo_cdi_mod)
 endif
 
