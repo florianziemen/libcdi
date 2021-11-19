@@ -7,7 +7,13 @@ noinst_PROGRAMS += compareResourcesArray
 endif ENABLE_MPI
 
 if ENABLE_CF_INTERFACE
+if ENABLE_MPI
+if BUILD_PIO_FC_PROGRAMS
 noinst_PROGRAMS += collectData2003
+endif BUILD_PIO_FC_PROGRAMS
+else !ENABLE_MPI
+noinst_PROGRAMS += collectData2003
+endif !ENABLE_MPI
 endif ENABLE_CF_INTERFACE
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
