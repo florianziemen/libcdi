@@ -26,12 +26,9 @@ TESTS = \
   test_cksum_service \
   test_f2003 \
   test_month_adjust \
+  test_resource_copy_mpi_run \
   test_resource_copy_run \
   test_table_run
-
-if ENABLE_MPI
-TESTS += test_resource_copy_mpi_run
-endif
 
 check_PROGRAMS = \
   calendar_test1 \
