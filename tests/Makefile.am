@@ -39,7 +39,6 @@ check_PROGRAMS = \
   pio_write \
   pio_write_deco2d \
   test_byteswap \
-  test_grib \
   test_month_adjust \
   test_resource_copy \
   test_table
@@ -112,8 +111,6 @@ pio_write_deco2d_SOURCES = \
   simple_model_helper.h
 
 test_byteswap_SOURCES = test_byteswap.c
-
-test_grib_SOURCES = test_grib.c
 
 test_month_adjust_SOURCES = test_month_adjust.c
 
