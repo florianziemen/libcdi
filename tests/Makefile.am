@@ -65,7 +65,10 @@ if ENABLE_ALL_STATIC
 AM_LDFLAGS += -all-static
 endif
 
-LDADD = ../src/libcdi.la
+LDADD = $(top_builddir)/src/libcdi.la
+if ENABLE_MPI
+LDADD += $(top_builddir)/src/libcdipio.la
+endif
 
 calendar_test1_SOURCES = calendar_test1.c
 
@@ -98,11 +101,6 @@ pio_write_SOURCES = \
   simple_model.c \
   simple_model_helper.c \
   simple_model_helper.h
-if ENABLE_MPI
-pio_write_LDADD = ../src/libcdipio.la $(MPI_C_LIB)
-else
-pio_write_LDADD = $(LDADD)
-endif
 
 pio_write_deco2d_SOURCES = \
   deco2d_model.c \
@@ -112,11 +110,6 @@ pio_write_deco2d_SOURCES = \
   pio_write_setup_grid.h \
   simple_model_helper.c \
   simple_model_helper.h
-if ENABLE_MPI
-pio_write_deco2d_LDADD = ../src/libcdipio.la $(MPI_C_LIB)
-else
-pio_write_deco2d_LDADD = $(LDADD)
-endif
 
 test_byteswap_SOURCES = test_byteswap.c
 
@@ -125,7 +118,7 @@ test_grib_SOURCES = test_grib.c
 test_month_adjust_SOURCES = test_month_adjust.c
 
 test_resource_copy_SOURCES = test_resource_copy.c
-test_resource_copy_LDADD = ../src/libcdiresunpack.la $(LDADD)
+test_resource_copy_LDADD = $(top_builddir)/src/libcdiresunpack.la
 
 test_table_SOURCES = test_table.c
 
@@ -137,11 +130,6 @@ test_cdf_write_SOURCES = \
   test_cdf_write.c
 
 test_resource_copy_mpi_SOURCES = test_resource_copy_mpi.c
-if ENABLE_MPI
-test_resource_copy_mpi_LDADD = ../src/libcdipio.la
-else
-test_resource_copy_mpi_LDADD = $(LDADD)
-endif
 
 clean-local:
 	-rm -f *.grb *.grb2 *.nc *.nc2 *.nc4 *.srv *.ext *.cksum *.ieg *.log *.stderr *.stdout
