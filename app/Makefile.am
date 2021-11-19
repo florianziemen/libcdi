@@ -20,7 +20,7 @@ if ENABLE_ALL_STATIC
 AM_LDFLAGS += -all-static
 endif
 
-LDADD = $(top_builddir)/src/libcdi.la $(LIBS)
+LDADD = $(top_builddir)/src/libcdi.la
 
 cdi_SOURCES = \
   cdi.c \
