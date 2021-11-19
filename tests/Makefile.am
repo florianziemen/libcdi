@@ -133,7 +133,7 @@ test_resource_copy_mpi_SOURCES = test_resource_copy_mpi.c
 
 clean-local:
 	-rm -f *.grb *.grb2 *.nc *.nc2 *.nc4 *.srv *.ext *.cksum *.ieg *.log *.stderr *.stdout
-	-rm -rf test_cdf_const.d *.dSYM
+	-rm -rf *.dSYM
 
 AUTOMAKE_OPTIONS = color-tests
 

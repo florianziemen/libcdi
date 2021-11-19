@@ -41,6 +41,7 @@ collectData2003_SOURCES = collectData2003.F90
 collectData2003_LDADD = $(LDADD) $(YAXT_FC_LIB) $(MPI_FC_LIB)
 
 clean-local:
+	-rm -f *.grb
 	-rm -rf *.dSYM
 
 # overrides to make regular compilations also use libtool
