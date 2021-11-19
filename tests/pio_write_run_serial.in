@@ -1,0 +1,50 @@
+#!@SHELL@
+
+prefix=${0##*/}
+suffix="${suffix-grb}"
+
+case ${suffix} in
+  grb)
+    test 'x@ENABLE_GRIB@' = xyes || exit 77
+    ;;
+  grb2)
+    @HAVE_LIBGRIB_API_FALSE@exit 77
+    ;;
+  nc|nc2)
+    test 'x@ENABLE_NETCDF@' = xyes || exit 77
+    ;;
+  nc4)
+    test 'x@ENABLE_NETCDF@' = xyes || exit 77
+    test 'x@ENABLE_NC4@' = xyes || exit 77
+    ;;
+  *)
+    echo "Unsupported suffix '${suffix}'" >&2
+    exit 1
+    ;;
+esac
+
+variations='-qcreate-curvilinear-grid'
+
+test_variation()
+{
+  echo "creating data with $1" >&2
+  variation=$1
+  @top_builddir@/libtool --mode=execute \
+    ${tool_wrap} ./pio_write_serial -b ${prefix} -f ${suffix} ${pio_write_args} -s 7 ${variation} || exit 1
+  echo "checking ${prefix}_0.${suffix}" >&2
+  @top_builddir@/libtool --mode=execute \
+    ${tool_wrap} ./cksum_read ${prefix}_0.${suffix} ${prefix}_0.cksum || exit 1
+  echo "checking ${prefix}_1.${suffix}" >&2
+  @top_builddir@/libtool --mode=execute \
+    ${tool_wrap} ./cksum_read ${prefix}_1.${suffix} ${prefix}_1.cksum || exit 1
+}
+
+for variation in "" $variations ; do
+  test_variation "$variation" || exit 1
+done
+
+#
+# Local Variables:
+# mode: sh
+# End:
+#
