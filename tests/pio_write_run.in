@@ -25,8 +25,8 @@ case ${suffix} in
     ;;
 esac
 
-@USE_MPI_TRUE@variations="-qno-batch-rma -qcache-redists -qcreate-curvilinear-grid -qpreset-decomposition=true"
-@USE_MPI_FALSE@variations="-qcreate-curvilinear-grid"
+@ENABLE_MPI_TRUE@variations='-qno-batch-rma -qcache-redists -qcreate-curvilinear-grid -qpreset-decomposition=true'
+@ENABLE_MPI_FALSE@variations='-qcreate-curvilinear-grid'
 
 test_variation()
 {
@@ -50,7 +50,9 @@ for variation in "" $variations ; do
   test_variation "$variation"
 done
 
-@USE_MPI_TRUE@@USE_PPM_CORE_TRUE@test_variation "-qcreate-curvilinear-grid -quse-dist-grid"
+if test 'x@HAVE_PPM_DIST_ARRAY@' = xyes; then
+  test_variation "-qcreate-curvilinear-grid -quse-dist-grid"
+fi
 
 exec 2>&6 1>&5 5>&- 6>&-
 #

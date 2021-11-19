@@ -1,5 +1,5 @@
 #!@SHELL@
-@USE_MPI_FALSE@exit 77
+@ENABLE_MPI_FALSE@exit 77
 
 pio_write_args="-p PIO_FPGUARD -w 3"
 mpi_task_num=6
