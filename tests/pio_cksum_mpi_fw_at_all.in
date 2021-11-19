@@ -1,5 +1,5 @@
 #!@SHELL@
-@USE_MPI_FALSE@exit 77
+@ENABLE_MPI_FALSE@exit 77
 
 pio_write_args="-p PIO_MPI_FW_AT_ALL -w 2"
 mpi_task_num=5
