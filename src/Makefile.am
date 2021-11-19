@@ -243,6 +243,7 @@ libcdi_f2003_la_LIBADD = libcdi.la
 libcdiresunpack_la_SOURCES = \
   resource_unpack.c \
   resource_unpack.h
+libcdiresunpack_la_LIBADD = libcdi.la
 
 mo_cdi.f90: @MAINTAINER_MODE_TRUE@ $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
