@@ -28,11 +28,8 @@ Makefile.in
 /config.status
 /libtool
 /src/config.h
-/src/pkgconfig/cdi.pc
-/src/pkgconfig/cdi_f2003.pc
-/src/pkgconfig/cdipio.pc
+/src/pkgconfig/*.pc
 /src/stamp-h1
-/tables/gen_tableheaderfile
 /tests/pio_cksum_asynch
 /tests/pio_cksum_cdf
 /tests/pio_cksum_fpguard
@@ -69,16 +66,6 @@ Makefile
 /*/**/.libs
 /app/cdi
 /app/createtable
-# We do not add the following because that is supposed to be deleted by the
-# configure script and we want to notice if it is not the case:
-#/.libs
-#/a.out
-
-# Documentation stage files:
-/doc/cdi_cman.pdf
-/doc/cdi_fman.pdf
-
-# Test stage files:
 /examples/cdi_copy
 /examples/cdi_read
 /examples/cdi_read_f2003
@@ -91,47 +78,46 @@ Makefile
 /examples/pio/collectData2003
 /examples/pio/collectDataNStreams
 /examples/pio/compareResourcesArray
-/tests/*.log
-/tests/*.stderr
-/tests/*.stdout
 /tests/calendar_test1
 /tests/cksum_read
 /tests/cksum_verify
 /tests/cksum_write
 /tests/cksum_write_chunk
-/tests/example.cksum
-/tests/example.ext
-/tests/example.grb
-/tests/example.grb2
-/tests/example.ieg
-/tests/example.nc
-/tests/example.nc2
-/tests/example.nc4
-/tests/example.svc
-/tests/example_0.cksum
-/tests/example_0.grb
-/tests/example_0.grb2
-/tests/example_0.nc
-/tests/example_0.nc2
-/tests/example_0.nc4
-/tests/example_1.cksum
-/tests/example_1.grb
-/tests/example_1.grb2
-/tests/example_1.nc
-/tests/example_1.nc2
-/tests/example_1.nc4
-/tests/example_const.nc
 /tests/pio_write
 /tests/pio_write_deco2d
 /tests/test_byteswap
 /tests/test_cdf_read
-/tests/test_cdf_transformation.nc
 /tests/test_cdf_write
 /tests/test_grib
 /tests/test_month_adjust
 /tests/test_resource_copy
 /tests/test_resource_copy_mpi
 /tests/test_table
+# We do not add the following because that is supposed to be deleted by the
+# configure script and we want to notice if it is not the case:
+#/.libs
+#/a.out
+
+# Documentation stage files:
+/doc/cdi_cman.pdf
+/doc/cdi_fman.pdf
+
+# Test stage files:
+/examples/**/*.grb
+/examples/**/*.grb2
+/examples/**/*.nc
+/tests/*.cksum
+/tests/*.ext
+/tests/*.grb
+/tests/*.grb2
+/tests/*.ieg
+/tests/*.log
+/tests/*.nc
+/tests/*.nc2
+/tests/*.nc4
+/tests/*.stderr
+/tests/*.stdout
+/tests/*.svc
 
 # Dist stage files:
 /cdi-*.tar.gz
