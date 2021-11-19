@@ -26,13 +26,10 @@ if ENABLE_ALL_STATIC
 AM_LDFLAGS += -all-static
 endif
 
-if ENABLE_MPI
-LDADD = $(top_builddir)/src/libcdipio.la $(top_builddir)/src/libcdi.la $(YAXT_LIBS) $(MPI_C_LIB)
-collectData2003_LDADD = $(top_builddir)/src/libcdipio.la $(top_builddir)/src/libcdi.la $(YAXT_FC_LIB) $(MPI_FC_LIB)
-else !ENABLE_MPI
 LDADD = $(top_builddir)/src/libcdi.la
-collectData2003_LDADD = $(top_builddir)/src/libcdi.la
-endif !ENABLE_MPI
+if ENABLE_MPI
+LDADD += $(top_builddir)/src/libcdipio.la
+endif ENABLE_MPI
 
 collectData_SOURCES = collectData.c
 
@@ -41,6 +38,7 @@ collectDataNStreams_SOURCES = collectDataNStreams.c
 compareResourcesArray_SOURCES = compareResourcesArray.c
 
 collectData2003_SOURCES = collectData2003.F90
+collectData2003_LDADD = $(LDADD) $(YAXT_FC_LIB) $(MPI_FC_LIB)
 
 clean-local:
 	-rm -rf *.dSYM
