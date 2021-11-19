@@ -1,13 +1,32 @@
 #!@SHELL@
-test 'x@ENABLE_GRIB@' = xyes || exit 77
 
 LOG="${LOG-pio_write_deco2d.log}"
 mpi_task_num="${mpi_task_num-6}"
 suffix="${suffix-grb}"
 
+case ${suffix} in
+  grb)
+    test 'x@ENABLE_GRIB@' = xyes || exit 77
+    ;;
+  grb2)
+    @HAVE_LIBGRIB_API_FALSE@exit 77
+    ;;
+  nc|nc2)
+    test 'x@ENABLE_NETCDF@' = xyes || exit 77
+    ;;
+  nc4)
+    test 'x@ENABLE_NETCDF@' = xyes || exit 77
+    test 'x@ENABLE_NC4@' = xyes || exit 77
+    ;;
+  *)
+    echo "Unsupported suffix '${suffix}'" >&2
+    exit 1
+    ;;
+esac
+
 exec 5>&1 6>&2 >"$LOG" 2>&1
 @top_builddir@/libtool --mode=execute @MPI_LAUNCH@ -n ${mpi_task_num} \
-  ${tool_wrap} ./pio_write_deco2d ${pio_write_args} || exit 1
+  ${tool_wrap} ./pio_write_deco2d -f ${suffix} ${pio_write_args} || exit 1
 exec 2>&6 1>&5 5>&- 6>&-
 @top_builddir@/libtool --mode=execute \
   ${tool_wrap} ./cksum_read example_0.${suffix} example_0.cksum || exit 1
