@@ -1,13 +1,13 @@
-check_PROGRAMS = \
+noinst_PROGRAMS = \
   collectData \
   collectDataNStreams
 
 if ENABLE_MPI
-check_PROGRAMS += compareResourcesArray
+noinst_PROGRAMS += compareResourcesArray
 endif ENABLE_MPI
 
 if ENABLE_CF_INTERFACE
-check_PROGRAMS += collectData2003
+noinst_PROGRAMS += collectData2003
 endif ENABLE_CF_INTERFACE
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
