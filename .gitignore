@@ -42,8 +42,10 @@ Makefile.in
 /tests/pio_cksum_nc2
 /tests/pio_cksum_nc4
 /tests/pio_cksum_writer
-/tests/pio_write_deco2d_run
-/tests/pio_write_run
+/tests/pio_write_deco2d_run_parallel
+/tests/pio_write_deco2d_run_serial
+/tests/pio_write_run_parallel
+/tests/pio_write_run_serial
 /tests/test_cdf_const
 /tests/test_cdf_transformation
 /tests/test_cksum_extra
@@ -57,7 +59,6 @@ Makefile.in
 /tests/test_cksum_service
 /tests/test_f2003
 /tests/test_resource_copy_mpi_run
-/util/serialrun
 Makefile
 
 # Build stage files:
@@ -77,9 +78,12 @@ Makefile
 /examples/cdi_write_ens
 /examples/cdi_write_f2003
 /examples/cdi_write_hybrid
-/examples/pio/collectData
-/examples/pio/collectData2003
-/examples/pio/collectDataNStreams
+/examples/pio/collectData2003_parallel
+/examples/pio/collectData2003_serial
+/examples/pio/collectDataNStreams_parallel
+/examples/pio/collectDataNStreams_serial
+/examples/pio/collectData_parallel
+/examples/pio/collectData_serial
 /examples/pio/compareResourcesArray
 /interfaces/CdiInfo
 /interfaces/python/*.pyc
@@ -95,8 +99,10 @@ Makefile
 /tests/cksum_verify
 /tests/cksum_write
 /tests/cksum_write_chunk
-/tests/pio_write
-/tests/pio_write_deco2d
+/tests/pio_write_deco2d_parallel
+/tests/pio_write_deco2d_serial
+/tests/pio_write_parallel
+/tests/pio_write_serial
 /tests/test_byteswap
 /tests/test_cdf_read
 /tests/test_cdf_write

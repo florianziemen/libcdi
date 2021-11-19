@@ -1,4 +1,5 @@
 #!@SHELL@
+@ENABLE_MPI_FALSE@exit 77
 test 'x@MPI_LAUNCH@' != xtrue || exit 77
 
 mpi_task_num="${mpi_task_num-4}"
@@ -26,8 +27,7 @@ case ${suffix} in
     ;;
 esac
 
-@ENABLE_MPI_TRUE@variations='-qno-batch-rma -qcache-redists -qcreate-curvilinear-grid -qpreset-decomposition=true'
-@ENABLE_MPI_FALSE@variations='-qcreate-curvilinear-grid'
+variations='-qno-batch-rma -qcache-redists -qcreate-curvilinear-grid -qpreset-decomposition=true'
 
 test_variation()
 {
@@ -35,7 +35,7 @@ test_variation()
   variation=$1
   @top_builddir@/libtool --mode=execute \
     @MPI_LAUNCH@ \
-    -n ${mpi_task_num} ${tool_wrap} ./pio_write -b ${prefix} -f ${suffix} ${pio_write_args} -s 7 ${variation} || exit 1
+    -n ${mpi_task_num} ${tool_wrap} ./pio_write_parallel -b ${prefix} -f ${suffix} ${pio_write_args} -s 7 ${variation} || exit 1
   echo "checking ${prefix}_0.${suffix}" >&2
   @top_builddir@/libtool --mode=execute \
     ${tool_wrap} ./cksum_read ${prefix}_0.${suffix} ${prefix}_0.cksum || exit 1

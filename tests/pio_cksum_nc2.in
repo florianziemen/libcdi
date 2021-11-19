@@ -1,11 +1,10 @@
 #!@SHELL@
-@ENABLE_MPI_FALSE@exit 77
 
 suffix=nc2
 pio_write_args="-w 3 -qtaxis-type=relative"
 mpi_task_num=8
 
-. ./pio_write_run
+. ./pio_write_run_parallel
 #
 # Local Variables:
 # mode: sh

@@ -12,8 +12,10 @@ TESTS = \
   pio_cksum_nc2 \
   pio_cksum_nc4 \
   pio_cksum_writer \
-  pio_write_deco2d_run \
-  pio_write_run \
+  pio_write_deco2d_run_parallel \
+  pio_write_deco2d_run_serial \
+  pio_write_run_parallel \
+  pio_write_run_serial \
   test_byteswap \
   test_cdf_const \
   test_cdf_transformation \
@@ -38,8 +40,8 @@ check_PROGRAMS = \
   cksum_verify \
   cksum_write \
   cksum_write_chunk \
-  pio_write \
-  pio_write_deco2d \
+  pio_write_deco2d_serial \
+  pio_write_serial \
   test_byteswap \
   test_month_adjust \
   test_resource_copy \
@@ -52,13 +54,13 @@ check_PROGRAMS += \
 endif
 
 if ENABLE_MPI
-check_PROGRAMS += test_resource_copy_mpi
+check_PROGRAMS += \
+  pio_write_deco2d_parallel \
+  pio_write_parallel \
+  test_resource_copy_mpi
 endif ENABLE_MPI
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
-if ENABLE_MPI
-AM_CPPFLAGS += -DUSE_MPI
-endif ENABLE_MPI
 AM_CFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 
 AM_LDFLAGS =
@@ -67,9 +69,6 @@ AM_LDFLAGS += -all-static
 endif
 
 LDADD = $(top_builddir)/src/libcdi.la
-if ENABLE_MPI
-LDADD += $(top_builddir)/src/libcdipio.la
-endif
 
 calendar_test1_SOURCES = calendar_test1.c
 
@@ -94,21 +93,21 @@ cksum_write_chunk_SOURCES = \
   simple_model_helper.c \
   simple_model_helper.h
 
-pio_write_SOURCES = \
-  pio_write.c \
-  pio_write.h \
-  pio_write_setup_grid.c \
-  pio_write_setup_grid.h \
-  simple_model.c \
-  simple_model_helper.c \
-  simple_model_helper.h
-
-pio_write_deco2d_SOURCES = \
+pio_write_deco2d_serial_SOURCES = \
   deco2d_model.c \
   pio_write.c \
   pio_write.h \
   pio_write_setup_grid.c \
   pio_write_setup_grid.h \
+  simple_model_helper.c \
+  simple_model_helper.h
+
+pio_write_serial_SOURCES = \
+  pio_write.c \
+  pio_write.h \
+  pio_write_setup_grid.c \
+  pio_write_setup_grid.h \
+  simple_model.c \
   simple_model_helper.c \
   simple_model_helper.h
 
@@ -128,7 +127,18 @@ test_cdf_write_SOURCES = \
   simple_model_helper.h \
   test_cdf_write.c
 
+pio_write_deco2d_parallel_SOURCES = \
+  $(pio_write_deco2d_serial_SOURCES)
+pio_write_deco2d_parallel_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_MPI
+pio_write_deco2d_parallel_LDADD = $(top_builddir)/src/libcdipio.la
+
+pio_write_parallel_SOURCES = \
+  $(pio_write_serial_SOURCES)
+pio_write_parallel_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_MPI
+pio_write_parallel_LDADD = $(top_builddir)/src/libcdipio.la
+
 test_resource_copy_mpi_SOURCES = test_resource_copy_mpi.c
+test_resource_copy_mpi_LDADD = $(top_builddir)/src/libcdipio.la
 
 clean-local:
 	-rm -f *.cksum *.ext *.grb *.grb2 *.ieg *.nc *.nc2 *.nc4 *.stderr *.stdout *.svc
