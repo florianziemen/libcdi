@@ -127,31 +127,11 @@ dnl interface compatibility is fulfilled:
    AS_IF([test "x$FC" != xno],
      [dnl
 dnl Additional tests with fallback values:
-dnl TODO: the following should be put to a separate .m4 file (note that we
-dnl test the Fortran include statement, which we actually use in the code, and
-dnl not the Fortran preprocessor include directive, which is tested in
-dnl ACX_SL_PROG_FC_FPP_FEATURES):
-      AC_CACHE_CHECK([for Fortran compiler flag needed to specify search dnl
-paths for the \"INCLUDE\" statement], [acx_cv_fc_ftn_include_flag],
-        [AC_LANG_PUSH([Fortran])
-         acx_cv_fc_ftn_include_flag=unknown
-         AS_MKDIR_P([conftest.dir])
-         AC_LANG_CONFTEST([AC_LANG_PROGRAM])
-         mv conftest.$ac_ext conftest.dir/conftest.inc
-         AC_LANG_CONFTEST([AC_LANG_SOURCE(
-           [[      include "conftest.inc"]])])
-         saved_FCFLAGS=$FCFLAGS
-         for acx_flag in -I '-I '; do
-           FCFLAGS="$saved_FCFLAGS ${acx_flag}conftest.dir"
-           AC_LINK_IFELSE([], [acx_cv_fc_ftn_include_flag=$acx_flag])
-           test "x$acx_cv_fc_ftn_include_flag" != xunknown && break
-         done
-         FCFLAGS=$saved_FCFLAGS
-         rm -rf conftest.$ac_ext conftest.dir
-         AC_LANG_POP([Fortran])])
-      AS_VAR_IF([acx_cv_fc_ftn_include_flag], [unknown],
-        [acx_cv_fc_ftn_include_flag=-I])
-      AC_SUBST([FC_OPTINC], [$acx_cv_fc_ftn_include_flag])
+      AC_LANG_PUSH([Fortran])
+      ACX_FORTRAN_INCLUDE_FLAG(
+        [AC_SUBST([FC_OPTINC], [$acx_cv_fc_ftn_include_flag])],
+        [FC_OPTINC=-I])
+      AC_LANG_POP([Fortran])
 dnl Find the Fortran compiler flag needed to specify a preprocessor macro
 dnl definition for *.F90 source files:
       m4_pushdef([AC_FC_PP_SRCEXT])dnl
