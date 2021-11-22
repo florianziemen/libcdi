@@ -11,7 +11,7 @@
 
 int main()
 {
-  char fname[] = "test.grb";
+  char fname[] = "test_grib.grb";
   int filetype = CDI_FILETYPE_GRB;
   enum {
     nlat = 18,
