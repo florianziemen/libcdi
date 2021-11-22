@@ -131,6 +131,14 @@ dnl interface compatibility is fulfilled:
    ACX_CHECK_CFORTRAN([$srcdir/src],
      [AC_DEFINE([HAVE_CF_INTERFACE], [1],
         [Defined to 1 if C / Fortran interface cfortran.h works])])
+   AS_IF([test "x$F77" != xno],
+     [AC_LANG_PUSH([Fortran 77])
+      ACX_FORTRAN_INCLUDE_FLAG
+      AC_LANG_POP([Fortran 77])
+      AS_IF([test "x$FC" != xno && dnl
+test "x$acx_cv_f77_ftn_include_flag" != "x$FC_OPTINC"],
+        [AC_MSG_ERROR([Fortran and Fortran 77 compilers require different ]dnl
+[flags needed to specify search paths for the "INCLUDE" statements])])])
    AS_IF([test "x$FC" = xno && test "x$F77" = xno],
      [AC_MSG_FAILURE([the Fortran 77 interface is requested but both ]dnl
 [Fortran and Fortran 77 compilers are disabled, missing or lack the ]dnl
