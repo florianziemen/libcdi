@@ -17,7 +17,7 @@ TESTS = \
   test_cksum_service \
   test_f2003 \
   test_month_adjust \
-  test_resource_copy \
+  test_resource_copy_run \
   test_table
 
 # MPI test must have prefix *.test:
