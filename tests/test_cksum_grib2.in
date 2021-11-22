@@ -1,5 +1,6 @@
 #!@SHELL@
 @HAVE_LIBGRIB_API_FALSE@exit 77
+test 'x@ENABLE_GRIB@' = xyes || exit 77
 
 prefix=${0##*/}
 format=grb2
