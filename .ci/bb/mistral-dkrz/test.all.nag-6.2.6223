@@ -34,6 +34,6 @@ PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 
 make -j8
 
-make -j8 check
+make -j8 check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log

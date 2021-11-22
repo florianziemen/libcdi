@@ -95,6 +95,6 @@ rsync -uavz "${PPM_ROOT}/" "${LOCAL_PPM_ROOT}" --exclude='*.la' --exclude='*.pc'
 
 make -j8
 
-make -j8 check
+make -j8 check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log

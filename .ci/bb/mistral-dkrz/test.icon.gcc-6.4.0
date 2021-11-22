@@ -64,4 +64,4 @@ acx_cv_have_pnetcdf=no
 
 make -j8
 
-make -j8 check
+make -j8 check || { cat tests/test-suite.log; exit 1; }
