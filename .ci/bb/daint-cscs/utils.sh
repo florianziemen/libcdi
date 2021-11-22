@@ -143,8 +143,9 @@ init_pgi2011 ()
 }
 
 #
-# Accepts a path to a file containing standard output of the 'make check'
-# command and checks whether all tests were run and passed.
+# Accepts a path to a file containing the testsuite summary (either the
+# 'test-suite.log' or the standard output of the 'make check' command) and
+# checks whether all tests were run and passed.
 #
 check_all_tests_passed ()
 {
