@@ -9,6 +9,8 @@ top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 . "${script_dir}/utils.sh"
 init_nag626223
 
+test -f "${top_srcdir}/configure" || ( cd "${top_srcdir}" && ./autogen.sh )
+
 # When configured as part of ICON, C headers, Fortran modules and library files
 # of YAXT and PPM become available only at the build time. The following
 # imitates that.

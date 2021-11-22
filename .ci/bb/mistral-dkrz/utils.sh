@@ -1,16 +1,4 @@
 #
-# Initializes the environment modules.
-#
-init_env_mods ()
-{
-  saved_set=$-
-  set +eu
-  . /sw/rhel6-x64/etc/profile.mistral
-  module use /sw/spack-rhel6/spack/modules/linux-rhel6-haswell
-  set -${saved_set}
-}
-
-#
 # Accepts a list of environment modules and loads them witch conflict
 # resolution.
 #
@@ -102,11 +90,24 @@ switch_for_module ()
 }
 
 #
+# Initializes the environment.
+#
+init_env ()
+{
+  saved_set=$-
+  set +eu
+  . /sw/rhel6-x64/etc/profile.mistral
+  module use /sw/spack-rhel6/spack/modules/linux-rhel6-haswell
+  set -${saved_set}
+  switch_for_module automake libtool autoconf
+}
+
+#
 # Sets variables for tests with GCC 6.4.0.
 #
-init_gcc640()
+init_gcc640 ()
 {
-  init_env_mods
+  init_env
   switch_for_module gcc/6.4.0 openmpi/2.0.2p1_hpcx-gcc64
 
   CC=gcc
@@ -125,9 +126,9 @@ init_gcc640()
 #
 # Sets variables for tests with Intel 17.0.6.
 #
-init_intel1706()
+init_intel1706 ()
 {
-  init_env_mods
+  init_env
   switch_for_module gcc/6.4.0 intel/17.0.6 openmpi/2.0.2p1_hpcx-intel14
 
   CC=icc
@@ -151,9 +152,9 @@ init_intel1706()
 #
 # Sets variables for tests with NAG 6.2.6223.
 #
-init_nag626223()
+init_nag626223 ()
 {
-  init_env_mods
+  init_env
   switch_for_module gcc/6.4.0 nag/6.2
 
   # There is no environment module for MPICH:
@@ -180,9 +181,9 @@ init_nag626223()
 #
 # Sets variables for tests with PGI 19.9.0.
 #
-init_pgi1990()
+init_pgi1990 ()
 {
-  init_env_mods
+  init_env
   switch_for_module pgi/19.9-spack openmpi/2.0.2p2-pgi-19.9
 
   CC=pgcc

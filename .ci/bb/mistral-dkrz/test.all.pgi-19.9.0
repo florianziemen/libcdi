@@ -9,6 +9,8 @@ top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 . "${script_dir}/utils.sh"
 init_pgi1990
 
+test -f "${top_srcdir}/configure" || ( cd "${top_srcdir}" && ./autogen.sh )
+
 # The configure script does not check the 'lib64' subdirectory, therefore we
 # run it with '--with-eccodes' and the following flags. Note that fixing this
 # in the configure script might be tricky: the 'lib64' subdirectory should be
@@ -24,6 +26,7 @@ LDFLAGS="-L${ECCODES_ROOT}/lib64"
 LDFLAGS+=" -L${HDF5_ROOT}/lib"
 
 "${top_srcdir}/configure" \
+--disable-maintainer-mode \
 --enable-cf-interface \
 --enable-iso-c-interface \
 --enable-mpi \
