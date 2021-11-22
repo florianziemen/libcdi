@@ -1,12 +1,4 @@
 #
-# Initializes the environment modules.
-#
-init_env_mods ()
-{
-  :
-}
-
-#
 # Accepts a list of environment modules and loads them witch conflict
 # resolution.
 #
@@ -98,11 +90,19 @@ switch_for_module ()
 }
 
 #
+# Initializes the environment.
+#
+init_env ()
+{
+  :
+}
+
+#
 # Sets variables for tests with Cray 11.0.0.
 #
-init_cray1100()
+init_cray1100 ()
 {
-  init_env_mods
+  init_env
   switch_for_module craype PrgEnv-cray cce/11.0.0 cray-mpich cray-netcdf
 
   CC=cc
@@ -122,9 +122,9 @@ init_cray1100()
 #
 # Sets variables for tests with PGI 20.1.1.
 #
-init_pgi2011()
+init_pgi2011 ()
 {
-  init_env_mods
+  init_env
   switch_for_module craype PrgEnv-pgi pgi/20.1.1 cray-mpich cray-netcdf
 
   CC=cc

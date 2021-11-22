@@ -9,6 +9,8 @@ top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 . "${script_dir}/utils.sh"
 init_nag626223
 
+test -f "${top_srcdir}/configure" || ( cd "${top_srcdir}" && ./autogen.sh )
+
 # Use GCC from the path when compiling/linking Fortran code:
 FCFLAGS="-Wc=$(which gcc)"
 
@@ -16,6 +18,7 @@ FCFLAGS="-Wc=$(which gcc)"
 FCFLAGS+=' -g -kind=byte'
 
 "${top_srcdir}/configure" \
+--disable-maintainer-mode \
 --enable-cf-interface \
 --enable-iso-c-interface \
 --enable-mpi \

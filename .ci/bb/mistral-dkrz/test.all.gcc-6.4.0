@@ -9,7 +9,10 @@ top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 . "${script_dir}/utils.sh"
 init_gcc640
 
+test -f "${top_srcdir}/configure" || ( cd "${top_srcdir}" && ./autogen.sh )
+
 "${top_srcdir}/configure" \
+--disable-maintainer-mode \
 --enable-cf-interface \
 --enable-iso-c-interface \
 --enable-mpi \
