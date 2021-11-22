@@ -26,12 +26,13 @@ endif
 
 LDADD = $(top_builddir)/src/libcdi.la
 
-cdi_SOURCES = \
-  cdi.c \
-  printinfo.h \
+cdi_SOURCES =        \
+  cdi.c              \
+  printinfo.h        \
   printinfo_extern.c
 
-createtable_SOURCES = createtable.c
+createtable_SOURCES = \
+  createtable.c
 
 clean-local:
 	-rm -rf *.dSYM
