@@ -55,15 +55,14 @@ if test "x$enable_iso_c_interface" = xyes || \
     test -z $FC 2>/dev/null && FC=no
     AS_IF([test "x$FC" != xno], [AC_FC_SRCEXT([f90], [], [FC=no])])
     AS_IF([test "x$FC" != xno],
-      [AC_MSG_CHECKING([whether the Fortran compiler works])
-       works_FC=no
-       AC_LANG_PUSH([Fortran])
-       AC_RUN_IFELSE([AC_LANG_PROGRAM],
-         [works_FC=yes], [], [works_FC=yes])
-       AC_LANG_POP([Fortran])
-       AC_MSG_RESULT([$works_FC])
-       AS_VAR_IF([works_FC], [no], [FC=no])
-       AS_UNSET([works_FC])])
+      [AC_CACHE_CHECK([whether the Fortran compiler works],
+         [acx_cv_fc_works],
+         [acx_cv_fc_works=no
+          AC_LANG_PUSH([Fortran])
+          AC_RUN_IFELSE([AC_LANG_PROGRAM],
+            [acx_cv_fc_works=yes], [], [acx_cv_fc_works=yes])
+          AC_LANG_POP([Fortran])])
+       AS_VAR_IF([acx_cv_fc_works], [no], [FC=no])])
 dnl Additional tests with fallback values:
     AS_IF([test "x$FC" != xno],
       [AC_LANG_PUSH([Fortran])
@@ -93,15 +92,14 @@ if test "x$enable_cf_interface" = xyes; then
     AC_PROG_F77
     test -z $F77 2>/dev/null && F77=no
     AS_IF([test "x$F77" != xno],
-      [AC_MSG_CHECKING([whether the Fortran 77 compiler works])
-       works_F77=no
-       AC_LANG_PUSH([Fortran 77])
-       AC_RUN_IFELSE([AC_LANG_PROGRAM],
-         [works_F77=yes], [], [works_F77=yes])
-       AC_LANG_POP([Fortran 77])
-       AC_MSG_RESULT([$works_F77])
-       AS_VAR_IF([works_F77], [no], [F77=no])
-       AS_UNSET([works_F77])])
+      [AC_CACHE_CHECK([whether the Fortran 77 compiler works],
+         [acx_cv_f77_works],
+         [acx_cv_f77_works=no
+          AC_LANG_PUSH([Fortran 77])
+          AC_RUN_IFELSE([AC_LANG_PROGRAM],
+            [acx_cv_f77_works=yes], [], [acx_cv_f77_works=yes])
+          AC_LANG_POP([Fortran 77])])
+       AS_VAR_IF([acx_cv_f77_works], [no], [F77=no])])
   else
     F77=no
   fi
