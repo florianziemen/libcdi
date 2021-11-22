@@ -21,12 +21,15 @@ case ${suffix} in
     ;;
   grb2)
     @HAVE_LIBGRIB_API_FALSE@exit 77
+    test 'x@ENABLE_GRIB@' = xyes || exit 77
     ;;
-  nc|nc2)
-    test 'x@ENABLE_NETCDF@' = xyes || exit 77
+  nc)
+    @ENABLE_NETCDF_FALSE@exit 77
+    ;;
+  nc2)
+    test 'x@ENABLE_NC2@' = xyes || exit 77
     ;;
   nc4)
-    test 'x@ENABLE_NETCDF@' = xyes || exit 77
     test 'x@ENABLE_NC4@' = xyes || exit 77
     ;;
   *)
