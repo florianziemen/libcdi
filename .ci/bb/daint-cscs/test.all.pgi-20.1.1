@@ -42,6 +42,6 @@ make -j8
 
 # Run with '-j' to submit as many MPI jobs as possible
 # (see '--with-concurrent-mpi-checks'):
-make -j check
+make -j check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
