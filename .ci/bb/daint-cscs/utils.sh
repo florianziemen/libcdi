@@ -116,7 +116,7 @@ init_cray1100()
 
   # Here we fix a never-ending story with Libtool overlinkning, absence of
   # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
-  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib64:${LD_LIBRARY_PATH-}"
+  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib64:${PPM_ROOT}/lib:${YAXT_ROOT}/lib:${LD_LIBRARY_PATH-}"
 }
 
 #
@@ -139,7 +139,7 @@ init_pgi2011()
 
   # Here we fix a never-ending story with Libtool overlinkning, absence of
   # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
-  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib64:${LD_LIBRARY_PATH-}"
+  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib64:${PPM_ROOT}/lib:${YAXT_ROOT}/lib:${LD_LIBRARY_PATH-}"
 }
 
 #
