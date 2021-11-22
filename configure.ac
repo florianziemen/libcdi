@@ -67,20 +67,31 @@ dnl Additional tests with fallback values:
     AS_IF([test "x$FC" != xno],
       [AC_LANG_PUSH([Fortran])
        ACX_SL_FC_CHECK_MOD_PATH_FLAG([], [FC_MOD_FLAG=-I])
+       ACX_FORTRAN_INCLUDE_FLAG(
+        [AC_SUBST([FC_OPTINC], [$acx_cv_fc_ftn_include_flag])],
+        [FC_OPTINC=-I])
+       ACX_SL_FC_MOD_SUFFIX([], [FCMODEXT=mod])
+dnl Find the Fortran compiler flag needed to specify a preprocessor macro
+dnl definition for *.F90 source files:
+       m4_pushdef([AC_FC_PP_SRCEXT])dnl
+       saved_ac_fc_srcext=$ac_fc_srcext
+       ac_fc_srcext='F90'
+       AC_FC_PP_DEFINE([], [FC_DEFINE=-D])
+       ac_fc_srcext=$saved_ac_fc_srcext
+       m4_popdef([AC_FC_PP_DEFINE])
        AC_LANG_POP([Fortran])])
   fi
 else
   FC=no
 fi
+AM_CONDITIONAL([FC_MOD_UPPERCASE], [test "x$FCMODCASE" = xuc])
 dnl Additional checks required for the Fortran 90 interface:
 AS_VAR_IF([enable_iso_c_interface], [yes],
   [AS_IF([test "x$FC" != xno], [ACX_FC_CHECK_STRPTR_CONVERT([], [FC=no])])
    AS_VAR_IF([FC], [no],
      [AC_MSG_FAILURE([the Fortran 90 interface is requested but the Fortran ]dnl
-[compiler is disabled, missing or lacks the required features])])
-dnl Additional tests with fallback values:
-   AS_IF([test "x$FC" != xno], [ACX_SL_FC_MOD_SUFFIX([], [FCMODEXT=mod])])])
-AM_CONDITIONAL([FC_MOD_UPPERCASE], [test "x$FCMODCASE" = xuc])
+[compiler is disabled, missing or lacks the required features])])])
+AM_CONDITIONAL([BUILD_FC_PROGRAMS], [test "x$FC" != xno])
 
 dnl We need Fortran 77 if either FC is not available or the user has specified
 dnl F77 explicitly to make sure that the generated Fortran 77 interface is
@@ -113,7 +124,7 @@ fi
 dnl Additional checks required for the Fortran 77 interface:
 AS_VAR_IF([enable_cf_interface], [yes],
   [dnl
-dnl The following macro make sure the the user's request for the Fortran 77
+dnl The following macro make sure that the user's request for the Fortran 77
 dnl interface compatibility is fulfilled:
    ACX_FIND_CFORTRAN_DEF
    ACX_XLF_QEXTNAME_ADD_APPENDUS
@@ -123,23 +134,7 @@ dnl interface compatibility is fulfilled:
    AS_IF([test "x$FC" = xno && test "x$F77" = xno],
      [AC_MSG_FAILURE([the Fortran 77 interface is requested but both ]dnl
 [Fortran and Fortran 77 compilers are disabled, missing or lack the ]dnl
-[required features])])
-   AS_IF([test "x$FC" != xno],
-     [dnl
-dnl Additional tests with fallback values:
-      AC_LANG_PUSH([Fortran])
-      ACX_FORTRAN_INCLUDE_FLAG(
-        [AC_SUBST([FC_OPTINC], [$acx_cv_fc_ftn_include_flag])],
-        [FC_OPTINC=-I])
-      AC_LANG_POP([Fortran])
-dnl Find the Fortran compiler flag needed to specify a preprocessor macro
-dnl definition for *.F90 source files:
-      m4_pushdef([AC_FC_PP_SRCEXT])dnl
-      saved_ac_fc_srcext=$ac_fc_srcext
-      ac_fc_srcext='F90'
-      AC_FC_PP_DEFINE([], [FC_DEFINE=-D])
-      ac_fc_srcext=$saved_ac_fc_srcext
-      m4_popdef([AC_FC_PP_DEFINE])])])
+[required features])])])
 
 AC_ARG_ENABLE([ruby-interface],
   [AS_HELP_STRING([--enable-ruby-interface],
