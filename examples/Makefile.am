@@ -3,11 +3,11 @@ SUBDIRS = pio
 noinst_PROGRAMS =
 check_PROGRAMS =
 
-EXTRA_PROGRAMS =   \
-  cdi_copy         \
-  cdi_read         \
-  cdi_write        \
-  cdi_write_ens    \
+EXTRA_PROGRAMS = \
+  cdi_copy \
+  cdi_read \
+  cdi_write \
+  cdi_write_ens \
   cdi_write_hybrid
 
 # Examples that are part of the test suite:

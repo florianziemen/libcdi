@@ -1,16 +1,16 @@
 #!@SHELL@
-
 test 'x@ENABLE_NETCDF@' = xyes || exit 77
 
 ncdatafile="$0.nc"
-@builddir@/test_cdf_write "${ncdatafile}" || exit 1
-digest=$(@builddir@/test_cdf_read "${ncdatafile}") || exit 1
 
-missValueCount=$(echo "$digest" | @SED@ -n '/^missing values count =/{
+./test_cdf_write "${ncdatafile}" || exit 1
+
+digest=`./test_cdf_read "${ncdatafile}"` || exit 1
+missValueCount=`echo "$digest" | @SED@ -n '/^missing values count =/{
 s/^missing values count *= *//
 p
 q
-}') || exit 1
+}'` || exit 1
 
 if test "$missValueCount" -ne 1; then
   echo "Mismatch in expected number of missing values!" >&2

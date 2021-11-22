@@ -1,10 +1,10 @@
 #!@SHELL@
 
 suffix=nc
+pio_write_args="-w 2 -qtaxis-type=relative"
 mpi_task_num=5
-pio_write_args='-w 2 -qtaxis-type=relative'
-. @builddir@/pio_write_run_parallel.test
 
+. ./pio_write_run_parallel.test
 #
 # Local Variables:
 # mode: sh

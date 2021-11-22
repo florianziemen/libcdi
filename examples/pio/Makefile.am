@@ -1,13 +1,13 @@
 noinst_PROGRAMS =
 
-EXTRA_PROGRAMS =             \
+EXTRA_PROGRAMS = \
   collectDataNStreams_serial \
   collectData_serial
 
 if ENABLE_MPI
-EXTRA_PROGRAMS +=              \
+EXTRA_PROGRAMS += \
   collectDataNStreams_parallel \
-  collectData_parallel         \
+  collectData_parallel \
   compareResourcesArray
 endif ENABLE_MPI
 
@@ -39,11 +39,9 @@ endif
 
 LDADD = $(top_builddir)/src/libcdi.la
 
-collectDataNStreams_serial_SOURCES = \
-  collectDataNStreams.c
+collectDataNStreams_serial_SOURCES = collectDataNStreams.c
 
-collectDataNStreams_parallel_SOURCES = \
-  $(collectDataNStreams_serial_SOURCES)
+collectDataNStreams_parallel_SOURCES = $(collectDataNStreams_serial_SOURCES)
 collectDataNStreams_parallel_CPPFLAGS = -DUSE_MPI $(AM_CPPFLAGS)
 collectDataNStreams_parallel_LDADD = $(top_builddir)/src/libcdipio.la
 
@@ -58,8 +56,7 @@ compareResourcesArray_LDADD = $(top_builddir)/src/libcdipio.la
 
 collectData2003_serial_SOURCES = collectData2003.F90
 
-collectData2003_parallel_SOURCES = \
-  $(collectData2003_serial_SOURCES)
+collectData2003_parallel_SOURCES = $(collectData2003_serial_SOURCES)
 collectData2003_parallel_FCFLAGS = $(FC_DEFINE)USE_MPI $(AM_FCFLAGS)
 collectData2003_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(YAXT_FC_LIB) $(MPI_FC_LIB)
 

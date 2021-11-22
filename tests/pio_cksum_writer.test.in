@@ -1,11 +1,10 @@
 #!@SHELL@
-
 test 'x@ENABLE_GRIB@' = xyes || exit 77
 
-pio_write_args='-p PIO_WRITER -w 4'
+pio_write_args="-p PIO_WRITER -w 4"
 mpi_task_num=8
-. @builddir@/pio_write_run_parallel.test
 
+. ./pio_write_run_parallel.test
 #
 # Local Variables:
 # mode: sh
