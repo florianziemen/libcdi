@@ -16,6 +16,7 @@ TESTS = \
   test_cksum_nc_chunk \
   test_cksum_service \
   test_f2003 \
+  test_grib_run \
   test_month_adjust \
   test_resource_copy_run \
   test_table
@@ -64,6 +65,7 @@ test_PROGRAMS_ = \
   pio_write \
   pio_write_deco2d \
   test_byteswap \
+  test_grib \
   test_month_adjust \
   test_resource_copy \
   test_table
@@ -151,6 +153,8 @@ nodist_pio_write_deco2d_parallel_SOURCES = \
 pio_write_deco2d_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 test_byteswap_SOURCES = test_byteswap.c
+
+test_grib_SOURCES = test_grib.c
 
 test_month_adjust_SOURCES = test_month_adjust.c
 
