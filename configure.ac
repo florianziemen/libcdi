@@ -159,13 +159,14 @@ if test "x$enable_ruby_interface" = xyes || \
     AC_PROG_CXX
     test -z $CXX 2>/dev/null && CXX=no
     AS_IF([test "x$CXX" != xno],
-      [AC_MSG_CHECKING([whether the C++ compiler works])
-       AC_LANG_PUSH([C++])
-       AC_LINK_IFELSE([AC_LANG_PROGRAM],
-         [AC_MSG_RESULT([yes])],
-         [AC_MSG_RESULT([no])
-          CXX=no])
-       AC_LANG_POP([C++])])
+      [AC_CACHE_CHECK([whether the C++ compiler works],
+         [acx_cv_cxx_works],
+         [acx_cv_cxx_works=no
+          AC_LANG_PUSH([C++])
+dnl Do not use AC_RUN_IFELSE for now:
+          AC_LINK_IFELSE([AC_LANG_PROGRAM], [acx_cv_cxx_works=yes])
+          AC_LANG_POP([C++])])
+       AS_VAR_IF([acx_cv_cxx_works], [no], [CXX=no])])
   fi
   AS_VAR_IF([CXX], [no],
     [AC_MSG_FAILURE([either the Ruby or the Python interface is requested ]dnl
