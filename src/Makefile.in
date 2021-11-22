@@ -107,7 +107,7 @@ host_triplet = @host@
 @with_on_demand_check_programs_TRUE@am__append_15 = libcdiresunpack.la
 @with_on_demand_check_programs_FALSE@am__append_16 = libcdiresunpack.la
 @ENABLE_CF_INTERFACE_TRUE@am__append_17 = \
-@ENABLE_CF_INTERFACE_TRUE@  cdiFortran.c \
+@ENABLE_CF_INTERFACE_TRUE@  cdiFortran.c       \
 @ENABLE_CF_INTERFACE_TRUE@  cfortran.h
 
 @HAVE_LIBGRIB_API_TRUE@am__append_18 = \
@@ -115,10 +115,12 @@ host_triplet = @host@
 @HAVE_LIBGRIB_API_TRUE@  stream_gribapi.c
 
 @ENABLE_CF_INTERFACE_TRUE@am__append_19 = \
-@ENABLE_CF_INTERFACE_TRUE@  cdipioFortran.c \
+@ENABLE_CF_INTERFACE_TRUE@  cdipioFortran.c       \
 @ENABLE_CF_INTERFACE_TRUE@  cfortran.h
 
-@HAVE_PARALLEL_NC4_TRUE@am__append_20 = pio_cdf_int.c
+@HAVE_PARALLEL_NC4_TRUE@am__append_20 = \
+@HAVE_PARALLEL_NC4_TRUE@  pio_cdf_int.c
+
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps =  \
@@ -660,7 +662,7 @@ libcdipio_la_LIBADD = libcdi.la $(LIBRT) $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(MPI_C
 libcdi_f2003_la_SOURCES = mo_cdi.f90
 libcdi_f2003_la_LIBADD = libcdi.la
 libcdiresunpack_la_SOURCES = \
-  resource_unpack.c \
+  resource_unpack.c          \
   resource_unpack.h
 
 libcdiresunpack_la_LIBADD = libcdi.la
@@ -1405,13 +1407,13 @@ $(mo_cdi_mod): mo_cdi.lo
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in $(top_builddir)/config.status
 	$(AM_V_GEN)cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-pkgconfig/cdipio.pc: pkgconfig/cdipio.pc.in ../config.status
-	$(AM_V_GEN)cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-
 pkgconfig/cdi_f2003.pc: pkgconfig/cdi_f2003.pc.in ../config.status
 	$(AM_V_GEN)cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-cdilib.c:
+pkgconfig/cdipio.pc: pkgconfig/cdipio.pc.in ../config.status
+	$(AM_V_GEN)cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+
+cdilib.c: 
 	$(AM_V_GEN)(cd $(top_srcdir)/src ; ./make_cdilib)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

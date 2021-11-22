@@ -104,12 +104,12 @@ TESTS = calendar_test1$(EXEEXT) cksum_verify$(EXEEXT) \
 	pio_write_dist_array.test pio_write_run_parallel.test \
 	test_resource_copy_mpi_run.test
 @ENABLE_NETCDF_TRUE@am__append_1 = \
-@ENABLE_NETCDF_TRUE@  test_cdf_read \
+@ENABLE_NETCDF_TRUE@  test_cdf_read   \
 @ENABLE_NETCDF_TRUE@  test_cdf_write
 
 @ENABLE_MPI_TRUE@am__append_2 = \
 @ENABLE_MPI_TRUE@  pio_write_deco2d_parallel \
-@ENABLE_MPI_TRUE@  pio_write_parallel \
+@ENABLE_MPI_TRUE@  pio_write_parallel        \
 @ENABLE_MPI_TRUE@  test_resource_copy_mpi
 
 @with_on_demand_check_programs_TRUE@check_PROGRAMS = $(am__EXEEXT_3)
@@ -780,71 +780,87 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 AM_CFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 AM_LDFLAGS = $(am__append_3)
 LDADD = $(top_builddir)/src/libcdi.la
-calendar_test1_SOURCES = calendar_test1.c
+calendar_test1_SOURCES = \
+  calendar_test1.c
+
 cksum_read_SOURCES = \
-  cksum_read.c \
+  cksum_read.c        \
   ensure_array_size.c \
   ensure_array_size.h \
-  stream_cksum.c \
-  stream_cksum.h \
-  var_cksum.c \
+  stream_cksum.c      \
+  stream_cksum.h      \
+  var_cksum.c         \
   var_cksum.h
 
-cksum_verify_SOURCES = cksum_verify.c
+cksum_verify_SOURCES = \
+  cksum_verify.c
+
 cksum_write_SOURCES = \
-  cksum_write.c \
+  cksum_write.c         \
   simple_model_helper.c \
   simple_model_helper.h
 
 cksum_write_chunk_SOURCES = \
-  cksum_write_chunk.c \
-  simple_model_helper.c \
+  cksum_write_chunk.c       \
+  simple_model_helper.c     \
   simple_model_helper.h
 
 pio_write_deco2d_serial_SOURCES = \
-  deco2d_model.c \
-  pio_write.c \
-  pio_write.h \
-  pio_write_setup_grid.c \
-  pio_write_setup_grid.h \
-  simple_model_helper.c \
+  deco2d_model.c                  \
+  pio_write.c                     \
+  pio_write.h                     \
+  pio_write_setup_grid.c          \
+  pio_write_setup_grid.h          \
+  simple_model_helper.c           \
   simple_model_helper.h
 
 nodist_pio_write_deco2d_parallel_SOURCES = \
-  deco2d_model.parallel.c \
-  pio_write.parallel.c \
-  pio_write_setup_grid.parallel.c \
+  deco2d_model.parallel.c                   \
+  pio_write.parallel.c                      \
+  pio_write_setup_grid.parallel.c           \
   simple_model_helper.parallel.c
 
 pio_write_deco2d_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 pio_write_serial_SOURCES = \
-  pio_write.c \
-  pio_write.h \
-  pio_write_setup_grid.c \
-  pio_write_setup_grid.h \
-  simple_model.c \
-  simple_model_helper.c \
+  pio_write.c              \
+  pio_write.h              \
+  pio_write_setup_grid.c   \
+  pio_write_setup_grid.h   \
+  simple_model.c           \
+  simple_model_helper.c    \
   simple_model_helper.h
 
 nodist_pio_write_parallel_SOURCES = \
-  pio_write.parallel.c \
-  pio_write_setup_grid.parallel.c \
-  simple_model.parallel.c \
+  pio_write.parallel.c               \
+  pio_write_setup_grid.parallel.c    \
+  simple_model.parallel.c            \
   simple_model_helper.parallel.c
 
 pio_write_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
-test_byteswap_SOURCES = test_byteswap.c
-test_month_adjust_SOURCES = test_month_adjust.c
-test_resource_copy_SOURCES = test_resource_copy.c
+test_byteswap_SOURCES = \
+  test_byteswap.c
+
+test_month_adjust_SOURCES = \
+  test_month_adjust.c
+
+test_resource_copy_SOURCES = \
+  test_resource_copy.c
+
 test_resource_copy_LDADD = $(top_builddir)/src/libcdiresunpack.la
-test_table_SOURCES = test_table.c
-test_cdf_read_SOURCES = test_cdf_read.c
+test_table_SOURCES = \
+  test_table.c
+
+test_cdf_read_SOURCES = \
+  test_cdf_read.c
+
 test_cdf_write_SOURCES = \
-  simple_model_helper.c \
-  simple_model_helper.h \
+  simple_model_helper.c  \
+  simple_model_helper.h  \
   test_cdf_write.c
 
-test_resource_copy_mpi_SOURCES = test_resource_copy_mpi.c
+test_resource_copy_mpi_SOURCES = \
+  test_resource_copy_mpi.c
+
 test_resource_copy_mpi_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 AUTOMAKE_OPTIONS = color-tests
 

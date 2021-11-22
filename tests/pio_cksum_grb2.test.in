@@ -1,11 +1,11 @@
 #!@SHELL@
 
-pio_write_args="-w 3"
-mpi_task_num=8
 suffix=grb2
+mpi_task_num=8
+pio_write_args='-w 3'
+. @builddir@/pio_write_run_parallel.test
+( . @builddir@/pio_write_dist_array.test ) || test $? -eq 77
 
-. ./pio_write_run_parallel.test
-( . ./pio_write_dist_array.test ) || test $? -eq 77
 #
 # Local Variables:
 # mode: sh

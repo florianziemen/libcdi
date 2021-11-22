@@ -1,7 +1,9 @@
 #!@SHELL@
+
 test 'x@ENABLE_NETCDF@' = xyes || exit 77
 
 prefix=${0##*/}
 format=nc
-./cksum_write -b ${prefix} -f ${format} || exit 1
-./cksum_read ${prefix}.${format} ${prefix}.cksum || exit 1
+@builddir@/cksum_write -b ${prefix} -f ${format} || exit 1
+@builddir@/cksum_read ${prefix}.${format} ${prefix}.cksum || exit 1
+

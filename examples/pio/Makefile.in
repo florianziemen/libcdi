@@ -93,7 +93,7 @@ EXTRA_PROGRAMS = collectDataNStreams_serial$(EXEEXT) \
 	$(am__EXEEXT_3)
 @ENABLE_MPI_TRUE@am__append_1 = \
 @ENABLE_MPI_TRUE@  collectDataNStreams_parallel \
-@ENABLE_MPI_TRUE@  collectData_parallel \
+@ENABLE_MPI_TRUE@  collectData_parallel         \
 @ENABLE_MPI_TRUE@  compareResourcesArray
 
 @ENABLE_CF_INTERFACE_TRUE@am__append_2 = collectData2003_serial

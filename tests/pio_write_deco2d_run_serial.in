@@ -1,6 +1,7 @@
 #!@SHELL@
+
 prefix=${0##*/}
-suffix="${suffix-grb}"
+suffix=${suffix-grb}
 
 case ${suffix} in
   grb)
@@ -23,11 +24,12 @@ case ${suffix} in
 esac
 
 @top_builddir@/libtool --mode=execute \
-  ${tool_wrap} ./pio_write_deco2d_serial -b ${prefix} -f ${suffix} ${pio_write_args} || exit 1
+  ${tool_wrap} @builddir@/pio_write_deco2d_serial -b ${prefix} -f ${suffix} ${pio_write_args} || exit 1
 @top_builddir@/libtool --mode=execute \
-  ${tool_wrap} ./cksum_read ${prefix}_0.${suffix} ${prefix}_0.cksum || exit 1
+  ${tool_wrap} @builddir@/cksum_read ${prefix}_0.${suffix} ${prefix}_0.cksum || exit 1
 @top_builddir@/libtool --mode=execute \
-  ${tool_wrap} ./cksum_read ${prefix}_1.${suffix} ${prefix}_1.cksum || exit 1
+  ${tool_wrap} @builddir@/cksum_read ${prefix}_1.${suffix} ${prefix}_1.cksum || exit 1
+
 #
 # Local Variables:
 # mode: sh
