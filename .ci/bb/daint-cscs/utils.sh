@@ -110,9 +110,9 @@ init_cray1100()
   FC=ftn
   MPI_LAUNCH="$(which srun) -p cscsci -C gpu -A d56 -t 05:00"
 
-  ECCODES_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/eccodes-20.20.0-cray11'
-  PPM_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/ppm-1.0.6-cray11'
-  YAXT_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/yaxt-0.9.0-cray11'
+  ECCODES_ROOT='/project/d56/libcdi-ci-sw/cce-11.0.0-haswell/eccodes-2.21.0-x3o7v65'
+  PPM_ROOT='/project/d56/libcdi-ci-sw/cce-11.0.0-haswell/scales-ppm-1.0.6-43iofhw'
+  YAXT_ROOT='/project/d56/libcdi-ci-sw/cce-11.0.0-haswell/yaxt-0.9.0-h6fg2ur'
 
   # Here we fix a never-ending story with Libtool overlinkning, absence of
   # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
@@ -132,10 +132,10 @@ init_pgi2011()
   FC=ftn
   MPI_LAUNCH="$(which srun) -p cscsci -C gpu -A d56 -t 05:00"
 
-  ECCODES_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/eccodes-20.20.0-pgi20'
-  PPM_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/ppm-1.0.6-pgi20'
+  ECCODES_ROOT='/project/d56/libcdi-ci-sw/pgi-20.1.1-haswell/eccodes-2.21.0-hxzyycf'
+  PPM_ROOT='/project/d56/libcdi-ci-sw/pgi-20.1.1-haswell/scales-ppm-1.0.6-tjpvz46'
   # YAXT 0.9.0 cannot be built with PGI 20.1.1:
-  YAXT_ROOT='/scratch/snx3000/skosukhi/cdi-pio-sw/yaxt-0.7.0-p1-pgi20'
+  YAXT_ROOT='/project/d56/libcdi-ci-sw/pgi-20.1.1-haswell/yaxt-0.7.0-p1-lirxrt4'
 
   # Here we fix a never-ending story with Libtool overlinkning, absence of
   # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
