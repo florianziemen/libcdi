@@ -58,11 +58,8 @@ if test "x$enable_iso_c_interface" = xyes || \
       [AC_MSG_CHECKING([whether the Fortran compiler works])
        works_FC=no
        AC_LANG_PUSH([Fortran])
-       AC_LINK_IFELSE([AC_LANG_PROGRAM],
-         [AS_IF([test "x$cross_compiling" != xyes],
-            [AC_TRY_COMMAND([./conftest$ac_exeext])
-             AS_IF([test $ac_status -eq 0], [works_FC=yes])],
-            [works_FC=yes])])
+       AC_RUN_IFELSE([AC_LANG_PROGRAM],
+         [works_FC=yes], [], [works_FC=yes])
        AC_LANG_POP([Fortran])
        AC_MSG_RESULT([$works_FC])
        AS_VAR_IF([works_FC], [no], [FC=no])
@@ -99,11 +96,8 @@ if test "x$enable_cf_interface" = xyes; then
       [AC_MSG_CHECKING([whether the Fortran 77 compiler works])
        works_F77=no
        AC_LANG_PUSH([Fortran 77])
-       AC_LINK_IFELSE([AC_LANG_PROGRAM],
-         [AS_IF([test "x$cross_compiling" != xyes],
-            [AC_TRY_COMMAND([./conftest$ac_exeext])
-             AS_IF([test $ac_status -eq 0], [works_F77=yes])],
-            [works_F77=yes])])
+       AC_RUN_IFELSE([AC_LANG_PROGRAM],
+         [works_F77=yes], [], [works_F77=yes])
        AC_LANG_POP([Fortran 77])
        AC_MSG_RESULT([$works_F77])
        AS_VAR_IF([works_F77], [no], [F77=no])
