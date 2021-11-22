@@ -1,16 +1,4 @@
 #
-# Initializes the environment modules.
-#
-init_env_mods ()
-{
-  saved_set=$-
-  set +eu
-  . /etc/profile.d/mpim.sh
-  module use /data/mpi/sclab/sip/m300488/nvhpc/modulefiles
-  set -${saved_set}
-}
-
-#
 # Accepts a list of environment modules and loads them witch conflict
 # resolution.
 #
@@ -102,11 +90,24 @@ switch_for_module ()
 }
 
 #
+# Initializes the environment.
+#
+init_env ()
+{
+  saved_set=$-
+  set +eu
+  . /etc/profile.d/mpim.sh
+  module use /data/mpi/sclab/sip/m300488/nvhpc/modulefiles
+  set -${saved_set}
+  switch_for_module automake
+}
+
+#
 # Sets variables for tests with NVHPC 21.3.0.
 #
-init_nv2130()
+init_nv2130 ()
 {
-  init_env_mods
+  init_env
   switch_for_module nvhpc/21.3
 
   # The default environment module of NVHPC sets variables, which we do not

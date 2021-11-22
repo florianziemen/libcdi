@@ -8,6 +8,8 @@ top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 . "${script_dir}/utils.sh"
 init_gcc640
 
+test -f "${top_srcdir}/configure" || ( cd "${top_srcdir}" && ./autogen.sh )
+
 # The configure wrappers of ICON export LD_LIBRARY_PATH:
 export LD_LIBRARY_PATH="${NETCDF_ROOT}/lib:${GRIBAPI_ROOT}/lib:${LD_LIBRARY_PATH-}"
 
