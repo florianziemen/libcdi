@@ -1,10 +1,10 @@
 #!@SHELL@
 
-pio_write_args='-p PIO_FPGUARD -w 3'
+pio_write_args="-p PIO_FPGUARD -w 3"
 mpi_task_num=6
-. @builddir@/pio_write_run_parallel.test
-( . @builddir@/pio_write_dist_array.test ) || test $? -eq 77
 
+. ./pio_write_run_parallel.test
+( . ./pio_write_dist_array.test ) || test $? -eq 77
 #
 # Local Variables:
 # mode: sh

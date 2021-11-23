@@ -9,26 +9,26 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 
 EXTRA_LTLIBRARIES = libcdipp.la
 EXTRA_PROGRAMS = CdiInfo
-EXTRA_DIST =             \
-  cdilib.i               \
-  cdiobj.i               \
-  f2003/bindGen.rb       \
-  python/CdiLib.py       \
-  python/CdiObj.py       \
-  python/cdilib_wrap.c   \
+EXTRA_DIST = \
+  cdilib.i \
+  cdiobj.i \
+  f2003/bindGen.rb \
+  python/CdiLib.py \
+  python/CdiObj.py \
+  python/cdilib_wrap.c \
   python/cdiobj_wrap.cpp \
-  python/setup.py        \
-  python/setupLib.py     \
-  python/setupObj.py     \
-  python/table.py        \
-  python/testLib.py      \
-  python/testObj.py      \
-  ruby/cdilib_wrap.c     \
-  ruby/cdiobj_wrap.cpp   \
-  ruby/extconf.rb        \
-  ruby/extconfLib.rb     \
-  ruby/extconfObj.rb     \
-  ruby/testLib.rb        \
+  python/setup.py \
+  python/setupLib.py \
+  python/setupObj.py \
+  python/table.py \
+  python/testLib.py \
+  python/testObj.py \
+  ruby/cdilib_wrap.c \
+  ruby/cdiobj_wrap.cpp \
+  ruby/extconf.rb \
+  ruby/extconfLib.rb \
+  ruby/extconfObj.rb \
+  ruby/testLib.rb \
   ruby/testObj.rb
 
 libcdipp_la_SOURCES = cdi.cpp cdi.hpp

@@ -1,13 +1,13 @@
 noinst_PROGRAMS =
 
-EXTRA_PROGRAMS =             \
+EXTRA_PROGRAMS = \
   collectDataNStreams_serial \
   collectData_serial
 
 if ENABLE_MPI
-EXTRA_PROGRAMS +=              \
+EXTRA_PROGRAMS += \
   collectDataNStreams_parallel \
-  collectData_parallel         \
+  collectData_parallel \
   compareResourcesArray
 endif ENABLE_MPI
 

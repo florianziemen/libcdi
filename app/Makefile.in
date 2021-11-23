@@ -406,13 +406,11 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 AM_LDFLAGS = $(am__append_6)
 LDADD = $(top_builddir)/src/libcdi.la
 cdi_SOURCES = \
-  cdi.c              \
-  printinfo.h        \
+  cdi.c \
+  printinfo.h \
   printinfo_extern.c
 
-createtable_SOURCES = \
-  createtable.c
-
+createtable_SOURCES = createtable.c
 
 # Compile programs using Libtool:
 COMPILE = $(LTCOMPILE)
