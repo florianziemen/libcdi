@@ -98,9 +98,12 @@ init_env ()
   set +eu
   . /etc/profile.d/mpim.sh
   module use /data/mpi/sclab/sip/m300488/nvhpc/modulefiles
-  module use /data/mpi/sclab/sip/m300488/cdi-pio-sw/modulefiles
   set -${saved_set}
-  switch_for_module automake libtool autoconf
+  switch_for_module automake/1.16.1
+
+  # Tell the custom installation of Automake 1.16 where to look for the libtool
+  # macros:
+  export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH-}"
 }
 
 #
