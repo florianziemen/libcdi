@@ -2,7 +2,7 @@
 
 suffix=grb
 mpi_task_num=6
-pio_write=./pio_write_deco2d_parallel
+pio_write=./pio_write_deco2d.parallel
 
 . ./pio_write_run
 #
