@@ -215,4 +215,7 @@ LTCXXCOMPILE = $(LTCXXCOMPILE_prefix) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) 
 SUFFIXES = .parallel.c
 
 .c.parallel.c:
-	$(AM_V_GEN):;{ echo '#define USE_MPI 1' && cat $<; }>$@
+	$(AM_V_GEN):;{ \
+	  echo '#define USE_MPI 1'; \
+	  echo '#include "$<"'; \
+	  } >$@
