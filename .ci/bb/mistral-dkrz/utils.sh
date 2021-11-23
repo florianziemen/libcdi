@@ -220,3 +220,19 @@ check_all_tests_passed ()
          }
        }' $1 >&2
 }
+
+#
+# Checks whether the current working directory or any of its subdirectories
+# contain a file and fails with an error message if that is the case.
+#
+check_no_files_in_cwd ()
+{
+  cnfic_files=`find . -type f 2>/dev/null`
+  if test -n "$cnfic_files"; then
+    {
+      echo "ERROR: the current working directory contains undeleted files:"
+      echo "$cnfic_files"
+    } >&2
+    exit 1
+  fi
+}
