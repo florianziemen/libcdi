@@ -1,0 +1,5 @@
+#!@SHELL@
+
+suffix=grb2
+
+. ./test_cksum.run

@@ -1,0 +1,5 @@
+#!@SHELL@
+
+suffix=ext
+
+. ./test_cksum.run
