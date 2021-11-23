@@ -62,10 +62,10 @@ cdi_write_hybrid_SOURCES = cdi_write_hybrid.c
 cdi_write_const_SOURCES = cdi_write_const.c
 
 cdi_read_f2003_SOURCES = cdi_read_f2003.f90
-cdi_read_f2003_LDADD = $(top_builddir)/src/libcdi_f2003.la
+cdi_read_f2003_LDADD = $(top_builddir)/src/libcdi_f2003.la $(LDADD)
 
 cdi_write_f2003_SOURCES = cdi_write_f2003.f90
-cdi_write_f2003_LDADD = $(top_builddir)/src/libcdi_f2003.la
+cdi_write_f2003_LDADD = $(top_builddir)/src/libcdi_f2003.la $(LDADD)
 
 if FC_MOD_UPPERCASE
 mo_cdi_mod = MO_CDI.$(FCMODEXT)
