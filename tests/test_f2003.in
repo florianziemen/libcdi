@@ -1,6 +1,6 @@
 #!@SHELL@
 @ENABLE_ISOC_INTERFACE_FALSE@exit 77
-test 'x@ENABLE_NETCDF@' = xyes || exit 77
+@ENABLE_NETCDF_FALSE@exit 77
 
 cdi_read_f2003_stdout="$0.cdi_read_f2003.stdout"
 cdi_read_f2003_stderr="$0.cdi_read_f2003.stderr"

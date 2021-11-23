@@ -1,5 +1,5 @@
 #!@SHELL@
-test 'x@ENABLE_NETCDF@' = xyes || exit 77
+@ENABLE_NETCDF_FALSE@exit 77
 
 cdi_app_stdout="$0.cdi_app.stdout"
 cdi_app_stderr="$0.cdi_app.stderr"
