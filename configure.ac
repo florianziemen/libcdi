@@ -670,39 +670,39 @@ AC_CONFIG_FILES([
 ])
 AC_CONFIG_FILES([
   tables/gen_tableheaderfile
-  tests/pio_cksum_asynch.test
-  tests/pio_cksum_fpguard.test
-  tests/pio_cksum_grb2.test
-  tests/pio_cksum_mpi_fw_at_all.test
-  tests/pio_cksum_mpi_fw_at_reblock.test
-  tests/pio_cksum_mpi_fw_ordered.test
-  tests/pio_cksum_mpinonb.test
-  tests/pio_cksum_nc.test
-  tests/pio_cksum_nc2.test
-  tests/pio_cksum_nc4.test
-  tests/pio_cksum_writer.test
-  tests/pio_write_deco2d_run
-  tests/pio_write_deco2d_run.parallel.test
-  tests/pio_write_dist_array.test
-  tests/pio_write_run
-  tests/pio_write_run.parallel.test
-  tests/test_byteswap_run
-  tests/test_cdf_const
-  tests/test_cdf_transformation
-  tests/test_cksum_extra
-  tests/test_cksum_grib
-  tests/test_cksum_grib2
-  tests/test_cksum_ieg
-  tests/test_cksum_nc
-  tests/test_cksum_nc2
-  tests/test_cksum_nc4
-  tests/test_cksum_nc_chunk
-  tests/test_cksum_service
-  tests/test_f2003
-  tests/test_grib_run
-  tests/test_resource_copy_run
-  tests/test_resource_copy_run.parallel.test
-  tests/test_table_run
+  tests/pio_cksum_asynch.run
+  tests/pio_cksum_fpguard.run
+  tests/pio_cksum_grb2.run
+  tests/pio_cksum_mpi_fw_at_all.run
+  tests/pio_cksum_mpi_fw_at_reblock.run
+  tests/pio_cksum_mpi_fw_ordered.run
+  tests/pio_cksum_mpinonb.run
+  tests/pio_cksum_nc.run
+  tests/pio_cksum_nc2.run
+  tests/pio_cksum_nc4.run
+  tests/pio_cksum_writer.run
+  tests/pio_write.parallel.run
+  tests/pio_write.run
+  tests/pio_write_deco2d.parallel.run
+  tests/pio_write_deco2d.run
+  tests/pio_write_dist_array.run
+  tests/test_byteswap.run
+  tests/test_cdf_const.run
+  tests/test_cdf_transformation.run
+  tests/test_cksum_extra.run
+  tests/test_cksum_grib.run
+  tests/test_cksum_grib2.run
+  tests/test_cksum_ieg.run
+  tests/test_cksum_nc.run
+  tests/test_cksum_nc2.run
+  tests/test_cksum_nc4.run
+  tests/test_cksum_nc_chunk.run
+  tests/test_cksum_service.run
+  tests/test_f2003.run
+  tests/test_grib.run
+  tests/test_resource_copy.parallel.run
+  tests/test_resource_copy.run
+  tests/test_table.run
 ],
 [chmod a+x "$ac_file"])
 

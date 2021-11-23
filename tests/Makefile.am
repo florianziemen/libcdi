@@ -1,43 +1,46 @@
+TEST_EXTENSIONS = @EXEEXT@ .run
+
+# Serial tests:
 TESTS = \
   calendar_test1 \
   cksum_verify \
-  test_byteswap_run \
-  pio_write_deco2d_run \
-  pio_write_run \
-  test_cdf_const \
-  test_cdf_transformation \
-  test_cksum_extra \
-  test_cksum_grib \
-  test_cksum_grib2 \
-  test_cksum_ieg \
-  test_cksum_nc \
-  test_cksum_nc2 \
-  test_cksum_nc4 \
-  test_cksum_nc_chunk \
-  test_cksum_service \
-  test_f2003 \
-  test_grib_run \
+  pio_write.run \
+  pio_write_deco2d.run \
+  test_byteswap.run \
+  test_cdf_const.run \
+  test_cdf_transformation.run \
+  test_cksum_extra.run \
+  test_cksum_grib.run \
+  test_cksum_grib2.run \
+  test_cksum_ieg.run \
+  test_cksum_nc.run \
+  test_cksum_nc2.run \
+  test_cksum_nc4.run \
+  test_cksum_nc_chunk.run \
+  test_cksum_service.run \
+  test_f2003.run \
+  test_grib.run \
   test_month_adjust \
-  test_resource_copy_run \
-  test_table_run
+  test_resource_copy.run \
+  test_table.run
 
-# MPI test must have prefix *.test:
+# Parallel tests:
 TESTS += \
-  pio_cksum_asynch.test \
-  pio_cksum_fpguard.test \
-  pio_cksum_grb2.test \
-  pio_cksum_mpi_fw_at_all.test \
-  pio_cksum_mpi_fw_at_reblock.test \
-  pio_cksum_mpi_fw_ordered.test \
-  pio_cksum_mpinonb.test \
-  pio_cksum_nc.test \
-  pio_cksum_nc2.test \
-  pio_cksum_nc4.test \
-  pio_cksum_writer.test \
-  pio_write_deco2d_run.parallel.test \
-  pio_write_dist_array.test \
-  pio_write_run.parallel.test \
-  test_resource_copy_run.parallel.test
+  pio_cksum_asynch.run \
+  pio_cksum_fpguard.run \
+  pio_cksum_grb2.run \
+  pio_cksum_mpi_fw_at_all.run \
+  pio_cksum_mpi_fw_at_reblock.run \
+  pio_cksum_mpi_fw_ordered.run \
+  pio_cksum_mpinonb.run \
+  pio_cksum_nc.run \
+  pio_cksum_nc2.run \
+  pio_cksum_nc4.run \
+  pio_cksum_writer.run \
+  pio_write.parallel.run \
+  pio_write_deco2d.parallel.run \
+  pio_write_dist_array.run \
+  test_resource_copy.parallel.run
 
 if !with_concurrent_mpi_checks
 pio_cksum_fpguard.log: pio_cksum_asynch.log
@@ -50,10 +53,10 @@ pio_cksum_nc.log: pio_cksum_mpinonb.log
 pio_cksum_nc2.log: pio_cksum_nc.log
 pio_cksum_nc4.log: pio_cksum_nc2.log
 pio_cksum_writer.log: pio_cksum_nc4.log
-pio_write_deco2d_run.parallel.log: pio_cksum_writer.log
-pio_write_dist_array.log: pio_write_deco2d_run.parallel.log
-pio_write_run.parallel.log: pio_write_dist_array.log
-test_resource_copy_run.parallel.log: pio_write_run.parallel.log
+pio_write.parallel.log: pio_cksum_writer.log
+pio_write_deco2d.parallel.log: pio_write.parallel.log
+pio_write_dist_array.log: pio_write_deco2d.parallel.log
+test_resource_copy.parallel.log: pio_write_dist_array.log
 endif !with_concurrent_mpi_checks
 
 test_PROGRAMS_ = \
