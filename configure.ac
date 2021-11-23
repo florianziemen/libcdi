@@ -721,8 +721,8 @@ AC_CONFIG_FILES([
   tests/test_cksum_service
   tests/test_f2003
   tests/test_grib_run
-  tests/test_resource_copy_mpi_run.test
   tests/test_resource_copy_run
+  tests/test_resource_copy_run.parallel.test
 ],
 [chmod a+x "$ac_file"])
 

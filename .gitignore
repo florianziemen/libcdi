@@ -60,8 +60,8 @@ Makefile.in
 /tests/test_cksum_service
 /tests/test_f2003
 /tests/test_grib_run
-/tests/test_resource_copy_mpi_run.test
 /tests/test_resource_copy_run
+/tests/test_resource_copy_run.parallel.test
 Makefile
 
 # Build stage files:
@@ -115,7 +115,7 @@ Makefile
 /tests/test_grib
 /tests/test_month_adjust
 /tests/test_resource_copy
-/tests/test_resource_copy_mpi
+/tests/test_resource_copy.parallel
 /tests/test_table
 # We do not add the following because that is supposed to be deleted by the
 # configure script and we want to notice if it is not the case:

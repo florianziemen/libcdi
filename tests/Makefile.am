@@ -37,7 +37,7 @@ TESTS += \
   pio_write_deco2d_run.parallel.test \
   pio_write_dist_array.test \
   pio_write_run.parallel.test \
-  test_resource_copy_mpi_run.test
+  test_resource_copy_run.parallel.test
 
 if !with_concurrent_mpi_checks
 pio_cksum_fpguard.log: pio_cksum_asynch.log
@@ -53,7 +53,7 @@ pio_cksum_writer.log: pio_cksum_nc4.log
 pio_write_deco2d_run.parallel.log: pio_cksum_writer.log
 pio_write_dist_array.log: pio_write_deco2d_run.parallel.log
 pio_write_run.parallel.log: pio_write_dist_array.log
-test_resource_copy_mpi_run.log: pio_write_run.parallel.log
+test_resource_copy_run.parallel.log: pio_write_run.parallel.log
 endif !with_concurrent_mpi_checks
 
 test_PROGRAMS_ = \
@@ -80,7 +80,7 @@ if ENABLE_MPI
 test_PROGRAMS_ += \
   pio_write.parallel \
   pio_write_deco2d.parallel \
-  test_resource_copy_mpi
+  test_resource_copy.parallel
 endif ENABLE_MPI
 
 if with_on_demand_check_programs
@@ -160,8 +160,8 @@ test_month_adjust_SOURCES = test_month_adjust.c
 
 test_resource_copy_SOURCES = test_resource_copy.c
 test_resource_copy_LDADD = $(top_builddir)/src/libcdiresunpack.la
-nodist_test_resource_copy_mpi_SOURCES = test_resource_copy.parallel.c
-test_resource_copy_mpi_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
+nodist_test_resource_copy_parallel_SOURCES = test_resource_copy.parallel.c
+test_resource_copy_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 test_table_SOURCES = test_table.c
 
