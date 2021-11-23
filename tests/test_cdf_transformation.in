@@ -1,5 +1,5 @@
 #!@SHELL@
-test 'x@ENABLE_NETCDF@' = xyes || exit 77
+@ENABLE_NETCDF_FALSE@exit 77
 
 ncdatafile="$0.nc"
 
