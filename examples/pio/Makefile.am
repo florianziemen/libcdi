@@ -7,8 +7,8 @@ EXTRA_PROGRAMS = \
 
 if ENABLE_MPI
 EXTRA_PROGRAMS += \
-  collectDataNStreams_parallel \
-  collectData_parallel \
+  collectData.parallel \
+  collectDataNStreams.parallel \
   compareResourcesArray
 endif ENABLE_MPI
 
@@ -17,7 +17,7 @@ if BUILD_FC_PROGRAMS
 EXTRA_PROGRAMS += collectData2003
 endif BUILD_FC_PROGRAMS
 if BUILD_PIO_FC_PROGRAMS
-EXTRA_PROGRAMS += collectData2003_parallel
+EXTRA_PROGRAMS += collectData2003.parallel
 endif BUILD_PIO_FC_PROGRAMS
 endif ENABLE_CF_INTERFACE
 
