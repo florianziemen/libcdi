@@ -11,13 +11,29 @@ init_nag626223
 
 test -f "${top_srcdir}/configure" || ( cd "${top_srcdir}" && ./autogen.sh )
 
+# Create a distribution file with minimalistic configuration:
+switch_for_module texlive
+"${top_srcdir}/configure" --disable-cf-interface
+make -j8 dist
+
+# Create a subdirectory for further testing and switch to it:
+mkdir check_dist && cd check_dist
+
+# Move the distribution file to the test directory and unpack it:
+mv ../cdi-*.tar.gz ./
+tar xf cdi-*.tar.gz
+
+# Create a subdirectory for building and switch to it:
+mkdir build && cd build
+
 # Use GCC from the path when compiling/linking Fortran code:
 FCFLAGS="-Wc=$(which gcc)"
 
 # MPI library is built with -kind=byte, therefore we have to specify it here:
 FCFLAGS+=' -g -kind=byte'
 
-"${top_srcdir}/configure" \
+# Create an out-of-source configuration:
+../cdi-*/configure \
 --disable-maintainer-mode \
 --enable-cf-interface \
 --enable-iso-c-interface \
@@ -37,3 +53,7 @@ make -j8
 make -j8 check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
+
+make -j8 distclean
+
+check_no_files_in_cwd
