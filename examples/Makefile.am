@@ -2,6 +2,7 @@ SUBDIRS = pio
 
 noinst_PROGRAMS =
 check_PROGRAMS =
+CLEANFILES =
 
 EXTRA_PROGRAMS = \
   cdi_copy \
@@ -29,8 +30,10 @@ endif !with_on_demand_check_programs
 
 if with_example_programs
 noinst_PROGRAMS += $(EXTRA_PROGRAMS)
-endif with_example_programs
-examples: $(test_PROGRAMS_) $(EXTRA_PROGRAMS)
+else !with_example_programs
+CLEANFILES += $(EXTRA_PROGRAMS)
+endif !with_example_programs
+examples-local: $(test_PROGRAMS_) $(EXTRA_PROGRAMS)
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
 
