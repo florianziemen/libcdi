@@ -221,4 +221,7 @@ CXXLINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 SUFFIXES = .parallel.c
 
 .c.parallel.c:
-	$(AM_V_GEN):;{ echo '#define USE_MPI 1' && cat $<; }>$@
+	$(AM_V_GEN):;{ \
+	  echo '#define USE_MPI 1'; \
+	  echo '#include "$<"'; \
+	  } >$@
