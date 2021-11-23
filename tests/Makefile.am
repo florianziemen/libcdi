@@ -160,6 +160,8 @@ test_month_adjust_SOURCES = test_month_adjust.c
 
 test_resource_copy_SOURCES = test_resource_copy.c
 test_resource_copy_LDADD = $(top_builddir)/src/libcdiresunpack.la
+nodist_test_resource_copy_mpi_SOURCES = test_resource_copy.parallel.c
+test_resource_copy_mpi_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 test_table_SOURCES = test_table.c
 
@@ -169,9 +171,6 @@ test_cdf_write_SOURCES = \
   simple_model_helper.c \
   simple_model_helper.h \
   test_cdf_write.c
-
-test_resource_copy_mpi_SOURCES = test_resource_copy_mpi.c
-test_resource_copy_mpi_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB)
 
 clean-local:
 	-rm -f *.parallel.c
