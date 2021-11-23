@@ -12,7 +12,7 @@
 #include "resource_handle.h"
 #include "resource_unpack.h"
 
-#ifdef MPI_MARSHALLING
+#ifdef USE_MPI
 #include <mpi.h>
 #include "cdipio.h"
 #include "pio_serialize.h"
@@ -191,7 +191,7 @@ modelRun(MPI_Comm comm)
   char *recvBuffer, *sendBuffer;
   int bufferSize;
 
-#ifdef MPI_MARSHALLING
+#ifdef USE_MPI
   cdiPioSerializeSetMPI();
 #endif
 
@@ -203,7 +203,7 @@ modelRun(MPI_Comm comm)
 
   struct idPair temp = defineVlist(gridID, zaxisID, taxisID);
   int vlistID = temp.id1;
-#ifdef MPI_MARSHALLING
+#ifdef USE_MPI
   int streamID = streamOpenWrite("example_resource_copy_mpi.grb", CDI_FILETYPE_GRB);
 #else
   int streamID = streamOpenWrite("example_resource_copy.grb", CDI_FILETYPE_GRB);
@@ -215,7 +215,7 @@ modelRun(MPI_Comm comm)
 
   reshPackBufferCreate(&sendBuffer, &bufferSize, &comm);
   recvBuffer = (char *) malloc((size_t) bufferSize);
-#ifdef MPI_MARSHALLING
+#ifdef USE_MPI
   xmpi(MPI_Sendrecv(sendBuffer, bufferSize, MPI_PACKED, 0, 0, recvBuffer, bufferSize, MPI_PACKED, 0, 0, MPI_COMM_SELF,
                     MPI_STATUS_IGNORE));
 #else
@@ -238,7 +238,7 @@ main(int argc, char *argv[])
 {
   int exitCode = 77;
   MPI_Comm commModel;
-#ifdef MPI_MARSHALLING
+#ifdef USE_MPI
   MPI_Init(&argc, &argv);
   commModel = MPI_COMM_WORLD;
 #else
@@ -250,7 +250,7 @@ main(int argc, char *argv[])
 
   exitCode = modelRun(commModel);
 
-#ifdef MPI_MARSHALLING
+#ifdef USE_MPI
   xmpi(MPI_Finalize());
 #endif
 
