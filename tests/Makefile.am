@@ -54,6 +54,25 @@ TESTS += \
   pio_write_dist_array.run \
   test_resource_copy.parallel.run
 
+# Update pio_write.run before running tests that source it:
+pio_write_TEST_LOGS_= \
+  pio_cksum_asynch.log \
+  pio_cksum_fpguard.log \
+  pio_cksum_grb2.log \
+  pio_cksum_mpi_fw_at_all.log \
+  pio_cksum_mpi_fw_at_reblock.log \
+  pio_cksum_mpi_fw_ordered.log \
+  pio_cksum_mpinonb.log \
+  pio_cksum_nc.log \
+  pio_cksum_nc2.log \
+  pio_cksum_nc4.log \
+  pio_cksum_writer.log \
+  pio_write.parallel.log \
+  pio_write_deco2d.log \
+  pio_write_deco2d.parallel.log \
+  pio_write_dist_array.log
+$(pio_write_TEST_LOGS_): pio_write.run
+
 if !with_concurrent_mpi_checks
 pio_cksum_fpguard.log: pio_cksum_asynch.log
 pio_cksum_grb2.log: pio_cksum_fpguard.log
