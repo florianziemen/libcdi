@@ -1164,7 +1164,11 @@ void streamClose(int streamID)
     }
 
   streamptr->filetype = 0;
-  if ( streamptr->filename ) Free(streamptr->filename);
+  if (streamptr->filename)
+    {
+      Free(streamptr->filename);
+      streamptr->filename = NULL;
+    }
 
   for ( int index = 0; index < streamptr->nvars; index++ )
     {
