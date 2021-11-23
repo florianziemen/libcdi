@@ -710,15 +710,15 @@ AC_CONFIG_FILES([
   tests/pio_write_dist_array.run
   tests/test_cdf_const.run
   tests/test_cdf_transformation.run
-  tests/test_cksum_extra.run
-  tests/test_cksum_grib.run
-  tests/test_cksum_grib2.run
+  tests/test_cksum.run
+  tests/test_cksum_ext.run
+  tests/test_cksum_grb2.run
   tests/test_cksum_ieg.run
   tests/test_cksum_nc.run
   tests/test_cksum_nc2.run
   tests/test_cksum_nc4.run
   tests/test_cksum_nc_chunk.run
-  tests/test_cksum_service.run
+  tests/test_cksum_svc.run
   tests/test_f2003.run
   tests/test_grib.run
   tests/test_resource_copy.parallel.run

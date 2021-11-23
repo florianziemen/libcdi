@@ -9,15 +9,15 @@ TESTS = \
   test_byteswap \
   test_cdf_const.run \
   test_cdf_transformation.run \
-  test_cksum_extra.run \
-  test_cksum_grib.run \
-  test_cksum_grib2.run \
+  test_cksum.run \
+  test_cksum_ext.run \
+  test_cksum_grb2.run \
   test_cksum_ieg.run \
   test_cksum_nc.run \
   test_cksum_nc2.run \
   test_cksum_nc4.run \
   test_cksum_nc_chunk.run \
-  test_cksum_service.run \
+  test_cksum_svc.run \
   test_f2003.run \
   test_grib.run \
   test_month_adjust \
@@ -41,6 +41,17 @@ TESTS += \
   pio_write_deco2d.parallel.run \
   pio_write_dist_array.run \
   test_resource_copy.parallel.run
+
+# Update test_cksum.run before running tests that source it:
+test_cksum_TEST_LOGS_ = \
+  test_cksum_ext.log \
+  test_cksum_grb2.log \
+  test_cksum_ieg.log \
+  test_cksum_nc.log \
+  test_cksum_nc2.log \
+  test_cksum_nc4.log \
+  test_cksum_svc.log
+$(test_cksum_TEST_LOGS_): test_cksum.run
 
 if !with_concurrent_mpi_checks
 pio_cksum_fpguard.log: pio_cksum_asynch.log

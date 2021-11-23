@@ -1,0 +1,5 @@
+#!@SHELL@
+
+suffix=svc
+
+. ./test_cksum.run
