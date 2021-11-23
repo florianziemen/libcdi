@@ -704,10 +704,10 @@ AC_CONFIG_FILES([
   tests/pio_cksum_nc4.test
   tests/pio_cksum_writer.test
   tests/pio_write_deco2d_run
-  tests/pio_write_deco2d_run_parallel.test
+  tests/pio_write_deco2d_run.parallel.test
   tests/pio_write_dist_array.test
   tests/pio_write_run
-  tests/pio_write_run_parallel.test
+  tests/pio_write_run.parallel.test
   tests/test_cdf_const
   tests/test_cdf_transformation
   tests/test_cksum_extra

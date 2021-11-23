@@ -34,9 +34,9 @@ TESTS += \
   pio_cksum_nc2.test \
   pio_cksum_nc4.test \
   pio_cksum_writer.test \
-  pio_write_deco2d_run_parallel.test \
+  pio_write_deco2d_run.parallel.test \
   pio_write_dist_array.test \
-  pio_write_run_parallel.test \
+  pio_write_run.parallel.test \
   test_resource_copy_mpi_run.test
 
 if !with_concurrent_mpi_checks
@@ -50,10 +50,10 @@ pio_cksum_nc.log: pio_cksum_mpinonb.log
 pio_cksum_nc2.log: pio_cksum_nc.log
 pio_cksum_nc4.log: pio_cksum_nc2.log
 pio_cksum_writer.log: pio_cksum_nc4.log
-pio_write_deco2d_run_parallel.log: pio_cksum_writer.log
-pio_write_dist_array.log: pio_write_deco2d_run_parallel.log
-pio_write_run_parallel.log: pio_write_dist_array.log
-test_resource_copy_mpi_run.log: pio_write_run_parallel.log
+pio_write_deco2d_run.parallel.log: pio_cksum_writer.log
+pio_write_dist_array.log: pio_write_deco2d_run.parallel.log
+pio_write_run.parallel.log: pio_write_dist_array.log
+test_resource_copy_mpi_run.log: pio_write_run.parallel.log
 endif !with_concurrent_mpi_checks
 
 test_PROGRAMS_ = \
@@ -78,8 +78,8 @@ endif
 
 if ENABLE_MPI
 test_PROGRAMS_ += \
-  pio_write_deco2d_parallel \
-  pio_write_parallel \
+  pio_write.parallel \
+  pio_write_deco2d.parallel \
   test_resource_copy_mpi
 endif ENABLE_MPI
 
