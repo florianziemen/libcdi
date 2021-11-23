@@ -63,8 +63,8 @@ Makefile.in
 /tests/test_cksum_service
 /tests/test_f2003
 /tests/test_grib_run
-/tests/test_resource_copy_mpi_run.test
 /tests/test_resource_copy_run
+/tests/test_resource_copy_run.parallel.test
 /tests/test_table_run
 Makefile
 
@@ -145,7 +145,7 @@ Makefile
 /tests/test_grib
 /tests/test_month_adjust
 /tests/test_resource_copy
-/tests/test_resource_copy_mpi
+/tests/test_resource_copy.parallel
 /tests/test_table
 
 # Documentation stage files:
