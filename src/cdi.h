@@ -74,6 +74,12 @@ extern "C" {
 #define  CDI_FILETYPE_EXT           9   // File type EXTRA
 #define  CDI_FILETYPE_IEG          10   // File type IEG
 
+// Protocols (in filename/URI)
+
+#define CDI_PROTOCOL_OTHER          0   // Any other protocol (might be supported by NetCDF library)
+#define CDI_PROTOCOL_FILE           1
+#define CDI_PROTOCOL_FDB            2
+
 // Compress types
 
 #define  CDI_COMPRESS_NONE          0
@@ -324,7 +330,8 @@ int     cdiEncodeTime(int hour, int minute, int second);
 
 // STREAM control routines
 
-int     cdiGetFiletype(const char *path, int *byteorder);
+int     cdiGetFiletype(const char *uri, int *byteorder);
+int     cdiGetProtocol(const char *uri, const char **filename);
 
 //      streamOpenRead: Open a dataset for reading
 int     streamOpenRead(const char *path);

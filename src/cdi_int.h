@@ -311,11 +311,8 @@ typedef struct {
   void       *jobs;
   void       *jobManager;
 
-  bool        fdbRetrieve;
-  bool        fdbStore;
-#ifdef  HAVE_LIBFDB5
-  void       *fdbHandle;
-#endif
+  int         protocol;
+  void       *protocolData;
 }
 stream_t;
 

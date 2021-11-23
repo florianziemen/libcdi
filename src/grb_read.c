@@ -139,13 +139,13 @@ DecodeArgs grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *
   if (!gribbuffer) gribbuffer = Malloc(streamptr->record->buffersize);
   if (!data) data = Malloc(gridsize * (memtype == MEMTYPE_FLOAT ? sizeof(float) : sizeof(double)));
 
-  if (streamptr->fdbRetrieve)
+  if (streamptr->protocol == CDI_PROTOCOL_FDB)
     {
 #ifdef HAVE_LIBFDB5
       void *fdbItem = streamptr->tsteps[tsID].records[recID].fdbItem;
       if (!fdbItem) Error("fdbItem not available!");
 
-      recsize = fdb_read_record(streamptr->fdbHandle, fdbItem, &(streamptr->record->buffersize), &gribbuffer);
+      recsize = fdb_read_record(streamptr->protocolData, fdbItem, &(streamptr->record->buffersize), &gribbuffer);
 #endif
     }
   else
@@ -332,3 +332,13 @@ void grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_
 }
 
 #endif
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

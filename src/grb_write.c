@@ -220,14 +220,14 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 
   void *gribbuffer = NULL;
 
-  if (streamptr1->fdbRetrieve)
+  if (streamptr1->protocol == CDI_PROTOCOL_FDB)
     {
 #ifdef HAVE_LIBFDB5
       void *fdbItem = streamptr1->tsteps[tsID].records[recID].fdbItem;
       if (!fdbItem) Error("fdbItem not available!");
 
       size_t buffersize = 0;
-      recsize = fdb_read_record(streamptr1->fdbHandle, fdbItem, &buffersize, &gribbuffer);
+      recsize = fdb_read_record(streamptr1->protocolData, fdbItem, &buffersize, &gribbuffer);
 
       // round up recsize to next multiple of 8
       const size_t gribbuffersize = ((recsize + 7U) & ~7U);
@@ -331,7 +331,7 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 
   fillup_gribbuffer(nbytes, gribbuffer);
 
-  if (streamptr2->fdbStore)
+  if (streamptr2->protocol == CDI_PROTOCOL_FDB)
     {
       const int vlistID = streamptr1->vlistID;
       const int varID = record->varID;
@@ -348,7 +348,7 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
       if (isML) snprintf(fdbKeys.levelist, sizeof(fdbKeys.levelist), "%d", isML ? record->ilevel : 0);
 
 #ifdef HAVE_LIBFDB5
-      cdi_fdb_store(streamptr2->fdbHandle, streamptr2->filename, gribbuffer, nbytes, &fdbKeys);
+      cdi_fdb_store(streamptr2->protocolData, streamptr2->filename, gribbuffer, nbytes, &fdbKeys);
 #endif
     }
   else
@@ -399,37 +399,45 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   if (filetype == CDI_FILETYPE_GRB && (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC))
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
-  if (streamptr->fdbStore)
+  switch (streamptr->protocol)
     {
-      const int zaxisType = zaxisInqType(zaxisID);
-      const double level = zaxisInqLevel(zaxisID, levelID);
 
-      FDB_Keys fdbKeys;
-      snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int)streamptr->tsteps[tsID].taxis.vdate);
-      snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", streamptr->tsteps[tsID].taxis.vtime / 100);
-      snprintf(fdbKeys.param, sizeof(fdbKeys.param), "%d", get_fdb_param(vlistInqVarParam(vlistID, varID)));
-      const bool isML = (zaxisType == ZAXIS_HYBRID || zaxisType == ZAXIS_HYBRID_HALF);
-      snprintf(fdbKeys.levtype, sizeof(fdbKeys.levtype), "%s", isML ? "ml" : "sfc");
-      fdbKeys.levelist[0] = 0;
-      int ilevel = (isML) ? (int)level : 0;
-      if (isML) snprintf(fdbKeys.levelist, sizeof(fdbKeys.levelist), "%d", isML ? ilevel : 0);
-
+    case CDI_PROTOCOL_FDB:
+      {
 #ifdef HAVE_LIBFDB5
-     cdi_fdb_store(streamptr->fdbHandle, streamptr->filename, gribbuffer, nbytes, &fdbKeys);
-#endif
-    }
-  else
-    {
-      size_t (*myFileWrite)(int fileID, const void *restrict buffer, size_t len)
-        = (size_t (*)(int, const void *restrict, size_t))
-        namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
+        const int zaxisType = zaxisInqType(zaxisID);
+        const double level = zaxisInqLevel(zaxisID, levelID);
 
-      const size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes);
-      if (nwrite != nbytes)
-        {
-          perror(__func__);
-          Error("Failed to write GRIB slice!");
-        }
+        FDB_Keys fdbKeys;
+        snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int)streamptr->tsteps[tsID].taxis.vdate);
+        snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", streamptr->tsteps[tsID].taxis.vtime / 100);
+        snprintf(fdbKeys.param, sizeof(fdbKeys.param), "%d", get_fdb_param(vlistInqVarParam(vlistID, varID)));
+        const bool isML = (zaxisType == ZAXIS_HYBRID || zaxisType == ZAXIS_HYBRID_HALF);
+        snprintf(fdbKeys.levtype, sizeof(fdbKeys.levtype), "%s", isML ? "ml" : "sfc");
+        fdbKeys.levelist[0] = 0;
+        int ilevel = (isML) ? (int)level : 0;
+        if (isML) snprintf(fdbKeys.levelist, sizeof(fdbKeys.levelist), "%d", isML ? ilevel : 0);
+
+        cdi_fdb_store(streamptr->protocolData, streamptr->filename, gribbuffer, nbytes, &fdbKeys);
+#endif
+      }
+      break;
+
+    case CDI_PROTOCOL_OTHER:
+    case CDI_PROTOCOL_FILE:
+      {
+        size_t (*myFileWrite)(int fileID, const void *restrict buffer, size_t len)
+          = (size_t (*)(int, const void *restrict, size_t))
+          namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
+
+        const size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes);
+        if (nwrite != nbytes)
+          {
+            perror(__func__);
+            Error("Failed to write GRIB slice!");
+          }
+      }
+      break;
     }
 
   if (gribbuffer) Free(gribbuffer);
@@ -482,3 +490,13 @@ void grb_write_record(stream_t *streamptr, int memtype, const void *data, size_t
 
 
 #endif
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */
