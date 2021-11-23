@@ -2,7 +2,7 @@
 
 mpi_task_num=${mpi_task_num-4}
 
-. ./pio_write_run
+. ./pio_write.run
 #
 # Local Variables:
 # mode: sh

@@ -4,7 +4,7 @@ test 'x@HAVE_PPM_DIST_ARRAY@' = xyes || exit 77
 mpi_task_num=${mpi_task_num-4}
 variations="'-qcreate-curvilinear-grid -quse-dist-grid'"
 
-. ./pio_write_run
+. ./pio_write.run
 #
 # Local Variables:
 # mode: sh
