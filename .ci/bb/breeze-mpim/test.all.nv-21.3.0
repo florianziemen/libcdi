@@ -9,7 +9,10 @@ top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 . "${script_dir}/utils.sh"
 init_nv2130
 
-test -f "${top_srcdir}/configure" || ( cd "${top_srcdir}" && ./autogen.sh )
+# We want to check with the Debian version of Libtool, which is patched to
+# avoid overlinking. Therefore, we regenerate the Autotools files even if they
+# are already available:
+cd "${top_srcdir}" && ./autogen.sh
 
 "${top_srcdir}/configure" \
 --disable-maintainer-mode \
