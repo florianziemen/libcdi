@@ -1,6 +1,6 @@
 #!@SHELL@
 
-prefix=${0##*/}
+prefix=`echo "$0" | sed 's@.*/@@'`
 suffix=${suffix-grb}
 
 case ${suffix} in
