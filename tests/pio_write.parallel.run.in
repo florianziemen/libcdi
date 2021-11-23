@@ -1,6 +1,6 @@
 #!@SHELL@
 
-mpi_task_num=${mpi_task_num-4}
+mpi_task_num=4
 
 . ./pio_write.run
 #
