@@ -24,7 +24,6 @@ done
 if test -s ${cdi_app_stderr}; then
   echo "unexpected error message from @top_builddir@/app/cdi:"
   cat ${cdi_app_stderr}
-  exit 1
 fi
 
 read pattern <&7
