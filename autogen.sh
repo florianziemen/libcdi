@@ -1,5 +1,31 @@
 #!/bin/sh
 
+for arg in "$@"; do
+  case ${arg} in
+    --help | -h)
+      cat <<EOF
+Usage: $0 [OPTION]
+
+Generate the configure script and other Autotools files.
+
+Options:
+  -h, --help              display this help and exit
+  -d, --download          download the most recent versions
+                          of \`config.guess' and \`config.sub'
+
+EOF
+    exit 0
+    ;;
+    --download | -d)
+      download=yes
+    ;;
+    *)
+      echo "ERROR: unrecognized option '${arg}': try \`$0 --help' for more information" >&2
+      exit 2
+    ;;
+  esac
+done
+
 autoreconf -fvi || exit $?
 
 # The following is not needed as long as we do not patch libtool.m4:
@@ -32,3 +58,15 @@ for patch in \
     patch -p 1 --no-backup-if-mismatch --forward -r - -i $patch -d .
     exitcode=$?; if test $exitcode -ne 0 && test $exitcode -ne 1; then exit $exitcode; fi
 done
+
+if test x"$download" = xyes; then
+  url_base='https://git.savannah.gnu.org/cgit/config.git/plain'
+
+  for file in config.guess config.sub; do
+    echo "downloading $file"
+    src="$url_base/$file"; dst="config/$file"
+    wget -o /dev/null -O "$dst" "$src" || {
+      echo "ERROR: failed to download from $src" >&2
+      exit 1; }
+  done
+fi
