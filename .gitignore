@@ -87,10 +87,6 @@ Makefile
 /tests/test_resource_copy
 /tests/test_resource_copy.parallel
 /tests/test_table
-# We do not add the following because that is supposed to be deleted by the
-# configure script and we want to notice if it is not the case:
-#/.libs
-#/a.out
 
 # Documentation stage files:
 /doc/cdi_cman.pdf
