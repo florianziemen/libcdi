@@ -199,7 +199,7 @@ test_month_adjust_SOURCES = test_month_adjust.c
 test_resource_copy_SOURCES = test_resource_copy.c
 test_resource_copy_LDADD = $(top_builddir)/src/libcdiresunpack.la
 nodist_test_resource_copy_parallel_SOURCES = test_resource_copy.parallel.c
-test_resource_copy_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(LDADD)
+test_resource_copy_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(LDADD)
 
 test_table_SOURCES = test_table.c
 
