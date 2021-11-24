@@ -45,18 +45,18 @@ endif
 LDADD = $(top_builddir)/src/libcdi.la
 
 collectData_SOURCES = collectData.c
-nodist_collectData_parallel_SOURCES = collectData.parallel.c
+nodist_collectData_parallel_SOURCES = $(collectData_SOURCES:.c=.parallel.c)
 collectData_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(YAXT_C_LIB) $(LDADD)
 
 collectDataNStreams_SOURCES = collectDataNStreams.c
-nodist_collectDataNStreams_parallel_SOURCES = collectDataNStreams.parallel.c
+nodist_collectDataNStreams_parallel_SOURCES = $(collectDataNStreams_SOURCES:.c=.parallel.c)
 collectDataNStreams_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(YAXT_C_LIB) $(LDADD)
 
 compareResourcesArray_SOURCES = compareResourcesArray.c
 compareResourcesArray_LDADD = $(top_builddir)/src/libcdipio.la $(YAXT_C_LIB) $(LDADD)
 
 collectData2003_SOURCES = collectData2003.F90
-nodist_collectData2003_parallel_SOURCES = collectData2003.parallel.F90
+nodist_collectData2003_parallel_SOURCES = $(collectData2003_SOURCES:.F90=.parallel.F90)
 collectData2003_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(YAXT_FC_LIB) $(MPI_FC_LIB) $(LDADD)
 
 clean-local:
