@@ -12,7 +12,7 @@ init_nv2130
 # We want to check with the Debian version of Libtool, which is patched to
 # avoid overlinking. Therefore, we regenerate the Autotools files even if they
 # are already available:
-cd "${top_srcdir}" && ./autogen.sh
+"${top_srcdir}/autogen.sh"
 
 "${top_srcdir}/configure" \
 --disable-maintainer-mode \
