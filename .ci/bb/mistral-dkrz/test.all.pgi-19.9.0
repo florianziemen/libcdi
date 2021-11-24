@@ -9,7 +9,7 @@ top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 . "${script_dir}/utils.sh"
 init_pgi1990
 
-test -f "${top_srcdir}/configure" || ( cd "${top_srcdir}" && ./autogen.sh )
+test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
 # The configure script does not check the 'lib64' subdirectory, therefore we
 # run it with '--with-eccodes' and the following flags. Note that fixing this
