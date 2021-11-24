@@ -9,7 +9,7 @@ top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 . "${script_dir}/utils.sh"
 init_intel1706
 
-test -f "${top_srcdir}/configure" || ( cd "${top_srcdir}" && ./autogen.sh )
+test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
 # Create a subdirectory for building and switch to it:
 mkdir build && cd build
