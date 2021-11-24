@@ -26,6 +26,11 @@ EOF
   esac
 done
 
+script_dir=`echo "$0" | sed 's@[^/]*$@@'`
+echo "Running autoreconf in $script_dir"
+(unset CDPATH) >/dev/null 2>&1 && unset CDPATH
+cd "$script_dir"
+
 autoreconf -fvi || exit $?
 
 # The following is not needed as long as we do not patch libtool.m4:
