@@ -11,6 +11,9 @@ init_intel1706
 
 test -f "${top_srcdir}/configure" || ( cd "${top_srcdir}" && ./autogen.sh )
 
+# Create a subdirectory for building and switch to it:
+mkdir build && cd build
+
 "${top_srcdir}/configure" \
 --disable-maintainer-mode \
 --enable-cf-interface \
@@ -30,3 +33,7 @@ make -j8
 make -j8 check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
+
+make -j8 distclean
+
+check_no_files_in_cwd
