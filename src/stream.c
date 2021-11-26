@@ -16,6 +16,7 @@
 
 #include "binary.h"
 #include "cdi.h"
+#include "cdi_across.h"
 #include "cdi_int.h"
 #include "cdi_cksum.h"
 #include "cdf.h"
@@ -93,6 +94,9 @@ int cdiGetFiletype(const char *uri, int *byteorder)
 
   switch (protocol)
     {
+    case CDI_PROTOCOL_ACROSS:
+      return CDI_FILETYPE_GRB2;
+
     case CDI_PROTOCOL_FDB:
       return CDI_FILETYPE_UNDEF;
 
@@ -402,6 +406,7 @@ int cdiInqContents(stream_t *streamptr)
             status = fdbInqContents(streamptr);
             break;
 
+          case CDI_PROTOCOL_ACROSS: // TODO read from ACROSS
           case CDI_PROTOCOL_OTHER:
           case CDI_PROTOCOL_FILE:
             status = grbInqContents(streamptr);
@@ -476,6 +481,7 @@ int cdiGetProtocol(const char *uri, const char **filename)
 
   if (strncmp(uri, "file", protocollen) == 0) return CDI_PROTOCOL_FILE;
   if (strncmp(uri, "fdb", protocollen) == 0) return CDI_PROTOCOL_FDB;
+  if (strncmp(uri, "across", protocollen) == 0) return CDI_PROTOCOL_ACROSS;
 
   *filename = uri;
   return CDI_PROTOCOL_OTHER;
@@ -491,6 +497,33 @@ int cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, s
 
   switch (streamptr->protocol)
     {
+    case CDI_PROTOCOL_ACROSS:
+#if defined(HAVE_ACROSS) && defined(HAVE_LIBGRIB_API)
+      if (filetype != CDI_FILETYPE_GRB2)
+        {
+          Warning("ACROSS needs to be used with GRIB2");
+          return CDI_EUFTYPE;
+        }
+      fileID = across_connect(filename, filemode, streamptr);
+      if (fileID >= 0)
+        {
+          streamptr->filetype = filetype;
+          if (recordBufIsToBeCreated)
+            {
+              streamptr->record = (Record *) Malloc(sizeof(Record));
+              streamptr->record->buffer = NULL;
+            }
+        }
+      return fileID;
+#else
+#ifdef HAVE_ACROSS
+      Warning("ecCodes support not compiled in (Needed for ACROSS)!");
+#else
+      Warning("ACROSS support not compiled in!");
+#endif
+      return CDI_ELIBNAVAIL;
+#endif
+
     case CDI_PROTOCOL_FDB:
 #if defined(HAVE_FDB5) && defined(HAVE_LIBGRIB_API)
 
@@ -1030,6 +1063,18 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
 
   switch (streamptr->protocol)
     {
+    case CDI_PROTOCOL_ACROSS:
+#ifdef HAVE_ACROSS
+      if (fileID) across_disconnect(fileID);
+      if (streamptr->protocolData)
+        {
+          Free(((across_info_t*)streamptr->protocolData)->expid);
+          Free(streamptr->protocolData);
+          streamptr->protocolData = NULL;
+        }
+#endif
+      return;
+
     case CDI_PROTOCOL_FDB:
 #ifdef HAVE_LIBFDB5
       if (streamptr->protocolData) fdb_delete_handle(streamptr->protocolData);
@@ -1423,6 +1468,7 @@ int streamInqTimestep(int streamID, int tsID)
             nrecs = fdbInqTimestep(streamptr, tsID);
             break;
 
+          case CDI_PROTOCOL_ACROSS: // TODO read from ACROSS
           case CDI_PROTOCOL_OTHER:
           case CDI_PROTOCOL_FILE:
             nrecs = grbInqTimestep(streamptr, tsID);

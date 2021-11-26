@@ -8,6 +8,10 @@
 #include "cdi_fdb.h"
 #endif
 
+#ifdef HAVE_ACROSS
+#include <unistd.h>
+#endif
+
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -401,6 +405,26 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 
   switch (streamptr->protocol)
     {
+    case CDI_PROTOCOL_ACROSS:
+      {
+#ifdef HAVE_ACROSS
+        void *bufpos = gribbuffer;
+        size_t nbytes_left = nbytes;
+        while (nbytes_left > 0)
+          {
+            size_t nbytes_written = write(streamptr->fileID, bufpos, nbytes_left);
+            if (nbytes_written < 0)
+              {
+                perror(__func__);
+                Error("Failed to write GRIB slice!");
+                break;
+              }
+            nbytes_left -= nbytes_written;
+            bufpos += nbytes_written;
+          }
+#endif
+      }
+      break;
 
     case CDI_PROTOCOL_FDB:
       {
