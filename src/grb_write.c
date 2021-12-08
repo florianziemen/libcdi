@@ -9,7 +9,7 @@
 #endif
 
 #ifdef HAVE_ACROSS
-#include <unistd.h>
+#include "cdi_across.h"
 #endif
 
 #include "dmemory.h"
@@ -408,19 +408,10 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
     case CDI_PROTOCOL_ACROSS:
       {
 #ifdef HAVE_ACROSS
-        void *bufpos = gribbuffer;
-        size_t nbytes_left = nbytes;
-        while (nbytes_left > 0)
+        if (across_write_grib_message(streamptr, gribbuffer, nbytes))
           {
-            size_t nbytes_written = write(streamptr->fileID, bufpos, nbytes_left);
-            if (nbytes_written < 0)
-              {
-                perror(__func__);
-                Error("Failed to write GRIB slice!");
-                break;
-              }
-            nbytes_left -= nbytes_written;
-            bufpos += nbytes_written;
+            Error("Failed to write GRIB slice!");
+            break;
           }
 #endif
       }

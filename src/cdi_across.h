@@ -19,6 +19,7 @@ typedef struct
 
 int across_connect(const char *path, char filemode, stream_t *streamptr);
 void across_disconnect(int sock);
+int across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nbytes);
 
 #endif
 
