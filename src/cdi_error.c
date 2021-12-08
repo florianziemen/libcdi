@@ -15,6 +15,7 @@ const char *cdiStringError(int cdiErrno)
   static const char _EUNC4[]       = "Unsupported NetCDF4 structure";
   static const char _EDIMSIZE[]    = "Invalid dimension size";
   static const char _ELIMIT[]      = "Internal limits exceeded";
+  static const char _EINVAL[]      = "Invalid argument";
 
   switch (cdiErrno) {
   case CDI_ESYSTEM:
@@ -32,6 +33,7 @@ const char *cdiStringError(int cdiErrno)
   case CDI_EUNC4:      return _EUNC4;
   case CDI_EDIMSIZE:   return _EDIMSIZE;
   case CDI_ELIMIT:     return _ELIMIT;
+  case CDI_EINVAL:     return _EINVAL;
   }
 
   return UnknownError;
