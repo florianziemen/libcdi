@@ -12,6 +12,8 @@
 #include "dmemory.h"
 #include "error.h"
 
+#define EXPID_MIN_LENGTH 7
+
 int across_connect_int(char *path, char filemode, stream_t *streamptr)
 {
   // parse ACROSS address format: across://<host>[:<port>]/<expid>[@<expver>]
@@ -27,13 +29,11 @@ int across_connect_int(char *path, char filemode, stream_t *streamptr)
       switch (*c)
         {
         case ':':
-          if (expid != NULL)
+          if (expid == NULL)
             {
-              Warning("Experiment id must not contain ':'");
-              return CDI_EINVAL;
+              port = c + 1;
+              *c = '\0';
             }
-          port = c + 1;
-          *c = '\0';
           ++c;
           break;
 
@@ -63,7 +63,28 @@ int across_connect_int(char *path, char filemode, stream_t *streamptr)
             }
           break;
 
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
+        case 'a': case 'b': case 'c': case 'd': case 'e':
+        case 'f': case 'g': case 'h': case 'i': case 'j':
+        case 'k': case 'l': case 'm': case 'n': case 'o':
+        case 'p': case 'q': case 'r': case 's': case 't':
+        case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
+        case 'A': case 'B': case 'C': case 'D': case 'E':
+        case 'F': case 'G': case 'H': case 'I': case 'J':
+        case 'K': case 'L': case 'M': case 'N': case 'O':
+        case 'P': case 'Q': case 'R': case 'S': case 'T':
+        case 'U': case 'V': case 'W': case 'X': case 'Y': case 'Z':
+        case '-': case '.': case '_': case '~':
+          ++c;
+          break;
+
         default:
+          if (expid != NULL)
+            {
+              Warning("Experiment id must not contain '%c'", c);
+              return CDI_EINVAL;
+            }
           ++c;
           break;
         }
@@ -71,7 +92,18 @@ int across_connect_int(char *path, char filemode, stream_t *streamptr)
 
   if (expid == NULL || expid[0] == '\0')
     {
-      Warning("No experiment version given");
+      Warning("No experiment id given");
+      return CDI_EINVAL;
+    }
+
+  if (strlen(expid) < EXPID_MIN_LENGTH)
+    {
+      Warning("Experiment id must be longer than %d chars", EXPID_MIN_LENGTH - 1);
+      return CDI_EINVAL;
+    }
+  if (strlen(expid) > 255)
+    {
+      Warning("Experiment id must be shorter than 256 chars");
       return CDI_EINVAL;
     }
 
