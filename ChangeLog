@@ -1,3 +1,7 @@
+2021-12-13  Uwe Schulzweida
+
+	* Added src/pkgconfig/cdi-config.cmake.in
+
 2021-11-18  Uwe Schulzweida
 
 	* Version 2.0.2 released

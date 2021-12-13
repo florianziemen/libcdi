@@ -267,6 +267,7 @@ libcdipio_la_LIBADD   = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
 LOCALTARGETS  =
 if ENABLE_CDI_LIB
 LOCALTARGETS += pkgconfig/cdi.pc
+LOCALTARGETS += pkgconfig/cdi-config.cmake
 if USE_MPI
 LOCALTARGETS += pkgconfig/cdipio.pc
 endif
@@ -290,6 +291,9 @@ endif
 #
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
+
+pkgconfig/cdi-config.cmake: pkgconfig/cdi-config.cmake.in ../config.status
+	(cd .. ; ./config.status src/pkgconfig/cdi-config.cmake)
 
 pkgconfig/cdipio.pc: pkgconfig/cdipio.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdipio.pc)
@@ -315,6 +319,8 @@ endif
 if ENABLE_CDI_LIB
 PKGCONFIG_FILES = pkgconfig/cdi.pc
 CLEANFILES += pkgconfig/cdi.pc
+PKGCONFIG_FILES += pkgconfig/cdi-config.cmake
+CLEANFILES += pkgconfig/cdi-config.cmake
 if USE_MPI
 PKGCONFIG_FILES += pkgconfig/cdipio.pc
 CLEANFILES += pkgconfig/cdipio.pc
