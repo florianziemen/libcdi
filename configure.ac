@@ -261,13 +261,13 @@ AM_CONDITIONAL([USE_PPM_CORE],[test $enable_ppm = yes])
 AM_CONDITIONAL([HAVE_PARALLEL_NC4],[test $HAVE_PARALLEL_NC4 -gt 0])
 AC_SUBST([USE_MPI])
 AC_SUBST([ENABLE_MPI],[`test x"$enable_mpi" = xyes && echo true || echo false`])
-AC_SUBST([LIBRT])
+AC_SUBST([LIBRT], [''])
 AM_COND_IF([USE_MPI],
-  [LIBRT=
-   LIBS_save=$LIBS
-   AC_SEARCH_LIBS([aio_suspend], [rt],
-     [test "$ac_res" = "none required" || LIBRT=$ac_res])
-   LIBS=$LIBS_save])
+  [AC_CHECK_DECL([_SX], [],
+     [LIBS_save=$LIBS
+      AC_SEARCH_LIBS([aio_suspend], [rt],
+        [test "$ac_res" = "none required" || LIBRT=$ac_res])
+      LIBS=$LIBS_save])])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
 #
