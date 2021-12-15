@@ -67,5 +67,6 @@
     "parallel_nc4"   : @HAVE_PARALLEL_NC4@,
     "enable_python"  : @ENABLE_PYTHON@,
     "enable_ruby"    : @ENABLE_RUBY@
+    "across"         : "@ENABLE_ACROSS@",
   }
 }

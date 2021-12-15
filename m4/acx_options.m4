@@ -298,6 +298,18 @@ AC_ARG_ENABLE([grib],
 AC_MSG_RESULT([$enable_grib])
 AC_SUBST([ENABLE_GRIB],[$enable_grib])
 #  ----------------------------------------------------------------------
+#  Enable ACROSS support
+AC_MSG_CHECKING([for ACROSS support])
+AC_ARG_ENABLE([across],
+              [AS_HELP_STRING([--enable-across],[ACROSS support [default=yes]])],
+              [AS_IF([test "x$enable_across" != 'xno'],
+                     [AC_DEFINE(HAVE_ACROSS, [1], [Define to 1 for ACROSS support])
+                      enable_across=yes])],
+              [AC_DEFINE(HAVE_ACROSS, [1], [Define to 1 for ACROSS support])
+               enable_across=yes])
+AC_MSG_RESULT([$enable_across])
+AC_SUBST([ENABLE_ACROSS],[$enable_across])
+#  ----------------------------------------------------------------------
 #  Compile interface with internal CGRIBEX library
 AC_MSG_CHECKING([for CGRIBEX support])
 AC_ARG_ENABLE([cgribex],

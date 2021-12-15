@@ -12,9 +12,11 @@
 
 #include <sys/stat.h> // struct stat
 #include <ctype.h>
+#include <string.h>
 
 #include "binary.h"
 #include "cdi.h"
+#include "cdi_across.h"
 #include "cdi_int.h"
 #include "cdi_cksum.h"
 #include "cdf.h"
@@ -80,22 +82,35 @@ int getByteorder(int byteswap)
 }
 
 // used also in CDO
-int cdiGetFiletype(const char *filename, int *byteorder)
+int cdiGetFiletype(const char *uri, int *byteorder)
 {
   int filetype = CDI_EUFTYPE;
   int swap = 0;
   int version;
   long recpos;
 
+  const char* filename;
+  const int protocol = cdiGetProtocol(uri, &filename);
+
+  switch (protocol)
+    {
+    case CDI_PROTOCOL_ACROSS:
+      return CDI_FILETYPE_GRB2;
+
+    case CDI_PROTOCOL_FDB:
+      return CDI_FILETYPE_UNDEF;
+
+    case CDI_PROTOCOL_OTHER:
+      return CDI_FILETYPE_NC; // support for NetCDF remote types and ESDM
+
+    case CDI_PROTOCOL_FILE:
+      // handled below;
+      break;
+    }
+
   const int fileID = fileOpen(filename, "r");
 
-  if (fileID == CDI_UNDEFID)
-    {
-      if (strstr(filename, ":/"))
-        return CDI_FILETYPE_NC; // support for NetCDF remote types and ESDM
-      else
-	return CDI_ESYSTEM;
-    }
+  if (fileID == CDI_UNDEFID) return CDI_ESYSTEM;
   else if (fileID == -2) return CDI_ETMOF;
 
   char buffer[8];
@@ -385,7 +400,18 @@ int cdiInqContents(stream_t *streamptr)
     case CDI_FILETYPE_GRB:
     case CDI_FILETYPE_GRB2:
       {
-        status = (streamptr->fdbRetrieve) ? fdbInqContents(streamptr) : grbInqContents(streamptr);
+        switch (streamptr->protocol)
+          {
+          case CDI_PROTOCOL_FDB:
+            status = fdbInqContents(streamptr);
+            break;
+
+          case CDI_PROTOCOL_ACROSS: // TODO read from ACROSS
+          case CDI_PROTOCOL_OTHER:
+          case CDI_PROTOCOL_FILE:
+            status = grbInqContents(streamptr);
+            break;
+          }
 	break;
       }
 #endif
@@ -441,73 +467,97 @@ int cdiInqContents(stream_t *streamptr)
   return status;
 }
 
+int cdiGetProtocol(const char *uri, const char **filename)
+{
+  char *pos = strstr(uri, "://");
+  if (pos == NULL)
+    {
+      *filename = uri;
+      return CDI_PROTOCOL_FILE;
+    }
 
-int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filetype, stream_t *streamptr, int recordBufIsToBeCreated)
+  const int protocollen = pos - uri;
+  *filename = pos + 3;
+
+  if (strncmp(uri, "file", protocollen) == 0) return CDI_PROTOCOL_FILE;
+  if (strncmp(uri, "fdb", protocollen) == 0) return CDI_PROTOCOL_FDB;
+  if (strncmp(uri, "across", protocollen) == 0) return CDI_PROTOCOL_ACROSS;
+
+  *filename = uri;
+  return CDI_PROTOCOL_OTHER;
+}
+
+int cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, stream_t *streamptr, int recordBufIsToBeCreated)
 {
   int fileID;
   char temp[2] = { filemode, 0 };
 
-  const int pathlen = (int)strlen(filename);
-  const bool fdbRetrieve = (pathlen >= 4 && filemode == 'r' && memcmp(filename, "fdb:", 4) == 0);
-  const bool fdbStore    = (pathlen >= 4 && filemode == 'w' && memcmp(filename, "fdb:", 4) == 0);
+  const char* filename;
+  streamptr->protocol = cdiGetProtocol(uri, &filename);
 
-#ifndef HAVE_LIBFDB5
-  if (fdbRetrieve || fdbStore)
+  switch (streamptr->protocol)
     {
-      Message("FDB5 support not compiled in!");
-      return CDI_ELIBNAVAIL;
-    }
-#endif
-
-#ifndef HAVE_LIBGRIB_API
-  if (fdbRetrieve || fdbStore)
-    {
-      Message("ecCodes support not compiled in (Needed for FDB5)!");
-      return CDI_ELIBNAVAIL;
-    }
-#endif
-
-  if (fdbRetrieve)
-    {
-      if (filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_GRB2)
+    case CDI_PROTOCOL_ACROSS:
+#if defined(HAVE_ACROSS) && defined(HAVE_LIBGRIB_API)
+      if (filetype != CDI_FILETYPE_GRB2)
         {
-#ifdef HAVE_LIBFDB5
-          fdb_initialise();
-          fdb_new_handle((fdb_handle_t **)&(streamptr->fdbHandle));
-          streamptr->fdbRetrieve = true;
-#endif
+          Warning("ACROSS needs to be used with GRIB2");
+          return CDI_EUFTYPE;
+        }
+      fileID = across_connect(filename, filemode, streamptr);
+      if (fileID >= 0)
+        {
           streamptr->filetype = filetype;
           if (recordBufIsToBeCreated)
             {
               streamptr->record = (Record *) Malloc(sizeof(Record));
               streamptr->record->buffer = NULL;
             }
-          return 88;
         }
-      else
-        {
-          Message("Input format must be GRIB to retrieve data to FDB.");
-          return -2;
-        }
-    }
-
-  if (fdbStore)
-    {
-      if (filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_GRB2)
-        {
-#ifdef HAVE_LIBFDB5
-          fdb_initialise();
-          fdb_new_handle((fdb_handle_t **)&(streamptr->fdbHandle));
-          streamptr->fdbStore = true;
+      return fileID;
+#else
+#ifdef HAVE_ACROSS
+      Warning("ecCodes support not compiled in (Needed for ACROSS)!");
+#else
+      Warning("ACROSS support not compiled in!");
 #endif
-          streamptr->filetype = filetype;
-          return 99;
-        }
-      else
+      return CDI_ELIBNAVAIL;
+#endif
+
+    case CDI_PROTOCOL_FDB:
+#if defined(HAVE_FDB5) && defined(HAVE_LIBGRIB_API)
+
+      if (filetype != CDI_FILETYPE_GRB && filetype != CDI_FILETYPE_GRB2)
         {
-          Message("Output format must be GRIB to store data to FDB.");
-          return -2;
+          Warning("FDB5 needs to be used with GRIB or GRIB2");
+          return CDI_EUFTYPE;
         }
+
+      fdb_initialise();
+      fdb_new_handle((fdb_handle_t **)&(streamptr->protocolData));
+      streamptr->filetype = filetype;
+      if (recordBufIsToBeCreated)
+        {
+          streamptr->record = (Record *) Malloc(sizeof(Record));
+          streamptr->record->buffer = NULL;
+        }
+      return 88;
+
+#else // !(defined(HAVE_FDB5) && defined(HAVE_LIBGRIB_API))
+
+#ifdef HAVE_FDB5
+      Warning("ecCodes support not compiled in (Needed for FDB5)!");
+#else
+      Warning("FDB5 support not compiled in!");
+#endif
+
+      return CDI_ELIBNAVAIL;
+#endif
+
+    case CDI_PROTOCOL_OTHER:
+    case CDI_PROTOCOL_FILE:
+      // handled below;
+      break;
     }
 
   switch (filetype)
@@ -839,11 +889,8 @@ int streamOpenRead(const char *filename)
 {
   cdiInitialize();
 
-  const int pathlen = (int)strlen(filename);
-  const bool fdbRetrieve = (pathlen >= 4 && memcmp(filename, "fdb:", 4) == 0);
-
   int byteorder = 0;
-  const int filetype = fdbRetrieve ? CDI_FILETYPE_GRB2 : cdiGetFiletype(filename, &byteorder);
+  const int filetype = cdiGetFiletype(filename, &byteorder);
   if (filetype < 0) return filetype;
 
   const int streamID = streamOpen(filename, "r", filetype);
@@ -986,11 +1033,7 @@ void streamDefaultValue(stream_t * streamptr)
   streamptr->jobs              = NULL;
   streamptr->jobManager        = NULL;
 
-  streamptr->fdbRetrieve       = false;
-  streamptr->fdbStore          = false;
-#ifdef HAVE_LIBFDB5
-  streamptr->fdbHandle         = NULL;
-#endif
+  streamptr->protocolData      = NULL;
 }
 
 static
@@ -1015,17 +1058,35 @@ stream_t *stream_new_entry(int resH)
 
 void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
-  if (streamptr->fdbStore || streamptr->fdbRetrieve)
-    {
-#ifdef HAVE_LIBFDB5
-      if (streamptr->fdbHandle) fdb_delete_handle(streamptr->fdbHandle);
-      streamptr->fdbHandle = NULL;
-#endif
-      return;
-    }
-
   const int fileID = streamptr->fileID;
   const int filetype = streamptr->filetype;
+
+  switch (streamptr->protocol)
+    {
+    case CDI_PROTOCOL_ACROSS:
+#ifdef HAVE_ACROSS
+      if (fileID) across_disconnect(fileID);
+      if (streamptr->protocolData)
+        {
+          Free(((across_info_t*)streamptr->protocolData)->expid);
+          Free(streamptr->protocolData);
+          streamptr->protocolData = NULL;
+        }
+#endif
+      return;
+
+    case CDI_PROTOCOL_FDB:
+#ifdef HAVE_LIBFDB5
+      if (streamptr->protocolData) fdb_delete_handle(streamptr->protocolData);
+      streamptr->protocolData = NULL;
+#endif
+      return;
+
+    case CDI_PROTOCOL_OTHER:
+    case CDI_PROTOCOL_FILE:
+      // handled below;
+      break;
+    }
 
   if (fileID == CDI_UNDEFID)
     Warning("File %s not open!", streamptr->filename);
@@ -1148,7 +1209,11 @@ void streamClose(int streamID)
     }
 
   streamptr->filetype = 0;
-  if ( streamptr->filename ) Free(streamptr->filename);
+  if (streamptr->filename)
+    {
+      Free(streamptr->filename);
+      streamptr->filename = NULL;
+    }
 
   for ( int index = 0; index < streamptr->nvars; index++ )
     {
@@ -1397,10 +1462,18 @@ int streamInqTimestep(int streamID, int tsID)
     case CDI_FILETYPE_GRB:
     case CDI_FILETYPE_GRB2:
       {
-        if (streamptr->fdbRetrieve)
-          nrecs = fdbInqTimestep(streamptr, tsID);
-        else
-          nrecs = grbInqTimestep(streamptr, tsID);
+        switch (streamptr->protocol)
+          {
+          case CDI_PROTOCOL_FDB:
+            nrecs = fdbInqTimestep(streamptr, tsID);
+            break;
+
+          case CDI_PROTOCOL_ACROSS: // TODO read from ACROSS
+          case CDI_PROTOCOL_OTHER:
+          case CDI_PROTOCOL_FILE:
+            nrecs = grbInqTimestep(streamptr, tsID);
+            break;
+          }
 	break;
       }
 #endif

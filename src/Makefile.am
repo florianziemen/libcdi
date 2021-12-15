@@ -105,6 +105,8 @@ libcdi_la_SOURCES = 	 \
 	stream_ieg.h	 \
 	cdi_int.c        \
 	cdi_int.h	 \
+	cdi_across.c        \
+	cdi_across.h	 \
 	cdi_fdb.c        \
 	cdi_fdb.h	 \
 	stream_scan.c    \

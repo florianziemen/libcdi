@@ -953,7 +953,7 @@ int fdbScanTimesteps(stream_t *streamptr)
   size_t buffersize = 0;
   grib_handle *gh = NULL;
 
-  fdb_handle_t *fdbHandle = streamptr->fdbHandle;
+  fdb_handle_t *fdbHandle = streamptr->protocolData;
 
   char **fdbItemList = NULL;
   fdb_request_t *request = create_fdb_request(streamptr->filename);
