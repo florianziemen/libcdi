@@ -3257,6 +3257,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
           unsigned char *section2Padding = (unsigned char*) Malloc(section2PaddingLength);
           cdiInqKeyBytes(vlistID, varID, CDI_KEY_SECTION2PADDING, section2Padding, &section2PaddingLength);
           size_t len = section2PaddingLength;
+          // Does not work anymore with ecCodes 2.22.0!!!
+          // ECCODES ERROR   :  pack_bytes: Wrong size (10) for section2Padding. It is 0 bytes long
           grib_set_bytes(gh, "section2Padding", section2Padding, &len);
           Free(section2Padding);
         }
