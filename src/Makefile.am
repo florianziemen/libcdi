@@ -268,8 +268,9 @@ libcdipio_la_LIBADD   = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
 
 LOCALTARGETS  =
 if ENABLE_CDI_LIB
+LOCALTARGETS += cmake/cdi-config.cmake
+LOCALTARGETS += cmake/cdi-config-version.cmake
 LOCALTARGETS += pkgconfig/cdi.pc
-LOCALTARGETS += pkgconfig/cdi-config.cmake
 if USE_MPI
 LOCALTARGETS += pkgconfig/cdipio.pc
 endif
@@ -291,11 +292,14 @@ mo_cdi.$(FCMODEXT): mo_cdi.lo
 endif
 	@if test ! -f $@; then rm -f $<; $(MAKE) $<; fi
 #
+cmake/cdi-config.cmake: cmake/cdi-config.cmake.in ../config.status
+	(cd .. ; ./config.status src/cmake/cdi-config.cmake)
+
+cmake/cdi-config-version.cmake: cmake/cdi-config-version.cmake.in ../config.status
+	(cd .. ; ./config.status src/cmake/cdi-config-version.cmake)
+
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
-
-pkgconfig/cdi-config.cmake: pkgconfig/cdi-config.cmake.in ../config.status
-	(cd .. ; ./config.status src/pkgconfig/cdi-config.cmake)
 
 pkgconfig/cdipio.pc: pkgconfig/cdipio.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdipio.pc)
@@ -319,10 +323,12 @@ endif
 endif
 
 if ENABLE_CDI_LIB
+CMAKECONFIG_FILES = cmake/cdi-config.cmake
+CLEANFILES += cmake/cdi-config.cmake
+CMAKECONFIG_FILES += cmake/cdi-config-version.cmake
+CLEANFILES += cmake/cdi-config-version.cmake
 PKGCONFIG_FILES = pkgconfig/cdi.pc
 CLEANFILES += pkgconfig/cdi.pc
-PKGCONFIG_FILES += pkgconfig/cdi-config.cmake
-CLEANFILES += pkgconfig/cdi-config.cmake
 if USE_MPI
 PKGCONFIG_FILES += pkgconfig/cdipio.pc
 CLEANFILES += pkgconfig/cdipio.pc
@@ -332,13 +338,16 @@ PKGCONFIG_FILES += pkgconfig/cdi_f2003.pc
 CLEANFILES += pkgconfig/cdi_f2003.pc
 endif
 
-install-exec-local: $(PKGCONFIG_FILES)
+install-exec-local: $(PKGCONFIG_FILES) $(CMAKECONFIG_FILES)
 	$(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig"
 	@for pkgconfigfile in $(PKGCONFIG_FILES) ; do \
-		echo $(install_sh_DATA) $$pkgconfigfile \
-		"$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
-		$(install_sh_DATA) $$pkgconfigfile \
-		"$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
+		echo $(install_sh_DATA) $$pkgconfigfile "$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
+		$(install_sh_DATA) $$pkgconfigfile "$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
+	done
+	$(mkinstalldirs) "$(DESTDIR)$(libdir)/cmake"
+	@for cmakeconfigfile in $(CMAKECONFIG_FILES) ; do \
+		echo $(install_sh_DATA) $$cmakeconfigfile "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
+		$(install_sh_DATA) $$cmakeconfigfile "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
 	done
 
 uninstall-local:
@@ -347,6 +356,11 @@ uninstall-local:
 		rm -f "$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
 	done
 	-@rmdir "$(DESTDIR)$(libdir)/pkgconfig"
+	@for cmakeconfigfile in $(CMAKECONFIG_FILES) ; do \
+		echo rm -f "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
+		rm -f "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
+	done
+	-@rmdir "$(DESTDIR)$(libdir)/cmake"
 
 endif
 

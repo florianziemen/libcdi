@@ -1,6 +1,10 @@
+2021-12-18  Uwe Schulzweida
+
+	* Added src/cmake/cdi-config-version.cmake.in
+
 2021-12-13  Uwe Schulzweida
 
-	* Added src/pkgconfig/cdi-config.cmake.in
+	* Added src/cmake/cdi-config.cmake.in
 
 2021-11-18  Uwe Schulzweida
 
