@@ -550,20 +550,24 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         "#endif\n"
         "\n", fpint);
 
-  fputs("static inline\n"
+
+  // TODO: the first string below should be generated using build_header_name
+  //       for consistency
+  fputs("#ifdef CDI_H_\n"
+        "static inline\n"
         "int DateType_c2f(DateType value_DateType)\n"
         "{\n"
         "  assert(value_DateType < INT_MAX);\n"
         "  return (int) value_DateType;\n"
         "}\n"
-        "\n", fpint);
-
-  fputs("static inline\n"
+        "\n"
+        "static inline\n"
         "int SizeType_c2f(SizeType value_SizeType)\n"
         "{\n"
         "  assert(value_SizeType < INT_MAX);\n"
         "  return (int) value_SizeType;\n"
         "}\n"
+        "#endif\n"
         "\n", fpint);
 
   bool startFortran = false;
