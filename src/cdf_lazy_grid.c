@@ -189,7 +189,7 @@ cdfLazyGridDefYVals(grid_t *grid, const double *vals)
 }
 
 static double
-cdfLazyGridInqXVal(grid_t *grid, size_t index)
+cdfLazyGridInqXVal(grid_t *grid, SizeType index)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *) grid;
   lock_lazy_load(lazyGrid);
@@ -199,7 +199,7 @@ cdfLazyGridInqXVal(grid_t *grid, size_t index)
 }
 
 static double
-cdfLazyGridInqYVal(grid_t *grid, size_t index)
+cdfLazyGridInqYVal(grid_t *grid, SizeType index)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *) grid;
   lock_lazy_load(lazyGrid);
