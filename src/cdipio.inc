@@ -1,12 +1,15 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.9.4rc1
+! Fortran interface for CDI library version 2.0.4
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   February 2018
+! Uwe Schulzweida, MPI-MET, Hamburg,   February 2022
 !
 
+!
+!  Start of fortran interface for the following routines (make_fint.c)
+!
 !
 !  parallel IO IOMode
 !
@@ -117,6 +120,10 @@
 !                                    (CHARACTER*(*)   modeStr)
       EXTERNAL        cdiPioStr2IOMode
 
+      CHARACTER(80)   cdiPioIOMode2Str
+!                                    (INTEGER         IOMode)
+      EXTERNAL        cdiPioIOMode2Str
+
       INTEGER         cdiPioConfCreate
       EXTERNAL        cdiPioConfCreate
 
@@ -195,3 +202,6 @@
 !                                    (INTEGER         confResH)
       EXTERNAL        cdiPioConfGetStripeConversion
 
+!
+!  End of fortran interface
+!

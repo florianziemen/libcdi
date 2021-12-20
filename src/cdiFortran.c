@@ -31,6 +31,7 @@
 #  pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #endif
 
+#ifdef CDI_H_
 static inline
 int DateType_c2f(DateType value_DateType)
 {
@@ -44,6 +45,7 @@ int SizeType_c2f(SizeType value_SizeType)
   assert(value_SizeType < INT_MAX);
   return (int) value_SizeType;
 }
+#endif
 
 
 /*  Start of fortran interface for the following routines (make_fint.c)  */
