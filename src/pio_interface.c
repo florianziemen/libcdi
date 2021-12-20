@@ -594,14 +594,14 @@ pioWriteTimestep(void)
 }
 
 void
-streamWriteVarPart(int streamID, int varID, const void *data, size_t nmiss, Xt_idxlist partDesc)
+streamWriteVarPart(int streamID, int varID, const void *data, int nmiss, Xt_idxlist partDesc)
 {
   if (CDI_Debug) Message("streamID = %d varID = %d", streamID, varID);
 
   int chunk = xt_idxlist_get_num_indices(partDesc);
   xassert(chunk == 0 || data);
 
-  void (*myStreamWriteVarPart)(int streamID, int varID, const void *data, size_t nmiss, Xt_idxlist partDesc)
+  void (*myStreamWriteVarPart)(int streamID, int varID, const void *data, int nmiss, Xt_idxlist partDesc)
       = (void (*)(int, int, const void *, int, Xt_idxlist)) namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_PART_).func;
 
   if (!myStreamWriteVarPart) xabort("local part writing is unsupported!");
@@ -611,7 +611,7 @@ streamWriteVarPart(int streamID, int varID, const void *data, size_t nmiss, Xt_i
 
 void
 streamWriteScatteredVarPart(int streamID, int varID, const void *data, int numBlocks, const int blocklengths[],
-                            const int displacements[], size_t nmiss, Xt_idxlist partDesc)
+                            const int displacements[], int nmiss, Xt_idxlist partDesc)
 {
   if (CDI_Debug) Message("streamID = %d varID = %d", streamID, varID);
 
@@ -619,7 +619,7 @@ streamWriteScatteredVarPart(int streamID, int varID, const void *data, int numBl
   xassert(chunk == 0 || data);
 
   void (*myStreamWriteScatteredVarPart)(int streamID, int varID, const void *data, int numBlocks, const int blocklengths[],
-                                        const int displacements[], size_t nmiss, Xt_idxlist partDesc)
+                                        const int displacements[], int nmiss, Xt_idxlist partDesc)
       = (void (*)(int, int, const void *, int, const int[], const int[], int, Xt_idxlist)) namespaceSwitchGet(
             NSSWITCH_STREAM_WRITE_SCATTERED_VAR_PART_)
             .func;
