@@ -1433,6 +1433,14 @@ streamMappingDelete(struct streamMapping **mapping)
   *mapping = NULL;
 }
 
+#if __GNUC__ == 11 && __GNUC_MINOR__ <= 2
+/* gcc 11.1 has a bug in the -fsanitize=undefined functionality
+ * which creates a bogus warning without the below suppression, bug
+ * report at https://gcc.gnu.org/bugzilla/show_bug.cgi?id=101585 */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wvla-parameter"
+#endif
+
 /**
  * @param[out] passes_ pointer to pointer to 2-dimensional array of
  * records of dimensions $number of passes \cdot number of collectors$,
@@ -1547,6 +1555,11 @@ planPasses(const struct streamMapping *mapping,
   Free(recordDataSizePfxSums);
   return numPasses;
 }
+
+#if __GNUC__ == 11 && __GNUC_MINOR__ <= 2
+#pragma GCC diagnostic pop
+#endif
+
 
 static inline size_t
 szmin(size_t a, size_t b)
