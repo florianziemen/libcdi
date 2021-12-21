@@ -1016,7 +1016,7 @@ cdiPioDistGridDefAReductions(grid_t *gridptr, size_t saIdx)
           if (saIdx == cdiPioGDsaXVals)
             {
               double xval0 = scanVals[0], xvalW = scanVals[lsize];
-              refInc = (fabs(xvalW) - fabs(xval0)) / (gsize - 1);
+              refInc = (fabs(xvalW) - fabs(xval0)) / (double) (gsize - 1);
             }
           else if (saIdx == cdiPioGDsaYVals)
             {
