@@ -972,7 +972,7 @@ module mo_cdi
       import c_double, c_int
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
-      integer(c_int), intent(in) :: rect_dummy(2, 3)
+      integer(c_int), intent(in) :: rect_dummy(2, *)
       real(c_double), intent(in) :: data_dummy(*)
       integer(c_int), value :: nmiss_dummy
     end subroutine streamWriteVarChunk
@@ -982,7 +982,7 @@ module mo_cdi
       import c_float, c_int
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
-      integer(c_int), intent(in) :: rect_dummy(2, 3)
+      integer(c_int), intent(in) :: rect_dummy(2, *)
       real(c_float), intent(in) :: data_dummy(*)
       integer(c_int), value :: nmiss_dummy
     end subroutine streamWriteVarChunkF
