@@ -92,6 +92,8 @@ cdi_get_keysp(int objID, int varID)
 {
   if (reshGetTxCode(objID) == GRID)
     return grid_get_keysp(grid_to_pointer(objID), varID);
+  else if (reshGetTxCode(objID) == DIST_GRID)
+    return grid_get_keysp(grid_to_pointer(objID), varID);
   else if (reshGetTxCode(objID) == ZAXIS)
     return zaxis_get_keysp(zaxis_to_pointer(objID), varID);
   else if (reshGetTxCode(objID) == VLIST)
