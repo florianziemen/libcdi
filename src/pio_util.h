@@ -115,9 +115,23 @@ void printArray ( const char *, const char *, const void *, int, int, const char
 int
 cdiPioQueryVarDims(int varShape[3], int vlistID, int varID);
 
+/**
+ * Computes simple, balanced 1D decomposition of weighted elements e.
+ *
+ * @param                 n number of elements to balance
+ * @param[in] weightPfxSums points to array of the \a n+1 partial
+ *                          weight sums, where
+ *                          weightPfxSums[i]-weightPfxSums[i-1] =
+ *                          weight of \$e_{i-1}\$
+ * @param            nparts number of parts to generate for partition
+ * @param[out]   separators pointer to array of size nparts+1,
+ *                          initialized by this function such that
+ *                          part i consists of elements indexed as
+ *                          separators[i] to separators[i+1]-1
+ */
 void
-cdiPioDeco1D_CCP(size_t n, const size_t weightPfxSums[n],
-                 size_t nparts, size_t separators[nparts + 1]);
+cdiPioDeco1D_CCP(size_t n, const size_t *restrict weightPfxSums,
+                 size_t nparts, size_t *restrict separators);
 
 
 static inline size_t
