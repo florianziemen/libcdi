@@ -357,6 +357,16 @@ $argumentTemplates =
 		 :callExpression => '<name>_dummy',
 		 :passAs => 'integer(c_<type>), intent(in) :: <name>_dummy(<lineSize>, <lineCount>)',
 		 :postcallStatements => ""
+	 }, {	#const <integerTypes> <name>[][<lineSize>]
+		 :regex => '^\s*const\s+(?<type><integerTypes>)\s+(?<name>\w+)\s*\[\s*\]\s*\[\s*(?<lineSize>[^\]]+)\s*\]\s*$',
+		 :placeholders => %w[name type lineSize],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'integer(c_<type>), intent(in) :: <name>_dummy(<lineSize>, *)',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'integer(c_<type>), intent(in) :: <name>_dummy(<lineSize>, *)',
+		 :postcallStatements => ""
 	 },
 	 #Non-optional pointer arguments. These match both pointers and
 	 #arrays, so they must appear after the more special array templates.
