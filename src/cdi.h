@@ -404,9 +404,9 @@ void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float d
 void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], int *nmiss);
 void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], int *nmiss);
 
-void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], int nmiss);
+void    streamWriteVarChunk(int streamID, int varID, const int rect[][2], const double data[], int nmiss);
 
-void    streamWriteVarChunkF(int streamID, int varID, const int rect[3][2], const float data[], int nmiss);
+void    streamWriteVarChunkF(int streamID, int varID, const int rect[][2], const float data[], int nmiss);
 
 
 /* STREAM record I/O routines (sequential access) */
