@@ -112,7 +112,7 @@ char* cdiUnescapeSpaces(const char* string, const char** outStringEnd)
 #if defined (HAVE_DECL_UUID_GENERATE) && defined (HAVE_UUID_UUID_H)
 #include <sys/time.h>
 #include <uuid/uuid.h>
-void cdiCreateUUID(unsigned char *uuid)
+void cdiCreateUUID(unsigned char uuid[CDI_UUID_SIZE])
 {
   static int uuid_seeded = 0;
   static char uuid_rand_state[31 * sizeof (long)];
