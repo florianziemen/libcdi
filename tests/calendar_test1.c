@@ -48,7 +48,8 @@ main(void)
   int ijulinc;
   int j = 0;
   int year, mon, day, hour, minute, second;
-  int calday, secofday;
+  int64_t calday;
+  int secofday;
 
   /* 1 - Check valid range of years */
 
@@ -70,7 +71,7 @@ main(void)
       vtime = sec_to_time(secofday);
 
       if (vdate0 != vdate || vtime0 != vtime)
-        fprintf(stderr, "%4d %8ld %4d %8ld %4d %9d %9d\n", ++j, vdate0, vtime0, vdate, vtime, calday, secofday);
+        fprintf(stderr, "%4d %8ld %4d %8ld %4d %9ld %9d\n", ++j, vdate0, vtime0, vdate, vtime, calday, secofday);
 
       year++;
       vdate0 = cdiEncodeDate(year, mon, day);
@@ -121,7 +122,7 @@ main(void)
       vdate = calday_to_date(calendar, calday);
       vtime = sec_to_time(secofday);
       if (vdate0 != vdate || vtime0 != vtime)
-        fprintf(stderr, "%4d %8ld %4d %8ld %4d %9d %9d\n", ++j, vdate0, vtime0, vdate, vtime, calday, secofday);
+        fprintf(stderr, "%4d %8ld %4d %8ld %4d %9ld %9d\n", ++j, vdate0, vtime0, vdate, vtime, calday, secofday);
     }
 
   /* printf("stop time: %8ld %4d\n", vdate0, vtime0); */
