@@ -2,7 +2,7 @@
 test 'x@ENABLE_GRIB@' = xyes || exit 77
 
 format=grb
-. ${srcdir}/test_cksum_base
+. @srcdir@/test_cksum_base
 
 #
 # Local Variables:
