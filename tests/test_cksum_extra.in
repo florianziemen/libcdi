@@ -2,4 +2,4 @@
 test 'x@ENABLE_EXTRA@' = xyes || exit 77
 
 format=ext
-. ${srcdir}/test_cksum_base
+. @srcdir@/test_cksum_base

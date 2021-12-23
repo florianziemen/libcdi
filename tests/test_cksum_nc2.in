@@ -2,4 +2,4 @@
 test 'x@ENABLE_NC2@' = xyes || exit 77
 
 format=nc2
-. ${srcdir}/test_cksum_base
+. @srcdir@/test_cksum_base

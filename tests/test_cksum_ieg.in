@@ -2,4 +2,4 @@
 test 'x@ENABLE_IEG@' = xyes || exit 77
 
 format=ieg
-. ${srcdir}/test_cksum_base
+. @srcdir@/test_cksum_base

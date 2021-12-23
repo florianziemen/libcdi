@@ -2,4 +2,4 @@
 test 'x@ENABLE_NETCDF@' = xyes || exit 77
 
 format=nc
-. ${srcdir}/test_cksum_base
+. @srcdir@/test_cksum_base

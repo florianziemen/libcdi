@@ -2,4 +2,4 @@
 test 'x@ENABLE_SERVICE@' = xyes || exit 77
 
 format=srv
-. ${srcdir}/test_cksum_base
+. @srcdir@/test_cksum_base
