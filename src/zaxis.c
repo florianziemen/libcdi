@@ -324,6 +324,12 @@ void zaxisName(int zaxistype, char *zaxisname)
   strcpy(zaxisname, zaxisNamePtr(zaxistype));
 }
 
+// obsolete function
+void zaxisDefLtype(int zaxisID, int ltype)
+{
+  (void)cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, ltype);
+}
+
 /*
 @Function  zaxisDefName
 @Title     Define the name of a Z-axis

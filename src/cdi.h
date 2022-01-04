@@ -12,11 +12,11 @@
 #include <sys/types.h>
 
 #ifndef CDI_SIZE_TYPE
-#define CDI_SIZE_TYPE size_t
+#define CDI_SIZE_TYPE int
 #endif
 
 #ifndef CDI_DATE_TYPE // Must be signed integer (int32_t or int64_t)!
-#define CDI_DATE_TYPE int64_t
+#define CDI_DATE_TYPE int
 #endif
 
 typedef CDI_SIZE_TYPE SizeType;
@@ -74,6 +74,13 @@ extern "C" {
 #define  CDI_FILETYPE_EXT           9   // File type EXTRA
 #define  CDI_FILETYPE_IEG          10   // File type IEG
 
+// Compatibility defines for release 1.8.3 (obsolete defines)
+#define  FILETYPE_GRB               1   // File type GRIB
+#define  FILETYPE_GRB2              2   // File type GRIB version 2
+#define  FILETYPE_NC                3   // File type NetCDF
+#define  FILETYPE_NC2               4   // File type NetCDF version 2 (64-bit offset)
+#define  FILETYPE_NC4               5   // File type NetCDF version 4
+
 // Protocols (in filename/URI)
 
 #define CDI_PROTOCOL_OTHER          0   // Any other protocol (might be supported by NetCDF library)
@@ -90,6 +97,14 @@ extern "C" {
 #define  CDI_COMPRESS_JPEG          4
 
 // external data types
+
+// Compatibility defines for release 1.8.3 (obsolete defines)
+#define  DATATYPE_PACK16           16
+#define  DATATYPE_PACK24           24
+#define  DATATYPE_FLT32           132
+#define  DATATYPE_FLT64           164
+#define  DATATYPE_INT32           232
+#define  DATATYPE_INT             251
 
 #define  CDI_DATATYPE_PACK          0
 #define  CDI_DATATYPE_PACK1         1
@@ -230,6 +245,7 @@ typedef struct  {
 
 // TSTEP types
 
+#define  TSTEP_CONSTANT           0  // obsolete, use TIME_CONSTANT
 #define  TSTEP_INSTANT            1  // Instant
 #define  TSTEP_AVG                2  // Average
 #define  TSTEP_ACCUM              3  // Accumulation
@@ -1287,6 +1303,12 @@ int     subtypeInqAttribute(int subtypeID, int index, const char *key, int *outV
 int     vlistInqVarSubtype(int vlistID, int varID);
 
 void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision_version);
+
+// Compatibility functions for release 1.8.3 (obsolete functions)
+void zaxisDefLtype(int zaxisID, int ltype);
+int  vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID);
+void vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGeneratingProcess);
+void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDefinitionTemplate);
 
 #ifdef __cplusplus
 }

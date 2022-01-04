@@ -1,3 +1,11 @@
+2022-01-12  Uwe Schulzweida
+
+	* Version 2.0.3 released
+
+2022-01-04  Uwe Schulzweida
+
+	* Make CDI compatible to revision 1.8.3 used in ICON
+
 2021-12-18  Uwe Schulzweida
 
 	* Added src/cmake/cdi-config-version.cmake.in

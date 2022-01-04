@@ -53,10 +53,19 @@ int SizeType_c2f(SizeType value_SizeType)
 /*  File types  */
 
 
+/*  Compatibility defines for release 1.8.3 (obsolete defines)  */
+
+
+/*  Protocols (in filename/URI)  */
+
+
 /*  Compress types  */
 
 
 /*  external data types  */
+
+
+/*  Compatibility defines for release 1.8.3 (obsolete defines)  */
 
 
 /*  internal data types  */
@@ -838,6 +847,13 @@ FCALLSCFUN3 (INT, subtypeInqTile, SUBTYPEINQTILE, subtypeinqtile, INT, INT, INT)
 FCALLSCFUN4 (INT, subtypeInqAttribute, SUBTYPEINQATTRIBUTE, subtypeinqattribute, INT, INT, STRING, PINT)
 FCALLSCFUN2 (INT, vlistInqVarSubtype, VLISTINQVARSUBTYPE, vlistinqvarsubtype, INT, INT)
 FCALLSCSUB3 (gribapiLibraryVersion, GRIBAPILIBRARYVERSION, gribapilibraryversion, PINT, PINT, PINT)
+
+/*  Compatibility functions for release 1.8.3 (obsolete functions)  */
+
+FCALLSCSUB2 (zaxisDefLtype, ZAXISDEFLTYPE, zaxisdefltype, INT, INT)
+FCALLSCFUN2 (INT, vlistInqVarTypeOfGeneratingProcess, VLISTINQVARTYPEOFGENERATINGPROCESS, vlistinqvartypeofgeneratingprocess, INT, INT)
+FCALLSCSUB3 (vlistDefVarTypeOfGeneratingProcess, VLISTDEFVARTYPEOFGENERATINGPROCESS, vlistdefvartypeofgeneratingprocess, INT, INT, INT)
+FCALLSCSUB3 (vlistDefVarProductDefinitionTemplate, VLISTDEFVARPRODUCTDEFINITIONTEMPLATE, vlistdefvarproductdefinitiontemplate, INT, INT, INT)
 
 #if defined __clang__
 #  pragma GCC diagnostic pop

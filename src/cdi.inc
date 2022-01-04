@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   October 2021
+! Uwe Schulzweida, MPI-MET, Hamburg,   December 2021
 !
 
       INTEGER    CDI_MAX_NAME
@@ -85,6 +85,30 @@
       INTEGER    CDI_FILETYPE_IEG
       PARAMETER (CDI_FILETYPE_IEG       = 10)
 !
+!  Compatibility defines for release 1.8.3 (obsolete defines)
+!
+      INTEGER    FILETYPE_GRB
+      PARAMETER (FILETYPE_GRB           =  1)
+      INTEGER    FILETYPE_GRB2
+      PARAMETER (FILETYPE_GRB2          =  2)
+      INTEGER    FILETYPE_NC
+      PARAMETER (FILETYPE_NC            =  3)
+      INTEGER    FILETYPE_NC2
+      PARAMETER (FILETYPE_NC2           =  4)
+      INTEGER    FILETYPE_NC4
+      PARAMETER (FILETYPE_NC4           =  5)
+!
+!  Protocols (in filename/URI)
+!
+      INTEGER    CDI_PROTOCOL_OTHER
+      PARAMETER (CDI_PROTOCOL_OTHER     =  0)
+      INTEGER    CDI_PROTOCOL_FILE
+      PARAMETER (CDI_PROTOCOL_FILE      =  1)
+      INTEGER    CDI_PROTOCOL_FDB
+      PARAMETER (CDI_PROTOCOL_FDB       =  2)
+      INTEGER    CDI_PROTOCOL_ACROSS
+      PARAMETER (CDI_PROTOCOL_ACROSS    =  3)
+!
 !  Compress types
 !
       INTEGER    CDI_COMPRESS_NONE
@@ -100,6 +124,21 @@
 !
 !  external data types
 !
+!
+!  Compatibility defines for release 1.8.3 (obsolete defines)
+!
+      INTEGER    DATATYPE_PACK16
+      PARAMETER (DATATYPE_PACK16        = 16)
+      INTEGER    DATATYPE_PACK24
+      PARAMETER (DATATYPE_PACK24        = 24)
+      INTEGER    DATATYPE_FLT32
+      PARAMETER (DATATYPE_FLT32         = 132)
+      INTEGER    DATATYPE_FLT64
+      PARAMETER (DATATYPE_FLT64         = 164)
+      INTEGER    DATATYPE_INT32
+      PARAMETER (DATATYPE_INT32         = 232)
+      INTEGER    DATATYPE_INT
+      PARAMETER (DATATYPE_INT           = 251)
       INTEGER    CDI_DATATYPE_PACK
       PARAMETER (CDI_DATATYPE_PACK      =  0)
       INTEGER    CDI_DATATYPE_PACK1
@@ -331,6 +370,8 @@
 !
 !  TSTEP types
 !
+      INTEGER    TSTEP_CONSTANT
+      PARAMETER (TSTEP_CONSTANT         =  0)
       INTEGER    TSTEP_INSTANT
       PARAMETER (TSTEP_INSTANT          =  1)
       INTEGER    TSTEP_AVG
@@ -532,7 +573,7 @@
 !  STREAM control routines
 !
       INTEGER         cdiGetFiletype
-!                                    (CHARACTER*(*)   path,
+!                                    (CHARACTER*(*)   uri,
 !                                     INTEGER         byteorder)
       EXTERNAL        cdiGetFiletype
 
@@ -2557,4 +2598,29 @@
 !                                     INTEGER         minor_version,
 !                                     INTEGER         revision_version)
       EXTERNAL        gribapiLibraryVersion
+
+!
+!  Compatibility functions for release 1.8.3 (obsolete functions)
+!
+!                     zaxisDefLtype
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         ltype)
+      EXTERNAL        zaxisDefLtype
+
+      INTEGER         vlistInqVarTypeOfGeneratingProcess
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarTypeOfGeneratingProcess
+
+!                     vlistDefVarTypeOfGeneratingProcess
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         typeOfGeneratingProcess)
+      EXTERNAL        vlistDefVarTypeOfGeneratingProcess
+
+!                     vlistDefVarProductDefinitionTemplate
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         productDefinitionTemplate)
+      EXTERNAL        vlistDefVarProductDefinitionTemplate
 

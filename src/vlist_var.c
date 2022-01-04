@@ -569,6 +569,23 @@ void vlistInqVarStdname(int vlistID, int varID, char *stdname)
   (void)cdiInqKeyString(vlistID, varID, CDI_KEY_STDNAME, stdname, &length);
 }
 
+int vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID)
+{
+  int typeOfGeneratingProcess = 0;
+  int status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFGENERATINGPROCESS, &typeOfGeneratingProcess);
+  return typeOfGeneratingProcess;
+}
+
+void vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGeneratingProcess)
+{
+  cdiDefKeyInt(vlistID, varID, CDI_KEY_TYPEOFGENERATINGPROCESS, typeOfGeneratingProcess);
+}
+
+void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDefinitionTemplate)
+{
+  cdiDefKeyInt(vlistID, varID, CDI_KEY_PRODUCTDEFINITIONTEMPLATE, productDefinitionTemplate);
+}
+
 /*
 @Function  vlistInqVarUnits
 @Title     Get the units of a Variable
