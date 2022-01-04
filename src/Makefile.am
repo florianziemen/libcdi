@@ -1,4 +1,5 @@
 pkgconfigdir = $(libdir)/pkgconfig
+cmakedir = $(libdir)/cmake
 
 include_HEADERS =
 nodist_include_HEADERS =
@@ -7,7 +8,7 @@ noinst_LTLIBRARIES = libcdiresunpack.la
 EXTRA_PROGRAMS = make_fint
 EXTRA_DIST = cdilib.c
 nodist_pkgconfig_DATA =
-CMAKECONFIG_FILES =
+nodist_cmake_DATA =
 
 if FORTRAN_MOD_UC
 mo_cdi_modfile = MO_CDI.$(FCMODEXT)
@@ -23,7 +24,7 @@ include_HEADERS += \
   julian_date.h
 lib_LTLIBRARIES += libcdi.la
 nodist_pkgconfig_DATA += pkgconfig/cdi.pc
-CMAKECONFIG_FILES += \
+nodist_cmake_DATA += \
   cmake/cdi/cdi-config-version.cmake \
   cmake/cdi/cdi-config.cmake
 # add cdi.inc only if cfortran interface is required
@@ -301,11 +302,11 @@ $(mo_cdi_modfile): mo_cdi.lo
 	$(AM_V_at)test -f $@ || rm -f $<
 	$(AM_V_at)test -f $@ || $(MAKE) $(AM_MAKEFLAGS) $<
 
-cmake/cdi/cdi-config.cmake: cmake/cdi/cdi-config.cmake.in ../config.status
-	(cd .. ; ./config.status src/cmake/cdi/cdi-config.cmake)
+cmake/cdi/cdi-config.cmake: cmake/cdi/cdi-config.cmake.in $(top_builddir)/config.status
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-cmake/cdi/cdi-config-version.cmake: cmake/cdi/cdi-config-version.cmake.in ../config.status
-	(cd .. ; ./config.status src/cmake/cdi/cdi-config-version.cmake)
+cmake/cdi/cdi-config-version.cmake: cmake/cdi/cdi-config-version.cmake.in $(top_builddir)/config.status
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
@@ -319,36 +320,13 @@ pkgconfig/cdi_f2003.pc: pkgconfig/cdi_f2003.pc.in ../config.status
 cdilib.c:
 	(cd $(top_srcdir)/src ; ./make_cdilib )
 
-all-local: $(CMAKECONFIG_FILES)
-
 MOSTLYCLEANFILES = make_fint
 CLEANFILES =
 if CREATE_ISOC
 CLEANFILES += $(mo_cdi_modfile)
 endif
-if ENABLE_CDI_LIB
-CLEANFILES += \
-  cmake/cdi/cdi-config-version.cmake \
-  cmake/cdi/cdi-config.cmake
-endif
 
 MAINTAINERCLEANFILES = cdi.inc cdiFortran.c cdipio.inc cdipioFortran.c mo_cdi.f90
-
-if ENABLE_CDI_LIB
-install-exec-local: $(CMAKECONFIG_FILES)
-	$(mkinstalldirs) "$(DESTDIR)$(libdir)/cmake"
-	@for cmakeconfigfile in $(CMAKECONFIG_FILES) ; do \
-		echo $(install_sh_DATA) $$cmakeconfigfile "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
-		$(install_sh_DATA) $$cmakeconfigfile "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
-	done
-
-uninstall-local:
-	@for cmakeconfigfile in $(CMAKECONFIG_FILES) ; do \
-		echo rm -f "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
-		rm -f "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
-	done
-	-@rmdir "$(DESTDIR)$(libdir)/cmake"
-endif
 
 install-exec-hook:
 	-@rmdir "$(DESTDIR)$(libdir)"
