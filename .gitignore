@@ -79,10 +79,6 @@ Makefile
 # Documentation stage files:
 /doc/cdi_cman.pdf
 /doc/cdi_fman.pdf
-/doc/c_quick_ref.txt
-/doc/f_quick_ref.txt
-/doc/pio/c_quick_ref.txt
-/doc/pio/f_quick_ref.txt
 
 # Test stage files:
 /examples/cdi_append
