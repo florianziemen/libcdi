@@ -135,7 +135,7 @@ while (<MOFILE>) {
       $ctexfile = "c_${sourcefile}.tex";
       $ftexfile = "f_${sourcefile}.tex";
       open(CDOCFILE,   ">$ctexfile");
-      open(FDOCFILE,   ">$ftexfile");
+      open(CDOFFILE,   ">$ftexfile");
     }
     printf README ("   %-20s %s\n", $funcname,  $title);
 
@@ -266,7 +266,7 @@ close(MOFILE);
 print "\nNumber of functions: $nfunc\n";
 
 open(CDOCFILE, ">c_ref.tex");
-open(FDOCFILE, ">f_ref.tex");
+open(CDOFFILE, ">f_ref.tex");
 
 @sorted_func = sort { $a cmp $b } keys %hreftitle;
 
@@ -329,13 +329,13 @@ sub printproto {
   if ( "$ftype" eq "float"   ) { $ftype = "REAL*4 FUNCTION"; }
   $klen = 0;
   $klen += length($ftype) + length($fname) + 6;
-  print FDOCFILE "    $ftype $fname(";
+  print CDOFFILE "    $ftype $fname(";
   undef @param;
   (@param) =  split(",", $value);
   $plen = $klen;
   $n = 0;
   foreach $tag (@param) {
-    if ( $n > 0 ) { print FDOCFILE ", ";}
+    if ( $n > 0 ) { print CDOFFILE ", ";}
     $tag =~ s/void//og;
     $tag =~ s/const char \*/CHARACTER*(*) /og;
     $tag =~ s/char \*/CHARACTER*(*) /og;
@@ -352,15 +352,15 @@ sub printproto {
     $tag =~ s/const //og;
     $len = length($tag);
     if ( $plen + $len > 80 ) {
-      print FDOCFILE "\n";
-      printf FDOCFILE ("%*s", $klen, "");
+      print CDOFFILE "\n";
+      printf CDOFFILE ("%*s", $klen, "");
       $plen = $klen;
     }
     $plen += $len;
-    print FDOCFILE "$tag";
+    print CDOFFILE "$tag";
     $n++;
   }
-  print FDOCFILE ")\n";
+  print CDOFFILE ")\n";
 }
 
 sub printfproto {
@@ -415,7 +415,7 @@ sub printfsrc {
   @list = @_;
   if ( $#list >= 0 ) {
     foreach $tag (@list) {
-      print FDOCFILE "$tag\n";
+      print CDOFFILE "$tag\n";
     }
   }
 }
@@ -432,7 +432,7 @@ sub printcfdoc {
       $tag =~ s/\@fref\{([^}]*)\}/{\\htmlref{\\texttt{\1}}{\1}}/og;
       $tag =~ s/\@func\{([^}]*)\}/{\\texttt{\1}}/og;
       print CDOCFILE "$tag\n";
-      print FDOCFILE "$tag\n";
+      print CDOFFILE "$tag\n";
     }
   }
 }
