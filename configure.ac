@@ -182,7 +182,31 @@ dnl we skipped the check for CXX. Prevent the configure script from failing:
 fi
 
 AC_PROG_INSTALL
+
+dnl Override the option set by AC_OPENMP:
+AC_ARG_ENABLE([openmp],
+  [AS_HELP_STRING([--enable-openmp],
+     [enable OpenMP support @<:@default=no@:>@])],
+  [test "x$enableval" != xno && enable_openmp=yes],
+dnl TODO: decide whether we want to compile with OpenMP support by default.
+dnl Before this change, we ran AC_OPENMP but did not append OPENMP_CFLAGS to
+dnl CFLAGS, which resulted in no OpenMP support. We preserve that behaviour:
+  [enable_openmp=no])
+m4_pushdef([AC_ARG_ENABLE])dnl
 AC_OPENMP
+m4_popdef([AC_ARG_ENABLE])dnl
+AS_IF(
+  [test "x$enable_openmp" = xno],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
+#ifndef _OPENMP
+ choke me
+#endif]])],
+     [AC_MSG_ERROR([OpenMP support is disabled but the compiler enables it dnl
+by default: change CFLAGS to disable it])])],
+  [test "x$ac_cv_prog_c_openmp" = xunsupported],
+  [AC_MSG_FAILURE([cannot link C OpenMP programs])],
+  [test -n "$OPENMP_CFLAGS"],
+  [AS_VAR_APPEND([CFLAGS], [" $OPENMP_CFLAGS"])])
 
 dnl Set up libtool:
 AC_MSG_NOTICE([setting up libtool])
