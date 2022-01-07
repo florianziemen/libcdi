@@ -218,31 +218,15 @@ CXXCOMPILE = $(LTCXXCOMPILE)
 
 # Compile *.F90 without CPPFLAGS, which are normally meant for the C compiler
 # and might not be compatible with the Fortran compiler:
-LTPPFCCOMPILE = $(LTFCCOMPILE)
+LTPPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
 
 # Avoid compiling twice by running Libtool with '-static'
 #   This is safe because all Libtool libraries in this directory are
 #   static-only and contain PIC objects:
-LTCOMPILE_prefix = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=compile $(CC) -static $(DEFS) \
-        $(DEFAULT_INCLUDES) $(INCLUDES)
-LTCOMPILE = $(LTCOMPILE_prefix) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=link $(CCLD) -static $(AM_CFLAGS) $(CFLAGS) \
-        $(AM_LDFLAGS) $(LDFLAGS) -o $@
-LTFCCOMPILE_prefix = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=compile $(FC) -static
-LTFCCOMPILE = $(LTFCCOMPILE_prefix) $(AM_FCFLAGS) $(FCFLAGS)
-FCLINK = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=link $(FCLD) -static $(AM_FCFLAGS) $(FCFLAGS) \
-        $(AM_LDFLAGS) $(LDFLAGS) -o $@
-LTCXXCOMPILE_prefix = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=compile $(CXX) -static $(DEFS) \
-        $(DEFAULT_INCLUDES) $(INCLUDES)
-LTCXXCOMPILE = $(LTCXXCOMPILE_prefix) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
-CXXLINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=link $(CXXLD) -static $(AM_CXXFLAGS) \
-        $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_CFLAGS += -static
+AM_FCFLAGS = -static
+AM_CXXFLAGS = -static
 
 # Generate source files for parallel versions of the programs. We do this to
 # avoid target-specific flags, which result into rules that do not use the
