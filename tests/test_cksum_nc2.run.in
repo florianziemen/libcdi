@@ -1,6 +1,3 @@
 #!@SHELL@
-test 'x@ENABLE_NC2@' = xyes || exit 77
-
-prefix=${0##*/}
-format=nc2
-. @srcdir@/test_cksum_base
+suffix=nc2
+. ./test_cksum_base

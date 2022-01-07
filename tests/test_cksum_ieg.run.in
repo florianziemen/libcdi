@@ -1,6 +1,3 @@
 #!@SHELL@
-test 'x@ENABLE_IEG@' = xyes || exit 77
-
-prefix=${0##*/}
-format=ieg
-. @srcdir@/test_cksum_base
+suffix=ieg
+. ./test_cksum_base

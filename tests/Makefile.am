@@ -9,20 +9,32 @@ TESTS = \
   test_byteswap.run \
   test_cdf_const.run \
   test_cdf_transformation.run \
-  test_cksum_extra.run \
-  test_cksum_grib.run \
-  test_cksum_grib2.run \
+  test_cksum_ext.run \
+  test_cksum_grb.run \
+  test_cksum_grb2.run \
   test_cksum_ieg.run \
   test_cksum_nc.run \
   test_cksum_nc2.run \
   test_cksum_nc4.run \
   test_cksum_nc_chunk.run \
-  test_cksum_service.run \
+  test_cksum_srv.run \
   test_f2003.run \
   test_grib.run \
   test_month_adjust \
   test_resource_copy.run \
   test_table.run
+
+# Update test_cksum_base before running tests that source it:
+test_cksum_TEST_LOGS_ = \
+  test_cksum_ext.log \
+  test_cksum_grb.log \
+  test_cksum_grb2.log \
+  test_cksum_ieg.log \
+  test_cksum_nc.log \
+  test_cksum_nc2.log \
+  test_cksum_nc4.log \
+  test_cksum_srv.log
+$(test_cksum_TEST_LOGS_): test_cksum_base
 
 # Parallel tests:
 TESTS += \
@@ -181,8 +193,6 @@ clean-local:
 	-rm -rf *.dSYM
 
 AUTOMAKE_OPTIONS = color-tests
-
-EXTRA_DIST = test_cksum_base
 
 # Compile programs using Libtool:
 COMPILE = $(LTCOMPILE)
