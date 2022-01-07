@@ -204,7 +204,7 @@ AC_CHECK_FUNCS([mallinfo pwrite])
 AC_REPLACE_FUNCS([getline])
 dnl Check for UUID library:
 ACX_UUID
-AS_VAR_APPEND([CFLAGS], [" $UUID_C_INCLUDE"])
+AS_VAR_APPEND([CPPFLAGS], [" $UUID_C_INCLUDE"])
 LIBS="$UUID_C_LIB $LIBS"
 dnl Checks for the availability of ANSI-C99 functions:
 AC_CHECK_DECLS([isnan], [], [],
@@ -297,12 +297,12 @@ dnl Check for MPI C interface:
      [AC_MSG_FAILURE([cannot link C MPI programs])])
 
 dnl Check for MPI_LAUNCH command:
-   saved_CFLAGS=$CFLAGS
+   saved_CPPFLAGS=$CPPFLAGS
    saved_LIBS=$LIBS
-   AS_VAR_APPEND([CFLAGS], [" $MPI_C_INCLUDE"])
+   AS_VAR_APPEND([CPPFLAGS], [" $MPI_C_INCLUDE"])
    LIBS="$MPI_C_LIB $LIBS"
    ACX_MPIRUN(,,[AC_MSG_WARN([MPI launch command not found or not compilable])])
-   CFLAGS=$saved_CFLAGS
+   CPPFLAGS=$saved_CPPFLAGS
    LIBS=$saved_LIBS
 
 dnl Check for MPI Fortran interface (if needed):
@@ -353,9 +353,9 @@ dnl have names YAXT_C_INCLUDE and YAXT_C_LIB, respectively:
             YAXT_C_LIB=`echo "$yaxt_LIBS" | sed -e 's/-lyaxt *$/-lyaxt_c/'`])],
         [:])])
    m4_popdef([AC_ARG_VAR])dnl
-   saved_CFLAGS=$CFLAGS
+   saved_CPPFLAGS=$CPPFLAGS
    saved_LIBS=$LIBS
-   AS_VAR_APPEND([CFLAGS], [" $MPI_C_INCLUDE"])
+   AS_VAR_APPEND([CPPFLAGS], [" $MPI_C_INCLUDE"])
    LIBS="$MPI_C_LIB $LIBS"
 dnl The following is extracted from ACX_GENERIC_PACKAGE, which is expanded by
 dnl ACX_C_PACKAGE. We do not use the latter macro here to avoid introduction of
@@ -375,7 +375,7 @@ dnl
    AC_CHECK_DECL([MPI_UINT64_T],
      [AC_DEFINE([YAXT_UID_DT], [MPI_UINT64_T])
       defined_Xt_uid=yes],
-     [AS_VAR_APPEND([CFLAGS], [" $YAXT_C_INCLUDE"])
+     [AS_VAR_APPEND([CPPFLAGS], [" $YAXT_C_INCLUDE"])
       LIBS="$YAXT_C_LIB $LIBS"
       AC_CHECK_SIZEOF([Xt_uid],,
         [AC_INCLUDES_DEFAULT
@@ -396,7 +396,7 @@ dnl
    AS_VAR_IF([defined_Xt_uid], [no],
      [AC_MSG_FAILURE([no way to communicate Xt_uid found])])
    AS_UNSET([defined_Xt_uid])
-   CFLAGS=$saved_CFLAGS
+   CPPFLAGS=$saved_CPPFLAGS
    LIBS=$saved_LIBS
 
 dnl Check for YAXT Fortran interface (if needed):
@@ -472,9 +472,9 @@ dnl case have names PPM_CORE_C_INCLUDE and PPM_CORE_C_LIB, respectively:
      [PPM_CORE_C_INCLUDE=$ppm_core_CFLAGS
       PPM_CORE_C_LIB=$ppm_core_LIBS], [:])
    m4_popdef([AC_ARG_VAR])dnl
-   saved_CFLAGS=$CFLAGS
+   saved_CPPFLAGS=$CPPFLAGS
    saved_LIBS=$LIBS
-   AS_VAR_APPEND([CFLAGS], [" $MPI_C_INCLUDE"])
+   AS_VAR_APPEND([CPPFLAGS], [" $MPI_C_INCLUDE"])
    LIBS="$MPI_C_LIB $LIBS"
 dnl The following is extracted from ACX_GENERIC_PACKAGE, which is expanded by
 dnl ACX_C_PACKAGE. We do not use the latter macro here to avoid introduction of
@@ -486,7 +486,7 @@ dnl since whatever pkg-config finds will be used instead.
         [PPM_CORE_C_LIB=$acx_cv_option_search_PPM_initialize_c
          have_ppm=yes
          AC_DEFINE([HAVE_PPM_CORE],,[ScalES PPM C core library is available])
-         AS_VAR_APPEND([CFLAGS], [" $PPM_CORE_C_INCLUDE"])
+         AS_VAR_APPEND([CPPFLAGS], [" $PPM_CORE_C_INCLUDE"])
          AS_IF([test "x$enable_ppm_dist_array" != xno],
            [AC_CHECK_HEADERS([ppm/dist_array.h],
               [HAVE_PPM_DIST_ARRAY=yes], [], [AC_INCLUDES_DEFAULT])])],
@@ -494,7 +494,7 @@ dnl since whatever pkg-config finds will be used instead.
         [$PPM_CORE_C_LIB])],
      [AC_MSG_WARN([required header ppm/ppm.h not found or not compilable])],,
      [$PPM_CORE_C_INCLUDE],[[]])
-   CFLAGS=$saved_CFLAGS
+   CPPFLAGS=$saved_CPPFLAGS
    LIBS=$saved_LIBS
 
 dnl NC_HAS_PNETCDF is useful when available to short-circuit some tests
@@ -517,8 +517,8 @@ dnl overrides the result of the test.
 
 dnl If scales-ppm is not available, netcdf can only be used in serial mode:
    AS_IF([test "x$ENABLE_NC4" = xyes && test "x$have_ppm" = xyes],
-     [saved_CFLAGS=$CFLAGS
-      CFLAGS="$CFLAGS $MPI_C_INCLUDE"
+     [saved_CPPFLAGS=$CPPFLAGS
+      AS_VAR_APPEND([CPPFLAGS], [" $MPI_C_INCLUDE"])
       AC_CHECK_HEADERS([netcdf_par.h],,,
         [AC_INCLUDES_DEFAULT
 @%:@include <netcdf.h>])
@@ -538,7 +538,7 @@ dnl If scales-ppm is not available, netcdf can only be used in serial mode:
 @%:@ifdef HAVE_NETCDF_PAR_H
 @%:@include <netcdf_par.h>
 @%:@endif])
-      CFLAGS=$saved_CFLAGS
+      CPPFLAGS=$saved_CPPFLAGS
 dnl WARNING: the following macro overwrites saved_CFLAGS shell variable and
 dnl modifies CFLAGS:
       ACX_TLS_XLC_RETRY])
