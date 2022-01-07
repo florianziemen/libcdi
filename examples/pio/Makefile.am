@@ -28,8 +28,7 @@ CLEANFILES += $(EXTRA_PROGRAMS)
 endif !with_example_programs
 examples-local: $(EXTRA_PROGRAMS)
 
-AM_CPPFLAGS = -I$(top_srcdir)/src
-AM_CFLAGS = $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
+AM_CPPFLAGS = -I$(top_srcdir)/src $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 
 AM_FCFLAGS =
 if ENABLE_CF_INTERFACE
