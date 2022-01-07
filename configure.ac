@@ -40,9 +40,9 @@ AM_CONDITIONAL([ENABLE_ISOC_INTERFACE],
 
 AC_ARG_ENABLE([cf-interface],
   [AS_HELP_STRING([--enable-cf-interface],
-     [create Fortran 77 interface using cfortran.h @<:@default=yes@:>@])],
+     [create Fortran 77 interface using cfortran.h @<:@default=no@:>@])],
   [test "x$enableval" != xno && enable_cf_interface=yes],
-  [enable_cf_interface=yes])
+  [enable_cf_interface=no])
 AM_CONDITIONAL([ENABLE_CF_INTERFACE], [test "x$enable_cf_interface" = xyes])
 
 dnl We need FC for the Fortran 90 and for the Fortran 77 interfaces. In the
