@@ -34,6 +34,7 @@ Makefile.in
 /src/stamp-h1
 /tables/gen_tableheaderfile
 /tests/*.run
+/tests/test_cksum_base
 Makefile
 
 # Build stage files:
