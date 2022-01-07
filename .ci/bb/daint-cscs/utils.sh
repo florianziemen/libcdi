@@ -94,7 +94,11 @@ switch_for_module ()
 #
 init_env ()
 {
-  :
+  AUTOMAKE_ROOT='/project/d56/libcdi-ci-sw/gcc-10.1.0-haswell/automake-1.16.1-o2z5zyt'
+  LIBTOOL_ROOT='/usr'
+
+  export PATH="${AUTOMAKE_ROOT}/bin:${PATH-}"
+  export ACLOCAL_PATH="${LIBTOOL_ROOT}/share/aclocal:${ACLOCAL_PATH-}"
 }
 
 #
