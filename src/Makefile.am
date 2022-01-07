@@ -56,14 +56,13 @@ else !with_on_demand_check_programs
 noinst_LTLIBRARIES += libcdiresunpack.la
 endif !with_on_demand_check_programs
 
-AM_CPPFLAGS =
+AM_CPPFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 if ENABLE_MPI
 # TODO: this needs a refactoring but for now we set this macro here and not in
 # config.h because the macro is used in several files that do not include the
 # header file directly.
 AM_CPPFLAGS += -DUSE_MPI
 endif
-AM_CFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 
 libcdiresunpack_la_SOURCES = \
   resource_unpack.c \
