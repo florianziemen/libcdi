@@ -31,7 +31,6 @@ Docu;
 
 // Example: ./make_fint -d ../doc/pio/ cdipio.h
 
-static const char default_doc_root[] = "../doc";
 static struct {
   const char *name;
   size_t len;
@@ -994,6 +993,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
   qsort(cdoc, ncdoc, sizeof(Docu), doccmp);
   qsort(fdoc, nfdoc, sizeof(Docu), doccmp);
 
+  if ( NULL == doc_root ) return;
 
   char *filename;
   const size_t doc_root_len = strlen(doc_root);
@@ -1107,7 +1107,7 @@ build_header_name(const size_t len, const char *fname, char *cppMacro)
 
 int main(int argc, char *argv[])
 {
-  const char *doc_root = default_doc_root;
+  const char *doc_root = NULL;
 
   int optargCount = 0;
   {
