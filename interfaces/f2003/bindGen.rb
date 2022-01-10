@@ -958,7 +958,7 @@ def scanHeader(headerPath)
 			defineFunction(matchedLine['functionName'], matchedLine['arguments'], matchedLine['returnType'])
 
 		else
-			puts("Warning: Unrecognized line '#{line}'")
+			STDERR.puts("Warning: Unrecognized line '#{line}'")
 		end
 	end
 end
