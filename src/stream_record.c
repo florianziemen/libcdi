@@ -277,15 +277,15 @@ void cdi_create_records(stream_t *streamptr, int tsID)
   tsteps_t *sourceTstep = streamptr->tsteps;
   tsteps_t *destTstep = sourceTstep + tsID;
 
-  if ( destTstep->records ) return;
+  if (destTstep->records) return;
 
   int vlistID = streamptr->vlistID;
 
-  if ( tsID == 0 )
+  if (tsID == 0)
     {
       maxrecords = 0;
       int nvars = streamptr->nvars;
-      for ( int varID = 0; varID < nvars; varID++)
+      for (int varID = 0; varID < nvars; varID++)
         for (int isub=0; isub<streamptr->vars[varID].subtypeSize; isub++)
           maxrecords += (unsigned)streamptr->vars[varID].recordTable[isub].nlevs;
     }
@@ -294,21 +294,28 @@ void cdi_create_records(stream_t *streamptr, int tsID)
       maxrecords = (unsigned)sourceTstep->recordSize;
     }
 
-  if ( tsID == 0 )
+  if (tsID == 0)
     {
       nrecords = maxrecords;
     }
-  else if ( tsID == 1 )
+  else if (tsID == 1)
     {
       nrecords = 0;
       maxrecords = (unsigned)sourceTstep->recordSize;
-      for ( unsigned recID = 0; recID < maxrecords; recID++ )
-	{
-	  int varID = sourceTstep->records[recID].varID;
-	  nrecords += (varID == CDI_UNDEFID /* varID = CDI_UNDEFID for write mode !!! */
-                       || vlistInqVarTimetype(vlistID, varID) != TIME_CONSTANT);
-          //    printf("varID nrecords %d %d %d \n", varID, nrecords, vlistInqVarTsteptype(vlistID, varID));
-	}
+      if (sourceTstep->records)
+        {
+          for (unsigned recID = 0; recID < maxrecords; recID++)
+            {
+              int varID = sourceTstep->records[recID].varID;
+              nrecords += (varID == CDI_UNDEFID /* varID = CDI_UNDEFID for write mode !!! */
+                           || vlistInqVarTimetype(vlistID, varID) != TIME_CONSTANT);
+              //    printf("varID nrecords %d %d %d \n", varID, nrecords, vlistInqVarTsteptype(vlistID, varID));
+            }
+        }
+      else
+        {
+          nrecords = maxrecords;
+        }
     }
   else
     {
@@ -317,28 +324,31 @@ void cdi_create_records(stream_t *streamptr, int tsID)
   //  printf("tsID, nrecords %d %d\n", tsID, nrecords);
 
   record_t *records = NULL;
-  if ( maxrecords > 0 ) records = (record_t *) Malloc(maxrecords*sizeof(record_t));
+  if (maxrecords > 0) records = (record_t *) Malloc(maxrecords*sizeof(record_t));
 
   destTstep->records    = records;
   destTstep->recordSize = (int)maxrecords;
   destTstep->nallrecs   = (int)nrecords;
+#ifdef HAVE_LIBFDB5
+  destTstep->records->fdbItem = NULL;
+#endif
 
-  if ( tsID == 0 )
+  if (tsID == 0)
     {
-      for ( unsigned recID = 0; recID < maxrecords; recID++ )
+      for (unsigned recID = 0; recID < maxrecords; recID++)
         recordInitEntry(&destTstep->records[recID]);
     }
-  else
+  else if (sourceTstep->records)
     {
       memcpy(destTstep->records, sourceTstep->records, (size_t)maxrecords*sizeof(record_t));
 
-      for ( unsigned recID = 0; recID < maxrecords; recID++ )
+      for (unsigned recID = 0; recID < maxrecords; recID++)
 	{
           record_t *curRecord = &sourceTstep->records[recID];
           destTstep->records[recID].used = curRecord->used;
-          if ( curRecord->used != CDI_UNDEFID && curRecord->varID != -1 ) /* curRecord->varID = -1 for write mode !!! */
+          if (curRecord->used != CDI_UNDEFID && curRecord->varID != -1) // curRecord->varID = -1 for write mode !!!
             {
-              if ( vlistInqVarTimetype(vlistID, curRecord->varID) != TIME_CONSTANT )
+              if (vlistInqVarTimetype(vlistID, curRecord->varID) != TIME_CONSTANT)
                 {
                   destTstep->records[recID].position = CDI_UNDEFID;
                   destTstep->records[recID].size     = 0;
