@@ -12,7 +12,7 @@ init_nag626223
 test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
 # Create a distribution file with minimalistic configuration:
-switch_for_module texlive
+switch_for_module texlive ruby
 "${top_srcdir}/configure"
 make -j8 dist
 
