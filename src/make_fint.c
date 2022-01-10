@@ -1112,19 +1112,23 @@ build_header_name(const size_t len, const char *fname, char *cppMacro)
 
 int main(int argc, char *argv[])
 {
-  const char *doc_root = NULL;
+  const char *doc_root = NULL, *out_root = NULL;
 
   int optargCount = 0;
   {
     int opt;
-    while ((opt = getopt(argc, argv, "d:")) != -1)
+    while ((opt = getopt(argc, argv, "d:o:")) != -1)
       switch (opt) {
       case 'd':
         doc_root = optarg;
-        optargCount = 2;
+        optargCount += 2;
+        break;
+      case 'o':
+        out_root = optarg;
+        optargCount += 2;
         break;
       default: /* '?' */
-        fprintf(stderr, "Usage: %s [-d DOCROOT] includefile\n", argv[0]);
+        fprintf(stderr, "Usage: %s [-d DOCROOT] [-o OUTROOT] includefile\n", argv[0]);
         return EXIT_FAILURE;
       }
   }
@@ -1132,21 +1136,53 @@ int main(int argc, char *argv[])
 
   if ( argc != 2 + optargCount)
     {
-      printf("Usage:  %s [-d DOCROOT] includefile\n", argv[0]);
+      printf("Usage:  %s [-d DOCROOT] [-o OUTROOT] includefile\n", argv[0]);
       return 1;
     }
 
   char *fname = argv[1 + optargCount];
 
-  char *cp = strrchr(fname, '.');
-  const size_t len = (cp == NULL) ? strlen(fname) : (size_t)(cp - fname);
+  const char *cs = strrchr(fname, '/');
+  const char *fbasename = (cs == NULL) ? fname : cs + 1;
+
+  const char *cp = strrchr(fbasename, '.');
+  const size_t fbasename_len = (cp == NULL) ? strlen(fbasename) : (size_t) (cp - fbasename);
+
+  const char *fprefix;
+  size_t fprefix_len;
+
+  if (out_root == NULL)
+    {
+      fprefix = fname;
+      fprefix_len = (size_t) (fbasename - fname);
+    }
+  else
+    {
+      fprefix = out_root;
+      fprefix_len = strlen(out_root);
+    }
 
   char fnameinc[128], fnameint[128];
-  memcpy(fnameinc, fname, len);
-  memcpy(fnameint, fname, len);
 
-  strcpy(fnameinc+len, ".inc");
-  strcpy(fnameint+len, "Fortran.c");
+  if (fprefix_len > 0)
+    {
+      memcpy(fnameinc, fprefix, fprefix_len);
+      memcpy(fnameint, fprefix, fprefix_len);
+
+      if (fprefix[fprefix_len - 1] != '/')
+        {
+          fnameinc[fprefix_len] = fnameint[fprefix_len] = '/';
+          fprefix_len += 1;
+        }
+    }
+
+  size_t fname_idx = fprefix_len;
+  memcpy(fnameinc + fname_idx, fbasename, fbasename_len);
+  memcpy(fnameint + fname_idx, fbasename, fbasename_len);
+
+  fname_idx += fbasename_len;
+  strcpy(fnameinc + fname_idx, ".inc");
+  strcpy(fnameint + fname_idx, "Fortran.c");
 
   fortran_interface(fname, fnameinc, fnameint, doc_root);
 
