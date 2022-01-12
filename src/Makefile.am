@@ -2,6 +2,7 @@
 #
 EXTRA_DIST = cdilib.c $(top_srcdir)/interfaces/f2003/bindGen.rb
 
+EXTRA_PROGRAMS = make_fint
 noinst_LTLIBRARIES = libcdiresunpack.la
 
 include_HEADERS =
@@ -202,6 +203,9 @@ libcdi_f2003_la_LIBADD = libcdi.la
 libcdiresunpack_la_SOURCES = \
 	resource_unpack.c
 
+make_fint_SOURCES = make_fint.c
+make_fint_LDADD = $(LIBOBJS)
+
 if USE_MPI
 if ENABLE_CDI_LIB
 lib_LTLIBRARIES += libcdipio.la
@@ -313,6 +317,7 @@ cdilib.c:
 #
 all-local: $(LOCALTARGETS)
 #
+MOSTLYCLEANFILES = make_fint
 CLEANFILES  := `ls *~`
 #CLEANFILES += cdilib.c
 if CREATE_ISOC
