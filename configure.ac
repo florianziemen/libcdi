@@ -88,7 +88,7 @@ AX_EXECINFO
 #  ----------------------------------------------------------------------
 # Checks for the availability of functions
 AC_CHECK_FUNCS([mallinfo])
-AC_CHECK_FUNCS([getline])
+AC_REPLACE_FUNCS([getline])
 ACX_UUID
 LIBS="${LIBS+$LIBS }$UUID_C_LIB"
 CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$UUID_C_INCLUDE"

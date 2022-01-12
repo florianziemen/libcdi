@@ -1,5 +1,21 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#if defined(HAVE_GETLINE) && !defined(_GNU_SOURCES)
+// It seems that _GNU_SOURCES must be defined to enable getline(3) on some
+// systems. However, it is unclear whether it is possible at all that
+// HAVE_GETLINE gets defined on such systems by the configure script, which does
+// not expand either AC_GNU_SOURCE or AC_USE_SYSTEM_EXTENSIONS and, therefore,
+// checks for getline without _GNU_SOURCES defined.
+#define _GNU_SOURCES 1
+#endif
+#else
+#define VERSION "2.0.4"
+#endif
+
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 700
-#define _GNU_SOURCE  // needed for getline(3) on some systems it seems
+#endif
+
 #include <ctype.h>
 #include <errno.h>
 #include <regex.h>
@@ -12,13 +28,19 @@
 #include <unistd.h>
 
 #ifndef HAVE_GETLINE
+#ifdef HAVE_CONFIG_H
+// Avoid warning: implicit declaration of function ‘getline’
+ssize_t getline(char **linebuf, size_t *linebuf_size, FILE *fp);
+#else
+// This is only to cover the case when this file is compiled "manually", i.e.
+// without the Makefile and without config.h, e.g. 'gcc make_fint.c', on a
+// system where HAVE_GETLINE would not get defined or getline does not work
+// without _GNU_SOURCES defined.
 #include "getline.c"
+#endif
 #endif
 
 // clang-format off
-
-//#include "config.h"
-#define VERSION "2.0.0"
 
 typedef struct
 {
