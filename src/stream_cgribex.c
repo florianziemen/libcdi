@@ -848,6 +848,12 @@ int cgribexScanTimestep1(stream_t *streamptr)
 	}
       else
 	{
+          if (sdate < taxis->sdate || (sdate == taxis->sdate && stime < taxis->stime))
+            {
+              taxis->sdate = sdate;
+              taxis->stime = stime;
+            }
+
 	  compvar_t compVar = cgribexVarSet(param, level1, level2, leveltype, ISEC1_TimeRange);
           record_t *records = streamptr->tsteps[tsID].records;
 	  for ( recID = 0; recID < nrecs; recID++ )
@@ -1010,6 +1016,14 @@ int cgribexScanTimestep2(stream_t * streamptr)
           taxis->sdate = sdate;
           taxis->stime = stime;
 	}
+      else
+        {
+          if (sdate < taxis->sdate || (sdate == taxis->sdate && stime < taxis->stime))
+            {
+              taxis->sdate = sdate;
+              taxis->stime = stime;
+            }
+        }
 
       const int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
 
@@ -1210,6 +1224,14 @@ int cgribexScanTimestep(stream_t * streamptr)
               taxis->sdate = sdate;
               taxis->stime = stime;
 	    }
+          else
+            {
+              if (sdate < taxis->sdate || (sdate == taxis->sdate && stime < taxis->stime))
+                {
+                  taxis->sdate = sdate;
+                  taxis->stime = stime;
+                }
+            }
 
 	  if ( ISEC1_AvgNum )
 	    {

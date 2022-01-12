@@ -1,5 +1,9 @@
 2022-01-12  Uwe Schulzweida
 
+	* GRIB read: recalculate start date/time for every record and timestep (bug fix) [report: Johannes Schick]
+
+2022-01-12  Uwe Schulzweida
+
 	* Version 2.0.3 released
 
 2022-01-04  Uwe Schulzweida

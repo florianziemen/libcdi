@@ -1200,6 +1200,12 @@ int gribapiScanTimestep1(stream_t *streamptr)
         }
       else
         {
+          if (sdate < taxis->sdate || (sdate == taxis->sdate && stime < taxis->stime))
+            {
+              taxis->sdate = sdate;
+              taxis->stime = stime;
+            }
+
           const int tsteptype = gribapiGetTsteptype(gh);
           const size_t gridsize = gribapiGetGridsize(gh);
           checkTimeResult result = checkTime(streamptr,
@@ -1356,6 +1362,14 @@ int gribapiScanTimestep2(stream_t *streamptr)
 	  taxis->stime = stime;
           // printf("2: %d %6d  %d %6d  %d %6d\n", taxis->rdate, taxis->rtime, taxis->sdate, taxis->stime, taxis->vdate, taxis->vtime);
 	}
+      else
+        {
+          if (sdate < taxis->sdate || (sdate == taxis->sdate && stime < taxis->stime))
+            {
+              taxis->sdate = sdate;
+              taxis->stime = stime;
+            }
+        }
 
       VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
@@ -1546,6 +1560,14 @@ int gribapiScanTimestep(stream_t *streamptr)
 	      taxis->stime = stime;
               // printf("n: %d %6d  %d %6d  %d %6d\n", taxis->rdate, taxis->rtime, taxis->sdate, taxis->stime, taxis->vdate, taxis->vtime);
 	    }
+          else
+            {
+              if (sdate < taxis->sdate || (sdate == taxis->sdate && stime < taxis->stime))
+                {
+                  taxis->sdate = sdate;
+                  taxis->stime = stime;
+                }
+            }
 
           VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
