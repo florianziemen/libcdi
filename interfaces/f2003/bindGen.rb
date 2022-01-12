@@ -938,6 +938,9 @@ def scanHeader(headerPath)
 	headerLines.each do |line|
 		line.chomp!
 
+		line.gsub!(/SizeType/,'int')
+		line.gsub!(/DateType/,'int')
+
 		if /^\s*$/.match(line)
 			#Empty lines are ignored.
 
