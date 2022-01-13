@@ -284,15 +284,73 @@ endif
 endif
 
 #
+# See https://www.gnu.org/software/automake/manual/html_node/Multiple-Outputs.html
+make_fint_run = stem=`echo '$@' | sed -e 's|.*/||' -e 's|.inc||' -e 's|Fortran.c||'`;
+if MAINTAINER_MODE
+make_fint_run += ./make_fint -o $(@D) "$(srcdir)/$${stem}.h"
+else
+make_fint_run += \
+  test -f "$${stem}.inc" && test -f "$${stem}Fortran.c" && exit 0; \
+  trap "rm -rf .fint/$${stem}.lock .fint/$${stem}.stamp" 1 2 13 15; \
+  if mkdir .fint/$${stem}.lock 2>/dev/null; then \
+    rm -f .fint/$${stem}.stamp; ec=0; \
+    test '.' != '$(srcdir)' && \
+      for f in "$(srcdir)/$${stem}.inc" "$(srcdir)/$${stem}Fortran.c"; do \
+        test -f $$f && \
+          echo "The source directory is inconsistent: remove '$$f' to recover" >&2 && \
+          ec=1 && break; done; \
+    test $$ec != 0 || ./make_fint -o $(@D) "$(srcdir)/$${stem}.h" || ec=1; \
+    test $$ec = 0 && touch .fint/$${stem}.stamp; \
+    rm -rf .fint/$${stem}.lock; exit $$ec; \
+  else \
+    while test -d .fint/$${stem}.lock; do sleep 1; done; \
+    test -f .fint/$${stem}.stamp || exit 1; fi
+endif
+
+# We have to provide the recipe fo non-maintainer mode literally to let make
+# know that it contains a recursive make call:
+cdiFortran.c cdi.inc: @MAINTAINER_MODE_TRUE@ $(srcdir)/cdi.h make_fint
+@MAINTAINER_MODE_FALSE@	@$(MKDIR_P) .fint; \
+@MAINTAINER_MODE_FALSE@	trap 'rm -rf .fint/make.lock .fint/make.stamp' 1 2 13 15; \
+@MAINTAINER_MODE_FALSE@	if mkdir .fint/make.lock 2>/dev/null; then \
+@MAINTAINER_MODE_FALSE@	  rm -f .fint/make.stamp; \
+@MAINTAINER_MODE_FALSE@	  $(MAKE) $(AM_MAKEFLAGS) make_fint; ec=$$?; \
+@MAINTAINER_MODE_FALSE@	  test $$ec = 0 && touch .fint/make.stamp; \
+@MAINTAINER_MODE_FALSE@	rm -rf .fint/make.lock; exit $$ec; \
+@MAINTAINER_MODE_FALSE@	else \
+@MAINTAINER_MODE_FALSE@	  while test -d .fint/make.lock; do sleep 1; done; \
+@MAINTAINER_MODE_FALSE@	  test -f .fint/make.stamp || exit 1; fi
+	$(AM_V_GEN)$(make_fint_run)
+cdi.inc: @MAINTAINER_MODE_TRUE@ cdiFortran.c
+
+cdipioFortran.c cdipio.inc: @MAINTAINER_MODE_TRUE@ $(srcdir)/cdipio.h make_fint
+@MAINTAINER_MODE_FALSE@	@$(MKDIR_P) .fint; trap 'rm -rf .fint/make.lock .fint/make.stamp' 1 2 13 15; \
+@MAINTAINER_MODE_FALSE@	if mkdir .fint/make.lock 2>/dev/null; then \
+@MAINTAINER_MODE_FALSE@	  rm -f .fint/make.stamp; \
+@MAINTAINER_MODE_FALSE@	  $(MAKE) $(AM_MAKEFLAGS) make_fint; ec=$$?; \
+@MAINTAINER_MODE_FALSE@	  test $$ec = 0 && touch .fint/make.stamp; \
+@MAINTAINER_MODE_FALSE@	rm -rf .fint/make.lock; exit $$ec; \
+@MAINTAINER_MODE_FALSE@	else \
+@MAINTAINER_MODE_FALSE@	  while test -d .fint/make.lock; do sleep 1; done; \
+@MAINTAINER_MODE_FALSE@	  test -f .fint/make.stamp || exit 1; fi
+	$(AM_V_GEN)$(make_fint_run)
+cdipio.inc: @MAINTAINER_MODE_TRUE@ cdipioFortran.c
+
 mo_cdi.f90: @MAINTAINER_MODE_TRUE@ $(srcdir)/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(srcdir)/cdi.h $@
 
 if MAINTAINER_MODE
 # Update files in $(srcdir) when building out-of-source:
+$(srcdir)/cdiFortran.c $(srcdir)/cdi.inc:
+$(srcdir)/cdipioFortran.c $(srcdir)/cdipio.inc:
 $(srcdir)/mo_cdi.f90:
 
 # Update files in any configuration:
 BUILT_SOURCES = \
+  cdi.inc \
+  cdiFortran.c \
+  cdipio.inc \
+  cdipioFortran.c \
   mo_cdi.f90
 endif
 
@@ -351,7 +409,8 @@ CLEANFILES += pkgconfig/cdi_f2003.pc
 endif
 
 clean-local:
-	test '.' = '$(srcdir)' || rm -f mo_cdi.f90
+@MAINTAINER_MODE_FALSE@	-rm -rf .fint
+	-test '.' = '$(srcdir)' || rm -f cdi.inc cdiFortran.c cdipio.inc cdipioFortran.c mo_cdi.f90
 
 install-exec-local: $(PKGCONFIG_FILES) $(CMAKECONFIG_FILES)
 	$(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig"

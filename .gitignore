@@ -73,6 +73,7 @@ Makefile
 /app/cdi
 /app/createtable
 /build
+/src/.fint
 /src/make_fint
 
 # Documentation stage files:
