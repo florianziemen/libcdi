@@ -74,6 +74,7 @@ libcdiresunpack_la_SOURCES = \
 libcdiresunpack_la_LIBADD = libcdi.la
 
 make_fint_SOURCES = make_fint.c
+make_fint_CFLAGS = -static
 make_fint_LDADD = $(LIBOBJS)
 
 libcdi_la_SOURCES = \
@@ -336,3 +337,14 @@ MOSTLYCLEANFILES += $(mo_cdi_mod)
 endif
 
 MAINTAINERCLEANFILES = cdi.inc cdiFortran.c cdipio.inc cdipioFortran.c mo_cdi.f90
+
+# Compile programs using Libtool:
+COMPILE = $(LTCOMPILE)
+FCCOMPILE = $(LTFCCOMPILE)
+PPFCCOMPILE = $(LTPPFCCOMPILE)
+CXXCOMPILE = $(LTCXXCOMPILE)
+
+# Compile *.F90 without CPPFLAGS, which are normally meant for the C compiler
+# and might not be compatible with the Fortran compiler:
+LTPPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
