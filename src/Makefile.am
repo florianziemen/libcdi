@@ -327,8 +327,8 @@ pkgconfig/cdipio.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdipio.pc
 pkgconfig/cdi_f2003.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdi_f2003.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-cdilib.c:
-	$(AM_V_GEN)$(am__cd) $(top_srcdir)/src && ./make_cdilib
+cdilib.c: $(libcdi_la_SOURCES) $(srcdir)/make_cdilib
+	$(AM_V_GEN)CPP='$(CPP)' $(srcdir)/make_cdilib $(srcdir)
 
 CLEANFILES = cdilib.c
 MOSTLYCLEANFILES = make_fint
