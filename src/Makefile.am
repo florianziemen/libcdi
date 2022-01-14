@@ -70,6 +70,7 @@ libcdiresunpack_la_SOURCES = \
 libcdiresunpack_la_LIBADD = libcdi.la
 
 make_fint_SOURCES = make_fint.c
+make_fint_CFLAGS = -static
 make_fint_LDADD = $(LIBOBJS)
 
 libcdi_la_SOURCES = \
@@ -288,8 +289,9 @@ endif
 
 # See https://www.gnu.org/software/automake/manual/html_node/Multiple-Outputs.html
 make_fint_run = stem=`echo '$@' | sed -e 's|.*/||' -e 's|.inc||' -e 's|Fortran.c||'`;
+make_fint_cmd = $(top_builddir)/libtool --mode=execute ./make_fint -o $(@D) "$(srcdir)/$${stem}.h"
 if MAINTAINER_MODE
-make_fint_run += ./make_fint -o $(@D) "$(srcdir)/$${stem}.h"
+make_fint_run += $(make_fint_cmd)
 else
 make_fint_run += \
   test -f "$${stem}.inc" && test -f "$${stem}Fortran.c" && exit 0; \
@@ -301,7 +303,7 @@ make_fint_run += \
         test -f $$f && \
           echo "The source directory is inconsistent: remove '$$f' to recover" >&2 && \
           ec=1 && break; done; \
-    test $$ec != 0 || ./make_fint -o $(@D) "$(srcdir)/$${stem}.h" || ec=1; \
+    test $$ec != 0 || $(make_fint_cmd) || ec=1; \
     test $$ec = 0 && touch .fint/$${stem}.stamp; \
     rm -rf .fint/$${stem}.lock; exit $$ec; \
   else \
@@ -378,3 +380,14 @@ endif
 clean-local:
 @MAINTAINER_MODE_FALSE@	-rm -rf .fint
 	-test '.' = '$(srcdir)' || rm -f cdi.inc cdiFortran.c cdipio.inc cdipioFortran.c mo_cdi.f90
+
+# Compile programs using Libtool:
+COMPILE = $(LTCOMPILE)
+FCCOMPILE = $(LTFCCOMPILE)
+PPFCCOMPILE = $(LTPPFCCOMPILE)
+CXXCOMPILE = $(LTCXXCOMPILE)
+
+# Compile *.F90 without CPPFLAGS, which are normally meant for the C compiler
+# and might not be compatible with the Fortran compiler:
+LTPPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
