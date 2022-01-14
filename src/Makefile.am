@@ -289,6 +289,15 @@ endif
 mo_cdi.f90: @MAINTAINER_MODE_TRUE@ $(srcdir)/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(srcdir)/cdi.h $@
 
+if MAINTAINER_MODE
+# Update files in $(srcdir) when building out-of-source:
+$(srcdir)/mo_cdi.f90:
+
+# Update files in any configuration:
+BUILT_SOURCES = \
+  mo_cdi.f90
+endif
+
 if FORTRAN_MOD_UC
 MO_CDI.$(FCMODEXT): mo_cdi.lo
 else
