@@ -296,6 +296,7 @@ int cdfInqDatatype(stream_t *streamptr, int xtype, bool lunsigned)
   if ( xtype == NC_BYTE && lunsigned ) xtype = NC_UBYTE;
 #endif
 
+  // clang-format off
   if      ( xtype == NC_BYTE   )  datatype = CDI_DATATYPE_INT8;
   else if ( xtype == NC_CHAR   )  datatype = CDI_DATATYPE_UINT8;
   else if ( xtype == NC_SHORT  )  datatype = CDI_DATATYPE_INT16;
@@ -340,6 +341,7 @@ int cdfInqDatatype(stream_t *streamptr, int xtype, bool lunsigned)
       else if ( xtype == streamptr->nc_complex_double_id )  datatype = CDI_DATATYPE_CPX64;
     }
 #endif
+  // clang-format on
 
   return datatype;
 }
@@ -777,11 +779,13 @@ void scan_hybrid_formulaterms(int ncid, int ncfvarid, int *avarid, int *bvarid, 
       int status_nc = nc_inq_varid(ncid, varname, &dimvarid);
       if ( status_nc == NC_NOERR )
         {
+          // clang-format off
           if      ( strIsEqual(tagname, "ap:") ) *avarid  = dimvarid;
           else if ( strIsEqual(tagname, "a:")  ) *avarid  = dimvarid;
           else if ( strIsEqual(tagname, "b:")  ) *bvarid  = dimvarid;
           else if ( strIsEqual(tagname, "ps:") ) *psvarid = dimvarid;
           else if ( strIsEqual(tagname, "p0:") ) *p0varid = dimvarid;
+          // clang-format on
         }
       else if ( !strIsEqual(tagname, "ps:") )
         {
@@ -904,6 +908,7 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
       int attint;
       int *pattint = (attlen > 1) ? (int*) malloc(attlen*sizeof(int)) : &attint;
       cdfGetAttInt(ncid, ncvarid, attname, attlen, pattint);
+      // clang-format off
       int datatype = (atttype == NC_SHORT)  ? CDI_DATATYPE_INT16 :
                      (atttype == NC_BYTE)   ? CDI_DATATYPE_INT8 :
 #ifdef HAVE_NETCDF4
@@ -911,7 +916,8 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
                      (atttype == NC_USHORT) ? CDI_DATATYPE_UINT16 :
                      (atttype == NC_UINT)   ? CDI_DATATYPE_UINT32 :
 #endif
-                     CDI_DATATYPE_INT32;
+                                              CDI_DATATYPE_INT32;
+      // clang-format on
       cdiDefAttInt(cdiID, varID, attname, datatype, (int)attlen, pattint);
       if (attlen > 1) free(pattint);
     }
@@ -935,6 +941,7 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
 static
 void cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
 {
+  // clang-format off
   char axis[7];
   enum { TAXIS = 't', ZAXIS = 'z', EAXIS = 'e', YAXIS = 'y', XAXIS = 'x' };
 
@@ -975,6 +982,7 @@ void cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
 
       fprintf(stderr, "%3d %3d  %-6s %s\n", ncvarid, ndim-3, axis, ncvar->name);
     }
+  // clang-format on
 }
 
 static
@@ -3414,9 +3422,11 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
           for (int idim = iodim; idim < ndims; idim++)
             {
               const int dimid = ncdims[dimids[idim]].dimid;
+              // clang-format off
               if      (xdimid == dimid) ixyz += 1*ipow10[ndims-idim-1];
               else if (ydimid == dimid) ixyz += 2*ipow10[ndims-idim-1];
               else if (zdimid == dimid) ixyz += 3*ipow10[ndims-idim-1];
+              // clang-format on
             }
         }
 
@@ -3967,11 +3977,13 @@ void cdfVerifyVars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
           int ndims = 0;
           for (int i = 0; i < ncvar->ndims; ++i)
             {
+              // clang-format off
               if      (ncvar->dimtype[i] == T_AXIS) ndims++;
               else if (ncvar->dimtype[i] == E_AXIS) ndims++;
               else if (ncvar->dimtype[i] == Z_AXIS) ndims++;
               else if (ncvar->dimtype[i] == Y_AXIS) ndims++;
               else if (ncvar->dimtype[i] == X_AXIS) ndims++;
+              // clang-format on
             }
 
           if ( ncvar->ndims != ndims )

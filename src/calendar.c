@@ -16,9 +16,11 @@ int calendar_dpy(int calendar)
 {
   int daysPerYear = 0;
 
+  // clang-format off
   if      (calendar == CALENDAR_360DAYS) daysPerYear = 360;
   else if (calendar == CALENDAR_365DAYS) daysPerYear = 365;
   else if (calendar == CALENDAR_366DAYS) daysPerYear = 366;
+  // clang-format on
 
   return daysPerYear;
 }
@@ -26,9 +28,11 @@ int calendar_dpy(int calendar)
 static const int *
 get_dayspermonth_array(int daysPerYear)
 {
+  // clang-format off
   return  (daysPerYear == 360) ? month_360 :
           (daysPerYear == 365) ? month_365 :
           (daysPerYear == 366) ? month_366 : NULL;
+  // clang-format on
 }
 
 

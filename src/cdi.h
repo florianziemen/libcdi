@@ -7,6 +7,8 @@
 #ifndef  CDI_H_
 #define  CDI_H_
 
+// clang-format off
+
 #include <stdio.h>
 #include <stdint.h>    // int64_t
 #include <sys/types.h>
@@ -1356,6 +1358,8 @@ extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, 
 #ifdef __cplusplus
 }
 #endif
+
+// clang-format on
 
 #endif  /* CDI_H_ */
 /*

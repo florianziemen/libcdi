@@ -9,7 +9,9 @@
 #include "cdi_att.h"
 
 
-typedef struct {
+// clang-format off
+typedef struct
+{
   double    *vals;
 #ifndef USE_MPI
   char     **cvals;
@@ -30,7 +32,7 @@ typedef struct {
   cdi_atts_t atts;
 }
 zaxis_t;
-
+// clang-format on
 
 void zaxisGetTypeDescription(int zaxisType, int* outPositive, const char** outName, const char** outLongName, const char** outStdName, const char** outUnit);  //The returned const char* point to static storage. Don't free or modify them.
 

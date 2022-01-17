@@ -10,7 +10,9 @@
 #endif
 
 // CDI attribute
-typedef struct {
+// clang-format off
+typedef struct
+{
   size_t    xsz;	  // amount of space at xvalue
   size_t    namesz;       // size of name
   char     *name;         // attribute name
@@ -23,13 +25,16 @@ typedef struct {
   size_t    nelems;    	  // number of elements
   void     *xvalue;       // the actual data
 } cdi_att_t;
+// clang-format on
 
-
-typedef struct {
+// clang-format off
+typedef struct
+{
   size_t     nalloc;		// number allocated >= nelems
   size_t     nelems;		// length of the array
   cdi_att_t  value[MAX_ATTRIBUTES];
 } cdi_atts_t;
+// clang-format on
 
 
 int cdiDeleteAtts(int vlistID, int varID);

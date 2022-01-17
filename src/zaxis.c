@@ -17,8 +17,9 @@
 #define  LevelUp    1
 #define  LevelDown  2
 
-
-static const struct {
+// clang-format off
+static const struct
+{
   unsigned char positive;   // 1: up;  2: down
   const char *name;
   const char *longname;
@@ -55,8 +56,10 @@ ZaxistypeEntry[] = {
   { /* 26 */ 0, "character",         "area_type",              "",               ""},
   { /* 27 */ 0, "tropopause",        "tropopause",             "",               ""},
 };
+// clang-format on
 
-enum {
+enum
+{
   CDI_NumZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]),
 };
 

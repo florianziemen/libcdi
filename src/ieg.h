@@ -1,6 +1,8 @@
 #ifndef _IEG_H
 #define _IEG_H
 
+// clang-format off
+
 /* Level Types */
 #define  IEG_LTYPE_SURFACE               1
 #define  IEG_LTYPE_99                   99
@@ -52,6 +54,7 @@
 #define  IEG_G_LonSP(x)       (x[17])  /*  Longitude of the southern pole of rotation   */
 #define  IEG_G_ResFac(x)      (x[18])  /*  Resolution factor                            */
 
+// clang-format on
 
 typedef struct {
   int    checked;

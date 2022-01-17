@@ -1,6 +1,8 @@
 #ifndef ERROR_H
 #define ERROR_H
 
+// clang-format off
+
 #include <stdarg.h>
 #include <stdlib.h>
 
@@ -69,6 +71,8 @@ cdiAbortC_serial(const char *caller, const char *filename,
 #if defined (__cplusplus)
 }
 #endif
+
+// clang-format on
 
 #endif  /* ERROR_H */
 /*

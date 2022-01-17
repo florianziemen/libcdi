@@ -1443,9 +1443,11 @@ zaxis_inq_xtype(int zaxisID)
   int datatype = CDI_UNDEFID;
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
   int xtype = NC_DOUBLE;
+  // clang-format off
   if      (datatype == CDI_DATATYPE_FLT32) xtype = NC_FLOAT;
   else if (datatype == CDI_DATATYPE_INT32) xtype = NC_INT;
   else if (datatype == CDI_DATATYPE_INT16) xtype = NC_SHORT;
+  // clang-format on
   return xtype;
 }
 

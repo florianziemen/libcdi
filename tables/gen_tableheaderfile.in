@@ -34,6 +34,8 @@ cat >&4 <<EOF
 #ifndef TABLE_H
 #define TABLE_H
 
+// clang-format off
+
 EOF
 #
 for TFILE in "${PTFILE[@]}"; do
@@ -78,13 +80,11 @@ cat >&4 <<EOF
 
   // define table : ${TFBASENAME}
   {
-    int instID  = institutInq(${TABLE_CE}, ${TABLE_SU}, "${TABLE_IN}", NULL);
-    if ( instID == -1 )
-      instID  = institutDef(${TABLE_CE}, ${TABLE_SU}, "${TABLE_IN}", NULL);
+    int instID = institutInq(${TABLE_CE}, ${TABLE_SU}, "${TABLE_IN}", NULL);
+    if (instID == -1) instID = institutDef(${TABLE_CE}, ${TABLE_SU}, "${TABLE_IN}", NULL);
 
     int modelID = modelInq(instID, 0, "${TABLE_MO}");
-    if ( modelID == -1 )
-      modelID = modelDef(instID, 0, "${TABLE_MO}");
+    if (modelID == -1) modelID = modelDef(instID, 0, "${TABLE_MO}");
 
     int tableID = tableDef(modelID, ${TABLE_ID}, "${TABLE_NA}");
 
@@ -96,6 +96,8 @@ done
 #
 cat >&4 <<EOF
 }
+
+// clang-format on
 
 #endif  /* TABLE_H */
 EOF

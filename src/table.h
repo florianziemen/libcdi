@@ -2,6 +2,8 @@
 #ifndef TABLE_H
 #define TABLE_H
 
+// clang-format off
+
 static const param_type echam4[] = {
   {   4, -1, 0, "precip",      "total precipitation",                      "m/s"      },
   {  34, -1, 0, "low_cld",     "low cloud",                                 NULL      },
@@ -1231,13 +1233,11 @@ void tableDefault(void)
 
   // define table : echam4
   {
-    int instID  = institutInq(98, 255, "MPIMET", NULL);
-    if ( instID == -1 )
-      instID  = institutDef(98, 255, "MPIMET", NULL);
+    int instID = institutInq(98, 255, "MPIMET", NULL);
+    if (instID == -1) instID = institutDef(98, 255, "MPIMET", NULL);
 
     int modelID = modelInq(instID, 0, "ECHAM4");
-    if ( modelID == -1 )
-      modelID = modelDef(instID, 0, "ECHAM4");
+    if (modelID == -1) modelID = modelDef(instID, 0, "ECHAM4");
 
     int tableID = tableDef(modelID, 128, "echam4");
 
@@ -1246,13 +1246,11 @@ void tableDefault(void)
 
   // define table : echam5
   {
-    int instID  = institutInq(98, 232, "MPIMET", NULL);
-    if ( instID == -1 )
-      instID  = institutDef(98, 232, "MPIMET", NULL);
+    int instID = institutInq(98, 232, "MPIMET", NULL);
+    if (instID == -1) instID = institutDef(98, 232, "MPIMET", NULL);
 
     int modelID = modelInq(instID, 0, "ECHAM5");
-    if ( modelID == -1 )
-      modelID = modelDef(instID, 0, "ECHAM5");
+    if (modelID == -1) modelID = modelDef(instID, 0, "ECHAM5");
 
     int tableID = tableDef(modelID, 128, "echam5");
 
@@ -1261,13 +1259,11 @@ void tableDefault(void)
 
   // define table : echam6
   {
-    int instID  = institutInq(0, 0, "MPIMET", NULL);
-    if ( instID == -1 )
-      instID  = institutDef(0, 0, "MPIMET", NULL);
+    int instID = institutInq(0, 0, "MPIMET", NULL);
+    if (instID == -1) instID = institutDef(0, 0, "MPIMET", NULL);
 
     int modelID = modelInq(instID, 0, "ECHAM6");
-    if ( modelID == -1 )
-      modelID = modelDef(instID, 0, "ECHAM6");
+    if (modelID == -1) modelID = modelDef(instID, 0, "ECHAM6");
 
     int tableID = tableDef(modelID, 128, "echam6");
 
@@ -1276,13 +1272,11 @@ void tableDefault(void)
 
   // define table : mpiom1
   {
-    int instID  = institutInq(0, 0, "MPIMET", NULL);
-    if ( instID == -1 )
-      instID  = institutDef(0, 0, "MPIMET", NULL);
+    int instID = institutInq(0, 0, "MPIMET", NULL);
+    if (instID == -1) instID = institutDef(0, 0, "MPIMET", NULL);
 
     int modelID = modelInq(instID, 0, "MPIOM1");
-    if ( modelID == -1 )
-      modelID = modelDef(instID, 0, "MPIOM1");
+    if (modelID == -1) modelID = modelDef(instID, 0, "MPIOM1");
 
     int tableID = tableDef(modelID, 128, "mpiom1");
 
@@ -1291,13 +1285,11 @@ void tableDefault(void)
 
   // define table : ecmwf
   {
-    int instID  = institutInq(0, 0, "ECMWF", NULL);
-    if ( instID == -1 )
-      instID  = institutDef(0, 0, "ECMWF", NULL);
+    int instID = institutInq(0, 0, "ECMWF", NULL);
+    if (instID == -1) instID = institutDef(0, 0, "ECMWF", NULL);
 
     int modelID = modelInq(instID, 0, "");
-    if ( modelID == -1 )
-      modelID = modelDef(instID, 0, "");
+    if (modelID == -1) modelID = modelDef(instID, 0, "");
 
     int tableID = tableDef(modelID, 128, "ecmwf");
 
@@ -1306,13 +1298,11 @@ void tableDefault(void)
 
   // define table : remo
   {
-    int instID  = institutInq(0, 0, "MPIMET", NULL);
-    if ( instID == -1 )
-      instID  = institutDef(0, 0, "MPIMET", NULL);
+    int instID = institutInq(0, 0, "MPIMET", NULL);
+    if (instID == -1) instID = institutDef(0, 0, "MPIMET", NULL);
 
     int modelID = modelInq(instID, 0, "REMO");
-    if ( modelID == -1 )
-      modelID = modelDef(instID, 0, "REMO");
+    if (modelID == -1) modelID = modelDef(instID, 0, "REMO");
 
     int tableID = tableDef(modelID, 128, "remo");
 
@@ -1321,13 +1311,11 @@ void tableDefault(void)
 
   // define table : cosmo002
   {
-    int instID  = institutInq(0, 0, "MCH", NULL);
-    if ( instID == -1 )
-      instID  = institutDef(0, 0, "MCH", NULL);
+    int instID = institutInq(0, 0, "MCH", NULL);
+    if (instID == -1) instID = institutDef(0, 0, "MCH", NULL);
 
     int modelID = modelInq(instID, 0, "COSMO");
-    if ( modelID == -1 )
-      modelID = modelDef(instID, 0, "COSMO");
+    if (modelID == -1) modelID = modelDef(instID, 0, "COSMO");
 
     int tableID = tableDef(modelID, 002, "cosmo002");
 
@@ -1336,13 +1324,11 @@ void tableDefault(void)
 
   // define table : cosmo201
   {
-    int instID  = institutInq(0, 0, "MCH", NULL);
-    if ( instID == -1 )
-      instID  = institutDef(0, 0, "MCH", NULL);
+    int instID = institutInq(0, 0, "MCH", NULL);
+    if (instID == -1) instID = institutDef(0, 0, "MCH", NULL);
 
     int modelID = modelInq(instID, 0, "COSMO");
-    if ( modelID == -1 )
-      modelID = modelDef(instID, 0, "COSMO");
+    if (modelID == -1) modelID = modelDef(instID, 0, "COSMO");
 
     int tableID = tableDef(modelID, 201, "cosmo201");
 
@@ -1351,13 +1337,11 @@ void tableDefault(void)
 
   // define table : cosmo202
   {
-    int instID  = institutInq(0, 0, "MCH", NULL);
-    if ( instID == -1 )
-      instID  = institutDef(0, 0, "MCH", NULL);
+    int instID = institutInq(0, 0, "MCH", NULL);
+    if (instID == -1) instID = institutDef(0, 0, "MCH", NULL);
 
     int modelID = modelInq(instID, 0, "COSMO");
-    if ( modelID == -1 )
-      modelID = modelDef(instID, 0, "COSMO");
+    if (modelID == -1) modelID = modelDef(instID, 0, "COSMO");
 
     int tableID = tableDef(modelID, 202, "cosmo202");
 
@@ -1366,13 +1350,11 @@ void tableDefault(void)
 
   // define table : cosmo203
   {
-    int instID  = institutInq(0, 0, "MCH", NULL);
-    if ( instID == -1 )
-      instID  = institutDef(0, 0, "MCH", NULL);
+    int instID = institutInq(0, 0, "MCH", NULL);
+    if (instID == -1) instID = institutDef(0, 0, "MCH", NULL);
 
     int modelID = modelInq(instID, 0, "COSMO");
-    if ( modelID == -1 )
-      modelID = modelDef(instID, 0, "COSMO");
+    if (modelID == -1) modelID = modelDef(instID, 0, "COSMO");
 
     int tableID = tableDef(modelID, 203, "cosmo203");
 
@@ -1381,13 +1363,11 @@ void tableDefault(void)
 
   // define table : cosmo205
   {
-    int instID  = institutInq(0, 0, "MCH", NULL);
-    if ( instID == -1 )
-      instID  = institutDef(0, 0, "MCH", NULL);
+    int instID = institutInq(0, 0, "MCH", NULL);
+    if (instID == -1) instID = institutDef(0, 0, "MCH", NULL);
 
     int modelID = modelInq(instID, 0, "COSMO");
-    if ( modelID == -1 )
-      modelID = modelDef(instID, 0, "COSMO");
+    if (modelID == -1) modelID = modelDef(instID, 0, "COSMO");
 
     int tableID = tableDef(modelID, 205, "cosmo205");
 
@@ -1396,18 +1376,18 @@ void tableDefault(void)
 
   // define table : cosmo250
   {
-    int instID  = institutInq(0, 0, "MCH", NULL);
-    if ( instID == -1 )
-      instID  = institutDef(0, 0, "MCH", NULL);
+    int instID = institutInq(0, 0, "MCH", NULL);
+    if (instID == -1) instID = institutDef(0, 0, "MCH", NULL);
 
     int modelID = modelInq(instID, 0, "COSMO");
-    if ( modelID == -1 )
-      modelID = modelDef(instID, 0, "COSMO");
+    if (modelID == -1) modelID = modelDef(instID, 0, "COSMO");
 
     int tableID = tableDef(modelID, 250, "cosmo250");
 
     tableLink(tableID, cosmo250, sizeof(cosmo250) / sizeof(param_type));
   }
 }
+
+// clang-format on
 
 #endif  /* TABLE_H */

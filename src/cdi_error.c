@@ -5,6 +5,7 @@
 
 const char *cdiStringError(int cdiErrno)
 {
+  // clang-format off
   static const char UnknownError[] = "Unknown Error";
   static const char _ETMOF[]       = "Too many open files";
   static const char _EISDIR[]      = "Is a directory";
@@ -21,7 +22,7 @@ const char *cdiStringError(int cdiErrno)
   case CDI_ESYSTEM:
     {
       const char *cp = strerror(errno);
-      if ( cp == NULL ) break;
+      if (cp == NULL) break;
       return cp;
     }
   case CDI_ETMOF:      return _ETMOF;
@@ -35,7 +36,7 @@ const char *cdiStringError(int cdiErrno)
   case CDI_ELIMIT:     return _ELIMIT;
   case CDI_EINVAL:     return _EINVAL;
   }
-
+  // clang-format on
   return UnknownError;
 }
 

@@ -5,6 +5,8 @@
 #ifndef __CFORTRAN_LOADED
 #define __CFORTRAN_LOADED
 
+// clang-format off
+
 /* 
    THIS FILE IS PROPERTY OF BURKHARD BUROW. IF YOU ARE USING THIS FILE YOU
    SHOULD ALSO HAVE ACCESS TO CFORTRAN.DOC WHICH PROVIDES TERMS FOR USING,
@@ -2558,5 +2560,6 @@ string. */
 
 #endif
 
+// clang-format on
 
 #endif	 /* __CFORTRAN_LOADED */

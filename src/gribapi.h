@@ -12,6 +12,8 @@
 #include "cdi_int.h"
 #endif
 
+// clang-format off
+
 #define  GRIBAPI_MISSVAL  -9.E33
 
 // GRIB2 Level Types
@@ -99,6 +101,8 @@ typedef struct {
   void *gribHandle;
 }
 gribContainer_t;
+
+// clang-format on
 
 #endif  /* GRIBAPI_H */
 /*
