@@ -26,6 +26,8 @@ Makefile.in
 /config.status
 /libtool
 /src/config.h
+/src/cmake/cdi-config-version.cmake
+/src/cmake/cdi-config.cmake
 /src/pkgconfig/cdi.pc
 /src/pkgconfig/cdi_f2003.pc
 /src/pkgconfig/cdipio.pc
@@ -77,6 +79,7 @@ Makefile
 /doc/cdi_fman.pdf
 
 # Test stage files:
+/examples/cdi_append
 /examples/cdi_copy
 /examples/cdi_read
 /examples/cdi_read_f2003
