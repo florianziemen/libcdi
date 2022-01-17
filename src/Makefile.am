@@ -286,16 +286,15 @@ endif
 endif
 
 #
-#	cat $(top_srcdir)/src/cdi.h |sed -e 's/SizeType/size_t/g' -e s/DateType/int64_t/g > cditmp.h
-mo_cdi.f90: @MAINTAINER_MODE_TRUE@ $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
-	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
+mo_cdi.f90: @MAINTAINER_MODE_TRUE@ $(srcdir)/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
+	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(srcdir)/cdi.h $@
 
 if FORTRAN_MOD_UC
 MO_CDI.$(FCMODEXT): mo_cdi.lo
 else
 mo_cdi.$(FCMODEXT): mo_cdi.lo
 endif
-	@if test ! -f $@; then rm -f $<; $(MAKE) $<; fi
+	$(AM_V_at)test -f $@ || { rm -f $<; $(MAKE) $(AM_MAKEFLAGS) $<; }
 #
 cmake/cdi/cdi-config.cmake: cmake/cdi/cdi-config.cmake.in ../config.status
 	(cd .. ; ./config.status src/cmake/cdi/cdi-config.cmake)
@@ -343,6 +342,9 @@ if CREATE_ISOC
 PKGCONFIG_FILES += pkgconfig/cdi_f2003.pc
 CLEANFILES += pkgconfig/cdi_f2003.pc
 endif
+
+clean-local:
+	test '.' = '$(srcdir)' || rm -f mo_cdi.f90
 
 install-exec-local: $(PKGCONFIG_FILES) $(CMAKECONFIG_FILES)
 	$(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig"
