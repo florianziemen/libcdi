@@ -58,6 +58,7 @@ bool is_time_units(const char *timeunits)
 {
   while ( isspace(*timeunits) ) timeunits++; 
 
+  // clang-format off
   bool status = strStartsWith(timeunits, "sec")
              || strStartsWith(timeunits, "minute")
              || strStartsWith(timeunits, "hour")
@@ -65,6 +66,7 @@ bool is_time_units(const char *timeunits)
              || strStartsWith(timeunits, "month")
              || strStartsWith(timeunits, "calendar_month")
              || strStartsWith(timeunits, "year");
+  // clang-format on
 
   return status;
 }
@@ -106,13 +108,14 @@ bool is_height_units(const char *units)
 {
   const int u0 = units[0];
 
-  bool status
-    = (u0=='m' && (!units[1] || strStartsWith(units, "meter")))
+  // clang-format off
+  bool status = (u0=='m' && (!units[1] || strStartsWith(units, "meter")))
     || (!units[2] && units[1]=='m' && (u0=='c' || u0=='d' || u0=='k'))
     || (strStartsWith(units, "decimeter"))
     || (strStartsWith(units, "centimeter"))
     || (strStartsWith(units, "millimeter"))
     || (strStartsWith(units, "kilometer"));
+  // clang-format on
 
   return status;
 }
@@ -120,11 +123,13 @@ bool is_height_units(const char *units)
 
 bool is_pressure_units(const char *units)
 {
+  // clang-format off
   bool status = strStartsWith(units, "millibar")
              || strStartsWith(units, "mb")
              || strStartsWith(units, "hectopas")
              || strStartsWith(units, "hPa")
              || strStartsWith(units, "Pa");
+  // clang-format on
 
   return status;
 }
@@ -132,9 +137,11 @@ bool is_pressure_units(const char *units)
 
 bool is_DBL_axis(const char *longname)
 {
+  // clang-format off
   bool status = strIsEqual(longname, "depth below land")
              || strIsEqual(longname, "depth_below_land")
              || strIsEqual(longname, "levels below the surface");
+  // clang-format on
 
   return status;
 }
@@ -142,9 +149,11 @@ bool is_DBL_axis(const char *longname)
 
 bool is_depth_axis(const char *stdname, const char *longname)
 {
+  // clang-format off
   bool status = strIsEqual(stdname, "depth")
              || strIsEqual(longname, "depth_below_sea")
              || strIsEqual(longname, "depth below sea");
+  // clang-format ofn
 
   return status;
 }
@@ -152,17 +161,21 @@ bool is_depth_axis(const char *stdname, const char *longname)
 
 bool is_height_axis(const char *stdname, const char *longname)
 {
+  // clang-format off
   bool status = strIsEqual(stdname, "height")
              || strIsEqual(longname, "height")
              || strIsEqual(longname, "height above the surface");
+  // clang-format on
 
   return status;
 }
 
 bool is_altitude_axis(const char *stdname, const char *longname)
 {
+  // clang-format off
   bool status = strIsEqual(stdname, "altitude")
              || strIsEqual(longname, "altitude");
+  // clang-format on
 
   return status;
 }

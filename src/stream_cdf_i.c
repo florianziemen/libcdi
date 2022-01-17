@@ -3057,9 +3057,11 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 	      plongname = ncvars[zvarid].longname;
 	      punits    = ncvars[zvarid].units;
 	      pstdname  = ncvars[zvarid].stdname;
+              // clang-format off
 	      if      (ncvars[zvarid].xtype == NC_FLOAT) zdatatype = CDI_DATATYPE_FLT32;
 	      else if (ncvars[zvarid].xtype == NC_INT)   zdatatype = CDI_DATATYPE_INT32;
 	      else if (ncvars[zvarid].xtype == NC_SHORT) zdatatype = CDI_DATATYPE_INT16;
+              // clang-format on
 	      // don't change the name !!!
 	      /*
 	      if ((len = strlen(pname)) > 2)
@@ -3561,10 +3563,12 @@ bool check_cube_sphere(int vlistID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
           const int ndims = ncvar->ndims;
           if (ndims == 3)
             {
+              // clang-format off
               if      (strIsEqual("lons", ncvar->name)) xvarid = varid;
               else if (strIsEqual("lats", ncvar->name)) yvarid = varid;
               else if (strIsEqual("corner_lons", ncvar->name)) xboundsid = varid;
               else if (strIsEqual("corner_lats", ncvar->name)) yboundsid = varid;
+              // clang-format on
             }
           if (xvarid != -1 && xboundsid != -1 && yvarid != -1 && yboundsid != -1)
             {
@@ -3884,9 +3888,11 @@ void cdf_set_ucla_dimtype(int ndims, ncdim_t *ncdims, ncvar_t *ncvars)
           ncvar_t *ncvar = &ncvars[ncvarid];
           if ( ncdims[ncdimid].dimtype == CDI_UNDEFID && ncvar->units[0] == 'm' )
             {
+              // clang-format off
               if      ( ncvar->name[0] == 'x' ) ncdims[ncdimid].dimtype = X_AXIS;
               else if ( ncvar->name[0] == 'y' ) ncdims[ncdimid].dimtype = Y_AXIS;
               else if ( ncvar->name[0] == 'z' ) ncdims[ncdimid].dimtype = Z_AXIS;
+              // clang-format on
             }
         }
     }

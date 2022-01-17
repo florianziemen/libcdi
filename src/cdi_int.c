@@ -48,6 +48,7 @@ int   cdiPartabIntern = 1;
 double CDI_Default_Missval = -9.E33;
 double CDI_Grid_Missval    = -9999.;
 
+// clang-format off
 static const char Filetypes[][9] = {
   "UNKNOWN",
   "GRIB",
@@ -62,6 +63,7 @@ static const char Filetypes[][9] = {
   "IEG",
   "HDF5",
 };
+// clang-format on
 
 int CDI_Debug   = 0;    // If set to 1, debugging
 int CDI_Recopt  = 0;
@@ -549,4 +551,3 @@ int cdiBaseFiletype(int filetype)
  * require-trailing-newline: t
  * End:
  */
-

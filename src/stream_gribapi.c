@@ -2199,10 +2199,12 @@ long radiusToShapeOfTheEarth(double radius)
 {
   long shapeOfTheEarth = 0;
 
+  // clang-format off
   if      (IS_EQUAL(radius, 6367470.0)) shapeOfTheEarth = 0;
   else if (IS_EQUAL(radius, 6378160.0)) shapeOfTheEarth = 2;
   else if (IS_EQUAL(radius, 6371229.0)) shapeOfTheEarth = 6;
   else if (IS_EQUAL(radius, 6371200.0)) shapeOfTheEarth = 8;
+  // clang-format on
 
   return shapeOfTheEarth;
 }
@@ -3111,9 +3113,11 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const void 
   if ( gridtype == GRID_PROJECTION )
     {
       int projtype = gridInqProjType(gridID);
-      if      ( projtype == CDI_PROJ_RLL )   gridtype = GRID_LONLAT;
-      else if ( projtype == CDI_PROJ_LCC )   gridtype = CDI_PROJ_LCC;
-      else if ( projtype == CDI_PROJ_STERE ) gridtype = CDI_PROJ_STERE;
+      // clang-format off
+      if      (projtype == CDI_PROJ_RLL)   gridtype = GRID_LONLAT;
+      else if (projtype == CDI_PROJ_LCC)   gridtype = CDI_PROJ_LCC;
+      else if (projtype == CDI_PROJ_STERE) gridtype = CDI_PROJ_STERE;
+      // clang-format on
     }
 
   if ( gridtype == GRID_GENERIC || gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN ||

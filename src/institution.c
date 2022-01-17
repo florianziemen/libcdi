@@ -52,6 +52,7 @@ void instituteDefaultValue(institute_t *instituteptr)
 
 void instituteDefaultEntries(void)
 {
+  // clang-format off
   cdiResH resH[]
     = { institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts"),
         institutDef(252,   1, "MPIMET",    "Max Planck Institute for Meteorology"),
@@ -69,6 +70,7 @@ void instituteDefaultEntries(void)
         institutDef( 80,   0, "CNMC",      "Reparto per la Meteorologia, Rome (REMET)"),
         // institutDef(  0,   0, "IPSL", "IPSL (Institut Pierre Simon Laplace, Paris, France)");
   };
+  // clang-format on
 
   const size_t n = sizeof(resH)/sizeof(*resH);
   for (size_t i = 0; i < n ; i++ )

@@ -352,6 +352,7 @@ const char *cdf_var_type(nc_type xtype)
 {
   const char *ctype = "unknown";
 
+  // clang-format off
   if      (xtype == NC_BYTE  )  ctype = "NC_BYTE";
   else if (xtype == NC_CHAR  )  ctype = "NC_CHAR";
   else if (xtype == NC_SHORT )  ctype = "NC_SHORT";
@@ -366,6 +367,7 @@ const char *cdf_var_type(nc_type xtype)
   else if (xtype == NC_INT64 )  ctype = "NC_INT64";
   else if (xtype == NC_UINT64)  ctype = "NC_UINT64";
 #endif
+  // clang-format on
 
   return ctype;
 }

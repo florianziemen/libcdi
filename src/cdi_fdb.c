@@ -191,6 +191,7 @@ int check_keyvalueList(int numItems, KeyValueEntry *keyValueList)
       char **itemKeys = keyValueList[i].keys;
       for (int k = 0; k < numSearchKeys; k++)
         {
+
           for (int j = 0; j < numKeys; j++)
             {
               if (strcmp(itemKeys[j], searchKeys[k]) == 0)
@@ -241,12 +242,14 @@ CmpKeys set_cmpkeys(RecordInfoEntry *recordInfo)
 static
 int compare_cmpkeys(const CmpKeys *cmpKeys1, const CmpKeys *cmpKeys2)
 {
+  // clang-format off
   if (cmpKeys1->date == cmpKeys2->date &&
       cmpKeys1->time == cmpKeys2->time &&
       cmpKeys1->param == cmpKeys2->param &&
       cmpKeys1->levtype == cmpKeys2->levtype &&
       cmpKeys1->level == cmpKeys2->level)
     return 0;
+  // clang-format on
 
   return -1;
 }
@@ -287,9 +290,11 @@ int get_ilevtype(const char *levtype)
 {
   int ilevtype = levTypeUndef;
 
+  // clang-format off
   if      (strcmp(levtype, "sfc") == 0) ilevtype = levTypeSFC;
   else if (strcmp(levtype, "ml") == 0) ilevtype = levTypeML;
   else if (strcmp(levtype, "pl") == 0) ilevtype = levTypeML;
+  // clang-format on
 
   return ilevtype;
 }
@@ -303,11 +308,13 @@ void decode_keyvalue(KeyValueEntry *keyValue, RecordInfoEntry *recordInfo)
   for (int i = 0; i < numKeys; i++)
     {
       //printf("key <%s> value <%s>\n", itemKeys[i], itemValues[i]);
+      // clang-format off
       if      (strcmp(itemKeys[i], "date") == 0) recordInfo->date = atoi(itemValues[i]);
       else if (strcmp(itemKeys[i], "time") == 0) recordInfo->time = atoi(itemValues[i]);
       else if (strcmp(itemKeys[i], "param") == 0) recordInfo->param = atoi(itemValues[i]);
       else if (strcmp(itemKeys[i], "levtype") == 0) recordInfo->levtype = get_ilevtype(itemValues[i]);
       else if (strcmp(itemKeys[i], "levelist") == 0) recordInfo->level = atoi(itemValues[i]);
+      // clang-format on
    }
 }
 
@@ -370,9 +377,11 @@ fdb_request_t *create_fdb_request(const char *filename)
   bool expverDefined = false;
   for (int i = 0; i < keyValue.numKeys; i++)
     {
+      // clang-format offxs
       if      (strcmp(keyValue.keys[i], "class") == 0) classDefined = true;
       else if (strcmp(keyValue.keys[i], "stream") == 0) streamDefined = true;
       else if (strcmp(keyValue.keys[i], "expver") == 0) expverDefined = true;
+      // clang-format on
 
       fdb_request_add1(request, keyValue.keys[i], keyValue.values[i]);
     }

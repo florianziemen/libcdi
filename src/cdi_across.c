@@ -19,20 +19,25 @@
 
 static uint16_t swap_endianness16(uint16_t v)
 {
+  // clang-format off
   return ((v>>8) & 0xff)
     | ((v<<8) & 0xff00);
+  // clang-format on
 }
 
 static uint32_t swap_endianness32(uint32_t v)
 {
+  // clang-format off
   return ((v>>24) & 0xff)
     | ((v<<8) & 0xff0000)
     | ((v>>8) & 0xff00)
     | ((v<<24) & 0xff000000);
+  // clang-format on
 }
 
 static uint64_t swap_endianness64(uint64_t v)
 {
+  // clang-format off
   return ((v >> 56) & 0xff)
     | ((v >> 40) & 0xff00)
     | ((v >> 24) & 0xff0000)
@@ -41,6 +46,7 @@ static uint64_t swap_endianness64(uint64_t v)
     | ((v << 24) & 0xff0000000000)
     | ((v << 40) & 0xff000000000000)
     | ((v << 56) & 0xff00000000000000);
+  // clang-format on
 }
 
 static int set8(unsigned char* buf, uint8_t v)

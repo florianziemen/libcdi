@@ -250,11 +250,13 @@ void cdfDefineCellMethods(stream_t *streamptr, int cdiID, int varID, int fileID,
   const int stepType = vlistInqVarTsteptype(cdiID, varID);
 
   const char *cellMethod = NULL;
+  // clang-format off
   if      (stepType == TSTEP_AVG)   cellMethod = "mean";
   else if (stepType == TSTEP_SUM)   cellMethod = "sum";
   else if (stepType == TSTEP_RANGE) cellMethod = "range";
   else if (stepType == TSTEP_MIN)   cellMethod = "minimum";
   else if (stepType == TSTEP_MAX)   cellMethod = "maximum";
+  // clang-format on
 
   if (cellMethod)
     {

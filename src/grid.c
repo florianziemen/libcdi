@@ -270,11 +270,13 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
   gridptr->type = gridtype;
   gridptr->size = size;
 
+  // clang-format off
   if      ( gridtype == GRID_LONLAT   ) gridptr->nvertex = 2;
   else if ( gridtype == GRID_GAUSSIAN ) gridptr->nvertex = 2;
   else if ( gridtype == GRID_GAUSSIAN_REDUCED ) gridptr->nvertex = 2;
   else if ( gridtype == GRID_CURVILINEAR  ) gridptr->nvertex = 4;
   else if ( gridtype == GRID_UNSTRUCTURED ) gridptr->x.size = size;
+  // clang-format on
 
   switch (gridtype)
     {
@@ -1876,9 +1878,11 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
           double attflt;
           if (cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, &attflt))
             {
-              if      ( strIsEqual(attname, "grid_north_pole_longitude") ) *xpole = attflt;
-              else if ( strIsEqual(attname, "grid_north_pole_latitude")  ) *ypole = attflt;
-              else if ( strIsEqual(attname, "north_pole_grid_longitude") ) *angle = attflt;
+              // clang-format off
+              if      (strIsEqual(attname, "grid_north_pole_longitude")) *xpole = attflt;
+              else if (strIsEqual(attname, "grid_north_pole_latitude") ) *ypole = attflt;
+              else if (strIsEqual(attname, "north_pole_grid_longitude")) *angle = attflt;
+              // clang-format on
             }
         }
     }
@@ -3761,9 +3765,9 @@ int gridVerifyProjParamsLCC(struct CDI_GridProjParams *gpp)
     {
       // lwarn = false;
       const char *projection = "lambert_conformal_conic";
-      if (IS_EQUAL(gpp->lon_0, gpp->mv)) { Warning("%s mapping parameter %s missing!", projection, "longitude_of_central_meridian"); }
-      if (IS_EQUAL(gpp->lat_0, gpp->mv)) { Warning("%s mapping parameter %s missing!", projection, "latitude_of_central_meridian"); }
-      if (IS_EQUAL(gpp->lat_1, gpp->mv)) { Warning("%s mapping parameter %s missing!", projection, "standard_parallel"); }
+      if (IS_EQUAL(gpp->lon_0, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "longitude_of_central_meridian");
+      if (IS_EQUAL(gpp->lat_0, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "latitude_of_central_meridian");
+      if (IS_EQUAL(gpp->lat_1, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "standard_parallel");
       if (IS_NOT_EQUAL(gpp->x_0, gpp->mv) && IS_NOT_EQUAL(gpp->y_0, gpp->mv) && (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv)))
         {
           if (proj_lcc_to_lonlat_func)
@@ -3788,9 +3792,9 @@ int gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp)
     {
       // lwarn = false;
       const char *projection = "lambert_conformal_conic";
-      if (IS_EQUAL(gpp->lon_0, gpp->mv)) { Warning("%s mapping parameter %s missing!", projection, "straight_vertical_longitude_from_pole"); }
-      if (IS_EQUAL(gpp->lat_0, gpp->mv)) { Warning("%s mapping parameter %s missing!", projection, "latitude_of_projection_origin"); }
-      if (IS_EQUAL(gpp->lat_1, gpp->mv)) { Warning("%s mapping parameter %s missing!", projection, "standard_parallel"); }
+      if (IS_EQUAL(gpp->lon_0, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "straight_vertical_longitude_from_pole");
+      if (IS_EQUAL(gpp->lat_0, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "latitude_of_projection_origin");
+      if (IS_EQUAL(gpp->lat_1, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "standard_parallel");
       if (IS_NOT_EQUAL(gpp->x_0, gpp->mv) && IS_NOT_EQUAL(gpp->y_0, gpp->mv) && (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv)))
         {
           if (proj_stere_to_lonlat_func)
@@ -3883,6 +3887,7 @@ int gridInqParamsSTERE(int gridID, struct CDI_GridProjParams *gpp)
           double attflt[2];
           if (cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, attflt))
             {
+              // clang-format off
               if      (strIsEqual(attname, "earth_radius"))                          gpp->a      = attflt[0];
               else if (strIsEqual(attname, "semi_major_axis"))                       gpp->a      = attflt[0];
               else if (strIsEqual(attname, "semi_minor_axis"))                       gpp->b      = attflt[0];
@@ -3894,6 +3899,7 @@ int gridInqParamsSTERE(int gridID, struct CDI_GridProjParams *gpp)
               else if (strIsEqual(attname, "false_northing"))                        gpp->y_0    = attflt[0];
               else if (strIsEqual(attname, "longitudeOfFirstGridPointInDegrees"))    gpp->xval_0 = attflt[0];
               else if (strIsEqual(attname, "latitudeOfFirstGridPointInDegrees"))     gpp->yval_0 = attflt[0];
+              // clang-format on
             }
         }
     }

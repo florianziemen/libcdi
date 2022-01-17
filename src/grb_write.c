@@ -134,10 +134,12 @@ void cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size
   const char *expver = NULL;
   for (int i = 0; i < keyValue.numKeys; i++)
     {
+      // clang-format off
       if      (strcmp(keyValue.keys[i], "class") == 0) class = keyValue.values[i];
       else if (strcmp(keyValue.keys[i], "stream") == 0) stream = keyValue.values[i];
       else if (strcmp(keyValue.keys[i], "expver") == 0) expver = keyValue.values[i];
       else Error("Unsupported FDB parameter: %s=%s", keyValue.keys[i], keyValue.values[i]);
+      // clang-format on
     }
 
   if (!class) Error("FDB parameter <class> undefined!");
@@ -176,6 +178,7 @@ void cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size
 static
 int map_grib2_param(int pnum, int pcat, int pdis)
 {
+  // clang-format off
   if      (pnum ==  8 && pcat == 2 && pdis == 0) return 135;
   else if (pnum ==  0 && pcat == 0 && pdis == 0) return 130;
   else if (pnum ==  0 && pcat == 1 && pdis == 0) return 133;
@@ -187,6 +190,7 @@ int map_grib2_param(int pnum, int pcat, int pdis)
   else if (pnum ==  3 && pcat == 2 && pdis == 0) return 132;
   else if (pnum == 25 && pcat == 3 && pdis == 0) return 152;
   else if (pnum ==  4 && pcat == 3 && pdis == 0) return 129;
+  // clang-format on
 
   return -1;
 }

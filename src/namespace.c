@@ -24,16 +24,18 @@ static unsigned nNamespaces = 1;
 static int activeNamespace = 0;
 
 #ifdef HAVE_LIBNETCDF
+// clang-format off
 #define CDI_NETCDF_SWITCHES                     \
   { .func = (void (*)()) nc__create },          \
   { .func = (void (*)()) cdf_def_var_serial },  \
   { .func = (void (*)()) cdfDefTimestep },      \
   { .func = (void (*)()) cdfDefCoordinateVars }
-
+// clang-format on
 #else
 #define CDI_NETCDF_SWITCHES
 #endif
 
+// clang-format off
 #define defaultSwitches {                                   \
     { .func = (void (*)()) cdiAbortC_serial },              \
     { .func = (void (*)()) cdiWarning },                    \
@@ -55,6 +57,7 @@ static int activeNamespace = 0;
     { .func = (void (*)()) cdiStreamSync_ },                \
     CDI_NETCDF_SWITCHES                        \
     }
+// clang-format on
 
 #if defined (SX) || defined (__cplusplus)
 static const union namespaceSwitchValue
