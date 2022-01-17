@@ -506,6 +506,8 @@ size_t cdiGetPageSize(bool largePageAlign);
 
 void zaxisGetIndexList(int nzaxis, int *zaxisIndexList);
 
+// clang-format off
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -528,6 +530,8 @@ int cdiBaseFiletype(int filetype);
 #ifdef __cplusplus
 }
 #endif
+
+// clang-format on
 
 #endif  /* CDI_INT_H */
 /*

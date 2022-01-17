@@ -1,6 +1,8 @@
 #ifndef  _DMEMORY_H
 #define  _DMEMORY_H
 
+// clang-format off
+
 #include <stdio.h>
 
 // if DEBUG_MEMORY is defined setenv MEMORY_DEBUG to debug memory
@@ -42,6 +44,8 @@ extern void    memFree   (void *ptr, const char *file, const char *functionname,
 #endif
 
 #endif /* DEBUG_MEMORY */
+
+// clang-format on
 
 #endif /* _DMEMORY_H */
 /*

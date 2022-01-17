@@ -1,6 +1,8 @@
 #ifndef CALENDAR_H
 #define CALENDAR_H
 
+// clang-format off
+
 #include <inttypes.h>
 
 #ifdef __cplusplus
@@ -19,6 +21,8 @@ int days_per_month(int calendar, int year, int month);
 #ifdef __cplusplus
 }
 #endif
+
+// clang-format on
 
 #endif  /* CALENDAR_H */
 /*

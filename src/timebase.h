@@ -1,6 +1,8 @@
 #ifndef TIMEBASE_H
 #define TIMEBASE_H
 
+// clang-format off
+
 #include <inttypes.h>
 
 #ifdef __cplusplus
@@ -29,5 +31,7 @@ void decode_juldaysec(int calendar, int64_t julday, int secofday, int *year, int
 #ifdef __cplusplus
 }
 #endif
+
+// clang-format on
 
 #endif /* TIMEBASE_H */
