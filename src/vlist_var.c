@@ -1430,7 +1430,7 @@ void vlistDefVarXYZ(int vlistID, int varID, int xyz)
 
   if ( xyz == 3 ) xyz = 321;
 
-  /* check xyz dimension order */
+  // check xyz dimension order
   {
     int dimorder[3];
     vlistDecodeXyz(xyz, &dimorder);
@@ -1448,9 +1448,11 @@ void vlistDefVarXYZ(int vlistID, int varID, int xyz)
     if ( dimz > 1 || dimy > 1 || dimx > 1 ) xyz = 321; // ZYX
     else
       {
-        if ( dimz == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 3; break;}
-        if ( dimy == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 2; break;}
-        if ( dimx == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 1; break;}
+        // clang-format off
+        if (dimz == 0) for (int id = 0; id < 3; ++id) if (dimorder[id] == 0) { dimorder[id] = 3; break; }
+        if (dimy == 0) for (int id = 0; id < 3; ++id) if (dimorder[id] == 0) { dimorder[id] = 2; break; }
+        if (dimx == 0) for (int id = 0; id < 3; ++id) if (dimorder[id] == 0) { dimorder[id] = 1; break; }
+        // clang-format on
         xyz = vlistEncodeXyz(&dimorder);
       }
   }
