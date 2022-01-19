@@ -2562,4 +2562,4 @@ string. */
 
 // clang-format on
 
-#endif	 /* __CFORTRAN_LOADED */
+#endif /* __CFORTRAN_LOADED */

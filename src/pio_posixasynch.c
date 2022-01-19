@@ -3,9 +3,8 @@
    README: specialRank Pe closes down, when all output files are closed
 */
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
-
 
 #ifndef _SX
 
@@ -43,7 +42,7 @@ typedef struct
 static int
 fileIDTest(void *a, void *fileID)
 {
-  return ((bFiledataPA *)a)->fileID == (int)(intptr_t)fileID;
+  return ((bFiledataPA *) a)->fileID == (int) (intptr_t) fileID;
 }
 
 static int nPrefStreams = 4;
@@ -55,24 +54,22 @@ initBFiledataPA(char *filename, size_t bs, int nc)
 {
   bFiledataPA *bfd;
 
-  xdebug ( "filename=%s, buffersize=%zu, ncollectors=%d, nPrefetchStreams=%d",
-           filename, bs, nc, nPrefStreams );
+  xdebug("filename=%s, buffersize=%zu, ncollectors=%d, nPrefetchStreams=%d", filename, bs, nc, nPrefStreams);
 
-  bfd = (bFiledataPA*) Malloc( sizeof (*bfd) + strlen(filename) + 1);
+  bfd = (bFiledataPA *) Malloc(sizeof(*bfd) + strlen(filename) + 1);
   strcpy(bfd->name, filename);
 
-  if (( bfd->handle = open ( bfd->name, O_CREAT | O_WRONLY, 0666 )) == -1 )
-    xabort("Failed to open %s", bfd->name);
+  if ((bfd->handle = open(bfd->name, O_CREAT | O_WRONLY, 0666)) == -1) xabort("Failed to open %s", bfd->name);
 
-  dbuffer_init(&(bfd->fb), (size_t)nPrefStreams * bs);
+  dbuffer_init(&(bfd->fb), (size_t) nPrefStreams * bs);
 
-  bfd->ctrlBlks = Calloc((size_t)nPrefStreams, sizeof (bfd->ctrlBlks[0]));
+  bfd->ctrlBlks = Calloc((size_t) nPrefStreams, sizeof(bfd->ctrlBlks[0]));
 
-  for (int i = 0; i < nPrefStreams; i++ )
+  for (int i = 0; i < nPrefStreams; i++)
     {
-      bfd->ctrlBlks[i].aio_fildes     = bfd->handle;
-      bfd->ctrlBlks[i].aio_buf = bfd->fb->buffer + (size_t)i * bs;
-      bfd->ctrlBlks[i].aio_reqprio    = 0;
+      bfd->ctrlBlks[i].aio_fildes = bfd->handle;
+      bfd->ctrlBlks[i].aio_buf = bfd->fb->buffer + (size_t) i * bs;
+      bfd->ctrlBlks[i].aio_reqprio = 0;
       bfd->ctrlBlks[i].aio_sigevent.sigev_notify = SIGEV_NONE;
     }
 
@@ -81,7 +78,7 @@ initBFiledataPA(char *filename, size_t bs, int nc)
   bfd->offset = 0;
   bfd->activeCollectors = nc;
 
-  xdebug ( "filename=%s, opened file, return", bfd->name );
+  xdebug("filename=%s, opened file, return", bfd->name);
 
   return bfd;
 }
@@ -89,45 +86,41 @@ initBFiledataPA(char *filename, size_t bs, int nc)
 /***************************************************************/
 
 static int
-destroyBFiledataPA ( void *v )
+destroyBFiledataPA(void *v)
 {
-  bFiledataPA *bfd = (bFiledataPA * ) v;
+  bFiledataPA *bfd = (bFiledataPA *) v;
   const struct aiocb *ccBP[1];
   int iret = 0;
   ssize_t ssiret;
-  int nextFinishOp = (bfd->nextOpIndex - bfd->prefIndex + nPrefStreams)
-    % nPrefStreams;
+  int nextFinishOp = (bfd->nextOpIndex - bfd->prefIndex + nPrefStreams) % nPrefStreams;
 
-  xdebug ( "filename=%s, cleanup and close file", bfd->name );
+  xdebug("filename=%s, cleanup and close file", bfd->name);
 
   /* close file */
 
-  for (; bfd->prefIndex > 0 ; --(bfd->prefIndex))
+  for (; bfd->prefIndex > 0; --(bfd->prefIndex))
     {
-      xdebug("file: %s, prefIndex=%d", bfd->name, (int)bfd->prefIndex);
-      ccBP[0] = ( bfd->ctrlBlks + nextFinishOp );
+      xdebug("file: %s, prefIndex=%d", bfd->name, (int) bfd->prefIndex);
+      ccBP[0] = (bfd->ctrlBlks + nextFinishOp);
       do
-	{
-	  iret = aio_suspend ( ccBP, 1, NULL );
-	  if ( iret < 0 && errno != EINTR ) xabort ( "aio_suspend () failed" );
-	}
-      while ( iret != 0 );
+        {
+          iret = aio_suspend(ccBP, 1, NULL);
+          if (iret < 0 && errno != EINTR) xabort("aio_suspend () failed");
+        }
+      while (iret != 0);
 
       iret = aio_error(bfd->ctrlBlks + nextFinishOp);
-      if (( ssiret = aio_return ( bfd->ctrlBlks + nextFinishOp )) == -1 )
-	xabort("aio_return () failed: %s", strerror(iret));
+      if ((ssiret = aio_return(bfd->ctrlBlks + nextFinishOp)) == -1) xabort("aio_return () failed: %s", strerror(iret));
 
-      nextFinishOp = ( nextFinishOp + 1 ) % nPrefStreams;
+      nextFinishOp = (nextFinishOp + 1) % nPrefStreams;
     }
 
-  if ((iret = ftruncate(bfd->handle, bfd->offset)) == -1)
-    xabort("failed to truncate file %s: %s", bfd->name, strerror(errno));
-  if (( iret = close ( bfd->handle )) == -1 )
-    xabort("failed to close %s", bfd->name);
+  if ((iret = ftruncate(bfd->handle, bfd->offset)) == -1) xabort("failed to truncate file %s: %s", bfd->name, strerror(errno));
+  if ((iret = close(bfd->handle)) == -1) xabort("failed to close %s", bfd->name);
 
   /* file closed, cleanup */
 
-  dbuffer_cleanup ( &( bfd->fb ));
+  dbuffer_cleanup(&(bfd->fb));
 
   Free(bfd->ctrlBlks);
   Free(bfd);
@@ -155,49 +148,46 @@ writePA(bFiledataPA *bfd, size_t amount)
   const struct aiocb *ccBP[1];
   ssize_t iret;
 
-  xdebug ( "file %s, in", bfd->name );
+  xdebug("file %s, in", bfd->name);
 
   bfd->ctrlBlks[bfd->currOpIndex].aio_nbytes = amount;
   bfd->ctrlBlks[bfd->currOpIndex].aio_offset = bfd->offset;
 
-  xdebug ( " before aio_write(), file %s, aio_nbytes=%zu, aio_offset=%zu",
-           bfd->name, bfd->ctrlBlks[bfd->currOpIndex].aio_nbytes,
-           bfd->ctrlBlks[bfd->currOpIndex].aio_offset );
+  xdebug(" before aio_write(), file %s, aio_nbytes=%zu, aio_offset=%zu", bfd->name, bfd->ctrlBlks[bfd->currOpIndex].aio_nbytes,
+         bfd->ctrlBlks[bfd->currOpIndex].aio_offset);
 
-  iret = aio_write ( bfd->ctrlBlks + bfd->currOpIndex );
+  iret = aio_write(bfd->ctrlBlks + bfd->currOpIndex);
 
-  xdebug ( "after aio_write(), file %s, aio_nbytes=%zu, aio_offset=%zu,"
-           "iret=aio_write()=%d",
-           bfd->name, bfd->ctrlBlks[bfd->currOpIndex].aio_nbytes,
-           bfd->ctrlBlks[bfd->currOpIndex].aio_offset, (int)iret );
+  xdebug("after aio_write(), file %s, aio_nbytes=%zu, aio_offset=%zu,"
+         "iret=aio_write()=%d",
+         bfd->name, bfd->ctrlBlks[bfd->currOpIndex].aio_nbytes, bfd->ctrlBlks[bfd->currOpIndex].aio_offset, (int) iret);
 
-  if ( iret == -1 )
+  if (iret == -1)
     {
-      xabort ( "did not succeed writing buffer" );
+      xabort("did not succeed writing buffer");
     }
   else
-    xdebug ( "buffer written to %s",  bfd->name );
+    xdebug("buffer written to %s", bfd->name);
 
-  bfd->offset += (off_t)amount;
-  bfd->prefIndex ++;
+  bfd->offset += (off_t) amount;
+  bfd->prefIndex++;
 
-  if ( bfd->prefIndex >= nPrefStreams )
+  if (bfd->prefIndex >= nPrefStreams)
     {
-      ccBP[0] = ( bfd->ctrlBlks + bfd->nextOpIndex );
+      ccBP[0] = (bfd->ctrlBlks + bfd->nextOpIndex);
       do
-	{
-	  iret = aio_suspend ( ccBP, 1, NULL );
-	  if ( iret < 0 && errno != EINTR )
-	    xabort ( "aio_suspend () failed" );
-	} while ( iret != 0 );
+        {
+          iret = aio_suspend(ccBP, 1, NULL);
+          if (iret < 0 && errno != EINTR) xabort("aio_suspend () failed");
+        }
+      while (iret != 0);
 
-      if (( iret = aio_return ( bfd->ctrlBlks + bfd->nextOpIndex )) == -1 )
-	xabort ( "aio_return () failed" );
+      if ((iret = aio_return(bfd->ctrlBlks + bfd->nextOpIndex)) == -1) xabort("aio_return () failed");
 
-      bfd->prefIndex --;
+      bfd->prefIndex--;
     }
 
-  xdebug ( "filename=%s, prefIndex=%d, return", bfd->name, bfd->prefIndex );
+  xdebug("filename=%s, prefIndex=%d, return", bfd->name, bfd->prefIndex);
 }
 
 /***************************************************************/
@@ -207,30 +197,29 @@ elemCheck(void *q, void *nm)
   bFiledataPA *bfd = q;
   const char *name = nm;
 
-  if (!strcmp(name, bfd->name))
-    xabort("Filename %s has already been inserted\n", name);
+  if (!strcmp(name, bfd->name)) xabort("Filename %s has already been inserted\n", name);
 }
 
 /***************************************************************/
 
-void pioWriterAIO(void)
+void
+pioWriterAIO(void)
 {
   bFiledataPA *bfd;
-  listSet * bibBFiledataPA;
-  MPI_Comm commPio = commInqCommPio ();
-  int nProcsColl = commInqSizeColl ();
+  listSet *bibBFiledataPA;
+  MPI_Comm commPio = commInqCommPio();
+  int nProcsColl = commInqSizeColl();
 
-  if ( nPrefStreams < 1 ) xabort("USAGE: # PREFETCH STREAMS >= 1");
-  xdebug ( "nProcsColl=%d ", nProcsColl );
+  if (nPrefStreams < 1) xabort("USAGE: # PREFETCH STREAMS >= 1");
+  xdebug("nProcsColl=%d ", nProcsColl);
 
   bibBFiledataPA = listSetNew(destroyBFiledataPA, compareNamesBPA);
-  bool *sentFinalize = Calloc((size_t)nProcsColl, sizeof (sentFinalize[0]));
+  bool *sentFinalize = Calloc((size_t) nProcsColl, sizeof(sentFinalize[0]));
 
-  for ( ;; )
+  for (;;)
     {
       MPI_Status status;
-      xmpiStat(MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, commPio,
-                         &status ), &status);
+      xmpiStat(MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, commPio, &status), &status);
 
       int source = status.MPI_SOURCE;
       int tag = status.MPI_TAG;
@@ -239,118 +228,103 @@ void pioWriterAIO(void)
       int messagesize;
       xmpi(MPI_Get_count(&status, MPI_UNSIGNED_CHAR, &messagesize));
 
-      xdebug ( "receive message from source=%d, id=%d, command=%d ( %s ), "
-               "messagesize=%d", source, rtag.id, rtag.command,
-               cdiPioCmdStrTab[rtag.command], messagesize);
+      xdebug("receive message from source=%d, id=%d, command=%d ( %s ), "
+             "messagesize=%d",
+             source, rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command], messagesize);
 
       switch (rtag.command)
-	{
-      	case IO_Open_file:
+        {
+        case IO_Open_file:
           {
-            unsigned char *messageBuffer = Malloc((size_t)messagesize
-                                                   * sizeof (messageBuffer[0])),
-              *pMB = messageBuffer;
+            unsigned char *messageBuffer = Malloc((size_t) messagesize * sizeof(messageBuffer[0])), *pMB = messageBuffer;
 
-            xmpi(MPI_Recv(messageBuffer, messagesize, MPI_UNSIGNED_CHAR, source,
-                          tag, commPio, &status ));
+            xmpi(MPI_Recv(messageBuffer, messagesize, MPI_UNSIGNED_CHAR, source, tag, commPio, &status));
 
-            char *filename = (char *)pMB;
+            char *filename = (char *) pMB;
             pMB += (strlen(filename) + 1);
-            char *temp = (char *)pMB;
+            char *temp = (char *) pMB;
             long buffersize = strtol(temp, NULL, 16);
             pMB += (strlen(temp) + 1);
-            size_t amount = (size_t)(messageBuffer + messagesize - pMB);
+            size_t amount = (size_t) (messageBuffer + messagesize - pMB);
 
-            xdebug("command  %s, filename=%s, buffersize=%ld, amount=%zd",
-                   cdiPioCmdStrTab[rtag.command], filename, buffersize, amount);
+            xdebug("command  %s, filename=%s, buffersize=%ld, amount=%zd", cdiPioCmdStrTab[rtag.command], filename, buffersize,
+                   amount);
 
-            if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest,
-                                   (void *)(intptr_t)rtag.id)))
+            if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest, (void *) (intptr_t) rtag.id)))
               {
                 listSetForeach(bibBFiledataPA, elemCheck, filename);
-                bfd = initBFiledataPA(filename, (size_t)buffersize, nProcsColl);
+                bfd = initBFiledataPA(filename, (size_t) buffersize, nProcsColl);
                 int id;
-                if ((id = listSetAdd(bibBFiledataPA, bfd)) < 0)
-                  xabort("fileID=%d not unique", rtag.id);
+                if ((id = listSetAdd(bibBFiledataPA, bfd)) < 0) xabort("fileID=%d not unique", rtag.id);
                 bfd->fileID = id;
               }
-            else
-              if (strcmp(filename, bfd->name) != 0)
-                xabort("filename is not consistent, fileID=%d", rtag.id);
+            else if (strcmp(filename, bfd->name) != 0)
+              xabort("filename is not consistent, fileID=%d", rtag.id);
 
             bfd->currOpIndex = bfd->nextOpIndex;
-            bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
+            bfd->nextOpIndex = (bfd->nextOpIndex + 1) % nPrefStreams;
 
-            memcpy((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
-                   pMB, (size_t)amount);
+            memcpy((void *) bfd->ctrlBlks[bfd->currOpIndex].aio_buf, pMB, (size_t) amount);
 
             writePA(bfd, amount);
 
             Free(messageBuffer);
           }
-	  break;
+          break;
 
-	case IO_Send_buffer:
+        case IO_Send_buffer:
 
-          if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest,
-                               (void *)(intptr_t)rtag.id)))
+          if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest, (void *) (intptr_t) rtag.id)))
             xabort("fileID=%d is not in set", rtag.id);
 
-	  xdebug("command: %s, id=%d, name=%s",
-                 cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name );
+          xdebug("command: %s, id=%d, name=%s", cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name);
 
-	  bfd->currOpIndex = bfd->nextOpIndex;
-	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
+          bfd->currOpIndex = bfd->nextOpIndex;
+          bfd->nextOpIndex = (bfd->nextOpIndex + 1) % nPrefStreams;
 
-	  xmpi(MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
-                        messagesize, MPI_UNSIGNED_CHAR, source, tag, commPio,
+          xmpi(MPI_Recv((void *) bfd->ctrlBlks[bfd->currOpIndex].aio_buf, messagesize, MPI_UNSIGNED_CHAR, source, tag, commPio,
                         &status));
-	  writePA(bfd, (size_t)messagesize);
-	  break;
+          writePA(bfd, (size_t) messagesize);
+          break;
 
-	case IO_Close_file:
+        case IO_Close_file:
 
-          if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest,
-                               (void *)(intptr_t)rtag.id)))
+          if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest, (void *) (intptr_t) rtag.id)))
             xabort("fileID=%d is not in set", rtag.id);
 
-	  xdebug(" command %s, id=%d, name=%s",
-                 cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name);
+          xdebug(" command %s, id=%d, name=%s", cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name);
 
-	  bfd->currOpIndex = bfd->nextOpIndex;
+          bfd->currOpIndex = bfd->nextOpIndex;
 
-	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
+          bfd->nextOpIndex = (bfd->nextOpIndex + 1) % nPrefStreams;
 
-	  xmpi(MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
-                        messagesize, MPI_UNSIGNED_CHAR,
-                        source, tag, commPio, &status));
+          xmpi(MPI_Recv((void *) bfd->ctrlBlks[bfd->currOpIndex].aio_buf, messagesize, MPI_UNSIGNED_CHAR, source, tag, commPio,
+                        &status));
 
-	  writePA(bfd, (size_t)messagesize);
+          writePA(bfd, (size_t) messagesize);
 
-	  if ( ! --(bfd->activeCollectors))
-	    {
-              xdebug ( "all are finished with file %d, delete entry", rtag.id);
-              listSetRemove(bibBFiledataPA, fileIDTest,
-                            (void *)(intptr_t)rtag.id);
-	    }
+          if (!--(bfd->activeCollectors))
+            {
+              xdebug("all are finished with file %d, delete entry", rtag.id);
+              listSetRemove(bibBFiledataPA, fileIDTest, (void *) (intptr_t) rtag.id);
+            }
           break;
         case IO_Finalize:
           {
             int buffer, collID;
 
-            xmpi ( MPI_Recv ( &buffer, 1, MPI_INT, source, tag, commPio, &status ));
+            xmpi(MPI_Recv(&buffer, 1, MPI_INT, source, tag, commPio, &status));
             sentFinalize[source] = true;
             bool doFinalize = true;
-            for ( collID = 0; collID < nProcsColl; collID++ )
-              doFinalize &= sentFinalize[collID];
-            if ( doFinalize )
+            for (collID = 0; collID < nProcsColl; collID++) doFinalize &= sentFinalize[collID];
+            if (doFinalize)
               {
                 if (!listSetIsEmpty(bibBFiledataPA))
                   xabort("Set bibBfiledataP is not empty.");
                 else
                   {
                     xdebug("%s", "all files are finished, destroy set,"
-                           " return");
+                                 " return");
                     listSetDelete(bibBFiledataPA);
                   }
                 Free(sentFinalize);
@@ -359,16 +333,12 @@ void pioWriterAIO(void)
           }
 
           break;
-        default:
-          xabort ( "COMMAND NOT IMPLEMENTED" );
-	}
+        default: xabort("COMMAND NOT IMPLEMENTED");
+        }
     }
 }
 
-
-
 /***************************************************************/
-
 
 #endif
 /*

@@ -1,5 +1,5 @@
-#ifndef  CDF_LAZY_GRID_H_
-#define  CDF_LAZY_GRID_H_
+#ifndef CDF_LAZY_GRID_H_
+#define CDF_LAZY_GRID_H_
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -23,14 +23,16 @@
 #include "cdf_int.h"
 #include "grid.h"
 
-struct xyValGet {
+struct xyValGet
+{
   double scalefactor, addoffset;
   size_t start[3], count[3], size, dimsize;
   int datasetNCId, varNCId;
   short ndims;
 };
 
-struct cdfLazyGridIds {
+struct cdfLazyGridIds
+{
   int datasetNCId, varNCId;
 };
 
@@ -44,7 +46,6 @@ struct cdfLazyGrid
   pthread_mutex_t loadSerialize;
 #endif
 };
-
 
 extern double *cdfPendingLoad;
 

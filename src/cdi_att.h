@@ -1,11 +1,11 @@
-#ifndef  CDI_ATT_H
-#define  CDI_ATT_H
+#ifndef CDI_ATT_H
+#define CDI_ATT_H
 
-#ifdef  HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#ifndef  CDI_LIMITS_H
+#ifndef CDI_LIMITS_H
 #include "cdi_limits.h"
 #endif
 
@@ -35,7 +35,6 @@ typedef struct
   cdi_att_t  value[MAX_ATTRIBUTES];
 } cdi_atts_t;
 // clang-format on
-
 
 int cdiDeleteAtts(int vlistID, int varID);
 int cdiAttsGetSize(void *p, int varID, void *context);

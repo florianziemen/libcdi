@@ -1,7 +1,8 @@
 #include "get_num_missvals.h"
 #include "cdi_int.h"
 
-size_t get_num_missvalsSP(size_t size, float *data, float missval)
+size_t
+get_num_missvalsSP(size_t size, float *data, float missval)
 {
   size_t nmiss = 0;
 
@@ -27,15 +28,15 @@ size_t get_num_missvalsSP(size_t size, float *data, float missval)
   return nmiss;
 }
 
-
-size_t get_num_missvalsDP(size_t size, double *data, double missval)
+size_t
+get_num_missvalsDP(size_t size, double *data, double missval)
 {
   size_t nmiss = 0;
 
   if (DBL_IS_NAN(missval))
     {
       for (size_t i = 0; i < size; i++)
-        if (DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval))
+        if (DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float) missval))
           {
             data[i] = missval;
             nmiss++;
@@ -44,7 +45,7 @@ size_t get_num_missvalsDP(size_t size, double *data, double missval)
   else
     {
       for (size_t i = 0; i < size; i++)
-        if (IS_EQUAL(data[i], missval) || IS_EQUAL(data[i], (float)missval))
+        if (IS_EQUAL(data[i], missval) || IS_EQUAL(data[i], (float) missval))
           {
             data[i] = missval;
             nmiss++;
@@ -54,55 +55,55 @@ size_t get_num_missvalsDP(size_t size, double *data, double missval)
   return nmiss;
 }
 
-
-size_t get_cplx_num_missvalsSP(size_t size, float *data, float missval)
+size_t
+get_cplx_num_missvalsSP(size_t size, float *data, float missval)
 {
   size_t nmiss = 0;
 
   if (DBL_IS_NAN(missval))
     {
-      for (size_t i = 0; i < 2*size; i+=2)
-	if (DBL_IS_EQUAL(data[i], missval))
-	  {
-	    data[i] = missval;
-	    nmiss++;
-	  }
+      for (size_t i = 0; i < 2 * size; i += 2)
+        if (DBL_IS_EQUAL(data[i], missval))
+          {
+            data[i] = missval;
+            nmiss++;
+          }
     }
   else
     {
-      for (size_t i = 0; i < 2*size; i+=2)
-	if (IS_EQUAL(data[i], missval))
-	  {
-	    data[i] = missval;
-	    nmiss++;
-	  }
+      for (size_t i = 0; i < 2 * size; i += 2)
+        if (IS_EQUAL(data[i], missval))
+          {
+            data[i] = missval;
+            nmiss++;
+          }
     }
 
   return nmiss;
 }
 
-
-size_t get_cplx_num_missvalsDP(size_t size, double *data, double missval)
+size_t
+get_cplx_num_missvalsDP(size_t size, double *data, double missval)
 {
   size_t nmiss = 0;
 
   if (DBL_IS_NAN(missval))
     {
-      for (size_t i = 0; i < 2*size; i+=2)
-	if (DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval))
-	  {
-	    data[i] = missval;
-	    nmiss++;
-	  }
+      for (size_t i = 0; i < 2 * size; i += 2)
+        if (DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float) missval))
+          {
+            data[i] = missval;
+            nmiss++;
+          }
     }
   else
     {
-      for (size_t i = 0; i < 2*size; i+=2)
-	if (IS_EQUAL(data[i], missval) || IS_EQUAL(data[i], (float)missval))
-	  {
-	    data[i] = missval;
-	    nmiss++;
-	  }
+      for (size_t i = 0; i < 2 * size; i += 2)
+        if (IS_EQUAL(data[i], missval) || IS_EQUAL(data[i], (float) missval))
+          {
+            data[i] = missval;
+            nmiss++;
+          }
     }
 
   return nmiss;

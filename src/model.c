@@ -9,57 +9,46 @@
 #include "resource_unpack.h"
 #include "serialize.h"
 
-#undef  CDI_UNDEFID
+#undef CDI_UNDEFID
 #define CDI_UNDEFID -1
 
 typedef struct
 {
-  int      self;
-  int      used;
-  int      instID;
-  int      modelgribID;
-  char    *name;
-}
-model_t;
+  int self;
+  int used;
+  int instID;
+  int modelgribID;
+  char *name;
+} model_t;
 
-
-static int  MODEL_Debug = 0;   /* If set to 1, debugging */
+static int MODEL_Debug = 0; /* If set to 1, debugging */
 
 static void modelInit(void);
 
-
 static int modelCompareP(void *modelptr1, void *modelptr2);
-static void   modelDestroyP ( void * modelptr );
-static void   modelPrintP   ( void * modelptr, FILE * fp );
-static int    modelGetSizeP ( void * modelptr, void *context);
-static void   modelPackP    ( void * modelptr, void * buff, int size,
-                              int *position, void *context);
-static int    modelTxCode   ( void );
+static void modelDestroyP(void *modelptr);
+static void modelPrintP(void *modelptr, FILE *fp);
+static int modelGetSizeP(void *modelptr, void *context);
+static void modelPackP(void *modelptr, void *buff, int size, int *position, void *context);
+static int modelTxCode(void);
 
-static const resOps modelOps = {
-  modelCompareP,
-  modelDestroyP,
-  modelPrintP,
-  modelGetSizeP,
-  modelPackP,
-  modelTxCode
-};
+static const resOps modelOps = { modelCompareP, modelDestroyP, modelPrintP, modelGetSizeP, modelPackP, modelTxCode };
 
-static
-void modelDefaultValue ( model_t *modelptr )
+static void
+modelDefaultValue(model_t *modelptr)
 {
-  modelptr->self        = CDI_UNDEFID;
-  modelptr->used        = 0;
-  modelptr->instID      = CDI_UNDEFID;
+  modelptr->self = CDI_UNDEFID;
+  modelptr->used = 0;
+  modelptr->instID = CDI_UNDEFID;
   modelptr->modelgribID = CDI_UNDEFID;
-  modelptr->name        = NULL;
+  modelptr->name = NULL;
 }
 
 static model_t *
 modelNewEntry(cdiResH resH, int instID, int modelgribID, const char *name)
 {
   model_t *modelptr = (model_t *) Malloc(sizeof(model_t));
-  modelDefaultValue ( modelptr );
+  modelDefaultValue(modelptr);
   if (resH == CDI_UNDEFID)
     modelptr->self = reshPut(modelptr, &modelOps);
   else
@@ -70,49 +59,52 @@ modelNewEntry(cdiResH resH, int instID, int modelgribID, const char *name)
   modelptr->used = 1;
   modelptr->instID = instID;
   modelptr->modelgribID = modelgribID;
-  if ( name && *name ) modelptr->name = strdupx(name);
+  if (name && *name) modelptr->name = strdupx(name);
 
   return (modelptr);
 }
 
-void modelDefaultEntries ( void )
+void
+modelDefaultEntries(void)
 {
   int instID;
-  enum { nDefModels = 10 };
+  enum
+  {
+    nDefModels = 10
+  };
   cdiResH resH[nDefModels];
 
-  instID  = institutInq(  0,   0, "ECMWF", NULL);
+  instID = institutInq(0, 0, "ECMWF", NULL);
   /* (void)    modelDef(instID, 131, "ERA15"); */
   /* (void)    modelDef(instID, 199, "ERA40"); */
 
-  instID  = institutInq( 98, 232, "MPIMET", NULL);
-  resH[0] = modelDef(instID,  64, "ECHAM5.4");
-  resH[1] = modelDef(instID,  63, "ECHAM5.3");
-  resH[2] = modelDef(instID,  62, "ECHAM5.2");
-  resH[3] = modelDef(instID,  61, "ECHAM5.1");
+  instID = institutInq(98, 232, "MPIMET", NULL);
+  resH[0] = modelDef(instID, 64, "ECHAM5.4");
+  resH[1] = modelDef(instID, 63, "ECHAM5.3");
+  resH[2] = modelDef(instID, 62, "ECHAM5.2");
+  resH[3] = modelDef(instID, 61, "ECHAM5.1");
 
-  instID  = institutInq( 98, 255, "MPIMET", NULL);
-  resH[4] = modelDef(instID,  60, "ECHAM5.0");
-  resH[5] = modelDef(instID,  50, "ECHAM4");
+  instID = institutInq(98, 255, "MPIMET", NULL);
+  resH[4] = modelDef(instID, 60, "ECHAM5.0");
+  resH[5] = modelDef(instID, 50, "ECHAM4");
   resH[6] = modelDef(instID, 110, "MPIOM1");
 
-  instID  = institutInq(  0,   0, "DWD", NULL);
+  instID = institutInq(0, 0, "DWD", NULL);
   resH[7] = modelDef(instID, 149, "GME");
 
-  instID  = institutInq(  0,   0, "MCH", NULL);
+  instID = institutInq(0, 0, "MCH", NULL);
   //(void)  = modelDef(instID, 137, "COSMO");
   resH[8] = modelDef(instID, 255, "COSMO");
 
-  instID  = institutInq(  0,   1, "NCEP", NULL);
-  resH[9] = modelDef(instID,  80, "T62L28MRF");
+  instID = institutInq(0, 1, "NCEP", NULL);
+  resH[9] = modelDef(instID, 80, "T62L28MRF");
 
   /* pre-defined models are not synchronized */
-  for ( int i = 0; i < nDefModels ; i++ )
-    reshSetStatus(resH[i], &modelOps, RESH_IN_USE);
+  for (int i = 0; i < nDefModels; i++) reshSetStatus(resH[i], &modelOps, RESH_IN_USE);
 }
 
-static
-void modelInit(void)
+static void
+modelInit(void)
 {
   static bool modelInitialized = false;
 
@@ -120,7 +112,7 @@ void modelInit(void)
 
   modelInitialized = true;
   char *env = getenv("MODEL_DEBUG");
-  if ( env ) MODEL_Debug = atoi(env);
+  if (env) MODEL_Debug = atoi(env);
 }
 
 struct modelLoc
@@ -132,12 +124,10 @@ struct modelLoc
 static enum cdiApplyRet
 findModelByID(int resID, void *res, void *data)
 {
-  model_t *modelptr = (model_t*) res;
-  struct modelLoc *ret = (struct modelLoc*) data;
+  model_t *modelptr = (model_t *) res;
+  struct modelLoc *ret = (struct modelLoc *) data;
   int instID = ret->instID, modelgribID = ret->modelgribID;
-  if (modelptr->used
-      && modelptr->instID == instID
-      && modelptr->modelgribID == modelgribID)
+  if (modelptr->used && modelptr->instID == instID && modelptr->modelgribID == modelgribID)
     {
       ret->resID = resID;
       return CDI_APPLY_STOP;
@@ -149,18 +139,15 @@ findModelByID(int resID, void *res, void *data)
 static enum cdiApplyRet
 findModelByName(int resID, void *res, void *data)
 {
-  model_t *modelptr = (model_t*) res;
-  struct modelLoc *ret = (struct modelLoc*) data;
+  model_t *modelptr = (model_t *) res;
+  struct modelLoc *ret = (struct modelLoc *) data;
   int instID = ret->instID, modelgribID = ret->modelgribID;
   const char *name = ret->name;
-  if (modelptr->used
-      && (instID == -1 || modelptr->instID == instID)
-      && (modelgribID == 0 || modelptr->modelgribID == modelgribID)
+  if (modelptr->used && (instID == -1 || modelptr->instID == instID) && (modelgribID == 0 || modelptr->modelgribID == modelgribID)
       && modelptr->name)
     {
       const char *p = name, *q = modelptr->name;
-      while (*p != '\0' && *p == *q)
-        ++p, ++q;
+      while (*p != '\0' && *p == *q) ++p, ++q;
       if (*p == '\0' || *q == '\0')
         {
           ret->resID = resID;
@@ -170,13 +157,12 @@ findModelByName(int resID, void *res, void *data)
   return CDI_APPLY_GO_ON;
 }
 
-int modelInq(int instID, int modelgribID, const char *name)
+int
+modelInq(int instID, int modelgribID, const char *name)
 {
-  modelInit ();
+  modelInit();
 
-  struct modelLoc searchState = { .name = name, .instID = instID,
-                                  .modelgribID = modelgribID,
-                                  .resID = CDI_UNDEFID };
+  struct modelLoc searchState = { .name = name, .instID = instID, .modelgribID = modelgribID, .resID = CDI_UNDEFID };
   if (name && *name)
     cdiResHFilterApply(&modelOps, findModelByName, &searchState);
   else
@@ -184,157 +170,142 @@ int modelInq(int instID, int modelgribID, const char *name)
   return searchState.resID;
 }
 
-
-int modelDef(int instID, int modelgribID, const char *name)
+int
+modelDef(int instID, int modelgribID, const char *name)
 {
   model_t *modelptr;
 
-  modelInit ();
+  modelInit();
 
   modelptr = modelNewEntry(CDI_UNDEFID, instID, modelgribID, name);
 
   return modelptr->self;
 }
 
-
-int modelInqInstitut(int modelID)
+int
+modelInqInstitut(int modelID)
 {
   model_t *modelptr = NULL;
 
-  modelInit ();
+  modelInit();
 
-  if ( modelID != CDI_UNDEFID )
-    modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
+  if (modelID != CDI_UNDEFID) modelptr = (model_t *) reshGetVal(modelID, &modelOps);
 
   return modelptr ? modelptr->instID : CDI_UNDEFID;
 }
 
-
-int modelInqGribID(int modelID)
+int
+modelInqGribID(int modelID)
 {
   model_t *modelptr = NULL;
 
-  modelInit ();
+  modelInit();
 
-  if ( modelID != CDI_UNDEFID )
-    modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
+  if (modelID != CDI_UNDEFID) modelptr = (model_t *) reshGetVal(modelID, &modelOps);
 
   return modelptr ? modelptr->modelgribID : CDI_UNDEFID;
 }
 
-
-const char *modelInqNamePtr(int modelID)
+const char *
+modelInqNamePtr(int modelID)
 {
   model_t *modelptr = NULL;
 
-  modelInit ();
+  modelInit();
 
-  if ( modelID != CDI_UNDEFID )
-    modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
+  if (modelID != CDI_UNDEFID) modelptr = (model_t *) reshGetVal(modelID, &modelOps);
 
   return modelptr ? modelptr->name : NULL;
 }
 
-
 static int
 modelCompareP(void *modelptr1, void *modelptr2)
 {
-  model_t *model1 = (model_t *)modelptr1, *model2 = (model_t *)modelptr2;
-  int diff = (namespaceResHDecode(model1->instID).idx
-              != namespaceResHDecode(model2->instID).idx)
-    | (model1->modelgribID != model2->modelgribID)
-    | (strcmp(model1->name, model2->name) != 0);
+  model_t *model1 = (model_t *) modelptr1, *model2 = (model_t *) modelptr2;
+  int diff = (namespaceResHDecode(model1->instID).idx != namespaceResHDecode(model2->instID).idx)
+             | (model1->modelgribID != model2->modelgribID) | (strcmp(model1->name, model2->name) != 0);
   return diff;
 }
 
-
-void modelDestroyP ( void * modelptr )
+void
+modelDestroyP(void *modelptr)
 {
-  model_t *mp = (model_t*) modelptr;
-  if (mp->name)
-    Free(mp->name);
+  model_t *mp = (model_t *) modelptr;
+  if (mp->name) Free(mp->name);
   Free(mp);
 }
 
-
-void modelPrintP   ( void * modelptr, FILE * fp )
+void
+modelPrintP(void *modelptr, FILE *fp)
 {
-  model_t *mp = (model_t*) modelptr;
+  model_t *mp = (model_t *) modelptr;
 
-  if ( !mp ) return;
+  if (!mp) return;
 
-  fprintf ( fp, "#\n");
-  fprintf ( fp, "# modelID %d\n", mp->self);
-  fprintf ( fp, "#\n");
-  fprintf ( fp, "self          = %d\n", mp->self );
-  fprintf ( fp, "used          = %d\n", mp->used );
-  fprintf ( fp, "instID        = %d\n", mp->instID );
-  fprintf ( fp, "modelgribID   = %d\n", mp->modelgribID );
-  fprintf ( fp, "name          = %s\n", mp->name ? mp->name : "NN" );
+  fprintf(fp, "#\n");
+  fprintf(fp, "# modelID %d\n", mp->self);
+  fprintf(fp, "#\n");
+  fprintf(fp, "self          = %d\n", mp->self);
+  fprintf(fp, "used          = %d\n", mp->used);
+  fprintf(fp, "instID        = %d\n", mp->instID);
+  fprintf(fp, "modelgribID   = %d\n", mp->modelgribID);
+  fprintf(fp, "name          = %s\n", mp->name ? mp->name : "NN");
 }
 
-
 static int
-modelTxCode ( void )
+modelTxCode(void)
 {
   return MODEL;
 }
 
-enum {
+enum
+{
   model_nints = 4,
 };
 
-
-static int modelGetSizeP(void * modelptr, void *context)
+static int
+modelGetSizeP(void *modelptr, void *context)
 {
-  model_t *p = (model_t*)modelptr;
-  size_t txsize = (size_t)serializeGetSize(model_nints, CDI_DATATYPE_INT, context)
-    + (size_t)serializeGetSize(p->name?(int)strlen(p->name) + 1:0, CDI_DATATYPE_TXT, context);
+  model_t *p = (model_t *) modelptr;
+  size_t txsize = (size_t) serializeGetSize(model_nints, CDI_DATATYPE_INT, context)
+                  + (size_t) serializeGetSize(p->name ? (int) strlen(p->name) + 1 : 0, CDI_DATATYPE_TXT, context);
   xassert(txsize <= INT_MAX);
-  return (int)txsize;
+  return (int) txsize;
 }
 
-
-static void modelPackP(void * modelptr, void * buf, int size, int *position, void *context)
+static void
+modelPackP(void *modelptr, void *buf, int size, int *position, void *context)
 {
-  model_t *p = (model_t*) modelptr;
+  model_t *p = (model_t *) modelptr;
   int tempbuf[model_nints];
   tempbuf[0] = p->self;
   tempbuf[1] = p->instID;
   tempbuf[2] = p->modelgribID;
-  tempbuf[3] = p->name ? (int)strlen(p->name) + 1 : 0;
+  tempbuf[3] = p->name ? (int) strlen(p->name) + 1 : 0;
   serializePack(tempbuf, model_nints, CDI_DATATYPE_INT, buf, size, position, context);
-  if (p->name)
-    serializePack(p->name, tempbuf[3], CDI_DATATYPE_TXT, buf, size, position, context);
+  if (p->name) serializePack(p->name, tempbuf[3], CDI_DATATYPE_TXT, buf, size, position, context);
 }
 
 int
-modelUnpack(void *buf, int size, int *position, int originNamespace, void *context,
-            int force_id)
+modelUnpack(void *buf, int size, int *position, int originNamespace, void *context, int force_id)
 {
   int tempbuf[model_nints];
   char *name;
   serializeUnpack(buf, size, position, tempbuf, model_nints, CDI_DATATYPE_INT, context);
   if (tempbuf[3] != 0)
     {
-      name = (char *) Malloc((size_t)tempbuf[3]);
-      serializeUnpack(buf, size, position,
-                      name, tempbuf[3], CDI_DATATYPE_TXT, context);
+      name = (char *) Malloc((size_t) tempbuf[3]);
+      serializeUnpack(buf, size, position, name, tempbuf[3], CDI_DATATYPE_TXT, context);
     }
   else
     {
-      name = (char*)"";
+      name = (char *) "";
     }
   int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);
-  model_t *mp = modelNewEntry(force_id?targetID:CDI_UNDEFID,
-                              namespaceAdaptKey(tempbuf[1], originNamespace),
-                              tempbuf[2], name);
-  if (tempbuf[3] != 0)
-    Free(name);
-  xassert(!force_id
-          || (mp->self == namespaceAdaptKey(tempbuf[0], originNamespace)));
-  reshSetStatus(mp->self, &modelOps,
-                reshGetStatus(mp->self, &modelOps) & ~RESH_SYNC_BIT);
+  model_t *mp = modelNewEntry(force_id ? targetID : CDI_UNDEFID, namespaceAdaptKey(tempbuf[1], originNamespace), tempbuf[2], name);
+  if (tempbuf[3] != 0) Free(name);
+  xassert(!force_id || (mp->self == namespaceAdaptKey(tempbuf[0], originNamespace)));
+  reshSetStatus(mp->self, &modelOps, reshGetStatus(mp->self, &modelOps) & ~RESH_SYNC_BIT);
   return mp->self;
 }
 

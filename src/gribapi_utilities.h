@@ -10,37 +10,40 @@
 
 #include <stdbool.h>
 
-char* gribCopyString(grib_handle* gribHandle, const char* key);
-bool gribCheckString(grib_handle* gribHandle, const char* key, const char* expectedValue);
+char *gribCopyString(grib_handle *gribHandle, const char *key);
+bool gribCheckString(grib_handle *gribHandle, const char *key, const char *expectedValue);
 
-bool gribCheckLong(grib_handle* gribHandle, const char* key, long expectedValue);
-long gribGetLong(grib_handle* gh, const char* key);
-long gribGetLongDefault(grib_handle* gribHandle, const char* key, long defaultValue);
+bool gribCheckLong(grib_handle *gribHandle, const char *key, long expectedValue);
+long gribGetLong(grib_handle *gh, const char *key);
+long gribGetLongDefault(grib_handle *gribHandle, const char *key, long defaultValue);
 
-double gribGetDouble(grib_handle* gh, const char* key);
-double gribGetDoubleDefault(grib_handle* gribHandle, const char* key, double defaultValue);
+double gribGetDouble(grib_handle *gh, const char *key);
+double gribGetDoubleDefault(grib_handle *gribHandle, const char *key, double defaultValue);
 
-size_t gribGetArraySize(grib_handle* gribHandle, const char* key);
-void gribGetDoubleArray(grib_handle* gribHandle, const char* key, double* array);       //The caller is responsible to ensure a sufficiently large buffer.
-void gribGetLongArray(grib_handle* gribHandle, const char* key, long* array);   //The caller is responsible to ensure a sufficiently large buffer.
+size_t gribGetArraySize(grib_handle *gribHandle, const char *key);
+void gribGetDoubleArray(grib_handle *gribHandle, const char *key,
+                        double *array);  // The caller is responsible to ensure a sufficiently large buffer.
+void gribGetLongArray(grib_handle *gribHandle, const char *key,
+                      long *array);  // The caller is responsible to ensure a sufficiently large buffer.
 
-long gribEditionNumber(grib_handle* gh);
-char* gribMakeTimeString(grib_handle* gh, CdiTimeType timeType);     //Returns NULL if timeType is kCdiTimeType_endTime and the field does not have an integration period (statistical data).
+long gribEditionNumber(grib_handle *gh);
+char *gribMakeTimeString(grib_handle *gh, CdiTimeType timeType);  // Returns NULL if timeType is kCdiTimeType_endTime and the field
+                                                                  // does not have an integration period (statistical data).
 int gribapiTimeIsFC(grib_handle *gh);
 int gribapiGetTsteptype(grib_handle *gh);
-int gribGetDatatype(grib_handle* gribHandle);
+int gribGetDatatype(grib_handle *gribHandle);
 int gribapiGetParam(grib_handle *gh);
 int gribapiGetGridType(grib_handle *gh);
 bool gribapiGetGrid(grib_handle *gh, grid_t *grid);
 size_t gribapiGetGridsize(grib_handle *gh);
 
-
 #ifdef HIRLAM_EXTENSIONS
 void gribapiSetDataTimeRangeIndicator(grib_handle *gh, int timeRangeIndicator);
 void gribapiGetDataTimeRangeIndicator(grib_handle *gh, int *timeRangeIndicator);
-#endif // #ifdef HIRLAM_EXTENSIONS
+#endif  // #ifdef HIRLAM_EXTENSIONS
 
-extern struct cdiGribAPI_ts_str_map_elem {
+extern struct cdiGribAPI_ts_str_map_elem
+{
   long productionTemplate;
   const char sname[8];
 } cdiGribAPI_ts_str_map[];

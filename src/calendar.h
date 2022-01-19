@@ -24,7 +24,7 @@ int days_per_month(int calendar, int year, int month);
 
 // clang-format on
 
-#endif  /* CALENDAR_H */
+#endif /* CALENDAR_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

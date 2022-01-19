@@ -12968,4 +12968,3 @@ cgribexLibraryVersion(void)
 #endif
 
 // clang-format on
-

@@ -1,8 +1,8 @@
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
-#if defined (HAVE_NETCDF4) && defined (HAVE_PARALLEL_NC4)
+#if defined(HAVE_NETCDF4) && defined(HAVE_PARALLEL_NC4)
 
 #include <netcdf.h>
 #ifdef HAVE_NETCDF_PAR_H
@@ -19,20 +19,15 @@
 #include "pio_cdf_int.h"
 
 static int
-cdiPio_nc__create(const char *path, int cmode,
-                  size_t initialsz, size_t *chunksizehintp,
-                  int *ncidp)
+cdiPio_nc__create(const char *path, int cmode, size_t initialsz, size_t *chunksizehintp, int *ncidp)
 {
   int status;
-  if (cmode & NC_NETCDF4
-      && commInqIOMode() != PIO_NONE)
+  if (cmode & NC_NETCDF4 && commInqIOMode() != PIO_NONE)
     {
       cmode |= NC_MPIPOSIX;
-      status = nc_create_par(path, cmode, commInqCommColl(),
-                             MPI_INFO_NULL, ncidp);
+      status = nc_create_par(path, cmode, commInqCommColl(), MPI_INFO_NULL, ncidp);
     }
-  else if (cmode & (NC_64BIT_OFFSET | NC_CLASSIC_MODEL)
-           && commInqIOMode() != PIO_NONE)
+  else if (cmode & (NC_64BIT_OFFSET | NC_CLASSIC_MODEL) && commInqIOMode() != PIO_NONE)
     {
       /* FIXME: improve handling of pnetcdf here */
       abort();
@@ -43,16 +38,14 @@ cdiPio_nc__create(const char *path, int cmode,
 }
 
 static void
-cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims,
-                const int dimids[], int *varidp)
+cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims, const int dimids[], int *varidp)
 {
   cdf_def_var_serial(ncid, name, xtype, ndims, dimids, varidp);
   if (commInqIOMode() != PIO_NONE)
     {
       xdebug("%s", "calling nc_var_par_access");
       int status = nc_var_par_access(ncid, *varidp, NC_COLLECTIVE);
-      if ( status != NC_NOERR )
-        Error("%s", nc_strerror(status));
+      if (status != NC_NOERR) Error("%s", nc_strerror(status));
     }
 }
 
@@ -63,7 +56,7 @@ cdiPioEnableNetCDFParAccess(void)
   namespaceSwitchSet(NSSWITCH_CDF_DEF_VAR, NSSW_FUNC(cdiPioCdfDefVar));
 }
 
-#endif  /* defined (HAVE_NETCDF4) && defined (HAVE_PARALLEL_NC4) */
+#endif /* defined (HAVE_NETCDF4) && defined (HAVE_PARALLEL_NC4) */
 /*
  * Local Variables:
  * c-file-style: "Java"

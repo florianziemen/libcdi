@@ -8,8 +8,9 @@
 
 /*
 This is a base class for all objects that need reference counting.
-A CdiReferencedObject has a reference count of one when it is constructed, refObjectRetain() increments the reference count, refObject Release() decrements it.
-When the reference count reaches zero, the destructor function is called before the memory of the object is deallocated with Free().
+A CdiReferencedObject has a reference count of one when it is constructed, refObjectRetain() increments the reference count,
+refObject Release() decrements it. When the reference count reaches zero, the destructor function is called before the memory of the
+object is deallocated with Free().
 
 >>> Warning <<<
 This code is currently not thread-safe.
@@ -22,18 +23,19 @@ So, we have two options: provide multithreading support by means of locks, or wa
 I, for one, prefer doing things right.
 */
 typedef struct CdiReferencedObject CdiReferencedObject;
-struct CdiReferencedObject {
-  //protected:
-    void (*destructor)(CdiReferencedObject* me);  //Subclass constructors should set this to their own destructor.
+struct CdiReferencedObject
+{
+  // protected:
+  void (*destructor)(CdiReferencedObject *me);  // Subclass constructors should set this to their own destructor.
 
-  //private:    //Subclasses may read it to determine whether there is only one reference, though.
-    size_t refCount;
+  // private:    //Subclasses may read it to determine whether there is only one reference, though.
+  size_t refCount;
 };
 
-void cdiRefObject_construct(CdiReferencedObject* me);
-void cdiRefObject_retain(CdiReferencedObject* me);
-void cdiRefObject_release(CdiReferencedObject* me);
-void cdiRefObject_destruct(CdiReferencedObject* me);
+void cdiRefObject_construct(CdiReferencedObject *me);
+void cdiRefObject_retain(CdiReferencedObject *me);
+void cdiRefObject_release(CdiReferencedObject *me);
+void cdiRefObject_destruct(CdiReferencedObject *me);
 
 #endif
 

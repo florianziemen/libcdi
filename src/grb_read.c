@@ -16,22 +16,20 @@
 #include "stream_grb.h"
 #include "stream_gribapi.h"
 #include "file.h"
-#include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
+#include "cgribex.h" /* gribZip gribGetZip gribGinfo */
 
-
-static
-int grbDecode(int filetype, int memtype, void *cgribexp, void *gribbuffer, size_t gribsize, void *data, size_t datasize,
-	      int unreduced, size_t *nmiss, double missval)
+static int
+grbDecode(int filetype, int memtype, void *cgribexp, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced,
+          size_t *nmiss, double missval)
 {
   int status = 0;
 
 #ifdef HAVE_LIBCGRIBEX
-  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
+  if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
     {
 #ifdef HAVE_LIBGRIB_API
       extern int cdiNAdditionalGRIBKeys;
-      if ( cdiNAdditionalGRIBKeys > 0 )
-	Error("CGRIBEX decode does not support reading of additional GRIB keys!");
+      if (cdiNAdditionalGRIBKeys > 0) Error("CGRIBEX decode does not support reading of additional GRIB keys!");
 #endif
       status = cgribexDecode(memtype, cgribexp, gribbuffer, gribsize, data, datasize, unreduced, nmiss, missval);
     }
@@ -39,30 +37,30 @@ int grbDecode(int filetype, int memtype, void *cgribexp, void *gribbuffer, size_
 #endif
 #ifdef HAVE_LIBGRIB_API
     {
-      void *datap = (memtype == MEMTYPE_FLOAT) ? Malloc(datasize*sizeof(double)) : data;
+      void *datap = (memtype == MEMTYPE_FLOAT) ? Malloc(datasize * sizeof(double)) : data;
 
       status = gribapiDecode(gribbuffer, gribsize, datap, datasize, unreduced, nmiss, missval);
 
-      if ( memtype == MEMTYPE_FLOAT )
+      if (memtype == MEMTYPE_FLOAT)
         {
-          float *dataf = (float*) data;
-          double *datad = (double*) datap;
-          for ( size_t i = 0; i < datasize; ++i ) dataf[i] = (float) datad[i];
+          float *dataf = (float *) data;
+          double *datad = (double *) datap;
+          for (size_t i = 0; i < datasize; ++i) dataf[i] = (float) datad[i];
           Free(datap);
         }
     }
 #else
-    {
-      Error("ecCodes support not compiled in!");
-    }
+  {
+    Error("ecCodes support not compiled in!");
+  }
 #endif
 
   return status;
 }
 
 // Decompresses the grib data in gribbuffer.
-static
-int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
+static int
+grbUnzipRecord(void *gribbuffer, size_t *gribsize)
 {
   int zip = 0;
 
@@ -71,32 +69,33 @@ int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
 
   int izip;
   size_t unzipsize;
-  if ( (izip = gribGetZip(igribsize, (unsigned char *)gribbuffer, &unzipsize)) > 0 )
+  if ((izip = gribGetZip(igribsize, (unsigned char *) gribbuffer, &unzipsize)) > 0)
     {
       zip = izip;
-      if ( izip == 128 ) /* szip */
-	{
-	  if ( unzipsize < igribsize )
-	    {
-	      fprintf(stderr, "Decompressed size smaller than compressed size (in %zu; out %zu)!\n", igribsize, unzipsize);
-	      return 0;
-	    }
+      if (izip == 128) /* szip */
+        {
+          if (unzipsize < igribsize)
+            {
+              fprintf(stderr, "Decompressed size smaller than compressed size (in %zu; out %zu)!\n", igribsize, unzipsize);
+              return 0;
+            }
 
-	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
+          unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
 
-	  void *buffer = Malloc(igribsize);
-	  memcpy(buffer, gribbuffer, igribsize);
+          void *buffer = Malloc(igribsize);
+          memcpy(buffer, gribbuffer, igribsize);
 
-	  ogribsize = (size_t)gribUnzip((unsigned char*)gribbuffer, (long)unzipsize, (unsigned char*)buffer, (long)igribsize);
+          ogribsize
+              = (size_t) gribUnzip((unsigned char *) gribbuffer, (long) unzipsize, (unsigned char *) buffer, (long) igribsize);
 
           Free(buffer);
 
-	  if ( ogribsize <= 0 ) Error("Decompression problem!");
-	}
+          if (ogribsize <= 0) Error("Decompression problem!");
+        }
       else
-	{
-	  Error("Decompression for %d not implemented!", izip);
-	}
+        {
+          Error("Decompression for %d not implemented!", izip);
+        }
     }
 
   *gribsize = ogribsize;
@@ -104,30 +103,29 @@ int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
   return zip;
 }
 
-
-typedef struct DecodeArgs {
+typedef struct DecodeArgs
+{
   int recID, *outZip, filetype, memtype, unreduced;
   void *cgribexp, *gribbuffer, *data;
   size_t recsize, gridsize, nmiss;
   double missval;
 } DecodeArgs;
 
-
-static
-int grb_decode_record(void *untypedArgs)
+static int
+grb_decode_record(void *untypedArgs)
 {
-  DecodeArgs *args = (DecodeArgs *)untypedArgs;
+  DecodeArgs *args = (DecodeArgs *) untypedArgs;
   *args->outZip = grbUnzipRecord(args->gribbuffer, &args->recsize);
   grbDecode(args->filetype, args->memtype, args->cgribexp, args->gribbuffer, args->recsize, args->data, args->gridsize,
             args->unreduced, &args->nmiss, args->missval);
   return 0;
 }
 
-static
-DecodeArgs grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *gribbuffer, void *data, bool resetFilePos)
+static DecodeArgs
+grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *gribbuffer, void *data, bool resetFilePos)
 {
   const int vlistID = streamptr->vlistID;
-  const int tsID = streamptr->curTsID;	// FIXME: This should be looked up from the given recID
+  const int tsID = streamptr->curTsID;  // FIXME: This should be looked up from the given recID
   const int varID = streamptr->tsteps[tsID].records[recID].varID;
   size_t recsize = streamptr->tsteps[tsID].records[recID].size;
 
@@ -153,7 +151,7 @@ DecodeArgs grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *
       const int fileID = streamptr->fileID;
       const off_t recpos = streamptr->tsteps[tsID].records[recID].position;
 
-      if (recsize == 0) Error("Internal problem! Recordsize is zero for record %d at timestep %d", recID+1, tsID+1);
+      if (recsize == 0) Error("Internal problem! Recordsize is zero for record %d at timestep %d", recID + 1, tsID + 1);
 
       if (resetFilePos)
         {
@@ -186,33 +184,34 @@ DecodeArgs grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *
   };
 }
 
-typedef struct JobDescriptor {
+typedef struct JobDescriptor
+{
   DecodeArgs args;
   AsyncJob *job;
 } JobDescriptor;
 
-static
-void JobDescriptor_startJob(AsyncManager *jobManager, JobDescriptor *me, stream_t *streamptr, int recID, int memtype, bool resetFilePos)
+static void
+JobDescriptor_startJob(AsyncManager *jobManager, JobDescriptor *me, stream_t *streamptr, int recID, int memtype, bool resetFilePos)
 {
   me->args = grb_read_raw_data(streamptr, recID, memtype, NULL, NULL, resetFilePos);
   me->job = AsyncWorker_requestWork(jobManager, grb_decode_record, &me->args);
   if (!me->job) xabort("error while trying to send job to worker thread");
 }
 
-static
-void JobDescriptor_finishJob(AsyncManager *jobManager, JobDescriptor *me, void *data, size_t *nmiss)
+static void
+JobDescriptor_finishJob(AsyncManager *jobManager, JobDescriptor *me, void *data, size_t *nmiss)
 {
   if (AsyncWorker_wait(jobManager, me->job)) xabort("error executing job in worker thread");
-  memcpy(data, me->args.data, me->args.gridsize*(me->args.memtype == MEMTYPE_FLOAT ? sizeof(float) : sizeof(double)));
+  memcpy(data, me->args.data, me->args.gridsize * (me->args.memtype == MEMTYPE_FLOAT ? sizeof(float) : sizeof(double)));
   *nmiss = me->args.nmiss;
 
   Free(me->args.gribbuffer);
   Free(me->args.data);
-  me->args.recID = -1;	// mark as inactive
+  me->args.recID = -1;  // mark as inactive
 }
 
-static
-void grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, size_t *nmiss, bool resetFilePos)
+static void
+grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, size_t *nmiss, bool resetFilePos)
 {
   bool jobFound = false;
 
@@ -229,7 +228,7 @@ void grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *dat
 
       if (!jobs)
         {
-          jobs = (JobDescriptor *)malloc(workerCount*sizeof*jobs);
+          jobs = (JobDescriptor *) malloc(workerCount * sizeof *jobs);
           streamptr->jobs = jobs;
           for (int i = 0; i < workerCount; i++) jobs[i].args.recID = -1;
           if (AsyncWorker_init(&jobManager, workerCount)) xabort("error while trying to start worker threads");
@@ -237,7 +236,8 @@ void grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *dat
         }
 
       if (recID == 0) streamptr->nextRecID = 0;
-      if (recID == 0) streamptr->cachedTsID = streamptr->curTsID; // no active workers -> we may start processing records of a new timestep
+      if (recID == 0)
+        streamptr->cachedTsID = streamptr->curTsID;  // no active workers -> we may start processing records of a new timestep
 
       if (streamptr->cachedTsID == streamptr->curTsID)
         {
@@ -247,7 +247,8 @@ void grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *dat
               JobDescriptor *jd = &jobs[i];
               if (jd->args.recID < 0)
                 {
-                  JobDescriptor_startJob(jobManager, jd, streamptr, timestep->recIDs[streamptr->nextRecID++], memtype, resetFilePos);
+                  JobDescriptor_startJob(jobManager, jd, streamptr, timestep->recIDs[streamptr->nextRecID++], memtype,
+                                         resetFilePos);
                 }
             }
 
@@ -261,7 +262,8 @@ void grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *dat
                   JobDescriptor_finishJob(jobManager, jd, data, nmiss);
                   if (streamptr->nextRecID < timestep->nrecs)
                     {
-                      JobDescriptor_startJob(jobManager, jd, streamptr, timestep->recIDs[streamptr->nextRecID++], memtype, resetFilePos);
+                      JobDescriptor_startJob(jobManager, jd, streamptr, timestep->recIDs[streamptr->nextRecID++], memtype,
+                                             resetFilePos);
                     }
                 }
             }
@@ -277,8 +279,8 @@ void grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *dat
     }
 }
 
-
-void grb_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss)
+void
+grb_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss)
 {
   const int tsID = streamptr->curTsID;
   const int vrecID = streamptr->tsteps[tsID].curRecID;
@@ -287,8 +289,8 @@ void grb_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss
   grb_read_next_record(streamptr, recID, memtype, data, nmiss, false);
 }
 
-
-void grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *nmiss)
+void
+grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *nmiss)
 {
   const int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
   const int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
@@ -296,8 +298,8 @@ void grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
   grb_read_next_record(streamptr, recID, memtype, data, nmiss, true);
 }
 
-
-void grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nmiss)
+void
+grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nmiss)
 {
   const int vlistID = streamptr->vlistID;
   const int fileID = streamptr->fileID;
@@ -310,7 +312,7 @@ void grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_
   const int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
   const int nlevs = streamptr->vars[varID].recordTable[0].nlevs;
 
-  if ( CDI_Debug ) Message("nlevs = %d gridID = %d gridsize = %zu", nlevs, gridID, gridsize);
+  if (CDI_Debug) Message("nlevs = %d gridID = %d gridsize = %zu", nlevs, gridID, gridsize);
 
   *nmiss = 0;
   for (int levelID = 0; levelID < nlevs; levelID++)
@@ -318,10 +320,10 @@ void grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_
       const int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
 
       void *datap = NULL;
-      if ( memtype == MEMTYPE_FLOAT )
-        datap = (float*)data + levelID*gridsize;
+      if (memtype == MEMTYPE_FLOAT)
+        datap = (float *) data + levelID * gridsize;
       else
-        datap = (double*)data + levelID*gridsize;
+        datap = (double *) data + levelID * gridsize;
 
       size_t imiss;
       grb_read_next_record(streamptr, recID, memtype, datap, &imiss, false);

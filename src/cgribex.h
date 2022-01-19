@@ -1,5 +1,5 @@
-#ifndef  CGRIBEX_H
-#define  CGRIBEX_H
+#ifndef CGRIBEX_H
+#define CGRIBEX_H
 
 // clang-format off
 
@@ -252,5 +252,4 @@ double calculate_pfactor_double(const double* spectralField, long fieldTruncatio
 
 // clang-format on
 
-#endif  /* CGRIBEX_H */ 
-
+#endif /* CGRIBEX_H */

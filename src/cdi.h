@@ -4,8 +4,8 @@
   This is the only file that must be included to use the CDI library from C.
 */
 
-#ifndef  CDI_H_
-#define  CDI_H_
+#ifndef CDI_H_
+#define CDI_H_
 
 // clang-format off
 
@@ -1373,7 +1373,7 @@ extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, 
 
 // clang-format on
 
-#endif  /* CDI_H_ */
+#endif /* CDI_H_ */
 /*
  * Local Variables:
  * c-file-style: "Java"

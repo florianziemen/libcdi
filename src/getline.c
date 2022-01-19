@@ -40,48 +40,47 @@ getline(char **linebuf, size_t *linebuf_size, FILE *fp)
   char *buf;
   ssize_t status = 0;
 
-  if ( feof(fp) ) return -1;
+  if (feof(fp)) return -1;
 
   if (!linebuf_size || !linebuf)
-  {
-    errno = EINVAL;
-    return -1;
-  }
-  if (!*linebuf)
-  {
-    buf_size = 80;
-    buf = malloc(buf_size);
-    if (!buf) return -1;
-  }
-  else
-  {
-    buf_size = *linebuf_size;
-    buf = *linebuf;
-  }
-  /* initially buf_size is guaranteed < INT_MAX */
-  if ((status = (fgets(buf, (int)buf_size, fp) != NULL)))
-  {
-    len = strlen(buf);
-    if (buf[len-1] != '\n')
     {
-      do {
-        size_t increment = 2 * buf_size - len <= INT_MAX
-          ? 2 * buf_size - len : INT_MAX - (buf_size - len);
-        void *temp = realloc(buf, buf_size + increment);
-        if (!temp)
-        {
-          status = -1;
-          break;
-        }
-        buf = temp;
-        buf_size += increment;
-        old_len = len;
-      } while(fgets(buf + len, (int)(buf_size - len), fp)
-              && (len += strlen(buf + len)) > old_len
-              && buf[len-1] != '\n');
+      errno = EINVAL;
+      return -1;
     }
-    status = len > SSIZE_MAX ? SSIZE_MAX : (ssize_t)len;
-  }
+  if (!*linebuf)
+    {
+      buf_size = 80;
+      buf = malloc(buf_size);
+      if (!buf) return -1;
+    }
+  else
+    {
+      buf_size = *linebuf_size;
+      buf = *linebuf;
+    }
+  /* initially buf_size is guaranteed < INT_MAX */
+  if ((status = (fgets(buf, (int) buf_size, fp) != NULL)))
+    {
+      len = strlen(buf);
+      if (buf[len - 1] != '\n')
+        {
+          do
+            {
+              size_t increment = 2 * buf_size - len <= INT_MAX ? 2 * buf_size - len : INT_MAX - (buf_size - len);
+              void *temp = realloc(buf, buf_size + increment);
+              if (!temp)
+                {
+                  status = -1;
+                  break;
+                }
+              buf = temp;
+              buf_size += increment;
+              old_len = len;
+            }
+          while (fgets(buf + len, (int) (buf_size - len), fp) && (len += strlen(buf + len)) > old_len && buf[len - 1] != '\n');
+        }
+      status = len > SSIZE_MAX ? SSIZE_MAX : (ssize_t) len;
+    }
 
   *linebuf_size = buf_size;
   *linebuf = buf;

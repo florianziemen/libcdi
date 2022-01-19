@@ -12,7 +12,8 @@
 
 #ifdef HAVE_LIBNETCDF
 
-void cdf_create(const char *path, int cmode, int *ncidp)
+void
+cdf_create(const char *path, int cmode, int *ncidp)
 {
   size_t initialsz = 0, chunksizehint = 0;
 
@@ -20,15 +21,12 @@ void cdf_create(const char *path, int cmode, int *ncidp)
   chunksizehint = 16777216; /* 16 MB */
 #endif
 
-  if (CDI_Netcdf_Chunksizehint != CDI_UNDEFID)
-    chunksizehint = (size_t)CDI_Netcdf_Chunksizehint;
+  if (CDI_Netcdf_Chunksizehint != CDI_UNDEFID) chunksizehint = (size_t) CDI_Netcdf_Chunksizehint;
 
-  cdi_nc__create_funcp my_nc__create =
-    (cdi_nc__create_funcp)namespaceSwitchGet(NSSWITCH_NC__CREATE).func;
+  cdi_nc__create_funcp my_nc__create = (cdi_nc__create_funcp) namespaceSwitchGet(NSSWITCH_NC__CREATE).func;
   int status = my_nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  mode=%d  chunksizehint=%zu  file=%s", *ncidp, cmode, chunksizehint, path);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  mode=%d  chunksizehint=%zu  file=%s", *ncidp, cmode, chunksizehint, path);
 
   if (status != NC_NOERR) Error("%s: %s", path, nc_strerror(status));
 
@@ -38,12 +36,12 @@ void cdf_create(const char *path, int cmode, int *ncidp)
   if (status != NC_NOERR) Error("%s: %s", path, nc_strerror(status));
 }
 
-
-int cdf_open(const char *path, int omode, int *ncidp)
+int
+cdf_open(const char *path, int omode, int *ncidp)
 {
   int status = 0;
 
-  if (strstr(path, ":/")) // ESDM and DAP
+  if (strstr(path, ":/"))  // ESDM and DAP
     {
       status = nc_open(path, omode, ncidp);
     }
@@ -58,7 +56,7 @@ int cdf_open(const char *path, int omode, int *ncidp)
       if (chunksizehint > (size_t) filestat.st_size) chunksizehint = (size_t) filestat.st_size;
 #endif
       // if (chunksizehint < ChunkSizeMin) chunksizehint = ChunkSizeMin;
-      if (CDI_Netcdf_Chunksizehint != CDI_UNDEFID) chunksizehint = (size_t)CDI_Netcdf_Chunksizehint;
+      if (CDI_Netcdf_Chunksizehint != CDI_UNDEFID) chunksizehint = (size_t) CDI_Netcdf_Chunksizehint;
 
       // FIXME: parallel part missing
       status = nc__open(path, omode, &chunksizehint, ncidp);
@@ -73,282 +71,257 @@ int cdf_open(const char *path, int omode, int *ncidp)
   return status;
 }
 
-
-void cdf_close(int ncid)
+void
+cdf_close(int ncid)
 {
   const int status = nc_close(ncid);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_redef(int ncid)
+void
+cdf_redef(int ncid)
 {
   const int status = nc_redef(ncid);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_enddef(int ncid)
+void
+cdf_enddef(int ncid)
 {
   const int status = nc_enddef(ncid);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf__enddef(const int ncid, const size_t hdr_pad)
+void
+cdf__enddef(const int ncid, const size_t hdr_pad)
 {
-  const size_t v_align   = 4UL; // [B] Alignment of beginning of data section for fixed variables
-  const size_t v_minfree = 0UL; // [B] Pad at end of data section for fixed size variables
-  const size_t r_align   = 4UL; // [B] Alignment of beginning of data section for record variables
+  const size_t v_align = 4UL;    // [B] Alignment of beginning of data section for fixed variables
+  const size_t v_minfree = 0UL;  // [B] Pad at end of data section for fixed size variables
+  const size_t r_align = 4UL;    // [B] Alignment of beginning of data section for record variables
 
   // nc_enddef(ncid) is equivalent to nc__enddef(ncid, 0, 4, 0, 4)
   const int status = nc__enddef(ncid, hdr_pad, v_align, v_minfree, r_align);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_sync(int ncid)
+void
+cdf_sync(int ncid)
 {
   const int status = nc_sync(ncid);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq(int ncid, int *ndimsp, int *nvarsp, int *ngattsp, int *unlimdimidp)
+void
+cdf_inq(int ncid, int *ndimsp, int *nvarsp, int *ngattsp, int *unlimdimidp)
 {
   const int status = nc_inq(ncid, ndimsp, nvarsp, ngattsp, unlimdimidp);
 
   if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  ndims=%d  nvars=%d  ngatts=%d  unlimid=%d",
-	    ncid, *ndimsp, *nvarsp, *ngattsp, *unlimdimidp);
+    Message("ncid=%d  ndims=%d  nvars=%d  ngatts=%d  unlimid=%d", ncid, *ndimsp, *nvarsp, *ngattsp, *unlimdimidp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_def_dim(int ncid, const char *name, size_t len, int *dimidp)
+void
+cdf_def_dim(int ncid, const char *name, size_t len, int *dimidp)
 {
   const int status = nc_def_dim(ncid, name, len, dimidp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  name=%s  len=%d", ncid, name, len);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  name=%s  len=%d", ncid, name, len);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_dimid(int ncid, const char *name, int *dimidp)
+void
+cdf_inq_dimid(int ncid, const char *name, int *dimidp)
 {
   const int status = nc_inq_dimid(ncid, name, dimidp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  name=%s  dimid=%d", ncid, name, *dimidp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  name=%s  dimid=%d", ncid, name, *dimidp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_dim(int ncid, int dimid, char *name, size_t * lengthp)
+void
+cdf_inq_dim(int ncid, int dimid, char *name, size_t *lengthp)
 {
   const int status = nc_inq_dim(ncid, dimid, name, lengthp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  dimid=%d  length=%d  name=%s", ncid, dimid, *lengthp, name);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  dimid=%d  length=%d  name=%s", ncid, dimid, *lengthp, name);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_dimname(int ncid, int dimid, char *name)
+void
+cdf_inq_dimname(int ncid, int dimid, char *name)
 {
   const int status = nc_inq_dimname(ncid, dimid, name);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  dimid=%d  name=%s", ncid, dimid, name);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  dimid=%d  name=%s", ncid, dimid, name);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_dimlen(int ncid, int dimid, size_t * lengthp)
+void
+cdf_inq_dimlen(int ncid, int dimid, size_t *lengthp)
 {
   const int status = nc_inq_dimlen(ncid, dimid, lengthp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  dimid=%d  length=%d", ncid, dimid, *lengthp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  dimid=%d  length=%d", ncid, dimid, *lengthp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_def_var(int ncid, const char *name, nc_type xtype, int ndims,
-                 const int dimids[], int *varidp)
+void
+cdf_def_var(int ncid, const char *name, nc_type xtype, int ndims, const int dimids[], int *varidp)
 {
-  cdi_cdf_def_var_funcp my_cdf_def_var
-    = (cdi_cdf_def_var_funcp)namespaceSwitchGet(NSSWITCH_CDF_DEF_VAR).func;
+  cdi_cdf_def_var_funcp my_cdf_def_var = (cdi_cdf_def_var_funcp) namespaceSwitchGet(NSSWITCH_CDF_DEF_VAR).func;
   my_cdf_def_var(ncid, name, xtype, ndims, dimids, varidp);
 }
 
 void
-cdf_def_var_serial(int ncid, const char *name, nc_type xtype, int ndims,
-                   const int dimids[], int *varidp)
+cdf_def_var_serial(int ncid, const char *name, nc_type xtype, int ndims, const int dimids[], int *varidp)
 {
   const int status = nc_def_var(ncid, name, xtype, ndims, dimids, varidp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  name=%s  xtype=%d  ndims=%d  varid=%d", ncid, name, xtype, ndims, *varidp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  name=%s  xtype=%d  ndims=%d  varid=%d", ncid, name, xtype, ndims, *varidp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-
-void cdf_inq_varid(int ncid, const char *name, int *varidp)
+void
+cdf_inq_varid(int ncid, const char *name, int *varidp)
 {
   const int status = nc_inq_varid(ncid, name, varidp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  name=%s  varid=%d", ncid, name, *varidp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  name=%s  varid=%d", ncid, name, *varidp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_nvars(int ncid, int *nvarsp)
+void
+cdf_inq_nvars(int ncid, int *nvarsp)
 {
   const int status = nc_inq_nvars(ncid, nvarsp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  nvars=%d", ncid, *nvarsp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  nvars=%d", ncid, *nvarsp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp,
-		 int dimids[], int *nattsp)
+void
+cdf_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp, int dimids[], int *nattsp)
 {
   const int status = nc_inq_var(ncid, varid, name, xtypep, ndimsp, dimids, nattsp);
 
   if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  ndims=%d  xtype=%d  natts=%d  name=%s",
-	    ncid, varid, *ndimsp, *xtypep, *nattsp, name);
+    Message("ncid=%d  varid=%d  ndims=%d  xtype=%d  natts=%d  name=%s", ncid, varid, *ndimsp, *xtypep, *nattsp, name);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_varname(int ncid, int varid, char *name)
+void
+cdf_inq_varname(int ncid, int varid, char *name)
 {
   const int status = nc_inq_varname(ncid, varid, name);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  name=%s", ncid, varid, name);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  name=%s", ncid, varid, name);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_vartype(int ncid, int varid, nc_type *xtypep)
+void
+cdf_inq_vartype(int ncid, int varid, nc_type *xtypep)
 {
   const int status = nc_inq_vartype(ncid, varid, xtypep);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  xtype=%s", ncid, varid, *xtypep);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  xtype=%s", ncid, varid, *xtypep);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_varndims(int ncid, int varid, int *ndimsp)
+void
+cdf_inq_varndims(int ncid, int varid, int *ndimsp)
 {
   const int status = nc_inq_varndims(ncid, varid, ndimsp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_vardimid(int ncid, int varid, int dimids[])
+void
+cdf_inq_vardimid(int ncid, int varid, int dimids[])
 {
   const int status = nc_inq_vardimid(ncid, varid, dimids);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_varnatts(int ncid, int varid, int *nattsp)
+void
+cdf_inq_varnatts(int ncid, int varid, int *nattsp)
 {
   const int status = nc_inq_varnatts(ncid, varid, nattsp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  nattsp=%d", ncid, varid, *nattsp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  nattsp=%d", ncid, varid, *nattsp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_put_var_text(int ncid, int varid, const char *tp)
+void
+cdf_put_var_text(int ncid, int varid, const char *tp)
 {
   const int status = nc_put_var_text(ncid, varid, tp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("%d %d %s", ncid, varid, tp);
+  if (CDF_Debug || status != NC_NOERR) Message("%d %d %s", ncid, varid, tp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_put_var_short(int ncid, int varid, const short *sp)
+void
+cdf_put_var_short(int ncid, int varid, const short *sp)
 {
   const int status = nc_put_var_short(ncid, varid, sp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("%d %d %hd", ncid, varid, *sp);
+  if (CDF_Debug || status != NC_NOERR) Message("%d %d %hd", ncid, varid, *sp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_put_var_int(int ncid, int varid, const int *ip)
+void
+cdf_put_var_int(int ncid, int varid, const int *ip)
 {
   const int status = nc_put_var_int(ncid, varid, ip);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("%d %d %d", ncid, varid, *ip);
+  if (CDF_Debug || status != NC_NOERR) Message("%d %d %d", ncid, varid, *ip);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_put_var_long(int ncid, int varid, const long *lp)
+void
+cdf_put_var_long(int ncid, int varid, const long *lp)
 {
   const int status = nc_put_var_long(ncid, varid, lp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("%d %d %ld", ncid, varid, *lp);
+  if (CDF_Debug || status != NC_NOERR) Message("%d %d %ld", ncid, varid, *lp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_put_var_float(int ncid, int varid, const float *fp)
+void
+cdf_put_var_float(int ncid, int varid, const float *fp)
 {
   const int status = nc_put_var_float(ncid, varid, fp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("%d %d %f", ncid, varid, *fp);
+  if (CDF_Debug || status != NC_NOERR) Message("%d %d %f", ncid, varid, *fp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-static
-const char *cdf_var_type(nc_type xtype)
+static const char *
+cdf_var_type(nc_type xtype)
 {
   const char *ctype = "unknown";
 
@@ -372,32 +345,36 @@ const char *cdf_var_type(nc_type xtype)
   return ctype;
 }
 
-static
-void minmaxval(size_t nvals, const double *array, double *minval, double *maxval)
+static void
+minmaxval(size_t nvals, const double *array, double *minval, double *maxval)
 {
   *minval = array[0];
   *maxval = array[0];
   for (size_t i = 1; i < nvals; ++i)
     {
-      if      (array[i] > *maxval) *maxval = array[i];
-      else if (array[i] < *minval) *minval = array[i];
+      if (array[i] > *maxval)
+        *maxval = array[i];
+      else if (array[i] < *minval)
+        *minval = array[i];
     }
 }
 
-static
-void minmaxvalf(size_t nvals, const float *array, double *minval, double *maxval)
+static void
+minmaxvalf(size_t nvals, const float *array, double *minval, double *maxval)
 {
   *minval = array[0];
   *maxval = array[0];
   for (size_t i = 1; i < nvals; ++i)
     {
-      if      (array[i] > *maxval) *maxval = array[i];
-      else if (array[i] < *minval) *minval = array[i];
+      if (array[i] > *maxval)
+        *maxval = array[i];
+      else if (array[i] < *minval)
+        *minval = array[i];
     }
 }
 
-void cdf_put_vara_double(int ncid, int varid, const size_t start[],
-                         const size_t count[], const double *dp)
+void
+cdf_put_vara_double(int ncid, int varid, const size_t start[], const size_t count[], const double *dp)
 {
   const int status = nc_put_vara_double(ncid, varid, start, count, dp);
 
@@ -420,9 +397,8 @@ void cdf_put_vara_double(int ncid, int varid, const size_t start[],
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_put_vara_float(int ncid, int varid, const size_t start[],
-                        const size_t count[], const float *fp)
+void
+cdf_put_vara_float(int ncid, int varid, const size_t start[], const size_t count[], const float *fp)
 {
   const int status = nc_put_vara_float(ncid, varid, start, count, fp);
 
@@ -445,356 +421,325 @@ void cdf_put_vara_float(int ncid, int varid, const size_t start[],
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_put_vara(int ncid, int varid, const size_t start[], const size_t count[], const void *cp)
+void
+cdf_put_vara(int ncid, int varid, const size_t start[], const size_t count[], const void *cp)
 {
   const int status = nc_put_vara(ncid, varid, start, count, cp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_vara(int ncid, int varid, const size_t start[], const size_t count[], void *cp)
+void
+cdf_get_vara(int ncid, int varid, const size_t start[], const size_t count[], void *cp)
 {
   const int status = nc_get_vara(ncid, varid, start, count, cp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_vara_int(int ncid, int varid, const size_t start[], const size_t count[], int *dp)
+void
+cdf_get_vara_int(int ncid, int varid, const size_t start[], const size_t count[], int *dp)
 {
   const int status = nc_get_vara_int(ncid, varid, start, count, dp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_vara_double(int ncid, int varid, const size_t start[], const size_t count[], double *dp)
+void
+cdf_get_vara_double(int ncid, int varid, const size_t start[], const size_t count[], double *dp)
 {
   const int status = nc_get_vara_double(ncid, varid, start, count, dp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  start[0]=%zu  count[0]=%zu", ncid, varid, start[0], count[0]);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  start[0]=%zu  count[0]=%zu", ncid, varid, start[0], count[0]);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_vara_float(int ncid, int varid, const size_t start[], const size_t count[], float *fp)
+void
+cdf_get_vara_float(int ncid, int varid, const size_t start[], const size_t count[], float *fp)
 {
   const int status = nc_get_vara_float(ncid, varid, start, count, fp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  start[0]=%zu  count[0]=%zu", ncid, varid, start[0], count[0]);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  start[0]=%zu  count[0]=%zu", ncid, varid, start[0], count[0]);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_vara_text(int ncid, int varid, const size_t start[], const size_t count[], char *tp)
+void
+cdf_get_vara_text(int ncid, int varid, const size_t start[], const size_t count[], char *tp)
 {
   const int status = nc_get_vara_text(ncid, varid, start, count, tp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_vara_uchar(int ncid, int varid, const size_t start[], const size_t count[], unsigned char *tp)
+void
+cdf_get_vara_uchar(int ncid, int varid, const size_t start[], const size_t count[], unsigned char *tp)
 {
   const int status = nc_get_vara_uchar(ncid, varid, start, count, tp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_put_var_double(int ncid, int varid, const double *dp)
+void
+cdf_put_var_double(int ncid, int varid, const double *dp)
 {
   const int status = nc_put_var_double(ncid, varid, dp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  val0=%f", ncid, varid, *dp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  val0=%f", ncid, varid, *dp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_var1_text(int ncid, int varid, const size_t index[], char *tp)
+void
+cdf_get_var1_text(int ncid, int varid, const size_t index[], char *tp)
 {
   const int status = nc_get_var1_text(ncid, varid, index, tp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_var1_double(int ncid, int varid, const size_t index[], double *dp)
+void
+cdf_get_var1_double(int ncid, int varid, const size_t index[], double *dp)
 {
   const int status = nc_get_var1_double(ncid, varid, index, dp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_put_var1_double(int ncid, int varid, const size_t index[], const double *dp)
+void
+cdf_put_var1_double(int ncid, int varid, const size_t index[], const double *dp)
 {
   const int status = nc_put_var1_double(ncid, varid, index, dp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  val=%f", ncid, varid, *dp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  val=%f", ncid, varid, *dp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_var_text(int ncid, int varid, char *tp)
+void
+cdf_get_var_text(int ncid, int varid, char *tp)
 {
   const int status = nc_get_var_text(ncid, varid, tp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_var_short(int ncid, int varid, short *sp)
+void
+cdf_get_var_short(int ncid, int varid, short *sp)
 {
   const int status = nc_get_var_short(ncid, varid, sp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_var_int(int ncid, int varid, int *ip)
+void
+cdf_get_var_int(int ncid, int varid, int *ip)
 {
   const int status = nc_get_var_int(ncid, varid, ip);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_var_long(int ncid, int varid, long *lp)
+void
+cdf_get_var_long(int ncid, int varid, long *lp)
 {
   const int status = nc_get_var_long(ncid, varid, lp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_var_float(int ncid, int varid, float *fp)
+void
+cdf_get_var_float(int ncid, int varid, float *fp)
 {
   const int status = nc_get_var_float(ncid, varid, fp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d", ncid, varid);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_var_double(int ncid, int varid, double *dp)
+void
+cdf_get_var_double(int ncid, int varid, double *dp)
 {
   const int status = nc_get_var_double(ncid, varid, dp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  val[0]=%f", ncid, varid, *dp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  val[0]=%f", ncid, varid, *dp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_copy_att(int ncid_in, int varid_in, const char *name, int ncid_out, int varid_out)
+void
+cdf_copy_att(int ncid_in, int varid_in, const char *name, int ncid_out, int varid_out)
 {
   const int status = nc_copy_att(ncid_in, varid_in, name, ncid_out, varid_out);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("%d %d %s %d %d", ncid_in, varid_out, name, ncid_out, varid_out);
+  if (CDF_Debug || status != NC_NOERR) Message("%d %d %s %d %d", ncid_in, varid_out, name, ncid_out, varid_out);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_put_att_text(int ncid, int varid, const char *name, size_t len, const char *tp)
+void
+cdf_put_att_text(int ncid, int varid, const char *name, size_t len, const char *tp)
 {
   const int status = nc_put_att_text(ncid, varid, name, len, tp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  att=%s  text=%.*s", ncid, varid, name, (int)len, tp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  text=%.*s", ncid, varid, name, (int) len, tp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_put_att_int(int ncid, int varid, const char *name, nc_type xtype, size_t len, const int *ip)
+void
+cdf_put_att_int(int ncid, int varid, const char *name, nc_type xtype, size_t len, const int *ip)
 {
   int status = nc_put_att_int(ncid, varid, name, xtype, len, ip);
 
   if (status == NC_ERANGE) status = NC_NOERR;
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  att=%s  val=%d", ncid, varid, name, *ip);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  val=%d", ncid, varid, name, *ip);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_put_att_float(int ncid, int varid, const char *name, nc_type xtype, size_t len, const float *dp)
+void
+cdf_put_att_float(int ncid, int varid, const char *name, nc_type xtype, size_t len, const float *dp)
 {
   const int status = nc_put_att_float(ncid, varid, name, xtype, len, dp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  att=%s  val=%g", ncid, varid, name, *dp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  val=%g", ncid, varid, name, *dp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_put_att_double(int ncid, int varid, const char *name, nc_type xtype, size_t len, const double *dp)
+void
+cdf_put_att_double(int ncid, int varid, const char *name, nc_type xtype, size_t len, const double *dp)
 {
   const int status = nc_put_att_double(ncid, varid, name, xtype, len, dp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  att=%s  val=%g", ncid, varid, name, *dp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  val=%g", ncid, varid, name, *dp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_att_text(int ncid, int varid, const char *name, char *tp)
+void
+cdf_get_att_text(int ncid, int varid, const char *name, char *tp)
 {
   const int status = nc_get_att_text(ncid, varid, name, tp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  name=%s", ncid, varid, name);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  name=%s", ncid, varid, name);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_att_string(int ncid, int varid, const char *name, char **tp)
+void
+cdf_get_att_string(int ncid, int varid, const char *name, char **tp)
 {
-#ifdef  HAVE_NETCDF4
+#ifdef HAVE_NETCDF4
   const int status = nc_get_att_string(ncid, varid, name, tp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  name=%s", ncid, varid, name);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  name=%s", ncid, varid, name);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 #endif
 }
 
-
-void cdf_get_att_int(int ncid, int varid, const char *name, int *ip)
+void
+cdf_get_att_int(int ncid, int varid, const char *name, int *ip)
 {
   int status = nc_get_att_int(ncid, varid, name, ip);
 
   if (status == NC_ERANGE) status = NC_NOERR;
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  att=%s  val=%d", ncid, varid, name, *ip);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  val=%d", ncid, varid, name, *ip);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_get_att_double(int ncid, int varid, const char *name, double *dp)
+void
+cdf_get_att_double(int ncid, int varid, const char *name, double *dp)
 {
   const int status = nc_get_att_double(ncid, varid, name, dp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  att=%s  val=%.9g", ncid, varid, name, *dp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  val=%.9g", ncid, varid, name, *dp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_att(int ncid, int varid, const char *name, nc_type *xtypep, size_t *lenp)
+void
+cdf_inq_att(int ncid, int varid, const char *name, nc_type *xtypep, size_t *lenp)
 {
   const int status = nc_inq_att(ncid, varid, name, xtypep, lenp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  att=%s", ncid, varid, name);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s", ncid, varid, name);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_atttype(int ncid, int varid, const char *name, nc_type * xtypep)
+void
+cdf_inq_atttype(int ncid, int varid, const char *name, nc_type *xtypep)
 {
   const int status = nc_inq_atttype(ncid, varid, name, xtypep);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  att=%s", ncid, varid, name);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s", ncid, varid, name);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_attlen(int ncid, int varid, const char *name, size_t * lenp)
+void
+cdf_inq_attlen(int ncid, int varid, const char *name, size_t *lenp)
 {
   const int status = nc_inq_attlen(ncid, varid, name, lenp);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  att=%s  len=%d", ncid, varid, name, *lenp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  len=%d", ncid, varid, name, *lenp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_attname(int ncid, int varid, int attnum, char *name)
+void
+cdf_inq_attname(int ncid, int varid, int attnum, char *name)
 {
   const int status = nc_inq_attname(ncid, varid, attnum, name);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  attnum=%d  att=%s", ncid, varid, attnum, name);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  attnum=%d  att=%s", ncid, varid, attnum, name);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-void cdf_inq_attid(int ncid, int varid, const char *name, int *attnump)
+void
+cdf_inq_attid(int ncid, int varid, const char *name, int *attnump)
 {
   const int status = nc_inq_attid(ncid, varid, name, attnump);
 
-  if (CDF_Debug || status != NC_NOERR)
-    Message("ncid=%d  varid=%d  att=%s", ncid, varid, name);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s", ncid, varid, name);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-
-#ifdef  HAVE_NETCDF4
-void cdf_def_var_chunking(int ncid, int varid, int storage, const size_t *chunksizesp)
+#ifdef HAVE_NETCDF4
+void
+cdf_def_var_chunking(int ncid, int varid, int storage, const size_t *chunksizesp)
 {
   const int status = nc_def_var_chunking(ncid, varid, storage, chunksizesp);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));

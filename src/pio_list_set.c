@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <stdbool.h>
@@ -16,22 +16,24 @@
 
 struct cons
 {
-  void * val;
-  struct cons * next;
+  void *val;
+  struct cons *next;
 };
 
-struct listSet {
+struct listSet
+{
   struct cons *head, *tail;
   valDestroyFunction valDestroy;
   eqPredicate keyCompare;
   int count;
 };
 
-listSet *listSetNew( valDestroyFunction vD, eqPredicate kC )
+listSet *
+listSetNew(valDestroyFunction vD, eqPredicate kC)
 {
   listSet *myq;
 
-  myq = (listSet*) Malloc( sizeof ( listSet ));
+  myq = (listSet *) Malloc(sizeof(listSet));
 
   myq->head = NULL;
   myq->tail = NULL;
@@ -47,20 +49,20 @@ listSetDelete(listSet *q)
 {
   struct cons *curr, *succ;
 
-  if ( q->head )
+  if (q->head)
     {
       curr = q->head;
 
-      while ( curr )
+      while (curr)
         {
           succ = curr->next;
-          ( *( q->valDestroy )) ( curr->val );
-          Free( curr );
+          (*(q->valDestroy))(curr->val);
+          Free(curr);
           curr = succ;
         }
     }
 
-  Free( q );
+  Free(q);
 
   return;
 }
@@ -74,13 +76,12 @@ listSetAdd(listSet *q, void *v)
     struct cons *p;
     for (p = q->head; p; p = p->next)
       // ensure unique keys
-      if (q->keyCompare(v, p->val))
-        return -1;
+      if (q->keyCompare(v, p->val)) return -1;
   }
 
-  if ((newCons = (struct cons*) Malloc(sizeof(struct cons))) == NULL)
+  if ((newCons = (struct cons *) Malloc(sizeof(struct cons))) == NULL)
     {
-      perror ( "pio_listSet: listSetAdd (): Not enough memory" );
+      perror("pio_listSet: listSetAdd (): Not enough memory");
       /* FIXME: why not abort? */
       return 1;
     }
@@ -88,8 +89,7 @@ listSetAdd(listSet *q, void *v)
   newCons->val = v;
   newCons->next = NULL;
 
-
-  if ( q->tail != NULL)
+  if (q->tail != NULL)
     q->tail->next = newCons;
   else
     q->head = newCons;
@@ -100,8 +100,7 @@ listSetAdd(listSet *q, void *v)
 }
 
 int
-listSetRemove(listSet *q, int (*predicate)(void *, void *),
-              void *data)
+listSetRemove(listSet *q, int (*predicate)(void *, void *), void *data)
 {
   struct cons **p;
 
@@ -125,8 +124,7 @@ listSetGet(listSet *q, int (*predicate)(void *, void *), void *data)
   struct cons *p;
   xassert(q && predicate);
   for (p = q->head; p; p = p->next)
-    if (predicate(p->val, data))
-      return p->val;
+    if (predicate(p->val, data)) return p->val;
   return NULL;
 }
 
@@ -136,13 +134,11 @@ listSetIsEmpty(listSet *q)
   return q->head == NULL;
 }
 
-
 void
 listSetForeach(listSet *q, void (*func)(void *elem, void *data), void *data)
 {
   struct cons *p;
-  for (p = q->head; p; p = p->next)
-    func(p->val, data);
+  for (p = q->head; p; p = p->next) func(p->val, data);
 }
 
 /*

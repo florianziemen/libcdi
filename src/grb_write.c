@@ -20,67 +20,62 @@
 #include "stream_grb.h"
 #include "stream_gribapi.h"
 #include "file.h"
-#include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
+#include "cgribex.h" /* gribZip gribGetZip gribGinfo */
 #include "namespace.h"
 
-
-static
-size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
-		 int date, int time, int tsteptype, int numavg,
-		 size_t datasize, const void *data, size_t nmiss, void **gribbuffer,
-		 int comptype, void *gribContainers)
+static size_t
+grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time,
+          int tsteptype, int numavg, size_t datasize, const void *data, size_t nmiss, void **gribbuffer, int comptype,
+          void *gribContainers)
 {
   size_t nbytes = 0;
 
 #ifdef HAVE_LIBCGRIBEX
   if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
     {
-      size_t gribbuffersize = datasize*4+3000;
+      size_t gribbuffersize = datasize * 4 + 3000;
       *gribbuffer = Malloc(gribbuffersize);
 
-      nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID,
-			     date, time, tsteptype, numavg,
-			     datasize, data, nmiss, *gribbuffer, gribbuffersize);
+      nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, datasize, data,
+                             nmiss, *gribbuffer, gribbuffersize);
     }
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
     {
 #ifdef GRIBCONTAINER2D
-      void *gribContainer = (void *) &((gribContainer_t **)gribContainers)[varID][levelID];
+      void *gribContainer = (void *) &((gribContainer_t **) gribContainers)[varID][levelID];
 #else
-      void *gribContainer = (void *) &((gribContainer_t *)gribContainers)[varID];
+      void *gribContainer = (void *) &((gribContainer_t *) gribContainers)[varID];
 #endif
       const void *datap = data;
-      if ( memtype == MEMTYPE_FLOAT )
+      if (memtype == MEMTYPE_FLOAT)
         {
-          const float *dataf = (const float*) data;
-          double *datad = (double*) Malloc(datasize*sizeof(double));
-          for ( size_t i = 0; i < datasize; ++i ) datad[i] = (double) dataf[i];
-          datap = (const void*) datad;
+          const float *dataf = (const float *) data;
+          double *datad = (double *) Malloc(datasize * sizeof(double));
+          for (size_t i = 0; i < datasize; ++i) datad[i] = (double) dataf[i];
+          datap = (const void *) datad;
         }
 
       size_t gribbuffersize;
-      nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID,
-			     date, time, tsteptype, numavg,
-			     (long) datasize, datap, nmiss, gribbuffer, &gribbuffersize,
-			     comptype, gribContainer);
-      
-      if ( memtype == MEMTYPE_FLOAT ) Free((void*)datap);
+      nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, (long) datasize, datap, nmiss,
+                             gribbuffer, &gribbuffersize, comptype, gribContainer);
+
+      if (memtype == MEMTYPE_FLOAT) Free((void *) datap);
     }
 #else
-    {
-      Error("ecCodes support not compiled in!");
-      (void)gribContainers;
-      (void)comptype;
-    }
+  {
+    Error("ecCodes support not compiled in!");
+    (void) gribContainers;
+    (void) comptype;
+  }
 #endif
 
   return nbytes;
 }
 
-static
-size_t grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
+static size_t
+grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
 {
   size_t buffersize = gribbuffersize + 1000; /* compressed record can be greater than source record */
   void *buffer = Malloc(buffersize);
@@ -88,14 +83,14 @@ size_t grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
   // memcpy(buffer, gribbuffer, gribbuffersize);
 
   size_t nbytes = 0;
-  if ( filetype == CDI_FILETYPE_GRB )
+  if (filetype == CDI_FILETYPE_GRB)
     {
-      nbytes = (size_t)gribZip((unsigned char *)gribbuffer, (long) gribbuffersize, (unsigned char *)buffer, (long) buffersize);
+      nbytes = (size_t) gribZip((unsigned char *) gribbuffer, (long) gribbuffersize, (unsigned char *) buffer, (long) buffersize);
     }
   else
     {
       static int lszip_warn = 1;
-      if ( lszip_warn ) Warning("Szip compression of GRIB2 records not implemented!");
+      if (lszip_warn) Warning("Szip compression of GRIB2 records not implemented!");
       lszip_warn = 0;
       nbytes = gribbuffersize;
     }
@@ -105,7 +100,6 @@ size_t grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
   return nbytes;
 }
 
-
 typedef struct
 {
   char date[16];
@@ -113,11 +107,10 @@ typedef struct
   char param[8];
   char levtype[8];
   char levelist[8];
-}
-FDB_Keys;
+} FDB_Keys;
 
-
-void cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nbytes, const FDB_Keys *fdbKeys)
+void
+cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nbytes, const FDB_Keys *fdbKeys)
 {
 #ifdef HAVE_LIBFDB5
   size_t len = strlen(filename);
@@ -175,8 +168,8 @@ void cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size
 #endif
 }
 
-static
-int map_grib2_param(int pnum, int pcat, int pdis)
+static int
+map_grib2_param(int pnum, int pcat, int pdis)
 {
   // clang-format off
   if      (pnum ==  8 && pcat == 2 && pdis == 0) return 135;
@@ -195,26 +188,27 @@ int map_grib2_param(int pnum, int pcat, int pdis)
   return -1;
 }
 
-static
-int get_fdb_param(int cdiParam)
+static int
+get_fdb_param(int cdiParam)
 {
   int pnum, pcat, pdis;
   cdiDecodeParam(cdiParam, &pnum, &pcat, &pdis);
   if (pnum < 0) pnum = -pnum;
-  if (pnum > 255) pnum = pnum%256;
+  if (pnum > 255) pnum = pnum % 256;
 
   int fdbParam = (pdis == 255) ? pnum : map_grib2_param(pnum, pcat, pdis);
 
   return fdbParam;
 }
 
-static
-void fillup_gribbuffer(size_t nbytes, unsigned char *gribbuffer)
+static void
+fillup_gribbuffer(size_t nbytes, unsigned char *gribbuffer)
 {
   while (nbytes & 7) gribbuffer[nbytes++] = 0;
 }
 
-void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
+void
+grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 {
   const int filetype = streamptr1->filetype;
   const int fileID1 = streamptr1->fileID;
@@ -252,48 +246,49 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 
       gribbuffer = (unsigned char *) Malloc(gribbuffersize);
 
-      if (fileRead(fileID1, gribbuffer, recsize) != recsize)
-        Error("Could not read GRIB record for copying!");
+      if (fileRead(fileID1, gribbuffer, recsize) != recsize) Error("Could not read GRIB record for copying!");
     }
 
   size_t nbytes = recsize;
 
 #ifdef HAVE_LIBCGRIBEX
-  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
+  if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
     {
-      if ( cdiGribChangeParameterID.active )
+      if (cdiGribChangeParameterID.active)
         {
           // Even if you are stream-copy records you might need to change a bit of grib-header !
-          void *gh = cgribex_handle_new_from_meassage((void*) gribbuffer, recsize);
-          cgribexChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype, cdiGribChangeParameterID.lev);
+          void *gh = cgribex_handle_new_from_meassage((void *) gribbuffer, recsize);
+          cgribexChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype,
+                                               cdiGribChangeParameterID.lev);
           cgribex_handle_delete(gh);
-          cdiGribChangeParameterID.active = false; // after grib attributes have been changed turn it off again
+          cdiGribChangeParameterID.active = false;  // after grib attributes have been changed turn it off again
         }
     }
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
     {
-      if ( cdiGribChangeParameterID.active )
+      if (cdiGribChangeParameterID.active)
         {
           // Even if you are stream-copy records you might need to change a bit of grib-header !
-          grib_handle *gh = grib_handle_new_from_message(NULL, (void*) gribbuffer, recsize);
-          gribapiChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype, cdiGribChangeParameterID.lev);
+          grib_handle *gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
+          gribapiChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype,
+                                               cdiGribChangeParameterID.lev);
           grib_handle_delete(gh);
-          cdiGribChangeParameterID.active = false; // after grib attributes have been changed turn it off again
+          cdiGribChangeParameterID.active = false;  // after grib attributes have been changed turn it off again
         }
     }
 #else
-    {
-      Error("ecCodes support not compiled in!");
-    }
+  {
+    Error("ecCodes support not compiled in!");
+  }
 #endif
 
 #ifdef HAVE_LIBGRIB_API
 #ifdef HIRLAM_EXTENSIONS
   // Even if you are stream-copy records you might need to change a bit of grib-header !
 
-  if ( cdiGribDataScanningMode.active )
+  if (cdiGribDataScanningMode.active)
     // allowed modes: <0, 64, 96>; Default is 64
     // This will overrule the old scanning mode of the given grid
     {
@@ -303,7 +298,8 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 
       grib_handle_delete(gh);
 
-      if (cdiDebugExt>=20) Message("Change GribDataScanningMode => %d (scanModeIN = %d)", cdiGribDataScanningMode.value, scanModeIN);
+      if (cdiDebugExt >= 20)
+        Message("Change GribDataScanningMode => %d (scanModeIN = %d)", cdiGribDataScanningMode.value, scanModeIN);
 
       if (scanModeIN != cdiGribDataScanningMode.value)
         {
@@ -315,17 +311,17 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
           const int gridID = vlistInqVarGrid(vlistID, varID);
 
           size_t gridsize = gridInqSize(gridID);
-          if ( vlistNumber(vlistID) != CDI_REAL ) gridsize *= 2;
-          double *data = (double *) malloc(gridsize*sizeof(double));
+          if (vlistNumber(vlistID) != CDI_REAL) gridsize *= 2;
+          double *data = (double *) malloc(gridsize * sizeof(double));
 
-          if (cdiDebugExt>=20) Message(" processing varID %d; levelID %d", varID, levelID);
+          if (cdiDebugExt >= 20) Message(" processing varID %d; levelID %d", varID, levelID);
 
           grb_write_var_slice(streamptr2, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
 
           free(data);
         }
     }
-#endif // HIRLAM_EXTENSIONS
+#endif  // HIRLAM_EXTENSIONS
 #endif
 
   if (filetype == CDI_FILETYPE_GRB)
@@ -347,7 +343,7 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
       const int zaxisType = zaxisInqType(zaxisID);
 
       FDB_Keys fdbKeys;
-      snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int)streamptr1->tsteps[tsID].taxis.vdate);
+      snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int) streamptr1->tsteps[tsID].taxis.vdate);
       snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", streamptr1->tsteps[tsID].taxis.vtime / 100);
       snprintf(fdbKeys.param, sizeof(fdbKeys.param), "%d", get_fdb_param(record->param));
       const bool isML = (zaxisType == ZAXIS_HYBRID || zaxisType == ZAXIS_HYBRID_HALF);
@@ -372,8 +368,8 @@ void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   Free(gribbuffer);
 }
 
-
-void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t nmiss)
+void
+grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t nmiss)
 {
   const int filetype = streamptr->filetype;
   const int fileID = streamptr->fileID;
@@ -401,8 +397,8 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
     }
 
   void *gribbuffer = NULL;
-  size_t nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg,
-                            datasize, data, nmiss, &gribbuffer, comptype, streamptr->gribContainers);
+  size_t nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, datasize,
+                            data, nmiss, &gribbuffer, comptype, streamptr->gribContainers);
 
   if (filetype == CDI_FILETYPE_GRB && (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC))
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
@@ -428,13 +424,13 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
         const double level = zaxisInqLevel(zaxisID, levelID);
 
         FDB_Keys fdbKeys;
-        snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int)streamptr->tsteps[tsID].taxis.vdate);
+        snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int) streamptr->tsteps[tsID].taxis.vdate);
         snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", streamptr->tsteps[tsID].taxis.vtime / 100);
         snprintf(fdbKeys.param, sizeof(fdbKeys.param), "%d", get_fdb_param(vlistInqVarParam(vlistID, varID)));
         const bool isML = (zaxisType == ZAXIS_HYBRID || zaxisType == ZAXIS_HYBRID_HALF);
         snprintf(fdbKeys.levtype, sizeof(fdbKeys.levtype), "%s", isML ? "ml" : "sfc");
         fdbKeys.levelist[0] = 0;
-        int ilevel = (isML) ? (int)level : 0;
+        int ilevel = (isML) ? (int) level : 0;
         if (isML) snprintf(fdbKeys.levelist, sizeof(fdbKeys.levelist), "%d", isML ? ilevel : 0);
 
         cdi_fdb_store(streamptr->protocolData, streamptr->filename, gribbuffer, nbytes, &fdbKeys);
@@ -446,8 +442,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
     case CDI_PROTOCOL_FILE:
       {
         size_t (*myFileWrite)(int fileID, const void *restrict buffer, size_t len)
-          = (size_t (*)(int, const void *restrict, size_t))
-          namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
+            = (size_t(*)(int, const void *restrict, size_t)) namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
 
         const size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes);
         if (nwrite != nbytes)
@@ -462,51 +457,46 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   if (gribbuffer) Free(gribbuffer);
 }
 
-
-void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t nmiss)
+void
+grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t nmiss)
 {
-  const int vlistID  = streamptr->vlistID,
-    gridID   = vlistInqVarGrid(vlistID, varID),
-    zaxisID  = vlistInqVarZaxis(vlistID, varID),
-    nlevs    = zaxisInqSize(zaxisID);
+  const int vlistID = streamptr->vlistID, gridID = vlistInqVarGrid(vlistID, varID), zaxisID = vlistInqVarZaxis(vlistID, varID),
+            nlevs = zaxisInqSize(zaxisID);
   const size_t gridsize = gridInqSize(gridID);
   const double missval = vlistInqVarMissval(vlistID, varID);
 
   const size_t chunkLen = gridsize;
-  if ( memtype == MEMTYPE_FLOAT )
-    for ( int levelID = 0; levelID < nlevs; levelID++ )
+  if (memtype == MEMTYPE_FLOAT)
+    for (int levelID = 0; levelID < nlevs; levelID++)
       {
-        const float *restrict fdata = ((const float *)data)+levelID*gridsize;
-        
+        const float *restrict fdata = ((const float *) data) + levelID * gridsize;
+
         size_t nmiss_slice = 0;
-        if ( nmiss )
-          for ( size_t i = 0; i < chunkLen; ++i )
-            nmiss_slice += DBL_IS_EQUAL(fdata[i], missval);
+        if (nmiss)
+          for (size_t i = 0; i < chunkLen; ++i) nmiss_slice += DBL_IS_EQUAL(fdata[i], missval);
 
         grb_write_var_slice(streamptr, varID, levelID, memtype, fdata, nmiss_slice);
       }
   else
-    for ( int levelID = 0; levelID < nlevs; levelID++ )
+    for (int levelID = 0; levelID < nlevs; levelID++)
       {
-        const double *restrict ddata = ((const double *)data)+levelID*gridsize;
-        
+        const double *restrict ddata = ((const double *) data) + levelID * gridsize;
+
         size_t nmiss_slice = 0;
-        if ( nmiss )
-          for ( size_t i = 0; i < chunkLen; ++i )
-            nmiss_slice += DBL_IS_EQUAL(ddata[i], missval);
+        if (nmiss)
+          for (size_t i = 0; i < chunkLen; ++i) nmiss_slice += DBL_IS_EQUAL(ddata[i], missval);
 
         grb_write_var_slice(streamptr, varID, levelID, memtype, ddata, nmiss_slice);
       }
 }
 
-
-void grb_write_record(stream_t *streamptr, int memtype, const void *data, size_t nmiss)
+void
+grb_write_record(stream_t *streamptr, int memtype, const void *data, size_t nmiss)
 {
-  const int varID   = streamptr->record->varID;
+  const int varID = streamptr->record->varID;
   const int levelID = streamptr->record->levelID;
   grb_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 }
-
 
 #endif
 

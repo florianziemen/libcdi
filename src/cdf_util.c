@@ -7,18 +7,17 @@
 #include "cdf_util.h"
 #include "error.h"
 
-
-char *strToLower(char *str)
+char *
+strToLower(char *str)
 {
   if (str)
-    for (size_t i = 0; str[i]; ++i)
-      str[i] = (char)tolower((int)str[i]);
+    for (size_t i = 0; str[i]; ++i) str[i] = (char) tolower((int) str[i]);
 
   return str;
 }
 
-
-bool strStartsWith(const char *vstr, const char *cstr)
+bool
+strStartsWith(const char *vstr, const char *cstr)
 {
   bool is_equal = false;
   if (vstr && cstr)
@@ -30,11 +29,16 @@ bool strStartsWith(const char *vstr, const char *cstr)
   return is_equal;
 }
 
-int get_timeunit(size_t len, const char *ptu)
+int
+get_timeunit(size_t len, const char *ptu)
 {
   int timeunit = -1;
 
-  while (isspace(*ptu) && len) { ptu++; len--; }
+  while (isspace(*ptu) && len)
+    {
+      ptu++;
+      len--;
+    }
 
   // clang-format off
   if (len > 2)
@@ -53,10 +57,10 @@ int get_timeunit(size_t len, const char *ptu)
   return timeunit;
 }
 
-
-bool is_time_units(const char *timeunits)
+bool
+is_time_units(const char *timeunits)
 {
-  while ( isspace(*timeunits) ) timeunits++; 
+  while (isspace(*timeunits)) timeunits++;
 
   // clang-format off
   bool status = strStartsWith(timeunits, "sec")
@@ -71,28 +75,27 @@ bool is_time_units(const char *timeunits)
   return status;
 }
 
-
-bool is_timeaxis_units(const char *timeunits)
+bool
+is_timeaxis_units(const char *timeunits)
 {
   bool status = false;
 
   const size_t len = strlen(timeunits);
-  char *tu = (char *) malloc((len+1)*sizeof(char));
-  memcpy(tu, timeunits, (len+1) * sizeof(char));
+  char *tu = (char *) malloc((len + 1) * sizeof(char));
+  memcpy(tu, timeunits, (len + 1) * sizeof(char));
   char *ptu = tu;
 
-  for (size_t i = 0; i < len; i++) ptu[i] = (char)tolower((int)ptu[i]);
+  for (size_t i = 0; i < len; i++) ptu[i] = (char) tolower((int) ptu[i]);
 
   int timeunit = get_timeunit(len, ptu);
   if (timeunit != -1)
     {
-      while (! isspace(*ptu) && *ptu != 0) ptu++;
+      while (!isspace(*ptu) && *ptu != 0) ptu++;
       if (*ptu)
         {
           while (isspace(*ptu)) ptu++;
 
-          int timetype = strStartsWith(ptu, "as") ? TAXIS_ABSOLUTE :
-                         strStartsWith(ptu, "since") ? TAXIS_RELATIVE : -1;
+          int timetype = strStartsWith(ptu, "as") ? TAXIS_ABSOLUTE : strStartsWith(ptu, "since") ? TAXIS_RELATIVE : -1;
 
           status = timetype != -1;
         }
@@ -103,8 +106,8 @@ bool is_timeaxis_units(const char *timeunits)
   return status;
 }
 
-
-bool is_height_units(const char *units)
+bool
+is_height_units(const char *units)
 {
   const int u0 = units[0];
 
@@ -120,8 +123,8 @@ bool is_height_units(const char *units)
   return status;
 }
 
-
-bool is_pressure_units(const char *units)
+bool
+is_pressure_units(const char *units)
 {
   // clang-format off
   bool status = strStartsWith(units, "millibar")
@@ -134,8 +137,8 @@ bool is_pressure_units(const char *units)
   return status;
 }
 
-
-bool is_DBL_axis(const char *longname)
+bool
+is_DBL_axis(const char *longname)
 {
   // clang-format off
   bool status = strIsEqual(longname, "depth below land")
@@ -146,8 +149,8 @@ bool is_DBL_axis(const char *longname)
   return status;
 }
 
-
-bool is_depth_axis(const char *stdname, const char *longname)
+bool
+is_depth_axis(const char *stdname, const char *longname)
 {
   // clang-format off
   bool status = strIsEqual(stdname, "depth")
@@ -170,7 +173,8 @@ bool is_height_axis(const char *stdname, const char *longname)
   return status;
 }
 
-bool is_altitude_axis(const char *stdname, const char *longname)
+bool
+is_altitude_axis(const char *stdname, const char *longname)
 {
   // clang-format off
   bool status = strIsEqual(stdname, "altitude")
@@ -180,8 +184,8 @@ bool is_altitude_axis(const char *stdname, const char *longname)
   return status;
 }
 
-
-bool is_lon_axis(const char *units, const char *stdname)
+bool
+is_lon_axis(const char *units, const char *stdname)
 {
   bool status = false;
   char lc_units[16];
@@ -190,14 +194,12 @@ bool is_lon_axis(const char *units, const char *stdname)
   lc_units[15] = 0;
   strToLower(lc_units);
 
-  if ((strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian")) &&
-      (strStartsWith(stdname, "grid_longitude") || strStartsWith(stdname, "longitude")))
+  if ((strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian"))
+      && (strStartsWith(stdname, "grid_longitude") || strStartsWith(stdname, "longitude")))
     {
       status = true;
     }
-  else if (strStartsWith(lc_units, "degree")
-           && !strStartsWith(stdname, "grid_latitude")
-           && !strStartsWith(stdname, "latitude"))
+  else if (strStartsWith(lc_units, "degree") && !strStartsWith(stdname, "grid_latitude") && !strStartsWith(stdname, "latitude"))
     {
       int ioff = 6;
       if (lc_units[ioff] == 's') ioff++;
@@ -209,8 +211,8 @@ bool is_lon_axis(const char *units, const char *stdname)
   return status;
 }
 
-
-bool is_lat_axis(const char *units, const char *stdname)
+bool
+is_lat_axis(const char *units, const char *stdname)
 {
   bool status = false;
   char lc_units[16];
@@ -219,14 +221,12 @@ bool is_lat_axis(const char *units, const char *stdname)
   lc_units[15] = 0;
   strToLower(lc_units);
 
-  if ((strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian")) &&
-      (strStartsWith(stdname, "grid_latitude") || strStartsWith(stdname, "latitude")))
+  if ((strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian"))
+      && (strStartsWith(stdname, "grid_latitude") || strStartsWith(stdname, "latitude")))
     {
       status = true;
     }
-  else if (strStartsWith(lc_units, "degree")
-           && !strStartsWith(stdname, "grid_longitude")
-           && !strStartsWith(stdname, "longitude"))
+  else if (strStartsWith(lc_units, "degree") && !strStartsWith(stdname, "grid_longitude") && !strStartsWith(stdname, "longitude"))
     {
       int ioff = 6;
       if (lc_units[ioff] == 's') ioff++;
@@ -238,22 +238,22 @@ bool is_lat_axis(const char *units, const char *stdname)
   return status;
 }
 
-
-bool is_x_axis(const char *units, const char *stdname)
+bool
+is_x_axis(const char *units, const char *stdname)
 {
-  (void)units;
+  (void) units;
   return (strIsEqual(stdname, "projection_x_coordinate"));
 }
 
-
-bool is_y_axis(const char *units, const char *stdname)
+bool
+is_y_axis(const char *units, const char *stdname)
 {
-  (void)units;
+  (void) units;
   return (strIsEqual(stdname, "projection_y_coordinate"));
 }
 
-
-void cdf_set_gridtype(const char *attstring, int *gridtype)
+void
+cdf_set_gridtype(const char *attstring, int *gridtype)
 {
   // clang-format off
   if      (strIsEqual(attstring, "gaussian_reduced")) *gridtype = GRID_GAUSSIAN_REDUCED;
@@ -282,8 +282,8 @@ void cdf_set_gridtype(const char *attstring, int *gridtype)
   // clang-format on
 }
 
-
-void cdf_set_zaxistype(const char *attstring, int *zaxistype)
+void
+cdf_set_zaxistype(const char *attstring, int *zaxistype)
 {
   // clang-format off
   if      (strIsEqual(attstring, "toa"))              *zaxistype = ZAXIS_TOA;
@@ -310,8 +310,8 @@ void cdf_set_zaxistype(const char *attstring, int *zaxistype)
   // clang-format on
 }
 
-
-int attribute_to_calendar(const char *attstring)
+int
+attribute_to_calendar(const char *attstring)
 {
   int calendar = CALENDAR_STANDARD;
   // clang-format off

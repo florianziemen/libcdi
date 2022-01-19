@@ -3,7 +3,8 @@
 #include <errno.h>
 #include "cdi.h"
 
-const char *cdiStringError(int cdiErrno)
+const char *
+cdiStringError(int cdiErrno)
 {
   // clang-format off
   static const char UnknownError[] = "Unknown Error";

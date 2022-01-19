@@ -1,4 +1,4 @@
-#ifdef  HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
@@ -16,53 +16,51 @@
 #include "stream_ext.h"
 #include "stream_ieg.h"
 
-
-void recordInitEntry(record_t *record)
+void
+recordInitEntry(record_t *record)
 {
-  record->position  = CDI_UNDEFID;
-  record->size      = 0;
-  record->gridsize  = 0;
-  record->param     = 0;
-  record->ilevel    = CDI_UNDEFID;
-  record->used      = false;
+  record->position = CDI_UNDEFID;
+  record->size = 0;
+  record->gridsize = 0;
+  record->param = 0;
+  record->ilevel = CDI_UNDEFID;
+  record->used = false;
   record->tsteptype = CDI_UNDEFID;
-  record->varID     = CDI_UNDEFID;
-  record->levelID   = CDI_UNDEFID;
+  record->varID = CDI_UNDEFID;
+  record->levelID = CDI_UNDEFID;
   memset(record->varname, 0, sizeof(record->varname));
   varScanKeysInit(&record->scanKeys);
   memset(&record->tiles, 0, sizeof(record->tiles));
 #ifdef HAVE_LIBFDB5
-  record->fdbItem   = NULL;
+  record->fdbItem = NULL;
 #endif
 }
 
-
-int recordNewEntry(stream_t *streamptr, int tsID)
+int
+recordNewEntry(stream_t *streamptr, int tsID)
 {
   size_t recordID = 0;
-  size_t recordSize = (size_t)streamptr->tsteps[tsID].recordSize;
+  size_t recordSize = (size_t) streamptr->tsteps[tsID].recordSize;
   record_t *records = streamptr->tsteps[tsID].records;
   /*
     Look for a free slot in record.
     (Create the table the first time through).
   */
-  if ( ! recordSize )
+  if (!recordSize)
     {
-      recordSize = 1;   /*  <<<<----  */
-      records = (record_t *) Malloc(recordSize * sizeof (record_t));
+      recordSize = 1; /*  <<<<----  */
+      records = (record_t *) Malloc(recordSize * sizeof(record_t));
 
-      for ( size_t i = 0; i < recordSize; i++ )
-	records[i].used = CDI_UNDEFID;
+      for (size_t i = 0; i < recordSize; i++) records[i].used = CDI_UNDEFID;
     }
   else
     {
-      while ( recordID < recordSize && records[recordID].used != CDI_UNDEFID )
-        ++recordID;
+      while (recordID < recordSize && records[recordID].used != CDI_UNDEFID) ++recordID;
     }
   /*
     If the table overflows, double its size.
   */
-  if ( recordID == recordSize )
+  if (recordID == recordSize)
     {
       if (recordSize <= INT_MAX / 2)
         recordSize *= 2;
@@ -70,42 +68,41 @@ int recordNewEntry(stream_t *streamptr, int tsID)
         recordSize = INT_MAX;
       else
         Error("Cannot handle this many records!\n");
-      records = (record_t *) Realloc(records, recordSize * sizeof (record_t));
+      records = (record_t *) Realloc(records, recordSize * sizeof(record_t));
 
-      for ( size_t i = recordID; i < recordSize; i++ )
-	records[i].used = CDI_UNDEFID;
+      for (size_t i = recordID; i < recordSize; i++) records[i].used = CDI_UNDEFID;
     }
 
   recordInitEntry(&records[recordID]);
 
   records[recordID].used = 1;
 
-  streamptr->tsteps[tsID].recordSize = (int)recordSize;
-  streamptr->tsteps[tsID].records    = records;
+  streamptr->tsteps[tsID].recordSize = (int) recordSize;
+  streamptr->tsteps[tsID].records = records;
 
-  return (int)recordID;
+  return (int) recordID;
 }
 
-static
-void cdiInitRecord(stream_t *streamptr)
+static void
+cdiInitRecord(stream_t *streamptr)
 {
   Record *record = (Record *) Malloc(sizeof(Record));
   streamptr->record = record;
 
-  record->param      = 0;
-  record->level      = 0;
-  record->date       = 0;
-  record->time       = 0;
-  record->gridID     = 0;
-  record->buffer     = NULL;
+  record->param = 0;
+  record->level = 0;
+  record->date = 0;
+  record->time = 0;
+  record->gridID = 0;
+  record->buffer = NULL;
   record->buffersize = 0;
-  record->position   = 0;
-  record->varID      = 0;
-  record->levelID    = CDI_UNDEFID;
+  record->position = 0;
+  record->varID = 0;
+  record->levelID = CDI_UNDEFID;
 }
 
-
-void streamInqRecord(int streamID, int *varID, int *levelID)
+void
+streamInqRecord(int streamID, int *varID, int *levelID)
 {
   check_parg(varID);
   check_parg(levelID);
@@ -114,27 +111,24 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
 
   cdiDefAccesstype(streamID, TYPE_REC);
 
-  if ( ! streamptr->record ) cdiInitRecord(streamptr);
+  if (!streamptr->record) cdiInitRecord(streamptr);
 
-  int tsID   = streamptr->curTsID;
+  int tsID = streamptr->curTsID;
   int rindex = streamptr->tsteps[tsID].curRecID + 1;
 
-  if ( rindex >= streamptr->tsteps[tsID].nrecs )
-    Error("record %d not available at timestep %d", rindex+1, tsID+1);
+  if (rindex >= streamptr->tsteps[tsID].nrecs) Error("record %d not available at timestep %d", rindex + 1, tsID + 1);
 
-  int recID  = streamptr->tsteps[tsID].recIDs[rindex];
+  int recID = streamptr->tsteps[tsID].recIDs[rindex];
 
-  if ( recID == -1 || recID >= streamptr->tsteps[tsID].nallrecs )
-    Error("Internal problem! tsID = %d recID = %d", tsID, recID);
+  if (recID == -1 || recID >= streamptr->tsteps[tsID].nallrecs) Error("Internal problem! tsID = %d recID = %d", tsID, recID);
 
-  *varID   = streamptr->tsteps[tsID].records[recID].varID;
+  *varID = streamptr->tsteps[tsID].records[recID].varID;
   int lindex = streamptr->tsteps[tsID].records[recID].levelID;
 
   int isub = subtypeInqActiveIndex(streamptr->vars[*varID].subtypeID);
   *levelID = streamptr->vars[*varID].recordTable[isub].lindex[lindex];
 
-  if ( CDI_Debug )
-    Message("streamID = %d tsID = %d, recID = %d, varID = %d, levelID = %d", streamID, tsID, recID, *varID, *levelID);
+  if (CDI_Debug) Message("streamID = %d tsID = %d, recID = %d, varID = %d, levelID = %d", streamID, tsID, recID, *varID, *levelID);
 
   streamptr->curTsID = tsID;
   streamptr->tsteps[tsID].curRecID = rindex;
@@ -154,123 +148,101 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
 The function streamDefRecord defines the meta-data of the next record.
 @EndFunction
 */
-void streamDefRecord(int streamID, int varID, int levelID)
+void
+streamDefRecord(int streamID, int varID, int levelID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
   int tsID = streamptr->curTsID;
 
-  if ( tsID == CDI_UNDEFID )
+  if (tsID == CDI_UNDEFID)
     {
       tsID++;
       streamDefTimestep(streamID, tsID);
     }
 
-  if ( ! streamptr->record ) cdiInitRecord(streamptr);
+  if (!streamptr->record) cdiInitRecord(streamptr);
 
   int vlistID = streamptr->vlistID;
-  int gridID  = vlistInqVarGrid(vlistID, varID);
+  int gridID = vlistInqVarGrid(vlistID, varID);
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
-  int param   = vlistInqVarParam(vlistID, varID);
-  int level   = (int)(zaxisInqLevel(zaxisID, levelID));
+  int param = vlistInqVarParam(vlistID, varID);
+  int level = (int) (zaxisInqLevel(zaxisID, levelID));
 
   Record *record = streamptr->record;
-  record->varID    = varID;
-  record->levelID  = levelID;
-  record->param    = param;
-  record->level    = level;
-  record->date     = streamptr->tsteps[tsID].taxis.vdate;
-  record->time     = streamptr->tsteps[tsID].taxis.vtime;
-  record->gridID   = gridID;
-  record->prec     = vlistInqVarDatatype(vlistID, varID);
+  record->varID = varID;
+  record->levelID = levelID;
+  record->param = param;
+  record->level = level;
+  record->date = streamptr->tsteps[tsID].taxis.vdate;
+  record->time = streamptr->tsteps[tsID].taxis.vtime;
+  record->gridID = gridID;
+  record->prec = vlistInqVarDatatype(vlistID, varID);
 
   switch (cdiBaseFiletype(streamptr->filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2:
-      grbDefRecord(streamptr);
-      break;
+    case CDI_FILETYPE_GRB2: grbDefRecord(streamptr); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV:
-      srvDefRecord(streamptr);
-      break;
+    case CDI_FILETYPE_SRV: srvDefRecord(streamptr); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT:
-      extDefRecord(streamptr);
-      break;
+    case CDI_FILETYPE_EXT: extDefRecord(streamptr); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG:
-      iegDefRecord(streamptr);
-      break;
+    case CDI_FILETYPE_IEG: iegDefRecord(streamptr); break;
 #endif
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF:
-      if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
+      if (streamptr->accessmode == 0) cdfEndDef(streamptr);
       cdfDefRecord(streamptr);
       break;
 #endif
-    default:
-      Error("%s support not compiled in!", strfiletype(streamptr->filetype));
-      break;
+    default: Error("%s support not compiled in!", strfiletype(streamptr->filetype)); break;
     }
 }
 
-
-void streamCopyRecord(int streamID2, int streamID1)
+void
+streamCopyRecord(int streamID2, int streamID1)
 {
-  stream_t *streamptr1 = stream_to_pointer(streamID1),
-    *streamptr2 = stream_to_pointer(streamID2);
-  int filetype1 = streamptr1->filetype,
-    filetype2 = streamptr2->filetype,
-    filetype  = CDI_FILETYPE_UNDEF;
+  stream_t *streamptr1 = stream_to_pointer(streamID1), *streamptr2 = stream_to_pointer(streamID2);
+  int filetype1 = streamptr1->filetype, filetype2 = streamptr2->filetype, filetype = CDI_FILETYPE_UNDEF;
 
   if (cdiBaseFiletype(filetype1) == cdiBaseFiletype(filetype2)) filetype = filetype2;
 
-  if ( filetype == CDI_FILETYPE_UNDEF )
+  if (filetype == CDI_FILETYPE_UNDEF)
     Error("Streams have different file types (%s -> %s)!", strfiletype(filetype1), strfiletype(filetype2));
 
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2:
-      grbCopyRecord(streamptr2, streamptr1);
-      break;
+    case CDI_FILETYPE_GRB2: grbCopyRecord(streamptr2, streamptr1); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV:
-      srvCopyRecord(streamptr2, streamptr1);
-      break;
+    case CDI_FILETYPE_SRV: srvCopyRecord(streamptr2, streamptr1); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT:
-      extCopyRecord(streamptr2, streamptr1);
-      break;
+    case CDI_FILETYPE_EXT: extCopyRecord(streamptr2, streamptr1); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG:
-      iegCopyRecord(streamptr2, streamptr1);
-      break;
+    case CDI_FILETYPE_IEG: iegCopyRecord(streamptr2, streamptr1); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF:
-      cdfCopyRecord(streamptr2, streamptr1);
-      break;
+    case CDI_FILETYPE_NETCDF: cdfCopyRecord(streamptr2, streamptr1); break;
 #endif
     default:
       {
-	Error("%s support not compiled in!", strfiletype(filetype));
-	break;
+        Error("%s support not compiled in!", strfiletype(filetype));
+        break;
       }
     }
 }
 
-
-void cdi_create_records(stream_t *streamptr, int tsID)
+void
+cdi_create_records(stream_t *streamptr, int tsID)
 {
   unsigned nrecords, maxrecords;
 
@@ -286,12 +258,12 @@ void cdi_create_records(stream_t *streamptr, int tsID)
       maxrecords = 0;
       int nvars = streamptr->nvars;
       for (int varID = 0; varID < nvars; varID++)
-        for (int isub=0; isub<streamptr->vars[varID].subtypeSize; isub++)
-          maxrecords += (unsigned)streamptr->vars[varID].recordTable[isub].nlevs;
+        for (int isub = 0; isub < streamptr->vars[varID].subtypeSize; isub++)
+          maxrecords += (unsigned) streamptr->vars[varID].recordTable[isub].nlevs;
     }
   else
     {
-      maxrecords = (unsigned)sourceTstep->recordSize;
+      maxrecords = (unsigned) sourceTstep->recordSize;
     }
 
   if (tsID == 0)
@@ -301,7 +273,7 @@ void cdi_create_records(stream_t *streamptr, int tsID)
   else if (tsID == 1)
     {
       nrecords = 0;
-      maxrecords = (unsigned)sourceTstep->recordSize;
+      maxrecords = (unsigned) sourceTstep->recordSize;
       if (sourceTstep->records)
         {
           for (unsigned recID = 0; recID < maxrecords; recID++)
@@ -319,69 +291,66 @@ void cdi_create_records(stream_t *streamptr, int tsID)
     }
   else
     {
-      nrecords = (unsigned)streamptr->tsteps[1].nallrecs;
+      nrecords = (unsigned) streamptr->tsteps[1].nallrecs;
     }
   //  printf("tsID, nrecords %d %d\n", tsID, nrecords);
 
   record_t *records = NULL;
-  if (maxrecords > 0) records = (record_t *) Malloc(maxrecords*sizeof(record_t));
+  if (maxrecords > 0) records = (record_t *) Malloc(maxrecords * sizeof(record_t));
 
-  destTstep->records    = records;
-  destTstep->recordSize = (int)maxrecords;
-  destTstep->nallrecs   = (int)nrecords;
+  destTstep->records = records;
+  destTstep->recordSize = (int) maxrecords;
+  destTstep->nallrecs = (int) nrecords;
 #ifdef HAVE_LIBFDB5
   destTstep->records->fdbItem = NULL;
 #endif
 
   if (tsID == 0)
     {
-      for (unsigned recID = 0; recID < maxrecords; recID++)
-        recordInitEntry(&destTstep->records[recID]);
+      for (unsigned recID = 0; recID < maxrecords; recID++) recordInitEntry(&destTstep->records[recID]);
     }
   else if (sourceTstep->records)
     {
-      memcpy(destTstep->records, sourceTstep->records, (size_t)maxrecords*sizeof(record_t));
+      memcpy(destTstep->records, sourceTstep->records, (size_t) maxrecords * sizeof(record_t));
 
       for (unsigned recID = 0; recID < maxrecords; recID++)
-	{
+        {
           record_t *curRecord = &sourceTstep->records[recID];
           destTstep->records[recID].used = curRecord->used;
-          if (curRecord->used != CDI_UNDEFID && curRecord->varID != -1) // curRecord->varID = -1 for write mode !!!
+          if (curRecord->used != CDI_UNDEFID && curRecord->varID != -1)  // curRecord->varID = -1 for write mode !!!
             {
               if (vlistInqVarTimetype(vlistID, curRecord->varID) != TIME_CONSTANT)
                 {
                   destTstep->records[recID].position = CDI_UNDEFID;
-                  destTstep->records[recID].size     = 0;
-                  destTstep->records[recID].used     = false;
+                  destTstep->records[recID].size = 0;
+                  destTstep->records[recID].used = false;
                 }
             }
-	}
+        }
     }
 }
 
 #include "file.h"
 
-void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *container_name)
+void
+streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *container_name)
 {
   int fileID1 = streamptr1->fileID;
   int fileID2 = streamptr2->fileID;
 
-  int tsID    = streamptr1->curTsID;
-  int vrecID  = streamptr1->tsteps[tsID].curRecID;
-  int recID   = streamptr1->tsteps[tsID].recIDs[vrecID];
-  off_t recpos  = streamptr1->tsteps[tsID].records[recID].position;
+  int tsID = streamptr1->curTsID;
+  int vrecID = streamptr1->tsteps[tsID].curRecID;
+  int recID = streamptr1->tsteps[tsID].recIDs[vrecID];
+  off_t recpos = streamptr1->tsteps[tsID].records[recID].position;
   size_t recsize = streamptr1->tsteps[tsID].records[recID].size;
 
-  if (fileSetPos(fileID1, recpos, SEEK_SET) != 0)
-    Error("Cannot seek input file for %s record copy!", container_name);
+  if (fileSetPos(fileID1, recpos, SEEK_SET) != 0) Error("Cannot seek input file for %s record copy!", container_name);
 
   char *buffer = (char *) Malloc(recsize);
 
-  if (fileRead(fileID1, buffer, recsize) != recsize)
-    Error("Failed to read record from %s file for copying!", container_name);
+  if (fileRead(fileID1, buffer, recsize) != recsize) Error("Failed to read record from %s file for copying!", container_name);
 
-  if (fileWrite(fileID2, buffer, recsize) != recsize)
-    Error("Failed to write record to %s file when copying!", container_name);
+  if (fileWrite(fileID2, buffer, recsize) != recsize) Error("Failed to write record to %s file when copying!", container_name);
 
   Free(buffer);
 }

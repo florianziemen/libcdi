@@ -11,16 +11,15 @@
 #include "stream_ieg.h"
 #include "dmemory.h"
 
-
 // the single image implementation
-static
-int cdiStreamReadVar(int streamID, int varID, int memtype, void *data, size_t *nmiss)
+static int
+cdiStreamReadVar(int streamID, int varID, int memtype, void *data, size_t *nmiss)
 {
   // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision reading.
   // A value > 0 is returned in this case, otherwise it returns zero.
   int status = 0;
 
-  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
+  if (CDI_Debug) Message("streamID = %d  varID = %d", streamID, varID);
 
   check_parg(data);
   check_parg(nmiss);
@@ -37,44 +36,44 @@ int cdiStreamReadVar(int streamID, int varID, int memtype, void *data, size_t *n
     case CDI_FILETYPE_GRB2:
       {
         grb_read_var(streamptr, varID, memtype, data, nmiss);
-	break;
+        break;
       }
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       {
-        if ( memtype == MEMTYPE_FLOAT ) return 1;
-        srvReadVarDP(streamptr, varID, (double *)data, nmiss);
-	break;
+        if (memtype == MEMTYPE_FLOAT) return 1;
+        srvReadVarDP(streamptr, varID, (double *) data, nmiss);
+        break;
       }
 #endif
 #ifdef HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
       {
-        if ( memtype == MEMTYPE_FLOAT ) return 1;
-        extReadVarDP(streamptr, varID, (double *)data, nmiss);
-	break;
+        if (memtype == MEMTYPE_FLOAT) return 1;
+        extReadVarDP(streamptr, varID, (double *) data, nmiss);
+        break;
       }
 #endif
 #ifdef HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
       {
-        if ( memtype == MEMTYPE_FLOAT ) return 1;
-        iegReadVarDP(streamptr, varID, (double *)data, nmiss);
-	break;
+        if (memtype == MEMTYPE_FLOAT) return 1;
+        iegReadVarDP(streamptr, varID, (double *) data, nmiss);
+        break;
       }
 #endif
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF:
       {
         cdf_read_var(streamptr, varID, memtype, data, nmiss);
-	break;
+        break;
       }
 #endif
     default:
       {
-	Error("%s support not compiled in!", strfiletype(filetype));
-	break;
+        Error("%s support not compiled in!", strfiletype(filetype));
+        break;
       }
     }
 
@@ -98,11 +97,12 @@ The function streamReadVar reads all the values of one time step of a variable
 from an open dataset.
 @EndFunction
 */
-void streamReadVar(int streamID, int varID, double *data, SizeType *nmiss)
+void
+streamReadVar(int streamID, int varID, double *data, SizeType *nmiss)
 {
   size_t numMiss = 0;
   cdiStreamReadVar(streamID, varID, MEMTYPE_DOUBLE, data, &numMiss);
-  *nmiss = (SizeType)numMiss;
+  *nmiss = (SizeType) numMiss;
 }
 
 /*
@@ -122,7 +122,8 @@ The function streamReadVar reads all the values of one time step of a variable
 from an open dataset.
 @EndFunction
 */
-void streamReadVarF(int streamID, int varID, float *data, SizeType *nmiss)
+void
+streamReadVarF(int streamID, int varID, float *data, SizeType *nmiss)
 {
   size_t numMiss = 0;
   if (cdiStreamReadVar(streamID, varID, MEMTYPE_FLOAT, data, &numMiss))
@@ -131,17 +132,16 @@ void streamReadVarF(int streamID, int varID, float *data, SizeType *nmiss)
       // we fall back to double precision reading, converting the data on the fly.
       size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       elementCount *= (size_t) zaxisInqSize(vlistInqVarZaxis(streamInqVlist(streamID), varID));
-      double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
+      double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
       streamReadVar(streamID, varID, conversionBuffer, nmiss);
       for (size_t i = elementCount; i--;) data[i] = (float) conversionBuffer[i];
       Free(conversionBuffer);
     }
-  *nmiss = (SizeType)numMiss;
+  *nmiss = (SizeType) numMiss;
 }
 
-
-static
-int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, void *data, size_t *nmiss)
+static int
+cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, void *data, size_t *nmiss)
 {
   // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision reading.
   // A value > 0 is returned in this case, otherwise it returns zero.
@@ -164,31 +164,31 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
     case CDI_FILETYPE_GRB2:
       {
         grb_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
-	break;
+        break;
       }
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       {
-        if ( memtype == MEMTYPE_FLOAT ) return 1;
-        srvReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
-	break;
+        if (memtype == MEMTYPE_FLOAT) return 1;
+        srvReadVarSliceDP(streamptr, varID, levelID, (double *) data, nmiss);
+        break;
       }
 #endif
 #ifdef HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
       {
-        if ( memtype == MEMTYPE_FLOAT ) return 1;
-        extReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
-	break;
+        if (memtype == MEMTYPE_FLOAT) return 1;
+        extReadVarSliceDP(streamptr, varID, levelID, (double *) data, nmiss);
+        break;
       }
 #endif
 #ifdef HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
       {
-        if ( memtype == MEMTYPE_FLOAT ) return 1;
-        iegReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
-	break;
+        if (memtype == MEMTYPE_FLOAT) return 1;
+        iegReadVarSliceDP(streamptr, varID, levelID, (double *) data, nmiss);
+        break;
       }
 #endif
 #ifdef HAVE_LIBNETCDF
@@ -200,9 +200,9 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
 #endif
     default:
       {
-	Error("%s support not compiled in!", strfiletype(filetype));
+        Error("%s support not compiled in!", strfiletype(filetype));
         status = 2;
-	break;
+        break;
       }
     }
 
@@ -227,7 +227,8 @@ The function streamReadVarSlice reads all the values of a horizontal slice of a 
 from an open dataset.
 @EndFunction
 */
-void streamReadVarSlice(int streamID, int varID, int levelID, double *data, SizeType *nmiss)
+void
+streamReadVarSlice(int streamID, int varID, int levelID, double *data, SizeType *nmiss)
 {
   size_t numMiss = 0;
   if (cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, &numMiss))
@@ -236,7 +237,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, Size
       size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       memset(data, 0, elementCount * sizeof(*data));
     }
-  *nmiss = (SizeType)numMiss;
+  *nmiss = (SizeType) numMiss;
 }
 
 /*
@@ -257,7 +258,8 @@ The function streamReadVarSliceF reads all the values of a horizontal slice of a
 from an open dataset.
 @EndFunction
 */
-void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, SizeType *nmiss)
+void
+streamReadVarSliceF(int streamID, int varID, int levelID, float *data, SizeType *nmiss)
 {
   size_t numMiss = 0;
   if (cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_FLOAT, data, &numMiss))
@@ -265,16 +267,16 @@ void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, Size
       // In case the file format does not support single precision reading,
       // we fall back to double precision reading, converting the data on the fly.
       size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
-      double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
+      double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
       streamReadVarSlice(streamID, varID, levelID, conversionBuffer, nmiss);
       for (size_t i = elementCount; i--;) data[i] = (float) conversionBuffer[i];
       Free(conversionBuffer);
     }
-  *nmiss = (SizeType)numMiss;
+  *nmiss = (SizeType) numMiss;
 }
 
-static
-void stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
+static void
+stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 {
   check_parg(data);
   check_parg(nmiss);
@@ -287,50 +289,40 @@ void stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2:
-      grb_read_record(streamptr, memtype, data, nmiss);
-      break;
+    case CDI_FILETYPE_GRB2: grb_read_record(streamptr, memtype, data, nmiss); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV:
-      srv_read_record(streamptr, memtype, data, nmiss);
-      break;
+    case CDI_FILETYPE_SRV: srv_read_record(streamptr, memtype, data, nmiss); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT:
-      ext_read_record(streamptr, memtype, data, nmiss);
-      break;
+    case CDI_FILETYPE_EXT: ext_read_record(streamptr, memtype, data, nmiss); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG:
-      ieg_read_record(streamptr, memtype, data, nmiss);
-      break;
+    case CDI_FILETYPE_IEG: ieg_read_record(streamptr, memtype, data, nmiss); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF:
-      cdf_read_record(streamptr, memtype, data, nmiss);
-      break;
+    case CDI_FILETYPE_NETCDF: cdf_read_record(streamptr, memtype, data, nmiss); break;
 #endif
     default:
       {
-	Error("%s support not compiled in!", strfiletype(streamptr->filetype));
-	break;
+        Error("%s support not compiled in!", strfiletype(streamptr->filetype));
+        break;
       }
     }
 }
 
-
-void streamReadRecord(int streamID, double *data, SizeType *nmiss)
+void
+streamReadRecord(int streamID, double *data, SizeType *nmiss)
 {
   size_t numMiss = 0;
   stream_read_record(streamID, MEMTYPE_DOUBLE, (void *) data, &numMiss);
-  *nmiss = (SizeType)numMiss;
+  *nmiss = (SizeType) numMiss;
 }
 
-
-void streamReadRecordF(int streamID, float *data, SizeType *nmiss)
+void
+streamReadRecordF(int streamID, float *data, SizeType *nmiss)
 {
   size_t numMiss = 0;
   stream_read_record(streamID, MEMTYPE_FLOAT, (void *) data, &numMiss);
-  *nmiss = (SizeType)numMiss;
+  *nmiss = (SizeType) numMiss;
 }

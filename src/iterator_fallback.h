@@ -9,7 +9,7 @@
 #define INCLUDE_GUARD_CDI_ITERATOR_FALLBACK_H
 
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <stdlib.h>
@@ -29,12 +29,13 @@ CdiFallbackIterator *cdiFallbackIterator_deserialize(const char *me);
 int cdiFallbackIterator_nextField(CdiIterator *me);
 
 char *cdiFallbackIterator_inqTime(CdiIterator *me, CdiTimeType timeType);
-int cdiFallbackIterator_levelType(CdiIterator *me, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit);
+int cdiFallbackIterator_levelType(CdiIterator *me, int levelSelector, char **outName, char **outLongName, char **outStdName,
+                                  char **outUnit);
 int cdiFallbackIterator_level(CdiIterator *me, int levelSelector, double *outValue1, double *outValue2);
 int cdiFallbackIterator_zaxisUuid(CdiIterator *me, int *outVgridNumber, int *outLevelCount, unsigned char outUuid[CDI_UUID_SIZE]);
 char *cdiFallbackIterator_copyVariableName(CdiIterator *me);
-int cdiFallbackIterator_inqTile(CdiIterator* me, int* outTileIndex, int* outTileAttribute);
-int cdiFallbackIterator_inqTileCount(CdiIterator* me, int* outTileCount, int* outTileAttributeCount);
+int cdiFallbackIterator_inqTile(CdiIterator *me, int *outTileIndex, int *outTileAttribute);
+int cdiFallbackIterator_inqTileCount(CdiIterator *me, int *outTileCount, int *outTileAttributeCount);
 
 void cdiFallbackIterator_readField(CdiIterator *me, double *buffer, size_t *nmiss);
 void cdiFallbackIterator_readFieldF(CdiIterator *me, float *buffer, size_t *nmiss);

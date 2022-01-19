@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <stdbool.h>
@@ -28,7 +28,7 @@ typedef struct
 static int
 fileIDTest(void *a, void *fileID)
 {
-  return ((bFiledataP *)a)->fileID == (int)(intptr_t)fileID;
+  return ((bFiledataP *) a)->fileID == (int) (intptr_t) fileID;
 }
 
 /***************************************************************/
@@ -36,24 +36,23 @@ fileIDTest(void *a, void *fileID)
 static bFiledataP *
 initBFiledataP(char *filename, size_t bs, int nc, int fileID)
 {
-  bFiledataP * bfp;
+  bFiledataP *bfp;
 
-  xdebug ( "filename=%s, buffersize=%lu, ncollectors=%d", filename, bs, nc );
+  xdebug("filename=%s, buffersize=%lu, ncollectors=%d", filename, bs, nc);
 
-  bfp = Malloc(sizeof (*bfp) + strlen(filename) + 1);
+  bfp = Malloc(sizeof(*bfp) + strlen(filename) + 1);
   strcpy(bfp->name, filename);
 
-  if (( bfp->fp = fopen ( filename, "w" )) == NULL )
-    xabort("Failed to open %s", bfp->name);
+  if ((bfp->fp = fopen(filename, "w")) == NULL) xabort("Failed to open %s", bfp->name);
   int fd = fileno(bfp->fp);
-  ftruncate(fd, (off_t)0);
+  ftruncate(fd, (off_t) 0);
   dbuffer_init(&bfp->fb, bs);
 
   bfp->activeCollectors = nc;
 
   bfp->fileID = fileID;
 
-  xdebug ( "filename=%s, opened file, return", bfp->name );
+  xdebug("filename=%s, opened file, return", bfp->name);
 
   return bfp;
 }
@@ -64,17 +63,16 @@ static int
 destroyBFiledataP(void *v)
 {
   int iret = 0;
-  bFiledataP *bfp = ( bFiledataP * ) v;
+  bFiledataP *bfp = (bFiledataP *) v;
 
-  xdebug ( "filename=%s, cleanup, in",  bfp->name );
+  xdebug("filename=%s, cleanup, in", bfp->name);
 
   /* close file */
-  if (( iret = fclose ( bfp->fp )) == EOF )
-    xabort("Failed to close %s", bfp->name);
+  if ((iret = fclose(bfp->fp)) == EOF) xabort("Failed to close %s", bfp->name);
 
   /* file closed, cleanup */
 
-  dbuffer_cleanup ( &( bfp->fb ));
+  dbuffer_cleanup(&(bfp->fb));
 
   Free(bfp);
 
@@ -100,13 +98,11 @@ writeP(bFiledataP *bfd, size_t amount)
 {
   size_t written;
 
-  xdebug ( "filename=%s, amount=%ld, in", bfd->name, amount );
+  xdebug("filename=%s, amount=%ld, in", bfd->name, amount);
 
-  if ((written = fwrite(bfd->fb->buffer, 1, amount, bfd->fp )) != amount)
-    xabort("did not succeed writing buffer in %s", bfd->name);
+  if ((written = fwrite(bfd->fb->buffer, 1, amount, bfd->fp)) != amount) xabort("did not succeed writing buffer in %s", bfd->name);
 
-  xdebug ( "filename=%s, written=%ld, amount=%ld, return",
-           bfd->name, written, amount );
+  xdebug("filename=%s, written=%ld, amount=%ld, return", bfd->name, written, amount);
 }
 
 /***************************************************************/
@@ -116,54 +112,49 @@ elemCheck(void *q, void *nm)
   bFiledataP *bfd = q;
   const char *name = nm;
 
-  if (!strcmp(name, bfd->name))
-    xabort("Filename %s has already been added to the set\n", name);
+  if (!strcmp(name, bfd->name)) xabort("Filename %s has already been added to the set\n", name);
 }
 
 void
 pioWriterStdIO(void)
 {
   bFiledataP *bfd;
-  listSet * bibBFiledataP;
+  listSet *bibBFiledataP;
   int messagesize, source, tag, id;
   struct fileOpTag rtag;
   MPI_Status status;
-  MPI_Comm commPio = commInqCommPio ();
-  int nProcsColl = commInqSizeColl ();
-  bool * sentFinalize, doFinalize;
+  MPI_Comm commPio = commInqCommPio();
+  int nProcsColl = commInqSizeColl();
+  bool *sentFinalize, doFinalize;
 
-  xdebug ( "ncollectors=%d", nProcsColl );
+  xdebug("ncollectors=%d", nProcsColl);
 
   bibBFiledataP = listSetNew(destroyBFiledataP, compareNamesBP);
-  sentFinalize = Calloc((size_t)nProcsColl, sizeof (sentFinalize[0]));
+  sentFinalize = Calloc((size_t) nProcsColl, sizeof(sentFinalize[0]));
 
-  for ( ;; )
+  for (;;)
     {
 
-      xmpiStat ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commPio,
-                             &status ), &status );
-
+      xmpiStat(MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, commPio, &status), &status);
 
       source = status.MPI_SOURCE;
-      tag    = status.MPI_TAG;
+      tag = status.MPI_TAG;
 
       rtag = decodeFileOpTag(tag);
 
       xmpi(MPI_Get_count(&status, MPI_UNSIGNED_CHAR, &messagesize));
 
-      xdebug ( "RECEIVE MESSAGE FROM SOURCE=%d, ID=%d, COMMAND=%d ( %s ),"
-               "MESSAGESIZE=%d", source, rtag.id, rtag.command,
-               cdiPioCmdStrTab[rtag.command], messagesize);
+      xdebug("RECEIVE MESSAGE FROM SOURCE=%d, ID=%d, COMMAND=%d ( %s ),"
+             "MESSAGESIZE=%d",
+             source, rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command], messagesize);
 
       switch (rtag.command)
-	{
-      	case IO_Open_file:
+        {
+        case IO_Open_file:
           {
-            char *messageBuffer
-              = Malloc((size_t)messagesize * sizeof (messageBuffer[0]));
+            char *messageBuffer = Malloc((size_t) messagesize * sizeof(messageBuffer[0]));
             char *pMB = messageBuffer;
-            xmpi(MPI_Recv(messageBuffer, messagesize, MPI_UNSIGNED_CHAR,
-                          source, tag, commPio, &status));
+            xmpi(MPI_Recv(messageBuffer, messagesize, MPI_UNSIGNED_CHAR, source, tag, commPio, &status));
 
             xdebug("%s", "after recv, in loop");
 
@@ -172,72 +163,59 @@ pioWriterStdIO(void)
             char *temp = pMB;
             long buffersize = strtol(temp, NULL, 16);
             pMB += (strlen(temp) + 1);
-            size_t amount = (size_t)(messageBuffer + messagesize - pMB);
+            size_t amount = (size_t) (messageBuffer + messagesize - pMB);
 
-            xdebug("command %s, filename=%s, buffersize=%ld, amount=%zu",
-                   cdiPioCmdStrTab[rtag.command], filename, buffersize, amount);
+            xdebug("command %s, filename=%s, buffersize=%ld, amount=%zu", cdiPioCmdStrTab[rtag.command], filename, buffersize,
+                   amount);
 
-
-            if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
-                                   (void *)(intptr_t)rtag.id)))
+            if (!(bfd = listSetGet(bibBFiledataP, fileIDTest, (void *) (intptr_t) rtag.id)))
               {
                 listSetForeach(bibBFiledataP, elemCheck, filename);
-                bfd = initBFiledataP(filename, (size_t)buffersize, nProcsColl,
-                                     rtag.id);
-                if ((id = listSetAdd(bibBFiledataP, bfd)) < 0)
-                  xabort("fileID=%d not unique", rtag.id);
+                bfd = initBFiledataP(filename, (size_t) buffersize, nProcsColl, rtag.id);
+                if ((id = listSetAdd(bibBFiledataP, bfd)) < 0) xabort("fileID=%d not unique", rtag.id);
                 bfd->fileID = id;
               }
-            else
-              if (strcmp(filename, bfd->name) != 0)
-                xabort("filename is not consistent, fileID=%d", rtag.id);
+            else if (strcmp(filename, bfd->name) != 0)
+              xabort("filename is not consistent, fileID=%d", rtag.id);
             memcpy(bfd->fb->buffer, pMB, amount);
 
             writeP(bfd, amount);
 
             Free(messageBuffer);
           }
-	  break;
+          break;
 
-	case IO_Send_buffer:
+        case IO_Send_buffer:
           {
-            if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
-                                   (void *)(intptr_t)rtag.id)))
-              xabort("fileID=%d is not in set", rtag.id );
-            size_t amount = (size_t)messagesize;
+            if (!(bfd = listSetGet(bibBFiledataP, fileIDTest, (void *) (intptr_t) rtag.id)))
+              xabort("fileID=%d is not in set", rtag.id);
+            size_t amount = (size_t) messagesize;
 
-            xdebug("COMMAND %s, ID=%d, NAME=%s", cdiPioCmdStrTab[rtag.command],
-                   rtag.id, bfd->name);
+            xdebug("COMMAND %s, ID=%d, NAME=%s", cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name);
 
-            xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_UNSIGNED_CHAR,
-                          source, tag, commPio, &status));
+            xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_UNSIGNED_CHAR, source, tag, commPio, &status));
 
             writeP(bfd, amount);
           }
           break;
 
-	case IO_Close_file:
+        case IO_Close_file:
           {
-            xdebug("COMMAND %s,  FILE%d, SOURCE%d",
-                   cdiPioCmdStrTab[rtag.command], rtag.id, source);
+            xdebug("COMMAND %s,  FILE%d, SOURCE%d", cdiPioCmdStrTab[rtag.command], rtag.id, source);
 
-            if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
-                                   (void *)(intptr_t)rtag.id)))
+            if (!(bfd = listSetGet(bibBFiledataP, fileIDTest, (void *) (intptr_t) rtag.id)))
               xabort("fileID=%d is not in set", rtag.id);
-            size_t amount = (size_t)messagesize;
-            xdebug("COMMAND %s, ID=%d, NAME=%s, AMOUNT=%zu",
-                   cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name, amount);
+            size_t amount = (size_t) messagesize;
+            xdebug("COMMAND %s, ID=%d, NAME=%s, AMOUNT=%zu", cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name, amount);
 
-            xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_UNSIGNED_CHAR,
-                          source, tag, commPio, &status));
+            xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_UNSIGNED_CHAR, source, tag, commPio, &status));
 
-            writeP ( bfd, amount );
+            writeP(bfd, amount);
 
-            if ( ! --(bfd->activeCollectors))
+            if (!--(bfd->activeCollectors))
               {
                 xdebug("all are finished with file %d, delete node", rtag.id);
-                listSetRemove(bibBFiledataP, fileIDTest,
-                              (void *)(intptr_t)rtag.id);
+                listSetRemove(bibBFiledataP, fileIDTest, (void *) (intptr_t) rtag.id);
               }
           }
           break;
@@ -245,26 +223,26 @@ pioWriterStdIO(void)
           {
             int buffer = CDI_UNDEFID, collID;
 
-            xmpi ( MPI_Recv ( &buffer, 1, MPI_INT, source, tag, commPio, &status ));
+            xmpi(MPI_Recv(&buffer, 1, MPI_INT, source, tag, commPio, &status));
 
             sentFinalize[source] = true;
             doFinalize = true;
 
-            for ( collID = 0; collID < nProcsColl; collID++ )
-              if ( !sentFinalize[collID] )
+            for (collID = 0; collID < nProcsColl; collID++)
+              if (!sentFinalize[collID])
                 {
                   doFinalize = false;
                   break;
                 }
 
-            if ( doFinalize )
+            if (doFinalize)
               {
                 if (!listSetIsEmpty(bibBFiledataP))
                   xabort("set bibBfiledataP is not empty.");
                 else
                   {
                     xdebug("%s", "all files are finished, destroy file set,"
-                           " return");
+                                 " return");
                     listSetDelete(bibBFiledataP);
                   }
                 Free(sentFinalize);
@@ -272,9 +250,8 @@ pioWriterStdIO(void)
               }
           }
           break;
-        default:
-          xabort ( "COMMAND NOT IMPLEMENTED" );
-	}
+        default: xabort("COMMAND NOT IMPLEMENTED");
+        }
     }
 }
 

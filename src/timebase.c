@@ -1,60 +1,60 @@
-#include <math.h>		/* for floor() */
+#include <math.h> /* for floor() */
 
 #include "cdi.h"
 #include "timebase.h"
 
 // convert Julian date into year, months, day
-void decode_julday(int calendar,
-		   int64_t julday, /* Julian day number to convert */
-                   int *year,      /* Gregorian year (out)         */
-		   int *mon,	   /* Gregorian month (1-12) (out) */
-                   int *day)       /* Gregorian day (1-31) (out)   */
+void
+decode_julday(int calendar, int64_t julday, /* Julian day number to convert */
+              int *year,                    /* Gregorian year (out)         */
+              int *mon,                     /* Gregorian month (1-12) (out) */
+              int *day)                     /* Gregorian day (1-31) (out)   */
 {
   int64_t a = julday;
 
-  double b = floor((a - 1867216.25)/36524.25);
-  double c = a + b - floor(b/4) + 1525;
+  double b = floor((a - 1867216.25) / 36524.25);
+  double c = a + b - floor(b / 4) + 1525;
 
-  if ( calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN )
-    if ( a < 2299161 ) c = a + 1524;
+  if (calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN)
+    if (a < 2299161) c = a + 1524;
 
-  double d = floor((c - 122.1)/365.25);
-  double e = floor(365.25*d);
-  double f = floor((c - e)/30.6001);
+  double d = floor((c - 122.1) / 365.25);
+  double e = floor(365.25 * d);
+  double f = floor((c - e) / 30.6001);
 
-  *day  = (int)(c - e - floor(30.6001*f));
-  *mon  = (int)(f - 1 - 12*floor(f/14));
-  *year = (int)(d - 4715 - floor((7 + *mon)/10));
+  *day = (int) (c - e - floor(30.6001 * f));
+  *mon = (int) (f - 1 - 12 * floor(f / 14));
+  *year = (int) (d - 4715 - floor((7 + *mon) / 10));
 }
 
-
 // convert year, month, day into Julian calendar day
-int64_t encode_julday(int calendar, int year, int month, int day)
+int64_t
+encode_julday(int calendar, int year, int month, int day)
 {
-  int iy = (month <= 2) ? year  - 1 : year;
+  int iy = (month <= 2) ? year - 1 : year;
   int im = (month <= 2) ? month + 12 : month;
-  int ib = (iy < 0) ? ((iy+1)/400 - (iy+1)/100) : (iy/400 - iy/100);
+  int ib = (iy < 0) ? ((iy + 1) / 400 - (iy + 1) / 100) : (iy / 400 - iy / 100);
 
-  if ( calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN )
+  if (calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN)
     {
-      if ( year > 1582 || (year == 1582 && (month > 10 || (month == 10 && day >= 15))) )
-	{
-	  // 15th October 1582 AD or later
-	}
+      if (year > 1582 || (year == 1582 && (month > 10 || (month == 10 && day >= 15))))
+        {
+          // 15th October 1582 AD or later
+        }
       else
-	{
-	  // 4th October 1582 AD or earlier
-	  ib = -2;
-	}
+        {
+          // 4th October 1582 AD or earlier
+          ib = -2;
+        }
     }
 
-  int64_t julday = (int64_t) (floor(365.25*iy) + (int64_t)(30.6001*(im+1)) + ib + 1720996.5 + day + 0.5);
+  int64_t julday = (int64_t) (floor(365.25 * iy) + (int64_t) (30.6001 * (im + 1)) + ib + 1720996.5 + day + 0.5);
 
   return julday;
 }
 
-
-int64_t date_to_julday(int calendar, int64_t date)
+int64_t
+date_to_julday(int calendar, int64_t date)
 {
   int year, month, day;
   cdiDecodeDate(date, &year, &month, &day);
@@ -64,8 +64,8 @@ int64_t date_to_julday(int calendar, int64_t date)
   return julday;
 }
 
-
-int64_t julday_to_date(int calendar, int64_t julday)
+int64_t
+julday_to_date(int calendar, int64_t julday)
 {
   int year, month, day;
   decode_julday(calendar, julday, &year, &month, &day);
@@ -75,49 +75,49 @@ int64_t julday_to_date(int calendar, int64_t julday)
   return date;
 }
 
-
-int time_to_sec(int time)
+int
+time_to_sec(int time)
 {
   int hour, minute, second;
   cdiDecodeTime(time, &hour, &minute, &second);
 
-  int secofday = hour*3600 + minute*60 + second;
+  int secofday = hour * 3600 + minute * 60 + second;
 
   return secofday;
 }
 
-
-int sec_to_time(int secofday)
+int
+sec_to_time(int secofday)
 {
-  int hour   = secofday/3600;
-  int minute = secofday/60 - hour*60;
-  int second = secofday - hour*3600 - minute*60;
+  int hour = secofday / 3600;
+  int minute = secofday / 60 - hour * 60;
+  int second = secofday - hour * 3600 - minute * 60;
 
   int time = cdiEncodeTime(hour, minute, second);
 
   return time;
 }
 
-static
-void adjust_seconds(int64_t *julday, int64_t *secofday)
+static void
+adjust_seconds(int64_t *julday, int64_t *secofday)
 {
   int64_t secperday = 86400;
 
-  while ( *secofday >= secperday )
+  while (*secofday >= secperday)
     {
       *secofday -= secperday;
       (*julday)++;
     }
 
-  while ( *secofday <  0 )
+  while (*secofday < 0)
     {
       *secofday += secperday;
       (*julday)--;
     }
 }
 
-
-void julday_add_seconds(int64_t seconds, int64_t *julday, int *secofday)
+void
+julday_add_seconds(int64_t seconds, int64_t *julday, int *secofday)
 {
   int64_t sec_of_day = *secofday;
 
@@ -129,12 +129,13 @@ void julday_add_seconds(int64_t seconds, int64_t *julday, int *secofday)
 }
 
 /* add days and secs to julday/secofday */
-void julday_add(int days, int secs, int64_t *julday, int *secofday)
+void
+julday_add(int days, int secs, int64_t *julday, int *secofday)
 {
   int64_t sec_of_day = *secofday;
 
   sec_of_day += secs;
-  *julday    += days;
+  *julday += days;
 
   adjust_seconds(julday, &sec_of_day);
 
@@ -142,7 +143,8 @@ void julday_add(int days, int secs, int64_t *julday, int *secofday)
 }
 
 /* subtract julday1/secofday1 from julday2/secofday2 and returns the result in seconds */
-double julday_sub(int64_t julday1, int secofday1, int64_t julday2, int secofday2, int64_t *days, int *secs)
+double
+julday_sub(int64_t julday1, int secofday1, int64_t julday2, int secofday2, int64_t *days, int *secs)
 {
   *days = julday2 - julday1;
   *secs = secofday2 - secofday1;
@@ -153,32 +155,32 @@ double julday_sub(int64_t julday1, int secofday1, int64_t julday2, int secofday2
 
   *secs = (int) sec_of_day;
 
-  int64_t seconds = (int64_t)(*days) * (int64_t)86400 + sec_of_day;
+  int64_t seconds = (int64_t) (*days) * (int64_t) 86400 + sec_of_day;
 
-  return (double)seconds;
+  return (double) seconds;
 }
 
-
-void encode_juldaysec(int calendar, int year, int month, int day, int hour, int minute, int second, int64_t *julday, int *secofday)
+void
+encode_juldaysec(int calendar, int year, int month, int day, int hour, int minute, int second, int64_t *julday, int *secofday)
 {
   *julday = encode_julday(calendar, year, month, day);
 
-  *secofday = (hour*60 + minute)*60 + second;
+  *secofday = (hour * 60 + minute) * 60 + second;
 }
 
-
-void decode_juldaysec(int calendar, int64_t julday, int secofday, int *year, int *month, int *day, int *hour, int *minute, int *second)
+void
+decode_juldaysec(int calendar, int64_t julday, int secofday, int *year, int *month, int *day, int *hour, int *minute, int *second)
 {
   decode_julday(calendar, julday, year, month, day);
 
-  *hour   = secofday/3600;
-  *minute = secofday/60 - *hour*60;
-  *second = secofday - *hour*3600 - *minute*60;
+  *hour = secofday / 3600;
+  *minute = secofday / 60 - *hour * 60;
+  *second = secofday - *hour * 3600 - *minute * 60;
 }
 
-
 #ifdef TEST
-int main(void)
+int
+main(void)
 {
   int nmin;
   int64_t vdate0, vdate;
@@ -203,15 +205,14 @@ int main(void)
       cdiDecodeDate(vdate0, &year, &mon, &day);
       cdiDecodeTime(vtime0, &hour, &minute, &second);
 
-      julday  = date_to_julday(calendar, vdate0);
+      julday = date_to_julday(calendar, vdate0);
       secofday = time_to_sec(vtime0);
 
       vdate = julday_to_date(calendar, julday);
       vtime = sec_to_time(secofday);
 
-      if ( vdate0 != vdate || vtime0 != vtime )
-	printf("%4d %8ld %4d %8ld %4d %9d %9d\n",
-	       ++j, vdate0, vtime0, vdate, vtime, julday, secofday);
+      if (vdate0 != vdate || vtime0 != vtime)
+        printf("%4d %8ld %4d %8ld %4d %9d %9d\n", ++j, vdate0, vtime0, vdate, vtime, julday, secofday);
 
       year++;
       vdate0 = cdiEncodeDate(year, mon, day);
@@ -236,23 +237,23 @@ int main(void)
       cdiDecodeDate(vdate0, &year, &mon, &day);
       cdiDecodeTime(vtime0, &hour, &minute, &second);
 
-      if ( ++minute >= 60 )
-	{
-	  minute = 0;
-	  if ( ++hour >= 24 )
-	    {
-	      hour = 0;
-	      if ( ++day >= 32 )
-		{
-		  day = 1;
-		  if ( ++mon >= 13 )
-		    {
-		      mon = 1;
-		      year++;
-		    }
-		}
-	    }
-	}
+      if (++minute >= 60)
+        {
+          minute = 0;
+          if (++hour >= 24)
+            {
+              hour = 0;
+              if (++day >= 32)
+                {
+                  day = 1;
+                  if (++mon >= 13)
+                    {
+                      mon = 1;
+                      year++;
+                    }
+                }
+            }
+        }
 
       vdate0 = cdiEncodeDate(year, mon, day);
       vtime0 = cdiEncodeTime(hour, minute, second);
@@ -261,9 +262,8 @@ int main(void)
 
       vdate = julday_to_date(calendar, julday);
       vtime = sec_to_time(secofday);
-      if ( vdate0 != vdate || vtime0 != vtime )
-	printf("%4d %8ld %4d %8ld %4d %9d %9d\n",
-	       ++j, vdate0, vtime0, vdate, vtime, julday, secofday);
+      if (vdate0 != vdate || vtime0 != vtime)
+        printf("%4d %8ld %4d %8ld %4d %9d %9d\n", ++j, vdate0, vtime0, vdate, vtime, julday, secofday);
     }
 
   printf("stop time: %8ld %4d\n", vdate0, vtime0);
@@ -272,9 +272,9 @@ int main(void)
 }
 #endif
 
-
 #ifdef TEST2
-int main(void)
+int
+main(void)
 {
   int julday, secofday;
   int year, month, day, hour, minute, second;
@@ -282,7 +282,11 @@ int main(void)
   int factor = 86400;
   int calendar = CALENDAR_STANDARD;
 
-  year=1979; month=1; day=15; hour=12; minute=30, second=17;
+  year = 1979;
+  month = 1;
+  day = 15;
+  hour = 12;
+  minute = 30, second = 17;
 
   printf("%d/%02d/%02d %02d:%02d:%02d\n", year, month, day, hour, minute, second);
 
@@ -296,7 +300,7 @@ int main(void)
 
       decode_juldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
       printf("%2d %d/%02d/%02d %02d:%02d:%02d\n", i, year, month, day, hour, minute, second);
-      julday_add_seconds(value*factor, &julday, &secofday);
+      julday_add_seconds(value * factor, &julday, &secofday);
     }
 
   return 0;

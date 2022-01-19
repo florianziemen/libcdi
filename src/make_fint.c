@@ -1,5 +1,5 @@
 #define _XOPEN_SOURCE 700
-#define _GNU_SOURCE // needed for getline(3) on some systems it seems
+#define _GNU_SOURCE  // needed for getline(3) on some systems it seems
 #include <ctype.h>
 #include <errno.h>
 #include <regex.h>
@@ -1537,4 +1537,3 @@ sprintFortranArrayArgDims(size_t argDimsFSize, char argDimsF[argDimsFSize],
  * require-trailing-newline: t
  * End:
  */
-

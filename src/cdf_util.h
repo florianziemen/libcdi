@@ -1,5 +1,5 @@
-#ifndef  CDF_UTIL_H_
-#define  CDF_UTIL_H_
+#ifndef CDF_UTIL_H_
+#define CDF_UTIL_H_
 
 #include <stdbool.h>
 

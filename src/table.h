@@ -1390,4 +1390,4 @@ void tableDefault(void)
 
 // clang-format on
 
-#endif  /* TABLE_H */
+#endif /* TABLE_H */

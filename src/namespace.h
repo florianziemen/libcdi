@@ -2,11 +2,11 @@
 #define NAMESPACE_H
 
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
-
-typedef struct {
+typedef struct
+{
   int idx;
   int nsp;
 } namespaceTuple_t;
@@ -47,24 +47,22 @@ union namespaceSwitchValue
   void (*func)();
 };
 
-#define NSSW_FUNC(p) ((union namespaceSwitchValue){ .func = (void (*)())(p) })
-#define NSSW_DATA(p) ((union namespaceSwitchValue){ .data = (void *)(p) })
+#define NSSW_FUNC(p) ((union namespaceSwitchValue){ .func = (void (*)()) (p) })
+#define NSSW_DATA(p) ((union namespaceSwitchValue){ .data = (void *) (p) })
 
-//int              namespaceNew();
-//void             namespaceDelete(int namespaceID);
-void             namespaceCleanup      ( void );
-int              namespaceGetNumber    ( void );
-//void             namespaceSetActive(int namespaceID);
-//int              namespaceGetActive    ( void );
-int              namespaceIdxEncode    ( namespaceTuple_t );
-int              namespaceIdxEncode2   ( int, int );
-namespaceTuple_t namespaceResHDecode   ( int );
-int              namespaceAdaptKey     ( int originResH, int originNamespace);
-int              namespaceAdaptKey2    ( int );
-void namespaceSwitchSet(enum namespaceSwitch sw,
-                        union namespaceSwitchValue value);
+// int              namespaceNew();
+// void             namespaceDelete(int namespaceID);
+void namespaceCleanup(void);
+int namespaceGetNumber(void);
+// void             namespaceSetActive(int namespaceID);
+// int              namespaceGetActive    ( void );
+int namespaceIdxEncode(namespaceTuple_t);
+int namespaceIdxEncode2(int, int);
+namespaceTuple_t namespaceResHDecode(int);
+int namespaceAdaptKey(int originResH, int originNamespace);
+int namespaceAdaptKey2(int);
+void namespaceSwitchSet(enum namespaceSwitch sw, union namespaceSwitchValue value);
 union namespaceSwitchValue namespaceSwitchGet(enum namespaceSwitch sw);
-
 
 #endif
 /*

@@ -3,9 +3,10 @@
 
 #include "swap.h"
 
-void swap4byte(void *ptr, size_t size)
+void
+swap4byte(void *ptr, size_t size)
 {
-  int32_t *ptrtmp = (int32_t *)ptr;
+  int32_t *ptrtmp = (int32_t *) ptr;
 
   // clang-format off
   for (size_t i = 0; i < size; ++i)
@@ -14,9 +15,10 @@ void swap4byte(void *ptr, size_t size)
   // clang-format on
 }
 
-void swap8byte(void *ptr, size_t size)
+void
+swap8byte(void *ptr, size_t size)
 {
-  int64_t *ptrtmp = (int64_t *)ptr;
+  int64_t *ptrtmp = (int64_t *) ptr;
 
   // clang-format off
   for (size_t i = 0; i < size; ++i)

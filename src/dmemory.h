@@ -1,5 +1,5 @@
-#ifndef  _DMEMORY_H
-#define  _DMEMORY_H
+#ifndef _DMEMORY_H
+#define _DMEMORY_H
 
 // clang-format off
 

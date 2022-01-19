@@ -12,7 +12,8 @@ int cdi_fdb_dummy;
 
 void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer);
 
-void decode_fdbitem(const char *fdbItem, KeyValueEntry *keyValue)
+void
+decode_fdbitem(const char *fdbItem, KeyValueEntry *keyValue)
 {
   keyValue->item = strdup(fdbItem);
   char *pItem = keyValue->item;
@@ -47,7 +48,7 @@ void decode_fdbitem(const char *fdbItem, KeyValueEntry *keyValue)
     }
 
   keyValue->numKeys = numKeys;
-  //for (int i = 0; i < numKeys; i++)  printf("%d <%s>\n", i, itemKeys[i]);
+  // for (int i = 0; i < numKeys; i++)  printf("%d <%s>\n", i, itemKeys[i]);
 
   for (int i = 0; i < numKeys; i++)
     {
@@ -61,18 +62,18 @@ void decode_fdbitem(const char *fdbItem, KeyValueEntry *keyValue)
             break;
           }
 
-      //printf("key <%s> value <%s>\n", itemKeys[i], itemValues[i]);
+      // printf("key <%s> value <%s>\n", itemKeys[i], itemValues[i]);
     }
 }
 
-static
-int fdb_request_add1(fdb_request_t *req, const char *param, const char *value)
+static int
+fdb_request_add1(fdb_request_t *req, const char *param, const char *value)
 {
   return fdb_request_add(req, param, &value, 1);
 }
 
-static
-void fdbitem_to_request(const char *fdbItem, fdb_request_t *request)
+static void
+fdbitem_to_request(const char *fdbItem, fdb_request_t *request)
 {
   KeyValueEntry keyValue;
   keyValue.item = NULL;
@@ -87,10 +88,10 @@ void fdbitem_to_request(const char *fdbItem, fdb_request_t *request)
   if (keyValue.item) free(keyValue.item);
 }
 
-
-int fdb_fill_itemlist(fdb_handle_t *fdb, fdb_request_t *request, char ***itemList)
+int
+fdb_fill_itemlist(fdb_handle_t *fdb, fdb_request_t *request, char ***itemList)
 {
-  const char **item = (const char **) malloc(sizeof(const char*));
+  const char **item = (const char **) malloc(sizeof(const char *));
 
   fdb_listiterator_t *it;
   fdb_new_listiterator(&it);
@@ -108,7 +109,7 @@ int fdb_fill_itemlist(fdb_handle_t *fdb, fdb_request_t *request, char ***itemLis
     }
   if (CDI_Debug) Message("numItems = %d", numItems);
 
-  if (*itemList == NULL) *itemList = (char **) malloc(numItems * sizeof(char*));
+  if (*itemList == NULL) *itemList = (char **) malloc(numItems * sizeof(char *));
 
   fdb_list(fdb, request, it);
 
@@ -129,10 +130,10 @@ int fdb_fill_itemlist(fdb_handle_t *fdb, fdb_request_t *request, char ***itemLis
   return numItems;
 }
 
-
-long fdb_read_record(fdb_handle_t *fdb, char *item, size_t *buffersize, void **gribbuffer)
+long
+fdb_read_record(fdb_handle_t *fdb, char *item, size_t *buffersize, void **gribbuffer)
 {
-  //Message("%s", item);
+  // Message("%s", item);
 
   fdb_datareader_t *dataReader = NULL;
   fdb_new_datareader(&dataReader);
@@ -160,8 +161,8 @@ long fdb_read_record(fdb_handle_t *fdb, char *item, size_t *buffersize, void **g
   return recordSize;
 }
 
-static
-int check_numKey(const char *key, int numKeys, int numItems)
+static int
+check_numKey(const char *key, int numKeys, int numItems)
 {
   if (numKeys == 0)
     {
@@ -177,10 +178,10 @@ int check_numKey(const char *key, int numKeys, int numItems)
   return 0;
 }
 
-
-int check_keyvalueList(int numItems, KeyValueEntry *keyValueList)
+int
+check_keyvalueList(int numItems, KeyValueEntry *keyValueList)
 {
-  const char *searchKeys[] = {"date", "time", "param", "levtype"};
+  const char *searchKeys[] = { "date", "time", "param", "levtype" };
   const int numSearchKeys = sizeof(searchKeys) / sizeof(searchKeys[0]);
   int searchKeysCount[numSearchKeys];
   for (int k = 0; k < numSearchKeys; k++) searchKeysCount[k] = 0;
@@ -205,12 +206,10 @@ int check_keyvalueList(int numItems, KeyValueEntry *keyValueList)
 
   int status = 0;
   for (int k = 0; k < numSearchKeys; k++)
-    if (check_numKey(searchKeys[k], searchKeysCount[k], numItems) != 0)
-      status = -1;
+    if (check_numKey(searchKeys[k], searchKeysCount[k], numItems) != 0) status = -1;
 
   return status;
 }
-
 
 typedef struct
 {
@@ -218,7 +217,8 @@ typedef struct
   int level;
 } CmpKeys;
 
-void record_info_entry_init(RecordInfoEntry *recordInfo)
+void
+record_info_entry_init(RecordInfoEntry *recordInfo)
 {
   recordInfo->date = 0;
   recordInfo->time = 0;
@@ -227,8 +227,8 @@ void record_info_entry_init(RecordInfoEntry *recordInfo)
   recordInfo->level = 0;
 }
 
-static
-CmpKeys set_cmpkeys(RecordInfoEntry *recordInfo)
+static CmpKeys
+set_cmpkeys(RecordInfoEntry *recordInfo)
 {
   CmpKeys cmpKeys;
   cmpKeys.date = recordInfo->date;
@@ -239,8 +239,8 @@ CmpKeys set_cmpkeys(RecordInfoEntry *recordInfo)
   return cmpKeys;
 }
 
-static
-int compare_cmpkeys(const CmpKeys *cmpKeys1, const CmpKeys *cmpKeys2)
+static int
+compare_cmpkeys(const CmpKeys *cmpKeys1, const CmpKeys *cmpKeys2)
 {
   // clang-format off
   if (cmpKeys1->date == cmpKeys2->date &&
@@ -254,8 +254,8 @@ int compare_cmpkeys(const CmpKeys *cmpKeys1, const CmpKeys *cmpKeys2)
   return -1;
 }
 
-
-int get_num_records(int numItems, RecordInfoEntry *recordInfoList)
+int
+get_num_records(int numItems, RecordInfoEntry *recordInfoList)
 {
   const int date = recordInfoList[0].date;
   const int time = recordInfoList[0].time;
@@ -283,10 +283,16 @@ int get_num_records(int numItems, RecordInfoEntry *recordInfoList)
   return numRecords;
 }
 
-enum {levTypeUndef = 0, levTypeSFC, levTypeML, levTypePL};
+enum
+{
+  levTypeUndef = 0,
+  levTypeSFC,
+  levTypeML,
+  levTypePL
+};
 
-static
-int get_ilevtype(const char *levtype)
+static int
+get_ilevtype(const char *levtype)
 {
   int ilevtype = levTypeUndef;
 
@@ -299,15 +305,15 @@ int get_ilevtype(const char *levtype)
   return ilevtype;
 }
 
-
-void decode_keyvalue(KeyValueEntry *keyValue, RecordInfoEntry *recordInfo)
+void
+decode_keyvalue(KeyValueEntry *keyValue, RecordInfoEntry *recordInfo)
 {
   char **itemKeys = keyValue->keys;
   char **itemValues = keyValue->values;
   int numKeys = keyValue->numKeys;
   for (int i = 0; i < numKeys; i++)
     {
-      //printf("key <%s> value <%s>\n", itemKeys[i], itemValues[i]);
+      // printf("key <%s> value <%s>\n", itemKeys[i], itemValues[i]);
       // clang-format off
       if      (strcmp(itemKeys[i], "date") == 0) recordInfo->date = atoi(itemValues[i]);
       else if (strcmp(itemKeys[i], "time") == 0) recordInfo->time = atoi(itemValues[i]);
@@ -315,11 +321,11 @@ void decode_keyvalue(KeyValueEntry *keyValue, RecordInfoEntry *recordInfo)
       else if (strcmp(itemKeys[i], "levtype") == 0) recordInfo->levtype = get_ilevtype(itemValues[i]);
       else if (strcmp(itemKeys[i], "levelist") == 0) recordInfo->level = atoi(itemValues[i]);
       // clang-format on
-   }
+    }
 }
 
-
-int remove_duplicate_timesteps(RecordInfoEntry *recordInfoList, int numRecords, int numTimesteps, int *timestepRecordOffset)
+int
+remove_duplicate_timesteps(RecordInfoEntry *recordInfoList, int numRecords, int numTimesteps, int *timestepRecordOffset)
 {
   int numTimestepsNew = numTimesteps;
 
@@ -357,8 +363,8 @@ int remove_duplicate_timesteps(RecordInfoEntry *recordInfoList, int numRecords, 
   return numTimestepsNew;
 }
 
-
-fdb_request_t *create_fdb_request(const char *filename)
+fdb_request_t *
+create_fdb_request(const char *filename)
 {
   size_t len = strlen(filename);
   if (len == 4) Error("Empty FDB request!");
@@ -378,9 +384,12 @@ fdb_request_t *create_fdb_request(const char *filename)
   for (int i = 0; i < keyValue.numKeys; i++)
     {
       // clang-format offxs
-      if      (strcmp(keyValue.keys[i], "class") == 0) classDefined = true;
-      else if (strcmp(keyValue.keys[i], "stream") == 0) streamDefined = true;
-      else if (strcmp(keyValue.keys[i], "expver") == 0) expverDefined = true;
+      if (strcmp(keyValue.keys[i], "class") == 0)
+        classDefined = true;
+      else if (strcmp(keyValue.keys[i], "stream") == 0)
+        streamDefined = true;
+      else if (strcmp(keyValue.keys[i], "expver") == 0)
+        expverDefined = true;
       // clang-format on
 
       fdb_request_add1(request, keyValue.keys[i], keyValue.values[i]);

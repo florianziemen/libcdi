@@ -74,7 +74,7 @@ cdiAbortC_serial(const char *caller, const char *filename,
 
 // clang-format on
 
-#endif  /* ERROR_H */
+#endif /* ERROR_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

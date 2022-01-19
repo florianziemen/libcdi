@@ -5,40 +5,44 @@
 #include "vlist.h"
 #include "resource_unpack.h"
 
-
-static
-cdi_keys_t *vlist_get_keysp(vlist_t *vlistptr, int varID)
+static cdi_keys_t *
+vlist_get_keysp(vlist_t *vlistptr, int varID)
 {
-  if      (varID == CDI_GLOBAL) return &vlistptr->keys;
-  else if (varID >= 0 && varID < vlistptr->nvars) return &(vlistptr->vars[varID].keys);
+  if (varID == CDI_GLOBAL)
+    return &vlistptr->keys;
+  else if (varID >= 0 && varID < vlistptr->nvars)
+    return &(vlistptr->vars[varID].keys);
 
   return NULL;
 }
 
-static
-cdi_keys_t *grid_get_keysp(grid_t *gridptr, int varID)
+static cdi_keys_t *
+grid_get_keysp(grid_t *gridptr, int varID)
 {
-  if      (varID == CDI_GLOBAL) return &gridptr->keys;
-  else if (varID == CDI_XAXIS)  return &gridptr->x.keys;
-  else if (varID == CDI_YAXIS)  return &gridptr->y.keys;
+  if (varID == CDI_GLOBAL)
+    return &gridptr->keys;
+  else if (varID == CDI_XAXIS)
+    return &gridptr->x.keys;
+  else if (varID == CDI_YAXIS)
+    return &gridptr->y.keys;
 
   return NULL;
 }
 
-static
-cdi_keys_t *zaxis_get_keysp(zaxis_t *zaxisptr, int varID)
+static cdi_keys_t *
+zaxis_get_keysp(zaxis_t *zaxisptr, int varID)
 {
   if (varID == CDI_GLOBAL) return &zaxisptr->keys;
 
   return NULL;
 }
 
-static
-cdi_key_t *new_key(cdi_keys_t *keysp, int key)
+static cdi_key_t *
+new_key(cdi_keys_t *keysp, int key)
 {
   xassert(keysp != NULL);
 
-  if ( keysp->nelems == keysp->nalloc ) return NULL;
+  if (keysp->nelems == keysp->nalloc) return NULL;
 
   cdi_key_t *keyp = &(keysp->value[keysp->nelems]);
   keysp->nelems++;
@@ -51,8 +55,8 @@ cdi_key_t *new_key(cdi_keys_t *keysp, int key)
   return keyp;
 }
 
-
-cdi_key_t *find_key(cdi_keys_t *keysp, int key)
+cdi_key_t *
+find_key(cdi_keys_t *keysp, int key)
 {
   xassert(keysp != NULL);
 
@@ -60,15 +64,15 @@ cdi_key_t *find_key(cdi_keys_t *keysp, int key)
 
   for (size_t keyid = 0; keyid < keysp->nelems; keyid++)
     {
-      cdi_key_t *keyp =  &(keysp->value[keyid]);
-      if ( keyp->key == key ) return keyp; // Normal return
+      cdi_key_t *keyp = &(keysp->value[keyid]);
+      if (keyp->key == key) return keyp;  // Normal return
     }
 
   return NULL;
 }
 
-static
-const cdi_key_t *find_key_const(const cdi_keys_t *keysp, int key)
+static const cdi_key_t *
+find_key_const(const cdi_keys_t *keysp, int key)
 {
   xassert(keysp != NULL);
 
@@ -76,29 +80,31 @@ const cdi_key_t *find_key_const(const cdi_keys_t *keysp, int key)
 
   for (size_t keyid = 0; keyid < keysp->nelems; keyid++)
     {
-      const cdi_key_t *keyp =  &(keysp->value[keyid]);
-      if (keyp->key == key) return keyp; // Normal return
+      const cdi_key_t *keyp = &(keysp->value[keyid]);
+      if (keyp->key == key) return keyp;  // Normal return
     }
 
   return NULL;
 }
 
-static
-cdi_keys_t *cdi_get_keysp(int objID, int varID)
+static cdi_keys_t *
+cdi_get_keysp(int objID, int varID)
 {
-  if      (reshGetTxCode(objID) == GRID)  return grid_get_keysp(grid_to_pointer(objID), varID);
-  else if (reshGetTxCode(objID) == ZAXIS) return zaxis_get_keysp(zaxis_to_pointer(objID), varID);
-  else if (reshGetTxCode(objID) == VLIST) return vlist_get_keysp(vlist_to_pointer(objID), varID);
+  if (reshGetTxCode(objID) == GRID)
+    return grid_get_keysp(grid_to_pointer(objID), varID);
+  else if (reshGetTxCode(objID) == ZAXIS)
+    return zaxis_get_keysp(zaxis_to_pointer(objID), varID);
+  else if (reshGetTxCode(objID) == VLIST)
+    return vlist_get_keysp(vlist_to_pointer(objID), varID);
 
   return NULL;
 }
 
-
-int cdi_key_compare(cdi_keys_t *keyspa, cdi_keys_t *keyspb, int keynum)
+int
+cdi_key_compare(cdi_keys_t *keyspa, cdi_keys_t *keyspb, int keynum)
 {
-  xassert(keynum >= 0 && keynum < (int)keyspa->nelems && keynum < (int)keyspb->nelems);
-  cdi_key_t *keypa = keyspa->value + keynum,
-            *keypb = keyspb->value + keynum;
+  xassert(keynum >= 0 && keynum < (int) keyspa->nelems && keynum < (int) keyspb->nelems);
+  cdi_key_t *keypa = keyspa->value + keynum, *keypb = keyspb->value + keynum;
 
   if (keypa->key != keypb->key) return 1;
 
@@ -121,13 +127,13 @@ int cdi_key_compare(cdi_keys_t *keyspa, cdi_keys_t *keyspb, int keynum)
   return 0;
 }
 
-
-void cdiDeleteVarKeys(cdi_keys_t *keysp)
+void
+cdiDeleteVarKeys(cdi_keys_t *keysp)
 {
-  for ( int keyid = 0; keyid < (int)keysp->nelems; keyid++ )
+  for (int keyid = 0; keyid < (int) keysp->nelems; keyid++)
     {
       cdi_key_t *keyp = &(keysp->value[keyid]);
-      if ( keyp->length )
+      if (keyp->length)
         {
           free(keyp->v.s);
           keyp->v.s = NULL;
@@ -138,8 +144,8 @@ void cdiDeleteVarKeys(cdi_keys_t *keysp)
   keysp->nelems = 0;
 }
 
-
-void cdiDeleteKeys(int cdiID, int varID)
+void
+cdiDeleteKeys(int cdiID, int varID)
 {
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
@@ -147,29 +153,29 @@ void cdiDeleteKeys(int cdiID, int varID)
   cdiDeleteVarKeys(keysp);
 }
 
-
-void cdiPrintVarKeys(cdi_keys_t *keysp)
+void
+cdiPrintVarKeys(cdi_keys_t *keysp)
 {
-  for ( int keyid = 0; keyid < (int)keysp->nelems; keyid++ )
+  for (int keyid = 0; keyid < (int) keysp->nelems; keyid++)
     {
       cdi_key_t *keyp = &(keysp->value[keyid]);
       if (keyp->type == KEY_BYTES)
         {
-          printf("%d key %d length %d value %s\n", keyid+1, keyp->key, keyp->length,  keyp->v.s);
+          printf("%d key %d length %d value %s\n", keyid + 1, keyp->key, keyp->length, keyp->v.s);
         }
       else if (keyp->type == KEY_FLOAT)
         {
-          printf("%d key %d value %g\n", keyid+1, keyp->key, keyp->v.d);
+          printf("%d key %d value %g\n", keyid + 1, keyp->key, keyp->v.d);
         }
       else if (keyp->type == KEY_INT)
         {
-          printf("%d key %d value %d\n", keyid+1, keyp->key, keyp->v.i);
+          printf("%d key %d value %d\n", keyid + 1, keyp->key, keyp->v.i);
         }
     }
 }
 
-
-void cdiPrintKeys(int cdiID, int varID)
+void
+cdiPrintKeys(int cdiID, int varID)
 {
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
@@ -178,7 +184,8 @@ void cdiPrintKeys(int cdiID, int varID)
 }
 
 //  cdiInqKeyLen: Get the length of the string representation of the key
-int cdiInqKeyLen(int cdiID, int varID, int key, int *length)
+int
+cdiInqKeyLen(int cdiID, int varID, int key, int *length)
 {
   int status = -1;
 
@@ -196,16 +203,19 @@ int cdiInqKeyLen(int cdiID, int varID, int key, int *length)
   return status;
 }
 
-static
-void cdi_define_key(const cdi_key_t *keyp, cdi_keys_t *keysp)
+static void
+cdi_define_key(const cdi_key_t *keyp, cdi_keys_t *keysp)
 {
-  if      (keyp->type == KEY_INT)   cdiDefVarKeyInt(keysp, keyp->key, keyp->v.i);
-  else if (keyp->type == KEY_FLOAT) cdiDefVarKeyFloat(keysp, keyp->key, keyp->v.d);
-  else if (keyp->type == KEY_BYTES) cdiDefVarKeyBytes(keysp, keyp->key, keyp->v.s, keyp->length);
+  if (keyp->type == KEY_INT)
+    cdiDefVarKeyInt(keysp, keyp->key, keyp->v.i);
+  else if (keyp->type == KEY_FLOAT)
+    cdiDefVarKeyFloat(keysp, keyp->key, keyp->v.d);
+  else if (keyp->type == KEY_BYTES)
+    cdiDefVarKeyBytes(keysp, keyp->key, keyp->v.s, keyp->length);
 }
 
-
-int cdiDeleteKey(int cdiID, int varID, int key)
+int
+cdiDeleteKey(int cdiID, int varID, int key)
 {
   int status = CDI_NOERR;
 
@@ -213,7 +223,7 @@ int cdiDeleteKey(int cdiID, int varID, int key)
   xassert(keysp != NULL);
 
   cdi_key_t *keyp = find_key(keysp, key);
-  if (keyp != NULL) // key in use
+  if (keyp != NULL)  // key in use
     {
       if (keyp->length)
         {
@@ -226,8 +236,8 @@ int cdiDeleteKey(int cdiID, int varID, int key)
   return status;
 }
 
-
-void cdiCopyVarKeys(const cdi_keys_t *keysp1, cdi_keys_t *keysp2)
+void
+cdiCopyVarKeys(const cdi_keys_t *keysp1, cdi_keys_t *keysp2)
 {
   for (size_t keyid = 0; keyid < keysp1->nelems; keyid++)
     {
@@ -236,8 +246,8 @@ void cdiCopyVarKeys(const cdi_keys_t *keysp1, cdi_keys_t *keysp2)
     }
 }
 
-
-int cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2)
+int
+cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2)
 {
   int status = CDI_NOERR;
 
@@ -252,8 +262,8 @@ int cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2)
   return status;
 }
 
-
-int cdiCopyVarKey(const cdi_keys_t *keysp1, int key, cdi_keys_t *keysp2)
+int
+cdiCopyVarKey(const cdi_keys_t *keysp1, int key, cdi_keys_t *keysp2)
 {
   int status = CDI_NOERR;
 
@@ -265,8 +275,8 @@ int cdiCopyVarKey(const cdi_keys_t *keysp1, int key, cdi_keys_t *keysp2)
   return status;
 }
 
-
-int cdiCopyKey(int cdiID1, int varID1, int key, int cdiID2)
+int
+cdiCopyKey(int cdiID1, int varID1, int key, int cdiID2)
 {
   cdi_keys_t *keysp1 = cdi_get_keysp(cdiID1, varID1);
   xassert(keysp1 != NULL);
@@ -277,19 +287,19 @@ int cdiCopyKey(int cdiID1, int varID1, int key, int cdiID2)
   return cdiCopyVarKey(keysp1, key, keysp2);
 }
 
-
-void cdiDefVarKeyInt(cdi_keys_t *keysp, int key, int value)
+void
+cdiDefVarKeyInt(cdi_keys_t *keysp, int key, int value)
 {
   cdi_key_t *keyp = find_key(keysp, key);
-  if ( keyp == NULL ) keyp = new_key(keysp, key);
+  if (keyp == NULL) keyp = new_key(keysp, key);
 
-  if ( keyp != NULL )
+  if (keyp != NULL)
     {
-      //if ( keyp->v.i != value )
-        {
-          keyp->type = KEY_INT;
-          keyp->v.i = value;
-        }
+      // if ( keyp->v.i != value )
+      {
+        keyp->type = KEY_INT;
+        keyp->v.i = value;
+      }
     }
 }
 
@@ -312,7 +322,8 @@ The function @func{cdiDefKeyInt} defines an integer value from a key.
 
 @EndFunction
 */
-int cdiDefKeyInt(int cdiID, int varID, int key, int value)
+int
+cdiDefKeyInt(int cdiID, int varID, int key, int value)
 {
   int status = CDI_NOERR;
 
@@ -343,7 +354,8 @@ The function @func{cdiInqKeyInt} gets an integer value from a key.
 
 @EndFunction
 */
-int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
+int
+cdiInqKeyInt(int cdiID, int varID, int key, int *value)
 {
   int status = -1;
 
@@ -353,42 +365,42 @@ int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
   xassert(keysp != NULL);
 
   const cdi_key_t *keyp = find_key_const(keysp, key);
-  if (keyp != NULL) // key in use
+  if (keyp != NULL)  // key in use
     {
       if (keyp->type == KEY_INT)
-	{
+        {
           *value = keyp->v.i;
           status = CDI_NOERR;
-	}
+        }
     }
 
   return status;
 }
 
-
-int cdiInqVarKeyInt(const cdi_keys_t *keysp, int key)
+int
+cdiInqVarKeyInt(const cdi_keys_t *keysp, int key)
 {
   int value = 0;
 
   const cdi_key_t *keyp = find_key_const(keysp, key);
-  if (keyp && keyp->type == KEY_INT ) value = keyp->v.i;
+  if (keyp && keyp->type == KEY_INT) value = keyp->v.i;
 
   return value;
 }
 
-
-void cdiDefVarKeyFloat(cdi_keys_t *keysp, int key, double value)
+void
+cdiDefVarKeyFloat(cdi_keys_t *keysp, int key, double value)
 {
   cdi_key_t *keyp = find_key(keysp, key);
-  if ( keyp == NULL ) keyp = new_key(keysp, key);
+  if (keyp == NULL) keyp = new_key(keysp, key);
 
-  if ( keyp != NULL )
+  if (keyp != NULL)
     {
-      //if ( keyp->v.i != value )
-        {
-          keyp->type = KEY_INT;
-          keyp->v.d = value;
-        }
+      // if ( keyp->v.i != value )
+      {
+        keyp->type = KEY_INT;
+        keyp->v.d = value;
+      }
     }
 }
 
@@ -411,7 +423,8 @@ The function @func{cdiDefKeyFloat} defines a CDI floating point value from a key
 
 @EndFunction
 */
-int cdiDefKeyFloat(int cdiID, int varID, int key, double value)
+int
+cdiDefKeyFloat(int cdiID, int varID, int key, double value)
 {
   int status = CDI_NOERR;
 
@@ -442,7 +455,8 @@ The function @func{cdiInqKeyFloat} gets a floating point value from a key.
 
 @EndFunction
 */
-int cdiInqKeyFloat(int cdiID, int varID, int key, double *value)
+int
+cdiInqKeyFloat(int cdiID, int varID, int key, double *value)
 {
   int status = -1;
 
@@ -452,32 +466,32 @@ int cdiInqKeyFloat(int cdiID, int varID, int key, double *value)
   xassert(keysp != NULL);
 
   const cdi_key_t *keyp = find_key_const(keysp, key);
-  if ( keyp != NULL ) // key in use
+  if (keyp != NULL)  // key in use
     {
-      if ( keyp->type == KEY_FLOAT )
-	{
+      if (keyp->type == KEY_FLOAT)
+        {
           *value = keyp->v.d;
           status = CDI_NOERR;
-	}
+        }
     }
 
   return status;
 }
 
-
-void cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, int length)
+void
+cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, int length)
 {
   cdi_key_t *keyp = find_key(keysp, key);
-  if ( keyp == NULL ) keyp = new_key(keysp, key);
+  if (keyp == NULL) keyp = new_key(keysp, key);
 
-  if ( keyp != NULL )
+  if (keyp != NULL)
     {
-      if ( keyp->length != 0 && keyp->length != length )
+      if (keyp->length != 0 && keyp->length != length)
         {
           free(keyp->v.s);
           keyp->length = 0;
         }
-      if ( keyp->length == 0 )
+      if (keyp->length == 0)
         {
           keyp->v.s = (unsigned char *) malloc((size_t) length);
           keyp->length = length;
@@ -508,7 +522,8 @@ The function @func{cdiDefKeyBytes} defines a byte array from a key.
 
 @EndFunction
 */
-int cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, int length)
+int
+cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, int length)
 {
   int status = CDI_NOERR;
 
@@ -520,19 +535,20 @@ int cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, in
   return status;
 }
 
-int cdiInqVarKeyBytes(const cdi_keys_t *keysp, int key, unsigned char *bytes, int *length)
+int
+cdiInqVarKeyBytes(const cdi_keys_t *keysp, int key, unsigned char *bytes, int *length)
 {
   int status = -1;
 
   const cdi_key_t *keyp = find_key_const(keysp, key);
-  if (keyp != NULL) // key in use
+  if (keyp != NULL)  // key in use
     {
       if (keyp->type == KEY_BYTES)
-	{
+        {
           if (keyp->length < *length) *length = keyp->length;
           memcpy(bytes, keyp->v.s, *length);
           status = CDI_NOERR;
-	}
+        }
     }
 
   return status;
@@ -559,7 +575,8 @@ The function @func{cdiInqKeyBytes} gets a byte array from a key.
 
 @EndFunction
 */
-int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length)
+int
+cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length)
 {
   xassert(bytes != NULL);
   xassert(length != NULL);
@@ -605,7 +622,8 @@ status = cdiDefKeyString(vlistID, varID, CDI_KEY_NAME, "temperature");
 @EndSource
 @EndFunction
 */
-int cdiDefKeyString(int cdiID, int varID, int key, const char *string)
+int
+cdiDefKeyString(int cdiID, int varID, int key, const char *string)
 {
   xassert(string != NULL);
 
@@ -654,7 +672,8 @@ status = cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
 @EndSource
 @EndFunction
 */
-int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
+int
+cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
 {
   xassert(string != NULL);
   xassert(length != NULL);
@@ -663,29 +682,32 @@ int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
   if (maxlength > 0) string[0] = '\0';
 
   int status = cdiInqKeyBytes(cdiID, varID, key, (unsigned char *) string, length);
-  if (status != CDI_NOERR) *length = 0;
-  else string[maxlength-1] = '\0';
+  if (status != CDI_NOERR)
+    *length = 0;
+  else
+    string[maxlength - 1] = '\0';
 
   return status;
 }
 
-const char *cdiInqVarKeyStringPtr(const cdi_keys_t *keysp, int key)
+const char *
+cdiInqVarKeyStringPtr(const cdi_keys_t *keysp, int key)
 {
   const cdi_key_t *keyp = find_key_const(keysp, key);
-  if ( keyp != NULL ) // key in use
+  if (keyp != NULL)  // key in use
     {
-      if ( keyp->type == KEY_BYTES ) return (const char *)keyp->v.s;
+      if (keyp->type == KEY_BYTES) return (const char *) keyp->v.s;
     }
 
   return NULL;
 }
 
-void cdiInitKeys(cdi_keys_t *keysp)
+void
+cdiInitKeys(cdi_keys_t *keysp)
 {
   keysp->nalloc = MAX_KEYS;
   keysp->nelems = 0;
-  for ( int i = 0; i < MAX_KEYS; ++i )
-    keysp->value[i].length = 0;
+  for (int i = 0; i < MAX_KEYS; ++i) keysp->value[i].length = 0;
 }
 
 /*

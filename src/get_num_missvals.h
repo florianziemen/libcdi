@@ -1,5 +1,5 @@
-#ifndef  GET_NUM_MISSVALS_H
-#define  GET_NUM_MISSVALS_H
+#ifndef GET_NUM_MISSVALS_H
+#define GET_NUM_MISSVALS_H
 
 #include <stddef.h>
 

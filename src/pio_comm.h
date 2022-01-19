@@ -2,29 +2,28 @@
 #define PIO_INFO_
 
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <mpi.h>
 #include <stdio.h>
 
-
 int cdiPioCommInit(MPI_Comm commGlob, int IOMode, int clientServerRole);
 void cdiPioCommFinalize(void);
 
-MPI_Comm commInqCommGlob        ( void );
-int      commInqSizeGlob        ( void );
-int      commInqRankGlob        ( void );
-int      commInqRootGlob        ( void );
+MPI_Comm commInqCommGlob(void);
+int commInqSizeGlob(void);
+int commInqRankGlob(void);
+int commInqRootGlob(void);
 
 /* returns the inter-communicator used to connect from
  * client to server group */
 MPI_Comm cdiPioInqInterComm(void);
 
-int      commInqIsProcIO        ( void );
-int      commInqIOMode          ( void );
+int commInqIsProcIO(void);
+int commInqIOMode(void);
 
-void     commDefCommPio         ( void );
+void commDefCommPio(void);
 MPI_Comm commInqCommPio(void);
 int commInqSizePio(void);
 int commInqRankPio(void);
@@ -35,15 +34,15 @@ int cdiPioCommInqSizeClients(void);
 
 int commInqSpecialRank(void);
 
-void     commDefCommColl        ( int );
-MPI_Comm commInqCommColl        ( void );
+void commDefCommColl(int);
+MPI_Comm commInqCommColl(void);
 int commRankGlob2CollID(int rankGlob);
-int      commInqSizeColl        ( void );
-int      commInqRankColl        ( void );
-MPI_Comm commInqCommCalc        ( void );
-int      commInqNProcsColl      ( void );
+int commInqSizeColl(void);
+int commInqRankColl(void);
+MPI_Comm commInqCommCalc(void);
+int commInqNProcsColl(void);
 
-void     commPrint              ( FILE * );
+void commPrint(FILE *);
 
 /* query rank of collector responsible for client on inter-communicator
  * returns -1 on server processes.
@@ -62,16 +61,13 @@ MPI_Group cdiPioInqRemoteGroup(void);
 static inline int
 cdiPioCollRank(int clientRank, int numClients, int numColl)
 {
-  return (int)(((long long)clientRank * (long long)numColl
-                + (long long)(numColl - 1))
-               / numClients);
+  return (int) (((long long) clientRank * (long long) numColl + (long long) (numColl - 1)) / numClients);
 }
 
 static inline int
 cdiPioClientRangeStart(int collRank, int numClients, int numColl)
 {
-  return (int)(((long long)collRank * (long long)numClients)
-               / (long long)numColl);
+  return (int) (((long long) collRank * (long long) numClients) / (long long) numColl);
 }
 
 #endif

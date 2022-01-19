@@ -1,7 +1,7 @@
 /*
  * An implementation of the iterator interface for GRIB files.
- * Since GRIB files do not contain an index, this avoids scanning the entire file to generate an in-memory index as streamOpenRead() does.
- * Consequently, using this interface is much more efficient for GRIB files.
+ * Since GRIB files do not contain an index, this avoids scanning the entire file to generate an in-memory index as streamOpenRead()
+ * does. Consequently, using this interface is much more efficient for GRIB files.
  */
 
 #ifndef INCLUDE_GUARD_CDI_ITERATOR_GRIB_H
@@ -31,7 +31,8 @@ CdiGribIterator *cdiGribIterator_deserialize(const char *me);
 int cdiGribIterator_nextField(CdiIterator *me);
 
 char *cdiGribIterator_inqTime(CdiIterator *me, CdiTimeType timeType);
-int cdiGribIterator_levelType(CdiIterator *me, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit);
+int cdiGribIterator_levelType(CdiIterator *me, int levelSelector, char **outName, char **outLongName, char **outStdName,
+                              char **outUnit);
 int cdiGribIterator_level(CdiIterator *me, int levelSelector, double *outValue1, double *outValue2);
 int cdiGribIterator_zaxisUuid(CdiIterator *me, int *outVgridNumber, int *outLevelCount, unsigned char outUuid[CDI_UUID_SIZE]);
 int cdiGribIterator_inqTile(CdiIterator *me, int *outTileIndex, int *outTileAttribute);

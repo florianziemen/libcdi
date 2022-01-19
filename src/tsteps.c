@@ -4,23 +4,23 @@
 #include "cdi_int.h"
 #include "dmemory.h"
 
-static
-void tstepsInitEntry(tsteps_t *tstep)
+static void
+tstepsInitEntry(tsteps_t *tstep)
 {
-  tstep->curRecID     = CDI_UNDEFID;
-  tstep->position     = 0;
-  tstep->records      = NULL;
-  tstep->recordSize   = 0;
-  tstep->nallrecs     = 0;
-  tstep->recIDs       = NULL;
-  tstep->nrecs        = 0;
-  tstep->next         = 0;
+  tstep->curRecID = CDI_UNDEFID;
+  tstep->position = 0;
+  tstep->records = NULL;
+  tstep->recordSize = 0;
+  tstep->nallrecs = 0;
+  tstep->recIDs = NULL;
+  tstep->nrecs = 0;
+  tstep->next = 0;
 
   ptaxisInit(&(tstep->taxis));
 }
 
-
-int tstepsNewEntry(stream_t *streamptr)
+int
+tstepsNewEntry(stream_t *streamptr)
 {
   const int tsID = streamptr->tstepsNextID++;
   int tstepsTableSize = streamptr->tstepsTableSize;
@@ -37,7 +37,7 @@ int tstepsNewEntry(stream_t *streamptr)
       else
         Error("Resizing of tstep table failed!");
 
-      tstepsTable = (tsteps_t *) Realloc(tstepsTable, (size_t)tstepsTableSize * sizeof(tsteps_t));
+      tstepsTable = (tsteps_t *) Realloc(tstepsTable, (size_t) tstepsTableSize * sizeof(tsteps_t));
     }
 
   streamptr->tstepsTableSize = tstepsTableSize;
@@ -51,17 +51,17 @@ int tstepsNewEntry(stream_t *streamptr)
   return tsID;
 }
 
-
-void cdiCreateTimesteps(stream_t *streamptr)
+void
+cdiCreateTimesteps(stream_t *streamptr)
 {
   if (streamptr->ntsteps < 0 || streamptr->tstepsTableSize > 0) return;
 
-  const int ntsteps = (streamptr->ntsteps == 0) ? 1 : (int)streamptr->ntsteps;
+  const int ntsteps = (streamptr->ntsteps == 0) ? 1 : (int) streamptr->ntsteps;
 
-  streamptr->tsteps = (tsteps_t *) Malloc((size_t)ntsteps * sizeof(tsteps_t));
+  streamptr->tsteps = (tsteps_t *) Malloc((size_t) ntsteps * sizeof(tsteps_t));
 
   streamptr->tstepsTableSize = ntsteps;
-  streamptr->tstepsNextID    = ntsteps;
+  streamptr->tstepsNextID = ntsteps;
 
   for (int tsID = 0; tsID < ntsteps; tsID++)
     {

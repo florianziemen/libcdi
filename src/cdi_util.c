@@ -12,104 +12,104 @@
 #include "cdi.h"
 #include "cdi_int.h"
 
-void cdiDecodeParam(int param, int *pnum, int *pcat, int *pdis)
+void
+cdiDecodeParam(int param, int *pnum, int *pcat, int *pdis)
 {
-  unsigned uparam = (unsigned)param;
+  unsigned uparam = (unsigned) param;
 
   *pdis = (int) (0xffU & uparam);
   *pcat = (int) (0xffU & (uparam >> 8));
   unsigned upnum = 0xffffU & (uparam >> 16);
-  if ( upnum > 0x7fffU ) upnum = 0x8000U - upnum;
+  if (upnum > 0x7fffU) upnum = 0x8000U - upnum;
   *pnum = (int) upnum;
 }
 
-
-int cdiEncodeParam(int pnum, int pcat, int pdis)
+int
+cdiEncodeParam(int pnum, int pcat, int pdis)
 {
-  if ( pcat < 0 || pcat > 255 ) pcat = 255;
-  if ( pdis < 0 || pdis > 255 ) pdis = 255;
+  if (pcat < 0 || pcat > 255) pcat = 255;
+  if (pdis < 0 || pdis > 255) pdis = 255;
 
-  unsigned upnum = (unsigned)pnum;
-  if ( pnum < 0 ) upnum = (unsigned)(0x8000 - pnum);
+  unsigned upnum = (unsigned) pnum;
+  if (pnum < 0) upnum = (unsigned) (0x8000 - pnum);
 
-  unsigned uparam = (upnum << 16) | (((unsigned)pcat) << 8) | (unsigned)pdis;
+  unsigned uparam = (upnum << 16) | (((unsigned) pcat) << 8) | (unsigned) pdis;
 
-  return (int)uparam;
+  return (int) uparam;
 }
 
-
-void cdiDecodeDate(DateType date, int *year, int *month, int *day)
+void
+cdiDecodeDate(DateType date, int *year, int *month, int *day)
 {
-  int64_t iyear = (int)(date / 10000);
-  *year = (int)iyear;
+  int64_t iyear = (int) (date / 10000);
+  *year = (int) iyear;
   int64_t idate = date - iyear * 10000;
   if (idate < 0) idate = -idate;
   int64_t imonth = idate / 100;
-  *month = (int)imonth;
-  *day   = (int)(idate - imonth * 100);
+  *month = (int) imonth;
+  *day = (int) (idate - imonth * 100);
 }
 
-
-DateType cdiEncodeDate(int year, int month, int day)
+DateType
+cdiEncodeDate(int year, int month, int day)
 {
   int64_t iyear = abs(year);
   int64_t date = iyear * 10000 + month * 100 + day;
   if (year < 0) date = -date;
 
-  return (DateType)date;
+  return (DateType) date;
 }
 
-
-void cdiDecodeTime(int time, int *hour, int *minute, int *second)
+void
+cdiDecodeTime(int time, int *hour, int *minute, int *second)
 {
-  int ihour = time / 10000,
-    itime = time - ihour * 10000,
-    iminute = itime / 100;
-  *hour   = ihour;
+  int ihour = time / 10000, itime = time - ihour * 10000, iminute = itime / 100;
+  *hour = ihour;
   *minute = iminute;
   *second = itime - iminute * 100;
 }
 
-
-int cdiEncodeTime(int hour, int minute, int second)
+int
+cdiEncodeTime(int hour, int minute, int second)
 {
-  return hour*10000 + minute*100 + second;
+  return hour * 10000 + minute * 100 + second;
 }
 
-
-void cdiParamToString(int param, char *paramstr, int maxlen)
+void
+cdiParamToString(int param, char *paramstr, int maxlen)
 {
   int dis, cat, num;
   cdiDecodeParam(param, &num, &cat, &dis);
 
-  size_t umaxlen = maxlen >= 0 ? (unsigned)maxlen : 0U;
+  size_t umaxlen = maxlen >= 0 ? (unsigned) maxlen : 0U;
   int len;
-  if ( dis == 255 && (cat == 255 || cat == 0 ) )
+  if (dis == 255 && (cat == 255 || cat == 0))
     len = snprintf(paramstr, umaxlen, "%d", num);
-  else  if ( dis == 255 )
+  else if (dis == 255)
     len = snprintf(paramstr, umaxlen, "%d.%d", num, cat);
   else
     len = snprintf(paramstr, umaxlen, "%d.%d.%d", num, cat, dis);
 
-  if ( len >= maxlen || len < 0)
-    fprintf(stderr, "Internal problem (%s): size of input string is too small!\n", __func__);
+  if (len >= maxlen || len < 0) fprintf(stderr, "Internal problem (%s): size of input string is too small!\n", __func__);
 }
 
-
-const char *cdiUnitNamePtr(int cdi_unit)
+const char *
+cdiUnitNamePtr(int cdi_unit)
 {
   const char *cdiUnits[] = {
-    /*  0 */  "undefined",
-    /*  1 */  "Pa",
-    /*  2 */  "hPa",
-    /*  3 */  "mm",
-    /*  4 */  "cm",
-    /*  5 */  "dm",
-    /*  6 */  "m",
+    /*  0 */ "undefined",
+    /*  1 */ "Pa",
+    /*  2 */ "hPa",
+    /*  3 */ "mm",
+    /*  4 */ "cm",
+    /*  5 */ "dm",
+    /*  6 */ "m",
   };
-  enum { numUnits = (int) (sizeof(cdiUnits)/sizeof(char *)) };
-  const char *name = ( cdi_unit > 0 && cdi_unit < numUnits ) ?
-    cdiUnits[cdi_unit] : NULL;
+  enum
+  {
+    numUnits = (int) (sizeof(cdiUnits) / sizeof(char *))
+  };
+  const char *name = (cdi_unit > 0 && cdi_unit < numUnits) ? cdiUnits[cdi_unit] : NULL;
 
   return name;
 }
@@ -121,44 +121,42 @@ cdiGetPageSize(bool largePageAlign)
 #if HAVE_DECL__SC_LARGE_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE || HAVE_DECL__SC_PAGESIZE
   bool nameAssigned = false;
   int name;
-#  if HAVE_DECL__SC_LARGE_PAGESIZE
+#if HAVE_DECL__SC_LARGE_PAGESIZE
   if (largePageAlign)
     {
       name = _SC_LARGE_PAGESIZE;
       nameAssigned = true;
     }
   else
-#  else
-    (void)largePageAlign;
-#  endif
+#else
+  (void) largePageAlign;
+#endif
     {
-#  if HAVE_DECL__SC_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE
+#if HAVE_DECL__SC_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE
       name =
-#    if HAVE_DECL__SC_PAGESIZE
-        _SC_PAGESIZE
-#    elif HAVE_DECL__SC_PAGE_SIZE
-        _SC_PAGE_SIZE
-#    endif
-        ;
+#if HAVE_DECL__SC_PAGESIZE
+          _SC_PAGESIZE
+#elif HAVE_DECL__SC_PAGE_SIZE
+          _SC_PAGE_SIZE
+#endif
+          ;
       nameAssigned = true;
-#  endif
+#endif
     }
-  if (nameAssigned)
-    pagesize = sysconf(name);
+  if (nameAssigned) pagesize = sysconf(name);
 #endif
   if (pagesize == -1L)
     pagesize =
 #if HAVE_DECL_PAGESIZE
-      PAGESIZE
+        PAGESIZE
 #elif HAVE_DECL_PAGE_SIZE
-      PAGE_SIZE
+        PAGE_SIZE
 #else
-      commonPageSize
+        commonPageSize
 #endif
-      ;
-  return (size_t)pagesize;
+        ;
+  return (size_t) pagesize;
 }
-
 
 /*
  * Local Variables:

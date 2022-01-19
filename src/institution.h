@@ -1,9 +1,7 @@
 #ifndef INSTITUTION_H
 #define INSTITUTION_H
 
-int
-instituteUnpack(void *buf, int size, int *position, int originNamespace,
-                void *context, int force_id);
+int instituteUnpack(void *buf, int size, int *position, int originNamespace, void *context, int force_id);
 
 void instituteDefaultEntries(void);
 

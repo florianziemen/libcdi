@@ -1,5 +1,5 @@
-#ifndef  CDI_INT_H
-#define  CDI_INT_H
+#ifndef CDI_INT_H
+#define CDI_INT_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -19,19 +19,19 @@
 
 // Base file types
 
-#define  CDI_FILETYPE_GRIB        100   // File type GRIB
-#define  CDI_FILETYPE_NETCDF      101   // File type NetCDF
+#define CDI_FILETYPE_GRIB 100    // File type GRIB
+#define CDI_FILETYPE_NETCDF 101  // File type NetCDF
 
 // dummy use of unused parameters to silence compiler warnings
-#ifndef  UNUSED
-#define  UNUSED(x) (void)x
+#ifndef UNUSED
+#define UNUSED(x) (void) x
 #endif
 
 #ifndef strdupx
 #ifndef strdup
 char *strdup(const char *s);
 #endif
-#define strdupx  strdup
+#define strdupx strdup
 /*
 #define strdupx(s)			          \
 ({					      	  \
@@ -52,110 +52,104 @@ strIsEqual(const char *x, const char *y)
   return (*x == *y) && strcmp(x, y) == 0;
 }
 
-
-#ifndef  M_PI
-#define  M_PI        3.14159265358979323846  /* pi */
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 /* pi */
 #endif
 
-
-#ifndef  ERROR_H
-#  include "error.h"
+#ifndef ERROR_H
+#include "error.h"
 #endif
 #ifndef _BASETIME_H
-#  include "basetime.h"
+#include "basetime.h"
 #endif
 #ifndef TIMEBASE_H
-#  include "timebase.h"
+#include "timebase.h"
 #endif
 #ifndef TAXIS_H
-#  include "taxis.h"
+#include "taxis.h"
 #endif
 #ifndef CDI_LIMITS_H
-#  include "cdi_limits.h"
+#include "cdi_limits.h"
 #endif
-#ifndef  _SERVICE_H
-#  include "service.h"
+#ifndef _SERVICE_H
+#include "service.h"
 #endif
-#ifndef  _EXTRA_H
-#  include "extra.h"
+#ifndef _EXTRA_H
+#include "extra.h"
 #endif
-#ifndef  _IEG_H
-#  include "ieg.h"
+#ifndef _IEG_H
+#include "ieg.h"
 #endif
 #ifndef RESOURCE_HANDLE_H
-#  include "resource_handle.h"
+#include "resource_handle.h"
 #endif
 
-
-#define check_parg(arg)  if ( arg == 0 ) Warning("Argument '" #arg "' not allocated!")
+#define check_parg(arg) \
+  if (arg == 0) Warning("Argument '" #arg "' not allocated!")
 
 #ifdef __xlC__ /* performance problems on IBM */
 #ifndef DBL_IS_NAN
-#  define DBL_IS_NAN(x)     ((x) != (x))
+#define DBL_IS_NAN(x) ((x) != (x))
 #endif
 #else
 #ifndef DBL_IS_NAN
-#if  defined  (HAVE_DECL_ISNAN)
-#  define DBL_IS_NAN(x)     (isnan(x))
-#elif  defined  (FP_NAN)
-#  define DBL_IS_NAN(x)     (fpclassify(x) == FP_NAN)
+#if defined(HAVE_DECL_ISNAN)
+#define DBL_IS_NAN(x) (isnan(x))
+#elif defined(FP_NAN)
+#define DBL_IS_NAN(x) (fpclassify(x) == FP_NAN)
 #else
-#  define DBL_IS_NAN(x)     ((x) != (x))
+#define DBL_IS_NAN(x) ((x) != (x))
 #endif
 #endif
 #endif
 
 #ifndef DBL_IS_EQUAL
 //#define DBL_IS_EQUAL(x,y) (!(x < y || y < x))
-#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)):!(x < y || y < x))
+#define DBL_IS_EQUAL(x, y) (DBL_IS_NAN(x) || DBL_IS_NAN(y) ? (DBL_IS_NAN(x) && DBL_IS_NAN(y)) : !(x < y || y < x))
 #endif
 
 #ifndef IS_EQUAL
-#  define IS_NOT_EQUAL(x,y) (x < y || y < x)
-#  define IS_EQUAL(x,y)     (!IS_NOT_EQUAL(x,y))
+#define IS_NOT_EQUAL(x, y) (x < y || y < x)
+#define IS_EQUAL(x, y) (!IS_NOT_EQUAL(x, y))
 #endif
 
-enum {
+enum
+{
   TYPE_REC,
   TYPE_VAR,
 };
 
-enum {
+enum
+{
   MEMTYPE_DOUBLE = 1,
   MEMTYPE_FLOAT,
 };
 
 typedef struct
 {
-  void     *buffer;             // gribapi, cgribex
-  size_t    buffersize;         // gribapi, cgribex
-  off_t     position;           // file position
-  int       param;
-  int       level;
-  int       date;
-  int       time;
-  int       gridID;
-  int       varID;
-  int       levelID;
-  int       prec;               // ext, srv
-  void     *exsep;              // ieg, ext, srv container
-  void     *cgribexp;           // cgribex container
-}
-Record;
+  void *buffer;       // gribapi, cgribex
+  size_t buffersize;  // gribapi, cgribex
+  off_t position;     // file position
+  int param;
+  int level;
+  int date;
+  int time;
+  int gridID;
+  int varID;
+  int levelID;
+  int prec;        // ext, srv
+  void *exsep;     // ieg, ext, srv container
+  void *cgribexp;  // cgribex container
+} Record;
 
 // data structure specifying tile-related meta-data. structure contains "-1" if this is no tile-variable.
-typedef struct {
-  int
-    tileindex,
-    totalno_of_tileattr_pairs,
-    tileClassification,
-    numberOfTiles,
-    numberOfAttributes,
-    attribute;
+typedef struct
+{
+  int tileindex, totalno_of_tileattr_pairs, tileClassification, numberOfTiles, numberOfAttributes, attribute;
 } var_tile_t;
 
-
-typedef struct {
+typedef struct
+{
   short perturbationNumber;
   short typeOfGeneratingProcess;
 } VarScanKeys;
@@ -174,184 +168,184 @@ varScanKeysIsEqual(const VarScanKeys *s1, const VarScanKeys *s2)
 
 typedef struct
 {
-  off_t     position;
-  size_t    size;
-  size_t    gridsize;
-  int       zip;
-  int       param;
-  int       ilevel;
-  int       ilevel2;
-  int       ltype;
-  short     tsteptype;
-  short     varID;
-  int       levelID;
-  short     used;
-  char      varname[32]; // needed for grib decoding with GRIB_API
+  off_t position;
+  size_t size;
+  size_t gridsize;
+  int zip;
+  int param;
+  int ilevel;
+  int ilevel2;
+  int ltype;
+  short tsteptype;
+  short varID;
+  int levelID;
+  short used;
+  char varname[32];  // needed for grib decoding with GRIB_API
   VarScanKeys scanKeys;
-  var_tile_t tiles;      // tile-related meta-data, currently for GRIB-API only.
-#ifdef  HAVE_LIBFDB5
-  void     *fdbItem;
+  var_tile_t tiles;  // tile-related meta-data, currently for GRIB-API only.
+#ifdef HAVE_LIBFDB5
+  void *fdbItem;
 #endif
-}
-record_t;
+} record_t;
 
-
-typedef struct {
+typedef struct
+{
   record_t *records;
-  int      *recIDs;      // IDs of non constant records
-  int       recordSize;  // number of allocated records
-  int       nrecs;       // number of used records
-                         // tsID=0 nallrecs
-                         // tsID>0 number of non constant records
-  int       nallrecs;    // number of all records
-  int       curRecID;    // current record ID
-  bool      next;
-  off_t     position;    // timestep file position
-  taxis_t   taxis;
-}
-tsteps_t;
+  int *recIDs;     // IDs of non constant records
+  int recordSize;  // number of allocated records
+  int nrecs;       // number of used records
+                   // tsID=0 nallrecs
+                   // tsID>0 number of non constant records
+  int nallrecs;    // number of all records
+  int curRecID;    // current record ID
+  bool next;
+  off_t position;  // timestep file position
+  taxis_t taxis;
+} tsteps_t;
 
-
-typedef struct {
-  int       nlevs;
-  int       subtypeIndex; // corresponding tile in subtype_t structure (subtype->self)
-  int      *recordID;     // record IDs: [nlevs]
-  int      *lindex;       // level index
+typedef struct
+{
+  int nlevs;
+  int subtypeIndex;  // corresponding tile in subtype_t structure (subtype->self)
+  int *recordID;     // record IDs: [nlevs]
+  int *lindex;       // level index
 } sleveltable_t;
 
+typedef struct
+{
+  sleveltable_t *recordTable;  // record IDs for each subtype
+  int ncvarid;
+  int subtypeSize;
+  bool defmiss;  // true: if missval is defined in file
+  bool isUsed;
 
-typedef struct {
-  sleveltable_t *recordTable; // record IDs for each subtype
-  int            ncvarid;
-  int            subtypeSize;
-  bool           defmiss;     // true: if missval is defined in file
-  bool           isUsed;
+  int gridID;
+  int zaxisID;
+  int tsteptype;  // TSTEP_*
+  int subtypeID;  // subtype ID, e.g. for tile-related meta-data (currently for GRIB-API only).
+} svarinfo_t;
 
-  int            gridID;
-  int            zaxisID;
-  int            tsteptype;   // TSTEP_*
-  int            subtypeID;   // subtype ID, e.g. for tile-related meta-data (currently for GRIB-API only).
-}
-svarinfo_t;
-
-
-typedef struct {
+typedef struct
+{
   int ilev;
   int mlev;
   int ilevID;
   int mlevID;
-}
-VCT;
+} VCT;
 
 #ifdef HAVE_LIBNETCDF
-enum cdfIDIdx {
+enum cdfIDIdx
+{
   CDF_DIMID_E,  // 3rd dimID of cube sphere grid (len=6)
   CDF_DIMID_X,
   CDF_DIMID_Y,
-  CDF_DIMID_RP, // reducedPoints
+  CDF_DIMID_RP,  // reducedPoints
   CDF_VARID_X,
   CDF_VARID_Y,
-  CDF_VARID_RP, // reducedPoints
+  CDF_VARID_RP,  // reducedPoints
   CDF_VARID_A,
   CDF_SIZE_ncIDs,
 };
 
-typedef struct {
+typedef struct
+{
   int ncIDs[CDF_SIZE_ncIDs];
   int gridID;
-}
-ncgrid_t;
+} ncgrid_t;
 #endif
 
-typedef struct {
-  int         self;
-  int         accesstype;   // TYPE_REC or TYPE_VAR
-  int         accessmode;
-  int         filetype;
-  int         byteorder;
-  int         fileID;
-  int         filemode;
-  int         nrecs;        // number of records
-  SizeType    numvals;
-  char       *filename;
-  Record     *record;
+typedef struct
+{
+  int self;
+  int accesstype;  // TYPE_REC or TYPE_VAR
+  int accessmode;
+  int filetype;
+  int byteorder;
+  int fileID;
+  int filemode;
+  int nrecs;  // number of records
+  SizeType numvals;
+  char *filename;
+  Record *record;
   svarinfo_t *vars;
-  int         nvars;        // number of variables
-  int         varsAllocated;
-  int         curTsID;      // current timestep ID
-  int         rtsteps;      // number of tsteps accessed
-  long        ntsteps;      // number of tsteps : only set if all records accessed
-  tsteps_t   *tsteps;
-  int         tstepsTableSize;
-  int         tstepsNextID;
-  basetime_t  basetime;
-  int         ncmode;
-  int         vlistID;
+  int nvars;  // number of variables
+  int varsAllocated;
+  int curTsID;   // current timestep ID
+  int rtsteps;   // number of tsteps accessed
+  long ntsteps;  // number of tsteps : only set if all records accessed
+  tsteps_t *tsteps;
+  int tstepsTableSize;
+  int tstepsNextID;
+  basetime_t basetime;
+  int ncmode;
+  int vlistID;
 #ifdef HAVE_LIBNETCDF
-  int         nc_complex_float_id;
-  int         nc_complex_double_id;
-  ncgrid_t    ncgrid[MAX_GRIDS_PS];
-  int         zaxisID[MAX_ZAXES_PS];	// Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
-  int         nczvarID[MAX_ZAXES_PS];
-  VCT         vct;
+  int nc_complex_float_id;
+  int nc_complex_double_id;
+  ncgrid_t ncgrid[MAX_GRIDS_PS];
+  int zaxisID[MAX_ZAXES_PS];  // Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
+  int nczvarID[MAX_ZAXES_PS];
+  VCT vct;
 #endif
-  int         globalatts;
-  int         localatts;
-  int         unreduced;
-  int         have_missval;
-  int         comptype;      // compression type
-  int         complevel;     // compression level
-  bool        sortname;
-  bool        sortparam;
-  void       *gribContainers;
+  int globalatts;
+  int localatts;
+  int unreduced;
+  int have_missval;
+  int comptype;   // compression type
+  int complevel;  // compression level
+  bool sortname;
+  bool sortparam;
+  void *gribContainers;
 
-  int         numWorker;
-  int         nextRecID;
-  int         cachedTsID;
-  void       *jobs;
-  void       *jobManager;
+  int numWorker;
+  int nextRecID;
+  int cachedTsID;
+  void *jobs;
+  void *jobManager;
 
-  int         protocol;
-  void       *protocolData;
-}
-stream_t;
-
+  int protocol;
+  void *protocolData;
+} stream_t;
 
 // Length of optional keyword/value pair list
 #define MAX_OPT_GRIB_ENTRIES 500
 
-enum cdi_convention {CDI_CONVENTION_ECHAM, CDI_CONVENTION_CF};
+enum cdi_convention
+{
+  CDI_CONVENTION_ECHAM,
+  CDI_CONVENTION_CF
+};
 
 // Data type specification for optional key/value pairs (GRIB)
-typedef enum {
+typedef enum
+{
   t_double = 0,
-  t_int    = 1
+  t_int = 1
 } key_val_pair_datatype;
 
 // Data structure holding optional key/value pairs for GRIB
 typedef struct
 {
-  char*                  keyword;        // keyword string
-  bool                   update;
-  key_val_pair_datatype  data_type;      // data type of this key/value pair
-  double                 dbl_val;        // double value (data_type == t_double)
-  int                    int_val;        // integer value (data_type == t_int)
-  int                    subtype_index;  // tile index for this key-value pair
+  char *keyword;  // keyword string
+  bool update;
+  key_val_pair_datatype data_type;  // data type of this key/value pair
+  double dbl_val;                   // double value (data_type == t_double)
+  int int_val;                      // integer value (data_type == t_int)
+  int subtype_index;                // tile index for this key-value pair
 } opt_key_val_pair_t;
 
 // enum for differenciating between the different times that we handle
-typedef enum {
+typedef enum
+{
   kCdiTimeType_referenceTime,
   kCdiTimeType_startTime,
   kCdiTimeType_endTime
 } CdiTimeType;
 
-
-#define  CDI_FILETYPE_UNDEF          -1   // Unknown/not yet defined file type
-
+#define CDI_FILETYPE_UNDEF -1  // Unknown/not yet defined file type
 
 extern int cdiDebugExt;
-extern int CDI_Debug;      // If set to 1, debuggig (default 0)
+extern int CDI_Debug;  // If set to 1, debuggig (default 0)
 extern int CDI_Recopt;
 extern bool CDI_gribapi_debug;
 extern bool CDI_gribapi_grib1;
@@ -362,7 +356,7 @@ extern int CDI_Default_ModelID;
 extern int CDI_Default_TableID;
 extern int cdiDefaultLeveltype;
 extern int CDI_Default_Calendar;
-//extern int cdiNcMissingValue;
+// extern int cdiNcMissingValue;
 extern int CDI_Netcdf_Chunksizehint;
 extern int CDI_Chunk_Type;
 extern int CDI_Split_Ltype105;
@@ -387,15 +381,14 @@ extern size_t CDI_Netcdf_Hdr_Pad;
 extern bool CDI_Netcdf_Lazy_Grid_Load;
 extern int STREAM_Debug;
 
-
 extern char *cdiPartabPath;
-extern int   cdiPartabIntern;
+extern int cdiPartabIntern;
 extern const resOps streamOps;
 
 static inline stream_t *
 stream_to_pointer(int idx)
 {
-  return (stream_t *)reshGetVal(idx, &streamOps);
+  return (stream_t *) reshGetVal(idx, &streamOps);
 }
 
 static inline void
@@ -404,56 +397,57 @@ stream_check_ptr(const char *caller, stream_t *streamptr)
   if (streamptr == NULL) Errorc("stream undefined!");
 }
 
-int     streamInqFileID(int streamID);
+int streamInqFileID(int streamID);
 
-void    gridDefHasDims(int gridID, int hasdims);
-int     gridInqHasDims(int gridID);
-int     zaxisInqLevelID(int zaxisID, double level);
+void gridDefHasDims(int gridID, int hasdims);
+int gridInqHasDims(int gridID);
+int zaxisInqLevelID(int zaxisID, double level);
 
-void    streamCheckID(const char *caller, int streamID);
+void streamCheckID(const char *caller, int streamID);
 
-void    streamDefineTaxis(int streamID);
+void streamDefineTaxis(int streamID);
 
-int     streamsNewEntry(int filetype);
-void    streamsInitEntry(int streamID);
-void    cdiStreamSetupVlist(stream_t *streamptr, int vlistID);
+int streamsNewEntry(int filetype);
+void streamsInitEntry(int streamID);
+void cdiStreamSetupVlist(stream_t *streamptr, int vlistID);
 // default implementation of the overridable function
-void    cdiStreamSetupVlist_(stream_t *streamptr, int vlistID);
-int     stream_new_var(stream_t *streamptr, int gridID, int zaxisID, int tilesetID);
+void cdiStreamSetupVlist_(stream_t *streamptr, int vlistID);
+int stream_new_var(stream_t *streamptr, int gridID, int zaxisID, int tilesetID);
 
-int     tstepsNewEntry(stream_t *streamptr);
+int tstepsNewEntry(stream_t *streamptr);
 
 const char *strfiletype(int filetype);
 
-void    cdi_generate_vars(stream_t *streamptr);
+void cdi_generate_vars(stream_t *streamptr);
 
-void    vlist_check_contents(int vlistID);
+void vlist_check_contents(int vlistID);
 
-void    cdi_create_records(stream_t *streamptr, int tsID);
+void cdi_create_records(stream_t *streamptr, int tsID);
 
 void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *container_name);
 
-int     recordNewEntry(stream_t *streamptr, int tsID);
+int recordNewEntry(stream_t *streamptr, int tsID);
 
-void    cdiCreateTimesteps(stream_t *streamptr);
+void cdiCreateTimesteps(stream_t *streamptr);
 
-void    recordInitEntry(record_t *record);
+void recordInitEntry(record_t *record);
 
-void    cdiCheckZaxis(int zaxisID);
+void cdiCheckZaxis(int zaxisID);
 
-void    cdiDefAccesstype(int streamID, int type);
-int     cdiInqAccesstype(int streamID);
+void cdiDefAccesstype(int streamID, int type);
+int cdiInqAccesstype(int streamID);
 
-int     getByteswap(int byteorder);
+int getByteswap(int byteorder);
 
 void cdiStreamGetIndexList(unsigned numIDs, int IDs[]);
 
-void  cdiInitialize(void);
+void cdiInitialize(void);
 
 char *cdiEscapeSpaces(const char *string);
 char *cdiUnescapeSpaces(const char *string, const char **outStringEnd);
 
-enum {
+enum
+{
   CDI_UNIT_PA = 1,
   CDI_UNIT_HPA,
   CDI_UNIT_MM,
@@ -467,29 +461,19 @@ struct streamAssoc
   int streamID, vlistID;
 };
 
-struct streamAssoc
-streamUnpack(char *unpackBuffer, int unpackBufferSize,
-             int *unpackBufferPos, int originNamespace, void *context);
+struct streamAssoc streamUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context);
 
-int
-cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
-                             int filetype, stream_t *streamptr,
-                             int recordBufIsToBeCreated);
+int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filetype, stream_t *streamptr,
+                                 int recordBufIsToBeCreated);
 
-int
-streamOpenID(const char *filename, char filemode, int filetype, int resH);
+int streamOpenID(const char *filename, char filemode, int filetype, int resH);
 
-void
-cdiStreamDefVlist_(int streamID, int vlistID);
+void cdiStreamDefVlist_(int streamID, int vlistID);
 
-int
-cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, SizeType nmiss);
+int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, SizeType nmiss);
 
-void
-cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
-                        const int rect[][2], const void *data, SizeType nmiss);
-void
-cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted);
+void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype, const int rect[][2], const void *data, SizeType nmiss);
+void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted);
 
 int cdiStreamDefTimestep_(stream_t *streamptr, int tsID);
 
@@ -497,7 +481,8 @@ void cdiStreamSync_(stream_t *streamptr);
 
 const char *cdiUnitNamePtr(int cdi_unit);
 
-enum {
+enum
+{
   // 8192 is known to work on most systems (4096 isn't on Alpha)
   commonPageSize = 8192,
 };
@@ -533,7 +518,7 @@ int cdiBaseFiletype(int filetype);
 
 // clang-format on
 
-#endif  /* CDI_INT_H */
+#endif /* CDI_INT_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

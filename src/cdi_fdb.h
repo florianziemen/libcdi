@@ -1,5 +1,5 @@
-#ifndef  CDI_FDB_H
-#define  CDI_FDB_H
+#ifndef CDI_FDB_H
+#define CDI_FDB_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -40,4 +40,4 @@ fdb_request_t *create_fdb_request(const char *filename);
 
 #endif
 
-#endif  /* CDI_FDB_H */
+#endif /* CDI_FDB_H */

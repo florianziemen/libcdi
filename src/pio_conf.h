@@ -1,7 +1,6 @@
 #ifndef PIO_CONF_H
 #define PIO_CONF_H
 
-
 #include <stdbool.h>
 
 #include <yaxt.h>
@@ -13,16 +12,15 @@
 
 #include "resource_handle.h"
 
-typedef Xt_xmap (*xmap_new_func_ptr)(Xt_idxlist src_idxlist,
-                                     Xt_idxlist dst_idxlist,
-                                     MPI_Comm comm);
+typedef Xt_xmap (*xmap_new_func_ptr)(Xt_idxlist src_idxlist, Xt_idxlist dst_idxlist, MPI_Comm comm);
 
 /*
  * cdiPioConf is meant to be internal to the library and not to be
  * used directly if possible, CDI-PIO users should rely on the
  * corresponding functions instead.
  */
-struct cdiPioConf {
+struct cdiPioConf
+{
   int IOMode;
   int clientServerRole;
   float partInflate;
@@ -52,17 +50,13 @@ void cdiPioConfSetCSRole(int confResH, int CSRole);
 
 int cdiPioConfGetCSRole(int confResH);
 
-void
-cdiPioConfSetpostCommSetupActions(int confResH,
-                                  void (*postCommSetupActions)(void));
+void cdiPioConfSetpostCommSetupActions(int confResH, void (*postCommSetupActions)(void));
 
 void (*cdiPioConfGetpostCommSetupActions(int confResH))(void);
 
-int
-cdiPioIOModeStr2Code(const char *modeStr);
+int cdiPioIOModeStr2Code(const char *modeStr);
 
-const char *
-cdiPioIOMode2Str(int IOMode);
+const char *cdiPioIOMode2Str(int IOMode);
 
 int cdiPioConfGetLargePageAlign(int confResH);
 

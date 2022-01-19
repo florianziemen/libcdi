@@ -1,14 +1,14 @@
-#ifndef  GRIBAPI_H
-#define  GRIBAPI_H
+#ifndef GRIBAPI_H
+#define GRIBAPI_H
 
-#ifdef  HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
 #include <grib_api.h>
-#ifndef  ERROR_H
+#ifndef ERROR_H
 #include "error.h"
 #endif
 #endif
 
-#ifndef  CDI_INT_H
+#ifndef CDI_INT_H
 #include "cdi_int.h"
 #endif
 
@@ -104,7 +104,7 @@ gribContainer_t;
 
 // clang-format on
 
-#endif  /* GRIBAPI_H */
+#endif /* GRIBAPI_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

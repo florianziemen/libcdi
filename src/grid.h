@@ -1,12 +1,11 @@
-#ifndef  GRID_H
-#define  GRID_H
+#ifndef GRID_H
+#define GRID_H
 
 #include "cdi.h"
 #include <stdbool.h>
 
 #include "cdi_key.h"
 #include "cdi_att.h"
-
 
 typedef unsigned char mask_t;
 
@@ -56,54 +55,56 @@ struct gridVirtTable
   const double *(*inqYBoundsPtr)(grid_t *gridptr);
 };
 
-struct gridaxis_t {
-  size_t      size;                   // number of values
-  short       flag;                   // 0: undefined 1:vals 2:first+inc
-  double      first, last, inc;
-  double     *vals;
-  double     *bounds;
-  cdi_keys_t  keys;
+struct gridaxis_t
+{
+  size_t size;  // number of values
+  short flag;   // 0: undefined 1:vals 2:first+inc
+  double first, last, inc;
+  double *vals;
+  double *bounds;
+  cdi_keys_t keys;
 #ifndef USE_MPI
-  int         clength;
-  char      **cvals;
+  int clength;
+  char **cvals;
 #endif
 };
 
 // GME Grid
-struct grid_gme_t {
-  int     nd, ni, ni2, ni3;           // parameter for GRID_GME
+struct grid_gme_t
+{
+  int nd, ni, ni2, ni3;  // parameter for GRID_GME
 };
 
-struct grid_t {
-  char       *name;
-  int         self;
-  size_t      size;
-  int         type;                   // grid type
-  int         datatype;               // grid data type (used only internal in gridComplete())
-  int         proj;                   // grid projection
-  int         projtype;               // grid projection type
-  mask_t     *mask;
-  mask_t     *mask_gme;
-  double     *area;
-  struct grid_gme_t  gme;
-  int         trunc;                  // parameter for GRID_SPECTRAL
-  int         nvertex;
-  int        *reducedPoints;
-  int         reducedPointsSize;
-  int         np;                     // number of parallels between a pole and the equator
-  signed char isCyclic;               // three possible states:
-                                      // -1 if unknown,
-                                      //  0 if found not cyclic, or
-                                      //  1 for global cyclic grids
-  bool        lcomplex;
-  bool        hasdims;
+struct grid_t
+{
+  char *name;
+  int self;
+  size_t size;
+  int type;      // grid type
+  int datatype;  // grid data type (used only internal in gridComplete())
+  int proj;      // grid projection
+  int projtype;  // grid projection type
+  mask_t *mask;
+  mask_t *mask_gme;
+  double *area;
+  struct grid_gme_t gme;
+  int trunc;  // parameter for GRID_SPECTRAL
+  int nvertex;
+  int *reducedPoints;
+  int reducedPointsSize;
+  int np;                // number of parallels between a pole and the equator
+  signed char isCyclic;  // three possible states:
+                         // -1 if unknown,
+                         //  0 if found not cyclic, or
+                         //  1 for global cyclic grids
+  bool lcomplex;
+  bool hasdims;
   struct gridaxis_t x;
   struct gridaxis_t y;
   const struct gridVirtTable *vtable;
-  cdi_keys_t  keys;
-  cdi_atts_t  atts;
+  cdi_keys_t keys;
+  cdi_atts_t atts;
 };
-
 
 void grid_init(grid_t *gridptr);
 void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size);
@@ -118,26 +119,23 @@ void gridVerifyProj(int gridID);
 double gridInqXincInMeter(int gridID);
 double gridInqYincInMeter(int gridID);
 
-//const double *gridInqXvalsPtr(int gridID);
-//const double *gridInqYvalsPtr(int gridID);
+// const double *gridInqXvalsPtr(int gridID);
+// const double *gridInqYvalsPtr(int gridID);
 
 const char **gridInqXCvalsPtr(int gridID);
 const char **gridInqYCvalsPtr(int gridID);
 
-//const double *gridInqXboundsPtr(int gridID);
-//const double *gridInqYboundsPtr(int gridID);
+// const double *gridInqXboundsPtr(int gridID);
+// const double *gridInqYboundsPtr(int gridID);
 const double *gridInqAreaPtr(int gridID);
 
 int gridGenerate(const grid_t *grid);
 
-//int gridIsEqual(int gridID1, int gridID2);
+// int gridIsEqual(int gridID1, int gridID2);
 
 void cdiGridGetIndexList(unsigned, int *);
 
-void
-gridUnpack(char * unpackBuffer, int unpackBufferSize,
-           int * unpackBufferPos, int originNamespace, void *context,
-           int force_id);
+void gridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id);
 
 struct addIfNewRes
 {

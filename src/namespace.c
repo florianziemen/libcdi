@@ -59,12 +59,12 @@ static int activeNamespace = 0;
     }
 // clang-format on
 
-#if defined (SX) || defined (__cplusplus)
-static const union namespaceSwitchValue
-  defaultSwitches_[NUM_NAMESPACE_SWITCH] = defaultSwitches;
+#if defined(SX) || defined(__cplusplus)
+static const union namespaceSwitchValue defaultSwitches_[NUM_NAMESPACE_SWITCH] = defaultSwitches;
 #endif
 
-enum namespaceStatus {
+enum namespaceStatus
+{
   NAMESPACE_STATUS_INUSE,
   NAMESPACE_STATUS_UNUSED,
 };
@@ -73,19 +73,16 @@ static struct Namespace
 {
   enum namespaceStatus resStage;
   union namespaceSwitchValue switches[NUM_NAMESPACE_SWITCH];
-} initialNamespace = {
-  .resStage = NAMESPACE_STATUS_INUSE,
-  .switches = defaultSwitches
-};
+} initialNamespace = { .resStage = NAMESPACE_STATUS_INUSE, .switches = defaultSwitches };
 
 static struct Namespace *namespaces = &initialNamespace;
 
 static unsigned namespacesSize = 1;
 
-#if  defined  (HAVE_LIBPTHREAD)
-#  include <pthread.h>
+#if defined(HAVE_LIBPTHREAD)
+#include <pthread.h>
 
-static pthread_once_t  namespaceOnce = PTHREAD_ONCE_INIT;
+static pthread_once_t namespaceOnce = PTHREAD_ONCE_INIT;
 static pthread_mutex_t namespaceMutex;
 
 static void
@@ -98,54 +95,58 @@ namespaceInitialize(void)
   pthread_mutexattr_destroy(&ma);
 }
 
-#  define NAMESPACE_LOCK()         pthread_mutex_lock(&namespaceMutex)
-#  define NAMESPACE_UNLOCK()       pthread_mutex_unlock(&namespaceMutex)
-#  define NAMESPACE_INIT()         pthread_once(&namespaceOnce, \
-                                                namespaceInitialize)
-
+#define NAMESPACE_LOCK() pthread_mutex_lock(&namespaceMutex)
+#define NAMESPACE_UNLOCK() pthread_mutex_unlock(&namespaceMutex)
+#define NAMESPACE_INIT() pthread_once(&namespaceOnce, namespaceInitialize)
 
 #else
 
-#  define NAMESPACE_INIT() do { } while (0)
-#  define NAMESPACE_LOCK()
-#  define NAMESPACE_UNLOCK()
+#define NAMESPACE_INIT() \
+  do                     \
+    {                    \
+    }                    \
+  while (0)
+#define NAMESPACE_LOCK()
+#define NAMESPACE_UNLOCK()
 
 #endif
 
-
-enum {
+enum
+{
   intbits = sizeof(int) * CHAR_BIT,
   nspbits = 4,
   idxbits = intbits - nspbits,
-  nspmask = (int)((( (unsigned)1 << nspbits ) - 1) << idxbits),
-  idxmask = ( 1 << idxbits ) - 1,
+  nspmask = (int) ((((unsigned) 1 << nspbits) - 1) << idxbits),
+  idxmask = (1 << idxbits) - 1,
 };
 
-enum {
+enum
+{
   NUM_NAMESPACES = 1 << nspbits,
   NUM_IDX = 1 << idxbits,
 };
 
-
-int namespaceIdxEncode ( namespaceTuple_t tin )
+int
+namespaceIdxEncode(namespaceTuple_t tin)
 {
-  xassert ( tin.nsp < NUM_NAMESPACES && tin.idx < NUM_IDX);
-  return ( tin.nsp << idxbits ) + tin.idx;
+  xassert(tin.nsp < NUM_NAMESPACES && tin.idx < NUM_IDX);
+  return (tin.nsp << idxbits) + tin.idx;
 }
 
-int namespaceIdxEncode2 ( int nsp, int idx )
+int
+namespaceIdxEncode2(int nsp, int idx)
 {
   xassert(nsp < NUM_NAMESPACES && idx < NUM_IDX);
-  return ( nsp << idxbits ) + idx;
+  return (nsp << idxbits) + idx;
 }
 
-
-namespaceTuple_t namespaceResHDecode ( int resH )
+namespaceTuple_t
+namespaceResHDecode(int resH)
 {
   namespaceTuple_t tin;
 
   tin.idx = resH & idxmask;
-  tin.nsp = (int)(((unsigned)( resH & nspmask )) >> idxbits);
+  tin.nsp = (int) (((unsigned) (resH & nspmask)) >> idxbits);
 
   return tin;
 }
@@ -162,16 +163,15 @@ namespaceNew()
       for (unsigned i = 0; i < namespacesSize; ++i)
         if (namespaces[i].resStage == NAMESPACE_STATUS_UNUSED)
           {
-            newNamespaceID = (int)i;
+            newNamespaceID = (int) i;
             break;
           }
     }
   else if (namespacesSize == 1)
     {
       /* make room for additional namespace */
-      struct Namespace *newNameSpaces
-        = (struct Namespace *) Malloc(((size_t)namespacesSize + 1) * sizeof (namespaces[0]));
-      memcpy(newNameSpaces, namespaces, sizeof (namespaces[0]));
+      struct Namespace *newNameSpaces = (struct Namespace *) Malloc(((size_t) namespacesSize + 1) * sizeof(namespaces[0]));
+      memcpy(newNameSpaces, namespaces, sizeof(namespaces[0]));
       namespaces = newNameSpaces;
       ++namespacesSize;
       newNamespaceID = 1;
@@ -179,9 +179,8 @@ namespaceNew()
   else if (namespacesSize < NUM_NAMESPACES)
     {
       /* make room for additional namespace */
-      newNamespaceID = (int)namespacesSize;
-      namespaces
-        = (struct Namespace *) Realloc(namespaces, ((size_t)namespacesSize + 1) * sizeof (namespaces[0]));
+      newNamespaceID = (int) namespacesSize;
+      namespaces = (struct Namespace *) Realloc(namespaces, ((size_t) namespacesSize + 1) * sizeof(namespaces[0]));
       ++namespacesSize;
     }
   else /* implicit: namespacesSize >= NUM_NAMESPACES */
@@ -192,14 +191,11 @@ namespaceNew()
   xassert(newNamespaceID >= 0 && newNamespaceID < NUM_NAMESPACES);
   ++nNamespaces;
   namespaces[newNamespaceID].resStage = NAMESPACE_STATUS_INUSE;
-#if defined (SX) || defined (__cplusplus)
-  memcpy(namespaces[newNamespaceID].switches,
-         defaultSwitches_,
-         sizeof (namespaces[newNamespaceID].switches));
+#if defined(SX) || defined(__cplusplus)
+  memcpy(namespaces[newNamespaceID].switches, defaultSwitches_, sizeof(namespaces[newNamespaceID].switches));
 #else
-    memcpy(namespaces[newNamespaceID].switches,
-           (union namespaceSwitchValue[NUM_NAMESPACE_SWITCH])defaultSwitches,
-           sizeof (namespaces[newNamespaceID].switches));
+  memcpy(namespaces[newNamespaceID].switches, (union namespaceSwitchValue[NUM_NAMESPACE_SWITCH]) defaultSwitches,
+         sizeof(namespaces[newNamespaceID].switches));
 #endif
   reshListCreate(newNamespaceID);
   NAMESPACE_UNLOCK();
@@ -211,87 +207,89 @@ namespaceDelete(int namespaceID)
 {
   NAMESPACE_INIT();
   NAMESPACE_LOCK();
-  xassert(namespaceID >= 0 && (unsigned)namespaceID < namespacesSize
-          && nNamespaces);
+  xassert(namespaceID >= 0 && (unsigned) namespaceID < namespacesSize && nNamespaces);
   reshListDestruct(namespaceID);
   namespaces[namespaceID].resStage = NAMESPACE_STATUS_UNUSED;
   --nNamespaces;
   NAMESPACE_UNLOCK();
 }
 
-int namespaceGetNumber ()
+int
+namespaceGetNumber()
 {
-  return (int)nNamespaces;
+  return (int) nNamespaces;
 }
 
-
-void namespaceSetActive ( int nId )
+void
+namespaceSetActive(int nId)
 {
-  xassert((unsigned)nId < namespacesSize
-          && namespaces[nId].resStage != NAMESPACE_STATUS_UNUSED);
+  xassert((unsigned) nId < namespacesSize && namespaces[nId].resStage != NAMESPACE_STATUS_UNUSED);
   activeNamespace = nId;
 }
 
-
-int namespaceGetActive ()
+int
+namespaceGetActive()
 {
   return activeNamespace;
 }
 
-int namespaceAdaptKey ( int originResH, int originNamespace )
+int
+namespaceAdaptKey(int originResH, int originNamespace)
 {
   namespaceTuple_t tin;
   int nsp;
 
-  if ( originResH == CDI_UNDEFID ) return CDI_UNDEFID;
+  if (originResH == CDI_UNDEFID) return CDI_UNDEFID;
 
   tin.idx = originResH & idxmask;
-  tin.nsp = (int)(((unsigned)( originResH & nspmask )) >> idxbits);
+  tin.nsp = (int) (((unsigned) (originResH & nspmask)) >> idxbits);
 
-  xassert ( tin.nsp == originNamespace );
+  xassert(tin.nsp == originNamespace);
 
-  nsp = namespaceGetActive ();
+  nsp = namespaceGetActive();
 
-  return namespaceIdxEncode2 ( nsp, tin.idx );
+  return namespaceIdxEncode2(nsp, tin.idx);
 }
 
-
-int namespaceAdaptKey2 ( int originResH )
+int
+namespaceAdaptKey2(int originResH)
 {
   namespaceTuple_t tin;
   int nsp;
 
-  if ( originResH == CDI_UNDEFID ) return CDI_UNDEFID;
+  if (originResH == CDI_UNDEFID) return CDI_UNDEFID;
 
   tin.idx = originResH & idxmask;
-  tin.nsp = (int)(((unsigned)( originResH & nspmask )) >> idxbits);
+  tin.nsp = (int) (((unsigned) (originResH & nspmask)) >> idxbits);
 
-  nsp = namespaceGetActive ();
+  nsp = namespaceGetActive();
 
-  return namespaceIdxEncode2 ( nsp, tin.idx );
+  return namespaceIdxEncode2(nsp, tin.idx);
 }
 
-void namespaceSwitchSet(enum namespaceSwitch sw, union namespaceSwitchValue value)
+void
+namespaceSwitchSet(enum namespaceSwitch sw, union namespaceSwitchValue value)
 {
   xassert(sw > NSSWITCH_NO_SUCH_SWITCH && sw < NUM_NAMESPACE_SWITCH);
   int nsp = namespaceGetActive();
   namespaces[nsp].switches[sw] = value;
 }
 
-union namespaceSwitchValue namespaceSwitchGet(enum namespaceSwitch sw)
+union namespaceSwitchValue
+namespaceSwitchGet(enum namespaceSwitch sw)
 {
   xassert(sw > NSSWITCH_NO_SUCH_SWITCH && sw < NUM_NAMESPACE_SWITCH);
   int nsp = namespaceGetActive();
   return namespaces[nsp].switches[sw];
 }
 
-void cdiReset(void)
+void
+cdiReset(void)
 {
   NAMESPACE_INIT();
   NAMESPACE_LOCK();
   for (unsigned namespaceID = 0; namespaceID < namespacesSize; ++namespaceID)
-    if (namespaces[namespaceID].resStage != NAMESPACE_STATUS_UNUSED)
-      namespaceDelete((int)namespaceID);
+    if (namespaces[namespaceID].resStage != NAMESPACE_STATUS_UNUSED) namespaceDelete((int) namespaceID);
   if (namespaces != &initialNamespace)
     {
       Free(namespaces);

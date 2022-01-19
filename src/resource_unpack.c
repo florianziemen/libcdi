@@ -14,83 +14,50 @@
 
 /*****************************************************************************/
 
-int reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
-                        void *context)
+int
+reshUnpackResources(char *unpackBuffer, int unpackBufferSize, void *context)
 {
   int updateType, resH, originNamespace;
   int unpackBufferPos = 0;
   int numAssociations = 0, sizeAssociations = 16;
-  struct streamAssoc *associations
-    = (struct streamAssoc *) Malloc(sizeof (associations[0])
-                                    * (size_t)sizeAssociations);
+  struct streamAssoc *associations = (struct streamAssoc *) Malloc(sizeof(associations[0]) * (size_t) sizeAssociations);
 
   {
     int msgHdr[2];
-    serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                    &msgHdr, 2, CDI_DATATYPE_INT, context);
-    if (msgHdr[0] != START)
-      xabort("error parsing resource serialization buffer");
+    serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, &msgHdr, 2, CDI_DATATYPE_INT, context);
+    if (msgHdr[0] != START) xabort("error parsing resource serialization buffer");
     originNamespace = msgHdr[1];
   }
-  while ( unpackBufferPos < unpackBufferSize )
+  while (unpackBufferPos < unpackBufferSize)
     {
-      serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                      &updateType, 1, CDI_DATATYPE_INT, context);
-      if (updateType == END)
-        break;
+      serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, &updateType, 1, CDI_DATATYPE_INT, context);
+      if (updateType == END) break;
       switch (updateType)
-	{
-	case GRID:
-	  gridUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                     originNamespace, context, 1);
-	  break;
-	case ZAXIS:
-	  zaxisUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                      originNamespace, context, 1);
-	  break;
-	case TAXIS:
-	  taxisUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                      originNamespace, context, 1);
-	  break;
-	case INSTITUTE:
-          instituteUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                          originNamespace, context, 1);
-	  break;
-	case MODEL:
-          modelUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                      originNamespace, context, 1);
-	  break;
-	case STREAM:
+        {
+        case GRID: gridUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
+        case ZAXIS: zaxisUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
+        case TAXIS: taxisUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
+        case INSTITUTE: instituteUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
+        case MODEL: modelUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
+        case STREAM:
           if (sizeAssociations == numAssociations)
-            associations
-              = (struct streamAssoc *) Realloc(associations,
-                         sizeof (associations[0]) * (size_t)(sizeAssociations *= 2));
-	  associations[numAssociations]
-            = streamUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                           originNamespace, context);
+            associations = (struct streamAssoc *) Realloc(associations, sizeof(associations[0]) * (size_t) (sizeAssociations *= 2));
+          associations[numAssociations] = streamUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context);
           ++numAssociations;
-	  break;
-	case VLIST:
-          vlistUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                      originNamespace, context, 1);
-	  break;
+          break;
+        case VLIST: vlistUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
         case RESH_DELETE:
-          serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                          &resH, 1, CDI_DATATYPE_INT, context);
+          serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, &resH, 1, CDI_DATATYPE_INT, context);
           resH = namespaceAdaptKey(resH, originNamespace);
           reshDestroy(resH);
           reshSetStatus(resH, NULL, RESH_UNUSED);
           break;
-	default:
-	  xabort("Invalid/unexpected serialization type %d or transfer error!",
-                 updateType);
-	}
+        default: xabort("Invalid/unexpected serialization type %d or transfer error!", updateType);
+        }
     }
   for (int i = 0; i < numAssociations; ++i)
     {
-      cdiStreamSetupVlist(stream_to_pointer(associations[i].streamID),
-                          namespaceAdaptKey(associations[i].vlistID,
-                                            originNamespace));
+      cdiStreamSetupVlist(stream_to_pointer(associations[i].streamID), namespaceAdaptKey(associations[i].vlistID, originNamespace));
     }
   Free(associations);
   return unpackBufferPos;

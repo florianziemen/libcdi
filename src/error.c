@@ -3,24 +3,24 @@
 #include <stdarg.h>
 #include <errno.h>
 
-#if !defined (NAMESPACE_H)
+#if !defined(NAMESPACE_H)
 #include "namespace.h"
 #endif
 #include "error.h"
 
-int _ExitOnError   = 1;	/* If set to 1, exit on error       */
-int _Verbose = 1;	/* If set to 1, errors are reported */
-int _Debug   = 0;       /* If set to 1, debugging           */
+int _ExitOnError = 1; /* If set to 1, exit on error       */
+int _Verbose = 1;     /* If set to 1, errors are reported */
+int _Debug = 0;       /* If set to 1, debugging           */
 
 /* If we're not using GNU C, elide __attribute__ */
-#if ! defined __GNUC__ && ! defined __attribute__
-#  define  __attribute__(x)  /*NOTHING*/
+#if !defined __GNUC__ && !defined __attribute__
+#define __attribute__(x) /*NOTHING*/
 #endif
 
-void SysError_(const char *caller, const char *fmt, ...)
-  __attribute__((noreturn));
+void SysError_(const char *caller, const char *fmt, ...) __attribute__((noreturn));
 
-void SysError_(const char *caller, const char *fmt, ...)
+void
+SysError_(const char *caller, const char *fmt, ...)
 {
   va_list args;
   int saved_errno = errno;
@@ -28,13 +28,13 @@ void SysError_(const char *caller, const char *fmt, ...)
   va_start(args, fmt);
 
   printf("\n");
-   fprintf(stderr, "Error (%s): ", caller);
+  fprintf(stderr, "Error (%s): ", caller);
   vfprintf(stderr, fmt, args);
-   fprintf(stderr, "\n");
+  fprintf(stderr, "\n");
 
   va_end(args);
 
-  if ( saved_errno )
+  if (saved_errno)
     {
       errno = saved_errno;
       perror("System error message");
@@ -43,92 +43,86 @@ void SysError_(const char *caller, const char *fmt, ...)
   exit(EXIT_FAILURE);
 }
 
-
-void Error_(const char *caller, const char *fmt, ...)
+void
+Error_(const char *caller, const char *fmt, ...)
 {
   va_list args;
 
   va_start(args, fmt);
 
   printf("\n");
-   fprintf(stderr, "Error (%s): ", caller);
+  fprintf(stderr, "Error (%s): ", caller);
   vfprintf(stderr, fmt, args);
-   fprintf(stderr, "\n");
+  fprintf(stderr, "\n");
 
   va_end(args);
 
-  if ( _ExitOnError ) exit(EXIT_FAILURE);
+  if (_ExitOnError) exit(EXIT_FAILURE);
 }
 
-typedef void (*cdiAbortCFunc)(const char * caller, const char * filename,
-                              const char *functionname, int line,
-                              const char * errorString, va_list ap)
+typedef void (*cdiAbortCFunc)(const char *caller, const char *filename, const char *functionname, int line, const char *errorString,
+                              va_list ap)
 #ifdef __GNUC__
-  __attribute__((noreturn))
+    __attribute__((noreturn))
 #endif
-;
+    ;
 
-void cdiAbortC(const char * caller, const char * filename,
-               const char *functionname, int line,
-               const char * errorString, ... )
+void
+cdiAbortC(const char *caller, const char *filename, const char *functionname, int line, const char *errorString, ...)
 {
   va_list ap;
   va_start(ap, errorString);
-  cdiAbortCFunc cdiAbortC_p
-    = (cdiAbortCFunc)namespaceSwitchGet(NSSWITCH_ABORT).func;
+  cdiAbortCFunc cdiAbortC_p = (cdiAbortCFunc) namespaceSwitchGet(NSSWITCH_ABORT).func;
   cdiAbortC_p(caller, filename, functionname, line, errorString, ap);
   va_end(ap);
 }
 
 void
-cdiAbortC_serial(const char *caller, const char *filename,
-                 const char *functionname, int line,
-                 const char *errorString, va_list ap)
+cdiAbortC_serial(const char *caller, const char *filename, const char *functionname, int line, const char *errorString, va_list ap)
 {
-  fprintf(stderr, "ERROR, %s, %s, line %d%s%s\nerrorString: \"",
-          functionname, filename, line, caller?", called from ":"",
-          caller?caller:"");
+  fprintf(stderr, "ERROR, %s, %s, line %d%s%s\nerrorString: \"", functionname, filename, line, caller ? ", called from " : "",
+          caller ? caller : "");
   vfprintf(stderr, errorString, ap);
   fputs("\"\n", stderr);
   exit(EXIT_FAILURE);
 }
 
-typedef void (*cdiWarningFunc)(const char * caller, const char * fmt,
-                               va_list ap);
+typedef void (*cdiWarningFunc)(const char *caller, const char *fmt, va_list ap);
 
-void Warning_(const char *caller, const char *fmt, ...)
+void
+Warning_(const char *caller, const char *fmt, ...)
 {
   va_list args;
 
   va_start(args, fmt);
 
-  if ( _Verbose )
+  if (_Verbose)
     {
-      cdiWarningFunc cdiWarning_p
-        = (cdiWarningFunc)namespaceSwitchGet(NSSWITCH_WARNING).func;
+      cdiWarningFunc cdiWarning_p = (cdiWarningFunc) namespaceSwitchGet(NSSWITCH_WARNING).func;
       cdiWarning_p(caller, fmt, args);
     }
 
   va_end(args);
 }
 
-void cdiWarning(const char *caller, const char *fmt, va_list ap)
+void
+cdiWarning(const char *caller, const char *fmt, va_list ap)
 {
   fprintf(stderr, "Warning (%s): ", caller);
   vfprintf(stderr, fmt, ap);
   fputc('\n', stderr);
 }
 
-
-void Message_(const char *caller, const char *fmt, ...)
+void
+Message_(const char *caller, const char *fmt, ...)
 {
   va_list args;
 
   va_start(args, fmt);
 
-   fprintf(stdout, "%-18s: ", caller);
+  fprintf(stdout, "%-18s: ", caller);
   vfprintf(stdout, fmt, args);
-   fprintf(stdout, "\n");
+  fprintf(stdout, "\n");
 
   va_end(args);
 }

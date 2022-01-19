@@ -13,7 +13,7 @@
 
 static int cdiPioConfCompareP(void *conf1, void *conf2);
 static void cdiPioConfDestroyP(void *conf);
-static void cdiPioConfPrintP(void *cdiPioConfPtr, FILE * fp);
+static void cdiPioConfPrintP(void *cdiPioConfPtr, FILE *fp);
 
 struct intCodeStrMap
 {
@@ -22,8 +22,7 @@ struct intCodeStrMap
 };
 
 static size_t
-mapSearchStr(const struct intCodeStrMap map[], size_t mapSize,
-             const char *str)
+mapSearchStr(const struct intCodeStrMap map[], size_t mapSize, const char *str)
 {
   size_t retval = SIZE_MAX;
   for (size_t i = 0; i < mapSize; ++i)
@@ -36,8 +35,7 @@ mapSearchStr(const struct intCodeStrMap map[], size_t mapSize,
 }
 
 static size_t
-mapSearchCode(const struct intCodeStrMap map[], size_t mapSize,
-              int code)
+mapSearchCode(const struct intCodeStrMap map[], size_t mapSize, int code)
 {
   size_t retval = SIZE_MAX;
   for (size_t i = 0; i < mapSize; ++i)
@@ -63,8 +61,7 @@ static const struct intCodeStrMap modeMap[] = {
 int
 cdiPioStr2IOMode(const char *modeStr)
 {
-  size_t idx = mapSearchStr(modeMap, sizeof (modeMap) / sizeof (modeMap[0]),
-                            modeStr);
+  size_t idx = mapSearchStr(modeMap, sizeof(modeMap) / sizeof(modeMap[0]), modeStr);
   int mode = (idx != SIZE_MAX) ? modeMap[idx].code : -1;
   return mode;
 }
@@ -79,10 +76,8 @@ cdiPioIOMode2Str(int IOMode)
 }
 
 static const struct intCodeStrMap roleMap[] = {
-  { "PIO_ROLE_CLIENT", PIO_ROLE_CLIENT },
-  { "PIO_ROLE_COLLECTOR", PIO_ROLE_COLLECTOR },
-  { "PIO_ROLE_WRITER", PIO_ROLE_WRITER },
-  { "PIO_ROLE_WRITER_COLLECTOR", PIO_ROLE_WRITER_COLLECTOR },
+  { "PIO_ROLE_CLIENT", PIO_ROLE_CLIENT },   { "PIO_ROLE_COLLECTOR", PIO_ROLE_COLLECTOR },
+  { "PIO_ROLE_WRITER", PIO_ROLE_WRITER },   { "PIO_ROLE_WRITER_COLLECTOR", PIO_ROLE_WRITER_COLLECTOR },
   { "PIO_ROLE_FPGUARD", PIO_ROLE_FPGUARD },
 };
 
@@ -100,28 +95,21 @@ cdiPioStr2CSRole(const char *roleStr)
 static const char *
 cdiPioCSRole2Str(int role)
 {
-  size_t pos = mapSearchCode(roleMap, sizeof (roleMap) / sizeof (roleMap[0]),
-                             role);
+  size_t pos = mapSearchCode(roleMap, sizeof(roleMap) / sizeof(roleMap[0]), role);
   const char *roleStr = (pos != SIZE_MAX) ? roleMap[pos].text : "";
   return roleStr;
 }
 
-const resOps cdiPioConfOps = {
-  cdiPioConfCompareP,
-  cdiPioConfDestroyP,
-  cdiPioConfPrintP,
-  /* serialization of configuration is not supported */
-  0, 0, 0
-};
+const resOps cdiPioConfOps = { cdiPioConfCompareP, cdiPioConfDestroyP, cdiPioConfPrintP,
+                               /* serialization of configuration is not supported */
+                               0, 0, 0 };
 
 static int
 cdiPioConfCompareP(void *p1, void *p2)
 {
   struct cdiPioConf *a = p1, *b = p2;
-  return (a->IOMode != b->IOMode)
-    | (a->clientServerRole != b->clientServerRole)
-    | (a->partInflate != b->partInflate)
-    | (a->postCommSetupActions != b->postCommSetupActions);
+  return (a->IOMode != b->IOMode) | (a->clientServerRole != b->clientServerRole) | (a->partInflate != b->partInflate)
+         | (a->postCommSetupActions != b->postCommSetupActions);
 }
 
 static void
@@ -131,32 +119,28 @@ cdiPioConfDestroyP(void *conf)
 }
 
 static void
-cdiPioConfPrintP(void *cdiPioConfPtr, FILE * fp)
+cdiPioConfPrintP(void *cdiPioConfPtr, FILE *fp)
 {
   struct cdiPioConf *conf = cdiPioConfPtr;
-  const char *iomodeStr = cdiPioIOMode2Str(conf->IOMode),
-    *CSRoleStr = cdiPioCSRole2Str(conf->clientServerRole);
-  if (!iomodeStr[0])
-    iomodeStr = "(invalid!)";
-  if (!CSRoleStr[0])
-    CSRoleStr = "(invalid!)";
-  fprintf(fp, "configuration object %p\n"
+  const char *iomodeStr = cdiPioIOMode2Str(conf->IOMode), *CSRoleStr = cdiPioCSRole2Str(conf->clientServerRole);
+  if (!iomodeStr[0]) iomodeStr = "(invalid!)";
+  if (!CSRoleStr[0]) CSRoleStr = "(invalid!)";
+  fprintf(fp,
+          "configuration object %p\n"
           "IOMode = %s\n"
           "client/server = %s\n"
           "part data imbalance = %f\n"
           "aligning of block buffers to large pages is %sabled\n"
           "record aggregation buffer size %zu\n"
           "callback after setup of communication = %p\n",
-          cdiPioConfPtr, iomodeStr, CSRoleStr, conf->partInflate,
-          conf->largePageAlign ? "en" : "dis",
-          (size_t)conf->recordAggBufLimMB * 1024 * 1024,
-          (void *)conf->postCommSetupActions);
+          cdiPioConfPtr, iomodeStr, CSRoleStr, conf->partInflate, conf->largePageAlign ? "en" : "dis",
+          (size_t) conf->recordAggBufLimMB * 1024 * 1024, (void *) conf->postCommSetupActions);
 }
 
-
-int cdiPioConfCreate(void)
+int
+cdiPioConfCreate(void)
 {
-  struct cdiPioConf *conf = Malloc(sizeof (*conf));
+  struct cdiPioConf *conf = Malloc(sizeof(*conf));
   conf->IOMode = PIO_NONE;
   conf->clientServerRole = PIO_ROLE_CLIENT;
   conf->partInflate = 1.1f;
@@ -168,58 +152,63 @@ int cdiPioConfCreate(void)
   conf->stripify = true;
   int resH = reshPut(conf, &cdiPioConfOps);
   /* configuration objects are never forwarded */
-  reshSetStatus(resH, &cdiPioConfOps,
-                reshGetStatus(resH, &cdiPioConfOps) & ~RESH_SYNC_BIT);
+  reshSetStatus(resH, &cdiPioConfOps, reshGetStatus(resH, &cdiPioConfOps) & ~RESH_SYNC_BIT);
   return resH;
 }
 
-void cdiPioConfDestroy(int confResH)
+void
+cdiPioConfDestroy(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   cdiPioConfDestroyP(conf);
   reshRemove(confResH, &cdiPioConfOps);
 }
 
-void cdiPioConfSetPartInflate(int confResH, float partInflate)
+void
+cdiPioConfSetPartInflate(int confResH, float partInflate)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   xassert(partInflate >= 1.0f);
   conf->partInflate = partInflate;
 }
 
-float cdiPioConfGetPartInflate(int confResH)
+float
+cdiPioConfGetPartInflate(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->partInflate;
 }
 
-void cdiPioConfSetIOMode(int confResH, int IOMode)
+void
+cdiPioConfSetIOMode(int confResH, int IOMode)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   conf->IOMode = IOMode;
 }
 
-int cdiPioConfGetIOMode(int confResH)
+int
+cdiPioConfGetIOMode(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->IOMode;
 }
 
-void cdiPioConfSetCSRole(int confResH, int CSRole)
+void
+cdiPioConfSetCSRole(int confResH, int CSRole)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   conf->clientServerRole = CSRole;
 }
 
-int cdiPioConfGetCSRole(int confResH)
+int
+cdiPioConfGetCSRole(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->clientServerRole;
 }
 
 void
-cdiPioConfSetPostCommSetupActions(int confResH,
-                                  void (*postCommSetupActions)(void))
+cdiPioConfSetPostCommSetupActions(int confResH, void (*postCommSetupActions)(void))
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   conf->postCommSetupActions = postCommSetupActions;
@@ -231,66 +220,75 @@ void (*cdiPioConfGetPostCommSetupActions(int confResH))(void)
   return conf->postCommSetupActions;
 }
 
-void cdiPioConfSetLargePageAlign(int confResH, int largePageAlign)
+void
+cdiPioConfSetLargePageAlign(int confResH, int largePageAlign)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   conf->largePageAlign = largePageAlign != 0;
 }
 
-int cdiPioConfGetLargePageAlign(int confResH)
+int
+cdiPioConfGetLargePageAlign(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->largePageAlign;
 }
 
-void cdiPioConfSetRedistCache(int confResH, int doCache)
+void
+cdiPioConfSetRedistCache(int confResH, int doCache)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   conf->cacheRedists = doCache;
 }
 
-int cdiPioConfGetRedistCache(int confResH)
+int
+cdiPioConfGetRedistCache(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->cacheRedists;
 }
 
-void cdiPioConfSetRecordAggBufLim(int confResH, int lim_mb)
+void
+cdiPioConfSetRecordAggBufLim(int confResH, int lim_mb)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   if (lim_mb > 0)
-    conf->recordAggBufLimMB = (unsigned)lim_mb;
+    conf->recordAggBufLimMB = (unsigned) lim_mb;
   else
     Error("unexpected negative buffer size value %d requested", lim_mb);
 }
 
-int cdiPioConfGetRecordAggBufLim(int confResH)
+int
+cdiPioConfGetRecordAggBufLim(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
-  return (int)conf->recordAggBufLimMB;
+  return (int) conf->recordAggBufLimMB;
 }
 
-void cdiPioConfSetXmapNew(int confResH, xmap_new_func_ptr xmap_new)
+void
+cdiPioConfSetXmapNew(int confResH, xmap_new_func_ptr xmap_new)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   conf->xmap_new = xmap_new;
 }
 
-xmap_new_func_ptr cdiPioConfGetXmapNew(int confResH)
+xmap_new_func_ptr
+cdiPioConfGetXmapNew(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->xmap_new;
 }
 
-void cdiPioConfSetStripeConversion(int confResH, int doConversion)
+void
+cdiPioConfSetStripeConversion(int confResH, int doConversion)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   conf->stripify = doConversion;
 }
 
-int cdiPioConfGetStripeConversion(int confResH)
+int
+cdiPioConfGetStripeConversion(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->stripify;
 }
-

@@ -3,41 +3,41 @@
 
 #include "cdi_int.h"
 
-enum {
-  POSITIVE_UP   = 1,
+enum
+{
+  POSITIVE_UP = 1,
   POSITIVE_DOWN = 2,
 };
 
-void   cdfDefCoordinateVars(stream_t *streamptr);
-void   cdfDefTimestep(stream_t *streamptr, int tsID);
-int    cdfInqTimestep(stream_t *streamptr, int tsID);
-int    cdfInqContents(stream_t *streamptr);
+void cdfDefCoordinateVars(stream_t *streamptr);
+void cdfDefTimestep(stream_t *streamptr, int tsID);
+int cdfInqTimestep(stream_t *streamptr, int tsID);
+int cdfInqContents(stream_t *streamptr);
 
-void   cdfEndDef(stream_t * streamptr);
-void   cdfDefRecord(stream_t * streamptr);
+void cdfEndDef(stream_t *streamptr);
+void cdfDefRecord(stream_t *streamptr);
 
-void   cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
+void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
 
-void   cdfDefineAttributes(int vlistID, int varID, int fileID, int ncvarID);
+void cdfDefineAttributes(int vlistID, int varID, int fileID, int ncvarID);
 
-void   cdf_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss);
-void   cdf_write_record(stream_t *streamptr, int memtype, const void *data, size_t nmiss);
+void cdf_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss);
+void cdf_write_record(stream_t *streamptr, int memtype, const void *data, size_t nmiss);
 
-void   cdf_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nmiss);
-void   cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t nmiss);
+void cdf_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nmiss);
+void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t nmiss);
 
-void   cdf_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *nmiss);
-void   cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t nmiss);
+void cdf_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *nmiss);
+void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t nmiss);
 
-void   cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
-                           const int rect[][2], const void *data, size_t nmiss);
+void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype, const int rect[][2], const void *data, size_t nmiss);
 
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level);
-void cdfDefTime(stream_t* streamptr);
+void cdfDefTime(stream_t *streamptr);
 
 void cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor);
 
-int cdfDefDatatype(int datatype, stream_t* streamptr);
+int cdfDefDatatype(int datatype, stream_t *streamptr);
 
 #endif
 /*

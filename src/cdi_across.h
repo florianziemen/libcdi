@@ -1,5 +1,5 @@
-#ifndef  CDI_ACROSS_H
-#define  CDI_ACROSS_H
+#ifndef CDI_ACROSS_H
+#define CDI_ACROSS_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -23,4 +23,4 @@ int across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_
 
 #endif
 
-#endif  /* CDI_ACROSS_H */
+#endif /* CDI_ACROSS_H */

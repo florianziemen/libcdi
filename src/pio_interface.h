@@ -2,7 +2,7 @@
 #define PIO_INTERFACE_
 
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <mpi.h>
@@ -11,19 +11,11 @@
 #include "resource_handle.h"
 #include "pio_rpc.h"
 
-void
-pioBufferPartData(int streamID, int varID, const double *data,
-                  size_t nmiss, Xt_idxlist partDesc);
-void
-cdiPioBufferPartDataGather(int streamID, int varID, const double *data,
-                           int numBlocks, const int blocklengths[],
-                           const int displacements[],
-                           size_t nmiss, Xt_idxlist partDesc);
+void pioBufferPartData(int streamID, int varID, const double *data, size_t nmiss, Xt_idxlist partDesc);
+void cdiPioBufferPartDataGather(int streamID, int varID, const double *data, int numBlocks, const int blocklengths[],
+                                const int displacements[], size_t nmiss, Xt_idxlist partDesc);
 
-void pioBufferFuncCall(int streamID,
-                       struct winHeaderEntry header,
-                       const void *data, valPackFunc dataPackFunc);
-
+void pioBufferFuncCall(int streamID, struct winHeaderEntry header, const void *data, valPackFunc dataPackFunc);
 
 struct memCpyDataDesc
 {
@@ -35,12 +27,9 @@ void memcpyPackFunc(void *dataDesc, void *buf, int size, int *pos, void *context
 
 extern float cdiPIOpartInflate_;
 
-void
-cdiPioClientStreamWinInit(int streamID);
-void
-cdiPioClientStreamWinCreate(int streamID, struct collSpec *cspec);
-void
-cdiPioClientStreamWinDestroy(int streamID);
+void cdiPioClientStreamWinInit(int streamID);
+void cdiPioClientStreamWinCreate(int streamID, struct collSpec *cspec);
+void cdiPioClientStreamWinDestroy(int streamID);
 
 #endif
 /*

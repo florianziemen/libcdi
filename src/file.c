@@ -116,7 +116,7 @@ static int FileTypeRead = FILE_TYPE_OPEN;
 static int FileTypeWrite = FILE_TYPE_FOPEN;
 static int FileFlagWrite = 0;
 
-static int FileDebug = 0; // If set to 1, debugging
+static int FileDebug = 0;  // If set to 1, debugging
 static bool FileInfo = false;
 
 static void file_table_print(void);
@@ -474,7 +474,7 @@ file_seek_buffer(bfile_t *fileptr, off_t offset, int whence)
       if (!file_set_buffer_pos(fileptr))
         {
           file_check_buffer_pos(fileptr);
-          fileptr->bufferCnt = (size_t)(fileptr->bufferEnd - fileptr->position) + 1;
+          fileptr->bufferCnt = (size_t) (fileptr->bufferEnd - fileptr->position) + 1;
           fileptr->bufferPtr = fileptr->buffer + fileptr->position - fileptr->bufferStart;
         }
     }
@@ -650,8 +650,9 @@ file_initialize(void)
         }
     }
 
-  if (FileInfo) fprintf(stderr, "FILE_TYPE_READ = %d [%d:%s  %d:%s]\n", FileTypeRead,
-                        FILE_TYPE_OPEN, ftname[FILE_TYPE_OPEN], FILE_TYPE_FOPEN, ftname[FILE_TYPE_FOPEN]);
+  if (FileInfo)
+    fprintf(stderr, "FILE_TYPE_READ = %d [%d:%s  %d:%s]\n", FileTypeRead, FILE_TYPE_OPEN, ftname[FILE_TYPE_OPEN], FILE_TYPE_FOPEN,
+            ftname[FILE_TYPE_FOPEN]);
 
   value = file_getenv("FILE_TYPE_WRITE");
   if (value > 0)
@@ -664,8 +665,9 @@ file_initialize(void)
         }
     }
 
-  if (FileInfo) fprintf(stderr, "FILE_TYPE_WRITE = %d [%d:%s  %d:%s]\n", FileTypeWrite,
-                        FILE_TYPE_OPEN, ftname[FILE_TYPE_OPEN], FILE_TYPE_FOPEN, ftname[FILE_TYPE_FOPEN]);
+  if (FileInfo)
+    fprintf(stderr, "FILE_TYPE_WRITE = %d [%d:%s  %d:%s]\n", FileTypeWrite, FILE_TYPE_OPEN, ftname[FILE_TYPE_OPEN], FILE_TYPE_FOPEN,
+            ftname[FILE_TYPE_FOPEN]);
 
 #ifdef O_NONBLOCK
   FileFlagWrite = O_NONBLOCK;
@@ -696,8 +698,9 @@ file_initialize(void)
         }
     }
 
-  if (FileInfo) fprintf(stderr, "FILE_BUFTYPE = %d [%d:%s  %d:%s]\n", FileBufferTypeEnv,
-                        FILE_BUFTYPE_STD, fbtname[FILE_BUFTYPE_STD], FILE_BUFTYPE_MMAP, fbtname[FILE_BUFTYPE_MMAP]);
+  if (FileInfo)
+    fprintf(stderr, "FILE_BUFTYPE = %d [%d:%s  %d:%s]\n", FileBufferTypeEnv, FILE_BUFTYPE_STD, fbtname[FILE_BUFTYPE_STD],
+            FILE_BUFTYPE_MMAP, fbtname[FILE_BUFTYPE_MMAP]);
 
   file_list_new();
   atexit(file_list_delete);

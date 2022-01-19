@@ -5,16 +5,13 @@ typedef struct
 {
   long date;
   long time;
-}
-DateTime;
+} DateTime;
 
 static inline int
 datetimeDiffer(DateTime dt1, DateTime dt2)
 {
-  return (2 * ((dt1.date > dt2.date) - (dt1.date < dt2.date))
-          + (dt1.time > dt2.time) - (dt1.time < dt2.time)) != 0;
+  return (2 * ((dt1.date > dt2.date) - (dt1.date < dt2.date)) + (dt1.time > dt2.time) - (dt1.time < dt2.time)) != 0;
 }
-
 
 #endif
 /*

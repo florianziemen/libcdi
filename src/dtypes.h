@@ -1,51 +1,51 @@
-#ifndef  DTYPES_H
-#define  DTYPES_H
+#ifndef DTYPES_H
+#define DTYPES_H
 
 #include <stdio.h>
 #include <limits.h>
 
 /* INT32 */
 
-#ifndef  INT_MAX
+#ifndef INT_MAX
 #error INT_MAX undefined
 #endif
 
-#undef  INT32
-#if  INT_MAX == 2147483647L
-#  define  INT32  int
+#undef INT32
+#if INT_MAX == 2147483647L
+#define INT32 int
 #elif LONG_MAX == 2147483647L
-#  define  INT32  long
+#define INT32 long
 #endif
 
 /* INT64 */
 
-#ifndef  LONG_MAX
-#  error LONG_MAX undefined
+#ifndef LONG_MAX
+#error LONG_MAX undefined
 #endif
 
-#undef  INT64
-#if  LONG_MAX > 2147483647L
-#  define  INT64  long
+#undef INT64
+#if LONG_MAX > 2147483647L
+#define INT64 long
 #else
-#  define  INT64  long long
+#define INT64 long long
 #endif
 
 /* FLT32 */
 
-#undef   FLT32
-#define  FLT32  float
+#undef FLT32
+#define FLT32 float
 
 /* FLT64 */
 
-#undef   FLT64
-#define  FLT64  double
+#undef FLT64
+#define FLT64 double
 
 /* UINT32 and UINT64 */
 
-#define  UINT32   unsigned INT32
-#define  UINT64   unsigned INT64
+#define UINT32 unsigned INT32
+#define UINT64 unsigned INT64
 
-#endif  /* DTYPES_H */
+#endif /* DTYPES_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

@@ -5,21 +5,21 @@
   of CDI.
 */
 
-#ifndef  CDIPIO_H_
-#define  CDIPIO_H_
+#ifndef CDIPIO_H_
+#define CDIPIO_H_
 
 #include <mpi.h>
 
 /* parallel IO IOMode */
 
-#define PIO_NONE                 0
-#define PIO_MPI                  1
-#define PIO_WRITER               2
-#define PIO_ASYNCH               3
-#define PIO_FPGUARD              4
-#define PIO_MPI_FW_ORDERED       5
-#define PIO_MPI_FW_AT_ALL        6
-#define PIO_MPI_FW_AT_REBLOCK    7
+#define PIO_NONE 0
+#define PIO_MPI 1
+#define PIO_WRITER 2
+#define PIO_ASYNCH 3
+#define PIO_FPGUARD 4
+#define PIO_MPI_FW_ORDERED 5
+#define PIO_MPI_FW_AT_ALL 6
+#define PIO_MPI_FW_AT_REBLOCK 7
 
 #define PIO_MINIOMODE PIO_NONE
 #define PIO_MAXIOMODE PIO_MPI_FW_AT_REBLOCK
@@ -33,28 +33,23 @@
 /* parallel IO routines */
 #include <yaxt.h>
 
-void     pioEndDef             ( void );
-void     pioEndTimestepping    ( void );
-void     pioFinalize           ( void );
+void pioEndDef(void);
+void pioEndTimestepping(void);
+void pioFinalize(void);
 /* cdiPioNoPostCommSetup: Dummy function to use as argument to pioInit
  * if no actions are necessary after I/O servers initialize communication */
 void cdiPioNoPostCommSetup(void);
 /*      pioInit: initialize I/O server processes and communication */
-MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode,
-                 int *pioNamespace, float partInflate,
+MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode, int *pioNamespace, float partInflate,
                  void (*postCommSetupActions)(void));
 /*      cdiPioInit: initialize I/O server processes and communication */
 MPI_Comm cdiPioInit(MPI_Comm commSuper, int confResH, int *pioNamespace);
-void     pioWriteTimestep(void);
-void     cdiPioRDMAProgress(void);
+void pioWriteTimestep(void);
+void cdiPioRDMAProgress(void);
 
-void     streamWriteVarPart    (int streamID, int varID,
-                                const void *data, size_t nmiss,
-                                Xt_idxlist partDesc);
-void     streamWriteScatteredVarPart(int streamID, int varID, const void *data,
-                                     int numBlocks, const int blocklengths[],
-                                     const int displacements[],
-                                     size_t nmiss, Xt_idxlist partDesc);
+void streamWriteVarPart(int streamID, int varID, const void *data, size_t nmiss, Xt_idxlist partDesc);
+void streamWriteScatteredVarPart(int streamID, int varID, const void *data, int numBlocks, const int blocklengths[],
+                                 const int displacements[], size_t nmiss, Xt_idxlist partDesc);
 /* cdiPioCSRLastN: return role codes appropriate to use the last
    \textit{nProcsIO} tasks as I/O servers */
 int cdiPioCSRLastN(MPI_Comm commSuper, int IOMode, int nProcsIO);
@@ -73,8 +68,7 @@ int cdiPioStr2IOMode(const char *modeStr);
 
 /* cdiPioStr2IOMode: return string corresponding to integer
  * code of mode or empty string if code is not valid */
-const char *
-cdiPioIOMode2Str(int IOMode);
+const char *cdiPioIOMode2Str(int IOMode);
 
 /* cdiPioConfCreate: create new configuration object and return its handle */
 int cdiPioConfCreate(void);
@@ -104,8 +98,7 @@ int cdiPioConfGetCSRole(int confResH);
 
 /* cdiPioConfSetPostCommSetupActions: set function to be called after
  * setup of client/server communications of configuration object */
-void cdiPioConfSetPostCommSetupActions(int confResH,
-                                       void (*postCommSetupActions)(void));
+void cdiPioConfSetPostCommSetupActions(int confResH, void (*postCommSetupActions)(void));
 
 /* cdiPioConfGetPostCommSetupActions: get function to be called after
  * setup of client/server communications from configuration object */
@@ -134,15 +127,10 @@ int cdiPioConfGetRedistCache(int confResH);
 
 /* cdiPioConfSetXmapNew: set method to compute part intersections,
  * defaults to xt_xmap_dist_dir_new */
-void cdiPioConfSetXmapNew(int confResH,
-                          Xt_xmap (*xmap_new)(Xt_idxlist src_idxlist,
-                                              Xt_idxlist dst_idxlist,
-                                              MPI_Comm comm));
+void cdiPioConfSetXmapNew(int confResH, Xt_xmap (*xmap_new)(Xt_idxlist src_idxlist, Xt_idxlist dst_idxlist, MPI_Comm comm));
 
 /* cdiPioConfSetXmapNew: get method to compute part intersections */
-Xt_xmap (*cdiPioConfGetXmapNew(int confResH))(Xt_idxlist src_idxlist,
-                                              Xt_idxlist dst_idxlist,
-                                              MPI_Comm comm);
+Xt_xmap (*cdiPioConfGetXmapNew(int confResH))(Xt_idxlist src_idxlist, Xt_idxlist dst_idxlist, MPI_Comm comm);
 /* convert index lists to stripes prior to intersection computation,
  * defaults to true */
 void cdiPioConfSetStripeConversion(int confResH, int doStripify);

@@ -2,7 +2,7 @@
 #define PIO_ID_LIST_H
 
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <limits.h>
@@ -19,41 +19,41 @@ struct idList
 
 #define emptyIDList ((struct idList){ NULL, 0 })
 
-static inline size_t indexOfID(const struct idList *list, int ID)
+static inline size_t
+indexOfID(const struct idList *list, int ID)
 {
   size_t index = SIZE_MAX;
   for (size_t i = 0; i < list->size; ++i)
-    if (list->entries[i] == ID)
-      index = i;
+    if (list->entries[i] == ID) index = i;
   return index;
 }
 
-static inline size_t insertID(struct idList *list, int ID)
+static inline size_t
+insertID(struct idList *list, int ID)
 {
   size_t index = indexOfID(list, CDI_UNDEFID);
   if (index == SIZE_MAX)
     {
       index = list->size;
-      list->entries = Realloc(list->entries,
-                               ++list->size
-                               * sizeof (list->entries[0]));
+      list->entries = Realloc(list->entries, ++list->size * sizeof(list->entries[0]));
     }
   list->entries[index] = ID;
   return index;
 }
 
-static inline void removeID(struct idList *list, int ID)
+static inline void
+removeID(struct idList *list, int ID)
 {
   size_t index = indexOfID(list, ID);
   xassert(index != SIZE_MAX);
   list->entries[index] = CDI_UNDEFID;
 }
 
-static inline void idSetDestroy(struct idList *list)
+static inline void
+idSetDestroy(struct idList *list)
 {
   free(list->entries);
 }
-
 
 #endif
 /*

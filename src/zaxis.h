@@ -1,13 +1,12 @@
-#ifndef  ZAXIS_H
-#define  ZAXIS_H
+#ifndef ZAXIS_H
+#define ZAXIS_H
 
-#ifdef  HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "cdi_key.h"
 #include "cdi_att.h"
-
 
 // clang-format off
 typedef struct
@@ -34,7 +33,9 @@ typedef struct
 zaxis_t;
 // clang-format on
 
-void zaxisGetTypeDescription(int zaxisType, int* outPositive, const char** outName, const char** outLongName, const char** outStdName, const char** outUnit);  //The returned const char* point to static storage. Don't free or modify them.
+void zaxisGetTypeDescription(int zaxisType, int *outPositive, const char **outName, const char **outLongName,
+                             const char **outStdName,
+                             const char **outUnit);  // The returned const char* point to static storage. Don't free or modify them.
 
 unsigned cdiZaxisCount(void);
 
@@ -42,10 +43,7 @@ zaxis_t *zaxis_to_pointer(int zaxisID);
 
 void cdiZaxisGetIndexList(unsigned numIDs, int *IDs);
 
-void
-zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
-            int * unpackBufferPos, int originNamespace, void *context,
-            int force_id);
+void zaxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id);
 
 const resOps *getZaxisOps(void);
 

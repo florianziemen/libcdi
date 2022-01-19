@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <errno.h>
@@ -14,22 +14,18 @@
 #include "cdi.h"
 #include "dmemory.h"
 
-static
-char commands[][13] = { "FINALIZE",
-                        "RESOURCES",
-                        "WRITETS"};
+static char commands[][13] = { "FINALIZE", "RESOURCES", "WRITETS" };
 
 /*****************************************************************************/
 void
-cdiAbortC_MPI(const char *caller, const char *filename,
-              const char *functionname, int line,
-              const char *errorString, va_list ap)
+cdiAbortC_MPI(const char *caller, const char *filename, const char *functionname, int line, const char *errorString, va_list ap)
 {
   {
     int rank = getMPICommWorldRank();
-    fprintf(stderr, "ERROR, pe%d in %s, %s, line %d%s"
-            "%s\nerrorString: \"", rank, functionname, filename, line,
-            caller?", called from ":"", caller?caller:"");
+    fprintf(stderr,
+            "ERROR, pe%d in %s, %s, line %d%s"
+            "%s\nerrorString: \"",
+            rank, functionname, filename, line, caller ? ", called from " : "", caller ? caller : "");
   }
   vfprintf(stderr, errorString, ap);
   fputs("\"\n", stderr);
@@ -41,7 +37,8 @@ cdiAbortC_MPI(const char *caller, const char *filename,
   va_end(ap);
 }
 
-void cdiPioWarning(const char *caller, const char *fmt, va_list ap)
+void
+cdiPioWarning(const char *caller, const char *fmt, va_list ap)
 {
   int rank = getMPICommWorldRank();
   fprintf(stderr, "pe%d: Warning (%s) : ", rank, caller);
@@ -53,7 +50,8 @@ void cdiPioWarning(const char *caller, const char *fmt, va_list ap)
 
 /***************************************************************/
 
-void pcdiXMPI(int iret, const char *filename, int line)
+void
+pcdiXMPI(int iret, const char *filename, int line)
 {
   char errorString[2][MPI_MAX_ERROR_STRING + 1];
   int len, errorClass, rank = getMPICommWorldRank();
@@ -62,105 +60,96 @@ void pcdiXMPI(int iret, const char *filename, int line)
   errorString[0][len] = '\0';
   MPI_Error_string(iret, errorString[1], &len);
   errorString[1][len] = '\0';
-  fprintf(stderr, "MPI ERROR, pe%d, %s, line %d,"
+  fprintf(stderr,
+          "MPI ERROR, pe%d, %s, line %d,"
           "errorClass: \"%s\""
           "errorString: \"%s\"\n",
-          rank, filename, line,
-          errorString[0], errorString[1]);
+          rank, filename, line, errorString[0], errorString[1]);
   MPI_Abort(MPI_COMM_WORLD, 1);
 }
 
 /*****************************************************************************/
 
-void pcdiXMPIStat ( int iret, const char *filename, int line, MPI_Status *status )
+void
+pcdiXMPIStat(int iret, const char *filename, int line, MPI_Status *status)
 {
   char errorString[MPI_MAX_ERROR_STRING + 1];
   int len, rank = getMPICommWorldRank();
 
-  if ( iret == MPI_ERR_IN_STATUS )
+  if (iret == MPI_ERR_IN_STATUS)
     {
-      fprintf ( stderr, "------- checking error in request ----------\n" );
-      switch ( status->MPI_ERROR )
+      fprintf(stderr, "------- checking error in request ----------\n");
+      switch (status->MPI_ERROR)
         {
-        case MPI_SUCCESS :
-          fprintf ( stderr, "-------- mpi_success -----------\n" );
-          break;
-        case MPI_ERR_PENDING:
-          fprintf ( stderr, "-------- mpi_err_pending ----------\n");
-          break;
+        case MPI_SUCCESS: fprintf(stderr, "-------- mpi_success -----------\n"); break;
+        case MPI_ERR_PENDING: fprintf(stderr, "-------- mpi_err_pending ----------\n"); break;
         default:
-          MPI_Error_string ( status->MPI_ERROR, errorString, &len );
+          MPI_Error_string(status->MPI_ERROR, errorString, &len);
           errorString[len] = '\0';
-          fprintf ( stderr,"MPI ERROR in request, pe%d, %s, line %d,"
-                    "return value: %d, error_string: %s\n",
-                    rank, filename, line, iret, errorString );
-          MPI_Abort ( MPI_COMM_WORLD, iret );
+          fprintf(stderr,
+                  "MPI ERROR in request, pe%d, %s, line %d,"
+                  "return value: %d, error_string: %s\n",
+                  rank, filename, line, iret, errorString);
+          MPI_Abort(MPI_COMM_WORLD, iret);
         }
     }
   else
-    xmpi ( iret );
+    xmpi(iret);
 
   return;
 }
 
 /****************************************************/
 
-void pcdiDebugMsg ( const char * cdiPioDebugString, const char *filename,
-                    const char *functionname, int line, int tag, int source,
-                    int nfinished )
+void
+pcdiDebugMsg(const char *cdiPioDebugString, const char *filename, const char *functionname, int line, int tag, int source,
+             int nfinished)
 {
   int rank = getMPICommWorldRank();
 
-  fprintf ( stdout,
-            "%s pe%d in %s, %s, line %d: command %s, source %d, finalized=%d\n",
-            cdiPioDebugString, rank, functionname, filename, line,
-            &commands[tag][0], source, nfinished );
+  fprintf(stdout, "%s pe%d in %s, %s, line %d: command %s, source %d, finalized=%d\n", cdiPioDebugString, rank, functionname,
+          filename, line, &commands[tag][0], source, nfinished);
 }
 
 /****************************************************/
 
-void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line,
-                   int tag, int source, char * text )
+void
+pcdiDebugMsg2(const char *filename, const char *functionname, int line, int tag, int source, char *text)
 {
   int rank = getMPICommWorldRank();
 
-  fprintf ( stdout,
-            "pe%d in %s, %s, line %d: command %s, source %d, %s\n",
-            rank, functionname, filename, line,
-            &commands[tag][0], source, text );
+  fprintf(stdout, "pe%d in %s, %s, line %d: command %s, source %d, %s\n", rank, functionname, filename, line, &commands[tag][0],
+          source, text);
 }
 
 /****************************************************/
 
-void printArray ( const char *cdiPioDebugString, const char *ps, const void *array, int n,
-                  int datatype, const char * funname, const char * filename, int line )
+void
+printArray(const char *cdiPioDebugString, const char *ps, const void *array, int n, int datatype, const char *funname,
+           const char *filename, int line)
 {
   int i;
-  int * iArray;
-  double * dArray;
+  int *iArray;
+  double *dArray;
 
   {
     int rank = getMPICommWorldRank();
-    fprintf ( stdout, "%s pe%d in %s, %s, line %d: %s = ",
-              cdiPioDebugString, rank, funname, filename, line, ps );
+    fprintf(stdout, "%s pe%d in %s, %s, line %d: %s = ", cdiPioDebugString, rank, funname, filename, line, ps);
   }
 
-  switch ( datatype )
+  switch (datatype)
     {
     case CDI_DATATYPE_INT:
-      iArray = ( int * ) array;
-      for ( i = 0; i < n-1; i++ )
-	fprintf ( stdout, "%d ", * ( iArray + i ));
-      fprintf ( stdout, "%d\n", * ( iArray + n - 1 ));
+      iArray = (int *) array;
+      for (i = 0; i < n - 1; i++) fprintf(stdout, "%d ", *(iArray + i));
+      fprintf(stdout, "%d\n", *(iArray + n - 1));
       break;
     case CDI_DATATYPE_FLT:
-      dArray = ( double * ) array;
-      for ( i = 0; i < n-1; i++ )
-	fprintf ( stdout, "%.2f ", * ( dArray + i ));
-      fprintf ( stdout, "%.2f\n", * ( dArray + n-1 ));
+      dArray = (double *) array;
+      for (i = 0; i < n - 1; i++) fprintf(stdout, "%.2f ", *(dArray + i));
+      fprintf(stdout, "%.2f\n", *(dArray + n - 1));
       break;
-    default:
-      fprintf ( stdout, " ... no datatype defined\n" );
+    default: fprintf(stdout, " ... no datatype defined\n");
     }
 
   return;
@@ -187,19 +176,15 @@ cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
     case GRID_PROJECTION:
     case GRID_GME:
     case GRID_CURVILINEAR:
-    case GRID_UNSTRUCTURED:
-      xabort("unimplemented grid type: %d", gridType);
+    case GRID_UNSTRUCTURED: xabort("unimplemented grid type: %d", gridType);
     }
   varShape[2] = zaxisInqSize(zaxisID);
   /* FIXME: other grids have different dimensionality */
-  return (varShape[2] == 1)?2:3;
+  return (varShape[2] == 1) ? 2 : 3;
 }
 
-
-
 void
-cdiPioDeco1D_CCP(size_t nelems, const size_t *restrict weightPfxSums,
-                 size_t nparts, size_t *restrict separators)
+cdiPioDeco1D_CCP(size_t nelems, const size_t *restrict weightPfxSums, size_t nparts, size_t *restrict separators)
 {
   separators[0] = 0;
   separators[nparts] = nelems;
@@ -208,9 +193,11 @@ cdiPioDeco1D_CCP(size_t nelems, const size_t *restrict weightPfxSums,
   while (k < nparts)
     {
       size_t target = k * weightTotal / nparts;
-      do {
-        ++i;
-      } while (i < nelems && weightPfxSums[i] < target);
+      do
+        {
+          ++i;
+        }
+      while (i < nelems && weightPfxSums[i] < target);
       separators[k] = i;
       ++k;
       --i;
@@ -220,8 +207,6 @@ cdiPioDeco1D_CCP(size_t nelems, const size_t *restrict weightPfxSums,
    * Fast optimal load balancing algorithms for 1D partitioning
    */
 }
-
-
 
 /****************************************************/
 /*

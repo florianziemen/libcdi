@@ -12,7 +12,8 @@ static const char cdi_libvers[] = VERSION;
 #error "VERSION undefined"
 #endif
 
-const char *cdiLibraryVersion(void)
+const char *
+cdiLibraryVersion(void)
 {
   return cdi_libvers;
 }

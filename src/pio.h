@@ -2,12 +2,11 @@
 #define _PIO_H
 
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <stdlib.h>
 #include <mpi.h>
-
 
 extern void (*cdiPioFileWritingFinalize)(void);
 

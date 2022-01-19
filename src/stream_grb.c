@@ -10,23 +10,24 @@
 #include "stream_gribapi.h"
 #include "gribapi.h"
 #include "file.h"
-#include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
+#include "cgribex.h" /* gribZip gribGetZip gribGinfo */
 
-int cdiDebugExt                        =  0;      //  Debug level for the KNMI extensions
+int cdiDebugExt = 0;  //  Debug level for the KNMI extensions
 #ifdef HIRLAM_EXTENSIONS
 // *** RELATED to GRIB only ***
-int cdiGribUseTimeRangeIndicator        = 0;       // normaly cdo looks in grib for attribute called "stepType"
-                                                   // but NWP models such as Harmonie 37h1.2, use "timeRangeIndicator"
-                                                   // where:  0: for instanteneous fields; 4: for accumulated fields
-#endif // HIRLAM_EXTENSIONS
+int cdiGribUseTimeRangeIndicator = 0;  // normaly cdo looks in grib for attribute called "stepType"
+                                       // but NWP models such as Harmonie 37h1.2, use "timeRangeIndicator"
+                                       // where:  0: for instanteneous fields; 4: for accumulated fields
+#endif                                 // HIRLAM_EXTENSIONS
 
-double zaxis_units_to_centimeter(int zaxisID)
+double
+zaxis_units_to_centimeter(int zaxisID)
 {
   char units[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
   cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
 
-  double sf = 100.0; // default: meter
+  double sf = 100.0;  // default: meter
   // clang-format off
   if (units[1] == 'm' && !units[2])
     {
@@ -39,13 +40,14 @@ double zaxis_units_to_centimeter(int zaxisID)
   return sf;
 }
 
-double zaxis_units_to_meter(int zaxisID)
+double
+zaxis_units_to_meter(int zaxisID)
 {
   char units[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
   cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
 
-  double sf = 1.0; // default: meter
+  double sf = 1.0;  // default: meter
   // clang-format off
   if (units[1] == 'm' && !units[2])
     {
@@ -59,7 +61,8 @@ double zaxis_units_to_meter(int zaxisID)
   return sf;
 }
 
-bool zaxis_units_is_Pa(int zaxisID)
+bool
+zaxis_units_is_Pa(int zaxisID)
 {
   char units[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
@@ -68,21 +71,23 @@ bool zaxis_units_is_Pa(int zaxisID)
   return (units[0] && (units[0] == 'P') && (units[1] == 'a'));
 }
 
-void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer)
+void
+ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer)
 {
-  if ( *curSize < requiredSize )
+  if (*curSize < requiredSize)
     {
       *curSize = requiredSize;
       *buffer = Realloc(*buffer, *curSize);
     }
 }
 
-int grbDecompress(size_t recsize, size_t *buffersize, void **gribbuffer)
+int
+grbDecompress(size_t recsize, size_t *buffersize, void **gribbuffer)
 {
   int comptype = CDI_COMPRESS_NONE;
 
   size_t unzipsize;
-  if ( gribGetZip(recsize, (unsigned char *)*gribbuffer, &unzipsize) > 0 )
+  if (gribGetZip(recsize, (unsigned char *) *gribbuffer, &unzipsize) > 0)
     {
       comptype = CDI_COMPRESS_SZIP;
       unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
@@ -92,13 +97,13 @@ int grbDecompress(size_t recsize, size_t *buffersize, void **gribbuffer)
   return comptype;
 }
 
-
 // Regarding operation to change parameter identification:
 // change if cdiGribChangeParameterID.active
 struct cdiGribParamChange cdiGribChangeParameterID;
 
 // Used only for CDO module Selmulti
-void streamGrbChangeParameterIdentification(int code, int ltype, int lev)
+void
+streamGrbChangeParameterIdentification(int code, int ltype, int lev)
 {
   // NOTE this is a "PROXY" function for gribapiChangeParameterIdentification();
   // This just sets the globals. There are probably better solutions to this.
@@ -113,17 +118,20 @@ void streamGrbChangeParameterIdentification(int code, int ltype, int lev)
 
 struct cdiGribScanModeChange cdiGribDataScanningMode;
 
-void streamGrbDefDataScanningMode(int scanmode)
+void
+streamGrbDefDataScanningMode(int scanmode)
 {
   cdiGribDataScanningMode.active = true;
   cdiGribDataScanningMode.value = scanmode;
 }
 
-
-enum { MapKey = 0, MapValue = 1 };
-
-static const int grib1ltypeMap[][2] =
+enum
 {
+  MapKey = 0,
+  MapValue = 1
+};
+
+static const int grib1ltypeMap[][2] = {
   // clang-format off
   {  GRIB1_LTYPE_SURFACE,             ZAXIS_SURFACE            },
   {  GRIB1_LTYPE_CLOUD_BASE,          ZAXIS_CLOUD_BASE         },
@@ -157,8 +165,7 @@ static const int grib1ltypeMap[][2] =
 
 static const size_t grib1ltypeMapSize = sizeof(grib1ltypeMap) / (2 * sizeof(int));
 
-static const int grib2ltypeMap[][2] =
-{
+static const int grib2ltypeMap[][2] = {
   // clang-format off
   {  GRIB2_LTYPE_SURFACE,             ZAXIS_SURFACE            },
   {  GRIB2_LTYPE_CLOUD_BASE,          ZAXIS_CLOUD_BASE         },
@@ -199,47 +206,49 @@ getInt2IntMap(int searchKey, bool keyValue, size_t mapSize, const int gribltypeM
   return defaultValue;
 }
 
-int grib1ltypeToZaxisType(int grib_ltype)
+int
+grib1ltypeToZaxisType(int grib_ltype)
 {
   return getInt2IntMap(grib_ltype, MapKey, grib1ltypeMapSize, grib1ltypeMap, ZAXIS_GENERIC);
 }
 
-int zaxisTypeToGrib1ltype(int zaxistype)
+int
+zaxisTypeToGrib1ltype(int zaxistype)
 {
   return getInt2IntMap(zaxistype, MapValue, grib1ltypeMapSize, grib1ltypeMap, -1);
 }
 
-int grib2ltypeToZaxisType(int grib_ltype)
+int
+grib2ltypeToZaxisType(int grib_ltype)
 {
   return getInt2IntMap(grib_ltype, MapKey, grib2ltypeMapSize, grib2ltypeMap, ZAXIS_GENERIC);
 }
 
-int zaxisTypeToGrib2ltype(int zaxistype)
+int
+zaxisTypeToGrib2ltype(int zaxistype)
 {
   return getInt2IntMap(zaxistype, MapValue, grib2ltypeMapSize, grib2ltypeMap, -1);
 }
 
-
-int grbBitsPerValue(int datatype)
+int
+grbBitsPerValue(int datatype)
 {
   int bitsPerValue = 16;
 
-  if ( datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
-    Error("CDI/GRIB library does not support complex numbers!");
+  if (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64) Error("CDI/GRIB library does not support complex numbers!");
 
-  if ( datatype != CDI_UNDEFID )
+  if (datatype != CDI_UNDEFID)
     {
-      if ( datatype > 0 && datatype <= 32 )
-	bitsPerValue = datatype;
-      else if ( datatype == CDI_DATATYPE_FLT64 )
-	bitsPerValue = 24;
+      if (datatype > 0 && datatype <= 32)
+        bitsPerValue = datatype;
+      else if (datatype == CDI_DATATYPE_FLT64)
+        bitsPerValue = 24;
       else
-	bitsPerValue = 16;
+        bitsPerValue = 16;
     }
 
   return bitsPerValue;
 }
-
 
 /*
 int grbInqRecord(stream_t * streamptr, int *varID, int *levelID)
@@ -252,13 +261,14 @@ int grbInqRecord(stream_t * streamptr, int *varID, int *levelID)
 }
 */
 
-void grbDefRecord(stream_t * streamptr)
+void
+grbDefRecord(stream_t *streamptr)
 {
   UNUSED(streamptr);
 }
 
-static
-int grbScanTimestep1(stream_t * streamptr)
+static int
+grbScanTimestep1(stream_t *streamptr)
 {
   int status = CDI_EUFTYPE;
 
@@ -272,14 +282,14 @@ int grbScanTimestep1(stream_t * streamptr)
 #ifdef HAVE_LIBGRIB_API
     status = gribapiScanTimestep1(streamptr);
 #else
-    Error("GRIB_API support unavailable!");
+  Error("GRIB_API support unavailable!");
 #endif
 
   return status;
 }
 
-static
-int grbScanTimestep2(stream_t * streamptr)
+static int
+grbScanTimestep2(stream_t *streamptr)
 {
   int status = CDI_EUFTYPE;
 
@@ -293,14 +303,14 @@ int grbScanTimestep2(stream_t * streamptr)
 #ifdef HAVE_LIBGRIB_API
     status = gribapiScanTimestep2(streamptr);
 #else
-    Error("GRIB_API support unavailable!");
+  Error("GRIB_API support unavailable!");
 #endif
 
   return status;
 }
 
-static
-int grbScanTimestep(stream_t * streamptr)
+static int
+grbScanTimestep(stream_t *streamptr)
 {
   int status = CDI_EUFTYPE;
 
@@ -314,15 +324,15 @@ int grbScanTimestep(stream_t * streamptr)
 #ifdef HAVE_LIBGRIB_API
     status = gribapiScanTimestep(streamptr);
 #else
-    Error("GRIB_API support unavailable!");
+  Error("GRIB_API support unavailable!");
 #endif
 
   return status;
 }
 
-
 #ifdef HAVE_LIBGRIB
-int grbInqContents(stream_t * streamptr)
+int
+grbInqContents(stream_t *streamptr)
 {
   streamptr->curTsID = 0;
 
@@ -335,10 +345,11 @@ int grbInqContents(stream_t * streamptr)
   return status;
 }
 
-int fdbInqContents(stream_t * streamptr)
+int
+fdbInqContents(stream_t *streamptr)
 {
   streamptr->curTsID = 0;
-#ifdef  HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
   int status = fdbScanTimesteps(streamptr);
   return status;
 #else
@@ -347,7 +358,8 @@ int fdbInqContents(stream_t * streamptr)
 }
 #endif
 
-int fdbInqTimestep(stream_t *streamptr, int tsID)
+int
+fdbInqTimestep(stream_t *streamptr, int tsID)
 {
   if (tsID == 0 && streamptr->rtsteps == 0) Error("Call to cdiInqContents missing!");
 
@@ -367,10 +379,10 @@ int fdbInqTimestep(stream_t *streamptr, int tsID)
   return nrecs;
 }
 
-int grbInqTimestep(stream_t *streamptr, int tsID)
+int
+grbInqTimestep(stream_t *streamptr, int tsID)
 {
-  if (tsID == 0 && streamptr->rtsteps == 0)
-    Error("Call to cdiInqContents missing!");
+  if (tsID == 0 && streamptr->rtsteps == 0) Error("Call to cdiInqContents missing!");
 
   if (CDI_Debug) Message("tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
 
@@ -379,10 +391,10 @@ int grbInqTimestep(stream_t *streamptr, int tsID)
     {
       ntsteps = grbScanTimestep(streamptr);
       if (ntsteps == CDI_EUFSTRUCT)
-	{
-	  streamptr->ntsteps = streamptr->rtsteps;
-	  break;
-	}
+        {
+          streamptr->ntsteps = streamptr->rtsteps;
+          break;
+        }
     }
 
   int nrecs;
@@ -400,61 +412,60 @@ int grbInqTimestep(stream_t *streamptr, int tsID)
 }
 
 // used in CDO!!!
-void streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
+void
+streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
   int filetype = streamptr->filetype;
 
-  if ( filetype == CDI_FILETYPE_GRB )
+  if (filetype == CDI_FILETYPE_GRB)
     {
-      int tsID     = streamptr->curTsID;
-      int vrecID   = streamptr->tsteps[tsID].curRecID;
-      int recID    = streamptr->tsteps[tsID].recIDs[vrecID];
+      int tsID = streamptr->curTsID;
+      int vrecID = streamptr->tsteps[tsID].curRecID;
+      int recID = streamptr->tsteps[tsID].recIDs[vrecID];
       off_t recpos = streamptr->tsteps[tsID].records[recID].position;
-      int zip      = streamptr->tsteps[tsID].records[recID].zip;
+      int zip = streamptr->tsteps[tsID].records[recID].zip;
 
       void *gribbuffer = streamptr->record->buffer;
       size_t gribbuffersize = streamptr->record->buffersize;
 
-      if ( zip > 0 )
-	Error("Compressed GRIB records unsupported!");
+      if (zip > 0)
+        Error("Compressed GRIB records unsupported!");
       else
-        grib_info_for_grads(recpos, (long)gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum, bignum);
+        grib_info_for_grads(recpos, (long) gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum, bignum);
     }
 }
 
-
-int grbGetGridtype(int *gridID, size_t gridsize, bool *gridIsRotated, bool *gridIsCurvilinear)
+int
+grbGetGridtype(int *gridID, size_t gridsize, bool *gridIsRotated, bool *gridIsCurvilinear)
 {
   int gridtype = gridInqType(*gridID);
 
-  if ( gridtype == GRID_GENERIC )
+  if (gridtype == GRID_GENERIC)
     {
       int xsize = (int) gridInqXsize(*gridID);
       int ysize = (int) gridInqYsize(*gridID);
 
-      if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
-	    ysize ==  96 || ysize == 160 || ysize == 192 ||
-	    ysize == 240 || ysize == 320 || ysize == 384 ||
-	    ysize == 480 || ysize == 768 ) &&
-	   (xsize == 2*ysize || xsize == 1) )
-	{
-	  gridtype = GRID_GAUSSIAN;
-	}
-      else if ( gridsize == 1 )
-	{
-	  gridtype = GRID_LONLAT;
-	}
-      else if ( gridInqXvals(*gridID, NULL) && gridInqYvals(*gridID, NULL) )
-	{
-	  gridtype = GRID_LONLAT;
-	}
+      if ((ysize == 32 || ysize == 48 || ysize == 64 || ysize == 96 || ysize == 160 || ysize == 192 || ysize == 240 || ysize == 320
+           || ysize == 384 || ysize == 480 || ysize == 768)
+          && (xsize == 2 * ysize || xsize == 1))
+        {
+          gridtype = GRID_GAUSSIAN;
+        }
+      else if (gridsize == 1)
+        {
+          gridtype = GRID_LONLAT;
+        }
+      else if (gridInqXvals(*gridID, NULL) && gridInqYvals(*gridID, NULL))
+        {
+          gridtype = GRID_LONLAT;
+        }
     }
-  else if ( gridtype == GRID_CURVILINEAR )
+  else if (gridtype == GRID_CURVILINEAR)
     {
       int projID = gridInqProj(*gridID);
-      if ( projID != CDI_UNDEFID && gridInqType(projID) == GRID_PROJECTION )
+      if (projID != CDI_UNDEFID && gridInqType(projID) == GRID_PROJECTION)
         {
           *gridID = projID;
           gridtype = GRID_PROJECTION;
@@ -462,7 +473,7 @@ int grbGetGridtype(int *gridID, size_t gridsize, bool *gridIsRotated, bool *grid
       else
         {
           static bool lwarning = true;
-          if ( lwarning && gridsize > 1 )
+          if (lwarning && gridsize > 1)
             {
               lwarning = false;
               Warning("Curvilinear grid is unsupported in GRIB format! Created wrong Grid Description Section!");
@@ -472,19 +483,19 @@ int grbGetGridtype(int *gridID, size_t gridsize, bool *gridIsRotated, bool *grid
         }
     }
 
-  if ( gridtype == GRID_PROJECTION )
+  if (gridtype == GRID_PROJECTION)
     {
       int projtype = gridInqProjType(*gridID);
-      if ( projtype == CDI_PROJ_RLL )
+      if (projtype == CDI_PROJ_RLL)
         {
           gridtype = GRID_LONLAT;
           *gridIsRotated = true;
         }
-      else if ( projtype == CDI_PROJ_LCC )
+      else if (projtype == CDI_PROJ_LCC)
         {
           gridtype = CDI_PROJ_LCC;
         }
-      else if ( projtype == CDI_PROJ_STERE )
+      else if (projtype == CDI_PROJ_STERE)
         {
           gridtype = CDI_PROJ_STERE;
         }

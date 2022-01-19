@@ -2,7 +2,7 @@
 #define PIO_RPC_H
 
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <limits.h>
@@ -11,7 +11,8 @@
 #include <mpi.h>
 #include <yaxt.h>
 
-enum collectorCommandTags {
+enum collectorCommandTags
+{
   FINALIZE,
   RESOURCES,
   STREAMOPEN,
@@ -21,7 +22,7 @@ enum collectorCommandTags {
   BLOCK_XFER,
 };
 
-#define MAXWINBUFFERSIZE ((size_t)2048 * 1024 * 1024)
+#define MAXWINBUFFERSIZE ((size_t) 2048 * 1024 * 1024)
 
 enum
 {
@@ -30,12 +31,13 @@ enum
   HEADERSIZEMARKER = -numRPCFuncs - 1,
   PARTDESCMARKER = -numRPCFuncs - 2,
 };
-enum {
+enum
+{
   MINFUNCID = -numRPCFuncs,
   MAXFUNCID = -1,
   defVlistNInts = 2,
 };
-extern const char * const funcMap[numRPCFuncs];
+extern const char *const funcMap[numRPCFuncs];
 
 struct headerSize
 {
@@ -55,10 +57,11 @@ union funcArgs
   } streamNewTimestep;
 };
 
-enum {
+enum
+{
   /* number of unsigned vector elements to pack an Xt_uid into */
-  uidInts = (sizeof(Xt_uid) + sizeof(unsigned) - 1)/sizeof (unsigned),
-  packUIDShift = (sizeof (unsigned) % sizeof(Xt_uid)) * CHAR_BIT,
+  uidInts = (sizeof(Xt_uid) + sizeof(unsigned) - 1) / sizeof(unsigned),
+  packUIDShift = (sizeof(unsigned) % sizeof(Xt_uid)) * CHAR_BIT,
 };
 /* Describes offset and ID of serialized partition descriptor.
  * partDescMarker == PARTDESCMARKER, always. */
@@ -81,11 +84,9 @@ static inline Xt_uid
 unpackXTUID(const unsigned *packedUID)
 {
   Xt_uid uid = 0;
-  for (size_t i = uidInts; i > 0; --i)
-    uid = (uid << packUIDShift) | packedUID[i - 1];
+  for (size_t i = uidInts; i > 0; --i) uid = (uid << packUIDShift) | packedUID[i - 1];
   return uid;
 }
-
 
 struct winHeaderEntry
 {
@@ -96,7 +97,7 @@ struct winHeaderEntry
     struct dataRecord dataRecord;
     union funcArgs funcArgs;
     struct partDescRecord partDesc;
-  }  specific;
+  } specific;
   int offset;
 };
 
@@ -104,13 +105,13 @@ struct winHeaderEntry
 static inline size_t
 roundUpToMultiple(size_t size, size_t factor)
 {
-  return (size + factor - 1)/factor * factor;
+  return (size + factor - 1) / factor * factor;
 }
 
 enum
 {
   /* align window base addresses and sizes to this value */
-  PIO_WIN_ALIGN = sizeof (double),
+  PIO_WIN_ALIGN = sizeof(double),
 };
 
 struct clientBufSize
@@ -126,8 +127,7 @@ struct collSpec
   bool sendRPCData;
 };
 
-struct clientBufSize
-computeClientStreamBufSize(int streamID, const struct collSpec *collector);
+struct clientBufSize computeClientStreamBufSize(int streamID, const struct collSpec *collector);
 
 #endif
 
