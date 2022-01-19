@@ -47,7 +47,7 @@ union namespaceSwitchValue
   void (*func)();
 };
 
-#define NSSW_FUNC(p) ((union namespaceSwitchValue){ .func = (void (*)()) (p) })
+#define NSSW_FUNC(p) ((union namespaceSwitchValue){ .func = (void (*)())(p) })
 #define NSSW_DATA(p) ((union namespaceSwitchValue){ .data = (void *) (p) })
 
 // int              namespaceNew();

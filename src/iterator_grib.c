@@ -339,10 +339,10 @@ static void hexdump(void *data, size_t size)
 
 // Read a record into memory and wrap it in a grib_handle.
 // XXX: I have omitted checking for szip compression as it is done in grbReadVarDP() & friends since that appears to be a
-// non-standard extension of the GRIB1 standard: bit 1 in octet 14 of the binary data section which is used to signal szip compressio
-// is defined to be reserved in the standard. As such, it seems prudent not to support this and to encourage people with such szip
-// compressed files to switch to the GRIB2/JPEG2000 format. However, in the case that this reasoning is wrong, this function is
-// probably the place to add the check for zsip compression.
+// non-standard extension of the GRIB1 standard: bit 1 in octet 14 of the binary data section which is used to signal szip
+// compression is defined to be reserved in the standard. As such, it seems prudent not to support this and to encourage people with
+// such szip compressed files to switch to the GRIB2/JPEG2000 format. However, in the case that this reasoning is wrong, this
+// function is probably the place to add the check for zsip compression.
 static int
 readMessage(CdiGribIterator *me)
 {
