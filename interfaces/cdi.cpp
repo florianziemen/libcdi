@@ -5,9 +5,10 @@
 #include <map>
 
 #if defined(__cplusplus)
-extern "C" {
+extern "C"
+{
 #endif
-#if defined (__cplusplus)
+#if defined(__cplusplus)
 }
 #endif
 #include "cdi.hpp"
@@ -17,18 +18,19 @@ extern "C" {
  * {
  */
 CdiGrid::CdiGrid() { gridID = -1; }
-CdiGrid::CdiGrid(int gridid) {
+CdiGrid::CdiGrid(int gridid)
+{
   char _name[CDI_MAX_NAME];
   char _xname[CDI_MAX_NAME], _xlongname[CDI_MAX_NAME], _xunits[CDI_MAX_NAME];
   char _yname[CDI_MAX_NAME], _ylongname[CDI_MAX_NAME], _yunits[CDI_MAX_NAME];
 
   gridID = gridid;
-  //std::cout << "DEBUG:input gridid =" << gridid << std::endl;
-  type   = gridInqType(gridID);
+  // std::cout << "DEBUG:input gridid =" << gridid << std::endl;
+  type = gridInqType(gridID);
   /*  strcpy(_name,gridNamePtr(type)); */
   name = std::string(gridNamePtr(type));
 
-  size  = gridInqSize(gridID);
+  size = gridInqSize(gridID);
   xsize = gridInqXsize(gridID);
   ysize = gridInqYsize(gridID);
   xvalues.resize(xsize);
@@ -40,141 +42,141 @@ CdiGrid::CdiGrid(int gridid) {
 
   prec = gridInqDatatype(gridID);
 
-  gridInqXname(gridID    , _xname);
+  gridInqXname(gridID, _xname);
   gridInqXlongname(gridID, _xlongname);
-  gridInqXunits(gridID   , _xunits);
-  gridInqYname(gridID    , _yname);
+  gridInqXunits(gridID, _xunits);
+  gridInqYname(gridID, _yname);
   gridInqYlongname(gridID, _ylongname);
-  gridInqYunits(gridID   , _yunits);
-  xname     = _xname;
+  gridInqYunits(gridID, _yunits);
+  xname = _xname;
   xlongname = _xlongname;
-  xunits    = _xunits;
-  yname     = _yname;
+  xunits = _xunits;
+  yname = _yname;
   ylongname = _ylongname;
-  yunits    = _yunits;
-
+  yunits = _yunits;
 }
 CdiGrid::~CdiGrid() { gridID = -1; }
 
-void CdiGrid::getValues()
+void
+CdiGrid::getValues()
 {
   double *xvals, *yvals;
 
   hasXValues = gridInqXvals(gridID, NULL);
   hasYValues = gridInqYvals(gridID, NULL);
-  if ( hasXValues )
-  {
-    xvals = (double *) malloc(xsize*sizeof(double));
+  if (hasXValues)
+    {
+      xvals = (double *) malloc(xsize * sizeof(double));
 
-    gridInqXvals(gridID, xvals);
-    std::copy(xvals, xvals + xsize, xvalues.begin());
-    free(xvals);
-  }
+      gridInqXvals(gridID, xvals);
+      std::copy(xvals, xvals + xsize, xvalues.begin());
+      free(xvals);
+    }
   else
-  {
-    std::cout << "grid " << gridID << " has no YValues" << std::endl;
-  }
+    {
+      std::cout << "grid " << gridID << " has no YValues" << std::endl;
+    }
 
-  if ( hasYValues )
-  {
-    yvals = (double *) malloc(ysize*sizeof(double));
-    gridInqYvals(gridID, yvals);
-    std::copy(yvals, yvals + ysize, yvalues.begin());
-    free(yvals);
-  }
+  if (hasYValues)
+    {
+      yvals = (double *) malloc(ysize * sizeof(double));
+      gridInqYvals(gridID, yvals);
+      std::copy(yvals, yvals + ysize, yvalues.begin());
+      free(yvals);
+    }
   else
-  {
-    std::cout << "grid " << gridID << " has no YValues" << std::endl;
-  }
+    {
+      std::cout << "grid " << gridID << " has no YValues" << std::endl;
+    }
 }
 
-void CdiGrid::getBounds()
+void
+CdiGrid::getBounds()
 {
   double *xbnds, *ybnds;
 
-  hasBounds = (gridInqXbounds(gridID,NULL) && gridInqYbounds(gridID,NULL));
+  hasBounds = (gridInqXbounds(gridID, NULL) && gridInqYbounds(gridID, NULL));
   if (hasBounds)
-  {
-    ncorner  = ( gridInqType(gridID) == GRID_UNSTRUCTURED ) ? gridInqNvertex(gridID) : 4;
-    ncorner *= size;
-    xbnds    = (double *) malloc((ncorner*size)*sizeof(double));
-    ybnds    = (double *) malloc((ncorner*size)*sizeof(double));
-    gridInqYbounds(gridID, xbnds);
-    gridInqXbounds(gridID, ybnds);
-    xbounds.resize(ncorner*size);
-    ybounds.resize(ncorner*size);
-    std::copy(xbnds, xbnds + ncorner*size, xbounds.begin());
-    std::copy(ybnds, ybnds + ncorner*size, ybounds.begin());
-    free(xbnds);
-    free(ybnds);
-  }
+    {
+      ncorner = (gridInqType(gridID) == GRID_UNSTRUCTURED) ? gridInqNvertex(gridID) : 4;
+      ncorner *= size;
+      xbnds = (double *) malloc((ncorner * size) * sizeof(double));
+      ybnds = (double *) malloc((ncorner * size) * sizeof(double));
+      gridInqYbounds(gridID, xbnds);
+      gridInqXbounds(gridID, ybnds);
+      xbounds.resize(ncorner * size);
+      ybounds.resize(ncorner * size);
+      std::copy(xbnds, xbnds + ncorner * size, xbounds.begin());
+      std::copy(ybnds, ybnds + ncorner * size, ybounds.begin());
+      free(xbnds);
+      free(ybnds);
+    }
   else
-  {
-    ncorner = 0;
-    std::cout << "grid " << gridID << " has no XYBounds" << std::endl;
-    xbounds.resize(ncorner*size);
-    ybounds.resize(ncorner*size);
-  }
+    {
+      ncorner = 0;
+      std::cout << "grid " << gridID << " has no XYBounds" << std::endl;
+      xbounds.resize(ncorner * size);
+      ybounds.resize(ncorner * size);
+    }
 }
 /*
  * pointer value functions {
  */
-void CdiGrid::getValuesAsPointer(double *xvals, double *yvals)
+void
+CdiGrid::getValuesAsPointer(double *xvals, double *yvals)
 {
   if (hasBounds)
-  {
-    std::copy(xvalues.begin(), xvalues.end(), xvals);
-    std::copy(yvalues.begin(), yvalues.end(), yvals);
-  }
+    {
+      std::copy(xvalues.begin(), xvalues.end(), xvals);
+      std::copy(yvalues.begin(), yvalues.end(), yvals);
+    }
   else
-  {
-    std::cout << "No Values available." << std::endl;
-  }
+    {
+      std::cout << "No Values available." << std::endl;
+    }
 }
 
 void
 CdiGrid::getBoundsAsPointer(double *xbnds, double *ybnds)
 {
   if (hasBounds)
-  {
-    std::copy(xbounds.begin(), xbounds.end(), xbnds);
-    std::copy(ybounds.begin(), ybounds.end(), ybnds);
-  }
+    {
+      std::copy(xbounds.begin(), xbounds.end(), xbnds);
+      std::copy(ybounds.begin(), ybounds.end(), ybnds);
+    }
   else
-  {
-    std::cout << "No bounds available." << std::endl;
-  }
+    {
+      std::cout << "No bounds available." << std::endl;
+    }
 }
-  /* } */
+/* } */
 /*
  * float pointer functions {
  */
 void
 CdiGrid::getFloatVals(float *xvalsF, float *yvalsF)
 {
-  for (int i = 0; i < xsize; i++)
-    xvalsF[i] = (float) xvalues[i];
-  for (int i = 0; i < ysize; i++)
-    yvalsF[i] = (float) yvalues[i];
+  for (int i = 0; i < xsize; i++) xvalsF[i] = (float) xvalues[i];
+  for (int i = 0; i < ysize; i++) yvalsF[i] = (float) yvalues[i];
 }
 
 void
 CdiGrid::getFloatBounds(float *xbndsF, float *ybndsF)
 {
   if (hasBounds)
-  {
-    for (int i = 0; i < ncorner*size; i++)
     {
-      xbndsF[i] = (float) xbounds[i];
-      ybndsF[i] = (float) ybounds[i];
+      for (int i = 0; i < ncorner * size; i++)
+        {
+          xbndsF[i] = (float) xbounds[i];
+          ybndsF[i] = (float) ybounds[i];
+        }
     }
-  }
   else
-  {
-    std::cout << "No bounds available." << std::endl;
-  }
+    {
+      std::cout << "No bounds available." << std::endl;
+    }
 }
-  /* } */
+/* } */
 /* } */
 
 /*
@@ -182,20 +184,24 @@ CdiGrid::getFloatBounds(float *xbndsF, float *ybndsF)
  * {
  */
 CdiTaxis::CdiTaxis() { taxisID = -1; }
-CdiTaxis::CdiTaxis(int vlistID) {
-  taxisID   = vlistInqTaxis(vlistID);
-  type      = taxisInqType(taxisID);
-  ntsteps   = vlistNtsteps(vlistID);
+CdiTaxis::CdiTaxis(int vlistID)
+{
+  taxisID = vlistInqTaxis(vlistID);
+  type = taxisInqType(taxisID);
+  ntsteps = vlistNtsteps(vlistID);
   hasBounds = taxisHasBounds(taxisID);
-  vdate     = taxisInqVdate(taxisID);
-  vtime     = taxisInqVtime(taxisID);
-  rdate     = taxisInqRdate(taxisID);
-  rtime     = taxisInqRtime(taxisID);
-  calendar  = taxisInqCalendar(taxisID);
-  unit      = taxisInqTunit(taxisID);
-  unitname  = tunitNamePtr(taxisID);
+  vdate = taxisInqVdate(taxisID);
+  vtime = taxisInqVtime(taxisID);
+  rdate = taxisInqRdate(taxisID);
+  rtime = taxisInqRtime(taxisID);
+  calendar = taxisInqCalendar(taxisID);
+  unit = taxisInqTunit(taxisID);
+  unitname = tunitNamePtr(taxisID);
 }
-CdiTaxis::~CdiTaxis() { if (taxisID >= 0) taxisID = -1; }
+CdiTaxis::~CdiTaxis()
+{
+  if (taxisID >= 0) taxisID = -1;
+}
 /* } */
 
 /*
@@ -203,35 +209,42 @@ CdiTaxis::~CdiTaxis() { if (taxisID >= 0) taxisID = -1; }
  * {
  */
 CdiZaxis::CdiZaxis() { zaxisID = -1; }
-CdiZaxis::CdiZaxis(int zaxisid) {
+CdiZaxis::CdiZaxis(int zaxisid)
+{
   char name[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
 
   zaxisID = zaxisid;
-  size    = zaxisInqSize(zaxisID);
-  prec    = zaxisInqDatatype(zaxisID);
-  type    = zaxisInqType(zaxisID);
-  ltype   = 0;
+  size = zaxisInqSize(zaxisID);
+  prec = zaxisInqDatatype(zaxisID);
+  type = zaxisInqType(zaxisID);
+  ltype = 0;
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
 
-  plevels  = (double *) malloc(size*sizeof(double));
-  plbounds = (double *) malloc(size*sizeof(double));
-  pubounds = (double *) malloc(size*sizeof(double));
-  pweights = (double *) malloc(size*sizeof(double));
-  zaxisInqLevels(zaxisID  ,plevels);
-  zaxisInqLbounds(zaxisID ,plbounds);
-  zaxisInqUbounds(zaxisID ,pubounds);
-  zaxisInqWeights(zaxisID ,pweights);
-  levels.resize(size); lbounds.resize(size); ubounds.resize(size); weights.resize(size);
-  std::copy(plevels,plevels+size,levels.begin());
-  std::copy(plbounds,plbounds+size,lbounds.begin());
-  std::copy(pubounds,pubounds+size,ubounds.begin());
-  std::copy(pweights,pweights+size,weights.begin());
+  plevels = (double *) malloc(size * sizeof(double));
+  plbounds = (double *) malloc(size * sizeof(double));
+  pubounds = (double *) malloc(size * sizeof(double));
+  pweights = (double *) malloc(size * sizeof(double));
+  zaxisInqLevels(zaxisID, plevels);
+  zaxisInqLbounds(zaxisID, plbounds);
+  zaxisInqUbounds(zaxisID, pubounds);
+  zaxisInqWeights(zaxisID, pweights);
+  levels.resize(size);
+  lbounds.resize(size);
+  ubounds.resize(size);
+  weights.resize(size);
+  std::copy(plevels, plevels + size, levels.begin());
+  std::copy(plbounds, plbounds + size, lbounds.begin());
+  std::copy(pubounds, pubounds + size, ubounds.begin());
+  std::copy(pweights, pweights + size, weights.begin());
 
-  zaxisInqName(zaxisid    ,name);
-  zaxisInqLongname(zaxisid,longname);
-  zaxisInqUnits(zaxisid   ,units);
+  zaxisInqName(zaxisid, name);
+  zaxisInqLongname(zaxisid, longname);
+  zaxisInqUnits(zaxisid, units);
 }
-CdiZaxis::~CdiZaxis() { if (zaxisID >= 0) zaxisID = -1; }
+CdiZaxis::~CdiZaxis()
+{
+  if (zaxisID >= 0) zaxisID = -1;
+}
 /* } */
 
 /*
@@ -239,34 +252,36 @@ CdiZaxis::~CdiZaxis() { if (zaxisID >= 0) zaxisID = -1; }
  * {
  */
 CdiVariable::CdiVariable() { size = -1; }
-CdiVariable::CdiVariable(int streamid,int vlistid, int varid) {
-  char _name[CDI_MAX_NAME],_longname[CDI_MAX_NAME], _units[CDI_MAX_NAME], _stdname[CDI_MAX_NAME];
+CdiVariable::CdiVariable(int streamid, int vlistid, int varid)
+{
+  char _name[CDI_MAX_NAME], _longname[CDI_MAX_NAME], _units[CDI_MAX_NAME], _stdname[CDI_MAX_NAME];
   streamID = streamid;
-  vlistID  = vlistid;
-  varID    = varid;
-  code     = vlistInqVarCode(vlistID, varID);
-  vlistInqVar(vlistID        , varID, &gridID    , &zaxisID, &timeID);
-  vlistInqVarName(vlistID    , varID, _name);
+  vlistID = vlistid;
+  varID = varid;
+  code = vlistInqVarCode(vlistID, varID);
+  vlistInqVar(vlistID, varID, &gridID, &zaxisID, &timeID);
+  vlistInqVarName(vlistID, varID, _name);
   vlistInqVarLongname(vlistID, varID, _longname);
-  vlistInqVarStdname(vlistID , varID, _stdname);
-  vlistInqVarUnits(vlistID   , varID, _units);
-  taxisID  = vlistInqTaxis(vlistID);
-  size     = vlistInqVarSize(vlistID, varID);
-  datatype = vlistInqVarDatatype(vlistID,varID);
-  missval  = vlistInqVarMissval(vlistID,varID);
-  name     = _name;
+  vlistInqVarStdname(vlistID, varID, _stdname);
+  vlistInqVarUnits(vlistID, varID, _units);
+  taxisID = vlistInqTaxis(vlistID);
+  size = vlistInqVarSize(vlistID, varID);
+  datatype = vlistInqVarDatatype(vlistID, varID);
+  missval = vlistInqVarMissval(vlistID, varID);
+  name = _name;
   longname = _longname;
-  stdname  = _stdname;
-  units    = _units;
+  stdname = _stdname;
+  units = _units;
 }
-CdiVariable::~CdiVariable(){ size = -1; }
+CdiVariable::~CdiVariable() { size = -1; }
 
 void
-CdiVariable::sinfo() {
-  std::cout << "name:"  << name << std::endl;
-  std::cout << "longname:"  << longname << std::endl;
-  std::cout << "units:"  << units << std::endl;
-  std::cout << "code:"  << code << std::endl;
+CdiVariable::sinfo()
+{
+  std::cout << "name:" << name << std::endl;
+  std::cout << "longname:" << longname << std::endl;
+  std::cout << "units:" << units << std::endl;
+  std::cout << "code:" << code << std::endl;
 }
 
 double *
@@ -278,7 +293,7 @@ CdiVariable::getValuesAsPointer()
   int nrecs = streamInqTimestep(streamID, tsID);
   int vdate = taxisInqVdate(taxisID);
   int vtime = taxisInqVtime(taxisID);
-  double *field = (double *) malloc(grid.size*sizeof(double));
+  double *field = (double *) malloc(grid.size * sizeof(double));
   streamReadVarSlice(streamID, varID, levelID, field, &nmiss);
 
   return field;
@@ -287,18 +302,18 @@ CdiVariable::getValuesAsPointer()
 double **
 CdiVariable::getValuesWithLevelAsPointer(int tsID)
 {
-  int    levelID, nrecs;
+  int levelID, nrecs;
   size_t nmiss;
   double **fieldWithLevel, *field;
 
-  nrecs          = streamInqTimestep(streamID, tsID);
-  fieldWithLevel = (double **) malloc(zaxis.size*sizeof(double *));
-  field          = (double *)  malloc(grid.size*sizeof(double));
+  nrecs = streamInqTimestep(streamID, tsID);
+  fieldWithLevel = (double **) malloc(zaxis.size * sizeof(double *));
+  field = (double *) malloc(grid.size * sizeof(double));
   for (levelID = 0; levelID < zaxis.size; levelID++)
-  {
-    streamReadVarSlice(streamID, varID, levelID, field, &nmiss);
-    fieldWithLevel[levelID] = field;
-  }
+    {
+      streamReadVarSlice(streamID, varID, levelID, field, &nmiss);
+      fieldWithLevel[levelID] = field;
+    }
   free(field);
   return fieldWithLevel;
 }
@@ -313,15 +328,16 @@ CdiVariable::getValues()
 }
 
 void
-CdiVariable::getValuesWithLevel(int tsID) {
+CdiVariable::getValuesWithLevel(int tsID)
+{
   double **fieldWithLevel = getValuesWithLevelAsPointer(tsID);
 
   valuesWithLevel.resize(zaxis.size);
   for (int levelID = 0; levelID < zaxis.size; levelID++)
-  {
-    valuesWithLevel[levelID].resize(grid.size);
-    std::copy(fieldWithLevel[levelID], fieldWithLevel[levelID] + grid.size, valuesWithLevel[levelID].begin());
-  }
+    {
+      valuesWithLevel[levelID].resize(grid.size);
+      std::copy(fieldWithLevel[levelID], fieldWithLevel[levelID] + grid.size, valuesWithLevel[levelID].begin());
+    }
   free(fieldWithLevel);
 }
 
@@ -329,21 +345,20 @@ std::vector<float>
 CdiVariable::getFValues()
 {
   if (values.empty()) getValues();
-  std::vector<float> retval(values.begin(),values.end());
+  std::vector<float> retval(values.begin(), values.end());
   return retval;
 }
 
-
-std::vector< std::vector<float> >
+std::vector<std::vector<float>>
 CdiVariable::getFValuesWithLevel(int tsID)
 {
   if (valuesWithLevel.empty()) getValuesWithLevel();
-  std::vector< std::vector<float> > retval;
-  for (std::vector< std::vector<double> >::const_iterator it = valuesWithLevel.begin(); it != valuesWithLevel.end(); it++)
-  {
-    std::vector<float> fvalues((*it).begin(),(*it).end());
-    retval.push_back(fvalues);
-  }
+  std::vector<std::vector<float>> retval;
+  for (std::vector<std::vector<double>>::const_iterator it = valuesWithLevel.begin(); it != valuesWithLevel.end(); it++)
+    {
+      std::vector<float> fvalues((*it).begin(), (*it).end());
+      retval.push_back(fvalues);
+    }
   return retval;
 }
 
@@ -353,15 +368,17 @@ CdiVariable::getFValuesWithLevel(int tsID)
  * Cdi
  * {
  */
-Cdi::Cdi(const char *path)  {
+Cdi::Cdi(const char *path)
+{
   streamID = streamOpenRead(path);
 
-  if (0 > streamID) {
-    std::cout << "Failed to read input '" << path <<"'";
-    std::cout << "Got streamID = " << streamID;
-  }
-  vlistID  = streamInqVlist(streamID);
-  nvars    = vlistNvars(vlistID);
+  if (0 > streamID)
+    {
+      std::cout << "Failed to read input '" << path << "'";
+      std::cout << "Got streamID = " << streamID;
+    }
+  vlistID = streamInqVlist(streamID);
+  nvars = vlistNvars(vlistID);
 
   getTaxes();
   getZaxes();
@@ -369,69 +386,73 @@ Cdi::Cdi(const char *path)  {
   getVars();
 }
 
-Cdi::~Cdi() {
-  streamClose(streamID);
-}
+Cdi::~Cdi() { streamClose(streamID); }
 
 void
-Cdi::getTaxes() {
+Cdi::getTaxes()
+{
   int taxisID;
-  ntaxes         = 1;
-  taxisID        = vlistInqTaxis(vlistID);
+  ntaxes = 1;
+  taxisID = vlistInqTaxis(vlistID);
   taxes[taxisID] = CdiTaxis(vlistID);
 }
 
 void
-Cdi::getZaxes() {
+Cdi::getZaxes()
+{
   int zaxisID;
   nzaxes = vlistNzaxis(vlistID);
   for (int i = 0; i < nzaxes; i++)
-  {
-    zaxisID        = vlistZaxis(vlistID, i);
-//    std::cout << "getZaxes : zaxisID=" << zaxisID << std::endl;
-    zaxes[zaxisID] = CdiZaxis(zaxisID);
-  }
+    {
+      zaxisID = vlistZaxis(vlistID, i);
+      //    std::cout << "getZaxes : zaxisID=" << zaxisID << std::endl;
+      zaxes[zaxisID] = CdiZaxis(zaxisID);
+    }
 }
 
 void
-Cdi::getGrids() {
+Cdi::getGrids()
+{
   int gridID;
   ngrids = vlistNgrids(vlistID);
-    std::cout << "ngrids=" << ngrids << std::endl;
+  std::cout << "ngrids=" << ngrids << std::endl;
   for (int i = 0; i < ngrids; i++)
-  {
-    gridID        = vlistGrid(vlistID, i);
-    std::cout << "getGrids : gridID=" << gridID << std::endl;
-    grids[gridID] = CdiGrid(gridID);
-  }
+    {
+      gridID = vlistGrid(vlistID, i);
+      std::cout << "getGrids : gridID=" << gridID << std::endl;
+      grids[gridID] = CdiGrid(gridID);
+    }
 }
 
 void
-Cdi::getVars() {
+Cdi::getVars()
+{
   char name[CDI_MAX_NAME];
   int varID, code;
-//  std::cout << vlistID << std::endl;
+  //  std::cout << vlistID << std::endl;
   for (varID = 0; varID < nvars; varID++)
-  {
-    code = vlistInqVarCode(vlistID, varID);
-    codes.push_back(code);
+    {
+      code = vlistInqVarCode(vlistID, varID);
+      codes.push_back(code);
 
-    vlistInqVarName(vlistID, varID, name);
-    varnames.push_back(name);
+      vlistInqVarName(vlistID, varID, name);
+      varnames.push_back(name);
 
-    CdiVariable _var = CdiVariable(streamID,vlistID,varID);
-    _var.grid        = grids[_var.gridID];
-    _var.zaxis       = zaxes[_var.zaxisID];
-    _var.taxis       = taxes[_var.taxisID];
-  
-    variables.push_back(_var);
+      CdiVariable _var = CdiVariable(streamID, vlistID, varID);
+      _var.grid = grids[_var.gridID];
+      _var.zaxis = zaxes[_var.zaxisID];
+      _var.taxis = taxes[_var.taxisID];
 
-    var[name] = _var;
-    varByCode[code]        = _var;
-  }
+      variables.push_back(_var);
+
+      var[name] = _var;
+      varByCode[code] = _var;
+    }
 }
 
-void Cdi::griddes() {
-  //Cdo::griddes("|" + streamID);
+void
+Cdi::griddes()
+{
+  // Cdo::griddes("|" + streamID);
 }
 /* } */
