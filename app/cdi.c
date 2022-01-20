@@ -13,7 +13,6 @@
 #include <math.h>
 
 #include <cdi.h>
-#include <cdi_uuid.h>
 
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 #ifndef DBL_IS_NAN
