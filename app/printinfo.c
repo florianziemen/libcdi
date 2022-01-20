@@ -445,7 +445,8 @@ printZaxisBoundsInfo(const int zaxisID, const int dig, const int levelsize, cons
 }
 
 static void
-printZaxisLevelInfo(const int levelsize, const int zaxisID, const int zaxistype, double zinc, const int dig, const char *zname, const char *zunits)
+printZaxisLevelInfo(const int levelsize, const int zaxisID, const int zaxistype, double zinc, const int dig, const char *zname,
+                    const char *zunits)
 {
   double *levels = (double *) malloc((size_t) levelsize * sizeof(double));
   zaxisInqLevels(zaxisID, levels);
