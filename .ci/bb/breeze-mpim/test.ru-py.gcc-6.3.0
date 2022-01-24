@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo "WARNING: this is a dummy test" >&2
