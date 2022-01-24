@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+script_dir=$(cd "$(dirname "$0")"; pwd)
+top_srcdir=$(cd "${script_dir}/../../.."; pwd)
+
+. "${script_dir}/utils.sh"
+init_gcc630
+
+test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
+
+"${top_srcdir}/configure" \
+--disable-maintainer-mode \
+--enable-option-checking=fatal \
+--enable-python-interface \
+--enable-ruby-interface \
+--with-eccodes="${ECCODES_ROOT}" \
+--with-netcdf="${NETCDF_ROOT}" \
+--with-util-linux-uuid="${UUID_ROOT}" \
+CC="${CC}" \
+CXX="${CXX}"
+
+make -j8
+
+make -j8 check || { cat tests/test-suite.log; exit 1; }
