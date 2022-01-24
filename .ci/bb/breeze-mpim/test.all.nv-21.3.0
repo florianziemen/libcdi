@@ -23,6 +23,7 @@ init_nv2130
 --enable-ppm-dist-array \
 --with-eccodes="${ECCODES_ROOT}" \
 --with-netcdf="${NETCDF_ROOT}" \
+--with-util-linux-uuid="${UUID_ROOT}" \
 CC="${MPICC}" \
 FC="${MPIFC}" \
 MPI_LAUNCH="${MPI_LAUNCH}" \
