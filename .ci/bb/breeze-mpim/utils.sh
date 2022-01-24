@@ -130,6 +130,7 @@ init_nv2130 ()
   NETCDF_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/nvhpc-21.3-sandybridge/netcdf-c-4.8.0-vjppuov'
   PPM_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/nvhpc-21.3-sandybridge/scales-ppm-1.0.7-uy4z72r'
   YAXT_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/nvhpc-21.3-sandybridge/yaxt-0.9.2.1-lbqqemx'
+  UUID_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/gcc-6.3.0-sandybridge/libuuid-1.0.3-rm4kv2o'
 
   # Here we fix a never-ending story with Libtool overlinkning, absence of
   # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
@@ -162,6 +163,7 @@ init_clang1201 ()
   NETCDF_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/clang-12.0.1-sandybridge/netcdf-c-4.8.0-z6r5guk'
   PPM_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/clang-12.0.1-sandybridge/scales-ppm-1.0.7-5mhatgx'
   YAXT_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/clang-12.0.1-sandybridge/yaxt-0.9.2.1-cj2nf5j'
+  UUID_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/gcc-6.3.0-sandybridge/libuuid-1.0.3-rm4kv2o'
 
   # Here we fix a never-ending story with Libtool overlinkning, absence of
   # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':

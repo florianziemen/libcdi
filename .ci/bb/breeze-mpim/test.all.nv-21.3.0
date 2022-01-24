@@ -24,7 +24,9 @@ init_nv2130
 --with-eccodes="${ECCODES_ROOT}" \
 --with-netcdf="${NETCDF_ROOT}" \
 CC="${MPICC}" \
+CPPFLAGS="-I${UUID_ROOT}/include" \
 FC="${MPIFC}" \
+LDFLAGS="-I${UUID_ROOT}/lib" \
 MPI_LAUNCH="${MPI_LAUNCH}" \
 PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 
