@@ -21,7 +21,7 @@ init_nv2130
 --enable-mpi \
 --enable-option-checking=fatal \
 --enable-ppm-dist-array \
---with-grib-api="${GRIBAPI_ROOT}" \
+--with-eccodes="${ECCODES_ROOT}" \
 --with-netcdf="${NETCDF_ROOT}" \
 CC="${MPICC}" \
 FC="${MPIFC}" \
