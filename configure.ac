@@ -690,6 +690,7 @@ AC_CONFIG_FILES([
   src/pkgconfig/cdi_f2003.pc
   src/pkgconfig/cdipio.pc
   tests/Makefile
+  overlinking/Makefile
 ])
 AC_CONFIG_FILES([
   tests/pio_cksum_asynch.run

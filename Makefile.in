@@ -87,6 +87,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@MAINTAINER_MODE_TRUE@am__append_1 = overlinking
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps =  \
@@ -188,7 +189,7 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
-DIST_SUBDIRS = $(SUBDIRS)
+DIST_SUBDIRS = src interfaces app examples tests overlinking
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/cdi.settings.in \
 	$(top_srcdir)/config/compile $(top_srcdir)/config/config.guess \
 	$(top_srcdir)/config/config.sub \
@@ -428,7 +429,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = src interfaces app examples tests
+SUBDIRS = src interfaces app examples tests $(am__append_1)
 EXTRA_DIST = \
   config/interface.rb \
   doc/cdi_cman.pdf \

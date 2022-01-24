@@ -32545,7 +32545,7 @@ ENABLE_PYTHON_INTERFACE=$enable_python_interface
 
 ac_config_headers="$ac_config_headers src/config.h"
 
-ac_config_files="$ac_config_files Makefile app/Makefile cdi.settings examples/Makefile examples/pio/Makefile interfaces/Makefile src/Makefile src/pkgconfig/cdi.pc src/pkgconfig/cdi_f2003.pc src/pkgconfig/cdipio.pc tests/Makefile"
+ac_config_files="$ac_config_files Makefile app/Makefile cdi.settings examples/Makefile examples/pio/Makefile interfaces/Makefile src/Makefile src/pkgconfig/cdi.pc src/pkgconfig/cdi_f2003.pc src/pkgconfig/cdipio.pc tests/Makefile overlinking/Makefile"
 
 ac_config_files="$ac_config_files tests/pio_cksum_asynch.run tests/pio_cksum_fpguard.run tests/pio_cksum_grb2.run tests/pio_cksum_mpi_fw_at_all.run tests/pio_cksum_mpi_fw_at_reblock.run tests/pio_cksum_mpi_fw_ordered.run tests/pio_cksum_mpinonb.run tests/pio_cksum_nc.run tests/pio_cksum_nc2.run tests/pio_cksum_nc4.run tests/pio_cksum_writer.run tests/pio_write.parallel.run tests/pio_write.run tests/pio_write_deco2d.parallel.run tests/pio_write_deco2d.run tests/pio_write_dist_array.run tests/test_cdf_const.run tests/test_cdf_transformation.run tests/test_cksum.run tests/test_cksum_ext.run tests/test_cksum_grb2.run tests/test_cksum_ieg.run tests/test_cksum_nc.run tests/test_cksum_nc2.run tests/test_cksum_nc4.run tests/test_cksum_nc_chunk.run tests/test_cksum_svc.run tests/test_f2003.run tests/test_grib.run tests/test_resource_copy.parallel.run tests/test_resource_copy.run"
 
@@ -33935,6 +33935,7 @@ do
     "src/pkgconfig/cdi_f2003.pc") CONFIG_FILES="$CONFIG_FILES src/pkgconfig/cdi_f2003.pc" ;;
     "src/pkgconfig/cdipio.pc") CONFIG_FILES="$CONFIG_FILES src/pkgconfig/cdipio.pc" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
+    "overlinking/Makefile") CONFIG_FILES="$CONFIG_FILES overlinking/Makefile" ;;
     "tests/pio_cksum_asynch.run") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_asynch.run" ;;
     "tests/pio_cksum_fpguard.run") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_fpguard.run" ;;
     "tests/pio_cksum_grb2.run") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_grb2.run" ;;
