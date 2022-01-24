@@ -9,6 +9,12 @@ top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 . "${script_dir}/utils.sh"
 init_clang1201
 
+# Check the formatting. Note that git-clang-format might keep redundant blank
+# lines. Therefore, we use clang-format:
+find src interfaces app \
+  -name '*.h' -o -name '*.hpp' -o -name '*.c' -o -name '*.cpp' | \
+    xargs -n 1 -P 8 clang-format --Werror --dry-run --verbose
+
 test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
 "${top_srcdir}/configure" \
