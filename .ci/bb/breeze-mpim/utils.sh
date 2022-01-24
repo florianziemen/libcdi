@@ -97,7 +97,6 @@ init_env ()
   saved_set=$-
   set +eu
   . /etc/profile.d/mpim.sh
-  module use /data/mpi/sclab/sip/m300488/nvhpc/modulefiles
   set -${saved_set}
   switch_for_module automake/1.16.1
 
@@ -112,23 +111,30 @@ init_env ()
 init_nv2130 ()
 {
   init_env
-  switch_for_module nvhpc/21.3
+  switch_for_module gcc/6.3.0
 
-  # The default environment module of NVHPC sets variables, which we do not
-  # want:
-  unset CC CPP CXX F77 F90 FC
+  export NVHPC='/data/mpi/sclab/sip/m300488/nvhpc'
+  export NVLOCALRC="${NVHPC}/Linux_x86_64/21.3/compilers/bin/localrc.60300"
+  export PATH="${NVHPC}/Linux_x86_64/21.3/compilers/bin:${PATH-}"
 
   CC=nvc
   CXX=nvc++
   FC=nvfortran
+
+  export PATH="/data/mpi/sclab/sip/m300488/libcdi-ci-sw/nvhpc-21.3-sandybridge/mpich-3.4.2-sfxulsj/bin:${PATH-}"
   MPICC=mpicc
   MPIFC=mpif90
-  MPI_LAUNCH="$(which mpirun) --mca mpi_cuda_support 0 --oversubscribe"
+  MPI_LAUNCH="$(which mpirun)"
 
-  GRIBAPI_ROOT='/sw/stretch-x64/grib_api/grib_api-1.21.0-gccsys'
-  NETCDF_ROOT='/sw/stretch-x64/netcdf/netcdf_c-4.6.1'
-  PPM_ROOT='/data/mpi/sclab/sip/m300488/cdi-pio-sw/ppm-1.0.6-nv21'
-  YAXT_ROOT='/data/mpi/sclab/sip/m300488/cdi-pio-sw/yaxt-0.9.0-nv21'
+  ECCODES_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/gcc-6.3.0-sandybridge/eccodes-2.21.0-3sdngaq'
+  NETCDF_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/nvhpc-21.3-sandybridge/netcdf-c-4.8.0-vjppuov'
+  PPM_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/nvhpc-21.3-sandybridge/scales-ppm-1.0.7-uy4z72r'
+  YAXT_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/nvhpc-21.3-sandybridge/yaxt-0.9.2.1-lbqqemx'
+
+  # Here we fix a never-ending story with Libtool overlinkning, absence of
+  # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
+  HDF5_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/nvhpc-21.3-sandybridge/hdf5-1.10.7-h7pvthl'
+  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib:${HDF5_ROOT}/lib:${LD_LIBRARY_PATH-}"
 }
 
 #
