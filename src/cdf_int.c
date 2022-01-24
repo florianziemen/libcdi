@@ -348,29 +348,31 @@ cdf_var_type(nc_type xtype)
 static void
 minmaxval(size_t nvals, const double *array, double *minval, double *maxval)
 {
-  *minval = array[0];
-  *maxval = array[0];
-  for (size_t i = 1; i < nvals; ++i)
+  double minv = array[0];
+  double maxv = array[0];
+  for (size_t i = 0; i < nvals; ++i)
     {
-      if (array[i] > *maxval)
-        *maxval = array[i];
-      else if (array[i] < *minval)
-        *minval = array[i];
+      minv = (array[i] < minv) ? array[i] : minv;
+      maxv = (array[i] > maxv) ? array[i] : maxv;
     }
+
+  *minval = minv;
+  *maxval = maxv;
 }
 
 static void
 minmaxvalf(size_t nvals, const float *array, double *minval, double *maxval)
 {
-  *minval = array[0];
-  *maxval = array[0];
-  for (size_t i = 1; i < nvals; ++i)
+  float minv = array[0];
+  float maxv = array[0];
+  for (size_t i = 0; i < nvals; ++i)
     {
-      if (array[i] > *maxval)
-        *maxval = array[i];
-      else if (array[i] < *minval)
-        *minval = array[i];
+      minv = (array[i] < minv) ? array[i] : minv;
+      maxv = (array[i] > maxv) ? array[i] : maxv;
     }
+
+  *minval = minv;
+  *maxval = maxv;
 }
 
 void
