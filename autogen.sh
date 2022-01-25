@@ -35,7 +35,7 @@ autoreconf -fvi || exit $?
 
 # Patch libtool.m4:
 for patch in \
-  contrib/000link_all_deplibs-patch/link_all_deplibs.patch \
+  contrib/000debian-no-overlink-patch/debian-no-overlink.patch \
   ; do
     echo "applying $patch"
     patch -p 1 --no-backup-if-mismatch --forward -r - -i $patch -d .
