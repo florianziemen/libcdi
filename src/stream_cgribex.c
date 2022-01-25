@@ -1901,6 +1901,12 @@ cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID, in
     }
 }
 
+static int
+level2int(double level)
+{
+  return (int) round(level);
+}
+
 static void
 isec1DefLevel(int *isec1, int leveltype, int level1, int level2)
 {
@@ -1916,10 +1922,10 @@ cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
   int ltype = 0;
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
 
-  bool hasBounds = (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL));
+  const bool hasBounds = (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL));
   double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
-  double dlevel1 = hasBounds ? zaxisInqLbound(zaxisID, levelID) : level;
-  double dlevel2 = hasBounds ? zaxisInqUbound(zaxisID, levelID) : 0.0;
+  const double dlevel1 = hasBounds ? zaxisInqLbound(zaxisID, levelID) : level;
+  const double dlevel2 = hasBounds ? zaxisInqUbound(zaxisID, levelID) : 0.0;
 
   if (zaxistype == ZAXIS_GENERIC && ltype == 0)
     {
@@ -1941,7 +1947,7 @@ cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
     case ZAXIS_DEPTH_BELOW_SEA:
     case ZAXIS_ISENTROPIC:
       {
-        isec1DefLevel(isec1, grib_ltype, (int) level, 0);
+        isec1DefLevel(isec1, grib_ltype, level2int(level), 0);
         break;
       }
     case ZAXIS_CLOUD_BASE:
@@ -1959,7 +1965,7 @@ cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
     case ZAXIS_HYBRID_HALF:
       {
         grib_ltype = hasBounds ? GRIB1_LTYPE_HYBRID_LAYER : GRIB1_LTYPE_HYBRID;
-        isec1DefLevel(isec1, grib_ltype, (int) dlevel1, (int) dlevel2);
+        isec1DefLevel(isec1, grib_ltype, level2int(dlevel1), level2int(dlevel2));
 
         int vctsize = zaxisInqVctSize(zaxisID);
         if (vctsize > 255)
@@ -1991,31 +1997,31 @@ cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
         else
           level = level / 100;
 
-        isec1DefLevel(isec1, grib_ltype, (int) level, 0);
+        isec1DefLevel(isec1, grib_ltype, level2int(level), 0);
         break;
       }
     case ZAXIS_HEIGHT:
       {
         double sf = zaxis_units_to_meter(zaxisID);
-        isec1DefLevel(isec1, grib_ltype, (int) (level * sf), 0);
+        isec1DefLevel(isec1, grib_ltype, level2int(level * sf), 0);
         break;
       }
     case ZAXIS_SIGMA:
       {
         grib_ltype = hasBounds ? GRIB1_LTYPE_SIGMA_LAYER : GRIB1_LTYPE_SIGMA;
-        isec1DefLevel(isec1, grib_ltype, (int) dlevel1, (int) dlevel2);
+        isec1DefLevel(isec1, grib_ltype, level2int(dlevel1), level2int(dlevel2));
         break;
       }
     case ZAXIS_DEPTH_BELOW_LAND:
       {
         grib_ltype = hasBounds ? GRIB1_LTYPE_LANDDEPTH_LAYER : GRIB1_LTYPE_LANDDEPTH;
         double sf = zaxis_units_to_centimeter(zaxisID);
-        isec1DefLevel(isec1, grib_ltype, (int) (sf * dlevel1), (int) (sf * dlevel2));
+        isec1DefLevel(isec1, grib_ltype, level2int(sf * dlevel1), level2int(sf * dlevel2));
         break;
       }
     case ZAXIS_GENERIC:
       {
-        isec1DefLevel(isec1, ltype, (int) level, 0);
+        isec1DefLevel(isec1, ltype, level2int(level), 0);
         break;
       }
     default:
