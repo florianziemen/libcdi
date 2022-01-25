@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+script_dir=$(cd "$(dirname "$0")"; pwd)
+top_srcdir=$(cd "${script_dir}/../../.."; pwd)
+
+. "${script_dir}/utils.sh"
+init_gcc630
+
+test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
+
+"${top_srcdir}/configure" \
+--disable-maintainer-mode \
+--enable-option-checking=fatal \
+--enable-python-interface \
+--enable-ruby-interface \
+--with-eccodes="${ECCODES_ROOT}" \
+--with-netcdf="${NETCDF_ROOT}" \
+CC="${CC}" \
+CPPFLAGS="-I${UUID_ROOT}/include" \
+CXX="${CXX}" \
+LDFLAGS="-L${UUID_ROOT}/lib"
+
+make -j8
+
+# For now, we only check that the interfaces can be built:
+make -j8 -C interfaces rubyLib rubyObj pythonLib pythonObj
+
+make -j8 check || { cat tests/test-suite.log; exit 1; }
