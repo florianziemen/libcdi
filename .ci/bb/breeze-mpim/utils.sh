@@ -103,6 +103,34 @@ init_env ()
   # Tell the custom installation of Automake 1.16 where to look for the libtool
   # macros:
   export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH-}"
+
+  SWIG_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/gcc-6.3.0-sandybridge/swig-4.0.2-busrrtn'
+  RUBY_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/gcc-6.3.0-sandybridge/ruby-3.0.2-stqm2vj'
+  PYTHON_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/gcc-6.3.0-sandybridge/python-2.7.18-zqrnwom'
+
+  export PATH="${RUBY_ROOT}/bin:${PYTHON_ROOT}/bin:${SWIG_ROOT}/bin:${PATH-}"
+}
+
+#
+# Sets variables for tests with GCC 6.3.0.
+#
+init_gcc630 ()
+{
+  init_env
+  switch_for_module gcc/6.3.0
+
+  CC=gcc
+  CXX=g++
+  FC=gfortran
+
+  ECCODES_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/gcc-6.3.0-sandybridge/eccodes-2.21.0-3sdngaq'
+  NETCDF_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/gcc-6.3.0-sandybridge/netcdf-c-4.8.0-fzupaca'
+  UUID_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/gcc-6.3.0-sandybridge/libuuid-1.0.3-rm4kv2o'
+
+  # Here we fix a never-ending story with Libtool overlinkning, absence of
+  # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
+  HDF5_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/gcc-6.3.0-sandybridge/hdf5-1.10.7-4l3frcp'
+  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib:${NETCDF_ROOT}/lib:${HDF5_ROOT}/lib:${LD_LIBRARY_PATH-}"
 }
 
 #
