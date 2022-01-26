@@ -1291,9 +1291,15 @@ static const uint32_t HOST_ENDIANNESS_temp[1] = { UINT32_C(0x00030201) };
 #if defined _ENABLE_AVX
 
 static
-void avx_encode_array_2byte_double(size_t datasize, 
+void avx_encode_array_2byte_double(size_t datasize,
 				   unsigned char * restrict lGrib,
-				   const double * restrict data, 
+				   const double * restrict data,
+				   double zref, double factor, size_t *gz)
+  __attribute__((optimize(2)));
+static
+void avx_encode_array_2byte_double(size_t datasize,
+				   unsigned char * restrict lGrib,
+				   const double * restrict data,
 				   double zref, double factor, size_t *gz) 
 {
   size_t i, j, residual;
