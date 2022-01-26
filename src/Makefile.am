@@ -282,7 +282,7 @@ endif
 #
 #	cat $(top_srcdir)/src/cdi.h |sed -e 's/SizeType/size_t/g' -e s/DateType/int64_t/g > cditmp.h
 mo_cdi.f90: @MAINTAINER_MODE_TRUE@ $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
-	cat $(top_srcdir)/src/cdi.h |sed -e 's/SizeType/int/g' -e s/DateType/int/g > cditmp.h
+	cat $(top_srcdir)/src/cdi.h |sed -e 's/SizeType/int/g' -e s/DateType/int64_t/g > cditmp.h
 	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb cditmp.h $@
 	rm cditmp.h
 
