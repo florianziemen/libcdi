@@ -12,6 +12,12 @@ extern "C" {
 // date format:  YYYYMMDD
 // time format:  hhmmss
 
+int64_t date_to_julday(int calendar, int64_t date);  // Used in paraview vtkCDIReader.cxx
+int64_t julday_to_date(int calendar, int64_t julday);
+
+int time_to_sec(int time);                           // Used in paraview vtkCDIReader.cxx
+int sec_to_time(int secofday);
+
 void decode_julday(int calendar, int64_t julday, int *year, int *mon, int *day);
 int64_t encode_julday(int calendar, int year, int month, int day);
 

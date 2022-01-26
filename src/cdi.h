@@ -17,12 +17,8 @@
 #define CDI_SIZE_TYPE int
 #endif
 
-#ifndef CDI_DATE_TYPE // Must be signed integer (int32_t or int64_t)!
-#define CDI_DATE_TYPE int
-#endif
-
 typedef CDI_SIZE_TYPE SizeType;
-typedef CDI_DATE_TYPE DateType;
+typedef int64_t DateType; // Must be signed integer (int32_t or int64_t)!
 
 //FINT_ON  <--- don't change or remove this line!!!
 // Start of fortran interface for the following routines (make_fint.c)

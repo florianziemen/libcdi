@@ -120,7 +120,7 @@ cdiGetPageSize(bool largePageAlign)
   long pagesize = -1L;
 #if HAVE_DECL__SC_LARGE_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE || HAVE_DECL__SC_PAGESIZE
   bool nameAssigned = false;
-  int name;
+  int name = 0;
 #if HAVE_DECL__SC_LARGE_PAGESIZE
   if (largePageAlign)
     {
@@ -135,11 +135,10 @@ cdiGetPageSize(bool largePageAlign)
 #if HAVE_DECL__SC_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE
       name =
 #if HAVE_DECL__SC_PAGESIZE
-          _SC_PAGESIZE
-#elif HAVE_DECL__SC_PAGE_SIZE
-          _SC_PAGE_SIZE
+          _SC_PAGESIZE;
+#else
+          _SC_PAGE_SIZE;
 #endif
-          ;
       nameAssigned = true;
 #endif
     }
@@ -148,13 +147,12 @@ cdiGetPageSize(bool largePageAlign)
   if (pagesize == -1L)
     pagesize =
 #if HAVE_DECL_PAGESIZE
-        PAGESIZE
+        PAGESIZE;
 #elif HAVE_DECL_PAGE_SIZE
-        PAGE_SIZE
+        PAGE_SIZE;
 #else
-        commonPageSize
+        commonPageSize;
 #endif
-        ;
   return (size_t) pagesize;
 }
 

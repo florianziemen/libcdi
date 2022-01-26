@@ -190,9 +190,8 @@ cdiPrintDatatypes(void)
           "| FLT32       | %-9s |\n"
           "| FLT64       | %-9s |\n"
           "| SizeType    | %-9s |\n"
-          "| DateType    | %-9s |\n"
           "+-------------+-----------+\n",
-          STRING(INT32), STRING(INT64), STRING(FLT32), STRING(FLT64), STRING(CDI_SIZE_TYPE), STRING(CDI_DATE_TYPE));
+          STRING(INT32), STRING(INT64), STRING(FLT32), STRING(FLT64), STRING(CDI_SIZE_TYPE));
 
   fprintf(stderr, "\n  byte ordering is %s\n\n",
           ((HOST_ENDIANNESS == CDI_BIGENDIAN)
