@@ -10727,11 +10727,7 @@ void encodePDS(GRIBPACK *lpds, long pdsLen, int *isec1)
 #define round_float roundf
 #define round_double round
 
-#if 0
-#define CGRIBEX_FPSCALE(data) (TEMPLATE(round,T)(((data) - zref) * factor))
-#else
-#define CGRIBEX_FPSCALE(data) (((data) - zref) * factor + (T)0.5)
-#endif
+#define CGRIBEX_FPSCALE(data) (((data) - zref) * factor + 0.5)
 
 static
 void TEMPLATE(encode_array_common,T)(int numBits, size_t packStart, size_t datasize, GRIBPACK *lGrib,
@@ -10849,7 +10845,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 #endif
   uint32_t ui32;
   size_t i, z = *gz;
-  T tmp;
+  double tmp;
 
   data += packStart;
   datasize -= packStart;
@@ -11006,7 +11002,7 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 #endif
   size_t residual;
   size_t ofs;
-  T dval[CGRIBEX__UNROLL_DEPTH_2];
+  double dval[CGRIBEX__UNROLL_DEPTH_2];
 
   data += packStart;
   datasize -= packStart;
@@ -11257,13 +11253,11 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
   *gz = z;
 }
 
-#endif /* T */
+#ifdef CGRIBEX_FPSCALE
+#undef CGRIBEX_FPSCALE
+#endif
 
-/*
- * Local Variables:
- * mode: c
- * End:
- */
+#endif /* T */
 
 #ifdef T
 #undef T
@@ -11275,11 +11269,7 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 #define round_float roundf
 #define round_double round
 
-#if 0
-#define CGRIBEX_FPSCALE(data) (TEMPLATE(round,T)(((data) - zref) * factor))
-#else
-#define CGRIBEX_FPSCALE(data) (((data) - zref) * factor + (T)0.5)
-#endif
+#define CGRIBEX_FPSCALE(data) (((data) - zref) * factor + 0.5)
 
 static
 void TEMPLATE(encode_array_common,T)(int numBits, size_t packStart, size_t datasize, GRIBPACK *lGrib,
@@ -11397,7 +11387,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 #endif
   uint32_t ui32;
   size_t i, z = *gz;
-  T tmp;
+  double tmp;
 
   data += packStart;
   datasize -= packStart;
@@ -11554,7 +11544,7 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 #endif
   size_t residual;
   size_t ofs;
-  T dval[CGRIBEX__UNROLL_DEPTH_2];
+  double dval[CGRIBEX__UNROLL_DEPTH_2];
 
   data += packStart;
   datasize -= packStart;
@@ -11805,13 +11795,11 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
   *gz = z;
 }
 
-#endif /* T */
+#ifdef CGRIBEX_FPSCALE
+#undef CGRIBEX_FPSCALE
+#endif
 
-/*
- * Local Variables:
- * mode: c
- * End:
- */
+#endif /* T */
 
 
 #ifdef T
