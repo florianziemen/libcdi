@@ -1,3 +1,7 @@
+2022-01-28  Uwe Schulzweida
+
+	* gribIterator::gridGenerate: copy CDI_KEY_UUID (bug fix)
+
 2022-01-12  Uwe Schulzweida
 
 	* GRIB read: recalculate start date/time for every record and timestep (bug fix) [report: Johannes Schick]
