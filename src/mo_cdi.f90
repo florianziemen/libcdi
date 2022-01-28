@@ -779,8 +779,8 @@ module mo_cdi
 
     subroutine cdiDecodeDate(date_dummy, year_dummy, month_dummy, day_dummy)&
     & bind(c, name = 'cdiDecodeDate')
-      import c_int, c_int64_t
-      integer(c_int64_t), value :: date_dummy
+      import c_int
+      integer(c_int), value :: date_dummy
       integer(c_int), intent(inout) :: year_dummy
       integer(c_int), intent(inout) :: month_dummy
       integer(c_int), intent(inout) :: day_dummy
@@ -788,11 +788,11 @@ module mo_cdi
 
     function cdiEncodeDate(year_dummy, month_dummy, day_dummy) bind(c, name =&
     & 'cdiEncodeDate') result(f_result)
-      import c_int, c_int64_t
+      import c_int
       integer(c_int), value :: year_dummy
       integer(c_int), value :: month_dummy
       integer(c_int), value :: day_dummy
-      integer(c_int64_t) :: f_result
+      integer(c_int) :: f_result
     end function cdiEncodeDate
 
     subroutine cdiDecodeTime(time_dummy, hour_dummy, minute_dummy,&
@@ -2605,9 +2605,9 @@ module mo_cdi
 
     subroutine taxisDefVdate(taxisID_dummy, date_dummy) bind(c, name =&
     & 'taxisDefVdate')
-      import c_int, c_int64_t
+      import c_int
       integer(c_int), value :: taxisID_dummy
-      integer(c_int64_t), value :: date_dummy
+      integer(c_int), value :: date_dummy
     end subroutine taxisDefVdate
 
     subroutine taxisDefVtime(taxisID_dummy, time_dummy) bind(c, name =&
@@ -2619,9 +2619,9 @@ module mo_cdi
 
     function taxisInqVdate(taxisID_dummy) bind(c, name = 'taxisInqVdate')&
     & result(f_result)
-      import c_int, c_int64_t
+      import c_int
       integer(c_int), value :: taxisID_dummy
-      integer(c_int64_t) :: f_result
+      integer(c_int) :: f_result
     end function taxisInqVdate
 
     function taxisInqVtime(taxisID_dummy) bind(c, name = 'taxisInqVtime')&
@@ -2633,9 +2633,9 @@ module mo_cdi
 
     subroutine taxisDefRdate(taxisID_dummy, date_dummy) bind(c, name =&
     & 'taxisDefRdate')
-      import c_int, c_int64_t
+      import c_int
       integer(c_int), value :: taxisID_dummy
-      integer(c_int64_t), value :: date_dummy
+      integer(c_int), value :: date_dummy
     end subroutine taxisDefRdate
 
     subroutine taxisDefRtime(taxisID_dummy, time_dummy) bind(c, name =&
@@ -2647,9 +2647,9 @@ module mo_cdi
 
     function taxisInqRdate(taxisID_dummy) bind(c, name = 'taxisInqRdate')&
     & result(f_result)
-      import c_int, c_int64_t
+      import c_int
       integer(c_int), value :: taxisID_dummy
-      integer(c_int64_t) :: f_result
+      integer(c_int) :: f_result
     end function taxisInqRdate
 
     function taxisInqRtime(taxisID_dummy) bind(c, name = 'taxisInqRtime')&
@@ -2661,9 +2661,9 @@ module mo_cdi
 
     subroutine taxisDefFdate(taxisID_dummy, date_dummy) bind(c, name =&
     & 'taxisDefFdate')
-      import c_int, c_int64_t
+      import c_int
       integer(c_int), value :: taxisID_dummy
-      integer(c_int64_t), value :: date_dummy
+      integer(c_int), value :: date_dummy
     end subroutine taxisDefFdate
 
     subroutine taxisDefFtime(taxisID_dummy, time_dummy) bind(c, name =&
@@ -2675,9 +2675,9 @@ module mo_cdi
 
     function taxisInqFdate(taxisID_dummy) bind(c, name = 'taxisInqFdate')&
     & result(f_result)
-      import c_int, c_int64_t
+      import c_int
       integer(c_int), value :: taxisID_dummy
-      integer(c_int64_t) :: f_result
+      integer(c_int) :: f_result
     end function taxisInqFdate
 
     function taxisInqFtime(taxisID_dummy) bind(c, name = 'taxisInqFtime')&
@@ -2707,10 +2707,10 @@ module mo_cdi
 
     subroutine taxisDefVdateBounds(taxisID_dummy, vdate_lb_dummy,&
     & vdate_ub_dummy) bind(c, name = 'taxisDefVdateBounds')
-      import c_int, c_int64_t
+      import c_int
       integer(c_int), value :: taxisID_dummy
-      integer(c_int64_t), value :: vdate_lb_dummy
-      integer(c_int64_t), value :: vdate_ub_dummy
+      integer(c_int), value :: vdate_lb_dummy
+      integer(c_int), value :: vdate_ub_dummy
     end subroutine taxisDefVdateBounds
 
     subroutine taxisDefVtimeBounds(taxisID_dummy, vtime_lb_dummy,&
@@ -2723,10 +2723,10 @@ module mo_cdi
 
     subroutine taxisInqVdateBounds(taxisID_dummy, vdate_lb_dummy,&
     & vdate_ub_dummy) bind(c, name = 'taxisInqVdateBounds')
-      import c_int, c_int64_t
+      import c_int
       integer(c_int), value :: taxisID_dummy
-      integer(c_int64_t), intent(inout) :: vdate_lb_dummy
-      integer(c_int64_t), intent(inout) :: vdate_ub_dummy
+      integer(c_int), intent(inout) :: vdate_lb_dummy
+      integer(c_int), intent(inout) :: vdate_ub_dummy
     end subroutine taxisInqVdateBounds
 
     subroutine taxisInqVtimeBounds(taxisID_dummy, vtime_lb_dummy,&

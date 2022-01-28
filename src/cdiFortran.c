@@ -46,6 +46,9 @@ int SizeType_c2f(SizeType value_SizeType)
 }
 
 
+/*  Start of fortran interface for the following routines (make_fint.c)  */
+
+
 /*  Byte order  */
 
 
@@ -856,6 +859,9 @@ FCALLSCSUB2 (zaxisDefLtype, ZAXISDEFLTYPE, zaxisdefltype, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarTypeOfGeneratingProcess, VLISTINQVARTYPEOFGENERATINGPROCESS, vlistinqvartypeofgeneratingprocess, INT, INT)
 FCALLSCSUB3 (vlistDefVarTypeOfGeneratingProcess, VLISTDEFVARTYPEOFGENERATINGPROCESS, vlistdefvartypeofgeneratingprocess, INT, INT, INT)
 FCALLSCSUB3 (vlistDefVarProductDefinitionTemplate, VLISTDEFVARPRODUCTDEFINITIONTEMPLATE, vlistdefvarproductdefinitiontemplate, INT, INT, INT)
+
+/*  End of fortran interface  */
+
 
 #if defined __clang__
 #  pragma GCC diagnostic pop

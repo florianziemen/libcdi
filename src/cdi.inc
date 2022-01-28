@@ -7,6 +7,9 @@
 ! Uwe Schulzweida, MPI-MET, Hamburg,   January 2022
 !
 
+!
+!  Start of fortran interface for the following routines (make_fint.c)
+!
       INTEGER    CDI_MAX_NAME
       PARAMETER (CDI_MAX_NAME           = 256)
       INTEGER    CDI_UNDEFID
@@ -2624,3 +2627,6 @@
 !                                     INTEGER         productDefinitionTemplate)
       EXTERNAL        vlistDefVarProductDefinitionTemplate
 
+!
+!  End of fortran interface
+!
