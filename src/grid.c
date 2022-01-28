@@ -2790,6 +2790,8 @@ gridGenerate(const grid_t *grid)
 
   gridComplete(gridptr);
 
+  cdiCopyVarKey(&grid->keys, CDI_KEY_UUID, &gridptr->keys);
+
   return gridID;
 }
 
