@@ -2556,7 +2556,13 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                 const int nbdims = ncvars[bvarid].ndims;
                 if (nbdims == 2 || nbdims == 3)
                   {
-                    if (ncvar->isCubeSphere)
+                    if (ncvars[bvarid].dimids[0] == timedimid)
+                      {
+                        static bool ltwarn = true;
+                        if (ltwarn) Warning("Time varying grid x-bounds unsupported, skipped!");
+                        ltwarn = false;
+                      }
+                    else if (ncvar->isCubeSphere)
                       {
                         grid->nvertex = 4;
                         const size_t bxsize = ncdims[ncvars[bvarid].dimids[2]].len;
@@ -2582,7 +2588,13 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                 const int nbdims = ncvars[bvarid].ndims;
                 if (nbdims == 2 || nbdims == 3)
                   {
-                    if (ncvar->isCubeSphere)
+                    if (ncvars[bvarid].dimids[0] == timedimid)
+                      {
+                        static bool ltwarn = true;
+                        if (ltwarn) Warning("Time varying grid y-bounds unsupported, skipped!");
+                        ltwarn = false;
+                      }
+                    else if (ncvar->isCubeSphere)
                       {
                         grid->nvertex = 4;
                         const size_t bxsize = ncdims[ncvars[bvarid].dimids[2]].len;
