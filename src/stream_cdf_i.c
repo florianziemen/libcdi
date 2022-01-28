@@ -2554,19 +2554,22 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
             if (bvarid != CDI_UNDEFID)
               {
                 const int nbdims = ncvars[bvarid].ndims;
-                if (nbdims == 3 && ncvar->isCubeSphere)
+                if (nbdims == 2 || nbdims == 3)
                   {
-                    grid->nvertex = 4;
-                    const size_t bxsize = ncdims[ncvars[bvarid].dimids[2]].len;
-                    const size_t bysize = ncdims[ncvars[bvarid].dimids[1]].len;
-                    cdf_load_bounds_cube_sphere(bxsize, bysize, size * (size_t) grid->nvertex, &ncvars[xvarid], &grid->x.bounds,
-                                                &lazyGrid->xBoundsGet);
-                  }
-                else if (nbdims == 2)
-                  {
-                    *vdimid = ncvars[bvarid].dimids[nbdims - 1];
-                    grid->nvertex = (int) ncdims[*vdimid].len;
-                    cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[xvarid], &grid->x.bounds, &lazyGrid->xBoundsGet);
+                    if (ncvar->isCubeSphere)
+                      {
+                        grid->nvertex = 4;
+                        const size_t bxsize = ncdims[ncvars[bvarid].dimids[2]].len;
+                        const size_t bysize = ncdims[ncvars[bvarid].dimids[1]].len;
+                        cdf_load_bounds_cube_sphere(bxsize, bysize, size * (size_t) grid->nvertex, &ncvars[xvarid], &grid->x.bounds,
+                                                    &lazyGrid->xBoundsGet);
+                      }
+                    else
+                      {
+                        *vdimid = ncvars[bvarid].dimids[nbdims - 1];
+                        grid->nvertex = (int) ncdims[*vdimid].len;
+                        cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[xvarid], &grid->x.bounds, &lazyGrid->xBoundsGet);
+                      }
                   }
               }
           }
@@ -2577,22 +2580,25 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
             if (bvarid != CDI_UNDEFID)
               {
                 const int nbdims = ncvars[bvarid].ndims;
-                if (nbdims == 3 && ncvar->isCubeSphere)
+                if (nbdims == 2 || nbdims == 3)
                   {
-                    grid->nvertex = 4;
-                    const size_t bxsize = ncdims[ncvars[bvarid].dimids[2]].len;
-                    const size_t bysize = ncdims[ncvars[bvarid].dimids[1]].len;
-                    cdf_load_bounds_cube_sphere(bxsize, bysize, size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds,
-                                                &lazyGrid->yBoundsGet);
-                  }
-                else if (nbdims == 2)
-                  {
-                    if (*vdimid == CDI_UNDEFID)
+                    if (ncvar->isCubeSphere)
                       {
-                        *vdimid = ncvars[bvarid].dimids[nbdims - 1];
-                        grid->nvertex = (int) ncdims[*vdimid].len;
+                        grid->nvertex = 4;
+                        const size_t bxsize = ncdims[ncvars[bvarid].dimids[2]].len;
+                        const size_t bysize = ncdims[ncvars[bvarid].dimids[1]].len;
+                        cdf_load_bounds_cube_sphere(bxsize, bysize, size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds,
+                                                    &lazyGrid->yBoundsGet);
                       }
-                    cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds, &lazyGrid->yBoundsGet);
+                    else
+                      {
+                        if (*vdimid == CDI_UNDEFID)
+                          {
+                            *vdimid = ncvars[bvarid].dimids[nbdims - 1];
+                            grid->nvertex = (int) ncdims[*vdimid].len;
+                          }
+                        cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds, &lazyGrid->yBoundsGet);
+                      }
                   }
               }
           }
