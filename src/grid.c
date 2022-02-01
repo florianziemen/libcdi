@@ -4165,7 +4165,7 @@ enum
   GRID_PACK_INT_IDX_GME_NI3,
   GRID_PACK_INT_IDX_TRUNC,
   GRID_PACK_INT_IDX_NVERTEX,
-  REDUCEDPOINTSSIZE,
+  GRID_PACK_INT_IDX_REDUCED_POINTS_SIZE,
   GRID_PACK_INT_IDX_SIZE,
   GRID_PACK_INT_IDX_X_SIZE,
   GRID_PACK_INT_IDX_Y_SIZE,
@@ -4337,7 +4337,7 @@ gridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int o
     gridP->gme.ni3 = intBuffer[GRID_PACK_INT_IDX_GME_NI3];
     gridP->trunc = intBuffer[GRID_PACK_INT_IDX_TRUNC];
     gridP->nvertex = intBuffer[GRID_PACK_INT_IDX_NVERTEX];
-    gridP->reducedPointsSize = intBuffer[REDUCEDPOINTSSIZE];
+    gridP->reducedPointsSize = intBuffer[GRID_PACK_INT_IDX_REDUCED_POINTS_SIZE];
     gridP->size = intBuffer[GRID_PACK_INT_IDX_SIZE];
     gridP->x.size = intBuffer[GRID_PACK_INT_IDX_X_SIZE];
     gridP->y.size = intBuffer[GRID_PACK_INT_IDX_Y_SIZE];
@@ -4469,7 +4469,7 @@ gridPack(void *voidP, void *packBuffer, int packBufferSize, int *packBufferPos, 
     intBuffer[GRID_PACK_INT_IDX_GME_NI3] = gridP->gme.ni3;
     intBuffer[GRID_PACK_INT_IDX_TRUNC] = gridP->trunc;
     intBuffer[GRID_PACK_INT_IDX_NVERTEX] = gridP->nvertex;
-    intBuffer[REDUCEDPOINTSSIZE] = gridP->reducedPointsSize;
+    intBuffer[GRID_PACK_INT_IDX_REDUCED_POINTS_SIZE] = gridP->reducedPointsSize;
     intBuffer[GRID_PACK_INT_IDX_SIZE] = gridP->size;
     intBuffer[GRID_PACK_INT_IDX_X_SIZE] = gridP->x.size;
     intBuffer[GRID_PACK_INT_IDX_Y_SIZE] = gridP->y.size;
