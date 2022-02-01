@@ -46,9 +46,13 @@ serializeKeysGetPackSize(const cdi_keys_t *keysp, void *context)
           int length = keyp->length;
           packBuffSize += serializeGetSize(1, CDI_DATATYPE_INT, context) + serializeGetSize(length, CDI_DATATYPE_TXT, context);
         }
-      else
+      else if (type == KEY_INT)
         {
           packBuffSize += serializeGetSize(1, CDI_DATATYPE_INT, context);
+        }
+      else if (type == KEY_FLOAT)
+        {
+          packBuffSize += serializeGetSize(1, CDI_DATATYPE_FLT64, context);
         }
     }
   packBuffSize += serializeGetSize(1, CDI_DATATYPE_UINT32, context);
@@ -121,6 +125,12 @@ serializeKeysUnpack(const void *buf, int buf_size, int *position, cdi_keys_t *ke
           int ival;
           serializeUnpack(buf, buf_size, position, &ival, 1, CDI_DATATYPE_INT, context);
           cdiDefVarKeyInt(keysp, key, ival);
+        }
+      else if (type == KEY_FLOAT)
+        {
+          double dval;
+          serializeUnpack(buf, buf_size, position, &dval, 1, CDI_DATATYPE_FLT64, context);
+          cdiDefVarKeyFloat(keysp, key, dval);
         }
     }
   serializeUnpack(buf, buf_size, position, &d, 1, CDI_DATATYPE_UINT32, context);
