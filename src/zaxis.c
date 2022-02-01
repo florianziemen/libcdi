@@ -1427,7 +1427,7 @@ zaxisGetPackSize(void *voidP, void *context)
 
   packBufferSize += serializeKeysGetPackSize(&zaxisP->keys, context);
 
-  packBufferSize += serializeGetSize(1, CDI_DATATYPE_UCHAR, context);
+  packBufferSize += serializeGetSize(1, CDI_DATATYPE_UINT, context);
 
   return packBufferSize;
 }
