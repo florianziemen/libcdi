@@ -595,6 +595,49 @@ taxisCopyTimestep(int taxisID2, int taxisID1)
   reshUnlock();
 }
 
+static struct CdiDate
+cdiSetDate(int64_t date)
+{
+  int year, month, day;
+  cdiDecodeDate(date, &year, &month, &day);
+
+  struct CdiDate cdiDate;
+  cdiDate.year = year;
+  cdiDate.month = (short)month;
+  cdiDate.day = (short)day;
+
+  return cdiDate;
+}
+
+static struct CdiTime
+cdiSetTime(int time)
+{
+  int hour, minute, second;
+  cdiDecodeTime(time, &hour, &minute, &second);
+
+  struct CdiTime cdiTime;
+  cdiTime.hour = (short)hour;
+  cdiTime.minute = (short)minute;
+  cdiTime.second = (short)second;
+  cdiTime.ms = 0;
+
+  return cdiTime;
+}
+
+struct CdiDateTime
+taxisInqVdatetime(int taxisID)
+{
+  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+
+  struct CdiDateTime datetime;
+
+  datetime.date = cdiSetDate(taxisptr->vdate);
+  datetime.time = cdiSetTime(taxisptr->vtime);
+
+  return datetime;
+}
+
+
 /*
 @Function  taxisInqVdate
 @Title     Get the verification date
