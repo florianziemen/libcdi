@@ -14,32 +14,22 @@
 #define TIME_FORMAT "%2.2d:%2.2d:%2.2d"
 
 void
-datetime2str(int64_t date, int time, char *datetimestr, int maxlen)
+datetime2str(struct CdiDateTime dt, char *datetimestr, int maxlen)
 {
-  int year, month, day;
-  cdiDecodeDate(date, &year, &month, &day);
-  int hour, minute, second;
-  cdiDecodeTime(time, &hour, &minute, &second);
-
-  snprintf(datetimestr, maxlen, DATE_FORMAT "T" TIME_FORMAT, year, month, day, hour, minute, second);
+  snprintf(datetimestr, maxlen, DATE_FORMAT "T" TIME_FORMAT,
+           dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute, dt.time.second);
 }
 
 void
-date2str(int64_t date, char *datestr, int maxlen)
+date2str(struct CdiDate date, char *datestr, int maxlen)
 {
-  int year, month, day;
-  cdiDecodeDate(date, &year, &month, &day);
-
-  snprintf(datestr, maxlen, DATE_FORMAT, year, month, day);
+  snprintf(datestr, maxlen, DATE_FORMAT, date.year, date.month, date.day);
 }
 
 void
-time2str(int time, char *timestr, int maxlen)
+time2str(struct CdiTime time, char *timestr, int maxlen)
 {
-  int hour, minute, second;
-  cdiDecodeTime(time, &hour, &minute, &second);
-
-  snprintf(timestr, maxlen, TIME_FORMAT, hour, minute, second);
+  snprintf(timestr, maxlen, TIME_FORMAT, time.hour, time.minute, time.second);
 }
 
 const char *
@@ -599,18 +589,17 @@ printSubtypeInfo(int vlistID)
 }
 
 static int
-printDateTime(int ntimeout, const int64_t vdate, const int vtime)
+printDateTime(int ntimeout, struct CdiDateTime vdatetime)
 {
-  char vdatestr[32], vtimestr[32];
-
   if (ntimeout == 4)
     {
       ntimeout = 0;
       fprintf(stdout, "\n");
     }
 
-  date2str(vdate, vdatestr, sizeof(vdatestr));
-  time2str(vtime, vtimestr, sizeof(vtimestr));
+  char vdatestr[32], vtimestr[32];
+  date2str(vdatetime.date, vdatestr, sizeof(vdatestr));
+  time2str(vdatetime.time, vtimestr, sizeof(vtimestr));
 
   fprintf(stdout, " %s %s", vdatestr, vtimestr);
 
@@ -647,18 +636,16 @@ printDot(int ndotout, int *nfact, int *ncout)
 void
 printTimesteps(int streamID, int taxisID, int verbose)
 {
-  int nrecs;
-  struct datetime
+  struct DateTimeEntry
   {
-    int64_t vdate;
-    int vtime;
-    struct datetime *next;
+    struct CdiDateTime dt;
+    struct DateTimeEntry *next;
   };
-  struct datetime vdatetime[NUM_TIMESTEP];
-  struct datetime *next_vdatetime = vdatetime;
+  struct DateTimeEntry dateTimeList[NUM_TIMESTEP];
+  struct DateTimeEntry *dateTimeNext = dateTimeList;
 
-  for (int i = 0; i < NUM_TIMESTEP - 1; ++i) vdatetime[i].next = &vdatetime[i + 1];
-  vdatetime[NUM_TIMESTEP - 1].next = &vdatetime[0];
+  for (int i = 0; i < NUM_TIMESTEP - 1; ++i) dateTimeList[i].next = &dateTimeList[i + 1];
+  dateTimeList[NUM_TIMESTEP - 1].next = &dateTimeList[0];
 
   int ntimeout = 0;
   int ndotout = 0;
@@ -667,14 +654,16 @@ printTimesteps(int streamID, int taxisID, int verbose)
   int nfact = 1;
   int tsID = 0;
 
-  while ((nrecs = streamInqTimestep(streamID, tsID)))
+  while (true)
     {
-      const int64_t vdate = taxisInqVdate(taxisID);
-      const int vtime = taxisInqVtime(taxisID);
+      const int nrecs = streamInqTimestep(streamID, tsID);
+      if (nrecs == 0) break;
+
+      const struct CdiDateTime vdatetime = taxisInqVdatetime(taxisID);
 
       if (verbose || tsID < NUM_TIMESTEP)
         {
-          ntimeout = printDateTime(ntimeout, vdate, vtime);
+          ntimeout = printDateTime(ntimeout, vdatetime);
         }
       else
         {
@@ -683,15 +672,13 @@ printTimesteps(int streamID, int taxisID, int verbose)
 
           if (nvdatetime < NUM_TIMESTEP)
             {
-              vdatetime[nvdatetime].vdate = vdate;
-              vdatetime[nvdatetime].vtime = vtime;
+              dateTimeList[nvdatetime].dt = vdatetime;
               nvdatetime++;
             }
           else
             {
-              next_vdatetime->vdate = vdate;
-              next_vdatetime->vtime = vtime;
-              next_vdatetime = next_vdatetime->next;
+              dateTimeNext->dt = vdatetime;
+              dateTimeNext = dateTimeNext->next;
             }
         }
 
@@ -708,14 +695,12 @@ printTimesteps(int streamID, int taxisID, int verbose)
         {
           toff = tsID % 4;
           if (toff > 0) toff = 4 - toff;
-          for (int i = 0; i < toff; ++i) next_vdatetime = next_vdatetime->next;
+          for (int i = 0; i < toff; ++i) dateTimeNext = dateTimeNext->next;
         }
       for (int i = toff; i < nvdatetime; ++i)
         {
-          const int64_t vdate = next_vdatetime->vdate;
-          const int vtime = next_vdatetime->vtime;
-          ntimeout = printDateTime(ntimeout, vdate, vtime);
-          next_vdatetime = next_vdatetime->next;
+          ntimeout = printDateTime(ntimeout, dateTimeNext->dt);
+          dateTimeNext = dateTimeNext->next;
         }
     }
 }

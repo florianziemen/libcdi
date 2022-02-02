@@ -188,13 +188,12 @@ usage(void)
 }
 
 static void
-printInfo(int64_t vdate, int vtime, char *varname, double level, size_t datasize, int number, size_t nmiss, double missval,
+printInfo(struct CdiDateTime vdatetime, char *varname, double level, size_t datasize, int number, size_t nmiss, double missval,
           const double *data, int vardis)
 {
   static int rec = 0;
   size_t ivals = 0, imiss = 0;
   double arrmean, arrmin, arrmax;
-  char vdatestr[32], vtimestr[32];
 
   if (!rec)
     {
@@ -208,8 +207,9 @@ printInfo(int64_t vdate, int vtime, char *varname, double level, size_t datasize
       //         ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+
     }
 
-  date2str(vdate, vdatestr, sizeof(vdatestr));
-  time2str(vtime, vtimestr, sizeof(vtimestr));
+  char vdatestr[32], vtimestr[32];
+  date2str(vdatetime.date, vdatestr, sizeof(vdatestr));
+  time2str(vdatetime.time, vtimestr, sizeof(vtimestr));
 
   fprintf(stdout, "%6d :%s %s %7g ", ++rec, vdatestr, vtimestr, level);
 
@@ -917,10 +917,8 @@ main(int argc, char *argv[])
                 taxisCopyTimestep(taxisID2, taxisID1);
                 streamDefTimestep(streamID2, tsID);
               }
-            const int64_t vdate = taxisInqVdate(taxisID1);
-            const int vtime = taxisInqVtime(taxisID1);
 
-            if (Debug) fprintf(stdout, "tsID = %d nrecs = %d date = %ld time = %d\n", tsID, nrecs, (long) vdate, vtime);
+            const struct CdiDateTime vdatetime = taxisInqVdatetime(taxisID1);
 
             if (Record)
               {
@@ -948,7 +946,7 @@ main(int argc, char *argv[])
                     const double missval = vlistInqVarMissval(vlistID1, varID);
 
                     if (Info)
-                      printInfo(vdate, vtime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, data, Vardis);
+                      printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, data, Vardis);
 
                     if (fname2)
                       {
@@ -990,7 +988,7 @@ main(int argc, char *argv[])
                       {
                         const double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
                         const size_t offset = levelID * gridsize;
-                        if (Info) printInfo(vdate, vtime, varname, level, gridsize, number, nmiss, missval, data + offset, Vardis);
+                        if (Info) printInfo(vdatetime, varname, level, gridsize, number, nmiss, missval, data + offset, Vardis);
                       }
 
                     if (fname2) streamWriteVar(streamID2, varID, data, nmiss);
@@ -1025,7 +1023,7 @@ main(int argc, char *argv[])
                         const double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
                         streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
 
-                        if (Info) printInfo(vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
+                        if (Info) printInfo(vdatetime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
 
                         if (fname2) streamWriteVarSlice(streamID2, varID, levelID, data, nmiss);
                       }
