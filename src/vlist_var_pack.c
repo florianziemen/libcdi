@@ -37,7 +37,7 @@ vlistVarGetPackSize(vlist_t *p, int varID, void *context)
   int varsize
       = serializeGetSize(vlistvarNint, CDI_DATATYPE_INT, context) + serializeGetSize(vlistvar_ndbls, CDI_DATATYPE_FLT64, context);
 
-  varsize += serializeGetSize(4 * zaxisInqSize(var->zaxisID), CDI_DATATYPE_INT, context);
+  if (var->levinfo) varsize += serializeGetSize(4 * zaxisInqSize(var->zaxisID), CDI_DATATYPE_INT, context);
   varsize += serializeKeysGetPackSize(&var->keys, context);
   varsize += cdiAttsGetSize(p, varID, context);
 
