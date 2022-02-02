@@ -209,7 +209,7 @@ normalizeDays(struct tm *me)
 {
   char *savedTz = setUtc();  // Ensure that mktime() does not interprete the date according to our local time zone.
 
-  int result = mktime(me) == (time_t) -1;  // This does all the heavy lifting.
+  int result = (mktime(me) == (time_t) -1);  // This does all the heavy lifting.
 
   resetTz(savedTz);
   return result;
@@ -381,16 +381,15 @@ gribMakeTimeString(grib_handle *gh, CdiTimeType timeType)
           // If we have relative times, apply the relative times to the date
           if (haveForecastTime)
             {
-              long offset = gribGetLongDefault(gh, "forecastTime",
-                                               0);  // if(stepUnits == indicatorOfUnitOfTimeRange) assert(startStep == forecastTime)
+              long offset = gribGetLongDefault(gh, "forecastTime", 0);
+              // if (stepUnits == indicatorOfUnitOfTimeRange) assert(startStep == forecastTime)
               long offsetUnit = gribGetLongDefault(gh, "indicatorOfUnitOfTimeRange", 255);
               if (addToDate(&date, offset, offsetUnit)) return NULL;
               if (timeType == kCdiTimeType_endTime)
                 {
                   assert(haveTimeRange);
-                  long range = gribGetLongDefault(
-                      gh, "lengthOfTimeRange",
-                      0);  // if(stepUnits == indicatorOfUnitForTimeRange) assert(endStep == startStep + lengthOfTimeRange)
+                  long range = gribGetLongDefault(gh, "lengthOfTimeRange", 0);
+                  // if (stepUnits == indicatorOfUnitForTimeRange) assert(endStep == startStep + lengthOfTimeRange)
                   long rangeUnit = gribGetLongDefault(gh, "indicatorOfUnitForTimeRange", 255);
                   if (addToDate(&date, range, rangeUnit)) return NULL;
                 }

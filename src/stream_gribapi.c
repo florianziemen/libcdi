@@ -3360,7 +3360,7 @@ gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int6
             if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)
               {
                 if (CDI_Debug)
-                  Message("key \"%s\"  :   double value = %g\n", vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+                  Message("key \"%s\"  :   double value = %g", vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
                           vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val);
                 my_grib_set_double(gh, vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
                                    vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val);
@@ -3369,7 +3369,7 @@ gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int6
             if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_int)
               {
                 if (CDI_Debug)
-                  Message("key \"%s\"  :   integer value = %d\n", vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+                  Message("key \"%s\"  :   integer value = %d", vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
                           vlistptr->vars[varID].opt_grib_kvpair[i].int_val);
                 my_grib_set_long(gh, vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
                                  (long) vlistptr->vars[varID].opt_grib_kvpair[i].int_val);
