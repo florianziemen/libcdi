@@ -1963,12 +1963,8 @@ gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinitionTemp
       proDefTempNum = cdiGribAPI_ts_str_map[tsteptype].productionTemplate;
     }
 
-  if (typeOfGeneratingProcess == 4)
-    {
-      proDefTempNum = (proDefTempNum == 8) ? 11 : 1;
-    }
-
   if (productDefinitionTemplate != -1) proDefTempNum = productDefinitionTemplate;
+  else if (typeOfGeneratingProcess == 4) proDefTempNum = (proDefTempNum == 8) ? 11 : 1;
 
   if (!gcinit)
     {
@@ -3225,7 +3221,7 @@ gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int6
   int datatype = vlistInqVarDatatype(vlistID, varID);
   int typeOfGeneratingProcess = 0;
   cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFGENERATINGPROCESS, &typeOfGeneratingProcess);
-  int productDefinitionTemplate = 0;
+  int productDefinitionTemplate = -1;
   cdiInqKeyInt(vlistID, varID, CDI_KEY_PRODUCTDEFINITIONTEMPLATE, &productDefinitionTemplate);
 
   int uvRelativeToGrid = -1;

@@ -1,3 +1,7 @@
+2022-02-02  Uwe Schulzweida
+
+	* gribapiEncode: init productDefinitionTemplate with -1 (bug fix)
+
 2022-01-28  Uwe Schulzweida
 
 	* cdf_read_coordinates: check that bounds have only 2 dimensions [Bug #10575]
