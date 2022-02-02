@@ -3,9 +3,6 @@
 
 #include <stdio.h>
 
-#define DATE_FORMAT "%5.4d-%2.2d-%2.2d"
-#define TIME_FORMAT "%2.2d:%2.2d:%2.2d"
-
 void datetime2str(int64_t date, int time, char *datetimestr, int maxlen);
 
 void date2str(int64_t date, char *datestr, int maxlen);

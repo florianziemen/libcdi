@@ -5,10 +5,13 @@
 
 #include <cdi.h>
 #include "cdi_uuid.h"
-
 #include "cdi_int.h"
 
 #include "printinfo.h"
+
+
+#define DATE_FORMAT "%5.4d-%2.2d-%2.2d"
+#define TIME_FORMAT "%2.2d:%2.2d:%2.2d"
 
 void
 datetime2str(int64_t date, int time, char *datetimestr, int maxlen)
@@ -18,8 +21,7 @@ datetime2str(int64_t date, int time, char *datetimestr, int maxlen)
   int hour, minute, second;
   cdiDecodeTime(time, &hour, &minute, &second);
 
-  const int len = sprintf(datetimestr, DATE_FORMAT "T" TIME_FORMAT, year, month, day, hour, minute, second);
-  if (len > (maxlen - 1)) fprintf(stderr, "Internal problem (%s): sizeof input string is too small!\n", __func__);
+  snprintf(datetimestr, maxlen, DATE_FORMAT "T" TIME_FORMAT, year, month, day, hour, minute, second);
 }
 
 void
@@ -28,8 +30,7 @@ date2str(int64_t date, char *datestr, int maxlen)
   int year, month, day;
   cdiDecodeDate(date, &year, &month, &day);
 
-  const int len = sprintf(datestr, DATE_FORMAT, year, month, day);
-  if (len > (maxlen - 1)) fprintf(stderr, "Internal problem (%s): sizeof input string is too small!\n", __func__);
+  snprintf(datestr, maxlen, DATE_FORMAT, year, month, day);
 }
 
 void
@@ -38,8 +39,7 @@ time2str(int time, char *timestr, int maxlen)
   int hour, minute, second;
   cdiDecodeTime(time, &hour, &minute, &second);
 
-  const int len = sprintf(timestr, TIME_FORMAT, hour, minute, second);
-  if (len > (maxlen - 1)) fprintf(stderr, "Internal problem (%s): sizeof input string is too small!\n", __func__);
+  snprintf(timestr, maxlen, TIME_FORMAT, hour, minute, second);
 }
 
 const char *
