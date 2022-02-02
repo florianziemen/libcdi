@@ -117,6 +117,12 @@ vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int timetype, int tileset
       vlistptr->vars[varID].timetype = TIME_VARYING;
     }
 
+  // Compatibility for release 1.8.3
+  if (timetype > 1 && timetype < 15)
+    {
+      vlistptr->vars[varID].tsteptype = timetype;
+    }
+
   vlistAdd2GridIDs(vlistptr, gridID);
   vlistAdd2ZaxisIDs(vlistptr, zaxisID);
   vlistAdd2SubtypeIDs(vlistptr, tilesetID);
