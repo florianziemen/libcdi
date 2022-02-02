@@ -1018,27 +1018,22 @@ varDefKeyString(int varID, int key, const char *string)
 }
 
 #ifdef HAVE_LIBGRIB_API
-/* Resizes and initializes opt_grib_kvpair data structure. */
+// Resizes and initializes opt_grib_kvpair data structure.
 static void
 resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
 {
-  if (var->opt_grib_kvpair_size >= nentries)
-    {
-      return; /* nothing to do; array is still large enough */
-    }
-  else
+  if (var->opt_grib_kvpair_size < nentries)
     {
       if (CDI_Debug) Message("resize data structure, %d -> %d", var->opt_grib_kvpair_size, nentries);
 
-      int i, new_size;
-      new_size = (2 * var->opt_grib_kvpair_size) > nentries ? (2 * var->opt_grib_kvpair_size) : nentries;
+      int new_size = ((2 * var->opt_grib_kvpair_size) > nentries) ? (2 * var->opt_grib_kvpair_size) : nentries;
       if (CDI_Debug) Message("resize vartable opt_grib_entries array to size %d", new_size);
       opt_key_val_pair_t *tmp = (opt_key_val_pair_t *) Malloc((size_t) new_size * sizeof(opt_key_val_pair_t));
-      for (i = 0; i < var->opt_grib_kvpair_size; i++)
+      for (int i = 0; i < var->opt_grib_kvpair_size; i++)
         {
           tmp[i] = var->opt_grib_kvpair[i];
         }
-      for (i = var->opt_grib_kvpair_size; i < new_size; i++)
+      for (int i = var->opt_grib_kvpair_size; i < new_size; i++)
         {
           tmp[i].int_val = 0;
           tmp[i].dbl_val = 0;
