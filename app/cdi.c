@@ -82,7 +82,7 @@ version(void)
                       CDI_FILETYPE_NC,  CDI_FILETYPE_NC2, CDI_FILETYPE_NC4, CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5 };
   const char *typenames[] = { "srv", "ext", "ieg", "grb", "grb2", "nc", "nc2", "nc4", "nc4c", "nc5" };
 
-  fprintf(stderr, "CDI version 1.9\n");
+  fprintf(stderr, "CDI version 2.0\n");
 #ifdef COMPILER
   fprintf(stderr, "C Compiler: %s\n", COMPILER);
 #endif
@@ -155,6 +155,7 @@ version(void)
     1.7.1   1 Nov 2009 : added option -z jpeg for JPEG compression of GRIB2 records
     1.7.2  14 Nov 2012 : added optional compression level -z zip[_1-9]
     1.9.0  29 May 2019 : added option -i to set number of input worker
+    2.0.0  02 Feb 2022 : changed to CdiDateTime
   */
 }
 
