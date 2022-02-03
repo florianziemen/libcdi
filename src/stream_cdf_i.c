@@ -4538,7 +4538,9 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
                 }
 #endif
               timevalue = get_timevalue(fileID, nctimevarid, tsID, streamptr->basetime.timevar_cache);
-              cdiDecodeTimeval(timevalue, taxis, &taxis->vdate, &taxis->vtime);
+              taxis->vdatetime = cdiDecodeTimeval(timevalue, taxis);
+              taxis->vdate = cdiEncodeDate(taxis->vdatetime.date.year, taxis->vdatetime.date.month, taxis->vdatetime.date.day);
+              taxis->vtime = cdiEncodeTime(taxis->vdatetime.time.hour, taxis->vdatetime.time.minute, taxis->vdatetime.time.second);
             }
 
           int nctimeboundsid = streamptr->basetime.ncvarboundsid;
@@ -4552,7 +4554,9 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
               cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
               if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
 
-              cdiDecodeTimeval(timevalue, taxis, &taxis->vdate_lb, &taxis->vtime_lb);
+              taxis->vdatetime_lb = cdiDecodeTimeval(timevalue, taxis);
+              taxis->vdate_lb = cdiEncodeDate(taxis->vdatetime_lb.date.year, taxis->vdatetime_lb.date.month, taxis->vdatetime_lb.date.day);
+              taxis->vtime_lb = cdiEncodeTime(taxis->vdatetime_lb.time.hour, taxis->vdatetime_lb.time.minute, taxis->vdatetime_lb.time.second);
 
               start[0] = index;
               count[0] = 1;
@@ -4561,8 +4565,10 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
               cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
               if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
 
-              cdiDecodeTimeval(timevalue, taxis, &taxis->vdate_ub, &taxis->vtime_ub);
-            }
+              taxis->vdatetime_ub = cdiDecodeTimeval(timevalue, taxis);
+              taxis->vdate_ub = cdiEncodeDate(taxis->vdatetime_ub.date.year, taxis->vdatetime_ub.date.month, taxis->vdatetime_ub.date.day);
+              taxis->vtime_ub = cdiEncodeTime(taxis->vdatetime_ub.time.hour, taxis->vdatetime_ub.time.minute, taxis->vdatetime_ub.time.second);
+           }
 
           int leadtimeid = streamptr->basetime.leadtimeid;
           if (leadtimeid != CDI_UNDEFID)

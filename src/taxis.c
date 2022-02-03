@@ -84,6 +84,46 @@ tunitNamePtr(int unitID)
   return (unitID > 0 && unitID < size) ? Timeunits[unitID] : Timeunits[0];
 }
 
+static CdiDate
+date_encode(int year, int month, int day)
+{
+  CdiDate date;
+  date.year = year;
+  date.month = month;
+  date.day = day;
+
+  return date;
+}
+
+static void
+date_decode(CdiDate date, int *year, int *month, int *day)
+{
+  *year = date.year;
+  *month = date.month;
+  *day = date.day;
+}
+
+static CdiTime
+time_encode(int hour, int minute, int second, int ms)
+{
+  CdiTime time;
+  time.hour = hour;
+  time.minute = minute;
+  time.second = second;
+  time.ms = ms;
+
+  return time;
+}
+
+static void
+time_decode(CdiTime time, int *hour, int *minute, int *second, int *ms)
+{
+  *hour = time.hour;
+  *minute = time.minute;
+  *second = time.second;
+  *ms = time.ms;
+}
+
 static void
 date_init(CdiDate *date)
 {
@@ -109,20 +149,43 @@ datetime_init(CdiDateTime *datetime)
 }
 
 static bool
-datetime_isNE(CdiDateTime datetime1, CdiDateTime datetime2)
+datetime_isEQ(const CdiDateTime datetime1, const CdiDateTime datetime2)
 {
+  // clang-format off
   if (datetime1.date.year == datetime2.date.year
       && datetime1.date.month == datetime2.date.month
-      && datetime1.date.day == datetime2.date.day)
-    return false;
-
-  if (datetime1.time.hour == datetime2.time.hour
+      && datetime1.date.day == datetime2.date.day
+      && datetime1.time.hour == datetime2.time.hour
       && datetime1.time.minute == datetime2.time.minute
       && datetime1.time.second == datetime2.time.second
       && datetime1.time.ms == datetime2.time.ms)
-    return false;
+    return true;
+  // clang-format on
 
-  return true;
+  return false;
+}
+
+static bool
+datetime_isNull(const CdiDateTime datetime)
+{
+  // clang-format off
+  if (datetime.date.year == 0
+      && datetime.date.month == 0
+      && datetime.date.day == 0
+      && datetime.time.hour == 0
+      && datetime.time.minute == 0
+      && datetime.time.second == 0
+      && datetime.time.ms == 0)
+    return true;
+  // clang-format on
+
+  return false;
+}
+
+static bool
+datetime_isNE(const CdiDateTime datetime1, const CdiDateTime datetime2)
+{
+  return !datetime_isEQ(datetime1, datetime2);
 }
 
 static void
@@ -736,6 +799,15 @@ taxisInqVdateBounds(int taxisID, DateType *vdate_lb, DateType *vdate_ub)
 }
 
 void
+taxisInqVdatetimeBounds(int taxisID, CdiDateTime *vdatetime_lb, CdiDateTime *vdatetime_ub)
+{
+  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+
+  *vdatetime_lb = taxisptr->vdatetime_lb;
+  *vdatetime_ub = taxisptr->vdatetime_ub;
+}
+
+void
 taxisDefVdateBounds(int taxisID, DateType vdate_lb, DateType vdate_ub)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
@@ -744,6 +816,20 @@ taxisDefVdateBounds(int taxisID, DateType vdate_lb, DateType vdate_ub)
     {
       taxisptr->vdate_lb = (int64_t) vdate_lb;
       taxisptr->vdate_ub = (int64_t) vdate_ub;
+      taxisptr->has_bounds = true;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
+}
+
+void
+taxisDefVdatetimeBounds(int taxisID, CdiDateTime vdatetime_lb, CdiDateTime vdatetime_ub)
+{
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+
+  if (taxisptr->has_bounds == false || datetime_isNE(taxisptr->vdatetime_lb, vdatetime_lb) || datetime_isNE(taxisptr->vdatetime_ub, vdatetime_ub))
+    {
+      taxisptr->vdatetime_lb = vdatetime_lb;
+      taxisptr->vdatetime_ub = vdatetime_ub;
       taxisptr->has_bounds = true;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
@@ -1121,25 +1207,27 @@ cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
     }
 }
 
-static void
-timeval2vtime(double timevalue, taxis_t *taxis, int64_t *vdate, int *vtime)
+static CdiDateTime
+timeval2datetime(double timevalue, taxis_t *taxis)
 {
   int64_t rdate = taxis->rdate;
   int rtime = taxis->rtime;
-
-  if (DBL_IS_EQUAL(timevalue, 0.))
-    {
-      *vdate = rdate;
-      *vtime = rtime;
-      return;
-    }
 
   int year, month, day, hour, minute, second;
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
 
+  if (DBL_IS_EQUAL(timevalue, 0.0))
+    {
+      CdiDateTime datetime;
+      datetime.date = date_encode(year, month, day);
+      int ms = 0;
+      datetime.time = time_encode(hour, minute, second, ms);
+      return datetime;
+    }
+
   int timeunit = taxis->unit;
-  int calendar = taxis->calendar;
+  const int calendar = taxis->calendar;
 
   if (timeunit == TUNIT_MONTH && calendar == CALENDAR_360DAYS)
     {
@@ -1176,14 +1264,18 @@ timeval2vtime(double timevalue, taxis_t *taxis, int64_t *vdate, int *vtime)
 
   decode_caldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
 
-  *vdate = cdiEncodeDate(year, month, day);
-  *vtime = cdiEncodeTime(hour, minute, second);
+  CdiDateTime datetime;
+  datetime.date = date_encode(year, month, day);
+  int ms = 0;
+  datetime.time = time_encode(hour, minute, second, ms);
+
+  return datetime;
 }
 
 static double
 vtime2timeval(int64_t vdate, int vtime, taxis_t *taxis)
 {
-  double value = 0;
+  double value = 0.0;
   int64_t julday1, julday2, days;
   int secofday1, secofday2, secs;
 
@@ -1235,7 +1327,7 @@ vtime2timeval(int64_t vdate, int vtime, taxis_t *taxis)
 
       julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
 
-      value += (days + secs / 86400.) / dpm;
+      value += (days + secs / 86400.0) / dpm;
 
       if (timeunit == TUNIT_YEAR) value = value / 12;
     }
@@ -1253,46 +1345,54 @@ vtime2timeval(int64_t vdate, int vtime, taxis_t *taxis)
   return value;
 }
 
-static void
-conv_timeval(double timevalue, int64_t *rvdate, int *rvtime)
+static CdiDateTime
+absolute_timeval2datetime(double timevalue)
 {
-  const int64_t vdate = (int) timevalue;
+  const int64_t vdate = (int64_t) timevalue;
   const double tmpval = (timevalue - vdate) * 86400.0;
   const int daysec = (vdate < 0) ? (int) (-tmpval + 0.01) : (int) (tmpval + 0.01);
+
+  int year, month, day;
+  cdiDecodeDate(vdate, &year, &month, &day);
 
   const int hour = daysec / 3600;
   const int minute = (daysec - hour * 3600) / 60;
   const int second = daysec - hour * 3600 - minute * 60;
-  const int vtime = cdiEncodeTime(hour, minute, second);
+  const int ms = 0;
 
-  *rvdate = vdate;
-  *rvtime = vtime;
+  CdiDateTime datetime;
+  datetime.date = date_encode(year, month, day);
+  datetime.time = time_encode(hour, minute, second, ms);
+
+  return datetime;
 }
 
-static void
-split_timevalue(double timevalue, int timeunit, int64_t *date, int *time)
+static CdiDateTime
+split_timevalue(double timevalue, int timeunit)
 {
-  int64_t vdate = 0;
-  int vtime = 0;
+  CdiDateTime datetime;
+  datetime_init(&datetime);
 
   if (timeunit == TUNIT_SECOND)
     {
       timevalue /= 86400;
-      conv_timeval(timevalue, &vdate, &vtime);
+      datetime = absolute_timeval2datetime(timevalue);
     }
   else if (timeunit == TUNIT_HOUR)
     {
       timevalue /= 24;
-      conv_timeval(timevalue, &vdate, &vtime);
+      datetime = absolute_timeval2datetime(timevalue);
     }
   else if (timeunit == TUNIT_DAY)
     {
-      conv_timeval(timevalue, &vdate, &vtime);
+      datetime = absolute_timeval2datetime(timevalue);
     }
   else if (timeunit == TUNIT_MONTH)
     {
-      vdate = (int64_t) timevalue * 100 - ((timevalue < 0) * 2 - 1);
-      vtime = 0;
+      int64_t vdate = (int64_t) timevalue * 100 - ((timevalue < 0) * 2 - 1);
+      int year, month, day;
+      cdiDecodeDate(vdate, &year, &month, &day);
+      datetime.date = date_encode(year, month, day);
     }
   else if (timeunit == TUNIT_YEAR)
     {
@@ -1327,9 +1427,11 @@ split_timevalue(double timevalue, int timeunit, int64_t *date, int *time)
           }
       }
 
-      vdate = (int64_t) timevalue * 10000;
-      vdate += timevalue < 0 ? -101 : 101;
-      vtime = 0;
+      int64_t vdate = (int64_t) timevalue * 10000;
+      vdate += (timevalue < 0) ? -101 : 101;
+      int year, month, day;
+      cdiDecodeDate(vdate, &year, &month, &day);
+      datetime.date = date_encode(year, month, day);
     }
   else
     {
@@ -1341,12 +1443,12 @@ split_timevalue(double timevalue, int timeunit, int64_t *date, int *time)
         }
     }
 
-  /* verify date and time */
+  // verify date and time
 
   int year, month, day;
-  cdiDecodeDate(vdate, &year, &month, &day);
-  int hour, minute, second;
-  cdiDecodeTime(vtime, &hour, &minute, &second);
+  date_decode(datetime.date, &year, &month, &day);
+  int hour, minute, second, ms;
+  time_decode(datetime.time, &hour, &minute, &second, &ms);
 
   if (month > 17 || day > 31 || hour > 23 || minute > 59 || second > 59)
     {
@@ -1357,8 +1459,8 @@ split_timevalue(double timevalue, int timeunit, int64_t *date, int *time)
       if (minute > 59) minute = 0;
       if (second > 59) second = 0;
 
-      vdate = cdiEncodeDate(year, month, day);
-      vtime = cdiEncodeTime(hour, minute, second);
+      datetime.date = date_encode(year, month, day);
+      datetime.time = time_encode(hour, minute, second, ms);
 
       static bool lwarn = true;
       if (lwarn)
@@ -1368,8 +1470,7 @@ split_timevalue(double timevalue, int timeunit, int64_t *date, int *time)
         }
     }
 
-  *date = vdate;
-  *time = vtime;
+  return datetime;
 }
 
 void
@@ -1386,7 +1487,7 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
   int64_t vdate = (*taxis).vdate;
   int vtime = (*taxis).vtime;
 
-  if (vdate == 0 && vtime == 0 && DBL_IS_EQUAL(timevalue, 0.)) return;
+  if (vdate == 0 && vtime == 0 && DBL_IS_EQUAL(timevalue, 0.0)) return;
 
   int year, month, day, hour, minute, second;
   cdiDecodeDate(vdate, &year, &month, &day);
@@ -1429,13 +1530,10 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
   (*taxis).ftime = cdiEncodeTime(hour, minute, second);
 }
 
-void
-cdiDecodeTimeval(double timevalue, taxis_t *taxis, int64_t *date, int *time)
+CdiDateTime
+cdiDecodeTimeval(double timevalue, taxis_t *taxis)
 {
-  if (taxis->type == TAXIS_ABSOLUTE)
-    split_timevalue(timevalue, taxis->unit, date, time);
-  else
-    timeval2vtime(timevalue, taxis, date, time);
+  return (taxis->type == TAXIS_ABSOLUTE) ? split_timevalue(timevalue, taxis->unit) : timeval2datetime(timevalue, taxis);
 }
 
 double
@@ -1669,9 +1767,8 @@ taxisPack(void *voidP, void *packBuffer, int packBufferSize, int *packBufferPos,
 {
   taxis_t *taxisP = (taxis_t *) voidP;
   int intBuffer[taxisNint];
-  uint32_t d;
-  int idx = 0;
 
+  int idx = 0;
   intBuffer[idx++] = taxisP->self;
   intBuffer[idx++] = taxisP->used;
   intBuffer[idx++] = taxisP->type;
@@ -1696,7 +1793,7 @@ taxisPack(void *voidP, void *packBuffer, int packBufferSize, int *packBufferPos,
   intBuffer[idx++] = taxisP->units ? (int) strlen(taxisP->units) : 0;
 
   serializePack(intBuffer, taxisNint, CDI_DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
-  d = cdiCheckSum(CDI_DATATYPE_INT, taxisNint, intBuffer);
+  uint32_t d = cdiCheckSum(CDI_DATATYPE_INT, taxisNint, intBuffer);
   serializePack(&d, 1, CDI_DATATYPE_UINT32, packBuffer, packBufferSize, packBufferPos, context);
   if (taxisP->name)
     serializePack(taxisP->name, intBuffer[15], CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
