@@ -57,7 +57,7 @@ cdfDefTimeValue(stream_t *streamptr, int tsID)
       streamptr->ncmode = 2;
     }
 
-  double timevalue = cdiEncodeTimeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis);
+  double timevalue = cdiEncodeTimeval(taxis->vdatetime, &streamptr->tsteps[0].taxis);
   if (CDI_Debug) Message("tsID = %d  timevalue = %f", tsID, timevalue);
 
   int ncvarid = streamptr->basetime.ncvarid;
@@ -69,7 +69,7 @@ cdfDefTimeValue(stream_t *streamptr, int tsID)
       ncvarid = streamptr->basetime.ncvarboundsid;
       if (ncvarid == CDI_UNDEFID) Error("Call to taxisWithBounds() missing!");
 
-      timevalue = cdiEncodeTimeval(taxis->vdate_lb, taxis->vtime_lb, &streamptr->tsteps[0].taxis);
+      timevalue = cdiEncodeTimeval(taxis->vdatetime_lb, &streamptr->tsteps[0].taxis);
       size_t start[2], count[2];
       start[0] = (size_t) tsID;
       count[0] = 1;
@@ -77,7 +77,7 @@ cdfDefTimeValue(stream_t *streamptr, int tsID)
       count[1] = 1;
       cdf_put_vara_double(fileID, ncvarid, start, count, &timevalue);
 
-      timevalue = cdiEncodeTimeval(taxis->vdate_ub, taxis->vtime_ub, &streamptr->tsteps[0].taxis);
+      timevalue = cdiEncodeTimeval(taxis->vdatetime_ub, &streamptr->tsteps[0].taxis);
       start[0] = (size_t) tsID;
       count[0] = 1;
       start[1] = 1;

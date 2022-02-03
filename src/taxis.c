@@ -389,6 +389,9 @@ taxisDefVdate(int taxisID, DateType vdate)
   if (taxisptr->vdate != (int64_t) vdate)
     {
       taxisptr->vdate = (int64_t) vdate;
+      int year, month, day;
+      cdiDecodeDate(vdate, &year, &month, &day);
+      taxisptr->vdatetime.date = date_encode(year, month, day);
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -415,6 +418,9 @@ taxisDefVtime(int taxisID, int vtime)
   if (taxisptr->vtime != vtime)
     {
       taxisptr->vtime = vtime;
+      int hour, minute, second, ms = 0;
+      cdiDecodeTime(vtime, &hour, &minute, &second);
+      taxisptr->vdatetime.time = time_encode(hour, minute, second, ms);
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -1207,8 +1213,9 @@ cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
     }
 }
 
+// convert relative time value to CdiDateTime
 static CdiDateTime
-timeval2datetime(double timevalue, taxis_t *taxis)
+rtimeval2datetime(double timevalue, taxis_t *taxis)
 {
   int64_t rdate = taxis->rdate;
   int rtime = taxis->rtime;
@@ -1272,8 +1279,9 @@ timeval2datetime(double timevalue, taxis_t *taxis)
   return datetime;
 }
 
+// convert CdiDateTime to relative time value
 static double
-vtime2timeval(int64_t vdate, int vtime, taxis_t *taxis)
+datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
 {
   double value = 0.0;
   int64_t julday1, julday2, days;
@@ -1284,30 +1292,29 @@ vtime2timeval(int64_t vdate, int vtime, taxis_t *taxis)
 
   int64_t rdate = (*taxis).rdate;
   int rtime = (*taxis).rtime;
+
   if (rdate == -1)
     {
       rdate = (*taxis).vdate;
       rtime = (*taxis).vtime;
     }
 
-  if (rdate == 0 && rtime == 0 && vdate == 0 && vtime == 0) return value;
+  if (rdate == 0 && rtime == 0 && datetime_isNull(vdatetime)) return value;
 
-  int ryear, rmonth;
-  int year, month, day, hour, minute, second;
-  cdiDecodeDate(rdate, &ryear, &rmonth, &day);
+  int year, month, day, hour, minute, second, ms;
+  cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
 
+  const int ryear = year;
+  const int rmonth = month;
   encode_caldaysec(calendar, ryear, rmonth, day, hour, minute, second, &julday1, &secofday1);
 
-  cdiDecodeDate(vdate, &year, &month, &day);
-  cdiDecodeTime(vtime, &hour, &minute, &second);
+  date_decode(vdatetime.date, &year, &month, &day);
+  time_decode(vdatetime.time, &hour, &minute, &second, &ms);
 
   int timeunit0 = timeunit;
 
-  if (timeunit == TUNIT_MONTH && calendar == CALENDAR_360DAYS)
-    {
-      timeunit = TUNIT_DAY;
-    }
+  if (timeunit == TUNIT_MONTH && calendar == CALENDAR_360DAYS) timeunit = TUNIT_DAY;
 
   if (timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR)
     {
@@ -1345,8 +1352,9 @@ vtime2timeval(int64_t vdate, int vtime, taxis_t *taxis)
   return value;
 }
 
+// convert absolute time value to CdiDateTime
 static CdiDateTime
-absolute_timeval2datetime(double timevalue)
+atimeval2datetime(double timevalue)
 {
   const int64_t vdate = (int64_t) timevalue;
   const double tmpval = (timevalue - vdate) * 86400.0;
@@ -1376,16 +1384,16 @@ split_timevalue(double timevalue, int timeunit)
   if (timeunit == TUNIT_SECOND)
     {
       timevalue /= 86400;
-      datetime = absolute_timeval2datetime(timevalue);
+      datetime = atimeval2datetime(timevalue);
     }
   else if (timeunit == TUNIT_HOUR)
     {
       timevalue /= 24;
-      datetime = absolute_timeval2datetime(timevalue);
+      datetime = atimeval2datetime(timevalue);
     }
   else if (timeunit == TUNIT_DAY)
     {
-      datetime = absolute_timeval2datetime(timevalue);
+      datetime = atimeval2datetime(timevalue);
     }
   else if (timeunit == TUNIT_MONTH)
     {
@@ -1482,7 +1490,7 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
   (*taxis).fc_period = timevalue;
 
   int timeunit = (*taxis).fc_unit;
-  int calendar = (*taxis).calendar;
+  const int calendar = (*taxis).calendar;
 
   int64_t vdate = (*taxis).vdate;
   int vtime = (*taxis).vtime;
@@ -1533,38 +1541,38 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
 CdiDateTime
 cdiDecodeTimeval(double timevalue, taxis_t *taxis)
 {
-  return (taxis->type == TAXIS_ABSOLUTE) ? split_timevalue(timevalue, taxis->unit) : timeval2datetime(timevalue, taxis);
+  return (taxis->type == TAXIS_ABSOLUTE) ? split_timevalue(timevalue, taxis->unit) : rtimeval2datetime(timevalue, taxis);
 }
 
 double
-cdiEncodeTimeval(int64_t date, int time, taxis_t *taxis)
+cdiEncodeTimeval(CdiDateTime datetime, taxis_t *taxis)
 {
   double timevalue;
 
   if (taxis->type == TAXIS_ABSOLUTE)
     {
+      int year, month, day;
+      date_decode(datetime.date, &year, &month, &day);
+
       if (taxis->unit == TUNIT_YEAR)
         {
-          int year, month, day;
-          cdiDecodeDate(date, &year, &month, &day);
-
           timevalue = year;
         }
       else if (taxis->unit == TUNIT_MONTH)
         {
-          int year, month, day;
-          cdiDecodeDate(date, &year, &month, &day);
-          timevalue = date / 100 + copysign((double) (day != 0) * 0.5, (double) date);
+          int64_t xdate = cdiEncodeDate(year, month, day);
+          timevalue = xdate / 100 + copysign((double) (day != 0) * 0.5, (double) xdate);
         }
       else
         {
-          int hour, minute, second;
-          cdiDecodeTime(time, &hour, &minute, &second);
-          timevalue = copysign(1.0, (double) date) * (fabs((double) date) + (hour * 3600 + minute * 60 + second) / 86400.);
+          int hour, minute, second, ms;
+          time_decode(datetime.time, &hour, &minute, &second, &ms);
+          int64_t xdate = cdiEncodeDate(year, month, day);
+          timevalue = copysign(1.0, (double) xdate) * (fabs((double) xdate) + (hour * 3600 + minute * 60 + second) / 86400.0);
         }
     }
   else
-    timevalue = vtime2timeval(date, time, taxis);
+    timevalue = datetime2rtimeval(datetime, taxis);
 
   return timevalue;
 }
@@ -1588,6 +1596,7 @@ ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->stime = source->stime;
   dest->vdate = source->vdate;
   dest->vtime = source->vtime;
+  dest->vdatetime = source->vdatetime;
   dest->rdate = source->rdate;
   dest->rtime = source->rtime;
   dest->fdate = source->fdate;
@@ -1601,6 +1610,8 @@ ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->vtime_lb = source->vtime_lb;
   dest->vdate_ub = source->vdate_ub;
   dest->vtime_ub = source->vtime_ub;
+  dest->vdatetime_lb = source->vdatetime_lb;
+  dest->vdatetime_ub = source->vdatetime_ub;
   dest->fc_unit = source->fc_unit;
   dest->fc_period = source->fc_period;
 
