@@ -155,7 +155,7 @@ version(void)
     1.7.1   1 Nov 2009 : added option -z jpeg for JPEG compression of GRIB2 records
     1.7.2  14 Nov 2012 : added optional compression level -z zip[_1-9]
     1.9.0  29 May 2019 : added option -i to set number of input worker
-    2.0.0  02 Feb 2022 : changed to CdiDateTime
+    2.0.0  02 Feb 2022 : changed date/time handling to CdiDateTime
   */
 }
 
@@ -189,7 +189,7 @@ usage(void)
 }
 
 static void
-printInfo(struct CdiDateTime vdatetime, char *varname, double level, size_t datasize, int number, size_t nmiss, double missval,
+printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, int number, size_t nmiss, double missval,
           const double *data, int vardis)
 {
   static int rec = 0;
@@ -338,7 +338,6 @@ limit_string_length(char *string, size_t maxlen)
 static void
 printShortinfo(int streamID, int vlistID, int vardis)
 {
-  int varID;
   char tmpname[CDI_MAX_NAME];
   char varname[CDI_MAX_NAME];
   int year, month, day, hour, minute, second;
@@ -350,8 +349,8 @@ printShortinfo(int streamID, int vlistID, int vardis)
   printFiletype(streamID, vlistID);
 
   // vlistPrint(vlistID);
-  int nvars = vlistNvars(vlistID);
-  int nsubtypes = vlistNsubtypes(vlistID);
+  const int nvars = vlistNvars(vlistID);
+  const int nsubtypes = vlistNsubtypes(vlistID);
 
   if (nsubtypes > 0)
     fprintf(stdout, "   Var : Institut Source   T Steptype Subtypes Levels Num    Points Num Dtype : ");
@@ -363,11 +362,11 @@ printShortinfo(int streamID, int vlistID, int vardis)
   else
     fprintf(stdout, "Parameter ID\n");
 
-  for (varID = 0; varID < nvars; varID++)
+  for (int varID = 0; varID < nvars; varID++)
     {
-      int param = vlistInqVarParam(vlistID, varID);
-      int gridID = vlistInqVarGrid(vlistID, varID);
-      int zaxisID = vlistInqVarZaxis(vlistID, varID);
+      const int param = vlistInqVarParam(vlistID, varID);
+      const int gridID = vlistInqVarGrid(vlistID, varID);
+      const int zaxisID = vlistInqVarZaxis(vlistID, varID);
 
       fprintf(stdout, "%6d : ", varID + 1);
 
@@ -386,11 +385,11 @@ printShortinfo(int streamID, int vlistID, int vardis)
       fprintf(stdout, "%-8s ", tmpname);
 
       // timetype
-      int timetype = vlistInqVarTimetype(vlistID, varID);
+      const int timetype = vlistInqVarTimetype(vlistID, varID);
       fprintf(stdout, "%c ", timetype == TIME_CONSTANT ? 'c' : 'v');
 
       // tsteptype
-      int tsteptype = vlistInqVarTsteptype(vlistID, varID);
+      const int tsteptype = vlistInqVarTsteptype(vlistID, varID);
       // clang-format off
 	  if      (tsteptype == TSTEP_INSTANT ) fprintf(stdout, "%-8s ", "instant");
 	  else if (tsteptype == TSTEP_INSTANT2) fprintf(stdout, "%-8s ", "instant");
@@ -407,24 +406,24 @@ printShortinfo(int streamID, int vlistID, int vardis)
 
       if (nsubtypes > 0)
         {
-          int subtypeID = vlistInqVarSubtype(vlistID, varID);
-          int subtypesize = subtypeInqSize(subtypeID);
+          const int subtypeID = vlistInqVarSubtype(vlistID, varID);
+          const int subtypesize = subtypeInqSize(subtypeID);
           fprintf(stdout, " %6d  ", subtypesize);
           fprintf(stdout, "%3d ", vlistSubtypeIndex(vlistID, subtypeID) + 1);
         }
 
-      /* layer info */
-      int levelsize = zaxisInqSize(zaxisID);
+      // layer info
+      const int levelsize = zaxisInqSize(zaxisID);
       fprintf(stdout, "%6d ", levelsize);
       fprintf(stdout, "%3d ", vlistZaxisIndex(vlistID, zaxisID) + 1);
 
-      /* grid info */
-      size_t gridsize = gridInqSize(gridID);
+      // grid info
+      const size_t gridsize = gridInqSize(gridID);
       fprintf(stdout, "%9zu ", gridsize);
       fprintf(stdout, "%3d ", vlistGridIndex(vlistID, gridID) + 1);
 
-      /* datatype */
-      int datatype = vlistInqVarDatatype(vlistID, varID);
+      // datatype
+      const int datatype = vlistInqVarDatatype(vlistID, varID);
       // clang-format off
 	  if      (datatype == CDI_DATATYPE_PACK  ) strcpy(pstr, "P0");
 	  else if (datatype > 0 && datatype <= 32 ) sprintf(pstr, "P%d", datatype);
@@ -482,8 +481,8 @@ printShortinfo(int streamID, int vlistID, int vardis)
       printSubtypeInfo(vlistID);
     }
 
-  int taxisID = vlistInqTaxis(vlistID);
-  int ntsteps = vlistNtsteps(vlistID);
+  const int taxisID = vlistInqTaxis(vlistID);
+  const int ntsteps = vlistNtsteps(vlistID);
 
   if (ntsteps != 0)
     {
@@ -504,10 +503,10 @@ printShortinfo(int streamID, int vlistID, int vardis)
 
               fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", year, month, day, hour, minute, second);
 
-              int tunits = taxisInqTunit(taxisID);
+              const int tunits = taxisInqTunit(taxisID);
               if (tunits != CDI_UNDEFID) fprintf(stdout, "  Units = %s", tunit2str(tunits));
 
-              int calendar = taxisInqCalendar(taxisID);
+              const int calendar = taxisInqCalendar(taxisID);
               if (calendar != CDI_UNDEFID) fprintf(stdout, "  Calendar = %s", calendar2str(calendar));
 
               if (taxisHasBounds(taxisID)) fprintf(stdout, "  Bounds = true");
@@ -557,12 +556,7 @@ setDefaultDataType(char *datatypestr)
           if (nbits > 0 && nbits < 32)
             DefaultDataType = nbits;
           else if (nbits == 32)
-            {
-              if (DefaultFileType == CDI_FILETYPE_GRB)
-                DefaultDataType = CDI_DATATYPE_PACK32;
-              else
-                DefaultDataType = CDI_DATATYPE_FLT32;
-            }
+            DefaultDataType = (DefaultFileType == CDI_FILETYPE_GRB) ? CDI_DATATYPE_PACK32 : CDI_DATATYPE_FLT32;
           else if (nbits == 64)
             DefaultDataType = CDI_DATATYPE_FLT64;
           else
@@ -729,10 +723,7 @@ defineCompress(const char *arg)
   else if (strncmp(arg, "zip", 3) == 0)
     {
       comptype = CDI_COMPRESS_ZIP;
-      if (len == 5 && arg[3] == '_' && isdigit(arg[4]))
-        complevel = atoi(&arg[4]);
-      else
-        complevel = 1;
+      complevel = (len == 5 && arg[3] == '_' && isdigit(arg[4])) ? atoi(&arg[4]) : 1;
     }
   else
     fprintf(stderr, "%s compression unsupported!\n", arg);
@@ -919,7 +910,7 @@ main(int argc, char *argv[])
                 streamDefTimestep(streamID2, tsID);
               }
 
-            const struct CdiDateTime vdatetime = taxisInqVdatetime(taxisID1);
+            const CdiDateTime vdatetime = taxisInqVdatetime(taxisID1);
 
             if (Record)
               {

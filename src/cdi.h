@@ -1324,28 +1324,31 @@ void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDef
 extern "C" {
 #endif
 
-struct CdiDate
+typedef struct
 {
-  int   year;           // year of date
-  short month;          // month of date
-  short day;            // day of date
-};
+  int   year;      // year of date
+  short month;     // month of date
+  short day;       // day of date
+} CdiDate;
 
-struct CdiTime
+typedef struct
 {
-  short hour;           // hour part of time
-  short minute;	        // minute part of time
-  short second;	        // second part of time
-  short ms;             // milli-second part of time. 0<=ms<=999
-};
+  short hour;      // hour part of time
+  short minute;	   // minute part of time
+  short second;	   // second part of time
+  short ms;        // milli-second part of time. 0<=ms<=999
+} CdiTime;
 
-struct CdiDateTime
+typedef struct
 {
-  struct CdiDate date;  // date elements
-  struct CdiTime time;  // time elements
-};
+  CdiDate date;    // date elements
+  CdiTime time;    // time elements
+} CdiDateTime;
 
-struct CdiDateTime taxisInqVdatetime(int taxisID);
+void taxisDefVdatetime(int taxisID, CdiDateTime vdatetime);
+CdiDateTime taxisInqVdatetime(int taxisID);
+void taxisDefVdatetimeBounds(int taxisID, CdiDateTime vdatetime_lb, CdiDateTime vdatetime_ub);
+void taxisInqVdatetimeBounds(int taxisID, CdiDateTime *vdatetime_lb, CdiDateTime *vdatetime_ub);
 
 // date format:  YYYYMMDD
 // time format:    hhmmss

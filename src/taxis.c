@@ -85,6 +85,47 @@ tunitNamePtr(int unitID)
 }
 
 static void
+date_init(CdiDate *date)
+{
+  date->year = 0;
+  date->month = 0;
+  date->day = 0;
+}
+
+static void
+time_init(CdiTime *time)
+{
+  time->hour = 0;
+  time->minute = 0;
+  time->second = 0;
+  time->ms = 0;
+}
+
+static void
+datetime_init(CdiDateTime *datetime)
+{
+  date_init(&datetime->date);
+  time_init(&datetime->time);
+}
+
+static bool
+datetime_isNE(CdiDateTime datetime1, CdiDateTime datetime2)
+{
+  if (datetime1.date.year == datetime2.date.year
+      && datetime1.date.month == datetime2.date.month
+      && datetime1.date.day == datetime2.date.day)
+    return false;
+
+  if (datetime1.time.hour == datetime2.time.hour
+      && datetime1.time.minute == datetime2.time.minute
+      && datetime1.time.second == datetime2.time.second
+      && datetime1.time.ms == datetime2.time.ms)
+    return false;
+
+  return true;
+}
+
+static void
 taxisDefaultValue(taxis_t *taxisptr)
 {
   taxisptr->self = CDI_UNDEFID;
@@ -95,6 +136,7 @@ taxisDefaultValue(taxis_t *taxisptr)
   taxisptr->stime = 0;
   taxisptr->vdate = 0;
   taxisptr->vtime = 0;
+  datetime_init(&taxisptr->vdatetime);
   taxisptr->rdate = CDI_UNDEFID;
   taxisptr->rtime = 0;
   taxisptr->fdate = CDI_UNDEFID;
@@ -108,6 +150,8 @@ taxisDefaultValue(taxis_t *taxisptr)
   taxisptr->vtime_lb = 0;
   taxisptr->vdate_ub = 0;
   taxisptr->vtime_ub = 0;
+  datetime_init(&taxisptr->vdatetime_lb);
+  datetime_init(&taxisptr->vdatetime_ub);
   taxisptr->fc_unit = DefaultTimeUnit;
   taxisptr->fc_period = 0;
   taxisptr->name = NULL;
@@ -308,6 +352,18 @@ taxisDefVtime(int taxisID, int vtime)
   if (taxisptr->vtime != vtime)
     {
       taxisptr->vtime = vtime;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
+}
+
+void
+taxisDefVdatetime(int taxisID, CdiDateTime vdatetime)
+{
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+
+  if (datetime_isNE(taxisptr->vdatetime, vdatetime))
+    {
+      taxisptr->vdatetime = vdatetime;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -576,6 +632,7 @@ taxisCopyTimestep(int taxisID2, int taxisID1)
 
   taxisptr2->vdate = taxisptr1->vdate;
   taxisptr2->vtime = taxisptr1->vtime;
+  taxisptr2->vdatetime = taxisptr1->vdatetime;
 
   if (taxisptr2->has_bounds)
     {
@@ -583,7 +640,9 @@ taxisCopyTimestep(int taxisID2, int taxisID1)
       taxisptr2->vtime_lb = taxisptr1->vtime_lb;
       taxisptr2->vdate_ub = taxisptr1->vdate_ub;
       taxisptr2->vtime_ub = taxisptr1->vtime_ub;
-    }
+      taxisptr2->vdatetime_lb = taxisptr1->vdatetime_lb;
+      taxisptr2->vdatetime_ub = taxisptr1->vdatetime_ub;
+   }
 
   taxisptr2->fdate = taxisptr1->fdate;
   taxisptr2->ftime = taxisptr1->ftime;
@@ -595,13 +654,13 @@ taxisCopyTimestep(int taxisID2, int taxisID1)
   reshUnlock();
 }
 
-static struct CdiDate
-cdiSetDate(int64_t date)
+static CdiDate
+cdiDateSet(int64_t date)
 {
   int year, month, day;
   cdiDecodeDate(date, &year, &month, &day);
 
-  struct CdiDate cdiDate;
+  CdiDate cdiDate;
   cdiDate.year = year;
   cdiDate.month = (short)month;
   cdiDate.day = (short)day;
@@ -609,13 +668,13 @@ cdiSetDate(int64_t date)
   return cdiDate;
 }
 
-static struct CdiTime
-cdiSetTime(int time)
+static CdiTime
+cdiTimeSet(int time)
 {
   int hour, minute, second;
   cdiDecodeTime(time, &hour, &minute, &second);
 
-  struct CdiTime cdiTime;
+  CdiTime cdiTime;
   cdiTime.hour = (short)hour;
   cdiTime.minute = (short)minute;
   cdiTime.second = (short)second;
@@ -624,15 +683,14 @@ cdiSetTime(int time)
   return cdiTime;
 }
 
-struct CdiDateTime
+CdiDateTime
 taxisInqVdatetime(int taxisID)
 {
   const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  struct CdiDateTime datetime;
-
-  datetime.date = cdiSetDate(taxisptr->vdate);
-  datetime.time = cdiSetTime(taxisptr->vtime);
+  CdiDateTime datetime;
+  datetime.date = cdiDateSet(taxisptr->vdate);
+  datetime.time = cdiTimeSet(taxisptr->vtime);
 
   return datetime;
 }
@@ -682,7 +740,7 @@ taxisDefVdateBounds(int taxisID, DateType vdate_lb, DateType vdate_ub)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->vdate_lb != (int64_t) vdate_lb || taxisptr->vdate_ub != (int64_t) vdate_ub || taxisptr->has_bounds == false)
+  if (taxisptr->has_bounds == false || taxisptr->vdate_lb != (int64_t) vdate_lb || taxisptr->vdate_ub != (int64_t) vdate_ub)
     {
       taxisptr->vdate_lb = (int64_t) vdate_lb;
       taxisptr->vdate_ub = (int64_t) vdate_ub;

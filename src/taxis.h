@@ -2,6 +2,7 @@
 #define TAXIS_H
 
 #include <stdbool.h>
+#include "cdi.h"
 
 #ifndef RESOURCE_HANDLE_H
 #include "resource_handle.h"
@@ -20,6 +21,7 @@ typedef struct
   int stime;      // start time
   int64_t vdate;  // verification date
   int vtime;      // verification time
+  CdiDateTime vdatetime; // verification date/time
   int64_t rdate;  // reference date
   int rtime;      // reference time
   int64_t fdate;  // forecast reference date
@@ -32,6 +34,8 @@ typedef struct
   int vtime_lb;      // lower bounds of vtime
   int64_t vdate_ub;  // upper bounds of vdate
   int vtime_ub;      // upper bounds of vtime
+  CdiDateTime vdatetime_lb; // lower bounds of verification date/time
+  CdiDateTime vdatetime_ub; // upper bounds of verification date/time
   int fc_unit;       // forecast time unit
   double fc_period;  // forecast time period
   char *name;

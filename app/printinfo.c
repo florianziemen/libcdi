@@ -14,20 +14,20 @@
 #define TIME_FORMAT "%2.2d:%2.2d:%2.2d"
 
 void
-datetime2str(struct CdiDateTime dt, char *datetimestr, int maxlen)
+datetime2str(CdiDateTime dt, char *datetimestr, int maxlen)
 {
   snprintf(datetimestr, maxlen, DATE_FORMAT "T" TIME_FORMAT,
            dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute, dt.time.second);
 }
 
 void
-date2str(struct CdiDate date, char *datestr, int maxlen)
+date2str(CdiDate date, char *datestr, int maxlen)
 {
   snprintf(datestr, maxlen, DATE_FORMAT, date.year, date.month, date.day);
 }
 
 void
-time2str(struct CdiTime time, char *timestr, int maxlen)
+time2str(CdiTime time, char *timestr, int maxlen)
 {
   snprintf(timestr, maxlen, TIME_FORMAT, time.hour, time.minute, time.second);
 }
@@ -589,7 +589,7 @@ printSubtypeInfo(int vlistID)
 }
 
 static int
-printDateTime(int ntimeout, struct CdiDateTime vdatetime)
+printDateTime(int ntimeout, CdiDateTime vdatetime)
 {
   if (ntimeout == 4)
     {
@@ -638,7 +638,7 @@ printTimesteps(int streamID, int taxisID, int verbose)
 {
   struct DateTimeEntry
   {
-    struct CdiDateTime dt;
+    CdiDateTime dt;
     struct DateTimeEntry *next;
   };
   struct DateTimeEntry dateTimeList[NUM_TIMESTEP];
@@ -659,7 +659,7 @@ printTimesteps(int streamID, int taxisID, int verbose)
       const int nrecs = streamInqTimestep(streamID, tsID);
       if (nrecs == 0) break;
 
-      const struct CdiDateTime vdatetime = taxisInqVdatetime(taxisID);
+      const CdiDateTime vdatetime = taxisInqVdatetime(taxisID);
 
       if (verbose || tsID < NUM_TIMESTEP)
         {
