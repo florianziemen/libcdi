@@ -5,6 +5,7 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #ifndef  WITH_CALLER_NAME
 #define  WITH_CALLER_NAME
@@ -67,6 +68,9 @@ cdiAbortC_serial(const char *caller, const char *filename,
                  const char *functionname, int line,
                  const char *errorString, va_list ap)
   __attribute__((noreturn));
+
+
+bool cdiObsoleteInfo(const char *oldFunction, const char *newFunction);
 
 #if defined (__cplusplus)
 }

@@ -126,6 +126,15 @@ Message_(const char *caller, const char *fmt, ...)
 
   va_end(args);
 }
+
+bool
+cdiObsoleteInfo(const char *oldFunction, const char *newFunction)
+{
+  fprintf(stdout, "CDI info: Function %s() is deprecated and might be removed in the future versions of CDI.\n", oldFunction);
+  fprintf(stdout, "CDI info:    Consider switching to the new function %s() as soon as possible.\n", newFunction);
+  return false;
+}
+
 /*
  * Local Variables:
  * c-file-style: "Java"
