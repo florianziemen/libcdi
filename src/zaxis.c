@@ -325,6 +325,9 @@ zaxisName(int zaxistype, char *zaxisname)
 void
 zaxisDefLtype(int zaxisID, int ltype)
 {
+  static bool printInfo = true;
+  if (printInfo) printInfo = cdiObsoleteInfo(__func__, "cdiDefKeyInt");
+
   (void) cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, ltype);
 }
 

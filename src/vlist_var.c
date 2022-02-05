@@ -120,7 +120,21 @@ vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int timetype, int tileset
   // Compatibility for release 1.8.3
   if (timetype > 1 && timetype < 15)
     {
+      vlistptr->vars[varID].timetype = TIME_VARYING;
       vlistptr->vars[varID].tsteptype = timetype;
+      static bool printInfo = true;
+      if (printInfo)
+        {
+          printInfo = false;
+          fprintf(stdout, "CDI info: The vlistDefVar() function was called with an invalid value for the timetype parameter.\n");
+          fprintf(stdout, "CDI info:    This may be an obsolete form of using the vlistDefVar() function.\n");
+          fprintf(stdout, "CDI info:    The correct form is:\n");
+          fprintf(stdout, "CDI info:       varID = vlistDefVar(vlistID, gridID, zaxisID, timetype)\n");
+          fprintf(stdout, "CDI info:       vlistDefVarTsteptype(vlistID, varID, tsteptype)\n");
+          fprintf(stdout, "CDI info:          with: timetype = TIME_CONSTANT | TIME_VARYING\n");
+          fprintf(stdout, "CDI info:                tsteptype = TSTEP_AVG .... TSTEP_SUM\n");
+
+        }
     }
 
   vlistAdd2GridIDs(vlistptr, gridID);
@@ -582,23 +596,32 @@ vlistInqVarStdname(int vlistID, int varID, char *stdname)
   (void) cdiInqKeyString(vlistID, varID, CDI_KEY_STDNAME, stdname, &length);
 }
 
+// obsolete function
 int
 vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID)
 {
+  static bool printInfo = true;
+  if (printInfo) printInfo = cdiObsoleteInfo(__func__, "cdiInqKeyInt");
   int typeOfGeneratingProcess = 0;
-  int status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFGENERATINGPROCESS, &typeOfGeneratingProcess);
+  cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFGENERATINGPROCESS, &typeOfGeneratingProcess);
   return typeOfGeneratingProcess;
 }
 
+// obsolete function
 void
 vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGeneratingProcess)
 {
+  static bool printInfo = true;
+  if (printInfo) printInfo = cdiObsoleteInfo(__func__, "cdiDefKeyInt");
   cdiDefKeyInt(vlistID, varID, CDI_KEY_TYPEOFGENERATINGPROCESS, typeOfGeneratingProcess);
 }
 
+// obsolete function
 void
 vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDefinitionTemplate)
 {
+  static bool printInfo = true;
+  if (printInfo) printInfo = cdiObsoleteInfo(__func__, "cdiDefKeyInt");
   cdiDefKeyInt(vlistID, varID, CDI_KEY_PRODUCTDEFINITIONTEMPLATE, productDefinitionTemplate);
 }
 
