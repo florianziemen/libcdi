@@ -291,6 +291,8 @@ srvScanTimestep1(stream_t *streamptr)
           datetime0 = datetime;
           taxis->vdate = vdate;
           taxis->vtime = vtime;
+          taxis->vdatetime.date = cdiDateSet(vdate);
+          taxis->vdatetime.time = cdiTimeSet(vtime);
         }
       else
         {
@@ -315,6 +317,8 @@ tstepScanLoopFinished:
 
   const int taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type = TAXIS_ABSOLUTE;
+  taxis->rdate = cdiDateGet(taxis->vdatetime.date);
+  taxis->rtime = cdiTimeGet(taxis->vdatetime.time);
   taxis->rdate = taxis->vdate;
   taxis->rtime = taxis->vtime;
 
@@ -377,6 +381,8 @@ srvScanTimestep2(stream_t *streamptr)
           taxis->type = TAXIS_ABSOLUTE;
           taxis->vdate = vdate;
           taxis->vtime = vtime;
+          taxis->vdatetime.date = cdiDateSet(vdate);
+          taxis->vdatetime.time = cdiTimeSet(vtime);
         }
 
       bool nextstep = false;
@@ -503,6 +509,8 @@ srvScanTimestep(stream_t *streamptr)
               taxis->type = TAXIS_ABSOLUTE;
               taxis->vdate = vdate;
               taxis->vtime = vtime;
+              taxis->vdatetime.date = cdiDateSet(vdate);
+              taxis->vdatetime.time = cdiTimeSet(vtime);
             }
 
           if (param != records[recID].param || rlevel != records[recID].ilevel)
@@ -614,6 +622,7 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   int fileID = streamptr->fileID;
   int tsID = streamptr->curTsID;
   int gridID = vlistInqVarGrid(vlistID, varID);
+  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   int pdis, pcat, pnum;
   cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pnum, &pcat, &pdis);
@@ -621,8 +630,10 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   int header[8];
   header[0] = pnum;
   header[1] = (int) (zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
-  header[2] = streamptr->tsteps[tsID].taxis.vdate;
-  header[3] = streamptr->tsteps[tsID].taxis.vtime;
+  header[2] = cdiDateGet(taxis->vdatetime.date);
+  header[3] = cdiTimeGet(taxis->vdatetime.time);
+  header[2] = taxis->vdate;
+  header[3] = taxis->vtime;
 
   size_t xsize = gridInqXsize(gridID);
   size_t ysize = gridInqYsize(gridID);

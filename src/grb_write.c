@@ -378,8 +378,10 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
   const int zaxisID = vlistInqVarZaxis(vlistID, varID);
   const int tsteptype = vlistInqVarTsteptype(vlistID, varID);
   const int tsID = streamptr->curTsID;
-  const int date = streamptr->tsteps[tsID].taxis.vdate;
-  const int time = streamptr->tsteps[tsID].taxis.vtime;
+  int date = cdiDateGet(streamptr->tsteps[tsID].taxis.vdatetime.date);
+  int time = cdiTimeGet(streamptr->tsteps[tsID].taxis.vdatetime.time);
+  date = streamptr->tsteps[tsID].taxis.vdate;
+  time = streamptr->tsteps[tsID].taxis.vtime;
   const int numavg = (tsteptype == TSTEP_AVG) ? streamptr->tsteps[tsID].taxis.numavg : 0;
   int comptype = streamptr->comptype;
 

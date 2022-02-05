@@ -455,8 +455,10 @@ iegDefRecord(stream_t *streamptr)
   IEG_P_Parameter(iegp->ipdb) = pnum;
   if (pdis == 255) IEG_P_CodeTable(iegp->ipdb) = pcat;
 
-  int64_t date = streamptr->tsteps[tsID].taxis.vdate;
-  int time = streamptr->tsteps[tsID].taxis.vtime;
+  int64_t date = cdiDateGet(streamptr->tsteps[tsID].taxis.vdatetime.date);
+  int time = cdiTimeGet(streamptr->tsteps[tsID].taxis.vdatetime.time);
+  date = streamptr->tsteps[tsID].taxis.vdate;
+  time = streamptr->tsteps[tsID].taxis.vtime;
   iegDefTime(iegp->ipdb, date, time, vlistInqTaxis(vlistID));
   iegDefGrid(iegp->igdb, gridID);
   iegDefLevel(iegp->ipdb, iegp->igdb, iegp->vct, zaxisID, levelID);
@@ -742,6 +744,8 @@ iegScanTimestep1(stream_t *streamptr)
           datetime0 = datetime;
           taxis->vdate = vdate;
           taxis->vtime = vtime;
+          taxis->vdatetime.date = cdiDateSet(vdate);
+          taxis->vdatetime.time = cdiTimeSet(vtime);
         }
       else
         {
@@ -766,6 +770,8 @@ tstepScanLoopFinished:
 
   const int taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type = TAXIS_ABSOLUTE;
+  taxis->rdate = cdiDateGet(taxis->vdatetime.date);
+  taxis->rtime = cdiTimeGet(taxis->vdatetime.time);
   taxis->rdate = taxis->vdate;
   taxis->rtime = taxis->vtime;
 
@@ -830,6 +836,8 @@ iegScanTimestep2(stream_t *streamptr)
           taxis->type = TAXIS_ABSOLUTE;
           taxis->vdate = vdate;
           taxis->vtime = vtime;
+          taxis->vdatetime.date = cdiDateSet(vdate);
+          taxis->vdatetime.time = cdiTimeSet(vtime);
         }
 
       bool nextstep = false;
@@ -963,6 +971,8 @@ iegScanTimestep(stream_t *streamptr)
               taxis->type = TAXIS_ABSOLUTE;
               taxis->vdate = vdate;
               taxis->vtime = vtime;
+              taxis->vdatetime.date = cdiDateSet(vdate);
+              taxis->vdatetime.time = cdiTimeSet(vtime);
             }
 
           if (param != records[recID].param || rlevel != records[recID].ilevel)
@@ -1082,8 +1092,10 @@ iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   IEG_P_Parameter(iegp->ipdb) = pnum;
   if (pdis == 255) IEG_P_CodeTable(iegp->ipdb) = pcat;
 
-  int64_t date = streamptr->tsteps[tsID].taxis.vdate;
-  int time = streamptr->tsteps[tsID].taxis.vtime;
+  int64_t date = cdiDateGet(streamptr->tsteps[tsID].taxis.vdatetime.date);
+  int time = cdiTimeGet(streamptr->tsteps[tsID].taxis.vdatetime.time);
+  date = streamptr->tsteps[tsID].taxis.vdate;
+  time = streamptr->tsteps[tsID].taxis.vtime;
   iegDefTime(iegp->ipdb, date, time, vlistInqTaxis(vlistID));
   iegDefGrid(iegp->igdb, gridID);
   iegDefLevel(iegp->ipdb, iegp->igdb, iegp->vct, zaxisID, levID);

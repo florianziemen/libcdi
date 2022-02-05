@@ -84,6 +84,47 @@ tunitNamePtr(int unitID)
   return (unitID > 0 && unitID < size) ? Timeunits[unitID] : Timeunits[0];
 }
 
+CdiDate
+cdiDateSet(int date)
+{
+  int year, month, day;
+  cdiDecodeDate(date, &year, &month, &day);
+
+  CdiDate cdiDate;
+  cdiDate.year = year;
+  cdiDate.month = (short)month;
+  cdiDate.day = (short)day;
+
+  return cdiDate;
+}
+
+CdiTime
+cdiTimeSet(int time)
+{
+  int hour, minute, second, ms = 0;
+  cdiDecodeTime(time, &hour, &minute, &second);
+
+  CdiTime cdiTime;
+  cdiTime.hour = (short)hour;
+  cdiTime.minute = (short)minute;
+  cdiTime.second = (short)second;
+  cdiTime.ms = ms;
+
+  return cdiTime;
+}
+
+int
+cdiDateGet(CdiDate cdiDate)
+{
+  return cdiEncodeDate(cdiDate.year, cdiDate.month, cdiDate.day);
+}
+
+int
+cdiTimeGet(CdiTime cditime)
+{
+  return cdiEncodeTime(cditime.hour, cditime.minute, cditime.second);
+}
+
 static CdiDate
 date_encode(int year, int month, int day)
 {
@@ -721,35 +762,6 @@ taxisCopyTimestep(int taxisID2, int taxisID1)
 
   reshSetStatus(taxisID2, &taxisOps, RESH_DESYNC_IN_USE);
   reshUnlock();
-}
-
-static CdiDate
-cdiDateSet(int64_t date)
-{
-  int year, month, day;
-  cdiDecodeDate(date, &year, &month, &day);
-
-  CdiDate cdiDate;
-  cdiDate.year = year;
-  cdiDate.month = (short)month;
-  cdiDate.day = (short)day;
-
-  return cdiDate;
-}
-
-static CdiTime
-cdiTimeSet(int time)
-{
-  int hour, minute, second;
-  cdiDecodeTime(time, &hour, &minute, &second);
-
-  CdiTime cdiTime;
-  cdiTime.hour = (short)hour;
-  cdiTime.minute = (short)minute;
-  cdiTime.second = (short)second;
-  cdiTime.ms = 0;
-
-  return cdiTime;
 }
 
 CdiDateTime

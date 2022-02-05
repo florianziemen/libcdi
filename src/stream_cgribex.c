@@ -842,6 +842,8 @@ cgribexScanTimestep1(stream_t *streamptr)
           taxis->stime = stime;
           taxis->vdate = vdate;
           taxis->vtime = vtime;
+          taxis->vdatetime.date = cdiDateSet(vdate);
+          taxis->vdatetime.time = cdiTimeSet(vtime);
         }
       else
         {
@@ -1010,6 +1012,8 @@ cgribexScanTimestep2(stream_t *streamptr)
           taxis->unit = cgribexGetTimeUnit(isec1);
           taxis->vdate = vdate;
           taxis->vtime = vtime;
+          taxis->vdatetime.date = cdiDateSet(vdate);
+          taxis->vdatetime.time = cdiTimeSet(vtime);
           taxis->sdate = sdate;
           taxis->stime = stime;
         }
@@ -1217,6 +1221,8 @@ cgribexScanTimestep(stream_t *streamptr)
               taxis->unit = cgribexGetTimeUnit(isec1);
               taxis->vdate = vdate;
               taxis->vtime = vtime;
+              taxis->vdatetime.date = cdiDateSet(vdate);
+              taxis->vdatetime.time = cdiTimeSet(vtime);
               taxis->sdate = sdate;
               taxis->stime = stime;
             }

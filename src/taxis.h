@@ -43,6 +43,12 @@ typedef struct
   char *units;
 } taxis_t;
 
+
+CdiDate cdiDateSet(int date);
+CdiTime cdiTimeSet(int time);
+int cdiDateGet(CdiDate cdiDate);
+int cdiTimeGet(CdiTime cditime);
+
 //      taxisInqSdate: Get the start date
 int64_t taxisInqSdate(int taxisID);
 

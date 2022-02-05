@@ -1060,6 +1060,8 @@ fdbScanTimesteps(stream_t *streamptr)
           taxis->stime = stime;
           taxis->vdate = vdate;
           taxis->vtime = vtime;
+          taxis->vdatetime.date = cdiDateSet(vdate);
+          taxis->vdatetime.time = cdiTimeSet(vtime);
         }
 
       if (CDI_Debug)
@@ -1120,6 +1122,8 @@ fdbScanTimesteps(stream_t *streamptr)
 
       taxis->vdate = vdate;
       taxis->vtime = vtime;
+      taxis->vdatetime.date = cdiDateSet(vdate);
+      taxis->vdatetime.time = cdiTimeSet(vtime);
 
       int rindex = 0;
       for (int recID = 0; recID < numRecords; recID++)
@@ -1224,6 +1228,8 @@ gribapiScanTimestep1(stream_t *streamptr)
           taxis->stime = stime;
           taxis->vdate = vdate;
           taxis->vtime = vtime;
+          taxis->vdatetime.date = cdiDateSet(vdate);
+          taxis->vdatetime.time = cdiTimeSet(vtime);
         }
       else
         {
@@ -1385,6 +1391,8 @@ gribapiScanTimestep2(stream_t *streamptr)
           taxis->ftime = taxis->rtime;
           taxis->vdate = vdate;
           taxis->vtime = vtime;
+          taxis->vdatetime.date = cdiDateSet(vdate);
+          taxis->vdatetime.time = cdiTimeSet(vtime);
           taxis->sdate = sdate;
           taxis->stime = stime;
           // printf("2: %d %6d  %d %6d  %d %6d\n", taxis->rdate, taxis->rtime, taxis->sdate, taxis->stime, taxis->vdate,
@@ -1583,6 +1591,8 @@ gribapiScanTimestep(stream_t *streamptr)
               taxis->ftime = taxis->rtime;
               taxis->vdate = vdate;
               taxis->vtime = vtime;
+              taxis->vdatetime.date = cdiDateSet(vdate);
+              taxis->vdatetime.time = cdiTimeSet(vtime);
               taxis->sdate = sdate;
               taxis->stime = stime;
               // printf("n: %d %6d  %d %6d  %d %6d\n", taxis->rdate, taxis->rtime, taxis->sdate, taxis->stime, taxis->vdate,
