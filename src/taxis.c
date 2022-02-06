@@ -427,12 +427,10 @@ taxisDefVdate(int taxisID, DateType vdate)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->vdate != (int64_t) vdate)
+  if (cdiDateGet(taxisptr->vdatetime.date) != vdate)
     {
-      taxisptr->vdate = (int64_t) vdate;
-      int year, month, day;
-      cdiDecodeDate(vdate, &year, &month, &day);
-      taxisptr->vdatetime.date = date_encode(year, month, day);
+      taxisptr->vdate = vdate;
+      taxisptr->vdatetime.date = cdiDateSet(vdate);
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -456,12 +454,10 @@ taxisDefVtime(int taxisID, int vtime)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->vtime != vtime)
+  if (cdiTimeGet(taxisptr->vdatetime.time) != vtime)
     {
       taxisptr->vtime = vtime;
-      int hour, minute, second, ms = 0;
-      cdiDecodeTime(vtime, &hour, &minute, &second);
-      taxisptr->vdatetime.time = time_encode(hour, minute, second, ms);
+      taxisptr->vdatetime.time = cdiTimeSet(vtime);
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -768,12 +764,7 @@ CdiDateTime
 taxisInqVdatetime(int taxisID)
 {
   const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-
-  CdiDateTime datetime;
-  datetime.date = cdiDateSet(taxisptr->vdate);
-  datetime.time = cdiTimeSet(taxisptr->vtime);
-
-  return datetime;
+  return taxisptr->vdatetime;
 }
 
 
@@ -797,7 +788,8 @@ DateType
 taxisInqVdate(int taxisID)
 {
   const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return (DateType) taxisptr->vdate;
+  //return (DateType) taxisptr->vdate;
+  return cdiDateGet(taxisptr->vdatetime.date);
 }
 
 int64_t
@@ -873,7 +865,8 @@ int
 taxisInqVtime(int taxisID)
 {
   const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return taxisptr->vtime;
+  //return taxisptr->vtime;
+  return cdiTimeGet(taxisptr->vdatetime.time);
 }
 
 int
