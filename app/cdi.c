@@ -340,7 +340,6 @@ printShortinfo(int streamID, int vlistID, int vardis)
 {
   char tmpname[CDI_MAX_NAME];
   char varname[CDI_MAX_NAME];
-  int year, month, day, hour, minute, second;
   char pstr[4];
   char paramstr[32];
 
@@ -495,11 +494,14 @@ printShortinfo(int streamID, int vlistID, int vardis)
         {
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             {
-              int64_t vdate = taxisInqRdate(taxisID);
-              int vtime = taxisInqRtime(taxisID);
+              const CdiDateTime rdatetime = taxisInqRdatetime(taxisID);
 
-              cdiDecodeDate(vdate, &year, &month, &day);
-              cdiDecodeTime(vtime, &hour, &minute, &second);
+              const int year = rdatetime.date.year;
+              const int month = rdatetime.date.month;
+              const int day = rdatetime.date.day;
+              const int hour = rdatetime.time.hour;
+              const int minute = rdatetime.time.minute;
+              const int second = rdatetime.time.second;
 
               fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", year, month, day, hour, minute, second);
 
