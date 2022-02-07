@@ -15,29 +15,23 @@ typedef struct
   int self;
   bool used;
   short has_bounds;
-  int datatype;   // datatype
-  int type;       // time type
-  int64_t sdate;  // start date
-  int stime;      // start time
-  //int64_t vdate;  // verification date
-  //int vtime;      // verification time
-  CdiDateTime vdatetime; // verification date/time
-  int64_t rdate;  // reference date
-  int rtime;      // reference time
-  int64_t fdate;  // forecast reference date
-  int ftime;      // forecast reference time
+  int datatype;             // datatype
+  int type;                 // time type
+  int64_t sdate;            // start date
+  int stime;                // start time
+  CdiDateTime vdatetime;    // verification date/time
+  int64_t rdate;            // reference date
+  int rtime;                // reference time
+  int64_t fdate;            // forecast reference date
+  int ftime;                // forecast reference time
   int calendar;
-  int unit;  // time unit
+  int unit;                 // time unit
   int numavg;
   bool climatology;
-  int64_t vdate_lb;  // lower bounds of vdate
-  int vtime_lb;      // lower bounds of vtime
-  int64_t vdate_ub;  // upper bounds of vdate
-  int vtime_ub;      // upper bounds of vtime
   CdiDateTime vdatetime_lb; // lower bounds of verification date/time
   CdiDateTime vdatetime_ub; // upper bounds of verification date/time
-  int fc_unit;       // forecast time unit
-  double fc_period;  // forecast time period
+  int fc_unit;              // forecast time unit
+  double fc_period;         // forecast time period
   char *name;
   char *longname;
   char *units;

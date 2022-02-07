@@ -4517,11 +4517,10 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
 
       double timevalue = tsID;
 
-      int nctimevarid = streamptr->basetime.ncvarid;
+      const int nctimevarid = streamptr->basetime.ncvarid;
       if (nctimevarid != CDI_UNDEFID && streamptr->basetime.lunits)
         {
-          int fileID = streamptr->fileID;
-          size_t index = (size_t) tsID;
+          const int fileID = streamptr->fileID;
 
           if (streamptr->basetime.lwrf)
             {
@@ -4541,11 +4540,11 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
               taxis->vdatetime = cdiDecodeTimeval(timevalue, taxis);
             }
 
-          int nctimeboundsid = streamptr->basetime.ncvarboundsid;
+          const int nctimeboundsid = streamptr->basetime.ncvarboundsid;
           if (nctimeboundsid != CDI_UNDEFID)
             {
               size_t start[2], count[2];
-              start[0] = index;
+              start[0] = (size_t) tsID;
               count[0] = 1;
               start[1] = 0;
               count[1] = 1;
@@ -4553,10 +4552,8 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
               if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
 
               taxis->vdatetime_lb = cdiDecodeTimeval(timevalue, taxis);
-              taxis->vdate_lb = cdiEncodeDate(taxis->vdatetime_lb.date.year, taxis->vdatetime_lb.date.month, taxis->vdatetime_lb.date.day);
-              taxis->vtime_lb = cdiEncodeTime(taxis->vdatetime_lb.time.hour, taxis->vdatetime_lb.time.minute, taxis->vdatetime_lb.time.second);
 
-              start[0] = index;
+              start[0] = (size_t) tsID;
               count[0] = 1;
               start[1] = 1;
               count[1] = 1;
@@ -4564,11 +4561,9 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
               if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
 
               taxis->vdatetime_ub = cdiDecodeTimeval(timevalue, taxis);
-              taxis->vdate_ub = cdiEncodeDate(taxis->vdatetime_ub.date.year, taxis->vdatetime_ub.date.month, taxis->vdatetime_ub.date.day);
-              taxis->vtime_ub = cdiEncodeTime(taxis->vdatetime_ub.time.hour, taxis->vdatetime_ub.time.minute, taxis->vdatetime_ub.time.second);
            }
 
-          int leadtimeid = streamptr->basetime.leadtimeid;
+          const int leadtimeid = streamptr->basetime.leadtimeid;
           if (leadtimeid != CDI_UNDEFID)
             {
               timevalue = get_timevalue(fileID, leadtimeid, tsID, NULL);

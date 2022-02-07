@@ -248,10 +248,6 @@ taxisDefaultValue(taxis_t *taxisptr)
   taxisptr->numavg = 0;
   taxisptr->climatology = false;
   taxisptr->has_bounds = false;
-  taxisptr->vdate_lb = 0;
-  taxisptr->vtime_lb = 0;
-  taxisptr->vdate_ub = 0;
-  taxisptr->vtime_ub = 0;
   datetime_init(&taxisptr->vdatetime_lb);
   datetime_init(&taxisptr->vdatetime_ub);
   taxisptr->fc_unit = DefaultTimeUnit;
@@ -736,10 +732,6 @@ taxisCopyTimestep(int taxisID2, int taxisID1)
 
   if (taxisptr2->has_bounds)
     {
-      taxisptr2->vdate_lb = taxisptr1->vdate_lb;
-      taxisptr2->vtime_lb = taxisptr1->vtime_lb;
-      taxisptr2->vdate_ub = taxisptr1->vdate_ub;
-      taxisptr2->vtime_ub = taxisptr1->vtime_ub;
       taxisptr2->vdatetime_lb = taxisptr1->vdatetime_lb;
       taxisptr2->vdatetime_ub = taxisptr1->vdatetime_ub;
    }
@@ -782,7 +774,6 @@ DateType
 taxisInqVdate(int taxisID)
 {
   const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  //return (DateType) taxisptr->vdate;
   return cdiDateGet(taxisptr->vdatetime.date);
 }
 
@@ -797,16 +788,14 @@ void
 taxisInqVdateBounds(int taxisID, DateType *vdate_lb, DateType *vdate_ub)
 {
   const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-
-  *vdate_lb = (DateType) taxisptr->vdate_lb;
-  *vdate_ub = (DateType) taxisptr->vdate_ub;
+  *vdate_lb = cdiDateGet(taxisptr->vdatetime_lb.date);
+  *vdate_ub = cdiDateGet(taxisptr->vdatetime_ub.date);
 }
 
 void
 taxisInqVdatetimeBounds(int taxisID, CdiDateTime *vdatetime_lb, CdiDateTime *vdatetime_ub)
 {
   const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-
   *vdatetime_lb = taxisptr->vdatetime_lb;
   *vdatetime_ub = taxisptr->vdatetime_ub;
 }
@@ -816,10 +805,10 @@ taxisDefVdateBounds(int taxisID, DateType vdate_lb, DateType vdate_ub)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->has_bounds == false || taxisptr->vdate_lb != (int64_t) vdate_lb || taxisptr->vdate_ub != (int64_t) vdate_ub)
+  if (taxisptr->has_bounds == false || cdiDateGet(taxisptr->vdatetime_lb.date) != vdate_lb || cdiDateGet(taxisptr->vdatetime_ub.date) != vdate_ub)
     {
-      taxisptr->vdate_lb = (int64_t) vdate_lb;
-      taxisptr->vdate_ub = (int64_t) vdate_ub;
+      taxisptr->vdatetime_lb.date = cdiDateSet(vdate_lb);
+      taxisptr->vdatetime_ub.date = cdiDateSet(vdate_ub);
       taxisptr->has_bounds = true;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
@@ -874,9 +863,8 @@ void
 taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 {
   const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-
-  *vtime_lb = taxisptr->vtime_lb;
-  *vtime_ub = taxisptr->vtime_ub;
+  *vtime_lb = cdiTimeGet(taxisptr->vdatetime_lb.time);
+  *vtime_ub = cdiTimeGet(taxisptr->vdatetime_ub.time);
 }
 
 void
@@ -884,10 +872,10 @@ taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->vtime_lb != vtime_lb || taxisptr->vtime_ub != vtime_ub || taxisptr->has_bounds == false)
+  if (taxisptr->has_bounds == false || cdiTimeGet(taxisptr->vdatetime_lb.time) != vtime_lb || cdiTimeGet(taxisptr->vdatetime_ub.time) != vtime_ub)
     {
-      taxisptr->vtime_lb = vtime_lb;
-      taxisptr->vtime_ub = vtime_ub;
+      taxisptr->vdatetime_lb.time = cdiTimeSet(vtime_lb);
+      taxisptr->vdatetime_ub.time = cdiTimeSet(vtime_ub);
       taxisptr->has_bounds = true;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
@@ -1603,10 +1591,6 @@ ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->numavg = source->numavg;
   dest->climatology = source->climatology;
   dest->has_bounds = source->has_bounds;
-  dest->vdate_lb = source->vdate_lb;
-  dest->vtime_lb = source->vtime_lb;
-  dest->vdate_ub = source->vdate_ub;
-  dest->vtime_ub = source->vtime_ub;
   dest->vdatetime_lb = source->vdatetime_lb;
   dest->vdatetime_ub = source->vdatetime_ub;
   dest->fc_unit = source->fc_unit;
@@ -1675,8 +1659,8 @@ taxisCompareP(void *taxisptr1, void *taxisptr2)
   return !(t1->used == t2->used && t1->type == t2->type && datetime_isEQ(t1->vdatetime,  t2->vdatetime)
            && t1->rdate == t2->rdate && t1->rtime == t2->rtime && t1->fdate == t2->fdate && t1->ftime == t2->ftime
            && t1->calendar == t2->calendar && t1->unit == t2->unit && t1->fc_unit == t2->fc_unit && t1->numavg == t2->numavg
-           && t1->climatology == t2->climatology && t1->has_bounds == t2->has_bounds && t1->vdate_lb == t2->vdate_lb
-           && t1->vtime_lb == t2->vtime_lb && t1->vdate_ub == t2->vdate_ub && t1->vtime_ub == t2->vtime_ub);
+           && t1->climatology == t2->climatology && t1->has_bounds == t2->has_bounds
+           && datetime_isEQ(t1->vdatetime_lb, t2->vdatetime_lb) && datetime_isEQ(t1->vdatetime_ub, t2->vdatetime_ub));
 }
 
 static int
@@ -1735,10 +1719,10 @@ taxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int 
   taxisP->numavg = intBuffer[idx++];
   taxisP->climatology = intBuffer[idx++];
   taxisP->has_bounds = (short) intBuffer[idx++];
-  taxisP->vdate_lb = intBuffer[idx++];
-  taxisP->vtime_lb = intBuffer[idx++];
-  taxisP->vdate_ub = intBuffer[idx++];
-  taxisP->vtime_ub = intBuffer[idx++];
+  taxisP->vdatetime_lb.date = cdiDateSet(intBuffer[idx++]);
+  taxisP->vdatetime_lb.time = cdiTimeSet(intBuffer[idx++]);
+  taxisP->vdatetime_ub.date = cdiDateSet(intBuffer[idx++]);
+  taxisP->vdatetime_ub.time = cdiTimeSet(intBuffer[idx++]);
 
   if (intBuffer[idx])
     {
@@ -1793,10 +1777,10 @@ taxisPack(void *voidP, void *packBuffer, int packBufferSize, int *packBufferPos,
   intBuffer[idx++] = taxisP->numavg;
   intBuffer[idx++] = taxisP->climatology;
   intBuffer[idx++] = taxisP->has_bounds;
-  intBuffer[idx++] = taxisP->vdate_lb;
-  intBuffer[idx++] = taxisP->vtime_lb;
-  intBuffer[idx++] = taxisP->vdate_ub;
-  intBuffer[idx++] = taxisP->vtime_ub;
+  intBuffer[idx++] = cdiDateGet(taxisP->vdatetime_lb.date);
+  intBuffer[idx++] = cdiTimeGet(taxisP->vdatetime_lb.time);
+  intBuffer[idx++] = cdiDateGet(taxisP->vdatetime_ub.date);
+  intBuffer[idx++] = cdiTimeGet(taxisP->vdatetime_ub.time);
   intBuffer[idx++] = taxisP->name ? (int) strlen(taxisP->name) : 0;
   intBuffer[idx++] = taxisP->longname ? (int) strlen(taxisP->longname) : 0;
   intBuffer[idx++] = taxisP->units ? (int) strlen(taxisP->units) : 0;
