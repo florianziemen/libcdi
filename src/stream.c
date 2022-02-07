@@ -1759,7 +1759,7 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
             if (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF)
               {
                 taxis_t *taxisptr = taxisPtr(taxisID);
-                if (taxisptr->rdate == -1)
+                if (cdiDateTime_isNull(taxisptr->rdatetime))
                   {
                     int vdate = taxisInqVdate(taxisID);
                     if (vdate == 0) vdate = 10101;

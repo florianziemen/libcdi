@@ -72,9 +72,12 @@ cdfDefTimeUnits(char *unitstr, taxis_t *taxis)
         }
       else
         {
-          int year, month, day, hour, minute, second;
-          cdiDecodeDate(taxis->rdate, &year, &month, &day);
-          cdiDecodeTime(taxis->rtime, &hour, &minute, &second);
+          const int year = taxis->rdatetime.date.year;
+          const int month = taxis->rdatetime.date.month;
+          const int day = taxis->rdatetime.date.day;
+          const int hour = taxis->rdatetime.time.hour;
+          const int minute = taxis->rdatetime.time.minute;
+          const int second = taxis->rdatetime.time.second;
 
           int timeunit = (taxis->unit != -1) ? taxis->unit : TUNIT_HOUR;
           if (timeunit == TUNIT_QUARTER)

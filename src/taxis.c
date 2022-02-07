@@ -239,8 +239,7 @@ taxisDefaultValue(taxis_t *taxisptr)
   taxisptr->sdate = 0;
   taxisptr->stime = 0;
   datetime_init(&taxisptr->vdatetime);
-  taxisptr->rdate = CDI_UNDEFID;
-  taxisptr->rtime = 0;
+  datetime_init(&taxisptr->rdatetime);
   taxisptr->fdate = CDI_UNDEFID;
   taxisptr->ftime = 0;
   taxisptr->calendar = CDI_Default_Calendar;
@@ -466,6 +465,24 @@ taxisDefVdatetime(int taxisID, CdiDateTime vdatetime)
     }
 }
 
+void
+taxisDefRdatetime(int taxisID, CdiDateTime rdatetime)
+{
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+
+  if (datetime_isNE(taxisptr->rdatetime, rdatetime))
+    {
+      taxisptr->rdatetime = rdatetime;
+
+      if (taxisptr->units)
+        {
+          delete_refcount_string(taxisptr->units);
+          taxisptr->units = NULL;
+        }
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
+}
+
 /*
 @Function  taxisDefRdate
 @Title     Define the reference date
@@ -485,9 +502,9 @@ taxisDefRdate(int taxisID, DateType rdate)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->rdate != (int64_t) rdate)
+  if (cdiDateGet(taxisptr->rdatetime.date) != rdate)
     {
-      taxisptr->rdate = (int64_t) rdate;
+      taxisptr->rdatetime.date = cdiDateSet(rdate);
 
       if (taxisptr->units)
         {
@@ -517,9 +534,9 @@ taxisDefRtime(int taxisID, int rtime)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->rtime != rtime)
+  if (cdiTimeGet(taxisptr->rdatetime.time) != rtime)
     {
-      taxisptr->rtime = rtime;
+      taxisptr->rdatetime.time = cdiTimeSet(rtime);
       if (taxisptr->units)
         {
           delete_refcount_string(taxisptr->units);
@@ -711,19 +728,7 @@ taxisCopyTimestep(int taxisID2, int taxisID1)
 
   reshLock();
 
-  /* reference date/time and units can't be changed after streamDefVlist().
-  if (taxisptr2->units && taxisptr2->rdate != CDI_UNDEFID)
-    {
-      if (taxisptr2->rdate != taxisptr1->rdate || taxisptr2->rtime != taxisptr1->rtime)
-        {
-          delete_refcount_string(taxisptr2->units);
-          taxisptr2->units = NULL;
-        }
-    }
-
-  taxisptr2->rdate = taxisptr1->rdate;
-  taxisptr2->rtime = taxisptr1->rtime;
-  */
+  // reference date/time and units can't be changed after streamDefVlist()!
 
   taxisptr2->sdate = taxisptr1->sdate;
   taxisptr2->stime = taxisptr1->stime;
@@ -751,6 +756,20 @@ taxisInqVdatetime(int taxisID)
 {
   const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return taxisptr->vdatetime;
+}
+
+CdiDateTime
+taxisInqRdatetime(int taxisID)
+{
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+
+  if (cdiDateTime_isNull(taxisptr->rdatetime))
+    {
+      taxisptr->rdatetime = taxisptr->vdatetime;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
+
+  return taxisptr->rdatetime;
 }
 
 
@@ -902,14 +921,13 @@ taxisInqRdate(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->rdate == -1)
+  if (cdiDateTime_isNull(taxisptr->rdatetime))
     {
-      taxisptr->rdate = cdiDateGet(taxisptr->vdatetime.date);
-      taxisptr->rtime = cdiTimeGet(taxisptr->vdatetime.time);
+      taxisptr->rdatetime = taxisptr->vdatetime;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 
-  return (DateType) taxisptr->rdate;
+  return cdiDateGet(taxisptr->rdatetime.date);
 }
 
 /*
@@ -933,14 +951,13 @@ taxisInqRtime(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->rdate == -1)
+  if (cdiDateTime_isNull(taxisptr->rdatetime))
     {
-      taxisptr->rdate = cdiDateGet(taxisptr->vdatetime.date);
-      taxisptr->rtime = cdiTimeGet(taxisptr->vdatetime.time);
+      taxisptr->rdatetime = taxisptr->vdatetime;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 
-  return taxisptr->rtime;
+  return cdiTimeGet(taxisptr->rdatetime.time);
 }
 
 /*
@@ -966,6 +983,7 @@ taxisInqFdate(int taxisID)
 
   if (taxisptr->fdate == -1)
     {
+      // rdatetime is initialized from vdatetime if empty!
       taxisptr->fdate = taxisInqRdate(taxisID);
       taxisptr->ftime = taxisInqRtime(taxisID);
     }
@@ -996,6 +1014,7 @@ taxisInqFtime(int taxisID)
 
   if (taxisptr->fdate == -1)
     {
+      // rdatetime is initialized from vdatetime if empty!
       taxisptr->fdate = taxisInqRdate(taxisID);
       taxisptr->ftime = taxisInqRtime(taxisID);
     }
@@ -1204,21 +1223,14 @@ cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
 static CdiDateTime
 rtimeval2datetime(double timevalue, taxis_t *taxis)
 {
-  int64_t rdate = taxis->rdate;
-  int rtime = taxis->rtime;
+  if (DBL_IS_EQUAL(timevalue, 0.0)) return taxis->rdatetime;
 
-  int year, month, day, hour, minute, second;
-  cdiDecodeDate(rdate, &year, &month, &day);
-  cdiDecodeTime(rtime, &hour, &minute, &second);
-
-  if (DBL_IS_EQUAL(timevalue, 0.0))
-    {
-      CdiDateTime datetime;
-      datetime.date = date_encode(year, month, day);
-      int ms = 0;
-      datetime.time = time_encode(hour, minute, second, ms);
-      return datetime;
-    }
+  int year = taxis->rdatetime.date.year;
+  int month = taxis->rdatetime.date.month;
+  int day = taxis->rdatetime.date.day;
+  int hour = taxis->rdatetime.time.hour;
+  int minute = taxis->rdatetime.time.minute;
+  int second = taxis->rdatetime.time.second;
 
   int timeunit = taxis->unit;
   const int calendar = taxis->calendar;
@@ -1277,20 +1289,19 @@ datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
   int timeunit = (*taxis).unit;
   const int calendar = (*taxis).calendar;
 
-  int64_t rdate = (*taxis).rdate;
-  int rtime = (*taxis).rtime;
+  CdiDateTime rdatetime = (*taxis).rdatetime;
 
-  if (rdate == -1)
-    {
-      rdate = cdiDateGet((*taxis).vdatetime.date);
-      rtime = cdiTimeGet((*taxis).vdatetime.time);
-    }
+  if (cdiDateTime_isNull(rdatetime)) rdatetime = (*taxis).vdatetime;
 
-  if (rdate == 0 && rtime == 0 && cdiDateTime_isNull(vdatetime)) return value;
+  if (cdiDateTime_isNull(rdatetime) && cdiDateTime_isNull(vdatetime)) return value;
 
-  int year, month, day, hour, minute, second, ms;
-  cdiDecodeDate(rdate, &year, &month, &day);
-  cdiDecodeTime(rtime, &hour, &minute, &second);
+  int year = taxis->rdatetime.date.year;
+  int month = taxis->rdatetime.date.month;
+  int day = taxis->rdatetime.date.day;
+  int hour = taxis->rdatetime.time.hour;
+  int minute = taxis->rdatetime.time.minute;
+  int second = taxis->rdatetime.time.second;
+  int ms = taxis->rdatetime.time.ms;
 
   const int ryear = year;
   const int rmonth = month;
@@ -1582,8 +1593,7 @@ ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->sdate = source->sdate;
   dest->stime = source->stime;
   dest->vdatetime = source->vdatetime;
-  dest->rdate = source->rdate;
-  dest->rtime = source->rtime;
+  dest->rdatetime = source->rdatetime;
   dest->fdate = source->fdate;
   dest->ftime = source->ftime;
   dest->calendar = source->calendar;
@@ -1626,7 +1636,7 @@ taxisPrintKernel(taxis_t *taxisptr, FILE *fp)
           "type        = %d\n"
           "vdate       = %d\n"
           "vtime       = %d\n"
-          "rdate       = %lld\n"
+          "rdate       = %d\n"
           "rtime       = %d\n"
           "fdate       = %lld\n"
           "ftime       = %d\n"
@@ -1643,8 +1653,9 @@ taxisPrintKernel(taxis_t *taxisptr, FILE *fp)
           "fc_period   = %g\n"
           "\n",
           taxisptr->self, taxisptr->self, (int) taxisptr->used, taxisptr->type,
-          cdiDateGet(taxisptr->vdatetime.date), cdiTimeGet(taxisptr->vdatetime.time), taxisptr->rdate,
-          taxisptr->rtime, taxisptr->fdate, taxisptr->ftime, taxisptr->calendar, taxisptr->unit, taxisptr->numavg,
+          cdiDateGet(taxisptr->vdatetime.date), cdiTimeGet(taxisptr->vdatetime.time),
+          cdiDateGet(taxisptr->rdatetime.date), cdiTimeGet(taxisptr->rdatetime.time),
+          taxisptr->fdate, taxisptr->ftime, taxisptr->calendar, taxisptr->unit, taxisptr->numavg,
           (int) taxisptr->climatology, (int) taxisptr->has_bounds, (long) vdate_lb, vtime_lb, (long) vdate_ub, vtime_ub,
           taxisptr->fc_unit, taxisptr->fc_period);
 }
@@ -1657,7 +1668,7 @@ taxisCompareP(void *taxisptr1, void *taxisptr2)
   xassert(t1 && t2);
 
   return !(t1->used == t2->used && t1->type == t2->type && datetime_isEQ(t1->vdatetime,  t2->vdatetime)
-           && t1->rdate == t2->rdate && t1->rtime == t2->rtime && t1->fdate == t2->fdate && t1->ftime == t2->ftime
+           && datetime_isEQ(t1->rdatetime, t2->rdatetime) && t1->fdate == t2->fdate && t1->ftime == t2->ftime
            && t1->calendar == t2->calendar && t1->unit == t2->unit && t1->fc_unit == t2->fc_unit && t1->numavg == t2->numavg
            && t1->climatology == t2->climatology && t1->has_bounds == t2->has_bounds
            && datetime_isEQ(t1->vdatetime_lb, t2->vdatetime_lb) && datetime_isEQ(t1->vdatetime_ub, t2->vdatetime_ub));
@@ -1709,8 +1720,8 @@ taxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int 
   taxisP->type = intBuffer[idx++];
   taxisP->vdatetime.date = cdiDateSet(intBuffer[idx++]);
   taxisP->vdatetime.time = cdiTimeSet(intBuffer[idx++]);
-  taxisP->rdate = intBuffer[idx++];
-  taxisP->rtime = intBuffer[idx++];
+  taxisP->rdatetime.date = cdiDateSet(intBuffer[idx++]);
+  taxisP->rdatetime.time = cdiTimeSet(intBuffer[idx++]);
   taxisP->fdate = intBuffer[idx++];
   taxisP->ftime = intBuffer[idx++];
   taxisP->calendar = intBuffer[idx++];
@@ -1767,8 +1778,8 @@ taxisPack(void *voidP, void *packBuffer, int packBufferSize, int *packBufferPos,
   intBuffer[idx++] = taxisP->type;
   intBuffer[idx++] = cdiDateGet(taxisP->vdatetime.date);
   intBuffer[idx++] = cdiTimeGet(taxisP->vdatetime.time);
-  intBuffer[idx++] = taxisP->rdate;
-  intBuffer[idx++] = taxisP->rtime;
+  intBuffer[idx++] = cdiDateGet(taxisP->rdatetime.date);
+  intBuffer[idx++] = cdiTimeGet(taxisP->rdatetime.time);
   intBuffer[idx++] = taxisP->fdate;
   intBuffer[idx++] = taxisP->ftime;
   intBuffer[idx++] = taxisP->calendar;

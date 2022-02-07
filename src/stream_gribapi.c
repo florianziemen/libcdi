@@ -119,11 +119,11 @@ gribapiGetSteps(grib_handle *gh, int timeunits, int *startStep, int *endStep)
 }
 
 static void
-gribapiGetDataDateTime(grib_handle *gh, int64_t *datadate, int *datatime)
+gribapiGetDataDateTime(grib_handle *gh, int *datadate, int *datatime)
 {
   long date;
   GRIB_CHECK(grib_get_long(gh, "dataDate", &date), 0);
-  *datadate = (int64_t) date;
+  *datadate = (int) date;
   long hour, minute, second;
   GRIB_CHECK(grib_get_long(gh, "hour", &hour), 0);
   GRIB_CHECK(grib_get_long(gh, "minute", &minute), 0);
@@ -132,7 +132,7 @@ gribapiGetDataDateTime(grib_handle *gh, int64_t *datadate, int *datatime)
 }
 
 static void
-gribapiSetDataDateTime(grib_handle *gh, int64_t datadate, int datatime)
+gribapiSetDataDateTime(grib_handle *gh, int datadate, int datatime)
 {
   GRIB_CHECK(my_grib_set_long(gh, "dataDate", (long) datadate), 0);
   int hour, minute, second;
@@ -167,7 +167,7 @@ gribapiGetTimeUnitFactor(const int timeUnits)
 }
 
 static void
-gribapiGetValidityDateTime(grib_handle *gh, int64_t *vdate, int *vtime, int64_t *sDate, int *sTime)
+gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime, int *sDate, int *sTime)
 {
   *sDate = 0;
   *sTime = 0;
@@ -186,8 +186,7 @@ gribapiGetValidityDateTime(grib_handle *gh, int64_t *vdate, int *vtime, int64_t 
     }
   else
     {
-      int64_t rdate;
-      int rtime;
+      int rdate, rtime;
       gribapiGetDataDateTime(gh, &rdate, &rtime);
 
       const int timeUnits = gribapiGetTimeUnits(gh);
@@ -1041,7 +1040,7 @@ fdbScanTimesteps(stream_t *streamptr)
       char varname[256];
       gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
-      int64_t vdate, sdate;
+      int vdate, sdate;
       int vtime, stime;
       gribapiGetValidityDateTime(gh, &vdate, &vtime, &sdate, &stime);
       DateTime datetime = { .date = vdate, .time = vtime };
@@ -1051,11 +1050,14 @@ fdbScanTimesteps(stream_t *streamptr)
       if (recID == 0)
         {
           datetime0 = datetime;
-          gribapiGetDataDateTime(gh, &(taxis->rdate), &(taxis->rtime));
+          int rdate, rtime;
+          gribapiGetDataDateTime(gh, &rdate, &rtime);
+          taxis->rdatetime.date = cdiDateSet(rdate);
+          taxis->rdatetime.time = cdiTimeSet(rtime);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
-          taxis->fdate = taxis->rdate;
-          taxis->ftime = taxis->rtime;
+          taxis->fdate = rdate;
+          taxis->ftime = rtime;
           taxis->sdate = sdate;
           taxis->stime = stime;
           taxis->vdatetime.date = cdiDateSet(vdate);
@@ -1205,7 +1207,7 @@ gribapiScanTimestep1(stream_t *streamptr)
       char varname[256];
       gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
-      int64_t vdate, sdate;
+      int vdate, sdate;
       int vtime, stime;
       gribapiGetValidityDateTime(gh, &vdate, &vtime, &sdate, &stime);
       DateTime datetime = { .date = vdate, .time = vtime };
@@ -1215,11 +1217,14 @@ gribapiScanTimestep1(stream_t *streamptr)
       if (nrecs == 0)
         {
           datetime0 = datetime;
-          gribapiGetDataDateTime(gh, &(taxis->rdate), &(taxis->rtime));
+          int rdate, rtime;
+          gribapiGetDataDateTime(gh, &rdate, &rtime);
+          taxis->rdatetime.date = cdiDateSet(rdate);
+          taxis->rdatetime.time = cdiTimeSet(rtime);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
-          taxis->fdate = taxis->rdate;
-          taxis->ftime = taxis->rtime;
+          taxis->fdate = rdate;
+          taxis->ftime = rtime;
           taxis->sdate = sdate;
           taxis->stime = stime;
           taxis->vdatetime.date = cdiDateSet(vdate);
@@ -1362,7 +1367,7 @@ gribapiScanTimestep2(stream_t *streamptr)
       char varname[256];
       gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
-      int64_t vdate, sdate;
+      int vdate, sdate;
       int vtime, stime;
       gribapiGetValidityDateTime(gh, &vdate, &vtime, &sdate, &stime);
       DateTime datetime = { .date = vdate, .time = vtime };
@@ -1375,14 +1380,17 @@ gribapiScanTimestep2(stream_t *streamptr)
             {
               taxis->type = TAXIS_RELATIVE;
               taxis->unit = gribapiGetTimeUnits(gh);
-              gribapiGetDataDateTime(gh, &(taxis->rdate), &(taxis->rtime));
+              int rdate, rtime;
+              gribapiGetDataDateTime(gh, &rdate, &rtime);
+              taxis->rdatetime.date = cdiDateSet(rdate);
+              taxis->rdatetime.time = cdiTimeSet(rtime);
             }
           else
             {
               taxis->type = TAXIS_ABSOLUTE;
             }
-          taxis->fdate = taxis->rdate;
-          taxis->ftime = taxis->rtime;
+          taxis->fdate = cdiDateGet(taxis->rdatetime.date);
+          taxis->ftime = cdiTimeGet(taxis->rdatetime.time);
           taxis->vdatetime.date = cdiDateSet(vdate);
           taxis->vdatetime.time = cdiTimeSet(vtime);
           taxis->sdate = sdate;
@@ -1558,7 +1566,7 @@ gribapiScanTimestep(stream_t *streamptr)
 
           gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
-          int64_t vdate, sdate;
+          int vdate, sdate;
           int vtime, stime;
           gribapiGetValidityDateTime(gh, &vdate, &vtime, &sdate, &stime);
           DateTime datetime = { .date = vdate, .time = vtime };
@@ -1573,14 +1581,17 @@ gribapiScanTimestep(stream_t *streamptr)
                 {
                   taxis->type = TAXIS_RELATIVE;
                   taxis->unit = gribapiGetTimeUnits(gh);
-                  gribapiGetDataDateTime(gh, &(taxis->rdate), &(taxis->rtime));
+                  int rdate, rtime;
+                  gribapiGetDataDateTime(gh, &rdate, &rtime);
+                  taxis->rdatetime.date = cdiDateSet(rdate);
+                  taxis->rdatetime.time = cdiTimeSet(rtime);
                 }
               else
                 {
                   taxis->type = TAXIS_ABSOLUTE;
                 }
-              taxis->fdate = taxis->rdate;
-              taxis->ftime = taxis->rtime;
+              taxis->fdate = cdiDateGet(taxis->rdatetime.date);
+              taxis->ftime = cdiTimeGet(taxis->rdatetime.time);
               taxis->vdatetime.date = cdiDateSet(vdate);
               taxis->vdatetime.time = cdiTimeSet(vtime);
               taxis->sdate = sdate;
@@ -1978,7 +1989,7 @@ gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinitionTemp
 }
 
 static void
-gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int64_t date, int time, int productDefinitionTemplate,
+gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int date, int time, int productDefinitionTemplate,
                       int typeOfGeneratingProcess, int tsteptype, int gcinit)
 {
   (void) gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
@@ -1991,7 +2002,7 @@ gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int64_t date, int time
 }
 
 static int
-gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t fdate, int ftime, int64_t vdate, int vtime, int64_t sdate,
+gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, int vdate, int vtime, int sdate,
                       int stime, int productDefinitionTemplate, int typeOfGeneratingProcess, int tsteptype, int timeunit,
                       int calendar, int gcinit)
 {
@@ -2075,7 +2086,7 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t fdate, int fti
 }
 
 static void
-gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGeneratingProcess, grib_handle *gh, int64_t vdate,
+gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGeneratingProcess, grib_handle *gh, int vdate,
                int vtime, int tsteptype, int numavg, int taxisID, int gcinit)
 {
   UNUSED(numavg);
@@ -2094,7 +2105,7 @@ gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGener
       const int timeunit = taxisInqTunit(taxisID);
       const int calendar = taxisInqCalendar(taxisID);
 
-      int64_t fdate = taxisInqFdate(taxisID);
+      int fdate = taxisInqFdate(taxisID);
       int ftime = taxisInqFtime(taxisID);
       if (fdate == CDI_UNDEFID)
         {
@@ -2107,7 +2118,7 @@ gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGener
           ftime = vtime;
         }
 
-      const int64_t sdate = taxisInqSdate(taxisID);
+      const int sdate = taxisInqSdate(taxisID);
       const int stime = taxisInqStime(taxisID);
 
       int status = gribapiDefDateTimeRel(editionNumber, gh, fdate, ftime, vdate, vtime, sdate, stime, productDefinitionTemplate,
@@ -3207,7 +3218,7 @@ gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const void *data
 // #define GRIBAPIENCODETEST 1
 
 size_t
-gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int64_t vdate, int vtime, int tsteptype, int numavg,
+gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int vdate, int vtime, int tsteptype, int numavg,
               size_t datasize, const void *data, size_t nmiss, void **gribbuffer, size_t *gribbuffersize, int comptype,
               void *gribContainer)
 {

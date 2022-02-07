@@ -760,8 +760,7 @@ tstepScanLoopFinished:
 
   const int taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type = TAXIS_ABSOLUTE;
-  taxis->rdate = cdiDateGet(taxis->vdatetime.date);
-  taxis->rtime = cdiTimeGet(taxis->vdatetime.time);
+  taxis->rdatetime = taxis->vdatetime;
 
   const int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);

@@ -1346,6 +1346,8 @@ typedef struct
 } CdiDateTime;
 
 
+void taxisDefRdatetime(int taxisID, CdiDateTime rdatetime);
+CdiDateTime taxisInqRdatetime(int taxisID);
 void taxisDefVdatetime(int taxisID, CdiDateTime vdatetime);
 CdiDateTime taxisInqVdatetime(int taxisID);
 void taxisDefVdatetimeBounds(int taxisID, CdiDateTime vdatetime_lb, CdiDateTime vdatetime_ub);

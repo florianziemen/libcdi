@@ -134,12 +134,12 @@ typedef struct
   int timedimid;
 } GridInfo;
 
-static void
-scanTimeString(const char *ptu, int64_t *rdate, int *rtime)
+static CdiDateTime
+scanTimeString(const char *ptu)
 {
-  int year = 1, month = 1, day = 1;
+  int year = 0, month = 0, day = 0;
   int hour = 0, minute = 0, second = 0;
-  int v1 = 1, v2 = 1, v3 = 1;
+  int v1 = 0, v2 = 0, v3 = 0;
   char ch = ' ';
 
   if (*ptu) sscanf(ptu, "%d-%d-%d%c%d:%d:%d", &v1, &v2, &v3, &ch, &hour, &minute, &second);
@@ -157,8 +157,15 @@ scanTimeString(const char *ptu, int64_t *rdate, int *rtime)
       day = v3;
     }
 
-  *rdate = cdiEncodeDate(year, month, day);
-  *rtime = cdiEncodeTime(hour, minute, second);
+  CdiDateTime datetime;
+  datetime.date.year = year;
+  datetime.date.month = month;
+  datetime.date.day = day;
+  datetime.time.hour = hour;
+  datetime.time.minute = minute;
+  datetime.time.second = second;
+
+  return datetime;
 }
 
 static int
@@ -175,7 +182,11 @@ setForecastTime(const char *timestr, taxis_t *taxis)
 {
   const size_t len = strlen(timestr);
   if (len != 0)
-    scanTimeString(timestr, &taxis->fdate, &taxis->ftime);
+    {
+      const CdiDateTime datetime = scanTimeString(timestr);
+      taxis->fdate = cdiDateGet(datetime.date);
+      taxis->ftime = cdiTimeGet(datetime.time);
+     }
   else
     taxis->fdate = taxis->ftime = 0;
 }
@@ -250,13 +261,8 @@ setBaseTime(const char *timeunits, taxis_t *taxis)
             }
           else if (taxistype == TAXIS_RELATIVE)
             {
-              int64_t rdate = -1;
-              int rtime = -1;
-              scanTimeString(tu + pos, &rdate, &rtime);
-              taxis->rdate = rdate;
-              taxis->rtime = rtime;
-
-              if (CDI_Debug) Message("rdate = %lld  rtime = %d", rdate, rtime);
+              taxis->rdatetime = scanTimeString(tu + pos);
+              if (CDI_Debug) Message("rdate = %d  rtime = %d", cdiDateGet(taxis->rdatetime.date), cdiTimeGet(taxis->rdatetime.time));
             }
         }
     }

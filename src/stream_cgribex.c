@@ -836,8 +836,8 @@ cgribexScanTimestep1(stream_t *streamptr)
           datetime0 = datetime;
           fcast = cgribexTimeIsFC(isec1);
           taxis->unit = cgribexGetTimeUnit(isec1);
-          taxis->rdate = gribRefDate(isec1);
-          taxis->rtime = gribRefTime(isec1);
+          taxis->rdatetime.date = cdiDateSet(gribRefDate(isec1));
+          taxis->rdatetime.time = cdiTimeSet(gribRefTime(isec1));
           taxis->sdate = sdate;
           taxis->stime = stime;
           taxis->vdatetime.date = cdiDateSet(vdate);
@@ -1000,8 +1000,8 @@ cgribexScanTimestep2(stream_t *streamptr)
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             {
               taxis->type = TAXIS_RELATIVE;
-              taxis->rdate = gribRefDate(isec1);
-              taxis->rtime = gribRefTime(isec1);
+              taxis->rdatetime.date = cdiDateSet(gribRefDate(isec1));
+              taxis->rdatetime.time = cdiTimeSet(gribRefTime(isec1));
             }
           else
             {
@@ -1207,8 +1207,8 @@ cgribexScanTimestep(stream_t *streamptr)
               if (taxisInqType(taxisID) == TAXIS_RELATIVE)
                 {
                   taxis->type = TAXIS_RELATIVE;
-                  taxis->rdate = gribRefDate(isec1);
-                  taxis->rtime = gribRefTime(isec1);
+                  taxis->rdatetime.date = cdiDateSet(gribRefDate(isec1));
+                  taxis->rdatetime.time = cdiTimeSet(gribRefTime(isec1));
                 }
               else
                 {
@@ -1623,8 +1623,7 @@ cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg, int 
       if ( lwarn && timetype == TAXIS_ABSOLUTE )
         {
           lwarn = false;
-          Warning("Can't store forecast time %ld %d relative to %ld %d, converted to absolute time!", (long)vdate, vtime,
-      (long)rdate, rtime);
+          Warning("Can't store forecast time %d %d relative to %d %d, converted to absolute time!", vdate, vtime, rdate, rtime);
         }
       */
       ISEC1_TimeRange = timerange;
