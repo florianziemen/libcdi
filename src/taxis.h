@@ -19,8 +19,8 @@ typedef struct
   int type;       // time type
   int64_t sdate;  // start date
   int stime;      // start time
-  int64_t vdate;  // verification date
-  int vtime;      // verification time
+  //int64_t vdate;  // verification date
+  //int vtime;      // verification time
   CdiDateTime vdatetime; // verification date/time
   int64_t rdate;  // reference date
   int rtime;      // reference time
@@ -48,6 +48,8 @@ CdiDate cdiDateSet(int date);
 CdiTime cdiTimeSet(int time);
 int cdiDateGet(CdiDate cdiDate);
 int cdiTimeGet(CdiTime cditime);
+bool cdiDateTime_isNull(CdiDateTime datetime);
+
 
 //      taxisInqSdate: Get the start date
 int64_t taxisInqSdate(int taxisID);

@@ -280,8 +280,6 @@ extScanTimestep1(stream_t *streamptr)
       if (nrecs == 0)
         {
           datetime0 = datetime;
-          taxis->vdate = vdate;
-          taxis->vtime = vtime;
           taxis->vdatetime.date = cdiDateSet(vdate);
           taxis->vdatetime.time = cdiTimeSet(vtime);
         }
@@ -310,8 +308,6 @@ tstepScanLoopFinished:
   taxis->type = TAXIS_ABSOLUTE;
   taxis->rdate = cdiDateGet(taxis->vdatetime.date);
   taxis->rtime = cdiTimeGet(taxis->vdatetime.time);
-  taxis->rdate = taxis->vdate;
-  taxis->rtime = taxis->vtime;
 
   const int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
@@ -370,8 +366,6 @@ extScanTimestep2(stream_t *streamptr)
       if (rindex == 0)
         {
           taxis->type = TAXIS_ABSOLUTE;
-          taxis->vdate = vdate;
-          taxis->vtime = vtime;
           taxis->vdatetime.date = cdiDateSet(vdate);
           taxis->vdatetime.time = cdiTimeSet(vtime);
         }
@@ -498,8 +492,6 @@ extScanTimestep(stream_t *streamptr)
           if (rindex == 0)
             {
               taxis->type = TAXIS_ABSOLUTE;
-              taxis->vdate = vdate;
-              taxis->vtime = vtime;
               taxis->vdatetime.date = cdiDateSet(vdate);
               taxis->vdatetime.time = cdiTimeSet(vtime);
             }
@@ -619,7 +611,6 @@ extWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
 
   int header[4];
   header[0] = cdiDateGet(streamptr->tsteps[tsID].taxis.vdatetime.date);
-  header[0] = streamptr->tsteps[tsID].taxis.vdate;
   header[1] = pnum;
   header[2] = (int) (zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
   int gridID = vlistInqVarGrid(vlistID, varID);

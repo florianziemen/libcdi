@@ -289,8 +289,6 @@ srvScanTimestep1(stream_t *streamptr)
       if (nrecs == 0)
         {
           datetime0 = datetime;
-          taxis->vdate = vdate;
-          taxis->vtime = vtime;
           taxis->vdatetime.date = cdiDateSet(vdate);
           taxis->vdatetime.time = cdiTimeSet(vtime);
         }
@@ -319,8 +317,6 @@ tstepScanLoopFinished:
   taxis->type = TAXIS_ABSOLUTE;
   taxis->rdate = cdiDateGet(taxis->vdatetime.date);
   taxis->rtime = cdiTimeGet(taxis->vdatetime.time);
-  taxis->rdate = taxis->vdate;
-  taxis->rtime = taxis->vtime;
 
   const int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
@@ -379,8 +375,6 @@ srvScanTimestep2(stream_t *streamptr)
       if (rindex == 0)
         {
           taxis->type = TAXIS_ABSOLUTE;
-          taxis->vdate = vdate;
-          taxis->vtime = vtime;
           taxis->vdatetime.date = cdiDateSet(vdate);
           taxis->vdatetime.time = cdiTimeSet(vtime);
         }
@@ -507,8 +501,6 @@ srvScanTimestep(stream_t *streamptr)
           if (rindex == 0)
             {
               taxis->type = TAXIS_ABSOLUTE;
-              taxis->vdate = vdate;
-              taxis->vtime = vtime;
               taxis->vdatetime.date = cdiDateSet(vdate);
               taxis->vdatetime.time = cdiTimeSet(vtime);
             }
@@ -632,8 +624,6 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   header[1] = (int) (zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
   header[2] = cdiDateGet(taxis->vdatetime.date);
   header[3] = cdiTimeGet(taxis->vdatetime.time);
-  header[2] = taxis->vdate;
-  header[3] = taxis->vtime;
 
   size_t xsize = gridInqXsize(gridID);
   size_t ysize = gridInqYsize(gridID);

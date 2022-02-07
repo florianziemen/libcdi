@@ -1058,8 +1058,6 @@ fdbScanTimesteps(stream_t *streamptr)
           taxis->ftime = taxis->rtime;
           taxis->sdate = sdate;
           taxis->stime = stime;
-          taxis->vdate = vdate;
-          taxis->vtime = vtime;
           taxis->vdatetime.date = cdiDateSet(vdate);
           taxis->vdatetime.time = cdiTimeSet(vtime);
         }
@@ -1120,8 +1118,6 @@ fdbScanTimesteps(stream_t *streamptr)
       const int nrecs = (tsID == 1) ? streamScanInitRecords2(streamptr) : streamScanInitRecords(streamptr, tsID);
       if (nrecs != numRecords) Error("Internal error. nrecs = %d", nrecs);
 
-      taxis->vdate = vdate;
-      taxis->vtime = vtime;
       taxis->vdatetime.date = cdiDateSet(vdate);
       taxis->vdatetime.time = cdiTimeSet(vtime);
 
@@ -1226,8 +1222,6 @@ gribapiScanTimestep1(stream_t *streamptr)
           taxis->ftime = taxis->rtime;
           taxis->sdate = sdate;
           taxis->stime = stime;
-          taxis->vdate = vdate;
-          taxis->vtime = vtime;
           taxis->vdatetime.date = cdiDateSet(vdate);
           taxis->vdatetime.time = cdiTimeSet(vtime);
         }
@@ -1389,8 +1383,6 @@ gribapiScanTimestep2(stream_t *streamptr)
             }
           taxis->fdate = taxis->rdate;
           taxis->ftime = taxis->rtime;
-          taxis->vdate = vdate;
-          taxis->vtime = vtime;
           taxis->vdatetime.date = cdiDateSet(vdate);
           taxis->vdatetime.time = cdiTimeSet(vtime);
           taxis->sdate = sdate;
@@ -1589,8 +1581,6 @@ gribapiScanTimestep(stream_t *streamptr)
                 }
               taxis->fdate = taxis->rdate;
               taxis->ftime = taxis->rtime;
-              taxis->vdate = vdate;
-              taxis->vtime = vtime;
               taxis->vdatetime.date = cdiDateSet(vdate);
               taxis->vdatetime.time = cdiTimeSet(vtime);
               taxis->sdate = sdate;
