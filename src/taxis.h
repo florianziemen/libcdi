@@ -20,8 +20,7 @@ typedef struct
   int64_t sdate;            // start date
   int stime;                // start time
   CdiDateTime vdatetime;    // verification date/time
-  int64_t rdate;            // reference date
-  int rtime;                // reference time
+  CdiDateTime rdatetime;    // reference date/time
   int64_t fdate;            // forecast reference date
   int ftime;                // forecast reference time
   int calendar;
@@ -63,7 +62,7 @@ void ptaxisDefName(taxis_t *taxisptr, const char *name);
 void ptaxisDefLongname(taxis_t *taxisptr, const char *longname);
 void ptaxisDefUnits(taxis_t *taxisptr, const char *units);
 void taxisDestroyKernel(taxis_t *taxisptr);
-#if !defined(SX)
+#ifndef SX
 extern const resOps taxisOps;
 #endif
 
