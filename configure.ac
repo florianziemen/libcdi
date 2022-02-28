@@ -310,7 +310,7 @@ AC_ARG_ENABLE([ppm-dist-array],
 build_pio_fc_programs=no
 have_ppm=no
 AC_SUBST([HAVE_PPM_DIST_ARRAY], [no])
-AM_SUBST_NOTMAKE([HAVE_PPM_DIST_ARRAY])dnl
+AM_SUBST_NOTMAKE([HAVE_PPM_DIST_ARRAY])
 have_parallel_nc4=no
 AS_VAR_IF([enable_mpi], [yes],
   [dnl
@@ -667,14 +667,26 @@ AC_CONFIG_COMMANDS_PRE(m4_bpatsubst(build_tool_var, [BUILD_], [])[="$]{build_too
 AM_SUBST_NOTMAKE(build_tool_var)])dnl
 
 dnl Additional output variables for cdi.settings:
-AC_SUBST([ENABLE_MPI], [$enable_mpi])
-AM_SUBST_NOTMAKE([ENABLE_MPI)])dnl
-AC_SUBST([HAVE_PARALLEL_NC4], [$have_parallel_nc4])
-AM_SUBST_NOTMAKE([HAVE_PARALLEL_NC4)])dnl
-AC_SUBST([ENABLE_RUBY_INTERFACE], [$enable_ruby_interface])
-AM_SUBST_NOTMAKE([ENABLE_RUBY_INTERFACE)])dnl
-AC_SUBST([ENABLE_PYTHON_INTERFACE], [$enable_python_interface])
-AM_SUBST_NOTMAKE([ENABLE_PYTHON_INTERFACE)])dnl
+AS_VAR_IF([enable_mpi],[yes],
+  [ENABLE_MPI=true],
+  [ENABLE_MPI=false])
+AC_SUBST([ENABLE_MPI])
+AM_SUBST_NOTMAKE([ENABLE_MPI)])
+AS_VAR_IF([have_parallel_nc4],[yes],
+  [HAVE_PARALLEL_NC4=1],
+  [HAVE_PARALLEL_NC4=0])
+AC_SUBST([HAVE_PARALLEL_NC4])
+AM_SUBST_NOTMAKE([HAVE_PARALLEL_NC4])
+AS_VAR_IF([enable_ruby_interface],[yes],
+  [ENABLE_RUBY_INTERFACE=true],
+  [ENABLE_RUBY_INTERFACE=false])
+AC_SUBST([ENABLE_RUBY_INTERFACE])
+AM_SUBST_NOTMAKE([ENABLE_RUBY_INTERFACE])
+AS_VAR_IF([enable_python_interface],[yes],
+  [ENABLE_PYTHON_INTERFACE=true],
+  [ENABLE_PYTHON_INTERFACE=false])
+AC_SUBST([ENABLE_PYTHON_INTERFACE])
+AM_SUBST_NOTMAKE([ENABLE_PYTHON_INTERFACE])
 
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES([
