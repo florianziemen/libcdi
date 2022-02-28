@@ -1644,7 +1644,7 @@ Optional Features:
                           create Fortran 90 interface using Fortran 2003
                           ISO_C_BINDING facility [default=no]
   --enable-cf-interface   create Fortran 77 interface using cfortran.h
-                          [default=no]
+                          [default=yes, if F77 or FC works]
   --enable-ruby-interface create Ruby language interface (EXPERIMENTAL)
                           [default=no]
   --enable-python-interface
@@ -5122,7 +5122,11 @@ fi
 if test "${enable_cf_interface+set}" = set; then :
   enableval=$enable_cf_interface; test "x$enableval" != xno && enable_cf_interface=yes
 else
+  if test "x$FC" != xno || test "x$F77" != xno; then :
+  enable_cf_interface=yes
+else
   enable_cf_interface=no
+fi
 fi
 
  if test "x$enable_cf_interface" = xyes; then
@@ -5786,7 +5790,7 @@ fi
    if test "x$FC" = xno; then :
   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "the Fortran 90 interface is requested but the Fortran compiler is disabled, missing or lacks the required features
+as_fn_error $? "the Fortran 2003 interface is requested but the Fortran compiler is disabled, missing or lacks the required features
 See \`config.log' for more details" "$LINENO" 5; }
 fi
 fi
