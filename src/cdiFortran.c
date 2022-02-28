@@ -339,10 +339,8 @@ FCALLSCSUB2 (gridDefNP, GRIDDEFNP, griddefnp, INT, INT)
 FCALLSCFUN1 (INT, gridInqNP, GRIDINQNP, gridinqnp, INT)
 FCALLSCSUB2 (gridDefXvals, GRIDDEFXVALS, griddefxvals, INT, DOUBLEV)
 FCALLSCFUN2 (INT, gridInqXvals, GRIDINQXVALS, gridinqxvals, INT, DOUBLEV)
-FCALLSCFUN1 (INT, gridInqXIsc, GRIDINQXISC, gridinqxisc, INT)
 FCALLSCSUB2 (gridDefYvals, GRIDDEFYVALS, griddefyvals, INT, DOUBLEV)
 FCALLSCFUN2 (INT, gridInqYvals, GRIDINQYVALS, gridinqyvals, INT, DOUBLEV)
-FCALLSCFUN1 (INT, gridInqYIsc, GRIDINQYISC, gridinqyisc, INT)
 
 /*  CDI grid string key values  */
 
