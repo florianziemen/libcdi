@@ -30005,6 +30005,7 @@ build_pio_fc_programs=no
 have_ppm=no
 HAVE_PPM_DIST_ARRAY=no
 
+
 have_parallel_nc4=no
 # Sed expression to map a string onto a valid argument string part.
 asx_tr_arg="eval sed 'y%*+%pp%;s%[^-$as_cr_alnum]%-%g'"
@@ -32534,13 +32535,33 @@ fi
 
 
 
-ENABLE_MPI=$enable_mpi
+if test "x$enable_mpi" = xyes; then :
+  ENABLE_MPI=true
+else
+  ENABLE_MPI=false
+fi
 
-HAVE_PARALLEL_NC4=$have_parallel_nc4
 
-ENABLE_RUBY_INTERFACE=$enable_ruby_interface
+if test "x$have_parallel_nc4" = xyes; then :
+  HAVE_PARALLEL_NC4=1
+else
+  HAVE_PARALLEL_NC4=0
+fi
 
-ENABLE_PYTHON_INTERFACE=$enable_python_interface
+
+if test "x$enable_ruby_interface" = xyes; then :
+  ENABLE_RUBY_INTERFACE=true
+else
+  ENABLE_RUBY_INTERFACE=false
+fi
+
+
+if test "x$enable_python_interface" = xyes; then :
+  ENABLE_PYTHON_INTERFACE=true
+else
+  ENABLE_PYTHON_INTERFACE=false
+fi
+
 
 
 ac_config_headers="$ac_config_headers src/config.h"
