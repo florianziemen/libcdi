@@ -760,7 +760,7 @@ void zaxisDefLevels(int zaxisID, const double *levels)
 
   if ( levels )
     {
-      if ( zaxisptr->vals == NULL )
+      if ( zaxisptr->vals == NULL && size != (size_t) 0 )
         zaxisptr->vals = (double*) Malloc(size*sizeof(double));
 
       double *vals = zaxisptr->vals;
@@ -792,7 +792,7 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   int size = zaxisptr->size;
 
-  if ( zaxisptr->vals == NULL )
+  if ( zaxisptr->vals == NULL && size != 0 )
     zaxisptr->vals = (double*) Malloc((size_t)size*sizeof(double));
 
   if ( levelID >= 0 && levelID < size )
