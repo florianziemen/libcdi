@@ -271,8 +271,6 @@
       PARAMETER (GRID_LCC               = 11)
       INTEGER    GRID_PROJECTION
       PARAMETER (GRID_PROJECTION        = 12)
-      INTEGER    GRID_CHARXY
-      PARAMETER (GRID_CHARXY            = 13)
       INTEGER    CDI_PROJ_RLL
       PARAMETER (CDI_PROJ_RLL           = 21)
       INTEGER    CDI_PROJ_LCC
@@ -336,8 +334,6 @@
       PARAMETER (ZAXIS_MIX_LAYER        = 24)
       INTEGER    ZAXIS_REFERENCE
       PARAMETER (ZAXIS_REFERENCE        = 25)
-      INTEGER    ZAXIS_CHAR
-      PARAMETER (ZAXIS_CHAR             = 26)
       INTEGER    ZAXIS_TROPOPAUSE
       PARAMETER (ZAXIS_TROPOPAUSE       = 27)
 !
@@ -1592,10 +1588,6 @@
 !                                     DOUBLEPRECISION xvals(*))
       EXTERNAL        gridInqXvals
 
-      INTEGER         gridInqXIsc
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqXIsc
-
 !                     gridDefYvals
 !                                    (INTEGER         gridID,
 !                                     DOUBLEPRECISION yvals(*))
@@ -1605,10 +1597,6 @@
 !                                    (INTEGER         gridID,
 !                                     DOUBLEPRECISION yvals(*))
       EXTERNAL        gridInqYvals
-
-      INTEGER         gridInqYIsc
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqYIsc
 
 !
 !  CDI grid string key values

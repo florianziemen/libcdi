@@ -40,7 +40,6 @@ static const char Grids[][17] = {
   /* 10 */  "curvilinear",
   /* 11 */  "lcc",
   /* 12 */  "projection",
-  /* 13 */  "characterXY",
 };
 
 /* must match table below */
@@ -48,7 +47,6 @@ enum xystdname_idx {
   grid_xystdname_grid_latlon,
   grid_xystdname_latlon,
   grid_xystdname_projection,
-  grid_xystdname_char,
 };
 static const char xystdname_tab[][2][24] = {
   [grid_xystdname_grid_latlon] = { "grid_longitude",
@@ -57,8 +55,7 @@ static const char xystdname_tab[][2][24] = {
                               "latitude" },
   [grid_xystdname_projection] = { "projection_x_coordinate",
                                   "projection_y_coordinate" },
-  [grid_xystdname_char] = { "region",
-                            "region" },
+
 };
 
 
@@ -130,11 +127,7 @@ void grid_init(grid_t *gridptr)
   gridptr->mask          = NULL;
   gridptr->mask_gme      = NULL;
   gridptr->x.vals        = NULL;
-  gridptr->x.cvals       = NULL;
-  gridptr->x.clength     = 0;
   gridptr->y.vals        = NULL;
-  gridptr->y.cvals       = NULL;
-  gridptr->y.clength     = 0;
   gridptr->x.bounds      = NULL;
   gridptr->y.bounds      = NULL;
   gridptr->area          = NULL;
@@ -207,7 +200,6 @@ void grid_free_components(grid_t *gridptr)
 {
   void *p2free[] = { gridptr->mask, gridptr->mask_gme,
                      gridptr->x.vals, gridptr->y.vals,
-                     gridptr->x.cvals, gridptr->y.cvals,
                      gridptr->x.bounds, gridptr->y.bounds,
                      gridptr->rowlon, gridptr->area,
                      gridptr->reference, gridptr->name};
@@ -337,13 +329,6 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
         gridSetName(gridptr->y.units, "degrees_north");
 
         break;
-      }
-    case GRID_CHARXY:
-      {
-        if ( gridptr->x.cvals )
-          gridptr->x.stdname = xystdname_tab[grid_xystdname_char][0];
-        if ( gridptr->y.cvals )
-          gridptr->y.stdname = xystdname_tab[grid_xystdname_char][0];
       }
     case GRID_GENERIC:
     case GRID_PROJECTION:
@@ -1521,6 +1506,7 @@ void gridDefMaskGME(int gridID, const int *mask)
   gridMark4Update(gridID);
 }
 
+
 static
 int gridInqXValsSerial(grid_t *gridptr, double *xvals)
 {
@@ -1547,37 +1533,6 @@ int gridInqXValsSerial(grid_t *gridptr, double *xvals)
     size = 0;
 
   return (int)size;
-}
-
-static
-int gridInqXCvalsSerial(grid_t *gridptr, char **xcvals)
-{
-  if ( gridptr->type != GRID_CHARXY )
-    Error("Function only valid for grid type 'GRID_CHARXY'.");
-
-  int size = gridptr->x.size;
-  int maxclength = 0;
-
-  const char **gridptr_xcvals = gridptr->vtable->inqXCvalsPtr(gridptr);
-  if ( gridptr_xcvals && size && xcvals )
-    {
-      maxclength = gridptr->x.clength;
-      for ( int i = 0; i < size; i++ )
-        memcpy(xcvals[i], gridptr_xcvals[i], (size_t)maxclength*sizeof(char));
-    }
-
-  return maxclength;
-}
-
-static
-int gridInqXIscSerial(grid_t *gridptr)
-{
-  int clen = gridptr->x.clength;
-  /*
-  if ( gridptr->type != GRID_CHARXY )
-    Error("Axis type is 'char' but grid is not type 'GRID_CHARXY'.");
-  */
-  return clen;
 }
 
 /*
@@ -1607,19 +1562,6 @@ int gridInqXvals(int gridID, double *xvals)
 }
 
 
-int gridInqXCvals(int gridID, char **xcvals)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->vtable->inqXCvals(gridptr, xcvals);
-}
-
-
-int gridInqXIsc(int gridID)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->vtable->inqXIsc(gridptr);
-}
-
 static
 void gridDefXValsSerial(grid_t *gridptr, const double *xvals)
 {
@@ -1641,37 +1583,6 @@ void gridDefXValsSerial(grid_t *gridptr, const double *xvals)
   gridptr->x.vals = (double *)Realloc(gridptr->x.vals,
                                       (size_t)size * sizeof(double));
   memcpy(gridptr->x.vals, xvals, (size_t)size * sizeof (double));
-}
-
-static
-int gridInqYCvalsSerial(grid_t *gridptr, char **ycvals)
-{
-  if ( gridptr->type != GRID_CHARXY )
-    Error("Function only valid for grid type 'GRID_CHARXY'.");
-
-  int size = gridptr->y.size;
-  int maxclength = 0;
-
-  const char **gridptr_ycvals = gridptr->vtable->inqYCvalsPtr(gridptr);
-  if ( gridptr_ycvals && size && ycvals )
-    {
-      maxclength = gridptr->y.clength;
-      for ( int i = 0; i < size; i++ )
-        memcpy(ycvals[i], gridptr_ycvals[i], (size_t)maxclength*sizeof(char));
-    }
-
-  return maxclength;
-}
-
-static
-int gridInqYIscSerial(grid_t *gridptr)
-{
-  int clen = gridptr->y.clength;
-  /*
-  if ( gridptr->type != GRID_CHARXY )
-    Error("Axis type is 'char' but grid is not type 'GRID_CHARXY'.");
-  */
-  return clen;
 }
 
 /*
@@ -1743,20 +1654,6 @@ int gridInqYvals(int gridID, double *yvals)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqYVals(gridptr, yvals);
-}
-
-
-int gridInqYCvals(int gridID, char **ycvals)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->vtable->inqYCvals(gridptr, ycvals);
-}
-
-
-int gridInqYIsc(int gridID)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->vtable->inqYIsc(gridptr);
 }
 
 static
@@ -2583,7 +2480,6 @@ void gridComplete(grid_t *grid)
     case GRID_CURVILINEAR:
     case GRID_GENERIC:
     case GRID_PROJECTION:
-    case GRID_CHARXY:
       {
 	if ( grid->x.size > 0 ) gridDefXsize(gridID, grid->x.size);
 	if ( grid->y.size > 0 ) gridDefYsize(gridID, grid->y.size);
@@ -3420,8 +3316,6 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
   char attstr[CDI_MAX_NAME];
   char attstr2[CDI_MAX_NAME];
   unsigned char uuidOfHGrid[CDI_UUID_SIZE];
-  const char  **xcvals  = gridInqXCvalsPtr(gridID);
-  const char  **ycvals  = gridInqYCvalsPtr(gridID);
   size_t nxvals = (size_t) gridInqXvals(gridID, NULL);
   size_t nyvals = (size_t) gridInqYvals(gridID, NULL);
   size_t nxbounds = (size_t) gridInqXbounds(gridID, NULL);
@@ -3431,8 +3325,6 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
   int gridsize = gridInqSize(gridID);
   int xsize    = gridInqXsize(gridID);
   int ysize    = gridInqYsize(gridID);
-  int xstrlen  = gridInqXIsc(gridID);
-  int ystrlen  = gridInqYIsc(gridID);
   int nvertex  = gridInqNvertex(gridID);
   int prec     = gridInqPrec(gridID);
 
@@ -3448,9 +3340,8 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
           if ( ysize > 0 ) fprintf(fp, "ysize     = %d\n", ysize);
         }
 
-      if ( nxvals > 0 || xcvals )
+      if ( nxvals > 0 )
         {
-          if ( xstrlen )  fprintf(fp, "xstringlen= %d\n", xstrlen);
           attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, attstr);
           if ( attstr[0] )  fprintf(fp, "xname     = %s\n", attstr);
           attstr2[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_XDIMNAME, CDI_MAX_NAME, attstr2);
@@ -3461,9 +3352,8 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
           if ( attstr[0] )  fprintf(fp, "xunits    = %s\n", attstr);
         }
 
-      if ( nyvals > 0 || ycvals )
+      if ( nyvals > 0 )
         {
-          if ( ystrlen )  fprintf(fp, "ystringlen= %d\n", ystrlen);
           attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_YNAME, CDI_MAX_NAME, attstr);
           if ( attstr[0] )  fprintf(fp, "yname     = %s\n", attstr);
           attstr2[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_YDIMNAME, CDI_MAX_NAME, attstr2);
@@ -3491,7 +3381,6 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
     case GRID_PROJECTION:
     case GRID_CURVILINEAR:
     case GRID_UNSTRUCTURED:
-    case GRID_CHARXY:
       {
         if ( type == GRID_GAUSSIAN || type == GRID_GAUSSIAN_REDUCED ) fprintf(fp, "np        = %d\n", gridInqNP(gridID));
 
@@ -3562,17 +3451,6 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
 	      }
 	  }
 
-        if ( xcvals )
-          {
-            attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, attstr);
-            if ( attstr[0] )
-              fprintf(fp, "x%ss = %.*s\n", attstr, xstrlen, xcvals[0]);
-            else
-              fprintf(fp, "xstrings  = %.*s\n", xstrlen, xcvals[0]);
-            for ( int i = 1; i < xsize; i++ )
-              fprintf(fp, "          = %.*s\n", xstrlen, xcvals[i]);
-          }
-
 	if ( nxbounds )
 	  {
             double *xbounds = (double*) Malloc(nxbounds*sizeof(double));
@@ -3607,17 +3485,6 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
                 Free(yvals);
 	      }
 	  }
-
-        if ( ycvals )
-          {
-            attstr[0] = 0; cdiGridInqKeyStr(gridID, CDI_KEY_YNAME, CDI_MAX_NAME, attstr);
-            if ( attstr[0] )
-              fprintf(fp, "x%ss = %.*s\n", attstr, ystrlen, ycvals[0]);
-            else
-              fprintf(fp, "ystrings  = %.*s\n", ystrlen, ycvals[0]);
-            for ( int i = 1; i < ysize; i++ )
-              fprintf(fp, "          = %.*s\n", ystrlen, ycvals[i]);
-          }
 
 	if ( nybounds )
 	  {
@@ -3752,12 +3619,6 @@ static const double *gridInqXValsPtrSerial(grid_t *gridptr)
   return gridptr->x.vals;
 }
 
-static const char **gridInqXCvalsPtrSerial(grid_t *gridptr)
-{
-  return (const char **) gridptr->x.cvals;
-}
-
-
 const double *gridInqXvalsPtr(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
@@ -3765,32 +3626,15 @@ const double *gridInqXvalsPtr(int gridID)
 }
 
 
-const char **gridInqXCvalsPtr(int gridID)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->vtable->inqXCvalsPtr(gridptr);
-}
-
 static const double *gridInqYValsPtrSerial(grid_t *gridptr)
 {
   return gridptr->y.vals;
-}
-
-static const char **gridInqYCvalsPtrSerial(grid_t *gridptr)
-{
-  return (const char **) gridptr->y.cvals;
 }
 
 const double *gridInqYvalsPtr(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqYValsPtr(gridptr);
-}
-
-const char **gridInqYCvalsPtr(int gridID)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->vtable->inqYCvalsPtr(gridptr);
 }
 
 /*
@@ -5023,15 +4867,9 @@ const struct gridVirtTable cdiGridVtable
   .inqXVal = gridInqXValSerial,
   .inqYVal = gridInqYValSerial,
   .inqXVals = gridInqXValsSerial,
-  .inqXCvals = gridInqXCvalsSerial,
-  .inqXIsc = gridInqXIscSerial,
   .inqYVals = gridInqYValsSerial,
-  .inqYCvals = gridInqYCvalsSerial,
-  .inqYIsc = gridInqYIscSerial,
   .inqXValsPtr = gridInqXValsPtrSerial,
   .inqYValsPtr = gridInqYValsPtrSerial,
-  .inqXCvalsPtr = gridInqXCvalsPtrSerial,
-  .inqYCvalsPtr = gridInqYCvalsPtrSerial,
   .inqXInc = gridInqXIncBase,
   .inqYInc = gridInqYIncBase,
   .compareXYFull = compareXYvals,

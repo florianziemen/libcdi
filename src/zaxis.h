@@ -20,7 +20,6 @@ typedef struct {
   char     p0name[CDI_MAX_NAME];
   zkey_double_t p0value;
   double  *vals;
-  char   **cvals;
   double  *lbounds;
   double  *ubounds;
   double  *weights;
