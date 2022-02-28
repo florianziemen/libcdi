@@ -40,9 +40,10 @@ AM_CONDITIONAL([ENABLE_ISOC_INTERFACE],
 
 AC_ARG_ENABLE([cf-interface],
   [AS_HELP_STRING([--enable-cf-interface],
-     [create Fortran 77 interface using cfortran.h @<:@default=no@:>@])],
+     [create Fortran 77 interface using cfortran.h @<:@default=yes, if F77 or FC works@:>@])],
   [test "x$enableval" != xno && enable_cf_interface=yes],
-  [enable_cf_interface=no])
+  [AS_IF([test "x$FC" != xno || test "x$F77" != xno],
+     [enable_cf_interface=yes],[enable_cf_interface=no])])
 AM_CONDITIONAL([ENABLE_CF_INTERFACE], [test "x$enable_cf_interface" = xyes])
 
 dnl We need FC for the Fortran 90 and for the Fortran 77 interfaces. In the
@@ -85,11 +86,11 @@ else
   FC=no
 fi
 AM_CONDITIONAL([FC_MOD_UPPERCASE], [test "x$FCMODCASE" = xuc])
-dnl Additional checks required for the Fortran 90 interface:
+dnl Additional checks required for the Fortran 2003 interface:
 AS_VAR_IF([enable_iso_c_interface], [yes],
   [AS_IF([test "x$FC" != xno], [ACX_FC_CHECK_STRPTR_CONVERT([], [FC=no])])
    AS_VAR_IF([FC], [no],
-     [AC_MSG_FAILURE([the Fortran 90 interface is requested but the Fortran ]dnl
+     [AC_MSG_FAILURE([the Fortran 2003 interface is requested but the Fortran ]dnl
 [compiler is disabled, missing or lacks the required features])])])
 AM_CONDITIONAL([BUILD_FC_PROGRAMS], [test "x$FC" != xno])
 
