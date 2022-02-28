@@ -56,16 +56,16 @@
     }
   },
   "features" : {
-    "enable_cdi_lib" : "@ENABLE_CDI_LIB@",
+    "enable_cdi_lib" : @ENABLE_CDI_LIB@,
     "grib"           : "@ENABLE_GRIB@",
     "cgribex"        : "@ENABLE_CGRIBEX@",
     "service"        : "@ENABLE_SERVICE@",
     "extra"          : "@ENABLE_EXTRA@",
     "ieg"            : "@ENABLE_IEG@",
-    "enable_mpi"     : "@ENABLE_MPI@",
-    "parallel_nc4"   : "@HAVE_PARALLEL_NC4@"
-    "enable_python"  : "@ENABLE_PYTHON_INTERFACE@",
-    "enable_ruby"    : "@ENABLE_RUBY_INTERFACE@",
+    "enable_mpi"     : @ENABLE_MPI@,
+    "parallel_nc4"   : @HAVE_PARALLEL_NC4@,
+    "enable_python"  : @ENABLE_PYTHON_INTERFACE@,
+    "enable_ruby"    : @ENABLE_RUBY_INTERFACE@
     "across"         : "@ENABLE_ACROSS@",
   }
 }
