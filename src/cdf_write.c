@@ -579,7 +579,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
     }
 
   if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT && gridtype != GRID_GAUSSIAN &&
-       gridtype != GRID_PROJECTION && gridtype != GRID_CURVILINEAR && gridtype != GRID_CHARXY )
+       gridtype != GRID_PROJECTION && gridtype != GRID_CURVILINEAR )
     {
       size_t len = strlen(gridNamePtr(gridtype));
       if ( len > 0 )
@@ -673,23 +673,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
       axis[iax++] = '-';
       cdf_put_att_text(fileID, ncvarid, "axis", iax, axis);
       cdf_put_att_int(fileID, ncvarid, "truncation", NC_INT, 1, &gridTruncation);
-    }
-  else if ( gridtype == GRID_CHARXY )
-    {
-      if ( gridInqXIsc(gridID) )
-        {
-          int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
-          size_t len = strlen(coordinates);
-          if ( len ) coordinates[len++] = ' ';
-          cdf_inq_varname(fileID, ncxvarID, coordinates+len);
-        }
-      else if ( gridInqYIsc(gridID) )
-        {
-          int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
-          size_t len = strlen(coordinates);
-          if ( len ) coordinates[len++] = ' ';
-          cdf_inq_varname(fileID, ncyvarID, coordinates+len);
-        }
     }
 
   size_t len = strlen(coordinates);
