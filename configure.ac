@@ -157,12 +157,6 @@ AC_ARG_ENABLE([python-interface],
   [test "x$enableval" != xno && enable_python_interface=yes],
   [enable_python_interface=no])
 
-AS_IF([test "x$enable_ruby_interface" = xyes || \
-       test "x$enable_python_interface" = xyes],
-  [AS_IF([test "`cd $srcdir && pwd`" != "`pwd`"],
-     [AC_MSG_ERROR(
-        [Ruby and Python are not supported for out-of-source builds])])])
-
 if test "x$enable_ruby_interface" = xyes || \
    test "x$enable_python_interface" = xyes; then
   if test "x$CXX" != xno; then
