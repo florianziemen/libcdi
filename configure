@@ -6692,13 +6692,6 @@ fi
 
 
 if test "x$enable_ruby_interface" = xyes || \
-       test "x$enable_python_interface" = xyes; then :
-  if test "`cd $srcdir && pwd`" != "`pwd`"; then :
-  as_fn_error $? "Ruby and Python are not supported for out-of-source builds" "$LINENO" 5
-fi
-fi
-
-if test "x$enable_ruby_interface" = xyes || \
    test "x$enable_python_interface" = xyes; then
   if test "x$CXX" != xno; then
     ac_ext=cpp
