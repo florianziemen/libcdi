@@ -773,33 +773,33 @@ help:
 
 # RUBY
 rubyObj: rubyObjWrapper rubyObjMakefile libcdipp.la
-	@$(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS)
+	@$(MKDIR_P) ruby && $(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS)
 
 rubyLib: rubyLibWrapper rubyLibMakefile
-	@$(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS)
+	@$(MKDIR_P) ruby && $(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS)
 
 rubyObjWrapper: ruby/cdiobj_wrap.cpp
 
 rubyLibWrapper: ruby/cdilib_wrap.c
 
 rubyObjTest: rubyObj
-	@$(am__cd) ruby && $(RUBY) testObj.rb
+	@$(MKDIR_P) ruby && $(am__cd) ruby && $(RUBY) testObj.rb
 
 rubyLibTest: rubyLib
-	@$(am__cd) ruby && $(RUBY) testLib.rb
+	@$(MKDIR_P) ruby && $(am__cd) ruby && $(RUBY) testLib.rb
 
 rubyObjInstall: rubyObjMakefile
-	@$(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS) install
+	@$(MKDIR_P) ruby && $(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS) install
 
 rubyLibInstall: rubyLibMakefile
-	@$(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS) install
+	@$(MKDIR_P) ruby && $(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS) install
 
 rubyObjMakefile:
-	$(AM_V_GEN)$(am__cd) ruby && \
+	$(AM_V_GEN)$(MKDIR_P) ruby && $(am__cd) ruby && \
 	INCFLAGS='-I$(abs_srcdir)' CFLAGS='$(CFLAGS)' LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' $(RUBY) extconfObj.rb
 
 rubyLibMakefile:
-	$(AM_V_GEN)$(am__cd) ruby && \
+	$(AM_V_GEN)$(MKDIR_P) ruby && $(am__cd) ruby && \
 	INCFLAGS='-I$(abs_top_srcdir)/src' CFLAGS='$(CFLAGS)' LDFLAGS='$(LDFLAGS) -L$(abs_top_builddir)/src/.libs' LIBS='-lcdi $(LIBS)' $(RUBY) extconfLib.rb
 
 ruby/cdiobj_wrap.cpp: @MAINTAINER_MODE_TRUE@ cdiobj.i
@@ -810,26 +810,26 @@ ruby/cdilib_wrap.c: @MAINTAINER_MODE_TRUE@ cdilib.i
 
 # PYTHON
 pythonObj: pythonObjWrapper cdi.lo
-	@$(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_srcdir)' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS) -L$(abs_top_builddir)/src/.libs' LIBS='$(LIBS)' BUILDLIBDIR='$(abs_top_builddir)/src/.libs' LIBDIR='$(libdir)' $(PYTHON) setupObj.py build_ext --inplace
+	@$(MKDIR_P) python && $(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_srcdir)' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS) -L$(abs_top_builddir)/src/.libs' LIBS='$(LIBS)' BUILDLIBDIR='$(abs_top_builddir)/src/.libs' LIBDIR='$(libdir)' $(PYTHON) setupObj.py build_ext --inplace
 
 pythonLib: pythonLibWrapper $(top_builddir)/src/cdilib.lo
-	@$(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_top_srcdir)/src' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' $(PYTHON) setupLib.py build_ext --inplace
+	@$(MKDIR_P) python && $(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_top_srcdir)/src' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' $(PYTHON) setupLib.py build_ext --inplace
 
 pythonObjWrapper: python/cdiobj_wrap.cpp
 
 pythonLibWrapper: python/cdilib_wrap.c
 
 pythonObjTest: pythonObj
-	@$(am__cd) python && $(PYTHON) testObj.py
+	@$(MKDIR_P) python && $(am__cd) python && $(PYTHON) testObj.py
 
 pythonLibTest: pythonLib
-	@$(am__cd) python && $(PYTHON) testLib.py
+	@$(MKDIR_P) python && $(am__cd) python && $(PYTHON) testLib.py
 
 pythonObjInstall: pythonObj
-	@$(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_srcdir)' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS) -L$(abs_top_builddir)/src/.libs' LIBS='$(LIBS)' BUILDLIBDIR='$(abs_top_builddir)/src/.libs' LIBDIR='$(libdir)' $(PYTHON) setupObj.py install --prefix='$(prefix)'
+	@$(MKDIR_P) python && $(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_srcdir)' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS) -L$(abs_top_builddir)/src/.libs' LIBS='$(LIBS)' BUILDLIBDIR='$(abs_top_builddir)/src/.libs' LIBDIR='$(libdir)' $(PYTHON) setupObj.py install --prefix='$(prefix)'
 
 pythonLibInstall: pythonLib
-	@$(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_top_srcdir)/src' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' $(PYTHON) setupLib.py install --prefix='$(prefix)'
+	@$(MKDIR_P) python && $(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_top_srcdir)/src' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' $(PYTHON) setupLib.py install --prefix='$(prefix)'
 
 python/cdiobj_wrap.cpp: @MAINTAINER_MODE_TRUE@ cdiobj.i
 	$(AM_V_GEN)$(SWIG) -python -c++ -module CdiObj -o $@ $(AM_CPPFLAGS) $<
