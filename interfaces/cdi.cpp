@@ -376,6 +376,7 @@ Cdi::Cdi(const char *path)
     {
       std::cout << "Failed to read input '" << path << "'";
       std::cout << "Got streamID = " << streamID;
+      throw;
     }
   vlistID = streamInqVlist(streamID);
   nvars = vlistNvars(vlistID);

@@ -1,6 +1,9 @@
 #include <string>
 #include <vector>
 #include <map>
+// the following include is only needed for buggy versions of SWIG
+// (2.0.7 and earlier) with newer STL which no longer include cstddef
+#include <cstddef>
 #include "cdi.h"
 
 class CdiGrid

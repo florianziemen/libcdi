@@ -4,13 +4,13 @@
 #include "cdi.hpp"
 
 int
-main()
+main(int argc, char *argv[])
 {
   int varno;
   std::string _name;
   CdiVariable var;
 
-  Cdi info("mulval.nc");
+  Cdi info(argc > 1 ? argv[1] : "testdata/mulval.nc");
 
   std::cout << "#===============================" << std::endl;
   for (int i = 0; i < info.nvars; i++) std::cout << info.codes[i] << ' ';

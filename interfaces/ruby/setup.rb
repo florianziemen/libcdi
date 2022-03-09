@@ -1,12 +1,12 @@
 require 'mkmf'
 
-$INCFLAGS = "#{ENV['INCFLAGS']} #{$INCFLAGS}"
-$CFLAGS   = "#{ENV['CFLAGS']} #{$CFLAGS}"
-$LDFLAGS  = "#{ENV['LDFLAGS']} #{$LDFLAGS}"
-$LIBS     = "#{ENV['LIBS']} #{$LIBS}"
+$INCFLAGS = "$(CDI_INCFLAGS) #{$INCFLAGS}"
+$CPPFLAGS = "$(CDI_CPPFLAGS) #{$CPPFLAGS}"
+$CXXFLAGS = "$(CDI_CXXFLAGS) #{$CXXFLAGS}"
+$LDFLAGS  = "$(CDI_LDFLAGS) #{$LDFLAGS}"
+$LIBS     = "#{$LIBS} $(CDI_LIBS)"
 
-$libs = append_library($libs, "stdc++")
-$LDFLAGS  += " ../.libs/libcdipp.a ../../src/.libs/libcdi.a"
+$libs = "../libcdipp.la #{$libs}"
 $srcs = %w[cdi_wrapper.cpp]
-$objs = %w[cdi_wrapper.o]
+$objs = %w[cdi_wrapper.lo]
 create_makefile('Cdi')

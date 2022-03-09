@@ -596,42 +596,43 @@ AM_CONDITIONAL([BUILD_PIO_FC_PROGRAMS], [test "x$build_pio_fc_programs" = xyes])
 AM_CONDITIONAL([ENABLE_MPI], [test "x$enable_mpi" = xyes])
 AM_CONDITIONAL([HAVE_PARALLEL_NC4], [test "x$have_parallel_nc4" = xyes])
 
-AS_IF([test "x$enable_ruby_interface" = xyes || \
-       test "x$enable_python_interface" = xyes],
-  [AC_CHECK_PROGS([SWIG], [swig])
-   AS_VAR_IF([SWIG], [], [AS_UNSET([SWIG])])])
 AM_MISSING_PROG([SWIG], [swig])
 
 AS_VAR_IF([enable_ruby_interface], [yes],
-  [AC_CHECK_PROGS([RUBY], [ruby])
-   AS_VAR_IF([RUBY], [],
-     [AC_MSG_FAILURE([Ruby interface is requested but the Ruby interpreter ]dnl
-[is not found])])
+  [AC_ARG_VAR([RUBY], [the Ruby interpreter])
+   AC_PATH_PROGS([RUBY], [ruby])
+   ruby_CPPFLAGS=`$RUBY $srcdir/config/interface.rb 2>/dev/null`
+   AS_IF([test $? -ne 0],
+     [AC_MSG_ERROR([Ruby interface is requested but the Ruby interpreter is ]dnl
+[not found])])
    saved_CPPFLAGS=$CPPFLAGS
-   AS_VAR_APPEND([CPPFLAGS],
-     [" `${RUBY} $srcdir/config/interface.rb 2>/dev/null`"])
+   AS_VAR_APPEND([CPPFLAGS], [" $ruby_CPPFLAGS"])
    AC_CHECK_HEADER([ruby.h], [],
      [AC_MSG_FAILURE([Ruby interface is requested but the required header ]dnl
 [ruby.h not found or not compilable])],
      [AC_INCLUDES_DEFAULT])
-   CPPFLAGS=$saved_CPPFLAGS])
-AM_MISSING_PROG([RUBY], [ruby])
+   CPPFLAGS=$saved_CPPFLAGS],
+  [AM_MISSING_PROG([RUBY], [ruby])])
 AM_CONDITIONAL([ENABLE_RUBY_INTERFACE], [test "x$enable_ruby_interface" = xyes])
 
 AS_VAR_IF([enable_python_interface], [yes],
-  [AC_CHECK_PROGS([PYTHON], [python])
-   AS_VAR_IF([PYTHON], [],
-     [AC_MSG_FAILURE([Python interface is requested but the Python ]dnl
+  [dnl
+dnl For consistency with the other commands (MPI_LAUNCH, SWIG, RUBY, etc.), we
+dnl ignore $PYTHON if it is not an absolute path:
+  AS_VAR_SET_IF([PYTHON],
+    [AS_CASE([$PYTHON],
+       [[[\\/]]* | ?:[[\\/]]*], [],
+       [PYTHON=])])
+  AM_PATH_PYTHON([], [], [:])
+dnl AM_PATH_PYTHON does not check whether $PYTHON really works and
+dnl AX_PYTHON_DEVEL fails with a misleading message if it doesn't:
+   AS_IF([$PYTHON -c 'import sys' >/dev/null 2>&1], [],
+     [AC_MSG_ERROR([Python interface is requested but the Python ]dnl
 [interpreter is not found])])
-   saved_CPPFLAGS=$CPPFLAGS
-   AS_VAR_APPEND([CPPFLAGS],
-     [" `${PYTHON} -c 'from distutils import sysconfig;print(\"-I\" + sysconfig.get_python_inc())'`"])
-   AC_CHECK_HEADER([Python.h], [],
-     [AC_MSG_FAILURE([Python interface is requested but the required header ]dnl
-[Python.h not found or not compilable])],
-     [AC_INCLUDES_DEFAULT])
-   CPPFLAGS=$saved_CPPFLAGS])
-AM_MISSING_PROG([PYTHON], [python])
+dnl Do not check for extra flags by default:
+   PYTHON_EXTRA_LDFLAGS=${PYTHON_EXTRA_LDFLAGS-' '}
+   PYTHON_EXTRA_LIBS=${PYTHON_EXTRA_LIBS-' '}
+   AX_PYTHON_DEVEL])
 AM_CONDITIONAL([ENABLE_PYTHON_INTERFACE],
   [test "x$enable_python_interface" = xyes])
 
@@ -713,6 +714,11 @@ AC_CONFIG_FILES([
   tests/test_cksum_base
 ])
 AC_CONFIG_FILES([
+  interfaces/test_cpp_nc.run
+  interfaces/test_python_grb.run
+  interfaces/test_python_nc.run
+  interfaces/test_ruby_grb.run
+  interfaces/test_ruby_nc.run
   tables/gen_tableheaderfile
   tests/pio_cksum_asynch.run
   tests/pio_cksum_fpguard.run

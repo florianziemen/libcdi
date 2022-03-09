@@ -11,6 +11,7 @@
 /config/install-sh
 /config/ltmain.sh
 /config/missing
+/config/py-compile
 /config/test-driver
 /configure
 /m4/libtool.m4
@@ -27,6 +28,7 @@ Makefile.in
 /config.log
 /config.lt
 /config.status
+/interfaces/*.run
 /libtool
 /src/cmake/cdi/*.cmake
 /src/config.h
@@ -38,11 +40,11 @@ Makefile.in
 Makefile
 
 # Build stage files:
-*.i
 *.la
 *.lo
 *.mod
 *.o
+.dirstamp
 /*/**/.libs
 /app/cdi
 /app/createtable
@@ -65,14 +67,8 @@ Makefile
 /examples/pio/collectDataNStreams.parallel
 /examples/pio/compareResourcesArray
 /interfaces/CdiInfo
-/interfaces/python/*.pyc
-/interfaces/python/*.pyo
 /interfaces/python/Cdi.py
-/interfaces/python/_Cdi.so
-/interfaces/python/__pychache__
-/interfaces/python/build
 /interfaces/python/cdi_wrapper.cpp
-/interfaces/ruby/Cdi.so
 /interfaces/ruby/cdi_wrapper.cpp
 /src/.fint
 /src/cdi.inc
@@ -91,7 +87,11 @@ Makefile
 /examples/cdi_read_f2003
 /examples/cdi_write_const
 /examples/cdi_write_f2003
-/interfaces/mulval.nc
+/interfaces/*.log
+/interfaces/*.trs
+/interfaces/python/*.pyc
+/interfaces/python/*.pyo
+/interfaces/python/__pycache__
 /tests/*.cksum
 /tests/*.ext
 /tests/*.grb
@@ -130,9 +130,6 @@ Makefile
 # Dist stage files:
 /cdi-*.tar.gz
 /src/cdilib.c
-
-# Install stage files:
-/interfaces/ruby/.sitearchdir.time
 
 # Mac OS files:
 *.dSYM
