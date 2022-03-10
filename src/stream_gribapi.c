@@ -3385,6 +3385,13 @@ gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int6
 
   GRIB_CHECK(grib_set_double_array(gh, "values", (const double *) data, datasize), 0);
 
+  if (nmiss)
+    {
+      long numberOfMissing = -1;
+      GRIB_CHECK(grib_get_long(gh, "numberOfMissing", &numberOfMissing), 0);
+      if (numberOfMissing == 0) GRIB_CHECK(my_grib_set_long(gh, "bitmapPresent", 0), 0);
+    }
+
   // get the size of coded message
   size_t recsize = 0;
   GRIB_CHECK(grib_get_message(gh, (const void **) &dummy, &recsize), 0);

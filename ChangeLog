@@ -2,6 +2,10 @@
 
 	* Version 2.0.5 released
 
+2022-03-10  Uwe Schulzweida
+
+	* ecCodes: switch off unused bitmap [request: Sebastian Borchert]
+
 2022-03-04  Uwe Schulzweida
 
 	* recalculate optimal chunk_size if gridsize is > chunk_size_lim (bug fix)
