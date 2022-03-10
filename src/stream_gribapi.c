@@ -2030,8 +2030,10 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t fdate, int fti
       if (endStepF > maxStep) return status;
       long endStep = (long) endStepF;
 
-      //if (sdate != 0 && (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF))
-      if (sdate != 0)
+      bool hasStartDate = (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF
+                           || tsteptype == TSTEP_MIN || tsteptype == TSTEP_MAX || tsteptype == TSTEP_RMS || tsteptype == TSTEP_SD
+                           || tsteptype == TSTEP_COV || tsteptype == TSTEP_RATIO || tsteptype == TSTEP_SUM);
+      if (sdate != 0 && hasStartDate)
         {
           cdiDecodeDate(sdate, &year, &month, &day);
           cdiDecodeTime(stime, &hour, &minute, &second);

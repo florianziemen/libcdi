@@ -4,7 +4,7 @@
 
 2022-03-10  Uwe Schulzweida
 
-	* ecCodes encode: fix problem with startStep when startDate is set [report: Johannes Schick]
+	* ecCodes encode: fix problem with startStep for step type MIN/MAX  [report: Johannes Schick]
 	* ecCodes encode: switch off unused bitmap [request: Sebastian Borchert]
 
 2022-03-04  Uwe Schulzweida
