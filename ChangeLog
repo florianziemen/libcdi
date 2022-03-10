@@ -4,7 +4,8 @@
 
 2022-03-10  Uwe Schulzweida
 
-	* ecCodes: switch off unused bitmap [request: Sebastian Borchert]
+	* ecCodes encode: fix problem with startStep when startDate is set [report: Johannes Schick]
+	* ecCodes encode: switch off unused bitmap [request: Sebastian Borchert]
 
 2022-03-04  Uwe Schulzweida
 
