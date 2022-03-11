@@ -440,17 +440,16 @@ vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *leve
   int zaxisID = CDI_UNDEFID;
   bool zaxisdefined = false;
   bool zaxisglobdefined = false;
-  bool has_bounds = false;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   int nzaxis = vlistptr->nzaxis;
 
-  if (lbounds && ubounds) has_bounds = true;
+  const bool hasBounds = (lbounds && ubounds);
 
   for (int index = 0; index < nzaxis; ++index)
     {
       zaxisID = vlistptr->zaxisIDs[index];
 
-      if (zaxisCompare(zaxisID, zaxistype, nlevels, has_bounds, levels, NULL, NULL, 0, -1) == false)
+      if (zaxisCompare(zaxisID, zaxistype, nlevels, hasBounds, levels, NULL, NULL, 0, -1) == false)
         {
           zaxisdefined = true;
           break;
@@ -463,7 +462,7 @@ vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *leve
       query.zaxistype = zaxistype;
       query.nlevels = nlevels;
       query.levels = levels;
-      query.lbounds = has_bounds;
+      query.lbounds = hasBounds;
 
       if ((zaxisglobdefined = (cdiResHFilterApply(getZaxisOps(), vgzZAxisSearch, &query) == CDI_APPLY_STOP)))
         zaxisID = query.resIDValue;
@@ -478,7 +477,7 @@ vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *leve
 
           if (zaxistype == ZAXIS_CHAR) zaxisDefCvals(zaxisID, cvals, (int) clen);
 
-          if (has_bounds)
+          if (hasBounds)
             {
               zaxisDefLbounds(zaxisID, lbounds);
               zaxisDefUbounds(zaxisID, ubounds);

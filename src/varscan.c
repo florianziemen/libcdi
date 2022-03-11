@@ -47,7 +47,7 @@ typedef struct
   int zaxistype;
   int ltype1;  // GRIB first level type
   int ltype2;  // GRIB second level type
-  int lbounds;
+  int hasBounds;
   int level_sf;
   int level_unit;
   int zaxisID;
@@ -91,7 +91,7 @@ paramInitEntry(int varID, int param)
   vartable[varID].zaxistype = 0;
   vartable[varID].ltype1 = 0;
   vartable[varID].ltype2 = -1;
-  vartable[varID].lbounds = 0;
+  vartable[varID].hasBounds = 0;
   vartable[varID].level_sf = 0;
   vartable[varID].level_unit = 0;
   vartable[varID].recordTable = NULL;
@@ -369,7 +369,7 @@ varInsertTileSubtype(vartable_t *vptr, const var_tile_t *tiles)
 }
 
 void
-varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds, int level1, int level2, int level_sf, int level_unit,
+varAddRecord(int recID, int param, int gridID, int zaxistype, int hasBounds, int level1, int level2, int level_sf, int level_unit,
              int prec, int *pvarID, int *plevelID, int tsteptype, int ltype1, int ltype2, const char *name,
              const VarScanKeys *scanKeys, const var_tile_t *tiles, int *tile_index)
 {
@@ -385,7 +385,7 @@ varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds, int l
       vartable[varID].zaxistype = zaxistype;
       vartable[varID].ltype1 = ltype1;
       vartable[varID].ltype2 = ltype2;
-      vartable[varID].lbounds = lbounds;
+      vartable[varID].hasBounds = hasBounds;
       vartable[varID].level_sf = level_sf;
       vartable[varID].level_unit = level_unit;
       vartable[varID].tsteptype = tsteptype;
@@ -540,7 +540,7 @@ cdi_generate_vars(stream_t *streamptr)
       const int ltype2 = vartable[varid].ltype2;
       int zaxistype = vartable[varid].zaxistype;
       if (ltype1 == 0 && zaxistype == ZAXIS_GENERIC && cdiDefaultLeveltype != -1) zaxistype = cdiDefaultLeveltype;
-      const int lbounds = vartable[varid].lbounds;
+      const int hasBounds = vartable[varid].hasBounds;
       const int prec = vartable[varid].prec;
       int instID = vartable[varid].instID;
       int modelID = vartable[varid].modelID;
@@ -587,7 +587,7 @@ cdi_generate_vars(stream_t *streamptr)
       double *dlevels = (double *) Malloc(nlevels * sizeof(double));
 
       /*
-      if ( lbounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
+      if ( hasBounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
         for ( int levelID = 0; levelID < nlevels; levelID++ )
           dlevels[levelID] = (level_sf*levelTable[levelID].level1 + level_sf*levelTable[levelID].level2) / 2.0;
       else
@@ -628,7 +628,7 @@ cdi_generate_vars(stream_t *streamptr)
           if (lsort)
             {
               /*
-              if ( lbounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
+              if ( hasBounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
                 for ( int levelID = 0; levelID < nlevels; levelID++ )
                   dlevels[levelID] = (level_sf*levelTable[levelID].level1 + level_sf*levelTable[levelID].level2) / 2.0;
               else
@@ -639,7 +639,7 @@ cdi_generate_vars(stream_t *streamptr)
 
       double *dlevels1 = NULL;
       double *dlevels2 = NULL;
-      if (lbounds)
+      if (hasBounds)
         {
           dlevels1 = (double *) Malloc(nlevels * sizeof(double));
           for (int levelID = 0; levelID < nlevels; levelID++) dlevels1[levelID] = level_sf * levelTable[levelID].level1;
@@ -649,7 +649,7 @@ cdi_generate_vars(stream_t *streamptr)
 
       const char **cvals = NULL;
       const char *unitptr = cdiUnitNamePtr(vartable[varid].level_unit);
-      int zaxisID = varDefZaxis(vlistID, zaxistype, (int) nlevels, dlevels, cvals, 0, lbounds, dlevels1, dlevels2, (int) Vctsize,
+      int zaxisID = varDefZaxis(vlistID, zaxistype, (int) nlevels, dlevels, cvals, 0, hasBounds, dlevels1, dlevels2, (int) Vctsize,
                                 Vct, NULL, NULL, unitptr, 0, 0, ltype1, ltype2);
 
       if (CDI_CMOR_Mode && nlevels == 1 && zaxistype != ZAXIS_HYBRID) zaxisDefScalar(zaxisID);
@@ -661,8 +661,8 @@ cdi_generate_vars(stream_t *streamptr)
           if (!cdiUUIDIsNull(uuidVGrid)) cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuidVGrid, CDI_UUID_SIZE);
         }
 
-      if (lbounds) Free(dlevels1);
-      if (lbounds) Free(dlevels2);
+      if (hasBounds) Free(dlevels1);
+      if (hasBounds) Free(dlevels2);
       Free(dlevels);
 
       // define new subtype for tile set
@@ -737,8 +737,8 @@ cdi_generate_vars(stream_t *streamptr)
       int nsub = (vartable[varid].nsubtypes >= 0) ? vartable[varid].nsubtypes : 0;
       for (int isub = 0; isub < nsub; isub++)
         {
-          sleveltable_t *restrict streamRecordTable = streamptr->vars[index].recordTable + isub;
-          leveltable_t *restrict vartableLevelTable = vartable[varid].recordTable[isub].levelTable;
+          sleveltable_t *streamRecordTable = streamptr->vars[index].recordTable + isub;
+          leveltable_t *vartableLevelTable = vartable[varid].recordTable[isub].levelTable;
           for (int levelID = 0; levelID < nlevels; levelID++)
             {
               streamRecordTable->recordID[levelID] = vartableLevelTable[levelID].recID;
@@ -776,7 +776,7 @@ varDefZAxisReference(int nhlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZE])
 }
 
 bool
-zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const double *levels, const char *longname, const char *units,
+zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool hasBounds, const double *levels, const char *longname, const char *units,
              int ltype1, int ltype2)
 {
   bool differ = true;
@@ -784,13 +784,15 @@ zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const double
   int ltype1_0 = 0, ltype2_0 = -1;
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype1_0);
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFSECONDFIXEDSURFACE, &ltype2_0);
-  bool ltype1_is_equal = (ltype1 == ltype1_0);
-  bool ltype2_is_equal = (ltype2 == ltype2_0);
+  const bool ltype1IsEqual = (ltype1 == ltype1_0);
+  const bool ltype2IsEqual = (ltype2 == ltype2_0);
 
-  if (ltype1_is_equal && ltype2_is_equal && (zaxistype == zaxisInqType(zaxisID) || zaxistype == ZAXIS_GENERIC))
+  printf("ltype1IsEqual, ltype2IsEqual %d %d\n", ltype1IsEqual, ltype2IsEqual);
+  if (ltype1IsEqual && ltype2IsEqual && (zaxistype == zaxisInqType(zaxisID) || zaxistype == ZAXIS_GENERIC))
     {
-      bool zlbounds = (zaxisInqLbounds(zaxisID, NULL) > 0);
-      if (nlevels == zaxisInqSize(zaxisID) && zlbounds == lbounds)
+      const bool hasBoundsZ = (zaxisInqLbounds(zaxisID, NULL) > 0);
+      printf("   hasBoundsZ, hasBounds %d %d\n", hasBoundsZ, hasBounds);
+      if (nlevels == zaxisInqSize(zaxisID) && hasBoundsZ == hasBounds)
         {
           const double *dlevels = zaxisInqLevelsPtr(zaxisID);
           if (dlevels && levels)
@@ -831,7 +833,7 @@ struct varDefZAxisSearchState
   int resIDValue;
   int zaxistype;
   int nlevels;
-  bool lbounds;
+  bool hasBounds;
   const double *levels;
   const char *longname;
   const char *units;
@@ -844,7 +846,7 @@ varDefZAxisSearch(int id, void *res, void *data)
 {
   struct varDefZAxisSearchState *state = (struct varDefZAxisSearchState *) data;
   (void) res;
-  if (zaxisCompare(id, state->zaxistype, state->nlevels, state->lbounds, state->levels, state->longname, state->units,
+  if (zaxisCompare(id, state->zaxistype, state->nlevels, state->hasBounds, state->levels, state->longname, state->units,
                    state->ltype1, state->ltype2)
       == false)
     {
@@ -856,7 +858,7 @@ varDefZAxisSearch(int id, void *res, void *data)
 }
 
 int
-varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, size_t clength, bool lbounds,
+varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, size_t clength, bool hasBounds,
             const double *levels1, const double *levels2, int vctsize, const double *vct, char *name, const char *longname,
             const char *units, int prec, int mode, int ltype1, int ltype2)
 {
@@ -877,7 +879,7 @@ varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const
       {
         zaxisID = vlistptr->zaxisIDs[index];
 
-        if (!zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, longname, units, ltype1, ltype2))
+        if (!zaxisCompare(zaxisID, zaxistype, nlevels, hasBounds, levels, longname, units, ltype1, ltype2))
           {
             zaxisdefined = true;
             break;
@@ -890,7 +892,7 @@ varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const
       query.zaxistype = zaxistype;
       query.nlevels = nlevels;
       query.levels = levels;
-      query.lbounds = lbounds;
+      query.hasBounds = hasBounds;
       query.longname = longname;
       query.units = units;
       query.ltype1 = ltype1;
@@ -914,7 +916,7 @@ varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const
         {
           zaxisID = zaxisCreate(zaxistype, nlevels);
           if (levels) zaxisDefLevels(zaxisID, levels);
-          if (lbounds)
+          if (hasBounds)
             {
               zaxisDefLbounds(zaxisID, levels1);
               zaxisDefUbounds(zaxisID, levels2);
