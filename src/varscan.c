@@ -776,8 +776,8 @@ varDefZAxisReference(int nhlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZE])
 }
 
 bool
-zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool hasBounds, const double *levels, const char *longname, const char *units,
-             int ltype1, int ltype2)
+zaxis_compare(int zaxisID, int zaxistype, int nlevels, const double *levels, const double *lbounds,
+              const double *ubounds, const char *longname, const char *units, int ltype1, int ltype2)
 {
   bool differ = true;
 
@@ -786,12 +786,11 @@ zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool hasBounds, const doub
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFSECONDFIXEDSURFACE, &ltype2_0);
   const bool ltype1IsEqual = (ltype1 == ltype1_0);
   const bool ltype2IsEqual = (ltype2 == ltype2_0);
+  const bool hasBounds = (lbounds && ubounds);
 
-  printf("ltype1IsEqual, ltype2IsEqual %d %d\n", ltype1IsEqual, ltype2IsEqual);
   if (ltype1IsEqual && ltype2IsEqual && (zaxistype == zaxisInqType(zaxisID) || zaxistype == ZAXIS_GENERIC))
     {
-      const bool hasBoundsZ = (zaxisInqLbounds(zaxisID, NULL) > 0);
-      printf("   hasBoundsZ, hasBounds %d %d\n", hasBoundsZ, hasBounds);
+      const bool hasBoundsZ = (zaxisInqLbounds(zaxisID, NULL) > 0 && zaxisInqUbounds(zaxisID, NULL) > 0);
       if (nlevels == zaxisInqSize(zaxisID) && hasBoundsZ == hasBounds)
         {
           const double *dlevels = zaxisInqLevelsPtr(zaxisID);
@@ -803,6 +802,23 @@ zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool hasBounds, const doub
                   if (fabs(dlevels[levelID] - levels[levelID]) > 1.e-9) break;
                 }
               if (levelID == nlevels) differ = false;
+            }
+
+          if (!differ && hasBounds)
+            {
+              double *bounds = malloc(2 * nlevels * sizeof(double));
+              zaxisInqLbounds(zaxisID, bounds);
+              zaxisInqUbounds(zaxisID, bounds + nlevels);
+              for (int levelID = 0; levelID < nlevels; levelID++)
+                {
+                  if (fabs(lbounds[levelID] - bounds[levelID]) > 1.e-9
+                   || fabs(ubounds[levelID] - bounds[levelID + nlevels]) > 1.e-9)
+                    {
+                      differ = true;
+                      break;
+                    }
+                }
+              free(bounds);
             }
 
           if (!differ)
@@ -833,8 +849,9 @@ struct varDefZAxisSearchState
   int resIDValue;
   int zaxistype;
   int nlevels;
-  bool hasBounds;
   const double *levels;
+  const double *lbounds;
+  const double *ubounds;
   const char *longname;
   const char *units;
   int ltype1;
@@ -846,8 +863,8 @@ varDefZAxisSearch(int id, void *res, void *data)
 {
   struct varDefZAxisSearchState *state = (struct varDefZAxisSearchState *) data;
   (void) res;
-  if (zaxisCompare(id, state->zaxistype, state->nlevels, state->hasBounds, state->levels, state->longname, state->units,
-                   state->ltype1, state->ltype2)
+  if (zaxis_compare(id, state->zaxistype, state->nlevels, state->levels, state->lbounds, state->ubounds,
+                    state->longname, state->units, state->ltype1, state->ltype2)
       == false)
     {
       state->resIDValue = id;
@@ -879,7 +896,7 @@ varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const
       {
         zaxisID = vlistptr->zaxisIDs[index];
 
-        if (!zaxisCompare(zaxisID, zaxistype, nlevels, hasBounds, levels, longname, units, ltype1, ltype2))
+        if (!zaxis_compare(zaxisID, zaxistype, nlevels, levels, levels1, levels2, longname, units, ltype1, ltype2))
           {
             zaxisdefined = true;
             break;
@@ -892,7 +909,8 @@ varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const
       query.zaxistype = zaxistype;
       query.nlevels = nlevels;
       query.levels = levels;
-      query.hasBounds = hasBounds;
+      query.lbounds = levels1;
+      query.ubounds = levels2;
       query.longname = longname;
       query.units = units;
       query.ltype1 = ltype1;

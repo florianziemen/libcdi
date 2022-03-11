@@ -415,8 +415,9 @@ struct vgzSearchState
   int resIDValue;
   int zaxistype;
   int nlevels;
-  bool lbounds;
   const double *levels;
+  const double *lbounds;
+  const double *ubounds;
 };
 
 static enum cdiApplyRet
@@ -424,7 +425,7 @@ vgzZAxisSearch(int id, void *res, void *data)
 {
   struct vgzSearchState *state = (struct vgzSearchState *) data;
   (void) res;
-  if (zaxisCompare(id, state->zaxistype, state->nlevels, state->lbounds, state->levels, NULL, NULL, 0, -1) == false)
+  if (zaxis_compare(id, state->zaxistype, state->nlevels, state->levels, state->lbounds, state->ubounds, NULL, NULL, 0, -1) == false)
     {
       state->resIDValue = id;
       return CDI_APPLY_STOP;
@@ -449,7 +450,7 @@ vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *leve
     {
       zaxisID = vlistptr->zaxisIDs[index];
 
-      if (zaxisCompare(zaxisID, zaxistype, nlevels, hasBounds, levels, NULL, NULL, 0, -1) == false)
+      if (zaxis_compare(zaxisID, zaxistype, nlevels, levels, lbounds, ubounds, NULL, NULL, 0, -1) == false)
         {
           zaxisdefined = true;
           break;
@@ -462,7 +463,6 @@ vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *leve
       query.zaxistype = zaxistype;
       query.nlevels = nlevels;
       query.levels = levels;
-      query.lbounds = hasBounds;
 
       if ((zaxisglobdefined = (cdiResHFilterApply(getZaxisOps(), vgzZAxisSearch, &query) == CDI_APPLY_STOP)))
         zaxisID = query.resIDValue;

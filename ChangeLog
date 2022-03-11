@@ -2,6 +2,10 @@
 
 	* Version 2.0.5 released
 
+2022-03-11  Uwe Schulzweida
+
+	* zaxis_compare: check bounds (bug fix)
+
 2022-03-10  Uwe Schulzweida
 
 	* ecCodes encode: fix problem with startStep for step type MIN/MAX  [report: Johannes Schick]
