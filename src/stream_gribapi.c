@@ -870,6 +870,9 @@ gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
   compVar0.scanKeys = record.scanKeys;
   compVar0.tiles = record.tiles;
 
+  //printf("var1: level1=%d level2=%d\n", compVar.level1, compVar.level2);
+  //printf("var2: level1=%d level2=%d\n", compVar0.level1, compVar0.level2);
+
   return memcmp(&compVar0, &compVar, sizeof(compvar2_t));
 }
 
