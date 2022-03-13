@@ -156,7 +156,7 @@ cdi_copy_DEPENDENCIES = $(top_builddir)/src/libcdi.la
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
-am__v_lt_1 =
+am__v_lt_1 = 
 am_cdi_read_OBJECTS = cdi_read.$(OBJEXT)
 cdi_read_OBJECTS = $(am_cdi_read_OBJECTS)
 cdi_read_LDADD = $(LDADD)
@@ -192,11 +192,11 @@ am__v_P_1 = :
 AM_V_GEN = $(am__v_GEN_@AM_V@)
 am__v_GEN_ = $(am__v_GEN_@AM_DEFAULT_V@)
 am__v_GEN_0 = @echo "  GEN     " $@;
-am__v_GEN_1 =
+am__v_GEN_1 = 
 AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
-am__v_at_1 =
+am__v_at_1 = 
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__maybe_remake_depfiles = depfiles
@@ -207,7 +207,7 @@ am__mv = mv -f
 AM_V_CC = $(am__v_CC_@AM_V@)
 am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
 am__v_CC_0 = @echo "  CC      " $@;
-am__v_CC_1 =
+am__v_CC_1 = 
 CCLD = $(CC)
 LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -215,11 +215,11 @@ LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
-am__v_CCLD_1 =
+am__v_CCLD_1 = 
 AM_V_FC = $(am__v_FC_@AM_V@)
 am__v_FC_ = $(am__v_FC_@AM_DEFAULT_V@)
 am__v_FC_0 = @echo "  FC      " $@;
-am__v_FC_1 =
+am__v_FC_1 = 
 FCLD = $(FC)
 FCLINK = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
@@ -227,7 +227,7 @@ FCLINK = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
 AM_V_FCLD = $(am__v_FCLD_@AM_V@)
 am__v_FCLD_ = $(am__v_FCLD_@AM_DEFAULT_V@)
 am__v_FCLD_0 = @echo "  FCLD    " $@;
-am__v_FCLD_1 =
+am__v_FCLD_1 = 
 SOURCES = $(cdi_copy_SOURCES) $(cdi_read_SOURCES) \
 	$(cdi_read_f2003_SOURCES) $(cdi_write_SOURCES) \
 	$(cdi_write_const_SOURCES) $(cdi_write_ens_SOURCES) \
@@ -591,35 +591,35 @@ clean-noinstPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
-cdi_copy$(EXEEXT): $(cdi_copy_OBJECTS) $(cdi_copy_DEPENDENCIES) $(EXTRA_cdi_copy_DEPENDENCIES)
+cdi_copy$(EXEEXT): $(cdi_copy_OBJECTS) $(cdi_copy_DEPENDENCIES) $(EXTRA_cdi_copy_DEPENDENCIES) 
 	@rm -f cdi_copy$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cdi_copy_OBJECTS) $(cdi_copy_LDADD) $(LIBS)
 
-cdi_read$(EXEEXT): $(cdi_read_OBJECTS) $(cdi_read_DEPENDENCIES) $(EXTRA_cdi_read_DEPENDENCIES)
+cdi_read$(EXEEXT): $(cdi_read_OBJECTS) $(cdi_read_DEPENDENCIES) $(EXTRA_cdi_read_DEPENDENCIES) 
 	@rm -f cdi_read$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cdi_read_OBJECTS) $(cdi_read_LDADD) $(LIBS)
 
-cdi_read_f2003$(EXEEXT): $(cdi_read_f2003_OBJECTS) $(cdi_read_f2003_DEPENDENCIES) $(EXTRA_cdi_read_f2003_DEPENDENCIES)
+cdi_read_f2003$(EXEEXT): $(cdi_read_f2003_OBJECTS) $(cdi_read_f2003_DEPENDENCIES) $(EXTRA_cdi_read_f2003_DEPENDENCIES) 
 	@rm -f cdi_read_f2003$(EXEEXT)
 	$(AM_V_FCLD)$(FCLINK) $(cdi_read_f2003_OBJECTS) $(cdi_read_f2003_LDADD) $(LIBS)
 
-cdi_write$(EXEEXT): $(cdi_write_OBJECTS) $(cdi_write_DEPENDENCIES) $(EXTRA_cdi_write_DEPENDENCIES)
+cdi_write$(EXEEXT): $(cdi_write_OBJECTS) $(cdi_write_DEPENDENCIES) $(EXTRA_cdi_write_DEPENDENCIES) 
 	@rm -f cdi_write$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cdi_write_OBJECTS) $(cdi_write_LDADD) $(LIBS)
 
-cdi_write_const$(EXEEXT): $(cdi_write_const_OBJECTS) $(cdi_write_const_DEPENDENCIES) $(EXTRA_cdi_write_const_DEPENDENCIES)
+cdi_write_const$(EXEEXT): $(cdi_write_const_OBJECTS) $(cdi_write_const_DEPENDENCIES) $(EXTRA_cdi_write_const_DEPENDENCIES) 
 	@rm -f cdi_write_const$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cdi_write_const_OBJECTS) $(cdi_write_const_LDADD) $(LIBS)
 
-cdi_write_ens$(EXEEXT): $(cdi_write_ens_OBJECTS) $(cdi_write_ens_DEPENDENCIES) $(EXTRA_cdi_write_ens_DEPENDENCIES)
+cdi_write_ens$(EXEEXT): $(cdi_write_ens_OBJECTS) $(cdi_write_ens_DEPENDENCIES) $(EXTRA_cdi_write_ens_DEPENDENCIES) 
 	@rm -f cdi_write_ens$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cdi_write_ens_OBJECTS) $(cdi_write_ens_LDADD) $(LIBS)
 
-cdi_write_f2003$(EXEEXT): $(cdi_write_f2003_OBJECTS) $(cdi_write_f2003_DEPENDENCIES) $(EXTRA_cdi_write_f2003_DEPENDENCIES)
+cdi_write_f2003$(EXEEXT): $(cdi_write_f2003_OBJECTS) $(cdi_write_f2003_DEPENDENCIES) $(EXTRA_cdi_write_f2003_DEPENDENCIES) 
 	@rm -f cdi_write_f2003$(EXEEXT)
 	$(AM_V_FCLD)$(FCLINK) $(cdi_write_f2003_OBJECTS) $(cdi_write_f2003_LDADD) $(LIBS)
 
-cdi_write_hybrid$(EXEEXT): $(cdi_write_hybrid_OBJECTS) $(cdi_write_hybrid_DEPENDENCIES) $(EXTRA_cdi_write_hybrid_DEPENDENCIES)
+cdi_write_hybrid$(EXEEXT): $(cdi_write_hybrid_OBJECTS) $(cdi_write_hybrid_DEPENDENCIES) $(EXTRA_cdi_write_hybrid_DEPENDENCIES) 
 	@rm -f cdi_write_hybrid$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cdi_write_hybrid_OBJECTS) $(cdi_write_hybrid_LDADD) $(LIBS)
 
@@ -711,7 +711,7 @@ $(am__recursive_targets):
 	if test "$$dot_seen" = "no"; then \
 	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
 	fi; test -z "$$fail"
-examples-local:
+examples-local: 
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique

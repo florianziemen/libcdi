@@ -181,7 +181,6 @@ GRID_UNSTRUCTURED = _CdiLib.GRID_UNSTRUCTURED
 GRID_CURVILINEAR = _CdiLib.GRID_CURVILINEAR
 GRID_LCC = _CdiLib.GRID_LCC
 GRID_PROJECTION = _CdiLib.GRID_PROJECTION
-GRID_CHARXY = _CdiLib.GRID_CHARXY
 CDI_PROJ_RLL = _CdiLib.CDI_PROJ_RLL
 CDI_PROJ_LCC = _CdiLib.CDI_PROJ_LCC
 CDI_PROJ_LAEA = _CdiLib.CDI_PROJ_LAEA
@@ -212,7 +211,6 @@ ZAXIS_SEDIMENT_BOTTOM_TA = _CdiLib.ZAXIS_SEDIMENT_BOTTOM_TA
 ZAXIS_SEDIMENT_BOTTOM_TW = _CdiLib.ZAXIS_SEDIMENT_BOTTOM_TW
 ZAXIS_MIX_LAYER = _CdiLib.ZAXIS_MIX_LAYER
 ZAXIS_REFERENCE = _CdiLib.ZAXIS_REFERENCE
-ZAXIS_CHAR = _CdiLib.ZAXIS_CHAR
 ZAXIS_TROPOPAUSE = _CdiLib.ZAXIS_TROPOPAUSE
 SUBTYPE_TILES = _CdiLib.SUBTYPE_TILES
 MAX_KV_PAIRS_MATCH = _CdiLib.MAX_KV_PAIRS_MATCH
@@ -1022,23 +1020,11 @@ def gridDefXvals(gridID, xvals):
 def gridInqXvals(gridID, xvals):
     return _CdiLib.gridInqXvals(gridID, xvals)
 
-def gridInqXIsc(gridID):
-    return _CdiLib.gridInqXIsc(gridID)
-
-def gridInqXCvals(gridID, xcvals):
-    return _CdiLib.gridInqXCvals(gridID, xcvals)
-
 def gridDefYvals(gridID, yvals):
     return _CdiLib.gridDefYvals(gridID, yvals)
 
 def gridInqYvals(gridID, yvals):
     return _CdiLib.gridInqYvals(gridID, yvals)
-
-def gridInqYIsc(gridID):
-    return _CdiLib.gridInqYIsc(gridID)
-
-def gridInqYCvals(gridID, ycvals):
-    return _CdiLib.gridInqYCvals(gridID, ycvals)
 CDI_KEY_XNAME = _CdiLib.CDI_KEY_XNAME
 CDI_KEY_XDIMNAME = _CdiLib.CDI_KEY_XDIMNAME
 CDI_KEY_XLONGNAME = _CdiLib.CDI_KEY_XLONGNAME
@@ -1261,9 +1247,6 @@ def zaxisPrint(zaxisID):
 
 def zaxisDefLevels(zaxisID, levels):
     return _CdiLib.zaxisDefLevels(zaxisID, levels)
-
-def zaxisDefCvals(zaxisID, cvals):
-    return _CdiLib.zaxisDefCvals(zaxisID, cvals)
 
 def zaxisInqLevels(zaxisID, levels):
     return _CdiLib.zaxisInqLevels(zaxisID, levels)
