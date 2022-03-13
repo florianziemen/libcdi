@@ -353,6 +353,8 @@ CdiVariable::getFValuesWithLevel(int tsID)
  */
 Cdi::Cdi(const char *path)  {
   streamID = streamOpenRead(path);
+  if (streamID < 0)
+    throw ;
   vlistID  = streamInqVlist(streamID);
   nvars    = vlistNvars(vlistID);
 

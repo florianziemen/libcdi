@@ -4928,7 +4928,7 @@ SWIGINTERN PyObject *_wrap_streamWriteVarChunk(PyObject *SWIGUNUSEDPARM(self), P
   arg2 = (int)(val2);
   res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_a_2__int, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "streamWriteVarChunk" "', argument " "3"" of type '" "int const [3][2]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "streamWriteVarChunk" "', argument " "3"" of type '" "int const [][2]""'"); 
   } 
   arg3 = (int (*)[2])(argp3);
   res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_double, 0 |  0 );
@@ -4981,7 +4981,7 @@ SWIGINTERN PyObject *_wrap_streamWriteVarChunkF(PyObject *SWIGUNUSEDPARM(self), 
   arg2 = (int)(val2);
   res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_a_2__int, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "streamWriteVarChunkF" "', argument " "3"" of type '" "int const [3][2]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "streamWriteVarChunkF" "', argument " "3"" of type '" "int const [][2]""'"); 
   } 
   arg3 = (int (*)[2])(argp3);
   res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_float, 0 |  0 );
@@ -11536,59 +11536,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gridInqXIsc(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "gridInqXIsc" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = (int)(val1);
-  result = (int)gridInqXIsc(arg1);
-  resultobj = SWIG_From_int((int)(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_gridInqXCvals(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  char **arg2 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "gridInqXCvals", 2, 2, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "gridInqXCvals" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = (int)(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_p_char, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridInqXCvals" "', argument " "2"" of type '" "char *[]""'"); 
-  } 
-  arg2 = (char **)(argp2);
-  result = (int)gridInqXCvals(arg1,arg2);
-  resultobj = SWIG_From_int((int)(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_gridDefYvals(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
@@ -11641,59 +11588,6 @@ SWIGINTERN PyObject *_wrap_gridInqYvals(PyObject *SWIGUNUSEDPARM(self), PyObject
   } 
   arg2 = (double *)(argp2);
   result = (int)gridInqYvals(arg1,arg2);
-  resultobj = SWIG_From_int((int)(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_gridInqYIsc(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "gridInqYIsc" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = (int)(val1);
-  result = (int)gridInqYIsc(arg1);
-  resultobj = SWIG_From_int((int)(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_gridInqYCvals(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  char **arg2 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "gridInqYCvals", 2, 2, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "gridInqYCvals" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = (int)(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_p_char, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridInqYCvals" "', argument " "2"" of type '" "char *[]""'"); 
-  } 
-  arg2 = (char **)(argp2);
-  result = (int)gridInqYCvals(arg1,arg2);
   resultobj = SWIG_From_int((int)(result));
   return resultobj;
 fail:
@@ -13920,35 +13814,6 @@ SWIGINTERN PyObject *_wrap_zaxisDefLevels(PyObject *SWIGUNUSEDPARM(self), PyObje
   } 
   arg2 = (double *)(argp2);
   zaxisDefLevels(arg1,(double const (*))arg2);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_zaxisDefCvals(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  char **arg2 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "zaxisDefCvals", 2, 2, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "zaxisDefCvals" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = (int)(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_p_char, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "zaxisDefCvals" "', argument " "2"" of type '" "char const *[]""'"); 
-  } 
-  arg2 = (char **)(argp2);
-  zaxisDefCvals(arg1,(char const *(*))arg2);
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -17851,12 +17716,8 @@ static PyMethodDef SwigMethods[] = {
 	 { "gridInqNP", _wrap_gridInqNP, METH_O, NULL},
 	 { "gridDefXvals", _wrap_gridDefXvals, METH_VARARGS, NULL},
 	 { "gridInqXvals", _wrap_gridInqXvals, METH_VARARGS, NULL},
-	 { "gridInqXIsc", _wrap_gridInqXIsc, METH_O, NULL},
-	 { "gridInqXCvals", _wrap_gridInqXCvals, METH_VARARGS, NULL},
 	 { "gridDefYvals", _wrap_gridDefYvals, METH_VARARGS, NULL},
 	 { "gridInqYvals", _wrap_gridInqYvals, METH_VARARGS, NULL},
-	 { "gridInqYIsc", _wrap_gridInqYIsc, METH_O, NULL},
-	 { "gridInqYCvals", _wrap_gridInqYCvals, METH_VARARGS, NULL},
 	 { "cdiGridDefKeyStr", _wrap_cdiGridDefKeyStr, METH_VARARGS, NULL},
 	 { "cdiGridInqKeyStr", _wrap_cdiGridInqKeyStr, METH_VARARGS, NULL},
 	 { "cdiZaxisDefKeyFlt", _wrap_cdiZaxisDefKeyFlt, METH_VARARGS, NULL},
@@ -17925,7 +17786,6 @@ static PyMethodDef SwigMethods[] = {
 	 { "zaxisDuplicate", _wrap_zaxisDuplicate, METH_O, NULL},
 	 { "zaxisPrint", _wrap_zaxisPrint, METH_O, NULL},
 	 { "zaxisDefLevels", _wrap_zaxisDefLevels, METH_VARARGS, NULL},
-	 { "zaxisDefCvals", _wrap_zaxisDefCvals, METH_VARARGS, NULL},
 	 { "zaxisInqLevels", _wrap_zaxisInqLevels, METH_VARARGS, NULL},
 	 { "zaxisDefLevel", _wrap_zaxisDefLevel, METH_VARARGS, NULL},
 	 { "zaxisInqLevel", _wrap_zaxisInqLevel, METH_VARARGS, NULL},
@@ -18982,7 +18842,6 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "GRID_CURVILINEAR",SWIG_From_int((int)(10)));
   SWIG_Python_SetConstant(d, "GRID_LCC",SWIG_From_int((int)(11)));
   SWIG_Python_SetConstant(d, "GRID_PROJECTION",SWIG_From_int((int)(12)));
-  SWIG_Python_SetConstant(d, "GRID_CHARXY",SWIG_From_int((int)(13)));
   SWIG_Python_SetConstant(d, "CDI_PROJ_RLL",SWIG_From_int((int)(21)));
   SWIG_Python_SetConstant(d, "CDI_PROJ_LCC",SWIG_From_int((int)(22)));
   SWIG_Python_SetConstant(d, "CDI_PROJ_LAEA",SWIG_From_int((int)(23)));
@@ -19013,7 +18872,6 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "ZAXIS_SEDIMENT_BOTTOM_TW",SWIG_From_int((int)(23)));
   SWIG_Python_SetConstant(d, "ZAXIS_MIX_LAYER",SWIG_From_int((int)(24)));
   SWIG_Python_SetConstant(d, "ZAXIS_REFERENCE",SWIG_From_int((int)(25)));
-  SWIG_Python_SetConstant(d, "ZAXIS_CHAR",SWIG_From_int((int)(26)));
   SWIG_Python_SetConstant(d, "ZAXIS_TROPOPAUSE",SWIG_From_int((int)(27)));
   SWIG_Python_SetConstant(d, "SUBTYPE_TILES",SWIG_From_int((int)(SUBTYPE_TILES)));
   SWIG_Python_SetConstant(d, "MAX_KV_PAIRS_MATCH",SWIG_From_int((int)(10)));

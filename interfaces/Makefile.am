@@ -37,6 +37,11 @@ libcdipp_la_LIBADD = $(top_builddir)/src/libcdi.la
 CdiInfo_SOURCES = CdiInfo.cpp
 CdiInfo_LDADD = libcdipp.la
 
+#
+#
+select_test_file = \
+	`if test $(ENABLE_NETCDF) = yes ; then test -f ../testdata/mulval.nc && echo ../testdata/mulval.nc || echo '$(abs_srcdir)/testdata/mulval.nc' ; elif test $(ENABLE_GRIB) = yes -o $(ENABLE_CGRIBEX) = yes ; then test -f ../testdata/mulval.grb && echo ../testdata/mulval.grb || echo '$(abs_srcdir)/testdata/mulval.grb' ; else exit 1; fi`
+
 help:
 	@echo "#=====================================================#"
 	@echo "# EXPERIMENTAL FEATURE ===============================#"
@@ -55,104 +60,225 @@ help:
 	@echo "  <lang>LibInstall - see <lang>ObjInstall"
 
 # RUBY
-rubyObj: rubyObjWrapper rubyObjMakefile libcdipp.la
-	@$(MKDIR_P) ruby && $(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS)
+rubyLibDir = rubyLibOut
 
-rubyLib: rubyLibWrapper rubyLibMakefile
-	@$(MKDIR_P) ruby && $(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS)
+rubyObj: $(rubyObjDir)/CdiObj.la
+$(rubyObjDir)/CdiObj.la: rubyObjWrapper rubyObjMakefile libcdipp.la
+	$(AM_V_GEN)$(MKDIR_P) $(rubyObjDir) && $(am__cd) $(rubyObjDir) && \
+	  $(MAKE) $(AM_MAKEFLAGS) \
+	  prefix="$(prefix)" libdir="$(libdir)" sitedir="$(libdir)/site_ruby" \
+	  CXX="$(abs_top_builddir)/libtool --mode=compile --tag=CXX $(CXX) -shared" \
+	  OBJS=cdiobj_wrap.lo \
+	  LDSHAREDXX="$(abs_top_builddir)/libtool --mode=link --tag=CXX $(CXX) -shared -module -rpath "'$$(sitearchdir)' \
+	  DLLIB='$$(TARGET).la'
+
+rubyLib: rubyLibMakefile $(rubyLibDir)/CdiLib.la
+$(rubyLibDir)/CdiLib.la: rubyLibWrapper rubyLibMakefile
+	$(AM_V_GEN)$(MKDIR_P) $(rubyLibDir) && $(am__cd) $(rubyLibDir) && \
+	  $(MAKE) $(AM_MAKEFLAGS) \
+	  prefix="$(prefix)" libdir="$(libdir)" sitedir="$(libdir)/site_ruby" \
+	  CC="$(abs_top_builddir)/libtool --mode=compile --tag=CC $(CC) -shared" \
+	  OBJS=cdilib_wrap.lo \
+	  LDSHARED="$(abs_top_builddir)/libtool --mode=link --tag=CC $(CC) -shared -module -rpath "'$$(sitearchdir)' \
+	  DLLIB='$$(TARGET).la'
 
 rubyObjWrapper: ruby/cdiobj_wrap.cpp
 
 rubyLibWrapper: ruby/cdilib_wrap.c
 
 rubyObjTest: rubyObj
-	@$(MKDIR_P) ruby && $(am__cd) ruby && $(RUBY) testObj.rb
+	$(AM_V_GEN)$(MKDIR_P) $(rubyObjDir) && $(am__cd) $(rubyObjDir) && $(RUBY) -I ./.libs \
+	  `test -f ../ruby/testObj.rb && echo ../ruby || echo '$(abs_srcdir)/ruby'`/testObj.rb \
+	  $(select_test_file)
 
 rubyLibTest: rubyLib
-	@$(MKDIR_P) ruby && $(am__cd) ruby && $(RUBY) testLib.rb
+	$(AM_V_GEN)$(MKDIR_P) $(rubyLibDir) && $(am__cd) $(rubyLibDir) && \
+	  $(RUBY) -I ./.libs \
+	  `test -f ../ruby/testLib.rb && echo .. || echo '$(abs_srcdir)'`/ruby/testLib.rb \
+	  $(select_test_file)
 
-rubyObjInstall: rubyObjMakefile
-	@$(MKDIR_P) ruby && $(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS) install
+rubyObjInstall: rubyObj
+	$(AM_V_GEN)$(MKDIR_P) $(rubyObjDir) && $(am__cd) $(rubyObjDir) && $(MAKE) $(AM_MAKEFLAGS) install
 
-rubyLibInstall: rubyLibMakefile
-	@$(MKDIR_P) ruby && $(am__cd) ruby && $(MAKE) $(AM_MAKEFLAGS) install
+rubyLibInstall: rubyLib
+	$(AM_V_GEN)$(MKDIR_P) $(rubyLibDir) && $(am__cd) $(rubyLibDir) && \
+	  $(MAKE) $(AM_MAKEFLAGS) \
+	  prefix="$(prefix)" libdir="$(libdir)" sitedir="$(libdir)/site_ruby" \
+	  CXX="$(abs_top_builddir)/libtool --mode=compile --tag=CXX $(CXX) -shared" \
+	  OBJS=cdiobj_wrap.lo \
+	  LDSHAREDXX="$(abs_top_builddir)/libtool --mode=link --tag=CXX $(CXX) -shared -module -rpath "'$$(sitearchdir)' \
+	  INSTALL_PROG="$(SHELL) $(abs_top_builddir)/libtool --mode=install $(install_sh_PROGRAM)" \
+	  DLLIB='$$(TARGET).la' install
 
-rubyObjMakefile:
-	$(AM_V_GEN)$(MKDIR_P) ruby && $(am__cd) ruby && \
-	INCFLAGS='-I$(abs_srcdir)' CFLAGS='$(CFLAGS)' LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' $(RUBY) extconfObj.rb
+rubyObjDir = rubyObjOut
 
-rubyLibMakefile:
-	$(AM_V_GEN)$(MKDIR_P) ruby && $(am__cd) ruby && \
-	INCFLAGS='-I$(abs_top_srcdir)/src' CFLAGS='$(CFLAGS)' LDFLAGS='$(LDFLAGS) -L$(abs_top_builddir)/src/.libs' LIBS='-lcdi $(LIBS)' $(RUBY) extconfLib.rb
+rubyObjMakefile: $(rubyObjDir)/Makefile
+$(rubyObjDir)/Makefile: ruby/extconfObj.rb
+	$(AM_V_GEN)$(MKDIR_P) $(rubyObjDir) && $(am__cd) $(rubyObjDir) && \
+	  CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" \
+	  LDFLAGS="$(LDFLAGS)" \
+	  INCFLAGS="-I$(abs_srcdir) -I$(abs_top_srcdir)/src" \
+	  $(RUBY) -I"$(abs_srcdir)/ruby" \
+	  `test -f ../ruby/extconfObj.rb && echo .. || echo '$(abs_srcdir)'`/ruby/extconfObj.rb && \
+	  $(SED) -i -e '/^\.cpp\.o:/s/^\.cpp\.o/.cpp.lo/;/^.SUFFIXES:/s/$$/ .lo/' \
+	  -e '/^install-so: \$$(RUBYARCHDIR)\/\$$(DLLIB)/{' \
+	  -e 's/^install-so:.*$$/install-so: $$(DLLIB)/;p;n;d' \
+	  -e '}' \
+	  -e 's/\$$(\@D)/\$$(RUBYARCHDIR)/' \
+	  -e '/^OBJS =/s/\.o/.lo/' \
+	  -e '/^CLEANOBJS =/s/\*\.o/*.o *.lo .libs/' \
+	  Makefile
 
-ruby/cdiobj_wrap.cpp: @MAINTAINER_MODE_TRUE@ cdiobj.i
-	$(AM_V_GEN)$(SWIG) -ruby -c++ -module CdiObj -o $@ $(AM_CPPFLAGS) $<
+rubyLibMakefile: $(rubyLibDir)/Makefile
+$(rubyLibDir)/Makefile: ruby/extconfLib.rb
+	$(AM_V_GEN)$(MKDIR_P) $(rubyLibDir) && $(am__cd) $(rubyLibDir) && \
+	  CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" \
+	  LDFLAGS="$(LDFLAGS)" \
+	  INCFLAGS="-I$(abs_top_srcdir)/src" \
+	  $(RUBY) -I"$(abs_srcdir)/ruby" \
+	  `test -f ../ruby/extconfLib.rb && echo .. || echo '$(abs_srcdir)'`/ruby/extconfLib.rb && \
+	  $(SED) -i -e '/^\.c\.o:/s/^\.c\.o/.c.lo/;/^.SUFFIXES:/s/$$/ .lo/' \
+	  -e '/^install-so: \$$(RUBYARCHDIR)\/\$$(DLLIB)/{' \
+	  -e 's/^install-so:.*$$/install-so: $$(DLLIB)/;p;n;d' \
+	  -e '}' \
+	  -e 's/\$$(\@D)/\$$(RUBYARCHDIR)/' \
+	  -e '/^OBJS =/s/\.o/.lo/' \
+	  -e '/^CLEANOBJS =/s/\*\.o/*.o *.lo .libs/' \
+	  Makefile
 
-ruby/cdilib_wrap.c: @MAINTAINER_MODE_TRUE@ cdilib.i
-	$(AM_V_GEN)$(SWIG) -ruby -module CdiLib -o $@ $(AM_CPPFLAGS) $<
+if MAINTAINER_MODE
+ruby/cdiobj_wrap.cpp: cdiobj.i cdi.hpp
+	$(AM_V_GEN)$(SWIG) -ruby -c++ -module CdiObj \
+	  -o "$(abs_srcdir)/$@" $(AM_CPPFLAGS) \
+	  `test -f ./$< && echo . || echo '$(abs_srcdir)'`/$<
+
+ruby/cdilib_wrap.c: cdilib.i
+	$(AM_V_GEN)$(SWIG) -ruby -module CdiLib \
+	  -o "$(abs_srcdir)/$@" $(AM_CPPFLAGS) \
+	  `test -f ./$< && echo . || echo '$(abs_srcdir)'`/$<
+endif
 
 # PYTHON
-pythonObj: pythonObjWrapper cdi.lo
-	@$(MKDIR_P) python && $(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_srcdir)' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS) -L$(abs_top_builddir)/src/.libs' LIBS='$(LIBS)' BUILDLIBDIR='$(abs_top_builddir)/src/.libs' LIBDIR='$(libdir)' $(PYTHON) setupObj.py build_ext --inplace
+setup_python_vars=LIBTOOL="$(SHELL) $(abs_top_builddir)/libtool" \
+	  AM_LIBTOOLFLAGS="$(AM_LIBTOOLFLAGS)" \
+	  LIBTOOLFLAGS="$(LIBTOOLFLAGS) --mode=install" \
+	  INSTALL="$(INSTALL) $(INSTALL_STRIP_FLAG)" \
+	  CC="$${LIBTOOL} --mode=compile --tag=CC $(CC) -shared" \
+	  CFLAGS="$(CFLAGS) $(DEFS)" \
+	  LDSHARED="$${LIBTOOL} --mode=link --tag=CC $(CC) -module -shared" \
+	  BUILDLIBDIR="$(top_builddir)/src" \
+	  LIBDIR="$(libdir)" \
+	  LIBS="$(LIBS)" \
+	  LDFLAGS="-L../../src $(LDFLAGS)" \
+	  INCFLAGS="-I.. -I$(abs_srcdir) -I$(abs_top_srcdir)/src" \
+	  OPT= \
+	  BASECFLAGS= \
+	  abs_srcdir='$(abs_srcdir)/python' ; \
+	  abs_builddir='$(abs_builddir)' \
+	  abs_builddir_python='$(abs_builddir)/python' \
+	  abs_builddir_python_build='$(abs_builddir)/python/'"$${py_build_libdir}/.libs" ; \
+	  export LIBTOOL AM_LIBTOOLFLAGS LIBTOOLFLAGS INSTALL \
+	  CC BUILDLIBDIR LIBDIR CFLAGS OPT LIBS CDIOBJ_WRAP LDFLAGS \
+	  BASECFLAGS INCFLAGS LDSHARED CXX abs_srcdir abs_builddir \
+	  abs_builddir_python abs_builddir_python_build ;
 
-pythonLib: pythonLibWrapper $(top_builddir)/src/cdilib.lo
-	@$(MKDIR_P) python && $(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_top_srcdir)/src' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' $(PYTHON) setupLib.py build_ext --inplace
+
+setup_cdilib_py_vars = \
+  setupLib_py=`test -f setupLib.py || echo '$(abs_srcdir)/python/'`setupLib.py ; \
+  py_libdir=`$(PYTHON) $${setupLib_py} install --print-libdir --prefix="$(prefix)"` ; \
+  py_build_libdir=`$(PYTHON) $${setupLib_py} install --print-build-libdir --prefix="$(prefix)"` ; \
+  LDFLAGS="$${LDFLAGS} -rpath $${py_libdir}" ; \
+  abs_builddir_python_build="$(abs_builddir)/python/$${py_build_libdir}/.libs"
+
+setup_python_cxx_vars = CFLAGS="$(CXXFLAGS) $(DEFS)" \
+	  CC="$${LIBTOOL} --mode=compile --tag=CXX $(CXX) -shared" \
+	  LDSHARED="$${LIBTOOL} --mode=link --tag=CXX $(CXX) -module -shared" \
+	  CXX="$${LIBTOOL} --mode=link --tag=CXX $(CXX) -module -shared"
+
+setup_cdiobj_py_vars = \
+  setupObj_py=`test -f setupObj.py || echo '$(abs_srcdir)/python/'`setupObj.py ; \
+  py_libdir=`$(PYTHON) $${setupObj_py} install --print-libdir --prefix="$(prefix)"` ; \
+  py_build_libdir=`$(PYTHON) $${setupObj_py} install --print-build-libdir --prefix="$(prefix)"` ; \
+  LDFLAGS="$${LDFLAGS} -shared -rpath $${py_libdir}" \
+  abs_builddir_python_build='$(abs_builddir)/python/'"$${py_build_libdir}/.libs"
+
+pythonObj: python/CdiObj.stamp
+python/CdiObj.stamp: python/cdiobj_wrap.cpp cdi.lo pythonObjWrapper
+	$(AM_V_GEN)$(MKDIR_P) python && $(am__cd) python && \
+	  $(setup_python_vars) \
+	  $(setup_python_cxx_vars) \
+	  $(setup_cdiobj_py_vars) \
+	  $(PYTHON) "$${setupObj_py}" \
+	  build_ext -v && touch "../$@"
+
+pythonLib: python/CdiLib.stamp
+python/CdiLib.stamp: pythonLibWrapper python/cdilib_wrap.c
+	$(AM_V_GEN)$(MKDIR_P) python && $(am__cd) python && \
+	  $(setup_python_vars) \
+	  $(setup_cdilib_py_vars) \
+	  $(PYTHON) "$${setupLib_py}" build_ext -v && \
+	  touch "../$@"
 
 pythonObjWrapper: python/cdiobj_wrap.cpp
 
 pythonLibWrapper: python/cdilib_wrap.c
 
 pythonObjTest: pythonObj
-	@$(MKDIR_P) python && $(am__cd) python && $(PYTHON) testObj.py
+	$(AM_V_GEN)$(MKDIR_P) python && $(am__cd) python && \
+	  $(setup_python_vars) \
+	  $(setup_python_cxx_vars) \
+	  $(setup_cdiobj_py_vars) \
+	  $(PYTHON) `test -f testObj.py || echo '$(abs_srcdir)/python/'`testObj.py \
+	  $(select_test_file)
 
 pythonLibTest: pythonLib
-	@$(MKDIR_P) python && $(am__cd) python && $(PYTHON) testLib.py
+	$(AM_V_GEN)$(MKDIR_P) python && $(am__cd) python && \
+	  $(setup_python_vars) \
+	  $(setup_cdilib_py_vars) \
+	  $(PYTHON) \
+	  `test -f testLib.py || echo '$(abs_srcdir)/python/'`testLib.py \
+	  $(select_test_file)
 
 pythonObjInstall: pythonObj
-	@$(MKDIR_P) python && $(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_srcdir)' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS) -L$(abs_top_builddir)/src/.libs' LIBS='$(LIBS)' BUILDLIBDIR='$(abs_top_builddir)/src/.libs' LIBDIR='$(libdir)' $(PYTHON) setupObj.py install --prefix='$(prefix)'
+	$(AM_V_GEN)$(MKDIR_P) python && $(am__cd) python && \
+	  $(setup_python_vars) $(setup_cdiobj_py_vars) \
+	  $(PYTHON) "$${setupObj_py}" \
+	  install --prefix="$(DESTDIR)$(prefix)"
 
 pythonLibInstall: pythonLib
-	@$(MKDIR_P) python && $(am__cd) python && CC='$(CC)' CXX='$(CXX)' INCFLAGS='-I$(abs_top_srcdir)/src' CFLAGS='$(CFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' $(PYTHON) setupLib.py install --prefix='$(prefix)'
+	$(AM_V_GEN)$(MKDIR_P) python && $(am__cd) python && \
+	  $(setup_python_vars) $(setup_cdilib_py_vars) \
+	  $(PYTHON) "$${setupLib_py}" \
+	  install --prefix="$(DESTDIR)$(prefix)"
 
-python/cdiobj_wrap.cpp: @MAINTAINER_MODE_TRUE@ cdiobj.i
-	$(AM_V_GEN)$(SWIG) -python -c++ -module CdiObj -o $@ $(AM_CPPFLAGS) $<
+if MAINTAINER_MODE
+python/cdiobj_wrap.cpp: cdiobj.i
+	$(AM_V_GEN)$(MKDIR_P) python && \
+	  $(SWIG) -python -c++ -module CdiObj -o $@ $(AM_CPPFLAGS) \
+	  `test -f ./$< && echo . || echo '$(abs_srcdir)'`/$<
 
-python/cdilib_wrap.c: @MAINTAINER_MODE_TRUE@ cdilib.i
-	$(AM_V_GEN)$(SWIG) -python -module CdiLib -o $@ $(AM_CPPFLAGS) $<
 
-$(top_builddir)/src/cdilib.lo:
-	@$(am__cd) $(top_builddir)/src && $(MAKE) $(AM_MAKEFLAGS) cdilib.lo
+python/cdilib_wrap.c: cdilib.i
+	$(AM_V_GEN)$(MKDIR_P) python && \
+	  $(SWIG) -python -module CdiLib -o $@ $(AM_CPPFLAGS) \
+	  `test -f ./$< && echo . || echo '$(abs_srcdir)'`/$<
+
+endif
 
 clean-local:
+	rm -f python/CdiLib.py python/CdiLib.pyc python/CdiLib.stamp \
+		python/CdiObj.py python/CdiObj.pyc python/CdiObj.stamp \
+		python/cdilib_wrap.c python/cdiobj_wrap.cpp
 	-rm -f CdiInfo libcdipp.la
-	-$(am__cd) ruby && rm -rf *.o *.so Makefile .sitearchdir.time
 	-$(am__cd) python && rm -rf *.pyc *.pyo *.so __pycache__ build
+	-$(am__cd) $(rubyObjDir) && \rm -f CdiObj.la Makefile cdiobj_wrap.cpp \
+		cdiobj_wrap.lo cdiobj_wrap.o *.o .libs Makefile .sitearchdir.time
+	-$(am__cd) $(rubyLibDir) && \rm -f CdiLib.la Makefile cdilib_wrap.c \
+		cdilib_wrap.lo cdilib_wrap.o *.o .libs Makefile .sitearchdir.time
+	-rmdir python $(rubyLibDir) $(rubyObjDir)
 
 # Compile programs using Libtool:
 COMPILE = $(LTCOMPILE)
 FCCOMPILE = $(LTFCCOMPILE)
 PPFCCOMPILE = $(LTPPFCCOMPILE)
 CXXCOMPILE = $(LTCXXCOMPILE)
-
-#
-# Avoid compiling twice by running Libtool with '-static'
-#   This is safe because none of the Libtool libraries in this directory is
-#   installed:
-#
-
-LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=compile $(CC) -static $(DEFS) \
-	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
-	$(AM_CFLAGS) $(CFLAGS)
-
-LTFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=compile $(FC) -static $(AM_FCFLAGS) $(FCFLAGS)
-
-# Also compile *.F90 without CPPFLAGS, which are normally meant for the C
-# compiler and might not be compatible with the Fortran compiler:
-LTPPFCCOMPILE = $(LTFCCOMPILE)
-
-LTCXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=compile $(CXX) -static $(DEFS) \
-        $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
-        $(AM_CXXFLAGS) $(CXXFLAGS)

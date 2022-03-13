@@ -1890,7 +1890,7 @@ SWIG_ruby_failed(VALUE SWIGUNUSEDPARM(arg1), VALUE SWIGUNUSEDPARM(arg2))
 } 
 
 
-/*@SWIG:/scratch/local1/icon-spack/spack/opt/spack/gcc-6.3.0-haswell/swig-4.0.2-6vbtyne/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
+/*@SWIG:/sw/spack/linux-debian9-x86_64/gcc-6.3.0/swig/4.0.2-yzoz7wafepdghk32h6l7lnk65nfacro5/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
 SWIGINTERN VALUE SWIG_AUX_NUM2LONG(VALUE arg)
 {
   VALUE *args = (VALUE *)arg;
@@ -1973,7 +1973,7 @@ SWIG_FromCharPtr(const char *cptr)
 }
 
 
-/*@SWIG:/scratch/local1/icon-spack/spack/opt/spack/gcc-6.3.0-haswell/swig-4.0.2-6vbtyne/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
+/*@SWIG:/sw/spack/linux-debian9-x86_64/gcc-6.3.0/swig/4.0.2-yzoz7wafepdghk32h6l7lnk65nfacro5/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
 SWIGINTERN VALUE SWIG_AUX_NUM2DBL(VALUE arg)
 {
   VALUE *args = (VALUE *)arg;
@@ -3955,7 +3955,7 @@ _wrap_streamWriteVarChunk(int argc, VALUE *argv, VALUE self) {
   arg2 = (int)(val2);
   res3 = SWIG_ConvertPtr(argv[2], &argp3,SWIGTYPE_p_a_2__int, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "int const [3][2]","streamWriteVarChunk", 3, argv[2] )); 
+    SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "int const [][2]","streamWriteVarChunk", 3, argv[2] )); 
   } 
   arg3 = (int (*)[2])(argp3);
   res4 = SWIG_ConvertPtr(argv[3], &argp4,SWIGTYPE_p_double, 0 |  0 );
@@ -4008,7 +4008,7 @@ _wrap_streamWriteVarChunkF(int argc, VALUE *argv, VALUE self) {
   arg2 = (int)(val2);
   res3 = SWIG_ConvertPtr(argv[2], &argp3,SWIGTYPE_p_a_2__int, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "int const [3][2]","streamWriteVarChunkF", 3, argv[2] )); 
+    SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "int const [][2]","streamWriteVarChunkF", 3, argv[2] )); 
   } 
   arg3 = (int (*)[2])(argp3);
   res4 = SWIG_ConvertPtr(argv[3], &argp4,SWIGTYPE_p_float, 0 |  0 );
@@ -10749,62 +10749,6 @@ fail:
 
 
 SWIGINTERN VALUE
-_wrap_gridInqXIsc(int argc, VALUE *argv, VALUE self) {
-  int arg1 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  int result;
-  VALUE vresult = Qnil;
-  
-  if ((argc < 1) || (argc > 1)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
-  }
-  ecode1 = SWIG_AsVal_int(argv[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), Ruby_Format_TypeError( "", "int","gridInqXIsc", 1, argv[0] ));
-  } 
-  arg1 = (int)(val1);
-  result = (int)gridInqXIsc(arg1);
-  vresult = SWIG_From_int((int)(result));
-  return vresult;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_gridInqXCvals(int argc, VALUE *argv, VALUE self) {
-  int arg1 ;
-  char **arg2 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  int result;
-  VALUE vresult = Qnil;
-  
-  if ((argc < 2) || (argc > 2)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
-  }
-  ecode1 = SWIG_AsVal_int(argv[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), Ruby_Format_TypeError( "", "int","gridInqXCvals", 1, argv[0] ));
-  } 
-  arg1 = (int)(val1);
-  res2 = SWIG_ConvertPtr(argv[1], &argp2,SWIGTYPE_p_p_char, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "char *[]","gridInqXCvals", 2, argv[1] )); 
-  } 
-  arg2 = (char **)(argp2);
-  result = (int)gridInqXCvals(arg1,arg2);
-  vresult = SWIG_From_int((int)(result));
-  return vresult;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
 _wrap_gridDefYvals(int argc, VALUE *argv, VALUE self) {
   int arg1 ;
   double *arg2 ;
@@ -10858,62 +10802,6 @@ _wrap_gridInqYvals(int argc, VALUE *argv, VALUE self) {
   } 
   arg2 = (double *)(argp2);
   result = (int)gridInqYvals(arg1,arg2);
-  vresult = SWIG_From_int((int)(result));
-  return vresult;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_gridInqYIsc(int argc, VALUE *argv, VALUE self) {
-  int arg1 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  int result;
-  VALUE vresult = Qnil;
-  
-  if ((argc < 1) || (argc > 1)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
-  }
-  ecode1 = SWIG_AsVal_int(argv[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), Ruby_Format_TypeError( "", "int","gridInqYIsc", 1, argv[0] ));
-  } 
-  arg1 = (int)(val1);
-  result = (int)gridInqYIsc(arg1);
-  vresult = SWIG_From_int((int)(result));
-  return vresult;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_gridInqYCvals(int argc, VALUE *argv, VALUE self) {
-  int arg1 ;
-  char **arg2 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  int result;
-  VALUE vresult = Qnil;
-  
-  if ((argc < 2) || (argc > 2)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
-  }
-  ecode1 = SWIG_AsVal_int(argv[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), Ruby_Format_TypeError( "", "int","gridInqYCvals", 1, argv[0] ));
-  } 
-  arg1 = (int)(val1);
-  res2 = SWIG_ConvertPtr(argv[1], &argp2,SWIGTYPE_p_p_char, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "char *[]","gridInqYCvals", 2, argv[1] )); 
-  } 
-  arg2 = (char **)(argp2);
-  result = (int)gridInqYCvals(arg1,arg2);
   vresult = SWIG_From_int((int)(result));
   return vresult;
 fail:
@@ -13177,35 +13065,6 @@ _wrap_zaxisDefLevels(int argc, VALUE *argv, VALUE self) {
   } 
   arg2 = (double *)(argp2);
   zaxisDefLevels(arg1,(double const (*))arg2);
-  return Qnil;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_zaxisDefCvals(int argc, VALUE *argv, VALUE self) {
-  int arg1 ;
-  char **arg2 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  
-  if ((argc < 2) || (argc > 2)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
-  }
-  ecode1 = SWIG_AsVal_int(argv[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), Ruby_Format_TypeError( "", "int","zaxisDefCvals", 1, argv[0] ));
-  } 
-  arg1 = (int)(val1);
-  res2 = SWIG_ConvertPtr(argv[1], &argp2,SWIGTYPE_p_p_char, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "char const *[]","zaxisDefCvals", 2, argv[1] )); 
-  } 
-  arg2 = (char **)(argp2);
-  zaxisDefCvals(arg1,(char const *(*))arg2);
   return Qnil;
 fail:
   return Qnil;
@@ -17386,7 +17245,6 @@ SWIGEXPORT void Init_CdiLib(void) {
   rb_define_const(mCdiLib, "GRID_CURVILINEAR", SWIG_From_int((int)(10)));
   rb_define_const(mCdiLib, "GRID_LCC", SWIG_From_int((int)(11)));
   rb_define_const(mCdiLib, "GRID_PROJECTION", SWIG_From_int((int)(12)));
-  rb_define_const(mCdiLib, "GRID_CHARXY", SWIG_From_int((int)(13)));
   rb_define_const(mCdiLib, "CDI_PROJ_RLL", SWIG_From_int((int)(21)));
   rb_define_const(mCdiLib, "CDI_PROJ_LCC", SWIG_From_int((int)(22)));
   rb_define_const(mCdiLib, "CDI_PROJ_LAEA", SWIG_From_int((int)(23)));
@@ -17417,7 +17275,6 @@ SWIGEXPORT void Init_CdiLib(void) {
   rb_define_const(mCdiLib, "ZAXIS_SEDIMENT_BOTTOM_TW", SWIG_From_int((int)(23)));
   rb_define_const(mCdiLib, "ZAXIS_MIX_LAYER", SWIG_From_int((int)(24)));
   rb_define_const(mCdiLib, "ZAXIS_REFERENCE", SWIG_From_int((int)(25)));
-  rb_define_const(mCdiLib, "ZAXIS_CHAR", SWIG_From_int((int)(26)));
   rb_define_const(mCdiLib, "ZAXIS_TROPOPAUSE", SWIG_From_int((int)(27)));
   rb_define_const(mCdiLib, "SUBTYPE_TILES", SWIG_From_int((int)(SUBTYPE_TILES)));
   rb_define_const(mCdiLib, "MAX_KV_PAIRS_MATCH", SWIG_From_int((int)(10)));
@@ -17731,12 +17588,8 @@ SWIGEXPORT void Init_CdiLib(void) {
   rb_define_module_function(mCdiLib, "gridInqNP", _wrap_gridInqNP, -1);
   rb_define_module_function(mCdiLib, "gridDefXvals", _wrap_gridDefXvals, -1);
   rb_define_module_function(mCdiLib, "gridInqXvals", _wrap_gridInqXvals, -1);
-  rb_define_module_function(mCdiLib, "gridInqXIsc", _wrap_gridInqXIsc, -1);
-  rb_define_module_function(mCdiLib, "gridInqXCvals", _wrap_gridInqXCvals, -1);
   rb_define_module_function(mCdiLib, "gridDefYvals", _wrap_gridDefYvals, -1);
   rb_define_module_function(mCdiLib, "gridInqYvals", _wrap_gridInqYvals, -1);
-  rb_define_module_function(mCdiLib, "gridInqYIsc", _wrap_gridInqYIsc, -1);
-  rb_define_module_function(mCdiLib, "gridInqYCvals", _wrap_gridInqYCvals, -1);
   rb_define_const(mCdiLib, "CDI_KEY_XNAME", SWIG_From_int((int)(901)));
   rb_define_const(mCdiLib, "CDI_KEY_XDIMNAME", SWIG_From_int((int)(902)));
   rb_define_const(mCdiLib, "CDI_KEY_XLONGNAME", SWIG_From_int((int)(903)));
@@ -17823,7 +17676,6 @@ SWIGEXPORT void Init_CdiLib(void) {
   rb_define_module_function(mCdiLib, "zaxisDuplicate", _wrap_zaxisDuplicate, -1);
   rb_define_module_function(mCdiLib, "zaxisPrint", _wrap_zaxisPrint, -1);
   rb_define_module_function(mCdiLib, "zaxisDefLevels", _wrap_zaxisDefLevels, -1);
-  rb_define_module_function(mCdiLib, "zaxisDefCvals", _wrap_zaxisDefCvals, -1);
   rb_define_module_function(mCdiLib, "zaxisInqLevels", _wrap_zaxisInqLevels, -1);
   rb_define_module_function(mCdiLib, "zaxisDefLevel", _wrap_zaxisDefLevel, -1);
   rb_define_module_function(mCdiLib, "zaxisInqLevel", _wrap_zaxisInqLevel, -1);

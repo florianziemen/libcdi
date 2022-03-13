@@ -2490,7 +2490,7 @@ SWIG_ruby_failed(VALUE SWIGUNUSEDPARM(arg1), VALUE SWIGUNUSEDPARM(arg2))
 } 
 
 
-/*@SWIG:/scratch/local1/icon-spack/spack/opt/spack/gcc-6.3.0-haswell/swig-4.0.2-6vbtyne/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
+/*@SWIG:/sw/spack/linux-debian9-x86_64/gcc-6.3.0/swig/4.0.2-yzoz7wafepdghk32h6l7lnk65nfacro5/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
 SWIGINTERN VALUE SWIG_AUX_NUM2ULONG(VALUE arg)
 {
   VALUE *args = (VALUE *)arg;
@@ -2536,7 +2536,7 @@ SWIG_AsVal_unsigned_SS_long (VALUE obj, unsigned long *val)
 
 
 #ifdef SWIG_LONG_LONG_AVAILABLE
-/*@SWIG:/scratch/local1/icon-spack/spack/opt/spack/gcc-6.3.0-haswell/swig-4.0.2-6vbtyne/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
+/*@SWIG:/sw/spack/linux-debian9-x86_64/gcc-6.3.0/swig/4.0.2-yzoz7wafepdghk32h6l7lnk65nfacro5/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
 SWIGINTERN VALUE SWIG_AUX_NUM2ULL(VALUE arg)
 {
   VALUE *args = (VALUE *)arg;
@@ -2595,7 +2595,7 @@ SWIG_From_bool  (bool value)
 }
 
 
-/*@SWIG:/scratch/local1/icon-spack/spack/opt/spack/gcc-6.3.0-haswell/swig-4.0.2-6vbtyne/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
+/*@SWIG:/sw/spack/linux-debian9-x86_64/gcc-6.3.0/swig/4.0.2-yzoz7wafepdghk32h6l7lnk65nfacro5/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
 SWIGINTERN VALUE SWIG_AUX_NUM2LONG(VALUE arg)
 {
   VALUE *args = (VALUE *)arg;
@@ -2626,7 +2626,7 @@ SWIG_AsVal_long (VALUE obj, long* val)
 
 
 #ifdef SWIG_LONG_LONG_AVAILABLE
-/*@SWIG:/scratch/local1/icon-spack/spack/opt/spack/gcc-6.3.0-haswell/swig-4.0.2-6vbtyne/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
+/*@SWIG:/sw/spack/linux-debian9-x86_64/gcc-6.3.0/swig/4.0.2-yzoz7wafepdghk32h6l7lnk65nfacro5/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
 SWIGINTERN VALUE SWIG_AUX_NUM2LL(VALUE arg)
 {
   VALUE *args = (VALUE *)arg;
@@ -4563,7 +4563,7 @@ SWIGINTERN VALUE std_vector_Sl_int_Sg____delete__(std::vector< int > *self,int c
     return r;
   }
 
-/*@SWIG:/scratch/local1/icon-spack/spack/opt/spack/gcc-6.3.0-haswell/swig-4.0.2-6vbtyne/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
+/*@SWIG:/sw/spack/linux-debian9-x86_64/gcc-6.3.0/swig/4.0.2-yzoz7wafepdghk32h6l7lnk65nfacro5/share/swig/4.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
 SWIGINTERN VALUE SWIG_AUX_NUM2DBL(VALUE arg)
 {
   VALUE *args = (VALUE *)arg;
