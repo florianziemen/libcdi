@@ -59,6 +59,7 @@ int main()
 
   streamWriteVar(streamID1, 0, data, 0);
 
+  free(data);
   return (0);
 
   vlistID = streamInqVlist(streamID1);
