@@ -54,8 +54,7 @@ cdiPioDbufferInit(struct dBuffer *db, size_t bufSize)
   db->buffer = (unsigned char *)buf;
 #else
   db->size = bufSize;
-  db->buffer = (unsigned char *)malloc(bufSize);
-  assert(db->buffer);
+  db->buffer = (unsigned char *)Malloc(bufSize);
 #endif
 }
 

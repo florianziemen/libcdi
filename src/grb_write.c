@@ -168,7 +168,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 
         gridsize = vlistGridsizeMax(vlistID);
         if ( vlistNumber(vlistID) != CDI_REAL ) gridsize *= 2;
-        double * data = (double *) malloc(gridsize*sizeof(double));
+        double * data = (double *) Malloc(gridsize*sizeof(double));
         //int missval = vlistInqVarMissval(vlistID, varID);
 
         //streamptr->numvals += gridsize;
