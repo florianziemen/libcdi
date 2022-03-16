@@ -631,6 +631,20 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
   if (len) cdf_put_att_text(fileID, ncvarID, "coordinates", len, coordinates);
 }
 
+static size_t
+calc_chuncksize(size_t chunkSizeMax, size_t size)
+{
+  static const size_t pageSize = 4096;
+
+  if (size <= chunkSizeMax) return size;
+
+  size_t numChunks = (size / chunkSizeMax) + 1;
+  size_t chunckSize = size / numChunks;
+  if (chunckSize%pageSize) chunckSize = (chunckSize / pageSize + 1) * pageSize;
+
+  return chunckSize;
+}
+
 static int
 cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, int zid, size_t gridsize, const int dimorder[3],
                        int dims[4], bool lchunk, size_t chunks[4], char axis[5], size_t *piax)
@@ -690,7 +704,7 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
           if (chunktype == CDI_CHUNK_AUTO && yid == CDI_UNDEFID)
             chunks[ndims] = (chunk_size_max > xsize) ? xsize : chunk_size_max;
           else
-            chunks[ndims] = (xsize > chunk_size_lim) ? chunk_size_lim : xsize;
+            chunks[ndims] = calc_chuncksize(chunk_size_lim, xsize);
           dims[ndims] = xid;
           ndims++;
         }

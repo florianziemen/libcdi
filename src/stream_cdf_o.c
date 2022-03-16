@@ -1143,7 +1143,7 @@ cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int *ncvaridp, int zax
   cdf_enddef(fileID);
   streamptr->ncmode = 2;
 
-  cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
+  if (zaxisInqLevels(zaxisID, NULL)) cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
 
   cdf_def_vct_echam(streamptr, zaxisID);
 
@@ -1952,6 +1952,7 @@ cdfDefCoordinateVars(stream_t *streamptr)
         if (projID != CDI_UNDEFID) cdfDefGrid(streamptr, projID, ++index);
       }
   }
+
   const int nzaxis = vlistNzaxis(vlistID);
   for (int index = 0; index < nzaxis; ++index)
     {

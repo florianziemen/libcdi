@@ -869,6 +869,9 @@ gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
   compVar0.scanKeys = record.scanKeys;
   compVar0.tiles = record.tiles;
 
+  //printf("var1: level1=%d level2=%d\n", compVar.level1, compVar.level2);
+  //printf("var2: level1=%d level2=%d\n", compVar0.level1, compVar0.level2);
+
   return memcmp(&compVar0, &compVar, sizeof(compvar2_t));
 }
 
@@ -2041,7 +2044,10 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
       if (endStepF > maxStep) return status;
       long endStep = (long) endStepF;
 
-      if (sdate != 0 && (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF))
+      bool hasStartDate = (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF
+                           || tsteptype == TSTEP_MIN || tsteptype == TSTEP_MAX || tsteptype == TSTEP_RMS || tsteptype == TSTEP_SD
+                           || tsteptype == TSTEP_COV || tsteptype == TSTEP_RATIO || tsteptype == TSTEP_SUM);
+      if (sdate != 0 && hasStartDate)
         {
           cdiDecodeDate(sdate, &year, &month, &day);
           cdiDecodeTime(stime, &hour, &minute, &second);
@@ -3395,6 +3401,13 @@ gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int 
   gribapiSetExtMode(gh, gridID, datasize, data);
 
   GRIB_CHECK(grib_set_double_array(gh, "values", (const double *) data, datasize), 0);
+
+  if (nmiss)
+    {
+      long numberOfMissing = -1;
+      GRIB_CHECK(grib_get_long(gh, "numberOfMissing", &numberOfMissing), 0);
+      if (numberOfMissing == 0) GRIB_CHECK(my_grib_set_long(gh, "bitmapPresent", 0), 0);
+    }
 
   // get the size of coded message
   size_t recsize = 0;
