@@ -312,7 +312,7 @@ grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 
           size_t gridsize = gridInqSize(gridID);
           if (vlistNumber(vlistID) != CDI_REAL) gridsize *= 2;
-          double *data = (double *) malloc(gridsize * sizeof(double));
+          double *data = (double *) Malloc(gridsize * sizeof(double));
 
           if (cdiDebugExt >= 20) Message(" processing varID %d; levelID %d", varID, levelID);
 

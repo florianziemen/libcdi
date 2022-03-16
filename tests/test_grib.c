@@ -31,7 +31,7 @@ main()
   SizeType nmiss;
 
   size_t datasize = (size_t) nlon * (size_t) nlat;
-  data = (double *) malloc(datasize * sizeof(double));
+  data = (double *) Malloc(datasize * sizeof(double));
   memset(data, 0, datasize * sizeof(double));
 
   gridID = gridCreate(GRID_GAUSSIAN, (int) datasize);
@@ -88,7 +88,7 @@ main()
       if (gridsize * varNlevel > datasize) datasize = gridsize * varNlevel;
     }
 
-  data = (double *) realloc(data, datasize * sizeof(double));
+  data = (double *) Realloc(data, datasize * sizeof(double));
   memset(data, 0, datasize * sizeof(double));
 
   taxisID = vlistInqTaxis(vlistID);
