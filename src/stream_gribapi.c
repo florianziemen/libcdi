@@ -2783,7 +2783,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
       }
   }
   double *dataCopy = NULL;
-  dataCopy = (double *) malloc(gridsize*sizeof(double));
+  dataCopy = (double *) Malloc(gridsize*sizeof(double));
 
   memcpy((void*)dataCopy,(void*) data, gridsize*sizeof(double));
 

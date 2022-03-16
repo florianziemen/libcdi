@@ -58,7 +58,7 @@ cksum_stream(const char *fname, size_t *table_len)
         break;
       }
     checksum_state = (uint32_t *) Calloc((size_t)nvars, sizeof (checksum_state[0]));
-    varDesc = (struct var_desc_t *)malloc((size_t)nvars * sizeof (varDesc[0]));
+    varDesc = (struct var_desc_t *)Malloc((size_t)nvars * sizeof (varDesc[0]));
 
     for (int varIdx = 0; varIdx < nvars; ++varIdx)
       {
@@ -143,7 +143,7 @@ cksum_stream(const char *fname, size_t *table_len)
         if (var_size_max_chars < varDesc[varIdx].chars)
           var_size_max_chars = varDesc[varIdx].chars;
       }
-    buf = (double*)malloc(var_size_max_chars);
+    buf = (double*)Malloc(var_size_max_chars);
 
     if (nvars == -1)
       break;
@@ -182,7 +182,7 @@ cksum_stream(const char *fname, size_t *table_len)
         ++tsID;
       }
 
-    file_vars = (struct cksum_table *)malloc((size_t)nvars
+    file_vars = (struct cksum_table *)Malloc((size_t)nvars
                                              * sizeof (file_vars[0]));
     for (int varIdx = 0; varIdx < nvars; ++varIdx)
       {
