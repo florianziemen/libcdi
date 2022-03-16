@@ -440,7 +440,7 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
 
 AC_CONFIG_FILES([Makefile src/Makefile interfaces/Makefile app/Makefile \
 	tests/Makefile examples/Makefile cdi.settings \
-	examples/pio/Makefile src/cmake/cdi-config.cmake src/cmake/cdi-config-version.cmake \
+	examples/pio/Makefile src/cmake/libcdi/cdi-config.cmake src/cmake/libcdi/cdi-config-version.cmake \
         src/pkgconfig/cdi.pc src/pkgconfig/cdipio.pc src/pkgconfig/cdi_f2003.pc])
 AC_OUTPUT
 
