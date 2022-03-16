@@ -232,7 +232,7 @@ int
 PPM_prime_factorization_32(uint32_t n, uint32_t **factors)
 {
   if (n <= 1) return 0;
-  uint32_t *restrict pfactors = realloc(*factors, 32 * sizeof(pfactors[0]));
+  uint32_t *restrict pfactors = Realloc(*factors, 32 * sizeof(pfactors[0]));
   size_t numFactors = 0;
   uint32_t unfactored = n;
   while (!(unfactored & 1))

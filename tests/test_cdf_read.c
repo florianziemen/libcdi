@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "cdi.h"
+#include "dmemory.h"
 
 static void printAtts(int vlistID);
 
@@ -41,7 +42,7 @@ main(int argc, const char **argv)
           SizeType nmiss;
           if (memSize > bufSize)
             {
-              double *temp = (double *) realloc(buf, memSize);
+              double *temp = (double *) Realloc(buf, memSize);
               if (!temp)
                 {
                   perror("read buffer reallocation failed");
@@ -66,7 +67,7 @@ printAtts(int vlistID)
   static const char globDesc[] = "global", varDescPrefix[] = "variable ";
   size_t digitsPerInt = 9;
   size_t bufSize = digitsPerInt + sizeof(varDescPrefix);
-  void *restrict buf = malloc(bufSize);
+  void *restrict buf = Malloc(bufSize);
   if (!buf)
     {
       perror("attribute buffer resize failed");
@@ -103,7 +104,7 @@ printAtts(int vlistID)
           size_t attSize = elemSize * ((size_t) attLen + 1);
           if (attSize > bufSize)
             {
-              if (!(buf = realloc(buf, attSize)))
+              if (!(buf = Realloc(buf, attSize)))
                 {
                   perror("attribute buffer resize failed");
                   exit(EXIT_FAILURE);

@@ -214,7 +214,7 @@ modelRun(MPI_Comm comm)
   vlistDestroy(temp.id2);
 
   reshPackBufferCreate(&sendBuffer, &bufferSize, &comm);
-  recvBuffer = (char *) malloc((size_t) bufferSize);
+  recvBuffer = (char *) Malloc((size_t) bufferSize);
 #ifdef USE_MPI
   xmpi(MPI_Sendrecv(sendBuffer, bufferSize, MPI_PACKED, 0, 0, recvBuffer, bufferSize, MPI_PACKED, 0, 0, MPI_COMM_SELF,
                     MPI_STATUS_IGNORE));
