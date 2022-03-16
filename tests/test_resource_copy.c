@@ -192,7 +192,10 @@ modelRun(MPI_Comm comm)
   int bufferSize;
 
 #ifdef USE_MPI
+  const char *fname = "example_resource_copy_mpi.grb";
   cdiPioSerializeSetMPI();
+#else
+  const char *fname = "example_resource_copy.grb";
 #endif
 
   int gridID = defineGrid();
@@ -203,11 +206,7 @@ modelRun(MPI_Comm comm)
 
   struct idPair temp = defineVlist(gridID, zaxisID, taxisID);
   int vlistID = temp.id1;
-#ifdef USE_MPI
-  int streamID = streamOpenWrite("example_resource_copy_mpi.grb", CDI_FILETYPE_GRB);
-#else
-  int streamID = streamOpenWrite("example_resource_copy.grb", CDI_FILETYPE_GRB);
-#endif
+  int streamID = streamOpenWrite(fname, CDI_FILETYPE_GRB);
   if (streamID < 0) xabort("Could not open file");
   defineStream(streamID, vlistID);
   vlistDestroy(temp.id1);
