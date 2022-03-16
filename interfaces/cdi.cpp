@@ -19,9 +19,9 @@ extern "C" {
  */
 CdiGrid::CdiGrid() { gridID = -1; }
 CdiGrid::CdiGrid(int gridid) {
-  char _name[CHARSIZE];
-  char _xname[CHARSIZE], _xlongname[CHARSIZE], _xstdname[CHARSIZE], _xunits[CHARSIZE];
-  char _yname[CHARSIZE], _ylongname[CHARSIZE], _ystdname[CHARSIZE], _yunits[CHARSIZE];
+  char _name[CDI_MAX_NAME];
+  char _xname[CDI_MAX_NAME], _xlongname[CDI_MAX_NAME], _xstdname[CDI_MAX_NAME], _xunits[CDI_MAX_NAME];
+  char _yname[CDI_MAX_NAME], _ylongname[CDI_MAX_NAME], _ystdname[CDI_MAX_NAME], _yunits[CDI_MAX_NAME];
 
   gridID = gridid;
   type   = gridInqType(gridID);
@@ -208,7 +208,7 @@ CdiTaxis::~CdiTaxis() { if (taxisID >= 0) taxisID = -1; }
  */
 CdiZaxis::CdiZaxis() { zaxisID = -1; }
 CdiZaxis::CdiZaxis(int zaxisid) {
-  char name[CHARSIZE], longname[CHARSIZE], units[CHARSIZE];
+  char name[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
 
   zaxisID = zaxisid;
   size    = zaxisInqSize(zaxisID);
@@ -243,7 +243,7 @@ CdiZaxis::~CdiZaxis() { if (zaxisID >= 0) zaxisID = -1; }
  */
 CdiVariable::CdiVariable() { size = -1; }
 CdiVariable::CdiVariable(int streamid,int vlistid, int varid) {
-  char _name[CHARSIZE],_longname[CHARSIZE], _units[CHARSIZE], _stdname[CHARSIZE];
+  char _name[CDI_MAX_NAME],_longname[CDI_MAX_NAME], _units[CDI_MAX_NAME], _stdname[CDI_MAX_NAME];
   streamID = streamid;
   vlistID  = vlistid;
   varID    = varid;
@@ -399,7 +399,7 @@ Cdi::getGrids() {
 
 void
 Cdi::getVars() {
-  char name[CHARSIZE];
+  char name[CDI_MAX_NAME];
   int varID, code;
 //  std::cout << vlistID << std::endl;
   for (varID = 0; varID < nvars; varID++)

@@ -5,7 +5,9 @@
 // (2.0.7 and earlier) with newer STL which no longer include cstddef
 #include <cstddef>
 
-#define CHARSIZE      128
+extern "C" {
+#include <cdi.h>
+}
 
 class CdiGrid {
   public:
@@ -44,7 +46,7 @@ class CdiTaxis {
     int ntsteps, unit;
     int rdate, rtime, vdate, vtime;
     int type, calendar, hasBounds;
-    char name[CHARSIZE];
+    char name[CDI_MAX_NAME];
     const char *unitname;
 };
 
