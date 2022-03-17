@@ -183,8 +183,11 @@ grid_free_components(grid_t *gridptr)
 void
 grid_free(grid_t *gridptr)
 {
-  grid_free_components(gridptr);
-  grid_init(gridptr);
+  if (gridptr)
+    {
+      grid_free_components(gridptr);
+      grid_init(gridptr);
+    }
 }
 
 static grid_t *
