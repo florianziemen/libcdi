@@ -29,6 +29,14 @@ m4_popdef([_AC_PROG_CC_C89])dnl
 ACX_PROG_CC_POSIX([2001])
 AC_C_RESTRICT
 
+dnl Compile with MPI support (we declare the option here because its value
+dnl affects values of the auto options below):
+AC_ARG_ENABLE([mpi],
+  [AS_HELP_STRING([--enable-mpi],
+     [enable parallel I/O with MPI @<:@default=no@:>@])],
+  [test "x$enableval" != xno && enable_mpi=yes],
+  [enable_mpi=no])
+
 AC_ARG_ENABLE([iso-c-interface],
   [AS_HELP_STRING([--enable-iso-c-interface],
      [create Fortran 90 interface using Fortran 2003 ISO_C_BINDING facility ]dnl
@@ -40,17 +48,18 @@ AM_CONDITIONAL([ENABLE_ISOC_INTERFACE],
 
 AC_ARG_ENABLE([cf-interface],
   [AS_HELP_STRING([--enable-cf-interface],
-     [create Fortran 77 interface using cfortran.h @<:@default=yes, if F77 or FC works@:>@])],
-  [test "x$enableval" != xno && enable_cf_interface=yes],
-  [AS_IF([test "x$FC" != xno || test "x$F77" != xno],
-     [enable_cf_interface=yes],[enable_cf_interface=no])])
-AM_CONDITIONAL([ENABLE_CF_INTERFACE], [test "x$enable_cf_interface" = xyes])
+     [create Fortran 77 interface using cfortran.h @<:@default=auto@:>@])],
+  [AS_IF([test "x$enableval" != xno && test "x$enableval" != xauto],
+     [enable_cf_interface=yes])],
+  [enable_cf_interface=auto])
+AS_IF([test "x${enable_mpi}${enable_cf_interface}" = xnoauto],
+  [enable_cf_interface=no])
 
 dnl We need FC for the Fortran 90 and for the Fortran 77 interfaces. In the
 dnl latter case, the compiler is used for testing. Note that we use neither
 dnl AS_IF nor AS_VAR_IF here to prevent checking for FC when we do not need it:
 if test "x$enable_iso_c_interface" = xyes || \
-   test "x$enable_cf_interface" = xyes; then
+   test "x$enable_cf_interface" != xno; then
   if test "x$FC" != xno; then
     AC_PROG_FC
     test -z $FC 2>/dev/null && FC=no
@@ -90,14 +99,14 @@ dnl Additional checks required for the Fortran 2003 interface:
 AS_VAR_IF([enable_iso_c_interface], [yes],
   [AS_IF([test "x$FC" != xno], [ACX_FC_CHECK_STRPTR_CONVERT([], [FC=no])])
    AS_VAR_IF([FC], [no],
-     [AC_MSG_FAILURE([the Fortran 2003 interface is requested but the Fortran ]dnl
-[compiler is disabled, missing or lacks the required features])])])
+     [AC_MSG_FAILURE([the Fortran 2003 interface is requested but the ]dnl
+[Fortran compiler is disabled, missing or lacks the required features])])])
 AM_CONDITIONAL([BUILD_FC_PROGRAMS], [test "x$FC" != xno])
 
 dnl We need Fortran 77 if either FC is not available or the user has specified
 dnl F77 explicitly to make sure that the generated Fortran 77 interface is
 dnl compatible with it:
-if test "x$enable_cf_interface" = xyes; then
+if test "x$enable_cf_interface" != xno; then
   AS_IF([test -n "$F77" && test "x$F77" != xno],
     [requested_F77=yes], [requested_F77=no])
   if test "x$FC" = xno || test "x$requested_F77" = xyes; then
@@ -123,7 +132,7 @@ else
   F77=no
 fi
 dnl Additional checks required for the Fortran 77 interface:
-AS_VAR_IF([enable_cf_interface], [yes],
+AS_IF([test "x$enable_cf_interface" != xno],
   [dnl
 dnl The following macro make sure that the user's request for the Fortran 77
 dnl interface compatibility is fulfilled:
@@ -141,9 +150,12 @@ test "x$acx_cv_f77_ftn_include_flag" != "x$FC_OPTINC"],
         [AC_MSG_ERROR([Fortran and Fortran 77 compilers require different ]dnl
 [flags needed to specify search paths for the "INCLUDE" statements])])])
    AS_IF([test "x$FC" = xno && test "x$F77" = xno],
-     [AC_MSG_FAILURE([the Fortran 77 interface is requested but both ]dnl
+     [AS_VAR_IF([enable_cf_interface], [auto], [enable_cf_interface=no],
+        [AC_MSG_FAILURE([the Fortran 77 interface is requested but both ]dnl
 [Fortran and Fortran 77 compilers are disabled, missing or lack the ]dnl
-[required features])])])
+[required features])])])])
+AS_VAR_IF([enable_cf_interface], [auto], [enable_cf_interface=yes])
+AM_CONDITIONAL([ENABLE_CF_INTERFACE], [test "x$enable_cf_interface" = xyes])
 
 AC_ARG_ENABLE([ruby-interface],
   [AS_HELP_STRING([--enable-ruby-interface],
@@ -287,13 +299,7 @@ dnl
 AC_DEFINE_UNQUOTED([SYSTEM_TYPE], ["$ac_cv_build"], [System type])
 AC_SUBST([SYSTEM_TYPE], ["$ac_cv_build"])
 
-dnl Compile with MPI support:
-AC_ARG_ENABLE([mpi],
-  [AS_HELP_STRING([--enable-mpi],
-     [enable parallel I/O with MPI @<:@default=no@:>@])],
-  [test "x$enableval" != xno && enable_mpi=yes],
-  [enable_mpi=no])
-
+dnl MPI-related options and checks:
 AC_ARG_ENABLE([ppm-dist-array],
   [AS_HELP_STRING([--enable-ppm-dist-array],
      [enable usage of the PPM distributed array @<:@default=auto@:>@])],
