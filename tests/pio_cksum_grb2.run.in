@@ -1,4 +1,4 @@
-#!@SHELL@
+#! @SHELL@
 
 suffix=grb2
 pio_write_args="-w 3"
