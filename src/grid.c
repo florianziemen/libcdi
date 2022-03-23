@@ -2119,30 +2119,32 @@ compareXYvals(grid_t *gridRef, grid_t *gridTest)
 {
   bool differ = false;
 
-  size_t xsizeTest = gridTest->x.size, ysizeTest = gridTest->y.size;
-  if (!differ && xsizeTest > 0 && xsizeTest == (size_t) gridRef->vtable->inqXVals(gridRef, NULL))
+  const size_t xsizeTest = gridTest->x.size;
+  const size_t xsizeRef = (size_t) gridRef->vtable->inqXVals(gridRef, NULL);
+  if (xsizeTest != xsizeRef) return true;
+
+  if (xsizeTest > 0)
     {
-      const double *restrict xvalsRef = gridRef->vtable->inqXValsPtr(gridRef), *restrict xvalsTest
-                                                                               = gridTest->vtable->inqXValsPtr(gridTest);
+      const double *xvalsRef = gridRef->vtable->inqXValsPtr(gridRef);
+      const double *xvalsTest = gridTest->vtable->inqXValsPtr(gridTest);
+      if (!xvalsTest) return true;
 
       for (size_t i = 0; i < xsizeTest; ++i)
-        if (fabs(xvalsTest[i] - xvalsRef[i]) > 1.e-10)
-          {
-            differ = true;
-            break;
-          }
+        if (fabs(xvalsTest[i] - xvalsRef[i]) > 1.e-10) return true;
     }
 
-  if (!differ && ysizeTest > 0 && ysizeTest == (size_t) gridRef->vtable->inqYVals(gridRef, NULL))
+  const size_t ysizeTest = gridTest->y.size;
+  const size_t ysizeRef = (size_t) gridRef->vtable->inqYVals(gridRef, NULL);
+  if (ysizeTest != ysizeRef) return true;
+
+  if (ysizeTest > 0)
     {
-      const double *restrict yvalsRef = gridRef->vtable->inqYValsPtr(gridRef), *restrict yvalsTest
-                                                                               = gridTest->vtable->inqYValsPtr(gridTest);
+      const double *yvalsRef = gridRef->vtable->inqYValsPtr(gridRef);
+      const double *yvalsTest = gridTest->vtable->inqYValsPtr(gridTest);
+      if (!yvalsTest) return true;
+
       for (size_t i = 0; i < ysizeTest; ++i)
-        if (fabs(yvalsTest[i] - yvalsRef[i]) > 1.e-10)
-          {
-            differ = true;
-            break;
-          }
+        if (fabs(yvalsTest[i] - yvalsRef[i]) > 1.e-10) return true;
     }
 
   return differ;
@@ -2151,7 +2153,7 @@ compareXYvals(grid_t *gridRef, grid_t *gridTest)
 static bool
 compareXYvals2(grid_t *gridRef, grid_t *gridTest)
 {
-  size_t gridsize = gridTest->size;
+  const size_t gridsize = gridTest->size;
   bool differ = ((gridTest->x.vals == NULL) ^ (gridRef->x.vals == NULL)) || ((gridTest->y.vals == NULL) ^ (gridRef->y.vals == NULL))
                 || ((gridTest->x.bounds == NULL) ^ (gridRef->x.bounds == NULL))
                 || ((gridTest->y.bounds == NULL) ^ (gridRef->y.bounds == NULL));
@@ -2347,8 +2349,8 @@ compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool coord_compa
       int positionB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
       if (coord_compare)
         {
-          differ = grid->nvertex != gridRef->nvertex || (numberA > 0 && positionA != positionB)
-                   || gridRef->vtable->compareXYFull((grid_t *) gridRef, (grid_t *) grid);
+          differ = (grid->nvertex != gridRef->nvertex || (numberA > 0 && positionA != positionB)
+                    || gridRef->vtable->compareXYFull((grid_t *) gridRef, (grid_t *) grid));
         }
       else
         {
@@ -2360,8 +2362,8 @@ compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool coord_compa
             }
           else
             {
-              differ = grid->nvertex != gridRef->nvertex || numberA != numberB || (numberA > 0 && positionA != positionB)
-                       || gridRef->vtable->compareXYAO((grid_t *) gridRef, (grid_t *) grid);
+              differ = (grid->nvertex != gridRef->nvertex || numberA != numberB || (numberA > 0 && positionA != positionB)
+                        || gridRef->vtable->compareXYAO((grid_t *) gridRef, (grid_t *) grid));
             }
         }
     }
