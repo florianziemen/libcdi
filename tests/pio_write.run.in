@@ -1,6 +1,22 @@
-#!@SHELL@
+#! @SHELL@
 
-prefix=`echo "$0" | sed 's@.*/@@'`
+set -e
+case "$0" in
+  */*)
+    prefix=`expr "$0" : '.*/\([^/]*\)$'`
+    ;;
+  *)
+    prefix=$0
+    ;;
+esac
+case x"${CDI_PIO_TEST_DIR+${CDI_PIO_TEST_DIR}}" in
+  x)
+    :
+    ;;
+  *)
+    prefix="${CDI_PIO_TEST_DIR}/${prefix}"
+    ;;
+esac
 suffix=${suffix-grb}
 
 if ${mpi_task_num+:} false; then
@@ -40,6 +56,9 @@ esac
 
 test_variation ()
 {
+  if prefix_dirname=`expr "$prefix" : '\(.*\)/'` ; then
+    mkdir -p "${prefix_dirname}"
+  fi
   echo "creating data with $1" >&2
   variation=$1
   @top_builddir@/libtool --mode=execute \
@@ -48,15 +67,15 @@ test_variation ()
     ${pio_write_args} -s 7 ${variation} || exit 1
   echo "checking ${prefix}_0.${suffix}" >&2
   @top_builddir@/libtool --mode=execute \
-    ${tool_wrap} ./cksum_read "${prefix}_0.${suffix}" "${prefix}_0.cksum" || exit 1
+    ${tool_wrap} ./cksum_read "${prefix}_0.${suffix}" "${prefix}_0.cksum"
   echo "checking ${prefix}_1.${suffix}" >&2
   @top_builddir@/libtool --mode=execute \
-    ${tool_wrap} ./cksum_read "${prefix}_1.${suffix}" "${prefix}_1.cksum" || exit 1
+    ${tool_wrap} ./cksum_read "${prefix}_1.${suffix}" "${prefix}_1.cksum"
 }
 
 eval "set dummy $variations"; shift
 for variation in "$@"; do
-  test_variation "$variation" || exit 1
+  test_variation "$variation"
 done
 #
 # Local Variables:
