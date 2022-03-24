@@ -2119,6 +2119,7 @@ compareXYvals(grid_t *gridRef, grid_t *gridTest)
 {
   bool differ = false;
 
+  //grid->type == GRID_UNSTRUCTURED
   const size_t xsizeTest = gridTest->x.size;
   const size_t xsizeRef = (size_t) gridRef->vtable->inqXVals(gridRef, NULL);
   if (xsizeTest != xsizeRef) return true;
@@ -2133,7 +2134,7 @@ compareXYvals(grid_t *gridRef, grid_t *gridTest)
         if (fabs(xvalsTest[i] - xvalsRef[i]) > 1.e-10) return true;
     }
 
-  const size_t ysizeTest = gridTest->y.size;
+  const size_t ysizeTest = (gridTest->type == GRID_UNSTRUCTURED) ? gridTest->x.size : gridTest->y.size;
   const size_t ysizeRef = (size_t) gridRef->vtable->inqYVals(gridRef, NULL);
   if (ysizeTest != ysizeRef) return true;
 
