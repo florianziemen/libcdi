@@ -65,12 +65,16 @@ test_variation ()
     ${launch} \
     ${pio_write} "-qprefix=${prefix}" -f ${suffix} \
     ${pio_write_args} -s 7 ${variation} || exit 1
-  echo "checking ${prefix}_0.${suffix}" >&2
-  @top_builddir@/libtool --mode=execute \
-    ${tool_wrap} ./cksum_read "${prefix}_0.${suffix}" "${prefix}_0.cksum"
-  echo "checking ${prefix}_1.${suffix}" >&2
-  @top_builddir@/libtool --mode=execute \
-    ${tool_wrap} ./cksum_read "${prefix}_1.${suffix}" "${prefix}_1.cksum"
+  tfile=0
+  ntfiles=2
+  while [ "$tfile" -lt "$ntfiles" ]; do
+    p="${prefix}_${tfile}"
+    echo "checking ${p}.${suffix}" >&2
+    @top_builddir@/libtool --mode=execute \
+      ${tool_wrap} ./cksum_read "${p}.${suffix}" "${p}.cksum"
+    rm "${p}.${suffix}" "${p}.cksum"
+    tfile=`expr "$tfile" + 1`
+  done
 }
 
 eval "set dummy $variations"; shift
