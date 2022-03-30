@@ -1363,9 +1363,9 @@ int  gridInqParamsSTERE(int gridID, struct CDI_GridProjParams *gridProjParams);
 
 #define HAVE_CDI_PROJ_FUNCS 1
 extern int (*proj_lonlat_to_lcc_func)(struct CDI_GridProjParams gpp, size_t, double*, double*);
-extern int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, size_t, double*, double*);
+extern int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double*, double*);
 extern int (*proj_lonlat_to_stere_func)(struct CDI_GridProjParams gpp, size_t, double*, double*);
-extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, size_t, double*, double*);
+extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double*, double*);
 
 #ifdef __cplusplus
 }

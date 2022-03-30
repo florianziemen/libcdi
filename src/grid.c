@@ -18,9 +18,9 @@
 #include "vlist.h"
 
 int (*proj_lonlat_to_lcc_func)(struct CDI_GridProjParams gpp, size_t, double *, double *) = NULL;
-int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, size_t, double *, double *) = NULL;
+int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double *, double *) = NULL;
 int (*proj_lonlat_to_stere_func)(struct CDI_GridProjParams gpp, size_t, double *, double *) = NULL;
-int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, size_t, double *, double *) = NULL;
+int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double *, double *) = NULL;
 
 /* the value in the second pair of brackets must match the length of
  * the longest string (including terminating NUL) */
@@ -3783,7 +3783,7 @@ gridVerifyProjParamsLCC(struct CDI_GridProjParams *gpp)
             {
               gpp->xval_0 = -gpp->x_0;
               gpp->yval_0 = -gpp->y_0;
-              proj_lcc_to_lonlat_func(gpp, 0.0, 0.0, (SizeType) 1, &gpp->xval_0, &gpp->yval_0);
+              proj_lcc_to_lonlat_func(*gpp, 0.0, 0.0, (SizeType) 1, &gpp->xval_0, &gpp->yval_0);
             }
           if (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv))
             Warning("%s mapping parameter %s missing!", projection,
@@ -3814,7 +3814,7 @@ gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp)
             {
               gpp->xval_0 = -gpp->x_0;
               gpp->xval_0 = -gpp->y_0;
-              proj_stere_to_lonlat_func(gpp, 0.0, 0.0, (SizeType) 1, &gpp->xval_0, &gpp->yval_0);
+              proj_stere_to_lonlat_func(*gpp, 0.0, 0.0, (SizeType) 1, &gpp->xval_0, &gpp->yval_0);
             }
           if (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv))
             Warning("%s mapping parameter %s missing!", projection,
