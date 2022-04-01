@@ -2331,7 +2331,7 @@ compare_curvilinear(const grid_t *grid, const grid_t *gridRef)
 }
 
 static bool
-compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool coord_compare)
+compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool compareCoord)
 {
   bool differ = false;
 
@@ -2344,11 +2344,11 @@ compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool coord_compa
   differ = ((!cdiUUIDIsNull(uuid1) || !cdiUUIDIsNull(uuid2)) && memcmp(uuid1, uuid2, CDI_UUID_SIZE));
   if (!differ)
     {
-      int numberA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED);
-      int numberB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDUSED);
-      int positionA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
-      int positionB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
-      if (coord_compare)
+      const int numberA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED);
+      const int numberB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDUSED);
+      const int positionA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
+      const int positionB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
+      if (compareCoord)
         {
           differ = (grid->nvertex != gridRef->nvertex || (numberA > 0 && positionA != positionB)
                     || gridRef->vtable->compareXYFull((grid_t *) gridRef, (grid_t *) grid));
@@ -2357,7 +2357,7 @@ compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool coord_compa
         {
           if (((grid->x.vals == NULL) ^ (gridRef->x.vals == NULL)) && ((grid->y.vals == NULL) ^ (gridRef->y.vals == NULL)))
             {
-              int nvertexA = grid->nvertex, nvertexB = gridRef->nvertex;
+              const int nvertexA = grid->nvertex, nvertexB = gridRef->nvertex;
               differ = (nvertexA && nvertexB && (nvertexA != nvertexB))
                        || ((numberA && numberB && (numberA != numberB)) || (numberA && numberB && positionA != positionB));
             }
@@ -2373,7 +2373,7 @@ compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool coord_compa
 }
 
 static bool
-gridCompare(int gridID, const grid_t *grid, bool coord_compare)
+gridCompare(int gridID, const grid_t *grid, bool compareCoord)
 {
   bool differ = true;
   const grid_t *gridRef = grid_to_pointer(gridID);
@@ -2405,17 +2405,17 @@ gridCompare(int gridID, const grid_t *grid, bool coord_compare)
             }
           else if (grid->type == GRID_UNSTRUCTURED)
             {
-              differ = compare_unstructured(grid, gridRef, coord_compare);
+              differ = compare_unstructured(grid, gridRef, compareCoord);
             }
         }
     }
 
-  int scanningModeA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_SCANNINGMODE);
-  int scanningModeB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_SCANNINGMODE);
+  const int scanningModeA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_SCANNINGMODE);
+  const int scanningModeB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_SCANNINGMODE);
   if (scanningModeA != scanningModeB)
     {
       // often grid definition may differ in UV-relativeToGrid
-      differ = 1;
+      differ = true;
 #ifdef HIRLAM_EXTENSIONS
       if (cdiDebugExt >= 200)
         printf("gridCompare(gridID=%d): Differs: scanningModeA [%d] != scanningModeB(gridID) [%d]\n", gridID, scanningModeA,
@@ -2429,10 +2429,9 @@ gridCompare(int gridID, const grid_t *grid, bool coord_compare)
 int
 cmp_key_int(const cdi_keys_t *keysp1, const cdi_keys_t *keysp2, int key)
 {
-  int v1 = cdiInqVarKeyInt(keysp1, key);
-  int v2 = cdiInqVarKeyInt(keysp2, key);
-  if (v1 != v2) return 1;
-  return 0;
+  const int v1 = cdiInqVarKeyInt(keysp1, key);
+  const int v2 = cdiInqVarKeyInt(keysp2, key);
+  return (v1 != v2);
 }
 
 int
@@ -4631,10 +4630,10 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
   int gridID = CDI_UNDEFID;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  unsigned ngrids = (unsigned) vlistptr->ngrids;
+  const int ngrids = vlistptr->ngrids;
 
   if (mode == 0)
-    for (unsigned index = 0; index < ngrids; index++)
+    for (int index = 0; index < ngrids; index++)
       {
         if ((gridID = vlistptr->gridIDs[index]) != CDI_UNDEFID)
           {
@@ -4656,7 +4655,7 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
         gridID = query.resIDValue;
 
       if (mode == 1 && gridglobdefined)
-        for (unsigned index = 0; index < ngrids; index++)
+        for (int index = 0; index < ngrids; index++)
           if (vlistptr->gridIDs[index] == gridID)
             {
               gridglobdefined = false;
@@ -4679,7 +4678,7 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
         }
     }
 
-  return (struct addIfNewRes){ .Id = gridID, .isNew = !griddefined && !gridglobdefined };
+  return (struct addIfNewRes){ .Id = gridID, .isNew = (!griddefined && !gridglobdefined) };
 }
 
 const struct gridVirtTable cdiGridVtable = {
