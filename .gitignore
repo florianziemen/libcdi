@@ -121,3 +121,30 @@ Makefile
 *.dSYM
 .DS_Store
 
+# Compiler files:
+*.pc
+*.lt
+.deps
+.libs
+.dirstamp
+stamp-h1
+config.log
+config.status
+config.h
+build
+autom4te.cache
+cdilib.c
+cdi_cman.pdf
+cdi_fman.pdf
+cdi.settings
+Makefile
+libtool
+cdi
+createtable
+mo_cdi.mod
+build
+.fortls
+.cache/
+.ccls-cache/
+compile_commands.json
+
