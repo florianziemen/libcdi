@@ -54,6 +54,8 @@
 #include "stream_cdf.h"
 #include "vlist_var.h"
 
+#include "sct.h"
+#include "sct_timer_helper.h"
 
 struct clientBuf
 {
@@ -1943,11 +1945,15 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
         xmpi(MPI_Win_start(clientGroup, 0, rxWin[streamIdx].getWin));
         /* FIXME: this needs to use MPI_PACKED for portability */
         for (size_t i = 0; i < (size_t)numClients_; ++i)
+        {
+          sct_start(timer_mpi_get);
           xmpi(MPI_Get(rxWin[streamIdx].clientBuf[i].mem,
                        (int)rxWin[streamIdx].clientBuf[i].size, MPI_UNSIGNED_CHAR,
                        clientRanks_[i], 0,
                        (int)rxWin[streamIdx].clientBuf[i].size, MPI_UNSIGNED_CHAR,
                        rxWin[streamIdx].getWin));
+          sct_stop(timer_mpi_get);
+        }
         xmpi(MPI_Win_complete(rxWin[streamIdx].getWin));
         if (!conf->batchedRMA)
           readGetBuffers(streamIdx, conf);
@@ -2421,6 +2427,9 @@ void cdiPioCollectorMessageLoop()
       switch ( tag )
         {
         case FINALIZE:
+          fprintf(stderr, "This is function cdiPioCollectorMessageLoop, tag: FINALIZE.\n");
+          sct_stop(timer_total);
+          sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
           xmpi(MPI_Recv(NULL, 0, MPI_INT, source, tag, pioInterComm, &status));
           for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
             {

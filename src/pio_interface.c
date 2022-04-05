@@ -38,6 +38,10 @@
 #include "vlist.h"
 #include "vlist_var.h"
 
+#include "sct.h"
+#define EXTERN
+#include "sct_timer_helper.h"
+
 
 static struct rdmaWin
 {
@@ -549,6 +553,8 @@ static void cdiPioFileWritingInit(void);
 MPI_Comm
 cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
 {
+  fprintf(stderr, "this is function %s.\n", "cdiPioInit");
+  fflush(stderr);
   namespaceSwitchSet(NSSWITCH_ABORT, NSSW_FUNC(cdiAbortC_MPI));
   namespaceSwitchSet(NSSWITCH_WARNING, NSSW_FUNC(cdiPioWarning));
 
@@ -586,6 +592,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   /* setup communication */
   cdiPioCommInit(commGlob, IOMode, conf->clientServerRole);
   int sizeGlob = commInqSizeGlob ();
+  // commPrint(stdout);
 
   cdiPIOpartInflate_ = conf->partInflate;
 
@@ -636,6 +643,10 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       cdiPioSerializeSetMPI();
       conf->callbacks[CDIPIO_CALLBACK_POSTCOMMSETUP]();
       cdiPioFileWritingInit();
+      // initialize sct timer
+      sct_init(TIMER_MAX, "CDI-PIO timer", commInqCommPio());
+      timer_mpi_get = sct_new_timer("MPI_Get");
+      timer_total   = sct_new_timer("total");
       if (commInqRankColl() >= 0)
         {
           cdiPioCollectorMessageLoop();
@@ -658,6 +669,8 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       modelComm = MPI_COMM_NULL;
       namespaceSetActive(prevNamespace);
       namespaceDelete(serverNamespace);
+
+      sct_start(timer_total);
     }
   else
     {
@@ -756,6 +769,8 @@ void  pioEndTimestepping ( void )
 void pioFinalize ( void )
 {
   xdebug("%s", "START");
+  fprintf(stderr, "this is function %s.\n", "pioFinalize");
+  fflush(stderr);
 
   /* namespace is unchanged on I/O servers */
   int pioNamespace = namespaceGetActive();
