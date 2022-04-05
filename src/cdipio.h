@@ -129,7 +129,7 @@ int cdiPioCSRBalanced(MPI_Comm commSuper, int IOMode, int nProcsIO);
  * representation of mode or -1 if no match was found */
 int cdiPioStr2IOMode(const char *modeStr);
 
-/* cdiPioStr2IOMode: return string corresponding to integer
+/* cdiPioIOMode2Str: return string corresponding to integer
  * code of mode or empty string if code is not valid */
 const char *
 cdiPioIOMode2Str(int IOMode);
