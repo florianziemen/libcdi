@@ -21,6 +21,7 @@
 #endif
 #endif
 
+#include "sct.h"
 #include "cdi.h"
 #include "error.h"
 #include "dmemory.h"
@@ -64,6 +65,8 @@ static const struct {
   { "svc", CDI_FILETYPE_SRV, CDI_DATATYPE_FLT64, GRID_GENERIC, },
   { "ieg", CDI_FILETYPE_IEG, CDI_DATATYPE_FLT64, GRID_LONLAT },
 };
+
+static struct timeval timeval0;
 
 static void
 invalidOptionDie(const char *format, ...)
@@ -383,6 +386,16 @@ parse_long_option(struct model_config *restrict setup,
     invalidOptionDie("unknown long option: %s\n", str);
 }
 
+static double simple_walltime() {
+  struct timeval tbuf;
+
+  gettimeofday(&tbuf, NULL);
+
+  double time_in_secs = (double) ( (tbuf.tv_sec  - timeval0.tv_sec) +
+                                   (tbuf.tv_usec - timeval0.tv_usec)*1.0e-6
+                                   );
+  return time_in_secs;
+}
 
 int main(int argc, char *argv[])
 {
@@ -397,6 +410,9 @@ int main(int argc, char *argv[])
   int rankGlob;
   int IOMode = PIO_MPI;
   int nProcsIO = 2;
+  int *timer;
+  const int timer_max = 2;
+  double *ts, *te;
 
   xmpi ( MPI_Init ( &argc, &argv));
   commGlob = MPI_COMM_WORLD;
@@ -404,6 +420,15 @@ int main(int argc, char *argv[])
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
+  if (rankGlob == 0)
+    fprintf(stdout, "sizeGlob is %d. \n", sizeGlob);
+
+  sct_init(timer_max, "test_sct", commGlob);
+  timer = calloc(timer_max, sizeof(int));
+  ts = calloc(timer_max+1, sizeof(double));
+  te = calloc(timer_max+1, sizeof(double));
+  timer[0] = sct_new_timer("timer 0");
+  sct_start(timer[0]);
 
   pioConfHandle = cdiPioConfCreate();
   pioRoleAssign = cdiPioCSRLastN;
@@ -548,6 +573,7 @@ int main(int argc, char *argv[])
                                                    nProcsIO));
   cdiPioConfSetPartInflate(pioConfHandle, 1.0f);
   int initNamespace = namespaceGetActive();
+  timer[1] = sct_new_timer("timer 1");
   commModel = cdiPioInit(commGlob, pioConfHandle, &pioNamespace);
   if (commModel != MPI_COMM_NULL)
     {
@@ -556,15 +582,27 @@ int main(int argc, char *argv[])
       commModel = -1;
 #endif
 
+      //ts[0] = simple_walltime();
+      sct_start(timer[1]);
       modelRun(&setup, commModel);
+      sct_stop(timer[1]);
+      // te[0] = simple_walltime();
+      // printf("time elapsed is: %f \n", te[0]-ts[0]);
 
 #ifdef USE_MPI
     }
+  else 
+    {
+      fprintf(stdout, "commModel is MPI_COMMNULL. \n");
+    }
+
+  sct_stop(timer[0]);
   cdi_repeatable_finalize();
   pioFinalize ();
   namespaceSetActive(initNamespace);
   cdiPioConfDestroy(pioConfHandle);
   xt_finalize();
+  sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
   MPI_Finalize ();
 #endif
   return 0;
