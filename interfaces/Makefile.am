@@ -194,7 +194,7 @@ setup_cdilib_py_vars = \
 setup_python_cxx_vars = CFLAGS="$(CXXFLAGS) $(DEFS)" \
 	  CC="$${LIBTOOL} --mode=compile --tag=CXX $(CXX) -shared" \
 	  LDSHARED="$${LIBTOOL} --mode=link --tag=CXX $(CXX) -module -shared" \
-	  CXX="$${LIBTOOL} --mode=link --tag=CXX $(CXX) -module -shared"
+	  CXX="$${LIBTOOL} --mode=compile --tag=CXX $(CXX) -shared"
 
 setup_cdiobj_py_vars = \
   setupObj_py=`test -f setupObj.py || echo '$(abs_srcdir)/python/'`setupObj.py ; \
