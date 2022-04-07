@@ -188,7 +188,7 @@ calendar_test1_DEPENDENCIES = $(top_builddir)/src/libcdi.la
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
-am__v_lt_1 = 
+am__v_lt_1 =
 am_cksum_read_OBJECTS = cksum_read.$(OBJEXT) \
 	ensure_array_size.$(OBJEXT) stream_cksum.$(OBJEXT) \
 	var_cksum.$(OBJEXT)
@@ -282,11 +282,11 @@ am__v_P_1 = :
 AM_V_GEN = $(am__v_GEN_@AM_V@)
 am__v_GEN_ = $(am__v_GEN_@AM_DEFAULT_V@)
 am__v_GEN_0 = @echo "  GEN     " $@;
-am__v_GEN_1 = 
+am__v_GEN_1 =
 AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
-am__v_at_1 = 
+am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__maybe_remake_depfiles = depfiles
@@ -313,7 +313,7 @@ am__mv = mv -f
 AM_V_CC = $(am__v_CC_@AM_V@)
 am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
 am__v_CC_0 = @echo "  CC      " $@;
-am__v_CC_1 = 
+am__v_CC_1 =
 CCLD = $(CC)
 LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -321,7 +321,7 @@ LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
-am__v_CCLD_1 = 
+am__v_CCLD_1 =
 SOURCES = $(calendar_test1_SOURCES) $(cksum_read_SOURCES) \
 	$(cksum_verify_SOURCES) $(cksum_write_SOURCES) \
 	$(cksum_write_chunk_SOURCES) $(pio_write_SOURCES) \
@@ -1031,71 +1031,71 @@ clean-noinstPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
-calendar_test1$(EXEEXT): $(calendar_test1_OBJECTS) $(calendar_test1_DEPENDENCIES) $(EXTRA_calendar_test1_DEPENDENCIES) 
+calendar_test1$(EXEEXT): $(calendar_test1_OBJECTS) $(calendar_test1_DEPENDENCIES) $(EXTRA_calendar_test1_DEPENDENCIES)
 	@rm -f calendar_test1$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(calendar_test1_OBJECTS) $(calendar_test1_LDADD) $(LIBS)
 
-cksum_read$(EXEEXT): $(cksum_read_OBJECTS) $(cksum_read_DEPENDENCIES) $(EXTRA_cksum_read_DEPENDENCIES) 
+cksum_read$(EXEEXT): $(cksum_read_OBJECTS) $(cksum_read_DEPENDENCIES) $(EXTRA_cksum_read_DEPENDENCIES)
 	@rm -f cksum_read$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cksum_read_OBJECTS) $(cksum_read_LDADD) $(LIBS)
 
-cksum_verify$(EXEEXT): $(cksum_verify_OBJECTS) $(cksum_verify_DEPENDENCIES) $(EXTRA_cksum_verify_DEPENDENCIES) 
+cksum_verify$(EXEEXT): $(cksum_verify_OBJECTS) $(cksum_verify_DEPENDENCIES) $(EXTRA_cksum_verify_DEPENDENCIES)
 	@rm -f cksum_verify$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cksum_verify_OBJECTS) $(cksum_verify_LDADD) $(LIBS)
 
-cksum_write$(EXEEXT): $(cksum_write_OBJECTS) $(cksum_write_DEPENDENCIES) $(EXTRA_cksum_write_DEPENDENCIES) 
+cksum_write$(EXEEXT): $(cksum_write_OBJECTS) $(cksum_write_DEPENDENCIES) $(EXTRA_cksum_write_DEPENDENCIES)
 	@rm -f cksum_write$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cksum_write_OBJECTS) $(cksum_write_LDADD) $(LIBS)
 
-cksum_write_chunk$(EXEEXT): $(cksum_write_chunk_OBJECTS) $(cksum_write_chunk_DEPENDENCIES) $(EXTRA_cksum_write_chunk_DEPENDENCIES) 
+cksum_write_chunk$(EXEEXT): $(cksum_write_chunk_OBJECTS) $(cksum_write_chunk_DEPENDENCIES) $(EXTRA_cksum_write_chunk_DEPENDENCIES)
 	@rm -f cksum_write_chunk$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cksum_write_chunk_OBJECTS) $(cksum_write_chunk_LDADD) $(LIBS)
 
-pio_write$(EXEEXT): $(pio_write_OBJECTS) $(pio_write_DEPENDENCIES) $(EXTRA_pio_write_DEPENDENCIES) 
+pio_write$(EXEEXT): $(pio_write_OBJECTS) $(pio_write_DEPENDENCIES) $(EXTRA_pio_write_DEPENDENCIES)
 	@rm -f pio_write$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(pio_write_OBJECTS) $(pio_write_LDADD) $(LIBS)
 
-pio_write.parallel$(EXEEXT): $(pio_write_parallel_OBJECTS) $(pio_write_parallel_DEPENDENCIES) $(EXTRA_pio_write_parallel_DEPENDENCIES) 
+pio_write.parallel$(EXEEXT): $(pio_write_parallel_OBJECTS) $(pio_write_parallel_DEPENDENCIES) $(EXTRA_pio_write_parallel_DEPENDENCIES)
 	@rm -f pio_write.parallel$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(pio_write_parallel_OBJECTS) $(pio_write_parallel_LDADD) $(LIBS)
 
-pio_write_deco2d$(EXEEXT): $(pio_write_deco2d_OBJECTS) $(pio_write_deco2d_DEPENDENCIES) $(EXTRA_pio_write_deco2d_DEPENDENCIES) 
+pio_write_deco2d$(EXEEXT): $(pio_write_deco2d_OBJECTS) $(pio_write_deco2d_DEPENDENCIES) $(EXTRA_pio_write_deco2d_DEPENDENCIES)
 	@rm -f pio_write_deco2d$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(pio_write_deco2d_OBJECTS) $(pio_write_deco2d_LDADD) $(LIBS)
 
-pio_write_deco2d.parallel$(EXEEXT): $(pio_write_deco2d_parallel_OBJECTS) $(pio_write_deco2d_parallel_DEPENDENCIES) $(EXTRA_pio_write_deco2d_parallel_DEPENDENCIES) 
+pio_write_deco2d.parallel$(EXEEXT): $(pio_write_deco2d_parallel_OBJECTS) $(pio_write_deco2d_parallel_DEPENDENCIES) $(EXTRA_pio_write_deco2d_parallel_DEPENDENCIES)
 	@rm -f pio_write_deco2d.parallel$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(pio_write_deco2d_parallel_OBJECTS) $(pio_write_deco2d_parallel_LDADD) $(LIBS)
 
-test_byteswap$(EXEEXT): $(test_byteswap_OBJECTS) $(test_byteswap_DEPENDENCIES) $(EXTRA_test_byteswap_DEPENDENCIES) 
+test_byteswap$(EXEEXT): $(test_byteswap_OBJECTS) $(test_byteswap_DEPENDENCIES) $(EXTRA_test_byteswap_DEPENDENCIES)
 	@rm -f test_byteswap$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_byteswap_OBJECTS) $(test_byteswap_LDADD) $(LIBS)
 
-test_cdf_read$(EXEEXT): $(test_cdf_read_OBJECTS) $(test_cdf_read_DEPENDENCIES) $(EXTRA_test_cdf_read_DEPENDENCIES) 
+test_cdf_read$(EXEEXT): $(test_cdf_read_OBJECTS) $(test_cdf_read_DEPENDENCIES) $(EXTRA_test_cdf_read_DEPENDENCIES)
 	@rm -f test_cdf_read$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_cdf_read_OBJECTS) $(test_cdf_read_LDADD) $(LIBS)
 
-test_cdf_write$(EXEEXT): $(test_cdf_write_OBJECTS) $(test_cdf_write_DEPENDENCIES) $(EXTRA_test_cdf_write_DEPENDENCIES) 
+test_cdf_write$(EXEEXT): $(test_cdf_write_OBJECTS) $(test_cdf_write_DEPENDENCIES) $(EXTRA_test_cdf_write_DEPENDENCIES)
 	@rm -f test_cdf_write$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_cdf_write_OBJECTS) $(test_cdf_write_LDADD) $(LIBS)
 
-test_grib$(EXEEXT): $(test_grib_OBJECTS) $(test_grib_DEPENDENCIES) $(EXTRA_test_grib_DEPENDENCIES) 
+test_grib$(EXEEXT): $(test_grib_OBJECTS) $(test_grib_DEPENDENCIES) $(EXTRA_test_grib_DEPENDENCIES)
 	@rm -f test_grib$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_grib_OBJECTS) $(test_grib_LDADD) $(LIBS)
 
-test_month_adjust$(EXEEXT): $(test_month_adjust_OBJECTS) $(test_month_adjust_DEPENDENCIES) $(EXTRA_test_month_adjust_DEPENDENCIES) 
+test_month_adjust$(EXEEXT): $(test_month_adjust_OBJECTS) $(test_month_adjust_DEPENDENCIES) $(EXTRA_test_month_adjust_DEPENDENCIES)
 	@rm -f test_month_adjust$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_month_adjust_OBJECTS) $(test_month_adjust_LDADD) $(LIBS)
 
-test_resource_copy$(EXEEXT): $(test_resource_copy_OBJECTS) $(test_resource_copy_DEPENDENCIES) $(EXTRA_test_resource_copy_DEPENDENCIES) 
+test_resource_copy$(EXEEXT): $(test_resource_copy_OBJECTS) $(test_resource_copy_DEPENDENCIES) $(EXTRA_test_resource_copy_DEPENDENCIES)
 	@rm -f test_resource_copy$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_resource_copy_OBJECTS) $(test_resource_copy_LDADD) $(LIBS)
 
-test_resource_copy.parallel$(EXEEXT): $(test_resource_copy_parallel_OBJECTS) $(test_resource_copy_parallel_DEPENDENCIES) $(EXTRA_test_resource_copy_parallel_DEPENDENCIES) 
+test_resource_copy.parallel$(EXEEXT): $(test_resource_copy_parallel_OBJECTS) $(test_resource_copy_parallel_DEPENDENCIES) $(EXTRA_test_resource_copy_parallel_DEPENDENCIES)
 	@rm -f test_resource_copy.parallel$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_resource_copy_parallel_OBJECTS) $(test_resource_copy_parallel_LDADD) $(LIBS)
 
-test_table$(EXEEXT): $(test_table_OBJECTS) $(test_table_DEPENDENCIES) $(EXTRA_test_table_DEPENDENCIES) 
+test_table$(EXEEXT): $(test_table_OBJECTS) $(test_table_DEPENDENCIES) $(EXTRA_test_table_DEPENDENCIES)
 	@rm -f test_table$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_table_OBJECTS) $(test_table_LDADD) $(LIBS)
 
@@ -1164,7 +1164,7 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-examples-local: 
+examples-local:
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique

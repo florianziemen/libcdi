@@ -135,7 +135,7 @@ libcdipp_la_OBJECTS = $(am_libcdipp_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
-am__v_lt_1 = 
+am__v_lt_1 =
 am_CdiInfo_OBJECTS = CdiInfo.$(OBJEXT)
 CdiInfo_OBJECTS = $(am_CdiInfo_OBJECTS)
 CdiInfo_DEPENDENCIES = libcdipp.la
@@ -146,11 +146,11 @@ am__v_P_1 = :
 AM_V_GEN = $(am__v_GEN_@AM_V@)
 am__v_GEN_ = $(am__v_GEN_@AM_DEFAULT_V@)
 am__v_GEN_0 = @echo "  GEN     " $@;
-am__v_GEN_1 = 
+am__v_GEN_1 =
 AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
-am__v_at_1 = 
+am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__maybe_remake_depfiles = depfiles
@@ -163,7 +163,7 @@ LTCXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 AM_V_CXX = $(am__v_CXX_@AM_V@)
 am__v_CXX_ = $(am__v_CXX_@AM_DEFAULT_V@)
 am__v_CXX_0 = @echo "  CXX     " $@;
-am__v_CXX_1 = 
+am__v_CXX_1 =
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -171,7 +171,7 @@ CXXLINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
-am__v_CXXLD_1 = 
+am__v_CXXLD_1 =
 LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
 	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
@@ -179,7 +179,7 @@ LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 AM_V_CC = $(am__v_CC_@AM_V@)
 am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
 am__v_CC_0 = @echo "  CC      " $@;
-am__v_CC_1 = 
+am__v_CC_1 =
 CCLD = $(CC)
 LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -187,7 +187,7 @@ LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
-am__v_CCLD_1 = 
+am__v_CCLD_1 =
 SOURCES = $(libcdipp_la_SOURCES) $(CdiInfo_SOURCES)
 DIST_SOURCES = $(libcdipp_la_SOURCES) $(CdiInfo_SOURCES)
 am__can_run_installinfo = \
@@ -474,7 +474,7 @@ setup_cdilib_py_vars = \
 setup_python_cxx_vars = CFLAGS="$(CXXFLAGS) $(DEFS)" \
 	  CC="$${LIBTOOL} --mode=compile --tag=CXX $(CXX) -shared" \
 	  LDSHARED="$${LIBTOOL} --mode=link --tag=CXX $(CXX) -module -shared" \
-	  CXX="$${LIBTOOL} --mode=link --tag=CXX $(CXX) -module -shared"
+	  CXX="$${LIBTOOL} --mode=compile --tag=CXX $(CXX) -shared"
 
 setup_cdiobj_py_vars = \
   setupObj_py=`test -f setupObj.py || echo '$(abs_srcdir)/python/'`setupObj.py ; \
@@ -523,10 +523,10 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 
-libcdipp.la: $(libcdipp_la_OBJECTS) $(libcdipp_la_DEPENDENCIES) $(EXTRA_libcdipp_la_DEPENDENCIES) 
+libcdipp.la: $(libcdipp_la_OBJECTS) $(libcdipp_la_DEPENDENCIES) $(EXTRA_libcdipp_la_DEPENDENCIES)
 	$(AM_V_CXXLD)$(CXXLINK)  $(libcdipp_la_OBJECTS) $(libcdipp_la_LIBADD) $(LIBS)
 
-CdiInfo$(EXEEXT): $(CdiInfo_OBJECTS) $(CdiInfo_DEPENDENCIES) $(EXTRA_CdiInfo_DEPENDENCIES) 
+CdiInfo$(EXEEXT): $(CdiInfo_OBJECTS) $(CdiInfo_DEPENDENCIES) $(EXTRA_CdiInfo_DEPENDENCIES)
 	@rm -f CdiInfo$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(CdiInfo_OBJECTS) $(CdiInfo_LDADD) $(LIBS)
 
@@ -571,7 +571,7 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-examples-local: 
+examples-local:
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -963,16 +963,14 @@ pythonLibInstall: pythonLib
 @MAINTAINER_MODE_TRUE@	  `test -f ./$< && echo . || echo '$(abs_srcdir)'`/$<
 
 clean-local:
-	rm -f python/CdiLib.py python/CdiLib.pyc python/CdiLib.stamp \
-		python/CdiObj.py python/CdiObj.pyc python/CdiObj.stamp \
-		python/cdilib_wrap.c python/cdiobj_wrap.cpp
+	-rm -f python/CdiLib.stamp python/CdiObj.stamp
 	-rm -f CdiInfo libcdipp.la
 	-$(am__cd) python && rm -rf *.pyc *.pyo *.so __pycache__ build
-	-$(am__cd) $(rubyObjDir) && \rm -f CdiObj.la Makefile cdiobj_wrap.cpp \
+	-$(am__cd) $(rubyObjDir) && \rm -rf CdiObj.la Makefile cdiobj_wrap.cpp \
 		cdiobj_wrap.lo cdiobj_wrap.o *.o .libs Makefile .sitearchdir.time
-	-$(am__cd) $(rubyLibDir) && \rm -f CdiLib.la Makefile cdilib_wrap.c \
+	-$(am__cd) $(rubyLibDir) && \rm -rf CdiLib.la Makefile cdilib_wrap.c \
 		cdilib_wrap.lo cdilib_wrap.o *.o .libs Makefile .sitearchdir.time
-	-rmdir python $(rubyLibDir) $(rubyObjDir)
+	-rmdir $(rubyLibDir) $(rubyObjDir)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
