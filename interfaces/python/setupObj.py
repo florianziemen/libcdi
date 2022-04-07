@@ -20,7 +20,7 @@ cdiobj_module = Extension('_CdiObj',
                   runtime_library_dirs = [os.environ['BUILDLIBDIR'],os.environ['LIBDIR']],
                   extra_link_args = LIBS,
                   libraries    = ['cdi','stdc++'],
-                  language = 'c++',
+                  language = 'c',
                   )
 
 print_libdir = False
