@@ -25,7 +25,11 @@ LDFLAGS="-L${UUID_ROOT}/lib"
 
 make -j8
 
-# For now, we only check that the interfaces can be built:
-make -j8 -C interfaces rubyLib rubyObj pythonLib pythonObj
+# Build the interfaces:
+make -j8 -C interfaces rubyLib rubyObj pythonLib pythonObj CdiInfo
+
+# Test the interfaces:
+make -j8 -C interfaces rubyLibTest rubyObjTest pythonLibTest pythonObjTest
+(cd interfaces && ./CdiInfo)
 
 make -j8 check || { cat tests/test-suite.log; exit 1; }
