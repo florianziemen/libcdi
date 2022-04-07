@@ -11,13 +11,15 @@ init_gcc640
 
 test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
+# We expect --enable-cf-interface and --enable-ppm-dist-array to be set to
+# 'yes' automatically because of --enable-mpi. Function
+# 'check_all_tests_passed' that we run at the end makes sure that the options
+# have been enabled and the corresponding tests have not been skipped.
 "${top_srcdir}/configure" \
 --disable-maintainer-mode \
---enable-cf-interface \
 --enable-iso-c-interface \
 --enable-mpi \
 --enable-option-checking=fatal \
---enable-ppm-dist-array \
 --with-grib-api="${GRIBAPI_ROOT}" \
 --with-netcdf="${NETCDF_ROOT}" \
 CC="${MPICC}" \
