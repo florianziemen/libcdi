@@ -267,16 +267,14 @@ python/cdilib_wrap.c: cdilib.i
 endif
 
 clean-local:
-	rm -f python/CdiLib.py python/CdiLib.pyc python/CdiLib.stamp \
-		python/CdiObj.py python/CdiObj.pyc python/CdiObj.stamp \
-		python/cdilib_wrap.c python/cdiobj_wrap.cpp
+	-rm -f python/CdiLib.stamp python/CdiObj.stamp
 	-rm -f CdiInfo libcdipp.la
 	-$(am__cd) python && rm -rf *.pyc *.pyo *.so __pycache__ build
-	-$(am__cd) $(rubyObjDir) && \rm -f CdiObj.la Makefile cdiobj_wrap.cpp \
+	-$(am__cd) $(rubyObjDir) && \rm -rf CdiObj.la Makefile cdiobj_wrap.cpp \
 		cdiobj_wrap.lo cdiobj_wrap.o *.o .libs Makefile .sitearchdir.time
-	-$(am__cd) $(rubyLibDir) && \rm -f CdiLib.la Makefile cdilib_wrap.c \
+	-$(am__cd) $(rubyLibDir) && \rm -rf CdiLib.la Makefile cdilib_wrap.c \
 		cdilib_wrap.lo cdilib_wrap.o *.o .libs Makefile .sitearchdir.time
-	-rmdir python $(rubyLibDir) $(rubyObjDir)
+	-rmdir $(rubyLibDir) $(rubyObjDir)
 
 # Compile programs using Libtool:
 COMPILE = $(LTCOMPILE)
