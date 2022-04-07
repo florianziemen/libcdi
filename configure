@@ -814,6 +814,8 @@ CXXDEPMODE
 ac_ct_CXX
 CXXFLAGS
 CXX
+ENABLE_CF_INTERFACE_FALSE
+ENABLE_CF_INTERFACE_TRUE
 ac_ct_F77
 FFLAGS
 F77
@@ -830,8 +832,6 @@ FCFLAGS_f90
 ac_ct_FC
 FCFLAGS
 FC
-ENABLE_CF_INTERFACE_FALSE
-ENABLE_CF_INTERFACE_TRUE
 ENABLE_ISOC_INTERFACE_FALSE
 ENABLE_ISOC_INTERFACE_TRUE
 am__fastdepCC_FALSE
@@ -933,6 +933,7 @@ enable_option_checking
 enable_silent_rules
 enable_maintainer_mode
 enable_dependency_tracking
+enable_mpi
 enable_iso_c_interface
 enable_cf_interface
 enable_ruby_interface
@@ -959,7 +960,6 @@ enable_ieg
 enable_all_static
 enable_hirlam_extensions
 enable_cdi_app
-enable_mpi
 enable_ppm_dist_array
 with_mpi_root
 with_mpi_include
@@ -1640,11 +1640,12 @@ Optional Features:
                           do not reject slow dependency extractors
   --disable-dependency-tracking
                           speeds up one-time build
+  --enable-mpi            enable parallel I/O with MPI [default=no]
   --enable-iso-c-interface
                           create Fortran 90 interface using Fortran 2003
                           ISO_C_BINDING facility [default=no]
   --enable-cf-interface   create Fortran 77 interface using cfortran.h
-                          [default=yes, if F77 or FC works]
+                          [default=auto]
   --enable-ruby-interface create Ruby language interface (EXPERIMENTAL)
                           [default=no]
   --enable-python-interface
@@ -1666,7 +1667,6 @@ Optional Features:
   --enable-hirlam-extensions
                           HIRLAM extensions [default=no]
   --enable-cdi-app        build and install CDI application [default=yes]
-  --enable-mpi            enable parallel I/O with MPI [default=no]
   --enable-ppm-dist-array enable usage of the PPM distributed array
                           [default=auto]
 
@@ -5102,6 +5102,14 @@ _ACEOF
  esac
 
 
+# Check whether --enable-mpi was given.
+if test "${enable_mpi+set}" = set; then :
+  enableval=$enable_mpi; test "x$enableval" != xno && enable_mpi=yes
+else
+  enable_mpi=no
+fi
+
+
 # Check whether --enable-iso-c-interface was given.
 if test "${enable_iso_c_interface+set}" = set; then :
   enableval=$enable_iso_c_interface; test "x$enableval" != xno && enable_iso_c_interface=yes
@@ -5120,26 +5128,19 @@ fi
 
 # Check whether --enable-cf-interface was given.
 if test "${enable_cf_interface+set}" = set; then :
-  enableval=$enable_cf_interface; test "x$enableval" != xno && enable_cf_interface=yes
-else
-  if test "x$FC" != xno || test "x$F77" != xno; then :
+  enableval=$enable_cf_interface; if test "x$enableval" != xno && test "x$enableval" != xauto; then :
   enable_cf_interface=yes
+fi
 else
+  enable_cf_interface=auto
+fi
+
+if test "x${enable_mpi}${enable_cf_interface}" = xnoauto; then :
   enable_cf_interface=no
 fi
-fi
-
- if test "x$enable_cf_interface" = xyes; then
-  ENABLE_CF_INTERFACE_TRUE=
-  ENABLE_CF_INTERFACE_FALSE='#'
-else
-  ENABLE_CF_INTERFACE_TRUE='#'
-  ENABLE_CF_INTERFACE_FALSE=
-fi
-
 
 if test "x$enable_iso_c_interface" = xyes || \
-   test "x$enable_cf_interface" = xyes; then
+   test "x$enable_cf_interface" != xno; then
   if test "x$FC" != xno; then
     ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -5803,7 +5804,7 @@ else
 fi
 
 
-if test "x$enable_cf_interface" = xyes; then
+if test "x$enable_cf_interface" != xno; then
   if test -n "$F77" && test "x$F77" != xno; then :
   requested_F77=yes
 else
@@ -6076,7 +6077,7 @@ fi
 else
   F77=no
 fi
-if test "x$enable_cf_interface" = xyes; then :
+if test "x$enable_cf_interface" != xno; then :
      { $as_echo "$as_me:${as_lineno-$LINENO}: checking C preprocessor flags for Fortran calling convention cfortran.h" >&5
 $as_echo_n "checking C preprocessor flags for Fortran calling convention cfortran.h... " >&6; }
 if ${acx_cv_cf_flag+:} false; then :
@@ -6668,12 +6669,27 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 fi
    if test "x$FC" = xno && test "x$F77" = xno; then :
+  if test "x$enable_cf_interface" = xauto; then :
+  enable_cf_interface=no
+else
   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "the Fortran 77 interface is requested but both Fortran and Fortran 77 compilers are disabled, missing or lack the required features
 See \`config.log' for more details" "$LINENO" 5; }
 fi
 fi
+fi
+if test "x$enable_cf_interface" = xauto; then :
+  enable_cf_interface=yes
+fi
+ if test "x$enable_cf_interface" = xyes; then
+  ENABLE_CF_INTERFACE_TRUE=
+  ENABLE_CF_INTERFACE_FALSE='#'
+else
+  ENABLE_CF_INTERFACE_TRUE='#'
+  ENABLE_CF_INTERFACE_FALSE=
+fi
+
 
 # Check whether --enable-ruby-interface was given.
 if test "${enable_ruby_interface+set}" = set; then :
@@ -29974,14 +29990,6 @@ _ACEOF
 SYSTEM_TYPE="$ac_cv_build"
 
 
-# Check whether --enable-mpi was given.
-if test "${enable_mpi+set}" = set; then :
-  enableval=$enable_mpi; test "x$enableval" != xno && enable_mpi=yes
-else
-  enable_mpi=no
-fi
-
-
 # Check whether --enable-ppm-dist-array was given.
 if test "${enable_ppm_dist_array+set}" = set; then :
   enableval=$enable_ppm_dist_array; case $enableval in #(
@@ -32709,16 +32717,16 @@ if test -z "${ENABLE_ISOC_INTERFACE_TRUE}" && test -z "${ENABLE_ISOC_INTERFACE_F
   as_fn_error $? "conditional \"ENABLE_ISOC_INTERFACE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${ENABLE_CF_INTERFACE_TRUE}" && test -z "${ENABLE_CF_INTERFACE_FALSE}"; then
-  as_fn_error $? "conditional \"ENABLE_CF_INTERFACE\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${FC_MOD_UPPERCASE_TRUE}" && test -z "${FC_MOD_UPPERCASE_FALSE}"; then
   as_fn_error $? "conditional \"FC_MOD_UPPERCASE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_FC_PROGRAMS_TRUE}" && test -z "${BUILD_FC_PROGRAMS_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_FC_PROGRAMS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_CF_INTERFACE_TRUE}" && test -z "${ENABLE_CF_INTERFACE_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_CF_INTERFACE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then

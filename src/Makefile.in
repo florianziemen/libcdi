@@ -241,7 +241,7 @@ libcdi_la_OBJECTS = $(am_libcdi_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
-am__v_lt_1 = 
+am__v_lt_1 =
 @ENABLE_CDI_LIB_FALSE@am_libcdi_la_rpath =
 @ENABLE_CDI_LIB_TRUE@am_libcdi_la_rpath = -rpath $(libdir)
 libcdi_f2003_la_DEPENDENCIES = libcdi.la
@@ -292,11 +292,11 @@ am__v_P_1 = :
 AM_V_GEN = $(am__v_GEN_@AM_V@)
 am__v_GEN_ = $(am__v_GEN_@AM_DEFAULT_V@)
 am__v_GEN_0 = @echo "  GEN     " $@;
-am__v_GEN_1 = 
+am__v_GEN_1 =
 AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
-am__v_at_1 = 
+am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__maybe_remake_depfiles = depfiles
@@ -360,7 +360,7 @@ LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 AM_V_CC = $(am__v_CC_@AM_V@)
 am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
 am__v_CC_0 = @echo "  CC      " $@;
-am__v_CC_1 = 
+am__v_CC_1 =
 CCLD = $(CC)
 LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -368,14 +368,14 @@ LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
-am__v_CCLD_1 = 
+am__v_CCLD_1 =
 FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
 LTFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
 AM_V_FC = $(am__v_FC_@AM_V@)
 am__v_FC_ = $(am__v_FC_@AM_DEFAULT_V@)
 am__v_FC_0 = @echo "  FC      " $@;
-am__v_FC_1 = 
+am__v_FC_1 =
 FCLD = $(FC)
 FCLINK = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
@@ -383,7 +383,7 @@ FCLINK = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
 AM_V_FCLD = $(am__v_FCLD_@AM_V@)
 am__v_FCLD_ = $(am__v_FCLD_@AM_DEFAULT_V@)
 am__v_FCLD_0 = @echo "  FCLD    " $@;
-am__v_FCLD_1 = 
+am__v_FCLD_1 =
 SOURCES = $(libcdi_la_SOURCES) $(libcdi_f2003_la_SOURCES) \
 	$(libcdipio_la_SOURCES) $(libcdiresunpack_la_SOURCES)
 DIST_SOURCES = $(am__libcdi_la_SOURCES_DIST) \
@@ -707,7 +707,7 @@ config.h: stamp-h1
 stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status src/config.h
-$(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
+$(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
 	rm -f stamp-h1
 	touch $@
@@ -772,16 +772,16 @@ clean-noinstLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
-libcdi.la: $(libcdi_la_OBJECTS) $(libcdi_la_DEPENDENCIES) $(EXTRA_libcdi_la_DEPENDENCIES) 
+libcdi.la: $(libcdi_la_OBJECTS) $(libcdi_la_DEPENDENCIES) $(EXTRA_libcdi_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(LINK) $(am_libcdi_la_rpath) $(libcdi_la_OBJECTS) $(libcdi_la_LIBADD) $(LIBS)
 
-libcdi_f2003.la: $(libcdi_f2003_la_OBJECTS) $(libcdi_f2003_la_DEPENDENCIES) $(EXTRA_libcdi_f2003_la_DEPENDENCIES) 
+libcdi_f2003.la: $(libcdi_f2003_la_OBJECTS) $(libcdi_f2003_la_DEPENDENCIES) $(EXTRA_libcdi_f2003_la_DEPENDENCIES)
 	$(AM_V_FCLD)$(FCLINK) $(am_libcdi_f2003_la_rpath) $(libcdi_f2003_la_OBJECTS) $(libcdi_f2003_la_LIBADD) $(LIBS)
 
-libcdipio.la: $(libcdipio_la_OBJECTS) $(libcdipio_la_DEPENDENCIES) $(EXTRA_libcdipio_la_DEPENDENCIES) 
+libcdipio.la: $(libcdipio_la_OBJECTS) $(libcdipio_la_DEPENDENCIES) $(EXTRA_libcdipio_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(LINK) $(am_libcdipio_la_rpath) $(libcdipio_la_OBJECTS) $(libcdipio_la_LIBADD) $(LIBS)
 
-libcdiresunpack.la: $(libcdiresunpack_la_OBJECTS) $(libcdiresunpack_la_DEPENDENCIES) $(EXTRA_libcdiresunpack_la_DEPENDENCIES) 
+libcdiresunpack.la: $(libcdiresunpack_la_OBJECTS) $(libcdiresunpack_la_DEPENDENCIES) $(EXTRA_libcdiresunpack_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(LINK) $(am_libcdiresunpack_la_rpath) $(libcdiresunpack_la_OBJECTS) $(libcdiresunpack_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
@@ -986,7 +986,7 @@ uninstall-nodist_includeHEADERS:
 	@list='$(nodist_include_HEADERS)'; test -n "$(includedir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(includedir)'; $(am__uninstall_files_from_dir)
-examples-local: 
+examples-local:
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
