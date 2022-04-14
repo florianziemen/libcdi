@@ -2153,8 +2153,9 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
     = (void (*)(int))conf->callbacks[CDIPIO_CALLBACK_POSTSTREAMCLOSE];
   streamCloseCallBack(streamptr->self);
 }
+
 #if defined HAVE_NC4HDF5 && defined HAVE_PARALLEL_NC4
-bool parH5ZeroCountProblem = false;
+static bool parH5ZeroCountProblem = false;
 #endif
 
 #ifdef HAVE_LIBNETCDF
@@ -2165,7 +2166,11 @@ cdiPioCdfDefTimestep(stream_t *streamptr, int tsID, size_t valCount)
     rankOpen = cdiPioStream2Owner(streamID);
 #ifdef HAVE_PARALLEL_NC4
   valCount = rankOpen != CDI_PIO_COLLECTIVE_OPEN
-    || parH5ZeroCountProblem
+#if defined HAVE_NC4HDF5
+    || (parH5ZeroCountProblem && streamptr->filetype == CDI_FILETYPE_NC4)
+#else
+    || streamptr->filetype == CDI_FILETYPE_NC4
+#endif
     || commInqRankColl() == 0;
 #endif
   if (commInqIOMode() == PIO_NONE
