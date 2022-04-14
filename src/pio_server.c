@@ -1088,6 +1088,7 @@ writeNetCDFStreamParallel(size_t streamIdx,
         {
           /* prepare yaxt descriptor for write chunk */
           Xt_idxlist preWriteChunk;
+          sct_start(timer_preWriteChunk);
           cdiPioNetCDFParChunk(vlistID, varID, &preWriteChunk, varChunk);
           for (int i = 0; i < 3; ++i)
             {
@@ -1099,8 +1100,10 @@ writeNetCDFStreamParallel(size_t streamIdx,
                  myChunk[1][0], myChunk[1][1], myChunk[2][0],
                  myChunk[2][1]);
           varSize = (size_t)xt_idxlist_get_num_indices(preWriteChunk);
+          sct_stop(timer_preWriteChunk);
           /* transpose data into write deco */
           {
+            sct_start(timer_writeDeco);
             Xt_idxlist *varPartDescPreset
               = partDescPreset ? partDescPreset + numClients_ * varID : NULL;
             gatherRedist = buildVarRedist(headerIdx, streamIdx,
@@ -1113,6 +1116,7 @@ writeNetCDFStreamParallel(size_t streamIdx,
               retained[varID].sliceExtent[1] = varChunk[1];
               retained[varID].sliceExtent[2] = varChunk[2];
             }
+            sct_stop(timer_writeDeco);
           }
         }
       int conversion = winDict[headerIdx].id;
@@ -1120,8 +1124,10 @@ writeNetCDFStreamParallel(size_t streamIdx,
         = conversion == DATA_HEADER_FLOAT ? sizeof (float) : sizeof (double);
       resizeVarGatherBuf(elemSize * varSize, data_, currentDataBufSize);
       void *restrict data = *data_;
+      sct_start(timer_yaxt_exchange);
       xt_redist_s_exchange1(gatherRedist,
                             rxWin[streamIdx].clientBuf[0].mem, data);
+      sct_stop(timer_yaxt_exchange);
 
       if (!conf->cacheRedists)
         xt_redist_delete(gatherRedist);
@@ -1133,6 +1139,7 @@ writeNetCDFStreamParallel(size_t streamIdx,
                                      (size_t)(PPM_extents_size(3, varChunk)),
                                      conversion, data);
         /* write chunk */
+        sct_start(timer_writeChunk);
         if (conversion == DATA_HEADER_DOUBLE)
           streamWriteVarChunk(streamID, varID,
                               (const int (*)[2])myChunk, data,
@@ -1141,6 +1148,7 @@ writeNetCDFStreamParallel(size_t streamIdx,
           streamWriteVarChunkF(streamID, varID,
                                (const int (*)[2])myChunk, data,
                                (int)nmiss);
+        sct_stop(timer_writeChunk);
       }
     }
 }
@@ -1892,7 +1900,9 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
       case CDI_FILETYPE_NC2:
       case CDI_FILETYPE_NC4:
       case CDI_FILETYPE_NC4C:
+        sct_start(timer_writeNetCDF);
         writeNetCDFStream(streamIdx, map, &data, &currentDataBufSize, conf);
+        sct_stop(timer_writeNetCDF);
         break;
 #endif
       default:
@@ -1941,8 +1951,10 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
   for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
     if (streamActivity[streamIdx])
       {
+        sct_start(timer_winStart);
         clearModelWinBuffer(streamIdx);
         xmpi(MPI_Win_start(clientGroup, 0, rxWin[streamIdx].getWin));
+        sct_stop(timer_winStart);
         /* FIXME: this needs to use MPI_PACKED for portability */
         for (size_t i = 0; i < (size_t)numClients_; ++i)
         {
@@ -1954,14 +1966,26 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
                        rxWin[streamIdx].getWin));
           sct_stop(timer_mpi_get);
         }
+        sct_start(timer_winComplete);
         xmpi(MPI_Win_complete(rxWin[streamIdx].getWin));
+        sct_stop(timer_winComplete);
         if (!conf->batchedRMA)
+        {
+          xdebug("%s", "not batchedRMA");
           readGetBuffers(streamIdx, conf);
+        }
       }
   if (conf->batchedRMA)
+  {
+    xdebug("%s", "is batchedRMA");
     for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
       if (streamActivity[streamIdx])
+      {
+        sct_start(timer_readgetbuffers);
         readGetBuffers(streamIdx, conf);
+        sct_stop(timer_readgetbuffers);
+      }
+  }
 
   xdebug("%s", "RETURN");
 }
@@ -2427,7 +2451,7 @@ void cdiPioCollectorMessageLoop()
       switch ( tag )
         {
         case FINALIZE:
-          fprintf(stderr, "This is function cdiPioCollectorMessageLoop, tag: FINALIZE.\n");
+          xdebug("%s", "tag: FINALIZE");
           sct_stop(timer_total);
           sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
           xmpi(MPI_Recv(NULL, 0, MPI_INT, source, tag, pioInterComm, &status));
@@ -2475,14 +2499,17 @@ void cdiPioCollectorMessageLoop()
               {
               case STREAMOPEN:
                 cdiPioRecvStreamOpen(buffer, size, &pos, pioInterComm);
+                xdebug("%s", "STREAMOPEN");
                 break;
               case STREAMFLUSHCLOSE:
               case STREAMCLOSE:
+                xdebug("%s", "STREAMCLOSE/FLUSHCLOSE");
                 cdiPioRecvStreamClose(buffer, size, &pos, pioInterComm,
                                       tag == STREAMFLUSHCLOSE, conf);
                 break;
               case STREAMDEFVLIST:
               case STREAM_DEF_DECOMPOSED_VLIST:
+                xdebug("%s", "STREAMDEFVLIST/_DEF_DECOMPOSED_VLIST");
                 cdiPioRecvStreamDefVlist(buffer, size, &pos, pioInterComm,
                                          tag, conf);
                 break;
@@ -2498,8 +2525,12 @@ void cdiPioCollectorMessageLoop()
                           MPI_INT, source, tag, pioInterComm, &status));
             xdebug("RECEIVED MESSAGE WITH TAG \"WRITETS\": source=%d",
                    source);
+            sct_start(timer_getTimeStepData);
             getTimeStepData(streamActivity, conf);
+            sct_stop(timer_getTimeStepData);
+            sct_start(timer_postwritebatch);
             conf->callbacks[CDIPIO_CALLBACK_POSTWRITEBATCH]();
+            sct_stop(timer_postwritebatch);
           }
 	  break;
 

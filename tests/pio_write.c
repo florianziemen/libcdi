@@ -21,16 +21,19 @@
 #endif
 #endif
 
-#include "sct.h"
 #include "cdi.h"
 #include "error.h"
 #include "dmemory.h"
 #include "pio_write.h"
 #include "simple_model_helper.h"
 #ifdef USE_MPI
+#include "sct.h"
+#define EXTERN
+#include "sct_timer_helper.h"
 #include "cdipio.h"
 #include "pio_util.h"
 #endif
+
 
 static const char default_fname_prefix[] = "example";
 
@@ -410,9 +413,6 @@ int main(int argc, char *argv[])
   int rankGlob;
   int IOMode = PIO_MPI;
   int nProcsIO = 2;
-  int *timer;
-  const int timer_max = 2;
-  double *ts, *te;
 
   xmpi ( MPI_Init ( &argc, &argv));
   commGlob = MPI_COMM_WORLD;
@@ -423,16 +423,12 @@ int main(int argc, char *argv[])
   if (rankGlob == 0)
     fprintf(stdout, "sizeGlob is %d. \n", sizeGlob);
 
-  sct_init(timer_max, "test_sct", commGlob);
-  timer = calloc(timer_max, sizeof(int));
-  ts = calloc(timer_max+1, sizeof(double));
-  te = calloc(timer_max+1, sizeof(double));
-  timer[0] = sct_new_timer("timer 0");
-  sct_start(timer[0]);
-
   pioConfHandle = cdiPioConfCreate();
   pioRoleAssign = cdiPioCSRLastN;
 #endif
+  double *ts, *te;
+  ts = calloc(16, sizeof(double));
+  te = calloc(16, sizeof(double));
 
   /* seed random generator */
   unsigned randSeed;
@@ -573,36 +569,33 @@ int main(int argc, char *argv[])
                                                    nProcsIO));
   cdiPioConfSetPartInflate(pioConfHandle, 1.0f);
   int initNamespace = namespaceGetActive();
-  timer[1] = sct_new_timer("timer 1");
   commModel = cdiPioInit(commGlob, pioConfHandle, &pioNamespace);
   if (commModel != MPI_COMM_NULL)
     {
       namespaceSetActive(pioNamespace);
+      // sct_init(TIMER_MAX, "worker timer", commModel);
+      // timer_worker_total = sct_new_timer("total");
+      // sct_start(timer_worker_total);
 #else
       commModel = -1;
 #endif
 
-      //ts[0] = simple_walltime();
-      sct_start(timer[1]);
+      ts[0] = simple_walltime();
       modelRun(&setup, commModel);
-      sct_stop(timer[1]);
-      // te[0] = simple_walltime();
-      // printf("time elapsed is: %f \n", te[0]-ts[0]);
-
+      te[0] = simple_walltime();
+#ifdef USE_MPI
+      // sct_stop(timer_worker_total);
+#endif
+      printf("time elapsed is: %f \n", te[0]-ts[0]);
 #ifdef USE_MPI
     }
-  else 
-    {
-      fprintf(stdout, "commModel is MPI_COMMNULL. \n");
-    }
 
-  sct_stop(timer[0]);
   cdi_repeatable_finalize();
   pioFinalize ();
   namespaceSetActive(initNamespace);
   cdiPioConfDestroy(pioConfHandle);
   xt_finalize();
-  sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
+  // sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
   MPI_Finalize ();
 #endif
   return 0;

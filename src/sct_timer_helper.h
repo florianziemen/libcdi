@@ -1,8 +1,23 @@
+#ifndef _SCT_TIMER_HELPER_H
+#define _SCT_TIMER_HELPER_H
+
 #ifndef EXTERN
 #define EXTERN extern
 #endif
 
 #define TIMER_MAX 16
-EXTERN int timer_mpi_get;
 EXTERN int timer_total;
+EXTERN int timer_getTimeStepData;
+EXTERN int timer_winStart;
+EXTERN int timer_mpi_get;
+EXTERN int timer_winComplete;
+EXTERN int timer_yaxt_exchange;
+EXTERN int timer_postwritebatch;
+EXTERN int timer_readgetbuffers;
+EXTERN int timer_writeNetCDF;
+EXTERN int timer_preWriteChunk;
+EXTERN int timer_writeDeco;
+EXTERN int timer_writeChunk;
+EXTERN int timer_worker_total;
 
+#endif

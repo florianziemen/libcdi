@@ -553,8 +553,6 @@ static void cdiPioFileWritingInit(void);
 MPI_Comm
 cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
 {
-  fprintf(stderr, "this is function %s.\n", "cdiPioInit");
-  fflush(stderr);
   namespaceSwitchSet(NSSWITCH_ABORT, NSSW_FUNC(cdiAbortC_MPI));
   namespaceSwitchSet(NSSWITCH_WARNING, NSSW_FUNC(cdiPioWarning));
 
@@ -645,8 +643,19 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       cdiPioFileWritingInit();
       // initialize sct timer
       sct_init(TIMER_MAX, "CDI-PIO timer", commInqCommPio());
-      timer_mpi_get = sct_new_timer("MPI_Get");
-      timer_total   = sct_new_timer("total");
+      timer_total            = sct_new_timer("total");
+      timer_getTimeStepData  = sct_new_timer("getTimeStepData");
+      timer_winStart         = sct_new_timer("window start");
+      timer_mpi_get          = sct_new_timer("MPI_Get");
+      timer_winComplete      = sct_new_timer("window complete");
+      timer_readgetbuffers   = sct_new_timer("read getbuffers");
+      timer_writeNetCDF      = sct_new_timer("write NetCDF");
+      timer_preWriteChunk    = sct_new_timer("prepare write chunk");
+      timer_writeDeco        = sct_new_timer("create write deco");
+      timer_yaxt_exchange    = sct_new_timer("YAXT exchange1");
+      timer_writeChunk       = sct_new_timer("write chunk");
+      timer_postwritebatch   = sct_new_timer("post write batch");
+      sct_start(timer_total);
       if (commInqRankColl() >= 0)
         {
           cdiPioCollectorMessageLoop();
@@ -670,7 +679,6 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       namespaceSetActive(prevNamespace);
       namespaceDelete(serverNamespace);
 
-      sct_start(timer_total);
     }
   else
     {
@@ -769,8 +777,6 @@ void  pioEndTimestepping ( void )
 void pioFinalize ( void )
 {
   xdebug("%s", "START");
-  fprintf(stderr, "this is function %s.\n", "pioFinalize");
-  fflush(stderr);
 
   /* namespace is unchanged on I/O servers */
   int pioNamespace = namespaceGetActive();
