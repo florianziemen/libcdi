@@ -1972,7 +1972,9 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
         if (!conf->batchedRMA)
         {
           xdebug("%s", "not batchedRMA");
+          sct_start(timer_readgetbuffers);
           readGetBuffers(streamIdx, conf);
+          sct_stop(timer_readgetbuffers);
         }
       }
   if (conf->batchedRMA)
