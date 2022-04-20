@@ -1785,7 +1785,9 @@ writeGribStream(size_t streamIdx,
       /* resize gather buffer if needed */
       resizeVarGatherBuf(myAggSize, data_, currentDataBufSize);
       /* execute composite redist */
+      sct_start(timer_yaxt_exchange);
       xt_redist_s_exchange1(compositePassRedist, clientBuf[0].mem, *data_);
+      sct_stop(timer_yaxt_exchange);
       /* delete composite redist */
       if (!conf->cacheRedists)
         xt_redist_delete(compositePassRedist);
@@ -1831,6 +1833,7 @@ writeGribStream(size_t streamIdx,
               size_t nmiss
                 = countVarChunkMissingVals(vlistID, varID, mapping, nvals,
                                            conversion, data + recordDataOfs);
+              sct_start(timer_writeSlice);
               if (conversion == DATA_HEADER_DOUBLE)
                 streamWriteVarSlice(streamID, varID, level,
                                     (const double *)(const void *)(data + recordDataOfs),
@@ -1840,8 +1843,11 @@ writeGribStream(size_t streamIdx,
                                      (const float *)(const void *)(data + recordDataOfs),
                                      (int)nmiss);
               recordDataOfs += recordSize;
+              sct_stop(timer_writeSlice);
             }
+          sct_start(timer_aggBufFlush);
           aggBufFlush(streamID, fileID, cdiPioFileWrite);
+          sct_stop(timer_aggBufFlush);
         }
       else
         /* write zero bytes to trigger synchronization code in fileWrite */
@@ -1889,6 +1895,7 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
     size_t currentDataBufSize = 0;
     int filetype = streamInqFiletype(streamID);
 
+    sct_start(timer_writeStream);
     switch (filetype)
       {
       case CDI_FILETYPE_GRB:
@@ -1900,14 +1907,13 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
       case CDI_FILETYPE_NC2:
       case CDI_FILETYPE_NC4:
       case CDI_FILETYPE_NC4C:
-        sct_start(timer_writeNetCDF);
         writeNetCDFStream(streamIdx, map, &data, &currentDataBufSize, conf);
-        sct_stop(timer_writeNetCDF);
         break;
 #endif
       default:
         xabort("unhandled filetype in parallel I/O.");
       }
+    sct_stop(timer_writeStream);
     streamMappingDelete(&map);
     Free(map);
     Free(data);
@@ -2454,7 +2460,7 @@ void cdiPioCollectorMessageLoop()
         {
         case FINALIZE:
           xdebug("%s", "tag: FINALIZE");
-          sct_stop(timer_total);
+          sct_stop(timer_ioTotal);
           sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
           xmpi(MPI_Recv(NULL, 0, MPI_INT, source, tag, pioInterComm, &status));
           for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)

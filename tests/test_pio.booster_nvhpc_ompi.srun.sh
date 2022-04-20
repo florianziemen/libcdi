@@ -12,7 +12,7 @@
 
 
 # set -eux
-set -x
+set -ex
 tests_dir=/p/scratch/highresmonsoon/xwang/cdi-pio-benchmark/cdi-pio-build-tj20220307-1.8.x-merge/cdi-5eb8cbb1d381fc78bced3fd769033946a99c9f7a/tests
 base_dir="$(cd "$tests_dir/.."; pwd)"
 set +x
@@ -43,8 +43,13 @@ cd "$tests_dir" || exit 1
 export SCT_PROC_CHOICE=SCT_SELECT_ALL
 export SCT_CALLSTATS=1
 
+# reduce output data to decrease test duration
+# time ../libtool --mode=execute srun \
+#   ./pio_write_deco2d.parallel -qpio-role-scheme=last \
+#   -c -m 384 -n 192 -z 95 -t 20 -y 60 -s 7 \
+#   -f grb2 -p PIO_MPI_FW_AT_ALL -w 16
 time ../libtool --mode=execute srun \
   ./pio_write_deco2d.parallel -qpio-role-scheme=last \
   -c -m 768 -n 384 -z 95 -t 10 -y 120 -s 7 \
-  -f nc4 -p PIO_MPI_FW_AT_ALL -w 16
+  -f grb2 -p PIO_MPI_FW_AT_ALL -w 16
 set +x

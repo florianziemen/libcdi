@@ -550,6 +550,28 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
 
 static void cdiPioFileWritingInit(void);
 
+int new_timer(const int tsize, const char *context_name, MPI_Comm comm)
+{
+  int timer_size = sct_init(tsize, context_name, comm);
+
+  timer_ioTotal          = sct_new_timer("IO servers total");
+  timer_getTimeStepData  = sct_new_timer("getTimeStepData");
+  timer_winStart         = sct_new_timer("window start");
+  timer_mpi_get          = sct_new_timer("MPI_Get");
+  timer_winComplete      = sct_new_timer("window complete");
+  timer_readgetbuffers   = sct_new_timer("read getbuffers");
+  timer_writeStream      = sct_new_timer("write stream");
+  timer_preWriteChunk    = sct_new_timer("prepare write chunk");
+  timer_writeDeco        = sct_new_timer("create write deco");
+  timer_yaxt_exchange    = sct_new_timer("YAXT exchange1");
+  timer_writeChunk       = sct_new_timer("write chunk");
+  timer_writeSlice       = sct_new_timer("write slice");
+  timer_aggBufFlush      = sct_new_timer("aggregate buffer flush");
+  timer_postwritebatch   = sct_new_timer("post write batch");
+
+  return timer_size;
+}
+
 MPI_Comm
 cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
 {
@@ -642,20 +664,8 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       conf->callbacks[CDIPIO_CALLBACK_POSTCOMMSETUP]();
       cdiPioFileWritingInit();
       // initialize sct timer
-      sct_init(TIMER_MAX, "CDI-PIO timer", commInqCommPio());
-      timer_total            = sct_new_timer("total");
-      timer_getTimeStepData  = sct_new_timer("getTimeStepData");
-      timer_winStart         = sct_new_timer("window start");
-      timer_mpi_get          = sct_new_timer("MPI_Get");
-      timer_winComplete      = sct_new_timer("window complete");
-      timer_readgetbuffers   = sct_new_timer("read getbuffers");
-      timer_writeNetCDF      = sct_new_timer("write NetCDF");
-      timer_preWriteChunk    = sct_new_timer("prepare write chunk");
-      timer_writeDeco        = sct_new_timer("create write deco");
-      timer_yaxt_exchange    = sct_new_timer("YAXT exchange1");
-      timer_writeChunk       = sct_new_timer("write chunk");
-      timer_postwritebatch   = sct_new_timer("post write batch");
-      sct_start(timer_total);
+      new_timer(TIMER_MAX, "CDI-PIO timer", commInqCommPio());
+      sct_start(timer_ioTotal);
       if (commInqRankColl() >= 0)
         {
           cdiPioCollectorMessageLoop();
@@ -794,6 +804,7 @@ void pioFinalize ( void )
   if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
     xmpi(MPI_Send(NULL, 0, MPI_INT, collRank, FINALIZE, cdiPioInqInterComm()));
   xdebug("%s", "SENT MESSAGE WITH TAG \"FINALIZE\"");
+  sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
   Free(txWin);
   cdiPioCommFinalize();
   idSetDestroy(&openStreams);

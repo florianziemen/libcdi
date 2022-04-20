@@ -420,6 +420,9 @@ int main(int argc, char *argv[])
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
+  sct_init(TIMER_MAX, "PIO-WRITE TIMER", commGlob);
+  timer_globTotal = sct_new_timer("global total");
+  sct_start(timer_globTotal);
   if (rankGlob == 0)
     fprintf(stdout, "sizeGlob is %d. \n", sizeGlob);
 
@@ -573,9 +576,6 @@ int main(int argc, char *argv[])
   if (commModel != MPI_COMM_NULL)
     {
       namespaceSetActive(pioNamespace);
-      // sct_init(TIMER_MAX, "worker timer", commModel);
-      // timer_worker_total = sct_new_timer("total");
-      // sct_start(timer_worker_total);
 #else
       commModel = -1;
 #endif
@@ -583,19 +583,17 @@ int main(int argc, char *argv[])
       ts[0] = simple_walltime();
       modelRun(&setup, commModel);
       te[0] = simple_walltime();
-#ifdef USE_MPI
-      // sct_stop(timer_worker_total);
-#endif
       printf("time elapsed is: %f \n", te[0]-ts[0]);
 #ifdef USE_MPI
     }
 
+  sct_stop(timer_globTotal);
   cdi_repeatable_finalize();
   pioFinalize ();
+  // sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
   namespaceSetActive(initNamespace);
   cdiPioConfDestroy(pioConfHandle);
   xt_finalize();
-  // sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
   MPI_Finalize ();
 #endif
   return 0;
