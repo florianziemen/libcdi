@@ -166,7 +166,7 @@ extDefRecord(stream_t *streamptr)
   int header[4];
   header[0] = record->date;
   header[1] = pnum;
-  header[2] = record->level;
+  header[2] = record->ilevel;
   const int gridID = record->gridID;
   cdi_check_gridsize_int_limit("EXTRA", gridInqSize(gridID));
   header[3] = (int) gridInqSize(gridID);
@@ -612,7 +612,7 @@ extWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   int header[4];
   header[0] = streamptr->tsteps[tsID].taxis.vdate;
   header[1] = pnum;
-  header[2] = (int) (zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
+  header[2] = (int) lround(zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
   const int gridID = vlistInqVarGrid(vlistID, varID);
   cdi_check_gridsize_int_limit("EXTRA", gridInqSize(gridID));
   header[3] = (int) gridInqSize(gridID);

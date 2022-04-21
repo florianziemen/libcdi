@@ -155,7 +155,7 @@ srvDefRecord(stream_t *streamptr)
 
   int header[8];
   header[0] = pnum;
-  header[1] = record->level;
+  header[1] = record->ilevel;
   header[2] = record->date;
   header[3] = record->time;
 
@@ -620,7 +620,7 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
 
   int header[8];
   header[0] = pnum;
-  header[1] = (int) (zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
+  header[1] = (int) lround(zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
   header[2] = streamptr->tsteps[tsID].taxis.vdate;
   header[3] = streamptr->tsteps[tsID].taxis.vtime;
 

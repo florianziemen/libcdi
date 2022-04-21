@@ -131,7 +131,7 @@ typedef struct
   size_t buffersize;  // gribapi, cgribex
   off_t position;     // file position
   int param;
-  int level;
+  int ilevel;
   int date;
   int time;
   int gridID;

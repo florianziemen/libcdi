@@ -90,7 +90,7 @@ cdiInitRecord(stream_t *streamptr)
   streamptr->record = record;
 
   record->param = 0;
-  record->level = 0;
+  record->ilevel = 0;
   record->date = 0;
   record->time = 0;
   record->gridID = 0;
@@ -167,13 +167,13 @@ streamDefRecord(int streamID, int varID, int levelID)
   int gridID = vlistInqVarGrid(vlistID, varID);
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
   int param = vlistInqVarParam(vlistID, varID);
-  int level = (int) (zaxisInqLevel(zaxisID, levelID));
+  int ilevel = (int) (zaxisInqLevel(zaxisID, levelID));
 
   Record *record = streamptr->record;
   record->varID = varID;
   record->levelID = levelID;
   record->param = param;
-  record->level = level;
+  record->ilevel = ilevel;
   record->date = streamptr->tsteps[tsID].taxis.vdate;
   record->time = streamptr->tsteps[tsID].taxis.vtime;
   record->gridID = gridID;

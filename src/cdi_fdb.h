@@ -25,7 +25,7 @@ typedef struct
   int time;
   int param;
   int levtype;
-  int level;
+  int ilevel;
 } RecordInfoEntry;
 
 void decode_fdbitem(const char *fdbItem, KeyValueEntry *keyValue);

@@ -1608,7 +1608,7 @@ streamDefVlist(int streamID, int vlistID)
   myStreamDefVlist(streamID, vlistID);
 }
 
-/* the single image implementation of streamDefVlist */
+// The single image implementation of streamDefVlist
 void
 cdiStreamDefVlist_(int streamID, int vlistID)
 {
@@ -1616,7 +1616,7 @@ cdiStreamDefVlist_(int streamID, int vlistID)
 
   if (streamptr->vlistID == CDI_UNDEFID)
     {
-      int vlistCopy = vlistDuplicate(vlistID);
+      const int vlistCopy = vlistDuplicate(vlistID);
       cdiVlistMakeInternal(vlistCopy);
       cdiVlistMakeImmutable(vlistID);
       cdiStreamSetupVlist(streamptr, vlistCopy);
