@@ -550,9 +550,10 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
 
 static void cdiPioFileWritingInit(void);
 
-int new_timer(const int tsize, const char *context_name, MPI_Comm comm)
+void new_context(const char *context_name, MPI_Comm comm)
 {
-  int timer_size = sct_init(tsize, context_name, comm);
+  context_handle = sct_new_context(context_name, comm);
+  sct_context_start(context_handle);
 
   timer_ioTotal          = sct_new_timer("IO servers total");
   timer_getTimeStepData  = sct_new_timer("getTimeStepData");
@@ -568,8 +569,6 @@ int new_timer(const int tsize, const char *context_name, MPI_Comm comm)
   timer_writeSlice       = sct_new_timer("write slice");
   timer_aggBufFlush      = sct_new_timer("aggregate buffer flush");
   timer_postwritebatch   = sct_new_timer("post write batch");
-
-  return timer_size;
 }
 
 MPI_Comm
@@ -664,7 +663,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       conf->callbacks[CDIPIO_CALLBACK_POSTCOMMSETUP]();
       cdiPioFileWritingInit();
       // initialize sct timer
-      new_timer(TIMER_MAX, "CDI-PIO timer", commInqCommPio());
+      new_context("CDI-PIO timer", commInqCommPio());
       sct_start(timer_ioTotal);
       if (commInqRankColl() >= 0)
         {

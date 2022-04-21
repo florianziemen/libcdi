@@ -2461,6 +2461,7 @@ void cdiPioCollectorMessageLoop()
         case FINALIZE:
           xdebug("%s", "tag: FINALIZE");
           sct_stop(timer_ioTotal);
+          sct_context_stop(context_handle);
           sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
           xmpi(MPI_Recv(NULL, 0, MPI_INT, source, tag, pioInterComm, &status));
           for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
