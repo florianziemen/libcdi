@@ -803,7 +803,7 @@ void pioFinalize ( void )
   if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
     xmpi(MPI_Send(NULL, 0, MPI_INT, collRank, FINALIZE, cdiPioInqInterComm()));
   xdebug("%s", "SENT MESSAGE WITH TAG \"FINALIZE\"");
-  sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
+  // sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
   Free(txWin);
   cdiPioCommFinalize();
   idSetDestroy(&openStreams);
