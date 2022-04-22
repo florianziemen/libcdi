@@ -10881,17 +10881,20 @@ ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
-
-   acx_Comp=$FC
-   $as_echo "$as_me:${as_lineno-$LINENO}: testing if $acx_Comp cannot build working shared objects" >&5
+                  $as_echo "$as_me:${as_lineno-$LINENO}: testing if $FC cannot build working shared objects" >&5
    case $host in #(
   *-ibm-aix*) :
-    if $acx_Comp -G -v 2>&1 | grep ' -binitfini:poe_remote_main ' >/dev/null; then :
+    if $FC -G -v 2>&1 | grep ' -binitfini:poe_remote_main ' >/dev/null; then :
   acx_cv_disable_shared=yes
 fi ;; #(
   x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*) :
-    if $acx_Comp -V 2>&1 | grep '^Intel(R).*Fortran.*Compiler.*Version 15.0.[123]' >/dev/null; then :
-  acx_cv_disable_shared=yes
+    if $FC -V 2>&1 | grep '^Intel(R).*Fortran.*Compiler.*Version 15.0.[123]' >/dev/null; then :
+  case " $FCFLAGS $LDFLAGS " in #(
+  *\ -Qlocation,ld,*\ *) :
+    acx_cv_disable_shared=yes ;; #(
+  *) :
+    FCFLAGS="$FCFLAGS -Qlocation,ld,$ac_abs_confdir/util/icomp15" ;;
+esac
 fi ;; #(
   *) :
      ;;
@@ -10908,17 +10911,20 @@ ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_f77_compiler_gnu
 
-
-   acx_Comp=$F77
-   $as_echo "$as_me:${as_lineno-$LINENO}: testing if $acx_Comp cannot build working shared objects" >&5
+                  $as_echo "$as_me:${as_lineno-$LINENO}: testing if $F77 cannot build working shared objects" >&5
    case $host in #(
   *-ibm-aix*) :
-    if $acx_Comp -G -v 2>&1 | grep ' -binitfini:poe_remote_main ' >/dev/null; then :
+    if $F77 -G -v 2>&1 | grep ' -binitfini:poe_remote_main ' >/dev/null; then :
   acx_cv_disable_shared=yes
 fi ;; #(
   x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*) :
-    if $acx_Comp -V 2>&1 | grep '^Intel(R).*Fortran.*Compiler.*Version 15.0.[123]' >/dev/null; then :
-  acx_cv_disable_shared=yes
+    if $F77 -V 2>&1 | grep '^Intel(R).*Fortran.*Compiler.*Version 15.0.[123]' >/dev/null; then :
+  case " $FFLAGS $LDFLAGS " in #(
+  *\ -Qlocation,ld,*\ *) :
+    acx_cv_disable_shared=yes ;; #(
+  *) :
+    FFLAGS="$FFLAGS -Qlocation,ld,$ac_abs_confdir/util/icomp15" ;;
+esac
 fi ;; #(
   *) :
      ;;
@@ -10936,17 +10942,20 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-
-   acx_Comp=$CC
-   $as_echo "$as_me:${as_lineno-$LINENO}: testing if $acx_Comp cannot build working shared objects" >&5
+                  $as_echo "$as_me:${as_lineno-$LINENO}: testing if $CC cannot build working shared objects" >&5
    case $host in #(
   *-ibm-aix*) :
-    if $acx_Comp -G -v 2>&1 | grep ' -binitfini:poe_remote_main ' >/dev/null; then :
+    if $CC -G -v 2>&1 | grep ' -binitfini:poe_remote_main ' >/dev/null; then :
   acx_cv_disable_shared=yes
 fi ;; #(
   x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*) :
-    if $acx_Comp -V 2>&1 | grep '^Intel(R).*Fortran.*Compiler.*Version 15.0.[123]' >/dev/null; then :
-  acx_cv_disable_shared=yes
+    if $CC -V 2>&1 | grep '^Intel(R).*Fortran.*Compiler.*Version 15.0.[123]' >/dev/null; then :
+  case " $CFLAGS $LDFLAGS " in #(
+  *\ -Qlocation,ld,*\ *) :
+    acx_cv_disable_shared=yes ;; #(
+  *) :
+    CFLAGS="$CFLAGS -Qlocation,ld,$ac_abs_confdir/util/icomp15" ;;
+esac
 fi ;; #(
   *) :
      ;;
