@@ -939,7 +939,7 @@ checkTime(stream_t *streamptr, compvar2_t compVar, const DateTime *verificationT
     {
       if (gribapiVarCompare(compVar, streamptr->tsteps[0].records[recID], 1) == 0) break;
     }
-  const bool recordExists = recID < streamptr->nrecs;
+  const bool recordExists = (recID < streamptr->nrecs);
 
   // Then we need to know whether the verification time is consistent.
   const bool consistentTime = !memcmp(verificationTime, expectedVTime, sizeof(*verificationTime));
@@ -2942,7 +2942,6 @@ verticallyFlipGridDefinitionWhenScanningModeChanged(grib_handle *gh, double yfir
 static void
 convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gridsize, size_t iDim, size_t jDim)
 {
-  size_t i, j;
   size_t idxIN, idxOUT;
 
   // 127: reserved for testing; it will generate test data in 64 scanning mode
@@ -2950,10 +2949,10 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
     {
       scanModeOUT = 64;
       if (cdiDebugExt >= 30) printf("convertDataScanningMode(): Generating test data in 64 scanning mode..\n");
-      for (j = 0; j < jDim; j++)
+      for (size_t j = 0; j < jDim; j++)
         {
           const size_t jXiDim = j * iDim;
-          for (i = 0; i < iDim; i++)
+          for (size_t i = 0; i < iDim; i++)
             {
               idxIN = i + jXiDim;
               data[idxIN] = (double) (100.0 * j + i);
@@ -2974,10 +2973,10 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
   if (cdiDebugExt >= 100)
     {
       printf("convertDataScanningMode(): data IN:\n");
-      for (j = 0; j < jDim; j++)
+      for (size_t j = 0; j < jDim; j++)
         {
           size_t jXiDim = j * iDim;
-          for (i = 0; i < iDim; i++)
+          for (size_t i = 0; i < iDim; i++)
             {
               idxIN = i + jXiDim;
               printf("%03.0f, ", data[idxIN]);
@@ -3019,7 +3018,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
           idxIN = 0;
           idxOUT = (jDim - 1) * iDim;
           if (cdiDebugExt >= 30) printf("convertDataScanningMode():  copying rows nr. (%04d : %04zu)\n", 0, jDim - 1);
-          for (j = 0; j < jDim; j++)
+          for (size_t j = 0; j < jDim; j++)
             {
               memcpy((void *) &data[idxOUT], (void *) &dataCopy[idxIN], iDim * sizeof(double));
               idxIN += iDim;
@@ -3032,9 +3031,9 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
         if (1)
           {
             if (cdiDebugExt >= 30) printf("convertDataScanningMode():  copying columns nr. (%04d : %04d);\n", 0, iDim - 1);
-            for (i = 0; i < iDim; i++)
+            for (size_t i = 0; i < iDim; i++)
               {
-                for (j = 0; j < jDim; j++)
+                for (size_t j = 0; j < jDim; j++)
                   {
                     size_t jXiDim = j * iDim;
                     idxIN = i + jXiDim;
@@ -3053,10 +3052,10 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
           if (cdiDebugExt >= 30)
             printf("convertDataScanningMode():  transpose data rows=>columns nr. (%04d : %04zu) => (%04d : %04zu);\n", 0, iDim - 1,
                    0, jDim - 1);
-          for (j = 0; j < jDim; j++)
+          for (size_t j = 0; j < jDim; j++)
             {
               size_t jXiDim = j * iDim;
-              for (i = 0; i < iDim; i++)
+              for (size_t i = 0; i < iDim; i++)
                 {
                   idxIN = i + jXiDim;
                   idxOUT = j + i * jDim;
@@ -3076,7 +3075,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
         {  // flip the data vertically ..
           idxIN = 0;
           idxOUT = (jDim - 1) * iDim;
-          for (j = 0; j < jDim; j++)
+          for (size_t j = 0; j < jDim; j++)
             {
               if (cdiDebugExt >= 25)
                 printf("convertDataScanningMode():  copying row nr. %04zu; [idxIN=%08zu] => [idxOUT=%08zu]\n", j, idxIN, idxOUT);
@@ -3089,11 +3088,11 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
       if (scanModeOUT == 96)
         {  // transpose the data
           size_t jInv;
-          for (j = 0; j < jDim; j++)
+          for (size_t j = 0; j < jDim; j++)
             {
               if (cdiDebugExt >= 30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
               jInv = (jDim - 1) - j;
-              for (i = 0; i < iDim; i++) data[j + i * jDim] = dataCopy[i + jInv * iDim];  // source data has -j
+              for (size_t i = 0; i < iDim; i++) data[j + i * jDim] = dataCopy[i + jInv * iDim];  // source data has -j
             }
         }  // end if (scanModeOUT==96)
     }      // end if (scanModeIN==00)
@@ -3104,11 +3103,11 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
               // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
       if (scanModeOUT == 64)
         {  // transpose the data
-          for (j = 0; j < jDim; j++)
+          for (size_t j = 0; j < jDim; j++)
             {
               if (cdiDebugExt >= 30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
               size_t jXiDim = j * iDim;
-              for (i = 0; i < iDim; i++)
+              for (size_t i = 0; i < iDim; i++)
                 // data[j + i*jDim] =  dataCopy[i + j*iDim];
                 data[i + jXiDim] = dataCopy[j + i * jDim];
             }
@@ -3119,12 +3118,12 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
           idxIN = 0;
           idxOUT = 0;
           size_t jInv;
-          for (j = 0; j < jDim; j++)
+          for (size_t j = 0; j < jDim; j++)
             {
               if (cdiDebugExt >= 30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
               jInv = (jDim - 1) - j;
               size_t jXiDim = j * iDim;
-              for (i = 0; i < iDim; i++)
+              for (size_t i = 0; i < iDim; i++)
                 // data[jInv + iXjDim] =  dataCopy[i + jXiDim];  // target data has -j
                 data[i + jXiDim] = dataCopy[jInv + i * jDim];  // target data has -j
             }
@@ -3134,10 +3133,10 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
   if (cdiDebugExt >= 100)
     {
       printf("convertDataScanningMode(): data OUT (new scanning mode):\n");
-      for (j = 0; j < jDim; j++)
+      for (size_t j = 0; j < jDim; j++)
         {
           size_t jXiDim = j * iDim;
-          for (i = 0; i < iDim; i++)
+          for (size_t i = 0; i < iDim; i++)
             {
               idxIN = i + jXiDim;
               printf("%03.0f, ", data[idxIN]);
@@ -3147,7 +3146,6 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
     }
 
   free(dataCopy);
-  return;
 }
 #endif  // HIRLAM_EXTENSIONS
 

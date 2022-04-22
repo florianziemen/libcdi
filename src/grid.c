@@ -2444,7 +2444,7 @@ gridCompareP(void *gridptr1, void *gridptr2)
     equal = 0,
     differ = -1
   };
-  size_t i, size;
+  size_t size;
 
   xassert(g1);
   xassert(g2);
@@ -2479,15 +2479,12 @@ gridCompareP(void *gridptr1, void *gridptr2)
   const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1), *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
   if (g1_xvals)
     {
-      if (g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR)
-        size = g1->size;
-      else
-        size = g1->x.size;
+      size = (g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR) ? g1->size : g1->x.size;
       xassert(size);
 
       if (!g2_xvals) return differ;
 
-      for (i = 0; i < size; i++)
+      for (size_t i = 0; i < size; ++i)
         if (IS_NOT_EQUAL(g1_xvals[i], g2_xvals[i])) return differ;
     }
   else if (g2_xvals)
@@ -2496,15 +2493,12 @@ gridCompareP(void *gridptr1, void *gridptr2)
   const double *restrict g1_yvals = g1->vtable->inqYValsPtr(g1), *restrict g2_yvals = g2->vtable->inqYValsPtr(g2);
   if (g1_yvals)
     {
-      if (g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR)
-        size = g1->size;
-      else
-        size = g1->y.size;
+      size = (g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR) ? g1->size : g1->y.size;
       xassert(size);
 
       if (!g2_yvals) return differ;
 
-      for (i = 0; i < size; i++)
+      for (size_t i = 0; i < size; ++i)
         if (IS_NOT_EQUAL(g1_yvals[i], g2_yvals[i])) return differ;
     }
   else if (g2_yvals)
@@ -2517,7 +2511,7 @@ gridCompareP(void *gridptr1, void *gridptr2)
 
       if (!g2_area) return differ;
 
-      for (i = 0; i < g1->size; i++)
+      for (size_t i = 0; i < g1->size; ++i)
         if (IS_NOT_EQUAL(g1_area[i], g2_area[i])) return differ;
     }
   else if (g2_area)
@@ -2528,15 +2522,12 @@ gridCompareP(void *gridptr1, void *gridptr2)
     if ((g1_xbounds = g1->vtable->inqXBoundsPtr(g1)))
       {
         xassert(g1->nvertex);
-        if (g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED)
-          size = g1->nvertex * g1->size;
-        else
-          size = g1->nvertex * g1->x.size;
+        size = (g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED) ? g1->nvertex * g1->size : g1->nvertex * g1->x.size;
         xassert(size);
 
         if (!(g2_xbounds = g2->vtable->inqXBoundsPtr(g2))) return differ;
 
-        for (i = 0; i < size; i++)
+        for (size_t i = 0; i < size; ++i)
           if (IS_NOT_EQUAL(g1_xbounds[i], g2_xbounds[i])) return differ;
       }
     else if (g2->vtable->inqXBoundsPtr(g2))
@@ -2548,15 +2539,12 @@ gridCompareP(void *gridptr1, void *gridptr2)
     if ((g1_ybounds = g1->vtable->inqYBoundsPtr(g1)))
       {
         xassert(g1->nvertex);
-        if (g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED)
-          size = g1->nvertex * g1->size;
-        else
-          size = g1->nvertex * g1->y.size;
+        size = (g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED) ? g1->nvertex * g1->size : g1->nvertex * g1->y.size;
         xassert(size);
 
         if (!(g2_ybounds = g2->vtable->inqYBoundsPtr(g2))) return differ;
 
-        for (i = 0; i < size; i++)
+        for (size_t i = 0; i < size; ++i)
           if (IS_NOT_EQUAL(g1->y.bounds[i], g2->y.bounds[i])) return differ;
       }
     else if (g2->vtable->inqYBoundsPtr(g2))

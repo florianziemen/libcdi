@@ -1096,9 +1096,7 @@ cdf_get_cell_varid(char *attstring, int ncid)
 static void
 cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timedimid, int modelID, int format)
 {
-  int ncdimid;
   int nvdims, nvatts;
-  int iatt;
   nc_type xtype, atttype;
   size_t attlen;
   char name[CDI_MAX_NAME];
@@ -1129,7 +1127,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
       strcpy(ncvar->name, name);
 
-      for (ncdimid = 0; ncdimid < nvdims; ncdimid++) ncvar->dimtype[ncdimid] = -1;
+      for (int ncdimid = 0; ncdimid < nvdims; ncdimid++) ncvar->dimtype[ncdimid] = -1;
 
       ncvar->xtype = xtype;
       ncvar->ndims = nvdims;
@@ -1195,7 +1193,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
           else
             {
-              for (ncdimid = 1; ncdimid < nvdims; ncdimid++)
+              for (int ncdimid = 1; ncdimid < nvdims; ncdimid++)
                 {
                   if (timedimid == dimidsp[ncdimid])
                     {
@@ -1208,7 +1206,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
 
       if (ncvar->natts == 0 && nvatts > 0) ncvar->atts = (int *) Malloc((size_t) nvatts * sizeof(int));
 
-      for (iatt = 0; iatt < nvatts; iatt++)
+      for (int iatt = 0; iatt < nvatts; ++iatt)
         {
           int nc_cell_id = CDI_UNDEFID;
 
@@ -3482,7 +3480,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       /*
       printf("ixyz %d\n", ixyz);
       printf("ndims %d\n", ncvar->ndims);
-      for ( int i = 0; i < ncvar->ndims; ++i )
+      for (int i = 0; i < ncvar->ndims; ++i)
         printf("dimids: %d %d\n", i, dimids[i]);
       printf("xdimid, ydimid %d %d\n", xdimid, ydimid);
       */
