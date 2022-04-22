@@ -429,9 +429,6 @@ int main(int argc, char *argv[])
   pioConfHandle = cdiPioConfCreate();
   pioRoleAssign = cdiPioCSRLastN;
 #endif
-  double *ts, *te;
-  ts = calloc(16, sizeof(double));
-  te = calloc(16, sizeof(double));
 
   /* seed random generator */
   unsigned randSeed;
@@ -580,10 +577,7 @@ int main(int argc, char *argv[])
       commModel = -1;
 #endif
 
-      ts[0] = simple_walltime();
       modelRun(&setup, commModel);
-      te[0] = simple_walltime();
-      printf("time elapsed is: %f \n", te[0]-ts[0]);
 #ifdef USE_MPI
     }
 
