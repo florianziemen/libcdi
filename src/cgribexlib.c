@@ -1320,7 +1320,8 @@ void avx_encode_array_2byte_double(size_t datasize,
 
   size_t residual = datasize % 16;
 
-  for (size_t i = 0; i < (datasize-residual); i += 16)
+  size_t i;
+  for (i = 0; i < (datasize-residual); i += 16)
     {
       (void) _mm_prefetch((const char*)(dval+8), _MM_HINT_NTA);
       //_____________________________________________________________________________
@@ -1422,7 +1423,8 @@ void sse41_encode_array_2byte_double(size_t datasize,
 
   size_t residual = datasize % 16;
 
-  for (size_t i = 0; i < (datasize-residual); i += 16)
+  size_t i;
+  for (i = 0; i < (datasize-residual); i += 16)
     {
       (void) _mm_prefetch((const char*)(dval+8), _MM_HINT_NTA);
       //_____________________________________________________________________________
