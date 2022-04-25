@@ -567,7 +567,8 @@ void new_context(const char *context_name, MPI_Comm comm)
   timer_yaxt_exchange    = sct_new_timer("YAXT exchange1");
   timer_writeChunk       = sct_new_timer("write chunk");
   timer_writeSlice       = sct_new_timer("write slice");
-  timer_aggBufFlush      = sct_new_timer("aggregate buffer flush");
+  timer_mpiAllGather     = sct_new_timer("MPI_Allgather");
+  timer_mpiFileWriteAtAll= sct_new_timer("MPI_File_write_at_all");
   timer_postwritebatch   = sct_new_timer("post write batch");
 }
 

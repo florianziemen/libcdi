@@ -18,6 +18,9 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
+#include "sct.h"
+#include "sct_timer_helper.h"
+
 struct fileMPIFWAA
 {
   char *name;
@@ -99,8 +102,10 @@ fwFileWriteAtAll(int fileID, const void *buffer, size_t len)
     rankPio = commInqRankPio();
   /* find position to write to */
   of->collWriteSize[rankPio] = (int)len;
+  sct_start(timer_mpiAllGather);
   xmpi(MPI_Allgather(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL,
                      of->collWriteSize, 1, MPI_INT, commPio));
+  sct_stop(timer_mpiAllGather);
   MPI_Offset myPos = of->pos, nextWritePos;
   for (size_t i = 0; i < (size_t)rankPio; ++i)
     myPos += of->collWriteSize[i];
@@ -108,8 +113,10 @@ fwFileWriteAtAll(int fileID, const void *buffer, size_t len)
   for (size_t i = (size_t)rankPio; i < (size_t)sizePio; ++i)
     nextWritePos += of->collWriteSize[i];
   /* write buffer */
+  sct_start(timer_mpiFileWriteAtAll);
   xmpi(MPI_File_write_at_all(of->fh, myPos, (void *)buffer, (int)len,
                              MPI_UNSIGNED_CHAR, MPI_STATUS_IGNORE));
+  sct_stop(timer_mpiFileWriteAtAll);
   of->pos = nextWritePos;
   return len;
 }

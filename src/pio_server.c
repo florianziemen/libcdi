@@ -1845,9 +1845,7 @@ writeGribStream(size_t streamIdx,
               recordDataOfs += recordSize;
               sct_stop(timer_writeSlice);
             }
-          sct_start(timer_aggBufFlush);
           aggBufFlush(streamID, fileID, cdiPioFileWrite);
-          sct_stop(timer_aggBufFlush);
         }
       else
         /* write zero bytes to trigger synchronization code in fileWrite */

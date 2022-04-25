@@ -21,7 +21,8 @@ EXTERN int timer_preWriteChunk;
 EXTERN int timer_writeDeco;
 EXTERN int timer_writeChunk;
 EXTERN int timer_writeSlice;
-EXTERN int timer_aggBufFlush;
+EXTERN int timer_mpiAllGather;
+EXTERN int timer_mpiFileWriteAtAll;
 
 EXTERN int context_handle;
 
