@@ -15,6 +15,9 @@
 set -ex
 tests_dir=/p/scratch/highresmonsoon/xwang/cdi-pio-benchmark/cdi-pio-build-tj20220307-1.8.x-merge/cdi-5eb8cbb1d381fc78bced3fd769033946a99c9f7a/tests
 base_dir="$(cd "$tests_dir/.."; pwd)"
+qprefix="/p/scratch/highresmonsoon/cdi-pio-test_dir"
+mkdir -p "$qprefix"
+qprefix="$qprefix/files_pio_write"
 set +x
 
 nvhpc_version=21.5
@@ -45,11 +48,12 @@ export SCT_CALLSTATS=1
 
 # reduce output data to decrease test duration
 # time ../libtool --mode=execute srun \
-#   ./pio_write_deco2d.parallel -qpio-role-scheme=last \
+#   ./pio_write_deco2d.parallel "-qprefix=$qprefix" -qpio-role-scheme=last \
 #   -c -m 384 -n 192 -z 95 -t 20 -y 60 -s 7 \
 #   -f grb2 -p PIO_MPI_FW_AT_ALL -w 16
+
 time ../libtool --mode=execute srun \
-  ./pio_write_deco2d.parallel -qpio-role-scheme=last \
+  ./pio_write_deco2d.parallel "-qprefix=$qprefix" -qpio-role-scheme=last \
   -c -m 768 -n 384 -z 95 -t 10 -y 120 -s 7 \
   -f grb2 -p PIO_MPI_FW_AT_ALL -w 16
 set +x
