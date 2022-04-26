@@ -1,6 +1,10 @@
 #! /bin/bash
 #SBATCH --job-name {{ name_job }}
+<<<<<<< HEAD
 #SBATCH -t 01:30:00
+=======
+#SBATCH -t 00:20:00
+>>>>>>> 519df112 (reduce number of submit jobs)
 #SBATCH --nodes {{ num_node }}
 #SBATCH --tasks-per-node 48
 #SBATCH --partition {{ partition }}
