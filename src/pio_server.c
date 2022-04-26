@@ -1139,7 +1139,7 @@ writeNetCDFStreamParallel(size_t streamIdx,
                                      (size_t)(PPM_extents_size(3, varChunk)),
                                      conversion, data);
         /* write chunk */
-        sct_start(timer_writeChunk);
+        sct_start(timer_streamWriteVarChunk);
         if (conversion == DATA_HEADER_DOUBLE)
           streamWriteVarChunk(streamID, varID,
                               (const int (*)[2])myChunk, data,
@@ -1148,7 +1148,7 @@ writeNetCDFStreamParallel(size_t streamIdx,
           streamWriteVarChunkF(streamID, varID,
                                (const int (*)[2])myChunk, data,
                                (int)nmiss);
-        sct_stop(timer_writeChunk);
+        sct_stop(timer_streamWriteVarChunk);
       }
     }
 }
