@@ -1,6 +1,6 @@
 #! /bin/bash
 #SBATCH --job-name {{ name_job }}
-#SBATCH -t 00:10:00
+#SBATCH -t 01:30:00
 #SBATCH --nodes {{ num_node }}
 #SBATCH --tasks-per-node 48
 #SBATCH --partition {{ partition }}
@@ -45,8 +45,14 @@ export SCT_CALLSTATS=1
 #   ./pio_write_deco2d.parallel "-qprefix=$qprefix" -qpio-role-scheme={{ pio_role_scheme }} \
 #   -c -m 384 -n 192 -z 95 -t 20 -y 60 -s 7 \
 #   -f grb2 -p PIO_MPI_FW_AT_ALL -w 16
-time ../libtool --mode=execute srun \
-  ./pio_write.parallel "-qprefix=$qprefix" -qpio-role-scheme={{ pio_role_scheme }} \
-  -c -m 768 -n 384 -z 95 -t 10 -y 120 -s 7 \
-  -f {{ format }} -p PIO_MPI_FW_AT_ALL -w {{ num_io_task }}
+{% for num_io_task in num_io_tasks %}
+  for (( i=0; i<3; ++i )); do
+    time ../libtool --mode=execute srun \
+      ./pio_write_deco2d.parallel "-qprefix=$qprefix" -qpio-role-scheme={{ pio_role_scheme }} \
+      -c -m 768 -n 384 -z 95 -t 10 -y 120 -s 7 \
+      -f {{ format }} -p PIO_MPI_FW_AT_ALL -w {{ num_io_task }}
+    echo "ABOVE: number of I/O servers -- {{ num_io_task }}"
+  done
+{% endfor %}
+
 set +x

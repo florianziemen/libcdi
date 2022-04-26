@@ -25,37 +25,35 @@ template = env.get_template("template_file.sh.jinja")
 
 num_nodes = list(range(5, 11))
 num_io_tasks = list(range(8, 56, 8))
+config['num_io_tasks'] = num_io_tasks
 for num_node in num_nodes:
-    for num_io_task in num_io_tasks:
-        config['name_job'] = (f"pio_benchmark.{partition}.{compiler}"
-                              f".{branch_short}.num_node-{num_node}"
-                              f".num_io_task-{num_io_task}"
-                              f".{pio_role_scheme}"
-                              f".{output_format}")
-        config['num_node'] = num_node
-        config['num_io_task'] = num_io_task
+    config['name_job'] = (f"pio_benchmark.{partition}.{compiler}"
+                          f".{branch_short}.num_node-{num_node}"
+                          f".{pio_role_scheme}"
+                          f".{output_format}")
+    config['num_node'] = num_node
+    # print(template.render(**config))
 
-        run_script = (f"pio_benchmark.num_node-{num_node}"
-                      f".num_io_task-{num_io_task}"
-                      f".{pio_role_scheme}.run"
-                      f".{output_format}")
-        with open(run_script, mode="w") as f:
-            f.write(template.render(**config))
-            f.flush()
-        for _ in range(3):
-            if job_id == 0:
-                # first submit
-                shell_process = run(['sbatch', run_script],
-                                    stdout=PIPE)
-            else:
-                # job has been submitted
-                shell_process = run(['sbatch',
-                                     dependency+str(job_id), run_script],
-                                    stdout=PIPE)
+    run_script = (f"pio_benchmark.num_node-{num_node}"
+                  f".{pio_role_scheme}.run"
+                  f".{output_format}")
+    with open(run_script, mode="w") as f:
+        f.write(template.render(**config))
+        f.flush()
 
-            if shell_process.returncode == 0:
-                # job submit successful
-                job_id = shell_process.stdout.decode('UTF-8').rstrip()
-                print(f"{run_script} submitted with ID {job_id}.")
-            else:
-                print(f"failed to submit {run_script}")
+    if job_id == 0:
+        # first submit
+        shell_process = run(['sbatch', run_script],
+                            stdout=PIPE)
+    else:
+        # job has been submitted
+        shell_process = run(['sbatch',
+                             dependency+str(job_id), run_script],
+                            stdout=PIPE)
+
+    if shell_process.returncode == 0:
+        # job submit successful
+        job_id = shell_process.stdout.decode('UTF-8').rstrip()
+        print(f"{run_script} submitted with ID {job_id}.")
+    else:
+        print(f"failed to submit {run_script}")
