@@ -48,7 +48,11 @@ initBFiledataP(struct fileFunnelStdio *bfp, const char *filename, size_t bs, siz
       }
   }
 
-  if ((bfp->fp = fopen(filename, "w")) == NULL) xabort("Failed to open %s", bfp->name);
+  if ((bfp->fp = fopen(filename, "w")) == NULL)
+    {
+      int fopen_errno = errno;
+      xabort("Failed to open %s\nerrno=%d: %s", bfp->name, fopen_errno, strerror(fopen_errno));
+    }
 
   struct dBuffer *db = bfp->db = Malloc(sizeof(*db) * nc);
   for (size_t i = 0; i < nc; ++i) cdiPioDbufferInit(db + i, bs);
