@@ -664,6 +664,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       conf->callbacks[CDIPIO_CALLBACK_POSTCOMMSETUP]();
       cdiPioFileWritingInit();
       // initialize sct timer
+      sct_init(TIMER_MAX, NULL, commInqCommPio());
       new_context("CDI-PIO timer", commInqCommPio());
       sct_start(timer_ioTotal);
       if (commInqRankColl() >= 0)

@@ -5,7 +5,7 @@
 #define EXTERN extern
 #endif
 
-#define TEST_SCT
+#undef TEST_SCT
 
 #define TIMER_MAX 32
 EXTERN int timer_ioTotal;
