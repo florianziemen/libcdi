@@ -21,11 +21,17 @@ EXTERN int timer_preWriteChunk;
 EXTERN int timer_writeDeco;
 EXTERN int timer_streamWriteVarChunk;
 EXTERN int timer_writeSlice;
+EXTERN int timer_cdipioFileWrite;
 EXTERN int timer_mpiAllGather;
 EXTERN int timer_mpiFileWriteAtAll;
 
 EXTERN int context_handle;
 
 EXTERN int timer_globTotal;
+
+EXTERN int timer_StreamMappingNew;
+EXTERN int timer_defTimeStep;
+EXTERN int timer_tmp2;
+EXTERN int timer_tmp3;
 
 #endif

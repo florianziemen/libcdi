@@ -1845,12 +1845,18 @@ writeGribStream(size_t streamIdx,
               recordDataOfs += recordSize;
               sct_stop(timer_writeSlice);
             }
+          sct_start(timer_cdipioFileWrite);
           aggBufFlush(streamID, fileID, cdiPioFileWrite);
+          sct_stop(timer_cdipioFileWrite);
         }
       else
+      {
         /* write zero bytes to trigger synchronization code in fileWrite */
+        sct_start(timer_cdipioFileWrite);
         cdiPioFileWrite(fileID, NULL, 0,
                         streamInqCurTimestepID(streamID));
+        sct_stop(timer_cdipioFileWrite);
+      }
       namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(cdiPioFileWrite));
     }
   Free(displ);
@@ -1880,13 +1886,17 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
         xassert(winDict[headerIdx].id >= MINFUNCID
                 && winDict[headerIdx].id <= MAXFUNCID);
         ++numFuncCalls;
+        sct_start(timer_defTimeStep);
         readFuncCall(winDict + headerIdx, streamIdx);
+        sct_stop(timer_defTimeStep);
       }
     xassert(numFuncCalls == winDict[0].specific.headerSize.numRPCEntries);
   }
   /* build list of streams, data was transferred for */
   {
+    sct_start(timer_StreamMappingNew);
     struct streamMapping *map = streamMappingNew(streamIdx, winDict, conf);
+    sct_stop(timer_StreamMappingNew);
     /* TODO: build list of rma buffer layout here to check if caching
      * can be done */
     void *data = NULL;
