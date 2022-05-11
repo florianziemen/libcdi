@@ -1,3 +1,11 @@
+2022-04-01  Uwe Schulzweida
+
+	* cdf_set_grid_to_similar_vars: set ydimid to CDI_UNDEFID for GRID_GAUSSIAN_REDUCED (bug fix)
+
+2022-03-23  Uwe Schulzweida
+
+	* compareXYvals failed for unstructured grids (segmentation fault) [Bug #10632]
+
 2022-03-16  Uwe Schulzweida
 
         * using CGRIBEX library version 2.0.1

@@ -1507,7 +1507,7 @@ void streamWriteContents(int streamID, char *cname)
   fputs("#\n#grids:\n", cnp);
 
   int ngrids = vlistNgrids(vlistID);
-  for ( int i = 0; i < ngrids; i++ )
+  for (int i = 0; i < ngrids; ++i)
     {
       int gridID   = vlistGrid(vlistID, i);
       int gridtype = gridInqType(gridID);
@@ -1519,7 +1519,7 @@ void streamWriteContents(int streamID, char *cname)
   fputs("#\nvarID:code:gridID:zaxisID:tsteptype:datatype\n", cnp);
 
   int nvars = vlistNvars(vlistID);
-  for ( int varID = 0; varID < nvars; varID++ )
+  for (int varID = 0; varID < nvars; ++varID)
     {
       int code      = vlistInqVarCode(vlistID, varID);
       int gridID    = vlistInqVarGrid(vlistID, varID);
@@ -1555,7 +1555,7 @@ void streamWriteContents(int streamID, char *cname)
   while (1)
     {
       int nrecs = streamptr->tsteps[tsID].nallrecs;
-      for ( int recID = 0; recID < nrecs; recID++ )
+      for (int recID = 0; recID < nrecs; ++recID)
 	{
 	  int varID   = streamptr->tsteps[tsID].records[recID].varID;
 	  int levelID = streamptr->tsteps[tsID].records[recID].levelID;
@@ -1608,7 +1608,7 @@ streamDefVlist(int streamID, int vlistID)
   myStreamDefVlist(streamID, vlistID);
 }
 
-/* the single image implementation of streamDefVlist */
+// The single image implementation of streamDefVlist
 void
 cdiStreamDefVlist_(int streamID, int vlistID)
 {
@@ -1616,7 +1616,7 @@ cdiStreamDefVlist_(int streamID, int vlistID)
 
   if (streamptr->vlistID == CDI_UNDEFID)
     {
-      int vlistCopy = vlistDuplicate(vlistID);
+      const int vlistCopy = vlistDuplicate(vlistID);
       cdiVlistMakeInternal(vlistCopy);
       cdiVlistMakeImmutable(vlistID);
       cdiStreamSetupVlist(streamptr, vlistCopy);
@@ -1730,7 +1730,7 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
 {
   streamptr->vlistID = vlistID;
   int nvars = vlistNvars(vlistID);
-  for (int varID = 0; varID < nvars; varID++)
+  for (int varID = 0; varID < nvars; ++varID)
     {
       int gridID = vlistInqVarGrid(vlistID, varID);
       int zaxisID = vlistInqVarZaxis(vlistID, varID);

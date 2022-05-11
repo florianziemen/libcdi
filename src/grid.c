@@ -18,9 +18,9 @@
 #include "vlist.h"
 
 int (*proj_lonlat_to_lcc_func)(struct CDI_GridProjParams gpp, size_t, double *, double *) = NULL;
-int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, size_t, double *, double *) = NULL;
+int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double *, double *) = NULL;
 int (*proj_lonlat_to_stere_func)(struct CDI_GridProjParams gpp, size_t, double *, double *) = NULL;
-int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, size_t, double *, double *) = NULL;
+int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double *, double *) = NULL;
 
 /* the value in the second pair of brackets must match the length of
  * the longest string (including terminating NUL) */
@@ -183,8 +183,11 @@ grid_free_components(grid_t *gridptr)
 void
 grid_free(grid_t *gridptr)
 {
-  grid_free_components(gridptr);
-  grid_init(gridptr);
+  if (gridptr)
+    {
+      grid_free_components(gridptr);
+      grid_init(gridptr);
+    }
 }
 
 static grid_t *
@@ -2115,31 +2118,34 @@ static bool
 compareXYvals(grid_t *gridRef, grid_t *gridTest)
 {
   bool differ = false;
+  const int gridtype = gridTest->type;
 
-  size_t xsizeTest = gridTest->x.size, ysizeTest = gridTest->y.size;
-  if (!differ && xsizeTest > 0 && xsizeTest == (size_t) gridRef->vtable->inqXVals(gridRef, NULL))
+  const size_t xsizeTest = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED) ? gridTest->size : gridTest->x.size;
+  const size_t xsizeRef = (size_t) gridRef->vtable->inqXVals(gridRef, NULL);
+  if (xsizeTest != xsizeRef) return true;
+
+  if (xsizeTest > 0)
     {
-      const double *restrict xvalsRef = gridRef->vtable->inqXValsPtr(gridRef), *restrict xvalsTest
-                                                                               = gridTest->vtable->inqXValsPtr(gridTest);
+      const double *xvalsRef = gridRef->vtable->inqXValsPtr(gridRef);
+      const double *xvalsTest = gridTest->vtable->inqXValsPtr(gridTest);
+      if (!xvalsTest) return true;
 
       for (size_t i = 0; i < xsizeTest; ++i)
-        if (fabs(xvalsTest[i] - xvalsRef[i]) > 1.e-10)
-          {
-            differ = true;
-            break;
-          }
+        if (fabs(xvalsTest[i] - xvalsRef[i]) > 1.e-10) return true;
     }
 
-  if (!differ && ysizeTest > 0 && ysizeTest == (size_t) gridRef->vtable->inqYVals(gridRef, NULL))
+  const size_t ysizeTest = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED) ? gridTest->size : gridTest->y.size;
+  const size_t ysizeRef = (size_t) gridRef->vtable->inqYVals(gridRef, NULL);
+  if (ysizeTest != ysizeRef) return true;
+
+  if (ysizeTest > 0)
     {
-      const double *restrict yvalsRef = gridRef->vtable->inqYValsPtr(gridRef), *restrict yvalsTest
-                                                                               = gridTest->vtable->inqYValsPtr(gridTest);
+      const double *yvalsRef = gridRef->vtable->inqYValsPtr(gridRef);
+      const double *yvalsTest = gridTest->vtable->inqYValsPtr(gridTest);
+      if (!yvalsTest) return true;
+
       for (size_t i = 0; i < ysizeTest; ++i)
-        if (fabs(yvalsTest[i] - yvalsRef[i]) > 1.e-10)
-          {
-            differ = true;
-            break;
-          }
+        if (fabs(yvalsTest[i] - yvalsRef[i]) > 1.e-10) return true;
     }
 
   return differ;
@@ -2148,7 +2154,7 @@ compareXYvals(grid_t *gridRef, grid_t *gridTest)
 static bool
 compareXYvals2(grid_t *gridRef, grid_t *gridTest)
 {
-  size_t gridsize = gridTest->size;
+  const size_t gridsize = gridTest->size;
   bool differ = ((gridTest->x.vals == NULL) ^ (gridRef->x.vals == NULL)) || ((gridTest->y.vals == NULL) ^ (gridRef->y.vals == NULL))
                 || ((gridTest->x.bounds == NULL) ^ (gridRef->x.bounds == NULL))
                 || ((gridTest->y.bounds == NULL) ^ (gridRef->y.bounds == NULL));
@@ -2325,7 +2331,7 @@ compare_curvilinear(const grid_t *grid, const grid_t *gridRef)
 }
 
 static bool
-compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool coord_compare)
+compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool compareCoord)
 {
   bool differ = false;
 
@@ -2338,27 +2344,27 @@ compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool coord_compa
   differ = ((!cdiUUIDIsNull(uuid1) || !cdiUUIDIsNull(uuid2)) && memcmp(uuid1, uuid2, CDI_UUID_SIZE));
   if (!differ)
     {
-      int numberA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED);
-      int numberB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDUSED);
-      int positionA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
-      int positionB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
-      if (coord_compare)
+      const int numberA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED);
+      const int numberB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDUSED);
+      const int positionA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
+      const int positionB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE);
+      if (compareCoord)
         {
-          differ = grid->nvertex != gridRef->nvertex || (numberA > 0 && positionA != positionB)
-                   || gridRef->vtable->compareXYFull((grid_t *) gridRef, (grid_t *) grid);
+          differ = (grid->nvertex != gridRef->nvertex || (numberA > 0 && positionA != positionB)
+                    || gridRef->vtable->compareXYFull((grid_t *) gridRef, (grid_t *) grid));
         }
       else
         {
           if (((grid->x.vals == NULL) ^ (gridRef->x.vals == NULL)) && ((grid->y.vals == NULL) ^ (gridRef->y.vals == NULL)))
             {
-              int nvertexA = grid->nvertex, nvertexB = gridRef->nvertex;
+              const int nvertexA = grid->nvertex, nvertexB = gridRef->nvertex;
               differ = (nvertexA && nvertexB && (nvertexA != nvertexB))
                        || ((numberA && numberB && (numberA != numberB)) || (numberA && numberB && positionA != positionB));
             }
           else
             {
-              differ = grid->nvertex != gridRef->nvertex || numberA != numberB || (numberA > 0 && positionA != positionB)
-                       || gridRef->vtable->compareXYAO((grid_t *) gridRef, (grid_t *) grid);
+              differ = (grid->nvertex != gridRef->nvertex || numberA != numberB || (numberA > 0 && positionA != positionB)
+                        || gridRef->vtable->compareXYAO((grid_t *) gridRef, (grid_t *) grid));
             }
         }
     }
@@ -2367,7 +2373,7 @@ compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool coord_compa
 }
 
 static bool
-gridCompare(int gridID, const grid_t *grid, bool coord_compare)
+gridCompare(int gridID, const grid_t *grid, bool compareCoord)
 {
   bool differ = true;
   const grid_t *gridRef = grid_to_pointer(gridID);
@@ -2399,17 +2405,17 @@ gridCompare(int gridID, const grid_t *grid, bool coord_compare)
             }
           else if (grid->type == GRID_UNSTRUCTURED)
             {
-              differ = compare_unstructured(grid, gridRef, coord_compare);
+              differ = compare_unstructured(grid, gridRef, compareCoord);
             }
         }
     }
 
-  int scanningModeA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_SCANNINGMODE);
-  int scanningModeB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_SCANNINGMODE);
+  const int scanningModeA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_SCANNINGMODE);
+  const int scanningModeB = cdiInqVarKeyInt(&gridRef->keys, CDI_KEY_SCANNINGMODE);
   if (scanningModeA != scanningModeB)
     {
       // often grid definition may differ in UV-relativeToGrid
-      differ = 1;
+      differ = true;
 #ifdef HIRLAM_EXTENSIONS
       if (cdiDebugExt >= 200)
         printf("gridCompare(gridID=%d): Differs: scanningModeA [%d] != scanningModeB(gridID) [%d]\n", gridID, scanningModeA,
@@ -2423,10 +2429,9 @@ gridCompare(int gridID, const grid_t *grid, bool coord_compare)
 int
 cmp_key_int(const cdi_keys_t *keysp1, const cdi_keys_t *keysp2, int key)
 {
-  int v1 = cdiInqVarKeyInt(keysp1, key);
-  int v2 = cdiInqVarKeyInt(keysp2, key);
-  if (v1 != v2) return 1;
-  return 0;
+  const int v1 = cdiInqVarKeyInt(keysp1, key);
+  const int v2 = cdiInqVarKeyInt(keysp2, key);
+  return (v1 != v2);
 }
 
 int
@@ -2439,7 +2444,7 @@ gridCompareP(void *gridptr1, void *gridptr2)
     equal = 0,
     differ = -1
   };
-  size_t i, size;
+  size_t size;
 
   xassert(g1);
   xassert(g2);
@@ -2474,15 +2479,12 @@ gridCompareP(void *gridptr1, void *gridptr2)
   const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1), *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
   if (g1_xvals)
     {
-      if (g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR)
-        size = g1->size;
-      else
-        size = g1->x.size;
+      size = (g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR) ? g1->size : g1->x.size;
       xassert(size);
 
       if (!g2_xvals) return differ;
 
-      for (i = 0; i < size; i++)
+      for (size_t i = 0; i < size; ++i)
         if (IS_NOT_EQUAL(g1_xvals[i], g2_xvals[i])) return differ;
     }
   else if (g2_xvals)
@@ -2491,15 +2493,12 @@ gridCompareP(void *gridptr1, void *gridptr2)
   const double *restrict g1_yvals = g1->vtable->inqYValsPtr(g1), *restrict g2_yvals = g2->vtable->inqYValsPtr(g2);
   if (g1_yvals)
     {
-      if (g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR)
-        size = g1->size;
-      else
-        size = g1->y.size;
+      size = (g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR) ? g1->size : g1->y.size;
       xassert(size);
 
       if (!g2_yvals) return differ;
 
-      for (i = 0; i < size; i++)
+      for (size_t i = 0; i < size; ++i)
         if (IS_NOT_EQUAL(g1_yvals[i], g2_yvals[i])) return differ;
     }
   else if (g2_yvals)
@@ -2512,7 +2511,7 @@ gridCompareP(void *gridptr1, void *gridptr2)
 
       if (!g2_area) return differ;
 
-      for (i = 0; i < g1->size; i++)
+      for (size_t i = 0; i < g1->size; ++i)
         if (IS_NOT_EQUAL(g1_area[i], g2_area[i])) return differ;
     }
   else if (g2_area)
@@ -2523,15 +2522,12 @@ gridCompareP(void *gridptr1, void *gridptr2)
     if ((g1_xbounds = g1->vtable->inqXBoundsPtr(g1)))
       {
         xassert(g1->nvertex);
-        if (g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED)
-          size = g1->nvertex * g1->size;
-        else
-          size = g1->nvertex * g1->x.size;
+        size = (g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED) ? g1->nvertex * g1->size : g1->nvertex * g1->x.size;
         xassert(size);
 
         if (!(g2_xbounds = g2->vtable->inqXBoundsPtr(g2))) return differ;
 
-        for (i = 0; i < size; i++)
+        for (size_t i = 0; i < size; ++i)
           if (IS_NOT_EQUAL(g1_xbounds[i], g2_xbounds[i])) return differ;
       }
     else if (g2->vtable->inqXBoundsPtr(g2))
@@ -2543,15 +2539,12 @@ gridCompareP(void *gridptr1, void *gridptr2)
     if ((g1_ybounds = g1->vtable->inqYBoundsPtr(g1)))
       {
         xassert(g1->nvertex);
-        if (g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED)
-          size = g1->nvertex * g1->size;
-        else
-          size = g1->nvertex * g1->y.size;
+        size = (g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED) ? g1->nvertex * g1->size : g1->nvertex * g1->y.size;
         xassert(size);
 
         if (!(g2_ybounds = g2->vtable->inqYBoundsPtr(g2))) return differ;
 
-        for (i = 0; i < size; i++)
+        for (size_t i = 0; i < size; ++i)
           if (IS_NOT_EQUAL(g1->y.bounds[i], g2->y.bounds[i])) return differ;
       }
     else if (g2->vtable->inqYBoundsPtr(g2))
@@ -3777,7 +3770,7 @@ gridVerifyProjParamsLCC(struct CDI_GridProjParams *gpp)
             {
               gpp->xval_0 = -gpp->x_0;
               gpp->yval_0 = -gpp->y_0;
-              proj_lcc_to_lonlat_func(gpp, 0.0, 0.0, (SizeType) 1, &gpp->xval_0, &gpp->yval_0);
+              proj_lcc_to_lonlat_func(*gpp, 0.0, 0.0, (SizeType) 1, &gpp->xval_0, &gpp->yval_0);
             }
           if (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv))
             Warning("%s mapping parameter %s missing!", projection,
@@ -3808,7 +3801,7 @@ gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp)
             {
               gpp->xval_0 = -gpp->x_0;
               gpp->xval_0 = -gpp->y_0;
-              proj_stere_to_lonlat_func(gpp, 0.0, 0.0, (SizeType) 1, &gpp->xval_0, &gpp->yval_0);
+              proj_stere_to_lonlat_func(*gpp, 0.0, 0.0, (SizeType) 1, &gpp->xval_0, &gpp->yval_0);
             }
           if (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv))
             Warning("%s mapping parameter %s missing!", projection,
@@ -4625,10 +4618,10 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
   int gridID = CDI_UNDEFID;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  unsigned ngrids = (unsigned) vlistptr->ngrids;
+  const int ngrids = vlistptr->ngrids;
 
   if (mode == 0)
-    for (unsigned index = 0; index < ngrids; index++)
+    for (int index = 0; index < ngrids; index++)
       {
         if ((gridID = vlistptr->gridIDs[index]) != CDI_UNDEFID)
           {
@@ -4650,7 +4643,7 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
         gridID = query.resIDValue;
 
       if (mode == 1 && gridglobdefined)
-        for (unsigned index = 0; index < ngrids; index++)
+        for (int index = 0; index < ngrids; index++)
           if (vlistptr->gridIDs[index] == gridID)
             {
               gridglobdefined = false;
@@ -4673,7 +4666,7 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
         }
     }
 
-  return (struct addIfNewRes){ .Id = gridID, .isNew = !griddefined && !gridglobdefined };
+  return (struct addIfNewRes){ .Id = gridID, .isNew = (!griddefined && !gridglobdefined) };
 }
 
 const struct gridVirtTable cdiGridVtable = {

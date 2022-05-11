@@ -312,13 +312,9 @@ cdiStreamWriteVarChunk_(int streamID, int varID, int memtype, const int rect[][2
     }
 }
 
-static int
+static void
 stream_write_record(int streamID, int memtype, const void *data, SizeType nmiss)
 {
-  // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision writing.
-  // A value > 0 is returned in this case, otherwise it returns zero.
-  int status = 0;
-
   check_parg(data);
 
   stream_t *streamptr = stream_to_pointer(streamID);
@@ -339,20 +335,10 @@ stream_write_record(int streamID, int memtype, const void *data, SizeType nmiss)
     case CDI_FILETYPE_IEG: ieg_write_record(streamptr, memtype, data); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF:
-      {
-        cdf_write_record(streamptr, memtype, data, nmiss);
-        break;
-      }
+    case CDI_FILETYPE_NETCDF: cdf_write_record(streamptr, memtype, data, nmiss); break;
 #endif
-    default:
-      {
-        Error("%s support not compiled in!", strfiletype(streamptr->filetype));
-        break;
-      }
+    default: Error("%s support not compiled in!", strfiletype(streamptr->filetype)); break;
     }
-
-  return status;
 }
 
 /*
@@ -379,16 +365,5 @@ streamWriteRecord(int streamID, const double *data, SizeType nmiss)
 void
 streamWriteRecordF(int streamID, const float *data, SizeType nmiss)
 {
-  if (stream_write_record(streamID, MEMTYPE_FLOAT, (const void *) data, nmiss))
-    {
-      // In case the file format does not support single precision writing,
-      // we fall back to double precision writing, converting the data on the fly.
-      stream_t *streamptr = stream_to_pointer(streamID);
-      const int varID = streamptr->record->varID;
-      const SizeType elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
-      double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
-      for (SizeType i = elementCount; i--;) conversionBuffer[i] = (double) data[i];
-      streamWriteRecord(streamID, conversionBuffer, nmiss);
-      Free(conversionBuffer);
-    }
+  stream_write_record(streamID, MEMTYPE_FLOAT, (const void *) data, nmiss);
 }

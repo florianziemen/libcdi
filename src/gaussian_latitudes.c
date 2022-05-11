@@ -70,7 +70,7 @@ gawl(double *pfn, double *pl, double *pw, size_t kn)
 
   // 2.0 Newton iteration
 
-  for (int jter = 1; jter <= itemax + 1; jter++)
+  for (int jter = 1; jter <= itemax + 1; ++jter)
     {
       cpledn(kn, iodd, pfn, zdlx, iflag, &zw, &zdlxn, &pmod);
       zdlx = zdlxn;
@@ -97,10 +97,10 @@ gauaw(size_t kn, double *restrict pl, double *restrict pw)
   double *zfnlat = (double *) malloc((kn / 2 + 1 + 1) * sizeof(double));
 
   zfn[0] = M_SQRT2;
-  for (size_t jn = 1; jn <= kn; jn++)
+  for (size_t jn = 1; jn <= kn; ++jn)
     {
       double zfnn = zfn[0];
-      for (size_t jgl = 1; jgl <= jn; jgl++)
+      for (size_t jgl = 1; jgl <= jn; ++jgl)
         {
           zfnn *= sqrt(1.0 - 0.25 / ((double) (jgl * jgl)));
         }
@@ -129,7 +129,7 @@ gauaw(size_t kn, double *restrict pl, double *restrict pw)
 
   size_t ins2 = kn / 2 + (kn % 2);
 
-  for (size_t jgl = 1; jgl <= ins2; jgl++)
+  for (size_t jgl = 1; jgl <= ins2; ++jgl)
     {
       double z = ((double) (4 * jgl - 1)) * M_PI / ((double) (4 * kn + 2));
       pl[jgl - 1] = z + 1.0 / (tan(z) * ((double) (8 * kn * kn)));
@@ -137,7 +137,7 @@ gauaw(size_t kn, double *restrict pl, double *restrict pw)
 
   // 2.2 Computes roots and weights for transformed theta
 
-  for (size_t jgl = ins2; jgl >= 1; jgl--)
+  for (size_t jgl = ins2; jgl >= 1; --jgl)
     {
       size_t jglm1 = jgl - 1;
       gawl(zfnlat, &(pl[jglm1]), &(pw[jglm1]), kn);
@@ -145,9 +145,9 @@ gauaw(size_t kn, double *restrict pl, double *restrict pw)
 
   // convert to physical latitude
 
-  for (size_t jgl = 0; jgl < ins2; jgl++) pl[jgl] = cos(pl[jgl]);
+  for (size_t jgl = 0; jgl < ins2; ++jgl) pl[jgl] = cos(pl[jgl]);
 
-  for (size_t jgl = 1; jgl <= kn / 2; jgl++)
+  for (size_t jgl = 1; jgl <= kn / 2; ++jgl)
     {
       size_t jglm1 = jgl - 1;
       size_t isym = kn - jgl;

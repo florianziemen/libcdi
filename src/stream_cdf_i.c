@@ -1102,9 +1102,7 @@ cdf_get_cell_varid(char *attstring, int ncid)
 static void
 cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timedimid, int modelID, int format)
 {
-  int ncdimid;
   int nvdims, nvatts;
-  int iatt;
   nc_type xtype, atttype;
   size_t attlen;
   char name[CDI_MAX_NAME];
@@ -1135,7 +1133,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
       strcpy(ncvar->name, name);
 
-      for (ncdimid = 0; ncdimid < nvdims; ncdimid++) ncvar->dimtype[ncdimid] = -1;
+      for (int ncdimid = 0; ncdimid < nvdims; ncdimid++) ncvar->dimtype[ncdimid] = -1;
 
       ncvar->xtype = xtype;
       ncvar->ndims = nvdims;
@@ -1201,7 +1199,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
           else
             {
-              for (ncdimid = 1; ncdimid < nvdims; ncdimid++)
+              for (int ncdimid = 1; ncdimid < nvdims; ncdimid++)
                 {
                   if (timedimid == dimidsp[ncdimid])
                     {
@@ -1214,7 +1212,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
 
       if (ncvar->natts == 0 && nvatts > 0) ncvar->atts = (int *) Malloc((size_t) nvatts * sizeof(int));
 
-      for (iatt = 0; iatt < nvatts; iatt++)
+      for (int iatt = 0; iatt < nvatts; ++iatt)
         {
           int nc_cell_id = CDI_UNDEFID;
 
@@ -2797,10 +2795,10 @@ cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int
     {
       int xdimid2 = CDI_UNDEFID, ydimid2 = CDI_UNDEFID, zdimid2 = CDI_UNDEFID;
       int xdimidx = CDI_UNDEFID, ydimidx = CDI_UNDEFID;
-      int ndims2 = ncvar2->ndims;
 
-      int *dimtype2 = ncvar2->dimtype;
-      int *dimids2 = ncvar2->dimids;
+      const int *dimtype2 = ncvar2->dimtype;
+      const int *dimids2 = ncvar2->dimids;
+      const int ndims2 = ncvar2->ndims;
       for (int i = 0; i < ndims2; i++)
         {
           if (dimtype2[i] == X_AXIS)
@@ -2819,31 +2817,38 @@ cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int
             }
         }
 
-      if (!ncvar2->isCubeSphere && ncvar2->gridtype == CDI_UNDEFID && gridtype == GRID_UNSTRUCTURED)
+      if (!ncvar2->isCubeSphere)
         {
-          if (xdimid == xdimid2 && ydimid2 != CDI_UNDEFID && zdimid2 == CDI_UNDEFID)
+          if (ncvar2->gridtype == CDI_UNDEFID && gridtype == GRID_UNSTRUCTURED)
             {
-              ncvar2->dimtype[ydimidx] = Z_AXIS;
-              ydimid2 = CDI_UNDEFID;
-            }
+              if (xdimid == xdimid2 && ydimid2 != CDI_UNDEFID && zdimid2 == CDI_UNDEFID)
+                {
+                  ncvar2->dimtype[ydimidx] = Z_AXIS;
+                  ydimid2 = CDI_UNDEFID;
+                }
 
-          if (xdimid == ydimid2 && xdimid2 != CDI_UNDEFID && zdimid2 == CDI_UNDEFID)
+              if (xdimid == ydimid2 && xdimid2 != CDI_UNDEFID && zdimid2 == CDI_UNDEFID)
+                {
+                  ncvar2->dimtype[xdimidx] = Z_AXIS;
+                  xdimid2 = ydimid2;
+                  ydimid2 = CDI_UNDEFID;
+                }
+            }
+          else if (ncvar2->gridtype == GRID_GAUSSIAN_REDUCED && gridtype == GRID_GAUSSIAN_REDUCED)
             {
-              ncvar2->dimtype[xdimidx] = Z_AXIS;
-              xdimid2 = ydimid2;
-              ydimid2 = CDI_UNDEFID;
+              ydimid = CDI_UNDEFID;
             }
         }
 
       if (xdimid == xdimid2 && (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == CDI_UNDEFID)))
         {
-          bool is_same_grid
+          bool isSameGrid
               = (ncvar1->xvarid == ncvar2->xvarid && ncvar1->yvarid == ncvar2->yvarid && ncvar1->position == ncvar2->position);
 
-          // if ( xvarid != -1 && ncvar2->xvarid != CDI_UNDEFID && xvarid != ncvar2->xvarid ) is_same_grid = false;
-          // if ( yvarid != -1 && ncvar2->yvarid != CDI_UNDEFID && yvarid != ncvar2->yvarid ) is_same_grid = false;
+          // if (xvarid != -1 && ncvar2->xvarid != CDI_UNDEFID && xvarid != ncvar2->xvarid) isSameGrid = false;
+          // if (yvarid != -1 && ncvar2->yvarid != CDI_UNDEFID && yvarid != ncvar2->yvarid) isSameGrid = false;
 
-          if (is_same_grid)
+          if (isSameGrid)
             {
               if (CDI_Debug) Message("Same gridID %d %s", ncvar1->gridID, ncvar2->name);
               ncvar2->gridID = ncvar1->gridID;
@@ -3481,7 +3486,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       /*
       printf("ixyz %d\n", ixyz);
       printf("ndims %d\n", ncvar->ndims);
-      for ( int i = 0; i < ncvar->ndims; ++i )
+      for (int i = 0; i < ncvar->ndims; ++i)
         printf("dimids: %d %d\n", i, dimids[i]);
       printf("xdimid, ydimid %d %d\n", xdimid, ydimid);
       */

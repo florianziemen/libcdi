@@ -63,7 +63,7 @@ vlistvarNewEntry(int vlistID)
     {
       vlistvarSize = 2;
       vlistvar = (var_t *) Malloc((size_t) vlistvarSize * sizeof(var_t));
-      for (int i = 0; i < vlistvarSize; i++) vlistvar[i].isUsed = false;
+      for (int i = 0; i < vlistvarSize; ++i) vlistvar[i].isUsed = false;
     }
   else
     {
@@ -73,7 +73,7 @@ vlistvarNewEntry(int vlistID)
   if (varID == vlistvarSize)
     {
       vlistvar = (var_t *) Realloc(vlistvar, (size_t) (vlistvarSize *= 2) * sizeof(var_t));
-      for (int i = varID; i < vlistvarSize; i++) vlistvar[i].isUsed = false;
+      for (int i = varID; i < vlistvarSize; ++i) vlistvar[i].isUsed = false;
     }
 
   vlistptr->varsAllocated = vlistvarSize;
@@ -201,7 +201,7 @@ cdiVlistCreateVarLevInfo(vlist_t *vlistptr, int varID)
 
   vlistptr->vars[varID].levinfo = (levinfo_t *) Malloc(nlevs * sizeof(levinfo_t));
 
-  for (size_t levID = 0; levID < nlevs; levID++) vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO((int) levID);
+  for (size_t levID = 0; levID < nlevs; ++levID) vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO((int) levID);
 }
 
 /*
@@ -676,7 +676,7 @@ vlistInqVarID(int vlistID, int code)
 {
   const vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  for (int varID = 0; varID < vlistptr->nvars; varID++)
+  for (int varID = 0; varID < vlistptr->nvars; ++varID)
     {
       const int param = vlistptr->vars[varID].param;
       int pdis, pcat, pnum;
@@ -1208,7 +1208,7 @@ vlistDefFlag(int vlistID, int varID, int levID, int flag)
   vlistptr->vars[varID].flag = 0;
 
   int nlevs = zaxisInqSize(vlistptr->vars[varID].zaxisID);
-  for (int levelID = 0; levelID < nlevs; levelID++)
+  for (int levelID = 0; levelID < nlevs; ++levelID)
     {
       if (vlistptr->vars[varID].levinfo[levelID].flag)
         {
@@ -1240,7 +1240,7 @@ vlistFindVar(int vlistID, int fvarID)
   int varID;
   const vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  for (varID = 0; varID < vlistptr->nvars; varID++)
+  for (varID = 0; varID < vlistptr->nvars; ++varID)
     {
       if (vlistptr->vars[varID].fvarID == fvarID) break;
     }
@@ -1265,7 +1265,7 @@ vlistFindLevel(int vlistID, int fvarID, int flevelID)
   if (varID != -1)
     {
       const int nlevs = zaxisInqSize(vlistptr->vars[varID].zaxisID);
-      for (levelID = 0; levelID < nlevs; levelID++)
+      for (levelID = 0; levelID < nlevs; ++levelID)
         {
           if (vlistptr->vars[varID].levinfo[levelID].flevelID == flevelID) break;
         }

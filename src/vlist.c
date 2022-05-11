@@ -105,7 +105,7 @@ vlist_init_entry(vlist_t *vlistptr)
   vlistptr->atts.nalloc = MAX_ATTRIBUTES;
   vlistptr->atts.nelems = 0;
   vlistptr->nsubtypes = 0;
-  for (int i = 0; i < MAX_SUBTYPES_PS; i++) vlistptr->subtypeIDs[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_SUBTYPES_PS; ++i) vlistptr->subtypeIDs[i] = CDI_UNDEFID;
 }
 
 static vlist_t *
@@ -880,15 +880,12 @@ vlistMerge(int vlistID2, int vlistID1)
 
           int zaxisID1 = vars1[varID].zaxisID;
           int zaxisID2 = vars2[varID].zaxisID;
-          /*
-          nlevs1 = zaxisInqSize(vars1[varID].zaxisID);
-          nlevs2 = zaxisInqSize(vars2[varID].zaxisID);
-          */
+          // nlevs1 = zaxisInqSize(vars1[varID].zaxisID);
+          // nlevs2 = zaxisInqSize(vars2[varID].zaxisID);
           int nlevs1 = zaxisInqSize(zaxisID1);
           int nlevs2 = zaxisInqSize(zaxisID2);
-          /*
-          fprintf(stderr, "zaxis %d %d %d %d\n", zaxisID1, zaxisID2, nlevs1, nlevs2);
-          */
+          // fprintf(stderr, "zaxis %d %d %d %d\n", zaxisID1, zaxisID2, nlevs1, nlevs2);
+
           int nlevs = nlevs1 + nlevs2;
 
           int zaxisID = zaxisDuplicate(zaxisID2);
@@ -900,8 +897,8 @@ vlistMerge(int vlistID2, int vlistID1)
 
               zaxisInqLevels(zaxisID1, levels);
               /*
-                for ( levID = 0; levID < nlevs1; levID++ )
-                fprintf(stderr, "%d %d %d %d %d %g\n", varID, levID, nlevs1, nlevs2, vars2[varID].nlevs, levels[levID]);
+                for (int levID = 0; levID < nlevs1; levID++)
+                  fprintf(stderr, "%d %d %d %d %d %g\n", varID, levID, nlevs1, nlevs2, vars2[varID].nlevs, levels[levID]);
               */
               for (int levID = 0; levID < nlevs1; levID++) zaxisDefLevel(zaxisID, nlevs2 + levID, levels[levID]);
 
@@ -1597,14 +1594,13 @@ resize_opt_grib_entries(var_t *var, int nentries)
     {
       if (CDI_Debug) Message("resize data structure, %d -> %d", var->opt_grib_kvpair_size, nentries);
 
-      int i, new_size;
-      new_size = (2 * var->opt_grib_kvpair_size) > nentries ? (2 * var->opt_grib_kvpair_size) : nentries;
+      int new_size = (2 * var->opt_grib_kvpair_size) > nentries ? (2 * var->opt_grib_kvpair_size) : nentries;
       opt_key_val_pair_t *tmp = (opt_key_val_pair_t *) Malloc((size_t) new_size * sizeof(opt_key_val_pair_t));
-      for (i = 0; i < var->opt_grib_kvpair_size; i++)
+      for (int i = 0; i < var->opt_grib_kvpair_size; ++i)
         {
           tmp[i] = var->opt_grib_kvpair[i];
         }
-      for (i = var->opt_grib_kvpair_size; i < new_size; i++)
+      for (int i = var->opt_grib_kvpair_size; i < new_size; ++i)
         {
           tmp[i].int_val = 0;
           tmp[i].dbl_val = 0;

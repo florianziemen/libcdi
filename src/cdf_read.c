@@ -81,7 +81,7 @@ cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[MAX_DIMENS
   assert(ndims <= (int) (sizeof(*count) / sizeof(**count)));
 
   if (CDI_Debug)
-    for (int idim = 0; idim < ndims; idim++) Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+    for (int idim = 0; idim < ndims; ++idim) Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 }
 
 // Scans the data array for missVals, optionally applying first a scale factor and then an offset.
@@ -112,7 +112,7 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
   switch (haveMissVal | (haveScaleFactor << 1) | (haveOffset << 2) | (haveRangeCheck << 3))
     {
     case 15:  // haveRangeCheck & haveMissVal & haveScaleFactor & haveOffset
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
@@ -121,7 +121,7 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
         }
       break;
     case 13:  // haveRangeCheck & haveMissVal & haveOffset
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
@@ -130,7 +130,7 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
         }
       break;
     case 11:  // haveRangeCheck & haveMissVal & haveScaleFactor
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
@@ -139,7 +139,7 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
         }
       break;
     case 9:  // haveRangeCheck & haveMissVal
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
@@ -148,43 +148,43 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
         }
       break;
     case 7:  // haveMissVal & haveScaleFactor & haveOffset
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         if (DBL_IS_EQUAL(data[i], missVal))
           missValCount++;
         else
           data[i] = data[i] * scaleFactor + offset;
       break;
     case 6:  // haveOffset & haveScaleFactor
-      for (size_t i = 0; i < valueCount; i++) data[i] = data[i] * scaleFactor + offset;
+      for (size_t i = 0; i < valueCount; ++i) data[i] = data[i] * scaleFactor + offset;
       break;
     case 5:  // haveMissVal & haveOffset
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         if (DBL_IS_EQUAL(data[i], missVal))
           missValCount++;
         else
           data[i] += offset;
       break;
     case 4:  // haveOffset
-      for (size_t i = 0; i < valueCount; i++) data[i] += offset;
+      for (size_t i = 0; i < valueCount; ++i) data[i] += offset;
       break;
     case 3:  // haveMissVal & haveScaleFactor
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         if (DBL_IS_EQUAL(data[i], missVal))
           missValCount++;
         else
           data[i] *= scaleFactor;
       break;
     case 2:  // haveScaleFactor
-      for (size_t i = 0; i < valueCount; i++) data[i] *= scaleFactor;
+      for (size_t i = 0; i < valueCount; ++i) data[i] *= scaleFactor;
       break;
     case 1:  // haveMissVal
       if (missValIsNaN)
         {
-          for (size_t i = 0; i < valueCount; i++) missValCount += (size_t) DBL_IS_NAN(data[i]);
+          for (size_t i = 0; i < valueCount; ++i) missValCount += (size_t) DBL_IS_NAN(data[i]);
         }
       else
         {
-          for (size_t i = 0; i < valueCount; i++) missValCount += (size_t) DBL_IS_EQUAL(data[i], missVal);
+          for (size_t i = 0; i < valueCount; ++i) missValCount += (size_t) DBL_IS_EQUAL(data[i], missVal);
         }
       break;
     }
@@ -218,7 +218,7 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
   switch (haveMissVal | (haveScaleFactor << 1) | (haveOffset << 2) | (haveRangeCheck << 3))
     {
     case 15:  // haveRangeCheck & haveMissVal & haveScaleFactor & haveOffset
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
@@ -227,7 +227,7 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
         }
       break;
     case 13:  // haveRangeCheck & haveMissVal & haveOffset
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
@@ -236,7 +236,7 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
         }
       break;
     case 11:  // haveRangeCheck & haveMissVal & haveScaleFactor
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
@@ -245,7 +245,7 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
         }
       break;
     case 9:  // haveRangeCheck & haveMissVal
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
@@ -254,43 +254,43 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
         }
       break;
     case 7:  // haveMissVal & haveScaleFactor & haveOffset
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         if (DBL_IS_EQUAL(data[i], missVal))
           missValCount++;
         else
           data[i] = (float) (data[i] * scaleFactor + offset);
       break;
     case 6:  // haveOffset & haveScaleFactor
-      for (size_t i = 0; i < valueCount; i++) data[i] = (float) (data[i] * scaleFactor + offset);
+      for (size_t i = 0; i < valueCount; ++i) data[i] = (float) (data[i] * scaleFactor + offset);
       break;
     case 5:  // haveMissVal & haveOffset
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         if (DBL_IS_EQUAL(data[i], missVal))
           missValCount++;
         else
           data[i] = (float) (data[i] + offset);
       break;
     case 4:  // haveOffset
-      for (size_t i = 0; i < valueCount; i++) data[i] = (float) (data[i] + offset);
+      for (size_t i = 0; i < valueCount; ++i) data[i] = (float) (data[i] + offset);
       break;
     case 3:  // haveMissVal & haveScaleFactor
-      for (size_t i = 0; i < valueCount; i++)
+      for (size_t i = 0; i < valueCount; ++i)
         if (DBL_IS_EQUAL(data[i], missVal))
           missValCount++;
         else
           data[i] = (float) (data[i] * scaleFactor);
       break;
     case 2:  // haveScaleFactor
-      for (size_t i = 0; i < valueCount; i++) data[i] = (float) (data[i] * scaleFactor);
+      for (size_t i = 0; i < valueCount; ++i) data[i] = (float) (data[i] * scaleFactor);
       break;
     case 1:  // haveMissVal
       if (missValIsNaN)
         {
-          for (size_t i = 0; i < valueCount; i++) missValCount += (size_t) DBL_IS_NAN(data[i]);
+          for (size_t i = 0; i < valueCount; ++i) missValCount += (size_t) DBL_IS_NAN(data[i]);
         }
       else
         {
-          for (size_t i = 0; i < valueCount; i++) missValCount += (size_t) DBL_IS_EQUAL(data[i], missVal);
+          for (size_t i = 0; i < valueCount; ++i) missValCount += (size_t) DBL_IS_EQUAL(data[i], missVal);
         }
       break;
     }
@@ -316,12 +316,12 @@ transpose2dArrayDP(int gridId, double *data)
   double **temp = (double **) malloc(inHeight * sizeof(double *));
   temp[0] = (double *) malloc(inHeight * inWidth * sizeof(double));
   memcpy(temp[0], data, inHeight * inWidth * sizeof(double));
-  for (size_t i = 0; i < inWidth; i++) out[i] = data + (inHeight * i);
-  for (size_t i = 1; i < inHeight; i++) temp[i] = temp[0] + (inWidth * i);
+  for (size_t i = 0; i < inWidth; ++i) out[i] = data + (inHeight * i);
+  for (size_t i = 1; i < inHeight; ++i) temp[i] = temp[0] + (inWidth * i);
 
   /*
-  for ( size_t y = 0; y < inHeight; ++y )
-    for ( size_t x = 0; x < inWidth; ++x )
+  for (size_t y = 0; y < inHeight; ++y)
+    for (size_t x = 0; x < inWidth; ++x)
       out[x][y] = temp[y][x];
   */
 
@@ -354,8 +354,8 @@ transpose2dArraySP(size_t gridId, float *data)
   for (size_t i = 1; i < inHeight; i++) temp[i] = temp[0] + (inWidth * i);
 
   /*
-  for ( size_t y = 0; y < inHeight; ++y )
-    for ( size_t x = 0; x < inWidth; ++x )
+  for (size_t y = 0; y < inHeight; ++y)
+    for (size_t x = 0; x < inWidth; ++x)
       out[x][y] = temp[y][x];
   */
 
@@ -500,7 +500,7 @@ cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, bool *ou
 #undef addDimension
 
   if (CDI_Debug)
-    for (int idim = 0; idim < ndims; idim++) Message("dim = %d  start = %d  count = %d", idim, (*start)[idim], (*count)[idim]);
+    for (int idim = 0; idim < ndims; ++idim) Message("dim = %d  start = %d  count = %d", idim, (*start)[idim], (*count)[idim]);
 
   int nvdims;
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
@@ -527,7 +527,7 @@ cdfReadDataSliceSP2DP(int fileID, int ncvarid, size_t length, size_t start[MAX_D
 {
   float *data_fp = (float *) Malloc(length * sizeof(*data_fp));
   cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
-  for (size_t i = 0; i < length; i++) data[i] = (double) data_fp[i];
+  for (size_t i = 0; i < length; ++i) data[i] = (double) data_fp[i];
   Free(data_fp);
 }
 
@@ -537,7 +537,7 @@ cdfReadDataSliceDP2SP(int fileID, int ncvarid, size_t length, size_t start[MAX_D
 {
   double *data_dp = (double *) Malloc(length * sizeof(*data_dp));
   cdf_get_vara_double(fileID, ncvarid, start, count, data_dp);
-  for (size_t i = 0; i < length; i++) data[i] = (float) data_dp[i];
+  for (size_t i = 0; i < length; ++i) data[i] = (float) data_dp[i];
   Free(data_dp);
 }
 
@@ -550,7 +550,7 @@ cdfCheckDataDP_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t len
       cdf_inq_vartype(fileID, ncvarid, &xtype);
       if (xtype == NC_BYTE)
         {
-          for (size_t i = 0; i < length; i++)
+          for (size_t i = 0; i < length; ++i)
             if (data[i] < 0) data[i] += 256;
         }
     }
@@ -565,7 +565,7 @@ cdfCheckDataSP_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t len
       cdf_inq_vartype(fileID, ncvarid, &xtype);
       if (xtype == NC_BYTE)
         {
-          for (size_t i = 0; i < length; i++)
+          for (size_t i = 0; i < length; ++i)
             if (data[i] < 0) data[i] += 256;
         }
     }
@@ -585,7 +585,7 @@ cdfReadDataDP(stream_t *streamptr, int varID, size_t length, size_t start[MAX_DI
       cdf_get_vara(fileID, ncvarid, start, count, data);
       if (datatype == CDI_DATATYPE_CPX32)
         {
-          for (long i = (long) length - 1; i >= 0; i--)
+          for (long i = (long) length - 1; i >= 0; --i)
             {
               data[2 * i] = (double) (((float *) data)[2 * i]);
               data[2 * i + 1] = (double) (((float *) data)[2 * i + 1]);
@@ -622,7 +622,7 @@ cdfReadDataSP(stream_t *streamptr, int varID, size_t length, size_t start[MAX_DI
         {
           double *cdata = (double *) Malloc(2 * length * sizeof(double));
           cdf_get_vara(fileID, ncvarid, start, count, cdata);
-          for (size_t i = 0; i < length; i++)
+          for (size_t i = 0; i < length; ++i)
             {
               data[2 * i] = (float) (cdata[2 * i]);
               data[2 * i + 1] = (float) (cdata[2 * i + 1]);
@@ -776,7 +776,7 @@ cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varType, 
   const size_t gridsize = gridInqSize(gridId);
 
   unsigned int position = 0;
-  for (int i = 0; i < MAX_DIMENSIONS; i++)
+  for (int i = 0; i < MAX_DIMENSIONS; ++i)
     if (count[i] == gridsize) position = i;
 
   start[position] = start[position] + startpoint;
@@ -807,7 +807,7 @@ cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varType, 
   size_t gridsize = gridInqSize(gridId);
 
   unsigned int position = 0;
-  for (int i = 0; i < MAX_DIMENSIONS; i++)
+  for (int i = 0; i < MAX_DIMENSIONS; ++i)
     if (count[i] == gridsize) position = i;
 
   start[position] = start[position] + startpoint;
