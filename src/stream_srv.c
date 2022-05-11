@@ -156,8 +156,8 @@ srvDefRecord(stream_t *streamptr)
   int header[8];
   header[0] = pnum;
   header[1] = record->ilevel;
-  header[2] = record->date;
-  header[3] = record->time;
+  header[2] = record->vdate;
+  header[3] = record->vtime;
 
   int gridID = record->gridID;
   size_t xsize = gridInqXsize(gridID), ysize = gridInqYsize(gridID);

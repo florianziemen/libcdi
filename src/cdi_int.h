@@ -132,8 +132,8 @@ typedef struct
   off_t position;     // file position
   int param;
   int ilevel;
-  int date;
-  int time;
+  int vdate;
+  int vtime;
   int gridID;
   int varID;
   int levelID;

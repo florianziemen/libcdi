@@ -164,7 +164,7 @@ extDefRecord(stream_t *streamptr)
   cdiDecodeParam(record->param, &pnum, &pcat, &pdis);
 
   int header[4];
-  header[0] = record->date;
+  header[0] = record->vdate;
   header[1] = pnum;
   header[2] = record->ilevel;
   const int gridID = record->gridID;

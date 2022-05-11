@@ -91,8 +91,8 @@ cdiInitRecord(stream_t *streamptr)
 
   record->param = 0;
   record->ilevel = 0;
-  record->date = 0;
-  record->time = 0;
+  record->vdate = 0;
+  record->vtime = 0;
   record->gridID = 0;
   record->buffer = NULL;
   record->buffersize = 0;
@@ -174,8 +174,8 @@ streamDefRecord(int streamID, int varID, int levelID)
   record->levelID = levelID;
   record->param = param;
   record->ilevel = ilevel;
-  record->date = cdiDateGet(streamptr->tsteps[tsID].taxis.vdatetime.date);
-  record->time = cdiTimeGet(streamptr->tsteps[tsID].taxis.vdatetime.time);
+  record->vdate = cdiDateGet(streamptr->tsteps[tsID].taxis.vdatetime.date);
+  record->vtime = cdiTimeGet(streamptr->tsteps[tsID].taxis.vdatetime.time);
   record->gridID = gridID;
   record->prec = vlistInqVarDatatype(vlistID, varID);
 
