@@ -620,8 +620,8 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   int header[8];
   header[0] = pnum;
   header[1] = (int) lround(zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
-  header[2] = streamptr->tsteps[tsID].taxis.vdate;
-  header[3] = streamptr->tsteps[tsID].taxis.vtime;
+  header[2] = cdiDateGet(streamptr->tsteps[tsID].taxis.vdatetime.date);
+  header[3] = cdiTimeGet(streamptr->tsteps[tsID].taxis.vdatetime.time);
 
   size_t xsize = gridInqXsize(gridID);
   size_t ysize = gridInqYsize(gridID);
