@@ -1537,7 +1537,7 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
 }
 
 CdiDateTime
-cdiDecodeTimeval(double timevalue, taxis_t *taxis)
+cdi_decode_timeval(double timevalue, taxis_t *taxis)
 {
   return (taxis->type == TAXIS_ABSOLUTE) ? split_timevalue(timevalue, taxis->unit) : rtimeval2datetime(timevalue, taxis);
 }

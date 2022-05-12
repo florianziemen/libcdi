@@ -135,27 +135,24 @@ typedef struct
 } GridInfo;
 
 static CdiDateTime
-scanTimeString(const char *ptu)
+scan_time_string(const char *ptu)
 {
   int year = 0, month = 0, day = 0;
-  int hour = 0, minute = 0, second = 0;
-  int v1 = 0, v2 = 0, v3 = 0;
+  int hour = 0, minute = 0;
+  double fseconds = 0.0;
   char ch = ' ';
 
-  if (*ptu) sscanf(ptu, "%d-%d-%d%c%d:%d:%d", &v1, &v2, &v3, &ch, &hour, &minute, &second);
+  if (*ptu) sscanf(ptu, "%d-%d-%d%c%d:%d:%lf", &year, &month, &day, &ch, &hour, &minute, &fseconds);
 
-  if (v3 > 999 && v1 < 32)
+  if (day > 999 && year < 32)
     {
-      year = v3;
-      month = v2;
-      day = v1;
+      int tmp = year;
+      year = day;
+      day = tmp;
     }
-  else
-    {
-      year = v1;
-      month = v2;
-      day = v3;
-    }
+
+  const int second = (int) fseconds;
+  const int ms = (fseconds - second) * 1000;
 
   CdiDateTime datetime;
   datetime.date.year = year;
@@ -164,12 +161,13 @@ scanTimeString(const char *ptu)
   datetime.time.hour = hour;
   datetime.time.minute = minute;
   datetime.time.second = second;
+  datetime.time.ms = ms;
 
   return datetime;
 }
 
 static int
-scanTimeUnit(const char *unitstr)
+scan_time_units(const char *unitstr)
 {
   const size_t len = strlen(unitstr);
   const int timeunit = get_timeunit(len, unitstr);
@@ -183,7 +181,7 @@ setForecastTime(const char *timestr, taxis_t *taxis)
   const size_t len = strlen(timestr);
   if (len != 0)
     {
-      const CdiDateTime datetime = scanTimeString(timestr);
+      const CdiDateTime datetime = scan_time_string(timestr);
       taxis->fdate = cdiDateGet(datetime.date);
       taxis->ftime = cdiTimeGet(datetime.time);
      }
@@ -261,7 +259,7 @@ setBaseTime(const char *timeunits, taxis_t *taxis)
             }
           else if (taxistype == TAXIS_RELATIVE)
             {
-              taxis->rdatetime = scanTimeString(tu + pos);
+              taxis->rdatetime = scan_time_string(tu + pos);
               if (CDI_Debug) Message("rdate = %d  rtime = %d", cdiDateGet(taxis->rdatetime.date), cdiTimeGet(taxis->rdatetime.time));
             }
         }
@@ -414,21 +412,14 @@ cdfGetAttDouble(int fileID, int ncvarid, char *attname, size_t attlen, double *a
 static bool
 cdfCheckAttText(int fileID, int ncvarid, const char *attname)
 {
-  bool status = false;
   nc_type atttype;
-
   const int status_nc = nc_inq_atttype(fileID, ncvarid, attname, &atttype);
-  if (status_nc == NC_NOERR
-      && (atttype == NC_CHAR
+
+  return (status_nc == NC_NOERR && (atttype == NC_CHAR
 #ifdef HAVE_NETCDF4
           || atttype == NC_STRING
 #endif
-          ))
-    {
-      status = true;
-    }
-
-  return status;
+          ));
 }
 
 static void
@@ -4368,7 +4359,7 @@ cdfInqContents(stream_t *streamptr)
           taxis->type = TAXIS_FORECAST;
 
           int timeunit = -1;
-          if (ncvars[leadtime_id].units[0] != 0) timeunit = scanTimeUnit(ncvars[leadtime_id].units);
+          if (ncvars[leadtime_id].units[0] != 0) timeunit = scan_time_units(ncvars[leadtime_id].units);
           if (timeunit == -1) timeunit = taxis->unit;
           taxis->fc_unit = timeunit;
 
@@ -4460,12 +4451,8 @@ cdfInqContents(stream_t *streamptr)
 static void
 wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
 {
-  size_t start[2], count[2];
+  const size_t start[2] = { tsID, 0 }, count[2] = { 1, 19 };
   char stvalue[128];
-  start[0] = (size_t) tsID;
-  start[1] = 0;
-  count[0] = 1;
-  count[1] = 19;
   stvalue[0] = 0;
   cdf_get_vara_text(fileID, nctimevarid, start, count, stvalue);
   stvalue[19] = 0;
@@ -4481,7 +4468,7 @@ wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
 static double
 get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
 {
-  double timevalue = 0;
+  double timevalue = 0.0;
 
   if (tcache)
     {
@@ -4507,7 +4494,7 @@ get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
       cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
     }
 
-  if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
+  if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
 
   return timevalue;
 }
@@ -4548,31 +4535,28 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
                 }
 #endif
               timevalue = get_timevalue(fileID, nctimevarid, tsID, streamptr->basetime.timevar_cache);
-              taxis->vdatetime = cdiDecodeTimeval(timevalue, taxis);
+              taxis->vdatetime = cdi_decode_timeval(timevalue, taxis);
             }
 
           const int nctimeboundsid = streamptr->basetime.ncvarboundsid;
           if (nctimeboundsid != CDI_UNDEFID)
             {
-              size_t start[2], count[2];
-              start[0] = (size_t) tsID;
-              count[0] = 1;
-              start[1] = 0;
-              count[1] = 1;
-              cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
-              if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
+              {
+                const size_t start[2] = { tsID, 1 }, count[2] = { 0, 1 };
+                cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
+                if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
 
-              taxis->vdatetime_lb = cdiDecodeTimeval(timevalue, taxis);
+                taxis->vdatetime_lb = cdi_decode_timeval(timevalue, taxis);
+              }
 
-              start[0] = (size_t) tsID;
-              count[0] = 1;
-              start[1] = 1;
-              count[1] = 1;
-              cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
-              if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
+              {
+                const size_t start[2] = { tsID, 1 }, count[2] = { 1, 1 };
+                cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
+                if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
 
-              taxis->vdatetime_ub = cdiDecodeTimeval(timevalue, taxis);
-           }
+                taxis->vdatetime_ub = cdi_decode_timeval(timevalue, taxis);
+              }
+            }
 
           const int leadtimeid = streamptr->basetime.leadtimeid;
           if (leadtimeid != CDI_UNDEFID)
