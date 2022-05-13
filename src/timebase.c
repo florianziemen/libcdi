@@ -271,7 +271,8 @@ main(void)
   month = 1;
   day = 15;
   hour = 12;
-  minute = 30, second = 17;
+  minute = 30;
+  second = 17;
 
   printf("%d/%02d/%02d %02d:%02d:%02d\n", year, month, day, hour, minute, second);
 

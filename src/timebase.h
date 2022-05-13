@@ -9,6 +9,12 @@
 extern "C" {
 #endif
 
+struct JulianDate
+{
+  int64_t julianDay;
+  double secondOfDay;
+};
+
 // date format:  YYYYMMDD
 // time format:  hhmmss
 
@@ -21,12 +27,12 @@ int sec_to_time(int seconds);
 void decode_julday(int calendar, int64_t julianDay, int *year, int *mon, int *day);
 int64_t encode_julday(int calendar, int year, int month, int day);
 
+double encode_secofday(int hour, int minute, int second, int ms);
+void decode_secofday(double secOfDay, int *hour, int *minute, int *second, int *ms);
+
 void julday_add_seconds(int64_t seconds, int64_t *julianDay, double *secondOfDay);
 void julday_add(int64_t days, double seconds, int64_t *julianDay, double *secondOfDay);
 double julday_sub(int64_t julianDay1, double secondOfDay1, int64_t julianDay2, double secondOfDay2, int64_t *days, double *secs);
-
-double encode_secofday(int hour, int minute, int second, int ms);
-void decode_secofday(double secOfDay, int *hour, int *minute, int *second, int *ms);
 
 #ifdef __cplusplus
 }
