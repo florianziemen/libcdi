@@ -1,6 +1,5 @@
 #include <math.h> /* for floor() */
 
-#include "cdi.h"
 #include "timebase.h"
 
 // convert Julian date into year, months, day
@@ -267,6 +266,7 @@ main(void)
   int factor = 86400;
   int calendar = CALENDAR_STANDARD;
 
+  CdiDateTime dt;
   year = 1979;
   month = 1;
   day = 15;

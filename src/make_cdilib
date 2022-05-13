@@ -126,6 +126,7 @@ files="async_worker.c \
    iterator.c \
    iterator_fallback.c \
    iterator_grib.c \
+   julian_date.c \
    model.c \
    namespace.c \
    referenceCounting.c \

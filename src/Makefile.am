@@ -78,6 +78,8 @@ libcdi_la_SOURCES = 	 \
 	input_file.h     \
 	institution.c  	 \
 	institution.h  	 \
+	julian_date.c  	 \
+	julian_date.h  	 \
 	model.c        	 \
 	model.h        	 \
 	namespace.c      \

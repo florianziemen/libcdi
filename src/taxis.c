@@ -1512,6 +1512,9 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
 
   if (timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR)
     {
+      year = (*taxis).vdatetime.date.year;
+      month = (*taxis).vdatetime.date.month;
+
       if (timeunit == TUNIT_YEAR) timevalue *= 12;
 
       const int nmon = (int) timevalue;
@@ -1527,19 +1530,21 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
       const int dpm = days_per_month(calendar, year, month);
       timeunit = TUNIT_DAY;
       timevalue = fmon * dpm;
+
+      (*taxis).vdatetime.date.year = year;
+      (*taxis).vdatetime.date.month = month;
     }
 
-  int64_t julianDay = encode_calday(calendar, year, month, day);
-  double secondOfDay = encode_secofday(hour, minute, second, ms);
+  JulianDate julianDate = julianDateEncode(calendar, (*taxis).vdatetime);
 
   int64_t days;
   double secs;
   cdi_decode_timevalue(timeunit, timevalue, &days, &secs);
 
-  julday_add(-days, -secs, &julianDay, &secondOfDay);
+  julday_add(-days, -secs, &julianDate.julianDay, &julianDate.secondOfDay);
 
-  decode_calday(calendar, julianDay, &year, &month, &day);
-  decode_secofday(secondOfDay, &hour, &minute, &second, &ms);
+  decode_calday(calendar, julianDate.julianDay, &year, &month, &day);
+  decode_secofday(julianDate.secondOfDay, &hour, &minute, &second, &ms);
 
   (*taxis).fdate = cdiEncodeDate(year, month, day);
   (*taxis).ftime = cdiEncodeTime(hour, minute, second);

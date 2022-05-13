@@ -3,17 +3,11 @@
 
 // clang-format off
 
-#include <inttypes.h>
+#include <julian_date.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-struct JulianDate
-{
-  int64_t julianDay;
-  double secondOfDay;
-};
 
 // date format:  YYYYMMDD
 // time format:  hhmmss
