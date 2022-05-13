@@ -1461,19 +1461,21 @@ static int
 cgribexDefTimerange(int tsteptype, int factor, int calendar, int rdate, int rtime, int vdate, int vtime, int sdate, int stime,
                     int *pip1, int *pip2)
 {
-  int year, month, day, hour, minute, second;
-  int64_t julday1, julday2, days;
-  int secofday1, secofday2, secs;
+  int year, month, day, hour, minute, second, ms = 0;
+  int64_t days;
+  double secs;
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
-  encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday1, &secofday1);
+  int64_t julianDay1 = encode_julday(calendar, year, month, day);
+  double secondOfDay1 = encode_secofday(hour, minute, second, ms);
 
   cdiDecodeDate(vdate, &year, &month, &day);
   cdiDecodeTime(vtime, &hour, &minute, &second);
-  encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
+  int64_t julianDay2 = encode_julday(calendar, year, month, day);
+  double secondOfDay2 = encode_secofday(hour, minute, second, ms);
 
-  (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
+  (void) julday_sub(julianDay1, secondOfDay1, julianDay2, secondOfDay2, &days, &secs);
 
   int timerange = -1;
   int ip1 = 0, ip2 = 0;
@@ -1487,15 +1489,16 @@ cgribexDefTimerange(int tsteptype, int factor, int calendar, int rdate, int rtim
         {
           cdiDecodeDate(sdate, &year, &month, &day);
           cdiDecodeTime(stime, &hour, &minute, &second);
-          encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
+          julianDay2 = encode_julday(calendar, year, month, day);
+          secondOfDay2 = encode_secofday(hour, minute, second, ms);
 
-          (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
+          (void) julday_sub(julianDay1, secondOfDay1, julianDay2, secondOfDay2, &days, &secs);
 
           ipx = (int) ((days * 86400.0 + secs) / factor);
         }
 
       // clang-format off
-      switch ( tsteptype )
+      switch (tsteptype)
 	{
 	case TSTEP_INSTANT:  timerange =  0; ip1 = ip;  ip2 = 0;  break;
 	case TSTEP_INSTANT2: timerange =  1; ip1 = 0;   ip2 = 0;  break;

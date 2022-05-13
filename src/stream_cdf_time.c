@@ -19,7 +19,6 @@ cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *taxis
 
   dims[0] = nctimedimid;
 
-  /* fprintf(stderr, "time has bounds\n"); */
   static const char bndsName[] = "bnds";
   if (nc_inq_dimid(fileID, bndsName, &dims[1]) != NC_NOERR) cdf_def_dim(fileID, bndsName, 2, &dims[1]);
 

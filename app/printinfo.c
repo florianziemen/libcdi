@@ -29,7 +29,23 @@ date2str(CdiDate date, char *datestr, int maxlen)
 void
 time2str(CdiTime time, char *timestr, int maxlen)
 {
-  snprintf(timestr, maxlen, TIME_FORMAT, time.hour, time.minute, time.second);
+  static bool readEnv = true;
+  static int msDigitsNum = 0;
+  if (readEnv)
+    {
+      readEnv = false;
+      char *envString = getenv("CDI_MS_DIGITS");
+      if (envString)
+        {
+          const int ival = atol(envString);
+          if (ival > 0 && ival < 10) msDigitsNum = ival;
+        }
+    }
+
+  if (msDigitsNum)
+    snprintf(timestr, maxlen, TIME_FORMAT".%*.*d", time.hour, time.minute, time.second, msDigitsNum, msDigitsNum, time.ms);
+  else
+    snprintf(timestr, maxlen, TIME_FORMAT, time.hour, time.minute, time.second);
 }
 
 const char *

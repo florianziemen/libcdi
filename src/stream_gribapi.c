@@ -194,31 +194,32 @@ gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime, int *sDate, 
       gribapiGetSteps(gh, timeUnits, &startStep, &endStep);
 
       {
-        int ryear, rmonth, rday, rhour, rminute, rsecond;
+        int ryear, rmonth, rday, rhour, rminute, rsecond, ms;
         cdiDecodeDate(rdate, &ryear, &rmonth, &rday);
         cdiDecodeTime(rtime, &rhour, &rminute, &rsecond);
 
         if (rday > 0)
           {
             extern int CGRIBEX_grib_calendar;
-            int64_t julday;
-            int secofday;
-            encode_caldaysec(CGRIBEX_grib_calendar, ryear, rmonth, rday, rhour, rminute, rsecond, &julday, &secofday);
+            int64_t julianDay = encode_calday(CGRIBEX_grib_calendar, ryear, rmonth, rday);
+            double secondOfDay = encode_secofday(rhour, rminute, rsecond, ms);
 
             int64_t time_unit_factor = gribapiGetTimeUnitFactor(timeUnits);
 
             // if (startStep > 0)
             {
-              int64_t julday_x = julday;
-              int secofday_x = secofday;
-              julday_add_seconds(time_unit_factor * startStep, &julday_x, &secofday_x);
-              decode_caldaysec(CGRIBEX_grib_calendar, julday_x, secofday_x, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
+              int64_t julianDay_x = julianDay;
+              double secondOfDay_x = secondOfDay;
+              julday_add_seconds(time_unit_factor * startStep, &julianDay_x, &secondOfDay_x);
+              decode_calday(CGRIBEX_grib_calendar, julianDay_x, &ryear, &rmonth, &rday);
+              decode_secofday(secondOfDay_x, &rhour, &rminute, &rsecond, &ms);
               *sDate = cdiEncodeDate(ryear, rmonth, rday);
               *sTime = cdiEncodeTime(rhour, rminute, 0);
             }
 
-            julday_add_seconds(time_unit_factor * endStep, &julday, &secofday);
-            decode_caldaysec(CGRIBEX_grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
+            julday_add_seconds(time_unit_factor * endStep, &julianDay, &secondOfDay);
+            decode_calday(CGRIBEX_grib_calendar, julianDay, &ryear, &rmonth, &rday);
+            decode_secofday(secondOfDay, &rhour, &rminute, &rsecond, &ms);
           }
 
         *vdate = cdiEncodeDate(ryear, rmonth, rday);
@@ -2010,13 +2011,14 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
                       int calendar, int gcinit)
 {
   int status = -1;
-  int year, month, day, hour, minute, second;
-  int64_t julday1, julday2, days;
-  int secofday1, secofday2, secs;
+  int year, month, day, hour, minute, second, ms = 0;
+  int64_t days;
+  double secs;
 
   cdiDecodeDate(fdate, &year, &month, &day);
   cdiDecodeTime(ftime, &hour, &minute, &second);
-  encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday1, &secofday1);
+  int64_t julianDay1 = encode_julday(calendar, year, month, day);
+  double secondOfDay1 = encode_secofday(hour, minute, second, ms);
 
   if (vdate == 0 && vtime == 0)
     {
@@ -2026,9 +2028,10 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
 
   cdiDecodeDate(vdate, &year, &month, &day);
   cdiDecodeTime(vtime, &hour, &minute, &second);
-  encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
+  int64_t julianDay2 = encode_julday(calendar, year, month, day);
+  double secondOfDay2 = encode_secofday(hour, minute, second, ms);
 
-  (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
+  (void) julday_sub(julianDay1, secondOfDay1, julianDay2, secondOfDay2, &days, &secs);
 
   const int factor = getTimeunitFactor(timeunit);
 
@@ -2051,9 +2054,10 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
         {
           cdiDecodeDate(sdate, &year, &month, &day);
           cdiDecodeTime(stime, &hour, &minute, &second);
-          encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
+          julianDay2 = encode_julday(calendar, year, month, day);
+          secondOfDay2 = encode_secofday(hour, minute, second, ms);
 
-          (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
+          (void) julday_sub(julianDay1, secondOfDay1, julianDay2, secondOfDay2, &days, &secs);
 
           startStep = (long) ((days * 86400.0 + secs) / factor);
         }

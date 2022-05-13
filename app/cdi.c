@@ -446,7 +446,7 @@ printShortinfo(int streamID, int vlistID, int vardis)
       else
         fprintf(stdout, "z ");
 
-      /* parameter info */
+      // parameter info
       fprintf(stdout, ": ");
 
       cdiParamToString(param, paramstr, sizeof(paramstr));

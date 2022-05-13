@@ -9,10 +9,8 @@
 extern "C" {
 #endif
 
-void encode_caldaysec(int calendar, int year, int month, int day, int hour, int minute, int second,
-		      int64_t *julday, int *secofday);
-void decode_caldaysec(int calendar, int64_t julday, int secofday,
-		      int *year, int *month, int *day, int *hour, int *minute, int *second);
+int64_t encode_calday(int calendar, int year, int month, int day);
+void decode_calday(int calendar, int64_t julday, int *year, int *month, int *day);
 
 int calendar_dpy(int calendar);
 int days_per_year(int calendar, int year);

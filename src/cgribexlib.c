@@ -2120,26 +2120,28 @@ void gribDateTimeX(int *isec1, int *date, int *time, int *startDate, int *startT
   else if ( ISEC1_TimeRange == 0 )
     time_period = ISEC1_TimePeriod1;
 
-  if ( time_period > 0 && rday > 0 )
+  if (time_period > 0 && rday > 0)
     {
-      int64_t julday = 0;
-      int secofday = 0;
-      encode_caldaysec(CGRIBEX_grib_calendar, ryear, rmonth, rday, rhour, rminute, rsecond, &julday, &secofday);
+      int ms = 0;
+      int64_t julianDay = encode_calday(CGRIBEX_grib_calendar, ryear, rmonth, rday);
+      double secondOfDay = encode_secofday(rhour, rminute, rsecond, ms);
 
       int time_unit_factor = getTimeUnitFactor(ISEC1_TimeUnit);
 
       if (time_period_x > 0)
         {
-          int64_t julday_x = julday;
-          int secofday_x = secofday;
-          julday_add_seconds(time_unit_factor * time_period_x, &julday_x, &secofday_x);
-          decode_caldaysec(CGRIBEX_grib_calendar, julday_x, secofday_x, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
+          int64_t julianDay_x = julianDay;
+          double secondOfDay_x = secondOfDay;
+          julday_add_seconds(time_unit_factor * time_period_x, &julianDay_x, &secondOfDay_x);
+          decode_calday(CGRIBEX_grib_calendar, julianDay_x, &ryear, &rmonth, &rday);
+          decode_secofday(secondOfDay_x, &rhour, &rminute, &rsecond, &ms);
           *startDate = cdiEncodeDate(ryear, rmonth, rday);
           *startTime = cdiEncodeTime(rhour, rminute, 0);
         }
       
-      julday_add_seconds(time_unit_factor * time_period, &julday, &secofday);
-      decode_caldaysec(CGRIBEX_grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
+      julday_add_seconds(time_unit_factor * time_period, &julianDay, &secondOfDay);
+      decode_calday(CGRIBEX_grib_calendar, julianDay, &ryear, &rmonth, &rday);
+      decode_secofday(secondOfDay, &rhour, &rminute, &rsecond, &ms);
     }
 
   // printf("new %d/%d/%d %d:%d\n", ryear, rmonth, rday, rhour, rminute);

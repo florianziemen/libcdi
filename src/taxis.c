@@ -1126,10 +1126,10 @@ ptaxisDefUnits(taxis_t *taxisptr, const char *units)
 }
 
 static void
-cdi_decode_timevalue(int timeunit, double timevalue, int64_t *days, int *secs)
+cdi_decode_timevalue(int timeunit, double timevalue, int64_t *days, double *secs)
 {
   *days = 0;
-  *secs = 0;
+  *secs = 0.0;
 
   if (timeunit == TUNIT_MINUTE)
     {
@@ -1144,37 +1144,35 @@ cdi_decode_timevalue(int timeunit, double timevalue, int64_t *days, int *secs)
 
   if (timeunit == TUNIT_SECOND)
     {
-      *days = (int) (timevalue / 86400);
-      const double seconds = timevalue - *days * 86400.;
-      *secs = (int) lround(seconds);
+      *days = (int64_t) (timevalue / 86400.0);
+      const double seconds = timevalue - *days * 86400.0;
+      *secs = round(seconds * 1000.0) / 1000.0;
       if (*secs < 0)
         {
           *days -= 1;
-          *secs += 86400;
+          *secs += 86400.0;
         };
       /*
       {
-        double cval = *days*86400. + *secs;
-        if ( cval != timevalue )
-          printf("TUNIT_SECOND error: %g %g %d %d\n", timevalue, cval, *days, *secs);
+        double cval = *days * 86400.0 + *secs;
+        if (cval != timevalue) printf("TUNIT_SECOND error: %g %g %d %d\n", timevalue, cval, *days, *secs);
       }
       */
     }
   else if (timeunit == TUNIT_DAY)
     {
-      *days = (int) timevalue;
-      const double seconds = (timevalue - *days) * 86400;
+      *days = (int64_t) timevalue;
+      const double seconds = (timevalue - *days) * 86400.0;
       *secs = (int) lround(seconds);
       if (*secs < 0)
         {
           *days -= 1;
-          *secs += 86400;
+          *secs += 86400.0;
         };
       /*
       {
-        double cval = *days + *secs/86400.;
-        if ( cval != timevalue )
-          printf("TUNIT_DAY error: %g %g %d %d\n", timevalue, cval, *days, *secs);
+        double cval = *days + *secs / 86400.0;
+        if (cval != timevalue) printf("TUNIT_DAY error: %g %g %d %d\n", timevalue, cval, *days, *secs);
       }
       */
     }
@@ -1189,24 +1187,26 @@ cdi_decode_timevalue(int timeunit, double timevalue, int64_t *days, int *secs)
     }
 }
 
-static void
-cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
+static double
+cdi_encode_timevalue(int days, double secs, int timeunit)
 {
+  double timevalue = 0.0;
+
   if (timeunit == TUNIT_SECOND)
     {
-      *timevalue = days * 86400. + secs;
+      timevalue = days * 86400.0 + secs;
     }
   else if (timeunit == TUNIT_MINUTE || timeunit == TUNIT_QUARTER || timeunit == TUNIT_30MINUTES)
     {
-      *timevalue = days * 1440. + secs / 60.;
+      timevalue = days * 1440. + secs / 60.;
     }
   else if (timeunit == TUNIT_HOUR || timeunit == TUNIT_3HOURS || timeunit == TUNIT_6HOURS || timeunit == TUNIT_12HOURS)
     {
-      *timevalue = days * 24. + secs / 3600.;
+      timevalue = days * 24. + secs / 3600.;
     }
   else if (timeunit == TUNIT_DAY)
     {
-      *timevalue = days + secs / 86400.;
+      timevalue = days + secs / 86400.;
     }
   else
     {
@@ -1217,6 +1217,8 @@ cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
           lwarn = false;
         }
     }
+
+  return timevalue;
 }
 
 // convert relative time value to CdiDateTime
@@ -1231,6 +1233,7 @@ rtimeval2datetime(double timevalue, taxis_t *taxis)
   int hour = taxis->rdatetime.time.hour;
   int minute = taxis->rdatetime.time.minute;
   int second = taxis->rdatetime.time.second;
+  int ms = taxis->rdatetime.time.ms;
 
   int timeunit = taxis->unit;
   const int calendar = taxis->calendar;
@@ -1260,19 +1263,20 @@ rtimeval2datetime(double timevalue, taxis_t *taxis)
       timevalue = fmon * dpm;
     }
 
-  int64_t julday, days;
-  int secofday, secs;
-  encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday, &secofday);
+  int64_t julianDay = encode_calday(calendar, year, month, day);
+  double secondOfDay = encode_secofday(hour, minute, second, ms);
 
+  int64_t days;
+  double secs;
   cdi_decode_timevalue(timeunit, timevalue, &days, &secs);
 
-  julday_add(days, secs, &julday, &secofday);
+  julday_add(days, secs, &julianDay, &secondOfDay);
 
-  decode_caldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
+  decode_calday(calendar, julianDay, &year, &month, &day);
+  decode_secofday(secondOfDay, &hour, &minute, &second, &ms);
 
   CdiDateTime datetime;
   datetime.date = date_encode(year, month, day);
-  int ms = 0;
   datetime.time = time_encode(hour, minute, second, ms);
 
   return datetime;
@@ -1283,8 +1287,8 @@ static double
 datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
 {
   double value = 0.0;
-  int64_t julday1, julday2, days;
-  int secofday1, secofday2, secs;
+  int64_t days;
+  double secs;
 
   int timeunit = (*taxis).unit;
   const int calendar = (*taxis).calendar;
@@ -1305,7 +1309,8 @@ datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
 
   const int ryear = year;
   const int rmonth = month;
-  encode_caldaysec(calendar, ryear, rmonth, day, hour, minute, second, &julday1, &secofday1);
+  int64_t julianDay1 = encode_calday(calendar, ryear, rmonth, day);
+  double secondOfDay1 = encode_secofday(hour, minute, second, ms);
 
   date_decode(vdatetime.date, &year, &month, &day);
   time_decode(vdatetime.time, &hour, &minute, &second, &ms);
@@ -1328,9 +1333,10 @@ datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
 
       int dpm = days_per_month(calendar, year, month);
 
-      encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
+      int64_t julianDay2 = encode_calday(calendar, year, month, day);
+      double secondOfDay2 = encode_secofday(hour, minute, second, ms);
 
-      julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
+      julday_sub(julianDay1, secondOfDay1, julianDay2, secondOfDay2, &days, &secs);
 
       value += (days + secs / 86400.0) / dpm;
 
@@ -1338,14 +1344,15 @@ datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
     }
   else
     {
-      encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
+      int64_t julianDay2 = encode_calday(calendar, year, month, day);
+      double secondOfDay2 = encode_secofday(hour, minute, second, ms);
 
-      julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
+      julday_sub(julianDay1, secondOfDay1, julianDay2, secondOfDay2, &days, &secs);
 
-      cdiEncodeTimevalue(days, secs, timeunit, &value);
+      value = cdi_encode_timevalue(days, secs, timeunit);
     }
 
-  if (timeunit0 == TUNIT_MONTH && calendar == CALENDAR_360DAYS) value /= 30;
+  if (timeunit0 == TUNIT_MONTH && calendar == CALENDAR_360DAYS) value /= 30.0;
 
   return value;
 }
@@ -1482,9 +1489,6 @@ split_timevalue(double timevalue, int timeunit)
 void
 cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
 {
-  int64_t julday, days;
-  int secofday, secs;
-
   (*taxis).fc_period = timevalue;
 
   int timeunit = (*taxis).fc_unit;
@@ -1498,6 +1502,7 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
   int hour = (*taxis).vdatetime.time.hour;
   int minute = (*taxis).vdatetime.time.minute;
   int second = (*taxis).vdatetime.time.second;
+  int ms = (*taxis).vdatetime.time.ms;
 
   if (timeunit == TUNIT_MONTH && calendar == CALENDAR_360DAYS)
     {
@@ -1524,13 +1529,17 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
       timevalue = fmon * dpm;
     }
 
-  encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday, &secofday);
+  int64_t julianDay = encode_calday(calendar, year, month, day);
+  double secondOfDay = encode_secofday(hour, minute, second, ms);
 
+  int64_t days;
+  double secs;
   cdi_decode_timevalue(timeunit, timevalue, &days, &secs);
 
-  julday_add(-days, -secs, &julday, &secofday);
+  julday_add(-days, -secs, &julianDay, &secondOfDay);
 
-  decode_caldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
+  decode_calday(calendar, julianDay, &year, &month, &day);
+  decode_secofday(secondOfDay, &hour, &minute, &second, &ms);
 
   (*taxis).fdate = cdiEncodeDate(year, month, day);
   (*taxis).ftime = cdiEncodeTime(hour, minute, second);
