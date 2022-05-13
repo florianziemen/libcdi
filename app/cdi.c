@@ -494,16 +494,11 @@ printShortinfo(int streamID, int vlistID, int vardis)
         {
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             {
-              const CdiDateTime rdatetime = taxisInqRdatetime(taxisID);
+              const CdiDateTime dt = taxisInqRdatetime(taxisID);
 
-              const int year = rdatetime.date.year;
-              const int month = rdatetime.date.month;
-              const int day = rdatetime.date.day;
-              const int hour = rdatetime.time.hour;
-              const int minute = rdatetime.time.minute;
-              const int second = rdatetime.time.second;
-
-              fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", year, month, day, hour, minute, second);
+              fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d",
+                      dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute, dt.time.second);
+              if (dt.time.ms) fprintf(stdout, ".%d", dt.time.ms);
 
               const int tunits = taxisInqTunit(taxisID);
               if (tunits != CDI_UNDEFID) fprintf(stdout, "  Units = %s", tunit2str(tunits));
