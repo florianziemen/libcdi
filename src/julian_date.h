@@ -17,8 +17,12 @@ typedef struct
 } JulianDate;
 
 JulianDate julianDate_encode(int calendar, CdiDateTime dt);
+CdiDateTime julianDate_decode(int calendar, JulianDate julianDate);
 JulianDate julianDate_add(JulianDate julianDate1, JulianDate julianDate2);
 JulianDate julianDate_sub(JulianDate julianDate1, JulianDate julianDate2);
+
+double secofday_encode(CdiTime time);
+CdiTime secofday_decode(double secondOfDay);
 
 #ifdef __cplusplus
 }

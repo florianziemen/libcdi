@@ -1,4 +1,34 @@
 #include "julian_date.h"
+#include <math.h>
+
+double
+secofday_encode(CdiTime time)
+{
+  const int hour = time.hour;
+  const int minute = time.minute;
+  const int second = time.second;
+  return hour * 3600 + minute * 60 + second + time.ms / 1000.0;
+}
+
+CdiTime
+secofday_decode(double secondOfDay)
+{
+  CdiTime time;
+
+  const int fullSeconds = (int) secondOfDay;
+
+  time.ms = (int) lround((secondOfDay - fullSeconds) * 1000);
+
+  const int hour = fullSeconds / 3600;
+  const int minute = fullSeconds / 60 - hour * 60;
+  const int second = fullSeconds - hour * 3600 - minute * 60;
+
+  time.hour = hour;
+  time.minute = minute;
+  time.second = second;
+
+  return time;
+}
 
 JulianDate
 julianDate_encode(int calendar, CdiDateTime dt)
@@ -10,7 +40,18 @@ julianDate_encode(int calendar, CdiDateTime dt)
 
   return julianDate;
 }
+/*
+CdiDateTime
+julianDate_decode(int calendar, JulianDate julianDate)
+{
+  CdiDateTime dt;
 
+  decode_calday(calendar, julianDate.julianDay, &dt.date.year, &dt.date.month, &dt.date.day);
+  decode_secofday(julianDate.secondOfDay, &dt.time.hour, &dt.time.minute, &dt.time.second, &dt.time.ms);
+
+  return dt;
+}
+*/
 static void
 adjust_seconds(JulianDate *julianDate)
 {
