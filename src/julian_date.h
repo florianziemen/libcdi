@@ -16,7 +16,8 @@ typedef struct
   double secondOfDay;
 } JulianDate;
 
-JulianDate julianDateEncode(int calendar, CdiDateTime dt);
+JulianDate julianDate_encode(int calendar, CdiDateTime dt);
+double julianDate_sub(JulianDate julianDate1, JulianDate julianDate2, int64_t *days, double *secs);
 
 #ifdef __cplusplus
 }

@@ -1290,8 +1290,9 @@ datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
   int64_t days;
   double secs;
 
-  int timeunit = (*taxis).unit;
   const int calendar = (*taxis).calendar;
+  int timeunits = (*taxis).unit;
+  const int timeunits0 = timeunits;
 
   CdiDateTime rdatetime = (*taxis).rdatetime;
 
@@ -1299,28 +1300,16 @@ datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
 
   if (cdiDateTime_isNull(rdatetime) && cdiDateTime_isNull(vdatetime)) return value;
 
-  int year = taxis->rdatetime.date.year;
-  int month = taxis->rdatetime.date.month;
-  int day = taxis->rdatetime.date.day;
-  int hour = taxis->rdatetime.time.hour;
-  int minute = taxis->rdatetime.time.minute;
-  int second = taxis->rdatetime.time.second;
-  int ms = taxis->rdatetime.time.ms;
+  const JulianDate julianDate1 = julianDate_encode(calendar, rdatetime);
 
-  const int ryear = year;
-  const int rmonth = month;
-  int64_t julianDay1 = encode_calday(calendar, ryear, rmonth, day);
-  double secondOfDay1 = encode_secofday(hour, minute, second, ms);
+  if (timeunits == TUNIT_MONTH && calendar == CALENDAR_360DAYS) timeunits = TUNIT_DAY;
 
-  cdiDateDecode(vdatetime.date, &year, &month, &day);
-  cdiTimeDecode(vdatetime.time, &hour, &minute, &second, &ms);
-
-  int timeunit0 = timeunit;
-
-  if (timeunit == TUNIT_MONTH && calendar == CALENDAR_360DAYS) timeunit = TUNIT_DAY;
-
-  if (timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR)
+  if (timeunits == TUNIT_MONTH || timeunits == TUNIT_YEAR)
     {
+      const int ryear = rdatetime.date.year;
+      const int rmonth = rdatetime.date.month;
+      int year = vdatetime.date.year;
+      int month = vdatetime.date.month;
       value = (year - ryear) * 12 - rmonth + month;
 
       int nmonth = (int) value;
@@ -1331,28 +1320,25 @@ datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
       while (month <  1) { month += 12; year--; }
       // clang-format on
 
-      int dpm = days_per_month(calendar, year, month);
+      const int dpm = days_per_month(calendar, year, month);
 
-      int64_t julianDay2 = encode_calday(calendar, year, month, day);
-      double secondOfDay2 = encode_secofday(hour, minute, second, ms);
-
-      julday_sub(julianDay1, secondOfDay1, julianDay2, secondOfDay2, &days, &secs);
+      vdatetime.date.year = year;
+      vdatetime.date.month = month;
+      const JulianDate julianDate2 = julianDate_encode(calendar, vdatetime);
+      julianDate_sub(julianDate1, julianDate2, &days, &secs);
 
       value += (days + secs / 86400.0) / dpm;
-
-      if (timeunit == TUNIT_YEAR) value = value / 12;
+      if (timeunits == TUNIT_YEAR) value = value / 12;
     }
   else
     {
-      int64_t julianDay2 = encode_calday(calendar, year, month, day);
-      double secondOfDay2 = encode_secofday(hour, minute, second, ms);
+      const JulianDate julianDate2 = julianDate_encode(calendar, vdatetime);
+      julianDate_sub(julianDate1, julianDate2, &days, &secs);
 
-      julday_sub(julianDay1, secondOfDay1, julianDay2, secondOfDay2, &days, &secs);
-
-      value = cdi_encode_timevalue(days, secs, timeunit);
+      value = cdi_encode_timevalue(days, secs, timeunits);
     }
 
-  if (timeunit0 == TUNIT_MONTH && calendar == CALENDAR_360DAYS) value /= 30.0;
+  if (timeunits0 == TUNIT_MONTH && calendar == CALENDAR_360DAYS) value /= 30.0;
 
   return value;
 }
@@ -1535,7 +1521,7 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
       (*taxis).vdatetime.date.month = month;
     }
 
-  JulianDate julianDate = julianDateEncode(calendar, (*taxis).vdatetime);
+  JulianDate julianDate = julianDate_encode(calendar, (*taxis).vdatetime);
 
   int64_t days;
   double secs;
