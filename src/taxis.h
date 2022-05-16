@@ -55,7 +55,7 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source);
 taxis_t *taxisPtr(int taxisID);
 void cdiSetForecastPeriod(double timevalue, taxis_t *taxis);
 CdiDateTime cdi_decode_timeval(double timevalue, taxis_t *taxis);
-double cdiEncodeTimeval(CdiDateTime datetime, taxis_t *taxis);
+double cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis);
 
 void ptaxisDefDatatype(taxis_t *taxisptr, int datatype);
 void ptaxisDefName(taxis_t *taxisptr, const char *name);

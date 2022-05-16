@@ -126,7 +126,7 @@ cdiTimeGet(CdiTime cditime)
 }
 
 static CdiDate
-cdiDateEncode(int year, int month, int day)
+cdiDate_encode(int year, int month, int day)
 {
   CdiDate date;
   date.year = year;
@@ -137,7 +137,7 @@ cdiDateEncode(int year, int month, int day)
 }
 
 static void
-cdiDateDecode(CdiDate date, int *year, int *month, int *day)
+cdiDate_decode(CdiDate date, int *year, int *month, int *day)
 {
   *year = date.year;
   *month = date.month;
@@ -145,7 +145,7 @@ cdiDateDecode(CdiDate date, int *year, int *month, int *day)
 }
 
 static CdiTime
-cdiTimeEncode(int hour, int minute, int second, int ms)
+cdiTime_encode(int hour, int minute, int second, int ms)
 {
   CdiTime time;
   time.hour = hour;
@@ -157,7 +157,7 @@ cdiTimeEncode(int hour, int minute, int second, int ms)
 }
 
 static void
-cdiTimeDecode(CdiTime time, int *hour, int *minute, int *second, int *ms)
+cdiTime_decode(CdiTime time, int *hour, int *minute, int *second, int *ms)
 {
   *hour = time.hour;
   *minute = time.minute;
@@ -1129,7 +1129,6 @@ static JulianDate
 timevalue_decode(int timeunits, double timevalue)
 {
   JulianDate julianDate;
-
   julianDate.julianDay = 0;
   julianDate.secondOfDay = 0.0;
 
@@ -1313,7 +1312,7 @@ datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
       vdatetime.date.year = year;
       vdatetime.date.month = month;
       const JulianDate julianDate2 = julianDate_encode(calendar, vdatetime);
-      JulianDate dateDifference = julianDate_sub(julianDate1, julianDate2);
+      const JulianDate dateDifference = julianDate_sub(julianDate1, julianDate2);
 
       value += (dateDifference.julianDay + dateDifference.secondOfDay / 86400.0) / dpm;
       if (timeunits == TUNIT_YEAR) value = value / 12;
@@ -1321,7 +1320,7 @@ datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
   else
     {
       const JulianDate julianDate2 = julianDate_encode(calendar, vdatetime);
-      JulianDate dateDifference = julianDate_sub(julianDate1, julianDate2);
+      const JulianDate dateDifference = julianDate_sub(julianDate1, julianDate2);
 
       value = cdi_encode_timevalue(dateDifference.julianDay, dateDifference.secondOfDay, timeunits);
     }
@@ -1348,8 +1347,8 @@ atimeval2datetime(double timevalue)
   const int ms = 0;
 
   CdiDateTime datetime;
-  datetime.date = cdiDateEncode(year, month, day);
-  datetime.time = cdiTimeEncode(hour, minute, second, ms);
+  datetime.date = cdiDate_encode(year, month, day);
+  datetime.time = cdiTime_encode(hour, minute, second, ms);
 
   return datetime;
 }
@@ -1377,9 +1376,7 @@ split_timevalue(double timevalue, int timeunit)
   else if (timeunit == TUNIT_MONTH)
     {
       int64_t vdate = (int64_t) timevalue * 100 - ((timevalue < 0) * 2 - 1);
-      int year, month, day;
-      cdiDecodeDate(vdate, &year, &month, &day);
-      datetime.date = cdiDateEncode(year, month, day);
+      datetime.date = cdiDateSet(vdate);
     }
   else if (timeunit == TUNIT_YEAR)
     {
@@ -1416,9 +1413,7 @@ split_timevalue(double timevalue, int timeunit)
 
       int64_t vdate = (int64_t) timevalue * 10000;
       vdate += (timevalue < 0) ? -101 : 101;
-      int year, month, day;
-      cdiDecodeDate(vdate, &year, &month, &day);
-      datetime.date = cdiDateEncode(year, month, day);
+      datetime.date = cdiDateSet(vdate);
     }
   else
     {
@@ -1433,9 +1428,9 @@ split_timevalue(double timevalue, int timeunit)
   // verify date and time
 
   int year, month, day;
-  cdiDateDecode(datetime.date, &year, &month, &day);
+  cdiDate_decode(datetime.date, &year, &month, &day);
   int hour, minute, second, ms;
-  cdiTimeDecode(datetime.time, &hour, &minute, &second, &ms);
+  cdiTime_decode(datetime.time, &hour, &minute, &second, &ms);
 
   if (month > 17 || day > 31 || hour > 23 || minute > 59 || second > 59)
     {
@@ -1446,8 +1441,8 @@ split_timevalue(double timevalue, int timeunit)
       if (minute > 59) minute = 0;
       if (second > 59) second = 0;
 
-      datetime.date = cdiDateEncode(year, month, day);
-      datetime.time = cdiTimeEncode(hour, minute, second, ms);
+      datetime.date = cdiDate_encode(year, month, day);
+      datetime.time = cdiTime_encode(hour, minute, second, ms);
 
       static bool lwarn = true;
       if (lwarn)
@@ -1518,14 +1513,14 @@ cdi_decode_timeval(double timevalue, taxis_t *taxis)
 }
 
 double
-cdiEncodeTimeval(CdiDateTime datetime, taxis_t *taxis)
+cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis)
 {
   double timevalue;
 
   if (taxis->type == TAXIS_ABSOLUTE)
     {
       int year, month, day;
-      cdiDateDecode(datetime.date, &year, &month, &day);
+      cdiDate_decode(datetime.date, &year, &month, &day);
 
       if (taxis->unit == TUNIT_YEAR)
         {
@@ -1539,7 +1534,7 @@ cdiEncodeTimeval(CdiDateTime datetime, taxis_t *taxis)
       else
         {
           int hour, minute, second, ms;
-          cdiTimeDecode(datetime.time, &hour, &minute, &second, &ms);
+          cdiTime_decode(datetime.time, &hour, &minute, &second, &ms);
           int64_t xdate = cdiEncodeDate(year, month, day);
           timevalue = copysign(1.0, (double) xdate) * (fabs((double) xdate) + (hour * 3600 + minute * 60 + second) / 86400.0);
         }
