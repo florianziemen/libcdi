@@ -17,6 +17,7 @@ typedef struct
 } JulianDate;
 
 JulianDate julianDate_encode(int calendar, CdiDateTime dt);
+JulianDate julianDate_add(JulianDate julianDate1, JulianDate julianDate2);
 JulianDate julianDate_sub(JulianDate julianDate1, JulianDate julianDate2);
 
 #ifdef __cplusplus

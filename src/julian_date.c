@@ -22,14 +22,27 @@ adjust_seconds(JulianDate *julianDate)
       julianDate->julianDay++;
     }
 
-  while (julianDate->secondOfDay < 0)
+  while (julianDate->secondOfDay < 0.0)
     {
       julianDate->secondOfDay += SecondsPerDay;
       julianDate->julianDay--;
     }
 }
 
-// subtract julianDate1 from julianDate2 and returns the result in seconds
+// add julianDate1 and julianDate2
+JulianDate
+julianDate_add(JulianDate julianDate1, JulianDate julianDate2)
+{
+  JulianDate julianDateSub;
+  julianDateSub.julianDay = julianDate2.julianDay + julianDate1.julianDay;
+  julianDateSub.secondOfDay = julianDate2.secondOfDay + julianDate1.secondOfDay;
+
+  adjust_seconds(&julianDateSub);
+
+  return julianDateSub;
+}
+
+// subtract julianDate1 from julianDate2
 JulianDate
 julianDate_sub(JulianDate julianDate1, JulianDate julianDate2)
 {
