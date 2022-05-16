@@ -38,12 +38,13 @@ time2str(CdiTime time, char *timestr, int maxlen)
       if (envString)
         {
           const int ival = atol(envString);
-          if (ival > 0 && ival < 10) msDigitsNum = ival;
+          if (ival > 0) msDigitsNum = ival;
+          if (ival > 3) msDigitsNum = 3;
         }
     }
 
   if (msDigitsNum)
-    snprintf(timestr, maxlen, TIME_FORMAT".%*.*d", time.hour, time.minute, time.second, msDigitsNum, msDigitsNum, time.ms);
+    snprintf(timestr, maxlen, "%2.2d:%2.2d:%0*.*f", time.hour, time.minute, msDigitsNum + 3, msDigitsNum, time.second + time.ms / 1000.0);
   else
     snprintf(timestr, maxlen, TIME_FORMAT, time.hour, time.minute, time.second);
 }
