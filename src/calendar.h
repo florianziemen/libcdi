@@ -3,7 +3,7 @@
 
 // clang-format off
 
-#include <inttypes.h>
+#include "cdi.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,6 +11,9 @@ extern "C" {
 
 int64_t encode_calday(int calendar, int year, int month, int day);
 void decode_calday(int calendar, int64_t julday, int *year, int *month, int *day);
+
+int64_t calDay_encode(int calendar, CdiDate date);
+CdiDate calDay_decode(int calendar, int64_t julday);
 
 int calendar_dpy(int calendar);
 int days_per_year(int calendar, int year);

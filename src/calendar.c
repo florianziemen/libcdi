@@ -1,7 +1,6 @@
 #include <limits.h>
 #include <stdio.h>
 
-#include "cdi.h" /* CALENDAR_ */
 #include "calendar.h"
 #include "error.h"
 #include "timebase.h"
@@ -120,6 +119,36 @@ decode_calday(int calendar, int64_t julday, int *year, int *month, int *day)
     decode_day(dpy, julday, year, month, day);
   else
     decode_julday(calendar, julday, year, month, day);
+}
+
+int64_t
+calDay_encode(int calendar, CdiDate date)
+{
+  const int dpy = calendar_dpy(calendar);
+
+  if (dpy == 360 || dpy == 365 || dpy == 366)
+    return encode_day(dpy, date.year, date.month, date.day);
+  else
+    return encode_julday(calendar, date.year, date.month, date.day);
+}
+
+CdiDate
+calDay_decode(int calendar, int64_t julday)
+{
+  int year, month, day;
+  const int dpy = calendar_dpy(calendar);
+
+  if (dpy == 360 || dpy == 365 || dpy == 366)
+    decode_day(dpy, julday, &year, &month, &day);
+  else
+    decode_julday(calendar, julday, &year, &month, &day);
+
+  CdiDate date;
+  date.year = year;
+  date.month = month;
+  date.day = day;
+
+  return date;
 }
 
 #ifdef TEST

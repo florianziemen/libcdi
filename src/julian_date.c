@@ -35,23 +35,23 @@ julianDate_encode(int calendar, CdiDateTime dt)
 {
   JulianDate julianDate;
 
-  julianDate.julianDay = encode_calday(calendar, dt.date.year, dt.date.month, dt.date.day);
-  julianDate.secondOfDay = encode_secofday(dt.time.hour, dt.time.minute, dt.time.second, dt.time.ms);
+  julianDate.julianDay = calDay_encode(calendar, dt.date);
+  julianDate.secondOfDay = secofday_encode(dt.time);
 
   return julianDate;
 }
-/*
+
 CdiDateTime
 julianDate_decode(int calendar, JulianDate julianDate)
 {
   CdiDateTime dt;
 
-  decode_calday(calendar, julianDate.julianDay, &dt.date.year, &dt.date.month, &dt.date.day);
-  decode_secofday(julianDate.secondOfDay, &dt.time.hour, &dt.time.minute, &dt.time.second, &dt.time.ms);
+  dt.date = calDay_decode(calendar, julianDate.julianDay);
+  dt.time = secofday_decode(julianDate.secondOfDay);
 
   return dt;
 }
-*/
+
 static void
 adjust_seconds(JulianDate *julianDate)
 {
