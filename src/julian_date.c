@@ -12,37 +12,32 @@ julianDate_encode(int calendar, CdiDateTime dt)
 }
 
 static void
-adjust_seconds(int64_t *julianDay, double *secondOfDay)
+adjust_seconds(JulianDate *julianDate)
 {
   const double SecondsPerDay = 86400.0;
 
-  while (*secondOfDay >= SecondsPerDay)
+  while (julianDate->secondOfDay >= SecondsPerDay)
     {
-      *secondOfDay -= SecondsPerDay;
-      (*julianDay)++;
+      julianDate->secondOfDay -= SecondsPerDay;
+      julianDate->julianDay++;
     }
 
-  while (*secondOfDay < 0)
+  while (julianDate->secondOfDay < 0)
     {
-      *secondOfDay += SecondsPerDay;
-      (*julianDay)--;
+      julianDate->secondOfDay += SecondsPerDay;
+      julianDate->julianDay--;
     }
 }
 
-// subtract jjulianDate1 from julianDate2 and returns the result in seconds
-double
-julianDate_sub(JulianDate julianDate1, JulianDate julianDate2, int64_t *days, double *secs)
+// subtract julianDate1 from julianDate2 and returns the result in seconds
+JulianDate
+julianDate_sub(JulianDate julianDate1, JulianDate julianDate2)
 {
-  *days = julianDate2.julianDay - julianDate1.julianDay;
-  *secs = julianDate2.secondOfDay - julianDate1.secondOfDay;
+  JulianDate julianDateSub;
+  julianDateSub.julianDay = julianDate2.julianDay - julianDate1.julianDay;
+  julianDateSub.secondOfDay = julianDate2.secondOfDay - julianDate1.secondOfDay;
 
-  double sec_of_day = *secs;
+  adjust_seconds(&julianDateSub);
 
-  adjust_seconds(days, &sec_of_day);
-
-  *secs = sec_of_day;
-
-  double seconds = (*days) * 86400.0 + sec_of_day;
-
-  return seconds;
+  return julianDateSub;
 }

@@ -1287,8 +1287,6 @@ static double
 datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
 {
   double value = 0.0;
-  int64_t days;
-  double secs;
 
   const int calendar = (*taxis).calendar;
   int timeunits = (*taxis).unit;
@@ -1325,17 +1323,17 @@ datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
       vdatetime.date.year = year;
       vdatetime.date.month = month;
       const JulianDate julianDate2 = julianDate_encode(calendar, vdatetime);
-      julianDate_sub(julianDate1, julianDate2, &days, &secs);
+      JulianDate dateDifference = julianDate_sub(julianDate1, julianDate2);
 
-      value += (days + secs / 86400.0) / dpm;
+      value += (dateDifference.julianDay + dateDifference.secondOfDay / 86400.0) / dpm;
       if (timeunits == TUNIT_YEAR) value = value / 12;
     }
   else
     {
       const JulianDate julianDate2 = julianDate_encode(calendar, vdatetime);
-      julianDate_sub(julianDate1, julianDate2, &days, &secs);
+      JulianDate dateDifference = julianDate_sub(julianDate1, julianDate2);
 
-      value = cdi_encode_timevalue(days, secs, timeunits);
+      value = cdi_encode_timevalue(dateDifference.julianDay, dateDifference.secondOfDay, timeunits);
     }
 
   if (timeunits0 == TUNIT_MONTH && calendar == CALENDAR_360DAYS) value /= 30.0;
