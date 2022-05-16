@@ -4544,7 +4544,7 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
               {
                 const size_t start[2] = { tsID, 1 }, count[2] = { 0, 1 };
                 cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
-                if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
+                if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
 
                 taxis->vdatetime_lb = cdi_decode_timeval(timevalue, taxis);
               }
@@ -4552,7 +4552,7 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
               {
                 const size_t start[2] = { tsID, 1 }, count[2] = { 1, 1 };
                 cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
-                if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
+                if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
 
                 taxis->vdatetime_ub = cdi_decode_timeval(timevalue, taxis);
               }

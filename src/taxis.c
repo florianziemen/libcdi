@@ -1125,54 +1125,56 @@ ptaxisDefUnits(taxis_t *taxisptr, const char *units)
     }
 }
 
-static void
-cdi_decode_timevalue(int timeunit, double timevalue, int64_t *days, double *secs)
+static JulianDate
+timevalue_decode(int timeunits, double timevalue)
 {
-  *days = 0;
-  *secs = 0.0;
+  JulianDate julianDate;
 
-  if (timeunit == TUNIT_MINUTE)
+  julianDate.julianDay = 0;
+  julianDate.secondOfDay = 0.0;
+
+  if (timeunits == TUNIT_MINUTE)
     {
       timevalue *= 60;
-      timeunit = TUNIT_SECOND;
+      timeunits = TUNIT_SECOND;
     }
-  else if (timeunit == TUNIT_HOUR)
+  else if (timeunits == TUNIT_HOUR)
     {
       timevalue /= 24;
-      timeunit = TUNIT_DAY;
+      timeunits = TUNIT_DAY;
     }
 
-  if (timeunit == TUNIT_SECOND)
+  if (timeunits == TUNIT_SECOND)
     {
-      *days = (int64_t) (timevalue / 86400.0);
-      const double seconds = timevalue - *days * 86400.0;
-      *secs = round(seconds * 1000.0) / 1000.0;
-      if (*secs < 0)
+      julianDate.julianDay = (int64_t) (timevalue / 86400.0);
+      const double seconds = timevalue - julianDate.julianDay * 86400.0;
+      julianDate.secondOfDay = round(seconds * 1000.0) / 1000.0;
+      if (julianDate.secondOfDay < 0)
         {
-          *days -= 1;
-          *secs += 86400.0;
+          julianDate.julianDay -= 1;
+          julianDate.secondOfDay += 86400.0;
         };
       /*
       {
-        double cval = *days * 86400.0 + *secs;
-        if (cval != timevalue) printf("TUNIT_SECOND error: %g %g %d %d\n", timevalue, cval, *days, *secs);
+        double cval = julianDate.julianDay * 86400.0 + julianDate.secondOfDay;
+        if (cval != timevalue) printf("TUNIT_SECOND error: %g %g %d %d\n", timevalue, cval, julianDate.julianDay, julianDate.secondOfDay);
       }
       */
     }
-  else if (timeunit == TUNIT_DAY)
+  else if (timeunits == TUNIT_DAY)
     {
-      *days = (int64_t) timevalue;
-      const double seconds = (timevalue - *days) * 86400.0;
-      *secs = (int) lround(seconds);
-      if (*secs < 0)
+      julianDate.julianDay = (int64_t) timevalue;
+      const double seconds = (timevalue - julianDate.julianDay) * 86400.0;
+      julianDate.secondOfDay = (int) lround(seconds);
+      if (julianDate.secondOfDay < 0)
         {
-          *days -= 1;
-          *secs += 86400.0;
+          julianDate.julianDay -= 1;
+          julianDate.secondOfDay += 86400.0;
         };
       /*
       {
-        double cval = *days + *secs / 86400.0;
-        if (cval != timevalue) printf("TUNIT_DAY error: %g %g %d %d\n", timevalue, cval, *days, *secs);
+        double cval = julianDate.julianDay + julianDate.secondOfDay / 86400.0;
+        if (cval != timevalue) printf("TUNIT_DAY error: %g %g %d %d\n", timevalue, cval, julianDate.julianDay, julianDate.secondOfDay);
       }
       */
     }
@@ -1181,10 +1183,12 @@ cdi_decode_timevalue(int timeunit, double timevalue, int64_t *days, double *secs
       static bool lwarn = true;
       if (lwarn)
         {
-          Warning("timeunit %s unsupported!", tunitNamePtr(timeunit));
+          Warning("timeunit %s unsupported!", tunitNamePtr(timeunits));
           lwarn = false;
         }
     }
+
+  return julianDate;
 }
 
 static double
@@ -1225,31 +1229,35 @@ cdi_encode_timevalue(int days, double secs, int timeunit)
 static CdiDateTime
 rtimeval2datetime(double timevalue, taxis_t *taxis)
 {
-  if (DBL_IS_EQUAL(timevalue, 0.0)) return taxis->rdatetime;
+  if (IS_EQUAL(timevalue, 0.0)) return taxis->rdatetime;
 
-  int year = taxis->rdatetime.date.year;
-  int month = taxis->rdatetime.date.month;
-  int day = taxis->rdatetime.date.day;
-  int hour = taxis->rdatetime.time.hour;
-  int minute = taxis->rdatetime.time.minute;
-  int second = taxis->rdatetime.time.second;
-  int ms = taxis->rdatetime.time.ms;
+  CdiDateTime dt = taxis->rdatetime;
+  int year = dt.date.year;
+  int month = dt.date.month;
+  int day = dt.date.day;
+  int hour = dt.time.hour;
+  int minute = dt.time.minute;
+  int second = dt.time.second;
+  int ms = dt.time.ms;
 
-  int timeunit = taxis->unit;
+  int timeunits = taxis->unit;
   const int calendar = taxis->calendar;
 
-  if (timeunit == TUNIT_MONTH && calendar == CALENDAR_360DAYS)
+  if (timeunits == TUNIT_MONTH && calendar == CALENDAR_360DAYS)
     {
-      timeunit = TUNIT_DAY;
+      timeunits = TUNIT_DAY;
       timevalue *= 30;
     }
 
-  if (timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR)
+  if (timeunits == TUNIT_MONTH || timeunits == TUNIT_YEAR)
     {
-      if (timeunit == TUNIT_YEAR) timevalue *= 12;
+      if (timeunits == TUNIT_YEAR) timevalue *= 12;
 
       const int nmon = (int) timevalue;
       const double fmon = timevalue - nmon;
+
+      int year = dt.date.year;
+      int month = dt.date.month;
 
       month += nmon;
 
@@ -1258,22 +1266,21 @@ rtimeval2datetime(double timevalue, taxis_t *taxis)
       while (month <  1) { month += 12; year--; }
       // clang-format on
 
+      dt.date.year = year;
+      dt.date.month = month;
+
       const int dpm = days_per_month(calendar, year, month);
-      timeunit = TUNIT_DAY;
+      timeunits = TUNIT_DAY;
       timevalue = fmon * dpm;
     }
 
-  int64_t julianDay = encode_calday(calendar, year, month, day);
-  double secondOfDay = encode_secofday(hour, minute, second, ms);
+  JulianDate julianDate = julianDate_encode(calendar, dt);
+  const JulianDate julianDate2 = timevalue_decode(timeunits, timevalue);
 
-  int64_t days;
-  double secs;
-  cdi_decode_timevalue(timeunit, timevalue, &days, &secs);
+  julianDate = julianDate_add(julianDate2, julianDate);
 
-  julday_add(days, secs, &julianDay, &secondOfDay);
-
-  decode_calday(calendar, julianDay, &year, &month, &day);
-  decode_secofday(secondOfDay, &hour, &minute, &second, &ms);
+  decode_calday(calendar, julianDate.julianDay, &year, &month, &day);
+  decode_secofday(julianDate.secondOfDay, &hour, &minute, &second, &ms);
 
   CdiDateTime datetime;
   datetime.date = cdiDateEncode(year, month, day);
@@ -1520,12 +1527,9 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
     }
 
   JulianDate julianDate = julianDate_encode(calendar, (*taxis).vdatetime);
+  const JulianDate julianDate2 = timevalue_decode(timeunit, timevalue);
 
-  int64_t days;
-  double secs;
-  cdi_decode_timevalue(timeunit, timevalue, &days, &secs);
-
-  julday_add(-days, -secs, &julianDate.julianDay, &julianDate.secondOfDay);
+  julianDate = julianDate_sub(julianDate2, julianDate);
 
   decode_calday(calendar, julianDate.julianDay, &year, &month, &day);
   decode_secofday(julianDate.secondOfDay, &hour, &minute, &second, &ms);
