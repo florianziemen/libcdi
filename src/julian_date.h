@@ -18,6 +18,7 @@ typedef struct
 
 JulianDate julianDate_encode(int calendar, CdiDateTime dt);
 CdiDateTime julianDate_decode(int calendar, JulianDate julianDate);
+JulianDate julianDate_add_seconds(JulianDate julianDate, int64_t seconds);
 JulianDate julianDate_add(JulianDate julianDate1, JulianDate julianDate2);
 JulianDate julianDate_sub(JulianDate julianDate1, JulianDate julianDate2);
 

@@ -194,32 +194,31 @@ gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime, int *sDate, 
       gribapiGetSteps(gh, timeUnits, &startStep, &endStep);
 
       {
-        int ryear, rmonth, rday, rhour, rminute, rsecond, ms;
+        int ryear, rmonth, rday, rhour, rminute, rsecond, ms = 0;
         cdiDecodeDate(rdate, &ryear, &rmonth, &rday);
         cdiDecodeTime(rtime, &rhour, &rminute, &rsecond);
 
         if (rday > 0)
           {
             extern int CGRIBEX_grib_calendar;
-            int64_t julianDay = encode_calday(CGRIBEX_grib_calendar, ryear, rmonth, rday);
-            double secondOfDay = encode_secofday(rhour, rminute, rsecond, ms);
+            JulianDate julianDate;
+            julianDate.julianDay = encode_calday(CGRIBEX_grib_calendar, ryear, rmonth, rday);
+            julianDate.secondOfDay = encode_secofday(rhour, rminute, rsecond, ms);
 
-            int64_t time_unit_factor = gribapiGetTimeUnitFactor(timeUnits);
+            const int64_t timeUnitFactor = gribapiGetTimeUnitFactor(timeUnits);
 
             // if (startStep > 0)
             {
-              int64_t julianDay_x = julianDay;
-              double secondOfDay_x = secondOfDay;
-              julday_add_seconds(time_unit_factor * startStep, &julianDay_x, &secondOfDay_x);
-              decode_calday(CGRIBEX_grib_calendar, julianDay_x, &ryear, &rmonth, &rday);
-              decode_secofday(secondOfDay_x, &rhour, &rminute, &rsecond, &ms);
+              JulianDate julianDate2 = julianDate_add_seconds(julianDate, timeUnitFactor * startStep);
+              decode_calday(CGRIBEX_grib_calendar, julianDate2.julianDay, &ryear, &rmonth, &rday);
+              decode_secofday(julianDate2.secondOfDay, &rhour, &rminute, &rsecond, &ms);
               *sDate = cdiEncodeDate(ryear, rmonth, rday);
               *sTime = cdiEncodeTime(rhour, rminute, 0);
             }
 
-            julday_add_seconds(time_unit_factor * endStep, &julianDay, &secondOfDay);
-            decode_calday(CGRIBEX_grib_calendar, julianDay, &ryear, &rmonth, &rday);
-            decode_secofday(secondOfDay, &rhour, &rminute, &rsecond, &ms);
+            julianDate = julianDate_add_seconds(julianDate, timeUnitFactor * endStep);
+            decode_calday(CGRIBEX_grib_calendar, julianDate.julianDay, &ryear, &rmonth, &rday);
+            decode_secofday(julianDate.secondOfDay, &rhour, &rminute, &rsecond, &ms);
           }
 
         *vdate = cdiEncodeDate(ryear, rmonth, rday);

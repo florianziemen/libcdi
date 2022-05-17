@@ -2110,38 +2110,37 @@ void gribDateTimeX(int *isec1, int *date, int *time, int *startDate, int *startT
   // printf("ref %d/%d/%d %d:%d\n", ryear, rmonth, rday, rhour, rminute);
 
   int64_t time_period = 0, time_period_x = 0;
-  if ( ISEC1_TimeRange == 10 )
+  if (ISEC1_TimeRange == 10)
     time_period = (ISEC1_TimePeriod1<<8) + ISEC1_TimePeriod2;
-  else if ( ISEC1_TimeRange >=2 && ISEC1_TimeRange <= 5 )
+  else if (ISEC1_TimeRange >=2 && ISEC1_TimeRange <= 5)
     {
       time_period_x = ISEC1_TimePeriod1;
       time_period = ISEC1_TimePeriod2;
     }
-  else if ( ISEC1_TimeRange == 0 )
+  else if (ISEC1_TimeRange == 0)
     time_period = ISEC1_TimePeriod1;
 
   if (time_period > 0 && rday > 0)
     {
       int ms = 0;
-      int64_t julianDay = encode_calday(CGRIBEX_grib_calendar, ryear, rmonth, rday);
-      double secondOfDay = encode_secofday(rhour, rminute, rsecond, ms);
+      JulianDate julianDate;
+      julianDate.julianDay = encode_calday(CGRIBEX_grib_calendar, ryear, rmonth, rday);
+      julianDate.secondOfDay = encode_secofday(rhour, rminute, rsecond, ms);
 
-      int time_unit_factor = getTimeUnitFactor(ISEC1_TimeUnit);
+      const int timeUnitFactor = getTimeUnitFactor(ISEC1_TimeUnit);
 
       if (time_period_x > 0)
         {
-          int64_t julianDay_x = julianDay;
-          double secondOfDay_x = secondOfDay;
-          julday_add_seconds(time_unit_factor * time_period_x, &julianDay_x, &secondOfDay_x);
-          decode_calday(CGRIBEX_grib_calendar, julianDay_x, &ryear, &rmonth, &rday);
-          decode_secofday(secondOfDay_x, &rhour, &rminute, &rsecond, &ms);
+          JulianDate julianDate2 = julianDate_add_seconds(julianDate, timeUnitFactor * time_period_x);
+          decode_calday(CGRIBEX_grib_calendar, julianDate2.julianDay, &ryear, &rmonth, &rday);
+          decode_secofday(julianDate2.secondOfDay, &rhour, &rminute, &rsecond, &ms);
           *startDate = cdiEncodeDate(ryear, rmonth, rday);
           *startTime = cdiEncodeTime(rhour, rminute, 0);
         }
       
-      julday_add_seconds(time_unit_factor * time_period, &julianDay, &secondOfDay);
-      decode_calday(CGRIBEX_grib_calendar, julianDay, &ryear, &rmonth, &rday);
-      decode_secofday(secondOfDay, &rhour, &rminute, &rsecond, &ms);
+      julianDate = julianDate_add_seconds(julianDate, timeUnitFactor * time_period);
+      decode_calday(CGRIBEX_grib_calendar, julianDate.julianDay, &ryear, &rmonth, &rday);
+      decode_secofday(julianDate.secondOfDay, &rhour, &rminute, &rsecond, &ms);
     }
 
   // printf("new %d/%d/%d %d:%d\n", ryear, rmonth, rday, rhour, rminute);

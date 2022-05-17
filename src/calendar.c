@@ -152,7 +152,7 @@ calDay_decode(int calendar, int64_t julday)
 }
 
 #ifdef TEST
-static int
+static int64_t
 date_to_calday(int calendar, int64_t date)
 {
   const int dpy = calendar_dpy(calendar);
@@ -170,7 +170,7 @@ date_to_calday(int calendar, int64_t date)
 }
 
 static int64_t
-calday_to_date(int calendar, int calendarDay)
+calday_to_date(int calendar, int64_t calendarDay)
 {
   int year, month, day;
   const int dpy = calendar_dpy(calendar);
@@ -192,7 +192,6 @@ main(void)
   int ijulinc;
   int j = 0;
   int year, mon, day, hour, minute, second;
-  int calendarDay, secondOfDay;
 
   // 1 - Check valid range of years
 
@@ -207,8 +206,8 @@ main(void)
       cdiDecodeDate(vdate0, &year, &mon, &day);
       cdiDecodeTime(vtime0, &hour, &minute, &second);
 
-      calendarDay = date_to_calday(calendar, vdate0);
-      secondOfDay = time_to_sec(vtime0);
+      int64_t calendarDay = date_to_calday(calendar, vdate0);
+      int secondOfDay = time_to_sec(vtime0);
 
       vdate = calday_to_date(calendar, calendarDay);
       vtime = sec_to_time(secondOfDay);
@@ -232,8 +231,9 @@ main(void)
 
   printf("start time: %8ld %4d\n", vdate0, vtime0);
 
-  calendarDay = date_to_calday(calendar, vdate0);
-  secondOfDay = time_to_sec(vtime0);
+  JulianDate julianDate;
+  julianDate.julianDay = date_to_calday(calendar, vdate0);
+  julianDate.secondOfDay = time_to_sec(vtime0);
   for (int i = 0; i < nmin; i++)
     {
       cdiDecodeDate(vdate0, &year, &mon, &day);
@@ -260,12 +260,12 @@ main(void)
       vdate0 = cdiEncodeDate(year, mon, day);
       vtime0 = cdiEncodeTime(hour, minute, second);
 
-      julday_add_seconds(ijulinc, &calendarDay, &secondOfDay);
+      julianDate = julianDate_add_seconds(julianDate, ijulinc);
 
-      vdate = calday_to_date(calendar, calendarDay);
-      vtime = sec_to_time(secondOfDay);
+      vdate = calday_to_date(calendar, julianDate.julianDay);
+      vtime = sec_to_time(julianDate.secondOfDay);
       if (vdate0 != vdate || vtime0 != vtime)
-        printf("%4d %8ld %4d %8ld %4d %9d %9d\n", ++j, vdate0, vtime0, vdate, vtime, calendarDay, secondOfDay);
+        printf("%4d %8ld %4d %8ld %4d %9d %9d\n", ++j, vdate0, vtime0, vdate, vtime, julianDate.julianDay, julianDate.secondOfDay);
     }
 
   printf("stop time: %8ld %4d\n", vdate0, vtime0);
@@ -294,19 +294,20 @@ main(void)
   printf("calendar = %d\n", calendar);
   printf("%d/%02d/%02d %02d:%02d:%02d\n", year, month, day, hour, minute, second);
 
-  int64_t calendarDay = encode_calday(calendar, year, month, day);
-  double secondOfDay = encode_secofday(hour, minute, second, ms);
+  JulianDate julianDate;
+  julianDate.julianDay = encode_calday(calendar, year, month, day);
+  julianDate.secondOfDay = encode_secofday(hour, minute, second, ms);
 
-  decode_calday(calendar, calendarDay, &year, &month, &day);
-  decode_secofday(secondOfDay, &hour, &minute, &second, &ms);
-  printf("%d/%02d/%02d %02d:%02d:%02d   %d %d\n", year, month, day, hour, minute, second, calendarDay, secondOfDay);
+  decode_calday(calendar, julianDate.julianDay, &year, &month, &day);
+  decode_secofday(julianDate.secondOfDay, &hour, &minute, &second, &ms);
+  printf("%d/%02d/%02d %02d:%02d:%02d   %d %g\n", year, month, day, hour, minute, second, julianDate.julianDay, julianDate.secondOfDay);
 
   for (int i = 0; i < 420; i++)
     {
-      decode_calday(calendar, calendarDay, &year, &month, &day);
-      decode_secofday(secondOfDay, &hour, &minute, &second, &ms);
+      decode_calday(calendar, julianDate.julianDay, &year, &month, &day);
+      decode_secofday(julianDate.secondOfDay, &hour, &minute, &second, &ms);
       printf("%2d %d/%02d/%02d %02d:%02d:%02d\n", i, year, month, day, hour, minute, second);
-      julday_add_seconds(value * factor, &calendarDay, &secondOfDay);
+      julianDate = julianDate_add_seconds(julianDate, value * factor);
     }
 
   return 0;

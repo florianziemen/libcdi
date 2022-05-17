@@ -70,28 +70,39 @@ adjust_seconds(JulianDate *julianDate)
     }
 }
 
+// add seconds to julianDate
+JulianDate
+julianDate_add_seconds(JulianDate julianDate, int64_t seconds)
+{
+  julianDate.secondOfDay += seconds;
+
+  adjust_seconds(&julianDate);
+
+  return julianDate;
+}
+
 // add julianDate1 and julianDate2
 JulianDate
 julianDate_add(JulianDate julianDate1, JulianDate julianDate2)
 {
-  JulianDate julianDateSub;
-  julianDateSub.julianDay = julianDate2.julianDay + julianDate1.julianDay;
-  julianDateSub.secondOfDay = julianDate2.secondOfDay + julianDate1.secondOfDay;
+  JulianDate julianDate;
+  julianDate.julianDay = julianDate2.julianDay + julianDate1.julianDay;
+  julianDate.secondOfDay = julianDate2.secondOfDay + julianDate1.secondOfDay;
 
-  adjust_seconds(&julianDateSub);
+  adjust_seconds(&julianDate);
 
-  return julianDateSub;
+  return julianDate;
 }
 
 // subtract julianDate1 from julianDate2
 JulianDate
 julianDate_sub(JulianDate julianDate1, JulianDate julianDate2)
 {
-  JulianDate julianDateSub;
-  julianDateSub.julianDay = julianDate2.julianDay - julianDate1.julianDay;
-  julianDateSub.secondOfDay = julianDate2.secondOfDay - julianDate1.secondOfDay;
+  JulianDate julianDate;
+  julianDate.julianDay = julianDate2.julianDay - julianDate1.julianDay;
+  julianDate.secondOfDay = julianDate2.secondOfDay - julianDate1.secondOfDay;
 
-  adjust_seconds(&julianDateSub);
+  adjust_seconds(&julianDate);
 
-  return julianDateSub;
+  return julianDate;
 }
