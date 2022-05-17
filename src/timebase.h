@@ -22,7 +22,6 @@ void decode_julday(int calendar, int64_t julianDay, int *year, int *mon, int *da
 int64_t encode_julday(int calendar, int year, int month, int day);
 
 double encode_secofday(int hour, int minute, int second, int ms);
-void decode_secofday(double secOfDay, int *hour, int *minute, int *second, int *ms);
 
 void julday_add_seconds(int64_t seconds, int64_t *julianDay, double *secondOfDay);
 double julday_sub(int64_t julianDay1, double secondOfDay1, int64_t julianDay2, double secondOfDay2, int64_t *days, double *secs);

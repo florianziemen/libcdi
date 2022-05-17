@@ -99,7 +99,7 @@ encode_day(int daysPerYear, int year, int month, int day)
   return rval;
 }
 
-int64_t
+static int64_t
 encode_calday(int calendar, int year, int month, int day)
 {
   const int dpy = calendar_dpy(calendar);
@@ -108,17 +108,6 @@ encode_calday(int calendar, int year, int month, int day)
     return encode_day(dpy, year, month, day);
   else
     return encode_julday(calendar, year, month, day);
-}
-
-void
-decode_calday(int calendar, int64_t julday, int *year, int *month, int *day)
-{
-  const int dpy = calendar_dpy(calendar);
-
-  if (dpy == 360 || dpy == 365 || dpy == 366)
-    decode_day(dpy, julday, year, month, day);
-  else
-    decode_julday(calendar, julday, year, month, day);
 }
 
 int64_t

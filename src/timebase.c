@@ -141,7 +141,7 @@ encode_secofday(int hour, int minute, int second, int ms)
   return hour * 3600 + minute * 60 + second + ms / 1000.0;
 }
 
-void
+static void
 decode_secofday(double secondOfDay, int *hour, int *minute, int *second, int *ms)
 {
   const int fullSeconds = (int) secondOfDay;

@@ -9,9 +9,6 @@
 extern "C" {
 #endif
 
-int64_t encode_calday(int calendar, int year, int month, int day);
-void decode_calday(int calendar, int64_t julday, int *year, int *month, int *day);
-
 int64_t calDay_encode(int calendar, CdiDate date);
 CdiDate calDay_decode(int calendar, int64_t julday);
 
