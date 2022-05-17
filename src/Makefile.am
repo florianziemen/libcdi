@@ -9,7 +9,7 @@ lib_LTLIBRARIES =
 
 if ENABLE_CDI_LIB
   lib_LTLIBRARIES += libcdi.la
-  include_HEADERS += cdi.h
+  include_HEADERS += cdi.h cdi_datetime.h
 # add cdi.inc only if cfortran interface is required
 if USE_FC
   include_HEADERS += cdi.inc
@@ -43,6 +43,7 @@ libcdi_la_SOURCES = 	 \
 	cdf_util.c	 \
 	cdf_util.h	 \
 	cdi.h	 	 \
+	cdi_datetime.h   \
 	cdi_error.c      \
 	cdi_limits.h	 \
 	cdi_util.c       \

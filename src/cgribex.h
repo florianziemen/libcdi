@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <sys/types.h>
+#include "cdi_datetime.h"
 
 #define  GRIB_MISSVAL  -9.E33
 
@@ -201,8 +202,8 @@ void  gribSetCalendar(int calendar);
 
 void  gribDateTimeX(int *isec1, int *date, int *time, int *startDate, int *startTime);
 void  gribDateTime(int *isec1, int *date, int *time);
-int   gribRefDate(const int *isec1);
-int   gribRefTime(const int *isec1);
+CdiDateTime gribRefDateTime(const int *isec1);
+
 bool  gribTimeIsFC(const int *isec1);
 
 void  gribPrintSec0(int *isec0);

@@ -1324,27 +1324,7 @@ void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDef
 extern "C" {
 #endif
 
-typedef struct
-{
-  int   year;      // year of date
-  short month;     // month of date
-  short day;       // day of date
-} CdiDate;
-
-typedef struct
-{
-  short hour;      // hour part of time
-  short minute;	   // minute part of time
-  short second;	   // second part of time
-  short ms;        // milli-second part of time. 0<=ms<=999
-} CdiTime;
-
-typedef struct
-{
-  CdiDate date;    // date elements
-  CdiTime time;    // time elements
-} CdiDateTime;
-
+#include "cdi_datetime.h"
 
 void taxisDefRdatetime(int taxisID, CdiDateTime rdatetime);
 CdiDateTime taxisInqRdatetime(int taxisID);

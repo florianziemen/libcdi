@@ -1,5 +1,5 @@
-#ifndef CDI_DATETIME_H
-#define CDI_DATETIME_H
+#ifndef DATETIME_H
+#define DATETIME_H
 
 typedef struct
 {

@@ -298,15 +298,14 @@ main(void)
   julianDate.julianDay = encode_calday(calendar, year, month, day);
   julianDate.secondOfDay = encode_secofday(hour, minute, second, ms);
 
-  decode_calday(calendar, julianDate.julianDay, &year, &month, &day);
-  decode_secofday(julianDate.secondOfDay, &hour, &minute, &second, &ms);
-  printf("%d/%02d/%02d %02d:%02d:%02d   %d %g\n", year, month, day, hour, minute, second, julianDate.julianDay, julianDate.secondOfDay);
+  CdiDateTime dt = julianDate_decode(calendar, julianDate);
+  printf("%d/%02d/%02d %02d:%02d:%02d   %d %g\n",
+         dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute, dt.time.second, julianDate.julianDay, julianDate.secondOfDay);
 
   for (int i = 0; i < 420; i++)
     {
-      decode_calday(calendar, julianDate.julianDay, &year, &month, &day);
-      decode_secofday(julianDate.secondOfDay, &hour, &minute, &second, &ms);
-      printf("%2d %d/%02d/%02d %02d:%02d:%02d\n", i, year, month, day, hour, minute, second);
+      CdiDateTime dt = julianDate_decode(calendar, julianDate);
+      printf("%2d %d/%02d/%02d %02d:%02d:%02d\n", i, dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute, dt.time.second);
       julianDate = julianDate_add_seconds(julianDate, value * factor);
     }
 

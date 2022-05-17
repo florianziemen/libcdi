@@ -1989,9 +1989,8 @@ double decfp2(int kexp, int kmant)
 #include <stdarg.h>
 #include <stdint.h>
 
-
 static
-void gribDecodeRefDate(const int *isec1, int *year, int *month, int *day)
+CdiDate gribRefDate(const int *isec1)
 {
   int ryear = ISEC1_Year;
 
@@ -2005,18 +2004,18 @@ void gribDecodeRefDate(const int *isec1, int *year, int *month, int *day)
     }
   else
     {
-      // if ( century != 0 )
+      // if (century != 0)
       {
-        if ( ryear == 100 )
+        if (ryear == 100)
           {
             ryear = 0;
             century += 1;
           }
 
-        if ( ryear != 255 )
+        if (ryear != 255)
           {
             ryear = century*100 + ryear;
-            if ( ISEC1_Century < 0 ) ryear = -ryear;
+            if (ISEC1_Century < 0) ryear = -ryear;
           }
         else
           {
@@ -2025,33 +2024,34 @@ void gribDecodeRefDate(const int *isec1, int *year, int *month, int *day)
       }
     }
 
-  *year  = ryear;
-  *month = ISEC1_Month;
-  *day   = ISEC1_Day;
-}
+  CdiDate date;
+  date.year  = ryear;
+  date.month = ISEC1_Month;
+  date.day   = ISEC1_Day;
 
-
-int gribRefDate(const int *isec1)
-{
-  int ryear, rmonth, rday;
-  gribDecodeRefDate(isec1, &ryear, &rmonth, &rday);
-  return cdiEncodeDate(ryear, rmonth, rday);
+  return date;
 }
 
 static
-void gribDecodeRefTime(const int *isec1, int *hour, int *minute, int *second)
+CdiTime gribRefTime(const int *isec1)
 {
-  *hour = ISEC1_Hour;
-  *minute = ISEC1_Minute;
-  *second = 0;
+  CdiTime time;
+  time.hour = ISEC1_Hour;
+  time.minute = ISEC1_Minute;
+  time.second = 0;
+  time.ms = 0;
+
+  return time;
 }
 
 
-int gribRefTime(const int *isec1)
+CdiDateTime gribRefDateTime(const int *isec1)
 {
-  int rhour, rminute, rsecond;
-  gribDecodeRefTime(isec1, &rhour, &rminute, &rsecond);
-  return cdiEncodeTime(rhour, rminute, rsecond);
+  CdiDateTime dt;
+  dt.date = gribRefDate(isec1);
+  dt.time = gribRefTime(isec1);
+
+  return dt;
 }
 
 
@@ -2101,13 +2101,7 @@ void gribDateTimeX(int *isec1, int *date, int *time, int *startDate, int *startT
   *startDate = 0;
   *startTime = 0;
 
-  int ryear, rmonth, rday;
-  gribDecodeRefDate(isec1, &ryear, &rmonth, &rday);
-
-  int rhour, rminute, rsecond;
-  gribDecodeRefTime(isec1, &rhour, &rminute, &rsecond);
-
-  // printf("ref %d/%d/%d %d:%d\n", ryear, rmonth, rday, rhour, rminute);
+  CdiDateTime rDateTime = gribRefDateTime(isec1);
 
   int64_t time_period = 0, time_period_x = 0;
   if (ISEC1_TimeRange == 10)
@@ -2120,32 +2114,27 @@ void gribDateTimeX(int *isec1, int *date, int *time, int *startDate, int *startT
   else if (ISEC1_TimeRange == 0)
     time_period = ISEC1_TimePeriod1;
 
-  if (time_period > 0 && rday > 0)
+  if (time_period > 0 && rDateTime.date.day > 0)
     {
-      int ms = 0;
-      JulianDate julianDate;
-      julianDate.julianDay = encode_calday(CGRIBEX_grib_calendar, ryear, rmonth, rday);
-      julianDate.secondOfDay = encode_secofday(rhour, rminute, rsecond, ms);
+      JulianDate julianDate = julianDate_encode(CGRIBEX_grib_calendar, rDateTime);
 
       const int timeUnitFactor = getTimeUnitFactor(ISEC1_TimeUnit);
 
       if (time_period_x > 0)
         {
           JulianDate julianDate2 = julianDate_add_seconds(julianDate, timeUnitFactor * time_period_x);
-          decode_calday(CGRIBEX_grib_calendar, julianDate2.julianDay, &ryear, &rmonth, &rday);
-          decode_secofday(julianDate2.secondOfDay, &rhour, &rminute, &rsecond, &ms);
-          *startDate = cdiEncodeDate(ryear, rmonth, rday);
-          *startTime = cdiEncodeTime(rhour, rminute, 0);
+          CdiDateTime sDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate2);
+          sDateTime.time.second = 0;
+          *startDate = cdiDateGet(sDateTime.date);
+          *startTime = cdiTimeGet(sDateTime.time);
         }
       
       julianDate = julianDate_add_seconds(julianDate, timeUnitFactor * time_period);
-      decode_calday(CGRIBEX_grib_calendar, julianDate.julianDay, &ryear, &rmonth, &rday);
-      decode_secofday(julianDate.secondOfDay, &rhour, &rminute, &rsecond, &ms);
+      rDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate);
     }
 
-  // printf("new %d/%d/%d %d:%d\n", ryear, rmonth, rday, rhour, rminute);
-  *date = (int)cdiEncodeDate(ryear, rmonth, rday);
-  *time = cdiEncodeTime(rhour, rminute, 0);
+  *date = cdiDateGet(rDateTime.date);
+  *time = cdiTimeGet(rDateTime.time);
 }
 
 
