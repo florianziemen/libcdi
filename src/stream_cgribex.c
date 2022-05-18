@@ -839,8 +839,7 @@ cgribexScanTimestep1(stream_t *streamptr)
           taxis->rdatetime = gribRefDateTime(isec1);
           taxis->sdate = sdate;
           taxis->stime = stime;
-          taxis->vdatetime.date = cdiDateSet(vdate);
-          taxis->vdatetime.time = cdiTimeSet(vtime);
+          taxis->vdatetime = cdiDateTime_set(vdate, vtime);
         }
       else
         {
@@ -1006,8 +1005,7 @@ cgribexScanTimestep2(stream_t *streamptr)
               taxis->type = TAXIS_ABSOLUTE;
             }
           taxis->unit = cgribexGetTimeUnit(isec1);
-          taxis->vdatetime.date = cdiDateSet(vdate);
-          taxis->vdatetime.time = cdiTimeSet(vtime);
+          taxis->vdatetime = cdiDateTime_set(vdate, vtime);
           taxis->sdate = sdate;
           taxis->stime = stime;
         }
@@ -1212,8 +1210,7 @@ cgribexScanTimestep(stream_t *streamptr)
                   taxis->type = TAXIS_ABSOLUTE;
                 }
               taxis->unit = cgribexGetTimeUnit(isec1);
-              taxis->vdatetime.date = cdiDateSet(vdate);
-              taxis->vdatetime.time = cdiTimeSet(vtime);
+              taxis->vdatetime = cdiDateTime_set(vdate, vtime);
               taxis->sdate = sdate;
               taxis->stime = stime;
             }
@@ -1458,14 +1455,10 @@ static int
 cgribexDefTimerange(int tsteptype, int factor, int calendar, int rdate, int rtime, int vdate, int vtime, int sdate, int stime,
                     int *pip1, int *pip2)
 {
-  CdiDateTime rDateTime;
-  rDateTime.date = cdiDateSet(rdate);
-  rDateTime.time = cdiTimeSet(rtime);
+  CdiDateTime rDateTime = cdiDateTime_set(rdate, rtime);
   JulianDate julianDate1 = julianDate_encode(calendar, rDateTime);
 
-  CdiDateTime vDateTime;
-  vDateTime.date = cdiDateSet(vdate);
-  vDateTime.time = cdiTimeSet(vtime);
+  CdiDateTime vDateTime = cdiDateTime_set(vdate, vtime);
   JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
 
   JulianDate julianDate = julianDate_sub(julianDate1, julianDate2);
@@ -1480,9 +1473,7 @@ cgribexDefTimerange(int tsteptype, int factor, int calendar, int rdate, int rtim
       int ipx = 0;
       if (sdate != 0 && (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF))
         {
-          CdiDateTime sDateTime;
-          sDateTime.date = cdiDateSet(sdate);
-          sDateTime.time = cdiTimeSet(stime);
+          CdiDateTime sDateTime = cdiDateTime_set(sdate, stime);
           julianDate2 = julianDate_encode(calendar, sDateTime);
 
           julianDate = julianDate_sub(julianDate1, julianDate2);

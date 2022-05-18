@@ -91,8 +91,8 @@ taxisDefaultValue(taxis_t *taxisptr)
   taxisptr->type = DefaultTimeType;
   taxisptr->sdate = 0;
   taxisptr->stime = 0;
-  cdiDatetimeInit(&taxisptr->vdatetime);
-  cdiDatetimeInit(&taxisptr->rdatetime);
+  cdiDateTime_init(&taxisptr->vdatetime);
+  cdiDateTime_init(&taxisptr->rdatetime);
   taxisptr->fdate = CDI_UNDEFID;
   taxisptr->ftime = 0;
   taxisptr->calendar = CDI_Default_Calendar;
@@ -100,8 +100,8 @@ taxisDefaultValue(taxis_t *taxisptr)
   taxisptr->numavg = 0;
   taxisptr->climatology = false;
   taxisptr->has_bounds = false;
-  cdiDatetimeInit(&taxisptr->vdatetime_lb);
-  cdiDatetimeInit(&taxisptr->vdatetime_ub);
+  cdiDateTime_init(&taxisptr->vdatetime_lb);
+  cdiDateTime_init(&taxisptr->vdatetime_ub);
   taxisptr->fc_unit = DefaultTimeUnit;
   taxisptr->fc_period = 0;
   taxisptr->name = NULL;
@@ -1210,7 +1210,7 @@ static CdiDateTime
 split_timevalue(double timevalue, int timeunit)
 {
   CdiDateTime datetime;
-  cdiDatetimeInit(&datetime);
+  cdiDateTime_init(&datetime);
 
   if (timeunit == TUNIT_SECOND)
     {

@@ -37,14 +37,14 @@ CdiTime cdiTimeSet(int time);
 int cdiDateGet(CdiDate cdiDate);
 int cdiTimeGet(CdiTime cdiTime);
 
-  CdiDate cdiDate_encode(int year, int month, int day);
+CdiDate cdiDate_encode(int year, int month, int day);
 void cdiDate_decode(CdiDate cdiDate, int *year, int *month, int *day);
-  CdiTime cdiTime_encode(int hour, int minute, int second, int ms);
-  void cdiTime_decode(CdiTime cdiTime, int *hour, int *minute, int *second, int *ms);
+CdiTime cdiTime_encode(int hour, int minute, int second, int ms);
+void cdiTime_decode(CdiTime cdiTime, int *hour, int *minute, int *second, int *ms);
 
-void cdiDateInit(CdiDate *cdiDate);
-void cdiTimeInit(CdiTime *cdiTime);
-void cdiDatetimeInit(CdiDateTime *cdiDateTime);
+void cdiDate_init(CdiDate *cdiDate);
+void cdiTime_init(CdiTime *cdiTime);
+void cdiDateTime_init(CdiDateTime *cdiDateTime);
 
 bool cdiDateTime_isNull(CdiDateTime cdiDateTime);
 

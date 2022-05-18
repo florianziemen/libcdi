@@ -734,8 +734,7 @@ iegScanTimestep1(stream_t *streamptr)
       if (nrecs == 0)
         {
           datetime0 = datetime;
-          taxis->vdatetime.date = cdiDateSet(vdate);
-          taxis->vdatetime.time = cdiTimeSet(vtime);
+          taxis->vdatetime = cdiDateTime_set(vdate, vtime);
         }
       else
         {
@@ -821,8 +820,7 @@ iegScanTimestep2(stream_t *streamptr)
       if (rindex == 0)
         {
           taxis->type = TAXIS_ABSOLUTE;
-          taxis->vdatetime.date = cdiDateSet(vdate);
-          taxis->vdatetime.time = cdiTimeSet(vtime);
+          taxis->vdatetime = cdiDateTime_set(vdate, vtime);
         }
 
       bool nextstep = false;
@@ -954,8 +952,7 @@ iegScanTimestep(stream_t *streamptr)
           if (rindex == 0)
             {
               taxis->type = TAXIS_ABSOLUTE;
-              taxis->vdatetime.date = cdiDateSet(vdate);
-              taxis->vdatetime.time = cdiTimeSet(vtime);
+              taxis->vdatetime = cdiDateTime_set(vdate, vtime);
             }
 
           if (param != records[recID].param || rlevel != records[recID].ilevel)

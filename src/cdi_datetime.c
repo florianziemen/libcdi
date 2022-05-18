@@ -92,7 +92,7 @@ cdiTime_decode(CdiTime cdiTime, int *hour, int *minute, int *second, int *ms)
 }
 
 void
-cdiDateInit(CdiDate *cdiDate)
+cdiDate_init(CdiDate *cdiDate)
 {
   cdiDate->year = 0;
   cdiDate->month = 0;
@@ -100,7 +100,7 @@ cdiDateInit(CdiDate *cdiDate)
 }
 
 void
-cdiTimeInit(CdiTime *cdiTime)
+cdiTime_init(CdiTime *cdiTime)
 {
   cdiTime->hour = 0;
   cdiTime->minute = 0;
@@ -109,48 +109,42 @@ cdiTimeInit(CdiTime *cdiTime)
 }
 
 void
-cdiDatetimeInit(CdiDateTime *cdiDateTime)
+cdiDateTime_init(CdiDateTime *cdiDateTime)
 {
-  cdiDateInit(&cdiDateTime->date);
-  cdiTimeInit(&cdiDateTime->time);
+  cdiDate_init(&cdiDateTime->date);
+  cdiTime_init(&cdiDateTime->time);
 }
 
 bool
 cdiDateTime_isEQ(const CdiDateTime cdiDateTime1, const CdiDateTime cdiDateTime2)
 {
   // clang-format off
-  if (cdiDateTime1.date.year == cdiDateTime2.date.year
+  return (cdiDateTime1.date.year == cdiDateTime2.date.year
       && cdiDateTime1.date.month == cdiDateTime2.date.month
       && cdiDateTime1.date.day == cdiDateTime2.date.day
       && cdiDateTime1.time.hour == cdiDateTime2.time.hour
       && cdiDateTime1.time.minute == cdiDateTime2.time.minute
       && cdiDateTime1.time.second == cdiDateTime2.time.second
-      && cdiDateTime1.time.ms == cdiDateTime2.time.ms)
-    return true;
+      && cdiDateTime1.time.ms == cdiDateTime2.time.ms);
   // clang-format on
-
-  return false;
 }
 
 bool
 cdiDateTime_isNE(const CdiDateTime cdiDateTime1, const CdiDateTime cdiDateTime2)
 {
-  return !datetime_isEQ(cdiDateTime1, cdiDateTime2);
+  return !cdiDateTime_isEQ(cdiDateTime1, cdiDateTime2);
 }
 
 bool
 cdiDateTime_isNull(const CdiDateTime cdiDateTime)
 {
   // clang-format off
-  if (cdiDateTime.date.year == 0
+  return (cdiDateTime.date.year == 0
       && cdiDateTime.date.month == 0
       && cdiDateTime.date.day == 0
       && cdiDateTime.time.hour == 0
       && cdiDateTime.time.minute == 0
       && cdiDateTime.time.second == 0
-      && cdiDateTime.time.ms == 0)
-    return true;
+      && cdiDateTime.time.ms == 0);
   // clang-format on
-
-  return false;
 }

@@ -1060,8 +1060,7 @@ fdbScanTimesteps(stream_t *streamptr)
           taxis->ftime = cdiTimeGet(taxis->rdatetime.time);
           taxis->sdate = sDate;
           taxis->stime = sTime;
-          taxis->vdatetime.date = cdiDateSet(vDate);
-          taxis->vdatetime.time = cdiTimeSet(vTime);
+          taxis->vdatetime = cdiDateTime_set(vDate, vTime);
         }
 
       if (CDI_Debug)
@@ -1120,8 +1119,7 @@ fdbScanTimesteps(stream_t *streamptr)
       const int nrecs = (tsID == 1) ? streamScanInitRecords2(streamptr) : streamScanInitRecords(streamptr, tsID);
       if (nrecs != numRecords) Error("Internal error. nrecs = %d", nrecs);
 
-      taxis->vdatetime.date = cdiDateSet(vdate);
-      taxis->vdatetime.time = cdiTimeSet(vtime);
+      taxis->vdatetime = cdiDateTime_set(vdate, vtime);
 
       int rindex = 0;
       for (int recID = 0; recID < numRecords; recID++)
@@ -1224,8 +1222,7 @@ gribapiScanTimestep1(stream_t *streamptr)
           taxis->ftime = cdiTimeGet(taxis->rdatetime.time);
           taxis->sdate = sDate;
           taxis->stime = sTime;
-          taxis->vdatetime.date = cdiDateSet(vDate);
-          taxis->vdatetime.time = cdiTimeSet(vTime);
+          taxis->vdatetime = cdiDateTime_set(vDate, vTime);
         }
       else
         {
@@ -1385,8 +1382,7 @@ gribapiScanTimestep2(stream_t *streamptr)
             }
           taxis->fdate = cdiDateGet(taxis->rdatetime.date);
           taxis->ftime = cdiTimeGet(taxis->rdatetime.time);
-          taxis->vdatetime.date = cdiDateSet(vDate);
-          taxis->vdatetime.time = cdiTimeSet(vTime);
+          taxis->vdatetime = cdiDateTime_set(vDate, vTime);
           taxis->sdate = sDate;
           taxis->stime = sTime;
           // printf("2: %d %6d  %d %6d  %d %6d\n", taxis->rdate, taxis->rtime, taxis->sdate, taxis->stime, taxis->vdate,
@@ -1583,8 +1579,7 @@ gribapiScanTimestep(stream_t *streamptr)
                 }
               taxis->fdate = cdiDateGet(taxis->rdatetime.date);
               taxis->ftime = cdiTimeGet(taxis->rdatetime.time);
-              taxis->vdatetime.date = cdiDateSet(vDate);
-              taxis->vdatetime.time = cdiTimeSet(vTime);
+              taxis->vdatetime = cdiDateTime_set(vDate, vTime);
               taxis->sdate = sDate;
               taxis->stime = sTime;
               // printf("n: %d %6d  %d %6d  %d %6d\n", taxis->rdate, taxis->rtime, taxis->sdate, taxis->stime, taxis->vdate,
@@ -1999,9 +1994,7 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
 {
   int status = -1;
 
-  CdiDateTime fDateTime;
-  fDateTime.date = cdiDateSet(fdate);
-  fDateTime.time = cdiTimeSet(ftime);
+  CdiDateTime fDateTime = cdiDateTime_set(fdate, ftime);
   JulianDate julianDate1 = julianDate_encode(calendar, fDateTime);
 
   if (vdate == 0 && vtime == 0)
@@ -2010,9 +2003,7 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
       vtime = ftime;
     }
 
-  CdiDateTime vDateTime;
-  vDateTime.date = cdiDateSet(vdate);
-  vDateTime.time = cdiTimeSet(vtime);
+  CdiDateTime vDateTime = cdiDateTime_set(vdate, vtime);
   JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
 
   JulianDate julianDate = julianDate_sub(julianDate1, julianDate2);
@@ -2036,9 +2027,7 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
                            || tsteptype == TSTEP_COV || tsteptype == TSTEP_RATIO || tsteptype == TSTEP_SUM);
       if (sdate != 0 && hasStartDate)
         {
-          CdiDateTime sDateTime;
-          sDateTime.date = cdiDateSet(sdate);
-          sDateTime.time = cdiTimeSet(stime);
+          CdiDateTime sDateTime = cdiDateTime_set(sdate, stime);
           julianDate2 = julianDate_encode(calendar, sDateTime);
 
           julianDate = julianDate_sub(julianDate1, julianDate2);
