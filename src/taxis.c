@@ -82,154 +82,7 @@ tunitNamePtr(int unitID)
 {
   int size = sizeof(Timeunits) / sizeof(*Timeunits);
   return (unitID > 0 && unitID < size) ? Timeunits[unitID] : Timeunits[0];
-}
-
-CdiDate
-cdiDateSet(int date)
-{
-  int year, month, day;
-  cdiDecodeDate(date, &year, &month, &day);
-
-  CdiDate cdiDate;
-  cdiDate.year = year;
-  cdiDate.month = (short)month;
-  cdiDate.day = (short)day;
-
-  return cdiDate;
-}
-
-CdiTime
-cdiTimeSet(int time)
-{
-  int hour, minute, second, ms = 0;
-  cdiDecodeTime(time, &hour, &minute, &second);
-
-  CdiTime cdiTime;
-  cdiTime.hour = (short)hour;
-  cdiTime.minute = (short)minute;
-  cdiTime.second = (short)second;
-  cdiTime.ms = ms;
-
-  return cdiTime;
-}
-
-int
-cdiDateGet(CdiDate cdiDate)
-{
-  return cdiEncodeDate(cdiDate.year, cdiDate.month, cdiDate.day);
-}
-
-int
-cdiTimeGet(CdiTime cditime)
-{
-  return cdiEncodeTime(cditime.hour, cditime.minute, cditime.second);
-}
-
-static CdiDate
-cdiDate_encode(int year, int month, int day)
-{
-  CdiDate date;
-  date.year = year;
-  date.month = month;
-  date.day = day;
-
-  return date;
-}
-
-static void
-cdiDate_decode(CdiDate date, int *year, int *month, int *day)
-{
-  *year = date.year;
-  *month = date.month;
-  *day = date.day;
-}
-
-static CdiTime
-cdiTime_encode(int hour, int minute, int second, int ms)
-{
-  CdiTime time;
-  time.hour = hour;
-  time.minute = minute;
-  time.second = second;
-  time.ms = ms;
-
-  return time;
-}
-
-static void
-cdiTime_decode(CdiTime time, int *hour, int *minute, int *second, int *ms)
-{
-  *hour = time.hour;
-  *minute = time.minute;
-  *second = time.second;
-  *ms = time.ms;
-}
-
-static void
-cdiDateInit(CdiDate *date)
-{
-  date->year = 0;
-  date->month = 0;
-  date->day = 0;
-}
-
-static void
-cdiTimeInit(CdiTime *time)
-{
-  time->hour = 0;
-  time->minute = 0;
-  time->second = 0;
-  time->ms = 0;
-}
-
-static void
-cdiDatetimeInit(CdiDateTime *datetime)
-{
-  cdiDateInit(&datetime->date);
-  cdiTimeInit(&datetime->time);
-}
-
-static bool
-datetime_isEQ(const CdiDateTime datetime1, const CdiDateTime datetime2)
-{
-  // clang-format off
-  if (datetime1.date.year == datetime2.date.year
-      && datetime1.date.month == datetime2.date.month
-      && datetime1.date.day == datetime2.date.day
-      && datetime1.time.hour == datetime2.time.hour
-      && datetime1.time.minute == datetime2.time.minute
-      && datetime1.time.second == datetime2.time.second
-      && datetime1.time.ms == datetime2.time.ms)
-    return true;
-  // clang-format on
-
-  return false;
-}
-
-bool
-cdiDateTime_isNull(const CdiDateTime datetime)
-{
-  // clang-format off
-  if (datetime.date.year == 0
-      && datetime.date.month == 0
-      && datetime.date.day == 0
-      && datetime.time.hour == 0
-      && datetime.time.minute == 0
-      && datetime.time.second == 0
-      && datetime.time.ms == 0)
-    return true;
-  // clang-format on
-
-  return false;
-}
-
-static bool
-datetime_isNE(const CdiDateTime datetime1, const CdiDateTime datetime2)
-{
-  return !datetime_isEQ(datetime1, datetime2);
-}
-
-static void
+}static void
 taxisDefaultValue(taxis_t *taxisptr)
 {
   taxisptr->self = CDI_UNDEFID;
@@ -458,7 +311,7 @@ taxisDefVdatetime(int taxisID, CdiDateTime vdatetime)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (datetime_isNE(taxisptr->vdatetime, vdatetime))
+  if (cdiDateTime_isNE(taxisptr->vdatetime, vdatetime))
     {
       taxisptr->vdatetime = vdatetime;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
@@ -470,7 +323,7 @@ taxisDefRdatetime(int taxisID, CdiDateTime rdatetime)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (datetime_isNE(taxisptr->rdatetime, rdatetime))
+  if (cdiDateTime_isNE(taxisptr->rdatetime, rdatetime))
     {
       taxisptr->rdatetime = rdatetime;
 
@@ -838,7 +691,7 @@ taxisDefVdatetimeBounds(int taxisID, CdiDateTime vdatetime_lb, CdiDateTime vdate
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->has_bounds == false || datetime_isNE(taxisptr->vdatetime_lb, vdatetime_lb) || datetime_isNE(taxisptr->vdatetime_ub, vdatetime_ub))
+  if (taxisptr->has_bounds == false || cdiDateTime_isNE(taxisptr->vdatetime_lb, vdatetime_lb) || cdiDateTime_isNE(taxisptr->vdatetime_ub, vdatetime_ub))
     {
       taxisptr->vdatetime_lb = vdatetime_lb;
       taxisptr->vdatetime_ub = vdatetime_ub;
@@ -1637,11 +1490,11 @@ taxisCompareP(void *taxisptr1, void *taxisptr2)
 
   xassert(t1 && t2);
 
-  return !(t1->used == t2->used && t1->type == t2->type && datetime_isEQ(t1->vdatetime,  t2->vdatetime)
-           && datetime_isEQ(t1->rdatetime, t2->rdatetime) && t1->fdate == t2->fdate && t1->ftime == t2->ftime
+  return !(t1->used == t2->used && t1->type == t2->type && cdiDateTime_isEQ(t1->vdatetime,  t2->vdatetime)
+           && cdiDateTime_isEQ(t1->rdatetime, t2->rdatetime) && t1->fdate == t2->fdate && t1->ftime == t2->ftime
            && t1->calendar == t2->calendar && t1->unit == t2->unit && t1->fc_unit == t2->fc_unit && t1->numavg == t2->numavg
            && t1->climatology == t2->climatology && t1->has_bounds == t2->has_bounds
-           && datetime_isEQ(t1->vdatetime_lb, t2->vdatetime_lb) && datetime_isEQ(t1->vdatetime_ub, t2->vdatetime_ub));
+           && cdiDateTime_isEQ(t1->vdatetime_lb, t2->vdatetime_lb) && cdiDateTime_isEQ(t1->vdatetime_ub, t2->vdatetime_ub));
 }
 
 static int

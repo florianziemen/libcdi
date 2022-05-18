@@ -43,6 +43,7 @@ libcdi_la_SOURCES = 	 \
 	cdf_util.c	 \
 	cdf_util.h	 \
 	cdi.h	 	 \
+	cdi_datetime.c   \
 	cdi_datetime.h   \
 	cdi_error.c      \
 	cdi_limits.h	 \

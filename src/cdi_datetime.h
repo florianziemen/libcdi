@@ -1,0 +1,57 @@
+#ifndef CDI_DATETIME_H
+#define CDI_DATETIME_H
+
+#include <stdbool.h>
+
+// clang-format off
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct
+{
+  int   year;      // year of date
+  short month;     // month of date
+  short day;       // day of date
+} CdiDate;
+
+typedef struct
+{
+  short hour;      // hour part of time
+  short minute;	   // minute part of time
+  short second;	   // second part of time
+  short ms;        // milli-second part of time. 0<=ms<=999
+} CdiTime;
+
+typedef struct
+{
+  CdiDate date;    // date elements
+  CdiTime time;    // time elements
+} CdiDateTime;
+
+
+CdiDateTime cdiDateTime_set(int date, int time);
+CdiDate cdiDateSet(int date);
+CdiTime cdiTimeSet(int time);
+int cdiDateGet(CdiDate cdiDate);
+int cdiTimeGet(CdiTime cdiTime);
+
+  CdiDate cdiDate_encode(int year, int month, int day);
+void cdiDate_decode(CdiDate cdiDate, int *year, int *month, int *day);
+  CdiTime cdiTime_encode(int hour, int minute, int second, int ms);
+  void cdiTime_decode(CdiTime cdiTime, int *hour, int *minute, int *second, int *ms);
+
+void cdiDateInit(CdiDate *cdiDate);
+void cdiTimeInit(CdiTime *cdiTime);
+void cdiDatetimeInit(CdiDateTime *cdiDateTime);
+
+bool cdiDateTime_isNull(CdiDateTime cdiDateTime);
+
+#ifdef __cplusplus
+}
+#endif
+
+// clang-format on
+
+#endif /* CDI_DATETIME_H */
