@@ -117,24 +117,6 @@ julday_add_seconds(int64_t seconds, int64_t *julianDay, double *secondOfDay)
   adjust_seconds(julianDay, secondOfDay);
 }
 
-// subtract julianDay1/secondOfDay1 from julianDay2/secondOfDay2 and returns the result in seconds
-double
-julday_sub(int64_t julianDay1, double secondOfDay1, int64_t julianDay2, double secondOfDay2, int64_t *days, double *secs)
-{
-  *days = julianDay2 - julianDay1;
-  *secs = secondOfDay2 - secondOfDay1;
-
-  double sec_of_day = *secs;
-
-  adjust_seconds(days, &sec_of_day);
-
-  *secs = sec_of_day;
-
-  double seconds = (*days) * 86400.0 + sec_of_day;
-
-  return seconds;
-}
-
 double
 encode_secofday(int hour, int minute, int second, int ms)
 {

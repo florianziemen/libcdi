@@ -1458,40 +1458,36 @@ static int
 cgribexDefTimerange(int tsteptype, int factor, int calendar, int rdate, int rtime, int vdate, int vtime, int sdate, int stime,
                     int *pip1, int *pip2)
 {
-  int year, month, day, hour, minute, second, ms = 0;
-  int64_t days;
-  double secs;
+  CdiDateTime rDateTime;
+  rDateTime.date = cdiDateSet(rdate);
+  rDateTime.time = cdiTimeSet(rtime);
+  JulianDate julianDate1 = julianDate_encode(calendar, rDateTime);
 
-  cdiDecodeDate(rdate, &year, &month, &day);
-  cdiDecodeTime(rtime, &hour, &minute, &second);
-  int64_t julianDay1 = encode_julday(calendar, year, month, day);
-  double secondOfDay1 = encode_secofday(hour, minute, second, ms);
+  CdiDateTime vDateTime;
+  vDateTime.date = cdiDateSet(vdate);
+  vDateTime.time = cdiTimeSet(vtime);
+  JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
 
-  cdiDecodeDate(vdate, &year, &month, &day);
-  cdiDecodeTime(vtime, &hour, &minute, &second);
-  int64_t julianDay2 = encode_julday(calendar, year, month, day);
-  double secondOfDay2 = encode_secofday(hour, minute, second, ms);
-
-  (void) julday_sub(julianDay1, secondOfDay1, julianDay2, secondOfDay2, &days, &secs);
+  JulianDate julianDate = julianDate_sub(julianDate1, julianDate2);
 
   int timerange = -1;
   int ip1 = 0, ip2 = 0;
-  if (!(int) (fmod(days * 86400.0 + secs, factor)))
+  if (!(int) (fmod(julianDate_seconds(julianDate), factor)))
     {
-      const int ip = (int) ((days * 86400.0 + secs) / factor);
+      const int ip = (int) lround(julianDate_seconds(julianDate) / factor);
       if ((ip > 255) && (tsteptype == TSTEP_INSTANT)) tsteptype = TSTEP_INSTANT3;
 
       int ipx = 0;
       if (sdate != 0 && (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF))
         {
-          cdiDecodeDate(sdate, &year, &month, &day);
-          cdiDecodeTime(stime, &hour, &minute, &second);
-          julianDay2 = encode_julday(calendar, year, month, day);
-          secondOfDay2 = encode_secofday(hour, minute, second, ms);
+          CdiDateTime sDateTime;
+          sDateTime.date = cdiDateSet(sdate);
+          sDateTime.time = cdiTimeSet(stime);
+          julianDate2 = julianDate_encode(calendar, sDateTime);
 
-          (void) julday_sub(julianDay1, secondOfDay1, julianDay2, secondOfDay2, &days, &secs);
+          julianDate = julianDate_sub(julianDate1, julianDate2);
 
-          ipx = (int) ((days * 86400.0 + secs) / factor);
+          ipx = (int) lround(julianDate_seconds(julianDate) / factor);
         }
 
       // clang-format off

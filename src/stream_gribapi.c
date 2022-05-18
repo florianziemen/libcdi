@@ -1998,14 +1998,11 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
                       int calendar, int gcinit)
 {
   int status = -1;
-  int year, month, day, hour, minute, second, ms = 0;
-  int64_t days;
-  double secs;
 
-  cdiDecodeDate(fdate, &year, &month, &day);
-  cdiDecodeTime(ftime, &hour, &minute, &second);
-  int64_t julianDay1 = encode_julday(calendar, year, month, day);
-  double secondOfDay1 = encode_secofday(hour, minute, second, ms);
+  CdiDateTime fDateTime;
+  fDateTime.date = cdiDateSet(fdate);
+  fDateTime.time = cdiTimeSet(ftime);
+  JulianDate julianDate1 = julianDate_encode(calendar, fDateTime);
 
   if (vdate == 0 && vtime == 0)
     {
@@ -2013,40 +2010,40 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
       vtime = ftime;
     }
 
-  cdiDecodeDate(vdate, &year, &month, &day);
-  cdiDecodeTime(vtime, &hour, &minute, &second);
-  int64_t julianDay2 = encode_julday(calendar, year, month, day);
-  double secondOfDay2 = encode_secofday(hour, minute, second, ms);
+  CdiDateTime vDateTime;
+  vDateTime.date = cdiDateSet(vdate);
+  vDateTime.time = cdiTimeSet(vtime);
+  JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
 
-  (void) julday_sub(julianDay1, secondOfDay1, julianDay2, secondOfDay2, &days, &secs);
+  JulianDate julianDate = julianDate_sub(julianDate1, julianDate2);
 
   const int factor = getTimeunitFactor(timeunit);
 
-  if (!(int) (fmod(days * 86400.0 + secs, factor)))
+  if (!(int) (fmod(julianDate_seconds(julianDate), factor)))
     {
       const int proDefTempNum
           = gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
       gribapiDefStepUnits(editionNumber, gh, timeunit, proDefTempNum, gcinit);
 
       long startStep = 0;
-      const double endStepF = (days * 86400.0 + secs) / factor;
+      const double endStepF = julianDate_seconds(julianDate) / factor;
       const long maxStep = (editionNumber > 1) ? INT_MAX : 65000;
       if (endStepF > maxStep) return status;
-      long endStep = (long) endStepF;
+      long endStep = lround(endStepF);
 
       bool hasStartDate = (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF
                            || tsteptype == TSTEP_MIN || tsteptype == TSTEP_MAX || tsteptype == TSTEP_RMS || tsteptype == TSTEP_SD
                            || tsteptype == TSTEP_COV || tsteptype == TSTEP_RATIO || tsteptype == TSTEP_SUM);
       if (sdate != 0 && hasStartDate)
         {
-          cdiDecodeDate(sdate, &year, &month, &day);
-          cdiDecodeTime(stime, &hour, &minute, &second);
-          julianDay2 = encode_julday(calendar, year, month, day);
-          secondOfDay2 = encode_secofday(hour, minute, second, ms);
+          CdiDateTime sDateTime;
+          sDateTime.date = cdiDateSet(sdate);
+          sDateTime.time = cdiTimeSet(stime);
+          julianDate2 = julianDate_encode(calendar, sDateTime);
 
-          (void) julday_sub(julianDay1, secondOfDay1, julianDay2, secondOfDay2, &days, &secs);
+          julianDate = julianDate_sub(julianDate1, julianDate2);
 
-          startStep = (long) ((days * 86400.0 + secs) / factor);
+          startStep = lround(julianDate_seconds(julianDate) / factor);
         }
 
       if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 1), 0);

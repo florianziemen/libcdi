@@ -21,6 +21,7 @@ CdiDateTime julianDate_decode(int calendar, JulianDate julianDate);
 JulianDate julianDate_add_seconds(JulianDate julianDate, int64_t seconds);
 JulianDate julianDate_add(JulianDate julianDate1, JulianDate julianDate2);
 JulianDate julianDate_sub(JulianDate julianDate1, JulianDate julianDate2);
+double julianDate_seconds(JulianDate julianDate);
 
 double secofday_encode(CdiTime time);
 CdiTime secofday_decode(double secondOfDay);

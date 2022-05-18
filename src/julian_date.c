@@ -106,3 +106,9 @@ julianDate_sub(JulianDate julianDate1, JulianDate julianDate2)
 
   return julianDate;
 }
+
+double
+julianDate_seconds(JulianDate julianDate)
+{
+  return julianDate.julianDay * 86400.0 + julianDate.secondOfDay;
+}
