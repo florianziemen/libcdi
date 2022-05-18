@@ -107,6 +107,7 @@ files="async_worker.c \
    cdf_lazy_grid.c \
    cdi_cksum.c \
    cdi_error.c \
+   cdi_datetime.c \
    cdi_int.c \
    cdi_util.c \
    cgribexlib.c \
@@ -156,7 +157,6 @@ files="async_worker.c \
    swap.c \
    table.c \
    taxis.c \
-   timebase.c \
    tsteps.c \
    util.c \
    varscan.c \

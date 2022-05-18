@@ -62,8 +62,8 @@ strIsEqual(const char *x, const char *y)
 #ifndef _BASETIME_H
 #include "basetime.h"
 #endif
-#ifndef TIMEBASE_H
-#include "timebase.h"
+#ifndef JULIAN_DATE_H
+#include "julian_date.h"
 #endif
 #ifndef TAXIS_H
 #include "taxis.h"

@@ -1,10 +1,9 @@
 #ifndef JULIAN_DATE_H
 #define JULIAN_DATE_H
 
-// clang-format off
-
-#include "cdi.h"
 #include "calendar.h"
+
+// clang-format off
 
 #ifdef __cplusplus
 extern "C" {

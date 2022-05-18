@@ -133,8 +133,6 @@ libcdi_la_SOURCES = 	 \
 	tablepar.h	 \
 	taxis.c          \
 	taxis.h	         \
-	timebase.c 	 \
-	timebase.h	 \
 	tsteps.c         \
 	util.c         	 \
 	varscan.c      	 \

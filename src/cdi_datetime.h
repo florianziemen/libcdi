@@ -46,6 +46,8 @@ void cdiDate_init(CdiDate *cdiDate);
 void cdiTime_init(CdiTime *cdiTime);
 void cdiDateTime_init(CdiDateTime *cdiDateTime);
 
+bool cdiDateTime_isEQ(CdiDateTime cdiDateTime1, CdiDateTime cdiDateTime2);
+bool cdiDateTime_isNE(CdiDateTime cdiDateTime1, CdiDateTime cdiDateTime2);
 bool cdiDateTime_isNull(CdiDateTime cdiDateTime);
 
 #ifdef __cplusplus

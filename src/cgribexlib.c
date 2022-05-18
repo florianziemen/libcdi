@@ -33,7 +33,7 @@
 #include "dmemory.h"
 #include "dtypes.h"
 #include "calendar.h"
-#include "timebase.h"
+#include "julian_date.h"
 
 #ifndef CGRIBEX_TEMPLATES_H
 #define CGRIBEX_TEMPLATES_H

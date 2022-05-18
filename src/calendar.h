@@ -1,16 +1,17 @@
 #ifndef CALENDAR_H
 #define CALENDAR_H
 
-// clang-format off
-
 #include "cdi.h"
+#include <stdint.h>    // int64_t
+
+// clang-format off
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int64_t calDay_encode(int calendar, CdiDate date);
-CdiDate calDay_decode(int calendar, int64_t julday);
+void decode_calday(int daysPerYear, int days, int *year, int *month, int *day);
+int64_t encode_calday(int daysPerYear, int year, int month, int day);
 
 int calendar_dpy(int calendar);
 int days_per_year(int calendar, int year);
