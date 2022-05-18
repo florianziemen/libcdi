@@ -1,4 +1,44 @@
 #include "cdi_datetime.h"
+#include <stdlib.h>
+
+// ==================================================================
+void
+cdiDecodeDate(int date, int *year, int *month, int *day)
+{
+  int iyear = date / 10000;
+  *year = iyear;
+  int idate = date - iyear * 10000;
+  if (idate < 0) idate = -idate;
+  int imonth = idate / 100;
+  *month = imonth;
+  *day = idate - imonth * 100;
+}
+
+int
+cdiEncodeDate(int year, int month, int day)
+{
+  int iyear = abs(year);
+  int date = iyear * 10000 + month * 100 + day;
+  if (year < 0) date = -date;
+
+  return date;
+}
+
+void
+cdiDecodeTime(int time, int *hour, int *minute, int *second)
+{
+  int ihour = time / 10000, itime = time - ihour * 10000, iminute = itime / 100;
+  *hour = ihour;
+  *minute = iminute;
+  *second = itime - iminute * 100;
+}
+
+int
+cdiEncodeTime(int hour, int minute, int second)
+{
+  return hour * 10000 + minute * 100 + second;
+}
+// ==================================================================
 
 CdiDate
 cdiDateSet(int date)

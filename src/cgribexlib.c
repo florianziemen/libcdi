@@ -1989,8 +1989,9 @@ double decfp2(int kexp, int kmant)
 #include <stdarg.h>
 #include <stdint.h>
 
+
 static
-CdiDate gribRefDate(const int *isec1)
+void gribDecodeRefDate(const int *isec1, int *year, int *month, int *day)
 {
   int ryear = ISEC1_Year;
 
@@ -2004,18 +2005,18 @@ CdiDate gribRefDate(const int *isec1)
     }
   else
     {
-      // if (century != 0)
+      // if ( century != 0 )
       {
-        if (ryear == 100)
+        if ( ryear == 100 )
           {
             ryear = 0;
             century += 1;
           }
 
-        if (ryear != 255)
+        if ( ryear != 255 )
           {
             ryear = century*100 + ryear;
-            if (ISEC1_Century < 0) ryear = -ryear;
+            if ( ISEC1_Century < 0 ) ryear = -ryear;
           }
         else
           {
@@ -2024,34 +2025,33 @@ CdiDate gribRefDate(const int *isec1)
       }
     }
 
-  CdiDate date;
-  date.year  = ryear;
-  date.month = ISEC1_Month;
-  date.day   = ISEC1_Day;
+  *year  = ryear;
+  *month = ISEC1_Month;
+  *day   = ISEC1_Day;
+}
 
-  return date;
+
+int gribRefDate(const int *isec1)
+{
+  int ryear, rmonth, rday;
+  gribDecodeRefDate(isec1, &ryear, &rmonth, &rday);
+  return cdiEncodeDate(ryear, rmonth, rday);
 }
 
 static
-CdiTime gribRefTime(const int *isec1)
+void gribDecodeRefTime(const int *isec1, int *hour, int *minute, int *second)
 {
-  CdiTime time;
-  time.hour = ISEC1_Hour;
-  time.minute = ISEC1_Minute;
-  time.second = 0;
-  time.ms = 0;
-
-  return time;
+  *hour = ISEC1_Hour;
+  *minute = ISEC1_Minute;
+  *second = 0;
 }
 
 
-CdiDateTime gribRefDateTime(const int *isec1)
+int gribRefTime(const int *isec1)
 {
-  CdiDateTime dt;
-  dt.date = gribRefDate(isec1);
-  dt.time = gribRefTime(isec1);
-
-  return dt;
+  int rhour, rminute, rsecond;
+  gribDecodeRefTime(isec1, &rhour, &rminute, &rsecond);
+  return cdiEncodeTime(rhour, rminute, rsecond);
 }
 
 
@@ -2101,7 +2101,7 @@ void gribDateTimeX(int *isec1, int *date, int *time, int *startDate, int *startT
   *startDate = 0;
   *startTime = 0;
 
-  CdiDateTime rDateTime = gribRefDateTime(isec1);
+  CdiDateTime rDateTime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
 
   int64_t time_period = 0, time_period_x = 0;
   if (ISEC1_TimeRange == 10)
