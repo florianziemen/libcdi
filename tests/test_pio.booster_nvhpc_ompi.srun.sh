@@ -3,7 +3,7 @@
 #SBATCH -t 00:10:00
 #SBATCH --nodes 2
 #SBATCH --tasks-per-node 48
-#SBATCH --partition develbooster
+#SBATCH --partition booster
 #SBATCH --account highresmonsoon
 #SBATCH --output ./LOG.%x.%j.o
 #SBATCH --error ./LOG.%x.%j.o
@@ -19,7 +19,7 @@ qprefix="/p/scratch/highresmonsoon/cdi-pio-test_dir"
 mkdir -p "$qprefix"
 qprefix="$qprefix/files_pio_write"
 
-export SCT_PROC_CHOICE=SCT_REDUCE_ALL
+export SCT_PROC_CHOICE=SCT_SELECT_ALL
 # export SCT_PROC_CHOICE=SCT_SELECT_ALL
 export SCT_CALLSTATS=1
 
@@ -32,5 +32,5 @@ export SCT_CALLSTATS=1
 time ../libtool --mode=execute srun \
   ./pio_write_deco2d.parallel "-qprefix=$qprefix" -qpio-role-scheme=last \
   -c -m 768 -n 384 -z 95 -t 10 -y 120 -s 7 \
-  -f nc4 -p PIO_MPI_FW_AT_ALL -w 16
+  -f grb2 -p PIO_MPI_FW_AT_ALL -w 16
 set +x

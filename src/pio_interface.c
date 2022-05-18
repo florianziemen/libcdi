@@ -555,21 +555,25 @@ void new_context(const char *context_name, MPI_Comm comm)
   context_handle = sct_new_context(context_name, comm);
   sct_context_start(context_handle);
 
-  timer_ioTotal          = sct_new_timer("IO servers total");
-  timer_getTimeStepData  = sct_new_timer("getTimeStepData");
-  timer_winStart         = sct_new_timer("window start");
-  timer_mpi_get          = sct_new_timer("MPI_Get");
-  timer_winComplete      = sct_new_timer("window complete");
-  timer_readgetbuffers   = sct_new_timer("read getbuffers");
-  timer_writeStream      = sct_new_timer("write stream");
-  timer_preWriteChunk    = sct_new_timer("prepare write chunk");
-  timer_writeDeco        = sct_new_timer("create write deco");
-  timer_yaxt_exchange    = sct_new_timer("YAXT exchange1");
-  timer_writeChunk       = sct_new_timer("write chunk");
-  timer_writeSlice       = sct_new_timer("write slice");
-  timer_mpiAllGather     = sct_new_timer("MPI_Allgather");
-  timer_mpiFileWriteAtAll= sct_new_timer("MPI_File_write_at_all");
-  timer_postwritebatch   = sct_new_timer("post write batch");
+  timer_ioTotal             = sct_new_timer("IO servers total");
+  timer_getTimeStepData     = sct_new_timer(" L getTimeStepData");
+  timer_winStart            = sct_new_timer("    L window start");
+  timer_mpi_get             = sct_new_timer("    L MPI_Get");
+  timer_winComplete         = sct_new_timer("    L window complete");
+  timer_readgetbuffers      = sct_new_timer("    L read getbuffers");
+  timer_defTimeStep         = sct_new_timer("       L stream define timestep");
+  timer_StreamMappingNew    = sct_new_timer("       L stream mapping create");
+  timer_writeStream         = sct_new_timer("       L write GRIB/NetCDF stream");
+  timer_preWriteChunk       = sct_new_timer("          L prepare write chunk");
+  timer_writeDeco           = sct_new_timer("          L create write deco");
+  timer_yaxt_exchange       = sct_new_timer("          L YAXT exchange1");
+  timer_streamWriteVarChunk = sct_new_timer("          L NetCDF streamWriteVarChunk(F)");
+  timer_writeSlice          = sct_new_timer("          L write slice to dataset");
+  timer_cdipioFileWrite     = sct_new_timer("          L cdipio file write");
+  timer_mpiAllGather        = sct_new_timer("            L MPI_Allgather");
+  timer_mpiFileWriteAtAll   = sct_new_timer("            L MPI_File_write_at_all");
+  timer_postwritebatch      = sct_new_timer(" L post write batch");
+  
 }
 
 MPI_Comm
