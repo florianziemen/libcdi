@@ -182,7 +182,7 @@ setForecastTime(const char *timestr, taxis_t *taxis)
   if (len != 0)
     {
       const CdiDateTime datetime = scan_time_string(timestr);
-      taxis->fdate = cdiDate_get(datetime.date);
+      taxis->fdate = (int)cdiDate_get(datetime.date);
       taxis->ftime = cdiTime_get(datetime.time);
      }
   else
@@ -260,7 +260,7 @@ setBaseTime(const char *timeunits, taxis_t *taxis)
           else if (taxistype == TAXIS_RELATIVE)
             {
               taxis->rdatetime = scan_time_string(tu + pos);
-              if (CDI_Debug) Message("rdate = %d  rtime = %d", cdiDate_get(taxis->rdatetime.date), cdiTime_get(taxis->rdatetime.time));
+              if (CDI_Debug) Message("rdate = %d  rtime = %d", (int)cdiDate_get(taxis->rdatetime.date), cdiTime_get(taxis->rdatetime.time));
             }
         }
     }

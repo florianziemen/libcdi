@@ -190,7 +190,7 @@ gribapiGetValidityDateTime(grib_handle *gh, int *vDate, int *vTime, int *sDate, 
              // significanceOfReferenceTime == 3. I would recommend replacing this condition with `if(!gribapiTimeIsFC())`.
     {
       CdiDateTime vDateTime = gribapiGetDataDateTime(gh);
-      *vDate = cdiDate_get(vDateTime.date);
+      *vDate = (int)cdiDate_get(vDateTime.date);
       *vTime = cdiTime_get(vDateTime.time);
     }
   else
@@ -213,7 +213,7 @@ gribapiGetValidityDateTime(grib_handle *gh, int *vDate, int *vTime, int *sDate, 
             JulianDate julianDate2 = julianDate_add_seconds(julianDate, timeUnitFactor * startStep);
             CdiDateTime sDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate2);
             sDateTime.time.second = 0;
-            *sDate = cdiDate_get(sDateTime.date);
+            *sDate = (int)cdiDate_get(sDateTime.date);
             *sTime = cdiTime_get(sDateTime.time);
           }
 
@@ -221,7 +221,7 @@ gribapiGetValidityDateTime(grib_handle *gh, int *vDate, int *vTime, int *sDate, 
           rDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate);
         }
 
-      *vDate = cdiDate_get(rDateTime.date);
+      *vDate = (int)cdiDate_get(rDateTime.date);
       *vTime = cdiTime_get(rDateTime.time);
     }
 }
@@ -1055,7 +1055,7 @@ fdbScanTimesteps(stream_t *streamptr)
           taxis->rdatetime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
-          taxis->fdate = cdiDate_get(taxis->rdatetime.date);
+          taxis->fdate = (int)cdiDate_get(taxis->rdatetime.date);
           taxis->ftime = cdiTime_get(taxis->rdatetime.time);
           taxis->sdate = sDate;
           taxis->stime = sTime;
@@ -1217,7 +1217,7 @@ gribapiScanTimestep1(stream_t *streamptr)
           taxis->rdatetime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
-          taxis->fdate = cdiDate_get(taxis->rdatetime.date);
+          taxis->fdate = (int)cdiDate_get(taxis->rdatetime.date);
           taxis->ftime = cdiTime_get(taxis->rdatetime.time);
           taxis->sdate = sDate;
           taxis->stime = sTime;
@@ -1379,7 +1379,7 @@ gribapiScanTimestep2(stream_t *streamptr)
             {
               taxis->type = TAXIS_ABSOLUTE;
             }
-          taxis->fdate = cdiDate_get(taxis->rdatetime.date);
+          taxis->fdate = (int)cdiDate_get(taxis->rdatetime.date);
           taxis->ftime = cdiTime_get(taxis->rdatetime.time);
           taxis->vdatetime = cdiDateTime_set(vDate, vTime);
           taxis->sdate = sDate;
@@ -1576,7 +1576,7 @@ gribapiScanTimestep(stream_t *streamptr)
                 {
                   taxis->type = TAXIS_ABSOLUTE;
                 }
-              taxis->fdate = cdiDate_get(taxis->rdatetime.date);
+              taxis->fdate = (int)cdiDate_get(taxis->rdatetime.date);
               taxis->ftime = cdiTime_get(taxis->rdatetime.time);
               taxis->vdatetime = cdiDateTime_set(vDate, vTime);
               taxis->sdate = sDate;

@@ -254,7 +254,7 @@ main(void)
       JulianDate julianDate = julianDate_encode(calendar, dt);
 
       dt = julianDate_decode(calendar, julianDate);
-      int vdate = cdiDate_get(dt.date);
+      int vdate = (int)cdiDate_get(dt.date);
       int vtime = cdiTime_get(dt.time);
 
       if (vdate0 != vdate || vtime0 != vtime)
@@ -264,7 +264,7 @@ main(void)
       julianDate = julianDate_encode(calendar, dt);
 
       dt = julianDate_decode(calendar, julianDate);
-      vdate0 = cdiDate_get(dt.date);
+      vdate0 = (int)cdiDate_get(dt.date);
       vtime0 = cdiTime_get(dt.time);
     }
 
@@ -311,7 +311,7 @@ main(void)
 
       julianDate = julianDate_add_seconds(julianDate, ijulinc);
       dt = julianDate_decode(calendar, julianDate);
-      int vdate = cdiDate_get(dt.date);
+      int vdate = (int)cdiDate_get(dt.date);
       int vtime = cdiTime_get(dt.time);
 
       if (vdate0 != vdate || vtime0 != vtime)

@@ -114,16 +114,6 @@ cdiDate_decode(CdiDate cdiDate, int *year, int *month, int *day)
   *day = cdiDate.day;
 }
 
-int64_t
-cdiDate_to_int64(CdiDate cdiDate)
-{
-  int64_t iyear = abs(cdiDate.year);
-  int64_t date = iyear * 10000 + cdiDate.month * 100 + cdiDate.day;
-  if (cdiDate.year < 0) date = -date;
-
-  return date;
-}
-
 CdiTime
 cdiTime_encode(int hour, int minute, int second, int ms)
 {
