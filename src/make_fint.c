@@ -407,7 +407,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
   regmatch_t funcargfull[MAX_FUNC_ARGS];
   regmatch_t funcargname[MAX_FUNC_ARGS];
   int  funcargtype[MAX_FUNC_ARGS];
-  /* char *strsort[99999]; */
+  // char *strsort[99999];
   char timestr[30];
   struct tm *date_and_time;
   regmatch_t *reMatch = NULL;
@@ -549,7 +549,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         "#  pragma GCC diagnostic ignored \"-Wmissing-prototypes\"\n"
         "#endif\n"
         "\n", fpint);
-
+  /*
   fputs("static inline\n"
         "int DateType_c2f(DateType value_DateType)\n"
         "{\n"
@@ -557,7 +557,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         "  return (int) value_DateType;\n"
         "}\n"
         "\n", fpint);
-
+  */
   fputs("static inline\n"
         "int SizeType_c2f(SizeType value_SizeType)\n"
         "{\n"

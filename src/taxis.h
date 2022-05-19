@@ -17,11 +17,11 @@ typedef struct
   short has_bounds;
   int datatype;             // datatype
   int type;                 // time type
-  int64_t sdate;            // start date
+  int sdate;                // start date
   int stime;                // start time
   CdiDateTime vdatetime;    // verification date/time
   CdiDateTime rdatetime;    // reference date/time
-  int64_t fdate;            // forecast reference date
+  int fdate;                // forecast reference date
   int ftime;                // forecast reference time
   int calendar;
   int unit;                 // time unit
@@ -38,7 +38,7 @@ typedef struct
 
 
 //      taxisInqSdate: Get the start date
-int64_t taxisInqSdate(int taxisID);
+int taxisInqSdate(int taxisID);
 
 //      taxisInqStime: Get the start time
 int taxisInqStime(int taxisID);

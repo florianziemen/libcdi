@@ -172,14 +172,8 @@ int     cdiEncodeParam(int pnum, int pcat, int pdis);
 /* date format:  YYYYMMDD */
 /* time format:  hhmmss   */
 
-#ifndef CDI_DATE_TYPE
-#define CDI_DATE_TYPE int
-#endif
-
-typedef CDI_DATE_TYPE DateType; // Must be signed integer (int32_t or int64_t)!
-
-void    cdiDecodeDate(DateType date, int *year, int *month, int *day);
-DateType cdiEncodeDate(int year, int month, int day);
+void    cdiDecodeDate(int date, int *year, int *month, int *day);
+int     cdiEncodeDate(int year, int month, int day);
 
 void    cdiDecodeTime(int time, int *hour, int *minute, int *second);
 int     cdiEncodeTime(int hour, int minute, int second);

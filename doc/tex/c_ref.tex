@@ -855,7 +855,7 @@ taxisDefRdate
 \fi
 }}
 \begin{verbatim}
-    void taxisDefRdate(int taxisID, DateType rdate);
+    void taxisDefRdate(int taxisID, int rdate);
 \end{verbatim}
 
 Define the reference date
@@ -885,7 +885,7 @@ taxisDefVdate
 \fi
 }}
 \begin{verbatim}
-    void taxisDefVdate(int taxisID, DateType vdate);
+    void taxisDefVdate(int taxisID, int vdate);
 \end{verbatim}
 
 Define the verification date
@@ -945,7 +945,7 @@ taxisInqRdate
 \fi
 }}
 \begin{verbatim}
-    DateType taxisInqRdate(int taxisID);
+    int taxisInqRdate(int taxisID);
 \end{verbatim}
 
 Get the reference date
@@ -975,7 +975,7 @@ taxisInqVdate
 \fi
 }}
 \begin{verbatim}
-    DateType taxisInqVdate(int taxisID);
+    int taxisInqVdate(int taxisID);
 \end{verbatim}
 
 Get the verification date

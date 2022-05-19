@@ -1,3 +1,8 @@
+2022-05-19  Uwe Schulzweida
+
+	* Added support for milli seconds
+	* Changed DateType back to int
+
 2022-04-01  Uwe Schulzweida
 
 	* cdf_set_grid_to_similar_vars: set ydimid to CDI_UNDEFID for GRID_GAUSSIAN_REDUCED (bug fix)

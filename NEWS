@@ -1,6 +1,11 @@
 CDI NEWS
 --------
 
+Version 2.1.0 (11 October 2021):
+
+   New features:
+     * Changed DateType back to int
+
 Version 2.0.0 (11 October 2021):
 
    New features:
