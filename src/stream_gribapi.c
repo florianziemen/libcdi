@@ -15,7 +15,6 @@
 #include "varscan.h"
 #include "datetime.h"
 #include "vlist.h"
-#include "calendar.h"
 #include "subtype.h"
 
 #include "cgribex.h" /* gribGetSize, gribRead, gribGetZip, GRIB1_LTYPE_99 */

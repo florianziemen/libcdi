@@ -79,10 +79,14 @@ cdiDateTime_set(int date, int time)
   return cdiDateTime;
 }
 
-int
+int64_t
 cdiDate_get(CdiDate cdiDate)
 {
-  return cdiEncodeDate(cdiDate.year, cdiDate.month, cdiDate.day);
+  int64_t iyear = abs(cdiDate.year);
+  int64_t date = iyear * 10000 + cdiDate.month * 100 + cdiDate.day;
+  if (cdiDate.year < 0) date = -date;
+
+  return date;
 }
 
 int

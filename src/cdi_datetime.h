@@ -31,12 +31,10 @@ typedef struct
   CdiTime time;    // time elements
 } CdiDateTime;
 
-int64_t cdiDate_to_int64(CdiDate cdiDate);
-
 CdiDateTime cdiDateTime_set(int date, int time);
 CdiDate cdiDate_set(int date);
 CdiTime cdiTime_set(int time);
-int cdiDate_get(CdiDate cdiDate);
+int64_t cdiDate_get(CdiDate cdiDate);
 int cdiTime_get(CdiTime cdiTime);
 
 CdiDate cdiDate_encode(int year, int month, int day);

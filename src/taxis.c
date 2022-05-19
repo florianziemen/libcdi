@@ -1,7 +1,6 @@
 #include <stddef.h>
 
 #include "cdi.h"
-#include "calendar.h"
 #include "dmemory.h"
 #include "error.h"
 #include "taxis.h"
@@ -1378,14 +1377,14 @@ cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis)
         }
       else if (taxis->unit == TUNIT_MONTH)
         {
-          int64_t xdate = cdiDate_to_int64(datetime.date);
+          int64_t xdate = cdiDate_get(datetime.date);
           timevalue = xdate / 100 + copysign((double) (datetime.date.day != 0) * 0.5, (double) xdate);
         }
       else
         {
           int hour, minute, second, ms;
           cdiTime_decode(datetime.time, &hour, &minute, &second, &ms);
-          int64_t xdate = cdiDate_to_int64(datetime.date);
+          int64_t xdate = cdiDate_get(datetime.date);
           timevalue = copysign(1.0, (double) xdate) * (fabs((double) xdate) + (hour * 3600 + minute * 60 + second) / 86400.0);
         }
     }
