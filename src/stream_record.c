@@ -174,8 +174,8 @@ streamDefRecord(int streamID, int varID, int levelID)
   record->levelID = levelID;
   record->param = param;
   record->ilevel = ilevel;
-  record->vdate = cdiDateGet(streamptr->tsteps[tsID].taxis.vdatetime.date);
-  record->vtime = cdiTimeGet(streamptr->tsteps[tsID].taxis.vdatetime.time);
+  record->vdate = cdiDate_get(streamptr->tsteps[tsID].taxis.vdatetime.date);
+  record->vtime = cdiTime_get(streamptr->tsteps[tsID].taxis.vdatetime.time);
   record->gridID = gridID;
   record->prec = vlistInqVarDatatype(vlistID, varID);
 

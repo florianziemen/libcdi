@@ -606,7 +606,7 @@ extWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pnum, &pcat, &pdis);
 
   int header[4];
-  header[0] = cdiDateGet(streamptr->tsteps[tsID].taxis.vdatetime.date);
+  header[0] = cdiDate_get(streamptr->tsteps[tsID].taxis.vdatetime.date);
   header[1] = pnum;
   header[2] = (int) lround(zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
   const int gridID = vlistInqVarGrid(vlistID, varID);

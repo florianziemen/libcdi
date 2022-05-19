@@ -2119,16 +2119,16 @@ void gribDateTimeX(int *isec1, int *date, int *time, int *startDate, int *startT
           JulianDate julianDate2 = julianDate_add_seconds(julianDate, timeUnitFactor * time_period_x);
           CdiDateTime sDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate2);
           sDateTime.time.second = 0;
-          *startDate = cdiDateGet(sDateTime.date);
-          *startTime = cdiTimeGet(sDateTime.time);
+          *startDate = cdiDate_get(sDateTime.date);
+          *startTime = cdiTime_get(sDateTime.time);
         }
       
       julianDate = julianDate_add_seconds(julianDate, timeUnitFactor * time_period);
       rDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate);
     }
 
-  *date = cdiDateGet(rDateTime.date);
-  *time = cdiTimeGet(rDateTime.time);
+  *date = cdiDate_get(rDateTime.date);
+  *time = cdiTime_get(rDateTime.time);
 }
 
 

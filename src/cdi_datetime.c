@@ -41,7 +41,7 @@ cdiEncodeTime(int hour, int minute, int second)
 // ==================================================================
 
 CdiDate
-cdiDateSet(int date)
+cdiDate_set(int date)
 {
   int year, month, day;
   cdiDecodeDate(date, &year, &month, &day);
@@ -55,7 +55,7 @@ cdiDateSet(int date)
 }
 
 CdiTime
-cdiTimeSet(int time)
+cdiTime_set(int time)
 {
   int hour, minute, second, ms = 0;
   cdiDecodeTime(time, &hour, &minute, &second);
@@ -73,20 +73,20 @@ CdiDateTime
 cdiDateTime_set(int date, int time)
 {
   CdiDateTime cdiDateTime;
-  cdiDateTime.date = cdiDateSet(date);
-  cdiDateTime.time = cdiTimeSet(time);
+  cdiDateTime.date = cdiDate_set(date);
+  cdiDateTime.time = cdiTime_set(time);
 
   return cdiDateTime;
 }
 
 int
-cdiDateGet(CdiDate cdiDate)
+cdiDate_get(CdiDate cdiDate)
 {
   return cdiEncodeDate(cdiDate.year, cdiDate.month, cdiDate.day);
 }
 
 int
-cdiTimeGet(CdiTime cdiTime)
+cdiTime_get(CdiTime cdiTime)
 {
   return cdiEncodeTime(cdiTime.hour, cdiTime.minute, cdiTime.second);
 }
@@ -108,6 +108,16 @@ cdiDate_decode(CdiDate cdiDate, int *year, int *month, int *day)
   *year = cdiDate.year;
   *month = cdiDate.month;
   *day = cdiDate.day;
+}
+
+int64_t
+cdiDate_to_int64(CdiDate cdiDate)
+{
+  int64_t iyear = abs(cdiDate.year);
+  int64_t date = iyear * 10000 + cdiDate.month * 100 + cdiDate.day;
+  if (cdiDate.year < 0) date = -date;
+
+  return date;
 }
 
 CdiTime

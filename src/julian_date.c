@@ -254,8 +254,8 @@ main(void)
       JulianDate julianDate = julianDate_encode(calendar, dt);
 
       dt = julianDate_decode(calendar, julianDate);
-      int vdate = cdiDateGet(dt.date);
-      int vtime = cdiTimeGet(dt.time);
+      int vdate = cdiDate_get(dt.date);
+      int vtime = cdiTime_get(dt.time);
 
       if (vdate0 != vdate || vtime0 != vtime)
         printf("%4d %8d %4d %8d %4d %9d %g\n", ++j, vdate0, vtime0, vdate, vtime, (int)julianDate.julianDay, julianDate.secondOfDay);
@@ -264,8 +264,8 @@ main(void)
       julianDate = julianDate_encode(calendar, dt);
 
       dt = julianDate_decode(calendar, julianDate);
-      vdate0 = cdiDateGet(dt.date);
-      vtime0 = cdiTimeGet(dt.time);
+      vdate0 = cdiDate_get(dt.date);
+      vtime0 = cdiTime_get(dt.time);
     }
 
   printf("stop time: %8d %4d\n", vdate0, vtime0);
@@ -311,8 +311,8 @@ main(void)
 
       julianDate = julianDate_add_seconds(julianDate, ijulinc);
       dt = julianDate_decode(calendar, julianDate);
-      int vdate = cdiDateGet(dt.date);
-      int vtime = cdiTimeGet(dt.time);
+      int vdate = cdiDate_get(dt.date);
+      int vtime = cdiTime_get(dt.time);
 
       if (vdate0 != vdate || vtime0 != vtime)
         printf("%4d %8d %4d %8d %4d %9d %g\n", ++j, vdate0, vtime0, vdate, vtime, (int)julianDate.julianDay, julianDate.secondOfDay);
