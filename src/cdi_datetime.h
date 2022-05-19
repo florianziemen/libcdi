@@ -31,8 +31,8 @@ typedef struct
   CdiTime time;    // time elements
 } CdiDateTime;
 
-CdiDateTime cdiDateTime_set(int date, int time);
-CdiDate cdiDate_set(int date);
+CdiDateTime cdiDateTime_set(int64_t date, int time);
+CdiDate cdiDate_set(int64_t date);
 CdiTime cdiTime_set(int time);
 int64_t cdiDate_get(CdiDate cdiDate);
 int cdiTime_get(CdiTime cdiTime);

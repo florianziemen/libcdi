@@ -41,10 +41,15 @@ cdiEncodeTime(int hour, int minute, int second)
 // ==================================================================
 
 CdiDate
-cdiDate_set(int date)
+cdiDate_set(int64_t date)
 {
-  int year, month, day;
-  cdiDecodeDate(date, &year, &month, &day);
+  int64_t iyear = date / 10000;
+  int year = iyear;
+  int64_t idate = date - iyear * 10000;
+  if (idate < 0) idate = -idate;
+  int64_t imonth = idate / 100;
+  int month = imonth;
+  int day = idate - imonth * 100;
 
   CdiDate cdiDate;
   cdiDate.year = year;
@@ -70,7 +75,7 @@ cdiTime_set(int time)
 }
 
 CdiDateTime
-cdiDateTime_set(int date, int time)
+cdiDateTime_set(int64_t date, int time)
 {
   CdiDateTime cdiDateTime;
   cdiDateTime.date = cdiDate_set(date);
