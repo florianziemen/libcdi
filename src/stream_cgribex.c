@@ -1461,7 +1461,7 @@ cgribexDefTimerange(int tsteptype, int factor, int calendar, int rdate, int rtim
   CdiDateTime vDateTime = cdiDateTime_set(vdate, vtime);
   JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
 
-  JulianDate julianDate = julianDate_sub(julianDate1, julianDate2);
+  JulianDate julianDate = julianDate_sub(julianDate2, julianDate1);
 
   int timerange = -1;
   int ip1 = 0, ip2 = 0;
@@ -1476,7 +1476,7 @@ cgribexDefTimerange(int tsteptype, int factor, int calendar, int rdate, int rtim
           CdiDateTime sDateTime = cdiDateTime_set(sdate, stime);
           julianDate2 = julianDate_encode(calendar, sDateTime);
 
-          julianDate = julianDate_sub(julianDate1, julianDate2);
+          julianDate = julianDate_sub(julianDate2, julianDate1);
 
           ipx = (int) lround(julianDate_to_seconds(julianDate) / factor);
         }

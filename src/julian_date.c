@@ -205,21 +205,21 @@ JulianDate
 julianDate_add(JulianDate julianDate1, JulianDate julianDate2)
 {
   JulianDate julianDate;
-  julianDate.julianDay = julianDate2.julianDay + julianDate1.julianDay;
-  julianDate.secondOfDay = julianDate2.secondOfDay + julianDate1.secondOfDay;
+  julianDate.julianDay = julianDate1.julianDay + julianDate2.julianDay;
+  julianDate.secondOfDay = julianDate1.secondOfDay + julianDate2.secondOfDay;
 
   adjust_seconds(&julianDate);
 
   return julianDate;
 }
 
-// subtract julianDate1 from julianDate2
+// subtract julianDate2 from julianDate1
 JulianDate
 julianDate_sub(JulianDate julianDate1, JulianDate julianDate2)
 {
   JulianDate julianDate;
-  julianDate.julianDay = julianDate2.julianDay - julianDate1.julianDay;
-  julianDate.secondOfDay = julianDate2.secondOfDay - julianDate1.secondOfDay;
+  julianDate.julianDay = julianDate1.julianDay - julianDate2.julianDay;
+  julianDate.secondOfDay = julianDate1.secondOfDay - julianDate2.secondOfDay;
 
   adjust_seconds(&julianDate);
 

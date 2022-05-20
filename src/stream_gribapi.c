@@ -2005,7 +2005,7 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
   CdiDateTime vDateTime = cdiDateTime_set(vdate, vtime);
   JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
 
-  JulianDate julianDate = julianDate_sub(julianDate1, julianDate2);
+  JulianDate julianDate = julianDate_sub(julianDate2, julianDate1);
 
   const int factor = getTimeunitFactor(timeunit);
 
@@ -2029,7 +2029,7 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
           CdiDateTime sDateTime = cdiDateTime_set(sdate, stime);
           julianDate2 = julianDate_encode(calendar, sDateTime);
 
-          julianDate = julianDate_sub(julianDate1, julianDate2);
+          julianDate = julianDate_sub(julianDate2, julianDate1);
 
           startStep = lround(julianDate_to_seconds(julianDate) / factor);
         }

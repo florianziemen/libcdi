@@ -1164,7 +1164,7 @@ datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
       vdatetime.date.year = year;
       vdatetime.date.month = month;
       const JulianDate julianDate2 = julianDate_encode(calendar, vdatetime);
-      const JulianDate dateDifference = julianDate_sub(julianDate1, julianDate2);
+      const JulianDate dateDifference = julianDate_sub(julianDate2, julianDate1);
 
       value += (dateDifference.julianDay + dateDifference.secondOfDay / 86400.0) / dpm;
       if (timeunits == TUNIT_YEAR) value = value / 12;
@@ -1172,7 +1172,7 @@ datetime2rtimeval(CdiDateTime vdatetime, taxis_t *taxis)
   else
     {
       const JulianDate julianDate2 = julianDate_encode(calendar, vdatetime);
-      const JulianDate dateDifference = julianDate_sub(julianDate1, julianDate2);
+      const JulianDate dateDifference = julianDate_sub(julianDate2, julianDate1);
 
       value = cdi_encode_timevalue(dateDifference.julianDay, dateDifference.secondOfDay, timeunits);
     }
@@ -1352,7 +1352,7 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
   const JulianDate julianDate = julianDate_encode(calendar, vdatetime);
   const JulianDate julianDate2 = timevalue_decode(timeunits, timevalue);
 
-  const CdiDateTime dt = julianDate_decode(calendar, julianDate_sub(julianDate2, julianDate));
+  const CdiDateTime dt = julianDate_decode(calendar, julianDate_sub(julianDate, julianDate2));
 
   (*taxis).fdate = (int)cdiDate_get(dt.date);
   (*taxis).ftime = (int)cdiTime_get(dt.time);
