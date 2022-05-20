@@ -1465,9 +1465,9 @@ cgribexDefTimerange(int tsteptype, int factor, int calendar, int rdate, int rtim
 
   int timerange = -1;
   int ip1 = 0, ip2 = 0;
-  if (!(int) (fmod(julianDate_seconds(julianDate), factor)))
+  if (!(int) (fmod(julianDate_to_seconds(julianDate), factor)))
     {
-      const int ip = (int) lround(julianDate_seconds(julianDate) / factor);
+      const int ip = (int) lround(julianDate_to_seconds(julianDate) / factor);
       if ((ip > 255) && (tsteptype == TSTEP_INSTANT)) tsteptype = TSTEP_INSTANT3;
 
       int ipx = 0;
@@ -1478,7 +1478,7 @@ cgribexDefTimerange(int tsteptype, int factor, int calendar, int rdate, int rtim
 
           julianDate = julianDate_sub(julianDate1, julianDate2);
 
-          ipx = (int) lround(julianDate_seconds(julianDate) / factor);
+          ipx = (int) lround(julianDate_to_seconds(julianDate) / factor);
         }
 
       // clang-format off

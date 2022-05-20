@@ -2009,14 +2009,14 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
 
   const int factor = getTimeunitFactor(timeunit);
 
-  if (!(int) (fmod(julianDate_seconds(julianDate), factor)))
+  if (!(int) (fmod(julianDate_to_seconds(julianDate), factor)))
     {
       const int proDefTempNum
           = gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
       gribapiDefStepUnits(editionNumber, gh, timeunit, proDefTempNum, gcinit);
 
       long startStep = 0;
-      const double endStepF = julianDate_seconds(julianDate) / factor;
+      const double endStepF = julianDate_to_seconds(julianDate) / factor;
       const long maxStep = (editionNumber > 1) ? INT_MAX : 65000;
       if (endStepF > maxStep) return status;
       long endStep = lround(endStepF);
@@ -2031,7 +2031,7 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
 
           julianDate = julianDate_sub(julianDate1, julianDate2);
 
-          startStep = lround(julianDate_seconds(julianDate) / factor);
+          startStep = lround(julianDate_to_seconds(julianDate) / factor);
         }
 
       if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
