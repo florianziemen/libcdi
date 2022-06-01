@@ -165,16 +165,37 @@ cdiDateTime_init(CdiDateTime *cdiDateTime)
 }
 
 bool
+cdiDate_isEQ(const CdiDate cdiDate1, const CdiDate cdiDate2)
+{
+  // clang-format off
+  return (cdiDate1.year  == cdiDate2.year
+       && cdiDate1.month == cdiDate2.month
+       && cdiDate1.day   == cdiDate2.day);
+  // clang-format on
+}
+
+bool
+cdiTime_isEQ(const CdiTime cdiTime1, const CdiTime cdiTime2)
+{
+  // clang-format off
+  return (cdiTime1.hour   == cdiTime2.hour
+       && cdiTime1.minute == cdiTime2.minute
+       && cdiTime1.second == cdiTime2.second
+       && cdiTime1.ms     == cdiTime2.ms);
+  // clang-format on
+}
+
+bool
 cdiDateTime_isEQ(const CdiDateTime cdiDateTime1, const CdiDateTime cdiDateTime2)
 {
   // clang-format off
-  return (cdiDateTime1.date.year == cdiDateTime2.date.year
-      && cdiDateTime1.date.month == cdiDateTime2.date.month
-      && cdiDateTime1.date.day == cdiDateTime2.date.day
-      && cdiDateTime1.time.hour == cdiDateTime2.time.hour
-      && cdiDateTime1.time.minute == cdiDateTime2.time.minute
-      && cdiDateTime1.time.second == cdiDateTime2.time.second
-      && cdiDateTime1.time.ms == cdiDateTime2.time.ms);
+  return (cdiDateTime1.date.year   == cdiDateTime2.date.year
+       && cdiDateTime1.date.month  == cdiDateTime2.date.month
+       && cdiDateTime1.date.day    == cdiDateTime2.date.day
+       && cdiDateTime1.time.hour   == cdiDateTime2.time.hour
+       && cdiDateTime1.time.minute == cdiDateTime2.time.minute
+       && cdiDateTime1.time.second == cdiDateTime2.time.second
+       && cdiDateTime1.time.ms     == cdiDateTime2.time.ms);
   // clang-format on
 }
 
