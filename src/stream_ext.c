@@ -243,7 +243,7 @@ static void
 extScanTimestep1(stream_t *streamptr)
 {
   int header[4];
-  DateTime datetime0 = { LONG_MIN, LONG_MIN };
+  CmpDateTime datetime0 = { INT_MIN, INT_MIN };
   off_t recpos = 0;
   extrec_t *extp = (extrec_t *) streamptr->record->exsep;
 
@@ -275,7 +275,7 @@ extScanTimestep1(stream_t *streamptr)
       const int rlevel = header[2];
       const int rxysize = header[3];
       const int param = cdiEncodeParam(rcode, 255, 255);
-      DateTime datetime = { .date = vdate, .time = vtime };
+      CmpDateTime datetime = { .date = vdate, .time = vtime };
 
       if (nrecs == 0)
         {
@@ -288,7 +288,7 @@ extScanTimestep1(stream_t *streamptr)
           for (int recID = 0; recID < nrecs; recID++)
             if (param == records[recID].param && rlevel == records[recID].ilevel) goto tstepScanLoopFinished;
 
-          if (datetimeDiffer(datetime, datetime0)) Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
+          if (datetime_differ(datetime, datetime0)) Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
         }
 
       nrecs++;

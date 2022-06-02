@@ -3,14 +3,14 @@
 
 typedef struct
 {
-  long date;
-  long time;
-} DateTime;
+  int date;
+  int time;
+} CmpDateTime;
 
 static inline int
-datetimeDiffer(DateTime dt1, DateTime dt2)
+datetime_differ(CmpDateTime dt1, CmpDateTime dt2)
 {
-  return (2 * ((dt1.date > dt2.date) - (dt1.date < dt2.date)) + (dt1.time > dt2.time) - (dt1.time < dt2.time)) != 0;
+  return ((2 * ((dt1.date > dt2.date) - (dt1.date < dt2.date)) + (dt1.time > dt2.time) - (dt1.time < dt2.time)) != 0);
 }
 
 #endif

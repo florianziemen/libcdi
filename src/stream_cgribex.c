@@ -767,7 +767,7 @@ cgribexScanTimestep1(stream_t *streamptr)
   void *gribbuffer = NULL;
   size_t buffersize = 0;
   int leveltype = 0, level1 = 0, level2 = 0;
-  DateTime datetime0 = { .date = 10101, .time = 0 };
+  CmpDateTime datetime0 = { .date = 10101, .time = 0 };
   unsigned recID;
   int nrecs_scanned = 0;
   bool warn_time = true;
@@ -829,7 +829,7 @@ cgribexScanTimestep1(stream_t *streamptr)
       int vdate, sdate;
       int vtime, stime;
       gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
-      DateTime datetime = { .date = vdate, .time = vtime };
+      CmpDateTime datetime = { .date = vdate, .time = vtime };
 
       if (nrecs == 0)
         {
@@ -860,7 +860,7 @@ cgribexScanTimestep1(stream_t *streamptr)
             {
               if (recID < nrecs) break;
               if (warn_time)
-                if (datetimeDiffer(datetime, datetime0))
+                if (datetime_differ(datetime, datetime0))
                   {
                     gribWarning("Inconsistent verification time!", nrecs_scanned, tsID + 1, paramstr, level1, level2);
                     warn_time = false;
@@ -868,7 +868,7 @@ cgribexScanTimestep1(stream_t *streamptr)
             }
           else
             {
-              if (datetimeDiffer(datetime, datetime0)) break;
+              if (datetime_differ(datetime, datetime0)) break;
 
               if (recID < nrecs)
                 {
@@ -928,7 +928,7 @@ cgribexScanTimestep2(stream_t *streamptr)
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   int leveltype = 0, level1 = 0, level2 = 0;
-  DateTime datetime0 = { LONG_MIN, LONG_MIN };
+  CmpDateTime datetime0 = { INT_MIN, INT_MIN };
   int recID = 0;
   bool warn_numavg = true;
   char paramstr[32];
@@ -989,7 +989,7 @@ cgribexScanTimestep2(stream_t *streamptr)
       int vdate, sdate;
       int vtime, stime;
       gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
-      DateTime datetime = { .date = vdate, .time = vtime };
+      CmpDateTime datetime = { .date = vdate, .time = vtime };
 
       if (rindex == 0)
         {
@@ -1057,7 +1057,7 @@ cgribexScanTimestep2(stream_t *streamptr)
         {
           if (records[recID].used)
             {
-              if (datetimeDiffer(datetime, datetime0)) break;
+              if (datetime_differ(datetime, datetime0)) break;
 
               gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID + 1, paramstr, level1, level2);
               continue;
@@ -1127,7 +1127,7 @@ cgribexScanTimestep(stream_t *streamptr)
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   int leveltype = 0, level1 = 0, level2 = 0;
-  DateTime datetime0 = { LONG_MIN, LONG_MIN };
+  CmpDateTime datetime0 = { INT_MIN, INT_MIN };
   int vrecID, recID = 0;
   bool warn_numavg = true;
   int nrecs = 0;
@@ -1191,7 +1191,7 @@ cgribexScanTimestep(stream_t *streamptr)
           int vdate, sdate;
           int vtime, stime;
           gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
-          DateTime datetime = { .date = vdate, .time = vtime };
+          CmpDateTime datetime = { .date = vdate, .time = vtime };
 
           if (rindex == nrecs) break;
 
@@ -1264,7 +1264,7 @@ cgribexScanTimestep(stream_t *streamptr)
                   char paramstr_[32];
                   cdiParamToString(param, paramstr_, sizeof(paramstr_));
 
-                  if (datetimeDiffer(datetime, datetime0)) break;
+                  if (datetime_differ(datetime, datetime0)) break;
 
                   if (CDI_Debug)
                     gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID + 1, paramstr_, level1, level2);

@@ -694,7 +694,7 @@ iegDateTime(int *pdb, int64_t *date, int *time)
 static void
 iegScanTimestep1(stream_t *streamptr)
 {
-  DateTime datetime0 = { LONG_MIN, LONG_MIN };
+  CmpDateTime datetime0 = { INT_MIN, INT_MIN };
   off_t recpos;
   iegrec_t *iegp = (iegrec_t *) streamptr->record->exsep;
 
@@ -729,7 +729,7 @@ iegScanTimestep1(stream_t *streamptr)
       int64_t vdate = 0;
       int vtime = 0;
       iegDateTime(iegp->ipdb, &vdate, &vtime);
-      DateTime datetime = { .date = vdate, .time = vtime };
+      CmpDateTime datetime = { .date = vdate, .time = vtime };
 
       if (nrecs == 0)
         {
@@ -742,7 +742,7 @@ iegScanTimestep1(stream_t *streamptr)
           for (int recID = 0; recID < nrecs; recID++)
             if (param == records[recID].param && rlevel == records[recID].ilevel) goto tstepScanLoopFinished;
 
-          if (datetimeDiffer(datetime, datetime0)) Warning("Inconsistent verification time for param %d level %d", param, rlevel);
+          if (datetime_differ(datetime, datetime0)) Warning("Inconsistent verification time for param %d level %d", param, rlevel);
         }
 
       nrecs++;

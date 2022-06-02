@@ -929,7 +929,7 @@ typedef enum
 } checkTimeResult;
 
 static checkTimeResult
-checkTime(stream_t *streamptr, compvar2_t compVar, const DateTime *verificationTime, const DateTime *expectedVTime)
+checkTime(stream_t *streamptr, compvar2_t compVar, const CmpDateTime *verificationTime, const CmpDateTime *expectedVTime)
 {
   // First determine whether the current record exists already.
   int recID = 0;
@@ -1014,7 +1014,7 @@ fdbScanTimesteps(stream_t *streamptr)
   numTimesteps = remove_duplicate_timesteps(recordInfoList, numRecords, numTimesteps, timestepRecordOffset);
   if (CDI_Debug) Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
 
-  DateTime datetime0 = { .date = 10101, .time = 0 };
+  CmpDateTime datetime0 = { .date = 10101, .time = 0 };
   int fcast = 0;
 
   streamptr->curTsID = 0;
@@ -1045,7 +1045,7 @@ fdbScanTimesteps(stream_t *streamptr)
       int vDate, sDate;
       int vTime, sTime;
       gribapiGetValidityDateTime(gh, &vDate, &vTime, &sDate, &sTime);
-      DateTime datetime = { .date = vDate, .time = vTime };
+      CmpDateTime datetime = { .date = vDate, .time = vTime };
 
       VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
@@ -1156,7 +1156,7 @@ gribapiScanTimestep1(stream_t *streamptr)
   off_t recpos = 0;
   void *gribbuffer = NULL;
   size_t buffersize = 0;
-  DateTime datetime0 = { .date = 10101, .time = 0 };
+  CmpDateTime datetime0 = { .date = 10101, .time = 0 };
   int nrecs_scanned = 0;  // Only used for debug output.
   bool warn_time = true;
   int fcast = 0;
@@ -1207,7 +1207,7 @@ gribapiScanTimestep1(stream_t *streamptr)
       int vDate, sDate;
       int vTime, sTime;
       gribapiGetValidityDateTime(gh, &vDate, &vTime, &sDate, &sTime);
-      DateTime datetime = { .date = vDate, .time = vTime };
+      CmpDateTime datetime = { .date = vDate, .time = vTime };
 
       VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
@@ -1302,7 +1302,7 @@ gribapiScanTimestep2(stream_t *streamptr)
 {
   int rstatus = 0;
   off_t recpos = 0;
-  DateTime datetime0 = { LONG_MIN, LONG_MIN };
+  CmpDateTime datetime0 = { INT_MIN, INT_MIN };
   // int gridID;
   int recID;
   grib_handle *gh = NULL;
@@ -1363,7 +1363,7 @@ gribapiScanTimestep2(stream_t *streamptr)
       int vDate, sDate;
       int vTime, sTime;
       gribapiGetValidityDateTime(gh, &vDate, &vTime, &sDate, &sTime);
-      DateTime datetime = { .date = vDate, .time = vTime };
+      CmpDateTime datetime = { .date = vDate, .time = vTime };
 
       if (rindex == 0)
         {
@@ -1425,7 +1425,7 @@ gribapiScanTimestep2(stream_t *streamptr)
             break;
           else
             {
-              if (datetimeDiffer(datetime, datetime0)) break;
+              if (datetime_differ(datetime, datetime0)) break;
 
               gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID + 1, varname, param, level1, level2);
               continue;
@@ -1516,7 +1516,7 @@ gribapiScanTimestep(stream_t *streamptr)
       int nrecs_scanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs * (tsID - 1);  // Only used for debug output.
       int rindex = 0;
       off_t recpos = 0;
-      DateTime datetime0 = { LONG_MIN, LONG_MIN };
+      CmpDateTime datetime0 = { INT_MIN, INT_MIN };
       grib_handle *gh = NULL;
       char varname[256];
       while (true)
@@ -1558,7 +1558,7 @@ gribapiScanTimestep(stream_t *streamptr)
           int vDate, sDate;
           int vTime, sTime;
           gribapiGetValidityDateTime(gh, &vDate, &vTime, &sDate, &sTime);
-          DateTime datetime = { .date = vDate, .time = vTime };
+          CmpDateTime datetime = { .date = vDate, .time = vTime };
 
           if (rindex == nrecs) break;
 
@@ -1624,7 +1624,7 @@ gribapiScanTimestep(stream_t *streamptr)
             {
               if (records[recID].used)
                 {
-                  if (datetimeDiffer(datetime, datetime0)) break;
+                  if (datetime_differ(datetime, datetime0)) break;
 
                   if (CDI_Debug)
                     gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID + 1, varname, param, level1, level2);

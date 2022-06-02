@@ -249,7 +249,7 @@ srv_add_record(stream_t *streamptr, int param, int level, size_t xsize, size_t y
 static void
 srvScanTimestep1(stream_t *streamptr)
 {
-  DateTime datetime0 = { LONG_MIN, LONG_MIN };
+  CmpDateTime datetime0 = { INT_MIN, INT_MIN };
   off_t recpos;
   srvrec_t *srvp = (srvrec_t *) streamptr->record->exsep;
 
@@ -284,7 +284,7 @@ srvScanTimestep1(stream_t *streamptr)
       const int rxsize = header[4];
       const int rysize = header[5];
       const int param = cdiEncodeParam(rcode, 255, 255);
-      DateTime datetime = { .date = vdate, .time = vtime };
+      CmpDateTime datetime = { .date = vdate, .time = vtime };
 
       if (nrecs == 0)
         {
@@ -297,7 +297,7 @@ srvScanTimestep1(stream_t *streamptr)
           for (int recID = 0; recID < nrecs; recID++)
             if (param == records[recID].param && rlevel == records[recID].ilevel) goto tstepScanLoopFinished;
 
-          if (datetimeDiffer(datetime, datetime0)) Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
+          if (datetime_differ(datetime, datetime0)) Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
         }
 
       nrecs++;
