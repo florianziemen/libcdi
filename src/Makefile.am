@@ -9,7 +9,7 @@ lib_LTLIBRARIES =
 
 if ENABLE_CDI_LIB
   lib_LTLIBRARIES += libcdi.la
-  include_HEADERS += cdi.h cdi_datetime.h julian_date.h
+  include_HEADERS += cdi.h cdi_datetime.h julian_date.h calendar.h
 # add cdi.inc only if cfortran interface is required
 if USE_FC
   include_HEADERS += cdi.inc
