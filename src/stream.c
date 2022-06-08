@@ -459,7 +459,7 @@ cdiGetProtocol(const char *uri, const char **filename)
   const int protocollen = pos - uri;
   *filename = pos + 3;
 
-  if (strncmp(uri, "file", protocollen) == 0) return CDI_PROTOCOL_FILE;
+  // if (strncmp(uri, "file", protocollen) == 0) return CDI_PROTOCOL_FILE; // file is already used in NetCDF
   if (strncmp(uri, "fdb", protocollen) == 0) return CDI_PROTOCOL_FDB;
   if (strncmp(uri, "across", protocollen) == 0) return CDI_PROTOCOL_ACROSS;
 
@@ -1405,7 +1405,7 @@ streamInqTimestep(int streamID, int tsID)
 {
   int nrecs = 0;
   stream_t *streamptr = stream_to_pointer(streamID);
-  int vlistID = streamptr->vlistID;
+  const int vlistID = streamptr->vlistID;
 
   if (tsID < streamptr->ntsteps) streamptr->tsteps[tsID].curRecID = CDI_UNDEFID;  // fix for netCDF
   if (tsID < streamptr->rtsteps)
@@ -1422,7 +1422,7 @@ streamInqTimestep(int streamID, int tsID)
 
   if (tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID) return 0;
 
-  int filetype = streamptr->filetype;
+  const int filetype = streamptr->filetype;
 
   if (CDI_Debug) Message("streamID = %d  tsID = %d  filetype = %d", streamID, tsID, filetype);
 
