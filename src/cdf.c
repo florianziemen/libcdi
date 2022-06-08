@@ -127,7 +127,7 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
           if (*filetype == CDI_FILETYPE_NC4)
             writemode |= NC_NETCDF4;
           else if (*filetype == CDI_FILETYPE_NC4C)
-            writemode |= NC_NETCDF4 | NC_CLASSIC_MODEL;
+            writemode |= (NC_NETCDF4 | NC_CLASSIC_MODEL);
 #endif
           cdf_create(filename, writemode, &ncid);
           if (CDI_Version_Info) cdfComment(ncid);
