@@ -68,7 +68,7 @@ case "${HOSTNAME}" in
                  --with-szlib=$HOME/local \
                  --with-fdb5=$HOME/src/fdb \
                  --with-eccodes=$HOME/local/eccodes-2.22.0 \
-                 --with-netcdf=$HOME/local/netcdf-c-4.8.0"
+                 --with-netcdf=$HOME/local/netcdf-c-4.8.1"
         PREFIX="--prefix=$HOME/local"
         LD_ADD="-Wl,-rpath,$HOME/local/eccodes-2.22.0/lib -Wl,-rpath,$HOME/src/fdb/lib"
         if  test "$COMP" = clang ; then
