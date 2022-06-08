@@ -421,43 +421,37 @@ xtype2ppb(nc_type xtype)
 }
 
 static void
-cdfDefVarCompression(const stream_t *streamptr, int ncvarID, bool lchunk, nc_type xtype)
+cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
 {
   if (streamptr->comptype == CDI_COMPRESS_ZIP)
     {
-      if (lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C))
+      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C)
         {
           cdfDefVarDeflate(streamptr->fileID, ncvarID, streamptr->complevel);
         }
       else
         {
-          if (lchunk)
+          static bool lwarn = true;
+          if (lwarn)
             {
-              static bool lwarn = true;
-              if (lwarn)
-                {
-                  lwarn = false;
-                  Warning("Deflate compression is only available for NetCDF4!");
-                }
+              lwarn = false;
+              Warning("Deflate compression is only available for NetCDF4!");
             }
         }
     }
   else if (streamptr->comptype == CDI_COMPRESS_SZIP)
     {
-      if (lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C))
+      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C)
         {
           cdfDefVarSzip(streamptr->fileID, ncvarID, xtype2ppb(xtype));
         }
       else
         {
-          if (lchunk)
+          static bool lwarn = true;
+          if (lwarn)
             {
-              static bool lwarn = true;
-              if (lwarn)
-                {
-                  lwarn = false;
-                  Warning("SZIP compression is only available for NetCDF4!");
-                }
+              lwarn = false;
+              Warning("SZIP compression is only available for NetCDF4!");
             }
         }
     }
@@ -647,7 +641,7 @@ calc_chunksize(size_t chunkSizeMax, size_t size)
 
 static int
 cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, int zid, size_t gridsize, const int dimorder[3],
-                       int dims[4], bool lchunk, size_t chunks[4], char axis[5], size_t *piax)
+                       int dims[4], bool useChunks, size_t chunks[4], char axis[5], size_t *piax)
 {
   const int fileID = streamptr->fileID;
   const int vlistID = streamptr->vlistID;
@@ -711,7 +705,7 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
     }
 
   if (CDI_Debug)
-    fprintf(stderr, "lchunk %d chunktype %d  chunks %zu %zu %zu %zu\n", lchunk, chunktype, chunks[0], chunks[1], chunks[2],
+    fprintf(stderr, "useChunks %d chunktype %d  chunks %zu %zu %zu %zu\n", useChunks, chunktype, chunks[0], chunks[1], chunks[2],
             chunks[3]);
 
   *piax = iax;
@@ -850,7 +844,7 @@ cdfDefVar(stream_t *streamptr, int varID)
 
   int dimorder[3];  // ZYX and ZXY
   vlistInqVarDimorder(vlistID, varID, &dimorder);
-  const bool lchunk = (dimorder[0] == 3) ? (gridsize >= 32) : false;
+  const bool useChunks = (dimorder[0] == 3) ? (gridsize >= 32) : false;
 
   if (((dimorder[0] > 0) + (dimorder[1] > 0) + (dimorder[2] > 0))
       < ((xid != CDI_UNDEFID) + (yid != CDI_UNDEFID) + (zid != CDI_UNDEFID)))
@@ -863,7 +857,7 @@ cdfDefVar(stream_t *streamptr, int varID)
   char axis[5];
   int dims[4];
   size_t chunks[4];
-  int ndims = cdfDefineDimsAndChunks(streamptr, varID, xid, yid, zid, gridsize, dimorder, dims, lchunk, chunks, axis, &iax);
+  int ndims = cdfDefineDimsAndChunks(streamptr, varID, xid, yid, zid, gridsize, dimorder, dims, useChunks, chunks, axis, &iax);
 
   char name[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
@@ -893,11 +887,11 @@ cdfDefVar(stream_t *streamptr, int varID)
   cdf_def_var(fileID, name, xtype, ndims, dims, &ncvarID);
 
 #ifdef HAVE_NETCDF4
-  if (lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C))
+  if (useChunks && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C))
     cdf_def_var_chunking(fileID, ncvarID, NC_CHUNKED, chunks);
 #endif
 
-  cdfDefVarCompression(streamptr, ncvarID, lchunk, xtype);
+  if (useChunks) cdfDefVarCompression(streamptr, ncvarID, xtype);
 
   if (*stdname) cdf_put_att_text(fileID, ncvarID, "standard_name", strlen(stdname), stdname);
   if (*longname) cdf_put_att_text(fileID, ncvarID, "long_name", strlen(longname), longname);
