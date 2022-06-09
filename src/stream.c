@@ -274,7 +274,7 @@ streamDefByteorder(int streamID, int byteorder)
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       {
-        srvrec_t *srvp = (srvrec_t *) streamptr->record->exsep;
+        srvrec_t *srvp = (srvrec_t *) streamptr->record->objectp;
         srvp->byteswap = getByteswap(byteorder);
 
         break;
@@ -283,7 +283,7 @@ streamDefByteorder(int streamID, int byteorder)
 #ifdef HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
       {
-        extrec_t *extp = (extrec_t *) streamptr->record->exsep;
+        extrec_t *extp = (extrec_t *) streamptr->record->objectp;
         extp->byteswap = getByteswap(byteorder);
 
         break;
@@ -292,7 +292,7 @@ streamDefByteorder(int streamID, int byteorder)
 #ifdef HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
       {
-        iegrec_t *iegp = (iegrec_t *) streamptr->record->exsep;
+        iegrec_t *iegp = (iegrec_t *) streamptr->record->objectp;
         iegp->byteswap = getByteswap(byteorder);
 
         break;
@@ -553,9 +553,9 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
 #ifdef HAVE_LIBCGRIBEX
-            streamptr->record->cgribexp = cgribexNew();
+            streamptr->record->objectp = cgribexNew();
 #else
-            streamptr->record->cgribexp = NULL;
+            streamptr->record->objectp = NULL;
 #endif
           }
         break;
@@ -583,7 +583,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
-            streamptr->record->exsep = srvNew();
+            streamptr->record->objectp = srvNew();
           }
         break;
       }
@@ -597,7 +597,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
-            streamptr->record->exsep = extNew();
+            streamptr->record->objectp = extNew();
           }
         break;
       }
@@ -611,7 +611,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
-            streamptr->record->exsep = iegNew();
+            streamptr->record->objectp = iegNew();
           }
         break;
       }
@@ -1074,7 +1074,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
           gribClose(fileID);
           if (recordBufIsToBeDeleted) gribContainersDelete(streamptr);
 #ifdef HAVE_LIBCGRIBEX
-          if (recordBufIsToBeDeleted) cgribexDelete(streamptr->record->cgribexp);
+          if (recordBufIsToBeDeleted) cgribexDelete(streamptr->record->objectp);
 #endif
           break;
         }
@@ -1089,7 +1089,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
       case CDI_FILETYPE_SRV:
         {
           fileClose(fileID);
-          if (recordBufIsToBeDeleted) srvDelete(streamptr->record->exsep);
+          if (recordBufIsToBeDeleted) srvDelete(streamptr->record->objectp);
           break;
         }
 #endif
@@ -1097,7 +1097,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
       case CDI_FILETYPE_EXT:
         {
           fileClose(fileID);
-          if (recordBufIsToBeDeleted) extDelete(streamptr->record->exsep);
+          if (recordBufIsToBeDeleted) extDelete(streamptr->record->objectp);
           break;
         }
 #endif
@@ -1105,7 +1105,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
       case CDI_FILETYPE_IEG:
         {
           fileClose(fileID);
-          if (recordBufIsToBeDeleted) iegDelete(streamptr->record->exsep);
+          if (recordBufIsToBeDeleted) iegDelete(streamptr->record->objectp);
           break;
         }
 #endif

@@ -133,7 +133,7 @@ grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *gribbuffer,
   const size_t gridsize = gridInqSize(gridID);
   if (CDI_Debug) Message("gridID = %d gridsize = %zu", gridID, gridsize);
 
-  void *cgribexp = (gribbuffer && streamptr->record->cgribexp) ? streamptr->record->cgribexp : NULL;
+  void *cgribexp = (gribbuffer && streamptr->record->objectp) ? streamptr->record->objectp : NULL;
   if (!gribbuffer) gribbuffer = Malloc(streamptr->record->buffersize);
   if (!data) data = Malloc(gridsize * (memtype == MEMTYPE_FLOAT ? sizeof(float) : sizeof(double)));
 

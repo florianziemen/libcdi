@@ -44,7 +44,7 @@ int srvInqRecord(stream_t *streamptr, int *varID, int *levelID)
   int zaxisID = -1;
   int header[8];
   int vlistID;
-  void *srvp = streamptr->record->exsep;
+  void *srvp = streamptr->record->objectp;
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -86,7 +86,7 @@ srv_read_recordSP(stream_t *streamptr, float *data, size_t *nmiss)
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
-  void *srvp = streamptr->record->exsep;
+  void *srvp = streamptr->record->objectp;
   if (srvRead(fileID, srvp) < 0) Error("Failed to read record from SRV file");
 
   int header[8];
@@ -115,7 +115,7 @@ srv_read_recordDP(stream_t *streamptr, double *data, size_t *nmiss)
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
-  void *srvp = streamptr->record->exsep;
+  void *srvp = streamptr->record->objectp;
   if (srvRead(fileID, srvp) < 0) Error("Failed to read record from SRV file");
 
   int header[8];
@@ -176,7 +176,7 @@ srvDefRecord(stream_t *streamptr)
   header[6] = 0;
   header[7] = 0;
 
-  srvrec_t *srvp = (srvrec_t *) record->exsep;
+  srvrec_t *srvp = (srvrec_t *) record->objectp;
   srvp->dprec = srvDefDatatype(record->prec);
 
   srvDefHeader(srvp, header);
@@ -185,7 +185,7 @@ srvDefRecord(stream_t *streamptr)
 static void
 srv_write_recordSP(stream_t *streamptr, const float *data)
 {
-  void *srvp = streamptr->record->exsep;
+  void *srvp = streamptr->record->objectp;
   srvDefDataSP(srvp, data);
   srvWrite(streamptr->fileID, srvp);
 }
@@ -193,7 +193,7 @@ srv_write_recordSP(stream_t *streamptr, const float *data)
 static void
 srv_write_recordDP(stream_t *streamptr, const double *data)
 {
-  void *srvp = streamptr->record->exsep;
+  void *srvp = streamptr->record->objectp;
   srvDefDataDP(srvp, data);
   srvWrite(streamptr->fileID, srvp);
 }
@@ -251,7 +251,7 @@ srvScanTimestep1(stream_t *streamptr)
 {
   CmpDateTime datetime0 = { INT_MIN, INT_MIN };
   off_t recpos;
-  srvrec_t *srvp = (srvrec_t *) streamptr->record->exsep;
+  srvrec_t *srvp = (srvrec_t *) streamptr->record->objectp;
 
   streamptr->curTsID = 0;
 
@@ -332,7 +332,7 @@ srvScanTimestep2(stream_t *streamptr)
 {
   int header[8];
   off_t recpos = 0;
-  void *srvp = streamptr->record->exsep;
+  void *srvp = streamptr->record->objectp;
 
   streamptr->curTsID = 1;
 
@@ -456,7 +456,7 @@ srvScanTimestep(stream_t *streamptr)
   int header[8];
   off_t recpos = 0;
   int nrecs = 0;
-  void *srvp = streamptr->record->exsep;
+  void *srvp = streamptr->record->objectp;
 
   int tsID = streamptr->rtsteps;
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
@@ -574,7 +574,7 @@ srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
-  void *srvp = streamptr->record->exsep;
+  void *srvp = streamptr->record->objectp;
   if (srvRead(fileID, srvp) < 0) abort();
 
   int header[8];
@@ -639,7 +639,7 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
 
   const int datatype = vlistInqVarDatatype(vlistID, varID);
 
-  srvrec_t *srvp = (srvrec_t *) streamptr->record->exsep;
+  srvrec_t *srvp = (srvrec_t *) streamptr->record->objectp;
   srvp->dprec = srvDefDatatype(datatype);
 
   srvDefHeader(srvp, header);

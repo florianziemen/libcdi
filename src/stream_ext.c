@@ -48,7 +48,7 @@ int extInqRecord(stream_t *streamptr, int *varID, int *levelID)
   int zaxisID = -1;
   int header[4];
   int vlistID;
-  void *extp = streamptr->record->exsep;
+  void *extp = streamptr->record->objectp;
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -90,7 +90,7 @@ ext_read_recordSP(stream_t *streamptr, float *data, size_t *nmiss)
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
-  void *extp = streamptr->record->exsep;
+  void *extp = streamptr->record->objectp;
   if (extRead(fileID, extp) < 0) Error("Failed to read EXTRA record");
 
   int header[4];
@@ -122,7 +122,7 @@ ext_read_recordDP(stream_t *streamptr, double *data, size_t *nmiss)
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
-  void *extp = streamptr->record->exsep;
+  void *extp = streamptr->record->objectp;
   if (extRead(fileID, extp) < 0) Error("Failed to read EXTRA record");
 
   int header[4];
@@ -171,7 +171,7 @@ extDefRecord(stream_t *streamptr)
   cdi_check_gridsize_int_limit("EXTRA", gridInqSize(gridID));
   header[3] = (int) gridInqSize(gridID);
 
-  extrec_t *extp = (extrec_t *) record->exsep;
+  extrec_t *extp = (extrec_t *) record->objectp;
   extDefDatatype(record->prec, &extp->prec, &extp->number);
   extDefHeader(extp, header);
 }
@@ -179,7 +179,7 @@ extDefRecord(stream_t *streamptr)
 static void
 ext_write_recordSP(stream_t *streamptr, const float *data)
 {
-  void *extp = streamptr->record->exsep;
+  void *extp = streamptr->record->objectp;
   extDefDataSP(extp, data);
   extWrite(streamptr->fileID, extp);
 }
@@ -187,7 +187,7 @@ ext_write_recordSP(stream_t *streamptr, const float *data)
 static void
 ext_write_recordDP(stream_t *streamptr, const double *data)
 {
-  void *extp = streamptr->record->exsep;
+  void *extp = streamptr->record->objectp;
   extDefDataDP(extp, data);
   extWrite(streamptr->fileID, extp);
 }
@@ -245,7 +245,7 @@ extScanTimestep1(stream_t *streamptr)
   int header[4];
   CmpDateTime datetime0 = { INT_MIN, INT_MIN };
   off_t recpos = 0;
-  extrec_t *extp = (extrec_t *) streamptr->record->exsep;
+  extrec_t *extp = (extrec_t *) streamptr->record->objectp;
 
   streamptr->curTsID = 0;
 
@@ -323,7 +323,7 @@ extScanTimestep2(stream_t *streamptr)
 {
   int header[4];
   off_t recpos = 0;
-  void *extp = streamptr->record->exsep;
+  void *extp = streamptr->record->objectp;
 
   streamptr->curTsID = 1;
 
@@ -447,7 +447,7 @@ extScanTimestep(stream_t *streamptr)
   int header[4];
   off_t recpos = 0;
   int nrecs = 0;
-  void *extp = streamptr->record->exsep;
+  void *extp = streamptr->record->objectp;
 
   int tsID = streamptr->rtsteps;
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
@@ -554,7 +554,7 @@ extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_
 {
   if (CDI_Debug) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
 
-  void *extp = streamptr->record->exsep;
+  void *extp = streamptr->record->objectp;
 
   const int vlistID = streamptr->vlistID;
   const int fileID = streamptr->fileID;
@@ -613,7 +613,7 @@ extWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   cdi_check_gridsize_int_limit("EXTRA", gridInqSize(gridID));
   header[3] = (int) gridInqSize(gridID);
 
-  extrec_t *extp = (extrec_t *) streamptr->record->exsep;
+  extrec_t *extp = (extrec_t *) streamptr->record->objectp;
   extDefDatatype(vlistInqVarDatatype(vlistID, varID), &extp->prec, &extp->number);
   extDefHeader(extp, header);
 

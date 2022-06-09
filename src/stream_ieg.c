@@ -50,7 +50,7 @@ ieg_read_recordSP(stream_t *streamptr, float *data, size_t *nmiss)
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
-  void *iegp = streamptr->record->exsep;
+  void *iegp = streamptr->record->objectp;
   if (iegRead(fileID, iegp) < 0) Error("Could not read IEG record!");
 
   iegInqDataSP(iegp, data);
@@ -77,7 +77,7 @@ ieg_read_recordDP(stream_t *streamptr, double *data, size_t *nmiss)
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
-  void *iegp = streamptr->record->exsep;
+  void *iegp = streamptr->record->objectp;
   if (iegRead(fileID, iegp) < 0) Error("Could not read IEG record!");
 
   iegInqDataDP(iegp, data);
@@ -439,7 +439,7 @@ iegDefRecord(stream_t *streamptr)
   int gridID = vlistInqVarGrid(vlistID, varID);
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
 
-  iegrec_t *iegp = (iegrec_t *) record->exsep;
+  iegrec_t *iegp = (iegrec_t *) record->objectp;
   iegInitMem(iegp);
   for (int i = 0; i < 37; i++) iegp->ipdb[i] = -1;
 
@@ -480,7 +480,7 @@ static void
 ieg_write_recordSP(stream_t *streamptr, const float *data)
 {
   Record *record = streamptr->record;
-  iegrec_t *iegp = (iegrec_t *) record->exsep;
+  iegrec_t *iegp = (iegrec_t *) record->objectp;
 
   int fileID = streamptr->fileID;
   size_t gridsize = gridInqSize(record->gridID);
@@ -495,7 +495,7 @@ static void
 ieg_write_recordDP(stream_t *streamptr, const double *data)
 {
   Record *record = streamptr->record;
-  iegrec_t *iegp = (iegrec_t *) record->exsep;
+  iegrec_t *iegp = (iegrec_t *) record->objectp;
 
   int fileID = streamptr->fileID;
   size_t gridsize = gridInqSize(record->gridID);
@@ -696,7 +696,7 @@ iegScanTimestep1(stream_t *streamptr)
 {
   CmpDateTime datetime0 = { INT_MIN, INT_MIN };
   off_t recpos;
-  iegrec_t *iegp = (iegrec_t *) streamptr->record->exsep;
+  iegrec_t *iegp = (iegrec_t *) streamptr->record->objectp;
 
   streamptr->curTsID = 0;
 
@@ -776,7 +776,7 @@ static int
 iegScanTimestep2(stream_t *streamptr)
 {
   off_t recpos = 0;
-  iegrec_t *iegp = (iegrec_t *) streamptr->record->exsep;
+  iegrec_t *iegp = (iegrec_t *) streamptr->record->objectp;
 
   streamptr->curTsID = 1;
 
@@ -903,7 +903,7 @@ static long
 iegScanTimestep(stream_t *streamptr)
 {
   off_t recpos = 0;
-  iegrec_t *iegp = (iegrec_t *) streamptr->record->exsep;
+  iegrec_t *iegp = (iegrec_t *) streamptr->record->objectp;
 
   if (streamptr->rtsteps == 0) Error("Internal problem! Missing contents.");
 
@@ -1017,7 +1017,7 @@ iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_
 {
   if (CDI_Debug) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
 
-  void *iegp = streamptr->record->exsep;
+  void *iegp = streamptr->record->objectp;
 
   int vlistID = streamptr->vlistID;
   int fileID = streamptr->fileID;
@@ -1056,7 +1056,7 @@ iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
 {
   if (CDI_Debug) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
 
-  iegrec_t *iegp = (iegrec_t *) streamptr->record->exsep;
+  iegrec_t *iegp = (iegrec_t *) streamptr->record->objectp;
   iegInitMem(iegp);
   for (int i = 0; i < 37; i++) iegp->ipdb[i] = -1;
 

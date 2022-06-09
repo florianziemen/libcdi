@@ -777,7 +777,7 @@ cgribexScanTimestep1(stream_t *streamptr)
 
   streamptr->curTsID = 0;
 
-  cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->cgribexp;
+  cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->objectp;
 
   const int tsID = tstepsNewEntry(streamptr);
   if (tsID != 0) Error("Internal problem! tstepsNewEntry returns %d", tsID);
@@ -935,7 +935,7 @@ cgribexScanTimestep2(stream_t *streamptr)
 
   streamptr->curTsID = 1;
 
-  cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->cgribexp;
+  cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->objectp;
   int *isec1 = cgribexp->sec1;
   int *isec2 = cgribexp->sec2;
 
@@ -1133,7 +1133,7 @@ cgribexScanTimestep(stream_t *streamptr)
   int nrecs = 0;
   char paramstr[32];
 
-  cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->cgribexp;
+  cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->objectp;
   int *isec1 = cgribexp->sec1;
 
   int tsID = streamptr->rtsteps;

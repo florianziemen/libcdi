@@ -88,10 +88,10 @@ typedef struct
   // set if this vlist has been created by CDI itself, and must not be destroyed by the user, consequently
   bool internal;
   int self;
-  int nvars; /* number of variables                */
+  int nvars; // number of variables
   int ngrids;
   int nzaxis;
-  int nsubtypes; /* no. of variable subtypes (e.g. sets of tiles) */
+  int nsubtypes; // no. of variable subtypes (e.g. sets of tiles)
   long ntsteps;
   int taxisID;
   int tableID;
