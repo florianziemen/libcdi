@@ -1959,6 +1959,7 @@ static void
 getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
 {
   MPI_Group clientGroup = cdiPioInqRemoteGroup();
+  static bool file_is_open = false;
 
   xdebug("%s", "START");
 
@@ -1986,9 +1987,12 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
         if (!conf->batchedRMA)
         {
           xdebug("%s", "not batchedRMA");
+          if (! file_is_open) sct_start(timer_readgetbuffers_first);
           sct_start(timer_readgetbuffers);
           readGetBuffers(streamIdx, conf);
           sct_stop(timer_readgetbuffers);
+          if (! file_is_open) sct_stop(timer_readgetbuffers_first);
+          file_is_open = true;
         }
       }
   if (conf->batchedRMA)
@@ -1997,9 +2001,12 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
     for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
       if (streamActivity[streamIdx])
       {
+        if (! file_is_open) sct_start(timer_readgetbuffers_first);
         sct_start(timer_readgetbuffers);
         readGetBuffers(streamIdx, conf);
         sct_stop(timer_readgetbuffers);
+        if (! file_is_open) sct_stop(timer_readgetbuffers_first);
+        file_is_open = true;
       }
   }
 

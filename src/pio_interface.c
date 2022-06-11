@@ -560,6 +560,7 @@ void new_context(const char *context_name, MPI_Comm comm)
   timer_winStart            = sct_new_timer("    L window start");
   timer_mpi_get             = sct_new_timer("    L MPI_Get");
   timer_winComplete         = sct_new_timer("    L window complete");
+  timer_readgetbuffers_first= sct_new_timer("    L read getbuffers (open + init write)");
   timer_readgetbuffers      = sct_new_timer("    L read getbuffers");
   timer_defTimeStep         = sct_new_timer("       L stream define timestep");
   timer_StreamMappingNew    = sct_new_timer("       L stream mapping create");
