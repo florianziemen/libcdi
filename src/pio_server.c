@@ -1928,6 +1928,8 @@ void clearModelWinBuffer(size_t streamIdx)
 
 /************************************************************************/
 
+static MPI_Datatype rmaElemDt = MPI_DATATYPE_NULL;
+
 
 static void
 getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
@@ -1941,13 +1943,14 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
       {
         clearModelWinBuffer(streamIdx);
         xmpi(MPI_Win_start(clientGroup, 0, rxWin[streamIdx].getWin));
-        /* FIXME: this needs to use MPI_PACKED for portability */
         for (size_t i = 0; i < (size_t)numClients_; ++i)
-          xmpi(MPI_Get(rxWin[streamIdx].clientBuf[i].mem,
-                       (int)rxWin[streamIdx].clientBuf[i].size, MPI_UNSIGNED_CHAR,
-                       clientRanks_[i], 0,
-                       (int)rxWin[streamIdx].clientBuf[i].size, MPI_UNSIGNED_CHAR,
-                       rxWin[streamIdx].getWin));
+          {
+            int tx_count
+              = (int)(rxWin[streamIdx].clientBuf[i].size / PIO_WIN_ALIGN);
+            xmpi(MPI_Get(rxWin[streamIdx].clientBuf[i].mem,
+                         tx_count, rmaElemDt, clientRanks_[i], 0,
+                         tx_count, rmaElemDt, rxWin[streamIdx].getWin));
+          }
         xmpi(MPI_Win_complete(rxWin[streamIdx].getWin));
         if (!conf->batchedRMA)
           readGetBuffers(streamIdx, conf);
@@ -2412,6 +2415,11 @@ void cdiPioCollectorMessageLoop()
                      NSSW_FUNC(cdiPioServerCdfDefVars));
 #endif
 
+  /* FIXME: this needs to use MPI_PACKED for portability */
+  xmpi(MPI_Type_contiguous(PIO_WIN_ALIGN, MPI_UNSIGNED_CHAR,
+                           &rmaElemDt));
+  xmpi(MPI_Type_commit(&rmaElemDt));
+
   int *streamActivity = NULL;
   setupClientRanks();
   if (conf->cacheXmaps)
@@ -2451,6 +2459,7 @@ void cdiPioCollectorMessageLoop()
             cdiPioXmapCacheDelete(XmapCache);
           cdiPioIdxlistCacheDelete(DstIdxlistCache);
           xdebug("%s", "RETURN");
+          xmpi(MPI_Type_free(&rmaElemDt));
           return;
 	case RESOURCES:
         case STREAMOPEN:
