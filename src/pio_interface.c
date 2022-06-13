@@ -189,7 +189,8 @@ cdiPioClientStreamWinCreate(int streamID, struct collSpec *cspec)
    * platforms that block the servers in MPI_Win_complete
    */
   collWaitAll();
-  struct clientBufSize bufSize = computeClientStreamBufSize(streamID, cspec);
+  struct clientBufSize bufSize
+    = cdiPioClientStreamBufSize(streamID, cspec);
   MPI_Info no_locks_info;
   xmpi(MPI_Info_create(&no_locks_info));
   xmpi(MPI_Info_set(no_locks_info, "no_locks", "true"));
