@@ -137,7 +137,7 @@ struct collSpec
 };
 
 struct clientBufSize
-computeClientStreamBufSize(int streamID, const struct collSpec *collector);
+cdiPioClientStreamBufSize(int streamID, const struct collSpec *collector);
 
 struct partDescPreset
 {

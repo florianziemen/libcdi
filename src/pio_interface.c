@@ -200,7 +200,7 @@ cdiPioClientStreamWinCreate(int streamID, struct collSpec *cspec)
    */
   collWaitAll();
   struct clientBufSize bufSize
-    = computeClientStreamBufSize(streamID, cspec);
+    = cdiPioClientStreamBufSize(streamID, cspec);
   MPI_Info no_locks_info;
   xmpi(MPI_Info_create(&no_locks_info));
   xmpi(MPI_Info_set(no_locks_info, "no_locks", "true"));

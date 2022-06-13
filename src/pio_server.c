@@ -2298,11 +2298,11 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos,
     {
       collectorData.partDesc = NULL;
       collectorData.conversion = NULL;
-      bufSizes[0] = computeClientStreamBufSize(serverStreamID, &collectorData);
+      bufSizes[0] = cdiPioClientStreamBufSize(serverStreamID, &collectorData);
       collectorData.sendRPCData = 0;
       for (size_t clientIdx = 1; clientIdx < (size_t)numClients_; ++clientIdx)
         bufSizes[clientIdx]
-          = computeClientStreamBufSize(serverStreamID, &collectorData);
+          = cdiPioClientStreamBufSize(serverStreamID, &collectorData);
     }
   else /* tag == STREAM_DEF_DECOMPOSED_VLIST */
     {
@@ -2348,7 +2348,7 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos,
           *pos += clientPos;
           collectorData.partDesc = clientPartDesc;
           bufSizes[clientIdx]
-            = computeClientStreamBufSize(serverStreamID, &collectorData);
+            = cdiPioClientStreamBufSize(serverStreamID, &collectorData);
           collectorData.sendRPCData = 0;
         }
       Free(clientPartDesc);
