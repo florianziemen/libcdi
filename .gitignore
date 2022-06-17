@@ -91,6 +91,7 @@ Makefile
 # Documentation stage files:
 /doc/cdi_cman.pdf
 /doc/cdi_fman.pdf
+/doc/tex/
 
 # Test stage files:
 /examples/**/*.grb
