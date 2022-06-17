@@ -70,6 +70,7 @@ getByteorder(int byteswap)
 int
 cdiGetFiletype(const char *uri, int *byteorder)
 {
+  // clang-format off
   int filetype = CDI_EUFTYPE;
   int swap = 0;
   int version;
@@ -81,11 +82,8 @@ cdiGetFiletype(const char *uri, int *byteorder)
   switch (protocol)
     {
     case CDI_PROTOCOL_ACROSS: return CDI_FILETYPE_GRB2;
-
-    case CDI_PROTOCOL_FDB: return CDI_FILETYPE_UNDEF;
-
-    case CDI_PROTOCOL_OTHER: return CDI_FILETYPE_NC;  // support for NetCDF remote types and ESDM
-
+    case CDI_PROTOCOL_FDB:    return CDI_FILETYPE_UNDEF;
+    case CDI_PROTOCOL_OTHER:  return CDI_FILETYPE_NC;  // support for NetCDF remote types and ESDM
     case CDI_PROTOCOL_FILE:
       // handled below;
       break;
@@ -93,10 +91,8 @@ cdiGetFiletype(const char *uri, int *byteorder)
 
   const int fileID = fileOpen(filename, "r");
 
-  if (fileID == CDI_UNDEFID)
-    return CDI_ESYSTEM;
-  else if (fileID == -2)
-    return CDI_ETMOF;
+  if      (fileID == CDI_UNDEFID) return CDI_ESYSTEM;
+  else if (fileID == -2)          return CDI_ETMOF;
 
   char buffer[8];
   if (fileRead(fileID, buffer, 8) != 8)
@@ -104,7 +100,7 @@ cdiGetFiletype(const char *uri, int *byteorder)
       struct stat buf;
       if (stat(filename, &buf) == 0)
         {
-          if (buf.st_size == 0) return CDI_EISEMPTY;
+          if (buf.st_size == 0)      return CDI_EISEMPTY;
           if (buf.st_mode & S_IFDIR) return CDI_EISDIR;
         }
 
@@ -116,73 +112,32 @@ cdiGetFiletype(const char *uri, int *byteorder)
   if (memcmp(buffer, "GRIB", 4) == 0)
     {
       version = buffer[7];
-      if (version <= 1)
-        {
-          filetype = CDI_FILETYPE_GRB;
-          if (CDI_Debug) Message("found GRIB file = %s, version %d", filename, version);
-        }
-      else if (version == 2)
-        {
-          filetype = CDI_FILETYPE_GRB2;
-          if (CDI_Debug) Message("found GRIB2 file = %s", filename);
-        }
+      if      (version <= 1) filetype = CDI_FILETYPE_GRB;
+      else if (version == 2) filetype = CDI_FILETYPE_GRB2;
     }
-  else if (memcmp(buffer, "CDF\001", 4) == 0)
-    {
-      filetype = CDI_FILETYPE_NC;
-      if (CDI_Debug) Message("found CDF1 file = %s", filename);
-    }
-  else if (memcmp(buffer, "CDF\002", 4) == 0)
-    {
-      filetype = CDI_FILETYPE_NC2;
-      if (CDI_Debug) Message("found CDF2 file = %s", filename);
-    }
-  else if (memcmp(buffer, "CDF\005", 4) == 0)
-    {
-      filetype = CDI_FILETYPE_NC5;
-      if (CDI_Debug) Message("found CDF5 file = %s", filename);
-    }
-  else if (memcmp(buffer + 1, "HDF", 3) == 0)
-    {
-      filetype = CDI_FILETYPE_NC4;
-      if (CDI_Debug) Message("found HDF file = %s", filename);
-    }
+  else if (memcmp(buffer, "CDF\001", 4) == 0) { filetype = CDI_FILETYPE_NC; }
+  else if (memcmp(buffer, "CDF\002", 4) == 0) { filetype = CDI_FILETYPE_NC2; }
+  else if (memcmp(buffer, "CDF\005", 4) == 0) { filetype = CDI_FILETYPE_NC5; }
+  else if (memcmp(buffer + 1, "HDF", 3) == 0) { filetype = CDI_FILETYPE_NC4; }
 #ifdef HAVE_LIBSERVICE
-  else if (srvCheckFiletype(fileID, &swap))
-    {
-      filetype = CDI_FILETYPE_SRV;
-      if (CDI_Debug) Message("found SRV file = %s", filename);
-    }
+  else if (srvCheckFiletype(fileID, &swap))   { filetype = CDI_FILETYPE_SRV; }
 #endif
 #ifdef HAVE_LIBEXTRA
-  else if (extCheckFiletype(fileID, &swap))
-    {
-      filetype = CDI_FILETYPE_EXT;
-      if (CDI_Debug) Message("found EXT file = %s", filename);
-    }
+  else if (extCheckFiletype(fileID, &swap))   { filetype = CDI_FILETYPE_EXT; }
 #endif
 #ifdef HAVE_LIBIEG
-  else if (iegCheckFiletype(fileID, &swap))
-    {
-      filetype = CDI_FILETYPE_IEG;
-      if (CDI_Debug) Message("found IEG file = %s", filename);
-    }
+  else if (iegCheckFiletype(fileID, &swap))   { filetype = CDI_FILETYPE_IEG; }
 #endif
 #ifdef HAVE_LIBGRIB
   else if (gribCheckSeek(fileID, &recpos, &version) == 0)
     {
-      if (version <= 1)
-        {
-          filetype = CDI_FILETYPE_GRB;
-          if (CDI_Debug) Message("found seeked GRIB file = %s", filename);
-        }
-      else if (version == 2)
-        {
-          filetype = CDI_FILETYPE_GRB2;
-          if (CDI_Debug) Message("found seeked GRIB2 file = %s", filename);
-        }
+      if      (version <= 1) filetype = CDI_FILETYPE_GRB;
+      else if (version == 2) filetype = CDI_FILETYPE_GRB2;
     }
 #endif
+  // clang-format on
+
+  if (CDI_Debug && filetype != CDI_EUFTYPE) Message("found %s file = %s", strfiletype(filetype), filename);
 
   fileClose(fileID);
 
