@@ -272,6 +272,7 @@ typedef struct
   int curTsID;       // current timestep ID
   int rtsteps;       // number of tsteps accessed
   long ntsteps;      // number of tsteps : only set if all records accessed
+  int maxSteps;      // max. number of timesteps (needed for CDI_FILETYPE_NCZARR)
   tsteps_t *tsteps;
   int tstepsTableSize;
   int tstepsNextID;

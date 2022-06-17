@@ -190,6 +190,16 @@ getByteswap(int byteorder)
 }
 
 void
+streamDefMaxSteps(int streamID, int maxSteps)
+{
+  if (maxSteps >= 0)
+    {
+      stream_t *streamptr = stream_to_pointer(streamID);
+      streamptr->maxSteps = maxSteps;
+    }
+}
+
+void
 streamDefNumWorker(int streamID, int numWorker)
 {
   if (numWorker > 0)
@@ -314,8 +324,8 @@ static long
 cdiInqTimeSize(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-  long ntsteps = streamptr->ntsteps;
 
+  long ntsteps = streamptr->ntsteps;
   if (ntsteps == (long) CDI_UNDEFID)
     {
       int tsID = 0;
@@ -907,6 +917,7 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->curTsID = CDI_UNDEFID;
   streamptr->rtsteps = 0;
   streamptr->ntsteps = CDI_UNDEFID;
+  streamptr->maxSteps = CDI_UNDEFID;
   streamptr->tsteps = NULL;
   streamptr->tstepsTableSize = 0;
   streamptr->tstepsNextID = 0;

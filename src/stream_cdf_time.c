@@ -150,7 +150,16 @@ cdfDefTime(stream_t *streamptr)
   taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
   const char *taxisName = (taxis->name && taxis->name[0]) ? taxis->name : defaultTimeAxisName;
+
   size_t timeDimLen = NC_UNLIMITED;
+  if (streamptr->filetype == CDI_FILETYPE_NCZARR)
+    {
+      if (streamptr->maxSteps == CDI_UNDEFID)
+        fprintf(stderr, "Max. number of timesteps undefined for NCZarr!\n");
+      else
+        timeDimLen = streamptr->maxSteps;
+    }
+
   int timeDimId;
   cdf_def_dim(fileID, taxisName, timeDimLen, &timeDimId);
   streamptr->basetime.ncdimid = timeDimId;
@@ -163,7 +172,7 @@ cdfDefTime(stream_t *streamptr)
   streamptr->basetime.ncvarid = timeVarId;
 
 #ifdef HAVE_NETCDF4
-  if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C)
+  if (timeDimLen == NC_UNLIMITED && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C))
     {
       const size_t chunk = 512;
       cdf_def_var_chunking(fileID, timeVarId, NC_CHUNKED, &chunk);

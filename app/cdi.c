@@ -871,6 +871,8 @@ main(int argc, char *argv[])
           streamID2 = streamOpenWrite(fname2, filetype);
           if (streamID2 < 0) return handle_error(streamID2, "Open failed on %s", fname2);
 
+          const int maxSteps = vlistNtsteps(vlistID1);
+          if (filetype == CDI_FILETYPE_NCZARR && maxSteps >= 0) streamDefMaxSteps(streamID2, maxSteps);
           if (numWorkerOut > 0) streamDefNumWorker(streamID2, numWorkerOut);
 
           if (DefaultByteorder != CDI_UNDEFID) streamDefByteorder(streamID2, DefaultByteorder);

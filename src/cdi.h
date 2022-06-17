@@ -362,6 +362,7 @@ void    streamClose(int streamID);
 //      streamSync: Synchronize an Open Dataset to Disk
 void    streamSync(int streamID);
 
+void    streamDefMaxSteps(int streamID, int maxSteps);
 void    streamDefNumWorker(int streamID, int numWorker);
 
 //      streamDefVlist: Define the Vlist for a stream
