@@ -248,9 +248,9 @@ cdfDefineCellMethods(stream_t *streamptr, int cdiID, int varID, int fileID, int 
   taxis_t *taxis = &streamptr->tsteps[0].taxis;
   if (!taxis->has_bounds) return;
 
-  const int time_varid = streamptr->basetime.ncvarid;
+  const int timeVarId = streamptr->basetime.ncvarid;
   char timeVarName[CDI_MAX_NAME];
-  cdf_inq_varname(fileID, time_varid, timeVarName);
+  cdf_inq_varname(fileID, timeVarId, timeVarName);
 
   const int stepType = vlistInqVarTsteptype(cdiID, varID);
 

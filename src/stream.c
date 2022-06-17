@@ -161,10 +161,8 @@ The function @func{streamInqFiletype} returns the filetype of a stream.
 @func{streamInqFiletype} returns the type of the file format,
 one of the set of predefined CDI file format types.
 The valid CDI file format types are @func{CDI_FILETYPE_GRB}, @func{CDI_FILETYPE_GRB2}, @func{CDI_FILETYPE_NC},
-@func{CDI_FILETYPE_NC2},
-@func{CDI_FILETYPE_NC4}, @func{CDI_FILETYPE_NC4C}, @func{CDI_FILETYPE_NC5}, @func{CDI_FILETYPE_SRV}, @func{CDI_FILETYPE_EXT} and
-@func{CDI_FILETYPE_IEG}.
-
+@func{CDI_FILETYPE_NC2}, @func{CDI_FILETYPE_NC4}, @func{CDI_FILETYPE_NC4C}, @func{CDI_FILETYPE_NC5},
+@func{CDI_FILETYPE_NCZARR}, @func{CDI_FILETYPE_SRV}, @func{CDI_FILETYPE_EXT} and @func{CDI_FILETYPE_IEG}.
 @EndFunction
 */
 int
@@ -564,6 +562,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
       }
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NCZARR:
       {
         fileID = cdf4Open(filename, temp, &filetype);
         break;
@@ -737,6 +736,7 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
       }
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NCZARR:
       {
         fileID = cdf4Open(filename, filemode, &filetype);
         streamptr->ncmode = 2;
@@ -844,8 +844,7 @@ streamOpenAppend(const char *filename)
     @Item  filetype  The type of the file format, one of the set of predefined CDI file format types.
                      The valid CDI file format types are @func{CDI_FILETYPE_GRB}, @func{CDI_FILETYPE_GRB2}, @func{CDI_FILETYPE_NC},
                      @func{CDI_FILETYPE_NC2}, @func{CDI_FILETYPE_NC4}, @func{CDI_FILETYPE_NC4C}, @func{CDI_FILETYPE_NC5},
-@func{CDI_FILETYPE_SRV},
-                     @func{CDI_FILETYPE_EXT} and @func{CDI_FILETYPE_IEG}.
+                     @func{CDI_FILETYPE_NCZARR}, @func{CDI_FILETYPE_SRV}, @func{CDI_FILETYPE_EXT} and @func{CDI_FILETYPE_IEG}.
 
 @Description
 The function @func{streamOpenWrite} creates a new datset.

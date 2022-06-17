@@ -79,10 +79,10 @@ static void
 version(void)
 {
   int filetypes[] = { CDI_FILETYPE_SRV, CDI_FILETYPE_EXT, CDI_FILETYPE_IEG, CDI_FILETYPE_GRB,  CDI_FILETYPE_GRB2,
-                      CDI_FILETYPE_NC,  CDI_FILETYPE_NC2, CDI_FILETYPE_NC4, CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5 };
-  const char *typenames[] = { "srv", "ext", "ieg", "grb", "grb2", "nc", "nc2", "nc4", "nc4c", "nc5" };
+                      CDI_FILETYPE_NC,  CDI_FILETYPE_NC2, CDI_FILETYPE_NC4, CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5, CDI_FILETYPE_NCZARR };
+  const char *typenames[] = { "srv", "ext", "ieg", "grb", "grb2", "nc", "nc2", "nc4", "nc4c", "nc5", "nczarr" };
 
-  fprintf(stderr, "CDI version 2.0\n");
+  fprintf(stderr, "CDI version 2.1\n");
 #ifdef COMPILER
   fprintf(stderr, "C Compiler: %s\n", COMPILER);
 #endif
@@ -156,6 +156,7 @@ version(void)
     1.7.2  14 Nov 2012 : added optional compression level -z zip[_1-9]
     1.9.0  29 May 2019 : added option -i to set number of input worker
     2.0.0  02 Feb 2022 : changed date/time handling to CdiDateTime
+    2.1.0  17 Jun 2022 : added NCZarr support
   */
 }
 
@@ -169,7 +170,7 @@ usage(void)
   fprintf(stderr, "\n");
   fprintf(stderr, "  Options:\n");
   fprintf(stderr, "    -d             Print debugging information\n");
-  fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, nc4c, nc5, srv, ext or ieg)\n");
+  fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext or ieg)\n");
   fprintf(stderr, "    -i <num>       Number of worker to decode/decompress GRIB records\n");
   fprintf(stderr, "    -m             Move records\n");
   fprintf(stderr, "    -r             Use CDI record API\n");
@@ -560,7 +561,7 @@ setDefaultDataType(char *datatypestr)
             {
               fprintf(stderr, "Unsupported number of bits %d!\n", nbits);
               fprintf(stderr,
-                      "Use I8/I16/I32/F32/F64 for nc/nc2/nc4/nc4c/nc5; F32/F64 for grb2/srv/ext/ieg; P1 - P24 for grb/grb2.\n");
+                      "Use I8/I16/I32/F32/F64 for nc/nc2/nc4/nc4c/nc5/nczarr; F32/F64 for grb2/srv/ext/ieg; P1 - P24 for grb/grb2.\n");
               exit(EXIT_FAILURE);
             }
         }
@@ -646,22 +647,23 @@ setDefaultFileType(char *filetypestr)
       char *ftstr = filetypestr;
 
       // clang-format off
-      if      ( memcmp(filetypestr, "grb2", 4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB2;}
-      else if ( memcmp(filetypestr, "grb1", 4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB; }
-      else if ( memcmp(filetypestr, "grb",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_GRB; }
-      else if ( memcmp(filetypestr, "nc2",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC2; }
-      else if ( memcmp(filetypestr, "nc4c", 4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_NC4C;}
-      else if ( memcmp(filetypestr, "nc4",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC4; }
-      else if ( memcmp(filetypestr, "nc5",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC5; }
-      else if ( memcmp(filetypestr, "nc1",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC;  }
-      else if ( memcmp(filetypestr, "nc",   2)  == 0 ) { ftstr += 2; DefaultFileType = CDI_FILETYPE_NC2; }
-      else if ( memcmp(filetypestr, "srv",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_SRV; }
-      else if ( memcmp(filetypestr, "ext",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_EXT; }
-      else if ( memcmp(filetypestr, "ieg",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_IEG; }
+      if      ( memcmp(filetypestr, "grb2",   4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB2;}
+      else if ( memcmp(filetypestr, "grb1",   4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB; }
+      else if ( memcmp(filetypestr, "grb",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_GRB; }
+      else if ( memcmp(filetypestr, "nc2",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC2; }
+      else if ( memcmp(filetypestr, "nc4c",   4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_NC4C;}
+      else if ( memcmp(filetypestr, "nc4",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC4; }
+      else if ( memcmp(filetypestr, "nc5",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC5; }
+      else if ( memcmp(filetypestr, "nc1",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC;  }
+      else if ( memcmp(filetypestr, "nczarr", 6)  == 0 ) { ftstr += 6; DefaultFileType = CDI_FILETYPE_NCZARR;  }
+      else if ( memcmp(filetypestr, "nc",     2)  == 0 ) { ftstr += 2; DefaultFileType = CDI_FILETYPE_NC2; }
+      else if ( memcmp(filetypestr, "srv",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_SRV; }
+      else if ( memcmp(filetypestr, "ext",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_EXT; }
+      else if ( memcmp(filetypestr, "ieg",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_IEG; }
       else
 	{
 	  fprintf(stderr, "Unsupported filetype %s!\n", filetypestr);
-	  fprintf(stderr, "Available filetypes: grb, grb2, nc, nc2, nc4, nc4c, nc5, srv, ext and ieg\n");
+	  fprintf(stderr, "Available filetypes: grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext and ieg\n");
 	  exit(EXIT_FAILURE);
 	}
       // clang-format on
@@ -678,8 +680,8 @@ setDefaultFileType(char *filetypestr)
             {
               fprintf(stderr, "Unexpected character >%c< in file type >%s<!\n", *ftstr, filetypestr);
               fprintf(stderr, "Use format[_nbits] with:\n");
-              fprintf(stderr, "    format = grb, grb2, nc, nc2, nc4, nc4c, nc5, srv, ext or ieg\n");
-              fprintf(stderr, "    nbits  = 32/64 for grb2/nc/nc2/nc4/nc4c/nc5/srv/ext/ieg; 1 - 24 for grb/grb2\n");
+              fprintf(stderr, "    format = grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext or ieg\n");
+              fprintf(stderr, "    nbits  = 32/64 for grb2/nc/nc2/nc4/nc4c/nc5/nczarr/srv/ext/ieg; 1 - 24 for grb/grb2\n");
               exit(EXIT_FAILURE);
             }
         }

@@ -67,16 +67,17 @@ printFiletype(int streamID, int vlistID)
   // clang-format off
   switch ( filetype )
     {
-    case CDI_FILETYPE_GRB:  printf("GRIB");  break;
-    case CDI_FILETYPE_GRB2: printf("GRIB2");  break;
-    case CDI_FILETYPE_NC:   printf("NetCDF");  break;
-    case CDI_FILETYPE_NC2:  printf("NetCDF2");  break;
-    case CDI_FILETYPE_NC4:  printf("NetCDF4");  break;
-    case CDI_FILETYPE_NC4C: printf("NetCDF4 classic");  break;
-    case CDI_FILETYPE_NC5:  printf("NetCDF5");  break;
-    case CDI_FILETYPE_SRV:  printf("SERVICE");  break;
-    case CDI_FILETYPE_EXT:  printf("EXTRA");  break;
-    case CDI_FILETYPE_IEG:  printf("IEG");  break;
+    case CDI_FILETYPE_GRB:    printf("GRIB");  break;
+    case CDI_FILETYPE_GRB2:   printf("GRIB2");  break;
+    case CDI_FILETYPE_NC:     printf("NetCDF");  break;
+    case CDI_FILETYPE_NC2:    printf("NetCDF2");  break;
+    case CDI_FILETYPE_NC4:    printf("NetCDF4");  break;
+    case CDI_FILETYPE_NC4C:   printf("NetCDF4 classic");  break;
+    case CDI_FILETYPE_NC5:    printf("NetCDF5");  break;
+    case CDI_FILETYPE_NCZARR: printf("NCZarr");  break;
+    case CDI_FILETYPE_SRV:    printf("SERVICE");  break;
+    case CDI_FILETYPE_EXT:    printf("EXTRA");  break;
+    case CDI_FILETYPE_IEG:    printf("IEG");  break;
     default: printf("  File format: unsupported filetype %d" , filetype);  break;
     }
 

@@ -837,7 +837,7 @@ cdiStreamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int
   *nmiss = 0;
 
   // currently we only care for netcdf data
-  switch (filetype)
+  switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
@@ -848,11 +848,7 @@ cdiStreamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int
       }
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
       {
         if (memtype == MEMTYPE_FLOAT)
           cdfReadVarSliceSPPart(streamptr, varID, levelID, varType, start, size, (float *) data, nmiss);
@@ -929,7 +925,7 @@ cdiStreamReadVarPart(int streamID, int varID, int varType, int start, size_t siz
   *nmiss = 0;
 
   // currently we only care for netcdf data
-  switch (filetype)
+  switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
@@ -940,11 +936,7 @@ cdiStreamReadVarPart(int streamID, int varID, int varType, int start, size_t siz
       }
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
       {
         if (memtype == MEMTYPE_FLOAT)
           cdfReadVarSPPart(streamptr, varID, varType, start, size, (float *) data, nmiss);

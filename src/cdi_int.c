@@ -61,6 +61,7 @@ static const char Filetypes[][9] = {
   "SERVICE",
   "EXTRA",
   "IEG",
+  "NCZarr",
   "HDF5",
 };
 // clang-format on
@@ -489,7 +490,7 @@ cdiInitialize(void)
 const char *
 strfiletype(int filetype)
 {
-  int size = (int) (sizeof(Filetypes) / sizeof(char *));
+  const int size = (int) (sizeof(Filetypes) / sizeof(char *));
   return (filetype > 0 && filetype < size) ? Filetypes[filetype] : Filetypes[0];
 }
 
@@ -544,6 +545,7 @@ cdiBaseFiletype(int filetype)
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NCZARR:
     case CDI_FILETYPE_NC5: return CDI_FILETYPE_NETCDF;
     default: return filetype;
     }
