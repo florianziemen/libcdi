@@ -141,20 +141,22 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
           if (*filetype == CDI_FILETYPE_NC4C) writemode |= (NC_NETCDF4 | NC_CLASSIC_MODEL);
           if (*filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
 #endif
+          const bool hasUri = has_uri(filename);
+
           if (*filetype == CDI_FILETYPE_NCZARR)
             {
-              if (has_uri(filename))
-                {
-                  cdf_create(filename, writemode, &ncid);
-                }
-              else
+              if (!hasUri)
                 {
                   fprintf(stderr, "URI is missing in NCZarr path!\n");
                   return CDI_EINVAL;
                 }
+
+              cdf_create(filename, writemode, &ncid);
             }
           else
             {
+              if (hasUri) fprintf(stderr, "URI defined for non NCZarr Data Model!\n");
+
               cdf__create(filename, writemode, &ncid);
             }
 
