@@ -25,56 +25,31 @@ cdiStreamReadVar(int streamID, int varID, int memtype, void *data, size_t *nmiss
   check_parg(nmiss);
 
   stream_t *streamptr = stream_to_pointer(streamID);
-  int filetype = streamptr->filetype;
+  const int filetype = streamptr->filetype;
 
   *nmiss = 0;
+
+  if (memtype == MEMTYPE_FLOAT && cdiFiletypeIsExse(filetype)) return 1;
 
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2:
-      {
-        grb_read_var(streamptr, varID, memtype, data, nmiss);
-        break;
-      }
+    case CDI_FILETYPE_GRB2: grb_read_var(streamptr, varID, memtype, data, nmiss); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV:
-      {
-        if (memtype == MEMTYPE_FLOAT) return 1;
-        srvReadVarDP(streamptr, varID, (double *) data, nmiss);
-        break;
-      }
+    case CDI_FILETYPE_SRV: srvReadVarDP(streamptr, varID, (double *) data, nmiss); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT:
-      {
-        if (memtype == MEMTYPE_FLOAT) return 1;
-        extReadVarDP(streamptr, varID, (double *) data, nmiss);
-        break;
-      }
+    case CDI_FILETYPE_EXT: extReadVarDP(streamptr, varID, (double *) data, nmiss); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG:
-      {
-        if (memtype == MEMTYPE_FLOAT) return 1;
-        iegReadVarDP(streamptr, varID, (double *) data, nmiss);
-        break;
-      }
+    case CDI_FILETYPE_IEG: iegReadVarDP(streamptr, varID, (double *) data, nmiss); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF:
-      {
-        cdf_read_var(streamptr, varID, memtype, data, nmiss);
-        break;
-      }
+    case CDI_FILETYPE_NETCDF: cdf_read_var(streamptr, varID, memtype, data, nmiss); break;
 #endif
-    default:
-      {
-        Error("%s support not compiled in!", strfiletype(filetype));
-        break;
-      }
+    default: Error("%s support not compiled in!", strfiletype(filetype));
     }
 
   return status;
@@ -153,57 +128,31 @@ cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, void *d
   check_parg(nmiss);
 
   stream_t *streamptr = stream_to_pointer(streamID);
-  int filetype = streamptr->filetype;
+  const int filetype = streamptr->filetype;
 
   *nmiss = 0;
+
+  if (memtype == MEMTYPE_FLOAT && cdiFiletypeIsExse(filetype)) return 1;
 
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2:
-      {
-        grb_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
-        break;
-      }
+    case CDI_FILETYPE_GRB2: grb_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV:
-      {
-        if (memtype == MEMTYPE_FLOAT) return 1;
-        srvReadVarSliceDP(streamptr, varID, levelID, (double *) data, nmiss);
-        break;
-      }
+    case CDI_FILETYPE_SRV: srvReadVarSliceDP(streamptr, varID, levelID, (double *) data, nmiss); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT:
-      {
-        if (memtype == MEMTYPE_FLOAT) return 1;
-        extReadVarSliceDP(streamptr, varID, levelID, (double *) data, nmiss);
-        break;
-      }
+    case CDI_FILETYPE_EXT: extReadVarSliceDP(streamptr, varID, levelID, (double *) data, nmiss); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG:
-      {
-        if (memtype == MEMTYPE_FLOAT) return 1;
-        iegReadVarSliceDP(streamptr, varID, levelID, (double *) data, nmiss);
-        break;
-      }
+    case CDI_FILETYPE_IEG: iegReadVarSliceDP(streamptr, varID, levelID, (double *) data, nmiss); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF:
-      {
-        cdf_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
-        break;
-      }
+    case CDI_FILETYPE_NETCDF: cdf_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss); break;
 #endif
-    default:
-      {
-        Error("%s support not compiled in!", strfiletype(filetype));
-        status = 2;
-        break;
-      }
+    default: Error("%s support not compiled in!", strfiletype(filetype));
     }
 
   return status;
@@ -303,11 +252,7 @@ stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF: cdf_read_record(streamptr, memtype, data, nmiss); break;
 #endif
-    default:
-      {
-        Error("%s support not compiled in!", strfiletype(streamptr->filetype));
-        break;
-      }
+    default: Error("%s support not compiled in!", strfiletype(streamptr->filetype));
     }
 }
 

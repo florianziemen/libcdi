@@ -529,6 +529,12 @@ cdiInqMissval(void)
   return CDI_Default_Missval;
 }
 
+bool
+cdiFiletypeIsExse(int filetype)
+{
+  return (filetype == CDI_FILETYPE_SRV || filetype == CDI_FILETYPE_EXT || filetype == CDI_FILETYPE_IEG);
+}
+
 int
 cdiBaseFiletype(int filetype)
 {

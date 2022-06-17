@@ -306,7 +306,6 @@ typedef struct CdiGribIterator CdiGribIterator;
 void    cdiReset(void);
 
 const char *cdiStringError(int cdiErrno);
-
 void    cdiDebug(int debug);
 
 const char *cdiLibraryVersion(void);

@@ -92,7 +92,7 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
   int ncid = -1;
 #ifdef HAVE_LIBNETCDF
-  int fmode = tolower(*mode);
+  const int fmode = tolower(*mode);
   int writemode = NC_CLOBBER;
   int readmode = NC_NOWRITE;
 
@@ -124,10 +124,8 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
           if (*filetype == CDI_FILETYPE_NC5) writemode |= NC_64BIT_DATA;
 #endif
 #ifdef HAVE_NETCDF4
-          if (*filetype == CDI_FILETYPE_NC4)
-            writemode |= NC_NETCDF4;
-          else if (*filetype == CDI_FILETYPE_NC4C)
-            writemode |= (NC_NETCDF4 | NC_CLASSIC_MODEL);
+          if (*filetype == CDI_FILETYPE_NC4) writemode |= NC_NETCDF4;
+          if (*filetype == CDI_FILETYPE_NC4C) writemode |= (NC_NETCDF4 | NC_CLASSIC_MODEL);
 #endif
           cdf_create(filename, writemode, &ncid);
           if (CDI_Version_Info) cdfComment(ncid);
@@ -211,33 +209,22 @@ cdf4CheckLibVersions(void)
 int
 cdf4Open(const char *filename, const char *mode, int *filetype)
 {
-  int fileID = -1;
-  bool open_file = false;
-
   if (CDF_Debug) Message("Open %s with mode %c", filename, *mode);
 
 #ifdef HAVE_NETCDF4
-  open_file = true;
+  {
+    if (cdf4CheckLibVersions() == 0)
+      {
+        const int fileID = cdfOpenFile(filename, mode, filetype);
+        if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
+        return fileID;
+      }
+
+    return CDI_EUFTYPE;
+  }
 #endif
 
-  if (open_file)
-    {
-      if (cdf4CheckLibVersions() == 0)
-        {
-          fileID = cdfOpenFile(filename, mode, filetype);
-          if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
-        }
-      else
-        {
-          fileID = CDI_EUFTYPE;
-        }
-    }
-  else
-    {
-      fileID = CDI_ELIBNAVAIL;
-    }
-
-  return fileID;
+  return CDI_ELIBNAVAIL;
 }
 
 static void

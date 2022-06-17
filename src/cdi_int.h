@@ -509,6 +509,7 @@ void cdi_check_gridsize_int_limit(const char *format, SizeType gridsize)
   if (gridsize > INT_MAX) Error("%s format grid size (%zu) limit exceeded (%zu)!", format, gridsize, INT_MAX);
 }
 
+bool cdiFiletypeIsExse(int filetype);
 int cdiBaseFiletype(int filetype);
 
 #ifdef __cplusplus

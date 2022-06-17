@@ -233,11 +233,7 @@ streamCopyRecord(int streamID2, int streamID1)
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF: cdfCopyRecord(streamptr2, streamptr1); break;
 #endif
-    default:
-      {
-        Error("%s support not compiled in!", strfiletype(filetype));
-        break;
-      }
+    default: Error("%s support not compiled in!", strfiletype(filetype));
     }
 }
 

@@ -936,8 +936,7 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
   /* build list of streams, data was transferred for */
   {
     struct streamMapping *map = streamMappingNew(streamIdx, winDict, conf);
-    /* TODO: build list of rma buffer layout here to check if caching
-     * can be done */
+    /* TODO: build list of rma buffer layout here to check if caching can be done */
     double *data = NULL;
     int currentDataBufSize = 0;
     int filetype = streamInqFiletype(streamID);
