@@ -1959,7 +1959,9 @@ static void
 getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
 {
   MPI_Group clientGroup = cdiPioInqRemoteGroup();
-  static bool file_is_open = false;
+  static unsigned long io_steps = 0;
+  double value_timer_readgetbuffers;
+  int rank = getMPICommWorldRank();
 
   xdebug("%s", "START");
 
@@ -1987,12 +1989,14 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
         if (!conf->batchedRMA)
         {
           xdebug("%s", "not batchedRMA");
-          if (! file_is_open) sct_start(timer_readgetbuffers_first);
+          if (io_steps < TIMER_MAX_STEPS) sct_start(timer_readgetbuffers_arr[io_steps]);
           sct_start(timer_readgetbuffers);
           readGetBuffers(streamIdx, conf);
           sct_stop(timer_readgetbuffers);
-          if (! file_is_open) sct_stop(timer_readgetbuffers_first);
-          file_is_open = true;
+          if (io_steps < TIMER_MAX_STEPS) {
+            sct_stop(timer_readgetbuffers_arr[io_steps]);
+          }
+          io_steps++;
         }
       }
   if (conf->batchedRMA)
@@ -2001,12 +2005,14 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
     for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
       if (streamActivity[streamIdx])
       {
-        if (! file_is_open) sct_start(timer_readgetbuffers_first);
+        if (io_steps < TIMER_MAX_STEPS) sct_start(timer_readgetbuffers_arr[io_steps]);
         sct_start(timer_readgetbuffers);
         readGetBuffers(streamIdx, conf);
         sct_stop(timer_readgetbuffers);
-        if (! file_is_open) sct_stop(timer_readgetbuffers_first);
-        file_is_open = true;
+        if (io_steps < TIMER_MAX_STEPS) {
+          sct_stop(timer_readgetbuffers_arr[io_steps]);
+        }
+        io_steps++;
       }
   }
 

@@ -7,7 +7,9 @@
 
 #undef TEST_SCT
 
-#define TIMER_MAX 32
+#define TIMER_MAX 128
+// size of the timer arrays
+#define TIMER_MAX_STEPS 16
 EXTERN int timer_ioTotal;
 EXTERN int timer_getTimeStepData;
 EXTERN int timer_winStart;
@@ -16,7 +18,7 @@ EXTERN int timer_winComplete;
 EXTERN int timer_yaxt_exchange;
 EXTERN int timer_postwritebatch;
 EXTERN int timer_readgetbuffers;
-EXTERN int timer_readgetbuffers_first;
+EXTERN int timer_readgetbuffers_arr[TIMER_MAX_STEPS];
 EXTERN int timer_writeStream;
 EXTERN int timer_preWriteChunk;
 EXTERN int timer_writeDeco;

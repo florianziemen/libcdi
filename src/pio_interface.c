@@ -554,13 +554,17 @@ void new_context(const char *context_name, MPI_Comm comm)
 {
   context_handle = sct_new_context(context_name, comm);
   sct_context_start(context_handle);
+  char readgetbuffers_str[64];
 
   timer_ioTotal             = sct_new_timer("IO servers total");
   timer_getTimeStepData     = sct_new_timer(" L getTimeStepData");
   timer_winStart            = sct_new_timer("    L window start");
   timer_mpi_get             = sct_new_timer("    L MPI_Get");
   timer_winComplete         = sct_new_timer("    L window complete");
-  timer_readgetbuffers_first= sct_new_timer("    L read getbuffers (open + init write)");
+  for (int i = 0; i < TIMER_MAX_STEPS; ++i) {
+    sprintf(readgetbuffers_str, "    L read getbuffers[%02d]", i+1);
+    timer_readgetbuffers_arr[i] = sct_new_timer(readgetbuffers_str);
+  }
   timer_readgetbuffers      = sct_new_timer("    L read getbuffers");
   timer_defTimeStep         = sct_new_timer("       L stream define timestep");
   timer_StreamMappingNew    = sct_new_timer("       L stream mapping create");
