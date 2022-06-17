@@ -736,11 +736,15 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
       }
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NCZARR:
       {
         fileID = cdf4Open(filename, filemode, &filetype);
         streamptr->ncmode = 2;
         break;
+      }
+    case CDI_FILETYPE_NCZARR:
+      {
+        Message("%s not available in append mode!", strfiletype(filetype));
+        return CDI_ELIBNAVAIL;
       }
 #endif
     default:

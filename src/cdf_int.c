@@ -26,7 +26,7 @@ has_uri(const char *uri)
 }
 
 void
-cdf_create(const char *path, int cmode, int *ncidp)
+cdf__create(const char *path, int cmode, int *ncidp)
 {
   int status = -1;
   size_t chunksizehint = 0;

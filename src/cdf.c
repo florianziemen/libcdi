@@ -128,7 +128,7 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
           if (*filetype == CDI_FILETYPE_NC4C) writemode |= (NC_NETCDF4 | NC_CLASSIC_MODEL);
           if (*filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
 #endif
-          cdf_create(filename, writemode, &ncid);
+          cdf__create(filename, writemode, &ncid);
           if (CDI_Version_Info) cdfComment(ncid);
           cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.6");
           break;
@@ -213,19 +213,17 @@ cdf4Open(const char *filename, const char *mode, int *filetype)
   if (CDF_Debug) Message("Open %s with mode %c", filename, *mode);
 
 #ifdef HAVE_NETCDF4
-  {
-    if (cdf4CheckLibVersions() == 0)
-      {
-        const int fileID = cdfOpenFile(filename, mode, filetype);
-        if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
-        return fileID;
-      }
+  if (cdf4CheckLibVersions() == 0)
+    {
+      const int fileID = cdfOpenFile(filename, mode, filetype);
+      if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
+      return fileID;
+    }
 
-    return CDI_EUFTYPE;
-  }
-#endif
-
+  return CDI_EUFTYPE;
+#else
   return CDI_ELIBNAVAIL;
+#endif
 }
 
 static void
