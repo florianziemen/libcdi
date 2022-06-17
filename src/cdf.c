@@ -87,6 +87,19 @@ cdfComment(int ncid)
 }
 #endif
 
+static bool
+has_uri(const char *uri)
+{
+  char *pos = strstr(uri, "://");
+  if (pos)
+    {
+      const int len = pos - uri;
+      if (strncmp(uri, "file", len) == 0 || strncmp(uri, "https", len) == 0 || strncmp(uri, "s3", len) == 0) return true;
+    }
+
+  return false;
+}
+
 static int
 cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
@@ -128,7 +141,23 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
           if (*filetype == CDI_FILETYPE_NC4C) writemode |= (NC_NETCDF4 | NC_CLASSIC_MODEL);
           if (*filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
 #endif
-          cdf__create(filename, writemode, &ncid);
+          if (*filetype == CDI_FILETYPE_NCZARR)
+            {
+              if (has_uri(filename))
+                {
+                  cdf_create(filename, writemode, &ncid);
+                }
+              else
+                {
+                  fprintf(stderr, "URI is missing in NCZarr path!\n");
+                  return CDI_EINVAL;
+                }
+            }
+          else
+            {
+              cdf__create(filename, writemode, &ncid);
+            }
+
           if (CDI_Version_Info) cdfComment(ncid);
           cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.6");
           break;

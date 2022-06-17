@@ -6,6 +6,7 @@
 #include <netcdf.h>
 
 void cdf__create(const char *path, int cmode, int *idp);
+void cdf_create(const char *path, int cmode, int *idp);
 int cdf_open(const char *path, int omode, int *idp);
 void cdf_close(int ncid);
 

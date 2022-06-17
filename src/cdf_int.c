@@ -12,17 +12,19 @@
 
 #ifdef HAVE_LIBNETCDF
 
-static bool
-has_uri(const char *uri)
+void
+cdf_create(const char *path, int cmode, int *ncidp)
 {
-  char *pos = strstr(uri, "://");
-  if (pos)
-    {
-      const int len = pos - uri;
-      if (strncmp(uri, "file", len) == 0 || strncmp(uri, "https", len) == 0 || strncmp(uri, "s3", len) == 0) return true;
-    }
+  int status = nc_create(path, cmode, ncidp);
 
-  return false;
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  mode=%d  file=%s", *ncidp, cmode, path);
+
+  if (status != NC_NOERR) Error("%s: %s", path, nc_strerror(status));
+
+  int oldfill;
+  status = nc_set_fill(*ncidp, NC_NOFILL, &oldfill);
+
+  if (status != NC_NOERR) Error("%s: %s", path, nc_strerror(status));
 }
 
 void
@@ -31,23 +33,16 @@ cdf__create(const char *path, int cmode, int *ncidp)
   int status = -1;
   size_t chunksizehint = 0;
 
-  if (has_uri(path))
-    {
-      status = nc_create(path, cmode, ncidp);
-    }
-  else
-    {
-      size_t initialsz = 0;
+  size_t initialsz = 0;
 
 #if defined(__SX__) || defined(ES)
-      chunksizehint = 16777216; // 16 MB
+  chunksizehint = 16777216; // 16 MB
 #endif
 
-      if (CDI_Netcdf_Chunksizehint != CDI_UNDEFID) chunksizehint = (size_t) CDI_Netcdf_Chunksizehint;
+  if (CDI_Netcdf_Chunksizehint != CDI_UNDEFID) chunksizehint = (size_t) CDI_Netcdf_Chunksizehint;
 
-      cdi_nc__create_funcp my_nc__create = (cdi_nc__create_funcp) namespaceSwitchGet(NSSWITCH_NC__CREATE).func;
-      status = my_nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
-    }
+  cdi_nc__create_funcp my_nc__create = (cdi_nc__create_funcp) namespaceSwitchGet(NSSWITCH_NC__CREATE).func;
+  status = my_nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
 
   if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  mode=%d  chunksizehint=%zu  file=%s", *ncidp, cmode, chunksizehint, path);
 
