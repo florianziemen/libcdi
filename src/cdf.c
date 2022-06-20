@@ -137,8 +137,8 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
           if (*filetype == CDI_FILETYPE_NC5) writemode |= NC_64BIT_DATA;
 #endif
 #ifdef HAVE_NETCDF4
-          if (*filetype == CDI_FILETYPE_NC4) writemode |= NC_NETCDF4;
           if (*filetype == CDI_FILETYPE_NC4C) writemode |= (NC_NETCDF4 | NC_CLASSIC_MODEL);
+          if (*filetype == CDI_FILETYPE_NC4) writemode |= NC_NETCDF4;
           if (*filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
 #endif
           const bool hasUri = has_uri(filename);

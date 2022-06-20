@@ -154,7 +154,6 @@ streamDefRecord(int streamID, int varID, int levelID)
   stream_t *streamptr = stream_to_pointer(streamID);
 
   int tsID = streamptr->curTsID;
-
   if (tsID == CDI_UNDEFID)
     {
       tsID++;
@@ -163,11 +162,11 @@ streamDefRecord(int streamID, int varID, int levelID)
 
   if (!streamptr->record) cdiInitRecord(streamptr);
 
-  int vlistID = streamptr->vlistID;
-  int gridID = vlistInqVarGrid(vlistID, varID);
-  int zaxisID = vlistInqVarZaxis(vlistID, varID);
-  int param = vlistInqVarParam(vlistID, varID);
-  int ilevel = (int) lround(zaxisInqLevel(zaxisID, levelID));
+  const int vlistID = streamptr->vlistID;
+  const int gridID = vlistInqVarGrid(vlistID, varID);
+  const int zaxisID = vlistInqVarZaxis(vlistID, varID);
+  const int param = vlistInqVarParam(vlistID, varID);
+  const int ilevel = (int) lround(zaxisInqLevel(zaxisID, levelID));
 
   Record *record = streamptr->record;
   record->varID = varID;

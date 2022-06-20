@@ -42,12 +42,12 @@ cdfDefRecord(stream_t *streamptr)
   (void) streamptr;
 }
 
-static void
-cdfDefTimeValue(stream_t *streamptr, int tsID)
+void
+cdfDefTimestep(stream_t *streamptr, int tsID)
 {
   const int fileID = streamptr->fileID;
 
-  if (CDI_Debug) Message("streamID = %d, fileID = %d", streamptr->self, fileID);
+  if (CDI_Debug) Message("streamID = %d, fileID = %d, tsID = %d", streamptr->self, fileID, tsID);
 
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -87,12 +87,6 @@ cdfDefTimeValue(stream_t *streamptr, int tsID)
       timevalue = taxis->fc_period;
       cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
     }
-}
-
-void
-cdfDefTimestep(stream_t *streamptr, int tsID)
-{
-  cdfDefTimeValue(streamptr, tsID);
 }
 
 static void

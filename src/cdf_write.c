@@ -425,7 +425,7 @@ cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
 {
   if (streamptr->comptype == CDI_COMPRESS_ZIP)
     {
-      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C)
+      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C || streamptr->filetype == CDI_FILETYPE_NCZARR)
         {
           cdfDefVarDeflate(streamptr->fileID, ncvarID, streamptr->complevel);
         }
@@ -441,7 +441,7 @@ cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
     }
   else if (streamptr->comptype == CDI_COMPRESS_SZIP)
     {
-      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C)
+      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C || streamptr->filetype == CDI_FILETYPE_NCZARR)
         {
           cdfDefVarSzip(streamptr->fileID, ncvarID, xtype2ppb(xtype));
         }
@@ -887,7 +887,7 @@ cdfDefVar(stream_t *streamptr, int varID)
   cdf_def_var(fileID, name, xtype, ndims, dims, &ncvarID);
 
 #ifdef HAVE_NETCDF4
-  if (useChunks && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C))
+  if (useChunks && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C || streamptr->filetype == CDI_FILETYPE_NCZARR))
     cdf_def_var_chunking(fileID, ncvarID, NC_CHUNKED, chunks);
 #endif
 
