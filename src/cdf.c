@@ -88,7 +88,7 @@ cdfComment(int ncid)
 #endif
 
 static bool
-has_uri(const char *uri)
+has_uri_scheme(const char *uri)
 {
   char *pos = strstr(uri, "://");
   if (pos)
@@ -141,13 +141,13 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
           if (*filetype == CDI_FILETYPE_NC4) writemode |= NC_NETCDF4;
           if (*filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
 #endif
-          const bool hasUri = has_uri(filename);
+          const bool hasUriScheme = has_uri_scheme(filename);
 
           if (*filetype == CDI_FILETYPE_NCZARR)
             {
-              if (!hasUri)
+              if (!hasUriScheme)
                 {
-                  fprintf(stderr, "URI is missing in NCZarr path!\n");
+                  fprintf(stderr, "URI scheme is missing in NCZarr path!\n");
                   return CDI_EINVAL;
                 }
 
@@ -155,7 +155,7 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
             }
           else
             {
-              if (hasUri) fprintf(stderr, "URI defined for non NCZarr Data Model!\n");
+              if (hasUriScheme) fprintf(stderr, "URI scheme defined for non NCZarr Data Model!\n");
 
               cdf__create(filename, writemode, &ncid);
             }
