@@ -57,6 +57,11 @@ cdfDefTimestep(stream_t *streamptr, int tsID)
       streamptr->ncmode = 2;
     }
 
+  if (streamptr->accessmode == 0)
+    {
+      cdfEndDef(streamptr);
+    }
+
   double timevalue = cdi_encode_timeval(taxis->vdatetime, &streamptr->tsteps[0].taxis);
   if (CDI_Debug) Message("tsID = %d  timevalue = %f", tsID, timevalue);
 
