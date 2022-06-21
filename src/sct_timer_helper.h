@@ -12,6 +12,9 @@
 #define TIMER_MAX 128
 // size of the timer arrays
 #define TIMER_MAX_STEPS 16
+// TIMER_LOG undefined: no timer output to the log 
+// TIMER_LOG defined:   output timer output to the log
+#define TIMER_LOG
 EXTERN int timer_ioTotal;
 EXTERN int timer_getTimeStepData;
 EXTERN int timer_winStart;

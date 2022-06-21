@@ -1960,8 +1960,10 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
 {
   MPI_Group clientGroup = cdiPioInqRemoteGroup();
   static unsigned long io_steps = 0;
+#ifdef TIMER_LOG
   double value_timer_readgetbuffers;
   int rank = getMPICommWorldRank();
+#endif
 
   xdebug("%s", "START");
 
@@ -1996,9 +1998,11 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
           if (io_steps < TIMER_MAX_STEPS) {
             sct_stop(timer_readgetbuffers_arr[io_steps]);
           }
+#ifdef TIMER_LOG
           value_timer_readgetbuffers = sct_last_dt(timer_readgetbuffers);
           fprintf(stdout, "pe%d cdi-pio timer readgetbuffers from the number %lu output: %lf \n",          \
               rank, io_steps, value_timer_readgetbuffers);
+#endif
           io_steps++;
         }
       }
@@ -2015,9 +2019,11 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
         if (io_steps < TIMER_MAX_STEPS) {
           sct_stop(timer_readgetbuffers_arr[io_steps]);
         }
+#ifdef TIMER_LOG
         value_timer_readgetbuffers = sct_last_dt(timer_readgetbuffers);
         fprintf(stdout, "pe%d cdi-pio timer readgetbuffers from the number %lu output: %lf \n",          \
             rank, io_steps, value_timer_readgetbuffers);
+#endif
         io_steps++;
       }
   }
