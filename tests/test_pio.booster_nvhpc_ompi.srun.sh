@@ -1,9 +1,9 @@
 #! /bin/bash
 #SBATCH --job-name test_pio.booster_nvhpc_ompi.srun
 #SBATCH -t 00:10:00
-#SBATCH --nodes 2
+#SBATCH --nodes 3
 #SBATCH --tasks-per-node 48
-#SBATCH --partition booster
+#SBATCH --partition develbooster
 #SBATCH --account highresmonsoon
 #SBATCH --output ./LOG.%x.%j.o
 #SBATCH --error ./LOG.%x.%j.o

@@ -1,5 +1,5 @@
 set -ex
-tests_dir=/p/scratch/highresmonsoon/xwang/cdi-pio-benchmark/cdi-pio-build-tj20220307-1.8.x-merge/cdi-5eb8cbb1d381fc78bced3fd769033946a99c9f7a/tests
+tests_dir="$(pwd)"
 base_dir="$(cd "$tests_dir/.."; pwd)"
 set +x
 
@@ -24,4 +24,5 @@ export LD_PRELOAD="/p/software/juwelsbooster/stages/2020/software/UCX/1.11.1/lib
 
 cd "$base_dir" || exit 1
 make -j 22
+make install
 cd "$tests_dir" || exit 1
