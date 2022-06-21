@@ -2489,7 +2489,7 @@ void cdiPioCollectorMessageLoop()
           xdebug("%s", "tag: FINALIZE");
           sct_stop(timer_ioTotal);
           sct_context_stop(context_handle);
-#ifdef TEST_SCT
+#ifdef TEST_CDI_PIO
           sct_stop(timer_globTotal);
 #endif
           sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);

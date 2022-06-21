@@ -5,7 +5,9 @@
 #define EXTERN extern
 #endif
 
-#undef TEST_SCT
+// TEST_CDI_PIO undefined: used for ICON model experiment
+// TEST_CDI_PIO defined:   used to test pio_write
+#undef TEST_CDI_PIO
 
 #define TIMER_MAX 128
 // size of the timer arrays
