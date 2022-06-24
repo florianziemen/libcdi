@@ -12,7 +12,6 @@ init_nag626223
 test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
 # Create a distribution file with minimalistic configuration:
-switch_for_module texlive
 "${top_srcdir}/configure"
 make -j8 dist
 
@@ -27,10 +26,7 @@ tar xf cdi-*.tar.gz
 mkdir build && cd build
 
 # Use GCC from the path when compiling/linking Fortran code:
-FCFLAGS="-Wc=$(which gcc)"
-
-# MPI library is built with -kind=byte, therefore we have to specify it here:
-FCFLAGS+=' -g -kind=byte'
+FCFLAGS="-O2 -g -Wc=$(which gcc)"
 
 # Create an out-of-source configuration:
 ../cdi-*/configure \
@@ -43,8 +39,10 @@ FCFLAGS+=' -g -kind=byte'
 --with-eccodes="${ECCODES_ROOT}" \
 --with-netcdf="${NETCDF_ROOT}" \
 CC="${MPICC}" \
+CPPFLAGS="-I${UUID_ROOT}/include" \
 FC="${MPIFC}" \
 FCFLAGS="${FCFLAGS}" \
+LDFLAGS="-I${UUID_ROOT}/lib" \
 MPI_LAUNCH="${MPI_LAUNCH}" \
 PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 
