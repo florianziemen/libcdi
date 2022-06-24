@@ -130,7 +130,7 @@ init_gcc630 ()
   # Here we fix a never-ending story with Libtool overlinkning, absence of
   # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
   HDF5_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/gcc-6.3.0-sandybridge/hdf5-1.10.7-4l3frcp'
-  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib:${NETCDF_ROOT}/lib:${HDF5_ROOT}/lib:${LD_LIBRARY_PATH-}"
+  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib:${HDF5_ROOT}/lib:${LD_LIBRARY_PATH-}"
 }
 
 #
