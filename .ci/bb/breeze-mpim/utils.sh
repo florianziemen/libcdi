@@ -200,6 +200,35 @@ init_clang1201 ()
 }
 
 #
+# Sets variables for tests with NAG 6.2.6223.
+#
+init_nag626223 ()
+{
+  init_env
+  switch_for_module gcc/6.3.0 nag/6.2
+
+  CC=gcc
+  CXX=g++
+  FC=nagfor
+
+  export PATH="/data/mpi/sclab/sip/m300488/libcdi-ci-sw/nag-6.2-sandybridge/mpich-3.4.2-fzsvtw2/bin:${PATH-}"
+  MPICC=mpicc
+  MPIFC=mpif90
+  MPI_LAUNCH="$(which mpirun)"
+
+  ECCODES_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/gcc-6.3.0-sandybridge/eccodes-2.21.0-3sdngaq'
+  NETCDF_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/nag-6.2-sandybridge/netcdf-c-4.8.0-ogawg3w'
+  PPM_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/nag-6.2-sandybridge/scales-ppm-1.0.7-5kdlwzv'
+  YAXT_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/nag-6.2-sandybridge/yaxt-0.9.2.1-rhq2ysn'
+  UUID_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/gcc-6.3.0-sandybridge/libuuid-1.0.3-rm4kv2o'
+
+  # Here we fix a never-ending story with Libtool overlinkning, absence of
+  # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
+  HDF5_ROOT='/data/mpi/sclab/sip/m300488/libcdi-ci-sw/nag-6.2-sandybridge/hdf5-1.10.7-pltg3k4'
+  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib:${HDF5_ROOT}/lib:${LD_LIBRARY_PATH-}"
+}
+
+#
 # Accepts a path to a file containing the testsuite summary (either the
 # 'test-suite.log' or the standard output of the 'make check' command) and
 # checks whether all tests were run and passed.
@@ -214,4 +243,20 @@ check_all_tests_passed ()
            exit 1;
          }
        }' $1 >&2
+}
+
+#
+# Checks whether the current working directory or any of its subdirectories
+# contain a file and fails with an error message if that is the case.
+#
+check_no_files_in_cwd ()
+{
+  cnfic_files=`find . -type f 2>/dev/null`
+  if test -n "$cnfic_files"; then
+    {
+      echo "ERROR: the current working directory contains undeleted files:"
+      echo "$cnfic_files"
+    } >&2
+    exit 1
+  fi
 }
