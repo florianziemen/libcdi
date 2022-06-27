@@ -6,12 +6,9 @@ script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
 . "${script_dir}/utils.sh"
-init_gcc640
+init_gcc1120
 
 test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
-
-# The configure wrappers of ICON export LD_LIBRARY_PATH:
-export LD_LIBRARY_PATH="${NETCDF_ROOT}/lib:${GRIBAPI_ROOT}/lib:${LD_LIBRARY_PATH-}"
 
 "${top_srcdir}/configure" \
 --disable-cdi-app \
@@ -32,15 +29,25 @@ export LD_LIBRARY_PATH="${NETCDF_ROOT}/lib:${GRIBAPI_ROOT}/lib:${LD_LIBRARY_PATH
 --without-grib_api \
 --without-szlib \
 --without-threads \
+BUILD_CC= \
+BUILD_CFLAGS= \
+BUILD_CXX= \
+BUILD_F77= \
+BUILD_FC= \
+BUILD_FCFLAGS= \
+BUILD_LDFLAGS= \
+BUILD_LIBS= \
+BUILD_MPI_C_LIB= \
+BUILD_MPI_FC_LIB= \
 CC="${MPICC}" \
 CFLAGS='-g -march=native -mpc64 -O2' \
-CPPFLAGS="-I${NETCDF_ROOT}/include -I${GRIBAPI_ROOT}/include" \
+CPPFLAGS="-I${NETCDF_ROOT}/include -I${ECCODES_ROOT}/include" \
 CXX=no \
 F77=no \
 FC="${MPIFC}" \
 FCFLAGS='-std=f2008 -fmodule-private -fimplicit-none -fmax-identifier-length=63 -Wall -Wcharacter-truncation -Wconversion -Wunderflow -Wunused-parameter -Wno-surprising -fall-intrinsics -g -march=native -mpc64' \
-LDFLAGS="-L${NETCDF_ROOT}/lib -L${GRIBAPI_ROOT}/lib" \
-LIBS='-lgrib_api -lnetcdf' \
+LDFLAGS="-L${NETCDF_ROOT}/lib -L${ECCODES_ROOT}/lib64" \
+LIBS='-leccodes -lnetcdf' \
 MPIROOT= \
 MPI_C_INCLUDE= \
 MPI_C_LIB= \
