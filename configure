@@ -1689,13 +1689,11 @@ Optional Packages:
   --with-netcdf=<yes|no|directory> (default=no)
                           location of NetCDF library (lib and include subdirs)
   --with-eccodes=<yes|no|directory>
-                          library for grib2 encoding/decoding; if a directory
-                          is given, it will be used as a value for
-                          --with-eccodes-root
+                          location of ECCODES library for grib2
+                          encoding/decoding (lib and include subdirs)
   --with-grib_api=<yes|no|directory>
-                          library for grib2 encoding/decoding; if a directory
-                          is given, it will be used as a value for
-                          --with-grib_api-root
+                          location of GRIB_API library for grib2
+                          encoding/decoding (lib and include subdirs)
   --with-mpi-root         set directory to search for MPI headers and library
   --with-mpi-include      specifically set directory to search for MPI
                           headers, [default=$with_mpi_root/include]
