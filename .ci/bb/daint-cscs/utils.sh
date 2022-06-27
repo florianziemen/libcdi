@@ -98,21 +98,21 @@ init_env ()
 }
 
 #
-# Sets variables for tests with Cray 11.0.0.
+# Sets variables for tests with Cray 12.0.3.
 #
-init_cray1100 ()
+init_cray1203 ()
 {
   init_env
-  switch_for_module craype PrgEnv-cray cce/11.0.0 cray-mpich cray-netcdf
+  switch_for_module craype PrgEnv-cray cce/12.0.3 cray-mpich cray-netcdf
 
   CC=cc
   CXX=CC
   FC=ftn
   MPI_LAUNCH="$(which srun) -p cscsci -C gpu -A d56 -t 05:00"
 
-  ECCODES_ROOT='/project/d56/libcdi-ci-sw/cce-11.0.0-haswell/eccodes-2.21.0-x3o7v65'
-  PPM_ROOT='/project/d56/libcdi-ci-sw/cce-11.0.0-haswell/scales-ppm-1.0.6-43iofhw'
-  YAXT_ROOT='/project/d56/libcdi-ci-sw/cce-11.0.0-haswell/yaxt-0.9.0-h6fg2ur'
+  ECCODES_ROOT='/project/d56/libcdi-ci-sw/cce-12.0.3-haswell/eccodes-2.24.2-o2a4fw3'
+  PPM_ROOT='/project/d56/libcdi-ci-sw/cce-12.0.3-haswell/scales-ppm-1.0.8-44zlrlu'
+  YAXT_ROOT='/project/d56/libcdi-ci-sw/cce-12.0.3-haswell/yaxt-0.9.2.1-enz3pcz'
 
   # Here we fix a never-ending story with Libtool overlinkning, absence of
   # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
@@ -125,17 +125,24 @@ init_cray1100 ()
 init_pgi2011 ()
 {
   init_env
-  switch_for_module craype PrgEnv-pgi pgi/20.1.1 cray-mpich cray-netcdf
+  # We use deprecated versions (the most recent compatible with PGI though) of
+  # the Cray packages and have to make sure that the default versions are
+  # unloaded (otherwise, we get various warnings and errors):
+  module unload cray-mpich cray-netcdf cray-netcdf-hdf5parallel cray-hdf5 cray-hdf5-parallel
+  switch_for_module craype PrgEnv-pgi/6.0.8 pgi/20.1.1 cray-mpich/7.7.15 cray-netcdf/4.7.4.0 cray-hdf5/1.12.0.0
 
   CC=cc
   CXX=CC
   FC=ftn
   MPI_LAUNCH="$(which srun) -p cscsci -C gpu -A d56 -t 05:00"
 
-  ECCODES_ROOT='/project/d56/libcdi-ci-sw/pgi-20.1.1-haswell/eccodes-2.21.0-hxzyycf'
-  PPM_ROOT='/project/d56/libcdi-ci-sw/pgi-20.1.1-haswell/scales-ppm-1.0.6-tjpvz46'
-  # YAXT 0.9.0 cannot be built with PGI 20.1.1:
-  YAXT_ROOT='/project/d56/libcdi-ci-sw/pgi-20.1.1-haswell/yaxt-0.7.0-p1-lirxrt4'
+  ECCODES_ROOT='/project/d56/libcdi-ci-sw/pgi-20.1.1-haswell/eccodes-2.24.2-hwtl5nr'
+  PPM_ROOT='/project/d56/libcdi-ci-sw/pgi-20.1.1-haswell/scales-ppm-1.0.8-z2nxqya'
+  YAXT_ROOT='/project/d56/libcdi-ci-sw/pgi-20.1.1-haswell/yaxt-0.9.2.1-3orop7g'
+
+  # The deprecated versions of the Cray packages are not in the default linker
+  # search path:
+  export LD_LIBRARY_PATH="${MPICH_DIR}/lib:${NETCDF_DIR}/lib:${HDF5_DIR}/lib:${LD_LIBRARY_PATH-}"
 
   # Here we fix a never-ending story with Libtool overlinkning, absence of
   # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
