@@ -123,6 +123,35 @@ init_gcc1120 ()
 }
 
 #
+# Sets variables for tests with Intel Classic 2021.5.0.
+#
+init_intelclassic202150 ()
+{
+  init_env
+  # Try to make sure that the compiler works with the system gcc:
+  module unload gcc
+  # For whatever reason, Intel Classic 2021.5.0 is enabled with
+  # intel-oneapi-compilers/2022.0.1-gcc-11.2.0:
+  switch_for_module intel-oneapi-compilers/2022.0.1-gcc-11.2.0 openmpi/4.1.2-intel-2021.5.0
+
+  CC=icc
+  CXX=icpc
+  FC=ifort
+  MPICC=mpicc
+  MPIFC=mpif90
+  MPI_LAUNCH="$(which mpirun)"
+
+  ECCODES_ROOT='/sw/spack-levante/eccodes-2.21.0-3ehkbb'
+  NETCDF_ROOT='/sw/spack-levante/netcdf-c-4.8.1-2k3cmu'
+  PPM_ROOT='/work/mh0287/m300488/libcdi-ci-sw/install/ppm-1.0.8-intel-classic-2021.5.0'
+  YAXT_ROOT='/work/mh0287/m300488/libcdi-ci-sw/install/yaxt-0.9.3-intel-classic-2021.5.0'
+
+  # Here we fix a never-ending story with Libtool overlinkning, absence of
+  # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
+  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib64:${NETCDF_ROOT}/lib:${LD_LIBRARY_PATH-}"
+}
+
+#
 # Accepts a path to a file containing the testsuite summary (either the
 # 'test-suite.log' or the standard output of the 'make check' command) and
 # checks whether all tests were run and passed.
@@ -137,4 +166,20 @@ check_all_tests_passed ()
            exit 1;
          }
        }' $1 >&2
+}
+
+#
+# Checks whether the current working directory or any of its subdirectories
+# contain a file and fails with an error message if that is the case.
+#
+check_no_files_in_cwd ()
+{
+  cnfic_files=`find . -type f 2>/dev/null`
+  if test -n "$cnfic_files"; then
+    {
+      echo "ERROR: the current working directory contains undeleted files:"
+      echo "$cnfic_files"
+    } >&2
+    exit 1
+  fi
 }
