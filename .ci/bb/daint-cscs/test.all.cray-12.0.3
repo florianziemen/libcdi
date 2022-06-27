@@ -7,7 +7,7 @@ script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
 . "${script_dir}/utils.sh"
-init_cray1100
+init_cray1203
 
 test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
