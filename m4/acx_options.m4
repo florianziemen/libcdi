@@ -228,7 +228,7 @@ ECCODES_INCLUDE=''
 ECCODES_LIBS=''
 AC_ARG_WITH([eccodes],
             [AS_HELP_STRING([--with-eccodes=<yes|no|directory>],
-                            [library for grib2 encoding/decoding; if a directory is given, it will be used as a value for --with-eccodes-root])],
+                            [location of ECCODES library for grib2 encoding/decoding (lib and include subdirs)])],
             [AS_CASE(["$with_eccodes"],
                      [no],[AC_MSG_CHECKING([for ECCODES library])
                            AC_MSG_RESULT([suppressed])],
@@ -264,7 +264,7 @@ GRIB_API_INCLUDE=''
 GRIB_API_LIBS=''
 AC_ARG_WITH([grib_api],
             [AS_HELP_STRING([--with-grib_api=<yes|no|directory>],
-                            [library for grib2 encoding/decoding; if a directory is given, it will be used as a value for --with-grib_api-root])],
+                            [location of GRIB_API library for grib2 encoding/decoding (lib and include subdirs)])],
             [AS_CASE(["$with_grib_api"],
                      [no],[AC_MSG_CHECKING([for GRIB_API library])
                            AC_MSG_RESULT([suppressed])],
