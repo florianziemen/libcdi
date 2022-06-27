@@ -7,7 +7,7 @@ script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
 . "${script_dir}/utils.sh"
-init_nag626223
+init_intelclassic202150
 
 test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
@@ -15,7 +15,7 @@ test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 # of YAXT and PPM become available only at the build time. The following
 # imitates that.
 
-WRONG_YAXT_ROOT=$(init_pgi1990 >/dev/null && echo "${YAXT_ROOT}")
+WRONG_YAXT_ROOT=$(init_gcc1120 >/dev/null && echo "${YAXT_ROOT}")
 export PKG_CONFIG_PATH="${WRONG_YAXT_ROOT}/lib/pkgconfig"
 export LD_LIBRARY_PATH="${WRONG_YAXT_ROOT}/lib:${LD_LIBRARY_PATH-}"
 
@@ -28,11 +28,8 @@ rm -rf "${LOCAL_YAXT_ROOT}" "${LOCAL_PPM_ROOT}"
 # script of CDI with the path to the installation of NetCDF in use. Here we
 # imitate a situation when 'nc-config' from another (wrong) installation of
 # NetCDF is in the PATH.
-WRONG_NETCDF_ROOT=$(init_gcc640 >/dev/null && echo "${NETCDF_ROOT}")
+WRONG_NETCDF_ROOT=$(init_gcc1120 >/dev/null && echo "${NETCDF_ROOT}")
 export PATH="${WRONG_NETCDF_ROOT}/bin:${PATH-}"
-
-# The configure wrappers of ICON export LD_LIBRARY_PATH:
-export LD_LIBRARY_PATH="${MPICH_ROOT}/lib:${NETCDF_ROOT}/lib:${ECCODES_ROOT}/lib:${LD_LIBRARY_PATH}"
 
 "${top_srcdir}/configure" \
 --disable-cdi-app \
@@ -50,18 +47,28 @@ export LD_LIBRARY_PATH="${MPICH_ROOT}/lib:${NETCDF_ROOT}/lib:${ECCODES_ROOT}/lib
 --with-netcdf \
 --with-on-demand-check-programs \
 --without-example-programs \
---without-grib-api \
+--without-grib_api \
 --without-szlib \
 --without-threads \
-CC="${CC}" \
-CFLAGS='-g -march=native -O2' \
-CPPFLAGS="-I${MPICH_ROOT}/include -I${NETCDF_ROOT}/include -I${ECCODES_ROOT}/include" \
+BUILD_CC= \
+BUILD_CFLAGS= \
+BUILD_CXX= \
+BUILD_F77= \
+BUILD_FC= \
+BUILD_FCFLAGS= \
+BUILD_LDFLAGS= \
+BUILD_LIBS= \
+BUILD_MPI_C_LIB= \
+BUILD_MPI_FC_LIB= \
+CC="${MPICC}" \
+CFLAGS='-no-prec-sqrt -no-prec-div -fast-transcendentals -m64 -march=core-avx2 -mtune=core-avx2 -no-fma -g -gdwarf-4 -ip -pc64 -std=gnu99 -qno-opt-dynamic-align -O2 -ftz' \
+CPPFLAGS="-I${NETCDF_ROOT}/include -I${ECCODES_ROOT}/include" \
 CXX=no \
 F77=no \
-FC="${FC}" \
-FCFLAGS="-I${MPICH_ROOT}/include -kind=byte -colour -f2008 -Wc=$(which gcc) -w=uep -O0 -Wc,-g -float-store -nan -gline -g" \
-LDFLAGS="-L${MPICH_ROOT}/lib -L${NETCDF_ROOT}/lib -L${ECCODES_ROOT}/lib" \
-LIBS='-leccodes -lnetcdf -lmpifort -lmpi -lubsan' \
+FC="${MPIFC}" \
+FCFLAGS="-gdwarf-4 -g -pc64 -fp-model source" \
+LDFLAGS="-L${NETCDF_ROOT}/lib -L${ECCODES_ROOT}/lib64" \
+LIBS='-Wl,--as-needed -lnetcdf -leccodes' \
 MPIROOT= \
 MPI_C_INCLUDE= \
 MPI_C_LIB= \
