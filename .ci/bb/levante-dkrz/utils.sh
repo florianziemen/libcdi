@@ -1,6 +1,6 @@
 #
 # Accepts a list of environment modules and loads them witch conflict
-# resolution.
+# resolution
 #
 switch_for_module ()
 {
