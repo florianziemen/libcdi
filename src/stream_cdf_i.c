@@ -2548,6 +2548,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
             const int bvarid = ncvars[xvarid].bounds;
             if (bvarid != CDI_UNDEFID)
               {
+                const int ndims = ncvars[xvarid].ndims;
                 const int nbdims = ncvars[bvarid].ndims;
                 if (nbdims == 2 || nbdims == 3)
                   {
@@ -2565,13 +2566,19 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                         cdf_load_bounds_cube_sphere(bxsize, bysize, size * (size_t) grid->nvertex, &ncvars[xvarid], &grid->x.bounds,
                                                     &lazyGrid->xBoundsGet);
                       }
-                    else
+                    else if (nbdims == ndims + 1)
                       {
                         *vdimid = ncvars[bvarid].dimids[nbdims - 1];
                         grid->nvertex = (int) ncdims[*vdimid].len;
                         cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[xvarid], &grid->x.bounds, &lazyGrid->xBoundsGet);
                       }
-                  }
+                    else
+                      {
+                        static bool lwarn = true;
+                        if (lwarn) Warning("x-bounds doesn't follow the CF-Convention, skipped!");
+                        lwarn = false;
+                      }
+                   }
               }
           }
         if (yvarid != CDI_UNDEFID && CDI_Read_Cell_Corners)
@@ -2580,6 +2587,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
             const int bvarid = ncvars[yvarid].bounds;
             if (bvarid != CDI_UNDEFID)
               {
+                const int ndims = ncvars[yvarid].ndims;
                 const int nbdims = ncvars[bvarid].ndims;
                 if (nbdims == 2 || nbdims == 3)
                   {
@@ -2597,7 +2605,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                         cdf_load_bounds_cube_sphere(bxsize, bysize, size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds,
                                                     &lazyGrid->yBoundsGet);
                       }
-                    else
+                    else if (nbdims == ndims + 1)
                       {
                         if (*vdimid == CDI_UNDEFID)
                           {
@@ -2606,7 +2614,13 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                           }
                         cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds, &lazyGrid->yBoundsGet);
                       }
-                  }
+                    else
+                      {
+                        static bool lwarn = true;
+                        if (lwarn) Warning("y-bounds doesn't follow the CF-Convention, skipped!");
+                        lwarn = false;
+                      }
+                   }
               }
           }
 
