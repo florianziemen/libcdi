@@ -276,7 +276,6 @@ void
 cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
 {
   int atttype, attlen;
-  size_t len;
   char attname[CDI_MAX_NAME + 1];
   void *attBuf = NULL;
   size_t attBufSize = 0;
@@ -288,23 +287,24 @@ cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
     {
       cdiInqAtt(cdiID, varID, iatt, attname, &atttype, &attlen);
 
-      if (attlen == 0) continue;
+      //if (attlen == 0) continue;
 
       if (atttype == CDI_DATATYPE_TXT)
         {
           const size_t attSize = (size_t) attlen * sizeof(char);
           char *atttxt = (char *) resizeBuf(&attBuf, &attBufSize, attSize);
           cdiInqAttTxt(cdiID, varID, attname, attlen, atttxt);
-          len = (size_t) attlen;
+          size_t len = (size_t) attlen;
           cdf_put_att_text(fileID, ncvarID, attname, len, atttxt);
         }
       else if (atttype == CDI_DATATYPE_INT8 || atttype == CDI_DATATYPE_UINT8 || atttype == CDI_DATATYPE_INT16
                || atttype == CDI_DATATYPE_UINT16 || atttype == CDI_DATATYPE_INT32 || atttype == CDI_DATATYPE_UINT32)
         {
+          if (attlen == 0) continue;
           const size_t attSize = (size_t) attlen * sizeof(int);
           int *attint = (int *) resizeBuf(&attBuf, &attBufSize, attSize);
           cdiInqAttInt(cdiID, varID, attname, attlen, &attint[0]);
-          len = (size_t) attlen;
+          size_t len = (size_t) attlen;
           // clang-format off
           nc_type xtype = (atttype == CDI_DATATYPE_INT8)   ? NC_BYTE :
                           (atttype == CDI_DATATYPE_INT16)  ? NC_SHORT :
@@ -319,10 +319,11 @@ cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
         }
       else if (atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64)
         {
+          if (attlen == 0) continue;
           const size_t attSize = (size_t) attlen * sizeof(double);
           double *attflt = (double *) resizeBuf(&attBuf, &attBufSize, attSize);
           cdiInqAttFlt(cdiID, varID, attname, attlen, attflt);
-          len = (size_t) attlen;
+          size_t len = (size_t) attlen;
           if (atttype == CDI_DATATYPE_FLT32)
             {
               float attflt_sp[8];

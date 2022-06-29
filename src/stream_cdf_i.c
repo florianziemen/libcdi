@@ -3715,6 +3715,10 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
                   cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
                 }
             }
+          else
+            {
+              cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
+            }
         }
       else if (xtype == NC_SHORT || xtype == NC_INT)
         {
