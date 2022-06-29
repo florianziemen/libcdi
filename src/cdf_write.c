@@ -889,10 +889,11 @@ cdfDefVar(stream_t *streamptr, int varID)
 
 #ifdef HAVE_NETCDF4
 #ifdef NC_QUANTIZE_BITROUND
-  if (dtype == CDI_DATATYPE_FLT32 || dtype == CDI_DATATYPE_FLT64)
+  if (xtype == NC_FLOAT || xtype == NC_DOUBLE)
     {
       const int nsd = vlistInqVarNSD(vlistID, varID);
       if (nsd > 0) nc_def_var_quantize(fileID, ncvarID, NC_QUANTIZE_BITROUND, nsd);
+      //if (nsd > 0) nc_def_var_quantize(fileID, ncvarID, NC_QUANTIZE_GRANULARBR, nsd);
     }
 #endif
 
