@@ -888,6 +888,14 @@ cdfDefVar(stream_t *streamptr, int varID)
   cdf_def_var(fileID, name, xtype, ndims, dims, &ncvarID);
 
 #ifdef HAVE_NETCDF4
+#ifdef NC_QUANTIZE_BITROUND
+  if (dtype == CDI_DATATYPE_FLT32 || dtype == CDI_DATATYPE_FLT64)
+    {
+      const int nsd = vlistInqVarNSD(vlistID, varID);
+      if (nsd > 0) nc_def_var_quantize(fileID, ncvarID, NC_QUANTIZE_BITROUND, nsd);
+    }
+#endif
+
   if (useChunks && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C || streamptr->filetype == CDI_FILETYPE_NCZARR))
     cdf_def_var_chunking(fileID, ncvarID, NC_CHUNKED, chunks);
 #endif

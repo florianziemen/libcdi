@@ -1446,6 +1446,15 @@ vlistDefVarChunkType(int vlistID, int varID, int chunktype)
     }
 }
 
+int
+vlistInqVarChunkType(int vlistID, int varID)
+{
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  return vlistptr->vars[varID].chunktype;
+}
+
 void
 vlistDefVarNSD(int vlistID, int varID, int nsd)
 {
@@ -1460,12 +1469,12 @@ vlistDefVarNSD(int vlistID, int varID, int nsd)
 }
 
 int
-vlistInqVarChunkType(int vlistID, int varID)
+vlistInqVarNSD(int vlistID, int varID)
 {
   vlistCheckVarID(__func__, vlistID, varID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].chunktype;
+  return vlistptr->vars[varID].nsd;
 }
 
 static int
