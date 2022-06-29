@@ -3655,7 +3655,7 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
         {
           cdfGetAttText(fileID, NC_GLOBAL, attname, sizeof(attstring), attstring);
 
-          size_t attstrlen = strlen(attstring);
+          const size_t attstrlen = strlen(attstring);
 
           if (attlen > 0 && attstring[0] != 0)
             {
@@ -3669,9 +3669,9 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
                   *modelID = modelInq(-1, 0, attstring);
                   if (*modelID == CDI_UNDEFID) *modelID = modelDef(-1, 0, attstring);
                 }
-              else if (strIsEqual(attname, "Source"))
+              else if (strIsEqual(attname, "Source") && strStartsWith(attstring, "UCLA-LES"))
                 {
-                  if (strStartsWith(attstring, "UCLA-LES")) *ucla_les = true;
+                  *ucla_les = true;
                 }
               /*
               else if ( strIsEqual(attname, "Conventions") )
