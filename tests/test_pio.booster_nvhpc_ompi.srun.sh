@@ -1,9 +1,9 @@
 #! /bin/bash
 #SBATCH --job-name test_pio.booster_nvhpc_ompi.srun
 #SBATCH -t 00:10:00
-#SBATCH --nodes 2
+#SBATCH --nodes 3
 #SBATCH --tasks-per-node 48
-#SBATCH --partition booster
+#SBATCH --partition develbooster
 #SBATCH --account highresmonsoon
 #SBATCH --output ./LOG.%x.%j.o
 #SBATCH --error ./LOG.%x.%j.o
@@ -12,15 +12,31 @@
 
 
 # set -eux
-set -ex
+set -e
 
-source ./test_pio.booster_nvhpc_ompi.compile.sh
+nvhpc_version=21.5
+openmpi_version=4.1.1
+module --force purge
+ml use "$OTHERSTAGES"
+ml Stages/2020
+ml NVHPC/${nvhpc_version}-GCC-10.3.0
+ml OpenMPI/${openmpi_version}
+ml Ruby/2.7.2
+ml UCX/1.10.1
+ml netCDF-Fortran
+ml CMake/3.18.0
+# ecCodes is not directly available, load dependencies instead...
+ml OpenGL/2020 libaec
+ml ecCodes/2.21.0-nompi
+module swap netCDF/4.7.4-serial netCDF/4.7.4
+
+set -x
+export LD_PRELOAD="/p/software/juwelsbooster/stages/2020/software/UCX/1.11.1/lib/libuct.so.0:/p/software/juwelsbooster/stages/2020/software/UCX/1.11.1/lib/libucp.so.0:/p/software/juwelsbooster/stages/2020/software/UCX/1.11.1/lib/libucs.so.0:/p/software/juwelsbooster/stages/2020/software/UCX/1.11.1/lib/libucm.so.0"
 qprefix="/p/scratch/highresmonsoon/cdi-pio-test_dir"
 mkdir -p "$qprefix"
 qprefix="$qprefix/files_pio_write"
 
-export SCT_PROC_CHOICE=SCT_SELECT_ALL
-# export SCT_PROC_CHOICE=SCT_SELECT_ALL
+export SCT_PROC_CHOICE=SCT_REDUCE_ALL
 export SCT_CALLSTATS=1
 
 # reduce output data to decrease test duration
