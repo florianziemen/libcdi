@@ -1,0 +1,11 @@
+remote_host       jbooster
+remote_user       wang37
+remote_port       22
+# remote_passwd      
+remote_path       /p/fastdata/slmet/slmet111/model_data/ICON/cdi-pio-libs-stable/src/cdi
+local_path        /Users/dkrz-xingran/DKRZ-Projects/libcdi
+# ignore_path      
+ignore_dotfiles   1
+auto_sync_up      0
+remote_or_local   remote
+sleep_before_sync 0
