@@ -22,7 +22,7 @@ vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].timetype = CDI_UNDEFID;
   vlistptr->vars[varID].tsteptype = TSTEP_INSTANT;
   vlistptr->vars[varID].chunktype = CDI_Chunk_Type;
-  vlistptr->vars[varID].nsd = 0;
+  vlistptr->vars[varID].nsb = 0;
   vlistptr->vars[varID].xyz = 321;
   vlistptr->vars[varID].gridID = CDI_UNDEFID;
   vlistptr->vars[varID].zaxisID = CDI_UNDEFID;
@@ -1456,25 +1456,25 @@ vlistInqVarChunkType(int vlistID, int varID)
 }
 
 void
-vlistDefVarNSD(int vlistID, int varID, int nsd)
+vlistDefVarNSB(int vlistID, int varID, int nsb)
 {
   vlistCheckVarID(__func__, vlistID, varID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (vlistptr->vars[varID].nsd != nsd)
+  if (vlistptr->vars[varID].nsb != nsb)
     {
-      vlistptr->vars[varID].nsd = nsd;
+      vlistptr->vars[varID].nsb = nsb;
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
 
 int
-vlistInqVarNSD(int vlistID, int varID)
+vlistInqVarNSB(int vlistID, int varID)
 {
   vlistCheckVarID(__func__, vlistID, varID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].nsd;
+  return vlistptr->vars[varID].nsb;
 }
 
 static int

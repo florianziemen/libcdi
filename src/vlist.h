@@ -59,7 +59,7 @@ typedef struct
   int tableID;
   int timave;
   int chunktype;
-  int nsd;
+  int nsb; // Number of significant bits
   int xyz;
   bool missvalused;  // true if missval is defined
   bool lvalidrange;

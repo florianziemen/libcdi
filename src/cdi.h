@@ -629,8 +629,8 @@ int     vlistInqVarChunkType(int vlistID, int varID);
 void    vlistDefVarXYZ(int vlistID, int varID, int xyz);
 int     vlistInqVarXYZ(int vlistID, int varID);
 
-void    vlistDefVarNSD(int vlistID, int varID, int nsd);
-int     vlistInqVarNSD(int vlistID, int varID);
+void    vlistDefVarNSB(int vlistID, int varID, int nsb);
+int     vlistInqVarNSB(int vlistID, int varID);
 
 int     vlistInqVarNumber(int vlistID, int varID);
 
