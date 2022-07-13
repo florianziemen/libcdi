@@ -9,6 +9,15 @@ top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 . "${script_dir}/utils.sh"
 init_pgi2011
 
+# Save time for the person running this script manually:
+if test "x${PE_NETCDF_MODULE_NAME}" = 'xcray-netcdf'; then
+  case $top_srcdir in
+    "${HOME}/"*)
+      echo "ERROR: parallel NetCDF4 tests are known to fail when CDI is built in the user home directory and linked against NetCDF that does not support MPI parallel invocations" >&2
+      exit 1
+  esac
+fi
+
 test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
 # The configure script does not check the 'lib64' subdirectory, therefore we

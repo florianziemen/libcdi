@@ -103,7 +103,15 @@ init_env ()
 init_cray1203 ()
 {
   init_env
-  switch_for_module craype PrgEnv-cray cce/12.0.3 cray-mpich cray-netcdf
+  switch_for_module craype PrgEnv-cray cce/12.0.3 cray-mpich
+
+  # Build and test against NetCDF that does not support MPI parallel invocations
+  # (parallel NetCDF4 tests are known to fail in this case when run from the
+  # user home directory on Daint):
+  switch_for_module cray-netcdf
+
+  # Uncomment the following line to test against MPI-capable NetCDF:
+  # switch_for_module cray-netcdf-hdf5parallel cray-hdf5-parallel
 
   CC=cc
   CXX=CC
@@ -129,7 +137,15 @@ init_pgi2011 ()
   # the Cray packages and have to make sure that the default versions are
   # unloaded (otherwise, we get various warnings and errors):
   module unload cray-mpich cray-netcdf cray-netcdf-hdf5parallel cray-hdf5 cray-hdf5-parallel
-  switch_for_module craype PrgEnv-pgi/6.0.8 pgi/20.1.1 cray-mpich/7.7.15 cray-netcdf/4.7.4.0 cray-hdf5/1.12.0.0
+  switch_for_module craype PrgEnv-pgi/6.0.8 pgi/20.1.1 cray-mpich/7.7.15
+
+  # Build and test against NetCDF that does not support MPI parallel invocations
+  # (parallel NetCDF4 tests are known to fail in this case when run from the
+  # user home directory on Daint):
+  switch_for_module cray-netcdf/4.7.4.0 cray-hdf5/1.12.0.0
+
+  # Uncomment the following line to test against MPI-capable NetCDF:
+  # switch_for_module cray-netcdf-hdf5parallel/4.7.4.0 cray-hdf5-parallel/1.12.0.0
 
   CC=cc
   CXX=CC
