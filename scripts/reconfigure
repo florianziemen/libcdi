@@ -16,8 +16,14 @@ case "$libtoolversion" in
       contrib/05macos-nagfor-patch/macos-nagfor.patch \
       contrib/06ltmain_nag_pthread-patch/ltmain_nag_pthread.patch \
       contrib/07ltmain-early-xcompile-patch/ltmain-early-xcompile-libtool-2.4.6.patch \
-      contrib/08ltmain-parallel-printf-patch/ltmain-parallel-printf.patch \
-      contrib/09debian-no-overlink-patch/debian-no-overlink.patch)
+      contrib/08ltmain-parallel-printf-patch/ltmain-parallel-printf.patch)
+
+    # We skip contrib/09debian-no-overlink-patch/debian-no-overlink.patch:
+    #   1) it has no real effect without
+    #      contrib/09debian-no-overlink-patch/debian-no-overlink.libtool.m4.patch,
+    #      which should be implemented as a monkey patch for libtool.m4;
+    #   2) it is already applied to the Debian-provided libtool and the current
+    #      way we apply our patches does not handle such cases.
     ;;
   2.4.2)
     patches=(contrib/00nagfor-libtool-patch/nagfor-libtool.patch \
