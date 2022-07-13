@@ -6,12 +6,20 @@ set -o pipefail
 script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
+# We want to check with the Debian version of Libtool, which is patched to avoid
+# overlinking:
+export PATH="/usr/bin:${PATH-}"
+
 . "${script_dir}/utils.sh"
 init_nv2130
 
-# We want to check with the Debian version of Libtool, which is patched to
-# avoid overlinking. Therefore, we regenerate the Autotools files even if they
-# are already available:
+libtoolize=$(which libtoolize)
+test "x${libtoolize}" = 'x/usr/bin/libtoolize' || {
+  echo "ERROR: '${libtoolize}' is not a Debian-provided system libtoolize" >&2
+  exit 1
+}
+
+# Regenerate the Autotools files even if they are already available:
 "${top_srcdir}/autogen.sh"
 
 "${top_srcdir}/configure" \
@@ -31,6 +39,20 @@ MPI_LAUNCH="${MPI_LAUNCH}" \
 PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 
 make -j8
+
+# Check that an executable is not overlinked to libscalesppmcore.so:
+tested_file='examples/pio/.libs/collectData.parallel'
+invalid_needed=`readelf -d "${tested_file}" | sed -E -n '/\(NEEDED\).*libscalesppmcore\.so/p'` || {
+  echo "ERROR: failed to check '${tested_file}' for ELF NEEDED entries" >&2
+  exit 1
+}
+if test -n "${invalid_needed}"; then
+  {
+    echo "ERROR: '${tested_file}' has excessive ELF NEEDED entries:" >&2
+    echo "${invalid_needed}" >&2
+  } >&2
+  exit 1
+fi
 
 make -j8 check || { cat tests/test-suite.log; exit 1; }
 
