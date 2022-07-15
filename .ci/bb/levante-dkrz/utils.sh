@@ -134,6 +134,7 @@ init_intelclassic202150 ()
   # intel-oneapi-compilers/2022.0.1-gcc-11.2.0:
   switch_for_module intel-oneapi-compilers/2022.0.1-gcc-11.2.0 openmpi/4.1.2-intel-2021.5.0
 
+  AR=xiar
   CC=icc
   CXX=icpc
   FC=ifort
