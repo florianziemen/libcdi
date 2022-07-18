@@ -1666,7 +1666,7 @@ gribapiScanTimestep(stream_t *streamptr)
 
       if (vrecID < nrecs)
         {
-          gribWarning("Paramameter not found!", nrecs_scanned, tsID + 1, varname, records[recID].param, records[recID].ilevel,
+          gribWarning("Parameter not found!", nrecs_scanned, tsID + 1, varname, records[recID].param, records[recID].ilevel,
                       records[recID].ilevel2);
           return CDI_EUFSTRUCT;
         }

@@ -1303,7 +1303,7 @@ cgribexScanTimestep(stream_t *streamptr)
       if (vrecID < nrecs)
         {
           cdiParamToString(records[recID].param, paramstr, sizeof(paramstr));
-          gribWarning("Paramameter not found!", nrecs_scanned, tsID + 1, paramstr, records[recID].ilevel, records[recID].ilevel2);
+          gribWarning("Parameter not found!", nrecs_scanned, tsID + 1, paramstr, records[recID].ilevel, records[recID].ilevel2);
           return CDI_EUFSTRUCT;
         }
 
