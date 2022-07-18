@@ -1521,6 +1521,7 @@ gribapiScanTimestep(stream_t *streamptr)
       char varname[256];
       while (true)
         {
+          varname[0] = 0;
           if (rindex > nrecs) break;
 
           const size_t recsize = gribGetSize(fileID);
