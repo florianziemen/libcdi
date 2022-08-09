@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   May 2022
+! Uwe Schulzweida, MPI-MET, Hamburg,   August 2022
 !
 
 !
@@ -87,6 +87,8 @@
       PARAMETER (CDI_FILETYPE_EXT       =  9)
       INTEGER    CDI_FILETYPE_IEG
       PARAMETER (CDI_FILETYPE_IEG       = 10)
+      INTEGER    CDI_FILETYPE_NCZARR
+      PARAMETER (CDI_FILETYPE_NCZARR    = 11)
 !
 !  Compatibility defines for release 1.8.3 (obsolete defines)
 !
@@ -600,6 +602,11 @@
 !                     streamSync
 !                                    (INTEGER         streamID)
       EXTERNAL        streamSync
+
+!                     streamDefMaxSteps
+!                                    (INTEGER         streamID,
+!                                     INTEGER         maxSteps)
+      EXTERNAL        streamDefMaxSteps
 
 !                     streamDefNumWorker
 !                                    (INTEGER         streamID,
@@ -1144,6 +1151,17 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarXYZ
+
+!                     vlistDefVarNSB
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         nsb)
+      EXTERNAL        vlistDefVarNSB
+
+      INTEGER         vlistInqVarNSB
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarNSB
 
       INTEGER         vlistInqVarNumber
 !                                    (INTEGER         vlistID,
