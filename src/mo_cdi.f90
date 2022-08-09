@@ -394,6 +394,8 @@ module mo_cdi
   public :: vlistInqVarChunkType
   public :: vlistDefVarXYZ
   public :: vlistInqVarXYZ
+  public :: vlistDefVarNSB
+  public :: vlistInqVarNSB
   public :: vlistInqVarNumber
   public :: vlistDefVarInstitut
   public :: vlistInqVarInstitut
@@ -1549,6 +1551,22 @@ module mo_cdi
       integer(c_int), value :: varID_dummy
       integer(c_int) :: f_result
     end function vlistInqVarXYZ
+
+    subroutine vlistDefVarNSB(vlistID_dummy, varID_dummy, nsb_dummy) bind(c,&
+    & name = 'vlistDefVarNSB')
+      import c_int
+      integer(c_int), value :: vlistID_dummy
+      integer(c_int), value :: varID_dummy
+      integer(c_int), value :: nsb_dummy
+    end subroutine vlistDefVarNSB
+
+    function vlistInqVarNSB(vlistID_dummy, varID_dummy) bind(c, name =&
+    & 'vlistInqVarNSB') result(f_result)
+      import c_int
+      integer(c_int), value :: vlistID_dummy
+      integer(c_int), value :: varID_dummy
+      integer(c_int) :: f_result
+    end function vlistInqVarNSB
 
     function vlistInqVarNumber(vlistID_dummy, varID_dummy) bind(c, name =&
     & 'vlistInqVarNumber') result(f_result)
