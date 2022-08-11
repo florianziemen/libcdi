@@ -4,7 +4,13 @@ CDI NEWS
 Version 2.1.0 (11 October 2021):
 
    New features:
+     * Added support for NCZarr
+     * Set number of significant bits used for NetCDF 4.9.0 bit-roundung: vlistDefVarNSB()/vlistInqVarNSB()
+     * Added support for milli seconds
      * Changed DateType back to int
+   Fixed bugs:
+     * compareXYvals failed for unstructured grids (segmentation fault) [Bug #10632]
+     * cdf_read_coordinates: check that bounds have only 2 dimensions [Bug #10575]
 
 Version 2.0.0 (11 October 2021):
 
