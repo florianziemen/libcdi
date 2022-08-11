@@ -17,12 +17,7 @@
 #define CDI_SIZE_TYPE int
 #endif
 
-#ifndef CDI_DATE_TYPE
-#define CDI_DATE_TYPE int
-#endif
-
 typedef CDI_SIZE_TYPE SizeType;
-typedef CDI_DATE_TYPE DateType; // Must be signed integer (int32_t or int64_t)!
 
 //FINT_ON  <--- don't change or remove this line!!!
 // Start of fortran interface for the following routines (make_fint.c)
@@ -76,6 +71,7 @@ extern "C" {
 #define  CDI_FILETYPE_SRV           8   // File type SERVICE
 #define  CDI_FILETYPE_EXT           9   // File type EXTRA
 #define  CDI_FILETYPE_IEG          10   // File type IEG
+#define  CDI_FILETYPE_NCZARR       11   // File type NetCDF NCZarr Data Model
 
 // Compatibility defines for release 1.8.3 (obsolete defines)
 #define  FILETYPE_GRB               1   // File type GRIB
@@ -311,7 +307,6 @@ typedef struct CdiGribIterator CdiGribIterator;
 void    cdiReset(void);
 
 const char *cdiStringError(int cdiErrno);
-
 void    cdiDebug(int debug);
 
 const char *cdiLibraryVersion(void);
@@ -341,8 +336,8 @@ int     cdiEncodeParam(int pnum, int pcat, int pdis);
 // date format:  YYYYMMDD
 // time format:    hhmmss
 
-void    cdiDecodeDate(DateType date, int *year, int *month, int *day);
-DateType cdiEncodeDate(int year, int month, int day);
+void    cdiDecodeDate(int date, int *year, int *month, int *day);
+int     cdiEncodeDate(int year, int month, int day);
 
 void    cdiDecodeTime(int time, int *hour, int *minute, int *second);
 int     cdiEncodeTime(int hour, int minute, int second);
@@ -367,6 +362,7 @@ void    streamClose(int streamID);
 //      streamSync: Synchronize an Open Dataset to Disk
 void    streamSync(int streamID);
 
+void    streamDefMaxSteps(int streamID, int maxSteps);
 void    streamDefNumWorker(int streamID, int numWorker);
 
 //      streamDefVlist: Define the Vlist for a stream
@@ -632,6 +628,9 @@ int     vlistInqVarChunkType(int vlistID, int varID);
 
 void    vlistDefVarXYZ(int vlistID, int varID, int xyz);
 int     vlistInqVarXYZ(int vlistID, int varID);
+
+void    vlistDefVarNSB(int vlistID, int varID, int nsb);
+int     vlistInqVarNSB(int vlistID, int varID);
 
 int     vlistInqVarNumber(int vlistID, int varID);
 
@@ -1159,37 +1158,37 @@ void    taxisDefType(int taxisID, int taxistype);
 int     taxisInqType(int taxisID);
 
 //      taxisDefVdate: Define the verification date
-void    taxisDefVdate(int taxisID, DateType date);
+void    taxisDefVdate(int taxisID, int date);
 
 //      taxisDefVtime: Define the verification time
 void    taxisDefVtime(int taxisID, int time);
 
 //      taxisInqVdate: Get the verification date
-DateType taxisInqVdate(int taxisID);
+int     taxisInqVdate(int taxisID);
 
 //      taxisInqVtime: Get the verification time
 int     taxisInqVtime(int taxisID);
 
 //      taxisDefRdate: Define the reference date
-void    taxisDefRdate(int taxisID, DateType date);
+void    taxisDefRdate(int taxisID, int date);
 
 //      taxisDefRtime: Define the reference time
 void    taxisDefRtime(int taxisID, int time);
 
 //      taxisInqRdate: Get the reference date
-DateType taxisInqRdate(int taxisID);
+int     taxisInqRdate(int taxisID);
 
 //      taxisInqRtime: Get the reference time
 int     taxisInqRtime(int taxisID);
 
 //      taxisDefFdate: Define the forecast reference date
-void    taxisDefFdate(int taxisID, DateType date);
+void    taxisDefFdate(int taxisID, int date);
 
 //      taxisDefFtime: Define the forecast reference time
 void    taxisDefFtime(int taxisID, int time);
 
 //      taxisInqFdate: Get the forecast reference date
-DateType taxisInqFdate(int taxisID);
+int     taxisInqFdate(int taxisID);
 
 //      taxisInqFtime: Get the forecast reference time
 int     taxisInqFtime(int taxisID);
@@ -1199,11 +1198,11 @@ void    taxisWithBounds(int taxisID);
 
 void    taxisDeleteBounds(int taxisID);
 
-void    taxisDefVdateBounds(int taxisID, DateType vdate_lb, DateType vdate_ub);
+void    taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub);
 
 void    taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub);
 
-void    taxisInqVdateBounds(int taxisID, DateType *vdate_lb, DateType *vdate_ub);
+void    taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub);
 
 void    taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub);
 
@@ -1324,6 +1323,15 @@ void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDef
 extern "C" {
 #endif
 
+#include "cdi_datetime.h"
+
+void taxisDefRdatetime(int taxisID, CdiDateTime rdatetime);
+CdiDateTime taxisInqRdatetime(int taxisID);
+void taxisDefVdatetime(int taxisID, CdiDateTime vdatetime);
+CdiDateTime taxisInqVdatetime(int taxisID);
+void taxisDefVdatetimeBounds(int taxisID, CdiDateTime vdatetime_lb, CdiDateTime vdatetime_ub);
+void taxisInqVdatetimeBounds(int taxisID, CdiDateTime *vdatetime_lb, CdiDateTime *vdatetime_ub);
+
 // date format:  YYYYMMDD
 // time format:    hhmmss
 
@@ -1363,9 +1371,9 @@ int  gridInqParamsSTERE(int gridID, struct CDI_GridProjParams *gridProjParams);
 
 #define HAVE_CDI_PROJ_FUNCS 1
 extern int (*proj_lonlat_to_lcc_func)(struct CDI_GridProjParams gpp, size_t, double*, double*);
-extern int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, size_t, double*, double*);
+extern int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double*, double*);
 extern int (*proj_lonlat_to_stere_func)(struct CDI_GridProjParams gpp, size_t, double*, double*);
-extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams *gpp, double, double, size_t, double*, double*);
+extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double*, double*);
 
 #ifdef __cplusplus
 }

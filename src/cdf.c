@@ -87,12 +87,25 @@ cdfComment(int ncid)
 }
 #endif
 
+static bool
+has_uri_scheme(const char *uri)
+{
+  char *pos = strstr(uri, "://");
+  if (pos)
+    {
+      const int len = pos - uri;
+      if (strncmp(uri, "file", len) == 0 || strncmp(uri, "https", len) == 0 || strncmp(uri, "s3", len) == 0) return true;
+    }
+
+  return false;
+}
+
 static int
 cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
   int ncid = -1;
 #ifdef HAVE_LIBNETCDF
-  int fmode = tolower(*mode);
+  const int fmode = tolower(*mode);
   int writemode = NC_CLOBBER;
   int readmode = NC_NOWRITE;
 
@@ -124,12 +137,29 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
           if (*filetype == CDI_FILETYPE_NC5) writemode |= NC_64BIT_DATA;
 #endif
 #ifdef HAVE_NETCDF4
-          if (*filetype == CDI_FILETYPE_NC4)
-            writemode |= NC_NETCDF4;
-          else if (*filetype == CDI_FILETYPE_NC4C)
-            writemode |= NC_NETCDF4 | NC_CLASSIC_MODEL;
+          if (*filetype == CDI_FILETYPE_NC4C) writemode |= (NC_NETCDF4 | NC_CLASSIC_MODEL);
+          if (*filetype == CDI_FILETYPE_NC4) writemode |= NC_NETCDF4;
+          if (*filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
 #endif
-          cdf_create(filename, writemode, &ncid);
+          const bool hasUriScheme = has_uri_scheme(filename);
+
+          if (*filetype == CDI_FILETYPE_NCZARR)
+            {
+              if (!hasUriScheme)
+                {
+                  fprintf(stderr, "URI scheme is missing in NCZarr path!\n");
+                  return CDI_EINVAL;
+                }
+
+              cdf_create(filename, writemode, &ncid);
+            }
+          else
+            {
+              if (hasUriScheme) fprintf(stderr, "URI scheme defined for non NCZarr Data Model!\n");
+
+              cdf__create(filename, writemode, &ncid);
+            }
+
           if (CDI_Version_Info) cdfComment(ncid);
           cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.6");
           break;
@@ -211,33 +241,20 @@ cdf4CheckLibVersions(void)
 int
 cdf4Open(const char *filename, const char *mode, int *filetype)
 {
-  int fileID = -1;
-  bool open_file = false;
-
   if (CDF_Debug) Message("Open %s with mode %c", filename, *mode);
 
 #ifdef HAVE_NETCDF4
-  open_file = true;
+  if (cdf4CheckLibVersions() == 0)
+    {
+      const int fileID = cdfOpenFile(filename, mode, filetype);
+      if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
+      return fileID;
+    }
+
+  return CDI_EUFTYPE;
+#else
+  return CDI_ELIBNAVAIL;
 #endif
-
-  if (open_file)
-    {
-      if (cdf4CheckLibVersions() == 0)
-        {
-          fileID = cdfOpenFile(filename, mode, filetype);
-          if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
-        }
-      else
-        {
-          fileID = CDI_EUFTYPE;
-        }
-    }
-  else
-    {
-      fileID = CDI_ELIBNAVAIL;
-    }
-
-  return fileID;
 }
 
 static void

@@ -70,6 +70,7 @@ getByteorder(int byteswap)
 int
 cdiGetFiletype(const char *uri, int *byteorder)
 {
+  // clang-format off
   int filetype = CDI_EUFTYPE;
   int swap = 0;
   int version;
@@ -81,11 +82,8 @@ cdiGetFiletype(const char *uri, int *byteorder)
   switch (protocol)
     {
     case CDI_PROTOCOL_ACROSS: return CDI_FILETYPE_GRB2;
-
-    case CDI_PROTOCOL_FDB: return CDI_FILETYPE_UNDEF;
-
-    case CDI_PROTOCOL_OTHER: return CDI_FILETYPE_NC;  // support for NetCDF remote types and ESDM
-
+    case CDI_PROTOCOL_FDB:    return CDI_FILETYPE_UNDEF;
+    case CDI_PROTOCOL_OTHER:  return CDI_FILETYPE_NC;  // support for NetCDF remote types and ESDM
     case CDI_PROTOCOL_FILE:
       // handled below;
       break;
@@ -93,10 +91,8 @@ cdiGetFiletype(const char *uri, int *byteorder)
 
   const int fileID = fileOpen(filename, "r");
 
-  if (fileID == CDI_UNDEFID)
-    return CDI_ESYSTEM;
-  else if (fileID == -2)
-    return CDI_ETMOF;
+  if      (fileID == CDI_UNDEFID) return CDI_ESYSTEM;
+  else if (fileID == -2)          return CDI_ETMOF;
 
   char buffer[8];
   if (fileRead(fileID, buffer, 8) != 8)
@@ -104,7 +100,7 @@ cdiGetFiletype(const char *uri, int *byteorder)
       struct stat buf;
       if (stat(filename, &buf) == 0)
         {
-          if (buf.st_size == 0) return CDI_EISEMPTY;
+          if (buf.st_size == 0)      return CDI_EISEMPTY;
           if (buf.st_mode & S_IFDIR) return CDI_EISDIR;
         }
 
@@ -116,73 +112,32 @@ cdiGetFiletype(const char *uri, int *byteorder)
   if (memcmp(buffer, "GRIB", 4) == 0)
     {
       version = buffer[7];
-      if (version <= 1)
-        {
-          filetype = CDI_FILETYPE_GRB;
-          if (CDI_Debug) Message("found GRIB file = %s, version %d", filename, version);
-        }
-      else if (version == 2)
-        {
-          filetype = CDI_FILETYPE_GRB2;
-          if (CDI_Debug) Message("found GRIB2 file = %s", filename);
-        }
+      if      (version <= 1) filetype = CDI_FILETYPE_GRB;
+      else if (version == 2) filetype = CDI_FILETYPE_GRB2;
     }
-  else if (memcmp(buffer, "CDF\001", 4) == 0)
-    {
-      filetype = CDI_FILETYPE_NC;
-      if (CDI_Debug) Message("found CDF1 file = %s", filename);
-    }
-  else if (memcmp(buffer, "CDF\002", 4) == 0)
-    {
-      filetype = CDI_FILETYPE_NC2;
-      if (CDI_Debug) Message("found CDF2 file = %s", filename);
-    }
-  else if (memcmp(buffer, "CDF\005", 4) == 0)
-    {
-      filetype = CDI_FILETYPE_NC5;
-      if (CDI_Debug) Message("found CDF5 file = %s", filename);
-    }
-  else if (memcmp(buffer + 1, "HDF", 3) == 0)
-    {
-      filetype = CDI_FILETYPE_NC4;
-      if (CDI_Debug) Message("found HDF file = %s", filename);
-    }
+  else if (memcmp(buffer, "CDF\001", 4) == 0) { filetype = CDI_FILETYPE_NC; }
+  else if (memcmp(buffer, "CDF\002", 4) == 0) { filetype = CDI_FILETYPE_NC2; }
+  else if (memcmp(buffer, "CDF\005", 4) == 0) { filetype = CDI_FILETYPE_NC5; }
+  else if (memcmp(buffer + 1, "HDF", 3) == 0) { filetype = CDI_FILETYPE_NC4; }
 #ifdef HAVE_LIBSERVICE
-  else if (srvCheckFiletype(fileID, &swap))
-    {
-      filetype = CDI_FILETYPE_SRV;
-      if (CDI_Debug) Message("found SRV file = %s", filename);
-    }
+  else if (srvCheckFiletype(fileID, &swap))   { filetype = CDI_FILETYPE_SRV; }
 #endif
 #ifdef HAVE_LIBEXTRA
-  else if (extCheckFiletype(fileID, &swap))
-    {
-      filetype = CDI_FILETYPE_EXT;
-      if (CDI_Debug) Message("found EXT file = %s", filename);
-    }
+  else if (extCheckFiletype(fileID, &swap))   { filetype = CDI_FILETYPE_EXT; }
 #endif
 #ifdef HAVE_LIBIEG
-  else if (iegCheckFiletype(fileID, &swap))
-    {
-      filetype = CDI_FILETYPE_IEG;
-      if (CDI_Debug) Message("found IEG file = %s", filename);
-    }
+  else if (iegCheckFiletype(fileID, &swap))   { filetype = CDI_FILETYPE_IEG; }
 #endif
 #ifdef HAVE_LIBGRIB
   else if (gribCheckSeek(fileID, &recpos, &version) == 0)
     {
-      if (version <= 1)
-        {
-          filetype = CDI_FILETYPE_GRB;
-          if (CDI_Debug) Message("found seeked GRIB file = %s", filename);
-        }
-      else if (version == 2)
-        {
-          filetype = CDI_FILETYPE_GRB2;
-          if (CDI_Debug) Message("found seeked GRIB2 file = %s", filename);
-        }
+      if      (version <= 1) filetype = CDI_FILETYPE_GRB;
+      else if (version == 2) filetype = CDI_FILETYPE_GRB2;
     }
 #endif
+  // clang-format on
+
+  if (CDI_Debug && filetype != CDI_EUFTYPE) Message("found %s file = %s", strfiletype(filetype), filename);
 
   fileClose(fileID);
 
@@ -206,10 +161,8 @@ The function @func{streamInqFiletype} returns the filetype of a stream.
 @func{streamInqFiletype} returns the type of the file format,
 one of the set of predefined CDI file format types.
 The valid CDI file format types are @func{CDI_FILETYPE_GRB}, @func{CDI_FILETYPE_GRB2}, @func{CDI_FILETYPE_NC},
-@func{CDI_FILETYPE_NC2},
-@func{CDI_FILETYPE_NC4}, @func{CDI_FILETYPE_NC4C}, @func{CDI_FILETYPE_NC5}, @func{CDI_FILETYPE_SRV}, @func{CDI_FILETYPE_EXT} and
-@func{CDI_FILETYPE_IEG}.
-
+@func{CDI_FILETYPE_NC2}, @func{CDI_FILETYPE_NC4}, @func{CDI_FILETYPE_NC4C}, @func{CDI_FILETYPE_NC5},
+@func{CDI_FILETYPE_NCZARR}, @func{CDI_FILETYPE_SRV}, @func{CDI_FILETYPE_EXT} and @func{CDI_FILETYPE_IEG}.
 @EndFunction
 */
 int
@@ -234,6 +187,16 @@ getByteswap(int byteorder)
     }
 
   return byteswap;
+}
+
+void
+streamDefMaxSteps(int streamID, int maxSteps)
+{
+  if (maxSteps >= 0)
+    {
+      stream_t *streamptr = stream_to_pointer(streamID);
+      streamptr->maxSteps = maxSteps;
+    }
 }
 
 void
@@ -274,7 +237,7 @@ streamDefByteorder(int streamID, int byteorder)
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       {
-        srvrec_t *srvp = (srvrec_t *) streamptr->record->exsep;
+        srvrec_t *srvp = (srvrec_t *) streamptr->record->objectp;
         srvp->byteswap = getByteswap(byteorder);
 
         break;
@@ -283,7 +246,7 @@ streamDefByteorder(int streamID, int byteorder)
 #ifdef HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
       {
-        extrec_t *extp = (extrec_t *) streamptr->record->exsep;
+        extrec_t *extp = (extrec_t *) streamptr->record->objectp;
         extp->byteswap = getByteswap(byteorder);
 
         break;
@@ -292,7 +255,7 @@ streamDefByteorder(int streamID, int byteorder)
 #ifdef HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
       {
-        iegrec_t *iegp = (iegrec_t *) streamptr->record->exsep;
+        iegrec_t *iegp = (iegrec_t *) streamptr->record->objectp;
         iegp->byteswap = getByteswap(byteorder);
 
         break;
@@ -361,8 +324,8 @@ static long
 cdiInqTimeSize(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-  long ntsteps = streamptr->ntsteps;
 
+  long ntsteps = streamptr->ntsteps;
   if (ntsteps == (long) CDI_UNDEFID)
     {
       int tsID = 0;
@@ -396,45 +359,27 @@ cdiInqContents(stream_t *streamptr)
       }
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV:
-      {
-        status = srvInqContents(streamptr);
-        break;
-      }
+    case CDI_FILETYPE_SRV: status = srvInqContents(streamptr); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT:
-      {
-        status = extInqContents(streamptr);
-        break;
-      }
+    case CDI_FILETYPE_EXT: status = extInqContents(streamptr); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG:
-      {
-        status = iegInqContents(streamptr);
-        break;
-      }
+    case CDI_FILETYPE_IEG: status = iegInqContents(streamptr); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF:
-      {
-        status = cdfInqContents(streamptr);
-        break;
-      }
+    case CDI_FILETYPE_NETCDF: status = cdfInqContents(streamptr); break;
 #endif
     default:
       {
-        if (CDI_Debug) Message("%s support not compiled in!", strfiletype(filetype));
-
         status = CDI_ELIBNAVAIL;
-        break;
+        if (CDI_Debug) Message("%s support not compiled in!", strfiletype(filetype));
       }
     }
 
   if (status == 0)
     {
-      int taxisID = vlistInqTaxis(streamptr->vlistID);
+      const int taxisID = vlistInqTaxis(streamptr->vlistID);
       if (taxisID != CDI_UNDEFID)
         {
           taxis_t *taxisptr1 = &streamptr->tsteps[0].taxis;
@@ -459,11 +404,12 @@ cdiGetProtocol(const char *uri, const char **filename)
   const int protocollen = pos - uri;
   *filename = pos + 3;
 
-  if (strncmp(uri, "file", protocollen) == 0) return CDI_PROTOCOL_FILE;
+  // if (strncmp(uri, "file", protocollen) == 0) return CDI_PROTOCOL_FILE; // file is already used in NetCDF
   if (strncmp(uri, "fdb", protocollen) == 0) return CDI_PROTOCOL_FDB;
   if (strncmp(uri, "across", protocollen) == 0) return CDI_PROTOCOL_ACROSS;
 
   *filename = uri;
+
   return CDI_PROTOCOL_OTHER;
 }
 
@@ -553,9 +499,9 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
 #ifdef HAVE_LIBCGRIBEX
-            streamptr->record->cgribexp = cgribexNew();
+            streamptr->record->objectp = cgribexNew();
 #else
-            streamptr->record->cgribexp = NULL;
+            streamptr->record->objectp = NULL;
 #endif
           }
         break;
@@ -583,7 +529,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
-            streamptr->record->exsep = srvNew();
+            streamptr->record->objectp = srvNew();
           }
         break;
       }
@@ -597,7 +543,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
-            streamptr->record->exsep = extNew();
+            streamptr->record->objectp = extNew();
           }
         break;
       }
@@ -611,7 +557,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
-            streamptr->record->exsep = iegNew();
+            streamptr->record->objectp = iegNew();
           }
         break;
       }
@@ -626,6 +572,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
       }
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NCZARR:
       {
         fileID = cdf4Open(filename, temp, &filetype);
         break;
@@ -736,7 +683,7 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
 
   streamptr->vlistID = vlistCreate();
   cdiVlistMakeInternal(streamptr->vlistID);
-  /* cdiReadByteorder(streamID); */
+  // cdiReadByteorder(streamID);
   int status = cdiInqContents(streamptr);
   if (status < 0) return status;
   vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
@@ -803,6 +750,11 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
         fileID = cdf4Open(filename, filemode, &filetype);
         streamptr->ncmode = 2;
         break;
+      }
+    case CDI_FILETYPE_NCZARR:
+      {
+        Message("%s not available in append mode!", strfiletype(filetype));
+        return CDI_ELIBNAVAIL;
       }
 #endif
     default:
@@ -906,8 +858,7 @@ streamOpenAppend(const char *filename)
     @Item  filetype  The type of the file format, one of the set of predefined CDI file format types.
                      The valid CDI file format types are @func{CDI_FILETYPE_GRB}, @func{CDI_FILETYPE_GRB2}, @func{CDI_FILETYPE_NC},
                      @func{CDI_FILETYPE_NC2}, @func{CDI_FILETYPE_NC4}, @func{CDI_FILETYPE_NC4C}, @func{CDI_FILETYPE_NC5},
-@func{CDI_FILETYPE_SRV},
-                     @func{CDI_FILETYPE_EXT} and @func{CDI_FILETYPE_IEG}.
+                     @func{CDI_FILETYPE_NCZARR}, @func{CDI_FILETYPE_SRV}, @func{CDI_FILETYPE_EXT} and @func{CDI_FILETYPE_IEG}.
 
 @Description
 The function @func{streamOpenWrite} creates a new datset.
@@ -966,6 +917,7 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->curTsID = CDI_UNDEFID;
   streamptr->rtsteps = 0;
   streamptr->ntsteps = CDI_UNDEFID;
+  streamptr->maxSteps = CDI_UNDEFID;
   streamptr->tsteps = NULL;
   streamptr->tstepsTableSize = 0;
   streamptr->tstepsNextID = 0;
@@ -1074,7 +1026,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
           gribClose(fileID);
           if (recordBufIsToBeDeleted) gribContainersDelete(streamptr);
 #ifdef HAVE_LIBCGRIBEX
-          if (recordBufIsToBeDeleted) cgribexDelete(streamptr->record->cgribexp);
+          if (recordBufIsToBeDeleted) cgribexDelete(streamptr->record->objectp);
 #endif
           break;
         }
@@ -1089,7 +1041,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
       case CDI_FILETYPE_SRV:
         {
           fileClose(fileID);
-          if (recordBufIsToBeDeleted) srvDelete(streamptr->record->exsep);
+          if (recordBufIsToBeDeleted) srvDelete(streamptr->record->objectp);
           break;
         }
 #endif
@@ -1097,7 +1049,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
       case CDI_FILETYPE_EXT:
         {
           fileClose(fileID);
-          if (recordBufIsToBeDeleted) extDelete(streamptr->record->exsep);
+          if (recordBufIsToBeDeleted) extDelete(streamptr->record->objectp);
           break;
         }
 #endif
@@ -1105,7 +1057,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
       case CDI_FILETYPE_IEG:
         {
           fileClose(fileID);
-          if (recordBufIsToBeDeleted) iegDelete(streamptr->record->exsep);
+          if (recordBufIsToBeDeleted) iegDelete(streamptr->record->objectp);
           break;
         }
 #endif
@@ -1229,7 +1181,7 @@ stream_delete_entry(stream_t *streamptr)
 {
   xassert(streamptr);
 
-  int idx = streamptr->self;
+  const int idx = streamptr->self;
   Free(streamptr);
   reshRemove(idx, &streamOps);
 
@@ -1239,10 +1191,10 @@ stream_delete_entry(stream_t *streamptr)
 void
 cdiStreamSync_(stream_t *streamptr)
 {
-  int fileID = streamptr->fileID;
-  int filetype = streamptr->filetype;
-  int vlistID = streamptr->vlistID;
-  int nvars = vlistNvars(vlistID);
+  const int fileID = streamptr->fileID;
+  const int filetype = streamptr->filetype;
+  const int vlistID = streamptr->vlistID;
+  const int nvars = vlistNvars(vlistID);
 
   if (fileID == CDI_UNDEFID)
     Warning("File %s not open!", streamptr->filename);
@@ -1303,15 +1255,15 @@ cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
 
   if (CDI_Debug) Message("streamID = %d  tsID = %d", streamptr->self, tsID);
 
-  int vlistID = streamptr->vlistID;
-  int time_is_varying = vlistHasTime(vlistID);
-  int taxisID = vlistInqTaxis(vlistID);
+  const int vlistID = streamptr->vlistID;
+  const int timeIsVarying = vlistHasTime(vlistID);
+  const int taxisID = vlistInqTaxis(vlistID);
 
   /* moved to cdiStreamSetupVlist
-  int taxisID = time_is_varying ? vlistInqTaxis(vlistID) : CDI_UNDEFID;
-  if ( time_is_varying )
+  int taxisID = timeIsVarying ? vlistInqTaxis(vlistID) : CDI_UNDEFID;
+  if (timeIsVarying)
     {
-      if ( taxisID == CDI_UNDEFID )
+      if (taxisID == CDI_UNDEFID)
         {
           Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamptr->self);
           taxisID = taxisCreate(TAXIS_ABSOLUTE);
@@ -1321,17 +1273,17 @@ cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
   */
   if (tsID > 0)
     {
-      int newtsID = tstepsNewEntry(streamptr);
+      const int newtsID = tstepsNewEntry(streamptr);
       if (tsID != newtsID) Error("Internal problem: tsID = %d newtsID = %d", tsID, newtsID);
     }
 
-  if (time_is_varying) ptaxisCopy(&streamptr->tsteps[tsID].taxis, taxisPtr(taxisID));
+  if (timeIsVarying) ptaxisCopy(&streamptr->tsteps[tsID].taxis, taxisPtr(taxisID));
 
   streamptr->curTsID = tsID;
   streamptr->ntsteps = tsID + 1;
 
 #ifdef HAVE_LIBNETCDF
-  if (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF && time_is_varying)
+  if (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF && timeIsVarying)
     {
       void (*myCdfDefTimestep)(stream_t * streamptr, int tsID)
           = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_CDF_DEF_TIMESTEP).func;
@@ -1405,7 +1357,7 @@ streamInqTimestep(int streamID, int tsID)
 {
   int nrecs = 0;
   stream_t *streamptr = stream_to_pointer(streamID);
-  int vlistID = streamptr->vlistID;
+  const int vlistID = streamptr->vlistID;
 
   if (tsID < streamptr->ntsteps) streamptr->tsteps[tsID].curRecID = CDI_UNDEFID;  // fix for netCDF
   if (tsID < streamptr->rtsteps)
@@ -1422,7 +1374,7 @@ streamInqTimestep(int streamID, int tsID)
 
   if (tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID) return 0;
 
-  int filetype = streamptr->filetype;
+  const int filetype = streamptr->filetype;
 
   if (CDI_Debug) Message("streamID = %d  tsID = %d  filetype = %d", streamID, tsID, filetype);
 
@@ -1507,7 +1459,7 @@ void streamWriteContents(int streamID, char *cname)
   fputs("#\n#grids:\n", cnp);
 
   int ngrids = vlistNgrids(vlistID);
-  for ( int i = 0; i < ngrids; i++ )
+  for (int i = 0; i < ngrids; ++i)
     {
       int gridID   = vlistGrid(vlistID, i);
       int gridtype = gridInqType(gridID);
@@ -1519,7 +1471,7 @@ void streamWriteContents(int streamID, char *cname)
   fputs("#\nvarID:code:gridID:zaxisID:tsteptype:datatype\n", cnp);
 
   int nvars = vlistNvars(vlistID);
-  for ( int varID = 0; varID < nvars; varID++ )
+  for (int varID = 0; varID < nvars; ++varID)
     {
       int code      = vlistInqVarCode(vlistID, varID);
       int gridID    = vlistInqVarGrid(vlistID, varID);
@@ -1555,7 +1507,7 @@ void streamWriteContents(int streamID, char *cname)
   while (1)
     {
       int nrecs = streamptr->tsteps[tsID].nallrecs;
-      for ( int recID = 0; recID < nrecs; recID++ )
+      for (int recID = 0; recID < nrecs; ++recID)
 	{
 	  int varID   = streamptr->tsteps[tsID].records[recID].varID;
 	  int levelID = streamptr->tsteps[tsID].records[recID].levelID;
@@ -1608,7 +1560,7 @@ streamDefVlist(int streamID, int vlistID)
   myStreamDefVlist(streamID, vlistID);
 }
 
-/* the single image implementation of streamDefVlist */
+// The single image implementation of streamDefVlist
 void
 cdiStreamDefVlist_(int streamID, int vlistID)
 {
@@ -1616,7 +1568,7 @@ cdiStreamDefVlist_(int streamID, int vlistID)
 
   if (streamptr->vlistID == CDI_UNDEFID)
     {
-      int vlistCopy = vlistDuplicate(vlistID);
+      const int vlistCopy = vlistDuplicate(vlistID);
       cdiVlistMakeInternal(vlistCopy);
       cdiVlistMakeImmutable(vlistID);
       cdiStreamSetupVlist(streamptr, vlistCopy);
@@ -1729,12 +1681,12 @@ void
 cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
 {
   streamptr->vlistID = vlistID;
-  int nvars = vlistNvars(vlistID);
-  for (int varID = 0; varID < nvars; varID++)
+  const int nvars = vlistNvars(vlistID);
+  for (int varID = 0; varID < nvars; ++varID)
     {
-      int gridID = vlistInqVarGrid(vlistID, varID);
-      int zaxisID = vlistInqVarZaxis(vlistID, varID);
-      int tilesetID = vlistInqVarSubtype(vlistID, varID);
+      const int gridID = vlistInqVarGrid(vlistID, varID);
+      const int zaxisID = vlistInqVarZaxis(vlistID, varID);
+      const int tilesetID = vlistInqVarSubtype(vlistID, varID);
       stream_new_var(streamptr, gridID, zaxisID, tilesetID);
       if (streamptr->have_missval) vlistDefVarMissval(vlistID, varID, vlistInqVarMissval(vlistID, varID));
     }
@@ -1742,9 +1694,9 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
   if (streamptr->filemode == 'w')
     {
       tstepsNewEntry(streamptr);  // timestep 0
-      int vlistIDw = streamptr->vlistID;
-      int time_is_varying = vlistHasTime(vlistIDw);
-      if (time_is_varying)
+      const int vlistIDw = streamptr->vlistID;
+      const int timeIsVarying = vlistHasTime(vlistIDw);
+      if (timeIsVarying)
         {
           int taxisID = vlistInqTaxis(vlistIDw);
           if (taxisID == CDI_UNDEFID)
@@ -1758,8 +1710,8 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             if (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF)
               {
-                taxis_t *taxisptr = taxisPtr(taxisID);
-                if (taxisptr->rdate == -1)
+                const taxis_t *taxisptr = taxisPtr(taxisID);
+                if (cdiDateTime_isNull(taxisptr->rdatetime))
                   {
                     int vdate = taxisInqVdate(taxisID);
                     if (vdate == 0) vdate = 10101;

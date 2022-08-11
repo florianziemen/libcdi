@@ -39,43 +39,6 @@ cdiEncodeParam(int pnum, int pcat, int pdis)
 }
 
 void
-cdiDecodeDate(DateType date, int *year, int *month, int *day)
-{
-  int64_t iyear = (int) (date / 10000);
-  *year = (int) iyear;
-  int64_t idate = date - iyear * 10000;
-  if (idate < 0) idate = -idate;
-  int64_t imonth = idate / 100;
-  *month = (int) imonth;
-  *day = (int) (idate - imonth * 100);
-}
-
-DateType
-cdiEncodeDate(int year, int month, int day)
-{
-  int64_t iyear = abs(year);
-  int64_t date = iyear * 10000 + month * 100 + day;
-  if (year < 0) date = -date;
-
-  return (DateType) date;
-}
-
-void
-cdiDecodeTime(int time, int *hour, int *minute, int *second)
-{
-  int ihour = time / 10000, itime = time - ihour * 10000, iminute = itime / 100;
-  *hour = ihour;
-  *minute = iminute;
-  *second = itime - iminute * 100;
-}
-
-int
-cdiEncodeTime(int hour, int minute, int second)
-{
-  return hour * 10000 + minute * 100 + second;
-}
-
-void
 cdiParamToString(int param, char *paramstr, int maxlen)
 {
   int dis, cat, num;

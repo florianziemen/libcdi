@@ -79,10 +79,10 @@ static void
 version(void)
 {
   int filetypes[] = { CDI_FILETYPE_SRV, CDI_FILETYPE_EXT, CDI_FILETYPE_IEG, CDI_FILETYPE_GRB,  CDI_FILETYPE_GRB2,
-                      CDI_FILETYPE_NC,  CDI_FILETYPE_NC2, CDI_FILETYPE_NC4, CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5 };
-  const char *typenames[] = { "srv", "ext", "ieg", "grb", "grb2", "nc", "nc2", "nc4", "nc4c", "nc5" };
+                      CDI_FILETYPE_NC,  CDI_FILETYPE_NC2, CDI_FILETYPE_NC4, CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5, CDI_FILETYPE_NCZARR };
+  const char *typenames[] = { "srv", "ext", "ieg", "grb", "grb2", "nc", "nc2", "nc4", "nc4c", "nc5", "nczarr" };
 
-  fprintf(stderr, "CDI version 1.9\n");
+  fprintf(stderr, "CDI version 2.1\n");
 #ifdef COMPILER
   fprintf(stderr, "C Compiler: %s\n", COMPILER);
 #endif
@@ -155,6 +155,8 @@ version(void)
     1.7.1   1 Nov 2009 : added option -z jpeg for JPEG compression of GRIB2 records
     1.7.2  14 Nov 2012 : added optional compression level -z zip[_1-9]
     1.9.0  29 May 2019 : added option -i to set number of input worker
+    2.0.0  02 Feb 2022 : changed date/time handling to CdiDateTime
+    2.1.0  17 Jun 2022 : added NCZarr support
   */
 }
 
@@ -168,7 +170,7 @@ usage(void)
   fprintf(stderr, "\n");
   fprintf(stderr, "  Options:\n");
   fprintf(stderr, "    -d             Print debugging information\n");
-  fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, nc4c, nc5, srv, ext or ieg)\n");
+  fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext or ieg)\n");
   fprintf(stderr, "    -i <num>       Number of worker to decode/decompress GRIB records\n");
   fprintf(stderr, "    -m             Move records\n");
   fprintf(stderr, "    -r             Use CDI record API\n");
@@ -188,13 +190,12 @@ usage(void)
 }
 
 static void
-printInfo(int64_t vdate, int vtime, char *varname, double level, size_t datasize, int number, size_t nmiss, double missval,
+printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, int number, size_t nmiss, double missval,
           const double *data, int vardis)
 {
   static int rec = 0;
   size_t ivals = 0, imiss = 0;
   double arrmean, arrmin, arrmax;
-  char vdatestr[32], vtimestr[32];
 
   if (!rec)
     {
@@ -208,8 +209,9 @@ printInfo(int64_t vdate, int vtime, char *varname, double level, size_t datasize
       //         ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+
     }
 
-  date2str(vdate, vdatestr, sizeof(vdatestr));
-  time2str(vtime, vtimestr, sizeof(vtimestr));
+  char vdatestr[32], vtimestr[32];
+  date2str(vdatetime.date, vdatestr, sizeof(vdatestr));
+  time2str(vdatetime.time, vtimestr, sizeof(vtimestr));
 
   fprintf(stdout, "%6d :%s %s %7g ", ++rec, vdatestr, vtimestr, level);
 
@@ -337,10 +339,8 @@ limit_string_length(char *string, size_t maxlen)
 static void
 printShortinfo(int streamID, int vlistID, int vardis)
 {
-  int varID;
   char tmpname[CDI_MAX_NAME];
   char varname[CDI_MAX_NAME];
-  int year, month, day, hour, minute, second;
   char pstr[4];
   char paramstr[32];
 
@@ -349,8 +349,8 @@ printShortinfo(int streamID, int vlistID, int vardis)
   printFiletype(streamID, vlistID);
 
   // vlistPrint(vlistID);
-  int nvars = vlistNvars(vlistID);
-  int nsubtypes = vlistNsubtypes(vlistID);
+  const int nvars = vlistNvars(vlistID);
+  const int nsubtypes = vlistNsubtypes(vlistID);
 
   if (nsubtypes > 0)
     fprintf(stdout, "   Var : Institut Source   T Steptype Subtypes Levels Num    Points Num Dtype : ");
@@ -362,11 +362,11 @@ printShortinfo(int streamID, int vlistID, int vardis)
   else
     fprintf(stdout, "Parameter ID\n");
 
-  for (varID = 0; varID < nvars; varID++)
+  for (int varID = 0; varID < nvars; varID++)
     {
-      int param = vlistInqVarParam(vlistID, varID);
-      int gridID = vlistInqVarGrid(vlistID, varID);
-      int zaxisID = vlistInqVarZaxis(vlistID, varID);
+      const int param = vlistInqVarParam(vlistID, varID);
+      const int gridID = vlistInqVarGrid(vlistID, varID);
+      const int zaxisID = vlistInqVarZaxis(vlistID, varID);
 
       fprintf(stdout, "%6d : ", varID + 1);
 
@@ -385,11 +385,11 @@ printShortinfo(int streamID, int vlistID, int vardis)
       fprintf(stdout, "%-8s ", tmpname);
 
       // timetype
-      int timetype = vlistInqVarTimetype(vlistID, varID);
+      const int timetype = vlistInqVarTimetype(vlistID, varID);
       fprintf(stdout, "%c ", timetype == TIME_CONSTANT ? 'c' : 'v');
 
       // tsteptype
-      int tsteptype = vlistInqVarTsteptype(vlistID, varID);
+      const int tsteptype = vlistInqVarTsteptype(vlistID, varID);
       // clang-format off
 	  if      (tsteptype == TSTEP_INSTANT ) fprintf(stdout, "%-8s ", "instant");
 	  else if (tsteptype == TSTEP_INSTANT2) fprintf(stdout, "%-8s ", "instant");
@@ -406,24 +406,24 @@ printShortinfo(int streamID, int vlistID, int vardis)
 
       if (nsubtypes > 0)
         {
-          int subtypeID = vlistInqVarSubtype(vlistID, varID);
-          int subtypesize = subtypeInqSize(subtypeID);
+          const int subtypeID = vlistInqVarSubtype(vlistID, varID);
+          const int subtypesize = subtypeInqSize(subtypeID);
           fprintf(stdout, " %6d  ", subtypesize);
           fprintf(stdout, "%3d ", vlistSubtypeIndex(vlistID, subtypeID) + 1);
         }
 
-      /* layer info */
-      int levelsize = zaxisInqSize(zaxisID);
+      // layer info
+      const int levelsize = zaxisInqSize(zaxisID);
       fprintf(stdout, "%6d ", levelsize);
       fprintf(stdout, "%3d ", vlistZaxisIndex(vlistID, zaxisID) + 1);
 
-      /* grid info */
-      size_t gridsize = gridInqSize(gridID);
+      // grid info
+      const size_t gridsize = gridInqSize(gridID);
       fprintf(stdout, "%9zu ", gridsize);
       fprintf(stdout, "%3d ", vlistGridIndex(vlistID, gridID) + 1);
 
-      /* datatype */
-      int datatype = vlistInqVarDatatype(vlistID, varID);
+      // datatype
+      const int datatype = vlistInqVarDatatype(vlistID, varID);
       // clang-format off
 	  if      (datatype == CDI_DATATYPE_PACK  ) strcpy(pstr, "P0");
 	  else if (datatype > 0 && datatype <= 32 ) sprintf(pstr, "P%d", datatype);
@@ -447,7 +447,7 @@ printShortinfo(int streamID, int vlistID, int vardis)
       else
         fprintf(stdout, "z ");
 
-      /* parameter info */
+      // parameter info
       fprintf(stdout, ": ");
 
       cdiParamToString(param, paramstr, sizeof(paramstr));
@@ -481,8 +481,8 @@ printShortinfo(int streamID, int vlistID, int vardis)
       printSubtypeInfo(vlistID);
     }
 
-  int taxisID = vlistInqTaxis(vlistID);
-  int ntsteps = vlistNtsteps(vlistID);
+  const int taxisID = vlistInqTaxis(vlistID);
+  const int ntsteps = vlistNtsteps(vlistID);
 
   if (ntsteps != 0)
     {
@@ -495,18 +495,16 @@ printShortinfo(int streamID, int vlistID, int vardis)
         {
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             {
-              int64_t vdate = taxisInqRdate(taxisID);
-              int vtime = taxisInqRtime(taxisID);
+              const CdiDateTime dt = taxisInqRdatetime(taxisID);
 
-              cdiDecodeDate(vdate, &year, &month, &day);
-              cdiDecodeTime(vtime, &hour, &minute, &second);
+              fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d",
+                      dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute, dt.time.second);
+              if (dt.time.ms) fprintf(stdout, ".%d", dt.time.ms);
 
-              fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", year, month, day, hour, minute, second);
-
-              int tunits = taxisInqTunit(taxisID);
+              const int tunits = taxisInqTunit(taxisID);
               if (tunits != CDI_UNDEFID) fprintf(stdout, "  Units = %s", tunit2str(tunits));
 
-              int calendar = taxisInqCalendar(taxisID);
+              const int calendar = taxisInqCalendar(taxisID);
               if (calendar != CDI_UNDEFID) fprintf(stdout, "  Calendar = %s", calendar2str(calendar));
 
               if (taxisHasBounds(taxisID)) fprintf(stdout, "  Bounds = true");
@@ -556,19 +554,14 @@ setDefaultDataType(char *datatypestr)
           if (nbits > 0 && nbits < 32)
             DefaultDataType = nbits;
           else if (nbits == 32)
-            {
-              if (DefaultFileType == CDI_FILETYPE_GRB)
-                DefaultDataType = CDI_DATATYPE_PACK32;
-              else
-                DefaultDataType = CDI_DATATYPE_FLT32;
-            }
+            DefaultDataType = (DefaultFileType == CDI_FILETYPE_GRB) ? CDI_DATATYPE_PACK32 : CDI_DATATYPE_FLT32;
           else if (nbits == 64)
             DefaultDataType = CDI_DATATYPE_FLT64;
           else
             {
               fprintf(stderr, "Unsupported number of bits %d!\n", nbits);
               fprintf(stderr,
-                      "Use I8/I16/I32/F32/F64 for nc/nc2/nc4/nc4c/nc5; F32/F64 for grb2/srv/ext/ieg; P1 - P24 for grb/grb2.\n");
+                      "Use I8/I16/I32/F32/F64 for nc/nc2/nc4/nc4c/nc5/nczarr; F32/F64 for grb2/srv/ext/ieg; P1 - P24 for grb/grb2.\n");
               exit(EXIT_FAILURE);
             }
         }
@@ -654,22 +647,23 @@ setDefaultFileType(char *filetypestr)
       char *ftstr = filetypestr;
 
       // clang-format off
-      if      ( memcmp(filetypestr, "grb2", 4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB2;}
-      else if ( memcmp(filetypestr, "grb1", 4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB; }
-      else if ( memcmp(filetypestr, "grb",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_GRB; }
-      else if ( memcmp(filetypestr, "nc2",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC2; }
-      else if ( memcmp(filetypestr, "nc4c", 4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_NC4C;}
-      else if ( memcmp(filetypestr, "nc4",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC4; }
-      else if ( memcmp(filetypestr, "nc5",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC5; }
-      else if ( memcmp(filetypestr, "nc1",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC;  }
-      else if ( memcmp(filetypestr, "nc",   2)  == 0 ) { ftstr += 2; DefaultFileType = CDI_FILETYPE_NC2; }
-      else if ( memcmp(filetypestr, "srv",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_SRV; }
-      else if ( memcmp(filetypestr, "ext",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_EXT; }
-      else if ( memcmp(filetypestr, "ieg",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_IEG; }
+      if      ( memcmp(filetypestr, "grb2",   4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB2;}
+      else if ( memcmp(filetypestr, "grb1",   4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB; }
+      else if ( memcmp(filetypestr, "grb",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_GRB; }
+      else if ( memcmp(filetypestr, "nc2",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC2; }
+      else if ( memcmp(filetypestr, "nc4c",   4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_NC4C;}
+      else if ( memcmp(filetypestr, "nc4",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC4; }
+      else if ( memcmp(filetypestr, "nc5",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC5; }
+      else if ( memcmp(filetypestr, "nc1",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC;  }
+      else if ( memcmp(filetypestr, "nczarr", 6)  == 0 ) { ftstr += 6; DefaultFileType = CDI_FILETYPE_NCZARR;  }
+      else if ( memcmp(filetypestr, "nc",     2)  == 0 ) { ftstr += 2; DefaultFileType = CDI_FILETYPE_NC2; }
+      else if ( memcmp(filetypestr, "srv",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_SRV; }
+      else if ( memcmp(filetypestr, "ext",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_EXT; }
+      else if ( memcmp(filetypestr, "ieg",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_IEG; }
       else
 	{
 	  fprintf(stderr, "Unsupported filetype %s!\n", filetypestr);
-	  fprintf(stderr, "Available filetypes: grb, grb2, nc, nc2, nc4, nc4c, nc5, srv, ext and ieg\n");
+	  fprintf(stderr, "Available filetypes: grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext and ieg\n");
 	  exit(EXIT_FAILURE);
 	}
       // clang-format on
@@ -686,8 +680,8 @@ setDefaultFileType(char *filetypestr)
             {
               fprintf(stderr, "Unexpected character >%c< in file type >%s<!\n", *ftstr, filetypestr);
               fprintf(stderr, "Use format[_nbits] with:\n");
-              fprintf(stderr, "    format = grb, grb2, nc, nc2, nc4, nc4c, nc5, srv, ext or ieg\n");
-              fprintf(stderr, "    nbits  = 32/64 for grb2/nc/nc2/nc4/nc4c/nc5/srv/ext/ieg; 1 - 24 for grb/grb2\n");
+              fprintf(stderr, "    format = grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext or ieg\n");
+              fprintf(stderr, "    nbits  = 32/64 for grb2/nc/nc2/nc4/nc4c/nc5/nczarr/srv/ext/ieg; 1 - 24 for grb/grb2\n");
               exit(EXIT_FAILURE);
             }
         }
@@ -728,10 +722,7 @@ defineCompress(const char *arg)
   else if (strncmp(arg, "zip", 3) == 0)
     {
       comptype = CDI_COMPRESS_ZIP;
-      if (len == 5 && arg[3] == '_' && isdigit(arg[4]))
-        complevel = atoi(&arg[4]);
-      else
-        complevel = 1;
+      complevel = (len == 5 && arg[3] == '_' && isdigit(arg[4])) ? atoi(&arg[4]) : 1;
     }
   else
     fprintf(stderr, "%s compression unsupported!\n", arg);
@@ -880,6 +871,8 @@ main(int argc, char *argv[])
           streamID2 = streamOpenWrite(fname2, filetype);
           if (streamID2 < 0) return handle_error(streamID2, "Open failed on %s", fname2);
 
+          const int maxSteps = vlistNtsteps(vlistID1);
+          if (filetype == CDI_FILETYPE_NCZARR && maxSteps >= 0) streamDefMaxSteps(streamID2, maxSteps);
           if (numWorkerOut > 0) streamDefNumWorker(streamID2, numWorkerOut);
 
           if (DefaultByteorder != CDI_UNDEFID) streamDefByteorder(streamID2, DefaultByteorder);
@@ -917,10 +910,8 @@ main(int argc, char *argv[])
                 taxisCopyTimestep(taxisID2, taxisID1);
                 streamDefTimestep(streamID2, tsID);
               }
-            const int64_t vdate = taxisInqVdate(taxisID1);
-            const int vtime = taxisInqVtime(taxisID1);
 
-            if (Debug) fprintf(stdout, "tsID = %d nrecs = %d date = %ld time = %d\n", tsID, nrecs, (long) vdate, vtime);
+            const CdiDateTime vdatetime = taxisInqVdatetime(taxisID1);
 
             if (Record)
               {
@@ -948,7 +939,7 @@ main(int argc, char *argv[])
                     const double missval = vlistInqVarMissval(vlistID1, varID);
 
                     if (Info)
-                      printInfo(vdate, vtime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, data, Vardis);
+                      printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, data, Vardis);
 
                     if (fname2)
                       {
@@ -990,7 +981,7 @@ main(int argc, char *argv[])
                       {
                         const double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
                         const size_t offset = levelID * gridsize;
-                        if (Info) printInfo(vdate, vtime, varname, level, gridsize, number, nmiss, missval, data + offset, Vardis);
+                        if (Info) printInfo(vdatetime, varname, level, gridsize, number, nmiss, missval, data + offset, Vardis);
                       }
 
                     if (fname2) streamWriteVar(streamID2, varID, data, nmiss);
@@ -1025,7 +1016,7 @@ main(int argc, char *argv[])
                         const double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
                         streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
 
-                        if (Info) printInfo(vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
+                        if (Info) printInfo(vdatetime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
 
                         if (fname2) streamWriteVarSlice(streamID2, varID, levelID, data, nmiss);
                       }

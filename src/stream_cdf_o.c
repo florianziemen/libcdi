@@ -42,12 +42,12 @@ cdfDefRecord(stream_t *streamptr)
   (void) streamptr;
 }
 
-static void
-cdfDefTimeValue(stream_t *streamptr, int tsID)
+void
+cdfDefTimestep(stream_t *streamptr, int tsID)
 {
   const int fileID = streamptr->fileID;
 
-  if (CDI_Debug) Message("streamID = %d, fileID = %d", streamptr->self, fileID);
+  if (CDI_Debug) Message("streamID = %d, fileID = %d, tsID = %d", streamptr->self, fileID, tsID);
 
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -57,7 +57,12 @@ cdfDefTimeValue(stream_t *streamptr, int tsID)
       streamptr->ncmode = 2;
     }
 
-  double timevalue = cdiEncodeTimeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis);
+  if (streamptr->accessmode == 0)
+    {
+      cdfEndDef(streamptr);
+    }
+
+  double timevalue = cdi_encode_timeval(taxis->vdatetime, &streamptr->tsteps[0].taxis);
   if (CDI_Debug) Message("tsID = %d  timevalue = %f", tsID, timevalue);
 
   int ncvarid = streamptr->basetime.ncvarid;
@@ -69,15 +74,11 @@ cdfDefTimeValue(stream_t *streamptr, int tsID)
       ncvarid = streamptr->basetime.ncvarboundsid;
       if (ncvarid == CDI_UNDEFID) Error("Call to taxisWithBounds() missing!");
 
-      timevalue = cdiEncodeTimeval(taxis->vdate_lb, taxis->vtime_lb, &streamptr->tsteps[0].taxis);
-      size_t start[2], count[2];
-      start[0] = (size_t) tsID;
-      count[0] = 1;
-      start[1] = 0;
-      count[1] = 1;
+      timevalue = cdi_encode_timeval(taxis->vdatetime_lb, &streamptr->tsteps[0].taxis);
+      size_t start[2] = { tsID, 0 }, count[2] = { 1, 1 };
       cdf_put_vara_double(fileID, ncvarid, start, count, &timevalue);
 
-      timevalue = cdiEncodeTimeval(taxis->vdate_ub, taxis->vtime_ub, &streamptr->tsteps[0].taxis);
+      timevalue = cdi_encode_timeval(taxis->vdatetime_ub, &streamptr->tsteps[0].taxis);
       start[0] = (size_t) tsID;
       count[0] = 1;
       start[1] = 1;
@@ -91,12 +92,6 @@ cdfDefTimeValue(stream_t *streamptr, int tsID)
       timevalue = taxis->fc_period;
       cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
     }
-}
-
-void
-cdfDefTimestep(stream_t *streamptr, int tsID)
-{
-  cdfDefTimeValue(streamptr, tsID);
 }
 
 static void

@@ -214,7 +214,7 @@ check_keyvalueList(int numItems, KeyValueEntry *keyValueList)
 typedef struct
 {
   int date, time, param, levtype;
-  int level;
+  int ilevel;
 } CmpKeys;
 
 void
@@ -224,7 +224,7 @@ record_info_entry_init(RecordInfoEntry *recordInfo)
   recordInfo->time = 0;
   recordInfo->param = 0;
   recordInfo->levtype = 0;
-  recordInfo->level = 0;
+  recordInfo->ilevel = 0;
 }
 
 static CmpKeys
@@ -235,7 +235,7 @@ set_cmpkeys(RecordInfoEntry *recordInfo)
   cmpKeys.time = recordInfo->time;
   cmpKeys.param = recordInfo->param;
   cmpKeys.levtype = recordInfo->levtype;
-  cmpKeys.level = recordInfo->level;
+  cmpKeys.ilevel = recordInfo->ilevel;
   return cmpKeys;
 }
 
@@ -247,7 +247,7 @@ compare_cmpkeys(const CmpKeys *cmpKeys1, const CmpKeys *cmpKeys2)
       cmpKeys1->time == cmpKeys2->time &&
       cmpKeys1->param == cmpKeys2->param &&
       cmpKeys1->levtype == cmpKeys2->levtype &&
-      cmpKeys1->level == cmpKeys2->level)
+      cmpKeys1->ilevel == cmpKeys2->ilevel)
     return 0;
   // clang-format on
 
@@ -319,7 +319,7 @@ decode_keyvalue(KeyValueEntry *keyValue, RecordInfoEntry *recordInfo)
       else if (strcmp(itemKeys[i], "time") == 0) recordInfo->time = atoi(itemValues[i]);
       else if (strcmp(itemKeys[i], "param") == 0) recordInfo->param = atoi(itemValues[i]);
       else if (strcmp(itemKeys[i], "levtype") == 0) recordInfo->levtype = get_ilevtype(itemValues[i]);
-      else if (strcmp(itemKeys[i], "levelist") == 0) recordInfo->level = atoi(itemValues[i]);
+      else if (strcmp(itemKeys[i], "levelist") == 0) recordInfo->ilevel = atoi(itemValues[i]);
       // clang-format on
     }
 }

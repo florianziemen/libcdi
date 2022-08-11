@@ -61,6 +61,7 @@ static const char Filetypes[][9] = {
   "SERVICE",
   "EXTRA",
   "IEG",
+  "NCZarr",
   "HDF5",
 };
 // clang-format on
@@ -142,7 +143,7 @@ cdiPrintVersion(void)
   fprintf(stdout, "  NetCDF library version : %s\n", cdfLibraryVersion());
 #endif
 #ifdef HAVE_NC4HDF5
-  fprintf(stdout, "    hdf5 library version : %s\n", hdfLibraryVersion());
+  fprintf(stdout, "    HDF5 library version : %s\n", hdfLibraryVersion());
 #endif
 #ifdef HAVE_LIBSERVICE
   fprintf(stdout, "    exse library version : %s\n", srvLibraryVersion());
@@ -273,6 +274,9 @@ cdiHaveFiletype(int filetype)
 #ifdef HAVE_NETCDF4
     case CDI_FILETYPE_NC4: status = 1; break;
     case CDI_FILETYPE_NC4C: status = 1; break;
+#endif
+#ifdef HAVE_NCZARR
+    case CDI_FILETYPE_NCZARR: status = 1; break;
 #endif
 #ifdef HAVE_NETCDF5
     case CDI_FILETYPE_NC5: status = 1; break;
@@ -489,7 +493,7 @@ cdiInitialize(void)
 const char *
 strfiletype(int filetype)
 {
-  int size = (int) (sizeof(Filetypes) / sizeof(char *));
+  const int size = (int) (sizeof(Filetypes) / sizeof(char *));
   return (filetype > 0 && filetype < size) ? Filetypes[filetype] : Filetypes[0];
 }
 
@@ -529,6 +533,12 @@ cdiInqMissval(void)
   return CDI_Default_Missval;
 }
 
+bool
+cdiFiletypeIsExse(int filetype)
+{
+  return (filetype == CDI_FILETYPE_SRV || filetype == CDI_FILETYPE_EXT || filetype == CDI_FILETYPE_IEG);
+}
+
 int
 cdiBaseFiletype(int filetype)
 {
@@ -538,6 +548,7 @@ cdiBaseFiletype(int filetype)
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NCZARR:
     case CDI_FILETYPE_NC5: return CDI_FILETYPE_NETCDF;
     default: return filetype;
     }

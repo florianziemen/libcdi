@@ -9,7 +9,7 @@ lib_LTLIBRARIES =
 
 if ENABLE_CDI_LIB
   lib_LTLIBRARIES += libcdi.la
-  include_HEADERS += cdi.h
+  include_HEADERS += cdi.h cdi_datetime.h julian_date.h calendar.h
 # add cdi.inc only if cfortran interface is required
 if USE_FC
   include_HEADERS += cdi.inc
@@ -43,6 +43,8 @@ libcdi_la_SOURCES = 	 \
 	cdf_util.c	 \
 	cdf_util.h	 \
 	cdi.h	 	 \
+	cdi_datetime.c   \
+	cdi_datetime.h   \
 	cdi_error.c      \
 	cdi_limits.h	 \
 	cdi_util.c       \
@@ -78,6 +80,8 @@ libcdi_la_SOURCES = 	 \
 	input_file.h     \
 	institution.c  	 \
 	institution.h  	 \
+	julian_date.c  	 \
+	julian_date.h  	 \
 	model.c        	 \
 	model.h        	 \
 	namespace.c      \
@@ -129,8 +133,6 @@ libcdi_la_SOURCES = 	 \
 	tablepar.h	 \
 	taxis.c          \
 	taxis.h	         \
-	timebase.c 	 \
-	timebase.h	 \
 	tsteps.c         \
 	util.c         	 \
 	varscan.c      	 \

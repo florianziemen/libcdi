@@ -64,11 +64,11 @@ static int doccmp(const void *s1, const void *s2)
 
 static void doctotex(FILE *fp, const Docu *doc, const size_t ndoc)
 {
-  for ( size_t i = 0; i < ndoc; i++ )
+  for (size_t i = 0; i < ndoc; ++i)
     {
       fprintf(fp, "\\section*{\\tt \\htmlref{%s}{%s}}\n\n", doc[i].fname, doc[i].fname);
       fprintf(fp, "\\begin{verbatim}\n");
-      for ( size_t k = 0; k < doc[i].naline; k++ )
+      for (size_t k = 0; k < doc[i].naline; ++k)
 	fprintf(fp, "    %s\n", doc[i].aline[k]);
       fprintf(fp, "\\end{verbatim}\n");
       fprintf(fp, "\n%s.\n\n\n", doc[i].text);
@@ -77,10 +77,10 @@ static void doctotex(FILE *fp, const Docu *doc, const size_t ndoc)
 
 static void doctotxt(FILE *fp, const Docu *doc, const size_t ndoc)
 {
-  for ( size_t i = 0; i < ndoc; i++ )
+  for (size_t i = 0; i < ndoc; ++i)
     {
       fprintf(fp, "%s\n\n", doc[i].fname);
-      for ( size_t k = 0; k < doc[i].naline; k++ )
+      for (size_t k = 0; k < doc[i].naline; ++k)
 	fprintf(fp, "    %s\n", doc[i].aline[k]);
       fprintf(fp, "\n  %s.\n\n", doc[i].text);
     }
@@ -289,10 +289,9 @@ function_fwrap(FILE *fpint, enum cftype functype, const char *delegateName, size
   fprintf(fpint, (funRet[functype].convert ? funRet[functype].convcfmt : funRet[functype].cfmt),
           "", (int)delegateNameLen, delegateName);
   fputs("(", fpint);
-  for (size_t i = 0; i < funcargc; i++)
+  for (size_t i = 0; i < funcargc; ++i)
     {
-      if (i > 0)
-        fputs(", ", fpint);
+      if (i > 0) fputs(", ", fpint);
       enum { arrayDimsCSize = 128 };
       char arrayDimsC[arrayDimsCSize];
       static const char constStr[] = "const ", nonConstStr[] = "";
@@ -323,7 +322,7 @@ function_fwrap(FILE *fpint, enum cftype functype, const char *delegateName, size
               line + funcargname[i].rm_so, arrayDimsC);
     }
   fputs(")\n{\n", fpint);
-  for (size_t i = 0; i < funcargc; i++ )
+  for (size_t i = 0; i < funcargc; ++i)
     {
       if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISDATETYPEP)
         {
@@ -347,7 +346,7 @@ function_fwrap(FILE *fpint, enum cftype functype, const char *delegateName, size
     }
   else
     fprintf(fpint, "  %s(", funcname);
-  for (size_t i = 0; i < funcargc; i++ )
+  for (size_t i = 0; i < funcargc; ++i)
     {
       if (i > 0) fputs(", ", fpint);
       if (funArgSym[funcargtype[i]].convert)
@@ -359,7 +358,7 @@ function_fwrap(FILE *fpint, enum cftype functype, const char *delegateName, size
         fprintf(fpint, "%.*s", (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
     }
   fputs(");\n", fpint);
-  for (size_t i = 0; i < funcargc; i++ )
+  for (size_t i = 0; i < funcargc; ++i)
     {
       if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISDATETYPEP)
         {
@@ -408,7 +407,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
   regmatch_t funcargfull[MAX_FUNC_ARGS];
   regmatch_t funcargname[MAX_FUNC_ARGS];
   int  funcargtype[MAX_FUNC_ARGS];
-  /* char *strsort[99999]; */
+  // char *strsort[99999];
   char timestr[30];
   struct tm *date_and_time;
   regmatch_t *reMatch = NULL;
@@ -550,7 +549,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         "#  pragma GCC diagnostic ignored \"-Wmissing-prototypes\"\n"
         "#endif\n"
         "\n", fpint);
-
+  /*
   fputs("static inline\n"
         "int DateType_c2f(DateType value_DateType)\n"
         "{\n"
@@ -558,7 +557,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         "  return (int) value_DateType;\n"
         "}\n"
         "\n", fpint);
-
+  */
   fputs("static inline\n"
         "int SizeType_c2f(SizeType value_SizeType)\n"
         "{\n"
@@ -625,7 +624,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
             size_t innerParens = 0;
             do {
               const ssize_t restLen = lineLen - (ssize_t)(pline - line);
-              for (; i < restLen; i++ )
+              for (; i < restLen; ++i)
                 {
                   switch (pline[i])
                     {
@@ -678,7 +677,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
             }
           {
             size_t i;
-            for (i = 0; i < funcargc; ++i )
+            for (i = 0; i < funcargc; ++i)
               {
                 pline = line + funcargname[i].rm_so;
                 int argtype;
@@ -750,7 +749,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
             {
               if (funRet[functype].needsPrologue)
                 funRet[functype].prologue(fpint, (size_t)-1);
-              for (size_t i = 0; i < funcargc; i++ )
+              for (size_t i = 0; i < funcargc; ++i)
                 {
                   if (funArgSym[funcargtype[i]].needsPrologue)
                     funArgSym[funcargtype[i]].prologue(fpint, i);
@@ -782,7 +781,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 	  for (size_t i = 0; i < funcnameLen; ++i)
             sname[i] = (char)tolower((int) sname[i]);
 	  fprintf(fpint, "%s", sname);
-	  for (size_t i = 0; i < funcargc; i++ )
+	  for (size_t i = 0; i < funcargc; ++i)
 	    {
 	      fprintf(fpint, ", %s", funArgSym[funcargtype[i]].cfint);
 	    }
@@ -809,7 +808,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 
 	      if ( (funcargc == 1 && funcargtype[0] == ISVOID) ) funcargc = 0;
 
-	      for (size_t i = 0; i < funcargc; i++ )
+	      for (size_t i = 0; i < funcargc; ++i)
 		{
 		  if (i)
                     {
@@ -858,7 +857,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 
               xlineLen = (size_t)nch;
 
-	      for (size_t i = 0; i < funcargc; i++ )
+	      for (size_t i = 0; i < funcargc; ++i)
 		{
 		  if (i)
                     {

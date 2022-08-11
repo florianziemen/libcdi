@@ -30,6 +30,7 @@ fileType2String(int fileType)
     case CDI_FILETYPE_NC4: return "CDI::Iterator::NetCDF4";
     case CDI_FILETYPE_NC4C: return "CDI::Iterator::NetCDF4C";
     case CDI_FILETYPE_NC5: return "CDI::Iterator::NetCDF5";
+    case CDI_FILETYPE_NCZARR: return "CDI::Iterator::NCZarr";
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV: return "CDI::Iterator::SRV";
@@ -72,6 +73,7 @@ string2FileType(const char *fileType, const char **outRestString)
   check(fileType, "CDI::Iterator::NetCDF4", CDI_FILETYPE_NC4);
   check(fileType, "CDI::Iterator::NetCDF4C", CDI_FILETYPE_NC4C);
   check(fileType, "CDI::Iterator::NetCDF5", CDI_FILETYPE_NC5);
+  check(fileType, "CDI::Iterator::NCZarr", CDI_FILETYPE_NCZARR);
   check(fileType, "CDI::Iterator::SRV", CDI_FILETYPE_SRV);
   check(fileType, "CDI::Iterator::EXT", CDI_FILETYPE_EXT);
   check(fileType, "CDI::Iterator::IEG", CDI_FILETYPE_IEG);
@@ -106,8 +108,8 @@ CdiIterator *
 cdiIterator_new(const char *path)
 {
   int trash;
-  int filetype = cdiGetFiletype(path, &trash);
-  switch (filetype)
+  const int filetype = cdiGetFiletype(path, &trash);
+  switch (cdiBaseFiletype(filetype))
     {
     case CDI_FILETYPE_UNDEF: Warning("Can't open file \"%s\": unknown format\n", path); return NULL;
 
@@ -117,11 +119,7 @@ cdiIterator_new(const char *path)
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -206,7 +204,7 @@ CdiIterator *
 cdiIterator_clone(CdiIterator *me)
 {
   sanityCheck(me);
-  switch (me->filetype)
+  switch (cdiBaseFiletype(me->filetype))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -214,11 +212,7 @@ cdiIterator_clone(CdiIterator *me)
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -285,7 +279,7 @@ cdiIterator_serialize(CdiIterator *me)
 {
   if (!me) xabort("NULL was passed to %s as an iterator. Please check the return value of cdiIterator_new().", __func__);
   char *subclassDescription = NULL;
-  switch (me->filetype)
+  switch (cdiBaseFiletype(me->filetype))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -293,11 +287,7 @@ cdiIterator_serialize(CdiIterator *me)
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -341,7 +331,7 @@ cdiIterator_serialize(CdiIterator *me)
 CdiIterator *
 cdiIterator_deserialize(const char *description)
 {
-  switch (string2FileType(description, NULL))
+  switch (cdiBaseFiletype(string2FileType(description, NULL)))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -349,11 +339,7 @@ cdiIterator_deserialize(const char *description)
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -411,7 +397,7 @@ cdiIterator_nextField(CdiIterator *me)
 {
   if (!me) xabort("NULL was passed in as an iterator. Please check the return value of cdiIterator_new().");
   me->isAdvanced = true;
-  switch (me->filetype)
+  switch (cdiBaseFiletype(me->filetype))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -419,11 +405,7 @@ cdiIterator_nextField(CdiIterator *me)
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -444,7 +426,7 @@ static char *
 cdiIterator_inqTime(CdiIterator *me, CdiTimeType timeType)
 {
   sanityCheck(me);
-  switch (me->filetype)
+  switch (cdiBaseFiletype(me->filetype))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -452,11 +434,7 @@ cdiIterator_inqTime(CdiIterator *me, CdiTimeType timeType)
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -609,7 +587,7 @@ int
 cdiIterator_inqLevelType(CdiIterator *me, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit)
 {
   sanityCheck(me);
-  switch (me->filetype)
+  switch (cdiBaseFiletype(me->filetype))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -617,11 +595,7 @@ cdiIterator_inqLevelType(CdiIterator *me, int levelSelector, char **outName, cha
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -660,7 +634,7 @@ int
 cdiIterator_inqLevel(CdiIterator *me, int levelSelector, double *outValue1, double *outValue2)
 {
   sanityCheck(me);
-  switch (me->filetype)
+  switch (cdiBaseFiletype(me->filetype))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -668,11 +642,7 @@ cdiIterator_inqLevel(CdiIterator *me, int levelSelector, double *outValue1, doub
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -709,7 +679,7 @@ int
 cdiIterator_inqLevelUuid(CdiIterator *me, int *outVgridNumber, int *outLevelCount, unsigned char outUuid[CDI_UUID_SIZE])
 {
   sanityCheck(me);
-  switch (me->filetype)
+  switch (cdiBaseFiletype(me->filetype))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -717,11 +687,7 @@ cdiIterator_inqLevelUuid(CdiIterator *me, int *outVgridNumber, int *outLevelCoun
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -757,7 +723,7 @@ int
 cdiIterator_inqTile(CdiIterator *me, int *outTileIndex, int *outTileAttribute)
 {
   sanityCheck(me);
-  switch (me->filetype)
+  switch (cdiBaseFiletype(me->filetype))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -765,11 +731,7 @@ cdiIterator_inqTile(CdiIterator *me, int *outTileIndex, int *outTileAttribute)
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -807,7 +769,7 @@ int
 cdiIterator_inqTileCount(CdiIterator *me, int *outTileCount, int *outTileAttributeCount)
 {
   sanityCheck(me);
-  switch (me->filetype)
+  switch (cdiBaseFiletype(me->filetype))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -815,11 +777,7 @@ cdiIterator_inqTileCount(CdiIterator *me, int *outTileCount, int *outTileAttribu
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -960,7 +918,7 @@ char *
 cdiIterator_inqVariableName(CdiIterator *me)
 {
   sanityCheck(me);
-  switch (me->filetype)
+  switch (cdiBaseFiletype(me->filetype))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -968,11 +926,7 @@ cdiIterator_inqVariableName(CdiIterator *me)
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -1030,7 +984,7 @@ cdiIterator_readField(CdiIterator *me, double *buffer, SizeType *nmiss)
   size_t numMiss = 0;
   sanityCheck(me);
   if (!buffer) xabort("NULL was passed in a buffer. Please provide a suitable buffer.");
-  switch (me->filetype)
+  switch (cdiBaseFiletype(me->filetype))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -1038,11 +992,7 @@ cdiIterator_readField(CdiIterator *me, double *buffer, SizeType *nmiss)
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -1081,7 +1031,7 @@ cdiIterator_readFieldF(CdiIterator *me, float *buffer, SizeType *nmiss)
   size_t numMiss = 0;
   sanityCheck(me);
   if (!buffer) xabort("NULL was passed in a buffer. Please provide a suitable buffer.");
-  switch (me->filetype)
+  switch (cdiBaseFiletype(me->filetype))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -1089,11 +1039,7 @@ cdiIterator_readFieldF(CdiIterator *me, float *buffer, SizeType *nmiss)
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -1127,7 +1073,7 @@ void
 cdiIterator_delete(CdiIterator *me)
 {
   if (!me) xabort("NULL was passed in as an iterator. Please check the return value of cdiIterator_new().");
-  switch (me->filetype)
+  switch (cdiBaseFiletype(me->filetype))
     {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB:
@@ -1135,11 +1081,7 @@ cdiIterator_delete(CdiIterator *me)
 #endif
 
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-    case CDI_FILETYPE_NC5:
+    case CDI_FILETYPE_NETCDF:
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:

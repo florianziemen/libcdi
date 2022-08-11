@@ -248,9 +248,9 @@ cdfDefineCellMethods(stream_t *streamptr, int cdiID, int varID, int fileID, int 
   taxis_t *taxis = &streamptr->tsteps[0].taxis;
   if (!taxis->has_bounds) return;
 
-  const int time_varid = streamptr->basetime.ncvarid;
+  const int timeVarId = streamptr->basetime.ncvarid;
   char timeVarName[CDI_MAX_NAME];
-  cdf_inq_varname(fileID, time_varid, timeVarName);
+  cdf_inq_varname(fileID, timeVarId, timeVarName);
 
   const int stepType = vlistInqVarTsteptype(cdiID, varID);
 
@@ -276,7 +276,6 @@ void
 cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
 {
   int atttype, attlen;
-  size_t len;
   char attname[CDI_MAX_NAME + 1];
   void *attBuf = NULL;
   size_t attBufSize = 0;
@@ -288,23 +287,24 @@ cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
     {
       cdiInqAtt(cdiID, varID, iatt, attname, &atttype, &attlen);
 
-      if (attlen == 0) continue;
+      //if (attlen == 0) continue;
 
       if (atttype == CDI_DATATYPE_TXT)
         {
           const size_t attSize = (size_t) attlen * sizeof(char);
           char *atttxt = (char *) resizeBuf(&attBuf, &attBufSize, attSize);
           cdiInqAttTxt(cdiID, varID, attname, attlen, atttxt);
-          len = (size_t) attlen;
+          size_t len = (size_t) attlen;
           cdf_put_att_text(fileID, ncvarID, attname, len, atttxt);
         }
       else if (atttype == CDI_DATATYPE_INT8 || atttype == CDI_DATATYPE_UINT8 || atttype == CDI_DATATYPE_INT16
                || atttype == CDI_DATATYPE_UINT16 || atttype == CDI_DATATYPE_INT32 || atttype == CDI_DATATYPE_UINT32)
         {
+          if (attlen == 0) continue;
           const size_t attSize = (size_t) attlen * sizeof(int);
           int *attint = (int *) resizeBuf(&attBuf, &attBufSize, attSize);
           cdiInqAttInt(cdiID, varID, attname, attlen, &attint[0]);
-          len = (size_t) attlen;
+          size_t len = (size_t) attlen;
           // clang-format off
           nc_type xtype = (atttype == CDI_DATATYPE_INT8)   ? NC_BYTE :
                           (atttype == CDI_DATATYPE_INT16)  ? NC_SHORT :
@@ -319,10 +319,11 @@ cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
         }
       else if (atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64)
         {
+          if (attlen == 0) continue;
           const size_t attSize = (size_t) attlen * sizeof(double);
           double *attflt = (double *) resizeBuf(&attBuf, &attBufSize, attSize);
           cdiInqAttFlt(cdiID, varID, attname, attlen, attflt);
-          len = (size_t) attlen;
+          size_t len = (size_t) attlen;
           if (atttype == CDI_DATATYPE_FLT32)
             {
               float attflt_sp[8];
@@ -421,43 +422,37 @@ xtype2ppb(nc_type xtype)
 }
 
 static void
-cdfDefVarCompression(const stream_t *streamptr, int ncvarID, bool lchunk, nc_type xtype)
+cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
 {
   if (streamptr->comptype == CDI_COMPRESS_ZIP)
     {
-      if (lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C))
+      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C || streamptr->filetype == CDI_FILETYPE_NCZARR)
         {
           cdfDefVarDeflate(streamptr->fileID, ncvarID, streamptr->complevel);
         }
       else
         {
-          if (lchunk)
+          static bool lwarn = true;
+          if (lwarn)
             {
-              static bool lwarn = true;
-              if (lwarn)
-                {
-                  lwarn = false;
-                  Warning("Deflate compression is only available for NetCDF4!");
-                }
+              lwarn = false;
+              Warning("Deflate compression is only available for NetCDF4!");
             }
         }
     }
   else if (streamptr->comptype == CDI_COMPRESS_SZIP)
     {
-      if (lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C))
+      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C || streamptr->filetype == CDI_FILETYPE_NCZARR)
         {
           cdfDefVarSzip(streamptr->fileID, ncvarID, xtype2ppb(xtype));
         }
       else
         {
-          if (lchunk)
+          static bool lwarn = true;
+          if (lwarn)
             {
-              static bool lwarn = true;
-              if (lwarn)
-                {
-                  lwarn = false;
-                  Warning("SZIP compression is only available for NetCDF4!");
-                }
+              lwarn = false;
+              Warning("SZIP compression is only available for NetCDF4!");
             }
         }
     }
@@ -632,22 +627,22 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
 }
 
 static size_t
-calc_chuncksize(size_t chunkSizeMax, size_t size)
+calc_chunksize(size_t chunkSizeMax, size_t size)
 {
   static const size_t pageSize = 4096;
 
   if (size <= chunkSizeMax) return size;
 
   size_t numChunks = (size / chunkSizeMax) + 1;
-  size_t chunckSize = size / numChunks;
-  if (chunckSize%pageSize) chunckSize = (chunckSize / pageSize + 1) * pageSize;
+  size_t chunkSize = size / numChunks;
+  if (chunkSize%pageSize) chunkSize = (chunkSize / pageSize + 1) * pageSize;
 
-  return chunckSize;
+  return chunkSize;
 }
 
 static int
 cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, int zid, size_t gridsize, const int dimorder[3],
-                       int dims[4], bool lchunk, size_t chunks[4], char axis[5], size_t *piax)
+                       int dims[4], bool useChunks, size_t chunks[4], char axis[5], size_t *piax)
 {
   const int fileID = streamptr->fileID;
   const int vlistID = streamptr->vlistID;
@@ -704,14 +699,14 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
           if (chunktype == CDI_CHUNK_AUTO && yid == CDI_UNDEFID)
             chunks[ndims] = (chunk_size_max > xsize) ? xsize : chunk_size_max;
           else
-            chunks[ndims] = calc_chuncksize(chunk_size_lim, xsize);
+            chunks[ndims] = calc_chunksize(chunk_size_lim, xsize);
           dims[ndims] = xid;
           ndims++;
         }
     }
 
   if (CDI_Debug)
-    fprintf(stderr, "lchunk %d chunktype %d  chunks %zu %zu %zu %zu\n", lchunk, chunktype, chunks[0], chunks[1], chunks[2],
+    fprintf(stderr, "useChunks %d chunktype %d  chunks %zu %zu %zu %zu\n", useChunks, chunktype, chunks[0], chunks[1], chunks[2],
             chunks[3]);
 
   *piax = iax;
@@ -850,7 +845,7 @@ cdfDefVar(stream_t *streamptr, int varID)
 
   int dimorder[3];  // ZYX and ZXY
   vlistInqVarDimorder(vlistID, varID, &dimorder);
-  const bool lchunk = (dimorder[0] == 3) ? (gridsize >= 32) : false;
+  const bool useChunks = (dimorder[0] == 3) ? (gridsize >= 32) : false;
 
   if (((dimorder[0] > 0) + (dimorder[1] > 0) + (dimorder[2] > 0))
       < ((xid != CDI_UNDEFID) + (yid != CDI_UNDEFID) + (zid != CDI_UNDEFID)))
@@ -863,7 +858,7 @@ cdfDefVar(stream_t *streamptr, int varID)
   char axis[5];
   int dims[4];
   size_t chunks[4];
-  int ndims = cdfDefineDimsAndChunks(streamptr, varID, xid, yid, zid, gridsize, dimorder, dims, lchunk, chunks, axis, &iax);
+  int ndims = cdfDefineDimsAndChunks(streamptr, varID, xid, yid, zid, gridsize, dimorder, dims, useChunks, chunks, axis, &iax);
 
   char name[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
@@ -893,11 +888,20 @@ cdfDefVar(stream_t *streamptr, int varID)
   cdf_def_var(fileID, name, xtype, ndims, dims, &ncvarID);
 
 #ifdef HAVE_NETCDF4
-  if (lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C))
+#ifdef NC_QUANTIZE_BITROUND
+  if (xtype == NC_FLOAT || xtype == NC_DOUBLE)
+    {
+      const int nsb = vlistInqVarNSB(vlistID, varID);
+      if (nsb > 0) nc_def_var_quantize(fileID, ncvarID, NC_QUANTIZE_BITROUND, nsb);
+      //if (nsb > 0) nc_def_var_quantize(fileID, ncvarID, NC_QUANTIZE_GRANULARBR, nsb);
+    }
+#endif
+
+  if (useChunks && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C || streamptr->filetype == CDI_FILETYPE_NCZARR))
     cdf_def_var_chunking(fileID, ncvarID, NC_CHUNKED, chunks);
 #endif
 
-  cdfDefVarCompression(streamptr, ncvarID, lchunk, xtype);
+  if (useChunks) cdfDefVarCompression(streamptr, ncvarID, xtype);
 
   if (*stdname) cdf_put_att_text(fileID, ncvarID, "standard_name", strlen(stdname), stdname);
   if (*longname) cdf_put_att_text(fileID, ncvarID, "long_name", strlen(longname), longname);
@@ -963,7 +967,7 @@ cdfEndDef(stream_t *streamptr)
       if (streamptr->ncmode == 2) cdf_redef(fileID);
 
       const int nvars = streamptr->nvars;
-      for (int varID = 0; varID < nvars; varID++) cdfDefVar(streamptr, varID);
+      for (int varID = 0; varID < nvars; ++varID) cdfDefVar(streamptr, varID);
 
       if (streamptr->ncmode == 2)
         {
@@ -1021,7 +1025,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
 
             if (nmiss > 0)
               {
-                for (size_t i = 0; i < nvals; i++)
+                for (size_t i = 0; i < nvals; ++i)
                   {
                     double temp = mdata_sp[i];
                     if (!DBL_IS_EQUAL(temp, missval))
@@ -1034,7 +1038,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
               }
             else
               {
-                for (size_t i = 0; i < nvals; i++)
+                for (size_t i = 0; i < nvals; ++i)
                   {
                     double temp = mdata_sp[i];
                     if (laddoffset) temp -= addoffset;
@@ -1051,7 +1055,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
 
             if (nmiss > 0)
               {
-                for (size_t i = 0; i < nvals; i++)
+                for (size_t i = 0; i < nvals; ++i)
                   {
                     if (!DBL_IS_EQUAL(mdata_dp[i], missval))
                       {
@@ -1062,7 +1066,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
               }
             else
               {
-                for (size_t i = 0; i < nvals; i++)
+                for (size_t i = 0; i < nvals; ++i)
                   {
                     if (laddoffset) mdata_dp[i] -= addoffset;
                     if (lscalefactor) mdata_dp[i] /= scalefactor;
@@ -1082,7 +1086,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
                 pdata_sp = mdata_sp;
               }
 
-            for (size_t i = 0; i < nvals; i++) mdata_sp[i] = roundf(mdata_sp[i]);
+            for (size_t i = 0; i < nvals; ++i) mdata_sp[i] = roundf(mdata_sp[i]);
 
             if (dtype == CDI_DATATYPE_UINT8)
               {
@@ -1104,7 +1108,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
                 pdata_dp = mdata_dp;
               }
 
-            for (size_t i = 0; i < nvals; i++) mdata_dp[i] = round(mdata_dp[i]);
+            for (size_t i = 0; i < nvals; ++i) mdata_dp[i] = round(mdata_dp[i]);
 
             if (dtype == CDI_DATATYPE_UINT8)
               {
@@ -1162,7 +1166,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
       if (memtype == MEMTYPE_FLOAT && dtype == CDI_DATATYPE_CPX64)
         {
           cdata_dp = (double *) Malloc(2 * nvals * sizeof(double));
-          for (size_t i = 0; i < nvals; i++)
+          for (size_t i = 0; i < nvals; ++i)
             {
               cdata_dp[2 * i] = (double) (pdata_sp[2 * i]);
               cdata_dp[2 * i + 1] = (double) (pdata_sp[2 * i + 1]);
@@ -1172,7 +1176,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
       else if (memtype == MEMTYPE_DOUBLE && dtype == CDI_DATATYPE_CPX32)
         {
           cdata_sp = (float *) Malloc(2 * nvals * sizeof(float));
-          for (size_t i = 0; i < nvals; i++)
+          for (size_t i = 0; i < nvals; ++i)
             {
               cdata_sp[2 * i] = (float) (pdata_dp[2 * i]);
               cdata_sp[2 * i + 1] = (float) (pdata_dp[2 * i + 1]);
@@ -1273,7 +1277,7 @@ cdfDefineStartAndCount(stream_t *streamptr, int varID, int xid, int yid, int zid
     }
 
   if (CDI_Debug)
-    for (size_t idim = 0; idim < ndims; idim++) Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+    for (size_t idim = 0; idim < ndims; ++idim) Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 }
 
 void
@@ -1368,7 +1372,7 @@ cdfDefineStartAndCountChunk(stream_t *streamptr, const int rect[][2], int varID,
     }
 
   if (CDI_Debug)
-    for (size_t idim = 0; idim < ndims; idim++) Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+    for (size_t idim = 0; idim < ndims; ++idim) Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 }
 
 void
@@ -1459,7 +1463,7 @@ cdfDefineStartAndCountSlice(stream_t *streamptr, int varID, int levelID, int dim
     }
 
   if (CDI_Debug)
-    for (size_t idim = 0; idim < ndims; idim++) Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+    for (size_t idim = 0; idim < ndims; ++idim) Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 }
 
 void

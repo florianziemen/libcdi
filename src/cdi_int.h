@@ -62,8 +62,8 @@ strIsEqual(const char *x, const char *y)
 #ifndef _BASETIME_H
 #include "basetime.h"
 #endif
-#ifndef TIMEBASE_H
-#include "timebase.h"
+#ifndef JULIAN_DATE_H
+#include "julian_date.h"
 #endif
 #ifndef TAXIS_H
 #include "taxis.h"
@@ -131,15 +131,14 @@ typedef struct
   size_t buffersize;  // gribapi, cgribex
   off_t position;     // file position
   int param;
-  int level;
-  int date;
-  int time;
+  int ilevel;
+  int vdate;
+  int vtime;
   int gridID;
   int varID;
   int levelID;
-  int prec;        // ext, srv
-  void *exsep;     // ieg, ext, srv container
-  void *cgribexp;  // cgribex container
+  int prec;           // ext, srv
+  void *objectp;      // pointer to ieg, ext, srv or cgribex objects
 } Record;
 
 // data structure specifying tile-related meta-data. structure contains "-1" if this is no tile-variable.
@@ -216,7 +215,7 @@ typedef struct
   sleveltable_t *recordTable;  // record IDs for each subtype
   int ncvarid;
   int subtypeSize;
-  bool defmiss;  // true: if missval is defined in file
+  bool defmiss;   // true: if missval is defined in file
   bool isUsed;
 
   int gridID;
@@ -236,7 +235,7 @@ typedef struct
 #ifdef HAVE_LIBNETCDF
 enum cdfIDIdx
 {
-  CDF_DIMID_E,  // 3rd dimID of cube sphere grid (len=6)
+  CDF_DIMID_E,   // 3rd dimID of cube sphere grid (len=6)
   CDF_DIMID_X,
   CDF_DIMID_Y,
   CDF_DIMID_RP,  // reducedPoints
@@ -257,22 +256,23 @@ typedef struct
 typedef struct
 {
   int self;
-  int accesstype;  // TYPE_REC or TYPE_VAR
+  int accesstype;    // TYPE_REC or TYPE_VAR
   int accessmode;
   int filetype;
   int byteorder;
   int fileID;
   int filemode;
-  int nrecs;  // number of records
+  int nrecs;         // number of records
   SizeType numvals;
   char *filename;
   Record *record;
   svarinfo_t *vars;
-  int nvars;  // number of variables
+  int nvars;         // number of variables
   int varsAllocated;
-  int curTsID;   // current timestep ID
-  int rtsteps;   // number of tsteps accessed
-  long ntsteps;  // number of tsteps : only set if all records accessed
+  int curTsID;       // current timestep ID
+  int rtsteps;       // number of tsteps accessed
+  long ntsteps;      // number of tsteps : only set if all records accessed
+  int maxSteps;      // max. number of timesteps (needed for CDI_FILETYPE_NCZARR)
   tsteps_t *tsteps;
   int tstepsTableSize;
   int tstepsNextID;
@@ -510,6 +510,7 @@ void cdi_check_gridsize_int_limit(const char *format, SizeType gridsize)
   if (gridsize > INT_MAX) Error("%s format grid size (%zu) limit exceeded (%zu)!", format, gridsize, INT_MAX);
 }
 
+bool cdiFiletypeIsExse(int filetype);
 int cdiBaseFiletype(int filetype);
 
 #ifdef __cplusplus

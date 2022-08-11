@@ -203,6 +203,7 @@ void  gribDateTimeX(int *isec1, int *date, int *time, int *startDate, int *start
 void  gribDateTime(int *isec1, int *date, int *time);
 int   gribRefDate(const int *isec1);
 int   gribRefTime(const int *isec1);
+
 bool  gribTimeIsFC(const int *isec1);
 
 void  gribPrintSec0(int *isec0);

@@ -65,7 +65,7 @@ typedef struct
   double missval;
   char *name;
 
-  /* meta-data for specification of tiles (currently only GRIB-API: */
+  // meta-data for specification of tiles (currently only GRIB-API:
   subtype_t *tiles;
 
   cdi_keys_t keys;
@@ -114,7 +114,7 @@ static int
 varGetEntry(int param, int gridID, int zaxistype, int ltype1, int tsteptype, const char *name, const VarScanKeys *scanKeys,
             const var_tile_t *tiles)
 {
-  for (int varID = 0; varID < varTableSize; varID++)
+  for (int varID = 0; varID < varTableSize; ++varID)
     {
       // testing for "param" implicitly checks if we are beyond the current vartable size:
       if (vartable[varID].param == param)
@@ -147,7 +147,7 @@ varFree(void)
 {
   if (CDI_Debug) Message("call to varFree");
 
-  for (int varID = 0; varID < varTableUsed; varID++)
+  for (int varID = 0; varID < varTableUsed; ++varID)
     {
       if (vartable[varID].recordTable)
         {
@@ -508,7 +508,7 @@ cdi_generate_vars(stream_t *streamptr)
   if ( streamptr->sortname )
     {
       size_t varID;
-      for ( varID = 0; varID < varTableUsed; varID++ )
+      for (varID = 0; varID < varTableUsed; varID++)
         if (!vartable[varID].name) break;
 
       if ( varID == varTableUsed )
@@ -516,13 +516,13 @@ cdi_generate_vars(stream_t *streamptr)
           struct cdi_generate_varinfo *varInfo
             = (struct cdi_generate_varinfo *) Malloc((size_t)varTableUsed * sizeof(struct cdi_generate_varinfo));
 
-          for ( size_t varID = 0; varID < varTableUsed; varID++ )
+          for (size_t varID = 0; varID < varTableUsed; varID++)
             {
               varInfo[varID].varid = varids[varID];
               varInfo[varID].name = vartable[varids[varID]].name;
             }
           qsort(varInfo, varTableUsed, sizeof(varInfo[0]), cdi_generate_cmp_varname);
-          for ( size_t varID = 0; varID < varTableUsed; varID++ )
+          for (size_t varID = 0; varID < varTableUsed; varID++)
             {
               varids[varID] = varInfo[varID].varid;
             }
@@ -588,7 +588,7 @@ cdi_generate_vars(stream_t *streamptr)
 
       /*
       if ( hasBounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
-        for ( int levelID = 0; levelID < nlevels; levelID++ )
+        for (int levelID = 0; levelID < nlevels; levelID++)
           dlevels[levelID] = (level_sf*levelTable[levelID].level1 + level_sf*levelTable[levelID].level2) / 2.0;
       else
       */
@@ -629,7 +629,7 @@ cdi_generate_vars(stream_t *streamptr)
             {
               /*
               if ( hasBounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
-                for ( int levelID = 0; levelID < nlevels; levelID++ )
+                for (int levelID = 0; levelID < nlevels; levelID++)
                   dlevels[levelID] = (level_sf*levelTable[levelID].level1 + level_sf*levelTable[levelID].level2) / 2.0;
               else
               */

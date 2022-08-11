@@ -56,6 +56,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_FILETYPE_SRV = 8
   integer(c_int), public, parameter :: CDI_FILETYPE_EXT = 9
   integer(c_int), public, parameter :: CDI_FILETYPE_IEG = 10
+  integer(c_int), public, parameter :: CDI_FILETYPE_NCZARR = 11
   integer(c_int), public, parameter :: FILETYPE_GRB = 1
   integer(c_int), public, parameter :: FILETYPE_GRB2 = 2
   integer(c_int), public, parameter :: FILETYPE_NC = 3
@@ -258,6 +259,7 @@ module mo_cdi
   public :: streamOpenAppend
   public :: streamClose
   public :: streamSync
+  public :: streamDefMaxSteps
   public :: streamDefNumWorker
   public :: streamDefVlist
   public :: streamInqVlist
@@ -392,6 +394,8 @@ module mo_cdi
   public :: vlistInqVarChunkType
   public :: vlistDefVarXYZ
   public :: vlistInqVarXYZ
+  public :: vlistDefVarNSB
+  public :: vlistInqVarNSB
   public :: vlistInqVarNumber
   public :: vlistDefVarInstitut
   public :: vlistInqVarInstitut
@@ -822,6 +826,13 @@ module mo_cdi
       import c_int
       integer(c_int), value :: streamID_dummy
     end subroutine streamSync
+
+    subroutine streamDefMaxSteps(streamID_dummy, maxSteps_dummy) bind(c, name =&
+    & 'streamDefMaxSteps')
+      import c_int
+      integer(c_int), value :: streamID_dummy
+      integer(c_int), value :: maxSteps_dummy
+    end subroutine streamDefMaxSteps
 
     subroutine streamDefNumWorker(streamID_dummy, numWorker_dummy) bind(c, name&
     & = 'streamDefNumWorker')
@@ -1540,6 +1551,22 @@ module mo_cdi
       integer(c_int), value :: varID_dummy
       integer(c_int) :: f_result
     end function vlistInqVarXYZ
+
+    subroutine vlistDefVarNSB(vlistID_dummy, varID_dummy, nsb_dummy) bind(c,&
+    & name = 'vlistDefVarNSB')
+      import c_int
+      integer(c_int), value :: vlistID_dummy
+      integer(c_int), value :: varID_dummy
+      integer(c_int), value :: nsb_dummy
+    end subroutine vlistDefVarNSB
+
+    function vlistInqVarNSB(vlistID_dummy, varID_dummy) bind(c, name =&
+    & 'vlistInqVarNSB') result(f_result)
+      import c_int
+      integer(c_int), value :: vlistID_dummy
+      integer(c_int), value :: varID_dummy
+      integer(c_int) :: f_result
+    end function vlistInqVarNSB
 
     function vlistInqVarNumber(vlistID_dummy, varID_dummy) bind(c, name =&
     & 'vlistInqVarNumber') result(f_result)

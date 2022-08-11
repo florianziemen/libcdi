@@ -130,7 +130,8 @@ cdi_key_compare(cdi_keys_t *keyspa, cdi_keys_t *keyspb, int keynum)
 void
 cdiDeleteVarKeys(cdi_keys_t *keysp)
 {
-  for (int keyid = 0; keyid < (int) keysp->nelems; keyid++)
+  const int nelems = keysp ? (int) keysp->nelems : 0;
+  for (int keyid = 0; keyid < nelems; keyid++)
     {
       cdi_key_t *keyp = &(keysp->value[keyid]);
       if (keyp->length)
@@ -156,7 +157,8 @@ cdiDeleteKeys(int cdiID, int varID)
 void
 cdiPrintVarKeys(cdi_keys_t *keysp)
 {
-  for (int keyid = 0; keyid < (int) keysp->nelems; keyid++)
+  const int nelems = keysp ? (int) keysp->nelems : 0;
+  for (int keyid = 0; keyid < nelems; keyid++)
     {
       cdi_key_t *keyp = &(keysp->value[keyid]);
       if (keyp->type == KEY_BYTES)

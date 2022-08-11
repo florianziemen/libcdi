@@ -90,9 +90,9 @@ cdiInitRecord(stream_t *streamptr)
   streamptr->record = record;
 
   record->param = 0;
-  record->level = 0;
-  record->date = 0;
-  record->time = 0;
+  record->ilevel = 0;
+  record->vdate = 0;
+  record->vtime = 0;
   record->gridID = 0;
   record->buffer = NULL;
   record->buffersize = 0;
@@ -154,7 +154,6 @@ streamDefRecord(int streamID, int varID, int levelID)
   stream_t *streamptr = stream_to_pointer(streamID);
 
   int tsID = streamptr->curTsID;
-
   if (tsID == CDI_UNDEFID)
     {
       tsID++;
@@ -163,19 +162,19 @@ streamDefRecord(int streamID, int varID, int levelID)
 
   if (!streamptr->record) cdiInitRecord(streamptr);
 
-  int vlistID = streamptr->vlistID;
-  int gridID = vlistInqVarGrid(vlistID, varID);
-  int zaxisID = vlistInqVarZaxis(vlistID, varID);
-  int param = vlistInqVarParam(vlistID, varID);
-  int level = (int) (zaxisInqLevel(zaxisID, levelID));
+  const int vlistID = streamptr->vlistID;
+  const int gridID = vlistInqVarGrid(vlistID, varID);
+  const int zaxisID = vlistInqVarZaxis(vlistID, varID);
+  const int param = vlistInqVarParam(vlistID, varID);
+  const int ilevel = (int) lround(zaxisInqLevel(zaxisID, levelID));
 
   Record *record = streamptr->record;
   record->varID = varID;
   record->levelID = levelID;
   record->param = param;
-  record->level = level;
-  record->date = streamptr->tsteps[tsID].taxis.vdate;
-  record->time = streamptr->tsteps[tsID].taxis.vtime;
+  record->ilevel = ilevel;
+  record->vdate = (int)cdiDate_get(streamptr->tsteps[tsID].taxis.vdatetime.date);
+  record->vtime = cdiTime_get(streamptr->tsteps[tsID].taxis.vdatetime.time);
   record->gridID = gridID;
   record->prec = vlistInqVarDatatype(vlistID, varID);
 
@@ -233,11 +232,7 @@ streamCopyRecord(int streamID2, int streamID1)
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF: cdfCopyRecord(streamptr2, streamptr1); break;
 #endif
-    default:
-      {
-        Error("%s support not compiled in!", strfiletype(filetype));
-        break;
-      }
+    default: Error("%s support not compiled in!", strfiletype(filetype));
     }
 }
 

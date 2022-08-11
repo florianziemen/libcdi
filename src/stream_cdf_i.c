@@ -134,35 +134,40 @@ typedef struct
   int timedimid;
 } GridInfo;
 
-static void
-scanTimeString(const char *ptu, int64_t *rdate, int *rtime)
+static CdiDateTime
+scan_time_string(const char *ptu)
 {
-  int year = 1, month = 1, day = 1;
-  int hour = 0, minute = 0, second = 0;
-  int v1 = 1, v2 = 1, v3 = 1;
+  int year = 0, month = 0, day = 0;
+  int hour = 0, minute = 0;
+  double fseconds = 0.0;
   char ch = ' ';
 
-  if (*ptu) sscanf(ptu, "%d-%d-%d%c%d:%d:%d", &v1, &v2, &v3, &ch, &hour, &minute, &second);
+  if (*ptu) sscanf(ptu, "%d-%d-%d%c%d:%d:%lf", &year, &month, &day, &ch, &hour, &minute, &fseconds);
 
-  if (v3 > 999 && v1 < 32)
+  if (day > 999 && year < 32)
     {
-      year = v3;
-      month = v2;
-      day = v1;
-    }
-  else
-    {
-      year = v1;
-      month = v2;
-      day = v3;
+      int tmp = year;
+      year = day;
+      day = tmp;
     }
 
-  *rdate = cdiEncodeDate(year, month, day);
-  *rtime = cdiEncodeTime(hour, minute, second);
+  const int second = (int) fseconds;
+  const int ms = (fseconds - second) * 1000;
+
+  CdiDateTime datetime;
+  datetime.date.year = year;
+  datetime.date.month = month;
+  datetime.date.day = day;
+  datetime.time.hour = hour;
+  datetime.time.minute = minute;
+  datetime.time.second = second;
+  datetime.time.ms = ms;
+
+  return datetime;
 }
 
 static int
-scanTimeUnit(const char *unitstr)
+scan_time_units(const char *unitstr)
 {
   const size_t len = strlen(unitstr);
   const int timeunit = get_timeunit(len, unitstr);
@@ -175,7 +180,11 @@ setForecastTime(const char *timestr, taxis_t *taxis)
 {
   const size_t len = strlen(timestr);
   if (len != 0)
-    scanTimeString(timestr, &taxis->fdate, &taxis->ftime);
+    {
+      const CdiDateTime datetime = scan_time_string(timestr);
+      taxis->fdate = (int)cdiDate_get(datetime.date);
+      taxis->ftime = cdiTime_get(datetime.time);
+     }
   else
     taxis->fdate = taxis->ftime = 0;
 }
@@ -250,13 +259,8 @@ setBaseTime(const char *timeunits, taxis_t *taxis)
             }
           else if (taxistype == TAXIS_RELATIVE)
             {
-              int64_t rdate = -1;
-              int rtime = -1;
-              scanTimeString(tu + pos, &rdate, &rtime);
-              taxis->rdate = rdate;
-              taxis->rtime = rtime;
-
-              if (CDI_Debug) Message("rdate = %lld  rtime = %d", rdate, rtime);
+              taxis->rdatetime = scan_time_string(tu + pos);
+              if (CDI_Debug) Message("rdate = %d  rtime = %d", (int)cdiDate_get(taxis->rdatetime.date), cdiTime_get(taxis->rdatetime.time));
             }
         }
     }
@@ -408,21 +412,14 @@ cdfGetAttDouble(int fileID, int ncvarid, char *attname, size_t attlen, double *a
 static bool
 cdfCheckAttText(int fileID, int ncvarid, const char *attname)
 {
-  bool status = false;
   nc_type atttype;
-
   const int status_nc = nc_inq_atttype(fileID, ncvarid, attname, &atttype);
-  if (status_nc == NC_NOERR
-      && (atttype == NC_CHAR
+
+  return (status_nc == NC_NOERR && (atttype == NC_CHAR
 #ifdef HAVE_NETCDF4
           || atttype == NC_STRING
 #endif
-          ))
-    {
-      status = true;
-    }
-
-  return status;
+          ));
 }
 
 static void
@@ -1096,9 +1093,7 @@ cdf_get_cell_varid(char *attstring, int ncid)
 static void
 cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timedimid, int modelID, int format)
 {
-  int ncdimid;
   int nvdims, nvatts;
-  int iatt;
   nc_type xtype, atttype;
   size_t attlen;
   char name[CDI_MAX_NAME];
@@ -1129,7 +1124,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
       strcpy(ncvar->name, name);
 
-      for (ncdimid = 0; ncdimid < nvdims; ncdimid++) ncvar->dimtype[ncdimid] = -1;
+      for (int ncdimid = 0; ncdimid < nvdims; ncdimid++) ncvar->dimtype[ncdimid] = -1;
 
       ncvar->xtype = xtype;
       ncvar->ndims = nvdims;
@@ -1195,7 +1190,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
           else
             {
-              for (ncdimid = 1; ncdimid < nvdims; ncdimid++)
+              for (int ncdimid = 1; ncdimid < nvdims; ncdimid++)
                 {
                   if (timedimid == dimidsp[ncdimid])
                     {
@@ -1208,7 +1203,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
 
       if (ncvar->natts == 0 && nvatts > 0) ncvar->atts = (int *) Malloc((size_t) nvatts * sizeof(int));
 
-      for (iatt = 0; iatt < nvatts; iatt++)
+      for (int iatt = 0; iatt < nvatts; ++iatt)
         {
           int nc_cell_id = CDI_UNDEFID;
 
@@ -2553,6 +2548,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
             const int bvarid = ncvars[xvarid].bounds;
             if (bvarid != CDI_UNDEFID)
               {
+                const int ndims = ncvars[xvarid].ndims;
                 const int nbdims = ncvars[bvarid].ndims;
                 if (nbdims == 2 || nbdims == 3)
                   {
@@ -2570,13 +2566,19 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                         cdf_load_bounds_cube_sphere(bxsize, bysize, size * (size_t) grid->nvertex, &ncvars[xvarid], &grid->x.bounds,
                                                     &lazyGrid->xBoundsGet);
                       }
-                    else
+                    else if (nbdims == ndims + 1)
                       {
                         *vdimid = ncvars[bvarid].dimids[nbdims - 1];
                         grid->nvertex = (int) ncdims[*vdimid].len;
                         cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[xvarid], &grid->x.bounds, &lazyGrid->xBoundsGet);
                       }
-                  }
+                    else
+                      {
+                        static bool lwarn = true;
+                        if (lwarn) Warning("x-bounds doesn't follow the CF-Convention, skipped!");
+                        lwarn = false;
+                      }
+                   }
               }
           }
         if (yvarid != CDI_UNDEFID && CDI_Read_Cell_Corners)
@@ -2585,6 +2587,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
             const int bvarid = ncvars[yvarid].bounds;
             if (bvarid != CDI_UNDEFID)
               {
+                const int ndims = ncvars[yvarid].ndims;
                 const int nbdims = ncvars[bvarid].ndims;
                 if (nbdims == 2 || nbdims == 3)
                   {
@@ -2602,7 +2605,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                         cdf_load_bounds_cube_sphere(bxsize, bysize, size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds,
                                                     &lazyGrid->yBoundsGet);
                       }
-                    else
+                    else if (nbdims == ndims + 1)
                       {
                         if (*vdimid == CDI_UNDEFID)
                           {
@@ -2611,7 +2614,13 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                           }
                         cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds, &lazyGrid->yBoundsGet);
                       }
-                  }
+                    else
+                      {
+                        static bool lwarn = true;
+                        if (lwarn) Warning("y-bounds doesn't follow the CF-Convention, skipped!");
+                        lwarn = false;
+                      }
+                   }
               }
           }
 
@@ -2791,10 +2800,10 @@ cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int
     {
       int xdimid2 = CDI_UNDEFID, ydimid2 = CDI_UNDEFID, zdimid2 = CDI_UNDEFID;
       int xdimidx = CDI_UNDEFID, ydimidx = CDI_UNDEFID;
-      int ndims2 = ncvar2->ndims;
 
-      int *dimtype2 = ncvar2->dimtype;
-      int *dimids2 = ncvar2->dimids;
+      const int *dimtype2 = ncvar2->dimtype;
+      const int *dimids2 = ncvar2->dimids;
+      const int ndims2 = ncvar2->ndims;
       for (int i = 0; i < ndims2; i++)
         {
           if (dimtype2[i] == X_AXIS)
@@ -2813,31 +2822,38 @@ cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int
             }
         }
 
-      if (!ncvar2->isCubeSphere && ncvar2->gridtype == CDI_UNDEFID && gridtype == GRID_UNSTRUCTURED)
+      if (!ncvar2->isCubeSphere)
         {
-          if (xdimid == xdimid2 && ydimid2 != CDI_UNDEFID && zdimid2 == CDI_UNDEFID)
+          if (ncvar2->gridtype == CDI_UNDEFID && gridtype == GRID_UNSTRUCTURED)
             {
-              ncvar2->dimtype[ydimidx] = Z_AXIS;
-              ydimid2 = CDI_UNDEFID;
-            }
+              if (xdimid == xdimid2 && ydimid2 != CDI_UNDEFID && zdimid2 == CDI_UNDEFID)
+                {
+                  ncvar2->dimtype[ydimidx] = Z_AXIS;
+                  ydimid2 = CDI_UNDEFID;
+                }
 
-          if (xdimid == ydimid2 && xdimid2 != CDI_UNDEFID && zdimid2 == CDI_UNDEFID)
+              if (xdimid == ydimid2 && xdimid2 != CDI_UNDEFID && zdimid2 == CDI_UNDEFID)
+                {
+                  ncvar2->dimtype[xdimidx] = Z_AXIS;
+                  xdimid2 = ydimid2;
+                  ydimid2 = CDI_UNDEFID;
+                }
+            }
+          else if (ncvar2->gridtype == GRID_GAUSSIAN_REDUCED && gridtype == GRID_GAUSSIAN_REDUCED)
             {
-              ncvar2->dimtype[xdimidx] = Z_AXIS;
-              xdimid2 = ydimid2;
-              ydimid2 = CDI_UNDEFID;
+              ydimid = CDI_UNDEFID;
             }
         }
 
       if (xdimid == xdimid2 && (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == CDI_UNDEFID)))
         {
-          bool is_same_grid
+          bool isSameGrid
               = (ncvar1->xvarid == ncvar2->xvarid && ncvar1->yvarid == ncvar2->yvarid && ncvar1->position == ncvar2->position);
 
-          // if ( xvarid != -1 && ncvar2->xvarid != CDI_UNDEFID && xvarid != ncvar2->xvarid ) is_same_grid = false;
-          // if ( yvarid != -1 && ncvar2->yvarid != CDI_UNDEFID && yvarid != ncvar2->yvarid ) is_same_grid = false;
+          // if (xvarid != -1 && ncvar2->xvarid != CDI_UNDEFID && xvarid != ncvar2->xvarid) isSameGrid = false;
+          // if (yvarid != -1 && ncvar2->yvarid != CDI_UNDEFID && yvarid != ncvar2->yvarid) isSameGrid = false;
 
-          if (is_same_grid)
+          if (isSameGrid)
             {
               if (CDI_Debug) Message("Same gridID %d %s", ncvar1->gridID, ncvar2->name);
               ncvar2->gridID = ncvar1->gridID;
@@ -3475,7 +3491,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       /*
       printf("ixyz %d\n", ixyz);
       printf("ndims %d\n", ncvar->ndims);
-      for ( int i = 0; i < ncvar->ndims; ++i )
+      for (int i = 0; i < ncvar->ndims; ++i)
         printf("dimids: %d %d\n", i, dimids[i]);
       printf("xdimid, ydimid %d %d\n", xdimid, ydimid);
       */
@@ -3639,7 +3655,7 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
         {
           cdfGetAttText(fileID, NC_GLOBAL, attname, sizeof(attstring), attstring);
 
-          size_t attstrlen = strlen(attstring);
+          const size_t attstrlen = strlen(attstring);
 
           if (attlen > 0 && attstring[0] != 0)
             {
@@ -3653,9 +3669,9 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
                   *modelID = modelInq(-1, 0, attstring);
                   if (*modelID == CDI_UNDEFID) *modelID = modelDef(-1, 0, attstring);
                 }
-              else if (strIsEqual(attname, "Source"))
+              else if (strIsEqual(attname, "Source") && strStartsWith(attstring, "UCLA-LES"))
                 {
-                  if (strStartsWith(attstring, "UCLA-LES")) *ucla_les = true;
+                  *ucla_les = true;
                 }
               /*
               else if ( strIsEqual(attname, "Conventions") )
@@ -3698,6 +3714,10 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
 
                   cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
                 }
+            }
+          else
+            {
+              cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
             }
         }
       else if (xtype == NC_SHORT || xtype == NC_INT)
@@ -4357,7 +4377,7 @@ cdfInqContents(stream_t *streamptr)
           taxis->type = TAXIS_FORECAST;
 
           int timeunit = -1;
-          if (ncvars[leadtime_id].units[0] != 0) timeunit = scanTimeUnit(ncvars[leadtime_id].units);
+          if (ncvars[leadtime_id].units[0] != 0) timeunit = scan_time_units(ncvars[leadtime_id].units);
           if (timeunit == -1) timeunit = taxis->unit;
           taxis->fc_unit = timeunit;
 
@@ -4449,20 +4469,15 @@ cdfInqContents(stream_t *streamptr)
 static void
 wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
 {
-  size_t start[2], count[2];
+  const size_t start[2] = { tsID, 0 }, count[2] = { 1, 19 };
   char stvalue[128];
-  start[0] = (size_t) tsID;
-  start[1] = 0;
-  count[0] = 1;
-  count[1] = 19;
   stvalue[0] = 0;
   cdf_get_vara_text(fileID, nctimevarid, start, count, stvalue);
   stvalue[19] = 0;
   {
     int year = 1, month = 1, day = 1, hour = 0, minute = 0, second = 0;
     if (strlen(stvalue) == 19) sscanf(stvalue, "%d-%d-%d_%d:%d:%d", &year, &month, &day, &hour, &minute, &second);
-    taxis->vdate = cdiEncodeDate(year, month, day);
-    taxis->vtime = cdiEncodeTime(hour, minute, second);
+    taxis->vdatetime = cdiDateTime_set(cdiEncodeDate(year, month, day), cdiEncodeTime(hour, minute, second));
     taxis->type = TAXIS_ABSOLUTE;
   }
 }
@@ -4470,7 +4485,7 @@ wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
 static double
 get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
 {
-  double timevalue = 0;
+  double timevalue = 0.0;
 
   if (tcache)
     {
@@ -4496,7 +4511,7 @@ get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
       cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
     }
 
-  if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
+  if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
 
   return timevalue;
 }
@@ -4517,11 +4532,10 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
 
       double timevalue = tsID;
 
-      int nctimevarid = streamptr->basetime.ncvarid;
+      const int nctimevarid = streamptr->basetime.ncvarid;
       if (nctimevarid != CDI_UNDEFID && streamptr->basetime.lunits)
         {
-          int fileID = streamptr->fileID;
-          size_t index = (size_t) tsID;
+          const int fileID = streamptr->fileID;
 
           if (streamptr->basetime.lwrf)
             {
@@ -4538,33 +4552,30 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
                 }
 #endif
               timevalue = get_timevalue(fileID, nctimevarid, tsID, streamptr->basetime.timevar_cache);
-              cdiDecodeTimeval(timevalue, taxis, &taxis->vdate, &taxis->vtime);
+              taxis->vdatetime = cdi_decode_timeval(timevalue, taxis);
             }
 
-          int nctimeboundsid = streamptr->basetime.ncvarboundsid;
+          const int nctimeboundsid = streamptr->basetime.ncvarboundsid;
           if (nctimeboundsid != CDI_UNDEFID)
             {
-              size_t start[2], count[2];
-              start[0] = index;
-              count[0] = 1;
-              start[1] = 0;
-              count[1] = 1;
-              cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
-              if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
+              {
+                const size_t start[2] = { tsID, 1 }, count[2] = { 0, 1 };
+                cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
+                if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
 
-              cdiDecodeTimeval(timevalue, taxis, &taxis->vdate_lb, &taxis->vtime_lb);
+                taxis->vdatetime_lb = cdi_decode_timeval(timevalue, taxis);
+              }
 
-              start[0] = index;
-              count[0] = 1;
-              start[1] = 1;
-              count[1] = 1;
-              cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
-              if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0;
+              {
+                const size_t start[2] = { tsID, 1 }, count[2] = { 1, 1 };
+                cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
+                if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
 
-              cdiDecodeTimeval(timevalue, taxis, &taxis->vdate_ub, &taxis->vtime_ub);
+                taxis->vdatetime_ub = cdi_decode_timeval(timevalue, taxis);
+              }
             }
 
-          int leadtimeid = streamptr->basetime.leadtimeid;
+          const int leadtimeid = streamptr->basetime.leadtimeid;
           if (leadtimeid != CDI_UNDEFID)
             {
               timevalue = get_timevalue(fileID, leadtimeid, tsID, NULL);

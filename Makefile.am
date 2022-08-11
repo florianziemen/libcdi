@@ -3,6 +3,7 @@
 SUBDIRS = src interfaces app examples examples/pio tests
 #
 EXTRA_DIST=config/default \
+	LICENSE \
 	doc/cdi_cman.pdf \
 	doc/cdi_fman.pdf \
 	src/cfortran.doc \

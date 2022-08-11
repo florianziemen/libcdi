@@ -137,7 +137,7 @@ void
 cdiClearAdditionalKeys()
 {
 #ifdef HAVE_LIBGRIB_API
-  for (int i = 0; i < cdiNAdditionalGRIBKeys; i++) free(cdiAdditionalGRIBKeys[i]);
+  for (int i = 0; i < cdiNAdditionalGRIBKeys; ++i) free(cdiAdditionalGRIBKeys[i]);
   cdiNAdditionalGRIBKeys = 0;
 #endif
 }
@@ -167,7 +167,7 @@ vlistHasVarKey(int vlistID, int varID, const char *name)
   /* check if the GRIB key was previously read and is stored */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; i++)
+  for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
     {
       if (strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword) == 0) return 1;
     }
@@ -188,7 +188,7 @@ vlistInqVarDblKey(int vlistID, int varID, const char *name)
   /* check if the GRIB key was previously read and is stored in "opt_grib_dbl_val" */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; i++)
+  for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
     {
       int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
       if ((strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword) == 0)
@@ -213,7 +213,7 @@ vlistInqVarIntKey(int vlistID, int varID, const char *name)
   /* check if the GRIB key was previously read and is stored in "opt_grib_int_val" */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; i++)
+  for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
     {
       int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
       if ((strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword) == 0)
