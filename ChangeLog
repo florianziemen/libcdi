@@ -1,5 +1,9 @@
 2022-08-11  Uwe Schulzweida
 
+	* added vlistDefVarChunkSize() and vlistInqVarChunkSize()
+
+2022-08-11  Uwe Schulzweida
+
         * using CGRIBEX library version 2.0.2
 	* Version 2.0.6 released
 

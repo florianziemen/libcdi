@@ -23,7 +23,7 @@ int CDI_Default_ModelID = CDI_UNDEFID;
 int CDI_Default_TableID = CDI_UNDEFID;
 // int cdiNcMissingValue  = CDI_UNDEFID;
 int CDI_Netcdf_Chunksizehint = CDI_UNDEFID;
-int CDI_Chunk_Type = CDI_CHUNK_GRID;
+int CDI_ChunkType = CDI_CHUNK_GRID;
 int CDI_Split_Ltype105 = CDI_UNDEFID;
 
 bool CDI_Ignore_Att_Coordinates = false;
@@ -312,7 +312,7 @@ cdiSetChunk(const char *chunkAlgo)
 
   if (algo != -1)
     {
-      CDI_Chunk_Type = algo;
+      CDI_ChunkType = algo;
       if (CDI_Debug) Message("set ChunkAlgo to %s", chunkAlgo);
     }
 }

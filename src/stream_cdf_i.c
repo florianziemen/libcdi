@@ -102,7 +102,8 @@ typedef struct
   int dimtype[MAX_DIMS_CDF];
   size_t chunks[MAX_DIMS_CDF];
   bool chunked;
-  int chunktype;
+  int chunkType;
+  int chunkSize;
   int natts;
   int *atts;
   size_t vctsize;
@@ -706,7 +707,8 @@ init_ncvars(int nvars, ncvar_t *ncvars)
       for (int i = 0; i < MAX_DIMS_CDF; ++i) ncvar->dimtype[i] = CDI_UNDEFID;
       for (int i = 0; i < MAX_DIMS_CDF; ++i) ncvar->chunks[i] = 0;
       ncvar->chunked = false;
-      ncvar->chunktype = CDI_UNDEFID;
+      ncvar->chunkType = CDI_UNDEFID;
+      ncvar->chunkSize = CDI_UNDEFID;
       ncvar->natts = 0;
       ncvar->atts = NULL;
       ncvar->vctsize = 0;
@@ -2034,17 +2036,17 @@ grid_set_chunktype(grid_t *grid, ncvar_t *ncvar)
 
       if (grid->type == GRID_UNSTRUCTURED)
         {
-          ncvar->chunktype = ncvar->chunks[ndims - 1] == grid->size ? CDI_CHUNK_GRID : CDI_CHUNK_AUTO;
+          ncvar->chunkType = ncvar->chunks[ndims - 1] == grid->size ? CDI_CHUNK_GRID : CDI_CHUNK_AUTO;
         }
       else
         {
           if (grid->x.size > 1 && grid->y.size > 1 && ndims > 1 && grid->x.size == ncvar->chunks[ndims - 1]
               && grid->y.size == ncvar->chunks[ndims - 2])
-            ncvar->chunktype = CDI_CHUNK_GRID;
+            ncvar->chunkType = CDI_CHUNK_GRID;
           else if (grid->x.size > 1 && grid->x.size == ncvar->chunks[ndims - 1])
-            ncvar->chunktype = CDI_CHUNK_LINES;
+            ncvar->chunkType = CDI_CHUNK_LINES;
           else
-            ncvar->chunktype = CDI_CHUNK_AUTO;
+            ncvar->chunkType = CDI_CHUNK_AUTO;
         }
     }
 }
@@ -2857,7 +2859,8 @@ cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int
             {
               if (CDI_Debug) Message("Same gridID %d %s", ncvar1->gridID, ncvar2->name);
               ncvar2->gridID = ncvar1->gridID;
-              ncvar2->chunktype = ncvar1->chunktype;
+              ncvar2->chunkType = ncvar1->chunkType;
+              ncvar2->chunkSize = ncvar1->chunkSize;
             }
         }
     }
@@ -3418,7 +3421,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
 #ifdef HAVE_NETCDF4
       if (ncvar->ldeflate) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_ZIP);
       if (ncvar->lszip) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_SZIP);
-      if (ncvar->chunked && ncvar->chunktype != CDI_UNDEFID) vlistDefVarChunkType(vlistID, varID, ncvar->chunktype);
+      if (ncvar->chunked && ncvar->chunkType != CDI_UNDEFID) vlistDefVarChunkType(vlistID, varID, ncvar->chunkType);
 #endif
 
       streamptr->vars[varID1].defmiss = false;

@@ -667,13 +667,13 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
       ndims++;
     }
 
-  int chunktype = vlistInqVarChunkType(vlistID, varID);
-  const size_t chunk_size_max = 65536;
-  const size_t chunk_size_lim = 16777216;
-  if (chunktype == CDI_CHUNK_GRID && gridsize > chunk_size_lim)
+  int chunkType = vlistInqVarChunkType(vlistID, varID);
+  const size_t chunkSizeMax = 65536;
+  const size_t chunkSizeLim = 16777216;
+  if (chunkType == CDI_CHUNK_GRID && gridsize > chunkSizeLim)
     {
-      if (CDI_Debug) fprintf(stderr, "gridsize > %zu, changed chunktype to CDI_CHUNK_LINES!\n", chunk_size_lim);
-      chunktype = CDI_CHUNK_LINES;
+      if (CDI_Debug) fprintf(stderr, "gridsize > %zu, changed chunkType to CDI_CHUNK_LINES!\n", chunkSizeLim);
+      chunkType = CDI_CHUNK_LINES;
     }
 
   for (int id = 0; id < 3; ++id)
@@ -687,26 +687,26 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
         }
       else if (dimorder[id] == 2 && yid != CDI_UNDEFID)
         {
-          if (chunktype == CDI_CHUNK_AUTO)
-            chunks[ndims] = (chunk_size_max > gridsize) ? ysize : chunk_size_max / xsize;
+          if (chunkType == CDI_CHUNK_AUTO)
+            chunks[ndims] = (chunkSizeMax > gridsize) ? ysize : chunkSizeMax / xsize;
           else
-            chunks[ndims] = (chunktype == CDI_CHUNK_LINES) ? 1 : ysize;
+            chunks[ndims] = (chunkType == CDI_CHUNK_LINES) ? 1 : ysize;
           dims[ndims] = yid;
           ndims++;
         }
       else if (dimorder[id] == 1 && xid != CDI_UNDEFID)
         {
-          if (chunktype == CDI_CHUNK_AUTO && yid == CDI_UNDEFID)
-            chunks[ndims] = (chunk_size_max > xsize) ? xsize : chunk_size_max;
+          if (chunkType == CDI_CHUNK_AUTO && yid == CDI_UNDEFID)
+            chunks[ndims] = (chunkSizeMax > xsize) ? xsize : chunkSizeMax;
           else
-            chunks[ndims] = calc_chunksize(chunk_size_lim, xsize);
+            chunks[ndims] = calc_chunksize(chunkSizeLim, xsize);
           dims[ndims] = xid;
           ndims++;
         }
     }
 
   if (CDI_Debug)
-    fprintf(stderr, "useChunks %d chunktype %d  chunks %zu %zu %zu %zu\n", useChunks, chunktype, chunks[0], chunks[1], chunks[2],
+    fprintf(stderr, "useChunks %d chunkType %d  chunks %zu %zu %zu %zu\n", useChunks, chunkType, chunks[0], chunks[1], chunks[2],
             chunks[3]);
 
   *piax = iax;
