@@ -627,13 +627,13 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
 }
 
 static size_t
-calc_chunksize(size_t chunkSizeMax, size_t size)
+calc_chunksize(size_t chunkSizeLim, size_t size)
 {
   static const size_t pageSize = 4096;
 
-  if (size <= chunkSizeMax) return size;
+  if (size <= chunkSizeLim) return size;
 
-  size_t numChunks = (size / chunkSizeMax) + 1;
+  size_t numChunks = (size / chunkSizeLim) + 1;
   size_t chunkSize = size / numChunks;
   if (chunkSize%pageSize) chunkSize = (chunkSize / pageSize + 1) * pageSize;
 
@@ -667,9 +667,12 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
       ndims++;
     }
 
-  int chunkType = vlistInqVarChunkType(vlistID, varID);
   const size_t chunkSizeMax = 65536;
   const size_t chunkSizeLim = 16777216;
+  int chunkSize = vlistInqVarChunkSize(vlistID, varID);
+  int chunkType = vlistInqVarChunkType(vlistID, varID);
+  if (chunkSize > 0 && yid == CDI_UNDEFID) chunkType = CDI_CHUNK_AUTO;
+
   if (chunkType == CDI_CHUNK_GRID && gridsize > chunkSizeLim)
     {
       if (CDI_Debug) fprintf(stderr, "gridsize > %zu, changed chunkType to CDI_CHUNK_LINES!\n", chunkSizeLim);
@@ -688,7 +691,7 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
       else if (dimorder[id] == 2 && yid != CDI_UNDEFID)
         {
           if (chunkType == CDI_CHUNK_AUTO)
-            chunks[ndims] = (chunkSizeMax > gridsize) ? ysize : chunkSizeMax / xsize;
+            chunks[ndims] = (gridsize <= chunkSizeMax) ? ysize : chunkSizeMax / xsize;
           else
             chunks[ndims] = (chunkType == CDI_CHUNK_LINES) ? 1 : ysize;
           dims[ndims] = yid;
@@ -697,7 +700,7 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
       else if (dimorder[id] == 1 && xid != CDI_UNDEFID)
         {
           if (chunkType == CDI_CHUNK_AUTO && yid == CDI_UNDEFID)
-            chunks[ndims] = (chunkSizeMax > xsize) ? xsize : chunkSizeMax;
+            chunks[ndims] = (chunkSize > 0) ? chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
           else
             chunks[ndims] = calc_chunksize(chunkSizeLim, xsize);
           dims[ndims] = xid;
@@ -706,8 +709,8 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
     }
 
   if (CDI_Debug)
-    fprintf(stderr, "useChunks %d chunkType %d  chunks %zu %zu %zu %zu\n", useChunks, chunkType, chunks[0], chunks[1], chunks[2],
-            chunks[3]);
+    fprintf(stderr, "useChunks %d chunkType %d chunkSize %d  chunks %zu %zu %zu %zu\n",
+            useChunks, chunkType, chunkSize, chunks[0], chunks[1], chunks[2], chunks[3]);
 
   *piax = iax;
   return ndims;
