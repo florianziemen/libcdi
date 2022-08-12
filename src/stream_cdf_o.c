@@ -569,12 +569,12 @@ cdfDefYaxis(stream_t *streamptr, int gridID, int gridindex, int ndims, bool addV
 }
 
 static void
-cdfGridCompress(int fileID, int ncvarid, size_t gridsize, int filetype, int comptype)
+cdfGridCompress(int fileID, int ncvarid, size_t gridsize, int filetype, int comptype, size_t *chunks)
 {
 #ifdef HAVE_NETCDF4
   if (gridsize > 1 && comptype == CDI_COMPRESS_ZIP && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C))
     {
-      cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, NULL);
+      cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
       cdfDefVarDeflate(fileID, ncvarid, 1);
     }
 #endif
@@ -618,8 +618,22 @@ struct cdfDefIrregularGridCommonIDs
   int xdimID, ydimID, ncxvarid, ncyvarid, ncavarid;
 };
 
+static size_t
+calc_chunksize2(size_t chunkSizeLim, size_t size)
+{
+  static const size_t pageSize = 4096;
+
+  if (size <= chunkSizeLim) return size;
+
+  size_t numChunks = (size / chunkSizeLim) + 1;
+  size_t chunkSize = size / numChunks;
+  if (chunkSize%pageSize) chunkSize = (chunkSize / pageSize + 1) * pageSize;
+
+  return chunkSize;
+}
+
 static struct cdfDefIrregularGridCommonIDs
-cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xdimlen, size_t ydimlen, int ndims, const char *xdimname_default,
+cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xsize, size_t ysize, int ndims, const char *xdimname_default,
                           size_t nvertex, const char *vdimname_default, bool setVdimname)
 {
   const nc_type xtype = grid_inq_xtype(gridID);
@@ -635,8 +649,8 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xdimlen, size_
     int length = sizeof(xdimname);
     cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_DIMNAME, xdimname, &length);
     if (xdimname[0] == 0) strcpy(xdimname, xdimname_default);
-    xdimID = checkDimName(fileID, xdimlen, xdimname);
-    if (xdimID == CDI_UNDEFID) cdf_def_dim(fileID, xdimname, xdimlen, &xdimID);
+    xdimID = checkDimName(fileID, xsize, xdimname);
+    if (xdimID == CDI_UNDEFID) cdf_def_dim(fileID, xdimname, xsize, &xdimID);
   }
 
   if (ndims == 3)
@@ -649,8 +663,8 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xdimlen, size_
           ydimname[0] = 'y';
           ydimname[1] = 0;
         }
-      ydimID = checkDimName(fileID, ydimlen, ydimname);
-      if (ydimID == CDI_UNDEFID) cdf_def_dim(fileID, ydimname, ydimlen, &ydimID);
+      ydimID = checkDimName(fileID, ysize, ydimname);
+      if (ydimID == CDI_UNDEFID) cdf_def_dim(fileID, ydimname, ysize, &ydimID);
     }
 
   int nvdimID = CDI_UNDEFID;
@@ -670,13 +684,41 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xdimlen, size_
         }
     }
 
+  size_t gridsize = xsize * ysize;
+  size_t chunks[3] = { 1, 1, 1 };
+  const size_t chunkSizeMax = 65536;
+  const size_t chunkSizeLim = 16777216;
+  int chunkSize = 0;
+  int chunkType = CDI_CHUNK_GRID;
+  cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_CHUNKTYPE, &chunkType);
+  cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_CHUNKSIZE, &chunkSize);
+  if (chunkSize > 0 && ydimID == CDI_UNDEFID) chunkType = CDI_CHUNK_AUTO;
+
+  if (chunkType == CDI_CHUNK_GRID && gridsize > chunkSizeLim) chunkType = CDI_CHUNK_LINES;
+
   if (ndims == 3)
     {
+      if (chunkType == CDI_CHUNK_AUTO)
+        chunks[0] = (gridsize <= chunkSizeMax) ? ysize : chunkSizeMax / xsize;
+      else
+        chunks[0] = (chunkType == CDI_CHUNK_LINES) ? 1 : ysize;
+
+      if (chunkType == CDI_CHUNK_AUTO && ydimID == CDI_UNDEFID)
+        chunks[1] = (chunkSize > 0) ? (size_t)chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
+      else
+        chunks[1] = calc_chunksize2(chunkSizeLim, xsize);
+
       dimIDs[0] = ydimID;
       dimIDs[1] = xdimID;
     }
   else /* ndims == 2 */
     {
+
+      if (chunkType == CDI_CHUNK_AUTO && ydimID == CDI_UNDEFID)
+        chunks[0] = (chunkSize > 0) ? (size_t)chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
+      else
+        chunks[0] = calc_chunksize2(chunkSizeLim, xsize);
+
       dimIDs[0] = xdimID;
       cdfDefGridReference(streamptr, gridID);
       cdfDefGridUUID(streamptr, gridID);
@@ -690,7 +732,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xdimlen, size_
       cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_NAME, xaxisname, &length);
       checkGridName(xaxisname, fileID);
       cdf_def_var(fileID, xaxisname, xtype, ndims - 1, dimIDs, &ncxvarid);
-      cdfGridCompress(fileID, ncxvarid, xdimlen * ydimlen, streamptr->filetype, streamptr->comptype);
+      cdfGridCompress(fileID, ncxvarid, gridsize, streamptr->filetype, streamptr->comptype, chunks);
 
       cdfPutGridStdAtts(fileID, ncxvarid, gridID, 'X');
 
@@ -703,7 +745,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xdimlen, size_
           xaxisname[xaxisnameLen] = '_';
           memcpy(xaxisname + xaxisnameLen + 1, bndsName, sizeof(bndsName));
           cdf_def_var(fileID, xaxisname, xtype, ndims, dimIDs, &ncbxvarid);
-          cdfGridCompress(fileID, ncbxvarid, xdimlen * ydimlen, streamptr->filetype, streamptr->comptype);
+          cdfGridCompress(fileID, ncbxvarid, gridsize, streamptr->filetype, streamptr->comptype, chunks);
 
           cdf_put_att_text(fileID, ncxvarid, "bounds", xaxisnameLen + sizeof(bndsName), xaxisname);
         }
@@ -717,7 +759,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xdimlen, size_
       checkGridName(yaxisname, fileID);
 
       cdf_def_var(fileID, yaxisname, xtype, ndims - 1, dimIDs, &ncyvarid);
-      cdfGridCompress(fileID, ncyvarid, xdimlen * ydimlen, streamptr->filetype, streamptr->comptype);
+      cdfGridCompress(fileID, ncyvarid, gridsize, streamptr->filetype, streamptr->comptype, chunks);
 
       cdfPutGridStdAtts(fileID, ncyvarid, gridID, 'Y');
 
@@ -730,7 +772,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xdimlen, size_
           yaxisname[yaxisnameLen] = '_';
           memcpy(yaxisname + yaxisnameLen + 1, bndsName, sizeof(bndsName));
           cdf_def_var(fileID, yaxisname, xtype, ndims, dimIDs, &ncbyvarid);
-          cdfGridCompress(fileID, ncbyvarid, xdimlen * ydimlen, streamptr->filetype, streamptr->comptype);
+          cdfGridCompress(fileID, ncbyvarid, gridsize, streamptr->filetype, streamptr->comptype, chunks);
 
           cdf_put_att_text(fileID, ncyvarid, "bounds", yaxisnameLen + sizeof(bndsName), yaxisname);
         }
