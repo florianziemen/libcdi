@@ -670,7 +670,7 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
   const size_t chunkSizeMax = 65536;
   const size_t chunkSizeLim = 16777216;
   int chunkSize = 0;
-  int chunkType = CDI_CHUNK_AUTO;
+  int chunkType = CDI_CHUNK_GRID;
   cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, &chunkType);
   cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, &chunkSize);
   if (chunkSize > 0 && yid == CDI_UNDEFID) chunkType = CDI_CHUNK_AUTO;
@@ -702,7 +702,7 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
       else if (dimorder[id] == 1 && xid != CDI_UNDEFID)
         {
           if (chunkType == CDI_CHUNK_AUTO && yid == CDI_UNDEFID)
-            chunks[ndims] = (chunkSize > 0) ? chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
+            chunks[ndims] = (chunkSize > 0) ? (size_t)chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
           else
             chunks[ndims] = calc_chunksize(chunkSizeLim, xsize);
           dims[ndims] = xid;
