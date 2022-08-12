@@ -640,6 +640,27 @@ calc_chunksize(size_t chunkSizeLim, size_t size)
   return chunkSize;
 }
 
+static const size_t chunkSizeMax = 65536;
+static const size_t chunkSizeLim = 16777216;
+
+size_t
+calc_chunksize_y(int chunkType, size_t gridsize, size_t xsize, size_t ysize)
+{
+  if (chunkType == CDI_CHUNK_AUTO)
+    return (gridsize <= chunkSizeMax) ? ysize : chunkSizeMax / xsize;
+  else
+    return (chunkType == CDI_CHUNK_LINES) ? 1 : ysize;
+}
+
+size_t
+calc_chunksize_x(int chunkType, int chunkSize, size_t xsize, bool yIsUndefined)
+{
+  if (chunkType == CDI_CHUNK_AUTO && yIsUndefined)
+    return (chunkSize > 0) ? (size_t)chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
+  else
+    return calc_chunksize(chunkSizeLim, xsize);
+}
+
 static int
 cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, int zid, size_t gridsize, const int dimorder[3],
                        int dims[4], bool useChunks, size_t chunks[4], char axis[5], size_t *piax)
@@ -667,17 +688,15 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
       ndims++;
     }
 
-  const size_t chunkSizeMax = 65536;
-  const size_t chunkSizeLim = 16777216;
   int chunkSize = 0;
   int chunkType = CDI_CHUNK_GRID;
   cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, &chunkType);
   cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, &chunkSize);
   if (chunkSize > 0 && yid == CDI_UNDEFID) chunkType = CDI_CHUNK_AUTO;
 
-  if (chunkType == CDI_CHUNK_GRID && gridsize > chunkSizeLim)
+  if (chunkType == CDI_CHUNK_GRID && gridsize > ChunkSizeLim)
     {
-      if (CDI_Debug) fprintf(stderr, "gridsize > %zu, changed chunkType to CDI_CHUNK_LINES!\n", chunkSizeLim);
+      if (CDI_Debug) fprintf(stderr, "gridsize > %u, changed chunkType to CDI_CHUNK_LINES!\n", ChunkSizeLim);
       chunkType = CDI_CHUNK_LINES;
     }
 
@@ -692,19 +711,13 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
         }
       else if (dimorder[id] == 2 && yid != CDI_UNDEFID)
         {
-          if (chunkType == CDI_CHUNK_AUTO)
-            chunks[ndims] = (gridsize <= chunkSizeMax) ? ysize : chunkSizeMax / xsize;
-          else
-            chunks[ndims] = (chunkType == CDI_CHUNK_LINES) ? 1 : ysize;
+          chunks[ndims] = calc_chunksize_y(chunkType, gridsize, xsize, ysize);
           dims[ndims] = yid;
           ndims++;
         }
       else if (dimorder[id] == 1 && xid != CDI_UNDEFID)
         {
-          if (chunkType == CDI_CHUNK_AUTO && yid == CDI_UNDEFID)
-            chunks[ndims] = (chunkSize > 0) ? (size_t)chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
-          else
-            chunks[ndims] = calc_chunksize(chunkSizeLim, xsize);
+          chunks[ndims] = calc_chunksize_x(chunkType, chunkSize, xsize, (yid == CDI_UNDEFID));
           dims[ndims] = xid;
           ndims++;
         }

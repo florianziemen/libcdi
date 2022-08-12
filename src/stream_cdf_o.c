@@ -618,20 +618,6 @@ struct cdfDefIrregularGridCommonIDs
   int xdimID, ydimID, ncxvarid, ncyvarid, ncavarid;
 };
 
-static size_t
-calc_chunksize2(size_t chunkSizeLim, size_t size)
-{
-  static const size_t pageSize = 4096;
-
-  if (size <= chunkSizeLim) return size;
-
-  size_t numChunks = (size / chunkSizeLim) + 1;
-  size_t chunkSize = size / numChunks;
-  if (chunkSize%pageSize) chunkSize = (chunkSize / pageSize + 1) * pageSize;
-
-  return chunkSize;
-}
-
 static struct cdfDefIrregularGridCommonIDs
 cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xsize, size_t ysize, int ndims, const char *xdimname_default,
                           size_t nvertex, const char *vdimname_default, bool setVdimname)
@@ -686,39 +672,24 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xsize, size_t 
 
   size_t gridsize = xsize * ysize;
   size_t chunks[3] = { 1, 1, 1 };
-  const size_t chunkSizeMax = 65536;
-  const size_t chunkSizeLim = 16777216;
   int chunkSize = 0;
   int chunkType = CDI_CHUNK_GRID;
   cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_CHUNKTYPE, &chunkType);
   cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_CHUNKSIZE, &chunkSize);
   if (chunkSize > 0 && ydimID == CDI_UNDEFID) chunkType = CDI_CHUNK_AUTO;
 
-  if (chunkType == CDI_CHUNK_GRID && gridsize > chunkSizeLim) chunkType = CDI_CHUNK_LINES;
+  if (chunkType == CDI_CHUNK_GRID && gridsize > ChunkSizeLim) chunkType = CDI_CHUNK_LINES;
 
   if (ndims == 3)
     {
-      if (chunkType == CDI_CHUNK_AUTO)
-        chunks[0] = (gridsize <= chunkSizeMax) ? ysize : chunkSizeMax / xsize;
-      else
-        chunks[0] = (chunkType == CDI_CHUNK_LINES) ? 1 : ysize;
-
-      if (chunkType == CDI_CHUNK_AUTO && ydimID == CDI_UNDEFID)
-        chunks[1] = (chunkSize > 0) ? (size_t)chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
-      else
-        chunks[1] = calc_chunksize2(chunkSizeLim, xsize);
-
+      chunks[0] = calc_chunksize_y(chunkType, gridsize, xsize, ysize);
+      chunks[1] = calc_chunksize_x(chunkType, chunkSize, xsize, (ydimID == CDI_UNDEFID));
       dimIDs[0] = ydimID;
       dimIDs[1] = xdimID;
     }
   else /* ndims == 2 */
     {
-
-      if (chunkType == CDI_CHUNK_AUTO && ydimID == CDI_UNDEFID)
-        chunks[0] = (chunkSize > 0) ? (size_t)chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
-      else
-        chunks[0] = calc_chunksize2(chunkSizeLim, xsize);
-
+      chunks[0] = calc_chunksize_x(chunkType, chunkSize, xsize, (ydimID == CDI_UNDEFID));
       dimIDs[0] = xdimID;
       cdfDefGridReference(streamptr, gridID);
       cdfDefGridUUID(streamptr, gridID);
