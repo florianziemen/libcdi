@@ -3421,7 +3421,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
 #ifdef HAVE_NETCDF4
       if (ncvar->ldeflate) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_ZIP);
       if (ncvar->lszip) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_SZIP);
-      if (ncvar->chunked && ncvar->chunkType != CDI_UNDEFID) vlistDefVarChunkType(vlistID, varID, ncvar->chunkType);
+      if (ncvar->chunked && ncvar->chunkType != CDI_UNDEFID) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, ncvar->chunkType);
 #endif
 
       streamptr->vars[varID1].defmiss = false;

@@ -1,6 +1,6 @@
-2022-08-11  Uwe Schulzweida
+2022-08-12  Uwe Schulzweida
 
-	* added vlistDefVarChunkSize() and vlistInqVarChunkSize()
+	* added CDI_KEY_CHUNKTYPE and CDI_KEY_CHUNKSIZE
 
 2022-08-11  Uwe Schulzweida
 
