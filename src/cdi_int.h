@@ -127,6 +127,26 @@ enum
 
 typedef struct
 {
+  const char *fileName;
+  double lonBounds[2];
+  double latBounds[2];
+  size_t numCells;
+  size_t offset;
+  int streamID;
+  bool needed;
+} MGF_Entry;
+
+typedef struct
+{
+  double lonBounds[2];
+  double latBounds[2];
+  size_t numCells;
+  int numFiles;
+  MGF_Entry *entries;
+} MGF;
+
+typedef struct
+{
   void *buffer;       // gribapi, cgribex
   size_t buffersize;  // gribapi, cgribex
   off_t position;     // file position
@@ -305,6 +325,7 @@ typedef struct
 
   int protocol;
   void *protocolData;
+  MGF mgf;
 } stream_t;
 
 // Length of optional keyword/value pair list

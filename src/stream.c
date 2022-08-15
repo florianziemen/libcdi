@@ -115,6 +115,7 @@ cdiGetFiletype(const char *uri, int *byteorder)
       if      (version <= 1) filetype = CDI_FILETYPE_GRB;
       else if (version == 2) filetype = CDI_FILETYPE_GRB2;
     }
+  else if (memcmp(buffer, "#MGF", 4) == 0) { filetype = CDI_FILETYPE_NCMGF; }
   else if (memcmp(buffer, "CDF\001", 4) == 0) { filetype = CDI_FILETYPE_NC; }
   else if (memcmp(buffer, "CDF\002", 4) == 0) { filetype = CDI_FILETYPE_NC2; }
   else if (memcmp(buffer, "CDF\005", 4) == 0) { filetype = CDI_FILETYPE_NC5; }
@@ -413,6 +414,87 @@ cdiGetProtocol(const char *uri, const char **filename)
   return CDI_PROTOCOL_OTHER;
 }
 
+static void
+mgf_read(MGF *mgf, FILE *fp, const char *filename)
+{
+  int numFiles = 0;
+  int fileIndex = -1;
+  char line[1024];
+  while (fgets(line, 1023, fp))
+    {
+      size_t len = strlen(line);
+      if (line[0] == '#') continue;
+      if (line[len-1] == '\n') line[len-1] = 0;
+      if (numFiles == 0)
+        {
+          sscanf(line, "numfiles=%d", &numFiles);
+          mgf->numFiles = numFiles;
+          mgf->entries = (MGF_Entry*) Malloc(numFiles * sizeof(MGF_Entry));
+          for (int i = 0; i < mgf->numFiles; ++i)
+            {
+              mgf->entries[i].fileName = NULL;
+              mgf->entries[i].streamID = -1;
+            }
+        }
+      else if (line[0] == '-' && line[1] == '-' && line[2] == '-')
+        {
+          fileIndex++;
+          continue;
+        }
+      else if (strncmp(line, "filename=", 9) == 0)
+        {
+          mgf->entries[fileIndex].fileName = strdup(line + 9);
+        }
+      else if (strncmp(line, "numcells=", 9) == 0)
+        {
+          mgf->entries[fileIndex].numCells = atol(line + 9);
+        }
+      else if (strncmp(line, "offset=", 7) == 0)
+        {
+          mgf->entries[fileIndex].offset = atol(line + 7);
+        }
+      else if (strncmp(line, "boundbox=", 9) == 0)
+        {
+          double *lons = mgf->entries[fileIndex].lonBounds;
+          double *lats = mgf->entries[fileIndex].latBounds;
+          sscanf(line + 9, "%lg/%lg/%lg/%lg\n", lons, lons + 1, lats, lats + 1);
+        }
+      else
+        {
+          Error("MGF %s contains unsupported keyword %s!", filename, line);
+        }
+    }
+}
+
+static int
+mgf_open(MGF *mgf, const char *filename, const char *mode, int *filetype)
+{
+  printf("mgfOpen\n");
+  int fileID = -1;
+
+  FILE *fp = fopen(filename, "r");
+  if (fp == NULL) return fileID;
+  mgf_read(mgf, fp, filename);
+  fclose(fp);
+  /*
+  for (int i = 0; i < mgf->numFiles; ++i)
+    {
+      printf("filename[%d]=%s\n", i + 1, mgf->entries[i].fileName);
+      printf("numcells[%d]=%zu\n", i + 1, mgf->entries[i].numCells);
+      printf("offset[%d]=%zu\n", i + 1, mgf->entries[i].offset);
+      double *lons = mgf->entries[i].lonBounds;
+      double *lats = mgf->entries[i].latBounds;
+      printf("boundbox[%d]=%g/%g/%g/%g\n", i + 1, lons[0], lons[1], lats[0], lats[1]);
+    }
+  */
+  for (int i = 0; i < mgf->numFiles; ++i) mgf->entries[i].streamID = streamOpenRead(mgf->entries[i].fileName);
+
+  stream_t *streamptr = (mgf->numFiles) ? stream_to_pointer(mgf->entries[0].streamID) : NULL;
+  if (mgf->numFiles && streamptr) fileID = streamptr->fileID;
+
+  return fileID;
+}
+
 int
 cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, stream_t *streamptr, int recordBufIsToBeCreated)
 {
@@ -575,6 +657,11 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
     case CDI_FILETYPE_NCZARR:
       {
         fileID = cdf4Open(filename, temp, &filetype);
+        break;
+      }
+    case CDI_FILETYPE_NCMGF:
+      {
+        fileID = mgf_open(&(streamptr->mgf), filename, temp, &filetype);
         break;
       }
 #endif
@@ -961,6 +1048,8 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->jobManager = NULL;
 
   streamptr->protocolData = NULL;
+
+  streamptr->mgf.entries = NULL;
 }
 
 static stream_t *
@@ -980,6 +1069,24 @@ stream_new_entry(int resH)
     }
 
   return streamptr;
+}
+
+static void
+record_cleanup(stream_t *streamptr)
+{
+  if (streamptr->ntsteps == 0 && streamptr->tsteps != NULL)
+    {
+      if (streamptr->tsteps[0].records)
+        {
+          Free(streamptr->tsteps[0].records);
+          streamptr->tsteps[0].records = NULL;
+        }
+      if (streamptr->tsteps[0].recIDs)
+        {
+          Free(streamptr->tsteps[0].recIDs);
+          streamptr->tsteps[0].recIDs = NULL;
+        }
+    }
 }
 
 void
@@ -1064,19 +1171,16 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 #ifdef HAVE_LIBNETCDF
       case CDI_FILETYPE_NETCDF:
         {
-          cdfClose(fileID);
-          if (streamptr->ntsteps == 0 && streamptr->tsteps != NULL)
+          if (filetype == CDI_FILETYPE_NCMGF)
             {
-              if (streamptr->tsteps[0].records)
-                {
-                  Free(streamptr->tsteps[0].records);
-                  streamptr->tsteps[0].records = NULL;
-                }
-              if (streamptr->tsteps[0].recIDs)
-                {
-                  Free(streamptr->tsteps[0].recIDs);
-                  streamptr->tsteps[0].recIDs = NULL;
-                }
+              MGF *mgf = &(streamptr->mgf);
+              for (int i = 0; i < mgf->numFiles; ++i) streamClose(mgf->entries[i].streamID);
+              streamptr->fileID = -1;
+            }
+          else
+            {
+              cdfClose(fileID);
+              record_cleanup(streamptr);
             }
           break;
         }

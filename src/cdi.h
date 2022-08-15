@@ -72,6 +72,7 @@ extern "C" {
 #define  CDI_FILETYPE_EXT           9   // File type EXTRA
 #define  CDI_FILETYPE_IEG          10   // File type IEG
 #define  CDI_FILETYPE_NCZARR       11   // File type NetCDF NCZarr Data Model
+#define  CDI_FILETYPE_NCMGF        12
 
 // Compatibility defines for release 1.8.3 (obsolete defines)
 #define  FILETYPE_GRB               1   // File type GRIB

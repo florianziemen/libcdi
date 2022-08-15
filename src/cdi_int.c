@@ -273,6 +273,7 @@ cdiHaveFiletype(int filetype)
 #ifdef HAVE_NETCDF4
     case CDI_FILETYPE_NC4: status = 1; break;
     case CDI_FILETYPE_NC4C: status = 1; break;
+    case CDI_FILETYPE_NCMGF: status = 1; break;
 #endif
 #ifdef HAVE_NCZARR
     case CDI_FILETYPE_NCZARR: status = 1; break;
@@ -524,6 +525,7 @@ cdiBaseFiletype(int filetype)
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
     case CDI_FILETYPE_NCZARR:
+    case CDI_FILETYPE_NCMGF:
     case CDI_FILETYPE_NC5: return CDI_FILETYPE_NETCDF;
     default: return filetype;
     }
