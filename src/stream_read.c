@@ -266,6 +266,9 @@ streamReadRecord(int streamID, double *data, SizeType *nmiss)
     {
       MGF *mgf = &(streamptr->mgf);
       size_t numMiss = 0;
+#ifdef _OPENMP
+#pragma omp parallel for default(shared) schedule(dynamic) reduction(+ : numMiss)
+#endif
       for (int i = 0; i < mgf->numFiles; ++i)
         {
           if (mgf->entries[i].needed)
