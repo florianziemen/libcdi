@@ -157,6 +157,8 @@ grid_init(grid_t *gridptr)
 
   cdiDefVarKeyInt(&gridptr->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
   cdiDefVarKeyInt(&gridptr->keys, CDI_KEY_SCANNINGMODE, 64);
+
+  //gridptr->mgf = NULL;
 }
 
 static void
@@ -1474,6 +1476,19 @@ SizeType
 gridInqXvals(int gridID, double *xvals)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
+  /*
+  if (gridptr->mgf)
+    {
+      MGF *mgf = gridptr->mgf;
+      size_t numVals = 0;
+      for (int i = 0; i < mgf->numFiles; ++i)
+        {
+          if (mgf->entries[i].needed)
+            numVals += gridInqXvals(mgf->entries[i].gridID, xvals ? xvals + mgf->entries[i].offset2 : NULL);
+        }
+      return numVals;
+    }
+  */
   return gridptr->vtable->inqXVals(gridptr, xvals);
 }
 
@@ -1636,6 +1651,19 @@ SizeType
 gridInqYvals(int gridID, double *yvals)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
+  /*
+  if (gridptr->mgf)
+    {
+      MGF *mgf = gridptr->mgf;
+      size_t numVals = 0;
+      for (int i = 0; i < mgf->numFiles; ++i)
+        {
+          if (mgf->entries[i].needed)
+            numVals += gridInqYvals(mgf->entries[i].gridID, yvals ? yvals + mgf->entries[i].offset2 : NULL);
+        }
+      return numVals;
+    }
+  */
   return gridptr->vtable->inqYVals(gridptr, yvals);
 }
 
@@ -3113,6 +3141,19 @@ SizeType
 gridInqXbounds(int gridID, double *xbounds)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
+  /*
+  if (gridptr->mgf)
+    {
+      MGF *mgf = gridptr->mgf;
+      size_t numVals = 0;
+      for (int i = 0; i < mgf->numFiles; ++i)
+        {
+          if (mgf->entries[i].needed)
+            numVals += gridInqXbounds(mgf->entries[i].gridID, xbounds ? xbounds + gridptr->nvertex * mgf->entries[i].offset2 : NULL);
+        }
+      return numVals;
+    }
+  */
   return gridptr->vtable->inqXBounds(gridptr, xbounds);
 }
 
@@ -3224,6 +3265,19 @@ SizeType
 gridInqYbounds(int gridID, double *ybounds)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
+  /*
+  if (gridptr->mgf)
+    {
+      MGF *mgf = gridptr->mgf;
+      size_t numVals = 0;
+      for (int i = 0; i < mgf->numFiles; ++i)
+        {
+          if (mgf->entries[i].needed)
+            numVals += gridInqYbounds(mgf->entries[i].gridID, ybounds ? ybounds + gridptr->nvertex * mgf->entries[i].offset2 : NULL);
+        }
+      return numVals;
+    }
+  */
   return gridptr->vtable->inqYBounds(gridptr, ybounds);
 }
 
@@ -4710,7 +4764,58 @@ const struct gridVirtTable cdiGridVtable = {
   .inqYBoundsPtr = gridInqYBoundsPtrSerial,
 };
 
-/*
+int
+gridFromMGF(MGF *mgf)
+{
+  int gridID0 = mgf->entries[mgf->firstId].gridID;
+  grid_t *gridptr0 = grid_to_pointer(gridID0);
+  int gridtype = gridptr0->type;
+
+  int gridID = gridCreate(gridtype, mgf->numCells);
+  grid_t *gridptr = grid_to_pointer(gridID);
+  //gridptr->mgf = mgf;
+  gridptr->nvertex = gridptr0->nvertex;
+
+  if (gridptr0->x.vals && gridptr0->y.vals)
+    {
+      gridptr->x.vals = (double *) Malloc(gridptr->size * sizeof(double));
+      gridptr->y.vals = (double *) Malloc(gridptr->size * sizeof(double));
+      for (int i = 0; i < mgf->numFiles; ++i)
+        {
+          if (mgf->entries[i].needed) gridInqXvals(mgf->entries[i].gridID, gridptr->x.vals + mgf->entries[i].offset2);
+          if (mgf->entries[i].needed) gridInqYvals(mgf->entries[i].gridID, gridptr->y.vals + mgf->entries[i].offset2);
+        }
+
+      if (gridptr0->x.bounds && gridptr0->y.bounds)
+        {
+          size_t nv = gridptr->nvertex;
+          gridptr->x.bounds = (double *) Malloc(nv * gridptr->size * sizeof(double));
+          gridptr->y.bounds = (double *) Malloc(nv * gridptr->size * sizeof(double));
+          for (int i = 0; i < mgf->numFiles; ++i)
+            {
+              if (mgf->entries[i].needed) gridInqXbounds(mgf->entries[i].gridID, gridptr->x.bounds + nv * mgf->entries[i].offset2);
+              if (mgf->entries[i].needed) gridInqYbounds(mgf->entries[i].gridID, gridptr->y.bounds + nv * mgf->entries[i].offset2);
+            }
+        }
+    }
+
+  cdiCopyVarKeys(&gridptr0->keys, &gridptr->keys);
+  cdiCopyVarKeys(&gridptr0->x.keys, &gridptr->x.keys);
+  cdiCopyVarKeys(&gridptr0->y.keys, &gridptr->y.keys);
+  /*
+  cdiCopyVarKey(&gridptr0->keys, CDI_KEY_DATATYPE, &gridptr->keys);
+  cdiCopyVarKey(&gridptr0->keys, CDI_KEY_NUMBEROFGRIDUSED, &gridptr->keys);
+  cdiCopyVarKey(&gridptr0->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE, &gridptr->keys);
+  cdiCopyVarKey(&gridptr0->keys, CDI_KEY_REFERENCEURI, &gridptr->keys);
+  */
+  gridComplete(gridptr);
+
+  //cdiCopyVarKey(&gridptr0->keys, CDI_KEY_UUID, &gridptr->keys);
+
+  return gridID;
+}
+
+/*1
  * Local Variables:
  * c-file-style: "Java"
  * c-basic-offset: 2

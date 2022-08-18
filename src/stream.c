@@ -422,7 +422,7 @@ mgf_read(MGF *mgf, FILE *fp, const char *filename)
   char line[1024];
   while (fgets(line, 1023, fp))
     {
-      size_t len = strlen(line);
+      const size_t len = strlen(line);
       if (line[0] == '#') continue;
       if (line[len-1] == '\n') line[len-1] = 0;
       if (numFiles == 0)
@@ -466,16 +466,86 @@ mgf_read(MGF *mgf, FILE *fp, const char *filename)
     }
 }
 
-static int
-mgf_open(MGF *mgf, const char *filename, const char *mode, int *filetype)
+static bool
+box_is_needed(double *lonsX, double *latsX, double *lons, double *lats)
 {
-  printf("mgfOpen\n");
+  bool needed = false;
+  double lon0 = lons[0];
+  double lon1 = lons[1];
+
+  if ((lats[0] >= latsX[0] && lats[0] <= latsX[1]) || (lats[1] >= latsX[0] && lats[1] <= latsX[1]) ||
+      (lats[0] <= latsX[0] && lats[1] >= latsX[1]))
+    {
+      if ((lon0 >= lonsX[0] && lon0 <= lonsX[1]) || (lon1 >= lonsX[0] && lon1 <= lonsX[1]) ||
+          (lon0 <= lonsX[0] && lon1 >= lonsX[1]))
+        needed = true;
+
+      if (needed == false && lon1 > 180.0)
+        {
+          lon0 -= 360.0;
+          lon1 -= 360.0;
+          if ((lon0 >= lonsX[0] && lon0 <= lonsX[1]) || (lon1 >= lonsX[0] && lon1 <= lonsX[1]) ||
+              (lon0 <= lonsX[0] && lon1 >= lonsX[1]))
+            needed = true;
+        }
+    }
+
+  return needed;
+}
+
+static int
+mgf_open(stream_t *streamptr, const char *filename, const char *mode)
+{
+  printf("mgf_open\n");
+  MGF *mgf = &(streamptr->mgf);
   int fileID = -1;
 
   FILE *fp = fopen(filename, "r");
   if (fp == NULL) return fileID;
   mgf_read(mgf, fp, filename);
   fclose(fp);
+
+  mgf->lonBounds[0] = -180.0;
+  mgf->lonBounds[1] =  180.0;
+  mgf->latBounds[0] = -90.0;
+  mgf->latBounds[1] =  90.0;
+
+  char *envString = getenv("CDI_BOUNDBOX");
+  if (envString)
+    {
+      double lon1, lon2, lat1, lat2;
+      int n = sscanf(envString, "%lg/%lg/%lg/%lg\n", &lon1, &lon2, &lat1, &lat2);
+      if (n == 4)
+        {
+          mgf->lonBounds[0] = lon1;
+          mgf->lonBounds[1] = lon2;
+          mgf->latBounds[0] = lat1;
+          mgf->latBounds[1] = lat2;
+        }
+    }
+
+  printf("BB=%g/%g/%g/%g\n", mgf->lonBounds[0], mgf->lonBounds[1], mgf->latBounds[0], mgf->latBounds[1]);
+  for (int i = 0; i < mgf->numFiles; ++i)
+    {
+      mgf->entries[i].needed = box_is_needed(mgf->lonBounds, mgf->latBounds, mgf->entries[i].lonBounds, mgf->entries[i].latBounds);
+    }
+
+  mgf->numCells = 0;
+  for (int i = 0; i < mgf->numFiles; ++i)
+    {
+      if (mgf->entries[i].needed)
+        {
+          mgf->entries[i].offset2 = mgf->numCells;
+          mgf->numCells += mgf->entries[i].numCells;
+        }
+    }
+
+  int numFilesNeeded = 0;
+  for (int i = 0; i < mgf->numFiles; ++i) if (mgf->entries[i].needed) numFilesNeeded++;
+  if (numFilesNeeded == 0) Error("No data in bounding box (lon=%g/%g lat=%g/%g)!",
+                                 mgf->lonBounds[0], mgf->lonBounds[1], mgf->latBounds[0], mgf->latBounds[1]);
+  printf("Number of needed files: %d/%d\n", numFilesNeeded, mgf->numFiles);
+
   /*
   for (int i = 0; i < mgf->numFiles; ++i)
     {
@@ -487,12 +557,41 @@ mgf_open(MGF *mgf, const char *filename, const char *mode, int *filetype)
       printf("boundbox[%d]=%g/%g/%g/%g\n", i + 1, lons[0], lons[1], lats[0], lats[1]);
     }
   */
-  for (int i = 0; i < mgf->numFiles; ++i) mgf->entries[i].streamID = streamOpenRead(mgf->entries[i].fileName);
+  for (int i = 0; i < mgf->numFiles; ++i)
+    {
+      if (mgf->entries[i].needed)
+        {
+          mgf->firstId = i;
+          mgf->entries[i].streamID = streamOpenRead(mgf->entries[i].fileName);
+          if (mgf->entries[i].streamID < 0)
+            {
+              for (int j = 0; j < i; ++j) if (mgf->entries[j].streamID >= 0) streamClose(mgf->entries[i].streamID);
+              Free(mgf->entries);
+              mgf->entries = NULL;
+              mgf->numFiles = 0;
+              return -1;
+            }
+          stream_t *streamPtr = stream_to_pointer(mgf->entries[i].streamID);
+          mgf->entries[i].fileID = streamPtr->fileID;
+          mgf->entries[i].vlistID = streamPtr->vlistID;
+          mgf->entries[i].gridID = vlistGrid(streamPtr->vlistID, 0);
+        }
+    }
 
-  stream_t *streamptr = (mgf->numFiles) ? stream_to_pointer(mgf->entries[0].streamID) : NULL;
+  streamptr->mgfMode = true;
   if (mgf->numFiles && streamptr) fileID = streamptr->fileID;
 
-  return fileID;
+  return 0;
+}
+
+static void
+mgf_set_grid(MGF *mgf, int vlistID)
+{
+  int gridFormMGF(MGF *mgf);
+  printf("mgf_set_grid\n");
+
+  int gridID = gridFromMGF(mgf);
+  vlistChangeGridIndex(vlistID, 0, gridID);
 }
 
 int
@@ -661,7 +760,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
       }
     case CDI_FILETYPE_NCMGF:
       {
-        fileID = mgf_open(&(streamptr->mgf), filename, temp, &filetype);
+        fileID = mgf_open(streamptr, filename, temp);
         break;
       }
 #endif
@@ -706,22 +805,34 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
 
       if (filemode == 'r')
         {
-          const int vlistID = vlistCreate();
-          if (vlistID < 0) return CDI_ELIMIT;
-
-          cdiVlistMakeInternal(vlistID);
-          streamptr->vlistID = vlistID;
-          // cdiReadByteorder(streamID);
-          const int status = cdiInqContents(streamptr);
-          if (status < 0)
+          if (streamptr->mgfMode)
             {
-              streamID = status;
+              MGF *mgf = &(streamptr->mgf);
+              const int vlistID = vlistDuplicate(mgf->entries[mgf->firstId].vlistID);
+              mgf_set_grid(mgf, vlistID);
+              cdiVlistMakeInternal(vlistID);
+              streamptr->fileID = mgf->entries[mgf->firstId].fileID;
+              streamptr->vlistID = vlistID;
             }
           else
             {
-              vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
-              vlistptr->ntsteps = streamptr->ntsteps;
-              cdiVlistMakeImmutable(vlistID);
+              const int vlistID = vlistCreate();
+              if (vlistID < 0) return CDI_ELIMIT;
+
+              cdiVlistMakeInternal(vlistID);
+              streamptr->vlistID = vlistID;
+              // cdiReadByteorder(streamID);
+              const int status = cdiInqContents(streamptr);
+              if (status < 0)
+                {
+                  streamID = status;
+                }
+              else
+                {
+                  vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
+                  vlistptr->ntsteps = streamptr->ntsteps;
+                  cdiVlistMakeImmutable(vlistID);
+                }
             }
         }
     }
@@ -1049,7 +1160,9 @@ streamDefaultValue(stream_t *streamptr)
 
   streamptr->protocolData = NULL;
 
+  streamptr->mgf.numFiles = 0;
   streamptr->mgf.entries = NULL;
+  streamptr->mgfMode = false;
 }
 
 static stream_t *
@@ -1123,7 +1236,9 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
     }
 
   if (fileID == CDI_UNDEFID)
-    Warning("File %s not open!", streamptr->filename);
+    {
+      if (!streamptr->mgfMode) Warning("File %s not open!", streamptr->filename);
+    }
   else
     switch (cdiBaseFiletype(filetype))
       {
@@ -1174,7 +1289,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
           if (filetype == CDI_FILETYPE_NCMGF)
             {
               MGF *mgf = &(streamptr->mgf);
-              for (int i = 0; i < mgf->numFiles; ++i) streamClose(mgf->entries[i].streamID);
+              for (int i = 0; i < mgf->numFiles; ++i) if (mgf->entries[i].needed) streamClose(mgf->entries[i].streamID);
               streamptr->fileID = -1;
             }
           else
@@ -1270,7 +1385,7 @@ streamClose(int streamID)
 
   if (vlistID != -1)
     {
-      if (streamptr->filemode != 'w' && vlistInqTaxis(vlistID) != -1) taxisDestroy(vlistInqTaxis(vlistID));
+      if (!streamptr->mgfMode && streamptr->filemode != 'w' && vlistInqTaxis(vlistID) != -1) taxisDestroy(vlistInqTaxis(vlistID));
       cdiVlistDestroy_(vlistID);
     }
 
@@ -1461,6 +1576,17 @@ streamInqTimestep(int streamID, int tsID)
 {
   int nrecs = 0;
   stream_t *streamptr = stream_to_pointer(streamID);
+  const int filetype = streamptr->filetype;
+
+  if (filetype == CDI_FILETYPE_NCMGF)
+    {
+      MGF *mgf = &(streamptr->mgf);
+      for (int i = 0; i < mgf->numFiles; ++i)
+        if (mgf->entries[i].needed)
+          nrecs = streamInqTimestep(mgf->entries[i].streamID, tsID);
+      return nrecs;
+    }
+
   const int vlistID = streamptr->vlistID;
 
   if (tsID < streamptr->ntsteps) streamptr->tsteps[tsID].curRecID = CDI_UNDEFID;  // fix for netCDF
@@ -1477,8 +1603,6 @@ streamInqTimestep(int streamID, int tsID)
     }
 
   if (tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID) return 0;
-
-  const int filetype = streamptr->filetype;
 
   if (CDI_Debug) Message("streamID = %d  tsID = %d  filetype = %d", streamID, tsID, filetype);
 

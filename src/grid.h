@@ -104,6 +104,8 @@ struct grid_t
   const struct gridVirtTable *vtable;
   cdi_keys_t keys;
   cdi_atts_t atts;
+
+  //MGF *mgf;
 };
 
 void grid_init(grid_t *gridptr);
@@ -150,6 +152,8 @@ int gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp);
 
 bool isGaussianLatitudes(SizeType nlats, const double *latitudes);
 void gaussianLatitudes(SizeType nlats, double *latitudes, double *weights);
+
+int gridFromMGF(MGF *mgf);
 
 #endif
 /*

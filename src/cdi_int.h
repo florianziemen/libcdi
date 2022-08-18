@@ -132,7 +132,11 @@ typedef struct
   double latBounds[2];
   size_t numCells;
   size_t offset;
+  size_t offset2;
   int streamID;
+  int fileID;
+  int vlistID;
+  int gridID;
   bool needed;
 } MGF_Entry;
 
@@ -141,8 +145,9 @@ typedef struct
   double lonBounds[2];
   double latBounds[2];
   size_t numCells;
-  int numFiles;
   MGF_Entry *entries;
+  int numFiles;
+  int firstId;
 } MGF;
 
 typedef struct
@@ -326,6 +331,7 @@ typedef struct
   int protocol;
   void *protocolData;
   MGF mgf;
+  bool mgfMode;
 } stream_t;
 
 // Length of optional keyword/value pair list

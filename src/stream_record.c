@@ -108,6 +108,16 @@ streamInqRecord(int streamID, int *varID, int *levelID)
   check_parg(levelID);
 
   stream_t *streamptr = stream_to_pointer(streamID);
+  const int filetype = streamptr->filetype;
+
+  if (filetype == CDI_FILETYPE_NCMGF)
+    {
+      MGF *mgf = &(streamptr->mgf);
+      for (int i = 0; i < mgf->numFiles; ++i)
+        if (mgf->entries[i].needed)
+          streamInqRecord(mgf->entries[i].streamID, varID, levelID);
+      return;
+    }
 
   cdiDefAccesstype(streamID, TYPE_REC);
 

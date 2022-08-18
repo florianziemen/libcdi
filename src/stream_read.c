@@ -259,6 +259,26 @@ stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 void
 streamReadRecord(int streamID, double *data, SizeType *nmiss)
 {
+  stream_t *streamptr = stream_to_pointer(streamID);
+  const int filetype = streamptr->filetype;
+
+  if (filetype == CDI_FILETYPE_NCMGF)
+    {
+      MGF *mgf = &(streamptr->mgf);
+      size_t numMiss = 0;
+      for (int i = 0; i < mgf->numFiles; ++i)
+        {
+          if (mgf->entries[i].needed)
+            {
+              SizeType tmpMiss;
+              streamReadRecord(mgf->entries[i].streamID, data + mgf->entries[i].offset2, &tmpMiss);
+              numMiss += tmpMiss;
+            }
+        }
+      *nmiss = (SizeType) numMiss;
+      return;
+    }
+
   size_t numMiss = 0;
   stream_read_record(streamID, MEMTYPE_DOUBLE, (void *) data, &numMiss);
   *nmiss = (SizeType) numMiss;
