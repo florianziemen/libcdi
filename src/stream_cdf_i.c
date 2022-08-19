@@ -2036,7 +2036,9 @@ grid_set_chunktype(grid_t *grid, ncvar_t *ncvar)
 
       if (grid->type == GRID_UNSTRUCTURED)
         {
-          ncvar->chunkType = ncvar->chunks[ndims - 1] == grid->size ? CDI_CHUNK_GRID : CDI_CHUNK_AUTO;
+          size_t chunkSize = ncvar->chunks[ndims - 1];
+          ncvar->chunkType = (chunkSize == grid->size) ? CDI_CHUNK_GRID : CDI_CHUNK_AUTO;
+          if (ncvar->chunkType == CDI_CHUNK_AUTO && ncvar->chunks[ndims - 1] > 1) ncvar->chunkSize = chunkSize;
         }
       else
         {
@@ -3422,6 +3424,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       if (ncvar->ldeflate) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_ZIP);
       if (ncvar->lszip) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_SZIP);
       if (ncvar->chunked && ncvar->chunkType != CDI_UNDEFID) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, ncvar->chunkType);
+      if (ncvar->chunked && ncvar->chunkSize > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, ncvar->chunkSize);
 #endif
 
       streamptr->vars[varID1].defmiss = false;
