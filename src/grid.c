@@ -157,8 +157,6 @@ grid_init(grid_t *gridptr)
 
   cdiDefVarKeyInt(&gridptr->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
   cdiDefVarKeyInt(&gridptr->keys, CDI_KEY_SCANNINGMODE, 64);
-
-  //gridptr->mgf = NULL;
 }
 
 static void
@@ -1476,19 +1474,6 @@ SizeType
 gridInqXvals(int gridID, double *xvals)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-  /*
-  if (gridptr->mgf)
-    {
-      MGF *mgf = gridptr->mgf;
-      size_t numVals = 0;
-      for (int i = 0; i < mgf->numFiles; ++i)
-        {
-          if (mgf->entries[i].needed)
-            numVals += gridInqXvals(mgf->entries[i].gridID, xvals ? xvals + mgf->entries[i].offset2 : NULL);
-        }
-      return numVals;
-    }
-  */
   return gridptr->vtable->inqXVals(gridptr, xvals);
 }
 
@@ -1651,19 +1636,6 @@ SizeType
 gridInqYvals(int gridID, double *yvals)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-  /*
-  if (gridptr->mgf)
-    {
-      MGF *mgf = gridptr->mgf;
-      size_t numVals = 0;
-      for (int i = 0; i < mgf->numFiles; ++i)
-        {
-          if (mgf->entries[i].needed)
-            numVals += gridInqYvals(mgf->entries[i].gridID, yvals ? yvals + mgf->entries[i].offset2 : NULL);
-        }
-      return numVals;
-    }
-  */
   return gridptr->vtable->inqYVals(gridptr, yvals);
 }
 
@@ -3141,19 +3113,6 @@ SizeType
 gridInqXbounds(int gridID, double *xbounds)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-  /*
-  if (gridptr->mgf)
-    {
-      MGF *mgf = gridptr->mgf;
-      size_t numVals = 0;
-      for (int i = 0; i < mgf->numFiles; ++i)
-        {
-          if (mgf->entries[i].needed)
-            numVals += gridInqXbounds(mgf->entries[i].gridID, xbounds ? xbounds + gridptr->nvertex * mgf->entries[i].offset2 : NULL);
-        }
-      return numVals;
-    }
-  */
   return gridptr->vtable->inqXBounds(gridptr, xbounds);
 }
 
@@ -3265,19 +3224,6 @@ SizeType
 gridInqYbounds(int gridID, double *ybounds)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-  /*
-  if (gridptr->mgf)
-    {
-      MGF *mgf = gridptr->mgf;
-      size_t numVals = 0;
-      for (int i = 0; i < mgf->numFiles; ++i)
-        {
-          if (mgf->entries[i].needed)
-            numVals += gridInqYbounds(mgf->entries[i].gridID, ybounds ? ybounds + gridptr->nvertex * mgf->entries[i].offset2 : NULL);
-        }
-      return numVals;
-    }
-  */
   return gridptr->vtable->inqYBounds(gridptr, ybounds);
 }
 
@@ -4773,7 +4719,6 @@ gridFromMGF(MGF *mgf)
 
   int gridID = gridCreate(gridtype, mgf->numCells);
   grid_t *gridptr = grid_to_pointer(gridID);
-  //gridptr->mgf = mgf;
   gridptr->nvertex = gridptr0->nvertex;
 
   if (gridptr0->x.vals && gridptr0->y.vals)
