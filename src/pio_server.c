@@ -271,14 +271,18 @@ resizeVarGatherBuf(size_t size, void **buf, size_t *bufSize)
 #define wHECast(buf) ((struct winHeaderEntry *) (void *) buf)
 
 static Xt_xmap
-buildVarXmap(struct Xt_offset_ext *restrict partExts, const struct clientBuf *restrict clientBuf, size_t headerIdx,
-             Xt_idxlist dstList, Xt_idxlist *partDescPreset, MPI_Comm pioInterComm, MPI_Comm collComm, int varID,
+buildVarXmap(int *restrict partSizes,
+             const struct clientBuf *restrict clientBuf, size_t headerIdx,
+             Xt_idxlist dstList,
+             Xt_idxlist *partDescPreset,
+             MPI_Comm pioInterComm,
+             MPI_Comm collComm,
+             int varID,
              const struct cdiPioConf *conf)
 {
   size_t numClients = (size_t) numClients_;
   Xt_idxlist *part = partDescPreset ? partDescPreset : Malloc(numClients * sizeof(part[0]));
   int conversion = (wHECast(clientBuf[0].mem))[headerIdx].id;
-  size_t elemSize = conversion == DATA_HEADER_FLOAT ? sizeof(float) : sizeof(double);
   for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
     {
       unsigned char *clientMem = clientBuf[clientIdx].mem;
@@ -292,13 +296,7 @@ buildVarXmap(struct Xt_offset_ext *restrict partExts, const struct clientBuf *re
                   && ((size_t) position < clientBuf[clientIdx].size));
           part[clientIdx] = xt_idxlist_unpack(clientMem, (int) clientBuf[clientIdx].size, &position, pioInterComm);
         }
-      unsigned partSize = (unsigned) xt_idxlist_get_num_indices(part[clientIdx]);
-      size_t charOfs = (size_t) ((clientMem + (wHECast(clientMem))[headerIdx].offset) - clientBuf[0].mem);
-      xassert(charOfs % elemSize == 0 && charOfs / elemSize + partSize <= INT_MAX);
-      int elemOfs = (int) (charOfs / elemSize);
-      partExts[clientIdx].start = elemOfs;
-      partExts[clientIdx].size = (int) partSize;
-      partExts[clientIdx].stride = 1;
+      partSizes[clientIdx+1] = xt_idxlist_get_num_indices(part[clientIdx]);
     }
   Xt_idxlist srcList = xt_idxlist_collection_new(part, (int) numClients);
   if (!partDescPreset)
@@ -704,6 +702,82 @@ buildDecoPresetXmaps(int streamID, struct partDescPreset clientDeco, MPI_Comm co
     }
 }
 
+struct partExtRes
+{
+  void *partExts;
+  bool needAExt;
+};
+
+static struct partExtRes
+fillPartExts(const int *partSizes,
+             const struct clientBuf *restrict clientBuf,
+             size_t headerIdx)
+{
+  int conversion = (wHECast(clientBuf[0].mem))[headerIdx].id;
+  int varID = wHECast(clientBuf[0].mem)[headerIdx].specific.dataRecord.varID;
+  size_t elemSize
+    = conversion == DATA_HEADER_FLOAT ? sizeof (float) : sizeof (double);
+#ifdef USE_XT_REDIST_P2P_AEXT_NEW
+  struct Xt_aoffset_ext *partAExts = NULL;
+  bool needAExt = false;
+#endif
+  size_t numClients = (size_t)numClients_;
+  struct partExtRes extRes;
+  struct Xt_offset_ext *partExts = extRes.partExts
+    = Malloc(numClients * sizeof (partExts[0]));
+#ifdef USE_XT_REDIST_P2P_AEXT_NEW
+  for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
+    {
+      unsigned char *clientMem = clientBuf[clientIdx].mem;
+      xassert((wHECast(clientMem))[headerIdx].specific.dataRecord.varID == varID
+              && (wHECast(clientMem))[headerIdx].id == conversion);
+      size_t charOfs = (size_t)((clientMem
+                                 + (wHECast(clientMem))[headerIdx].offset)
+                                - clientBuf[0].mem);
+      int partSize = partSizes[clientIdx+1];
+      // FIXME: prevent overflow in second expression
+      needAExt |= (charOfs % elemSize != 0)
+        | (charOfs + (size_t)partSize * elemSize
+           > (size_t)INT_MAX * elemSize);
+    }
+  extRes.needAExt = needAExt;
+  if (needAExt)
+    {
+      extRes.partExts = partAExts
+        = Realloc(partExts, numClients * sizeof (partAExts[0]));
+      partExts = NULL;
+    }
+#endif
+  for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
+    {
+      unsigned char *clientMem = clientBuf[clientIdx].mem;
+      size_t charOfs = (size_t)((clientMem
+                                 + (wHECast(clientMem))[headerIdx].offset)
+                                - clientBuf[0].mem);
+      int partSize = partSizes[clientIdx+1];
+#ifndef USE_XT_REDIST_P2P_AEXT_NEW
+      xassert(charOfs % elemSize == 0
+              && charOfs / elemSize + (size_t)partSize <= INT_MAX);
+#else
+      if (needAExt)
+        {
+          partAExts[clientIdx].start = (MPI_Aint)charOfs;
+          partAExts[clientIdx].size = partSize;
+          partAExts[clientIdx].stride = (MPI_Aint)elemSize;
+        }
+      else
+#endif
+        {
+          int elemOfs = (int)(charOfs / elemSize);
+          partExts[clientIdx].start = elemOfs;
+          partExts[clientIdx].size = partSize;
+          partExts[clientIdx].stride = 1;
+        }
+    }
+  return extRes;
+}
+
+
 static Xt_redist
 buildVarRedist(int headerIdx, size_t streamIdx,
                /* index list representing the data elements gathered on
@@ -714,18 +788,23 @@ buildVarRedist(int headerIdx, size_t streamIdx,
   const struct winHeaderEntry *winDict = wHECast(clientBuf[0].mem);
   int varID = winDict[headerIdx].specific.dataRecord.varID;
   int conversion = winDict[headerIdx].id;
-  size_t elemSize = conversion == DATA_HEADER_FLOAT ? sizeof(float) : sizeof(double);
-  size_t numClients = (size_t) numClients_;
-  struct Xt_offset_ext *partExts = Malloc(numClients * sizeof(partExts[0]));
-  MPI_Comm pioInterComm = cdiPioInqInterComm(), collComm = commInqCommColl();
+#if USE_XT_REDIST_P2P_AEXT_NEW
+  size_t elemSize
+    = conversion == DATA_HEADER_FLOAT ? sizeof (float) : sizeof (double);
+#endif
+  size_t numClients = (size_t)numClients_;
+  MPI_Comm pioInterComm = cdiPioInqInterComm(),
+    collComm = commInqCommColl();
   Xt_xmap gatherXmap;
   struct Xt_offset_ext gatherExt = { .start = 0, .size = xt_idxlist_get_num_indices(dstList), .stride = 1 };
   Xt_uid *restrict uids = NULL;
+  void *tmpBuf = NULL;
   int *restrict partSizes = NULL;
   bool cacheXmaps = conf->cacheXmaps;
   if (cacheXmaps)
     {
       allocUIDLookup(numClients, &uids, &partSizes);
+      tmpBuf = uids;
       uids[0] = xt_idxlist_get_uid(dstList);
       for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
         {
@@ -736,35 +815,48 @@ buildVarRedist(int headerIdx, size_t streamIdx,
         }
       if ((gatherXmap = cdiPioXmapCacheLookup(XmapCache, uids, partSizes)))
         {
-          for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
-            {
-              unsigned char *clientMem = clientBuf[clientIdx].mem;
-              struct dataRecord *dataHeader = &(wHECast(clientMem))[headerIdx].specific.dataRecord;
-              xassert(dataHeader->varID == varID && (wHECast(clientMem))[headerIdx].id == conversion);
-              size_t charOfs = (size_t) ((clientMem + (wHECast(clientMem))[headerIdx].offset) - clientBuf[0].mem);
-              int partSize = partSizes[clientIdx + 1];
-              xassert(charOfs % elemSize == 0 && charOfs / elemSize + (size_t) partSize <= INT_MAX);
-              int elemOfs = (int) (charOfs / elemSize);
-              partExts[clientIdx].start = elemOfs;
-              partExts[clientIdx].size = partSize;
-              partExts[clientIdx].stride = 1;
-            }
-          goto finishXmapCaching;
+          goto afterNewXmapCacheEntry;
         }
     }
-  gatherXmap = buildVarXmap(partExts, clientBuf, (size_t) headerIdx, dstList, partDescPreset, pioInterComm, collComm, varID, conf);
+  else
+    {
+      tmpBuf = partSizes = Malloc(sizeof (*partSizes) * (numClients + 1));
+    }
+  partSizes[0] = gatherExt.size;
+  gatherXmap = buildVarXmap(partSizes, clientBuf, (size_t)headerIdx,
+                            dstList, partDescPreset, pioInterComm, collComm,
+                            varID, conf);
   if (cacheXmaps)
     {
-      partSizes[0] = gatherExt.size;
-      for (size_t i = 0; i < numClients; ++i) partSizes[i + 1] = partExts[i].size;
       cdiPioXmapCacheAdd(XmapCache, uids, partSizes, gatherXmap);
-    finishXmapCaching:
-      Free(uids);
     }
-  MPI_Datatype elemDt = conversion == DATA_HEADER_FLOAT ? MPI_FLOAT : MPI_DOUBLE;
-  Xt_redist varRedist = xt_redist_p2p_ext_new(gatherXmap, (int) numClients, partExts, 1, &gatherExt, elemDt);
-  if (!cacheXmaps) xt_xmap_delete(gatherXmap);
-  Free(partExts);
+  afterNewXmapCacheEntry:;
+  struct partExtRes extRes
+    = fillPartExts(partSizes, clientBuf, (size_t)headerIdx);
+  Free(tmpBuf);
+  MPI_Datatype elemDt
+    = conversion ==  DATA_HEADER_FLOAT ? MPI_FLOAT : MPI_DOUBLE;
+  Xt_redist varRedist;
+#if USE_XT_REDIST_P2P_AEXT_NEW
+  if (extRes.needAExt)
+    {
+      struct Xt_aoffset_ext gatherAExt
+        = { .start = 0,
+            .size = gatherExt.size,
+            .stride = (MPI_Aint)elemSize };
+
+      varRedist
+        = xt_redist_p2p_aext_new(gatherXmap, (int)numClients, extRes.partExts,
+                                 1, &gatherAExt, elemDt);
+    }
+  else
+#endif
+    varRedist
+      = xt_redist_p2p_ext_new(gatherXmap, (int)numClients, extRes.partExts,
+                              1, &gatherExt, elemDt);
+  if (!cacheXmaps)
+    xt_xmap_delete(gatherXmap);
+  Free(extRes.partExts);
   return varRedist;
 }
 
