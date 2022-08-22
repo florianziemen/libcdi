@@ -397,16 +397,17 @@ dnl whatever pkg-config finds will be used instead.
         [AC_MSG_FAILURE([cannot link C YAXT programs])],,[$YAXT_C_LIB])],
      [AC_MSG_FAILURE([required header yaxt.h not found or not compilable])],,
      [$YAXT_C_INCLUDE],[[]])
-dnl
+dnl the following tests can rely on having yaxt.h and C libs available
+   AS_VAR_APPEND([CFLAGS], [" $YAXT_C_INCLUDE"])
+   LIBS="$YAXT_C_LIB $LIBS"
+dnl determine how to xfer Xt_uid values by MPI
    AH_TEMPLATE([YAXT_UID_DT],
      [Defined to MPI datatype to be used for Xt_uid])dnl
    defined_Xt_uid=no
    AC_CHECK_DECL([MPI_UINT64_T],
      [AC_DEFINE([YAXT_UID_DT], [MPI_UINT64_T])
       defined_Xt_uid=yes],
-     [AS_VAR_APPEND([CFLAGS], [" $YAXT_C_INCLUDE"])
-      LIBS="$YAXT_C_LIB $LIBS"
-      AC_CHECK_SIZEOF([Xt_uid],,
+     [AC_CHECK_SIZEOF([Xt_uid],,
         [AC_INCLUDES_DEFAULT
 @%:@include <yaxt.h>])
       AC_CHECK_SIZEOF([unsigned long])
@@ -425,6 +426,13 @@ dnl
    AS_VAR_IF([defined_Xt_uid], [no],
      [AC_MSG_FAILURE([no way to communicate Xt_uid found])])
    AS_UNSET([defined_Xt_uid])
+dnl determine if xt_redist_p2p_aext_new is available
+   AC_CHECK_FUNC([xt_redist_p2p_aext_new],
+     [AC_CHECK_SIZEOF([MPI_Aint],,[AC_INCLUDES_DEFAULT
+@%:@include <mpi.h>])
+      AC_CHECK_SIZEOF([int])
+      AS_IF([test $ac_cv_sizeof_MPI_Aint -gt $ac_cv_sizeof_int],
+        [AC_DEFINE([USE_XT_REDIST_P2P_AEXT_NEW],[1],[Defined if aext alternatives should be tested])])])
    CFLAGS=$saved_CFLAGS
    LIBS=$saved_LIBS
 

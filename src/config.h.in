@@ -253,6 +253,12 @@
    your system. */
 #undef PTHREAD_CREATE_JOINABLE
 
+/* The size of `int', as computed by sizeof. */
+#undef SIZEOF_INT
+
+/* The size of `MPI_Aint', as computed by sizeof. */
+#undef SIZEOF_MPI_AINT
+
 /* The size of `unsigned long', as computed by sizeof. */
 #undef SIZEOF_UNSIGNED_LONG
 
@@ -273,6 +279,9 @@
 
 /* User name */
 #undef USER_NAME
+
+/* Defined if aext alternatives should be tested */
+#undef USE_XT_REDIST_P2P_AEXT_NEW
 
 /* Version number of package */
 #undef VERSION

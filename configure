@@ -31187,6 +31187,8 @@ as_fn_error $? "required header yaxt.h not found or not compilable
 See \`config.log' for more details" "$LINENO" 5; }
 fi
 
+   as_fn_append CFLAGS " $YAXT_C_INCLUDE"
+   LIBS="$YAXT_C_LIB $LIBS"
       defined_Xt_uid=no
    ac_fn_c_check_decl "$LINENO" "MPI_UINT64_T" "ac_cv_have_decl_MPI_UINT64_T" "$ac_includes_default
 #include <mpi.h>
@@ -31196,9 +31198,7 @@ if test "x$ac_cv_have_decl_MPI_UINT64_T" = xyes; then :
 
       defined_Xt_uid=yes
 else
-  as_fn_append CFLAGS " $YAXT_C_INCLUDE"
-      LIBS="$YAXT_C_LIB $LIBS"
-      # The cast to long int works around a bug in the HP C Compiler
+  # The cast to long int works around a bug in the HP C Compiler
 # version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
 # declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
 # This bug is HP SR number 8606223364.
@@ -31334,6 +31334,83 @@ as_fn_error $? "no way to communicate Xt_uid found
 See \`config.log' for more details" "$LINENO" 5; }
 fi
    { defined_Xt_uid=; unset defined_Xt_uid;}
+   ac_fn_c_check_func "$LINENO" "xt_redist_p2p_aext_new" "ac_cv_func_xt_redist_p2p_aext_new"
+if test "x$ac_cv_func_xt_redist_p2p_aext_new" = xyes; then :
+  # The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking size of MPI_Aint" >&5
+$as_echo_n "checking size of MPI_Aint... " >&6; }
+if ${ac_cv_sizeof_MPI_Aint+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (MPI_Aint))" "ac_cv_sizeof_MPI_Aint"        "$ac_includes_default
+#include <mpi.h>
+"; then :
+
+else
+  if test "$ac_cv_type_MPI_Aint" = yes; then
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (MPI_Aint)
+See \`config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof_MPI_Aint=0
+   fi
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_MPI_Aint" >&5
+$as_echo "$ac_cv_sizeof_MPI_Aint" >&6; }
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define SIZEOF_MPI_AINT $ac_cv_sizeof_MPI_Aint
+_ACEOF
+
+
+      # The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking size of int" >&5
+$as_echo_n "checking size of int... " >&6; }
+if ${ac_cv_sizeof_int+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (int))" "ac_cv_sizeof_int"        "$ac_includes_default"; then :
+
+else
+  if test "$ac_cv_type_int" = yes; then
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (int)
+See \`config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof_int=0
+   fi
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_int" >&5
+$as_echo "$ac_cv_sizeof_int" >&6; }
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define SIZEOF_INT $ac_cv_sizeof_int
+_ACEOF
+
+
+      if test $ac_cv_sizeof_MPI_Aint -gt $ac_cv_sizeof_int; then :
+
+$as_echo "#define USE_XT_REDIST_P2P_AEXT_NEW 1" >>confdefs.h
+
+fi
+fi
+
    CFLAGS=$saved_CFLAGS
    LIBS=$saved_LIBS
 
