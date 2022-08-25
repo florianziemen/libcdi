@@ -8,8 +8,8 @@
 #include "cdi_fdb.h"
 #endif
 
-#ifdef HAVE_ACROSS
-#include "cdi_across.h"
+#ifdef HAVE_BORGES
+#include "cdi_borges.h"
 #endif
 
 #include "dmemory.h"
@@ -401,10 +401,14 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
 
   switch (streamptr->protocol)
     {
-    case CDI_PROTOCOL_ACROSS:
+    case CDI_PROTOCOL_BORGES:
       {
-#ifdef HAVE_ACROSS
-        if (across_write_grib_message(streamptr, gribbuffer, nbytes)) SysError("Failed to write GRIB slice!");
+#ifdef HAVE_BORGES
+        if (borges_write_grib_message(streamptr, gribbuffer, nbytes))
+          {
+            Error("Failed to write GRIB slice!");
+            break;
+          }
 #endif
       }
       break;

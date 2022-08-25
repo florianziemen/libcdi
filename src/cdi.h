@@ -88,7 +88,7 @@ extern "C" {
 #define CDI_PROTOCOL_OTHER          0   // Any other protocol (might be supported by NetCDF library)
 #define CDI_PROTOCOL_FILE           1
 #define CDI_PROTOCOL_FDB            2
-#define CDI_PROTOCOL_ACROSS         3
+#define CDI_PROTOCOL_BORGES         3
 
 // Compress types
 

@@ -16,7 +16,7 @@
 
 #include "binary.h"
 #include "cdi.h"
-#include "cdi_across.h"
+#include "cdi_borges.h"
 #include "cdi_int.h"
 #include "cdi_cksum.h"
 #include "cdf.h"
@@ -80,7 +80,7 @@ cdiGetFiletype(const char *uri, int *byteorder)
 
   switch (protocol)
     {
-    case CDI_PROTOCOL_ACROSS: return CDI_FILETYPE_GRB2;
+    case CDI_PROTOCOL_BORGES: return CDI_FILETYPE_GRB2;
     case CDI_PROTOCOL_FDB:    return CDI_FILETYPE_UNDEF;
     case CDI_PROTOCOL_OTHER:  return CDI_FILETYPE_NC4;  // support for NetCDF remote types and ESDM
     case CDI_PROTOCOL_FILE:
@@ -392,7 +392,7 @@ cdiInqContents(stream_t *streamptr)
           {
           case CDI_PROTOCOL_FDB: status = fdbInqContents(streamptr); break;
 
-          case CDI_PROTOCOL_ACROSS:  // TODO read from ACROSS
+          case CDI_PROTOCOL_BORGES: // TODO read from Borges
           case CDI_PROTOCOL_OTHER:
           case CDI_PROTOCOL_FILE: status = grbInqContents(streamptr); break;
           }
@@ -447,7 +447,7 @@ cdiGetProtocol(const char *uri, const char **filename)
 
   // if (strncmp(uri, "file", protocollen) == 0) return CDI_PROTOCOL_FILE; // file is already used in NetCDF
   if (strncmp(uri, "fdb", protocollen) == 0) return CDI_PROTOCOL_FDB;
-  if (strncmp(uri, "across", protocollen) == 0) return CDI_PROTOCOL_ACROSS;
+  if (strncmp(uri, "borges", protocollen) == 0) return CDI_PROTOCOL_BORGES;
 
   *filename = uri;
 
@@ -465,14 +465,14 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
 
   switch (streamptr->protocol)
     {
-    case CDI_PROTOCOL_ACROSS:
-#if defined(HAVE_ACROSS) && defined(HAVE_LIBGRIB_API)
+    case CDI_PROTOCOL_BORGES:
+#if defined(HAVE_BORGES) && defined(HAVE_LIBGRIB_API)
       if (filetype != CDI_FILETYPE_GRB2)
         {
-          Warning("ACROSS needs to be used with GRIB2");
+          Warning("BORGES needs to be used with GRIB2");
           return CDI_EUFTYPE;
         }
-      fileID = across_connect(filename, filemode, streamptr);
+      fileID = borges_connect(filename, filemode, streamptr);
       if (fileID >= 0)
         {
           streamptr->filetype = filetype;
@@ -484,10 +484,10 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
         }
       return fileID;
 #else
-#ifdef HAVE_ACROSS
-      Warning("ecCodes support not compiled in (Needed for ACROSS)!");
+#ifdef HAVE_BORGES
+      Warning("ecCodes support not compiled in (Needed for BORGES)!");
 #else
-      Warning("ACROSS support not compiled in!");
+      Warning("BORGES support not compiled in!");
 #endif
       return CDI_ELIBNAVAIL;
 #endif
@@ -1081,15 +1081,9 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 
   switch (streamptr->protocol)
     {
-    case CDI_PROTOCOL_ACROSS:
-#ifdef HAVE_ACROSS
-      if (fileID) across_disconnect(fileID);
-      if (streamptr->protocolData)
-        {
-          Free(((across_info_t *) streamptr->protocolData)->expid);
-          Free(streamptr->protocolData);
-          streamptr->protocolData = NULL;
-        }
+    case CDI_PROTOCOL_BORGES:
+#ifdef HAVE_BORGES
+      borges_disconnect(fileID);
 #endif
       return;
 
@@ -1493,7 +1487,7 @@ streamInqTimestep(int streamID, int tsID)
           {
           case CDI_PROTOCOL_FDB: nrecs = fdbInqTimestep(streamptr, tsID); break;
 
-          case CDI_PROTOCOL_ACROSS:  // TODO read from ACROSS
+          case CDI_PROTOCOL_BORGES: // TODO read from Borges
           case CDI_PROTOCOL_OTHER:
           case CDI_PROTOCOL_FILE: nrecs = grbInqTimestep(streamptr, tsID); break;
           }

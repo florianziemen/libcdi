@@ -303,17 +303,40 @@ AC_ARG_ENABLE([grib],
 AC_MSG_RESULT([$enable_grib])
 AC_SUBST([ENABLE_GRIB],[$enable_grib])
 #  ----------------------------------------------------------------------
-#  Enable ACROSS support
-AC_MSG_CHECKING([for ACROSS support])
-AC_ARG_ENABLE([across],
-              [AS_HELP_STRING([--enable-across],[ACROSS support [default=yes]])],
-              [AS_IF([test "x$enable_across" != 'xno'],
-                     [AC_DEFINE(HAVE_ACROSS, [1], [Define to 1 for ACROSS support])
-                      enable_across=yes])],
-              [AC_DEFINE(HAVE_ACROSS, [1], [Define to 1 for ACROSS support])
-               enable_across=yes])
-AC_MSG_RESULT([$enable_across])
-AC_SUBST([ENABLE_ACROSS],[$enable_across])
+#  Compile application with BORGES libraries
+AC_MSG_CHECKING([for the BORGES library]) 
+BORGES_INCLUDE=''
+BORGES_LIBS=''
+AC_ARG_WITH([borges],
+              [AS_HELP_STRING([--with-borges=<yes|no|directory>],
+                            [library for using borges])],
+              [AS_CASE(["$with_borges"],
+                     [no],[AC_MSG_CHECKING([for BORGES library])
+                           AC_MSG_RESULT([no])],
+                     [yes],[AC_CHECK_HEADERS([borges/borges.h],,
+                                             [AC_MSG_ERROR([Could not find borges/borges.h])],
+                                             [AC_INCLUDES_DEFAULT])
+                            AC_SEARCH_LIBS([borges_context_init],
+                                           [borges],
+                                           [AC_DEFINE([HAVE_BORGES],[1],[BORGES library is present if defined to 1])],
+                                           [AC_MSG_ERROR([Could not link to borges library])])],
+                     [*],[BORGES_ROOT=$with_borges
+                          AS_IF([test -d "$BORGES_ROOT"],
+                                [LDFLAGS="-L$BORGES_ROOT/lib $LDFLAGS"
+                                 CPPFLAGS="-I$BORGES_ROOT/include $CPPFLAGS"
+                                 AC_CHECK_HEADERS([borges/borges.h],,
+                                                  [AC_MSG_ERROR([Could not find borges/borges.h])],
+                                                  [AC_INCLUDES_DEFAULT])
+                                 AC_SEARCH_LIBS([borges_context_init],
+                                                [borges],
+                                                [AC_DEFINE([HAVE_BORGES],[1],[BORGES library is present if defined to 1])],
+                                                [AC_MSG_ERROR([Could not link to borges library])])
+                                 BORGES_LIBS=" -L$BORGES_ROOT/lib -lborges"
+                                 BORGES_INCLUDE=" -I$BORGES_ROOT/include"],
+                                [AC_MSG_ERROR([$BORGES_ROOT is not a directory! BORGES suppressed])])])])
+AC_SUBST([BORGES_INCLUDE])
+AC_SUBST([BORGES_LIBS])
+AC_SUBST([HAVE_BORGES])
 #  ----------------------------------------------------------------------
 #  Compile interface with internal CGRIBEX library
 AC_MSG_CHECKING([for CGRIBEX support])

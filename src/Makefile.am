@@ -101,8 +101,8 @@ libcdi_la_SOURCES = \
   cdf_util.h \
   cdf_write.c \
   cdi.h \
-  cdi_across.c \
-  cdi_across.h \
+  cdi_borges.c \
+  cdi_borges.h \
   cdi_att.c \
   cdi_att.h \
   cdi_cksum.c \
