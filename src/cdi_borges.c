@@ -129,7 +129,7 @@ static int borges_write_buf(int sock, const void* buf, size_t nbytes)
   info->buffer.size = nbytes;
   borges_connection_unpause_stream(&info->borges_conn);
   borges_err err;
-  if (borges_context_run(&info->borges_conn, &err) < 0)
+  if (borges_context_run(&info->borges_ctx, &err) < 0)
   {
     log_err(&err, "Failed to complete work queue");
     return -1;
@@ -338,9 +338,11 @@ int borges_connect_int(char *path, char filemode, stream_t *streamptr)
     Free(info);
     return -1;
   }
-  path[strcspn(path, "/")] = '\0';
-  if (borges_connection_init(&info->borges_conn, &info->borges_ctx, path, borges_ev_handler, info, &err) < 0)
+  char borges_path[256];
+  snprintf(borges_path, sizeof(borges_path), "tcp://%s:%s", host, port);
+  if (borges_connection_init(&info->borges_conn, &info->borges_ctx, borges_path, borges_ev_handler, info, &err) < 0)
   { 
+    Warning("Path is %s", path);
     log_err(&err, "Failed to init borges connection");
     borges_context_cleanup(&info->borges_ctx);
     Free(info);
