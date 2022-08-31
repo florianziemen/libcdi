@@ -5,11 +5,16 @@
 #define EXTERN extern
 #endif
 
-#undef TEST_SCT
+// TEST_CDI_PIO undefined: used for ICON model experiment
+// TEST_CDI_PIO defined:   used to test pio_write
+#undef TEST_CDI_PIO
 
 #define TIMER_MAX 128
 // size of the timer arrays
 #define TIMER_MAX_STEPS 16
+// TIMER_LOG undefined: no timer output to the log 
+// TIMER_LOG defined:   output timer output to the log
+#define TIMER_LOG
 EXTERN int timer_ioTotal;
 EXTERN int timer_getTimeStepData;
 EXTERN int timer_winStart;
@@ -27,14 +32,11 @@ EXTERN int timer_writeSlice;
 EXTERN int timer_cdipioFileWrite;
 EXTERN int timer_mpiAllGather;
 EXTERN int timer_mpiFileWriteAtAll;
+EXTERN int timer_StreamMappingNew;
+EXTERN int timer_defTimeStep;
 
 EXTERN int context_handle;
 
 EXTERN int timer_globTotal;
-
-EXTERN int timer_StreamMappingNew;
-EXTERN int timer_defTimeStep;
-EXTERN int timer_tmp2;
-EXTERN int timer_tmp3;
 
 #endif
