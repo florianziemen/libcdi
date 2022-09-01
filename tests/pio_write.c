@@ -29,6 +29,7 @@
 #ifdef USE_MPI
 #include "sct.h"
 #define EXTERN
+#define TEST_CDI_PIO
 #include "sct_timer_helper.h"
 #include "cdipio.h"
 #include "pio_util.h"

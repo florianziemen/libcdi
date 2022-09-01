@@ -5,9 +5,13 @@
 #define EXTERN extern
 #endif
 
-// TEST_CDI_PIO undefined: used for ICON model experiment
-// TEST_CDI_PIO defined:   used to test pio_write
-#undef TEST_CDI_PIO
+// TEST_CDI_PIO false: ICON model experiment
+// TEST_CDI_PIO true:  test pio_write_deco2d.parallel
+#ifdef TEST_CDI_PIO
+#define TEST_CDI_PIO true
+#else
+#define TEST_CDI_PIO false
+#endif
 
 #define TIMER_MAX 128
 // size of the timer arrays
