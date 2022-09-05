@@ -29,7 +29,6 @@
 #ifdef USE_MPI
 #include "sct.h"
 #define EXTERN
-#define TEST_CDI_PIO
 #include "sct_timer_helper.h"
 #include "cdipio.h"
 #include "pio_util.h"
@@ -409,6 +408,7 @@ int main(int argc, char *argv[])
   int pioConfHandle = 0;
   pioRoleFunc pioRoleAssign = 0;
 #ifdef USE_MPI
+  test_cdi_pio = TEST_RUN;
   MPI_Comm commGlob;
   int sizeGlob;
   int rankGlob;
@@ -585,7 +585,6 @@ int main(int argc, char *argv[])
   sct_stop(timer_globTotal);
   cdi_repeatable_finalize();
   pioFinalize ();
-  // sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
   namespaceSetActive(initNamespace);
   cdiPioConfDestroy(pioConfHandle);
   xt_finalize();

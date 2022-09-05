@@ -43,6 +43,8 @@
 #include "sct_timer_helper.h"
 
 
+int test_cdi_pio = MODEL_RUN;
+
 static struct rdmaWin
 {
   size_t size;
@@ -814,7 +816,8 @@ void pioFinalize ( void )
   if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
     xmpi(MPI_Send(NULL, 0, MPI_INT, collRank, FINALIZE, cdiPioInqInterComm()));
   xdebug("%s", "SENT MESSAGE WITH TAG \"FINALIZE\"");
-  if (TEST_CDI_PIO) sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
+  if (test_cdi_pio == TEST_RUN)
+    sct_report(SCT_GETENV, SCT_GETENV, SCT_GETENV);
   Free(txWin);
   cdiPioCommFinalize();
   idSetDestroy(&openStreams);

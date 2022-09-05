@@ -5,13 +5,8 @@
 #define EXTERN extern
 #endif
 
-// TEST_CDI_PIO false: ICON model experiment
-// TEST_CDI_PIO true:  test pio_write_deco2d.parallel
-#ifdef TEST_CDI_PIO
-#define TEST_CDI_PIO true
-#else
-#define TEST_CDI_PIO false
-#endif
+#define TEST_RUN 0
+#define MODEL_RUN 1
 
 #define TIMER_MAX 128
 // size of the timer arrays
@@ -43,4 +38,5 @@ EXTERN int context_handle;
 
 EXTERN int timer_globTotal;
 
+extern int test_cdi_pio;
 #endif
