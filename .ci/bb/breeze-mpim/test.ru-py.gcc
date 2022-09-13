@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+script_dir=$(cd "$(dirname "$0")"; pwd)
+top_srcdir=$(cd "${script_dir}/../../.."; pwd)
+
+. "${script_dir}/utils.sh"
+init_gcc630
+
+test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
+
+"${top_srcdir}/configure" \
+--disable-maintainer-mode \
+--enable-option-checking=fatal \
+--enable-python \
+--enable-ruby \
+--enable-swig \
+--with-eccodes="${ECCODES_ROOT}" \
+--with-netcdf="${NETCDF_ROOT}" \
+CC="${CC}" \
+CPPFLAGS="-I${UUID_ROOT}/include" \
+CXX="${CXX}" \
+LDFLAGS="-L${UUID_ROOT}/lib"
+
+make -j8
+
+# Test the interfaces:
+LD_LIBRARY_PATH="${NETCDF_ROOT}/lib:${LD_LIBRARY_PATH}" make -j8 -C interfaces test
+(cd interfaces && ./CdiInfo)
+
+make -j8 check

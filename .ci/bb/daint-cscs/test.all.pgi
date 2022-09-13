@@ -1,0 +1,56 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+script_dir=$(cd "$(dirname "$0")"; pwd)
+top_srcdir=$(cd "${script_dir}/../../.."; pwd)
+
+. "${script_dir}/utils.sh"
+init_pgi2011
+
+# Save time for the person running this script manually:
+if test "x${PE_NETCDF_MODULE_NAME}" = 'xcray-netcdf'; then
+  case $top_srcdir in
+    "${HOME}/"*)
+      echo "ERROR: parallel NetCDF4 tests are known to fail when CDI is built in the user home directory and linked against NetCDF that does not support MPI parallel invocations" >&2
+      exit 1
+  esac
+fi
+
+test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
+
+# The configure script does not check the 'lib64' subdirectory, therefore we
+# run it with '--with-eccodes' and the following flags. Note that fixing this
+# in the configure script might be tricky: the 'lib64' subdirectory should be
+# checked first but if it does not exist or does not contain the library, we
+# might end up linking to a library from the linker's default search path
+# (e.g. /usr/lib) instead of the one from "$with_eccodes/lib" because
+# "-L${with_eccodes}/lib64" would be ignored in that case:
+CPPFLAGS="-I${ECCODES_ROOT}/include"
+LDFLAGS="-L${ECCODES_ROOT}/lib64"
+
+"${top_srcdir}/configure" \
+--disable-maintainer-mode \
+--enable-cf-interface \
+--enable-iso-c-interface \
+--enable-mpi \
+--enable-option-checking=fatal \
+--with-eccodes \
+--with-netcdf \
+CC="${CC}" \
+CFLAGS='-g -O1' \
+CPPFLAGS="${CPPFLAGS}" \
+F77="${FC}" \
+FC="${FC}" \
+FCFLAGS='-g -fPIC' \
+LDFLAGS="${LDFLAGS}" \
+MPI_LAUNCH="${MPI_LAUNCH}" \
+PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig:${PKG_CONFIG_PATH}" \
+PTHREAD_LIBS='-lpthread'
+
+make -j8
+
+make -j8 check | tee tests/test-suite.log
+
+check_all_tests_passed tests/test-suite.log
