@@ -3,10 +3,10 @@
 
 // convert Julian calendar day into year, months, day
 static void
-decode_julday(int calendar, int64_t julianDay, // Julian day number to convert
-              int *year,                       // Gregorian year (out)
-              int *mon,                        // Gregorian month (1-12) (out)
-              int *day)                        // Gregorian day (1-31) (out)
+decode_julday(int calendar, int64_t julianDay,  // Julian day number to convert
+              int *year,                        // Gregorian year (out)
+              int *mon,                         // Gregorian month (1-12) (out)
+              int *day)                         // Gregorian day (1-31) (out)
 {
   const int64_t a = julianDay;
 
@@ -241,84 +241,86 @@ main(void)
 
   // 1 - Check valid range of years
   {
-  int nmin = 11000;
-  int vdate0 = -80001201;
-  int vtime0 = 120500;
+    int nmin = 11000;
+    int vdate0 = -80001201;
+    int vtime0 = 120500;
 
-  printf("start time: %8d %4d\n", vdate0, vtime0);
+    printf("start time: %8d %4d\n", vdate0, vtime0);
 
-  CdiDateTime dt = cdiDateTime_set(vdate0, vtime0);
+    CdiDateTime dt = cdiDateTime_set(vdate0, vtime0);
 
-  for (int i = 0; i < nmin; i++)
-    {
-      JulianDate julianDate = julianDate_encode(calendar, dt);
+    for (int i = 0; i < nmin; i++)
+      {
+        JulianDate julianDate = julianDate_encode(calendar, dt);
 
-      dt = julianDate_decode(calendar, julianDate);
-      int vdate = (int)cdiDate_get(dt.date);
-      int vtime = cdiTime_get(dt.time);
+        dt = julianDate_decode(calendar, julianDate);
+        int vdate = (int) cdiDate_get(dt.date);
+        int vtime = cdiTime_get(dt.time);
 
-      if (vdate0 != vdate || vtime0 != vtime)
-        printf("%4d %8d %4d %8d %4d %9d %g\n", ++j, vdate0, vtime0, vdate, vtime, (int)julianDate.julianDay, julianDate.secondOfDay);
+        if (vdate0 != vdate || vtime0 != vtime)
+          printf("%4d %8d %4d %8d %4d %9d %g\n", ++j, vdate0, vtime0, vdate, vtime, (int) julianDate.julianDay,
+                 julianDate.secondOfDay);
 
-      dt.date.year++;
-      julianDate = julianDate_encode(calendar, dt);
+        dt.date.year++;
+        julianDate = julianDate_encode(calendar, dt);
 
-      dt = julianDate_decode(calendar, julianDate);
-      vdate0 = (int)cdiDate_get(dt.date);
-      vtime0 = cdiTime_get(dt.time);
-    }
+        dt = julianDate_decode(calendar, julianDate);
+        vdate0 = (int) cdiDate_get(dt.date);
+        vtime0 = cdiTime_get(dt.time);
+      }
 
-  printf("stop time: %8d %4d\n", vdate0, vtime0);
+    printf("stop time: %8d %4d\n", vdate0, vtime0);
   }
   // 2 - Check time increment of one minute
   {
-  int nmin = 120000;
-  int ijulinc = 60;
-  int vdate0 = 20001201;
-  int vtime0 = 0;
+    int nmin = 120000;
+    int ijulinc = 60;
+    int vdate0 = 20001201;
+    int vtime0 = 0;
 
-  printf("start time: %8d %4d\n", vdate0, vtime0);
+    printf("start time: %8d %4d\n", vdate0, vtime0);
 
-  CdiDateTime dt = cdiDateTime_set(vdate0, vtime0);
-  JulianDate julianDate = julianDate_encode(calendar, dt);
+    CdiDateTime dt = cdiDateTime_set(vdate0, vtime0);
+    JulianDate julianDate = julianDate_encode(calendar, dt);
 
-  for (int i = 0; i < nmin; i++)
-    {
-      int year, mon, day, hour, minute, second;
-      cdiDecodeDate(vdate0, &year, &mon, &day);
-      cdiDecodeTime(vtime0, &hour, &minute, &second);
+    for (int i = 0; i < nmin; i++)
+      {
+        int year, mon, day, hour, minute, second;
+        cdiDecodeDate(vdate0, &year, &mon, &day);
+        cdiDecodeTime(vtime0, &hour, &minute, &second);
 
-      if (++minute >= 60)
-        {
-          minute = 0;
-          if (++hour >= 24)
-            {
-              hour = 0;
-              if (++day >= 32)
-                {
-                  day = 1;
-                  if (++mon >= 13)
-                    {
-                      mon = 1;
-                      year++;
-                    }
-                }
-            }
-        }
+        if (++minute >= 60)
+          {
+            minute = 0;
+            if (++hour >= 24)
+              {
+                hour = 0;
+                if (++day >= 32)
+                  {
+                    day = 1;
+                    if (++mon >= 13)
+                      {
+                        mon = 1;
+                        year++;
+                      }
+                  }
+              }
+          }
 
-      vdate0 = cdiEncodeDate(year, mon, day);
-      vtime0 = cdiEncodeTime(hour, minute, second);
+        vdate0 = cdiEncodeDate(year, mon, day);
+        vtime0 = cdiEncodeTime(hour, minute, second);
 
-      julianDate = julianDate_add_seconds(julianDate, ijulinc);
-      dt = julianDate_decode(calendar, julianDate);
-      int vdate = (int)cdiDate_get(dt.date);
-      int vtime = cdiTime_get(dt.time);
+        julianDate = julianDate_add_seconds(julianDate, ijulinc);
+        dt = julianDate_decode(calendar, julianDate);
+        int vdate = (int) cdiDate_get(dt.date);
+        int vtime = cdiTime_get(dt.time);
 
-      if (vdate0 != vdate || vtime0 != vtime)
-        printf("%4d %8d %4d %8d %4d %9d %g\n", ++j, vdate0, vtime0, vdate, vtime, (int)julianDate.julianDay, julianDate.secondOfDay);
-    }
+        if (vdate0 != vdate || vtime0 != vtime)
+          printf("%4d %8d %4d %8d %4d %9d %g\n", ++j, vdate0, vtime0, vdate, vtime, (int) julianDate.julianDay,
+                 julianDate.secondOfDay);
+      }
 
-  printf("stop time: %8d %4d\n", vdate0, vtime0);
+    printf("stop time: %8d %4d\n", vdate0, vtime0);
   }
   return 0;
 }
@@ -343,19 +345,20 @@ main(void)
   CdiDateTime dt;
   dt.date = cdiDate_encode(year, month, day);
   dt.time = cdiTime_encode(hour, minute, second, ms);
-  printf("%d/%02d/%02d %02d:%02d:%02d.%03d\n",
-         dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute, dt.time.second, dt.time.ms);
+  printf("%d/%02d/%02d %02d:%02d:%02d.%03d\n", dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute,
+         dt.time.second, dt.time.ms);
 
   JulianDate julianDate = julianDate_encode(calendar, dt);
 
   dt = julianDate_decode(calendar, julianDate);
-  printf("%d/%02d/%02d %02d:%02d:%02d.%03d   %d %g\n",
-         dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute, dt.time.second, dt.time.ms, (int)julianDate.julianDay, julianDate.secondOfDay);
+  printf("%d/%02d/%02d %02d:%02d:%02d.%03d   %d %g\n", dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute,
+         dt.time.second, dt.time.ms, (int) julianDate.julianDay, julianDate.secondOfDay);
 
   for (int i = 0; i < 420; i++)
     {
       dt = julianDate_decode(calendar, julianDate);
-      printf("%2d %d/%02d/%02d %02d:%02d:%02d.%03d\n", i, dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute, dt.time.second, dt.time.ms);
+      printf("%2d %d/%02d/%02d %02d:%02d:%02d.%03d\n", i, dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute,
+             dt.time.second, dt.time.ms);
       julianDate = julianDate_add_seconds(julianDate, value * factor);
     }
 

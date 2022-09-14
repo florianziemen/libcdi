@@ -183,9 +183,9 @@ setForecastTime(const char *timestr, taxis_t *taxis)
   if (len != 0)
     {
       const CdiDateTime datetime = scan_time_string(timestr);
-      taxis->fdate = (int)cdiDate_get(datetime.date);
+      taxis->fdate = (int) cdiDate_get(datetime.date);
       taxis->ftime = cdiTime_get(datetime.time);
-     }
+    }
   else
     taxis->fdate = taxis->ftime = 0;
 }
@@ -261,7 +261,8 @@ setBaseTime(const char *timeunits, taxis_t *taxis)
           else if (taxistype == TAXIS_RELATIVE)
             {
               taxis->rdatetime = scan_time_string(tu + pos);
-              if (CDI_Debug) Message("rdate = %d  rtime = %d", (int)cdiDate_get(taxis->rdatetime.date), cdiTime_get(taxis->rdatetime.time));
+              if (CDI_Debug)
+                Message("rdate = %d  rtime = %d", (int) cdiDate_get(taxis->rdatetime.date), cdiTime_get(taxis->rdatetime.time));
             }
         }
     }
@@ -416,11 +417,12 @@ cdfCheckAttText(int fileID, int ncvarid, const char *attname)
   nc_type atttype;
   const int status_nc = nc_inq_atttype(fileID, ncvarid, attname, &atttype);
 
-  return (status_nc == NC_NOERR && (atttype == NC_CHAR
+  return (status_nc == NC_NOERR
+          && (atttype == NC_CHAR
 #ifdef HAVE_NETCDF4
-          || atttype == NC_STRING
+              || atttype == NC_STRING
 #endif
-          ));
+              ));
 }
 
 static void
@@ -2582,7 +2584,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                         if (lwarn) Warning("x-bounds doesn't follow the CF-Convention, skipped!");
                         lwarn = false;
                       }
-                   }
+                  }
               }
           }
         if (yvarid != CDI_UNDEFID && CDI_Read_Cell_Corners)
@@ -2624,7 +2626,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                         if (lwarn) Warning("y-bounds doesn't follow the CF-Convention, skipped!");
                         lwarn = false;
                       }
-                   }
+                  }
               }
           }
 

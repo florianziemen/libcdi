@@ -287,7 +287,7 @@ cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
     {
       cdiInqAtt(cdiID, varID, iatt, attname, &atttype, &attlen);
 
-      //if (attlen == 0) continue;
+      // if (attlen == 0) continue;
 
       if (atttype == CDI_DATATYPE_TXT)
         {
@@ -426,7 +426,8 @@ cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
 {
   if (streamptr->comptype == CDI_COMPRESS_ZIP)
     {
-      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C || streamptr->filetype == CDI_FILETYPE_NCZARR)
+      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
+          || streamptr->filetype == CDI_FILETYPE_NCZARR)
         {
           cdfDefVarDeflate(streamptr->fileID, ncvarID, streamptr->complevel);
         }
@@ -442,7 +443,8 @@ cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
     }
   else if (streamptr->comptype == CDI_COMPRESS_SZIP)
     {
-      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C || streamptr->filetype == CDI_FILETYPE_NCZARR)
+      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
+          || streamptr->filetype == CDI_FILETYPE_NCZARR)
         {
           cdfDefVarSzip(streamptr->fileID, ncvarID, xtype2ppb(xtype));
         }
@@ -635,7 +637,7 @@ calc_chunksize(size_t chunkSizeLim, size_t size)
 
   size_t numChunks = (size / chunkSizeLim) + 1;
   size_t chunkSize = size / numChunks;
-  if (chunkSize%pageSize) chunkSize = (chunkSize / pageSize + 1) * pageSize;
+  if (chunkSize % pageSize) chunkSize = (chunkSize / pageSize + 1) * pageSize;
 
   return chunkSize;
 }
@@ -656,7 +658,7 @@ size_t
 calc_chunksize_x(int chunkType, int chunkSize, size_t xsize, bool yIsUndefined)
 {
   if (chunkType == CDI_CHUNK_AUTO && yIsUndefined)
-    return (chunkSize > 0) ? (size_t)chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
+    return (chunkSize > 0) ? (size_t) chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
   else
     return calc_chunksize(chunkSizeLim, xsize);
 }
@@ -724,8 +726,8 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
     }
 
   if (CDI_Debug)
-    fprintf(stderr, "useChunks %d chunkType %d chunkSize %d  chunks %zu %zu %zu %zu\n",
-            useChunks, chunkType, chunkSize, chunks[0], chunks[1], chunks[2], chunks[3]);
+    fprintf(stderr, "useChunks %d chunkType %d chunkSize %d  chunks %zu %zu %zu %zu\n", useChunks, chunkType, chunkSize, chunks[0],
+            chunks[1], chunks[2], chunks[3]);
 
   *piax = iax;
   return ndims;
@@ -911,11 +913,13 @@ cdfDefVar(stream_t *streamptr, int varID)
     {
       const int nsb = vlistInqVarNSB(vlistID, varID);
       if (nsb > 0) nc_def_var_quantize(fileID, ncvarID, NC_QUANTIZE_BITROUND, nsb);
-      //if (nsb > 0) nc_def_var_quantize(fileID, ncvarID, NC_QUANTIZE_GRANULARBR, nsb);
+      // if (nsb > 0) nc_def_var_quantize(fileID, ncvarID, NC_QUANTIZE_GRANULARBR, nsb);
     }
 #endif
 
-  if (useChunks && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C || streamptr->filetype == CDI_FILETYPE_NCZARR))
+  if (useChunks
+      && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
+          || streamptr->filetype == CDI_FILETYPE_NCZARR))
     cdf_def_var_chunking(fileID, ncvarID, NC_CHUNKED, chunks);
 #endif
 

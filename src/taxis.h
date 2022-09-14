@@ -15,27 +15,26 @@ typedef struct
   int self;
   bool used;
   short has_bounds;
-  int datatype;             // datatype
-  int type;                 // time type
-  int sdate;                // start date
-  int stime;                // start time
-  CdiDateTime vdatetime;    // verification date/time
-  CdiDateTime rdatetime;    // reference date/time
-  int fdate;                // forecast reference date
-  int ftime;                // forecast reference time
+  int datatype;           // datatype
+  int type;               // time type
+  int sdate;              // start date
+  int stime;              // start time
+  CdiDateTime vdatetime;  // verification date/time
+  CdiDateTime rdatetime;  // reference date/time
+  int fdate;              // forecast reference date
+  int ftime;              // forecast reference time
   int calendar;
-  int unit;                 // time unit
+  int unit;  // time unit
   int numavg;
   bool climatology;
-  CdiDateTime vdatetime_lb; // lower bounds of verification date/time
-  CdiDateTime vdatetime_ub; // upper bounds of verification date/time
-  int fc_unit;              // forecast time unit
-  double fc_period;         // forecast time period
+  CdiDateTime vdatetime_lb;  // lower bounds of verification date/time
+  CdiDateTime vdatetime_ub;  // upper bounds of verification date/time
+  int fc_unit;               // forecast time unit
+  double fc_period;          // forecast time period
   char *name;
   char *longname;
   char *units;
 } taxis_t;
-
 
 //      taxisInqSdate: Get the start date
 int taxisInqSdate(int taxisID);

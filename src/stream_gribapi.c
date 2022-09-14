@@ -190,7 +190,7 @@ gribapiGetValidityDateTime(grib_handle *gh, int *vDate, int *vTime, int *sDate, 
              // significanceOfReferenceTime == 3. I would recommend replacing this condition with `if(!gribapiTimeIsFC())`.
     {
       CdiDateTime vDateTime = gribapiGetDataDateTime(gh);
-      *vDate = (int)cdiDate_get(vDateTime.date);
+      *vDate = (int) cdiDate_get(vDateTime.date);
       *vTime = cdiTime_get(vDateTime.time);
     }
   else
@@ -213,7 +213,7 @@ gribapiGetValidityDateTime(grib_handle *gh, int *vDate, int *vTime, int *sDate, 
             JulianDate julianDate2 = julianDate_add_seconds(julianDate, timeUnitFactor * startStep);
             CdiDateTime sDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate2);
             sDateTime.time.second = 0;
-            *sDate = (int)cdiDate_get(sDateTime.date);
+            *sDate = (int) cdiDate_get(sDateTime.date);
             *sTime = cdiTime_get(sDateTime.time);
           }
 
@@ -221,7 +221,7 @@ gribapiGetValidityDateTime(grib_handle *gh, int *vDate, int *vTime, int *sDate, 
           rDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate);
         }
 
-      *vDate = (int)cdiDate_get(rDateTime.date);
+      *vDate = (int) cdiDate_get(rDateTime.date);
       *vTime = cdiTime_get(rDateTime.time);
     }
 }
@@ -868,8 +868,8 @@ gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
   compVar0.scanKeys = record.scanKeys;
   compVar0.tiles = record.tiles;
 
-  //printf("var1: level1=%d level2=%d\n", compVar.level1, compVar.level2);
-  //printf("var2: level1=%d level2=%d\n", compVar0.level1, compVar0.level2);
+  // printf("var1: level1=%d level2=%d\n", compVar.level1, compVar.level2);
+  // printf("var2: level1=%d level2=%d\n", compVar0.level1, compVar0.level2);
 
   return memcmp(&compVar0, &compVar, sizeof(compvar2_t));
 }
@@ -1055,7 +1055,7 @@ fdbScanTimesteps(stream_t *streamptr)
           taxis->rdatetime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
-          taxis->fdate = (int)cdiDate_get(taxis->rdatetime.date);
+          taxis->fdate = (int) cdiDate_get(taxis->rdatetime.date);
           taxis->ftime = cdiTime_get(taxis->rdatetime.time);
           taxis->sdate = sDate;
           taxis->stime = sTime;
@@ -1217,7 +1217,7 @@ gribapiScanTimestep1(stream_t *streamptr)
           taxis->rdatetime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
-          taxis->fdate = (int)cdiDate_get(taxis->rdatetime.date);
+          taxis->fdate = (int) cdiDate_get(taxis->rdatetime.date);
           taxis->ftime = cdiTime_get(taxis->rdatetime.time);
           taxis->sdate = sDate;
           taxis->stime = sTime;
@@ -1374,12 +1374,12 @@ gribapiScanTimestep2(stream_t *streamptr)
               taxis->type = TAXIS_RELATIVE;
               taxis->unit = gribapiGetTimeUnits(gh);
               taxis->rdatetime = gribapiGetDataDateTime(gh);
-           }
+            }
           else
             {
               taxis->type = TAXIS_ABSOLUTE;
             }
-          taxis->fdate = (int)cdiDate_get(taxis->rdatetime.date);
+          taxis->fdate = (int) cdiDate_get(taxis->rdatetime.date);
           taxis->ftime = cdiTime_get(taxis->rdatetime.time);
           taxis->vdatetime = cdiDateTime_set(vDate, vTime);
           taxis->sdate = sDate;
@@ -1577,7 +1577,7 @@ gribapiScanTimestep(stream_t *streamptr)
                 {
                   taxis->type = TAXIS_ABSOLUTE;
                 }
-              taxis->fdate = (int)cdiDate_get(taxis->rdatetime.date);
+              taxis->fdate = (int) cdiDate_get(taxis->rdatetime.date);
               taxis->ftime = cdiTime_get(taxis->rdatetime.time);
               taxis->vdatetime = cdiDateTime_set(vDate, vTime);
               taxis->sdate = sDate;
@@ -1960,8 +1960,10 @@ gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinitionTemp
       proDefTempNum = cdiGribAPI_ts_str_map[tsteptype].productionTemplate;
     }
 
-  if (productDefinitionTemplate != -1) proDefTempNum = productDefinitionTemplate;
-  else if (typeOfGeneratingProcess == 4) proDefTempNum = (proDefTempNum == 8) ? 11 : 1;
+  if (productDefinitionTemplate != -1)
+    proDefTempNum = productDefinitionTemplate;
+  else if (typeOfGeneratingProcess == 4)
+    proDefTempNum = (proDefTempNum == 8) ? 11 : 1;
 
   if (!gcinit)
     {
@@ -1988,9 +1990,9 @@ gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int date, int time, in
 }
 
 static int
-gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, int vdate, int vtime, int sdate,
-                      int stime, int productDefinitionTemplate, int typeOfGeneratingProcess, int tsteptype, int timeunit,
-                      int calendar, int gcinit)
+gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, int vdate, int vtime, int sdate, int stime,
+                      int productDefinitionTemplate, int typeOfGeneratingProcess, int tsteptype, int timeunit, int calendar,
+                      int gcinit)
 {
   int status = -1;
 
@@ -2069,8 +2071,8 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
 }
 
 static void
-gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGeneratingProcess, grib_handle *gh, int vdate,
-               int vtime, int tsteptype, int numavg, int taxisID, int gcinit)
+gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGeneratingProcess, grib_handle *gh, int vdate, int vtime,
+               int tsteptype, int numavg, int taxisID, int gcinit)
 {
   UNUSED(numavg);
 
