@@ -4071,7 +4071,6 @@ cdfVerifyVars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 int
 cdfInqContents(stream_t *streamptr)
 {
-  int ndims, nvars, ngatts, unlimdimid;
   bool time_has_units = false;
   bool time_has_bounds = false;
   bool time_climatology = false;
@@ -4095,6 +4094,7 @@ cdfInqContents(stream_t *streamptr)
   nc_inq_format(fileID, &format);
 #endif
 
+  int ndims, nvars, ngatts, unlimdimid;
   cdf_inq(fileID, &ndims, &nvars, &ngatts, &unlimdimid);
 
   if (CDI_Debug) Message("root: ndims %d, nvars %d, ngatts %d", ndims, nvars, ngatts);
