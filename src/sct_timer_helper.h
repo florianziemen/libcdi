@@ -16,9 +16,7 @@
 #define TIMER_LOG
 EXTERN int timer_ioTotal;
 EXTERN int timer_getTimeStepData;
-EXTERN int timer_winStart;
 EXTERN int timer_mpi_get;
-EXTERN int timer_winComplete;
 EXTERN int timer_yaxt_exchange;
 EXTERN int timer_postwritebatch;
 EXTERN int timer_readgetbuffers;

@@ -1970,24 +1970,18 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
   for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
     if (streamActivity[streamIdx])
       {
-        sct_start(timer_winStart);
         clearModelWinBuffer(streamIdx);
+        sct_start(timer_mpi_get);
         xmpi(MPI_Win_start(clientGroup, 0, rxWin[streamIdx].getWin));
-        sct_stop(timer_winStart);
         /* FIXME: this needs to use MPI_PACKED for portability */
         for (size_t i = 0; i < (size_t)numClients_; ++i)
-        {
-          sct_start(timer_mpi_get);
           xmpi(MPI_Get(rxWin[streamIdx].clientBuf[i].mem,
                        (int)rxWin[streamIdx].clientBuf[i].size, MPI_UNSIGNED_CHAR,
                        clientRanks_[i], 0,
                        (int)rxWin[streamIdx].clientBuf[i].size, MPI_UNSIGNED_CHAR,
                        rxWin[streamIdx].getWin));
-          sct_stop(timer_mpi_get);
-        }
-        sct_start(timer_winComplete);
         xmpi(MPI_Win_complete(rxWin[streamIdx].getWin));
-        sct_stop(timer_winComplete);
+        sct_stop(timer_mpi_get);
         if (!conf->batchedRMA)
         {
           xdebug("%s", "not batchedRMA");

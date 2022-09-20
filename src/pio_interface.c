@@ -560,9 +560,7 @@ void new_context(const char *context_name, MPI_Comm comm)
 
   timer_ioTotal             = sct_new_timer("IO servers total");
   timer_getTimeStepData     = sct_new_timer(" L getTimeStepData");
-  timer_winStart            = sct_new_timer("    L window start");
   timer_mpi_get             = sct_new_timer("    L MPI_Get");
-  timer_winComplete         = sct_new_timer("    L window complete");
   for (int i = 0; i < TIMER_MAX_STEPS; ++i) {
     sprintf(readgetbuffers_str, "    L read getbuffers[%02d]", i+1);
     timer_readgetbuffers_arr[i] = sct_new_timer(readgetbuffers_str);
