@@ -1,7 +1,3 @@
-2022-09-23  Uwe Schulzweida
-
-	* removed default positive attribute for pressure levels
-
 2022-08-12  Uwe Schulzweida
 
 	* added CDI_KEY_CHUNKTYPE and CDI_KEY_CHUNKSIZE
