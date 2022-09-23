@@ -31,7 +31,7 @@ ZaxistypeEntry[] = {
   { /*  1 */ 0, "lev",               "generic",                "",               ""},
   { /*  2 */ 2, "lev",               "hybrid",                 "",               "level"},
   { /*  3 */ 2, "lev",               "hybrid_half",            "",               "level"},
-  { /*  4 */ 2, "plev",              "pressure",               "air_pressure",   "Pa"},
+  { /*  4 */ 0, "plev",              "pressure",               "air_pressure",   "Pa"},
   { /*  5 */ 1, "height",            "height",                 "height",         "m"},
   { /*  6 */ 2, "depth",             "depth_below_sea",        "depth",          "m"},
   { /*  7 */ 2, "depth",             "depth_below_land",       "",               "cm"},
