@@ -42,7 +42,7 @@ case "${HOSTNAME}" in
 	            CC=icc CFLAGS="-g -D_REENTRANT -Wall -Wwrite-strings -O3 -march=native -fp-model source"
 	;;
     bailung*|d133*|d134*)
-	${CONFPATH}configure --prefix=$HOME/local \
+	${CONFPATH}configure --prefix=$HOME/local/cdi \
                     --enable-maintainer-mode \
                     --enable-iso-c-interface \
                     --enable-swig \
@@ -69,7 +69,7 @@ case "${HOSTNAME}" in
                  --with-fdb5=$HOME/src/fdb \
                  --with-eccodes=$HOME/local/eccodes-2.22.0 \
                  --with-netcdf=$HOME/local/netcdf-c-4.9.0"
-        PREFIX="--prefix=$HOME/local"
+        PREFIX="--prefix=$HOME/local/cdi"
         LD_ADD="-Wl,-rpath,$HOME/local/eccodes-2.22.0/lib -Wl,-rpath,$HOME/src/fdb/lib"
         if  test "$COMP" = clang ; then
           ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \

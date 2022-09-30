@@ -2,6 +2,10 @@
 
 	* Version 2.1.0 released
 
+2022-09-30  Uwe Schulzweida
+
+	* install cmake files in <install>/lib/cmake/cdi
+
 2022-08-12  Uwe Schulzweida
 
 	* added CDI_KEY_CHUNKTYPE and CDI_KEY_CHUNKSIZE

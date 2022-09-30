@@ -270,8 +270,8 @@ libcdipio_la_LIBADD   = libcdi.la $(LIBRT) $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C
 
 LOCALTARGETS  =
 if ENABLE_CDI_LIB
-LOCALTARGETS += cmake/libcdi/cdi-config.cmake
-LOCALTARGETS += cmake/libcdi/cdi-config-version.cmake
+LOCALTARGETS += cmake/cdi/cdi-config.cmake
+LOCALTARGETS += cmake/cdi/cdi-config-version.cmake
 LOCALTARGETS += pkgconfig/cdi.pc
 if USE_MPI
 LOCALTARGETS += pkgconfig/cdipio.pc
@@ -295,11 +295,11 @@ mo_cdi.$(FCMODEXT): mo_cdi.lo
 endif
 	@if test ! -f $@; then rm -f $<; $(MAKE) $<; fi
 #
-cmake/libcdi/cdi-config.cmake: cmake/libcdi/cdi-config.cmake.in ../config.status
-	(cd .. ; ./config.status src/cmake/libcdi/cdi-config.cmake)
+cmake/cdi/cdi-config.cmake: cmake/cdi/cdi-config.cmake.in ../config.status
+	(cd .. ; ./config.status src/cmake/cdi/cdi-config.cmake)
 
-cmake/libcdi/cdi-config-version.cmake: cmake/libcdi/cdi-config-version.cmake.in ../config.status
-	(cd .. ; ./config.status src/cmake/libcdi/cdi-config-version.cmake)
+cmake/cdi/cdi-config-version.cmake: cmake/cdi/cdi-config-version.cmake.in ../config.status
+	(cd .. ; ./config.status src/cmake/cdi/cdi-config-version.cmake)
 
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
@@ -326,10 +326,10 @@ endif
 endif
 
 if ENABLE_CDI_LIB
-CMAKECONFIG_FILES = cmake/libcdi/cdi-config.cmake
-CLEANFILES += cmake/libcdi/cdi-config.cmake
-CMAKECONFIG_FILES += cmake/libcdi/cdi-config-version.cmake
-CLEANFILES += cmake/libcdi/cdi-config-version.cmake
+CMAKECONFIG_FILES = cmake/cdi/cdi-config.cmake
+CLEANFILES += cmake/cdi/cdi-config.cmake
+CMAKECONFIG_FILES += cmake/cdi/cdi-config-version.cmake
+CLEANFILES += cmake/cdi/cdi-config-version.cmake
 PKGCONFIG_FILES = pkgconfig/cdi.pc
 CLEANFILES += pkgconfig/cdi.pc
 if USE_MPI
