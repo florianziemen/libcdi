@@ -2,6 +2,10 @@
 
 	* Version 2.1.0 released
 
+2022-10-04  Uwe Schulzweida
+
+	* cdi_encode_timeval: added support for TUNIT_SECOND
+
 2022-09-30  Uwe Schulzweida
 
 	* install cmake files in <install>/lib/cmake/cdi

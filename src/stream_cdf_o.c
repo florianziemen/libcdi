@@ -62,35 +62,35 @@ cdfDefTimestep(stream_t *streamptr, int tsID)
       cdfEndDef(streamptr);
     }
 
-  double timevalue = cdi_encode_timeval(taxis->vdatetime, &streamptr->tsteps[0].taxis);
-  if (CDI_Debug) Message("tsID = %d  timevalue = %f", tsID, timevalue);
+  double timeValue = cdi_encode_timeval(taxis->vdatetime, &streamptr->tsteps[0].taxis);
+  if (CDI_Debug) Message("tsID = %d  timeValue = %f", tsID, timeValue);
 
   int ncvarid = streamptr->basetime.ncvarid;
   size_t index = (size_t) tsID;
-  cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
+  cdf_put_var1_double(fileID, ncvarid, &index, &timeValue);
 
   if (taxis->has_bounds)
     {
       ncvarid = streamptr->basetime.ncvarboundsid;
       if (ncvarid == CDI_UNDEFID) Error("Call to taxisWithBounds() missing!");
 
-      timevalue = cdi_encode_timeval(taxis->vdatetime_lb, &streamptr->tsteps[0].taxis);
+      timeValue = cdi_encode_timeval(taxis->vdatetime_lb, &streamptr->tsteps[0].taxis);
       size_t start[2] = { tsID, 0 }, count[2] = { 1, 1 };
-      cdf_put_vara_double(fileID, ncvarid, start, count, &timevalue);
+      cdf_put_vara_double(fileID, ncvarid, start, count, &timeValue);
 
-      timevalue = cdi_encode_timeval(taxis->vdatetime_ub, &streamptr->tsteps[0].taxis);
+      timeValue = cdi_encode_timeval(taxis->vdatetime_ub, &streamptr->tsteps[0].taxis);
       start[0] = (size_t) tsID;
       count[0] = 1;
       start[1] = 1;
       count[1] = 1;
-      cdf_put_vara_double(fileID, ncvarid, start, count, &timevalue);
+      cdf_put_vara_double(fileID, ncvarid, start, count, &timeValue);
     }
 
   ncvarid = streamptr->basetime.leadtimeid;
   if (taxis->type == TAXIS_FORECAST && ncvarid != CDI_UNDEFID)
     {
-      timevalue = taxis->fc_period;
-      cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
+      timeValue = taxis->fc_period;
+      cdf_put_var1_double(fileID, ncvarid, &index, &timeValue);
     }
 }
 
@@ -454,7 +454,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims, bool
               if (IS_EQUAL(inqVal(gridID0, 0), inqVal(gridID, 0))
                   && IS_EQUAL(inqVal(gridID0, dimlen - 1), inqVal(gridID, dimlen - 1)))
                 {
-                  dimID = ncgrid[index].ncIDs[axisLetter == 'X' ? CDF_DIMID_X : CDF_DIMID_Y];
+                  dimID = ncgrid[index].ncIDs[(axisLetter == 'X') ? CDF_DIMID_X : CDF_DIMID_Y];
                   break;
                 }
             }
@@ -535,11 +535,11 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims, bool
       if (ncbvarid != CDI_UNDEFID) cdf_put_var_double(fileID, ncbvarid, pbounds);
       if (gen_bounds) Free(pbounds);
 
-      if (ndims == 0 || addVarToGrid) ncgrid[gridindex].ncIDs[axisLetter == 'X' ? CDF_VARID_X : CDF_VARID_Y] = ncvarid;
+      if (ndims == 0 || addVarToGrid) ncgrid[gridindex].ncIDs[(axisLetter == 'X') ? CDF_VARID_X : CDF_VARID_Y] = ncvarid;
     }
 
   ncgrid[gridindex].gridID = gridID;
-  ncgrid[gridindex].ncIDs[axisLetter == 'X' ? CDF_DIMID_X : CDF_DIMID_Y] = dimID;
+  ncgrid[gridindex].ncIDs[(axisLetter == 'X') ? CDF_DIMID_X : CDF_DIMID_Y] = dimID;
 }
 
 static void
