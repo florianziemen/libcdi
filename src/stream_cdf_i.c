@@ -171,13 +171,13 @@ static int
 scan_time_units(const char *unitstr)
 {
   const size_t len = strlen(unitstr);
-  const int timeunit = get_timeunit(len, unitstr);
+  const int timeunit = get_time_units(len, unitstr);
   if (timeunit == -1) Message("Unsupported TIMEUNIT: %s!", unitstr);
   return timeunit;
 }
 
 static void
-setForecastTime(const char *timestr, taxis_t *taxis)
+set_forecast_time(const char *timestr, taxis_t *taxis)
 {
   const size_t len = strlen(timestr);
   if (len != 0)
@@ -191,26 +191,26 @@ setForecastTime(const char *timestr, taxis_t *taxis)
 }
 
 static int
-setBaseTime(const char *timeunits, taxis_t *taxis)
+set_base_time(const char *timeUnitsStr, taxis_t *taxis)
 {
-  int taxistype = TAXIS_ABSOLUTE;
+  int taxisType = TAXIS_ABSOLUTE;
 
-  size_t len = strlen(timeunits);
-  while (isspace(*timeunits) && len)
+  size_t len = strlen(timeUnitsStr);
+  while (isspace(*timeUnitsStr) && len)
     {
-      timeunits++;
+      timeUnitsStr++;
       len--;
     }
 
   char *tu = (char *) Malloc((len + 1) * sizeof(char));
 
-  for (size_t i = 0; i < len; i++) tu[i] = (char) tolower((int) timeunits[i]);
+  for (size_t i = 0; i < len; i++) tu[i] = (char) tolower((int) timeUnitsStr[i]);
   tu[len] = 0;
 
-  int timeunit = get_timeunit(len, tu);
-  if (timeunit == -1)
+  int timeUnits = get_time_units(len, tu);
+  if (timeUnits == -1)
     {
-      Message("Unsupported TIMEUNIT: %s!", timeunits);
+      Message("Unsupported TIMEUNIT: %s!", timeUnitsStr);
       return 1;
     }
 
@@ -220,37 +220,37 @@ setBaseTime(const char *timeunits, taxis_t *taxis)
     {
       while (isspace(tu[pos])) ++pos;
 
-      if (strStartsWith(tu + pos, "since")) taxistype = TAXIS_RELATIVE;
+      if (strStartsWith(tu + pos, "since")) taxisType = TAXIS_RELATIVE;
 
       while (pos < len && !isspace(tu[pos])) ++pos;
       if (tu[pos])
         {
           while (isspace(tu[pos])) ++pos;
 
-          if (taxistype == TAXIS_ABSOLUTE)
+          if (taxisType == TAXIS_ABSOLUTE)
             {
-              if (timeunit == TUNIT_DAY)
+              if (timeUnits == TUNIT_DAY)
                 {
                   if (!strStartsWith(tu + pos, "%y%m%d.%f"))
                     {
                       Warning("Unsupported format %s for TIMEUNIT day!", tu + pos);
-                      timeunit = -1;
+                      timeUnits = -1;
                     }
                 }
-              else if (timeunit == TUNIT_MONTH)
+              else if (timeUnits == TUNIT_MONTH)
                 {
                   if (!strStartsWith(tu + pos, "%y%m.%f"))
                     {
                       Warning("Unsupported format %s for TIMEUNIT month!", tu + pos);
-                      timeunit = -1;
+                      timeUnits = -1;
                     }
                 }
-              else if (timeunit == TUNIT_YEAR)
+              else if (timeUnits == TUNIT_YEAR)
                 {
                   if (!strStartsWith(tu + pos, "%y.%f"))
                     {
                       Warning("Unsupported format %s for TIMEUNIT year!", tu + pos);
-                      timeunit = -1;
+                      timeUnits = -1;
                     }
                 }
               else
@@ -258,7 +258,7 @@ setBaseTime(const char *timeunits, taxis_t *taxis)
                   Warning("Unsupported format for time units: %s!", tu);
                 }
             }
-          else if (taxistype == TAXIS_RELATIVE)
+          else if (taxisType == TAXIS_RELATIVE)
             {
               taxis->rdatetime = scan_time_string(tu + pos);
               if (CDI_Debug)
@@ -267,12 +267,12 @@ setBaseTime(const char *timeunits, taxis_t *taxis)
         }
     }
 
-  taxis->type = taxistype;
-  taxis->unit = timeunit;
+  taxis->type = taxisType;
+  taxis->unit = timeUnits;
 
   Free(tu);
 
-  if (CDI_Debug) Message("taxistype = %d  unit = %d", taxistype, timeunit);
+  if (CDI_Debug) Message("taxisType = %d  timeUnits = %d", taxisType, timeUnits);
 
   return 0;
 }
@@ -3774,7 +3774,7 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
 
   if (timedimid == CDI_UNDEFID)
     {
-      char timeunits[CDI_MAX_NAME];
+      char timeUnitsStr[CDI_MAX_NAME];
 
       for (ncvarid = 0; ncvarid < nvars; ncvarid++)
         {
@@ -3783,10 +3783,10 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
             {
               if (ncvar->units[0])
                 {
-                  strcpy(timeunits, ncvar->units);
-                  strToLower(timeunits);
+                  strcpy(timeUnitsStr, ncvar->units);
+                  strToLower(timeUnitsStr);
 
-                  if (is_time_units(timeunits))
+                  if (is_time_units(timeUnitsStr))
                     {
                       streamptr->basetime.ncvarid = ncvarid;
                       break;
@@ -4372,7 +4372,7 @@ cdfInqContents(stream_t *streamptr)
     {
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
-      if (setBaseTime(ncvars[nctimevarid].units, taxis) == 1)
+      if (set_base_time(ncvars[nctimevarid].units, taxis) == 1)
         {
           nctimevarid = CDI_UNDEFID;
           streamptr->basetime.ncvarid = CDI_UNDEFID;
@@ -4389,7 +4389,7 @@ cdfInqContents(stream_t *streamptr)
           if (timeunit == -1) timeunit = taxis->unit;
           taxis->fc_unit = timeunit;
 
-          setForecastTime(fcreftime, taxis);
+          set_forecast_time(fcreftime, taxis);
         }
     }
 

@@ -1372,31 +1372,37 @@ cdi_decode_timeval(double timevalue, taxis_t *taxis)
 double
 cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis)
 {
-  double timevalue;
+  double timeValue = 0.0;
 
   if (taxis->type == TAXIS_ABSOLUTE)
     {
       if (taxis->unit == TUNIT_YEAR)
         {
-          timevalue = datetime.date.year;
+          timeValue = datetime.date.year;
         }
       else if (taxis->unit == TUNIT_MONTH)
         {
-          int64_t xdate = cdiDate_get(datetime.date);
-          timevalue = xdate / 100 + copysign((double) (datetime.date.day != 0) * 0.5, (double) xdate);
+          const int64_t xdate = cdiDate_get(datetime.date);
+          timeValue = xdate / 100 + copysign((double) (datetime.date.day != 0) * 0.5, (double) xdate);
+        }
+      else if (taxis->unit == TUNIT_SECOND)
+        {
+          int hour, minute, second, ms;
+          cdiTime_decode(datetime.time, &hour, &minute, &second, &ms);
+          timeValue = hour * 3600 + minute * 60 + second;
         }
       else
         {
           int hour, minute, second, ms;
           cdiTime_decode(datetime.time, &hour, &minute, &second, &ms);
-          int64_t xdate = cdiDate_get(datetime.date);
-          timevalue = copysign(1.0, (double) xdate) * (fabs((double) xdate) + (hour * 3600 + minute * 60 + second) / 86400.0);
+          const int64_t xdate = cdiDate_get(datetime.date);
+          timeValue = copysign(1.0, (double) xdate) * (fabs((double) xdate) + (hour * 3600 + minute * 60 + second) / 86400.0);
         }
     }
   else
-    timevalue = datetime2rtimeval(datetime, taxis);
+    timeValue = datetime2rtimeval(datetime, taxis);
 
-  return timevalue;
+  return timeValue;
 }
 
 void
