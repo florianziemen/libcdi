@@ -2228,7 +2228,7 @@ cdf_check_gridtype(int *gridtype, bool isLon, bool isLat, size_t xsize, size_t y
 {
   if (isLat && (isLon || xsize == 0))
     {
-      double yinc = 0;
+      double yinc = 0.0;
       if (isLon && ysize > 1)
         {
           yinc = fabs(grid->y.vals[0] - grid->y.vals[1]);
@@ -2245,14 +2245,14 @@ cdf_check_gridtype(int *gridtype, bool isLon, bool isLat, size_t xsize, size_t y
           grid->np = (int) (ysize / 2);
         }
       else
-        *gridtype = GRID_LONLAT;
-    }
-  else if (isLon && !isLat && ysize == 0)
-    {
-      *gridtype = GRID_LONLAT;
+        {
+          *gridtype = GRID_LONLAT;
+        }
     }
   else
-    *gridtype = GRID_GENERIC;
+    {
+      *gridtype = (isLon && !isLat && ysize == 0) ? GRID_LONLAT : GRID_GENERIC;
+    }
 }
 
 static bool
@@ -2879,17 +2879,17 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
       ncvar_t *ncvar = &ncvars[ncvarid];
       if (ncvar->varStatus == DataVar && ncvar->gridID == CDI_UNDEFID)
         {
-          int ndims = ncvar->ndims;
+          const int ndims = ncvar->ndims;
           int *dimtype = ncvar->dimtype;
           int vdimid = CDI_UNDEFID;
           struct addIfNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 }, gridAdded = { .Id = CDI_UNDEFID, .isNew = 0 };
           int xdimid = CDI_UNDEFID, ydimid = CDI_UNDEFID;
-          int nydims = cdf_get_xydimid(ndims, ncvar->dimids, dimtype, &xdimid, &ydimid);
+          const int nydims = cdf_get_xydimid(ndims, ncvar->dimids, dimtype, &xdimid, &ydimid);
 
           int xaxisid = (xdimid != CDI_UNDEFID) ? ncdims[xdimid].ncvarid : CDI_UNDEFID;
           int yaxisid = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].ncvarid : CDI_UNDEFID;
-          int xvarid = (ncvar->xvarid != CDI_UNDEFID) ? ncvar->xvarid : xaxisid;
-          int yvarid = (ncvar->yvarid != CDI_UNDEFID) ? ncvar->yvarid : yaxisid;
+          const int xvarid = (ncvar->xvarid != CDI_UNDEFID) ? ncvar->xvarid : xaxisid;
+          const int yvarid = (ncvar->yvarid != CDI_UNDEFID) ? ncvar->yvarid : yaxisid;
 
           size_t xsize = (xdimid != CDI_UNDEFID) ? ncdims[xdimid].len : 0;
           size_t ysize = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].len : 0;

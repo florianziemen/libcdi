@@ -2593,7 +2593,7 @@ gridCompareP(void *gridptr1, void *gridptr2)
 }
 
 static void
-gridComplete(grid_t *grid)
+grid_complete(grid_t *grid)
 {
   const int gridID = grid->self;
 
@@ -2781,7 +2781,7 @@ gridGenerate(const grid_t *grid)
   gridptr->gme.ni2 = grid->gme.ni2;
   gridptr->gme.ni3 = grid->gme.ni3;
 
-  gridComplete(gridptr);
+  grid_complete(gridptr);
 
   cdiCopyVarKey(&grid->keys, CDI_KEY_UUID, &gridptr->keys);
 
@@ -4613,8 +4613,8 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
           1 search in grid table only
           2 search in grid table only and don't store the grid in vlist
    */
-  bool gridglobdefined = false;
-  bool griddefined = false;
+  bool gridIsDefinedGlobal = false;
+  bool gridIsDefined = false;
   int gridID = CDI_UNDEFID;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -4627,7 +4627,7 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
           {
             if (gridCompare(gridID, grid, false) == false)
               {
-                griddefined = true;
+                gridIsDefined = true;
                 break;
               }
           }
@@ -4635,28 +4635,28 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
           Error("Internal problem: undefined gridID in vlist %d, position %u!", vlistID, index);
       }
 
-  if (!griddefined)
+  if (!gridIsDefined)
     {
       struct gridCompareSearchState query;
       query.queryKey = grid;  // = { .queryKey = grid };
-      if ((gridglobdefined = (cdiResHFilterApply(&gridOps, gridCompareSearch, &query) == CDI_APPLY_STOP)))
+      if ((gridIsDefinedGlobal = (cdiResHFilterApply(&gridOps, gridCompareSearch, &query) == CDI_APPLY_STOP)))
         gridID = query.resIDValue;
 
-      if (mode == 1 && gridglobdefined)
+      if (mode == 1 && gridIsDefinedGlobal)
         for (int index = 0; index < ngrids; index++)
           if (vlistptr->gridIDs[index] == gridID)
             {
-              gridglobdefined = false;
+              gridIsDefinedGlobal = false;
               break;
             }
     }
 
-  if (!griddefined)
+  if (!gridIsDefined)
     {
-      if (!gridglobdefined)
+      if (!gridIsDefinedGlobal)
         {
           grid->self = gridID = reshPut(grid, &gridOps);
-          gridComplete(grid);
+          grid_complete(grid);
         }
       if (mode < 2)
         {
@@ -4666,7 +4666,7 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
         }
     }
 
-  return (struct addIfNewRes){ .Id = gridID, .isNew = (!griddefined && !gridglobdefined) };
+  return (struct addIfNewRes){ .Id = gridID, .isNew = (!gridIsDefined && !gridIsDefinedGlobal) };
 }
 
 const struct gridVirtTable cdiGridVtable = {
