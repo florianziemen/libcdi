@@ -184,6 +184,7 @@ extern "C" {
 #define  CDI_PROJ_LAEA             23  // Lambert Azimuthal Equal Area
 #define  CDI_PROJ_SINU             24  // Sinusoidal
 #define  CDI_PROJ_STERE            25  // Polar stereographic
+#define  CDI_PROJ_HEALPIX          26  // Healpix
 
 // ZAXIS types
 

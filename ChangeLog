@@ -2,6 +2,10 @@
 
 	* Version 2.1.0 released
 
+2022-10-05  Uwe Schulzweida
+
+	* Added CDI_PROJ_HEALPIX
+
 2022-10-04  Uwe Schulzweida
 
 	* cdi_encode_timeval: added support for TUNIT_SECOND

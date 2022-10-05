@@ -898,6 +898,7 @@ gridInqProjType(int gridID)
           else if (strIsEqual(gmapname, "lambert_conformal_conic"))      projtype = CDI_PROJ_LCC;
           else if (strIsEqual(gmapname, "sinusoidal"))                   projtype = CDI_PROJ_SINU;
           else if (strIsEqual(gmapname, "polar_stereographic"))          projtype = CDI_PROJ_STERE;
+          else if (strIsEqual(gmapname, "healpix"))                      projtype = CDI_PROJ_HEALPIX;
           // clang-format on
           gridptr->projtype = projtype;
         }
