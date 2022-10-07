@@ -709,7 +709,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xsize, size_t 
       cdfPutGridStdAtts(fileID, ncxvarid, gridID, 'X');
 
       // attribute for Panoply
-      if (ndims == 3) cdf_put_att_text(fileID, ncxvarid, "_CoordinateAxisType", 3, "Lon");
+      if (!CDI_CMOR_Mode && ndims == 3) cdf_put_att_text(fileID, ncxvarid, "_CoordinateAxisType", 3, "Lon");
 
       if ((xboundsPtr = gridInqXboundsPtr(gridID)) && nvdimID != CDI_UNDEFID)
         {
@@ -736,7 +736,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xsize, size_t 
       cdfPutGridStdAtts(fileID, ncyvarid, gridID, 'Y');
 
       // attribute for Panoply
-      if (ndims == 3) cdf_put_att_text(fileID, ncyvarid, "_CoordinateAxisType", 3, "Lat");
+      if (!CDI_CMOR_Mode && ndims == 3) cdf_put_att_text(fileID, ncyvarid, "_CoordinateAxisType", 3, "Lat");
 
       if ((yboundsPtr = gridInqYboundsPtr(gridID)) && nvdimID != CDI_UNDEFID)
         {
