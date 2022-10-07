@@ -147,6 +147,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_PROJ_LAEA = 23
   integer(c_int), public, parameter :: CDI_PROJ_SINU = 24
   integer(c_int), public, parameter :: CDI_PROJ_STERE = 25
+  integer(c_int), public, parameter :: CDI_PROJ_HEALPIX = 26
   integer(c_int), public, parameter :: ZAXIS_SURFACE = 0
   integer(c_int), public, parameter :: ZAXIS_GENERIC = 1
   integer(c_int), public, parameter :: ZAXIS_HYBRID = 2

@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   September 2022
+! Uwe Schulzweida, MPI-MET, Hamburg,   October 2022
 !
 
 !
@@ -293,6 +293,8 @@
       PARAMETER (CDI_PROJ_SINU          = 24)
       INTEGER    CDI_PROJ_STERE
       PARAMETER (CDI_PROJ_STERE         = 25)
+      INTEGER    CDI_PROJ_HEALPIX
+      PARAMETER (CDI_PROJ_HEALPIX       = 26)
 !
 !  ZAXIS types
 !
