@@ -147,6 +147,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_PROJ_LAEA = 23
   integer(c_int), public, parameter :: CDI_PROJ_SINU = 24
   integer(c_int), public, parameter :: CDI_PROJ_STERE = 25
+  integer(c_int), public, parameter :: CDI_PROJ_HEALPIX = 26
   integer(c_int), public, parameter :: ZAXIS_SURFACE = 0
   integer(c_int), public, parameter :: ZAXIS_GENERIC = 1
   integer(c_int), public, parameter :: ZAXIS_HYBRID = 2
@@ -390,8 +391,6 @@ module mo_cdi
   public :: vlistInqVarCode
   public :: vlistDefVarDatatype
   public :: vlistInqVarDatatype
-  public :: vlistDefVarChunkType
-  public :: vlistInqVarChunkType
   public :: vlistDefVarXYZ
   public :: vlistInqVarXYZ
   public :: vlistDefVarNSB
@@ -484,11 +483,13 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_STDNAME = 944
   integer(c_int), public, parameter :: CDI_KEY_UNITS = 945
   integer(c_int), public, parameter :: CDI_KEY_DATATYPE = 946
-  integer(c_int), public, parameter :: CDI_KEY_REFERENCEURI = 965
-  integer(c_int), public, parameter :: CDI_KEY_NUMBEROFGRIDUSED = 963
-  integer(c_int), public, parameter :: CDI_KEY_NUMBEROFGRIDINREFERENCE = 964
-  integer(c_int), public, parameter :: CDI_KEY_NUMBEROFVGRIDUSED = 961
-  integer(c_int), public, parameter :: CDI_KEY_NLEV = 962
+  integer(c_int), public, parameter :: CDI_KEY_REFERENCEURI = 947
+  integer(c_int), public, parameter :: CDI_KEY_NUMBEROFGRIDUSED = 961
+  integer(c_int), public, parameter :: CDI_KEY_NUMBEROFGRIDINREFERENCE = 962
+  integer(c_int), public, parameter :: CDI_KEY_NUMBEROFVGRIDUSED = 963
+  integer(c_int), public, parameter :: CDI_KEY_NLEV = 964
+  integer(c_int), public, parameter :: CDI_KEY_CHUNKTYPE = 965
+  integer(c_int), public, parameter :: CDI_KEY_CHUNKSIZE = 966
   integer(c_int), public, parameter :: CDI_KEY_MISSVAL = 701
   integer(c_int), public, parameter :: CDI_KEY_UUID = 960
   integer(c_int), public, parameter :: CDI_KEY_DIMNAME = 941
@@ -1519,22 +1520,6 @@ module mo_cdi
       integer(c_int), value :: varID_dummy
       integer(c_int) :: f_result
     end function vlistInqVarDatatype
-
-    subroutine vlistDefVarChunkType(vlistID_dummy, varID_dummy,&
-    & chunktype_dummy) bind(c, name = 'vlistDefVarChunkType')
-      import c_int
-      integer(c_int), value :: vlistID_dummy
-      integer(c_int), value :: varID_dummy
-      integer(c_int), value :: chunktype_dummy
-    end subroutine vlistDefVarChunkType
-
-    function vlistInqVarChunkType(vlistID_dummy, varID_dummy) bind(c, name =&
-    & 'vlistInqVarChunkType') result(f_result)
-      import c_int
-      integer(c_int), value :: vlistID_dummy
-      integer(c_int), value :: varID_dummy
-      integer(c_int) :: f_result
-    end function vlistInqVarChunkType
 
     subroutine vlistDefVarXYZ(vlistID_dummy, varID_dummy, xyz_dummy) bind(c,&
     & name = 'vlistDefVarXYZ')

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "WARNING: the current version of CDI-PIO is incompatible with the build system if ICON" >&2
+exit 0

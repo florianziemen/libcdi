@@ -7,7 +7,7 @@
 AC_PREREQ([2.69])
 LT_PREREQ([2.4.6])
 
-AC_INIT([cdi],[2.0.6],[https://mpimet.mpg.de/cdi])
+AC_INIT([cdi],[2.1.0],[https://mpimet.mpg.de/cdi])
 
 AC_DEFINE_UNQUOTED(CDI, ["$PACKAGE_VERSION"], [CDI version])
 
@@ -395,13 +395,13 @@ dnl
 m4_foreach([build_flag_var],[[BUILD_CFLAGS],[BUILD_FCFLAGS],[BUILD_LDFLAGS],[BUILD_LIBS],[BUILD_MPI_C_LIB],[BUILD_MPI_FC_LIB],[BUILD_C_INCLUDE],[BUILD_FC_INCLUDE]],
   [AC_ARG_VAR(build_flag_var,
      [append to ]m4_bpatsubst(build_flag_var, [BUILD_], [])[ during build but not in configure phase])dnl
-AC_CONFIG_COMMANDS_PRE(m4_bpatsubst(build_flag_var, [BUILD_], [])[="$]m4_bpatsubst(build_flag_var, [BUILD_], [])[$]{build_flag_var+ $build_flag_var[}"])dnl
+AC_CONFIG_COMMANDS_PRE(m4_bpatsubst(build_flag_var, [BUILD_], [])[="$]m4_bpatsubst(build_flag_var, [BUILD_], [])[$]{build_flag_var:+ $build_flag_var[}"])dnl
 AM_SUBST_NOTMAKE(build_flag_var)])dnl
 
 m4_foreach([build_tool_var],[[BUILD_CC],[BUILD_CXX],[BUILD_FC],[BUILD_F77]],
   [AC_ARG_VAR(build_tool_var,
      [replace ]m4_bpatsubst(build_tool_var, [BUILD_], [])[ with expansion of $]build_tool_var[ during build but not in configure phase])dnl
-AC_CONFIG_COMMANDS_PRE(m4_bpatsubst(build_tool_var, [BUILD_], [])[="$]{build_tool_var-$[]m4_bpatsubst(build_tool_var, [BUILD_], [])}["])dnl
+AC_CONFIG_COMMANDS_PRE(m4_bpatsubst(build_tool_var, [BUILD_], [])[="$]{build_tool_var:-$[]m4_bpatsubst(build_tool_var, [BUILD_], [])}["])dnl
 AM_SUBST_NOTMAKE(build_tool_var)])dnl
 dnl
 dnl
@@ -440,7 +440,7 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
 
 AC_CONFIG_FILES([Makefile src/Makefile interfaces/Makefile app/Makefile \
 	tests/Makefile examples/Makefile cdi.settings \
-	examples/pio/Makefile src/cmake/libcdi/cdi-config.cmake src/cmake/libcdi/cdi-config-version.cmake \
+	examples/pio/Makefile src/cmake/cdi/cdi-config.cmake src/cmake/cdi/cdi-config-version.cmake \
         src/pkgconfig/cdi.pc src/pkgconfig/cdipio.pc src/pkgconfig/cdi_f2003.pc])
 AC_OUTPUT
 

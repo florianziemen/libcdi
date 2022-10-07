@@ -23,7 +23,6 @@ int CDI_Default_ModelID = CDI_UNDEFID;
 int CDI_Default_TableID = CDI_UNDEFID;
 // int cdiNcMissingValue  = CDI_UNDEFID;
 int CDI_Netcdf_Chunksizehint = CDI_UNDEFID;
-int CDI_Chunk_Type = CDI_CHUNK_GRID;
 int CDI_Split_Ltype105 = CDI_UNDEFID;
 
 bool CDI_Ignore_Att_Coordinates = false;
@@ -296,27 +295,6 @@ cdiDefTableID(int tableID)
   CDI_Default_InstID = modelInqInstitut(modelID);
 }
 
-static void
-cdiSetChunk(const char *chunkAlgo)
-{
-  int algo = -1;
-
-  if (strIsEqual("auto", chunkAlgo))
-    algo = CDI_CHUNK_AUTO;
-  else if (strIsEqual("grid", chunkAlgo))
-    algo = CDI_CHUNK_GRID;
-  else if (strIsEqual("lines", chunkAlgo))
-    algo = CDI_CHUNK_LINES;
-  else
-    Warning("Invalid environment variable CDI_CHUNK_ALGO: %s", chunkAlgo);
-
-  if (algo != -1)
-    {
-      CDI_Chunk_Type = algo;
-      if (CDI_Debug) Message("set ChunkAlgo to %s", chunkAlgo);
-    }
-}
-
 void
 cdiSetEccodesGrib1(bool value)
 {
@@ -399,9 +377,6 @@ cdiInitialize(void)
       */
       envstr = getenv("NC_CHUNKSIZEHINT");
       if (envstr) CDI_Netcdf_Chunksizehint = atoi(envstr);
-
-      envstr = getenv("CDI_CHUNK_ALGO");
-      if (envstr) cdiSetChunk(envstr);
 
       envstr = getenv("SPLIT_LTYPE_105");
       if (envstr) CDI_Split_Ltype105 = atoi(envstr);

@@ -185,8 +185,7 @@ cdfDefTime(stream_t *streamptr)
   if (taxis->longname && taxis->longname[0])
     cdf_put_att_text(fileID, timeVarId, "long_name", strlen(taxis->longname), taxis->longname);
 
-  if (taxis->has_bounds)
-    streamptr->basetime.ncvarboundsid = cdfDefTimeBounds(fileID, timeVarId, timeDimId, taxisName, taxis);
+  if (taxis->has_bounds) streamptr->basetime.ncvarboundsid = cdfDefTimeBounds(fileID, timeVarId, timeDimId, taxisName, taxis);
 
   char unitsStr[CDI_MAX_NAME];
   cdfDefTimeUnits(unitsStr, taxis);

@@ -374,8 +374,8 @@ varAddRecord(int recID, int param, int gridID, int zaxistype, int hasBounds, int
              const VarScanKeys *scanKeys, const var_tile_t *tiles, int *tile_index)
 {
   int varID = (CDI_Split_Ltype105 != 1 || zaxistype != ZAXIS_HEIGHT)
-                       ? varGetEntry(param, gridID, zaxistype, ltype1, tsteptype, name, scanKeys, tiles)
-                       : CDI_UNDEFID;
+                  ? varGetEntry(param, gridID, zaxistype, ltype1, tsteptype, name, scanKeys, tiles)
+                  : CDI_UNDEFID;
 
   if (varID == CDI_UNDEFID)
     {
@@ -776,8 +776,8 @@ varDefZAxisReference(int nhlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZE])
 }
 
 bool
-zaxis_compare(int zaxisID, int zaxistype, int nlevels, const double *levels, const double *lbounds,
-              const double *ubounds, const char *longname, const char *units, int ltype1, int ltype2)
+zaxis_compare(int zaxisID, int zaxistype, int nlevels, const double *levels, const double *lbounds, const double *ubounds,
+              const char *longname, const char *units, int ltype1, int ltype2)
 {
   bool differ = true;
 
@@ -812,7 +812,7 @@ zaxis_compare(int zaxisID, int zaxistype, int nlevels, const double *levels, con
               for (int levelID = 0; levelID < nlevels; levelID++)
                 {
                   if (fabs(lbounds[levelID] - bounds[levelID]) > 1.e-9
-                   || fabs(ubounds[levelID] - bounds[levelID + nlevels]) > 1.e-9)
+                      || fabs(ubounds[levelID] - bounds[levelID + nlevels]) > 1.e-9)
                     {
                       differ = true;
                       break;
@@ -863,8 +863,8 @@ varDefZAxisSearch(int id, void *res, void *data)
 {
   struct varDefZAxisSearchState *state = (struct varDefZAxisSearchState *) data;
   (void) res;
-  if (zaxis_compare(id, state->zaxistype, state->nlevels, state->levels, state->lbounds, state->ubounds,
-                    state->longname, state->units, state->ltype1, state->ltype2)
+  if (zaxis_compare(id, state->zaxistype, state->nlevels, state->levels, state->lbounds, state->ubounds, state->longname,
+                    state->units, state->ltype1, state->ltype2)
       == false)
     {
       state->resIDValue = id;

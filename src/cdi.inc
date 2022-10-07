@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 2.0.0
+! Fortran interface for CDI library version 2.1.0
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   August 2022
+! Uwe Schulzweida, MPI-MET, Hamburg,   October 2022
 !
 
 !
@@ -248,7 +248,7 @@
       INTEGER    CDI_DATATYPE_UINT
       PARAMETER (CDI_DATATYPE_UINT      = 257)
 !
-!  Chunks
+!  Chunk types
 !
       INTEGER    CDI_CHUNK_AUTO
       PARAMETER (CDI_CHUNK_AUTO         =  1)
@@ -293,6 +293,8 @@
       PARAMETER (CDI_PROJ_SINU          = 24)
       INTEGER    CDI_PROJ_STERE
       PARAMETER (CDI_PROJ_STERE         = 25)
+      INTEGER    CDI_PROJ_HEALPIX
+      PARAMETER (CDI_PROJ_HEALPIX       = 26)
 !
 !  ZAXIS types
 !
@@ -1130,17 +1132,6 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarDatatype
 
-!                     vlistDefVarChunkType
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         chunktype)
-      EXTERNAL        vlistDefVarChunkType
-
-      INTEGER         vlistInqVarChunkType
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarChunkType
-
 !                     vlistDefVarXYZ
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
@@ -1640,18 +1631,22 @@
       INTEGER    CDI_KEY_DATATYPE
       PARAMETER (CDI_KEY_DATATYPE       = 946)
       INTEGER    CDI_KEY_REFERENCEURI
-      PARAMETER (CDI_KEY_REFERENCEURI   = 965)
+      PARAMETER (CDI_KEY_REFERENCEURI   = 947)
 !
 !  Integer keys
 !
       INTEGER    CDI_KEY_NUMBEROFGRIDUSED
-      PARAMETER (CDI_KEY_NUMBEROFGRIDUSED = 963)
+      PARAMETER (CDI_KEY_NUMBEROFGRIDUSED = 961)
       INTEGER    CDI_KEY_NUMBEROFGRIDINREFERENCE
-      PARAMETER (CDI_KEY_NUMBEROFGRIDINREFERENCE = 964)
+      PARAMETER (CDI_KEY_NUMBEROFGRIDINREFERENCE = 962)
       INTEGER    CDI_KEY_NUMBEROFVGRIDUSED
-      PARAMETER (CDI_KEY_NUMBEROFVGRIDUSED = 961)
+      PARAMETER (CDI_KEY_NUMBEROFVGRIDUSED = 963)
       INTEGER    CDI_KEY_NLEV
-      PARAMETER (CDI_KEY_NLEV           = 962)
+      PARAMETER (CDI_KEY_NLEV           = 964)
+      INTEGER    CDI_KEY_CHUNKTYPE
+      PARAMETER (CDI_KEY_CHUNKTYPE      = 965)
+      INTEGER    CDI_KEY_CHUNKSIZE
+      PARAMETER (CDI_KEY_CHUNKSIZE      = 966)
 !
 !  Floating point keys
 !

@@ -158,7 +158,7 @@ extern "C" {
 #define  CDI_DATATYPE_LONG        256
 #define  CDI_DATATYPE_UINT        257
 
-// Chunks
+// Chunk types
 
 #define  CDI_CHUNK_AUTO             1  // use default chunk size
 #define  CDI_CHUNK_GRID             2
@@ -184,6 +184,7 @@ extern "C" {
 #define  CDI_PROJ_LAEA             23  // Lambert Azimuthal Equal Area
 #define  CDI_PROJ_SINU             24  // Sinusoidal
 #define  CDI_PROJ_STERE            25  // Polar stereographic
+#define  CDI_PROJ_HEALPIX          26  // Healpix
 
 // ZAXIS types
 
@@ -623,9 +624,6 @@ void    vlistDefVarDatatype(int vlistID, int varID, int datatype);
 //      vlistInqVarDatatype: Get the data type of a Variable
 int     vlistInqVarDatatype(int vlistID, int varID);
 
-void    vlistDefVarChunkType(int vlistID, int varID, int chunktype);
-int     vlistInqVarChunkType(int vlistID, int varID);
-
 void    vlistDefVarXYZ(int vlistID, int varID, int xyz);
 int     vlistInqVarXYZ(int vlistID, int varID);
 
@@ -831,13 +829,15 @@ SizeType gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_STDNAME                       944  // CF Standard name of the variable
 #define  CDI_KEY_UNITS                         945  // Units of the variable
 #define  CDI_KEY_DATATYPE                      946  // Data type
-#define  CDI_KEY_REFERENCEURI                  965  // Reference URI to grid file
+#define  CDI_KEY_REFERENCEURI                  947  // Reference URI to grid file
 
 // Integer keys
-#define  CDI_KEY_NUMBEROFGRIDUSED              963  // GRIB2 numberOfGridUsed
-#define  CDI_KEY_NUMBEROFGRIDINREFERENCE       964  // GRIB2 numberOfGridInReference
-#define  CDI_KEY_NUMBEROFVGRIDUSED             961  // GRIB2 numberOfVGridUsed
-#define  CDI_KEY_NLEV                          962  // GRIB2 nlev
+#define  CDI_KEY_NUMBEROFGRIDUSED              961  // GRIB2 numberOfGridUsed
+#define  CDI_KEY_NUMBEROFGRIDINREFERENCE       962  // GRIB2 numberOfGridInReference
+#define  CDI_KEY_NUMBEROFVGRIDUSED             963  // GRIB2 numberOfVGridUsed
+#define  CDI_KEY_NLEV                          964  // GRIB2 nlev
+#define  CDI_KEY_CHUNKTYPE                     965  // ChunkType: CDI_CHUNK_AUTO/CDI_CHUNK_GRID/CDI_CHUNK_LINES
+#define  CDI_KEY_CHUNKSIZE                     966  // ChunkSize
 
 // Floating point keys
 #define  CDI_KEY_MISSVAL                       701  // Missing value

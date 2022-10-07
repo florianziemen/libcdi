@@ -102,7 +102,8 @@ typedef struct
   int dimtype[MAX_DIMS_CDF];
   size_t chunks[MAX_DIMS_CDF];
   bool chunked;
-  int chunktype;
+  int chunkType;
+  int chunkSize;
   int natts;
   int *atts;
   size_t vctsize;
@@ -170,46 +171,46 @@ static int
 scan_time_units(const char *unitstr)
 {
   const size_t len = strlen(unitstr);
-  const int timeunit = get_timeunit(len, unitstr);
+  const int timeunit = get_time_units(len, unitstr);
   if (timeunit == -1) Message("Unsupported TIMEUNIT: %s!", unitstr);
   return timeunit;
 }
 
 static void
-setForecastTime(const char *timestr, taxis_t *taxis)
+set_forecast_time(const char *timestr, taxis_t *taxis)
 {
   const size_t len = strlen(timestr);
   if (len != 0)
     {
       const CdiDateTime datetime = scan_time_string(timestr);
-      taxis->fdate = (int)cdiDate_get(datetime.date);
+      taxis->fdate = (int) cdiDate_get(datetime.date);
       taxis->ftime = cdiTime_get(datetime.time);
-     }
+    }
   else
     taxis->fdate = taxis->ftime = 0;
 }
 
 static int
-setBaseTime(const char *timeunits, taxis_t *taxis)
+set_base_time(const char *timeUnitsStr, taxis_t *taxis)
 {
-  int taxistype = TAXIS_ABSOLUTE;
+  int taxisType = TAXIS_ABSOLUTE;
 
-  size_t len = strlen(timeunits);
-  while (isspace(*timeunits) && len)
+  size_t len = strlen(timeUnitsStr);
+  while (isspace(*timeUnitsStr) && len)
     {
-      timeunits++;
+      timeUnitsStr++;
       len--;
     }
 
   char *tu = (char *) Malloc((len + 1) * sizeof(char));
 
-  for (size_t i = 0; i < len; i++) tu[i] = (char) tolower((int) timeunits[i]);
+  for (size_t i = 0; i < len; i++) tu[i] = (char) tolower((int) timeUnitsStr[i]);
   tu[len] = 0;
 
-  int timeunit = get_timeunit(len, tu);
-  if (timeunit == -1)
+  int timeUnits = get_time_units(len, tu);
+  if (timeUnits == -1)
     {
-      Message("Unsupported TIMEUNIT: %s!", timeunits);
+      Message("Unsupported TIMEUNIT: %s!", timeUnitsStr);
       return 1;
     }
 
@@ -219,37 +220,37 @@ setBaseTime(const char *timeunits, taxis_t *taxis)
     {
       while (isspace(tu[pos])) ++pos;
 
-      if (strStartsWith(tu + pos, "since")) taxistype = TAXIS_RELATIVE;
+      if (strStartsWith(tu + pos, "since")) taxisType = TAXIS_RELATIVE;
 
       while (pos < len && !isspace(tu[pos])) ++pos;
       if (tu[pos])
         {
           while (isspace(tu[pos])) ++pos;
 
-          if (taxistype == TAXIS_ABSOLUTE)
+          if (taxisType == TAXIS_ABSOLUTE)
             {
-              if (timeunit == TUNIT_DAY)
+              if (timeUnits == TUNIT_DAY)
                 {
                   if (!strStartsWith(tu + pos, "%y%m%d.%f"))
                     {
                       Warning("Unsupported format %s for TIMEUNIT day!", tu + pos);
-                      timeunit = -1;
+                      timeUnits = -1;
                     }
                 }
-              else if (timeunit == TUNIT_MONTH)
+              else if (timeUnits == TUNIT_MONTH)
                 {
                   if (!strStartsWith(tu + pos, "%y%m.%f"))
                     {
                       Warning("Unsupported format %s for TIMEUNIT month!", tu + pos);
-                      timeunit = -1;
+                      timeUnits = -1;
                     }
                 }
-              else if (timeunit == TUNIT_YEAR)
+              else if (timeUnits == TUNIT_YEAR)
                 {
                   if (!strStartsWith(tu + pos, "%y.%f"))
                     {
                       Warning("Unsupported format %s for TIMEUNIT year!", tu + pos);
-                      timeunit = -1;
+                      timeUnits = -1;
                     }
                 }
               else
@@ -257,20 +258,21 @@ setBaseTime(const char *timeunits, taxis_t *taxis)
                   Warning("Unsupported format for time units: %s!", tu);
                 }
             }
-          else if (taxistype == TAXIS_RELATIVE)
+          else if (taxisType == TAXIS_RELATIVE)
             {
               taxis->rdatetime = scan_time_string(tu + pos);
-              if (CDI_Debug) Message("rdate = %d  rtime = %d", (int)cdiDate_get(taxis->rdatetime.date), cdiTime_get(taxis->rdatetime.time));
+              if (CDI_Debug)
+                Message("rdate = %d  rtime = %d", (int) cdiDate_get(taxis->rdatetime.date), cdiTime_get(taxis->rdatetime.time));
             }
         }
     }
 
-  taxis->type = taxistype;
-  taxis->unit = timeunit;
+  taxis->type = taxisType;
+  taxis->unit = timeUnits;
 
   Free(tu);
 
-  if (CDI_Debug) Message("taxistype = %d  unit = %d", taxistype, timeunit);
+  if (CDI_Debug) Message("taxisType = %d  timeUnits = %d", taxisType, timeUnits);
 
   return 0;
 }
@@ -415,11 +417,12 @@ cdfCheckAttText(int fileID, int ncvarid, const char *attname)
   nc_type atttype;
   const int status_nc = nc_inq_atttype(fileID, ncvarid, attname, &atttype);
 
-  return (status_nc == NC_NOERR && (atttype == NC_CHAR
+  return (status_nc == NC_NOERR
+          && (atttype == NC_CHAR
 #ifdef HAVE_NETCDF4
-          || atttype == NC_STRING
+              || atttype == NC_STRING
 #endif
-          ));
+              ));
 }
 
 static void
@@ -706,7 +709,8 @@ init_ncvars(int nvars, ncvar_t *ncvars)
       for (int i = 0; i < MAX_DIMS_CDF; ++i) ncvar->dimtype[i] = CDI_UNDEFID;
       for (int i = 0; i < MAX_DIMS_CDF; ++i) ncvar->chunks[i] = 0;
       ncvar->chunked = false;
-      ncvar->chunktype = CDI_UNDEFID;
+      ncvar->chunkType = CDI_UNDEFID;
+      ncvar->chunkSize = CDI_UNDEFID;
       ncvar->natts = 0;
       ncvar->atts = NULL;
       ncvar->vctsize = 0;
@@ -2034,17 +2038,19 @@ grid_set_chunktype(grid_t *grid, ncvar_t *ncvar)
 
       if (grid->type == GRID_UNSTRUCTURED)
         {
-          ncvar->chunktype = ncvar->chunks[ndims - 1] == grid->size ? CDI_CHUNK_GRID : CDI_CHUNK_AUTO;
+          size_t chunkSize = ncvar->chunks[ndims - 1];
+          ncvar->chunkType = (chunkSize == grid->size) ? CDI_CHUNK_GRID : CDI_CHUNK_AUTO;
+          if (ncvar->chunkType == CDI_CHUNK_AUTO && ncvar->chunks[ndims - 1] > 1) ncvar->chunkSize = chunkSize;
         }
       else
         {
           if (grid->x.size > 1 && grid->y.size > 1 && ndims > 1 && grid->x.size == ncvar->chunks[ndims - 1]
               && grid->y.size == ncvar->chunks[ndims - 2])
-            ncvar->chunktype = CDI_CHUNK_GRID;
+            ncvar->chunkType = CDI_CHUNK_GRID;
           else if (grid->x.size > 1 && grid->x.size == ncvar->chunks[ndims - 1])
-            ncvar->chunktype = CDI_CHUNK_LINES;
+            ncvar->chunkType = CDI_CHUNK_LINES;
           else
-            ncvar->chunktype = CDI_CHUNK_AUTO;
+            ncvar->chunkType = CDI_CHUNK_AUTO;
         }
     }
 }
@@ -2222,7 +2228,7 @@ cdf_check_gridtype(int *gridtype, bool isLon, bool isLat, size_t xsize, size_t y
 {
   if (isLat && (isLon || xsize == 0))
     {
-      double yinc = 0;
+      double yinc = 0.0;
       if (isLon && ysize > 1)
         {
           yinc = fabs(grid->y.vals[0] - grid->y.vals[1]);
@@ -2239,14 +2245,14 @@ cdf_check_gridtype(int *gridtype, bool isLon, bool isLat, size_t xsize, size_t y
           grid->np = (int) (ysize / 2);
         }
       else
-        *gridtype = GRID_LONLAT;
-    }
-  else if (isLon && !isLat && ysize == 0)
-    {
-      *gridtype = GRID_LONLAT;
+        {
+          *gridtype = GRID_LONLAT;
+        }
     }
   else
-    *gridtype = GRID_GENERIC;
+    {
+      *gridtype = (isLon && !isLat && ysize == 0) ? GRID_LONLAT : GRID_GENERIC;
+    }
 }
 
 static bool
@@ -2578,7 +2584,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                         if (lwarn) Warning("x-bounds doesn't follow the CF-Convention, skipped!");
                         lwarn = false;
                       }
-                   }
+                  }
               }
           }
         if (yvarid != CDI_UNDEFID && CDI_Read_Cell_Corners)
@@ -2620,7 +2626,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                         if (lwarn) Warning("y-bounds doesn't follow the CF-Convention, skipped!");
                         lwarn = false;
                       }
-                   }
+                  }
               }
           }
 
@@ -2857,7 +2863,8 @@ cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int
             {
               if (CDI_Debug) Message("Same gridID %d %s", ncvar1->gridID, ncvar2->name);
               ncvar2->gridID = ncvar1->gridID;
-              ncvar2->chunktype = ncvar1->chunktype;
+              ncvar2->chunkType = ncvar1->chunkType;
+              ncvar2->chunkSize = ncvar1->chunkSize;
             }
         }
     }
@@ -2872,17 +2879,17 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
       ncvar_t *ncvar = &ncvars[ncvarid];
       if (ncvar->varStatus == DataVar && ncvar->gridID == CDI_UNDEFID)
         {
-          int ndims = ncvar->ndims;
+          const int ndims = ncvar->ndims;
           int *dimtype = ncvar->dimtype;
           int vdimid = CDI_UNDEFID;
           struct addIfNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 }, gridAdded = { .Id = CDI_UNDEFID, .isNew = 0 };
           int xdimid = CDI_UNDEFID, ydimid = CDI_UNDEFID;
-          int nydims = cdf_get_xydimid(ndims, ncvar->dimids, dimtype, &xdimid, &ydimid);
+          const int nydims = cdf_get_xydimid(ndims, ncvar->dimids, dimtype, &xdimid, &ydimid);
 
           int xaxisid = (xdimid != CDI_UNDEFID) ? ncdims[xdimid].ncvarid : CDI_UNDEFID;
           int yaxisid = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].ncvarid : CDI_UNDEFID;
-          int xvarid = (ncvar->xvarid != CDI_UNDEFID) ? ncvar->xvarid : xaxisid;
-          int yvarid = (ncvar->yvarid != CDI_UNDEFID) ? ncvar->yvarid : yaxisid;
+          const int xvarid = (ncvar->xvarid != CDI_UNDEFID) ? ncvar->xvarid : xaxisid;
+          const int yvarid = (ncvar->yvarid != CDI_UNDEFID) ? ncvar->yvarid : yaxisid;
 
           size_t xsize = (xdimid != CDI_UNDEFID) ? ncdims[xdimid].len : 0;
           size_t ysize = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].len : 0;
@@ -3418,7 +3425,8 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
 #ifdef HAVE_NETCDF4
       if (ncvar->ldeflate) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_ZIP);
       if (ncvar->lszip) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_SZIP);
-      if (ncvar->chunked && ncvar->chunktype != CDI_UNDEFID) vlistDefVarChunkType(vlistID, varID, ncvar->chunktype);
+      if (ncvar->chunked && ncvar->chunkType != CDI_UNDEFID) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, ncvar->chunkType);
+      if (ncvar->chunked && ncvar->chunkSize > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, ncvar->chunkSize);
 #endif
 
       streamptr->vars[varID1].defmiss = false;
@@ -3766,7 +3774,7 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
 
   if (timedimid == CDI_UNDEFID)
     {
-      char timeunits[CDI_MAX_NAME];
+      char timeUnitsStr[CDI_MAX_NAME];
 
       for (ncvarid = 0; ncvarid < nvars; ncvarid++)
         {
@@ -3775,10 +3783,10 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
             {
               if (ncvar->units[0])
                 {
-                  strcpy(timeunits, ncvar->units);
-                  strToLower(timeunits);
+                  strcpy(timeUnitsStr, ncvar->units);
+                  strToLower(timeUnitsStr);
 
-                  if (is_time_units(timeunits))
+                  if (is_time_units(timeUnitsStr))
                     {
                       streamptr->basetime.ncvarid = ncvarid;
                       break;
@@ -4065,7 +4073,6 @@ cdfVerifyVars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 int
 cdfInqContents(stream_t *streamptr)
 {
-  int ndims, nvars, ngatts, unlimdimid;
   bool time_has_units = false;
   bool time_has_bounds = false;
   bool time_climatology = false;
@@ -4089,6 +4096,7 @@ cdfInqContents(stream_t *streamptr)
   nc_inq_format(fileID, &format);
 #endif
 
+  int ndims, nvars, ngatts, unlimdimid;
   cdf_inq(fileID, &ndims, &nvars, &ngatts, &unlimdimid);
 
   if (CDI_Debug) Message("root: ndims %d, nvars %d, ngatts %d", ndims, nvars, ngatts);
@@ -4364,7 +4372,7 @@ cdfInqContents(stream_t *streamptr)
     {
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
-      if (setBaseTime(ncvars[nctimevarid].units, taxis) == 1)
+      if (set_base_time(ncvars[nctimevarid].units, taxis) == 1)
         {
           nctimevarid = CDI_UNDEFID;
           streamptr->basetime.ncvarid = CDI_UNDEFID;
@@ -4381,7 +4389,7 @@ cdfInqContents(stream_t *streamptr)
           if (timeunit == -1) timeunit = taxis->unit;
           taxis->fc_unit = timeunit;
 
-          setForecastTime(fcreftime, taxis);
+          set_forecast_time(fcreftime, taxis);
         }
     }
 

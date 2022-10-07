@@ -288,7 +288,7 @@ double *
 CdiVariable::getValuesAsPointer()
 {
   int levelID = 0, tsID = 0;
-  size_t nmiss;
+  SizeType nmiss;
 
   int nrecs = streamInqTimestep(streamID, tsID);
   int vdate = taxisInqVdate(taxisID);
@@ -303,7 +303,7 @@ double **
 CdiVariable::getValuesWithLevelAsPointer(int tsID)
 {
   int levelID, nrecs;
-  size_t nmiss;
+  SizeType nmiss;
   double **fieldWithLevel, *field;
 
   nrecs = streamInqTimestep(streamID, tsID);

@@ -153,7 +153,7 @@ vlist_copy(vlist_t *vlistptr2, vlist_t *vlistptr1)
   memcpy(vlistptr2, vlistptr1, sizeof(vlist_t));
   vlistptr2->internal = vlist2internal;  // the question who's responsible to destroy the vlist is tied to its containing memory
                                          // region, so we retain this flag
-  vlistptr2->immutable = 0;  // this is a copy, so it's mutable, independent of whether the original is mutable or not
+  vlistptr2->immutable = 0;              // this is a copy, so it's mutable, independent of whether the original is mutable or not
   vlistptr2->keys.nelems = 0;
   vlistptr2->atts.nelems = 0;
   vlistptr2->self = vlistID2;
@@ -425,7 +425,8 @@ vgzZAxisSearch(int id, void *res, void *data)
 {
   struct vgzSearchState *state = (struct vgzSearchState *) data;
   (void) res;
-  if (zaxis_compare(id, state->zaxistype, state->nlevels, state->levels, state->lbounds, state->ubounds, NULL, NULL, 0, -1) == false)
+  if (zaxis_compare(id, state->zaxistype, state->nlevels, state->levels, state->lbounds, state->ubounds, NULL, NULL, 0, -1)
+      == false)
     {
       state->resIDValue = id;
       return CDI_APPLY_STOP;

@@ -30,7 +30,7 @@ strStartsWith(const char *vstr, const char *cstr)
 }
 
 int
-get_timeunit(size_t len, const char *ptu)
+get_time_units(size_t len, const char *ptu)
 {
   int timeunit = -1;
 
@@ -51,7 +51,7 @@ get_timeunit(size_t len, const char *ptu)
       else if (strStartsWith(ptu, "calendar_month")) timeunit = TUNIT_MONTH;
       else if (strStartsWith(ptu, "year"))           timeunit = TUNIT_YEAR;
     }
-  else if (len == 1 && ptu[0] == 's')  timeunit = TUNIT_SECOND;
+  else if     (len == 1 && ptu[0] == 's')            timeunit = TUNIT_SECOND;
   // clang-format on
 
   return timeunit;
@@ -87,17 +87,15 @@ is_timeaxis_units(const char *timeunits)
 
   for (size_t i = 0; i < len; i++) ptu[i] = (char) tolower((int) ptu[i]);
 
-  int timeunit = get_timeunit(len, ptu);
+  int timeunit = get_time_units(len, ptu);
   if (timeunit != -1)
     {
       while (!isspace(*ptu) && *ptu != 0) ptu++;
       if (*ptu)
         {
           while (isspace(*ptu)) ptu++;
-
           int timetype = strStartsWith(ptu, "as") ? TAXIS_ABSOLUTE : strStartsWith(ptu, "since") ? TAXIS_RELATIVE : -1;
-
-          status = timetype != -1;
+          status = (timetype != -1);
         }
     }
 
