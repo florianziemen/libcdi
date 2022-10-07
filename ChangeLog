@@ -72,7 +72,7 @@
 
 2022-01-28  Uwe Schulzweida
 
-	* cdf_read_coordinates: check that bounds have only 2 dimensions [Bug #10575]
+	* cdf_read_coordinates: check that grid cell bounds have only 2 dimensions [Bug #10575]
 	* gribIterator::gridGenerate: copy CDI_KEY_UUID (bug fix)
 
 2022-01-12  Uwe Schulzweida
