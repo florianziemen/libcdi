@@ -202,7 +202,7 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
       len--;
     }
 
-  char *tu = (char *) Malloc((len + 1) * sizeof(char));
+  char *tu = (char *) malloc((len + 1) * sizeof(char));
 
   for (size_t i = 0; i < len; i++) tu[i] = (char) tolower((int) timeUnitsStr[i]);
   tu[len] = 0;
@@ -270,7 +270,7 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
   taxis->type = taxisType;
   taxis->unit = timeUnits;
 
-  Free(tu);
+  free(tu);
 
   if (CDI_Debug) Message("taxisType = %d  timeUnits = %d", taxisType, timeUnits);
 
@@ -4566,21 +4566,14 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
           const int nctimeboundsid = streamptr->basetime.ncvarboundsid;
           if (nctimeboundsid != CDI_UNDEFID)
             {
-              {
-                const size_t start[2] = { tsID, 1 }, count[2] = { 0, 1 };
-                cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
-                if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
+              double values[2];
+              const size_t start[2] = { tsID, 0 }, count[2] = { 1, 2 };
+              cdf_get_vara_double(fileID, nctimeboundsid, start, count, values);
+              if (values[0] >= NC_FILL_DOUBLE || values[0] < -NC_FILL_DOUBLE) values[0] = 0.0;
+              if (values[1] >= NC_FILL_DOUBLE || values[1] < -NC_FILL_DOUBLE) values[1] = 0.0;
 
-                taxis->vdatetime_lb = cdi_decode_timeval(timevalue, taxis);
-              }
-
-              {
-                const size_t start[2] = { tsID, 1 }, count[2] = { 1, 1 };
-                cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
-                if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
-
-                taxis->vdatetime_ub = cdi_decode_timeval(timevalue, taxis);
-              }
+              taxis->vdatetime_lb = cdi_decode_timeval(values[0], taxis);
+              taxis->vdatetime_ub = cdi_decode_timeval(values[1], taxis);
             }
 
           const int leadtimeid = streamptr->basetime.leadtimeid;
