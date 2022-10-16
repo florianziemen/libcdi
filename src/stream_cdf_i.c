@@ -1097,6 +1097,21 @@ cdf_get_cell_varid(char *attstring, int ncid)
 }
 
 static void
+set_extra_attr(char *buf, int nvdims, const size_t *chunks)
+{
+  size_t pos = strlen(buf);
+  static const char prefix[] = "chunks=";
+  memcpy(buf + pos, prefix, sizeof(prefix));
+  pos += sizeof(prefix) - 1;
+  for (int i = nvdims - 1; i >= 0; --i)
+    {
+      pos += (size_t) (sprintf(buf + pos, "%zu%s", chunks[i], i > 0 ? "x" : ""));
+    }
+  buf[pos] = ' ';
+  buf[pos + 1] = 0;
+}
+
+static void
 cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timedimid, int modelID, int format)
 {
   int nvdims, nvatts;
@@ -1161,19 +1176,8 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                       for (int i = 0; i < nvdims; ++i) fprintf(stderr, "%zu ", chunks[i]);
                       fprintf(stderr, "\n");
                     }
-                  {
-                    char *buf = ncvar->extra;
-                    size_t pos = strlen(buf);
-                    static const char prefix[] = "chunks=";
-                    memcpy(buf + pos, prefix, sizeof(prefix));
-                    pos += sizeof(prefix) - 1;
-                    for (int i = nvdims - 1; i >= 0; --i)
-                      {
-                        pos += (size_t) (sprintf(buf + pos, "%zu%s", chunks[i], i > 0 ? "x" : ""));
-                      }
-                    buf[pos] = ' ';
-                    buf[pos + 1] = 0;
-                  }
+
+                  set_extra_attr(ncvar->extra, nvdims, chunks);
                 }
             }
 
