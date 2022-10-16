@@ -39,6 +39,7 @@ int CDI_Read_Cell_Corners = 1;
 int CDI_CMOR_Mode = 0;
 int CDI_Reduce_Dim = 0;
 size_t CDI_Netcdf_Hdr_Pad = 0UL;
+size_t CDI_Chunk_Cache = 0UL;
 bool CDI_Netcdf_Lazy_Grid_Load = false;
 
 char *cdiPartabPath = NULL;
@@ -77,7 +78,7 @@ int cdiSortParam = 0;
 int cdiHaveMissval = 0;
 
 static long
-cdiGetenvInt(const char *envName)
+cdi_getenv_int(const char *envName)
 {
   long envValue = -1;
 
@@ -327,41 +328,44 @@ cdiInitialize(void)
       grib_multi_support_off(NULL);
 #endif
 
-      value = cdiGetenvInt("CDI_DEBUG");
+      value = cdi_getenv_int("CDI_DEBUG");
       if (value >= 0) CDI_Debug = (int) value;
 
-      value = cdiGetenvInt("CDI_GRIBAPI_DEBUG");
+      value = cdi_getenv_int("CDI_GRIBAPI_DEBUG");
       if (value >= 0) CDI_gribapi_debug = (bool) value;
 
-      value = cdiGetenvInt("CDI_ECCODES_DEBUG");
+      value = cdi_getenv_int("CDI_ECCODES_DEBUG");
       if (value >= 0) CDI_gribapi_debug = (bool) value;
 
-      value = cdiGetenvInt("CDI_ECCODES_GRIB1");
+      value = cdi_getenv_int("CDI_ECCODES_GRIB1");
       if (value >= 0) cdiSetEccodesGrib1((bool) value);
 
-      value = cdiGetenvInt("CDI_READ_CELL_CORNERS");
+      value = cdi_getenv_int("CDI_READ_CELL_CORNERS");
       if (value >= 0) CDI_Read_Cell_Corners = (int) value;
 
-      value = cdiGetenvInt("CDI_RECOPT");
+      value = cdi_getenv_int("CDI_RECOPT");
       if (value >= 0) CDI_Recopt = (int) value;
 
-      value = cdiGetenvInt("CDI_REGULARGRID");
+      value = cdi_getenv_int("CDI_REGULARGRID");
       if (value >= 0) cdiDataUnreduced = (int) value;
 
-      value = cdiGetenvInt("CDI_SORTNAME");
+      value = cdi_getenv_int("CDI_SORTNAME");
       if (value >= 0) cdiSortName = (int) value;
 
-      value = cdiGetenvInt("CDI_SORTPARAM");
+      value = cdi_getenv_int("CDI_SORTPARAM");
       if (value >= 0) cdiSortParam = (int) value;
 
-      value = cdiGetenvInt("CDI_HAVE_MISSVAL");
+      value = cdi_getenv_int("CDI_HAVE_MISSVAL");
       if (value >= 0) cdiHaveMissval = (int) value;
 
-      value = cdiGetenvInt("CDI_LEVELTYPE");
+      value = cdi_getenv_int("CDI_LEVELTYPE");
       if (value >= 0) cdiDefaultLeveltype = (int) value;
 
-      value = cdiGetenvInt("CDI_NETCDF_HDR_PAD");
+      value = cdi_getenv_int("CDI_NETCDF_HDR_PAD");
       if (value >= 0) CDI_Netcdf_Hdr_Pad = (size_t) value;
+
+      value = cdi_getenv_int("CDI_CHUNK_CACHE");
+      if (value >= 0) CDI_Chunk_Cache = (size_t) value;
 
       envstr = getenv("CDI_GRIB1_TEMPLATE");
       if (envstr) CDI_GRIB1_Template = envstr;

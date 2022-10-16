@@ -105,6 +105,10 @@ typedef struct
   int chunkType;
   int chunkSize;
   size_t chunkCacheSize;
+  size_t chunkCacheNelems;
+  float chunkCachePreemption;
+  size_t gridSize;
+  size_t numLevels;
   int natts;
   int *atts;
   size_t vctsize;
@@ -713,6 +717,10 @@ init_ncvars(int nvars, ncvar_t *ncvars)
       ncvar->chunkType = CDI_UNDEFID;
       ncvar->chunkSize = CDI_UNDEFID;
       ncvar->chunkCacheSize = 0;
+      ncvar->chunkCacheNelems = 0;
+      ncvar->chunkCachePreemption = 0.0;
+      ncvar->gridSize = 0;
+      ncvar->numLevels = 0;
       ncvar->natts = 0;
       ncvar->atts = NULL;
       ncvar->vctsize = 0;
@@ -1187,7 +1195,10 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
           if (nc_get_var_chunk_cache(ncid, ncvarid, &size, &nelems, &preemption) == NC_NOERR)
             {
               ncvar->chunkCacheSize = size;
-              //printf("ncid=%d, ncvarid=%d, size=%zu, nelems=%zu, preemption=%g\n", ncid, ncvarid, size, nelems, preemption);
+              ncvar->chunkCacheNelems = nelems;
+              ncvar->chunkCachePreemption = preemption;
+              if (CDI_Debug)
+                fprintf(stderr, "%s: chunkCacheSize=%zu nelems=%zu preemption=%g\n", name, size, nelems, preemption);
             }
         }
 #endif
@@ -2983,6 +2994,7 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
 
           gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 1);
           ncvar->gridID = gridAdded.Id;
+          ncvar->gridSize = grid->size;
 
           const int gridID = ncvar->gridID;
 
@@ -3206,6 +3218,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
               return CDI_EDIMSIZE;
             }
 
+          ncvar->numLevels = zsize;
           ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (const char **) zcvals, zclength, with_bounds,
                                        lbounds, ubounds, (int) vctsize, vct, pname, plongname, punits, zdatatype, 1, 0, -1);
 
@@ -3433,6 +3446,10 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       if (ncvar->lszip) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_SZIP);
       if (ncvar->chunked && ncvar->chunkType != CDI_UNDEFID) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, ncvar->chunkType);
       if (ncvar->chunked && ncvar->chunkSize > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, ncvar->chunkSize);
+      size_t cdiChunkCacheSize = CDI_Chunk_Cache;
+      //printf("cdiChunkCacheSize=%zu\n", cdiChunkCacheSize);
+      if (cdiChunkCacheSize > 0)
+        nc_set_var_chunk_cache(ncvar->ncid, ncvarid, cdiChunkCacheSize, ncvar->chunkCacheNelems, ncvar->chunkCachePreemption);
 #endif
 
       streamptr->vars[varID1].defmiss = false;
