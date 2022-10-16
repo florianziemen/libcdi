@@ -104,6 +104,7 @@ typedef struct
   bool chunked;
   int chunkType;
   int chunkSize;
+  size_t chunkCacheSize;
   int natts;
   int *atts;
   size_t vctsize;
@@ -711,6 +712,7 @@ init_ncvars(int nvars, ncvar_t *ncvars)
       ncvar->chunked = false;
       ncvar->chunkType = CDI_UNDEFID;
       ncvar->chunkSize = CDI_UNDEFID;
+      ncvar->chunkCacheSize = 0;
       ncvar->natts = 0;
       ncvar->atts = NULL;
       ncvar->vctsize = 0;
@@ -1145,25 +1147,17 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
           nc_inq_var_szip(ncid, ncvarid, &options_mask, &pixels_per_block);
           if (options_mask && pixels_per_block) ncvar->lszip = true;
 #endif
-          /*
-          size_t cache_size, nelems;
-          float preemption;
-          nc_get_chunk_cache(&cache_size, &nelems, &preemption);
-          printf("cache_size %lu nelems %lu preemption %g\n", cache_size, nelems, preemption);
-          nc_get_var_chunk_cache(ncid, ncvarid, &cache_size, &nelems, &preemption);
-          printf("varid %d cache_size %lu nelems %lu preemption %g\n", ncvarid, cache_size, nelems, preemption);
-          */
           size_t chunks[nvdims];
-          int storage_in;
-          if (nc_inq_var_chunking(ncid, ncvarid, &storage_in, chunks) == NC_NOERR)
+          int storageIn;
+          if (nc_inq_var_chunking(ncid, ncvarid, &storageIn, chunks) == NC_NOERR)
             {
-              if (storage_in == NC_CHUNKED)
+              if (storageIn == NC_CHUNKED)
                 {
                   ncvar->chunked = true;
                   for (int i = 0; i < nvdims; ++i) ncvar->chunks[i] = chunks[i];
                   if (CDI_Debug)
                     {
-                      fprintf(stderr, "%s: chunking %d %d %d  chunks ", name, storage_in, NC_CONTIGUOUS, NC_CHUNKED);
+                      fprintf(stderr, "%s: chunking %d %d %d  chunks ", name, storageIn, NC_CONTIGUOUS, NC_CHUNKED);
                       for (int i = 0; i < nvdims; ++i) fprintf(stderr, "%zu ", chunks[i]);
                       fprintf(stderr, "\n");
                     }
@@ -1181,6 +1175,15 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                     buf[pos + 1] = 0;
                   }
                 }
+            }
+
+          size_t size;
+          size_t nelems;
+          float preemption;
+          if (nc_get_var_chunk_cache(ncid, ncvarid, &size, &nelems, &preemption) == NC_NOERR)
+            {
+              ncvar->chunkCacheSize = size;
+              //printf("ncid=%d, ncvarid=%d, size=%zu, nelems=%zu, preemption=%g\n", ncid, ncvarid, size, nelems, preemption);
             }
         }
 #endif
@@ -1702,7 +1705,6 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
           int allcdims = lcdim;
 
           if (!lxdim && ncvar->xvarid != CDI_UNDEFID && ncvars[ncvar->xvarid].ndims == 0) lxdim = true;
-
           if (!lydim && ncvar->yvarid != CDI_UNDEFID && ncvars[ncvar->yvarid].ndims == 0) lydim = true;
 
           if (lxdim && (lydim || ncvar->gridtype == GRID_UNSTRUCTURED))
