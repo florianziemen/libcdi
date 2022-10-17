@@ -379,6 +379,7 @@ extern int CDI_CMOR_Mode;
 extern int CDI_Reduce_Dim;
 extern size_t CDI_Netcdf_Hdr_Pad;
 extern size_t CDI_Chunk_Cache;
+extern size_t CDI_Chunk_Cache_Max;
 extern bool CDI_Netcdf_Lazy_Grid_Load;
 extern int STREAM_Debug;
 
