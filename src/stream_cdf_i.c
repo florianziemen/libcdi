@@ -321,19 +321,19 @@ cdfInqDatatype(stream_t *streamptr, int xtype, bool lunsigned)
 #endif
 
   // clang-format off
-  if      ( xtype == NC_BYTE   )  datatype = CDI_DATATYPE_INT8;
-  else if ( xtype == NC_CHAR   )  datatype = CDI_DATATYPE_UINT8;
-  else if ( xtype == NC_SHORT  )  datatype = CDI_DATATYPE_INT16;
-  else if ( xtype == NC_INT    )  datatype = CDI_DATATYPE_INT32;
-  else if ( xtype == NC_FLOAT  )  datatype = CDI_DATATYPE_FLT32;
-  else if ( xtype == NC_DOUBLE )  datatype = CDI_DATATYPE_FLT64;
+  if      (xtype == NC_BYTE  )  datatype = CDI_DATATYPE_INT8;
+  else if (xtype == NC_CHAR  )  datatype = CDI_DATATYPE_UINT8;
+  else if (xtype == NC_SHORT )  datatype = CDI_DATATYPE_INT16;
+  else if (xtype == NC_INT   )  datatype = CDI_DATATYPE_INT32;
+  else if (xtype == NC_FLOAT )  datatype = CDI_DATATYPE_FLT32;
+  else if (xtype == NC_DOUBLE)  datatype = CDI_DATATYPE_FLT64;
 #ifdef HAVE_NETCDF4
-  else if ( xtype == NC_UBYTE  )  datatype = CDI_DATATYPE_UINT8;
-  else if ( xtype == NC_LONG   )  datatype = CDI_DATATYPE_INT32;
-  else if ( xtype == NC_USHORT )  datatype = CDI_DATATYPE_UINT16;
-  else if ( xtype == NC_UINT   )  datatype = CDI_DATATYPE_UINT32;
-  else if ( xtype == NC_INT64  )  datatype = CDI_DATATYPE_FLT64;
-  else if ( xtype == NC_UINT64 )  datatype = CDI_DATATYPE_FLT64;
+  else if (xtype == NC_UBYTE )  datatype = CDI_DATATYPE_UINT8;
+  else if (xtype == NC_LONG  )  datatype = CDI_DATATYPE_INT32;
+  else if (xtype == NC_USHORT)  datatype = CDI_DATATYPE_UINT16;
+  else if (xtype == NC_UINT  )  datatype = CDI_DATATYPE_UINT32;
+  else if (xtype == NC_INT64 )  datatype = CDI_DATATYPE_FLT64;
+  else if (xtype == NC_UINT64)  datatype = CDI_DATATYPE_FLT64;
   else
     {
       if (xtype != streamptr->nc_complex_float_id && xtype != streamptr->nc_complex_double_id)
@@ -361,8 +361,8 @@ cdfInqDatatype(stream_t *streamptr, int xtype, bool lunsigned)
                 }
             }
         }
-      if      ( xtype == streamptr->nc_complex_float_id  )  datatype = CDI_DATATYPE_CPX32;
-      else if ( xtype == streamptr->nc_complex_double_id )  datatype = CDI_DATATYPE_CPX64;
+      if      (xtype == streamptr->nc_complex_float_id )  datatype = CDI_DATATYPE_CPX32;
+      else if (xtype == streamptr->nc_complex_double_id)  datatype = CDI_DATATYPE_CPX64;
     }
 #endif
   // clang-format on
@@ -509,7 +509,7 @@ cdfCreateRecords(stream_t *streamptr, int tsID)
 
   if (tsID == 0)
     {
-      const int nvrecs = nrecs; /* use all records at first timestep */
+      const int nvrecs = nrecs; // use all records at first timestep
 
       streamptr->nrecs += nrecs;
 
@@ -3416,10 +3416,38 @@ cdf_define_institut_and_model_id(int vlistID, int varID)
   if (varTableID != CDI_UNDEFID) vlistDefVarTable(vlistID, varID, varTableID);
 }
 
+static size_t
+calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
+{
+  size_t chunkCacheSize = ncvar->gridSize;
+
+  chunkCacheSize *= (ncvar->dimids[0] == timedimid) ? ncvar->chunks[0] : 1;
+
+  int zdimid = CDI_UNDEFID;
+  for (int i = 0; i < ncvar->ndims; i++)
+    {
+      if (ncvar->dimtype[i] == Z_AXIS) zdimid = ncvar->dimids[i];
+    }
+  if (zdimid != CDI_UNDEFID) chunkCacheSize *= ncvar->chunks[zdimid];
+
+  chunkCacheSize *= (ncvar->xtype == NC_DOUBLE) ? 8 : 4;
+
+  if (CDI_Chunk_Cache_Max > 0 && chunkCacheSize > CDI_Chunk_Cache_Max) chunkCacheSize = CDI_Chunk_Cache_Max;
+
+  return chunkCacheSize;
+}
+
+static void
+cdf_set_var_chunk_cache(ncvar_t *ncvar, int ncvarid, size_t chunckCacheSize)
+{
+  if (CDI_Debug) Message("ncvarid = %d chunckCacheSize=%zu", ncvarid, chunckCacheSize);
+  nc_set_var_chunk_cache(ncvar->ncid, ncvarid, chunckCacheSize, ncvar->chunkCacheNelems, ncvar->chunkCachePreemption);
+}
+
 // define all input data variables
 static void
 cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int nvars, int num_ncvars, ncvar_t *ncvars,
-                    ncdim_t *ncdims)
+                    ncdim_t *ncdims, int timedimid)
 {
   int *varids = (int *) Malloc((size_t) nvars * sizeof(int));
   int n = 0;
@@ -3444,12 +3472,17 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
 #ifdef HAVE_NETCDF4
       if (ncvar->ldeflate) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_ZIP);
       if (ncvar->lszip) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_SZIP);
-      if (ncvar->chunked && ncvar->chunkType != CDI_UNDEFID) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, ncvar->chunkType);
-      if (ncvar->chunked && ncvar->chunkSize > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, ncvar->chunkSize);
-      size_t cdiChunkCacheSize = CDI_Chunk_Cache;
-      //printf("cdiChunkCacheSize=%zu\n", cdiChunkCacheSize);
-      if (cdiChunkCacheSize > 0)
-        nc_set_var_chunk_cache(ncvar->ncid, ncvarid, cdiChunkCacheSize, ncvar->chunkCacheNelems, ncvar->chunkCachePreemption);
+      if (ncvar->chunked)
+        {
+          if (ncvar->chunkType != CDI_UNDEFID) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, ncvar->chunkType);
+          if (ncvar->chunkSize > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, ncvar->chunkSize);
+
+          const size_t varChunkCacheSize = calc_chunk_cache_size(timedimid, ncvar);
+          if (CDI_Chunk_Cache > 0)
+            cdf_set_var_chunk_cache(ncvar, ncvarid, CDI_Chunk_Cache);
+          else if (varChunkCacheSize > ncvar->chunkCacheSize)
+            cdf_set_var_chunk_cache(ncvar, ncvarid, varChunkCacheSize);
+        }
 #endif
 
       streamptr->vars[varID1].defmiss = false;
@@ -4381,7 +4414,7 @@ cdfInqContents(stream_t *streamptr)
   streamptr->ntsteps = (long) ntsteps;
 
   // define all data variables
-  cdf_define_all_vars(streamptr, vlistID, instID, modelID, nvars_data, nvars, ncvars, ncdims);
+  cdf_define_all_vars(streamptr, vlistID, instID, modelID, nvars_data, nvars, ncvars, ncdims, timedimid);
 
   cdiCreateTimesteps(streamptr);
 
