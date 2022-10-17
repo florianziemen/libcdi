@@ -2882,6 +2882,7 @@ cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int
               ncvar2->gridID = ncvar1->gridID;
               ncvar2->chunkType = ncvar1->chunkType;
               ncvar2->chunkSize = ncvar1->chunkSize;
+              ncvar2->gridSize = ncvar1->gridSize;
             }
         }
     }
@@ -3462,7 +3463,7 @@ calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
 static void
 cdf_set_var_chunk_cache(ncvar_t *ncvar, int ncvarid, size_t chunckCacheSize)
 {
-  if (CDI_Debug) Message("ncvarid = %d chunckCacheSize=%zu", ncvarid, chunckCacheSize);
+  if (CDI_Debug) Message("%s: chunckCacheSize=%zu", ncvar->name, chunckCacheSize);
   nc_set_var_chunk_cache(ncvar->ncid, ncvarid, chunckCacheSize, ncvar->chunkCacheNelems, ncvar->chunkCachePreemption);
 }
 
