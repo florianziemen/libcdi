@@ -14,16 +14,16 @@
 #include "vlist_var.h"
 
 void
-cdfDefVarDeflate(int ncid, int ncvarID, int deflate_level)
+cdfDefVarDeflate(int ncid, int ncvarID, int deflateLevel)
 {
 #ifdef HAVE_NETCDF4
   // Set chunking, shuffle, and deflate.
-  const int shuffle = 1, deflate = 1;
+  const int shuffle = (CDI_Shuffle > 0), deflate = 1;
 
-  if (deflate_level < 1 || deflate_level > 9) deflate_level = 1;
+  if (deflateLevel < 1 || deflateLevel > 9) deflateLevel = 1;
 
   int status;
-  if ((status = nc_def_var_deflate(ncid, ncvarID, shuffle, deflate, deflate_level)))
+  if ((status = nc_def_var_deflate(ncid, ncvarID, shuffle, deflate, deflateLevel)))
     {
       Error("nc_def_var_deflate failed; %s", nc_strerror(status));
     }

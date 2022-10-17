@@ -1161,8 +1161,8 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
 #ifdef HAVE_NETCDF4
       if (format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4)
         {
-          int shuffle = 0, deflate = 0, deflate_level = 0;
-          nc_inq_var_deflate(ncid, ncvarid, &shuffle, &deflate, &deflate_level);
+          int shuffle = 0, deflate = 0, deflateLevel = 0;
+          nc_inq_var_deflate(ncid, ncvarid, &shuffle, &deflate, &deflateLevel);
           if (deflate > 0) ncvar->ldeflate = true;
 
 #ifdef HAVE_NC_DEF_VAR_SZIP

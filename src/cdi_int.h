@@ -377,6 +377,7 @@ extern int CDI_Convert_Cubesphere;
 extern int CDI_Read_Cell_Corners;
 extern int CDI_CMOR_Mode;
 extern int CDI_Reduce_Dim;
+extern int CDI_Shuffle;
 extern size_t CDI_Netcdf_Hdr_Pad;
 extern size_t CDI_Chunk_Cache;
 extern size_t CDI_Chunk_Cache_Max;

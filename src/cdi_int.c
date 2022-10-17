@@ -38,6 +38,7 @@ int CDI_Convert_Cubesphere = 1;
 int CDI_Read_Cell_Corners = 1;
 int CDI_CMOR_Mode = 0;
 int CDI_Reduce_Dim = 0;
+int CDI_Shuffle = 0;
 size_t CDI_Netcdf_Hdr_Pad = 0UL;
 size_t CDI_Chunk_Cache = 0UL;
 size_t CDI_Chunk_Cache_Max = 0UL;
@@ -376,6 +377,9 @@ cdiInitialize(void)
 
       envstr = getenv("CDI_GRIB2_TEMPLATE");
       if (envstr) CDI_GRIB2_Template = envstr;
+
+      envstr = getenv("CDI_SHUFFLE");
+      if (envstr) CDI_Shuffle = atoi(envstr);
 
       envstr = getenv("CDI_MISSVAL");
       if (envstr) CDI_Default_Missval = atof(envstr);

@@ -1,3 +1,7 @@
+2022-10-17  Uwe Schulzweida
+
+        * Added environment variable CDI_SHUFFLE to set shuffle option to NetCDF4 deflation compression
+
 2022-10-16  Uwe Schulzweida
 
 	* Improved read performance of temporal chunked NetCDF4 data
