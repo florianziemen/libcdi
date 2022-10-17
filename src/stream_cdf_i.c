@@ -3416,6 +3416,28 @@ cdf_define_institut_and_model_id(int vlistID, int varID)
   if (varTableID != CDI_UNDEFID) vlistDefVarTable(vlistID, varID, varTableID);
 }
 
+static int
+cdf_xtype_to_numbytes(int xtype)
+{
+  int numBytes = 8;
+
+  // clang-format off
+  if      (xtype == NC_BYTE  )  numBytes = 1;
+  else if (xtype == NC_CHAR  )  numBytes = 1;
+  else if (xtype == NC_SHORT )  numBytes = 2;
+  else if (xtype == NC_INT   )  numBytes = 4;
+  else if (xtype == NC_FLOAT )  numBytes = 4;
+#ifdef HAVE_NETCDF4
+  else if (xtype == NC_UBYTE )  numBytes = 1;
+  else if (xtype == NC_LONG  )  numBytes = 4;
+  else if (xtype == NC_USHORT)  numBytes = 2;
+  else if (xtype == NC_UINT  )  numBytes = 4;
+#endif
+  // clang-format on
+
+  return numBytes;
+}
+
 static size_t
 calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
 {
@@ -3430,7 +3452,7 @@ calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
     }
   if (zdimid != CDI_UNDEFID) chunkCacheSize *= ncvar->chunks[zdimid];
 
-  chunkCacheSize *= (ncvar->xtype == NC_DOUBLE) ? 8 : 4;
+  chunkCacheSize *= cdf_xtype_to_numbytes(ncvar->xtype);
 
   if (CDI_Chunk_Cache_Max > 0 && chunkCacheSize > CDI_Chunk_Cache_Max) chunkCacheSize = CDI_Chunk_Cache_Max;
 
