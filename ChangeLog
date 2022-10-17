@@ -1,5 +1,6 @@
 2022-10-16  Uwe Schulzweida
 
+	* Improved read performance of temporal chunked NetCDF4 data
         * Added environment variable CDI_CHUNK_CACHE to set the NetCDF4 chunk cache size
         * Added environment variable CDI_CHUNK_CACHE_MAX to set the maximum chunk cache size
 

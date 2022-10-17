@@ -1,7 +1,13 @@
 CDI NEWS
 --------
 
-Version 2.1.0 (6 October 2021):
+Version 2.2.0 (6 October 2023):
+
+   New features:
+     * Improved read performance of temporal chunked NetCDF4 data
+   Fixed bugs:
+
+Version 2.1.0 (6 October 2022):
 
    New features:
      * Added support for NCZarr
