@@ -276,7 +276,7 @@ decodeForm2(char *pline, char *name, char *longname, char *units)
   pend--;
   while (isspace((int) *pend)) pend--;
   {
-    size_t len = (size_t) (pend - pline + 1);
+    const size_t len = (size_t) (pend - pline + 1);
     if (len > 0)
       {
         memcpy(longname, pline, len);
@@ -409,7 +409,7 @@ tableFromEnv(int modelID, int tablenum)
   strcat(tablefile, tablename);
   // if (tablefile) printf("tableFile = %s\n", tablefile);
 
-  int tableID = tableRead(tablefile);
+  const int tableID = tableRead(tablefile);
   if (tableID != CDI_UNDEFID)
     {
       tableDefModelID(tableID, modelID);
@@ -469,7 +469,7 @@ tableInq(int modelID, int tablenum, const char *tablename)
               if ((modelName = modelInqNamePtr(modelID)))
                 {
                   strcpy(tablefile, modelName);
-                  size_t len = strlen(tablefile);
+                  const size_t len = strlen(tablefile);
                   for (size_t i = 0; i < len; i++)
                     if (tablefile[i] == '.') tablefile[i] = '\0';
                   modelID2 = modelInq(-1, 0, tablefile);
@@ -572,6 +572,17 @@ tableInqNamePtr(int tableID)
   return tablename;
 }
 
+static size_t
+max_length(size_t maxlen, const char *cstring)
+{
+  if (cstring)
+    {
+      const size_t len = strlen(cstring);
+      if (len > maxlen) maxlen = len;
+    }
+  return maxlen;
+}
+
 void
 tableWrite(const char *ptfile, int tableID)
 {
@@ -595,23 +606,9 @@ tableWrite(const char *ptfile, int tableID)
   const int npars = parTable[tableID].npars;
   for (int item = 0; item < npars; item++)
     {
-      if (parTable[tableID].pars[item].name)
-        {
-          const size_t lenname = strlen(parTable[tableID].pars[item].name);
-          if (lenname > maxname) maxname = lenname;
-        }
-
-      if (parTable[tableID].pars[item].longname)
-        {
-          const size_t lenlname = strlen(parTable[tableID].pars[item].longname);
-          if (lenlname > maxlname) maxlname = lenlname;
-        }
-
-      if (parTable[tableID].pars[item].units)
-        {
-          const size_t lenunits = strlen(parTable[tableID].pars[item].units);
-          if (lenunits > maxunits) maxunits = lenunits;
-        }
+      maxname = max_length(maxname, parTable[tableID].pars[item].name);
+      maxlname = max_length(maxlname, parTable[tableID].pars[item].longname);
+      maxunits = max_length(maxunits, parTable[tableID].pars[item].units);
     }
 
   const int tablenum = tableInqNum(tableID);
@@ -679,29 +676,15 @@ tableFWriteC(FILE *ptfp, int tableID)
   const int npars = parTable[tableID].npars;
   for (int item = 0; item < npars; item++)
     {
-      if (parTable[tableID].pars[item].name)
-        {
-          const size_t lenname = strlen(parTable[tableID].pars[item].name);
-          if (lenname > maxname) maxname = lenname;
-        }
-
-      if (parTable[tableID].pars[item].longname)
-        {
-          const size_t lenlname = strlen(parTable[tableID].pars[item].longname);
-          if (lenlname > maxlname) maxlname = lenlname;
-        }
-
-      if (parTable[tableID].pars[item].units)
-        {
-          const size_t lenunits = strlen(parTable[tableID].pars[item].units);
-          if (lenunits > maxunits) maxunits = lenunits;
-        }
+      maxname = max_length(maxname, parTable[tableID].pars[item].name);
+      maxlname = max_length(maxlname, parTable[tableID].pars[item].longname);
+      maxunits = max_length(maxunits, parTable[tableID].pars[item].units);
     }
 
   strncpy(tablename, parTable[tableID].name, sizeof(tablename));
   tablename[sizeof(tablename) - 1] = '\0';
   {
-    size_t len = strlen(tablename);
+    const size_t len = strlen(tablename);
     for (size_t i = 0; i < len; i++)
       if (tablename[i] == '.') tablename[i] = '_';
   }
