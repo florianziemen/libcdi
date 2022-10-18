@@ -1225,9 +1225,9 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
   size_t len = 0;
   char txt[CDI_MAX_NAME];
   if (p0status == 0)
-    len = (size_t) (sprintf(txt, "%s%s %s%s", "a: a b: b p0: ", p0name, "ps: ", psname));
+    len = (size_t) (snprintf(txt, sizeof(txt), "%s%s %s%s", "a: a b: b p0: ", p0name, "ps: ", psname));
   else
-    len = (size_t) (sprintf(txt, "%s%s", "ap: ap b: b ps: ", psname));
+    len = (size_t) (snprintf(txt, sizeof(txt), "%s%s", "ap: ap b: b ps: ", psname));
   cdf_put_att_text(fileID, ncvarid, "formula_terms", len, txt);
 
   int ncbvarid = CDI_UNDEFID;
@@ -1283,9 +1283,9 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
         }
 
         if (p0status == 0)
-          len = (size_t) (sprintf(txt, "%s%s %s%s", "a: a_bnds b: b_bnds p0: ", p0name, "ps: ", psname));
+          len = (size_t) (snprintf(txt, sizeof(txt), "%s%s %s%s", "a: a_bnds b: b_bnds p0: ", p0name, "ps: ", psname));
         else
-          len = (size_t) (sprintf(txt, "%s%s", "ap: ap_bnds b: b_bnds ps: ", psname));
+          len = (size_t) (snprintf(txt, sizeof(txt), "%s%s", "ap: ap_bnds b: b_bnds ps: ", psname));
         cdf_put_att_text(fileID, ncbvarid, "formula_terms", len, txt);
       }
   }
@@ -1762,7 +1762,7 @@ cdfDefRgrid(stream_t *streamptr, int gridID, int gridIndex)
         if (iz == 0)
           axisname[14] = '\0';
         else
-          sprintf(&axisname[5], "%1d", iz + 1);
+          sprintf(&axisname[14], "%1d", iz + 1);
 
         if (streamptr->ncmode == 2) cdf_redef(fileID);
 

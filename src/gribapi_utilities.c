@@ -271,8 +271,9 @@ addToDate(struct tm *me, long long amount, long unit)
 static char *
 makeDateString(struct tm *me)
 {
-  char *result = (char *) Malloc(4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 4 + 1);
-  sprintf(result, "%04d-%02d-%02dT%02d:%02d:%02d.000", me->tm_year + 1900, me->tm_mon + 1, me->tm_mday, me->tm_hour, me->tm_min,
+  const size_t length = 4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 4 + 1;
+  char *result = (char *) Malloc(length);
+  snprintf(result, length, "%04d-%02d-%02dT%02d:%02d:%02d.000", me->tm_year + 1900, me->tm_mon + 1, me->tm_mday, me->tm_hour, me->tm_min,
           me->tm_sec);
   return result;
 }

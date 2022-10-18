@@ -267,7 +267,7 @@ cdfDefineCellMethods(stream_t *streamptr, int cdiID, int varID, int fileID, int 
     {
       const char *attname = "cell_methods";
       char atttxt[CDI_MAX_NAME + 10];
-      sprintf(atttxt, "%s: %s", timeVarName, cellMethod);
+      snprintf(atttxt, sizeof(atttxt), "%s: %s", timeVarName, cellMethod);
       cdf_put_att_text(fileID, ncvarID, attname, strlen(atttxt), atttxt);
     }
 }
@@ -777,7 +777,7 @@ cdfCheckVarname(int fileID, char name[CDI_MAX_NAME])
     {
       int ncvarID;
       char varname[CDI_MAX_NAME];
-      sprintf(varname, "%s", name);
+      snprintf(varname, sizeof(varname), "%s", name);
       char *varname2 = varname + strlen(varname);
       unsigned iz = 0;
 
@@ -810,9 +810,9 @@ cdfGenVarname(int fileID, char name[CDI_MAX_NAME], int pnum, int pcat, int *pdis
   if (pnum < 0) pnum = -pnum;
 
   if (*pdis == 255)
-    sprintf(varname, "var%d", code);
+    snprintf(varname, sizeof(varname), "var%d", code);
   else
-    sprintf(varname, "param%d.%d.%d", pnum, pcat, *pdis);
+    snprintf(varname, sizeof(varname), "param%d.%d.%d", pnum, pcat, *pdis);
 
   char *varname2 = varname + strlen(varname);
   int ncvarID;
