@@ -3590,6 +3590,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
         }
 
       if (ncvar->extra[0] != 0) vlistDefVarExtra(vlistID, varID, ncvar->extra);
+      if (ncvar->extra[0] != 0) cdiDefKeyString(vlistID, varID, CDI_KEY_CHUNKS, ncvar->extra);
     }
 
   for (int varID = 0; varID < nvars; varID++)
