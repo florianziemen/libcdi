@@ -672,12 +672,6 @@ void    vlistDefVarMissval(int vlistID, int varID, double missval);
 //      vlistInqVarMissval: Get the missing value of a Variable
 double  vlistInqVarMissval(int vlistID, int varID);
 
-//      vlistDefVarExtra: Define extra information of a Variable
-void    vlistDefVarExtra(int vlistID, int varID, const char *extra);
-
-//      vlistInqVarExtra: Get extra information of a Variable
-void    vlistInqVarExtra(int vlistID, int varID, char *extra);
-
 void    vlistDefVarScalefactor(int vlistID, int varID, double scalefactor);
 double  vlistInqVarScalefactor(int vlistID, int varID);
 void    vlistDefVarAddoffset(int vlistID, int varID, double addoffset);

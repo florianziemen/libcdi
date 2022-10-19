@@ -413,8 +413,6 @@ module mo_cdi
   public :: vlistInqVarUnits
   public :: vlistDefVarMissval
   public :: vlistInqVarMissval
-  public :: vlistDefVarExtra
-  public :: vlistInqVarExtra
   public :: vlistDefVarScalefactor
   public :: vlistInqVarScalefactor
   public :: vlistDefVarAddoffset
@@ -484,6 +482,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_UNITS = 945
   integer(c_int), public, parameter :: CDI_KEY_DATATYPE = 946
   integer(c_int), public, parameter :: CDI_KEY_REFERENCEURI = 947
+  integer(c_int), public, parameter :: CDI_KEY_CHUNKS = 948
   integer(c_int), public, parameter :: CDI_KEY_NUMBEROFGRIDUSED = 961
   integer(c_int), public, parameter :: CDI_KEY_NUMBEROFGRIDINREFERENCE = 962
   integer(c_int), public, parameter :: CDI_KEY_NUMBEROFVGRIDUSED = 963
@@ -4437,61 +4436,6 @@ contains
       units_dummy(units_i:units_i) = ' '
     end do
   end subroutine vlistInqVarUnits
-
-  subroutine vlistDefVarExtra(vlistID_dummy, varID_dummy, extra_dummy)
-    integer(c_int), value :: vlistID_dummy
-    integer(c_int), value :: varID_dummy
-    character(kind = c_char, len = *), intent(in) :: extra_dummy
-    character(kind = c_char) :: extra_temp(len(extra_dummy) + 1)
-    integer :: extra_i
-    interface
-      subroutine lib_vlistDefVarExtra(vlistID_dummy, varID_dummy, extra_dummy)&
-      & bind(c, name = 'vlistDefVarExtra')
-        import c_char, c_int
-        integer(c_int), value :: vlistID_dummy
-        integer(c_int), value :: varID_dummy
-        character(kind = c_char) :: extra_dummy(*)
-      end subroutine lib_vlistDefVarExtra
-    end interface
-    do extra_i = 1, len(extra_dummy)
-      extra_temp(extra_i) = extra_dummy(extra_i:extra_i)
-    end do
-    extra_temp(len(extra_dummy) + 1) = c_null_char
-    call lib_vlistDefVarExtra(vlistID_dummy, varID_dummy, extra_temp)
-  end subroutine vlistDefVarExtra
-
-  subroutine vlistInqVarExtra(vlistID_dummy, varID_dummy, extra_dummy)
-    integer(c_int), value :: vlistID_dummy
-    integer(c_int), value :: varID_dummy
-    character(kind = c_char, len = *), intent(inout) :: extra_dummy
-    character(kind = c_char) :: extra_temp(len(extra_dummy) + 1)
-    integer :: extra_i
-    interface
-      subroutine lib_vlistInqVarExtra(vlistID_dummy, varID_dummy, extra_dummy)&
-      & bind(c, name = 'vlistInqVarExtra')
-        import c_char, c_int
-        integer(c_int), value :: vlistID_dummy
-        integer(c_int), value :: varID_dummy
-        character(kind = c_char) :: extra_dummy(*)
-      end subroutine lib_vlistInqVarExtra
-    end interface
-    extra_temp(len(extra_dummy) + 1) = c_null_char
-    do extra_i = len(extra_dummy), 1, -1
-      if(extra_dummy(extra_i:extra_i) /= ' ') exit
-      extra_temp(extra_i) = c_null_char
-    end do
-    do extra_i = extra_i, 1, -1
-        extra_temp(extra_i) = extra_dummy(extra_i:extra_i)
-    end do
-    call lib_vlistInqVarExtra(vlistID_dummy, varID_dummy, extra_temp)
-    do extra_i = 1, len(extra_dummy)
-      if(extra_temp(extra_i) == c_null_char) exit
-      extra_dummy(extra_i:extra_i) = extra_temp(extra_i)
-    end do
-    do extra_i = extra_i, len(extra_dummy)
-      extra_dummy(extra_i:extra_i) = ' '
-    end do
-  end subroutine vlistInqVarExtra
 
   subroutine cdiDefAdditionalKey(string_dummy)
     character(kind = c_char, len = *), intent(in) :: string_dummy

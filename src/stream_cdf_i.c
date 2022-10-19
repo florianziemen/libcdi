@@ -3589,7 +3589,6 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
           cdiDefKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, ncvar->perturbationNumber);
         }
 
-      if (ncvar->extra[0] != 0) vlistDefVarExtra(vlistID, varID, ncvar->extra);
       if (ncvar->extra[0] != 0) cdiDefKeyString(vlistID, varID, CDI_KEY_CHUNKS, ncvar->extra);
     }
 

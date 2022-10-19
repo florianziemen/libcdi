@@ -395,8 +395,6 @@ FCALLSCSUB3 (vlistDefVarUnits, VLISTDEFVARUNITS, vlistdefvarunits, INT, INT, STR
 FCALLSCSUB3 (vlistInqVarUnits, VLISTINQVARUNITS, vlistinqvarunits, INT, INT, PSTRING)
 FCALLSCSUB3 (vlistDefVarMissval, VLISTDEFVARMISSVAL, vlistdefvarmissval, INT, INT, DOUBLE)
 FCALLSCFUN2 (DOUBLE, vlistInqVarMissval, VLISTINQVARMISSVAL, vlistinqvarmissval, INT, INT)
-FCALLSCSUB3 (vlistDefVarExtra, VLISTDEFVAREXTRA, vlistdefvarextra, INT, INT, STRING)
-FCALLSCSUB3 (vlistInqVarExtra, VLISTINQVAREXTRA, vlistinqvarextra, INT, INT, PSTRING)
 FCALLSCSUB3 (vlistDefVarScalefactor, VLISTDEFVARSCALEFACTOR, vlistdefvarscalefactor, INT, INT, DOUBLE)
 FCALLSCFUN2 (DOUBLE, vlistInqVarScalefactor, VLISTINQVARSCALEFACTOR, vlistinqvarscalefactor, INT, INT)
 FCALLSCSUB3 (vlistDefVarAddoffset, VLISTDEFVARADDOFFSET, vlistdefvaraddoffset, INT, INT, DOUBLE)

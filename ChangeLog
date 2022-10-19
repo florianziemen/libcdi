@@ -1,3 +1,8 @@
+2022-10-19  Uwe Schulzweida
+
+	* Replaced CDI function vlistDefVarExtra() by cdiDefKeyString() with CDI_KEY_CHUNKS
+	* Replaced CDI function vlistInqVarExtra() by cdiInqKeyString() with CDI_KEY_CHUNKS
+
 2022-10-17  Uwe Schulzweida
 
         * Added environment variable CDI_SHUFFLE to set shuffle option to NetCDF4 deflation compression

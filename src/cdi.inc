@@ -1256,18 +1256,6 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarMissval
 
-!                     vlistDefVarExtra
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     CHARACTER*(*)   extra)
-      EXTERNAL        vlistDefVarExtra
-
-!                     vlistInqVarExtra
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     CHARACTER*(*)   extra)
-      EXTERNAL        vlistInqVarExtra
-
 !                     vlistDefVarScalefactor
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
@@ -1632,6 +1620,8 @@
       PARAMETER (CDI_KEY_DATATYPE       = 946)
       INTEGER    CDI_KEY_REFERENCEURI
       PARAMETER (CDI_KEY_REFERENCEURI   = 947)
+      INTEGER    CDI_KEY_CHUNKS
+      PARAMETER (CDI_KEY_CHUNKS         = 948)
 !
 !  Integer keys
 !
