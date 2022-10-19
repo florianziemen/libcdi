@@ -413,10 +413,6 @@ module mo_cdi
   public :: vlistInqVarUnits
   public :: vlistDefVarMissval
   public :: vlistInqVarMissval
-  public :: vlistDefVarScalefactor
-  public :: vlistInqVarScalefactor
-  public :: vlistDefVarAddoffset
-  public :: vlistInqVarAddoffset
   public :: vlistInqVarSize
   public :: vlistDefIndex
   public :: vlistInqIndex
@@ -490,6 +486,8 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_CHUNKTYPE = 965
   integer(c_int), public, parameter :: CDI_KEY_CHUNKSIZE = 966
   integer(c_int), public, parameter :: CDI_KEY_MISSVAL = 701
+  integer(c_int), public, parameter :: CDI_KEY_ADDOFFSET = 702
+  integer(c_int), public, parameter :: CDI_KEY_SCALEFACTOR = 703
   integer(c_int), public, parameter :: CDI_KEY_UUID = 960
   integer(c_int), public, parameter :: CDI_KEY_DIMNAME = 941
   integer(c_int), public, parameter :: CDI_KEY_PSNAME = 950
@@ -1623,38 +1621,6 @@ module mo_cdi
       integer(c_int), value :: varID_dummy
       real(c_double) :: f_result
     end function vlistInqVarMissval
-
-    subroutine vlistDefVarScalefactor(vlistID_dummy, varID_dummy,&
-    & scalefactor_dummy) bind(c, name = 'vlistDefVarScalefactor')
-      import c_double, c_int
-      integer(c_int), value :: vlistID_dummy
-      integer(c_int), value :: varID_dummy
-      real(c_double), value :: scalefactor_dummy
-    end subroutine vlistDefVarScalefactor
-
-    function vlistInqVarScalefactor(vlistID_dummy, varID_dummy) bind(c, name =&
-    & 'vlistInqVarScalefactor') result(f_result)
-      import c_double, c_int
-      integer(c_int), value :: vlistID_dummy
-      integer(c_int), value :: varID_dummy
-      real(c_double) :: f_result
-    end function vlistInqVarScalefactor
-
-    subroutine vlistDefVarAddoffset(vlistID_dummy, varID_dummy,&
-    & addoffset_dummy) bind(c, name = 'vlistDefVarAddoffset')
-      import c_double, c_int
-      integer(c_int), value :: vlistID_dummy
-      integer(c_int), value :: varID_dummy
-      real(c_double), value :: addoffset_dummy
-    end subroutine vlistDefVarAddoffset
-
-    function vlistInqVarAddoffset(vlistID_dummy, varID_dummy) bind(c, name =&
-    & 'vlistInqVarAddoffset') result(f_result)
-      import c_double, c_int
-      integer(c_int), value :: vlistID_dummy
-      integer(c_int), value :: varID_dummy
-      real(c_double) :: f_result
-    end function vlistInqVarAddoffset
 
     function vlistInqVarSize(vlistID_dummy, varID_dummy) bind(c, name =&
     & 'vlistInqVarSize') result(f_result)

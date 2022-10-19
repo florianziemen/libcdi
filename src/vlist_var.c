@@ -31,9 +31,6 @@ vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].tableID = CDI_UNDEFID;
   vlistptr->vars[varID].missvalused = false;
   vlistptr->vars[varID].missval = CDI_Default_Missval;
-  vlistptr->vars[varID].addoffset = 0.0;
-  vlistptr->vars[varID].scalefactor = 1.0;
-  vlistptr->vars[varID].extra = NULL;
   vlistptr->vars[varID].levinfo = NULL;
   vlistptr->vars[varID].comptype = CDI_COMPRESS_NONE;
   vlistptr->vars[varID].complevel = 1;
@@ -1014,50 +1011,6 @@ vlistDefVarValidrange(int vlistID, int varID, const double *validrange)
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
-double
-vlistInqVarScalefactor(int vlistID, int varID)
-{
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].scalefactor;
-}
-
-double
-vlistInqVarAddoffset(int vlistID, int varID)
-{
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].addoffset;
-}
-
-void
-vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
-{
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (IS_NOT_EQUAL(vlistptr->vars[varID].scalefactor, scalefactor))
-    {
-      vlistptr->vars[varID].scalefactor = scalefactor;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-void
-vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
-{
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (IS_NOT_EQUAL(vlistptr->vars[varID].addoffset, addoffset))
-    {
-      vlistptr->vars[varID].addoffset = addoffset;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-}
-
 void
 vlistDefVarTimetype(int vlistID, int varID, int timetype)
 {
@@ -1492,7 +1445,7 @@ vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
 #define FCMP2(f) (namespaceResHDecode(pva->f).idx != namespaceResHDecode(pvb->f).idx)
   int diff = (int) FCMP(fvarID) | FCMP(mvarID) | FCMP(flag) | FCMP(param) | FCMP(datatype) | FCMP(timetype) | FCMP(tsteptype)
              | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID) | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
-             | FCMPFLT(missval) | FCMPFLT(addoffset) | FCMPFLT(scalefactor) | FCMPSTR(extra) | FCMP(comptype) | FCMP(complevel)
+             | FCMPFLT(missval) | FCMP(comptype) | FCMP(complevel)
              | FCMP(lvalidrange) | FCMPFLT(validrange[0]) | FCMPFLT(validrange[1]);
 #undef FCMP
 #undef FCMPFLT

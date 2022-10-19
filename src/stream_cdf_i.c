@@ -474,18 +474,18 @@ cdfGetAttText(int fileID, int ncvarid, const char *attname, size_t attlen, char 
 void
 cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor)
 {
-  const bool laddoffset = IS_NOT_EQUAL(addoffset, 0);
-  const bool lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
+  const bool haveAddoffset = IS_NOT_EQUAL(addoffset, 0.0);
+  const bool haveScalefactor = IS_NOT_EQUAL(scalefactor, 1.0);
 
-  if (laddoffset && lscalefactor)
+  if (haveAddoffset && haveScalefactor)
     {
       for (size_t i = 0; i < size; ++i) data[i] = data[i] * scalefactor + addoffset;
     }
-  else if (lscalefactor)
+  else if (haveScalefactor)
     {
       for (size_t i = 0; i < size; ++i) data[i] *= scalefactor;
     }
-  else if (laddoffset)
+  else if (haveAddoffset)
     {
       for (size_t i = 0; i < size; ++i) data[i] += addoffset;
     }
@@ -727,8 +727,8 @@ init_ncvars(int nvars, ncvar_t *ncvars)
       ncvar->vct = NULL;
       ncvar->missval = 0;
       ncvar->fillval = 0;
-      ncvar->addoffset = 0;
-      ncvar->scalefactor = 1;
+      ncvar->addoffset = 0.0;
+      ncvar->scalefactor = 1.0;
       ncvar->ldeflate = false;
       ncvar->lszip = false;
       ncvar->lunsigned = false;
@@ -3521,8 +3521,8 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
 
       if (ncvar->lvalidrange) vlistDefVarValidrange(vlistID, varID, ncvar->validrange);
 
-      if (IS_NOT_EQUAL(ncvar->addoffset, 0)) vlistDefVarAddoffset(vlistID, varID, ncvar->addoffset);
-      if (IS_NOT_EQUAL(ncvar->scalefactor, 1)) vlistDefVarScalefactor(vlistID, varID, ncvar->scalefactor);
+      if (IS_NOT_EQUAL(ncvar->addoffset, 0.0)) cdiDefKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, ncvar->addoffset);
+      if (IS_NOT_EQUAL(ncvar->scalefactor, 1.0)) cdiDefKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, ncvar->scalefactor);
 
       vlistDefVarDatatype(vlistID, varID, cdfInqDatatype(streamptr, ncvar->xtype, ncvar->lunsigned));
 

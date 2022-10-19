@@ -2,6 +2,10 @@
 
 	* Replaced CDI function vlistDefVarExtra() by cdiDefKeyString() with CDI_KEY_CHUNKS
 	* Replaced CDI function vlistInqVarExtra() by cdiInqKeyString() with CDI_KEY_CHUNKS
+	* Replaced CDI function vlistDefVarScalefactor() by cdiDefKeyFloat() with CDI_KEY_SCALEFACTOR
+	* Replaced CDI function vlistInqVarScalefactor() by cdiDefKeyFloat () with CDI_KEY_SCALEFACTOR
+	* Replaced CDI function vlistDefVarAddoffset() by cdiDefKeyFloat () with CDI_KEY_ADDOFFSET
+	* Replaced CDI function vlistInqVarAddoffset() by cdiDefKeyFloat () with CDI_KEY_ADDOFFSET
 
 2022-10-17  Uwe Schulzweida
 

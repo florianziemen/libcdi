@@ -465,12 +465,13 @@ cdfDefVarPacking(const stream_t *streamptr, int ncvarID, nc_type xtype, int vlis
 {
   //  if ( xtype == NC_BYTE || xtype == NC_SHORT || xtype == NC_INT )
   {
-    const double addoffset = vlistInqVarAddoffset(vlistID, varID);
-    const double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-    const bool laddoffset = IS_NOT_EQUAL(addoffset, 0);
-    const bool lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
+    double addoffset = 0.0, scalefactor = 1.0;
+    cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &addoffset);
+    cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scalefactor);
+    const bool haveAddoffset = IS_NOT_EQUAL(addoffset, 0.0);
+    const bool haveScalefactor = IS_NOT_EQUAL(scalefactor, 1.0);
 
-    if (laddoffset || lscalefactor)
+    if (haveAddoffset || haveScalefactor)
       {
         nc_type astype = (xtype == NC_FLOAT) ? NC_FLOAT : NC_DOUBLE;
         if ((astype == NC_DOUBLE) && IS_EQUAL(addoffset, (double) ((float) addoffset))
@@ -1032,12 +1033,13 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
   /*  if ( dtype == CDI_DATATYPE_INT8 || dtype == CDI_DATATYPE_INT16 || dtype == CDI_DATATYPE_INT32 ) */
   {
     const double missval = vlistInqVarMissval(vlistID, varID);
-    const double addoffset = vlistInqVarAddoffset(vlistID, varID);
-    const double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-    const bool laddoffset = IS_NOT_EQUAL(addoffset, 0);
-    const bool lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
+    double addoffset = 0.0, scalefactor = 1.0;
+    cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &addoffset);
+    cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scalefactor);
+    const bool haveAddoffset = IS_NOT_EQUAL(addoffset, 0.0);
+    const bool haveScalefactor = IS_NOT_EQUAL(scalefactor, 1.0);
 
-    if (laddoffset || lscalefactor)
+    if (haveAddoffset || haveScalefactor)
       {
         if (memtype == MEMTYPE_FLOAT)
           {
@@ -1052,8 +1054,8 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
                     double temp = mdata_sp[i];
                     if (!DBL_IS_EQUAL(temp, missval))
                       {
-                        if (laddoffset) temp -= addoffset;
-                        if (lscalefactor) temp /= scalefactor;
+                        if (haveAddoffset) temp -= addoffset;
+                        if (haveScalefactor) temp /= scalefactor;
                         mdata_sp[i] = (float) temp;
                       }
                   }
@@ -1063,8 +1065,8 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
                 for (size_t i = 0; i < nvals; ++i)
                   {
                     double temp = mdata_sp[i];
-                    if (laddoffset) temp -= addoffset;
-                    if (lscalefactor) temp /= scalefactor;
+                    if (haveAddoffset) temp -= addoffset;
+                    if (haveScalefactor) temp /= scalefactor;
                     mdata_sp[i] = (float) temp;
                   }
               }
@@ -1081,8 +1083,8 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
                   {
                     if (!DBL_IS_EQUAL(mdata_dp[i], missval))
                       {
-                        if (laddoffset) mdata_dp[i] -= addoffset;
-                        if (lscalefactor) mdata_dp[i] /= scalefactor;
+                        if (haveAddoffset) mdata_dp[i] -= addoffset;
+                        if (haveScalefactor) mdata_dp[i] /= scalefactor;
                       }
                   }
               }
@@ -1090,8 +1092,8 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
               {
                 for (size_t i = 0; i < nvals; ++i)
                   {
-                    if (laddoffset) mdata_dp[i] -= addoffset;
-                    if (lscalefactor) mdata_dp[i] /= scalefactor;
+                    if (haveAddoffset) mdata_dp[i] -= addoffset;
+                    if (haveScalefactor) mdata_dp[i] /= scalefactor;
                   }
               }
           }

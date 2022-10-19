@@ -93,8 +93,9 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
   const int haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double validRange[2];
   if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange))) validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
-  const double offset = vlistInqVarAddoffset(vlistID, varID);
-  const double scaleFactor = vlistInqVarScalefactor(vlistID, varID);
+  double offset = 0.0, scaleFactor = 1.0;
+  cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &offset);
+  cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scaleFactor);
 
   const bool missValIsNaN = DBL_IS_NAN(missVal);
   const int haveOffset = IS_NOT_EQUAL(offset, 0.0);
@@ -199,8 +200,9 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
   const int haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double validRange[2];
   if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange))) validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
-  const double offset = vlistInqVarAddoffset(vlistID, varID);
-  const double scaleFactor = vlistInqVarScalefactor(vlistID, varID);
+  double offset = 0.0, scaleFactor = 1.0;
+  cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &offset);
+  cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scaleFactor);
 
   const bool missValIsNaN = DBL_IS_NAN(missVal);
   const int haveOffset = IS_NOT_EQUAL(offset, 0.0);

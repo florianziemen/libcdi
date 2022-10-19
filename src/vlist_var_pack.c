@@ -27,7 +27,7 @@ enum
 
 enum
 {
-  vlistvar_ndbls = 3,
+  vlistvar_ndbls = 1,
 };
 
 int
@@ -36,11 +36,9 @@ vlistVarGetPackSize(vlist_t *p, int varID, void *context)
   var_t *var = p->vars + varID;
   int varsize
       = serializeGetSize(vlistvarNint, CDI_DATATYPE_INT, context) + serializeGetSize(vlistvar_ndbls, CDI_DATATYPE_FLT64, context);
-  if (var->extra) varsize += serializeGetSize((int) strlen(var->extra), CDI_DATATYPE_TXT, context);
+
   varsize += serializeGetSize(4 * zaxisInqSize(var->zaxisID), CDI_DATATYPE_INT, context);
-
   varsize += serializeKeysGetPackSize(&var->keys, context);
-
   varsize += cdiAttsGetSize(p, varID, context);
 
   return varsize;
@@ -69,8 +67,6 @@ vlistVarPack(vlist_t *p, int varID, char *buf, int size, int *position, void *co
   tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS] = nlevs;
   tempbuf[VLISTVAR_PACK_INT_IDX_IORANK] = var->iorank;
   dtempbuf[0] = var->missval;
-  dtempbuf[1] = var->scalefactor;
-  dtempbuf[2] = var->addoffset;
   serializePack(tempbuf, vlistvarNint, CDI_DATATYPE_INT, buf, size, position, context);
   serializePack(dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64, buf, size, position, context);
   if (nlevs)
@@ -114,8 +110,6 @@ vlistVarUnpack(int vlistID, char *buf, int size, int *position, int originNamesp
   // FIXME: changing the table might change the param code
   vlistDefVarParam(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_PARAM]);
   if (tempbuf[VLISTVAR_PACK_INT_IDX_MISSVALUSED]) vlistDefVarMissval(vlistID, newvar, dtempbuf[0]);
-  vlistDefVarScalefactor(vlistID, newvar, dtempbuf[1]);
-  vlistDefVarAddoffset(vlistID, newvar, dtempbuf[2]);
   vlistDefVarCompType(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_COMPTYPE]);
   vlistDefVarCompLevel(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_COMPLEVEL]);
   const int nlevs = tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS];

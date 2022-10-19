@@ -672,11 +672,6 @@ void    vlistDefVarMissval(int vlistID, int varID, double missval);
 //      vlistInqVarMissval: Get the missing value of a Variable
 double  vlistInqVarMissval(int vlistID, int varID);
 
-void    vlistDefVarScalefactor(int vlistID, int varID, double scalefactor);
-double  vlistInqVarScalefactor(int vlistID, int varID);
-void    vlistDefVarAddoffset(int vlistID, int varID, double addoffset);
-double  vlistInqVarAddoffset(int vlistID, int varID);
-
 SizeType vlistInqVarSize(int vlistID, int varID);
 
 void    vlistDefIndex(int vlistID, int varID, int levID, int index);
@@ -836,6 +831,8 @@ SizeType gridInqYCvals(int gridID, char *ycvals[]);
 
 // Floating point keys
 #define  CDI_KEY_MISSVAL                       701  // Missing value
+#define  CDI_KEY_ADDOFFSET                     702  // Add offset
+#define  CDI_KEY_SCALEFACTOR                   703  // Scale factor
 
 // Byte array keys
 #define  CDI_KEY_UUID                          960  // UUID for grid/Z-axis reference [size: CDI_UUID_SIZE]

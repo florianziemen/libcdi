@@ -62,10 +62,7 @@ typedef struct
   int xyz;
   bool missvalused;  // true if missval is defined
   bool lvalidrange;
-  char *extra;
   double missval;
-  double scalefactor;
-  double addoffset;
   double validrange[2];
   levinfo_t *levinfo;
   int comptype;   // compression type

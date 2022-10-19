@@ -1256,28 +1256,6 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarMissval
 
-!                     vlistDefVarScalefactor
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     DOUBLEPRECISION scalefactor)
-      EXTERNAL        vlistDefVarScalefactor
-
-      DOUBLEPRECISION vlistInqVarScalefactor
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarScalefactor
-
-!                     vlistDefVarAddoffset
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     DOUBLEPRECISION addoffset)
-      EXTERNAL        vlistDefVarAddoffset
-
-      DOUBLEPRECISION vlistInqVarAddoffset
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarAddoffset
-
       INTEGER         vlistInqVarSize
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
@@ -1642,6 +1620,10 @@
 !
       INTEGER    CDI_KEY_MISSVAL
       PARAMETER (CDI_KEY_MISSVAL        = 701)
+      INTEGER    CDI_KEY_ADDOFFSET
+      PARAMETER (CDI_KEY_ADDOFFSET      = 702)
+      INTEGER    CDI_KEY_SCALEFACTOR
+      PARAMETER (CDI_KEY_SCALEFACTOR    = 703)
 !
 !  Byte array keys
 !
