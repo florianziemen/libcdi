@@ -400,7 +400,7 @@ cdiDefVarKeyFloat(cdi_keys_t *keysp, int key, double value)
     {
       // if ( keyp->v.i != value )
       {
-        keyp->type = KEY_INT;
+        keyp->type = KEY_FLOAT;
         keyp->v.d = value;
       }
     }
