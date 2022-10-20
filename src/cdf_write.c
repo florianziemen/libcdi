@@ -466,10 +466,8 @@ cdfDefVarPacking(const stream_t *streamptr, int ncvarID, nc_type xtype, int vlis
   //  if ( xtype == NC_BYTE || xtype == NC_SHORT || xtype == NC_INT )
   {
     double addoffset = 0.0, scalefactor = 1.0;
-    cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &addoffset);
-    cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scalefactor);
-    const bool haveAddoffset = IS_NOT_EQUAL(addoffset, 0.0);
-    const bool haveScalefactor = IS_NOT_EQUAL(scalefactor, 1.0);
+    const bool haveAddoffset = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &addoffset) == CDI_NOERR);
+    const bool haveScalefactor = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scalefactor) == CDI_NOERR);
 
     if (haveAddoffset || haveScalefactor)
       {
@@ -1034,10 +1032,8 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
   {
     const double missval = vlistInqVarMissval(vlistID, varID);
     double addoffset = 0.0, scalefactor = 1.0;
-    cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &addoffset);
-    cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scalefactor);
-    const bool haveAddoffset = IS_NOT_EQUAL(addoffset, 0.0);
-    const bool haveScalefactor = IS_NOT_EQUAL(scalefactor, 1.0);
+    const bool haveAddoffset = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &addoffset) == CDI_NOERR);
+    const bool haveScalefactor = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scalefactor) == CDI_NOERR);
 
     if (haveAddoffset || haveScalefactor)
       {

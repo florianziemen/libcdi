@@ -93,13 +93,11 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
   const int haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double validRange[2];
   if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange))) validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
-  double offset = 0.0, scaleFactor = 1.0;
-  cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &offset);
-  cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scaleFactor);
+  double addoffset = 0.0, scalefactor = 1.0;
+  const int haveAddoffset = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &addoffset) == CDI_NOERR);
+  const int haveScalefactor = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scalefactor) == CDI_NOERR);
 
   const bool missValIsNaN = DBL_IS_NAN(missVal);
-  const int haveOffset = IS_NOT_EQUAL(offset, 0.0);
-  const int haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1.0);
   size_t missValCount = 0;
 
   double validMin = validRange[0];
@@ -110,33 +108,33 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
   const int haveRangeCheck = (IS_NOT_EQUAL(validMax, DBL_MAX)) | (IS_NOT_EQUAL(validMin, DBL_MIN));
   assert(!haveRangeCheck || haveMissVal);
 
-  switch (haveMissVal | (haveScaleFactor << 1) | (haveOffset << 2) | (haveRangeCheck << 3))
+  switch (haveMissVal | (haveScalefactor << 1) | (haveAddoffset << 2) | (haveRangeCheck << 3))
     {
-    case 15:  // haveRangeCheck & haveMissVal & haveScaleFactor & haveOffset
+    case 15:  // haveRangeCheck & haveMissVal & haveScalefactor & haveAddoffset
       for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
           missValCount += (size_t) (outOfRange | isMissVal);
-          data[i] = outOfRange ? missVal : isMissVal ? data[i] : data[i] * scaleFactor + offset;
+          data[i] = outOfRange ? missVal : isMissVal ? data[i] : data[i] * scalefactor + addoffset;
         }
       break;
-    case 13:  // haveRangeCheck & haveMissVal & haveOffset
+    case 13:  // haveRangeCheck & haveMissVal & haveAddoffset
       for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
           missValCount += (size_t) (outOfRange | isMissVal);
-          data[i] = outOfRange ? missVal : isMissVal ? data[i] : data[i] + offset;
+          data[i] = outOfRange ? missVal : isMissVal ? data[i] : data[i] + addoffset;
         }
       break;
-    case 11:  // haveRangeCheck & haveMissVal & haveScaleFactor
+    case 11:  // haveRangeCheck & haveMissVal & haveScalefactor
       for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
           missValCount += (size_t) (outOfRange | isMissVal);
-          data[i] = outOfRange ? missVal : isMissVal ? data[i] : data[i] * scaleFactor;
+          data[i] = outOfRange ? missVal : isMissVal ? data[i] : data[i] * scalefactor;
         }
       break;
     case 9:  // haveRangeCheck & haveMissVal
@@ -148,35 +146,35 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
           data[i] = outOfRange ? missVal : data[i];
         }
       break;
-    case 7:  // haveMissVal & haveScaleFactor & haveOffset
+    case 7:  // haveMissVal & haveScalefactor & haveAddoffset
       for (size_t i = 0; i < valueCount; ++i)
         if (DBL_IS_EQUAL(data[i], missVal))
           missValCount++;
         else
-          data[i] = data[i] * scaleFactor + offset;
+          data[i] = data[i] * scalefactor + addoffset;
       break;
-    case 6:  // haveOffset & haveScaleFactor
-      for (size_t i = 0; i < valueCount; ++i) data[i] = data[i] * scaleFactor + offset;
+    case 6:  // haveAddoffset & haveScalefactor
+      for (size_t i = 0; i < valueCount; ++i) data[i] = data[i] * scalefactor + addoffset;
       break;
-    case 5:  // haveMissVal & haveOffset
+    case 5:  // haveMissVal & haveAddoffset
       for (size_t i = 0; i < valueCount; ++i)
         if (DBL_IS_EQUAL(data[i], missVal))
           missValCount++;
         else
-          data[i] += offset;
+          data[i] += addoffset;
       break;
-    case 4:  // haveOffset
-      for (size_t i = 0; i < valueCount; ++i) data[i] += offset;
+    case 4:  // haveAddoffset
+      for (size_t i = 0; i < valueCount; ++i) data[i] += addoffset;
       break;
-    case 3:  // haveMissVal & haveScaleFactor
+    case 3:  // haveMissVal & haveScalefactor
       for (size_t i = 0; i < valueCount; ++i)
         if (DBL_IS_EQUAL(data[i], missVal))
           missValCount++;
         else
-          data[i] *= scaleFactor;
+          data[i] *= scalefactor;
       break;
-    case 2:  // haveScaleFactor
-      for (size_t i = 0; i < valueCount; ++i) data[i] *= scaleFactor;
+    case 2:  // haveScalefactor
+      for (size_t i = 0; i < valueCount; ++i) data[i] *= scalefactor;
       break;
     case 1:  // haveMissVal
       if (missValIsNaN)
@@ -200,13 +198,11 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
   const int haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double validRange[2];
   if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange))) validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
-  double offset = 0.0, scaleFactor = 1.0;
-  cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &offset);
-  cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scaleFactor);
+  double addoffset = 0.0, scalefactor = 1.0;
+  const int haveAddoffset = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &addoffset) == CDI_NOERR);
+  const int haveScalefactor = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scalefactor) == CDI_NOERR);
 
   const bool missValIsNaN = DBL_IS_NAN(missVal);
-  const int haveOffset = IS_NOT_EQUAL(offset, 0.0);
-  const int haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1.0);
   size_t missValCount = 0;
 
   double validMin = validRange[0];
@@ -217,33 +213,33 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
   const int haveRangeCheck = (IS_NOT_EQUAL(validMax, DBL_MAX)) | (IS_NOT_EQUAL(validMin, DBL_MIN));
   assert(!haveRangeCheck || haveMissVal);
 
-  switch (haveMissVal | (haveScaleFactor << 1) | (haveOffset << 2) | (haveRangeCheck << 3))
+  switch (haveMissVal | (haveScalefactor << 1) | (haveAddoffset << 2) | (haveRangeCheck << 3))
     {
-    case 15:  // haveRangeCheck & haveMissVal & haveScaleFactor & haveOffset
+    case 15:  // haveRangeCheck & haveMissVal & haveScalefactor & haveAddoffset
       for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
           missValCount += (size_t) (outOfRange | isMissVal);
-          data[i] = outOfRange ? (float) missVal : isMissVal ? data[i] : (float) (data[i] * scaleFactor + offset);
+          data[i] = outOfRange ? (float) missVal : isMissVal ? data[i] : (float) (data[i] * scalefactor + addoffset);
         }
       break;
-    case 13:  // haveRangeCheck & haveMissVal & haveOffset
+    case 13:  // haveRangeCheck & haveMissVal & haveAddoffset
       for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
           missValCount += (size_t) (outOfRange | isMissVal);
-          data[i] = outOfRange ? (float) missVal : isMissVal ? data[i] : (float) (data[i] + offset);
+          data[i] = outOfRange ? (float) missVal : isMissVal ? data[i] : (float) (data[i] + addoffset);
         }
       break;
-    case 11:  // haveRangeCheck & haveMissVal & haveScaleFactor
+    case 11:  // haveRangeCheck & haveMissVal & haveScalefactor
       for (size_t i = 0; i < valueCount; ++i)
         {
           int outOfRange = (data[i] < validMin || data[i] > validMax);
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
           missValCount += (size_t) (outOfRange | isMissVal);
-          data[i] = outOfRange ? (float) missVal : isMissVal ? data[i] : (float) (data[i] * scaleFactor);
+          data[i] = outOfRange ? (float) missVal : isMissVal ? data[i] : (float) (data[i] * scalefactor);
         }
       break;
     case 9:  // haveRangeCheck & haveMissVal
@@ -255,35 +251,35 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
           data[i] = outOfRange ? (float) missVal : data[i];
         }
       break;
-    case 7:  // haveMissVal & haveScaleFactor & haveOffset
+    case 7:  // haveMissVal & haveScalefactor & haveAddoffset
       for (size_t i = 0; i < valueCount; ++i)
         if (DBL_IS_EQUAL(data[i], missVal))
           missValCount++;
         else
-          data[i] = (float) (data[i] * scaleFactor + offset);
+          data[i] = (float) (data[i] * scalefactor + addoffset);
       break;
-    case 6:  // haveOffset & haveScaleFactor
-      for (size_t i = 0; i < valueCount; ++i) data[i] = (float) (data[i] * scaleFactor + offset);
+    case 6:  // haveAddoffset & haveScalefactor
+      for (size_t i = 0; i < valueCount; ++i) data[i] = (float) (data[i] * scalefactor + addoffset);
       break;
-    case 5:  // haveMissVal & haveOffset
+    case 5:  // haveMissVal & haveAddoffset
       for (size_t i = 0; i < valueCount; ++i)
         if (DBL_IS_EQUAL(data[i], missVal))
           missValCount++;
         else
-          data[i] = (float) (data[i] + offset);
+          data[i] = (float) (data[i] + addoffset);
       break;
-    case 4:  // haveOffset
-      for (size_t i = 0; i < valueCount; ++i) data[i] = (float) (data[i] + offset);
+    case 4:  // haveAddoffset
+      for (size_t i = 0; i < valueCount; ++i) data[i] = (float) (data[i] + addoffset);
       break;
-    case 3:  // haveMissVal & haveScaleFactor
+    case 3:  // haveMissVal & haveScalefactor
       for (size_t i = 0; i < valueCount; ++i)
         if (DBL_IS_EQUAL(data[i], missVal))
           missValCount++;
         else
-          data[i] = (float) (data[i] * scaleFactor);
+          data[i] = (float) (data[i] * scalefactor);
       break;
-    case 2:  // haveScaleFactor
-      for (size_t i = 0; i < valueCount; ++i) data[i] = (float) (data[i] * scaleFactor);
+    case 2:  // haveScalefactor
+      for (size_t i = 0; i < valueCount; ++i) data[i] = (float) (data[i] * scalefactor);
       break;
     case 1:  // haveMissVal
       if (missValIsNaN)
