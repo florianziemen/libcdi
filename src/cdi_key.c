@@ -192,7 +192,7 @@ cdiInqKeyLen(int cdiID, int varID, int key, int *length)
   xassert(keysp != NULL);
 
   const cdi_key_t *keyp = find_key_const(keysp, key);
-  if (keyp != NULL || keyp->length > 0)
+  if (keyp != NULL && keyp->length > 0)
     {
       *length = keyp->length;
       status = CDI_NOERR;
