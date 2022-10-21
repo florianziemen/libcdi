@@ -125,6 +125,7 @@ typedef struct
   int typeOfEnsembleForecast;
   int numberOfForecastsInEnsemble;
   int perturbationNumber;
+  int unitsLen;
   char name[CDI_MAX_NAME];
   char longname[CDI_MAX_NAME];
   char stdname[CDI_MAX_NAME];
@@ -738,6 +739,7 @@ init_ncvars(int nvars, ncvar_t *ncvars)
       ncvar->typeOfEnsembleForecast = -1;
       ncvar->numberOfForecastsInEnsemble = -1;
       ncvar->perturbationNumber = -1;
+      ncvar->unitsLen = 0;
       memset(ncvar->name, 0, CDI_MAX_NAME);
       memset(ncvar->longname, 0, CDI_MAX_NAME);
       memset(ncvar->stdname, 0, CDI_MAX_NAME);
@@ -1253,6 +1255,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
           else if (isText && strIsEqual(attname, "units"))
             {
+              ncvar->unitsLen = attstringsize;
               memcpy(ncvar->units, attstring, attstringsize);
             }
           else if (isText && strIsEqual(attname, "calendar"))
@@ -3517,7 +3520,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       if (ncvar->code != CDI_UNDEFID) vlistDefVarParam(vlistID, varID, cdiEncodeParam(ncvar->code, ncvar->tabnum, 255));
       if (ncvar->longname[0]) cdiDefKeyString(vlistID, varID, CDI_KEY_LONGNAME, ncvar->longname);
       if (ncvar->stdname[0]) cdiDefKeyString(vlistID, varID, CDI_KEY_STDNAME, ncvar->stdname);
-      if (ncvar->units[0]) cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, ncvar->units);
+      if (ncvar->unitsLen > 0) cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, ncvar->units);
 
       if (ncvar->lvalidrange) vlistDefVarValidrange(vlistID, varID, ncvar->validrange);
 

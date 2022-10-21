@@ -438,21 +438,19 @@ void
 vlistInqVarName(int vlistID, int varID, char *name)
 {
   int length = CDI_MAX_NAME;
-  (void) cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
-
-  if (!name[0])
+  if (CDI_NOERR != cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length))
     {
       vlistCheckVarID(__func__, vlistID, varID);
 
       vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-      int param = vlistptr->vars[varID].param;
+      const int param = vlistptr->vars[varID].param;
       int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
       if (pdis == 255)
         {
-          int code = pnum;
-          int tableID = vlistptr->vars[varID].tableID;
+          const int code = pnum;
+          const int tableID = vlistptr->vars[varID].tableID;
           tableInqEntry(tableID, code, -1, name, NULL, NULL);
           if (!name[0]) sprintf(name, "var%d", code);
         }
@@ -493,13 +491,13 @@ vlistCopyVarName(int vlistID, int varID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   // Otherwise we check if we should use the table of parameter descriptions.
-  int param = vlistptr->vars[varID].param;
+  const int param = vlistptr->vars[varID].param;
   int discipline, category, number;
   cdiDecodeParam(param, &number, &category, &discipline);
   char *result = NULL;
   if (discipline == 255)
     {
-      int tableID = vlistptr->vars[varID].tableID;
+      const int tableID = vlistptr->vars[varID].tableID;
       tableInqEntry(tableID, number, -1, name, NULL, NULL);
       if (name[0])
         result = strdup(name);
@@ -544,21 +542,19 @@ void
 vlistInqVarLongname(int vlistID, int varID, char *longname)
 {
   int length = CDI_MAX_NAME;
-  (void) cdiInqKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname, &length);
-
-  if (!longname[0])
+  if (CDI_NOERR != cdiInqKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname, &length))
     {
       vlistCheckVarID(__func__, vlistID, varID);
 
       vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-      int param = vlistptr->vars[varID].param;
+      const int param = vlistptr->vars[varID].param;
       int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
       if (pdis == 255)
         {
-          int code = pnum;
-          int tableID = vlistptr->vars[varID].tableID;
+          const int code = pnum;
+          const int tableID = vlistptr->vars[varID].tableID;
           tableInqEntry(tableID, code, -1, NULL, longname, NULL);
         }
     }
@@ -646,21 +642,19 @@ void
 vlistInqVarUnits(int vlistID, int varID, char *units)
 {
   int length = CDI_MAX_NAME;
-  (void) cdiInqKeyString(vlistID, varID, CDI_KEY_UNITS, units, &length);
-
-  if (!units[0])
+  if (CDI_NOERR != cdiInqKeyString(vlistID, varID, CDI_KEY_UNITS, units, &length))
     {
       vlistCheckVarID(__func__, vlistID, varID);
 
       vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-      int param = vlistptr->vars[varID].param;
+      const int param = vlistptr->vars[varID].param;
       int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
       if (pdis == 255)
         {
-          int code = pnum;
-          int tableID = vlistptr->vars[varID].tableID;
+          const int code = pnum;
+          const int tableID = vlistptr->vars[varID].tableID;
           tableInqEntry(tableID, code, -1, NULL, NULL, units);
         }
     }

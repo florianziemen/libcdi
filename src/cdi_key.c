@@ -214,7 +214,7 @@ cdi_define_key(const cdi_key_t *keyp, cdi_keys_t *keysp)
 int
 cdiDeleteKey(int cdiID, int varID, int key)
 {
-  int status = CDI_NOERR;
+  const int status = CDI_NOERR;
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
@@ -237,7 +237,7 @@ cdiCopyVarKeys(const cdi_keys_t *keysp1, cdi_keys_t *keysp2)
 int
 cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2)
 {
-  int status = CDI_NOERR;
+  const int status = CDI_NOERR;
 
   cdi_keys_t *keysp1 = cdi_get_keysp(cdiID1, varID1);
   xassert(keysp1 != NULL);
@@ -253,7 +253,7 @@ cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2)
 int
 cdiCopyVarKey(const cdi_keys_t *keysp1, int key, cdi_keys_t *keysp2)
 {
-  int status = CDI_NOERR;
+  const int status = CDI_NOERR;
 
   const cdi_key_t *keyp = find_key_const(keysp1, key);
   if (keyp == NULL) return -1;
@@ -314,7 +314,7 @@ The function @func{cdiDefKeyInt} defines an integer value from a key.
 int
 cdiDefKeyInt(int cdiID, int varID, int key, int value)
 {
-  int status = CDI_NOERR;
+  const int status = CDI_NOERR;
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
@@ -413,7 +413,7 @@ The function @func{cdiDefKeyFloat} defines a CDI floating point value from a key
 int
 cdiDefKeyFloat(int cdiID, int varID, int key, double value)
 {
-  int status = CDI_NOERR;
+  const int status = CDI_NOERR;
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
@@ -512,7 +512,7 @@ The function @func{cdiDefKeyBytes} defines a byte array from a key.
 int
 cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, int length)
 {
-  int status = CDI_NOERR;
+  const int status = CDI_NOERR;
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
@@ -614,8 +614,8 @@ cdiDefKeyString(int cdiID, int varID, int key, const char *string)
 {
   xassert(string != NULL);
 
-  int length = strlen(string) + 1;
-  int status = cdiDefKeyBytes(cdiID, varID, key, (const unsigned char *) string, length);
+  const int length = strlen(string) + 1;
+  const int status = cdiDefKeyBytes(cdiID, varID, key, (const unsigned char *) string, length);
 
   return status;
 }
@@ -669,10 +669,10 @@ cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
   if (maxlength > 0) string[0] = '\0';
 
   int status = cdiInqKeyBytes(cdiID, varID, key, (unsigned char *) string, length);
-  if (status != CDI_NOERR)
-    *length = 0;
-  else
+  if (CDI_NOERR == status)
     string[maxlength - 1] = '\0';
+  else
+    *length = 0;
 
   return status;
 }
