@@ -67,24 +67,6 @@ int borges_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_
 static int parse(const char *path, const char **host, size_t *host_len, const char **port, size_t *port_len, const char **meta, size_t *meta_len)
 {
   const char *p = path;
-  if (*(p++) != 'b')
-    return -1;
-  if (*(p++) != 'o')
-    return -1;
-  if (*(p++) != 'r')
-    return -1;
-  if (*(p++) != 'g')
-    return -1;
-  if (*(p++) != 'e')
-    return -1;
-  if (*(p++) != 's')
-    return -1;
-  if (*(p++) != ':')
-    return -1;
-  if (*(p++) != '/')
-    return -1;
-  if (*(p++) != '/')
-    return -1;
   *host = p;
   for (; *p != '/' && *p != ':' && *p != '\0'; ++p)
   {
@@ -94,7 +76,8 @@ static int parse(const char *path, const char **host, size_t *host_len, const ch
   *host_len = (p - *host);
   if (*p == ':')
   {
-    *port = ++p;
+    ++p;
+    *port = p;
     for (; *p != '/' && *p != '\0'; ++p)
     {
       if (*p < '0' || *p > '9')
@@ -129,7 +112,7 @@ int borges_connect_int(const char *path, char filemode, stream_t *streamptr)
     Warning("Invalid path");
     return -1;
   }
-  if (port = NULL)
+  if (port == NULL)
   {
     port = BORGES_DEFAULT_PORT;
     meta_len = sizeof(BORGES_DEFAULT_PORT);
@@ -147,7 +130,7 @@ int borges_connect_int(const char *path, char filemode, stream_t *streamptr)
     return -1;
   }
   char borges_path[256];
-  snprintf(borges_path, sizeof(borges_path), "tcp://%*s:%*s", host_len, host, port_len, port);
+  snprintf(borges_path, sizeof(borges_path), "tcp://%.*s:%.*s", host_len, host, port_len, port);
   if (borges_connection_init(&info->borges_conn, &info->borges_ctx, borges_path, borges_ev_handler, info, &err) < 0)
   {
     Warning("Path is %s", path);
