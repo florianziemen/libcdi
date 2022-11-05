@@ -419,6 +419,18 @@ checkZaxisName(char *axisname, int fileID, int vlistID, int zaxisID, int nzaxis)
 }
 
 static void
+cdfGridCompress(int fileID, int ncvarid, size_t gridsize, int filetype, int comptype, size_t *chunks)
+{
+#ifdef HAVE_NETCDF4
+  if (gridsize >= 32 && comptype == CDI_COMPRESS_ZIP && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR))
+    {
+      cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
+      cdfDefVarDeflate(fileID, ncvarid, 1);
+    }
+#endif
+}
+
+static void
 cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool addVarToGrid,
                  const struct cdfDefGridAxisInqs *gridAxisInq, int axisKey, char axisLetter,
                  void (*finishCyclicBounds)(double *pbounds, size_t dimlen, const double *pvals))
@@ -489,6 +501,17 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
       if (pvals)
         {
           cdf_def_var(fileID, axisname, xtype, ndims, &dimID, &ncvarid);
+
+          int chunkSize = 0;
+          int chunkType = CDI_CHUNK_GRID;
+          cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_CHUNKTYPE, &chunkType);
+          cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_CHUNKSIZE, &chunkSize);
+          if (chunkSize > 0) chunkType = CDI_CHUNK_AUTO;
+
+          if (chunkType == CDI_CHUNK_GRID && dimlen > ChunkSizeLim) chunkType = CDI_CHUNK_LINES;
+
+          size_t chunk = calc_chunksize_x(chunkType, chunkSize, dimlen, true);
+          cdfGridCompress(fileID, ncvarid, dimlen, streamptr->filetype, streamptr->comptype, &chunk);
 
           cdfPutGridStdAtts(fileID, ncvarid, gridID, axisLetter);
           {
@@ -567,18 +590,6 @@ static void
 cdfDefYaxis(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool addVarToGrid)
 {
   cdfDefAxisCommon(streamptr, gridID, gridIndex, ndims, addVarToGrid, &gridInqsY, CDI_YAXIS, 'Y', finishCyclicYBounds);
-}
-
-static void
-cdfGridCompress(int fileID, int ncvarid, size_t gridsize, int filetype, int comptype, size_t *chunks)
-{
-#ifdef HAVE_NETCDF4
-  if (gridsize > 1 && comptype == CDI_COMPRESS_ZIP && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C))
-    {
-      cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
-      cdfDefVarDeflate(fileID, ncvarid, 1);
-    }
-#endif
 }
 
 static void
@@ -688,7 +699,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xsize, size_t 
       dimIDs[0] = ydimID;
       dimIDs[1] = xdimID;
     }
-  else /* ndims == 2 */
+  else // ndims == 2
     {
       chunks[0] = calc_chunksize_x(chunkType, chunkSize, xsize, (ydimID == CDI_UNDEFID));
       dimIDs[0] = xdimID;
