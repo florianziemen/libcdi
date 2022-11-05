@@ -1,3 +1,7 @@
+2022-11-05  Uwe Schulzweida
+
+	* NetCDF output: added compression support for data on GRID_GENERIC
+
 2022-10-19  Uwe Schulzweida
 
 	* Replaced CDI function vlistDefVarExtra() by cdiDefKeyString() with CDI_KEY_CHUNKS
