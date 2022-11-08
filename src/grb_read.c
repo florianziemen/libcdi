@@ -19,8 +19,8 @@
 #include "cgribex.h" /* gribZip gribGetZip gribGinfo */
 
 static int
-grbDecode(int filetype, int memtype, void *cgribexp, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced,
-          size_t *nmiss, double missval)
+grb_decode(int filetype, int memtype, void *cgribexp, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced,
+           size_t *nmiss, double missval)
 {
   int status = 0;
 
@@ -60,7 +60,7 @@ grbDecode(int filetype, int memtype, void *cgribexp, void *gribbuffer, size_t gr
 
 // Decompresses the grib data in gribbuffer.
 static int
-grbUnzipRecord(void *gribbuffer, size_t *gribsize)
+grib1_unzip_record(void *gribbuffer, size_t *gribsize)
 {
   int zip = 0;
 
@@ -72,7 +72,7 @@ grbUnzipRecord(void *gribbuffer, size_t *gribsize)
   if ((izip = gribGetZip(igribsize, (unsigned char *) gribbuffer, &unzipsize)) > 0)
     {
       zip = izip;
-      if (izip == 128) /* szip */
+      if (izip == 128) // szip
         {
           if (unzipsize < igribsize)
             {
@@ -80,7 +80,7 @@ grbUnzipRecord(void *gribbuffer, size_t *gribsize)
               return 0;
             }
 
-          unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
+          unzipsize += 100; // need 0 to 1 bytes for rounding of bds
 
           void *buffer = Malloc(igribsize);
           memcpy(buffer, gribbuffer, igribsize);
@@ -115,9 +115,9 @@ static int
 grb_decode_record(void *untypedArgs)
 {
   DecodeArgs *args = (DecodeArgs *) untypedArgs;
-  *args->outZip = grbUnzipRecord(args->gribbuffer, &args->recsize);
-  grbDecode(args->filetype, args->memtype, args->cgribexp, args->gribbuffer, args->recsize, args->data, args->gridsize,
-            args->unreduced, &args->nmiss, args->missval);
+  *args->outZip = grib1_unzip_record(args->gribbuffer, &args->recsize);
+  grb_decode(args->filetype, args->memtype, args->cgribexp, args->gribbuffer, args->recsize, args->data, args->gridsize,
+             args->unreduced, &args->nmiss, args->missval);
   return 0;
 }
 
