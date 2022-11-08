@@ -135,7 +135,7 @@ grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *gribbuffer,
 
   void *cgribexp = (gribbuffer && streamptr->record->objectp) ? streamptr->record->objectp : NULL;
   if (!gribbuffer) gribbuffer = Malloc(streamptr->record->buffersize);
-  if (!data) data = Malloc(gridsize * (memtype == MEMTYPE_FLOAT ? sizeof(float) : sizeof(double)));
+  if (!data) data = Malloc(gridsize * ((memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
 
   if (streamptr->protocol == CDI_PROTOCOL_FDB)
     {
@@ -184,6 +184,14 @@ grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *gribbuffer,
   };
 }
 
+static void
+grb_read_and_decode_record(stream_t *streamptr, int recID, int memtype, void *data, size_t *nmiss, bool resetFilePos)
+{
+  DecodeArgs args = grb_read_raw_data(streamptr, recID, memtype, streamptr->record->buffer, data, resetFilePos);
+  grb_decode_record(&args);
+  *nmiss = args.nmiss;
+}
+
 typedef struct JobDescriptor
 {
   DecodeArgs args;
@@ -202,7 +210,7 @@ static void
 JobDescriptor_finishJob(AsyncManager *jobManager, JobDescriptor *me, void *data, size_t *nmiss)
 {
   if (AsyncWorker_wait(jobManager, me->job)) xabort("error executing job in worker thread");
-  memcpy(data, me->args.data, me->args.gridsize * (me->args.memtype == MEMTYPE_FLOAT ? sizeof(float) : sizeof(double)));
+  memcpy(data, me->args.data, me->args.gridsize * ((me->args.memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
   *nmiss = me->args.nmiss;
 
   Free(me->args.gribbuffer);
@@ -228,7 +236,7 @@ grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
 
       if (!jobs)
         {
-          jobs = (JobDescriptor *) malloc(workerCount * sizeof *jobs);
+          jobs = (JobDescriptor *) malloc(workerCount * sizeof(*jobs));
           streamptr->jobs = jobs;
           for (int i = 0; i < workerCount; i++) jobs[i].args.recID = -1;
           if (AsyncWorker_init(&jobManager, workerCount)) xabort("error while trying to start worker threads");
@@ -271,12 +279,7 @@ grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
     }
 
   // perform the work synchronously if we didn't start a job for it yet
-  if (!jobFound)
-    {
-      DecodeArgs args = grb_read_raw_data(streamptr, recID, memtype, streamptr->record->buffer, data, resetFilePos);
-      grb_decode_record(&args);
-      *nmiss = args.nmiss;
-    }
+  if (!jobFound) grb_read_and_decode_record(streamptr, recID, memtype, data, nmiss, resetFilePos);
 }
 
 void
@@ -295,7 +298,7 @@ grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, voi
   const int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
   const int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
 
-  grb_read_next_record(streamptr, recID, memtype, data, nmiss, true);
+  grb_read_and_decode_record(streamptr, recID, memtype, data, nmiss, true);
 }
 
 void
@@ -326,7 +329,7 @@ grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nm
         datap = (double *) data + levelID * gridsize;
 
       size_t imiss;
-      grb_read_next_record(streamptr, recID, memtype, datap, &imiss, false);
+      grb_read_and_decode_record(streamptr, recID, memtype, datap, &imiss, false);
       *nmiss += imiss;
     }
 
