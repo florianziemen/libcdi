@@ -148,24 +148,17 @@ grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *gribbuffer,
     }
   else
     {
-      const int fileID = streamptr->fileID;
-      const off_t recpos = streamptr->tsteps[tsID].records[recID].position;
-
       if (recsize == 0) Error("Internal problem! Recordsize is zero for record %d at timestep %d", recID + 1, tsID + 1);
 
-      if (resetFilePos)
-        {
-          const off_t currentfilepos = fileGetPos(fileID);
-          fileSetPos(fileID, recpos, SEEK_SET);
-          if (fileRead(fileID, gribbuffer, recsize) != recsize) Error("Failed to read GRIB record!");
-          fileSetPos(fileID, currentfilepos, SEEK_SET);
-        }
-      else
-        {
-          fileSetPos(fileID, recpos, SEEK_SET);
-          if (fileRead(fileID, gribbuffer, recsize) != recsize) Error("Failed to read GRIB record!");
-          streamptr->numvals += gridsize;
-        }
+      const int fileID = streamptr->fileID;
+      const off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+      const off_t currentfilepos = (resetFilePos ? fileGetPos(fileID) : 0);
+
+      fileSetPos(fileID, recpos, SEEK_SET);
+      if (fileRead(fileID, gribbuffer, recsize) != recsize) Error("Failed to read GRIB record!");
+
+      if (resetFilePos) fileSetPos(fileID, currentfilepos, SEEK_SET);
+      if (!resetFilePos) streamptr->numvals += gridsize;
     }
 
   return (DecodeArgs){
