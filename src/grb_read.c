@@ -184,12 +184,12 @@ grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *gribbuffer,
   };
 }
 
-static void
-grb_read_and_decode_record(stream_t *streamptr, int recID, int memtype, void *data, size_t *nmiss, bool resetFilePos)
+static size_t
+grb_read_and_decode_record(stream_t *streamptr, int recID, int memtype, void *data, bool resetFilePos)
 {
   DecodeArgs args = grb_read_raw_data(streamptr, recID, memtype, streamptr->record->buffer, data, resetFilePos);
   grb_decode_record(&args);
-  *nmiss = args.nmiss;
+  return args.nmiss;
 }
 
 typedef struct JobDescriptor
@@ -279,7 +279,7 @@ grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
     }
 
   // perform the work synchronously if we didn't start a job for it yet
-  if (!jobFound) grb_read_and_decode_record(streamptr, recID, memtype, data, nmiss, resetFilePos);
+  if (!jobFound) *nmiss = grb_read_and_decode_record(streamptr, recID, memtype, data, resetFilePos);
 }
 
 void
@@ -298,7 +298,7 @@ grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, voi
   const int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
   const int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
 
-  grb_read_and_decode_record(streamptr, recID, memtype, data, nmiss, true);
+  *nmiss = grb_read_and_decode_record(streamptr, recID, memtype, data, true);
 }
 
 void
@@ -324,9 +324,7 @@ grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nm
       const size_t offset = levelID * gridsize;
       void *datap = (memtype == MEMTYPE_FLOAT) ? (void*)((float *) data + offset) : (void*)((double *) data + offset);
 
-      size_t imiss;
-      grb_read_and_decode_record(streamptr, recID, memtype, datap, &imiss, false);
-      *nmiss += imiss;
+      *nmiss += grb_read_and_decode_record(streamptr, recID, memtype, datap, false);
     }
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
