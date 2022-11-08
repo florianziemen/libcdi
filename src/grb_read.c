@@ -321,12 +321,8 @@ grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nm
   for (int levelID = 0; levelID < nlevs; levelID++)
     {
       const int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
-
-      void *datap = NULL;
-      if (memtype == MEMTYPE_FLOAT)
-        datap = (float *) data + levelID * gridsize;
-      else
-        datap = (double *) data + levelID * gridsize;
+      const size_t offset = levelID * gridsize;
+      void *datap = (memtype == MEMTYPE_FLOAT) ? (void*)((float *) data + offset) : (void*)((double *) data + offset);
 
       size_t imiss;
       grb_read_and_decode_record(streamptr, recID, memtype, datap, &imiss, false);
