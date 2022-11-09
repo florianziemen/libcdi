@@ -1,3 +1,7 @@
+2022-11-09  Uwe Schulzweida
+
+	* async_worker: removed syncronization at end of timesteps
+
 2022-11-05  Uwe Schulzweida
 
 	* NetCDF output: added compression support for data on GRID_GENERIC

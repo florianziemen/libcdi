@@ -298,7 +298,7 @@ typedef struct
   void *gribContainers;
 
   int numWorker;
-  int nextRecID;
+  int nextGlobalRecId;
   int cachedTsID;
   void *jobs;
   void *jobManager;

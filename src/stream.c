@@ -199,6 +199,21 @@ streamDefMaxSteps(int streamID, int maxSteps)
     }
 }
 
+static long
+cdiInqTimeSize(int streamID)
+{
+  stream_t *streamptr = stream_to_pointer(streamID);
+
+  long ntsteps = streamptr->ntsteps;
+  if (ntsteps == (long) CDI_UNDEFID)
+    {
+      int tsID = 0;
+      while (streamInqTimestep(streamID, tsID++)) ntsteps = streamptr->ntsteps;
+    }
+
+  return ntsteps;
+}
+
 void
 streamDefNumWorker(int streamID, int numWorker)
 {
@@ -206,6 +221,10 @@ streamDefNumWorker(int streamID, int numWorker)
     {
       stream_t *streamptr = stream_to_pointer(streamID);
       streamptr->numWorker = numWorker;
+
+      const int filetype = streamptr->filetype;
+      const bool filetypeIsGrib = (filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_GRB2);
+      if (streamptr->filemode == 'r' && filetypeIsGrib) (void)cdiInqTimeSize(streamID);
     }
 }
 
@@ -318,21 +337,6 @@ streamFilename(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
   return streamptr->filename;
-}
-
-static long
-cdiInqTimeSize(int streamID)
-{
-  stream_t *streamptr = stream_to_pointer(streamID);
-
-  long ntsteps = streamptr->ntsteps;
-  if (ntsteps == (long) CDI_UNDEFID)
-    {
-      int tsID = 0;
-      while (streamInqTimestep(streamID, tsID++)) ntsteps = streamptr->ntsteps;
-    }
-
-  return ntsteps;
 }
 
 static int
@@ -955,7 +959,7 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->gribContainers = NULL;
 
   streamptr->numWorker = 0;
-  streamptr->nextRecID = 0;
+  streamptr->nextGlobalRecId = 0;
   streamptr->cachedTsID = -1;
   streamptr->jobs = NULL;
   streamptr->jobManager = NULL;
