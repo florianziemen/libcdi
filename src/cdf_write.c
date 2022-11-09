@@ -14,16 +14,16 @@
 #include "vlist_var.h"
 
 void
-cdfDefVarDeflate(int ncid, int ncvarID, int deflate_level)
+cdfDefVarDeflate(int ncid, int ncvarID, int deflateLevel)
 {
 #ifdef HAVE_NETCDF4
   // Set chunking, shuffle, and deflate.
-  const int shuffle = 1, deflate = 1;
+  const int shuffle = (CDI_Shuffle > 0), deflate = 1;
 
-  if (deflate_level < 1 || deflate_level > 9) deflate_level = 1;
+  if (deflateLevel < 1 || deflateLevel > 9) deflateLevel = 1;
 
   int status;
-  if ((status = nc_def_var_deflate(ncid, ncvarID, shuffle, deflate, deflate_level)))
+  if ((status = nc_def_var_deflate(ncid, ncvarID, shuffle, deflate, deflateLevel)))
     {
       Error("nc_def_var_deflate failed; %s", nc_strerror(status));
     }
@@ -267,7 +267,7 @@ cdfDefineCellMethods(stream_t *streamptr, int cdiID, int varID, int fileID, int 
     {
       const char *attname = "cell_methods";
       char atttxt[CDI_MAX_NAME + 10];
-      sprintf(atttxt, "%s: %s", timeVarName, cellMethod);
+      snprintf(atttxt, sizeof(atttxt), "%s: %s", timeVarName, cellMethod);
       cdf_put_att_text(fileID, ncvarID, attname, strlen(atttxt), atttxt);
     }
 }
@@ -287,7 +287,7 @@ cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
     {
       cdiInqAtt(cdiID, varID, iatt, attname, &atttype, &attlen);
 
-      //if (attlen == 0) continue;
+      // if (attlen == 0) continue;
 
       if (atttype == CDI_DATATYPE_TXT)
         {
@@ -426,7 +426,8 @@ cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
 {
   if (streamptr->comptype == CDI_COMPRESS_ZIP)
     {
-      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C || streamptr->filetype == CDI_FILETYPE_NCZARR)
+      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
+          || streamptr->filetype == CDI_FILETYPE_NCZARR)
         {
           cdfDefVarDeflate(streamptr->fileID, ncvarID, streamptr->complevel);
         }
@@ -442,7 +443,8 @@ cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
     }
   else if (streamptr->comptype == CDI_COMPRESS_SZIP)
     {
-      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C || streamptr->filetype == CDI_FILETYPE_NCZARR)
+      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
+          || streamptr->filetype == CDI_FILETYPE_NCZARR)
         {
           cdfDefVarSzip(streamptr->fileID, ncvarID, xtype2ppb(xtype));
         }
@@ -463,12 +465,11 @@ cdfDefVarPacking(const stream_t *streamptr, int ncvarID, nc_type xtype, int vlis
 {
   //  if ( xtype == NC_BYTE || xtype == NC_SHORT || xtype == NC_INT )
   {
-    const double addoffset = vlistInqVarAddoffset(vlistID, varID);
-    const double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-    const bool laddoffset = IS_NOT_EQUAL(addoffset, 0);
-    const bool lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
+    double addoffset = 0.0, scalefactor = 1.0;
+    const bool haveAddoffset = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &addoffset) == CDI_NOERR);
+    const bool haveScalefactor = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scalefactor) == CDI_NOERR);
 
-    if (laddoffset || lscalefactor)
+    if (haveAddoffset || haveScalefactor)
       {
         nc_type astype = (xtype == NC_FLOAT) ? NC_FLOAT : NC_DOUBLE;
         if ((astype == NC_DOUBLE) && IS_EQUAL(addoffset, (double) ((float) addoffset))
@@ -635,7 +636,7 @@ calc_chunksize(size_t chunkSizeLim, size_t size)
 
   size_t numChunks = (size / chunkSizeLim) + 1;
   size_t chunkSize = size / numChunks;
-  if (chunkSize%pageSize) chunkSize = (chunkSize / pageSize + 1) * pageSize;
+  if (chunkSize % pageSize) chunkSize = (chunkSize / pageSize + 1) * pageSize;
 
   return chunkSize;
 }
@@ -656,7 +657,7 @@ size_t
 calc_chunksize_x(int chunkType, int chunkSize, size_t xsize, bool yIsUndefined)
 {
   if (chunkType == CDI_CHUNK_AUTO && yIsUndefined)
-    return (chunkSize > 0) ? (size_t)chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
+    return (chunkSize > 0) ? (size_t) chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
   else
     return calc_chunksize(chunkSizeLim, xsize);
 }
@@ -724,8 +725,8 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
     }
 
   if (CDI_Debug)
-    fprintf(stderr, "useChunks %d chunkType %d chunkSize %d  chunks %zu %zu %zu %zu\n",
-            useChunks, chunkType, chunkSize, chunks[0], chunks[1], chunks[2], chunks[3]);
+    fprintf(stderr, "useChunks %d chunkType %d chunkSize %d  chunks %zu %zu %zu %zu\n", useChunks, chunkType, chunkSize, chunks[0],
+            chunks[1], chunks[2], chunks[3]);
 
   *piax = iax;
   return ndims;
@@ -775,7 +776,7 @@ cdfCheckVarname(int fileID, char name[CDI_MAX_NAME])
     {
       int ncvarID;
       char varname[CDI_MAX_NAME];
-      sprintf(varname, "%s", name);
+      snprintf(varname, sizeof(varname), "%s", name);
       char *varname2 = varname + strlen(varname);
       unsigned iz = 0;
 
@@ -808,9 +809,9 @@ cdfGenVarname(int fileID, char name[CDI_MAX_NAME], int pnum, int pcat, int *pdis
   if (pnum < 0) pnum = -pnum;
 
   if (*pdis == 255)
-    sprintf(varname, "var%d", code);
+    snprintf(varname, sizeof(varname), "var%d", code);
   else
-    sprintf(varname, "param%d.%d.%d", pnum, pcat, *pdis);
+    snprintf(varname, sizeof(varname), "param%d.%d.%d", pnum, pcat, *pdis);
 
   char *varname2 = varname + strlen(varname);
   int ncvarID;
@@ -861,9 +862,10 @@ cdfDefVar(stream_t *streamptr, int varID)
   const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   const int zid = streamptr->zaxisID[zaxisindex];
 
-  int dimorder[3];  // ZYX and ZXY
+  int dimorder[3];  // ZYX/321 and ZXY/312
   vlistInqVarDimorder(vlistID, varID, &dimorder);
-  const bool useChunks = (dimorder[0] == 3) ? (gridsize >= 32) : false;
+  const bool useGridsize = (dimorder[0] == 3) || (dimorder[1] == 3 && dimorder[2] == 1 && gridsize == gridInqXsize(gridID));
+  const bool useChunks = useGridsize ? (gridsize >= 32) : false;
 
   if (((dimorder[0] > 0) + (dimorder[1] > 0) + (dimorder[2] > 0))
       < ((xid != CDI_UNDEFID) + (yid != CDI_UNDEFID) + (zid != CDI_UNDEFID)))
@@ -911,11 +913,13 @@ cdfDefVar(stream_t *streamptr, int varID)
     {
       const int nsb = vlistInqVarNSB(vlistID, varID);
       if (nsb > 0) nc_def_var_quantize(fileID, ncvarID, NC_QUANTIZE_BITROUND, nsb);
-      //if (nsb > 0) nc_def_var_quantize(fileID, ncvarID, NC_QUANTIZE_GRANULARBR, nsb);
+      // if (nsb > 0) nc_def_var_quantize(fileID, ncvarID, NC_QUANTIZE_GRANULARBR, nsb);
     }
 #endif
 
-  if (useChunks && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C || streamptr->filetype == CDI_FILETYPE_NCZARR))
+  if (useChunks
+      && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
+          || streamptr->filetype == CDI_FILETYPE_NCZARR))
     cdf_def_var_chunking(fileID, ncvarID, NC_CHUNKED, chunks);
 #endif
 
@@ -1028,12 +1032,11 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
   /*  if ( dtype == CDI_DATATYPE_INT8 || dtype == CDI_DATATYPE_INT16 || dtype == CDI_DATATYPE_INT32 ) */
   {
     const double missval = vlistInqVarMissval(vlistID, varID);
-    const double addoffset = vlistInqVarAddoffset(vlistID, varID);
-    const double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-    const bool laddoffset = IS_NOT_EQUAL(addoffset, 0);
-    const bool lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
+    double addoffset = 0.0, scalefactor = 1.0;
+    const bool haveAddoffset = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &addoffset) == CDI_NOERR);
+    const bool haveScalefactor = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scalefactor) == CDI_NOERR);
 
-    if (laddoffset || lscalefactor)
+    if (haveAddoffset || haveScalefactor)
       {
         if (memtype == MEMTYPE_FLOAT)
           {
@@ -1048,8 +1051,8 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
                     double temp = mdata_sp[i];
                     if (!DBL_IS_EQUAL(temp, missval))
                       {
-                        if (laddoffset) temp -= addoffset;
-                        if (lscalefactor) temp /= scalefactor;
+                        if (haveAddoffset) temp -= addoffset;
+                        if (haveScalefactor) temp /= scalefactor;
                         mdata_sp[i] = (float) temp;
                       }
                   }
@@ -1059,8 +1062,8 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
                 for (size_t i = 0; i < nvals; ++i)
                   {
                     double temp = mdata_sp[i];
-                    if (laddoffset) temp -= addoffset;
-                    if (lscalefactor) temp /= scalefactor;
+                    if (haveAddoffset) temp -= addoffset;
+                    if (haveScalefactor) temp /= scalefactor;
                     mdata_sp[i] = (float) temp;
                   }
               }
@@ -1077,8 +1080,8 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
                   {
                     if (!DBL_IS_EQUAL(mdata_dp[i], missval))
                       {
-                        if (laddoffset) mdata_dp[i] -= addoffset;
-                        if (lscalefactor) mdata_dp[i] /= scalefactor;
+                        if (haveAddoffset) mdata_dp[i] -= addoffset;
+                        if (haveScalefactor) mdata_dp[i] /= scalefactor;
                       }
                   }
               }
@@ -1086,8 +1089,8 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
               {
                 for (size_t i = 0; i < nvals; ++i)
                   {
-                    if (laddoffset) mdata_dp[i] -= addoffset;
-                    if (lscalefactor) mdata_dp[i] /= scalefactor;
+                    if (haveAddoffset) mdata_dp[i] -= addoffset;
+                    if (haveScalefactor) mdata_dp[i] /= scalefactor;
                   }
               }
           }

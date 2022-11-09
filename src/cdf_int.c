@@ -36,7 +36,7 @@ cdf__create(const char *path, int cmode, int *ncidp)
   size_t initialsz = 0;
 
 #if defined(__SX__) || defined(ES)
-  chunksizehint = 16777216; // 16 MB
+  chunksizehint = 16777216;  // 16 MB
 #endif
 
   if (CDI_Netcdf_Chunksizehint != CDI_UNDEFID) chunksizehint = (size_t) CDI_Netcdf_Chunksizehint;

@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 2.0.0
+! Fortran interface for CDI library version 2.1.0
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   August 2022
+! Uwe Schulzweida, MPI-MET, Hamburg,   October 2022
 !
 
 !
@@ -293,6 +293,8 @@
       PARAMETER (CDI_PROJ_SINU          = 24)
       INTEGER    CDI_PROJ_STERE
       PARAMETER (CDI_PROJ_STERE         = 25)
+      INTEGER    CDI_PROJ_HEALPIX
+      PARAMETER (CDI_PROJ_HEALPIX       = 26)
 !
 !  ZAXIS types
 !
@@ -1254,40 +1256,6 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarMissval
 
-!                     vlistDefVarExtra
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     CHARACTER*(*)   extra)
-      EXTERNAL        vlistDefVarExtra
-
-!                     vlistInqVarExtra
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     CHARACTER*(*)   extra)
-      EXTERNAL        vlistInqVarExtra
-
-!                     vlistDefVarScalefactor
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     DOUBLEPRECISION scalefactor)
-      EXTERNAL        vlistDefVarScalefactor
-
-      DOUBLEPRECISION vlistInqVarScalefactor
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarScalefactor
-
-!                     vlistDefVarAddoffset
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     DOUBLEPRECISION addoffset)
-      EXTERNAL        vlistDefVarAddoffset
-
-      DOUBLEPRECISION vlistInqVarAddoffset
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarAddoffset
-
       INTEGER         vlistInqVarSize
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
@@ -1630,6 +1598,8 @@
       PARAMETER (CDI_KEY_DATATYPE       = 946)
       INTEGER    CDI_KEY_REFERENCEURI
       PARAMETER (CDI_KEY_REFERENCEURI   = 947)
+      INTEGER    CDI_KEY_CHUNKS
+      PARAMETER (CDI_KEY_CHUNKS         = 948)
 !
 !  Integer keys
 !
@@ -1650,6 +1620,10 @@
 !
       INTEGER    CDI_KEY_MISSVAL
       PARAMETER (CDI_KEY_MISSVAL        = 701)
+      INTEGER    CDI_KEY_ADDOFFSET
+      PARAMETER (CDI_KEY_ADDOFFSET      = 702)
+      INTEGER    CDI_KEY_SCALEFACTOR
+      PARAMETER (CDI_KEY_SCALEFACTOR    = 703)
 !
 !  Byte array keys
 !

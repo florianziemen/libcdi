@@ -10,10 +10,10 @@ Use the variable ID or one of the following identifiers for the coordinates:
 
 \vspace*{3mm}
 \hspace*{8mm}\begin{minipage}{15cm}
-\begin{deflist}{\large\texttt{CDI\_KEY\_GLOBAL \ \ }}
-\item[\large\texttt{CDI\_KEY\_XAXIS}]   X-axis ID
-\item[\large\texttt{CDI\_KEY\_YAXIS}]   Y-axis ID 
-\item[\large\texttt{CDI\_KEY\_GLOBAL}]   Global Z-axis
+\begin{deflist}{\large\texttt{CDI\_GLOBAL \ \ }}
+\item[\large\texttt{CDI\_XAXIS}]   X-axis ID
+\item[\large\texttt{CDI\_YAXIS}]   Y-axis ID 
+\item[\large\texttt{CDI\_GLOBAL}]   Global Z-axis
 \end{deflist}
 \end{minipage}
 \vspace*{4mm}
@@ -48,11 +48,21 @@ The following key attributes are available:
 \item[\large\texttt{CDI\_KEY\_NUMBEROFGRIDINREFERENCE}]   GRIB2 numberOfGridInReference
 \item[\large\texttt{CDI\_KEY\_NUMBEROFVGRIDUSED}]   GRIB2 numberOfVGridUsed
 \item[\large\texttt{CDI\_KEY\_NLEV}]   GRIB2 nlev
+\item[\large\texttt{CDI\_KEY\_CHUNKTYPE}]   ChunkType: CDI\_CHUNK\_AUTO/CDI\_CHUNK\_GRID/CDI\_CHUNK\_LINES
+\item[\large\texttt{CDI\_KEY\_CHUNKSIZE}]   ChunkSize
 \end{deflist}
 \end{minipage}
 \vspace*{4mm}
 
 \textbf{Floating point keys}
+
+\vspace*{3mm}
+\hspace*{8mm}\begin{minipage}{15cm}
+\begin{deflist}{\large\texttt{CDI\_KEY\_MISSVAL \ \ }}
+\item[\large\texttt{CDI\_KEY\_MISSVAL}]   Missing value
+\end{deflist}
+\end{minipage}
+\vspace*{4mm}
 
 \textbf{Byte array keys}
 

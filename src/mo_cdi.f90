@@ -147,6 +147,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_PROJ_LAEA = 23
   integer(c_int), public, parameter :: CDI_PROJ_SINU = 24
   integer(c_int), public, parameter :: CDI_PROJ_STERE = 25
+  integer(c_int), public, parameter :: CDI_PROJ_HEALPIX = 26
   integer(c_int), public, parameter :: ZAXIS_SURFACE = 0
   integer(c_int), public, parameter :: ZAXIS_GENERIC = 1
   integer(c_int), public, parameter :: ZAXIS_HYBRID = 2
@@ -412,12 +413,6 @@ module mo_cdi
   public :: vlistInqVarUnits
   public :: vlistDefVarMissval
   public :: vlistInqVarMissval
-  public :: vlistDefVarExtra
-  public :: vlistInqVarExtra
-  public :: vlistDefVarScalefactor
-  public :: vlistInqVarScalefactor
-  public :: vlistDefVarAddoffset
-  public :: vlistInqVarAddoffset
   public :: vlistInqVarSize
   public :: vlistDefIndex
   public :: vlistInqIndex
@@ -483,6 +478,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_UNITS = 945
   integer(c_int), public, parameter :: CDI_KEY_DATATYPE = 946
   integer(c_int), public, parameter :: CDI_KEY_REFERENCEURI = 947
+  integer(c_int), public, parameter :: CDI_KEY_CHUNKS = 948
   integer(c_int), public, parameter :: CDI_KEY_NUMBEROFGRIDUSED = 961
   integer(c_int), public, parameter :: CDI_KEY_NUMBEROFGRIDINREFERENCE = 962
   integer(c_int), public, parameter :: CDI_KEY_NUMBEROFVGRIDUSED = 963
@@ -490,6 +486,8 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_CHUNKTYPE = 965
   integer(c_int), public, parameter :: CDI_KEY_CHUNKSIZE = 966
   integer(c_int), public, parameter :: CDI_KEY_MISSVAL = 701
+  integer(c_int), public, parameter :: CDI_KEY_ADDOFFSET = 702
+  integer(c_int), public, parameter :: CDI_KEY_SCALEFACTOR = 703
   integer(c_int), public, parameter :: CDI_KEY_UUID = 960
   integer(c_int), public, parameter :: CDI_KEY_DIMNAME = 941
   integer(c_int), public, parameter :: CDI_KEY_PSNAME = 950
@@ -1623,38 +1621,6 @@ module mo_cdi
       integer(c_int), value :: varID_dummy
       real(c_double) :: f_result
     end function vlistInqVarMissval
-
-    subroutine vlistDefVarScalefactor(vlistID_dummy, varID_dummy,&
-    & scalefactor_dummy) bind(c, name = 'vlistDefVarScalefactor')
-      import c_double, c_int
-      integer(c_int), value :: vlistID_dummy
-      integer(c_int), value :: varID_dummy
-      real(c_double), value :: scalefactor_dummy
-    end subroutine vlistDefVarScalefactor
-
-    function vlistInqVarScalefactor(vlistID_dummy, varID_dummy) bind(c, name =&
-    & 'vlistInqVarScalefactor') result(f_result)
-      import c_double, c_int
-      integer(c_int), value :: vlistID_dummy
-      integer(c_int), value :: varID_dummy
-      real(c_double) :: f_result
-    end function vlistInqVarScalefactor
-
-    subroutine vlistDefVarAddoffset(vlistID_dummy, varID_dummy,&
-    & addoffset_dummy) bind(c, name = 'vlistDefVarAddoffset')
-      import c_double, c_int
-      integer(c_int), value :: vlistID_dummy
-      integer(c_int), value :: varID_dummy
-      real(c_double), value :: addoffset_dummy
-    end subroutine vlistDefVarAddoffset
-
-    function vlistInqVarAddoffset(vlistID_dummy, varID_dummy) bind(c, name =&
-    & 'vlistInqVarAddoffset') result(f_result)
-      import c_double, c_int
-      integer(c_int), value :: vlistID_dummy
-      integer(c_int), value :: varID_dummy
-      real(c_double) :: f_result
-    end function vlistInqVarAddoffset
 
     function vlistInqVarSize(vlistID_dummy, varID_dummy) bind(c, name =&
     & 'vlistInqVarSize') result(f_result)
@@ -4436,61 +4402,6 @@ contains
       units_dummy(units_i:units_i) = ' '
     end do
   end subroutine vlistInqVarUnits
-
-  subroutine vlistDefVarExtra(vlistID_dummy, varID_dummy, extra_dummy)
-    integer(c_int), value :: vlistID_dummy
-    integer(c_int), value :: varID_dummy
-    character(kind = c_char, len = *), intent(in) :: extra_dummy
-    character(kind = c_char) :: extra_temp(len(extra_dummy) + 1)
-    integer :: extra_i
-    interface
-      subroutine lib_vlistDefVarExtra(vlistID_dummy, varID_dummy, extra_dummy)&
-      & bind(c, name = 'vlistDefVarExtra')
-        import c_char, c_int
-        integer(c_int), value :: vlistID_dummy
-        integer(c_int), value :: varID_dummy
-        character(kind = c_char) :: extra_dummy(*)
-      end subroutine lib_vlistDefVarExtra
-    end interface
-    do extra_i = 1, len(extra_dummy)
-      extra_temp(extra_i) = extra_dummy(extra_i:extra_i)
-    end do
-    extra_temp(len(extra_dummy) + 1) = c_null_char
-    call lib_vlistDefVarExtra(vlistID_dummy, varID_dummy, extra_temp)
-  end subroutine vlistDefVarExtra
-
-  subroutine vlistInqVarExtra(vlistID_dummy, varID_dummy, extra_dummy)
-    integer(c_int), value :: vlistID_dummy
-    integer(c_int), value :: varID_dummy
-    character(kind = c_char, len = *), intent(inout) :: extra_dummy
-    character(kind = c_char) :: extra_temp(len(extra_dummy) + 1)
-    integer :: extra_i
-    interface
-      subroutine lib_vlistInqVarExtra(vlistID_dummy, varID_dummy, extra_dummy)&
-      & bind(c, name = 'vlistInqVarExtra')
-        import c_char, c_int
-        integer(c_int), value :: vlistID_dummy
-        integer(c_int), value :: varID_dummy
-        character(kind = c_char) :: extra_dummy(*)
-      end subroutine lib_vlistInqVarExtra
-    end interface
-    extra_temp(len(extra_dummy) + 1) = c_null_char
-    do extra_i = len(extra_dummy), 1, -1
-      if(extra_dummy(extra_i:extra_i) /= ' ') exit
-      extra_temp(extra_i) = c_null_char
-    end do
-    do extra_i = extra_i, 1, -1
-        extra_temp(extra_i) = extra_dummy(extra_i:extra_i)
-    end do
-    call lib_vlistInqVarExtra(vlistID_dummy, varID_dummy, extra_temp)
-    do extra_i = 1, len(extra_dummy)
-      if(extra_temp(extra_i) == c_null_char) exit
-      extra_dummy(extra_i:extra_i) = extra_temp(extra_i)
-    end do
-    do extra_i = extra_i, len(extra_dummy)
-      extra_dummy(extra_i:extra_i) = ' '
-    end do
-  end subroutine vlistInqVarExtra
 
   subroutine cdiDefAdditionalKey(string_dummy)
     character(kind = c_char, len = *), intent(in) :: string_dummy

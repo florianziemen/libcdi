@@ -78,8 +78,8 @@ static int datamode = DP_MODE;
 static void
 version(void)
 {
-  int filetypes[] = { CDI_FILETYPE_SRV, CDI_FILETYPE_EXT, CDI_FILETYPE_IEG, CDI_FILETYPE_GRB,  CDI_FILETYPE_GRB2,
-                      CDI_FILETYPE_NC,  CDI_FILETYPE_NC2, CDI_FILETYPE_NC4, CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5, CDI_FILETYPE_NCZARR };
+  int filetypes[] = { CDI_FILETYPE_SRV, CDI_FILETYPE_EXT, CDI_FILETYPE_IEG,  CDI_FILETYPE_GRB, CDI_FILETYPE_GRB2,  CDI_FILETYPE_NC,
+                      CDI_FILETYPE_NC2, CDI_FILETYPE_NC4, CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5, CDI_FILETYPE_NCZARR };
   const char *typenames[] = { "srv", "ext", "ieg", "grb", "grb2", "nc", "nc2", "nc4", "nc4c", "nc5", "nczarr" };
 
   fprintf(stderr, "CDI version 2.1\n");
@@ -497,8 +497,8 @@ printShortinfo(int streamID, int vlistID, int vardis)
             {
               const CdiDateTime dt = taxisInqRdatetime(taxisID);
 
-              fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d",
-                      dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute, dt.time.second);
+              fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", dt.date.year, dt.date.month, dt.date.day,
+                      dt.time.hour, dt.time.minute, dt.time.second);
               if (dt.time.ms) fprintf(stdout, ".%d", dt.time.ms);
 
               const int tunits = taxisInqTunit(taxisID);
@@ -560,8 +560,9 @@ setDefaultDataType(char *datatypestr)
           else
             {
               fprintf(stderr, "Unsupported number of bits %d!\n", nbits);
-              fprintf(stderr,
-                      "Use I8/I16/I32/F32/F64 for nc/nc2/nc4/nc4c/nc5/nczarr; F32/F64 for grb2/srv/ext/ieg; P1 - P24 for grb/grb2.\n");
+              fprintf(
+                  stderr,
+                  "Use I8/I16/I32/F32/F64 for nc/nc2/nc4/nc4c/nc5/nczarr; F32/F64 for grb2/srv/ext/ieg; P1 - P24 for grb/grb2.\n");
               exit(EXIT_FAILURE);
             }
         }

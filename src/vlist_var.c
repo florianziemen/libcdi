@@ -31,9 +31,6 @@ vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].tableID = CDI_UNDEFID;
   vlistptr->vars[varID].missvalused = false;
   vlistptr->vars[varID].missval = CDI_Default_Missval;
-  vlistptr->vars[varID].addoffset = 0.0;
-  vlistptr->vars[varID].scalefactor = 1.0;
-  vlistptr->vars[varID].extra = NULL;
   vlistptr->vars[varID].levinfo = NULL;
   vlistptr->vars[varID].comptype = CDI_COMPRESS_NONE;
   vlistptr->vars[varID].complevel = 1;
@@ -133,7 +130,6 @@ vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int timetype, int tileset
           fprintf(stdout, "CDI info:       vlistDefVarTsteptype(vlistID, varID, tsteptype)\n");
           fprintf(stdout, "CDI info:          with: timetype = TIME_CONSTANT | TIME_VARYING\n");
           fprintf(stdout, "CDI info:                tsteptype = TSTEP_AVG .... TSTEP_SUM\n");
-
         }
     }
 
@@ -442,21 +438,19 @@ void
 vlistInqVarName(int vlistID, int varID, char *name)
 {
   int length = CDI_MAX_NAME;
-  (void) cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
-
-  if (!name[0])
+  if (CDI_NOERR != cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length))
     {
       vlistCheckVarID(__func__, vlistID, varID);
 
       vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-      int param = vlistptr->vars[varID].param;
+      const int param = vlistptr->vars[varID].param;
       int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
       if (pdis == 255)
         {
-          int code = pnum;
-          int tableID = vlistptr->vars[varID].tableID;
+          const int code = pnum;
+          const int tableID = vlistptr->vars[varID].tableID;
           tableInqEntry(tableID, code, -1, name, NULL, NULL);
           if (!name[0]) sprintf(name, "var%d", code);
         }
@@ -497,13 +491,13 @@ vlistCopyVarName(int vlistID, int varID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   // Otherwise we check if we should use the table of parameter descriptions.
-  int param = vlistptr->vars[varID].param;
+  const int param = vlistptr->vars[varID].param;
   int discipline, category, number;
   cdiDecodeParam(param, &number, &category, &discipline);
   char *result = NULL;
   if (discipline == 255)
     {
-      int tableID = vlistptr->vars[varID].tableID;
+      const int tableID = vlistptr->vars[varID].tableID;
       tableInqEntry(tableID, number, -1, name, NULL, NULL);
       if (name[0])
         result = strdup(name);
@@ -548,21 +542,19 @@ void
 vlistInqVarLongname(int vlistID, int varID, char *longname)
 {
   int length = CDI_MAX_NAME;
-  (void) cdiInqKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname, &length);
-
-  if (!longname[0])
+  if (CDI_NOERR != cdiInqKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname, &length))
     {
       vlistCheckVarID(__func__, vlistID, varID);
 
       vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-      int param = vlistptr->vars[varID].param;
+      const int param = vlistptr->vars[varID].param;
       int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
       if (pdis == 255)
         {
-          int code = pnum;
-          int tableID = vlistptr->vars[varID].tableID;
+          const int code = pnum;
+          const int tableID = vlistptr->vars[varID].tableID;
           tableInqEntry(tableID, code, -1, NULL, longname, NULL);
         }
     }
@@ -650,21 +642,19 @@ void
 vlistInqVarUnits(int vlistID, int varID, char *units)
 {
   int length = CDI_MAX_NAME;
-  (void) cdiInqKeyString(vlistID, varID, CDI_KEY_UNITS, units, &length);
-
-  if (!units[0])
+  if (CDI_NOERR != cdiInqKeyString(vlistID, varID, CDI_KEY_UNITS, units, &length))
     {
       vlistCheckVarID(__func__, vlistID, varID);
 
       vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-      int param = vlistptr->vars[varID].param;
+      const int param = vlistptr->vars[varID].param;
       int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
       if (pdis == 255)
         {
-          int code = pnum;
-          int tableID = vlistptr->vars[varID].tableID;
+          const int code = pnum;
+          const int tableID = vlistptr->vars[varID].tableID;
           tableInqEntry(tableID, code, -1, NULL, NULL, units);
         }
     }
@@ -986,74 +976,6 @@ vlistDefVarMissval(int vlistID, int varID, double missval)
   vlistptr->vars[varID].missvalused = true;
 }
 
-/*
-@Function  vlistDefVarExtra
-@Title     Define extra information of a Variable
-
-@Prototype void vlistDefVarExtra(int vlistID, int varID, const char *extra)
-@Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
-    @Item  varID    Variable identifier.
-    @Item  extra    Extra information.
-
-@Description
-The function @func{vlistDefVarExtra} defines the extra information of a variable.
-
-@EndFunction
-*/
-void
-vlistDefVarExtra(int vlistID, int varID, const char *extra)
-{
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  if (extra)
-    {
-      if (vlistptr->vars[varID].extra)
-        {
-          Free(vlistptr->vars[varID].extra);
-          vlistptr->vars[varID].extra = NULL;
-        }
-
-      vlistptr->vars[varID].extra = strdupx(extra);
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-/*
-@Function  vlistInqVarExtra
-@Title     Get extra information of a Variable
-
-@Prototype void vlistInqVarExtra(int vlistID, int varID, char *extra)
-@Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
-    @Item  varID    Variable identifier.
-    @Item  extra    Returned variable extra information. The caller must allocate space for the
-                    returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
-
-@Description
-The function @func{vlistInqVarExtra} returns the extra information of a variable.
-
-@Result
-@func{vlistInqVarExtra} returns the extra information of the variable to the parameter extra if available,
-otherwise the result is an empty string.
-
-@EndFunction
-*/
-void
-vlistInqVarExtra(int vlistID, int varID, char *extra)
-{
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (vlistptr->vars[varID].extra == NULL)
-    sprintf(extra, "-");
-  else
-    strcpy(extra, vlistptr->vars[varID].extra);
-}
-
 int
 vlistInqVarValidrange(int vlistID, int varID, double *validrange)
 {
@@ -1081,50 +1003,6 @@ vlistDefVarValidrange(int vlistID, int varID, const double *validrange)
   vlistptr->vars[varID].validrange[1] = validrange[1];
   vlistptr->vars[varID].lvalidrange = true;
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-}
-
-double
-vlistInqVarScalefactor(int vlistID, int varID)
-{
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].scalefactor;
-}
-
-double
-vlistInqVarAddoffset(int vlistID, int varID)
-{
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].addoffset;
-}
-
-void
-vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
-{
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (IS_NOT_EQUAL(vlistptr->vars[varID].scalefactor, scalefactor))
-    {
-      vlistptr->vars[varID].scalefactor = scalefactor;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-void
-vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
-{
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (IS_NOT_EQUAL(vlistptr->vars[varID].addoffset, addoffset))
-    {
-      vlistptr->vars[varID].addoffset = addoffset;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
 }
 
 void
@@ -1559,10 +1437,10 @@ vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
 #define FCMPFLT(f) (IS_NOT_EQUAL((pva->f), (pvb->f)))
 #define FCMPSTR(fs) ((pva->fs) != (pvb->fs) && strcmp((pva->fs), (pvb->fs)))
 #define FCMP2(f) (namespaceResHDecode(pva->f).idx != namespaceResHDecode(pvb->f).idx)
-  int diff = FCMP(fvarID) | FCMP(mvarID) | FCMP(flag) | FCMP(param) | FCMP(datatype) | FCMP(timetype) | FCMP(tsteptype)
-             | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID) | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID)
-             | FCMP(missvalused) | FCMPFLT(missval) | FCMPFLT(addoffset) | FCMPFLT(scalefactor) | FCMPSTR(extra) | FCMP(comptype)
-             | FCMP(complevel) | FCMP(lvalidrange) | FCMPFLT(validrange[0]) | FCMPFLT(validrange[1]);
+  int diff = (int) FCMP(fvarID) | FCMP(mvarID) | FCMP(flag) | FCMP(param) | FCMP(datatype) | FCMP(timetype) | FCMP(tsteptype)
+             | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID) | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
+             | FCMPFLT(missval) | FCMP(comptype) | FCMP(complevel)
+             | FCMP(lvalidrange) | FCMPFLT(validrange[0]) | FCMPFLT(validrange[1]);
 #undef FCMP
 #undef FCMPFLT
 #undef FCMPSTR

@@ -53,8 +53,8 @@ cdiDate_set(int64_t date)
 
   CdiDate cdiDate;
   cdiDate.year = year;
-  cdiDate.month = (short)month;
-  cdiDate.day = (short)day;
+  cdiDate.month = (short) month;
+  cdiDate.day = (short) day;
 
   return cdiDate;
 }
@@ -66,9 +66,9 @@ cdiTime_set(int time)
   cdiDecodeTime(time, &hour, &minute, &second);
 
   CdiTime cdiTime;
-  cdiTime.hour = (short)hour;
-  cdiTime.minute = (short)minute;
-  cdiTime.second = (short)second;
+  cdiTime.hour = (short) hour;
+  cdiTime.minute = (short) minute;
+  cdiTime.second = (short) second;
   cdiTime.ms = ms;
 
   return cdiTime;

@@ -42,7 +42,7 @@ gribapiLibraryVersionString(void)
       int major_version, minor_version, revision_version;
       gribapiLibraryVersion(&major_version, &minor_version, &revision_version);
 
-      sprintf(gribapi_libvers, "%d.%d.%d", major_version, minor_version, revision_version);
+      snprintf(gribapi_libvers, sizeof(gribapi_libvers), "%d.%d.%d", major_version, minor_version, revision_version);
       gribapi_libvers_init = true;
     }
 #endif

@@ -185,6 +185,7 @@ extern "C" {
 #define  CDI_PROJ_LAEA             23  // Lambert Azimuthal Equal Area
 #define  CDI_PROJ_SINU             24  // Sinusoidal
 #define  CDI_PROJ_STERE            25  // Polar stereographic
+#define  CDI_PROJ_HEALPIX          26  // Healpix
 
 // ZAXIS types
 
@@ -672,17 +673,6 @@ void    vlistDefVarMissval(int vlistID, int varID, double missval);
 //      vlistInqVarMissval: Get the missing value of a Variable
 double  vlistInqVarMissval(int vlistID, int varID);
 
-//      vlistDefVarExtra: Define extra information of a Variable
-void    vlistDefVarExtra(int vlistID, int varID, const char *extra);
-
-//      vlistInqVarExtra: Get extra information of a Variable
-void    vlistInqVarExtra(int vlistID, int varID, char *extra);
-
-void    vlistDefVarScalefactor(int vlistID, int varID, double scalefactor);
-double  vlistInqVarScalefactor(int vlistID, int varID);
-void    vlistDefVarAddoffset(int vlistID, int varID, double addoffset);
-double  vlistInqVarAddoffset(int vlistID, int varID);
-
 SizeType vlistInqVarSize(int vlistID, int varID);
 
 void    vlistDefIndex(int vlistID, int varID, int levID, int index);
@@ -830,6 +820,7 @@ SizeType gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_UNITS                         945  // Units of the variable
 #define  CDI_KEY_DATATYPE                      946  // Data type
 #define  CDI_KEY_REFERENCEURI                  947  // Reference URI to grid file
+#define  CDI_KEY_CHUNKS                        948  // Chunks
 
 // Integer keys
 #define  CDI_KEY_NUMBEROFGRIDUSED              961  // GRIB2 numberOfGridUsed
@@ -841,6 +832,8 @@ SizeType gridInqYCvals(int gridID, char *ycvals[]);
 
 // Floating point keys
 #define  CDI_KEY_MISSVAL                       701  // Missing value
+#define  CDI_KEY_ADDOFFSET                     702  // Add offset
+#define  CDI_KEY_SCALEFACTOR                   703  // Scale factor
 
 // Byte array keys
 #define  CDI_KEY_UUID                          960  // UUID for grid/Z-axis reference [size: CDI_UUID_SIZE]

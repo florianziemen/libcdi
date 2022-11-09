@@ -2,7 +2,7 @@
 #define CALENDAR_H
 
 #include "cdi.h"
-#include <stdint.h>    // int64_t
+#include <stdint.h>  // int64_t
 
 // clang-format off
 

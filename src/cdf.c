@@ -42,9 +42,9 @@ hdfLibraryVersion(void)
       unsigned majnum, minnum, relnum;
       H5get_libversion(&majnum, &minnum, &relnum);
 #ifdef HAVE_NC4HDF5_THREADSAFE
-      sprintf(hdf_libvers, "%u.%u.%u threadsafe", majnum, minnum, relnum);
+      snprintf(hdf_libvers, sizeof(hdf_libvers), "%u.%u.%u threadsafe", majnum, minnum, relnum);
 #else
-      sprintf(hdf_libvers, "%u.%u.%u", majnum, minnum, relnum);
+      snprintf(hdf_libvers, sizeof(hdf_libvers), "%u.%u.%u", majnum, minnum, relnum);
 #endif
     }
 

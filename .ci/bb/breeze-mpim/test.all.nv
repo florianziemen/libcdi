@@ -1,0 +1,55 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+script_dir=$(cd "$(dirname "$0")"; pwd)
+top_srcdir=$(cd "${script_dir}/../../.."; pwd)
+
+. "${script_dir}/utils.sh"
+init_nv2130
+
+# We want to check with the Debian version of Libtool, which is patched to avoid
+# overlinking:
+( export PATH="/usr/bin:${PATH-}"
+  export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH-}"
+  module unload automake/1.16.1
+  module load automake/1.16.1
+  "${top_srcdir}/autogen.sh" )
+
+"${top_srcdir}/configure" \
+--disable-maintainer-mode \
+--enable-cf-interface \
+--enable-iso-c-interface \
+--enable-mpi \
+--enable-option-checking=fatal \
+--with-eccodes="${ECCODES_ROOT}" \
+--with-netcdf="${NETCDF_ROOT}" \
+CC="${MPICC}" \
+CPPFLAGS="-I${UUID_ROOT}/include" \
+F77="${MPIFC}" \
+FC="${MPIFC}" \
+FCFLAGS='-g -fPIC' \
+LDFLAGS="-I${UUID_ROOT}/lib" \
+MPI_LAUNCH="${MPI_LAUNCH}" \
+PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
+
+make -j8
+
+make -j8 check | tee tests/test-suite.log
+
+check_all_tests_passed tests/test-suite.log
+
+# Check that an executable is not overlinked to libscalesppmcore.so:
+tested_file='./examples/pio/.libs/collectData'
+invalid_needed=`readelf -d "${tested_file}" | sed -E -n '/\(NEEDED\).*libscalesppmcore\.so/p'` || {
+  echo "ERROR: failed to check '${tested_file}' for ELF NEEDED entries" >&2
+  exit 1
+}
+if test -n "${invalid_needed}"; then
+  {
+    echo "ERROR: '${tested_file}' has excessive ELF NEEDED entries:" >&2
+    echo "${invalid_needed}" >&2
+  } >&2
+  exit 1
+fi

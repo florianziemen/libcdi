@@ -9,15 +9,14 @@
 
 #include "printinfo.h"
 
-
 #define DATE_FORMAT "%5.4d-%2.2d-%2.2d"
 #define TIME_FORMAT "%2.2d:%2.2d:%2.2d"
 
 void
 datetime2str(CdiDateTime dt, char *datetimestr, int maxlen)
 {
-  snprintf(datetimestr, maxlen, DATE_FORMAT "T" TIME_FORMAT,
-           dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute, dt.time.second);
+  snprintf(datetimestr, maxlen, DATE_FORMAT "T" TIME_FORMAT, dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute,
+           dt.time.second);
 }
 
 void
@@ -44,7 +43,8 @@ time2str(CdiTime time, char *timestr, int maxlen)
     }
 
   if (msDigitsNum)
-    snprintf(timestr, maxlen, "%2.2d:%2.2d:%0*.*f", time.hour, time.minute, msDigitsNum + 3, msDigitsNum, time.second + time.ms / 1000.0);
+    snprintf(timestr, maxlen, "%2.2d:%2.2d:%0*.*f", time.hour, time.minute, msDigitsNum + 3, msDigitsNum,
+             time.second + time.ms / 1000.0);
   else
     snprintf(timestr, maxlen, TIME_FORMAT, time.hour, time.minute, time.second);
 }

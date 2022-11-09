@@ -32,15 +32,15 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 
 void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype, const int rect[][2], const void *data, size_t nmiss);
 
-void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level);
+void cdfDefVarDeflate(int ncid, int ncvarid, int deflateLevel);
 void cdfDefTime(stream_t *streamptr);
 
 void cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor);
 
 int cdfDefDatatype(int datatype, stream_t *streamptr);
 
-#define ChunkSizeMax     65536
-#define ChunkSizeLim  16777216
+#define ChunkSizeMax 65536
+#define ChunkSizeLim 16777216
 size_t calc_chunksize_x(int chunkType, int chunkSize, size_t xsize, bool yIsUndefined);
 size_t calc_chunksize_y(int chunkType, size_t gridsize, size_t xsize, size_t ysize);
 

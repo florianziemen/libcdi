@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-int get_timeunit(size_t len, const char *ptu);
+int get_time_units(size_t len, const char *ptu);
 
 bool is_time_units(const char *timeunits);
 bool is_timeaxis_units(const char *timeunits);
