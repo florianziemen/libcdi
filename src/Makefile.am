@@ -47,6 +47,7 @@ libcdi_la_SOURCES = 	 \
 	cdi_datetime.h   \
 	cdi_error.c      \
 	cdi_limits.h	 \
+	cdi_query.c	 \
 	cdi_util.c       \
 	cgribex.h	 \
 	cgribexlib.c  	 \

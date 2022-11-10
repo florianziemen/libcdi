@@ -1315,6 +1315,21 @@ void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDef
 extern "C" {
 #endif
 
+// CDI query interface
+
+typedef struct CdiQuery
+{
+  int numNames;
+  char **names;
+} CdiQuery;
+
+CdiQuery *cdiQueryCreate();
+void cdiQueryDelete(CdiQuery *query);
+void cdiQuerySetNames(CdiQuery *query, int numNames, char **names);
+void cdiQueryPrint(CdiQuery *query);
+
+// CDI interface for  paraview vtkCDIReader.cxx
+
 #include "cdi_datetime.h"
 
 void taxisDefRdatetime(int taxisID, CdiDateTime rdatetime);
@@ -1333,6 +1348,7 @@ int64_t julday_to_date(int calendar, int64_t julday);
 int time_to_sec(int time);                           // Used in paraview vtkCDIReader.cxx
 int sec_to_time(int secofday);
 
+// CDI projection parameter interface
 
 struct CDI_GridProjParams
 {

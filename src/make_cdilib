@@ -109,6 +109,7 @@ files="async_worker.c \
    cdi_error.c \
    cdi_datetime.c \
    cdi_int.c \
+   cdi_query.c \
    cdi_util.c \
    cgribexlib.c \
    cksum.c \
