@@ -729,6 +729,72 @@ defineCompress(const char *arg)
     fprintf(stderr, "%s compression unsupported!\n", arg);
 }
 
+typedef struct CdiQuery
+{
+  int numNames;
+  char **names;
+} CdiQuery;
+
+void
+cdiQueryInit(CdiQuery *query)
+{
+  query->numNames = 0;
+  query->names = NULL;
+}
+
+CdiQuery *
+cdiQueryCreate()
+{
+  CdiQuery *query = (CdiQuery*) malloc(sizeof(CdiQuery));
+  cdiQueryInit(query);
+  return query;
+}
+
+void
+cdiQueryDelete(CdiQuery *query)
+{
+  if (query->numNames && query)
+    {
+      for (int i = 0; i < query->numNames; ++i) free(query->names[i]);
+      free(query);
+    }
+}
+
+void
+cdiQuerySetNames(CdiQuery *query, int numNames, char **names)
+{
+  if (numNames)
+    {
+      query->numNames = numNames;
+      query->names = (char**)malloc(numNames * sizeof(char*));
+      for (int i = 0; i < numNames; ++i) query->names[i] = strdup(names[i]);
+    }
+}
+
+CdiQuery *
+cdiQueryClone(CdiQuery *query)
+{
+  CdiQuery *queryOut = cdiQueryCreate();
+
+  if (query)
+    {
+      cdiQuerySetNames(queryOut, query->numNames, query->names);
+    }
+
+  return queryOut;
+}
+
+void
+cdiQueryPrint(CdiQuery *query)
+{
+  if (query->numNames)
+    {
+      printf("Names:");
+      for (int i = 0; i < query->numNames; ++i) printf(" %s", query->names[i]);
+      printf("\n");
+    }
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -741,7 +807,6 @@ main(int argc, char *argv[])
   int Record = 0;
   int Variable = 0;
   int Debug = 0;
-  /* int Quiet  = 0; */
   int Vardis = 0;
   int Version = 0;
   int Longinfo = 0;
@@ -754,6 +819,8 @@ main(int argc, char *argv[])
   int numWorkerOut = 0;
   char varname[CDI_MAX_NAME];
   char paramstr[32];
+  char *queryNames[256];
+  int numQueryNames = 0;
 
   Progname = strrchr(argv[0], '/');
   if (Progname == 0)
@@ -762,7 +829,7 @@ main(int argc, char *argv[])
     Progname++;
 
   // clang-format off
-  while ((c = getopt(argc, argv, "b:f:i:o:t:w:z:cdhlMmnqRrsvVxXZ")) != EOF)
+  while ((c = getopt(argc, argv, "b:f:i:o:q:t:w:z:cdhlMmnqRrsvVxXZ")) != EOF)
     {
       switch (c)
 	{
@@ -776,7 +843,7 @@ main(int argc, char *argv[])
 	case 'M': cdiDefGlobal("HAVE_MISSVAL", 1); break;
 	case 'm': Move = 1; break;
 	case 'n': Info = 0;  NoInfo = 1;  break;
-	case 'q': /* Quiet = 1; */  break;
+	case 'q': queryNames[numQueryNames++] = strdup(optarg); break;
 	case 'R': cdiDefGlobal("REGULARGRID", 1); break;
 	case 'r': Record = 1; break;
 	case 'X': Variable = 1; break;
@@ -812,6 +879,8 @@ main(int argc, char *argv[])
       exit(0);
     }
 
+  // for (int i = 0; i < numQueryNames; ++i) printf("queryName[%d] = %s\n", i+1, queryNames[i]);
+
   if (fname1)
     {
       SizeType nmiss;
@@ -825,6 +894,11 @@ main(int argc, char *argv[])
       int recID;
       int taxisID2 = CDI_UNDEFID;
       int vlistID2 = CDI_UNDEFID;
+
+      CdiQuery *query = cdiQueryCreate();
+      cdiQuerySetNames(query, numQueryNames, queryNames);
+      cdiQueryPrint(query);
+      cdiQueryDelete(query);
 
       const int streamID1 = streamOpenRead(fname1);
       if (streamID1 < 0) return handle_error(streamID1, "Open failed on %s", fname1);
@@ -1039,6 +1113,8 @@ main(int argc, char *argv[])
         }
       streamClose(streamID1);
     }
+
+  for (int i = 0; i < numQueryNames; ++i) free(queryNames[i]);
 
   if (wTable) tableWrite(wTable, itableID);
 
