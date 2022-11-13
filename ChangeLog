@@ -1,3 +1,8 @@
+2022-11-13  Uwe Schulzweida
+
+	* Added interface function streamOpenReadQuery();
+	* Added module cdiQuery
+
 2022-11-09  Uwe Schulzweida
 
 	* async_worker: removed syncronization at end of timesteps

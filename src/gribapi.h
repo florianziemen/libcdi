@@ -67,10 +67,10 @@ static inline int my_grib_set_double(grib_handle* h, const char* key, double val
   if (CDI_gribapi_debug)
     fprintf(stderr, "grib_set_double(\tgrib_handle* h, \"%s\", %f)\n", key, val);
 
-  int ret_val = grib_set_double(h, key, val);
-  if (ret_val != 0)
+  const int retVal = grib_set_double(h, key, val);
+  if (retVal != 0)
     fprintf(stderr, "!!! failed call to grib_set_double(\tgrib_handle* h, \"%s\", %f) !!!\n", key, val);
-  return ret_val;
+  return retVal;
 }
 
 static inline int my_grib_set_long(grib_handle* h, const char* key, long val)
@@ -78,10 +78,10 @@ static inline int my_grib_set_long(grib_handle* h, const char* key, long val)
   if (CDI_gribapi_debug)
     fprintf(stderr, "grib_set_long(  \tgrib_handle* h, \"%s\", %ld)\n", key, val);
 
-  int ret_val = grib_set_long(h, key, val);
-  if (ret_val != 0)
+  const int retVal = grib_set_long(h, key, val);
+  if (retVal != 0)
     fprintf(stderr, "!!! failed call to grib_set_long(  \tgrib_handle* h, \"%s\", %ld) !!!\n", key, val);
-  return ret_val;
+  return retVal;
 }
 
 static inline int my_grib_set_string(grib_handle* h, const char* key, const char* val, size_t* length)

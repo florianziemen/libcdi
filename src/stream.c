@@ -594,6 +594,28 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
   return fileID;
 }
 
+static int
+stream_create_vlist(stream_t *streamptr, CdiQuery *query)
+{
+  const int vlistID = vlistCreate();
+  if (vlistID < 0) return CDI_ELIMIT;
+
+  cdiVlistMakeInternal(vlistID);
+  streamptr->vlistID = vlistID;
+
+  if (query) streamptr->query = cdiQueryClone(query);
+
+  const int status = cdiInqContents(streamptr);
+  if (status >= 0)
+    {
+      vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
+      vlistptr->ntsteps = streamptr->ntsteps;
+      cdiVlistMakeImmutable(vlistID);
+    }
+
+  return status;
+}
+
 int
 streamOpenID(const char *filename, char filemode, int filetype, int resH)
 {
@@ -611,6 +633,8 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
   if (fileID < 0)
     {
       streamID = fileID;
+      if (streamptr->record) Free(streamptr->record);
+      stream_delete_entry(streamptr);
     }
   else
     {
@@ -620,33 +644,6 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
       streamptr->filemode = filemode;
       streamptr->filename = strdupx(filename);
       streamptr->fileID = fileID;
-
-      if (filemode == 'r')
-        {
-          const int vlistID = vlistCreate();
-          if (vlistID < 0) return CDI_ELIMIT;
-
-          cdiVlistMakeInternal(vlistID);
-          streamptr->vlistID = vlistID;
-          // cdiReadByteorder(streamID);
-          const int status = cdiInqContents(streamptr);
-          if (status < 0)
-            {
-              streamID = status;
-            }
-          else
-            {
-              vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
-              vlistptr->ntsteps = streamptr->ntsteps;
-              cdiVlistMakeImmutable(vlistID);
-            }
-        }
-    }
-
-  if (streamID < 0)
-    {
-      Free(streamptr->record);
-      stream_delete_entry(streamptr);
     }
 
   return streamID;
@@ -823,11 +820,46 @@ streamOpenRead(const char *filename)
   const int filetype = cdiGetFiletype(filename, &byteorder);
   if (filetype < 0) return filetype;
 
-  const int streamID = streamOpen(filename, "r", filetype);
+  int streamID = streamOpen(filename, "r", filetype);
   if (streamID >= 0)
     {
       stream_t *streamptr = stream_to_pointer(streamID);
       streamptr->byteorder = byteorder;
+
+      const int status = stream_create_vlist(streamptr, NULL);
+      if (status < 0)
+        {
+          streamID = status;
+          if (streamptr->record) Free(streamptr->record);
+          stream_delete_entry(streamptr);
+        }
+    }
+
+  return streamID;
+}
+
+int
+streamOpenReadQuery(const char *filename, CdiQuery *query)
+{
+  cdiInitialize();
+
+  int byteorder = 0;
+  const int filetype = cdiGetFiletype(filename, &byteorder);
+  if (filetype < 0) return filetype;
+
+  int streamID = streamOpen(filename, "r", filetype);
+  if (streamID >= 0)
+    {
+      stream_t *streamptr = stream_to_pointer(streamID);
+      streamptr->byteorder = byteorder;
+
+      const int status = stream_create_vlist(streamptr, query);
+      if (status < 0)
+        {
+          streamID = status;
+          if (streamptr->record) Free(streamptr->record);
+          stream_delete_entry(streamptr);
+        }
     }
 
   return streamID;
@@ -913,6 +945,7 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->numvals = 0;
   streamptr->filename = NULL;
   streamptr->record = NULL;
+  streamptr->query = NULL;
   streamptr->varsAllocated = 0;
   streamptr->nrecs = 0;
   streamptr->nvars = 0;

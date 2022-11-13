@@ -5,6 +5,8 @@ Version 2.2.0 (6 October 2023):
 
    New features:
      * Improved read performance of temporal chunked NetCDF4 data
+   New interface function
+     * streamOpenReadQuery()
    Fixed bugs:
 
 Version 2.1.0 (6 October 2022):

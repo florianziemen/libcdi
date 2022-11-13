@@ -34,6 +34,7 @@ const char *CDI_GRIB2_Template = NULL;
 int CDI_Convention = CDI_CONVENTION_ECHAM;
 int CDI_Inventory_Mode = 1;
 int CDI_Version_Info = 1;
+int CDI_Query_Abort = 1;
 int CDI_Convert_Cubesphere = 1;
 int CDI_Read_Cell_Corners = 1;
 int CDI_CMOR_Mode = 0;
@@ -426,6 +427,17 @@ cdiInitialize(void)
             {
               CDI_Inventory_Mode = 2;
               if (CDI_Debug) Message("Inventory mode was set to timestep!");
+            }
+        }
+
+      envstr = getenv("CDI_QUERY_ABORT");
+      if (envstr)
+        {
+          const int ival = atoi(envstr);
+          if (ival == 0 || ival == 1)
+            {
+              CDI_Query_Abort = ival;
+              if (CDI_Debug) Message("CDI_Query_Abort = %s", envstr);
             }
         }
 

@@ -18,6 +18,7 @@ cdiStringError(int cdiErrno)
   static const char _EDIMSIZE[]    = "Invalid dimension size";
   static const char _ELIMIT[]      = "Internal limits exceeded";
   static const char _EINVAL[]      = "Invalid argument";
+  static const char _EQENF[]       = "Query entries not found";
 
   switch (cdiErrno) {
   case CDI_ESYSTEM:
@@ -36,6 +37,7 @@ cdiStringError(int cdiErrno)
   case CDI_EDIMSIZE:   return _EDIMSIZE;
   case CDI_ELIMIT:     return _ELIMIT;
   case CDI_EINVAL:     return _EINVAL;
+  case CDI_EQENF:      return _EQENF;
   }
   // clang-format on
   return UnknownError;

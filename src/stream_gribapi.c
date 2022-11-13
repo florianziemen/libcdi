@@ -398,16 +398,31 @@ gribapiGetString(grib_handle *gh, const char *key, char *string, size_t length)
 {
   string[0] = 0;
 
-  int ret = grib_get_string(gh, key, string, &length);
+  const int ret = grib_get_string(gh, key, string, &length);
   if (ret != 0)
     {
       fprintf(stderr, "grib_get_string(gh, \"%s\", ...) failed!\n", key);
       GRIB_CHECK(ret, 0);
     }
-  if (length == 8 && memcmp(string, "unknown", length) == 0)
-    string[0] = 0;
-  else if (length == 2 && memcmp(string, "~", length) == 0)
-    string[0] = 0;
+  // clang-format off
+  if      (length == 8 && memcmp(string, "unknown", length) == 0) string[0] = 0;
+  else if (length == 2 && memcmp(string, "~", length) == 0)       string[0] = 0;
+  // clang-format on
+}
+
+static void
+param_to_name(int param, char *name)
+{
+  int pdis, pcat, pnum;
+  cdiDecodeParam(param, &pnum, &pcat, &pdis);
+  if (pdis == 255)
+    {
+      sprintf(name, "code%d", pnum);
+    }
+  else
+    {
+      sprintf(name, "param%d.%d.%d", pnum, pcat, pdis);
+    }
 }
 
 static int
@@ -693,19 +708,31 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   strncpy(record->varname, varname, sizeof(record->varname) - 1);
   record->varname[sizeof(record->varname) - 1] = 0;
 
+  streamptr->tsteps[tsID].nallrecs++;
+  streamptr->nrecs++;
+
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+  CdiQuery *query = streamptr->query;
+  if (query && cdiQueryName(query, varname) < 0)
+    {
+      record->used = false;
+      return;
+    }
+
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
   grid_t *grid = (grid_t *) Malloc(sizeof(*grid));
   const bool uvRelativeToGrid = gribapiGetGrid(gh, grid);
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   const int gridID = gridAdded.Id;
-  if (!gridAdded.isNew)
-    Free(grid);
-  else if (grid->projtype == CDI_PROJ_RLL)
-    gribapiDefProjRLL(gh, gridID);
-  else if (grid->projtype == CDI_PROJ_LCC)
-    gribapiDefProjLCC(gh, gridID);
-  else if (grid->projtype == CDI_PROJ_STERE)
-    gribapiDefProjSTERE(gh, gridID);
+  // clang-format off
+  if (!gridAdded.isNew) Free(grid);
+  else if (grid->projtype == CDI_PROJ_RLL)   gribapiDefProjRLL(gh, gridID);
+  else if (grid->projtype == CDI_PROJ_LCC)   gribapiDefProjLCC(gh, gridID);
+  else if (grid->projtype == CDI_PROJ_STERE) gribapiDefProjSTERE(gh, gridID);
+  // clang-format on
 
   const int zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
 
@@ -814,9 +841,6 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
           varDefTable(varID, tableID);
         }
     }
-
-  streamptr->tsteps[tsID].nallrecs++;
-  streamptr->nrecs++;
 
   if (CDI_Debug)
     Message("varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d", varID, param, zaxistype, gridID, levelID);
@@ -1033,7 +1057,6 @@ fdbScanTimesteps(stream_t *streamptr)
 
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
 
-      const int param = gribapiGetParam(gh);
       int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
       var_tile_t tiles = dummy_tiles;
       int level1 = 0, level2 = 0;
@@ -1042,8 +1065,9 @@ fdbScanTimesteps(stream_t *streamptr)
       char varname[256];
       gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
-      int vDate, sDate;
-      int vTime, sTime;
+      const int param = gribapiGetParam(gh);
+
+      int vDate, vTime, sDate, sTime;
       gribapiGetValidityDateTime(gh, &vDate, &vTime, &sDate, &sTime);
       CmpDateTime datetime = { .date = vDate, .time = vTime };
 
@@ -1157,7 +1181,7 @@ gribapiScanTimestep1(stream_t *streamptr)
   void *gribbuffer = NULL;
   size_t buffersize = 0;
   CmpDateTime datetime0 = { .date = 10101, .time = 0 };
-  int nrecs_scanned = 0;  // Only used for debug output.
+  int nrecsScanned = 0;  // Only used for debug output.
   bool warn_time = true;
   int fcast = 0;
   grib_handle *gh = NULL;
@@ -1189,13 +1213,13 @@ gribapiScanTimestep1(stream_t *streamptr)
       // Search for next 'GRIB', read the following record, and position file offset after it.
       if (gribRead(fileID, gribbuffer, &readsize)) break;
 
+      nrecsScanned++;
+
       int datatype, comptype = 0;
       gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype);
 
-      nrecs_scanned++;
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
 
-      const int param = gribapiGetParam(gh);
       int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
       var_tile_t tiles = dummy_tiles;
       int level1 = 0, level2 = 0;
@@ -1204,8 +1228,11 @@ gribapiScanTimestep1(stream_t *streamptr)
       char varname[256];
       gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
-      int vDate, sDate;
-      int vTime, sTime;
+      const int param = gribapiGetParam(gh);
+
+      if (!varname[0]) param_to_name(param, varname);
+
+      int vDate, vTime, sDate, sTime;
       gribapiGetValidityDateTime(gh, &vDate, &vTime, &sDate, &sTime);
       CmpDateTime datetime = { .date = vDate, .time = vTime };
 
@@ -1238,16 +1265,17 @@ gribapiScanTimestep1(stream_t *streamptr)
               &datetime0);
           if (result == CHECKTIME_STOP)
             {
+              nrecsScanned--;
               break;
             }
           else if (result == CHECKTIME_SKIP)
             {
-              gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID + 1, varname, param, level1, level2);
+              gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
               continue;
             }
           else if (result == CHECKTIME_INCONSISTENT && warn_time)
             {
-              gribWarning("Inconsistent verification time!", nrecs_scanned, tsID + 1, varname, param, level1, level2);
+              gribWarning("Inconsistent verification time!", nrecsScanned, tsID + 1, varname, param, level1, level2);
               warn_time = false;
             }
           assert(result == CHECKTIME_OK || result == CHECKTIME_INCONSISTENT);
@@ -1277,10 +1305,18 @@ gribapiScanTimestep1(stream_t *streamptr)
 
   if (nrecs == 0) return CDI_EUFSTRUCT;
 
+  if (streamptr->query)
+    {
+      const int numEntries = cdiQueryNumEntries(streamptr->query);
+      const int numEntriesFound = cdiQueryNumEntriesFound(streamptr->query);
+      cdiQueryPrintEntriesNotFound(streamptr->query);
+      if (numEntriesFound == 0 || (CDI_Query_Abort && numEntries != numEntriesFound)) return CDI_EQENF;
+    }
+
   cdi_generate_vars(streamptr);
 
   taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
-  int taxisID = taxisCreate(taxis->type);
+  const int taxisID = taxisCreate(taxis->type);
   // printf("1: %d %6d  %d %6d  %d %6d\n", taxis->rdate, taxis->rtime, taxis->sdate, taxis->stime, taxis->vdate, taxis->vtime);
 
   const int vlistID = streamptr->vlistID;
@@ -1315,7 +1351,7 @@ gribapiScanTimestep2(stream_t *streamptr)
   void *gribbuffer = streamptr->record->buffer;
   size_t buffersize = streamptr->record->buffersize;
 
-  int tsID = streamptr->rtsteps;
+  const int tsID = streamptr->rtsteps;
   if (tsID != 1) Error("Internal problem! unexpected timestep %d", tsID + 1);
 
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
@@ -1327,7 +1363,7 @@ gribapiScanTimestep2(stream_t *streamptr)
 
   const int nrecords = streamScanInitRecords2(streamptr);
 
-  int nrecs_scanned = nrecords;  // Only used for debug output
+  int nrecsScanned = nrecords;  // Only used for debug output
   int rindex = 0;
   while (true)
     {
@@ -1348,11 +1384,10 @@ gribapiScanTimestep2(stream_t *streamptr)
 
       grbDecompress(recsize, &buffersize, &gribbuffer);
 
-      nrecs_scanned++;
+      nrecsScanned++;
       gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
 
-      const int param = gribapiGetParam(gh);
       int level1 = 0, level2 = 0, leveltype1, leveltype2, lbounds, level_sf, level_unit;
       var_tile_t tiles = dummy_tiles;
       gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
@@ -1360,8 +1395,11 @@ gribapiScanTimestep2(stream_t *streamptr)
       char varname[256];
       gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
-      int vDate, sDate;
-      int vTime, sTime;
+      const int param = gribapiGetParam(gh);
+
+      if (!varname[0]) param_to_name(param, varname);
+
+      int vDate, vTime, sDate, sTime;
       gribapiGetValidityDateTime(gh, &vDate, &vTime, &sDate, &sTime);
       CmpDateTime datetime = { .date = vDate, .time = vTime };
 
@@ -1409,12 +1447,12 @@ gribapiScanTimestep2(stream_t *streamptr)
         {
           if (CDI_Inventory_Mode == 1)
             {
-              gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID + 1, varname, param, level1, level2);
+              gribWarning("Parameter not defined at timestep 1!", nrecsScanned, tsID + 1, varname, param, level1, level2);
               return CDI_EUFSTRUCT;
             }
           else
             {
-              gribWarning("Parameter not defined at timestep 1, skipped!", nrecs_scanned, tsID + 1, varname, param, level1, level2);
+              gribWarning("Parameter not defined at timestep 1, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
               continue;
             }
         }
@@ -1427,7 +1465,7 @@ gribapiScanTimestep2(stream_t *streamptr)
             {
               if (datetime_differ(datetime, datetime0)) break;
 
-              gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID + 1, varname, param, level1, level2);
+              gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
               continue;
             }
         }
@@ -1439,7 +1477,7 @@ gribapiScanTimestep2(stream_t *streamptr)
         {
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          Message("%4d %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%lld vtime=%d", nrecs_scanned, (int) recpos, varname,
+          Message("%4d %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%lld vtime=%d", nrecsScanned, (int) recpos, varname,
                   paramstr, leveltype1, level1, level2, vDate, vTime);
         }
 
@@ -1468,14 +1506,10 @@ gribapiScanTimestep2(stream_t *streamptr)
   int nrecs = 0;
   for (recID = 0; recID < nrecords; recID++)
     {
-      if (!records[recID].used)
-        {
-          vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
-        }
+      if (records[recID].used)
+        nrecs++;
       else
-        {
-          nrecs++;
-        }
+        vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
     }
   streamptr->tsteps[tsID].nrecs = nrecs;
 
@@ -1495,7 +1529,6 @@ gribapiScanTimestep(stream_t *streamptr)
   int vrecID, recID = -1;
   int nrecs = 0;
   int vlistID = streamptr->vlistID;
-
   int tsID = streamptr->rtsteps;
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -1513,7 +1546,7 @@ gribapiScanTimestep(stream_t *streamptr)
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
-      int nrecs_scanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs * (tsID - 1);  // Only used for debug output.
+      int nrecsScanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs * (tsID - 1);  // Only used for debug output.
       int rindex = 0;
       off_t recpos = 0;
       CmpDateTime datetime0 = { INT_MIN, INT_MIN };
@@ -1532,8 +1565,6 @@ gribapiScanTimestep(stream_t *streamptr)
               break;
             }
 
-          if (rindex >= nrecs) break;
-
           ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
           size_t readsize = recsize;
@@ -1545,23 +1576,25 @@ gribapiScanTimestep(stream_t *streamptr)
 
           grbDecompress(recsize, &buffersize, &gribbuffer);
 
-          nrecs_scanned++;
+          nrecsScanned++;
           gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
           GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
 
-          const int param = gribapiGetParam(gh);
           int level1 = 0, level2 = 0, leveltype1, leveltype2 = -1, lbounds, level_sf, level_unit;
           var_tile_t tiles = dummy_tiles;
           gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
-          gribapiGetString(gh, "shortName", varname, sizeof(varname));
-
-          int vDate, sDate;
-          int vTime, sTime;
+          int vDate, vTime, sDate, sTime;
           gribapiGetValidityDateTime(gh, &vDate, &vTime, &sDate, &sTime);
           CmpDateTime datetime = { .date = vDate, .time = vTime };
 
           if (rindex == nrecs) break;
+
+          gribapiGetString(gh, "shortName", varname, sizeof(varname));
+
+          const int param = gribapiGetParam(gh);
+
+          if (!varname[0]) param_to_name(param, varname);
 
           if (rindex == 0)
             {
@@ -1610,12 +1643,12 @@ gribapiScanTimestep(stream_t *streamptr)
             {
               if (CDI_Inventory_Mode == 1)
                 {
-                  gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID + 1, varname, param, level1, level2);
+                  gribWarning("Parameter not defined at timestep 1!", nrecsScanned, tsID + 1, varname, param, level1, level2);
                   return CDI_EUFSTRUCT;
                 }
               else
                 {
-                  gribWarning("Parameter not defined at timestep 1, skipped!", nrecs_scanned, tsID + 1, varname, param, level1,
+                  gribWarning("Parameter not defined at timestep 1, skipped!", nrecsScanned, tsID + 1, varname, param, level1,
                               level2);
                   continue;
                 }
@@ -1628,7 +1661,7 @@ gribapiScanTimestep(stream_t *streamptr)
                   if (datetime_differ(datetime, datetime0)) break;
 
                   if (CDI_Debug)
-                    gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID + 1, varname, param, level1, level2);
+                    gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
 
                   continue;
                 }
@@ -1667,7 +1700,7 @@ gribapiScanTimestep(stream_t *streamptr)
 
       if (vrecID < nrecs)
         {
-          gribWarning("Parameter not found!", nrecs_scanned, tsID + 1, varname, records[recID].param, records[recID].ilevel,
+          gribWarning("Parameter not found!", nrecsScanned, tsID + 1, varname, records[recID].param, records[recID].ilevel,
                       records[recID].ilevel2);
           return CDI_EUFSTRUCT;
         }

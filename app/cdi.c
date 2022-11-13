@@ -829,13 +829,19 @@ main(int argc, char *argv[])
       int taxisID2 = CDI_UNDEFID;
       int vlistID2 = CDI_UNDEFID;
 
-      CdiQuery *query = cdiQueryCreate();
-      cdiQuerySetNames(query, numQueryNames, queryNames);
-      cdiQueryPrint(query);
-      cdiQueryDelete(query);
+      const bool useQuery = (numQueryNames > 0);
+      CdiQuery *query = NULL;
+      if (useQuery)
+        {
+          query = cdiQueryCreate();
+          cdiQuerySetNames(query, numQueryNames, queryNames);
+          // cdiQueryPrint(query);
+        }
 
-      const int streamID1 = streamOpenRead(fname1);
+      const int streamID1 = useQuery ? streamOpenReadQuery(fname1, query) : streamOpenRead(fname1);
       if (streamID1 < 0) return handle_error(streamID1, "Open failed on %s", fname1);
+
+      if (query) cdiQueryDelete(query);
 
       if (numWorkerIn > 0) streamDefNumWorker(streamID1, numWorkerIn);
 

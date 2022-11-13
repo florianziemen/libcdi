@@ -266,6 +266,7 @@ typedef struct
   SizeType numvals;
   char *filename;
   Record *record;
+  CdiQuery *query;
   svarinfo_t *vars;
   int nvars;  // number of variables
   int varsAllocated;
@@ -372,6 +373,7 @@ extern const char *CDI_GRIB1_Template;
 extern const char *CDI_GRIB2_Template;
 extern int CDI_Convention;
 extern int CDI_Inventory_Mode;
+extern int CDI_Query_Abort;
 extern int CDI_Version_Info;
 extern int CDI_Convert_Cubesphere;
 extern int CDI_Read_Cell_Corners;

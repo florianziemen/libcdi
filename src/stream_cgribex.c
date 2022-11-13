@@ -769,7 +769,7 @@ cgribexScanTimestep1(stream_t *streamptr)
   int leveltype = 0, level1 = 0, level2 = 0;
   CmpDateTime datetime0 = { .date = 10101, .time = 0 };
   unsigned recID;
-  int nrecs_scanned = 0;
+  int nrecsScanned = 0;
   bool warn_time = true;
   bool warn_numavg = true;
   bool fcast = false;
@@ -818,7 +818,7 @@ cgribexScanTimestep1(stream_t *streamptr)
 
       int *isec1 = cgribexp->sec1;
 
-      nrecs_scanned++;
+      nrecsScanned++;
       cgribexDecodeHeader(cgribexp, (int *) gribbuffer, (int) recsize, &lmv, &iret);
 
       const int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
@@ -862,7 +862,7 @@ cgribexScanTimestep1(stream_t *streamptr)
               if (warn_time)
                 if (datetime_differ(datetime, datetime0))
                   {
-                    gribWarning("Inconsistent verification time!", nrecs_scanned, tsID + 1, paramstr, level1, level2);
+                    gribWarning("Inconsistent verification time!", nrecsScanned, tsID + 1, paramstr, level1, level2);
                     warn_time = false;
                   }
             }
@@ -872,7 +872,7 @@ cgribexScanTimestep1(stream_t *streamptr)
 
               if (recID < nrecs)
                 {
-                  gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID + 1, paramstr, level1, level2);
+                  gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, paramstr, level1, level2);
                   continue;
                 }
             }
@@ -894,7 +894,7 @@ cgribexScanTimestep1(stream_t *streamptr)
       nrecs++;
 
       if (CDI_Debug)
-        Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
+        Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecsScanned, paramstr, level1, level2, vdate, vtime);
 
       cgribexAddRecord(streamptr, cgribexp, param, recsize, recpos, comptype, lmv, iret);
     }
@@ -957,7 +957,7 @@ cgribexScanTimestep2(stream_t *streamptr)
 
   const int nrecords = streamScanInitRecords2(streamptr);
 
-  int nrecs_scanned = nrecords;
+  int nrecsScanned = nrecords;
   int rindex = 0;
   while (true)
     {
@@ -978,7 +978,7 @@ cgribexScanTimestep2(stream_t *streamptr)
 
       grbDecompress(recsize, &buffersize, &gribbuffer);
 
-      nrecs_scanned++;
+      nrecsScanned++;
       cgribexDecodeHeader(cgribexp, (int *) gribbuffer, (int) recsize, &lmv, &iret);
 
       const int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
@@ -1037,7 +1037,7 @@ cgribexScanTimestep2(stream_t *streamptr)
 
       if (recID == nrecords)
         {
-          gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID + 1, paramstr, level1, level2);
+          gribWarning("Parameter not defined at timestep 1!", nrecsScanned, tsID + 1, paramstr, level1, level2);
           return CDI_EUFSTRUCT;
         }
 
@@ -1059,7 +1059,7 @@ cgribexScanTimestep2(stream_t *streamptr)
             {
               if (datetime_differ(datetime, datetime0)) break;
 
-              gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID + 1, paramstr, level1, level2);
+              gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, paramstr, level1, level2);
               continue;
             }
           else
@@ -1070,7 +1070,7 @@ cgribexScanTimestep2(stream_t *streamptr)
         }
 
       if (CDI_Debug)
-        Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
+        Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecsScanned, paramstr, level1, level2, vdate, vtime);
 
       if (cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0)
         {
@@ -1100,14 +1100,10 @@ cgribexScanTimestep2(stream_t *streamptr)
   int nrecs = 0;
   for (recID = 0; recID < nrecords; recID++)
     {
-      if (!records[recID].used)
-        {
-          vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
-        }
+      if (records[recID].used)
+        nrecs++;
       else
-        {
-          nrecs++;
-        }
+        vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
     }
   streamptr->tsteps[tsID].nrecs = nrecs;
 
@@ -1153,7 +1149,7 @@ cgribexScanTimestep(stream_t *streamptr)
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
-      int nrecs_scanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs * (tsID - 1);
+      int nrecsScanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs * (tsID - 1);
       int rindex = 0;
       while (true)
         {
@@ -1167,8 +1163,6 @@ cgribexScanTimestep(stream_t *streamptr)
               break;
             }
 
-          if (rindex >= nrecs) break;
-
           ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
           size_t readsize = recsize;
@@ -1180,7 +1174,7 @@ cgribexScanTimestep(stream_t *streamptr)
 
           grbDecompress(recsize, &buffersize, &gribbuffer);
 
-          nrecs_scanned++;
+          nrecsScanned++;
           cgribexDecodeHeader(cgribexp, (int *) gribbuffer, (int) recsize, &lmv, &iret);
 
           const int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
@@ -1192,8 +1186,6 @@ cgribexScanTimestep(stream_t *streamptr)
           int vtime, stime;
           gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
           CmpDateTime datetime = { .date = vdate, .time = vtime };
-
-          if (rindex == nrecs) break;
 
           if (rindex == 0)
             {
@@ -1244,7 +1236,7 @@ cgribexScanTimestep(stream_t *streamptr)
 
           if (vrecID == nrecs)
             {
-              gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID + 1, paramstr, level1, level2);
+              gribWarning("Parameter not defined at timestep 1!", nrecsScanned, tsID + 1, paramstr, level1, level2);
 
               if (CDI_Inventory_Mode == 1)
                 return CDI_EUFSTRUCT;
@@ -1267,7 +1259,7 @@ cgribexScanTimestep(stream_t *streamptr)
                   if (datetime_differ(datetime, datetime0)) break;
 
                   if (CDI_Debug)
-                    gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID + 1, paramstr_, level1, level2);
+                    gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, paramstr_, level1, level2);
 
                   continue;
                 }
@@ -1279,7 +1271,7 @@ cgribexScanTimestep(stream_t *streamptr)
             }
 
           if (CDI_Debug)
-            Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
+            Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecsScanned, paramstr, level1, level2, vdate, vtime);
 
           if (cgribexVarCompare(compVar, records[recID], 0) != 0)
             {
@@ -1303,7 +1295,7 @@ cgribexScanTimestep(stream_t *streamptr)
       if (vrecID < nrecs)
         {
           cdiParamToString(records[recID].param, paramstr, sizeof(paramstr));
-          gribWarning("Parameter not found!", nrecs_scanned, tsID + 1, paramstr, records[recID].ilevel, records[recID].ilevel2);
+          gribWarning("Parameter not found!", nrecsScanned, tsID + 1, paramstr, records[recID].ilevel, records[recID].ilevel2);
           return CDI_EUFSTRUCT;
         }
 

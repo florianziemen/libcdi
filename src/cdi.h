@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdint.h>    // int64_t
+#include <stdbool.h>
 #include <sys/types.h>
 
 #ifndef CDI_SIZE_TYPE
@@ -57,6 +58,7 @@ extern "C" {
 #define  CDI_EUFSTRUCT            -25   // Unsupported file structure
 #define  CDI_EUNC4                -26   // Unsupported NetCDF4 structure
 #define  CDI_EDIMSIZE             -27   // Invalid dimension size
+#define  CDI_EQENF                -50   // Query entries not found
 #define  CDI_ELIMIT               -99   // Internal limits exceeded
 
 // File types
@@ -1317,16 +1319,26 @@ extern "C" {
 
 // CDI query interface
 
-typedef struct CdiQuery
+typedef struct
 {
+  int numEntries;
   int numNames;
+  bool *namesFound;
   char **names;
 } CdiQuery;
 
 CdiQuery *cdiQueryCreate();
+CdiQuery *cdiQueryClone(CdiQuery *query);
 void cdiQueryDelete(CdiQuery *query);
 void cdiQuerySetNames(CdiQuery *query, int numNames, char **names);
+int cdiQueryName(CdiQuery *query, const char *name);
+int cdiQueryNumEntries(CdiQuery *query);
+int cdiQueryNumEntriesFound(CdiQuery *query);
 void cdiQueryPrint(CdiQuery *query);
+void cdiQueryPrintEntriesNotFound(CdiQuery *query);
+
+// streamOpenReadQuery: Open a dataset for reading and apply query
+int streamOpenReadQuery(const char *path, CdiQuery *query);
 
 // CDI interface for  paraview vtkCDIReader.cxx
 
