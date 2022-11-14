@@ -118,6 +118,8 @@ streamInqRecord(int streamID, int *varID, int *levelID)
   if (recID == -1 || recID >= streamptr->tsteps[tsID].nallrecs) Error("Internal problem! tsID = %d recID = %d", tsID, recID);
 
   *varID = streamptr->tsteps[tsID].records[recID].varID;
+  if (*varID == -1) Error("Internal problem! varID = %d recID = %d", *varID, recID);
+
   const int lindex = streamptr->tsteps[tsID].records[recID].levelID;
 
   const int isub = subtypeInqActiveIndex(streamptr->vars[*varID].subtypeID);
