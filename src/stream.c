@@ -595,7 +595,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
 }
 
 static int
-stream_create_vlist(stream_t *streamptr, CdiQuery *query)
+stream_create_vlist(stream_t *streamptr, const CdiQuery *query)
 {
   const int vlistID = vlistCreate();
   if (vlistID < 0) return CDI_ELIMIT;
@@ -839,7 +839,7 @@ streamOpenRead(const char *filename)
 }
 
 int
-streamOpenReadQuery(const char *filename, CdiQuery *query)
+streamOpenReadQuery(const char *filename, const CdiQuery *query)
 {
   cdiInitialize();
 

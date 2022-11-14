@@ -31,7 +31,7 @@ cdiQueryDelete(CdiQuery *query)
 }
 
 int
-cdiQueryNumEntries(CdiQuery *query)
+cdiQueryNumEntries(const CdiQuery *query)
 {
   return query ? query->numEntries : 0;
 }
@@ -63,7 +63,7 @@ cdiQueryClone(CdiQuery *query)
 }
 
 void
-cdiQueryPrint(CdiQuery *query)
+cdiQueryPrint(const CdiQuery *query)
 {
   if (query && query->numNames)
     {
@@ -74,7 +74,7 @@ cdiQueryPrint(CdiQuery *query)
 }
 
 int
-cdiQueryNumEntriesFound(CdiQuery *query)
+cdiQueryNumEntriesFound(const CdiQuery *query)
 {
   int numEntriesFound = 0;
 
@@ -90,7 +90,7 @@ cdiQueryNumEntriesFound(CdiQuery *query)
 }
 
 void
-cdiQueryPrintEntriesNotFound(CdiQuery *query)
+cdiQueryPrintEntriesNotFound(const CdiQuery *query)
 {
   if (query)
     {

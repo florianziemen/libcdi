@@ -1332,13 +1332,13 @@ CdiQuery *cdiQueryClone(CdiQuery *query);
 void cdiQueryDelete(CdiQuery *query);
 void cdiQuerySetNames(CdiQuery *query, int numNames, char **names);
 int cdiQueryName(CdiQuery *query, const char *name);
-int cdiQueryNumEntries(CdiQuery *query);
-int cdiQueryNumEntriesFound(CdiQuery *query);
-void cdiQueryPrint(CdiQuery *query);
-void cdiQueryPrintEntriesNotFound(CdiQuery *query);
+int cdiQueryNumEntries(const CdiQuery *query);
+int cdiQueryNumEntriesFound(const CdiQuery *query);
+void cdiQueryPrint(const CdiQuery *query);
+void cdiQueryPrintEntriesNotFound(const CdiQuery *query);
 
 // streamOpenReadQuery: Open a dataset for reading and apply query
-int streamOpenReadQuery(const char *path, CdiQuery *query);
+int streamOpenReadQuery(const char *path, const CdiQuery *query);
 
 // CDI interface for  paraview vtkCDIReader.cxx
 
