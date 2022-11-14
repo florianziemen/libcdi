@@ -1187,6 +1187,8 @@ cgribexScanTimestep(stream_t *streamptr)
           gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
           CmpDateTime datetime = { .date = vdate, .time = vtime };
 
+          if (rindex == nrecs) break;
+
           if (rindex == 0)
             {
               datetime0 = datetime;
