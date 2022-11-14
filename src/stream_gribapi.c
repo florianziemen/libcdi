@@ -173,11 +173,10 @@ gribapiGetTimeUnitFactor(const int timeUnits)
   return 0;
 }
 
-static void
-gribapiGetValidityDateTime(grib_handle *gh, int *vDate, int *vTime, int *sDate, int *sTime)
+static CmpDateTime
+gribapiGetValidityDateTime(grib_handle *gh, CmpDateTime *cmpDateTimeS)
 {
-  *sDate = 0;
-  *sTime = 0;
+  int vdate = 0, sdate = 0, vtime = 0, stime = 0;
 
   long sigofrtime = 3;
   if (gribEditionNumber(gh) > 1)
@@ -189,9 +188,9 @@ gribapiGetValidityDateTime(grib_handle *gh, int *vDate, int *vTime, int *sDate, 
       == 3)  // XXX: This looks like a bug to me, because timeRangeIndicator == 3 does not seem to have the same meaning as
              // significanceOfReferenceTime == 3. I would recommend replacing this condition with `if(!gribapiTimeIsFC())`.
     {
-      CdiDateTime vDateTime = gribapiGetDataDateTime(gh);
-      *vDate = (int) cdiDate_get(vDateTime.date);
-      *vTime = cdiTime_get(vDateTime.time);
+      const CdiDateTime vDateTime = gribapiGetDataDateTime(gh);
+      vdate = (int) cdiDate_get(vDateTime.date);
+      vtime = cdiTime_get(vDateTime.time);
     }
   else
     {
@@ -210,20 +209,28 @@ gribapiGetValidityDateTime(grib_handle *gh, int *vDate, int *vTime, int *sDate, 
 
           // if (startStep > 0)
           {
-            JulianDate julianDate2 = julianDate_add_seconds(julianDate, timeUnitFactor * startStep);
+            const JulianDate julianDate2 = julianDate_add_seconds(julianDate, timeUnitFactor * startStep);
             CdiDateTime sDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate2);
             sDateTime.time.second = 0;
-            *sDate = (int) cdiDate_get(sDateTime.date);
-            *sTime = cdiTime_get(sDateTime.time);
+            sdate = (int) cdiDate_get(sDateTime.date);
+            stime = cdiTime_get(sDateTime.time);
           }
 
           julianDate = julianDate_add_seconds(julianDate, timeUnitFactor * endStep);
           rDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate);
         }
 
-      *vDate = (int) cdiDate_get(rDateTime.date);
-      *vTime = cdiTime_get(rDateTime.time);
+      vdate = (int) cdiDate_get(rDateTime.date);
+      vtime = cdiTime_get(rDateTime.time);
     }
+
+  cmpDateTimeS->date = sdate;
+  cmpDateTimeS->time = stime;
+
+  CmpDateTime cmpDateTimeV;
+  cmpDateTimeV.date = vdate;
+  cmpDateTimeV.time = vtime;
+  return cmpDateTimeV;
 }
 
 static void
@@ -1067,23 +1074,22 @@ fdbScanTimesteps(stream_t *streamptr)
 
       const int param = gribapiGetParam(gh);
 
-      int vDate, vTime, sDate, sTime;
-      gribapiGetValidityDateTime(gh, &vDate, &vTime, &sDate, &sTime);
-      CmpDateTime datetime = { .date = vDate, .time = vTime };
+      CmpDateTime cdtS;
+      const CmpDateTime cdtV = gribapiGetValidityDateTime(gh, &cdtS);
 
       VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
       if (recID == 0)
         {
-          datetime0 = datetime;
+          datetime0 = cdtV;
           taxis->rdatetime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
           taxis->fdate = (int) cdiDate_get(taxis->rdatetime.date);
           taxis->ftime = cdiTime_get(taxis->rdatetime.time);
-          taxis->sdate = sDate;
-          taxis->stime = sTime;
-          taxis->vdatetime = cdiDateTime_set(vDate, vTime);
+          taxis->sdate = cdtS.date;
+          taxis->stime = cdtS.time;
+          taxis->vdatetime = cdiDateTime_set(cdtV.date, cdtV.time);
         }
 
       if (CDI_Debug)
@@ -1091,7 +1097,7 @@ fdbScanTimesteps(stream_t *streamptr)
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
           Message("%4d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%lld vtime=%d", recID + 1, varname, paramstr, leveltype1,
-                  level1, level2, vDate, vTime);
+                  level1, level2, cdtV.date, cdtV.time);
         }
 
       var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
@@ -1232,36 +1238,35 @@ gribapiScanTimestep1(stream_t *streamptr)
 
       if (!varname[0]) param_to_name(param, varname);
 
-      int vDate, vTime, sDate, sTime;
-      gribapiGetValidityDateTime(gh, &vDate, &vTime, &sDate, &sTime);
-      CmpDateTime datetime = { .date = vDate, .time = vTime };
+      CmpDateTime cdtS;
+      const CmpDateTime cdtV = gribapiGetValidityDateTime(gh, &cdtS);
 
       VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
       if (nrecs == 0)
         {
-          datetime0 = datetime;
+          datetime0 = cdtV;
           taxis->rdatetime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
           taxis->fdate = (int) cdiDate_get(taxis->rdatetime.date);
           taxis->ftime = cdiTime_get(taxis->rdatetime.time);
-          taxis->sdate = sDate;
-          taxis->stime = sTime;
-          taxis->vdatetime = cdiDateTime_set(vDate, vTime);
+          taxis->sdate = cdtS.date;
+          taxis->stime = cdtS.time;
+          taxis->vdatetime = cdiDateTime_set(cdtV.date, cdtV.time);
         }
       else
         {
-          if (sDate < taxis->sdate || (sDate == taxis->sdate && sTime < taxis->stime))
+          if (cdtS.date < taxis->sdate || (cdtS.date == taxis->sdate && cdtS.time < taxis->stime))
             {
-              taxis->sdate = sDate;
-              taxis->stime = sTime;
+              taxis->sdate = cdtS.date;
+              taxis->stime = cdtS.time;
             }
 
           const int tsteptype = gribapiGetTsteptype(gh);
           const size_t gridsize = gribapiGetGridsize(gh);
           checkTimeResult result = checkTime(
-              streamptr, gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles), &datetime,
+              streamptr, gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles), &cdtV,
               &datetime0);
           if (result == CHECKTIME_STOP)
             {
@@ -1288,7 +1293,7 @@ gribapiScanTimestep1(stream_t *streamptr)
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
           Message("%4u %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%lld vtime=%d", nrecs, (int) recpos, varname, paramstr,
-                  leveltype1, level1, level2, vDate, vTime);
+                  leveltype1, level1, level2, cdtV.date, cdtV.time);
         }
 
       var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
@@ -1399,13 +1404,12 @@ gribapiScanTimestep2(stream_t *streamptr)
 
       if (!varname[0]) param_to_name(param, varname);
 
-      int vDate, vTime, sDate, sTime;
-      gribapiGetValidityDateTime(gh, &vDate, &vTime, &sDate, &sTime);
-      CmpDateTime datetime = { .date = vDate, .time = vTime };
+      CmpDateTime cdtS;
+      const CmpDateTime cdtV = gribapiGetValidityDateTime(gh, &cdtS);
 
       if (rindex == 0)
         {
-          datetime0 = datetime;
+          datetime0 = cdtV;
           const int taxisID = vlistInqTaxis(vlistID);
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             {
@@ -1419,18 +1423,18 @@ gribapiScanTimestep2(stream_t *streamptr)
             }
           taxis->fdate = (int) cdiDate_get(taxis->rdatetime.date);
           taxis->ftime = cdiTime_get(taxis->rdatetime.time);
-          taxis->vdatetime = cdiDateTime_set(vDate, vTime);
-          taxis->sdate = sDate;
-          taxis->stime = sTime;
+          taxis->vdatetime = cdiDateTime_set(cdtV.date, cdtV.time);
+          taxis->sdate = cdtS.date;
+          taxis->stime = cdtS.time;
           // printf("2: %d %6d  %d %6d  %d %6d\n", taxis->rdate, taxis->rtime, taxis->sdate, taxis->stime, taxis->vdate,
           // taxis->vtime);
         }
       else
         {
-          if (sDate < taxis->sdate || (sDate == taxis->sdate && sTime < taxis->stime))
+          if (cdtS.date < taxis->sdate || (cdtS.date == taxis->sdate && cdtS.time < taxis->stime))
             {
-              taxis->sdate = sDate;
-              taxis->stime = sTime;
+              taxis->sdate = cdtS.date;
+              taxis->stime = cdtS.time;
             }
         }
 
@@ -1463,7 +1467,7 @@ gribapiScanTimestep2(stream_t *streamptr)
             break;
           else
             {
-              if (datetime_differ(datetime, datetime0)) break;
+              if (datetime_differ(cdtV, datetime0)) break;
 
               gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
               continue;
@@ -1478,7 +1482,7 @@ gribapiScanTimestep2(stream_t *streamptr)
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
           Message("%4d %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%lld vtime=%d", nrecsScanned, (int) recpos, varname,
-                  paramstr, leveltype1, level1, level2, vDate, vTime);
+                  paramstr, leveltype1, level1, level2, cdtV.date, cdtV.time);
         }
 
       if (gribapiVarCompare(compVar, records[recID], 0) != 0)
@@ -1584,9 +1588,8 @@ gribapiScanTimestep(stream_t *streamptr)
           var_tile_t tiles = dummy_tiles;
           gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
-          int vDate, vTime, sDate, sTime;
-          gribapiGetValidityDateTime(gh, &vDate, &vTime, &sDate, &sTime);
-          CmpDateTime datetime = { .date = vDate, .time = vTime };
+          CmpDateTime cdtS;
+          const CmpDateTime cdtV = gribapiGetValidityDateTime(gh, &cdtS);
 
           if (rindex == nrecs) break;
 
@@ -1598,7 +1601,7 @@ gribapiScanTimestep(stream_t *streamptr)
 
           if (rindex == 0)
             {
-              datetime0 = datetime;
+              datetime0 = cdtV;
               const int taxisID = vlistInqTaxis(vlistID);
               if (taxisInqType(taxisID) == TAXIS_RELATIVE)
                 {
@@ -1612,18 +1615,18 @@ gribapiScanTimestep(stream_t *streamptr)
                 }
               taxis->fdate = (int) cdiDate_get(taxis->rdatetime.date);
               taxis->ftime = cdiTime_get(taxis->rdatetime.time);
-              taxis->vdatetime = cdiDateTime_set(vDate, vTime);
-              taxis->sdate = sDate;
-              taxis->stime = sTime;
+              taxis->vdatetime = cdiDateTime_set(cdtV.date, cdtV.time);
+              taxis->sdate = cdtS.date;
+              taxis->stime = cdtS.time;
               // printf("n: %d %6d  %d %6d  %d %6d\n", taxis->rdate, taxis->rtime, taxis->sdate, taxis->stime, taxis->vdate,
               // taxis->vtime);
             }
           else
             {
-              if (sDate < taxis->sdate || (sDate == taxis->sdate && sTime < taxis->stime))
+              if (cdtS.date < taxis->sdate || (cdtS.date == taxis->sdate && cdtS.time < taxis->stime))
                 {
-                  taxis->sdate = sDate;
-                  taxis->stime = sTime;
+                  taxis->sdate = cdtS.date;
+                  taxis->stime = cdtS.time;
                 }
             }
 
@@ -1658,7 +1661,7 @@ gribapiScanTimestep(stream_t *streamptr)
             {
               if (records[recID].used)
                 {
-                  if (datetime_differ(datetime, datetime0)) break;
+                  if (datetime_differ(cdtV, datetime0)) break;
 
                   if (CDI_Debug)
                     gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
@@ -1670,7 +1673,7 @@ gribapiScanTimestep(stream_t *streamptr)
           records[recID].used = true;
           streamptr->tsteps[tsID].recIDs[rindex] = recID;
 
-          if (CDI_Debug) Message("%4d %8d %4d %8d %8lld %6d", rindex + 1, (int) recpos, param, level1, vDate, vTime);
+          if (CDI_Debug) Message("%4d %8d %4d %8d %8lld %6d", rindex + 1, (int) recpos, param, level1, cdtV.date, cdtV.time);
 
           if (gribapiVarCompare(compVar, records[recID], 0) != 0)
             {
@@ -1682,7 +1685,7 @@ gribapiScanTimestep(stream_t *streamptr)
           records[recID].position = recpos;
           records[recID].size = recsize;
 
-          if (CDI_Debug) Message("%4d %8d %4d %8d %8lld %6d", rindex, (int) recpos, param, level1, vDate, vTime);
+          if (CDI_Debug) Message("%4d %8d %4d %8d %8lld %6d", rindex, (int) recpos, param, level1, cdtV.date, cdtV.time);
 
           grib_handle_delete(gh);
           gh = NULL;
