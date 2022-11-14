@@ -10,7 +10,7 @@
 #include "cdi_int.h"
 #include "file.h"
 #include "varscan.h"
-#include "datetime.h"
+#include "cmp_datetime.h"
 #include "stream_scan.h"
 #include "stream_grb.h"
 #include "stream_cgribex.h"

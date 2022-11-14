@@ -11,7 +11,7 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "varscan.h"
-#include "datetime.h"
+#include "cmp_datetime.h"
 #include "ieg.h"
 #include "stream_scan.h"
 #include "stream_ieg.h"

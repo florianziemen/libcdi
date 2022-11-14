@@ -11,7 +11,7 @@
 #include "stream_scan.h"
 #include "stream_ext.h"
 #include "varscan.h"
-#include "datetime.h"
+#include "cmp_datetime.h"
 #include "extra.h"
 #include "get_num_missvals.h"
 #include "exse.h"
