@@ -1,5 +1,5 @@
-#ifndef DATETIME_H
-#define DATETIME_H
+#ifndef CMP_DATETIME_H
+#define CMP_DATETIME_H
 
 typedef struct
 {

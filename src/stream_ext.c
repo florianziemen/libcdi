@@ -275,7 +275,7 @@ extScanTimestep1(stream_t *streamptr)
       const int rlevel = header[2];
       const int rxysize = header[3];
       const int param = cdiEncodeParam(rcode, 255, 255);
-      CmpDateTime datetime = { .date = vdate, .time = vtime };
+      const CmpDateTime datetime = { .date = vdate, .time = vtime };
 
       if (nrecs == 0)
         {
@@ -409,14 +409,10 @@ extScanTimestep2(stream_t *streamptr)
   int nrecs = 0;
   for (int recID = 0; recID < nrecords; recID++)
     {
-      if (!records[recID].used)
-        {
-          vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
-        }
+      if (records[recID].used)
+        nrecs++;
       else
-        {
-          nrecs++;
-        }
+        vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
     }
   streamptr->tsteps[tsID].nrecs = nrecs;
 
