@@ -9,7 +9,6 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "varscan.h"
-#include "cmp_datetime.h"
 #include "service.h"
 #include "stream_scan.h"
 #include "stream_srv.h"
@@ -249,7 +248,8 @@ srv_add_record(stream_t *streamptr, int param, int level, size_t xsize, size_t y
 static void
 srvScanTimestep1(stream_t *streamptr)
 {
-  CmpDateTime datetime0 = { INT_MIN, INT_MIN };
+  CdiDateTime datetime0;
+  cdiDateTime_init(&datetime0);
   off_t recpos;
   srvrec_t *srvp = (srvrec_t *) streamptr->record->objectp;
 
@@ -284,12 +284,12 @@ srvScanTimestep1(stream_t *streamptr)
       const int rxsize = header[4];
       const int rysize = header[5];
       const int param = cdiEncodeParam(rcode, 255, 255);
-      const CmpDateTime datetime = { .date = vdate, .time = vtime };
+      const CdiDateTime datetime = cdiDateTime_set(vdate, vtime);
 
       if (nrecs == 0)
         {
           datetime0 = datetime;
-          taxis->vdatetime = cdiDateTime_set(vdate, vtime);
+          taxis->vdatetime = datetime;
         }
       else
         {
@@ -297,7 +297,7 @@ srvScanTimestep1(stream_t *streamptr)
           for (int recID = 0; recID < nrecs; recID++)
             if (param == records[recID].param && rlevel == records[recID].ilevel) goto tstepScanLoopFinished;
 
-          if (datetime_differ(datetime, datetime0)) Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
+          if (cdiDateTime_isNE(datetime, datetime0)) Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
         }
 
       nrecs++;
@@ -605,6 +605,7 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   const int vlistID = streamptr->vlistID;
   const int fileID = streamptr->fileID;
   const int tsID = streamptr->curTsID;
+  const CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vdatetime;
   const int gridID = vlistInqVarGrid(vlistID, varID);
 
   int pdis, pcat, pnum;
@@ -613,8 +614,8 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   int header[8];
   header[0] = pnum;
   header[1] = (int) lround(zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
-  header[2] = (int) cdiDate_get(streamptr->tsteps[tsID].taxis.vdatetime.date);
-  header[3] = cdiTime_get(streamptr->tsteps[tsID].taxis.vdatetime.time);
+  header[2] = (int) cdiDate_get(vDateTime.date);
+  header[3] = cdiTime_get(vDateTime.time);
 
   size_t xsize = gridInqXsize(gridID);
   size_t ysize = gridInqYsize(gridID);
