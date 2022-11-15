@@ -280,7 +280,7 @@ extScanTimestep1(stream_t *streamptr)
       if (nrecs == 0)
         {
           datetime0 = datetime;
-          taxis->vdatetime = datetime;
+          taxis->vDateTime = datetime;
         }
       else
         {
@@ -305,7 +305,7 @@ tstepScanLoopFinished:
 
   const int taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type = TAXIS_ABSOLUTE;
-  taxis->rdatetime = taxis->vdatetime;
+  taxis->rdatetime = taxis->vDateTime;
 
   const int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
@@ -364,7 +364,7 @@ extScanTimestep2(stream_t *streamptr)
       if (rindex == 0)
         {
           taxis->type = TAXIS_ABSOLUTE;
-          taxis->vdatetime = cdiDateTime_set(vdate, vtime);
+          taxis->vDateTime = cdiDateTime_set(vdate, vtime);
         }
 
       bool nextstep = false;
@@ -485,7 +485,7 @@ extScanTimestep(stream_t *streamptr)
           if (rindex == 0)
             {
               taxis->type = TAXIS_ABSOLUTE;
-              taxis->vdatetime = cdiDateTime_set(vdate, vtime);
+              taxis->vDateTime = cdiDateTime_set(vdate, vtime);
             }
 
           if (param != records[recID].param || rlevel != records[recID].ilevel)
@@ -597,7 +597,7 @@ extWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   const int vlistID = streamptr->vlistID;
   const int fileID = streamptr->fileID;
   const int tsID = streamptr->curTsID;
-  const CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vdatetime;
+  const CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
 
   int pdis, pcat, pnum;
   cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pnum, &pcat, &pdis);

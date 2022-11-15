@@ -1350,8 +1350,8 @@ void taxisDefFdatetime(int taxisID, CdiDateTime fDateTime);
 CdiDateTime taxisInqFdatetime(int taxisID);
 void taxisDefVdatetime(int taxisID, CdiDateTime vDateTime);
 CdiDateTime taxisInqVdatetime(int taxisID);
-void taxisDefVdatetimeBounds(int taxisID, CdiDateTime vdatetime_lb, CdiDateTime vdatetime_ub);
-void taxisInqVdatetimeBounds(int taxisID, CdiDateTime *vdatetime_lb, CdiDateTime *vdatetime_ub);
+void taxisDefVdatetimeBounds(int taxisID, CdiDateTime vDateTime_lb, CdiDateTime vDateTime_ub);
+void taxisInqVdatetimeBounds(int taxisID, CdiDateTime *vDateTime_lb, CdiDateTime *vDateTime_ub);
 
 // date format:  YYYYMMDD
 // time format:    hhmmss

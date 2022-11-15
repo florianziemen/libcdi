@@ -4563,7 +4563,7 @@ wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
   {
     int year = 1, month = 1, day = 1, hour = 0, minute = 0, second = 0;
     if (strlen(stvalue) == 19) sscanf(stvalue, "%d-%d-%d_%d:%d:%d", &year, &month, &day, &hour, &minute, &second);
-    taxis->vdatetime = cdiDateTime_set(cdiEncodeDate(year, month, day), cdiEncodeTime(hour, minute, second));
+    taxis->vDateTime = cdiDateTime_set(cdiEncodeDate(year, month, day), cdiEncodeTime(hour, minute, second));
     taxis->type = TAXIS_ABSOLUTE;
   }
 }
@@ -4638,7 +4638,7 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
                 }
 #endif
               timevalue = get_timevalue(fileID, nctimevarid, tsID, streamptr->basetime.timevar_cache);
-              taxis->vdatetime = cdi_decode_timeval(timevalue, taxis);
+              taxis->vDateTime = cdi_decode_timeval(timevalue, taxis);
             }
 
           const int nctimeboundsid = streamptr->basetime.ncvarboundsid;
@@ -4650,8 +4650,8 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
               if (values[0] >= NC_FILL_DOUBLE || values[0] < -NC_FILL_DOUBLE) values[0] = 0.0;
               if (values[1] >= NC_FILL_DOUBLE || values[1] < -NC_FILL_DOUBLE) values[1] = 0.0;
 
-              taxis->vdatetime_lb = cdi_decode_timeval(values[0], taxis);
-              taxis->vdatetime_ub = cdi_decode_timeval(values[1], taxis);
+              taxis->vDateTime_lb = cdi_decode_timeval(values[0], taxis);
+              taxis->vDateTime_ub = cdi_decode_timeval(values[1], taxis);
             }
 
           const int leadtimeid = streamptr->basetime.leadtimeid;

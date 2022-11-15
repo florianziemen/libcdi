@@ -341,10 +341,11 @@ grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
       const int varID = record->varID;
       const int zaxisID = vlistInqVarZaxis(vlistID, varID);
       const int zaxisType = zaxisInqType(zaxisID);
+      const CdiDateTime vDateTime = streamptr1->tsteps[tsID].taxis.vDateTime;
 
       FDB_Keys fdbKeys;
-      snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int) cdiDate_get(streamptr1->tsteps[tsID].taxis.vdatetime.date));
-      snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", (short)(cdiTime_get(streamptr1->tsteps[tsID].taxis.vdatetime.time) / 100));
+      snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int) cdiDate_get(vDateTime.date));
+      snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", (short)(cdiTime_get(vDateTime.time) / 100));
       snprintf(fdbKeys.param, sizeof(fdbKeys.param), "%d", get_fdb_param(record->param));
       const bool isML = (zaxisType == ZAXIS_HYBRID || zaxisType == ZAXIS_HYBRID_HALF);
       snprintf(fdbKeys.levtype, sizeof(fdbKeys.levtype), "%s", isML ? "ml" : "sfc");
@@ -378,7 +379,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
   const int zaxisID = vlistInqVarZaxis(vlistID, varID);
   const int tsteptype = vlistInqVarTsteptype(vlistID, varID);
   const int tsID = streamptr->curTsID;
-  const CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vdatetime;
+  const CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
   const int numavg = (tsteptype == TSTEP_AVG) ? streamptr->tsteps[tsID].taxis.numavg : 0;
   int comptype = streamptr->comptype;
 

@@ -434,7 +434,7 @@ iegDefRecord(stream_t *streamptr)
   const int varID = record->varID;
   const int levelID = record->levelID;
   const int tsID = streamptr->curTsID;
-  const CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vdatetime;
+  const CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
 
   const int gridID = vlistInqVarGrid(vlistID, varID);
   const int zaxisID = vlistInqVarZaxis(vlistID, varID);
@@ -734,7 +734,7 @@ iegScanTimestep1(stream_t *streamptr)
       if (nrecs == 0)
         {
           datetime0 = datetime;
-          taxis->vdatetime = datetime;
+          taxis->vDateTime = datetime;
         }
       else
         {
@@ -759,7 +759,7 @@ tstepScanLoopFinished:
 
   const int taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type = TAXIS_ABSOLUTE;
-  taxis->rdatetime = taxis->vdatetime;
+  taxis->rdatetime = taxis->vDateTime;
 
   const int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
@@ -818,7 +818,7 @@ iegScanTimestep2(stream_t *streamptr)
       if (rindex == 0)
         {
           taxis->type = TAXIS_ABSOLUTE;
-          taxis->vdatetime = datetime;
+          taxis->vDateTime = datetime;
         }
 
       bool nextstep = false;
@@ -944,7 +944,7 @@ iegScanTimestep(stream_t *streamptr)
           if (rindex == 0)
             {
               taxis->type = TAXIS_ABSOLUTE;
-              taxis->vdatetime = datetime;
+              taxis->vDateTime = datetime;
             }
 
           if (param != records[recID].param || rlevel != records[recID].ilevel)
@@ -1055,7 +1055,7 @@ iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   const int vlistID = streamptr->vlistID;
   const int fileID = streamptr->fileID;
   const int tsID = streamptr->curTsID;
-  const CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vdatetime;
+  const CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
   const int gridID = vlistInqVarGrid(vlistID, varID);
   const int zaxisID = vlistInqVarZaxis(vlistID, varID);
 

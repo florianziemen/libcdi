@@ -20,11 +20,11 @@ typedef struct
   int numavg;
   bool climatology;
   CdiDateTime sDateTime;     // start date/time
-  CdiDateTime vdatetime;     // verification date/time
+  CdiDateTime vDateTime;     // verification date/time
   CdiDateTime rdatetime;     // reference date/time
   CdiDateTime fDateTime;     // forecast reference date/time
-  CdiDateTime vdatetime_lb;  // lower bounds of verification date/time
-  CdiDateTime vdatetime_ub;  // upper bounds of verification date/time
+  CdiDateTime vDateTime_lb;  // lower bounds of verification date/time
+  CdiDateTime vDateTime_ub;  // upper bounds of verification date/time
   int fc_unit;               // forecast time unit
   double fc_period;          // forecast time period
   char *name;

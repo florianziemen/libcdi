@@ -50,7 +50,7 @@ void
 streamScanTimeConstAdjust(stream_t *streamptr, const taxis_t *taxis)
 {
   const int vlistID = streamptr->vlistID;
-  if (streamptr->ntsteps == 1 && cdiDateTime_isNull(taxis->vdatetime))
+  if (streamptr->ntsteps == 1 && cdiDateTime_isNull(taxis->vDateTime))
     {
       streamptr->ntsteps = 0;
       for (int varID = 0; varID < streamptr->nvars; ++varID) vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);

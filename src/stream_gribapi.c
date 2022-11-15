@@ -1077,14 +1077,14 @@ fdbScanTimesteps(stream_t *streamptr)
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
           taxis->fDateTime = taxis->rdatetime;
           taxis->sDateTime = sDateTime;
-          taxis->vdatetime = vDateTime;
+          taxis->vDateTime = vDateTime;
         }
 
       if (CDI_Debug)
         {
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          Message("%4d name=%s id=%s ltype=%d lev1=%d lev2=%d vdatetime=%s", recID + 1, varname, paramstr, leveltype1,
+          Message("%4d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", recID + 1, varname, paramstr, leveltype1,
                   level1, level2, CdiDateTime_string(vDateTime));
         }
 
@@ -1136,7 +1136,7 @@ fdbScanTimesteps(stream_t *streamptr)
       const int nrecs = (tsID == 1) ? streamScanInitRecords2(streamptr) : streamScanInitRecords(streamptr, tsID);
       if (nrecs != numRecords) Error("Internal error. nrecs = %d", nrecs);
 
-      taxis->vdatetime = cdiDateTime_set(vdate, vtime);
+      taxis->vDateTime = cdiDateTime_set(vdate, vtime);
 
       int rindex = 0;
       for (int recID = 0; recID < numRecords; recID++)
@@ -1240,7 +1240,7 @@ gribapiScanTimestep1(stream_t *streamptr)
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
           taxis->fDateTime = taxis->rdatetime;
           taxis->sDateTime = sDateTime;
-          taxis->vdatetime = vDateTime;
+          taxis->vDateTime = vDateTime;
         }
       else
         {
@@ -1275,7 +1275,7 @@ gribapiScanTimestep1(stream_t *streamptr)
         {
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          Message("%4u %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdatetime=%s", nrecs, (int) recpos, varname, paramstr,
+          Message("%4u %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", nrecs, (int) recpos, varname, paramstr,
                   leveltype1, level1, level2, CdiDateTime_string(vDateTime));
         }
 
@@ -1405,7 +1405,7 @@ gribapiScanTimestep2(stream_t *streamptr)
               taxis->type = TAXIS_ABSOLUTE;
             }
           taxis->fDateTime = taxis->rdatetime;
-          taxis->vdatetime = vDateTime;
+          taxis->vDateTime = vDateTime;
           taxis->sDateTime = sDateTime;
         }
       else
@@ -1456,7 +1456,7 @@ gribapiScanTimestep2(stream_t *streamptr)
         {
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          Message("%4d %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdatetime=%s", nrecsScanned, (int) recpos, varname,
+          Message("%4d %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", nrecsScanned, (int) recpos, varname,
                   paramstr, leveltype1, level1, level2, CdiDateTime_string(vDateTime));
         }
 
@@ -1590,7 +1590,7 @@ gribapiScanTimestep(stream_t *streamptr)
                   taxis->type = TAXIS_ABSOLUTE;
                 }
               taxis->fDateTime = taxis->rdatetime;
-              taxis->vdatetime = vDateTime;
+              taxis->vDateTime = vDateTime;
               taxis->sDateTime = sDateTime;
             }
           else
