@@ -262,9 +262,9 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
             }
           else if (taxisType == TAXIS_RELATIVE)
             {
-              taxis->rdatetime = scan_time_string(tu + pos);
+              taxis->rDateTime = scan_time_string(tu + pos);
               if (CDI_Debug)
-                Message("rdate = %d  rtime = %d", (int) cdiDate_get(taxis->rdatetime.date), cdiTime_get(taxis->rdatetime.time));
+                Message("rdate = %d  rtime = %d", (int) cdiDate_get(taxis->rDateTime.date), cdiTime_get(taxis->rDateTime.time));
             }
         }
     }

@@ -1748,7 +1748,7 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
             if (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF)
               {
                 const taxis_t *taxisptr = taxisPtr(taxisID);
-                if (cdiDateTime_isNull(taxisptr->rdatetime))
+                if (cdiDateTime_isNull(taxisptr->rDateTime))
                   {
                     int vdate = taxisInqVdate(taxisID);
                     if (vdate == 0) vdate = 10101;

@@ -846,7 +846,7 @@ cgribexScanTimestep1(stream_t *streamptr)
           vDateTime0 = vDateTime;
           fcast = cgribexTimeIsFC(isec1);
           taxis->unit = cgribexGetTimeUnit(isec1);
-          taxis->rdatetime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
+          taxis->rDateTime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
           taxis->sDateTime = sDateTime;
           taxis->vDateTime = vDateTime;
         }
@@ -1002,7 +1002,7 @@ cgribexScanTimestep2(stream_t *streamptr)
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             {
               taxis->type = TAXIS_RELATIVE;
-              taxis->rdatetime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
+              taxis->rDateTime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
             }
           else
             {
@@ -1195,7 +1195,7 @@ cgribexScanTimestep(stream_t *streamptr)
               if (taxisInqType(taxisID) == TAXIS_RELATIVE)
                 {
                   taxis->type = TAXIS_RELATIVE;
-                  taxis->rdatetime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
+                  taxis->rDateTime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
                 }
               else
                 {

@@ -21,7 +21,7 @@ typedef struct
   bool climatology;
   CdiDateTime sDateTime;     // start date/time
   CdiDateTime vDateTime;     // verification date/time
-  CdiDateTime rdatetime;     // reference date/time
+  CdiDateTime rDateTime;     // reference date/time
   CdiDateTime fDateTime;     // forecast reference date/time
   CdiDateTime vDateTime_lb;  // lower bounds of verification date/time
   CdiDateTime vDateTime_ub;  // upper bounds of verification date/time

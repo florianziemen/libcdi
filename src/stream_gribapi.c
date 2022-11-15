@@ -1072,10 +1072,10 @@ fdbScanTimesteps(stream_t *streamptr)
       if (recID == 0)
         {
           vDateTime0 = vDateTime;
-          taxis->rdatetime = gribapiGetDataDateTime(gh);
+          taxis->rDateTime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
-          taxis->fDateTime = taxis->rdatetime;
+          taxis->fDateTime = taxis->rDateTime;
           taxis->sDateTime = sDateTime;
           taxis->vDateTime = vDateTime;
         }
@@ -1235,10 +1235,10 @@ gribapiScanTimestep1(stream_t *streamptr)
       if (nrecs == 0)
         {
           vDateTime0 = vDateTime;
-          taxis->rdatetime = gribapiGetDataDateTime(gh);
+          taxis->rDateTime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
-          taxis->fDateTime = taxis->rdatetime;
+          taxis->fDateTime = taxis->rDateTime;
           taxis->sDateTime = sDateTime;
           taxis->vDateTime = vDateTime;
         }
@@ -1398,13 +1398,13 @@ gribapiScanTimestep2(stream_t *streamptr)
             {
               taxis->type = TAXIS_RELATIVE;
               taxis->unit = gribapiGetTimeUnits(gh);
-              taxis->rdatetime = gribapiGetDataDateTime(gh);
+              taxis->rDateTime = gribapiGetDataDateTime(gh);
             }
           else
             {
               taxis->type = TAXIS_ABSOLUTE;
             }
-          taxis->fDateTime = taxis->rdatetime;
+          taxis->fDateTime = taxis->rDateTime;
           taxis->vDateTime = vDateTime;
           taxis->sDateTime = sDateTime;
         }
@@ -1583,13 +1583,13 @@ gribapiScanTimestep(stream_t *streamptr)
                 {
                   taxis->type = TAXIS_RELATIVE;
                   taxis->unit = gribapiGetTimeUnits(gh);
-                  taxis->rdatetime = gribapiGetDataDateTime(gh);
+                  taxis->rDateTime = gribapiGetDataDateTime(gh);
                 }
               else
                 {
                   taxis->type = TAXIS_ABSOLUTE;
                 }
-              taxis->fDateTime = taxis->rdatetime;
+              taxis->fDateTime = taxis->rDateTime;
               taxis->vDateTime = vDateTime;
               taxis->sDateTime = sDateTime;
             }
