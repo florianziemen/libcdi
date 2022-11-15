@@ -207,6 +207,16 @@ cdiDateTime_isNE(const CdiDateTime cdiDateTime1, const CdiDateTime cdiDateTime2)
 }
 
 bool
+cdiDateTime_isLT(const CdiDateTime cdiDateTime1, const CdiDateTime cdiDateTime2)
+{
+  const int64_t date1 = cdiDate_get(cdiDateTime1.date);
+  const int64_t date2 = cdiDate_get(cdiDateTime2.date);
+  const int time1 = cdiTime_get(cdiDateTime1.time);
+  const int time2 = cdiTime_get(cdiDateTime2.time);
+  return (date1 < date2 || (date1 == date2 && time1 < time2));
+}
+
+bool
 cdiDateTime_isNull(const CdiDateTime cdiDateTime)
 {
   // clang-format off
