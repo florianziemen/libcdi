@@ -1,4 +1,5 @@
 #include "cdi_datetime.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 // ==================================================================
@@ -217,4 +218,24 @@ cdiDateTime_isNull(const CdiDateTime cdiDateTime)
       && cdiDateTime.time.second == 0
       && cdiDateTime.time.ms == 0);
   // clang-format on
+}
+
+
+#define DATE_FORMAT "%5.4d-%2.2d-%2.2d"
+#define TIME_FORMAT "%2.2d:%2.2d:%2.2d"
+
+
+const char *
+CdiDateTime_string(CdiDateTime cdiDateTime)
+{
+  int year, month, day;
+  cdiDate_decode(cdiDateTime.date, &year, &month, &day);
+  int hour, minute, second, ms;
+  cdiTime_decode(cdiDateTime.time, &hour, &minute, &second, &ms);
+
+  static char datetimeString[64];
+  snprintf(datetimeString, sizeof(datetimeString), DATE_FORMAT "T" TIME_FORMAT,
+           year, month, day, hour, minute, second);
+
+  return datetimeString;
 }

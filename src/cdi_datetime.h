@@ -52,6 +52,8 @@ bool cdiDateTime_isEQ(CdiDateTime cdiDateTime1, CdiDateTime cdiDateTime2);
 bool cdiDateTime_isNE(CdiDateTime cdiDateTime1, CdiDateTime cdiDateTime2);
 bool cdiDateTime_isNull(CdiDateTime cdiDateTime);
 
+const char *CdiDateTime_string(CdiDateTime cdiDateTime);
+
 #ifdef __cplusplus
 }
 #endif
