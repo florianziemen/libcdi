@@ -24,7 +24,7 @@
 #include "namespace.h"
 
 static size_t
-grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time,
+grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime,
           int tsteptype, int numavg, size_t datasize, const void *data, size_t nmiss, void **gribbuffer, int comptype,
           void *gribContainers)
 {
@@ -36,7 +36,7 @@ grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gr
       size_t gribbuffersize = datasize * 4 + 3000;
       *gribbuffer = Malloc(gribbuffersize);
 
-      nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, datasize, data,
+      nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize, data,
                              nmiss, *gribbuffer, gribbuffersize);
     }
   else
@@ -58,7 +58,7 @@ grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gr
         }
 
       size_t gribbuffersize;
-      nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, (long) datasize, datap, nmiss,
+      nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, (long) datasize, datap, nmiss,
                              gribbuffer, &gribbuffersize, comptype, gribContainer);
 
       if (memtype == MEMTYPE_FLOAT) Free((void *) datap);
@@ -378,8 +378,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
   const int zaxisID = vlistInqVarZaxis(vlistID, varID);
   const int tsteptype = vlistInqVarTsteptype(vlistID, varID);
   const int tsID = streamptr->curTsID;
-  const int date = (int) cdiDate_get(streamptr->tsteps[tsID].taxis.vdatetime.date);
-  const int time = cdiTime_get(streamptr->tsteps[tsID].taxis.vdatetime.time);
+  const CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vdatetime;
   const int numavg = (tsteptype == TSTEP_AVG) ? streamptr->tsteps[tsID].taxis.numavg : 0;
   int comptype = streamptr->comptype;
 
@@ -397,7 +396,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     }
 
   void *gribbuffer = NULL;
-  size_t nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, datasize,
+  size_t nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize,
                             data, nmiss, &gribbuffer, comptype, streamptr->gribContainers);
 
   if (filetype == CDI_FILETYPE_GRB && (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC))
@@ -424,8 +423,8 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
         const double level = zaxisInqLevel(zaxisID, levelID);
 
         FDB_Keys fdbKeys;
-        snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int) cdiDate_get(streamptr->tsteps[tsID].taxis.vdatetime.date));
-        snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", (short)(cdiTime_get(streamptr->tsteps[tsID].taxis.vdatetime.time) / 100));
+        snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int) cdiDate_get(vDateTime.date));
+        snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", (short)(cdiTime_get(vDateTime.time) / 100));
         snprintf(fdbKeys.param, sizeof(fdbKeys.param), "%d", get_fdb_param(vlistInqVarParam(vlistID, varID)));
         const bool isML = (zaxisType == ZAXIS_HYBRID || zaxisType == ZAXIS_HYBRID_HALF);
         snprintf(fdbKeys.levtype, sizeof(fdbKeys.levtype), "%s", isML ? "ml" : "sfc");

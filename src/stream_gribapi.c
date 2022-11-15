@@ -138,11 +138,13 @@ gribapiGetDataDateTime(grib_handle *gh)
 }
 
 static void
-gribapiSetDataDateTime(grib_handle *gh, int datadate, int datatime)
+gribapiSetDataDateTime(grib_handle *gh, CdiDateTime dataDateTime)
 {
-  GRIB_CHECK(my_grib_set_long(gh, "dataDate", (long) datadate), 0);
-  int hour, minute, second;
-  cdiDecodeTime(datatime, &hour, &minute, &second);
+  long dataDate = (long)cdiDate_get(dataDateTime.date);
+  GRIB_CHECK(my_grib_set_long(gh, "dataDate", (long) dataDate), 0);
+
+  int hour, minute, second, ms;
+  cdiTime_decode(dataDateTime.time, &hour, &minute, &second, &ms);
   GRIB_CHECK(my_grib_set_long(gh, "hour", hour), 0);
   GRIB_CHECK(my_grib_set_long(gh, "minute", minute), 0);
   GRIB_CHECK(my_grib_set_long(gh, "second", second), 0);
@@ -1073,10 +1075,8 @@ fdbScanTimesteps(stream_t *streamptr)
           taxis->rdatetime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
-          taxis->fdate = (int) cdiDate_get(taxis->rdatetime.date);
-          taxis->ftime = cdiTime_get(taxis->rdatetime.time);
-          taxis->sdate = cdiDate_get(sDateTime.date);
-          taxis->stime = cdiTime_get(sDateTime.time);
+          taxis->fDateTime = taxis->rdatetime;
+          taxis->sDateTime = sDateTime;
           taxis->vdatetime = vDateTime;
         }
 
@@ -1238,19 +1238,13 @@ gribapiScanTimestep1(stream_t *streamptr)
           taxis->rdatetime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
-          taxis->fdate = (int) cdiDate_get(taxis->rdatetime.date);
-          taxis->ftime = cdiTime_get(taxis->rdatetime.time);
-          taxis->sdate = cdiDate_get(sDateTime.date);
-          taxis->stime = cdiTime_get(sDateTime.time);
+          taxis->fDateTime = taxis->rdatetime;
+          taxis->sDateTime = sDateTime;
           taxis->vdatetime = vDateTime;
         }
       else
         {
-          if (cdiDateTime_isLT(sDateTime, cdiDateTime_set(taxis->sdate, taxis->stime)))
-            {
-              taxis->sdate = cdiDate_get(sDateTime.date);
-              taxis->stime = cdiTime_get(sDateTime.time);
-            }
+          if (cdiDateTime_isLT(sDateTime, taxis->sDateTime)) taxis->sDateTime = sDateTime;
 
           const int tsteptype = gribapiGetTsteptype(gh);
           const size_t gridsize = gribapiGetGridsize(gh);
@@ -1311,7 +1305,6 @@ gribapiScanTimestep1(stream_t *streamptr)
 
   taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
   const int taxisID = taxisCreate(taxis->type);
-  // printf("1: %d %6d  %d %6d  %d %6d\n", taxis->rdate, taxis->rtime, taxis->sdate, taxis->stime, taxis->vdate, taxis->vtime);
 
   const int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
@@ -1411,21 +1404,13 @@ gribapiScanTimestep2(stream_t *streamptr)
             {
               taxis->type = TAXIS_ABSOLUTE;
             }
-          taxis->fdate = (int) cdiDate_get(taxis->rdatetime.date);
-          taxis->ftime = cdiTime_get(taxis->rdatetime.time);
+          taxis->fDateTime = taxis->rdatetime;
           taxis->vdatetime = vDateTime;
-          taxis->sdate = cdiDate_get(sDateTime.date);
-          taxis->stime = cdiTime_get(sDateTime.time);
-          // printf("2: %d %6d  %d %6d  %d %6d\n", taxis->rdate, taxis->rtime, taxis->sdate, taxis->stime, taxis->vdate,
-          // taxis->vtime);
+          taxis->sDateTime = sDateTime;
         }
       else
         {
-          if (cdiDateTime_isLT(sDateTime, cdiDateTime_set(taxis->sdate, taxis->stime)))
-            {
-              taxis->sdate = cdiDate_get(sDateTime.date);
-              taxis->stime = cdiTime_get(sDateTime.time);
-            }
+          if (cdiDateTime_isLT(sDateTime, taxis->sDateTime)) taxis->sDateTime = sDateTime;
         }
 
       VarScanKeys scanKeys = gribapiGetScanKeys(gh);
@@ -1604,21 +1589,13 @@ gribapiScanTimestep(stream_t *streamptr)
                 {
                   taxis->type = TAXIS_ABSOLUTE;
                 }
-              taxis->fdate = (int) cdiDate_get(taxis->rdatetime.date);
-              taxis->ftime = cdiTime_get(taxis->rdatetime.time);
+              taxis->fDateTime = taxis->rdatetime;
               taxis->vdatetime = vDateTime;
-              taxis->sdate = cdiDate_get(sDateTime.date);
-              taxis->stime = cdiTime_get(sDateTime.time);
-              // printf("n: %d %6d  %d %6d  %d %6d\n", taxis->rdate, taxis->rtime, taxis->sdate, taxis->stime, taxis->vdate,
-              // taxis->vtime);
+              taxis->sDateTime = sDateTime;
             }
           else
             {
-              if (cdiDateTime_isLT(sDateTime, cdiDateTime_set(taxis->sdate, taxis->stime)))
-                {
-                  taxis->sdate = cdiDate_get(sDateTime.date);
-                  taxis->stime = cdiTime_get(sDateTime.time);
-                }
+              if (cdiDateTime_isLT(sDateTime, taxis->sDateTime)) taxis->sDateTime = sDateTime;
             }
 
           VarScanKeys scanKeys = gribapiGetScanKeys(gh);
@@ -2004,7 +1981,7 @@ gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinitionTemp
 }
 
 static void
-gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int date, int time, int productDefinitionTemplate,
+gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, CdiDateTime dateTime, int productDefinitionTemplate,
                       int typeOfGeneratingProcess, int tsteptype, int gcinit)
 {
   (void) gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
@@ -2012,30 +1989,23 @@ gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int date, int time, in
   if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 0), 0);
   if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "stepRange", 0), 0);
 
-  if (date == 0) date = 10101;
-  gribapiSetDataDateTime(gh, date, time);
+  if (cdiDateTime_isNull(dateTime)) dateTime.date = cdiDate_set(10101);
+  gribapiSetDataDateTime(gh, dateTime);
 }
 
 static int
-gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, int vdate, int vtime, int sdate, int stime,
+gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, CdiDateTime fDateTime, CdiDateTime vDateTime, CdiDateTime sDateTime,
                       int productDefinitionTemplate, int typeOfGeneratingProcess, int tsteptype, int timeunit, int calendar,
                       int gcinit)
 {
   int status = -1;
 
-  CdiDateTime fDateTime = cdiDateTime_set(fdate, ftime);
   JulianDate julianDate1 = julianDate_encode(calendar, fDateTime);
 
-  if (vdate == 0 && vtime == 0)
-    {
-      vdate = fdate;
-      vtime = ftime;
-    }
+  if (cdiDateTime_isNull(vDateTime)) vDateTime = fDateTime;
 
-  CdiDateTime vDateTime = cdiDateTime_set(vdate, vtime);
   JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
-
-  JulianDate julianDate = julianDate_sub(julianDate2, julianDate1);
+  const JulianDate julianDate = julianDate_sub(julianDate2, julianDate1);
 
   const int factor = getTimeunitFactor(timeunit);
 
@@ -2054,21 +2024,17 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
       bool hasStartDate = (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF
                            || tsteptype == TSTEP_MIN || tsteptype == TSTEP_MAX || tsteptype == TSTEP_RMS || tsteptype == TSTEP_SD
                            || tsteptype == TSTEP_COV || tsteptype == TSTEP_RATIO || tsteptype == TSTEP_SUM);
-      if (sdate != 0 && hasStartDate)
+      if (!cdiDateTime_isNull(sDateTime) && hasStartDate)
         {
-          CdiDateTime sDateTime = cdiDateTime_set(sdate, stime);
           julianDate2 = julianDate_encode(calendar, sDateTime);
-
-          julianDate = julianDate_sub(julianDate2, julianDate1);
-
-          startStep = lround(julianDate_to_seconds(julianDate) / factor);
+          startStep = lround(julianDate_to_seconds(julianDate_sub(julianDate2, julianDate1)) / factor);
         }
 
       if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
       if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "stepRange", 0), 0);
 
-      if (fdate == 0) fdate = 10101;
-      gribapiSetDataDateTime(gh, fdate, ftime);
+      if (cdiDateTime_isNull(fDateTime)) fDateTime.date = cdiDate_set(10101);
+      gribapiSetDataDateTime(gh, fDateTime);
 
       // printf(">>>>> tsteptype %d  startStep %ld  endStep %ld\n", tsteptype, startStep, endStep);
 
@@ -2098,7 +2064,7 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int fdate, int ftime, 
 }
 
 static void
-gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGeneratingProcess, grib_handle *gh, int vdate, int vtime,
+gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGeneratingProcess, grib_handle *gh, CdiDateTime vDateTime,
                int tsteptype, int numavg, int taxisID, int gcinit)
 {
   UNUSED(numavg);
@@ -2107,8 +2073,7 @@ gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGener
 
   if (typeOfGeneratingProcess == 196)
     {
-      vdate = 10101;
-      vtime = 0;
+      vDateTime = cdiDateTime_set(10101, 0);
       taxistype = TAXIS_ABSOLUTE;
     }
 
@@ -2117,29 +2082,19 @@ gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGener
       const int timeunit = taxisInqTunit(taxisID);
       const int calendar = taxisInqCalendar(taxisID);
 
-      int fdate = taxisInqFdate(taxisID);
-      int ftime = taxisInqFtime(taxisID);
-      if (fdate == CDI_UNDEFID)
-        {
-          fdate = taxisInqRdate(taxisID);
-          ftime = taxisInqRtime(taxisID);
-        }
-      if (vdate < fdate || (vdate == fdate && vtime < ftime))
-        {
-          fdate = vdate;
-          ftime = vtime;
-        }
+      CdiDateTime fDateTime = taxisInqFdatetime(taxisID);
+      if (cdiDateTime_isNull(fDateTime)) fDateTime = taxisInqRdatetime(taxisID);
+      if (cdiDateTime_isLT(vDateTime, fDateTime)) fDateTime = vDateTime;
 
-      const int sdate = taxisInqSdate(taxisID);
-      const int stime = taxisInqStime(taxisID);
+      const CdiDateTime sDateTime = taxisInqSdatetime(taxisID);
 
-      int status = gribapiDefDateTimeRel(editionNumber, gh, fdate, ftime, vdate, vtime, sdate, stime, productDefinitionTemplate,
+      int status = gribapiDefDateTimeRel(editionNumber, gh, fDateTime, vDateTime, sDateTime, productDefinitionTemplate,
                                          typeOfGeneratingProcess, tsteptype, timeunit, calendar, gcinit);
       if (status != 0) taxistype = TAXIS_ABSOLUTE;
     }
 
   if (taxistype == TAXIS_ABSOLUTE)
-    gribapiDefDateTimeAbs(editionNumber, gh, vdate, vtime, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
+    gribapiDefDateTimeAbs(editionNumber, gh, vDateTime, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
 }
 
 static void
@@ -3228,7 +3183,7 @@ gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const void *data
 // #define GRIBAPIENCODETEST 1
 
 size_t
-gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int vdate, int vtime, int tsteptype, int numavg,
+gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime, int tsteptype, int numavg,
               size_t datasize, const void *data, size_t nmiss, void **gribbuffer, size_t *gribbuffersize, int comptype,
               void *gribContainer)
 {
@@ -3286,7 +3241,7 @@ gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int 
         }
     }
 
-  gribapiDefTime((int) editionNumber, productDefinitionTemplate, typeOfGeneratingProcess, gh, vdate, vtime, tsteptype, numavg,
+  gribapiDefTime((int) editionNumber, productDefinitionTemplate, typeOfGeneratingProcess, gh, vDateTime, tsteptype, numavg,
                  vlistInqTaxis(vlistID), gc->init);
 
   {

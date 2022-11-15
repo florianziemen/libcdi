@@ -1344,9 +1344,11 @@ int streamOpenReadQuery(const char *path, const CdiQuery *query);
 
 #include "cdi_datetime.h"
 
-void taxisDefRdatetime(int taxisID, CdiDateTime rdatetime);
+void taxisDefRdatetime(int taxisID, CdiDateTime rDateTime);
 CdiDateTime taxisInqRdatetime(int taxisID);
-void taxisDefVdatetime(int taxisID, CdiDateTime vdatetime);
+void taxisDefFdatetime(int taxisID, CdiDateTime fDateTime);
+CdiDateTime taxisInqFdatetime(int taxisID);
+void taxisDefVdatetime(int taxisID, CdiDateTime vDateTime);
 CdiDateTime taxisInqVdatetime(int taxisID);
 void taxisDefVdatetimeBounds(int taxisID, CdiDateTime vdatetime_lb, CdiDateTime vdatetime_ub);
 void taxisInqVdatetimeBounds(int taxisID, CdiDateTime *vdatetime_lb, CdiDateTime *vdatetime_ub);

@@ -187,13 +187,9 @@ set_forecast_time(const char *timestr, taxis_t *taxis)
 {
   const size_t len = strlen(timestr);
   if (len != 0)
-    {
-      const CdiDateTime datetime = scan_time_string(timestr);
-      taxis->fdate = (int) cdiDate_get(datetime.date);
-      taxis->ftime = cdiTime_get(datetime.time);
-    }
+    taxis->fDateTime = scan_time_string(timestr);
   else
-    taxis->fdate = taxis->ftime = 0;
+    cdiDateTime_init(&(taxis->fDateTime));
 }
 
 static int

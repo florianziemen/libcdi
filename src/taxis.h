@@ -10,23 +10,19 @@
 
 typedef struct
 {
-  // Date format  YYYYMMDD
-  // Time format    hhmmss
   int self;
   bool used;
   short has_bounds;
-  int datatype;           // datatype
-  int type;               // time type
-  int sdate;              // start date
-  int stime;              // start time
-  CdiDateTime vdatetime;  // verification date/time
-  CdiDateTime rdatetime;  // reference date/time
-  int fdate;              // forecast reference date
-  int ftime;              // forecast reference time
+  int datatype;              // datatype
+  int type;                  // time type
   int calendar;
   int unit;  // time unit
   int numavg;
   bool climatology;
+  CdiDateTime sDateTime;     // start date/time
+  CdiDateTime vdatetime;     // verification date/time
+  CdiDateTime rdatetime;     // reference date/time
+  CdiDateTime fDateTime;     // forecast reference date/time
   CdiDateTime vdatetime_lb;  // lower bounds of verification date/time
   CdiDateTime vdatetime_ub;  // upper bounds of verification date/time
   int fc_unit;               // forecast time unit
@@ -36,11 +32,8 @@ typedef struct
   char *units;
 } taxis_t;
 
-//      taxisInqSdate: Get the start date
-int taxisInqSdate(int taxisID);
-
-//      taxisInqStime: Get the start time
-int taxisInqStime(int taxisID);
+//      taxisInqSdatetime: Get the start date/time
+CdiDateTime taxisInqSdatetime(int taxisID);
 
 void ptaxisInit(taxis_t *taxis);
 void ptaxisCopy(taxis_t *dest, taxis_t *source);
