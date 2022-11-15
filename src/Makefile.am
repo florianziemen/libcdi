@@ -56,7 +56,6 @@ libcdi_la_SOURCES = 	 \
 	cdi_cksum.c	 \
 	cdi_cksum.h 	 \
 	cdi_uuid.h	 \
-	cmp_datetime.h	 \
 	dmemory.c      	 \
 	dmemory.h	 \
 	dtypes.h	 \
