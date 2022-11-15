@@ -773,8 +773,8 @@ cgribexDateTimeX(int *isec1, CdiDateTime *sDateTime)
 int
 cgribexScanTimestep1(stream_t *streamptr)
 {
-  CdiDateTime datetime0;
-  cdiDateTime_init(&datetime0);
+  CdiDateTime vDateTime0;
+  cdiDateTime_init(&vDateTime0);
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   void *gribbuffer = NULL;
@@ -839,17 +839,17 @@ cgribexScanTimestep1(stream_t *streamptr)
       cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
       CdiDateTime sDateTime;
-      const CdiDateTime datetime = cgribexDateTimeX(isec1, &sDateTime);
+      const CdiDateTime vDateTime = cgribexDateTimeX(isec1, &sDateTime);
 
       if (nrecs == 0)
         {
-          datetime0 = datetime;
+          vDateTime0 = vDateTime;
           fcast = cgribexTimeIsFC(isec1);
           taxis->unit = cgribexGetTimeUnit(isec1);
           taxis->rdatetime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
           taxis->sdate = cdiDate_get(sDateTime.date);
           taxis->stime = cdiTime_get(sDateTime.time);
-          taxis->vdatetime = datetime;
+          taxis->vdatetime = vDateTime;
         }
       else
         {
@@ -870,7 +870,7 @@ cgribexScanTimestep1(stream_t *streamptr)
             {
               if (recID < nrecs) break;
               if (warn_time)
-                if (cdiDateTime_isNE(datetime, datetime0))
+                if (cdiDateTime_isNE(vDateTime, vDateTime0))
                   {
                     gribWarning("Inconsistent verification time!", nrecsScanned, tsID + 1, paramstr, level1, level2);
                     warn_time = false;
@@ -878,7 +878,7 @@ cgribexScanTimestep1(stream_t *streamptr)
             }
           else
             {
-              if (cdiDateTime_isNE(datetime, datetime0)) break;
+              if (cdiDateTime_isNE(vDateTime, vDateTime0)) break;
 
               if (recID < nrecs)
                 {
@@ -904,7 +904,7 @@ cgribexScanTimestep1(stream_t *streamptr)
       nrecs++;
 
       if (CDI_Debug)
-        Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2, CdiDateTime_string(datetime));
+        Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2, CdiDateTime_string(vDateTime));
 
       cgribexAddRecord(streamptr, cgribexp, param, recsize, recpos, comptype, lmv, iret);
     }
@@ -935,8 +935,8 @@ cgribexScanTimestep1(stream_t *streamptr)
 int
 cgribexScanTimestep2(stream_t *streamptr)
 {
-  CdiDateTime datetime0;
-  cdiDateTime_init(&datetime0);
+  CdiDateTime vDateTime0;
+  cdiDateTime_init(&vDateTime0);
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   int leveltype = 0, level1 = 0, level2 = 0;
@@ -998,11 +998,11 @@ cgribexScanTimestep2(stream_t *streamptr)
       cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
       CdiDateTime sDateTime;
-      const CdiDateTime datetime = cgribexDateTimeX(isec1, &sDateTime);
+      const CdiDateTime vDateTime = cgribexDateTimeX(isec1, &sDateTime);
 
       if (rindex == 0)
         {
-          datetime0 = datetime;
+          vDateTime0 = vDateTime;
           const int taxisID = vlistInqTaxis(vlistID);
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             {
@@ -1014,7 +1014,7 @@ cgribexScanTimestep2(stream_t *streamptr)
               taxis->type = TAXIS_ABSOLUTE;
             }
           taxis->unit = cgribexGetTimeUnit(isec1);
-          taxis->vdatetime = datetime;
+          taxis->vdatetime = vDateTime;
           taxis->sdate = cdiDate_get(sDateTime.date);
           taxis->stime = cdiTime_get(sDateTime.time);
         }
@@ -1066,7 +1066,7 @@ cgribexScanTimestep2(stream_t *streamptr)
         {
           if (records[recID].used)
             {
-              if (cdiDateTime_isNE(datetime, datetime0)) break;
+              if (cdiDateTime_isNE(vDateTime, vDateTime0)) break;
 
               gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, paramstr, level1, level2);
               continue;
@@ -1079,7 +1079,7 @@ cgribexScanTimestep2(stream_t *streamptr)
         }
 
       if (CDI_Debug)
-        Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2, CdiDateTime_string(datetime));
+        Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2, CdiDateTime_string(vDateTime));
 
       if (cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0)
         {
@@ -1129,8 +1129,8 @@ cgribexScanTimestep2(stream_t *streamptr)
 int
 cgribexScanTimestep(stream_t *streamptr)
 {
-  CdiDateTime datetime0;
-  cdiDateTime_init(&datetime0);
+  CdiDateTime vDateTime0;
+  cdiDateTime_init(&vDateTime0);
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   int leveltype = 0, level1 = 0, level2 = 0;
@@ -1193,13 +1193,13 @@ cgribexScanTimestep(stream_t *streamptr)
           cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
           CdiDateTime sDateTime;
-          const CdiDateTime datetime = cgribexDateTimeX(isec1, &sDateTime);
+          const CdiDateTime vDateTime = cgribexDateTimeX(isec1, &sDateTime);
 
           if (rindex == nrecs) break;
 
           if (rindex == 0)
             {
-              datetime0 = datetime;
+              vDateTime0 = vDateTime;
               const int vlistID = streamptr->vlistID;
               const int taxisID = vlistInqTaxis(vlistID);
               if (taxisInqType(taxisID) == TAXIS_RELATIVE)
@@ -1212,7 +1212,7 @@ cgribexScanTimestep(stream_t *streamptr)
                   taxis->type = TAXIS_ABSOLUTE;
                 }
               taxis->unit = cgribexGetTimeUnit(isec1);
-              taxis->vdatetime = datetime;
+              taxis->vdatetime = vDateTime;
               taxis->sdate = cdiDate_get(sDateTime.date);
               taxis->stime = cdiTime_get(sDateTime.time);
             }
@@ -1263,7 +1263,7 @@ cgribexScanTimestep(stream_t *streamptr)
                   char paramstr_[32];
                   cdiParamToString(param, paramstr_, sizeof(paramstr_));
 
-                  if (cdiDateTime_isNE(datetime, datetime0)) break;
+                  if (cdiDateTime_isNE(vDateTime, vDateTime0)) break;
 
                   if (CDI_Debug)
                     gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, paramstr_, level1, level2);
@@ -1278,7 +1278,7 @@ cgribexScanTimestep(stream_t *streamptr)
             }
 
           if (CDI_Debug)
-            Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2, CdiDateTime_string(datetime));
+            Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2, CdiDateTime_string(vDateTime));
 
           if (cgribexVarCompare(compVar, records[recID], 0) != 0)
             {
