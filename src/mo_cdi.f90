@@ -45,6 +45,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_EUFSTRUCT = -25
   integer(c_int), public, parameter :: CDI_EUNC4 = -26
   integer(c_int), public, parameter :: CDI_EDIMSIZE = -27
+  integer(c_int), public, parameter :: CDI_EQENF = -50
   integer(c_int), public, parameter :: CDI_ELIMIT = -99
   integer(c_int), public, parameter :: CDI_FILETYPE_GRB = 1
   integer(c_int), public, parameter :: CDI_FILETYPE_GRB2 = 2
@@ -645,10 +646,6 @@ module mo_cdi
   public :: taxisDefRtime
   public :: taxisInqRdate
   public :: taxisInqRtime
-  public :: taxisDefFdate
-  public :: taxisDefFtime
-  public :: taxisInqFdate
-  public :: taxisInqFtime
   public :: taxisHasBounds
   public :: taxisWithBounds
   public :: taxisDeleteBounds
@@ -2635,34 +2632,6 @@ module mo_cdi
       integer(c_int), value :: taxisID_dummy
       integer(c_int) :: f_result
     end function taxisInqRtime
-
-    subroutine taxisDefFdate(taxisID_dummy, date_dummy) bind(c, name =&
-    & 'taxisDefFdate')
-      import c_int
-      integer(c_int), value :: taxisID_dummy
-      integer(c_int), value :: date_dummy
-    end subroutine taxisDefFdate
-
-    subroutine taxisDefFtime(taxisID_dummy, time_dummy) bind(c, name =&
-    & 'taxisDefFtime')
-      import c_int
-      integer(c_int), value :: taxisID_dummy
-      integer(c_int), value :: time_dummy
-    end subroutine taxisDefFtime
-
-    function taxisInqFdate(taxisID_dummy) bind(c, name = 'taxisInqFdate')&
-    & result(f_result)
-      import c_int
-      integer(c_int), value :: taxisID_dummy
-      integer(c_int) :: f_result
-    end function taxisInqFdate
-
-    function taxisInqFtime(taxisID_dummy) bind(c, name = 'taxisInqFtime')&
-    & result(f_result)
-      import c_int
-      integer(c_int), value :: taxisID_dummy
-      integer(c_int) :: f_result
-    end function taxisInqFtime
 
     function taxisHasBounds(taxisID_dummy) bind(c, name = 'taxisHasBounds')&
     & result(f_result)

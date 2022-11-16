@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   October 2022
+! Uwe Schulzweida, MPI-MET, Hamburg,   November 2022
 !
 
 !
@@ -62,6 +62,8 @@
       PARAMETER (CDI_EUNC4              = -26)
       INTEGER    CDI_EDIMSIZE
       PARAMETER (CDI_EDIMSIZE           = -27)
+      INTEGER    CDI_EQENF
+      PARAMETER (CDI_EQENF              = -50)
       INTEGER    CDI_ELIMIT
       PARAMETER (CDI_ELIMIT             = -99)
 !
@@ -2303,24 +2305,6 @@
       INTEGER         taxisInqRtime
 !                                    (INTEGER         taxisID)
       EXTERNAL        taxisInqRtime
-
-!                     taxisDefFdate
-!                                    (INTEGER         taxisID,
-!                                     INTEGER         date)
-      EXTERNAL        taxisDefFdate
-
-!                     taxisDefFtime
-!                                    (INTEGER         taxisID,
-!                                     INTEGER         time)
-      EXTERNAL        taxisDefFtime
-
-      INTEGER         taxisInqFdate
-!                                    (INTEGER         taxisID)
-      EXTERNAL        taxisInqFdate
-
-      INTEGER         taxisInqFtime
-!                                    (INTEGER         taxisID)
-      EXTERNAL        taxisInqFtime
 
       INTEGER         taxisHasBounds
 !                                    (INTEGER         taxisID)
