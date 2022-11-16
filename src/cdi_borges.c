@@ -1,5 +1,5 @@
 #include "cdi_borges.h"
-#define HAVE_BORGES
+
 #ifdef HAVE_BORGES
 
 #include <assert.h>
