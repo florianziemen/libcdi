@@ -1175,18 +1175,6 @@ int     taxisInqRdate(int taxisID);
 //      taxisInqRtime: Get the reference time
 int     taxisInqRtime(int taxisID);
 
-//      taxisDefFdate: Define the forecast reference date
-void    taxisDefFdate(int taxisID, int date);
-
-//      taxisDefFtime: Define the forecast reference time
-void    taxisDefFtime(int taxisID, int time);
-
-//      taxisInqFdate: Get the forecast reference date
-int     taxisInqFdate(int taxisID);
-
-//      taxisInqFtime: Get the forecast reference time
-int     taxisInqFtime(int taxisID);
-
 int     taxisHasBounds(int taxisID);
 void    taxisWithBounds(int taxisID);
 
@@ -1344,11 +1332,17 @@ int streamOpenReadQuery(const char *path, const CdiQuery *query);
 
 #include "cdi_datetime.h"
 
+// taxisDefRdatetime: Define the reference date/time
 void taxisDefRdatetime(int taxisID, CdiDateTime rDateTime);
+// taxisInqRdatetime: Get the reference date/time
 CdiDateTime taxisInqRdatetime(int taxisID);
+// taxisDefFdatetime: Define the forecast reference date/time
 void taxisDefFdatetime(int taxisID, CdiDateTime fDateTime);
+// taxisInqFdatetime: Get the forecast reference date/time
 CdiDateTime taxisInqFdatetime(int taxisID);
+// taxisDefVdatetime: Define the verification date/time
 void taxisDefVdatetime(int taxisID, CdiDateTime vDateTime);
+// taxisInqVdatetime: Get the verification date/time
 CdiDateTime taxisInqVdatetime(int taxisID);
 void taxisDefVdatetimeBounds(int taxisID, CdiDateTime vDateTime_lb, CdiDateTime vDateTime_ub);
 void taxisInqVdatetimeBounds(int taxisID, CdiDateTime *vDateTime_lb, CdiDateTime *vDateTime_ub);

@@ -79,7 +79,7 @@ taxisNamePtr(int taxisID)
 const char *
 tunitNamePtr(int unitID)
 {
-  int size = sizeof(Timeunits) / sizeof(*Timeunits);
+  const int size = sizeof(Timeunits) / sizeof(*Timeunits);
   return (unitID > 0 && unitID < size) ? Timeunits[unitID] : Timeunits[0];
 }
 static void
@@ -128,9 +128,7 @@ static void
 taxisInit(void)
 {
   static bool taxisInitialized = false;
-
   if (taxisInitialized) return;
-
   taxisInitialized = true;
 
   char *env = getenv("TAXIS_DEBUG");
@@ -398,53 +396,27 @@ taxisDefRtime(int taxisID, int rtime)
 }
 
 /*
-@Function  taxisDefFdate
-@Title     Define the forecast reference date
+@Function  taxisDefFdatetime
+@Title     Define the forecast reference date/time
 
-@Prototype void taxisDefFdate(int taxisID, int fdate)
+@Prototype void taxisDefFdatetime(int taxisID, CdiDateTime fDateTime)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
-    @Item  fdate    Forecast reference date (YYYYMMDD)
+    @Item  taxisID    Time axis ID, from a previous call to @fref{taxisCreate}
+    @Item  fDateTime  Forecast reference date/time
 
 @Description
-The function @func{taxisDefFdate} defines the forecast reference date of a Time axis.
+The function @func{taxisDefFdatetime} defines the forecast reference date/time of a Time axis.
 
 @EndFunction
 */
 void
-taxisDefFdate(int taxisID, int fdate)
+taxisDefFdatetime(int taxisID, CdiDateTime fDateTime)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (cdiDate_get(taxisptr->fDateTime.date) != fdate)
+  if (cdiDateTime_isNE(taxisptr->fDateTime, fDateTime))
     {
-      taxisptr->fDateTime.date = cdiDate_set(fdate);
-      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-/*
-@Function  taxisDefFtime
-@Title     Define the forecast reference time
-
-@Prototype void taxisDefFtime(int taxisID, int ftime)
-@Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
-    @Item  ftime    Forecast reference time (hhmmss)
-
-@Description
-The function @func{taxisDefFtime} defines the forecast reference time of a Time axis.
-
-@EndFunction
-*/
-void
-taxisDefFtime(int taxisID, int ftime)
-{
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-
-  if (cdiTime_get(taxisptr->fDateTime.time) != ftime)
-    {
-      taxisptr->fDateTime.time = cdiTime_set(ftime);
+      taxisptr->fDateTime = fDateTime;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -613,20 +585,6 @@ taxisInqRdatetime(int taxisID)
   if (cdiDateTime_isNull(taxisptr->rDateTime))
     {
       taxisptr->rDateTime = taxisptr->vDateTime;
-      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
-    }
-
-  return taxisptr->rDateTime;
-}
-
-CdiDateTime
-taxisInqFdatetime(int taxisID)
-{
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-
-  if (cdiDateTime_isNull(taxisptr->fDateTime))
-    {
-      taxisptr->fDateTime = taxisInqRdatetime(taxisID);
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 
@@ -816,23 +774,23 @@ taxisInqRtime(int taxisID)
 }
 
 /*
-@Function  taxisInqFdate
-@Title     Get the forecast reference date
+@Function  taxisInqFdatetime
+@Title     Get the forecast reference date/time
 
-@Prototype int taxisInqFdate(int taxisID)
+@Prototype int taxisInqFdatetime(int taxisID)
 @Parameter
     @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate} or @fref{vlistInqTaxis}
 
 @Description
-The function @func{taxisInqFdate} returns the forecast reference date of a Time axis.
+The function @func{taxisInqFdatetime} returns the forecast reference date/time of a Time axis.
 
 @Result
-@func{taxisInqFdate} returns the forecast reference date.
+@func{taxisInqFdate} returns the forecast reference date/time.
 
 @EndFunction
 */
-int
-taxisInqFdate(int taxisID)
+CdiDateTime
+taxisInqFdatetime(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
@@ -840,39 +798,10 @@ taxisInqFdate(int taxisID)
     {
       // rDateTime is initialized from vDateTime if empty!
       taxisptr->fDateTime = taxisInqRdatetime(taxisID);
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 
-  return cdiDate_get(taxisptr->fDateTime.date);
-}
-
-/*
-@Function  taxisInqFtime
-@Title     Get the forecast reference time
-
-@Prototype int taxisInqFtime(int taxisID)
-@Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate} or @fref{vlistInqTaxis}
-
-@Description
-The function @func{taxisInqFtime} returns the forecast reference time of a Time axis.
-
-@Result
-@func{taxisInqFtime} returns the forecast reference time.
-
-@EndFunction
-*/
-int
-taxisInqFtime(int taxisID)
-{
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-
-  if (cdiDateTime_isNull(taxisptr->fDateTime))
-    {
-      // rDateTime is initialized from vDateTime if empty!
-      taxisptr->fDateTime = taxisInqRdatetime(taxisID);
-    }
-
-  return cdiTime_get(taxisptr->fDateTime.time);
+  return taxisptr->fDateTime;
 }
 
 /*
