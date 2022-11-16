@@ -2278,13 +2278,13 @@ cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdi
   grid_t *grid = &lazyGrid->base;
   bool skipvar = true;
   *isLon = axisvar->isLon;
-  int ndims = axisvar->ndims;
+  const int ndims = axisvar->ndims;
   size_t size = 0;
 
-  if (xtypeIsText(axisvar->xtype))
+  if (ndims == 1 && xtypeIsText(axisvar->xtype))
     {
       ncvar->varStatus = CoordVar;
-      Warning("Unsupported coordinate type (char/string), skipped variable %s!", ncvar->name);
+      Warning("Unsupported x-coordinate type (char/string), skipped variable %s!", ncvar->name);
       return true;
     }
 
@@ -2361,13 +2361,13 @@ cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdi
   grid_t *grid = &lazyGrid->base;
   bool skipvar = true;
   *isLat = axisvar->isLat;
-  int ndims = axisvar->ndims;
+  const int ndims = axisvar->ndims;
   size_t size = 0;
 
-  if (xtypeIsText(axisvar->xtype))
+  if (ndims == 1 && xtypeIsText(axisvar->xtype))
     {
       ncvar->varStatus = CoordVar;
-      Warning("Unsupported coordinate type (char/string), skipped variable %s!", ncvar->name);
+      Warning("Unsupported y-coordinate type (char/string), skipped variable %s!", ncvar->name);
       return true;
     }
 
