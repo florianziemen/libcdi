@@ -50,7 +50,7 @@ cdiQuerySetNames(CdiQuery *query, int numNames, char **names)
 }
 
 CdiQuery *
-cdiQueryClone(CdiQuery *query)
+cdiQueryClone(const CdiQuery *query)
 {
   CdiQuery *queryOut = cdiQueryCreate();
 

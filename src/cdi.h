@@ -1316,7 +1316,7 @@ typedef struct
 } CdiQuery;
 
 CdiQuery *cdiQueryCreate();
-CdiQuery *cdiQueryClone(CdiQuery *query);
+CdiQuery *cdiQueryClone(const CdiQuery *query);
 void cdiQueryDelete(CdiQuery *query);
 void cdiQuerySetNames(CdiQuery *query, int numNames, char **names);
 int cdiQueryName(CdiQuery *query, const char *name);
