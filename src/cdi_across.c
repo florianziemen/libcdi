@@ -114,7 +114,7 @@ fletcher8_check2(uint8_t sum1, uint8_t sum2)
 static int
 across_write_buf(int sock, const void *buf, size_t nbytes)
 {
-  const void *bufpos = buf;
+  const char *bufpos = buf;
   size_t nbytes_left = nbytes;
   while (nbytes_left > 0)
     {
@@ -137,7 +137,7 @@ across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nb
   const size_t section0_len = sizeof(section0);
 
   uint32_t section1_len;
-  const unsigned char *section1 = gribbuffer + section0_len;
+  const unsigned char *section1 = (unsigned char*)gribbuffer + section0_len;
   if (nbytes < section0_len + sizeof(section1_len) + 1)
     {
       Error("GRIB2 stream is too short");
