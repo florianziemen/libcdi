@@ -1,3 +1,11 @@
+2022-12-06  Uwe Schulzweida
+
+	* Version 2.1.1 released
+
+2022-11-18  Uwe Schulzweida
+
+	* grid module: removed initialization of CDI_KEY_SCANNINGMODE (bug fix)
+
 2022-11-16  Uwe Schulzweida
 
 	* cdf_read_xcoord: skip char coordinates only if ndims=1 (bug fix)

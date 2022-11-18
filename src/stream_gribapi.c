@@ -2805,7 +2805,7 @@ gribapiSetScanningMode(grib_handle *gh, int scanningMode)
   const long jScansPositively = (scanningMode & 64) / 64;
   const long jPointsAreConsecutive = (scanningMode & 32) / 32;
 
-  if (cdiDebugExt >= 30)
+  if (cdiDebugExt >= 30 && gribEditionNumber(gh) <= 1)
     {
       long paramId, levelTypeId, levelId, uvRelativeToGrid;
       GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &uvRelativeToGrid), 0);
@@ -3149,7 +3149,7 @@ gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const void *data
       if (cdiDebugExt >= 100)
         {
           size_t gridsize = gridInqSize(gridID);
-          Message("(scanModeIN=%d; gridsize=%zu", scanModeIN, gridsize);
+          Message("scanModeIN=%d; gridsize=%zu", scanModeIN, gridsize);
         }
 
       if (cdiGribDataScanningMode.active)  // allowed modes: <0, 64, 96>; Default is 64
@@ -3411,9 +3411,12 @@ void
 gribapiChangeParameterIdentification(grib_handle *gh, int code, int ltype, int level)
 {
   //  timeRangeIndicator: could be included later
-  if (code != -1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", code), 0);
-  if (ltype != -1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfTypeOfLevel", ltype), 0);
-  if (level != -1) GRIB_CHECK(my_grib_set_long(gh, "level", level), 0);
+  if (gribEditionNumber(gh) <= 1)
+    {
+      if (code != -1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", code), 0);
+      if (ltype != -1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfTypeOfLevel", ltype), 0);
+      if (level != -1) GRIB_CHECK(my_grib_set_long(gh, "level", level), 0);
+    }
 }
 
 #endif
