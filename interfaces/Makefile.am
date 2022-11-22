@@ -37,7 +37,7 @@ libcdipp_la_SOURCES = cdi.cpp cdi.hpp
 libcdipp_la_LIBADD  = $(top_builddir)/src/libcdi.la
 libcdipp_la_LDFLAGS = @NETCDF_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
 
-CdiInfo_SOURCES     = CdiInfo.cpp mulval.nc
+CdiInfo_SOURCES     = CdiInfo.cpp
 CdiInfo_LDADD       = libcdipp.la
 CdiInfo_LDFLAGS     = @NETCDF_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
 
