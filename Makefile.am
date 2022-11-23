@@ -16,6 +16,10 @@ ACLOCAL_AMFLAGS = -I m4
 #
 CLEANFILES  = `ls *~`
 #
+
+# The pdf files below cannot be created in parallel:
+doc/cdi_cman.pdf: doc/cdi_fman.pdf
+
 doc/cdi_cman.pdf: 
 	(cd $(top_srcdir)/doc/tex ; ./makepdf_c ; mv cdi_cman.pdf .. ; ./cleanup)
 #
