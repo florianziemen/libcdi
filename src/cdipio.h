@@ -8,6 +8,11 @@
 #ifndef CDIPIO_H_
 #define CDIPIO_H_
 
+// clang-format off
+
+//FINT_ON  <--- don't change or remove this line!!!
+// Start of fortran interface for the following routines (make_fint.c)
+
 #include <mpi.h>
 
 /* parallel IO IOMode */
@@ -138,5 +143,10 @@ void cdiPioConfSetStripeConversion(int confResH, int doStripify);
 /* are index lists of parts converted stripes before being passed
  * to the xmap constructor? */
 int cdiPioConfGetStripeConversion(int confResH);
+
+// End of fortran interface
+//FINT_OFF  <--- don't change or remove this line!!!
+
+// clang-format on
 
 #endif

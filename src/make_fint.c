@@ -549,6 +549,11 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         "#  pragma GCC diagnostic ignored \"-Wmissing-prototypes\"\n"
         "#endif\n"
         "\n", fpint);
+
+
+  // TODO: the string below should be generated using build_header_name
+  //       for consistency
+  fputs("#ifdef CDI_H_\n\n", fpint);
   /*
   fputs("static inline\n"
         "int DateType_c2f(DateType value_DateType)\n"
@@ -565,6 +570,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         "  return (int) value_SizeType;\n"
         "}\n"
         "\n", fpint);
+  fputs("#endif\n", fpint);
 
   bool startFortran = false;
   ssize_t lineLen;
