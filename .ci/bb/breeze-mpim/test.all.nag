@@ -13,7 +13,7 @@ test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
 # Create a distribution file with minimalistic configuration:
 "${top_srcdir}/configure"
-make -j1 dist
+make -j8 dist
 
 # Create a subdirectory for further testing and switch to it:
 mkdir check_dist && cd check_dist
