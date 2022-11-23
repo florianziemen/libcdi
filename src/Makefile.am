@@ -286,30 +286,23 @@ endif
 endif
 
 if MAINTAINER_MODE
-cdiFortran.c cdi.inc: $(srcdir)/cdi.h make_fint
+cdiFortran.c cdi.inc: cdi.h make_fint
 	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute ./make_fint -o $(@D) $<
 cdi.inc: cdiFortran.c
 
-cdipioFortran.c cdipio.inc: $(srcdir)/cdipio.h make_fint
+cdipioFortran.c cdipio.inc: cdipio.h make_fint
 	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute ./make_fint -o $(@D) $<
 cdipio.inc: cdipioFortran.c
 
-mo_cdi.f90: $(srcdir)/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
+mo_cdi.f90: cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $< $@
-
-# Update files in $(srcdir) when building out-of-source:
-$(srcdir)/cdiFortran.c $(srcdir)/cdi.inc:
-$(srcdir)/cdipioFortran.c $(srcdir)/cdipio.inc:
-$(srcdir)/mo_cdi.f90:
-
-# Update files in any configuration:
-BUILT_SOURCES = \
-  cdi.inc \
-  cdiFortran.c \
-  cdipio.inc \
-  cdipioFortran.c \
-  mo_cdi.f90
-endif MAINTAINER_MODE
+else !MAINTAINER_MODE
+cdiFortran.c cdi.inc cdipioFortran.c cdipio.inc mo_cdi.f90:
+	@:;{ \
+	  echo "ERROR: cannot generate '$@' when the maintainer mode is disabled:"; \
+          echo "       re-configure with the '--enable-maintainer-mode' option"; \
+	} >&2; exit 1
+endif !MAINTAINER_MODE
 
 if FORTRAN_MOD_UC
 MO_CDI.$(FCMODEXT): mo_cdi.lo
