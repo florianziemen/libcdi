@@ -286,15 +286,19 @@ endif
 endif
 
 if MAINTAINER_MODE
-cdiFortran.c cdi.inc: cdi.h make_fint.c
+cdiFortran.c: cdi.h make_fint.c
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) make_fint
 	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute ./make_fint -o $(@D) $<
 cdi.inc: cdiFortran.c
+	$(AM_V_at)test -f $@ || { rm -f $<; $(MAKE) $(AM_MAKEFLAGS) $<; }
 
-cdipioFortran.c cdipio.inc: cdipio.h make_fint.c
+cdipioFortran.c: cdipio.h make_fint.c
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) make_fint
 	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute ./make_fint -o $(@D) $<
 cdipio.inc: cdipioFortran.c
+	$(AM_V_at)test -f $@ || { rm -f $<; $(MAKE) $(AM_MAKEFLAGS) $<; }
+
+cdipioFortran.c: cdiFortran.c
 
 mo_cdi.f90: cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $< $@
