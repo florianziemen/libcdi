@@ -36,8 +36,8 @@ grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gr
       size_t gribbuffersize = datasize * 4 + 3000;
       *gribbuffer = Malloc(gribbuffersize);
 
-      nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize, data,
-                             nmiss, *gribbuffer, gribbuffersize);
+      nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize, data, nmiss,
+                             *gribbuffer, gribbuffersize);
     }
   else
 #endif
@@ -345,7 +345,7 @@ grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 
       FDB_Keys fdbKeys;
       snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int) cdiDate_get(vDateTime.date));
-      snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", (short)(cdiTime_get(vDateTime.time) / 100));
+      snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", (short) (cdiTime_get(vDateTime.time) / 100));
       snprintf(fdbKeys.param, sizeof(fdbKeys.param), "%d", get_fdb_param(record->param));
       const bool isML = (zaxisType == ZAXIS_HYBRID || zaxisType == ZAXIS_HYBRID_HALF);
       snprintf(fdbKeys.levtype, sizeof(fdbKeys.levtype), "%s", isML ? "ml" : "sfc");
@@ -425,7 +425,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
 
         FDB_Keys fdbKeys;
         snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int) cdiDate_get(vDateTime.date));
-        snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", (short)(cdiTime_get(vDateTime.time) / 100));
+        snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", (short) (cdiTime_get(vDateTime.time) / 100));
         snprintf(fdbKeys.param, sizeof(fdbKeys.param), "%d", get_fdb_param(vlistInqVarParam(vlistID, varID)));
         const bool isML = (zaxisType == ZAXIS_HYBRID || zaxisType == ZAXIS_HYBRID_HALF);
         snprintf(fdbKeys.levtype, sizeof(fdbKeys.levtype), "%s", isML ? "ml" : "sfc");

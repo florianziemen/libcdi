@@ -72,7 +72,7 @@ grib1_unzip_record(void *gribbuffer, size_t *gribsize)
   if ((izip = gribGetZip(igribsize, (unsigned char *) gribbuffer, &unzipsize)) > 0)
     {
       zip = izip;
-      if (izip == 128) // szip
+      if (izip == 128)  // szip
         {
           if (unzipsize < igribsize)
             {
@@ -80,7 +80,7 @@ grib1_unzip_record(void *gribbuffer, size_t *gribsize)
               return 0;
             }
 
-          unzipsize += 100; // need 0 to 1 bytes for rounding of bds
+          unzipsize += 100;  // need 0 to 1 bytes for rounding of bds
 
           void *buffer = Malloc(igribsize);
           memcpy(buffer, gribbuffer, igribsize);
@@ -209,7 +209,7 @@ JobDescriptor_finishJob(AsyncManager *jobManager, JobDescriptor *me, void *data,
   Free(me->args.gribbuffer);
   Free(me->args.data);
   me->args.recID = -1;  // mark as inactive
-  me->args.tsID = -1;  // mark as inactive
+  me->args.tsID = -1;   // mark as inactive
 }
 /*
 static long
@@ -277,7 +277,7 @@ grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
     {
       const int tsID = streamptr->curTsID;
       const long maxGlobalRecs = get_max_global_recs(streamptr);
-      //const long globalRecId = get_global_recId(streamptr, streamptr->curTsID, recID);
+      // const long globalRecId = get_global_recId(streamptr, streamptr->curTsID, recID);
       if (maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
 
       if (workerCount > maxGlobalRecs) workerCount = maxGlobalRecs;
@@ -361,7 +361,7 @@ grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nm
     {
       const int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
       const size_t offset = levelID * gridsize;
-      void *datap = (memtype == MEMTYPE_FLOAT) ? (void*)((float *) data + offset) : (void*)((double *) data + offset);
+      void *datap = (memtype == MEMTYPE_FLOAT) ? (void *) ((float *) data + offset) : (void *) ((double *) data + offset);
 
       *nmiss += grb_read_and_decode_record(streamptr, recID, memtype, datap, false);
     }

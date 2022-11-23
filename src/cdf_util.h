@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 
-
 bool xtypeIsText(int xtype);
 
 int get_time_units(size_t len, const char *ptu);
