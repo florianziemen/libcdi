@@ -209,7 +209,11 @@ make_fint_LDADD = $(LIBOBJS)
 if USE_MPI
 if ENABLE_CDI_LIB
 lib_LTLIBRARIES += libcdipio.la
-include_HEADERS += cdipio.h cdipio.inc
+include_HEADERS += cdipio.h
+# add cdipio.inc only if cfortran interface is required
+if USE_FC
+  include_HEADERS += cdipio.inc
+endif
 else
 noinst_LTLIBRARIES += libcdipio.la
 endif
@@ -217,8 +221,6 @@ endif
 
 libcdipio_la_SOURCES =							\
 	cdipio.h							\
-	cdipioFortran.c							\
-	cfortran.h							\
 	pio.c								\
 	pio.h								\
 	pio_comm.c							\
@@ -257,10 +259,16 @@ libcdipio_la_SOURCES =							\
 libcdipio_la_HAVE_PARALLEL_NC4_extra_sources =				\
 	pio_cdf_int.c
 
-if USE_MPI
+libcdipio_la_USE_FC_extra_sources = \
+	cfortran.h       \
+	cdipioFortran.c
+
 if HAVE_PARALLEL_NC4
 libcdipio_la_SOURCES += $(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
 endif
+
+if USE_FC
+libcdipio_la_SOURCES += $(libcdipio_la_USE_FC_extra_sources)
 endif
 
 libcdipio_la_LIBADD   = libcdi.la $(LIBRT) $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
