@@ -13,7 +13,7 @@ cdiQueryInit(CdiQuery *query)
 CdiQuery *
 cdiQueryCreate()
 {
-  CdiQuery *query = (CdiQuery*) malloc(sizeof(CdiQuery));
+  CdiQuery *query = (CdiQuery *) malloc(sizeof(CdiQuery));
   cdiQueryInit(query);
   return query;
 }
@@ -43,8 +43,8 @@ cdiQuerySetNames(CdiQuery *query, int numNames, char **names)
     {
       query->numEntries += numNames;
       query->numNames = numNames;
-      query->namesFound = (bool*)calloc(numNames, sizeof(bool));
-      query->names = (char**)malloc(numNames * sizeof(char*));
+      query->namesFound = (bool *) calloc(numNames, sizeof(bool));
+      query->names = (char **) malloc(numNames * sizeof(char *));
       for (int i = 0; i < numNames; ++i) query->names[i] = strdup(names[i]);
     }
 }

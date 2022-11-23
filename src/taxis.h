@@ -13,8 +13,8 @@ typedef struct
   int self;
   bool used;
   short has_bounds;
-  int datatype;              // datatype
-  int type;                  // time type
+  int datatype;  // datatype
+  int type;      // time type
   int calendar;
   int unit;  // time unit
   int numavg;

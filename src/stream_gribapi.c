@@ -140,7 +140,7 @@ gribapiGetDataDateTime(grib_handle *gh)
 static void
 gribapiSetDataDateTime(grib_handle *gh, CdiDateTime dataDateTime)
 {
-  long dataDate = (long)cdiDate_get(dataDateTime.date);
+  long dataDate = (long) cdiDate_get(dataDateTime.date);
   GRIB_CHECK(my_grib_set_long(gh, "dataDate", (long) dataDate), 0);
 
   int hour, minute, second, ms;
@@ -1084,8 +1084,8 @@ fdbScanTimesteps(stream_t *streamptr)
         {
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          Message("%4d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", recID + 1, varname, paramstr, leveltype1,
-                  level1, level2, CdiDateTime_string(vDateTime));
+          Message("%4d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", recID + 1, varname, paramstr, leveltype1, level1,
+                  level2, CdiDateTime_string(vDateTime));
         }
 
       var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
@@ -1275,8 +1275,8 @@ gribapiScanTimestep1(stream_t *streamptr)
         {
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          Message("%4u %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", nrecs, (int) recpos, varname, paramstr,
-                  leveltype1, level1, level2, CdiDateTime_string(vDateTime));
+          Message("%4u %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", nrecs, (int) recpos, varname, paramstr, leveltype1,
+                  level1, level2, CdiDateTime_string(vDateTime));
         }
 
       var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
@@ -1456,8 +1456,8 @@ gribapiScanTimestep2(stream_t *streamptr)
         {
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          Message("%4d %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", nrecsScanned, (int) recpos, varname,
-                  paramstr, leveltype1, level1, level2, CdiDateTime_string(vDateTime));
+          Message("%4d %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", nrecsScanned, (int) recpos, varname, paramstr,
+                  leveltype1, level1, level2, CdiDateTime_string(vDateTime));
         }
 
       if (gribapiVarCompare(compVar, records[recID], 0) != 0)
@@ -2064,8 +2064,8 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, CdiDateTime fDateTime,
 }
 
 static void
-gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGeneratingProcess, grib_handle *gh, CdiDateTime vDateTime,
-               int tsteptype, int numavg, int taxisID, int gcinit)
+gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGeneratingProcess, grib_handle *gh,
+               CdiDateTime vDateTime, int tsteptype, int numavg, int taxisID, int gcinit)
 {
   UNUSED(numavg);
 

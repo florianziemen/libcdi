@@ -137,7 +137,7 @@ across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nb
   const size_t section0_len = sizeof(section0);
 
   uint32_t section1_len;
-  const unsigned char *section1 = (unsigned char*)gribbuffer + section0_len;
+  const unsigned char *section1 = (unsigned char *) gribbuffer + section0_len;
   if (nbytes < section0_len + sizeof(section1_len) + 1)
     {
       Error("GRIB2 stream is too short");

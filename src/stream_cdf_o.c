@@ -422,7 +422,8 @@ static void
 cdfGridCompress(int fileID, int ncvarid, size_t gridsize, int filetype, int comptype, size_t *chunks)
 {
 #ifdef HAVE_NETCDF4
-  if (gridsize >= 32 && comptype == CDI_COMPRESS_ZIP && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR))
+  if (gridsize >= 32 && comptype == CDI_COMPRESS_ZIP
+      && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR))
     {
       cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
       cdfDefVarDeflate(fileID, ncvarid, 1);
@@ -699,7 +700,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xsize, size_t 
       dimIDs[0] = ydimID;
       dimIDs[1] = xdimID;
     }
-  else // ndims == 2
+  else  // ndims == 2
     {
       chunks[0] = calc_chunksize_x(chunkType, chunkSize, xsize, (ydimID == CDI_UNDEFID));
       dimIDs[0] = xdimID;

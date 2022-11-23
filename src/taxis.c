@@ -1406,9 +1406,9 @@ taxisPrintKernel(taxis_t *taxisptr, FILE *fp)
           "\n",
           taxisptr->self, taxisptr->self, (int) taxisptr->used, taxisptr->type, (int) cdiDate_get(taxisptr->vDateTime.date),
           cdiTime_get(taxisptr->vDateTime.time), (int) cdiDate_get(taxisptr->rDateTime.date), cdiTime_get(taxisptr->rDateTime.time),
-          (int) cdiDate_get(taxisptr->fDateTime.date), cdiTime_get(taxisptr->fDateTime.time), taxisptr->calendar,
-          taxisptr->unit, taxisptr->numavg, (int) taxisptr->climatology,
-          (int) taxisptr->has_bounds, vdate_lb, vtime_lb, vdate_ub, vtime_ub, taxisptr->fc_unit, taxisptr->fc_period);
+          (int) cdiDate_get(taxisptr->fDateTime.date), cdiTime_get(taxisptr->fDateTime.time), taxisptr->calendar, taxisptr->unit,
+          taxisptr->numavg, (int) taxisptr->climatology, (int) taxisptr->has_bounds, vdate_lb, vtime_lb, vdate_ub, vtime_ub,
+          taxisptr->fc_unit, taxisptr->fc_period);
 }
 
 static int

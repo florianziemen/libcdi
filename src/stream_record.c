@@ -48,9 +48,9 @@ recordNewEntry(stream_t *streamptr, int tsID)
     {
       while (recordID < recordSize && records[recordID].used != CDI_UNDEFID) ++recordID;
     }
-  else // Create the table the first time through.
+  else  // Create the table the first time through.
     {
-      recordSize = 1; //  <<<<----
+      recordSize = 1;  //  <<<<----
       records = (record_t *) Malloc(recordSize * sizeof(record_t));
       for (int i = recordID; i < recordSize; i++) records[i].used = CDI_UNDEFID;
     }

@@ -506,7 +506,7 @@ cdfCreateRecords(stream_t *streamptr, int tsID)
 
   if (tsID == 0)
     {
-      const int nvrecs = nrecs; // use all records at first timestep
+      const int nvrecs = nrecs;  // use all records at first timestep
 
       streamptr->nrecs += nrecs;
 
@@ -1195,8 +1195,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
               ncvar->chunkCacheSize = size;
               ncvar->chunkCacheNelems = nelems;
               ncvar->chunkCachePreemption = preemption;
-              if (CDI_Debug)
-                fprintf(stderr, "%s: chunkCacheSize=%zu nelems=%zu preemption=%g\n", name, size, nelems, preemption);
+              if (CDI_Debug) fprintf(stderr, "%s: chunkCacheSize=%zu nelems=%zu preemption=%g\n", name, size, nelems, preemption);
             }
         }
 #endif

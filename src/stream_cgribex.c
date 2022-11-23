@@ -899,7 +899,8 @@ cgribexScanTimestep1(stream_t *streamptr)
       nrecs++;
 
       if (CDI_Debug)
-        Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2, CdiDateTime_string(vDateTime));
+        Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2,
+                CdiDateTime_string(vDateTime));
 
       cgribexAddRecord(streamptr, cgribexp, param, recsize, recpos, comptype, lmv, iret);
     }
@@ -1069,7 +1070,8 @@ cgribexScanTimestep2(stream_t *streamptr)
         }
 
       if (CDI_Debug)
-        Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2, CdiDateTime_string(vDateTime));
+        Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2,
+                CdiDateTime_string(vDateTime));
 
       if (cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0)
         {
@@ -1263,7 +1265,8 @@ cgribexScanTimestep(stream_t *streamptr)
             }
 
           if (CDI_Debug)
-            Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2, CdiDateTime_string(vDateTime));
+            Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2,
+                    CdiDateTime_string(vDateTime));
 
           if (cgribexVarCompare(compVar, records[recID], 0) != 0)
             {
@@ -1451,8 +1454,8 @@ cgribexDefTimerange(int tsteptype, int factor, int calendar, CdiDateTime rDateTi
       if ((ip > 255) && (tsteptype == TSTEP_INSTANT)) tsteptype = TSTEP_INSTANT3;
 
       int ipx = 0;
-      if (!cdiDateTime_isNull(sDateTime) &&
-          (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF))
+      if (!cdiDateTime_isNull(sDateTime)
+          && (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF))
         {
           julianDate2 = julianDate_encode(calendar, sDateTime);
           ipx = (int) lround(julianDate_to_seconds(julianDate_sub(julianDate2, julianDate1)) / factor);

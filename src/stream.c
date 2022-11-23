@@ -224,7 +224,7 @@ streamDefNumWorker(int streamID, int numWorker)
 
       const int filetype = streamptr->filetype;
       const bool filetypeIsGrib = (filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_GRB2);
-      if (streamptr->filemode == 'r' && filetypeIsGrib) (void)cdiInqTimeSize(streamID);
+      if (streamptr->filemode == 'r' && filetypeIsGrib) (void) cdiInqTimeSize(streamID);
     }
 }
 

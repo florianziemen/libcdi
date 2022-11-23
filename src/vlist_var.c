@@ -1439,8 +1439,8 @@ vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
 #define FCMP2(f) (namespaceResHDecode(pva->f).idx != namespaceResHDecode(pvb->f).idx)
   int diff = (int) FCMP(fvarID) | FCMP(mvarID) | FCMP(flag) | FCMP(param) | FCMP(datatype) | FCMP(timetype) | FCMP(tsteptype)
              | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID) | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
-             | FCMPFLT(missval) | FCMP(comptype) | FCMP(complevel)
-             | FCMP(lvalidrange) | FCMPFLT(validrange[0]) | FCMPFLT(validrange[1]);
+             | FCMPFLT(missval) | FCMP(comptype) | FCMP(complevel) | FCMP(lvalidrange) | FCMPFLT(validrange[0])
+             | FCMPFLT(validrange[1]);
 #undef FCMP
 #undef FCMPFLT
 #undef FCMPSTR
