@@ -634,7 +634,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         funcnameLen = (size_t)nameLen;
         if ( pline[funNameLast] != '(' )
           {
-            printf("%s\n>(< not found!", line);
+            fprintf(stderr, "%s\n>(< not found!", line);
             return;
           }
         memcpy(funcname, pline + nameMatch->rm_so, funcnameLen);
@@ -725,13 +725,13 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
                     }
                 if (argtype == NUM_KNOWN_ARG_TYPES)
                   {
-                    printf("%s not implemented\n", line + funcargname[i].rm_so);
+                    fprintf(stderr, "%s not implemented\n", line + funcargname[i].rm_so);
                     break;
                   }
               }
             if ( i != funcargc )
               {
-                printf("problem parsing line: %s\n", line);
+                fprintf(stderr, "problem parsing line: %s\n", line);
                 continue;
               }
           }
@@ -1000,7 +1000,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
       else
 	{
 	  if ( lineLen > 1 )
-	    printf("skip: line %3d  size %3zd  %s%s", lineno, lineLen, line,
+	    fprintf(stderr, "skip: line %3d  size %3zd  %s%s", lineno, lineLen, line,
                    line[lineLen-1]=='\n'?"":"missing new-line\n");
 	}
     }
