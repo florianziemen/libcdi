@@ -14,7 +14,13 @@ init_gcc1120
 CFLAGS='-g -gdwarf-4 -march=native -mpc64 -O2'
 FCFLAGS='-fmodule-private -fimplicit-none -fmax-identifier-length=63 -Wall -Wcharacter-truncation -Wconversion -Wunderflow -Wunused-parameter -Wno-surprising -fall-intrinsics -g -march=native -mpc64 -fbacktrace -fbounds-check -fstack-protector-all -finit-real=nan -finit-integer=-2147483648 -finit-character=127 -O2 -std=f2008'
 
-test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
+if test ! -f "${top_srcdir}/configure"; then
+  "${top_srcdir}/autogen.sh"
+  # If there is no configure script, there are, most probably, no Fortran
+  # interface files, which are generated in the maintainer mode only. Therefore,
+  # we have to generate them before testing:
+  "${top_srcdir}/configure" --enable-maintainer-mode && make -C src mo_cdi.f90 && make distclean
+fi
 
 "${top_srcdir}/configure" \
 --disable-cdi-app \

@@ -9,7 +9,13 @@ top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 . "${script_dir}/utils.sh"
 init_intelclassic202150
 
-test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
+enable_maintainer_mode='no'
+if test ! -f "${top_srcdir}/configure"; then
+  "${top_srcdir}/autogen.sh"
+  # If there is no configure script, there are, most probably, no Fortran
+  # interface files, which are generated in the maintainer mode only:
+  enable_maintainer_mode='yes'
+fi
 
 # Create a subdirectory for building and switch to it:
 mkdir build && cd build
@@ -25,9 +31,9 @@ CPPFLAGS="-I${ECCODES_ROOT}/include"
 LDFLAGS="-L${ECCODES_ROOT}/lib64"
 
 "${top_srcdir}/configure" \
---disable-maintainer-mode \
 --enable-cf-interface \
 --enable-iso-c-interface \
+--enable-maintainer-mode="${enable_maintainer_mode}" \
 --enable-mpi \
 --enable-option-checking=fatal \
 --with-eccodes \
@@ -46,6 +52,10 @@ make -j8 check | tee tests/test-suite.log
 
 check_all_tests_passed tests/test-suite.log
 
-make -j8 distclean
+if test "x${enable_maintainer_mode}" = 'xyes'; then
+  make -j8 maintainer-clean
+else
+  make -j8 distclean
+fi
 
 check_no_files_in_cwd

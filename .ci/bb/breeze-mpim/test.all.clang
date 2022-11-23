@@ -15,12 +15,18 @@ find src app \
   -name '*.h' -o -name '*.hpp' -o -name '*.c' -o -name '*.cpp' | \
     xargs -n 1 -P 8 clang-format --Werror --dry-run --verbose
 
-test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
+enable_maintainer_mode='no'
+if test ! -f "${top_srcdir}/configure"; then
+  "${top_srcdir}/autogen.sh"
+  # If there is no configure script, there are, most probably, no Fortran
+  # interface files, which are generated in the maintainer mode only:
+  enable_maintainer_mode='yes'
+fi
 
 "${top_srcdir}/configure" \
---disable-maintainer-mode \
 --enable-cf-interface \
 --enable-iso-c-interface \
+--enable-maintainer-mode="${enable_maintainer_mode}" \
 --enable-mpi \
 --enable-option-checking=fatal \
 --with-eccodes="${ECCODES_ROOT}" \

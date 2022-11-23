@@ -18,7 +18,13 @@ if test "x${PE_NETCDF_MODULE_NAME}" = 'xcray-netcdf'; then
   esac
 fi
 
-test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
+enable_maintainer_mode='no'
+if test ! -f "${top_srcdir}/configure"; then
+  "${top_srcdir}/autogen.sh"
+  # If there is no configure script, there are, most probably, no Fortran
+  # interface files, which are generated in the maintainer mode only:
+  enable_maintainer_mode='yes'
+fi
 
 # The configure script does not check the 'lib64' subdirectory, therefore we
 # run it with '--with-eccodes' and the following flags. Note that fixing this
@@ -31,9 +37,9 @@ CPPFLAGS="-I${ECCODES_ROOT}/include"
 LDFLAGS="-L${ECCODES_ROOT}/lib64"
 
 "${top_srcdir}/configure" \
---disable-maintainer-mode \
 --enable-cf-interface \
 --enable-iso-c-interface \
+--enable-maintainer-mode="${enable_maintainer_mode}" \
 --enable-mpi \
 --enable-option-checking=fatal \
 --with-eccodes \
