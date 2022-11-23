@@ -567,6 +567,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         "/* These functions are meant to be called from Fortran and don't\n"
         " * need an interface declaration in a C header. */\n"
         "#ifdef __clang__\n"
+        "#  pragma GCC diagnostic push\n"
         "#  pragma GCC diagnostic ignored \"-Wmissing-prototypes\"\n"
         "#endif\n"
         "\n", fpint);
