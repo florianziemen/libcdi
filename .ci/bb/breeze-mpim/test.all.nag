@@ -12,7 +12,7 @@ init_nag626223
 test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
 # Create a distribution file with minimalistic configuration:
-"${top_srcdir}/configure"
+"${top_srcdir}/configure" --enable-maintainer-mode
 make -j8 dist
 
 # Create a subdirectory for further testing and switch to it:
