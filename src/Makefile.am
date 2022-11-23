@@ -286,11 +286,13 @@ endif
 endif
 
 if MAINTAINER_MODE
-cdiFortran.c cdi.inc: cdi.h make_fint
+cdiFortran.c cdi.inc: cdi.h make_fint.c
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) make_fint
 	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute ./make_fint -o $(@D) $<
 cdi.inc: cdiFortran.c
 
-cdipioFortran.c cdipio.inc: cdipio.h make_fint
+cdipioFortran.c cdipio.inc: cdipio.h make_fint.c
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) make_fint
 	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute ./make_fint -o $(@D) $<
 cdipio.inc: cdipioFortran.c
 
