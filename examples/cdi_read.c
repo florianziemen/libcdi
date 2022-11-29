@@ -1,20 +1,21 @@
 #include <stdio.h>
 #include "cdi.h"
 
-int main(void)
+int
+main(void)
 {
-  enum {
-    nlon = 12, // Number of longitudes
-    nlat =  6, // Number of latitudes
-    nlev =  5, // Number of levels
-    nts  =  3, // Number of time steps
+  enum
+  {
+    nlon = 12,  // Number of longitudes
+    nlat = 6,   // Number of latitudes
+    nlev = 5,   // Number of levels
+    nts = 3,    // Number of time steps
   };
   SizeType nmiss;
-  double var1[nlon*nlat];
-  double var2[nlon*nlat*nlev];
+  double var1[nlon * nlat];
+  double var2[nlon * nlat * nlev];
 
-
-  // Open the dataset 
+  // Open the dataset
   int streamID = streamOpenRead("example.nc");
   if (streamID < 0)
     {
@@ -22,33 +23,33 @@ int main(void)
       return 1;
     }
 
-  // Get the variable list of the dataset 
+  // Get the variable list of the dataset
   int vlistID = streamInqVlist(streamID);
 
-  // Set the variable IDs 
+  // Set the variable IDs
   int varID1 = 0;
   int varID2 = 1;
 
-  // Get the Time axis from the variable list 
+  // Get the Time axis from the variable list
   int taxisID = vlistInqTaxis(vlistID);
 
-  // Loop over the number of time steps 
+  // Loop over the number of time steps
   for (int tsID = 0; tsID < nts; tsID++)
     {
-      // Inquire the time step 
+      // Inquire the time step
       streamInqTimestep(streamID, tsID);
 
-      // Get the verification date and time 
+      // Get the verification date and time
       int vdate = taxisInqVdate(taxisID);
       int vtime = taxisInqVtime(taxisID);
-      printf("read timestep %d:  date=%d  time=%d\n", tsID+1, vdate, vtime);
+      printf("read timestep %d:  date=%d  time=%d\n", tsID + 1, vdate, vtime);
 
-      // Read var1 and var2 
+      // Read var1 and var2
       streamReadVar(streamID, varID1, var1, &nmiss);
       streamReadVar(streamID, varID2, var2, &nmiss);
     }
 
-  // Close the input stream 
+  // Close the input stream
   streamClose(streamID);
 
   return 0;

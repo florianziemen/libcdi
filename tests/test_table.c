@@ -3,9 +3,10 @@
 
 #include "cdi.h"
 
-int main()
+int
+main()
 {
   tableInqEntry(-1, -1, -1, NULL, NULL, NULL);
-  //assert(tableInqEntry(-1, -1, -1, NULL, NULL, NULL) != 0);
+  // assert(tableInqEntry(-1, -1, -1, NULL, NULL, NULL) != 0);
   return EXIT_SUCCESS;
 }

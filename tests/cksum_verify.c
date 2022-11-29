@@ -13,7 +13,8 @@
 
 #include "cksum.h"
 
-enum {
+enum
+{
   block_size = 16,
 };
 
@@ -23,8 +24,8 @@ main()
   unsigned char *test_data = NULL, *init_block = NULL;
   size_t num_blocks = 1000;
 
-  if (!(init_block = (unsigned char *)calloc(block_size * block_size, 1U))
-      || !(test_data = (unsigned char *)calloc((size_t)block_size * num_blocks, 1U)))
+  if (!(init_block = (unsigned char *) calloc(block_size * block_size, 1U))
+      || !(test_data = (unsigned char *) calloc((size_t) block_size * num_blocks, 1U)))
     return EXIT_FAILURE;
 
   /* this is supposed to be non-random */
@@ -34,23 +35,20 @@ main()
   /* repeat block and rotate */
   for (size_t i = 1; i < block_size; ++i)
     {
-      memcpy(init_block + block_size * i,
-             init_block + block_size - i, i);
-      memcpy(init_block + block_size * i + i, init_block,
-             block_size - i);
+      memcpy(init_block + block_size * i, init_block + block_size - i, i);
+      memcpy(init_block + block_size * i + i, init_block, block_size - i);
     }
 
   for (size_t i = 0; i < num_blocks; ++i)
     {
-      size_t block_idx = ((size_t)lrand48()) % block_size;
-      memcpy(test_data + i, init_block + block_idx * block_size,
-             block_size);
+      size_t block_idx = ((size_t) lrand48()) % block_size;
+      memcpy(test_data + i, init_block + block_idx * block_size, block_size);
     }
 
   uint32_t cksum_result = memcrc(test_data, num_blocks * block_size);
   if (cksum_result != UINT32_C(0xc47779cd))
     {
-      printf("unexpected crc result: 0x%8" PRIx32"\n", cksum_result);
+      printf("unexpected crc result: 0x%8" PRIx32 "\n", cksum_result);
       return EXIT_FAILURE;
     }
 

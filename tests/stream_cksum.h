@@ -7,7 +7,6 @@
 
 #include "var_cksum.h"
 
-struct cksum_table *
-cksum_stream(const char *fname, size_t *table_len);
+struct cksum_table *cksum_stream(const char *fname, size_t *table_len);
 
 #endif

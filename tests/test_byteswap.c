@@ -6,7 +6,8 @@
 /* function called by CDO */
 extern int getByteswap(int);
 
-int main()
+int
+main()
 {
   assert(getByteswap(-1) == -1);
   return EXIT_SUCCESS;
