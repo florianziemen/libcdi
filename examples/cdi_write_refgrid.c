@@ -1,23 +1,23 @@
 #include <stdio.h>
 #include "cdi.h"
 
-#define  nlon   12 // Number of longitudes
-#define  nlat    6 // Number of latitudes 
-#define  nlev    5 // Number of levels    
-#define  nts     3 // Number of time steps
+#define nlon 12  // Number of longitudes
+#define nlat 6   // Number of latitudes
+#define nlev 5   // Number of levels
+#define nts 3    // Number of time steps
 
-int main(void)
+int
+main(void)
 {
   int gridID, zaxisID1, zaxisID2, taxisID;
   int vlistID, varID1, varID2, streamID;
   size_t nmiss = 0;
-  double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
-  double var1[nlon*nlat];
-  double var2[nlon*nlat*nlev];
-
+  double levs[nlev] = { 101300, 92500, 85000, 50000, 20000 };
+  double var1[nlon * nlat];
+  double var2[nlon * nlat * nlev];
 
   // Create a grid reference
-  gridID = gridCreate(GRID_UNSTRUCTURED, nlon*nlat);
+  gridID = gridCreate(GRID_UNSTRUCTURED, nlon * nlat);
   cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, 123);
   cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDINREFERENCE, 3);
   cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_REFERENCEURI, "http://www.x.y/gridfile.nc");
@@ -29,7 +29,7 @@ int main(void)
   // Create a pressure level Z-axis
   zaxisID2 = zaxisCreate(ZAXIS_PRESSURE, nlev);
   zaxisDefLevels(zaxisID2, levs);
- 
+
   // Create a variable list
   vlistID = vlistCreate();
 
@@ -48,30 +48,30 @@ int main(void)
   vlistDefTaxis(vlistID, taxisID);
 
   // Create a dataset in netCDF format
-  //streamID = streamOpenWrite("example.grb2", CDI_FILETYPE_GRB2);
+  // streamID = streamOpenWrite("example.grb2", CDI_FILETYPE_GRB2);
   streamID = streamOpenWrite("example.nc", CDI_FILETYPE_NC);
-  if ( streamID < 0 )
+  if (streamID < 0)
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID));
-      return(1);
+      return (1);
     }
 
   // Assign the variable list to the dataset
   streamDefVlist(streamID, vlistID);
 
   // Loop over the number of time steps
-  for ( int tsID = 0; tsID < nts; tsID++ )
+  for (int tsID = 0; tsID < nts; tsID++)
     {
       // Set the verification date to 1985-01-01 + tsID
-      taxisDefVdate(taxisID, 19850101+tsID);
+      taxisDefVdate(taxisID, 19850101 + tsID);
       // Set the verification time to 12:00:00
       taxisDefVtime(taxisID, 120000);
       // Define the time step
       streamDefTimestep(streamID, tsID);
 
       // Init var1 and var2
-      for ( size_t i = 0; i < nlon*nlat;      i++ ) var1[i] = 1.1;
-      for ( size_t i = 0; i < nlon*nlat*nlev; i++ ) var2[i] = 2.2;
+      for (size_t i = 0; i < nlon * nlat; i++) var1[i] = 1.1;
+      for (size_t i = 0; i < nlon * nlat * nlev; i++) var2[i] = 2.2;
 
       // Write var1 and var2
       streamWriteVar(streamID, varID1, var1, nmiss);

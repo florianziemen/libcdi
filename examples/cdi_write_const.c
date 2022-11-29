@@ -1,24 +1,24 @@
 #include <stdio.h>
 #include "cdi.h"
 
-#define  nlon   12 // Number of longitudes
-#define  nlat    6 // Number of latitudes 
-#define  nlev    5 // Number of levels    
+#define nlon 12  // Number of longitudes
+#define nlat 6   // Number of latitudes
+#define nlev 5   // Number of levels
 
-int main(void)
+int
+main(void)
 {
   int gridID, zaxisID1, zaxisID2;
   int vlistID, varID1, varID2, streamID;
   size_t i, nmiss = 0;
-  double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
-  double lats[nlat] = {-75, -45, -15, 15, 45, 75};
-  double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
-  double var1[nlon*nlat];
-  double var2[nlon*nlat*nlev];
-
+  double lons[nlon] = { 0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330 };
+  double lats[nlat] = { -75, -45, -15, 15, 45, 75 };
+  double levs[nlev] = { 101300, 92500, 85000, 50000, 20000 };
+  double var1[nlon * nlat];
+  double var2[nlon * nlat * nlev];
 
   // Create a regular lon/lat grid
-  gridID = gridCreate(GRID_LONLAT, nlon*nlat);
+  gridID = gridCreate(GRID_LONLAT, nlon * nlat);
   gridDefXsize(gridID, nlon);
   gridDefYsize(gridID, nlat);
   gridDefXvals(gridID, lons);
@@ -30,7 +30,7 @@ int main(void)
   // Create a pressure level Z-axis
   zaxisID2 = zaxisCreate(ZAXIS_PRESSURE, nlev);
   zaxisDefLevels(zaxisID2, levs);
- 
+
   // Create a variable list
   vlistID = vlistCreate();
 
@@ -44,20 +44,20 @@ int main(void)
 
   // Create a dataset in netCDF format
   streamID = streamOpenWrite("example_const.nc", CDI_FILETYPE_NC);
-  if ( streamID < 0 )
+  if (streamID < 0)
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID));
-      return(1);
+      return (1);
     }
 
   // Assign the variable list to the dataset
   streamDefVlist(streamID, vlistID);
 
-  //streamDefTimestep(streamID, 0);
+  // streamDefTimestep(streamID, 0);
 
   // Init var1 and var2
-  for ( i = 0; i < nlon*nlat;      i++ ) var1[i] = 1.1;
-  for ( i = 0; i < nlon*nlat*nlev; i++ ) var2[i] = 2.2;
+  for (i = 0; i < nlon * nlat; i++) var1[i] = 1.1;
+  for (i = 0; i < nlon * nlat * nlev; i++) var2[i] = 2.2;
 
   // Write var1 and var2
   streamWriteVar(streamID, varID1, var1, nmiss);

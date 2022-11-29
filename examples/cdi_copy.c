@@ -1,21 +1,22 @@
 #include <stdio.h>
 #include "cdi.h"
 
-int main(void)
+int
+main(void)
 {
-  enum {
-    nlon = 12, // Number of longitudes
-    nlat =  6, // Number of latitudes
-    nlev =  5, // Number of levels
-    nts  =  3, // Number of time steps
+  enum
+  {
+    nlon = 12,  // Number of longitudes
+    nlat = 6,   // Number of latitudes
+    nlev = 5,   // Number of levels
+    nts = 3,    // Number of time steps
   };
   SizeType nmiss;
-  double var1[nlon*nlat];
-  double var2[nlon*nlat*nlev];
-
+  double var1[nlon * nlat];
+  double var2[nlon * nlat * nlev];
 
   // Open the input dataset
-  int streamID1  = streamOpenRead("example.nc");
+  int streamID1 = streamOpenRead("example.nc");
   if (streamID1 < 0)
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID1));
@@ -30,7 +31,7 @@ int main(void)
   int varID2 = 1;
 
   // Open the output dataset (GRIB format)
-  int streamID2  = streamOpenWrite("example.grb", CDI_FILETYPE_GRB);
+  int streamID2 = streamOpenWrite("example.grb", CDI_FILETYPE_GRB);
   if (streamID2 < 0)
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID2));
@@ -50,7 +51,7 @@ int main(void)
       // Define the output time step
       streamDefTimestep(streamID2, tsID);
 
-      // Read var1 and var2 
+      // Read var1 and var2
       streamReadVar(streamID1, varID1, var1, &nmiss);
       streamReadVar(streamID1, varID2, var2, &nmiss);
 

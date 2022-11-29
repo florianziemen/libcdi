@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <stdio.h>
@@ -9,13 +9,15 @@
 #include "cdi.h"
 #include "dmemory.h"
 
-int main()
+int
+main()
 {
   char fname[] = "test.grb";
   int filetype = CDI_FILETYPE_GRB;
-  enum {
+  enum
+  {
     nlat = 18,
-    nlon = 2*nlat,
+    nlon = 2 * nlat,
   };
   double *data = NULL;
   int nlevel;
@@ -28,12 +30,11 @@ int main()
   int vlistID, taxisID;
   SizeType nmiss;
 
+  size_t datasize = (size_t) nlon * (size_t) nlat;
+  data = (double *) malloc(datasize * sizeof(double));
+  memset(data, 0, datasize * sizeof(double));
 
-  size_t datasize = (size_t)nlon * (size_t)nlat;
-  data = (double *)malloc(datasize * sizeof (double));
-  memset(data, 0, datasize * sizeof (double));
-
-  gridID = gridCreate(GRID_GAUSSIAN, (int)datasize);
+  gridID = gridCreate(GRID_GAUSSIAN, (int) datasize);
   gridDefXsize(gridID, nlon);
   gridDefYsize(gridID, nlat);
 
@@ -46,7 +47,7 @@ int main()
   vlistDefTaxis(vlistID, taxisID);
 
   streamID1 = streamOpenWrite(fname, filetype);
-  if ( streamID1 < 0 )
+  if (streamID1 < 0)
     {
       fprintf(stderr, "Open failed on %s\n", fname);
       fprintf(stderr, "%s\n", cdiStringError(streamID1));
@@ -66,7 +67,7 @@ int main()
   filetype = streamInqFiletype(streamID1);
 
   streamID2 = streamOpenWrite(fname, filetype);
-  if ( streamID2 < 0 )
+  if (streamID2 < 0)
     {
       fprintf(stderr, "Open failed on %s\n", fname);
       fprintf(stderr, "%s\n", cdiStringError(streamID2));
@@ -77,48 +78,48 @@ int main()
 
   nvars = vlistNvars(vlistID);
 
-  for ( varID = 0; varID < nvars; varID++ )
+  for (varID = 0; varID < nvars; varID++)
     {
-      int varGridID      = vlistInqVarGrid(vlistID, varID);
-      int varZaxisID     = vlistInqVarZaxis(vlistID, varID);
-      size_t gridsize = (size_t)gridInqSize(varGridID);
-      size_t varNlevel   = (size_t)zaxisInqSize(varZaxisID);
-      if ( gridsize*varNlevel > datasize ) datasize = gridsize*varNlevel;
+      int varGridID = vlistInqVarGrid(vlistID, varID);
+      int varZaxisID = vlistInqVarZaxis(vlistID, varID);
+      size_t gridsize = (size_t) gridInqSize(varGridID);
+      size_t varNlevel = (size_t) zaxisInqSize(varZaxisID);
+      if (gridsize * varNlevel > datasize) datasize = gridsize * varNlevel;
     }
 
-  data = (double *)realloc(data, datasize*sizeof(double));
-  memset(data, 0, datasize*sizeof(double));
+  data = (double *) realloc(data, datasize * sizeof(double));
+  memset(data, 0, datasize * sizeof(double));
 
   taxisID = vlistInqTaxis(vlistID);
 
   tsID = 0;
-  while ( (nrecs = streamInqTimestep(streamID1, tsID)) )
+  while ((nrecs = streamInqTimestep(streamID1, tsID)))
     {
-      /* int vdate =  */taxisInqVdate(taxisID);
-      /* int vtime =  */taxisInqVtime(taxisID);
+      /* int vdate =  */ taxisInqVdate(taxisID);
+      /* int vtime =  */ taxisInqVtime(taxisID);
 
       streamDefTimestep(streamID2, tsID);
 
-      for ( varID = 0; varID < nvars; varID++ )
-	{
-	  streamReadVar(streamID1, varID, data, &nmiss);
+      for (varID = 0; varID < nvars; varID++)
+        {
+          streamReadVar(streamID1, varID, data, &nmiss);
 
-	  /* int code = */vlistInqVarCode(vlistID, varID);
-	  gridID   = vlistInqVarGrid(vlistID, varID);
-	  zaxisID  = vlistInqVarZaxis(vlistID, varID);
-	  /* int gridtype = */gridInqType(gridID);
-	  /* int gridsize = */gridInqSize(gridID);
-	  nlevel   = zaxisInqSize(zaxisID);
-	  /* double missval = */vlistInqVarMissval(vlistID, varID);
+          /* int code = */ vlistInqVarCode(vlistID, varID);
+          gridID = vlistInqVarGrid(vlistID, varID);
+          zaxisID = vlistInqVarZaxis(vlistID, varID);
+          /* int gridtype = */ gridInqType(gridID);
+          /* int gridsize = */ gridInqSize(gridID);
+          nlevel = zaxisInqSize(zaxisID);
+          /* double missval = */ vlistInqVarMissval(vlistID, varID);
 
-	  for ( levelID = 0; levelID < nlevel; levelID++ )
-	    {
-	      /* int level  = (int) */ zaxisInqLevel(zaxisID, levelID);
-	      /* int offset = gridsize*levelID; */
-	    }
+          for (levelID = 0; levelID < nlevel; levelID++)
+            {
+              /* int level  = (int) */ zaxisInqLevel(zaxisID, levelID);
+              /* int offset = gridsize*levelID; */
+            }
 
-	  streamWriteVar(streamID2, varID, data, nmiss);
-	}
+          streamWriteVar(streamID2, varID, data, nmiss);
+        }
       tsID++;
     }
 
