@@ -9,6 +9,7 @@
 #include "cdi_uuid.h"
 #include "stream_cdf.h"
 #include "cdf_int.h"
+#include "cdf_util.h"
 #include "vlist.h"
 #include "zaxis.h"
 
@@ -422,7 +423,8 @@ static void
 cdfGridCompress(int fileID, int ncvarid, size_t gridsize, int filetype, int comptype, size_t *chunks)
 {
 #ifdef HAVE_NETCDF4
-  if (gridsize >= 32 && comptype == CDI_COMPRESS_ZIP && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR))
+  if (gridsize >= 32 && comptype == CDI_COMPRESS_ZIP
+      && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR))
     {
       cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
       cdfDefVarDeflate(fileID, ncvarid, 1);
@@ -699,7 +701,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xsize, size_t 
       dimIDs[0] = ydimID;
       dimIDs[1] = xdimID;
     }
-  else // ndims == 2
+  else  // ndims == 2
     {
       chunks[0] = calc_chunksize_x(chunkType, chunkSize, xsize, (ydimID == CDI_UNDEFID));
       dimIDs[0] = xdimID;
@@ -1609,8 +1611,8 @@ cdf_def_mapping(stream_t *streamptr, int gridID)
   if (natts == 0) return;
 
   int datatype = -1;
-  int status = cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, &datatype);
-  nc_type gmapvartype = (status == CDI_NOERR) ? (nc_type) datatype : NC_INT;
+  const int status = cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, &datatype);
+  const nc_type gmapvartype = (status == CDI_NOERR) ? (nc_type) datatype : NC_INT;
   char gmapvarname[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
   cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname, &length);
@@ -1620,12 +1622,12 @@ cdf_def_mapping(stream_t *streamptr, int gridID)
   if (streamptr->ncmode == 2) cdf_redef(fileID);
 
   int ncvarid;
-  const int ncerrcode = nc_def_var(fileID, gmapvarname, (nc_type) gmapvartype, 0, NULL, &ncvarid);
+  const int ncerrcode = nc_def_var(fileID, gmapvarname, gmapvartype, 0, NULL, &ncvarid);
   if (ncerrcode == NC_NOERR) cdfDefineAttributes(gridID, CDI_GLOBAL, fileID, ncvarid);
 
   cdf_enddef(fileID);
 
-  if (ncerrcode == NC_NOERR && gmapvartype != NC_CHAR)
+  if (ncerrcode == NC_NOERR && !xtypeIsText(gmapvartype))
     {
       int dummy = 1;
       cdf_put_var_int(fileID, ncvarid, &dummy);

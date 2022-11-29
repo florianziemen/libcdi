@@ -279,7 +279,7 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
   return 0;
 }
 
-static bool
+bool
 xtypeIsText(int xtype)
 {
   const bool isText = (xtype == NC_CHAR)

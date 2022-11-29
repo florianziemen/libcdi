@@ -2,6 +2,10 @@
 
 	* Version 2.1.1 released
 
+2022-11-29  Uwe Schulzweida
+
+	* cdf_def_mapping: added support for datatype NC_STRING (bug fix)
+
 2022-11-18  Uwe Schulzweida
 
 	* grid module: removed initialization of CDI_KEY_SCANNINGMODE (bug fix)
