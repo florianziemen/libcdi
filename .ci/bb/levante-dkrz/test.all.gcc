@@ -6,8 +6,8 @@ set -o pipefail
 script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
-. "${script_dir}/utils.sh"
-init_gcc1120
+. "${script_dir}/init.sh"
+init_gcc
 
 enable_maintainer_mode='no'
 if test ! -f "${top_srcdir}/configure"; then
@@ -40,7 +40,6 @@ LDFLAGS="-L${ECCODES_ROOT}/lib64"
 --with-netcdf="${NETCDF_ROOT}" \
 CC="${MPICC}" \
 CPPFLAGS="${CPPFLAGS}" \
-F77="${MPIFC}" \
 FC="${MPIFC}" \
 LDFLAGS="${LDFLAGS}" \
 MPI_LAUNCH="${MPI_LAUNCH}" \
@@ -48,6 +47,8 @@ PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 
 make -j8
 
-make -j8 check | tee tests/test-suite.log
+make -j8 check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
+
+check_no_git_untracked

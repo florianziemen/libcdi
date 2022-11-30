@@ -6,8 +6,8 @@ set -o pipefail
 script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
-. "${script_dir}/utils.sh"
-init_pgi2011
+. "${script_dir}/init.sh"
+init_pgi
 
 # Save time for the person running this script manually:
 if test "x${PE_NETCDF_MODULE_NAME}" = 'xcray-netcdf'; then
@@ -42,14 +42,13 @@ LDFLAGS="-L${ECCODES_ROOT}/lib64"
 --enable-maintainer-mode="${enable_maintainer_mode}" \
 --enable-mpi \
 --enable-option-checking=fatal \
+--enable-ppm-dist-array \
+--with-concurrent-mpi-checks \
 --with-eccodes \
 --with-netcdf \
 CC="${CC}" \
-CFLAGS='-g -O1' \
 CPPFLAGS="${CPPFLAGS}" \
-F77="${FC}" \
 FC="${FC}" \
-FCFLAGS='-g -fPIC' \
 LDFLAGS="${LDFLAGS}" \
 MPI_LAUNCH="${MPI_LAUNCH}" \
 PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig:${PKG_CONFIG_PATH}" \
@@ -57,6 +56,10 @@ PTHREAD_LIBS='-lpthread'
 
 make -j8
 
-make -j8 check | tee tests/test-suite.log
+# Run with '-j' to submit as many MPI jobs as possible
+# (see '--with-concurrent-mpi-checks'):
+make -j check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
+
+check_no_git_untracked

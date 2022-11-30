@@ -5,8 +5,8 @@ set -eu
 script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
-. "${script_dir}/utils.sh"
-init_gcc1120
+. "${script_dir}/init.sh"
+init_gcc
 
 # The following compiler flags are used by the respective ICON configure
 # wrapper. They are not set into stone and can be changed if needed. It is just
@@ -23,8 +23,12 @@ if test ! -f "${top_srcdir}/configure"; then
 fi
 
 "${top_srcdir}/configure" \
+--disable-across \
 --disable-cdi-app \
 --disable-maintainer-mode \
+--disable-openmp \
+--disable-python-interface \
+--disable-ruby-interface \
 --disable-shared \
 --enable-cf-interface=no \
 --enable-cgribex \
@@ -32,15 +36,19 @@ fi
 --enable-iso-c-interface \
 --enable-mpi=no \
 --enable-ppm-dist-array=no \
---enable-silent-rules=no \
+--enable-silent-rules=yes \
 --enable-static \
 --with-eccodes=yes \
 --with-netcdf \
 --with-on-demand-check-programs \
+--without-dce-uuid \
 --without-example-programs \
+--without-fdb5 \
 --without-grib_api \
+--without-ossp-uuid \
 --without-szlib \
 --without-threads \
+--without-util-linux-uuid \
 BUILD_CC= \
 BUILD_CFLAGS= \
 BUILD_CXX= \
@@ -55,26 +63,30 @@ CC="${MPICC}" \
 CFLAGS="${CFLAGS}" \
 CPPFLAGS="-I${NETCDF_ROOT}/include -I${ECCODES_ROOT}/include" \
 CXX=no \
+DCE_UUID_C_INCLUDE= \
+DCE_UUID_C_LIB= \
 F77=no \
 FC="${MPIFC}" \
 FCFLAGS="${FCFLAGS}" \
 LDFLAGS="-L${NETCDF_ROOT}/lib -L${ECCODES_ROOT}/lib64" \
-LIBS='-leccodes -lnetcdf' \
+LIBS='-Wl,--disable-new-dtags -Wl,--as-needed -leccodes -lnetcdf' \
 MPIROOT= \
 MPI_C_INCLUDE= \
 MPI_C_LIB= \
 MPI_FC_LIB= \
 MPI_FC_MOD= \
 MPI_LAUNCH="${MPI_LAUNCH}" \
+OSSP_UUID_C_INCLUDE= \
+OSSP_UUID_C_LIB= \
 PKG_CONFIG= \
 PPM_CORE_C_INCLUDE= \
 PPM_CORE_C_LIB= \
+UTIL_LINUX_UUID_C_INCLUDE= \
+UTIL_LINUX_UUID_C_LIB= \
 YAXT_C_INCLUDE= \
 YAXT_C_LIB= \
 YAXT_FC_LIB= \
 YAXT_FC_MOD= \
-ac_cv_func_uuid_create=no \
-ac_cv_lib_uuid_uuid_generate=no \
 acx_cv_have_libnc_dap=no \
 acx_cv_have_nc4hdf5=no \
 acx_cv_have_netcdf2=yes \
@@ -83,4 +95,6 @@ acx_cv_have_pnetcdf=no
 
 make -j8
 
-make -j8 check
+make -j8 check || { cat tests/test-suite.log; exit 1; }
+
+check_no_git_untracked

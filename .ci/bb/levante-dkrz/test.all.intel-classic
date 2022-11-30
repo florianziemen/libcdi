@@ -6,8 +6,8 @@ set -o pipefail
 script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
-. "${script_dir}/utils.sh"
-init_intelclassic202150
+. "${script_dir}/init.sh"
+init_intelclassic
 
 enable_maintainer_mode='no'
 if test ! -f "${top_srcdir}/configure"; then
@@ -46,9 +46,12 @@ LDFLAGS="${LDFLAGS}" \
 MPI_LAUNCH="${MPI_LAUNCH}" \
 PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 
+# Check whether the configure script removed the '.libs' directory:
+test -e .libs && echo "ERROR: the configure script did not remove directory '.libs'" && exit 1
+
 make -j8
 
-make -j8 check | tee tests/test-suite.log
+make -j8 check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
 
@@ -59,3 +62,5 @@ else
 fi
 
 check_no_files_in_cwd
+
+cd "${top_srcdir}" && check_no_git_untracked

@@ -39,10 +39,30 @@ switch_for_module ()
     # Add the short name of the module to the list of conflicts:
     sfm_conflicts="$sfm_conflicts $sfm_module_short"
 
+    # On a Cray system, it is important that only one PrgEnv module is loaded at
+    # a time. This is normally covered with the mutual conflict statements in
+    # the respective module files. However, that is not always the case,
+    # therefore we introduce an additional protection against two or more PrgEnv
+    # modules being loaded simultaneously: if the module we are asked to switch
+    # for starts with PrgEnv-, each of the loaded modules that starts with
+    # PrgEnv- too is added to the list of conflicts:
+    case $sfm_module_short in
+      PrgEnv-*)
+        for sfm_loaded in $sfm_loaded_short; do
+          case $sfm_loaded in
+            PrgEnv-*)
+              sfm_conflicts="$sfm_conflicts $sfm_loaded" ;;
+            *) ;;
+          esac
+        done
+      ;;
+      *) ;;
+    esac
+
     # A list of loaded modules that are in conflict with the requested module:
     sfm_loaded_conflicts=
     for sfm_conflict in $sfm_conflicts""; do
-      sfm_loaded_list=      
+      sfm_loaded_list=
       case $sfm_conflict in
         */*)
           # The conflict is specified with the version part:
@@ -90,78 +110,19 @@ switch_for_module ()
 }
 
 #
-# Initializes the environment.
-#
-init_env ()
-{
-  switch_for_module ruby/3.0.2-gcc-11.2.0
-}
-
-#
-# Sets variables for tests with GCC 11.2.0.
-#
-init_gcc1120 ()
-{
-  init_env
-  switch_for_module gcc/11.2.0-gcc-11.2.0 openmpi/4.1.2-gcc-11.2.0
-
-  CC=gcc
-  CXX=g++
-  FC=gfortran
-  MPICC=mpicc
-  MPIFC=mpif90
-  MPI_LAUNCH="$(which mpirun)"
-
-  ECCODES_ROOT='/sw/spack-levante/eccodes-2.21.0-4ywkk4'
-  NETCDF_ROOT='/sw/spack-levante/netcdf-c-4.8.1-6qheqr'
-  PPM_ROOT='/work/mh0287/m300488/libcdi-ci-sw/install/ppm-1.0.8-gcc-11.2.0'
-  YAXT_ROOT='/work/mh0287/m300488/libcdi-ci-sw/install/yaxt-0.9.3-gcc-11.2.0'
-
-  # Here we fix a never-ending story with Libtool overlinkning, absence of
-  # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
-  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib64:${NETCDF_ROOT}/lib:${LD_LIBRARY_PATH-}"
-}
-
-#
-# Sets variables for tests with Intel Classic 2021.5.0.
-#
-init_intelclassic202150 ()
-{
-  init_env
-  # Try to make sure that the compiler works with the system gcc:
-  module unload gcc
-  # For whatever reason, Intel Classic 2021.5.0 is enabled with
-  # intel-oneapi-compilers/2022.0.1-gcc-11.2.0:
-  switch_for_module intel-oneapi-compilers/2022.0.1-gcc-11.2.0 openmpi/4.1.2-intel-2021.5.0
-
-  AR=xiar
-  CC=icc
-  CXX=icpc
-  FC=ifort
-  MPICC=mpicc
-  MPIFC=mpif90
-  MPI_LAUNCH="$(which mpirun)"
-
-  ECCODES_ROOT='/sw/spack-levante/eccodes-2.21.0-3ehkbb'
-  NETCDF_ROOT='/sw/spack-levante/netcdf-c-4.8.1-2k3cmu'
-  PPM_ROOT='/work/mh0287/m300488/libcdi-ci-sw/install/ppm-1.0.8-intel-classic-2021.5.0'
-  YAXT_ROOT='/work/mh0287/m300488/libcdi-ci-sw/install/yaxt-0.9.3-intel-classic-2021.5.0'
-
-  # Here we fix a never-ending story with Libtool overlinkning, absence of
-  # '*.la' files when they could help, and '-Wl,--disable/enable-new-dtags':
-  export LD_LIBRARY_PATH="${ECCODES_ROOT}/lib64:${NETCDF_ROOT}/lib:${LD_LIBRARY_PATH-}"
-}
-
-#
 # Accepts a path to a file containing the testsuite summary (either the
 # 'test-suite.log' or the standard output of the 'make check' command) and
 # checks whether all tests were run and passed.
 #
 check_all_tests_passed ()
 {
-  awk '/SKIP: /{
-         print "ERROR: the total number of tests is not equal to the number of passed tests";
-         exit 1;
+  awk '/^# TOTAL: /{ total=$3 };
+       /^# PASS: /{ pass=$3 };
+       END {
+         if ( total == "" || total != pass ) {
+           print "ERROR: the total number of tests is not equal to the number of passed tests";
+           exit 1;
+         }
        }' $1 >&2
 }
 
@@ -173,10 +134,32 @@ check_no_files_in_cwd ()
 {
   cnfic_files=`find . -type f 2>/dev/null`
   if test -n "$cnfic_files"; then
-    {
-      echo "ERROR: the current working directory contains undeleted files:"
-      echo "$cnfic_files"
-    } >&2
+    cat >&2 <<_EOF
+ERROR: the current working directory contains undeleted files:
+
+$cnfic_files
+
+Update the respective distclean recipes.
+_EOF
+    exit 1
+  fi
+}
+
+#
+# Checks whether the building has generated any git-untracked files and fails if
+# it has.
+#
+check_no_git_untracked ()
+{
+  cngu_files=`git ls-files --other --exclude-standard`
+  if test -n "${cngu_files}"; then
+    cat >&2 <<_EOF
+ERROR: the building process generated untracked files in the repository:
+
+$cngu_files
+
+Update '.gitignore'.
+_EOF
     exit 1
   fi
 }
