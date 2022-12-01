@@ -549,7 +549,6 @@ cdiBaseFiletype(int filetype)
     case CDI_FILETYPE_NC4C:
     case CDI_FILETYPE_NCZARR:
     case CDI_FILETYPE_NC5: return CDI_FILETYPE_NETCDF;
-    default: return filetype;
     }
 
   return filetype;

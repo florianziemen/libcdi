@@ -128,8 +128,7 @@ destroyBFiledataPA(struct fileFunnelAIO *bfd)
       for (size_t i = 0; i < numQueuedWrites; ++i)
         if ((iret = aio_error(cBP[i])) == 0)
           {
-            ssize_t ssiret;
-            if ((ssiret = aio_return(cBP[i])) == -1)
+            if (aio_return(cBP[i]) == -1)
               {
                 errno = iret;
                 SysError("aio_write(2) failed");
@@ -192,8 +191,7 @@ completeSomeAIOWrites(struct fileFunnelAIO *bfd, const struct cdiPioConf *conf)
   for (size_t i = 0; i < aioQueueDepth; ++i)
     if ((iret = aio_error(ctrlBlks + i)) == 0)
       {
-        ssize_t ssiret;
-        if ((ssiret = aio_return(ctrlBlks + i)) == -1)
+        if (aio_return(ctrlBlks + i) == -1)
           {
             errno = iret;
             SysError("failed aio_write");

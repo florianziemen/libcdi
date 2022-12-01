@@ -24,7 +24,7 @@ main()
   int varID;
   int streamID1, streamID2;
   int gridID, zaxisID;
-  int nrecs, nvars;
+  int nvars;
   int tsID;
   int levelID;
   int vlistID, taxisID;
@@ -94,7 +94,7 @@ main()
   taxisID = vlistInqTaxis(vlistID);
 
   tsID = 0;
-  while ((nrecs = streamInqTimestep(streamID1, tsID)))
+  while (streamInqTimestep(streamID1, tsID))
     {
       /* int vdate =  */ taxisInqVdate(taxisID);
       /* int vtime =  */ taxisInqVtime(taxisID);

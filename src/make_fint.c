@@ -519,7 +519,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         for (int retType = 0; retType < NUM_RET_TYPES; ++retType)
           if (!regexec(&funRet[retType].preg, pline, maxMatch, reMatch, 0))
             {
-              functype = retType;
+              functype = (enum cftype) retType;
               declType = FUNC_DECL;
               needsPrologue |= funRet[retType].needsPrologue;
               needsExtraWrapper |= funRet[retType].needsExtraWrapper;

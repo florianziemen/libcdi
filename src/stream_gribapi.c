@@ -683,7 +683,6 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   record_t *record = &streamptr->tsteps[tsID].records[recID];
 
   const int tsteptype = gribapiGetTsteptype(gh);
-  int numavg = 0;
 
   // fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, leveltype1);
 

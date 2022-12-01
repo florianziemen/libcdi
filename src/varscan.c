@@ -364,8 +364,6 @@ varInsertTileSubtype(vartable_t *vptr, const var_tile_t *tiles)
       subtypeDestroyPtr(subtype_ptr);
       return vptr->tiles->nentries - 1;
     }
-
-  return CDI_UNDEFID;
 }
 
 void
@@ -490,12 +488,14 @@ struct cdi_generate_varinfo
   const char *name;
 };
 
+/*
 static int
 cdi_generate_cmp_varname(const void *s1, const void *s2)
 {
   const struct cdi_generate_varinfo *x = (const struct cdi_generate_varinfo *) s1, *y = (const struct cdi_generate_varinfo *) s2;
   return strcmp(x->name, y->name);
 }
+*/
 
 void
 cdi_generate_vars(stream_t *streamptr)

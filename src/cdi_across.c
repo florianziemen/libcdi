@@ -118,7 +118,7 @@ across_write_buf(int sock, const void *buf, size_t nbytes)
   size_t nbytes_left = nbytes;
   while (nbytes_left > 0)
     {
-      size_t nbytes_written = write(sock, bufpos, nbytes_left);
+      ssize_t nbytes_written = write(sock, bufpos, nbytes_left);
       if (nbytes_written < 0)
         {
           perror(__func__);
