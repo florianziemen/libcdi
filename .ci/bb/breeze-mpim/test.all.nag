@@ -6,8 +6,8 @@ set -o pipefail
 script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
-. "${script_dir}/utils.sh"
-init_nag626223
+. "${script_dir}/init.sh"
+init_nag
 
 test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
@@ -15,18 +15,18 @@ test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 "${top_srcdir}/configure"
 make -j8 dist
 
-# Create a subdirectory for further testing and switch to it:
-mkdir check_dist && cd check_dist
+# Create a (git-ignored) subdirectory for further testing and switch to it:
+mkdir build && cd build
 
 # Move the distribution file to the test directory and unpack it:
 mv ../cdi-*.tar.gz ./
 tar xf cdi-*.tar.gz
 
 # Create a subdirectory for building and switch to it:
-mkdir build && cd build
+mkdir build_dist && cd build_dist
 
 # Use GCC from the path when compiling/linking Fortran code:
-FCFLAGS="-O2 -g -Wc=$(which gcc)"
+FCFLAGS="-g -O2 -Wc=$(which gcc)"
 
 # Create an out-of-source configuration:
 ../cdi-*/configure \
@@ -39,10 +39,8 @@ FCFLAGS="-O2 -g -Wc=$(which gcc)"
 --with-eccodes="${ECCODES_ROOT}" \
 --with-netcdf="${NETCDF_ROOT}" \
 CC="${MPICC}" \
-CPPFLAGS="-I${UUID_ROOT}/include" \
 FC="${MPIFC}" \
 FCFLAGS="${FCFLAGS}" \
-LDFLAGS="-I${UUID_ROOT}/lib" \
 MPI_LAUNCH="${MPI_LAUNCH}" \
 PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 
@@ -55,3 +53,5 @@ check_all_tests_passed tests/test-suite.log
 make -j8 distclean
 
 check_no_files_in_cwd
+
+cd "${top_srcdir}" && check_no_git_untracked

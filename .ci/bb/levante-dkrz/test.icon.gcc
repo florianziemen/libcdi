@@ -5,14 +5,18 @@ set -eu
 script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
-. "${script_dir}/utils.sh"
-init_gcc1120
+. "${script_dir}/init.sh"
+init_gcc
 
 # The following compiler flags are used by the respective ICON configure
 # wrapper. They are not set into stone and can be changed if needed. It is just
 # important to keep them the same as in the wrapper.
 CFLAGS='-g -gdwarf-4 -march=native -mpc64 -O2'
 FCFLAGS='-fmodule-private -fimplicit-none -fmax-identifier-length=63 -Wall -Wcharacter-truncation -Wconversion -Wunderflow -Wunused-parameter -Wno-surprising -fall-intrinsics -g -march=native -mpc64 -fbacktrace -fbounds-check -fstack-protector-all -finit-real=nan -finit-integer=-2147483648 -finit-character=127 -O2 -std=f2008'
+
+# Make sure we do not need RUBY, i.e. the Fortran interface files are not
+# re-generated:
+export RUBY=$(which false)
 
 test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
@@ -26,7 +30,7 @@ test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 --enable-iso-c-interface \
 --enable-mpi=no \
 --enable-ppm-dist-array=no \
---enable-silent-rules=no \
+--enable-silent-rules=yes \
 --enable-static \
 --with-eccodes=yes \
 --with-netcdf \
@@ -53,7 +57,7 @@ F77=no \
 FC="${MPIFC}" \
 FCFLAGS="${FCFLAGS}" \
 LDFLAGS="-L${NETCDF_ROOT}/lib -L${ECCODES_ROOT}/lib64" \
-LIBS='-leccodes -lnetcdf' \
+LIBS='-Wl,--disable-new-dtags -Wl,--as-needed -leccodes -lnetcdf' \
 MPIROOT= \
 MPI_C_INCLUDE= \
 MPI_C_LIB= \
@@ -75,6 +79,8 @@ acx_cv_have_netcdf2=yes \
 acx_cv_have_netcdf4=yes \
 acx_cv_have_pnetcdf=no
 
-make -j8
+make
 
-make -j8 check || { cat tests/test-suite.log; exit 1; }
+make check || { cat tests/test-suite.log; exit 1; }
+
+check_no_git_untracked

@@ -43,6 +43,7 @@ Makefile
 /*/**/.libs
 /app/cdi
 /app/createtable
+/build
 /examples/cdi_copy
 /examples/cdi_read
 /examples/cdi_read_f2003

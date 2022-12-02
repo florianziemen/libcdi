@@ -6,21 +6,12 @@ set -o pipefail
 script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
+. "${script_dir}/init.sh"
+init_nvhpc
+
 # We want to check with the Debian version of Libtool, which is patched to avoid
 # overlinking:
-export PATH="/usr/bin:${PATH-}"
-
-. "${script_dir}/utils.sh"
-init_nv2130
-
-libtoolize=$(which libtoolize)
-test "x${libtoolize}" = 'x/usr/bin/libtoolize' || {
-  echo "ERROR: '${libtoolize}' is not a Debian-provided system libtoolize" >&2
-  exit 1
-}
-
-# Regenerate the Autotools files even if they are already available:
-"${top_srcdir}/autogen.sh"
+( init_debian_libtool; "${top_srcdir}/autogen.sh" )
 
 "${top_srcdir}/configure" \
 --disable-maintainer-mode \
@@ -32,9 +23,7 @@ test "x${libtoolize}" = 'x/usr/bin/libtoolize' || {
 --with-eccodes="${ECCODES_ROOT}" \
 --with-netcdf="${NETCDF_ROOT}" \
 CC="${MPICC}" \
-CPPFLAGS="-I${UUID_ROOT}/include" \
 FC="${MPIFC}" \
-LDFLAGS="-I${UUID_ROOT}/lib" \
 MPI_LAUNCH="${MPI_LAUNCH}" \
 PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 
@@ -57,3 +46,5 @@ fi
 make -j8 check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
+
+check_no_git_untracked

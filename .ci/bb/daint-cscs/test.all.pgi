@@ -6,8 +6,8 @@ set -o pipefail
 script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
-. "${script_dir}/utils.sh"
-init_pgi2011
+. "${script_dir}/init.sh"
+init_pgi
 
 # Save time for the person running this script manually:
 if test "x${PE_NETCDF_MODULE_NAME}" = 'xcray-netcdf'; then
@@ -54,3 +54,5 @@ make -j8
 make -j check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
+
+check_no_git_untracked

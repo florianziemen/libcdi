@@ -6,8 +6,8 @@ set -o pipefail
 script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
-. "${script_dir}/utils.sh"
-init_intelclassic202150
+. "${script_dir}/init.sh"
+init_intelclassic
 
 test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
 
@@ -30,11 +30,11 @@ LDFLAGS="-L${ECCODES_ROOT}/lib64"
 --enable-iso-c-interface \
 --enable-mpi \
 --enable-option-checking=fatal \
---enable-ppm-dist-array \
 --with-eccodes \
 --with-netcdf="${NETCDF_ROOT}" \
 CC="${MPICC}" \
 CPPFLAGS="${CPPFLAGS}" \
+F77="${MPIFC}" \
 FC="${MPIFC}" \
 LDFLAGS="${LDFLAGS}" \
 MPI_LAUNCH="${MPI_LAUNCH}" \
@@ -43,12 +43,14 @@ PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 # Check whether the configure script removed the '.libs' directory:
 test -e .libs && echo "ERROR: the configure script did not remove directory '.libs'" && exit 1
 
-make -j8
+make
 
-make -j8 check || { cat tests/test-suite.log; exit 1; }
+make check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
 
-make -j8 distclean
+make distclean
 
 check_no_files_in_cwd
+
+cd "${top_srcdir}" && check_no_git_untracked
