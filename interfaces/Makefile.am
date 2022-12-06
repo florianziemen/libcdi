@@ -141,6 +141,7 @@ install-exec-local: $(install_exec_local)
 uninstall-local: $(uninstall_local)
 clean-local: $(clean_local)
 
+AM_TESTSUITE_SUMMARY_HEADER = ' for Ruby and Python interfaces of $(PACKAGE_STRING)'
 TEST_EXTENSIONS = .run
 TESTS = \
   test_cpp_nc.run \
