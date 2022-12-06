@@ -116,11 +116,11 @@ switch_for_module ()
 #
 check_all_tests_passed ()
 {
-  awk '/^# TOTAL: /{ total=$3 };
-       /^# PASS: /{ pass=$3 };
+  awk '/^# TOTAL: /{ total+=$3 };
+       /^# PASS: /{ pass+=$3 };
        END {
          if ( total == "" || total != pass ) {
-           print "ERROR: the total number of tests is not equal to the number of passed tests";
+           print "ERROR: the total number of tests ("total") is not equal to the number of passed tests ("pass")";
            exit 1;
          }
        }' $1 >&2
