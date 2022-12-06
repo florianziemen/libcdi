@@ -1,0 +1,196 @@
+#! /bin/sh
+#
+# default configuration options and compiler flags for different hosts
+#
+#
+CONFPATH=`echo $0 | cut -c 1-6`
+if [ "$CONFPATH" != "../../" ] ; then
+  CONFPATH='./'
+fi
+#
+set -x
+
+HOSTNAME=`hostname`
+#
+while test $# != 0
+do
+  case $1 in
+    CC=?*)
+      COMP=`expr "X$1" : 'X[^=]*=\(.*\)'`
+      ;;
+    CONFIG_OPTS=?*)
+      CONFIG_OPTS=`expr "X$1" : 'X[^=]*=\(.*\)'`
+      ;;
+    *)
+          HOSTNAME=$1
+          ;;
+  esac
+  shift
+done
+#
+case "${HOSTNAME}" in
+# i386-apple-darwin10
+    icc)
+	${CONFPATH}configure --prefix=$HOME/local \
+                    --enable-maintainer-mode \
+                    --enable-iso-c-interface \
+                    --enable-swig \
+                    --enable-python \
+                    --with-eccodes=$HOME/local/eccodes-2.6.0 \
+                    --with-netcdf=$HOME/local/netcdf-4.4.1.1 \
+                    --with-szlib=$HOME/local \
+	            CC=icc CFLAGS="-g -D_REENTRANT -Wall -Wwrite-strings -O3 -march=native -fp-model source"
+	;;
+    bailung*|d133*|d134*)
+	${CONFPATH}configure --prefix=$HOME/local/cdi \
+                    --enable-maintainer-mode \
+                    --enable-iso-c-interface \
+                    --enable-swig \
+                    --with-eccodes=/opt/local \
+                    --with-netcdf=/opt/local \
+                    --with-szlib=/opt/local/lib/libaec \
+	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3"
+	;;
+    cinglung*|feilung*|wanglung*)
+	${CONFPATH}configure --prefix=$HOME/local \
+                    --enable-shared \
+                    --enable-maintainer-mode \
+                    --enable-swig \
+                    --enable-python \
+                    --with-grib_api=/opt/local \
+                    --with-netcdf=/opt/local \
+                    --with-szlib=/opt/local \
+	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O2"
+	;;
+    hama*)
+        CDILIBS="--disable-iso-c-interface \
+                 --enable-maintainer-mode \
+                 --with-szlib=$HOME/local \
+                 --with-fdb5=$HOME/src/fdb \
+                 --with-eccodes=$HOME/local/eccodes-2.22.0 \
+                 --with-netcdf=$HOME/local/netcdf-c-4.9.0"
+        PREFIX="--prefix=$HOME/local/cdi"
+        LD_ADD="-Wl,-rpath,$HOME/local/eccodes-2.22.0/lib -Wl,-rpath,$HOME/src/fdb/lib"
+        if  test "$COMP" = clang ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
+	             CC=clang CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3"
+	else
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
+	             CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3"
+        fi;
+	;;
+# x86_64-squeeze-x64-linux
+    thunder*)
+        ${CONFPATH}configure --with-grib_api=/sw/squeeze-x64/grib_api-1.13.0-static-gccsys \
+                    --with-netcdf=/sw/squeeze-x64/netcdf-4.2-static \
+                    --disable-cf-interface \
+	            CC=gcc CFLAGS="-g -Wall -O3" 
+	;;
+# ia64-nec-linux
+    ds*)
+	${CONFPATH}configure --prefix=$HOME/local \
+                    --with-netcdf=/pool/ia64/netcdf/netcdf-3.6.0-p1 \
+                    --with-szlib=$HOME/local \
+                    CC=icc CFLAGS="-g -O2 -Wall -fno-alias -DMIN_BUF_SIZE=4194304"
+	;;
+# i686-linux
+    melian)
+      ${CONFPATH}configure --prefix=`pwd`/build \
+	            --with-netcdf \
+                     --with-szlib \
+                  --with-eccodes \
+                      --with-pic --enable-swig --enable-ruby --enable-python \
+                      CC=gcc CFLAGS="-g -O2 -Wall" LIBS=-lopenjpeg
+	;;
+# sx6-nec-superux12.2
+    cs*)
+	${CONFPATH}configure --prefix=$HOME/local \
+         	    --with-netcdf=/pool/netcdf/netcdf-3.6.0-p1 \
+		    CC=c++ \
+                    CFLAGS="-O -Onooverlap,restrict=all -pvctl,fullmsg,noassume,loopcnt=1000000"
+	;;
+    sx6)
+	${CONFPATH}configure --host=sx6 --prefix=$HOME/local \
+                    --with-netcdf=/pool/SX-6/netcdf/netcdf-3.6.0-p1 \
+		    CC=sxc++ AR=sxar RANLIB=ls \
+                    CFLAGS="-O -Onooverlap,restrict=all -pvctl,fullmsg,noassume,loopcnt=1000000"
+	;;
+    lxe0*)
+        echo 'Please choose compiler modules! Checkout with "module av"!'
+        ${CONFPATH}configure --prefix=$(pwd)/build-SX  --host=sx9-nec-superux \
+              --with-netcdf=/usr/local/pkg-sx9 \
+              --with-grib_api=/usr/local/pkg-sx9/grib_api   CC=sxc++ FC=sxf90 \
+              LD=/SX/opt/crosskit/inst/bin/sxld AR=/SX/opt/crosskit/inst/bin/sxar \
+              RANLIB=echo
+	;;
+# powerpc-ibm-aix6.1.0.0
+    blizzard*)
+        CONFIG_SHELL=/bin/bash /bin/bash \
+                    ${CONFPATH}configure --prefix=$HOME/local \
+                    --with-netcdf=/sw/aix61/netcdf-4.2 \
+                    --with-szlib=/sw/aix61/szip-2.1-threadsafe \
+                    AR="ar -X 64" LDFLAGS="-brtl" FC=xlf2003_r CC=xlc_r \
+                    CFLAGS="-g -O3 -qhot -q64 -qarch=auto -qtune=auto -qlistfmt=html=transforms -DHAVE_MMAP" \
+                    FCFLAGS="-qsuffix=cpp=f90 -qextname" \
+                    SHELL=/bin/bash
+        ;;
+    breeze*)
+        CDILIBS="--with-eccodes=/sw/jessie-x64/eccodes/eccodes-2.4.1-gccsys \
+                 --with-netcdf=/sw/jessie-x64/netcdf-4.3.3.1-gccsys"
+        PREFIX="--prefix=$(pwd)/build/${COMP}"
+        LD_ADD="-Wl,-rpath,/sw/jessie-x64/eccodes/eccodes-2.4.1-gccsys/lib"
+
+        if  test "$COMP" = intel ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
+                    CC=icc FC=ifort CFLAGS="-g -Wall -O2 -qopt-report=5 -march=native"
+        elif  test "$COMP" = gnu ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS $LDFLAGS\
+                    CC=gcc FC=gfortran F77=gfortran CFLAGS="-g -Wall -O2 -march=native"
+        elif  test "$COMP" = pgi ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS $LDFLAGS\
+                    CC=pgcc FC=pgf90 F77=pgf90 CFLAGS="-g"
+        elif  test "$COMP" = clang ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS $LDFLAGS\
+                    CC=clang FC=gfortran CFLAGS="-g -O2"
+        elif  test "$COMP" = nag ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
+                    CC=gcc FC=nagfor F77=nagfor CFLAGS="-g -O2"
+        elif  test "$COMP" = nagClang ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
+                    CC=clang FC=nagfor F77=nagfor CFLAGS="-g -Wall -02"
+        else
+          echo "no config found for host: $HOSTNAME, COMP: $COMP !!"
+        fi;
+
+      ;;
+    mlogin*)
+        CDILIBS="--with-eccodes=/sw/rhel6-x64/eccodes/eccodes-2.3.0-gcc48 \
+                 --with-netcdf=/sw/rhel6-x64/netcdf/netcdf_c-4.3.2-gcc48"
+        PREFIX="--prefix=$(pwd)/build/${COMP}"
+
+        if  test "$COMP" = intel ; then
+          ${CONFPATH}configure $PREFIX $CONFIG_OPTS $CDILIBS \
+                    LDFLAGS="-Wl,-rpath,/sw/rhel6-x64/eccodes/eccodes-2.3.0-gcc48/lib" \
+                    F77=ifort FC=ifort FFLAGS="-g -O2" \
+	            CC=icc   CFLAGS="-g -Wall -O2 -qopt-report=5 -march=core-avx2"
+        elif  test "$COMP" = pgi ; then
+          ${CONFPATH}configure  $PREFIX $CONFIG_OPTS $CDILIBS \
+                    LDFLAGS="-Wl,-rpath,/sw/rhel6-x64/eccodes/eccodes-2.3.0-gcc48/lib" \
+	            CXX=pgc++ CXXFLAGS="-g -fast" \
+	            CC=pgcc   CFLAGS="-g -fast"
+        elif  test "$COMP" = gnu_pic ; then
+          ${CONFPATH}configure $PREFIX $CONFIG_OPTS $CDILIBS \
+                    LDFLAGS="-Wl,-rpath,/sw/rhel6-x64/eccodes/eccodes-2.3.0-gcc48/lib" \
+                    FC=gfortran F77=gfortran FFLAGS="-g -O2" \
+                    CC=gcc  CFLAGS='-g -Wall -O3 -march=native -mavx2 -fPIC'
+	else
+          ${CONFPATH}configure $PREFIX $CONFIG_OPTS  $CDILIBS \
+                    LDFLAGS="-Wl,-rpath,/sw/rhel6-x64/eccodes/eccodes-2.3.0-gcc48/lib" \
+                    FC=gfortran F77=gfortran FFLAGS="-g -O2" \
+                    CC=gcc  CFLAGS='-g -Wall -O3 -march=native -mavx2'
+	fi
+	;;
+    *)
+	echo "configuration for hostname $HOSTNAME not found!"
+	;;
+esac
