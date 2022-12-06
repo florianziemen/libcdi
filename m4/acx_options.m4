@@ -316,7 +316,7 @@ AC_ARG_WITH([borges],
                      [yes],[AC_CHECK_HEADERS([borges/borges.h],,
                                              [AC_MSG_ERROR([Could not find borges/borges.h])],
                                              [AC_INCLUDES_DEFAULT])
-                            AC_SEARCH_LIBS([borges_context_init],
+                            AC_SEARCH_LIBS([borg_context_init],
                                            [borges],
                                            [AC_DEFINE([HAVE_BORGES],[1],[BORGES library is present if defined to 1])],
                                            [AC_MSG_ERROR([Could not link to borges library])])],
@@ -327,7 +327,7 @@ AC_ARG_WITH([borges],
                                  AC_CHECK_HEADERS([borges/borges.h],,
                                                   [AC_MSG_ERROR([Could not find borges/borges.h])],
                                                   [AC_INCLUDES_DEFAULT])
-                                 AC_SEARCH_LIBS([borges_context_init],
+                                 AC_SEARCH_LIBS([borg_context_init],
                                                 [borges],
                                                 [AC_DEFINE([HAVE_BORGES],[1],[BORGES library is present if defined to 1])],
                                                 [AC_MSG_ERROR([Could not link to borges library])])
