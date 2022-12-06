@@ -85,6 +85,10 @@ test "x${nc_has_dap}" = 'xyes' || {
 
 export PATH="${WRONG_NETCDF_BINDIR}:${PATH-}"
 
+# Make sure we do not need RUBY, i.e. the Fortran interface files are not
+# re-generated:
+export RUBY=$(which false)
+
 "${top_srcdir}/configure" \
 --disable-across \
 --disable-cdi-app \
