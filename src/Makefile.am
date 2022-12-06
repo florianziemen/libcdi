@@ -300,8 +300,11 @@ cdipioFortran.c: cdipio.inc
 
 mo_cdi.f90: cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $< $@
+
+cdilib.c: $(libcdi_la_SOURCES) $(srcdir)/make_cdilib
+	$(AM_V_GEN)CPP='$(CPP)' $(srcdir)/make_cdilib $(srcdir)
 else !MAINTAINER_MODE
-cdiFortran.c cdi.inc cdipioFortran.c cdipio.inc mo_cdi.f90:
+cdiFortran.c cdi.inc cdipioFortran.c cdipio.inc mo_cdi.f90 cdilib.c:
 	@:;{ \
 	  echo "ERROR: cannot generate '$@' when the maintainer mode is disabled:"; \
           echo "       re-configure with the '--enable-maintainer-mode' option"; \
@@ -327,16 +330,18 @@ pkgconfig/cdipio.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdipio.pc
 pkgconfig/cdi_f2003.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdi_f2003.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-cdilib.c: $(libcdi_la_SOURCES) $(srcdir)/make_cdilib
-	$(AM_V_GEN)CPP='$(CPP)' $(srcdir)/make_cdilib $(srcdir)
-
-CLEANFILES = cdilib.c
 MOSTLYCLEANFILES = make_fint
 if ENABLE_ISOC_INTERFACE
 MOSTLYCLEANFILES += $(mo_cdi_mod)
 endif
 
-MAINTAINERCLEANFILES = cdi.inc cdiFortran.c cdipio.inc cdipioFortran.c mo_cdi.f90
+MAINTAINERCLEANFILES = \
+  cdi.inc \
+  cdiFortran.c \
+  cdilib.c \
+  cdipio.inc \
+  cdipioFortran.c \
+  mo_cdi.f90
 
 # Compile programs using Libtool:
 COMPILE = $(LTCOMPILE)

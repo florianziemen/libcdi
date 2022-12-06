@@ -126,7 +126,8 @@ Makefile
 /doc/cdi_fman.pdf
 
 # Dist stage files:
-/cdi-*.tar.gz
+/cdi-[0-9].[0-9].[0-9]*
+/cdi-[0-9].[0-9][0-9].[0-9]*
 /src/cdilib.c
 
 # Mac OS files:
