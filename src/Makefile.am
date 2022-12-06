@@ -7,7 +7,9 @@ lib_LTLIBRARIES =
 check_LTLIBRARIES =
 noinst_LTLIBRARIES =
 EXTRA_PROGRAMS = make_fint
-EXTRA_DIST = cdilib.c
+EXTRA_DIST = \
+  cdilib.c \
+  make_cdilib
 nodist_pkgconfig_DATA =
 nodist_cmake_DATA =
 
