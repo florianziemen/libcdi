@@ -12,7 +12,7 @@ init_intelclassic
 # The following compiler flags are used by the respective ICON configure
 # wrapper. They are not set into stone and can be changed if needed. It is just
 # important to keep them the same as in the wrapper.
-CFLAGS='-g -gdwarf-4 -qno-opt-dynamic-align -m64 -march=core-avx2 -mtune=core-avx2 -m64 -march=core-avx2 -mtune=core-avx2 -fma -ip -pc64 -std=gnu99 -O2 -ftz'
+CFLAGS='-g -gdwarf-4 -qno-opt-dynamic-align -m64 -march=core-avx2 -mtune=core-avx2 -fma -ip -pc64 -std=gnu99 -O2 -ftz'
 FCFLAGS='-m64 -march=core-avx2 -mtune=core-avx2 -g -gdwarf-4 -pc64 -fp-model source -O3 -ftz -qoverride-limits -assume realloc_lhs -align array64byte -fma -ip'
 
 if test ! -f "${top_srcdir}/configure"; then
