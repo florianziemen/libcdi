@@ -97,8 +97,8 @@ acx_cv_have_netcdf2=yes \
 acx_cv_have_netcdf4=yes \
 acx_cv_have_pnetcdf=no
 
-make -j8
+make
 
-make -j8 check || { cat tests/test-suite.log; exit 1; }
+make check || { cat tests/test-suite.log; exit 1; }
 
 check_no_git_untracked
