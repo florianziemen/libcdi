@@ -1,6 +1,7 @@
 check-develop-release:
   before_script:
     - . /sw/etc/profile.levante && module use /sw/spack-levante/spack/modules && module list
+    - module load texlive/live2021-gcc-11.2.0
   script:
     - git checkout -b develop-relase
     - ./scripts/git_add_dist
