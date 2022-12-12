@@ -10,3 +10,4 @@ check-develop-release:
     - xen, levante
   only:
     - develop
+    - k202125/add-gitlab-ci
