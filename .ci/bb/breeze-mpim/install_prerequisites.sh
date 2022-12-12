@@ -6,7 +6,7 @@ unset CDPATH
 module purge
 module load git
 
-install_dir='/data/mpi/sclab/sip/m300488/libcdi-ci-sw-bullseye'
+install_dir='/data/mpi/sclab/sip/m300488/libcdi-ci-sw'
 work_dir="$(pwd)/build"
 make_cmd='make -j22'
 
