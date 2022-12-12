@@ -4,9 +4,7 @@ check-develop-release:
     - module load texlive/live2021-gcc-11.2.0 ruby python3
   script:
     - git checkout -B develop-release
-    - ./scripts/git_add_dist
-    - git commit -m 'Add automatically generated files.'
-    - git push -f
+    - cd doc/tex && ./makehtml
   tags:
     - latex
   only:
