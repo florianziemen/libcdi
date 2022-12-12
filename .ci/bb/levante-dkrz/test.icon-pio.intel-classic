@@ -177,7 +177,7 @@ s/^library_names=.*/library_names=''/
 s/^installed=.*/installed=no/
 }" `find "${LOCAL_YAXT_ROOT}" "${LOCAL_PPM_ROOT}" -name '*.la'`
 
-make -j8
+make
 
 # The current general approach in the build system of ICON is to avoid building
 # the shared versions of the bundled libraries and link to the static ones
@@ -204,7 +204,7 @@ if test -n "${invalid_entries}"; then
   exit 1
 fi
 
-make -j8 check TESTS= XFAIL_TESTS=
+make check TESTS= XFAIL_TESTS=
 
 # Check that a test program is linked to YAXT and PPM statically as it should
 # when built inside the build system of ICON:
@@ -238,7 +238,7 @@ case " ${cdi_features} " in
     exit 1 ;;
 esac
 
-make -j8 check || { cat tests/test-suite.log; exit 1; }
+make check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
 

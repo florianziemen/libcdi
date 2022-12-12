@@ -49,9 +49,9 @@ PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 # Check whether the configure script removed the '.libs' directory:
 test -e .libs && echo "ERROR: the configure script did not remove directory '.libs'" && exit 1
 
-make -j8
+make
 
-make -j8 check || { cat tests/test-suite.log; exit 1; }
+make check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
 
