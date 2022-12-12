@@ -1,6 +1,5 @@
 check-develop-release:
   script:
-    - git checkout -B develop-release
     - cd doc/tex && ./makehtml
   tags:
     - latex
