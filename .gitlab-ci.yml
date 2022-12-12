@@ -1,0 +1,12 @@
+check-develop-release:
+  before_script:
+    - . /sw/etc/profile.levante && module use /sw/spack-levante/spack/modules && module list
+  script:
+    - git checkout -b develop-relase
+    - ./scripts/git_add_dist
+    - git commit -m 'Add automatically generated files.'
+    - git push -f
+  tags:
+    - xen, levante
+  only:
+    - develop
