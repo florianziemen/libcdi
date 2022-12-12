@@ -56,9 +56,9 @@ make check || { cat tests/test-suite.log; exit 1; }
 check_all_tests_passed tests/test-suite.log
 
 if test "x${enable_maintainer_mode}" = 'xyes'; then
-  make -j8 maintainer-clean
+  make maintainer-clean
 else
-  make -j8 distclean
+  make distclean
 fi
 
 check_no_files_in_cwd
