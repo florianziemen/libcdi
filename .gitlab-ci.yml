@@ -8,7 +8,7 @@ check-develop-release:
     - git commit -m 'Add automatically generated files.'
     - git push -f
   tags:
-    - xen, levante
+    - latex
   only:
     - develop
     - k202125/add-gitlab-ci
