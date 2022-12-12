@@ -23,16 +23,16 @@ class lt_install_lib(install_lib):
         verbose=1
         update=0
         if not self.dry_run and not os.path.isdir(infile):
-            raise DistutilsFileError, \
-                "cannot copy tree '%s': not a directory" % infile
+            raise DistutilsFileError(
+                "cannot copy tree '%s': not a directory" % infile)
         try:
             names = os.listdir(infile)
-        except os.error, (errno, errstr):
+        except os.error as e:
             if self.dry_run:
                 names = []
             else:
-                raise DistutilsFileError, \
-                    "error listing files in '%s': %s" % (infile, errstr)
+                raise DistutilsFileError(
+                    "error listing files in '%s': %s" % (infile, e.strerror))
 
         if not self.dry_run:
             mkpath(outfile, verbose=verbose)

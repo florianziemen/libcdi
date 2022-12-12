@@ -12,10 +12,10 @@ from setup import *
 cdiobj_module = Extension('_CdiObj',
                   sources=['cdiobj_wrap.cpp'],
                   extra_compile_args = INCFLAGS,
-                  library_dirs = map(lambda x: x.lstrip('-L'),
-                                     filter(lambda x: x if x.startswith('-L')
-                                            else None,
-                                            os.environ['LDFLAGS'].split())),
+                  library_dirs = list(map(
+                      lambda x: x.lstrip('-L'),
+                      filter(lambda x: x if x.startswith('-L') else None,
+                             os.environ['LDFLAGS'].split()))),
                   extra_objects = ['../cdi.lo'],
                   runtime_library_dirs = [os.environ['BUILDLIBDIR'],os.environ['LIBDIR']],
                   extra_link_args = LIBS,

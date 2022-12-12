@@ -7,10 +7,10 @@ import sys, os, distutils
 CdiLib_module = Extension('_CdiLib',
                   sources=['cdilib_wrap.c'],
                   extra_compile_args = INCFLAGS,
-                  library_dirs = map(lambda x: x.lstrip('-L'),
-                                     filter(lambda x: x if x.startswith('-L')
-                                            else None,
-                                            os.environ['LDFLAGS'].split())),
+                  library_dirs = list(map(
+                      lambda x: x.lstrip('-L'),
+                      filter(lambda x: x if x.startswith('-L') else None,
+                             os.environ['LDFLAGS'].split()))),
                   libraries = ['cdi'],
                   extra_link_args = LIBS,
                   )
