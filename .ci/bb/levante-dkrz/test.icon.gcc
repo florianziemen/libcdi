@@ -22,6 +22,10 @@ if test ! -f "${top_srcdir}/configure"; then
   "${top_srcdir}/configure" --enable-maintainer-mode && make -C src mo_cdi.f90 && make distclean
 fi
 
+# Make sure we do not need RUBY, i.e. the Fortran interface files are not
+# re-generated:
+export RUBY=$(which false)
+
 "${top_srcdir}/configure" \
 --disable-across \
 --disable-cdi-app \
@@ -93,8 +97,8 @@ acx_cv_have_netcdf2=yes \
 acx_cv_have_netcdf4=yes \
 acx_cv_have_pnetcdf=no
 
-make -j8
+make
 
-make -j8 check || { cat tests/test-suite.log; exit 1; }
+make check || { cat tests/test-suite.log; exit 1; }
 
 check_no_git_untracked

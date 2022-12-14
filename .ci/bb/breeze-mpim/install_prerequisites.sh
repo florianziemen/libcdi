@@ -6,7 +6,7 @@ unset CDPATH
 module purge
 module load git
 
-install_dir='/data/mpi/sclab/sip/m300488/libcdi-ci-sw-bullseye'
+install_dir='/data/mpi/sclab/sip/m300488/libcdi-ci-sw'
 work_dir="$(pwd)/build"
 make_cmd='make -j22'
 
@@ -61,7 +61,7 @@ module load mpich/3.4.3-nvhpc-22.3
 build_dir="${ppm_name_tag}-${compiler_name_tag}"
 mkdir "${build_dir}"
 ( cd "${build_dir}"
-  "${ppm_src_dir}/configure" ${ppm_config_args} --prefix="${install_dir}/${ppm_name_tag}-${compiler_name_tag}"
+  "${ppm_src_dir}/configure" ${ppm_config_args} --prefix="${install_dir}/${ppm_name_tag}-${compiler_name_tag}" FCFLAGS='-g -O2 -tp sandybridge' CFLAGS='-g -O2 -tp sandybridge'
   $make_cmd
   $make_cmd check
   $make_cmd install )
@@ -70,7 +70,7 @@ mkdir "${build_dir}"
 build_dir="${yaxt_name_tag}-${compiler_name_tag}"
 mkdir "${build_dir}"
 ( cd "${build_dir}"
-  "${yaxt_src_dir}/configure" ${yaxt_config_args} --prefix="${install_dir}/${yaxt_name_tag}-${compiler_name_tag}"
+  "${yaxt_src_dir}/configure" ${yaxt_config_args} --prefix="${install_dir}/${yaxt_name_tag}-${compiler_name_tag}" FCFLAGS='-g -O2 -tp sandybridge' CFLAGS='-g -O2 -tp sandybridge'
   $make_cmd
   $make_cmd check
   $make_cmd install )
