@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#include "calendar.h"
+#include "normalize_month.h"
 
 int
 main(void)
@@ -19,7 +19,7 @@ main(void)
         startYear = 1900
       };
       int month = vals[i];
-      struct yearMonth ym = normalize_month(startYear, month);
+      struct YearMonth ym = normalize_month(startYear, month);
       if ((long) ym.year * 12 + ym.month != (long) startYear * 12 + month)
         {
           fprintf(stderr,
@@ -42,7 +42,7 @@ main(void)
   for (size_t j = 0; j < 1000000; ++j)
     {
       int year = (int) (random() - RAND_MAX / 2), month = (int) (random() - RAND_MAX / 2);
-      struct yearMonth ym = normalize_month(year, month);
+      struct YearMonth ym = normalize_month(year, month);
       if ((long) ym.year * 12 + ym.month != (long) year * 12 + month)
         {
           fprintf(stderr,

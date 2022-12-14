@@ -11,6 +11,7 @@
 #include "serialize.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
+#include "normalize_month.h"
 
 static int DefaultTimeType = TAXIS_ABSOLUTE;
 static int DefaultTimeUnit = TUNIT_HOUR;
@@ -500,14 +501,14 @@ taxisDefNumavg(int taxisID, int numavg)
 int
 taxisInqType(int taxisID)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return taxisptr->type;
 }
 
 int
 taxisHasBounds(int taxisID)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return taxisptr->has_bounds;
 }
 
@@ -564,7 +565,7 @@ taxisCopyTimestep(int taxisID2, int taxisID1)
 CdiDateTime
 taxisInqVdatetime(int taxisID)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return taxisptr->vDateTime;
 }
 
@@ -601,21 +602,21 @@ The function @func{taxisInqVdate} returns the verification date of a Time axis.
 int
 taxisInqVdate(int taxisID)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return (int) cdiDate_get(taxisptr->vDateTime.date);
 }
 
 CdiDateTime
 taxisInqSdatetime(int taxisID)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return taxisptr->sDateTime;
 }
 
 void
 taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   *vdate_lb = (int) cdiDate_get(taxisptr->vDateTime_lb.date);
   *vdate_ub = (int) cdiDate_get(taxisptr->vDateTime_ub.date);
 }
@@ -623,7 +624,7 @@ taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
 void
 taxisInqVdatetimeBounds(int taxisID, CdiDateTime *vDateTime_lb, CdiDateTime *vDateTime_ub)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   *vDateTime_lb = taxisptr->vDateTime_lb;
   *vDateTime_ub = taxisptr->vDateTime_ub;
 }
@@ -677,14 +678,14 @@ The function @func{taxisInqVtime} returns the verification time of a Time axis.
 int
 taxisInqVtime(int taxisID)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return cdiTime_get(taxisptr->vDateTime.time);
 }
 
 void
 taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   *vtime_lb = cdiTime_get(taxisptr->vDateTime_lb.time);
   *vtime_ub = cdiTime_get(taxisptr->vDateTime_ub.time);
 }
@@ -817,35 +818,35 @@ The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_PROLEP
 int
 taxisInqCalendar(int taxisID)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return taxisptr->calendar;
 }
 
 int
 taxisInqTunit(int taxisID)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return taxisptr->unit;
 }
 
 int
 taxisInqForecastTunit(int taxisID)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return taxisptr->fc_unit;
 }
 
 double
 taxisInqForecastPeriod(int taxisID)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return taxisptr->fc_period;
 }
 
 int
 taxisInqNumavg(int taxisID)
 {
-  const taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return taxisptr->numavg;
 }
 
@@ -867,7 +868,7 @@ ptaxisDefName(taxis_t *taxisptr, const char *name)
 {
   if (name)
     {
-      const size_t len = strlen(name);
+      size_t len = strlen(name);
       delete_refcount_string(taxisptr->name);
       char *taxisname = taxisptr->name = new_refcount_string(len);
       strcpy(taxisname, name);
@@ -879,7 +880,7 @@ ptaxisDefLongname(taxis_t *taxisptr, const char *longname)
 {
   if (longname)
     {
-      const size_t len = strlen(longname);
+      size_t len = strlen(longname);
       delete_refcount_string(taxisptr->longname);
       char *taxislongname = taxisptr->longname = new_refcount_string(len);
       strcpy(taxislongname, longname);
@@ -898,7 +899,7 @@ ptaxisDefUnits(taxis_t *taxisptr, const char *units)
 {
   if (units)
     {
-      const size_t len = strlen(units);
+      size_t len = strlen(units);
       char *taxisunits = ptaxisAllocUnits(taxisptr, len);
       strcpy(taxisunits, units);
     }
@@ -925,7 +926,7 @@ timevalue_decode(int timeunits, double timevalue)
   if (timeunits == TUNIT_SECOND)
     {
       julianDate.julianDay = (int64_t) (timevalue / 86400.0);
-      const double seconds = timevalue - julianDate.julianDay * 86400.0;
+      double seconds = timevalue - julianDate.julianDay * 86400.0;
       julianDate.secondOfDay = round(seconds * 1000.0) / 1000.0;
       if (julianDate.secondOfDay < 0)
         {
@@ -943,7 +944,7 @@ timevalue_decode(int timeunits, double timevalue)
   else if (timeunits == TUNIT_DAY)
     {
       julianDate.julianDay = (int64_t) timevalue;
-      const double seconds = (timevalue - julianDate.julianDay) * 86400.0;
+      double seconds = (timevalue - julianDate.julianDay) * 86400.0;
       julianDate.secondOfDay = (int) lround(seconds);
       if (julianDate.secondOfDay < 0)
         {
@@ -1012,7 +1013,7 @@ rtimeval2datetime(double timevalue, const taxis_t *taxis)
   if (IS_EQUAL(timevalue, 0.0)) return taxis->rDateTime;
 
   int timeunits = taxis->unit;
-  const int calendar = taxis->calendar;
+  int calendar = taxis->calendar;
 
   if (timeunits == TUNIT_MONTH && calendar == CALENDAR_360DAYS)
     {
@@ -1029,12 +1030,12 @@ rtimeval2datetime(double timevalue, const taxis_t *taxis)
 
       if (timeunits == TUNIT_YEAR) timevalue *= 12;
 
-      const int nmon = (int) timevalue;
-      const double fmon = timevalue - nmon;
+      int nmon = (int) timevalue;
+      double fmon = timevalue - nmon;
 
       month += nmon;
 
-      struct yearMonth ym = normalize_month(year, month);
+      struct YearMonth ym = normalize_month(year, month);
       year = ym.year;
       month = ym.month;
 
@@ -1045,8 +1046,8 @@ rtimeval2datetime(double timevalue, const taxis_t *taxis)
       rDateTime.date.month = month;
     }
 
-  const JulianDate julianDate = julianDate_encode(calendar, rDateTime);
-  const JulianDate julianDate2 = timevalue_decode(timeunits, timevalue);
+  JulianDate julianDate = julianDate_encode(calendar, rDateTime);
+  JulianDate julianDate2 = timevalue_decode(timeunits, timevalue);
 
   return julianDate_decode(calendar, julianDate_add(julianDate2, julianDate));
 }
@@ -1057,9 +1058,9 @@ datetime2rtimeval(CdiDateTime vDateTime, const taxis_t *taxis)
 {
   double value = 0.0;
 
-  const int calendar = taxis->calendar;
+  int calendar = taxis->calendar;
   int timeunits = taxis->unit;
-  const int timeunits0 = timeunits;
+  int timeunits0 = timeunits;
 
   CdiDateTime rDateTime = taxis->rDateTime;
 
@@ -1067,14 +1068,14 @@ datetime2rtimeval(CdiDateTime vDateTime, const taxis_t *taxis)
 
   if (cdiDateTime_isNull(rDateTime) && cdiDateTime_isNull(vDateTime)) return value;
 
-  const JulianDate julianDate1 = julianDate_encode(calendar, rDateTime);
+  JulianDate julianDate1 = julianDate_encode(calendar, rDateTime);
 
   if (timeunits == TUNIT_MONTH && calendar == CALENDAR_360DAYS) timeunits = TUNIT_DAY;
 
   if (timeunits == TUNIT_MONTH || timeunits == TUNIT_YEAR)
     {
-      const int ryear = rDateTime.date.year;
-      const int rmonth = rDateTime.date.month;
+      int ryear = rDateTime.date.year;
+      int rmonth = rDateTime.date.month;
       int year = vDateTime.date.year;
       int month = vDateTime.date.month;
       value = (year - ryear) * 12 - rmonth + month;
@@ -1082,24 +1083,24 @@ datetime2rtimeval(CdiDateTime vDateTime, const taxis_t *taxis)
       int nmonth = (int) value;
       month -= nmonth;
 
-      struct yearMonth ym = normalize_month(year, month);
+      struct YearMonth ym = normalize_month(year, month);
       year = ym.year;
       month = ym.month;
 
-      const int dpm = days_per_month(calendar, year, month);
+      int dpm = days_per_month(calendar, year, month);
 
       vDateTime.date.year = year;
       vDateTime.date.month = month;
-      const JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
-      const JulianDate dateDifference = julianDate_sub(julianDate2, julianDate1);
+      JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
+      JulianDate dateDifference = julianDate_sub(julianDate2, julianDate1);
 
       value += (dateDifference.julianDay + dateDifference.secondOfDay / 86400.0) / dpm;
       if (timeunits == TUNIT_YEAR) value = value / 12;
     }
   else
     {
-      const JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
-      const JulianDate dateDifference = julianDate_sub(julianDate2, julianDate1);
+      JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
+      JulianDate dateDifference = julianDate_sub(julianDate2, julianDate1);
 
       value = cdi_encode_timevalue(dateDifference.julianDay, dateDifference.secondOfDay, timeunits);
     }
@@ -1113,17 +1114,17 @@ datetime2rtimeval(CdiDateTime vDateTime, const taxis_t *taxis)
 static CdiDateTime
 atimeval2datetime(double timevalue)
 {
-  const int64_t vdate = (int64_t) timevalue;
-  const double tmpval = (timevalue - vdate) * 86400.0;
-  const int daysec = (vdate < 0) ? (int) (-tmpval + 0.01) : (int) (tmpval + 0.01);
+  int64_t vdate = (int64_t) timevalue;
+  double tmpval = (timevalue - vdate) * 86400.0;
+  int daysec = (vdate < 0) ? (int) (-tmpval + 0.01) : (int) (tmpval + 0.01);
 
   int year, month, day;
   cdiDecodeDate(vdate, &year, &month, &day);
 
-  const int hour = daysec / 3600;
-  const int minute = (daysec - hour * 3600) / 60;
-  const int second = daysec - hour * 3600 - minute * 60;
-  const int ms = 0;
+  int hour = daysec / 3600;
+  int minute = (daysec - hour * 3600) / 60;
+  int second = daysec - hour * 3600 - minute * 60;
+  int ms = 0;
 
   CdiDateTime datetime;
   datetime.date = cdiDate_encode(year, month, day);
@@ -1240,7 +1241,7 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
   taxis->fc_period = timevalue;
 
   int timeunits = taxis->fc_unit;
-  const int calendar = taxis->calendar;
+  int calendar = taxis->calendar;
 
   if (cdiDateTime_isNull(taxis->vDateTime) && DBL_IS_EQUAL(timevalue, 0.0)) return;
 
@@ -1259,12 +1260,12 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
 
       if (timeunits == TUNIT_YEAR) timevalue *= 12;
 
-      const int nmon = (int) timevalue;
-      const double fmon = timevalue - nmon;
+      int nmon = (int) timevalue;
+      double fmon = timevalue - nmon;
 
       month -= nmon;
 
-      struct yearMonth ym = normalize_month(year, month);
+      struct YearMonth ym = normalize_month(year, month);
       year = ym.year;
       month = ym.month;
 
@@ -1275,8 +1276,8 @@ cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
       vDateTime.date.month = month;
     }
 
-  const JulianDate julianDate = julianDate_encode(calendar, vDateTime);
-  const JulianDate julianDate2 = timevalue_decode(timeunits, timevalue);
+  JulianDate julianDate = julianDate_encode(calendar, vDateTime);
+  JulianDate julianDate2 = timevalue_decode(timeunits, timevalue);
 
   taxis->fDateTime = julianDate_decode(calendar, julianDate_sub(julianDate, julianDate2));
 }
@@ -1300,7 +1301,7 @@ cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis)
         }
       else if (taxis->unit == TUNIT_MONTH)
         {
-          const int64_t xdate = cdiDate_get(datetime.date);
+          int64_t xdate = cdiDate_get(datetime.date);
           timeValue = xdate / 100 + copysign((double) (datetime.date.day != 0) * 0.5, (double) xdate);
         }
       else if (taxis->unit == TUNIT_SECOND)
@@ -1313,7 +1314,7 @@ cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis)
         {
           int hour, minute, second, ms;
           cdiTime_decode(datetime.time, &hour, &minute, &second, &ms);
-          const int64_t xdate = cdiDate_get(datetime.date);
+          int64_t xdate = cdiDate_get(datetime.date);
           timeValue = copysign(1.0, (double) xdate) * (fabs((double) xdate) + (hour * 3600 + minute * 60 + second) / 86400.0);
         }
     }

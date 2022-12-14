@@ -159,6 +159,7 @@ libcdi_la_SOURCES = \
   model.h \
   namespace.c \
   namespace.h \
+  mormalize_month.h \
   referenceCounting.c \
   referenceCounting.h \
   resource_handle.c \
