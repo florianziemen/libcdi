@@ -6,8 +6,6 @@
 
 // clang-format off
 
-#include <stdlib.h>
-
 #include "cdi.h"
 
 #ifdef __cplusplus
@@ -32,24 +30,10 @@ calendar_dpy(int calendar)
 int days_per_year(int calendar, int year);
 int days_per_month(int calendar, int year, int month);
 
-struct yearMonth
-{
-  int year, month;
-};
-
-/* normalizes month to range [1,12] and adjusts year accordingly */
-static inline struct yearMonth
-normalize_month(int year, int month)
-{
-  div_t modres = div(month - 1, 12);
-  year += modres.quot - ((month < 1) & (modres.rem != 0));
-  return (struct yearMonth){ .year = year, .month = (modres.rem + 12) % 12 + 1 };
-}
-
 #ifdef __cplusplus
 }
 #endif
 
 // clang-format on
 
-#endif /* CALENDAR_H */
+#endif
