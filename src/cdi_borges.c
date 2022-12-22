@@ -168,7 +168,7 @@ int borges_connect(const char *path, char filemode, stream_t *streamptr)
     Warning("Reading from BORGES not implemented yet"); // TODO read from BORGES
     return CDI_EINVAL;
   }
-  int sock = borg_connect_int(path, filemode, streamptr);
+  int sock = borges_connect_int(path, filemode, streamptr);
   return sock;
 }
 
