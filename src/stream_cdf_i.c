@@ -3849,8 +3849,8 @@ find_leadtime(int nvars, ncvar_t *ncvars, int timedimid)
 }
 
 static void
-find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, stream_t *streamptr, bool *time_has_units,
-               bool *time_has_bounds, bool *time_climatology)
+find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, stream_t *streamptr, bool *timeHasUnits,
+               bool *timeHasBounds, bool *timeClimatology)
 {
   int ncvarid;
 
@@ -3876,12 +3876,12 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
     }
   else
     {
-      bool ltimevar = false;
+      bool hasTimeVar = false;
 
       if (ncdims[timedimid].ncvarid != CDI_UNDEFID)
         {
           streamptr->basetime.ncvarid = ncdims[timedimid].ncvarid;
-          ltimevar = true;
+          hasTimeVar = true;
         }
 
       for (ncvarid = 0; ncvarid < nvars; ncvarid++)
@@ -3892,11 +3892,10 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
             {
               ncvar->varStatus = CoordVar;
 
-              if (!ltimevar)
+              if (!hasTimeVar)
                 {
+                  hasTimeVar = true;
                   streamptr->basetime.ncvarid = ncvarid;
-                  ltimevar = true;
-                  if (CDI_Debug) fprintf(stderr, "timevar %s\n", ncvar->name);
                 }
               else
                 {
@@ -3905,7 +3904,7 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
             }
         }
 
-      if (ltimevar == false)  // search for WRF time description
+      if (hasTimeVar == false)  // search for WRF time description
         {
           for (ncvarid = 0; ncvarid < nvars; ncvarid++)
             {
@@ -3924,7 +3923,7 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
       // time varID
       ncvarid = streamptr->basetime.ncvarid;
 
-      if (ncvarid == CDI_UNDEFID) Warning("Time variable >%s< not found!", ncdims[timedimid].name);
+      if (ncvarid == CDI_UNDEFID && ncdims[timedimid].len > 0) Warning("Time variable >%s< not found!", ncdims[timedimid].name);
     }
 
   // time varID
@@ -3933,7 +3932,7 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
   if (ncvarid != CDI_UNDEFID && streamptr->basetime.lwrf == false)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
-      if (ncvar->units[0] != 0) *time_has_units = true;
+      if (ncvar->units[0] != 0) *timeHasUnits = true;
 
       if (ncvar->bounds != CDI_UNDEFID)
         {
@@ -3943,9 +3942,9 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
               int len = (int) ncdims[ncvars[ncvar->bounds].dimids[nbdims - 1]].len;
               if (len == 2 && timedimid == ncvars[ncvar->bounds].dimids[0])
                 {
-                  *time_has_bounds = true;
+                  *timeHasBounds = true;
                   streamptr->basetime.ncvarboundsid = ncvar->bounds;
-                  if (ncvar->isClimatology) *time_climatology = true;
+                  if (ncvar->isClimatology) *timeClimatology = true;
                 }
             }
         }
@@ -4152,9 +4151,9 @@ cdfVerifyVars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 int
 cdfInqContents(stream_t *streamptr)
 {
-  bool time_has_units = false;
-  bool time_has_bounds = false;
-  bool time_climatology = false;
+  bool timeHasUnits = false;
+  bool timeHasBounds = false;
+  bool timeClimatology = false;
   int leadtime_id = CDI_UNDEFID;
   int format = 0;
   char fcreftime[CDI_MAX_NAME];
@@ -4314,7 +4313,7 @@ cdfInqContents(stream_t *streamptr)
     }
 
   // find time vars
-  find_time_vars(nvars, ncvars, ncdims, timedimid, streamptr, &time_has_units, &time_has_bounds, &time_climatology);
+  find_time_vars(nvars, ncvars, ncdims, timedimid, streamptr, &timeHasUnits, &timeHasBounds, &timeClimatology);
 
   leadtime_id = find_leadtime(nvars, ncvars, timedimid);
   if (leadtime_id != CDI_UNDEFID) ncvars[leadtime_id].varStatus = CoordVar;
@@ -4442,10 +4441,10 @@ cdfInqContents(stream_t *streamptr)
   // time varID
   int nctimevarid = streamptr->basetime.ncvarid;
 
-  if (nctimevarid != CDI_UNDEFID && (!time_has_units || streamptr->basetime.lwrf)) ncvars[nctimevarid].units[0] = 0;
-  if (nctimevarid != CDI_UNDEFID && time_has_units) streamptr->basetime.lunits = true;
+  if (nctimevarid != CDI_UNDEFID && (!timeHasUnits || streamptr->basetime.lwrf)) ncvars[nctimevarid].units[0] = 0;
+  if (nctimevarid != CDI_UNDEFID && timeHasUnits) streamptr->basetime.lunits = true;
 
-  if (time_has_units)
+  if (timeHasUnits)
     {
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
@@ -4470,10 +4469,10 @@ cdfInqContents(stream_t *streamptr)
         }
     }
 
-  if (time_has_bounds)
+  if (timeHasBounds)
     {
       streamptr->tsteps[0].taxis.has_bounds = true;
-      if (time_climatology) streamptr->tsteps[0].taxis.climatology = true;
+      if (timeClimatology) streamptr->tsteps[0].taxis.climatology = true;
     }
 
   if (nctimevarid != CDI_UNDEFID)
@@ -4510,7 +4509,7 @@ cdfInqContents(stream_t *streamptr)
   else
     {
       taxisID = taxisCreate(TAXIS_ABSOLUTE);
-      if (!time_has_units)
+      if (!timeHasUnits)
         {
           taxisDefTunit(taxisID, TUNIT_DAY);
           streamptr->tsteps[0].taxis.unit = TUNIT_DAY;
