@@ -107,7 +107,7 @@ parTableFinalize(void)
   for (int tableID = 0; tableID < MAX_TABLE; ++tableID)
     if (parTable[tableID].used)
       {
-        const int npars = parTable[tableID].npars;
+        int npars = parTable[tableID].npars;
         for (int item = 0; item < npars; ++item)
           {
             if (parTable[tableID].pars[item].dupflags & TABLE_DUP_NAME) Free((void *) parTable[tableID].pars[item].name);
@@ -276,7 +276,7 @@ decodeForm2(char *pline, char *name, char *longname, char *units)
   pend--;
   while (isspace((int) *pend)) pend--;
   {
-    const size_t len = (size_t) (pend - pline + 1);
+    size_t len = (size_t) (pend - pline + 1);
     if (len > 0)
       {
         memcpy(longname, pline, len);
@@ -306,9 +306,7 @@ int
 tableRead(const char *tablefile)
 {
   char line[1024], *pline;
-  int lnr = 0;
   char name[256], longname[256], units[256];
-  int err;
   int tableID = CDI_UNDEFID;
 
   FILE *tablefp = fopen(tablefile, "r");
@@ -326,9 +324,6 @@ tableRead(const char *tablefile)
     {
       size_t len = strlen(line);
       if (line[len - 1] == '\n') line[len - 1] = '\0';
-      lnr++;
-      int id = CDI_UNDEFID;
-      int ltype = CDI_UNDEFID;
       name[0] = 0;
       longname[0] = 0;
       units[0] = 0;
@@ -338,12 +333,13 @@ tableRead(const char *tablefile)
       len = strlen(pline);
       if (len < 4) continue;
       while (isspace((int) *pline)) pline++;
-      id = atoi(pline);
+      int id = atoi(pline);
       // if ( id > 255 ) id -= 256;
       if (id == 0) continue;
 
       while (isdigit((int) *pline)) pline++;
 
+      int ltype = CDI_UNDEFID;
       if (*pline == ';' || *pline == ':')
         {
           pline++;
@@ -359,11 +355,7 @@ tableRead(const char *tablefile)
 
       while (isdigit((int) *pline)) pline++;
 
-      if (strchr(pline, '|'))
-        err = decodeForm2(pline, name, longname, units);
-      else
-        err = decodeForm1(pline, name, longname, units);
-
+      int err = (strchr(pline, '|')) ? decodeForm2(pline, name, longname, units) : decodeForm1(pline, name, longname, units);
       if (err) continue;
 
       if (name[0] == 0) snprintf(name, sizeof(name), "var%d", id);
@@ -409,7 +401,7 @@ tableFromEnv(int modelID, int tablenum)
   strcat(tablefile, tablename);
   // if (tablefile) printf("tableFile = %s\n", tablefile);
 
-  const int tableID = tableRead(tablefile);
+  int tableID = tableRead(tablefile);
   if (tableID != CDI_UNDEFID)
     {
       tableDefModelID(tableID, modelID);
@@ -469,7 +461,7 @@ tableInq(int modelID, int tablenum, const char *tablename)
               if ((modelName = modelInqNamePtr(modelID)))
                 {
                   strcpy(tablefile, modelName);
-                  const size_t len = strlen(tablefile);
+                  size_t len = strlen(tablefile);
                   for (size_t i = 0; i < len; i++)
                     if (tablefile[i] == '.') tablefile[i] = '\0';
                   modelID2 = modelInq(-1, 0, tablefile);
@@ -577,7 +569,7 @@ max_length(size_t maxlen, const char *cstring)
 {
   if (cstring)
     {
-      const size_t len = strlen(cstring);
+      size_t len = strlen(cstring);
       if (len > maxlen) maxlen = len;
     }
   return maxlen;
@@ -603,7 +595,7 @@ tableWrite(const char *ptfile, int tableID)
 
   FILE *ptfp = fopen(ptfile, "w");
 
-  const int npars = parTable[tableID].npars;
+  int npars = parTable[tableID].npars;
   for (int item = 0; item < npars; item++)
     {
       maxname = max_length(maxname, parTable[tableID].pars[item].name);
@@ -611,8 +603,8 @@ tableWrite(const char *ptfile, int tableID)
       maxunits = max_length(maxunits, parTable[tableID].pars[item].units);
     }
 
-  const int tablenum = tableInqNum(tableID);
-  const int modelID = parTable[tableID].modelID;
+  int tablenum = tableInqNum(tableID);
+  int modelID = parTable[tableID].modelID;
   if (modelID != CDI_UNDEFID)
     {
       modelnameptr = modelInqNamePtr(modelID);
@@ -673,7 +665,7 @@ tableFWriteC(FILE *ptfp, int tableID)
 
   partabCheckID(tableID);
 
-  const int npars = parTable[tableID].npars;
+  int npars = parTable[tableID].npars;
   for (int item = 0; item < npars; item++)
     {
       maxname = max_length(maxname, parTable[tableID].pars[item].name);
@@ -684,7 +676,7 @@ tableFWriteC(FILE *ptfp, int tableID)
   strncpy(tablename, parTable[tableID].name, sizeof(tablename) - 1);
   tablename[sizeof(tablename) - 1] = '\0';
   {
-    const size_t len = strlen(tablename);
+    size_t len = strlen(tablename);
     for (size_t i = 0; i < len; i++)
       if (tablename[i] == '.') tablename[i] = '_';
   }
@@ -716,7 +708,7 @@ tableInqEntry(int tableID, int id, int ltype, char *name, char *longname, char *
 
   if (tableID != CDI_UNDEFID)
     {
-      const int npars = parTable[tableID].npars;
+      int npars = parTable[tableID].npars;
       for (int item = 0; item < npars; item++)
         {
           if (parTable[tableID].pars[item].id == id
@@ -739,7 +731,7 @@ tableInqParCode(int tableID, char *varname, int *code)
 
   if (tableID != CDI_UNDEFID && varname != NULL)
     {
-      const int npars = parTable[tableID].npars;
+      int npars = parTable[tableID].npars;
       for (int item = 0; item < npars; item++)
         {
           if (parTable[tableID].pars[item].name && strcmp(parTable[tableID].pars[item].name, varname) == 0)
