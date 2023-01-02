@@ -1024,7 +1024,7 @@ cdfScanAttrAxis(ncvar_t *ncvars, ncdim_t *ncdims, int ncvarid, const char *attst
   if (attlen != nvdims) return;
 
   static const char accept[] = "-tTzZyYxX";
-  if (strspn(attstring, accept) != attlen) return;
+  if ((int)strspn(attstring, accept) != attlen) return;
 
   while (attlen--)
     {
