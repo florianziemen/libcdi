@@ -41,7 +41,7 @@ case "${HOSTNAME}" in
                     --with-szlib=$HOME/local \
 	            CC=icc CFLAGS="-g -D_REENTRANT -Wall -Wwrite-strings -O3 -march=native -fp-model source"
 	;;
-    bailung*|d133*|d134*)
+    bailung*|d146*)
 	${CONFPATH}configure --prefix=$HOME/local/cdi \
                     --enable-maintainer-mode \
                     --enable-iso-c-interface \
