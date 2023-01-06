@@ -316,10 +316,12 @@ AC_ARG_WITH([borges],
                      [yes],[AC_CHECK_HEADERS([borges/borges.h],,
                                              [AC_MSG_ERROR([Could not find borges/borges.h])],
                                              [AC_INCLUDES_DEFAULT])
+                            AC_CHECK_LIB([rt], [shm_open])
                             AC_SEARCH_LIBS([borg_context_init],
                                            [borges],
                                            [AC_DEFINE([HAVE_BORGES],[1],[BORGES library is present if defined to 1])],
-                                           [AC_MSG_ERROR([Could not link to borges library])])],
+                                           [AC_MSG_ERROR([Could not link to borges library])],
+                                           [-lrt])],
                      [*],[BORGES_ROOT=$with_borges
                           AS_IF([test -d "$BORGES_ROOT"],
                                 [LDFLAGS="-L$BORGES_ROOT/lib $LDFLAGS"
@@ -327,11 +329,13 @@ AC_ARG_WITH([borges],
                                  AC_CHECK_HEADERS([borges/borges.h],,
                                                   [AC_MSG_ERROR([Could not find borges/borges.h])],
                                                   [AC_INCLUDES_DEFAULT])
+                                 AC_CHECK_LIB([rt], [shm_open])
                                  AC_SEARCH_LIBS([borg_context_init],
                                                 [borges],
                                                 [AC_DEFINE([HAVE_BORGES],[1],[BORGES library is present if defined to 1])],
-                                                [AC_MSG_ERROR([Could not link to borges library])])
-                                 BORGES_LIBS=" -L$BORGES_ROOT/lib -lborges"
+                                                [AC_MSG_ERROR([Could not link to borges library])],
+                                                [-lrt])
+                                 BORGES_LIBS=" -L$BORGES_ROOT/lib"
                                  BORGES_INCLUDE=" -I$BORGES_ROOT/include"],
                                 [AC_MSG_ERROR([$BORGES_ROOT is not a directory! BORGES suppressed])])])])
 AC_SUBST([BORGES_INCLUDE])
