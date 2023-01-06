@@ -157,6 +157,12 @@ test "x$acx_cv_f77_ftn_include_flag" != "x$FC_OPTINC"],
 AS_VAR_IF([enable_cf_interface], [auto], [enable_cf_interface=yes])
 AM_CONDITIONAL([ENABLE_CF_INTERFACE], [test "x$enable_cf_interface" = xyes])
 
+AC_ARG_ENABLE([borges],
+  [AS_HELP_STRING([--enable-borges],
+     [enable output to BORGES data system @<:@default=no@:>@])],
+  [AS_IF([test x"$enableval" != xno], [enable_borges=yes])],
+  [enable_borges=no])
+
 AC_ARG_ENABLE([ruby-interface],
   [AS_HELP_STRING([--enable-ruby-interface],
      [create Ruby language interface (EXPERIMENTAL) @<:@default=no@:>@])],
@@ -596,6 +602,15 @@ AM_CONDITIONAL([BUILD_PIO_FC_PROGRAMS], [test "x$build_pio_fc_programs" = xyes])
 AM_CONDITIONAL([ENABLE_MPI], [test "x$enable_mpi" = xyes])
 AM_CONDITIONAL([HAVE_PARALLEL_NC4], [test "x$have_parallel_nc4" = xyes])
 
+AS_VAR_IF([enable_borges], [yes],
+  [ACX_C_PACKAGE([BORGES], [borges/borges.h],,,
+     [AC_MSG_FAILURE([required header borges/borges.h not found or not compilable])],
+     [borg_context_init],[borges], [rt], [],
+     [AC_MSG_FAILURE([cannot link C BORGES programs])])
+   AC_DEFINE([HAVE_BORGES], [1],
+     [supporting output to BORGES data system])])
+AM_CONDITIONAL([ENABLE_BORGES], [test "x$enable_borges" = xyes])
+
 AM_MISSING_PROG([SWIG], [swig])
 
 AS_VAR_IF([enable_ruby_interface], [yes],
@@ -685,6 +700,11 @@ AS_VAR_IF([have_parallel_nc4],[yes],
   [HAVE_PARALLEL_NC4=0])
 AC_SUBST([HAVE_PARALLEL_NC4])
 AM_SUBST_NOTMAKE([HAVE_PARALLEL_NC4])
+AS_VAR_IF([enable_borges],[yes],
+  [ENABLE_BORGES=true],
+  [ENABLE_BORGES=false])
+AC_SUBST([ENABLE_BORGES])
+AM_SUBST_NOTMAKE([ENABLE_BORGES])
 AS_VAR_IF([enable_ruby_interface],[yes],
   [ENABLE_RUBY_INTERFACE=true],
   [ENABLE_RUBY_INTERFACE=false])

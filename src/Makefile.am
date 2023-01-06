@@ -101,8 +101,6 @@ libcdi_la_SOURCES = \
   cdf_util.h \
   cdf_write.c \
   cdi.h \
-  cdi_borges.c \
-  cdi_borges.h \
   cdi_att.c \
   cdi_att.h \
   cdi_cksum.c \
@@ -222,6 +220,12 @@ libcdi_la_SOURCES += \
   cdiFortran.c \
   cfortran.h
 endif ENABLE_CF_INTERFACE
+
+if ENABLE_BORGES
+libcdi_la_SOURCES += \
+  cdi_borges.c \
+  cdi_borges.h
+endif ENABLE_BORGES
 
 if HAVE_LIBGRIB_API
 libcdi_la_SOURCES += \

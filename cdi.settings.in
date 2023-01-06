@@ -47,8 +47,8 @@
         "include"  : "@GRIB_API_INCLUDE@"
       },
       "borges" : {
-        "lib"      : "@BORGES_LIBS@",
-        "include"  : "@BORGES_INCLUDE@"
+        "lib"      : "@BORGES_C_LIB@",
+        "include"  : "@BORGES_C_INCLUDE@"
       },
       "eccodes" : {
         "lib"      : "@ECCODES_LIBS@",
@@ -66,6 +66,7 @@
     "service"        : "@ENABLE_SERVICE@",
     "extra"          : "@ENABLE_EXTRA@",
     "ieg"            : "@ENABLE_IEG@",
+    "enable_borges"  : @ENABLE_BORGES@,
     "enable_mpi"     : @ENABLE_MPI@,
     "parallel_nc4"   : @HAVE_PARALLEL_NC4@,
     "enable_python"  : @ENABLE_PYTHON_INTERFACE@,

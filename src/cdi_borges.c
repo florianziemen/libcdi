@@ -1,7 +1,5 @@
 #include "cdi_borges.h"
 
-#ifdef HAVE_BORGES
-
 #include <assert.h>
 #include <msgpack/msgpack.h>
 #include <netdb.h>
@@ -303,8 +301,6 @@ static int borges_ev_handler(borg_connection *conn, borg_event_type event_type, 
   }
   return 0;
 }
-
-#endif
 
 /*
  * Local Variables:

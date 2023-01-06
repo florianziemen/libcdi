@@ -10,13 +10,16 @@
 #include "cdi_fdb.h"
 #endif
 
+#ifdef HAVE_BORGES
+#include "cdi_borges.h"
+#endif
+
 #include <sys/stat.h>  // struct stat
 #include <ctype.h>
 #include <string.h>
 
 #include "binary.h"
 #include "cdi.h"
-#include "cdi_borges.h"
 #include "cdi_int.h"
 #include "cdi_cksum.h"
 #include "cdf.h"

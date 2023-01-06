@@ -5,14 +5,10 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_BORGES
-
 #include "cdi_int.h"
 
 int borges_connect(const char *path, char filemode, stream_t *streamptr);
 void borges_disconnect(int sock);
 int borges_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nbytes);
-
-#endif
 
 #endif /* CDI_BORGES_H */
