@@ -1,3 +1,4 @@
+#include <float.h>   /* FLT_MAX */
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -16,7 +17,7 @@ vlistvarInitEntry(int vlistID, int varID)
 
   vlistptr->vars[varID].flag = false;
   vlistptr->vars[varID].lvalidrange = false;
-  vlistptr->vars[varID].xyz = 5; /* xyzStorVals[5] == 321 */
+  vlistptr->vars[varID].xyz = 5;          // xyzStorVals[5] == 321
   vlistptr->vars[varID].missvalused = false;
   vlistptr->vars[varID].mvarID = varID;
   vlistptr->vars[varID].fvarID = varID;
@@ -731,6 +732,12 @@ vlistInqVarNumber(int vlistID, int varID)
   return number;
 }
 
+static bool
+check_range(double value, double lowerBound, double upperBound)
+{
+  return (value >= lowerBound && value <= upperBound);
+}
+
 /*
 @Function  vlistDefVarDatatype
 @Title     Define the data type of a Variable
@@ -760,18 +767,40 @@ vlistDefVarDatatype(int vlistID, int varID, int datatype)
       vlistptr->vars[varID].datatype = datatype;
 
       if (!vlistptr->vars[varID].missvalused)
-        // clang-format off
-        switch (datatype)
-          {
-          case CDI_DATATYPE_INT8:   vlistptr->vars[varID].missval = -SCHAR_MAX; break;
-          case CDI_DATATYPE_UINT8:  vlistptr->vars[varID].missval =  UCHAR_MAX; break;
-          case CDI_DATATYPE_INT16:  vlistptr->vars[varID].missval = -SHRT_MAX;  break;
-          case CDI_DATATYPE_UINT16: vlistptr->vars[varID].missval =  USHRT_MAX; break;
-          case CDI_DATATYPE_INT32:  vlistptr->vars[varID].missval = -INT_MAX;   break;
-          case CDI_DATATYPE_UINT32: vlistptr->vars[varID].missval =  UINT_MAX;  break;
-          case CDI_DATATYPE_FLT32:  vlistptr->vars[varID].missval =  (float) CDI_Default_Missval;  break;
-          }
-      // clang-format on
+        {
+          double missval = vlistptr->vars[varID].missval;
+          bool missvalIsDefault = DBL_IS_EQUAL(missval, CDI_Default_Missval);
+          if (missvalIsDefault)
+            {
+              // clang-format off
+              switch (datatype)
+                {
+                case CDI_DATATYPE_INT8:   vlistptr->vars[varID].missval = -SCHAR_MAX; break;
+                case CDI_DATATYPE_UINT8:  vlistptr->vars[varID].missval =  UCHAR_MAX; break;
+                case CDI_DATATYPE_INT16:  vlistptr->vars[varID].missval = -SHRT_MAX;  break;
+                case CDI_DATATYPE_UINT16: vlistptr->vars[varID].missval =  USHRT_MAX; break;
+                case CDI_DATATYPE_INT32:  vlistptr->vars[varID].missval = -INT_MAX;   break;
+                case CDI_DATATYPE_UINT32: vlistptr->vars[varID].missval =  UINT_MAX;  break;
+                case CDI_DATATYPE_FLT32:  vlistptr->vars[varID].missval =  (float) CDI_Default_Missval;  break;
+                }
+              // clang-format on
+            }
+          else
+            {
+              // clang-format off
+              switch (datatype)
+                {
+                case CDI_DATATYPE_INT8:   vlistptr->vars[varID].missval = check_range(missval, -SCHAR_MAX, SCHAR_MAX) ? missval : -SCHAR_MAX; break;
+                case CDI_DATATYPE_UINT8:  vlistptr->vars[varID].missval = check_range(missval, 0, UCHAR_MAX) ? missval :  UCHAR_MAX; break;
+                case CDI_DATATYPE_INT16:  vlistptr->vars[varID].missval = check_range(missval, -SHRT_MAX, SHRT_MAX) ? missval : -SHRT_MAX;  break;
+                case CDI_DATATYPE_UINT16: vlistptr->vars[varID].missval = check_range(missval, 0, USHRT_MAX) ? missval :  USHRT_MAX; break;
+                case CDI_DATATYPE_INT32:  vlistptr->vars[varID].missval = check_range(missval, -INT_MAX, INT_MAX) ? missval : -INT_MAX;   break;
+                case CDI_DATATYPE_UINT32: vlistptr->vars[varID].missval = check_range(missval, 0, UINT_MAX) ? missval :  UINT_MAX;  break;
+                case CDI_DATATYPE_FLT32:  vlistptr->vars[varID].missval = check_range(missval, -FLT_MAX, FLT_MAX) ? missval :  CDI_Default_Missval;  break;
+                }
+              // clang-format on
+            }
+        }
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
