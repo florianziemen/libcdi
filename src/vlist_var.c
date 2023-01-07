@@ -1,4 +1,4 @@
-#include <float.h>   /* FLT_MAX */
+#include <float.h> /* FLT_MAX */
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -16,7 +16,7 @@ vlistvar_init_entry(var_t *vlistvars, int varID)
   var_t *varptr = &vlistvars[varID];
   varptr->flag = false;
   varptr->lvalidrange = false;
-  varptr->xyz = 5;          // xyzStorVals[5] == 321
+  varptr->xyz = 5;  // xyzStorVals[5] == 321
   varptr->missvalused = false;
   varptr->mvarID = varID;
   varptr->fvarID = varID;
@@ -88,7 +88,6 @@ vlistptr_get_varptr(const char *caller, vlist_t *vlistptr, int varID)
   if (varID < 0 || varID >= vlistptr->nvars || !vlistptr->vars[varID].isUsed) Errorc("varID %d undefined!", varID);
   return &vlistptr->vars[varID];
 }
-
 
 int
 vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int timetype, int tilesetID)
@@ -216,7 +215,7 @@ The function @func{vlistDefVarParam} defines the parameter number of a variable.
 void
 vlistDefVarParam(int vlistID, int varID, int param)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__,  vlist_to_pointer(vlistID), varID);
+  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
 
   if (varptr->param != param)
     {
@@ -423,7 +422,7 @@ vlistInqVarName(int vlistID, int varID, char *name)
   int length = CDI_MAX_NAME;
   if (CDI_NOERR != cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length))
     {
-      var_t *varptr = vlistptr_get_varptr(__func__,  vlist_to_pointer(vlistID), varID);
+      var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
 
       int pdis, pcat, pnum;
       cdiDecodeParam(varptr->param, &pnum, &pcat, &pdis);
