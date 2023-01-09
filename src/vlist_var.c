@@ -798,7 +798,8 @@ vlistDefVarTable(int vlistID, int varID, int tableID)
 
   if (varptr->tableID != tableID)
     {
-      int tablenum = tableInqNum(varptr->tableID);
+      varptr->tableID = tableID;
+      int tablenum = tableInqNum(tableID);
       int pnum, pcat, pdis;
       cdiDecodeParam(varptr->param, &pnum, &pcat, &pdis);
       varptr->param = cdiEncodeParam(pnum, tablenum, pdis);
