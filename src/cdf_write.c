@@ -853,9 +853,8 @@ cdfDefVar(stream_t *streamptr, int varID)
   int gridtype = gridInqType(gridID);
   int gridindex = nc_grid_index(streamptr, gridID);
   int xid = (gridtype != GRID_TRAJECTORY) ? streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X] : CDI_UNDEFID;
-  int yid = (gridtype != GRID_TRAJECTORY && gridtype != GRID_GAUSSIAN_REDUCED)
-                      ? streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y]
-                      : CDI_UNDEFID;
+  int yid = (gridtype != GRID_TRAJECTORY && gridtype != GRID_GAUSSIAN_REDUCED) ? streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y]
+                                                                               : CDI_UNDEFID;
 
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
   int zaxistype = zaxisInqType(zaxisID);
