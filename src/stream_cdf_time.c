@@ -227,7 +227,7 @@ cdfDefTime(stream_t *streamptr)
       static const char longName[] = "Time elapsed since the start of the forecast";
       cdf_put_att_text(fileID, leadtimeid, "long_name", sizeof(longName) - 1, longName);
 
-      const char *unitsStr = cdfGetForecastTimeUnits(taxis->fc_unit);
+      unitsStr = cdfGetForecastTimeUnits(taxis->fc_unit);
       size_t len = strlen(unitsStr);
       if (len) cdf_put_att_text(fileID, leadtimeid, "units", len, unitsStr);
     }

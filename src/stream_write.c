@@ -220,7 +220,7 @@ streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, Si
 }
 
 void
-streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double *data, SizeType nmiss)
+streamWriteVarChunk(int streamID, int varID, const int rect[][2], const double *data, SizeType nmiss)
 {
   void (*myCdiStreamWriteVarChunk_)(int streamID, int varID, int memtype, const int rect[3][2], const void *data, SizeType nmiss)
       = (void (*)(int, int, int, const int[3][2], const void *, SizeType)) namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_)
@@ -229,7 +229,7 @@ streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double 
 }
 
 void
-streamWriteVarChunkF(int streamID, int varID, const int rect[3][2], const float *data, SizeType nmiss)
+streamWriteVarChunkF(int streamID, int varID, const int rect[][2], const float *data, SizeType nmiss)
 {
   void (*myCdiStreamWriteVarChunk_)(int streamID, int varID, int memtype, const int rect[3][2], const void *data, SizeType nmiss)
       = (void (*)(int, int, int, const int[3][2], const void *, SizeType)) namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_)
