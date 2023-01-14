@@ -692,7 +692,7 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
   // Needed for NetCDF4
   for (int varID = 0; varID < vlistptr->nvars; ++varID) streamptr->vars[varID].defmiss = true;
 
-  if (!strcmp(filemode, "r")) cdiVlistMakeImmutable(streamptr->vlistID);
+  if (str_is_equal(filemode, "r")) cdiVlistMakeImmutable(streamptr->vlistID);
 
   {
     void (*streamCloseDelegate)(stream_t * streamptr, int recordBufIsToBeDeleted)
@@ -1826,7 +1826,7 @@ streamCompareP(void *streamptr1, void *streamptr2)
 
   if (s1->filename)
     {
-      if (strcmp(s1->filename, s2->filename)) return differ;
+      if (!str_is_equal(s1->filename, s2->filename)) return differ;
     }
   else if (s2->filename)
     return differ;

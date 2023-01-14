@@ -129,7 +129,7 @@ varGetEntry(int param, int gridID, int zaxistype, int ltype1, int tsteptype, con
             {
               if (name && name[0] && vartable[varID].name && vartable[varID].name[0])
                 {
-                  if (strcmp(name, vartable[varID].name) == 0) return varID;
+                  if (str_is_equal(name, vartable[varID].name)) return varID;
                 }
               else
                 {
@@ -828,14 +828,14 @@ zaxis_compare(int zaxisID, int zaxistype, int nlevels, const double *levels, con
                   char zlongname[CDI_MAX_NAME];
                   int length = CDI_MAX_NAME;
                   cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, zlongname, &length);
-                  if (zlongname[0] && (strcmp(longname, zlongname) != 0)) differ = true;
+                  if (zlongname[0] && !str_is_equal(longname, zlongname)) differ = true;
                 }
               if (units && units[0])
                 {
                   char zunits[CDI_MAX_NAME];
                   int length = CDI_MAX_NAME;
                   cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, zunits, &length);
-                  if (zunits[0] && (strcmp(units, zunits) != 0)) differ = true;
+                  if (zunits[0] && !str_is_equal(units, zunits)) differ = true;
                 }
             }
         }
@@ -1073,7 +1073,7 @@ varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword)
   int idx = -1;
   for (int i = 0; i < vartable[varID].opt_grib_nentries; i++)
     {
-      if ((strcmp(keyword, vartable[varID].opt_grib_kvpair[i].keyword) == 0)
+      if (str_is_equal(keyword, vartable[varID].opt_grib_kvpair[i].keyword)
           && (vartable[varID].opt_grib_kvpair[i].data_type == t_int)
           && (vartable[varID].opt_grib_kvpair[i].subtype_index == tile_index))
         idx = i;
@@ -1103,7 +1103,7 @@ varDefOptGribDbl(int varID, int tile_index, double dval, const char *keyword)
   int idx = -1;
   for (int i = 0; i < vartable[varID].opt_grib_nentries; i++)
     {
-      if ((strcmp(keyword, vartable[varID].opt_grib_kvpair[i].keyword) == 0)
+      if (str_is_equal(keyword, vartable[varID].opt_grib_kvpair[i].keyword)
           && (vartable[varID].opt_grib_kvpair[i].data_type == t_double)
           && (vartable[varID].opt_grib_kvpair[i].subtype_index == tile_index))
         idx = i;

@@ -128,9 +128,9 @@ cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nb
   for (int i = 0; i < keyValue.numKeys; i++)
     {
       // clang-format off
-      if      (strcmp(keyValue.keys[i], "class") == 0) class = keyValue.values[i];
-      else if (strcmp(keyValue.keys[i], "stream") == 0) stream = keyValue.values[i];
-      else if (strcmp(keyValue.keys[i], "expver") == 0) expver = keyValue.values[i];
+      if      (str_is_equal(keyValue.keys[i], "class"))  class = keyValue.values[i];
+      else if (str_is_equal(keyValue.keys[i], "stream")) stream = keyValue.values[i];
+      else if (str_is_equal(keyValue.keys[i], "expver")) expver = keyValue.values[i];
       else Error("Unsupported FDB parameter: %s=%s", keyValue.keys[i], keyValue.values[i]);
       // clang-format on
     }

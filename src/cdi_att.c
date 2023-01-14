@@ -200,7 +200,7 @@ cdiInqAttLen(int cdiID, int varID, const char *name)
   for (int attid = 0; attid < (int) attsp->nelems; attid++)
     {
       cdi_att_t *attp = &(attsp->value[attid]);
-      if (attp->name && strcmp(attp->name, name) == 0) length = (int) attp->nelems;
+      if (attp->name && str_is_equal(attp->name, name)) length = (int) attp->nelems;
     }
 
   return length;
@@ -219,7 +219,7 @@ cdiInqAttType(int cdiID, int varID, const char *name)
   for (int attid = 0; attid < (int) attsp->nelems; attid++)
     {
       cdi_att_t *attp = &(attsp->value[attid]);
-      if (attp->name && strcmp(attp->name, name) == 0) type = attp->exdtype;
+      if (attp->name && str_is_equal(attp->name, name)) type = attp->exdtype;
     }
 
   return type;
@@ -261,7 +261,7 @@ cdiDelAtt(int cdiID, int varID, const char *name)
   for (int attid = 0; attid < (int) attsp->nelems; attid++)
     {
       cdi_att_t *attp = &(attsp->value[attid]);
-      if (attp->name && strcmp(attp->name, name) == 0)
+      if (attp->name && str_is_equal(attp->name, name))
         {
           status = CDI_NOERR;
           Free(attp->name);

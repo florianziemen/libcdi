@@ -392,7 +392,7 @@ checkZaxisName(char *axisname, int fileID, int vlistID, int zaxisID, int nzaxis)
                   if (zaxisID != zaxisID0)
                     {
                       const char *axisname0 = zaxisInqNamePtr(zaxisID0);
-                      if (strcmp(axisname0, axisname2) == 0) goto nextSuffix;
+                      if (str_is_equal(axisname0, axisname2)) goto nextSuffix;
                     }
                 }
             }
@@ -578,7 +578,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
           dimname0[0] = 0;
           length = sizeof(dimname0);
           if (dimname[0]) cdiInqKeyString(gridID0, axisKey, CDI_KEY_DIMNAME, dimname0, &length);
-          const bool lname = dimname0[0] ? strcmp(dimname, dimname0) == 0 : true;
+          const bool lname = dimname0[0] ? str_is_equal(dimname, dimname0) : true;
           if (dimlen == dimlen0 && lname)
             {
               double (*inqVal)(int gridID, SizeType index) = gridAxisInq->axisVal;

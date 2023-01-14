@@ -792,7 +792,7 @@ cdfCheckVarname(int fileID, char name[CDI_MAX_NAME])
 
       if (iz > 99) Error("Variable name %s already exsist!", name);
 
-      if (strcmp(name, varname) != 0)
+      if (!str_is_equal(name, varname))
         Warning("Changed %s entry of variable name '%s' to '%s'!", (iz == 1) ? "double" : "multiple", name, varname);
 
       strcpy(name, varname);

@@ -88,11 +88,11 @@ gribCheckString(grib_handle *gribHandle, const char *key, const char *expectedVa
   if (length != expectedLength) return false;
   char *value = (char *) Malloc(length);
   if (grib_get_string(gribHandle, key, value, &length)) return false;
-  int rc = !strcmp(value, expectedValue);
+  int rc = str_is_equal(value, expectedValue);
   Free(value);
 #else
   char *value = gribCopyString(gribHandle, key);
-  int rc = value ? (strlen(value) + 1 == expectedLength ? !strcmp(value, expectedValue) : false) : false;
+  int rc = value ? (strlen(value) + 1 == expectedLength ? str_is_equal(value, expectedValue) : false) : false;
   Free(value);
 #endif
   return rc;
