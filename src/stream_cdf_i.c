@@ -914,7 +914,7 @@ isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, const nc
 }
 
 static void
-cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
+cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool removeFillValue)
 {
   nc_type atttype;
   size_t attlen;
@@ -923,6 +923,9 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
   cdf_inq_attname(ncid, ncvarid, attnum, attname);
   cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
   cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
+
+  if (removeFillValue && strIsEqual("_FillValue", attname)) return;
+
   if (xtypeIsInt(atttype))
     {
       int attint;
@@ -2813,7 +2816,8 @@ cdf_read_mapping_atts(int ncid, int gmapvarid, int projID)
 
   int nvatts;
   cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
-  for (int attnum = 0; attnum < nvatts; ++attnum) cdf_set_cdi_attr(ncid, gmapvarid, attnum, projID, CDI_GLOBAL);
+  bool removeFillValue = true;
+  for (int attnum = 0; attnum < nvatts; ++attnum) cdf_set_cdi_attr(ncid, gmapvarid, attnum, projID, CDI_GLOBAL, removeFillValue);
 }
 
 static void
@@ -3264,7 +3268,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
               for (int iatt = 0; iatt < nvatts; ++iatt)
                 {
                   const int attnum = ncvars[zvarid].atts[iatt];
-                  cdf_set_cdi_attr(ncid, zvarid, attnum, zaxisID, CDI_GLOBAL);
+                  cdf_set_cdi_attr(ncid, zvarid, attnum, zaxisID, CDI_GLOBAL, false);
                 }
             }
 
@@ -3598,7 +3602,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       ncvar_t *ncvar = &ncvars[ncvarid];
       const int ncid = ncvar->ncid;
       const int nvatts = ncvar->natts;
-      for (int iatt = 0; iatt < nvatts; ++iatt) cdf_set_cdi_attr(ncid, ncvarid, ncvar->atts[iatt], vlistID, varID);
+      for (int iatt = 0; iatt < nvatts; ++iatt) cdf_set_cdi_attr(ncid, ncvarid, ncvar->atts[iatt], vlistID, varID, false);
 
       if (ncvar->atts) Free(ncvar->atts);
       if (ncvar->vct) Free(ncvar->vct);
