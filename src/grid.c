@@ -2269,8 +2269,8 @@ compare_projection(int gridID, const grid_t *grid, const grid_t *gridRef)
       // printf(">%s< >%s<\n", cdiInqVarKeyString(&grid->keys, CDI_KEY_GRIDMAP_VARNAME), cdiInqVarKeyString(&gridRef->keys,
       // CDI_KEY_GRIDMAP_VARNAME)); printf(">%s< >%s<\n", cdiInqVarKeyString(&grid->keys, CDI_KEY_GRIDMAP_NAME),
       // cdiInqVarKeyString(&gridRef->keys, CDI_KEY_GRIDMAP_NAME));
-      // if (strcmp(cdiInqVarKeyString(&grid->keys, CDI_KEY_GRIDMAP_VARNAME), cdiInqVarKeyString(&gridRef->keys,
-      // CDI_KEY_GRIDMAP_VARNAME))) return true; if (strcmp(cdiInqVarKeyString(&grid->keys, CDI_KEY_GRIDMAP_NAME),
+      // if (!str_is_equal(cdiInqVarKeyString(&grid->keys, CDI_KEY_GRIDMAP_VARNAME), cdiInqVarKeyString(&gridRef->keys,
+      // CDI_KEY_GRIDMAP_VARNAME))) return true; if (!str_is_equal(cdiInqVarKeyString(&grid->keys, CDI_KEY_GRIDMAP_NAME),
       // cdiInqVarKeyString(&gridRef->keys, CDI_KEY_GRIDMAP_NAME))) return true;
     }
 
@@ -2562,16 +2562,20 @@ gridCompareP(void *gridptr1, void *gridptr2)
       }
   }
 
-  if (strcmp(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_NAME), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_NAME))) return differ;
-  if (strcmp(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_NAME), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_NAME))) return differ;
-  if (strcmp(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_LONGNAME), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_LONGNAME))) return differ;
-  if (strcmp(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_LONGNAME), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_LONGNAME))) return differ;
-  if (strcmp(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_UNITS), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_UNITS))) return differ;
-  if (strcmp(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_UNITS), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_UNITS))) return differ;
-  if (strcmp(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_STDNAME), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_STDNAME))) return differ;
-  if (strcmp(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_STDNAME), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_STDNAME))) return differ;
+  if (!str_is_equal(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_NAME), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_NAME))) return differ;
+  if (!str_is_equal(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_NAME), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_NAME))) return differ;
+  if (!str_is_equal(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_LONGNAME), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_LONGNAME)))
+    return differ;
+  if (!str_is_equal(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_LONGNAME), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_LONGNAME)))
+    return differ;
+  if (!str_is_equal(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_UNITS), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_UNITS))) return differ;
+  if (!str_is_equal(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_UNITS), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_UNITS))) return differ;
+  if (!str_is_equal(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_STDNAME), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_STDNAME)))
+    return differ;
+  if (!str_is_equal(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_STDNAME), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_STDNAME)))
+    return differ;
 
-  if (strcmp(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_REFERENCEURI), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_REFERENCEURI)))
+  if (!str_is_equal(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_REFERENCEURI), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_REFERENCEURI)))
     return differ;
 
   if (g1->mask)
@@ -3400,7 +3404,7 @@ gridPrintKernel(int gridID, int opt, FILE *fp)
           if (attstr[0]) fprintf(fp, "xname     = %s\n", attstr);
           length = CDI_MAX_NAME;
           cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_DIMNAME, attstr2, &length);
-          if (attstr2[0] && strcmp(attstr, attstr2)) fprintf(fp, "xdimname  = %s\n", attstr2);
+          if (attstr2[0] && !str_is_equal(attstr, attstr2)) fprintf(fp, "xdimname  = %s\n", attstr2);
           length = CDI_MAX_NAME;
           cdiInqKeyString(gridID, CDI_XAXIS, CDI_KEY_LONGNAME, attstr, &length);
           if (attstr[0]) fprintf(fp, "xlongname = %s\n", attstr);
@@ -3416,7 +3420,7 @@ gridPrintKernel(int gridID, int opt, FILE *fp)
           if (attstr[0]) fprintf(fp, "yname     = %s\n", attstr);
           length = CDI_MAX_NAME;
           cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_DIMNAME, attstr2, &length);
-          if (attstr2[0] && strcmp(attstr, attstr2)) fprintf(fp, "ydimname  = %s\n", attstr2);
+          if (attstr2[0] && !str_is_equal(attstr, attstr2)) fprintf(fp, "ydimname  = %s\n", attstr2);
           length = CDI_MAX_NAME;
           cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_LONGNAME, attstr, &length);
           if (attstr[0]) fprintf(fp, "ylongname = %s\n", attstr);

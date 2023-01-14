@@ -734,7 +734,7 @@ tableInqParCode(int tableID, char *varname, int *code)
       int npars = parTable[tableID].npars;
       for (int item = 0; item < npars; item++)
         {
-          if (parTable[tableID].pars[item].name && strcmp(parTable[tableID].pars[item].name, varname) == 0)
+          if (parTable[tableID].pars[item].name && str_is_equal(parTable[tableID].pars[item].name, varname))
             {
               *code = parTable[tableID].pars[item].id;
               err = 0;

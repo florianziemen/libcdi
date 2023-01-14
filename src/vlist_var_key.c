@@ -22,7 +22,7 @@ vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
           vlistID);
 
   for (idx = 0; idx < vlistptr->vars[varID].opt_grib_nentries; idx++)
-    if ((strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[idx].keyword) == 0)
+    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[idx].keyword)
         && (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_int))
       break;
 
@@ -85,7 +85,7 @@ vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
           vlistID);
 
   for (idx = 0; idx < vlistptr->vars[varID].opt_grib_nentries; idx++)
-    if ((strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[idx].keyword) == 0)
+    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[idx].keyword)
         && (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_double))
       break;
 
@@ -169,7 +169,7 @@ vlistHasVarKey(int vlistID, int varID, const char *name)
 
   for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
     {
-      if (strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword) == 0) return 1;
+      if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)) return 1;
     }
 #else
   (void) vlistID;
@@ -191,7 +191,7 @@ vlistInqVarDblKey(int vlistID, int varID, const char *name)
   for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
     {
       int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
-      if ((strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword) == 0)
+      if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)
           && (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)
           && (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub))
         return vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val;
@@ -216,7 +216,7 @@ vlistInqVarIntKey(int vlistID, int varID, const char *name)
   for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
     {
       int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
-      if ((strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword) == 0)
+      if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)
           && (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_int)
           && (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub))
         return vlistptr->vars[varID].opt_grib_kvpair[i].int_val;

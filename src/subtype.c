@@ -71,7 +71,7 @@ attribute_to_index(const char *key)
 {
   if (key == NULL) Error("Internal error!");
   for (int i = 0; i < nSubtypeAttributes; i++)
-    if (strcmp(key, cdiSubtypeAttributeName[i]) == 0) return i;
+    if (str_is_equal(key, cdiSubtypeAttributeName[i])) return i;
   return -1;
 }
 

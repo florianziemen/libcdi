@@ -835,7 +835,7 @@ vlistMerge(int vlistID2, int vlistID1)
 
           if (*name1 && *name2)
             {
-              if (strcmp(name1, name2) != 0) break;
+              if (!str_is_equal(name1, name2)) break;
             }
           else
             {

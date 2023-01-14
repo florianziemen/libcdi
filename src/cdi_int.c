@@ -413,7 +413,7 @@ cdiInitialize(void)
       envstr = getenv("CDI_CONVENTION");
       if (envstr)
         {
-          if (strcmp(envstr, "CF") == 0 || strcmp(envstr, "cf") == 0)
+          if (str_is_equal(envstr, "CF") || str_is_equal(envstr, "cf"))
             {
               CDI_Convention = CDI_CONVENTION_CF;
               if (CDI_Debug) Message("CDI convention was set to CF!");

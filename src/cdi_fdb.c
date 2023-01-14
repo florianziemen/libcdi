@@ -195,7 +195,7 @@ check_keyvalueList(int numItems, KeyValueEntry *keyValueList)
 
           for (int j = 0; j < numKeys; j++)
             {
-              if (strcmp(itemKeys[j], searchKeys[k]) == 0)
+              if (str_is_equal(itemKeys[j], searchKeys[k]))
                 {
                   searchKeysCount[k]++;
                   break;
@@ -297,9 +297,9 @@ get_ilevtype(const char *levtype)
   int ilevtype = levTypeUndef;
 
   // clang-format off
-  if      (strcmp(levtype, "sfc") == 0) ilevtype = levTypeSFC;
-  else if (strcmp(levtype, "ml") == 0) ilevtype = levTypeML;
-  else if (strcmp(levtype, "pl") == 0) ilevtype = levTypeML;
+  if      (str_is_equal(levtype, "sfc")) ilevtype = levTypeSFC;
+  else if (str_is_equal(levtype, "ml"))  ilevtype = levTypeML;
+  else if (str_is_equal(levtype, "pl"))  ilevtype = levTypeML;
   // clang-format on
 
   return ilevtype;
@@ -315,11 +315,11 @@ decode_keyvalue(KeyValueEntry *keyValue, RecordInfoEntry *recordInfo)
     {
       // printf("key <%s> value <%s>\n", itemKeys[i], itemValues[i]);
       // clang-format off
-      if      (strcmp(itemKeys[i], "date") == 0) recordInfo->date = atoi(itemValues[i]);
-      else if (strcmp(itemKeys[i], "time") == 0) recordInfo->time = atoi(itemValues[i]);
-      else if (strcmp(itemKeys[i], "param") == 0) recordInfo->param = atoi(itemValues[i]);
-      else if (strcmp(itemKeys[i], "levtype") == 0) recordInfo->levtype = get_ilevtype(itemValues[i]);
-      else if (strcmp(itemKeys[i], "levelist") == 0) recordInfo->ilevel = atoi(itemValues[i]);
+      if      (str_is_equal(itemKeys[i], "date"))     recordInfo->date = atoi(itemValues[i]);
+      else if (str_is_equal(itemKeys[i], "time"))     recordInfo->time = atoi(itemValues[i]);
+      else if (str_is_equal(itemKeys[i], "param"))    recordInfo->param = atoi(itemValues[i]);
+      else if (str_is_equal(itemKeys[i], "levtype"))  recordInfo->levtype = get_ilevtype(itemValues[i]);
+      else if (str_is_equal(itemKeys[i], "levelist")) recordInfo->ilevel = atoi(itemValues[i]);
       // clang-format on
     }
 }
@@ -383,13 +383,10 @@ create_fdb_request(const char *filename)
   bool expverDefined = false;
   for (int i = 0; i < keyValue.numKeys; i++)
     {
-      // clang-format offxs
-      if (strcmp(keyValue.keys[i], "class") == 0)
-        classDefined = true;
-      else if (strcmp(keyValue.keys[i], "stream") == 0)
-        streamDefined = true;
-      else if (strcmp(keyValue.keys[i], "expver") == 0)
-        expverDefined = true;
+      // clang-format off
+      if      (str_is_equal(keyValue.keys[i], "class"))  classDefined = true;
+      else if (str_is_equal(keyValue.keys[i], "stream")) streamDefined = true;
+      else if (str_is_equal(keyValue.keys[i], "expver")) expverDefined = true;
       // clang-format on
 
       fdb_request_add1(request, keyValue.keys[i], keyValue.values[i]);
