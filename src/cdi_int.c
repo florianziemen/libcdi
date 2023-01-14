@@ -500,18 +500,18 @@ void
 cdiDefGlobal(const char *string, int value)
 {
   // clang-format off
-  if      (strIsEqual(string, "REGULARGRID")          ) cdiDataUnreduced = value;
-  else if (strIsEqual(string, "ECCODES_DEBUG")        ) CDI_gribapi_debug = (bool) value;
-  else if (strIsEqual(string, "ECCODES_GRIB1")        ) cdiSetEccodesGrib1((bool) value);
-  else if (strIsEqual(string, "SORTNAME")             ) cdiSortName = value;
-  else if (strIsEqual(string, "SORTPARAM")            ) cdiSortParam = value;
-  else if (strIsEqual(string, "HAVE_MISSVAL")         ) cdiHaveMissval = value;
-  else if (strIsEqual(string, "NC_CHUNKSIZEHINT")     ) CDI_Netcdf_Chunksizehint = value;
-  else if (strIsEqual(string, "READ_CELL_CORNERS")    ) CDI_Read_Cell_Corners = value;
-  else if (strIsEqual(string, "CMOR_MODE")            ) CDI_CMOR_Mode = value;
-  else if (strIsEqual(string, "REDUCE_DIM")           ) CDI_Reduce_Dim = value;
-  else if (strIsEqual(string, "NETCDF_HDR_PAD")       ) CDI_Netcdf_Hdr_Pad = (size_t) value;
-  else if (strIsEqual(string, "NETCDF_LAZY_GRID_LOAD")) CDI_Netcdf_Lazy_Grid_Load = (bool) value;
+  if      (str_is_equal(string, "REGULARGRID")          ) cdiDataUnreduced = value;
+  else if (str_is_equal(string, "ECCODES_DEBUG")        ) CDI_gribapi_debug = (bool) value;
+  else if (str_is_equal(string, "ECCODES_GRIB1")        ) cdiSetEccodesGrib1((bool) value);
+  else if (str_is_equal(string, "SORTNAME")             ) cdiSortName = value;
+  else if (str_is_equal(string, "SORTPARAM")            ) cdiSortParam = value;
+  else if (str_is_equal(string, "HAVE_MISSVAL")         ) cdiHaveMissval = value;
+  else if (str_is_equal(string, "NC_CHUNKSIZEHINT")     ) CDI_Netcdf_Chunksizehint = value;
+  else if (str_is_equal(string, "READ_CELL_CORNERS")    ) CDI_Read_Cell_Corners = value;
+  else if (str_is_equal(string, "CMOR_MODE")            ) CDI_CMOR_Mode = value;
+  else if (str_is_equal(string, "REDUCE_DIM")           ) CDI_Reduce_Dim = value;
+  else if (str_is_equal(string, "NETCDF_HDR_PAD")       ) CDI_Netcdf_Hdr_Pad = (size_t) value;
+  else if (str_is_equal(string, "NETCDF_LAZY_GRID_LOAD")) CDI_Netcdf_Lazy_Grid_Load = (bool) value;
   else Warning("Unsupported global key: %s", string);
   // clang-format on
 }

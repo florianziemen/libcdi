@@ -804,14 +804,14 @@ scan_hybrid_formulaterms(int ncid, int ncfvarid, int *avarid, int *bvarid, int *
       if (status_nc == NC_NOERR)
         {
           // clang-format off
-          if      ( strIsEqual(tagname, "ap:") ) *avarid  = dimvarid;
-          else if ( strIsEqual(tagname, "a:")  ) *avarid  = dimvarid;
-          else if ( strIsEqual(tagname, "b:")  ) *bvarid  = dimvarid;
-          else if ( strIsEqual(tagname, "ps:") ) *psvarid = dimvarid;
-          else if ( strIsEqual(tagname, "p0:") ) *p0varid = dimvarid;
+          if      ( str_is_equal(tagname, "ap:") ) *avarid  = dimvarid;
+          else if ( str_is_equal(tagname, "a:")  ) *avarid  = dimvarid;
+          else if ( str_is_equal(tagname, "b:")  ) *bvarid  = dimvarid;
+          else if ( str_is_equal(tagname, "ps:") ) *psvarid = dimvarid;
+          else if ( str_is_equal(tagname, "p0:") ) *p0varid = dimvarid;
           // clang-format on
         }
-      else if (!strIsEqual(tagname, "ps:"))
+      else if (!str_is_equal(tagname, "ps:"))
         {
           Warning("%s - %s", nc_strerror(status_nc), varname);
         }
@@ -857,7 +857,7 @@ isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, const nc
   bool status = false;
   ncvar_t *ncvar = &ncvars[ncvarid];
 
-  if (strIsEqual(ncvar->stdname, "atmosphere_hybrid_sigma_pressure_coordinate"))
+  if (str_is_equal(ncvar->stdname, "atmosphere_hybrid_sigma_pressure_coordinate"))
     {
       CDI_Convention = CDI_CONVENTION_CF;
 
@@ -924,7 +924,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
   cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
   cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
 
-  if (removeFillValue && strIsEqual("_FillValue", attname)) return;
+  if (removeFillValue && str_is_equal("_FillValue", attname)) return;
 
   if (xtypeIsInt(atttype))
     {
@@ -1242,36 +1242,36 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
               if (attstringsize > CDI_MAX_NAME) attstringsize = CDI_MAX_NAME;
             }
 
-          if (isText && strIsEqual(attname, "long_name"))
+          if (isText && str_is_equal(attname, "long_name"))
             {
               memcpy(ncvar->longname, attstring, attstringsize);
             }
-          else if (isText && strIsEqual(attname, "standard_name"))
+          else if (isText && str_is_equal(attname, "standard_name"))
             {
               memcpy(ncvar->stdname, attstring, attstringsize);
             }
-          else if (isText && strIsEqual(attname, "units"))
+          else if (isText && str_is_equal(attname, "units"))
             {
               ncvar->unitsLen = attstringsize;
               memcpy(ncvar->units, attstring, attstringsize);
             }
-          else if (isText && strIsEqual(attname, "calendar"))
+          else if (isText && str_is_equal(attname, "calendar"))
             {
               ncvar->hasCalendar = true;
             }
-          else if (isText && strIsEqual(attname, "param"))
+          else if (isText && str_is_equal(attname, "param"))
             {
               int pnum = 0, pcat = 255, pdis = 255;
               sscanf(attstring, "%d.%d.%d", &pnum, &pcat, &pdis);
               ncvar->param = cdiEncodeParam(pnum, pcat, pdis);
               cdf_set_var(ncvar, DataVar);
             }
-          else if (isNumber && strIsEqual(attname, "code"))
+          else if (isNumber && str_is_equal(attname, "code"))
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvar->code);
               cdf_set_var(ncvar, DataVar);
             }
-          else if (isNumber && strIsEqual(attname, "table"))
+          else if (isNumber && str_is_equal(attname, "table"))
             {
               int tablenum;
               cdfGetAttInt(ncid, ncvarid, attname, 1, &tablenum);
@@ -1283,17 +1283,17 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                 }
               cdf_set_var(ncvar, DataVar);
             }
-          else if (isText && strIsEqual(attname, "trunc_type"))
+          else if (isText && str_is_equal(attname, "trunc_type"))
             {
-              if (strIsEqual(attstring, "Triangular")) ncvar->gridtype = GRID_SPECTRAL;
+              if (str_is_equal(attstring, "Triangular")) ncvar->gridtype = GRID_SPECTRAL;
             }
-          else if (isText && (strIsEqual(attname, "grid_type") || strIsEqual(attname, "CDI_grid_type")))
+          else if (isText && (str_is_equal(attname, "grid_type") || str_is_equal(attname, "CDI_grid_type")))
             {
               strToLower(attstring);
               cdf_set_gridtype(attstring, &ncvar->gridtype);
               cdf_set_var(ncvar, DataVar);
             }
-          else if (isText && strIsEqual(attname, "CDI_grid_latitudes"))
+          else if (isText && str_is_equal(attname, "CDI_grid_latitudes"))
             {
               int nc_yvar_id;
               int status = nc_inq_varid(ncid, attstring, &nc_yvar_id);
@@ -1307,7 +1307,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
 
               cdf_set_var(ncvar, DataVar);
             }
-          else if (isText && strIsEqual(attname, "CDI_grid_reduced_points"))
+          else if (isText && str_is_equal(attname, "CDI_grid_reduced_points"))
             {
               int nc_rpvar_id;
               int status = nc_inq_varid(ncid, attstring, &nc_rpvar_id);
@@ -1321,29 +1321,29 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
 
               cdf_set_var(ncvar, DataVar);
             }
-          else if (isNumber && strIsEqual(attname, "CDI_grid_num_LPE"))
+          else if (isNumber && str_is_equal(attname, "CDI_grid_num_LPE"))
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvar->numLPE);
             }
-          else if (isText && strIsEqual(attname, "level_type"))
+          else if (isText && str_is_equal(attname, "level_type"))
             {
               strToLower(attstring);
               cdf_set_zaxistype(attstring, &ncvar->zaxistype);
               cdf_set_var(ncvar, DataVar);
             }
-          else if (isNumber && strIsEqual(attname, "trunc_count"))
+          else if (isNumber && str_is_equal(attname, "trunc_count"))
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvar->truncation);
             }
-          else if (isNumber && strIsEqual(attname, "truncation"))
+          else if (isNumber && str_is_equal(attname, "truncation"))
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvar->truncation);
             }
-          else if (isNumber && strIsEqual(attname, "number_of_grid_in_reference"))
+          else if (isNumber && str_is_equal(attname, "number_of_grid_in_reference"))
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvar->position);
             }
-          else if (isNumber && strIsEqual(attname, "add_offset"))
+          else if (isNumber && str_is_equal(attname, "add_offset"))
             {
               cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvar->addoffset);
               /*
@@ -1353,7 +1353,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
               */
               // (also used for lon/lat) cdf_set_var(ncvar, DataVar);
             }
-          else if (isNumber && strIsEqual(attname, "scale_factor"))
+          else if (isNumber && str_is_equal(attname, "scale_factor"))
             {
               cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvar->scalefactor);
               /*
@@ -1363,7 +1363,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
               */
               // (also used for lon/lat) cdf_set_var(ncvar, DataVar);
             }
-          else if (isText && strIsEqual(attname, "climatology"))
+          else if (isText && str_is_equal(attname, "climatology"))
             {
               int ncboundsid;
               int status = nc_inq_varid(ncid, attstring, &ncboundsid);
@@ -1377,7 +1377,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
               else
                 Warning("%s - %s", nc_strerror(status), attstring);
             }
-          else if (isText && strIsEqual(attname, "bounds"))
+          else if (isText && str_is_equal(attname, "bounds"))
             {
               int ncboundsid;
               int status = nc_inq_varid(ncid, attstring, &ncboundsid);
@@ -1390,18 +1390,18 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
               else
                 Warning("%s - %s", nc_strerror(status), attstring);
             }
-          else if (isText && strIsEqual(attname, "formula_terms"))
+          else if (isText && str_is_equal(attname, "formula_terms"))
             {
               ncvar->hasFormulaterms = true;
             }
-          else if (isText && strIsEqual(attname, "cell_measures")
+          else if (isText && str_is_equal(attname, "cell_measures")
                    && (nc_cell_id = cdf_get_cell_varid(attstring, ncid)) != CDI_UNDEFID)
             {
               ncvar->cellarea = nc_cell_id;
               ncvars[nc_cell_id].varStatus = CoordVar;
               cdf_set_var(ncvar, DataVar);
             }
-          else if (isText && (strIsEqual(attname, "associate") || strIsEqual(attname, "coordinates")))
+          else if (isText && (str_is_equal(attname, "associate") || str_is_equal(attname, "coordinates")))
             {
               bool lstop = false;
               char *pstring = attstring;
@@ -1433,7 +1433,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
 
                       int k;
                       for (k = 0; k < nchecked_vars; ++k)
-                        if (strIsEqual(checked_vars[k], varname)) break;
+                        if (str_is_equal(checked_vars[k], varname)) break;
 
                       if (k == nchecked_vars)
                         {
@@ -1445,7 +1445,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
 
               cdf_set_var(ncvar, DataVar);
             }
-          else if (isText && strIsEqual(attname, "auxiliary_variable"))
+          else if (isText && str_is_equal(attname, "auxiliary_variable"))
             {
               bool lstop = false;
               char *pstring = attstring;
@@ -1478,7 +1478,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
 
               cdf_set_var(ncvar, DataVar);
             }
-          else if (isText && strIsEqual(attname, "grid_mapping"))
+          else if (isText && str_is_equal(attname, "grid_mapping"))
             {
               int nc_gmap_id;
               int status = nc_inq_varid(ncid, attstring, &nc_gmap_id);
@@ -1492,13 +1492,13 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
 
               cdf_set_var(ncvar, DataVar);
             }
-          else if (isText && strIsEqual(attname, "positive"))
+          else if (isText && str_is_equal(attname, "positive"))
             {
               strToLower(attstring);
 
-              if (strIsEqual(attstring, "down"))
+              if (str_is_equal(attstring, "down"))
                 ncvar->positive = POSITIVE_DOWN;
-              else if (strIsEqual(attstring, "up"))
+              else if (str_is_equal(attstring, "up"))
                 ncvar->positive = POSITIVE_UP;
 
               if (ncvar->ndims == 1)
@@ -1517,19 +1517,19 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                   ncvar->atts[ncvar->natts++] = iatt;
                 }
             }
-          else if (isNumber && strIsEqual(attname, "_FillValue"))
+          else if (isNumber && str_is_equal(attname, "_FillValue"))
             {
               cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvar->fillval);
               ncvar->deffillval = true;
               // cdf_set_var(ncvar, DataVar);
             }
-          else if (isNumber && strIsEqual(attname, "missing_value"))
+          else if (isNumber && str_is_equal(attname, "missing_value"))
             {
               cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvar->missval);
               ncvar->defmissval = true;
               // cdf_set_var(ncvar, DataVar);
             }
-          else if (isNumber && strIsEqual(attname, "valid_range") && attlen == 2)
+          else if (isNumber && str_is_equal(attname, "valid_range") && attlen == 2)
             {
               if (ncvar->lvalidrange == false)
                 {
@@ -1547,7 +1547,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                     }
                 }
             }
-          else if (isNumber && strIsEqual(attname, "valid_min") && attlen == 1)
+          else if (isNumber && str_is_equal(attname, "valid_min") && attlen == 1)
             {
               bool lignore = (xtypeIsFloat(atttype) != xtypeIsFloat(xtype));
               if (!CDI_Ignore_Valid_Range && lignore == false)
@@ -1560,7 +1560,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                   Warning("Inconsistent data type for attribute %s:valid_min, ignored!", name);
                 }
             }
-          else if (isNumber && strIsEqual(attname, "valid_max") && attlen == 1)
+          else if (isNumber && str_is_equal(attname, "valid_max") && attlen == 1)
             {
               bool lignore = (xtypeIsFloat(atttype) != xtypeIsFloat(xtype));
               if (!CDI_Ignore_Valid_Range && lignore == false)
@@ -1573,10 +1573,10 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                   Warning("Inconsistent data type for attribute %s:valid_max, ignored!", name);
                 }
             }
-          else if (isText && strIsEqual(attname, "_Unsigned"))
+          else if (isText && str_is_equal(attname, "_Unsigned"))
             {
               strToLower(attstring);
-              if (strIsEqual(attstring, "true"))
+              if (str_is_equal(attstring, "true"))
                 {
                   ncvar->lunsigned = true;
                   /*
@@ -1587,20 +1587,20 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                 }
               // cdf_set_var(ncvar, DataVar);
             }
-          else if (isText && strIsEqual(attname, "cdi"))
+          else if (isText && str_is_equal(attname, "cdi"))
             {
               strToLower(attstring);
 
-              if (strIsEqual(attstring, "ignore"))
+              if (str_is_equal(attstring, "ignore"))
                 {
                   ncvar->ignoreVar = true;
                   cdf_set_var(ncvar, CoordVar);
                 }
             }
           else if (isNumber
-                   && ((isRealization = strIsEqual(attname, "realization"))
-                       || (isEnsembleMembers = strIsEqual(attname, "ensemble_members"))
-                       || (isForecastInitType = strIsEqual(attname, "forecast_init_type"))))
+                   && ((isRealization = str_is_equal(attname, "realization"))
+                       || (isEnsembleMembers = str_is_equal(attname, "ensemble_members"))
+                       || (isForecastInitType = str_is_equal(attname, "forecast_init_type"))))
             {
               int temp;
               cdfGetAttInt(ncid, ncvarid, attname, 1, &temp);
@@ -1658,12 +1658,12 @@ cdfVerifyVarAttr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
               attstringsize = strlen(attstring) + 1;
               if (attstringsize > CDI_MAX_NAME) attstringsize = CDI_MAX_NAME;
 
-              if (strIsEqual(attname, "axis"))
+              if (str_is_equal(attname, "axis"))
                 {
                   cdfScanAttrAxis(ncvars, ncdims, ncvarid, attstring, nvdims, dimidsp);
                 }
               /*
-              else if (strIsEqual(attname, "standard_name"))
+              else if (str_is_equal(attname, "standard_name"))
                 {
                   memcpy(ncvar->stdname, attstring, attstringsize);
                 }
@@ -1892,17 +1892,17 @@ verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncvars,
                 {
                   ncvar->zaxistype = ZAXIS_PRESSURE;
                 }
-              else if (strIsEqual(ncvar->units, "level") || strIsEqual(ncvar->units, "1"))
+              else if (str_is_equal(ncvar->units, "level") || str_is_equal(ncvar->units, "1"))
                 {
-                  if (strIsEqual(ncvar->longname, "hybrid level at layer midpoints"))
+                  if (str_is_equal(ncvar->longname, "hybrid level at layer midpoints"))
                     ncvar->zaxistype = ZAXIS_HYBRID;
                   else if (strStartsWith(ncvar->longname, "hybrid level at midpoints"))
                     ncvar->zaxistype = ZAXIS_HYBRID;
-                  else if (strIsEqual(ncvar->longname, "hybrid level at layer interfaces"))
+                  else if (str_is_equal(ncvar->longname, "hybrid level at layer interfaces"))
                     ncvar->zaxistype = ZAXIS_HYBRID_HALF;
                   else if (strStartsWith(ncvar->longname, "hybrid level at interfaces"))
                     ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-                  else if (strIsEqual(ncvar->units, "level"))
+                  else if (str_is_equal(ncvar->units, "level"))
                     ncvar->zaxistype = ZAXIS_GENERIC;
                 }
               else if (is_DBL_axis(ncvar->longname))
@@ -1921,10 +1921,10 @@ verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncvars,
             }
           else
             {
-              if ((strIsEqual(ncvar->longname, "generalized_height") || strIsEqual(ncvar->longname, "generalized height"))
-                  && strIsEqual(ncvar->stdname, "height"))
+              if ((str_is_equal(ncvar->longname, "generalized_height") || str_is_equal(ncvar->longname, "generalized height"))
+                  && str_is_equal(ncvar->stdname, "height"))
                 ncvar->zaxistype = ZAXIS_REFERENCE;
-              else if (strIsEqual(ncvar->stdname, "air_pressure"))
+              else if (str_is_equal(ncvar->stdname, "air_pressure"))
                 ncvar->zaxistype = ZAXIS_PRESSURE;
             }
 
@@ -1990,17 +1990,17 @@ verify_coordinates_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
                   ncvar->isYaxis = true;
                   continue;
                 }
-              else if (ncvar->zaxistype == CDI_UNDEFID && (strIsEqual(ncvar->units, "level") || strIsEqual(ncvar->units, "1")))
+              else if (ncvar->zaxistype == CDI_UNDEFID && (str_is_equal(ncvar->units, "level") || str_is_equal(ncvar->units, "1")))
                 {
-                  if (strIsEqual(ncvar->longname, "hybrid level at layer midpoints"))
+                  if (str_is_equal(ncvar->longname, "hybrid level at layer midpoints"))
                     ncvar->zaxistype = ZAXIS_HYBRID;
                   else if (strStartsWith(ncvar->longname, "hybrid level at midpoints"))
                     ncvar->zaxistype = ZAXIS_HYBRID;
-                  else if (strIsEqual(ncvar->longname, "hybrid level at layer interfaces"))
+                  else if (str_is_equal(ncvar->longname, "hybrid level at layer interfaces"))
                     ncvar->zaxistype = ZAXIS_HYBRID_HALF;
                   else if (strStartsWith(ncvar->longname, "hybrid level at interfaces"))
                     ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-                  else if (strIsEqual(ncvar->units, "level"))
+                  else if (str_is_equal(ncvar->units, "level"))
                     ncvar->zaxistype = ZAXIS_GENERIC;
                   continue;
                 }
@@ -2023,12 +2023,12 @@ verify_coordinates_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
                   continue;
                 }
             }
-          else if (strIsEqual(ncvar->stdname, "region") || strIsEqual(ncvar->stdname, "area_type")
+          else if (str_is_equal(ncvar->stdname, "region") || str_is_equal(ncvar->stdname, "area_type")
                    || cdfInqDatatype(streamptr, ncvar->xtype, ncvar->lunsigned) == CDI_DATATYPE_UINT8)
             {
               ncvar->isCharAxis = true;
             }
-          else if (strIsEqual(ncvar->stdname, "air_pressure"))
+          else if (str_is_equal(ncvar->stdname, "air_pressure"))
             ncvar->zaxistype = ZAXIS_PRESSURE;
 
           // not needed anymore for rotated grids
@@ -2552,7 +2552,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
         {
           char attstring[CDI_MAX_NAME];
           cdfGetAttText(ncvar->ncid, gmapvarid, "grid_mapping_name", CDI_MAX_NAME, attstring);
-          if (strIsEqual(attstring, "latitude_longitude")) gridtype = ncvar->gridtype;
+          if (str_is_equal(attstring, "latitude_longitude")) gridtype = ncvar->gridtype;
         }
     }
 
@@ -3669,12 +3669,12 @@ check_cube_sphere(int vlistID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
           if (ncvar->ndims == 1)
             {
               int dimid = ncvar->dimids[0];
-              if (ncdims[dimid].len == 6 && strIsEqual(nf_name, ncvar->name))
+              if (ncdims[dimid].len == 6 && str_is_equal(nf_name, ncvar->name))
                 {
                   isGeosData = true;
                   nf_dimid = ncvar->dimids[0];
                 }
-              if (ncdims[dimid].len == 4 && strIsEqual(ncontact_name, ncvar->name)) ncontact_dimid = ncvar->dimids[0];
+              if (ncdims[dimid].len == 4 && str_is_equal(ncontact_name, ncvar->name)) ncontact_dimid = ncvar->dimids[0];
             }
           if (isGeosData && ncontact_dimid != -1) break;
         }
@@ -3686,7 +3686,7 @@ check_cube_sphere(int vlistID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
       for (int varid = 0; varid < nvars; ++varid)
         {
           ncvar_t *ncvar = &ncvars[varid];
-          if (strIsEqual("orientation", ncvar->name) || strIsEqual("anchor", ncvar->name) || strIsEqual("contacts", ncvar->name))
+          if (str_is_equal("orientation", ncvar->name) || str_is_equal("anchor", ncvar->name) || str_is_equal("contacts", ncvar->name))
             cdf_set_var(ncvar, CoordVar);
         }
 
@@ -3707,10 +3707,10 @@ check_cube_sphere(int vlistID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
           if (ndims == 3)
             {
               // clang-format off
-              if      (strIsEqual("lons", ncvar->name)) xvarid = varid;
-              else if (strIsEqual("lats", ncvar->name)) yvarid = varid;
-              else if (strIsEqual("corner_lons", ncvar->name)) xboundsid = varid;
-              else if (strIsEqual("corner_lats", ncvar->name)) yboundsid = varid;
+              if      (str_is_equal("lons", ncvar->name)) xvarid = varid;
+              else if (str_is_equal("lats", ncvar->name)) yvarid = varid;
+              else if (str_is_equal("corner_lons", ncvar->name)) xboundsid = varid;
+              else if (str_is_equal("corner_lats", ncvar->name)) yboundsid = varid;
               // clang-format on
             }
           if (xvarid != -1 && xboundsid != -1 && yvarid != -1 && yboundsid != -1)
@@ -3755,55 +3755,55 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
 
           if (attlen > 0 && attstring[0] != 0)
             {
-              if (strIsEqual(attname, "institution"))
+              if (str_is_equal(attname, "institution"))
                 {
                   *instID = institutInq(0, 0, NULL, attstring);
                   if (*instID == CDI_UNDEFID) *instID = institutDef(0, 0, NULL, attstring);
                 }
-              else if (strIsEqual(attname, "source"))
+              else if (str_is_equal(attname, "source"))
                 {
                   *modelID = modelInq(-1, 0, attstring);
                   if (*modelID == CDI_UNDEFID) *modelID = modelDef(-1, 0, attstring);
                 }
-              else if (strIsEqual(attname, "Source") && strStartsWith(attstring, "UCLA-LES"))
+              else if (str_is_equal(attname, "Source") && strStartsWith(attstring, "UCLA-LES"))
                 {
                   *ucla_les = true;
                 }
               /*
-              else if ( strIsEqual(attname, "Conventions") )
+              else if ( str_is_equal(attname, "Conventions") )
                 {
                 }
               */
-              else if (strIsEqual(attname, "_NCProperties"))
+              else if (str_is_equal(attname, "_NCProperties"))
                 {
                 }
-              else if (strIsEqual(attname, "CDI"))
+              else if (str_is_equal(attname, "CDI"))
                 {
                 }
-              else if (strIsEqual(attname, "CDO"))
+              else if (str_is_equal(attname, "CDO"))
                 {
                 }
               /*
-              else if ( strIsEqual(attname, "forecast_reference_time") )
+              else if ( str_is_equal(attname, "forecast_reference_time") )
                 {
                   memcpy(fcreftime, attstring, attstrlen+1);
                 }
               */
-              else if (strIsEqual(attname, "grid_file_uri"))
+              else if (str_is_equal(attname, "grid_file_uri"))
                 {
                   memcpy(gridInfo->gridfile, attstring, attstrlen + 1);
                 }
-              else if (attstrlen == 36 && strIsEqual(attname, "uuidOfHGrid"))
+              else if (attstrlen == 36 && str_is_equal(attname, "uuidOfHGrid"))
                 {
                   cdiStr2UUID(attstring, gridInfo->uuid);
                 }
-              else if (attstrlen == 36 && strIsEqual(attname, "uuidOfVGrid"))
+              else if (attstrlen == 36 && str_is_equal(attname, "uuidOfVGrid"))
                 {
                   cdiStr2UUID(attstring, uuidOfVGrid);
                 }
               else
                 {
-                  if (strIsEqual(attname, "ICON_grid_file_uri") && gridInfo->gridfile[0] == 0)
+                  if (str_is_equal(attname, "ICON_grid_file_uri") && gridInfo->gridfile[0] == 0)
                     memcpy(gridInfo->gridfile, attstring, attstrlen + 1);
 
                   cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
@@ -3816,7 +3816,7 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
         }
       else if (xtype == NC_SHORT || xtype == NC_INT)
         {
-          if (strIsEqual(attname, "number_of_grid_used"))
+          if (str_is_equal(attname, "number_of_grid_used"))
             {
               gridInfo->number_of_grid_used = CDI_UNDEFID;
               cdfGetAttInt(fileID, NC_GLOBAL, attname, 1, &gridInfo->number_of_grid_used);
@@ -3842,7 +3842,7 @@ find_leadtime(int nvars, ncvar_t *ncvars, int timedimid)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
       if (ncvar->ndims == 1 && timedimid == ncvar->dimids[0])
-        if (ncvar->stdname[0] && strIsEqual(ncvar->stdname, "forecast_period"))
+        if (ncvar->stdname[0] && str_is_equal(ncvar->stdname, "forecast_period"))
           {
             leadtime_id = ncvarid;
             break;
@@ -3865,7 +3865,7 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
       for (ncvarid = 0; ncvarid < nvars; ncvarid++)
         {
           ncvar_t *ncvar = &ncvars[ncvarid];
-          if (ncvar->ndims == 0 && ncvar->units[0] && strIsEqual(ncvar->name, "time"))
+          if (ncvar->ndims == 0 && ncvar->units[0] && str_is_equal(ncvar->name, "time"))
             {
               strcpy(timeUnitsStr, ncvar->units);
               strToLower(timeUnitsStr);
@@ -4307,7 +4307,7 @@ cdfInqContents(stream_t *streamptr)
               // if ( ncvar->varStatus != DataVar ) cdf_set_var(ncvar, CoordVar);
 
               if (ncdimid == ncvar->dimids[0] && ncdims[ncdimid].ncvarid == CDI_UNDEFID)
-                if (strIsEqual(ncvar->name, ncdims[ncdimid].name))
+                if (str_is_equal(ncvar->name, ncdims[ncdimid].name))
                   {
                     ncdims[ncdimid].ncvarid = ncvarid;
                     ncvar->varStatus = CoordVar;
