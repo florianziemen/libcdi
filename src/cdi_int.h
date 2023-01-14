@@ -47,7 +47,7 @@ char *strToLower(char *str);
 bool strStartsWith(const char *vstr, const char *cstr);
 
 static inline bool
-strIsEqual(const char *x, const char *y)
+str_is_equal(const char *x, const char *y)
 {
   return (*x == *y) && strcmp(x, y) == 0;
 }

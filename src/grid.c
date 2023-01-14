@@ -897,12 +897,12 @@ gridInqProjType(int gridID)
       if (gmapname[0])
         {
           // clang-format off
-          if      (strIsEqual(gmapname, "rotated_latitude_longitude"))   projtype = CDI_PROJ_RLL;
-          else if (strIsEqual(gmapname, "lambert_azimuthal_equal_area")) projtype = CDI_PROJ_LAEA;
-          else if (strIsEqual(gmapname, "lambert_conformal_conic"))      projtype = CDI_PROJ_LCC;
-          else if (strIsEqual(gmapname, "sinusoidal"))                   projtype = CDI_PROJ_SINU;
-          else if (strIsEqual(gmapname, "polar_stereographic"))          projtype = CDI_PROJ_STERE;
-          else if (strIsEqual(gmapname, "healpix"))                      projtype = CDI_PROJ_HEALPIX;
+          if      (str_is_equal(gmapname, "rotated_latitude_longitude"))   projtype = CDI_PROJ_RLL;
+          else if (str_is_equal(gmapname, "lambert_azimuthal_equal_area")) projtype = CDI_PROJ_LAEA;
+          else if (str_is_equal(gmapname, "lambert_conformal_conic"))      projtype = CDI_PROJ_LCC;
+          else if (str_is_equal(gmapname, "sinusoidal"))                   projtype = CDI_PROJ_SINU;
+          else if (str_is_equal(gmapname, "polar_stereographic"))          projtype = CDI_PROJ_STERE;
+          else if (str_is_equal(gmapname, "healpix"))                      projtype = CDI_PROJ_HEALPIX;
           // clang-format on
           gridptr->projtype = projtype;
         }
@@ -1896,7 +1896,7 @@ gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
   char name[CDI_MAX_NAME + 1];
   int length = CDI_MAX_NAME;
   cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, name, &length);
-  if (name[0] && strIsEqual(name, projection))
+  if (name[0] && str_is_equal(name, projection))
     {
       int atttype, attlen;
 
@@ -1910,9 +1910,9 @@ gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
             {
               double *attflt;
               // clang-format off
-              if      (strIsEqual(name, "grid_north_pole_longitude")) attflt = xpole;
-              else if (strIsEqual(name, "grid_north_pole_latitude") ) attflt = ypole;
-              else if (strIsEqual(name, "north_pole_grid_longitude")) attflt = angle;
+              if      (str_is_equal(name, "grid_north_pole_longitude")) attflt = xpole;
+              else if (str_is_equal(name, "grid_north_pole_latitude") ) attflt = ypole;
+              else if (str_is_equal(name, "north_pole_grid_longitude")) attflt = angle;
               else continue;
               // clang-format on
               bool valid = cdiInqAttConvertedToFloat(gridID, atttype, name, attlen, attflt);
@@ -3745,7 +3745,7 @@ gridInqParamsLCC(int gridID, struct CDI_GridProjParams *gpp)
   char gmapname[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
   cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
-  if (gmapname[0] && strIsEqual(gmapname, projection))
+  if (gmapname[0] && str_is_equal(gmapname, projection))
     {
       char attname[CDI_MAX_NAME + 1];
 
@@ -3764,17 +3764,17 @@ gridInqParamsLCC(int gridID, struct CDI_GridProjParams *gpp)
           if (cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, attflt))
             {
               // clang-format off
-              if      (strIsEqual(attname, "earth_radius"))                       gpp->a      = attflt[0];
-              else if (strIsEqual(attname, "semi_major_axis"))                    gpp->a      = attflt[0];
-              else if (strIsEqual(attname, "semi_minor_axis"))                    gpp->b      = attflt[0];
-              else if (strIsEqual(attname, "inverse_flattening"))                 gpp->rf     = attflt[0];
-              else if (strIsEqual(attname, "longitude_of_central_meridian"))      gpp->lon_0  = attflt[0];
-              else if (strIsEqual(attname, "latitude_of_projection_origin"))      gpp->lat_0  = attflt[0];
-              else if (strIsEqual(attname, "false_easting"))                      gpp->x_0    = attflt[0];
-              else if (strIsEqual(attname, "false_northing"))                     gpp->y_0    = attflt[0];
-              else if (strIsEqual(attname, "longitudeOfFirstGridPointInDegrees")) gpp->xval_0 = attflt[0];
-              else if (strIsEqual(attname, "latitudeOfFirstGridPointInDegrees"))  gpp->yval_0 = attflt[0];
-              else if (strIsEqual(attname, "standard_parallel"))
+              if      (str_is_equal(attname, "earth_radius"))                       gpp->a      = attflt[0];
+              else if (str_is_equal(attname, "semi_major_axis"))                    gpp->a      = attflt[0];
+              else if (str_is_equal(attname, "semi_minor_axis"))                    gpp->b      = attflt[0];
+              else if (str_is_equal(attname, "inverse_flattening"))                 gpp->rf     = attflt[0];
+              else if (str_is_equal(attname, "longitude_of_central_meridian"))      gpp->lon_0  = attflt[0];
+              else if (str_is_equal(attname, "latitude_of_projection_origin"))      gpp->lat_0  = attflt[0];
+              else if (str_is_equal(attname, "false_easting"))                      gpp->x_0    = attflt[0];
+              else if (str_is_equal(attname, "false_northing"))                     gpp->y_0    = attflt[0];
+              else if (str_is_equal(attname, "longitudeOfFirstGridPointInDegrees")) gpp->xval_0 = attflt[0];
+              else if (str_is_equal(attname, "latitudeOfFirstGridPointInDegrees"))  gpp->yval_0 = attflt[0];
+              else if (str_is_equal(attname, "standard_parallel"))
                 {
                   gpp->lat_1 = attflt[0];
                   gpp->lat_2 = (attlen == 2) ? attflt[1] : attflt[0];
@@ -3909,7 +3909,7 @@ gridInqParamsSTERE(int gridID, struct CDI_GridProjParams *gpp)
   char gmapname[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
   cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
-  if (gmapname[0] && strIsEqual(gmapname, projection))
+  if (gmapname[0] && str_is_equal(gmapname, projection))
     {
       int atttype, attlen;
       char attname[CDI_MAX_NAME + 1];
@@ -3928,17 +3928,17 @@ gridInqParamsSTERE(int gridID, struct CDI_GridProjParams *gpp)
           if (cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, attflt))
             {
               // clang-format off
-              if      (strIsEqual(attname, "earth_radius"))                          gpp->a      = attflt[0];
-              else if (strIsEqual(attname, "semi_major_axis"))                       gpp->a      = attflt[0];
-              else if (strIsEqual(attname, "semi_minor_axis"))                       gpp->b      = attflt[0];
-              else if (strIsEqual(attname, "inverse_flattening"))                    gpp->rf     = attflt[0];
-              else if (strIsEqual(attname, "standard_parallel"))                     gpp->lat_1  = attflt[0];
-              else if (strIsEqual(attname, "straight_vertical_longitude_from_pole")) gpp->lon_0  = attflt[0];
-              else if (strIsEqual(attname, "latitude_of_projection_origin"))         gpp->lat_0  = attflt[0];
-              else if (strIsEqual(attname, "false_easting"))                         gpp->x_0    = attflt[0];
-              else if (strIsEqual(attname, "false_northing"))                        gpp->y_0    = attflt[0];
-              else if (strIsEqual(attname, "longitudeOfFirstGridPointInDegrees"))    gpp->xval_0 = attflt[0];
-              else if (strIsEqual(attname, "latitudeOfFirstGridPointInDegrees"))     gpp->yval_0 = attflt[0];
+              if      (str_is_equal(attname, "earth_radius"))                          gpp->a      = attflt[0];
+              else if (str_is_equal(attname, "semi_major_axis"))                       gpp->a      = attflt[0];
+              else if (str_is_equal(attname, "semi_minor_axis"))                       gpp->b      = attflt[0];
+              else if (str_is_equal(attname, "inverse_flattening"))                    gpp->rf     = attflt[0];
+              else if (str_is_equal(attname, "standard_parallel"))                     gpp->lat_1  = attflt[0];
+              else if (str_is_equal(attname, "straight_vertical_longitude_from_pole")) gpp->lon_0  = attflt[0];
+              else if (str_is_equal(attname, "latitude_of_projection_origin"))         gpp->lat_0  = attflt[0];
+              else if (str_is_equal(attname, "false_easting"))                         gpp->x_0    = attflt[0];
+              else if (str_is_equal(attname, "false_northing"))                        gpp->y_0    = attflt[0];
+              else if (str_is_equal(attname, "longitudeOfFirstGridPointInDegrees"))    gpp->xval_0 = attflt[0];
+              else if (str_is_equal(attname, "latitudeOfFirstGridPointInDegrees"))     gpp->yval_0 = attflt[0];
               // clang-format on
             }
         }

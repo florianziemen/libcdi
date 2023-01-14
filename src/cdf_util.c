@@ -138,9 +138,9 @@ bool
 is_DBL_axis(const char *longname)
 {
   // clang-format off
-  bool status = strIsEqual(longname, "depth below land")
-             || strIsEqual(longname, "depth_below_land")
-             || strIsEqual(longname, "levels below the surface");
+  bool status = str_is_equal(longname, "depth below land")
+             || str_is_equal(longname, "depth_below_land")
+             || str_is_equal(longname, "levels below the surface");
   // clang-format on
 
   return status;
@@ -150,9 +150,9 @@ bool
 is_depth_axis(const char *stdname, const char *longname)
 {
   // clang-format off
-  bool status = strIsEqual(stdname, "depth")
-             || strIsEqual(longname, "depth_below_sea")
-             || strIsEqual(longname, "depth below sea");
+  bool status = str_is_equal(stdname, "depth")
+             || str_is_equal(longname, "depth_below_sea")
+             || str_is_equal(longname, "depth below sea");
   // clang-format ofn
 
   return status;
@@ -162,9 +162,9 @@ is_depth_axis(const char *stdname, const char *longname)
 bool is_height_axis(const char *stdname, const char *longname)
 {
   // clang-format off
-  bool status = strIsEqual(stdname, "height")
-             || strIsEqual(longname, "height")
-             || strIsEqual(longname, "height above the surface");
+  bool status = str_is_equal(stdname, "height")
+             || str_is_equal(longname, "height")
+             || str_is_equal(longname, "height above the surface");
   // clang-format on
 
   return status;
@@ -174,8 +174,8 @@ bool
 is_altitude_axis(const char *stdname, const char *longname)
 {
   // clang-format off
-  bool status = strIsEqual(stdname, "altitude")
-             || strIsEqual(longname, "altitude");
+  bool status = str_is_equal(stdname, "altitude")
+             || str_is_equal(longname, "altitude");
   // clang-format on
 
   return status;
@@ -239,34 +239,34 @@ bool
 is_x_axis(const char *units, const char *stdname)
 {
   (void) units;
-  return (strIsEqual(stdname, "projection_x_coordinate"));
+  return (str_is_equal(stdname, "projection_x_coordinate"));
 }
 
 bool
 is_y_axis(const char *units, const char *stdname)
 {
   (void) units;
-  return (strIsEqual(stdname, "projection_y_coordinate"));
+  return (str_is_equal(stdname, "projection_y_coordinate"));
 }
 
 void
 cdf_set_gridtype(const char *attstring, int *gridtype)
 {
   // clang-format off
-  if      (strIsEqual(attstring, "gaussian_reduced")) *gridtype = GRID_GAUSSIAN_REDUCED;
-  else if (strIsEqual(attstring, "gaussian"))         *gridtype = GRID_GAUSSIAN;
+  if      (str_is_equal(attstring, "gaussian_reduced")) *gridtype = GRID_GAUSSIAN_REDUCED;
+  else if (str_is_equal(attstring, "gaussian"))         *gridtype = GRID_GAUSSIAN;
   else if (strStartsWith(attstring, "spectral"))      *gridtype = GRID_SPECTRAL;
   else if (strStartsWith(attstring, "fourier"))       *gridtype = GRID_FOURIER;
-  else if (strIsEqual(attstring, "trajectory"))       *gridtype = GRID_TRAJECTORY;
-  else if (strIsEqual(attstring, "generic"))          *gridtype = GRID_GENERIC;
-  else if (strIsEqual(attstring, "cell"))             *gridtype = GRID_UNSTRUCTURED;
-  else if (strIsEqual(attstring, "unstructured"))     *gridtype = GRID_UNSTRUCTURED;
-  else if (strIsEqual(attstring, "curvilinear")) ;
-  else if (strIsEqual(attstring, "characterxy"))      *gridtype = GRID_CHARXY;
-  else if (strIsEqual(attstring, "sinusoidal")) ;
-  else if (strIsEqual(attstring, "laea")) ;
-  else if (strIsEqual(attstring, "lcc2")) ;
-  else if (strIsEqual(attstring, "linear")) ; // ignore grid type linear
+  else if (str_is_equal(attstring, "trajectory"))       *gridtype = GRID_TRAJECTORY;
+  else if (str_is_equal(attstring, "generic"))          *gridtype = GRID_GENERIC;
+  else if (str_is_equal(attstring, "cell"))             *gridtype = GRID_UNSTRUCTURED;
+  else if (str_is_equal(attstring, "unstructured"))     *gridtype = GRID_UNSTRUCTURED;
+  else if (str_is_equal(attstring, "curvilinear")) ;
+  else if (str_is_equal(attstring, "characterxy"))      *gridtype = GRID_CHARXY;
+  else if (str_is_equal(attstring, "sinusoidal")) ;
+  else if (str_is_equal(attstring, "laea")) ;
+  else if (str_is_equal(attstring, "lcc2")) ;
+  else if (str_is_equal(attstring, "linear")) ; // ignore grid type linear
   else
     {
       static bool warn = true;
@@ -283,18 +283,18 @@ void
 cdf_set_zaxistype(const char *attstring, int *zaxistype)
 {
   // clang-format off
-  if      (strIsEqual(attstring, "toa"))              *zaxistype = ZAXIS_TOA;
-  else if (strIsEqual(attstring, "tropopause"))       *zaxistype = ZAXIS_TROPOPAUSE;
-  else if (strIsEqual(attstring, "cloudbase"))        *zaxistype = ZAXIS_CLOUD_BASE;
-  else if (strIsEqual(attstring, "cloudtop"))         *zaxistype = ZAXIS_CLOUD_TOP;
-  else if (strIsEqual(attstring, "isotherm0"))        *zaxistype = ZAXIS_ISOTHERM_ZERO;
-  else if (strIsEqual(attstring, "seabottom"))        *zaxistype = ZAXIS_SEA_BOTTOM;
-  else if (strIsEqual(attstring, "lakebottom"))       *zaxistype = ZAXIS_LAKE_BOTTOM;
-  else if (strIsEqual(attstring, "sedimentbottom"))   *zaxistype = ZAXIS_SEDIMENT_BOTTOM;
-  else if (strIsEqual(attstring, "sedimentbottomta")) *zaxistype = ZAXIS_SEDIMENT_BOTTOM_TA;
-  else if (strIsEqual(attstring, "sedimentbottomtw")) *zaxistype = ZAXIS_SEDIMENT_BOTTOM_TW;
-  else if (strIsEqual(attstring, "mixlayer"))         *zaxistype = ZAXIS_MIX_LAYER;
-  else if (strIsEqual(attstring, "atmosphere"))       *zaxistype = ZAXIS_ATMOSPHERE;
+  if      (str_is_equal(attstring, "toa"))              *zaxistype = ZAXIS_TOA;
+  else if (str_is_equal(attstring, "tropopause"))       *zaxistype = ZAXIS_TROPOPAUSE;
+  else if (str_is_equal(attstring, "cloudbase"))        *zaxistype = ZAXIS_CLOUD_BASE;
+  else if (str_is_equal(attstring, "cloudtop"))         *zaxistype = ZAXIS_CLOUD_TOP;
+  else if (str_is_equal(attstring, "isotherm0"))        *zaxistype = ZAXIS_ISOTHERM_ZERO;
+  else if (str_is_equal(attstring, "seabottom"))        *zaxistype = ZAXIS_SEA_BOTTOM;
+  else if (str_is_equal(attstring, "lakebottom"))       *zaxistype = ZAXIS_LAKE_BOTTOM;
+  else if (str_is_equal(attstring, "sedimentbottom"))   *zaxistype = ZAXIS_SEDIMENT_BOTTOM;
+  else if (str_is_equal(attstring, "sedimentbottomta")) *zaxistype = ZAXIS_SEDIMENT_BOTTOM_TA;
+  else if (str_is_equal(attstring, "sedimentbottomtw")) *zaxistype = ZAXIS_SEDIMENT_BOTTOM_TW;
+  else if (str_is_equal(attstring, "mixlayer"))         *zaxistype = ZAXIS_MIX_LAYER;
+  else if (str_is_equal(attstring, "atmosphere"))       *zaxistype = ZAXIS_ATMOSPHERE;
   else
     {
       static bool warn = true;
