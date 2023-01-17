@@ -3686,7 +3686,8 @@ check_cube_sphere(int vlistID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
       for (int varid = 0; varid < nvars; ++varid)
         {
           ncvar_t *ncvar = &ncvars[varid];
-          if (str_is_equal("orientation", ncvar->name) || str_is_equal("anchor", ncvar->name) || str_is_equal("contacts", ncvar->name))
+          if (str_is_equal("orientation", ncvar->name) || str_is_equal("anchor", ncvar->name)
+              || str_is_equal("contacts", ncvar->name))
             cdf_set_var(ncvar, CoordVar);
         }
 
