@@ -43,7 +43,7 @@ char *strdup(const char *s);
 */
 #endif
 
-char *strToLower(char *str);
+char *str_to_lower(char *str);
 bool strStartsWith(const char *vstr, const char *cstr);
 
 static inline bool

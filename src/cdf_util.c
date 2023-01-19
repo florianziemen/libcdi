@@ -8,7 +8,7 @@
 #include "error.h"
 
 char *
-strToLower(char *str)
+str_to_lower(char *str)
 {
   if (str)
     for (size_t i = 0; str[i]; ++i) str[i] = (char) tolower((int) str[i]);
@@ -189,7 +189,7 @@ is_lon_axis(const char *units, const char *stdname)
 
   memcpy(lc_units, units, 15);
   lc_units[15] = 0;
-  strToLower(lc_units);
+  str_to_lower(lc_units);
 
   if ((strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian"))
       && (strStartsWith(stdname, "grid_longitude") || strStartsWith(stdname, "longitude")))
@@ -216,7 +216,7 @@ is_lat_axis(const char *units, const char *stdname)
 
   memcpy(lc_units, units, 15);
   lc_units[15] = 0;
-  strToLower(lc_units);
+  str_to_lower(lc_units);
 
   if ((strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian"))
       && (strStartsWith(stdname, "grid_latitude") || strStartsWith(stdname, "latitude")))

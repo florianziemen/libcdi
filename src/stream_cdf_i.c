@@ -626,7 +626,7 @@ cdf_time_dimid(int fileID, int ndims, int nvars, ncdim_t *ncdims)
               if (strStartsWith(sbuf, "units"))
                 {
                   cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
-                  strToLower(sbuf);
+                  str_to_lower(sbuf);
 
                   if (is_time_units(sbuf)) return dimids[0];
                 }
@@ -1289,7 +1289,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
           else if (isText && (str_is_equal(attname, "grid_type") || str_is_equal(attname, "CDI_grid_type")))
             {
-              strToLower(attstring);
+              str_to_lower(attstring);
               cdf_set_gridtype(attstring, &ncvar->gridtype);
               cdf_set_var(ncvar, DataVar);
             }
@@ -1327,7 +1327,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
           else if (isText && str_is_equal(attname, "level_type"))
             {
-              strToLower(attstring);
+              str_to_lower(attstring);
               cdf_set_zaxistype(attstring, &ncvar->zaxistype);
               cdf_set_var(ncvar, DataVar);
             }
@@ -1494,7 +1494,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
           else if (isText && str_is_equal(attname, "positive"))
             {
-              strToLower(attstring);
+              str_to_lower(attstring);
 
               if (str_is_equal(attstring, "down"))
                 ncvar->positive = POSITIVE_DOWN;
@@ -1575,7 +1575,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
           else if (isText && str_is_equal(attname, "_Unsigned"))
             {
-              strToLower(attstring);
+              str_to_lower(attstring);
               if (str_is_equal(attstring, "true"))
                 {
                   ncvar->isUnsigned = true;
@@ -1589,7 +1589,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
           else if (isText && str_is_equal(attname, "cdi"))
             {
-              strToLower(attstring);
+              str_to_lower(attstring);
 
               if (str_is_equal(attstring, "ignore"))
                 {
@@ -3869,7 +3869,7 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
           if (ncvar->ndims == 0 && ncvar->units[0] && str_is_equal(ncvar->name, "time"))
             {
               strcpy(timeUnitsStr, ncvar->units);
-              strToLower(timeUnitsStr);
+              str_to_lower(timeUnitsStr);
 
               if (is_time_units(timeUnitsStr))
                 {
@@ -4498,7 +4498,7 @@ cdfInqContents(stream_t *streamptr)
       {
         char attstring[1024];
         cdfGetAttText(fileID, nctimevarid, "calendar", sizeof(attstring), attstring);
-        strToLower(attstring);
+        str_to_lower(attstring);
         calendar = attribute_to_calendar(attstring);
       }
 
