@@ -284,7 +284,7 @@ xtypeIsText(int xtype)
 {
   bool isText = (xtype == NC_CHAR)
 #ifdef HAVE_NETCDF4
-             || (xtype == NC_STRING)
+                || (xtype == NC_STRING)
 #endif
       ;
   return isText;
@@ -301,7 +301,7 @@ xtypeIsInt(nc_type xtype)
 {
   bool isInt = xtype == NC_SHORT || xtype == NC_INT || xtype == NC_BYTE
 #ifdef HAVE_NETCDF4
-    || xtype == NC_USHORT || xtype == NC_UINT || xtype == NC_UBYTE
+               || xtype == NC_USHORT || xtype == NC_UINT || xtype == NC_UBYTE
 #endif
       ;
 
