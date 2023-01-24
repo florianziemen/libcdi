@@ -185,6 +185,7 @@ usage(void)
   fprintf(stderr, "    -z szip        SZIP compression of GRIB1 records\n");
   fprintf(stderr, "       jpeg        JPEG compression of GRIB2 records\n");
   fprintf(stderr, "        zip[_1-9]  Deflate compression of netCDF4 variables\n");
+  fprintf(stderr, "        zstd[_1-19] zstandard compression of netCDF4 variables\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "  Report bugs to <https://code.mpimet.mpg.de/projects/cdi>\n");
 }
@@ -724,6 +725,11 @@ defineCompress(const char *arg)
     {
       comptype = CDI_COMPRESS_ZIP;
       complevel = (len == 5 && arg[3] == '_' && isdigit(arg[4])) ? atoi(&arg[4]) : 1;
+    }
+  else if (strncmp(arg, "zstd", 4) == 0)
+    {
+      comptype = CDI_COMPRESS_ZSTD;
+      complevel = (len >=6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
     }
   else
     fprintf(stderr, "%s compression unsupported!\n", arg);

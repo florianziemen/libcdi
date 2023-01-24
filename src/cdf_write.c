@@ -13,17 +13,19 @@
 #include "vlist.h"
 #include "vlist_var.h"
 
+#include <netcdf_filter.h>
+
 void
-cdfDefVarDeflate(int ncid, int ncvarID, int deflateLevel)
+cdfDefVarDeflate(int ncid, int ncvarID, int compLevel)
 {
 #ifdef HAVE_NETCDF4
   // Set chunking, shuffle, and deflate.
   int shuffle = (CDI_Shuffle > 0), deflate = 1;
 
-  if (deflateLevel < 1 || deflateLevel > 9) deflateLevel = 1;
+  if (compLevel < 1 || compLevel > 9) compLevel = 1;
 
   int status;
-  if ((status = nc_def_var_deflate(ncid, ncvarID, shuffle, deflate, deflateLevel)))
+  if ((status = nc_def_var_deflate(ncid, ncvarID, shuffle, deflate, compLevel)))
     {
       Error("nc_def_var_deflate failed; %s", nc_strerror(status));
     }
@@ -33,6 +35,27 @@ cdfDefVarDeflate(int ncid, int ncvarID, int deflateLevel)
     {
       lwarn = false;
       Warning("Deflate compression failed, NetCDF4 not available!");
+    }
+#endif
+}
+
+void
+cdfDefVarZstd(int ncid, int ncvarID, int compLevel)
+{
+#ifdef HAVE_NETCDF4
+  if (compLevel < 1 || compLevel > 19) compLevel = 1;
+
+  int status;
+  if ((status = nc_def_var_zstandard(ncid, ncvarID, compLevel)))
+    {
+      Error("nc_def_var_zstandard failed; %s", nc_strerror(status));
+    }
+#else
+  static bool lwarn = true;
+  if (lwarn)
+    {
+      lwarn = false;
+      Warning("zstd compression failed, NetCDF4 not available!");
     }
 #endif
 }
@@ -438,6 +461,23 @@ cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
             {
               lwarn = false;
               Warning("Deflate compression is only available for NetCDF4!");
+            }
+        }
+    }
+  else if (streamptr->comptype == CDI_COMPRESS_ZSTD)
+    {
+      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
+          || streamptr->filetype == CDI_FILETYPE_NCZARR)
+        {
+          cdfDefVarZstd(streamptr->fileID, ncvarID, streamptr->complevel);
+        }
+      else
+        {
+          static bool lwarn = true;
+          if (lwarn)
+            {
+              lwarn = false;
+              Warning("SZIP compression is only available for NetCDF4!");
             }
         }
     }
@@ -849,7 +889,7 @@ cdfDefVar(stream_t *streamptr, int varID)
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
   int gridID = vlistInqVarGrid(vlistID, varID);
-  size_t gridsize = gridInqSize(gridID);
+  SizeType gridsize = gridInqSize(gridID);
   int gridtype = gridInqType(gridID);
   int gridindex = nc_grid_index(streamptr, gridID);
   int xid = (gridtype != GRID_TRAJECTORY) ? streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X] : CDI_UNDEFID;
