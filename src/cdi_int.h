@@ -292,6 +292,12 @@ typedef struct
   int localatts;
   int unreduced;
   int have_missval;
+  // netcdf4/HDF5 filter
+  unsigned int filterId;
+  size_t numParams;
+  size_t maxParams;
+  unsigned int params[8];
+
   int comptype;   // compression type
   int complevel;  // compression level
   bool sortname;

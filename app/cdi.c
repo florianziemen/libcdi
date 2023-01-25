@@ -65,6 +65,10 @@ static int DefaultFileType = CDI_UNDEFID;
 static int DefaultDataType = CDI_UNDEFID;
 static int DefaultByteorder = CDI_UNDEFID;
 
+static int filterId = 0;
+static int params[8];
+static int maxParams = sizeof(params) / sizeof(params[0]);
+static int numParams = 0;
 static int comptype = CDI_COMPRESS_NONE;  // Compression type
 static int complevel = 0;                 // Compression level
 
@@ -711,7 +715,7 @@ handle_error(int cdiErrno, const char *fmt, ...)
 static void
 defineCompress(const char *arg)
 {
-  const size_t len = strlen(arg);
+  size_t len = strlen(arg);
 
   if (strncmp(arg, "szip", len) == 0)
     {
@@ -729,10 +733,42 @@ defineCompress(const char *arg)
   else if (strncmp(arg, "zstd", 4) == 0)
     {
       comptype = CDI_COMPRESS_ZSTD;
-      complevel = (len >=6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
+      complevel = (len >= 6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
     }
   else
     fprintf(stderr, "%s compression unsupported!\n", arg);
+}
+
+static void
+defineFilter(const char *arg)
+{
+  size_t len = strlen(arg);
+
+  if (len > 0 && isdigit(arg[0]))
+    {
+      filterId = atoi(arg);
+      const char *next;
+      const char *parg = arg;
+      while ((next = strchr(parg, ',')))
+        {
+          parg = ++next;
+          len = strlen(parg);
+          if (len > 0 && isdigit(parg[0]))
+            {
+              if (numParams >= maxParams)
+                {
+                  fprintf(stderr, "Too many filter parameter (max=%d)!\n", maxParams);
+                  return;
+                }
+              params[numParams] = atoi(parg);
+              numParams++;
+            }
+        }
+    }
+  else
+    {
+      fprintf(stderr, "Filter id missing!\n");
+    }
 }
 
 int
@@ -769,7 +805,7 @@ main(int argc, char *argv[])
     Progname++;
 
   // clang-format off
-  while ((c = getopt(argc, argv, "b:f:i:o:q:t:w:z:cdhlMmnqRrsvVxXZ")) != EOF)
+  while ((c = getopt(argc, argv, "b:F:f:i:o:q:t:w:z:cdhlMmnqRrsvVxXZ")) != EOF)
     {
       switch (c)
 	{
@@ -794,6 +830,7 @@ main(int argc, char *argv[])
 	case 'w': wTable = optarg; break;
 	case 'x': datamode = SP_MODE; break;
 	case 'z': defineCompress(optarg); break;
+	case 'F': defineFilter(optarg); break;
 	}
     }
   // clang-format on
@@ -892,11 +929,16 @@ main(int argc, char *argv[])
           streamID2 = streamOpenWrite(fname2, filetype);
           if (streamID2 < 0) return handle_error(streamID2, "Open failed on %s", fname2);
 
-          const int maxSteps = vlistNtsteps(vlistID1);
+          int maxSteps = vlistNtsteps(vlistID1);
           if (filetype == CDI_FILETYPE_NCZARR && maxSteps >= 0) streamDefMaxSteps(streamID2, maxSteps);
           if (numWorkerOut > 0) streamDefNumWorker(streamID2, numWorkerOut);
 
           if (DefaultByteorder != CDI_UNDEFID) streamDefByteorder(streamID2, DefaultByteorder);
+
+          if (filterId != 0)
+            {
+              streamDefFilter(streamID2, filterId, numParams, params);
+            }
 
           if (comptype != CDI_COMPRESS_NONE)
             {

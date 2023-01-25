@@ -13,7 +13,26 @@
 #include "vlist.h"
 #include "vlist_var.h"
 
-#include <netcdf_filter.h>
+//#include <netcdf_filter.h>
+
+void
+cdf_def_var_filter(int ncid, int ncvarID, unsigned int id, size_t nparams, const unsigned int *params)
+{
+#ifdef HAVE_NETCDF4
+  int status;
+  if ((status = nc_def_var_filter(ncid, ncvarID, id, nparams, params)))
+    {
+      Error("nc_def_var_filter failed; %s", nc_strerror(status));
+    }
+#else
+  static bool lwarn = true;
+  if (lwarn)
+    {
+      lwarn = false;
+      Warning("filter failed, NetCDF4 not available!");
+    }
+#endif
+}
 
 void
 cdfDefVarDeflate(int ncid, int ncvarID, int compLevel)
@@ -38,7 +57,7 @@ cdfDefVarDeflate(int ncid, int ncvarID, int compLevel)
     }
 #endif
 }
-
+/*
 void
 cdfDefVarZstd(int ncid, int ncvarID, int compLevel)
 {
@@ -59,7 +78,7 @@ cdfDefVarZstd(int ncid, int ncvarID, int compLevel)
     }
 #endif
 }
-
+*/
 void
 cdfDefVarSzip(int ncid, int ncvarID, int pixels_per_block)
 {
@@ -445,6 +464,27 @@ xtype2ppb(nc_type xtype)
 }
 
 static void
+cdfDefVarFilter(const stream_t *s, int ncvarID)
+{
+  if (s->filterId != 0)
+    {
+      if (s->filetype == CDI_FILETYPE_NC4 || s->filetype == CDI_FILETYPE_NC4C || s->filetype == CDI_FILETYPE_NCZARR)
+        {
+           cdf_def_var_filter(s->fileID, ncvarID, s->filterId, s->numParams, s->params);
+        }
+      else
+        {
+          static bool lwarn = true;
+          if (lwarn)
+            {
+              lwarn = false;
+              Warning("Filter is only available for NetCDF4!");
+            }
+        }
+    }
+}
+
+static void
 cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
 {
   if (streamptr->comptype == CDI_COMPRESS_ZIP)
@@ -464,6 +504,7 @@ cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
             }
         }
     }
+  /*
   else if (streamptr->comptype == CDI_COMPRESS_ZSTD)
     {
       if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
@@ -481,6 +522,7 @@ cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
             }
         }
     }
+  */
   else if (streamptr->comptype == CDI_COMPRESS_SZIP)
     {
       if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
@@ -969,6 +1011,7 @@ cdfDefVar(stream_t *streamptr, int varID)
 #endif
 
   if (useChunks) cdfDefVarCompression(streamptr, ncvarID, xtype);
+  if (useChunks) cdfDefVarFilter(streamptr, ncvarID);
 
   if (*stdname) cdf_put_att_text(fileID, ncvarID, "standard_name", strlen(stdname), stdname);
   if (*longname) cdf_put_att_text(fileID, ncvarID, "long_name", strlen(longname), longname);
