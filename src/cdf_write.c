@@ -470,7 +470,7 @@ cdfDefVarFilter(const stream_t *s, int ncvarID)
     {
       if (s->filetype == CDI_FILETYPE_NC4 || s->filetype == CDI_FILETYPE_NC4C || s->filetype == CDI_FILETYPE_NCZARR)
         {
-           cdf_def_var_filter(s->fileID, ncvarID, s->filterId, s->numParams, s->params);
+          cdf_def_var_filter(s->fileID, ncvarID, s->filterId, s->numParams, s->params);
         }
       else
         {

@@ -969,7 +969,7 @@ streamDefaultValue(stream_t *streamptr)
   // netcdf4/HDF5 filter
   streamptr->filterId = 0;
   streamptr->numParams = 0;
-  streamptr->maxParams = sizeof(streamptr->params) / sizeof(streamptr->params[0]) ;
+  streamptr->maxParams = sizeof(streamptr->params) / sizeof(streamptr->params[0]);
 
   basetimeInit(&streamptr->basetime);
 
@@ -1655,9 +1655,9 @@ void
 streamDefFilter(int streamID, int filterId, int numParams, const int *params)
 {
   stream_t *s = stream_to_pointer(streamID);
-  if ((int)s->filterId != filterId)
+  if ((int) s->filterId != filterId)
     {
-      if (numParams > (int)s->maxParams) Error("Too many filter parameter %d (max=%zu)!", numParams, s->maxParams);
+      if (numParams > (int) s->maxParams) Error("Too many filter parameter %d (max=%zu)!", numParams, s->maxParams);
       s->filterId = filterId;
       s->numParams = numParams;
       for (int i = 0; i < numParams; ++i) s->params[i] = params[i];
