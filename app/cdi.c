@@ -653,19 +653,19 @@ setDefaultFileType(char *filetypestr)
       char *ftstr = filetypestr;
 
       // clang-format off
-      if      ( memcmp(filetypestr, "grb2",   4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB2;}
-      else if ( memcmp(filetypestr, "grb1",   4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB; }
-      else if ( memcmp(filetypestr, "grb",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_GRB; }
-      else if ( memcmp(filetypestr, "nc2",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC2; }
-      else if ( memcmp(filetypestr, "nc4c",   4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_NC4C;}
-      else if ( memcmp(filetypestr, "nc4",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC4; }
-      else if ( memcmp(filetypestr, "nc5",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC5; }
-      else if ( memcmp(filetypestr, "nc1",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC;  }
-      else if ( memcmp(filetypestr, "nczarr", 6)  == 0 ) { ftstr += 6; DefaultFileType = CDI_FILETYPE_NCZARR;  }
-      else if ( memcmp(filetypestr, "nc",     2)  == 0 ) { ftstr += 2; DefaultFileType = CDI_FILETYPE_NC2; }
-      else if ( memcmp(filetypestr, "srv",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_SRV; }
-      else if ( memcmp(filetypestr, "ext",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_EXT; }
-      else if ( memcmp(filetypestr, "ieg",    3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_IEG; }
+      if      (memcmp(filetypestr, "grb2",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB2;}
+      else if (memcmp(filetypestr, "grb1",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB; }
+      else if (memcmp(filetypestr, "grb",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_GRB; }
+      else if (memcmp(filetypestr, "nc2",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC2; }
+      else if (memcmp(filetypestr, "nc4c",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_NC4C;}
+      else if (memcmp(filetypestr, "nc4",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC4; }
+      else if (memcmp(filetypestr, "nc5",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC5; }
+      else if (memcmp(filetypestr, "nc1",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC;  }
+      else if (memcmp(filetypestr, "nczarr", 6)  == 0) { ftstr += 6; DefaultFileType = CDI_FILETYPE_NCZARR;  }
+      else if (memcmp(filetypestr, "nc",     2)  == 0) { ftstr += 2; DefaultFileType = CDI_FILETYPE_NC2; }
+      else if (memcmp(filetypestr, "srv",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_SRV; }
+      else if (memcmp(filetypestr, "ext",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_EXT; }
+      else if (memcmp(filetypestr, "ieg",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_IEG; }
       else
 	{
 	  fprintf(stderr, "Unsupported filetype %s!\n", filetypestr);
@@ -732,8 +732,16 @@ defineCompress(const char *arg)
     }
   else if (strncmp(arg, "zstd", 4) == 0)
     {
-      comptype = CDI_COMPRESS_ZSTD;
-      complevel = (len >= 6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
+      if (filterId == 0)
+        {
+          filterId = 32015;
+          numParams = 1;
+          params[0] = (len >= 6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
+        }
+      else
+        {
+          fprintf(stderr, "Filter already defined!\n");
+        }
     }
   else
     fprintf(stderr, "%s compression unsupported!\n", arg);
