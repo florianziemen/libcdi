@@ -6,8 +6,14 @@ void
 cdiQueryInit(CdiQuery *query)
 {
   query->numEntries = 0;
+
   query->numNames = 0;
   query->names = NULL;
+  query->namesFound = NULL;
+
+  query->numIndices = 0;
+  query->indices = NULL;
+  query->indicesFound = NULL;
 }
 
 CdiQuery *
@@ -21,11 +27,22 @@ cdiQueryCreate()
 void
 cdiQueryDelete(CdiQuery *query)
 {
-  if (query && query->numNames)
+  if (query)
     {
-      for (int i = 0; i < query->numNames; ++i) free(query->names[i]);
-      free(query->names);
-      free(query->namesFound);
+      if (query->numNames)
+        {
+          for (int i = 0; i < query->numNames; ++i) free(query->names[i]);
+          free(query->names);
+          free(query->namesFound);
+        }
+
+      if (query->numIndices)
+        {
+          free(query->indices);
+          free(query->indicesFound);
+        }
+
+      cdiQueryInit(query);
       free(query);
     }
 }
@@ -37,15 +54,28 @@ cdiQueryNumEntries(const CdiQuery *query)
 }
 
 void
-cdiQuerySetNames(CdiQuery *query, int numNames, char **names)
+cdiQuerySetNames(CdiQuery *query, int numEntries, char **names)
 {
-  if (numNames)
+  if (numEntries)
     {
-      query->numEntries += numNames;
-      query->numNames = numNames;
-      query->namesFound = (bool *) calloc(numNames, sizeof(bool));
-      query->names = (char **) malloc(numNames * sizeof(char *));
-      for (int i = 0; i < numNames; ++i) query->names[i] = strdup(names[i]);
+      query->numEntries += numEntries;
+      query->numNames = numEntries;
+      query->namesFound = (bool *) calloc(numEntries, sizeof(bool));
+      query->names = (char **) malloc(numEntries * sizeof(char *));
+      for (int i = 0; i < numEntries; ++i) query->names[i] = strdup(names[i]);
+    }
+}
+
+void
+cdiQuerySetIndices(CdiQuery *query, int numEntries, size_t *indices)
+{
+  if (numEntries)
+    {
+      query->numEntries += numEntries;
+      query->numIndices = numEntries;
+      query->indicesFound = (bool *) calloc(numEntries, sizeof(bool));
+      query->indices = (size_t *) malloc(numEntries * sizeof(size_t));
+      for (int i = 0; i < numEntries; ++i) query->indices[i] = indices[i];
     }
 }
 
@@ -57,6 +87,7 @@ cdiQueryClone(const CdiQuery *query)
   if (query)
     {
       cdiQuerySetNames(queryOut, query->numNames, query->names);
+      cdiQuerySetIndices(queryOut, query->numIndices, query->indices);
     }
 
   return queryOut;
@@ -65,11 +96,21 @@ cdiQueryClone(const CdiQuery *query)
 void
 cdiQueryPrint(const CdiQuery *query)
 {
-  if (query && query->numNames)
+  if (query)
     {
-      printf("Names:");
-      for (int i = 0; i < query->numNames; ++i) printf(" %s", query->names[i]);
-      printf("\n");
+      if (query->numNames)
+        {
+          printf("Names:");
+          for (int i = 0; i < query->numNames; ++i) printf(" %s", query->names[i]);
+          printf("\n");
+        }
+
+      if (query->numIndices)
+        {
+          printf("Indices:");
+          for (int i = 0; i < query->numIndices; ++i) printf(" %zu", query->indices[i]);
+          printf("\n");
+        }
     }
 }
 
@@ -78,12 +119,21 @@ cdiQueryNumEntriesFound(const CdiQuery *query)
 {
   int numEntriesFound = 0;
 
-  if (query && query->numNames)
+  if (query)
     {
-      int numNamesFound = 0;
-      for (int i = 0; i < query->numNames; ++i) numNamesFound += query->namesFound[i];
+      if (query->numNames)
+        {
+          int numNamesFound = 0;
+          for (int i = 0; i < query->numNames; ++i) numNamesFound += query->namesFound[i];
+          numEntriesFound += numNamesFound;
+        }
 
-      numEntriesFound += numNamesFound;
+      if (query->numIndices)
+        {
+          int numIndicesFound = 0;
+          for (int i = 0; i < query->numIndices; ++i) numIndicesFound += query->indicesFound[i];
+          numEntriesFound += numIndicesFound;
+        }
     }
 
   return numEntriesFound;
@@ -94,22 +144,40 @@ cdiQueryPrintEntriesNotFound(const CdiQuery *query)
 {
   if (query)
     {
-      const int numEnties = cdiQueryNumEntries(query);
-      const int numEntiesFound = cdiQueryNumEntriesFound(query);
+      int numEnties = cdiQueryNumEntries(query);
+      int numEntiesFound = cdiQueryNumEntriesFound(query);
 
-      const int numEntriesNotFound = numEnties - numEntiesFound;
-      if (numEntriesNotFound > 0 && query->numNames)
+      int numEntriesNotFound = numEnties - numEntiesFound;
+      if (numEntriesNotFound > 0)
         {
-          int numNamesFound = 0;
-          for (int i = 0; i < query->numNames; ++i) numNamesFound += query->namesFound[i];
-
-          const int numNamesNotFound = query->numNames - numNamesFound;
-          if (numNamesNotFound > 0)
+          if (query->numNames)
             {
-              printf("Name not found:");
-              for (int i = 0; i < query->numNames; ++i)
-                if (!query->namesFound[i]) printf(" %s", query->names[i]);
-              printf("\n");
+              int numNamesFound = 0;
+              for (int i = 0; i < query->numNames; ++i) numNamesFound += query->namesFound[i];
+
+              int numNamesNotFound = query->numNames - numNamesFound;
+              if (numNamesNotFound > 0)
+                {
+                  printf("Name not found:");
+                  for (int i = 0; i < query->numNames; ++i)
+                    if (!query->namesFound[i]) printf(" %s", query->names[i]);
+                  printf("\n");
+                }
+            }
+
+          if (query->numIndices)
+            {
+              int numIndicesFound = 0;
+              for (int i = 0; i < query->numIndices; ++i) numIndicesFound += query->indicesFound[i];
+
+              int numIndicesNotFound = query->numIndices - numIndicesFound;
+              if (numIndicesNotFound > 0)
+                {
+                  printf("Name not found:");
+                  for (int i = 0; i < query->numIndices; ++i)
+                    if (!query->indicesFound[i]) printf(" %zu", query->indices[i]);
+                  printf("\n");
+                }
             }
         }
     }
@@ -124,6 +192,22 @@ cdiQueryName(CdiQuery *query, const char *name)
         if (strcmp(name, query->names[i]) == 0)
           {
             query->namesFound[i] = true;
+            return 0;
+          }
+    }
+
+  return -1;
+}
+
+int
+cdiQueryIndex(CdiQuery *query, size_t index)
+{
+  if (query && query->numIndices)
+    {
+      for (int i = 0; i < query->numIndices; ++i)
+        if (query->indices[i] == index)
+          {
+            query->indicesFound[i] = true;
             return 0;
           }
     }

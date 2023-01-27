@@ -1314,16 +1314,23 @@ extern "C" {
 typedef struct
 {
   int numEntries;
+  // Names
   int numNames;
   bool *namesFound;
   char **names;
+  // Indices
+  int numIndices;
+  bool *indicesFound;
+  size_t *indices;
 } CdiQuery;
 
 CdiQuery *cdiQueryCreate();
 CdiQuery *cdiQueryClone(const CdiQuery *query);
 void cdiQueryDelete(CdiQuery *query);
 void cdiQuerySetNames(CdiQuery *query, int numNames, char **names);
+void cdiQuerySetIndices(CdiQuery *query, int numIndices, size_t *indices);
 int cdiQueryName(CdiQuery *query, const char *name);
+int cdiQueryIndex(CdiQuery *query, size_t index);
 int cdiQueryNumEntries(const CdiQuery *query);
 int cdiQueryNumEntriesFound(const CdiQuery *query);
 void cdiQueryPrint(const CdiQuery *query);
