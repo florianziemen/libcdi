@@ -1,3 +1,7 @@
+2023-01-27  Uwe Schulzweida
+
+	* NetCDF: added query support for variable names
+
 2023-01-25  Uwe Schulzweida
 
 	* Added support for NetCDF4/HDF5 filter

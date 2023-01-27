@@ -328,7 +328,7 @@ static void
 limit_string_length(char *string, size_t maxlen)
 {
   string[maxlen - 1] = 0;
-  const size_t len = strlen(string);
+  size_t len = strlen(string);
 
   if (len > 10)
     {
@@ -354,8 +354,8 @@ printShortinfo(int streamID, int vlistID, int vardis)
   printFiletype(streamID, vlistID);
 
   // vlistPrint(vlistID);
-  const int nvars = vlistNvars(vlistID);
-  const int nsubtypes = vlistNsubtypes(vlistID);
+  int nvars = vlistNvars(vlistID);
+  int nsubtypes = vlistNsubtypes(vlistID);
 
   if (nsubtypes > 0)
     fprintf(stdout, "   Var : Institut Source   T Steptype Subtypes Levels Num    Points Num Dtype : ");
@@ -369,9 +369,9 @@ printShortinfo(int streamID, int vlistID, int vardis)
 
   for (int varID = 0; varID < nvars; varID++)
     {
-      const int param = vlistInqVarParam(vlistID, varID);
-      const int gridID = vlistInqVarGrid(vlistID, varID);
-      const int zaxisID = vlistInqVarZaxis(vlistID, varID);
+      int param = vlistInqVarParam(vlistID, varID);
+      int gridID = vlistInqVarGrid(vlistID, varID);
+      int zaxisID = vlistInqVarZaxis(vlistID, varID);
 
       fprintf(stdout, "%6d : ", varID + 1);
 
@@ -390,11 +390,11 @@ printShortinfo(int streamID, int vlistID, int vardis)
       fprintf(stdout, "%-8s ", tmpname);
 
       // timetype
-      const int timetype = vlistInqVarTimetype(vlistID, varID);
+      int timetype = vlistInqVarTimetype(vlistID, varID);
       fprintf(stdout, "%c ", timetype == TIME_CONSTANT ? 'c' : 'v');
 
       // tsteptype
-      const int tsteptype = vlistInqVarTsteptype(vlistID, varID);
+      int tsteptype = vlistInqVarTsteptype(vlistID, varID);
       // clang-format off
 	  if      (tsteptype == TSTEP_INSTANT ) fprintf(stdout, "%-8s ", "instant");
 	  else if (tsteptype == TSTEP_INSTANT2) fprintf(stdout, "%-8s ", "instant");
@@ -411,24 +411,24 @@ printShortinfo(int streamID, int vlistID, int vardis)
 
       if (nsubtypes > 0)
         {
-          const int subtypeID = vlistInqVarSubtype(vlistID, varID);
-          const int subtypesize = subtypeInqSize(subtypeID);
+          int subtypeID = vlistInqVarSubtype(vlistID, varID);
+          int subtypesize = subtypeInqSize(subtypeID);
           fprintf(stdout, " %6d  ", subtypesize);
           fprintf(stdout, "%3d ", vlistSubtypeIndex(vlistID, subtypeID) + 1);
         }
 
       // layer info
-      const int levelsize = zaxisInqSize(zaxisID);
+      int levelsize = zaxisInqSize(zaxisID);
       fprintf(stdout, "%6d ", levelsize);
       fprintf(stdout, "%3d ", vlistZaxisIndex(vlistID, zaxisID) + 1);
 
       // grid info
-      const size_t gridsize = gridInqSize(gridID);
+      size_t gridsize = gridInqSize(gridID);
       fprintf(stdout, "%9zu ", gridsize);
       fprintf(stdout, "%3d ", vlistGridIndex(vlistID, gridID) + 1);
 
       // datatype
-      const int datatype = vlistInqVarDatatype(vlistID, varID);
+      int datatype = vlistInqVarDatatype(vlistID, varID);
       // clang-format off
 	  if      (datatype == CDI_DATATYPE_PACK  ) strcpy(pstr, "P0");
 	  else if (datatype > 0 && datatype <= 32 ) sprintf(pstr, "P%d", datatype);
@@ -486,8 +486,8 @@ printShortinfo(int streamID, int vlistID, int vardis)
       printSubtypeInfo(vlistID);
     }
 
-  const int taxisID = vlistInqTaxis(vlistID);
-  const int ntsteps = vlistNtsteps(vlistID);
+  int taxisID = vlistInqTaxis(vlistID);
+  int ntsteps = vlistNtsteps(vlistID);
 
   if (ntsteps != 0)
     {
@@ -500,16 +500,16 @@ printShortinfo(int streamID, int vlistID, int vardis)
         {
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             {
-              const CdiDateTime dt = taxisInqRdatetime(taxisID);
+              CdiDateTime dt = taxisInqRdatetime(taxisID);
 
               fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", dt.date.year, dt.date.month, dt.date.day,
                       dt.time.hour, dt.time.minute, dt.time.second);
               if (dt.time.ms) fprintf(stdout, ".%d", dt.time.ms);
 
-              const int tunits = taxisInqTunit(taxisID);
+              int tunits = taxisInqTunit(taxisID);
               if (tunits != CDI_UNDEFID) fprintf(stdout, "  Units = %s", tunit2str(tunits));
 
-              const int calendar = taxisInqCalendar(taxisID);
+              int calendar = taxisInqCalendar(taxisID);
               if (calendar != CDI_UNDEFID) fprintf(stdout, "  Calendar = %s", calendar2str(calendar));
 
               if (taxisHasBounds(taxisID)) fprintf(stdout, "  Bounds = true");
@@ -539,7 +539,7 @@ setDefaultDataType(char *datatypestr)
   };
   int dtype = -1;
 
-  const int datatype = tolower(*datatypestr);
+  int datatype = tolower(*datatypestr);
   // clang-format off
   if      (datatype == 'i') { dtype = D_INT;  datatypestr++; }
   else if (datatype == 'u') { dtype = D_UINT; datatypestr++; }
@@ -805,6 +805,8 @@ main(int argc, char *argv[])
   char paramstr[32];
   char *queryNames[256];
   int numQueryNames = 0;
+  size_t queryIndices[256];
+  int numQueryIndices = 0;
 
   Progname = strrchr(argv[0], '/');
   if (Progname == 0)
@@ -813,7 +815,7 @@ main(int argc, char *argv[])
     Progname++;
 
   // clang-format off
-  while ((c = getopt(argc, argv, "b:F:f:i:o:q:t:w:z:cdhlMmnqRrsvVxXZ")) != EOF)
+  while ((c = getopt(argc, argv, "b:F:f:I:i:o:N:t:w:z:cdhlMmnRrsvVxXZ")) != EOF)
     {
       switch (c)
 	{
@@ -821,13 +823,14 @@ main(int argc, char *argv[])
 	case 'd': Debug = 1; break;
 	case 'f': setDefaultFileType(optarg); break;
 	case 'h': usage(); exit (0);
+	case 'I': queryIndices[numQueryIndices++] = atol(optarg); break;
 	case 'i': numWorkerIn = atoi(optarg);  break;
 	case 'o': numWorkerOut = atoi(optarg); break;
 	case 'l': Longinfo = 1; break;
 	case 'M': cdiDefGlobal("HAVE_MISSVAL", 1); break;
 	case 'm': Move = 1; break;
+	case 'N': queryNames[numQueryNames++] = strdup(optarg); break;
 	case 'n': Info = 0;  NoInfo = 1;  break;
-	case 'q': queryNames[numQueryNames++] = strdup(optarg); break;
 	case 'R': cdiDefGlobal("REGULARGRID", 1); break;
 	case 'r': Record = 1; break;
 	case 'X': Variable = 1; break;
@@ -880,29 +883,30 @@ main(int argc, char *argv[])
       int taxisID2 = CDI_UNDEFID;
       int vlistID2 = CDI_UNDEFID;
 
-      const bool useQuery = (numQueryNames > 0);
+      bool useQuery = (numQueryNames > 0) ||  (numQueryIndices > 0);
       CdiQuery *query = NULL;
       if (useQuery)
         {
           query = cdiQueryCreate();
-          cdiQuerySetNames(query, numQueryNames, queryNames);
-          // cdiQueryPrint(query);
+          if (numQueryNames) cdiQuerySetNames(query, numQueryNames, queryNames);
+          if (numQueryIndices) cdiQuerySetIndices(query, numQueryIndices, queryIndices);
+          cdiQueryPrint(query);
         }
 
-      const int streamID1 = useQuery ? streamOpenReadQuery(fname1, query) : streamOpenRead(fname1);
+      int streamID1 = useQuery ? streamOpenReadQuery(fname1, query) : streamOpenRead(fname1);
       if (streamID1 < 0) return handle_error(streamID1, "Open failed on %s", fname1);
 
       if (query) cdiQueryDelete(query);
 
       if (numWorkerIn > 0) streamDefNumWorker(streamID1, numWorkerIn);
 
-      const int vlistID1 = streamInqVlist(streamID1);
+      int vlistID1 = streamInqVlist(streamID1);
 
       if (Longinfo) vlistPrint(vlistID1);
 
-      const int nvars = vlistNvars(vlistID1);
-      const int taxisID1 = vlistInqTaxis(vlistID1);
-      const int ntsteps = vlistNtsteps(vlistID1);
+      int nvars = vlistNvars(vlistID1);
+      int taxisID1 = vlistInqTaxis(vlistID1);
+      int ntsteps = vlistNtsteps(vlistID1);
 
       if (Debug) fprintf(stderr, "nvars   = %d\nntsteps = %d\n", nvars, ntsteps);
 
@@ -915,11 +919,11 @@ main(int argc, char *argv[])
 
       for (varID = 0; varID < nvars; varID++)
         {
-          const int gridID = vlistInqVarGrid(vlistID1, varID);
-          const size_t gridsize = gridInqSize(gridID);
+          int gridID = vlistInqVarGrid(vlistID1, varID);
+          size_t gridsize = gridInqSize(gridID);
           if (gridsize > datasize) datasize = gridsize;
-          const int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-          const size_t nlev = zaxisInqSize(zaxisID);
+          int zaxisID = vlistInqVarZaxis(vlistID1, varID);
+          size_t nlev = zaxisInqSize(zaxisID);
           if (nlev > maxlev) maxlev = nlev;
           if (fname2)
             {
@@ -982,7 +986,7 @@ main(int argc, char *argv[])
                 streamDefTimestep(streamID2, tsID);
               }
 
-            const CdiDateTime vdatetime = taxisInqVdatetime(taxisID1);
+            CdiDateTime vdatetime = taxisInqVdatetime(taxisID1);
 
             if (Record)
               {
@@ -991,10 +995,10 @@ main(int argc, char *argv[])
                     streamInqRecord(streamID1, &varID, &levelID);
                     streamReadRecord(streamID1, data, &nmiss);
 
-                    const int number = vlistInqVarNumber(vlistID1, varID);
-                    const int gridID = vlistInqVarGrid(vlistID1, varID);
-                    const int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-                    const int param = vlistInqVarParam(vlistID1, varID);
+                    int number = vlistInqVarNumber(vlistID1, varID);
+                    int gridID = vlistInqVarGrid(vlistID1, varID);
+                    int zaxisID = vlistInqVarZaxis(vlistID1, varID);
+                    int param = vlistInqVarParam(vlistID1, varID);
 
                     cdiParamToString(param, paramstr, sizeof(paramstr));
 
@@ -1005,9 +1009,9 @@ main(int argc, char *argv[])
 
                     // printf("varID=%d, param=%d, gridID=%d, zaxisID=%d levelID=%d\n", varID, param, gridID, zaxisID, levelID);
 
-                    const SizeType gridsize = gridInqSize(gridID);
-                    const double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
-                    const double missval = vlistInqVarMissval(vlistID1, varID);
+                    SizeType gridsize = gridInqSize(gridID);
+                    double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
+                    double missval = vlistInqVarMissval(vlistID1, varID);
 
                     if (Info)
                       printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, data, Vardis);
@@ -1028,10 +1032,10 @@ main(int argc, char *argv[])
                   {
                     if (vlistInqVarTimetype(vlistID1, varID) == TIME_CONSTANT && tsID > 0) continue;
 
-                    const int number = vlistInqVarNumber(vlistID1, varID);
-                    const int gridID = vlistInqVarGrid(vlistID1, varID);
-                    const int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-                    const int param = vlistInqVarParam(vlistID1, varID);
+                    int number = vlistInqVarNumber(vlistID1, varID);
+                    int gridID = vlistInqVarGrid(vlistID1, varID);
+                    int zaxisID = vlistInqVarZaxis(vlistID1, varID);
+                    int param = vlistInqVarParam(vlistID1, varID);
 
                     cdiParamToString(param, paramstr, sizeof(paramstr));
 
@@ -1042,16 +1046,16 @@ main(int argc, char *argv[])
 
                     if (Debug) fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
 
-                    const size_t gridsize = gridInqSize(gridID);
-                    const double missval = vlistInqVarMissval(vlistID1, varID);
+                    size_t gridsize = gridInqSize(gridID);
+                    double missval = vlistInqVarMissval(vlistID1, varID);
 
                     streamReadVar(streamID1, varID, data, &nmiss);
 
-                    const int nlevs = zaxisInqSize(zaxisID);
+                    int nlevs = zaxisInqSize(zaxisID);
                     for (levelID = 0; levelID < nlevs; levelID++)
                       {
-                        const double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
-                        const size_t offset = levelID * gridsize;
+                        double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
+                        size_t offset = levelID * gridsize;
                         if (Info) printInfo(vdatetime, varname, level, gridsize, number, nmiss, missval, data + offset, Vardis);
                       }
 
@@ -1064,10 +1068,10 @@ main(int argc, char *argv[])
                   {
                     if (vlistInqVarTimetype(vlistID1, varID) == TIME_CONSTANT && tsID > 0) continue;
 
-                    const int number = vlistInqVarNumber(vlistID1, varID);
-                    const int gridID = vlistInqVarGrid(vlistID1, varID);
-                    const int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-                    const int param = vlistInqVarParam(vlistID1, varID);
+                    int number = vlistInqVarNumber(vlistID1, varID);
+                    int gridID = vlistInqVarGrid(vlistID1, varID);
+                    int zaxisID = vlistInqVarZaxis(vlistID1, varID);
+                    int param = vlistInqVarParam(vlistID1, varID);
 
                     cdiParamToString(param, paramstr, sizeof(paramstr));
 
@@ -1078,13 +1082,13 @@ main(int argc, char *argv[])
 
                     if (Debug) fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
 
-                    const size_t gridsize = gridInqSize(gridID);
-                    const double missval = vlistInqVarMissval(vlistID1, varID);
+                    size_t gridsize = gridInqSize(gridID);
+                    double missval = vlistInqVarMissval(vlistID1, varID);
 
-                    const int nlevs = zaxisInqSize(zaxisID);
+                    int nlevs = zaxisInqSize(zaxisID);
                     for (levelID = 0; levelID < nlevs; levelID++)
                       {
-                        const double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
+                        double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
                         streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
 
                         if (Info) printInfo(vdatetime, varname, level, gridsize, number, nmiss, missval, data, Vardis);

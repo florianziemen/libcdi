@@ -4403,6 +4403,21 @@ cdfInqContents(stream_t *streamptr)
   double *vct = NULL;
   if (!isHybridCF) read_vct_echam(fileID, nvars, ncvars, ncdims, &vct, &vctsize);
 
+  // process query information if available
+  CdiQuery *query = streamptr->query;
+  if (query)
+    {
+      for (int ncvarid = 0; ncvarid < nvars; ++ncvarid)
+        {
+          ncvar_t *ncvar = &ncvars[ncvarid];
+          if (ncvar->varStatus == DataVar)
+            if (cdiQueryName(query, ncvar->name) < 0)
+              {
+                ncvar->varStatus = CoordVar;
+              }
+        }
+    }
+
   if (CDI_Debug) cdf_print_vars(ncvars, nvars, "cdf_define_all_grids");
 
   // define all grids
