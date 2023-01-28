@@ -498,6 +498,21 @@ cdf_init_timestep(tsteps_t *timeStep, int numRecs, int numRecsAvail)
   timeStep->curRecID = CDI_UNDEFID;
 }
 
+static int
+cdf_get_numRecsAvail(int vlistID)
+{
+  int numRecsAvail = 0;
+  int numVars = vlistNvars(vlistID);
+  for (int varID = 0; varID < numVars; varID++)
+    {
+      if (vlistInqVarTimetype(vlistID, varID) != TIME_CONSTANT)
+        {
+          numRecsAvail += zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
+        }
+    }
+  return numRecsAvail;
+}
+
 static void
 cdfCreateRecords(stream_t *streamptr, int tsID)
 {
@@ -510,7 +525,7 @@ cdfCreateRecords(stream_t *streamptr, int tsID)
   tsteps_t *sourceTstep = streamptr->tsteps;
   tsteps_t *destTstep = sourceTstep + tsID;
 
-  int nvars = vlistNvars(vlistID);
+  int numVars = vlistNvars(vlistID);
   int numRecs = vlistNrecs(vlistID);
   if (numRecs <= 0) return;
 
@@ -528,7 +543,7 @@ cdfCreateRecords(stream_t *streamptr, int tsID)
 
       record_t *records = destTstep->records;
 
-      for (int varID = 0, recID = 0; varID < nvars; varID++)
+      for (int varID = 0, recID = 0; varID < numVars; varID++)
         {
           int zaxisID = vlistInqVarZaxis(vlistID, varID);
           int nlev = zaxisInqSize(zaxisID);
@@ -543,15 +558,7 @@ cdfCreateRecords(stream_t *streamptr, int tsID)
     }
   else if (tsID == 1)
     {
-      int numRecsAvail = 0;
-      for (int varID = 0; varID < nvars; varID++)
-        {
-          if (vlistInqVarTimetype(vlistID, varID) != TIME_CONSTANT)
-            {
-              int zaxisID = vlistInqVarZaxis(vlistID, varID);
-              numRecsAvail += zaxisInqSize(zaxisID);
-            }
-        }
+      int numRecsAvail = cdf_get_numRecsAvail(vlistID);
 
       streamptr->nrecs += numRecsAvail;
 
@@ -581,7 +588,7 @@ cdfCreateRecords(stream_t *streamptr, int tsID)
       streamptr->nrecs += numRecsAvail;
 
       cdf_init_timestep(destTstep, numRecs, numRecsAvail);
- 
+
       memcpy(destTstep->records, sourceTstep->records, (size_t) numRecs * sizeof(record_t));
 
       destTstep->recIDs = (int *) Malloc((size_t) numRecsAvail * sizeof(int));
