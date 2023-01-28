@@ -3090,8 +3090,8 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
       ncvar_t *ncvar = &ncvars[ncvarid];
       if (ncvar->varStatus == DataVar && ncvar->zaxisID == CDI_UNDEFID)
         {
-          bool is_scalar = false;
-          bool with_bounds = false;
+          bool isScalar = false;
+          bool withBounds = false;
           int zdimid = CDI_UNDEFID;
           int zvarid = CDI_UNDEFID;
           size_t zsize = 1;
@@ -3104,7 +3104,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
           if (ncvar->zvarid != -1 && ncvars[ncvar->zvarid].ndims == 0)
             {
               zvarid = ncvar->zvarid;
-              is_scalar = true;
+              isScalar = true;
             }
           else
             {
@@ -3149,7 +3149,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
                 // clang-format on
                 // don't change the name !!!
                 /*
-                if ((len = strlen(pname)) > 2)
+                  if ((len = strlen(pname)) > 2)
                   if (pname[len-2] == '_' && isdigit((int) pname[len-1])) pname[len-2] = 0;
                 */
 #ifndef USE_MPI
@@ -3179,13 +3179,13 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
               if (ncvars[zvarid].bounds != CDI_UNDEFID)
                 {
                   int nbdims = ncvars[ncvars[zvarid].bounds].ndims;
-                  if (nbdims == 2 || is_scalar)
+                  if (nbdims == 2 || isScalar)
                     {
-                      size_t nlevel = is_scalar ? 1 : ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
-                      int nvertex = (int) ncdims[ncvars[ncvars[zvarid].bounds].dimids[1 - is_scalar]].len;
+                      size_t nlevel = isScalar ? 1 : ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
+                      int nvertex = (int) ncdims[ncvars[ncvars[zvarid].bounds].dimids[1 - isScalar]].len;
                       if (nlevel == zsize && nvertex == 2)
                         {
-                          with_bounds = true;
+                          withBounds = true;
                           lbounds = (double *) Malloc(4 * nlevel * sizeof(double));
                           ubounds = lbounds + nlevel;
                           double *zbounds = lbounds + 2 * nlevel;
@@ -3224,8 +3224,8 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
             }
 
           ncvar->numLevels = zsize;
-          ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (const char **) zcvals, zclength, with_bounds,
-                                       lbounds, ubounds, (int) vctsize, vct, pname, plongname, punits, zdatatype, 1, 0, -1);
+          ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (const char **) zcvals, zclength, withBounds, lbounds,
+                                       ubounds, (int) vctsize, vct, pname, plongname, punits, zdatatype, 1, 0, -1);
 
           int zaxisID = ncvar->zaxisID;
 
@@ -3249,7 +3249,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
             }
 
           if (positive > 0) zaxisDefPositive(zaxisID, positive);
-          if (is_scalar) zaxisDefScalar(zaxisID);
+          if (isScalar) zaxisDefScalar(zaxisID);
 
           if (zdimid != CDI_UNDEFID) cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_DIMNAME, ncdims[zdimid].name);
 
@@ -4405,16 +4405,12 @@ cdfInqContents(stream_t *streamptr)
 
   // process query information if available
   CdiQuery *query = streamptr->query;
-  if (query)
+  if (query && cdiQueryNumNames(query) > 0)
     {
       for (int ncvarid = 0; ncvarid < nvars; ++ncvarid)
         {
           ncvar_t *ncvar = &ncvars[ncvarid];
-          if (ncvar->varStatus == DataVar)
-            if (cdiQueryName(query, ncvar->name) < 0)
-              {
-                ncvar->varStatus = CoordVar;
-              }
+          if (ncvar->varStatus == DataVar && cdiQueryName(query, ncvar->name) < 0) ncvar->varStatus = CoordVar;
         }
     }
 

@@ -805,8 +805,12 @@ main(int argc, char *argv[])
   char paramstr[32];
   char *queryNames[256];
   int numQueryNames = 0;
-  size_t queryIndices[256];
-  int numQueryIndices = 0;
+  size_t queryCellidx[256];
+  int numQueryCellidx = 0;
+  int queryLevidx[256];
+  int numQueryLevidx = 0;
+  int queryStepidx[256];
+  int numQueryStepidx = 0;
 
   Progname = strrchr(argv[0], '/');
   if (Progname == 0)
@@ -815,17 +819,18 @@ main(int argc, char *argv[])
     Progname++;
 
   // clang-format off
-  while ((c = getopt(argc, argv, "b:F:f:I:i:o:N:t:w:z:cdhlMmnRrsvVxXZ")) != EOF)
+  while ((c = getopt(argc, argv, "b:C:F:f:i:L:o:N:S:t:w:z:cdhlMmnRrsvVxXZ")) != EOF)
     {
       switch (c)
 	{
 	case 'b': setDefaultDataType(optarg); break;
+	case 'C': queryCellidx[numQueryCellidx++] = atol(optarg); break;
 	case 'd': Debug = 1; break;
 	case 'f': setDefaultFileType(optarg); break;
 	case 'h': usage(); exit (0);
-	case 'I': queryIndices[numQueryIndices++] = atol(optarg); break;
 	case 'i': numWorkerIn = atoi(optarg);  break;
 	case 'o': numWorkerOut = atoi(optarg); break;
+	case 'L': queryLevidx[numQueryLevidx++] = atoi(optarg); break;
 	case 'l': Longinfo = 1; break;
 	case 'M': cdiDefGlobal("HAVE_MISSVAL", 1); break;
 	case 'm': Move = 1; break;
@@ -834,6 +839,7 @@ main(int argc, char *argv[])
 	case 'R': cdiDefGlobal("REGULARGRID", 1); break;
 	case 'r': Record = 1; break;
 	case 'X': Variable = 1; break;
+	case 'S': queryStepidx[numQueryStepidx++] = atoi(optarg); break;
 	case 's': Shortinfo = 1; break;
 	case 't': rTable = optarg;  break;
 	case 'v': Vardis = 1; break;
@@ -883,13 +889,15 @@ main(int argc, char *argv[])
       int taxisID2 = CDI_UNDEFID;
       int vlistID2 = CDI_UNDEFID;
 
-      bool useQuery = (numQueryNames > 0) ||  (numQueryIndices > 0);
+      bool useQuery = (numQueryNames > 0) ||  (numQueryCellidx > 0) ||  (numQueryLevidx > 0) ||  (numQueryStepidx > 0);
       CdiQuery *query = NULL;
       if (useQuery)
         {
           query = cdiQueryCreate();
           if (numQueryNames) cdiQuerySetNames(query, numQueryNames, queryNames);
-          if (numQueryIndices) cdiQuerySetIndices(query, numQueryIndices, queryIndices);
+          if (numQueryCellidx) cdiQuerySetCellidx(query, numQueryCellidx, queryCellidx);
+          if (numQueryLevidx) cdiQuerySetLevidx(query, numQueryLevidx, queryLevidx);
+          if (numQueryStepidx) cdiQuerySetStepidx(query, numQueryStepidx, queryStepidx);
           cdiQueryPrint(query);
         }
 

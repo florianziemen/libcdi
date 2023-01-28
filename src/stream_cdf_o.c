@@ -1687,14 +1687,14 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
   if (dimlen == 1)
     {
-      bool is_scalar = zaxisInqScalar(zaxisID) > 0;
-      if (!is_scalar && CDI_CMOR_Mode)
+      bool isScalar = zaxisInqScalar(zaxisID) > 0;
+      if (!isScalar && CDI_CMOR_Mode)
         {
-          is_scalar = true;
+          isScalar = true;
           zaxisDefScalar(zaxisID);
         }
 
-      if (is_scalar) ndims = 0;
+      if (isScalar) ndims = 0;
       if (CDI_Reduce_Dim) return delayed;
 
       switch (type)
