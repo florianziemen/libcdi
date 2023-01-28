@@ -489,6 +489,16 @@ cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor)
 }
 
 static void
+cdf_init_timestep(tsteps_t *timeStep, int numRecs, int numRecsAvail)
+{
+  timeStep->records = (record_t *) Malloc((size_t) numRecs * sizeof(record_t));
+  timeStep->nrecs = numRecsAvail;
+  timeStep->nallrecs = numRecs;
+  timeStep->recordSize = numRecs;
+  timeStep->curRecID = CDI_UNDEFID;
+}
+
+static void
 cdfCreateRecords(stream_t *streamptr, int tsID)
 {
   if (tsID < 0 || (tsID >= streamptr->ntsteps && tsID > 0)) return;
@@ -501,23 +511,20 @@ cdfCreateRecords(stream_t *streamptr, int tsID)
   tsteps_t *destTstep = sourceTstep + tsID;
 
   int nvars = vlistNvars(vlistID);
-  int nrecs = vlistNrecs(vlistID);
-  if (nrecs <= 0) return;
+  int numRecs = vlistNrecs(vlistID);
+  if (numRecs <= 0) return;
 
   if (tsID == 0)
     {
-      int nvrecs = nrecs;  // use all records at first timestep
+      int numRecsAvail = numRecs;  // use all records at first timestep
 
-      streamptr->nrecs += nrecs;
+      streamptr->nrecs += numRecs;
 
-      destTstep->records = (record_t *) Malloc((size_t) nrecs * sizeof(record_t));
-      destTstep->nrecs = nrecs;
-      destTstep->nallrecs = nrecs;
-      destTstep->recordSize = nrecs;
-      destTstep->curRecID = CDI_UNDEFID;
-      destTstep->recIDs = (int *) Malloc((size_t) nvrecs * sizeof(int));
-      ;
-      for (int recID = 0; recID < nvrecs; recID++) destTstep->recIDs[recID] = recID;
+      cdf_init_timestep(destTstep, numRecs, numRecsAvail);
+
+      destTstep->recIDs = (int *) Malloc((size_t) numRecsAvail * sizeof(int));
+
+      for (int recID = 0; recID < numRecsAvail; recID++) destTstep->recIDs[recID] = recID;
 
       record_t *records = destTstep->records;
 
@@ -536,30 +543,26 @@ cdfCreateRecords(stream_t *streamptr, int tsID)
     }
   else if (tsID == 1)
     {
-      int nvrecs = 0;
+      int numRecsAvail = 0;
       for (int varID = 0; varID < nvars; varID++)
         {
           if (vlistInqVarTimetype(vlistID, varID) != TIME_CONSTANT)
             {
               int zaxisID = vlistInqVarZaxis(vlistID, varID);
-              nvrecs += zaxisInqSize(zaxisID);
+              numRecsAvail += zaxisInqSize(zaxisID);
             }
         }
 
-      streamptr->nrecs += nvrecs;
+      streamptr->nrecs += numRecsAvail;
 
-      destTstep->records = (record_t *) Malloc((size_t) nrecs * sizeof(record_t));
-      destTstep->nrecs = nvrecs;
-      destTstep->nallrecs = nrecs;
-      destTstep->recordSize = nrecs;
-      destTstep->curRecID = CDI_UNDEFID;
+      cdf_init_timestep(destTstep, numRecs, numRecsAvail);
 
-      memcpy(destTstep->records, sourceTstep->records, (size_t) nrecs * sizeof(record_t));
+      memcpy(destTstep->records, sourceTstep->records, (size_t) numRecs * sizeof(record_t));
 
-      if (nvrecs)
+      if (numRecsAvail)
         {
-          destTstep->recIDs = (int *) Malloc((size_t) nvrecs * sizeof(int));
-          for (int recID = 0, vrecID = 0; recID < nrecs; recID++)
+          destTstep->recIDs = (int *) Malloc((size_t) numRecsAvail * sizeof(int));
+          for (int recID = 0, vrecID = 0; recID < numRecs; recID++)
             {
               int varID = destTstep->records[recID].varID;
               if (vlistInqVarTimetype(vlistID, varID) != TIME_CONSTANT)
@@ -573,21 +576,17 @@ cdfCreateRecords(stream_t *streamptr, int tsID)
     {
       if (streamptr->tsteps[1].records == 0) cdfCreateRecords(streamptr, 1);
 
-      int nvrecs = streamptr->tsteps[1].nrecs;
+      int numRecsAvail = streamptr->tsteps[1].nrecs;
 
-      streamptr->nrecs += nvrecs;
+      streamptr->nrecs += numRecsAvail;
 
-      destTstep->records = (record_t *) Malloc((size_t) nrecs * sizeof(record_t));
-      destTstep->nrecs = nvrecs;
-      destTstep->nallrecs = nrecs;
-      destTstep->recordSize = nrecs;
-      destTstep->curRecID = CDI_UNDEFID;
+      cdf_init_timestep(destTstep, numRecs, numRecsAvail);
+ 
+      memcpy(destTstep->records, sourceTstep->records, (size_t) numRecs * sizeof(record_t));
 
-      memcpy(destTstep->records, sourceTstep->records, (size_t) nrecs * sizeof(record_t));
+      destTstep->recIDs = (int *) Malloc((size_t) numRecsAvail * sizeof(int));
 
-      destTstep->recIDs = (int *) Malloc((size_t) nvrecs * sizeof(int));
-
-      memcpy(destTstep->recIDs, streamptr->tsteps[1].recIDs, (size_t) nvrecs * sizeof(int));
+      memcpy(destTstep->recIDs, streamptr->tsteps[1].recIDs, (size_t) numRecsAvail * sizeof(int));
     }
 }
 
@@ -4375,21 +4374,18 @@ cdfInqContents(stream_t *streamptr)
               if (ncvaridc != CDI_UNDEFID)
                 {
                   ncvar_t *ncvarc = &ncvars[ncvaridc];
-                  if (ncvarc->isLon || ncvarc->isXaxis)
-                    ncvar->xvarid = ncvaridc;
-                  else if (ncvarc->isLat || ncvarc->isYaxis)
-                    ncvar->yvarid = ncvaridc;
-                  else if (ncvarc->isZaxis)
-                    ncvar->zvarid = ncvaridc;
-                  else if (ncvarc->isTaxis)
-                    ncvar->tvarid = ncvaridc;
-                  else if (ncvarc->isCharAxis)
-                    ncvar->cvarids[i] = ncvaridc;
+                  // clang-format off
+                  if      (ncvarc->isLon || ncvarc->isXaxis) ncvar->xvarid = ncvaridc;
+                  else if (ncvarc->isLat || ncvarc->isYaxis) ncvar->yvarid = ncvaridc;
+                  else if (ncvarc->isZaxis)                  ncvar->zvarid = ncvaridc;
+                  else if (ncvarc->isTaxis)                  ncvar->tvarid = ncvaridc;
+                  else if (ncvarc->isCharAxis)               ncvar->cvarids[i] = ncvaridc;
                   else if (ncvarc->printWarning)
                     {
                       Warning("Coordinates variable %s can't be assigned!", ncvarc->name);
                       ncvarc->printWarning = false;
                     }
+                  // clang-format on
                 }
             }
         }
@@ -4595,6 +4591,7 @@ get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
 
   if (tcache)
     {
+#ifdef USE_TIMECACHE
       if (tcache->size == 0 || (tsID < (int) tcache->startid || tsID > (int) (tcache->startid + tcache->size - 1)))
         {
           size_t maxvals = MAX_TIMECACHE_SIZE;
@@ -4610,6 +4607,7 @@ get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
 
       // timevalue = tcache->cache[tsID%MAX_TIMECACHE_SIZE];
       timevalue = tcache->cache[tsID];
+#endif
     }
   else
     {
@@ -4688,9 +4686,9 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
     }
 
   streamptr->curTsID = tsID;
-  long nrecs = streamptr->tsteps[tsID].nrecs;
+  int numRecs = streamptr->tsteps[tsID].nrecs;
 
-  return (int) nrecs;
+  return numRecs;
 }
 
 #endif

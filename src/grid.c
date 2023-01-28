@@ -3020,7 +3020,6 @@ gridHasArea(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqPropPresence(gridptr, GRID_PROP_AREA);
-  ;
 }
 
 static const double *
