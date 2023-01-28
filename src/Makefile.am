@@ -96,6 +96,7 @@ libcdi_la_SOURCES = \
   cdf_lazy_grid.c \
   cdf_lazy_grid.h \
   cdf_read.c \
+  cdf_records.c \
   cdf_util.c \
   cdf_util.h \
   cdf_write.c \

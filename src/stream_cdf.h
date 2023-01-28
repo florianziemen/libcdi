@@ -54,6 +54,8 @@ void cdf_scale_add(size_t size, double *data, double addoffset, double scalefact
 
 int cdfDefDatatype(int datatype, stream_t *streamptr);
 
+void cdf_create_records(stream_t *streamptr, int tsID);
+
 #define ChunkSizeMax 65536
 #define ChunkSizeLim 16777216
 size_t calc_chunksize_x(int chunkType, int chunkSize, size_t xsize, bool yIsUndefined);
