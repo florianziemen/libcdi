@@ -1186,8 +1186,6 @@ streamDestroy(stream_t *streamptr)
 
   if (streamptr->tsteps) Free(streamptr->tsteps);
 
-  if (streamptr->basetime.timevar_cache) Free(streamptr->basetime.timevar_cache);
-
   if (vlistID != -1)
     {
       if (streamptr->filemode != 'w' && vlistInqTaxis(vlistID) != -1) taxisDestroy(vlistInqTaxis(vlistID));

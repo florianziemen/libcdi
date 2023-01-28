@@ -4448,7 +4448,6 @@ cdfInqContents(stream_t *streamptr)
   streamptr->rtsteps = 1;
 
   (void) cdfInqTimestep(streamptr, 0);
-
   cdf_create_records(streamptr, 0);
 
   // free ncdims
@@ -4465,7 +4464,7 @@ wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
 {
   enum
   {
-    /* position of terminator separating date and time from rest of  */
+    // position of terminator separating date and time from rest of
     dateTimeSepPos = 19,
     dateTimeStrSize = 128,
   };
@@ -4483,35 +4482,12 @@ wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
 }
 
 static double
-get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
+get_timevalue(int fileID, int nctimevarid, int tsID)
 {
   double timevalue = 0.0;
 
-  if (tcache)
-    {
-#ifdef USE_TIMECACHE
-      if (tcache->size == 0 || (tsID < (int) tcache->startid || tsID > (int) (tcache->startid + tcache->size - 1)))
-        {
-          size_t maxvals = MAX_TIMECACHE_SIZE;
-          if (maxvals > tcache->maxvals) maxvals = tcache->maxvals;
-          tcache->startid = tsID;
-          // tcache->startid = (tsID/MAX_TIMECACHE_SIZE)*MAX_TIMECACHE_SIZE;
-          // if ( (tcache->startid + maxvals) > tcache->maxvals ) maxvals = (tcache->maxvals)%MAX_TIMECACHE_SIZE;
-          tcache->size = maxvals;
-          // fprintf(stderr, "fill time cache: %d %d %d %d %d\n", tcache->maxvals, tsID, tcache->startid, tcache->startid+maxvals-1,
-          // maxvals);
-          cdf_get_vara_double(fileID, nctimevarid, &tcache->startid, &maxvals, tcache->cache);
-        }
-
-      // timevalue = tcache->cache[tsID%MAX_TIMECACHE_SIZE];
-      timevalue = tcache->cache[tsID];
-#endif
-    }
-  else
-    {
-      size_t index = (size_t) tsID;
-      cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
-    }
+  size_t index = (size_t) tsID;
+  cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
 
   if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
 
@@ -4543,16 +4519,7 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
             }
           else
             {
-#ifdef USE_TIMECACHE
-              if (streamptr->basetime.timevar_cache == NULL)
-                {
-                  streamptr->basetime.timevar_cache = (timecache_t *) Malloc(sizeof(timecache_t));
-                  streamptr->basetime.timevar_cache->size = 0;
-                  streamptr->basetime.timevar_cache->maxvals = streamptr->ntsteps;
-                }
-#endif
-              double timevalue = get_timevalue(fileID, nctimevarid, tsID, streamptr->basetime.timevar_cache);
-              taxis->vDateTime = cdi_decode_timeval(timevalue, taxis);
+              taxis->vDateTime = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID), taxis);
             }
 
           int nctimeboundsid = streamptr->basetime.ncvarboundsid;
@@ -4577,8 +4544,7 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
           int leadtimeid = streamptr->basetime.leadtimeid;
           if (leadtimeid != CDI_UNDEFID)
             {
-              double timevalue = get_timevalue(fileID, leadtimeid, tsID, NULL);
-              cdiSetForecastPeriod(timevalue, taxis);
+              cdiSetForecastPeriod(get_timevalue(fileID, leadtimeid, tsID), taxis);
             }
         }
     }

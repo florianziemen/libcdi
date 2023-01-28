@@ -16,7 +16,6 @@ basetimeInit(basetime_t *basetime)
       basetime->leadtimeid = CDI_UNDEFID;
       basetime->lunits = false;
       basetime->lwrf = false;
-      basetime->timevar_cache = NULL;
     }
 }
 
