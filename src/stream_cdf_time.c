@@ -187,7 +187,7 @@ cdfDefTime(stream_t *streamptr)
   if (taxis->longname && taxis->longname[0])
     cdf_put_att_text(fileID, timeVarId, "long_name", strlen(taxis->longname), taxis->longname);
 
-  if (taxis->has_bounds) streamptr->basetime.ncvarboundsid = cdfDefTimeBounds(fileID, timeVarId, timeDimId, taxisName, taxis);
+  if (taxis->hasBounds) streamptr->basetime.ncvarboundsid = cdfDefTimeBounds(fileID, timeVarId, timeDimId, taxisName, taxis);
 
   char unitsStr_[CDF_MAX_TIME_UNIT_STR];
   const char *unitsStr;
@@ -275,7 +275,7 @@ cdfDefTimestep(stream_t *streamptr, int tsID, size_t valCount)
   int ncvarid = streamptr->basetime.ncvarid;
   cdf_put_vara_double(fileID, ncvarid, start, count, timeValue);
 
-  if (taxis->has_bounds)
+  if (taxis->hasBounds)
     {
       ncvarid = streamptr->basetime.ncvarboundsid;
       if (ncvarid == CDI_UNDEFID) Error("Call to taxisWithBounds() missing!");

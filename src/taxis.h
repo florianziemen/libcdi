@@ -11,7 +11,6 @@
 typedef struct
 {
   int self;
-  short has_bounds;
   int datatype;  // datatype
   int type;      // time type
   int calendar;
@@ -29,6 +28,7 @@ typedef struct
   char *name;
   char *longname;
   char *units;
+  bool hasBounds;
 } taxis_t;
 
 //      taxisInqSdatetime: Get the start date/time

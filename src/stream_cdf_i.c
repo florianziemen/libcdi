@@ -4064,12 +4064,11 @@ wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
   stvalue[0] = 0;
   cdf_get_vara_text(fileID, nctimevarid, start, count, stvalue);
   stvalue[dateTimeSepPos] = 0;
-  {
-    int year = 1, month = 1, day = 1, hour = 0, minute = 0, second = 0;
-    if (strlen(stvalue) == dateTimeSepPos) sscanf(stvalue, "%d-%d-%d_%d:%d:%d", &year, &month, &day, &hour, &minute, &second);
-    taxis->vDateTime = cdiDateTime_set(cdiEncodeDate(year, month, day), cdiEncodeTime(hour, minute, second));
-    taxis->type = TAXIS_ABSOLUTE;
-  }
+
+  int year = 1, month = 1, day = 1, hour = 0, minute = 0, second = 0;
+  if (strlen(stvalue) == dateTimeSepPos) sscanf(stvalue, "%d-%d-%d_%d:%d:%d", &year, &month, &day, &hour, &minute, &second);
+  taxis->vDateTime = cdiDateTime_set(cdiEncodeDate(year, month, day), cdiEncodeTime(hour, minute, second));
+  taxis->type = TAXIS_ABSOLUTE;
 }
 
 static double
@@ -4088,55 +4087,64 @@ get_timevalue(int fileID, int nctimevarid, int tsID)
 static void
 cdf_read_timesteps(stream_t *streamptr)
 {
-  for (int tsID = 0; tsID < streamptr->ntsteps; ++tsID)
+  if (streamptr->ntsteps == 0)
     {
-      cdf_create_records(streamptr, tsID);
+      cdf_create_records(streamptr, 0);
+    }
+  else
+    {
+      //CdiDateTime *vDateTimeList = (CdiDateTime *) malloc(streamptr->ntsteps *CdiDateTime);
 
-      taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
-      if (tsID > 0) ptaxisCopy(taxis, &streamptr->tsteps[0].taxis);
-
-      int nctimevarid = streamptr->basetime.ncvarid;
-      if (nctimevarid != CDI_UNDEFID && streamptr->basetime.lunits)
+      for (int tsID = 0; tsID < streamptr->ntsteps; ++tsID)
         {
-          int fileID = streamptr->fileID;
+          cdf_create_records(streamptr, tsID);
 
-          if (streamptr->basetime.lwrf)
-            {
-              wrf_read_timestep(fileID, nctimevarid, tsID, taxis);
-            }
-          else
-            {
-              taxis->vDateTime = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID), taxis);
-            }
+          taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+          if (tsID > 0) ptaxisCopy(taxis, &streamptr->tsteps[0].taxis);
 
-          int nctimeboundsid = streamptr->basetime.ncvarboundsid;
-          if (nctimeboundsid != CDI_UNDEFID)
+          int nctimevarid = streamptr->basetime.ncvarid;
+          if (nctimevarid != CDI_UNDEFID && streamptr->basetime.lunits)
             {
-              enum
-              {
-                numBnds = 2,
-                tbNdims = 2
-              };
-              const size_t start[tbNdims] = { tsID, 0 };
-              static const size_t count[tbNdims] = { 1, numBnds };
-              double timeBnds[numBnds];
-              cdf_get_vara_double(fileID, nctimeboundsid, start, count, timeBnds);
-              for (size_t i = 0; i < numBnds; ++i)
-                if (timeBnds[i] >= NC_FILL_DOUBLE || timeBnds[i] < -NC_FILL_DOUBLE) timeBnds[i] = 0;
+              int fileID = streamptr->fileID;
 
-              taxis->vDateTime_lb = cdi_decode_timeval(timeBnds[0], taxis);
-              taxis->vDateTime_ub = cdi_decode_timeval(timeBnds[1], taxis);
-            }
+              if (streamptr->basetime.lwrf)
+                {
+                  wrf_read_timestep(fileID, nctimevarid, tsID, taxis);
+                }
+              else
+                {
+                  taxis->vDateTime = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID), taxis);
+                }
 
-          int leadtimeid = streamptr->basetime.leadtimeid;
-          if (leadtimeid != CDI_UNDEFID)
-            {
-              cdiSetForecastPeriod(get_timevalue(fileID, leadtimeid, tsID), taxis);
+              int nctimeboundsid = streamptr->basetime.ncvarboundsid;
+              if (nctimeboundsid != CDI_UNDEFID)
+                {
+                  enum
+                  {
+                    numBnds = 2,
+                    tbNdims = 2
+                  };
+                  const size_t start[tbNdims] = { tsID, 0 };
+                  static const size_t count[tbNdims] = { 1, numBnds };
+                  double timeBnds[numBnds];
+                  cdf_get_vara_double(fileID, nctimeboundsid, start, count, timeBnds);
+                  for (size_t i = 0; i < numBnds; ++i)
+                    if (timeBnds[i] >= NC_FILL_DOUBLE || timeBnds[i] < -NC_FILL_DOUBLE) timeBnds[i] = 0.0;
+
+                  taxis->vDateTime_lb = cdi_decode_timeval(timeBnds[0], taxis);
+                  taxis->vDateTime_ub = cdi_decode_timeval(timeBnds[1], taxis);
+                }
+
+              int leadtimeid = streamptr->basetime.leadtimeid;
+              if (leadtimeid != CDI_UNDEFID)
+                {
+                  cdiSetForecastPeriod(get_timevalue(fileID, leadtimeid, tsID), taxis);
+                }
             }
         }
-    }
 
-  if (streamptr->ntsteps == 0) cdf_create_records(streamptr, 0);
+      //free(vDateTimeList);
+    }
 }
 
 int
@@ -4470,7 +4478,7 @@ cdfInqContents(stream_t *streamptr)
 
   if (timeHasBounds)
     {
-      streamptr->tsteps[0].taxis.has_bounds = true;
+      streamptr->tsteps[0].taxis.hasBounds = true;
       if (timeClimatology) streamptr->tsteps[0].taxis.climatology = true;
     }
 
@@ -4550,7 +4558,7 @@ cdfInqContents(stream_t *streamptr)
 int
 cdfInqTimestep(stream_t *streamptr, int tsID)
 {
-  if (tsID < 0 || tsID >= streamptr->ntsteps) Error("tsID=%d out of range (0-%d)!", tsID, streamptr->ntsteps-1);
+  if (tsID < 0 || tsID >= streamptr->ntsteps) Error("tsID=%d out of range (0-%d)!", tsID, streamptr->ntsteps - 1);
 
   streamptr->curTsID = tsID;
   int numRecs = streamptr->tsteps[tsID].nrecs;

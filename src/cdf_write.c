@@ -288,7 +288,7 @@ static void
 cdfDefineCellMethods(stream_t *streamptr, int cdiID, int varID, int fileID, int ncvarID)
 {
   taxis_t *taxis = &streamptr->tsteps[0].taxis;
-  if (!taxis->has_bounds) return;
+  if (!taxis->hasBounds) return;
 
   int timeVarId = streamptr->basetime.ncvarid;
   char timeVarName[CDI_MAX_NAME];
