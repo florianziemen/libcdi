@@ -4438,18 +4438,19 @@ cdfInqContents(stream_t *streamptr)
 
   if (ntsteps == 0 && streamptr->basetime.ncdimid == CDI_UNDEFID && streamptr->basetime.ncvarid != CDI_UNDEFID) ntsteps = 1;
 
-  streamptr->ntsteps = (long) ntsteps;
-
   // define all data variables
   cdf_define_all_vars(streamptr, vlistID, instID, modelID, nvars_data, nvars, ncvars, ncdims, timedimid);
-
-  cdiCreateTimesteps(streamptr);
 
   // time varID
   int nctimevarid = streamptr->basetime.ncvarid;
 
   if (nctimevarid != CDI_UNDEFID && (!timeHasUnits || streamptr->basetime.lwrf)) ncvars[nctimevarid].units[0] = 0;
   if (nctimevarid != CDI_UNDEFID && timeHasUnits) streamptr->basetime.lunits = true;
+
+
+  streamptr->ntsteps = (long) ntsteps;
+
+  cdiCreateTimesteps(streamptr);
 
   if (timeHasUnits)
     {
