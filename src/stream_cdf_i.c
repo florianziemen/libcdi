@@ -4085,7 +4085,7 @@ get_timevalue(int fileID, int nctimevarid, int tsID)
 }
 
 static void
-cdf_read_timesteps(stream_t *streamptr)
+cdf_read_timesteps(stream_t *streamptr, taxis_t *taxis0)
 {
   if (streamptr->ntsteps == 0)
     {
@@ -4093,14 +4093,14 @@ cdf_read_timesteps(stream_t *streamptr)
     }
   else
     {
-      //CdiDateTime *vDateTimeList = (CdiDateTime *) malloc(streamptr->ntsteps *CdiDateTime);
+      // CdiDateTime *vDateTimeList = (CdiDateTime *) malloc(streamptr->ntsteps *CdiDateTime);
 
       for (int tsID = 0; tsID < streamptr->ntsteps; ++tsID)
         {
           cdf_create_records(streamptr, tsID);
 
           taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
-          if (tsID > 0) ptaxisCopy(taxis, &streamptr->tsteps[0].taxis);
+          ptaxisCopy(taxis, taxis0);
 
           int nctimevarid = streamptr->basetime.ncvarid;
           if (nctimevarid != CDI_UNDEFID && streamptr->basetime.lunits)
@@ -4143,7 +4143,7 @@ cdf_read_timesteps(stream_t *streamptr)
             }
         }
 
-      //free(vDateTimeList);
+      // free(vDateTimeList);
     }
 }
 
@@ -4447,70 +4447,64 @@ cdfInqContents(stream_t *streamptr)
   if (nctimevarid != CDI_UNDEFID && (!timeHasUnits || streamptr->basetime.lwrf)) ncvars[nctimevarid].units[0] = 0;
   if (nctimevarid != CDI_UNDEFID && timeHasUnits) streamptr->basetime.lunits = true;
 
-
-  streamptr->ntsteps = (long) ntsteps;
-
-  cdiCreateTimesteps(streamptr);
+  taxis_t taxis0;
+  ptaxisInit(&taxis0);
 
   if (timeHasUnits)
     {
-      taxis_t *taxis = &streamptr->tsteps[0].taxis;
-
-      if (set_base_time(ncvars[nctimevarid].units, taxis) == 1)
+      if (set_base_time(ncvars[nctimevarid].units, &taxis0) == 1)
         {
           nctimevarid = CDI_UNDEFID;
           streamptr->basetime.ncvarid = CDI_UNDEFID;
           streamptr->basetime.lunits = false;
         }
 
-      if (leadtime_id != CDI_UNDEFID && taxis->type == TAXIS_RELATIVE)
+      if (leadtime_id != CDI_UNDEFID && taxis0.type == TAXIS_RELATIVE)
         {
           streamptr->basetime.leadtimeid = leadtime_id;
-          taxis->type = TAXIS_FORECAST;
+          taxis0.type = TAXIS_FORECAST;
 
           int timeunit = -1;
           if (ncvars[leadtime_id].units[0] != 0) timeunit = scan_time_units(ncvars[leadtime_id].units);
-          if (timeunit == -1) timeunit = taxis->unit;
-          taxis->fc_unit = timeunit;
+          if (timeunit == -1) timeunit = taxis0.unit;
+          taxis0.fc_unit = timeunit;
 
-          set_forecast_time(fcreftime, taxis);
+          set_forecast_time(fcreftime, &taxis0);
         }
     }
 
   if (timeHasBounds)
     {
-      streamptr->tsteps[0].taxis.hasBounds = true;
-      if (timeClimatology) streamptr->tsteps[0].taxis.climatology = true;
+      taxis0.hasBounds = true;
+      if (timeClimatology) taxis0.climatology = true;
     }
 
   if (nctimevarid != CDI_UNDEFID)
     {
-      taxis_t *taxis = &streamptr->tsteps[0].taxis;
-      ptaxisDefName(taxis, ncvars[nctimevarid].name);
-      if (ncvars[nctimevarid].longname[0]) ptaxisDefLongname(taxis, ncvars[nctimevarid].longname);
-      if (ncvars[nctimevarid].units[0]) ptaxisDefUnits(taxis, ncvars[nctimevarid].units);
+      ptaxisDefName(&taxis0, ncvars[nctimevarid].name);
+      if (ncvars[nctimevarid].longname[0]) ptaxisDefLongname(&taxis0, ncvars[nctimevarid].longname);
+      if (ncvars[nctimevarid].units[0]) ptaxisDefUnits(&taxis0, ncvars[nctimevarid].units);
 
       int xtype = ncvars[nctimevarid].xtype;
       int datatype = (xtype == NC_INT) ? CDI_DATATYPE_INT32 : ((xtype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64);
-      ptaxisDefDatatype(taxis, datatype);
+      ptaxisDefDatatype(&taxis0, datatype);
     }
 
   int calendar = CDI_UNDEFID;
-  if (nctimevarid != CDI_UNDEFID)
-    if (ncvars[nctimevarid].hasCalendar)
-      {
-        char attstring[1024];
-        cdfGetAttText(fileID, nctimevarid, "calendar", sizeof(attstring), attstring);
-        str_to_lower(attstring);
-        calendar = attribute_to_calendar(attstring);
-      }
+  if (nctimevarid != CDI_UNDEFID && ncvars[nctimevarid].hasCalendar)
+    {
+      char attstring[1024];
+      cdfGetAttText(fileID, nctimevarid, "calendar", sizeof(attstring), attstring);
+      str_to_lower(attstring);
+      calendar = attribute_to_calendar(attstring);
+    }
 
   int taxisID;
-  if (streamptr->tsteps[0].taxis.type == TAXIS_FORECAST)
+  if (taxis0.type == TAXIS_FORECAST)
     {
       taxisID = taxisCreate(TAXIS_FORECAST);
     }
-  else if (streamptr->tsteps[0].taxis.type == TAXIS_RELATIVE)
+  else if (taxis0.type == TAXIS_RELATIVE)
     {
       taxisID = taxisCreate(TAXIS_RELATIVE);
     }
@@ -4520,11 +4514,11 @@ cdfInqContents(stream_t *streamptr)
       if (!timeHasUnits)
         {
           taxisDefTunit(taxisID, TUNIT_DAY);
-          streamptr->tsteps[0].taxis.unit = TUNIT_DAY;
+          taxis0.unit = TUNIT_DAY;
         }
     }
 
-  if (calendar == CDI_UNDEFID && streamptr->tsteps[0].taxis.type != TAXIS_ABSOLUTE) calendar = CALENDAR_STANDARD;
+  if (calendar == CDI_UNDEFID && taxis0.type != TAXIS_ABSOLUTE) calendar = CALENDAR_STANDARD;
 
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
 #pragma GCC diagnostic push
@@ -4532,8 +4526,7 @@ cdfInqContents(stream_t *streamptr)
 #endif
   if (calendar != CDI_UNDEFID)
     {
-      taxis_t *taxis = &streamptr->tsteps[0].taxis;
-      taxis->calendar = calendar;
+      taxis0.calendar = calendar;
       taxisDefCalendar(taxisID, calendar);
     }
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
@@ -4544,8 +4537,13 @@ cdfInqContents(stream_t *streamptr)
 
   streamptr->curTsID = 0;
   streamptr->rtsteps = 1;
+  streamptr->ntsteps = (long) ntsteps;
 
-  cdf_read_timesteps(streamptr);
+  cdiCreateTimesteps(streamptr);
+
+  cdf_read_timesteps(streamptr, &taxis0);
+  taxisDestroyKernel(&taxis0);
+
 
   // free ncdims
   if (ncdims) Free(ncdims);
