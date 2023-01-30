@@ -4544,7 +4544,6 @@ cdfInqContents(stream_t *streamptr)
   cdf_read_timesteps(streamptr, &taxis0);
   taxisDestroyKernel(&taxis0);
 
-
   // free ncdims
   if (ncdims) Free(ncdims);
 
