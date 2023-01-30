@@ -65,8 +65,6 @@ dup_refcount_string(char *p)
 
 #undef container_of
 
-static int TAXIS_Debug = 0;  // If set to 1, debugging
-
 const char *
 taxisNamePtr(int taxisID)
 {
@@ -131,17 +129,6 @@ taxisNewEntry(cdiResH resH)
   return taxisptr;
 }
 
-static void
-taxisInit(void)
-{
-  static bool taxisInitialized = false;
-  if (taxisInitialized) return;
-  taxisInitialized = true;
-
-  char *env = getenv("TAXIS_DEBUG");
-  if (env) TAXIS_Debug = atoi(env);
-}
-
 /*
 @Function  taxisCreate
 @Title     Create a Time axis
@@ -176,17 +163,10 @@ taxisDefRtime(taxisID, 120000);
 int
 taxisCreate(int taxistype)
 {
-  if (CDI_Debug) Message("taxistype: %d", taxistype);
-
-  taxisInit();
-
   taxis_t *taxisptr = taxisNewEntry(CDI_UNDEFID);
   taxisptr->type = taxistype;
 
   int taxisID = taxisptr->self;
-
-  if (CDI_Debug) Message("taxisID: %d", taxisID);
-
   return taxisID;
 }
 
@@ -231,8 +211,6 @@ taxisDuplicate(int taxisID1)
   taxis_t *taxisptr2 = taxisNewEntry(CDI_UNDEFID);
 
   int taxisID2 = taxisptr2->self;
-
-  if (CDI_Debug) Message("taxisID2: %d", taxisID2);
 
   ptaxisCopy(taxisptr2, taxisptr1);
 
@@ -1485,8 +1463,6 @@ taxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);
 
   xassert(cdiCheckSum(CDI_DATATYPE_INT, taxisNint, intBuffer) == d);
-
-  taxisInit();
 
   cdiResH targetID = force_id ? adaptKey(intBuffer[TAXIS_PACK_INT_SELF]) : CDI_UNDEFID;
   taxisP = taxisNewEntry(targetID);
