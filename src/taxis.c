@@ -88,8 +88,8 @@ tunitNamePtr(int unitID)
   return name;
 }
 
-static void
-taxisDefaultValue(taxis_t *taxisptr)
+void
+ptaxisInit(taxis_t *taxisptr)
 {
   taxisptr->self = CDI_UNDEFID;
   taxisptr->datatype = CDI_DATATYPE_FLT64;
@@ -117,7 +117,7 @@ taxisNewEntry(cdiResH resH)
 {
   taxis_t *taxisptr = (taxis_t *) Malloc(sizeof(taxis_t));
 
-  taxisDefaultValue(taxisptr);
+  ptaxisInit(taxisptr);
   if (resH == CDI_UNDEFID)
     taxisptr->self = reshPut(taxisptr, &taxisOps);
   else
@@ -1301,12 +1301,6 @@ cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis)
     timeValue = datetime2rtimeval(datetime, taxis);
 
   return timeValue;
-}
-
-void
-ptaxisInit(taxis_t *taxisptr)
-{
-  taxisDefaultValue(taxisptr);
 }
 
 void
