@@ -397,7 +397,7 @@ cdiInqContents(stream_t *streamptr)
 int
 cdiGetProtocol(const char *uri, const char **filename)
 {
-  char *pos = strstr(uri, "://");
+  const char *pos = strstr(uri, "://");
   if (pos == NULL)
     {
       *filename = uri;

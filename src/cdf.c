@@ -85,7 +85,7 @@ cdfComment(int ncid)
 static bool
 has_uri_scheme(const char *uri)
 {
-  char *pos = strstr(uri, "://");
+  const char *pos = strstr(uri, "://");
   if (pos)
     {
       const int len = pos - uri;

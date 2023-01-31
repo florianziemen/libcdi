@@ -3,6 +3,11 @@
 #include <stdlib.h>
 
 // ==================================================================
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// clang-format off
 void
 cdiDecodeDate(int date, int *year, int *month, int *day)
 {
@@ -39,6 +44,11 @@ cdiEncodeTime(int hour, int minute, int second)
 {
   return hour * 10000 + minute * 100 + second;
 }
+// clang-format on
+
+#ifdef __cplusplus
+}
+#endif
 // ==================================================================
 
 CdiDate
