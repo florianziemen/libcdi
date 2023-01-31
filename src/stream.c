@@ -1202,7 +1202,7 @@ streamDestroy(stream_t *streamptr)
 static void
 streamDestroyP(void *streamptr)
 {
-  streamDestroy(streamptr);
+  streamDestroy((stream_t *)streamptr);
 }
 
 /*

@@ -194,7 +194,7 @@ static const struct cdfDefGridAxisInqs
   enum cdfIDIdx dimIdx, varIdx;
   char axisSym;
   enum gridPropInq valsQueryKey, bndsQueryKey;
-  char axisPanoplyName[3];
+  char axisPanoplyName[4];
 } gridInqsX = {
   .axisSize = gridInqXsize,
   .axisVal = gridInqXval,
@@ -422,7 +422,7 @@ static void
 cdfDelayedPutVarDouble(void *data)
 {
   struct cdfPostDefPutVar *put = (struct cdfPostDefPutVar *) data;
-  cdf_put_var_double(put->fileID, put->ncvarid, put->values.array);
+  cdf_put_var_double(put->fileID, put->ncvarid, (const double *) put->values.array);
 }
 
 static void
@@ -772,12 +772,13 @@ cdfPostDefActionGridProp(stream_t *streamptr, int gridID, int ncvarid, enum grid
     case GRID_PROP_XBOUNDS: valsPtr = gridInqXboundsPtr(gridID); break;
     case GRID_PROP_YBOUNDS: valsPtr = gridInqYboundsPtr(gridID); break;
     }
-  cdfPostDefActionAddPutVal(delayed, streamptr->fileID, ncvarid, valsPtr, (void (*)(void *))(void (*)(void)) memFree);
+  cdfPostDefActionAddPutVal(delayed, streamptr->fileID, ncvarid, (const double *) valsPtr,
+                            (void (*)(void *))(void (*)(void)) memFree);
 }
 
 static int
 cdfDefIrregularGridAxisSetup(stream_t *streamptr, int gridID, nc_type xtype, int varID, size_t dimlens, int ndims,
-                             int dimIDs[ndims], size_t *chunks, const struct cdfDefGridAxisInqs *inqs,
+                             int dimIDs[], size_t *chunks, const struct cdfDefGridAxisInqs *inqs,
                              struct cdfPostDefActionList **delayed)
 {
   int ncvarid = CDI_UNDEFID;

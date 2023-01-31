@@ -135,11 +135,9 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
           if (*filetype == CDI_FILETYPE_NC4) writemode |= NC_NETCDF4;
           if (*filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
 #endif
-          const bool hasUriScheme = has_uri_scheme(filename);
-
           if (*filetype == CDI_FILETYPE_NCZARR)
             {
-              if (!hasUriScheme)
+              if (!has_uri_scheme(filename))
                 {
                   fprintf(stderr, "URI scheme is missing in NCZarr path!\n");
                   return CDI_EINVAL;
@@ -149,7 +147,7 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
             }
           else
             {
-              if (hasUriScheme) fprintf(stderr, "URI scheme defined for non NCZarr Data Model!\n");
+              if (has_uri_scheme(filename)) fprintf(stderr, "URI scheme defined for non NCZarr Data Model!\n");
 
               cdf__create(filename, writemode, &ncid);
             }

@@ -64,7 +64,7 @@ grib1_unzip_record(void *gribbuffer, size_t *gribsize)
 {
   int zip = 0;
 
-  const size_t igribsize = *gribsize;
+  size_t igribsize = *gribsize;
   size_t ogribsize = *gribsize;
 
   int izip;
@@ -124,12 +124,12 @@ grb_decode_record(void *untypedArgs)
 static DecodeArgs
 grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memtype, void *gribbuffer, void *data, bool resetFilePos)
 {
-  const int vlistID = streamptr->vlistID;
-  const int varID = streamptr->tsteps[tsID].records[recID].varID;
+  int vlistID = streamptr->vlistID;
+  int varID = streamptr->tsteps[tsID].records[recID].varID;
   size_t recsize = streamptr->tsteps[tsID].records[recID].size;
 
-  const int gridID = vlistInqVarGrid(vlistID, varID);
-  const size_t gridsize = gridInqSize(gridID);
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  size_t gridsize = gridInqSize(gridID);
   if (CDI_Debug) Message("gridID = %d gridsize = %zu", gridID, gridsize);
 
   void *cgribexp = (gribbuffer && streamptr->record->objectp) ? streamptr->record->objectp : NULL;
@@ -149,9 +149,9 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memtype, void *g
     {
       if (recsize == 0) Error("Internal problem! Recordsize is zero for record %d at timestep %d", recID + 1, tsID + 1);
 
-      const int fileID = streamptr->fileID;
-      const off_t recpos = streamptr->tsteps[tsID].records[recID].position;
-      const off_t currentfilepos = (resetFilePos ? fileGetPos(fileID) : 0);
+      int fileID = streamptr->fileID;
+      off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+      off_t currentfilepos = (resetFilePos ? fileGetPos(fileID) : 0);
 
       fileSetPos(fileID, recpos, SEEK_SET);
       if (fileRead(fileID, gribbuffer, recsize) != recsize) Error("Failed to read GRIB record!");
@@ -166,12 +166,12 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memtype, void *g
     .outZip = &streamptr->tsteps[tsID].records[recID].zip,
     .filetype = streamptr->filetype,
     .memtype = memtype,
+    .unreduced = streamptr->unreduced,
     .cgribexp = cgribexp,
     .gribbuffer = gribbuffer,
-    .recsize = recsize,
     .data = data,
+    .recsize = recsize,
     .gridsize = gridsize,
-    .unreduced = streamptr->unreduced,
     .nmiss = 0,
     .missval = vlistInqVarMissval(vlistID, varID),
   };
@@ -226,7 +226,7 @@ static long
 get_max_global_recs(stream_t *streamptr)
 {
   long maxGlobalRecs = -1;
-  const long numSteps = streamptr->ntsteps;
+  long numSteps = streamptr->ntsteps;
   if (numSteps > 0)
     {
       const tsteps_t *tsteps = streamptr->tsteps;
@@ -240,7 +240,7 @@ static void
 get_local_step_and_recId(stream_t *streamptr, long globalRecId, int *tsID, int *recID)
 {
   int localTsId = 0;
-  const long numSteps = streamptr->ntsteps;
+  long numSteps = streamptr->ntsteps;
   const tsteps_t *tsteps = streamptr->tsteps;
   if (numSteps > 0 && globalRecId >= tsteps[0].nrecs)
     {
@@ -262,7 +262,7 @@ read_next_record(AsyncManager *jobManager, JobDescriptor *jd, stream_t *streampt
 {
   int tsId = -1, recId = -1;
   get_local_step_and_recId(streamptr, streamptr->nextGlobalRecId, &tsId, &recId);
-  const int xRecId = streamptr->tsteps[tsId].recIDs[recId];
+  int xRecId = streamptr->tsteps[tsId].recIDs[recId];
   JobDescriptor_startJob(jobManager, jd, streamptr, tsId, xRecId, memtype);
   streamptr->nextGlobalRecId++;
 }
@@ -275,9 +275,9 @@ grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
   int workerCount = streamptr->numWorker;
   if (workerCount > 0)
     {
-      const int tsID = streamptr->curTsID;
-      const long maxGlobalRecs = get_max_global_recs(streamptr);
-      // const long globalRecId = get_global_recId(streamptr, streamptr->curTsID, recID);
+      int tsID = streamptr->curTsID;
+      long maxGlobalRecs = get_max_global_recs(streamptr);
+      // long globalRecId = get_global_recId(streamptr, streamptr->curTsID, recID);
       if (maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
 
       if (workerCount > maxGlobalRecs) workerCount = maxGlobalRecs;
@@ -324,9 +324,9 @@ grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
 void
 grb_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss)
 {
-  const int tsID = streamptr->curTsID;
-  const int vrecID = streamptr->tsteps[tsID].curRecID;
-  const int recID = streamptr->tsteps[tsID].recIDs[vrecID];
+  int tsID = streamptr->curTsID;
+  int vrecID = streamptr->tsteps[tsID].curRecID;
+  int recID = streamptr->tsteps[tsID].recIDs[vrecID];
 
   grb_read_next_record(streamptr, recID, memtype, data, nmiss);
 }
@@ -334,8 +334,8 @@ grb_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss)
 void
 grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *nmiss)
 {
-  const int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
-  const int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
+  int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
+  int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
 
   *nmiss = grb_read_and_decode_record(streamptr, recID, memtype, data, true);
 }
@@ -343,24 +343,24 @@ grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, voi
 void
 grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nmiss)
 {
-  const int vlistID = streamptr->vlistID;
-  const int fileID = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
 
-  const int gridID = vlistInqVarGrid(vlistID, varID);
-  const size_t gridsize = gridInqSize(gridID);
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  size_t gridsize = gridInqSize(gridID);
 
-  const off_t currentfilepos = fileGetPos(fileID);
+  off_t currentfilepos = fileGetPos(fileID);
 
-  const int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
-  const int nlevs = streamptr->vars[varID].recordTable[0].nlevs;
+  int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
+  int nlevs = streamptr->vars[varID].recordTable[0].nlevs;
 
   if (CDI_Debug) Message("nlevs = %d gridID = %d gridsize = %zu", nlevs, gridID, gridsize);
 
   *nmiss = 0;
   for (int levelID = 0; levelID < nlevs; levelID++)
     {
-      const int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
-      const size_t offset = levelID * gridsize;
+      int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
+      size_t offset = levelID * gridsize;
       void *datap = (memtype == MEMTYPE_FLOAT) ? (void *) ((float *) data + offset) : (void *) ((double *) data + offset);
 
       *nmiss += grb_read_and_decode_record(streamptr, recID, memtype, datap, false);
