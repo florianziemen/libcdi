@@ -167,7 +167,7 @@ zaxisInit(void)
 static void
 zaxis_copy(zaxis_t *zaxisptr2, zaxis_t *zaxisptr1)
 {
-  const int zaxisID2 = zaxisptr2->self;
+  int zaxisID2 = zaxisptr2->self;
   memcpy(zaxisptr2, zaxisptr1, sizeof(zaxis_t));
   zaxisptr2->self = zaxisID2;
   cdiInitKeys(&zaxisptr2->keys);
@@ -192,7 +192,7 @@ zaxisCreate_(int zaxistype, int size, int id)
   if (zaxistype >= CDI_NumZaxistype || zaxistype < 0)
     Error("Internal problem! zaxistype=%d out of range (min=0/max=%d)!", zaxistype, CDI_NumZaxistype - 1);
 
-  const int zaxisID = zaxisptr->self;
+  int zaxisID = zaxisptr->self;
   cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, ZaxistypeEntry[zaxistype].name);
   if (zaxistype != ZAXIS_GENERIC) zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
   cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, ZaxistypeEntry[zaxistype].units);
@@ -261,7 +261,7 @@ zaxisDestroyKernel(zaxis_t *zaxisptr)
 {
   xassert(zaxisptr);
 
-  const int id = zaxisptr->self;
+  int id = zaxisptr->self;
 
   if (zaxisptr->vals) Free(zaxisptr->vals);
 #ifndef USE_MPI
@@ -608,7 +608,7 @@ void
 zaxisDefLevel(int zaxisID, int levelID, double level)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  const int size = zaxisptr->size;
+  int size = zaxisptr->size;
   xassert(size);
   xassert(levelID >= 0 && levelID < size);
 
@@ -910,7 +910,7 @@ zaxisInqLevelID(int zaxisID, double level)
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if (zaxisptr->vals)
     {
-      const int size = zaxisptr->size;
+      int size = zaxisptr->size;
       for (int i = 0; i < size; i++)
         if (fabs(level - zaxisptr->vals[i]) < DBL_EPSILON)
           {
@@ -984,7 +984,7 @@ cdiCheckZaxis(int zaxisID)
 
   if (zaxisInqType(zaxisID) == ZAXIS_GENERIC && zaxisptr->vals)
     {
-      const int size = zaxisptr->size;
+      int size = zaxisptr->size;
       if (size > 1)
         {
           /* check direction */
@@ -1129,10 +1129,10 @@ zaxisDuplicate(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
 
-  const int zaxistype = zaxisInqType(zaxisID);
-  const int zaxissize = zaxisInqSize(zaxisID);
+  int zaxistype = zaxisInqType(zaxisID);
+  int zaxissize = zaxisInqSize(zaxisID);
 
-  const int zaxisIDnew = zaxisCreate(zaxistype, zaxissize);
+  int zaxisIDnew = zaxisCreate(zaxistype, zaxissize);
   zaxis_t *zaxisptrnew = zaxis_to_pointer(zaxisIDnew);
 
   zaxis_copy(zaxisptrnew, zaxisptr);
@@ -1188,10 +1188,10 @@ zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
   int datatype = CDI_UNDEFID;
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
 
-  const int type = zaxisptr->type;
-  const int nlevels = zaxisptr->size;
+  int type = zaxisptr->type;
+  int nlevels = zaxisptr->size;
 
-  const int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
+  int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
 
   fprintf(fp, "zaxistype = %s\n", zaxisNamePtr(type));
   fprintf(fp, "size      = %d\n", nlevels);
@@ -1258,7 +1258,7 @@ zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 
   if (type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF)
     {
-      const int vctsize = zaxisptr->vctsize;
+      int vctsize = zaxisptr->vctsize;
       const double *vct = zaxisptr->vct;
       fprintf(fp, "vctsize   = %d\n", vctsize);
       if (vctsize)

@@ -54,7 +54,7 @@ cdiCreateTimesteps(stream_t *streamptr)
 {
   if (streamptr->ntsteps < 0 || streamptr->tstepsTableSize > 0) return;
 
-  const int ntsteps = (streamptr->ntsteps == 0) ? 1 : (int) streamptr->ntsteps;
+  int ntsteps = (streamptr->ntsteps == 0) ? 1 : (int) streamptr->ntsteps;
 
   streamptr->tsteps = (tsteps_t *) Malloc((size_t) ntsteps * sizeof(tsteps_t));
 

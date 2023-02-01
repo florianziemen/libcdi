@@ -133,7 +133,7 @@ cdi_delete_key(cdi_key_t *keyp)
 void
 cdiDeleteVarKeys(cdi_keys_t *keysp)
 {
-  const int nelems = keysp ? (int) keysp->nelems : 0;
+  int nelems = keysp ? (int) keysp->nelems : 0;
   for (int keyid = 0; keyid < nelems; keyid++)
     {
       cdi_delete_key(&(keysp->value[keyid]));
@@ -154,7 +154,7 @@ cdiDeleteKeys(int cdiID, int varID)
 void
 cdiPrintVarKeys(cdi_keys_t *keysp)
 {
-  const int nelems = keysp ? (int) keysp->nelems : 0;
+  int nelems = keysp ? (int) keysp->nelems : 0;
   for (int keyid = 0; keyid < nelems; keyid++)
     {
       cdi_key_t *keyp = &(keysp->value[keyid]);
@@ -215,7 +215,7 @@ cdi_define_key(const cdi_key_t *keyp, cdi_keys_t *keysp)
 int
 cdiDeleteKey(int cdiID, int varID, int key)
 {
-  const int status = CDI_NOERR;
+  int status = CDI_NOERR;
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
@@ -238,7 +238,7 @@ cdiCopyVarKeys(const cdi_keys_t *keysp1, cdi_keys_t *keysp2)
 int
 cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2)
 {
-  const int status = CDI_NOERR;
+  int status = CDI_NOERR;
 
   cdi_keys_t *keysp1 = cdi_get_keysp(cdiID1, varID1);
   xassert(keysp1 != NULL);
@@ -254,7 +254,7 @@ cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2)
 int
 cdiCopyVarKey(const cdi_keys_t *keysp1, int key, cdi_keys_t *keysp2)
 {
-  const int status = CDI_NOERR;
+  int status = CDI_NOERR;
 
   const cdi_key_t *keyp = find_key_const(keysp1, key);
   if (keyp == NULL) return -1;
@@ -315,7 +315,7 @@ The function @func{cdiDefKeyInt} defines an integer value from a key.
 int
 cdiDefKeyInt(int cdiID, int varID, int key, int value)
 {
-  const int status = CDI_NOERR;
+  int status = CDI_NOERR;
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
@@ -414,7 +414,7 @@ The function @func{cdiDefKeyFloat} defines a CDI floating point value from a key
 int
 cdiDefKeyFloat(int cdiID, int varID, int key, double value)
 {
-  const int status = CDI_NOERR;
+  int status = CDI_NOERR;
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
@@ -513,7 +513,7 @@ The function @func{cdiDefKeyBytes} defines a byte array from a key.
 int
 cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, int length)
 {
-  const int status = CDI_NOERR;
+  int status = CDI_NOERR;
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
@@ -615,8 +615,8 @@ cdiDefKeyString(int cdiID, int varID, int key, const char *string)
 {
   xassert(string != NULL);
 
-  const int length = strlen(string) + 1;
-  const int status = cdiDefKeyBytes(cdiID, varID, key, (const unsigned char *) string, length);
+  int length = strlen(string) + 1;
+  int status = cdiDefKeyBytes(cdiID, varID, key, (const unsigned char *) string, length);
 
   return status;
 }
