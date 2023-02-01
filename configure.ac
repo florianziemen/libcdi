@@ -742,7 +742,7 @@ AC_CONFIG_FILES([
 AC_OUTPUT
 
 AC_MSG_NOTICE([CDI is configured with the following options:])
-cat cdi.settings
+cat cdi.settings >&AS_MESSAGE_FD
 
 AC_MSG_NOTICE([
 

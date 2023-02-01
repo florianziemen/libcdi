@@ -28585,7 +28585,7 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
                LIBS="$PTHREAD_LIBS $LIBS"
                CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
                CC="$PTHREAD_CC"
-               $as_echo "CC:$CC CFLAGS:$CFLAGS LIBS:$LIBS" ;; #(
+               $as_echo "CC:$CC CFLAGS:$CFLAGS LIBS:$LIBS" >&6 ;; #(
   *) :
     THREADS_ROOT=$with_threads
              LDFLAGS="-L$THREADS_ROOT/lib $LDFLAGS"
@@ -35788,7 +35788,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: CDI is configured with the following options:" >&5
 $as_echo "$as_me: CDI is configured with the following options:" >&6;}
-cat cdi.settings
+cat cdi.settings >&6
 
 { $as_echo "$as_me:${as_lineno-$LINENO}:
 

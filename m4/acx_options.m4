@@ -16,7 +16,7 @@ AS_CASE([$with_threads],
                LIBS="$PTHREAD_LIBS $LIBS"
                CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
                CC="$PTHREAD_CC"
-               AS_ECHO(["CC:$CC CFLAGS:$CFLAGS LIBS:$LIBS"])],
+               AS_ECHO(["CC:$CC CFLAGS:$CFLAGS LIBS:$LIBS"]) >&AS_MESSAGE_FD],
         [*],[THREADS_ROOT=$with_threads
              LDFLAGS="-L$THREADS_ROOT/lib $LDFLAGS"
              CPPFLAGS="-I$THREADS_ROOT/include $CPPFLAGS "
