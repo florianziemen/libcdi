@@ -889,7 +889,7 @@ main(int argc, char *argv[])
       int taxisID2 = CDI_UNDEFID;
       int vlistID2 = CDI_UNDEFID;
 
-      bool useQuery = (numQueryNames > 0) ||  (numQueryCellidx > 0) ||  (numQueryLevidx > 0) ||  (numQueryStepidx > 0);
+      bool useQuery = (numQueryNames > 0) || (numQueryCellidx > 0) || (numQueryLevidx > 0) || (numQueryStepidx > 0);
       CdiQuery *query = NULL;
       if (useQuery)
         {
