@@ -64,7 +64,7 @@ static int gridTxCode(void *gridptr);
 
 static const resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP, gridGetPackSize, gridPack, gridTxCode };
 
-static int GRID_Debug = 0; // If set to 1, debugging
+static int GRID_Debug = 0;  // If set to 1, debugging
 
 grid_t *
 grid_to_pointer(int gridID)
@@ -184,10 +184,13 @@ grid_free_components(grid_t *gridptr)
     if (p2free[i]) Free(p2free[i]);
 
   int gridID = gridptr->self;
-  cdiDeleteKeys(gridID, CDI_XAXIS);
-  cdiDeleteKeys(gridID, CDI_YAXIS);
-  cdiDeleteKeys(gridID, CDI_GLOBAL);
-  cdiDeleteAtts(gridID, CDI_GLOBAL);
+  if (gridID != CDI_UNDEFID)
+    {
+      cdiDeleteKeys(gridID, CDI_XAXIS);
+      cdiDeleteKeys(gridID, CDI_YAXIS);
+      cdiDeleteKeys(gridID, CDI_GLOBAL);
+      cdiDeleteAtts(gridID, CDI_GLOBAL);
+    }
 }
 
 void
