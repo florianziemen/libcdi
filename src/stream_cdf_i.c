@@ -4059,7 +4059,7 @@ wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
     dateTimeSepPos = 19,
     dateTimeStrSize = 128,
   };
-  const size_t start[2] = { (size_t)tsID, 0 }, count[2] = { 1, dateTimeSepPos };
+  const size_t start[2] = { (size_t) tsID, 0 }, count[2] = { 1, dateTimeSepPos };
   char stvalue[dateTimeStrSize];
   stvalue[0] = 0;
   cdf_get_vara_text(fileID, nctimevarid, start, count, stvalue);
@@ -4124,7 +4124,7 @@ cdf_read_timesteps(stream_t *streamptr, taxis_t *taxis0)
                     numBnds = 2,
                     tbNdims = 2
                   };
-                  const size_t start[tbNdims] = { (size_t)tsID, 0 };
+                  const size_t start[tbNdims] = { (size_t) tsID, 0 };
                   static const size_t count[tbNdims] = { 1, numBnds };
                   double timeBnds[numBnds];
                   cdf_get_vara_double(fileID, nctimeboundsid, start, count, timeBnds);
