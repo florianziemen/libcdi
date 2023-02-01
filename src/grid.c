@@ -184,6 +184,7 @@ grid_free_components(grid_t *gridptr)
     if (p2free[i]) Free(p2free[i]);
 
   int gridID = gridptr->self;
+  /*
   if (gridID != CDI_UNDEFID)
     {
       cdiDeleteKeys(gridID, CDI_XAXIS);
@@ -191,6 +192,7 @@ grid_free_components(grid_t *gridptr)
       cdiDeleteKeys(gridID, CDI_GLOBAL);
       cdiDeleteAtts(gridID, CDI_GLOBAL);
     }
+  */
 }
 
 void
