@@ -114,7 +114,7 @@ fletcher8_check2(uint8_t sum1, uint8_t sum2)
 static int
 across_write_buf(int sock, const void *buf, size_t nbytes)
 {
-  const char *bufpos = (const char *)buf;
+  const char *bufpos = (const char *) buf;
   size_t nbytes_left = nbytes;
   while (nbytes_left > 0)
     {

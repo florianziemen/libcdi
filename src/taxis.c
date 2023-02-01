@@ -488,7 +488,7 @@ int
 taxisHasBounds(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return (int)taxisptr->hasBounds;
+  return (int) taxisptr->hasBounds;
 }
 
 void

@@ -777,9 +777,8 @@ cdfPostDefActionGridProp(stream_t *streamptr, int gridID, int ncvarid, enum grid
 }
 
 static int
-cdfDefIrregularGridAxisSetup(stream_t *streamptr, int gridID, nc_type xtype, int varID, size_t dimlens, int ndims,
-                             int dimIDs[], size_t *chunks, const struct cdfDefGridAxisInqs *inqs,
-                             struct cdfPostDefActionList **delayed)
+cdfDefIrregularGridAxisSetup(stream_t *streamptr, int gridID, nc_type xtype, int varID, size_t dimlens, int ndims, int dimIDs[],
+                             size_t *chunks, const struct cdfDefGridAxisInqs *inqs, struct cdfPostDefActionList **delayed)
 {
   int ncvarid = CDI_UNDEFID;
   const int fileID = streamptr->fileID;
