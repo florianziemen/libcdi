@@ -40,7 +40,7 @@ static const char Grids[][17] = {
   /* 13 */ "characterXY",
 };
 
-/* must match table below */
+// must match table below
 enum xystdname_idx
 {
   grid_xystdname_grid_latlon,
@@ -64,7 +64,7 @@ static int gridTxCode(void *gridptr);
 
 static const resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP, gridGetPackSize, gridPack, gridTxCode };
 
-static int GRID_Debug = 0; /* If set to 1, debugging */
+static int GRID_Debug = 0; // If set to 1, debugging
 
 grid_t *
 grid_to_pointer(int gridID)
@@ -183,13 +183,11 @@ grid_free_components(grid_t *gridptr)
   for (size_t i = 0; i < sizeof(p2free) / sizeof(p2free[0]); ++i)
     if (p2free[i]) Free(p2free[i]);
 
-  /*
   int gridID = gridptr->self;
   cdiDeleteKeys(gridID, CDI_XAXIS);
   cdiDeleteKeys(gridID, CDI_YAXIS);
   cdiDeleteKeys(gridID, CDI_GLOBAL);
   cdiDeleteAtts(gridID, CDI_GLOBAL);
-  */
 }
 
 void
@@ -559,9 +557,6 @@ gridDestroyKernel(grid_t *gridptr)
 void
 gridDestroy(int gridID)
 {
-  // cdiDeleteKeys(gridID, CDI_GLOBAL);
-  // cdiDeleteAtts(gridID, CDI_GLOBAL);
-
   grid_t *gridptr = grid_to_pointer(gridID);
   gridptr->vtable->destroy(gridptr);
   reshRemove(gridID, &gridOps);
