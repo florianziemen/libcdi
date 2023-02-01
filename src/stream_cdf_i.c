@@ -1808,21 +1808,19 @@ verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncvars,
                 }
               else if (is_height_units(ncvar->units))
                 {
-                  if (is_depth_axis(ncvar->stdname, ncvar->longname))
-                    ncvar->zaxistype = ZAXIS_DEPTH_BELOW_SEA;
-                  else if (is_height_axis(ncvar->stdname, ncvar->longname))
-                    ncvar->zaxistype = ZAXIS_HEIGHT;
-                  else if (is_altitude_axis(ncvar->stdname, ncvar->longname))
-                    ncvar->zaxistype = ZAXIS_ALTITUDE;
+                  // clang-format off
+                  if      (is_depth_axis(ncvar->stdname, ncvar->longname))    ncvar->zaxistype = ZAXIS_DEPTH_BELOW_SEA;
+                  else if (is_height_axis(ncvar->stdname, ncvar->longname))   ncvar->zaxistype = ZAXIS_HEIGHT;
+                  else if (is_altitude_axis(ncvar->stdname, ncvar->longname)) ncvar->zaxistype = ZAXIS_ALTITUDE;
+                  // clang-format on
                 }
             }
           else
             {
-              if ((str_is_equal(ncvar->longname, "generalized_height") || str_is_equal(ncvar->longname, "generalized height"))
-                  && str_is_equal(ncvar->stdname, "height"))
-                ncvar->zaxistype = ZAXIS_REFERENCE;
-              else if (str_is_equal(ncvar->stdname, "air_pressure"))
-                ncvar->zaxistype = ZAXIS_PRESSURE;
+              // clang-format off
+              if      (is_reference_axis(ncvar->stdname, ncvar->longname)) ncvar->zaxistype = ZAXIS_REFERENCE;
+              else if (str_is_equal(ncvar->stdname, "air_pressure"))       ncvar->zaxistype = ZAXIS_PRESSURE;
+              // clang-format on
             }
 
           if (!ncvar->isLon && (ncvar->longname[0] != 0) && !ncvar->isLat && (ncvar->longname[1] != 0))
