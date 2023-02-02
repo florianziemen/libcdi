@@ -9,8 +9,8 @@ typedef struct
   int ncdimid;
   int ncvarboundsid;
   int leadtimeid;
-  bool lunits;
-  bool lwrf;  // true for time axis in WRF format
+  bool hasUnits;
+  bool isWRF;        // true for time axis in WRF format
 } basetime_t;
 
 void basetimeInit(basetime_t *basetime);
