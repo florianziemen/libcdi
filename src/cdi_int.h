@@ -439,7 +439,7 @@ void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *c
 
 int recordNewEntry(stream_t *streamptr, int tsID);
 
-void cdiCreateTimesteps(stream_t *streamptr);
+void cdi_create_timesteps(stream_t *streamptr);
 
 void recordInitEntry(record_t *record);
 

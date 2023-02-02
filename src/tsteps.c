@@ -50,7 +50,7 @@ tstepsNewEntry(stream_t *streamptr)
 }
 
 void
-cdiCreateTimesteps(stream_t *streamptr)
+cdi_create_timesteps(stream_t *streamptr)
 {
   if (streamptr->ntsteps < 0 || streamptr->tstepsTableSize > 0) return;
 
@@ -63,8 +63,7 @@ cdiCreateTimesteps(stream_t *streamptr)
 
   for (int tsID = 0; tsID < ntsteps; tsID++)
     {
-      tsteps_t *curTstep = &streamptr->tsteps[tsID];
-      tstepsInitEntry(curTstep);
+      tstepsInitEntry(&streamptr->tsteps[tsID]);
     }
 }
 /*

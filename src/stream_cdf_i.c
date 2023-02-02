@@ -4086,10 +4086,12 @@ cdf_read_timesteps(stream_t *streamptr, taxis_t *taxis0)
 {
   if (streamptr->ntsteps == 0)
     {
+      cdi_create_timesteps(streamptr);
       cdf_create_records(streamptr, 0);
     }
   else
     {
+      cdi_create_timesteps(streamptr);
       int fileID = streamptr->fileID;
       int numTimesteps = streamptr->ntsteps;
       int nctimevarid = streamptr->basetime.ncvarid;
@@ -4556,8 +4558,6 @@ cdfInqContents(stream_t *streamptr)
   streamptr->curTsID = 0;
   streamptr->rtsteps = 1;
   streamptr->ntsteps = (long) ntsteps;
-
-  cdiCreateTimesteps(streamptr);
 
   cdf_read_timesteps(streamptr, &taxis0);
   taxisDestroyKernel(&taxis0);
