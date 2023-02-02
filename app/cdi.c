@@ -898,12 +898,13 @@ main(int argc, char *argv[])
           if (numQueryCellidx) cdiQuerySetCellidx(query, numQueryCellidx, queryCellidx);
           if (numQueryLevidx) cdiQuerySetLevidx(query, numQueryLevidx, queryLevidx);
           if (numQueryStepidx) cdiQuerySetStepidx(query, numQueryStepidx, queryStepidx);
-          cdiQueryPrint(query);
+          if (Debug) cdiQueryPrint(query);
         }
 
       int streamID1 = useQuery ? streamOpenReadQuery(fname1, query) : streamOpenRead(fname1);
       if (streamID1 < 0) return handle_error(streamID1, "Open failed on %s", fname1);
 
+      if (useQuery) cdiQueryPrintEntriesNotFound(query);
       if (query) cdiQueryDelete(query);
 
       if (numWorkerIn > 0) streamDefNumWorker(streamID1, numWorkerIn);
