@@ -189,17 +189,18 @@ typedef struct
 
 typedef struct
 {
+  int *recIDs;  // IDs of non constant records
   record_t *records;
-  int *recIDs;     // IDs of non constant records
-  int recordSize;  // number of allocated records
-  int nrecs;       // number of used records
-                   // tsID=0 nallrecs
-                   // tsID>0 number of non constant records
-  int nallrecs;    // number of all records
-  int curRecID;    // current record ID
-  bool next;
-  off_t position;  // timestep file position
+  int recordSize;   // number of allocated records
+  int nrecs;        // number of used records
+                    // tsID=0 nallrecs
+                    // tsID>0 number of non constant records
+  int nallrecs;     // number of all records
+  int curRecID;     // current record ID
+  int ncStepIndex;  // NetCDF timestep index
+  off_t position;   // timestep file position
   taxis_t taxis;
+  bool next;
 } tsteps_t;
 
 typedef struct

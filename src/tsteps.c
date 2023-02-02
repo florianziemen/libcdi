@@ -7,13 +7,14 @@
 static void
 tstepsInitEntry(tsteps_t *tstep)
 {
-  tstep->curRecID = CDI_UNDEFID;
-  tstep->position = 0;
+  tstep->recIDs = NULL;
   tstep->records = NULL;
   tstep->recordSize = 0;
-  tstep->nallrecs = 0;
-  tstep->recIDs = NULL;
   tstep->nrecs = 0;
+  tstep->curRecID = CDI_UNDEFID;
+  tstep->ncStepIndex = 0;
+  tstep->position = 0;
+  tstep->nallrecs = 0;
   tstep->next = 0;
 
   ptaxisInit(&(tstep->taxis));

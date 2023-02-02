@@ -4119,6 +4119,7 @@ cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
 
       for (int tsID = 0; tsID < numTimesteps; ++tsID)
         {
+          wstreamptr->tsteps[tsID].ncStepIndex = tsID;
           cdf_create_records(streamptr, tsID);
 
           taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
