@@ -1215,7 +1215,7 @@ split_timevalue(double timevalue, int timeunit)
 }
 
 void
-cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
+cdi_set_forecast_period(double timevalue, taxis_t *taxis)
 {
   taxis->fc_period = timevalue;
 

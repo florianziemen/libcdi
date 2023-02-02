@@ -4110,7 +4110,7 @@ cdf_read_timesteps(stream_t *streamptr, taxis_t *taxis0)
                 }
               else
                 {
-                  taxis->vDateTime = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID), taxis);
+                  taxis->vDateTime = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID), taxis0);
                 }
 
               int nctimeboundsid = streamptr->basetime.ncvarboundsid;
@@ -4135,7 +4135,7 @@ cdf_read_timesteps(stream_t *streamptr, taxis_t *taxis0)
               int leadtimeid = streamptr->basetime.leadtimeid;
               if (leadtimeid != CDI_UNDEFID)
                 {
-                  cdiSetForecastPeriod(get_timevalue(fileID, leadtimeid, tsID), taxis);
+                  cdi_set_forecast_period(get_timevalue(fileID, leadtimeid, tsID), taxis);
                 }
             }
         }

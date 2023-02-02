@@ -14,20 +14,20 @@ typedef struct
   int datatype;  // datatype
   int type;      // time type
   int calendar;
-  int unit;  // time unit
+  int unit;      // time units
   int numavg;
-  bool climatology;
   CdiDateTime sDateTime;     // start date/time
   CdiDateTime vDateTime;     // verification date/time
   CdiDateTime rDateTime;     // reference date/time
   CdiDateTime fDateTime;     // forecast reference date/time
   CdiDateTime vDateTime_lb;  // lower bounds of verification date/time
   CdiDateTime vDateTime_ub;  // upper bounds of verification date/time
-  int fc_unit;               // forecast time unit
   double fc_period;          // forecast time period
+  int fc_unit;               // forecast time unit
   char *name;
   char *longname;
   char *units;
+  bool climatology;
   bool hasBounds;
 } taxis_t;
 
@@ -37,7 +37,7 @@ CdiDateTime taxisInqSdatetime(int taxisID);
 void ptaxisInit(taxis_t *taxis);
 void ptaxisCopy(taxis_t *dest, taxis_t *source);
 taxis_t *taxisPtr(int taxisID);
-void cdiSetForecastPeriod(double timevalue, taxis_t *taxis);
+void cdi_set_forecast_period(double timevalue, taxis_t *taxis);
 CdiDateTime cdi_decode_timeval(double timevalue, const taxis_t *taxis);
 double cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis);
 
