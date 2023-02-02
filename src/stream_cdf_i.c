@@ -4082,18 +4082,22 @@ get_timevalue(int fileID, int nctimevarid, int tsID)
 }
 
 static void
-cdf_read_timesteps(stream_t *streamptr, taxis_t *taxis0)
+cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
 {
-  if (streamptr->ntsteps == 0)
+  streamptr->curTsID = 0;
+  streamptr->rtsteps = 1;
+
+  if (numTimesteps == 0)
     {
+      streamptr->ntsteps = (long) numTimesteps;
       cdi_create_timesteps(streamptr);
       cdf_create_records(streamptr, 0);
     }
   else
     {
+      streamptr->ntsteps = (long) numTimesteps;
       cdi_create_timesteps(streamptr);
       int fileID = streamptr->fileID;
-      int numTimesteps = streamptr->ntsteps;
       int nctimevarid = streamptr->basetime.ncvarid;
       int nctimeboundsid = streamptr->basetime.ncvarboundsid;
       bool hasTimesteps = (nctimevarid != CDI_UNDEFID && streamptr->basetime.hasUnits);
@@ -4555,11 +4559,7 @@ cdfInqContents(stream_t *streamptr)
 
   vlistDefTaxis(vlistID, taxisID);
 
-  streamptr->curTsID = 0;
-  streamptr->rtsteps = 1;
-  streamptr->ntsteps = (long) ntsteps;
-
-  cdf_read_timesteps(streamptr, &taxis0);
+  cdf_read_timesteps(ntsteps, streamptr, &taxis0);
   taxisDestroyKernel(&taxis0);
 
   // free ncdims
