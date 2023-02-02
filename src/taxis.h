@@ -14,7 +14,7 @@ typedef struct
   int datatype;  // datatype
   int type;      // time type
   int calendar;
-  int unit;      // time units
+  int unit;  // time units
   int numavg;
   CdiDateTime sDateTime;     // start date/time
   CdiDateTime vDateTime;     // verification date/time
