@@ -4048,8 +4048,8 @@ cdfVerifyVars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
     }
 }
 
-static void
-wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
+static CdiDateTime
+wrf_read_timestep(int fileID, int nctimevarid, int tsID)
 {
   enum
   {
@@ -4065,8 +4065,7 @@ wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
 
   int year = 1, month = 1, day = 1, hour = 0, minute = 0, second = 0;
   if (strlen(stvalue) == dateTimeSepPos) sscanf(stvalue, "%d-%d-%d_%d:%d:%d", &year, &month, &day, &hour, &minute, &second);
-  taxis->vDateTime = cdiDateTime_set(cdiEncodeDate(year, month, day), cdiEncodeTime(hour, minute, second));
-  taxis->type = TAXIS_ABSOLUTE;
+  return cdiDateTime_set(cdiEncodeDate(year, month, day), cdiEncodeTime(hour, minute, second));
 }
 
 static double
@@ -4107,7 +4106,7 @@ cdf_read_timesteps(stream_t *streamptr, taxis_t *taxis0)
 
               if (streamptr->basetime.lwrf)
                 {
-                  wrf_read_timestep(fileID, nctimevarid, tsID, taxis);
+                  taxis->vDateTime = wrf_read_timestep(fileID, nctimevarid, tsID);
                 }
               else
                 {
@@ -4496,6 +4495,8 @@ cdfInqContents(stream_t *streamptr)
       str_to_lower(attstring);
       calendar = attribute_to_calendar(attstring);
     }
+
+  if (streamptr->basetime.lwrf) taxis0.type = TAXIS_ABSOLUTE;
 
   int taxisID;
   if (taxis0.type == TAXIS_FORECAST)
