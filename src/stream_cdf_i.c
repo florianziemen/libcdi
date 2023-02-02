@@ -4069,12 +4069,11 @@ wrf_read_timestep(int fileID, int nctimevarid, int tsID)
 }
 
 static double
-get_timevalue(int fileID, int nctimevarid, int tsID)
+get_timevalue(int fileID, int nctimevarid, size_t ncStepIndex)
 {
   double timevalue = 0.0;
 
-  size_t index = (size_t) tsID;
-  cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
+  cdf_get_var1_double(fileID, nctimevarid, &ncStepIndex, &timevalue);
 
   if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
 
@@ -4092,13 +4091,18 @@ cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
       cdi_create_timesteps(numTimesteps, streamptr);
       cdf_create_records(streamptr, 0);
     }
+  else if (numTimesteps < 0)
+    {
+    }
   else
     {
-      cdi_create_timesteps(numTimesteps, streamptr);
       int fileID = streamptr->fileID;
       int nctimevarid = streamptr->basetime.ncvarid;
       int nctimeboundsid = streamptr->basetime.ncvarboundsid;
       bool hasTimesteps = (nctimevarid != CDI_UNDEFID && streamptr->basetime.hasUnits);
+
+      int *ncStepIndices = (int *) malloc(numTimesteps * sizeof(int));
+      for (int tsID = 0; tsID < numTimesteps; ++tsID) ncStepIndices[tsID] = tsID;
 
       CdiDateTime *vDateTimeList = NULL;
 
@@ -4117,16 +4121,39 @@ cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
             }
         }
 
-      for (int tsID = 0; tsID < numTimesteps; ++tsID)
+      // process query information if available
+      CdiQuery *query = streamptr->query;
+      if (query && cdiQueryNumStepidx(query) > 0)
         {
-          streamptr->tsteps[tsID].ncStepIndex = tsID;
-          cdf_create_records(streamptr, tsID);
-
-          taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
-          ptaxisCopy(taxis, taxis0);
-
-          if (hasTimesteps) taxis->vDateTime = vDateTimeList[tsID];
+          for (int tsID = 0; tsID < numTimesteps; ++tsID)
+            {
+              if (cdiQueryStepidx(query, tsID + 1) < 0) ncStepIndices[tsID] = -1;
+            }
         }
+
+      int numSteps = 0;
+      for (int tsID = 0; tsID < numTimesteps; ++tsID)
+        if (ncStepIndices[tsID] >= 0) numSteps++;
+
+      cdi_create_timesteps(numSteps, streamptr);
+
+      for (int tsID = 0, stepID = 0; tsID < numTimesteps; ++tsID)
+        {
+          if (ncStepIndices[tsID] >= 0)
+            {
+              streamptr->tsteps[stepID].ncStepIndex = ncStepIndices[tsID];
+              cdf_create_records(streamptr, stepID);
+
+              taxis_t *taxis = &streamptr->tsteps[stepID].taxis;
+              ptaxisCopy(taxis, taxis0);
+
+              if (hasTimesteps) taxis->vDateTime = vDateTimeList[tsID];
+
+              stepID++;
+            }
+        }
+
+      if (ncStepIndices) free(ncStepIndices);
 
       if (hasTimesteps)
         {
@@ -4138,10 +4165,11 @@ cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
                 tbNdims = 2
               };
 
-              for (int tsID = 0; tsID < numTimesteps; ++tsID)
+              for (int tsID = 0; tsID < numSteps; ++tsID)
                 {
+                  size_t ncStepIndex = streamptr->tsteps[tsID].ncStepIndex;
                   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
-                  const size_t start[tbNdims] = { (size_t) tsID, 0 };
+                  const size_t start[tbNdims] = { ncStepIndex, 0 };
                   static const size_t count[tbNdims] = { 1, numBnds };
                   double timeBnds[numBnds];
                   cdf_get_vara_double(fileID, nctimeboundsid, start, count, timeBnds);
@@ -4156,10 +4184,11 @@ cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
           int leadtimeid = streamptr->basetime.leadtimeid;
           if (leadtimeid != CDI_UNDEFID)
             {
-              for (int tsID = 0; tsID < numTimesteps; ++tsID)
+              for (int tsID = 0; tsID < numSteps; ++tsID)
                 {
+                  size_t ncStepIndex = streamptr->tsteps[tsID].ncStepIndex;
                   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
-                  cdi_set_forecast_period(get_timevalue(fileID, leadtimeid, tsID), taxis);
+                  cdi_set_forecast_period(get_timevalue(fileID, leadtimeid, ncStepIndex), taxis);
                 }
             }
         }
