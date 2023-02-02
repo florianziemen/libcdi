@@ -4089,14 +4089,12 @@ cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
 
   if (numTimesteps == 0)
     {
-      streamptr->ntsteps = (long) numTimesteps;
-      cdi_create_timesteps(streamptr);
+      cdi_create_timesteps(numTimesteps, streamptr);
       cdf_create_records(streamptr, 0);
     }
   else
     {
-      streamptr->ntsteps = (long) numTimesteps;
-      cdi_create_timesteps(streamptr);
+      cdi_create_timesteps(numTimesteps, streamptr);
       int fileID = streamptr->fileID;
       int nctimevarid = streamptr->basetime.ncvarid;
       int nctimeboundsid = streamptr->basetime.ncvarboundsid;
