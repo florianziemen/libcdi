@@ -2,6 +2,20 @@
 #include <stdlib.h>
 #include "cdi.h"
 
+static int
+sum_found(int listSize, bool *listFound)
+{
+  int numFound = 0;
+  for (int i = 0; i < listSize; ++i) numFound += listFound[i];
+  return numFound;
+}
+
+static int
+sum_not_found(int listSize, bool *listFound)
+{
+  return listSize - sum_found(listSize, listFound);
+}
+
 void
 cdiQueryInit(CdiQuery *query)
 {
@@ -195,33 +209,10 @@ cdiQueryNumEntriesFound(const CdiQuery *query)
 
   if (query)
     {
-      if (query->numNames)
-        {
-          int numNamesFound = 0;
-          for (int i = 0; i < query->numNames; ++i) numNamesFound += query->namesFound[i];
-          numEntriesFound += numNamesFound;
-        }
-
-      if (query->numCellidx)
-        {
-          int numCellidxFound = 0;
-          for (int i = 0; i < query->numCellidx; ++i) numCellidxFound += query->cellidxFound[i];
-          numEntriesFound += numCellidxFound;
-        }
-
-      if (query->numLevidx)
-        {
-          int numLevidxFound = 0;
-          for (int i = 0; i < query->numLevidx; ++i) numLevidxFound += query->levidxFound[i];
-          numEntriesFound += numLevidxFound;
-        }
-
-      if (query->numStepidx)
-        {
-          int numStepidxFound = 0;
-          for (int i = 0; i < query->numStepidx; ++i) numStepidxFound += query->stepidxFound[i];
-          numEntriesFound += numStepidxFound;
-        }
+      if (query->numNames) numEntriesFound += sum_found(query->numNames, query->namesFound);
+      if (query->numCellidx) numEntriesFound += sum_found(query->numCellidx, query->cellidxFound);
+      if (query->numLevidx) numEntriesFound += sum_found(query->numLevidx, query->levidxFound);
+      if (query->numStepidx) numEntriesFound += sum_found(query->numStepidx, query->stepidxFound);
     }
 
   return numEntriesFound;
@@ -232,19 +223,12 @@ cdiQueryPrintEntriesNotFound(const CdiQuery *query)
 {
   if (query)
     {
-      int numEnties = cdiQueryNumEntries(query);
-      int numEntiesFound = cdiQueryNumEntriesFound(query);
-
-      int numEntriesNotFound = numEnties - numEntiesFound;
+      int numEntriesNotFound = cdiQueryNumEntries(query) - cdiQueryNumEntriesFound(query);
       if (numEntriesNotFound > 0)
         {
           if (query->numNames)
             {
-              int numNamesFound = 0;
-              for (int i = 0; i < query->numNames; ++i) numNamesFound += query->namesFound[i];
-
-              int numNamesNotFound = query->numNames - numNamesFound;
-              if (numNamesNotFound > 0)
+              if (sum_not_found(query->numNames, query->namesFound) > 0)
                 {
                   printf("Name not found:");
                   for (int i = 0; i < query->numNames; ++i)
@@ -255,11 +239,7 @@ cdiQueryPrintEntriesNotFound(const CdiQuery *query)
 
           if (query->numCellidx)
             {
-              int numCellidxFound = 0;
-              for (int i = 0; i < query->numCellidx; ++i) numCellidxFound += query->cellidxFound[i];
-
-              int numCellidxNotFound = query->numCellidx - numCellidxFound;
-              if (numCellidxNotFound > 0)
+              if (sum_not_found(query->numCellidx, query->cellidxFound) > 0)
                 {
                   printf("Grid cell index not found:");
                   for (int i = 0; i < query->numCellidx; ++i)
@@ -270,11 +250,7 @@ cdiQueryPrintEntriesNotFound(const CdiQuery *query)
 
           if (query->numLevidx)
             {
-              int numLevidxFound = 0;
-              for (int i = 0; i < query->numLevidx; ++i) numLevidxFound += query->levidxFound[i];
-
-              int numLevidxNotFound = query->numLevidx - numLevidxFound;
-              if (numLevidxNotFound > 0)
+              if (sum_not_found(query->numLevidx, query->levidxFound) > 0)
                 {
                   printf("Level index not found:");
                   for (int i = 0; i < query->numLevidx; ++i)
@@ -285,11 +261,7 @@ cdiQueryPrintEntriesNotFound(const CdiQuery *query)
 
           if (query->numStepidx)
             {
-              int numStepidxFound = 0;
-              for (int i = 0; i < query->numStepidx; ++i) numStepidxFound += query->stepidxFound[i];
-
-              int numStepidxNotFound = query->numStepidx - numStepidxFound;
-              if (numStepidxNotFound > 0)
+              if (sum_not_found(query->numStepidx, query->stepidxFound) > 0)
                 {
                   printf("Step index not found:");
                   for (int i = 0; i < query->numStepidx; ++i)

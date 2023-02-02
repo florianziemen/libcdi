@@ -1351,7 +1351,7 @@ void cdiQueryPrint(const CdiQuery *query);
 void cdiQueryPrintEntriesNotFound(const CdiQuery *query);
 
 // streamOpenReadQuery: Open a dataset for reading and apply query
-int streamOpenReadQuery(const char *path, const CdiQuery *query);
+int streamOpenReadQuery(const char *path, CdiQuery *query);
 
 // CDI interface for  paraview vtkCDIReader.cxx
 
