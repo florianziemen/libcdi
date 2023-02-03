@@ -59,6 +59,7 @@ extern "C" {
 #define  CDI_EUNC4                -26   // Unsupported NetCDF4 structure
 #define  CDI_EDIMSIZE             -27   // Invalid dimension size
 #define  CDI_EQENF                -50   // Query entries not found
+#define  CDI_EQNAVAIL             -51   // Query not available for file type
 #define  CDI_ELIMIT               -99   // Internal limits exceeded
 
 // File types
