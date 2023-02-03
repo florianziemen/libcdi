@@ -701,11 +701,11 @@ scan_hybrid_formulaterms(int ncid, int ncfvarid, int *avarid, int *bvarid, int *
       if (status_nc == NC_NOERR)
         {
           // clang-format off
-          if      ( str_is_equal(tagname, "ap:") ) *avarid  = dimvarid;
-          else if ( str_is_equal(tagname, "a:")  ) *avarid  = dimvarid;
-          else if ( str_is_equal(tagname, "b:")  ) *bvarid  = dimvarid;
-          else if ( str_is_equal(tagname, "ps:") ) *psvarid = dimvarid;
-          else if ( str_is_equal(tagname, "p0:") ) *p0varid = dimvarid;
+          if      (str_is_equal(tagname, "ap:")) *avarid  = dimvarid;
+          else if (str_is_equal(tagname, "a:") ) *avarid  = dimvarid;
+          else if (str_is_equal(tagname, "b:") ) *bvarid  = dimvarid;
+          else if (str_is_equal(tagname, "ps:")) *psvarid = dimvarid;
+          else if (str_is_equal(tagname, "p0:")) *p0varid = dimvarid;
           // clang-format on
         }
       else if (!str_is_equal(tagname, "ps:"))
@@ -1502,12 +1502,11 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
               int temp;
               cdfGetAttInt(ncid, ncvarid, attname, 1, &temp);
 
-              if (isRealization)
-                ncvar->perturbationNumber = temp;
-              else if (isEnsembleMembers)
-                ncvar->numberOfForecastsInEnsemble = temp;
-              else if (isForecastInitType)
-                ncvar->typeOfEnsembleForecast = temp;
+              // clang-format off
+              if      (isRealization)      ncvar->perturbationNumber = temp;
+              else if (isEnsembleMembers)  ncvar->numberOfForecastsInEnsemble = temp;
+              else if (isForecastInitType) ncvar->typeOfEnsembleForecast = temp;
+              // clang-format on
 
               cdf_set_var(ncvar, DataVar);
             }
@@ -1887,16 +1886,13 @@ verify_coordinates_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
                 }
               else if (ncvar->zaxistype == CDI_UNDEFID && (str_is_equal(ncvar->units, "level") || str_is_equal(ncvar->units, "1")))
                 {
-                  if (str_is_equal(ncvar->longname, "hybrid level at layer midpoints"))
-                    ncvar->zaxistype = ZAXIS_HYBRID;
-                  else if (strStartsWith(ncvar->longname, "hybrid level at midpoints"))
-                    ncvar->zaxistype = ZAXIS_HYBRID;
-                  else if (str_is_equal(ncvar->longname, "hybrid level at layer interfaces"))
-                    ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-                  else if (strStartsWith(ncvar->longname, "hybrid level at interfaces"))
-                    ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-                  else if (str_is_equal(ncvar->units, "level"))
-                    ncvar->zaxistype = ZAXIS_GENERIC;
+                  // clang-format off
+                  if      (str_is_equal(ncvar->longname, "hybrid level at layer midpoints"))  ncvar->zaxistype = ZAXIS_HYBRID;
+                  else if (strStartsWith(ncvar->longname, "hybrid level at midpoints"))       ncvar->zaxistype = ZAXIS_HYBRID;
+                  else if (str_is_equal(ncvar->longname, "hybrid level at layer interfaces")) ncvar->zaxistype = ZAXIS_HYBRID_HALF;
+                  else if (strStartsWith(ncvar->longname, "hybrid level at interfaces"))      ncvar->zaxistype = ZAXIS_HYBRID_HALF;
+                  else if (str_is_equal(ncvar->units, "level"))                               ncvar->zaxistype = ZAXIS_GENERIC;
+                  // clang-format on
                   continue;
                 }
               else if (ncvar->zaxistype == CDI_UNDEFID && is_pressure_units(ncvar->units))
@@ -1911,10 +1907,10 @@ verify_coordinates_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
                 }
               else if (is_height_units(ncvar->units))
                 {
-                  if (is_depth_axis(ncvar->stdname, ncvar->longname))
-                    ncvar->zaxistype = ZAXIS_DEPTH_BELOW_SEA;
-                  else if (is_height_axis(ncvar->stdname, ncvar->longname))
-                    ncvar->zaxistype = ZAXIS_HEIGHT;
+                  // clang-format off
+                  if      (is_depth_axis(ncvar->stdname, ncvar->longname))  ncvar->zaxistype = ZAXIS_DEPTH_BELOW_SEA;
+                  else if (is_height_axis(ncvar->stdname, ncvar->longname)) ncvar->zaxistype = ZAXIS_HEIGHT;
+                  // clang-format on
                   continue;
                 }
             }
@@ -3250,17 +3246,11 @@ cdf_define_code_and_param(int vlistID, int varID)
       size_t len = strlen(name);
       if (len > 3 && isdigit((int) name[3]))
         {
-          if (strStartsWith(name, "var"))
-            {
-              vlistDefVarCode(vlistID, varID, atoi(name + 3));
-            }
+          if (strStartsWith(name, "var")) vlistDefVarCode(vlistID, varID, atoi(name + 3));
         }
       else if (len > 4 && isdigit((int) name[4]))
         {
-          if (strStartsWith(name, "code"))
-            {
-              vlistDefVarCode(vlistID, varID, atoi(name + 4));
-            }
+          if (strStartsWith(name, "code")) vlistDefVarCode(vlistID, varID, atoi(name + 4));
         }
       else if (len > 5 && isdigit((int) name[5]))
         {
@@ -3655,15 +3645,20 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
                 {
                   *instID = institutInq(0, 0, NULL, attstring);
                   if (*instID == CDI_UNDEFID) *instID = institutDef(0, 0, NULL, attstring);
+
+                  cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
                 }
               else if (str_is_equal(attname, "source"))
                 {
                   *modelID = modelInq(-1, 0, attstring);
                   if (*modelID == CDI_UNDEFID) *modelID = modelDef(-1, 0, attstring);
+
+                  cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
                 }
               else if (str_is_equal(attname, "Source") && strStartsWith(attstring, "UCLA-LES"))
                 {
                   *ucla_les = true;
+                  cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
                 }
               /*
               else if ( str_is_equal(attname, "Conventions") )
