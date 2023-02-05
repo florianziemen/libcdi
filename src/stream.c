@@ -990,6 +990,10 @@ streamDefaultValue(stream_t *streamptr)
       for (size_t j = 0; j < CDF_SIZE_ncIDs; ++j) streamptr->ncgrid[i].ncIDs[j] = CDI_UNDEFID;
     }
 
+  streamptr->ncNumDims = 0;
+  for (int i = 0; i < MAX_DIMS_PS; i++) streamptr->ncDimID[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_DIMS_PS; i++) streamptr->ncDimLen[i] = 0;
+
   streamptr->vct.ilev = 0;
   streamptr->vct.mlev = 0;
   streamptr->vct.ilevID = CDI_UNDEFID;

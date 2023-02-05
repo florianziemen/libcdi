@@ -289,6 +289,9 @@ typedef struct
   ncgrid_t ncgrid[MAX_GRIDS_PS];
   int zaxisID[MAX_ZAXES_PS];  // Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
   int nczvarID[MAX_ZAXES_PS];
+  int ncNumDims;
+  int ncDimID[MAX_DIMS_PS];
+  size_t ncDimLen[MAX_DIMS_PS];
   VCT vct;
 #endif
   int globalatts;

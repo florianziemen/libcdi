@@ -4260,6 +4260,15 @@ cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
     }
 }
 
+static void
+stream_set_ncdims(stream_t *streamptr, int ndims, ncdim_t *ncdims)
+{
+  int n = (ndims > MAX_DIMS_PS) ? MAX_DIMS_PS : ndims;
+  streamptr->ncNumDims = n;
+  for (int i = 0; i < n; i++) streamptr->ncDimID[i] = ncdims[i].dimid;
+  for (int i = 0; i < n; i++) streamptr->ncDimLen[i] = ncdims[i].len;
+}
+
 int
 cdfInqContents(stream_t *streamptr)
 {
@@ -4306,9 +4315,7 @@ cdfInqContents(stream_t *streamptr)
       int ncdimid = 0;
       for (int dimid = 0; dimid < NC_MAX_DIMS; ++dimid)
         {
-          size_t dimlen;
-          int status = nc_inq_dimlen(fileID, dimid, &dimlen);
-          if (status == NC_NOERR)
+          if (nc_inq_dimlen(fileID, dimid, NULL) == NC_NOERR)
             {
               ncdims[ncdimid++].dimid = dimid;
               if (ncdimid == ndims) break;
@@ -4380,6 +4387,8 @@ cdfInqContents(stream_t *streamptr)
       cdf_inq_dimname(fileID, ncdims[ncdimid].dimid, ncdims[ncdimid].name);
       if (timedimid == ncdimid) ncdims[ncdimid].dimtype = T_AXIS;
     }
+
+  stream_set_ncdims(streamptr, ndims, ncdims);
 
   if (CDI_Debug) cdf_print_vars(ncvars, nvars, "cdfScanVarAttr");
 
