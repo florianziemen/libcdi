@@ -2013,7 +2013,8 @@ cdf_load_cvals(size_t size, int varid, ncvar_t *ncvar, char ***gridvals, size_t 
 #endif
 
 static void
-cdf_load_bounds(size_t size, ncvar_t *ncvar, double **gridbounds, struct cdfLazyGridIds *cellBoundsGet)
+cdf_load_bounds(size_t size, ncvar_t *ncvar, double **gridbounds, struct cdfLazyGridIds *cellBoundsGet, bool readPart,
+                size_t *start, size_t *count)
 {
   if (CDI_Netcdf_Lazy_Grid_Load)
     {
@@ -2024,7 +2025,10 @@ cdf_load_bounds(size_t size, ncvar_t *ncvar, double **gridbounds, struct cdfLazy
   else
     {
       *gridbounds = (double *) Malloc(size * sizeof(double));
-      cdf_get_var_double(ncvar->ncid, ncvar->bounds, *gridbounds);
+      if (readPart)
+        cdf_get_vara_double(ncvar->ncid, ncvar->bounds, start, count, *gridbounds);
+      else
+        cdf_get_var_double(ncvar->ncid, ncvar->bounds, *gridbounds);
     }
 }
 
@@ -2352,6 +2356,8 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
 {
   grid_t *grid = &lazyGrid->base;
   size_t size = 0;
+  size_t start[3] = { 0, 0, 0 }, count[3] = { 1, 1, 1 };
+  bool readPart = false;
 
   grid->datatype = CDI_DATATYPE_FLT64;
 
@@ -2362,8 +2368,6 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
     }
   else
     {
-      size_t start[3] = { 0, 0, 0 }, count[3] = { 1, 1, 1 };
-      bool readPart = false;
       bool hasTimeDim = false;
 
       if (xvarid != CDI_UNDEFID && yvarid != CDI_UNDEFID)
@@ -2427,10 +2431,6 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
         }
 
       bool isLon = false, isLat = false;
-
-      if (readPart) Warning("reading xy bounds not implemented");
-      if (readPart && xvarid != CDI_UNDEFID) ncvars[xvarid].bounds = CDI_UNDEFID;
-      if (readPart && yvarid != CDI_UNDEFID) ncvars[yvarid].bounds = CDI_UNDEFID;
 
       if (xvarid != CDI_UNDEFID)
         if (cdf_read_xcoord(streamptr, lazyGrid, ncdims, ncvar, xvarid, &ncvars[xvarid], &xsize, ysize, hasTimeDim, readPart, start,
@@ -2510,7 +2510,13 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                       {
                         *vdimid = ncvars[bvarid].dimids[nbdims - 1];
                         grid->nvertex = (int) ncdims[*vdimid].len;
-                        cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[xvarid], &grid->x.bounds, &lazyGrid->xBoundsGet);
+                        if (readPart)
+                          {
+                            start[1] = 0;
+                            count[1] = grid->nvertex;
+                          }
+                        cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[xvarid], &grid->x.bounds, &lazyGrid->xBoundsGet,
+                                        readPart, start, count);
                       }
                     else
                       {
@@ -2552,7 +2558,13 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                             *vdimid = ncvars[bvarid].dimids[nbdims - 1];
                             grid->nvertex = (int) ncdims[*vdimid].len;
                           }
-                        cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds, &lazyGrid->yBoundsGet);
+                        if (readPart)
+                          {
+                            start[1] = 0;
+                            count[1] = grid->nvertex;
+                          }
+                        cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds, &lazyGrid->yBoundsGet,
+                                        readPart, start, count);
                       }
                     else
                       {
@@ -2599,7 +2611,8 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                             *vdimid = ncvars[bvarid].dimids[nbdims - 1];
                             grid->nvertex = (int) ncdims[*vdimid].len;
                           }
-                        cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds, &lazyGrid->yBoundsGet);
+                        cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds, &lazyGrid->yBoundsGet,
+                                        false, NULL, NULL);
                       }
                   }
               }

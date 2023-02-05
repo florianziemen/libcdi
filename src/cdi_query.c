@@ -160,7 +160,7 @@ cdiQuerySetStepidx(CdiQuery *query, int numEntries, int *stepidx)
 size_t
 cdiQueryGetCellidx(const CdiQuery *query, int index)
 {
-  return (index >= 0 && index < query->numCellidx) ? query->cellidx[index] : (size_t)-1;
+  return (index >= 0 && index < query->numCellidx) ? query->cellidx[index] : (size_t) -1;
 }
 
 CdiQuery *
