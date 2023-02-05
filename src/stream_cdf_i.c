@@ -1968,8 +1968,8 @@ grid_set_chunktype(grid_t *grid, ncvar_t *ncvar)
 
 // define all input grids
 static void
-cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridvals, struct xyValGet *valsGet, int ntdims,
-              size_t *start, size_t *count)
+cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridvals, struct xyValGet *valsGet, bool hasTimeDim,
+              bool readPart, size_t *start, size_t *count)
 {
   if (CDI_Netcdf_Lazy_Grid_Load)
     {
@@ -1988,7 +1988,7 @@ cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridva
   else
     {
       *gridvals = (double *) Malloc(size * sizeof(double));
-      if (ntdims == 1)
+      if (hasTimeDim || readPart)
         cdf_get_vara_double(ncvar->ncid, varid, start, count, *gridvals);
       else
         cdf_get_var_double(ncvar->ncid, varid, *gridvals);
@@ -2168,7 +2168,7 @@ cdf_check_gridtype(int *gridtype, bool isLon, bool isLat, size_t xsize, size_t y
 
 static bool
 cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int xvarid, ncvar_t *axisvar,
-                size_t *xsize, size_t ysize, int ntdims, size_t *start, size_t *count, bool *isLon)
+                size_t *xsize, size_t ysize, bool hasTimeDim, bool readPart, size_t *start, size_t *count, bool *isLon)
 {
   grid_t *grid = &lazyGrid->base;
   bool skipvar = true;
@@ -2185,7 +2185,7 @@ cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdi
 
   int datatype = cdfInqDatatype(streamptr, axisvar->xtype, axisvar->isUnsigned);
 
-  if ((ndims - ntdims) == 2)
+  if ((ndims - hasTimeDim) == 2)
     {
       // Check size of 2 dimensional coordinates variables
       int dimid = axisvar->dimids[ndims - 2];
@@ -2206,13 +2206,13 @@ cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdi
           skipvar = (dimsize1 * dimsize2 != size);
         }
     }
-  else if ((ndims - ntdims) == 1)
+  else if ((ndims - hasTimeDim) == 1)
     {
       size = *xsize;
       // Check size of 1 dimensional coordinates variables
       int dimid = axisvar->dimids[ndims - 1];
       size_t dimsize = ncdims[dimid].len;
-      skipvar = (dimsize != size);
+      skipvar = readPart ? false : (dimsize != size);
     }
   else if (ndims == 0 && *xsize == 0)
     {
@@ -2242,7 +2242,7 @@ cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdi
 #endif
     }
   else
-    cdf_load_vals(size, ndims, xvarid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, ntdims, start, count);
+    cdf_load_vals(size, ndims, xvarid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, hasTimeDim, readPart, start, count);
 
   cdf_copy_grid_axis_attr(axisvar, &grid->x);
 
@@ -2251,7 +2251,7 @@ cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdi
 
 static bool
 cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int yvarid, ncvar_t *axisvar,
-                size_t xsize, size_t *ysize, int ntdims, size_t *start, size_t *count, bool *isLat)
+                size_t xsize, size_t *ysize, bool hasTimeDim, bool readPart, size_t *start, size_t *count, bool *isLat)
 {
   grid_t *grid = &lazyGrid->base;
   bool skipvar = true;
@@ -2268,7 +2268,7 @@ cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdi
 
   int datatype = cdfInqDatatype(streamptr, axisvar->xtype, axisvar->isUnsigned);
 
-  if ((ndims - ntdims) == 2)
+  if ((ndims - hasTimeDim) == 2)
     {
       // Check size of 2 dimensional coordinates variables
       int dimid = axisvar->dimids[ndims - 2];
@@ -2289,12 +2289,12 @@ cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdi
           skipvar = (dimsize1 * dimsize2 != size);
         }
     }
-  else if ((ndims - ntdims) == 1)
+  else if ((ndims - hasTimeDim) == 1)
     {
       size = (*ysize) ? *ysize : xsize;
       int dimid = axisvar->dimids[ndims - 1];
       size_t dimsize = ncdims[dimid].len;
-      skipvar = (dimsize != size);
+      skipvar = readPart ? false : (dimsize != size);
     }
   else if (ndims == 0 && *ysize == 0)
     {
@@ -2324,16 +2324,31 @@ cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdi
 #endif
     }
   else
-    cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet, ntdims, start, count);
+    cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet, hasTimeDim, readPart, start, count);
 
   cdf_copy_grid_axis_attr(axisvar, &grid->y);
 
   return false;
 }
 
+typedef struct
+{
+  long start;
+  long count;
+  bool readPart;
+} GridPart;
+
+static void
+gridpart_init(GridPart *gridPart)
+{
+  gridPart->start = -1;
+  gridPart->count = -1;
+  gridPart->readPart = false;
+}
+
 static bool
 cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t *ncvar, ncvar_t *ncvars, ncdim_t *ncdims,
-                     int timedimid, int xvarid, int yvarid, size_t xsize, size_t ysize, int *vdimid)
+                     int timedimid, int xvarid, int yvarid, size_t xsize, size_t ysize, int *vdimid, const GridPart *gridPart)
 {
   grid_t *grid = &lazyGrid->base;
   size_t size = 0;
@@ -2348,7 +2363,8 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
   else
     {
       size_t start[3] = { 0, 0, 0 }, count[3] = { 1, 1, 1 };
-      int ntdims = 0;
+      bool readPart = false;
+      bool hasTimeDim = false;
 
       if (xvarid != CDI_UNDEFID && yvarid != CDI_UNDEFID)
         {
@@ -2370,7 +2386,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                       cdf_inq_dimlen(ncvar->ncid, ncdims[timedimid].dimid, &ntsteps);
                       if (ltwarn && ntsteps > 1) Warning("Time varying grids unsupported, using grid at time step 1!");
                       ltwarn = false;
-                      ntdims = 1;
+                      hasTimeDim = true;
                       count[1] = ysize;
                       count[2] = xsize;
                     }
@@ -2382,11 +2398,17 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                   ncvar->yvarid = yvarid = CDI_UNDEFID;
                 }
             }
+          else if (gridPart && gridPart->readPart)
+            {
+              start[0] = gridPart->start;
+              count[0] = gridPart->count;
+              readPart = true;
+            }
         }
 
       if (xvarid != CDI_UNDEFID)
         {
-          if (!ncvar->isCubeSphere && (ncvars[xvarid].ndims - ntdims) > 2)
+          if (!ncvar->isCubeSphere && (ncvars[xvarid].ndims - hasTimeDim) > 2)
             {
               Warning("Coordinates variable %s has too many dimensions (%d), skipped!", ncvars[xvarid].name, ncvars[xvarid].ndims);
               // ncvar->xvarid = CDI_UNDEFID;
@@ -2396,7 +2418,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
 
       if (yvarid != CDI_UNDEFID)
         {
-          if (!ncvar->isCubeSphere && (ncvars[yvarid].ndims - ntdims) > 2)
+          if (!ncvar->isCubeSphere && (ncvars[yvarid].ndims - hasTimeDim) > 2)
             {
               Warning("Coordinates variable %s has too many dimensions (%d), skipped!", ncvars[yvarid].name, ncvars[yvarid].ndims);
               // ncvar->yvarid = CDI_UNDEFID;
@@ -2406,26 +2428,27 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
 
       bool isLon = false, isLat = false;
 
+      if (readPart) Warning("reading xy bounds not implemented");
+      if (readPart && xvarid != CDI_UNDEFID) ncvars[xvarid].bounds = CDI_UNDEFID;
+      if (readPart && yvarid != CDI_UNDEFID) ncvars[yvarid].bounds = CDI_UNDEFID;
+
       if (xvarid != CDI_UNDEFID)
-        if (cdf_read_xcoord(streamptr, lazyGrid, ncdims, ncvar, xvarid, &ncvars[xvarid], &xsize, ysize, ntdims, start, count,
-                            &isLon))
+        if (cdf_read_xcoord(streamptr, lazyGrid, ncdims, ncvar, xvarid, &ncvars[xvarid], &xsize, ysize, hasTimeDim, readPart, start,
+                            count, &isLon))
           return true;
 
       if (yvarid != CDI_UNDEFID)
-        if (cdf_read_ycoord(streamptr, lazyGrid, ncdims, ncvar, yvarid, &ncvars[yvarid], xsize, &ysize, ntdims, start, count,
-                            &isLat))
+        if (cdf_read_ycoord(streamptr, lazyGrid, ncdims, ncvar, yvarid, &ncvars[yvarid], xsize, &ysize, hasTimeDim, readPart, start,
+                            count, &isLat))
           return true;
 
-      if (ncvar->gridtype == GRID_UNSTRUCTURED)
-        size = xsize;
-      else if (ncvar->gridtype == GRID_GAUSSIAN_REDUCED)
-        size = xsize;
-      else if (ysize == 0)
-        size = xsize;
-      else if (xsize == 0)
-        size = ysize;
-      else
-        size = xsize * ysize;
+      // clang-format off
+      if      (ncvar->gridtype == GRID_UNSTRUCTURED)     size = xsize;
+      else if (ncvar->gridtype == GRID_GAUSSIAN_REDUCED) size = xsize;
+      else if (ysize == 0)                               size = xsize;
+      else if (xsize == 0)                               size = ysize;
+      else                                               size = xsize * ysize;
+      // clang-format on
 
       if (ncvar->gridtype == CDI_UNDEFID || ncvar->gridtype == GRID_GENERIC)
         cdf_check_gridtype(&ncvar->gridtype, isLon, isLat, xsize, ysize, grid);
@@ -2792,6 +2815,8 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
       ncvar_t *ncvar = &ncvars[ncvarid];
       if (ncvar->varStatus == DataVar && ncvar->gridID == CDI_UNDEFID)
         {
+          GridPart gridPart;
+          gridpart_init(&gridPart);
           int ndims = ncvar->ndims;
           int *dimtype = ncvar->dimtype;
           int vdimid = CDI_UNDEFID;
@@ -2857,8 +2882,33 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
           xaxisid = (xdimid != CDI_UNDEFID) ? ncdims[xdimid].ncvarid : CDI_UNDEFID;
           yaxisid = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].ncvarid : CDI_UNDEFID;
 
+          if (ncvar->gridtype == GRID_UNSTRUCTURED)
+            {
+              // process query information if available
+              CdiQuery *query = streamptr->query;
+              if (query)
+                {
+                  int numCellidx = cdiQueryNumCellidx(query);
+                  if (numCellidx > 0)
+                    {
+                      size_t start = cdiQueryGetCellidx(query, 0);
+                      size_t count = (numCellidx == 2) ? cdiQueryGetCellidx(query, 1) : 1;
+                      if ((start + count) <= xsize)
+                        {
+                          cdiQueryCellidx(query, start);
+                          if (numCellidx == 2) cdiQueryCellidx(query, count);
+                          xsize = count;
+                          ysize = count;
+                          gridPart.start = start - 1;
+                          gridPart.count = count;
+                          gridPart.readPart = true;
+                        }
+                    }
+                }
+            }
+
           if (cdf_read_coordinates(streamptr, lazyGrid, ncvar, ncvars, ncdims, gridInfo->timedimid, xvarid, yvarid, xsize, ysize,
-                                   &vdimid))
+                                   &vdimid, &gridPart))
             continue;
 
           if (gridInfo->number_of_grid_used != CDI_UNDEFID && (grid->type == CDI_UNDEFID || grid->type == GRID_GENERIC)
@@ -2872,7 +2922,7 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
             {
               int dimid;
               cdf_read_coordinates(streamptr, lazyProj, ncvar, ncvars, ncdims, gridInfo->timedimid, xaxisid, yaxisid, xsize, ysize,
-                                   &dimid);
+                                   &dimid, NULL);
             }
 
           if (CDI_Debug)
@@ -2915,6 +2965,11 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
           if (ncvar->isChunked) grid_set_chunktype(grid, ncvar);
 
           int gridindex = vlistGridIndex(vlistID, gridID);
+          if (gridPart.readPart)
+            {
+              ncgrid[gridindex].start = gridPart.start;
+              ncgrid[gridindex].count = gridPart.count;
+            }
           ncgrid[gridindex].gridID = gridID;
           if (grid->type == GRID_TRAJECTORY)
             {

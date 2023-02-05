@@ -88,6 +88,12 @@ cdiQueryNumNames(const CdiQuery *query)
 }
 
 int
+cdiQueryNumCellidx(const CdiQuery *query)
+{
+  return query ? query->numCellidx : 0;
+}
+
+int
 cdiQueryNumStepidx(const CdiQuery *query)
 {
   return query ? query->numStepidx : 0;
@@ -149,6 +155,12 @@ cdiQuerySetStepidx(CdiQuery *query, int numEntries, int *stepidx)
       query->stepidx = (int *) malloc(numEntries * sizeof(int));
       for (int i = 0; i < numEntries; ++i) query->stepidx[i] = stepidx[i];
     }
+}
+
+size_t
+cdiQueryGetCellidx(const CdiQuery *query, int index)
+{
+  return (index >= 0 && index < query->numCellidx) ? query->cellidx[index] : (size_t)-1;
 }
 
 CdiQuery *

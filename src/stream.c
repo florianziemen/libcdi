@@ -984,6 +984,8 @@ streamDefaultValue(stream_t *streamptr)
 
   for (int i = 0; i < MAX_GRIDS_PS; i++)
     {
+      streamptr->ncgrid[i].start = CDI_UNDEFID;
+      streamptr->ncgrid[i].count = CDI_UNDEFID;
       streamptr->ncgrid[i].gridID = CDI_UNDEFID;
       for (size_t j = 0; j < CDF_SIZE_ncIDs; ++j) streamptr->ncgrid[i].ncIDs[j] = CDI_UNDEFID;
     }

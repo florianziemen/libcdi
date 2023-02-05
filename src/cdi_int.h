@@ -251,6 +251,8 @@ typedef struct
 {
   int ncIDs[CDF_SIZE_ncIDs];
   int gridID;
+  long start;
+  long count;
 } ncgrid_t;
 #endif
 

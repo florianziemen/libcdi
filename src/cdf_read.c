@@ -370,14 +370,13 @@ transpose2dArraySP(size_t gridId, float *data)
 }
 
 static void
-cdfInqDimIds(stream_t *streamptr, int varId, int (*outDimIds)[4])
+cdf_inq_dimIds(stream_t *streamptr, int varId, int (*outDimIds)[4])
 {
   int vlistID = streamptr->vlistID;
   int gridId = vlistInqVarGrid(vlistID, varId);
   int gridindex = vlistGridIndex(vlistID, gridId);
   const int *ncIDs = streamptr->ncgrid[gridindex].ncIDs;
 
-  (*outDimIds)[0] = (*outDimIds)[1] = (*outDimIds)[2] = (*outDimIds)[3] = CDI_UNDEFID;
   switch (gridInqType(gridId))
     {
     case GRID_TRAJECTORY: cdfReadGridTraj(streamptr, gridId); break;
@@ -399,7 +398,7 @@ cdfInqDimIds(stream_t *streamptr, int varId, int (*outDimIds)[4])
 }
 
 static int
-cdfGetSkipDim(int fileId, int ncvarid, int dimIds[3])
+cdf_get_skip_dim(int fileId, int ncvarid, int dimIds[3])
 {
   if (dimIds[0] != CDI_UNDEFID || dimIds[1] != CDI_UNDEFID) return 0;
 
@@ -407,7 +406,7 @@ cdfGetSkipDim(int fileId, int ncvarid, int dimIds[3])
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
   if (nvdims != 3) return 0;
 
-  int varDimIds[3];
+  int varDimIds[3] = { -1, -1, -1 };
   cdf_inq_vardimid(fileId, ncvarid, varDimIds);
 
   size_t size = 0;
@@ -446,10 +445,10 @@ cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, bool *ou
 
   streamptr->numvals += gridsize;
 
-  int dimIds[4];  // this array joins the old variables xid, yid, and zid
-  cdfInqDimIds(streamptr, varID, &dimIds);
+  int dimIds[4] = { -1, -1, -1, -1 };  // this array joins the old variables xid, yid, and zid
+  cdf_inq_dimIds(streamptr, varID, &dimIds);
 
-  int skipdim = cdfGetSkipDim(fileId, ncvarid, dimIds);
+  int skipdim = cdf_get_skip_dim(fileId, ncvarid, dimIds);
 
   int dimorder[4] = { 3, 4, 2, 1 };  // order of cube sphere grid
   if (dimIds[3] == CDI_UNDEFID)
@@ -475,6 +474,10 @@ cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, bool *ou
   if (timetype != TIME_CONSTANT) addDimension(ncStepIndex, 1);
   if (skipdim == 1) addDimension(0, 1);
 
+  int gridindex = vlistGridIndex(vlistID, gridId);
+  const ncgrid_t *ncGrid = &streamptr->ncgrid[gridindex];
+  bool readPart = (ncGrid->gridID == gridId && ncGrid->start != -1 && ncGrid->count != -1);
+
   for (int id = 0; id < 4; ++id)
     {
       size_t size;
@@ -485,11 +488,18 @@ cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, bool *ou
         case 1:
         case 2:
         case 4:
-          cdf_inq_dimlen(fileId, curDimId, &size);
-          addDimension(0, size);
+          if (readPart && curDimId == dimIds[0])
+            {
+              addDimension(ncGrid->start, ncGrid->count);
+            }
+          else
+            {
+              cdf_inq_dimlen(fileId, curDimId, &size);
+              addDimension(0, size);
+            }
           break;
         case 3: addDimension((size_t) levelID, 1); break;
-        default: Error("Internal errror: Malformed dimension order encountered. Please report this bug.\n");
+        default: Error("Internal errror: Malformed dimension order encountered. Please report this bug.");
         }
     }
 
@@ -500,7 +510,7 @@ cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, bool *ou
 #undef addDimension
 
   if (CDI_Debug)
-    for (int idim = 0; idim < ndims; ++idim) Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+    for (int idim = 0; idim < ndims; ++idim) Message("dim = %d  start = %zu  count = %zu", idim, start[idim], count[idim]);
 
   int nvdims;
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
