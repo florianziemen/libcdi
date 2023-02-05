@@ -724,7 +724,7 @@ calc_chunksize(size_t chunkSizeLim, size_t size)
 }
 
 static const size_t chunkSizeMax = 65536;
-static const size_t chunkSizeLim = 16777216;
+static const size_t chunkSizeLim = 1048576;
 
 size_t
 calc_chunksize_y(int chunkType, size_t gridsize, size_t xsize, size_t ysize)

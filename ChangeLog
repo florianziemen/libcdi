@@ -1,5 +1,6 @@
 2023-02-05  Uwe Schulzweida
 
+	* changed chunkSizeLim from 16777216 to 1048576
 	* NetCDF: added query support for grid cells
 
 2023-02-02  Uwe Schulzweida
@@ -2440,7 +2441,7 @@
 	* timeval2vtime: bug fix for timeunit TUNIT_MONTH
 	* streamSync: extent to non netCDF files
 	* Version 1.3.2 released
-	
+
 2009-04-16  Uwe Schulzweida
 
 	* using GRIB library version 1.3.0
@@ -2772,14 +2773,14 @@
 	    	grbScanTimestep, varscan, stream_var, stream_record
 	* vlist: initialize ntsteps
 	* Version 0.8.5 released
-	
+
 2004-10-12  Uwe Schulzweida
 
         * netCDF2 support
 	* cdfDefVars: Bug fix (vlistInqNgrids)
 	* stream_grb: check also leveltype to find different variables
 	* Version 0.8.4 released
-	
+
 2004-09-08  Uwe Schulzweida
 
 	* griblib: version 0.5.6
