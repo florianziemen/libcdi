@@ -1,3 +1,9 @@
+2023-03-06  Uwe Schulzweida
+
+        * using CGRIBEX library version 2.1.0
+        * using EXSE library version 1.5.0
+	* Version 2.2.0 released
+
 2023-02-05  Uwe Schulzweida
 
 	* changed chunkSizeLim from 16777216 to 1048576
