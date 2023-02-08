@@ -176,17 +176,15 @@ scan_time_string(const char *ptu)
 static int
 scan_time_units(const char *unitstr)
 {
-  size_t len = strlen(unitstr);
-  int timeunit = get_time_units(len, unitstr);
-  if (timeunit == -1) Message("Unsupported TIMEUNIT: %s!", unitstr);
+  int timeunit = get_time_units(strlen(unitstr), unitstr);
+  if (timeunit == -1) Warning("Unsupported TIMEUNIT: %s!", unitstr);
   return timeunit;
 }
 
 static void
 set_forecast_time(const char *timestr, taxis_t *taxis)
 {
-  size_t len = strlen(timestr);
-  if (len != 0)
+  if (strlen(timestr) != 0)
     taxis->fDateTime = scan_time_string(timestr);
   else
     cdiDateTime_init(&(taxis->fDateTime));
@@ -212,7 +210,7 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
   int timeUnits = get_time_units(len, tu);
   if (timeUnits == -1)
     {
-      Message("Unsupported TIMEUNIT: %s!", timeUnitsStr);
+      Warning("Unsupported TIMEUNIT: %s!", timeUnitsStr);
       return 1;
     }
 
