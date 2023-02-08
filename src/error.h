@@ -1,5 +1,5 @@
-#ifndef ERROR_H
-#define ERROR_H
+#ifndef _ERROR_H_
+#define _ERROR_H_
 
 // clang-format off
 
@@ -15,9 +15,9 @@
 extern "C" {
 #endif
 
-extern int _ExitOnError;  /* If set to 1, exit on error (default 1)       */
-extern int _Verbose;      /* If set to 1, errors are reported (default 1) */
-extern int _Debug;        /* If set to 1, debuggig (default 0)            */
+extern int _ExitOnError;  // If set to 1, exit on error (default 1)
+extern int _Verbose;      // If set to 1, errors are reported (default 1)
+extern int _Debug;        // If set to 1, debuggig (default 0)
 
 void SysError_(const char *caller, const char *fmt, ...);
 void    Error_(const char *caller, const char *fmt, ...);
@@ -26,7 +26,7 @@ void  Warning_(const char *caller, const char *fmt, ...);
 void cdiWarning(const char *caller, const char *fmt, va_list ap);
 void  Message_(const char *caller, const char *fmt, ...);
 
-#if  defined  WITH_CALLER_NAME
+#ifdef WITH_CALLER_NAME
 #  define  SysError(...)  SysError_(__func__, __VA_ARGS__)
 #  define    Errorc(...)     Error_(  caller, __VA_ARGS__)
 #  define     Error(...)     Error_(__func__, __VA_ARGS__)
@@ -78,13 +78,4 @@ bool cdiObsoleteInfo(const char *oldFunction, const char *newFunction);
 
 // clang-format on
 
-#endif /* ERROR_H */
-/*
- * Local Variables:
- * c-file-style: "Java"
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * show-trailing-whitespace: t
- * require-trailing-newline: t
- * End:
- */
+#endif /* _ERROR_H_ */

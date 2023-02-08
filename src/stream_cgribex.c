@@ -199,9 +199,9 @@ cgribexGetTimeUnit(int *isec1)
     case ISEC1_TABLE4_12HOURS:   timeunit = TUNIT_12HOURS;   break;
     case ISEC1_TABLE4_DAY:       timeunit = TUNIT_DAY;       break;
     default:
-      if ( lprint )
+      if (lprint)
 	{
-	  Message("GRIB time unit %d unsupported!", ISEC1_TimeUnit);
+	  Warning("GRIB time unit %d unsupported!", ISEC1_TimeUnit);
 	  lprint = false;
 	}
       break;
@@ -235,9 +235,9 @@ cgribexGetTsteptype(int timerange)
     case  5:  tsteptype = TSTEP_DIFF;     break;
     case 10:  tsteptype = TSTEP_INSTANT3; break;
     default:
-      if ( lprint )
+      if (lprint)
 	{
-	  Message("Time range indicator %d unsupported, set to 0!", timerange);
+	  Warning("Time range indicator %d unsupported, set to 0!", timerange);
 	  lprint = false;
 	}
       break;
@@ -1889,7 +1889,7 @@ cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
 
   if (zaxistype == ZAXIS_GENERIC && ltype == 0)
     {
-      Message("Changed zaxis type from %s to %s", zaxisNamePtr(zaxistype), zaxisNamePtr(ZAXIS_PRESSURE));
+      Warning("Changed zaxis type from %s to %s", zaxisNamePtr(zaxistype), zaxisNamePtr(ZAXIS_PRESSURE));
       zaxistype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, zaxistype);
       cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, "Pa");

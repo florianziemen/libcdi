@@ -348,7 +348,7 @@ remove_duplicate_timesteps(RecordInfoEntry *recordInfoList, int numRecords, int 
           int n = k;
           for (k = 0; k < n; k++)
             {
-              Message("Skip timestep %d", i + k + 1);
+              Warning("Skip timestep %d", i + k + 1);
               numTimestepsNew--;
               for (int j = i; j < numTimestepsNew; j++) timestepRecordOffset[j] = timestepRecordOffset[j + 1];
             }

@@ -753,7 +753,7 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
       }
     case CDI_FILETYPE_NCZARR:
       {
-        Message("%s not available in append mode!", strfiletype(filetype));
+        Warning("%s not available in append mode!", strfiletype(filetype));
         return CDI_ELIBNAVAIL;
       }
 #endif

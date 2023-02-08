@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -8,9 +12,9 @@
 #endif
 #include "error.h"
 
-int _ExitOnError = 1; /* If set to 1, exit on error       */
-int _Verbose = 1;     /* If set to 1, errors are reported */
-int _Debug = 0;       /* If set to 1, debugging           */
+int _ExitOnError = 1; // If set to 1, exit on error
+int _Verbose = 1;     // If set to 1, errors are reported
+int _Debug = 0;       // If set to 1, debugging
 
 /* If we're not using GNU C, elide __attribute__ */
 #if !defined __GNUC__ && !defined __attribute__
@@ -28,7 +32,7 @@ SysError_(const char *caller, const char *fmt, ...)
   va_start(args, fmt);
 
   printf("\n");
-  fprintf(stderr, "Error (%s): ", caller);
+  fprintf(stderr, "%s  error (%s): ", PACKAGE_NAME, caller);
   vfprintf(stderr, fmt, args);
   fprintf(stderr, "\n");
 
@@ -51,7 +55,7 @@ Error_(const char *caller, const char *fmt, ...)
   va_start(args, fmt);
 
   printf("\n");
-  fprintf(stderr, "Error (%s): ", caller);
+  fprintf(stderr, "%s  error (%s): ", PACKAGE_NAME, caller);
   vfprintf(stderr, fmt, args);
   fprintf(stderr, "\n");
 
@@ -80,7 +84,7 @@ cdiAbortC(const char *caller, const char *filename, const char *functionname, in
 void
 cdiAbortC_serial(const char *caller, const char *filename, const char *functionname, int line, const char *errorString, va_list ap)
 {
-  fprintf(stderr, "ERROR, %s, %s, line %d%s%s\nerrorString: \"", functionname, filename, line, caller ? ", called from " : "",
+  fprintf(stderr, "%s  error, %s, %s, line %d%s%s\nerrorString: \"", PACKAGE_NAME, functionname, filename, line, caller ? ", called from " : "",
           caller ? caller : "");
   vfprintf(stderr, errorString, ap);
   fputs("\"\n", stderr);
@@ -108,7 +112,7 @@ Warning_(const char *caller, const char *fmt, ...)
 void
 cdiWarning(const char *caller, const char *fmt, va_list ap)
 {
-  fprintf(stderr, "Warning (%s): ", caller);
+  fprintf(stderr, "%s  warning (%s): ", PACKAGE_NAME, caller);
   vfprintf(stderr, fmt, ap);
   fputc('\n', stderr);
 }
@@ -120,7 +124,7 @@ Message_(const char *caller, const char *fmt, ...)
 
   va_start(args, fmt);
 
-  fprintf(stdout, "%-18s: ", caller);
+  fprintf(stdout, "%s  %-18s: ", PACKAGE_NAME, caller);
   vfprintf(stdout, fmt, args);
   fprintf(stdout, "\n");
 
@@ -130,8 +134,8 @@ Message_(const char *caller, const char *fmt, ...)
 bool
 cdiObsoleteInfo(const char *oldFunction, const char *newFunction)
 {
-  fprintf(stdout, "CDI info: Function %s() is deprecated and might be removed in the future versions of CDI.\n", oldFunction);
-  fprintf(stdout, "CDI info:    Consider switching to the new function %s() as soon as possible.\n", newFunction);
+  fprintf(stdout, "cdi info: Function %s() is deprecated and might be removed in the future versions of CDI.\n", oldFunction);
+  fprintf(stdout, "cdi info:    Consider switching to the new function %s() as soon as possible.\n", newFunction);
   return false;
 }
 

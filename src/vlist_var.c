@@ -106,7 +106,7 @@ vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int timetype, int tileset
 
   if (timetype < 0)
     {
-      Message("Unexpected time type %d, set to TIME_VARYING!", timetype);
+      Warning("Unexpected time type %d, set to TIME_VARYING!", timetype);
       varptr->timetype = TIME_VARYING;
     }
 
@@ -1090,7 +1090,7 @@ vlistFindVar(int vlistID, int fvarID)
   if (varID == vlistptr->nvars)
     {
       varID = -1;
-      Message("varID not found for fvarID %d in vlistID %d!", fvarID, vlistID);
+      Warning("varID not found for fvarID %d in vlistID %d!", fvarID, vlistID);
     }
 
   return varID;
@@ -1114,7 +1114,7 @@ vlistFindLevel(int vlistID, int fvarID, int flevelID)
       if (levelID == nlevs)
         {
           levelID = -1;
-          Message("levelID not found for fvarID %d and levelID %d in vlistID %d!", fvarID, flevelID, vlistID);
+          Warning("levelID not found for fvarID %d and levelID %d in vlistID %d!", fvarID, flevelID, vlistID);
         }
     }
 

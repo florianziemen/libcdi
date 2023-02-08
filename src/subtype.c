@@ -543,11 +543,8 @@ keyValuePair(const char *key, int value)
   result.nAND = 1;
   result.key_value_pairs[0][0] = attribute_to_index(key);
   result.key_value_pairs[1][0] = value;
-  if (CDI_Debug)
-    {
-      Message("key  %s matches %d", key, result.key_value_pairs[0][0]);
-      Message("%d --?-- %d", result.key_value_pairs[0][0], result.key_value_pairs[1][0]);
-    }
+  if (CDI_Debug) Message("key  %s matches %d", key, result.key_value_pairs[0][0]);
+  if (CDI_Debug) Message("%d --?-- %d", result.key_value_pairs[0][0], result.key_value_pairs[1][0]);
   return result;
 }
 
@@ -572,11 +569,10 @@ matchAND(subtype_query_t q1, subtype_query_t q2)
       result.nAND++;
     }
 
+  if (CDI_Debug) Message("combined criterion:");
   if (CDI_Debug)
-    {
-      Message("combined criterion:");
-      for (int i = 0; i < result.nAND; i++) Message("%d --?-- %d", result.key_value_pairs[0][i], result.key_value_pairs[1][i]);
-    }
+    for (int i = 0; i < result.nAND; i++) Message("%d --?-- %d", result.key_value_pairs[0][i], result.key_value_pairs[1][i]);
+
   return result;
 }
 
@@ -665,7 +661,6 @@ int
 subtypeCreate(int subtype)
 {
   if (CDI_Debug) Message("subtype: %d ", subtype);
-  Message("subtype: %d ", subtype);
 
   /* allocate new subtype */
   subtype_t *subtype_ptr;

@@ -101,7 +101,7 @@ cdi_getenv_int(const char *envName)
                 case 'g': fact = 1073741824; break;
                 default:
                   fact = 0;
-                  Message("Invalid number string in %s: %s", envName, envString);
+                  Warning("Invalid number string in %s: %s", envName, envString);
                   Warning("%s must comprise only digits [0-9].", envName);
                   break;
                 }

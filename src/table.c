@@ -481,8 +481,7 @@ tableInq(int modelID, int tablenum, const char *tablename)
 
       if (tableID == CDI_UNDEFID && modelID != CDI_UNDEFID) tableID = tableFromEnv(modelID, tablenum);
 
-      if (CDI_Debug)
-        if (tablename) Message("tableID = %d tablename = %s", tableID, tablename);
+      if (CDI_Debug && tablename) Message("tableID = %d tablename = %s", tableID, tablename);
     }
 
   return tableID;
