@@ -948,7 +948,7 @@ typedef enum
 } checkTimeResult;
 
 static checkTimeResult
-checkTime(stream_t *streamptr, compvar2_t compVar,  CdiDateTime verificationTime, CdiDateTime expectedVTime)
+checkTime(stream_t *streamptr, compvar2_t compVar, CdiDateTime verificationTime, CdiDateTime expectedVTime)
 {
   // First determine whether the current record exists already.
   int recID = 0;
@@ -3117,7 +3117,7 @@ gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const void *data
       int scanModeIN = 0;
       cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_SCANNINGMODE, &scanModeIN);
 
-      if (cdiDebugExt >= 100) Message("scanModeIN=%d; gridsize=%zu", scanModeIN,  gridInqSize(gridID));
+      if (cdiDebugExt >= 100) Message("scanModeIN=%d; gridsize=%zu", scanModeIN, gridInqSize(gridID));
 
       if (cdiGribDataScanningMode.active)  // allowed modes: <0, 64, 96>; Default is 64
         {

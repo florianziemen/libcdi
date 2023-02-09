@@ -12,9 +12,9 @@
 #endif
 #include "error.h"
 
-int _ExitOnError = 1; // If set to 1, exit on error
-int _Verbose = 1;     // If set to 1, errors are reported
-int _Debug = 0;       // If set to 1, debugging
+int _ExitOnError = 1;  // If set to 1, exit on error
+int _Verbose = 1;      // If set to 1, errors are reported
+int _Debug = 0;        // If set to 1, debugging
 
 /* If we're not using GNU C, elide __attribute__ */
 #if !defined __GNUC__ && !defined __attribute__
@@ -84,8 +84,8 @@ cdiAbortC(const char *caller, const char *filename, const char *functionname, in
 void
 cdiAbortC_serial(const char *caller, const char *filename, const char *functionname, int line, const char *errorString, va_list ap)
 {
-  fprintf(stderr, "%s  error, %s, %s, line %d%s%s\nerrorString: \"", PACKAGE_NAME, functionname, filename, line, caller ? ", called from " : "",
-          caller ? caller : "");
+  fprintf(stderr, "%s  error, %s, %s, line %d%s%s\nerrorString: \"", PACKAGE_NAME, functionname, filename, line,
+          caller ? ", called from " : "", caller ? caller : "");
   vfprintf(stderr, errorString, ap);
   fputs("\"\n", stderr);
   exit(EXIT_FAILURE);
