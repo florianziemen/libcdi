@@ -2676,7 +2676,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
 }
 
 static bool
-cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *ydimid, GridInfo *gridInfo)
+cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *ydimid, GridInfo *gridInfo, bool readPart)
 {
   int ndims = ncvar->ndims;
   int *dimtype = ncvar->dimtype;
@@ -2686,12 +2686,11 @@ cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *ydimid,
 
   for (int i = 0; i < ndims; i++)
     {
-      if (dimtype[i] == X_AXIS)
-        xdimidx = i;
-      else if (dimtype[i] == Y_AXIS)
-        ydimidx = i;
-      else if (dimtype[i] == Z_AXIS)
-        zdimid = ncvar->dimids[i];
+      // clang-format off
+      if      (dimtype[i] == X_AXIS) xdimidx = i;
+      else if (dimtype[i] == Y_AXIS) ydimidx = i;
+      else if (dimtype[i] == Z_AXIS) zdimid = ncvar->dimids[i];
+      // clang-format on
     }
 
   if (*xdimid != CDI_UNDEFID && *ydimid != CDI_UNDEFID && zdimid == CDI_UNDEFID)
@@ -2721,10 +2720,13 @@ cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *ydimid,
       return true;
     }
 
-  if (gridInfo->number_of_grid_used != CDI_UNDEFID)
-    cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED, gridInfo->number_of_grid_used);
-  if (ncvar->position > 0) cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE, ncvar->position);
-  if (!cdiUUIDIsNull(gridInfo->uuid)) cdiDefVarKeyBytes(&grid->keys, CDI_KEY_UUID, gridInfo->uuid, CDI_UUID_SIZE);
+  if (!readPart)
+    {
+      if (gridInfo->number_of_grid_used != CDI_UNDEFID)
+        cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED, gridInfo->number_of_grid_used);
+      if (ncvar->position > 0) cdiDefVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDINREFERENCE, ncvar->position);
+      if (!cdiUUIDIsNull(gridInfo->uuid)) cdiDefVarKeyBytes(&grid->keys, CDI_KEY_UUID, gridInfo->uuid, CDI_UUID_SIZE);
+    }
 
   return false;
 }
@@ -2817,6 +2819,20 @@ cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int
     }
 }
 
+static void
+destroy_grid(struct cdfLazyGrid *lazyGrid, grid_t *grid)
+{
+  if (lazyGrid)
+    {
+      if (CDI_Netcdf_Lazy_Grid_Load) cdfLazyGridDestroy(lazyGrid);
+      if (grid)
+        {
+          grid_free(grid);
+          Free(grid);
+        }
+    }
+}
+
 static int
 cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                      GridInfo *gridInfo)
@@ -2893,9 +2909,9 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
           xaxisid = (xdimid != CDI_UNDEFID) ? ncdims[xdimid].ncvarid : CDI_UNDEFID;
           yaxisid = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].ncvarid : CDI_UNDEFID;
 
+          // process query information if available
           if (ncvar->gridtype == GRID_UNSTRUCTURED)
             {
-              // process query information if available
               CdiQuery *query = streamptr->query;
               if (query)
                 {
@@ -2927,7 +2943,7 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
             grid->type = GRID_UNSTRUCTURED;
 
           if (!ncvar->isCubeSphere && grid->type == GRID_UNSTRUCTURED)
-            if (cdf_set_unstructured_par(ncvar, grid, &xdimid, &ydimid, gridInfo)) continue;
+            if (cdf_set_unstructured_par(ncvar, grid, &xdimid, &ydimid, gridInfo, gridPart.readPart)) continue;
 
           if (lgrid && lproj)
             {
@@ -2971,7 +2987,8 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
                 }
             }
 
-          if (grid->type == GRID_UNSTRUCTURED && gridInfo->gridfile[0] != 0) gridDefReference(gridID, gridInfo->gridfile);
+          if (grid->type == GRID_UNSTRUCTURED && gridInfo->gridfile[0] != 0 && !gridPart.readPart)
+            gridDefReference(gridID, gridInfo->gridfile);
 
           if (ncvar->isChunked) grid_set_chunktype(grid, ncvar);
 
@@ -3008,25 +3025,8 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
           if (gridAdded.isNew) lazyGrid = NULL;
           if (projAdded.isNew) lazyProj = NULL;
 
-          if (lazyGrid)
-            {
-              if (CDI_Netcdf_Lazy_Grid_Load) cdfLazyGridDestroy(lazyGrid);
-              if (grid)
-                {
-                  grid_free(grid);
-                  Free(grid);
-                }
-            }
-
-          if (lazyProj)
-            {
-              if (CDI_Netcdf_Lazy_Grid_Load) cdfLazyGridDestroy(lazyProj);
-              if (proj)
-                {
-                  grid_free(proj);
-                  Free(proj);
-                }
-            }
+          if (lazyGrid) destroy_grid(lazyGrid, grid);
+          if (lazyProj) destroy_grid(lazyProj, proj);
         }
     }
 
