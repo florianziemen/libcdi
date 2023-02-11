@@ -447,10 +447,8 @@ printShortinfo(int streamID, int vlistID, int vardis)
 
       fprintf(stdout, " %-3s", pstr);
 
-      if (vlistInqVarCompType(vlistID, varID) == CDI_COMPRESS_NONE)
-        fprintf(stdout, "  ");
-      else
-        fprintf(stdout, "z ");
+      bool isCompressed = (vlistInqVarCompType(vlistID, varID) != CDI_COMPRESS_NONE);
+      fprintf(stdout, "%c ", isCompressed ? 'z' : ' ');
 
       // parameter info
       fprintf(stdout, ": ");
