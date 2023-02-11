@@ -50,13 +50,16 @@ time2str(CdiTime time, char *timestr, int maxlen)
 }
 
 const char *
-comp_name(int comptype)
+comptype_to_name(int compType)
 {
-  if (comptype == CDI_COMPRESS_SZIP) return "szip";
-  if (comptype == CDI_COMPRESS_AEC) return "aec";
-  if (comptype == CDI_COMPRESS_ZIP) return "zip";
-  if (comptype == CDI_COMPRESS_JPEG) return "jpeg";
-  if (comptype == CDI_COMPRESS_FILTER) return "filter";
+  switch (compType)
+    {
+    case CDI_COMPRESS_SZIP: return "szip";
+    case CDI_COMPRESS_AEC: return "aec";
+    case CDI_COMPRESS_ZIP: return "zip";
+    case CDI_COMPRESS_JPEG: return "jpeg";
+    case CDI_COMPRESS_FILTER: return "filter";
+    }
   return " ";
 }
 
@@ -66,7 +69,7 @@ printFiletype(int streamID, int vlistID)
   int filetype = streamInqFiletype(streamID);
 
   // clang-format off
-  switch ( filetype )
+  switch (filetype)
     {
     case CDI_FILETYPE_GRB:    printf("GRIB");  break;
     case CDI_FILETYPE_GRB2:   printf("GRIB2");  break;
@@ -82,9 +85,9 @@ printFiletype(int streamID, int vlistID)
     default: printf("  File format: unsupported filetype %d" , filetype);  break;
     }
 
-  if ( filetype == CDI_FILETYPE_SRV || filetype == CDI_FILETYPE_EXT || filetype == CDI_FILETYPE_IEG )
+  if (filetype == CDI_FILETYPE_SRV || filetype == CDI_FILETYPE_EXT || filetype == CDI_FILETYPE_IEG)
     {
-      switch ( streamInqByteorder(streamID) )
+      switch (streamInqByteorder(streamID))
 	{
 	case CDI_BIGENDIAN:    printf("  BIGENDIAN");  break;
 	case CDI_LITTLEENDIAN: printf("  LITTLEENDIAN");  break;
@@ -102,7 +105,7 @@ printFiletype(int streamID, int vlistID)
         int comptype = vlistInqVarCompType(vlistID, varID);
         if (comptype == comps[k])
           {
-            printf("%c%s", (kk++ == 0) ? ' ' : '/', comp_name(comptype));
+            printf("%c%s", (kk++ == 0) ? ' ' : '/', comptype_to_name(comptype));
             break;
           }
       }
