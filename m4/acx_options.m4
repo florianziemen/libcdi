@@ -214,6 +214,10 @@ AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
       [AC_SEARCH_LIBS([H5get_libversion], [netcdf hdf5],
                [AC_DEFINE([HAVE_H5GET_LIBVERSION],[1],[Define to 1 for H5get_libversion support])],,)])
 
+AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
+      [AC_SEARCH_LIBS([H5dont_atexit], [netcdf hdf5],
+               [AC_DEFINE([HAVE_H5DONT_ATEXIT],[1],[Define to 1 for H5dont_atexit support])],,)])
+
 AC_SUBST([ENABLE_NETCDF])
 AC_SUBST([ENABLE_NC2])
 AC_SUBST([ENABLE_NC4])
