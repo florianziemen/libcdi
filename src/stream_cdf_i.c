@@ -117,8 +117,9 @@ typedef struct
   double fillval;
   double addoffset;
   double scalefactor;
-  bool isDeflate;
-  bool isSzip;
+  bool hasFilter;
+  bool hasDeflate;
+  bool hasSzip;
   bool isUnsigned;
   bool validrangeDefined;
   double validrange[2];
@@ -621,8 +622,9 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
       ncvar->fillval = 0;
       ncvar->addoffset = 0.0;
       ncvar->scalefactor = 1.0;
-      ncvar->isDeflate = false;
-      ncvar->isSzip = false;
+      ncvar->hasFilter = false;
+      ncvar->hasDeflate = false;
+      ncvar->hasSzip = false;
       ncvar->isUnsigned = false;
       ncvar->validrangeDefined = false;
       ncvar->validrange[0] = VALIDMISS;
@@ -1058,13 +1060,18 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
         {
           int shuffle = 0, deflate = 0, deflateLevel = 0;
           nc_inq_var_deflate(ncid, ncvarid, &shuffle, &deflate, &deflateLevel);
-          if (deflate > 0) ncvar->isDeflate = true;
+          if (deflate > 0) ncvar->hasDeflate = true;
 
 #ifdef HAVE_NC_DEF_VAR_SZIP
           int options_mask = 0, pixels_per_block = 0;
           nc_inq_var_szip(ncid, ncvarid, &options_mask, &pixels_per_block);
-          if (options_mask && pixels_per_block) ncvar->isSzip = true;
+          if (options_mask && pixels_per_block) ncvar->hasSzip = true;
 #endif
+          unsigned filterId;
+          size_t numParams;
+          nc_inq_var_filter(ncid, ncvarid, &filterId, &numParams, NULL);
+          if (filterId > 0) ncvar->hasFilter = true;
+
           size_t chunks[nvdims];
           int storageIn;
           if (nc_inq_var_chunking(ncid, ncvarid, &storageIn, chunks) == NC_NOERR)
@@ -3452,8 +3459,9 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       int varID = vlistDefVar(vlistID, gridID, zaxisID, ncvar->timetype);
 
 #ifdef HAVE_NETCDF4
-      if (ncvar->isDeflate) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_ZIP);
-      if (ncvar->isSzip) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_SZIP);
+      if (ncvar->hasFilter) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_FILTER);
+      if (ncvar->hasDeflate) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_ZIP);
+      if (ncvar->hasSzip) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_SZIP);
       if (ncvar->isChunked)
         {
           if (ncvar->chunkType != CDI_UNDEFID) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, ncvar->chunkType);

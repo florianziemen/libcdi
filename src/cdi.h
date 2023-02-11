@@ -97,7 +97,7 @@ extern "C" {
 #define  CDI_COMPRESS_AEC           2
 #define  CDI_COMPRESS_ZIP           3
 #define  CDI_COMPRESS_JPEG          4
-#define  CDI_COMPRESS_ZSTD          5
+#define  CDI_COMPRESS_FILTER        5
 
 // external data types
 

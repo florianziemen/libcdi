@@ -57,28 +57,7 @@ cdfDefVarDeflate(int ncid, int ncvarID, int compLevel)
     }
 #endif
 }
-/*
-void
-cdfDefVarZstd(int ncid, int ncvarID, int compLevel)
-{
-#ifdef HAVE_NETCDF4
-  if (compLevel < 1 || compLevel > 19) compLevel = 1;
 
-  int status;
-  if ((status = nc_def_var_zstandard(ncid, ncvarID, compLevel)))
-    {
-      Error("nc_def_var_zstandard failed; %s", nc_strerror(status));
-    }
-#else
-  static bool lwarn = true;
-  if (lwarn)
-    {
-      lwarn = false;
-      Warning("zstd compression failed, NetCDF4 not available!");
-    }
-#endif
-}
-*/
 void
 cdfDefVarSzip(int ncid, int ncvarID, int pixels_per_block)
 {
