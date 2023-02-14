@@ -1071,6 +1071,14 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
           size_t numParams;
           nc_inq_var_filter(ncid, ncvarid, &filterId, &numParams, NULL);
           if (filterId > 0) ncvar->hasFilter = true;
+          if (filterId > 0 && numParams <= 16 && CDI_Debug)
+            {
+              unsigned int params[16];
+              nc_inq_var_filter(ncid, ncvarid, &filterId, &numParams, params);
+              fprintf(stderr, "%s: filterId=%d  params=", ncvar->name, filterId);
+              for (int i = 0; i < (int) numParams; ++i) fprintf(stderr, " %u", params[i]);
+              fprintf(stderr, "\n");
+            }
 
           size_t chunks[nvdims];
           int storageIn;
