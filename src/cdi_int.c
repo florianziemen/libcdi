@@ -146,7 +146,7 @@ cdiPrintVersion(void)
   fprintf(stdout, "  NetCDF library version : %s\n", cdfLibraryVersion());
 #endif
 #ifdef HAVE_NC4HDF5
-  fprintf(stdout, "    HDF5 library version : %s\n", hdfLibraryVersion());
+  //  fprintf(stdout, "    HDF5 library version : %s\n", hdfLibraryVersion());
 #endif
 #ifdef HAVE_LIBSERVICE
   fprintf(stdout, "    exse library version : %s\n", srvLibraryVersion());
