@@ -206,17 +206,17 @@ AS_IF([test "x$ENABLE_NC4SZLIB" = "xyes"],
       [AC_SEARCH_LIBS([nc_def_var_szip], [netcdf],
                [AC_DEFINE([HAVE_NC_DEF_VAR_SZIP],[1],[Define to 1 for NetCDF4 nc_def_var_szip support])],,[-lhdf5])])
 
-AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
-      [AC_SEARCH_LIBS([H5TS_mutex_lock], [netcdf],
-               [AC_DEFINE([HAVE_NC4HDF5_THREADSAFE],[1],[Define to 1 for NetCDF4/HDF5 threadsafe support])],,[-lhdf5])])
+#AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
+#      [AC_SEARCH_LIBS([H5TS_mutex_lock], [netcdf],
+#               [AC_DEFINE([HAVE_NC4HDF5_THREADSAFE],[1],[Define to 1 for NetCDF4/HDF5 threadsafe support])],,[-lhdf5])])
 
-AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
-      [AC_SEARCH_LIBS([H5get_libversion], [netcdf],
-               [AC_DEFINE([HAVE_H5GET_LIBVERSION],[1],[Define to 1 for H5get_libversion support])],,[-lhdf5])])
+#AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
+#      [AC_SEARCH_LIBS([H5get_libversion], [netcdf],
+#               [AC_DEFINE([HAVE_H5GET_LIBVERSION],[1],[Define to 1 for H5get_libversion support])],,[-lhdf5])])
 
-AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
-      [AC_SEARCH_LIBS([H5dont_atexit], [netcdf],
-               [AC_DEFINE([HAVE_H5DONT_ATEXIT],[1],[Define to 1 for H5dont_atexit support])],,[-lhdf5])])
+#AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
+#      [AC_SEARCH_LIBS([H5dont_atexit], [netcdf],
+#               [AC_DEFINE([HAVE_H5DONT_ATEXIT],[1],[Define to 1 for H5dont_atexit support])],,[-lhdf5])])
 
 AC_SUBST([ENABLE_NETCDF])
 AC_SUBST([ENABLE_NC2])
