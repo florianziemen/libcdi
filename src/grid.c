@@ -180,11 +180,11 @@ grid_free_components(grid_t *gridptr)
 
   for (size_t i = 0; i < sizeof(p2free) / sizeof(p2free[0]); ++i)
     if (p2free[i]) Free(p2free[i]);
-
+  /*
   cdiDeleteVarKeys(&(gridptr->x.keys));
   cdiDeleteVarKeys(&(gridptr->y.keys));
   cdiDeleteVarKeys(&(gridptr->keys));
-
+  */
   int gridID = gridptr->self;
   if (gridID != CDI_UNDEFID) cdiDeleteAtts(gridID, CDI_GLOBAL);
 }
