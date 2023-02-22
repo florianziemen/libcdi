@@ -186,7 +186,7 @@ grid_free_components(grid_t *gridptr)
   cdiDeleteVarKeys(&(gridptr->keys));
   */
   int gridID = gridptr->self;
-  if (gridID != CDI_UNDEFID) cdiDeleteAtts(gridID, CDI_GLOBAL);
+  //if (gridID != CDI_UNDEFID) cdiDeleteAtts(gridID, CDI_GLOBAL);
 }
 
 void
