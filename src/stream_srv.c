@@ -226,7 +226,11 @@ srv_add_record(stream_t *streamptr, int param, int level, size_t xsize, size_t y
   grid->y.size = ysize;
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
-  if (!gridAdded.isNew) Free(grid);
+  if (!gridAdded.isNew)
+    {
+      grid_free(grid);
+      Free(grid);
+    }
 
   int leveltype = ZAXIS_GENERIC;
   int datatype = srvInqDatatype(prec);

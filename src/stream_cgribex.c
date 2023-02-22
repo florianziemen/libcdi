@@ -593,7 +593,10 @@ cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t 
         }
     }
   else
-    Free(gridptr);
+    {
+      grid_free(gridptr);
+      Free(gridptr);
+    }
 
   const int zaxistype = grib1ltypeToZaxisType(leveltype);
   if (zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF)

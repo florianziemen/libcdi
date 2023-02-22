@@ -220,7 +220,11 @@ extAddRecord(stream_t *streamptr, int param, int level, size_t xysize, size_t re
   grid->y.size = 0;
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
-  if (!gridAdded.isNew) Free(grid);
+  if (!gridAdded.isNew)
+    {
+      grid_free(grid);
+      Free(grid);
+    }
 
   int leveltype = ZAXIS_GENERIC;
   int datatype = extInqDatatype(prec, number);

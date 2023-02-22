@@ -614,7 +614,10 @@ iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, si
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
   if (!gridAdded.isNew)
-    Free(grid);
+    {
+      grid_free(grid);
+      Free(grid);
+    }
   else if (gridtype == GRID_PROJECTION)
     gridDefParamRLL(gridID, xpole, ypole, 0);
 
