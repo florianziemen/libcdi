@@ -634,6 +634,7 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
       streamID = fileID;
       if (streamptr->record) Free(streamptr->record);
       reshRemove(streamptr->self, &streamOps);
+      Free(streamptr);
     }
   else
     {
