@@ -1065,77 +1065,80 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
     }
 
   if (fileID == CDI_UNDEFID)
-    Warning("File %s not open!", streamptr->filename);
-  else
-    switch (cdiBaseFiletype(filetype))
-      {
+    {
+      Warning("File %s not open!", streamptr->filename);
+      return;
+    }
+
+  switch (cdiBaseFiletype(filetype))
+    {
 #if defined(HAVE_LIBGRIB) && (defined(HAVE_LIBCGRIBEX) || defined(HAVE_LIBGRIB_API))
-      case CDI_FILETYPE_GRB:
-        {
-          gribClose(fileID);
-          if (recordBufIsToBeDeleted) gribContainersDelete(streamptr);
+    case CDI_FILETYPE_GRB:
+      {
+        gribClose(fileID);
+        if (recordBufIsToBeDeleted) gribContainersDelete(streamptr);
 #ifdef HAVE_LIBCGRIBEX
-          if (recordBufIsToBeDeleted) cgribexDelete(streamptr->record->objectp);
+        if (recordBufIsToBeDeleted) cgribexDelete(streamptr->record->objectp);
 #endif
-          break;
-        }
-      case CDI_FILETYPE_GRB2:
-        {
-          gribClose(fileID);
-          if (recordBufIsToBeDeleted) gribContainersDelete(streamptr);
-          break;
-        }
+        break;
+      }
+    case CDI_FILETYPE_GRB2:
+      {
+        gribClose(fileID);
+        if (recordBufIsToBeDeleted) gribContainersDelete(streamptr);
+        break;
+      }
 #endif
 #ifdef HAVE_LIBSERVICE
-      case CDI_FILETYPE_SRV:
-        {
-          fileClose(fileID);
-          if (recordBufIsToBeDeleted) srvDelete(streamptr->record->objectp);
-          break;
-        }
+    case CDI_FILETYPE_SRV:
+      {
+        fileClose(fileID);
+        if (recordBufIsToBeDeleted) srvDelete(streamptr->record->objectp);
+        break;
+      }
 #endif
 #ifdef HAVE_LIBEXTRA
-      case CDI_FILETYPE_EXT:
-        {
-          fileClose(fileID);
-          if (recordBufIsToBeDeleted) extDelete(streamptr->record->objectp);
-          break;
-        }
+    case CDI_FILETYPE_EXT:
+      {
+        fileClose(fileID);
+        if (recordBufIsToBeDeleted) extDelete(streamptr->record->objectp);
+        break;
+      }
 #endif
 #ifdef HAVE_LIBIEG
-      case CDI_FILETYPE_IEG:
-        {
-          fileClose(fileID);
-          if (recordBufIsToBeDeleted) iegDelete(streamptr->record->objectp);
-          break;
-        }
+    case CDI_FILETYPE_IEG:
+      {
+        fileClose(fileID);
+        if (recordBufIsToBeDeleted) iegDelete(streamptr->record->objectp);
+        break;
+      }
 #endif
 #ifdef HAVE_LIBNETCDF
-      case CDI_FILETYPE_NETCDF:
-        {
-          cdfClose(fileID);
-          if (streamptr->ntsteps == 0 && streamptr->tsteps != NULL)
-            {
-              if (streamptr->tsteps[0].records)
-                {
-                  Free(streamptr->tsteps[0].records);
-                  streamptr->tsteps[0].records = NULL;
-                }
-              if (streamptr->tsteps[0].recIDs)
-                {
-                  Free(streamptr->tsteps[0].recIDs);
-                  streamptr->tsteps[0].recIDs = NULL;
-                }
-            }
-          break;
-        }
-#endif
-      default:
-        {
-          Error("%s support not compiled in (fileID = %d)!", strfiletype(filetype), fileID);
-          break;
-        }
+    case CDI_FILETYPE_NETCDF:
+      {
+        cdfClose(fileID);
+        if (streamptr->ntsteps == 0 && streamptr->tsteps != NULL)
+          {
+            if (streamptr->tsteps[0].records)
+              {
+                Free(streamptr->tsteps[0].records);
+                streamptr->tsteps[0].records = NULL;
+              }
+            if (streamptr->tsteps[0].recIDs)
+              {
+                Free(streamptr->tsteps[0].recIDs);
+                streamptr->tsteps[0].recIDs = NULL;
+              }
+          }
+        break;
       }
+#endif
+    default:
+      {
+        Error("%s support not compiled in (fileID = %d)!", strfiletype(filetype), fileID);
+        break;
+      }
+    }
 }
 
 static void
@@ -1161,7 +1164,6 @@ streamDestroy(stream_t *streamptr)
   if (streamptr->record)
     {
       if (streamptr->record->buffer) Free(streamptr->record->buffer);
-
       Free(streamptr->record);
     }
 
@@ -1182,7 +1184,9 @@ streamDestroy(stream_t *streamptr)
   Free(streamptr->vars);
   streamptr->vars = NULL;
 
-  for (int index = 0; index < streamptr->ntsteps; ++index)
+  int numSteps = streamptr->ntsteps;
+  if (numSteps == 0 && streamptr->tstepsTableSize > 0) numSteps = 1;
+  for (int index = 0; index < numSteps; ++index)
     {
       tsteps_t *tstep = &(streamptr->tsteps[index]);
 #ifdef HAVE_LIBFDB5
