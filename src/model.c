@@ -20,8 +20,6 @@ typedef struct
   char *name;
 } model_t;
 
-static int MODEL_Debug = 0; /* If set to 1, debugging */
-
 static void modelInit(void);
 
 static int modelCompareP(void *modelptr1, void *modelptr2);
@@ -104,12 +102,7 @@ static void
 modelInit(void)
 {
   static bool modelInitialized = false;
-
   if (modelInitialized) return;
-
-  modelInitialized = true;
-  char *env = getenv("MODEL_DEBUG");
-  if (env) MODEL_Debug = atoi(env);
 }
 
 struct modelLoc

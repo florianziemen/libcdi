@@ -79,8 +79,6 @@ getZaxisOps(void)
   return &zaxisOps;
 }
 
-static int ZAXIS_Debug = 0; /* If set to 1, debugging */
-
 void
 zaxisGetTypeDescription(int zaxisType, int *outPositive, const char **outName, const char **outLongName, const char **outStdName,
                         const char **outUnit)
@@ -159,9 +157,6 @@ zaxisInit(void)
   static bool zaxisInitialized = false;
   if (zaxisInitialized) return;
   zaxisInitialized = true;
-
-  const char *env = getenv("ZAXIS_DEBUG");
-  if (env) ZAXIS_Debug = atoi(env);
 }
 
 static void

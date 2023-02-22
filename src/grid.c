@@ -64,8 +64,6 @@ static int gridTxCode(void *gridptr);
 
 static const resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP, gridGetPackSize, gridPack, gridTxCode };
 
-static int GRID_Debug = 0;  // If set to 1, debugging
-
 grid_t *
 grid_to_pointer(int gridID)
 {
@@ -228,9 +226,6 @@ gridInit(void)
   static bool gridInitialized = false;
   if (gridInitialized) return;
   gridInitialized = true;
-
-  const char *env = getenv("GRID_DEBUG");
-  if (env) GRID_Debug = atoi(env);
 }
 
 static void
