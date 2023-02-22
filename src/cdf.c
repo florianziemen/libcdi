@@ -116,7 +116,7 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
 #ifdef HAVE_NETCDF4
             else
               {
-                int format;
+                int format = -1;
                 (void) nc_inq_format(ncid, &format);
                 if (format == NC_FORMAT_NETCDF4_CLASSIC) *filetype = CDI_FILETYPE_NC4C;
               }

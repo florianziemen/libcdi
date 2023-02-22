@@ -3703,9 +3703,9 @@ static void
 cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *modelID, bool *ucla_les, unsigned char *uuidOfVGrid,
                      GridInfo *gridInfo)
 {
-  nc_type xtype;
-  size_t attlen;
-  char attname[CDI_MAX_NAME];
+  nc_type xtype = 0;
+  size_t attlen = 0;
+  char attname[CDI_MAX_NAME] = { 0 };
 
   for (int iatt = 0; iatt < ngatts; iatt++)
     {
@@ -3719,7 +3719,7 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
           {
             attstringsize = 65636
           };
-          char attstring[attstringsize];
+          char attstring[attstringsize] = { 0 };
 
           cdfGetAttText(fileID, NC_GLOBAL, attname, attstringsize, attstring);
 
@@ -4313,7 +4313,7 @@ cdfInqContents(stream_t *streamptr)
   nc_inq_format(fileID, &format);
 #endif
 
-  int ndims, nvars, ngatts, unlimdimid;
+  int ndims = 0, nvars = 0, ngatts = 0, unlimdimid = 0;
   cdf_inq(fileID, &ndims, &nvars, &ngatts, &unlimdimid);
 
   if (CDI_Debug) Message("root: ndims %d, nvars %d, ngatts %d", ndims, nvars, ngatts);
