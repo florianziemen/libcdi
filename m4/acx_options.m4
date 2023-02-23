@@ -111,7 +111,7 @@ AC_ARG_WITH([netcdf],
             [AS_CASE(["$with_netcdf"],
                      [no],[AC_MSG_CHECKING([for NetCDF library])
                            AC_MSG_RESULT([suppressed])],
-                     [yes],[AC_CHECK_HEADERS([netcdf.h netcdf_meta.h],,
+                     [yes],[AC_CHECK_HEADERS([netcdf.h],,
                                              [AC_MSG_ERROR([Could not find netcdf.h])],
                                              [AC_INCLUDES_DEFAULT])
                             AC_SEARCH_LIBS([nc_open],
@@ -125,7 +125,7 @@ AC_ARG_WITH([netcdf],
                                 [NETCDF_ROOT=$with_netcdf
                                  LDFLAGS="-L$NETCDF_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$NETCDF_ROOT/include $CPPFLAGS"
-                                 AC_CHECK_HEADERS([netcdf.h netcdf_meta.h],,
+                                 AC_CHECK_HEADERS([netcdf.h],,
                                                   [AC_MSG_ERROR([Could not find netcdf.h])],
                                                   [AC_INCLUDES_DEFAULT])
                                  AC_SEARCH_LIBS([nc_open],
