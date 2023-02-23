@@ -723,7 +723,11 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
   // clang-format off
-  if (!gridAdded.isNew) Free(grid);
+  if (!gridAdded.isNew)
+    {
+      grid_free(grid);
+      Free(grid);
+    }
   else if (grid->projtype == CDI_PROJ_RLL)   gribapiDefProjRLL(gh, gridID);
   else if (grid->projtype == CDI_PROJ_LCC)   gribapiDefProjLCC(gh, gridID);
   else if (grid->projtype == CDI_PROJ_STERE) gribapiDefProjSTERE(gh, gridID);
