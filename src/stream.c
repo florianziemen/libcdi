@@ -1184,20 +1184,22 @@ streamDestroy(stream_t *streamptr)
   Free(streamptr->vars);
   streamptr->vars = NULL;
 
-  int numSteps = streamptr->ntsteps;
-  if (numSteps == 0 && streamptr->tstepsTableSize > 0) numSteps = 1;
-  for (int index = 0; index < numSteps; ++index)
+  if (streamptr->tsteps)
     {
-      tsteps_t *tstep = &(streamptr->tsteps[index]);
+      int maxSteps = streamptr->tstepsNextID;
+      for (int index = 0; index < maxSteps; ++index)
+        {
+          tsteps_t *tstep = &(streamptr->tsteps[index]);
 #ifdef HAVE_LIBFDB5
-      if (tstep->records && tstep->records->fdbItem) free(tstep->records->fdbItem);
+          if (tstep->records && tstep->records->fdbItem) free(tstep->records->fdbItem);
 #endif
-      if (tstep->records) Free(tstep->records);
-      if (tstep->recIDs) Free(tstep->recIDs);
-      taxisDestroyKernel(&(tstep->taxis));
-    }
+          if (tstep->records) Free(tstep->records);
+          if (tstep->recIDs) Free(tstep->recIDs);
+          taxisDestroyKernel(&(tstep->taxis));
+        }
 
-  if (streamptr->tsteps) Free(streamptr->tsteps);
+      Free(streamptr->tsteps);
+    }
 
   if (vlistID != -1)
     {
