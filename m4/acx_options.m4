@@ -111,7 +111,7 @@ AC_ARG_WITH([netcdf],
             [AS_CASE(["$with_netcdf"],
                      [no],[AC_MSG_CHECKING([for NetCDF library])
                            AC_MSG_RESULT([suppressed])],
-                     [yes],[AC_CHECK_HEADERS([netcdf.h],,
+                     [yes],[AC_CHECK_HEADERS([netcdf.h netcdf_meta.h],,
                                              [AC_MSG_ERROR([Could not find netcdf.h])],
                                              [AC_INCLUDES_DEFAULT])
                             AC_SEARCH_LIBS([nc_open],
@@ -125,7 +125,7 @@ AC_ARG_WITH([netcdf],
                                 [NETCDF_ROOT=$with_netcdf
                                  LDFLAGS="-L$NETCDF_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$NETCDF_ROOT/include $CPPFLAGS"
-                                 AC_CHECK_HEADERS([netcdf.h],,
+                                 AC_CHECK_HEADERS([netcdf.h netcdf_meta.h],,
                                                   [AC_MSG_ERROR([Could not find netcdf.h])],
                                                   [AC_INCLUDES_DEFAULT])
                                  AC_SEARCH_LIBS([nc_open],
@@ -204,19 +204,7 @@ AS_VAR_IF([ENABLE_NETCDF], [yes],
 
 AS_IF([test "x$ENABLE_NC4SZLIB" = "xyes"],
       [AC_SEARCH_LIBS([nc_def_var_szip], [netcdf],
-               [AC_DEFINE([HAVE_NC_DEF_VAR_SZIP],[1],[Define to 1 for NetCDF4 nc_def_var_szip support])],,[-lhdf5])])
-
-#AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
-#      [AC_SEARCH_LIBS([H5TS_mutex_lock], [netcdf],
-#               [AC_DEFINE([HAVE_NC4HDF5_THREADSAFE],[1],[Define to 1 for NetCDF4/HDF5 threadsafe support])],,[-lhdf5])])
-
-#AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
-#      [AC_SEARCH_LIBS([H5get_libversion], [netcdf],
-#               [AC_DEFINE([HAVE_H5GET_LIBVERSION],[1],[Define to 1 for H5get_libversion support])],,[-lhdf5])])
-
-#AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
-#      [AC_SEARCH_LIBS([H5dont_atexit], [netcdf],
-#               [AC_DEFINE([HAVE_H5DONT_ATEXIT],[1],[Define to 1 for H5dont_atexit support])],,[-lhdf5])])
+               [AC_DEFINE([HAVE_NC_DEF_VAR_SZIP],[1],[Define to 1 for NetCDF4 nc_def_var_szip support])],,)])
 
 AC_SUBST([ENABLE_NETCDF])
 AC_SUBST([ENABLE_NC2])
