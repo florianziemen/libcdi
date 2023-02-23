@@ -209,6 +209,7 @@ cdiPrintDatatypes(void)
 void
 cdiDebug(int level)
 {
+  if (level < 0) return;
   unsigned ulevel = (unsigned) level;
 
   if (ulevel == 1 || (ulevel & 2)) CDI_Debug = 1;
