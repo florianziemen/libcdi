@@ -1,4 +1,4 @@
-2023-03-06  Uwe Schulzweida
+2023-02-23  Uwe Schulzweida
 
         * using CGRIBEX library version 2.1.0
         * using EXSE library version 1.5.0
@@ -31,11 +31,11 @@
 
 2022-11-29  Uwe Schulzweida
 
-	* cdf_def_mapping: added support for datatype NC_STRING (bug fix)
+	* cdf_def_mapping: add support for datatype NC_STRING (bug fix)
 
 2022-11-18  Uwe Schulzweida
 
-	* grid module: removed initialization of CDI_KEY_SCANNINGMODE (bug fix)
+	* grid module: remove initialization of CDI_KEY_SCANNINGMODE (bug fix)
 
 2022-11-16  Uwe Schulzweida
 
@@ -48,11 +48,11 @@
 
 2022-11-09  Uwe Schulzweida
 
-	* async_worker: removed syncronization at end of timesteps
+	* async_worker: remove syncronization at end of timesteps
 
 2022-11-05  Uwe Schulzweida
 
-	* NetCDF output: added compression support for data on GRID_GENERIC
+	* NetCDF output: adde compression support for data on GRID_GENERIC
 
 2022-10-19  Uwe Schulzweida
 
