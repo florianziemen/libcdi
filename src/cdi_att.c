@@ -225,6 +225,22 @@ cdiInqAttType(int cdiID, int varID, const char *name)
   return type;
 }
 
+static void
+cdi_attribute_free(cdi_att_t *attp)
+{
+  if (attp->name)
+    {
+      Free(attp->name);
+      attp->name = NULL;
+      attp->namesz = 0;
+    }
+  if (attp->xvalue)
+    {
+      Free(attp->xvalue);
+      attp->xvalue = NULL;
+    }
+}
+
 int
 cdiDeleteAtts(int cdiID, int varID)
 {
@@ -236,13 +252,7 @@ cdiDeleteAtts(int cdiID, int varID)
   for (int attid = 0; attid < (int) attsp->nelems; attid++)
     {
       cdi_att_t *attp = &(attsp->value[attid]);
-      if (attp->name)
-        {
-          Free(attp->name);
-          attp->name = NULL;
-          attp->namesz = 0;
-        }
-      if (attp->xvalue) Free(attp->xvalue);
+      cdi_attribute_free(attp);
     }
 
   attsp->nelems = 0;
@@ -263,15 +273,9 @@ cdiDelAtt(int cdiID, int varID, const char *name)
       cdi_att_t *attp = &(attsp->value[attid]);
       if (attp->name && str_is_equal(attp->name, name))
         {
+          cdi_attribute_free(attp);
           status = CDI_NOERR;
-          Free(attp->name);
-          attp->name = NULL;
-          attp->namesz = 0;
-          if (attp->xvalue)
-            {
-              Free(attp->xvalue);
-              attp->xvalue = NULL;
-            }
+          break;
         }
     }
 
