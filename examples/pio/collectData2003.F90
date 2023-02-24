@@ -3,6 +3,7 @@ PROGRAM collectdata2003
   USE yaxt, ONLY: xt_initialize, xt_finalize, xt_idxlist, xt_idxstripes_new, &
        xt_idxlist_delete, xi => xt_int_kind, xt_stripe
   USE iso_c_binding, ONLY: c_int
+  USE mpi
 #endif
 
   IMPLICIT NONE
@@ -11,12 +12,11 @@ PROGRAM collectdata2003
   INCLUDE 'cdipio.inc'
 
 #ifdef USE_MPI
-  INCLUDE 'mpif.h'
-
   INTEGER, PARAMETER :: i4 = SELECTED_INT_KIND(9)
   INTEGER, PARAMETER :: i8 = SELECTED_INT_KIND(14)
 #endif
 
+#ifdef USE_MPI
   ! For parallel IO:
   !  Parameter and variables needed.
   INTEGER, PARAMETER :: nProcsIO     = 3
@@ -25,6 +25,7 @@ PROGRAM collectdata2003
   ! INTEGER, PARAMETER :: IOMode       = PIO_WRITER
   ! INTEGER, PARAMETER :: IOMode       = PIO_ASYNCH
   INTEGER, PARAMETER :: IOMode       = PIO_FPGUARD
+#endif
 
   INTEGER :: commModel
 #ifdef USE_MPI
@@ -217,12 +218,6 @@ CONTAINS
       CALL pioWriteTimestep
 #endif
     END DO
-
-#ifdef USE_MPI
-    ! For parallel IO:
-    ! Preparation for local cleanup
-    CALL pioEndTimestepping ()
-#endif
 
     !     Close the output stream
     CALL streamClose(streamID)

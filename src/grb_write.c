@@ -24,7 +24,7 @@
 #include "namespace.h"
 
 static size_t
-grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time,
+grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime,
           int tsteptype, int numavg, size_t datasize, const void *data, size_t nmiss, void **gribbuffer, int comptype,
           void *gribContainers)
 {
@@ -36,8 +36,8 @@ grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gr
       size_t gribbuffersize = datasize * 4 + 3000;
       *gribbuffer = Malloc(gribbuffersize);
 
-      nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, datasize, data,
-                             nmiss, *gribbuffer, gribbuffersize);
+      nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize, data, nmiss,
+                             *gribbuffer, gribbuffersize);
     }
   else
 #endif
@@ -58,7 +58,7 @@ grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gr
         }
 
       size_t gribbuffersize;
-      nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, (long) datasize, datap, nmiss,
+      nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, (long) datasize, datap, nmiss,
                              gribbuffer, &gribbuffersize, comptype, gribContainer);
 
       if (memtype == MEMTYPE_FLOAT) Free((void *) datap);
@@ -128,9 +128,9 @@ cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nb
   for (int i = 0; i < keyValue.numKeys; i++)
     {
       // clang-format off
-      if      (strcmp(keyValue.keys[i], "class") == 0) class = keyValue.values[i];
-      else if (strcmp(keyValue.keys[i], "stream") == 0) stream = keyValue.values[i];
-      else if (strcmp(keyValue.keys[i], "expver") == 0) expver = keyValue.values[i];
+      if      (str_is_equal(keyValue.keys[i], "class"))  class = keyValue.values[i];
+      else if (str_is_equal(keyValue.keys[i], "stream")) stream = keyValue.values[i];
+      else if (str_is_equal(keyValue.keys[i], "expver")) expver = keyValue.values[i];
       else Error("Unsupported FDB parameter: %s=%s", keyValue.keys[i], keyValue.values[i]);
       // clang-format on
     }
@@ -210,14 +210,14 @@ fillup_gribbuffer(size_t nbytes, unsigned char *gribbuffer)
 void
 grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 {
-  const int filetype = streamptr1->filetype;
-  const int fileID1 = streamptr1->fileID;
-  const int fileID2 = streamptr2->fileID;
-  const int tsID = streamptr1->curTsID;
-  const int vrecID = streamptr1->tsteps[tsID].curRecID;
-  const int recID = streamptr1->tsteps[tsID].recIDs[vrecID];
+  int filetype = streamptr1->filetype;
+  int fileID1 = streamptr1->fileID;
+  int fileID2 = streamptr2->fileID;
+  int tsID = streamptr1->curTsID;
+  int vrecID = streamptr1->tsteps[tsID].curRecID;
+  int recID = streamptr1->tsteps[tsID].recIDs[vrecID];
   const record_t *record = &streamptr1->tsteps[tsID].records[recID];
-  const off_t recpos = record->position;
+  off_t recpos = record->position;
   size_t recsize = record->size;
 
   void *gribbuffer = NULL;
@@ -232,7 +232,7 @@ grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
       recsize = fdb_read_record(streamptr1->protocolData, fdbItem, &buffersize, &gribbuffer);
 
       // round up recsize to next multiple of 8
-      const size_t gribbuffersize = ((recsize + 7U) & ~7U);
+      size_t gribbuffersize = ((recsize + 7U) & ~7U);
 
       gribbuffer = (unsigned char *) Realloc(gribbuffer, gribbuffersize);
 #endif
@@ -242,7 +242,7 @@ grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
       fileSetPos(fileID1, recpos, SEEK_SET);
 
       // round up recsize to next multiple of 8
-      const size_t gribbuffersize = ((recsize + 7U) & ~7U);
+      size_t gribbuffersize = ((recsize + 7U) & ~7U);
 
       gribbuffer = (unsigned char *) Malloc(gribbuffersize);
 
@@ -294,7 +294,7 @@ grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
     {
       grib_handle *gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
 
-      const int scanModeIN = gribapiGetScanningMode(gh);
+      int scanModeIN = gribapiGetScanningMode(gh);
 
       grib_handle_delete(gh);
 
@@ -305,14 +305,14 @@ grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
         {
           size_t nmiss = 0;
 
-          const int vlistID = streamptr1->vlistID;
-          const int varID = record->varID;
-          const int levelID = record->levelID;
-          const int gridID = vlistInqVarGrid(vlistID, varID);
+          int vlistID = streamptr1->vlistID;
+          int varID = record->varID;
+          int levelID = record->levelID;
+          int gridID = vlistInqVarGrid(vlistID, varID);
 
           size_t gridsize = gridInqSize(gridID);
           if (vlistNumber(vlistID) != CDI_REAL) gridsize *= 2;
-          double *data = (double *) malloc(gridsize * sizeof(double));
+          double *data = (double *) Malloc(gridsize * sizeof(double));
 
           if (cdiDebugExt >= 20) Message(" processing varID %d; levelID %d", varID, levelID);
 
@@ -327,26 +327,27 @@ grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   if (filetype == CDI_FILETYPE_GRB)
     {
       size_t unzipsize;
-      const int izip = gribGetZip(recsize, gribbuffer, &unzipsize);
+      int izip = gribGetZip(recsize, (unsigned char *) gribbuffer, &unzipsize);
 
       if (izip == 0 && (streamptr2->comptype == CDI_COMPRESS_SZIP || streamptr2->comptype == CDI_COMPRESS_AEC))
         nbytes = grbSzip(filetype, gribbuffer, nbytes);
     }
 
-  fillup_gribbuffer(nbytes, gribbuffer);
+  fillup_gribbuffer(nbytes, (unsigned char *) gribbuffer);
 
   if (streamptr2->protocol == CDI_PROTOCOL_FDB)
     {
-      const int vlistID = streamptr1->vlistID;
-      const int varID = record->varID;
-      const int zaxisID = vlistInqVarZaxis(vlistID, varID);
-      const int zaxisType = zaxisInqType(zaxisID);
+      int vlistID = streamptr1->vlistID;
+      int varID = record->varID;
+      int zaxisID = vlistInqVarZaxis(vlistID, varID);
+      int zaxisType = zaxisInqType(zaxisID);
+      CdiDateTime vDateTime = streamptr1->tsteps[tsID].taxis.vDateTime;
 
       FDB_Keys fdbKeys;
-      snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int) cdiDate_get(streamptr1->tsteps[tsID].taxis.vdatetime.date));
-      snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", cdiTime_get(streamptr1->tsteps[tsID].taxis.vdatetime.time) / 100);
+      snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int) cdiDate_get(vDateTime.date));
+      snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", (short) (cdiTime_get(vDateTime.time) / 100));
       snprintf(fdbKeys.param, sizeof(fdbKeys.param), "%d", get_fdb_param(record->param));
-      const bool isML = (zaxisType == ZAXIS_HYBRID || zaxisType == ZAXIS_HYBRID_HALF);
+      bool isML = (zaxisType == ZAXIS_HYBRID || zaxisType == ZAXIS_HYBRID_HALF);
       snprintf(fdbKeys.levtype, sizeof(fdbKeys.levtype), "%s", isML ? "ml" : "sfc");
       fdbKeys.levelist[0] = 0;
       if (isML) snprintf(fdbKeys.levelist, sizeof(fdbKeys.levelist), "%d", isML ? record->ilevel : 0);
@@ -357,12 +358,8 @@ grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
     }
   else
     {
-      const size_t nwrite = fileWrite(fileID2, gribbuffer, nbytes);
-      if (nwrite != nbytes)
-        {
-          perror(__func__);
-          Error("Could not write record for copying!");
-        }
+      size_t nwrite = fileWrite(fileID2, gribbuffer, nbytes);
+      if (nwrite != nbytes) SysError("Could not write record for copying!");
     }
 
   Free(gribbuffer);
@@ -371,21 +368,20 @@ grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 void
 grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t nmiss)
 {
-  const int filetype = streamptr->filetype;
-  const int fileID = streamptr->fileID;
-  const int vlistID = streamptr->vlistID;
-  const int gridID = vlistInqVarGrid(vlistID, varID);
-  const int zaxisID = vlistInqVarZaxis(vlistID, varID);
-  const int tsteptype = vlistInqVarTsteptype(vlistID, varID);
-  const int tsID = streamptr->curTsID;
-  const int date = (int) cdiDate_get(streamptr->tsteps[tsID].taxis.vdatetime.date);
-  const int time = cdiTime_get(streamptr->tsteps[tsID].taxis.vdatetime.time);
-  const int numavg = (tsteptype == TSTEP_AVG) ? streamptr->tsteps[tsID].taxis.numavg : 0;
+  int filetype = streamptr->filetype;
+  int fileID = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  int zaxisID = vlistInqVarZaxis(vlistID, varID);
+  int tsteptype = vlistInqVarTsteptype(vlistID, varID);
+  int tsID = streamptr->curTsID;
+  CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
+  int numavg = (tsteptype == TSTEP_AVG) ? streamptr->tsteps[tsID].taxis.numavg : 0;
   int comptype = streamptr->comptype;
 
   if (CDI_Debug) Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
-  const size_t datasize = gridInqSize(gridID);
+  size_t datasize = gridInqSize(gridID);
 
   if (comptype != CDI_COMPRESS_JPEG && comptype != CDI_COMPRESS_SZIP && comptype != CDI_COMPRESS_AEC) comptype = CDI_COMPRESS_NONE;
 
@@ -397,7 +393,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     }
 
   void *gribbuffer = NULL;
-  size_t nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, datasize,
+  size_t nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize,
                             data, nmiss, &gribbuffer, comptype, streamptr->gribContainers);
 
   if (filetype == CDI_FILETYPE_GRB && (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC))
@@ -408,11 +404,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     case CDI_PROTOCOL_ACROSS:
       {
 #ifdef HAVE_ACROSS
-        if (across_write_grib_message(streamptr, gribbuffer, nbytes))
-          {
-            Error("Failed to write GRIB slice!");
-            break;
-          }
+        if (across_write_grib_message(streamptr, gribbuffer, nbytes)) SysError("Failed to write GRIB slice!");
 #endif
       }
       break;
@@ -420,14 +412,14 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     case CDI_PROTOCOL_FDB:
       {
 #ifdef HAVE_LIBFDB5
-        const int zaxisType = zaxisInqType(zaxisID);
-        const double level = zaxisInqLevel(zaxisID, levelID);
+        int zaxisType = zaxisInqType(zaxisID);
+        double level = zaxisInqLevel(zaxisID, levelID);
 
         FDB_Keys fdbKeys;
-        snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int) cdiDate_get(streamptr->tsteps[tsID].taxis.vdatetime.date));
-        snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", cdiTime_get(streamptr->tsteps[tsID].taxis.vdatetime.time) / 100);
+        snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int) cdiDate_get(vDateTime.date));
+        snprintf(fdbKeys.time, sizeof(fdbKeys.time), "%04d", (short) (cdiTime_get(vDateTime.time) / 100));
         snprintf(fdbKeys.param, sizeof(fdbKeys.param), "%d", get_fdb_param(vlistInqVarParam(vlistID, varID)));
-        const bool isML = (zaxisType == ZAXIS_HYBRID || zaxisType == ZAXIS_HYBRID_HALF);
+        bool isML = (zaxisType == ZAXIS_HYBRID || zaxisType == ZAXIS_HYBRID_HALF);
         snprintf(fdbKeys.levtype, sizeof(fdbKeys.levtype), "%s", isML ? "ml" : "sfc");
         fdbKeys.levelist[0] = 0;
         int ilevel = (isML) ? (int) level : 0;
@@ -444,12 +436,8 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
         size_t (*myFileWrite)(int fileID, const void *restrict buffer, size_t len)
             = (size_t(*)(int, const void *restrict, size_t)) namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
 
-        const size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes);
-        if (nwrite != nbytes)
-          {
-            perror(__func__);
-            Error("Failed to write GRIB slice!");
-          }
+        size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes);
+        if (nwrite != nbytes) SysError("Failed to write GRIB slice!");
       }
       break;
     }
@@ -460,12 +448,12 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
 void
 grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t nmiss)
 {
-  const int vlistID = streamptr->vlistID, gridID = vlistInqVarGrid(vlistID, varID), zaxisID = vlistInqVarZaxis(vlistID, varID),
-            nlevs = zaxisInqSize(zaxisID);
-  const size_t gridsize = gridInqSize(gridID);
-  const double missval = vlistInqVarMissval(vlistID, varID);
+  int vlistID = streamptr->vlistID, gridID = vlistInqVarGrid(vlistID, varID), zaxisID = vlistInqVarZaxis(vlistID, varID),
+      nlevs = zaxisInqSize(zaxisID);
+  size_t gridsize = gridInqSize(gridID);
+  double missval = vlistInqVarMissval(vlistID, varID);
 
-  const size_t chunkLen = gridsize;
+  size_t chunkLen = gridsize;
   if (memtype == MEMTYPE_FLOAT)
     for (int levelID = 0; levelID < nlevs; levelID++)
       {
@@ -493,8 +481,8 @@ grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, siz
 void
 grb_write_record(stream_t *streamptr, int memtype, const void *data, size_t nmiss)
 {
-  const int varID = streamptr->record->varID;
-  const int levelID = streamptr->record->levelID;
+  int varID = streamptr->record->varID;
+  int levelID = streamptr->record->levelID;
   grb_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 }
 

@@ -1,374 +1,359 @@
-## Process this file with automake to produce Makefile.in
-#
-EXTRA_DIST = cdilib.c $(top_srcdir)/interfaces/f2003/bindGen.rb
-
-noinst_LTLIBRARIES = libcdiresunpack.la
+pkgconfigdir = $(libdir)/pkgconfig
+cmakedir = $(libdir)/cmake
 
 include_HEADERS =
+nodist_include_HEADERS =
 lib_LTLIBRARIES =
+check_LTLIBRARIES =
+noinst_LTLIBRARIES =
+EXTRA_PROGRAMS = make_fint
+EXTRA_DIST = \
+  cdilib.c \
+  make_cdilib
+nodist_pkgconfig_DATA =
+nodist_cmake_DATA =
+
+if FC_MOD_UPPERCASE
+mo_cdi_mod = MO_CDI.$(FCMODEXT)
+else !FC_MOD_UPPERCASE
+mo_cdi_mod = mo_cdi.$(FCMODEXT)
+endif !FC_MOD_UPPERCASE
 
 if ENABLE_CDI_LIB
-  lib_LTLIBRARIES += libcdi.la
-  include_HEADERS += cdi.h cdi_datetime.h julian_date.h calendar.h
-# add cdi.inc only if cfortran interface is required
-if USE_FC
-  include_HEADERS += cdi.inc
+include_HEADERS += \
+  calendar.h \
+  cdi.h \
+  cdi_datetime.h \
+  julian_date.h
+lib_LTLIBRARIES += libcdi.la
+nodist_pkgconfig_DATA += pkgconfig/cdi.pc
+nodist_cmake_DATA += \
+  cmake/cdi/cdi-config-version.cmake \
+  cmake/cdi/cdi-config.cmake
+if ENABLE_CF_INTERFACE
+include_HEADERS += cdi.inc
+endif ENABLE_CF_INTERFACE
+if ENABLE_ISOC_INTERFACE
+nodist_include_HEADERS += $(mo_cdi_mod)
+lib_LTLIBRARIES += libcdi_f2003.la
+nodist_pkgconfig_DATA += pkgconfig/cdi_f2003.pc
+endif ENABLE_ISOC_INTERFACE
+if ENABLE_MPI
+include_HEADERS += cdipio.h
+lib_LTLIBRARIES += libcdipio.la
+nodist_pkgconfig_DATA += pkgconfig/cdipio.pc
+if ENABLE_CF_INTERFACE
+include_HEADERS += cdipio.inc
+endif ENABLE_CF_INTERFACE
+endif ENABLE_MPI
+else !ENABLE_CDI_LIB
+noinst_LTLIBRARIES += libcdi.la
+if ENABLE_ISOC_INTERFACE
+noinst_LTLIBRARIES += libcdi_f2003.la
+endif ENABLE_ISOC_INTERFACE
+if ENABLE_MPI
+noinst_LTLIBRARIES += libcdipio.la
+endif ENABLE_MPI
+endif !ENABLE_CDI_LIB
+
+if with_on_demand_check_programs
+check_LTLIBRARIES += libcdiresunpack.la
+else !with_on_demand_check_programs
+noinst_LTLIBRARIES += libcdiresunpack.la
+endif !with_on_demand_check_programs
+
+AM_CPPFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
+if ENABLE_MPI
+# TODO: this needs a refactoring but for now we set this macro here and not in
+# config.h because the macro is used in several files that do not include the
+# header file directly.
+AM_CPPFLAGS += -DUSE_MPI
 endif
-if CREATE_ISOC
-  lib_LTLIBRARIES += libcdi_f2003.la
-endif
-else
-  noinst_LTLIBRARIES += libcdi.la
-if CREATE_ISOC
-  noinst_LTLIBRARIES += libcdi_f2003.la
-endif
-endif
-
-AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
-
-libcdi_la_SOURCES = 	 \
-	async_worker.c   \
-	async_worker.h	 \
-	basetime.c     	 \
-	basetime.h	 \
-	binary.c	 \
-	binary.h	 \
-	calendar.c 	 \
-	calendar.h	 \
-	cdf.c            \
-	cdf.h	 	 \
-	cdf_config.h	 \
-	cdf_int.c	 \
-	cdf_int.h	 \
-	cdf_util.c	 \
-	cdf_util.h	 \
-	cdi.h	 	 \
-	cdi_datetime.c   \
-	cdi_datetime.h   \
-	cdi_error.c      \
-	cdi_limits.h	 \
-	cdi_util.c       \
-	cgribex.h	 \
-	cgribexlib.c  	 \
-	cksum.c		 \
-	cksum.h		 \
-	cdi_cksum.c	 \
-	cdi_cksum.h 	 \
-	cdi_uuid.h	 \
-	datetime.h	 \
-	dmemory.c      	 \
-	dmemory.h	 \
-	dtypes.h	 \
-	error.c        	 \
-	error.h	 	 \
-	exse.h	 	 \
-	extra.h	 	 \
-	extralib.c       \
-	file.c         	 \
-	file.h	 	 \
-	get_num_missvals.c \
-	get_num_missvals.h \
-	gaussian_latitudes.c \
-	gribapi.c  	 \
-	gribapi.h	 \
-	gribapi_utilities.h \
-	grid.c           \
-	grid.h	 	 \
-	ieg.h	 	 \
-	ieglib.c         \
-	input_file.c	 \
-	input_file.h     \
-	institution.c  	 \
-	institution.h  	 \
-	julian_date.c  	 \
-	julian_date.h  	 \
-	model.c        	 \
-	model.h        	 \
-	namespace.c      \
-	namespace.h      \
-	serialize.h	\
-	serialize.c	\
-	referenceCounting.c \
-	referenceCounting.h \
-	resource_handle.c\
-	resource_handle.h\
-	service.h	 \
-	servicelib.c     \
-	stream_cdf_i.c   \
-	stream_cdf_o.c   \
-	stream_cdf_time.c \
-	stream_cdf.h	 \
-	stream_cgribex.c \
-	stream_cgribex.h \
-	stream_ext.c     \
-	stream_ext.h	 \
-	stream_grb.c     \
-	stream_grb.h     \
-	stream_gribapi.h \
-	stream_ieg.c     \
-	stream_ieg.h	 \
-	cdi_int.c        \
-	cdi_int.h	 \
-	cdi_across.c        \
-	cdi_across.h	 \
-	cdi_fdb.c        \
-	cdi_fdb.h	 \
-	stream_scan.c    \
-	stream_scan.h	 \
-	stream_record.c  \
-	stream_srv.c     \
-	stream_srv.h	 \
-	stream_var.c     \
-        grb_write.c      \
-        grb_read.c       \
-        cdf_write.c      \
-        cdf_read.c       \
-        cdf_lazy_grid.c  \
-        cdf_lazy_grid.h  \
-        subtype.c        \
-        subtype.h        \
-	swap.h	 	 \
-	table.c        	 \
-	table.h	 	 \
-	tablepar.h	 \
-	taxis.c          \
-	taxis.h	         \
-	tsteps.c         \
-	util.c         	 \
-	varscan.c      	 \
-	varscan.h        \
-	version.c      	 \
-	vlist.c 	 \
-	vlist.h	         \
-	cdi_key.c 	 \
-	cdi_key.h 	 \
-	cdi_att.c 	 \
-	cdi_att.h 	 \
-	vlist_var.c 	 \
-	vlist_var.h	 \
-	vlist_var_pack.c \
-	vlist_var_key.c  \
-	zaxis.c		 \
-	zaxis.h		 \
-	stream.c         \
-	stream_write.c   \
-	stream_read.c    \
-	swap.c           \
-	iterator.c          \
-	iterator.h          \
-	iterator_fallback.c \
-	iterator_fallback.h \
-	iterator_grib.c     \
-	iterator_grib.h
-
-# cfortran.h is an optional part of libcdi
-libcdi_la_USE_FC_extra_sources = \
-	cfortran.h       \
-	cdiFortran.c
-
-# these only contain code if grib_api is available
-libcdi_la_HAVE_LIBGRIB_API_extra_sources = \
-	gribapi_utilities.c stream_gribapi.c
-
-if USE_FC
-libcdi_la_SOURCES += 	 \
-	$(libcdi_la_USE_FC_extra_sources)
-endif
-
-if HAVE_LIBGRIB_API
-libcdi_la_SOURCES += 	 \
-	$(libcdi_la_HAVE_LIBGRIB_API_extra_sources)
-endif
-
-EXTRA_DIST += \
-	$(libcdi_la_USE_FC_extra_sources) \
-	$(libcdi_la_HAVE_LIBGRIB_API_extra_sources) \
-	$(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
-
-
-
-libcdi_f2003_la_SOURCES = mo_cdi.f90
-libcdi_f2003_ladir = $(includedir)
-nodist_libcdi_f2003_la_HEADERS =
-if CREATE_ISOC
-if FORTRAN_MOD_UC
-nodist_libcdi_f2003_la_HEADERS += MO_CDI.$(FCMODEXT)
-else
-nodist_libcdi_f2003_la_HEADERS += mo_cdi.$(FCMODEXT)
-endif
-endif
-libcdi_f2003_la_LIBADD = libcdi.la
 
 libcdiresunpack_la_SOURCES = \
-	resource_unpack.c
+  resource_unpack.c \
+  resource_unpack.h
+libcdiresunpack_la_LIBADD = libcdi.la
 
-if USE_MPI
-if ENABLE_CDI_LIB
-lib_LTLIBRARIES += libcdipio.la
-include_HEADERS += cdipio.h cdipio.inc
-else
-noinst_LTLIBRARIES += libcdipio.la
-endif
-endif
+make_fint_SOURCES = make_fint.c
+make_fint_CFLAGS = -static
+make_fint_LDADD = $(LIBOBJS)
 
-libcdipio_la_SOURCES =							\
-	cdipio.h							\
-	cdipioFortran.c							\
-	cfortran.h							\
-	pio.c								\
-	pio.h								\
-	pio_comm.c							\
-	pio_comm.h							\
-	pio_conf.c							\
-	pio_conf.h							\
-	pio_dbuffer.c							\
-	pio_id_set.h							\
-	pio_impl.h							\
-	pio_interface.c							\
-	pio_interface.h							\
-	pio_mpinonb.c							\
-	pio_mpi_fw_ordered.c						\
-	pio_mpi_fw_at_all.c						\
-	pio_mpi_fw_at_reblock.c						\
-	pio_record_send.c						\
-	pio_posixasynch.c						\
-	pio_posixfpguardsendrecv.c					\
-	pio_posixnonb.c							\
-	pio_list_set.c							\
-	resource_unpack.h						\
-	resource_unpack.c						\
-	pio_client.c							\
-	pio_client.h							\
-	pio_roles.c							\
-	pio_rpc.c							\
-	pio_rpc.h							\
-	pio_server.c							\
-	pio_server.h							\
-	pio_serialize.h							\
-	pio_serialize.c							\
-	pio_util.c							\
-	pio_util.h							\
-	pio_cdf_int.h
+libcdi_la_SOURCES = \
+  async_worker.c \
+  async_worker.h \
+  basetime.c \
+  basetime.h \
+  binary.c \
+  binary.h \
+  calendar.c \
+  calendar.h \
+  cdf.c \
+  cdf.h \
+  cdf_config.h \
+  cdf_int.c \
+  cdf_int.h \
+  cdf_lazy_grid.c \
+  cdf_lazy_grid.h \
+  cdf_read.c \
+  cdf_records.c \
+  cdf_util.c \
+  cdf_util.h \
+  cdf_write.c \
+  cdi.h \
+  cdi_across.c \
+  cdi_across.h \
+  cdi_att.c \
+  cdi_att.h \
+  cdi_cksum.c \
+  cdi_cksum.h \
+  cdi_datetime.c \
+  cdi_datetime.h \
+  cdi_error.c \
+  cdi_fdb.c \
+  cdi_fdb.h \
+  cdi_int.c \
+  cdi_int.h \
+  cdi_key.c \
+  cdi_key.h \
+  cdi_limits.h \
+  cdi_query.c \
+  cdi_util.c \
+  cdi_uuid.h \
+  cgribex.h \
+  cgribexlib.c \
+  cksum.c \
+  cksum.h \
+  dmemory.c \
+  dmemory.h \
+  dtypes.h \
+  error.c \
+  error.h \
+  exse.h \
+  extra.h \
+  extralib.c \
+  file.c \
+  file.h \
+  gaussian_latitudes.c \
+  get_num_missvals.c \
+  get_num_missvals.h \
+  grb_read.c \
+  grb_write.c \
+  gribapi.c \
+  gribapi.h \
+  gribapi_utilities.h \
+  grid.c \
+  grid.h \
+  ieg.h \
+  ieglib.c \
+  input_file.c \
+  input_file.h \
+  institution.c \
+  institution.h \
+  iterator.c \
+  iterator.h \
+  iterator_fallback.c \
+  iterator_fallback.h \
+  iterator_grib.c \
+  iterator_grib.h \
+  julian_date.c \
+  julian_date.h \
+  model.c \
+  model.h \
+  namespace.c \
+  namespace.h \
+  normalize_month.h \
+  referenceCounting.c \
+  referenceCounting.h \
+  resource_handle.c \
+  resource_handle.h \
+  serialize.c \
+  serialize.h \
+  service.h \
+  servicelib.c \
+  stream.c \
+  stream_cdf.h \
+  stream_cdf_i.c \
+  stream_cdf_o.c \
+  stream_cdf_postdef.h \
+  stream_cdf_time.c \
+  stream_cgribex.c \
+  stream_cgribex.h \
+  stream_ext.c \
+  stream_ext.h \
+  stream_grb.c \
+  stream_grb.h \
+  stream_gribapi.h \
+  stream_ieg.c \
+  stream_ieg.h \
+  stream_read.c \
+  stream_record.c \
+  stream_scan.c \
+  stream_scan.h \
+  stream_srv.c \
+  stream_srv.h \
+  stream_var.c \
+  stream_write.c \
+  subtype.c \
+  subtype.h \
+  swap.c \
+  swap.h \
+  table.c \
+  table.h \
+  tablepar.h \
+  taxis.c \
+  taxis.h \
+  tsteps.c \
+  util.c \
+  varscan.c \
+  varscan.h \
+  version.c \
+  vlist.c \
+  vlist.h \
+  vlist_var.c \
+  vlist_var.h \
+  vlist_var_key.c \
+  vlist_var_pack.c \
+  zaxis.c \
+  zaxis.h
 
-libcdipio_la_HAVE_PARALLEL_NC4_extra_sources =				\
-	pio_cdf_int.c
+if ENABLE_CF_INTERFACE
+libcdi_la_SOURCES += \
+  cdiFortran.c \
+  cfortran.h
+endif ENABLE_CF_INTERFACE
 
-if USE_MPI
+if HAVE_LIBGRIB_API
+libcdi_la_SOURCES += \
+  gribapi_utilities.c \
+  stream_gribapi.c
+endif HAVE_LIBGRIB_API
+
+libcdi_f2003_la_SOURCES = mo_cdi.f90
+libcdi_f2003_la_LIBADD = libcdi.la
+
+libcdipio_la_SOURCES = \
+  cdipio.h \
+  pio.c \
+  pio.h \
+  pio_cdf_int.h \
+  pio_client.c \
+  pio_client.h \
+  pio_comm.c \
+  pio_comm.h \
+  pio_conf.c \
+  pio_conf.h \
+  pio_dbuffer.c \
+  pio_dbuffer.h \
+  pio_dist_grid.c \
+  pio_dist_grid.h \
+  pio_id_set.h \
+  pio_idxlist_cache.c \
+  pio_idxlist_cache.h \
+  pio_impl.h \
+  pio_interface.c \
+  pio_interface.h \
+  pio_mpi_fw_at_all.c \
+  pio_mpi_fw_at_reblock.c \
+  pio_mpi_fw_ordered.c \
+  pio_mpinonb.c \
+  pio_posixasynch.c \
+  pio_posixfpguardsendrecv.c \
+  pio_posixnonb.c \
+  pio_record_send.c \
+  pio_roles.c \
+  pio_rpc.c \
+  pio_rpc.h \
+  pio_serialize.c \
+  pio_serialize.h \
+  pio_server.c \
+  pio_server.h \
+  pio_util.c \
+  pio_util.h \
+  pio_xmap_cache.c \
+  pio_xmap_cache.h \
+  resource_unpack.c \
+  resource_unpack.h
+
+if ENABLE_CF_INTERFACE
+libcdipio_la_SOURCES += \
+  cdipioFortran.c \
+  cfortran.h
+endif ENABLE_CF_INTERFACE
+
 if HAVE_PARALLEL_NC4
-libcdipio_la_SOURCES += $(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
-endif
-endif
+libcdipio_la_SOURCES += pio_cdf_int.c
+endif HAVE_PARALLEL_NC4
 
-libcdipio_la_LIBADD   = libcdi.la $(LIBRT) $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
+libcdipio_la_LIBADD = libcdi.la $(LIBRT) $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(MPI_C_LIB)
 
-#
-#cdilib.c:
-#	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
-#
-#cdilib.o: cdilib.c
-#	$(COMPILE) -c $<
+if MAINTAINER_MODE
+cdi.inc: cdi.h make_fint.c
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) make_fint
+	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute ./make_fint -o $(@D) $<
+cdiFortran.c: cdi.inc
+	$(AM_V_at)test -f $@ || rm -f $<
+	$(AM_V_at)test -f $@ || $(MAKE) $(AM_MAKEFLAGS) $<
 
-LOCALTARGETS  =
-if ENABLE_CDI_LIB
-LOCALTARGETS += cmake/cdi/cdi-config.cmake
-LOCALTARGETS += cmake/cdi/cdi-config-version.cmake
-LOCALTARGETS += pkgconfig/cdi.pc
-if USE_MPI
-LOCALTARGETS += pkgconfig/cdipio.pc
-endif
-if CREATE_ISOC
-LOCALTARGETS += pkgconfig/cdi_f2003.pc
-endif
-endif
+cdipio.inc: cdipio.h make_fint.c cdi.inc
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) make_fint
+	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute ./make_fint -o $(@D) $<
+cdipioFortran.c: cdipio.inc
+	$(AM_V_at)test -f $@ || rm -f $<
+	$(AM_V_at)test -f $@ || $(MAKE) $(AM_MAKEFLAGS) $<
 
-#
-#	cat $(top_srcdir)/src/cdi.h |sed -e 's/SizeType/size_t/g' -e s/DateType/int64_t/g > cditmp.h
-mo_cdi.f90: @MAINTAINER_MODE_TRUE@ $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
-	cat $(top_srcdir)/src/cdi.h |sed -e 's/SizeType/int/g' -e s/DateType/int/g > cditmp.h
-	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb cditmp.h $@
-	rm cditmp.h
+mo_cdi.f90: cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
+	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $< $@
 
-if FORTRAN_MOD_UC
-MO_CDI.$(FCMODEXT): mo_cdi.lo
-else
-mo_cdi.$(FCMODEXT): mo_cdi.lo
-endif
-	@if test ! -f $@; then rm -f $<; $(MAKE) $<; fi
-#
-cmake/cdi/cdi-config.cmake: cmake/cdi/cdi-config.cmake.in ../config.status
-	(cd .. ; ./config.status src/cmake/cdi/cdi-config.cmake)
+cdilib.c: $(libcdi_la_SOURCES) $(srcdir)/make_cdilib
+	$(AM_V_GEN)CPP='$(CPP)' $(srcdir)/make_cdilib $(srcdir)
+else !MAINTAINER_MODE
+cdiFortran.c cdi.inc cdipioFortran.c cdipio.inc mo_cdi.f90 cdilib.c:
+	@:;{ \
+	  echo "ERROR: cannot generate '$@' when the maintainer mode is disabled:"; \
+          echo "       re-configure with the '--enable-maintainer-mode' option"; \
+	} >&2; exit 1
+endif !MAINTAINER_MODE
 
-cmake/cdi/cdi-config-version.cmake: cmake/cdi/cdi-config-version.cmake.in ../config.status
-	(cd .. ; ./config.status src/cmake/cdi/cdi-config-version.cmake)
+$(mo_cdi_mod): mo_cdi.lo
+	$(AM_V_at)test -f $@ || rm -f $<
+	$(AM_V_at)test -f $@ || $(MAKE) $(AM_MAKEFLAGS) $<
 
-pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
-	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
+cmake/cdi/cdi-config.cmake: $(top_builddir)/config.status cmake/cdi/cdi-config.cmake.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-pkgconfig/cdipio.pc: pkgconfig/cdipio.pc.in ../config.status
-	(cd .. ; ./config.status src/pkgconfig/cdipio.pc)
+cmake/cdi/cdi-config-version.cmake: $(top_builddir)/config.status cmake/cdi/cdi-config-version.cmake.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-pkgconfig/cdi_f2003.pc: pkgconfig/cdi_f2003.pc.in ../config.status
-	(cd .. ; ./config.status src/pkgconfig/cdi_f2003.pc)
+pkgconfig/cdi.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdi.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-cdilib.c: 
-	(cd $(top_srcdir)/src ; ./make_cdilib )
-#
-all-local: $(LOCALTARGETS)
-#
-CLEANFILES  := `ls *~`
-#CLEANFILES += cdilib.c
-if CREATE_ISOC
-if FORTRAN_MOD_UC
-CLEANFILES += MO_CDI.$(FCMODEXT)
-else
-CLEANFILES += mo_cdi.$(FCMODEXT)
-endif
+pkgconfig/cdipio.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdipio.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+
+pkgconfig/cdi_f2003.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdi_f2003.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+
+MOSTLYCLEANFILES = make_fint
+if ENABLE_ISOC_INTERFACE
+MOSTLYCLEANFILES += $(mo_cdi_mod)
 endif
 
-if ENABLE_CDI_LIB
-CMAKECONFIG_FILES = cmake/cdi/cdi-config.cmake
-CLEANFILES += cmake/cdi/cdi-config.cmake
-CMAKECONFIG_FILES += cmake/cdi/cdi-config-version.cmake
-CLEANFILES += cmake/cdi/cdi-config-version.cmake
-PKGCONFIG_FILES = pkgconfig/cdi.pc
-CLEANFILES += pkgconfig/cdi.pc
-if USE_MPI
-PKGCONFIG_FILES += pkgconfig/cdipio.pc
-CLEANFILES += pkgconfig/cdipio.pc
-endif
-if CREATE_ISOC
-PKGCONFIG_FILES += pkgconfig/cdi_f2003.pc
-CLEANFILES += pkgconfig/cdi_f2003.pc
-endif
+MAINTAINERCLEANFILES = \
+  cdi.inc \
+  cdiFortran.c \
+  cdilib.c \
+  cdipio.inc \
+  cdipioFortran.c \
+  mo_cdi.f90
 
-install-exec-local: $(PKGCONFIG_FILES) $(CMAKECONFIG_FILES)
-	$(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig"
-	@for pkgconfigfile in $(PKGCONFIG_FILES) ; do \
-		echo $(install_sh_DATA) $$pkgconfigfile "$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
-		$(install_sh_DATA) $$pkgconfigfile "$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
-	done
-	$(mkinstalldirs) "$(DESTDIR)$(libdir)/cmake"
-	@for cmakeconfigfile in $(CMAKECONFIG_FILES) ; do \
-		echo $(install_sh_DATA) $$cmakeconfigfile "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
-		$(install_sh_DATA) $$cmakeconfigfile "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
-	done
+# Compile programs using Libtool:
+COMPILE = $(LTCOMPILE)
+FCCOMPILE = $(LTFCCOMPILE)
+PPFCCOMPILE = $(LTPPFCCOMPILE)
+CXXCOMPILE = $(LTCXXCOMPILE)
 
-uninstall-local:
-	@for pkgconfigfile in $(PKGCONFIG_FILES) ; do \
-		echo rm -f "$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
-		rm -f "$(DESTDIR)$(libdir)/$$pkgconfigfile" ; \
-	done
-	-@rmdir "$(DESTDIR)$(libdir)/pkgconfig"
-	@for cmakeconfigfile in $(CMAKECONFIG_FILES) ; do \
-		echo rm -f "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
-		rm -f "$(DESTDIR)$(libdir)/$$cmakeconfigfile" ; \
-	done
-	-@rmdir "$(DESTDIR)$(libdir)/cmake"
-
-endif
-
-install-exec-hook:
-	-@rmdir "$(DESTDIR)$(libdir)"
-install-data-hook:
-	-@rmdir "$(DESTDIR)$(includedir)"
-
+# Compile *.F90 without CPPFLAGS, which are normally meant for the C compiler
+# and might not be compatible with the Fortran compiler:
+LTPPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)

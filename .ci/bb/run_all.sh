@@ -14,7 +14,7 @@ case $(uname -s) in
       mpipc*.mpimet.mpg.de\ * | \
       breeze*.mpimet.mpg.de\ *)
         test_environment='breeze-mpim' ;;
-      levante*.atos.local\ *)
+      levante*.lvt.dkrz.de\ *)
         test_environment='levante-dkrz' ;;
       daint*.login.cscs.ch\ *)
         test_environment='daint-cscs' ;;

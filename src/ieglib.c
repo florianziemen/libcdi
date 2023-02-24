@@ -16,7 +16,7 @@ static int iegDefaultDprec = 0;
 
 // A version string.
 #undef LIBVERSION
-#define LIBVERSION 1.4.2
+#define LIBVERSION 1.5.0
 #define XSTRING(x) #x
 #define STRING(x) XSTRING(x)
 static const char ieg_libvers[] = STRING(LIBVERSION);
@@ -49,13 +49,13 @@ iegLibInit(void)
                   {
                   case '4': iegDefaultDprec = EXSE_SINGLE_PRECISION; break;
                   case '8': iegDefaultDprec = EXSE_DOUBLE_PRECISION; break;
-                  default: Message("Invalid digit in %s: %s", envName, envString);
+                  default: Warning("Invalid digit in %s: %s", envName, envString);
                   }
                 break;
               }
             default:
               {
-                Message("Invalid character in %s: %s", envName, envString);
+                Warning("Invalid character in %s: %s", envName, envString);
                 break;
               }
             }
@@ -128,44 +128,44 @@ iegCheckFiletype(int fileID, int *swap)
 
   if (fileRead(fileID, buffer, 4) != 4) return 0;
 
-  const size_t blocklen = get_UINT32(buffer);
-  const size_t sblocklen = get_SUINT32(buffer);
+  size_t blocklen = get_UINT32(buffer);
+  size_t sblocklen = get_SUINT32(buffer);
 
   if (IEG_Debug) Message("blocklen = %d sblocklen = %d", blocklen, sblocklen);
 
   // clang-format off
-  if ( blocklen == 636 || blocklen == 640 )
+  if (blocklen == 636 || blocklen == 640)
     {
      *swap = 0;
       fact = 4;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return 0;
+      if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
       pbuf = buffer+(37+4)*4;    dimx = (size_t) get_UINT32(pbuf);
       pbuf = buffer+(37+5)*4;    dimy = (size_t) get_UINT32(pbuf);
       pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
     }
-  else if ( blocklen == 1040 || blocklen == 1036 )
+  else if (blocklen == 1040 || blocklen == 1036)
     {
      *swap = 0;
       fact = 8;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return 0;
+      if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
       pbuf = buffer+(37+4)*4;    dimx = (size_t) get_UINT32(pbuf);
       pbuf = buffer+(37+5)*4;    dimy = (size_t) get_UINT32(pbuf);
       pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
     }
-  else if ( sblocklen == 636 || sblocklen == 640 )
+  else if (sblocklen == 636 || sblocklen == 640)
     {
      *swap = 1;
       fact = 4;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return 0;
+      if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
       pbuf = buffer+(37+4)*4;     dimx = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+(37+5)*4;     dimy = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
     }
-  else if ( sblocklen == 1040 || sblocklen == 1036 )
+  else if (sblocklen == 1040 || sblocklen == 1036)
     {
      *swap = 1;
       fact = 8;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return 0;
+      if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
       pbuf = buffer+(37+4)*4;     dimx = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+(37+5)*4;     dimy = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
@@ -174,13 +174,10 @@ iegCheckFiletype(int fileID, int *swap)
 
   fileRewind(fileID);
 
-  if (IEG_Debug)
-    {
-      Message("swap = %d fact = %d", *swap, fact);
-      Message("dimx = %lu dimy = %lu data = %lu", dimx, dimy, data);
-    }
+  if (IEG_Debug) Message("swap = %d fact = %d", *swap, fact);
+  if (IEG_Debug) Message("dimx = %lu dimy = %lu data = %lu", dimx, dimy, data);
 
-  const int found = data && (dimx * dimy * fact == data || dimx * dimy * 8 == data);
+  int found = data && (dimx * dimy * fact == data || dimx * dimy * 8 == data);
   return found;
 }
 
@@ -204,10 +201,10 @@ iegInqData(void *ieg, int prec, void *data)
 {
   iegrec_t *iegp = (iegrec_t *) ieg;
   int ierr = 0;
-  const int byteswap = iegp->byteswap;
-  const size_t datasize = iegp->datasize;
+  int byteswap = iegp->byteswap;
+  size_t datasize = iegp->datasize;
   void *buffer = iegp->buffer;
-  const int dprec = iegp->dprec;
+  int dprec = iegp->dprec;
 
   switch (dprec)
     {
@@ -281,8 +278,8 @@ iegDefData(iegrec_t *iegp, int prec, const void *data)
   int dprec = iegDefaultDprec ? iegDefaultDprec : iegp->dprec;
   iegp->dprec = dprec ? dprec : prec;
 
-  const size_t datasize = (size_t) IEG_G_NumLon(iegp->igdb) * (size_t) IEG_G_NumLat(iegp->igdb);
-  const size_t blocklen = datasize * (size_t) dprec;
+  size_t datasize = (size_t) IEG_G_NumLon(iegp->igdb) * (size_t) IEG_G_NumLat(iegp->igdb);
+  size_t blocklen = datasize * (size_t) dprec;
 
   iegp->datasize = datasize;
 
@@ -353,12 +350,12 @@ iegRead(int fileID, void *ieg)
 
   if (!iegp->checked)
     {
-      const int status = iegCheckFiletype(fileID, &iegp->byteswap);
+      int status = iegCheckFiletype(fileID, &iegp->byteswap);
       if (status == 0) Error("Not a IEG file!");
       iegp->checked = 1;
     }
 
-  const int byteswap = iegp->byteswap;
+  int byteswap = iegp->byteswap;
 
   // read header record
   size_t blocklen = binReadF77Block(fileID, byteswap);
@@ -463,8 +460,8 @@ iegWrite(int fileID, void *ieg)
     INT32 i32[200];
     float fvct[100];
   } buf;
-  const int dprec = iegp->dprec;
-  const int byteswap = iegp->byteswap;
+  int dprec = iegp->dprec;
+  int byteswap = iegp->byteswap;
 
   // write header record
   size_t blocklen = (dprec == EXSE_SINGLE_PRECISION) ? 636 : 1040;

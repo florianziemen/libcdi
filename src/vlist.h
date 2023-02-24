@@ -9,6 +9,7 @@
 #include "error.h"
 #endif
 
+#include <stdbool.h>
 #include <stddef.h> /* size_t */
 
 #ifndef CDI_LIMITS_H
@@ -46,6 +47,10 @@ typedef struct
 {
   bool isUsed;
   bool flag;
+  bool lvalidrange;
+  signed char xyz;   /* order of spatial dimensions,
+                      * a permutation of 123 */
+  bool missvalused;  // true if missval is defined
   int mvarID;
   int fvarID;
   int param;
@@ -59,21 +64,13 @@ typedef struct
   int tableID;
   int timave;
   int nsb;  // Number of significant bits
-  int xyz;
-  bool missvalused;  // true if missval is defined
-  bool lvalidrange;
-  char *extra;
   double missval;
-  double scalefactor;
-  double addoffset;
   double validrange[2];
   levinfo_t *levinfo;
   int comptype;   // compression type
   int complevel;  // compression level
   cdi_keys_t keys;
   cdi_atts_t atts;
-  int iorank;
-
   int subtypeID;  // subtype ID for tile-related meta-data, currently for GRIB-API only.
 
   int opt_grib_nentries;                // current no. key-value pairs
@@ -109,12 +106,11 @@ typedef struct
 vlist_t *vlist_to_pointer(int vlistID);
 void cdiVlistMakeInternal(int vlistID);
 void cdiVlistMakeImmutable(int vlistID);
-void vlistCheckVarID(const char *caller, int vlistID, int varID);
-void cdiVlistDestroy_(int vlistID);
+void cdiVlistDestroy_(int vlistID, bool assertInternal);
 int vlistInqVarMissvalUsed(int vlistID, int varID);
 int vlistHasTime(int vlistID);
 
-void vlistUnpack(char *buffer, int bufferSize, int *pos, int originNamespace, void *context, int force_id);
+int vlistUnpack(char *buffer, int bufferSize, int *pos, int originNamespace, void *context, int force_id);
 
 /*      vlistDefVarValidrange: Define the valid range of a Variable */
 void vlistDefVarValidrange(int vlistID, int varID, const double *validrange);
@@ -122,7 +118,7 @@ void vlistDefVarValidrange(int vlistID, int varID, const double *validrange);
 /*      vlistInqVarValidrange: Get the valid range of a Variable */
 int vlistInqVarValidrange(int vlistID, int varID, double *validrange);
 
-void vlistInqVarDimorder(int vlistID, int varID, int (*outDimorder)[3]);
+void vlistInqVarDimorder(int vlistID, int varID, int outDimorder[3]);
 
 void resize_opt_grib_entries(var_t *var, int nentries);
 

@@ -1,7 +1,14 @@
 #include "cdi_datetime.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 // ==================================================================
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+  // clang-format off
 void
 cdiDecodeDate(int date, int *year, int *month, int *day)
 {
@@ -38,6 +45,11 @@ cdiEncodeTime(int hour, int minute, int second)
 {
   return hour * 10000 + minute * 100 + second;
 }
+  // clang-format on
+
+#ifdef __cplusplus
+}
+#endif
 // ==================================================================
 
 CdiDate
@@ -206,6 +218,16 @@ cdiDateTime_isNE(const CdiDateTime cdiDateTime1, const CdiDateTime cdiDateTime2)
 }
 
 bool
+cdiDateTime_isLT(const CdiDateTime cdiDateTime1, const CdiDateTime cdiDateTime2)
+{
+  const int64_t date1 = cdiDate_get(cdiDateTime1.date);
+  const int64_t date2 = cdiDate_get(cdiDateTime2.date);
+  const int time1 = cdiTime_get(cdiDateTime1.time);
+  const int time2 = cdiTime_get(cdiDateTime2.time);
+  return (date1 < date2 || (date1 == date2 && time1 < time2));
+}
+
+bool
 cdiDateTime_isNull(const CdiDateTime cdiDateTime)
 {
   // clang-format off
@@ -217,4 +239,21 @@ cdiDateTime_isNull(const CdiDateTime cdiDateTime)
       && cdiDateTime.time.second == 0
       && cdiDateTime.time.ms == 0);
   // clang-format on
+}
+
+#define DATE_FORMAT "%5.4d-%2.2d-%2.2d"
+#define TIME_FORMAT "%2.2d:%2.2d:%2.2d"
+
+const char *
+CdiDateTime_string(CdiDateTime cdiDateTime)
+{
+  int year, month, day;
+  cdiDate_decode(cdiDateTime.date, &year, &month, &day);
+  int hour, minute, second, ms;
+  cdiTime_decode(cdiDateTime.time, &hour, &minute, &second, &ms);
+
+  static char datetimeString[64];
+  snprintf(datetimeString, sizeof(datetimeString), DATE_FORMAT "T" TIME_FORMAT, year, month, day, hour, minute, second);
+
+  return datetimeString;
 }

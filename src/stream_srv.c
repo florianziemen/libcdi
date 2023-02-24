@@ -9,7 +9,6 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "varscan.h"
-#include "datetime.h"
 #include "service.h"
 #include "stream_scan.h"
 #include "stream_srv.h"
@@ -75,14 +74,14 @@ int srvInqRecord(stream_t *streamptr, int *varID, int *levelID)
 static void
 srv_read_recordSP(stream_t *streamptr, float *data, size_t *nmiss)
 {
-  const int vlistID = streamptr->vlistID;
-  const int fileID = streamptr->fileID;
-  const int tsID = streamptr->curTsID;
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
+  int tsID = streamptr->curTsID;
 
-  const int vrecID = streamptr->tsteps[tsID].curRecID;
-  const int recID = streamptr->tsteps[tsID].recIDs[vrecID];
-  const int varID = streamptr->tsteps[tsID].records[recID].varID;
-  const off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+  int vrecID = streamptr->tsteps[tsID].curRecID;
+  int recID = streamptr->tsteps[tsID].recIDs[vrecID];
+  int varID = streamptr->tsteps[tsID].records[recID].varID;
+  off_t recpos = streamptr->tsteps[tsID].records[recID].position;
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
@@ -93,8 +92,8 @@ srv_read_recordSP(stream_t *streamptr, float *data, size_t *nmiss)
   srvInqHeader(srvp, header);
   srvInqDataSP(srvp, data);
 
-  const double missval = vlistInqVarMissval(vlistID, varID);
-  const size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  double missval = vlistInqVarMissval(vlistID, varID);
+  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
 
   *nmiss = get_num_missvalsSP(size, data, (float) missval);
 
@@ -104,14 +103,14 @@ srv_read_recordSP(stream_t *streamptr, float *data, size_t *nmiss)
 static void
 srv_read_recordDP(stream_t *streamptr, double *data, size_t *nmiss)
 {
-  const int vlistID = streamptr->vlistID;
-  const int fileID = streamptr->fileID;
-  const int tsID = streamptr->curTsID;
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
+  int tsID = streamptr->curTsID;
 
-  const int vrecID = streamptr->tsteps[tsID].curRecID;
-  const int recID = streamptr->tsteps[tsID].recIDs[vrecID];
-  const int varID = streamptr->tsteps[tsID].records[recID].varID;
-  const off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+  int vrecID = streamptr->tsteps[tsID].curRecID;
+  int recID = streamptr->tsteps[tsID].recIDs[vrecID];
+  int varID = streamptr->tsteps[tsID].records[recID].varID;
+  off_t recpos = streamptr->tsteps[tsID].records[recID].position;
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
@@ -122,8 +121,8 @@ srv_read_recordDP(stream_t *streamptr, double *data, size_t *nmiss)
   srvInqHeader(srvp, header);
   srvInqDataDP(srvp, data);
 
-  const double missval = vlistInqVarMissval(vlistID, varID);
-  const size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  double missval = vlistInqVarMissval(vlistID, varID);
+  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
 
   *nmiss = get_num_missvalsDP(size, data, missval);
 
@@ -210,9 +209,9 @@ srv_write_record(stream_t *streamptr, int memtype, const void *data)
 static void
 srv_add_record(stream_t *streamptr, int param, int level, size_t xsize, size_t ysize, size_t recsize, off_t position, int prec)
 {
-  const int vlistID = streamptr->vlistID;
-  const int tsID = streamptr->curTsID;
-  const int recID = recordNewEntry(streamptr, tsID);
+  int vlistID = streamptr->vlistID;
+  int tsID = streamptr->curTsID;
+  int recID = recordNewEntry(streamptr, tsID);
   record_t *record = &streamptr->tsteps[tsID].records[recID];
 
   record->size = recsize;
@@ -226,11 +225,15 @@ srv_add_record(stream_t *streamptr, int param, int level, size_t xsize, size_t y
   grid->x.size = xsize;
   grid->y.size = ysize;
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
-  const int gridID = gridAdded.Id;
-  if (!gridAdded.isNew) Free(grid);
+  int gridID = gridAdded.Id;
+  if (!gridAdded.isNew)
+    {
+      grid_free(grid);
+      Free(grid);
+    }
 
-  const int leveltype = ZAXIS_GENERIC;
-  const int datatype = srvInqDatatype(prec);
+  int leveltype = ZAXIS_GENERIC;
+  int datatype = srvInqDatatype(prec);
 
   int varID, levelID = 0;
   varAddRecord(recID, param, gridID, leveltype, 0, level, 0, 0, 0, datatype, &varID, &levelID, TSTEP_INSTANT, 0, -1, NULL, NULL,
@@ -249,7 +252,8 @@ srv_add_record(stream_t *streamptr, int param, int level, size_t xsize, size_t y
 static void
 srvScanTimestep1(stream_t *streamptr)
 {
-  CmpDateTime datetime0 = { INT_MIN, INT_MIN };
+  CdiDateTime datetime0;
+  cdiDateTime_init(&datetime0);
   off_t recpos;
   srvrec_t *srvp = (srvrec_t *) streamptr->record->objectp;
 
@@ -259,7 +263,7 @@ srvScanTimestep1(stream_t *streamptr)
   if (tsID != 0) Error("Internal problem! tstepsNewEntry returns %d", tsID);
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
-  const int fileID = streamptr->fileID;
+  int fileID = streamptr->fileID;
 
   int nrecs = 0;
   while (true)
@@ -271,25 +275,25 @@ srvScanTimestep1(stream_t *streamptr)
           break;
         }
 
-      const size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+      size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
 
       int header[8];
       srvInqHeader(srvp, header);
 
-      const int prec = srvp->dprec;
-      const int rcode = header[0];
-      const int rlevel = header[1];
-      const int vdate = header[2];
-      const int vtime = header[3];
-      const int rxsize = header[4];
-      const int rysize = header[5];
-      const int param = cdiEncodeParam(rcode, 255, 255);
-      CmpDateTime datetime = { .date = vdate, .time = vtime };
+      int prec = srvp->dprec;
+      int rcode = header[0];
+      int rlevel = header[1];
+      int vdate = header[2];
+      int vtime = header[3];
+      int rxsize = header[4];
+      int rysize = header[5];
+      int param = cdiEncodeParam(rcode, 255, 255);
+      CdiDateTime datetime = cdiDateTime_set(vdate, vtime);
 
       if (nrecs == 0)
         {
           datetime0 = datetime;
-          taxis->vdatetime = cdiDateTime_set(vdate, vtime);
+          taxis->vDateTime = datetime;
         }
       else
         {
@@ -297,7 +301,7 @@ srvScanTimestep1(stream_t *streamptr)
           for (int recID = 0; recID < nrecs; recID++)
             if (param == records[recID].param && rlevel == records[recID].ilevel) goto tstepScanLoopFinished;
 
-          if (datetime_differ(datetime, datetime0)) Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
+          if (cdiDateTime_isNE(datetime, datetime0)) Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
         }
 
       nrecs++;
@@ -312,11 +316,11 @@ tstepScanLoopFinished:
 
   cdi_generate_vars(streamptr);
 
-  const int taxisID = taxisCreate(TAXIS_ABSOLUTE);
+  int taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type = TAXIS_ABSOLUTE;
-  taxis->rdatetime = taxis->vdatetime;
+  taxis->rDateTime = taxis->vDateTime;
 
-  const int vlistID = streamptr->vlistID;
+  int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
   vlist_check_contents(vlistID);
@@ -336,10 +340,10 @@ srvScanTimestep2(stream_t *streamptr)
 
   streamptr->curTsID = 1;
 
-  const int vlistID = streamptr->vlistID;
-  const int fileID = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
 
-  const int tsID = streamptr->rtsteps;
+  int tsID = streamptr->rtsteps;
   if (tsID != 1) Error("Internal problem! unexpected timestep %d", tsID + 1);
 
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
@@ -349,7 +353,7 @@ srvScanTimestep2(stream_t *streamptr)
   cdi_create_records(streamptr, tsID);
   record_t *records = streamptr->tsteps[tsID].records;
 
-  const int nrecords = streamScanInitRecords2(streamptr);
+  int nrecords = streamScanInitRecords2(streamptr);
 
   for (int rindex = 0; rindex <= nrecords; rindex++)
     {
@@ -360,20 +364,20 @@ srvScanTimestep2(stream_t *streamptr)
           break;
         }
 
-      const size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+      size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
 
       srvInqHeader(srvp, header);
 
-      const int rcode = header[0];
-      const int rlevel = header[1];
-      const int vdate = header[2];
-      const int vtime = header[3];
-      const int param = cdiEncodeParam(rcode, 255, 255);
+      int rcode = header[0];
+      int rlevel = header[1];
+      int vdate = header[2];
+      int vtime = header[3];
+      int param = cdiEncodeParam(rcode, 255, 255);
 
       if (rindex == 0)
         {
           taxis->type = TAXIS_ABSOLUTE;
-          taxis->vdatetime = cdiDateTime_set(vdate, vtime);
+          taxis->vDateTime = cdiDateTime_set(vdate, vtime);
         }
 
       bool nextstep = false;
@@ -418,14 +422,10 @@ srvScanTimestep2(stream_t *streamptr)
   int nrecs = 0;
   for (int recID = 0; recID < nrecords; recID++)
     {
-      if (!records[recID].used)
-        {
-          vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
-        }
+      if (records[recID].used)
+        nrecs++;
       else
-        {
-          nrecs++;
-        }
+        vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
     }
   streamptr->tsteps[tsID].nrecs = nrecs;
 
@@ -443,7 +443,7 @@ srvInqContents(stream_t *streamptr)
 
   srvScanTimestep1(streamptr);
 
-  const int status = (streamptr->ntsteps == -1) ? srvScanTimestep2(streamptr) : 0;
+  int status = (streamptr->ntsteps == -1) ? srvScanTimestep2(streamptr) : 0;
 
   fileSetPos(streamptr->fileID, 0, SEEK_SET);
 
@@ -468,7 +468,7 @@ srvScanTimestep(stream_t *streamptr)
 
       nrecs = streamScanInitRecords(streamptr, tsID);
 
-      const int fileID = streamptr->fileID;
+      int fileID = streamptr->fileID;
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
@@ -481,24 +481,24 @@ srvScanTimestep(stream_t *streamptr)
               break;
             }
 
-          const size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+          size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
 
           srvInqHeader(srvp, header);
 
-          const int rcode = header[0];
-          const int rlevel = header[1];
-          const int vdate = header[2];
-          const int vtime = header[3];
-          const int param = cdiEncodeParam(rcode, 255, 255);
+          int rcode = header[0];
+          int rlevel = header[1];
+          int vdate = header[2];
+          int vtime = header[3];
+          int param = cdiEncodeParam(rcode, 255, 255);
 
           // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
           if (rindex == nrecs) continue;
-          const int recID = streamptr->tsteps[tsID].recIDs[rindex];
+          int recID = streamptr->tsteps[tsID].recIDs[rindex];
 
           if (rindex == 0)
             {
               taxis->type = TAXIS_ABSOLUTE;
-              taxis->vdatetime = cdiDateTime_set(vdate, vtime);
+              taxis->vDateTime = cdiDateTime_set(vdate, vtime);
             }
 
           if (param != records[recID].param || rlevel != records[recID].ilevel)
@@ -563,14 +563,14 @@ srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_
 {
   if (CDI_Debug) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
 
-  const int vlistID = streamptr->vlistID;
-  const int fileID = streamptr->fileID;
-  const int tsid = streamptr->curTsID;
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
+  int tsid = streamptr->curTsID;
 
-  const off_t currentfilepos = fileGetPos(fileID);
+  off_t currentfilepos = fileGetPos(fileID);
 
-  const int recID = streamptr->vars[varID].recordTable[0].recordID[levID];
-  const off_t recpos = streamptr->tsteps[tsid].records[recID].position;
+  int recID = streamptr->vars[varID].recordTable[0].recordID[levID];
+  off_t recpos = streamptr->tsteps[tsid].records[recID].position;
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
@@ -583,8 +583,8 @@ srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
-  const double missval = vlistInqVarMissval(vlistID, varID);
-  const size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  double missval = vlistInqVarMissval(vlistID, varID);
+  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
 
   *nmiss = get_num_missvalsDP(size, data, missval);
 }
@@ -594,9 +594,9 @@ srvReadVarDP(stream_t *streamptr, int varID, double *data, size_t *nmiss)
 {
   if (CDI_Debug) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
-  const int vlistID = streamptr->vlistID;
-  const size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
-  const size_t nlevs = (size_t) streamptr->vars[varID].recordTable[0].nlevs;
+  int vlistID = streamptr->vlistID;
+  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t nlevs = (size_t) streamptr->vars[varID].recordTable[0].nlevs;
 
   for (size_t levID = 0; levID < nlevs; levID++) srvReadVarSliceDP(streamptr, varID, (int) levID, &data[levID * gridsize], nmiss);
 }
@@ -606,10 +606,11 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
 {
   if (CDI_Debug) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
 
-  const int vlistID = streamptr->vlistID;
-  const int fileID = streamptr->fileID;
-  const int tsID = streamptr->curTsID;
-  const int gridID = vlistInqVarGrid(vlistID, varID);
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
+  int tsID = streamptr->curTsID;
+  CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
+  int gridID = vlistInqVarGrid(vlistID, varID);
 
   int pdis, pcat, pnum;
   cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pnum, &pcat, &pdis);
@@ -617,8 +618,8 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   int header[8];
   header[0] = pnum;
   header[1] = (int) lround(zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
-  header[2] = (int) cdiDate_get(streamptr->tsteps[tsID].taxis.vdatetime.date);
-  header[3] = cdiTime_get(streamptr->tsteps[tsID].taxis.vdatetime.time);
+  header[2] = (int) cdiDate_get(vDateTime.date);
+  header[3] = cdiTime_get(vDateTime.time);
 
   size_t xsize = gridInqXsize(gridID);
   size_t ysize = gridInqYsize(gridID);
@@ -637,7 +638,7 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   header[6] = 0;
   header[7] = 0;
 
-  const int datatype = vlistInqVarDatatype(vlistID, varID);
+  int datatype = vlistInqVarDatatype(vlistID, varID);
 
   srvrec_t *srvp = (srvrec_t *) streamptr->record->objectp;
   srvp->dprec = srvDefDatatype(datatype);
@@ -652,9 +653,9 @@ srvWriteVarDP(stream_t *streamptr, int varID, const double *data)
 {
   if (CDI_Debug) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
-  const int vlistID = streamptr->vlistID;
-  const size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
-  const size_t nlevs = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
+  int vlistID = streamptr->vlistID;
+  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t nlevs = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
   for (size_t levID = 0; levID < nlevs; levID++) srvWriteVarSliceDP(streamptr, varID, (int) levID, &data[levID * gridsize]);
 }

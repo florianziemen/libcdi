@@ -1,3 +1,82 @@
+2023-02-23  Uwe Schulzweida
+
+        * using CGRIBEX library version 2.1.0
+        * using EXSE library version 1.5.0
+	* Version 2.2.0 released
+
+2023-02-05  Uwe Schulzweida
+
+	* changed chunkSizeLim from 16777216 to 1048576
+	* NetCDF: added query support for grid cells
+
+2023-02-02  Uwe Schulzweida
+
+	* NetCDF: added query support for timesteps
+
+2023-01-27  Uwe Schulzweida
+
+	* NetCDF: added query support for variable names
+
+2023-01-25  Uwe Schulzweida
+
+	* Added support for NetCDF4/HDF5 filter
+
+2023-01-06  Uwe Schulzweida
+
+	* vlistDefVarDatatype: refactor handling of missing value (bug fix)
+
+2022-12-06  Uwe Schulzweida
+
+	* Version 2.1.1 released
+
+2022-11-29  Uwe Schulzweida
+
+	* cdf_def_mapping: add support for datatype NC_STRING (bug fix)
+
+2022-11-18  Uwe Schulzweida
+
+	* grid module: remove initialization of CDI_KEY_SCANNINGMODE (bug fix)
+
+2022-11-16  Uwe Schulzweida
+
+	* cdf_read_xcoord: skip char coordinates only if ndims=1 (bug fix)
+
+2022-11-13  Uwe Schulzweida
+
+	* Added interface function streamOpenReadQuery();
+	* Added module cdiQuery
+
+2022-11-09  Uwe Schulzweida
+
+	* async_worker: remove syncronization at end of timesteps
+
+2022-11-05  Uwe Schulzweida
+
+	* NetCDF output: adde compression support for data on GRID_GENERIC
+
+2022-10-19  Uwe Schulzweida
+
+	* Replaced CDI function vlistDefVarExtra() by cdiDefKeyString() with CDI_KEY_CHUNKS
+	* Replaced CDI function vlistInqVarExtra() by cdiInqKeyString() with CDI_KEY_CHUNKS
+	* Replaced CDI function vlistDefVarScalefactor() by cdiDefKeyFloat() with CDI_KEY_SCALEFACTOR
+	* Replaced CDI function vlistInqVarScalefactor() by cdiDefKeyFloat () with CDI_KEY_SCALEFACTOR
+	* Replaced CDI function vlistDefVarAddoffset() by cdiDefKeyFloat () with CDI_KEY_ADDOFFSET
+	* Replaced CDI function vlistInqVarAddoffset() by cdiDefKeyFloat () with CDI_KEY_ADDOFFSET
+
+2022-10-17  Uwe Schulzweida
+
+        * Added environment variable CDI_SHUFFLE to set shuffle option to NetCDF4 deflation compression
+
+2022-10-16  Uwe Schulzweida
+
+	* Improved read performance of temporal chunked NetCDF4 data
+        * Added environment variable CDI_CHUNK_CACHE to set the NetCDF4 chunk cache size
+        * Added environment variable CDI_CHUNK_CACHE_MAX to set the maximum chunk cache size
+
+2022-10-14  Uwe Schulzweida
+
+	* NetCDF: reading of lower time bounds is wrong since 2.0.6 (bug fix)
+
 2022-10-06  Uwe Schulzweida
 
 	* Version 2.1.0 released
@@ -72,7 +151,7 @@
 
 2022-01-28  Uwe Schulzweida
 
-	* cdf_read_coordinates: check that bounds have only 2 dimensions [Bug #10575]
+	* cdf_read_coordinates: check that grid cell bounds have only 2 dimensions [Bug #10575]
 	* gribIterator::gridGenerate: copy CDI_KEY_UUID (bug fix)
 
 2022-01-12  Uwe Schulzweida
@@ -2368,7 +2447,7 @@
 	* timeval2vtime: bug fix for timeunit TUNIT_MONTH
 	* streamSync: extent to non netCDF files
 	* Version 1.3.2 released
-	
+
 2009-04-16  Uwe Schulzweida
 
 	* using GRIB library version 1.3.0
@@ -2700,14 +2779,14 @@
 	    	grbScanTimestep, varscan, stream_var, stream_record
 	* vlist: initialize ntsteps
 	* Version 0.8.5 released
-	
+
 2004-10-12  Uwe Schulzweida
 
         * netCDF2 support
 	* cdfDefVars: Bug fix (vlistInqNgrids)
 	* stream_grb: check also leveltype to find different variables
 	* Version 0.8.4 released
-	
+
 2004-09-08  Uwe Schulzweida
 
 	* griblib: version 0.5.6

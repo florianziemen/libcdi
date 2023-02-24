@@ -5,7 +5,7 @@ dnl Version: 1.0
 dnl Keywords: configure configure.ac autotools
 dnl Author: Thomas Jahns <jahns@dkrz.de>
 dnl Maintainer: Thomas Jahns <jahns@dkrz.de>
-dnl URL: https://www.dkrz.de/redmine/projects/show/scales-ppm
+dnl URL: https://www.dkrz.de/redmine/projects/scales-ppm
 dnl
 dnl Redistribution and use in source and binary forms, with or without
 dnl modification, are  permitted provided that the following conditions are
@@ -48,7 +48,7 @@ dnl    [FUNCTION], [LIB-CANDIDATES], [EXTRA-LIBS], [EXTRA-LIBFLAGS],
 dnl      [ACTION-IF-LIB-NOT-FOUND],
 dnl    [DEFAULT-ROOT], [EXTRA-INCLUDE-PATHS-TO-TRY])
 dnl -------------------------------------------------------------------
-dnl Check wether INCLUDE can be compiled and FUNCTION is found in
+dnl Check whether INCLUDE can be compiled and FUNCTION is found in
 dnl LIB-CANDIDATES. Sets PACKAGE_C_LIB and PACKAGE_C_INCLUDE variables to
 dnl necessary C compiler switches and arguments such that
 dnl inclusion/compilation succeed for program using INCLUDE or

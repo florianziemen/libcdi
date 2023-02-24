@@ -4,11 +4,12 @@
 
 #include "cdi.h"
 
-int main(void)
+int
+main(void)
 {
   char fname[] = "test_ens.grb2";
   int filetype = CDI_FILETYPE_GRB2;
-  int nlat = 18, nlon = 2*nlat;
+  int nlat = 18, nlon = 2 * nlat;
   double *data = NULL;
   int nlevel;
   int varID;
@@ -22,17 +23,17 @@ int main(void)
 
   int instID;
 
-  size_t datasize = (size_t)nlon * (size_t)nlat;
-  data = (double *) malloc(datasize * sizeof (double));
-  memset(data, 0, datasize * sizeof (double));
+  size_t datasize = (size_t) nlon * (size_t) nlat;
+  data = (double *) malloc(datasize * sizeof(double));
+  memset(data, 0, datasize * sizeof(double));
 
-  gridID = gridCreate(GRID_GAUSSIAN, (int)datasize);
+  gridID = gridCreate(GRID_GAUSSIAN, (int) datasize);
   gridDefXsize(gridID, nlon);
   gridDefYsize(gridID, nlat);
 
   zaxisID = zaxisCreate(ZAXIS_SURFACE, 1);
-  
-  instID  = institutDef( 252, 0, NULL, NULL );
+
+  instID = institutDef(252, 0, NULL, NULL);
 
   vlistID = vlistCreate();
   varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARYING);
@@ -40,7 +41,7 @@ int main(void)
   int perturbationNumber = 1;
   int numberOfForecastsInEnsemble = 2;
   int typeOfEnsembleForecast = 3;
-  
+
   cdiDefKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, typeOfEnsembleForecast);
   cdiDefKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, numberOfForecastsInEnsemble);
   cdiDefKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, perturbationNumber);
@@ -48,14 +49,14 @@ int main(void)
   cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber);
   cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble);
   cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast);
-  
-  vlistDefInstitut( vlistID,instID );
+
+  vlistDefInstitut(vlistID, instID);
 
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
   vlistDefTaxis(vlistID, taxisID);
 
   streamID1 = streamOpenWrite(fname, filetype);
-  if ( streamID1 < 0 )
+  if (streamID1 < 0)
     {
       fprintf(stderr, "Open failed on %s\n", fname);
       fprintf(stderr, "%s\n", cdiStringError(streamID1));
@@ -75,7 +76,7 @@ int main(void)
   filetype = streamInqFiletype(streamID1);
 
   streamID2 = streamOpenWrite(fname, filetype);
-  if ( streamID2 < 0 )
+  if (streamID2 < 0)
     {
       fprintf(stderr, "Open failed on %s\n", fname);
       fprintf(stderr, "%s\n", cdiStringError(streamID2));
@@ -86,48 +87,48 @@ int main(void)
 
   nvars = vlistNvars(vlistID);
 
-  for ( varID = 0; varID < nvars; varID++ )
+  for (varID = 0; varID < nvars; varID++)
     {
-      int gridID   = vlistInqVarGrid(vlistID, varID);
-      int zaxisID  = vlistInqVarZaxis(vlistID, varID);
-      size_t gridsize = (size_t)gridInqSize(gridID);
-      size_t nlevel = (size_t)zaxisInqSize(zaxisID);
-      if ( gridsize * nlevel > datasize ) datasize = gridsize * nlevel;
+      int varGridID = vlistInqVarGrid(vlistID, varID);
+      int varZaxisID = vlistInqVarZaxis(vlistID, varID);
+      size_t gridsize = (size_t) gridInqSize(varGridID);
+      size_t varNlevel = (size_t) zaxisInqSize(varZaxisID);
+      if (gridsize * varNlevel > datasize) datasize = gridsize * varNlevel;
     }
 
-  data = (double *) malloc(datasize*sizeof(double));
-  memset(data, 0, datasize*sizeof(double));
+  data = (double *) malloc(datasize * sizeof(double));
+  memset(data, 0, datasize * sizeof(double));
 
   taxisID = vlistInqTaxis(vlistID);
 
   tsID = 0;
-  while ( (nrecs = streamInqTimestep(streamID1, tsID)) )
+  while ((nrecs = streamInqTimestep(streamID1, tsID)))
     {
-      /* int vdate =  */taxisInqVdate(taxisID);
-      /* int vtime =  */taxisInqVtime(taxisID);
+      /* int vdate =  */ taxisInqVdate(taxisID);
+      /* int vtime =  */ taxisInqVtime(taxisID);
 
       streamDefTimestep(streamID2, tsID);
 
-      for ( varID = 0; varID < nvars; varID++ )
-	{
-	  streamReadVar(streamID1, varID, data, &nmiss);
+      for (varID = 0; varID < nvars; varID++)
+        {
+          streamReadVar(streamID1, varID, data, &nmiss);
 
-	  /* int code     =  */vlistInqVarCode(vlistID, varID);
-	  gridID   = vlistInqVarGrid(vlistID, varID);
-	  zaxisID  = vlistInqVarZaxis(vlistID, varID);
-	  /* int gridtype =  */gridInqType(gridID);
-	  /* int gridsize =  */gridInqSize(gridID);
-	  nlevel   = zaxisInqSize(zaxisID);
-	  /* double missval =  */vlistInqVarMissval(vlistID, varID);
+          /* int code     =  */ vlistInqVarCode(vlistID, varID);
+          gridID = vlistInqVarGrid(vlistID, varID);
+          zaxisID = vlistInqVarZaxis(vlistID, varID);
+          /* int gridtype =  */ gridInqType(gridID);
+          /* int gridsize =  */ gridInqSize(gridID);
+          nlevel = zaxisInqSize(zaxisID);
+          /* double missval =  */ vlistInqVarMissval(vlistID, varID);
 
-	  for ( levelID = 0; levelID < nlevel; levelID++ )
-	    {
-	      /* int level  = (int)  */zaxisInqLevel(zaxisID, levelID);
-	      /* int offset = gridsize*levelID; */
-	    }
+          for (levelID = 0; levelID < nlevel; levelID++)
+            {
+              /* int level  = (int)  */ zaxisInqLevel(zaxisID, levelID);
+              /* int offset = gridsize*levelID; */
+            }
 
-	  streamWriteVar(streamID2, varID, data, nmiss);
-	}
+          streamWriteVar(streamID2, varID, data, nmiss);
+        }
       tsID++;
     }
 

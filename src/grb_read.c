@@ -19,8 +19,8 @@
 #include "cgribex.h" /* gribZip gribGetZip gribGinfo */
 
 static int
-grbDecode(int filetype, int memtype, void *cgribexp, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced,
-          size_t *nmiss, double missval)
+grb_decode(int filetype, int memtype, void *cgribexp, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced,
+           size_t *nmiss, double missval)
 {
   int status = 0;
 
@@ -60,11 +60,11 @@ grbDecode(int filetype, int memtype, void *cgribexp, void *gribbuffer, size_t gr
 
 // Decompresses the grib data in gribbuffer.
 static int
-grbUnzipRecord(void *gribbuffer, size_t *gribsize)
+grib1_unzip_record(void *gribbuffer, size_t *gribsize)
 {
   int zip = 0;
 
-  const size_t igribsize = *gribsize;
+  size_t igribsize = *gribsize;
   size_t ogribsize = *gribsize;
 
   int izip;
@@ -72,7 +72,7 @@ grbUnzipRecord(void *gribbuffer, size_t *gribsize)
   if ((izip = gribGetZip(igribsize, (unsigned char *) gribbuffer, &unzipsize)) > 0)
     {
       zip = izip;
-      if (izip == 128) /* szip */
+      if (izip == 128)  // szip
         {
           if (unzipsize < igribsize)
             {
@@ -80,7 +80,7 @@ grbUnzipRecord(void *gribbuffer, size_t *gribsize)
               return 0;
             }
 
-          unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
+          unzipsize += 100;  // need 0 to 1 bytes for rounding of bds
 
           void *buffer = Malloc(igribsize);
           memcpy(buffer, gribbuffer, igribsize);
@@ -105,7 +105,7 @@ grbUnzipRecord(void *gribbuffer, size_t *gribsize)
 
 typedef struct DecodeArgs
 {
-  int recID, *outZip, filetype, memtype, unreduced;
+  int recID, tsID, *outZip, filetype, memtype, unreduced;
   void *cgribexp, *gribbuffer, *data;
   size_t recsize, gridsize, nmiss;
   double missval;
@@ -115,27 +115,26 @@ static int
 grb_decode_record(void *untypedArgs)
 {
   DecodeArgs *args = (DecodeArgs *) untypedArgs;
-  *args->outZip = grbUnzipRecord(args->gribbuffer, &args->recsize);
-  grbDecode(args->filetype, args->memtype, args->cgribexp, args->gribbuffer, args->recsize, args->data, args->gridsize,
-            args->unreduced, &args->nmiss, args->missval);
+  *args->outZip = grib1_unzip_record(args->gribbuffer, &args->recsize);
+  grb_decode(args->filetype, args->memtype, args->cgribexp, args->gribbuffer, args->recsize, args->data, args->gridsize,
+             args->unreduced, &args->nmiss, args->missval);
   return 0;
 }
 
 static DecodeArgs
-grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *gribbuffer, void *data, bool resetFilePos)
+grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memtype, void *gribbuffer, void *data, bool resetFilePos)
 {
-  const int vlistID = streamptr->vlistID;
-  const int tsID = streamptr->curTsID;  // FIXME: This should be looked up from the given recID
-  const int varID = streamptr->tsteps[tsID].records[recID].varID;
+  int vlistID = streamptr->vlistID;
+  int varID = streamptr->tsteps[tsID].records[recID].varID;
   size_t recsize = streamptr->tsteps[tsID].records[recID].size;
 
-  const int gridID = vlistInqVarGrid(vlistID, varID);
-  const size_t gridsize = gridInqSize(gridID);
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  size_t gridsize = gridInqSize(gridID);
   if (CDI_Debug) Message("gridID = %d gridsize = %zu", gridID, gridsize);
 
   void *cgribexp = (gribbuffer && streamptr->record->objectp) ? streamptr->record->objectp : NULL;
   if (!gribbuffer) gribbuffer = Malloc(streamptr->record->buffersize);
-  if (!data) data = Malloc(gridsize * (memtype == MEMTYPE_FLOAT ? sizeof(float) : sizeof(double)));
+  if (!data) data = Malloc(gridsize * ((memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
 
   if (streamptr->protocol == CDI_PROTOCOL_FDB)
     {
@@ -148,40 +147,42 @@ grb_read_raw_data(stream_t *streamptr, int recID, int memtype, void *gribbuffer,
     }
   else
     {
-      const int fileID = streamptr->fileID;
-      const off_t recpos = streamptr->tsteps[tsID].records[recID].position;
-
       if (recsize == 0) Error("Internal problem! Recordsize is zero for record %d at timestep %d", recID + 1, tsID + 1);
 
-      if (resetFilePos)
-        {
-          const off_t currentfilepos = fileGetPos(fileID);
-          fileSetPos(fileID, recpos, SEEK_SET);
-          if (fileRead(fileID, gribbuffer, recsize) != recsize) Error("Failed to read GRIB record!");
-          fileSetPos(fileID, currentfilepos, SEEK_SET);
-        }
-      else
-        {
-          fileSetPos(fileID, recpos, SEEK_SET);
-          if (fileRead(fileID, gribbuffer, recsize) != recsize) Error("Failed to read GRIB record!");
-          streamptr->numvals += gridsize;
-        }
+      int fileID = streamptr->fileID;
+      off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+      off_t currentfilepos = (resetFilePos ? fileGetPos(fileID) : 0);
+
+      fileSetPos(fileID, recpos, SEEK_SET);
+      if (fileRead(fileID, gribbuffer, recsize) != recsize) Error("Failed to read GRIB record!");
+
+      if (resetFilePos) fileSetPos(fileID, currentfilepos, SEEK_SET);
+      if (!resetFilePos) streamptr->numvals += gridsize;
     }
 
   return (DecodeArgs){
     .recID = recID,
+    .tsID = tsID,
     .outZip = &streamptr->tsteps[tsID].records[recID].zip,
     .filetype = streamptr->filetype,
     .memtype = memtype,
+    .unreduced = streamptr->unreduced,
     .cgribexp = cgribexp,
     .gribbuffer = gribbuffer,
-    .recsize = recsize,
     .data = data,
+    .recsize = recsize,
     .gridsize = gridsize,
-    .unreduced = streamptr->unreduced,
     .nmiss = 0,
     .missval = vlistInqVarMissval(vlistID, varID),
   };
+}
+
+static size_t
+grb_read_and_decode_record(stream_t *streamptr, int recID, int memtype, void *data, bool resetFilePos)
+{
+  DecodeArgs args = grb_read_raw_data(streamptr, streamptr->curTsID, recID, memtype, streamptr->record->buffer, data, resetFilePos);
+  grb_decode_record(&args);
+  return args.nmiss;
 }
 
 typedef struct JobDescriptor
@@ -191,9 +192,9 @@ typedef struct JobDescriptor
 } JobDescriptor;
 
 static void
-JobDescriptor_startJob(AsyncManager *jobManager, JobDescriptor *me, stream_t *streamptr, int recID, int memtype, bool resetFilePos)
+JobDescriptor_startJob(AsyncManager *jobManager, JobDescriptor *me, stream_t *streamptr, int tsID, int recID, int memtype)
 {
-  me->args = grb_read_raw_data(streamptr, recID, memtype, NULL, NULL, resetFilePos);
+  me->args = grb_read_raw_data(streamptr, tsID, recID, memtype, NULL, NULL, false);
   me->job = AsyncWorker_requestWork(jobManager, grb_decode_record, &me->args);
   if (!me->job) xabort("error while trying to send job to worker thread");
 }
@@ -202,132 +203,167 @@ static void
 JobDescriptor_finishJob(AsyncManager *jobManager, JobDescriptor *me, void *data, size_t *nmiss)
 {
   if (AsyncWorker_wait(jobManager, me->job)) xabort("error executing job in worker thread");
-  memcpy(data, me->args.data, me->args.gridsize * (me->args.memtype == MEMTYPE_FLOAT ? sizeof(float) : sizeof(double)));
+  memcpy(data, me->args.data, me->args.gridsize * ((me->args.memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
   *nmiss = me->args.nmiss;
 
   Free(me->args.gribbuffer);
   Free(me->args.data);
   me->args.recID = -1;  // mark as inactive
+  me->args.tsID = -1;   // mark as inactive
+}
+/*
+static long
+get_global_recId(stream_t *streamptr, int tsID, int recID)
+{
+  const tsteps_t *tsteps = streamptr->tsteps;
+  long globalRecId = recID;
+  if (tsID > 0) globalRecId += tsteps[0].nrecs;
+  if (tsID > 1) globalRecId += tsteps[1].nrecs * (tsID - 1);
+  return globalRecId;
+}
+*/
+static long
+get_max_global_recs(stream_t *streamptr)
+{
+  long maxGlobalRecs = -1;
+  long numSteps = streamptr->ntsteps;
+  if (numSteps > 0)
+    {
+      const tsteps_t *tsteps = streamptr->tsteps;
+      maxGlobalRecs = tsteps[0].nrecs;
+      if (numSteps > 1) maxGlobalRecs += tsteps[1].nrecs * (numSteps - 1);
+    }
+  return maxGlobalRecs;
 }
 
 static void
-grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, size_t *nmiss, bool resetFilePos)
+get_local_step_and_recId(stream_t *streamptr, long globalRecId, int *tsID, int *recID)
+{
+  int localTsId = 0;
+  long numSteps = streamptr->ntsteps;
+  const tsteps_t *tsteps = streamptr->tsteps;
+  if (numSteps > 0 && globalRecId >= tsteps[0].nrecs)
+    {
+      localTsId++;
+      globalRecId -= tsteps[0].nrecs;
+    }
+  while (globalRecId >= tsteps[1].nrecs)
+    {
+      localTsId++;
+      globalRecId -= tsteps[1].nrecs;
+    }
+
+  *tsID = localTsId;
+  *recID = globalRecId;
+}
+
+static void
+read_next_record(AsyncManager *jobManager, JobDescriptor *jd, stream_t *streamptr, int memtype)
+{
+  int tsId = -1, recId = -1;
+  get_local_step_and_recId(streamptr, streamptr->nextGlobalRecId, &tsId, &recId);
+  int xRecId = streamptr->tsteps[tsId].recIDs[recId];
+  JobDescriptor_startJob(jobManager, jd, streamptr, tsId, xRecId, memtype);
+  streamptr->nextGlobalRecId++;
+}
+
+static void
+grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, size_t *nmiss)
 {
   bool jobFound = false;
 
   int workerCount = streamptr->numWorker;
   if (workerCount > 0)
     {
-      if (workerCount > streamptr->tsteps[0].nrecs) workerCount = streamptr->tsteps[0].nrecs;
+      int tsID = streamptr->curTsID;
+      long maxGlobalRecs = get_max_global_recs(streamptr);
+      // long globalRecId = get_global_recId(streamptr, streamptr->curTsID, recID);
+      if (maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
+
+      if (workerCount > maxGlobalRecs) workerCount = maxGlobalRecs;
 
       AsyncManager *jobManager = (AsyncManager *) streamptr->jobManager;
       JobDescriptor *jobs = (JobDescriptor *) streamptr->jobs;
 
       // if this is the first call, init and start worker threads
-      tsteps_t *timestep = &streamptr->tsteps[streamptr->curTsID];
 
       if (!jobs)
         {
-          jobs = (JobDescriptor *) malloc(workerCount * sizeof *jobs);
+          jobs = (JobDescriptor *) malloc(workerCount * sizeof(*jobs));
           streamptr->jobs = jobs;
           for (int i = 0; i < workerCount; i++) jobs[i].args.recID = -1;
+          for (int i = 0; i < workerCount; i++) jobs[i].args.tsID = -1;
           if (AsyncWorker_init(&jobManager, workerCount)) xabort("error while trying to start worker threads");
           streamptr->jobManager = jobManager;
+
+          // Start as many new jobs as possible.
+          for (int i = 0; streamptr->nextGlobalRecId < maxGlobalRecs && i < workerCount; i++)
+            {
+              JobDescriptor *jd = &jobs[i];
+              if (jd->args.recID < 0 && jd->args.tsID < 0) read_next_record(jobManager, jd, streamptr, memtype);
+            }
         }
 
-      if (recID == 0) streamptr->nextRecID = 0;
-      if (recID == 0)
-        streamptr->cachedTsID = streamptr->curTsID;  // no active workers -> we may start processing records of a new timestep
-
-      if (streamptr->cachedTsID == streamptr->curTsID)
+      // search for a job descriptor with the given tsID and recID, and use its results if it exists
+      for (int i = 0; !jobFound && i < workerCount; i++)
         {
-          // Start as many new jobs as possible.
-          for (int i = 0; streamptr->nextRecID < timestep->nrecs && i < workerCount; i++)
+          JobDescriptor *jd = &jobs[i];
+          if (jd->args.recID == recID && jd->args.tsID == tsID)
             {
-              JobDescriptor *jd = &jobs[i];
-              if (jd->args.recID < 0)
-                {
-                  JobDescriptor_startJob(jobManager, jd, streamptr, timestep->recIDs[streamptr->nextRecID++], memtype,
-                                         resetFilePos);
-                }
-            }
-
-          // search for a job descriptor with the given recID, and use its results if it exists
-          for (int i = 0; !jobFound && i < workerCount; i++)
-            {
-              JobDescriptor *jd = &jobs[i];
-              if (jd->args.recID == recID)
-                {
-                  jobFound = true;
-                  JobDescriptor_finishJob(jobManager, jd, data, nmiss);
-                  if (streamptr->nextRecID < timestep->nrecs)
-                    {
-                      JobDescriptor_startJob(jobManager, jd, streamptr, timestep->recIDs[streamptr->nextRecID++], memtype,
-                                             resetFilePos);
-                    }
-                }
+              jobFound = true;
+              JobDescriptor_finishJob(jobManager, jd, data, nmiss);
+              if (streamptr->nextGlobalRecId < maxGlobalRecs) read_next_record(jobManager, jd, streamptr, memtype);
             }
         }
     }
 
   // perform the work synchronously if we didn't start a job for it yet
-  if (!jobFound)
-    {
-      DecodeArgs args = grb_read_raw_data(streamptr, recID, memtype, streamptr->record->buffer, data, resetFilePos);
-      grb_decode_record(&args);
-      *nmiss = args.nmiss;
-    }
+  if (!jobFound) *nmiss = grb_read_and_decode_record(streamptr, recID, memtype, data, false);
 }
 
 void
 grb_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss)
 {
-  const int tsID = streamptr->curTsID;
-  const int vrecID = streamptr->tsteps[tsID].curRecID;
-  const int recID = streamptr->tsteps[tsID].recIDs[vrecID];
+  int tsID = streamptr->curTsID;
+  int vrecID = streamptr->tsteps[tsID].curRecID;
+  int recID = streamptr->tsteps[tsID].recIDs[vrecID];
 
-  grb_read_next_record(streamptr, recID, memtype, data, nmiss, false);
+  grb_read_next_record(streamptr, recID, memtype, data, nmiss);
 }
 
 void
 grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *nmiss)
 {
-  const int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
-  const int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
+  int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
+  int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
 
-  grb_read_next_record(streamptr, recID, memtype, data, nmiss, true);
+  *nmiss = grb_read_and_decode_record(streamptr, recID, memtype, data, true);
 }
 
 void
 grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nmiss)
 {
-  const int vlistID = streamptr->vlistID;
-  const int fileID = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
 
-  const int gridID = vlistInqVarGrid(vlistID, varID);
-  const size_t gridsize = gridInqSize(gridID);
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  size_t gridsize = gridInqSize(gridID);
 
-  const off_t currentfilepos = fileGetPos(fileID);
+  off_t currentfilepos = fileGetPos(fileID);
 
-  const int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
-  const int nlevs = streamptr->vars[varID].recordTable[0].nlevs;
+  int isub = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
+  int nlevs = streamptr->vars[varID].recordTable[0].nlevs;
 
   if (CDI_Debug) Message("nlevs = %d gridID = %d gridsize = %zu", nlevs, gridID, gridsize);
 
   *nmiss = 0;
   for (int levelID = 0; levelID < nlevs; levelID++)
     {
-      const int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
+      int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
+      size_t offset = levelID * gridsize;
+      void *datap = (memtype == MEMTYPE_FLOAT) ? (void *) ((float *) data + offset) : (void *) ((double *) data + offset);
 
-      void *datap = NULL;
-      if (memtype == MEMTYPE_FLOAT)
-        datap = (float *) data + levelID * gridsize;
-      else
-        datap = (double *) data + levelID * gridsize;
-
-      size_t imiss;
-      grb_read_next_record(streamptr, recID, memtype, datap, &imiss, false);
-      *nmiss += imiss;
+      *nmiss += grb_read_and_decode_record(streamptr, recID, memtype, datap, false);
     }
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);

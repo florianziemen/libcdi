@@ -10,49 +10,42 @@
 
 typedef struct
 {
-  // Date format  YYYYMMDD
-  // Time format    hhmmss
   int self;
-  bool used;
-  short has_bounds;
-  int datatype;           // datatype
-  int type;               // time type
-  int sdate;              // start date
-  int stime;              // start time
-  CdiDateTime vdatetime;  // verification date/time
-  CdiDateTime rdatetime;  // reference date/time
-  int fdate;              // forecast reference date
-  int ftime;              // forecast reference time
+  int datatype;  // datatype
+  int type;      // time type
   int calendar;
-  int unit;  // time unit
+  int unit;  // time units
   int numavg;
-  bool climatology;
-  CdiDateTime vdatetime_lb;  // lower bounds of verification date/time
-  CdiDateTime vdatetime_ub;  // upper bounds of verification date/time
-  int fc_unit;               // forecast time unit
+  CdiDateTime sDateTime;     // start date/time
+  CdiDateTime vDateTime;     // verification date/time
+  CdiDateTime rDateTime;     // reference date/time
+  CdiDateTime fDateTime;     // forecast reference date/time
+  CdiDateTime vDateTime_lb;  // lower bounds of verification date/time
+  CdiDateTime vDateTime_ub;  // upper bounds of verification date/time
   double fc_period;          // forecast time period
+  int fc_unit;               // forecast time unit
   char *name;
   char *longname;
   char *units;
+  bool climatology;
+  bool hasBounds;
 } taxis_t;
 
-//      taxisInqSdate: Get the start date
-int taxisInqSdate(int taxisID);
-
-//      taxisInqStime: Get the start time
-int taxisInqStime(int taxisID);
+//      taxisInqSdatetime: Get the start date/time
+CdiDateTime taxisInqSdatetime(int taxisID);
 
 void ptaxisInit(taxis_t *taxis);
 void ptaxisCopy(taxis_t *dest, taxis_t *source);
 taxis_t *taxisPtr(int taxisID);
-void cdiSetForecastPeriod(double timevalue, taxis_t *taxis);
-CdiDateTime cdi_decode_timeval(double timevalue, taxis_t *taxis);
+void cdi_set_forecast_period(double timevalue, taxis_t *taxis);
+CdiDateTime cdi_decode_timeval(double timevalue, const taxis_t *taxis);
 double cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis);
 
 void ptaxisDefDatatype(taxis_t *taxisptr, int datatype);
 void ptaxisDefName(taxis_t *taxisptr, const char *name);
 void ptaxisDefLongname(taxis_t *taxisptr, const char *longname);
 void ptaxisDefUnits(taxis_t *taxisptr, const char *units);
+char *ptaxisAllocUnits(taxis_t *taxisptr, size_t len);
 void taxisDestroyKernel(taxis_t *taxisptr);
 #ifndef SX
 extern const resOps taxisOps;
@@ -60,6 +53,11 @@ extern const resOps taxisOps;
 
 int taxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context,
                 int checkForSameID);
+
+enum
+{
+  TAXIS_MAX_UNIT_STR_LEN = 9
+};
 
 #endif /* TAXIS_H */
 /*

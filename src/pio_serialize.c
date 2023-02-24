@@ -11,19 +11,29 @@
 #include "pio_serialize.h"
 #include "pio_util.h"
 
-static struct
+#if MPI_VERSION == 1 || (MPI_VERSION == 2 && MPI_SUBVERSION < 2)
+#define CDI_DT_MATCH_NEEDED 1
+#endif
+
+static
+#ifndef CDI_DT_MATCH_NEEDED
+    const
+#endif
+    struct
 {
   int cdidt;
   MPI_Datatype mpidt;
 } dtDict[] = {
-#if MPI_VERSION == 1 || (MPI_VERSION == 2 && MPI_SUBVERSION < 2)
-#define CDI_DT_MATCH_NEEDED 1
-  { CDI_DATATYPE_INT8, MPI_SIGNED_CHAR }, { CDI_DATATYPE_INT16, MPI_SHORT },         { CDI_DATATYPE_UINT32, MPI_INT },
+#ifdef CDI_DT_MATCH_NEEDED
+  { CDI_DATATYPE_INT8, MPI_SIGNED_CHAR }, { CDI_DATATYPE_INT16, MPI_SHORT },   { CDI_DATATYPE_INT32, MPI_INT },
+  { CDI_DATATYPE_UINT32, MPI_INT },
 #else
-  { CDI_DATATYPE_INT8, MPI_INT8_T }, { CDI_DATATYPE_INT16, MPI_INT16_T },       { CDI_DATATYPE_UINT32, MPI_UINT32_T },
+  { CDI_DATATYPE_INT8, MPI_INT8_T },     { CDI_DATATYPE_INT16, MPI_INT16_T }, { CDI_DATATYPE_INT32, MPI_INT32_T },
+  { CDI_DATATYPE_UINT32, MPI_UINT32_T },
 #endif
-  { CDI_DATATYPE_INT, MPI_INT },          { CDI_DATATYPE_UINT, MPI_UNSIGNED },       { CDI_DATATYPE_FLT64, MPI_DOUBLE },
-  { CDI_DATATYPE_TXT, MPI_CHAR },         { CDI_DATATYPE_UCHAR, MPI_UNSIGNED_CHAR }, { CDI_DATATYPE_LONG, MPI_LONG },
+  { CDI_DATATYPE_INT, MPI_INT },          { CDI_DATATYPE_UINT, MPI_UNSIGNED }, { CDI_DATATYPE_FLT64, MPI_DOUBLE },
+  { CDI_DATATYPE_FLT, MPI_DOUBLE },       { CDI_DATATYPE_TXT, MPI_CHAR },      { CDI_DATATYPE_UCHAR, MPI_UNSIGNED_CHAR },
+  { CDI_DATATYPE_LONG, MPI_LONG },
 };
 
 static inline size_t
@@ -54,6 +64,7 @@ setupDtDict()
 {
   dtDictFixMPIType(lookupDt(CDI_DATATYPE_INT8), MPI_TYPECLASS_INTEGER, (int) sizeof(int8_t));
   dtDictFixMPIType(lookupDt(CDI_DATATYPE_INT16), MPI_TYPECLASS_INTEGER, (int) sizeof(int16_t));
+  dtDictFixMPIType(lookupDt(CDI_DATATYPE_INT32), MPI_TYPECLASS_INTEGER, (int) sizeof(int32_t));
   dtDictFixMPIType(lookupDt(CDI_DATATYPE_UINT32), MPI_TYPECLASS_INTEGER, (int) sizeof(uint32_t));
   dtDictMatchComplete = 1;
 }

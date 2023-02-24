@@ -21,8 +21,8 @@ static uint16_t
 swap_endianness16(uint16_t v)
 {
   // clang-format off
-  return ((v>>8) & 0xff)
-    | ((v<<8) & 0xff00);
+  return ((v >> 8) & 0xff)
+       | ((v << 8) & 0xff00);
   // clang-format on
 }
 
@@ -30,10 +30,10 @@ static uint32_t
 swap_endianness32(uint32_t v)
 {
   // clang-format off
-  return ((v>>24) & 0xff)
-    | ((v<<8) & 0xff0000)
-    | ((v>>8) & 0xff00)
-    | ((v<<24) & 0xff000000);
+  return ((v >> 24) & 0xff)
+       | ((v <<  8) & 0xff0000)
+       | ((v >>  8) & 0xff00)
+       | ((v << 24) & 0xff000000);
   // clang-format on
 }
 
@@ -42,13 +42,13 @@ swap_endianness64(uint64_t v)
 {
   // clang-format off
   return ((v >> 56) & 0xff)
-    | ((v >> 40) & 0xff00)
-    | ((v >> 24) & 0xff0000)
-    | ((v >> 8) & 0xff000000)
-    | ((v << 8) & 0xff00000000)
-    | ((v << 24) & 0xff0000000000)
-    | ((v << 40) & 0xff000000000000)
-    | ((v << 56) & 0xff00000000000000);
+       | ((v >> 40) & 0xff00)
+       | ((v >> 24) & 0xff0000)
+       | ((v >>  8) & 0xff000000)
+       | ((v <<  8) & 0xff00000000)
+       | ((v << 24) & 0xff0000000000)
+       | ((v << 40) & 0xff000000000000)
+       | ((v << 56) & 0xff00000000000000);
   // clang-format on
 }
 
@@ -114,11 +114,11 @@ fletcher8_check2(uint8_t sum1, uint8_t sum2)
 static int
 across_write_buf(int sock, const void *buf, size_t nbytes)
 {
-  const void *bufpos = buf;
+  const char *bufpos = (const char *) buf;
   size_t nbytes_left = nbytes;
   while (nbytes_left > 0)
     {
-      size_t nbytes_written = write(sock, bufpos, nbytes_left);
+      ssize_t nbytes_written = write(sock, bufpos, nbytes_left);
       if (nbytes_written < 0)
         {
           perror(__func__);
@@ -137,7 +137,7 @@ across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nb
   const size_t section0_len = sizeof(section0);
 
   uint32_t section1_len;
-  const unsigned char *section1 = gribbuffer + section0_len;
+  const unsigned char *section1 = (unsigned char *) gribbuffer + section0_len;
   if (nbytes < section0_len + sizeof(section1_len) + 1)
     {
       Error("GRIB2 stream is too short");

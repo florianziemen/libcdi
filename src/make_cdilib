@@ -19,8 +19,9 @@ rm -f ${PROG}
 
 DATE=`date +%F`
 
-if test -f ../configure.ac ; then
-   CDILIBVERSION=\"`sed -n '/^AC_INIT(/s/AC_INIT *( *[^,]*,[[ ]*\([^],]*\).*/\1/ p' ../configure.ac`\"
+config_file="${srcdir}/../configure.ac"
+if test -f "$config_file" ; then
+   CDILIBVERSION=\"`sed -n '/^AC_INIT(/s/AC_INIT *( *[^,]*,[[ ]*\([^],]*\).*/\1/ p' "$config_file"`\"
 else
    echo "error: cannot find configure.ac" >&2
    exit 1
@@ -109,6 +110,7 @@ files="async_worker.c \
    cdi_error.c \
    cdi_datetime.c \
    cdi_int.c \
+   cdi_query.c \
    cdi_util.c \
    cgribexlib.c \
    cksum.c \
@@ -192,8 +194,10 @@ until test "foo$scanlist" = "foo" ; do
             if echo "$fileList" | grep -q '\<'"$curFile"'\>' ; then
                 true    #Nothing to do, we have already scanned this header.
             else
+                curFilePath="$srcdir/$curFile"
+                if [ "$curFile" = "config.h" ] ; then curFilePath="$curFile" ; fi
                 #Prepend the includes of the current header to the scanlist so that we will scan them in the order that the preprocessor would.
-                scanlist="$(listIncludes "$curFile") <$curFile> $scanlist"
+                scanlist="$(listIncludes "$curFilePath") <$curFile> $scanlist"
             fi
             ;;
     esac
@@ -211,7 +215,7 @@ for file in $fileList ; do
 done
 
 
-cpp -P -DVERSION="${CDILIBVERSION}" -DCDI_H_ \
+${CPP-cpp} -P -DVERSION="${CDILIBVERSION}" -DCDI_H_ \
   $srcdir/version.c >>${PROG}
 
 # Fortran interface (with -DHAVE_CF_INTERFACE)

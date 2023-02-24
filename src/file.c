@@ -284,7 +284,7 @@ file_new_entry(void)
 static void
 file_delete_entry(bfile_t *fileptr)
 {
-  const int idx = fileptr->self;
+  int idx = fileptr->self;
 
   FILE_LOCK();
 
@@ -380,8 +380,17 @@ fileSetBufferType(int fileID, int type)
 int
 fileFlush(int fileID)
 {
+  int retval = 0;
   bfile_t *fileptr = file_to_pointer(fileID);
-  return fileptr ? fflush(fileptr->fp) : 0;
+  if (fileptr)
+    {
+      FILE *fp = fileptr->fp;
+      retval = fflush(fp);
+      if (retval == 0) retval = fsync(fileno(fp));
+      if (retval != 0) retval = errno;
+    }
+
+  return retval;
 }
 
 void
@@ -437,7 +446,7 @@ fileGetPos(int fileID)
 static int
 file_set_buffer_pos(bfile_t *fileptr)
 {
-  const off_t position = fileptr->position;
+  off_t position = fileptr->position;
   if (position < fileptr->bufferStart || position > fileptr->bufferEnd)
     {
       if (fileptr->bufferType == FILE_BUFTYPE_STD)
@@ -593,7 +602,7 @@ file_getenv(const char *envName)
                 case 'g': fact = 1073741824; break;
                 default:
                   fact = 0;
-                  Message("Invalid number string in %s: %s", envName, envString);
+                  Warning("Invalid number string in %s: %s", envName, envString);
                   Warning("%s must comprise only digits [0-9].", envName);
                 }
               break;
@@ -794,7 +803,7 @@ file_fill_buffer(bfile_t *fileptr)
 
   if (fileptr->bufferSize == 0) return EOF;
 
-  const int fd = fileptr->fd;
+  int fd = fileptr->fd;
 
 #ifdef HAVE_MMAP
   if (fileptr->bufferType == FILE_BUFTYPE_MMAP)
@@ -813,7 +822,7 @@ file_fill_buffer(bfile_t *fileptr)
 
           if (fileptr->buffer)
             {
-              const int ret = munmap(fileptr->buffer, fileptr->mappedSize);
+              int ret = munmap(fileptr->buffer, fileptr->mappedSize);
               if (ret == -1) SysError("munmap error for read %s", fileptr->name);
               fileptr->buffer = NULL;
             }
@@ -830,7 +839,7 @@ file_fill_buffer(bfile_t *fileptr)
   else
 #endif
     {
-      const off_t retseek = lseek(fileptr->fd, fileptr->bufferPos, SEEK_SET);
+      off_t retseek = lseek(fileptr->fd, fileptr->bufferPos, SEEK_SET);
       if (retseek == (off_t) -1) SysError("lseek error at pos %ld file %s", (long) fileptr->bufferPos, fileptr->name);
 
       nread = read(fd, fileptr->buffer, fileptr->bufferSize);
@@ -964,7 +973,7 @@ fileOpen_serial(const char *filename, const char *mode)
 
   FILE_INIT();
 
-  const int fmode = tolower((int) mode[0]);
+  int fmode = tolower((int) mode[0]);
 
   switch (fmode)
     {
@@ -985,8 +994,7 @@ fileOpen_serial(const char *filename, const char *mode)
     default: Error("Mode %c unexpected!", fmode);
     }
 
-  if (FileDebug)
-    if (fp == NULL && fd == -1) Message("Open failed on %s mode %c errno %d", filename, fmode, errno);
+  if (FileDebug && fp == NULL && fd == -1) Message("Open failed on %s mode %c errno %d", filename, fmode, errno);
 
   if (fp)
     {

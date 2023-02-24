@@ -15,13 +15,10 @@
 typedef struct
 {
   int self;
-  int used;
   int instID;
   int modelgribID;
   char *name;
 } model_t;
-
-static int MODEL_Debug = 0; /* If set to 1, debugging */
 
 static void modelInit(void);
 
@@ -30,7 +27,7 @@ static void modelDestroyP(void *modelptr);
 static void modelPrintP(void *modelptr, FILE *fp);
 static int modelGetSizeP(void *modelptr, void *context);
 static void modelPackP(void *modelptr, void *buff, int size, int *position, void *context);
-static int modelTxCode(void);
+static int modelTxCode(void *modelptr);
 
 static const resOps modelOps = { modelCompareP, modelDestroyP, modelPrintP, modelGetSizeP, modelPackP, modelTxCode };
 
@@ -38,7 +35,6 @@ static void
 modelDefaultValue(model_t *modelptr)
 {
   modelptr->self = CDI_UNDEFID;
-  modelptr->used = 0;
   modelptr->instID = CDI_UNDEFID;
   modelptr->modelgribID = CDI_UNDEFID;
   modelptr->name = NULL;
@@ -56,7 +52,6 @@ modelNewEntry(cdiResH resH, int instID, int modelgribID, const char *name)
       modelptr->self = resH;
       reshReplace(resH, modelptr, &modelOps);
     }
-  modelptr->used = 1;
   modelptr->instID = instID;
   modelptr->modelgribID = modelgribID;
   if (name && *name) modelptr->name = strdupx(name);
@@ -107,12 +102,7 @@ static void
 modelInit(void)
 {
   static bool modelInitialized = false;
-
   if (modelInitialized) return;
-
-  modelInitialized = true;
-  char *env = getenv("MODEL_DEBUG");
-  if (env) MODEL_Debug = atoi(env);
 }
 
 struct modelLoc
@@ -127,7 +117,7 @@ findModelByID(int resID, void *res, void *data)
   model_t *modelptr = (model_t *) res;
   struct modelLoc *ret = (struct modelLoc *) data;
   int instID = ret->instID, modelgribID = ret->modelgribID;
-  if (modelptr->used && modelptr->instID == instID && modelptr->modelgribID == modelgribID)
+  if (modelptr->instID == instID && modelptr->modelgribID == modelgribID)
     {
       ret->resID = resID;
       return CDI_APPLY_STOP;
@@ -143,8 +133,7 @@ findModelByName(int resID, void *res, void *data)
   struct modelLoc *ret = (struct modelLoc *) data;
   int instID = ret->instID, modelgribID = ret->modelgribID;
   const char *name = ret->name;
-  if (modelptr->used && (instID == -1 || modelptr->instID == instID) && (modelgribID == 0 || modelptr->modelgribID == modelgribID)
-      && modelptr->name)
+  if ((instID == -1 || modelptr->instID == instID) && (modelgribID == 0 || modelptr->modelgribID == modelgribID) && modelptr->name)
     {
       const char *p = name, *q = modelptr->name;
       while (*p != '\0' && *p == *q) ++p, ++q;
@@ -223,7 +212,7 @@ modelCompareP(void *modelptr1, void *modelptr2)
 {
   model_t *model1 = (model_t *) modelptr1, *model2 = (model_t *) modelptr2;
   int diff = (namespaceResHDecode(model1->instID).idx != namespaceResHDecode(model2->instID).idx)
-             | (model1->modelgribID != model2->modelgribID) | (strcmp(model1->name, model2->name) != 0);
+             | (model1->modelgribID != model2->modelgribID) | !str_is_equal(model1->name, model2->name);
   return diff;
 }
 
@@ -239,36 +228,39 @@ void
 modelPrintP(void *modelptr, FILE *fp)
 {
   model_t *mp = (model_t *) modelptr;
-
-  if (!mp) return;
-
-  fprintf(fp, "#\n");
-  fprintf(fp, "# modelID %d\n", mp->self);
-  fprintf(fp, "#\n");
-  fprintf(fp, "self          = %d\n", mp->self);
-  fprintf(fp, "used          = %d\n", mp->used);
-  fprintf(fp, "instID        = %d\n", mp->instID);
-  fprintf(fp, "modelgribID   = %d\n", mp->modelgribID);
-  fprintf(fp, "name          = %s\n", mp->name ? mp->name : "NN");
+  fprintf(fp,
+          "#\n"
+          "# modelID %d\n"
+          "#\n"
+          "self          = %d\n"
+          "instID        = %d\n"
+          "modelgribID   = %d\n"
+          "name          = %s\n",
+          mp->self, mp->self, mp->instID, mp->modelgribID, mp->name ? mp->name : "NN");
 }
 
 static int
-modelTxCode(void)
+modelTxCode(void *modelptr)
 {
+  (void) modelptr;
   return MODEL;
 }
 
 enum
 {
-  model_nints = 4,
+  MODEL_PACK_INT_SELF,
+  MODEL_PACK_INT_INSTID,
+  MODEL_PACK_INT_MODELGRIBID,
+  MODEL_PACK_INT_NAMELEN,
+  modelNints,
 };
 
 static int
 modelGetSizeP(void *modelptr, void *context)
 {
   model_t *p = (model_t *) modelptr;
-  size_t txsize = (size_t) serializeGetSize(model_nints, CDI_DATATYPE_INT, context)
-                  + (size_t) serializeGetSize(p->name ? (int) strlen(p->name) + 1 : 0, CDI_DATATYPE_TXT, context);
+  size_t txsize = (size_t) serializeGetSize(modelNints, CDI_DATATYPE_INT, context)
+                  + (size_t) serializeGetSize(p->name ? (int) strlen(p->name) : 0, CDI_DATATYPE_TXT, context);
   xassert(txsize <= INT_MAX);
   return (int) txsize;
 }
@@ -277,35 +269,40 @@ static void
 modelPackP(void *modelptr, void *buf, int size, int *position, void *context)
 {
   model_t *p = (model_t *) modelptr;
-  int tempbuf[model_nints];
-  tempbuf[0] = p->self;
-  tempbuf[1] = p->instID;
-  tempbuf[2] = p->modelgribID;
-  tempbuf[3] = p->name ? (int) strlen(p->name) + 1 : 0;
-  serializePack(tempbuf, model_nints, CDI_DATATYPE_INT, buf, size, position, context);
-  if (p->name) serializePack(p->name, tempbuf[3], CDI_DATATYPE_TXT, buf, size, position, context);
+  int tempbuf[modelNints];
+  tempbuf[MODEL_PACK_INT_SELF] = p->self;
+  tempbuf[MODEL_PACK_INT_INSTID] = p->instID;
+  tempbuf[MODEL_PACK_INT_MODELGRIBID] = p->modelgribID;
+  tempbuf[MODEL_PACK_INT_NAMELEN] = p->name ? (int) strlen(p->name) : 0;
+  serializePack(tempbuf, modelNints, CDI_DATATYPE_INT, buf, size, position, context);
+  if (p->name) serializePack(p->name, tempbuf[MODEL_PACK_INT_NAMELEN], CDI_DATATYPE_TXT, buf, size, position, context);
 }
 
 int
 modelUnpack(void *buf, int size, int *position, int originNamespace, void *context, int force_id)
 {
-  int tempbuf[model_nints];
+#define adaptKey(key) (namespaceAdaptKey((key), originNamespace))
+  int tempbuf[modelNints];
   char *name;
-  serializeUnpack(buf, size, position, tempbuf, model_nints, CDI_DATATYPE_INT, context);
-  if (tempbuf[3] != 0)
+  serializeUnpack(buf, size, position, tempbuf, modelNints, CDI_DATATYPE_INT, context);
+  if (tempbuf[MODEL_PACK_INT_NAMELEN] != 0)
     {
-      name = (char *) Malloc((size_t) tempbuf[3]);
-      serializeUnpack(buf, size, position, name, tempbuf[3], CDI_DATATYPE_TXT, context);
+      size_t len = (size_t) tempbuf[MODEL_PACK_INT_NAMELEN];
+      name = (char *) Malloc(len + 1);
+      serializeUnpack(buf, size, position, name, tempbuf[MODEL_PACK_INT_NAMELEN], CDI_DATATYPE_TXT, context);
+      name[len] = '\0';
     }
   else
     {
       name = (char *) "";
     }
-  int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);
-  model_t *mp = modelNewEntry(force_id ? targetID : CDI_UNDEFID, namespaceAdaptKey(tempbuf[1], originNamespace), tempbuf[2], name);
-  if (tempbuf[3] != 0) Free(name);
-  xassert(!force_id || (mp->self == namespaceAdaptKey(tempbuf[0], originNamespace)));
+  int targetID = adaptKey(tempbuf[MODEL_PACK_INT_SELF]);
+  model_t *mp = modelNewEntry(force_id ? targetID : CDI_UNDEFID, adaptKey(tempbuf[MODEL_PACK_INT_INSTID]),
+                              tempbuf[MODEL_PACK_INT_MODELGRIBID], name);
+  if (tempbuf[MODEL_PACK_INT_NAMELEN] != 0) Free(name);
+  xassert(!force_id || (mp->self == adaptKey(tempbuf[0])));
   reshSetStatus(mp->self, &modelOps, reshGetStatus(mp->self, &modelOps) & ~RESH_SYNC_BIT);
+#undef adaptKey
   return mp->self;
 }
 

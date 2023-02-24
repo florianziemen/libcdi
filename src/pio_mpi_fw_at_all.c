@@ -2,6 +2,7 @@
 #include "config.h"
 #endif
 
+#include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
@@ -17,33 +18,28 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-typedef struct
+struct fileMPIFWAA
 {
+  char *name;
   MPI_File fh;
   int fileID;
   MPI_Offset pos;
-  char *name;
-  int collWriteSize[];
-} aFiledataM;
+  int *collWriteSize;
+};
 
-static listSet *bibAFiledataM;
-
-static int
-fileIDTest(void *a, void *fileID)
-{
-  return ((aFiledataM *) a)->fileID == (int) (intptr_t) fileID;
-}
+static struct fileMPIFWAA *openFiles;
+static unsigned openFilesSize, openFilesFill;
 
 /***************************************************************/
 
-static aFiledataM *
-initAFiledataFileWriteAtAll(const char *filename, size_t bs)
+static void
+initAFiledataFileWriteAtAll(struct fileMPIFWAA *of, const char *filename, size_t bs)
 {
   MPI_Comm commPio = commInqCommPio();
   int sizePio = commInqSizePio();
   size_t nameSize = strlen(filename) + 1;
-  aFiledataM *of = Malloc(sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio + nameSize);
-  of->name = (char *) ((unsigned char *) of + sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio);
+  of->collWriteSize = Malloc(sizeof(of->collWriteSize[0]) * (size_t) sizePio);
+  of->name = Malloc(nameSize);
   memcpy(of->name, filename, nameSize);
 
   MPI_Info open_info = MPI_INFO_NULL;
@@ -60,17 +56,13 @@ initAFiledataFileWriteAtAll(const char *filename, size_t bs)
   xmpi(MPI_File_open(commPio, of->name, MPI_MODE_CREATE | MPI_MODE_WRONLY | MPI_MODE_UNIQUE_OPEN, open_info, &of->fh));
   xmpi(MPI_Info_free(&open_info));
   of->pos = 0;
-
-  return of;
 }
 
 /***************************************************************/
 
 static int
-destroyAFiledataFileWriteAtAll(void *v)
+destroyAFiledataFileWriteAtAll(struct fileMPIFWAA *of)
 {
-  aFiledataM *of = v;
-
   /* close file */
   MPI_Offset endpos, fsize;
   endpos = of->pos;
@@ -81,19 +73,11 @@ destroyAFiledataFileWriteAtAll(void *v)
   xmpi(MPI_Allreduce(MPI_IN_PLACE, &trailingOctets, 1, MPI_INT, MPI_LOR, commPio));
   if (trailingOctets) xmpi(MPI_File_set_size(of->fh, endpos));
   int iret = MPI_File_close(&of->fh);
-
-  Free(of);
+  Free(of->collWriteSize);
+  Free(of->name);
+  of->name = NULL;
 
   return iret == MPI_SUCCESS ? 0 : -1;
-}
-
-/***************************************************************/
-
-static bool
-compareNamesFileWriteAtAll(void *v1, void *v2)
-{
-  aFiledataM *afm1 = v1, *afm2 = v2;
-  return !strcmp(afm1->name, afm2->name);
 }
 
 /***************************************************************/
@@ -101,8 +85,9 @@ compareNamesFileWriteAtAll(void *v1, void *v2)
 static size_t
 fwFileWriteAtAll(int fileID, const void *buffer, size_t len)
 {
-  aFiledataM *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
-  xassert(of && len <= INT_MAX);
+  assert(fileID >= 0 && (size_t) fileID < openFilesSize && openFiles[fileID].name);
+  struct fileMPIFWAA *of = openFiles + fileID;
+  xassert(len <= INT_MAX);
   MPI_Comm commPio = commInqCommPio();
   int sizePio = commInqSizePio(), rankPio = commInqRankPio();
   /* find position to write to */
@@ -113,7 +98,6 @@ fwFileWriteAtAll(int fileID, const void *buffer, size_t len)
   nextWritePos = myPos;
   for (size_t i = (size_t) rankPio; i < (size_t) sizePio; ++i) nextWritePos += of->collWriteSize[i];
   /* write buffer */
-  xassert(len <= INT_MAX);
   xmpi(MPI_File_write_at_all(of->fh, myPos, (void *) buffer, (int) len, MPI_UNSIGNED_CHAR, MPI_STATUS_IGNORE));
   of->pos = nextWritePos;
   return len;
@@ -124,54 +108,56 @@ fwFileWriteAtAll(int fileID, const void *buffer, size_t len)
 static int
 fcFileWriteAtAll(int fileID)
 {
-  aFiledataM *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
-  if (!of) xabort("listSet, fileID=%d not found", fileID);
-  int iret = listSetRemove(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
+  assert(fileID >= 0 && (size_t) fileID < openFilesSize && openFiles[fileID].name);
+  struct fileMPIFWAA *of = openFiles + fileID;
+  int iret = destroyAFiledataFileWriteAtAll(of);
+  --openFilesFill;
   return iret;
 }
 
 /***************************************************************/
-static void
-elemCheck(void *q, void *nm)
-{
-  aFiledataM *afm = q;
-  const char *name = nm;
-
-  if (!strcmp(name, afm->name)) xabort("Filename %s has already been added to set\n", name);
-}
 
 static int
 fowFileWriteAtAll(const char *filename, const char *mode)
 {
-  static unsigned long buffersize = 0;
-  int id;
-  enum
-  {
-    bcastRoot = 0
-  };
-  MPI_Comm commPio = commInqCommPio();
-  int rankPio = commInqRankPio();
-
   if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
     xabort("Unsupported mode \"%s\" in parallel file open.", mode);
 
-  /* broadcast buffersize to collectors ( just once, for all files )*/
+  struct cdiPioConf *conf = cdiPioGetConf();
 
-  if (!buffersize)
+  for (size_t i = 0; i < openFilesSize; ++i)
+    if (openFiles[i].name && !strcmp(openFiles[i].name, filename))
+      {
+        Warning("filename %s is already open!"
+                " CDI-PIO does not support concurrent access"
+                " through different filehandles.",
+                filename);
+        return CDI_EINVAL;
+      }
+
+  size_t fileID = SIZE_MAX;
+  if (openFilesSize == openFilesFill)
     {
-      if (rankPio == bcastRoot) buffersize = findWriteAccumBufsize();
-      xmpi(MPI_Bcast(&buffersize, 1, MPI_UNSIGNED_LONG, bcastRoot, commPio));
+      fileID = openFilesSize;
+      if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
+      openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
+      if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
+      openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
+      for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
     }
-
-  xdebug("buffersize=%lu", buffersize);
-
-  listSetForeach(bibAFiledataM, elemCheck, (void *) filename);
-  aFiledataM *of = initAFiledataFileWriteAtAll(filename, (size_t) buffersize);
-
-  if ((id = listSetAdd(bibAFiledataM, of)) < 0) xabort("filename %s not unique", of->name);
-
-  of->fileID = id;
-  return id;
+  else
+    {
+      for (size_t i = 0; i < openFilesSize; ++i)
+        if (openFiles[i].name == NULL)
+          {
+            fileID = i;
+            break;
+          }
+    }
+  struct fileMPIFWAA *of = openFiles + fileID;
+  ++openFilesFill;
+  initAFiledataFileWriteAtAll(of, filename, conf->writeAggBufLim);
+  return (int) fileID;
 }
 
 /***************************************************************/
@@ -179,13 +165,10 @@ fowFileWriteAtAll(const char *filename, const char *mode)
 static void
 finalizeFileWriteAtAll(void)
 {
-  if (!listSetIsEmpty(bibAFiledataM))
-    xabort("set bibAFiledataM not empty");
+  if (openFilesFill)
+    xabort("files still open on exit!");
   else
-    {
-      xdebug("%s", "destroy set");
-      listSetDelete(bibAFiledataM);
-    }
+    Free(openFiles);
 }
 
 /***************************************************************/
@@ -193,14 +176,10 @@ finalizeFileWriteAtAll(void)
 void
 cdiPioFileWriteAtAllInit(void)
 {
-  bibAFiledataM = listSetNew(destroyAFiledataFileWriteAtAll, compareNamesFileWriteAtAll);
-
   namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowFileWriteAtAll));
   namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcFileWriteAtAll));
   namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwFileWriteAtAll));
-  cdiPioFileWritingFinalize = finalizeFileWriteAtAll;
-
-  if (bibAFiledataM == NULL) xabort("listSetNew did not succeed");
+  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(finalizeFileWriteAtAll));
 }
 
 /*

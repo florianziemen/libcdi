@@ -1,4 +1,4 @@
-dnl acx_lang_c_check_include.m4 --- Check wether an include succeeds
+dnl acx_lang_c_check_include.m4 --- Check whether an include succeeds
 dnl                                 given one from a collection of
 dnl                                 include paths.
 dnl
@@ -8,7 +8,7 @@ dnl Version: 1.0
 dnl Keywords: c header check -I path
 dnl Author: Thomas Jahns <jahns@dkrz.de>
 dnl Maintainer: Thomas Jahns <jahns@dkrz.de>
-dnl URL: https://www.dkrz.de/redmine/projects/show/scales-ppm
+dnl URL: https://www.dkrz.de/redmine/projects/scales-ppm
 dnl
 dnl Redistribution and use in source and binary forms, with or without
 dnl modification, are  permitted provided that the following conditions are
@@ -48,7 +48,7 @@ dnl
 #   [INCLUDES], [INCLUDE-FLAGS], [EXTRA-INCLUDE-FLAG-SETS])
 # ------------------------------------------------------------------
 # Check the compiler accepts HEADER-FILE. The INCLUDES might be defaulted.
-AC_DEFUN([ACX_LANG_CHECK_INCLUDE_PATHS_IFELSE(C)],dnl
+AC_DEFUN([ACX_LANG_CHECK_INCLUDE_PATHS_IFELSE(C)],
   [ACX_GENERIC_CHECK_INCLUDE_PATHS_IFELSE(CPPFLAGS,-I,$@)])
 #
 m4_define([ACX_LANG_INCLUDE_PROGRAM(C)],
@@ -57,6 +57,6 @@ m4_define([ACX_LANG_INCLUDE_PROGRAM(C)],
 dnl
 dnl Local Variables:
 dnl mode: autoconf
-dnl license-project-url: "https://www.dkrz.de/redmine/projects/show/scales-ppm"
+dnl license-project-url: "https://www.dkrz.de/redmine/projects/scales-ppm"
 dnl license-default: "bsd"
 dnl End:

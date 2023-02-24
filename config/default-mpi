@@ -2,27 +2,52 @@
 #
 # default configuration options and compiler flags for different hosts
 #
+CONFPATH=`echo $0 | cut -c 1-6`
+if [ "$CONFPATH" != "../../" ] ; then
+  CONFPATH='./'
+fi
+#
+set -x
+
 if test -z "$1" ; then
   HOSTNAME=`hostname`
 else
   HOSTNAME=$1
 fi
-set -x
-cwd=`pwd -P`
-srcd="$(readlink -f ${0})"
-srcd="${srcd%/config/default-mpi}"
-if [[ "$cwd" =~ "^${srcd}/.\+" ]]; then
-  echo "A build directory that is a sub-directory of the source directory is unsupported!" >&2
-  exit 1
-elif [[ "$srcd" = "$cwd" ]]; then
-  confpath=.
-else
-  confpath="${srcd}"
-fi
 #
 case "${HOSTNAME}" in
+    hama*)
+        YAXT_ROOT=/Users/m214003/local/yaxt
+        MPI_LAUNCH="$(which mpirun)"
+        CDILIBS="--disable-iso-c-interface \
+                 --enable-maintainer-mode \
+                 --enable-mpi \
+                 --enable-option-checking=fatal \
+                 --with-szlib=$HOME/local \
+                 --with-fdb5=$HOME/src/fdb \
+                 --with-eccodes=$HOME/local/eccodes-2.27 \
+                 --with-netcdf=$HOME/local/netcdf-c-4.9.0"
+        PREFIX="--prefix=$HOME/local/cdi"
+        LD_ADD="-Wl,-rpath,$HOME/local/eccodes-2.27/lib -Wl,-rpath,$HOME/src/fdb/lib"
+        ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
+                   MPI_LAUNCH="${MPI_LAUNCH}" \
+                   PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig" \
+                   FC=mpif90 \
+	           CC=mpicc CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3"
+	;;
 # powerpc-ibm-aix6.1.0.0
   blizzard*|passat*)
+    cwd=`pwd -P`
+    srcd="$(readlink -f ${0})"
+    srcd="${srcd%/config/default-mpi}"
+    if [[ "$cwd" =~ "^${srcd}/.\+" ]]; then
+      echo "A build directory that is a sub-directory of the source directory is unsupported!" >&2
+      exit 1
+    elif [[ "$srcd" = "$cwd" ]]; then
+      confpath=.
+    else
+      confpath="${srcd}"
+    fi
     export MP_PROCS=1
     export MP_HOSTFILE="${cwd}/hostfile"
     hostname >"$MP_HOSTFILE"

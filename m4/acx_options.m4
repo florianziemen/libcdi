@@ -16,7 +16,7 @@ AS_CASE([$with_threads],
                LIBS="$PTHREAD_LIBS $LIBS"
                CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
                CC="$PTHREAD_CC"
-               AS_ECHO(["CC:$CC CFLAGS:$CFLAGS LIBS:$LIBS"])],
+               AS_ECHO(["CC:$CC CFLAGS:$CFLAGS LIBS:$LIBS"]) >&AS_MESSAGE_FD],
         [*],[THREADS_ROOT=$with_threads
              LDFLAGS="-L$THREADS_ROOT/lib $LDFLAGS"
              CPPFLAGS="-I$THREADS_ROOT/include $CPPFLAGS "
@@ -204,15 +204,15 @@ AS_VAR_IF([ENABLE_NETCDF], [yes],
 
 AS_IF([test "x$ENABLE_NC4SZLIB" = "xyes"],
       [AC_SEARCH_LIBS([nc_def_var_szip], [netcdf],
-               [AC_DEFINE([HAVE_NC_DEF_VAR_SZIP],[1],[Define to 1 for NetCDF4 nc_def_var_szip support])],,[-lhdf5])])
+               [AC_DEFINE([HAVE_NC_DEF_VAR_SZIP],[1],[Define to 1 for NetCDF4 nc_def_var_szip support])],,)])
 
 AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
       [AC_SEARCH_LIBS([H5TS_mutex_lock], [netcdf],
                [AC_DEFINE([HAVE_NC4HDF5_THREADSAFE],[1],[Define to 1 for NetCDF4/HDF5 threadsafe support])],,[-lhdf5])])
 
 AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
-      [AC_SEARCH_LIBS([H5get_libversion], [netcdf hdf5],
-               [AC_DEFINE([HAVE_H5GET_LIBVERSION],[1],[Define to 1 for H5get_libversion support])],,)])
+      [AC_SEARCH_LIBS([H5get_libversion], [netcdf],
+               [AC_DEFINE([HAVE_H5GET_LIBVERSION],[1],[Define to 1 for H5get_libversion support])],,[-lhdf5])])
 
 AC_SUBST([ENABLE_NETCDF])
 AC_SUBST([ENABLE_NC2])
@@ -228,7 +228,7 @@ ECCODES_INCLUDE=''
 ECCODES_LIBS=''
 AC_ARG_WITH([eccodes],
             [AS_HELP_STRING([--with-eccodes=<yes|no|directory>],
-                            [library for grib2 encoding/decoding; if a directory is given, it will be used as a value for --with-eccodes-root])],
+                            [location of ECCODES library for grib2 encoding/decoding (lib and include subdirs)])],
             [AS_CASE(["$with_eccodes"],
                      [no],[AC_MSG_CHECKING([for ECCODES library])
                            AC_MSG_RESULT([suppressed])],
@@ -244,8 +244,8 @@ AC_ARG_WITH([eccodes],
                                 [LDFLAGS="-L$ECCODES_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$ECCODES_ROOT/include $CPPFLAGS"
                                  AC_CHECK_HEADERS([grib_api.h],,
-                                             [AC_MSG_ERROR([Could not find grib_api.h])],
-                                             [AC_INCLUDES_DEFAULT])
+                                                  [AC_MSG_ERROR([Could not find grib_api.h])],
+                                                  [AC_INCLUDES_DEFAULT])
                                  AC_SEARCH_LIBS([grib_get_message],
                                                 [eccodes],
                                                 [AC_DEFINE([HAVE_LIBGRIB_API],[1],[ECCODES library is present if defined to 1])],
@@ -264,7 +264,7 @@ GRIB_API_INCLUDE=''
 GRIB_API_LIBS=''
 AC_ARG_WITH([grib_api],
             [AS_HELP_STRING([--with-grib_api=<yes|no|directory>],
-                            [library for grib2 encoding/decoding; if a directory is given, it will be used as a value for --with-grib_api-root])],
+                            [location of GRIB_API library for grib2 encoding/decoding (lib and include subdirs)])],
             [AS_CASE(["$with_grib_api"],
                      [no],[AC_MSG_CHECKING([for GRIB_API library])
                            AC_MSG_RESULT([suppressed])],

@@ -5,13 +5,32 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_LIBNETCDF
+#ifdef HAVE_PARALLEL_NC4
+#include <setjmp.h>
+
 #include "cdf_int.h"
+
+enum
+{
+  CDI_PIO_COLLECTIVE_OPEN = -1,
+};
+
+struct cdiPioNcCreateLongJmpRetBuf
+{
+  sigjmp_buf jmpBuf;
+  int openRank;
+};
+
+#if !defined TLS && defined HAVE_PTHREAD
+extern pthread_key_t cdiPioCdfJmpKey;
+#else
+extern TLS struct cdiPioNcCreateLongJmpRetBuf *cdiPioCdfJmpBuf;
+#endif
 
 void cdiPioEnableNetCDFParAccess(void);
 
-#endif
-#endif
+#endif /* HAVE_PARALLEL_NC4 */
+#endif /* PIO_CDF_INT_H */
 
 /*
  * Local Variables:

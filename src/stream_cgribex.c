@@ -10,7 +10,6 @@
 #include "cdi_int.h"
 #include "file.h"
 #include "varscan.h"
-#include "datetime.h"
 #include "stream_scan.h"
 #include "stream_grb.h"
 #include "stream_cgribex.h"
@@ -200,9 +199,9 @@ cgribexGetTimeUnit(int *isec1)
     case ISEC1_TABLE4_12HOURS:   timeunit = TUNIT_12HOURS;   break;
     case ISEC1_TABLE4_DAY:       timeunit = TUNIT_DAY;       break;
     default:
-      if ( lprint )
+      if (lprint)
 	{
-	  Message("GRIB time unit %d unsupported!", ISEC1_TimeUnit);
+	  Warning("GRIB time unit %d unsupported!", ISEC1_TimeUnit);
 	  lprint = false;
 	}
       break;
@@ -236,9 +235,9 @@ cgribexGetTsteptype(int timerange)
     case  5:  tsteptype = TSTEP_DIFF;     break;
     case 10:  tsteptype = TSTEP_INSTANT3; break;
     default:
-      if ( lprint )
+      if (lprint)
 	{
-	  Message("Time range indicator %d unsupported, set to 0!", timerange);
+	  Warning("Time range indicator %d unsupported, set to 0!", timerange);
 	  lprint = false;
 	}
       break;
@@ -594,7 +593,10 @@ cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t 
         }
     }
   else
-    Free(gridptr);
+    {
+      grid_free(gridptr);
+      Free(gridptr);
+    }
 
   const int zaxistype = grib1ltypeToZaxisType(leveltype);
   if (zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF)
@@ -759,17 +761,30 @@ cgribexSkipRecords(const int fileID)
     }
 }
 
+static CdiDateTime
+cgribexDateTimeX(int *isec1, CdiDateTime *sDateTime)
+{
+  int vdate = 0, sdate = 0, vtime = 0, stime = 0;
+  gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
+
+  sDateTime->date = cdiDate_set(sdate);
+  sDateTime->time = cdiTime_set(stime);
+
+  return cdiDateTime_set(vdate, vtime);
+}
+
 int
 cgribexScanTimestep1(stream_t *streamptr)
 {
+  CdiDateTime vDateTime0;
+  cdiDateTime_init(&vDateTime0);
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   void *gribbuffer = NULL;
   size_t buffersize = 0;
   int leveltype = 0, level1 = 0, level2 = 0;
-  CmpDateTime datetime0 = { .date = 10101, .time = 0 };
   unsigned recID;
-  int nrecs_scanned = 0;
+  int nrecsScanned = 0;
   bool warn_time = true;
   bool warn_numavg = true;
   bool fcast = false;
@@ -818,7 +833,7 @@ cgribexScanTimestep1(stream_t *streamptr)
 
       int *isec1 = cgribexp->sec1;
 
-      nrecs_scanned++;
+      nrecsScanned++;
       cgribexDecodeHeader(cgribexp, (int *) gribbuffer, (int) recsize, &lmv, &iret);
 
       const int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
@@ -826,28 +841,21 @@ cgribexScanTimestep1(stream_t *streamptr)
 
       cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
-      int vdate, sdate;
-      int vtime, stime;
-      gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
-      CmpDateTime datetime = { .date = vdate, .time = vtime };
+      CdiDateTime sDateTime;
+      const CdiDateTime vDateTime = cgribexDateTimeX(isec1, &sDateTime);
 
       if (nrecs == 0)
         {
-          datetime0 = datetime;
+          vDateTime0 = vDateTime;
           fcast = cgribexTimeIsFC(isec1);
           taxis->unit = cgribexGetTimeUnit(isec1);
-          taxis->rdatetime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
-          taxis->sdate = sdate;
-          taxis->stime = stime;
-          taxis->vdatetime = cdiDateTime_set(vdate, vtime);
+          taxis->rDateTime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
+          taxis->sDateTime = sDateTime;
+          taxis->vDateTime = vDateTime;
         }
       else
         {
-          if (sdate < taxis->sdate || (sdate == taxis->sdate && stime < taxis->stime))
-            {
-              taxis->sdate = sdate;
-              taxis->stime = stime;
-            }
+          if (cdiDateTime_isLT(sDateTime, taxis->sDateTime)) taxis->sDateTime = sDateTime;
 
           compvar_t compVar = cgribexVarSet(param, level1, level2, leveltype, ISEC1_TimeRange);
           record_t *records = streamptr->tsteps[tsID].records;
@@ -860,19 +868,19 @@ cgribexScanTimestep1(stream_t *streamptr)
             {
               if (recID < nrecs) break;
               if (warn_time)
-                if (datetime_differ(datetime, datetime0))
+                if (cdiDateTime_isNE(vDateTime, vDateTime0))
                   {
-                    gribWarning("Inconsistent verification time!", nrecs_scanned, tsID + 1, paramstr, level1, level2);
+                    gribWarning("Inconsistent verification time!", nrecsScanned, tsID + 1, paramstr, level1, level2);
                     warn_time = false;
                   }
             }
           else
             {
-              if (datetime_differ(datetime, datetime0)) break;
+              if (cdiDateTime_isNE(vDateTime, vDateTime0)) break;
 
               if (recID < nrecs)
                 {
-                  gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID + 1, paramstr, level1, level2);
+                  gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, paramstr, level1, level2);
                   continue;
                 }
             }
@@ -894,7 +902,8 @@ cgribexScanTimestep1(stream_t *streamptr)
       nrecs++;
 
       if (CDI_Debug)
-        Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
+        Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2,
+                CdiDateTime_string(vDateTime));
 
       cgribexAddRecord(streamptr, cgribexp, param, recsize, recpos, comptype, lmv, iret);
     }
@@ -925,10 +934,11 @@ cgribexScanTimestep1(stream_t *streamptr)
 int
 cgribexScanTimestep2(stream_t *streamptr)
 {
+  CdiDateTime vDateTime0;
+  cdiDateTime_init(&vDateTime0);
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   int leveltype = 0, level1 = 0, level2 = 0;
-  CmpDateTime datetime0 = { INT_MIN, INT_MIN };
   int recID = 0;
   bool warn_numavg = true;
   char paramstr[32];
@@ -957,7 +967,7 @@ cgribexScanTimestep2(stream_t *streamptr)
 
   const int nrecords = streamScanInitRecords2(streamptr);
 
-  int nrecs_scanned = nrecords;
+  int nrecsScanned = nrecords;
   int rindex = 0;
   while (true)
     {
@@ -978,7 +988,7 @@ cgribexScanTimestep2(stream_t *streamptr)
 
       grbDecompress(recsize, &buffersize, &gribbuffer);
 
-      nrecs_scanned++;
+      nrecsScanned++;
       cgribexDecodeHeader(cgribexp, (int *) gribbuffer, (int) recsize, &lmv, &iret);
 
       const int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
@@ -986,36 +996,29 @@ cgribexScanTimestep2(stream_t *streamptr)
 
       cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
-      int vdate, sdate;
-      int vtime, stime;
-      gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
-      CmpDateTime datetime = { .date = vdate, .time = vtime };
+      CdiDateTime sDateTime;
+      const CdiDateTime vDateTime = cgribexDateTimeX(isec1, &sDateTime);
 
       if (rindex == 0)
         {
-          datetime0 = datetime;
+          vDateTime0 = vDateTime;
           const int taxisID = vlistInqTaxis(vlistID);
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             {
               taxis->type = TAXIS_RELATIVE;
-              taxis->rdatetime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
+              taxis->rDateTime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
             }
           else
             {
               taxis->type = TAXIS_ABSOLUTE;
             }
           taxis->unit = cgribexGetTimeUnit(isec1);
-          taxis->vdatetime = cdiDateTime_set(vdate, vtime);
-          taxis->sdate = sdate;
-          taxis->stime = stime;
+          taxis->vDateTime = vDateTime;
+          taxis->sDateTime = sDateTime;
         }
       else
         {
-          if (sdate < taxis->sdate || (sdate == taxis->sdate && stime < taxis->stime))
-            {
-              taxis->sdate = sdate;
-              taxis->stime = stime;
-            }
+          if (cdiDateTime_isLT(sDateTime, taxis->sDateTime)) taxis->sDateTime = sDateTime;
         }
 
       const int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
@@ -1037,7 +1040,7 @@ cgribexScanTimestep2(stream_t *streamptr)
 
       if (recID == nrecords)
         {
-          gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID + 1, paramstr, level1, level2);
+          gribWarning("Parameter not defined at timestep 1!", nrecsScanned, tsID + 1, paramstr, level1, level2);
           return CDI_EUFSTRUCT;
         }
 
@@ -1057,9 +1060,9 @@ cgribexScanTimestep2(stream_t *streamptr)
         {
           if (records[recID].used)
             {
-              if (datetime_differ(datetime, datetime0)) break;
+              if (cdiDateTime_isNE(vDateTime, vDateTime0)) break;
 
-              gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID + 1, paramstr, level1, level2);
+              gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, paramstr, level1, level2);
               continue;
             }
           else
@@ -1070,7 +1073,8 @@ cgribexScanTimestep2(stream_t *streamptr)
         }
 
       if (CDI_Debug)
-        Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
+        Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2,
+                CdiDateTime_string(vDateTime));
 
       if (cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0)
         {
@@ -1100,14 +1104,10 @@ cgribexScanTimestep2(stream_t *streamptr)
   int nrecs = 0;
   for (recID = 0; recID < nrecords; recID++)
     {
-      if (!records[recID].used)
-        {
-          vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
-        }
+      if (records[recID].used)
+        nrecs++;
       else
-        {
-          nrecs++;
-        }
+        vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
     }
   streamptr->tsteps[tsID].nrecs = nrecs;
 
@@ -1124,10 +1124,11 @@ cgribexScanTimestep2(stream_t *streamptr)
 int
 cgribexScanTimestep(stream_t *streamptr)
 {
+  CdiDateTime vDateTime0;
+  cdiDateTime_init(&vDateTime0);
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   int leveltype = 0, level1 = 0, level2 = 0;
-  CmpDateTime datetime0 = { INT_MIN, INT_MIN };
   int vrecID, recID = 0;
   bool warn_numavg = true;
   int nrecs = 0;
@@ -1153,7 +1154,7 @@ cgribexScanTimestep(stream_t *streamptr)
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
-      int nrecs_scanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs * (tsID - 1);
+      int nrecsScanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs * (tsID - 1);
       int rindex = 0;
       while (true)
         {
@@ -1167,8 +1168,6 @@ cgribexScanTimestep(stream_t *streamptr)
               break;
             }
 
-          if (rindex >= nrecs) break;
-
           ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
           size_t readsize = recsize;
@@ -1180,7 +1179,7 @@ cgribexScanTimestep(stream_t *streamptr)
 
           grbDecompress(recsize, &buffersize, &gribbuffer);
 
-          nrecs_scanned++;
+          nrecsScanned++;
           cgribexDecodeHeader(cgribexp, (int *) gribbuffer, (int) recsize, &lmv, &iret);
 
           const int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
@@ -1188,39 +1187,32 @@ cgribexScanTimestep(stream_t *streamptr)
 
           cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
-          int vdate, sdate;
-          int vtime, stime;
-          gribDateTimeX(isec1, &vdate, &vtime, &sdate, &stime);
-          CmpDateTime datetime = { .date = vdate, .time = vtime };
+          CdiDateTime sDateTime;
+          const CdiDateTime vDateTime = cgribexDateTimeX(isec1, &sDateTime);
 
           if (rindex == nrecs) break;
 
           if (rindex == 0)
             {
-              datetime0 = datetime;
+              vDateTime0 = vDateTime;
               const int vlistID = streamptr->vlistID;
               const int taxisID = vlistInqTaxis(vlistID);
               if (taxisInqType(taxisID) == TAXIS_RELATIVE)
                 {
                   taxis->type = TAXIS_RELATIVE;
-                  taxis->rdatetime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
+                  taxis->rDateTime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
                 }
               else
                 {
                   taxis->type = TAXIS_ABSOLUTE;
                 }
               taxis->unit = cgribexGetTimeUnit(isec1);
-              taxis->vdatetime = cdiDateTime_set(vdate, vtime);
-              taxis->sdate = sdate;
-              taxis->stime = stime;
+              taxis->vDateTime = vDateTime;
+              taxis->sDateTime = sDateTime;
             }
           else
             {
-              if (sdate < taxis->sdate || (sdate == taxis->sdate && stime < taxis->stime))
-                {
-                  taxis->sdate = sdate;
-                  taxis->stime = stime;
-                }
+              if (cdiDateTime_isLT(sDateTime, taxis->sDateTime)) taxis->sDateTime = sDateTime;
             }
 
           if (ISEC1_AvgNum)
@@ -1230,9 +1222,6 @@ cgribexScanTimestep(stream_t *streamptr)
               else
                 taxis->numavg = ISEC1_AvgNum;
             }
-
-          datetime.date = vdate;
-          datetime.time = vtime;
 
           compvar_t compVar = cgribexVarSet(param, level1, level2, leveltype, ISEC1_TimeRange);
 
@@ -1244,7 +1233,7 @@ cgribexScanTimestep(stream_t *streamptr)
 
           if (vrecID == nrecs)
             {
-              gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID + 1, paramstr, level1, level2);
+              gribWarning("Parameter not defined at timestep 1!", nrecsScanned, tsID + 1, paramstr, level1, level2);
 
               if (CDI_Inventory_Mode == 1)
                 return CDI_EUFSTRUCT;
@@ -1264,10 +1253,10 @@ cgribexScanTimestep(stream_t *streamptr)
                   char paramstr_[32];
                   cdiParamToString(param, paramstr_, sizeof(paramstr_));
 
-                  if (datetime_differ(datetime, datetime0)) break;
+                  if (cdiDateTime_isNE(vDateTime, vDateTime0)) break;
 
                   if (CDI_Debug)
-                    gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID + 1, paramstr_, level1, level2);
+                    gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, paramstr_, level1, level2);
 
                   continue;
                 }
@@ -1279,7 +1268,8 @@ cgribexScanTimestep(stream_t *streamptr)
             }
 
           if (CDI_Debug)
-            Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
+            Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2,
+                    CdiDateTime_string(vDateTime));
 
           if (cgribexVarCompare(compVar, records[recID], 0) != 0)
             {
@@ -1303,7 +1293,7 @@ cgribexScanTimestep(stream_t *streamptr)
       if (vrecID < nrecs)
         {
           cdiParamToString(records[recID].param, paramstr, sizeof(paramstr));
-          gribWarning("Parameter not found!", nrecs_scanned, tsID + 1, paramstr, records[recID].ilevel, records[recID].ilevel2);
+          gribWarning("Parameter not found!", nrecsScanned, tsID + 1, paramstr, records[recID].ilevel, records[recID].ilevel2);
           return CDI_EUFSTRUCT;
         }
 
@@ -1452,16 +1442,12 @@ cgribexDefParam(int *isec1, int param)
 }
 
 static int
-cgribexDefTimerange(int tsteptype, int factor, int calendar, int rdate, int rtime, int vdate, int vtime, int sdate, int stime,
+cgribexDefTimerange(int tsteptype, int factor, int calendar, CdiDateTime rDateTime, CdiDateTime vDateTime, CdiDateTime sDateTime,
                     int *pip1, int *pip2)
 {
-  CdiDateTime rDateTime = cdiDateTime_set(rdate, rtime);
   JulianDate julianDate1 = julianDate_encode(calendar, rDateTime);
-
-  CdiDateTime vDateTime = cdiDateTime_set(vdate, vtime);
   JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
-
-  JulianDate julianDate = julianDate_sub(julianDate2, julianDate1);
+  const JulianDate julianDate = julianDate_sub(julianDate2, julianDate1);
 
   int timerange = -1;
   int ip1 = 0, ip2 = 0;
@@ -1471,14 +1457,11 @@ cgribexDefTimerange(int tsteptype, int factor, int calendar, int rdate, int rtim
       if ((ip > 255) && (tsteptype == TSTEP_INSTANT)) tsteptype = TSTEP_INSTANT3;
 
       int ipx = 0;
-      if (sdate != 0 && (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF))
+      if (!cdiDateTime_isNull(sDateTime)
+          && (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF))
         {
-          CdiDateTime sDateTime = cdiDateTime_set(sdate, stime);
           julianDate2 = julianDate_encode(calendar, sDateTime);
-
-          julianDate = julianDate_sub(julianDate2, julianDate1);
-
-          ipx = (int) lround(julianDate_to_seconds(julianDate) / factor);
+          ipx = (int) lround(julianDate_to_seconds(julianDate_sub(julianDate2, julianDate1)) / factor);
         }
 
       // clang-format off
@@ -1503,11 +1486,11 @@ cgribexDefTimerange(int tsteptype, int factor, int calendar, int rdate, int rtim
 }
 
 static int
-cgribexDefDateTime(int *isec1, int timeunit, int date, int time)
+cgribexDefDateTime(int *isec1, int timeunit, CdiDateTime dt)
 {
-  int year, month, day, hour, minute, second;
-  cdiDecodeDate(date, &year, &month, &day);
-  cdiDecodeTime(time, &hour, &minute, &second);
+  int year, month, day, hour, minute, second, ms;
+  cdiDate_decode(dt.date, &year, &month, &day);
+  cdiTime_decode(dt.time, &hour, &minute, &second, &ms);
 
   int century = year / 100;
 
@@ -1555,7 +1538,7 @@ cgribexDefDateTime(int *isec1, int timeunit, int date, int time)
 }
 
 static void
-cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg, int taxisID)
+cgribexDefTime(int *isec1, CdiDateTime vDateTime, int tsteptype, int numavg, int taxisID)
 {
   int timetype = TAXIS_ABSOLUTE;
   int timeunit = TUNIT_HOUR;
@@ -1570,26 +1553,20 @@ cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg, int 
     {
       const int calendar = taxisInqCalendar(taxisID);
 
-      int rdate = taxisInqRdate(taxisID);
-      int rtime = taxisInqRtime(taxisID);
-      if (vdate < rdate || (vdate == rdate && vtime < rtime))
-        {
-          rdate = vdate;
-          rtime = vtime;
-        }
+      CdiDateTime rDateTime = taxisInqRdatetime(taxisID);
+      if (cdiDateTime_isLT(vDateTime, rDateTime)) rDateTime = vDateTime;
 
-      int sdate = taxisInqSdate(taxisID);
-      int stime = taxisInqStime(taxisID);
+      CdiDateTime sDateTime = taxisInqSdatetime(taxisID);
 
-      int factor = cgribexDefDateTime(isec1, timeunit, rdate, rtime);
+      int factor = cgribexDefDateTime(isec1, timeunit, rDateTime);
       int ip1 = 0, ip2 = 0;
-      int timerange = cgribexDefTimerange(tsteptype, factor, calendar, rdate, rtime, vdate, vtime, sdate, stime, &ip1, &ip2);
+      int timerange = cgribexDefTimerange(tsteptype, factor, calendar, rDateTime, vDateTime, sDateTime, &ip1, &ip2);
 
       if (ip2 > 0xFF && timeunit < TUNIT_YEAR)
         {
           timeunit++;
-          factor = cgribexDefDateTime(isec1, timeunit, rdate, rtime);
-          timerange = cgribexDefTimerange(tsteptype, factor, calendar, rdate, rtime, vdate, vtime, sdate, stime, &ip1, &ip2);
+          factor = cgribexDefDateTime(isec1, timeunit, rDateTime);
+          timerange = cgribexDefTimerange(tsteptype, factor, calendar, rDateTime, vDateTime, sDateTime, &ip1, &ip2);
         }
 
       if (timerange == -1 || timerange == 1 || timerange == 3) timetype = TAXIS_ABSOLUTE;
@@ -1620,7 +1597,7 @@ cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg, int 
 
   if (timetype == TAXIS_ABSOLUTE)
     {
-      (void) cgribexDefDateTime(isec1, timeunit, vdate, vtime);
+      (void) cgribexDefDateTime(isec1, timeunit, vDateTime);
 
       /*
       if ( numavg > 0 )
@@ -1915,7 +1892,7 @@ cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
 
   if (zaxistype == ZAXIS_GENERIC && ltype == 0)
     {
-      Message("Changed zaxis type from %s to %s", zaxisNamePtr(zaxistype), zaxisNamePtr(ZAXIS_PRESSURE));
+      Warning("Changed zaxis type from %s to %s", zaxisNamePtr(zaxistype), zaxisNamePtr(ZAXIS_PRESSURE));
       zaxistype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, zaxistype);
       cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, "Pa");
@@ -2068,7 +2045,7 @@ cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 }
 
 size_t
-cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, int vdate, int vtime, int tsteptype,
+cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime, int tsteptype,
               int numavg, size_t datasize, const void *data, size_t nmiss, void *gribbuffer, size_t gribbuffersize)
 {
   cgribexrec_t *cgribexp = (cgribexrec_t *) cgribexNew();
@@ -2112,7 +2089,7 @@ cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int 
   cdiInqKeyInt(vlistID, varID, CDI_KEY_UVRELATIVETOGRID, &uvRelativeToGrid);
 
   cgribexDefParam(isec1, param);
-  cgribexDefTime(isec1, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID));
+  cgribexDefTime(isec1, vDateTime, tsteptype, numavg, vlistInqTaxis(vlistID));
   cgribexDefGrid(isec1, isec2, fsec2, isec4, gridID, uvRelativeToGrid);
   cgribexDefLevel(isec1, isec2, fsec2, zaxisID, levelID);
 

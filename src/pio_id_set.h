@@ -9,6 +9,7 @@
 #include <stdlib.h>
 
 #include "cdi.h"
+#include "error.h"
 #include "dmemory.h"
 
 struct idList

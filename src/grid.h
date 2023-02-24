@@ -6,10 +6,22 @@
 
 #include "cdi_key.h"
 #include "cdi_att.h"
+#include "resource_handle.h"
 
 typedef unsigned char mask_t;
 
 typedef struct grid_t grid_t;
+
+enum gridPropInq
+{
+  GRID_PROP_MASK,
+  GRID_PROP_MASK_GME,
+  GRID_PROP_XVALS,
+  GRID_PROP_YVALS,
+  GRID_PROP_AREA,
+  GRID_PROP_XBOUNDS,
+  GRID_PROP_YBOUNDS,
+};
 
 struct gridVirtTable
 {
@@ -40,19 +52,35 @@ struct gridVirtTable
   const char **(*inqXCvalsPtr)(grid_t *gridptr);
   const char **(*inqYCvalsPtr)(grid_t *gridptr);
 #endif
-  // return if for both grids, all xval and all yval are equal
+  double (*inqXInc)(grid_t *gridptr);
+  double (*inqYInc)(grid_t *gridptr);
+  // return true if for both grids, any xval and all yval differ
   bool (*compareXYFull)(grid_t *gridRef, grid_t *gridTest);
   // return if for both grids, x[0], y[0], x[size-1] and y[size-1] are respectively equal
   bool (*compareXYAO)(grid_t *gridRef, grid_t *gridTest);
   void (*inqArea)(grid_t *gridptr, double *area);
   const double *(*inqAreaPtr)(grid_t *gridptr);
-  int (*hasArea)(grid_t *gridptr);
+  /* return 1 if inq property is set */
+  int (*inqPropPresence)(grid_t *gridptr, enum gridPropInq inq);
   SizeType (*inqMask)(grid_t *gridptr, int *mask);
   int (*inqMaskGME)(grid_t *gridptr, int *mask_gme);
   SizeType (*inqXBounds)(grid_t *gridptr, double *xbounds);
   SizeType (*inqYBounds)(grid_t *gridptr, double *ybounds);
   const double *(*inqXBoundsPtr)(grid_t *gridptr);
   const double *(*inqYBoundsPtr)(grid_t *gridptr);
+  int txCode;
+  int (*getPackSize)(grid_t *gridptr, void *context);
+  int (*getPackSizeScalars)(grid_t *gridptr, void *context);
+  int (*getPackSizeArrays)(grid_t *gridptr, void *context);
+  int (*unpack)(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id);
+  grid_t *(*unpackScalars)(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context,
+                           int force_id, int *memberMaskP);
+  void (*unpackArrays)(grid_t *gridptr, int memberMask, char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos,
+                       int originNamespace, void *context);
+  void (*pack)(grid_t *gridptr, void *packBuffer, int packBufferSize, int *packBufferPos, void *context);
+  /* return member mask */
+  int (*packScalars)(grid_t *gridptr, void *packBuffer, int packBufferSize, int *packBufferPos, void *context);
+  void (*packArrays)(grid_t *gridptr, int memberMask, void *packBuffer, int packBufferSize, int *packBufferPos, void *context);
 };
 
 struct gridaxis_t
@@ -104,6 +132,7 @@ struct grid_t
   const struct gridVirtTable *vtable;
   cdi_keys_t keys;
   cdi_atts_t atts;
+  void *extraData;
 };
 
 void grid_init(grid_t *gridptr);
@@ -129,13 +158,18 @@ const char **gridInqYCvalsPtr(int gridID);
 // const double *gridInqYboundsPtr(int gridID);
 const double *gridInqAreaPtr(int gridID);
 
+int gridInqPropPresence(int gridID, enum gridPropInq inq);
+
 int gridGenerate(const grid_t *grid);
 
 // int gridIsEqual(int gridID1, int gridID2);
 
 void cdiGridGetIndexList(unsigned, int *);
 
-void gridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id);
+int gridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id);
+
+/* apply func to each grid */
+enum cdiApplyRet cdiGridApply(enum cdiApplyRet (*func)(int id, void *res, void *data), void *data);
 
 struct addIfNewRes
 {

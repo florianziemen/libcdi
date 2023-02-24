@@ -10,52 +10,60 @@
 #include <stdio.h>
 
 #include "cdi.h"
+#include "cdi_int.h"
 #include "dmemory.h"
 #include "namespace.h"
 #include "resource_handle.h"
 #include "serialize.h"
 #include "error.h"
-#include "cdf_int.h"
 #include "file.h"
-#include "cdi_int.h"
+#include "vlist.h"
+#ifdef HAVE_LIBNETCDF
+#include "cdf_int.h"
 #include "stream_cdf.h"
+#include "stream_cdf_postdef.h"
+#endif
 
 static unsigned nNamespaces = 1;
 static int activeNamespace = 0;
 
 #ifdef HAVE_LIBNETCDF
 // clang-format off
-#define CDI_NETCDF_SWITCHES                     \
-  { .func = (void (*)()) nc__create },          \
-  { .func = (void (*)()) cdf_def_var_serial },  \
-  { .func = (void (*)()) cdfDefTimestep },      \
-  { .func = (void (*)()) cdfDefCoordinateVars }
+#define CDI_NETCDF_SWITCHES                              \
+  { .func = (void (*)(void)) nc__create },               \
+  { .func = (void (*)(void)) cdf_def_var_serial },       \
+  { .func = (void (*)(void)) cdi_nc_enddef_serial },     \
+  { .func = (void (*)(void)) cdi_nc__enddef_serial },    \
+  { .func = (void (*)(void)) cdfDefTimestep },           \
+  { .func = (void (*)(void)) cdfDefCoordinateVars },     \
+  { .func = (void (*)(void)) cdfPostDefActionGridProp }
 // clang-format on
 #else
 #define CDI_NETCDF_SWITCHES
 #endif
 
 // clang-format off
-#define defaultSwitches {                                   \
-    { .func = (void (*)()) cdiAbortC_serial },              \
-    { .func = (void (*)()) cdiWarning },                    \
-    { .func = (void (*)()) serializeGetSizeInCore },        \
-    { .func = (void (*)()) serializePackInCore },           \
-    { .func = (void (*)()) serializeUnpackInCore },         \
-    { .func = (void (*)()) fileOpen_serial },               \
-    { .func = (void (*)()) fileWrite },                     \
-    { .func = (void (*)()) fileClose_serial },              \
-    { .func = (void (*)()) cdiStreamOpenDefaultDelegate },  \
-    { .func = (void (*)()) cdiStreamDefVlist_ },            \
-    { .func = (void (*)()) cdiStreamSetupVlist_ },          \
-    { .func = (void (*)()) cdiStreamWriteVar_ },            \
-    { .func = (void (*)()) cdiStreamWriteVarChunk_ },       \
-    { .func = (void (*)()) 0 },                             \
-    { .func = (void (*)()) 0 },                             \
-    { .func = (void (*)()) cdiStreamCloseDefaultDelegate }, \
-    { .func = (void (*)()) cdiStreamDefTimestep_ }, \
-    { .func = (void (*)()) cdiStreamSync_ },                \
-    CDI_NETCDF_SWITCHES                        \
+#define defaultSwitches {                                       \
+    { .func = (void (*)(void)) cdiAbortC_serial },              \
+    { .func = (void (*)(void)) cdiWarning },                    \
+    { .func = (void (*)(void)) serializeGetSizeInCore },        \
+    { .func = (void (*)(void)) serializePackInCore },           \
+    { .func = (void (*)(void)) serializeUnpackInCore },         \
+    { .func = (void (*)(void)) fileOpen_serial },               \
+    { .func = (void (*)(void)) fileWrite },                     \
+    { .func = (void (*)(void)) fileClose_serial },              \
+    { .func = (void (*)(void)) cdiStreamOpenDefaultDelegate },  \
+    { .func = (void (*)(void)) cdiStreamDefVlist_ },            \
+    { .func = (void (*)(void)) cdiStreamSetupVlist_ },          \
+    { .func = (void (*)(void)) cdiStreamWriteVar_ },            \
+    { .func = (void (*)(void)) cdiStreamWriteVarChunk_ },       \
+    { .func = (void (*)(void)) 0 },                             \
+    { .func = (void (*)(void)) 0 },                             \
+    { .func = (void (*)(void)) cdiStreamCloseDefaultDelegate }, \
+    { .func = (void (*)(void)) cdiStreamDefTimestep_ },         \
+    { .func = (void (*)(void)) cdiStreamSync_ },                \
+    { .func = (void (*)(void)) cdiVlistDestroy_ },              \
+    CDI_NETCDF_SWITCHES                                         \
     }
 // clang-format on
 
@@ -69,11 +77,14 @@ enum namespaceStatus
   NAMESPACE_STATUS_UNUSED,
 };
 
+static union namespaceSwitchValue initialSwitches[NUM_NAMESPACE_SWITCH] = defaultSwitches;
+
 static struct Namespace
 {
   enum namespaceStatus resStage;
-  union namespaceSwitchValue switches[NUM_NAMESPACE_SWITCH];
-} initialNamespace = { .resStage = NAMESPACE_STATUS_INUSE, .switches = defaultSwitches };
+  unsigned numSwitches;
+  union namespaceSwitchValue *switches;
+} initialNamespace = { .resStage = NAMESPACE_STATUS_INUSE, .numSwitches = NUM_NAMESPACE_SWITCH, .switches = initialSwitches };
 
 static struct Namespace *namespaces = &initialNamespace;
 
@@ -191,11 +202,16 @@ namespaceNew()
   xassert(newNamespaceID >= 0 && newNamespaceID < NUM_NAMESPACES);
   ++nNamespaces;
   namespaces[newNamespaceID].resStage = NAMESPACE_STATUS_INUSE;
+  namespaces[newNamespaceID].numSwitches = NUM_NAMESPACE_SWITCH;
+  enum
+  {
+    initialNSSWSize = sizeof(union namespaceSwitchValue) * NUM_NAMESPACE_SWITCH
+  };
+  namespaces[newNamespaceID].switches = (union namespaceSwitchValue *) Malloc(initialNSSWSize);
 #if defined(SX) || defined(__cplusplus)
-  memcpy(namespaces[newNamespaceID].switches, defaultSwitches_, sizeof(namespaces[newNamespaceID].switches));
+  memcpy(namespaces[newNamespaceID].switches, defaultSwitches_, initialNSSWSize);
 #else
-  memcpy(namespaces[newNamespaceID].switches, (union namespaceSwitchValue[NUM_NAMESPACE_SWITCH]) defaultSwitches,
-         sizeof(namespaces[newNamespaceID].switches));
+  memcpy(namespaces[newNamespaceID].switches, (union namespaceSwitchValue[NUM_NAMESPACE_SWITCH]) defaultSwitches, initialNSSWSize);
 #endif
   reshListCreate(newNamespaceID);
   NAMESPACE_UNLOCK();
@@ -209,6 +225,7 @@ namespaceDelete(int namespaceID)
   NAMESPACE_LOCK();
   xassert(namespaceID >= 0 && (unsigned) namespaceID < namespacesSize && nNamespaces);
   reshListDestruct(namespaceID);
+  if (namespaces[namespaceID].switches != initialSwitches) Free(namespaces[namespaceID].switches);
   namespaces[namespaceID].resStage = NAMESPACE_STATUS_UNUSED;
   --nNamespaces;
   NAMESPACE_UNLOCK();
@@ -236,17 +253,12 @@ namespaceGetActive()
 int
 namespaceAdaptKey(int originResH, int originNamespace)
 {
-  namespaceTuple_t tin;
-  int nsp;
-
   if (originResH == CDI_UNDEFID) return CDI_UNDEFID;
 
-  tin.idx = originResH & idxmask;
-  tin.nsp = (int) (((unsigned) (originResH & nspmask)) >> idxbits);
-
+  namespaceTuple_t tin = { .idx = originResH & idxmask, .nsp = (int) (((unsigned) (originResH & nspmask)) >> idxbits) };
   xassert(tin.nsp == originNamespace);
 
-  nsp = namespaceGetActive();
+  int nsp = namespaceGetActive();
 
   return namespaceIdxEncode2(nsp, tin.idx);
 }
@@ -254,33 +266,62 @@ namespaceAdaptKey(int originResH, int originNamespace)
 int
 namespaceAdaptKey2(int originResH)
 {
-  namespaceTuple_t tin;
-  int nsp;
 
   if (originResH == CDI_UNDEFID) return CDI_UNDEFID;
 
-  tin.idx = originResH & idxmask;
-  tin.nsp = (int) (((unsigned) (originResH & nspmask)) >> idxbits);
-
-  nsp = namespaceGetActive();
-
+  namespaceTuple_t tin = { .idx = originResH & idxmask, .nsp = (int) (((unsigned) (originResH & nspmask)) >> idxbits) };
+  int nsp = namespaceGetActive();
   return namespaceIdxEncode2(nsp, tin.idx);
 }
 
 void
-namespaceSwitchSet(enum namespaceSwitch sw, union namespaceSwitchValue value)
+namespaceSwitchSet(int sw, union namespaceSwitchValue value)
 {
-  xassert(sw > NSSWITCH_NO_SUCH_SWITCH && sw < NUM_NAMESPACE_SWITCH);
+  xassert(sw > NSSWITCH_NO_SUCH_SWITCH);
   int nsp = namespaceGetActive();
+  NAMESPACE_LOCK();
+  if (namespaces[nsp].numSwitches <= (unsigned) sw)
+    {
+      if (namespaces[nsp].switches != initialSwitches)
+        namespaces[nsp].switches
+            = (union namespaceSwitchValue *) Realloc(namespaces[nsp].switches, ((unsigned) sw + 1) * sizeof value);
+      else
+        {
+          void *temp = Malloc(((unsigned) sw + 1) * sizeof value);
+          memcpy(temp, (void *) namespaces[nsp].switches, namespaces[nsp].numSwitches * sizeof value);
+          namespaces[nsp].switches = (union namespaceSwitchValue *) temp;
+        }
+      namespaces[nsp].numSwitches = (unsigned) sw + 1;
+    }
   namespaces[nsp].switches[sw] = value;
+  NAMESPACE_UNLOCK();
 }
 
 union namespaceSwitchValue
-namespaceSwitchGet(enum namespaceSwitch sw)
+namespaceSwitchGet(int sw)
 {
-  xassert(sw > NSSWITCH_NO_SUCH_SWITCH && sw < NUM_NAMESPACE_SWITCH);
   int nsp = namespaceGetActive();
-  return namespaces[nsp].switches[sw];
+  xassert(sw > NSSWITCH_NO_SUCH_SWITCH && (unsigned) sw < namespaces[nsp].numSwitches);
+  NAMESPACE_LOCK();
+  union namespaceSwitchValue sw_val = namespaces[nsp].switches[sw];
+  NAMESPACE_UNLOCK();
+  return sw_val;
+}
+
+int
+cdiNamespaceSwitchNewKey(void)
+{
+  static unsigned reservedKeys = 0;
+#if defined(HAVE_LIBPTHREAD)
+  static pthread_mutex_t keyMutex = PTHREAD_MUTEX_INITIALIZER;
+  pthread_mutex_lock(&keyMutex);
+#endif
+  if (reservedKeys >= INT_MAX - NUM_NAMESPACE_SWITCH - 1) Error("pool of available namespace switch keys exhausted!");
+  int newKey = (int) (reservedKeys++) + NUM_NAMESPACE_SWITCH;
+#if defined(HAVE_LIBPTHREAD)
+  pthread_mutex_unlock(&keyMutex);
+#endif
+  return newKey;
 }
 
 void

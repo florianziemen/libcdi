@@ -28,7 +28,7 @@ static int extDefaultNumber = EXT_REAL;
 
 // A version string.
 #undef LIBVERSION
-#define LIBVERSION 1.4.2
+#define LIBVERSION 1.5.0
 #define XSTRING(x) #x
 #define STRING(x) XSTRING(x)
 static const char ext_libvers[] = STRING(LIBVERSION);
@@ -67,7 +67,7 @@ extLibInit()
                   {
                   case '4': extDefaultPrec = EXSE_SINGLE_PRECISION; break;
                   case '8': extDefaultPrec = EXSE_DOUBLE_PRECISION; break;
-                  default: Message("Invalid digit in %s: %s", envName, envString);
+                  default: Warning("Invalid digit in %s: %s", envName, envString);
                   }
                 break;
               }
@@ -78,13 +78,13 @@ extLibInit()
                   {
                   case '4': extDefaultPrec = EXSE_SINGLE_PRECISION; break;
                   case '8': extDefaultPrec = EXSE_DOUBLE_PRECISION; break;
-                  default: Message("Invalid digit in %s: %s", envName, envString);
+                  default: Warning("Invalid digit in %s: %s", envName, envString);
                   }
                 break;
               }
             default:
               {
-                Message("Invalid character in %s: %s", envName, envString);
+                Warning("Invalid character in %s: %s", envName, envString);
                 break;
               }
             }
@@ -140,41 +140,41 @@ extCheckFiletype(int fileID, int *swap)
 
   if (fileRead(fileID, buffer, 4) != 4) return 0;
 
-  const size_t blocklen = (size_t) get_UINT32(buffer);
-  const size_t sblocklen = (size_t) get_SUINT32(buffer);
+  size_t blocklen = (size_t) get_UINT32(buffer);
+  size_t sblocklen = (size_t) get_SUINT32(buffer);
 
   if (EXT_Debug) Message("blocklen = %d sblocklen = %d", blocklen, sblocklen);
 
   // clang-format off
-  if ( blocklen == 16 )
+  if (blocklen == 16)
     {
      *swap = 0;
       fact = blocklen/4;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return 0;
+      if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
       pbuf = buffer+3*fact;      dimxy = (size_t) get_UINT32(pbuf);
       pbuf = buffer+blocklen+4;  data  = (size_t) get_UINT32(pbuf);
     }
-  else if ( blocklen == 32 )
+  else if (blocklen == 32)
     {
      *swap = 0;
       fact = blocklen/4;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return 0;
+      if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
       pbuf = buffer+3*fact;      dimxy = (size_t) get_UINT64(pbuf);
       pbuf = buffer+blocklen+4;  data  = (size_t) get_UINT32(pbuf);
     }
-  else if ( sblocklen == 16 )
+  else if (sblocklen == 16)
     {
      *swap = 1;
       fact = sblocklen/4;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return 0;
+      if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
       pbuf = buffer+3*fact;       dimxy = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+sblocklen+4;  data  = (size_t) get_SUINT32(pbuf);
     }
-  else if ( sblocklen == 32 )
+  else if (sblocklen == 32)
     {
      *swap = 1;
       fact = sblocklen/4;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return 0;
+      if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
       pbuf = buffer+3*fact;       dimxy = (size_t) get_SUINT64(pbuf);
       pbuf = buffer+sblocklen+4;  data  = (size_t) get_SUINT32(pbuf);
     }
@@ -182,13 +182,10 @@ extCheckFiletype(int fileID, int *swap)
 
   fileRewind(fileID);
 
-  if (EXT_Debug)
-    {
-      Message("swap = %d fact = %d", *swap, fact);
-      Message("dimxy = %lu data = %lu", dimxy, data);
-    }
+  if (EXT_Debug) Message("swap = %d fact = %d", *swap, fact);
+  if (EXT_Debug) Message("dimxy = %lu data = %lu", dimxy, data);
 
-  const int found = data && (dimxy * fact == data || dimxy * fact * 2 == data);
+  int found = data && (dimxy * fact == data || dimxy * fact * 2 == data);
   return found;
 }
 
@@ -223,10 +220,10 @@ static int
 extInqData(extrec_t *extp, int prec, void *data)
 {
   int ierr = 0;
-  const int byteswap = extp->byteswap;
-  const size_t datasize = extp->datasize;
+  int byteswap = extp->byteswap;
+  size_t datasize = extp->datasize;
   void *buffer = extp->buffer;
-  const int rprec = extp->prec;
+  int rprec = extp->prec;
 
   switch (rprec)
     {
@@ -289,14 +286,14 @@ extDefData(void *ext, int prec, const void *data)
 {
   extrec_t *extp = (extrec_t *) ext;
 
-  const int rprec = extDefaultPrec ? extDefaultPrec : extp->prec;
+  int rprec = extDefaultPrec ? extDefaultPrec : extp->prec;
   extp->prec = rprec ? rprec : prec;
 
   int *header = extp->header;
 
   size_t datasize = (size_t) header[3];
   if (extp->number == EXT_COMP) datasize *= 2;
-  const size_t blocklen = datasize * (size_t) rprec;
+  size_t blocklen = datasize * (size_t) rprec;
 
   extp->datasize = datasize;
 
@@ -360,7 +357,7 @@ extRead(int fileID, void *ext)
       extp->checked = 1;
     }
 
-  const int byteswap = extp->byteswap;
+  int byteswap = extp->byteswap;
 
   // read header record
   size_t blocklen = binReadF77Block(fileID, byteswap);
@@ -369,7 +366,7 @@ extRead(int fileID, void *ext)
 
   if (EXT_Debug) Message("blocklen = %lu", blocklen);
 
-  const size_t hprec = blocklen / EXT_HEADER_LEN;
+  size_t hprec = blocklen / EXT_HEADER_LEN;
 
   extp->prec = (int) hprec;
 
@@ -452,8 +449,8 @@ extWrite(int fileID, void *ext)
 {
   extrec_t *extp = (extrec_t *) ext;
   union EXT_HEADER tempheader;
-  const int byteswap = extp->byteswap;
-  const int rprec = extp->prec;
+  int byteswap = extp->byteswap;
+  int rprec = extp->prec;
   int number = extp->number;
   int *header = extp->header;
 

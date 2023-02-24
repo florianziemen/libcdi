@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
@@ -108,8 +109,10 @@ static int
 cdiPioConfCompareP(void *p1, void *p2)
 {
   struct cdiPioConf *a = p1, *b = p2;
+  bool callBackDifference = false;
+  for (size_t i = 0; i < CDIPIO_NUM_CALLBACKS; ++i) callBackDifference |= (a->callbacks[i] != b->callbacks[i]);
   return (a->IOMode != b->IOMode) | (a->clientServerRole != b->clientServerRole) | (a->partInflate != b->partInflate)
-         | (a->postCommSetupActions != b->postCommSetupActions);
+         | callBackDifference;
 }
 
 static void
@@ -132,9 +135,34 @@ cdiPioConfPrintP(void *cdiPioConfPtr, FILE *fp)
           "part data imbalance = %f\n"
           "aligning of block buffers to large pages is %sabled\n"
           "record aggregation buffer size %zu\n"
+          "write aggregation buffer size %zu\n"
+          "stripe conversion of index lists is %sabled\n"
+          "caching of YAXT redists is %sabled\n"
+          "caching of YAXT xmaps is %sabled\n"
           "callback after setup of communication = %p\n",
           cdiPioConfPtr, iomodeStr, CSRoleStr, conf->partInflate, conf->largePageAlign ? "en" : "dis",
-          (size_t) conf->recordAggBufLimMB * 1024 * 1024, (void *) conf->postCommSetupActions);
+          (size_t) conf->recordAggBufLimMB * 1024 * 1024, conf->writeAggBufLim, conf->stripify ? "en" : "dis",
+          conf->cacheRedists ? "en" : "dis", conf->cacheXmaps ? "en" : "dis",
+          (void *) conf->callbacks[CDIPIO_CALLBACK_POSTCOMMSETUP]);
+}
+
+static inline size_t
+findWriteAccumBufsize()
+{
+  size_t buffersize = (size_t) 16 * 1024 * 1024;
+  const char *p = getenv("BUFSIZE");
+  if (p)
+    {
+      char *end;
+      long temp = strtol(p, &end, 0);
+      if ((errno == ERANGE && (temp == LONG_MAX || temp == LONG_MIN)) || (errno != 0 && temp == 0))
+        {
+          perror("failed to parse BUFSIZE environment variable");
+        }
+      else if (temp > 0 && (unsigned long) temp > buffersize)
+        buffersize = (unsigned long) temp;
+    }
+  return buffersize;
 }
 
 int
@@ -144,12 +172,16 @@ cdiPioConfCreate(void)
   conf->IOMode = PIO_NONE;
   conf->clientServerRole = PIO_ROLE_CLIENT;
   conf->partInflate = 1.1f;
-  conf->postCommSetupActions = cdiPioNoPostCommSetup;
+  for (size_t i = 0; i < CDIPIO_NUM_CALLBACKS; ++i) conf->callbacks[i] = cdiPioNoPostCommSetup;
   conf->largePageAlign = false;
-  conf->cacheRedists = true;
+  conf->cacheRedists = conf->cacheXmaps = true;
   conf->recordAggBufLimMB = 128;
+  conf->writeAggBufLim = findWriteAccumBufsize();
+  conf->maxPathLen = 2 * (size_t) PATH_MAX;
+  conf->aioQueueDepth = 4U;
   conf->xmap_new = xt_xmap_dist_dir_new;
   conf->stripify = true;
+  conf->batchedRMA = true;
   int resH = reshPut(conf, &cdiPioConfOps);
   /* configuration objects are never forwarded */
   reshSetStatus(resH, &cdiPioConfOps, reshGetStatus(resH, &cdiPioConfOps) & ~RESH_SYNC_BIT);
@@ -208,16 +240,39 @@ cdiPioConfGetCSRole(int confResH)
 }
 
 void
-cdiPioConfSetPostCommSetupActions(int confResH, void (*postCommSetupActions)(void))
+cdiPioConfSetCallBackActions(int confResH, int trigger, void (*callback)(void))
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
-  conf->postCommSetupActions = postCommSetupActions;
+  if (trigger >= 0 && trigger < CDIPIO_NUM_CALLBACKS)
+    {
+      conf->callbacks[trigger] = callback;
+    }
+  else
+    Error("invalid trigger callback query: %d", trigger);
+}
+
+void (*cdiPioConfGetCallBackActions(int confResH, int trigger))(void)
+{
+  void (*callback)(void) = (void (*)(void)) 0;
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  if (trigger >= 0 && trigger < CDIPIO_NUM_CALLBACKS)
+    {
+      callback = conf->callbacks[trigger];
+    }
+  else
+    Error("invalid trigger callback query: %d", trigger);
+  return callback;
+}
+
+void
+cdiPioConfSetPostCommSetupActions(int confResH, void (*postCommSetupActions)(void))
+{
+  cdiPioConfSetCallBackActions(confResH, CDIPIO_CALLBACK_POSTCOMMSETUP, postCommSetupActions);
 }
 
 void (*cdiPioConfGetPostCommSetupActions(int confResH))(void)
 {
-  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
-  return conf->postCommSetupActions;
+  return cdiPioConfGetCallBackActions(confResH, CDIPIO_CALLBACK_POSTCOMMSETUP);
 }
 
 void
@@ -249,6 +304,20 @@ cdiPioConfGetRedistCache(int confResH)
 }
 
 void
+cdiPioConfSetXmapCache(int confResH, int doCache)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  conf->cacheXmaps = doCache;
+}
+
+int
+cdiPioConfGetXmapCache(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return conf->cacheXmaps;
+}
+
+void
 cdiPioConfSetRecordAggBufLim(int confResH, int lim_mb)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
@@ -263,6 +332,57 @@ cdiPioConfGetRecordAggBufLim(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return (int) conf->recordAggBufLimMB;
+}
+
+void
+cdiPioConfSetWriteAggBufLim(int confResH, int lim_mb)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  if (lim_mb > 0)
+    conf->writeAggBufLim = (size_t) lim_mb * 1024 * 1024;
+  else
+    Error("unexpected negative buffer size value %d requested", lim_mb);
+}
+
+int
+cdiPioConfGetWriteAggBufLim(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return (int) (conf->recordAggBufLimMB / (1024 * 1024));
+}
+
+void
+cdiPioConfSetAioQueueDepth(int confResH, int queue_depth)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  if (queue_depth >= 1 && queue_depth <= USHRT_MAX)
+    conf->aioQueueDepth = (unsigned short) queue_depth;
+  else
+    Error("out of range AIO queue size value %d requested (MIN: 1, MAX: %d)", queue_depth, USHRT_MAX);
+}
+
+int
+cdiPioConfGetAioQueueDepth(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return conf->aioQueueDepth;
+}
+
+void
+cdiPioConfSetMaxPathLen(int confResH, int max_path_len)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  if (max_path_len >= 1)
+    conf->maxPathLen = max_path_len;
+  else
+    Error("negative value %d for maximum path length requested", max_path_len);
+}
+
+int
+cdiPioConfGetMaxPathLen(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return conf->maxPathLen;
 }
 
 void
@@ -292,3 +412,27 @@ cdiPioConfGetStripeConversion(int confResH)
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->stripify;
 }
+
+void
+cdiPioConfSetBatchedRMA(int confResH, int doBatchedRMA)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  conf->batchedRMA = doBatchedRMA;
+}
+
+int
+cdiPioConfGetBatchedRMA(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return conf->batchedRMA;
+}
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

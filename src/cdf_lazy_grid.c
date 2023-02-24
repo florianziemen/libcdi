@@ -29,6 +29,7 @@ static bool cdfLazyInitialized;
 void
 cdfLazyGridDestroy(struct cdfLazyGrid *lazyGrid)
 {
+  lazyGrid->base.extraData = NULL;
   if (lazyGrid->base.area == cdfPendingLoad) lazyGrid->base.area = NULL;
   if (lazyGrid->base.x.vals == cdfPendingLoad) lazyGrid->base.x.vals = NULL;
   if (lazyGrid->base.y.vals == cdfPendingLoad) lazyGrid->base.y.vals = NULL;
@@ -189,7 +190,7 @@ cdfLazyGridDefYVals(grid_t *grid, const double *vals)
 }
 
 static double
-cdfLazyGridInqXVal(grid_t *grid, size_t index)
+cdfLazyGridInqXVal(grid_t *grid, SizeType index)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *) grid;
   lock_lazy_load(lazyGrid);
@@ -199,7 +200,7 @@ cdfLazyGridInqXVal(grid_t *grid, size_t index)
 }
 
 static double
-cdfLazyGridInqYVal(grid_t *grid, size_t index)
+cdfLazyGridInqYVal(grid_t *grid, SizeType index)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *) grid;
   lock_lazy_load(lazyGrid);

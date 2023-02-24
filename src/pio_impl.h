@@ -1,11 +1,13 @@
-#ifndef _PIO_IMPL_H
-#define _PIO_IMPL_H
+#ifndef CDI_PIO_IMPL_H
+#define CDI_PIO_IMPL_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include <stdbool.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <mpi.h>
 
@@ -15,37 +17,30 @@ enum IO_Server_command
 {
   IO_Open_file,
   IO_Close_file,
-  IO_Get_fp,
   IO_Set_fp,
   IO_Send_buffer,
   IO_Finalize,
+  IO_Sync_file,
   tagKey = 8, /* should be power of 2, must be
                * larger than IO_Finalize */
 };
 
 extern const char *const cdiPioCmdStrTab[];
 
-static inline size_t
-findWriteAccumBufsize()
+struct syncMsg
 {
-  unsigned long initial_buffersize = 16UL * 1024UL * 1024UL;
-  const char *p = getenv("BUFSIZE");
-  long temp = p ? atol(p) : -1;
-  unsigned long buffersize = (temp > 0 && (unsigned long) temp > initial_buffersize) ? (unsigned long) temp : initial_buffersize;
-  return buffersize;
-}
-
-struct dBuffer
-{
-  size_t wr_pointer;
-  size_t size;
-  unsigned char *buffer;
+  off_t amount;
+  int fileID, command;
 };
 
-typedef int (*valDestroyFunction)(void *);
-typedef bool (*eqPredicate)(void *, void *);
+/* datatype to communicate an off_t */
+extern MPI_Datatype cdiPioOffsetDt;
+/* datatype to communicate a sync message */
+extern MPI_Datatype cdiPioSyncMsgDt;
 
-typedef struct listSet listSet;
+void cdiPioLookupOffsetDt(void);
+void cdiPioCreateSyncMsgDt(void);
+void cdiPioDestroySyncMsgDt(void);
 
 struct fileOpTag
 {
@@ -67,24 +62,6 @@ decodeFileOpTag(int tag)
   return rtag;
 }
 
-/* pio_dbuffer.c */
-int dbuffer_init(struct dBuffer **, size_t);
-int dbuffer_push(struct dBuffer *, const void *, size_t);
-size_t dbuffer_data_size(struct dBuffer *);
-int dbuffer_reset(struct dBuffer *);
-void dbuffer_cleanup(struct dBuffer **);
-
-/* pio_list_set.c */
-listSet *listSetNew(valDestroyFunction, eqPredicate);
-void listSetDelete(listSet *);
-int listSetAdd(listSet *, void *);
-bool listSetIsEmpty(listSet *);
-int listSetRemove(listSet *, int (*predicate)(void *, void *), void *data);
-void *listSetGet(listSet *q, int (*predicate)(void *, void *), void *data);
-
-typedef void (*elemOp)(void *elem, void *data);
-void listSetForeach(listSet *q, elemOp func, void *data);
-
 /* pio_mpinonb.c */
 void initMPINONB(void);
 
@@ -95,13 +72,13 @@ void cdiPioFileWriteOrderedInit(void);
 void cdiPioFileWriteAtAllInit(void);
 
 /* pio_mpi_fw_at_reblock.c */
-void cdiPioFileWriteAtReblockInit(const struct cdiPioConf *conf);
+void cdiPioFileWriteAtReblockInit(void);
 
 /* common functionality for file split between collectors and writer(s) */
 void pioSendInitialize(void);
 
 /* pio_posixasynch.c */
-#ifndef _SX
+#ifdef _POSIX_ASYNCHRONOUS_IO
 void pioWriterAIO(void);
 #endif
 

@@ -23,10 +23,9 @@ streamScanInitRecords2(stream_t *streamptr)
   streamptr->tsteps[1].recIDs = (int *) Malloc((size_t) nrecords * sizeof(int));
   streamptr->tsteps[1].nrecs = 0;
 
-  for (int recID = 0; recID < nrecords; ++recID) streamptr->tsteps[1].recIDs[recID] = -1;
-
   for (int recID = 0; recID < nrecords; ++recID)
     {
+      streamptr->tsteps[1].recIDs[recID] = -1;
       streamptr->tsteps[1].records[recID].position = streamptr->tsteps[0].records[recID].position;
       streamptr->tsteps[1].records[recID].size = streamptr->tsteps[0].records[recID].size;
     }
@@ -51,7 +50,7 @@ void
 streamScanTimeConstAdjust(stream_t *streamptr, const taxis_t *taxis)
 {
   const int vlistID = streamptr->vlistID;
-  if (streamptr->ntsteps == 1 && cdiDateTime_isNull(taxis->vdatetime))
+  if (streamptr->ntsteps == 1 && cdiDateTime_isNull(taxis->vDateTime))
     {
       streamptr->ntsteps = 0;
       for (int varID = 0; varID < streamptr->nvars; ++varID) vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);

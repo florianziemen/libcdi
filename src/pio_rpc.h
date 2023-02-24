@@ -16,16 +16,24 @@ enum collectorCommandTags
   FINALIZE,
   RESOURCES,
   STREAMOPEN,
+  STREAMFLUSHCLOSE,
   STREAMCLOSE,
   STREAMDEFVLIST,
+  STREAM_DEF_DECOMPOSED_VLIST,
   WRITETS,
   BLOCK_XFER,
+  DIST_DATA_AGG,
+  ASSERT_CONSISTENCY,
+  IDXLIST_PRESET,
+  IDXLIST_PRESET_SIZE,
 };
 
 #define MAXWINBUFFERSIZE ((size_t) 2048 * 1024 * 1024)
 
 enum
 {
+  DATA_HEADER_FLOAT = 4,
+  DATA_HEADER_DOUBLE = 8,
   numRPCFuncs = 1,
   STREAMDEFTIMESTEP = -1,
   HEADERSIZEMARKER = -numRPCFuncs - 1,
@@ -122,12 +130,23 @@ struct clientBufSize
 
 struct collSpec
 {
+  const Xt_idxlist *partDesc;
+  int *conversion;
   int numClients;
   int numServers;
   bool sendRPCData;
 };
 
 struct clientBufSize computeClientStreamBufSize(int streamID, const struct collSpec *collector);
+
+struct partDescPreset
+{
+  Xt_idxlist *lists;
+  Xt_uid *uids;
+  int *conversion;
+};
+
+void cdiPioDestroyPartDescPreset(size_t nRanks, size_t nVars, struct partDescPreset *deco);
 
 #endif
 

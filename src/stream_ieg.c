@@ -11,7 +11,6 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "varscan.h"
-#include "datetime.h"
 #include "ieg.h"
 #include "stream_scan.h"
 #include "stream_ieg.h"
@@ -154,7 +153,7 @@ calc_resfac(double xfirst, double xlast, double xinc, double yfirst, double ylas
     nMultTests = 6,
   };
   static const double scaleFactors[nPwrOf10] = { 1000, 10000, 100000, 1000000, 10000000 };
-  double vals[nMultTests] = { xfirst, xlast, xinc, yfirst, ylast, yinc };
+  const double vals[nMultTests] = { xfirst, xlast, xinc, yfirst, ylast, yinc };
 
   for (size_t j = 0; j < nPwrOf10; ++j)
     {
@@ -315,7 +314,7 @@ iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
   int leveltype = zaxisInqType(zaxisID);
   if (leveltype == ZAXIS_GENERIC)
     {
-      Message("Changed zaxis type from %s to %s", zaxisNamePtr(leveltype), zaxisNamePtr(ZAXIS_PRESSURE));
+      Warning("Changed zaxis type from %s to %s", zaxisNamePtr(leveltype), zaxisNamePtr(ZAXIS_PRESSURE));
       leveltype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, leveltype);
       cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, "Pa");
@@ -435,6 +434,7 @@ iegDefRecord(stream_t *streamptr)
   int varID = record->varID;
   int levelID = record->levelID;
   int tsID = streamptr->curTsID;
+  CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
 
   int gridID = vlistInqVarGrid(vlistID, varID);
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
@@ -451,7 +451,7 @@ iegDefRecord(stream_t *streamptr)
   IEG_P_Parameter(iegp->ipdb) = pnum;
   if (pdis == 255) IEG_P_CodeTable(iegp->ipdb) = pcat;
 
-  iegDefTime(iegp->ipdb, streamptr->tsteps[tsID].taxis.vdatetime, vlistInqTaxis(vlistID));
+  iegDefTime(iegp->ipdb, vDateTime, vlistInqTaxis(vlistID));
   iegDefGrid(iegp->igdb, gridID);
   iegDefLevel(iegp->ipdb, iegp->igdb, iegp->vct, zaxisID, levelID);
 
@@ -518,9 +518,9 @@ ieg_write_record(stream_t *streamptr, int memtype, const void *data)
 static void
 iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, size_t recsize, off_t position, int prec)
 {
-  const int vlistID = streamptr->vlistID;
-  const int tsID = streamptr->curTsID;
-  const int recID = recordNewEntry(streamptr, tsID);
+  int vlistID = streamptr->vlistID;
+  int tsID = streamptr->curTsID;
+  int recID = recordNewEntry(streamptr, tsID);
   record_t *record = &streamptr->tsteps[tsID].records[recID];
 
   int level1, level2;
@@ -551,8 +551,8 @@ iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, si
   grid_t *grid = (grid_t *) Malloc(sizeof(*grid));
   grid_init(grid);
   cdiGridTypeInit(grid, gridtype, IEG_G_NumLon(gdb) * IEG_G_NumLat(gdb));
-  const size_t xsize = (size_t) IEG_G_NumLon(gdb);
-  const size_t ysize = (size_t) IEG_G_NumLat(gdb);
+  size_t xsize = (size_t) IEG_G_NumLon(gdb);
+  size_t ysize = (size_t) IEG_G_NumLat(gdb);
   grid->x.size = xsize;
   grid->y.size = ysize;
   grid->x.inc = 0;
@@ -561,7 +561,7 @@ iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, si
 
   int iresfac = IEG_G_ResFac(gdb);
   if (iresfac == 0) iresfac = 1000;
-  const double resfac = 1. / (double) iresfac;
+  double resfac = 1. / (double) iresfac;
 
   // if ( IEG_G_FirstLon != 0 || IEG_G_LastLon != 0 )
   {
@@ -575,7 +575,7 @@ iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, si
         // correct xinc if necessary
         if (IEG_G_FirstLon(gdb) == 0 && IEG_G_LastLon(gdb) > 354000)
           {
-            const double xinc = 360. / xsize;
+            double xinc = 360. / xsize;
             // FIXME: why not use grid->x.inc != xinc as condition?
             if (fabs(grid->x.inc - xinc) > 0.0)
               {
@@ -612,9 +612,12 @@ iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, si
     }
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
-  const int gridID = gridAdded.Id;
+  int gridID = gridAdded.Id;
   if (!gridAdded.isNew)
-    Free(grid);
+    {
+      grid_free(grid);
+      Free(grid);
+    }
   else if (gridtype == GRID_PROJECTION)
     gridDefParamRLL(gridID, xpole, ypole, 0);
 
@@ -630,9 +633,9 @@ iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, si
       varDefVCT(vctsize, tmpvct);
     }
 
-  const int lbounds = IEG_P_LevelType(pdb) == IEG_LTYPE_HYBRID_LAYER ? 1 : 0;
+  int lbounds = IEG_P_LevelType(pdb) == IEG_LTYPE_HYBRID_LAYER ? 1 : 0;
 
-  const int datatype = iegInqDatatype(prec);
+  int datatype = iegInqDatatype(prec);
 
   int varID, levelID = 0;
   varAddRecord(recID, param, gridID, leveltype, lbounds, level1, level2, 0, 0, datatype, &varID, &levelID, TSTEP_INSTANT, 0, -1,
@@ -657,8 +660,7 @@ void iegCmpRecord(stream_t *streamptr, int tsID, int recID, off_t position, int 
 
   record_t *record  = &streamptr->tsteps[tsID].records[recID];
 
-  if ( param != (*record).param || level != (*record).ilevel )
-    Error("inconsistent timestep");
+  if (param != (*record).param || level != (*record).ilevel) Error("inconsistent timestep");
 
   (*record).position = position;
   /*
@@ -670,13 +672,12 @@ void iegCmpRecord(stream_t *streamptr, int tsID, int recID, off_t position, int 
   streamptr->tsteps[tsID].nallrecs++;
   streamptr->nrecs++;
   */
-  if ( CDI_Debug )
-    Message("varID = %d levelID = %d", varID, levelID);
+  if (CDI_Debug) Message("varID = %d levelID = %d", varID, levelID);
 }
 #endif
 
-static void
-iegDateTime(int *pdb, int64_t *date, int *time)
+static CdiDateTime
+iegDateTime(const int *pdb)
 {
   int ryear = IEG_P_Year(pdb);
   int rmonth = IEG_P_Month(pdb);
@@ -687,14 +688,17 @@ iegDateTime(int *pdb, int64_t *date, int *time)
 
   if (rminute == -1) rminute = 0;
 
-  *date = cdiEncodeDate(ryear, rmonth, rday);
-  *time = cdiEncodeTime(rhour, rminute, 0);
+  CdiDateTime cdiDateTime;
+  cdiDateTime.date = cdiDate_encode(ryear, rmonth, rday);
+  cdiDateTime.time = cdiTime_encode(rhour, rminute, 0, 0);
+  return cdiDateTime;
 }
 
 static void
 iegScanTimestep1(stream_t *streamptr)
 {
-  CmpDateTime datetime0 = { INT_MIN, INT_MIN };
+  CdiDateTime datetime0;
+  cdiDateTime_init(&datetime0);
   off_t recpos;
   iegrec_t *iegp = (iegrec_t *) streamptr->record->objectp;
 
@@ -704,7 +708,7 @@ iegScanTimestep1(stream_t *streamptr)
   if (tsID != 0) Error("Internal problem! tstepsNewEntry returns %d", tsID);
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
-  const int fileID = streamptr->fileID;
+  int fileID = streamptr->fileID;
 
   int nrecs = 0;
   while (true)
@@ -716,25 +720,22 @@ iegScanTimestep1(stream_t *streamptr)
           break;
         }
 
-      const size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+      size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
 
-      const int prec = iegp->dprec;
-      const int rcode = IEG_P_Parameter(iegp->ipdb);
-      const int tabnum = IEG_P_CodeTable(iegp->ipdb);
-      const int param = cdiEncodeParam(rcode, tabnum, 255);
+      int prec = iegp->dprec;
+      int rcode = IEG_P_Parameter(iegp->ipdb);
+      int tabnum = IEG_P_CodeTable(iegp->ipdb);
+      int param = cdiEncodeParam(rcode, tabnum, 255);
       int rlevel = (IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER) ? IEG_P_Level1(iegp->ipdb) : IEG_P_Level2(iegp->ipdb);
 
       if (IEG_P_LevelType(iegp->ipdb) == 100) rlevel *= 100;
 
-      int64_t vdate = 0;
-      int vtime = 0;
-      iegDateTime(iegp->ipdb, &vdate, &vtime);
-      CmpDateTime datetime = { .date = vdate, .time = vtime };
+      CdiDateTime datetime = iegDateTime(iegp->ipdb);
 
       if (nrecs == 0)
         {
           datetime0 = datetime;
-          taxis->vdatetime = cdiDateTime_set(vdate, vtime);
+          taxis->vDateTime = datetime;
         }
       else
         {
@@ -742,12 +743,12 @@ iegScanTimestep1(stream_t *streamptr)
           for (int recID = 0; recID < nrecs; recID++)
             if (param == records[recID].param && rlevel == records[recID].ilevel) goto tstepScanLoopFinished;
 
-          if (datetime_differ(datetime, datetime0)) Warning("Inconsistent verification time for param %d level %d", param, rlevel);
+          if (cdiDateTime_isNE(datetime, datetime0)) Warning("Inconsistent verification time for param %d level %d", param, rlevel);
         }
 
       nrecs++;
 
-      if (CDI_Debug) Message("%4d%8d%4d%8d%8ld%6d", nrecs, (int) recpos, param, rlevel, (long) vdate, vtime);
+      if (CDI_Debug) Message("%4d%8d%4d%8d %s", nrecs, (int) recpos, param, rlevel, CdiDateTime_string(datetime));
 
       iegAddRecord(streamptr, param, iegp->ipdb, iegp->igdb, iegp->vct, recsize, recpos, prec);
     }
@@ -757,11 +758,11 @@ tstepScanLoopFinished:
 
   cdi_generate_vars(streamptr);
 
-  const int taxisID = taxisCreate(TAXIS_ABSOLUTE);
+  int taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type = TAXIS_ABSOLUTE;
-  taxis->rdatetime = taxis->vdatetime;
+  taxis->rDateTime = taxis->vDateTime;
 
-  const int vlistID = streamptr->vlistID;
+  int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
   vlist_check_contents(vlistID);
@@ -780,10 +781,10 @@ iegScanTimestep2(stream_t *streamptr)
 
   streamptr->curTsID = 1;
 
-  const int vlistID = streamptr->vlistID;
-  const int fileID = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
 
-  const int tsID = streamptr->rtsteps;
+  int tsID = streamptr->rtsteps;
   if (tsID != 1) Error("Internal problem! unexpected timestep %d", tsID + 1);
 
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
@@ -793,7 +794,7 @@ iegScanTimestep2(stream_t *streamptr)
   cdi_create_records(streamptr, tsID);
   record_t *records = streamptr->tsteps[tsID].records;
 
-  const int nrecords = streamScanInitRecords2(streamptr);
+  int nrecords = streamScanInitRecords2(streamptr);
 
   for (int rindex = 0; rindex <= nrecords; rindex++)
     {
@@ -804,23 +805,21 @@ iegScanTimestep2(stream_t *streamptr)
           break;
         }
 
-      const size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+      size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
 
-      const int rcode = IEG_P_Parameter(iegp->ipdb);
-      const int tabnum = IEG_P_CodeTable(iegp->ipdb);
-      const int param = cdiEncodeParam(rcode, tabnum, 255);
+      int rcode = IEG_P_Parameter(iegp->ipdb);
+      int tabnum = IEG_P_CodeTable(iegp->ipdb);
+      int param = cdiEncodeParam(rcode, tabnum, 255);
       int rlevel = (IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER) ? IEG_P_Level1(iegp->ipdb) : IEG_P_Level2(iegp->ipdb);
 
       if (IEG_P_LevelType(iegp->ipdb) == 100) rlevel *= 100;
 
-      int64_t vdate = 0;
-      int vtime = 0;
-      iegDateTime(iegp->ipdb, &vdate, &vtime);
+      CdiDateTime datetime = iegDateTime(iegp->ipdb);
 
       if (rindex == 0)
         {
           taxis->type = TAXIS_ABSOLUTE;
-          taxis->vdatetime = cdiDateTime_set(vdate, vtime);
+          taxis->vDateTime = datetime;
         }
 
       bool nextstep = false;
@@ -851,7 +850,7 @@ iegScanTimestep2(stream_t *streamptr)
 
       if (nextstep) break;
 
-      if (CDI_Debug) Message("%4d%8d%4d%8d%8ld%6d", rindex + 1, (int) recpos, param, rlevel, (long) vdate, vtime);
+      if (CDI_Debug) Message("%4d%8d%4d%8d %s", rindex + 1, (int) recpos, param, rlevel, CdiDateTime_string(datetime));
 
       if (param != records[recID].param || rlevel != records[recID].ilevel)
         {
@@ -867,14 +866,10 @@ iegScanTimestep2(stream_t *streamptr)
   int nrecs = 0;
   for (int recID = 0; recID < nrecords; recID++)
     {
-      if (!records[recID].used)
-        {
-          vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
-        }
+      if (records[recID].used)
+        nrecs++;
       else
-        {
-          nrecs++;
-        }
+        vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
     }
   streamptr->tsteps[tsID].nrecs = nrecs;
 
@@ -892,7 +887,7 @@ iegInqContents(stream_t *streamptr)
 
   iegScanTimestep1(streamptr);
 
-  const int status = (streamptr->ntsteps == -1) ? iegScanTimestep2(streamptr) : 0;
+  int status = (streamptr->ntsteps == -1) ? iegScanTimestep2(streamptr) : 0;
 
   fileSetPos(streamptr->fileID, 0, SEEK_SET);
 
@@ -918,7 +913,7 @@ iegScanTimestep(stream_t *streamptr)
 
       nrecs = streamScanInitRecords(streamptr, tsID);
 
-      const int fileID = streamptr->fileID;
+      int fileID = streamptr->fileID;
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
@@ -931,28 +926,26 @@ iegScanTimestep(stream_t *streamptr)
               break;
             }
 
-          const size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+          size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
 
-          const int rcode = IEG_P_Parameter(iegp->ipdb);
-          const int tabnum = IEG_P_CodeTable(iegp->ipdb);
-          const int param = cdiEncodeParam(rcode, tabnum, 255);
+          int rcode = IEG_P_Parameter(iegp->ipdb);
+          int tabnum = IEG_P_CodeTable(iegp->ipdb);
+          int param = cdiEncodeParam(rcode, tabnum, 255);
           int rlevel
               = (IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER) ? IEG_P_Level1(iegp->ipdb) : IEG_P_Level2(iegp->ipdb);
 
           if (IEG_P_LevelType(iegp->ipdb) == 100) rlevel *= 100;
 
-          int64_t vdate = 0;
-          int vtime = 0;
-          iegDateTime(iegp->ipdb, &vdate, &vtime);
+          CdiDateTime datetime = iegDateTime(iegp->ipdb);
 
           // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
           if (rindex == nrecs) continue;
-          const int recID = streamptr->tsteps[tsID].recIDs[rindex];
+          int recID = streamptr->tsteps[tsID].recIDs[rindex];
 
           if (rindex == 0)
             {
               taxis->type = TAXIS_ABSOLUTE;
-              taxis->vdatetime = cdiDateTime_set(vdate, vtime);
+              taxis->vDateTime = datetime;
             }
 
           if (param != records[recID].param || rlevel != records[recID].ilevel)
@@ -965,7 +958,7 @@ iegScanTimestep(stream_t *streamptr)
           records[recID].position = recpos;
           records[recID].size = recsize;
 
-          if (CDI_Debug) Message("%4d%8d%4d%8d%8ld%6d", rindex, (int) recpos, param, rlevel, (long) vdate, vtime);
+          if (CDI_Debug) Message("%4d%8d%4d%8d %s", rindex, (int) recpos, param, rlevel, CdiDateTime_string(datetime));
         }
 
       streamptr->rtsteps++;
@@ -1063,6 +1056,7 @@ iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   int vlistID = streamptr->vlistID;
   int fileID = streamptr->fileID;
   int tsID = streamptr->curTsID;
+  CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
   int gridID = vlistInqVarGrid(vlistID, varID);
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
 
@@ -1072,13 +1066,13 @@ iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   IEG_P_Parameter(iegp->ipdb) = pnum;
   if (pdis == 255) IEG_P_CodeTable(iegp->ipdb) = pcat;
 
-  iegDefTime(iegp->ipdb, streamptr->tsteps[tsID].taxis.vdatetime, vlistInqTaxis(vlistID));
+  iegDefTime(iegp->ipdb, vDateTime, vlistInqTaxis(vlistID));
   iegDefGrid(iegp->igdb, gridID);
   iegDefLevel(iegp->ipdb, iegp->igdb, iegp->vct, zaxisID, levID);
 
   iegp->dprec = iegDefDatatype(vlistInqVarDatatype(vlistID, varID));
 
-  const size_t gridsize = gridInqSize(gridID);
+  size_t gridsize = gridInqSize(gridID);
   iegp->refval = calc_refvalDP(gridsize, data);
 
   iegDefDataDP(iegp, data);

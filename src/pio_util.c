@@ -2,7 +2,9 @@
 #include "config.h"
 #endif
 
+#include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,11 +12,10 @@
 
 #include <unistd.h>
 
+#include "pio_rpc.h"
 #include "pio_util.h"
 #include "cdi.h"
 #include "dmemory.h"
-
-static char commands[][13] = { "FINALIZE", "RESOURCES", "WRITETS" };
 
 /*****************************************************************************/
 void
@@ -61,8 +62,8 @@ pcdiXMPI(int iret, const char *filename, int line)
   MPI_Error_string(iret, errorString[1], &len);
   errorString[1][len] = '\0';
   fprintf(stderr,
-          "MPI ERROR, pe%d, %s, line %d,"
-          "errorClass: \"%s\""
+          "MPI ERROR, pe%d, %s, line %d, "
+          "errorClass: \"%s\", "
           "errorString: \"%s\"\n",
           rank, filename, line, errorString[0], errorString[1]);
   MPI_Abort(MPI_COMM_WORLD, 1);
@@ -74,7 +75,6 @@ void
 pcdiXMPIStat(int iret, const char *filename, int line, MPI_Status *status)
 {
   char errorString[MPI_MAX_ERROR_STRING + 1];
-  int len, rank = getMPICommWorldRank();
 
   if (iret == MPI_ERR_IN_STATUS)
     {
@@ -84,45 +84,57 @@ pcdiXMPIStat(int iret, const char *filename, int line, MPI_Status *status)
         case MPI_SUCCESS: fprintf(stderr, "-------- mpi_success -----------\n"); break;
         case MPI_ERR_PENDING: fprintf(stderr, "-------- mpi_err_pending ----------\n"); break;
         default:
-          MPI_Error_string(status->MPI_ERROR, errorString, &len);
-          errorString[len] = '\0';
-          fprintf(stderr,
-                  "MPI ERROR in request, pe%d, %s, line %d,"
-                  "return value: %d, error_string: %s\n",
-                  rank, filename, line, iret, errorString);
-          MPI_Abort(MPI_COMM_WORLD, iret);
+          {
+            int len, rank = getMPICommWorldRank();
+            MPI_Error_string(status->MPI_ERROR, errorString, &len);
+            errorString[len] = '\0';
+            fprintf(stderr,
+                    "MPI ERROR in request, pe%d, %s, line %d,"
+                    "return value: %d, error_string: %s\n",
+                    rank, filename, line, iret, errorString);
+            MPI_Abort(MPI_COMM_WORLD, iret);
+          }
         }
     }
-  else
-    xmpi(iret);
+  else if (iret != MPI_SUCCESS)
+    pcdiXMPI(iret, filename, line);
 
   return;
 }
 
-/****************************************************/
-
 void
-pcdiDebugMsg(const char *cdiPioDebugString, const char *filename, const char *functionname, int line, int tag, int source,
-             int nfinished)
+pcdiXMPIStats(int iret, const char *filename, int line, int n, MPI_Status *restrict statuses)
 {
-  int rank = getMPICommWorldRank();
-
-  fprintf(stdout, "%s pe%d in %s, %s, line %d: command %s, source %d, finalized=%d\n", cdiPioDebugString, rank, functionname,
-          filename, line, &commands[tag][0], source, nfinished);
+  if (iret == MPI_ERR_IN_STATUS)
+    {
+      for (size_t i = 0; i < (size_t) n; ++i)
+        if (statuses[i].MPI_ERROR != MPI_SUCCESS && statuses[i].MPI_ERROR != MPI_ERR_PENDING)
+          pcdiXMPIStat(iret, filename, line, statuses + i);
+    }
+  else if (iret != MPI_SUCCESS)
+    pcdiXMPI(iret, filename, line);
 }
 
 /****************************************************/
 
+#ifndef NDEBUG
 void
-pcdiDebugMsg2(const char *filename, const char *functionname, int line, int tag, int source, char *text)
+cdiPioAssertConsistentIntVec(size_t n, const int *restrict a, MPI_Comm comm, int commRank, int rankRangeStart, int rankRangeSize)
 {
-  int rank = getMPICommWorldRank();
-
-  fprintf(stdout, "pe%d in %s, %s, line %d: command %s, source %d, %s\n", rank, functionname, filename, line, &commands[tag][0],
-          source, text);
+  int *restrict b = Malloc(n * sizeof(*b));
+  int rankDst = rankRangeStart + (commRank + 1 - rankRangeStart) % rankRangeSize,
+      rankSrc = rankRangeStart + (commRank + rankRangeSize - 1 - rankRangeStart) % rankRangeSize;
+  MPI_Request req[2];
+  assert(n <= INT_MAX);
+  xmpi(MPI_Irecv(b, (int) n, MPI_INT, rankSrc, ASSERT_CONSISTENCY, comm, req + 0));
+  xmpi(MPI_Isend((int *) a, (int) n, MPI_INT, rankDst, ASSERT_CONSISTENCY, comm, req + 1));
+  xmpi(MPI_Waitall(2, req, MPI_STATUSES_IGNORE));
+  bool allEqual = true;
+  for (size_t i = 0; i < n; ++i) allEqual &= (a[i] == b[i]);
+  assert(allEqual);
+  Free(b);
 }
-
-/****************************************************/
+#endif
 
 void
 printArray(const char *cdiPioDebugString, const char *ps, const void *array, int n, int datatype, const char *funname,
@@ -165,6 +177,7 @@ cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
     {
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
+    case GRID_CURVILINEAR:
       varShape[0] = gridInqXsize(gridID);
       varShape[1] = gridInqYsize(gridID);
       break;
@@ -172,15 +185,17 @@ cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
       varShape[0] = 2;
       varShape[1] = gridInqSize(gridID) / 2;
       break;
+    case GRID_UNSTRUCTURED:
+      varShape[0] = gridInqSize(gridID);
+      varShape[1] = 1;
+      break;
     case GRID_GENERIC:
     case GRID_PROJECTION:
-    case GRID_GME:
-    case GRID_CURVILINEAR:
-    case GRID_UNSTRUCTURED: xabort("unimplemented grid type: %d", gridType);
+    case GRID_GME: xabort("unimplemented grid type: %d", gridType);
     }
   varShape[2] = zaxisInqSize(zaxisID);
   /* FIXME: other grids have different dimensionality */
-  return (varShape[2] == 1) ? 2 : 3;
+  return (varShape[2] > 1) ? 2 : 3;
 }
 
 void

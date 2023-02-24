@@ -1,14 +1,13 @@
-import sys,os
-sys.path.insert(0,os.getcwd())
+#! /usr/bin/env python
+from __future__ import print_function
+import sys, os
+
 import Cdi
 
 print("# BEGIN PYTHON TEST ==================================#")
-if ( 1 == len(sys.argv) ):
-    ifile = "../mulval.nc"
-else:
-    ifile = sys.argv[1]
+ifile_name = sys.argv[1] if len(sys.argv) > 1 else "../testdata/mulval.grb"
 
-cdi = Cdi.Cdi(ifile)
+cdi = Cdi.Cdi(ifile_name)
 
 print('Stream: ',cdi.streamID,' vlistID:',cdi.vlistID,' nvars:{d}', cdi.nvars)
 
@@ -34,12 +33,8 @@ print("#========== VAR by index ======================================#")
 var = cdi.variables[1]
 var.getValues()
 val = var.values
-i=0; print('val[',i,'] = ',val[i])
-i=1; print('val[',i,'] = ',val[i])
-i=2; print('val[',i,'] = ',val[i])
-i=3; print('val[',i,'] = ',val[i])
-i=4; print('val[',i,'] = ',val[i])
-i=5; print('val[',i,'] = ',val[i])
+for i in range(6):
+  print('val[',i,'] = ',val[i])
 print("#========= Var by name ===============================#")
 name ="tsurf"
 newvar = cdi.var[name]

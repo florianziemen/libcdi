@@ -1,5 +1,5 @@
-#ifndef _PIO_H
-#define _PIO_H
+#ifndef CDI_PIO_H
+#define CDI_PIO_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -8,7 +8,26 @@
 #include <stdlib.h>
 #include <mpi.h>
 
-extern void (*cdiPioFileWritingFinalize)(void);
+#include "namespace.h"
+#include "pio_conf.h"
+
+/* indices of extra keys put into cdiPioExtraNSKeys */
+
+enum
+{
+  cdiPioEKFileWritingFinalize,
+  cdiPioEKConf,
+  cdiPioEKComms,
+  cdiPioExtraNSKeysSize
+};
+
+extern int cdiPioExtraNSKeys[cdiPioExtraNSKeysSize];
+
+static inline struct cdiPioConf *
+cdiPioGetConf(void)
+{
+  return (struct cdiPioConf *) namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKConf]).data;
+}
 
 #endif
 /*

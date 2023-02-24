@@ -8,10 +8,17 @@
 #include "config.h"
 #endif
 
+#define _XOPEN_SOURCE 500
+
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <mpi.h>
 
@@ -20,312 +27,119 @@
 #include "namespace.h"
 #include "pio.h"
 #include "pio_comm.h"
+#include "pio_conf.h"
+#include "pio_dbuffer.h"
 #include "pio_impl.h"
 #include "pio_util.h"
 
-typedef struct
+enum
 {
-  struct dBuffer *db1;
-  struct dBuffer *db2;
-  struct dBuffer *db;
-  FILE *fp;
+  collGuardTag = 777,
+};
+
+/*
+ * Represents file opened by multiple writers and the corresponding
+ * buffer(s) for accumulation of timestep data.
+ */
+struct mwFileBuf
+{
+  char *name;
+  struct dBuffer db;
+  int fd, tsID;
   enum IO_Server_command command;
-  int tsID, fileID;
-  char name[];
-} aFiledataPF;
+};
 
-static int
-fileIDTestA(void *a, void *fileID)
-{
-  return ((aFiledataPF *) a)->fileID == (int) (intptr_t) fileID;
-}
-
-typedef struct
-{
-  long offset;
-  bool finished;
-  int fileID;
-  bool nfinished[];
-} bFiledataPF;
-
-static int
-fileIDTestB(void *a, void *fileID)
-{
-  return ((bFiledataPF *) a)->fileID == (int) (intptr_t) fileID;
-}
-
-static bool
-fileIDCmpB(void *a, void *b)
-{
-  return ((bFiledataPF *) a)->fileID == ((bFiledataPF *) b)->fileID;
-}
-
-static listSet *bibAFiledataPF;
+static struct mwFileBuf *openFiles;
+static unsigned openFilesSize, openFilesFill;
 
 /***************************************************************/
 
-static aFiledataPF *
-initAFiledataPF(const char *key, size_t bs)
+static void
+newMultiwriterFileBuf(struct mwFileBuf *afd, const char *filename, size_t bs)
 {
-  aFiledataPF *afd;
-  size_t len;
-  int iret;
-
-  len = strlen(key);
-  afd = Calloc(1, sizeof(*afd) + len + 1);
-  strcpy(afd->name, key);
+  {
+    size_t nameSize = strlen(filename) + 1;
+    char *name = afd->name = Malloc(nameSize);
+    memcpy(name, filename, nameSize);
+  }
   afd->tsID = 0;
 
   /* init output buffer */
 
   xdebug(" name=%s, init output buffer", afd->name);
 
-  iret = dbuffer_init(&(afd->db1), bs);
-  iret += dbuffer_init(&(afd->db2), bs);
-
-  if (iret > 0) xabort("dbuffer_init did not succeed");
-
-  afd->db = afd->db1;
+  cdiPioDbufferInit(&afd->db, bs);
 
   /* open file */
   xdebug("name=%s, open file", afd->name);
 
-  if ((afd->fp = fopen(afd->name, "w")) == NULL) xabort("Failed to open %s", afd->name);
+  if ((afd->fd = open(afd->name, O_CREAT | O_WRONLY, 0666)) == -1) xabort("Failed to open %s", afd->name);
 
   afd->command = IO_Open_file;
-  return afd;
 }
-
-/***************************************************************/
-static bFiledataPF *
-initBFiledataPF(int fileID, int nc)
-{
-  bFiledataPF *bfd;
-  size_t bfdSize = sizeof(bFiledataPF) + (size_t) nc * sizeof(bool);
-  bfd = Calloc(1, bfdSize);
-  bfd->offset = 0;
-  bfd->finished = false;
-  bfd->fileID = fileID;
-
-  return bfd;
-}
-
-/***************************************************************/
 
 static int
-destroyAFiledataPF(void *v)
+deleteMultiwriterFileBuf(struct mwFileBuf *afd)
 {
-  int iret = 0;
-  aFiledataPF *afd = (aFiledataPF *) v;
+  int iret;
 
   /* close file */
   xdebug("name=%s, close file", afd->name);
-  if ((iret = fclose(afd->fp)) == EOF) xabort("Failed to close %s", afd->name);
+  if ((iret = close(afd->fd)) == -1) xabort("Failed to close %s", afd->name);
 
   /* file closed, cleanup */
   xdebug("name=%s, file closed, cleanup ...", afd->name);
-  dbuffer_cleanup(&(afd->db1));
-  dbuffer_cleanup(&(afd->db2));
-
-  Free(afd);
-
-  return iret;
-}
-
-/***************************************************************/
-
-static int
-destroyBFiledataPF(void *v)
-{
-  int iret = 0;
-  bFiledataPF *bfd = (bFiledataPF *) v;
-
-  Free(bfd);
+  cdiPioDbufferDestroy(&afd->db);
+  Free(afd->name);
+  afd->name = NULL;
 
   return iret;
-}
-
-/***************************************************************/
-
-static bool
-compareNamesAPF(void *v1, void *v2)
-{
-  aFiledataPF *afd1 = v1, *afd2 = v2;
-
-  return !strcmp(afd1->name, afd2->name);
-}
-
-/***************************************************************/
-
-static void
-fpgPOSIXFPGUARDSENDRECV(void)
-{
-  int i, source, iret;
-  struct fileOpTag rtag;
-  MPI_Status status;
-  bFiledataPF *bfd;
-  listSet *bibBFiledataPF;
-  long amount;
-  MPI_Comm commPio = commInqCommPio();
-  int nProcsColl = commInqSizeColl();
-  bool *sentFinalize, doFinalize = false;
-
-  xdebug("ncollectors=%d", nProcsColl);
-
-  bibBFiledataPF = listSetNew(destroyBFiledataPF, fileIDCmpB);
-  sentFinalize = Calloc((size_t) nProcsColl, sizeof(sentFinalize[0]));
-
-  for (;;)
-    {
-      xmpi(MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, commPio, &status));
-      source = status.MPI_SOURCE;
-      rtag = decodeFileOpTag(status.MPI_TAG);
-
-      xdebug("receive message from source=%d, id=%d, command=%d ( %s )", source, rtag.id, rtag.command,
-             cdiPioCmdStrTab[rtag.command]);
-
-      switch (rtag.command)
-        {
-        case IO_Open_file:
-
-          if (!(bfd = listSetGet(bibBFiledataPF, fileIDTestB, (void *) (intptr_t) rtag.id)))
-            {
-              bfd = initBFiledataPF(rtag.id, nProcsColl);
-
-              if ((iret = listSetAdd(bibBFiledataPF, bfd)) < 0) xabort("fileID=%d not unique", rtag.id);
-              bfd->fileID = iret;
-            }
-
-          xdebug("id=%d, command=%d ( %s ), send offset=%ld", rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command], bfd->offset);
-
-          xmpi(MPI_Sendrecv(&(bfd->offset), 1, MPI_LONG, source, status.MPI_TAG, &amount, 1, MPI_LONG, source, status.MPI_TAG,
-                            commPio, &status));
-
-          bfd->offset += amount;
-
-          xdebug("id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld", rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command],
-                 amount, bfd->offset);
-
-          break;
-
-        case IO_Set_fp:
-
-          if (!(bfd = listSetGet(bibBFiledataPF, fileIDTestB, (void *) (intptr_t) rtag.id)))
-            xabort("fileId=%d not in set", rtag.id);
-
-          xdebug("id=%d, command=%d ( %s ), send offset=%ld", rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command], bfd->offset);
-
-          xmpi(MPI_Sendrecv(&(bfd->offset), 1, MPI_LONG, source, status.MPI_TAG, &amount, 1, MPI_LONG, source, status.MPI_TAG,
-                            commPio, &status));
-
-          bfd->offset += amount;
-
-          xdebug("id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld", rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command],
-                 amount, bfd->offset);
-
-          break;
-
-        case IO_Close_file:
-
-          if (!(bfd = listSetGet(bibBFiledataPF, fileIDTestB, (void *) (intptr_t) rtag.id)))
-            xabort("fileId=%d not in set", rtag.id);
-
-          xdebug("id=%d, command=%d ( %s )), send offset=%ld", rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command], bfd->offset);
-
-          xmpi(MPI_Sendrecv(&(bfd->offset), 1, MPI_LONG, source, status.MPI_TAG, &amount, 1, MPI_LONG, source, status.MPI_TAG,
-                            commPio, &status));
-
-          bfd->offset += amount;
-
-          xdebug("id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld", rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command],
-                 amount, bfd->offset);
-
-          bfd->nfinished[source] = true;
-          bfd->finished = true;
-
-          for (i = 0; i < nProcsColl; i++)
-            if (!(bfd->nfinished[i]))
-              {
-                bfd->finished = false;
-                break;
-              }
-
-          if (bfd->finished) listSetRemove(bibBFiledataPF, fileIDTestB, (void *) (intptr_t) rtag.id);
-          break;
-        case IO_Finalize:
-          {
-            int buffer = CDI_UNDEFID, collID;
-
-            xmpi(MPI_Recv(&buffer, 1, MPI_INT, source, status.MPI_TAG, commPio, &status));
-            sentFinalize[source] = true;
-            doFinalize = true;
-            for (collID = 0; collID < nProcsColl; collID++) doFinalize &= sentFinalize[collID];
-            if (doFinalize)
-              {
-                if (!listSetIsEmpty(bibBFiledataPF))
-                  xabort("set bibBFiledataM not empty");
-                else
-                  {
-                    xdebug("%s", "destroy set");
-                    listSetDelete(bibBFiledataPF);
-                  }
-                Free(sentFinalize);
-                return;
-              }
-          }
-          break;
-        default: xabort("COMMAND NOT IMPLEMENTED");
-        }
-    }
 }
 
 //*******************************************************
+#ifndef HAVE_PWRITE
+static ssize_t
+pwrite(int fd, const void *buf, size_t count, off_t offset)
+{
+  off_t pos;
+  ssize_t written;
+  if ((pos = lseek(fd, offset, SEEK_SET)) == (off_t) -1) xabort("did not succeed seeking file: %s", strerror(errno));
+  if ((written = write(fd, buf, count)) != amount)
+    xabort("fileId=%d, expect to write %zu byte, written %zd byte", id, count, written);
+  return written;
+}
+#endif
 
 static void
-writePF(aFiledataPF *afd)
+writePF(struct mwFileBuf *afd)
 {
-  size_t amount, written;
-  long offset;
-  long amountL;
-  int error, tag;
+  ssize_t written;
   MPI_Status status;
   /* FIXME: pretend there's only one special rank for now */
+  int fileID = (int) (afd - openFiles);
   int specialRank = commInqSizePio() - 1;
   MPI_Comm commPio = commInqCommPio();
 
   /* send buffersize, recv offset */
+  size_t amount = cdiPioDbufferGetPos(&afd->db);
 
-  amount = dbuffer_data_size(afd->db);
-  amountL = (long) amount;
-  int id = afd->fileID;
-  tag = encodeFileOpTag(id, afd->command);
+  struct syncMsg query = { .amount = (off_t) amount, .fileID = fileID, .command = afd->command };
+  off_t offset;
+  xmpiStat(MPI_Sendrecv(&query, 1, cdiPioSyncMsgDt, specialRank, collGuardTag, &offset, 1, cdiPioOffsetDt, specialRank,
+                        collGuardTag, commPio, &status),
+           &status);
+  xdebug("id=%d, command=%d, amount=%zu, sent amount=%lld, recv offset=%ld", fileID, afd->command, amount,
+         (long long) (off_t) amount, offset);
 
-  xmpi(MPI_Sendrecv(&amountL, 1, MPI_LONG, specialRank, tag, &offset, 1, MPI_LONG, specialRank, tag, commPio, &status));
-  xdebug("id=%d, command=%d, amount=%zu, send amountL=%ld, recv offset=%ld", id, afd->command, amount, amountL, offset);
-
+  bool doTruncate = offset < 0;
+  if (offset < 0) offset = -offset - 1;
   /* write buffer */
-
-  if ((error = fseek(afd->fp, offset, SEEK_SET)) != 0) xabort("did not succeed seeking fp");
-
-  if ((written = fwrite(afd->db->buffer, sizeof(char), amount, afd->fp)) != amount)
-    xabort("fileId=%d, expect to write %zu byte, written %zu byte", id, amount, written);
-
-  xdebug("written %zu bytes in file %d with offset %ld", written, id, offset);
-
+  if ((written = pwrite(afd->fd, afd->db.buffer, amount, offset)) != (ssize_t) amount)
+    xabort("fileId=%d, expect to write %zu byte, written %zu byte", fileID, amount, written);
+  xdebug("written %zu bytes in file %d with offset %ld", written, fileID, offset);
+  if (doTruncate) ftruncate(afd->fd, offset + (off_t) amount);
   /* change outputBuffer */
-
-  dbuffer_reset(afd->db);
-
-  if (afd->db == afd->db1)
-    {
-      xdebug("id=%d, change to buffer 2 ...", id);
-      afd->db = afd->db2;
-    }
-  else
-    {
-      xdebug("id=%d, change to buffer 1 ...", id);
-      afd->db = afd->db1;
-    }
+  cdiPioDbufferReset(&afd->db);
 
   afd->command = IO_Set_fp;
 }
@@ -333,16 +147,16 @@ writePF(aFiledataPF *afd)
 /***************************************************************/
 
 static void
-defTimestepPF(aFiledataPF *afd, int tsID)
+defTimestepPF(struct mwFileBuf *afd, int tsID)
 {
-  if (afd == NULL || tsID < 0 || tsID != afd->tsID + 1) xabort(" defTimestepPF() didn't succeed.");
+  assert(afd != NULL && tsID >= 0 && tsID == afd->tsID + 1);
   afd->tsID = tsID;
 }
 
 /***************************************************************/
 
 static void
-flushOp(aFiledataPF *a, int tsID)
+flushOp(struct mwFileBuf *a, int tsID)
 {
   writePF(a);
   defTimestepPF(a, tsID);
@@ -351,9 +165,8 @@ flushOp(aFiledataPF *a, int tsID)
 static size_t
 fwPOSIXFPGUARDSENDRECV(int fileID, const void *buffer, size_t len, int tsID)
 {
-  int error = 0;
-  int filled = 0;
-  aFiledataPF *afd = listSetGet(bibAFiledataPF, fileIDTestA, (void *) (intptr_t) fileID);
+  assert(fileID >= 0 && (size_t) fileID < openFilesSize && openFiles[fileID].name);
+  struct mwFileBuf *afd = openFiles + fileID;
 
   bool flush = tsID != afd->tsID;
 
@@ -364,10 +177,11 @@ fwPOSIXFPGUARDSENDRECV(int fileID, const void *buffer, size_t len, int tsID)
       xmpi(MPI_Barrier(commInqCommColl()));
     }
 
-  filled = dbuffer_push(afd->db, (unsigned char *) buffer, len);
+  int filled = cdiPioDbufferAppend(&afd->db, buffer, len);
 
   xdebug("fileID = %d, tsID = %d, pushed data on buffer, filled = %d", fileID, tsID, filled);
 
+  int error = 0;
   if (filled == 1)
     {
       if (flush)
@@ -376,7 +190,7 @@ fwPOSIXFPGUARDSENDRECV(int fileID, const void *buffer, size_t len, int tsID)
         {
           writePF(afd);
 
-          error = dbuffer_push(afd->db, (unsigned char *) buffer, len);
+          error = cdiPioDbufferAppend(&afd->db, buffer, len);
         }
     }
 
@@ -388,74 +202,77 @@ fwPOSIXFPGUARDSENDRECV(int fileID, const void *buffer, size_t len, int tsID)
 /***************************************************************/
 
 static int
-fcPOSIXFPGUARDSENDRECV(int id)
+fcPOSIXFPGUARDSENDRECV(int fileID)
 {
-  aFiledataPF *afd;
-  int iret;
+  assert(fileID >= 0 && (size_t) fileID < openFilesSize && openFiles[fileID].name);
+  struct mwFileBuf *afd = openFiles + fileID;
 
-  xdebug("write buffer, close file %d and cleanup", id);
-
-  afd = listSetGet(bibAFiledataPF, fileIDTestA, (void *) (intptr_t) id);
+  xdebug("write buffer, close file %d and cleanup", fileID);
 
   afd->command = IO_Close_file;
 
   writePF(afd);
 
   /* remove file element */
-  iret = listSetRemove(bibAFiledataPF, fileIDTestA, (void *) (intptr_t) id);
+  int iret = deleteMultiwriterFileBuf(afd);
   /* make sure the file is closed on all collectors before proceeding */
   xmpi(MPI_Barrier(commInqCommColl()));
   return iret;
 }
 
 /***************************************************************/
-static void
-elemCheck(void *q, void *nm)
-{
-  aFiledataPF *afd = q;
-  const char *name = nm;
-
-  if (!strcmp(name, afd->name)) xabort("Filename %s has already been added to set\n", name);
-}
 
 static int
 fowPOSIXFPGUARDSENDRECV(const char *filename, const char *mode)
 {
-  int id;
-  enum
-  {
-    bcastRoot = 0
-  };
-  if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
-    xabort("Unsupported mode \"%s\" in parallel file open.", mode);
-  aFiledataPF *afd;
-  static unsigned long buffersize = 0;
+  if ((mode[0] != 'w' && mode[0] != 'W') || mode[1] != 0) xabort("Unsupported mode \"%s\" in parallel file open.", mode);
 
-  /* broadcast buffersize to collectors */
-  if (!buffersize)
+  struct cdiPioConf *conf = cdiPioGetConf();
+
+  for (size_t i = 0; i < openFilesSize; ++i)
+    if (openFiles[i].name && !strcmp(openFiles[i].name, filename))
+      {
+        Warning("filename %s is already open!"
+                " CDI-PIO does not support concurrent access"
+                " through different filehandles.",
+                filename);
+        return CDI_EINVAL;
+      }
+
+  size_t fileID = SIZE_MAX;
+  if (openFilesSize == openFilesFill)
     {
-      if (commInqRankColl() == bcastRoot) buffersize = findWriteAccumBufsize();
-      xmpi(MPI_Bcast(&buffersize, 1, MPI_UNSIGNED_LONG, bcastRoot, commInqCommColl()));
+      fileID = openFilesSize;
+      if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
+      openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
+      if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
+      openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
+      for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
     }
+  else
+    {
+      for (size_t i = 0; i < openFilesSize; ++i)
+        if (openFiles[i].name == NULL)
+          {
+            fileID = i;
+            break;
+          }
+    }
+  struct mwFileBuf *afd = openFiles + fileID;
 
-  /* init and add file element */
-  listSetForeach(bibAFiledataPF, elemCheck, (void *) filename);
+  newMultiwriterFileBuf(afd, filename, conf->writeAggBufLim);
 
-  afd = initAFiledataPF(filename, (size_t) buffersize);
-
-  if ((id = listSetAdd(bibAFiledataPF, afd)) < 0) xabort("filename %s not unique", afd->name);
-  afd->fileID = id;
-  xdebug("name=%s, init and add aFiledataPF, return id = %d", filename, id);
-  {
-    long offset, amount = 0L;
-    int tag = encodeFileOpTag(afd->fileID, afd->command);
-    int specialRank = commInqSpecialRank();
-    MPI_Status status;
-    MPI_Comm commPio = commInqCommPio();
-    xmpi(MPI_Sendrecv(&amount, 1, MPI_LONG, specialRank, tag, &offset, 1, MPI_LONG, specialRank, tag, commPio, &status));
-  }
+  xdebug("name=%s, init and add struct mwFileBuf, return id = %zu", filename, fileID);
+  off_t offset;
+  int specialRank = commInqSpecialRank();
+  MPI_Status status;
+  MPI_Comm commPio = commInqCommPio();
+  struct syncMsg query = { .amount = 0, .fileID = (int) fileID, .command = afd->command };
+  xmpiStat(MPI_Sendrecv(&query, 1, cdiPioSyncMsgDt, specialRank, collGuardTag, &offset, 1, cdiPioOffsetDt, specialRank,
+                        collGuardTag, commPio, &status),
+           &status);
   afd->command = IO_Set_fp;
-  return id;
+  return (int) fileID;
 }
 
 /***************************************************************/
@@ -463,20 +280,17 @@ fowPOSIXFPGUARDSENDRECV(const char *filename, const char *mode)
 static void
 finalizePOSIXFPGUARDSENDRECV(void)
 {
-  int buffer = 0, tag = encodeFileOpTag(0, IO_Finalize);
+  static const struct syncMsg query = { .amount = 0, .fileID = 0, .command = IO_Finalize };
+  xmpi(MPI_Send((void *) &query, 1, cdiPioSyncMsgDt, commInqSpecialRank(), collGuardTag, commInqCommPio()));
 
-  xmpi(MPI_Send(&buffer, 1, MPI_INT, commInqSpecialRank(), tag, commInqCommPio()));
-
-  if (!listSetIsEmpty(bibAFiledataPF))
-    xabort("set bibAFiledataM not empty");
-  else
-    {
-      xdebug("%s", "destroy set");
-      listSetDelete(bibAFiledataPF);
-    }
+  if (openFilesFill) xabort("files still open at CDI-PIO finalization");
+  Free(openFiles);
+  cdiPioDestroySyncMsgDt();
 }
 
 /***************************************************************/
+
+static void fpgPOSIXFPGUARDSENDRECV(void);
 
 void
 initPOSIXFPGUARDSENDRECV(void)
@@ -484,6 +298,8 @@ initPOSIXFPGUARDSENDRECV(void)
   int numIOServers = commInqSizePio();
   if (numIOServers < 2) xabort("error: # of I/O processes must be >= 2 for mode, but is %d", numIOServers);
 
+  cdiPioLookupOffsetDt();
+  cdiPioCreateSyncMsgDt();
   int isCollector = commInqRankColl() != -1;
   if (!isCollector)
     fpgPOSIXFPGUARDSENDRECV();
@@ -492,8 +308,130 @@ initPOSIXFPGUARDSENDRECV(void)
       namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowPOSIXFPGUARDSENDRECV));
       namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcPOSIXFPGUARDSENDRECV));
       namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwPOSIXFPGUARDSENDRECV));
-      cdiPioFileWritingFinalize = finalizePOSIXFPGUARDSENDRECV;
-      bibAFiledataPF = listSetNew(destroyAFiledataPF, compareNamesAPF);
+      namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(finalizePOSIXFPGUARDSENDRECV));
+    }
+}
+
+/***************************************************************/
+/* the rank running the message loop below responds to queries of the form
+ * struct syncMsg { off_t amount, int fileID, int operation code }
+ * where the answer depends on the operation code:
+ * IO_Open_file, IO_Set_fp or IO_Close_file:
+ * off_t answer = offset to write to
+ * IO_Finalize: no answer
+ *
+ * In essence this is an implementation of a shared file pointer.
+ */
+
+struct sharedFP
+{
+  off_t offset;
+  int unfinished;
+};
+
+static inline void
+initSharedFP(struct sharedFP *bfd, int nProcsColl)
+{
+  bfd->offset = 0;
+  bfd->unfinished = nProcsColl;
+}
+
+/* MPICH 3.3 has a problem in its implementation of MPI_Testany and
+ * MPI_Waitany, see commit 0f7be7196cc05bf0c908761e148628e88d635190
+ * at https://github.com/pmodels/mpich
+ * effectively, the work-around prepends MPI_REQUEST_NULL to the
+ * request array */
+#ifdef MPICH_CALC_VERSION
+#if MPICH_NUMVERSION >= MPICH_CALC_VERSION(3, 3, 0, 0, 0) && MPI_NUMVERSION < MPICH_CALC_VERSION(3, 3, 1, 0, 0)
+#define CDIPIO_MPICH33_WORKAROUND(code) code
+#else
+#define CDIPIO_MPICH33_WORKAROUND(code)
+#endif
+#else
+#define CDIPIO_MPICH33_WORKAROUND(code)
+#endif
+
+static void
+fpgPOSIXFPGUARDSENDRECV(void)
+{
+  int source;
+  MPI_Status status;
+  struct sharedFP *restrict sharedFPs = NULL;
+  size_t sharedFPsSize = 0, sharedFPsFill = 0;
+  MPI_Comm commPio = commInqCommPio();
+  size_t nProcsColl = (size_t) (commInqSizeColl()), sentFinalize = nProcsColl;
+  struct syncMsg *msgWords = Malloc(sizeof(*msgWords) * nProcsColl);
+  size_t numReq = nProcsColl;
+  CDIPIO_MPICH33_WORKAROUND(++numReq);
+  MPI_Request *msgReq = Malloc(sizeof(*msgReq) * numReq);
+
+  xdebug("ncollectors=%zu", nProcsColl);
+
+  CDIPIO_MPICH33_WORKAROUND(msgReq[0] = MPI_REQUEST_NULL; ++msgReq);
+  for (size_t i = 0; i < nProcsColl; ++i)
+    xmpi(MPI_Irecv(msgWords + i, 1, cdiPioSyncMsgDt, (int) i, collGuardTag, commPio, msgReq + i));
+  for (;;)
+    {
+      CDIPIO_MPICH33_WORKAROUND(--msgReq; ++nProcsColl);
+      xmpiStat(MPI_Waitany((int) nProcsColl, msgReq, &source, &status), &status);
+      CDIPIO_MPICH33_WORKAROUND(++msgReq; --nProcsColl; --source);
+      int fileID = msgWords[source].fileID;
+      assert(fileID >= 0);
+      int opcode = msgWords[source].command;
+      off_t amount = msgWords[source].amount;
+      /* re-instate listening */
+      if (opcode != IO_Finalize)
+        xmpi(MPI_Irecv(msgWords + source, 1, cdiPioSyncMsgDt, source, collGuardTag, commPio, msgReq + source));
+
+      xdebug("receive message from source=%d, id=%d, command=%d (%s)", source, fileID, opcode, cdiPioCmdStrTab[opcode]);
+
+      if (opcode >= IO_Open_file && opcode < IO_Send_buffer)
+        {
+          if (opcode == IO_Open_file)
+            {
+              if (sharedFPsSize <= (size_t) fileID)
+                {
+                  size_t oldSize = sharedFPsSize;
+                  sharedFPsSize = sharedFPsSize ? sharedFPsSize * 2 : 2;
+                  sharedFPs = Realloc(sharedFPs, sharedFPsSize * sizeof(*sharedFPs));
+                  for (size_t i = oldSize; i < sharedFPsSize; ++i) sharedFPs[i].offset = -1;
+                }
+              if (sharedFPs[fileID].offset < 0)
+                {
+                  initSharedFP(sharedFPs + fileID, (int) nProcsColl);
+                  ++sharedFPsFill;
+                }
+            }
+          xdebug("id=%d, command=%d (%s), send offset=%lld", fileID, opcode, cdiPioCmdStrTab[opcode],
+                 (long long) sharedFPs[fileID].offset);
+
+          int unfinished = sharedFPs[fileID].unfinished;
+          if (opcode == IO_Close_file && unfinished == 1) sharedFPs[fileID].offset = -sharedFPs[fileID].offset - 1;
+          xmpi(MPI_Send(&sharedFPs[fileID].offset, 1, cdiPioOffsetDt, source, collGuardTag, commPio));
+
+          xdebug("id=%d, command=%d (%s), recv amount=%lld, set offset=%ld", fileID, opcode, cdiPioCmdStrTab[opcode],
+                 (long long) amount, sharedFPs[fileID].offset);
+
+          if (opcode == IO_Close_file && !(sharedFPs[fileID].unfinished = --unfinished))
+            --sharedFPsFill;
+          else
+            sharedFPs[fileID].offset += amount;
+        }
+      else if (opcode == IO_Finalize)
+        {
+          if (!--sentFinalize)
+            {
+              if (sharedFPsFill) xabort("still files open");
+              Free(sharedFPs);
+              CDIPIO_MPICH33_WORKAROUND(--msgReq);
+              Free(msgReq);
+              Free(msgWords);
+              cdiPioDestroySyncMsgDt();
+              return;
+            }
+        }
+      else
+        xabort("COMMAND NOT IMPLEMENTED: %d", opcode);
     }
 }
 

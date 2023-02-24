@@ -7,7 +7,7 @@ void datetime2str(CdiDateTime dt, char *datetimestr, int maxlen);
 void date2str(CdiDate date, char *datestr, int maxlen);
 void time2str(CdiTime time, char *timestr, int maxlen);
 
-const char *comp_name(int comptype);
+const char *comptype_to_name(int comptype);
 
 void printFiletype(int streamID, int vlistID);
 void printGridInfo(int vlistID);

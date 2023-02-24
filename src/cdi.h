@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdint.h>    // int64_t
+#include <stdbool.h>
 #include <sys/types.h>
 
 #ifndef CDI_SIZE_TYPE
@@ -57,6 +58,8 @@ extern "C" {
 #define  CDI_EUFSTRUCT            -25   // Unsupported file structure
 #define  CDI_EUNC4                -26   // Unsupported NetCDF4 structure
 #define  CDI_EDIMSIZE             -27   // Invalid dimension size
+#define  CDI_EQENF                -50   // Query entries not found
+#define  CDI_EQNAVAIL             -51   // Query not available for file type
 #define  CDI_ELIMIT               -99   // Internal limits exceeded
 
 // File types
@@ -94,6 +97,7 @@ extern "C" {
 #define  CDI_COMPRESS_AEC           2
 #define  CDI_COMPRESS_ZIP           3
 #define  CDI_COMPRESS_JPEG          4
+#define  CDI_COMPRESS_FILTER        5
 
 // external data types
 
@@ -381,6 +385,8 @@ void    streamDefByteorder(int streamID, int byteorder);
 //      streamInqByteorder: Get the byteorder
 int     streamInqByteorder(int streamID);
 
+void    streamDefFilter(int streamID, int filterId, int nparams, const int *params);
+
 //      streamDefCompType: Define compression type
 void    streamDefCompType(int streamID, int comptype);
 
@@ -429,7 +435,8 @@ void    streamReadVarSlicePart(int streamID, int varID, int levelID, int varType
 void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], SizeType *nmiss);
 void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], SizeType *nmiss);
 
-void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], SizeType nmiss);
+void    streamWriteVarChunk(int streamID, int varID, const int rect[][2], const double data[], SizeType nmiss);
+void    streamWriteVarChunkF(int streamID, int varID, const int rect[][2], const float data[], SizeType nmiss);
 
 
 // STREAM record I/O routines (sequential access)
@@ -672,17 +679,6 @@ void    vlistDefVarMissval(int vlistID, int varID, double missval);
 //      vlistInqVarMissval: Get the missing value of a Variable
 double  vlistInqVarMissval(int vlistID, int varID);
 
-//      vlistDefVarExtra: Define extra information of a Variable
-void    vlistDefVarExtra(int vlistID, int varID, const char *extra);
-
-//      vlistInqVarExtra: Get extra information of a Variable
-void    vlistInqVarExtra(int vlistID, int varID, char *extra);
-
-void    vlistDefVarScalefactor(int vlistID, int varID, double scalefactor);
-double  vlistInqVarScalefactor(int vlistID, int varID);
-void    vlistDefVarAddoffset(int vlistID, int varID, double addoffset);
-double  vlistInqVarAddoffset(int vlistID, int varID);
-
 SizeType vlistInqVarSize(int vlistID, int varID);
 
 void    vlistDefIndex(int vlistID, int varID, int levID, int index);
@@ -830,6 +826,7 @@ SizeType gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_UNITS                         945  // Units of the variable
 #define  CDI_KEY_DATATYPE                      946  // Data type
 #define  CDI_KEY_REFERENCEURI                  947  // Reference URI to grid file
+#define  CDI_KEY_CHUNKS                        948  // Chunks
 
 // Integer keys
 #define  CDI_KEY_NUMBEROFGRIDUSED              961  // GRIB2 numberOfGridUsed
@@ -841,6 +838,8 @@ SizeType gridInqYCvals(int gridID, char *ycvals[]);
 
 // Floating point keys
 #define  CDI_KEY_MISSVAL                       701  // Missing value
+#define  CDI_KEY_ADDOFFSET                     702  // Add offset
+#define  CDI_KEY_SCALEFACTOR                   703  // Scale factor
 
 // Byte array keys
 #define  CDI_KEY_UUID                          960  // UUID for grid/Z-axis reference [size: CDI_UUID_SIZE]
@@ -1181,18 +1180,6 @@ int     taxisInqRdate(int taxisID);
 //      taxisInqRtime: Get the reference time
 int     taxisInqRtime(int taxisID);
 
-//      taxisDefFdate: Define the forecast reference date
-void    taxisDefFdate(int taxisID, int date);
-
-//      taxisDefFtime: Define the forecast reference time
-void    taxisDefFtime(int taxisID, int time);
-
-//      taxisInqFdate: Get the forecast reference date
-int     taxisInqFdate(int taxisID);
-
-//      taxisInqFtime: Get the forecast reference time
-int     taxisInqFtime(int taxisID);
-
 int     taxisHasBounds(int taxisID);
 void    taxisWithBounds(int taxisID);
 
@@ -1323,14 +1310,70 @@ void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDef
 extern "C" {
 #endif
 
+// CDI query interface
+
+typedef struct
+{
+  int numEntries;
+  // Names
+  int numNames;
+  bool *namesFound;
+  char **names;
+  // Grid cell indices
+  int numCellidx;
+  bool *cellidxFound;
+  size_t *cellidx;
+  // Level indices
+  int numLevidx;
+  bool *levidxFound;
+  int *levidx;
+  // Time step indices
+  int numStepidx;
+  bool *stepidxFound;
+  int *stepidx;
+} CdiQuery;
+
+CdiQuery *cdiQueryCreate();
+CdiQuery *cdiQueryClone(const CdiQuery *query);
+void cdiQueryDelete(CdiQuery *query);
+void cdiQuerySetNames(CdiQuery *query, int numNames, char **names);
+void cdiQuerySetCellidx(CdiQuery *query, int numCellidx, size_t *cellidx);
+void cdiQuerySetLevidx(CdiQuery *query, int numLevidx, int *levidx);
+void cdiQuerySetStepidx(CdiQuery *query, int numStepidx, int *stepidx);
+size_t cdiQueryGetCellidx(const CdiQuery *query, int index);
+int cdiQueryName(CdiQuery *query, const char *name);
+int cdiQueryCellidx(CdiQuery *query, size_t cellidx);
+int cdiQueryLevidx(CdiQuery *query, int levidx);
+int cdiQueryStepidx(CdiQuery *query, int stepidx);
+int cdiQueryNumNames(const CdiQuery *query);
+int cdiQueryNumCellidx(const CdiQuery *query);
+int cdiQueryNumStepidx(const CdiQuery *query);
+int cdiQueryNumEntries(const CdiQuery *query);
+int cdiQueryNumEntriesFound(const CdiQuery *query);
+void cdiQueryPrint(const CdiQuery *query);
+void cdiQueryPrintEntriesNotFound(const CdiQuery *query);
+
+// streamOpenReadQuery: Open a dataset for reading and apply query
+int streamOpenReadQuery(const char *path, CdiQuery *query);
+
+// CDI interface for  paraview vtkCDIReader.cxx
+
 #include "cdi_datetime.h"
 
-void taxisDefRdatetime(int taxisID, CdiDateTime rdatetime);
+// taxisDefRdatetime: Define the reference date/time
+void taxisDefRdatetime(int taxisID, CdiDateTime rDateTime);
+// taxisInqRdatetime: Get the reference date/time
 CdiDateTime taxisInqRdatetime(int taxisID);
-void taxisDefVdatetime(int taxisID, CdiDateTime vdatetime);
+// taxisDefFdatetime: Define the forecast reference date/time
+void taxisDefFdatetime(int taxisID, CdiDateTime fDateTime);
+// taxisInqFdatetime: Get the forecast reference date/time
+CdiDateTime taxisInqFdatetime(int taxisID);
+// taxisDefVdatetime: Define the verification date/time
+void taxisDefVdatetime(int taxisID, CdiDateTime vDateTime);
+// taxisInqVdatetime: Get the verification date/time
 CdiDateTime taxisInqVdatetime(int taxisID);
-void taxisDefVdatetimeBounds(int taxisID, CdiDateTime vdatetime_lb, CdiDateTime vdatetime_ub);
-void taxisInqVdatetimeBounds(int taxisID, CdiDateTime *vdatetime_lb, CdiDateTime *vdatetime_ub);
+void taxisDefVdatetimeBounds(int taxisID, CdiDateTime vDateTime_lb, CdiDateTime vDateTime_ub);
+void taxisInqVdatetimeBounds(int taxisID, CdiDateTime *vDateTime_lb, CdiDateTime *vDateTime_ub);
 
 // date format:  YYYYMMDD
 // time format:    hhmmss
@@ -1341,6 +1384,7 @@ int64_t julday_to_date(int calendar, int64_t julday);
 int time_to_sec(int time);                           // Used in paraview vtkCDIReader.cxx
 int sec_to_time(int secofday);
 
+// CDI projection parameter interface
 
 struct CDI_GridProjParams
 {

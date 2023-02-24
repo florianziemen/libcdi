@@ -1,7 +1,9 @@
 #ifndef PIO_CLIENT_H
 #define PIO_CLIENT_H
 
-void cdiPioClientSetup(int *pioNamespace_, int *pioNamespace);
+#include <pio_conf.h>
+
+void cdiPioClientSetup(int pioNamespace, struct cdiPioConf *conf);
 
 #endif
 

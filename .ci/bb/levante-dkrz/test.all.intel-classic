@@ -6,10 +6,16 @@ set -o pipefail
 script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
-. "${script_dir}/utils.sh"
-init_intelclassic202150
+. "${script_dir}/init.sh"
+init_intelclassic
 
-test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
+enable_maintainer_mode='no'
+if test ! -f "${top_srcdir}/configure"; then
+  "${top_srcdir}/autogen.sh"
+  # If there is no configure script, there are, most probably, no Fortran
+  # interface files, which are generated in the maintainer mode only:
+  enable_maintainer_mode='yes'
+fi
 
 # Create a subdirectory for building and switch to it:
 mkdir build && cd build
@@ -25,9 +31,9 @@ CPPFLAGS="-I${ECCODES_ROOT}/include"
 LDFLAGS="-L${ECCODES_ROOT}/lib64"
 
 "${top_srcdir}/configure" \
---disable-maintainer-mode \
 --enable-cf-interface \
 --enable-iso-c-interface \
+--enable-maintainer-mode="${enable_maintainer_mode}" \
 --enable-mpi \
 --enable-option-checking=fatal \
 --with-eccodes \
@@ -40,12 +46,21 @@ LDFLAGS="${LDFLAGS}" \
 MPI_LAUNCH="${MPI_LAUNCH}" \
 PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 
-make -j8
+# Check whether the configure script removed the '.libs' directory:
+test -e .libs && echo "ERROR: the configure script did not remove directory '.libs'" && exit 1
 
-make -j8 check | tee tests/test-suite.log
+make
+
+make check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
 
-make -j8 distclean
+if test "x${enable_maintainer_mode}" = 'xyes'; then
+  make maintainer-clean
+else
+  make distclean
+fi
 
 check_no_files_in_cwd
+
+cd "${top_srcdir}" && check_no_git_untracked

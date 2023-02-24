@@ -8,13 +8,12 @@
 #include <mpi.h>
 #include <stdio.h>
 
-int cdiPioCommInit(MPI_Comm commGlob, int IOMode, int clientServerRole);
+void cdiPioCommInit(MPI_Comm commGlob, int IOMode, int clientServerRole);
 void cdiPioCommFinalize(void);
 
 MPI_Comm commInqCommGlob(void);
 int commInqSizeGlob(void);
 int commInqRankGlob(void);
-int commInqRootGlob(void);
 
 /* returns the inter-communicator used to connect from
  * client to server group */
@@ -34,20 +33,14 @@ int cdiPioCommInqSizeClients(void);
 
 int commInqSpecialRank(void);
 
-void commDefCommColl(int);
+/* query communicator of processes active in collection of data */
 MPI_Comm commInqCommColl(void);
 int commRankGlob2CollID(int rankGlob);
 int commInqSizeColl(void);
 int commInqRankColl(void);
 MPI_Comm commInqCommCalc(void);
-int commInqNProcsColl(void);
 
 void commPrint(FILE *);
-
-/* query rank of collector responsible for client on inter-communicator
- * returns -1 on server processes.
- */
-int cdiPioInqCollectorOfClient(void);
 
 /* query communicator containing clients and collectors,
  * the collectors occupy the top-ranks

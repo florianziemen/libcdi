@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <math.h>
@@ -7,11 +7,12 @@
 #include <stdio.h>
 
 #include "cdi.h"
+#include "dmemory.h"
 
-static void
-printAtts(int vlistID);
+static void printAtts(int vlistID);
 
-int main(int argc, const char **argv)
+int
+main(int argc, const char **argv)
 {
   // todo: handle optional arguments here to increase test coverage
   const char *fname = (argc > 1) ? argv[1] : "test.nc";
@@ -21,12 +22,11 @@ int main(int argc, const char **argv)
   int streamID = streamOpenRead(fname);
   if (streamID < 0)
     {
-      fprintf(stderr, "Open failed for file %s: %s\n",
-              fname, cdiStringError(streamID));
+      fprintf(stderr, "Open failed for file %s: %s\n", fname, cdiStringError(streamID));
       return EXIT_FAILURE;
     }
   int vlistID = streamInqVlist(streamID);
-  size_t nVars = (size_t)vlistNvars(vlistID);
+  size_t nVars = (size_t) vlistNvars(vlistID);
 
   double *buf = NULL;
   size_t bufSize = 0;
@@ -38,12 +38,11 @@ int main(int argc, const char **argv)
     {
       for (size_t varID = 0; varID < nVars; ++varID)
         {
-          size_t memSize = (size_t)vlistInqVarSize(vlistID, (int)varID)
-            * sizeof (double);
+          size_t memSize = (size_t) vlistInqVarSize(vlistID, (int) varID) * sizeof(double);
           SizeType nmiss;
           if (memSize > bufSize)
             {
-              double *temp = (double *)realloc(buf, memSize);
+              double *temp = (double *) Realloc(buf, memSize);
               if (!temp)
                 {
                   perror("read buffer reallocation failed");
@@ -51,12 +50,12 @@ int main(int argc, const char **argv)
                 }
               buf = temp;
             }
-          streamReadVar(streamID, (int)varID, buf, &nmiss);
+          streamReadVar(streamID, (int) varID, buf, &nmiss);
           allNmissSum += nmiss;
         }
     }
-  if (countMissingValues)
-    printf("missing values count = %zu\n", allNmissSum);
+  if (countMissingValues) printf("missing values count = %zu\n", allNmissSum);
+  free(buf);
   streamClose(streamID);
   return EXIT_SUCCESS;
 }
@@ -64,12 +63,11 @@ int main(int argc, const char **argv)
 static void
 printAtts(int vlistID)
 {
-  size_t nVars = (size_t)vlistNvars(vlistID);
-  static const char globDesc[] = "global",
-    varDescPrefix[] = "variable ";
+  size_t nVars = (size_t) vlistNvars(vlistID);
+  static const char globDesc[] = "global", varDescPrefix[] = "variable ";
   size_t digitsPerInt = 9;
-  size_t bufSize = digitsPerInt + sizeof (varDescPrefix);
-  void *restrict buf = malloc(bufSize);
+  size_t bufSize = digitsPerInt + sizeof(varDescPrefix);
+  void *restrict buf = Malloc(bufSize);
   if (!buf)
     {
       perror("attribute buffer resize failed");
@@ -79,43 +77,34 @@ printAtts(int vlistID)
     {
       int nAtts, attType, attLen;
       char attName[CDI_MAX_NAME + 1];
-      int varID = (int)varIdx - 1;
+      int varID = (int) varIdx - 1;
       cdiInqNatts(vlistID, varID, &nAtts);
-      for (size_t attIdx = 0; attIdx < (size_t)nAtts; attIdx++ )
+      for (size_t attIdx = 0; attIdx < (size_t) nAtts; attIdx++)
         {
-          int rc = cdiInqAtt(vlistID, varID, (int)attIdx,
-                             attName, &attType, &attLen);
+          int rc = cdiInqAtt(vlistID, varID, (int) attIdx, attName, &attType, &attLen);
           {
-            const char *varDesc = varIdx > 0
-              ? (sprintf((char *)buf, "%s%d", varDescPrefix,
-                         vlistInqVarCode(vlistID, varID)), (char *)buf)
-              : globDesc;
-            printf("%s attribute \"%s\", value: ",
-                   varDesc, attName);
+            const char *varDesc
+                = varIdx > 0 ? (sprintf((char *) buf, "%s%d", varDescPrefix, vlistInqVarCode(vlistID, varID)), (char *) buf)
+                             : globDesc;
+            printf("%s attribute \"%s\", value: ", varDesc, attName);
           }
           if (attLen < 0)
             {
-            puts("error retrieving value");
-            continue;
+              puts("error retrieving value");
+              continue;
             }
           size_t elemSize = 0;
           switch (attType)
             {
-            case CDI_DATATYPE_TXT:
-              elemSize = 1;
-              break;
-            case CDI_DATATYPE_FLT:
-              elemSize = sizeof (double);
-              break;
-            case CDI_DATATYPE_INT:
-              elemSize = sizeof (int);
-              break;
+            case CDI_DATATYPE_TXT: elemSize = 1; break;
+            case CDI_DATATYPE_FLT: elemSize = sizeof(double); break;
+            case CDI_DATATYPE_INT: elemSize = sizeof(int); break;
             }
 
-          size_t attSize = elemSize * ((size_t)attLen + 1);
+          size_t attSize = elemSize * ((size_t) attLen + 1);
           if (attSize > bufSize)
             {
-              if (!(buf = realloc(buf, attSize)))
+              if (!(buf = Realloc(buf, attSize)))
                 {
                   perror("attribute buffer resize failed");
                   exit(EXIT_FAILURE);
@@ -125,31 +114,25 @@ printAtts(int vlistID)
           switch (attType)
             {
             case CDI_DATATYPE_TXT:
-              rc = cdiInqAttTxt(vlistID, (int)varID, attName,
-                                attLen, (char *)buf);
-              if (rc == CDI_NOERR)
-                printf("\"%.*s\"", attLen, (char *)buf);
+              rc = cdiInqAttTxt(vlistID, (int) varID, attName, attLen, (char *) buf);
+              if (rc == CDI_NOERR) printf("\"%.*s\"", attLen, (char *) buf);
               break;
             case CDI_DATATYPE_FLT:
-              rc = cdiInqAttFlt(vlistID, (int)varID, attName,
-                                attLen + 1, (double *)buf);
+              rc = cdiInqAttFlt(vlistID, (int) varID, attName, attLen + 1, (double *) buf);
               if (rc == CDI_NOERR && attLen)
                 {
-                  const double *restrict dp = (const double*)buf;
+                  const double *restrict dp = (const double *) buf;
                   printf("%10g", dp[0]);
-                  for (size_t i = 1; i < (size_t)attLen; ++i)
-                    printf(", %10g", dp[i]);
+                  for (size_t i = 1; i < (size_t) attLen; ++i) printf(", %10g", dp[i]);
                 }
               break;
             case CDI_DATATYPE_INT:
-              rc = cdiInqAttInt(vlistID, (int)varID, attName,
-                                attLen + 1, (int *)buf);
+              rc = cdiInqAttInt(vlistID, (int) varID, attName, attLen + 1, (int *) buf);
               if (rc == CDI_NOERR && attLen)
                 {
-                  const int *restrict ip = (const int *)buf;
+                  const int *restrict ip = (const int *) buf;
                   printf("%d", ip[0]);
-                  for (size_t i = 1; i < (size_t)attLen; ++i)
-                    printf(", %d", ip[i]);
+                  for (size_t i = 1; i < (size_t) attLen; ++i) printf(", %d", ip[i]);
                 }
               break;
             }
@@ -166,7 +149,6 @@ printAtts(int vlistID)
     }
   free(buf);
 }
-
 
 /*
  * Local Variables:

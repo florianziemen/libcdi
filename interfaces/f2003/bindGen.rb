@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+$VERBOSE=true
 
 # This script generates a fortran source file that uses the ISO_C_BINDINGS to interface to the functions defined in the given C header file.
 # The basic approach is, that every C function is wrapped in a fortran function/subroutine, which internally uses a bind(c) interface to the C code.
@@ -133,6 +134,16 @@ $argumentTemplates =
 		 :precallStatements => '',
 		 :callExpression => '<name>_dummy',
 		 :passAs => 'integer(c_<type>), value :: <name>_dummy',
+		 :postcallStatements => ''
+	 }, {	#logical
+		 :regex => '^\s*(?<type>bool)\s+(?<name>\w+)\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'logical(c_<type>), value :: <name>_dummy',
+		 :helperVars => '',
+		 :precallStatements => '',
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'logical(c_<type>), value :: <name>_dummy',
 		 :postcallStatements => ''
 	 }, {	#<floatTypes>
 		 :regex => '^\s*(?<type><floatTypes>)\s+(?<name>\w+)\s*$',
@@ -366,6 +377,16 @@ $argumentTemplates =
 		 :callExpression => '<name>_dummy',
 		 :passAs => 'integer(c_<type>), intent(in) :: <name>_dummy(<lineSize>, <lineCount>)',
 		 :postcallStatements => ""
+	 }, {	#const <integerTypes> <name>[][<lineSize>]
+		 :regex => '^\s*const\s+(?<type><integerTypes>)\s+(?<name>\w+)\s*\[\s*\]\s*\[\s*(?<lineSize>[^\]]+)\s*\]\s*$',
+		 :placeholders => %w[name type lineSize],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'integer(c_<type>), intent(in) :: <name>_dummy(<lineSize>, *)',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'integer(c_<type>), intent(in) :: <name>_dummy(<lineSize>, *)',
+		 :postcallStatements => ""
 	 },
 	 #Non-optional pointer arguments. These match both pointers and
 	 #arrays, so they must appear after the more special array templates.
@@ -489,6 +510,16 @@ $returnTypeTemplates = [
 		:receiveAs => 'integer(c_<type>)',
 		:assignVariable => $wrapperResultVarName,
 		:postcallStatements => ''
+	}, {	#bool
+		:regex => '^\s*(?<type>bool)\s*$',
+		:placeholders => %w[type],
+		:isVoid => false,
+		:returnAs => 'logical(c_<type>)',
+		:helperVars => '',
+		:precallStatements => '',
+		:receiveAs => 'logical(c_<type>)',
+		:assignVariable => $wrapperResultVarName,
+		:postcallStatements => ''
 	}, {	#<floatTypes>
 		:regex => '^\s*(?<type><floatTypes>)\s*$',
 		:placeholders => %w[type],
@@ -603,9 +634,9 @@ $verbatimDeclarations = '
 			type(c_ptr), value :: charPtr
 		end function lib_strlen
 
-		subroutine lib_free(pointer) bind(c, name = "free")
+		subroutine lib_free(ptr) bind(c, name = "free")
 			import c_ptr
-			type(c_ptr), value, intent(in) :: pointer
+			type(c_ptr), value, intent(in) :: ptr
 		end subroutine lib_free
 	end interface
 '
@@ -934,10 +965,42 @@ end
 #Scan the given header and collect the interface information in the global variables.
 def scanHeader(headerPath)
 	#Scan the given header.
-	headerLines = IO.popen('cpp -fpreprocessed -dD ' + headerPath).readlines	#The options cause the preprocessor to strip all comments, but retain all #defines, and ignore #includes.
-	headerLines.each do |line|
+	headerFile = File.open(headerPath, 'r')
+	commentTerm = %r{\*/}
+	commentInit = %r{/[*/]}
+	while line = headerFile.gets
 		line.chomp!
 
+		line.gsub!(/SizeType/,'int')
+		line.gsub!(/DateType/,'int')
+
+		commentBeginLineNo = headerFile.lineno
+		while foundComment = commentInit.match(line)
+			commentBegin = foundComment.begin(0)
+			typeChar = line[commentBegin+1]
+			if typeChar == "/"
+				line = line[0,commentBegin]
+				line.rstrip!
+				foundComment = false
+			elsif typeChar == "*"
+				commentSubStr=line[commentBegin..-1]
+				if commentTerm.match(commentSubStr)
+					newLine =	line.gsub(%r{/\*.*?\*/},'')
+					line = newLine.rstrip
+				else
+					while newLine = headerFile.gets and not foundCommentEnd = commentTerm.match(newLine)
+					end
+					if not newLine
+						$stderr.puts("Unterminated comment started at line ",
+												 commentBeginLineNo, "'", line, "'")
+						exit(1)
+					end
+					newLine.chomp!
+					line = line[0,commentBegin] +
+								 newLine[foundCommentEnd.begin(0)+2..-1]
+				end
+			end
+		end
 		if /^\s*$/.match(line)
 			#Empty lines are ignored.
 
@@ -958,7 +1021,7 @@ def scanHeader(headerPath)
 			defineFunction(matchedLine['functionName'], matchedLine['arguments'], matchedLine['returnType'])
 
 		else
-			puts("Warning: Unrecognized line '#{line}'")
+			STDERR.puts("Warning: Unrecognized line '#{line}'")
 		end
 	end
 end
@@ -971,7 +1034,7 @@ def fortranLine(file, line)
 		mline = line.gsub("\t", ' '*spacesPerTab)
 		charsPerLine=79
 		indentation = /^ */.match(mline)[0]
-		if not /^ *!/.match(mline)
+		if not %r{^ *!}.match(mline)
 			while mline.length > charsPerLine
 				# last position of space preceding line break
 				tspos = mline[0..charsPerLine].rindex(' ') || charsPerLine

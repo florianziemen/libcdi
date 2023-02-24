@@ -9,14 +9,11 @@
 #include "cdi_int.h"
 #include "cdf_int.h"
 
+#ifdef HAVE_LIBNETCDF
 const char *
 cdfLibraryVersion(void)
 {
-#ifdef HAVE_LIBNETCDF
   return nc_inq_libvers();
-#else
-  return "library undefined";
-#endif
 }
 
 #ifdef HAVE_H5GET_LIBVERSION
@@ -42,9 +39,9 @@ hdfLibraryVersion(void)
       unsigned majnum, minnum, relnum;
       H5get_libversion(&majnum, &minnum, &relnum);
 #ifdef HAVE_NC4HDF5_THREADSAFE
-      sprintf(hdf_libvers, "%u.%u.%u threadsafe", majnum, minnum, relnum);
+      snprintf(hdf_libvers, sizeof(hdf_libvers), "%u.%u.%u threadsafe", majnum, minnum, relnum);
 #else
-      sprintf(hdf_libvers, "%u.%u.%u", majnum, minnum, relnum);
+      snprintf(hdf_libvers, sizeof(hdf_libvers), "%u.%u.%u", majnum, minnum, relnum);
 #endif
     }
 
@@ -64,7 +61,6 @@ cdfDebug(int debug)
   if (CDF_Debug) Message("debug level %d", debug);
 }
 
-#ifdef HAVE_LIBNETCDF
 static void
 cdfComment(int ncid)
 {
@@ -85,12 +81,11 @@ cdfComment(int ncid)
 
   cdf_put_att_text(ncid, NC_GLOBAL, "CDI", strlen(comment), comment);
 }
-#endif
 
 static bool
 has_uri_scheme(const char *uri)
 {
-  char *pos = strstr(uri, "://");
+  const char *pos = strstr(uri, "://");
   if (pos)
     {
       const int len = pos - uri;
@@ -104,7 +99,6 @@ static int
 cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
   int ncid = -1;
-#ifdef HAVE_LIBNETCDF
   const int fmode = tolower(*mode);
   int writemode = NC_CLOBBER;
   int readmode = NC_NOWRITE;
@@ -122,7 +116,7 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
 #ifdef HAVE_NETCDF4
             else
               {
-                int format;
+                int format = -1;
                 (void) nc_inq_format(ncid, &format);
                 if (format == NC_FORMAT_NETCDF4_CLASSIC) *filetype = CDI_FILETYPE_NC4C;
               }
@@ -141,11 +135,9 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
           if (*filetype == CDI_FILETYPE_NC4) writemode |= NC_NETCDF4;
           if (*filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
 #endif
-          const bool hasUriScheme = has_uri_scheme(filename);
-
           if (*filetype == CDI_FILETYPE_NCZARR)
             {
-              if (!hasUriScheme)
+              if (!has_uri_scheme(filename))
                 {
                   fprintf(stderr, "URI scheme is missing in NCZarr path!\n");
                   return CDI_EINVAL;
@@ -155,7 +147,7 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
             }
           else
             {
-              if (hasUriScheme) fprintf(stderr, "URI scheme defined for non NCZarr Data Model!\n");
+              if (has_uri_scheme(filename)) fprintf(stderr, "URI scheme defined for non NCZarr Data Model!\n");
 
               cdf__create(filename, writemode, &ncid);
             }
@@ -167,7 +159,6 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
         default: ncid = CDI_EINVAL;
         }
     }
-#endif
 
   return ncid;
 }
@@ -180,13 +171,11 @@ cdfOpen(const char *filename, const char *mode, int filetype)
 
   if (CDF_Debug) Message("Open %s with mode %c", filename, *mode);
 
-#ifdef HAVE_LIBNETCDF
 #ifndef NC_64BIT_OFFSET
   if (filetype == CDI_FILETYPE_NC2) open_file = false;
 #endif
 #ifndef NC_64BIT_DATA
   if (filetype == CDI_FILETYPE_NC5) open_file = false;
-#endif
 #endif
 
   if (open_file)
@@ -260,9 +249,7 @@ cdf4Open(const char *filename, const char *mode, int *filetype)
 static void
 cdfCloseFile(int fileID)
 {
-#ifdef HAVE_LIBNETCDF
   cdf_close(fileID);
-#endif
 }
 
 void
@@ -270,6 +257,7 @@ cdfClose(int fileID)
 {
   cdfCloseFile(fileID);
 }
+#endif
 /*
  * Local Variables:
  * c-file-style: "Java"

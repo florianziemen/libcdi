@@ -3,26 +3,14 @@
 
 #include <stdbool.h>
 
-//#define USE_TIMECACHE 1
-#define MAX_TIMECACHE_SIZE 1024 * 1024
-
-typedef struct
-{
-  size_t size;
-  size_t startid;
-  size_t maxvals;
-  double cache[MAX_TIMECACHE_SIZE];
-} timecache_t;
-
 typedef struct
 {
   int ncvarid;
   int ncdimid;
   int ncvarboundsid;
   int leadtimeid;
-  bool lunits;
-  bool lwrf;  // true for time axis in WRF format
-  timecache_t *timevar_cache;
+  bool hasUnits;
+  bool isWRF;  // true for time axis in WRF format
 } basetime_t;
 
 void basetimeInit(basetime_t *basetime);

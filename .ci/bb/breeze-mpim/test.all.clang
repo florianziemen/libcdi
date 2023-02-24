@@ -6,35 +6,45 @@ set -o pipefail
 script_dir=$(cd "$(dirname "$0")"; pwd)
 top_srcdir=$(cd "${script_dir}/../../.."; pwd)
 
-. "${script_dir}/utils.sh"
-init_clang1201
+. "${script_dir}/init.sh"
+init_clang
 
 # Check the formatting. Note that git-clang-format might keep redundant blank
 # lines. Therefore, we use clang-format:
-find src app \
-  -name '*.h' -o -name '*.hpp' -o -name '*.c' -o -name '*.cpp' | \
-    xargs -n 1 -P 8 clang-format --Werror --dry-run --verbose
+find src app interfaces tests examples \
+  \( -name '*.h' -o -name '*.hpp' -o -name '*.c' -o -name '*.cpp' \) -a \
+  ! -path 'interfaces/python/cdi_wrapper.cpp' -a \
+  ! -path 'interfaces/ruby/cdi_wrapper.cpp' -a \
+  ! -path 'src/cdilib.c' \
+    | xargs -n 1 -P 8 clang-format --Werror --dry-run --verbose
 
-test -f "${top_srcdir}/configure" || "${top_srcdir}/autogen.sh"
+enable_maintainer_mode='no'
+if test ! -f "${top_srcdir}/configure"; then
+  "${top_srcdir}/autogen.sh"
+  # If there is no configure script, there are, most probably, no Fortran
+  # interface files, which are generated in the maintainer mode only:
+  enable_maintainer_mode='yes'
+fi
 
 "${top_srcdir}/configure" \
---disable-maintainer-mode \
 --enable-cf-interface \
 --enable-iso-c-interface \
+--enable-maintainer-mode="${enable_maintainer_mode}" \
 --enable-mpi \
 --enable-option-checking=fatal \
+--enable-ppm-dist-array \
 --with-eccodes="${ECCODES_ROOT}" \
 --with-netcdf="${NETCDF_ROOT}" \
 CC="${MPICC}" \
-CPPFLAGS="-I${UUID_ROOT}/include" \
 FC="${MPIFC}" \
-F77="${MPIFC}" \
-LDFLAGS="-I${UUID_ROOT}/lib" \
+FCFLAGS='-g -O2 -no-pie' \
 MPI_LAUNCH="${MPI_LAUNCH}" \
 PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 
 make -j8
 
-make -j8 check | tee tests/test-suite.log
+make -j8 check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
+
+check_no_git_untracked

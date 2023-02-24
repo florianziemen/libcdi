@@ -34,11 +34,15 @@ const char *CDI_GRIB2_Template = NULL;
 int CDI_Convention = CDI_CONVENTION_ECHAM;
 int CDI_Inventory_Mode = 1;
 int CDI_Version_Info = 1;
+int CDI_Query_Abort = 1;
 int CDI_Convert_Cubesphere = 1;
 int CDI_Read_Cell_Corners = 1;
 int CDI_CMOR_Mode = 0;
 int CDI_Reduce_Dim = 0;
+int CDI_Shuffle = 0;
 size_t CDI_Netcdf_Hdr_Pad = 0UL;
+size_t CDI_Chunk_Cache = 0UL;
+size_t CDI_Chunk_Cache_Max = 0UL;
 bool CDI_Netcdf_Lazy_Grid_Load = false;
 
 char *cdiPartabPath = NULL;
@@ -77,7 +81,7 @@ int cdiSortParam = 0;
 int cdiHaveMissval = 0;
 
 static long
-cdiGetenvInt(const char *envName)
+cdi_getenv_int(const char *envName)
 {
   long envValue = -1;
 
@@ -97,7 +101,7 @@ cdiGetenvInt(const char *envName)
                 case 'g': fact = 1073741824; break;
                 default:
                   fact = 0;
-                  Message("Invalid number string in %s: %s", envName, envString);
+                  Warning("Invalid number string in %s: %s", envName, envString);
                   Warning("%s must comprise only digits [0-9].", envName);
                   break;
                 }
@@ -142,7 +146,7 @@ cdiPrintVersion(void)
   fprintf(stdout, "  NetCDF library version : %s\n", cdfLibraryVersion());
 #endif
 #ifdef HAVE_NC4HDF5
-  fprintf(stdout, "    HDF5 library version : %s\n", hdfLibraryVersion());
+  //  fprintf(stdout, "    HDF5 library version : %s\n", hdfLibraryVersion());
 #endif
 #ifdef HAVE_LIBSERVICE
   fprintf(stdout, "    exse library version : %s\n", srvLibraryVersion());
@@ -205,6 +209,7 @@ cdiPrintDatatypes(void)
 void
 cdiDebug(int level)
 {
+  if (level < 0) return;
   unsigned ulevel = (unsigned) level;
 
   if (ulevel == 1 || (ulevel & 2)) CDI_Debug = 1;
@@ -327,47 +332,56 @@ cdiInitialize(void)
       grib_multi_support_off(NULL);
 #endif
 
-      value = cdiGetenvInt("CDI_DEBUG");
+      value = cdi_getenv_int("CDI_DEBUG");
       if (value >= 0) CDI_Debug = (int) value;
 
-      value = cdiGetenvInt("CDI_GRIBAPI_DEBUG");
+      value = cdi_getenv_int("CDI_GRIBAPI_DEBUG");
       if (value >= 0) CDI_gribapi_debug = (bool) value;
 
-      value = cdiGetenvInt("CDI_ECCODES_DEBUG");
+      value = cdi_getenv_int("CDI_ECCODES_DEBUG");
       if (value >= 0) CDI_gribapi_debug = (bool) value;
 
-      value = cdiGetenvInt("CDI_ECCODES_GRIB1");
+      value = cdi_getenv_int("CDI_ECCODES_GRIB1");
       if (value >= 0) cdiSetEccodesGrib1((bool) value);
 
-      value = cdiGetenvInt("CDI_READ_CELL_CORNERS");
+      value = cdi_getenv_int("CDI_READ_CELL_CORNERS");
       if (value >= 0) CDI_Read_Cell_Corners = (int) value;
 
-      value = cdiGetenvInt("CDI_RECOPT");
+      value = cdi_getenv_int("CDI_RECOPT");
       if (value >= 0) CDI_Recopt = (int) value;
 
-      value = cdiGetenvInt("CDI_REGULARGRID");
+      value = cdi_getenv_int("CDI_REGULARGRID");
       if (value >= 0) cdiDataUnreduced = (int) value;
 
-      value = cdiGetenvInt("CDI_SORTNAME");
+      value = cdi_getenv_int("CDI_SORTNAME");
       if (value >= 0) cdiSortName = (int) value;
 
-      value = cdiGetenvInt("CDI_SORTPARAM");
+      value = cdi_getenv_int("CDI_SORTPARAM");
       if (value >= 0) cdiSortParam = (int) value;
 
-      value = cdiGetenvInt("CDI_HAVE_MISSVAL");
+      value = cdi_getenv_int("CDI_HAVE_MISSVAL");
       if (value >= 0) cdiHaveMissval = (int) value;
 
-      value = cdiGetenvInt("CDI_LEVELTYPE");
+      value = cdi_getenv_int("CDI_LEVELTYPE");
       if (value >= 0) cdiDefaultLeveltype = (int) value;
 
-      value = cdiGetenvInt("CDI_NETCDF_HDR_PAD");
+      value = cdi_getenv_int("CDI_NETCDF_HDR_PAD");
       if (value >= 0) CDI_Netcdf_Hdr_Pad = (size_t) value;
+
+      value = cdi_getenv_int("CDI_CHUNK_CACHE");
+      if (value >= 0) CDI_Chunk_Cache = (size_t) value;
+
+      value = cdi_getenv_int("CDI_CHUNK_CACHE_MAX");
+      if (value >= 0) CDI_Chunk_Cache_Max = (size_t) value;
 
       envstr = getenv("CDI_GRIB1_TEMPLATE");
       if (envstr) CDI_GRIB1_Template = envstr;
 
       envstr = getenv("CDI_GRIB2_TEMPLATE");
       if (envstr) CDI_GRIB2_Template = envstr;
+
+      envstr = getenv("CDI_SHUFFLE");
+      if (envstr) CDI_Shuffle = atoi(envstr);
 
       envstr = getenv("CDI_MISSVAL");
       if (envstr) CDI_Default_Missval = atof(envstr);
@@ -400,7 +414,7 @@ cdiInitialize(void)
       envstr = getenv("CDI_CONVENTION");
       if (envstr)
         {
-          if (strcmp(envstr, "CF") == 0 || strcmp(envstr, "cf") == 0)
+          if (str_is_equal(envstr, "CF") || str_is_equal(envstr, "cf"))
             {
               CDI_Convention = CDI_CONVENTION_CF;
               if (CDI_Debug) Message("CDI convention was set to CF!");
@@ -414,6 +428,17 @@ cdiInitialize(void)
             {
               CDI_Inventory_Mode = 2;
               if (CDI_Debug) Message("Inventory mode was set to timestep!");
+            }
+        }
+
+      envstr = getenv("CDI_QUERY_ABORT");
+      if (envstr)
+        {
+          const int ival = atoi(envstr);
+          if (ival == 0 || ival == 1)
+            {
+              CDI_Query_Abort = ival;
+              if (CDI_Debug) Message("CDI_Query_Abort = %s", envstr);
             }
         }
 
@@ -476,18 +501,18 @@ void
 cdiDefGlobal(const char *string, int value)
 {
   // clang-format off
-  if      (strIsEqual(string, "REGULARGRID")          ) cdiDataUnreduced = value;
-  else if (strIsEqual(string, "ECCODES_DEBUG")        ) CDI_gribapi_debug = (bool) value;
-  else if (strIsEqual(string, "ECCODES_GRIB1")        ) cdiSetEccodesGrib1((bool) value);
-  else if (strIsEqual(string, "SORTNAME")             ) cdiSortName = value;
-  else if (strIsEqual(string, "SORTPARAM")            ) cdiSortParam = value;
-  else if (strIsEqual(string, "HAVE_MISSVAL")         ) cdiHaveMissval = value;
-  else if (strIsEqual(string, "NC_CHUNKSIZEHINT")     ) CDI_Netcdf_Chunksizehint = value;
-  else if (strIsEqual(string, "READ_CELL_CORNERS")    ) CDI_Read_Cell_Corners = value;
-  else if (strIsEqual(string, "CMOR_MODE")            ) CDI_CMOR_Mode = value;
-  else if (strIsEqual(string, "REDUCE_DIM")           ) CDI_Reduce_Dim = value;
-  else if (strIsEqual(string, "NETCDF_HDR_PAD")       ) CDI_Netcdf_Hdr_Pad = (size_t) value;
-  else if (strIsEqual(string, "NETCDF_LAZY_GRID_LOAD")) CDI_Netcdf_Lazy_Grid_Load = (bool) value;
+  if      (str_is_equal(string, "REGULARGRID")          ) cdiDataUnreduced = value;
+  else if (str_is_equal(string, "ECCODES_DEBUG")        ) CDI_gribapi_debug = (bool) value;
+  else if (str_is_equal(string, "ECCODES_GRIB1")        ) cdiSetEccodesGrib1((bool) value);
+  else if (str_is_equal(string, "SORTNAME")             ) cdiSortName = value;
+  else if (str_is_equal(string, "SORTPARAM")            ) cdiSortParam = value;
+  else if (str_is_equal(string, "HAVE_MISSVAL")         ) cdiHaveMissval = value;
+  else if (str_is_equal(string, "NC_CHUNKSIZEHINT")     ) CDI_Netcdf_Chunksizehint = value;
+  else if (str_is_equal(string, "READ_CELL_CORNERS")    ) CDI_Read_Cell_Corners = value;
+  else if (str_is_equal(string, "CMOR_MODE")            ) CDI_CMOR_Mode = value;
+  else if (str_is_equal(string, "REDUCE_DIM")           ) CDI_Reduce_Dim = value;
+  else if (str_is_equal(string, "NETCDF_HDR_PAD")       ) CDI_Netcdf_Hdr_Pad = (size_t) value;
+  else if (str_is_equal(string, "NETCDF_LAZY_GRID_LOAD")) CDI_Netcdf_Lazy_Grid_Load = (bool) value;
   else Warning("Unsupported global key: %s", string);
   // clang-format on
 }
@@ -525,7 +550,6 @@ cdiBaseFiletype(int filetype)
     case CDI_FILETYPE_NC4C:
     case CDI_FILETYPE_NCZARR:
     case CDI_FILETYPE_NC5: return CDI_FILETYPE_NETCDF;
-    default: return filetype;
     }
 
   return filetype;

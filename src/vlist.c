@@ -2,6 +2,8 @@
 #include "config.h"
 #endif
 
+#include <stdbool.h>
+
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -63,7 +65,7 @@ static void vlist_delete(vlist_t *vlistptr);
 
 static int vlistGetSizeP(void *vlistptr, void *context);
 static void vlistPackP(void *vlistptr, void *buff, int size, int *position, void *context);
-static int vlistTxCode(void);
+static int vlistTxCode(void *vlistptr);
 
 #if !defined(__cplusplus)
 const
@@ -124,15 +126,11 @@ vlist_new_entry(cdiResH resH)
 }
 
 static void
-vlist_delete_entry(vlist_t *vlistptr)
+vlist_delete_entry(int vlistID)
 {
-  int idx = vlistptr->self;
+  reshRemove(vlistID, &vlistOps);
 
-  reshRemove(idx, &vlistOps);
-
-  Free(vlistptr);
-
-  if (VLIST_Debug) Message("Removed idx %d from vlist list", idx);
+  if (VLIST_Debug) Message("Removed idx %d from vlist list", vlistID);
 }
 
 static void
@@ -242,7 +240,28 @@ vlist_delete(vlist_t *vlistptr)
 
   if (vars) Free(vars);
 
-  vlist_delete_entry(vlistptr);
+  Free(vlistptr);
+}
+
+// destroy a vlist object, should always be called through namespace lookup
+void
+cdiVlistDestroy_(int vlistID, bool assertInternal)
+{
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
+  static const char warningTextUserByInternal[]
+      = "Destroying a vlist object that is owned by the user (vlistID=%d).\n"
+        "This is most likely because of a missing vlistDestroy() in the application code.\n"
+        "If that's not the case, and you are absolutely certain about it, please report the bug.",
+      warningTextInternalByUser[] = "Attempt to destroy an internal vlist object by the user (vlistID=%d).";
+  static const char *const wText[2] = { warningTextUserByInternal, warningTextInternalByUser };
+  if (vlistptr->internal == assertInternal)
+    {
+      vlist_delete(vlistptr);
+      vlist_delete_entry(vlistID);
+    }
+  else
+    Warning(wText[!assertInternal], vlistID);
 }
 
 /*
@@ -258,26 +277,8 @@ vlist_delete(vlist_t *vlistptr)
 void
 vlistDestroy(int vlistID)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  if (vlistptr->internal)
-    Warning("Attempt to destroy an internal vlist object by the user (vlistID=%d).", vlistID);
-  else
-    vlist_delete(vlistptr);
-}
-
-// destroy an internal vlist object
-void
-cdiVlistDestroy_(int vlistID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  if (!vlistptr->internal)
-    Warning("Destroying a vlist object that is owned by the user.\n"
-            "This is most likely because of a missing vlistDestroy() in the application code.\n"
-            "If that's not the case, and you are absolutely certain about it, please report the bug.");
-
-  vlist_delete(vlistptr);
+  void (*mycdiVlistDestroy_)(int, bool) = (void (*)(int, bool)) namespaceSwitchGet(NSSWITCH_VLIST_DESTROY_).func;
+  mycdiVlistDestroy_(vlistID, false);
 }
 
 static void
@@ -834,7 +835,7 @@ vlistMerge(int vlistID2, int vlistID1)
 
           if (*name1 && *name2)
             {
-              if (strcmp(name1, name2) != 0) break;
+              if (!str_is_equal(name1, name2)) break;
             }
           else
             {
@@ -1088,7 +1089,7 @@ vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
 
   if (nvars > 0)
     {
-      fprintf(fp, " varID param    gridID zaxisID stypeID tsteptype flag iorank name     longname         units\n");
+      fprintf(fp, " varID param    gridID zaxisID stypeID tsteptype flag name     longname         units\n");
       for (int varID = 0; varID < nvars; varID++)
         {
           int param = vlistptr->vars[varID].param;
@@ -1104,12 +1105,11 @@ vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
           length = CDI_MAX_NAME;
           (void) cdiInqKeyString(vlistID, varID, CDI_KEY_UNITS, units, &length);
           int flag = vlistptr->vars[varID].flag;
-          int iorank = vlistptr->vars[varID].iorank;
 
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          fprintf(fp, "%6d %-8s %6d  %6d  %6d  %6d  %5d %6d %-8s %s [%s]\n", varID, paramstr, gridID, zaxisID, subtypeID, tsteptype,
-                  flag, iorank, name, longname, units);
+          fprintf(fp, "%6d %-8s %6d  %6d  %6d  %6d  %5d %-8s %s [%s]\n", varID, paramstr, gridID, zaxisID, subtypeID, tsteptype,
+                  flag, name, longname, units);
         }
 
       fputs("\n"
@@ -1142,12 +1142,11 @@ vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
         }
 
       fputs("\n"
-            " varID  size iorank\n",
+            " varID  size\n",
             fp);
       for (int varID = 0; varID < nvars; varID++)
-        fprintf(fp, "%3d %8zu %6d\n", varID,
-                (size_t) zaxisInqSize(vlistptr->vars[varID].zaxisID) * gridInqSize(vlistptr->vars[varID].gridID),
-                vlistptr->vars[varID].iorank);
+        fprintf(fp, "%3d %8zu\n", varID,
+                (size_t) zaxisInqSize(vlistptr->vars[varID].zaxisID) * gridInqSize(vlistptr->vars[varID].gridID));
     }
 }
 
@@ -1497,8 +1496,10 @@ vlistHasTime(int vlistID)
 
   if (!(CDI_Reduce_Dim && vlistptr->ntsteps == 1))
     {
-      for (int varID = 0; varID < vlistptr->nvars; varID++)
-        if (vlistptr->vars[varID].timetype != TIME_CONSTANT)
+      size_t nvars = vlistptr->nvars > 0 ? (size_t) vlistptr->nvars : (size_t) 0;
+      var_t *restrict vars = vlistptr->vars;
+      for (size_t varID = 0; varID < nvars; varID++)
+        if (vars[varID].timetype != TIME_CONSTANT)
           {
             hastime = true;
             break;
@@ -1510,12 +1511,19 @@ vlistHasTime(int vlistID)
 
 enum
 {
-  vlist_nints = 6,
+  VLIST_PACK_INT_SELF,
+  VLIST_PACK_INT_NVARS,
+  VLIST_PACK_INT_TAXISID,
+  VLIST_PACK_INT_TABLEID,
+  VLIST_PACK_INT_INSTID,
+  VLIST_PACK_INT_MODELID,
+  vlistNints,
 };
 
 static int
-vlistTxCode(void)
+vlistTxCode(void *vlistptr)
 {
+  (void) vlistptr;
   return VLIST;
 }
 
@@ -1523,7 +1531,7 @@ static int
 vlistGetSizeP(void *vlistptr, void *context)
 {
   vlist_t *p = (vlist_t *) vlistptr;
-  int txsize = serializeGetSize(vlist_nints, CDI_DATATYPE_INT, context);
+  int txsize = serializeGetSize(vlistNints, CDI_DATATYPE_INT, context);
   txsize += serializeGetSize(1, CDI_DATATYPE_LONG, context);
   txsize += cdiAttsGetSize(p, CDI_GLOBAL, context);
   for (int varID = 0; varID < p->nvars; varID++) txsize += vlistVarGetPackSize(p, varID, context);
@@ -1533,15 +1541,15 @@ vlistGetSizeP(void *vlistptr, void *context)
 static void
 vlistPackP(void *vlistptr, void *buf, int size, int *position, void *context)
 {
-  int tempbuf[vlist_nints];
+  int tempbuf[vlistNints];
   vlist_t *p = (vlist_t *) vlistptr;
-  tempbuf[0] = p->self;
-  tempbuf[1] = p->nvars;
-  tempbuf[2] = p->taxisID;
-  tempbuf[3] = p->tableID;
-  tempbuf[4] = p->instID;
-  tempbuf[5] = p->modelID;
-  serializePack(tempbuf, vlist_nints, CDI_DATATYPE_INT, buf, size, position, context);
+  tempbuf[VLIST_PACK_INT_SELF] = p->self;
+  tempbuf[VLIST_PACK_INT_NVARS] = p->nvars;
+  tempbuf[VLIST_PACK_INT_TAXISID] = p->taxisID;
+  tempbuf[VLIST_PACK_INT_TABLEID] = p->tableID;
+  tempbuf[VLIST_PACK_INT_INSTID] = p->instID;
+  tempbuf[VLIST_PACK_INT_MODELID] = p->modelID;
+  serializePack(tempbuf, vlistNints, CDI_DATATYPE_INT, buf, size, position, context);
   serializePack(&p->ntsteps, 1, CDI_DATATYPE_LONG, buf, size, position, context);
 
   cdiAttsPack(p, CDI_GLOBAL, buf, size, position, context);
@@ -1551,25 +1559,28 @@ vlistPackP(void *vlistptr, void *buf, int size, int *position, void *context)
     }
 }
 
-void
+int
 vlistUnpack(char *buf, int size, int *position, int originNamespace, void *context, int force_id)
 {
-  int tempbuf[vlist_nints];
-  serializeUnpack(buf, size, position, tempbuf, vlist_nints, CDI_DATATYPE_INT, context);
-  int nvars = tempbuf[1];
-  int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);
-  vlist_t *p = vlist_new_entry(force_id ? targetID : CDI_UNDEFID);
+#define adaptKey(key) (namespaceAdaptKey((key), originNamespace))
+  int tempbuf[vlistNints];
+  serializeUnpack(buf, size, position, tempbuf, vlistNints, CDI_DATATYPE_INT, context);
+  int nvars = tempbuf[VLIST_PACK_INT_NVARS];
+  int targetID = force_id ? adaptKey(tempbuf[VLIST_PACK_INT_SELF]) : CDI_UNDEFID;
+  vlist_t *p = vlist_new_entry(targetID);
   xassert(!force_id || p->self == targetID);
   if (!force_id) targetID = p->self;
   cdiVlistMakeInternal(p->self);
-  p->taxisID = namespaceAdaptKey(tempbuf[2], originNamespace);
-  p->tableID = tempbuf[3];
-  p->instID = namespaceAdaptKey(tempbuf[4], originNamespace);
-  p->modelID = namespaceAdaptKey(tempbuf[5], originNamespace);
+  p->taxisID = adaptKey(tempbuf[VLIST_PACK_INT_TAXISID]);
+  p->tableID = tempbuf[VLIST_PACK_INT_TABLEID];
+  p->instID = adaptKey(tempbuf[VLIST_PACK_INT_INSTID]);
+  p->modelID = adaptKey(tempbuf[VLIST_PACK_INT_MODELID]);
   serializeUnpack(buf, size, position, &p->ntsteps, 1, CDI_DATATYPE_LONG, context);
   cdiAttsUnpack(targetID, CDI_GLOBAL, buf, size, position, context);
   for (int varID = 0; varID < nvars; varID++) vlistVarUnpack(targetID, buf, size, position, originNamespace, context);
   reshSetStatus(targetID, &vlistOps, reshGetStatus(targetID, &vlistOps) & ~RESH_SYNC_BIT);
+#undef adaptKey
+  return targetID;
 }
 
 void

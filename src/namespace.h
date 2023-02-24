@@ -32,11 +32,15 @@ enum namespaceSwitch
   NSSWITCH_STREAM_CLOSE_BACKEND,
   NSSWITCH_STREAM_DEF_TIMESTEP_,
   NSSWITCH_STREAM_SYNC,
+  NSSWITCH_VLIST_DESTROY_,
 #ifdef HAVE_LIBNETCDF
   NSSWITCH_NC__CREATE,
   NSSWITCH_CDF_DEF_VAR,
+  NSSWITCH_NC_ENDDEF,
+  NSSWITCH_NC__ENDDEF,
   NSSWITCH_CDF_DEF_TIMESTEP,
   NSSWITCH_CDF_STREAM_SETUP,
+  NSSWITCH_CDF_POSTDEFACTION_GRID_PROP,
 #endif
   NUM_NAMESPACE_SWITCH,
 };
@@ -44,10 +48,10 @@ enum namespaceSwitch
 union namespaceSwitchValue
 {
   void *data;
-  void (*func)();
+  void (*func)(void);
 };
 
-#define NSSW_FUNC(p) ((union namespaceSwitchValue){ .func = (void (*)())(p) })
+#define NSSW_FUNC(p) ((union namespaceSwitchValue){ .func = (void (*)(void))(p) })
 #define NSSW_DATA(p) ((union namespaceSwitchValue){ .data = (void *) (p) })
 
 // int              namespaceNew();
@@ -61,8 +65,10 @@ int namespaceIdxEncode2(int, int);
 namespaceTuple_t namespaceResHDecode(int);
 int namespaceAdaptKey(int originResH, int originNamespace);
 int namespaceAdaptKey2(int);
-void namespaceSwitchSet(enum namespaceSwitch sw, union namespaceSwitchValue value);
-union namespaceSwitchValue namespaceSwitchGet(enum namespaceSwitch sw);
+void namespaceSwitchSet(int sw, union namespaceSwitchValue value);
+union namespaceSwitchValue namespaceSwitchGet(int sw);
+/* reserve new dynamic key */
+int cdiNamespaceSwitchNewKey(void);
 
 #endif
 /*

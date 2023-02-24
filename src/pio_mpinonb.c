@@ -2,6 +2,7 @@
 #include "config.h"
 #endif
 
+#include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
@@ -14,87 +15,93 @@
 #include "namespace.h"
 #include "pio.h"
 #include "pio_comm.h"
+#include "pio_dbuffer.h"
 #include "pio_impl.h"
 #include "pio_util.h"
 
-typedef struct
+struct fileMPIFWS
 {
-  size_t size;
-  struct dBuffer *db1;
-  struct dBuffer *db2;
-  struct dBuffer *db;
+  char *name;
+  struct dBuffer db[2];
   MPI_File fh;
   MPI_Request request;
-  int fileID;
   int tsID;
-  bool finished;
-  char name[];
-} aFiledataM;
+  unsigned dbufIdx;
+};
 
-static listSet *bibAFiledataM;
+static struct fileMPIFWS *openFiles;
+static unsigned openFilesSize, openFilesFill;
 
-static int
-fileIDTest(void *a, void *fileID)
-{
-  return ((aFiledataM *) a)->fileID == (int) (intptr_t) fileID;
-}
+/* Open MPI 2.0.2 forgets to set request to MPI_REQUEST_NULL */
+#ifdef OMPI_MINOR_VERSION
+#if OMPI_MAJOR_VERSION == 2 && OMPI_MINOR_VERSION == 0 && OMPI_RELEASE_VERSION == 2
+#define POSTWAIT_WORKAROUND(req) req = MPI_REQUEST_NULL
+#else
+#define POSTWAIT_WORKAROUND(req)
+#endif
+#else
+#define POSTWAIT_WORKAROUND(req)
+#endif
 
 /***************************************************************/
 
-static aFiledataM *
-initAFiledataMPINONB(const char *filename, size_t bs)
+static void
+initAFiledataMPINONB(struct fileMPIFWS *of, const char *filename, size_t bufSize)
 {
   MPI_Comm commPio = commInqCommPio();
-  aFiledataM *of = (aFiledataM *) Malloc(sizeof(*of) + strlen(filename) + 1);
-
-  strcpy(of->name, filename);
-  of->size = bs;
-  of->db1 = NULL;
-  of->db2 = NULL;
+  {
+    size_t nameSize = strlen(filename) + 1;
+    char *name = of->name = Malloc(nameSize);
+    memcpy(name, filename, nameSize);
+  }
 
   /* init output buffer */
-  int iret = dbuffer_init(&(of->db1), of->size);
-  iret += dbuffer_init(&(of->db2), of->size);
+  for (size_t dbufIdx = 0; dbufIdx < 2; ++dbufIdx) cdiPioDbufferInit(of->db + dbufIdx, bufSize);
 
-  if (iret > 0) xabort("dbuffer_init did not succeed");
+  of->dbufIdx = 0;
 
-  of->db = of->db1;
-
-  of->tsID = CDI_UNDEFID;
+  of->tsID = -1;
 
   MPI_Info open_info = MPI_INFO_NULL;
   /* tell IBM PE to buffer just as much as one buffer holds */
   {
     xmpi(MPI_Info_create(&open_info));
     char buf_size_str[3 * sizeof(size_t) * CHAR_BIT / 8 + 1];
-    snprintf(buf_size_str, sizeof(buf_size_str), "%zu", bs);
+    snprintf(buf_size_str, sizeof(buf_size_str), "%zu", bufSize);
     xmpi(MPI_Info_set(open_info, "IBM_io_buffer_size", buf_size_str));
     xmpi(MPI_Info_set(open_info, "IBM_largeblock_io", "true"));
   }
   xmpi(MPI_File_open(commPio, of->name, MPI_MODE_CREATE | MPI_MODE_WRONLY, open_info, &of->fh));
   xmpi(MPI_Info_free(&open_info));
+#ifdef OMPI_MINOR_VERSION
+  /* Bull X MPI 1.2.x has a defective shared file pointer that can be
+   * righted with a collective operation, thus we write zero bytes
+   * from all tasks iff we detect that this is Bull X MPI, which
+   * fortunately can be found from a mismatch in MPI and OMPI versions. */
+#if OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION == 2 && MPI_SUBVERSION == 1
+#warning "implementing Bull X MPI work-around"
+  {
+    MPI_Status status;
+    xmpiStat(MPI_File_write_ordered(of->fh, filename, 0, MPI_BYTE, &status), &status);
+  }
+#endif
+#endif
   of->request = MPI_REQUEST_NULL;
-  of->finished = false;
-
-  return of;
 }
 
 /***************************************************************/
 
 static int
-destroyAFiledataMPINONB(void *v)
+destroyAFiledataMPINONB(struct fileMPIFWS *of)
 {
   int iret = 0;
-  aFiledataM *of;
   MPI_Status status;
   MPI_Offset endpos;
 
-  of = (aFiledataM *) v;
-
-  xdebug("IOPE%d: close file %d, name=\"%s\"", commInqRankGlob(), of->fileID, of->name);
+  xdebug("IOPE%d: close file %d, name=\"%s\"", commInqRankGlob(), (int) (of - openFiles), of->name);
 
   /* close file */
-  xmpi(MPI_Wait(&of->request, &status));
+  xmpiStat(MPI_Wait(&of->request, &status), &status);
   xmpi(MPI_Barrier(commInqCommPio()));
   xmpi(MPI_File_get_position_shared(of->fh, &endpos));
   xmpi(MPI_File_set_size(of->fh, endpos));
@@ -102,10 +109,10 @@ destroyAFiledataMPINONB(void *v)
 
   /* file closed, cleanup */
 
-  dbuffer_cleanup(&(of->db1));
-  dbuffer_cleanup(&(of->db2));
-
-  Free(of);
+  cdiPioDbufferDestroy(of->db);
+  cdiPioDbufferDestroy(of->db + 1);
+  Free(of->name);
+  of->name = NULL;
 
   xdebug("IOPE%d: closed file, cleaned up, return", commInqRankGlob());
 
@@ -114,50 +121,28 @@ destroyAFiledataMPINONB(void *v)
 
 /***************************************************************/
 
-static bool
-compareNamesMPINONB(void *v1, void *v2)
-{
-  aFiledataM *afm1 = v1, *afm2 = v2;
-  return !strcmp(afm1->name, afm2->name);
-}
-
-/***************************************************************/
-
 static void
-writeMPINONB(aFiledataM *of)
+writeMPINONB(struct fileMPIFWS *of)
 {
-  int amount;
   MPI_Status status;
-  int fileID = of->fileID;
+  int fileID = (int) (of - openFiles);
 
   /* write buffer */
-
-  amount = (int) dbuffer_data_size(of->db);
+  size_t dbufIdx = of->dbufIdx;
+  int amount = (int) cdiPioDbufferGetPos(of->db + dbufIdx);
 
   if (amount == 0) return;
 
   xdebug3("IOPI%d: Write buffer, size %d bytes, in", commInqRankGlob(), amount);
 
-  xmpi(MPI_Wait(&(of->request), &status));
-  xmpi(MPI_File_iwrite_shared(of->fh, of->db->buffer, amount, MPI_UNSIGNED_CHAR, &of->request));
+  xmpiStat(MPI_Wait(&of->request, &status), &status);
+  xmpi(MPI_File_iwrite_shared(of->fh, of->db[dbufIdx].buffer, amount, MPI_UNSIGNED_CHAR, &of->request));
   xdebug("%d bytes written for fileID=%d", amount, fileID);
 
   /* change outputBuffer */
 
-  dbuffer_reset(of->db);
-
-  if (of->db == of->db1)
-    {
-      xdebug3("IOPE%d: fileID=%d, change to buffer 2 ...", commInqRankGlob(), fileID);
-      of->db = of->db2;
-    }
-  else
-    {
-      xdebug3("IOPE%d: fileID=%d, change to buffer 1 ...", commInqRankGlob(), fileID);
-      of->db = of->db1;
-    }
-
-  return;
+  cdiPioDbufferReset(of->db + dbufIdx);
+  of->dbufIdx = (unsigned) (dbufIdx ^ 1);
 }
 
 /***************************************************************/
@@ -165,32 +150,30 @@ writeMPINONB(aFiledataM *of)
 static size_t
 fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
 {
-  int error = 0;
-  int filled = 0;
-  aFiledataM *of;
-  int rankPio = commInqRankPio();
-
-  of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
-  xassert(of);
+  assert(fileID >= 0 && (size_t) fileID < openFilesSize && openFiles[fileID].name);
+  struct fileMPIFWS *of = openFiles + fileID;
 
   bool flush = tsID != of->tsID;
 
   if (flush)
     {
-      xdebug3("IOPE%d: tsID = %d, flush buffer", rankPio, tsID);
+      xdebug3("IOPE%d: tsID = %d, flush buffer", commInqRankPio(), tsID);
       writeMPINONB(of);
       of->tsID = tsID;
       MPI_Status status;
-      xmpi(MPI_Wait(&(of->request), &status));
+      xmpiStat(MPI_Wait(&of->request, &status), &status);
+      POSTWAIT_WORKAROUND(of->request);
       xmpi(MPI_Barrier(commInqCommPio()));
     }
 
-  filled = dbuffer_push(of->db, (unsigned char *) buffer, len);
+  size_t dbufIdx = of->dbufIdx;
+  int filled = cdiPioDbufferAppend(of->db + dbufIdx, buffer, len);
 
   xdebug3("IOPE%d: fileID = %d, tsID = %d,"
           " pushed data on buffer, filled = %d",
-          rankPio, fileID, tsID, filled);
+          commInqRankPio(), fileID, tsID, filled);
 
+  int error = 0;
   if (filled == 1)
     {
       if (flush)
@@ -198,8 +181,8 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
       else
         {
           writeMPINONB(of);
-
-          error = dbuffer_push(of->db, (unsigned char *) buffer, len);
+          dbufIdx ^= 1;
+          error = cdiPioDbufferAppend(of->db + dbufIdx, buffer, len);
         }
     }
 
@@ -213,63 +196,64 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
 static int
 fcMPINONB(int fileID)
 {
-  aFiledataM *of;
-
   xdebug("IOPE%d: write buffer, close file and cleanup, in %d", commInqRankPio(), fileID);
 
-  if (!(of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID))) xabort("listSet, fileID=%d not found", fileID);
+  assert(fileID >= 0 && (size_t) fileID < openFilesSize && openFiles[fileID].name);
+  struct fileMPIFWS *of = openFiles + fileID;
 
   writeMPINONB(of);
   MPI_Status status;
-  xmpi(MPI_Wait(&(of->request), &status));
+  xmpiStat(MPI_Wait(&(of->request), &status), &status);
+  POSTWAIT_WORKAROUND(of->request);
   /* remove file element */
-  int iret = listSetRemove(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
+  int iret = destroyAFiledataMPINONB(of);
+  --openFilesFill;
   return iret;
 }
 
 /***************************************************************/
-static void
-elemCheck(void *q, void *nm)
-{
-  aFiledataM *afm = q;
-  const char *name = nm;
-
-  if (!strcmp(name, afm->name)) xabort("Filename %s has already been added to set\n", name);
-}
 
 static int
 fowMPINONB(const char *filename, const char *mode)
 {
-  static unsigned long buffersize = 0;
-  int id;
-  enum
-  {
-    bcastRoot = 0
-  };
-  MPI_Comm commPio = commInqCommPio();
-  int rankPio = commInqRankPio();
-
   if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
     xabort("Unsupported mode \"%s\" in parallel file open.", mode);
 
-  /* broadcast buffersize to collectors ( just once, for all files )*/
+  struct cdiPioConf *conf = cdiPioGetConf();
 
-  if (!buffersize)
+  for (size_t i = 0; i < openFilesSize; ++i)
+    if (openFiles[i].name && !strcmp(openFiles[i].name, filename))
+      {
+        Warning("filename %s is already open!"
+                " CDI-PIO does not support concurrent access"
+                " through different filehandles.",
+                filename);
+        return CDI_EINVAL;
+      }
+
+  size_t fileID = SIZE_MAX;
+  if (openFilesSize == openFilesFill)
     {
-      if (rankPio == bcastRoot) buffersize = findWriteAccumBufsize();
-      xmpi(MPI_Bcast(&buffersize, 1, MPI_UNSIGNED_LONG, bcastRoot, commPio));
+      fileID = openFilesSize;
+      if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
+      openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
+      if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
+      openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
+      for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
     }
-
-  xdebug("buffersize=%ld", buffersize);
-
-  listSetForeach(bibAFiledataM, elemCheck, (void *) filename);
-  aFiledataM *of = initAFiledataMPINONB(filename, (size_t) buffersize);
-
-  if ((id = listSetAdd(bibAFiledataM, of)) < 0) xabort("filename %s not unique", of->name);
-
-  xdebug("IOPE%d: name=%s, init and added aFiledataM, return id = %d", rankPio, filename, id);
-  of->fileID = id;
-  return id;
+  else
+    {
+      for (size_t i = 0; i < openFilesSize; ++i)
+        if (openFiles[i].name == NULL)
+          {
+            fileID = i;
+            break;
+          }
+    }
+  struct fileMPIFWS *of = openFiles + fileID;
+  ++openFilesFill;
+  initAFiledataMPINONB(of, filename, conf->writeAggBufLim);
+  return (int) fileID;
 }
 
 /***************************************************************/
@@ -277,13 +261,8 @@ fowMPINONB(const char *filename, const char *mode)
 static void
 finalizeMPINONB(void)
 {
-  if (!listSetIsEmpty(bibAFiledataM))
-    xabort("set bibAFiledataM not empty");
-  else
-    {
-      xdebug("%s", "destroy set");
-      listSetDelete(bibAFiledataM);
-    }
+  if (openFilesFill) xabort("files still open on exit!");
+  Free(openFiles);
 }
 
 /***************************************************************/
@@ -291,14 +270,10 @@ finalizeMPINONB(void)
 void
 initMPINONB(void)
 {
-  bibAFiledataM = listSetNew(destroyAFiledataMPINONB, compareNamesMPINONB);
-
   namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowMPINONB));
   namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcMPINONB));
   namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwMPINONB));
-  cdiPioFileWritingFinalize = finalizeMPINONB;
-
-  if (bibAFiledataM == NULL) xabort("listSetNew did not succeed");
+  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(finalizeMPINONB));
 }
 
 /*

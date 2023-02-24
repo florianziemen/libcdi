@@ -48,7 +48,7 @@ static void subtypeDestroyP(void *subtype_ptr);
 static void subtypePrintP(void *subtype_ptr, FILE *fp);
 static int subtypeGetPackSize(void *subtype_ptr, void *context);
 static void subtypePack(void *subtype_ptr, void *buffer, int size, int *pos, void *context);
-static int subtypeTxCode(void);
+static int subtypeTxCode(void *subtype_ptr);
 
 static const resOps subtypeOps = { (int (*)(void *, void *)) subtypeCompareP,
                                    (void (*)(void *)) subtypeDestroyP,
@@ -71,7 +71,7 @@ attribute_to_index(const char *key)
 {
   if (key == NULL) Error("Internal error!");
   for (int i = 0; i < nSubtypeAttributes; i++)
-    if (strcmp(key, cdiSubtypeAttributeName[i]) == 0) return i;
+    if (str_is_equal(key, cdiSubtypeAttributeName[i])) return i;
   return -1;
 }
 
@@ -543,11 +543,8 @@ keyValuePair(const char *key, int value)
   result.nAND = 1;
   result.key_value_pairs[0][0] = attribute_to_index(key);
   result.key_value_pairs[1][0] = value;
-  if (CDI_Debug)
-    {
-      Message("key  %s matches %d", key, result.key_value_pairs[0][0]);
-      Message("%d --?-- %d", result.key_value_pairs[0][0], result.key_value_pairs[1][0]);
-    }
+  if (CDI_Debug) Message("key  %s matches %d", key, result.key_value_pairs[0][0]);
+  if (CDI_Debug) Message("%d --?-- %d", result.key_value_pairs[0][0], result.key_value_pairs[1][0]);
   return result;
 }
 
@@ -572,11 +569,10 @@ matchAND(subtype_query_t q1, subtype_query_t q2)
       result.nAND++;
     }
 
+  if (CDI_Debug) Message("combined criterion:");
   if (CDI_Debug)
-    {
-      Message("combined criterion:");
-      for (int i = 0; i < result.nAND; i++) Message("%d --?-- %d", result.key_value_pairs[0][i], result.key_value_pairs[1][i]);
-    }
+    for (int i = 0; i < result.nAND; i++) Message("%d --?-- %d", result.key_value_pairs[0][i], result.key_value_pairs[1][i]);
+
   return result;
 }
 
@@ -665,7 +661,6 @@ int
 subtypeCreate(int subtype)
 {
   if (CDI_Debug) Message("subtype: %d ", subtype);
-  Message("subtype: %d ", subtype);
 
   /* allocate new subtype */
   subtype_t *subtype_ptr;
@@ -888,8 +883,9 @@ subtypePack(void *subtype_ptr, void *buffer, int size, int *pos, void *context)
 }
 
 static int
-subtypeTxCode(void)
+subtypeTxCode(void *subtypePtr)
 {
+  (void) subtypePtr;
   Error("Not yet implemented for subtypes!");
   return 0;
 }

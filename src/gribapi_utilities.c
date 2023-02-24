@@ -88,11 +88,11 @@ gribCheckString(grib_handle *gribHandle, const char *key, const char *expectedVa
   if (length != expectedLength) return false;
   char *value = (char *) Malloc(length);
   if (grib_get_string(gribHandle, key, value, &length)) return false;
-  int rc = !strcmp(value, expectedValue);
+  int rc = str_is_equal(value, expectedValue);
   Free(value);
 #else
   char *value = gribCopyString(gribHandle, key);
-  int rc = value ? (strlen(value) + 1 == expectedLength ? !strcmp(value, expectedValue) : false) : false;
+  int rc = value ? (strlen(value) + 1 == expectedLength ? str_is_equal(value, expectedValue) : false) : false;
   Free(value);
 #endif
   return rc;
@@ -271,9 +271,10 @@ addToDate(struct tm *me, long long amount, long unit)
 static char *
 makeDateString(struct tm *me)
 {
-  char *result = (char *) Malloc(4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 4 + 1);
-  sprintf(result, "%04d-%02d-%02dT%02d:%02d:%02d.000", me->tm_year + 1900, me->tm_mon + 1, me->tm_mday, me->tm_hour, me->tm_min,
-          me->tm_sec);
+  const size_t length = 4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 4 + 1;
+  char *result = (char *) Malloc(length);
+  snprintf(result, length, "%04d-%02d-%02dT%02d:%02d:%02d.000", me->tm_year + 1900, me->tm_mon + 1, me->tm_mday, me->tm_hour,
+           me->tm_min, me->tm_sec);
   return result;
 }
 
@@ -941,7 +942,7 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
          Default / implicit scanning mode is 64:
                             i and j scan positively, i points are consecutive (row-major)        */
 #ifdef HIRLAM_EXTENSIONS
-      if (cdiDebugExt >= 30)
+      if (cdiDebugExt >= 30 && gribEditionNumber(gh) <= 1)
         {
           //  indicatorOfParameter=33,indicatorOfTypeOfLevel=105,level
           long paramId, levelTypeId, levelId;

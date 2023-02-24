@@ -7,13 +7,14 @@
 static void
 tstepsInitEntry(tsteps_t *tstep)
 {
-  tstep->curRecID = CDI_UNDEFID;
-  tstep->position = 0;
+  tstep->recIDs = NULL;
   tstep->records = NULL;
   tstep->recordSize = 0;
-  tstep->nallrecs = 0;
-  tstep->recIDs = NULL;
   tstep->nrecs = 0;
+  tstep->curRecID = CDI_UNDEFID;
+  tstep->ncStepIndex = 0;
+  tstep->position = 0;
+  tstep->nallrecs = 0;
   tstep->next = 0;
 
   ptaxisInit(&(tstep->taxis));
@@ -46,17 +47,16 @@ tstepsNewEntry(stream_t *streamptr)
   tsteps_t *curTstep = &streamptr->tsteps[tsID];
   tstepsInitEntry(curTstep);
 
-  curTstep->taxis.used = true;
-
   return tsID;
 }
 
 void
-cdiCreateTimesteps(stream_t *streamptr)
+cdi_create_timesteps(int numTimesteps, stream_t *streamptr)
 {
-  if (streamptr->ntsteps < 0 || streamptr->tstepsTableSize > 0) return;
+  streamptr->ntsteps = (long) numTimesteps;
+  if (numTimesteps < 0 || streamptr->tstepsTableSize > 0) return;
 
-  const int ntsteps = (streamptr->ntsteps == 0) ? 1 : (int) streamptr->ntsteps;
+  int ntsteps = (numTimesteps == 0) ? 1 : numTimesteps;
 
   streamptr->tsteps = (tsteps_t *) Malloc((size_t) ntsteps * sizeof(tsteps_t));
 
@@ -65,9 +65,7 @@ cdiCreateTimesteps(stream_t *streamptr)
 
   for (int tsID = 0; tsID < ntsteps; tsID++)
     {
-      tsteps_t *curTstep = &streamptr->tsteps[tsID];
-      tstepsInitEntry(curTstep);
-      curTstep->taxis.used = true;
+      tstepsInitEntry(&streamptr->tsteps[tsID]);
     }
 }
 /*

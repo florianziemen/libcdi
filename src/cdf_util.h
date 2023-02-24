@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+bool xtypeIsText(int xtype);
+
 int get_time_units(size_t len, const char *ptu);
 
 bool is_time_units(const char *timeunits);
@@ -14,6 +16,7 @@ bool is_DBL_axis(/*const char *units,*/ const char *longname);
 bool is_depth_axis(const char *stdname, const char *longname);
 bool is_height_axis(const char *stdname, const char *longname);
 bool is_altitude_axis(const char *stdname, const char *longname);
+bool is_reference_axis(const char *stdname, const char *longname);
 
 bool is_lon_axis(const char *units, const char *stdname);
 bool is_lat_axis(const char *units, const char *stdname);

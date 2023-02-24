@@ -29,7 +29,7 @@ static int srvDefaultDprec = 0;
 
 // A version string.
 #undef LIBVERSION
-#define LIBVERSION 1.4.2
+#define LIBVERSION 1.5.0
 #define XSTRING(x) #x
 #define STRING(x) XSTRING(x)
 static const char srv_libvers[] = STRING(LIBVERSION);
@@ -69,7 +69,7 @@ srvLibInit()
                   {
                   case '4': srvDefaultHprec = EXSE_SINGLE_PRECISION; break;
                   case '8': srvDefaultHprec = EXSE_DOUBLE_PRECISION; break;
-                  default: Message("Invalid digit in %s: %s", envName, envString);
+                  default: Warning("Invalid digit in %s: %s", envName, envString);
                   }
                 break;
               }
@@ -79,13 +79,13 @@ srvLibInit()
                   {
                   case '4': srvDefaultDprec = EXSE_SINGLE_PRECISION; break;
                   case '8': srvDefaultDprec = EXSE_DOUBLE_PRECISION; break;
-                  default: Message("Invalid digit in %s: %s", envName, envString);
+                  default: Warning("Invalid digit in %s: %s", envName, envString);
                   }
                 break;
               }
             default:
               {
-                Message("Invalid character in %s: %s", envName, envString);
+                Warning("Invalid character in %s: %s", envName, envString);
                 break;
               }
             }
@@ -141,44 +141,44 @@ srvCheckFiletype(int fileID, int *swap)
 
   if (fileRead(fileID, buffer, 4) != 4) return 0;
 
-  const size_t blocklen = (size_t) get_UINT32(buffer);
-  const size_t sblocklen = (size_t) get_SUINT32(buffer);
+  size_t blocklen = (size_t) get_UINT32(buffer);
+  size_t sblocklen = (size_t) get_SUINT32(buffer);
 
   if (SRV_Debug) Message("blocklen = %d sblocklen = %d", blocklen, sblocklen);
 
   // clang-format off
-  if ( blocklen == 32 )
+  if (blocklen == 32)
     {
      *swap = 0;
       fact = blocklen>>3;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return 0;
+      if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
       pbuf = buffer+4*fact;      dimx = (size_t) get_UINT32(pbuf);
       pbuf = buffer+5*fact;      dimy = (size_t) get_UINT32(pbuf);
       pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
     }
-  else if ( blocklen == 64 )
+  else if (blocklen == 64)
     {
      *swap = 0;
       fact = blocklen>>3;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return 0;
+      if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
       pbuf = buffer+4*fact;      dimx = (size_t) get_UINT64(pbuf);
       pbuf = buffer+5*fact;      dimy = (size_t) get_UINT64(pbuf);
       pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
     }
-  else if ( sblocklen == 32 )
+  else if (sblocklen == 32)
     {
      *swap = 1;
       fact = sblocklen>>3;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return 0;
+      if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
       pbuf = buffer+4*fact;       dimx = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+5*fact;       dimy = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
     }
-  else if ( sblocklen == 64 )
+  else if (sblocklen == 64)
     {
      *swap = 1;
       fact = sblocklen>>3;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return 0;
+      if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
       pbuf = buffer+4*fact;       dimx = (size_t) get_SUINT64(pbuf);
       pbuf = buffer+5*fact;       dimy = (size_t) get_SUINT64(pbuf);
       pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
@@ -187,13 +187,10 @@ srvCheckFiletype(int fileID, int *swap)
 
   fileRewind(fileID);
 
-  if (SRV_Debug)
-    {
-      Message("swap = %d fact = %d", *swap, fact);
-      Message("dimx = %lu dimy = %lu data = %lu", dimx, dimy, data);
-    }
+  if (SRV_Debug) Message("swap = %d fact = %d", *swap, fact);
+  if (SRV_Debug) Message("dimx = %lu dimy = %lu data = %lu", dimx, dimy, data);
 
-  const int found = data && (dimx * dimy * fact == data || dimx * dimy * 8 == data);
+  int found = data && (dimx * dimy * fact == data || dimx * dimy * 8 == data);
   return found;
 }
 
@@ -227,10 +224,10 @@ static int
 srvInqData(srvrec_t *srvp, int prec, void *data)
 {
   int ierr = 0;
-  const int byteswap = srvp->byteswap;
-  const size_t datasize = srvp->datasize;
+  int byteswap = srvp->byteswap;
+  size_t datasize = srvp->datasize;
   void *buffer = srvp->buffer;
-  const int dprec = srvp->dprec;
+  int dprec = srvp->dprec;
 
   switch (dprec)
     {
@@ -293,16 +290,16 @@ srvDefData(void *srv, int prec, const void *data)
 {
   srvrec_t *srvp = (srvrec_t *) srv;
 
-  const int dprec = srvDefaultDprec ? srvDefaultDprec : srvp->dprec;
+  int dprec = srvDefaultDprec ? srvDefaultDprec : srvp->dprec;
   srvp->dprec = dprec ? dprec : prec;
 
-  const int hprec = srvDefaultHprec ? srvDefaultHprec : srvp->hprec;
+  int hprec = srvDefaultHprec ? srvDefaultHprec : srvp->hprec;
   srvp->hprec = hprec ? hprec : dprec;
 
   int *header = srvp->header;
 
-  const size_t datasize = (size_t) header[4] * (size_t) header[5];
-  const size_t blocklen = datasize * (size_t) dprec;
+  size_t datasize = (size_t) header[4] * (size_t) header[5];
+  size_t blocklen = datasize * (size_t) dprec;
 
   srvp->datasize = datasize;
 
@@ -362,12 +359,12 @@ srvRead(int fileID, void *srv)
 
   if (!srvp->checked)
     {
-      const int status = srvCheckFiletype(fileID, &srvp->byteswap);
+      int status = srvCheckFiletype(fileID, &srvp->byteswap);
       if (status == 0) Error("Not a SERVICE file!");
       srvp->checked = 1;
     }
 
-  const int byteswap = srvp->byteswap;
+  int byteswap = srvp->byteswap;
 
   // read header record
   size_t blocklen = binReadF77Block(fileID, byteswap);
@@ -376,7 +373,7 @@ srvRead(int fileID, void *srv)
 
   if (SRV_Debug) Message("blocklen = %lu", blocklen);
 
-  const size_t hprec = blocklen / SRV_HEADER_LEN;
+  size_t hprec = blocklen / SRV_HEADER_LEN;
 
   srvp->hprec = (int) hprec;
 
@@ -421,7 +418,7 @@ srvRead(int fileID, void *srv)
       srvp->buffer = Realloc(srvp->buffer, srvp->buffersize);
     }
 
-  const size_t dprec = blocklen / srvp->datasize;
+  size_t dprec = blocklen / srvp->datasize;
 
   srvp->dprec = (int) dprec;
 
@@ -449,9 +446,9 @@ srvWrite(int fileID, void *srv)
 {
   srvrec_t *srvp = (srvrec_t *) srv;
   union SRV_HEADER tempheader;
-  const int byteswap = srvp->byteswap;
-  const int dprec = srvp->dprec;
-  const int hprec = srvp->hprec;
+  int byteswap = srvp->byteswap;
+  int dprec = srvp->dprec;
+  int hprec = srvp->hprec;
   int *restrict header = srvp->header;
 
   // write header record

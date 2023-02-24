@@ -7,9 +7,9 @@
 
 #include <mpi.h>
 
-#include "pio_conf.h"
+void cdiPioCollectorMessageLoop(void);
 
-void cdiPioCollectorMessageLoop(const struct cdiPioConf *conf);
+int cdiPioStream2Owner(int streamID);
 
 #endif
 /*

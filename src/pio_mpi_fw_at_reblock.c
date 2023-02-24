@@ -50,10 +50,9 @@ struct pendingBufWrite
   int incoming;
 };
 
-typedef struct
+struct fileMPIFWAR
 {
   MPI_File fh;
-  int fileID;
   int numMsg;
   MPI_Offset pos;
   char *name;
@@ -69,22 +68,17 @@ typedef struct
   int msgSize;
   struct IOmsg *msgs;
   MPI_Request *reqs;
-  long collWriteSize[]; /* used to allgather sizes of writes
-                         * on different processes */
-} aFiledataM;
+  long *collWriteSize; /* used to allgather sizes of writes
+                        * on different processes */
+};
 
-static listSet *bibAFiledataM;
-
-static int
-fileIDTest(void *a, void *fileID)
-{
-  return ((aFiledataM *) a)->fileID == (int) (intptr_t) fileID;
-}
+static struct fileMPIFWAR *openFiles;
+static unsigned openFilesSize, openFilesFill;
 
 /***************************************************************/
 
 static inline void
-initReblockPendingMsg(aFiledataM *of, size_t i)
+initReblockPendingMsg(struct fileMPIFWAR *of, size_t i)
 {
   of->msgs[i].pos = -1;
   of->msgs[i].len = -1;
@@ -112,8 +106,6 @@ lcm(size_t a, size_t b)
   return a / gcd(a, b) * b;
 }
 
-static bool largePageAlign;
-
 static size_t
 getXferBufAlign(const char *path)
 {
@@ -132,8 +124,8 @@ getXferBufAlign(const char *path)
   return (size_t) align;
 }
 
-static aFiledataM *
-initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
+static void
+initAFiledataFileWriteAtReblock(struct fileMPIFWAR *of, const char *filename, const struct cdiPioConf *conf)
 {
   MPI_Comm commPio = commInqCommPio();
   int sizePio = commInqSizePio();
@@ -167,12 +159,12 @@ initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
 #undef MINBLOCKSIZE
     /* ensure block size also meets page and direct I/O buffer
      * alignment requirements */
-    size_t pageSize = cdiGetPageSize(largePageAlign), IOAlign = getXferBufAlign(filename);
+    size_t pageSize = cdiGetPageSize(conf->largePageAlign), IOAlign = getXferBufAlign(filename);
     bufBlockAlign = lcm(pageSize, IOAlign);
     blockSize = lcm(blockSize, bufBlockAlign);
   }
   /* round bufSize to next multiple of block size and I/O alignment */
-  bufSize = roundUpToMultiple(bufSize, blockSize);
+  size_t bufSize = roundUpToMultiple(conf->writeAggBufLim, blockSize);
   size_t numBlockBuf = bufSize / blockSize;
   assert(blockSize <= INT_MAX && numBlockBuf <= INT_MAX);
   /* never go less than double-buffering */
@@ -181,12 +173,12 @@ initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
       numBlockBuf = 2;
       bufSize = blockSize * 2;
     }
-  aFiledataM *of = Malloc(sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio + nameSize);
+  of->collWriteSize = Malloc(sizeof(of->collWriteSize[0]) * (size_t) sizePio);
   of->fh = fh;
-  of->name = (char *) ((unsigned char *) of + sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio);
+  of->name = Malloc(nameSize);
   memcpy(of->name, filename, nameSize);
   {
-    void *ptr;
+    void *ptr = NULL;
     int err = posix_memalign(&ptr, bufBlockAlign, bufSize);
     if (!err)
       of->blockBuf = ptr;
@@ -211,18 +203,15 @@ initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
   for (size_t i = 0; i < (size_t) msgSize; ++i) initReblockPendingMsg(of, i);
   of->pos = 0;
   of->numMsg = 0;
-  return of;
 }
 
 /***************************************************************/
 
-static void flushReblockBuffer(aFiledataM *of, int blockBufIdx);
+static void flushReblockBuffer(struct fileMPIFWAR *of, int blockBufIdx);
 
 static int
-destroyAFiledataFileWriteAtReblock(void *v)
+destroyAFiledataFileWriteAtReblock(struct fileMPIFWAR *restrict of)
 {
-  aFiledataM *of = v;
-
   size_t numBlockBuf = (size_t) of->numBlockBuf;
   /* flush pending buffers */
   /** 1. handle all outstanding messages */
@@ -248,18 +237,11 @@ destroyAFiledataFileWriteAtReblock(void *v)
   Free(of->msgs);
   Free(of->reqs);
   Free(of->pending);
-  Free(of);
+  Free(of->collWriteSize);
+  Free(of->name);
+  of->name = NULL;
 
   return iret == MPI_SUCCESS ? 0 : -1;
-}
-
-/***************************************************************/
-
-static bool
-compareNamesFileWriteAtReblock(void *v1, void *v2)
-{
-  aFiledataM *afm1 = v1, *afm2 = v2;
-  return !strcmp(afm1->name, afm2->name);
 }
 
 /***************************************************************/
@@ -271,7 +253,7 @@ lmin(long a, long b)
 }
 
 static void
-flushReblockBuffer(aFiledataM *of, int blockBufIdx)
+flushReblockBuffer(struct fileMPIFWAR *of, int blockBufIdx)
 {
   int blockSize = of->blockSize;
   unsigned char *blockBuf = of->blockBuf + blockSize * blockBufIdx;
@@ -299,14 +281,14 @@ flushReblockBuffer(aFiledataM *of, int blockBufIdx)
   MPI_Offset ofs = (MPI_Offset) blockSize
                    * (((MPI_Offset) of->pending[blockBufIdx].pass * (MPI_Offset) sizePio * of->numBlockBuf)
                       + (MPI_Offset) blockBufIdx * (MPI_Offset) sizePio + (MPI_Offset) rankPio);
-  int wsize = of->pos >= ofs + blockSize ? blockSize : (int) (of->pos - ofs);
+  int wsize = (of->pos >= ofs + blockSize) ? blockSize : (int) (of->pos - ofs);
   xmpi(MPI_File_write_at(of->fh, ofs, blockBuf, wsize, MPI_UNSIGNED_CHAR, MPI_STATUS_IGNORE));
   of->pending[blockBufIdx].pass = -1;
   of->numMsg = numMsg;
 }
 
 static void
-reblockMoreMsgs(aFiledataM *of, int numMsg)
+reblockMoreMsgs(struct fileMPIFWAR *of, int numMsg)
 {
   /* optimize with MPI_Testsome */
   if (of->msgSize == numMsg)
@@ -323,8 +305,9 @@ reblockMoreMsgs(aFiledataM *of, int numMsg)
 static size_t
 fwFileWriteAtReblock(int fileID, const void *buffer, size_t len)
 {
-  aFiledataM *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
-  xassert(of && len <= INT_MAX);
+  assert(fileID >= 0 && (size_t) fileID < openFilesSize && openFiles[fileID].name);
+  struct fileMPIFWAR *of = openFiles + fileID;
+  xassert(len <= INT_MAX);
   MPI_Comm commPio = commInqCommPio();
   int sizePio = commInqSizePio(), rankPio = commInqRankPio();
   /* find position to write to */
@@ -431,54 +414,56 @@ fwFileWriteAtReblock(int fileID, const void *buffer, size_t len)
 static int
 fcFileWriteAtReblock(int fileID)
 {
-  aFiledataM *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
-  if (!of) xabort("listSet, fileID=%d not found", fileID);
-  int iret = listSetRemove(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
+  assert(fileID >= 0 && (size_t) fileID < openFilesSize && openFiles[fileID].name);
+  struct fileMPIFWAR *of = openFiles + fileID;
+  int iret = destroyAFiledataFileWriteAtReblock(of);
+  --openFilesFill;
   return iret;
 }
 
 /***************************************************************/
-static void
-elemCheck(void *q, void *nm)
-{
-  aFiledataM *afm = q;
-  const char *name = nm;
-
-  if (!strcmp(name, afm->name)) xabort("Filename %s has already been added to set\n", name);
-}
 
 static int
 fowFileWriteAtReblock(const char *filename, const char *mode)
 {
-  static unsigned long buffersize = 0;
-  int id;
-  enum
-  {
-    bcastRoot = 0
-  };
-  MPI_Comm commPio = commInqCommPio();
-  int rankPio = commInqRankPio();
-
   if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
     xabort("Unsupported mode \"%s\" in parallel file open.", mode);
 
-  /* broadcast buffersize to collectors ( just once, for all files )*/
+  const struct cdiPioConf *conf = cdiPioGetConf();
 
-  if (!buffersize)
+  for (size_t i = 0; i < openFilesSize; ++i)
+    if (openFiles[i].name && !strcmp(openFiles[i].name, filename))
+      {
+        Warning("filename %s is already open!"
+                " CDI-PIO does not support concurrent access"
+                " through different filehandles.",
+                filename);
+        return CDI_EINVAL;
+      }
+
+  size_t fileID = SIZE_MAX;
+  if (openFilesSize == openFilesFill)
     {
-      if (rankPio == bcastRoot) buffersize = findWriteAccumBufsize();
-      xmpi(MPI_Bcast(&buffersize, 1, MPI_UNSIGNED_LONG, bcastRoot, commPio));
+      fileID = openFilesSize;
+      if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
+      openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
+      if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
+      openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
+      for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
     }
-
-  xdebug("buffersize=%lu", buffersize);
-
-  listSetForeach(bibAFiledataM, elemCheck, (void *) filename);
-  aFiledataM *of = initAFiledataFileWriteAtReblock(filename, (size_t) buffersize);
-
-  if ((id = listSetAdd(bibAFiledataM, of)) < 0) xabort("filename %s not unique", of->name);
-
-  of->fileID = id;
-  return id;
+  else
+    {
+      for (size_t i = 0; i < openFilesSize; ++i)
+        if (openFiles[i].name == NULL)
+          {
+            fileID = i;
+            break;
+          }
+    }
+  struct fileMPIFWAR *of = openFiles + fileID;
+  ++openFilesFill;
+  initAFiledataFileWriteAtReblock(of, filename, conf);
+  return (int) fileID;
 }
 
 /***************************************************************/
@@ -486,29 +471,21 @@ fowFileWriteAtReblock(const char *filename, const char *mode)
 static void
 finalizeFileWriteAtReblock(void)
 {
-  if (!listSetIsEmpty(bibAFiledataM))
-    xabort("set bibAFiledataM not empty");
+  if (openFilesFill)
+    xabort("files still open on exit!");
   else
-    {
-      xdebug("%s", "destroy set");
-      listSetDelete(bibAFiledataM);
-    }
+    Free(openFiles);
 }
 
 /***************************************************************/
 
 void
-cdiPioFileWriteAtReblockInit(const struct cdiPioConf *conf)
+cdiPioFileWriteAtReblockInit(void)
 {
-  bibAFiledataM = listSetNew(destroyAFiledataFileWriteAtReblock, compareNamesFileWriteAtReblock);
   namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowFileWriteAtReblock));
   namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcFileWriteAtReblock));
   namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwFileWriteAtReblock));
-  cdiPioFileWritingFinalize = finalizeFileWriteAtReblock;
-
-  largePageAlign = conf->largePageAlign;
-
-  if (bibAFiledataM == NULL) xabort("listSetNew did not succeed");
+  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(finalizeFileWriteAtReblock));
 }
 
 /*

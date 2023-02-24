@@ -2,209 +2,193 @@
 #include "config.h"
 #endif
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "cdipio.h"
 #include "dmemory.h"
 #include "namespace.h"
 #include "pio.h"
 #include "pio_comm.h"
+#include "pio_dbuffer.h"
+#include "pio_id_set.h"
 #include "pio_impl.h"
 #include "pio_util.h"
 
-typedef struct
+enum
 {
-  size_t size;
-  struct dBuffer *db1;
-  struct dBuffer *db2;
-  struct dBuffer *db;
-  enum IO_Server_command command;
-  MPI_Request request;
-  int tsID, fileID;
-  char name[];
-} remoteFileBuf;
-
-static listSet *bibRemoteFileBuf;
-
-static int
-fileIDTest(void *a, void *fileID)
+  numRecordSendBuf = 2,
+  numFlushOp = 2,
+};
+struct remoteFileBuf
 {
-  return ((remoteFileBuf *) a)->fileID == (int) (intptr_t) fileID;
-}
+  char *name;
+  struct dBuffer dbuf[numRecordSendBuf];
+  /* extra request for sync signal to and go-on signal from writer */
+  MPI_Request request[numRecordSendBuf + numFlushOp];
+  struct syncMsg syncMsg;
+  off_t amount;
+  unsigned dbufIdx;
+  int tsID;
+};
 
-static remoteFileBuf *
-initRemoteFileBuf(const char *filename, size_t bs)
+static struct remoteFileBuf *openRemoteFiles;
+static unsigned openRemoteFilesSize, openRemoteFilesFill;
+
+static void
+initRemoteFileBuf(struct remoteFileBuf *restrict rfile, const char *filename, size_t bs)
 {
-  remoteFileBuf *afp;
-  size_t len;
-  int iret;
 
   xdebug("filename=%s, buffersize=%zu, in", filename, bs);
 
-  len = strlen(filename);
-  afp = Malloc(sizeof(remoteFileBuf) + len + 1);
-  strcpy(afp->name, filename);
-  afp->size = bs;
-  afp->tsID = 0;
-
+  size_t len = strlen(filename);
+  rfile->name = Malloc(len + 1);
+  memcpy(rfile->name, filename, len + 1);
+  rfile->tsID = 0;
+  rfile->amount = 0;
   /* init output buffer */
 
-  xdebug("filename=%s, init output buffer", afp->name);
+  xdebug("filename=%s, init output buffer", filename);
 
-  iret = dbuffer_init(&(afp->db1), afp->size);
-  iret += dbuffer_init(&(afp->db2), afp->size);
+  for (size_t i = 0; i < numRecordSendBuf; ++i) cdiPioDbufferInit(rfile->dbuf + i, bs);
+  for (size_t i = 0; i < numRecordSendBuf + numFlushOp; ++i) rfile->request[i] = MPI_REQUEST_NULL;
 
-  if (iret > 0) xabort("dbuffer_init did not succeed");
+  rfile->dbufIdx = 0;
 
-  afp->db = afp->db1;
-
-  afp->command = IO_Open_file;
-  afp->request = MPI_REQUEST_NULL;
-
-  xdebug("added name=%s, return", afp->name);
-  return afp;
+  xdebug("added name=%s, return", rfile->name);
 }
 
 static int
-destroyRemoteFileBuf(void *v)
+destroyRemoteFileBuf(struct remoteFileBuf *restrict rfile)
 {
-  remoteFileBuf *afp = (remoteFileBuf *) v;
-  MPI_Status status;
+  MPI_Status status[numRecordSendBuf + numFlushOp];
 
-  xdebug("filename=%s, cleanup, in", afp->name);
+  xdebug("filename=%s, cleanup, in", rfile->name);
 
-  xmpiStat(MPI_Wait(&afp->request, &status), &status);
-  dbuffer_cleanup(&afp->db1);
-  dbuffer_cleanup(&afp->db2);
+  xmpiStats(MPI_Waitall(numRecordSendBuf + numFlushOp, rfile->request, status), numRecordSendBuf, status);
 
-  Free(afp);
+  for (size_t i = 0; i < numRecordSendBuf; ++i) cdiPioDbufferDestroy(rfile->dbuf + i);
+  Free(rfile->name);
+  rfile->name = NULL;
 
   xdebug("%s", "cleaned up, return");
 
   return 0;
 }
 
-static bool
-compareNames(void *v1, void *v2)
-{
-  remoteFileBuf *afd1 = v1, *afd2 = v2;
-
-  return !strcmp(afd1->name, afd2->name);
-}
-
 /***************************************************************/
 /* send buffer to writer and swap buffer for filling */
 static void
-sendP(remoteFileBuf *afd, int id)
+sendP(struct remoteFileBuf *rfile)
 {
-  int tag;
-  size_t amount;
-  MPI_Status status;
-
-  amount = dbuffer_data_size(afd->db);
-  tag = encodeFileOpTag(id, afd->command);
-
-  xdebug("send buffer for %s, size: %zu bytes, command=%s, in", afd->name, amount, cdiPioCmdStrTab[afd->command]);
-
-  xmpiStat(MPI_Wait(&(afd->request), &status), &status);
-
-  /* FIXME: amount > INT_MAX unhandled */
-  xmpi(MPI_Issend(afd->db->buffer, (int) amount, MPI_UNSIGNED_CHAR, commInqSizePio() - 1, tag, commInqCommPio(), &afd->request));
-
-  /* change outputBuffer */
-  dbuffer_reset(afd->db);
-  if (afd->db == afd->db1)
+  MPI_Status statui[numFlushOp];
+  if (rfile->request[numRecordSendBuf + 1] != MPI_REQUEST_NULL)
+    xmpiStats(MPI_Waitall(numFlushOp, rfile->request + numRecordSendBuf, statui), numFlushOp, statui);
+  size_t dbufIdx = rfile->dbufIdx;
+  struct dBuffer *restrict dbuf = rfile->dbuf;
+  size_t amount = cdiPioDbufferGetPos(dbuf + dbufIdx);
+  if (amount)
     {
-      xdebug("%s", "Change to buffer 2 ...");
-      afd->db = afd->db2;
-    }
-  else
-    {
-      xdebug("%s", "Change to buffer 1 ...");
-      afd->db = afd->db1;
-    }
-  afd->command = IO_Send_buffer;
+      int fileID = (int) (rfile - openRemoteFiles);
+      int tag = encodeFileOpTag(fileID, IO_Send_buffer);
 
-  return;
+      xdebug("send buffer for %s, size: %zu bytes, command=%s, in", rfile->name, amount, cdiPioCmdStrTab[IO_Send_buffer]);
+
+      /* FIXME: amount > INT_MAX unhandled */
+      xmpi(MPI_Isend(dbuf[dbufIdx].buffer, (int) amount, MPI_UNSIGNED_CHAR, commInqSizePio() - 1, tag, commInqCommPio(),
+                     rfile->request + dbufIdx));
+      rfile->amount += (off_t) amount;
+
+      /* change outputBuffer */
+      dbufIdx ^= 1;
+      xmpiStat(MPI_Wait(rfile->request + dbufIdx, statui), statui);
+      cdiPioDbufferReset(dbuf + dbufIdx);
+      rfile->dbufIdx = (unsigned) dbufIdx;
+    }
 }
 
 static void
-defTimestep(remoteFileBuf *afd, int tsID)
+flushOp(struct remoteFileBuf *rfile, int tsID)
 {
-  if (afd == NULL || tsID != afd->tsID + 1) xabort(" defTimestepPA () didn't succeed.");
-  afd->tsID = tsID;
-}
-
-static void
-flushOp(remoteFileBuf *fb, int tsID)
-{
-  sendP(fb, fb->fileID);
-  defTimestep(fb, (int) (intptr_t) tsID);
+  assert(rfile != NULL && tsID == rfile->tsID + 1);
+  sendP(rfile);
+  rfile->tsID = tsID;
+  int fileID = (int) (rfile - openRemoteFiles), funnelRank = commInqSizePio() - 1;
+  MPI_Comm commPio = commInqCommPio();
+  MPI_Request *req = rfile->request + numRecordSendBuf;
+  rfile->syncMsg = (struct syncMsg){ .amount = rfile->amount, .fileID = fileID, .command = IO_Sync_file };
+  xmpi(MPI_Isend(&rfile->syncMsg, 1, cdiPioSyncMsgDt, funnelRank, IO_Sync_file, commPio, req));
+  int syncFromFunnelTag = encodeFileOpTag(fileID, IO_Sync_file);
+  xmpi(MPI_Irecv(NULL, 0, MPI_INT, funnelRank, syncFromFunnelTag, commPio, req + 1));
+  MPI_Status statui[numFlushOp];
+  int numComplete, completeIdx[numFlushOp];
+  xmpiStats(MPI_Testsome(numFlushOp, req, &numComplete, completeIdx, statui), numComplete, statui);
 }
 
 static size_t
-pioSendWrite(int id, const void *buffer, size_t len, int tsID)
+pioSendWrite(int fileID, const void *buffer, size_t len, int tsID)
 {
-  int error = 0;
-  int flush = 0;
-  int filled;
-  remoteFileBuf *afd;
+  assert(fileID >= 0 && (size_t) fileID < openRemoteFilesSize && openRemoteFiles[fileID].name);
+  struct remoteFileBuf *rfile = openRemoteFiles + fileID;
 
-  afd = listSetGet(bibRemoteFileBuf, fileIDTest, (void *) (intptr_t) id);
+  bool flush = tsID != rfile->tsID;
 
-  flush = tsID != afd->tsID;
+  size_t dbufIdx = rfile->dbufIdx;
+  struct dBuffer *restrict dbuf = rfile->dbuf;
 
   if (flush)
     {
-      xdebug("tsID = %d, flush buffer for fileID=%d", tsID, afd->fileID);
-
-      flushOp(afd, tsID);
-      {
-        MPI_Status status;
-        xmpiStat(MPI_Wait(&(afd->request), &status), &status);
-      }
-      xmpi(MPI_Barrier(commInqCommColl()));
+      xdebug("tsID = %d, flush buffer for fileID=%d", tsID, fileID);
+      flushOp(rfile, tsID);
+      dbufIdx ^= 1;
     }
 
-  filled = dbuffer_push(afd->db, buffer, len);
+  int filled = cdiPioDbufferAppend(dbuf + dbufIdx, buffer, len);
 
-  xdebug("id = %d, tsID = %d, pushed %lu byte data on buffer, filled = %d", id, tsID, len, filled);
+  xdebug("id = %d, tsID = %d, pushed %lu byte data on buffer, filled = %d", fileID, tsID, len, filled);
 
+  int error = 0;
   if (filled == 1)
     {
       if (flush)
         error = filled;
       else
         {
-          sendP(afd, id);
-          error = dbuffer_push(afd->db, buffer, len);
+          sendP(rfile);
+          dbufIdx = rfile->dbufIdx;
+          error = cdiPioDbufferAppend(dbuf + dbufIdx, buffer, len);
         }
     }
 
-  if (error == 1) xabort("did not succeed filling output buffer, id=%d", id);
+  if (error == 1) xabort("did not succeed filling output buffer, id=%d", fileID);
 
   return len;
 }
 
 static int
-pioSendClose(int id)
+pioSendClose(int fileID)
 {
-  remoteFileBuf *afd;
-  xdebug("fileID %d: send buffer, close file and cleanup", id);
+  assert(fileID >= 0 && (size_t) fileID < openRemoteFilesSize && openRemoteFiles[fileID].name);
 
-  afd = listSetGet(bibRemoteFileBuf, fileIDTest, (void *) (intptr_t) id);
+  struct remoteFileBuf *rfile = openRemoteFiles + fileID;
 
-  afd->command = IO_Close_file;
+  xdebug("fileID %d: send buffer, close file and cleanup", fileID);
 
-  sendP(afd, id);
+  sendP(rfile);
+  MPI_Comm commPio = commInqCommPio();
+  int funnelRank = commInqSizePio() - 1;
+  struct syncMsg query = { .amount = rfile->amount, .fileID = fileID, .command = IO_Close_file };
+  xmpi(MPI_Send(&query, 1, cdiPioSyncMsgDt, funnelRank, IO_Sync_file, commPio));
+  /* remove file element and wait for pending data sends to finish */
+  destroyRemoteFileBuf(rfile);
   /* wait for other collectors to also close the file
    * this prevents one process from re-using the file ID before
    * another has sent the close */
-  xmpi(MPI_Barrier(commInqCommColl()));
+  int iret;
+  xmpi(MPI_Bcast(&iret, 1, MPI_INT, funnelRank, commPio));
 
-  /* remove file element */
-  int iret = listSetRemove(bibRemoteFileBuf, fileIDTest, (void *) (intptr_t) id);
   return iret;
 }
 
@@ -213,91 +197,111 @@ pioSendOpen(const char *filename, const char *mode)
 {
   if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
     xabort("Unsupported mode \"%s\" in parallel file open.", mode);
-  remoteFileBuf *afd;
-  static unsigned long buffersize = 0;
-  int id, iret;
-  enum
-  {
-    bcastRoot = 0,
-    messageLength = 32,
-  };
-  char message[messageLength];
-  MPI_Comm commCollectors = commInqCommColl();
 
-  /* broadcast buffersize to collectors */
-  if (!buffersize)
+  struct cdiPioConf *conf = cdiPioGetConf();
+
+  /* init and add struct remoteFileBuf */
+  for (size_t i = 0; i < openRemoteFilesSize; ++i)
+    if (openRemoteFiles[i].name && !strcmp(openRemoteFiles[i].name, filename))
+      {
+        Warning("filename %s is already open!"
+                " CDI-PIO does not support concurrent access"
+                " through different filehandles.",
+                filename);
+        return CDI_EINVAL;
+      }
+
+  int fileID = CDI_ELIMIT;
+  if (openRemoteFilesSize == openRemoteFilesFill)
     {
-      if (commInqRankColl() == bcastRoot) buffersize = findWriteAccumBufsize();
-      xmpi(MPI_Bcast(&buffersize, 1, MPI_UNSIGNED_LONG, bcastRoot, commCollectors));
+      fileID = (int) openRemoteFilesSize;
+      if (openRemoteFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
+      openRemoteFilesSize = openRemoteFilesSize ? openRemoteFilesSize * 2 : 4;
+      if (openRemoteFilesSize > (size_t) INT_MAX + 1) openRemoteFilesSize = (size_t) INT_MAX + 1;
+      openRemoteFiles = Realloc(openRemoteFiles, sizeof(*openRemoteFiles) * openRemoteFilesSize);
+      for (size_t i = (size_t) fileID; i < openRemoteFilesSize; ++i) openRemoteFiles[i].name = NULL;
     }
+  else
+    {
+      for (size_t i = 0; i < openRemoteFilesSize; ++i)
+        if (openRemoteFiles[i].name == NULL)
+          {
+            fileID = (int) i;
+            break;
+          }
+    }
+  struct remoteFileBuf *rfile = openRemoteFiles + fileID;
+  initRemoteFileBuf(rfile, filename, conf->writeAggBufLim);
 
-  /* init and add remoteFileBuf */
-  afd = initRemoteFileBuf(filename, (size_t) buffersize);
-  if ((id = listSetAdd(bibRemoteFileBuf, afd)) < 0) xabort("filename %s is not unique", afd->name);
-  afd->fileID = id;
-
-  xdebug("filename=%s, init and added remoteFileBuf, return id = %d", filename, id);
+  xdebug("filename=%s, init and added remoteFileBuf, return fileID = %d", filename, fileID);
 
   /* put filename, id and buffersize on buffer */
-  iret = dbuffer_push(afd->db, filename, strlen(filename) + 1);
-  xassert(iret == 0);
-  sprintf(message, "%lX", buffersize);
-  iret = dbuffer_push(afd->db, message, strlen(message) + 1);
-  xassert(iret == 0);
+  size_t dbufIdx = rfile->dbufIdx;
+  MPI_Comm commPio = commInqCommPio();
+  int intPackSize;
+  xmpi(MPI_Pack_size(2, MPI_INT, commPio, &intPackSize));
+  size_t maxPathLen = (size_t) conf->maxPathLen, openMsgSize = (size_t) intPackSize + maxPathLen;
 
-  if (ddebug)
-    {
-      size_t l = strlen(filename) + strlen(message) + 2;
-      char *temp = Malloc(l + 1);
-      strncpy(temp, (char *) afd->db->buffer, l);
-      temp[l] = '\0';
-      xdebug("filename=%s, put Open file message on buffer:\n%s,\t return", filename, temp);
-      Free(temp);
-    }
-  sendP(afd, afd->fileID);
-  xmpi(MPI_Barrier(commCollectors));
-  return id;
+  unsigned char *buf = rfile->dbuf[dbufIdx].size >= openMsgSize ? rfile->dbuf[dbufIdx].buffer : Malloc(openMsgSize);
+  size_t bufSize = conf->writeAggBufLim;
+  size_t nameLen = strlen(filename);
+  assert(nameLen <= (size_t) conf->maxPathLen);
+  int position = 0;
+  int openMsgHdr[2] = { [0] = fileID, [1] = (int) nameLen };
+  int funnelRank = commInqSizePio() - 1;
+  xmpi(MPI_Pack(openMsgHdr, 2, MPI_INT, buf, (int) bufSize, &position, commPio));
+  xmpi(MPI_Pack((void *) filename, (int) nameLen, MPI_CHAR, buf, (int) bufSize, &position, commPio));
+  xmpi(MPI_Send(buf, position, MPI_PACKED, funnelRank, IO_Open_file, commPio));
+  if (buf != rfile->dbuf[dbufIdx].buffer) Free(buf);
+  return fileID;
 }
 
 static void
 pioSendFinalize(void)
 {
-  int buffer = 0, tag, specialRank = commInqSizePio() - 1;
+  int funnelRank = commInqSizePio() - 1;
   MPI_Comm commPio = commInqCommPio();
 
-  tag = encodeFileOpTag(0, IO_Finalize);
+  static const struct syncMsg finQuery = { .amount = 0, .fileID = 0, .command = IO_Finalize };
+  xmpi(MPI_Send((void *) &finQuery, 1, cdiPioSyncMsgDt, funnelRank, IO_Sync_file, commPio));
 
-  xmpi(MPI_Send(&buffer, 1, MPI_INT, specialRank, tag, commPio));
   xdebug("%s", "SENT MESSAGE WITH TAG \"IO_FINALIZE\" TO SPECIAL PROCESS");
 
-  if (!listSetIsEmpty(bibRemoteFileBuf))
-    xabort("set bibRemoteFileBuf not empty.");
+  if (openRemoteFilesFill)
+    xabort("files still open.");
   else
     {
       xdebug("%s", "destroy set");
-      listSetDelete(bibRemoteFileBuf);
+      Free(openRemoteFiles);
     }
+  cdiPioDestroySyncMsgDt();
 }
 
 void
 pioSendInitialize(void)
 {
   int numIOServers = commInqSizePio();
+  cdiPioCreateSyncMsgDt();
   if (numIOServers < 2) xabort("error: # of I/O processes must be >= 2 for mode, but is %d", numIOServers);
 
   int isCollector = commInqRankColl() != -1;
-  if (!isCollector) switch (commInqIOMode())
-      {
-      case PIO_WRITER: pioWriterStdIO(); break;
-      case PIO_ASYNCH: pioWriterAIO(); break;
-      }
+  if (!isCollector)
+    {
+      switch (commInqIOMode())
+        {
+        case PIO_WRITER: pioWriterStdIO(); break;
+#ifdef _POSIX_ASYNCHRONOUS_IO
+        case PIO_ASYNCH: pioWriterAIO(); break;
+#endif
+        }
+      cdiPioDestroySyncMsgDt();
+    }
   else
     {
       namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioSendOpen));
       namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioSendClose));
       namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(pioSendWrite));
-      cdiPioFileWritingFinalize = pioSendFinalize;
-      bibRemoteFileBuf = listSetNew(destroyRemoteFileBuf, compareNames);
+      namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(pioSendFinalize));
     }
 }
 

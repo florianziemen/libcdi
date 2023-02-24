@@ -27,34 +27,34 @@ static const struct
   const char *units;
 }
 ZaxistypeEntry[] = {
-  { /*  0 */ 0, "sfc",               "surface",                "",               ""},
-  { /*  1 */ 0, "lev",               "generic",                "",               ""},
-  { /*  2 */ 2, "lev",               "hybrid",                 "",               "level"},
-  { /*  3 */ 2, "lev",               "hybrid_half",            "",               "level"},
-  { /*  4 */ 2, "plev",              "pressure",               "air_pressure",   "Pa"},
-  { /*  5 */ 1, "height",            "height",                 "height",         "m"},
-  { /*  6 */ 2, "depth",             "depth_below_sea",        "depth",          "m"},
-  { /*  7 */ 2, "depth",             "depth_below_land",       "",               "cm"},
-  { /*  8 */ 0, "lev",               "isentropic",             "",               "K"},
-  { /*  9 */ 0, "lev",               "trajectory",             "",               ""},
-  { /* 10 */ 1, "alt",               "altitude",               "",               "m"},
-  { /* 11 */ 0, "lev",               "sigma",                  "",               "level"},
-  { /* 12 */ 0, "lev",               "meansea",                "",               "level"},
-  { /* 13 */ 0, "toa",               "top_of_atmosphere",      "",               ""},
-  { /* 14 */ 0, "seabottom",         "sea_bottom",             "",               ""},
-  { /* 15 */ 0, "atmosphere",        "atmosphere",             "",               ""},
-  { /* 16 */ 0, "cloudbase",         "cloud_base",             "",               ""},
-  { /* 17 */ 0, "cloudtop",          "cloud_top",              "",               ""},
-  { /* 18 */ 0, "isotherm0",         "isotherm_zero",          "",               ""},
-  { /* 19 */ 0, "snow",              "snow",                   "",               ""},
-  { /* 20 */ 0, "lakebottom",        "lake_bottom",            "",               ""},
-  { /* 21 */ 0, "sedimentbottom",    "sediment_bottom",        "",               ""},
-  { /* 22 */ 0, "sedimentbottomta",  "sediment_bottom_ta",     "",               ""},
-  { /* 23 */ 0, "sedimentbottomtw",  "sediment_bottom_tw",     "",               ""},
-  { /* 24 */ 0, "mixlayer",          "mix_layer",              "",               ""},
-  { /* 25 */ 0, "height",            "generalized_height",     "height",         ""},
-  { /* 26 */ 0, "character",         "area_type",              "",               ""},
-  { /* 27 */ 0, "tropopause",        "tropopause",             "",               ""},
+  { /*  0 */ 0, "sfc",               "surface",                     "",               ""},
+  { /*  1 */ 0, "lev",               "generic",                     "",               ""},
+  { /*  2 */ 2, "lev",               "hybrid",                      "",               "level"},
+  { /*  3 */ 2, "lev",               "hybrid_half",                 "",               "level"},
+  { /*  4 */ 2, "plev",              "pressure",                    "air_pressure",   "Pa"},
+  { /*  5 */ 1, "height",            "height",                      "height",         "m"},
+  { /*  6 */ 2, "depth",             "depth_below_sea",             "depth",          "m"},
+  { /*  7 */ 2, "depth",             "depth_below_land",            "",               "cm"},
+  { /*  8 */ 0, "lev",               "isentropic",                  "",               "K"},
+  { /*  9 */ 0, "lev",               "trajectory",                  "",               ""},
+  { /* 10 */ 1, "alt",               "height above mean sea level", "altitude",       "m"},
+  { /* 11 */ 0, "lev",               "sigma",                       "",               "level"},
+  { /* 12 */ 0, "lev",               "meansea",                     "",               "level"},
+  { /* 13 */ 0, "toa",               "top_of_atmosphere",           "",               ""},
+  { /* 14 */ 0, "seabottom",         "sea_bottom",                  "",               ""},
+  { /* 15 */ 0, "atmosphere",        "atmosphere",                  "",               ""},
+  { /* 16 */ 0, "cloudbase",         "cloud_base",                  "",               ""},
+  { /* 17 */ 0, "cloudtop",          "cloud_top",                   "",               ""},
+  { /* 18 */ 0, "isotherm0",         "isotherm_zero",               "",               ""},
+  { /* 19 */ 0, "snow",              "snow",                        "",               ""},
+  { /* 20 */ 0, "lakebottom",        "lake_bottom",                 "",               ""},
+  { /* 21 */ 0, "sedimentbottom",    "sediment_bottom",             "",               ""},
+  { /* 22 */ 0, "sedimentbottomta",  "sediment_bottom_ta",          "",               ""},
+  { /* 23 */ 0, "sedimentbottomtw",  "sediment_bottom_tw",          "",               ""},
+  { /* 24 */ 0, "mixlayer",          "mix_layer",                   "",               ""},
+  { /* 25 */ 0, "height",            "generalized_height",          "height",         ""},
+  { /* 26 */ 0, "character",         "area_type",                   "",               ""},
+  { /* 27 */ 0, "tropopause",        "tropopause",                  "",               ""},
 };
 // clang-format on
 
@@ -68,7 +68,7 @@ static void zaxisDestroyP(void *zaxisptr);
 static void zaxisPrintP(void *zaxisptr, FILE *fp);
 static int zaxisGetPackSize(void *zaxisptr, void *context);
 static void zaxisPack(void *zaxisptr, void *buffer, int size, int *pos, void *context);
-static int zaxisTxCode(void);
+static int zaxisTxCode(void *zaxisptr);
 
 static const resOps zaxisOps
     = { (int (*)(void *, void *)) zaxisCompareP, zaxisDestroyP, zaxisPrintP, zaxisGetPackSize, zaxisPack, zaxisTxCode };
@@ -78,8 +78,6 @@ getZaxisOps(void)
 {
   return &zaxisOps;
 }
-
-static int ZAXIS_Debug = 0; /* If set to 1, debugging */
 
 void
 zaxisGetTypeDescription(int zaxisType, int *outPositive, const char **outName, const char **outLongName, const char **outStdName,
@@ -159,15 +157,12 @@ zaxisInit(void)
   static bool zaxisInitialized = false;
   if (zaxisInitialized) return;
   zaxisInitialized = true;
-
-  const char *env = getenv("ZAXIS_DEBUG");
-  if (env) ZAXIS_Debug = atoi(env);
 }
 
 static void
 zaxis_copy(zaxis_t *zaxisptr2, zaxis_t *zaxisptr1)
 {
-  const int zaxisID2 = zaxisptr2->self;
+  int zaxisID2 = zaxisptr2->self;
   memcpy(zaxisptr2, zaxisptr1, sizeof(zaxis_t));
   zaxisptr2->self = zaxisID2;
   cdiInitKeys(&zaxisptr2->keys);
@@ -192,7 +187,7 @@ zaxisCreate_(int zaxistype, int size, int id)
   if (zaxistype >= CDI_NumZaxistype || zaxistype < 0)
     Error("Internal problem! zaxistype=%d out of range (min=0/max=%d)!", zaxistype, CDI_NumZaxistype - 1);
 
-  const int zaxisID = zaxisptr->self;
+  int zaxisID = zaxisptr->self;
   cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, ZaxistypeEntry[zaxistype].name);
   if (zaxistype != ZAXIS_GENERIC) zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
   cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, ZaxistypeEntry[zaxistype].units);
@@ -261,8 +256,6 @@ zaxisDestroyKernel(zaxis_t *zaxisptr)
 {
   xassert(zaxisptr);
 
-  const int id = zaxisptr->self;
-
   if (zaxisptr->vals) Free(zaxisptr->vals);
 #ifndef USE_MPI
   if (zaxisptr->cvals)
@@ -276,12 +269,11 @@ zaxisDestroyKernel(zaxis_t *zaxisptr)
   if (zaxisptr->weights) Free(zaxisptr->weights);
   if (zaxisptr->vct) Free(zaxisptr->vct);
 
-  cdiDeleteKeys(id, CDI_GLOBAL);
-  cdiDeleteAtts(id, CDI_GLOBAL);
+  int zaxisID = zaxisptr->self;
+  cdiDeleteKeys(zaxisID, CDI_GLOBAL);
+  cdiDeleteAtts(zaxisID, CDI_GLOBAL);
 
   Free(zaxisptr);
-
-  reshRemove(id, &zaxisOps);
 }
 
 /*
@@ -299,6 +291,7 @@ zaxisDestroy(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   zaxisDestroyKernel(zaxisptr);
+  reshRemove(zaxisID, &zaxisOps);
 }
 
 static void
@@ -609,7 +602,7 @@ void
 zaxisDefLevel(int zaxisID, int levelID, double level)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  const int size = zaxisptr->size;
+  int size = zaxisptr->size;
   xassert(size);
   xassert(levelID >= 0 && levelID < size);
 
@@ -911,7 +904,7 @@ zaxisInqLevelID(int zaxisID, double level)
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if (zaxisptr->vals)
     {
-      const int size = zaxisptr->size;
+      int size = zaxisptr->size;
       for (int i = 0; i < size; i++)
         if (fabs(level - zaxisptr->vals[i]) < DBL_EPSILON)
           {
@@ -985,7 +978,7 @@ cdiCheckZaxis(int zaxisID)
 
   if (zaxisInqType(zaxisID) == ZAXIS_GENERIC && zaxisptr->vals)
     {
-      const int size = zaxisptr->size;
+      int size = zaxisptr->size;
       if (size > 1)
         {
           /* check direction */
@@ -1130,10 +1123,10 @@ zaxisDuplicate(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
 
-  const int zaxistype = zaxisInqType(zaxisID);
-  const int zaxissize = zaxisInqSize(zaxisID);
+  int zaxistype = zaxisInqType(zaxisID);
+  int zaxissize = zaxisInqSize(zaxisID);
 
-  const int zaxisIDnew = zaxisCreate(zaxistype, zaxissize);
+  int zaxisIDnew = zaxisCreate(zaxistype, zaxissize);
   zaxis_t *zaxisptrnew = zaxis_to_pointer(zaxisIDnew);
 
   zaxis_copy(zaxisptrnew, zaxisptr);
@@ -1189,10 +1182,10 @@ zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
   int datatype = CDI_UNDEFID;
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
 
-  const int type = zaxisptr->type;
-  const int nlevels = zaxisptr->size;
+  int type = zaxisptr->type;
+  int nlevels = zaxisptr->size;
 
-  const int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
+  int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
 
   fprintf(fp, "zaxistype = %s\n", zaxisNamePtr(type));
   fprintf(fp, "size      = %d\n", nlevels);
@@ -1259,7 +1252,7 @@ zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 
   if (type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF)
     {
-      const int vctsize = zaxisptr->vctsize;
+      int vctsize = zaxisptr->vctsize;
       const double *vct = zaxisptr->vct;
       fprintf(fp, "vctsize   = %d\n", vctsize);
       if (vctsize)
@@ -1368,14 +1361,25 @@ zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
 }
 
 static int
-zaxisTxCode(void)
+zaxisTxCode(void *zaxisPtr)
 {
+  (void) zaxisPtr;
   return ZAXIS;
 }
 
 enum
 {
-  zaxisNint = 6,
+  ZAXIS_PACK_INT_SELF,
+  ZAXIS_PACK_INT_TYPE,
+  ZAXIS_PACK_INT_SIZE,
+  ZAXIS_PACK_INT_DIRECTION,
+  ZAXIS_PACK_INT_VCTSIZE,
+  ZAXIS_PACK_INT_MEMBERMASK,
+  zaxisNint
+};
+
+enum
+{
   vals = 1 << 0,
   lbounds = 1 << 1,
   ubounds = 1 << 2,
@@ -1430,12 +1434,12 @@ zaxisGetPackSize(void *voidP, void *context)
 
   packBufferSize += serializeKeysGetPackSize(&zaxisP->keys, context);
 
-  packBufferSize += serializeGetSize(1, CDI_DATATYPE_UCHAR, context);
+  packBufferSize += serializeGetSize(1, CDI_DATATYPE_UINT, context);
 
   return packBufferSize;
 }
 
-void
+int
 zaxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id)
 {
   int intBuffer[zaxisNint], memberMask;
@@ -1448,13 +1452,13 @@ zaxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int 
 
   zaxisInit();
 
-  zaxis_t *zaxisP = zaxisNewEntry(force_id ? namespaceAdaptKey(intBuffer[0], originNamespace) : CDI_UNDEFID);
+  zaxis_t *zaxisP = zaxisNewEntry(force_id ? namespaceAdaptKey(intBuffer[ZAXIS_PACK_INT_SELF], originNamespace) : CDI_UNDEFID);
 
-  zaxisP->type = intBuffer[1];
-  zaxisP->size = intBuffer[2];
-  zaxisP->direction = intBuffer[3];
-  zaxisP->vctsize = intBuffer[4];
-  memberMask = intBuffer[5];
+  zaxisP->type = intBuffer[ZAXIS_PACK_INT_TYPE];
+  zaxisP->size = intBuffer[ZAXIS_PACK_INT_SIZE];
+  zaxisP->direction = intBuffer[ZAXIS_PACK_INT_DIRECTION];
+  zaxisP->vctsize = intBuffer[ZAXIS_PACK_INT_VCTSIZE];
+  memberMask = intBuffer[ZAXIS_PACK_INT_MEMBERMASK];
 
   if (memberMask & vals)
     {
@@ -1516,6 +1520,7 @@ zaxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &zaxisP->positive, 1, CDI_DATATYPE_UINT, context);
 
   reshSetStatus(zaxisP->self, &zaxisOps, reshGetStatus(zaxisP->self, &zaxisOps) & ~RESH_SYNC_BIT);
+  return zaxisP->self;
 }
 
 static void
@@ -1526,12 +1531,12 @@ zaxisPack(void *voidP, void *packBuffer, int packBufferSize, int *packBufferPos,
   int memberMask;
   uint32_t d;
 
-  intBuffer[0] = zaxisP->self;
-  intBuffer[1] = zaxisP->type;
-  intBuffer[2] = zaxisP->size;
-  intBuffer[3] = zaxisP->direction;
-  intBuffer[4] = zaxisP->vctsize;
-  intBuffer[5] = memberMask = zaxisGetMemberMask(zaxisP);
+  intBuffer[ZAXIS_PACK_INT_SELF] = zaxisP->self;
+  intBuffer[ZAXIS_PACK_INT_TYPE] = zaxisP->type;
+  intBuffer[ZAXIS_PACK_INT_SIZE] = zaxisP->size;
+  intBuffer[ZAXIS_PACK_INT_DIRECTION] = zaxisP->direction;
+  intBuffer[ZAXIS_PACK_INT_VCTSIZE] = zaxisP->vctsize;
+  intBuffer[ZAXIS_PACK_INT_MEMBERMASK] = memberMask = zaxisGetMemberMask(zaxisP);
 
   serializePack(intBuffer, zaxisNint, CDI_DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
   d = cdiCheckSum(CDI_DATATYPE_INT, zaxisNint, intBuffer);

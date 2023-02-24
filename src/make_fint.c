@@ -1,8 +1,25 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#if defined(HAVE_GETLINE) && !defined(_GNU_SOURCES)
+// It seems that _GNU_SOURCES must be defined to enable getline(3) on some
+// systems. However, it is unclear whether it is possible at all that
+// HAVE_GETLINE gets defined on such systems by the configure script, which does
+// not expand either AC_GNU_SOURCE or AC_USE_SYSTEM_EXTENSIONS and, therefore,
+// checks for getline without _GNU_SOURCES defined.
+#define _GNU_SOURCES 1
+#endif
+#else
+#define VERSION "2.2.0"
+#endif
+
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 700
-#define _GNU_SOURCE  // needed for getline(3) on some systems it seems
+#endif
+
 #include <ctype.h>
 #include <errno.h>
 #include <regex.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -12,13 +29,19 @@
 #include <unistd.h>
 
 #ifndef HAVE_GETLINE
+#ifdef HAVE_CONFIG_H
+// Avoid warning: implicit declaration of function ‘getline’
+ssize_t getline(char **linebuf, size_t *linebuf_size, FILE *fp);
+#else
+// This is only to cover the case when this file is compiled "manually", i.e.
+// without the Makefile and without config.h, e.g. 'gcc make_fint.c', on a
+// system where HAVE_GETLINE would not get defined or getline does not work
+// without _GNU_SOURCES defined.
 #include "getline.c"
+#endif
 #endif
 
 // clang-format off
-
-//#include "config.h"
-#define VERSION "2.1.0"
 
 typedef struct
 {
@@ -31,7 +54,6 @@ Docu;
 
 // Example: ./make_fint -d ../doc/pio/ cdipio.h
 
-static const char default_doc_root[] = "../doc";
 static struct {
   const char *name;
   size_t len;
@@ -86,8 +108,8 @@ static void doctotxt(FILE *fp, const Docu *doc, const size_t ndoc)
     }
 }
 
-enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISDATETYPE, ISSIZETYPE, ISMPI_COMM,
-             ISXT_IDXLIST, ISCHOICE, ISINTP, ISDATETYPEP, ISSIZETYPEP, ISFLOATV, ISFLOATVV,
+enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISLOGICAL, ISREAL, ISDOUBLE, ISDATETYPE, ISSIZETYPE, ISMPI_COMM,
+             ISXT_IDXLIST, ISXT_IDXLISTV, ISCHOICE, ISINTP, ISDATETYPEP, ISSIZETYPEP, ISFLOATV, ISFLOATVV,
              ISDOUBLEV, ISDOUBLEVV, ISINTV, ISINTVV, ISINTVVV, ISREALP,
              ISDOUBLEP, ISCBUF, ISUUID, ISUCHAR, ISSTRING, ISSTRINGP,
              VOIDFUNCVOID,
@@ -115,7 +137,7 @@ struct symbol {
   const char *f77name, *cfint, *cfmt, *parseRE;
   // pair of parentheses which matches the argument name
   size_t nameMatch;
-  int needsExtraWrapper, needsPrologue;
+  bool needsExtraWrapper, needsPrologue;
   cfConversionEmitter convert;
   const char *convcfmt;
   cfPrologueEmitter prologue;
@@ -146,96 +168,103 @@ static inline int isSym(const int c)
 /* Note: size of this table must match the cftype enum */
 static struct symbol funArgSym[]
   = { { "",                "",        "%svoid",
-        "^"WS"*void"WS"*)", 0, 0, 0 },
+        "^"WS"*void"WS"*\\)", 0, 0, 0 },
       { "CHARACTER(80)",    "STRING",  "%schar *%.*s",
-        "^"WS"*const"WS"+char"WS"+\\*"SYMRE WS"*\\(", 1, 0, 0 },
+        "^"WS"*const"WS"+char"WS"+\\*"SYMRE WS"*\\(", 1, false, false },
       { "INTEGER",         "INT",     "%sint %.*s",
-        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*[,\\)]", 3, 0, 0 },
+        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*[,\\)]", 3, false, false },
+      { "LOGICAL",         "LOGICAL", "%bool %.*s",
+        "^"WS"*(const"WS"+)?bool("WS"+"SYMRE")?"WS"*[,\\)]", 3, false, false },
       { "REAL",            "FLOAT",   "%sfloat %.*s",
-        "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2, false, false },
       { "DOUBLEPRECISION", "DOUBLE",  "%sdouble %.*s",
-        "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2, false, false },
       { "INTEGER",         "INT",     "%sDateType %.*s",
-        "^"WS"*(const"WS"+)?DateType("WS"+"SYMRE")?"WS"*[,\\)]", 3, 1, 0,
+        "^"WS"*(const"WS"+)?DateType("WS"+"SYMRE")?"WS"*[,\\)]", 3, true, false,
         cfDateTypeConvert, "%sint %.*s" },
       { "INTEGER",         "INT",     "%sSizeType %.*s",
-        "^"WS"*(const"WS"+)?SizeType("WS"+"SYMRE")?"WS"*[,\\)]", 3, 1, 0,
+        "^"WS"*(const"WS"+)?SizeType("WS"+"SYMRE")?"WS"*[,\\)]", 3, true, false,
         cfSizeTypeConvert, "%sint %.*s" },
       { "INTEGER",         "INT", "%sMPI_Comm %.*s",
-        "^"WS"*MPI_Comm"WS"+"SYMRE"?"WS"*[,\\)]", 1, 1, 0,
+        "^"WS"*MPI_Comm"WS"+"SYMRE"?"WS"*[,\\)]", 1, true, false,
         cfMPICommConvert, "%sint %.*s" },
       { "TYPE(XT_IDXLIST)", "PVOID", "%sXt_idxlist %.*s",
-        "^"WS"*Xt_idxlist"WS"+"SYMRE"?"WS"*[,\\)]", 1, 1, 0,
+        "^"WS"*Xt_idxlist"WS"+"SYMRE"?"WS"*[,\\)]", 1, true, false,
         cfXtIdxlistConvert, "%svoid *%.*s" },
+      { "TYPE(XT_IDXLIST)", "PVOID", "%sXt_idxlist %.*s[]",
+        "^"WS"*(const"WS"+)?Xt_idxlist("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
+        "[,\\)]", 3, false, false },
       { "CHOICE", "PVOID", "%sconst void *%.*s",
-        "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
+        "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, false, false },
       { "INTEGER",         "PINT",    "%sint *%.*s",
-        "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, false, false },
       { "INTEGER",         "PINT",    "%sDateType *%.*s",
-        "^"WS"*(const"WS"+)?DateType"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 1, 0,
+        "^"WS"*(const"WS"+)?DateType"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, true, false,
         cfDateTypepConvert, "%sint *%.*s"},
       { "INTEGER",         "PINT",    "%sSizeType *%.*s",
-        "^"WS"*(const"WS"+)?SizeType"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 1, 0,
+        "^"WS"*(const"WS"+)?SizeType"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, true, false,
         cfSizeTypepConvert, "%sint *%.*s"},
       { "REAL",            "FLOATV",  "%sfloat %.*s[]",
         "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        "[,\\)]", 3, 0, 0 },
+        "[,\\)]", 3, false, false },
       { "REAL",            "FLOATVV", "%sfloat %.*s%s",
         "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        ARRAY_BOUND"[,\\)]", 3, 0, 0 },
+        ARRAY_BOUND"[,\\)]", 3, false, false },
       { "DOUBLEPRECISION", "DOUBLEV",  "%sdouble %.*s[]",
         "^"WS"*(const"WS"+)?double("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        "[,\\)]", 3, 0, 0 },
+        "[,\\)]", 3, false, false },
       { "DOUBLEPRECISION", "DOUBLEVV", "%sdouble %.*s%s",
         "^"WS"*(const"WS"+)?double("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        ARRAY_BOUND"[,\\)]", 3, 0, 0 },
+        ARRAY_BOUND"[,\\)]", 3, false, false },
       { "INTEGER",         "INTV",    "%sint  %.*s[]",
         "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        "[,\\)]", 3, 0, 0 },
+        "[,\\)]", 3, false, false },
       { "INTEGER",         "INTVV",    "%sint %.*s%s",
         "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        ARRAY_BOUND "[,\\)]", 3, 0, 0 },
+        ARRAY_BOUND "[,\\)]", 3, false, false },
       { "INTEGER",         "INTVVV",    "%sint %.*s%s",
         "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        ARRAY_BOUND ARRAY_BOUND"[,\\)]", 3, 0, 0 },
+        ARRAY_BOUND ARRAY_BOUND"[,\\)]", 3, false, false },
       { "REAL",            "PFLOAT",  "%sfloat *%.*s",
-        "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, false, false },
       { "DOUBLEPRECISION", "PDOUBLE", "%sdouble *%.*s",
-        "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, false, false },
       { "CHARACTER*(*)",   "PPSTRING",    "%schar *%.*s",
         "^"WS"*(const"WS"+)?char"WS"+\\*""([A-Za-z_][A-Za-z_0-9]*_cbuf)"
-        WS"*[,\\)]", 2, 0, 0 },
+        WS"*[,\\)]", 2, false, false },
       { "INTEGER*1(16)",   "PVOID",    "%sunsigned char %.*s[16]",
-        "^"WS"*(const"WS"+)?unsigned"WS"+char"WS"+"SYMRE"?\\[(16|CDI_UUID_SIZE)\\]"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?unsigned"WS"+char"WS"+"SYMRE"?\\[(16|CDI_UUID_SIZE)\\]"WS"*[,\\)]", 2, false, false },
       { "INTEGER*1(*)",   "PVOID",    "%sunsigned char *%.*s",
-        "^"WS"*(const"WS"+)?unsigned"WS"+char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?unsigned"WS"+char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, false, false },
       { "CHARACTER*(*)",   "STRING",  "%schar *%.*s",
-        "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
+        "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, false, false },
       { "CHARACTER*(*)",   "PSTRING", "%schar *%.*s",
-        "^"WS"*char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
+        "^"WS"*char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 1, false, false },
       { "PROCEDURE", "ROUTINE", "%svoid (*%.*s)(void)",
         "^"WS"*void"WS"*\\("WS"*\\*"WS"*"SYMRE"?"WS"*\\)"
-        WS"*\\("WS"*void"WS"*\\)"WS"*[,\\)]", 1, 0, 1,
+        WS"*\\("WS"*void"WS"*\\)"WS"*[,\\)]", 1, false, true,
         NULL, NULL, cfVoidFuncPrologue },
 };
 
 static struct symbol funRet[] = {
   { "",                "",        "%svoid %.*s",
-    "void"WS"+"SYMRE WS"*\\(", 1, 0, 0 },
+    "void"WS"+"SYMRE WS"*\\(", 1, false, false },
   { "CHARACTER",       "STRING",  "%schar *%.*s",
-    "char"WS"+\\*"WS"*"SYMRE WS"*\\(", 1, 0, 0 },
+    "char"WS"+\\*"WS"*"SYMRE WS"*\\(", 1, false, false },
   { "INTEGER",         "INT",     "%sint %.*s",
-    "(const"WS"+)?int"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
+    "(const"WS"+)?int"WS"+"SYMRE WS"*\\(", 2, false, false },
+  { "LOGICAL",         "LOGICAL", "%sbool %.*s",
+    "(const"WS"+)?bool"WS"+"SYMRE WS"*\\(", 2, false, false },
   { "REAL",            "FLOAT",   "%sfloat %.*s",
-    "(const"WS"+)?float"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
+    "(const"WS"+)?float"WS"+"SYMRE WS"*\\(", 2, false, false },
   { "DOUBLEPRECISION", "DOUBLE",  "%sdouble %.*s",
-    "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
+    "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2, false, false },
   { "INTEGER",         "INT",     "%sMPI_Comm %.*s",
-    "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, 0, 0, cfMPICommConvert, "%sint %.*s" },
+    "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, true, false, cfMPICommConvert, "%sint %.*s" },
   { "INTEGER",         "INT",    "%sDateType %.*s",
-    "(const"WS"+)?DateType"WS"+"SYMRE WS"*\\(", 2, 1, 0, cfDateTypeConvert, "%sint %.*s" },
+    "(const"WS"+)?DateType"WS"+"SYMRE WS"*\\(", 2, true, false, cfDateTypeConvert, "%sint %.*s" },
   { "INTEGER",         "INT",    "%sSizeType %.*s",
-    "(const"WS"+)?SizeType"WS"+"SYMRE WS"*\\(", 2, 1, 0, cfSizeTypeConvert, "%sint %.*s" },
+    "(const"WS"+)?SizeType"WS"+"SYMRE WS"*\\(", 2, true, false, cfSizeTypeConvert, "%sint %.*s" },
 };
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
 #pragma GCC diagnostic pop
@@ -274,122 +303,16 @@ static inline int
 arrayArgRank(int argType);
 
 static void
+emitWrapper(char *restrict delegateNameBuf, FILE *fpint,
+            const char *line,
+            enum cftype functype, const char *funcname, size_t funcnameLen,
+            size_t funcargc, const int funcargtype[],
+            const regmatch_t funcargfull[], const regmatch_t funcargname[],
+            size_t maxMatch, regmatch_t *restrict reMatch);
+
+static void
 sprintFortranArrayArgDims(size_t argDimsFSize, char argDimsF[argDimsFSize],
                           int argType, const char *argSpecC, size_t maxMatch, regmatch_t reMatch[]);
-
-static void
-sprintCArrayArgDims(size_t argDimsCSize, char argDimsC[argDimsCSize],
-                    int argType, const char *argSpecC, const regmatch_t reMatch[]);
-
-static void
-function_fwrap(FILE *fpint, enum cftype functype, const char *delegateName, size_t delegateNameLen, size_t funcargc, int *funcargtype,
-               regmatch_t *funcargfull, regmatch_t *funcargname, char *funcname, size_t maxMatch, regmatch_t *reMatch, char *line)
-{
-  fputs("static ", fpint);
-  fprintf(fpint, (funRet[functype].convert ? funRet[functype].convcfmt : funRet[functype].cfmt),
-          "", (int)delegateNameLen, delegateName);
-  fputs("(", fpint);
-  for (size_t i = 0; i < funcargc; ++i)
-    {
-      if (i > 0) fputs(", ", fpint);
-      enum { arrayDimsCSize = 128 };
-      char arrayDimsC[arrayDimsCSize];
-      static const char constStr[] = "const ", nonConstStr[] = "";
-      const char *constStrP;
-      const int argType = funcargtype[i];
-      const int isArray = isArrayArgType(argType);
-      if (!isArray)
-        {
-          arrayDimsC[0] = 0;
-          constStrP = nonConstStr;
-        }
-      else
-        {
-          if (regexec(&funArgSym[argType].preg, line + funcargfull[i].rm_so, maxMatch, reMatch, 0))
-            {
-              fprintf(stderr, "unexpected non-matching of array argument regexp!\n");
-              exit(1);
-            }
-          if (reMatch[1].rm_eo - reMatch[1].rm_so > 5
-              && !strncmp(line + funcargfull[i].rm_so + reMatch[1].rm_so, constStr, sizeof (constStr) - 2))
-            constStrP = constStr;
-          else
-            constStrP = nonConstStr;
-          sprintCArrayArgDims(arrayDimsCSize, arrayDimsC, argType, line + funcargfull[i].rm_so, reMatch);
-        }
-      fprintf(fpint, (funArgSym[argType].convert ? funArgSym[argType].convcfmt : funArgSym[argType].cfmt),
-              constStrP, (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
-              line + funcargname[i].rm_so, arrayDimsC);
-    }
-  fputs(")\n{\n", fpint);
-  for (size_t i = 0; i < funcargc; ++i)
-    {
-      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISDATETYPEP)
-        {
-          // create temporary DateType variable
-          fprintf(fpint, "  DateType %.*s_DateType;\n",
-                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-        }
-      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETYPEP)
-        {
-          // create temporary SizeType variable
-          fprintf(fpint, "  SizeType %.*s_SizeType;\n",
-                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-        }
-    }
-  if (functype != ISVOID)
-    {
-      fputs("  ", fpint);
-      fprintf(fpint, funRet[functype].cfmt, "", 1, "v");
-      fprintf(fpint, ";\n");
-      fprintf(fpint, "  v = %s(", funcname);
-    }
-  else
-    fprintf(fpint, "  %s(", funcname);
-  for (size_t i = 0; i < funcargc; ++i)
-    {
-      if (i > 0) fputs(", ", fpint);
-      if (funArgSym[funcargtype[i]].convert)
-        {
-          funArgSym[funcargtype[i]].convert(fpint, line + funcargname[i].rm_so,
-                                            (size_t)(funcargname[i].rm_eo - funcargname[i].rm_so), CONV_ARG);
-        }
-      else
-        fprintf(fpint, "%.*s", (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-    }
-  fputs(");\n", fpint);
-  for (size_t i = 0; i < funcargc; ++i)
-    {
-      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISDATETYPEP)
-        {
-          fprintf(fpint, "  assert(%.*s_DateType < INT_MAX);\n",
-                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-          // copy temporary DateType variable
-          fprintf(fpint, "  *%.*s = %.*s_DateType;\n",
-                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so,
-                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-        }
-      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETYPEP)
-        {
-          fprintf(fpint, "  assert(%.*s_SizeType < INT_MAX);\n",
-                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-          // copy temporary SizeType variable
-          fprintf(fpint, "  *%.*s = %.*s_SizeType;\n",
-                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so,
-                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
-        }
-    }
-  if (functype != ISVOID)
-    {
-      fputs("  return ", fpint);
-      if (funRet[functype].convert)
-        funRet[functype].convert(fpint, "v", 1, CONV_RET);
-      else
-        fputc('v', fpint);
-      fputs(";\n", fpint);
-    }
-  fputs("}\n", fpint);
-}
 
 static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const char *doc_root)
 {
@@ -456,7 +379,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
   }
   /* compile complete comment regular expression */
   {
-    static const char commentREString[]  = "^"WS"*/\\*"WS"*(.*"NWS")"WS"*\\*/";
+    static const char commentREString[]  = "^"WS"*/\\*"WS"*("NWS"+("WS"+"NWS"+)*)?"WS"*\\*/";
     static const char comment2REString[] = "^"WS"*//"WS"*(.*"NWS")";
     if (reCompile(&commentRE, commentREString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
@@ -546,9 +469,15 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         "/* These functions are meant to be called from Fortran and don't\n"
         " * need an interface declaration in a C header. */\n"
         "#ifdef __clang__\n"
+        "#  pragma GCC diagnostic push\n"
         "#  pragma GCC diagnostic ignored \"-Wmissing-prototypes\"\n"
         "#endif\n"
         "\n", fpint);
+
+
+  // TODO: the string below should be generated using build_header_name
+  //       for consistency
+  fputs("#ifdef CDI_H_\n\n", fpint);
   /*
   fputs("static inline\n"
         "int DateType_c2f(DateType value_DateType)\n"
@@ -565,6 +494,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         "  return (int) value_SizeType;\n"
         "}\n"
         "\n", fpint);
+  fputs("#endif\n", fpint);
 
   bool startFortran = false;
   ssize_t lineLen;
@@ -582,16 +512,17 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
       if (strncmp(line, "//FINT_OFF", 10) == 0) break;
       functype = ISVOID;
       pline = line;
-      int needsExtraWrapper = 0, needsPrologue = 0;
+      bool needsExtraWrapper = false, needsPrologue = false;
       size_t funcnameLen;
       enum decl declType = UNKNOWN_DECL;
       do {
         for (int retType = 0; retType < NUM_RET_TYPES; ++retType)
           if (!regexec(&funRet[retType].preg, pline, maxMatch, reMatch, 0))
             {
-              functype = retType;
+              functype = (enum cftype) retType;
               declType = FUNC_DECL;
-              needsExtraWrapper = needsExtraWrapper || funRet[retType].needsExtraWrapper;
+              needsPrologue |= funRet[retType].needsPrologue;
+              needsExtraWrapper |= funRet[retType].needsExtraWrapper;
               break;
             }
         if (declType == UNKNOWN_DECL)
@@ -606,7 +537,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
         funcnameLen = (size_t)nameLen;
         if ( pline[funNameLast] != '(' )
           {
-            printf("%s\n>(< not found!", line);
+            fprintf(stderr, "%s\n>(< not found!", line);
             return;
           }
         memcpy(funcname, pline + nameMatch->rm_so, funcnameLen);
@@ -691,19 +622,19 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
                       regmatch_t *nameMatch = reMatch + funArgSym[argtype].nameMatch;
                       funcargname[i].rm_so = nameMatch->rm_so + argStart;
                       funcargname[i].rm_eo = nameMatch->rm_eo + argStart;
-                      needsExtraWrapper = needsExtraWrapper || funArgSym[argtype].needsExtraWrapper;
-                      needsPrologue = needsPrologue || funArgSym[argtype].needsPrologue;
+                      needsExtraWrapper |= funArgSym[argtype].needsExtraWrapper;
+                      needsPrologue |= funArgSym[argtype].needsPrologue;
                       break;
                     }
                 if (argtype == NUM_KNOWN_ARG_TYPES)
                   {
-                    printf("%s not implemented\n", line + funcargname[i].rm_so);
+                    fprintf(stderr, "%s not implemented\n", line + funcargname[i].rm_so);
                     break;
                   }
               }
             if ( i != funcargc )
               {
-                printf("problem parsing line: %s\n", line);
+                fprintf(stderr, "problem parsing line: %s\n", line);
                 continue;
               }
           }
@@ -743,7 +674,6 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 	  /* fortran interface */
           const char *delegateName;
           char delegateNameBuf[MAX_FUNC_NAME_LEN + 7];
-          size_t delegateNameLen = funcnameLen;
           /* emit prologue if needed */
           if (needsPrologue)
             {
@@ -758,20 +688,18 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
           /* emit wrapper for type conversions if needed */
           if (needsExtraWrapper)
             {
-              strcpy(delegateNameBuf, funcname);
-              strcat(delegateNameBuf, "_fwrap");
-              delegateNameLen += 6;
+              emitWrapper(delegateNameBuf, fpint, line,
+                          functype, funcname, funcnameLen,
+                          funcargc, funcargtype, funcargfull, funcargname,
+                          maxMatch, reMatch);
               delegateName = delegateNameBuf;
-
-              function_fwrap(fpint, functype, delegateName, delegateNameLen, funcargc, funcargtype,
-                             funcargfull, funcargname, funcname, maxMatch, reMatch, line);
             }
           else
             delegateName = funcname;
 
-          fprintf(fpint, (functype == ISVOID) ? "FCALLSCSUB" : "FCALLSCFUN");
+	  fputs(functype == ISVOID ? "FCALLSCSUB" : "FCALLSCFUN", fpint);
 	  fprintf(fpint, "%zd ", funcargc);
-	  fprintf(fpint, "(");
+	  fputs("(", fpint);
 	  if ( functype != ISVOID )
 	    fprintf(fpint, "%s, ", funRet[functype].cfint);
 	  fprintf(fpint, "%s, ", delegateName);
@@ -785,7 +713,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 	    {
 	      fprintf(fpint, ", %s", funArgSym[funcargtype[i]].cfint);
 	    }
-	  fprintf(fpint, ")\n");
+	  fputs(")\n", fpint);
 
 
 	  if ( funcnameLen == xnameLen && memcmp(funcname, xname, funcnameLen) == 0 )
@@ -801,9 +729,10 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 	      cdoc[ncdoc].fname  = strdup(funcname);
 
 	      nch = sprintf(xline, funRet[functype].cfmt, "", (int)funcnameLen, funcname);
-              xline[nch++] = ' ';
-              xline[nch++] = '(';
-              xline[nch] = '\0';
+              xline[nch  ] = ' ';
+              xline[nch+1] = '(';
+              xline[nch+2] = '\0';
+              nch += 2;
               xlineLen = (size_t)nch;
 
 	      if ( (funcargc == 1 && funcargtype[0] == ISVOID) ) funcargc = 0;
@@ -812,7 +741,9 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 		{
 		  if (i)
                     {
-                      strcat(xline, ", ");
+                      xline[xlineLen  ] = ',';
+                      xline[xlineLen+1] = ' ';
+                      xline[xlineLen+2] = '\0';
                       xlineLen += 2;
                     }
 
@@ -835,7 +766,10 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 		  strcat(xline, farg);
                   xlineLen += (size_t)nchn;
 		}
-	      strcat(xline, ");");
+              xline[xlineLen  ] = ')';
+              xline[xlineLen+1] = ';';
+              xline[xlineLen+2] = '\0';
+              xlineLen += 2;
 	      cdoc[ncdoc].aline[cdoc[ncdoc].naline++] = strdup(xline);
 	      cdoc[ncdoc].text  = strdup(xdes);
 
@@ -847,13 +781,18 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 	      fdoc[nfdoc].text   = NULL;
 	      fdoc[nfdoc].fname  = strdup(funcname);
 
-	      if ( functype == ISVOID )
-		nch = sprintf(xline, "SUBROUTINE %s", xname);
-	      else
-		nch = sprintf(xline, "%s FUNCTION %s", funArgSym[functype].f77name, xname);
+              nch = sprintf(xline, "%s%s %s", funArgSym[functype].f77name,
+                            functype == ISVOID ? "SUBROUTINE" : " FUNCTION",
+                            xname);
 
 	      if ( (funcargc == 1 && funcargtype[0] == ISVOID) ) funcargc = 0;
-              if (funcargc) strcat(xline, " ("), nch += 2;
+              if (funcargc)
+                {
+                  xline[nch  ] = ' ';
+                  xline[nch+1] = '(';
+                  xline[nch+2] = '\0';
+                  nch += 2;
+                }
 
               xlineLen = (size_t)nch;
 
@@ -861,7 +800,9 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 		{
 		  if (i)
                     {
-                      strcat(xline, ", ");
+                      xline[xlineLen  ] = ',';
+                      xline[xlineLen+1] = ' ';
+                      xline[xlineLen+2] = '\0';
                       xlineLen += 2U;
                     }
 
@@ -890,7 +831,12 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 		  strcat(xline, farg);
                   xlineLen += (size_t)nchn;
 		}
-	      if ( funcargc ) strcat(xline, ")");
+	      if ( funcargc )
+                {
+                  xline[xlineLen  ] = ')';
+                  xline[xlineLen+1] = '\0';
+                  xlineLen += 1;
+                }
 	      fdoc[nfdoc].aline[fdoc[nfdoc].naline++] = strdup(xline);
 	      fdoc[nfdoc].text  = strdup(xdes);
 
@@ -972,7 +918,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
       else
 	{
 	  if ( lineLen > 1 )
-	    printf("skip: line %3d  size %3zd  %s%s", lineno, lineLen, line,
+	    fprintf(stderr, "skip: line %3d  size %3zd  %s%s", lineno, lineLen, line,
                    line[lineLen-1]=='\n'?"":"missing new-line\n");
 	}
     }
@@ -993,6 +939,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
   qsort(cdoc, ncdoc, sizeof(Docu), doccmp);
   qsort(fdoc, nfdoc, sizeof(Docu), doccmp);
 
+  if ( NULL == doc_root ) return;
 
   char *filename;
   const size_t doc_root_len = strlen(doc_root);
@@ -1106,19 +1053,23 @@ build_header_name(const size_t len, const char *fname, char *cppMacro)
 
 int main(int argc, char *argv[])
 {
-  const char *doc_root = default_doc_root;
+  const char *doc_root = NULL, *out_root = NULL;
 
   int optargCount = 0;
   {
     int opt;
-    while ((opt = getopt(argc, argv, "d:")) != -1)
+    while ((opt = getopt(argc, argv, "d:o:")) != -1)
       switch (opt) {
       case 'd':
         doc_root = optarg;
-        optargCount = 2;
+        optargCount += 2;
+        break;
+      case 'o':
+        out_root = optarg;
+        optargCount += 2;
         break;
       default: /* '?' */
-        fprintf(stderr, "Usage: %s [-d DOCROOT] includefile\n", argv[0]);
+        fprintf(stderr, "Usage: %s [-d DOCROOT] [-o OUTROOT] includefile\n", argv[0]);
         return EXIT_FAILURE;
       }
   }
@@ -1126,21 +1077,53 @@ int main(int argc, char *argv[])
 
   if ( argc != 2 + optargCount)
     {
-      printf("Usage:  %s [-d DOCROOT] includefile\n", argv[0]);
+      printf("Usage:  %s [-d DOCROOT] [-o OUTROOT] includefile\n", argv[0]);
       return 1;
     }
 
   char *fname = argv[1 + optargCount];
 
-  char *cp = strrchr(fname, '.');
-  const size_t len = (cp == NULL) ? strlen(fname) : (size_t)(cp - fname);
+  const char *cs = strrchr(fname, '/');
+  const char *fbasename = (cs == NULL) ? fname : cs + 1;
+
+  const char *cp = strrchr(fbasename, '.');
+  const size_t fbasename_len = (cp == NULL) ? strlen(fbasename) : (size_t) (cp - fbasename);
+
+  const char *fprefix;
+  size_t fprefix_len;
+
+  if (out_root == NULL)
+    {
+      fprefix = fname;
+      fprefix_len = (size_t) (fbasename - fname);
+    }
+  else
+    {
+      fprefix = out_root;
+      fprefix_len = strlen(out_root);
+    }
 
   char fnameinc[128], fnameint[128];
-  memcpy(fnameinc, fname, len);
-  memcpy(fnameint, fname, len);
 
-  strcpy(fnameinc+len, ".inc");
-  strcpy(fnameint+len, "Fortran.c");
+  if (fprefix_len > 0)
+    {
+      memcpy(fnameinc, fprefix, fprefix_len);
+      memcpy(fnameint, fprefix, fprefix_len);
+
+      if (fprefix[fprefix_len - 1] != '/')
+        {
+          fnameinc[fprefix_len] = fnameint[fprefix_len] = '/';
+          fprefix_len += 1;
+        }
+    }
+
+  size_t fname_idx = fprefix_len;
+  memcpy(fnameinc + fname_idx, fbasename, fbasename_len);
+  memcpy(fnameint + fname_idx, fbasename, fbasename_len);
+
+  fname_idx += fbasename_len;
+  strcpy(fnameinc + fname_idx, ".inc");
+  strcpy(fnameint + fname_idx, "Fortran.c");
 
   fortran_interface(fname, fnameinc, fnameint, doc_root);
 
@@ -1435,6 +1418,7 @@ isArrayArgType(const int argType)
     || argType == ISFLOATVV
     || argType == ISDOUBLEV
     || argType == ISDOUBLEVV
+    || argType == ISXT_IDXLISTV
     || argType == ISINTV
     || argType == ISINTVV
     || argType == ISINTVVV;
@@ -1448,6 +1432,7 @@ arrayArgRank(const int argType)
   case ISFLOATV:
   case ISDOUBLEV:
   case ISINTV:
+  case ISXT_IDXLISTV:
     rank = 1;
     break;
   case ISINTVV:
@@ -1465,30 +1450,7 @@ arrayArgRank(const int argType)
 static void
 sprintCArrayArgDims(size_t argDimsCSize, char argDimsC[argDimsCSize],
                     int argType, const char *argSpecC,
-                    const regmatch_t reMatch[])
-{
-  size_t argDimsCPos = 0;
-  const int arank = arrayArgRank(argType);
-  for (int rank = 1; rank <= arank; ++rank)
-    {
-      const size_t rankBoundMatch
-        = funArgSym[argType].nameMatch + (size_t)rank;
-      const size_t boundStringLen
-        = (size_t)(reMatch[rankBoundMatch].rm_eo
-                   - reMatch[rankBoundMatch].rm_so);
-      argDimsC[argDimsCPos++] = '[';
-      if (boundStringLen)
-        {
-          memcpy(argDimsC + argDimsCPos,
-                 argSpecC + reMatch[rankBoundMatch].rm_so,
-                 boundStringLen);
-          argDimsCPos += boundStringLen;
-        }
-      argDimsC[argDimsCPos++] = ']';
-    }
-  argDimsC[argDimsCPos++] = 0;
-}
-
+                    const regmatch_t reMatch[]);
 
 static void
 sprintFortranArrayArgDims(size_t argDimsFSize, char argDimsF[argDimsFSize],
@@ -1523,6 +1485,160 @@ sprintFortranArrayArgDims(size_t argDimsFSize, char argDimsF[argDimsFSize],
       argDimsF[argDimsFPos++] = rank > 1 ? ',' : ')';
     }
   argDimsF[argDimsFPos++] = 0;
+}
+
+/*
+ * Creates a wrapper function to call funcname indirectly.
+ *
+ * This is needed in case a function needs a wrapper going from
+ * Fortran to C or back because a variable type cannot be used
+ * directly like e.g. MPI_Comm
+ */
+static void
+emitWrapper(char *restrict delegateNameBuf, FILE *fpint,
+            const char *line,
+            enum cftype functype, const char *funcname, size_t funcnameLen,
+            size_t funcargc, const int funcargtype[],
+            const regmatch_t funcargfull[], const regmatch_t funcargname[],
+            size_t maxMatch, regmatch_t *restrict reMatch)
+{
+  static const char fwrap_suffix[] = "_fwrap";
+  size_t delegateNameLen = funcnameLen;
+  strcpy(delegateNameBuf, funcname);
+  strcpy(delegateNameBuf+delegateNameLen, fwrap_suffix);
+  delegateNameLen += sizeof (fwrap_suffix) - 1;
+  const char *delegateName = delegateNameBuf;
+  fputs("static ", fpint);
+  fprintf(fpint, (funRet[functype].convert ? funRet[functype].convcfmt : funRet[functype].cfmt),
+          "", (int)delegateNameLen, delegateName);
+  fputs("(", fpint);
+  for (size_t i = 0; i < funcargc; ++i)
+    {
+      if (i > 0) fputs(", ", fpint);
+      enum { arrayDimsCSize = 128 };
+      char arrayDimsC[arrayDimsCSize];
+      static const char constStr[] = "const ", nonConstStr[] = "";
+      const char *constStrP;
+      const int argType = funcargtype[i];
+      const int isArray = isArrayArgType(argType);
+      if (!isArray)
+        {
+          arrayDimsC[0] = 0;
+          constStrP = nonConstStr;
+        }
+      else
+        {
+          if (regexec(&funArgSym[argType].preg, line + funcargfull[i].rm_so, maxMatch, reMatch, 0))
+            {
+              fprintf(stderr, "unexpected non-matching of array argument regexp!\n");
+              exit(1);
+            }
+          if (reMatch[1].rm_eo - reMatch[1].rm_so > 5
+              && !strncmp(line + funcargfull[i].rm_so + reMatch[1].rm_so, constStr, sizeof (constStr) - 2))
+            constStrP = constStr;
+          else
+            constStrP = nonConstStr;
+          sprintCArrayArgDims(arrayDimsCSize, arrayDimsC, argType, line + funcargfull[i].rm_so, reMatch);
+        }
+      fprintf(fpint, (funArgSym[argType].convert ? funArgSym[argType].convcfmt : funArgSym[argType].cfmt),
+              constStrP, (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
+              line + funcargname[i].rm_so, arrayDimsC);
+    }
+  fputs(")\n{\n", fpint);
+  for (size_t i = 0; i < funcargc; ++i)
+    {
+      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISDATETYPEP)
+        {
+          // create temporary DateType variable
+          fprintf(fpint, "  DateType %.*s_DateType;\n",
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+        }
+      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETYPEP)
+        {
+          // create temporary SizeType variable
+          fprintf(fpint, "  SizeType %.*s_SizeType;\n",
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+        }
+    }
+  if (functype != ISVOID)
+    {
+      fputs("  ", fpint);
+      fprintf(fpint, funRet[functype].cfmt, "", 1, "v");
+      fprintf(fpint, ";\n");
+      fprintf(fpint, "  v = %s(", funcname);
+    }
+  else
+    fprintf(fpint, "  %s(", funcname);
+  for (size_t i = 0; i < funcargc; ++i)
+    {
+      if (i > 0) fputs(", ", fpint);
+      if (funArgSym[funcargtype[i]].convert)
+        {
+          funArgSym[funcargtype[i]].convert(fpint, line + funcargname[i].rm_so,
+                                            (size_t)(funcargname[i].rm_eo - funcargname[i].rm_so), CONV_ARG);
+        }
+      else
+        fprintf(fpint, "%.*s", (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+    }
+  fputs(");\n", fpint);
+  for (size_t i = 0; i < funcargc; ++i)
+    {
+      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISDATETYPEP)
+        {
+          fprintf(fpint, "  assert(%.*s_DateType < INT_MAX);\n",
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+          // copy temporary DateType variable
+          fprintf(fpint, "  *%.*s = %.*s_DateType;\n",
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so,
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+        }
+      if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETYPEP)
+        {
+          fprintf(fpint, "  assert(%.*s_SizeType < INT_MAX);\n",
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+          // copy temporary SizeType variable
+          fprintf(fpint, "  *%.*s = %.*s_SizeType;\n",
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so,
+                  (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+        }
+    }
+  if (functype != ISVOID)
+    {
+      fputs("  return ", fpint);
+      if (funRet[functype].convert)
+        funRet[functype].convert(fpint, "v", 1, CONV_RET);
+      else
+        fputc('v', fpint);
+      fputs(";\n", fpint);
+    }
+  fputs("}\n", fpint);
+}
+
+static void
+sprintCArrayArgDims(size_t argDimsCSize, char argDimsC[argDimsCSize],
+                    int argType, const char *argSpecC,
+                    const regmatch_t reMatch[])
+{
+  size_t argDimsCPos = 0;
+  const int arank = arrayArgRank(argType);
+  for (int rank = 1; rank <= arank; ++rank)
+    {
+      const size_t rankBoundMatch
+        = funArgSym[argType].nameMatch + (size_t)rank;
+      const size_t boundStringLen
+        = (size_t)(reMatch[rankBoundMatch].rm_eo
+                   - reMatch[rankBoundMatch].rm_so);
+      argDimsC[argDimsCPos++] = '[';
+      if (boundStringLen)
+        {
+          memcpy(argDimsC + argDimsCPos,
+                 argSpecC + reMatch[rankBoundMatch].rm_so,
+                 boundStringLen);
+          argDimsCPos += boundStringLen;
+        }
+      argDimsC[argDimsCPos++] = ']';
+    }
+  argDimsC[argDimsCPos++] = 0;
 }
 
 // clang-format on

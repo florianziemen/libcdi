@@ -43,11 +43,11 @@ char *strdup(const char *s);
 */
 #endif
 
-char *strToLower(char *str);
+char *str_to_lower(char *str);
 bool strStartsWith(const char *vstr, const char *cstr);
 
 static inline bool
-strIsEqual(const char *x, const char *y)
+str_is_equal(const char *x, const char *y)
 {
   return (*x == *y) && strcmp(x, y) == 0;
 }
@@ -189,17 +189,18 @@ typedef struct
 
 typedef struct
 {
+  int *recIDs;  // IDs of non constant records
   record_t *records;
-  int *recIDs;     // IDs of non constant records
-  int recordSize;  // number of allocated records
-  int nrecs;       // number of used records
-                   // tsID=0 nallrecs
-                   // tsID>0 number of non constant records
-  int nallrecs;    // number of all records
-  int curRecID;    // current record ID
-  bool next;
-  off_t position;  // timestep file position
+  int recordSize;   // number of allocated records
+  int nrecs;        // number of used records
+                    // tsID=0 nallrecs
+                    // tsID>0 number of non constant records
+  int nallrecs;     // number of all records
+  int curRecID;     // current record ID
+  int ncStepIndex;  // NetCDF timestep index
+  off_t position;   // timestep file position
   taxis_t taxis;
+  bool next;
 } tsteps_t;
 
 typedef struct
@@ -250,6 +251,8 @@ typedef struct
 {
   int ncIDs[CDF_SIZE_ncIDs];
   int gridID;
+  long start;
+  long count;
 } ncgrid_t;
 #endif
 
@@ -266,6 +269,7 @@ typedef struct
   SizeType numvals;
   char *filename;
   Record *record;
+  CdiQuery *query;
   svarinfo_t *vars;
   int nvars;  // number of variables
   int varsAllocated;
@@ -285,12 +289,21 @@ typedef struct
   ncgrid_t ncgrid[MAX_GRIDS_PS];
   int zaxisID[MAX_ZAXES_PS];  // Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
   int nczvarID[MAX_ZAXES_PS];
+  int ncNumDims;
+  int ncDimID[MAX_DIMS_PS];
+  size_t ncDimLen[MAX_DIMS_PS];
   VCT vct;
 #endif
   int globalatts;
   int localatts;
   int unreduced;
   int have_missval;
+  // netcdf4/HDF5 filter
+  unsigned int filterId;
+  size_t numParams;
+  size_t maxParams;
+  unsigned int params[8];
+
   int comptype;   // compression type
   int complevel;  // compression level
   bool sortname;
@@ -298,7 +311,7 @@ typedef struct
   void *gribContainers;
 
   int numWorker;
-  int nextRecID;
+  int nextGlobalRecId;
   int cachedTsID;
   void *jobs;
   void *jobManager;
@@ -372,12 +385,16 @@ extern const char *CDI_GRIB1_Template;
 extern const char *CDI_GRIB2_Template;
 extern int CDI_Convention;
 extern int CDI_Inventory_Mode;
+extern int CDI_Query_Abort;
 extern int CDI_Version_Info;
 extern int CDI_Convert_Cubesphere;
 extern int CDI_Read_Cell_Corners;
 extern int CDI_CMOR_Mode;
 extern int CDI_Reduce_Dim;
+extern int CDI_Shuffle;
 extern size_t CDI_Netcdf_Hdr_Pad;
+extern size_t CDI_Chunk_Cache;
+extern size_t CDI_Chunk_Cache_Max;
 extern bool CDI_Netcdf_Lazy_Grid_Load;
 extern int STREAM_Debug;
 
@@ -428,7 +445,7 @@ void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *c
 
 int recordNewEntry(stream_t *streamptr, int tsID);
 
-void cdiCreateTimesteps(stream_t *streamptr);
+void cdi_create_timesteps(int numTimesteps, stream_t *streamptr);
 
 void recordInitEntry(record_t *record);
 

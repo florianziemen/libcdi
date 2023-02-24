@@ -11,8 +11,9 @@ int cgribexScanTimestep(stream_t *streamptr);
 int cgribexDecode(int memtype, void *cgribexp, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced,
                   size_t *nmiss, double missval);
 
-size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, int vdate, int vtime, int tsteptype,
-                     int numavg, size_t datasize, const void *data, size_t nmiss, void *gribbuffer, size_t gribbuffersize);
+size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime,
+                     int tsteptype, int numavg, size_t datasize, const void *data, size_t nmiss, void *gribbuffer,
+                     size_t gribbuffersize);
 
 void *cgribex_handle_new_from_meassage(void *gribbuffer, size_t recsize);
 void cgribex_handle_delete(void *gh);

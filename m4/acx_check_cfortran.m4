@@ -8,7 +8,7 @@ dnl Version: 1.0
 dnl Keywords:
 dnl Author: Thomas Jahns <jahns@dkrz.de>
 dnl Maintainer: Thomas Jahns <jahns@dkrz.de>
-dnl URL: https://www.dkrz.de/redmine/projects/show/scales-ppm
+dnl URL: https://www.dkrz.de/redmine/projects/scales-ppm
 dnl
 dnl Redistribution and use in source and binary forms, with or without
 dnl modification, are  permitted provided that the following conditions are
@@ -55,10 +55,11 @@ AC_DEFUN([_ACX_CHECK_CFORTRAN_FC],
       r = v * 100.0
       ri = 1.0 / v
       END FUNCTION cftstf])],
-           [_AC_RUN_LOG([mv "conftest.$ac_objext" "conftest_f.$ac_objext"],
-              [_AS_ECHO_LOG([Renaming Fortran object file.])])
+           [ACX_MV_OBJ([conftest],[conftest_f])
             save_LIBS=$LIBS
             LIBS="conftest_c.$ac_objext conftest_f.$ac_objext $LIBS"
+            AS_CASE([$FC_FPP_FLAG],[-x\ f??-cpp-input],
+              [LIBS="-x none $LIBS"])
             AC_RUN_IFELSE([AC_LANG_PROGRAM(,
 [      USE conftest_data, ONLY: ri
       IMPLICIT NONE
@@ -117,8 +118,13 @@ AC_DEFUN([_ACX_CHECK_CFORTRAN_FC],
               [acx_cv_cfortran_works=yes],
               [acx_cv_cfortran_works="error"],
               [AC_MSG_NOTICE([Skipping run test for cfortran.h in cross-compilation mode,])
-	       AC_MSG_NOTICE([link test succeeded.])
+	       AC_MSG_NOTICE([cfortran.h link test succeeded for $FC.])
                acx_cv_cfortran_works=yes])
+	       rm -f "conftest_f.$ac_objext" "conftest_f.$OBJEXT"
+dnl Some Fortran compilers create module files not in the current
+dnl working directory but in the directory with the object file,
+dnl therefore we try to delete everything:
+	       rm -f conftest_data* CONFTEST_DATA* 2>/dev/null
 	    LIBS=$save_LIBS],
            [acx_cv_cfortran_works="error compiling Fortran subroutine"])
          AC_LANG_POP([Fortran])])
@@ -135,10 +141,11 @@ AC_DEFUN([_ACX_CHECK_CFORTRAN_F77],
       CFTSTF = V * 100.0
       RI = 1.0 / V
       END FUNCTION CFTSTF])],
-           [_AC_RUN_LOG([mv "conftest.$ac_objext" "conftest_f.$ac_objext"],
-              [_AS_ECHO_LOG([Renaming Fortran object file.])])
+           [ACX_MV_OBJ([conftest],[conftest_f])
             save_LIBS=$LIBS
             LIBS="conftest_c.$ac_objext conftest_f.$ac_objext $LIBS"
+            AS_CASE([$FC_FPP_FLAG],[-x\ f??-cpp-input],
+              [LIBS="-x none $LIBS"])
             AC_RUN_IFELSE([AC_LANG_PROGRAM(,
 [      REAL RI
       COMMON /CFTSTD/ RI
@@ -184,8 +191,9 @@ AC_DEFUN([_ACX_CHECK_CFORTRAN_F77],
               [acx_cv_cfortran_works=yes],
               [acx_cv_cfortran_works="error"],
               [AC_MSG_NOTICE([Skipping run test for cfortran.h in cross-compilation mode,])
-	       AC_MSG_NOTICE([link test succeeded.])
+	       AC_MSG_NOTICE([cfortran.h link test succeeded for $F77.])
                acx_cv_cfortran_works=yes])
+	       rm -f "conftest_f.$ac_objext" "conftest_f.$OBJEXT"
 	    LIBS=$save_LIBS],
            [acx_cv_cfortran_works="error compiling Fortran subroutine"])
          AC_LANG_POP([Fortran 77])])
@@ -246,10 +254,14 @@ errExit(void)
 FCALLSCSUB0(errExit,ERR_EXIT,err_exit)
 
 ])],
-        [_AC_RUN_LOG([mv "conftest.$ac_objext" "conftest_c.$ac_objext"],
-           [_AS_ECHO_LOG([Renaming C object file.])])
-         AC_PROVIDE_IFELSE([AC_PROG_FC],[_ACX_CHECK_CFORTRAN_FC])
-         AC_PROVIDE_IFELSE([AC_PROG_F77],[_ACX_CHECK_CFORTRAN_F77])
+        [ACX_MV_OBJ([conftest],[conftest_c])
+         AC_PROVIDE_IFELSE([AC_PROG_FC],
+           [AS_IF([test -n "$FC" -a X"$FC" != Xno],
+              [_ACX_CHECK_CFORTRAN_FC],
+              [acx_cv_cfortran_works=${acx_cv_cfortran_works-yes}])])
+         AC_PROVIDE_IFELSE([AC_PROG_F77],
+           [AS_IF([test -n "$F77" -a X"$F77" != Xno AC_PROVIDE_IFELSE([AC_PROG_FC],[-a \( x"$acx_cv_cfortran_works" = xyes -o -z "$FC" -o X"$FC" = Xno \)])],[_ACX_CHECK_CFORTRAN_F77])])
+         rm -f "conftest_c.$ac_objext" "conftest_c.$OBJEXT"
         ],
         [acx_cv_cfortran_works="compiling with cfortran.h failed"])
       AC_LANG_POP([C])
@@ -270,6 +282,6 @@ FCALLSCSUB0(errExit,ERR_EXIT,err_exit)
 dnl
 dnl Local Variables:
 dnl mode: autoconf
-dnl license-project-url: "https://www.dkrz.de/redmine/projects/show/scales-ppm"
+dnl license-project-url: "https://www.dkrz.de/redmine/projects/scales-ppm"
 dnl license-default: "bsd"
 dnl End:

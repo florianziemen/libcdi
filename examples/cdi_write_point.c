@@ -1,19 +1,19 @@
 #include <stdio.h>
 #include "cdi.h"
 
-#define  ngp     1 // Number of gridpoints
-#define  nlev    5 // Number of levels    
-#define  nts     3 // Number of time steps
+#define ngp 1   // Number of gridpoints
+#define nlev 5  // Number of levels
+#define nts 3   // Number of time steps
 
-int main(void)
+int
+main(void)
 {
   int gridID, zaxisID1, zaxisID2, taxisID;
   int vlistID, varID1, varID2, streamID;
   size_t nmiss = 0;
-  double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
+  double levs[nlev] = { 101300, 92500, 85000, 50000, 20000 };
   double var1;
   double var2[nlev];
-
 
   // Create a generic grid without dimensions and coordinates
   gridID = gridCreate(GRID_GENERIC, 1);
@@ -24,7 +24,7 @@ int main(void)
   // Create a pressure level Z-axis
   zaxisID2 = zaxisCreate(ZAXIS_PRESSURE, nlev);
   zaxisDefLevels(zaxisID2, levs);
- 
+
   // Create a variable list
   vlistID = vlistCreate();
 
@@ -44,20 +44,20 @@ int main(void)
 
   // Create a dataset in netCDF format
   streamID = streamOpenWrite("example.nc", CDI_FILETYPE_NC);
-  if ( streamID < 0 )
+  if (streamID < 0)
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID));
-      return(1);
+      return (1);
     }
 
   // Assign the variable list to the dataset
   streamDefVlist(streamID, vlistID);
 
   // Loop over the number of time steps
-  for ( int tsID = 0; tsID < nts; tsID++ )
+  for (int tsID = 0; tsID < nts; tsID++)
     {
       // Set the verification date to 1985-01-01 + tsID
-      taxisDefVdate(taxisID, 19850101+tsID);
+      taxisDefVdate(taxisID, 19850101 + tsID);
       // Set the verification time to 12:00:00
       taxisDefVtime(taxisID, 120000);
       // Define the time step
@@ -65,7 +65,7 @@ int main(void)
 
       // Init var1 and var2
       var1 = 1.1;
-      for ( size_t i = 0; i < nlev; i++ ) var2[i] = 2.2;
+      for (size_t i = 0; i < nlev; i++) var2[i] = 2.2;
 
       // Write var1 and var2
       streamWriteVar(streamID, varID1, &var1, nmiss);

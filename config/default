@@ -41,7 +41,7 @@ case "${HOSTNAME}" in
                     --with-szlib=$HOME/local \
 	            CC=icc CFLAGS="-g -D_REENTRANT -Wall -Wwrite-strings -O3 -march=native -fp-model source"
 	;;
-    bailung*|d133*|d134*)
+    bailung*|d146*)
 	${CONFPATH}configure --prefix=$HOME/local/cdi \
                     --enable-maintainer-mode \
                     --enable-iso-c-interface \
@@ -67,10 +67,10 @@ case "${HOSTNAME}" in
                  --enable-maintainer-mode \
                  --with-szlib=$HOME/local \
                  --with-fdb5=$HOME/src/fdb \
-                 --with-eccodes=$HOME/local/eccodes-2.22.0 \
+                 --with-eccodes=$HOME/local/eccodes-2.27 \
                  --with-netcdf=$HOME/local/netcdf-c-4.9.0"
         PREFIX="--prefix=$HOME/local/cdi"
-        LD_ADD="-Wl,-rpath,$HOME/local/eccodes-2.22.0/lib -Wl,-rpath,$HOME/src/fdb/lib"
+        LD_ADD="-Wl,-rpath,$HOME/local/eccodes-2.27/lib -Wl,-rpath,$HOME/src/fdb/lib"
         if  test "$COMP" = clang ; then
           ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
 	             CC=clang CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3"
@@ -78,13 +78,6 @@ case "${HOSTNAME}" in
           ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
 	             CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3"
         fi;
-	;;
-# x86_64-squeeze-x64-linux
-    thunder*)
-        ${CONFPATH}configure --with-grib_api=/sw/squeeze-x64/grib_api-1.13.0-static-gccsys \
-                    --with-netcdf=/sw/squeeze-x64/netcdf-4.2-static \
-                    --disable-cf-interface \
-	            CC=gcc CFLAGS="-g -Wall -O3" 
 	;;
 # ia64-nec-linux
     ds*)
@@ -123,17 +116,6 @@ case "${HOSTNAME}" in
               LD=/SX/opt/crosskit/inst/bin/sxld AR=/SX/opt/crosskit/inst/bin/sxar \
               RANLIB=echo
 	;;
-# powerpc-ibm-aix6.1.0.0
-    blizzard*)
-        CONFIG_SHELL=/bin/bash /bin/bash \
-                    ${CONFPATH}configure --prefix=$HOME/local \
-                    --with-netcdf=/sw/aix61/netcdf-4.2 \
-                    --with-szlib=/sw/aix61/szip-2.1-threadsafe \
-                    AR="ar -X 64" LDFLAGS="-brtl" FC=xlf2003_r CC=xlc_r \
-                    CFLAGS="-g -O3 -qhot -q64 -qarch=auto -qtune=auto -qlistfmt=html=transforms -DHAVE_MMAP" \
-                    FCFLAGS="-qsuffix=cpp=f90 -qextname" \
-                    SHELL=/bin/bash
-        ;;
     breeze*)
         CDILIBS="--with-eccodes=/sw/jessie-x64/eccodes/eccodes-2.4.1-gccsys \
                  --with-netcdf=/sw/jessie-x64/netcdf-4.3.3.1-gccsys"

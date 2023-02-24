@@ -1,18 +1,19 @@
 #include <stdio.h>
 #include "cdi.h"
 
-int main(void)
+int
+main(void)
 {
-  enum {
-    nlon = 12, // Number of longitudes
-    nlat =  6, // Number of latitudes
-    nlev =  5, // Number of levels
-    nts  =  3, // Number of time steps
+  enum
+  {
+    nlon = 12,  // Number of longitudes
+    nlat = 6,   // Number of latitudes
+    nlev = 5,   // Number of levels
+    nts = 3,    // Number of time steps
   };
   SizeType nmiss = 0;
-  double var1[nlon*nlat];
-  double var2[nlon*nlat*nlev];
-
+  double var1[nlon * nlat];
+  double var2[nlon * nlat * nlev];
 
   // Append a dataset (created by cdi_write)
   int streamID = streamOpenAppend("example.nc");
@@ -22,7 +23,7 @@ int main(void)
       return 1;
     }
 
-  // Get the variable list of the dataset 
+  // Get the variable list of the dataset
   int vlistID = streamInqVlist(streamID);
 
   int numVars = vlistNvars(vlistID);
@@ -36,16 +37,16 @@ int main(void)
   int varID2 = 1;
 
   SizeType varSize1 = gridInqSize(vlistInqVarGrid(vlistID, varID1)) * zaxisInqSize(vlistInqVarZaxis(vlistID, varID1));
-  if (varSize1 != nlon*nlat)
+  if (varSize1 != nlon * nlat)
     {
-      fprintf(stderr, "Unexpected size of variable 1: %ld\n", (long)varSize1);
+      fprintf(stderr, "Unexpected size of variable 1: %ld\n", (long) varSize1);
       return 1;
     }
 
   SizeType varSize2 = gridInqSize(vlistInqVarGrid(vlistID, varID2)) * zaxisInqSize(vlistInqVarZaxis(vlistID, varID2));
-  if (varSize2 != nlon*nlat*nlev)
+  if (varSize2 != nlon * nlat * nlev)
     {
-      fprintf(stderr, "Unexpected size of variable 2: %ld\n", (long)varSize2);
+      fprintf(stderr, "Unexpected size of variable 2: %ld\n", (long) varSize2);
       return 1;
     }
 
@@ -65,8 +66,8 @@ int main(void)
       streamDefTimestep(streamID, nsteps + tsID);
 
       // Init var1 and var2
-      for (size_t i = 0; i < nlon*nlat;      i++) var1[i] = 1.1;
-      for (size_t i = 0; i < nlon*nlat*nlev; i++) var2[i] = 2.2;
+      for (size_t i = 0; i < nlon * nlat; i++) var1[i] = 1.1;
+      for (size_t i = 0; i < nlon * nlat * nlev; i++) var2[i] = 2.2;
 
       // Write var1 and var2
       streamWriteVar(streamID, varID1, var1, nmiss);
