@@ -2928,16 +2928,16 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
           CdiQuery *query = streamptr->query;
           if (query)
             {
-              if (ncvar->gridtype != GRID_UNSTRUCTURED)
-                {
-                  Warning("Query parameter cell is only available for unstructured grids, skipped variable %s!", ncvar->name);
-                  ncvar->varStatus = UndefVar;
-                  continue;
-                }
-
               int numCellidx = cdiQueryNumCellidx(query);
               if (numCellidx > 0)
                 {
+                  if (ncvar->gridtype != GRID_UNSTRUCTURED)
+                    {
+                      Warning("Query parameter cell is only available for unstructured grids, skipped variable %s!", ncvar->name);
+                      ncvar->varStatus = UndefVar;
+                      continue;
+                    }
+
                   size_t start = cdiQueryGetCellidx(query, 0);
                   size_t count = (numCellidx == 2) ? cdiQueryGetCellidx(query, 1) : 1;
                   if ((start + count) <= xsize)
