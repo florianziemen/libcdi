@@ -22,6 +22,7 @@ cdf_def_var_filter(int ncid, int ncvarID, unsigned int id, size_t nparams, const
   int status;
   if ((status = nc_def_var_filter(ncid, ncvarID, id, nparams, params)))
     {
+      Message("filterId=%u  numParams=%zu", id, nparams);
       Error("nc_def_var_filter failed; %s", nc_strerror(status));
     }
 #else
