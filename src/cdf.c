@@ -16,42 +16,7 @@ cdfLibraryVersion(void)
   return nc_inq_libvers();
 }
 
-#ifdef HAVE_H5GET_LIBVERSION
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-  int H5get_libversion(unsigned *, unsigned *, unsigned *);
-#ifdef __cplusplus
-}
-#endif
-#endif
-
-const char *
-hdfLibraryVersion(void)
-{
-#ifdef HAVE_H5GET_LIBVERSION
-  static char hdf_libvers[256];
-  static int linit = 0;
-  if (!linit)
-    {
-      linit = 1;
-      unsigned majnum, minnum, relnum;
-      H5get_libversion(&majnum, &minnum, &relnum);
-#ifdef HAVE_NC4HDF5_THREADSAFE
-      snprintf(hdf_libvers, sizeof(hdf_libvers), "%u.%u.%u threadsafe", majnum, minnum, relnum);
-#else
-      snprintf(hdf_libvers, sizeof(hdf_libvers), "%u.%u.%u", majnum, minnum, relnum);
-#endif
-    }
-
-  return hdf_libvers;
-#else
-  return "library undefined";
-#endif
-}
-
-int CDF_Debug = 0; /* If set to 1, debugging           */
+int CDF_Debug = 0;  // If set to 1, debugging
 
 void
 cdfDebug(int debug)
@@ -88,7 +53,7 @@ has_uri_scheme(const char *uri)
   const char *pos = strstr(uri, "://");
   if (pos)
     {
-      const int len = pos - uri;
+      int len = pos - uri;
       if (strncmp(uri, "file", len) == 0 || strncmp(uri, "https", len) == 0 || strncmp(uri, "s3", len) == 0) return true;
     }
 
@@ -99,7 +64,7 @@ static int
 cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
   int ncid = -1;
-  const int fmode = tolower(*mode);
+  int fmode = tolower(*mode);
   int writemode = NC_CLOBBER;
   int readmode = NC_NOWRITE;
 
@@ -111,7 +76,7 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
         {
         case 'r':
           {
-            const int status = cdf_open(filename, readmode, &ncid);
+            int status = cdf_open(filename, readmode, &ncid);
             if (status > 0 && ncid < 0) ncid = CDI_ESYSTEM;
 #ifdef HAVE_NETCDF4
             else
@@ -192,55 +157,15 @@ cdfOpen(const char *filename, const char *mode, int filetype)
   return fileID;
 }
 
-static int
-cdf4CheckLibVersions(void)
-{
-  int status = 0;
-#ifdef HAVE_NETCDF4
-#ifdef HAVE_H5GET_LIBVERSION
-  static int checked = 0;
-  if (!checked)
-    {
-      checked = 1;
-      unsigned majnum, minnum, relnum;
-
-      sscanf(nc_inq_libvers(), "%u.%u.%u", &majnum, &minnum, &relnum);
-      // printf("netCDF %u.%u.%u\n", majnum, minnum, relnum);
-      const unsigned ncmaxver = 4 * 1000000 + 4 * 1000;
-      const unsigned nclibver = majnum * 1000000 + minnum * 1000 + relnum;
-
-      if (nclibver <= ncmaxver)
-        {
-          H5get_libversion(&majnum, &minnum, &relnum);
-          const unsigned hdf5maxver = 1 * 1000000 + 10 * 1000;
-          const unsigned hdf5libver = majnum * 1000000 + minnum * 1000 + relnum;
-
-          if (hdf5libver >= hdf5maxver)
-            {
-              fprintf(stderr, "NetCDF library 4.4.0 or earlier, combined with libhdf5 1.10.0 or greater not supported!\n");
-              status = 1;
-            }
-        }
-    }
-#endif
-#endif
-  return status;
-}
-
 int
 cdf4Open(const char *filename, const char *mode, int *filetype)
 {
   if (CDF_Debug) Message("Open %s with mode %c", filename, *mode);
 
 #ifdef HAVE_NETCDF4
-  if (cdf4CheckLibVersions() == 0)
-    {
-      const int fileID = cdfOpenFile(filename, mode, filetype);
-      if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
-      return fileID;
-    }
-
-  return CDI_EUFTYPE;
+  int fileID = cdfOpenFile(filename, mode, filetype);
+  if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
+  return fileID;
 #else
   return CDI_ELIBNAVAIL;
 #endif
