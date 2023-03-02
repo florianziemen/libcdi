@@ -7,6 +7,7 @@
 #include <limits.h>
 #include <float.h>
 
+#include "async_worker.h"
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -445,10 +446,9 @@ enum
 };
 
 static void
-cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, bool *outSwapXY, size_t start[cdfSliceNDim],
+cdfGetSliceSlapDescription(stream_t *streamptr, int tsID, int varID, int levelID, bool *outSwapXY, size_t start[cdfSliceNDim],
                            size_t count[cdfSliceNDim])
 {
-  int tsID = streamptr->curTsID;
   int fileId = streamptr->fileID;
   int vlistID = streamptr->vlistID;
   int ncvarid = streamptr->vars[varID].ncvarid;
@@ -710,13 +710,13 @@ cdf_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nm
 }
 
 static void
-cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, size_t *nmiss)
+cdf_read_var_slice_DP(stream_t *streamptr, int tsID, int varID, int levelID, double *data, size_t *nmiss)
 {
-  if (CDI_Debug) Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
+  if (CDI_Debug) Message("streamID=%d  tsID=%d varID=%d  levelID=%d", streamptr->self, tsID, varID, levelID);
 
   bool swapxy = false;
   size_t start[cdfSliceNDim], count[cdfSliceNDim];
-  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, start, count);
+  cdfGetSliceSlapDescription(streamptr, tsID, varID, levelID, &swapxy, start, count);
 
   int vlistID = streamptr->vlistID;
   int gridId = vlistInqVarGrid(vlistID, varID);
@@ -729,13 +729,19 @@ cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, siz
 }
 
 static void
-cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data, size_t *nmiss)
+cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, size_t *nmiss)
 {
-  if (CDI_Debug) Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
+  cdf_read_var_slice_DP(streamptr, streamptr->curTsID, varID, levelID, data, nmiss);
+}
+
+static void
+cdf_read_var_slice_SP(stream_t *streamptr, int tsID, int varID, int levelID, float *data, size_t *nmiss)
+{
+  if (CDI_Debug) Message("streamID=%d  tsID=%d varID=%d  levelID=%d", streamptr->self, tsID, varID, levelID);
 
   bool swapxy = false;
   size_t start[cdfSliceNDim], count[cdfSliceNDim];
-  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, start, count);
+  cdfGetSliceSlapDescription(streamptr, tsID, varID, levelID, &swapxy, start, count);
 
   int vlistID = streamptr->vlistID;
   int gridId = vlistInqVarGrid(vlistID, varID);
@@ -747,6 +753,12 @@ cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data, size
   *nmiss = cdfDoInputDataTransformationSP(vlistID, varID, length, data);
 }
 
+static void
+cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data, size_t *nmiss)
+{
+  cdf_read_var_slice_SP(streamptr, streamptr->curTsID, varID, levelID, data, nmiss);
+}
+
 void
 cdf_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *nmiss)
 {
@@ -756,21 +768,209 @@ cdf_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, voi
     cdfReadVarSliceSP(streamptr, varID, levelID, (float *) data, nmiss);
 }
 
-void
-cdf_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss)
+typedef struct JobArgs
 {
-  if (CDI_Debug) Message("streamID = %d", streamptr->self);
+  stream_t *streamptr;
+  int varID, levelID;
+  int recID, tsID, memtype;
+  void *data;
+  size_t gridsize, nmiss;
+} JobArgs;
 
+static int
+cdf_read_data_async(void *untypedArgs)
+{
+  JobArgs *args = (JobArgs *) untypedArgs;
+
+  if (args->memtype == MEMTYPE_DOUBLE)
+    cdf_read_var_slice_DP(args->streamptr, args->tsID, args->varID, args->levelID, (double *) args->data, &args->nmiss);
+  else
+    cdf_read_var_slice_SP(args->streamptr, args->tsID, args->varID, args->levelID, (float *) args->data, &args->nmiss);
+
+  return 0;
+}
+
+static size_t
+cdf_read_data(stream_t *streamptr, int recID, int memtype, void *data)
+{
   int tsID = streamptr->curTsID;
-  int vrecID = streamptr->tsteps[tsID].curRecID;
-  int recID = streamptr->tsteps[tsID].recIDs[vrecID];
   int varID = streamptr->tsteps[tsID].records[recID].varID;
   int levelID = streamptr->tsteps[tsID].records[recID].levelID;
 
+  size_t nmiss = 0;
   if (memtype == MEMTYPE_DOUBLE)
-    cdfReadVarSliceDP(streamptr, varID, levelID, (double *) data, nmiss);
+    cdf_read_var_slice_DP(streamptr, tsID, varID, levelID, (double *) data, &nmiss);
   else
-    cdfReadVarSliceSP(streamptr, varID, levelID, (float *) data, nmiss);
+    cdf_read_var_slice_SP(streamptr, tsID, varID, levelID, (float *) data, &nmiss);
+
+  return nmiss;
+}
+
+typedef struct JobDescriptor
+{
+  JobArgs args;
+  AsyncJob *job;
+} JobDescriptor;
+
+static JobArgs
+job_args_init(stream_t *streamptr, int tsID, int recID, int memtype, void *data)
+{
+  int varID = streamptr->tsteps[tsID].records[recID].varID;
+  int levelID = streamptr->tsteps[tsID].records[recID].levelID;
+  size_t gridsize = gridInqSize(vlistInqVarGrid(streamptr->vlistID, varID));
+
+  if (!data) data = Malloc(gridsize * ((memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
+
+  return (JobArgs){
+    .streamptr = streamptr,
+    .varID = varID,
+    .levelID = levelID,
+    .recID = recID,
+    .tsID = tsID,
+    .memtype = memtype,
+    .data = data,
+    .gridsize = gridsize,
+    .nmiss = 0,
+  };
+}
+
+static void
+JobDescriptor_startJob(AsyncManager *jobManager, JobDescriptor *me, stream_t *streamptr, int tsID, int recID, int memtype)
+{
+  me->args = job_args_init(streamptr, tsID, recID, memtype, NULL);
+  me->job = AsyncWorker_requestWork(jobManager, cdf_read_data_async, &me->args);
+  if (!me->job) xabort("error while trying to send job to worker thread");
+}
+
+static void
+JobDescriptor_finishJob(AsyncManager *jobManager, JobDescriptor *me, void *data, size_t *nmiss)
+{
+  if (AsyncWorker_wait(jobManager, me->job)) xabort("error executing job in worker thread");
+  memcpy(data, me->args.data, me->args.gridsize * ((me->args.memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
+  *nmiss = me->args.nmiss;
+
+  Free(me->args.data);
+  me->args.recID = -1;  // mark as inactive
+  me->args.tsID = -1;   // mark as inactive
+}
+/*
+static long
+get_global_recId(stream_t *streamptr, int tsID, int recID)
+{
+  const tsteps_t *tsteps = streamptr->tsteps;
+  long globalRecId = recID;
+  if (tsID > 0) globalRecId += tsteps[0].nrecs;
+  if (tsID > 1) globalRecId += tsteps[1].nrecs * (tsID - 1);
+  return globalRecId;
+}
+*/
+static long
+get_max_global_recs(stream_t *streamptr)
+{
+  long maxGlobalRecs = -1;
+  long numSteps = streamptr->ntsteps;
+  if (numSteps > 0)
+    {
+      const tsteps_t *tsteps = streamptr->tsteps;
+      maxGlobalRecs = tsteps[0].nrecs;
+      if (numSteps > 1) maxGlobalRecs += tsteps[1].nrecs * (numSteps - 1);
+    }
+  return maxGlobalRecs;
+}
+
+static void
+get_local_step_and_recId(stream_t *streamptr, long globalRecId, int *tsID, int *recID)
+{
+  int localTsId = 0;
+  long numSteps = streamptr->ntsteps;
+  const tsteps_t *tsteps = streamptr->tsteps;
+  if (numSteps > 0 && globalRecId >= tsteps[0].nrecs)
+    {
+      localTsId++;
+      globalRecId -= tsteps[0].nrecs;
+    }
+  while (globalRecId >= tsteps[1].nrecs)
+    {
+      localTsId++;
+      globalRecId -= tsteps[1].nrecs;
+    }
+
+  *tsID = localTsId;
+  *recID = globalRecId;
+}
+
+static void
+read_next_record(AsyncManager *jobManager, JobDescriptor *jd, stream_t *streamptr, int memtype)
+{
+  int tsId = -1, recId = -1;
+  get_local_step_and_recId(streamptr, streamptr->nextGlobalRecId, &tsId, &recId);
+  int xRecId = streamptr->tsteps[tsId].recIDs[recId];
+  JobDescriptor_startJob(jobManager, jd, streamptr, tsId, xRecId, memtype);
+  streamptr->nextGlobalRecId++;
+}
+
+static void
+cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, size_t *nmiss)
+{
+  bool readAsync = true;
+  bool jobFound = false;
+
+  int workerCount = streamptr->numWorker;
+  if (readAsync && workerCount > 0)
+    {
+      int tsID = streamptr->curTsID;
+      long maxGlobalRecs = get_max_global_recs(streamptr);
+      // long globalRecId = get_global_recId(streamptr, streamptr->curTsID, recID);
+      if (maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
+
+      if (workerCount > maxGlobalRecs) workerCount = maxGlobalRecs;
+
+      AsyncManager *jobManager = (AsyncManager *) streamptr->jobManager;
+      JobDescriptor *jobs = (JobDescriptor *) streamptr->jobs;
+
+      // if this is the first call, init and start worker threads
+      if (!jobs)
+        {
+          jobs = (JobDescriptor *) malloc(workerCount * sizeof(*jobs));
+          streamptr->jobs = jobs;
+          for (int i = 0; i < workerCount; i++) jobs[i].args.recID = -1;
+          for (int i = 0; i < workerCount; i++) jobs[i].args.tsID = -1;
+          if (AsyncWorker_init(&jobManager, workerCount)) xabort("error while trying to start worker threads");
+          streamptr->jobManager = jobManager;
+
+          // Start as many new jobs as possible.
+          for (int i = 0; streamptr->nextGlobalRecId < maxGlobalRecs && i < workerCount; i++)
+            {
+              JobDescriptor *jd = &jobs[i];
+              if (jd->args.recID < 0 && jd->args.tsID < 0) read_next_record(jobManager, jd, streamptr, memtype);
+            }
+        }
+
+      // search for a job descriptor with the given tsID and recID, and use its results if it exists
+      for (int i = 0; !jobFound && i < workerCount; i++)
+        {
+          JobDescriptor *jd = &jobs[i];
+          if (jd->args.recID == recID && jd->args.tsID == tsID)
+            {
+              jobFound = true;
+              JobDescriptor_finishJob(jobManager, jd, data, nmiss);
+              if (streamptr->nextGlobalRecId < maxGlobalRecs) read_next_record(jobManager, jd, streamptr, memtype);
+            }
+        }
+    }
+
+  // perform the work synchronously if we didn't start a job for it yet
+  if (!jobFound) *nmiss = cdf_read_data(streamptr, recID, memtype, data);
+}
+
+void
+cdf_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss)
+{
+  int tsID = streamptr->curTsID;
+  int vrecID = streamptr->tsteps[tsID].curRecID;
+  int recID = streamptr->tsteps[tsID].recIDs[vrecID];
+
+  cdf_read_next_record(streamptr, recID, memtype, data, nmiss);
 }
 
 //----------------------------------------------------------------------------
@@ -789,7 +989,7 @@ cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varType, 
 
   bool swapxy = false;
   size_t start[cdfSliceNDim], count[cdfSliceNDim];
-  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, start, count);
+  cdfGetSliceSlapDescription(streamptr, streamptr->curTsID, varID, levelID, &swapxy, start, count);
 
   int gridId = vlistInqVarGrid(vlistID, varID);
   size_t gridsize = gridInqSize(gridId);
@@ -820,7 +1020,7 @@ cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varType, 
 
   bool swapxy = false;
   size_t start[cdfSliceNDim], count[cdfSliceNDim];
-  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, start, count);
+  cdfGetSliceSlapDescription(streamptr, streamptr->curTsID, varID, levelID, &swapxy, start, count);
 
   int gridId = vlistInqVarGrid(vlistID, varID);
   size_t gridsize = gridInqSize(gridId);

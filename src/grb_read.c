@@ -286,7 +286,6 @@ grb_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
       JobDescriptor *jobs = (JobDescriptor *) streamptr->jobs;
 
       // if this is the first call, init and start worker threads
-
       if (!jobs)
         {
           jobs = (JobDescriptor *) malloc(workerCount * sizeof(*jobs));
