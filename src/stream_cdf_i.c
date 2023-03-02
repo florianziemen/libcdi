@@ -2931,9 +2931,10 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
               int numCellidx = cdiQueryNumCellidx(query);
               if (numCellidx > 0)
                 {
-                  if (ncvar->gridtype != GRID_UNSTRUCTURED)
+                  // if (ncvar->gridtype != GRID_UNSTRUCTURED)
+                  if (xdimid != CDI_UNDEFID && ydimid != CDI_UNDEFID)
                     {
-                      Warning("Query parameter cell is only available for unstructured grids, skipped variable %s!", ncvar->name);
+                      Warning("Query parameter cell is only available for 1D grids, skipped variable %s!", ncvar->name);
                       ncvar->varStatus = UndefVar;
                       continue;
                     }

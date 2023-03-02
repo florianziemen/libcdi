@@ -1,3 +1,7 @@
+2023-03-02  Uwe Schulzweida
+
+	* query cells: changed to all 1D grids
+
 2023-02-23  Uwe Schulzweida
 
         * using CGRIBEX library version 2.1.0
