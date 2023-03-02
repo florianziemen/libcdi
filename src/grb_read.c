@@ -103,25 +103,25 @@ grib1_unzip_record(void *gribbuffer, size_t *gribsize)
   return zip;
 }
 
-typedef struct DecodeArgs
+typedef struct JobArgs
 {
   int recID, tsID, *outZip, filetype, memtype, unreduced;
   void *cgribexp, *gribbuffer, *data;
   size_t recsize, gridsize, nmiss;
   double missval;
-} DecodeArgs;
+} JobArgs;
 
 static int
 grb_decode_record(void *untypedArgs)
 {
-  DecodeArgs *args = (DecodeArgs *) untypedArgs;
+  JobArgs *args = (JobArgs *) untypedArgs;
   *args->outZip = grib1_unzip_record(args->gribbuffer, &args->recsize);
   grb_decode(args->filetype, args->memtype, args->cgribexp, args->gribbuffer, args->recsize, args->data, args->gridsize,
              args->unreduced, &args->nmiss, args->missval);
   return 0;
 }
 
-static DecodeArgs
+static JobArgs
 grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memtype, void *gribbuffer, void *data, bool resetFilePos)
 {
   int vlistID = streamptr->vlistID;
@@ -160,7 +160,7 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memtype, void *g
       if (!resetFilePos) streamptr->numvals += gridsize;
     }
 
-  return (DecodeArgs){
+  return (JobArgs){
     .recID = recID,
     .tsID = tsID,
     .outZip = &streamptr->tsteps[tsID].records[recID].zip,
@@ -180,14 +180,14 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memtype, void *g
 static size_t
 grb_read_and_decode_record(stream_t *streamptr, int recID, int memtype, void *data, bool resetFilePos)
 {
-  DecodeArgs args = grb_read_raw_data(streamptr, streamptr->curTsID, recID, memtype, streamptr->record->buffer, data, resetFilePos);
+  JobArgs args = grb_read_raw_data(streamptr, streamptr->curTsID, recID, memtype, streamptr->record->buffer, data, resetFilePos);
   grb_decode_record(&args);
   return args.nmiss;
 }
 
 typedef struct JobDescriptor
 {
-  DecodeArgs args;
+  JobArgs args;
   AsyncJob *job;
 } JobDescriptor;
 
