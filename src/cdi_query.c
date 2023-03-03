@@ -179,6 +179,24 @@ cdiQueryClone(const CdiQuery *query)
   return queryOut;
 }
 
+static void
+print_list_compact_int(int n, const int *list)
+{
+  for (int i = 0; i < n; ++i)
+    {
+      int value = list[i];
+      printf(" %d", value);
+      if ((i + 2) < n && (value + 1) == list[i + 1] && (value + 2) == list[i + 2])
+        {
+          printf("/to/");
+          int last = list[++i];
+          while ((i + 1) < n && (last + 1) == list[i + 1]) last = list[++i];
+          printf("%d", last);
+        }
+    }
+  printf("\n");
+}
+
 void
 cdiQueryPrint(const CdiQuery *query)
 {
@@ -201,15 +219,13 @@ cdiQueryPrint(const CdiQuery *query)
       if (query->numLevidx)
         {
           printf("Levidx:");
-          for (int i = 0; i < query->numLevidx; ++i) printf(" %d", query->levidx[i]);
-          printf("\n");
+          print_list_compact_int(query->numLevidx, query->levidx);
         }
 
       if (query->numStepidx)
         {
           printf("Stepidx:");
-          for (int i = 0; i < query->numStepidx; ++i) printf(" %d", query->stepidx[i]);
-          printf("\n");
+          print_list_compact_int(query->numStepidx, query->stepidx);
         }
     }
 }
