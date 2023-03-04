@@ -342,7 +342,7 @@ limit_string_length(char *string, size_t maxlen)
 }
 
 static void
-printShortinfo(int streamID, int vlistID, int vardis)
+print_short_info(int streamID, int vlistID, int vardis)
 {
   char tmpname[CDI_MAX_NAME];
   char varname[CDI_MAX_NAME];
@@ -981,7 +981,7 @@ main(int argc, char *argv[])
       if (Shortinfo)
         {
           Info = 0;
-          printShortinfo(streamID1, vlistID1, Vardis);
+          print_short_info(streamID1, vlistID1, Vardis);
         }
 
       int tsID = 0;

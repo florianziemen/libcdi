@@ -82,8 +82,14 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
             else
               {
                 int format = -1;
-                (void) nc_inq_format(ncid, &format);
-                if (format == NC_FORMAT_NETCDF4_CLASSIC) *filetype = CDI_FILETYPE_NC4C;
+                status = nc_inq_format(ncid, &format);
+                if (status == NC_NOERR && format == NC_FORMAT_NETCDF4_CLASSIC) *filetype = CDI_FILETYPE_NC4C;
+
+#ifdef NC_FORMATX_NCZARR
+                int modeNC;
+                status = nc_inq_format_extended(ncid, &format, &modeNC);
+                if (status == NC_NOERR && format == NC_FORMATX_NCZARR) *filetype = CDI_FILETYPE_NCZARR;
+#endif
               }
 #endif
           }
