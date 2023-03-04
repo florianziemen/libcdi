@@ -82,7 +82,7 @@ cdiGetFiletype(const char *uri, int *byteorder)
     {
     case CDI_PROTOCOL_ACROSS: return CDI_FILETYPE_GRB2;
     case CDI_PROTOCOL_FDB:    return CDI_FILETYPE_UNDEF;
-    case CDI_PROTOCOL_OTHER:  return CDI_FILETYPE_NC;  // support for NetCDF remote types and ESDM
+    case CDI_PROTOCOL_OTHER:  return CDI_FILETYPE_NC4;  // support for NetCDF remote types and ESDM
     case CDI_PROTOCOL_FILE:
       // handled below;
       break;
