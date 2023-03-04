@@ -81,6 +81,44 @@ cdf_open_read(const char *filename, int *filetype)
 #endif
     }
 #endif
+
+  return ncid;
+}
+
+static int
+cdf_open_write(const char *filename, int *filetype)
+{
+  int ncid = -1;
+  int writemode = NC_CLOBBER;
+
+#ifdef NC_64BIT_OFFSET
+  if (*filetype == CDI_FILETYPE_NC2) writemode |= NC_64BIT_OFFSET;
+#endif
+#ifdef NC_64BIT_DATA
+  if (*filetype == CDI_FILETYPE_NC5) writemode |= NC_64BIT_DATA;
+#endif
+#ifdef HAVE_NETCDF4
+  if (*filetype == CDI_FILETYPE_NC4C) writemode |= (NC_NETCDF4 | NC_CLASSIC_MODEL);
+  if (*filetype == CDI_FILETYPE_NC4) writemode |= NC_NETCDF4;
+  if (*filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
+#endif
+  if (*filetype == CDI_FILETYPE_NCZARR)
+    {
+      if (!has_uri_scheme(filename))
+        {
+          fprintf(stderr, "URI scheme is missing in NCZarr path!\n");
+          return CDI_EINVAL;
+        }
+
+      cdf_create(filename, writemode, &ncid);
+    }
+  else
+    {
+      if (has_uri_scheme(filename)) fprintf(stderr, "URI scheme defined for non NCZarr Data Model!\n");
+
+      cdf__create(filename, writemode, &ncid);
+    }
+
   return ncid;
 }
 
@@ -88,48 +126,19 @@ static int
 cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
   int ncid = -1;
-  int fmode = tolower(*mode);
-  int writemode = NC_CLOBBER;
-  int readmode = NC_NOWRITE;
 
   if (filename == NULL)
-    ncid = CDI_EINVAL;
+    {
+      ncid = CDI_EINVAL;
+    }
   else
     {
+      int fmode = tolower(*mode);
       switch (fmode)
         {
-        case 'r':
-          ncid = cdf_open_read(filename, filetype);
-          break;
+        case 'r': ncid = cdf_open_read(filename, filetype); break;
         case 'w':
-#ifdef NC_64BIT_OFFSET
-          if (*filetype == CDI_FILETYPE_NC2) writemode |= NC_64BIT_OFFSET;
-#endif
-#ifdef NC_64BIT_DATA
-          if (*filetype == CDI_FILETYPE_NC5) writemode |= NC_64BIT_DATA;
-#endif
-#ifdef HAVE_NETCDF4
-          if (*filetype == CDI_FILETYPE_NC4C) writemode |= (NC_NETCDF4 | NC_CLASSIC_MODEL);
-          if (*filetype == CDI_FILETYPE_NC4) writemode |= NC_NETCDF4;
-          if (*filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
-#endif
-          if (*filetype == CDI_FILETYPE_NCZARR)
-            {
-              if (!has_uri_scheme(filename))
-                {
-                  fprintf(stderr, "URI scheme is missing in NCZarr path!\n");
-                  return CDI_EINVAL;
-                }
-
-              cdf_create(filename, writemode, &ncid);
-            }
-          else
-            {
-              if (has_uri_scheme(filename)) fprintf(stderr, "URI scheme defined for non NCZarr Data Model!\n");
-
-              cdf__create(filename, writemode, &ncid);
-            }
-
+          ncid = cdf_open_write(filename, filetype);
           if (CDI_Version_Info) cdfComment(ncid);
           cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.6");
           break;
