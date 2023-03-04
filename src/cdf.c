@@ -61,6 +61,30 @@ has_uri_scheme(const char *uri)
 }
 
 static int
+cdf_open_read(const char *filename, int *filetype)
+{
+  int ncid = -1;
+  int readmode = NC_NOWRITE;
+  int status = cdf_open(filename, readmode, &ncid);
+  if (status > 0 && ncid < 0) ncid = CDI_ESYSTEM;
+#ifdef HAVE_NETCDF4
+  else
+    {
+      int format = -1;
+      status = nc_inq_format(ncid, &format);
+      if (status == NC_NOERR && format == NC_FORMAT_NETCDF4_CLASSIC) *filetype = CDI_FILETYPE_NC4C;
+
+#ifdef NC_FORMATX_NCZARR
+      int modeNC;
+      status = nc_inq_format_extended(ncid, &format, &modeNC);
+      if (status == NC_NOERR && format == NC_FORMATX_NCZARR) *filetype = CDI_FILETYPE_NCZARR;
+#endif
+    }
+#endif
+  return ncid;
+}
+
+static int
 cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
   int ncid = -1;
@@ -75,24 +99,7 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
       switch (fmode)
         {
         case 'r':
-          {
-            int status = cdf_open(filename, readmode, &ncid);
-            if (status > 0 && ncid < 0) ncid = CDI_ESYSTEM;
-#ifdef HAVE_NETCDF4
-            else
-              {
-                int format = -1;
-                status = nc_inq_format(ncid, &format);
-                if (status == NC_NOERR && format == NC_FORMAT_NETCDF4_CLASSIC) *filetype = CDI_FILETYPE_NC4C;
-
-#ifdef NC_FORMATX_NCZARR
-                int modeNC;
-                status = nc_inq_format_extended(ncid, &format, &modeNC);
-                if (status == NC_NOERR && format == NC_FORMATX_NCZARR) *filetype = CDI_FILETYPE_NCZARR;
-#endif
-              }
-#endif
-          }
+          ncid = cdf_open_read(filename, filetype);
           break;
         case 'w':
 #ifdef NC_64BIT_OFFSET
