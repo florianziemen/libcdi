@@ -242,6 +242,7 @@ streamDefNumWorker(int streamID, int numWorker)
               (void) cdiInqTimeSize(streamID);
               streamptr->maxGlobalRecs = get_max_global_recs(streamptr);
             }
+#ifdef HAVE_LIBNETCDF
           else if (filetype == CDI_FILETYPE_NCZARR)
             {
               streamptr->maxGlobalRecs = get_max_global_recs(streamptr);
@@ -249,6 +250,7 @@ streamDefNumWorker(int streamID, int numWorker)
               if (numWorker > streamptr->maxGlobalRecs) numWorker = streamptr->maxGlobalRecs;
               if (streamptr->chunkSizeTdim > 1 && numWorker > streamptr->nvars) numWorker = streamptr->nvars;
             }
+#endif
           else
             {
               numWorker = 0;
