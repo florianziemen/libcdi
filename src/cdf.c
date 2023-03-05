@@ -139,8 +139,11 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
         case 'r': ncid = cdf_open_read(filename, filetype); break;
         case 'w':
           ncid = cdf_open_write(filename, filetype);
-          if (CDI_Version_Info) cdfComment(ncid);
-          cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.6");
+          if (ncid != CDI_EINVAL)
+            {
+              if (CDI_Version_Info) cdfComment(ncid);
+              cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.6");
+            }
           break;
         case 'a': cdf_open(filename, NC_WRITE, &ncid); break;
         default: ncid = CDI_EINVAL;

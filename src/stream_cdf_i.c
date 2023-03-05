@@ -1535,6 +1535,32 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
 }
 
 static void
+cdf_set_chunk_info(stream_t *streamptr, int nvars, ncvar_t *ncvars)
+{
+  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+    {
+      ncvar_t *ncvar = &ncvars[ncvarid];
+      if (ncvar->varStatus == DataVar)
+        {
+          int ndims = ncvar->ndims;
+          ncvar->isChunked = true;
+          for (int i = 0; i < ndims; ++i)
+            {
+              size_t chunkSize = ncvar->chunks[i];
+              if (chunkSize > 1)
+                {
+                  int dimType = ncvar->dimtype[i];
+                  // clang-format off
+                  if      (dimType == T_AXIS && chunkSize > streamptr->chunkSizeTdim) streamptr->chunkSizeTdim = chunkSize;
+                  else if (dimType == Z_AXIS && chunkSize > streamptr->chunkSizeZdim) streamptr->chunkSizeZdim = chunkSize;
+                  // clang-format on
+                }
+            }
+        }
+    }
+}
+
+static void
 cdfVerifyVarAttr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
   nc_type atttype;
@@ -4562,15 +4588,15 @@ cdfInqContents(stream_t *streamptr)
   cdfVerifyVars(nvars, ncvars, ncdims);
 
   // select vars
-  int nvars_data = 0;
+  int nvarsData = 0;
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
-    if (ncvars[ncvarid].varStatus == DataVar) nvars_data++;
+    if (ncvars[ncvarid].varStatus == DataVar) nvarsData++;
 
   if (CDI_Debug) Message("time varid = %d", streamptr->basetime.ncvarid);
   if (CDI_Debug) Message("ntsteps = %zu", ntsteps);
-  if (CDI_Debug) Message("nvars_data = %d", nvars_data);
+  if (CDI_Debug) Message("nvarsData = %d", nvarsData);
 
-  if (nvars_data == 0)
+  if (nvarsData == 0)
     {
       streamptr->ntsteps = 0;
       Warning("No data arrays found!");
@@ -4580,7 +4606,9 @@ cdfInqContents(stream_t *streamptr)
   if (ntsteps == 0 && streamptr->basetime.ncdimid == CDI_UNDEFID && streamptr->basetime.ncvarid != CDI_UNDEFID) ntsteps = 1;
 
   // define all data variables
-  cdf_define_all_vars(streamptr, vlistID, instID, modelID, nvars_data, nvars, ncvars, ncdims, timedimid);
+  cdf_define_all_vars(streamptr, vlistID, instID, modelID, nvarsData, nvars, ncvars, ncdims, timedimid);
+
+  cdf_set_chunk_info(streamptr, nvars, ncvars);
 
   // time varID
   int nctimevarid = streamptr->basetime.ncvarid;

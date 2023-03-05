@@ -293,6 +293,8 @@ typedef struct
   int ncDimID[MAX_DIMS_PS];
   size_t ncDimLen[MAX_DIMS_PS];
   VCT vct;
+  size_t chunkSizeTdim;
+  size_t chunkSizeZdim;
 #endif
   int globalatts;
   int localatts;

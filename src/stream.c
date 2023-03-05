@@ -999,6 +999,9 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->vct.mlev = 0;
   streamptr->vct.ilevID = CDI_UNDEFID;
   streamptr->vct.mlevID = CDI_UNDEFID;
+
+  streamptr->chunkSizeTdim = 0;
+  streamptr->chunkSizeZdim = 0;
 #endif
 
   streamptr->gribContainers = NULL;
