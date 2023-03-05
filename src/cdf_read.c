@@ -912,7 +912,7 @@ read_next_record(AsyncManager *jobManager, JobDescriptor *jd, stream_t *streampt
 static void
 cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, size_t *nmiss)
 {
-  bool readAsync = true;
+  bool readAsync = (streamptr->chunkSizeZdim <= 1);
   bool jobFound = false;
 
   int workerCount = streamptr->numWorker;
@@ -924,6 +924,9 @@ cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
       if (maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
 
       if (workerCount > maxGlobalRecs) workerCount = maxGlobalRecs;
+      if (streamptr->chunkSizeTdim > 1 && workerCount > streamptr->nvars) workerCount = streamptr->nvars;
+
+      if (CDI_Debug) Message("Number of asyncron worker: %d", workerCount);
 
       AsyncManager *jobManager = (AsyncManager *) streamptr->jobManager;
       JobDescriptor *jobs = (JobDescriptor *) streamptr->jobs;
