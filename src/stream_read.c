@@ -34,8 +34,7 @@ cdiStreamReadVar(int streamID, int varID, int memtype, void *data, size_t *nmiss
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2: grb_read_var(streamptr, varID, memtype, data, nmiss); break;
+    case CDI_FILETYPE_GRIB: grb_read_var(streamptr, varID, memtype, data, nmiss); break;
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV: srvReadVarDP(streamptr, varID, (double *) data, nmiss); break;
@@ -137,8 +136,7 @@ cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, void *d
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2: grb_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss); break;
+    case CDI_FILETYPE_GRIB: grb_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss); break;
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV: srvReadVarSliceDP(streamptr, varID, levelID, (double *) data, nmiss); break;
@@ -237,8 +235,7 @@ stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
   switch (cdiBaseFiletype(streamptr->filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2: grb_read_record(streamptr, memtype, data, nmiss); break;
+    case CDI_FILETYPE_GRIB: grb_read_record(streamptr, memtype, data, nmiss); break;
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV: srv_read_record(streamptr, memtype, data, nmiss); break;

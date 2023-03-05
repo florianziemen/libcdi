@@ -213,17 +213,50 @@ cdiInqTimeSize(int streamID)
   return ntsteps;
 }
 
+static long
+get_max_global_recs(stream_t *streamptr)
+{
+  long maxGlobalRecs = -1;
+  long numSteps = streamptr->ntsteps;
+  if (numSteps > 0)
+    {
+      const tsteps_t *tsteps = streamptr->tsteps;
+      maxGlobalRecs = tsteps[0].nrecs;
+      if (numSteps > 1) maxGlobalRecs += tsteps[1].nrecs * (numSteps - 1);
+    }
+  return maxGlobalRecs;
+}
+
 void
 streamDefNumWorker(int streamID, int numWorker)
 {
   if (numWorker > 0)
     {
       stream_t *streamptr = stream_to_pointer(streamID);
-      streamptr->numWorker = numWorker;
-
       int filetype = streamptr->filetype;
-      bool filetypeIsGrib = (filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_GRB2);
-      if (streamptr->filemode == 'r' && filetypeIsGrib) (void) cdiInqTimeSize(streamID);
+
+      if (streamptr->filemode == 'r')
+        {
+          if (cdiBaseFiletype(filetype) == CDI_FILETYPE_GRIB)
+            {
+              (void) cdiInqTimeSize(streamID);
+              streamptr->maxGlobalRecs = get_max_global_recs(streamptr);
+            }
+          else if (filetype == CDI_FILETYPE_NCZARR)
+            {
+              streamptr->maxGlobalRecs = get_max_global_recs(streamptr);
+              if (streamptr->maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
+              if (numWorker > streamptr->maxGlobalRecs) numWorker = streamptr->maxGlobalRecs;
+              if (streamptr->chunkSizeTdim > 1 && numWorker > streamptr->nvars) numWorker = streamptr->nvars;
+            }
+          else
+            {
+              numWorker = 0;
+            }
+
+          streamptr->numWorker = numWorker;
+          if (CDI_Debug) Message("Number of asynchronous worker: %d", numWorker);
+        }
     }
 }
 
@@ -321,8 +354,7 @@ streamFilesuffix(int filetype)
 
   switch (cdiBaseFiletype(filetype))
     {
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2: return grbSuffix;
+    case CDI_FILETYPE_GRIB: return grbSuffix;
     case CDI_FILETYPE_SRV: return srvSuffix;
     case CDI_FILETYPE_EXT: return extSuffix;
     case CDI_FILETYPE_IEG: return iegSuffix;
@@ -347,8 +379,7 @@ cdiInqContents(stream_t *streamptr)
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2:
+    case CDI_FILETYPE_GRIB:
       {
         switch (streamptr->protocol)
           {
@@ -1003,6 +1034,7 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->chunkSizeTdim = 0;
   streamptr->chunkSizeZdim = 0;
 #endif
+  streamptr->maxGlobalRecs = CDI_UNDEFID;
 
   streamptr->gribContainers = NULL;
 
@@ -1076,21 +1108,21 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
   switch (cdiBaseFiletype(filetype))
     {
 #if defined(HAVE_LIBGRIB) && (defined(HAVE_LIBCGRIBEX) || defined(HAVE_LIBGRIB_API))
-    case CDI_FILETYPE_GRB:
-      {
-        gribClose(fileID);
-        if (recordBufIsToBeDeleted) gribContainersDelete(streamptr);
+    case CDI_FILETYPE_GRIB:
+      if (filetype == CDI_FILETYPE_GRB)
+        {
+          gribClose(fileID);
+          if (recordBufIsToBeDeleted) gribContainersDelete(streamptr);
 #ifdef HAVE_LIBCGRIBEX
-        if (recordBufIsToBeDeleted) cgribexDelete(streamptr->record->objectp);
+          if (recordBufIsToBeDeleted) cgribexDelete(streamptr->record->objectp);
 #endif
-        break;
-      }
-    case CDI_FILETYPE_GRB2:
-      {
-        gribClose(fileID);
-        if (recordBufIsToBeDeleted) gribContainersDelete(streamptr);
-        break;
-      }
+        }
+      else if (filetype == CDI_FILETYPE_GRB2)
+        {
+          gribClose(fileID);
+          if (recordBufIsToBeDeleted) gribContainersDelete(streamptr);
+        }
+      break;
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
@@ -1448,8 +1480,7 @@ streamInqTimestep(int streamID, int tsID)
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2:
+    case CDI_FILETYPE_GRIB:
       {
         switch (streamptr->protocol)
           {
@@ -1729,8 +1760,7 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
           break;
 #endif
 #ifdef HAVE_LIBGRIB
-        case CDI_FILETYPE_GRB:
-        case CDI_FILETYPE_GRB2: gribContainersNew(streamptr); break;
+        case CDI_FILETYPE_GRIB: gribContainersNew(streamptr); break;
 #endif
         default:;
         }

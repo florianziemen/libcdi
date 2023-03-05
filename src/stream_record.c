@@ -178,8 +178,7 @@ streamDefRecord(int streamID, int varID, int levelID)
   switch (cdiBaseFiletype(streamptr->filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2: grbDefRecord(streamptr); break;
+    case CDI_FILETYPE_GRIB: grbDefRecord(streamptr); break;
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV: srvDefRecord(streamptr); break;
@@ -214,8 +213,7 @@ streamCopyRecord(int streamID2, int streamID1)
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2: grbCopyRecord(streamptr2, streamptr1); break;
+    case CDI_FILETYPE_GRIB: grbCopyRecord(streamptr2, streamptr1); break;
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV: srvCopyRecord(streamptr2, streamptr1); break;

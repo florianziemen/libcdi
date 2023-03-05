@@ -1582,8 +1582,7 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
 
     switch (cdiBaseFiletype(filetype))
       {
-      case CDI_FILETYPE_GRB:
-      case CDI_FILETYPE_GRB2: writeGribStream(streamIdx, map, &data, &currentDataBufSize, conf); break;
+      case CDI_FILETYPE_GRIB: writeGribStream(streamIdx, map, &data, &currentDataBufSize, conf); break;
 #ifdef HAVE_LIBNETCDF
       case CDI_FILETYPE_NETCDF: writeNetCDFStream(streamIdx, map, &data, &currentDataBufSize, conf); break;
 #endif

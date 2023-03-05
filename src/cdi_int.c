@@ -541,6 +541,8 @@ cdiBaseFiletype(int filetype)
 {
   switch (filetype)
     {
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2: return CDI_FILETYPE_GRIB;
     case CDI_FILETYPE_NC:
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:

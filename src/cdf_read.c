@@ -864,19 +864,6 @@ get_global_recId(stream_t *streamptr, int tsID, int recID)
   return globalRecId;
 }
 */
-static long
-get_max_global_recs(stream_t *streamptr)
-{
-  long maxGlobalRecs = -1;
-  long numSteps = streamptr->ntsteps;
-  if (numSteps > 0)
-    {
-      const tsteps_t *tsteps = streamptr->tsteps;
-      maxGlobalRecs = tsteps[0].nrecs;
-      if (numSteps > 1) maxGlobalRecs += tsteps[1].nrecs * (numSteps - 1);
-    }
-  return maxGlobalRecs;
-}
 
 static void
 get_local_step_and_recId(stream_t *streamptr, long globalRecId, int *tsID, int *recID)
@@ -919,14 +906,6 @@ cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
   if (readAsync && workerCount > 0)
     {
       int tsID = streamptr->curTsID;
-      long maxGlobalRecs = get_max_global_recs(streamptr);
-      // long globalRecId = get_global_recId(streamptr, streamptr->curTsID, recID);
-      if (maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
-
-      if (workerCount > maxGlobalRecs) workerCount = maxGlobalRecs;
-      if (streamptr->chunkSizeTdim > 1 && workerCount > streamptr->nvars) workerCount = streamptr->nvars;
-
-      if (CDI_Debug) Message("Number of asyncron worker: %d", workerCount);
 
       AsyncManager *jobManager = (AsyncManager *) streamptr->jobManager;
       JobDescriptor *jobs = (JobDescriptor *) streamptr->jobs;
@@ -942,7 +921,7 @@ cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
           streamptr->jobManager = jobManager;
 
           // Start as many new jobs as possible.
-          for (int i = 0; streamptr->nextGlobalRecId < maxGlobalRecs && i < workerCount; i++)
+          for (int i = 0; streamptr->nextGlobalRecId < streamptr->maxGlobalRecs && i < workerCount; i++)
             {
               JobDescriptor *jd = &jobs[i];
               if (jd->args.recID < 0 && jd->args.tsID < 0) read_next_record(jobManager, jd, streamptr, memtype);
@@ -957,7 +936,7 @@ cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
             {
               jobFound = true;
               JobDescriptor_finishJob(jobManager, jd, data, nmiss);
-              if (streamptr->nextGlobalRecId < maxGlobalRecs) read_next_record(jobManager, jd, streamptr, memtype);
+              if (streamptr->nextGlobalRecId < streamptr->maxGlobalRecs) read_next_record(jobManager, jd, streamptr, memtype);
             }
         }
     }
@@ -1062,8 +1041,7 @@ cdiStreamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2:
+    case CDI_FILETYPE_GRIB:
       {
         grb_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
         break;
@@ -1150,8 +1128,7 @@ cdiStreamReadVarPart(int streamID, int varID, int varType, int start, size_t siz
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2:
+    case CDI_FILETYPE_GRIB:
       {
         grb_read_var(streamptr, varID, memtype, data, nmiss);
         break;

@@ -296,6 +296,7 @@ typedef struct
   size_t chunkSizeTdim;
   size_t chunkSizeZdim;
 #endif
+  long maxGlobalRecs;
   int globalatts;
   int localatts;
   int unreduced;
