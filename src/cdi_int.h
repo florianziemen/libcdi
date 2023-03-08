@@ -375,6 +375,7 @@ extern int CDI_Default_Calendar;
 // extern int cdiNcMissingValue;
 extern int CDI_Netcdf_Chunksizehint;
 extern int CDI_ChunkType;
+extern int CDI_Test;
 extern int CDI_Split_Ltype105;
 extern int cdiDataUnreduced;
 extern int cdiSortName;

@@ -40,6 +40,7 @@ int CDI_Read_Cell_Corners = 1;
 int CDI_CMOR_Mode = 0;
 int CDI_Reduce_Dim = 0;
 int CDI_Shuffle = 0;
+int CDI_Test = 0;
 size_t CDI_Netcdf_Hdr_Pad = 0UL;
 size_t CDI_Chunk_Cache = 0UL;
 size_t CDI_Chunk_Cache_Max = 0UL;
@@ -365,6 +366,9 @@ cdiInitialize(void)
 
       value = cdi_getenv_int("CDI_CHUNK_CACHE_MAX");
       if (value >= 0) CDI_Chunk_Cache_Max = (size_t) value;
+
+      value = cdi_getenv_int("CDI_TEST");
+      if (value >= 0) CDI_Test = (size_t) value;
 
       envstr = getenv("CDI_GRIB1_TEMPLATE");
       if (envstr) CDI_GRIB1_Template = envstr;
