@@ -899,11 +899,10 @@ read_next_record(AsyncManager *jobManager, JobDescriptor *jd, stream_t *streampt
 static void
 cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, size_t *nmiss)
 {
-  bool readAsync = (streamptr->chunkSizeZdim <= 1);
   bool jobFound = false;
 
   int workerCount = streamptr->numWorker;
-  if (readAsync && workerCount > 0)
+  if (workerCount > 0)
     {
       int tsID = streamptr->curTsID;
 

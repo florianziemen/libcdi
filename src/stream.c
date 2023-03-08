@@ -217,11 +217,11 @@ static long
 get_max_global_recs(stream_t *streamptr)
 {
   long maxGlobalRecs = -1;
-  long numSteps = streamptr->ntsteps;
-  if (numSteps > 0)
+  const tsteps_t *tsteps = streamptr->tsteps;
+  if (tsteps)
     {
-      const tsteps_t *tsteps = streamptr->tsteps;
       maxGlobalRecs = tsteps[0].nrecs;
+      long numSteps = streamptr->ntsteps;
       if (numSteps > 1) maxGlobalRecs += tsteps[1].nrecs * (numSteps - 1);
     }
   return maxGlobalRecs;
@@ -246,9 +246,14 @@ streamDefNumWorker(int streamID, int numWorker)
           else if (filetype == CDI_FILETYPE_NCZARR)
             {
               streamptr->maxGlobalRecs = get_max_global_recs(streamptr);
+              if (CDI_Test) Message("numWorker=%d", numWorker);
+              if (CDI_Test) Message("maxGlobalRecs=%ld", streamptr->maxGlobalRecs);
               if (streamptr->maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
+              if (streamptr->maxGlobalRecs == 1) numWorker = 0;
               if (numWorker > streamptr->maxGlobalRecs) numWorker = streamptr->maxGlobalRecs;
               if (streamptr->chunkSizeTdim > 1 && numWorker > streamptr->nvars) numWorker = streamptr->nvars;
+              if (streamptr->chunkSizeZdim > 1) numWorker = 0;
+              if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", streamptr->chunkSizeTdim, streamptr->chunkSizeZdim);
             }
 #endif
           else
@@ -257,7 +262,7 @@ streamDefNumWorker(int streamID, int numWorker)
             }
 
           streamptr->numWorker = numWorker;
-          if (CDI_Debug) Message("Number of asynchronous worker: %d", numWorker);
+          if (CDI_Debug || CDI_Test) Message("Number of asynchronous worker: %d", numWorker);
         }
     }
 }
