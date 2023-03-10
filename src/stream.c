@@ -243,7 +243,7 @@ streamDefNumWorker(int streamID, int numWorker)
               streamptr->maxGlobalRecs = get_max_global_recs(streamptr);
             }
 #ifdef HAVE_LIBNETCDF
-          else if (filetype == CDI_FILETYPE_NCZARR)
+          else if (filetype == CDI_FILETYPE_NCZARR || (CDI_Test && cdiBaseFiletype(filetype) == CDI_FILETYPE_NETCDF))
             {
               streamptr->maxGlobalRecs = get_max_global_recs(streamptr);
               if (CDI_Test) Message("numWorker=%d", numWorker);
