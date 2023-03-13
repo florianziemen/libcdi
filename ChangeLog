@@ -5,6 +5,7 @@
 2023-03-13  Uwe Schulzweida
 
 	* set chunkSizeMin to 256k
+	* change chunkSizeLim from to 1m to 16m
 
 2023-03-02  Uwe Schulzweida
 
@@ -19,7 +20,7 @@
 
 2023-02-05  Uwe Schulzweida
 
-	* changed chunkSizeLim from 16777216 to 1048576
+	* changed chunkSizeLim from 16m to 1m
 	* NetCDF: added query support for grid cells
 
 2023-02-02  Uwe Schulzweida
