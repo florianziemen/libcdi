@@ -1,3 +1,11 @@
+2023-04-06  Uwe Schulzweida
+
+	* Version 2.2.1 released
+
+2023-03-13  Uwe Schulzweida
+
+	* set chunkSizeMin to 256k
+
 2023-03-02  Uwe Schulzweida
 
 	* add async_worker support for NCZARR

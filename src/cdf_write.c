@@ -703,14 +703,14 @@ calc_chunksize(size_t chunkSizeLim, size_t size)
   return chunkSize;
 }
 
-static const size_t chunkSizeMax = 65536;
+static const size_t chunkSizeMin = 262144;
 static const size_t chunkSizeLim = 1048576;
 
 size_t
 calc_chunksize_y(int chunkType, size_t gridsize, size_t xsize, size_t ysize)
 {
   if (chunkType == CDI_CHUNK_AUTO)
-    return (gridsize <= chunkSizeMax) ? ysize : chunkSizeMax / xsize;
+    return (gridsize <= chunkSizeMin) ? ysize : chunkSizeMin / xsize;
   else
     return (chunkType == CDI_CHUNK_LINES) ? 1 : ysize;
 }
@@ -719,7 +719,7 @@ size_t
 calc_chunksize_x(int chunkType, int chunkSize, size_t xsize, bool yIsUndefined)
 {
   if (chunkType == CDI_CHUNK_AUTO && yIsUndefined)
-    return (chunkSize > 0) ? (size_t) chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
+    return (chunkSize > 0) ? (size_t) chunkSize : ((xsize <= chunkSizeMin) ? xsize : chunkSizeMin);
   else
     return calc_chunksize(chunkSizeLim, xsize);
 }
