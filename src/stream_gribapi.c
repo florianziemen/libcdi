@@ -870,31 +870,31 @@ gribapiVarSet(int param, int level1, int level2, int leveltype, int tsteptype, s
 }
 
 static int
-gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
+gribapiVarCompare(const compvar2_t *compVar, const record_t *record, int flag)
 {
   compvar2_t compVar0;
   memset(&compVar0, 0, sizeof(compvar2_t));
-  compVar0.param = record.param;
-  compVar0.level1 = record.ilevel;
-  compVar0.level2 = record.ilevel2;
-  compVar0.ltype = record.ltype;
-  compVar0.tsteptype = record.tsteptype;
-  compVar0.gridsize = record.gridsize;
-  memcpy(compVar0.name, record.varname, sizeof(compVar.name));
+  compVar0.param = record->param;
+  compVar0.level1 = record->ilevel;
+  compVar0.level2 = record->ilevel2;
+  compVar0.ltype = record->ltype;
+  compVar0.tsteptype = record->tsteptype;
+  compVar0.gridsize = record->gridsize;
+  memcpy(compVar0.name, record->varname, sizeof(compVar->name));
 
   if (flag == 0)
     {
-      if (compVar0.tsteptype == TSTEP_INSTANT && compVar.tsteptype == TSTEP_INSTANT3) compVar0.tsteptype = TSTEP_INSTANT3;
-      if (compVar0.tsteptype == TSTEP_INSTANT3 && compVar.tsteptype == TSTEP_INSTANT) compVar0.tsteptype = TSTEP_INSTANT;
+      if (compVar0.tsteptype == TSTEP_INSTANT && compVar->tsteptype == TSTEP_INSTANT3) compVar0.tsteptype = TSTEP_INSTANT3;
+      if (compVar0.tsteptype == TSTEP_INSTANT3 && compVar->tsteptype == TSTEP_INSTANT) compVar0.tsteptype = TSTEP_INSTANT;
     }
 
-  compVar0.scanKeys = record.scanKeys;
-  compVar0.tiles = record.tiles;
+  compVar0.scanKeys = record->scanKeys;
+  compVar0.tiles = record->tiles;
 
   // printf("var1: level1=%d level2=%d\n", compVar.level1, compVar.level2);
   // printf("var2: level1=%d level2=%d\n", compVar0.level1, compVar0.level2);
 
-  return memcmp(&compVar0, &compVar, sizeof(compvar2_t));
+  return memcmp(&compVar0, compVar, sizeof(compvar2_t));
 }
 
 static grib_handle *
@@ -958,7 +958,7 @@ checkTime(stream_t *streamptr, compvar2_t compVar, CdiDateTime verificationTime,
   int recID = 0;
   for (; recID < streamptr->nrecs; recID++)
     {
-      if (gribapiVarCompare(compVar, streamptr->tsteps[0].records[recID], 1) == 0) break;
+      if (gribapiVarCompare(&compVar, &streamptr->tsteps[0].records[recID], 1) == 0) break;
     }
   bool recordExists = (recID < streamptr->nrecs);
 
@@ -1420,7 +1420,7 @@ gribapiScanTimestep2(stream_t *streamptr)
       compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
 
       for (recID = 0; recID < nrecords; recID++)
-        if (gribapiVarCompare(compVar, records[recID], 0) == 0) break;
+        if (gribapiVarCompare(&compVar, &records[recID], 0) == 0) break;
 
       if (recID == nrecords)
         {
@@ -1460,7 +1460,7 @@ gribapiScanTimestep2(stream_t *streamptr)
                   paramstr, leveltype1, level1, level2, CdiDateTime_string(vDateTime));
         }
 
-      if (gribapiVarCompare(compVar, records[recID], 0) != 0)
+      if (gribapiVarCompare(&compVar, &records[recID], 0) != 0)
         {
           Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
                   records[recID].ilevel, level1);
@@ -1602,7 +1602,7 @@ gribapiScanTimestep(stream_t *streamptr)
           for (vrecID = 0; vrecID < nrecs; vrecID++)
             {
               recID = streamptr->tsteps[1].recIDs[vrecID];
-              if (gribapiVarCompare(compVar, records[recID], 0) == 0) break;
+              if (gribapiVarCompare(&compVar, &records[recID], 0) == 0) break;
             }
 
           if (vrecID == nrecs)
@@ -1639,7 +1639,7 @@ gribapiScanTimestep(stream_t *streamptr)
           if (CDI_Debug)
             Message("%4d %8lld %4d %8d %8s", rindex + 1, (long long) recpos, param, level1, CdiDateTime_string(vDateTime));
 
-          if (gribapiVarCompare(compVar, records[recID], 0) != 0)
+          if (gribapiVarCompare(&compVar, &records[recID], 0) != 0)
             {
               Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
                       records[recID].ilevel, level1);
