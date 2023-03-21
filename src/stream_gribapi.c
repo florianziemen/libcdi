@@ -952,13 +952,13 @@ typedef enum
 } checkTimeResult;
 
 static checkTimeResult
-checkTime(stream_t *streamptr, compvar2_t compVar, CdiDateTime verificationTime, CdiDateTime expectedVTime)
+checkTime(stream_t *streamptr, const compvar2_t *compVar, CdiDateTime verificationTime, CdiDateTime expectedVTime)
 {
   // First determine whether the current record exists already.
   int recID = 0;
   for (; recID < streamptr->nrecs; recID++)
     {
-      if (gribapiVarCompare(&compVar, &streamptr->tsteps[0].records[recID], 1) == 0) break;
+      if (gribapiVarCompare(compVar, &streamptr->tsteps[0].records[recID], 1) == 0) break;
     }
   bool recordExists = (recID < streamptr->nrecs);
 
@@ -1251,9 +1251,8 @@ gribapiScanTimestep1(stream_t *streamptr)
 
           int tsteptype = gribapiGetTsteptype(gh);
           size_t gridsize = gribapiGetGridsize(gh);
-          checkTimeResult result = checkTime(
-              streamptr, gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles), vDateTime,
-              vDateTime0);
+          compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
+          checkTimeResult result = checkTime(streamptr, &compVar, vDateTime, vDateTime0);
           if (result == CHECKTIME_STOP)
             {
               nrecsScanned--;
