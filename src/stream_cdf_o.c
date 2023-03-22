@@ -98,7 +98,7 @@ struct idSearch
 };
 
 static inline struct idSearch
-cdfSearchIDBySize(size_t startIdx, size_t numIDs, const ncgrid_t ncgrid[/*numIDs*/], int ncIDType, int searchType, int searchSize,
+cdfSearchIDBySize(size_t startIdx, size_t numIDs, ncgrid_t ncgrid[/*numIDs*/], int ncIDType, int searchType, int searchSize,
                   int (*typeInq)(int id), SizeType (*sizeInq)(int id))
 {
   int numNonMatching = 0, foundID = CDI_UNDEFID;
@@ -1749,7 +1749,7 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
     {
       dimID = checkDimName(fileID, dimlen, dimname);
 
-      bool switchNCMode = streamptr->ncmode == 2;
+      bool switchNCMode = (streamptr->ncmode == 2);
       if (switchNCMode)
         {
           streamptr->ncmode = 1;
@@ -1848,7 +1848,7 @@ cdf_def_mapping(stream_t *streamptr, int gridID)
   if (!gmapvarname[0]) strcpy(gmapvarname, "crs");
 
   int fileID = streamptr->fileID;
-  bool switchNCMode = streamptr->ncmode == 2;
+  bool switchNCMode = (streamptr->ncmode == 2);
   if (switchNCMode)
     {
       streamptr->ncmode = 1;
@@ -1986,7 +1986,7 @@ cdfDefRgrid(stream_t *streamptr, int gridID, int gridIndex)
         else
           sprintf(&axisname[5], "%1d", iz + 1);
 
-        bool switchNCMode = streamptr->ncmode == 2;
+        bool switchNCMode = (streamptr->ncmode == 2);
         if (switchNCMode)
           {
             streamptr->ncmode = 1;
@@ -2023,7 +2023,7 @@ cdfDefRgrid(stream_t *streamptr, int gridID, int gridIndex)
         else
           sprintf(&axisname[14], "%1d", iz + 1);
 
-        bool switchNCMode = streamptr->ncmode == 2;
+        bool switchNCMode = (streamptr->ncmode == 2);
         if (switchNCMode)
           {
             streamptr->ncmode = 1;
@@ -2033,12 +2033,9 @@ cdfDefRgrid(stream_t *streamptr, int gridID, int gridIndex)
         cdf_def_dim(fileID, axisname, dimlen, &dimID);
 
         int ncvarid = CDI_UNDEFID;
+        cdf_def_var(fileID, axisname, NC_INT, 1, &dimID, &ncvarid);
 
-        int ndims = 1;
-        nc_type xtype = NC_INT;
-        cdf_def_var(fileID, axisname, xtype, ndims, &dimID, &ncvarid);
-
-        if (switchNCMode)
+        if (switchNCMode || streamptr->ncmode == 1)
           {
             cdf_enddef(fileID, streamptr->self);
             streamptr->ncmode = 2;

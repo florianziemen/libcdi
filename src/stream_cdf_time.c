@@ -72,12 +72,12 @@ cdfGetTimeUnits(taxis_t *taxis)
         }
       else
         {
-          const int year = taxis->rDateTime.date.year;
-          const int month = taxis->rDateTime.date.month;
-          const int day = taxis->rDateTime.date.day;
-          const int hour = taxis->rDateTime.time.hour;
-          const int minute = taxis->rDateTime.time.minute;
-          const int second = taxis->rDateTime.time.second;
+          int year = taxis->rDateTime.date.year;
+          int month = taxis->rDateTime.date.month;
+          int day = taxis->rDateTime.date.day;
+          int hour = taxis->rDateTime.time.hour;
+          int minute = taxis->rDateTime.time.minute;
+          int second = taxis->rDateTime.time.second;
 
           int timeunit = (taxis->unit != -1) ? taxis->unit : TUNIT_HOUR;
           if (timeunit == TUNIT_QUARTER)
@@ -144,7 +144,7 @@ cdfDefTime(stream_t *streamptr)
 
   if (streamptr->basetime.ncvarid != CDI_UNDEFID) return;
 
-  const int fileID = streamptr->fileID;
+  int fileID = streamptr->fileID;
 
   if (streamptr->ncmode == 0) streamptr->ncmode = 1;
   if (streamptr->ncmode == 2) cdf_redef(fileID);
@@ -166,8 +166,8 @@ cdfDefTime(stream_t *streamptr)
   cdf_def_dim(fileID, taxisName, timeDimLen, &timeDimId);
   streamptr->basetime.ncdimid = timeDimId;
 
-  const int datatype = taxis->datatype;
-  const nc_type xtype = (datatype == CDI_DATATYPE_INT32) ? NC_INT : ((datatype == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE);
+  int datatype = taxis->datatype;
+  nc_type xtype = (datatype == CDI_DATATYPE_INT32) ? NC_INT : ((datatype == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE);
 
   int timeVarId;
   cdf_def_var(fileID, taxisName, xtype, 1, &timeDimId, &timeVarId);
@@ -240,17 +240,17 @@ cdfDefTime(stream_t *streamptr)
 void
 cdfDefTimestep(stream_t *streamptr, int tsID, size_t valCount)
 {
-  const int time_varid = streamptr->basetime.ncvarid;
+  int time_varid = streamptr->basetime.ncvarid;
   if (time_varid != CDI_UNDEFID && tsID == 0)
     {
       taxis_t *taxis = taxisPtr(vlistInqTaxis(streamptr->vlistID));
-      const int fileID = streamptr->fileID;
+      int fileID = streamptr->fileID;
       const char *unitstr = cdfGetTimeUnits(taxis);
-      const size_t len = strlen(unitstr);
+      size_t len = strlen(unitstr);
       if (len) cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
     }
 
-  const int fileID = streamptr->fileID;
+  int fileID = streamptr->fileID;
 
   if (CDI_Debug) Message("streamID = %d, fileID = %d, tsID = %d", streamptr->self, fileID, tsID);
 
