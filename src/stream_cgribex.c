@@ -250,12 +250,12 @@ cgribexGetTsteptype(int timerange)
 static bool
 cgribexGetGridRegular(int *isec2, int *isec4, grid_t *grid, int gridtype, bool compyinc)
 {
-  const bool ijDirectionIncrementGiven = gribbyte_get_bit(ISEC2_ResFlag, 1);
-  const bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
+  bool ijDirectionIncrementGiven = gribbyte_get_bit(ISEC2_ResFlag, 1);
+  bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
 
-  const size_t nvalues = (size_t) ISEC4_NumValues;
-  const size_t nlon = (size_t) ISEC2_NumLon;
-  const size_t nlat = (size_t) ISEC2_NumLat;
+  size_t nvalues = (size_t) ISEC4_NumValues;
+  size_t nlon = (size_t) ISEC2_NumLon;
+  size_t nlat = (size_t) ISEC2_NumLat;
   if (nvalues != nlon * nlat) Error("numberOfPoints (%zu) and gridSize (%zu) differ!", nvalues, nlon * nlat);
 
   grid->size = nvalues;
@@ -336,12 +336,16 @@ cgribexGetGridRegular(int *isec2, int *isec4, grid_t *grid, int gridtype, bool c
 static bool
 cgribexGetGridReduced(int *isec2, int *isec4, grid_t *grid)
 {
-  const bool ijDirectionIncrementGiven = gribbyte_get_bit(ISEC2_ResFlag, 1);
-  const bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
+  bool ijDirectionIncrementGiven = gribbyte_get_bit(ISEC2_ResFlag, 1);
+  bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
   grid->np = ISEC2_NumPar;
   grid->size = (size_t) ISEC4_NumValues;
-  grid->reducedPoints = ISEC2_ReducedPointsPtr;
-  grid->reducedPointsSize = (size_t) ISEC2_NumLat;
+
+  size_t reducedPointsSize = (size_t) ISEC2_NumLat;
+  grid->reducedPointsSize = reducedPointsSize;
+  grid->reducedPoints = (int *) Malloc(reducedPointsSize * sizeof(int));
+  memcpy(grid->reducedPoints, ISEC2_ReducedPointsPtr, reducedPointsSize * sizeof(int));
+
   grid->y.size = (size_t) ISEC2_NumLat;
   grid->x.inc = 0;
   grid->y.inc = 0;
@@ -381,11 +385,11 @@ cgribexGetGridReduced(int *isec2, int *isec4, grid_t *grid)
 static bool
 cgribexGetGridLCC(int *isec2, int *isec4, grid_t *grid)
 {
-  const bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
+  bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
 
-  const size_t nvalues = (size_t) ISEC4_NumValues;
-  const size_t nlon = (size_t) ISEC2_NumLon;
-  const size_t nlat = (size_t) ISEC2_NumLat;
+  size_t nvalues = (size_t) ISEC4_NumValues;
+  size_t nlon = (size_t) ISEC2_NumLon;
+  size_t nlat = (size_t) ISEC2_NumLat;
   if (nvalues != nlon * nlat) Error("numberOfPoints (%zu) and gridSize (%zu) differ!", nvalues, nlon * nlat);
 
   grid->size = nvalues;
@@ -492,7 +496,7 @@ cgribexDefProjLCC(int *isec2, int gridID)
   struct CDI_GridProjParams gpp;
   gridProjParamsInit(&gpp);
 
-  const bool earthIsOblate = gribbyte_get_bit(ISEC2_ResFlag, 2);
+  bool earthIsOblate = gribbyte_get_bit(ISEC2_ResFlag, 2);
   if (earthIsOblate)
     {
       gpp.a = 6378160.0;
@@ -509,7 +513,7 @@ cgribexDefProjLCC(int *isec2, int gridID)
   gpp.lon_0 = ISEC2_Lambert_Lov * 0.001;
   gpp.lat_1 = ISEC2_Lambert_LatS1 * 0.001;
   gpp.lat_2 = ISEC2_Lambert_LatS2 * 0.001;
-  const bool lsouth = gribbyte_get_bit(ISEC2_Lambert_ProjFlag, 1);
+  bool lsouth = gribbyte_get_bit(ISEC2_Lambert_ProjFlag, 1);
   if (lsouth)
     {
       gpp.lat_1 = -gpp.lat_1;
@@ -546,12 +550,12 @@ cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t 
   if (datatype > 32) datatype = CDI_DATATYPE_PACK32;
   if (datatype < 0) datatype = CDI_DATATYPE_PACK;
 
-  const int vlistID = streamptr->vlistID;
-  const int tsID = streamptr->curTsID;
-  const int recID = recordNewEntry(streamptr, tsID);
+  int vlistID = streamptr->vlistID;
+  int tsID = streamptr->curTsID;
+  int recID = recordNewEntry(streamptr, tsID);
   record_t *record = &streamptr->tsteps[tsID].records[recID];
 
-  const int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
+  int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
 
   int leveltype, level1, level2;
   cgribexGetLevel(isec1, &leveltype, &level1, &level2);
@@ -567,46 +571,36 @@ cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t 
   record->tsteptype = (short) tsteptype;
 
   grid_t *gridptr = (grid_t *) Malloc(sizeof(*gridptr));
-  const bool uvRelativeToGrid = cgribexGetGrid(streamptr, isec2, isec4, gridptr, iret);
+  bool uvRelativeToGrid = cgribexGetGrid(streamptr, isec2, isec4, gridptr, iret);
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
   int gridID = gridAdded.Id;
-  if (gridAdded.isNew)
-    {
-      if (gridptr->reducedPointsSize)
-        {
-          const size_t reducedPointsSize = (size_t) gridptr->reducedPointsSize;
-          int *reducedPoints = gridptr->reducedPoints;
-          gridptr->reducedPoints = (int *) Malloc(reducedPointsSize * sizeof(int));
-          memcpy(gridptr->reducedPoints, reducedPoints, reducedPointsSize * sizeof(int));
-        }
-      else if (gridptr->projtype == CDI_PROJ_RLL)
-        {
-          const double xpole = ISEC2_LonSP * 0.001 - 180;
-          const double ypole = -ISEC2_LatSP * 0.001;
-          const double angle = -FSEC2_RotAngle;
-          gridDefParamRLL(gridID, xpole, ypole, angle);
-        }
-      else if (gridptr->projtype == CDI_PROJ_LCC)
-        {
-          cgribexDefProjLCC(isec2, gridID);
-        }
-    }
-  else
+  if (!gridAdded.isNew)
     {
       grid_free(gridptr);
       Free(gridptr);
     }
+  else if (gridptr->projtype == CDI_PROJ_RLL)
+    {
+      double xpole = ISEC2_LonSP * 0.001 - 180;
+      double ypole = -ISEC2_LatSP * 0.001;
+      double angle = -FSEC2_RotAngle;
+      gridDefParamRLL(gridID, xpole, ypole, angle);
+    }
+  else if (gridptr->projtype == CDI_PROJ_LCC)
+    {
+      cgribexDefProjLCC(isec2, gridID);
+    }
 
-  const int zaxistype = grib1ltypeToZaxisType(leveltype);
+  int zaxistype = grib1ltypeToZaxisType(leveltype);
   if (zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF)
     {
-      const size_t vctsize = (size_t) ISEC2_NumVCP;
+      size_t vctsize = (size_t) ISEC2_NumVCP;
       double *vctptr = &fsec2[10];
       varDefVCT(vctsize, vctptr);
     }
 
-  const bool lbounds = cgribexGetZaxisHasBounds(leveltype);
+  bool lbounds = cgribexGetZaxisHasBounds(leveltype);
 
   int varID = 0, levelID = 0;
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0, 0, datatype, &varID, &levelID, tsteptype, leveltype, -1,
@@ -639,8 +633,8 @@ cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t 
 
   if (varInqInst(varID) == CDI_UNDEFID)
     {
-      const int center = ISEC1_CenterID;
-      const int subcenter = ISEC1_SubCenterID;
+      int center = ISEC1_CenterID;
+      int subcenter = ISEC1_SubCenterID;
       int instID = institutInq(center, subcenter, NULL, NULL);
       if (instID == CDI_UNDEFID) instID = institutDef(center, subcenter, NULL, NULL);
       varDefInst(varID, instID);
@@ -748,15 +742,15 @@ cgribexVarCompare(const compvar_t *compVar, const record_t *record, int flag)
   Warning("Record %2d (id=%s lev1=%d lev2=%d) timestep %d: %s", nrecs, paramstr, level1, level2, timestep, text)
 
 static void
-cgribexSkipRecords(const int fileID)
+cgribexSkipRecords(int fileID)
 {
   int nskip = CDI_Skip_Records;
   while (nskip-- > 0)
     {
-      const size_t recsize = gribGetSize(fileID);
+      size_t recsize = gribGetSize(fileID);
       if (recsize == 0) Error("Skipping of %d records failed!", CDI_Skip_Records);
 
-      const off_t recpos = fileGetPos(fileID);
+      off_t recpos = fileGetPos(fileID);
       fileSetPos(fileID, recpos, SEEK_CUR);
     }
 }
@@ -794,19 +788,19 @@ cgribexScanTimestep1(stream_t *streamptr)
 
   cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->objectp;
 
-  const int tsID = tstepsNewEntry(streamptr);
+  int tsID = tstepsNewEntry(streamptr);
   if (tsID != 0) Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
-  const int fileID = streamptr->fileID;
+  int fileID = streamptr->fileID;
 
   if (CDI_Skip_Records) cgribexSkipRecords(fileID);
 
   unsigned nrecs = 0;
   while (true)
     {
-      const size_t recsize = gribGetSize(fileID);
+      size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
 
       if (recsize == 0)
@@ -822,9 +816,9 @@ cgribexScanTimestep1(stream_t *streamptr)
       // Search for next 'GRIB', read the following record, and position file offset after it.
       if (gribRead(fileID, gribbuffer, &readsize)) break;
 
-      const int comptype = grbDecompress(recsize, &buffersize, &gribbuffer);
+      int comptype = grbDecompress(recsize, &buffersize, &gribbuffer);
 
-      const size_t sec2len = cgribexSection2Length(gribbuffer, buffersize);
+      size_t sec2len = cgribexSection2Length(gribbuffer, buffersize);
       if (sec2len > cgribexp->sec2len)
         {
           cgribexp->sec2len = sec2len;
@@ -836,13 +830,13 @@ cgribexScanTimestep1(stream_t *streamptr)
       nrecsScanned++;
       cgribexDecodeHeader(cgribexp, (int *) gribbuffer, (int) recsize, &lmv, &iret);
 
-      const int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
+      int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       cdiParamToString(param, paramstr, sizeof(paramstr));
 
       cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
       CdiDateTime sDateTime;
-      const CdiDateTime vDateTime = cgribexDateTimeX(isec1, &sDateTime);
+      CdiDateTime vDateTime = cgribexDateTimeX(isec1, &sDateTime);
 
       if (nrecs == 0)
         {
@@ -915,9 +909,9 @@ cgribexScanTimestep1(stream_t *streamptr)
   cdi_generate_vars(streamptr);
 
   taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
-  const int taxisID = taxisCreate(taxis->type);
+  int taxisID = taxisCreate(taxis->type);
 
-  const int vlistID = streamptr->vlistID;
+  int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
   streamScanResizeRecords1(streamptr);
@@ -949,8 +943,8 @@ cgribexScanTimestep2(stream_t *streamptr)
   int *isec1 = cgribexp->sec1;
   int *isec2 = cgribexp->sec2;
 
-  const int fileID = streamptr->fileID;
-  const int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
 
   void *gribbuffer = streamptr->record->buffer;
   size_t buffersize = streamptr->record->buffersize;
@@ -965,7 +959,7 @@ cgribexScanTimestep2(stream_t *streamptr)
   cdi_create_records(streamptr, tsID);
   record_t *records = streamptr->tsteps[tsID].records;
 
-  const int nrecords = streamScanInitRecords2(streamptr);
+  int nrecords = streamScanInitRecords2(streamptr);
 
   int nrecsScanned = nrecords;
   int rindex = 0;
@@ -973,7 +967,7 @@ cgribexScanTimestep2(stream_t *streamptr)
     {
       if (rindex > nrecords) break;
 
-      const size_t recsize = gribGetSize(fileID);
+      size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
       if (recsize == 0)
         {
@@ -991,18 +985,18 @@ cgribexScanTimestep2(stream_t *streamptr)
       nrecsScanned++;
       cgribexDecodeHeader(cgribexp, (int *) gribbuffer, (int) recsize, &lmv, &iret);
 
-      const int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
+      int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       cdiParamToString(param, paramstr, sizeof(paramstr));
 
       cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
       CdiDateTime sDateTime;
-      const CdiDateTime vDateTime = cgribexDateTimeX(isec1, &sDateTime);
+      CdiDateTime vDateTime = cgribexDateTimeX(isec1, &sDateTime);
 
       if (rindex == 0)
         {
           vDateTime0 = vDateTime;
-          const int taxisID = vlistInqTaxis(vlistID);
+          int taxisID = vlistInqTaxis(vlistID);
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             {
               taxis->type = TAXIS_RELATIVE;
@@ -1021,7 +1015,7 @@ cgribexScanTimestep2(stream_t *streamptr)
           if (cdiDateTime_isLT(sDateTime, taxis->sDateTime)) taxis->sDateTime = sDateTime;
         }
 
-      const int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
+      int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
 
       if (ISEC1_AvgNum)
         {
@@ -1086,8 +1080,8 @@ cgribexScanTimestep2(stream_t *streamptr)
       records[recID].position = recpos;
       records[recID].size = recsize;
 
-      const int varID = records[recID].varID;
-      const int gridID = vlistInqVarGrid(vlistID, varID);
+      int varID = records[recID].varID;
+      int gridID = vlistInqVarGrid(vlistID, varID);
       if (gridInqSize(gridID) == 1 && gridInqType(gridID) == GRID_LONLAT)
         {
           if (IS_NOT_EQUAL(gridInqXval(gridID, 0), ISEC2_FirstLon * 0.001)
@@ -1150,7 +1144,7 @@ cgribexScanTimestep(stream_t *streamptr)
 
       nrecs = streamScanInitRecords(streamptr, tsID);
 
-      const int fileID = streamptr->fileID;
+      int fileID = streamptr->fileID;
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
@@ -1160,7 +1154,7 @@ cgribexScanTimestep(stream_t *streamptr)
         {
           if (rindex > nrecs) break;
 
-          const size_t recsize = gribGetSize(fileID);
+          size_t recsize = gribGetSize(fileID);
           recpos = fileGetPos(fileID);
           if (recsize == 0)
             {
@@ -1182,21 +1176,21 @@ cgribexScanTimestep(stream_t *streamptr)
           nrecsScanned++;
           cgribexDecodeHeader(cgribexp, (int *) gribbuffer, (int) recsize, &lmv, &iret);
 
-          const int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
+          int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
           cdiParamToString(param, paramstr, sizeof(paramstr));
 
           cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
           CdiDateTime sDateTime;
-          const CdiDateTime vDateTime = cgribexDateTimeX(isec1, &sDateTime);
+          CdiDateTime vDateTime = cgribexDateTimeX(isec1, &sDateTime);
 
           if (rindex == nrecs) break;
 
           if (rindex == 0)
             {
               vDateTime0 = vDateTime;
-              const int vlistID = streamptr->vlistID;
-              const int taxisID = vlistInqTaxis(vlistID);
+              int vlistID = streamptr->vlistID;
+              int taxisID = vlistInqTaxis(vlistID);
               if (taxisInqType(taxisID) == TAXIS_RELATIVE)
                 {
                   taxis->type = TAXIS_RELATIVE;
@@ -1447,13 +1441,13 @@ cgribexDefTimerange(int tsteptype, int factor, int calendar, CdiDateTime rDateTi
 {
   JulianDate julianDate1 = julianDate_encode(calendar, rDateTime);
   JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
-  const JulianDate julianDate = julianDate_sub(julianDate2, julianDate1);
+  JulianDate julianDate = julianDate_sub(julianDate2, julianDate1);
 
   int timerange = -1;
   int ip1 = 0, ip2 = 0;
   if (!(int) (fmod(julianDate_to_seconds(julianDate), factor)))
     {
-      const int ip = (int) lround(julianDate_to_seconds(julianDate) / factor);
+      int ip = (int) lround(julianDate_to_seconds(julianDate) / factor);
       if ((ip > 255) && (tsteptype == TSTEP_INSTANT)) tsteptype = TSTEP_INSTANT3;
 
       int ipx = 0;
@@ -1551,7 +1545,7 @@ cgribexDefTime(int *isec1, CdiDateTime vDateTime, int tsteptype, int numavg, int
 
   if (timetype == TAXIS_RELATIVE)
     {
-      const int calendar = taxisInqCalendar(taxisID);
+      int calendar = taxisInqCalendar(taxisID);
 
       CdiDateTime rDateTime = taxisInqRdatetime(taxisID);
       if (cdiDateTime_isLT(vDateTime, rDateTime)) rDateTime = vDateTime;
@@ -1718,8 +1712,8 @@ cgribexDefGridRegular(int *isec2, double *fsec2, int gridID, int gridtype, bool 
 static void
 cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
 {
-  const int xsize = (int) gridInqXsize(gridID);
-  const int ysize = (int) gridInqYsize(gridID);
+  int xsize = (int) gridInqXsize(gridID);
+  int ysize = (int) gridInqYsize(gridID);
 
   struct CDI_GridProjParams gpp;
   gridInqParamsLCC(gridID, &gpp);
@@ -1730,7 +1724,7 @@ cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
     }
   gridVerifyProjParamsLCC(&gpp);
 
-  const bool lsouth = (gpp.lat_1 < 0);
+  bool lsouth = (gpp.lat_1 < 0);
   if (lsouth)
     {
       gpp.lat_1 = -gpp.lat_2;
@@ -1757,7 +1751,7 @@ cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
   ISEC2_Lambert_ProjFlag = 0;
   if (lsouth) gribbyte_set_bit(&ISEC2_Lambert_ProjFlag, 1);
 
-  const bool earthIsOblate = (IS_EQUAL(gpp.a, 6378160.0) && IS_EQUAL(gpp.rf, 297.0));
+  bool earthIsOblate = (IS_EQUAL(gpp.a, 6378160.0) && IS_EQUAL(gpp.rf, 297.0));
   ISEC2_ResFlag = 0;
   if (ISEC2_Lambert_dx && ISEC2_Lambert_dy) gribbyte_set_bit(&ISEC2_ResFlag, 1);
   if (earthIsOblate) gribbyte_set_bit(&ISEC2_ResFlag, 2);
@@ -1818,10 +1812,10 @@ cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID, in
   ISEC2_Reduced = false;
   ISEC2_ScanFlag = 0;
 
-  const int gridsize = (int) gridInqSize(gridID);
+  int gridsize = (int) gridInqSize(gridID);
   bool gridIsRotated = false;
   bool gridIsCurvilinear = false;
-  const int gridtype = grbGetGridtype(&gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
+  int gridtype = grbGetGridtype(&gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
 
   switch (gridtype)
     {
@@ -1885,10 +1879,10 @@ cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
   int ltype = 0;
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
 
-  const bool hasBounds = (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL));
+  bool hasBounds = (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL));
   double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
-  const double dlevel1 = hasBounds ? zaxisInqLbound(zaxisID, levelID) : level;
-  const double dlevel2 = hasBounds ? zaxisInqUbound(zaxisID, levelID) : 0.0;
+  double dlevel1 = hasBounds ? zaxisInqLbound(zaxisID, levelID) : level;
+  double dlevel2 = hasBounds ? zaxisInqUbound(zaxisID, levelID) : 0.0;
 
   if (zaxistype == ZAXIS_GENERIC && ltype == 0)
     {
@@ -2027,9 +2021,9 @@ cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
   // Put2Byte(isec1[39]);        // number of forecasts in ensemble
 
   int perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
-  const int r1 = cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber);
-  const int r2 = cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble);
-  const int r3 = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast);
+  int r1 = cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber);
+  int r2 = cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble);
+  int r3 = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast);
 
   if (r1 == 0 && r2 == 0 && r3 == 0)
     {
@@ -2050,7 +2044,7 @@ cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int 
 {
   cgribexrec_t *cgribexp = (cgribexrec_t *) cgribexNew();
 
-  const size_t sec2len = 1024 + 2 * gridInqYsize(gridID);  // Gaussian reduced grid
+  size_t sec2len = 1024 + 2 * gridInqYsize(gridID);  // Gaussian reduced grid
   if (sec2len > cgribexp->sec2len)
     {
       cgribexp->sec2len = sec2len;
@@ -2073,8 +2067,8 @@ cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int 
   fsec2f[0] = 0;
   fsec2f[1] = 0;
 
-  const int gribsize = (int) (gribbuffersize / sizeof(int));
-  const int param = vlistInqVarParam(vlistID, varID);
+  int gribsize = (int) (gribbuffersize / sizeof(int));
+  int param = vlistInqVarParam(vlistID, varID);
 
   cgribexDefaultSec0(isec0);
   cgribexDefaultSec1(isec1);
@@ -2083,7 +2077,7 @@ cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int 
   cgribexDefInstitut(isec1, vlistID, varID);
   cgribexDefModel(isec1, vlistID, varID);
 
-  const int datatype = vlistInqVarDatatype(vlistID, varID);
+  int datatype = vlistInqVarDatatype(vlistID, varID);
 
   int uvRelativeToGrid = -1;
   cdiInqKeyInt(vlistID, varID, CDI_KEY_UVRELATIVETOGRID, &uvRelativeToGrid);
@@ -2136,7 +2130,7 @@ cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int 
 
   if (iret) Error("Problem during GRIB encode (errno = %d)!", iret);
 
-  const size_t nbytes = (size_t) iword * sizeof(int);
+  size_t nbytes = (size_t) iword * sizeof(int);
   return nbytes;
 }
 
