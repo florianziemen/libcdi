@@ -2,6 +2,10 @@
 
 	* Version 2.2.1 released
 
+2023-03-23  Uwe Schulzweida
+
+	* cgribexDefTime: change relative time to absolute time axis if necessary (bug fix)
+
 2023-03-13  Uwe Schulzweida
 
 	* set chunkSizeMin to 256k

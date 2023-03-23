@@ -730,8 +730,8 @@ cgribexVarSet(int param, int level1, int level2, int leveltype, int trange)
 static inline int
 cgribexVarCompare(const compvar_t *compVar, const record_t *record, int flag)
 {
-  bool vinst = compVar->tsteptype == TSTEP_INSTANT || compVar->tsteptype == TSTEP_INSTANT2 || compVar->tsteptype == TSTEP_INSTANT3;
-  bool rinst = record->tsteptype == TSTEP_INSTANT || record->tsteptype == TSTEP_INSTANT2 || record->tsteptype == TSTEP_INSTANT3;
+  bool vinst = (compVar->tsteptype == TSTEP_INSTANT || compVar->tsteptype == TSTEP_INSTANT2 || compVar->tsteptype == TSTEP_INSTANT3);
+  bool rinst = (record->tsteptype == TSTEP_INSTANT || record->tsteptype == TSTEP_INSTANT2 || record->tsteptype == TSTEP_INSTANT3);
   int tstepDiff = (!((flag == 0) & (vinst && rinst))) & (compVar->tsteptype != record->tsteptype);
   int rstatus = (compVar->param != record->param) | (compVar->level1 != record->ilevel) | (compVar->level2 != record->ilevel2)
                 | (compVar->ltype != record->ltype) | tstepDiff;
@@ -1487,7 +1487,6 @@ cgribexDefDateTime(int *isec1, int timeunit, CdiDateTime dt)
   cdiTime_decode(dt.time, &hour, &minute, &second, &ms);
 
   int century = year / 100;
-
   ISEC1_Year = year - century * 100;
 
   if (year < 0)
@@ -1545,6 +1544,7 @@ cgribexDefTime(int *isec1, CdiDateTime vDateTime, int tsteptype, int numavg, int
 
   if (timetype == TAXIS_RELATIVE)
     {
+      int ip1 = 0, ip2 = 0;
       int calendar = taxisInqCalendar(taxisID);
 
       CdiDateTime rDateTime = taxisInqRdatetime(taxisID);
@@ -1553,22 +1553,28 @@ cgribexDefTime(int *isec1, CdiDateTime vDateTime, int tsteptype, int numavg, int
       CdiDateTime sDateTime = taxisInqSdatetime(taxisID);
 
       int factor = cgribexDefDateTime(isec1, timeunit, rDateTime);
-      int ip1 = 0, ip2 = 0;
       int timerange = cgribexDefTimerange(tsteptype, factor, calendar, rDateTime, vDateTime, sDateTime, &ip1, &ip2);
 
+      if (ip2 > 0xFF)
+        {
+          rDateTime = vDateTime;
+          factor = cgribexDefDateTime(isec1, timeunit, rDateTime);
+          timerange = cgribexDefTimerange(tsteptype, factor, calendar, rDateTime, vDateTime, sDateTime, &ip1, &ip2);
+        }
+      /*
       if (ip2 > 0xFF && timeunit < TUNIT_YEAR)
         {
           timeunit++;
           factor = cgribexDefDateTime(isec1, timeunit, rDateTime);
           timerange = cgribexDefTimerange(tsteptype, factor, calendar, rDateTime, vDateTime, sDateTime, &ip1, &ip2);
         }
-
+      */
       if (timerange == -1 || timerange == 1 || timerange == 3) timetype = TAXIS_ABSOLUTE;
       /*
-      else if ( timerange == 10 )
+      else if (timerange == 10)
         {
-          if ( ip1 < 0 || ip1 > 0xFFFF ) timetype = TAXIS_ABSOLUTE;
-          if ( ip2 < 0 || ip2 > 0xFFFF ) timetype = TAXIS_ABSOLUTE;
+          if (ip1 < 0 || ip1 > 0xFFFF) timetype = TAXIS_ABSOLUTE;
+          if (ip2 < 0 || ip2 > 0xFFFF) timetype = TAXIS_ABSOLUTE;
         }
       */
       else
@@ -1576,17 +1582,13 @@ cgribexDefTime(int *isec1, CdiDateTime vDateTime, int tsteptype, int numavg, int
           if (ip1 < 0 || ip1 > 0xFF) timetype = TAXIS_ABSOLUTE;
           if (ip2 < 0 || ip2 > 0xFF) timetype = TAXIS_ABSOLUTE;
         }
-      /*
-      static bool lwarn = true;
-      if ( lwarn && timetype == TAXIS_ABSOLUTE )
+
+      if (timetype != TAXIS_ABSOLUTE)
         {
-          lwarn = false;
-          Warning("Can't store forecast time %d %d relative to %d %d, converted to absolute time!", vdate, vtime, rdate, rtime);
+          ISEC1_TimeRange = timerange;
+          ISEC1_TimePeriod1 = ip1;
+          ISEC1_TimePeriod2 = ip2;
         }
-      */
-      ISEC1_TimeRange = timerange;
-      ISEC1_TimePeriod1 = ip1;
-      ISEC1_TimePeriod2 = ip2;
     }
 
   if (timetype == TAXIS_ABSOLUTE)
@@ -1594,7 +1596,7 @@ cgribexDefTime(int *isec1, CdiDateTime vDateTime, int tsteptype, int numavg, int
       (void) cgribexDefDateTime(isec1, timeunit, vDateTime);
 
       /*
-      if ( numavg > 0 )
+      if (numavg > 0)
         ISEC1_TimeRange = 0;
       else
       */
