@@ -869,11 +869,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xsize, size_t 
       cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_VDIMNAME, vdimname, &length);
       if (vdimname[0] == 0) strcpy(vdimname, vdimname_default);
       nvdimID = dimIDs[ndims - 1] = checkDimName(fileID, nvertex, vdimname);
-      if (nvdimID == CDI_UNDEFID)
-        {
-          cdf_def_dim(fileID, vdimname, nvertex, dimIDs + ndims - 1);
-          nvdimID = dimIDs[ndims - 1];
-        }
+      if (nvdimID == CDI_UNDEFID) cdf_def_dim(fileID, vdimname, nvertex, dimIDs + ndims - 1);
     }
 
   size_t gridsize = xsize * ysize;
@@ -1643,10 +1639,7 @@ cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimID, si
       cdf_enddef(fileID, streamptr->self);
 
       // Write Stringvalues
-      size_t start[2], count[2];
-      start[1] = 0;
-      count[0] = 1;
-      count[1] = clen;
+      size_t start[2] = { 0, 0 }, count[2] = { 1, clen };
       for (size_t i = 0; i < dimlen; i++)
         {
           start[0] = i;
@@ -1944,14 +1937,11 @@ cdfDefCharacter(stream_t *streamptr, int gridID, int gridIndex, int cdiAxisID, i
 
   // Write Var
 
-  size_t start[2], count[2];
-  start[1] = 0;
-  count[0] = 1;
-  count[1] = strlen;
+  size_t start[2] = { 0, 0 }, count[2] = { 1, strlen };
   for (size_t i = 0; i < dimlen; i++)
     {
       start[0] = i;
-      status = nc_put_vara_text(fileID, ncaxisid, start, count, cvals[i]);
+      (void) nc_put_vara_text(fileID, ncaxisid, start, count, cvals[i]);
     }
 
   ncgrid[gridIndex].gridID = gridID;
