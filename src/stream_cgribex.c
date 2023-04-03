@@ -730,7 +730,8 @@ cgribexVarSet(int param, int level1, int level2, int leveltype, int trange)
 static inline int
 cgribexVarCompare(const compvar_t *compVar, const record_t *record, int flag)
 {
-  bool vinst = (compVar->tsteptype == TSTEP_INSTANT || compVar->tsteptype == TSTEP_INSTANT2 || compVar->tsteptype == TSTEP_INSTANT3);
+  bool vinst
+      = (compVar->tsteptype == TSTEP_INSTANT || compVar->tsteptype == TSTEP_INSTANT2 || compVar->tsteptype == TSTEP_INSTANT3);
   bool rinst = (record->tsteptype == TSTEP_INSTANT || record->tsteptype == TSTEP_INSTANT2 || record->tsteptype == TSTEP_INSTANT3);
   int tstepDiff = (!((flag == 0) & (vinst && rinst))) & (compVar->tsteptype != record->tsteptype);
   int rstatus = (compVar->param != record->param) | (compVar->level1 != record->ilevel) | (compVar->level2 != record->ilevel2)
