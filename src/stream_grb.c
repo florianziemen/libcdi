@@ -64,11 +64,11 @@ zaxis_units_to_meter(int zaxisID)
 bool
 zaxis_units_is_Pa(int zaxisID)
 {
-  char units[CDI_MAX_NAME];
+  char units[CDI_MAX_NAME] = { 0 };
   int length = CDI_MAX_NAME;
   cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
 
-  return (units[0] && (units[0] == 'P') && (units[1] == 'a'));
+  return (units[0] == 'P' && units[1] == 'a');
 }
 
 void

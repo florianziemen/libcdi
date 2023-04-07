@@ -1725,7 +1725,7 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
   if (type == ZAXIS_REFERENCE) cdfDefZaxisUUID(streamptr, zaxisID);
 
-  int dimID;
+  int dimID = CDI_UNDEFID;
   if (type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF)
     {
       delayed = cdf_def_zaxis_hybrid(streamptr, type, &ncvarid, zaxisID, zaxisindex, xtype, dimlen, &dimID, axisname);

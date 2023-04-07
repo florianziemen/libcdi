@@ -825,7 +825,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
 
   if (xtypeIsInt(atttype))
     {
-      int attint;
+      int attint = 0;
       int *pattint = (attlen > 1) ? (int *) malloc(attlen * sizeof(int)) : &attint;
       cdfGetAttInt(ncid, ncvarid, attname, attlen, pattint);
       // clang-format off
@@ -843,7 +843,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
     }
   else if (xtypeIsFloat(atttype))
     {
-      double attflt;
+      double attflt = 0.0;
       double *pattflt = (attlen > 1) ? (double *) malloc(attlen * sizeof(double)) : &attflt;
       cdfGetAttDouble(ncid, ncvarid, attname, attlen, pattflt);
       int datatype = (atttype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
