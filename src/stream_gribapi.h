@@ -13,9 +13,9 @@ int gribapiScanTimestep(stream_t *streamptr);
 
 int gribapiDecode(void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced, size_t *nmiss, double missval);
 
-size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime, int tsteptype, int numavg,
-                     size_t datasize, const void *data, size_t nmiss, void **gribbuffer, size_t *gribbuffersize, int ljpeg,
-                     void *gribContainer);
+size_t gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime,
+                     int tsteptype, int numavg, size_t datasize, const void *data, size_t nmiss, void **gribbuffer,
+                     size_t *gribbuffersize, int ljpeg, void *gribContainer);
 
 int gribapiGetScanningMode(grib_handle *gh);
 void gribapiSetScanningMode(grib_handle *gh, int scanningMode);

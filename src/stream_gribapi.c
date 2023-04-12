@@ -3153,8 +3153,8 @@ gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const void *data
 // #define GRIBAPIENCODETEST 1
 
 size_t
-gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime, int tsteptype, int numavg,
-              size_t datasize, const void *data, size_t nmiss, void **gribbuffer, size_t *gribbuffersize, int comptype,
+gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime, int tsteptype,
+              int numavg, size_t datasize, const void *data, size_t nmiss, void **gribbuffer, size_t *gribbuffersize, int comptype,
               void *gribContainer)
 {
   long editionNumber = 2;
@@ -3331,7 +3331,10 @@ gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiD
 
   gribapiSetExtMode(gh, gridID, datasize, data);
 
-  GRIB_CHECK(grib_set_double_array(gh, "values", (const double *) data, datasize), 0);
+  if (memType == MEMTYPE_FLOAT)
+    GRIB_CHECK(grib_set_float_array(gh, "values", (const float *) data, datasize), 0);
+  else
+    GRIB_CHECK(grib_set_double_array(gh, "values", (const double *) data, datasize), 0);
 
   if (nmiss)
     {

@@ -32,8 +32,8 @@ zaxis_units_to_centimeter(int zaxisID)
   if (units[1] == 'm' && !units[2])
     {
       if      (units[0] == 'm') sf =   0.1;
-      else if (units[0] == 'c') sf =   1;
-      else if (units[0] == 'd') sf =  10;
+      else if (units[0] == 'c') sf =   1.0;
+      else if (units[0] == 'd') sf =  10.0;
     }
   // clang-format on
 
@@ -90,7 +90,7 @@ grbDecompress(size_t recsize, size_t *buffersize, void **gribbuffer)
   if (gribGetZip(recsize, (unsigned char *) *gribbuffer, &unzipsize) > 0)
     {
       comptype = CDI_COMPRESS_SZIP;
-      unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
+      unzipsize += 100; // need 0 to 1 bytes for rounding of bds
       ensureBufferSize(unzipsize, buffersize, gribbuffer);
     }
 
@@ -273,7 +273,7 @@ grbScanTimestep1(stream_t *streamptr)
   int status = CDI_EUFTYPE;
 
 #ifdef HAVE_LIBCGRIBEX
-  const int filetype = streamptr->filetype;
+  int filetype = streamptr->filetype;
 
   if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
     status = cgribexScanTimestep1(streamptr);
@@ -294,7 +294,7 @@ grbScanTimestep2(stream_t *streamptr)
   int status = CDI_EUFTYPE;
 
 #ifdef HAVE_LIBCGRIBEX
-  const int filetype = streamptr->filetype;
+  int filetype = streamptr->filetype;
 
   if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
     status = cgribexScanTimestep2(streamptr);
@@ -315,7 +315,7 @@ grbScanTimestep(stream_t *streamptr)
   int status = CDI_EUFTYPE;
 
 #ifdef HAVE_LIBCGRIBEX
-  const int filetype = streamptr->filetype;
+  int filetype = streamptr->filetype;
 
   if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
     status = cgribexScanTimestep(streamptr);
@@ -339,7 +339,7 @@ grbInqContents(stream_t *streamptr)
   int status = grbScanTimestep1(streamptr);
   if (status == 0 && streamptr->ntsteps == -1) status = grbScanTimestep2(streamptr);
 
-  const int fileID = streamptr->fileID;
+  int fileID = streamptr->fileID;
   fileSetPos(fileID, 0, SEEK_SET);
 
   return status;
