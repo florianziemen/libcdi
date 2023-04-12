@@ -1730,7 +1730,13 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
   if (gridsize != datasize) Error("Internal problem: gridsize(%zu) != datasize(%zu)!", gridsize, datasize);
   size_t dummy = datasize;
   if (memType == MEMTYPE_FLOAT)
-    GRIB_CHECK(grib_get_float_array(gh, "values", (float *) data, &dummy), 0);
+    {
+#ifdef HAVE_GRIBAPI_FLOAT_INTERFACE
+      GRIB_CHECK(grib_get_float_array(gh, "values", (float *) data, &dummy), 0);
+#else
+      Error("grib_get_float_array() not found!");
+#endif
+    }
   else
     GRIB_CHECK(grib_get_double_array(gh, "values", (double *) data, &dummy), 0);
 
@@ -3336,7 +3342,13 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
   gribapiSetExtMode(gh, gridID, datasize, data);
 
   if (memType == MEMTYPE_FLOAT)
-    GRIB_CHECK(grib_set_float_array(gh, "values", (const float *) data, datasize), 0);
+    {
+#ifdef HAVE_GRIBAPI_FLOAT_INTERFACE
+      GRIB_CHECK(grib_set_float_array(gh, "values", (const float *) data, datasize), 0);
+#else
+      Error("grib_set_float_array() not found!");
+#endif
+    }
   else
     GRIB_CHECK(grib_set_double_array(gh, "values", (const double *) data, datasize), 0);
 

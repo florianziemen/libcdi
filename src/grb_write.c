@@ -49,8 +49,8 @@ grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int g
       void *gribContainer = (void *) &((gribContainer_t *) gribContainers)[varID];
 #endif
       const void *datap = data;
-      int memTypeX = gribapi_has_float_interface() ? memType : MEMTYPE_DOUBLE;
-      if (!gribapi_has_float_interface() && memType == MEMTYPE_FLOAT)
+      int memTypeX = /*have_gribapi_float_interface() ? memType :*/ MEMTYPE_DOUBLE;
+      if (/*!have_gribapi_float_interface() &&*/ memType == MEMTYPE_FLOAT)
         {
           const float *dataf = (const float *) data;
           double *datad = (double *) Malloc(datasize * sizeof(double));
@@ -62,7 +62,7 @@ grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int g
       nbytes = gribapiEncode(memTypeX, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, (long) datasize,
                              datap, nmiss, gribbuffer, &gribbuffersize, comptype, gribContainer);
 
-      if (!gribapi_has_float_interface() && memType == MEMTYPE_FLOAT) Free((void *) datap);
+      if (/*!have_gribapi_float_interface() &&*/ memType == MEMTYPE_FLOAT) Free((void *) datap);
     }
 #else
   {

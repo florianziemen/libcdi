@@ -62,10 +62,17 @@ void gribContainersNew(stream_t *streamptr);
 void gribContainersDelete(stream_t *streamptr);
 
 #ifdef HAVE_LIBGRIB_API
-static inline int gribapi_has_float_interface()
-{
+
 #ifdef ECCODES_VERSION
-  return (ECCODES_VERSION >= 23000);
+#if ECCODES_VERSION >= 23000
+#define HAVE_GRIBAPI_FLOAT_INTERFACE 1
+#endif
+#endif
+
+static inline int have_gribapi_float_interface()
+{
+#ifdef HAVE_GRIBAPI_FLOAT_INTERFACE
+  return 1;
 #else
   return 0;
 #endif

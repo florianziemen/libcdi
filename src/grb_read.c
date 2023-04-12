@@ -38,12 +38,12 @@ grb_decode(int filetype, int memType, void *cgribexp, void *gribbuffer, size_t g
 #ifdef HAVE_LIBGRIB_API
     {
       void *datap = data;
-      int memTypeX = gribapi_has_float_interface() ? memType : MEMTYPE_DOUBLE;
-      if (!gribapi_has_float_interface() && memType == MEMTYPE_FLOAT) datap = Malloc(datasize * sizeof(double));
+      int memTypeX = have_gribapi_float_interface() ? memType : MEMTYPE_DOUBLE;
+      if (!have_gribapi_float_interface() && memType == MEMTYPE_FLOAT) datap = Malloc(datasize * sizeof(double));
 
       status = gribapiDecode(memTypeX, gribbuffer, gribsize, datap, datasize, unreduced, nmiss, missval);
 
-      if (!gribapi_has_float_interface() && memType == MEMTYPE_FLOAT)
+      if (!have_gribapi_float_interface() && memType == MEMTYPE_FLOAT)
         {
           float *dataf = (float *) data;
           double *datad = (double *) datap;
