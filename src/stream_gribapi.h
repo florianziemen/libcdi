@@ -11,7 +11,8 @@ int gribapiScanTimestep1(stream_t *streamptr);
 int gribapiScanTimestep2(stream_t *streamptr);
 int gribapiScanTimestep(stream_t *streamptr);
 
-int gribapiDecode(void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced, size_t *nmiss, double missval);
+int gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced, size_t *nmiss,
+                  double missval);
 
 size_t gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime,
                      int tsteptype, int numavg, size_t datasize, const void *data, size_t nmiss, void **gribbuffer,

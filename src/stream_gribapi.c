@@ -1701,7 +1701,8 @@ gribapiScanTimestep(stream_t *streamptr)
 #endif
 
 int
-gribapiDecode(void *gribbuffer, size_t gribsize, void *data, size_t gridsize, int unreduced, size_t *nmiss, double missval)
+gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t gridsize, int unreduced, size_t *nmiss,
+              double missval)
 {
   int status = 0;
 
@@ -1728,7 +1729,10 @@ gribapiDecode(void *gribbuffer, size_t gribsize, void *data, size_t gridsize, in
 
   if (gridsize != datasize) Error("Internal problem: gridsize(%zu) != datasize(%zu)!", gridsize, datasize);
   size_t dummy = datasize;
-  GRIB_CHECK(grib_get_double_array(gh, "values", (double *) data, &dummy), 0);
+  if (memType == MEMTYPE_FLOAT)
+    GRIB_CHECK(grib_get_float_array(gh, "values", (float *) data, &dummy), 0);
+  else
+    GRIB_CHECK(grib_get_double_array(gh, "values", (double *) data, &dummy), 0);
 
   long lpar;
   GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);

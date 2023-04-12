@@ -65,12 +65,11 @@ case "${HOSTNAME}" in
     hama*)
         CDILIBS="--disable-iso-c-interface \
                  --enable-maintainer-mode \
-                 --with-szlib=$HOME/local \
-                 --with-fdb5=$HOME/src/fdb \
-                 --with-eccodes=$HOME/local/eccodes-2.27 \
+                 --with-szlib=/opt/local/lib/libaec \
+                 --with-eccodes=$HOME/local/eccodes-2.30.0 \
                  --with-netcdf=$HOME/local/netcdf-c-4.9.1"
         PREFIX="--prefix=$HOME/local/cdi"
-        LD_ADD="-Wl,-rpath,$HOME/local/eccodes-2.27/lib -Wl,-rpath,$HOME/src/fdb/lib"
+        LD_ADD="-Wl,-rpath,$HOME/local/eccodes-2.30.0/lib"
         if  test "$COMP" = clang ; then
           ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
 	             CC=clang CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3"

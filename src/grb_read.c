@@ -19,7 +19,7 @@
 #include "cgribex.h" /* gribZip gribGetZip gribGinfo */
 
 static int
-grb_decode(int filetype, int memtype, void *cgribexp, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced,
+grb_decode(int filetype, int memType, void *cgribexp, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced,
            size_t *nmiss, double missval)
 {
   int status = 0;
@@ -31,17 +31,19 @@ grb_decode(int filetype, int memtype, void *cgribexp, void *gribbuffer, size_t g
       extern int cdiNAdditionalGRIBKeys;
       if (cdiNAdditionalGRIBKeys > 0) Error("CGRIBEX decode does not support reading of additional GRIB keys!");
 #endif
-      status = cgribexDecode(memtype, cgribexp, gribbuffer, gribsize, data, datasize, unreduced, nmiss, missval);
+      status = cgribexDecode(memType, cgribexp, gribbuffer, gribsize, data, datasize, unreduced, nmiss, missval);
     }
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
     {
-      void *datap = (memtype == MEMTYPE_FLOAT) ? Malloc(datasize * sizeof(double)) : data;
+      void *datap = data;
+      int memTypeX = gribapi_has_float_interface() ? memType : MEMTYPE_DOUBLE;
+      if (!gribapi_has_float_interface() && memType == MEMTYPE_FLOAT) datap = Malloc(datasize * sizeof(double));
 
-      status = gribapiDecode(gribbuffer, gribsize, datap, datasize, unreduced, nmiss, missval);
+      status = gribapiDecode(memTypeX, gribbuffer, gribsize, datap, datasize, unreduced, nmiss, missval);
 
-      if (memtype == MEMTYPE_FLOAT)
+      if (!gribapi_has_float_interface() && memType == MEMTYPE_FLOAT)
         {
           float *dataf = (float *) data;
           double *datad = (double *) datap;
