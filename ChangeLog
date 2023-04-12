@@ -2,6 +2,10 @@
 
 	* gribapi: add support for single precision float interface (available since ecCodes-2.30.0)
 
+2023-04-09  Uwe Schulzweida
+
+        * fix Bug #10790
+
 2023-04-06  Uwe Schulzweida
 
 	* Version 2.2.1 released
