@@ -1,3 +1,11 @@
+2023-04-17  Uwe Schulzweida
+
+	* Version 2.2.1 released
+
+2023-04-14  Uwe Schulzweida
+
+	* Add support for NetCDF attribute type NC_INT64
+
 2023-04-12  Uwe Schulzweida
 
 	* gribapi decode: add support for single precision float interface (available since ecCodes-2.30.0)
@@ -5,10 +13,6 @@
 2023-04-09  Uwe Schulzweida
 
         * fix Bug #10790
-
-2023-04-06  Uwe Schulzweida
-
-	* Version 2.2.1 released
 
 2023-03-23  Uwe Schulzweida
 

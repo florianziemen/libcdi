@@ -3825,7 +3825,7 @@ gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp)
   if (lwarn)
     {
       // lwarn = false;
-      const char *projection = "lambert_conformal_conic";
+      const char *projection = "polar_stereographic";
       if (IS_EQUAL(gpp->lon_0, gpp->mv))
         Warning("%s mapping parameter %s missing!", projection, "straight_vertical_longitude_from_pole");
       if (IS_EQUAL(gpp->lat_0, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "latitude_of_projection_origin");

@@ -307,6 +307,16 @@ xtypeIsInt(nc_type xtype)
   return isInt;
 }
 
+static bool
+xtypeIsInt64(nc_type xtype)
+{
+#ifdef HAVE_NETCDF4
+  return (xtype == NC_INT64 || xtype == NC_UINT64);
+#else
+  return false;
+#endif
+}
+
 static int
 cdfInqDatatype(stream_t *streamptr, int xtype, bool isUnsigned)
 {
@@ -379,12 +389,35 @@ cdfGetAttInt(int fileID, int ncvarid, const char *attname, size_t attlen, int *a
   if (xtypeIsFloat(atttype) || xtypeIsInt(atttype))
     {
       bool needAlloc = (nc_attlen > attlen);
-      int *pintatt = needAlloc ? (int *) (Malloc(nc_attlen * sizeof(int))) : attint;
+      int *pintatt = needAlloc ? (int *) (malloc(nc_attlen * sizeof(int))) : attint;
       cdf_get_att_int(fileID, ncvarid, attname, pintatt);
       if (needAlloc)
         {
           memcpy(attint, pintatt, attlen * sizeof(int));
-          Free(pintatt);
+          free(pintatt);
+        }
+    }
+}
+
+static void
+cdfGetAttInt64(int fileID, int ncvarid, const char *attname, size_t attlen, int64_t *attint)
+{
+  *attint = 0;
+
+  nc_type atttype;
+  size_t nc_attlen;
+  cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
+  cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
+
+  if (xtypeIsFloat(atttype) || xtypeIsInt(atttype) || xtypeIsInt64(atttype))
+    {
+      bool needAlloc = (nc_attlen > attlen);
+      int64_t *pintatt = needAlloc ? (int64_t *) (malloc(nc_attlen * sizeof(int64_t))) : attint;
+      cdf_get_att_int64(fileID, ncvarid, attname, pintatt);
+      if (needAlloc)
+        {
+          memcpy(attint, pintatt, attlen * sizeof(int64_t));
+          free(pintatt);
         }
     }
 }
@@ -840,6 +873,24 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
       // clang-format on
       cdiDefAttInt(cdiID, varID, attname, datatype, (int) attlen, pattint);
       if (attlen > 1) free(pattint);
+    }
+  else if (xtypeIsInt64(atttype))
+    {
+      int64_t attint64 = 0;
+      int64_t *pattint64 = (attlen > 1) ? (int64_t *) malloc(attlen * sizeof(int64_t)) : &attint64;
+      cdfGetAttInt64(ncid, ncvarid, attname, attlen, pattint64);
+      bool defineAtts = true;
+      for (size_t i = 0; i < attlen; ++i)
+        if (pattint64[i] > INT_MAX) defineAtts = false;
+      if (defineAtts)
+        {
+          int attint = 0;
+          int *pattint = (attlen > 1) ? (int *) malloc(attlen * sizeof(int)) : &attint;
+          for (size_t i = 0; i < attlen; ++i) pattint[i] = pattint64[i];
+          cdiDefAttInt(cdiID, varID, attname, CDI_DATATYPE_INT32, (int) attlen, pattint);
+          if (attlen > 1) free(pattint);
+        }
+      if (attlen > 1) free(pattint64);
     }
   else if (xtypeIsFloat(atttype))
     {
