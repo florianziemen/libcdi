@@ -19,8 +19,8 @@
 #include "cgribex.h" /* gribZip gribGetZip gribGinfo */
 
 static int
-grb_decode(int filetype, int memType, int datatype, void *cgribexp, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced,
-           size_t *nmiss, double missval)
+grb_decode(int filetype, int memType, int datatype, void *cgribexp, void *gribbuffer, size_t gribsize, void *data, size_t datasize,
+           int unreduced, size_t *nmiss, double missval)
 {
   int status = 0;
 
@@ -44,7 +44,7 @@ grb_decode(int filetype, int memType, int datatype, void *cgribexp, void *gribbu
 
       status = gribapiDecode(memTypeX, gribbuffer, gribsize, datap, datasize, unreduced, nmiss, missval);
 
-      if (!useFloatInterface&& memType == MEMTYPE_FLOAT)
+      if (!useFloatInterface && memType == MEMTYPE_FLOAT)
         {
           float *dataf = (float *) data;
           double *datad = (double *) datap;
@@ -119,8 +119,8 @@ grb_decode_record(void *untypedArgs)
 {
   JobArgs *args = (JobArgs *) untypedArgs;
   *args->outZip = grib1_unzip_record(args->gribbuffer, &args->recsize);
-  grb_decode(args->filetype, args->memType, args->datatype, args->cgribexp, args->gribbuffer, args->recsize, args->data, args->gridsize,
-             args->unreduced, &args->nmiss, args->missval);
+  grb_decode(args->filetype, args->memType, args->datatype, args->cgribexp, args->gribbuffer, args->recsize, args->data,
+             args->gridsize, args->unreduced, &args->nmiss, args->missval);
   return 0;
 }
 
