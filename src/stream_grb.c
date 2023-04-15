@@ -90,7 +90,7 @@ grbDecompress(size_t recsize, size_t *buffersize, void **gribbuffer)
   if (gribGetZip(recsize, (unsigned char *) *gribbuffer, &unzipsize) > 0)
     {
       comptype = CDI_COMPRESS_SZIP;
-      unzipsize += 100; // need 0 to 1 bytes for rounding of bds
+      unzipsize += 100;  // need 0 to 1 bytes for rounding of bds
       ensureBufferSize(unzipsize, buffersize, gribbuffer);
     }
 
