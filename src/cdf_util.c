@@ -22,8 +22,8 @@ strStartsWith(const char *vstr, const char *cstr)
   bool is_equal = false;
   if (vstr && cstr)
     {
-      const size_t clen = strlen(cstr);
-      const size_t vlen = strlen(vstr);
+      size_t clen = strlen(cstr);
+      size_t vlen = strlen(vstr);
       if (clen <= vlen) is_equal = (memcmp(vstr, cstr, clen) == 0);
     }
   return is_equal;
@@ -78,7 +78,7 @@ is_timeaxis_units(const char *timeunits)
 {
   bool status = false;
 
-  const size_t len = strlen(timeunits);
+  size_t len = strlen(timeunits);
   char *tu = (char *) malloc((len + 1) * sizeof(char));
 
   for (size_t i = 0; i < len; i++) tu[i] = (char) tolower((int) timeunits[i]);
@@ -124,6 +124,7 @@ is_pressure_units(const char *units)
        || strStartsWith(units, "mb")
        || strStartsWith(units, "hectopas")
        || strStartsWith(units, "hPa")
+       || strStartsWith(units, "pa")
        || strStartsWith(units, "Pa"));
   // clang-format on
 }

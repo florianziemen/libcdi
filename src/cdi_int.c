@@ -40,6 +40,7 @@ int CDI_Read_Cell_Corners = 1;
 int CDI_CMOR_Mode = 0;
 int CDI_Reduce_Dim = 0;
 int CDI_Shuffle = 0;
+int CDI_Test = 0;
 size_t CDI_Netcdf_Hdr_Pad = 0UL;
 size_t CDI_Chunk_Cache = 0UL;
 size_t CDI_Chunk_Cache_Max = 0UL;
@@ -145,9 +146,6 @@ cdiPrintVersion(void)
 #ifdef HAVE_LIBNETCDF
   fprintf(stdout, "  NetCDF library version : %s\n", cdfLibraryVersion());
 #endif
-#ifdef HAVE_NC4HDF5
-  //  fprintf(stdout, "    HDF5 library version : %s\n", hdfLibraryVersion());
-#endif
 #ifdef HAVE_LIBSERVICE
   fprintf(stdout, "    exse library version : %s\n", srvLibraryVersion());
 #endif
@@ -209,18 +207,13 @@ cdiPrintDatatypes(void)
 void
 cdiDebug(int level)
 {
-  if (level < 0) return;
-  unsigned ulevel = (unsigned) level;
+  unsigned ulevel = (level == 1) ? (1U << 16) : (unsigned) level;
 
-  if (ulevel == 1 || (ulevel & 2)) CDI_Debug = 1;
+  if (ulevel & 2) CDI_Debug = 1;
+  if (ulevel & 4) memDebug(1);
+  if (ulevel & 8) fileDebug(1);
 
-  if (CDI_Debug) Message("debug level %d", level);
-
-  if (ulevel == 1 || (ulevel & 4)) memDebug(1);
-
-  if (ulevel == 1 || (ulevel & 8)) fileDebug(1);
-
-  if (ulevel == 1 || (ulevel & 16))
+  if (ulevel & 16)
     {
 #ifdef HAVE_LIBCGRIBEX
       gribSetDebug(1);
@@ -373,6 +366,9 @@ cdiInitialize(void)
 
       value = cdi_getenv_int("CDI_CHUNK_CACHE_MAX");
       if (value >= 0) CDI_Chunk_Cache_Max = (size_t) value;
+
+      value = cdi_getenv_int("CDI_TEST");
+      if (value >= 0) CDI_Test = (size_t) value;
 
       envstr = getenv("CDI_GRIB1_TEMPLATE");
       if (envstr) CDI_GRIB1_Template = envstr;
@@ -544,6 +540,8 @@ cdiBaseFiletype(int filetype)
 {
   switch (filetype)
     {
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2: return CDI_FILETYPE_GRIB;
     case CDI_FILETYPE_NC:
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:

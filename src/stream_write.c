@@ -37,8 +37,7 @@ cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, SizeT
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2: grb_write_var(streamptr, varID, memtype, data, nmiss); break;
+    case CDI_FILETYPE_GRIB: grb_write_var(streamptr, varID, memtype, data, nmiss); break;
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV: srvWriteVarDP(streamptr, varID, (double *) data); break;
@@ -143,8 +142,7 @@ cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, const 
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2: grb_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss); break;
+    case CDI_FILETYPE_GRIB: grb_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss); break;
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV: srvWriteVarSliceDP(streamptr, varID, levelID, (double *) data); break;
@@ -252,8 +250,7 @@ cdiStreamWriteVarChunk_(int streamID, int varID, int memtype, const int rect[][2
   switch (cdiBaseFiletype(filetype))
     {
 #if defined(HAVE_LIBGRIB)
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2:
+    case CDI_FILETYPE_GRIB:
 #endif
 #if defined(HAVE_LIBSERVICE)
     case CDI_FILETYPE_SRV:
@@ -285,8 +282,7 @@ stream_write_record(int streamID, int memtype, const void *data, SizeType nmiss)
   switch (cdiBaseFiletype(streamptr->filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRB:
-    case CDI_FILETYPE_GRB2: grb_write_record(streamptr, memtype, data, nmiss); break;
+    case CDI_FILETYPE_GRIB: grb_write_record(streamptr, memtype, data, nmiss); break;
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV: srv_write_record(streamptr, memtype, data); break;

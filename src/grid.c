@@ -85,8 +85,8 @@ cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int attl
 
   if (atttype == CDI_DATATYPE_INT32)
     {
-      int attint;
-      int *pattint = attlen > 1 ? (int *) malloc(attlen * sizeof(int)) : &attint;
+      int attint = 0;
+      int *pattint = (attlen > 1) ? (int *) malloc(attlen * sizeof(int)) : &attint;
       cdiInqAttInt(gridID, CDI_GLOBAL, attname, attlen, pattint);
       for (int i = 0; i < attlen; ++i) attflt[i] = (double) pattint[i];
       if (attlen > 1) free(pattint);
@@ -3825,7 +3825,7 @@ gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp)
   if (lwarn)
     {
       // lwarn = false;
-      const char *projection = "lambert_conformal_conic";
+      const char *projection = "polar_stereographic";
       if (IS_EQUAL(gpp->lon_0, gpp->mv))
         Warning("%s mapping parameter %s missing!", projection, "straight_vertical_longitude_from_pole");
       if (IS_EQUAL(gpp->lat_0, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "latitude_of_projection_origin");

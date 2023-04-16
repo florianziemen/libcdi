@@ -307,6 +307,16 @@ xtypeIsInt(nc_type xtype)
   return isInt;
 }
 
+static bool
+xtypeIsInt64(nc_type xtype)
+{
+#ifdef HAVE_NETCDF4
+  return (xtype == NC_INT64 || xtype == NC_UINT64);
+#else
+  return false;
+#endif
+}
+
 static int
 cdfInqDatatype(stream_t *streamptr, int xtype, bool isUnsigned)
 {
@@ -379,12 +389,35 @@ cdfGetAttInt(int fileID, int ncvarid, const char *attname, size_t attlen, int *a
   if (xtypeIsFloat(atttype) || xtypeIsInt(atttype))
     {
       bool needAlloc = (nc_attlen > attlen);
-      int *pintatt = needAlloc ? (int *) (Malloc(nc_attlen * sizeof(int))) : attint;
+      int *pintatt = needAlloc ? (int *) (malloc(nc_attlen * sizeof(int))) : attint;
       cdf_get_att_int(fileID, ncvarid, attname, pintatt);
       if (needAlloc)
         {
           memcpy(attint, pintatt, attlen * sizeof(int));
-          Free(pintatt);
+          free(pintatt);
+        }
+    }
+}
+
+static void
+cdfGetAttInt64(int fileID, int ncvarid, const char *attname, size_t attlen, int64_t *attint)
+{
+  *attint = 0;
+
+  nc_type atttype;
+  size_t nc_attlen;
+  cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
+  cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
+
+  if (xtypeIsFloat(atttype) || xtypeIsInt(atttype) || xtypeIsInt64(atttype))
+    {
+      bool needAlloc = (nc_attlen > attlen);
+      int64_t *pintatt = needAlloc ? (int64_t *) (malloc(nc_attlen * sizeof(int64_t))) : attint;
+      cdf_get_att_int64(fileID, ncvarid, attname, pintatt);
+      if (needAlloc)
+        {
+          memcpy(attint, pintatt, attlen * sizeof(int64_t));
+          free(pintatt);
         }
     }
 }
@@ -825,7 +858,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
 
   if (xtypeIsInt(atttype))
     {
-      int attint;
+      int attint = 0;
       int *pattint = (attlen > 1) ? (int *) malloc(attlen * sizeof(int)) : &attint;
       cdfGetAttInt(ncid, ncvarid, attname, attlen, pattint);
       // clang-format off
@@ -841,9 +874,27 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
       cdiDefAttInt(cdiID, varID, attname, datatype, (int) attlen, pattint);
       if (attlen > 1) free(pattint);
     }
+  else if (xtypeIsInt64(atttype))
+    {
+      int64_t attint64 = 0;
+      int64_t *pattint64 = (attlen > 1) ? (int64_t *) malloc(attlen * sizeof(int64_t)) : &attint64;
+      cdfGetAttInt64(ncid, ncvarid, attname, attlen, pattint64);
+      bool defineAtts = true;
+      for (size_t i = 0; i < attlen; ++i)
+        if (pattint64[i] > INT_MAX) defineAtts = false;
+      if (defineAtts)
+        {
+          int attint = 0;
+          int *pattint = (attlen > 1) ? (int *) malloc(attlen * sizeof(int)) : &attint;
+          for (size_t i = 0; i < attlen; ++i) pattint[i] = pattint64[i];
+          cdiDefAttInt(cdiID, varID, attname, CDI_DATATYPE_INT32, (int) attlen, pattint);
+          if (attlen > 1) free(pattint);
+        }
+      if (attlen > 1) free(pattint64);
+    }
   else if (xtypeIsFloat(atttype))
     {
-      double attflt;
+      double attflt = 0.0;
       double *pattflt = (attlen > 1) ? (double *) malloc(attlen * sizeof(double)) : &attflt;
       cdfGetAttDouble(ncid, ncvarid, attname, attlen, pattflt);
       int datatype = (atttype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
@@ -1532,6 +1583,32 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
 
   for (int i = 0; i < max_check_vars; ++i)
     if (checked_vars[i]) Free(checked_vars[i]);
+}
+
+static void
+cdf_set_chunk_info(stream_t *streamptr, int nvars, ncvar_t *ncvars)
+{
+  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+    {
+      ncvar_t *ncvar = &ncvars[ncvarid];
+      if (ncvar->varStatus == DataVar)
+        {
+          int ndims = ncvar->ndims;
+          ncvar->isChunked = true;
+          for (int i = 0; i < ndims; ++i)
+            {
+              size_t chunkSize = ncvar->chunks[i];
+              if (chunkSize > 1)
+                {
+                  int dimType = ncvar->dimtype[i];
+                  // clang-format off
+                  if      (dimType == T_AXIS && chunkSize > streamptr->chunkSizeTdim) streamptr->chunkSizeTdim = chunkSize;
+                  else if (dimType == Z_AXIS && chunkSize > streamptr->chunkSizeZdim) streamptr->chunkSizeZdim = chunkSize;
+                  // clang-format on
+                }
+            }
+        }
+    }
 }
 
 static void
@@ -2928,16 +3005,17 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
           CdiQuery *query = streamptr->query;
           if (query)
             {
-              if (ncvar->gridtype != GRID_UNSTRUCTURED)
-                {
-                  Warning("Query parameter cell is only available for unstructured grids, skipped variable %s!", ncvar->name);
-                  ncvar->varStatus = UndefVar;
-                  continue;
-                }
-
               int numCellidx = cdiQueryNumCellidx(query);
               if (numCellidx > 0)
                 {
+                  // if (ncvar->gridtype != GRID_UNSTRUCTURED)
+                  if (xdimid != CDI_UNDEFID && ydimid != CDI_UNDEFID)
+                    {
+                      Warning("Query parameter cell is only available for 1D grids, skipped variable %s!", ncvar->name);
+                      ncvar->varStatus = UndefVar;
+                      continue;
+                    }
+
                   size_t start = cdiQueryGetCellidx(query, 0);
                   size_t count = (numCellidx == 2) ? cdiQueryGetCellidx(query, 1) : 1;
                   if ((start + count) <= xsize)
@@ -4561,15 +4639,15 @@ cdfInqContents(stream_t *streamptr)
   cdfVerifyVars(nvars, ncvars, ncdims);
 
   // select vars
-  int nvars_data = 0;
+  int nvarsData = 0;
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
-    if (ncvars[ncvarid].varStatus == DataVar) nvars_data++;
+    if (ncvars[ncvarid].varStatus == DataVar) nvarsData++;
 
   if (CDI_Debug) Message("time varid = %d", streamptr->basetime.ncvarid);
   if (CDI_Debug) Message("ntsteps = %zu", ntsteps);
-  if (CDI_Debug) Message("nvars_data = %d", nvars_data);
+  if (CDI_Debug) Message("nvarsData = %d", nvarsData);
 
-  if (nvars_data == 0)
+  if (nvarsData == 0)
     {
       streamptr->ntsteps = 0;
       Warning("No data arrays found!");
@@ -4579,7 +4657,9 @@ cdfInqContents(stream_t *streamptr)
   if (ntsteps == 0 && streamptr->basetime.ncdimid == CDI_UNDEFID && streamptr->basetime.ncvarid != CDI_UNDEFID) ntsteps = 1;
 
   // define all data variables
-  cdf_define_all_vars(streamptr, vlistID, instID, modelID, nvars_data, nvars, ncvars, ncdims, timedimid);
+  cdf_define_all_vars(streamptr, vlistID, instID, modelID, nvarsData, nvars, ncvars, ncdims, timedimid);
+
+  cdf_set_chunk_info(streamptr, nvars, ncvars);
 
   // time varID
   int nctimevarid = streamptr->basetime.ncvarid;

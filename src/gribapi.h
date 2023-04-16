@@ -62,12 +62,28 @@ void gribContainersNew(stream_t *streamptr);
 void gribContainersDelete(stream_t *streamptr);
 
 #ifdef HAVE_LIBGRIB_API
+
+#ifdef ECCODES_VERSION
+#if ECCODES_VERSION >= 23000
+#define HAVE_GRIBAPI_FLOAT_INTERFACE 1
+#endif
+#endif
+
+static inline int have_gribapi_float_interface()
+{
+#ifdef HAVE_GRIBAPI_FLOAT_INTERFACE
+  return 1;
+#else
+  return 0;
+#endif
+}
+
 static inline int my_grib_set_double(grib_handle* h, const char* key, double val)
 {
   if (CDI_gribapi_debug)
     fprintf(stderr, "grib_set_double(\tgrib_handle* h, \"%s\", %f)\n", key, val);
 
-  const int retVal = grib_set_double(h, key, val);
+  int retVal = grib_set_double(h, key, val);
   if (retVal != 0)
     fprintf(stderr, "!!! failed call to grib_set_double(\tgrib_handle* h, \"%s\", %f) !!!\n", key, val);
   return retVal;
@@ -78,7 +94,7 @@ static inline int my_grib_set_long(grib_handle* h, const char* key, long val)
   if (CDI_gribapi_debug)
     fprintf(stderr, "grib_set_long(  \tgrib_handle* h, \"%s\", %ld)\n", key, val);
 
-  const int retVal = grib_set_long(h, key, val);
+  int retVal = grib_set_long(h, key, val);
   if (retVal != 0)
     fprintf(stderr, "!!! failed call to grib_set_long(  \tgrib_handle* h, \"%s\", %ld) !!!\n", key, val);
   return retVal;

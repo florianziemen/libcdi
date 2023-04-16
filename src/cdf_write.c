@@ -13,7 +13,7 @@
 #include "vlist.h"
 #include "vlist_var.h"
 
-//#include <netcdf_filter.h>
+// #include <netcdf_filter.h>
 
 void
 cdf_def_var_filter(int ncid, int ncvarID, unsigned int id, size_t nparams, const unsigned int *params)
@@ -22,6 +22,7 @@ cdf_def_var_filter(int ncid, int ncvarID, unsigned int id, size_t nparams, const
   int status;
   if ((status = nc_def_var_filter(ncid, ncvarID, id, nparams, params)))
     {
+      Message("filterId=%u  numParams=%zu", id, nparams);
       Error("nc_def_var_filter failed; %s", nc_strerror(status));
     }
 #else
@@ -75,6 +76,9 @@ cdfDefVarSzip(int ncid, int ncvarID, int pixels_per_block)
   if ((status = nc_def_var_szip(ncid, ncvarID, options_mask, pixels_per_block)))
     Error("nc_def_var_szip failed; %s", nc_strerror(status));
 #else
+  (void) ncid;
+  (void) ncvarID;
+  (void) pixels_per_block;
   static bool lwarn = true;
   if (lwarn)
     {
@@ -702,14 +706,14 @@ calc_chunksize(size_t chunkSizeLim, size_t size)
   return chunkSize;
 }
 
-static const size_t chunkSizeMax = 65536;
-static const size_t chunkSizeLim = 1048576;
+static const size_t chunkSizeMin = 262144;    // 256k
+static const size_t chunkSizeLim = 16777216;  // 16m
 
 size_t
 calc_chunksize_y(int chunkType, size_t gridsize, size_t xsize, size_t ysize)
 {
   if (chunkType == CDI_CHUNK_AUTO)
-    return (gridsize <= chunkSizeMax) ? ysize : chunkSizeMax / xsize;
+    return (gridsize <= chunkSizeMin) ? ysize : chunkSizeMin / xsize;
   else
     return (chunkType == CDI_CHUNK_LINES) ? 1 : ysize;
 }
@@ -718,7 +722,7 @@ size_t
 calc_chunksize_x(int chunkType, int chunkSize, size_t xsize, bool yIsUndefined)
 {
   if (chunkType == CDI_CHUNK_AUTO && yIsUndefined)
-    return (chunkSize > 0) ? (size_t) chunkSize : ((xsize <= chunkSizeMax) ? xsize : chunkSizeMax);
+    return (chunkSize > 0) ? (size_t) chunkSize : ((xsize <= chunkSizeMin) ? xsize : chunkSizeMin);
   else
     return calc_chunksize(chunkSizeLim, xsize);
 }

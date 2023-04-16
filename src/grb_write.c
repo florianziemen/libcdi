@@ -24,9 +24,9 @@
 #include "namespace.h"
 
 static size_t
-grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime,
-          int tsteptype, int numavg, size_t datasize, const void *data, size_t nmiss, void **gribbuffer, int comptype,
-          void *gribContainers)
+grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime,
+           int tsteptype, int numavg, size_t datasize, const void *data, size_t nmiss, void **gribbuffer, int comptype,
+           void *gribContainers)
 {
   size_t nbytes = 0;
 
@@ -36,7 +36,7 @@ grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gr
       size_t gribbuffersize = datasize * 4 + 3000;
       *gribbuffer = Malloc(gribbuffersize);
 
-      nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize, data, nmiss,
+      nbytes = cgribexEncode(memType, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize, data, nmiss,
                              *gribbuffer, gribbuffersize);
     }
   else
@@ -49,7 +49,8 @@ grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gr
       void *gribContainer = (void *) &((gribContainer_t *) gribContainers)[varID];
 #endif
       const void *datap = data;
-      if (memtype == MEMTYPE_FLOAT)
+      int memTypeX = /*have_gribapi_float_interface() ? memType :*/ MEMTYPE_DOUBLE;
+      if (/*!have_gribapi_float_interface() &&*/ memType == MEMTYPE_FLOAT)
         {
           const float *dataf = (const float *) data;
           double *datad = (double *) Malloc(datasize * sizeof(double));
@@ -58,10 +59,10 @@ grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gr
         }
 
       size_t gribbuffersize;
-      nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, (long) datasize, datap, nmiss,
-                             gribbuffer, &gribbuffersize, comptype, gribContainer);
+      nbytes = gribapiEncode(memTypeX, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, (long) datasize,
+                             datap, nmiss, gribbuffer, &gribbuffersize, comptype, gribContainer);
 
-      if (memtype == MEMTYPE_FLOAT) Free((void *) datap);
+      if (/*!have_gribapi_float_interface() &&*/ memType == MEMTYPE_FLOAT) Free((void *) datap);
     }
 #else
   {
@@ -77,7 +78,7 @@ grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gr
 static size_t
 grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
 {
-  size_t buffersize = gribbuffersize + 1000; /* compressed record can be greater than source record */
+  size_t buffersize = gribbuffersize + 1000;  // compressed record can be greater than source record
   void *buffer = Malloc(buffersize);
 
   // memcpy(buffer, gribbuffer, gribbuffersize);
@@ -393,8 +394,8 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     }
 
   void *gribbuffer = NULL;
-  size_t nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize,
-                            data, nmiss, &gribbuffer, comptype, streamptr->gribContainers);
+  size_t nbytes = grb_encode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize,
+                             data, nmiss, &gribbuffer, comptype, streamptr->gribContainers);
 
   if (filetype == CDI_FILETYPE_GRB && (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC))
     nbytes = grbSzip(filetype, gribbuffer, nbytes);

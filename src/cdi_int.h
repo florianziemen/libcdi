@@ -293,7 +293,10 @@ typedef struct
   int ncDimID[MAX_DIMS_PS];
   size_t ncDimLen[MAX_DIMS_PS];
   VCT vct;
+  size_t chunkSizeTdim;
+  size_t chunkSizeZdim;
 #endif
+  long maxGlobalRecs;
   int globalatts;
   int localatts;
   int unreduced;
@@ -372,6 +375,7 @@ extern int CDI_Default_Calendar;
 // extern int cdiNcMissingValue;
 extern int CDI_Netcdf_Chunksizehint;
 extern int CDI_ChunkType;
+extern int CDI_Test;
 extern int CDI_Split_Ltype105;
 extern int cdiDataUnreduced;
 extern int cdiSortName;

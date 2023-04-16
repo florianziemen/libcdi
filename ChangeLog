@@ -1,3 +1,33 @@
+2023-04-17  Uwe Schulzweida
+
+	* Version 2.2.1 released
+
+2023-04-14  Uwe Schulzweida
+
+	* Add support for NetCDF attribute type NC_INT64
+
+2023-04-12  Uwe Schulzweida
+
+	* gribapi decode: add support for single precision float interface (available since ecCodes-2.30.0)
+
+2023-04-09  Uwe Schulzweida
+
+        * fix Bug #10790
+
+2023-03-23  Uwe Schulzweida
+
+	* cgribexDefTime: change relative time to absolute time axis if necessary (bug fix)
+
+2023-03-13  Uwe Schulzweida
+
+	* set chunkSizeMin to 256k
+	* change chunkSizeLim from to 1m to 16m
+
+2023-03-02  Uwe Schulzweida
+
+	* add async_worker support for NCZARR
+	* query cells: changed to all 1D grids
+
 2023-02-23  Uwe Schulzweida
 
         * using CGRIBEX library version 2.1.0
@@ -6,7 +36,7 @@
 
 2023-02-05  Uwe Schulzweida
 
-	* changed chunkSizeLim from 16777216 to 1048576
+	* changed chunkSizeLim from 16m to 1m
 	* NetCDF: added query support for grid cells
 
 2023-02-02  Uwe Schulzweida

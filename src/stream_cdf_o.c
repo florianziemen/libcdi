@@ -98,7 +98,7 @@ struct idSearch
 };
 
 static inline struct idSearch
-cdfSearchIDBySize(size_t startIdx, size_t numIDs, const ncgrid_t ncgrid[/*numIDs*/], int ncIDType, int searchType, int searchSize,
+cdfSearchIDBySize(size_t startIdx, size_t numIDs, ncgrid_t ncgrid[/*numIDs*/], int ncIDType, int searchType, int searchSize,
                   int (*typeInq)(int id), SizeType (*sizeInq)(int id))
 {
   int numNonMatching = 0, foundID = CDI_UNDEFID;
@@ -869,11 +869,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xsize, size_t 
       cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_VDIMNAME, vdimname, &length);
       if (vdimname[0] == 0) strcpy(vdimname, vdimname_default);
       nvdimID = dimIDs[ndims - 1] = checkDimName(fileID, nvertex, vdimname);
-      if (nvdimID == CDI_UNDEFID)
-        {
-          cdf_def_dim(fileID, vdimname, nvertex, dimIDs + ndims - 1);
-          nvdimID = dimIDs[ndims - 1];
-        }
+      if (nvdimID == CDI_UNDEFID) cdf_def_dim(fileID, vdimname, nvertex, dimIDs + ndims - 1);
     }
 
   size_t gridsize = xsize * ysize;
@@ -1643,10 +1639,7 @@ cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimID, si
       cdf_enddef(fileID, streamptr->self);
 
       // Write Stringvalues
-      size_t start[2], count[2];
-      start[1] = 0;
-      count[0] = 1;
-      count[1] = clen;
+      size_t start[2] = { 0, 0 }, count[2] = { 1, clen };
       for (size_t i = 0; i < dimlen; i++)
         {
           start[0] = i;
@@ -1732,7 +1725,7 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
   if (type == ZAXIS_REFERENCE) cdfDefZaxisUUID(streamptr, zaxisID);
 
-  int dimID;
+  int dimID = CDI_UNDEFID;
   if (type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF)
     {
       delayed = cdf_def_zaxis_hybrid(streamptr, type, &ncvarid, zaxisID, zaxisindex, xtype, dimlen, &dimID, axisname);
@@ -1749,7 +1742,7 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
     {
       dimID = checkDimName(fileID, dimlen, dimname);
 
-      bool switchNCMode = streamptr->ncmode == 2;
+      bool switchNCMode = (streamptr->ncmode == 2);
       if (switchNCMode)
         {
           streamptr->ncmode = 1;
@@ -1848,7 +1841,7 @@ cdf_def_mapping(stream_t *streamptr, int gridID)
   if (!gmapvarname[0]) strcpy(gmapvarname, "crs");
 
   int fileID = streamptr->fileID;
-  bool switchNCMode = streamptr->ncmode == 2;
+  bool switchNCMode = (streamptr->ncmode == 2);
   if (switchNCMode)
     {
       streamptr->ncmode = 1;
@@ -1944,14 +1937,11 @@ cdfDefCharacter(stream_t *streamptr, int gridID, int gridIndex, int cdiAxisID, i
 
   // Write Var
 
-  size_t start[2], count[2];
-  start[1] = 0;
-  count[0] = 1;
-  count[1] = strlen;
+  size_t start[2] = { 0, 0 }, count[2] = { 1, strlen };
   for (size_t i = 0; i < dimlen; i++)
     {
       start[0] = i;
-      status = nc_put_vara_text(fileID, ncaxisid, start, count, cvals[i]);
+      (void) nc_put_vara_text(fileID, ncaxisid, start, count, cvals[i]);
     }
 
   ncgrid[gridIndex].gridID = gridID;
@@ -1986,7 +1976,7 @@ cdfDefRgrid(stream_t *streamptr, int gridID, int gridIndex)
         else
           sprintf(&axisname[5], "%1d", iz + 1);
 
-        bool switchNCMode = streamptr->ncmode == 2;
+        bool switchNCMode = (streamptr->ncmode == 2);
         if (switchNCMode)
           {
             streamptr->ncmode = 1;
@@ -2023,7 +2013,7 @@ cdfDefRgrid(stream_t *streamptr, int gridID, int gridIndex)
         else
           sprintf(&axisname[14], "%1d", iz + 1);
 
-        bool switchNCMode = streamptr->ncmode == 2;
+        bool switchNCMode = (streamptr->ncmode == 2);
         if (switchNCMode)
           {
             streamptr->ncmode = 1;
@@ -2033,12 +2023,9 @@ cdfDefRgrid(stream_t *streamptr, int gridID, int gridIndex)
         cdf_def_dim(fileID, axisname, dimlen, &dimID);
 
         int ncvarid = CDI_UNDEFID;
+        cdf_def_var(fileID, axisname, NC_INT, 1, &dimID, &ncvarid);
 
-        int ndims = 1;
-        nc_type xtype = NC_INT;
-        cdf_def_var(fileID, axisname, xtype, ndims, &dimID, &ncvarid);
-
-        if (switchNCMode)
+        if (switchNCMode || streamptr->ncmode == 1)
           {
             cdf_enddef(fileID, streamptr->self);
             streamptr->ncmode = 2;

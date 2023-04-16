@@ -13,7 +13,7 @@
 #define HAVE_MALLOC_H
 #endif
 
-#if defined(HAVE_MALLOC_H)
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 
@@ -26,6 +26,7 @@ enum
   REALLOC_FUNC,
   FREE_FUNC
 };
+
 static const char *const memfunc[] = { "Malloc", "Calloc", "Realloc", "Free" };
 
 #undef MEM_UNDEFID
@@ -75,6 +76,7 @@ void
 memDebug(int debug)
 {
   MEM_Debug = debug;
+  if (MEM_Debug && !MEM_Info) MEM_Info = 1;
 }
 
 // If we're not using GNU C, elide __attribute__
@@ -346,7 +348,7 @@ memListChangeEntry(void *ptrold, void *ptr, size_t size, const char *functionnam
     {
       item = memTable[memID].item;
 
-      const size_t sizeold = memTable[memID].size * memTable[memID].nobj;
+      size_t sizeold = memTable[memID].size * memTable[memID].nobj;
 
       memTable[memID].ptr = ptr;
       memTable[memID].size = size;
@@ -464,7 +466,7 @@ memFree(void *ptr, const char *file, const char *functionname, int line)
   if (MEM_Info)
     {
       size_t size = 0;
-      const int item = memListDeleteEntry(ptr, &size);
+      int item = memListDeleteEntry(ptr, &size);
       if (item >= 0)
         {
           if (MEM_Debug) memListPrintEntry(FREE_FUNC, item, size, ptr, functionname, file, line);
@@ -502,6 +504,7 @@ memTotal(void)
 
       // malloc_stats();
     }
+
   memtotal = (size_t) meminfo.arena;
 #endif
 

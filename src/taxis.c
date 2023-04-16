@@ -1386,7 +1386,7 @@ taxisCompareP(void *taxisptr1, void *taxisptr2)
 
   return !(t1->type == t2->type && cdiDateTime_isEQ(t1->vDateTime, t2->vDateTime) && cdiDateTime_isEQ(t1->rDateTime, t2->rDateTime)
            && cdiDateTime_isEQ(t1->fDateTime, t2->fDateTime) && t1->calendar == t2->calendar && t1->unit == t2->unit
-           && t1->fc_unit == t2->fc_unit && t1->fc_period == t2->fc_period && t1->numavg == t2->numavg
+           && t1->fc_unit == t2->fc_unit && IS_EQUAL(t1->fc_period, t2->fc_period) && t1->numavg == t2->numavg
            && t1->climatology == t2->climatology && t1->hasBounds == t2->hasBounds
            && cdiDateTime_isEQ(t1->vDateTime_lb, t2->vDateTime_lb) && cdiDateTime_isEQ(t1->vDateTime_ub, t2->vDateTime_ub));
 }
