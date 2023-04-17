@@ -59,9 +59,9 @@ days_per_year(int calendar, int year)
 }
 
 void
-decode_calday(int daysPerYear, int days, int *year, int *month, int *day)
+decode_calday(int daysPerYear, int64_t days, int *year, int *month, int *day)
 {
-  *year = (days - 1) / daysPerYear;
+  *year = (int)((days - 1) / daysPerYear);
   days -= (*year * daysPerYear);
 
   const int *daysPerMonthArray = get_dayspermonth_array(daysPerYear);
@@ -77,7 +77,7 @@ decode_calday(int daysPerYear, int days, int *year, int *month, int *day)
       }
 
   *month = i + 1;
-  *day = days;
+  *day = (int)days;
 }
 
 int64_t
