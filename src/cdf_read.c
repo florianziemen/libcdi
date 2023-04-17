@@ -337,7 +337,7 @@ transpose2dArrayDP(int gridId, double *data)
 }
 
 static void
-transpose2dArraySP(size_t gridId, float *data)
+transpose2dArraySP(int gridId, float *data)
 {
   size_t inWidth = (size_t)gridInqYsize(gridId);
   size_t inHeight = (size_t)gridInqXsize(gridId);
