@@ -33,8 +33,8 @@ static uint16_t
 swap_endianness16(uint16_t v)
 {
   // clang-format off
-  return ((v >> 8) & 0xff)
-       | ((v << 8) & 0xff00);
+  return (uint16_t)((  (uint16_t)(v >> 8) & UINT16_C(0xff))
+                    | ((uint16_t)(v << 8) & UINT16_C(0xff00)));
   // clang-format on
 }
 
@@ -102,25 +102,25 @@ fletcher8(const unsigned char *buf, size_t len, uint8_t *sum1out, uint8_t *sum2o
   uint16_t sum2 = 0;
   for (size_t i = 0; i < len; ++i)
     {
-      sum1 += *buf++;
+      sum1 += buf[i];
       if (sum1 >= 255) sum1 -= 255;
       sum2 += sum1;
       if (sum2 >= 255) sum2 -= 255;
     }
-  *sum1out = sum1;
-  *sum2out = sum2;
+  *sum1out = (uint8_t)sum1;
+  *sum2out = (uint8_t)sum2;
 }
 
 static uint8_t
 fletcher8_check1(uint8_t sum1, uint8_t sum2)
 {
-  return 255 - ((sum1 + sum2) % 255);
+  return (uint8_t)(255 - ((sum1 + sum2) % 255));
 }
 
 static uint8_t
 fletcher8_check2(uint8_t sum1, uint8_t sum2)
 {
-  return 255 - ((sum1 + fletcher8_check1(sum1, sum2)) % 255);
+  return (uint8_t)(255 - ((sum1 + fletcher8_check1(sum1, sum2)) % 255));
 }
 
 static int
