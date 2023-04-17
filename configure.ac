@@ -256,7 +256,8 @@ AC_CHECK_FUNCS([mallinfo pwrite])
 AC_REPLACE_FUNCS([getline])
 dnl Check for UUID library:
 ACX_UUID
-AS_VAR_APPEND([CPPFLAGS], [" $UUID_C_INCLUDE"])
+AS_IF([test -n "$UUID_C_INCLUDE"],
+  [AS_VAR_APPEND([CPPFLAGS], [" $UUID_C_INCLUDE"])])
 LIBS="$UUID_C_LIB $LIBS"
 dnl Checks for the availability of ANSI-C99 functions:
 AC_CHECK_DECLS([isnan], [], [],
