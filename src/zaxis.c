@@ -596,6 +596,9 @@ zaxisDefCvals(int zaxisID, const char **cvals, int clen)
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
 #else
+  (void)zaxisID;
+  (void)cvals;
+  (void)clen;
   Error("This function was disabled!");
 #endif
 }
@@ -836,6 +839,8 @@ zaxisInqCLen(int zaxisID)
 #ifndef USE_MPI
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if (zaxisptr->cvals && zaxisptr->clength) clen = zaxisptr->clength;
+#else
+  (void)zaxisID;
 #endif
 
   return clen;
@@ -861,6 +866,9 @@ zaxisInqCVals(int zaxisID, char ***clevels)
             }
         }
     }
+#else
+  (void)zaxisID;
+  (void)clevels;
 #endif
 
   return size;

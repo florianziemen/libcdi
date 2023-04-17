@@ -239,6 +239,7 @@ across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nb
 int
 across_connect_int(char *path, char filemode, stream_t *streamptr)
 {
+  (void)filemode;
   // parse ACROSS address format: across://<host>[:<port>]/<expid>[@<expver>]
 
   const char *host = path;
