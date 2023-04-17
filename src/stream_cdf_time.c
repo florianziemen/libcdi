@@ -160,7 +160,7 @@ cdfDefTime(stream_t *streamptr)
       if (streamptr->maxSteps == CDI_UNDEFID)
         fprintf(stderr, "Max. number of timesteps undefined for NCZarr!\n");
       else
-        timeDimLen = streamptr->maxSteps;
+        timeDimLen = (size_t)streamptr->maxSteps;
     }
 
   int timeDimId;

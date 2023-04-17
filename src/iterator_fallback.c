@@ -345,7 +345,7 @@ cdiFallbackIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outL
   if (outUuid)
     {
       int length = CDI_UUID_SIZE;
-      memset(outUuid, 0, length);
+      memset(outUuid, 0, (size_t)length);
       cdiInqKeyBytes(zaxisId, CDI_GLOBAL, CDI_KEY_UUID, outUuid, &length);
     }
   return CDI_NOERR;

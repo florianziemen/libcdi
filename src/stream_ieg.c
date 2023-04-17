@@ -550,9 +550,9 @@ iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, si
 
   grid_t *grid = (grid_t *) Malloc(sizeof(*grid));
   grid_init(grid);
-  cdiGridTypeInit(grid, gridtype, IEG_G_NumLon(gdb) * IEG_G_NumLat(gdb));
   size_t xsize = (size_t) IEG_G_NumLon(gdb);
   size_t ysize = (size_t) IEG_G_NumLat(gdb);
+  cdiGridTypeInit(grid, gridtype, xsize * ysize);
   grid->x.size = xsize;
   grid->y.size = ysize;
   grid->x.inc = 0;

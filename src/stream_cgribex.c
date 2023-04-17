@@ -95,14 +95,14 @@ extern "C"
 static size_t
 cgribexSection2Length(void *gribbuffer, size_t gribbuffersize)
 {
-  long sec2len = 0;
+  size_t sec2len = 0;
 
   if (gribbuffersize && gribbuffer)
     {
       unsigned char *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
       long gribrecsize;
       int status = grib1Sections((unsigned char *) gribbuffer, (long) gribbuffersize, &pds, &gds, &bms, &bds, &gribrecsize);
-      if (status >= 0 && gds != NULL) sec2len = (unsigned) ((gds[0] << 16) + (gds[1] << 8) + (gds[3]));
+      if (status >= 0 && gds != NULL) sec2len = (size_t) ((gds[0] << 16) + (gds[1] << 8) + (gds[3]));
     }
 
   return sec2len;

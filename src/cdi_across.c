@@ -136,7 +136,7 @@ across_write_buf(int sock, const void *buf, size_t nbytes)
           perror(__func__);
           return 1;
         }
-      nbytes_left -= nbytes_written;
+      nbytes_left -= (size_t)nbytes_written;
       bufpos += nbytes_written;
     }
   return 0;
@@ -184,7 +184,7 @@ across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nb
 
   across_info_t *info = (across_info_t *) streamptr->protocolData;
 
-  int expid_len = strlen(info->expid);
+  size_t expid_len = strlen(info->expid);
   if (expid_len < EXPID_MIN_LENGTH)
     {
       Error("expid is too short");
@@ -200,27 +200,27 @@ across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nb
                           + 2              // local section number ("0")
                           + 1              // across local section version
                           + 1              // expid length
-                          + expid_len + 4  // expver
+                          + (uint32_t)expid_len + 4  // expver
                           + 4              // timestamp
                           + 2              // check bytes
       ;
   unsigned char *section2 = (unsigned char *) Malloc(section2_len);
   {
-    unsigned char pos = 0;
-    pos += set32(section2 + pos, section2_len);
-    pos += set8(section2 + pos, 2);   // section number
-    pos += set16(section2 + pos, 0);  // local section number
-    pos += set8(section2 + pos, ACROSS_SECTION2_VERSION);
-    pos += set8(section2 + pos, expid_len);
+    size_t pos = 0;
+    pos += (size_t)set32(section2 + pos, section2_len);
+    pos += (size_t)set8(section2 + pos, 2);   // section number
+    pos += (size_t)set16(section2 + pos, 0);  // local section number
+    pos += (size_t)set8(section2 + pos, ACROSS_SECTION2_VERSION);
+    pos += (size_t)set8(section2 + pos, (uint8_t)expid_len);
     memcpy(section2 + pos, info->expid, expid_len);
     pos += expid_len;
-    pos += set32(section2 + pos, info->expver);
-    pos += set32(section2 + pos, time(NULL));
+    pos += (size_t)set32(section2 + pos, (uint32_t)info->expver);
+    pos += (size_t)set32(section2 + pos, (uint32_t)time(NULL));
     uint8_t fletchersum1;
     uint8_t fletchersum2;
     fletcher8(section2 + 5, section2_len - 7, &fletchersum1, &fletchersum2);
-    pos += set8(section2 + pos, fletcher8_check1(fletchersum1, fletchersum2));
-    pos += set8(section2 + pos, fletcher8_check2(fletchersum1, fletchersum2));
+    pos += (size_t)set8(section2 + pos, fletcher8_check1(fletchersum1, fletchersum2));
+    pos += (size_t)set8(section2 + pos, fletcher8_check2(fletchersum1, fletchersum2));
     assert(pos == section2_len);
   }
 

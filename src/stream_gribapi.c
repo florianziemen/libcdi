@@ -2903,7 +2903,7 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
             GRIB_CHECK(my_grib_set_long(gh, "nlev", nlev), 0);
             unsigned char uuid[CDI_UUID_SIZE];
             int length = CDI_UUID_SIZE;
-            memset(uuid, 0, length);
+            memset(uuid, 0, (size_t)length);
             cdiInqKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
             size_t len = CDI_UUID_SIZE;
             if (grib_set_bytes(gh, "uuidOfVGrid", uuid, &len) != 0) Warning("Can't write UUID!");
@@ -3426,7 +3426,7 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
           unsigned char revNumber[revNumLen];
           if (cdiInqKeyBytes(vlistID, varID, CDI_KEY_REVNUMBER, revNumber, &revNumLen) == CDI_NOERR)
             {
-              size_t revNumLenS = revNumLen;
+              size_t revNumLenS = (size_t)revNumLen;
               grib_set_bytes(gh, "revNumber", revNumber, &revNumLenS);
             }
           int revStatus;
@@ -3437,9 +3437,9 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
         {
           grib_set_long(gh, "grib2LocalSectionPresent", 1);
           grib_set_long(gh, "grib2LocalSectionNumber", grib2LocalSectionNumber);
-          unsigned char *section2Padding = (unsigned char *) Malloc(section2PaddingLength);
+          unsigned char *section2Padding = Malloc((size_t)section2PaddingLength);
           cdiInqKeyBytes(vlistID, varID, CDI_KEY_SECTION2PADDING, section2Padding, &section2PaddingLength);
-          size_t len = section2PaddingLength;
+          size_t len = (size_t)section2PaddingLength;
           // Does not work anymore with ecCodes 2.22.0/2.25.0!!!
           // ECCODES ERROR   :  pack_bytes: Wrong size (10) for section2Padding. It is 0 bytes long
           grib_set_bytes(gh, "section2Padding", section2Padding, &len);
@@ -3497,19 +3497,19 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
     }
 
-  gribapiSetExtMode(gh, gridID, datasize, data);
+  gribapiSetExtMode(gh, gridID, (size_t)datasize, data);
 
   if (memType == MEMTYPE_FLOAT)
     {
 #ifdef HAVE_GRIBAPI_FLOAT_INTERFACE
-      GRIB_CHECK(grib_set_float_array(gh, "values", (const float *) data, datasize), 0);
+      GRIB_CHECK(grib_set_float_array(gh, "values", (const float *) data, (size_t)datasize), 0);
 #else
       Error("grib_set_float_array() not found!");
 #endif
     }
   else
     {
-      GRIB_CHECK(grib_set_double_array(gh, "values", (const double *) data, datasize), 0);
+      GRIB_CHECK(grib_set_double_array(gh, "values", (const double *) data, (size_t)datasize), 0);
     }
 
   if (numMissVals)

@@ -446,7 +446,7 @@ cdiGetProtocol(const char *uri, const char **filename)
       return CDI_PROTOCOL_FILE;
     }
 
-  int protocollen = pos - uri;
+  size_t protocollen = (size_t)(pos - uri);
   *filename = pos + 3;
 
   // if (strncmp(uri, "file", protocollen) == 0) return CDI_PROTOCOL_FILE; // file is already used in NetCDF

@@ -500,7 +500,7 @@ cdi_generate_vars(stream_t *streamptr)
 {
   int vlistID = streamptr->vlistID;
 
-  int *varids = (int *) Malloc(varTableUsed * sizeof(int));
+  int *varids = Malloc((size_t)varTableUsed * sizeof(int));
   for (int varID = 0; varID < varTableUsed; varID++) varids[varID] = (int) varID;
   /*
     if (streamptr->sortname)
@@ -582,7 +582,7 @@ cdi_generate_vars(stream_t *streamptr)
 
       if (ltype1 == 0 && zaxistype == ZAXIS_GENERIC && nlevels == 1 && levelTable[0].level1 == 0) zaxistype = ZAXIS_SURFACE;
 
-      double *dlevels = (double *) Malloc(nlevels * sizeof(double));
+      double *dlevels = Malloc((size_t)nlevels * sizeof(double));
 
       /*
       if ( hasBounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
@@ -609,7 +609,7 @@ cdi_generate_vars(stream_t *streamptr)
            */
           if ((!linc && !ldec) && zaxistype == ZAXIS_PRESSURE)
             {
-              qsort(levelTable, nlevels, sizeof(leveltable_t), cmpLevelTableInv);
+              qsort(levelTable, (size_t)nlevels, sizeof(leveltable_t), cmpLevelTableInv);
               lsort = true;
             }
           /*
@@ -619,7 +619,7 @@ cdi_generate_vars(stream_t *streamptr)
            */
           else if ((!linc && !ldec) || zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_DEPTH_BELOW_LAND)
             {
-              qsort(levelTable, nlevels, sizeof(leveltable_t), cmpLevelTable);
+              qsort(levelTable, (size_t)nlevels, sizeof(leveltable_t), cmpLevelTable);
               lsort = true;
             }
 
@@ -639,9 +639,9 @@ cdi_generate_vars(stream_t *streamptr)
       double *dlevels2 = NULL;
       if (hasBounds)
         {
-          dlevels1 = (double *) Malloc(nlevels * sizeof(double));
+          dlevels1 = Malloc((size_t)nlevels * sizeof(double));
           for (int levelID = 0; levelID < nlevels; levelID++) dlevels1[levelID] = level_sf * levelTable[levelID].level1;
-          dlevels2 = (double *) Malloc(nlevels * sizeof(double));
+          dlevels2 = Malloc((size_t)nlevels * sizeof(double));
           for (int levelID = 0; levelID < nlevels; levelID++) dlevels2[levelID] = level_sf * levelTable[levelID].level2;
         }
 

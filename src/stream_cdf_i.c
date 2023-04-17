@@ -3501,10 +3501,10 @@ cdf_define_institut_and_model_id(int vlistID, int varID)
   if (varTableID != CDI_UNDEFID) vlistDefVarTable(vlistID, varID, varTableID);
 }
 
-static int
+static size_t
 cdf_xtype_to_numbytes(int xtype)
 {
-  int numBytes = 8;
+  size_t numBytes = 8;
 
   // clang-format off
   if      (xtype == NC_BYTE  )  numBytes = 1;
