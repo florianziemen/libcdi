@@ -456,7 +456,7 @@ cdfGetSliceSlapDescription(stream_t *streamptr, int tsID, int varID, int levelID
 
   int gridId = vlistInqVarGrid(vlistID, varID);
   int timetype = vlistInqVarTimetype(vlistID, varID);
-  size_t gridsize = gridInqSize(gridId);
+  SizeType gridsize = gridInqSize(gridId);
 
   streamptr->numvals += gridsize;
 
@@ -973,11 +973,11 @@ cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varType, 
   cdfGetSliceSlapDescription(streamptr, streamptr->curTsID, varID, levelID, &swapxy, start, count);
 
   int gridId = vlistInqVarGrid(vlistID, varID);
-  size_t gridsize = gridInqSize(gridId);
+  SizeType gridsize = gridInqSize(gridId);
 
   unsigned int position = 0;
   for (int i = 0; i < MAX_DIMENSIONS; ++i)
-    if (count[i] == gridsize) position = i;
+    if (count[i] == (size_t)gridsize) position = i;
 
   start[position] = start[position] + startpoint;
   count[position] = length;
@@ -1004,11 +1004,11 @@ cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varType, 
   cdfGetSliceSlapDescription(streamptr, streamptr->curTsID, varID, levelID, &swapxy, start, count);
 
   int gridId = vlistInqVarGrid(vlistID, varID);
-  size_t gridsize = gridInqSize(gridId);
+  SizeType gridsize = gridInqSize(gridId);
 
   unsigned int position = 0;
   for (int i = 0; i < MAX_DIMENSIONS; ++i)
-    if (count[i] == gridsize) position = i;
+    if (count[i] == (size_t)gridsize) position = i;
 
   start[position] = start[position] + startpoint;
   count[position] = length;

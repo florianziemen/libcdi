@@ -764,13 +764,15 @@ cdiPioStreamWriteVarPart_(int streamID, int varID, int memtype, const void *data
 }
 
 void
-streamWriteVarPart(int streamID, int varID, const double *data, int numMissVals, Xt_idxlist partDesc)
+streamWriteVarPart(int streamID, int varID, const double *data,
+                   SizeType numMissVals, Xt_idxlist partDesc)
 {
   cdiPioStreamWriteVarPart_(streamID, varID, MEMTYPE_DOUBLE, data, numMissVals, partDesc);
 }
 
 void
-streamWriteVarPartF(int streamID, int varID, const float *data, int numMissVals, Xt_idxlist partDesc)
+streamWriteVarPartF(int streamID, int varID, const float *data,
+                    SizeType numMissVals, Xt_idxlist partDesc)
 {
   cdiPioStreamWriteVarPart_(streamID, varID, MEMTYPE_FLOAT, data, numMissVals, partDesc);
 }

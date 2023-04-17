@@ -12,7 +12,7 @@ int cgribexDecode(int memtype, void *cgribexp, void *gribbuffer, size_t gribsize
                   size_t *numMissVals, double missval);
 
 size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime,
-                     int tsteptype, int numavg, size_t datasize, const void *data, size_t numMissVals, void *gribbuffer,
+                     int tsteptype, int numavg, SizeType datasize, const void *data, SizeType numMissVals, void *gribbuffer,
                      size_t gribbuffersize);
 
 void *cgribex_handle_new_from_meassage(void *gribbuffer, size_t recsize);

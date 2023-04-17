@@ -1112,13 +1112,13 @@ cdiPioDistGridInqXorYVal(grid_t *gridptr, enum cdiPioGDsa saIdx, const double *v
 }
 
 static double
-cdiPioDistGridInqXVal(grid_t *gridptr, int index)
+cdiPioDistGridInqXVal(grid_t *gridptr, SizeType index)
 {
   return cdiPioDistGridInqXorYVal(gridptr, cdiPioGDsaXVals, gridptr->x.vals, index);
 }
 
 static double
-cdiPioDistGridInqYVal(grid_t *gridptr, int index)
+cdiPioDistGridInqYVal(grid_t *gridptr, SizeType index)
 {
   return cdiPioDistGridInqXorYVal(gridptr, cdiPioGDsaYVals, gridptr->y.vals, index);
 }

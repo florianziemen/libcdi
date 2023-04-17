@@ -2220,8 +2220,8 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
   double xfirst = 0.0, xlast = 0.0, xinc = 0.0;
   double yfirst = 0.0, ylast = 0.0, yinc = 0.0;
 
-  size_t nlon = gridInqXsize(gridID);
-  size_t nlat = gridInqYsize(gridID);
+  SizeType nlon = gridInqXsize(gridID),
+    nlat = gridInqYsize(gridID);
 
   if (gridtype == GRID_GAUSSIAN_REDUCED)
     {
@@ -2230,8 +2230,8 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
 
       nlon = 0;
 
-      int *reducedPoints = (int *) Malloc(nlat * sizeof(int));
-      long *pl = (long *) Malloc(nlat * sizeof(long));
+      int *reducedPoints = Malloc((size_t)nlat * sizeof(int));
+      long *pl = Malloc((size_t)nlat * sizeof(long));
       gridInqReducedPoints(gridID, reducedPoints);
       for (size_t i = 0; i < nlat; ++i) pl[i] = reducedPoints[i];
 
@@ -2542,7 +2542,7 @@ gribapiDefGridSpectral(grib_handle *gh, int gridID)
 }
 
 static void
-gribapiDefPackingType(grib_handle *gh, bool lieee, bool lspectral, bool lcomplex, int comptype, size_t gridsize)
+gribapiDefPackingType(grib_handle *gh, bool lieee, bool lspectral, bool lcomplex, int comptype, SizeType gridsize)
 {
   static const char mesg_spectral_complex[] = "spectral_complex";
   static const char mesg_spectral_simple[] = "spectral_simple";
@@ -2576,7 +2576,7 @@ gribapiDefPackingType(grib_handle *gh, bool lieee, bool lspectral, bool lcomplex
 static void
 gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int datatype, int uvRelativeToGrid)
 {
-  size_t gridsize = gridInqSize(gridID);
+  SizeType gridsize = gridInqSize(gridID);
   bool gridIsRotated = false;
   bool gridIsCurvilinear = false;
   int gridtype = grbGetGridtype(&gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
@@ -3322,7 +3322,7 @@ gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const void *data
 
 size_t
 gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime, int tsteptype,
-              int numavg, size_t datasize, const void *data, size_t numMissVals, void **gribbuffer, size_t *gribbuffersize,
+              int numavg, SizeType datasize, const void *data, SizeType numMissVals, void **gribbuffer, size_t *gribbuffersize,
               int comptype, void *gribContainer)
 {
   long editionNumber = 2;

@@ -1056,14 +1056,17 @@ gridDefXsize(int gridID, SizeType xsize)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
 
-  size_t gridSize = gridInqSize(gridID);
-  if ((size_t) xsize > gridSize) Error("xsize %zu is greater then gridsize %zu", (size_t) xsize, gridSize);
+  SizeType gridSize = gridInqSize(gridID);
+  if (xsize > gridSize) Error("xsize %lld is greater then gridsize %lld",
+                              (long long) xsize, (long long)gridSize);
 
   int gridType = gridInqType(gridID);
-  if (gridType == GRID_UNSTRUCTURED && (size_t) xsize != gridSize)
-    Error("xsize %zu must be equal to gridsize %zu for gridtype: %s", (size_t) xsize, gridSize, gridNamePtr(gridType));
-  if (gridType == GRID_GAUSSIAN_REDUCED && xsize != 2 && (size_t) xsize != gridSize)
-    Error("xsize %zu must be equal to gridsize %zu for gridtype: %s", (size_t) xsize, gridSize, gridNamePtr(gridType));
+  if (gridType == GRID_UNSTRUCTURED && xsize != gridSize)
+    Error("xsize %lld must be equal to gridsize %lld for gridtype: %s",
+          (long long)xsize, (long long)gridSize, gridNamePtr(gridType));
+  if (gridType == GRID_GAUSSIAN_REDUCED && xsize != 2 && xsize != gridSize)
+    Error("xsize %lld must be equal to gridsize %lld for gridtype: %s",
+          (long long)xsize, (long long)gridSize, gridNamePtr(gridType));
 
   if (gridptr->x.size != (size_t) xsize)
     {
@@ -1074,8 +1077,8 @@ gridDefXsize(int gridID, SizeType xsize)
   if (gridType != GRID_UNSTRUCTURED && gridType != GRID_GAUSSIAN_REDUCED && gridType != GRID_PROJECTION)
     {
       size_t axisproduct = gridptr->x.size * gridptr->y.size;
-      if (axisproduct > 0 && axisproduct != gridSize)
-        Error("Inconsistent grid declaration! (xsize=%zu ysize=%zu gridsize=%zu)", gridptr->x.size, gridptr->y.size, gridSize);
+      if (axisproduct > 0 && axisproduct != (size_t)gridSize)
+        Error("Inconsistent grid declaration! (xsize=%zu ysize=%zu gridsize=%zu)", gridptr->x.size, gridptr->y.size, (size_t)gridSize);
     }
 }
 
@@ -1135,13 +1138,15 @@ gridDefYsize(int gridID, SizeType ysize)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
 
-  size_t gridSize = gridInqSize(gridID);
+  SizeType gridSize = gridInqSize(gridID);
 
-  if ((size_t) ysize > gridSize) Error("ysize %zu is greater then gridsize %zu", (size_t) ysize, gridSize);
+  if (ysize > gridSize) Error("ysize %lld is greater then gridsize %lld",
+                              (long long) ysize, (long long)gridSize);
 
   int gridType = gridInqType(gridID);
-  if (gridType == GRID_UNSTRUCTURED && (size_t) ysize != gridSize)
-    Error("ysize %zu must be equal gridsize %zu for gridtype: %s", gridNamePtr(gridType), (size_t) ysize, gridSize);
+  if (gridType == GRID_UNSTRUCTURED && ysize != gridSize)
+    Error("ysize %lld must be equal gridsize %lld for gridtype: %s",
+          (long long)ysize, (long long)gridSize, gridNamePtr(gridType));
 
   if (gridptr->y.size != (size_t) ysize)
     {
@@ -1152,8 +1157,9 @@ gridDefYsize(int gridID, SizeType ysize)
   if (gridType != GRID_UNSTRUCTURED && gridType != GRID_GAUSSIAN_REDUCED && gridType != GRID_PROJECTION)
     {
       size_t axisproduct = gridptr->x.size * gridptr->y.size;
-      if (axisproduct > 0 && axisproduct != gridSize)
-        Error("Inconsistent grid declaration! (xsize=%zu ysize=%zu gridsize=%zu)", gridptr->x.size, gridptr->y.size, gridSize);
+      if (axisproduct > 0 && axisproduct != (size_t)gridSize)
+        Error("Inconsistent grid declaration! (xsize=%zu ysize=%zu gridsize=%zu)",
+              gridptr->x.size, gridptr->y.size, (size_t)gridSize);
     }
 }
 
@@ -2684,7 +2690,7 @@ grid_complete(grid_t *grid)
     case GRID_GAUSSIAN_REDUCED:
       {
         gridDefNP(gridID, grid->np);
-        gridDefYsize(gridID, grid->y.size);
+        gridDefYsize(gridID, (SizeType)grid->y.size);
         if (grid->x.flag == 2)
           {
             double xvals[2] = { grid->x.first, grid->x.last };
@@ -2749,7 +2755,7 @@ int
 gridGenerate(const grid_t *grid)
 {
   int gridtype = grid->type;
-  int gridID = gridCreate(gridtype, grid->size);
+  int gridID = gridCreate(gridtype, (SizeType)grid->size);
   grid_t *restrict gridptr = grid_to_pointer(gridID);
   cdiCopyVarKey(&grid->keys, CDI_KEY_DATATYPE, &gridptr->keys);
   gridptr->x.size = grid->x.size;

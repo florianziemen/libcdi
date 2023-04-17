@@ -437,7 +437,7 @@ streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
 }
 
 int
-grbGetGridtype(int *gridID, size_t gridsize, bool *gridIsRotated, bool *gridIsCurvilinear)
+grbGetGridtype(int *gridID, SizeType gridsize, bool *gridIsRotated, bool *gridIsCurvilinear)
 {
   int gridtype = gridInqType(*gridID);
 

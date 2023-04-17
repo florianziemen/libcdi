@@ -116,7 +116,7 @@ printFiletype(int streamID, int vlistID)
 static void
 print_xvals(int gridID, int dig)
 {
-  size_t xsize = gridInqXsize(gridID);
+  SizeType xsize = gridInqXsize(gridID);
   if (xsize > 0 && gridInqXvals(gridID, NULL))
     {
       char xname[CDI_MAX_NAME], xunits[CDI_MAX_NAME];
@@ -141,7 +141,7 @@ print_xvals(int gridID, int dig)
 static void
 print_yvals(int gridID, int dig)
 {
-  size_t ysize = gridInqYsize(gridID);
+  SizeType ysize = gridInqYsize(gridID);
   if (ysize > 0 && gridInqYvals(gridID, NULL))
     {
       char yname[CDI_MAX_NAME], yunits[CDI_MAX_NAME];

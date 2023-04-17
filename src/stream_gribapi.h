@@ -7,15 +7,15 @@
 
 int fdbScanTimesteps(stream_t *streamptr);
 
-int gribapiScanTimestep1(stream_t *streamptr);
-int gribapiScanTimestep2(stream_t *streamptr);
-int gribapiScanTimestep(stream_t *streamptr);
+long gribapiScanTimestep1(stream_t *streamptr);
+long gribapiScanTimestep2(stream_t *streamptr);
+long gribapiScanTimestep(stream_t *streamptr);
 
 int gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced, size_t *numMissVals,
                   double missval);
 
 size_t gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime,
-                     int tsteptype, int numavg, size_t datasize, const void *data, size_t numMissVals, void **gribbuffer,
+                     int tsteptype, int numavg, SizeType datasize, const void *data, SizeType numMissVals, void **gribbuffer,
                      size_t *gribbuffersize, int ljpeg, void *gribContainer);
 
 int gribapiGetScanningMode(grib_handle *gh);

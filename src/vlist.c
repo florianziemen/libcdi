@@ -826,8 +826,8 @@ vlistMerge(int vlistID2, int vlistID1)
       char name1[CDI_MAX_NAME], name2[CDI_MAX_NAME];
       for (varID = 0; varID < nvars2; varID++)
         {
-          size_t ngp1 = gridInqSize(vars1[varID].gridID);
-          size_t ngp2 = gridInqSize(vars2[varID].gridID);
+          SizeType ngp1 = gridInqSize(vars1[varID].gridID);
+          SizeType ngp2 = gridInqSize(vars2[varID].gridID);
           if (ngp1 != ngp2) break;
 
           int length = CDI_MAX_NAME;

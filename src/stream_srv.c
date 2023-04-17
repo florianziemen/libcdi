@@ -93,9 +93,9 @@ srv_read_recordSP(stream_t *streamptr, float *data, size_t *numMissVals)
   srvInqDataFP32(srvp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
-  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  SizeType size = gridInqSize(vlistInqVarGrid(vlistID, varID));
 
-  *numMissVals = get_num_missvalsSP(size, data, (float) missval);
+  *numMissVals = get_num_missvalsSP((size_t)size, data, (float) missval);
 
   streamptr->numvals += size;
 }
@@ -122,9 +122,9 @@ srv_read_recordDP(stream_t *streamptr, double *data, size_t *numMissVals)
   srvInqDataFP64(srvp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
-  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  SizeType size = gridInqSize(vlistInqVarGrid(vlistID, varID));
 
-  *numMissVals = get_num_missvalsDP(size, data, missval);
+  *numMissVals = get_num_missvalsDP((size_t)size, data, missval);
 
   streamptr->numvals += size;
 }
@@ -159,14 +159,14 @@ srvDefRecord(stream_t *streamptr)
   header[3] = record->vtime;
 
   int gridID = record->gridID;
-  size_t xsize = gridInqXsize(gridID), ysize = gridInqYsize(gridID);
+  SizeType xsize = gridInqXsize(gridID), ysize = gridInqYsize(gridID);
   if (xsize == 0 || ysize == 0)
     {
       xsize = gridInqSize(gridID);
       ysize = 1;
     }
   if (gridInqType(gridID) == GRID_UNSTRUCTURED) ysize = 1;
-  if ((size_t) gridInqSize(gridID) != xsize * ysize) Error("Internal problem with gridsize!");
+  if (gridInqSize(gridID) != xsize * ysize) Error("Internal problem with gridsize!");
 
   cdi_check_gridsize_int_limit("SERVICE", gridInqSize(gridID));
 
@@ -584,9 +584,9 @@ srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
   double missval = vlistInqVarMissval(vlistID, varID);
-  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  SizeType size = gridInqSize(vlistInqVarGrid(vlistID, varID));
 
-  *numMissVals = get_num_missvalsDP(size, data, missval);
+  *numMissVals = get_num_missvalsDP((size_t)size, data, missval);
 }
 
 void
@@ -622,20 +622,20 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   header[2] = (int) cdiDate_get(vDateTime.date);
   header[3] = cdiTime_get(vDateTime.time);
 
-  size_t xsize = gridInqXsize(gridID);
-  size_t ysize = gridInqYsize(gridID);
+  SizeType xsize = gridInqXsize(gridID),
+    ysize = gridInqYsize(gridID);
   if (xsize == 0 || ysize == 0)
     {
       xsize = gridInqSize(gridID);
       ysize = 1;
     }
   if (gridInqType(gridID) == GRID_UNSTRUCTURED) ysize = 1;
-  if ((size_t) gridInqSize(gridID) != xsize * ysize) Error("Internal problem with gridsize!");
+  if (gridInqSize(gridID) != xsize * ysize) Error("Internal problem with gridsize!");
 
   cdi_check_gridsize_int_limit("SERVICE", gridInqSize(gridID));
 
-  header[4] = xsize;
-  header[5] = ysize;
+  header[4] = (int)xsize;
+  header[5] = (int)ysize;
   header[6] = 0;
   header[7] = 0;
 
@@ -655,10 +655,11 @@ srvWriteVarDP(stream_t *streamptr, int varID, const double *data)
   if (CDI_Debug) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
-  size_t nlevs = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
+  SizeType gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  int nlevs = zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
-  for (size_t levID = 0; levID < nlevs; levID++) srvWriteVarSliceDP(streamptr, varID, (int) levID, &data[levID * gridsize]);
+  for (int levID = 0; levID < nlevs; levID++)
+    srvWriteVarSliceDP(streamptr, varID, levID, data + (size_t)levID*(size_t)gridsize);
 }
 
 #endif /* HAVE_LIBSERVICE */

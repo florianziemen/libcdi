@@ -183,8 +183,8 @@ iegDefGrid(int *gdb, int gridID)
   int projtype = CDI_UNDEFID;
   if (gridtype == GRID_PROJECTION && gridInqProjType(gridID) == CDI_PROJ_RLL) projtype = CDI_PROJ_RLL;
 
-  size_t xsize = gridInqXsize(gridID);
-  size_t ysize = gridInqYsize(gridID);
+  SizeType xsize = gridInqXsize(gridID);
+  SizeType ysize = gridInqYsize(gridID);
 
   cdi_check_gridsize_int_limit("IEG", xsize * ysize);
 

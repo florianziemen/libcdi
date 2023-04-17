@@ -25,7 +25,7 @@
 
 static size_t
 grb_encode(int filetype, int memType, int datatype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
-           CdiDateTime vDateTime, int tsteptype, int numavg, size_t datasize, const void *data, size_t numMissVals,
+           CdiDateTime vDateTime, int tsteptype, int numavg, SizeType datasize, const void *data, SizeType numMissVals,
            void **gribbuffer, int comptype, void *gribContainers)
 {
   size_t nbytes = 0;
@@ -33,7 +33,7 @@ grb_encode(int filetype, int memType, int datatype, int varID, int levelID, int 
 #ifdef HAVE_LIBCGRIBEX
   if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
     {
-      size_t gribbuffersize = datasize * 4 + 3000;
+      size_t gribbuffersize = (size_t)datasize * 4 + 3000;
       *gribbuffer = Malloc(gribbuffersize);
 
       nbytes = cgribexEncode(memType, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize, data,
@@ -60,13 +60,13 @@ grb_encode(int filetype, int memType, int datatype, int varID, int levelID, int 
         {
           // printf("gribapi write: convert float to double\n");
           const float *dataf = (const float *) data;
-          double *datad = (double *) Malloc(datasize * sizeof(double));
-          for (size_t i = 0; i < datasize; ++i) datad[i] = (double) dataf[i];
+          double *datad = Malloc((size_t)datasize * sizeof(double));
+          for (size_t i = 0; i < (size_t)datasize; ++i) datad[i] = (double) dataf[i];
           datap = (const void *) datad;
         }
 
       size_t gribbuffersize;
-      nbytes = gribapiEncode(memTypeX, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, (long) datasize,
+      nbytes = gribapiEncode(memTypeX, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, (size_t) datasize,
                              datap, numMissVals, gribbuffer, &gribbuffersize, comptype, gribContainer);
 
       if (!useFloatInterface && memType == MEMTYPE_FLOAT) Free((void *) datap);
@@ -393,7 +393,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
 
   if (CDI_Debug) Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
-  size_t datasize = gridInqSize(gridID);
+  SizeType datasize = gridInqSize(gridID);
 
   if (comptype != CDI_COMPRESS_JPEG && comptype != CDI_COMPRESS_SZIP && comptype != CDI_COMPRESS_AEC) comptype = CDI_COMPRESS_NONE;
 

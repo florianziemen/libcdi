@@ -1827,7 +1827,7 @@ cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID, in
   ISEC2_Reduced = false;
   ISEC2_ScanFlag = 0;
 
-  int gridsize = (int) gridInqSize(gridID);
+  SizeType gridsize = gridInqSize(gridID);
   bool gridIsRotated = false;
   bool gridIsCurvilinear = false;
   int gridtype = grbGetGridtype(&gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
@@ -2067,7 +2067,7 @@ cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 
 size_t
 cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime, int tsteptype,
-              int numavg, size_t datasize, const void *data, size_t numMissVals, void *gribbuffer, size_t gribbuffersize)
+              int numavg, SizeType datasize, const void *data, SizeType numMissVals, void *gribbuffer, size_t gribbuffersize)
 {
   cgribexrec_t *cgribexp = (cgribexrec_t *) cgribexNew();
 
