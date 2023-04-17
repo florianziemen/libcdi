@@ -975,7 +975,7 @@ cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varType, 
   int gridId = vlistInqVarGrid(vlistID, varID);
   SizeType gridsize = gridInqSize(gridId);
 
-  unsigned int position = 0;
+  int position = 0;
   for (int i = 0; i < MAX_DIMENSIONS; ++i)
     if (count[i] == (size_t)gridsize) position = i;
 
@@ -1006,7 +1006,7 @@ cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varType, 
   int gridId = vlistInqVarGrid(vlistID, varID);
   SizeType gridsize = gridInqSize(gridId);
 
-  unsigned int position = 0;
+  int position = 0;
   for (int i = 0; i < MAX_DIMENSIONS; ++i)
     if (count[i] == (size_t)gridsize) position = i;
 
