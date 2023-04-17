@@ -462,14 +462,14 @@ grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, siz
 {
   int vlistID = streamptr->vlistID, gridID = vlistInqVarGrid(vlistID, varID), zaxisID = vlistInqVarZaxis(vlistID, varID),
       nlevs = zaxisInqSize(zaxisID);
-  size_t gridsize = gridInqSize(gridID);
+  size_t gridsize = (size_t)gridInqSize(gridID);
   double missval = vlistInqVarMissval(vlistID, varID);
 
   size_t chunkLen = gridsize;
   if (memtype == MEMTYPE_FLOAT)
     for (int levelID = 0; levelID < nlevs; levelID++)
       {
-        const float *restrict fdata = ((const float *) data) + levelID * gridsize;
+        const float *restrict fdata = ((const float *) data) + (size_t)levelID * gridsize;
 
         size_t numMissVals_slice = 0;
         if (numMissVals)
@@ -480,7 +480,7 @@ grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, siz
   else
     for (int levelID = 0; levelID < nlevs; levelID++)
       {
-        const double *restrict ddata = ((const double *) data) + levelID * gridsize;
+        const double *restrict ddata = ((const double *) data) + (size_t)levelID * gridsize;
 
         size_t numMissVals_slice = 0;
         if (numMissVals)

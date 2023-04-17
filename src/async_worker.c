@@ -147,7 +147,7 @@ AsyncWorker_init(AsyncManager **jobManager, int threadCount)
   *jobManager = (AsyncManager *) malloc(sizeof(AsyncManager));
   if (!*jobManager) return CDI_ESYSTEM;
   (*jobManager)->workerCount = threadCount;
-  (*jobManager)->communicators = (AsyncJob *) malloc(threadCount * sizeof(AsyncJob));
+  (*jobManager)->communicators = (AsyncJob *) malloc((size_t)threadCount * sizeof(AsyncJob));
   if (!(*jobManager)->communicators) xabort("memory allocation failure");
 
   for (int i = 0; i < threadCount; i++) startWorker(&((*jobManager)->communicators[i]));

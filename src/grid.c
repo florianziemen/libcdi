@@ -337,36 +337,36 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
 
 // used also in CDO
 void
-gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *restrict xvals)
+gridGenXvals(size_t xsize, double xfirst, double xlast, double xinc, double *restrict xvals)
 {
   if (fabs(xinc) <= 0 && xsize > 1)
     {
       if (xfirst >= xlast)
         {
           while (xfirst >= xlast) xlast += 360;
-          xinc = (xlast - xfirst) / (xsize);
+          xinc = (xlast - xfirst) / (double)xsize;
         }
       else
         {
-          xinc = (xlast - xfirst) / (xsize - 1);
+          xinc = (xlast - xfirst) / (double)(xsize - 1);
         }
     }
 
-  for (int i = 0; i < xsize; ++i) xvals[i] = xfirst + i * xinc;
+  for (size_t i = 0; i < xsize; ++i) xvals[i] = xfirst + (double)i * xinc;
 }
 
 static void
-calc_gaussgrid(double *restrict yvals, int ysize, double yfirst, double ylast)
+calc_gaussgrid(double *restrict yvals, size_t ysize, double yfirst, double ylast)
 {
-  double *restrict yw = (double *) malloc((size_t) ysize * sizeof(double));
-  gaussianLatitudes((size_t) ysize, yvals, yw);
+  double *restrict yw = malloc(ysize * sizeof(double));
+  gaussianLatitudes(ysize, yvals, yw);
   free(yw);
-  for (int i = 0; i < ysize; i++) yvals[i] = asin(yvals[i]) / M_PI * 180.0;
+  for (size_t i = 0; i < ysize; i++) yvals[i] = asin(yvals[i]) / M_PI * 180.0;
 
   if (yfirst < ylast && yfirst > -90.0 && ylast < 90.0)
     {
-      int yhsize = ysize / 2;
-      for (int i = 0; i < yhsize; i++)
+      size_t yhsize = ysize / 2;
+      for (size_t i = 0; i < yhsize; i++)
         {
           const double ytmp = yvals[i];
           yvals[i] = yvals[ysize - i - 1];
@@ -376,7 +376,7 @@ calc_gaussgrid(double *restrict yvals, int ysize, double yfirst, double ylast)
 }
 
 static void
-gridGenYvalsGaussian(int ysize, double yfirst, double ylast, double *restrict yvals)
+gridGenYvalsGaussian(size_t ysize, double yfirst, double ylast, double *restrict yvals)
 {
   const double deleps = 0.002;
 
@@ -386,22 +386,26 @@ gridGenYvalsGaussian(int ysize, double yfirst, double ylast, double *restrict yv
     if (fabs(yvals[0] - yfirst) > deleps || fabs(yvals[ysize - 1] - ylast) > deleps)
       {
         bool lfound = false;
-        int ny = (int) (180. / (fabs(ylast - yfirst) / (ysize - 1)) + 0.5);
+        long ny = (long) (180. / (fabs(ylast - yfirst) / (double)(ysize - 1)) + 0.5);
         ny -= ny % 2;
-        if (ny > ysize && ny < 4096)
+        if (ny > 0 && (size_t)ny > ysize && ny < 4096)
           {
             double *ytmp = (double *) Malloc((size_t) ny * sizeof(double));
-            calc_gaussgrid(ytmp, ny, yfirst, ylast);
+            calc_gaussgrid(ytmp, (size_t)ny, yfirst, ylast);
 
-            int i;
-            for (i = 0; i < (ny - ysize); i++)
-              if (fabs(ytmp[i] - yfirst) < deleps) break;
-            int nstart = i;
+            size_t nstart = (size_t)ny-ysize;
+            for (size_t i = 0; i < ((size_t)ny - ysize); i++)
+              if (fabs(ytmp[i] - yfirst) < deleps)
+                {
+                  nstart = i;
+                  break;
+                }
 
-            lfound = (nstart + ysize - 1) < ny && fabs(ytmp[nstart + ysize - 1] - ylast) < deleps;
+            lfound = (nstart + ysize - 1) < (size_t)ny && fabs(ytmp[nstart + ysize - 1] - ylast) < deleps;
             if (lfound)
               {
-                for (i = 0; i < ysize; i++) yvals[i] = ytmp[i + nstart];
+                for (size_t i = 0; i < ysize; i++)
+                  yvals[i] = ytmp[i + nstart];
               }
 
             if (ytmp) Free(ytmp);
@@ -410,7 +414,7 @@ gridGenYvalsGaussian(int ysize, double yfirst, double ylast, double *restrict yv
         if (!lfound)
           {
             Warning("Cannot calculate gaussian latitudes for lat1 = %g latn = %g!", yfirst, ylast);
-            for (int i = 0; i < ysize; i++) yvals[i] = 0;
+            for (size_t i = 0; i < ysize; i++) yvals[i] = 0;
             yvals[0] = yfirst;
             yvals[ysize - 1] = ylast;
           }
@@ -418,26 +422,26 @@ gridGenYvalsGaussian(int ysize, double yfirst, double ylast, double *restrict yv
 }
 
 static void
-gridGenYvalsRegular(int ysize, double yfirst, double ylast, double yinc, double *restrict yvals)
+gridGenYvalsRegular(size_t ysize, double yfirst, double ylast, double yinc, double *restrict yvals)
 {
   if (fabs(yinc) <= 0 && ysize > 1)
     {
       if (IS_EQUAL(yfirst, ylast) && IS_NOT_EQUAL(yfirst, 0)) ylast *= -1;
 
       if (yfirst > ylast)
-        yinc = (yfirst - ylast) / (ysize - 1);
+        yinc = (yfirst - ylast) / (double)(ysize - 1);
       else if (yfirst < ylast)
-        yinc = (ylast - yfirst) / (ysize - 1);
+        yinc = (ylast - yfirst) / (double)(ysize - 1);
       else
         {
           if (ysize % 2 != 0)
             {
-              yinc = 180.0 / (ysize - 1);
+              yinc = 180.0 / (double)(ysize - 1);
               yfirst = -90;
             }
           else
             {
-              yinc = 180.0 / ysize;
+              yinc = 180.0 / (double)ysize;
               yfirst = -90 + yinc / 2;
             }
         }
@@ -445,12 +449,12 @@ gridGenYvalsRegular(int ysize, double yfirst, double ylast, double yinc, double 
 
   if (yfirst > ylast && yinc > 0) yinc = -yinc;
 
-  for (int i = 0; i < ysize; i++) yvals[i] = yfirst + i * yinc;
+  for (size_t i = 0; i < ysize; i++) yvals[i] = yfirst + (double)i * yinc;
 }
 
 // used also in CDO
 void
-gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *restrict yvals)
+gridGenYvals(int gridtype, size_t ysize, double yfirst, double ylast, double yinc, double *restrict yvals)
 {
   if (gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED)
     {
@@ -518,7 +522,8 @@ gridDefYvals(gridID, lats);
 int
 gridCreate(int gridtype, SizeType size)
 {
-  if (CDI_Debug) Message("gridtype=%s  size=%zu", gridNamePtr(gridtype), size);
+  if (CDI_Debug)
+    Message("gridtype=%s  size=%zu", gridNamePtr(gridtype), (size_t)size);
 
   xassert(size);
   gridInit();
@@ -996,7 +1001,7 @@ gridInqSize(int gridID)
 }
 
 static int
-nsp2trunc(int nsp)
+nsp2trunc(size_t nsp)
 {
   /*  nsp = (trunc+1)*(trunc+1)              */
   /*      => trunc^2 + 3*trunc - (x-2) = 0   */
@@ -1004,7 +1009,7 @@ nsp2trunc(int nsp)
   /*  with:  y^2 + p*y + q = 0               */
   /*         y = -p/2 +- sqrt((p/2)^2 - q)   */
   /*         p = 3 and q = - (x-2)           */
-  int trunc = (int) (sqrt(nsp * 4 + 1.) - 3) / 2;
+  int trunc = (int)(sqrt((double)nsp * 4 + 1.) - 3) / 2;
   return trunc;
 }
 
@@ -1278,7 +1283,7 @@ gridInqReducedPoints(int gridID, int *reducedPoints)
   memcpy(reducedPoints, gridptr->reducedPoints, (size_t) gridptr->reducedPointsSize * sizeof(int));
 }
 
-static size_t
+static SizeType
 gridInqMaskSerialGeneric(grid_t *gridptr, mask_t **internalMask, int *restrict mask)
 {
   size_t size = gridptr->size;
@@ -1294,13 +1299,13 @@ gridInqMaskSerialGeneric(grid_t *gridptr, mask_t **internalMask, int *restrict m
   else
     size = 0;
 
-  return size;
+  return (SizeType)size;
 }
 
 static SizeType
 gridInqMaskSerial(grid_t *gridptr, int *mask)
 {
-  return (SizeType) gridInqMaskSerialGeneric(gridptr, &gridptr->mask, mask);
+  return gridInqMaskSerialGeneric(gridptr, &gridptr->mask, mask);
 }
 
 int
@@ -1346,7 +1351,7 @@ gridDefMask(int gridID, const int *mask)
 static int
 gridInqMaskGMESerial(grid_t *gridptr, int *mask_gme)
 {
-  return gridInqMaskSerialGeneric(gridptr, &gridptr->mask_gme, mask_gme);
+  return (int)gridInqMaskSerialGeneric(gridptr, &gridptr->mask_gme, mask_gme);
 }
 
 int
@@ -1758,7 +1763,7 @@ grid_calc_increment(size_t size, const double *vals)
 {
   if (size > 1)
     {
-      double inc = (vals[size - 1] - vals[0]) / (size - 1);
+      double inc = (vals[size - 1] - vals[0]) / (double)(size - 1);
       const double abs_inc = fabs(inc);
       for (size_t i = 1; i < size; ++i)
         if (fabs(fabs(vals[i - 1] - vals[i]) - abs_inc) > 0.01 * abs_inc)
@@ -1778,7 +1783,7 @@ grid_calc_increment_in_meter(SizeType size, const double *vals)
 {
   if (size > 1)
     {
-      const double inc = (vals[size - 1] - vals[0]) / (size - 1);
+      const double inc = (vals[size - 1] - vals[0]) / (double)(size - 1);
       return round(fabs(inc));
     }
 
@@ -2056,7 +2061,7 @@ grid_check_cyclic(grid_t *gridptr)
           if (IS_NOT_EQUAL(xval1, xvaln))
             {
               double xinc = xval2 - xval1;
-              if (IS_EQUAL(xinc, 0)) xinc = (xvaln - xval1) / (xsize - 1);
+              if (IS_EQUAL(xinc, 0)) xinc = (xvaln - xval1) / (double)(xsize - 1);
 
               const double x0 = xvaln + xinc - 360;
 
@@ -2192,11 +2197,12 @@ compareXYvals2(grid_t *gridRef, grid_t *gridTest)
 
   if (!differ && gridTest->x.vals)
     differ = fabs(inqXValTest(gridTest, 0) - inqXValRef(gridRef, 0)) > 1.e-9
-             || fabs(inqXValTest(gridTest, gridsize - 1) - inqXValRef(gridRef, gridsize - 1)) > 1.e-9;
+      || fabs(inqXValTest(gridTest, (SizeType)(gridsize - 1))
+              - inqXValRef(gridRef, (SizeType)(gridsize - 1))) > 1.e-9;
 
   if (!differ && gridTest->y.vals)
     differ = fabs(inqYValTest(gridTest, 0) - inqYValRef(gridRef, 0)) > 1.e-9
-             || fabs(inqYValTest(gridTest, gridsize - 1) - inqYValRef(gridRef, gridsize - 1)) > 1.e-9;
+      || fabs(inqYValTest(gridTest, (SizeType)gridsize - 1) - inqYValRef(gridRef, (SizeType)gridsize - 1)) > 1.e-9;
 
   return differ;
 }
@@ -2546,7 +2552,7 @@ gridCompareP(void *gridptr1, void *gridptr2)
     if (g1_xbounds)
       {
         xassert(g1->nvertex);
-        size_t size = g1->nvertex * (isIrregular ? g1->size : g1->x.size);
+        size_t size = (size_t)g1->nvertex * (isIrregular ? g1->size : g1->x.size);
         xassert(size);
 
         for (size_t i = 0; i < size; i++)
@@ -2560,7 +2566,7 @@ gridCompareP(void *gridptr1, void *gridptr2)
     if (g1_ybounds)
       {
         xassert(g1->nvertex);
-        size_t size = g1->nvertex * (isIrregular ? g1->size : g1->y.size);
+        size_t size = (size_t)g1->nvertex * (isIrregular ? g1->size : g1->y.size);
         xassert(size);
 
         for (size_t i = 0; i < size; i++)
@@ -2631,8 +2637,8 @@ grid_complete(grid_t *grid)
     case GRID_PROJECTION:
     case GRID_CHARXY:
       {
-        if (grid->x.size > 0) gridDefXsize(gridID, grid->x.size);
-        if (grid->y.size > 0) gridDefYsize(gridID, grid->y.size);
+        if (grid->x.size > 0) gridDefXsize(gridID, (SizeType)grid->x.size);
+        if (grid->y.size > 0) gridDefYsize(gridID, (SizeType)grid->y.size);
 
         if (gridtype == GRID_GAUSSIAN) gridDefNP(gridID, grid->np);
 
@@ -2641,7 +2647,7 @@ grid_complete(grid_t *grid)
         if (grid->x.flag == 2)
           {
             assert(gridtype != GRID_UNSTRUCTURED && gridtype != GRID_CURVILINEAR);
-            double *xvals = (double *) Malloc(grid->x.size * sizeof(double));
+            double *xvals = Malloc(grid->x.size * sizeof(double));
             gridGenXvals(grid->x.size, grid->x.first, grid->x.last, grid->x.inc, xvals);
             grid->x.vals = xvals;
             // gridDefXinc(gridID, grid->x.inc);
@@ -2794,7 +2800,8 @@ gridGenerate(const grid_t *grid)
   cdiCopyVarKey(&grid->keys, CDI_KEY_SCANNINGMODE, &gridptr->keys);
 
   if (gridtype == GRID_PROJECTION) gridptr->name = strdup(grid->name);
-  if (gridtype == GRID_GAUSSIAN_REDUCED) gridDefReducedPoints(gridID, grid->y.size, grid->reducedPoints);
+  if (gridtype == GRID_GAUSSIAN_REDUCED)
+    gridDefReducedPoints(gridID, (int)grid->y.size, grid->reducedPoints);
   gridptr->trunc = grid->trunc;
   gridptr->lcomplex = grid->lcomplex;
   gridptr->gme.nd = grid->gme.nd;
@@ -2812,7 +2819,8 @@ gridGenerate(const grid_t *grid)
 static void
 grid_copy_base_array_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
 {
-  size_t reducedPointsSize = (SizeType) gridptrOrig->reducedPointsSize;
+  size_t reducedPointsSize = gridptrOrig->reducedPointsSize > 0 ?
+    (size_t)gridptrOrig->reducedPointsSize : (size_t)0;
   size_t gridsize = gridptrOrig->size;
   int gridtype = gridptrOrig->type;
   bool isIrregular = grid_is_irregular(gridtype);
@@ -2838,14 +2846,16 @@ grid_copy_base_array_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
 
   if (gridptrOrig->x.bounds != NULL)
     {
-      size_t size = (isIrregular ? gridsize : gridptrOrig->x.size) * gridptrOrig->nvertex;
+      size_t size = (isIrregular ? gridsize : gridptrOrig->x.size)
+        * (size_t)gridptrOrig->nvertex;
       gridptrDup->x.bounds = (double *) Malloc(size * sizeof(double));
       memcpy(gridptrDup->x.bounds, gridptrOrig->x.bounds, size * sizeof(double));
     }
 
   if (gridptrOrig->y.bounds != NULL)
     {
-      size_t size = (isIrregular ? gridsize : gridptrOrig->y.size) * gridptrOrig->nvertex;
+      size_t size = (isIrregular ? gridsize : gridptrOrig->y.size)
+        * (size_t)gridptrOrig->nvertex;
       gridptrDup->y.bounds = (double *) Malloc(size * sizeof(double));
       memcpy(gridptrDup->y.bounds, gridptrOrig->y.bounds, size * sizeof(double));
     }
@@ -2911,7 +2921,7 @@ gridCompress(int gridID)
     {
       if (gridptr->mask_gme != NULL)
         {
-          size_t gridsize = gridInqSize(gridID);
+          size_t gridsize = (size_t)gridInqSize(gridID);
           size_t nv = (size_t) gridptr->nvertex;
           double *restrict area = (double *) gridptr->vtable->inqAreaPtr(gridptr),
                            *restrict xvals = (double *) gridptr->vtable->inqXValsPtr(gridptr),
@@ -2943,9 +2953,9 @@ gridCompress(int gridID)
 
           /* fprintf(stderr, "grid compress %d %d %d\n", i, j, gridsize); */
           gridsize = nselect;
-          gridptr->size = (int) gridsize;
-          gridptr->x.size = (int) gridsize;
-          gridptr->y.size = (int) gridsize;
+          gridptr->size = gridsize;
+          gridptr->x.size = gridsize;
+          gridptr->y.size = gridsize;
 
           double **resizeP[] = { &gridptr->x.vals, &gridptr->y.vals, &gridptr->area, &gridptr->x.bounds, &gridptr->y.bounds };
           size_t newSize[] = { gridsize, gridsize, gridsize, nv * gridsize, nv * gridsize };
@@ -3186,7 +3196,8 @@ gridInqXboundsPart(int gridID, int start, SizeType size, double *xbounds)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   const double *gridptr_xbounds = gridptr->vtable->inqXBoundsPtr(gridptr);
-  if (gridptr_xbounds && size && xbounds) memcpy(xbounds, gridptr_xbounds + start, size * sizeof(double));
+  if (gridptr_xbounds && size && xbounds)
+    memcpy(xbounds, gridptr_xbounds + start, (size_t)size * sizeof(double));
 
   return size;
 }
@@ -3196,7 +3207,8 @@ gridInqYboundsPart(int gridID, int start, SizeType size, double *ybounds)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   const double *gridptr_ybounds = gridptr->vtable->inqYBoundsPtr(gridptr);
-  if (gridptr_ybounds && size && ybounds) memcpy(ybounds, gridptr_ybounds + start, size * sizeof(double));
+  if (gridptr_ybounds && size && ybounds)
+    memcpy(ybounds, gridptr_ybounds + start, (size_t)size * sizeof(double));
 
   return size;
 }
@@ -3376,13 +3388,13 @@ gridPrintKernel(int gridID, int opt, FILE *fp)
 {
   char attstr[CDI_MAX_NAME];
   char attstr2[CDI_MAX_NAME];
-  size_t nxvals = gridInqXvals(gridID, NULL);
-  size_t nyvals = gridInqYvals(gridID, NULL);
+  size_t nxvals = (size_t)gridInqXvals(gridID, NULL);
+  size_t nyvals = (size_t)gridInqYvals(gridID, NULL);
 
   int type = gridInqType(gridID);
-  size_t gridsize = gridInqSize(gridID);
-  size_t xsize = gridInqXsize(gridID);
-  size_t ysize = gridInqYsize(gridID);
+  size_t gridsize = (size_t)gridInqSize(gridID);
+  size_t xsize = (size_t)gridInqXsize(gridID);
+  size_t ysize = (size_t)gridInqYsize(gridID);
   int nvertex = gridInqNvertex(gridID);
   int datatype;
   cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
@@ -4546,7 +4558,8 @@ gridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, int unpackBu
   if (memberMask & gridHasReducedPointsFlag)
     {
       xassert(gridP->reducedPointsSize);
-      gridP->reducedPoints = (int *) Malloc((size_t) gridP->reducedPointsSize * sizeof(int));
+      gridP->reducedPoints
+        = Malloc((size_t) gridP->reducedPointsSize * sizeof(int));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, gridP->reducedPoints, gridP->reducedPointsSize,
                       CDI_DATATYPE_INT, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);

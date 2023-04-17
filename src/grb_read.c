@@ -134,7 +134,7 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memType, void *g
   size_t recsize = streamptr->tsteps[tsID].records[recID].size;
 
   int gridID = vlistInqVarGrid(vlistID, varID);
-  size_t gridsize = gridInqSize(gridID);
+  size_t gridsize = (size_t)gridInqSize(gridID);
   if (CDI_Debug) Message("gridID = %d gridsize = %zu", gridID, gridsize);
 
   void *cgribexp = (gribbuffer && streamptr->record->objectp) ? streamptr->record->objectp : NULL;
@@ -163,7 +163,7 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memType, void *g
       if (fileRead(fileID, gribbuffer, recsize) != recsize) Error("Failed to read GRIB record!");
 
       if (resetFilePos) fileSetPos(fileID, currentfilepos, SEEK_SET);
-      if (!resetFilePos) streamptr->numvals += gridsize;
+      if (!resetFilePos) streamptr->numvals += (SizeType)gridsize;
     }
 
   return (JobArgs){
@@ -335,7 +335,7 @@ grb_read_var(stream_t *streamptr, int varID, int memType, void *data, size_t *nu
   int fileID = streamptr->fileID;
 
   int gridID = vlistInqVarGrid(vlistID, varID);
-  size_t gridsize = gridInqSize(gridID);
+  size_t gridsize = (size_t)gridInqSize(gridID);
 
   off_t currentfilepos = fileGetPos(fileID);
 
@@ -348,7 +348,7 @@ grb_read_var(stream_t *streamptr, int varID, int memType, void *data, size_t *nu
   for (int levelID = 0; levelID < nlevs; levelID++)
     {
       int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
-      size_t offset = levelID * gridsize;
+      size_t offset = (size_t)levelID * gridsize;
       void *datap = (memType == MEMTYPE_FLOAT) ? (void *) ((float *) data + offset) : (void *) ((double *) data + offset);
 
       *numMissVals += grb_read_and_decode_record(streamptr, recID, memType, datap, false);

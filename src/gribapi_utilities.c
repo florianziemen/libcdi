@@ -727,7 +727,7 @@ gribapiGetGridRegular(grib_handle *gh, grid_t *grid, int editionNumber, int grid
           // correct xinc if necessary
           if (IS_EQUAL(grid->x.first, 0) && grid->x.last > 354 && grid->x.last < 360)
             {
-              double xinc = 360. / grid->x.size;
+              double xinc = 360. / (double)grid->x.size;
               if (fabs(grid->x.inc - xinc) > 0.0)
                 {
                   grid->x.inc = xinc;

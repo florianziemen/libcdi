@@ -37,7 +37,7 @@ cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, SizeT
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB: grb_write_var(streamptr, varID, memtype, data, numMissVals); break;
+    case CDI_FILETYPE_GRIB: grb_write_var(streamptr, varID, memtype, data, (size_t)numMissVals); break;
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV: srvWriteVarDP(streamptr, varID, (double *) data); break;
@@ -49,7 +49,7 @@ cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, SizeT
     case CDI_FILETYPE_IEG: iegWriteVarDP(streamptr, varID, (double *) data); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdf_write_var(streamptr, varID, memtype, data, numMissVals); break;
+    case CDI_FILETYPE_NETCDF: cdf_write_var(streamptr, varID, memtype, data, (size_t)numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(filetype));
     }
@@ -111,9 +111,9 @@ streamWriteVarF(int streamID, int varID, const float *data, SizeType numMissVals
       const int vlistID = streamInqVlist(streamID);
       SizeType elementCount = gridInqSize(vlistInqVarGrid(vlistID, varID));
       elementCount *= (SizeType) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
-      double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
-      for (SizeType i = elementCount; i--;) conversionBuffer[i] = (double) data[i];
-      myCdiStreamWriteVar_(streamID, varID, MEMTYPE_DOUBLE, (const void *) conversionBuffer, numMissVals);
+      double *conversionBuffer = Malloc((size_t)elementCount * sizeof(*conversionBuffer));
+      for (SizeType i = elementCount; i--;) conversionBuffer[i] = data[i];
+      myCdiStreamWriteVar_(streamID, varID, MEMTYPE_DOUBLE, (const void *) conversionBuffer,  numMissVals);
       Free(conversionBuffer);
     }
 }
@@ -142,7 +142,7 @@ cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, const 
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB: grb_write_var_slice(streamptr, varID, levelID, memtype, data, numMissVals); break;
+    case CDI_FILETYPE_GRIB: grb_write_var_slice(streamptr, varID, levelID, memtype, data, (size_t)numMissVals); break;
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV: srvWriteVarSliceDP(streamptr, varID, levelID, (double *) data); break;
@@ -154,7 +154,7 @@ cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, const 
     case CDI_FILETYPE_IEG: iegWriteVarSliceDP(streamptr, varID, levelID, (double *) data); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdf_write_var_slice(streamptr, varID, levelID, memtype, data, numMissVals); break;
+    case CDI_FILETYPE_NETCDF: cdf_write_var_slice(streamptr, varID, levelID, memtype, data, (size_t)numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(filetype));
     }
@@ -210,7 +210,7 @@ streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, Si
       // In case the file format does not support single precision writing,
       // we fall back to double precision writing, converting the data on the fly.
       const SizeType elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
-      double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
+      double *conversionBuffer = Malloc((size_t)elementCount * sizeof(*conversionBuffer));
       for (SizeType i = elementCount; i--;) conversionBuffer[i] = (double) data[i];
       streamWriteVarSlice(streamID, varID, levelID, conversionBuffer, numMissVals);
       Free(conversionBuffer);
@@ -268,7 +268,7 @@ cdiStreamWriteVarChunk_(int streamID, int varID, int memtype, const int rect[][2
       break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdf_write_var_chunk(streamptr, varID, memtype, rect, data, numMissVals); break;
+    case CDI_FILETYPE_NETCDF: cdf_write_var_chunk(streamptr, varID, memtype, rect, data, (size_t)numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(filetype)); break;
     }
@@ -286,7 +286,7 @@ stream_write_record(int streamID, int memtype, const void *data, SizeType numMis
   switch (cdiBaseFiletype(streamptr->filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB: grb_write_record(streamptr, memtype, data, numMissVals); break;
+    case CDI_FILETYPE_GRIB: grb_write_record(streamptr, memtype, data, (size_t)numMissVals); break;
 #endif
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV: srv_write_record(streamptr, memtype, data); break;
@@ -298,7 +298,7 @@ stream_write_record(int streamID, int memtype, const void *data, SizeType numMis
     case CDI_FILETYPE_IEG: ieg_write_record(streamptr, memtype, data); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdf_write_record(streamptr, memtype, data, numMissVals); break;
+    case CDI_FILETYPE_NETCDF: cdf_write_record(streamptr, memtype, data, (size_t)numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(streamptr->filetype));
     }

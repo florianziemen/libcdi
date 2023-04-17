@@ -308,7 +308,7 @@ srvScanTimestep1(stream_t *streamptr)
 
       if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", nrecs, (int) recpos, rcode, rlevel, vdate, vtime);
 
-      srv_add_record(streamptr, param, rlevel, rxsize, rysize, recsize, recpos, prec);
+      srv_add_record(streamptr, param, rlevel, (size_t)rxsize, (size_t)rysize, recsize, recpos, prec);
     }
 
 tstepScanLoopFinished:
@@ -595,7 +595,7 @@ srvReadVarDP(stream_t *streamptr, int varID, double *data, size_t *numMissVals)
   if (CDI_Debug) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = (size_t)gridInqSize(vlistInqVarGrid(vlistID, varID));
   size_t nlevs = (size_t) streamptr->vars[varID].recordTable[0].nlevs;
 
   for (size_t levID = 0; levID < nlevs; levID++)

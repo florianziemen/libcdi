@@ -291,12 +291,12 @@ cgribexGetGridRegular(int *isec2, int *isec4, grid_t *grid, int gridtype, bool c
           }
 
         // recompute xinc if necessary
-        if (recompinc) grid->x.inc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->x.size - 1);
+        if (recompinc) grid->x.inc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / ((double)grid->x.size - 1);
 
         // correct xinc if necessary
         if (ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 && ISEC2_LastLon < 360000)
           {
-            double xinc = 360. / grid->x.size;
+            double xinc = 360. / (double)grid->x.size;
             if (fabs(grid->x.inc - xinc) > 0.0)
               {
                 grid->x.inc = xinc;
@@ -324,7 +324,7 @@ cgribexGetGridRegular(int *isec2, int *isec4, grid_t *grid, int gridtype, bool c
           }
 
         // recompute yinc if necessary
-        if (recompinc) grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->y.size - 1);
+        if (recompinc) grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / ((double)grid->y.size - 1);
       }
     grid->y.first = ISEC2_FirstLat * 0.001;
     grid->y.last = ISEC2_LastLat * 0.001;
@@ -373,7 +373,7 @@ cgribexGetGridReduced(int *isec2, int *isec4, grid_t *grid)
         if (ijDirectionIncrementGiven && ISEC2_LatIncr > 0)
           grid->y.inc = ISEC2_LatIncr * 0.001;
         else
-          grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->y.size - 1);
+          grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / ((double)grid->y.size - 1);
       }
     grid->y.first = ISEC2_FirstLat * 0.001;
     grid->y.last = ISEC2_LastLat * 0.001;

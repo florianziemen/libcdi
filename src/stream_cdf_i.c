@@ -2517,8 +2517,8 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
             }
           else if (gridPart && gridPart->readPart)
             {
-              start[0] = gridPart->start;
-              count[0] = gridPart->count;
+              start[0] = (size_t)gridPart->start;
+              count[0] = (size_t)gridPart->count;
               readPart = true;
             }
         }
@@ -2626,7 +2626,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                         if (readPart)
                           {
                             start[1] = 0;
-                            count[1] = grid->nvertex;
+                            count[1] = (size_t)grid->nvertex;
                           }
                         cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[xvarid], &grid->x.bounds, &lazyGrid->xBoundsGet,
                                         readPart, start, count);
@@ -2674,7 +2674,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                         if (readPart)
                           {
                             start[1] = 0;
-                            count[1] = grid->nvertex;
+                            count[1] = (size_t)grid->nvertex;
                           }
                         cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds, &lazyGrid->yBoundsGet,
                                         readPart, start, count);
@@ -2708,7 +2708,8 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
                 int dimid = ncvars[ncvar->rpvarid].dimids[0];
                 size_t len = ncdims[dimid].len;
                 grid->y.size = len;
-                grid->reducedPointsSize = len;
+                assert(len <= INT_MAX);
+                grid->reducedPointsSize = (int)len;
                 grid->reducedPoints = (int *) Malloc(len * sizeof(int));
                 cdf_get_var_int(ncvar->ncid, ncvar->rpvarid, grid->reducedPoints);
                 grid->np = ncvar->numLPE;
@@ -3049,8 +3050,8 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
                       if (numCellidx == 2) cdiQueryCellidx(query, count);
                       xsize = count;
                       ysize = count;
-                      gridPart.start = start - 1;
-                      gridPart.count = count;
+                      gridPart.start = (long)start - 1;
+                      gridPart.count = (long)count;
                       gridPart.readPart = true;
                     }
                 }

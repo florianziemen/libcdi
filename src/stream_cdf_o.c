@@ -26,7 +26,7 @@ cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   int recID = streamptr1->tsteps[tsID].recIDs[vrecID];
   int ivarID = streamptr1->tsteps[tsID].records[recID].varID;
   int gridID = vlistInqVarGrid(vlistID1, ivarID);
-  size_t datasize = gridInqSize(gridID);
+  size_t datasize = (size_t)gridInqSize(gridID);
   int datatype = vlistInqVarDatatype(vlistID1, ivarID);
   int memtype = (datatype != CDI_DATATYPE_FLT32) ? MEMTYPE_DOUBLE : MEMTYPE_FLOAT;
 
@@ -649,7 +649,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
           bool genBounds = false, hasBounds = gridInqPropPresence(gridID, gridAxisInq->bndsQueryKey);
           bool grid_is_cyclic = (gridIsCircular(gridID) > 0);
           double *restrict pbounds;
-          size_t nvertex = gridInqNvertex(gridID);
+          size_t nvertex = (size_t)gridInqNvertex(gridID);
           if (CDI_CMOR_Mode && grid_is_cyclic && !hasBounds)
             {
               const double *pvals = gridAxisInq->axisValsPtr(gridID);
@@ -1458,7 +1458,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
   int ncbvarid = CDI_UNDEFID;
   int nvdimID = CDI_UNDEFID;
 
-  double *buffer = (double *) malloc(2 * dimlen * sizeof(double));
+  double *buffer = Malloc(2 * dimlen * sizeof(double));
   double *lbounds = buffer;
   double *ubounds = buffer + dimlen;
   double *restrict levels;
@@ -1468,7 +1468,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
     levels = (double *) zaxisInqLevelsPtr(zaxisID);
   else
     {
-      levels = (double *) Malloc(sizeof(*levels) * dimlen);
+      levels = Malloc(sizeof(*levels) * dimlen);
       for (size_t i = 0; i < dimlen; ++i) levels[i] = (double) (i + 1);
     }
 
@@ -1535,7 +1535,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
 
   if (ncbvarid != CDI_UNDEFID)
     {
-      double *restrict zbounds = (double *) Malloc(2 * dimlen * sizeof(*zbounds));
+      double *restrict zbounds = Malloc(2 * dimlen * sizeof(*zbounds));
       for (size_t i = 0; i < dimlen; ++i)
         {
           zbounds[2 * i] = lbounds[i];

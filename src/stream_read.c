@@ -104,7 +104,7 @@ streamReadVarF(int streamID, int varID, float *data, SizeType *numMissVals)
     {
       // In case the file format does not support single precision reading,
       // we fall back to double precision reading, converting the data on the fly.
-      size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      size_t elementCount = (size_t)gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       elementCount *= (size_t) zaxisInqSize(vlistInqVarZaxis(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
       streamReadVar(streamID, varID, conversionBuffer, numMissVals);
@@ -181,7 +181,7 @@ streamReadVarSlice(int streamID, int varID, int levelID, double *data, SizeType 
   if (cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, &numMiss))
     {
       Warning("Unexpected error returned from cdiStreamReadVarSlice()!");
-      size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      size_t elementCount = (size_t)gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       memset(data, 0, elementCount * sizeof(*data));
     }
   *numMissVals = (SizeType) numMiss;
@@ -213,7 +213,7 @@ streamReadVarSliceF(int streamID, int varID, int levelID, float *data, SizeType 
     {
       // In case the file format does not support single precision reading,
       // we fall back to double precision reading, converting the data on the fly.
-      size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      size_t elementCount = (size_t)gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
       streamReadVarSlice(streamID, varID, levelID, conversionBuffer, numMissVals);
       for (size_t i = elementCount; i--;) data[i] = (float) conversionBuffer[i];

@@ -534,8 +534,8 @@ extern "C" {
 
 void cdiDefTableID(int tableID);
 
-void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals);
-void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals);
+void gridGenXvals(size_t xsize, double xfirst, double xlast, double xinc, double *xvals);
+void gridGenYvals(int gridtype, size_t ysize, double yfirst, double ylast, double yinc, double *yvals);
 
 static inline
 void cdi_check_gridsize_int_limit(const char *format, SizeType gridsize)

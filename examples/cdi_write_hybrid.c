@@ -12,7 +12,7 @@ main(void)
 {
   int gridID, zaxisID1, zaxisID2, zaxisID3, zaxisID4, taxisID;
   int vlistID, varID1, varID2, varID3, varID4, streamID;
-  size_t numMissVals = 0;
+  SizeType numMissVals = 0;
   double lons[nlon] = { 0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330 };
   double lats[nlat] = { -75, -45, -15, 15, 45, 75 };
   double levs[nhlev] = { 1, 2, 3, 4, 5, 6 };
@@ -95,11 +95,11 @@ main(void)
       // Init var1 and var2
       for (size_t i = 0; i < nlon * nlat; ++i) var1[i] = 1.1;
       for (size_t k = 0; k < nflev; ++k)
-        for (size_t i = 0; i < nlon * nlat; ++i) var2[i + k * nlon * nlat] = 2.2 + k;
+        for (size_t i = 0; i < nlon * nlat; ++i) var2[i + k * nlon * nlat] = 2.2 + (double)k;
       for (size_t k = 0; k < nhlev; ++k)
-        for (size_t i = 0; i < nlon * nlat; ++i) var3[i + k * nlon * nlat] = -2.2 - k;
+        for (size_t i = 0; i < nlon * nlat; ++i) var3[i + k * nlon * nlat] = -2.2 - (double)k;
       for (size_t k = 0; k < nflev; ++k)
-        for (size_t i = 0; i < nlon * nlat; ++i) var4[i + k * nlon * nlat] = 100 + k;
+        for (size_t i = 0; i < nlon * nlat; ++i) var4[i + k * nlon * nlat] = 100.0 + (double)k;
 
       // Write var1 and var2
       streamWriteVar(streamID, varID1, var1, numMissVals);
