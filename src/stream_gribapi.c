@@ -2227,15 +2227,14 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
 
       nlon = 0;
 
-      int *reducedPoints = Malloc((size_t)nlat * sizeof(int));
-      long *pl = Malloc((size_t)nlat * sizeof(long));
+      long *pl = Malloc((size_t)nlat * sizeof(long) + (size_t)nlat * sizeof(int));
+      int *reducedPoints = (int *)(pl + nlat);
       gridInqReducedPoints(gridID, reducedPoints);
-      for (size_t i = 0; i < nlat; ++i) pl[i] = reducedPoints[i];
+      for (long i = 0; i < nlat; ++i) pl[i] = reducedPoints[i];
 
-      GRIB_CHECK(grib_set_long_array(gh, "pl", pl, nlat), 0);
+      GRIB_CHECK(grib_set_long_array(gh, "pl", pl, (size_t)nlat), 0);
 
       Free(pl);
-      Free(reducedPoints);
     }
   else
     {
