@@ -1293,7 +1293,7 @@ streamDestroy(stream_t *streamptr)
       mycdiVlistDestroy_(vlistID, true);
     }
 
-  if (streamptr->jobs) free(streamptr->jobs);
+  if (streamptr->jobs) Free(streamptr->jobs);
   if (streamptr->jobManager) AsyncWorker_finalize((AsyncManager *) streamptr->jobManager);
 
   Free(streamptr);
