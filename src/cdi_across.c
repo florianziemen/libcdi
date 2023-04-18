@@ -236,16 +236,16 @@ across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nb
   return res;
 }
 
-int
+static int
 across_connect_int(char *path, char filemode, stream_t *streamptr)
 {
   (void)filemode;
   // parse ACROSS address format: across://<host>[:<port>]/<expid>[@<expver>]
-
+  // note: cdiGetProtocol already advanced path up to after the across:// part
   const char *host = path;
   const char *port = ACROSS_DEFAULT_PORT;
   const char *expid = NULL;
-  int expver = 1;
+  unsigned long expver = 1;
 
   char *c = path;
   while (*c != '\0')
@@ -416,7 +416,8 @@ across_connect_int(char *path, char filemode, stream_t *streamptr)
 
   across_info_t *info = (across_info_t *) Malloc(sizeof(across_info_t));
   info->expid = strdup(expid);
-  info->expver = expver;
+  assert(expver <= INT_MAX);
+  info->expver = (int)expver;
   streamptr->protocolData = info;
 
   return sock;
