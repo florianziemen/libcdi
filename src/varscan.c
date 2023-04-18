@@ -802,7 +802,7 @@ zaxis_compare(int zaxisID, int zaxistype, int nlevels, const double *levels, con
 
           if (!differ && hasBounds)
             {
-              double *bounds = (double *) malloc(2 * nlevels * sizeof(double));
+              double *bounds = Malloc(2 * (size_t)nlevels * sizeof(double));
               zaxisInqLbounds(zaxisID, bounds);
               zaxisInqUbounds(zaxisID, bounds + nlevels);
               for (int levelID = 0; levelID < nlevels; levelID++)
@@ -814,7 +814,7 @@ zaxis_compare(int zaxisID, int zaxistype, int nlevels, const double *levels, con
                       break;
                     }
                 }
-              free(bounds);
+              Free(bounds);
             }
 
           if (!differ)
