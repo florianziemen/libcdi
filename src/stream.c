@@ -352,12 +352,12 @@ streamInqByteorder(int streamID)
 const char *
 streamFilesuffix(int filetype)
 {
-  static const char *noSuffix = "";
-  static const char *ncSuffix = ".nc";
-  static const char *grbSuffix = ".grb";
-  static const char *srvSuffix = ".srv";
-  static const char *extSuffix = ".ext";
-  static const char *iegSuffix = ".ieg";
+  static const char noSuffix[] = "";
+  static const char ncSuffix[] = ".nc";
+  static const char grbSuffix[] = ".grb";
+  static const char srvSuffix[] = ".srv";
+  static const char extSuffix[] = ".ext";
+  static const char iegSuffix[] = ".ieg";
 
   switch (cdiBaseFiletype(filetype))
     {
