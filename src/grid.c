@@ -4535,9 +4535,10 @@ gridUnpackScalars(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos
     gridP->trunc = intBuffer[GRID_PACK_INT_IDX_TRUNC];
     gridP->nvertex = intBuffer[GRID_PACK_INT_IDX_NVERTEX];
     gridP->reducedPointsSize = intBuffer[GRID_PACK_INT_IDX_REDUCED_POINTS_SIZE];
-    gridP->size = intBuffer[GRID_PACK_INT_IDX_SIZE];
-    gridP->x.size = intBuffer[GRID_PACK_INT_IDX_X_SIZE];
-    gridP->y.size = intBuffer[GRID_PACK_INT_IDX_Y_SIZE];
+    /* FIXME: use int64_t for the following 3 */
+    gridP->size = (size_t)intBuffer[GRID_PACK_INT_IDX_SIZE];
+    gridP->x.size = (size_t)intBuffer[GRID_PACK_INT_IDX_X_SIZE];
+    gridP->y.size = (size_t)intBuffer[GRID_PACK_INT_IDX_Y_SIZE];
     gridP->lcomplex = (bool) intBuffer[GRID_PACK_INT_IDX_LCOMPLEX];
     memberMask = intBuffer[GRID_PACK_INT_IDX_MEMBERMASK];
   }
@@ -4704,15 +4705,19 @@ gridPackScalars(grid_t *gridP, void *packBuffer, int packBufferSize, int *packBu
     intBuffer[GRID_PACK_INT_IDX_TRUNC] = gridP->trunc;
     intBuffer[GRID_PACK_INT_IDX_NVERTEX] = gridP->nvertex;
     intBuffer[GRID_PACK_INT_IDX_REDUCED_POINTS_SIZE] = gridP->reducedPointsSize;
-    intBuffer[GRID_PACK_INT_IDX_SIZE] = gridP->size;
-    intBuffer[GRID_PACK_INT_IDX_X_SIZE] = gridP->x.size;
-    intBuffer[GRID_PACK_INT_IDX_Y_SIZE] = gridP->y.size;
+    xassert(gridP->size <= INT_MAX && gridP->x.size <= INT_MAX
+            && gridP->y.size <= INT_MAX);
+    intBuffer[GRID_PACK_INT_IDX_SIZE] = (int)gridP->size;
+    intBuffer[GRID_PACK_INT_IDX_X_SIZE] = (int)gridP->x.size;
+    intBuffer[GRID_PACK_INT_IDX_Y_SIZE] = (int)gridP->y.size;
     intBuffer[GRID_PACK_INT_IDX_LCOMPLEX] = gridP->lcomplex;
     intBuffer[GRID_PACK_INT_IDX_MEMBERMASK] = memberMask = gridGetComponentFlags(gridP);
 
-    serializePack(intBuffer, gridNint, CDI_DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
+    serializePack(intBuffer, gridNint, CDI_DATATYPE_INT,
+                  packBuffer, packBufferSize, packBufferPos, context);
     d = cdiCheckSum(CDI_DATATYPE_INT, gridNint, intBuffer);
-    serializePack(&d, 1, CDI_DATATYPE_UINT32, packBuffer, packBufferSize, packBufferPos, context);
+    serializePack(&d, 1, CDI_DATATYPE_UINT32,
+                  packBuffer, packBufferSize, packBufferPos, context);
   }
 
   {
@@ -4725,9 +4730,11 @@ gridPackScalars(grid_t *gridP, void *packBuffer, int packBufferSize, int *packBu
     doubleBuffer[GRID_PACK_DBL_IDX_X_INC] = gridP->x.inc;
     doubleBuffer[GRID_PACK_DBL_IDX_Y_INC] = gridP->y.inc;
 
-    serializePack(doubleBuffer, gridNdouble, CDI_DATATYPE_FLT64, packBuffer, packBufferSize, packBufferPos, context);
+    serializePack(doubleBuffer, gridNdouble, CDI_DATATYPE_FLT64,
+                  packBuffer, packBufferSize, packBufferPos, context);
     d = cdiCheckSum(CDI_DATATYPE_FLT, gridNdouble, doubleBuffer);
-    serializePack(&d, 1, CDI_DATATYPE_UINT32, packBuffer, packBufferSize, packBufferPos, context);
+    serializePack(&d, 1, CDI_DATATYPE_UINT32,
+                  packBuffer, packBufferSize, packBufferPos, context);
   }
 
   serializeKeysPack(&gridP->keys, packBuffer, packBufferSize, packBufferPos, context);
