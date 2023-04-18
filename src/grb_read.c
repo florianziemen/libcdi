@@ -231,7 +231,8 @@ get_global_recId(stream_t *streamptr, int tsID, int recID)
 */
 
 static void
-get_local_step_and_recId(stream_t *streamptr, long globalRecId, int *tsID, int *recID)
+get_local_step_and_recId(stream_t *streamptr, long globalRecId,
+                         int *tsID, long *recID)
 {
   int localTsId = 0;
   long numSteps = streamptr->ntsteps;
@@ -254,7 +255,8 @@ get_local_step_and_recId(stream_t *streamptr, long globalRecId, int *tsID, int *
 static void
 read_next_record(AsyncManager *jobManager, JobDescriptor *jd, stream_t *streamptr, int memType)
 {
-  int tsId = -1, recId = -1;
+  int tsId = -1;
+  long recId = -1;
   get_local_step_and_recId(streamptr, streamptr->nextGlobalRecId, &tsId, &recId);
   int xRecId = streamptr->tsteps[tsId].recIDs[recId];
   JobDescriptor_startJob(jobManager, jd, streamptr, tsId, xRecId, memType);

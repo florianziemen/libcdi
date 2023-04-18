@@ -71,9 +71,10 @@ cdf_init_records_step1(int numRecs, int *recIDs, record_t *records, int vlistID)
 }
 
 void
-cdf_create_records(stream_t *streamptr, int tsID)
+cdf_create_records(stream_t *streamptr, size_t tsID)
 {
-  if (tsID < 0 || (tsID >= streamptr->ntsteps && tsID > 0)) return;
+  if ((streamptr->ntsteps < 0 || tsID >= (size_t)streamptr->ntsteps)
+      && tsID > 0) return;
 
   if (streamptr->tsteps[tsID].nallrecs > 0) return;
 

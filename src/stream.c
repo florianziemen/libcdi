@@ -377,12 +377,12 @@ streamFilename(int streamID)
   return streamptr->filename;
 }
 
-static int
+static long
 cdiInqContents(stream_t *streamptr)
 {
   if (streamptr->lockIO) CDI_IO_LOCK();
 
-  int status = 0;
+  long status = 0;
   int filetype = streamptr->filetype;
 
   switch (cdiBaseFiletype(filetype))
@@ -635,7 +635,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
   return fileID;
 }
 
-static int
+static long
 stream_create_vlist(stream_t *streamptr, CdiQuery *query)
 {
   int vlistID = vlistCreate();
@@ -646,7 +646,7 @@ stream_create_vlist(stream_t *streamptr, CdiQuery *query)
 
   if (query) streamptr->query = query;
 
-  int status = cdiInqContents(streamptr);
+  long status = cdiInqContents(streamptr);
   if (status >= 0)
     {
       vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
@@ -741,8 +741,8 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
   streamptr->vlistID = vlistCreate();
   cdiVlistMakeInternal(streamptr->vlistID);
   // cdiReadByteorder(streamID);
-  int status = cdiInqContents(streamptr);
-  if (status < 0) return status;
+  long status = cdiInqContents(streamptr);
+  if (status < 0) return (int)status;
   vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
   vlistptr->ntsteps = streamInqNumSteps(streamID);
 
@@ -882,10 +882,10 @@ streamOpenRead(const char *filename)
       stream_t *streamptr = stream_to_pointer(streamID);
       streamptr->byteorder = byteorder;
 
-      int status = stream_create_vlist(streamptr, NULL);
+      long status = stream_create_vlist(streamptr, NULL);
       if (status < 0)
         {
-          streamID = status;
+          streamID = (int)status;
           if (streamptr->record) Free(streamptr->record);
           reshRemove(streamptr->self, &streamOps);
         }
@@ -911,10 +911,10 @@ streamOpenReadQuery(const char *filename, CdiQuery *query)
       stream_t *streamptr = stream_to_pointer(streamID);
       streamptr->byteorder = byteorder;
 
-      int status = stream_create_vlist(streamptr, query);
+      long status = stream_create_vlist(streamptr, query);
       if (status < 0)
         {
-          streamID = status;
+          streamID = (int)status;
           if (streamptr->record) Free(streamptr->record);
           reshRemove(streamptr->self, &streamOps);
         }

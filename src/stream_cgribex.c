@@ -1328,7 +1328,9 @@ cgribexScanTimestep(stream_t *streamptr)
       streamptr->ntsteps = tsID;
     }
 
-  return streamptr->ntsteps;
+  /* this will need work for files containing more than INT_MAX timesteps! */
+  assert(streamptr->ntsteps <= INT_MAX);
+  return (int)streamptr->ntsteps;
 }
 
 #ifdef gribWarning

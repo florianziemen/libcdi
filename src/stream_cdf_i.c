@@ -4298,7 +4298,7 @@ get_timevalue(int fileID, int nctimevarid, size_t ncStepIndex, double *timevarBu
 }
 
 static void
-cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
+cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
 {
   streamptr->curTsID = 0;
   streamptr->rtsteps = 1;
@@ -4307,9 +4307,6 @@ cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
     {
       cdi_create_timesteps(numTimesteps, streamptr);
       cdf_create_records(streamptr, 0);
-    }
-  else if (numTimesteps < 0)
-    {
     }
   else
     {
@@ -4345,19 +4342,21 @@ cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
       CdiQuery *query = streamptr->query;
       if (query && cdiQueryNumStepidx(query) > 0)
         {
-          for (int tsID = 0; tsID < numTimesteps; ++tsID)
-            {
-              if (cdiQueryStepidx(query, tsID + 1) < 0) ncStepIndices[tsID] = -1;
-            }
+          /* currently, the query interface does not support more
+           * than INT_MAX-1 steps! */
+          assert(numTimesteps < INT_MAX);
+          for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
+            if (cdiQueryStepidx(query, (int)tsID + 1) < 0)
+              ncStepIndices[tsID] = -1;
         }
 
-      int numSteps = 0;
-      for (int tsID = 0; tsID < numTimesteps; ++tsID)
-        if (ncStepIndices[tsID] >= 0) numSteps++;
+      size_t numSteps = 0;
+      for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
+        numSteps += (ncStepIndices[tsID] >= 0);
 
       cdi_create_timesteps(numSteps, streamptr);
 
-      for (int tsID = 0, stepID = 0; tsID < numTimesteps; ++tsID)
+      for (size_t tsID = 0, stepID = 0; tsID < numTimesteps; ++tsID)
         {
           if (ncStepIndices[tsID] >= 0)
             {
@@ -4385,9 +4384,10 @@ cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
                 tbNdims = 2
               };
 
-              for (int tsID = 0; tsID < numSteps; ++tsID)
+              for (size_t tsID = 0; tsID < numSteps; ++tsID)
                 {
-                  size_t ncStepIndex = streamptr->tsteps[tsID].ncStepIndex;
+                  size_t ncStepIndex
+                    = (size_t)streamptr->tsteps[tsID].ncStepIndex;
                   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
                   size_t start[tbNdims] = { ncStepIndex, 0 };
                   size_t count[tbNdims] = { 1, numBnds };
@@ -4404,9 +4404,10 @@ cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
           int leadtimeid = streamptr->basetime.leadtimeid;
           if (leadtimeid != CDI_UNDEFID)
             {
-              for (int tsID = 0; tsID < numSteps; ++tsID)
+              for (size_t tsID = 0; tsID < numSteps; ++tsID)
                 {
-                  size_t ncStepIndex = streamptr->tsteps[tsID].ncStepIndex;
+                  size_t ncStepIndex
+                    = (size_t)streamptr->tsteps[tsID].ncStepIndex;
                   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
                   cdi_set_forecast_period(get_timevalue(fileID, leadtimeid, ncStepIndex, NULL), taxis);
                 }

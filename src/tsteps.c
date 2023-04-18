@@ -63,19 +63,19 @@ tstepsNewEntry(stream_t *streamptr)
 }
 
 void
-cdi_create_timesteps(int numTimesteps, stream_t *streamptr)
+cdi_create_timesteps(size_t numTimesteps, stream_t *streamptr)
 {
   streamptr->ntsteps = (long) numTimesteps;
-  if (numTimesteps < 0 || streamptr->tstepsTableSize > 0) return;
+  if (streamptr->tstepsTableSize > 0) return;
 
-  int ntsteps = (numTimesteps == 0) ? 1 : numTimesteps;
+  size_t ntsteps = (numTimesteps == 0) ? 1 : numTimesteps;
 
-  streamptr->tsteps = (tsteps_t *) Malloc((size_t) ntsteps * sizeof(tsteps_t));
+  streamptr->tsteps = Malloc(ntsteps * sizeof(tsteps_t));
 
-  streamptr->tstepsTableSize = ntsteps;
-  streamptr->tstepsNextID = ntsteps;
+  streamptr->tstepsTableSize = (int)ntsteps;
+  streamptr->tstepsNextID = (int)ntsteps;
 
-  for (int tsID = 0; tsID < ntsteps; tsID++)
+  for (size_t tsID = 0; tsID < ntsteps; tsID++)
     {
       tstepsInitEntry(&streamptr->tsteps[tsID]);
     }
