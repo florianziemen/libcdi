@@ -86,10 +86,10 @@ cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int attl
   if (atttype == CDI_DATATYPE_INT32)
     {
       int attint = 0;
-      int *pattint = attlen > 1 ? malloc((size_t)attlen * sizeof(int)) : &attint;
+      int *pattint = attlen > 1 ? Malloc((size_t)attlen * sizeof(int)) : &attint;
       cdiInqAttInt(gridID, CDI_GLOBAL, attname, attlen, pattint);
       for (int i = 0; i < attlen; ++i) attflt[i] = (double) pattint[i];
-      if (attlen > 1) free(pattint);
+      if (attlen > 1) Free(pattint);
     }
   else if (atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64)
     {
@@ -358,9 +358,9 @@ gridGenXvals(size_t xsize, double xfirst, double xlast, double xinc, double *res
 static void
 calc_gaussgrid(double *restrict yvals, size_t ysize, double yfirst, double ylast)
 {
-  double *restrict yw = malloc(ysize * sizeof(double));
+  double *restrict yw = Malloc(ysize * sizeof(double));
   gaussianLatitudes(ysize, yvals, yw);
-  free(yw);
+  Free(yw);
   for (size_t i = 0; i < ysize; i++) yvals[i] = asin(yvals[i]) / M_PI * 180.0;
 
   if (yfirst < ylast && yfirst > -90.0 && ylast < 90.0)
@@ -390,7 +390,7 @@ gridGenYvalsGaussian(size_t ysize, double yfirst, double ylast, double *restrict
         ny -= ny % 2;
         if (ny > 0 && (size_t)ny > ysize && ny < 4096)
           {
-            double *ytmp = (double *) Malloc((size_t) ny * sizeof(double));
+            double *ytmp = Malloc((size_t) ny * sizeof(double));
             calc_gaussgrid(ytmp, (size_t)ny, yfirst, ylast);
 
             size_t nstart = (size_t)ny-ysize;

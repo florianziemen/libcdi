@@ -17,6 +17,7 @@
 #ifndef ERROR_H
 #include "error.h"
 #endif
+#include "dmemory.h"
 
 /*
  * Generic interfaces for (de-)marshalling
@@ -114,7 +115,7 @@ serializeKeysUnpack(const void *buf, int buf_size, int *position, cdi_keys_t *ke
           if (length > buffersize)
             {
               buffersize = length;
-              buffer = realloc(buffer, (size_t)buffersize);
+              buffer = Realloc(buffer, (size_t)buffersize);
             }
           serializeUnpack(buf, buf_size, position, buffer, length, CDI_DATATYPE_TXT, context);
           cdiDefVarKeyBytes(keysp, key, (unsigned char *) buffer, length);
@@ -135,7 +136,7 @@ serializeKeysUnpack(const void *buf, int buf_size, int *position, cdi_keys_t *ke
     }
   serializeUnpack(buf, buf_size, position, &d, 1, CDI_DATATYPE_UINT32, context);
   xassert(d == d2);
-  if (buffer) free(buffer);
+  if (buffer) Free(buffer);
 }
 
 /*
