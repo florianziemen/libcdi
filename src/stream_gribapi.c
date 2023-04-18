@@ -1212,7 +1212,6 @@ fdbScanTimesteps(stream_t *streamptr)
   return 0;
 }
 
-<<<<<<< HEAD
 static int
 records_cmp_varname(const void *s1, const void *s2)
 {
@@ -1228,10 +1227,7 @@ sort_records(stream_t *streamptr)
   qsort(records, numRecords, sizeof(records[0]), records_cmp_varname);
 }
 
-int
-=======
 long
->>>>>>> 356bb8e3b (Use wider type for time step indexing.)
 gribapiScanTimestep1(stream_t *streamptr)
 {
   CdiDateTime vDateTime0;
