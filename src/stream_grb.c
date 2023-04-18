@@ -345,6 +345,7 @@ grbInqContents(stream_t *streamptr)
   return status;
 }
 
+#ifdef HAVE_LIBFDB5
 int
 fdbInqContents(stream_t *streamptr)
 {
@@ -355,6 +356,7 @@ fdbInqContents(stream_t *streamptr)
   return -1;
 #endif
 }
+#endif
 #endif
 
 int

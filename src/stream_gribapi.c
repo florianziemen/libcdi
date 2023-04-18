@@ -1025,13 +1025,10 @@ checkTime(stream_t *streamptr, const compvar2_t *compVar, CdiDateTime verificati
 
 #ifdef HAVE_LIBFDB5
 #include "cdi_fdb.h"
-#endif
 
 int
 fdbScanTimesteps(stream_t *streamptr)
 {
-  (void) streamptr;
-#ifdef HAVE_LIBFDB5
   void *gribbuffer = NULL;
   size_t buffersize = 0;
   grib_handle *gh = NULL;
@@ -1207,10 +1204,10 @@ fdbScanTimesteps(stream_t *streamptr)
 
   if (recordInfoList) free(recordInfoList);
   if (timestepRecordOffset) free(timestepRecordOffset);
-#endif
 
   return 0;
 }
+#endif
 
 static int
 records_cmp_varname(const void *s1, const void *s2)

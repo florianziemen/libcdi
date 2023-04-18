@@ -392,8 +392,9 @@ cdiInqContents(stream_t *streamptr)
       {
         switch (streamptr->protocol)
           {
+#ifdef HAVE_LIBFDB5
           case CDI_PROTOCOL_FDB: status = fdbInqContents(streamptr); break;
-
+#endif
           case CDI_PROTOCOL_ACROSS:  // TODO read from ACROSS
           case CDI_PROTOCOL_OTHER:
           case CDI_PROTOCOL_FILE: status = grbInqContents(streamptr); break;

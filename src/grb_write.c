@@ -117,10 +117,10 @@ typedef struct
   char levelist[8];
 } FDB_Keys;
 
-void
+#ifdef HAVE_LIBFDB5
+static void
 cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nbytes, const FDB_Keys *fdbKeys)
 {
-#ifdef HAVE_LIBFDB5
   size_t len = strlen(filename);
   if (len == 6) Error("FDB keys missing!");
 
@@ -175,8 +175,8 @@ cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nb
   // alternative: write to tmpfile and use C++ code from fdb_write
 
   check_fdb_error(fdb_delete_key(key));
-#endif
 }
+#endif
 
 static int
 map_grib2_param(int pnum, int pcat, int pdis)
