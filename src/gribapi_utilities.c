@@ -617,7 +617,7 @@ gribapiGetGridsize(grib_handle *gh)
 }
 
 static void
-gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, int editionNumber, size_t numberOfPoints)
+gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, long editionNumber, size_t numberOfPoints)
 {
   long lpar;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar);
@@ -672,7 +672,7 @@ gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, int editionNumber, 
 }
 
 static void
-gribapiGetGridRegular(grib_handle *gh, grid_t *grid, int editionNumber, int gridtype, size_t numberOfPoints)
+gribapiGetGridRegular(grib_handle *gh, grid_t *grid, long editionNumber, int gridtype, size_t numberOfPoints)
 {
   long lpar;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ni", &lpar);
@@ -945,7 +945,7 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
       GRIB_CHECK(grib_get_long(gh, "jScansPositively", &jScansPositively), 0);
       GRIB_CHECK(grib_get_long(gh, "jPointsAreConsecutive", &jPointsAreConsecutive), 0);
 
-      int scanningMode = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
+      int scanningMode = (int)(128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive);
       cdiDefVarKeyInt(&grid->keys, CDI_KEY_SCANNINGMODE, scanningMode);
       /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
                    64  = 128 * 0                + 64 *        1         + 32 * 0
@@ -954,7 +954,7 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
          Default / implicit scanning mode is 64:
                             i and j scan positively, i points are consecutive (row-major)        */
 #ifdef HIRLAM_EXTENSIONS
-      if (cdiDebugExt >= 30 && gribEditionNumber(gh) <= 1)
+      if (cdiDebugExt >= 30 && edititionnumber <= 1)
         {
           //  indicatorOfParameter=33,indicatorOfTypeOfLevel=105,level
           long paramId, levelTypeId, levelId;
