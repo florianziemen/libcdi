@@ -397,12 +397,12 @@ cdfGetAttInt(int fileID, int ncvarid, const char *attname, size_t attlen, int *a
   if (xtypeIsFloat(atttype) || xtypeIsInt(atttype))
     {
       bool needAlloc = (nc_attlen > attlen);
-      int *pintatt = needAlloc ? (int *) (malloc(nc_attlen * sizeof(int))) : attint;
+      int *pintatt = needAlloc ? Malloc(nc_attlen * sizeof(int)) : attint;
       cdf_get_att_int(fileID, ncvarid, attname, pintatt);
       if (needAlloc)
         {
           memcpy(attint, pintatt, attlen * sizeof(int));
-          free(pintatt);
+          Free(pintatt);
         }
     }
 }
@@ -419,10 +419,10 @@ cdfGetAttInt64(int fileID, int ncvarid, const char *attname, size_t attlen, int6
 
   if (xtypeIsFloat(atttype) || xtypeIsInt(atttype) || xtypeIsInt64(atttype))
     {
-      long long *plongatt = (long long *) malloc(nc_attlen * sizeof(long long));
+      long long *plongatt = Malloc(nc_attlen * sizeof(long long));
       cdf_get_att_longlong(fileID, ncvarid, attname, plongatt);
       for (size_t i = 0; i < attlen; ++i) attint[i] = plongatt[i];
-      free(plongatt);
+      Free(plongatt);
     }
 }
 
@@ -439,7 +439,7 @@ cdfGetAttDouble(int fileID, int ncvarid, char *attname, size_t attlen, double *a
   if (xtypeIsFloat(atttype) || xtypeIsInt(atttype))
     {
       bool needAlloc = (nc_attlen > attlen);
-      double *pdoubleatt = needAlloc ? (double *) Malloc(nc_attlen * sizeof(double)) : attdouble;
+      double *pdoubleatt = needAlloc ? Malloc(nc_attlen * sizeof(double)) : attdouble;
       cdf_get_att_double(fileID, ncvarid, attname, pdoubleatt);
       if (needAlloc)
         {
@@ -864,7 +864,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
   if (xtypeIsInt(atttype))
     {
       int attint = 0;
-      int *pattint = (attlen > 1) ? (int *) malloc(attlen * sizeof(int)) : &attint;
+      int *pattint = (attlen > 1) ? Malloc(attlen * sizeof(int)) : &attint;
       cdfGetAttInt(ncid, ncvarid, attname, attlen, pattint);
       // clang-format off
       int datatype = (atttype == NC_SHORT)  ? CDI_DATATYPE_INT16 :
@@ -877,12 +877,12 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
                                               CDI_DATATYPE_INT32;
       // clang-format on
       cdiDefAttInt(cdiID, varID, attname, datatype, (int) attlen, pattint);
-      if (attlen > 1) free(pattint);
+      if (attlen > 1) Free(pattint);
     }
   else if (xtypeIsInt64(atttype))
     {
       int64_t attint64 = 0;
-      int64_t *pattint64 = (attlen > 1) ? (int64_t *) malloc(attlen * sizeof(int64_t)) : &attint64;
+      int64_t *pattint64 = (attlen > 1) ? Malloc(attlen * sizeof(int64_t)) : &attint64;
       cdfGetAttInt64(ncid, ncvarid, attname, attlen, pattint64);
       bool defineAtts = true;
       for (size_t i = 0; i < attlen; ++i)
@@ -890,21 +890,21 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
       if (defineAtts)
         {
           int attint = 0;
-          int *pattint = (attlen > 1) ? (int *) malloc(attlen * sizeof(int)) : &attint;
+          int *pattint = (attlen > 1) ? Malloc(attlen * sizeof(int)) : &attint;
           for (size_t i = 0; i < attlen; ++i) pattint[i] = pattint64[i];
           cdiDefAttInt(cdiID, varID, attname, CDI_DATATYPE_INT32, (int) attlen, pattint);
-          if (attlen > 1) free(pattint);
+          if (attlen > 1) Free(pattint);
         }
-      if (attlen > 1) free(pattint64);
+      if (attlen > 1) Free(pattint64);
     }
   else if (xtypeIsFloat(atttype))
     {
       double attflt = 0.0;
-      double *pattflt = (attlen > 1) ? (double *) malloc(attlen * sizeof(double)) : &attflt;
+      double *pattflt = (attlen > 1) ? Malloc(attlen * sizeof(double)) : &attflt;
       cdfGetAttDouble(ncid, ncvarid, attname, attlen, pattflt);
       int datatype = (atttype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
       cdiDefAttFlt(cdiID, varID, attname, datatype, (int) attlen, pattflt);
-      if (attlen > 1) free(pattflt);
+      if (attlen > 1) Free(pattflt);
     }
   else if (xtypeIsText(atttype))
     {
@@ -3728,22 +3728,22 @@ static void
 cdf_copy_attint(int fileID, int vlistID, nc_type xtype, size_t attlen, char *attname)
 {
   int attint[8];
-  int *pattint = (attlen > 8) ? (int *) malloc(attlen * sizeof(int)) : attint;
+  int *pattint = (attlen > 8) ? (int *) Malloc(attlen * sizeof(int)) : attint;
   cdfGetAttInt(fileID, NC_GLOBAL, attname, attlen, pattint);
   int datatype = (xtype == NC_SHORT) ? CDI_DATATYPE_INT16 : CDI_DATATYPE_INT32;
   cdiDefAttInt(vlistID, CDI_GLOBAL, attname, datatype, (int) attlen, pattint);
-  if (attlen > 8) free(pattint);
+  if (attlen > 8) Free(pattint);
 }
 
 static void
 cdf_copy_attflt(int fileID, int vlistID, nc_type xtype, size_t attlen, char *attname)
 {
   double attflt[8];
-  double *pattflt = (attlen > 8) ? (double *) malloc(attlen * sizeof(double)) : attflt;
+  double *pattflt = (attlen > 8) ? (double *) Malloc(attlen * sizeof(double)) : attflt;
   cdfGetAttDouble(fileID, NC_GLOBAL, attname, attlen, pattflt);
   int datatype = (xtype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
   cdiDefAttFlt(vlistID, CDI_GLOBAL, attname, datatype, (int) attlen, pattflt);
-  if (attlen > 8) free(pattflt);
+  if (attlen > 8) Free(pattflt);
 }
 
 static bool
@@ -4320,26 +4320,28 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
       int nctimeboundsid = streamptr->basetime.ncvarboundsid;
       bool hasTimesteps = (nctimevarid != CDI_UNDEFID && streamptr->basetime.hasUnits);
 
-      int *ncStepIndices = (int *) malloc(numTimesteps * sizeof(int));
-      for (int tsID = 0; tsID < numTimesteps; ++tsID) ncStepIndices[tsID] = tsID;
+      int *ncStepIndices = Malloc(numTimesteps * sizeof(int));
+      for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
+        ncStepIndices[tsID] = (int)tsID;
 
       CdiDateTime *vDateTimeList = NULL;
 
       if (hasTimesteps)
         {
-          vDateTimeList = (CdiDateTime *) malloc(numTimesteps * sizeof(CdiDateTime));
+          vDateTimeList = Malloc(numTimesteps * sizeof(CdiDateTime));
 
           if (streamptr->basetime.isWRF)
             {
-              for (int tsID = 0; tsID < numTimesteps; ++tsID) vDateTimeList[tsID] = wrf_read_timestep(fileID, nctimevarid, tsID);
+              for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
+                vDateTimeList[tsID] = wrf_read_timestep(fileID, nctimevarid, (int)tsID);
             }
           else
             {
-              double *timevarBuffer = (double *) malloc(numTimesteps * sizeof(double));
+              double *timevarBuffer = Malloc(numTimesteps * sizeof(double));
               cdf_get_var_double(fileID, nctimevarid, timevarBuffer);
-              for (int tsID = 0; tsID < numTimesteps; ++tsID)
+              for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
                 vDateTimeList[tsID] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID, timevarBuffer), taxis0);
-              if (timevarBuffer) free(timevarBuffer);
+              if (timevarBuffer) Free(timevarBuffer);
             }
         }
 
@@ -4377,7 +4379,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
             }
         }
 
-      if (ncStepIndices) free(ncStepIndices);
+      if (ncStepIndices) Free(ncStepIndices);
 
       if (hasTimesteps)
         {
@@ -4419,7 +4421,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
             }
         }
 
-      if (vDateTimeList) free(vDateTimeList);
+      if (vDateTimeList) Free(vDateTimeList);
     }
 }
 
