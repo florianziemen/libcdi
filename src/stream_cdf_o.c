@@ -1877,6 +1877,7 @@ cdf_def_mapping(stream_t *streamptr, int gridID)
   return delayed;
 }
 
+#ifndef USE_MPI
 static void
 cdfDefCharacter(stream_t *streamptr, int gridID, int gridIndex, int cdiAxisID, int strlen)
 {
@@ -1962,6 +1963,7 @@ cdfDefCharacter(stream_t *streamptr, int gridID, int gridIndex, int cdiAxisID, i
 
   streamptr->ncmode = 2;
 }
+#endif
 
 static void
 cdfDefReducedGrid(stream_t *streamptr, int gridID, int gridIndex)
@@ -2203,6 +2205,7 @@ cdf_define_grid(stream_t *streamptr, int gridID, int gridIndex)
       cdfDefTrajLon(streamptr, gridID, gridIndex);
       cdfDefTrajLat(streamptr, gridID, gridIndex);
     }
+#ifndef USE_MPI
   else if (gridtype == GRID_CHARXY)
     {
       int strlen = 0;
@@ -2224,6 +2227,7 @@ cdf_define_grid(stream_t *streamptr, int gridID, int gridIndex)
           Free(ydelayed);
         }
     }
+#endif
   else
     {
       Error("Unsupported grid type: %s", gridNamePtr(gridtype));
