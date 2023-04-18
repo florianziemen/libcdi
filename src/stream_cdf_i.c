@@ -206,8 +206,9 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
       timeUnitsStr++;
       len--;
     }
-
-  char *tu = (char *) malloc((len + 1) * sizeof(char));
+  char tmp[32], *tu = tmp;
+  if (len+1 > sizeof(tmp))
+    tu = Malloc(len + 1);
 
   for (size_t i = 0; i < len; i++) tu[i] = (char) tolower((int) timeUnitsStr[i]);
   tu[len] = 0;
@@ -216,6 +217,8 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
   if (timeUnits == -1)
     {
       Warning("Unsupported TIMEUNIT: %s!", timeUnitsStr);
+      if (tu != tmp)
+        Free(tu);
       return 1;
     }
 
@@ -275,7 +278,8 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
   taxis->type = taxisType;
   taxis->unit = timeUnits;
 
-  free(tu);
+  if (tu != tmp)
+    Free(tu);
 
   if (CDI_Debug) Message("taxisType = %d  timeUnits = %d", taxisType, timeUnits);
 
