@@ -242,10 +242,11 @@ get_local_step_and_recId(stream_t *streamptr, long globalRecId,
       localTsId++;
       globalRecId -= tsteps[0].nrecs;
     }
-  while (globalRecId >= tsteps[1].nrecs)
+  if (globalRecId >= tsteps[1].nrecs)
     {
-      localTsId++;
-      globalRecId -= tsteps[1].nrecs;
+      ldiv_t nadjust = ldiv(globalRecId, tsteps[1].nrecs);
+      localTsId += (int)nadjust.quot;
+      globalRecId = nadjust.rem;
     }
 
   *tsID = localTsId;
