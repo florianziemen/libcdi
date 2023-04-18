@@ -326,7 +326,7 @@ cdiPioBufferPartData_(int streamID, int varID, int memtype, const void *packData
   xassert(varID >= 0 && varID < streamInqNvars(streamID));
   collWaitAll();
   int dataHeaderID = memtype == MEMTYPE_DOUBLE ? DATA_HEADER_DOUBLE : DATA_HEADER_FLOAT;
-  struct winHeaderEntry dataHeader = { .id = dataHeaderID, .specific.dataRecord = { varID, numMissVals }, .offset = -1 };
+  struct winHeaderEntry dataHeader = { .id = dataHeaderID, .specific.dataRecord = { varID, (int)numMissVals }, .offset = -1 };
   modelWinEnqueue(streamIdx, dataHeader, packData, packDataFunc);
   {
     struct winHeaderEntry partHeader = { .id = PARTDESCMARKER, .offset = 0 };
@@ -748,15 +748,17 @@ pioWriteTimestep(void)
 }
 
 void
-cdiPioStreamWriteVarPart_(int streamID, int varID, int memtype, const void *data, int numMissVals, Xt_idxlist partDesc)
+cdiPioStreamWriteVarPart_(int streamID, int varID, int memtype,
+                          const void *data, size_t numMissVals,
+                          Xt_idxlist partDesc)
 {
   if (CDI_Debug) Message("streamID = %d varID = %d", streamID, varID);
 
   int chunk = xt_idxlist_get_num_indices(partDesc);
   xassert(chunk == 0 || data);
 
-  void (*myStreamWriteVarPart)(int streamID, int varID, int memtype, const void *data, int numMissVals, Xt_idxlist partDesc)
-      = (void (*)(int, int, int, const void *, int, Xt_idxlist)) namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_PART_).func;
+  void (*myStreamWriteVarPart)(int streamID, int varID, int memtype, const void *data, size_t numMissVals, Xt_idxlist partDesc)
+      = (void (*)(int, int, int, const void *, size_t, Xt_idxlist)) namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_PART_).func;
 
   if (!myStreamWriteVarPart) xabort("local part writing is unsupported!");
 
