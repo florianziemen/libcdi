@@ -1027,7 +1027,7 @@ varDefKeyBytes(int varID, int key, const unsigned char *bytes, int length)
 void
 varDefKeyString(int varID, int key, const char *string)
 {
-  int length = strlen(string) + 1;
+  int length = (int)strlen(string) + 1;
   cdi_keys_t *keysp = &(vartable[varID].keys);
   cdiDefVarKeyBytes(keysp, key, (const unsigned char *) string, length);
 }

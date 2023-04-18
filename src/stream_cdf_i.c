@@ -163,16 +163,17 @@ scan_time_string(const char *ptu)
     }
 
   int second = (int) fseconds;
-  int ms = (fseconds - second) * 1000;
-
+  double aseconds;
+  double ms = modf(fseconds, &aseconds) * 1000;
+  assert(aseconds == second);
   CdiDateTime datetime;
   datetime.date.year = year;
-  datetime.date.month = month;
-  datetime.date.day = day;
-  datetime.time.hour = hour;
-  datetime.time.minute = minute;
-  datetime.time.second = second;
-  datetime.time.ms = ms;
+  datetime.date.month = (short)month;
+  datetime.date.day = (short)day;
+  datetime.time.hour = (short)hour;
+  datetime.time.minute = (short)minute;
+  datetime.time.second = (short)second;
+  datetime.time.ms = (short)ms;
 
   return datetime;
 }
@@ -905,7 +906,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
     {
       char attstring[8192];
       cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
-      cdiDefAttTxt(cdiID, varID, attname, strlen(attstring), attstring);
+      cdiDefAttTxt(cdiID, varID, attname, (int)strlen(attstring), attstring);
     }
 }
 
@@ -1230,7 +1231,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
           else if (isText && str_is_equal(attname, "units"))
             {
-              ncvar->unitsLen = attstringsize;
+              ncvar->unitsLen = (int)attstringsize;
               memcpy(ncvar->units, attstring, attstringsize);
             }
           else if (isText && str_is_equal(attname, "calendar"))
@@ -2064,7 +2065,7 @@ grid_set_chunktype(grid_t *grid, ncvar_t *ncvar)
         {
           size_t chunkSize = ncvar->chunks[ndims - 1];
           ncvar->chunkType = (chunkSize == grid->size) ? CDI_CHUNK_GRID : CDI_CHUNK_AUTO;
-          if (ncvar->chunkType == CDI_CHUNK_AUTO && ncvar->chunks[ndims - 1] > 1) ncvar->chunkSize = chunkSize;
+          if (ncvar->chunkType == CDI_CHUNK_AUTO && chunkSize > 1) ncvar->chunkSize = (int)chunkSize;
         }
       else
         {

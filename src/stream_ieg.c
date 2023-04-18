@@ -57,7 +57,7 @@ ieg_read_recordSP(stream_t *streamptr, float *data, size_t *numMissVals)
   double missval = vlistInqVarMissval(vlistID, varID);
   size_t size = (size_t)gridInqSize(vlistInqVarGrid(vlistID, varID));
 
-  *numMissVals = get_num_missvalsSP(size, data, missval);
+  *numMissVals = get_num_missvalsSP(size, data, (float)missval);
 
   streamptr->numvals += (SizeType)size;
 }

@@ -136,9 +136,9 @@ gribapiGetDataDateTime(grib_handle *gh)
 
   CdiDateTime dt;
   dt.date = cdiDate_set(date);
-  dt.time.hour = hour;
-  dt.time.minute = minute;
-  dt.time.second = second;
+  dt.time.hour = (short)hour;
+  dt.time.minute = (short)minute;
+  dt.time.second = (short)second;
   dt.time.ms = 0;
 
   return dt;
@@ -559,9 +559,9 @@ gribapiGetKeys(grib_handle *gh, int varID)
           else if (grib_get_long(gh, "mpimType", &mpimType) == 0 && grib_get_long(gh, "mpimClass", &mpimClass) == 0
                    && grib_get_long(gh, "mpimUser", &mpimUser) == 0)
             {
-              varDefKeyInt(varID, CDI_KEY_MPIMTYPE, mpimType);
-              varDefKeyInt(varID, CDI_KEY_MPIMCLASS, mpimClass);
-              varDefKeyInt(varID, CDI_KEY_MPIMUSER, mpimUser);
+              varDefKeyInt(varID, CDI_KEY_MPIMTYPE, (int)mpimType);
+              varDefKeyInt(varID, CDI_KEY_MPIMCLASS, (int)mpimClass);
+              varDefKeyInt(varID, CDI_KEY_MPIMUSER, (int)mpimUser);
 
               size_t revNumLen = 20;
               unsigned char revNumber[revNumLen];
@@ -570,7 +570,7 @@ gribapiGetKeys(grib_handle *gh, int varID)
 
               long revStatus;
               grib_get_long(gh, "revStatus", &revStatus);
-              varDefKeyInt(varID, CDI_KEY_REVSTATUS, revStatus);
+              varDefKeyInt(varID, CDI_KEY_REVSTATUS, (int)revStatus);
             }
         }
     }
@@ -1844,7 +1844,7 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
   if (gridtype < 50 || gridtype > 53)
     {
       GRIB_CHECK(grib_get_long(gh, "numberOfMissing", &lpar), 0);
-      *numMissVals = (int) lpar;
+      *numMissVals = (size_t) lpar;
       // printf("gridtype %d, numMissVals %d\n", gridtype, numMissVals);
     }
 
@@ -2268,7 +2268,7 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
   GRIB_CHECK(my_grib_set_double(gh, "longitudeOfLastGridPointInDegrees", xlasto), 0);
   if (gridtype != GRID_GAUSSIAN_REDUCED) GRIB_CHECK(my_grib_set_double(gh, "iDirectionIncrementInDegrees", xinc), 0);
 
-  GRIB_CHECK(my_grib_set_long(gh, "Nj", (long) nlat), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "Nj", nlat), 0);
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", yfirst), 0);
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees", ylast), 0);
 
@@ -2279,7 +2279,7 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
 
   if (gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED)
     {
-      int np = gridInqNP(gridID);
+      long np = gridInqNP(gridID);
       if (np == 0) np = nlat / 2;
       GRIB_CHECK(my_grib_set_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", np), 0);
     }
@@ -2412,7 +2412,7 @@ gribapiDefGridSTERE(grib_handle *gh, int gridID, int uvRelativeToGrid)
   GRIB_CHECK(my_grib_set_double(gh, "LaDInDegrees", gpp.lat_1), 0);
   GRIB_CHECK(my_grib_set_double(gh, "orientationOfTheGridInDegrees", gpp.lon_0), 0);
   long southPoleOnProjectionPlane = IS_EQUAL(gpp.lat_0, -90.0);
-  GRIB_CHECK(my_grib_set_double(gh, "southPoleOnProjectionPlane", southPoleOnProjectionPlane), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "southPoleOnProjectionPlane", (double)southPoleOnProjectionPlane), 0);
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
   long shapeOfTheEarth = encode_shapeOfTheEarth(&gpp);

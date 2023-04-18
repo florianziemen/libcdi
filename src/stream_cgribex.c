@@ -1369,7 +1369,7 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
     gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double *) data, (int) datasize, (int *) gribbuffer, (int) gribsize,
              &iword, hoper, &iret);
 
-  *numMissVals = (ISEC1_Sec2Or3Flag & 64) ? ISEC4_NumValues - ISEC4_NumNonMissValues : 0;
+  *numMissVals = (ISEC1_Sec2Or3Flag & 64) ? (size_t)ISEC4_NumValues - (size_t)ISEC4_NumNonMissValues : 0;
 
   if (ISEC1_CenterID == 215 && (isec1[34] != 0 && isec1[34] != 255))
     {
@@ -2073,11 +2073,11 @@ cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int 
 {
   cgribexrec_t *cgribexp = (cgribexrec_t *) cgribexNew();
 
-  size_t sec2len = 1024 + 2 * gridInqYsize(gridID);  // Gaussian reduced grid
+  size_t sec2len = 1024 + 2 * (size_t)gridInqYsize(gridID);  // Gaussian reduced grid
   if (sec2len > cgribexp->sec2len)
     {
       cgribexp->sec2len = sec2len;
-      cgribexp->sec2 = (int *) Realloc(cgribexp->sec2, sec2len * sizeof(int));
+      cgribexp->sec2 = Realloc(cgribexp->sec2, sec2len * sizeof(int));
     }
 
   int *isec0 = cgribexp->sec0;
