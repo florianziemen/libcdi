@@ -635,13 +635,12 @@ cdi_generate_vars(stream_t *streamptr)
             }
         }
 
-      double *dlevels1 = NULL;
-      double *dlevels2 = NULL;
+      double *dlevels1 = NULL, *dlevels2 = NULL;
       if (hasBounds)
         {
-          dlevels1 = Malloc((size_t)nlevels * sizeof(double));
+          dlevels1 = Malloc(2 * (size_t)nlevels * sizeof(double));
+          dlevels2 = dlevels1+nlevels;
           for (int levelID = 0; levelID < nlevels; levelID++) dlevels1[levelID] = level_sf * levelTable[levelID].level1;
-          dlevels2 = Malloc((size_t)nlevels * sizeof(double));
           for (int levelID = 0; levelID < nlevels; levelID++) dlevels2[levelID] = level_sf * levelTable[levelID].level2;
         }
 
@@ -660,7 +659,6 @@ cdi_generate_vars(stream_t *streamptr)
         }
 
       if (hasBounds) Free(dlevels1);
-      if (hasBounds) Free(dlevels2);
       Free(dlevels);
 
       // define new subtype for tile set
