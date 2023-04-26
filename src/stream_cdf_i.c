@@ -1124,6 +1124,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
           nc_inq_var_szip(ncid, ncvarid, &options_mask, &pixels_per_block);
           if (options_mask && pixels_per_block) ncvar->hasSzip = true;
 #endif
+#if defined HAVE_DECL_NC_INQ_VAR_FILTER && HAVE_DECL_NC_INQ_VAR_FILTER
           unsigned filterId;
           size_t numParams;
           nc_inq_var_filter(ncid, ncvarid, &filterId, &numParams, NULL);
@@ -1136,6 +1137,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
               for (int i = 0; i < (int) numParams; ++i) fprintf(stderr, " %u", params[i]);
               fprintf(stderr, "\n");
             }
+#endif
 
           size_t chunks[nvdims];
           int storageIn;

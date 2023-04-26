@@ -189,8 +189,17 @@ AS_VAR_IF([ENABLE_NETCDF], [yes],
                    test "x$($NC_CONFIG --has-hdf5)" = "xyes" && \
                    acx_cv_have_nc4hdf5=yes])
    AS_VAR_IF([acx_cv_have_nc4hdf5], [yes],
-             [AC_DEFINE([HAVE_NC4HDF5],[1],[Define to 1 for NetCDF4/HDF5 support])
-              ENABLE_NC4HDF5=yes])
+     [AC_DEFINE([HAVE_NC4HDF5],[1],[Define to 1 for NetCDF4/HDF5 support])
+      ENABLE_NC4HDF5=yes
+      AC_CHECK_DECLS([nc_inq_var_filter],,,
+        [AC_INCLUDES_DEFAULT
+@%:@include <netcdf.h>])
+      AC_SEARCH_LIBS([ncaux_h5filterspec_parselist], [netcdf],
+        [AC_CHECK_DECLS([ncaux_h5filterspec_parselist],,,
+           [AC_INCLUDES_DEFAULT
+@%:@include <netcdf.h>
+@%:@include <netcdf_aux.h>])])])
+
 
    AC_CACHE_CHECK([netcdf's nc4/szlib support],
                   [acx_cv_have_nc4szlib],
@@ -201,10 +210,6 @@ AS_VAR_IF([ENABLE_NETCDF], [yes],
    AS_VAR_IF([acx_cv_have_nc4szlib], [yes],
              [AC_DEFINE([HAVE_NC4SZLIB],[1],[Define to 1 for NetCDF4/szlib support])
               ENABLE_NC4SZLIB=yes])])
-
-AS_IF([test "x$ENABLE_NC4" = "xyes"],
-      [AC_SEARCH_LIBS([ncaux_h5filterspec_parselist], [netcdf],
-               [AC_DEFINE([HAVE_NCAUX_H5FILTERSPEC_PARSELIST],[1],[Define to 1 for NetCDF4 ncaux_h5filterspec_parselist support])],,)])
 
 AS_IF([test "x$ENABLE_NC4SZLIB" = "xyes"],
       [AC_SEARCH_LIBS([nc_def_var_szip], [netcdf],

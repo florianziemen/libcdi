@@ -3,6 +3,7 @@
 #endif
 
 #include <stdbool.h>
+
 #include "error.h"
 
 #ifdef HAVE_LIBNETCDF
@@ -16,8 +17,9 @@
 #include "vlist_var.h"
 #endif
 
-#ifdef HAVE_NETCDF4
-#include "netcdf_aux.h"
+// #include <netcdf_filter.h>
+#if defined HAVE_NETCDF4 && defined HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST && HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST
+#include <netcdf_aux.h>
 #endif
 
 void
@@ -25,7 +27,7 @@ cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
 {
   if (filterSpec)
     {
-#ifdef HAVE_NCAUX_H5FILTERSPEC_PARSELIST
+#if defined HAVE_NETCDF4 && defined HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST && HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST
       size_t nfilters = 0;
       NC_H5_Filterspec **filters = NULL;
       int status = ncaux_h5filterspec_parselist(filterSpec, NULL, &nfilters, &filters);
@@ -54,6 +56,9 @@ cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
           free(filters);
         }
 #else
+      (void)ncid;
+      (void)ncvarID;
+      (void)filterSpec;
       static bool lwarn = true;
       if (lwarn)
         {
