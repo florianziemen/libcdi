@@ -61,7 +61,7 @@ encode_julday(int calendar, int year, int month, int day)
         }
     }
 
-  int64_t julianDay = (int64_t) (floor(365.25 * iy) + (int64_t) (30.6001 * (im + 1)) + ib + 1720996.5 + day + 0.5);
+  int64_t julianDay = (int64_t) (floor(365.25 * iy) + trunc(30.6001 * (im + 1)) + ib + 1720996.5 + day + 0.5);
 
   return julianDay;
 }

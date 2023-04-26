@@ -1164,7 +1164,7 @@ split_timevalue(double timevalue, int timeunit)
     {
       {
         static bool lwarn = true;
-        if (lwarn && (fabs(timevalue - (int64_t) timevalue) > 0))
+        if (lwarn && (fabs(timevalue - trunc(timevalue)) > 0))
           {
             Warning("Fraction of a year is not supported!!");
             lwarn = false;
