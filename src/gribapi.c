@@ -84,6 +84,7 @@ gribHandleNew(int editionNumber)
 
   return gh;
 #else
+  (void)editionNumber;
   return NULL;
 #endif
 }
@@ -93,6 +94,8 @@ gribHandleDelete(void *gh)
 {
 #ifdef HAVE_LIBGRIB_API
   grib_handle_delete((struct grib_handle *) gh);
+#else
+  (void)gh;
 #endif
 }
 
