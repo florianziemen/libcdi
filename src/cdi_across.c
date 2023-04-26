@@ -95,6 +95,13 @@ set64(unsigned char *buf, uint64_t v)
   return sizeof(v);
 }
 
+/* gcc versions 4.5 up to 9.4 generate an incorrect warning for the
+ * summation below */
+#if defined __GNUC__ && ((__GNUC__ == 4 && __GNUC_MINOR__ > 5) || __GNUC__ > 4) && __GNUC__ <= 9
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
 static void
 fletcher8(const unsigned char *buf, size_t len, uint8_t *sum1out, uint8_t *sum2out)
 {
@@ -110,6 +117,10 @@ fletcher8(const unsigned char *buf, size_t len, uint8_t *sum1out, uint8_t *sum2o
   *sum1out = (uint8_t)sum1;
   *sum2out = (uint8_t)sum2;
 }
+
+#if defined __GNUC__ && ((__GNUC__ == 4 && __GNUC_MINOR__ > 5) || __GNUC__ > 4) && __GNUC__ <= 9
+#pragma GCC diagnostic pop
+#endif
 
 static uint8_t
 fletcher8_check1(uint8_t sum1, uint8_t sum2)
