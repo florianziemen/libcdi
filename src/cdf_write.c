@@ -768,10 +768,10 @@ calc_chunksize_y(int chunkType, size_t gridsize, size_t xsize, size_t ysize)
 }
 
 size_t
-calc_chunksize_x(int chunkType, int chunkSize, size_t xsize, bool yIsUndefined)
+calc_chunksize_x(int chunkType, long chunkSize, size_t xsize, bool yIsUndefined)
 {
   if (chunkType == CDI_CHUNK_AUTO && yIsUndefined)
-    return (chunkSize > 0 && chunkSize < (int) xsize) ? (size_t) chunkSize : ((xsize <= chunkSizeMin) ? xsize : chunkSizeMin);
+    return (chunkSize > 0 && (size_t) chunkSize < xsize) ? (size_t) chunkSize : ((xsize <= chunkSizeMin) ? xsize : chunkSizeMin);
   else
     return calc_chunksize(chunkSizeLim, xsize);
 }

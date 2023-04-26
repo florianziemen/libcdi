@@ -58,7 +58,7 @@ void cdf_create_records(stream_t *streamptr, size_t tsID);
 
 #define ChunkSizeMax 65536
 #define ChunkSizeLim 16777216
-size_t calc_chunksize_x(int chunkType, int chunkSize, size_t xsize, bool yIsUndefined);
+size_t calc_chunksize_x(int chunkType, long chunkSize, size_t xsize, bool yIsUndefined);
 size_t calc_chunksize_y(int chunkType, size_t gridsize, size_t xsize, size_t ysize);
 
 #endif
