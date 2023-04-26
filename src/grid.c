@@ -1785,7 +1785,7 @@ grid_calc_increment(size_t size, const double *vals)
 }
 
 static double
-grid_calc_increment_in_meter(SizeType size, const double *vals)
+grid_calc_increment_in_meter(size_t size, const double *vals)
 {
   if (size > 1)
     {
