@@ -630,6 +630,11 @@ printDot(int ndotout, int *nfact, int *ncout)
   return ndotout;
 }
 
+/* gcc 4.9 makes (valid) assumptions that nvdatetime will not overflow */
+#if defined __GNUC__ || (__GNUC__ == 4 && __GNUC_MINOR__ == 9)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wstrict-overflow"
+#endif
 void
 printTimesteps(int streamID, int taxisID, int verbose)
 {
@@ -701,3 +706,6 @@ printTimesteps(int streamID, int taxisID, int verbose)
         }
     }
 }
+#if defined __GNUC__ || (__GNUC__ == 4 && __GNUC_MINOR__ == 9)
+#pragma GCC diagnostic pop
+#endif
