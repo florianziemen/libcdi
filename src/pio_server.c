@@ -1074,6 +1074,20 @@ cdiPioStream2Owner(int streamID)
 }
 
 int
+cdiPioNcID2streamID(int ncid)
+{
+  size_t nstreams = openStreams.size;
+  for (size_t streamIdx = 0; streamIdx < nstreams; ++streamIdx) {
+    int streamID = openStreams.entries[streamIdx];
+    int ftype = cdiBaseFiletype(streamInqFiletype(streamID));
+    if (ftype == CDI_FILETYPE_NETCDF
+        && streamInqFileID(streamID) == ncid)
+      return streamID;
+  }
+  return CDI_UNDEFID;
+}
+
+int
 cdiPioNcID2OwnerRank(int ncid)
 {
   size_t nstreams = openStreams.size;
