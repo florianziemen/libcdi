@@ -1078,6 +1078,11 @@ is_valid_coordinate(ncvar_t *ncvar)
   return status;
 }
 
+#if defined __GNUC__ || (__GNUC__ == 4 && __GNUC_MINOR__ == 9)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wstrict-overflow"
+#endif
+
 static void
 cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timedimid, int modelID, int format)
 {
@@ -1616,6 +1621,9 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
   for (int i = 0; i < max_check_vars; ++i)
     if (checked_vars[i]) Free(checked_vars[i]);
 }
+#if defined __GNUC__ || (__GNUC__ == 4 && __GNUC_MINOR__ == 9)
+#pragma GCC diagnostic pop
+#endif
 
 static void
 cdf_set_chunk_info(stream_t *streamptr, int nvars, ncvar_t *ncvars)
