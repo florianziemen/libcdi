@@ -783,7 +783,7 @@ static void minmax_val_float_simd(const float *restrict data, size_t datasize, f
 #endif
 // clang-format on
 
-#if defined(GNUC_PUSH_POP)
+#if defined(GNUC_PUSH_POP) && defined __OPTIMIZE__
 #pragma GCC push_options
 #pragma GCC optimize("O3", "fast-math")
 #endif
@@ -835,14 +835,14 @@ minmax_val_float(const float *restrict data, long idatasize, float *fmin, float 
   *fmin = dmin;
   *fmax = dmax;
 }
-#if defined(GNUC_PUSH_POP)
+#if defined(GNUC_PUSH_POP) && defined __OPTIMIZE__
 #pragma GCC pop_options
 #endif
 
 // TEST
 #if defined(OMP_SIMD)
 
-#if defined(GNUC_PUSH_POP)
+#if defined(GNUC_PUSH_POP) && defined __OPTIMIZE__
 #pragma GCC push_options
 #pragma GCC optimize("O3", "fast-math")
 #endif
@@ -899,7 +899,7 @@ minmax_val_float_simd(const float *restrict data, size_t datasize, float *fmin, 
   *fmin = dmin;
   *fmax = dmax;
 }
-#if defined(GNUC_PUSH_POP)
+#if defined(GNUC_PUSH_POP) && defined __OPTIMIZE__
 #pragma GCC pop_options
 #endif
 #endif
