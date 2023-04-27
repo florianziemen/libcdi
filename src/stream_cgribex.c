@@ -554,8 +554,6 @@ cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t 
   double *fsec3 = cgribexp->fsec3;
 
   int datatype = (ISEC4_NumBits > 0 && ISEC4_NumBits <= 32) ? ISEC4_NumBits : CDI_DATATYPE_PACK;
-  if (datatype > 32) datatype = CDI_DATATYPE_PACK32;
-  if (datatype < 0) datatype = CDI_DATATYPE_PACK;
 
   int vlistID = streamptr->vlistID;
   int tsID = streamptr->curTsID;
