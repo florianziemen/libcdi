@@ -1073,6 +1073,20 @@ cdiPioStream2Owner(int streamID)
   return rxWin[streamIdx].ownerRank;
 }
 
+int
+cdiPioNcID2OwnerRank(int ncid)
+{
+  size_t nstreams = openStreams.size;
+  for (size_t streamIdx = 0; streamIdx < nstreams; ++streamIdx) {
+    int streamID = openStreams.entries[streamIdx];
+    int ftype = cdiBaseFiletype(streamInqFiletype(streamID));
+    if (ftype == CDI_FILETYPE_NETCDF
+        && streamInqFileID(streamID) == ncid)
+      return rxWin[streamIdx].ownerRank;
+  }
+  return CDI_UNDEFID;
+}
+
 /* for load-balancing purposes, count number of files per process */
 /* cdiOpenFileCounts[rank] gives number of open files rank has to himself */
 static int *cdiSerialOpenFileCount;

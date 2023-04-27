@@ -51,16 +51,25 @@ cdiPio_nc__create(const char *path, int cmode, size_t initialsz, size_t *chunksi
   int status = NC_EINVAL, ioMode = commInqIOMode();
   if (ioMode != PIO_NONE)
     {
-#if CDI_PIO_TRY_PNETCDF
 #if !defined TLS && defined HAVE_PTHREAD
       struct cdiPioNcCreateLongJmpRetBuf *cdiPioCdfJmpBuf = pthread_getspecific(cdiPioCdfJmpKey);
-#endif
 #endif
       if (cmode & NC_NETCDF4)
         {
           cmode |= NC_MPIPOSIX;
           status = nc_create_par(path, cmode, commInqCommColl(), MPI_INFO_NULL, ncidp);
-          if (status == NC_NOERR) cdiPioCdfJmpBuf->openRank = CDI_PIO_COLLECTIVE_OPEN;
+          if (status == NC_NOERR) {
+            cdiPioCdfJmpBuf->openRank = CDI_PIO_COLLECTIVE_OPEN;
+          } else {
+            int rank = commInqRankColl();
+            if (rank == 0)
+              fputs("warning: parallel create not implemented"
+                    " for NetCDF4/HDF5 format!\n", stderr);
+            if (rank == cdiPioCdfJmpBuf->openRank)
+              status = nc__create(path, cmode, initialsz, chunksizehintp, ncidp);
+            else
+              longjmp(cdiPioCdfJmpBuf->jmpBuf, 1);
+          }
         }
       else
         {
@@ -123,7 +132,8 @@ cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims, const int 
   int cf_format;
   int status = nc_inq_format(ncid, &cf_format);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
-  if (commInqIOMode() != PIO_NONE && cf_format == NC_FORMAT_NETCDF4)
+  if (commInqIOMode() != PIO_NONE && cf_format == NC_FORMAT_NETCDF4
+      && cdiPioNcID2OwnerRank(ncid) == CDI_PIO_COLLECTIVE_OPEN)
     {
       xdebug("%s", "calling nc_var_par_access");
       int status = nc_var_par_access(ncid, *varidp, NC_COLLECTIVE);
