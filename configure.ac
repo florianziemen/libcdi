@@ -728,6 +728,7 @@ AC_CONFIG_FILES([
   examples/Makefile
   examples/pio/Makefile
   interfaces/Makefile
+  interfaces/python/Makefile
   src/Makefile
   src/cmake/cdi/cdi-config-version.cmake
   src/cmake/cdi/cdi-config.cmake
