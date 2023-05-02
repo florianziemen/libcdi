@@ -3323,7 +3323,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
               return CDI_EDIMSIZE;
             }
 
-          ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (const char **) zcvals, zclength, withBounds, lbounds,
+          ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (const char **) zcvals, zclength, lbounds,
                                        ubounds, (int) vctsize, vct, pname, plongname, punits, zdatatype, 1, 0, -1);
 
           int zaxisID = ncvar->zaxisID;

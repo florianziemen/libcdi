@@ -646,7 +646,7 @@ cdi_generate_vars(stream_t *streamptr)
 
       const char **cvals = NULL;
       const char *unitptr = cdiUnitNamePtr(vartable[varid].level_unit);
-      int zaxisID = varDefZaxis(vlistID, zaxistype, (int) nlevels, dlevels, cvals, 0, hasBounds, dlevels1, dlevels2, (int) Vctsize,
+      int zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, cvals, 0, dlevels1, dlevels2, (int) Vctsize,
                                 Vct, NULL, NULL, unitptr, 0, 0, ltype1, ltype2);
 
       if (CDI_CMOR_Mode && nlevels == 1 && zaxistype != ZAXIS_HYBRID) zaxisDefScalar(zaxisID);
@@ -870,7 +870,7 @@ varDefZAxisSearch(int id, void *res, void *data)
 }
 
 int
-varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, size_t clength, bool hasBounds,
+varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, size_t clength,
             const double *levels1, const double *levels2, int vctsize, const double *vct, char *name, const char *longname,
             const char *units, int prec, int mode, int ltype1, int ltype2)
 {
@@ -929,7 +929,7 @@ varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const
         {
           zaxisID = zaxisCreate(zaxistype, nlevels);
           if (levels) zaxisDefLevels(zaxisID, levels);
-          if (hasBounds)
+          if (levels1 && levels2)
             {
               zaxisDefLbounds(zaxisID, levels1);
               zaxisDefUbounds(zaxisID, levels2);
