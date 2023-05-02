@@ -62,7 +62,7 @@ else !with_on_demand_check_programs
 noinst_LTLIBRARIES += libcdiresunpack.la
 endif !with_on_demand_check_programs
 
-AM_CPPFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
+AM_CPPFLAGS = $(BORGES_C_INCLUDE) $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 if ENABLE_MPI
 # TODO: this needs a refactoring but for now we set this macro here and not in
 # config.h because the macro is used in several files that do not include the
@@ -232,6 +232,8 @@ libcdi_la_SOURCES += \
   gribapi_utilities.c \
   stream_gribapi.c
 endif HAVE_LIBGRIB_API
+
+libcdi_la_LIBADD = $(BORGES_C_LIB) $(LIBRT)
 
 libcdi_f2003_la_SOURCES = mo_cdi.f90
 libcdi_f2003_la_LIBADD = libcdi.la

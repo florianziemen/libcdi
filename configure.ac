@@ -605,7 +605,7 @@ AM_CONDITIONAL([HAVE_PARALLEL_NC4], [test "x$have_parallel_nc4" = xyes])
 AS_VAR_IF([enable_borges], [yes],
   [ACX_C_PACKAGE([BORGES], [borges/borges.h],,,
      [AC_MSG_FAILURE([required header borges/borges.h not found or not compilable])],
-     [borges_context_create],[borges], [rt], [],
+     [borges_context_create],[borges], [$LIBRT], [],
      [AC_MSG_FAILURE([cannot link C BORGES programs])])
    AC_DEFINE([HAVE_BORGES], [1],
      [supporting output to BORGES data system])])
