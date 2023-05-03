@@ -109,6 +109,10 @@ secofday_decode(double secondOfDay)
 //  time.ms = (int) lround((secondOfDay - fullSeconds) * 1000);
 //  time.ms = (short) lround((secondOfDay - fullSeconds) * 1000);
 
+  const int ms = (int) lround((secondOfDay - fullSeconds) * 1000);
+  time.ms = ms;
+
+
   const int hour = fullSeconds / 3600;
   const int minute = fullSeconds / 60 - hour * 60;
   const int second = fullSeconds - hour * 3600 - minute * 60;
