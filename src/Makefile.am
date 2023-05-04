@@ -1,5 +1,5 @@
 pkgconfigdir = $(libdir)/pkgconfig
-cmakedir = $(libdir)/cmake
+cmakedir = $(libdir)/cmake/cdi
 
 include_HEADERS =
 nodist_include_HEADERS =
