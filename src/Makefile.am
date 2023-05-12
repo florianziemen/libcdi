@@ -1,8 +1,3 @@
-pkgconfigdir = $(libdir)/pkgconfig
-cmakedir = $(libdir)/cmake
-
-include_HEADERS =
-nodist_include_HEADERS =
 lib_LTLIBRARIES =
 check_LTLIBRARIES =
 noinst_LTLIBRARIES =
@@ -10,8 +5,6 @@ EXTRA_PROGRAMS = make_fint
 EXTRA_DIST = \
   cdilib.c \
   make_cdilib
-nodist_pkgconfig_DATA =
-nodist_cmake_DATA =
 
 if FC_MOD_UPPERCASE
 mo_cdi_mod = MO_CDI.$(FCMODEXT)
@@ -20,6 +13,14 @@ mo_cdi_mod = mo_cdi.$(FCMODEXT)
 endif !FC_MOD_UPPERCASE
 
 if ENABLE_CDI_LIB
+pkgconfigdir = $(libdir)/pkgconfig
+cmakedir = $(libdir)/cmake
+include_HEADERS =
+
+nodist_pkgconfig_DATA =
+nodist_cmake_DATA =
+nodist_include_HEADERS =
+
 include_HEADERS += \
   calendar.h \
   cdi.h \
