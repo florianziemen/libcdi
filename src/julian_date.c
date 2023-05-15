@@ -104,7 +104,8 @@ secofday_decode(double secondOfDay)
 {
   CdiTime time;
 
-  const int fullSeconds = (int) secondOfDay;
+//  const int fullSeconds = (int) secondOfDay;
+  const int fullSeconds = (long) secondOfDay;
 
   time.ms = (int) lround((secondOfDay - fullSeconds) * 1000);
 
