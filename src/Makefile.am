@@ -14,7 +14,7 @@ endif !FC_MOD_UPPERCASE
 
 if ENABLE_CDI_LIB
 pkgconfigdir = $(libdir)/pkgconfig
-cmakedir = $(libdir)/cmake
+cmakedir = $(libdir)/cmake/cdi
 include_HEADERS =
 
 nodist_pkgconfig_DATA =
