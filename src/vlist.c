@@ -1351,7 +1351,13 @@ vlistChangeGridIndex(int vlistID, int index, int gridID)
 
       int nvars = vlistptr->nvars;
       for (int varID = 0; varID < nvars; varID++)
-        if (vlistptr->vars[varID].gridID == gridIDold) vlistptr->vars[varID].gridID = gridID;
+        if (vlistptr->vars[varID].gridID == gridIDold)
+          {
+            vlistptr->vars[varID].gridID = gridID;
+            int chunkSize = 0;
+            cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, &chunkSize);
+            if (chunkSize > 0) cdiDeleteKey(vlistID, varID, CDI_KEY_CHUNKSIZE);
+          }
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
