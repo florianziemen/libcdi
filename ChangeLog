@@ -1,3 +1,7 @@
+2023-05-19  Uwe Schulzweida
+
+	* cdfDefineAttributes: check filetype for unsigned int attributes (bug fix)
+
 2023-05-16  Uwe Schulzweida
 
 	* vlistChangeGridIndex: remove CDI_KEY_CHUNKSIZE if present

@@ -1633,7 +1633,7 @@ cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimID, si
 
       cdfPutGridStdAtts(fileID, ncvarID, zaxisID, 'Z');
       cdf_put_att_text(fileID, ncvarID, "axis", 1, "Z");
-      cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarID);
+      cdfDefineAttributes(streamptr->filetype, zaxisID, CDI_GLOBAL, fileID, ncvarID);
 
       streamptr->nczvarID[zaxisindex] = ncvarID;
       cdf_enddef(fileID, streamptr->self);
@@ -1732,7 +1732,7 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
       int natts;
       cdiInqNatts(zaxisID, CDI_GLOBAL, &natts);
-      cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
+      cdfDefineAttributes(streamptr->filetype, zaxisID, CDI_GLOBAL, fileID, ncvarid);
     }
 #ifndef USE_MPI
   else if (type == ZAXIS_CHAR)
@@ -1807,7 +1807,7 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
                   }
                 }
             }
-          cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
+          cdfDefineAttributes(streamptr->filetype, zaxisID, CDI_GLOBAL, fileID, ncvarid);
         }
 
       if (switchNCMode)
@@ -1850,7 +1850,7 @@ cdf_def_mapping(stream_t *streamptr, int gridID)
 
   int ncvarid;
   int ncerrcode = nc_def_var(fileID, gmapvarname, gmapvartype, 0, NULL, &ncvarid);
-  if (ncerrcode == NC_NOERR) cdfDefineAttributes(gridID, CDI_GLOBAL, fileID, ncvarid);
+  if (ncerrcode == NC_NOERR) cdfDefineAttributes(streamptr->filetype, gridID, CDI_GLOBAL, fileID, ncvarid);
 
   if (switchNCMode)
     {

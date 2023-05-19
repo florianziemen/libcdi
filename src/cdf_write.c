@@ -297,8 +297,30 @@ cdfDefineCellMethods(stream_t *streamptr, int cdiID, int varID, int fileID, int 
     }
 }
 
+static nc_type
+int_datatype_to_xtype(int filetype, int datatype)
+{
+  // clang-format off
+  if (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR)
+    {
+      return (datatype == CDI_DATATYPE_INT8)   ? NC_BYTE :
+             (datatype == CDI_DATATYPE_INT16)  ? NC_SHORT :
+#ifdef  HAVE_NETCDF4
+             (datatype == CDI_DATATYPE_UINT8)  ? NC_UBYTE :
+             (datatype == CDI_DATATYPE_UINT16) ? NC_USHORT :
+             (datatype == CDI_DATATYPE_UINT32) ? NC_UINT :
+#endif
+                                                 NC_INT;
+    }
+
+  return (datatype == CDI_DATATYPE_INT8)   ? NC_BYTE :
+         (datatype == CDI_DATATYPE_INT16)  ? NC_SHORT :
+                                             NC_INT;
+  // clang-format on
+}
+
 void
-cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
+cdfDefineAttributes(int filetype, int cdiID, int varID, int fileID, int ncvarID)
 {
   int atttype, attlen;
   char attname[CDI_MAX_NAME + 1];
@@ -330,17 +352,7 @@ cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
           int *attint = (int *) resizeBuf(&attBuf, &attBufSize, attSize);
           cdiInqAttInt(cdiID, varID, attname, attlen, &attint[0]);
           size_t len = (size_t) attlen;
-          // clang-format off
-          nc_type xtype = (atttype == CDI_DATATYPE_INT8)   ? NC_BYTE :
-                          (atttype == CDI_DATATYPE_INT16)  ? NC_SHORT :
-#ifdef  HAVE_NETCDF4
-                          (atttype == CDI_DATATYPE_UINT8)  ? NC_UBYTE :
-                          (atttype == CDI_DATATYPE_UINT16) ? NC_USHORT :
-                          (atttype == CDI_DATATYPE_UINT32) ? NC_UINT :
-#endif
-                                                             NC_INT;
-          // clang-format on
-          cdf_put_att_int(fileID, ncvarID, attname, xtype, len, attint);
+          cdf_put_att_int(fileID, ncvarID, attname, int_datatype_to_xtype(filetype, atttype), len, attint);
         }
       else if (atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64)
         {
@@ -392,7 +404,7 @@ cdfDefGlobalAtts(stream_t *streamptr)
 
   if (natts > 0 && streamptr->ncmode == 2) cdf_redef(fileID);
 
-  cdfDefineAttributes(vlistID, CDI_GLOBAL, fileID, NC_GLOBAL);
+  cdfDefineAttributes(streamptr->filetype, vlistID, CDI_GLOBAL, fileID, NC_GLOBAL);
 
   if (natts > 0 && streamptr->ncmode == 2) cdf_enddef(fileID, streamptr->self);
 
@@ -1041,7 +1053,7 @@ cdfDefVar(stream_t *streamptr, int varID)
   cdfDefineCellMethods(streamptr, vlistID, varID, fileID, ncvarID);
 
   // Attributes
-  cdfDefineAttributes(vlistID, varID, fileID, ncvarID);
+  cdfDefineAttributes(streamptr->filetype, vlistID, varID, fileID, ncvarID);
 
   // Institute
   if (vlistInqInstitut(vlistID) == CDI_UNDEFID) cdfDefineInstituteName(vlistID, varID, fileID, ncvarID);
