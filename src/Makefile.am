@@ -13,22 +13,17 @@ mo_cdi_mod = mo_cdi.$(FCMODEXT)
 endif !FC_MOD_UPPERCASE
 
 if ENABLE_CDI_LIB
-pkgconfigdir = $(libdir)/pkgconfig
-cmakedir = $(libdir)/cmake/cdi
-include_HEADERS =
-
-nodist_pkgconfig_DATA =
-nodist_cmake_DATA =
-nodist_include_HEADERS =
-
-include_HEADERS += \
+include_HEADERS = \
   calendar.h \
   cdi.h \
   cdi_datetime.h \
   julian_date.h
+nodist_include_HEADERS =
 lib_LTLIBRARIES += libcdi.la
-nodist_pkgconfig_DATA += pkgconfig/cdi.pc
-nodist_cmake_DATA += \
+pkgconfigdir = $(libdir)/pkgconfig
+nodist_pkgconfig_DATA = pkgconfig/cdi.pc
+cmakedir = $(libdir)/cmake/cdi
+nodist_cmake_DATA = \
   cmake/cdi/cdi-config-version.cmake \
   cmake/cdi/cdi-config.cmake
 if ENABLE_CF_INTERFACE
