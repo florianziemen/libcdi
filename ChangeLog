@@ -1,3 +1,7 @@
+2023-05-25  Uwe Schulzweida
+
+	* Version 2.2.2 released
+
 2023-05-19  Uwe Schulzweida
 
 	* cdfDefineAttributes: check filetype for unsigned int attributes (bug fix)
