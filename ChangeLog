@@ -1,3 +1,16 @@
+2023-05-25  Uwe Schulzweida
+
+	* Version 2.2.2 released
+
+2023-05-19  Uwe Schulzweida
+
+	* cdfDefineAttributes: check filetype for unsigned int attributes (bug fix)
+
+2023-05-16  Uwe Schulzweida
+
+	* vlistChangeGridIndex: remove CDI_KEY_CHUNKSIZE if present
+	* NetCDF4: use chunkSize only if it is less than gridsize (bug fix)
+
 2023-04-17  Uwe Schulzweida
 
 	* Version 2.2.1 released

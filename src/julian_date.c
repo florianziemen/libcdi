@@ -104,9 +104,10 @@ secofday_decode(double secondOfDay)
 {
   CdiTime time;
 
-  const int fullSeconds = (int) secondOfDay;
+  double secondOfDayIntegral;
+  time.ms = lround(modf(secondOfDay, &secondOfDayIntegral) * 1000);
 
-  time.ms = (int) lround((secondOfDay - fullSeconds) * 1000);
+  const int fullSeconds = lrint(secondOfDayIntegral);
 
   const int hour = fullSeconds / 3600;
   const int minute = fullSeconds / 60 - hour * 60;
