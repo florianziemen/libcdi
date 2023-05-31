@@ -1,3 +1,7 @@
+2023-05-31  Uwe Schulzweida
+
+	* netcdf: filter coordinates variable name zg and zghalf in is_valid_coordinate()
+
 2023-05-25  Uwe Schulzweida
 
 	* Version 2.2.2 released
