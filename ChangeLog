@@ -1,3 +1,7 @@
+2023-06-04  Uwe Schulzweida
+
+	* gribapiDefGridLCC: store DxInMetres/DyInMetres as double (bug fix)
+
 2023-05-31  Uwe Schulzweida
 
 	* netcdf: filter coordinates variable name zg and zghalf in is_valid_coordinate()

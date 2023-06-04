@@ -2258,8 +2258,10 @@ gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
 
   GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
   GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(fabs(xinc))), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(fabs(yinc))), 0);
+  // GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(fabs(xinc))), 0);
+  // GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(fabs(yinc))), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "DxInMetres", fabs(xinc)), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "DyInMetres", fabs(yinc)), 0);
   GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", gpp.xval_0), 0);
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", gpp.yval_0), 0);
   GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", gpp.lon_0), 0);
@@ -2301,8 +2303,10 @@ gribapiDefGridSTERE(grib_handle *gh, int gridID)
 
   GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
   GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(xinc)), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(yinc)), 0);
+  // GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(xinc)), 0);
+  // GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(yinc)), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "DxInMetres", xinc), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "DyInMetres", yinc), 0);
   GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", gpp.xval_0), 0);
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", gpp.yval_0), 0);
   GRIB_CHECK(my_grib_set_double(gh, "LaDInDegrees", gpp.lat_1), 0);
