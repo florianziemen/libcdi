@@ -1,6 +1,6 @@
 2023-06-04  Uwe Schulzweida
 
-	* gribapiDefGridLCC: add LaDInDegrees (bug fix)
+	* gribapiDefGridLCC: add LaDInDegrees for GRIB2 (bug fix)
 	* gribapiDefGridLCC: store DxInMetres/DyInMetres as double (bug fix)
 
 2023-05-31  Uwe Schulzweida
