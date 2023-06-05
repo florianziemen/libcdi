@@ -1,5 +1,6 @@
 2023-06-04  Uwe Schulzweida
 
+	* gribapi LCC: add support for parameter xpole/ypole (bug fix)
 	* gribapiDefGridLCC: add LaDInDegrees for GRIB2 (bug fix)
 	* gribapiDefGridLCC: store DxInMetres/DyInMetres as double (bug fix)
 

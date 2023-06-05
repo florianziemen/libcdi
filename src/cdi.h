@@ -1401,6 +1401,8 @@ struct CDI_GridProjParams
   double yval_0; // Latitude of the first grid point in degree (optional)
   double x_0;    // False easting (optional)
   double y_0;    // False northing (optional)
+  double xpole;  // Longitude of southern pole
+  double ypole;  // Latitude of southern pole
 };
 
 void gridProjParamsInit(struct CDI_GridProjParams *gridProjParams);
