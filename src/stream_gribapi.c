@@ -612,14 +612,14 @@ gribapiDefProjLCC(grib_handle *gh, int gridID)
   long projflag = 0;
   grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &gpp.xval_0);
   grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &gpp.yval_0);
-  grib_get_double(gh, "longitudeOfSouthernPoleInDegrees", &gpp.xpole);
-  grib_get_double(gh, "latitudeOfSouthernPoleInDegrees", &gpp.ypole);
+  grib_get_double(gh, "longitudeOfSouthernPoleInDegrees", &gpp.x_SP);
+  grib_get_double(gh, "latitudeOfSouthernPoleInDegrees", &gpp.y_SP);
   grib_get_double(gh, "LoVInDegrees", &gpp.lon_0);
   grib_get_double(gh, "Latin1InDegrees", &gpp.lat_1);
   grib_get_double(gh, "Latin2InDegrees", &gpp.lat_2);
   grib_get_long(gh, "projectionCentreFlag", &projflag);
-  bool lsouth = gribbyte_get_bit((int) projflag, 1);
-  if (lsouth)
+  bool isSouthPole = gribbyte_get_bit((int) projflag, 1);
+  if (isSouthPole)
     {
       gpp.lat_1 = -gpp.lat_1;
       gpp.lat_2 = -gpp.lat_2;
@@ -2240,14 +2240,14 @@ gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
   if (gpp.xval_0 < 0.0) gpp.xval_0 += 360.0;
   if (gpp.lon_0 < 0.0) gpp.lon_0 += 360.0;
 
-  bool lsouth = (gpp.lat_1 < 0.0);
-  if (lsouth)
+  bool isSouthPole = (gpp.lat_1 < 0.0);
+  if (isSouthPole)
     {
       gpp.lat_1 = -gpp.lat_2;
       gpp.lat_2 = -gpp.lat_2;
     }
   int projflag = 0;
-  if (lsouth) gribbyte_set_bit(&projflag, 1);
+  if (isSouthPole) gribbyte_set_bit(&projflag, 1);
 
   double xinc = gridInqXinc(gridID);
   double yinc = gridInqYinc(gridID);
@@ -2270,8 +2270,8 @@ gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
   GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", gpp.lat_2), 0);
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
-  if (gpp.xpole >= -180 && gpp.xpole <= 360) GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", gpp.xpole), 0);
-  if (gpp.ypole >= -90 && gpp.ypole <= 90) GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees", gpp.ypole), 0);
+  if (gpp.x_SP >= -180 && gpp.x_SP <= 360) GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", gpp.x_SP), 0);
+  if (gpp.y_SP >= -90 && gpp.y_SP <= 90) GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees", gpp.y_SP), 0);
 
   long shapeOfTheEarth = radiusToShapeOfTheEarth(gpp.a);
   if (shapeOfTheEarth) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);

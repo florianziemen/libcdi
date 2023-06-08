@@ -3651,9 +3651,8 @@ gridProjParamsInit(struct CDI_GridProjParams *gpp)
   gpp->yval_0  = CDI_Grid_Missval;   // Latitude of the first grid point in degree (optional)
   gpp->x_0     = CDI_Grid_Missval;   // False easting (optional)
   gpp->y_0     = CDI_Grid_Missval;   // False northing (optional)
-  gpp->xpole   = CDI_Grid_Missval;   // Longitude of southern pole
-  gpp->ypole   = CDI_Grid_Missval;   // Latitude of southern pole
-
+  gpp->x_SP    = CDI_Grid_Missval;   // Longitude of southern pole
+  gpp->y_SP    = CDI_Grid_Missval;   // Latitude of southern pole
   // clang-format on
 }
 
@@ -3679,10 +3678,10 @@ gridDefParamsCommon(int gridID, struct CDI_GridProjParams gpp)
     cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.xval_0);
   if (IS_NOT_EQUAL(gpp.yval_0, gpp.mv))
     cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.yval_0);
-  if (IS_NOT_EQUAL(gpp.xpole, gpp.mv))
-    cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfSouthernPoleInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.xpole);
-  if (IS_NOT_EQUAL(gpp.ypole, gpp.mv))
-    cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfSouthernPoleInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.ypole);
+  if (IS_NOT_EQUAL(gpp.x_SP, gpp.mv))
+    cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfSouthernPoleInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.x_SP);
+  if (IS_NOT_EQUAL(gpp.y_SP, gpp.mv))
+    cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfSouthernPoleInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.y_SP);
 }
 
 /*
@@ -3781,8 +3780,8 @@ gridInqParamsLCC(int gridID, struct CDI_GridProjParams *gpp)
               else if (str_is_equal(attname, "false_northing"))                     gpp->y_0    = attflt[0];
               else if (str_is_equal(attname, "longitudeOfFirstGridPointInDegrees")) gpp->xval_0 = attflt[0];
               else if (str_is_equal(attname, "latitudeOfFirstGridPointInDegrees"))  gpp->yval_0 = attflt[0];
-              else if (str_is_equal(attname, "longitudeOfSouthernPoleInDegrees"))   gpp->xpole  = attflt[0];
-              else if (str_is_equal(attname, "latitudeOfSouthernPoleInDegrees"))    gpp->ypole  = attflt[0];
+              else if (str_is_equal(attname, "longitudeOfSouthernPoleInDegrees"))   gpp->x_SP   = attflt[0];
+              else if (str_is_equal(attname, "latitudeOfSouthernPoleInDegrees"))    gpp->y_SP   = attflt[0];
               else if (str_is_equal(attname, "standard_parallel"))
                 {
                   gpp->lat_1 = attflt[0];
