@@ -19,7 +19,7 @@ enum
 };
 
 int
-main()
+main(void)
 {
   unsigned char *test_data = NULL, *init_block = NULL;
   size_t num_blocks = 1000;

@@ -179,7 +179,7 @@ gribEditionNumber(grib_handle *gh)
 // This return value of this should be passed to a call to resetTz(), it is a malloc'ed string with the content of the TZ
 // environment variable before the call (or NULL if that was not set).
 static char *
-setUtc()
+setUtc(void)
 {
   char *temp = getenv("TZ"), *result = NULL;
   if (temp) result = strdup(temp);

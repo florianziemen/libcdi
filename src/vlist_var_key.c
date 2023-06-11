@@ -134,7 +134,7 @@ vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 
 /* cdiClearAdditionalKeys: Clears the list of additional GRIB keys. */
 void
-cdiClearAdditionalKeys()
+cdiClearAdditionalKeys(void)
 {
 #ifdef HAVE_LIBGRIB_API
   for (int i = 0; i < cdiNAdditionalGRIBKeys; ++i) free(cdiAdditionalGRIBKeys[i]);

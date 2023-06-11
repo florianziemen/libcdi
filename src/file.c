@@ -319,7 +319,7 @@ file_pagesize(void)
 }
 
 static double
-file_time()
+file_time(void)
 {
 #ifdef HAVE_SYS_TIME_H
   struct timeval mytime;

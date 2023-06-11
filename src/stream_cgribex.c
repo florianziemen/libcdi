@@ -63,7 +63,7 @@ cgribexInit(cgribexrec_t *cgribexp)
 }
 
 void *
-cgribexNew()
+cgribexNew(void)
 {
   cgribexrec_t *cgribexp = (cgribexrec_t *) Malloc(sizeof(cgribexrec_t));
   cgribexInit(cgribexp);

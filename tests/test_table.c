@@ -4,7 +4,7 @@
 #include "cdi.h"
 
 int
-main()
+main(void)
 {
   tableInqEntry(-1, -1, -1, NULL, NULL, NULL);
   // assert(tableInqEntry(-1, -1, -1, NULL, NULL, NULL) != 0);

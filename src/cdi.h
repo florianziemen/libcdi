@@ -1333,7 +1333,7 @@ typedef struct
   int *stepidx;
 } CdiQuery;
 
-CdiQuery *cdiQueryCreate();
+CdiQuery *cdiQueryCreate(void);
 CdiQuery *cdiQueryClone(const CdiQuery *query);
 void cdiQueryDelete(CdiQuery *query);
 void cdiQuerySetNames(CdiQuery *query, int numNames, char **names);

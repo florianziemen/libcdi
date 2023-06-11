@@ -39,7 +39,7 @@ cdiQueryInit(CdiQuery *query)
 }
 
 CdiQuery *
-cdiQueryCreate()
+cdiQueryCreate(void)
 {
   CdiQuery *query = (CdiQuery *) malloc(sizeof(CdiQuery));
   cdiQueryInit(query);
