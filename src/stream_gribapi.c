@@ -1702,6 +1702,37 @@ gribapiScanTimestep(stream_t *streamptr)
 #undef gribWarning
 #endif
 
+static void
+unpack_alternative_rows(grib_handle *gh, int memType, void *data)
+{
+  long xsize = 0, ysize = 0;
+  grib_get_long(gh, "Nx", &xsize);
+  grib_get_long(gh, "Ny", &ysize);
+
+  if (memType == MEMTYPE_FLOAT)
+    {
+      float *pdata = (float *) data;
+      for (int j = 1; j < ysize; j += 2)
+        for (int i = 0; i < xsize / 2; i++)
+          {
+            float tmp = pdata[j * xsize + i];
+            pdata[j * xsize + i] = pdata[j * xsize + xsize - i - 1];
+            pdata[j * xsize + xsize - i - 1] = tmp;
+          }
+    }
+  else
+    {
+      double *pdata = (double *) data;
+      for (int j = 1; j < ysize; j += 2)
+        for (int i = 0; i < xsize / 2; i++)
+          {
+            double tmp = pdata[j * xsize + i];
+            pdata[j * xsize + i] = pdata[j * xsize + xsize - i - 1];
+            pdata[j * xsize + xsize - i - 1] = tmp;
+          }
+    }
+}
+
 int
 gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t gridsize, int unreduced, size_t *nmiss,
               double missval)
@@ -1731,6 +1762,7 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
 
   if (gridsize != datasize) Error("Internal problem: gridsize(%zu) != datasize(%zu)!", gridsize, datasize);
   size_t dummy = datasize;
+
   if (memType == MEMTYPE_FLOAT)
     {
 #ifdef HAVE_GRIBAPI_FLOAT_INTERFACE
@@ -1740,7 +1772,13 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
 #endif
     }
   else
-    GRIB_CHECK(grib_get_double_array(gh, "values", (double *) data, &dummy), 0);
+    {
+      GRIB_CHECK(grib_get_double_array(gh, "values", (double *) data, &dummy), 0);
+    }
+
+  long alternativeRowScanning = false;
+  grib_get_long(gh, "alternativeRowScanning", &alternativeRowScanning);
+  if (alternativeRowScanning) unpack_alternative_rows(gh, memType, data);
 
   long lpar;
   GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);

@@ -1,3 +1,11 @@
+2023-06-29  Uwe Schulzweida
+
+	* Version 2.2.3 released
+
+2023-06-18  Uwe Schulzweida
+
+	* grib2: add read only support for alternativeRowScanning
+
 2023-06-04  Uwe Schulzweida
 
 	* gribapi LCC: add support for parameter xpole/ypole (bug fix)
