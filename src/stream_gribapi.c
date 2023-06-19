@@ -1779,9 +1779,12 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
       GRIB_CHECK(grib_get_double_array(gh, "values", (double *) data, &dummy), 0);
     }
 
-  long alternativeRowScanning = false;
-  grib_get_long(gh, "alternativeRowScanning", &alternativeRowScanning);
-  if (alternativeRowScanning) unpack_alternative_rows(gh, memType, data);
+  if (gribEditionNumber(gh) > 1)
+    {
+      long alternativeRowScanning = false;
+      grib_get_long(gh, "alternativeRowScanning", &alternativeRowScanning);
+      if (alternativeRowScanning) unpack_alternative_rows(gh, memType, data);
+    }
 
   long lpar;
   GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
@@ -2659,7 +2662,7 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
 
   void (*defLevel)(grib_handle * gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level, double dlevel1,
                    double dlevel2)
-      = editionNumber <= 1 ? grib1DefLevel : grib2DefLevel;
+      = (editionNumber <= 1) ? grib1DefLevel : grib2DefLevel;
 
   switch (zaxistype)
     {
