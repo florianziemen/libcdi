@@ -2,6 +2,10 @@
 
 	* Version 2.2.3 released
 
+2023-06-19  Uwe Schulzweida
+
+	* grib2: add support for earth radius specified by data producer
+
 2023-06-18  Uwe Schulzweida
 
 	* grib2: add read only support for alternativeRowScanning

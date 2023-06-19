@@ -584,17 +584,24 @@ gribapiDefProjRLL(grib_handle *gh, int gridID)
 }
 
 static void
-shapeOfTheEarthToRadius(long shapeOfTheEarth, double *a, double *b, double *rf)
+decode_shapeOfTheEarth(grib_handle *gh, struct CDI_GridProjParams *gpp)
 {
+  long shapeOfTheEarth = 0;
+  grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth);
+
+  double radiusOfTheEarth = 6367470.0;
+  if (shapeOfTheEarth == 1) grib_get_double(gh, "radiusOfTheEarth", &radiusOfTheEarth);
+
   // clang-format off
   switch (shapeOfTheEarth)
     {
-    case 2:   *a = 6378160.0; *b = 6356775.0;   *rf = 297.0; break;
-    case 4:   *a = 6378137.0; *b = 6356752.314; *rf = 298.257222101; break;
-    case 6:   *a = 6371229.0; break;
-    case 8:   *a = 6371200.0; break;
-    case 0:   *a = 6367470.0; break;
-    default:  *a = 6367470.0;
+    case 0:   gpp->a = radiusOfTheEarth; break;
+    case 1:   gpp->a = radiusOfTheEarth; break;
+    case 2:   gpp->a = 6378160.0; gpp->b = 6356775.0;   gpp->rf = 297.0; break;
+    case 4:   gpp->a = 6378137.0; gpp->b = 6356752.314; gpp->rf = 298.257222101; break;
+    case 6:   gpp->a = 6371229.0; break;
+    case 8:   gpp->a = 6371200.0; break;
+    default:  gpp->a = radiusOfTheEarth;
     }
   // clang-format on
 }
@@ -605,9 +612,7 @@ gribapiDefProjLCC(grib_handle *gh, int gridID)
   struct CDI_GridProjParams gpp;
   gridProjParamsInit(&gpp);
 
-  long shapeOfTheEarth;
-  grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth);
-  shapeOfTheEarthToRadius(shapeOfTheEarth, &gpp.a, &gpp.b, &gpp.rf);
+  decode_shapeOfTheEarth(gh, &gpp);
 
   long projflag = 0;
   grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &gpp.xval_0);
@@ -647,9 +652,7 @@ gribapiDefProjSTERE(grib_handle *gh, int gridID)
   struct CDI_GridProjParams gpp;
   gridProjParamsInit(&gpp);
 
-  long shapeOfTheEarth;
-  grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth);
-  shapeOfTheEarthToRadius(shapeOfTheEarth, &gpp.a, &gpp.b, &gpp.rf);
+  decode_shapeOfTheEarth(gh, &gpp);
 
   grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &gpp.xval_0);
   grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &gpp.yval_0);
@@ -2246,16 +2249,20 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
   if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
 }
 
-static long
-radiusToShapeOfTheEarth(double radius)
+static int
+encode_shapeOfTheEarth(struct CDI_GridProjParams *gpp)
 {
-  long shapeOfTheEarth = 0;
+  int shapeOfTheEarth = 1;
+  int a = (int) lround(gpp->a);
+  int b = (int) lround(gpp->b);
+  int rf = (int) lround(gpp->rf);
 
   // clang-format off
-  if      (IS_EQUAL(radius, 6367470.0)) shapeOfTheEarth = 0;
-  else if (IS_EQUAL(radius, 6378160.0)) shapeOfTheEarth = 2;
-  else if (IS_EQUAL(radius, 6371229.0)) shapeOfTheEarth = 6;
-  else if (IS_EQUAL(radius, 6371200.0)) shapeOfTheEarth = 8;
+  if      (a == 6367470) shapeOfTheEarth = 0;
+  else if (a == 6371229) shapeOfTheEarth = 6;
+  else if (a == 6371200) shapeOfTheEarth = 8;
+  else if (a == 6378160 && b == 6356775 && rf == 297) shapeOfTheEarth = 2;
+  else if (a == 6378137 && b == 6356752 && rf == 298) shapeOfTheEarth = 4;
   // clang-format on
 
   return shapeOfTheEarth;
@@ -2311,8 +2318,9 @@ gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
   if (gpp.x_SP >= -180 && gpp.x_SP <= 360) GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", gpp.x_SP), 0);
   if (gpp.y_SP >= -90 && gpp.y_SP <= 90) GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees", gpp.y_SP), 0);
 
-  long shapeOfTheEarth = radiusToShapeOfTheEarth(gpp.a);
+  long shapeOfTheEarth = encode_shapeOfTheEarth(&gpp);
   if (shapeOfTheEarth) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
+  if (shapeOfTheEarth == 1) GRIB_CHECK(my_grib_set_long(gh, "radiusOfTheEarth", gpp.a), 0);
 
   if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
 
@@ -2355,8 +2363,9 @@ gribapiDefGridSTERE(grib_handle *gh, int gridID)
   GRIB_CHECK(my_grib_set_double(gh, "southPoleOnProjectionPlane", southPoleOnProjectionPlane), 0);
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
-  long shapeOfTheEarth = radiusToShapeOfTheEarth(gpp.a);
+  long shapeOfTheEarth = encode_shapeOfTheEarth(&gpp);
   if (shapeOfTheEarth) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
+  if (shapeOfTheEarth == 1) GRIB_CHECK(my_grib_set_long(gh, "radiusOfTheEarth", gpp.a), 0);
 
   GRIB_CHECK(my_grib_set_long(gh, "resolutionAndComponentFlags", 8), 0);
   GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", 0), 0);
