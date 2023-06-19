@@ -2217,10 +2217,10 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", yfirst), 0);
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees", ylast), 0);
 
-  long xscan = xfirst > xlast;
-  GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", xscan), 0);
-  xscan = yfirst < ylast;
-  GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", xscan), 0);
+  if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+
+  GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", (xfirst > xlast)), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", (yfirst < ylast)), 0);
 
   if (gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED)
     {
@@ -2245,8 +2245,6 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
       GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", xpole), 0);
       GRIB_CHECK(my_grib_set_double(gh, "angleOfRotation", angle), 0);
     }
-
-  if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
 }
 
 static int
@@ -2322,18 +2320,17 @@ gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
   if (shapeOfTheEarth) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
   if (shapeOfTheEarth == 1) GRIB_CHECK(my_grib_set_long(gh, "radiusOfTheEarth", gpp.a), 0);
 
-  if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
-
-  long earthIsOblate = (IS_EQUAL(gpp.a, 6378160.0) && IS_EQUAL(gpp.rf, 297.0));
+  long earthIsOblate = (shapeOfTheEarth == 2 || shapeOfTheEarth == 3 || shapeOfTheEarth == 4);
   if (earthIsOblate) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
 
-  int scanflag = 0;
-  gribbyte_set_bit(&scanflag, 2);
-  if (editionNumber <= 1) GRIB_CHECK(my_grib_set_long(gh, "scanningMode", (long) scanflag), 0);
+  if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+
+  GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", (xinc < 0)), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", (yinc > 0)), 0);
 }
 
 static void
-gribapiDefGridSTERE(grib_handle *gh, int gridID)
+gribapiDefGridSTERE(grib_handle *gh, int gridID, int uvRelativeToGrid)
 {
   long xsize = (long) gridInqXsize(gridID);
   long ysize = (long) gridInqYsize(gridID);
@@ -2367,9 +2364,13 @@ gribapiDefGridSTERE(grib_handle *gh, int gridID)
   if (shapeOfTheEarth) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
   if (shapeOfTheEarth == 1) GRIB_CHECK(my_grib_set_long(gh, "radiusOfTheEarth", gpp.a), 0);
 
-  GRIB_CHECK(my_grib_set_long(gh, "resolutionAndComponentFlags", 8), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", 0), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", 1), 0);
+  long earthIsOblate = (shapeOfTheEarth == 2 || shapeOfTheEarth == 3 || shapeOfTheEarth == 4);
+  if (earthIsOblate) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
+
+  if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+
+  GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", (xinc < 0)), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", (yinc > 0)), 0);
 }
 
 static void
@@ -2529,7 +2530,7 @@ gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int
       }
     case CDI_PROJ_STERE:
       {
-        gribapiDefGridSTERE(gh, gridID);
+        gribapiDefGridSTERE(gh, gridID, uvRelativeToGrid);
         break;
       }
     case GRID_SPECTRAL:
