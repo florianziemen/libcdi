@@ -131,7 +131,7 @@ parTableInit(void)
 }
 
 static int
-tableNewEntry()
+tableNewEntry(void)
 {
   int tableID = 0;
 

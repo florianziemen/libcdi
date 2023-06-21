@@ -1333,7 +1333,7 @@ typedef struct
   int *stepidx;
 } CdiQuery;
 
-CdiQuery *cdiQueryCreate();
+CdiQuery *cdiQueryCreate(void);
 CdiQuery *cdiQueryClone(const CdiQuery *query);
 void cdiQueryDelete(CdiQuery *query);
 void cdiQuerySetNames(CdiQuery *query, int numNames, char **names);
@@ -1401,6 +1401,8 @@ struct CDI_GridProjParams
   double yval_0; // Latitude of the first grid point in degree (optional)
   double x_0;    // False easting (optional)
   double y_0;    // False northing (optional)
+  double x_SP;   // Longitude of southern pole
+  double y_SP;   // Latitude of southern pole
 };
 
 void gridProjParamsInit(struct CDI_GridProjParams *gridProjParams);

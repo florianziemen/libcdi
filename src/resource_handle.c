@@ -15,7 +15,7 @@
 #endif
 
 static void
-show_stackframe()
+show_stackframe(void)
 {
 #if defined HAVE_EXECINFO_H && defined backtrace_size_t && defined HAVE_BACKTRACE
   void *trace[16];
@@ -808,7 +808,7 @@ reshGetStatus(cdiResH resH, const resOps *ops)
 /**************************************************************/
 
 void
-reshLock()
+reshLock(void)
 {
   LIST_LOCK();
 }
@@ -816,7 +816,7 @@ reshLock()
 /**************************************************************/
 
 void
-reshUnlock()
+reshUnlock(void)
 {
   LIST_UNLOCK();
 }

@@ -1,3 +1,25 @@
+2023-06-21  Uwe Schulzweida
+
+	* Version 2.2.3 released
+
+2023-06-19  Uwe Schulzweida
+
+	* grib2: add support for earth radius specified by data producer
+
+2023-06-18  Uwe Schulzweida
+
+	* grib2: add read only support for alternativeRowScanning
+
+2023-06-04  Uwe Schulzweida
+
+	* gribapi LCC: add support for parameter xpole/ypole (bug fix)
+	* gribapiDefGridLCC: add LaDInDegrees for GRIB2 (bug fix)
+	* gribapiDefGridLCC: store DxInMetres/DyInMetres as double (bug fix)
+
+2023-05-31  Uwe Schulzweida
+
+	* netcdf: filter coordinates variable name zg and zghalf in is_valid_coordinate()
+
 2023-05-25  Uwe Schulzweida
 
 	* Version 2.2.2 released

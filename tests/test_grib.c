@@ -10,7 +10,7 @@
 #include "dmemory.h"
 
 int
-main()
+main(void)
 {
   char fname[] = "test_grib.grb";
   int filetype = CDI_FILETYPE_GRB;

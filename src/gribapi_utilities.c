@@ -18,7 +18,7 @@
 #define FAIL_ON_GRIB_ERROR(function, gribHandle, key, ...)                                                                 \
   do                                                                                                                       \
     {                                                                                                                      \
-      const int errorCode = (int) function(gribHandle, key, __VA_ARGS__);                                                  \
+      int errorCode = (int) function(gribHandle, key, __VA_ARGS__);                                                        \
       if (errorCode)                                                                                                       \
         {                                                                                                                  \
           fprintf(stderr, "%s:%d: Error in function `%s`: `%s` returned error code %d for key \"%s\"", __FILE__, __LINE__, \
@@ -179,7 +179,7 @@ gribEditionNumber(grib_handle *gh)
 // This return value of this should be passed to a call to resetTz(), it is a malloc'ed string with the content of the TZ
 // environment variable before the call (or NULL if that was not set).
 static char *
-setUtc()
+setUtc(void)
 {
   char *temp = getenv("TZ"), *result = NULL;
   if (temp) result = strdup(temp);
@@ -573,7 +573,7 @@ has_ni(grib_handle *gh)
 int
 gribapiGetGridType(grib_handle *gh)
 {
-  const long gridDefinitionTemplateNumber = gribGetLongDefault(gh, "gridDefinitionTemplateNumber", -1);
+  long gridDefinitionTemplateNumber = gribGetLongDefault(gh, "gridDefinitionTemplateNumber", -1);
   switch (gridDefinitionTemplateNumber)
     {
     case GRIB2_GTYPE_LATLON: return has_ni(gh) ? GRID_LONLAT : GRID_GENERIC;
@@ -675,9 +675,9 @@ gribapiGetGridRegular(grib_handle *gh, grid_t *grid, int editionNumber, int grid
 {
   long lpar;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ni", &lpar);
-  const size_t nlon = (size_t) lpar;
+  size_t nlon = (size_t) lpar;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nj", &lpar);
-  const size_t nlat = (size_t) lpar;
+  size_t nlat = (size_t) lpar;
 
   if (gridtype == GRID_GAUSSIAN)
     {
@@ -756,9 +756,9 @@ gribapiGetGridProj(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 {
   long lpar;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nx", &lpar);
-  const size_t nlon = (size_t) lpar;
+  size_t nlon = (size_t) lpar;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ny", &lpar);
-  const size_t nlat = (size_t) lpar;
+  size_t nlat = (size_t) lpar;
 
   if (numberOfPoints != nlon * nlat) Error("numberOfPoints (%zu) and gridSize (%zu) differ!", numberOfPoints, nlon * nlat);
 
@@ -841,12 +841,12 @@ static void
 gribapiGetGridGeneric(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 {
   long lpar;
-  const size_t nlon = (grib_get_long(gh, "Ni", &lpar) == 0) ? (size_t) lpar : 0;
-  const size_t nlat = (grib_get_long(gh, "Nj", &lpar) == 0) ? (size_t) lpar : 0;
+  size_t nlon = (grib_get_long(gh, "Ni", &lpar) == 0) ? (size_t) lpar : 0;
+  size_t nlat = (grib_get_long(gh, "Nj", &lpar) == 0) ? (size_t) lpar : 0;
 
   grid->size = numberOfPoints;
 
-  const bool lgeneric = (nlon > 0 && nlat > 0 && nlon * nlat == numberOfPoints);
+  bool lgeneric = (nlon > 0 && nlat > 0 && nlon * nlat == numberOfPoints);
   grid->x.size = lgeneric ? nlon : 0;
   grid->y.size = lgeneric ? nlat : 0;
 }
@@ -856,7 +856,7 @@ bool
 gribapiGetGrid(grib_handle *gh, grid_t *grid)
 {
   bool uvRelativeToGrid = false;
-  const long editionNumber = gribEditionNumber(gh);
+  long editionNumber = gribEditionNumber(gh);
   int gridtype = gribapiGetGridType(gh);
   int projtype = (gridtype == GRID_PROJECTION && gribapiGetIsRotated(gh)) ? CDI_PROJ_RLL : CDI_UNDEFID;
   if (gridtype == CDI_PROJ_LCC || gridtype == CDI_PROJ_STERE)
@@ -920,7 +920,7 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
 
   if (gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || projtype == CDI_PROJ_RLL || projtype == CDI_PROJ_LCC)
     {
-      long temp;
+      long temp = 0;
       GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &temp), 0);
       assert(temp == 0 || temp == 1);
       uvRelativeToGrid = (bool) temp;

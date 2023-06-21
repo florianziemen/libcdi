@@ -7,7 +7,7 @@
 extern int getByteswap(int);
 
 int
-main()
+main(void)
 {
   assert(getByteswap(-1) == -1);
   return EXIT_SUCCESS;

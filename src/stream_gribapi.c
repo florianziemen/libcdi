@@ -584,17 +584,24 @@ gribapiDefProjRLL(grib_handle *gh, int gridID)
 }
 
 static void
-shapeOfTheEarthToRadius(long shapeOfTheEarth, double *a, double *b, double *rf)
+decode_shapeOfTheEarth(grib_handle *gh, struct CDI_GridProjParams *gpp)
 {
+  long shapeOfTheEarth = 0;
+  grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth);
+
+  double radiusOfTheEarth = 6367470.0;
+  if (shapeOfTheEarth == 1) grib_get_double(gh, "radiusOfTheEarth", &radiusOfTheEarth);
+
   // clang-format off
   switch (shapeOfTheEarth)
     {
-    case 2:   *a = 6378160.0; *b = 6356775.0;   *rf = 297.0; break;
-    case 4:   *a = 6378137.0; *b = 6356752.314; *rf = 298.257222101; break;
-    case 6:   *a = 6371229.0; break;
-    case 8:   *a = 6371200.0; break;
-    case 0:   *a = 6367470.0; break;
-    default:  *a = 6367470.0;
+    case 0:   gpp->a = radiusOfTheEarth; break;
+    case 1:   gpp->a = radiusOfTheEarth; break;
+    case 2:   gpp->a = 6378160.0; gpp->b = 6356775.0;   gpp->rf = 297.0; break;
+    case 4:   gpp->a = 6378137.0; gpp->b = 6356752.314; gpp->rf = 298.257222101; break;
+    case 6:   gpp->a = 6371229.0; break;
+    case 8:   gpp->a = 6371200.0; break;
+    default:  gpp->a = radiusOfTheEarth;
     }
   // clang-format on
 }
@@ -605,19 +612,19 @@ gribapiDefProjLCC(grib_handle *gh, int gridID)
   struct CDI_GridProjParams gpp;
   gridProjParamsInit(&gpp);
 
-  long shapeOfTheEarth;
-  grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth);
-  shapeOfTheEarthToRadius(shapeOfTheEarth, &gpp.a, &gpp.b, &gpp.rf);
+  decode_shapeOfTheEarth(gh, &gpp);
 
   long projflag = 0;
   grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &gpp.xval_0);
   grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &gpp.yval_0);
+  grib_get_double(gh, "longitudeOfSouthernPoleInDegrees", &gpp.x_SP);
+  grib_get_double(gh, "latitudeOfSouthernPoleInDegrees", &gpp.y_SP);
   grib_get_double(gh, "LoVInDegrees", &gpp.lon_0);
   grib_get_double(gh, "Latin1InDegrees", &gpp.lat_1);
   grib_get_double(gh, "Latin2InDegrees", &gpp.lat_2);
   grib_get_long(gh, "projectionCentreFlag", &projflag);
-  bool lsouth = gribbyte_get_bit((int) projflag, 1);
-  if (lsouth)
+  bool isSouthPole = gribbyte_get_bit((int) projflag, 1);
+  if (isSouthPole)
     {
       gpp.lat_1 = -gpp.lat_1;
       gpp.lat_2 = -gpp.lat_2;
@@ -645,9 +652,7 @@ gribapiDefProjSTERE(grib_handle *gh, int gridID)
   struct CDI_GridProjParams gpp;
   gridProjParamsInit(&gpp);
 
-  long shapeOfTheEarth;
-  grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth);
-  shapeOfTheEarthToRadius(shapeOfTheEarth, &gpp.a, &gpp.b, &gpp.rf);
+  decode_shapeOfTheEarth(gh, &gpp);
 
   grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &gpp.xval_0);
   grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &gpp.yval_0);
@@ -1700,6 +1705,37 @@ gribapiScanTimestep(stream_t *streamptr)
 #undef gribWarning
 #endif
 
+static void
+unpack_alternative_rows(grib_handle *gh, int memType, void *data)
+{
+  long xsize = 0, ysize = 0;
+  grib_get_long(gh, "Nx", &xsize);
+  grib_get_long(gh, "Ny", &ysize);
+
+  if (memType == MEMTYPE_FLOAT)
+    {
+      float *pdata = (float *) data;
+      for (int j = 1; j < ysize; j += 2)
+        for (int i = 0; i < xsize / 2; i++)
+          {
+            float tmp = pdata[j * xsize + i];
+            pdata[j * xsize + i] = pdata[j * xsize + xsize - i - 1];
+            pdata[j * xsize + xsize - i - 1] = tmp;
+          }
+    }
+  else
+    {
+      double *pdata = (double *) data;
+      for (int j = 1; j < ysize; j += 2)
+        for (int i = 0; i < xsize / 2; i++)
+          {
+            double tmp = pdata[j * xsize + i];
+            pdata[j * xsize + i] = pdata[j * xsize + xsize - i - 1];
+            pdata[j * xsize + xsize - i - 1] = tmp;
+          }
+    }
+}
+
 int
 gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t gridsize, int unreduced, size_t *nmiss,
               double missval)
@@ -1729,6 +1765,7 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
 
   if (gridsize != datasize) Error("Internal problem: gridsize(%zu) != datasize(%zu)!", gridsize, datasize);
   size_t dummy = datasize;
+
   if (memType == MEMTYPE_FLOAT)
     {
 #ifdef HAVE_GRIBAPI_FLOAT_INTERFACE
@@ -1738,7 +1775,16 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
 #endif
     }
   else
-    GRIB_CHECK(grib_get_double_array(gh, "values", (double *) data, &dummy), 0);
+    {
+      GRIB_CHECK(grib_get_double_array(gh, "values", (double *) data, &dummy), 0);
+    }
+
+  if (gribEditionNumber(gh) > 1)
+    {
+      long alternativeRowScanning = false;
+      grib_get_long(gh, "alternativeRowScanning", &alternativeRowScanning);
+      if (alternativeRowScanning) unpack_alternative_rows(gh, memType, data);
+    }
 
   long lpar;
   GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
@@ -2174,10 +2220,10 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", yfirst), 0);
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees", ylast), 0);
 
-  long xscan = xfirst > xlast;
-  GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", xscan), 0);
-  xscan = yfirst < ylast;
-  GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", xscan), 0);
+  if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+
+  GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", (xfirst > xlast)), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", (yfirst < ylast)), 0);
 
   if (gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED)
     {
@@ -2202,20 +2248,22 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
       GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", xpole), 0);
       GRIB_CHECK(my_grib_set_double(gh, "angleOfRotation", angle), 0);
     }
-
-  if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
 }
 
-static long
-radiusToShapeOfTheEarth(double radius)
+static int
+encode_shapeOfTheEarth(struct CDI_GridProjParams *gpp)
 {
-  long shapeOfTheEarth = 0;
+  int shapeOfTheEarth = 1;
+  int a = (int) lround(gpp->a);
+  int b = (int) lround(gpp->b);
+  int rf = (int) lround(gpp->rf);
 
   // clang-format off
-  if      (IS_EQUAL(radius, 6367470.0)) shapeOfTheEarth = 0;
-  else if (IS_EQUAL(radius, 6378160.0)) shapeOfTheEarth = 2;
-  else if (IS_EQUAL(radius, 6371229.0)) shapeOfTheEarth = 6;
-  else if (IS_EQUAL(radius, 6371200.0)) shapeOfTheEarth = 8;
+  if      (a == 6367470) shapeOfTheEarth = 0;
+  else if (a == 6371229) shapeOfTheEarth = 6;
+  else if (a == 6371200) shapeOfTheEarth = 8;
+  else if (a == 6378160 && b == 6356775 && rf == 297) shapeOfTheEarth = 2;
+  else if (a == 6378137 && b == 6356752 && rf == 298) shapeOfTheEarth = 4;
   // clang-format on
 
   return shapeOfTheEarth;
@@ -2238,14 +2286,14 @@ gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
   if (gpp.xval_0 < 0.0) gpp.xval_0 += 360.0;
   if (gpp.lon_0 < 0.0) gpp.lon_0 += 360.0;
 
-  bool lsouth = (gpp.lat_1 < 0.0);
-  if (lsouth)
+  bool isSouthPole = (gpp.lat_1 < 0.0);
+  if (isSouthPole)
     {
       gpp.lat_1 = -gpp.lat_2;
       gpp.lat_2 = -gpp.lat_2;
     }
   int projflag = 0;
-  if (lsouth) gribbyte_set_bit(&projflag, 1);
+  if (isSouthPole) gribbyte_set_bit(&projflag, 1);
 
   double xinc = gridInqXinc(gridID);
   double yinc = gridInqYinc(gridID);
@@ -2258,30 +2306,34 @@ gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
 
   GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
   GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(fabs(xinc))), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(fabs(yinc))), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "DxInMetres", fabs(xinc)), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "DyInMetres", fabs(yinc)), 0);
   GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", gpp.xval_0), 0);
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", gpp.yval_0), 0);
+  if (editionNumber > 1) GRIB_CHECK(my_grib_set_double(gh, "LaDInDegrees", gpp.lat_1), 0);
   GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", gpp.lon_0), 0);
   GRIB_CHECK(my_grib_set_double(gh, "Latin1InDegrees", gpp.lat_1), 0);
   GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", gpp.lat_2), 0);
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
-  long shapeOfTheEarth = radiusToShapeOfTheEarth(gpp.a);
+  if (gpp.x_SP >= -180 && gpp.x_SP <= 360) GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", gpp.x_SP), 0);
+  if (gpp.y_SP >= -90 && gpp.y_SP <= 90) GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees", gpp.y_SP), 0);
+
+  long shapeOfTheEarth = encode_shapeOfTheEarth(&gpp);
   if (shapeOfTheEarth) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
+  if (shapeOfTheEarth == 1) GRIB_CHECK(my_grib_set_long(gh, "radiusOfTheEarth", gpp.a), 0);
+
+  long earthIsOblate = (shapeOfTheEarth == 2 || shapeOfTheEarth == 3 || shapeOfTheEarth == 4);
+  if (earthIsOblate) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
 
   if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
 
-  long earthIsOblate = (IS_EQUAL(gpp.a, 6378160.0) && IS_EQUAL(gpp.rf, 297.0));
-  if (earthIsOblate) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
-
-  int scanflag = 0;
-  gribbyte_set_bit(&scanflag, 2);
-  if (editionNumber <= 1) GRIB_CHECK(my_grib_set_long(gh, "scanningMode", (long) scanflag), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", (xinc < 0)), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", (yinc > 0)), 0);
 }
 
 static void
-gribapiDefGridSTERE(grib_handle *gh, int gridID)
+gribapiDefGridSTERE(grib_handle *gh, int gridID, int uvRelativeToGrid)
 {
   long xsize = (long) gridInqXsize(gridID);
   long ysize = (long) gridInqYsize(gridID);
@@ -2301,8 +2353,8 @@ gribapiDefGridSTERE(grib_handle *gh, int gridID)
 
   GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
   GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(xinc)), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(yinc)), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "DxInMetres", xinc), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "DyInMetres", yinc), 0);
   GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", gpp.xval_0), 0);
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", gpp.yval_0), 0);
   GRIB_CHECK(my_grib_set_double(gh, "LaDInDegrees", gpp.lat_1), 0);
@@ -2311,12 +2363,17 @@ gribapiDefGridSTERE(grib_handle *gh, int gridID)
   GRIB_CHECK(my_grib_set_double(gh, "southPoleOnProjectionPlane", southPoleOnProjectionPlane), 0);
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
-  long shapeOfTheEarth = radiusToShapeOfTheEarth(gpp.a);
+  long shapeOfTheEarth = encode_shapeOfTheEarth(&gpp);
   if (shapeOfTheEarth) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
+  if (shapeOfTheEarth == 1) GRIB_CHECK(my_grib_set_long(gh, "radiusOfTheEarth", gpp.a), 0);
 
-  GRIB_CHECK(my_grib_set_long(gh, "resolutionAndComponentFlags", 8), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", 0), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", 1), 0);
+  long earthIsOblate = (shapeOfTheEarth == 2 || shapeOfTheEarth == 3 || shapeOfTheEarth == 4);
+  if (earthIsOblate) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
+
+  if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+
+  GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", (xinc < 0)), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", (yinc > 0)), 0);
 }
 
 static void
@@ -2476,7 +2533,7 @@ gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int
       }
     case CDI_PROJ_STERE:
       {
-        gribapiDefGridSTERE(gh, gridID);
+        gribapiDefGridSTERE(gh, gridID, uvRelativeToGrid);
         break;
       }
     case GRID_SPECTRAL:
@@ -2605,7 +2662,7 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
 
   void (*defLevel)(grib_handle * gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level, double dlevel1,
                    double dlevel2)
-      = editionNumber <= 1 ? grib1DefLevel : grib2DefLevel;
+      = (editionNumber <= 1) ? grib1DefLevel : grib2DefLevel;
 
   switch (zaxistype)
     {

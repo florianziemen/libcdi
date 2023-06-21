@@ -163,7 +163,7 @@ namespaceResHDecode(int resH)
 }
 
 int
-namespaceNew()
+namespaceNew(void)
 {
   int newNamespaceID = -1;
   NAMESPACE_INIT();
@@ -232,7 +232,7 @@ namespaceDelete(int namespaceID)
 }
 
 int
-namespaceGetNumber()
+namespaceGetNumber(void)
 {
   return (int) nNamespaces;
 }
@@ -245,7 +245,7 @@ namespaceSetActive(int nId)
 }
 
 int
-namespaceGetActive()
+namespaceGetActive(void)
 {
   return activeNamespace;
 }

@@ -69,7 +69,7 @@ void gribContainersDelete(stream_t *streamptr);
 #endif
 #endif
 
-static inline int have_gribapi_float_interface()
+static inline int have_gribapi_float_interface(void)
 {
 #ifdef HAVE_GRIBAPI_FLOAT_INTERFACE
   return 1;

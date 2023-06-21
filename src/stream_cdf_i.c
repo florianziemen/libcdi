@@ -1067,6 +1067,14 @@ set_extra_attr(char *buf, int nvdims, const size_t *chunks)
   buf[pos + 1] = 0;
 }
 
+static bool
+is_valid_coordinate(ncvar_t *ncvar)
+{
+  bool status = true;
+  if (ncvar->ndims > 1 && (str_is_equal(ncvar->name, "zg") || str_is_equal(ncvar->name, "zghalf"))) status = false;
+  return status;
+}
+
 static void
 cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timedimid, int modelID, int format)
 {
@@ -1182,6 +1190,15 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                 }
             }
         }
+    }
+
+  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+    {
+      ncvar_t *ncvar = &ncvars[ncvarid];
+      int ncid = ncvar->ncid;
+      int *dimidsp = ncvar->dimids;
+
+      cdf_inq_var(ncid, ncvarid, name, &xtype, &nvdims, dimidsp, &nvatts);
 
       if (ncvar->natts == 0 && nvatts > 0) ncvar->atts = (int *) Malloc((size_t) nvatts * sizeof(int));
 
@@ -1381,11 +1398,14 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                   int status = nc_inq_varid(ncid, varname, &dimvarid);
                   if (status == NC_NOERR)
                     {
-                      cdf_set_var(&ncvars[dimvarid], CoordVar);
-                      if (!CDI_Ignore_Att_Coordinates)
+                      if (is_valid_coordinate(&ncvars[dimvarid]))
                         {
-                          ncvar->coordvarids[i] = dimvarid;
-                          ncvar->ncoordvars++;
+                          cdf_set_var(&ncvars[dimvarid], CoordVar);
+                          if (!CDI_Ignore_Att_Coordinates)
+                            {
+                              ncvar->coordvarids[i] = dimvarid;
+                              ncvar->ncoordvars++;
+                            }
                         }
                     }
                   else

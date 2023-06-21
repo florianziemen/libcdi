@@ -170,7 +170,7 @@ defineVlist(int gridID, int zaxisID, int taxisID)
 }
 
 static int
-defineInstitute()
+defineInstitute(void)
 {
   int instID = institutDef(0, 0, "MYINSTITUTE", "myInstitute");
   return instID;

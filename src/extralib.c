@@ -49,7 +49,7 @@ extDebug(int debug)
 }
 
 static void
-extLibInit()
+extLibInit(void)
 {
   const char *envName = "EXT_PRECISION";
 
