@@ -15,6 +15,7 @@
 #include "varscan.h"
 #include "vlist.h"
 #include "subtype.h"
+#include "cdi_uuid.h"
 
 #include "cgribex.h" /* gribGetSize, gribRead, gribGetZip, GRIB1_LTYPE_99 */
 #include "gribapi.h"
@@ -2433,7 +2434,10 @@ gribapiDefGridUnstructured(grib_handle *gh, int gridID)
       if (warning && errCount > 0)
         {
           warning = false;
-          Warning("GRIB library doesn't support unstructured grids, grid information will be lost!");
+          char uuidStr[uuidNumHexChars + 1] = { 0 };
+          cdiUUID2Str(uuid, uuidStr);
+          Warning("GRIB2 grid parameter missing: numberOfGridUsed=%d numberOfGridInReference=%d uuidOfHGrid=%s", number, position,
+                  uuidStr);
         }
     }
 }
