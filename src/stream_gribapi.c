@@ -3428,7 +3428,7 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
   *gribbuffersize = recsize;
   *gribbuffer = Malloc(*gribbuffersize);
 
-  if (!gc->init && editionNumber == 2)
+  if (CDI_Debug && !gc->init && editionNumber == 2)
     {
       long pdis;
       grib_get_long(gh, "discipline", &pdis);

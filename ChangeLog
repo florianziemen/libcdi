@@ -1,3 +1,7 @@
+2023-07-04  Uwe Schulzweida
+
+	* gribapiEncode: add CDI_Debug condition for warning message
+
 2023-06-21  Uwe Schulzweida
 
 	* Version 2.2.3 released
