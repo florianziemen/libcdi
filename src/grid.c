@@ -165,6 +165,9 @@ grid_init(grid_t *gridptr)
   gridptr->atts.nelems = 0;
 
   cdiDefVarKeyInt(&gridptr->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
+#ifdef HIRLAM_EXTENSIONS
+  cdiDefVarKeyInt(&gridptr->keys, CDI_KEY_SCANNINGMODE, 64);
+#endif
 
   gridptr->extraData = NULL;
 }

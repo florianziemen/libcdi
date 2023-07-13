@@ -1,3 +1,7 @@
+2023-07-13  Uwe Schulzweida
+
+	* HIRLAM_EXTENSIONS: set default CDI_KEY_SCANNINGMODE to 64 [Bug #11367]
+
 2023-07-04  Uwe Schulzweida
 
 	* gribapiEncode: add CDI_Debug condition for warning message
