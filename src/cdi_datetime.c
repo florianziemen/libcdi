@@ -232,12 +232,12 @@ cdiDateTime_isNull(const CdiDateTime cdiDateTime)
 {
   // clang-format off
   return (cdiDateTime.date.year == 0
-      && cdiDateTime.date.month == 0
-      && cdiDateTime.date.day == 0
-      && cdiDateTime.time.hour == 0
-      && cdiDateTime.time.minute == 0
-      && cdiDateTime.time.second == 0
-      && cdiDateTime.time.ms == 0);
+       && cdiDateTime.date.month == 0
+       && cdiDateTime.date.day == 0
+       && cdiDateTime.time.hour == 0
+       && cdiDateTime.time.minute == 0
+       && cdiDateTime.time.second == 0
+       && cdiDateTime.time.ms == 0);
   // clang-format on
 }
 
