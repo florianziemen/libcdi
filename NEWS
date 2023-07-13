@@ -1,6 +1,18 @@
 CDI NEWS
 --------
 
+Version 2.3.0 (23 October 2023):
+
+   New features:
+     * Add support for NetCDF attribute type NC_INT64
+     * gribapi decode: add support for single precision float interface (available since ecCodes-2.30.0)
+     * grib2: add read only support for alternativeRowScanning
+     * grib2: add support for earth radius specified by data producer
+   Fixed bugs:
+     * gribapiDefGridLCC: store DxInMetres/DyInMetres as double
+     * NetCDF4: use chunkSize only if it is less than gridsize
+     * cdfDefineAttributes: check filetype for unsigned int attributes
+
 Version 2.2.0 (23 February 2023):
 
    New features:
