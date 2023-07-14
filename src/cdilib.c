@@ -53473,7 +53473,7 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
           str_to_lower(cdi_name);
           str_to_lower(grb_name);
           bool checkName = (!grb_name[0] && strncmp(cdi_name, "param", 5) == 0) ? false : true;
-          if (checkName && ((strlen(cdi_name) != strlen(grb_name)) || !strStartsWith(cdi_name, grb_name)))
+          if (CDI_Debug && checkName && ((strlen(cdi_name) != strlen(grb_name)) || !strStartsWith(cdi_name, grb_name)))
             Warning("*** GRIB2 shortName does not correspond to chosen variable name: \"%s\" (\"%s\").",
                     grb_name[0] ? grb_name : "unknown", cdi_name);
         }
