@@ -3682,7 +3682,11 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
 
   // release mem of not freed attributes
   for (int ncvarid = 0; ncvarid < num_ncvars; ncvarid++)
-    if (ncvars[ncvarid].atts) Free(ncvars[ncvarid].atts);
+    {
+      ncvar_t *ncvar = &ncvars[ncvarid];
+      if (ncvar->atts) Free(ncvar->atts);
+      ncvar->atts = NULL;
+    }
 
   if (varids) Free(varids);
 
@@ -4784,7 +4788,16 @@ cdfInqContents(stream_t *streamptr)
   if (ncdims) Free(ncdims);
 
   // free ncvars
-  if (ncvars) Free(ncvars);
+  if (ncvars)
+    {
+      for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+        {
+          ncvar_t *ncvar = &ncvars[ncvarid];
+          if (ncvar->atts) Free(ncvar->atts);
+          if (ncvar->vct) Free(ncvar->vct);
+        }
+      Free(ncvars);
+    }
 
   return 0;
 }
