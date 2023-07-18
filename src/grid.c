@@ -187,9 +187,10 @@ grid_free_components(grid_t *gridptr)
   cdiDeleteVarKeys(&(gridptr->x.keys));
   cdiDeleteVarKeys(&(gridptr->y.keys));
   cdiDeleteVarKeys(&(gridptr->keys));
-
+  /* 12 pio tests fail
   int gridID = gridptr->self;
   if (gridID != CDI_UNDEFID) cdiDeleteAtts(gridID, CDI_GLOBAL);
+  */
 }
 
 void
