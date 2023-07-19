@@ -3126,6 +3126,11 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
           if (ydimid != CDI_UNDEFID) cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_DIMNAME, ncdims[ydimid].name);
           if (vdimid != CDI_UNDEFID) cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_VDIMNAME, ncdims[vdimid].name);
 
+          if (xvarid != CDI_UNDEFID && ncvars[xvarid].stdname[0])
+            cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_STDNAME, ncvars[xvarid].stdname);
+          if (yvarid != CDI_UNDEFID && ncvars[yvarid].stdname[0])
+            cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_STDNAME, ncvars[yvarid].stdname);
+
           if (CDI_Debug) Message("gridID %d %d %s", gridID, ncvarid, ncvar->name);
 
           for (int ncvarid2 = ncvarid + 1; ncvarid2 < nvars; ncvarid2++)
