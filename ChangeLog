@@ -1,3 +1,7 @@
+2023-07-20  Uwe Schulzweida
+
+	* write grib via ecCodes: set default taxistype to TAXIS_ABSOLUTE
+
 2023-07-19  Uwe Schulzweida
 
 	* NetCDF read: add standard_name attribute for lon/lat coordinates

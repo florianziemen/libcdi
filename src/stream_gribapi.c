@@ -2042,7 +2042,7 @@ gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, CdiDateTime dateTime, 
   if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 0), 0);
   if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "stepRange", 0), 0);
 
-  //if (cdiDateTime_isNull(dateTime)) dateTime.date = cdiDate_set(10101);
+  if (cdiDateTime_isNull(dateTime)) dateTime.date = cdiDate_set(10101);
   gribapiSetDataDateTime(gh, dateTime);
 }
 
