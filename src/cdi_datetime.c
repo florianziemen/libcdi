@@ -177,7 +177,7 @@ cdiDateTime_init(CdiDateTime *cdiDateTime)
 }
 
 bool
-cdiDate_isEQ(const CdiDate cdiDate1, const CdiDate cdiDate2)
+cdiDate_isEQ(CdiDate cdiDate1, CdiDate cdiDate2)
 {
   // clang-format off
   return (cdiDate1.year  == cdiDate2.year
@@ -187,7 +187,7 @@ cdiDate_isEQ(const CdiDate cdiDate1, const CdiDate cdiDate2)
 }
 
 bool
-cdiTime_isEQ(const CdiTime cdiTime1, const CdiTime cdiTime2)
+cdiTime_isEQ(CdiTime cdiTime1, CdiTime cdiTime2)
 {
   // clang-format off
   return (cdiTime1.hour   == cdiTime2.hour
@@ -198,7 +198,7 @@ cdiTime_isEQ(const CdiTime cdiTime1, const CdiTime cdiTime2)
 }
 
 bool
-cdiDateTime_isEQ(const CdiDateTime cdiDateTime1, const CdiDateTime cdiDateTime2)
+cdiDateTime_isEQ(CdiDateTime cdiDateTime1, CdiDateTime cdiDateTime2)
 {
   // clang-format off
   return (cdiDateTime1.date.year   == cdiDateTime2.date.year
@@ -212,23 +212,23 @@ cdiDateTime_isEQ(const CdiDateTime cdiDateTime1, const CdiDateTime cdiDateTime2)
 }
 
 bool
-cdiDateTime_isNE(const CdiDateTime cdiDateTime1, const CdiDateTime cdiDateTime2)
+cdiDateTime_isNE(CdiDateTime cdiDateTime1, CdiDateTime cdiDateTime2)
 {
   return !cdiDateTime_isEQ(cdiDateTime1, cdiDateTime2);
 }
 
 bool
-cdiDateTime_isLT(const CdiDateTime cdiDateTime1, const CdiDateTime cdiDateTime2)
+cdiDateTime_isLT(CdiDateTime cdiDateTime1, CdiDateTime cdiDateTime2)
 {
-  const int64_t date1 = cdiDate_get(cdiDateTime1.date);
-  const int64_t date2 = cdiDate_get(cdiDateTime2.date);
-  const int time1 = cdiTime_get(cdiDateTime1.time);
-  const int time2 = cdiTime_get(cdiDateTime2.time);
+  int64_t date1 = cdiDate_get(cdiDateTime1.date);
+  int64_t date2 = cdiDate_get(cdiDateTime2.date);
+  int time1 = cdiTime_get(cdiDateTime1.time);
+  int time2 = cdiTime_get(cdiDateTime2.time);
   return (date1 < date2 || (date1 == date2 && time1 < time2));
 }
 
 bool
-cdiDateTime_isNull(const CdiDateTime cdiDateTime)
+cdiDateTime_isNull(CdiDateTime cdiDateTime)
 {
   // clang-format off
   return (cdiDateTime.date.year == 0
