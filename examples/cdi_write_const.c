@@ -42,18 +42,29 @@ main(void)
   vlistDefVarName(vlistID, varID1, "varname1");
   vlistDefVarName(vlistID, varID2, "varname2");
 
+  // Create a Time axis
+  int taxisID = taxisCreate(TAXIS_RELATIVE);
+
+  // Assign the Time axis to the variable list
+  vlistDefTaxis(vlistID, taxisID);
+
   // Create a dataset in netCDF format
-  streamID = streamOpenWrite("example_const.nc", CDI_FILETYPE_NC);
+  streamID = streamOpenWrite("example_const.grb", CDI_FILETYPE_GRB2);
   if (streamID < 0)
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID));
-      return (1);
+      return 1;
     }
 
   // Assign the variable list to the dataset
   streamDefVlist(streamID, vlistID);
 
-  // streamDefTimestep(streamID, 0);
+  // Set the verification date to 1985-01-01
+  taxisDefVdate(taxisID, 19850101);
+  // Set the verification time to 12:00:00
+  taxisDefVtime(taxisID, 120000);
+  // Define the time step
+  streamDefTimestep(streamID, 0);
 
   // Init var1 and var2
   for (i = 0; i < nlon * nlat; i++) var1[i] = 1.1;

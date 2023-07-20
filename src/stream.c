@@ -1357,33 +1357,20 @@ cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
   if (vlistID == CDI_UNDEFID)
     Error("Must not call streamDefTimestep for stream (ID=%d) with (not yet) defined vlist", streamptr->self);
 
-  int timeIsVarying = vlistHasTime(vlistID);
-  int taxisID = vlistInqTaxis(vlistID);
-
-  /* moved to cdiStreamSetupVlist
-  int taxisID = timeIsVarying ? vlistInqTaxis(vlistID) : CDI_UNDEFID;
-  if (timeIsVarying)
-    {
-      if (taxisID == CDI_UNDEFID)
-        {
-          Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamptr->self);
-          taxisID = taxisCreate(TAXIS_ABSOLUTE);
-          vlistDefTaxis(vlistID, taxisID);
-        }
-    }
-  */
   if (tsID > 0)
     {
       int newtsID = tstepsNewEntry(streamptr);
       if (tsID != newtsID) Error("Internal problem: tsID = %d newtsID = %d", tsID, newtsID);
     }
 
-  if (timeIsVarying) ptaxisCopy(&streamptr->tsteps[tsID].taxis, taxisPtr(taxisID));
+  int taxisID = vlistInqTaxis(vlistID);
+  if (taxisID != CDI_UNDEFID) ptaxisCopy(&streamptr->tsteps[tsID].taxis, taxisPtr(taxisID));
 
   streamptr->curTsID = tsID;
   streamptr->ntsteps = tsID + 1;
 
 #ifdef HAVE_LIBNETCDF
+  int timeIsVarying = vlistHasTime(vlistID);
   if (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF && timeIsVarying)
     {
       /* usually points to cdfDefTimestep in serial mode but
