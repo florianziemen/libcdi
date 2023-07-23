@@ -210,7 +210,7 @@ streamInqNumSteps(int streamID)
       while (streamInqTimestep(streamID, tsID++)) ntsteps = streamptr->ntsteps;
     }
 
-  return (int)ntsteps;
+  return (int) ntsteps;
 }
 
 static long
