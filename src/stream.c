@@ -198,8 +198,8 @@ streamDefMaxSteps(int streamID, int maxSteps)
     }
 }
 
-static long
-cdiInqTimeSize(int streamID)
+int
+streamInqNumSteps(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
@@ -210,7 +210,7 @@ cdiInqTimeSize(int streamID)
       while (streamInqTimestep(streamID, tsID++)) ntsteps = streamptr->ntsteps;
     }
 
-  return ntsteps;
+  return (int)ntsteps;
 }
 
 static long
@@ -239,7 +239,7 @@ streamDefNumWorker(int streamID, int numWorker)
         {
           if (cdiBaseFiletype(filetype) == CDI_FILETYPE_GRIB)
             {
-              (void) cdiInqTimeSize(streamID);
+              (void) streamInqNumSteps(streamID);
               streamptr->maxGlobalRecs = get_max_global_recs(streamptr);
             }
 #ifdef HAVE_LIBNETCDF
@@ -726,7 +726,7 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
   int status = cdiInqContents(streamptr);
   if (status < 0) return status;
   vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
-  vlistptr->ntsteps = (int) cdiInqTimeSize(streamID);
+  vlistptr->ntsteps = streamInqNumSteps(streamID);
 
   // Needed for NetCDF4
   for (int varID = 0; varID < vlistptr->nvars; ++varID) streamptr->vars[varID].defmiss = true;

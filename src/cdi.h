@@ -370,6 +370,8 @@ void    streamSync(int streamID);
 void    streamDefMaxSteps(int streamID, int maxSteps);
 void    streamDefNumWorker(int streamID, int numWorker);
 
+int     streamInqNumSteps(int streamID);
+
 //      streamDefVlist: Define the Vlist for a stream
 void    streamDefVlist(int streamID, int vlistID);
 

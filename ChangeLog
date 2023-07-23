@@ -1,3 +1,7 @@
+2023-07-23  Uwe Schulzweida
+
+	* Add interface function streamInqNumSteps(int streamID) to inquire number of time steps
+
 2023-07-20  Uwe Schulzweida
 
 	* time information missing if the stream contains only constant time fields (bug fix)
@@ -125,8 +129,8 @@
 
 2022-11-13  Uwe Schulzweida
 
-	* Added interface function streamOpenReadQuery();
-	* Added module cdiQuery
+	* Add interface function streamOpenReadQuery();
+	* Add module cdiQuery
 
 2022-11-09  Uwe Schulzweida
 
