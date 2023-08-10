@@ -411,14 +411,10 @@ cdfGetAttInt64(int fileID, int ncvarid, const char *attname, size_t attlen, int6
 
   if (xtypeIsFloat(atttype) || xtypeIsInt(atttype) || xtypeIsInt64(atttype))
     {
-      bool needAlloc = (nc_attlen > attlen);
-      int64_t *pintatt = needAlloc ? (int64_t *) (malloc(nc_attlen * sizeof(int64_t))) : attint;
-      cdf_get_att_int64(fileID, ncvarid, attname, pintatt);
-      if (needAlloc)
-        {
-          memcpy(attint, pintatt, attlen * sizeof(int64_t));
-          free(pintatt);
-        }
+      long long *plongatt = (long long *) malloc(nc_attlen * sizeof(long long));
+      cdf_get_att_longlong(fileID, ncvarid, attname, plongatt);
+      for (size_t i = 0; i < attlen; ++i) attint[i] = plongatt[i];
+      free(plongatt);
     }
 }
 

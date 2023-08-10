@@ -1,3 +1,7 @@
+2023-08-10  Uwe Schulzweida
+
+	* Replace cdf_get_att_int64() by cdf_get_att_longlong() to read NC_INT64 attributes with nc_get_att_longlong()
+
 2023-07-23  Uwe Schulzweida
 
 	* Add interface function streamInqNumSteps(int streamID) to inquire number of time steps
