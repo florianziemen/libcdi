@@ -3526,10 +3526,10 @@ calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
 }
 
 static void
-cdf_set_var_chunk_cache(ncvar_t *ncvar, int ncvarid, size_t chunckCacheSize)
+cdf_set_var_chunk_cache(ncvar_t *ncvar, int ncvarid, size_t chunkCacheSize)
 {
-  if (CDI_Debug) Message("%s: chunckCacheSize=%zu", ncvar->name, chunckCacheSize);
-  nc_set_var_chunk_cache(ncvar->ncid, ncvarid, chunckCacheSize, ncvar->chunkCacheNelems, ncvar->chunkCachePreemption);
+  if (CDI_Debug) Message("%s: chunkCacheSize=%zu", ncvar->name, chunkCacheSize);
+  nc_set_var_chunk_cache(ncvar->ncid, ncvarid, chunkCacheSize, ncvar->chunkCacheNelems, ncvar->chunkCachePreemption);
 }
 
 // define all input data variables
