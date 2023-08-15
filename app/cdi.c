@@ -86,7 +86,7 @@ version(void)
                       CDI_FILETYPE_NC2, CDI_FILETYPE_NC4, CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5, CDI_FILETYPE_NCZARR };
   const char *typenames[] = { "srv", "ext", "ieg", "grb", "grb2", "nc", "nc2", "nc4", "nc4c", "nc5", "nczarr" };
 
-  fprintf(stderr, "CDI version 2.1\n");
+  fprintf(stderr, "CDI version 2.2\n");
 #ifdef COMPILER
   fprintf(stderr, "C Compiler: %s\n", COMPILER);
 #endif
@@ -150,17 +150,18 @@ version(void)
     1.4.2  22 Mar 2005 : change level from int to double
     1.4.3  11 Apr 2005 : change date and time format to ISO
     1.5.0  22 Nov 2005 : IEG support
-    1.5.1  21 Feb 2006 : added option -s for short info
-    1.6.0   1 Aug 2006 : added option -z szip for SZIP compression of GRIB records
+    1.5.1  21 Feb 2006 : add option -s for short info
+    1.6.0   1 Aug 2006 : add option -z szip for SZIP compression of GRIB records
     1.6.1  27 Feb 2007 : short info with ltype for GENERIC zaxis
     1.6.2   3 Jan 2008 : changes for CDI library version 1.1.0 (compress)
     1.6.3  26 Mar 2008 : call streamDefTimestep also if ntsteps = 0 (buf fix)
-    1.7.0  11 Apr 2008 : added option -z zip for deflate compression of netCDF4 variables
-    1.7.1   1 Nov 2009 : added option -z jpeg for JPEG compression of GRIB2 records
-    1.7.2  14 Nov 2012 : added optional compression level -z zip[_1-9]
-    1.9.0  29 May 2019 : added option -i to set number of input worker
+    1.7.0  11 Apr 2008 : add option -z zip for deflate compression of netCDF4 variables
+    1.7.1   1 Nov 2009 : add option -z jpeg for JPEG compression of GRIB2 records
+    1.7.2  14 Nov 2012 : add optional compression level -z zip[_1-9]
+    1.9.0  29 May 2019 : add option -i to set number of input worker
     2.0.0  02 Feb 2022 : changed date/time handling to CdiDateTime
-    2.1.0  17 Jun 2022 : added NCZarr support
+    2.1.0  17 Jun 2022 : add NCZarr support
+    2.2.0  23 Jul 2023 : add option -E and -T
   */
 }
 
@@ -174,11 +175,13 @@ usage(void)
   fprintf(stderr, "\n");
   fprintf(stderr, "  Options:\n");
   fprintf(stderr, "    -d             Print debugging information\n");
+  fprintf(stderr, "    -E             Use ecCodes to decode/encode GRIB1 messages\n");
   fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext or ieg)\n");
   fprintf(stderr, "    -i <num>       Number of worker to decode/decompress GRIB records\n");
   fprintf(stderr, "    -m             Move records\n");
   fprintf(stderr, "    -r             Use CDI record API\n");
   fprintf(stderr, "    -s             give short information if ofile is missing\n");
+  fprintf(stderr, "    -T             Pre scan hole GRIB file to get the number of timesteps\n");
   fprintf(stderr, "    -t <table>     Parameter table name/file\n");
   fprintf(stderr, "                   Predefined tables: ");
   for (int id = 0; id < tableInqNumber(); id++)
@@ -219,9 +222,7 @@ printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, i
   time2str(vdatetime.time, vtimestr, sizeof(vtimestr));
 
   fprintf(stdout, "%6d :%s %s %7g ", ++rec, vdatestr, vtimestr, level);
-
   fprintf(stdout, "%8zu ", datasize);
-
   fprintf(stdout, "%7zu :", nmiss);
 
   if (number == CDI_REAL)
@@ -296,18 +297,18 @@ static const char *
 tunit2str(int tunits)
 {
   // clang-format off
-  if      ( tunits == TUNIT_YEAR )       return ("years");
-  else if ( tunits == TUNIT_MONTH )      return ("months");
-  else if ( tunits == TUNIT_DAY )        return ("days");
-  else if ( tunits == TUNIT_12HOURS )    return ("12hours");
-  else if ( tunits == TUNIT_6HOURS )     return ("6hours");
-  else if ( tunits == TUNIT_3HOURS )     return ("3hours");
-  else if ( tunits == TUNIT_HOUR )       return ("hours");
-  else if ( tunits == TUNIT_30MINUTES )  return ("30minutes");
-  else if ( tunits == TUNIT_QUARTER )    return ("15minutes");
-  else if ( tunits == TUNIT_MINUTE )     return ("minutes");
-  else if ( tunits == TUNIT_SECOND )     return ("seconds");
-  else                                   return ("unknown");
+  if      (tunits == TUNIT_YEAR)       return ("years");
+  else if (tunits == TUNIT_MONTH)      return ("months");
+  else if (tunits == TUNIT_DAY)        return ("days");
+  else if (tunits == TUNIT_12HOURS)    return ("12hours");
+  else if (tunits == TUNIT_6HOURS)     return ("6hours");
+  else if (tunits == TUNIT_3HOURS)     return ("3hours");
+  else if (tunits == TUNIT_HOUR)       return ("hours");
+  else if (tunits == TUNIT_30MINUTES)  return ("30minutes");
+  else if (tunits == TUNIT_QUARTER)    return ("15minutes");
+  else if (tunits == TUNIT_MINUTE)     return ("minutes");
+  else if (tunits == TUNIT_SECOND)     return ("seconds");
+  else                                 return ("unknown");
   // clang-format on
 }
 
@@ -315,12 +316,12 @@ static const char *
 calendar2str(int calendar)
 {
   // clang-format off
-  if      ( calendar == CALENDAR_STANDARD )  return ("standard");
-  else if ( calendar == CALENDAR_PROLEPTIC ) return ("proleptic_gregorian");
-  else if ( calendar == CALENDAR_360DAYS )   return ("360_day");
-  else if ( calendar == CALENDAR_365DAYS )   return ("365_day");
-  else if ( calendar == CALENDAR_366DAYS )   return ("366_day");
-  else                                       return ("unknown");
+  if      (calendar == CALENDAR_STANDARD)  return ("standard");
+  else if (calendar == CALENDAR_PROLEPTIC) return ("proleptic_gregorian");
+  else if (calendar == CALENDAR_360DAYS)   return ("360_day");
+  else if (calendar == CALENDAR_365DAYS)   return ("365_day");
+  else if (calendar == CALENDAR_366DAYS)   return ("366_day");
+  else                                     return ("unknown");
   // clang-format on
 }
 
@@ -712,7 +713,7 @@ handle_error(int cdiErrno, const char *fmt, ...)
 }
 
 static void
-defineCompress(const char *arg)
+define_compress(const char *arg)
 {
   size_t len = strlen(arg);
 
@@ -747,7 +748,7 @@ defineCompress(const char *arg)
 }
 
 static void
-defineFilter(const char *arg)
+define_filter(const char *arg)
 {
   size_t len = strlen(arg);
 
@@ -781,11 +782,9 @@ defineFilter(const char *arg)
 int
 main(int argc, char *argv[])
 {
-  int c;
-  char *fname1 = NULL;
-  char *fname2 = NULL;
   char *rTable = NULL;
   char *wTable = NULL;
+  bool preScan = false;
   int Move = 0;
   int Record = 0;
   int Variable = 0;
@@ -818,13 +817,15 @@ main(int argc, char *argv[])
     Progname++;
 
   // clang-format off
-  while ((c = getopt(argc, argv, "b:C:F:f:i:L:o:N:S:t:w:z:cdhlMmnRrsvVxXZ")) != EOF)
+  int c;
+  while ((c = getopt(argc, argv, "b:C:F:f:i:L:o:N:S:t:w:z:cdEhlMmnRrsTvVxXZ")) != EOF)
     {
       switch (c)
 	{
 	case 'b': setDefaultDataType(optarg); break;
 	case 'C': queryCellidx[numQueryCellidx++] = atol(optarg); break;
 	case 'd': Debug = 1; break;
+        case 'E': cdiDefGlobal("ECCODES_GRIB1", true); break;
 	case 'f': setDefaultFileType(optarg); break;
 	case 'h': usage(); exit (0);
 	case 'i': numWorkerIn = atoi(optarg);  break;
@@ -840,19 +841,20 @@ main(int argc, char *argv[])
 	case 'X': Variable = 1; break;
 	case 'S': queryStepidx[numQueryStepidx++] = atoi(optarg); break;
 	case 's': Shortinfo = 1; break;
+	case 'T': preScan = true;  break;
 	case 't': rTable = optarg;  break;
 	case 'v': Vardis = 1; break;
 	case 'V': Version = 1; break;
 	case 'w': wTable = optarg; break;
 	case 'x': datamode = SP_MODE; break;
-	case 'z': defineCompress(optarg); break;
-	case 'F': defineFilter(optarg); break;
+	case 'z': define_compress(optarg); break;
+	case 'F': define_filter(optarg); break;
 	}
     }
   // clang-format on
 
-  if (optind < argc) fname1 = argv[optind++];
-  if (optind < argc) fname2 = argv[optind++];
+  char *fname1 = (optind < argc) ? argv[optind++] : NULL;
+  char *fname2 = (optind < argc) ? argv[optind++] : NULL;
   if (optind < argc) fprintf(stderr, "optind: %d argc: %d\n", optind, argc);
 
   if (Debug || Version) version();
@@ -907,6 +909,8 @@ main(int argc, char *argv[])
       if (query) cdiQueryDelete(query);
 
       if (numWorkerIn > 0) streamDefNumWorker(streamID1, numWorkerIn);
+
+      if (preScan) fprintf(stdout, "numSteps=%d\n", streamInqNumSteps(streamID1));
 
       int vlistID1 = streamInqVlist(streamID1);
 

@@ -184,18 +184,23 @@ zaxisCreate_(int zaxistype, int size, int id)
   zaxisptr->type = zaxistype;
   zaxisptr->size = size;
 
-  if (zaxistype >= CDI_NumZaxistype || zaxistype < 0)
-    Error("Internal problem! zaxistype=%d out of range (min=0/max=%d)!", zaxistype, CDI_NumZaxistype - 1);
-
   int zaxisID = zaxisptr->self;
-  cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, ZaxistypeEntry[zaxistype].name);
-  if (zaxistype != ZAXIS_GENERIC) zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
-  cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, ZaxistypeEntry[zaxistype].units);
 
-  const char *stdname = ZaxistypeEntry[zaxistype].stdname;
-  if (*stdname) cdiDefVarKeyBytes(&zaxisptr->keys, CDI_KEY_STDNAME, (const unsigned char *) stdname, (int) strlen(stdname) + 1);
+  if (zaxistype >= 0 && zaxistype < CDI_NumZaxistype)
+    {
+      cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, ZaxistypeEntry[zaxistype].name);
+      if (zaxistype != ZAXIS_GENERIC) zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
+      cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, ZaxistypeEntry[zaxistype].units);
 
-  zaxisptr->positive = ZaxistypeEntry[zaxistype].positive;
+      const char *stdname = ZaxistypeEntry[zaxistype].stdname;
+      if (*stdname) cdiDefVarKeyBytes(&zaxisptr->keys, CDI_KEY_STDNAME, (const unsigned char *) stdname, (int) strlen(stdname) + 1);
+
+      zaxisptr->positive = ZaxistypeEntry[zaxistype].positive;
+    }
+  else
+    {
+      Error("Internal problem! zaxistype=%d out of range (min=0/max=%d)!", zaxistype, CDI_NumZaxistype - 1);
+    }
 
   return zaxisID;
 }

@@ -108,21 +108,21 @@ streamInqRecord(int streamID, int *varID, int *levelID)
 
   if (!streamptr->record) cdiInitRecord(streamptr);
 
-  const int tsID = streamptr->curTsID;
-  const int rindex = streamptr->tsteps[tsID].curRecID + 1;
+  int tsID = streamptr->curTsID;
+  int rindex = streamptr->tsteps[tsID].curRecID + 1;
 
   if (rindex >= streamptr->tsteps[tsID].nrecs) Error("record %d not available at timestep %d", rindex + 1, tsID + 1);
 
-  const int recID = streamptr->tsteps[tsID].recIDs[rindex];
+  int recID = streamptr->tsteps[tsID].recIDs[rindex];
 
   if (recID == -1 || recID >= streamptr->tsteps[tsID].nallrecs) Error("Internal problem! tsID = %d recID = %d", tsID, recID);
 
   *varID = streamptr->tsteps[tsID].records[recID].varID;
   if (*varID == -1) Error("Internal problem! varID = %d recID = %d", *varID, recID);
 
-  const int lindex = streamptr->tsteps[tsID].records[recID].levelID;
+  int lindex = streamptr->tsteps[tsID].records[recID].levelID;
 
-  const int isub = subtypeInqActiveIndex(streamptr->vars[*varID].subtypeID);
+  int isub = subtypeInqActiveIndex(streamptr->vars[*varID].subtypeID);
   *levelID = streamptr->vars[*varID].recordTable[isub].lindex[lindex];
 
   if (CDI_Debug) Message("streamID = %d tsID = %d, recID = %d, varID = %d, levelID = %d", streamID, tsID, recID, *varID, *levelID);
@@ -159,11 +159,11 @@ streamDefRecord(int streamID, int varID, int levelID)
 
   if (!streamptr->record) cdiInitRecord(streamptr);
 
-  const int vlistID = streamptr->vlistID;
-  const int gridID = vlistInqVarGrid(vlistID, varID);
-  const int zaxisID = vlistInqVarZaxis(vlistID, varID);
-  const int param = vlistInqVarParam(vlistID, varID);
-  const int ilevel = (int) lround(zaxisInqLevel(zaxisID, levelID));
+  int vlistID = streamptr->vlistID;
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  int zaxisID = vlistInqVarZaxis(vlistID, varID);
+  int param = vlistInqVarParam(vlistID, varID);
+  int ilevel = (int) lround(zaxisInqLevel(zaxisID, levelID));
 
   Record *record = streamptr->record;
   record->varID = varID;
@@ -241,12 +241,12 @@ cdi_create_records(stream_t *streamptr, int tsID)
 
   if (destTstep->records) return;
 
-  const int vlistID = streamptr->vlistID;
+  int vlistID = streamptr->vlistID;
 
   if (tsID == 0)
     {
       maxrecords = 0;
-      const int nvars = streamptr->nvars;
+      int nvars = streamptr->nvars;
       for (int varID = 0; varID < nvars; varID++)
         for (int isub = 0; isub < streamptr->vars[varID].subtypeSize; isub++)
           maxrecords += (unsigned) streamptr->vars[varID].recordTable[isub].nlevs;
@@ -324,14 +324,14 @@ cdi_create_records(stream_t *streamptr, int tsID)
 void
 streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *container_name)
 {
-  const int fileID1 = streamptr1->fileID;
-  const int fileID2 = streamptr2->fileID;
+  int fileID1 = streamptr1->fileID;
+  int fileID2 = streamptr2->fileID;
 
-  const int tsID = streamptr1->curTsID;
-  const int vrecID = streamptr1->tsteps[tsID].curRecID;
-  const int recID = streamptr1->tsteps[tsID].recIDs[vrecID];
-  const off_t recpos = streamptr1->tsteps[tsID].records[recID].position;
-  const size_t recsize = streamptr1->tsteps[tsID].records[recID].size;
+  int tsID = streamptr1->curTsID;
+  int vrecID = streamptr1->tsteps[tsID].curRecID;
+  int recID = streamptr1->tsteps[tsID].recIDs[vrecID];
+  off_t recpos = streamptr1->tsteps[tsID].records[recID].position;
+  size_t recsize = streamptr1->tsteps[tsID].records[recID].size;
 
   if (fileSetPos(fileID1, recpos, SEEK_SET) != 0) Error("Cannot seek input file for %s record copy!", container_name);
 

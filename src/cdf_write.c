@@ -1137,7 +1137,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
                 for (size_t i = 0; i < nvals; ++i)
                   {
                     double temp = mdata_sp[i];
-                    if (!DBL_IS_EQUAL(temp, missval))
+                    if (!DBL_IS_EQUAL(temp, (float) missval))
                       {
                         if (haveAddoffset) temp -= addoffset;
                         if (haveScalefactor) temp /= scalefactor;
@@ -1184,7 +1184,8 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
           }
       }
 
-    if (dtype == CDI_DATATYPE_UINT8 || dtype == CDI_DATATYPE_INT8 || dtype == CDI_DATATYPE_INT16 || dtype == CDI_DATATYPE_INT32)
+    if (dtype == CDI_DATATYPE_UINT8 || dtype == CDI_DATATYPE_INT8 || dtype == CDI_DATATYPE_UINT16 || dtype == CDI_DATATYPE_INT16
+        || dtype == CDI_DATATYPE_UINT32 || dtype == CDI_DATATYPE_INT32)
       {
         if (memtype == MEMTYPE_FLOAT)
           {
@@ -1232,18 +1233,33 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
           }
       }
 
-    if (CDF_Debug && memtype != MEMTYPE_FLOAT)
+    if (CDF_Debug)
       {
         double fmin = 1.0e200;
         double fmax = -1.0e200;
-        for (size_t i = 0; i < nvals; ++i)
+        if (memtype == MEMTYPE_FLOAT)
           {
-            if (!DBL_IS_EQUAL(pdata_dp[i], missval))
+            for (size_t i = 0; i < nvals; ++i)
               {
-                if (pdata_dp[i] < fmin) fmin = pdata_dp[i];
-                if (pdata_dp[i] > fmax) fmax = pdata_dp[i];
+                if (!DBL_IS_EQUAL(pdata_sp[i], (float) missval))
+                  {
+                    if (pdata_sp[i] < fmin) fmin = pdata_sp[i];
+                    if (pdata_sp[i] > fmax) fmax = pdata_sp[i];
+                  }
               }
           }
+        else
+          {
+            for (size_t i = 0; i < nvals; ++i)
+              {
+                if (!DBL_IS_EQUAL(pdata_dp[i], missval))
+                  {
+                    if (pdata_dp[i] < fmin) fmin = pdata_dp[i];
+                    if (pdata_dp[i] > fmax) fmax = pdata_dp[i];
+                  }
+              }
+          }
+
         Message("nvals = %zu, nmiss = %d, missval = %g, minval = %g, maxval = %g", nvals, nmiss, missval, fmin, fmax);
       }
   }

@@ -741,12 +741,12 @@ vlistDefVarDatatype(int vlistID, int varID, int datatype)
               switch (datatype)
                 {
                 case CDI_DATATYPE_INT8:   varptr->missval = check_range(missval, -SCHAR_MAX, SCHAR_MAX) ? missval : -SCHAR_MAX; break;
-                case CDI_DATATYPE_UINT8:  varptr->missval = check_range(missval, 0, UCHAR_MAX) ? missval :  UCHAR_MAX; break;
-                case CDI_DATATYPE_INT16:  varptr->missval = check_range(missval, -SHRT_MAX, SHRT_MAX) ? missval : -SHRT_MAX;  break;
-                case CDI_DATATYPE_UINT16: varptr->missval = check_range(missval, 0, USHRT_MAX) ? missval :  USHRT_MAX; break;
-                case CDI_DATATYPE_INT32:  varptr->missval = check_range(missval, -INT_MAX, INT_MAX) ? missval : -INT_MAX;   break;
-                case CDI_DATATYPE_UINT32: varptr->missval = check_range(missval, 0, UINT_MAX) ? missval :  UINT_MAX;  break;
-                case CDI_DATATYPE_FLT32:  varptr->missval = check_range(missval, -FLT_MAX, FLT_MAX) ? missval :  CDI_Default_Missval;  break;
+                case CDI_DATATYPE_UINT8:  varptr->missval = check_range(missval,          0, UCHAR_MAX) ? missval :  UCHAR_MAX; break;
+                case CDI_DATATYPE_INT16:  varptr->missval = check_range(missval,  -SHRT_MAX,  SHRT_MAX) ? missval : -SHRT_MAX;  break;
+                case CDI_DATATYPE_UINT16: varptr->missval = check_range(missval,          0, USHRT_MAX) ? missval :  USHRT_MAX; break;
+                case CDI_DATATYPE_INT32:  varptr->missval = check_range(missval,   -INT_MAX,   INT_MAX) ? missval : -INT_MAX;   break;
+                case CDI_DATATYPE_UINT32: varptr->missval = check_range(missval,          0,  UINT_MAX) ? missval :  UINT_MAX;  break;
+                case CDI_DATATYPE_FLT32:  varptr->missval = check_range(missval,   -FLT_MAX,   FLT_MAX) ? missval :  CDI_Default_Missval;  break;
                 }
               // clang-format on
             }

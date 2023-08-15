@@ -719,14 +719,14 @@ cdf_get_att_int(int ncid, int varid, const char *name, int *ip)
 }
 
 void
-cdf_get_att_int64(int ncid, int varid, const char *name, int64_t *ip)
+cdf_get_att_longlong(int ncid, int varid, const char *name, long long *llp)
 {
 #ifdef HAVE_NETCDF4
-  int status = nc_get_att_longlong(ncid, varid, name, ip);
+  int status = nc_get_att_longlong(ncid, varid, name, llp);
 
   if (status == NC_ERANGE) status = NC_NOERR;
 
-  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  val=%lld", ncid, varid, name, *ip);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  val=%lld", ncid, varid, name, *llp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 #endif

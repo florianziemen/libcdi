@@ -15,6 +15,7 @@
 #include "varscan.h"
 #include "vlist.h"
 #include "subtype.h"
+#include "cdi_uuid.h"
 
 #include "cgribex.h" /* gribGetSize, gribRead, gribGetZip, GRIB1_LTYPE_99 */
 #include "gribapi.h"
@@ -2121,7 +2122,7 @@ gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGener
 {
   UNUSED(numavg);
 
-  int taxistype = (taxisID == -1) ? -1 : taxisInqType(taxisID);
+  int taxistype = (taxisID == -1) ? TAXIS_ABSOLUTE : taxisInqType(taxisID);
 
   if (typeOfGeneratingProcess == 196)
     {
@@ -2433,7 +2434,10 @@ gribapiDefGridUnstructured(grib_handle *gh, int gridID)
       if (warning && errCount > 0)
         {
           warning = false;
-          Warning("GRIB library doesn't support unstructured grids, grid information will be lost!");
+          char uuidStr[uuidNumHexChars + 1] = { 0 };
+          cdiUUID2Str(uuid, uuidStr);
+          Warning("GRIB2 grid parameter missing: numberOfGridUsed=%d numberOfGridInReference=%d uuidOfHGrid=%s", number, position,
+                  uuidStr);
         }
     }
 }
@@ -3424,7 +3428,7 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
   *gribbuffersize = recsize;
   *gribbuffer = Malloc(*gribbuffersize);
 
-  if (!gc->init && editionNumber == 2)
+  if (CDI_Debug && !gc->init && editionNumber == 2)
     {
       long pdis;
       grib_get_long(gh, "discipline", &pdis);
