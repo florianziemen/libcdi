@@ -1201,30 +1201,34 @@ streamDestroy(stream_t *streamptr)
   void (*streamCloseDelegate)(stream_t * streamptr, int recordBufIsToBeDeleted)
       = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
 
-  if (streamptr->filetype != -1) streamCloseDelegate(streamptr, 1);
+  if (streamptr->filetype != CDI_FILETYPE_UNDEF) streamCloseDelegate(streamptr, 1);
 
   if (streamptr->record)
     {
       if (streamptr->record->buffer) Free(streamptr->record->buffer);
       Free(streamptr->record);
+      streamptr->record = NULL;
     }
 
-  streamptr->filetype = 0;
+  streamptr->filetype = CDI_FILETYPE_UNDEF;
   if (streamptr->filename)
     {
       Free(streamptr->filename);
       streamptr->filename = NULL;
     }
 
-  for (int index = 0; index < streamptr->nvars; index++)
+  if (streamptr->vars)
     {
-      sleveltable_t *pslev = streamptr->vars[index].recordTable;
-      unsigned nsub = streamptr->vars[index].subtypeSize >= 0 ? (unsigned) streamptr->vars[index].subtypeSize : 0U;
-      for (size_t isub = 0; isub < nsub; isub++) deallocate_sleveltable_t(pslev + isub);
-      if (pslev) Free(pslev);
+      for (int index = 0; index < streamptr->nvars; index++)
+        {
+          sleveltable_t *pslev = streamptr->vars[index].recordTable;
+          unsigned nsub = streamptr->vars[index].subtypeSize >= 0 ? (unsigned) streamptr->vars[index].subtypeSize : 0U;
+          for (size_t isub = 0; isub < nsub; isub++) deallocate_sleveltable_t(pslev + isub);
+          if (pslev) Free(pslev);
+        }
+      Free(streamptr->vars);
+      streamptr->vars = NULL;
     }
-  Free(streamptr->vars);
-  streamptr->vars = NULL;
 
   if (streamptr->tsteps)
     {
@@ -1241,6 +1245,7 @@ streamDestroy(stream_t *streamptr)
         }
 
       Free(streamptr->tsteps);
+      streamptr->tsteps = NULL;
     }
 
   if (vlistID != -1)
