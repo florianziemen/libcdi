@@ -1250,7 +1250,8 @@ streamDestroy(stream_t *streamptr)
 
   if (vlistID != -1)
     {
-      if (streamptr->filemode != 'w' && vlistInqTaxis(vlistID) != -1) taxisDestroy(vlistInqTaxis(vlistID));
+      int taxisID = (streamptr->filemode != 'w') ? vlistInqTaxis(vlistID) : -1;
+      if (taxisID != -1) taxisDestroy(taxisID);
       void (*mycdiVlistDestroy_)(int, bool) = (void (*)(int, bool)) namespaceSwitchGet(NSSWITCH_VLIST_DESTROY_).func;
       mycdiVlistDestroy_(vlistID, true);
     }
