@@ -36,11 +36,12 @@ cdf_def_var_filter(int ncid, int ncvarID, unsigned int id, size_t nparams, const
 }
 
 void
-cdfDefVarDeflate(int ncid, int ncvarID, int compLevel)
+cdfDefVarDeflate(int ncid, int ncvarID, int shuffle, int compLevel)
 {
 #ifdef HAVE_NETCDF4
-  // Set chunking, shuffle, and deflate.
-  int shuffle = (CDI_Shuffle > 0), deflate = 1;
+  int deflate = 1;
+
+  if (CDI_Shuffle > 0 && shuffle == 0) shuffle = 1;
 
   if (compLevel < 1 || compLevel > 9) compLevel = 1;
 
@@ -487,7 +488,7 @@ cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
       if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
           || streamptr->filetype == CDI_FILETYPE_NCZARR)
         {
-          cdfDefVarDeflate(streamptr->fileID, ncvarID, streamptr->complevel);
+          cdfDefVarDeflate(streamptr->fileID, ncvarID, streamptr->shuffle, streamptr->complevel);
         }
       else
         {

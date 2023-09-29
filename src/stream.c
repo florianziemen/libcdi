@@ -1007,6 +1007,7 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->have_missval = cdiHaveMissval;
   streamptr->comptype = CDI_COMPRESS_NONE;
   streamptr->complevel = 0;
+  streamptr->shuffle = 0;
   // netcdf4/HDF5 filter
   streamptr->filterId = 0;
   streamptr->numParams = 0;
@@ -1605,6 +1606,17 @@ streamInqVlist(int streamID)
 {
   stream_t *s = stream_to_pointer(streamID);
   return s->vlistID;
+}
+
+void
+streamDefShuffle(int streamID, int shuffle)
+{
+  stream_t *s = stream_to_pointer(streamID);
+  if (s->shuffle != shuffle)
+    {
+      s->shuffle = shuffle;
+      reshSetStatus(streamID, &streamOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 void

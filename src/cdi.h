@@ -387,6 +387,8 @@ void    streamDefByteorder(int streamID, int byteorder);
 //      streamInqByteorder: Get the byteorder
 int     streamInqByteorder(int streamID);
 
+void    streamDefShuffle(int streamID, int shuffle);
+
 void    streamDefFilter(int streamID, int filterId, int nparams, const int *params);
 
 //      streamDefCompType: Define compression type
