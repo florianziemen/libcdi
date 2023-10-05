@@ -2023,14 +2023,14 @@ cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
   // Put2Byte(isec1[38]);        // individual ensemble member
   // Put2Byte(isec1[39]);        // number of forecasts in ensemble
 
-  int perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
-  int r1 = cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber);
-  int r2 = cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble);
-  int r3 = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast);
-
-  if (r1 == 0 && r2 == 0 && r3 == 0)
+  if (ISEC1_CenterID == 252)
     {
-      if (ISEC1_CenterID == 252)
+      int perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
+      int r1 = cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber);
+      int r2 = cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble);
+      int r3 = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast);
+
+      if (r1 == 0 && r2 == 0 && r3 == 0)
         {
           ISEC1_LocalFLag = 1;
           isec1[36] = 1;

@@ -518,7 +518,7 @@ gribapiGetKeys(grib_handle *gh, int varID)
   */
 
   /*
-    Get the ensemble Info from the grib-2 Tables and update the intermediate datastructure.
+    Get the ensemble information from the grib-2 Tables and update the intermediate datastructure.
     Further update to the "vlist" is handled in the same way as for GRIB-1 by "cdi_generate_vars"
   */
   long typeOfEnsembleForecast = 0, numberOfForecastsInEnsemble = 0, perturbationNumber = 0;
