@@ -4,6 +4,7 @@ CDI NEWS
 Version 2.3.0 (23 October 2023):
 
    New features:
+     * Add GRIB2 HEALPix support (available with eccodes-2.32.0)
      * Add support for NetCDF attribute type NC_INT64
      * Add interface function streamInqNumSteps() to inquire number of time steps
      * gribapi decode: add support for single precision float interface (available since ecCodes-2.30.0)

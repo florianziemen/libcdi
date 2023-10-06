@@ -679,6 +679,24 @@ gribapiDefProjSTERE(grib_handle *gh, int gridID)
 }
 
 static void
+gribapiDefProjHEALPIX(grib_handle *gh, int gridID)
+{
+  struct CDI_GridProjParams gpp;
+  gridProjParamsInit(&gpp);
+
+  decode_shapeOfTheEarth(gh, &gpp);
+
+  long lval = -1;
+  grib_get_long(gh, "Nside", &lval);
+  gpp.nside = (int) lval;
+  lval = -1;
+  grib_get_long(gh, "ordering", &lval);
+  gpp.order = (int) lval;
+
+  gridDefParamsHEALPIX(gridID, gpp);
+}
+
+static void
 gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize, off_t position, int datatype, int comptype,
                  const char *varname, int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf,
                  int level_unit, VarScanKeys *scanKeys, const var_tile_t *tiles, bool lread_additional_keys, void *fdbItem)
@@ -734,9 +752,10 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
       grid_free(grid);
       Free(grid);
     }
-  else if (grid->projtype == CDI_PROJ_RLL)   gribapiDefProjRLL(gh, gridID);
-  else if (grid->projtype == CDI_PROJ_LCC)   gribapiDefProjLCC(gh, gridID);
-  else if (grid->projtype == CDI_PROJ_STERE) gribapiDefProjSTERE(gh, gridID);
+  else if (grid->projtype == CDI_PROJ_RLL)     gribapiDefProjRLL(gh, gridID);
+  else if (grid->projtype == CDI_PROJ_LCC)     gribapiDefProjLCC(gh, gridID);
+  else if (grid->projtype == CDI_PROJ_STERE)   gribapiDefProjSTERE(gh, gridID);
+  else if (grid->projtype == CDI_PROJ_HEALPIX) gribapiDefProjHEALPIX(gh, gridID);
   // clang-format on
 
   int zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
@@ -2380,6 +2399,33 @@ gribapiDefGridSTERE(grib_handle *gh, int gridID, int uvRelativeToGrid)
 }
 
 static void
+gribapiDefGridHEALPIX(grib_handle *gh, int gridID, int uvRelativeToGrid)
+{
+  struct CDI_GridProjParams gpp;
+  gridInqParamsHEALPIX(gridID, &gpp);
+  gridVerifyProjParamsHEALPIX(&gpp);
+  // if (gpp.xval_0 < 0.0) gpp.xval_0 += 360.0;
+
+  static const char mesg[] = "healpix";
+  size_t len = sizeof(mesg) - 1;
+  GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
+
+  GRIB_CHECK(my_grib_set_long(gh, "Nside", gpp.nside), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "ordering", gpp.order), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", 45.0), 0);
+  // GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", gpp.xval_0), 0);
+  /*
+  long shapeOfTheEarth = encode_shapeOfTheEarth(&gpp);
+  if (shapeOfTheEarth) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
+  if (shapeOfTheEarth == 1) GRIB_CHECK(my_grib_set_long(gh, "radiusOfTheEarth", gpp.a), 0);
+
+  long earthIsOblate = (shapeOfTheEarth == 2 || shapeOfTheEarth == 3 || shapeOfTheEarth == 4);
+  if (earthIsOblate) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
+  */
+  if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+}
+
+static void
 gribapiDefGridGME(grib_handle *gh, int gridID, long gridsize)
 {
   GRIB_CHECK(my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_GME), 0);
@@ -2540,6 +2586,12 @@ gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int
     case CDI_PROJ_STERE:
       {
         gribapiDefGridSTERE(gh, gridID, uvRelativeToGrid);
+        break;
+      }
+    case CDI_PROJ_HEALPIX:
+      {
+        if (editionNumber <= 1) Error("HEALPix grid can't be stored in GRIB edition %d!", editionNumber);
+        gribapiDefGridHEALPIX(gh, gridID, uvRelativeToGrid);
         break;
       }
     case GRID_SPECTRAL:

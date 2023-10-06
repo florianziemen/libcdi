@@ -1850,6 +1850,11 @@ cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID, in
         ISEC1_Sec2Or3Flag = 0;
         break;
       }
+    case CDI_PROJ_HEALPIX:
+      {
+        Error("CGRIBEX library doesn't support HEALPix grids!");
+        break;
+      }
     default:
       {
         static bool lwarn = true;

@@ -1407,6 +1407,8 @@ struct CDI_GridProjParams
   double y_0;    // False northing (optional)
   double x_SP;   // Longitude of southern pole
   double y_SP;   // Latitude of southern pole
+  int nside;     // HEALPix number of points along a side (number of data points should be = 12 * nside * nside)
+  int order;     // HEALPix ordering convention (0:ring; 1:nested)
 };
 
 void gridProjParamsInit(struct CDI_GridProjParams *gridProjParams);
@@ -1418,6 +1420,10 @@ int  gridInqParamsLCC(int gridID, struct CDI_GridProjParams *gridProjParams);
 // Polar stereographic grid
 void gridDefParamsSTERE(int gridID, struct CDI_GridProjParams gridProjParams);
 int  gridInqParamsSTERE(int gridID, struct CDI_GridProjParams *gridProjParams);
+
+// HEALPix grid
+void gridDefParamsHEALPIX(int gridID, struct CDI_GridProjParams gridProjParams);
+int  gridInqParamsHEALPIX(int gridID, struct CDI_GridProjParams *gridProjParams);
 
 #define HAVE_CDI_PROJ_FUNCS 1
 extern int (*proj_lonlat_to_lcc_func)(struct CDI_GridProjParams gpp, size_t, double*, double*);
