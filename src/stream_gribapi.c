@@ -423,21 +423,21 @@ param_to_name(int param, char *name)
 }
 
 static int
-gribapiGetEnsembleInfo(grib_handle *gh, long *typeOfEnsembleForecast, long *numberOfForecastsInEnsemble, long *perturbationNumber)
+gribapiGetEnsembleInfo(grib_handle *gh, long *numberOfForecastsInEnsemble, long *perturbationNumber, long *typeOfEnsembleForecast)
 {
   int status = 0;
-  if (grib_get_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast) == 0)
+  if (grib_get_long(gh, "numberOfForecastsInEnsemble", numberOfForecastsInEnsemble) == 0)
     {
-      GRIB_CHECK(grib_get_long(gh, "numberOfForecastsInEnsemble", numberOfForecastsInEnsemble), 0);
+      if (*numberOfForecastsInEnsemble > 0) status = 1;
       GRIB_CHECK(grib_get_long(gh, "perturbationNumber", perturbationNumber), 0);
-      if (*perturbationNumber > 0) status = 1;
+      grib_get_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast);
     }
 
   if (status == 0)
     {
-      *typeOfEnsembleForecast = 0;
-      *perturbationNumber = 0;
-      *numberOfForecastsInEnsemble = 0;
+      *numberOfForecastsInEnsemble = -1;
+      *perturbationNumber = -1;
+      *typeOfEnsembleForecast = -1;
     }
 
   return status;
@@ -449,8 +449,8 @@ gribapiGetScanKeys(grib_handle *gh)
   VarScanKeys scanKeys;
   varScanKeysInit(&scanKeys);
 
-  long typeOfEnsembleForecast = 0, numberOfForecastsInEnsemble = 0, perturbationNumber = 0;
-  gribapiGetEnsembleInfo(gh, &typeOfEnsembleForecast, &numberOfForecastsInEnsemble, &perturbationNumber);
+  long numberOfForecastsInEnsemble = -1, perturbationNumber = -1, typeOfEnsembleForecast = -1;
+  gribapiGetEnsembleInfo(gh, &numberOfForecastsInEnsemble, &perturbationNumber, &typeOfEnsembleForecast);
   scanKeys.perturbationNumber = (short) perturbationNumber;
 
   long typeOfGeneratingProcess = 0;
@@ -521,13 +521,13 @@ gribapiGetKeys(grib_handle *gh, int varID)
     Get the ensemble information from the grib-2 Tables and update the intermediate datastructure.
     Further update to the "vlist" is handled in the same way as for GRIB-1 by "cdi_generate_vars"
   */
-  long typeOfEnsembleForecast = 0, numberOfForecastsInEnsemble = 0, perturbationNumber = 0;
-  gribapiGetEnsembleInfo(gh, &typeOfEnsembleForecast, &numberOfForecastsInEnsemble, &perturbationNumber);
-  if (perturbationNumber > 0)
+  long numberOfForecastsInEnsemble = -1, perturbationNumber = -1, typeOfEnsembleForecast = -1;
+  gribapiGetEnsembleInfo(gh, &numberOfForecastsInEnsemble, &perturbationNumber, &typeOfEnsembleForecast);
+  if (numberOfForecastsInEnsemble > 0)
     {
-      varDefKeyInt(varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, (int) typeOfEnsembleForecast);
       varDefKeyInt(varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, (int) numberOfForecastsInEnsemble);
       varDefKeyInt(varID, CDI_KEY_PERTURBATIONNUMBER, (int) perturbationNumber);
+      if (typeOfEnsembleForecast != -1) varDefKeyInt(varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, (int) typeOfEnsembleForecast);
     }
 
   long section2Length = 0;
@@ -3288,12 +3288,12 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
 
   {
     int status, perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
-    status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast);
-    if (status == 0) grib_set_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast);
     status = cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble);
     if (status == 0) grib_set_long(gh, "numberOfForecastsInEnsemble", numberOfForecastsInEnsemble);
     status = cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber);
     if (status == 0) grib_set_long(gh, "perturbationNumber", perturbationNumber);
+    status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast);
+    if (status == 0) grib_set_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast);
   }
 
   if (!gc->init) gribapiDefInstitut(gh, vlistID, varID);
