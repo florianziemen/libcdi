@@ -1952,6 +1952,8 @@ grib2ProDefTempHasStatisticalDef(int proDefTempNum)
     case 46:
     case 47:
     case 61:
+    case 67:
+    case 68:
     case 91:
     case 1001:
     case 1101:
