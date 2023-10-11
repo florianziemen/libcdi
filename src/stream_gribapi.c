@@ -40,13 +40,13 @@ typedef struct
 } compvar2_t;
 
 static int
-gribapiGetZaxisType(long editionNumber, int grib_ltype)
+gribapi_get_zaxis_type(long editionNumber, int grib_ltype)
 {
   return (editionNumber <= 1) ? grib1ltypeToZaxisType(grib_ltype) : grib2ltypeToZaxisType(grib_ltype);
 }
 
 static int
-getTimeunits(long unitsOfTime)
+get_timeunits(long unitsOfTime)
 {
   switch (unitsOfTime)
     {
@@ -63,19 +63,19 @@ getTimeunits(long unitsOfTime)
 }
 
 static double
-timeunit_factor(int tu1, int tu2)
+timeunits_factor(int timeUnits1, int timeUnits2)
 {
-  if (tu2 == TUNIT_HOUR)
+  if (timeUnits2 == TUNIT_HOUR)
     {
-      switch (tu1)
+      switch (timeUnits1)
         {
         case TUNIT_SECOND: return 3600;
         case TUNIT_MINUTE: return 60;
         case TUNIT_HOUR: return 1;
-        case TUNIT_3HOURS: return 1. / 3;
-        case TUNIT_6HOURS: return 1. / 6;
-        case TUNIT_12HOURS: return 1. / 12;
-        case TUNIT_DAY: return 1. / 24;
+        case TUNIT_3HOURS: return 1.0 / 3;
+        case TUNIT_6HOURS: return 1.0 / 6;
+        case TUNIT_12HOURS: return 1.0 / 12;
+        case TUNIT_DAY: return 1.0 / 24;
         }
     }
 
@@ -83,14 +83,14 @@ timeunit_factor(int tu1, int tu2)
 }
 
 static int
-gribapiGetTimeUnits(grib_handle *gh)
+gribapi_get_timeunits(grib_handle *gh)
 {
   long unitsOfTime = -1;
   grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime);
 
   GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
 
-  return getTimeunits(unitsOfTime);
+  return get_timeunits(unitsOfTime);
 }
 
 static void
@@ -98,8 +98,8 @@ gribapiGetSteps(grib_handle *gh, int timeunits, int *startStep, int *endStep)
 {
   long unitsOfTime;
   int status = grib_get_long(gh, "stepUnits", &unitsOfTime);
-  int timeunits2 = (status == 0) ? getTimeunits(unitsOfTime) : timeunits;
-  // timeunits2 = gribapiGetTimeUnits(gh);
+  int timeunits2 = (status == 0) ? get_timeunits(unitsOfTime) : timeunits;
+  // timeunits2 = gribapi_get_timeunits(gh);
 
   long lpar;
   status = grib_get_long(gh, "forecastTime", &lpar);
@@ -108,13 +108,13 @@ gribapiGetSteps(grib_handle *gh, int timeunits, int *startStep, int *endStep)
   else
     {
       status = grib_get_long(gh, "startStep", &lpar);
-      if (status == 0) *startStep = (int) (((double) lpar * timeunit_factor(timeunits, timeunits2)) + 0.5);
+      if (status == 0) *startStep = (int) (((double) lpar * timeunits_factor(timeunits, timeunits2)) + 0.5);
     }
 
   *endStep = *startStep;
   status = grib_get_long(gh, "endStep", &lpar);
-  if (status == 0) *endStep = (int) (((double) lpar * timeunit_factor(timeunits, timeunits2)) + 0.5);
-  // printf("%d %d %d %d %d %g\n", *startStep, *endStep, lpar, timeunits, timeunits2, timeunit_factor(timeunits, timeunits2));
+  if (status == 0) *endStep = (int) (((double) lpar * timeunits_factor(timeunits, timeunits2)) + 0.5);
+  // printf("%d %d %d %d %d %g\n", *startStep, *endStep, lpar, timeunits, timeunits2, timeunits_factor(timeunits, timeunits2));
 }
 
 static CdiDateTime
@@ -152,7 +152,7 @@ gribapiSetDataDateTime(grib_handle *gh, CdiDateTime dataDateTime)
 }
 
 static int
-gribapiGetTimeUnitFactor(int timeUnits)
+gribapi_get_timeunits_factor(int timeUnits)
 {
   static bool lprint = true;
   switch (timeUnits)
@@ -197,7 +197,7 @@ gribapiGetValidityDateTime(grib_handle *gh, CdiDateTime *sDateTime)
     {
       CdiDateTime rDateTime = gribapiGetDataDateTime(gh);
 
-      int timeUnits = gribapiGetTimeUnits(gh);
+      int timeUnits = gribapi_get_timeunits(gh);
       int startStep = 0, endStep = 0;
       gribapiGetSteps(gh, timeUnits, &startStep, &endStep);
 
@@ -206,7 +206,7 @@ gribapiGetValidityDateTime(grib_handle *gh, CdiDateTime *sDateTime)
           extern int CGRIBEX_grib_calendar;
           JulianDate julianDate = julianDate_encode(CGRIBEX_grib_calendar, rDateTime);
 
-          int64_t timeUnitFactor = gribapiGetTimeUnitFactor(timeUnits);
+          int64_t timeUnitFactor = gribapi_get_timeunits_factor(timeUnits);
 
           // if (startStep > 0)
           {
@@ -224,7 +224,7 @@ gribapiGetValidityDateTime(grib_handle *gh, CdiDateTime *sDateTime)
 }
 
 static void
-grib1GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, int *level2)
+grib1_get_level(grib_handle *gh, int *leveltype, int *lbounds, int *level1, int *level2)
 {
   *leveltype = 0;
   *lbounds = 0;
@@ -300,7 +300,7 @@ grib2ScaleFactor(long factor)
 }
 
 static int
-calcLevel(int level_sf, long factor, long level)
+calc_level(int level_sf, long factor, long level)
 {
   double result = 0;
   if (level != GRIB_MISSING_LONG) result = (double) level * grib2ScaleFactor(factor);
@@ -309,8 +309,8 @@ calcLevel(int level_sf, long factor, long level)
 }
 
 static void
-grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lbounds, int *level1, int *level2, int *level_sf,
-              int *level_unit)
+grib2_get_level(grib_handle *gh, int *leveltype1, int *leveltype2, int *lbounds, int *level1, int *level2, int *level_sf,
+                int *level_unit)
 {
   *leveltype1 = 0;
   *leveltype2 = -1;
@@ -353,31 +353,31 @@ grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lbounds, i
       long factor, llevel;
       GRIB_CHECK(grib_get_long(gh, "scaleFactorOfFirstFixedSurface", &factor), 0);  // 1 byte
       GRIB_CHECK(grib_get_long(gh, "scaledValueOfFirstFixedSurface", &llevel), 0);  // 4 byte
-      *level1 = calcLevel(*level_sf, factor, llevel);
+      *level1 = calc_level(*level_sf, factor, llevel);
 
       if (*lbounds)
         {
           GRIB_CHECK(grib_get_long(gh, "scaleFactorOfSecondFixedSurface", &factor), 0);  // 1 byte
           GRIB_CHECK(grib_get_long(gh, "scaledValueOfSecondFixedSurface", &llevel), 0);  // 4 byte
-          *level2 = calcLevel(*level_sf, factor, llevel);
+          *level2 = calc_level(*level_sf, factor, llevel);
         }
     }
 }
 
 static void
-gribGetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lbounds, int *level1, int *level2, int *level_sf,
-             int *level_unit, var_tile_t *tiles)
+grib_get_level(grib_handle *gh, int *leveltype1, int *leveltype2, int *lbounds, int *level1, int *level2, int *level_sf,
+               int *level_unit, var_tile_t *tiles)
 {
   if (gribEditionNumber(gh) <= 1)
     {
-      grib1GetLevel(gh, leveltype1, lbounds, level1, level2);
+      grib1_get_level(gh, leveltype1, lbounds, level1, level2);
       *leveltype2 = -1;
       *level_sf = 0;
       *level_unit = 0;
     }
   else
     {
-      grib2GetLevel(gh, leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit);
+      grib2_get_level(gh, leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit);
 
       // read in tiles attributes (if there are any)
       tiles->tileindex = (int) gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILEINDEX], 0);
@@ -391,7 +391,7 @@ gribGetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lbounds, in
 }
 
 static void
-gribapiGetString(grib_handle *gh, const char *key, char *string, size_t length)
+gribapi_get_string(grib_handle *gh, const char *key, char *string, size_t length)
 {
   string[0] = 0;
 
@@ -466,10 +466,10 @@ gribapiGetNameKeys(grib_handle *gh, int varID)
   char string[CDI_MAX_NAME];
 
   size_t vlen = CDI_MAX_NAME;
-  gribapiGetString(gh, "name", string, vlen);  // longname
+  gribapi_get_string(gh, "name", string, vlen);  // longname
   if (string[0]) varDefKeyString(varID, CDI_KEY_LONGNAME, string);
 
-  gribapiGetString(gh, "units", string, vlen);
+  gribapi_get_string(gh, "units", string, vlen);
   if (string[0]) varDefKeyString(varID, CDI_KEY_UNITS, string);
 
   string[0] = 0;
@@ -722,6 +722,8 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   record->tiles = tiles ? *tiles : dummy_tiles;
 #ifdef HAVE_LIBFDB5
   record->fdbItem = fdbItem;
+#else
+  (void) fdbItem;
 #endif
 
   strncpy(record->varname, varname, sizeof(record->varname) - 1);
@@ -758,7 +760,7 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   else if (grid->projtype == CDI_PROJ_HEALPIX) gribapiDefProjHEALPIX(gh, gridID);
   // clang-format on
 
-  int zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
+  int zaxistype = gribapi_get_zaxis_type(gribEditionNumber(gh), leveltype1);
 
   switch (zaxistype)
     {
@@ -1022,6 +1024,7 @@ checkTime(stream_t *streamptr, const compvar2_t *compVar, CdiDateTime verificati
 int
 fdbScanTimesteps(stream_t *streamptr)
 {
+  (void) streamptr;
 #ifdef HAVE_LIBFDB5
   void *gribbuffer = NULL;
   size_t buffersize = 0;
@@ -1085,10 +1088,10 @@ fdbScanTimesteps(stream_t *streamptr)
       int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
       var_tile_t tiles = dummy_tiles;
       int level1 = 0, level2 = 0;
-      gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
+      grib_get_level(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
       char varname[256];
-      gribapiGetString(gh, "shortName", varname, sizeof(varname));
+      gribapi_get_string(gh, "shortName", varname, sizeof(varname));
 
       int param = gribapiGetParam(gh);
 
@@ -1102,7 +1105,7 @@ fdbScanTimesteps(stream_t *streamptr)
           vDateTime0 = vDateTime;
           taxis->rDateTime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
-          if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
+          if (fcast) taxis->unit = gribapi_get_timeunits(gh);
           taxis->fDateTime = taxis->rDateTime;
           taxis->sDateTime = sDateTime;
           taxis->vDateTime = vDateTime;
@@ -1246,10 +1249,10 @@ gribapiScanTimestep1(stream_t *streamptr)
       int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
       var_tile_t tiles = dummy_tiles;
       int level1 = 0, level2 = 0;
-      gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
+      grib_get_level(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
       char varname[256];
-      gribapiGetString(gh, "shortName", varname, sizeof(varname));
+      gribapi_get_string(gh, "shortName", varname, sizeof(varname));
 
       int param = gribapiGetParam(gh);
 
@@ -1265,7 +1268,7 @@ gribapiScanTimestep1(stream_t *streamptr)
           vDateTime0 = vDateTime;
           taxis->rDateTime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
-          if (fcast) taxis->unit = gribapiGetTimeUnits(gh);
+          if (fcast) taxis->unit = gribapi_get_timeunits(gh);
           taxis->fDateTime = taxis->rDateTime;
           taxis->sDateTime = sDateTime;
           taxis->vDateTime = vDateTime;
@@ -1402,10 +1405,10 @@ gribapiScanTimestep2(stream_t *streamptr)
 
       int level1 = 0, level2 = 0, leveltype1, leveltype2, lbounds, level_sf, level_unit;
       var_tile_t tiles = dummy_tiles;
-      gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
+      grib_get_level(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
       char varname[256];
-      gribapiGetString(gh, "shortName", varname, sizeof(varname));
+      gribapi_get_string(gh, "shortName", varname, sizeof(varname));
 
       int param = gribapiGetParam(gh);
 
@@ -1421,7 +1424,7 @@ gribapiScanTimestep2(stream_t *streamptr)
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             {
               taxis->type = TAXIS_RELATIVE;
-              taxis->unit = gribapiGetTimeUnits(gh);
+              taxis->unit = gribapi_get_timeunits(gh);
               taxis->rDateTime = gribapiGetDataDateTime(gh);
             }
           else
@@ -1581,14 +1584,14 @@ gribapiScanTimestep(stream_t *streamptr)
 
           int level1 = 0, level2 = 0, leveltype1, leveltype2 = -1, lbounds, level_sf, level_unit;
           var_tile_t tiles = dummy_tiles;
-          gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
+          grib_get_level(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
           CdiDateTime sDateTime;
           CdiDateTime vDateTime = gribapiGetValidityDateTime(gh, &sDateTime);
 
           if (rindex == nrecs) break;
 
-          gribapiGetString(gh, "shortName", varname, sizeof(varname));
+          gribapi_get_string(gh, "shortName", varname, sizeof(varname));
 
           int param = gribapiGetParam(gh);
 
@@ -1601,7 +1604,7 @@ gribapiScanTimestep(stream_t *streamptr)
               if (taxisInqType(taxisID) == TAXIS_RELATIVE)
                 {
                   taxis->type = TAXIS_RELATIVE;
-                  taxis->unit = gribapiGetTimeUnits(gh);
+                  taxis->unit = gribapi_get_timeunits(gh);
                   taxis->rDateTime = gribapiGetDataDateTime(gh);
                 }
               else
@@ -3224,6 +3227,7 @@ static void
 gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const void *data)
 {
 #ifndef HIRLAM_EXTENSIONS
+  (void) gh;
   (void) data;
   (void) datasize;
 #endif
@@ -3465,7 +3469,9 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
 #endif
     }
   else
-    GRIB_CHECK(grib_set_double_array(gh, "values", (const double *) data, datasize), 0);
+    {
+      GRIB_CHECK(grib_set_double_array(gh, "values", (const double *) data, datasize), 0);
+    }
 
   if (nmiss)
     {
@@ -3492,7 +3498,7 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
           cdi_name[0] = 0;
           vlistInqVarName(vlistID, varID, cdi_name);
           char grb_name[256];
-          gribapiGetString(gh, "shortName", grb_name, sizeof(grb_name));
+          gribapi_get_string(gh, "shortName", grb_name, sizeof(grb_name));
           str_to_lower(cdi_name);
           str_to_lower(grb_name);
           bool checkName = (!grb_name[0] && strncmp(cdi_name, "param", 5) == 0) ? false : true;
