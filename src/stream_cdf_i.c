@@ -33,6 +33,8 @@ enum AxisType
   T_AXIS = 5,
 };
 
+static int axisTypeChar[] = { '?', 'X', 'Y', 'Z', 'E', 'T' };
+
 typedef struct
 {
   int dimid;
@@ -689,8 +691,8 @@ cdf_set_dim(ncvar_t *ncvar, int dimid, int dimtype)
 {
   if (ncvar->dimtype[dimid] != CDI_UNDEFID && ncvar->dimtype[dimid] != dimtype)
     {
-      Warning("Inconsistent dimension definition for %s! dimid = %d;  type = %d;  newtype = %d", ncvar->name, dimid,
-              ncvar->dimtype[dimid], dimtype);
+      Warning("Inconsistent dimension definition for %s! dimid=%d  type=%c  newtype=%c", ncvar->name, dimid,
+              axisTypeChar[ncvar->dimtype[dimid]], axisTypeChar[dimtype]);
     }
 
   ncvar->dimtype[dimid] = dimtype;
@@ -3650,9 +3652,10 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       */
       if (ncvar->numberOfForecastsInEnsemble != -1)
         {
-          cdiDefKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, ncvar->typeOfEnsembleForecast);
           cdiDefKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, ncvar->numberOfForecastsInEnsemble);
           cdiDefKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, ncvar->perturbationNumber);
+          if (ncvar->numberOfForecastsInEnsemble != -1)
+            cdiDefKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, ncvar->typeOfEnsembleForecast);
         }
 
       if (ncvar->extra[0] != 0) cdiDefKeyString(vlistID, varID, CDI_KEY_CHUNKS, ncvar->extra);

@@ -66,10 +66,10 @@ case "${HOSTNAME}" in
         CDILIBS="--disable-iso-c-interface \
                  --enable-maintainer-mode \
                  --with-szlib=/opt/local/lib/libaec \
-                 --with-eccodes=$HOME/local/eccodes-2.30.0 \
+                 --with-eccodes=$HOME/local/eccodes-2.32.0 \
                  --with-netcdf=$HOME/local/netcdf-c-4.9.1"
         PREFIX="--prefix=$HOME/local/cdi"
-        LD_ADD="-Wl,-rpath,$HOME/local/eccodes-2.30.0/lib"
+        LD_ADD="-Wl,-rpath,$HOME/local/eccodes-2.32.0/lib"
         if  test "$COMP" = clang ; then
           ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
 	             CC=clang CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3"

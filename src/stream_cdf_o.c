@@ -544,7 +544,8 @@ cdfGridCompress(int fileID, int ncvarid, size_t gridsize, int filetype, int comp
       && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR))
     {
       cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
-      cdfDefVarDeflate(fileID, ncvarid, 1);
+      int shuffle = 1, compLevel = 1;
+      cdfDefVarDeflate(fileID, ncvarid, shuffle, compLevel);
     }
 #endif
 }

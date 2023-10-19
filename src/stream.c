@@ -1007,6 +1007,7 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->have_missval = cdiHaveMissval;
   streamptr->comptype = CDI_COMPRESS_NONE;
   streamptr->complevel = 0;
+  streamptr->shuffle = 0;
   // netcdf4/HDF5 filter
   streamptr->filterId = 0;
   streamptr->numParams = 0;
@@ -1201,30 +1202,34 @@ streamDestroy(stream_t *streamptr)
   void (*streamCloseDelegate)(stream_t * streamptr, int recordBufIsToBeDeleted)
       = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
 
-  if (streamptr->filetype != -1) streamCloseDelegate(streamptr, 1);
+  if (streamptr->filetype != CDI_FILETYPE_UNDEF) streamCloseDelegate(streamptr, 1);
 
   if (streamptr->record)
     {
       if (streamptr->record->buffer) Free(streamptr->record->buffer);
       Free(streamptr->record);
+      streamptr->record = NULL;
     }
 
-  streamptr->filetype = 0;
+  streamptr->filetype = CDI_FILETYPE_UNDEF;
   if (streamptr->filename)
     {
       Free(streamptr->filename);
       streamptr->filename = NULL;
     }
 
-  for (int index = 0; index < streamptr->nvars; index++)
+  if (streamptr->vars)
     {
-      sleveltable_t *pslev = streamptr->vars[index].recordTable;
-      unsigned nsub = streamptr->vars[index].subtypeSize >= 0 ? (unsigned) streamptr->vars[index].subtypeSize : 0U;
-      for (size_t isub = 0; isub < nsub; isub++) deallocate_sleveltable_t(pslev + isub);
-      if (pslev) Free(pslev);
+      for (int index = 0; index < streamptr->nvars; index++)
+        {
+          sleveltable_t *pslev = streamptr->vars[index].recordTable;
+          unsigned nsub = streamptr->vars[index].subtypeSize >= 0 ? (unsigned) streamptr->vars[index].subtypeSize : 0U;
+          for (size_t isub = 0; isub < nsub; isub++) deallocate_sleveltable_t(pslev + isub);
+          if (pslev) Free(pslev);
+        }
+      Free(streamptr->vars);
+      streamptr->vars = NULL;
     }
-  Free(streamptr->vars);
-  streamptr->vars = NULL;
 
   if (streamptr->tsteps)
     {
@@ -1241,11 +1246,13 @@ streamDestroy(stream_t *streamptr)
         }
 
       Free(streamptr->tsteps);
+      streamptr->tsteps = NULL;
     }
 
   if (vlistID != -1)
     {
-      if (streamptr->filemode != 'w' && vlistInqTaxis(vlistID) != -1) taxisDestroy(vlistInqTaxis(vlistID));
+      int taxisID = (streamptr->filemode != 'w') ? vlistInqTaxis(vlistID) : -1;
+      if (taxisID != -1) taxisDestroy(taxisID);
       void (*mycdiVlistDestroy_)(int, bool) = (void (*)(int, bool)) namespaceSwitchGet(NSSWITCH_VLIST_DESTROY_).func;
       mycdiVlistDestroy_(vlistID, true);
     }
@@ -1599,6 +1606,17 @@ streamInqVlist(int streamID)
 {
   stream_t *s = stream_to_pointer(streamID);
   return s->vlistID;
+}
+
+void
+streamDefShuffle(int streamID, int shuffle)
+{
+  stream_t *s = stream_to_pointer(streamID);
+  if (s->shuffle != shuffle)
+    {
+      s->shuffle = shuffle;
+      reshSetStatus(streamID, &streamOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 void

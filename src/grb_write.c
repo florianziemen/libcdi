@@ -24,9 +24,9 @@
 #include "namespace.h"
 
 static size_t
-grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime,
-           int tsteptype, int numavg, size_t datasize, const void *data, size_t nmiss, void **gribbuffer, int comptype,
-           void *gribContainers)
+grb_encode(int filetype, int memType, int datatype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
+           CdiDateTime vDateTime, int tsteptype, int numavg, size_t datasize, const void *data, size_t nmiss, void **gribbuffer,
+           int comptype, void *gribContainers)
 {
   size_t nbytes = 0;
 
@@ -48,10 +48,17 @@ grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int g
 #else
       void *gribContainer = (void *) &((gribContainer_t *) gribContainers)[varID];
 #endif
+      // bool useFloatInterface = (have_gribapi_float_interface() && datatype != CDI_DATATYPE_FLT32 && datatype !=
+      // CDI_DATATYPE_FLT64);
+      bool useFloatInterface = false;
+      int memTypeX = useFloatInterface ? memType : MEMTYPE_DOUBLE;
       const void *datap = data;
-      int memTypeX = /*have_gribapi_float_interface() ? memType :*/ MEMTYPE_DOUBLE;
-      if (/*!have_gribapi_float_interface() &&*/ memType == MEMTYPE_FLOAT)
+
+      // if (useFloatInterface) printf("gribapi write: useFloatInterface\n");
+
+      if (!useFloatInterface && memType == MEMTYPE_FLOAT)
         {
+          // printf("gribapi write: convert float to double\n");
           const float *dataf = (const float *) data;
           double *datad = (double *) Malloc(datasize * sizeof(double));
           for (size_t i = 0; i < datasize; ++i) datad[i] = (double) dataf[i];
@@ -62,7 +69,7 @@ grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int g
       nbytes = gribapiEncode(memTypeX, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, (long) datasize,
                              datap, nmiss, gribbuffer, &gribbuffersize, comptype, gribContainer);
 
-      if (/*!have_gribapi_float_interface() &&*/ memType == MEMTYPE_FLOAT) Free((void *) datap);
+      if (!useFloatInterface && memType == MEMTYPE_FLOAT) Free((void *) datap);
     }
 #else
   {
@@ -379,6 +386,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
   CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
   int numavg = (tsteptype == TSTEP_AVG) ? streamptr->tsteps[tsID].taxis.numavg : 0;
   int comptype = streamptr->comptype;
+  int datatype = vlistInqVarDatatype(vlistID, varID);
 
   if (CDI_Debug) Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
@@ -394,8 +402,8 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     }
 
   void *gribbuffer = NULL;
-  size_t nbytes = grb_encode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize,
-                             data, nmiss, &gribbuffer, comptype, streamptr->gribContainers);
+  size_t nbytes = grb_encode(filetype, memtype, datatype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg,
+                             datasize, data, nmiss, &gribbuffer, comptype, streamptr->gribContainers);
 
   if (filetype == CDI_FILETYPE_GRB && (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC))
     nbytes = grbSzip(filetype, gribbuffer, nbytes);

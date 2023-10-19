@@ -499,6 +499,10 @@ grbGetGridtype(int *gridID, size_t gridsize, bool *gridIsRotated, bool *gridIsCu
         {
           gridtype = CDI_PROJ_STERE;
         }
+      else if (projtype == CDI_PROJ_HEALPIX)
+        {
+          gridtype = CDI_PROJ_HEALPIX;
+        }
     }
 
   return gridtype;
