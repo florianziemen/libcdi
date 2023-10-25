@@ -51,17 +51,17 @@ tableDefEntry(int tableID, int id, int ltype, const char *name, const char *long
 
   if (name && name[0])
     {
-      parTable[tableID].pars[item].name = strdupx(name);
+      parTable[tableID].pars[item].name = strdup(name);
       parTable[tableID].pars[item].dupflags |= TABLE_DUP_NAME;
     }
   if (longname && longname[0])
     {
-      parTable[tableID].pars[item].longname = strdupx(longname);
+      parTable[tableID].pars[item].longname = strdup(longname);
       parTable[tableID].pars[item].dupflags |= TABLE_DUP_LONGNAME;
     }
   if (units && units[0])
     {
-      parTable[tableID].pars[item].units = strdupx(units);
+      parTable[tableID].pars[item].units = strdup(units);
       parTable[tableID].pars[item].dupflags |= TABLE_DUP_UNITS;
     }
 }
@@ -97,7 +97,7 @@ static void
 tableGetPath(void)
 {
   char *path = getenv("TABLEPATH");
-  if (path) tablePath = strdupx(path);
+  if (path) tablePath = strdup(path);
   // printf("tablePath = %s\n", tablePath);
 }
 
@@ -500,7 +500,7 @@ tableDef(int modelID, int tablenum, const char *tablename)
 
       parTable[tableID].modelID = modelID;
       parTable[tableID].number = tablenum;
-      if (tablename) parTable[tableID].name = strdupx(tablename);
+      if (tablename) parTable[tableID].name = strdup(tablename);
 
       parTable[tableID].pars = (param_type *) Malloc(MAX_PARS * sizeof(param_type));
     }

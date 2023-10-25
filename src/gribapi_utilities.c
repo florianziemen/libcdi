@@ -836,7 +836,7 @@ gribapiGetGridUnstructured(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
         if ( grib_get_string(gh, "gridDescriptionFile", reference_link, &len) == 0 )
         {
         if ( strncmp(reference_link, "file://", 7) == 0 )
-        grid->reference = strdupx(reference_link);
+        grid->reference = strdup(reference_link);
         }
       */
       size_t len = (size_t) CDI_UUID_SIZE;

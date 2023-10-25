@@ -1,3 +1,11 @@
+// strdup() from string.h
+#ifdef __STDC_ALLOC_LIB__
+#define __STDC_WANT_LIB_EXT2__ 1
+#else
+#undef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -31,10 +39,6 @@
 
 #ifndef O_BINARY
 #define O_BINARY 0
-#endif
-
-#ifndef strdup
-char *strdup(const char *s);
 #endif
 
 #ifdef HAVE_MMAP

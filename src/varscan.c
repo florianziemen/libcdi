@@ -693,7 +693,7 @@ cdi_generate_vars(stream_t *streamptr)
           vlistptr->vars[varID].opt_grib_kvpair[idx] = vartable[varid].opt_grib_kvpair[i];
           vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = NULL;
           if (vartable[varid].opt_grib_kvpair[i].keyword)
-            vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdupx(vartable[varid].opt_grib_kvpair[i].keyword);
+            vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdup(vartable[varid].opt_grib_kvpair[i].keyword);
           vlistptr->vars[varID].opt_grib_kvpair[i].update = true;
         }
       // note: if the key is not defined, we do not throw an error!
@@ -1091,7 +1091,7 @@ varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword)
     }
   vartable[varID].opt_grib_kvpair[idx].data_type = t_int;
   vartable[varID].opt_grib_kvpair[idx].int_val = (int) lval;
-  vartable[varID].opt_grib_kvpair[idx].keyword = strdupx(keyword);
+  vartable[varID].opt_grib_kvpair[idx].keyword = strdup(keyword);
   vartable[varID].opt_grib_kvpair[idx].subtype_index = tile_index;
 }
 #endif
@@ -1121,7 +1121,7 @@ varDefOptGribDbl(int varID, int tile_index, double dval, const char *keyword)
     }
   vartable[varID].opt_grib_kvpair[idx].data_type = t_double;
   vartable[varID].opt_grib_kvpair[idx].dbl_val = dval;
-  vartable[varID].opt_grib_kvpair[idx].keyword = strdupx(keyword);
+  vartable[varID].opt_grib_kvpair[idx].keyword = strdup(keyword);
   vartable[varID].opt_grib_kvpair[idx].subtype_index = tile_index;
 }
 #endif

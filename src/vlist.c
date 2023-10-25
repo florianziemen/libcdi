@@ -299,7 +299,7 @@ var_copy_entries(var_t *var2, var_t *var1)
       if (var1->opt_grib_kvpair[i].keyword != NULL)
         {
           var2->opt_grib_kvpair[i] = var1->opt_grib_kvpair[i];
-          var2->opt_grib_kvpair[i].keyword = strdupx(var1->opt_grib_kvpair[i].keyword);
+          var2->opt_grib_kvpair[i].keyword = strdup(var1->opt_grib_kvpair[i].keyword);
           var2->opt_grib_kvpair[i].update = true;
           if (CDI_Debug) Message("done.");
         }

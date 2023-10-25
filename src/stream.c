@@ -680,7 +680,7 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
       if (streamID < 0) return CDI_ELIMIT;
 
       streamptr->filemode = filemode;
-      streamptr->filename = strdupx(filename);
+      streamptr->filename = strdup(filename);
       streamptr->fileID = fileID;
     }
 
@@ -717,7 +717,7 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
   int streamID = streamptr->self;
 
   streamptr->filemode = tolower(*filemode);
-  streamptr->filename = strdupx(filename);
+  streamptr->filename = strdup(filename);
   streamptr->fileID = fileID;
 
   streamptr->vlistID = vlistCreate();
