@@ -786,7 +786,7 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
         unsigned char uuid[CDI_UUID_SIZE];
         long lpar;
         GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
-        if (lpar != 6) fprintf(stderr, "Warning ...\n");
+        // if (lpar != 6) fprintf(stderr, "Warning ...\n");
         GRIB_CHECK(grib_get_long(gh, "nlev", &lpar), 0);
         int nhlev = (int) lpar;
         GRIB_CHECK(grib_get_long(gh, "numberOfVGridUsed", &lpar), 0);
