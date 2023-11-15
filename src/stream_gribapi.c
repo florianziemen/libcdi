@@ -1786,7 +1786,7 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
   // GRIB_CHECK(grib_get_long(gh, "numberOfPoints", &numberOfPoints), 0);
   // printf("values_size = %d  numberOfPoints = %ld\n", datasize, numberOfPoints);
 
-  if (gridsize != datasize) Error("Internal problem: gridsize(%zu) != datasize(%zu)!", gridsize, datasize);
+  if (datasize != gridsize) Error("numberOfPoint (%zu) and gridSize (%zu) differ!", datasize, gridsize);
   size_t dummy = datasize;
 
   if (memType == MEMTYPE_FLOAT)
