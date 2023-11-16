@@ -1557,7 +1557,7 @@ static struct cdfPostDefActionList *
 cdf_def_zaxis_hybrid(stream_t *streamptr, int type, int *ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID,
                      char *axisname)
 {
-  struct cdfPostDefActionList *(*def_zaxis_hybrid_delegate)(stream_t *streamptr, int type, int *ncvarid, int zaxisID,
+  struct cdfPostDefActionList *(*def_zaxis_hybrid_delegate)(stream_t * streamptr, int type, int *ncvarid, int zaxisID,
                                                             int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
       = ((!CDI_CMOR_Mode && CDI_Convention == CDI_CONVENTION_ECHAM) || type == ZAXIS_HYBRID_HALF) ? cdf_def_zaxis_hybrid_echam
                                                                                                   : cdf_def_zaxis_hybrid_cf;
