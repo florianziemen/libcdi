@@ -566,7 +566,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
   char dimname[CDI_MAX_NAME + 3];
   dimname[0] = 0;
   int length = sizeof(dimname);
-  if (ndims && hasVals) cdiInqKeyString(gridID, axisKey, CDI_KEY_DIMNAME, dimname, &length);
+  if (ndims && !hasVals) cdiInqKeyString(gridID, axisKey, CDI_KEY_DIMNAME, dimname, &length);
 
   for (int index = 0; index < gridIndex; ++index)
     {
