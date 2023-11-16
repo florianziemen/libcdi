@@ -70,7 +70,7 @@ cdfDefComplex(stream_t *streamptr, int gridID, int gridIndex)
     size_t dimlen = 2;
     int fileID = streamptr->fileID;
 
-    bool switchNCMode = streamptr->ncmode == 2;
+    bool switchNCMode = (streamptr->ncmode == 2);
     if (switchNCMode)
       {
         streamptr->ncmode = 1;
@@ -150,7 +150,7 @@ cdfDefSPorFC(stream_t *streamptr, int gridID, int gridIndex, char *restrict axis
       else
         sprintf(&axisname[3], "%1d", iz + 1);
 
-      bool switchNCMode = streamptr->ncmode == 2;
+      bool switchNCMode = (streamptr->ncmode == 2);
       if (switchNCMode)
         {
           streamptr->ncmode = 1;
@@ -268,11 +268,11 @@ cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridIndex, const struct cd
     {
       int dimNcID = streamptr->basetime.ncvarid;
       int fileID = streamptr->fileID;
-      bool switchNCMode = streamptr->ncmode == 2;
+
+      bool switchNCMode = (streamptr->ncmode == 2);
       if (switchNCMode)
         {
           cdf_redef(fileID);
-          switchNCMode = true;
           streamptr->ncmode = 1;
         }
 
@@ -282,6 +282,7 @@ cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridIndex, const struct cd
       cdiInqKeyString(gridID, axistype, CDI_KEY_NAME, axisname, &length);
       cdf_def_var(fileID, axisname, xtype, 1, &dimNcID, &ncvarid);
       cdfPutGridStdAtts(fileID, ncvarid, gridID, inqs->axisSym);
+
       if (switchNCMode)
         {
           cdf_enddef(fileID, streamptr->self);
@@ -606,7 +607,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
       checkGridName(axisname, fileID);
       size_t axisnameLen = strlen(axisname);
 
-      bool switchNCMode = streamptr->ncmode == 2 && (hasVals || ndims);
+      bool switchNCMode = (streamptr->ncmode == 2 && (hasVals || ndims));
       if (switchNCMode)
         {
           cdf_redef(fileID);
@@ -646,7 +647,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
           mycdfPostDefActionGridProp(streamptr, gridID, ncvarid, gridAxisInq->valsQueryKey, &delayed);
 
           bool genBounds = false, hasBounds = gridInqPropPresence(gridID, gridAxisInq->bndsQueryKey);
-          bool grid_is_cyclic = gridIsCircular(gridID) > 0;
+          bool grid_is_cyclic = (gridIsCircular(gridID) > 0);
           double *restrict pbounds;
           size_t nvertex = gridInqNvertex(gridID);
           if (CDI_CMOR_Mode && grid_is_cyclic && !hasBounds)
@@ -696,6 +697,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
 
   ncgrid[gridIndex].gridID = gridID;
   ncgrid[gridIndex].ncIDs[(axisLetter == 'X') ? CDF_DIMID_X : CDF_DIMID_Y] = dimID;
+
   return delayed;
 }
 
@@ -830,7 +832,8 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xsize, size_t 
   int xdimID = CDI_UNDEFID;
   int ydimID = CDI_UNDEFID;
   int fileID = streamptr->fileID;
-  bool switchNCMode = streamptr->ncmode == 2;
+
+  bool switchNCMode = (streamptr->ncmode == 2);
   if (switchNCMode)
     {
       cdf_redef(fileID);
@@ -1082,7 +1085,7 @@ cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
 
       int fileID = streamptr->fileID;
 
-      bool switchNCMode = streamptr->ncmode == 2;
+      bool switchNCMode = (streamptr->ncmode == 2);
       if (switchNCMode)
         {
           streamptr->ncmode = 1;
@@ -1184,7 +1187,7 @@ cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID, int 
 
       int fileID = streamptr->fileID;
 
-      bool switchNCMode = streamptr->ncmode == 2;
+      bool switchNCMode = (streamptr->ncmode == 2);
       if (switchNCMode)
         {
           cdf_redef(fileID);
@@ -1295,7 +1298,8 @@ cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int *ncvaridp, int zax
 {
   int fileID = streamptr->fileID;
   struct cdfPostDefActionList *delayed = NULL;
-  bool switchNCMode = streamptr->ncmode == 2;
+
+  bool switchNCMode = (streamptr->ncmode == 2);
   if (switchNCMode)
     {
       streamptr->ncmode = 1;
@@ -1367,7 +1371,8 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
   if (psname[0] == 0) strcpy(psname, "ps");
 
   int fileID = streamptr->fileID;
-  bool switchNCMode = streamptr->ncmode == 2;
+
+  bool switchNCMode = (streamptr->ncmode == 2);
   if (switchNCMode)
     {
       streamptr->ncmode = 1;
@@ -1571,7 +1576,8 @@ cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
       if (cdiUUID2Str(uuid, uuidStr) == uuidNumHexChars)
         {
           int fileID = streamptr->fileID;
-          bool switchNCMode = streamptr->ncmode == 2;
+
+          bool switchNCMode = (streamptr->ncmode == 2);
           if (switchNCMode)
             {
               streamptr->ncmode = 1;
@@ -1579,6 +1585,7 @@ cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
             }
 
           cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfVGrid", uuidNumHexChars, uuidStr);
+
           if (switchNCMode)
             {
               cdf_enddef(fileID, streamptr->self);
@@ -1842,6 +1849,7 @@ cdf_def_mapping(stream_t *streamptr, int gridID)
   if (!gmapvarname[0]) strcpy(gmapvarname, "crs");
 
   int fileID = streamptr->fileID;
+
   bool switchNCMode = (streamptr->ncmode == 2);
   if (switchNCMode)
     {
@@ -1953,7 +1961,7 @@ cdfDefCharacter(stream_t *streamptr, int gridID, int gridIndex, int cdiAxisID, i
 }
 
 static void
-cdfDefRgrid(stream_t *streamptr, int gridID, int gridIndex)
+cdfDefReducedGrid(stream_t *streamptr, int gridID, int gridIndex)
 {
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
@@ -2014,23 +2022,15 @@ cdfDefRgrid(stream_t *streamptr, int gridID, int gridIndex)
         else
           sprintf(&axisname[14], "%1d", iz + 1);
 
-        bool switchNCMode = (streamptr->ncmode == 2);
-        if (switchNCMode)
-          {
-            streamptr->ncmode = 1;
-            cdf_redef(fileID);
-          }
+        if (streamptr->ncmode == 2) cdf_redef(fileID);
 
         cdf_def_dim(fileID, axisname, dimlen, &dimID);
 
         int ncvarid = CDI_UNDEFID;
         cdf_def_var(fileID, axisname, NC_INT, 1, &dimID, &ncvarid);
 
-        if (switchNCMode || streamptr->ncmode == 1)
-          {
-            cdf_enddef(fileID, streamptr->self);
-            streamptr->ncmode = 2;
-          }
+        cdf_enddef(fileID, streamptr->self);
+        streamptr->ncmode = 2;
 
         int *reducedPoints = (int *) Malloc(dimlen * sizeof(int));
         gridInqReducedPoints(gridID, reducedPoints);
@@ -2078,7 +2078,7 @@ cdf_define_generic_dim(stream_t *streamptr, int gridID, int gridIndex)
 
       if (dimID == CDI_UNDEFID)
         {
-          bool switchNCMode = streamptr->ncmode == 2;
+          bool switchNCMode = (streamptr->ncmode == 2);
           if (switchNCMode)
             {
               streamptr->ncmode = 1;
@@ -2181,7 +2181,7 @@ cdf_define_grid(stream_t *streamptr, int gridID, int gridIndex)
     }
   else if (gridtype == GRID_GAUSSIAN_REDUCED)
     {
-      cdfDefRgrid(streamptr, gridID, gridIndex);
+      cdfDefReducedGrid(streamptr, gridID, gridIndex);
       if (gridInqYsize(gridID)) cdfDefYaxis(streamptr, gridID, gridIndex, 1, true);
     }
   else if (gridtype == GRID_SPECTRAL)
