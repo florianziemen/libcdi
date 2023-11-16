@@ -1557,7 +1557,7 @@ static struct cdfPostDefActionList *
 cdf_def_zaxis_hybrid(stream_t *streamptr, int type, int *ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID,
                      char *axisname)
 {
-  struct cdfPostDefActionList *(*def_zaxis_hybrid_delegate)(stream_t * streamptr, int type, int *ncvarid, int zaxisID,
+  struct cdfPostDefActionList *(*def_zaxis_hybrid_delegate)(stream_t *streamptr, int type, int *ncvarid, int zaxisID,
                                                             int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
       = ((!CDI_CMOR_Mode && CDI_Convention == CDI_CONVENTION_ECHAM) || type == ZAXIS_HYBRID_HALF) ? cdf_def_zaxis_hybrid_echam
                                                                                                   : cdf_def_zaxis_hybrid_cf;
@@ -2182,7 +2182,12 @@ cdf_define_grid(stream_t *streamptr, int gridID, int gridIndex)
   else if (gridtype == GRID_GAUSSIAN_REDUCED)
     {
       cdfDefReducedGrid(streamptr, gridID, gridIndex);
-      if (gridInqYsize(gridID)) cdfDefYaxis(streamptr, gridID, gridIndex, 1, true);
+      if (gridInqYsize(gridID))
+        {
+          struct cdfPostDefActionList *ydelayed = cdfDefYaxis(streamptr, gridID, gridIndex, 1, true);
+          delayed = cdfPostDefActionConcat(delayed, ydelayed);
+          Free(ydelayed);
+        }
     }
   else if (gridtype == GRID_SPECTRAL)
     {
@@ -2205,12 +2210,20 @@ cdf_define_grid(stream_t *streamptr, int gridID, int gridIndex)
       if ((strlen = gridInqXIsc(gridID)))
         cdfDefCharacter(streamptr, gridID, gridIndex, CDI_XAXIS, strlen);
       else if (gridInqXsize(gridID))
-        cdfDefXaxis(streamptr, gridID, gridIndex, 1, false);
+        {
+          struct cdfPostDefActionList *xdelayed = cdfDefXaxis(streamptr, gridID, gridIndex, 1, false);
+          delayed = cdfPostDefActionConcat(delayed, xdelayed);
+          Free(xdelayed);
+        }
 
       if ((strlen = gridInqYIsc(gridID)))
         cdfDefCharacter(streamptr, gridID, gridIndex, CDI_YAXIS, strlen);
       else if (gridInqYsize(gridID))
-        cdfDefYaxis(streamptr, gridID, gridIndex, 1, false);
+        {
+          struct cdfPostDefActionList *ydelayed = cdfDefYaxis(streamptr, gridID, gridIndex, 1, false);
+          delayed = cdfPostDefActionConcat(delayed, ydelayed);
+          Free(ydelayed);
+        }
     }
   else
     {
