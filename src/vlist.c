@@ -446,7 +446,7 @@ vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *leve
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   int nzaxis = vlistptr->nzaxis;
 
-  const bool hasBounds = (lbounds && ubounds);
+  bool hasBounds = (lbounds && ubounds);
 
   for (int index = 0; index < nzaxis; ++index)
     {
@@ -465,6 +465,8 @@ vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *leve
       query.zaxistype = zaxistype;
       query.nlevels = nlevels;
       query.levels = levels;
+      query.lbounds = lbounds;
+      query.ubounds = ubounds;
 
       if ((zaxisglobdefined = (cdiResHFilterApply(getZaxisOps(), vgzZAxisSearch, &query) == CDI_APPLY_STOP)))
         zaxisID = query.resIDValue;
@@ -1070,10 +1072,10 @@ vlistNtsteps(int vlistID)
 static void
 vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
 {
-  const int vlistID = vlistptr->self;
+  int vlistID = vlistptr->self;
   fprintf(fp, "#\n# vlistID %d\n#\n", vlistID);
 
-  const int nvars = vlistptr->nvars;
+  int nvars = vlistptr->nvars;
 
   fprintf(fp,
           "nvars    : %d\n"
