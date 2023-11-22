@@ -37,10 +37,10 @@ static int axisTypeChar[] = { '?', 'X', 'Y', 'Z', 'E', 'T' };
 
 typedef struct
 {
-  int dimid;      // NetCDF dim ID
-  int ncvarid;    // NetCDF var ID
-  int dimtype;    // AxisType
-  size_t len;     // Dimension size
+  int dimid;    // NetCDF dim ID
+  int ncvarid;  // NetCDF var ID
+  int dimtype;  // AxisType
+  size_t len;   // Dimension size
   char name[CDI_MAX_NAME];
 } ncdim_t;
 
@@ -100,8 +100,8 @@ typedef struct
   int gmapid;
   int positive;
   int ndims;
-  int dimids[MAX_DIMS_CDF];     // Netcdf dimension IDs
-  int dimtypes[MAX_DIMS_CDF];    // AxisType
+  int dimids[MAX_DIMS_CDF];    // Netcdf dimension IDs
+  int dimtypes[MAX_DIMS_CDF];  // AxisType
   size_t chunks[MAX_DIMS_CDF];
   bool isChunked;
   int chunkType;
