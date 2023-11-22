@@ -10,18 +10,6 @@ init_env ()
 }
 
 #
-# Initializes the Debian libtool
-init_debian_libtool ()
-{
-  export PATH="/usr/bin:${PATH-}"
-  export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH-}"
-
-  # Prepend ACLOCAL_PATH with the path to Automake:
-  module unload automake
-  switch_for_module automake
-}
-
-#
 # Sets variables for tests with GCC.
 #
 init_gcc ()
