@@ -3511,12 +3511,14 @@ calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
 
   chunkCacheSize *= (ncvar->dimids[0] == timedimid) ? ncvar->chunks[0] : 1;
 
-  int zdimid = CDI_UNDEFID;
   for (int i = 0; i < ncvar->ndims; i++)
     {
-      if (ncvar->dimtypes[i] == Z_AXIS) zdimid = ncvar->dimids[i];
+      if (ncvar->dimtypes[i] == Z_AXIS)
+        {
+          chunkCacheSize *= ncvar->chunks[i];
+          break;
+        }
     }
-  if (zdimid != CDI_UNDEFID) chunkCacheSize *= ncvar->chunks[zdimid];
 
   chunkCacheSize *= cdf_xtype_to_numbytes(ncvar->xtype);
 
