@@ -465,6 +465,8 @@ vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *leve
       query.zaxistype = zaxistype;
       query.nlevels = nlevels;
       query.levels = levels;
+      query.lbounds = lbounds;
+      query.ubounds = ubounds;
 
       if ((zaxisglobdefined = (cdiResHFilterApply(getZaxisOps(), vgzZAxisSearch, &query) == CDI_APPLY_STOP)))
         zaxisID = query.resIDValue;
