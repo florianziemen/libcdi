@@ -279,6 +279,8 @@ stream_write_record(int streamID, int memtype, const void *data, SizeType nmiss)
 
   stream_t *streamptr = stream_to_pointer(streamID);
 
+  if (CDI_Lock_IO) CDI_IO_LOCK();
+
   switch (cdiBaseFiletype(streamptr->filetype))
     {
 #ifdef HAVE_LIBGRIB
@@ -298,6 +300,8 @@ stream_write_record(int streamID, int memtype, const void *data, SizeType nmiss)
 #endif
     default: Error("%s support not compiled in!", strfiletype(streamptr->filetype));
     }
+
+  if (CDI_Lock_IO) CDI_IO_UNLOCK();
 }
 
 /*

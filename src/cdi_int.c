@@ -16,6 +16,11 @@
 #include "cgribex.h"
 #endif
 
+#ifdef HAVE_LIBPTHREAD
+#include <pthread.h>
+pthread_mutex_t CDI_IO_Mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
+
 int CDI_Default_Calendar = CALENDAR_PROLEPTIC;
 
 int CDI_Default_InstID = CDI_UNDEFID;
@@ -77,6 +82,7 @@ bool CDI_gribapi_debug = false;
 bool CDI_gribapi_grib1 = false;
 int cdiDefaultLeveltype = -1;
 int cdiDataUnreduced = 0;
+int CDI_Lock_IO = 0;
 int cdiSortName = 0;
 int cdiSortParam = 0;
 int cdiHaveMissval = 0;
@@ -337,6 +343,9 @@ cdiInitialize(void)
       value = cdi_getenv_int("CDI_ECCODES_GRIB1");
       if (value >= 0) cdiSetEccodesGrib1((bool) value);
 
+      value = cdi_getenv_int("CDI_LOCK_IO");
+      if (value >= 0) CDI_Lock_IO = (int) value;
+
       value = cdi_getenv_int("CDI_READ_CELL_CORNERS");
       if (value >= 0) CDI_Read_Cell_Corners = (int) value;
 
@@ -430,7 +439,7 @@ cdiInitialize(void)
       envstr = getenv("CDI_QUERY_ABORT");
       if (envstr)
         {
-          const int ival = atoi(envstr);
+          int ival = atoi(envstr);
           if (ival == 0 || ival == 1)
             {
               CDI_Query_Abort = ival;
@@ -441,7 +450,7 @@ cdiInitialize(void)
       envstr = getenv("CDI_VERSION_INFO");
       if (envstr)
         {
-          const int ival = atoi(envstr);
+          int ival = atoi(envstr);
           if (ival == 0 || ival == 1)
             {
               CDI_Version_Info = ival;
@@ -452,7 +461,7 @@ cdiInitialize(void)
       envstr = getenv("CDI_CONVERT_CUBESPHERE");
       if (envstr)
         {
-          const int ival = atoi(envstr);
+          int ival = atoi(envstr);
           if (ival == 0 || ival == 1)
             {
               CDI_Convert_Cubesphere = ival;
@@ -489,7 +498,7 @@ cdiInitialize(void)
 const char *
 strfiletype(int filetype)
 {
-  const int size = (int) (sizeof(Filetypes) / sizeof(char *));
+  int size = (int) (sizeof(Filetypes) / sizeof(char *));
   return (filetype > 0 && filetype < size) ? Filetypes[filetype] : Filetypes[0];
 }
 
@@ -498,6 +507,7 @@ cdiDefGlobal(const char *string, int value)
 {
   // clang-format off
   if      (str_is_equal(string, "REGULARGRID")          ) cdiDataUnreduced = value;
+  else if (str_is_equal(string, "LOCKIO")               ) CDI_Lock_IO = (bool) value;
   else if (str_is_equal(string, "ECCODES_DEBUG")        ) CDI_gribapi_debug = (bool) value;
   else if (str_is_equal(string, "ECCODES_GRIB1")        ) cdiSetEccodesGrib1((bool) value);
   else if (str_is_equal(string, "SORTNAME")             ) cdiSortName = value;

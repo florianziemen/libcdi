@@ -25,6 +25,16 @@
 #include "cdi.h"
 #include "cdf_config.h"
 
+#ifdef HAVE_LIBPTHREAD
+#include <pthread.h>
+extern pthread_mutex_t CDI_IO_Mutex;
+#define CDI_IO_LOCK() pthread_mutex_lock(&CDI_IO_Mutex)
+#define CDI_IO_UNLOCK() pthread_mutex_unlock(&CDI_IO_Mutex)
+#else
+#define CDI_IO_LOCK()
+#define CDI_IO_UNLOCK()
+#endif
+
 // Base file types
 
 #define CDI_FILETYPE_GRIB 100    // File type GRIB
@@ -370,6 +380,7 @@ extern int CDI_Netcdf_Chunksizehint;
 extern int CDI_ChunkType;
 extern int CDI_Test;
 extern int CDI_Split_Ltype105;
+extern int CDI_Lock_IO;
 extern int cdiDataUnreduced;
 extern int cdiSortName;
 extern int cdiSortParam;

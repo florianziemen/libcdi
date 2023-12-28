@@ -663,6 +663,8 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
   stream_t *streamptr = stream_new_entry(resH);
   int streamID = CDI_ESYSTEM;
 
+  if (CDI_Lock_IO) CDI_IO_LOCK();
+
   int (*streamOpenDelegate)(const char *filename, char filemode, int filetype, stream_t *streamptr, int recordBufIsToBeCreated)
       = (int (*)(const char *, char, int, stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
 
@@ -683,6 +685,8 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
       streamptr->filename = strdup(filename);
       streamptr->fileID = fileID;
     }
+
+  if (CDI_Lock_IO) CDI_IO_UNLOCK();
 
   return streamID;
 }
@@ -1287,10 +1291,14 @@ streamClose(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
+  if (CDI_Lock_IO) CDI_IO_LOCK();
+
   if (CDI_Debug) Message("streamID = %d filename = %s", streamID, streamptr->filename);
   streamDestroy(streamptr);
   reshRemove(streamID, &streamOps);
   if (CDI_Debug) Message("Removed stream %d from stream list", streamID);
+
+  if (CDI_Lock_IO) CDI_IO_UNLOCK();
 }
 
 void
@@ -1418,9 +1426,16 @@ int
 streamDefTimestep(int streamID, int tsID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
+
+  if (CDI_Lock_IO) CDI_IO_LOCK();
+
   int (*myStreamDefTimestep_)(stream_t * streamptr, int tsID)
       = (int (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_DEF_TIMESTEP_).func;
-  return myStreamDefTimestep_(streamptr, tsID);
+  int status = myStreamDefTimestep_(streamptr, tsID);
+
+  if (CDI_Lock_IO) CDI_IO_UNLOCK();
+
+  return status;
 }
 
 int
@@ -1476,6 +1491,8 @@ streamInqTimestep(int streamID, int tsID)
 
   if (CDI_Debug) Message("streamID = %d  tsID = %d  filetype = %d", streamID, tsID, filetype);
 
+  if (CDI_Lock_IO) CDI_IO_LOCK();
+
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
@@ -1527,6 +1544,8 @@ streamInqTimestep(int streamID, int tsID)
       }
     }
 
+  if (CDI_Lock_IO) CDI_IO_UNLOCK();
+
   int taxisID = vlistInqTaxis(vlistID);
   if (taxisID == -1) Error("Timestep undefined for fileID = %d", streamID);
 
@@ -1564,8 +1583,12 @@ All further vlist changes have to use the vlist object returned by streamInqVlis
 void
 streamDefVlist(int streamID, int vlistID)
 {
+  if (CDI_Lock_IO) CDI_IO_LOCK();
+
   void (*myStreamDefVlist)(int streamID, int vlistID) = (void (*)(int, int)) namespaceSwitchGet(NSSWITCH_STREAM_DEF_VLIST_).func;
   myStreamDefVlist(streamID, vlistID);
+
+  if (CDI_Lock_IO) CDI_IO_UNLOCK();
 }
 
 // The single image implementation of streamDefVlist

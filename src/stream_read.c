@@ -230,6 +230,8 @@ stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 
   stream_t *streamptr = stream_to_pointer(streamID);
 
+  if (CDI_Lock_IO) CDI_IO_LOCK();
+
   *nmiss = 0;
 
   switch (cdiBaseFiletype(streamptr->filetype))
@@ -251,6 +253,8 @@ stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 #endif
     default: Error("%s support not compiled in!", strfiletype(streamptr->filetype));
     }
+
+  if (CDI_Lock_IO) CDI_IO_UNLOCK();
 }
 
 void

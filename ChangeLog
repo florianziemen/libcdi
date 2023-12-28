@@ -1,3 +1,7 @@
+2023-12-28  Uwe Schulzweida
+
+	* Add environment variable CDI_LOCK_IO to lock IO access
+
 2023-11-22  Uwe Schulzweida
 
 	* calc_chunk_cache_size: wrong result for 3D data (bug fix)
@@ -183,13 +187,13 @@
 
 2022-10-17  Uwe Schulzweida
 
-        * Added environment variable CDI_SHUFFLE to set shuffle option to NetCDF4 deflation compression
+        * Add environment variable CDI_SHUFFLE to set shuffle option to NetCDF4 deflation compression
 
 2022-10-16  Uwe Schulzweida
 
-	* Improved read performance of temporal chunked NetCDF4 data
-        * Added environment variable CDI_CHUNK_CACHE to set the NetCDF4 chunk cache size
-        * Added environment variable CDI_CHUNK_CACHE_MAX to set the maximum chunk cache size
+	* Improve read performance of temporal chunked NetCDF4 data
+        * Add environment variable CDI_CHUNK_CACHE to set the NetCDF4 chunk cache size
+        * Add environment variable CDI_CHUNK_CACHE_MAX to set the maximum chunk cache size
 
 2022-10-14  Uwe Schulzweida
 
