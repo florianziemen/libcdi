@@ -56,7 +56,7 @@ static bool _file_init = false;
 #include <pthread.h>
 
 static pthread_once_t _file_init_thread = PTHREAD_ONCE_INIT;
-static pthread_mutex_t _file_mutex;
+static pthread_mutex_t _file_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #define FILE_LOCK() pthread_mutex_lock(&_file_mutex)
 #define FILE_UNLOCK() pthread_mutex_unlock(&_file_mutex)
@@ -436,10 +436,7 @@ fileGetPos(int fileID)
   bfile_t *fileptr = file_to_pointer(fileID);
   if (fileptr)
     {
-      if (fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN)
-        filepos = fileptr->position;
-      else
-        filepos = ftell(fileptr->fp);
+      filepos = (fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN) ? fileptr->position : ftell(fileptr->fp);
     }
 
   if (FileDebug) Message("Position %ld", filepos);
@@ -453,11 +450,7 @@ file_set_buffer_pos(bfile_t *fileptr)
   off_t position = fileptr->position;
   if (position < fileptr->bufferStart || position > fileptr->bufferEnd)
     {
-      if (fileptr->bufferType == FILE_BUFTYPE_STD)
-        fileptr->bufferPos = position;
-      else
-        fileptr->bufferPos = position - position % file_pagesize();
-
+      fileptr->bufferPos = (fileptr->bufferType == FILE_BUFTYPE_STD) ? position : position - position % file_pagesize();
       fileptr->bufferCnt = 0;
       fileptr->bufferPtr = NULL;
 
@@ -524,8 +517,7 @@ fileSetPos(int fileID, off_t offset, int whence)
   else
     status = fseek(fileptr->fp, offset, whence);
 
-  if (fileptr->position < fileptr->size)
-    if ((fileptr->flag & FILE_EOF) != 0) fileptr->flag -= FILE_EOF;
+  if ((fileptr->position < fileptr->size) && ((fileptr->flag & FILE_EOF) != 0)) fileptr->flag -= FILE_EOF;
 
   return status;
 }
@@ -624,14 +616,9 @@ file_getenv(const char *envName)
 static void
 file_initialize(void)
 {
-#ifdef HAVE_LIBPTHREAD
-  // initialize global API mutex lock
-  pthread_mutex_init(&_file_mutex, NULL);
-#endif
-
   long value;
 
-  FileInfo = file_getenv("FILE_INFO") > 0;
+  FileInfo = (file_getenv("FILE_INFO") > 0);
 
   value = file_getenv("FILE_DEBUG");
   if (value >= 0) FileDebug = (int) value;
@@ -1066,7 +1053,6 @@ int
 fileClose_serial(int fileID)
 #endif
 {
-  int ret;
   double rout = 0;
 
   bfile_t *fileptr = file_to_pointer(fileID);
@@ -1134,21 +1120,18 @@ fileClose_serial(int fileID)
 
   if (fileptr->type == FILE_TYPE_FOPEN)
     {
-      ret = fclose(fileptr->fp);
-      if (ret == EOF) SysError("EOF returned for close of %s!", name);
+      if (fclose(fileptr->fp) == EOF) SysError("EOF returned for close of %s!", name);
     }
   else
     {
 #ifdef HAVE_MMAP
       if (fileptr->buffer && fileptr->mappedSize)
         {
-          ret = munmap(fileptr->buffer, fileptr->mappedSize);
-          if (ret == -1) SysError("munmap error for close %s", fileptr->name);
+          if (munmap(fileptr->buffer, fileptr->mappedSize) == -1) SysError("munmap error for close %s", fileptr->name);
           fileptr->buffer = NULL;
         }
 #endif
-      ret = close(fileptr->fd);
-      if (ret == -1) SysError("EOF returned for close of %s!", name);
+      if (close(fileptr->fd) == -1) SysError("EOF returned for close of %s!", name);
     }
 
   if (fileptr->name) free((void *) fileptr->name);
