@@ -663,7 +663,17 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
   stream_t *streamptr = stream_new_entry(resH);
   int streamID = CDI_ESYSTEM;
 
-  if (CDI_Lock_IO) CDI_IO_LOCK();
+#ifndef HAVE_NC4HDF5_THREADSAFE
+  if (CDI_Threadsafe)
+    {
+#ifndef HAVE_LIBPTHREAD
+      Error("CDI threadsafe failed, pthread support not compiled!");
+#endif
+      if (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C) streamptr->lockIO = true;
+    }
+#endif
+
+  if (streamptr->lockIO) CDI_IO_LOCK();
 
   int (*streamOpenDelegate)(const char *filename, char filemode, int filetype, stream_t *streamptr, int recordBufIsToBeCreated)
       = (int (*)(const char *, char, int, stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
@@ -686,7 +696,7 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
       streamptr->fileID = fileID;
     }
 
-  if (CDI_Lock_IO) CDI_IO_UNLOCK();
+  if (streamptr->lockIO) CDI_IO_UNLOCK();
 
   return streamID;
 }
@@ -1006,12 +1016,12 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->globalatts = 0;
   streamptr->localatts = 0;
   streamptr->unreduced = cdiDataUnreduced;
-  streamptr->sortname = cdiSortName > 0;
-  streamptr->sortparam = cdiSortParam > 0;
   streamptr->have_missval = cdiHaveMissval;
   streamptr->comptype = CDI_COMPRESS_NONE;
   streamptr->complevel = 0;
   streamptr->shuffle = 0;
+  streamptr->sortname = (cdiSortName > 0);
+  streamptr->lockIO = CDI_Lock_IO;
   // netcdf4/HDF5 filter
   streamptr->filterId = 0;
   streamptr->numParams = 0;
@@ -1291,14 +1301,14 @@ streamClose(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  if (CDI_Lock_IO) CDI_IO_LOCK();
+  if (streamptr->lockIO) CDI_IO_LOCK();
 
   if (CDI_Debug) Message("streamID = %d filename = %s", streamID, streamptr->filename);
   streamDestroy(streamptr);
   reshRemove(streamID, &streamOps);
   if (CDI_Debug) Message("Removed stream %d from stream list", streamID);
 
-  if (CDI_Lock_IO) CDI_IO_UNLOCK();
+  if (streamptr->lockIO) CDI_IO_UNLOCK();
 }
 
 void
@@ -1427,13 +1437,13 @@ streamDefTimestep(int streamID, int tsID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  if (CDI_Lock_IO) CDI_IO_LOCK();
+  if (streamptr->lockIO) CDI_IO_LOCK();
 
   int (*myStreamDefTimestep_)(stream_t * streamptr, int tsID)
       = (int (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_DEF_TIMESTEP_).func;
   int status = myStreamDefTimestep_(streamptr, tsID);
 
-  if (CDI_Lock_IO) CDI_IO_UNLOCK();
+  if (streamptr->lockIO) CDI_IO_UNLOCK();
 
   return status;
 }
@@ -1491,7 +1501,7 @@ streamInqTimestep(int streamID, int tsID)
 
   if (CDI_Debug) Message("streamID = %d  tsID = %d  filetype = %d", streamID, tsID, filetype);
 
-  if (CDI_Lock_IO) CDI_IO_LOCK();
+  if (streamptr->lockIO) CDI_IO_LOCK();
 
   switch (cdiBaseFiletype(filetype))
     {
@@ -1544,7 +1554,7 @@ streamInqTimestep(int streamID, int tsID)
       }
     }
 
-  if (CDI_Lock_IO) CDI_IO_UNLOCK();
+  if (streamptr->lockIO) CDI_IO_UNLOCK();
 
   int taxisID = vlistInqTaxis(vlistID);
   if (taxisID == -1) Error("Timestep undefined for fileID = %d", streamID);
@@ -1583,12 +1593,8 @@ All further vlist changes have to use the vlist object returned by streamInqVlis
 void
 streamDefVlist(int streamID, int vlistID)
 {
-  if (CDI_Lock_IO) CDI_IO_LOCK();
-
   void (*myStreamDefVlist)(int streamID, int vlistID) = (void (*)(int, int)) namespaceSwitchGet(NSSWITCH_STREAM_DEF_VLIST_).func;
   myStreamDefVlist(streamID, vlistID);
-
-  if (CDI_Lock_IO) CDI_IO_UNLOCK();
 }
 
 // The single image implementation of streamDefVlist
@@ -1599,10 +1605,14 @@ cdiStreamDefVlist_(int streamID, int vlistID)
 
   if (streamptr->vlistID == CDI_UNDEFID)
     {
+      if (streamptr->lockIO) CDI_IO_LOCK();
+
       int vlistCopy = vlistDuplicate(vlistID);
       cdiVlistMakeInternal(vlistCopy);
       cdiVlistMakeImmutable(vlistID);
       cdiStreamSetupVlist(streamptr, vlistCopy);
+
+      if (streamptr->lockIO) CDI_IO_UNLOCK();
     }
   else
     Warning("vlist already defined for %s!", streamptr->filename);

@@ -230,7 +230,7 @@ stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  if (CDI_Lock_IO) CDI_IO_LOCK();
+  if (streamptr->lockIO) CDI_IO_LOCK();
 
   *nmiss = 0;
 
@@ -254,7 +254,7 @@ stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
     default: Error("%s support not compiled in!", strfiletype(streamptr->filetype));
     }
 
-  if (CDI_Lock_IO) CDI_IO_UNLOCK();
+  if (streamptr->lockIO) CDI_IO_UNLOCK();
 }
 
 void

@@ -1,3 +1,7 @@
+2023-12-29  Uwe Schulzweida
+
+	* Add global option CDI_Threadsafe to lock non thread-safe netCDF4/HDF5 calls
+
 2023-12-28  Uwe Schulzweida
 
 	* Add environment variable CDI_LOCK_IO to lock IO access

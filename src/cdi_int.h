@@ -313,7 +313,8 @@ typedef struct
   int comptype;   // compression type
   int complevel;  // compression level
   bool sortname;
-  bool sortparam;
+  bool lockIO;
+
   void *gribContainers;
 
   int numWorker;
@@ -380,10 +381,10 @@ extern int CDI_Netcdf_Chunksizehint;
 extern int CDI_ChunkType;
 extern int CDI_Test;
 extern int CDI_Split_Ltype105;
-extern int CDI_Lock_IO;
+extern bool CDI_Lock_IO;
+extern bool CDI_Threadsafe;
 extern int cdiDataUnreduced;
 extern int cdiSortName;
-extern int cdiSortParam;
 extern int cdiHaveMissval;
 extern bool CDI_Ignore_Att_Coordinates;
 extern bool CDI_Coordinates_Lon_Lat;
