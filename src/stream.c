@@ -1301,14 +1301,15 @@ streamClose(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  if (streamptr->lockIO) CDI_IO_LOCK();
+  bool lockIO = streamptr->lockIO;
+  if (lockIO) CDI_IO_LOCK();
 
   if (CDI_Debug) Message("streamID = %d filename = %s", streamID, streamptr->filename);
   streamDestroy(streamptr);
   reshRemove(streamID, &streamOps);
   if (CDI_Debug) Message("Removed stream %d from stream list", streamID);
 
-  if (streamptr->lockIO) CDI_IO_UNLOCK();
+  if (lockIO) CDI_IO_UNLOCK();
 }
 
 void
