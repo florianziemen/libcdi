@@ -855,12 +855,13 @@ cdfCheckVarname(int fileID, char name[CDI_MAX_NAME])
       int ncvarID;
       char varname[CDI_MAX_NAME];
       snprintf(varname, sizeof(varname), "%s", name);
-      char *varname2 = varname + strlen(varname);
+      size_t len = strlen(varname);
+      char *varname2 = varname + len;
       unsigned iz = 0;
 
       do
         {
-          if (iz) sprintf(varname2, "_%u", iz + 1);
+          if (iz) snprintf(varname2, sizeof(varname) - len, "_%u", iz + 1);
 
           if (nc_inq_varid(fileID, varname, &ncvarID) != NC_NOERR) break;
 
@@ -891,13 +892,14 @@ cdfGenVarname(int fileID, char name[CDI_MAX_NAME], int pnum, int pcat, int *pdis
   else
     snprintf(varname, sizeof(varname), "param%d.%d.%d", pnum, pcat, *pdis);
 
-  char *varname2 = varname + strlen(varname);
+  size_t len = strlen(varname);
+  char *varname2 = varname + len;
   int ncvarID;
   unsigned iz = 0;
 
   do
     {
-      if (iz) sprintf(varname2, "_%u", iz + 1);
+      if (iz) snprintf(varname2, sizeof(varname) - len, "_%u", iz + 1);
 
       if (nc_inq_varid(fileID, varname, &ncvarID) != NC_NOERR) break;
 

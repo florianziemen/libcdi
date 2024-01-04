@@ -1057,7 +1057,7 @@ set_extra_attr(char *buf, int nvdims, const size_t *chunks)
   pos += sizeof(prefix) - 1;
   for (int i = nvdims - 1; i >= 0; --i)
     {
-      pos += (size_t) (sprintf(buf + pos, "%zu%s", chunks[i], i > 0 ? "x" : ""));
+      pos += (size_t) (snprintf(buf + pos, CDI_MAX_NAME - pos, "%zu%s", chunks[i], i > 0 ? "x" : ""));
     }
   buf[pos] = ' ';
   buf[pos + 1] = 0;

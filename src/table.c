@@ -385,7 +385,7 @@ tableFromEnv(int modelID, int tablenum)
   }
   tablenameLen = strlen(name2Use);
   memcpy(tablename, name2Use, tablenameLen);
-  if (tablenum) tablenameLen += (size_t) (sprintf(tablename + tablenameLen, "_%03d", tablenum));
+  if (tablenum) tablenameLen += (size_t) (snprintf(tablename + tablenameLen, 256 - tablenameLen, "_%03d", tablenum));
   size_t lenp = 0, lenf = tablenameLen;
   if (tablePath) lenp = strlen(tablePath);
   // if (tablePath) printf("tablePath = %s\n", tablePath);

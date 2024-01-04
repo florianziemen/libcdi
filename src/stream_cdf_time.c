@@ -88,7 +88,8 @@ cdfGetTimeUnits(taxis_t *taxis)
             timeunit = TUNIT_HOUR;
 
           char *unitstr_ = ptaxisAllocUnits(taxis, CDF_MAX_TIME_UNIT_STR);
-          sprintf(unitstr_, "%s since %d-%d-%d %02d:%02d:%02d", tunitNamePtr(timeunit), year, month, day, hour, minute, second);
+          snprintf(unitstr_, CDF_MAX_TIME_UNIT_STR, "%s since %d-%d-%d %02d:%02d:%02d", tunitNamePtr(timeunit), year, month, day,
+                   hour, minute, second);
           unitstr = unitstr_;
         }
     }

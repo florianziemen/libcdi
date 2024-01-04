@@ -145,8 +145,9 @@ cdiGribIterator_serialize(CdiIterator *super)
 
   const char *path = cdiInputFile_getPath(me->file);
   char *escapedPath = cdiEscapeSpaces(path);
-  char *result = (char *) Malloc(strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT / 8);
-  sprintf(result, "%s %zu", escapedPath, (size_t) me->fileOffset);
+  size_t len = strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT / 8;
+  char *result = (char *) Malloc(len);
+  snprintf(result, len, "%s %zu", escapedPath, (size_t) me->fileOffset);
   Free(escapedPath);
   return result;
 }

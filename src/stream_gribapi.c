@@ -414,11 +414,11 @@ param_to_name(int param, char *name)
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
   if (pdis == 255)
     {
-      sprintf(name, "code%d", pnum);
+      snprintf(name, 256, "code%d", pnum);
     }
   else
     {
-      sprintf(name, "param%d.%d.%d", pnum, pcat, pdis);
+      snprintf(name, 256, "param%d.%d.%d", pnum, pcat, pdis);
     }
 }
 

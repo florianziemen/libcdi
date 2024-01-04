@@ -131,7 +131,7 @@ cdfGridInqHalfSize(int gridID)
 }
 
 static void
-cdfDefSPorFC(stream_t *streamptr, int gridID, int gridIndex, char *restrict axisname, int gridRefType)
+cdfDefSPorFC(stream_t *streamptr, int gridID, int gridIndex, char *axisname, size_t maxlen, int gridRefType)
 {
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
@@ -145,10 +145,8 @@ cdfDefSPorFC(stream_t *streamptr, int gridID, int gridIndex, char *restrict axis
   if (dimID == CDI_UNDEFID)
     {
       int fileID = streamptr->fileID;
-      if (iz == 0)
-        axisname[3] = '\0';
-      else
-        sprintf(&axisname[3], "%1d", iz + 1);
+      size_t len = strlen(axisname);
+      if (iz) snprintf(axisname + len, maxlen - len, "%1d", iz + 1);
 
       bool switchNCMode = (streamptr->ncmode == 2);
       if (switchNCMode)
@@ -174,15 +172,15 @@ static void
 cdfDefSP(stream_t *streamptr, int gridID, int gridIndex)
 {
   // char longname[] = "Spherical harmonic coefficient";
-  char axisname[5] = "nspX";
-  cdfDefSPorFC(streamptr, gridID, gridIndex, axisname, GRID_SPECTRAL);
+  char axisname[5] = "nsp";
+  cdfDefSPorFC(streamptr, gridID, gridIndex, axisname, sizeof(axisname), GRID_SPECTRAL);
 }
 
 static void
 cdfDefFC(stream_t *streamptr, int gridID, int gridIndex)
 {
-  char axisname[5] = "nfcX";
-  cdfDefSPorFC(streamptr, gridID, gridIndex, axisname, GRID_FOURIER);
+  char axisname[5] = "nfc";
+  cdfDefSPorFC(streamptr, gridID, gridIndex, axisname, sizeof(axisname), GRID_FOURIER);
 }
 
 static const struct cdfDefGridAxisInqs
@@ -320,7 +318,7 @@ checkDimName(int fileID, size_t dimlen, char *dimname)
 
   do
     {
-      if (iz) sprintf(name + len, "_%u", iz + 1);
+      if (iz) snprintf(name + len, CDI_MAX_NAME - len, "_%u", iz + 1);
 
       int dimid0;
       int status = nc_inq_dimid(fileID, name, &dimid0);
@@ -336,7 +334,7 @@ checkDimName(int fileID, size_t dimlen, char *dimname)
     }
   while (iz <= 99);
 
-  if (iz) sprintf(dimname + len, "_%u", iz + 1);
+  if (iz) snprintf(dimname + len, CDI_MAX_NAME - len, "_%u", iz + 1);
 
   return dimid;
 }
@@ -355,7 +353,7 @@ checkGridName(char *axisname, int fileID)
 
   do
     {
-      if (iz) sprintf(axisname2 + axisnameLen, "_%u", iz + 1);
+      if (iz) snprintf(axisname2 + axisnameLen, CDI_MAX_NAME - axisnameLen, "_%u", iz + 1);
 
       if (nc_inq_varid(fileID, axisname2, &ncdimid) != NC_NOERR) break;
 
@@ -363,7 +361,7 @@ checkGridName(char *axisname, int fileID)
     }
   while (iz <= 99);
 
-  if (iz) sprintf(axisname + axisnameLen, "_%u", iz + 1);
+  if (iz) snprintf(axisname + axisnameLen, CDI_MAX_NAME - axisnameLen, "_%u", iz + 1);
 }
 
 static int
@@ -378,7 +376,7 @@ checkZaxisName(char *axisname, int fileID, int vlistID, int zaxisID, int nzaxis)
   memcpy(axisname2, axisname, axisnameLen + 1);
   do
     {
-      if (iz) sprintf(axisname2 + axisnameLen, "_%u", iz + 1);
+      if (iz) snprintf(axisname2 + axisnameLen, CDI_MAX_NAME - axisnameLen, "_%u", iz + 1);
 
       int ncdimid;
       int status = nc_inq_varid(fileID, axisname2, &ncdimid);
@@ -399,12 +397,13 @@ checkZaxisName(char *axisname, int fileID, int vlistID, int zaxisID, int nzaxis)
             }
           break;
         }
+
     nextSuffix:
       ++iz;
     }
   while (iz <= 99);
 
-  if (iz) sprintf(axisname + axisnameLen, "_%u", iz + 1);
+  if (iz) snprintf(axisname + axisnameLen, CDI_MAX_NAME - axisnameLen, "_%u", iz + 1);
 
   return (int) iz;
 }
@@ -1498,9 +1497,10 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
         cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen, axisname);
         size_t formulatermsLen;
         if (p0status == 0)
-          formulatermsLen = (size_t) (sprintf(txt, "%s%s %s%s", "a: a_bnds b: b_bnds p0: ", p0name, "ps: ", psname));
+          formulatermsLen = (size_t) (snprintf(txt, sizeof(txt), "%s%s %s%s", "a: a_bnds b: b_bnds p0: ", p0name, "ps: ", psname));
         else
-          formulatermsLen = (size_t) (sprintf(txt, "%s%s", "ap: ap_bnds b: b_bnds ps: ", psname));
+          formulatermsLen = (size_t) (snprintf(txt, sizeof(txt), "%s%s", "ap: ap_bnds b: b_bnds ps: ", psname));
+
         {
           static const char sname[] = "standard_name", sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate",
                             formulaterms[] = "formula_terms", units[] = "units";
@@ -1979,11 +1979,9 @@ cdfDefReducedGrid(stream_t *streamptr, int gridID, int gridIndex)
       {
         int fileID = streamptr->fileID;
 
-        char axisname[16] = "rgridX";
-        if (iz == 0)
-          axisname[5] = '\0';
-        else
-          sprintf(&axisname[5], "%1d", iz + 1);
+        char axisname[16] = "rgrid";
+        size_t len = strlen(axisname);
+        if (iz) snprintf(axisname + len, sizeof(axisname) - len, "%1d", iz + 1);
 
         bool switchNCMode = (streamptr->ncmode == 2);
         if (switchNCMode)
@@ -2016,11 +2014,9 @@ cdfDefReducedGrid(stream_t *streamptr, int gridID, int gridIndex)
       {
         int fileID = streamptr->fileID;
 
-        char axisname[32] = "reduced_pointsX";
-        if (iz == 0)
-          axisname[14] = '\0';
-        else
-          sprintf(&axisname[14], "%1d", iz + 1);
+        char axisname[32] = "reduced_points";
+        size_t len = strlen(axisname);
+        if (iz) snprintf(axisname + len, sizeof(axisname) - len, "%1d", iz + 1);
 
         if (streamptr->ncmode == 2) cdf_redef(fileID);
 
