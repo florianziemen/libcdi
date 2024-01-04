@@ -1,3 +1,7 @@
+2024-01-04  Uwe Schulzweida
+
+	* define SSIZE_MAX to LONG_MAX, if undefined
+
 2023-12-29  Uwe Schulzweida
 
 	* Add global option CDI_Threadsafe to lock non thread-safe netCDF4/HDF5 calls

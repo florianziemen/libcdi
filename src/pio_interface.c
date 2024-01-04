@@ -38,6 +38,10 @@
 #include "vlist.h"
 #include "vlist_var.h"
 
+#ifndef SSIZE_MAX
+#define SSIZE_MAX LONG_MAX
+#endif
+
 static struct rdmaWin
 {
   size_t size;
