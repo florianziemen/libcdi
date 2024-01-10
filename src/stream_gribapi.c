@@ -743,21 +743,21 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
 
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-  grid_t *grid = (grid_t *) Malloc(sizeof(*grid));
-  bool uvRelativeToGrid = gribapiGetGrid(gh, grid);
+  grid_t *gridptr = (grid_t *) Malloc(sizeof(*gridptr));
+  bool uvRelativeToGrid = gribapiGetGrid(gh, gridptr);
 
-  struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
+  struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
   int gridID = gridAdded.Id;
   // clang-format off
   if (!gridAdded.isNew)
     {
-      grid_free(grid);
-      Free(grid);
+      grid_free(gridptr);
+      Free(gridptr);
     }
-  else if (grid->projtype == CDI_PROJ_RLL)     gribapiDefProjRLL(gh, gridID);
-  else if (grid->projtype == CDI_PROJ_LCC)     gribapiDefProjLCC(gh, gridID);
-  else if (grid->projtype == CDI_PROJ_STERE)   gribapiDefProjSTERE(gh, gridID);
-  else if (grid->projtype == CDI_PROJ_HEALPIX) gribapiDefProjHEALPIX(gh, gridID);
+  else if (gridptr->projtype == CDI_PROJ_RLL)     gribapiDefProjRLL(gh, gridID);
+  else if (gridptr->projtype == CDI_PROJ_LCC)     gribapiDefProjLCC(gh, gridID);
+  else if (gridptr->projtype == CDI_PROJ_STERE)   gribapiDefProjSTERE(gh, gridID);
+  else if (gridptr->projtype == CDI_PROJ_HEALPIX) gribapiDefProjHEALPIX(gh, gridID);
   // clang-format on
 
   int zaxistype = gribapi_get_zaxis_type(gribEditionNumber(gh), leveltype1);

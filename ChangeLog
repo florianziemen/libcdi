@@ -1,3 +1,7 @@
+2024-01-10  Uwe Schulzweida
+
+	* cgribex: check gridsize when creating the inventory
+
 2024-01-04  Uwe Schulzweida
 
 	* define SSIZE_MAX to LONG_MAX, if undefined
