@@ -3228,7 +3228,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
                 }
 #endif
 
-              if (zaxisType == ZAXIS_HYBRID && ncvars[zvarid].vct)
+              if ((zaxisType == ZAXIS_HYBRID || zaxisType == ZAXIS_HYBRID_HALF) && ncvars[zvarid].vct)
                 {
                   vct = ncvars[zvarid].vct;
                   vctsize = ncvars[zvarid].vctsize;
