@@ -11,6 +11,7 @@
  * next to find out what happened */
 
 #include "cdi_datetime.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 // ==================================================================
