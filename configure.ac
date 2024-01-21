@@ -249,7 +249,7 @@ AC_FUNC_MMAP
 dnl Check for structures:
 AC_CHECK_MEMBERS([struct stat.st_blksize])
 dnl Checks for header files:
-AC_CHECK_HEADERS([malloc.h unistd.h sys/time.h],,,[AC_INCLUDES_DEFAULT])
+AC_CHECK_HEADERS([malloc.h sys/time.h],,,[AC_INCLUDES_DEFAULT])
 AX_EXECINFO
 dnl Checks for the availability of functions:
 AC_CHECK_FUNCS([mallinfo pwrite])
