@@ -25,5 +25,5 @@ if (netCDF_FOUND)
 endif ()
 
 add_subdirectory( src )
-#add_subdirectory( app )
+add_subdirectory( app )
 #target_link_libraries(cdi PRIVATE NetCDF)

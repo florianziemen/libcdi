@@ -137,10 +137,9 @@ list( APPEND cdi_src_files
   zaxis.h
 )
 
-add_library(cdi
-#      SOURCES
+add_library(cdilib
   ${cdi_src_files}
 #  INSTALL_HEADERS_LIST  cdi.h
 )
 
-target_compile_definitions(cdi PUBLIC HAVE_CONFIG_H)
+target_compile_definitions(cdilib PUBLIC HAVE_CONFIG_H)

@@ -5,6 +5,8 @@
 
 #define VERSION           "@PROJECT_VERSION@"
 
+#define CDI               1
+
 #define HAVE_LIBGRIB      1
 #define HAVE_LIBCGRIBEX   1
 #define HAVE_LIBEXTRA     1
