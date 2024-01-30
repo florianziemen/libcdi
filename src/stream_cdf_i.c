@@ -3624,7 +3624,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       const int *dimids = ncvar->dimids;
 
       int ixyz = 0;
-      if (gridInqType(gridID) == GRID_UNSTRUCTURED && ndims - iodim <= 2 && (ydimid == xdimid || ydimid == CDI_UNDEFID))
+      if ((ndims - iodim) <= 2 && (ydimid == xdimid || ydimid == CDI_UNDEFID))
         {
           ixyz = (xdimid == ncdims[dimids[ndims - 1]].dimid) ? 321 : 213;
         }
@@ -3634,9 +3634,9 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
             {
               int dimid = ncdims[dimids[idim]].dimid;
               // clang-format off
-              if      (xdimid == dimid) ixyz += 1*ipow10[ndims-idim-1];
-              else if (ydimid == dimid) ixyz += 2*ipow10[ndims-idim-1];
-              else if (zdimid == dimid) ixyz += 3*ipow10[ndims-idim-1];
+              if      (xdimid == dimid) ixyz += 1 * ipow10[ndims - idim - 1];
+              else if (ydimid == dimid) ixyz += 2 * ipow10[ndims - idim - 1];
+              else if (zdimid == dimid) ixyz += 3 * ipow10[ndims - idim - 1];
               // clang-format on
             }
         }
