@@ -271,7 +271,7 @@ cdfDefTimestep(stream_t *streamptr, int tsID, size_t valCount)
   const size_t start[2] = { [0] = (size_t) tsID, [1] = 0 }, count[2] = { [0] = valCount, [1] = 2 * valCount };
 
   double timeValue[2] = { cdi_encode_timeval(taxis->vDateTime, &streamptr->tsteps[0].taxis) };
-  if (CDI_Debug) Message("tsID = %d  timeValue = %f", tsID, timeValue);
+  if (CDI_Debug) Message("tsID = %d  timeValue = %f", tsID, timeValue[0]);
 
   int ncvarid = streamptr->basetime.ncvarid;
   cdf_put_vara_double(fileID, ncvarid, start, count, timeValue);

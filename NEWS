@@ -6,6 +6,7 @@ Version 2.4.0 (22 February 2024):
    New features:
      * Add global option CDI_Threadsafe to lock non thread-safe netCDF4/HDF5 calls
    Fixed bugs:
+     * improve support for time units second [Bug #11740]
      * calc_chunk_cache_size: wrong result for 3D data (bug fix)
      * netCDF: write of y-coordinates failed for Gaussian reduced grids (bug fix)
 
