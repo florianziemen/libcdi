@@ -1153,8 +1153,8 @@ cdiStreamReadVarPart(int streamID, int varID, int varType, int start, size_t siz
 }
 
 void
-streamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, SizeType size, void *data, SizeType *numMissVals,
-                       int memtype)
+streamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, SizeType size, void *data,
+                       SizeType *numMissVals, int memtype)
 {
   size_t numMiss = 0;
   if (cdiStreamReadVarSlicePart(streamID, varID, levelID, varType, start, size, memtype, data, &numMiss))

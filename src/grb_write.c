@@ -25,8 +25,8 @@
 
 static size_t
 grb_encode(int filetype, int memType, int datatype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
-           CdiDateTime vDateTime, int tsteptype, int numavg, size_t datasize, const void *data, size_t numMissVals, void **gribbuffer,
-           int comptype, void *gribContainers)
+           CdiDateTime vDateTime, int tsteptype, int numavg, size_t datasize, const void *data, size_t numMissVals,
+           void **gribbuffer, int comptype, void *gribContainers)
 {
   size_t nbytes = 0;
 
@@ -36,8 +36,8 @@ grb_encode(int filetype, int memType, int datatype, int varID, int levelID, int 
       size_t gribbuffersize = datasize * 4 + 3000;
       *gribbuffer = Malloc(gribbuffersize);
 
-      nbytes = cgribexEncode(memType, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize, data, numMissVals,
-                             *gribbuffer, gribbuffersize);
+      nbytes = cgribexEncode(memType, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize, data,
+                             numMissVals, *gribbuffer, gribbuffersize);
     }
   else
 #endif

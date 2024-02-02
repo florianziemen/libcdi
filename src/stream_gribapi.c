@@ -3283,8 +3283,8 @@ gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const void *data
 
 size_t
 gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime, int tsteptype,
-              int numavg, size_t datasize, const void *data, size_t numMissVals, void **gribbuffer, size_t *gribbuffersize, int comptype,
-              void *gribContainer)
+              int numavg, size_t datasize, const void *data, size_t numMissVals, void **gribbuffer, size_t *gribbuffersize,
+              int comptype, void *gribContainer)
 {
   long editionNumber = 2;
 

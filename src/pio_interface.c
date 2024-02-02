@@ -798,7 +798,8 @@ void
 streamWriteScatteredVarPart(int streamID, int varID, const double *data, int numBlocks, const int blocklengths[],
                             const int displacements[], int numMissVals, Xt_idxlist partDesc)
 {
-  streamWriteScatteredVarPart_(streamID, varID, MEMTYPE_DOUBLE, data, numBlocks, blocklengths, displacements, numMissVals, partDesc);
+  streamWriteScatteredVarPart_(streamID, varID, MEMTYPE_DOUBLE, data, numBlocks, blocklengths, displacements, numMissVals,
+                               partDesc);
 }
 
 void

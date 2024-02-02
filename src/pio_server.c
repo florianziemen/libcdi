@@ -1535,9 +1535,11 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, void **data_, s
               size_t nvals = recordSize / elemSize;
               size_t numMissVals = countVarChunkMissingVals(vlistID, varID, mapping, nvals, conversion, data + recordDataOfs);
               if (conversion == DATA_HEADER_DOUBLE)
-                streamWriteVarSlice(streamID, varID, level, (const double *) (const void *) (data + recordDataOfs), (int) numMissVals);
+                streamWriteVarSlice(streamID, varID, level, (const double *) (const void *) (data + recordDataOfs),
+                                    (int) numMissVals);
               else
-                streamWriteVarSliceF(streamID, varID, level, (const float *) (const void *) (data + recordDataOfs), (int) numMissVals);
+                streamWriteVarSliceF(streamID, varID, level, (const float *) (const void *) (data + recordDataOfs),
+                                     (int) numMissVals);
               recordDataOfs += recordSize;
             }
           aggBufFlush(streamID, fileID, cdiPioFileWrite);

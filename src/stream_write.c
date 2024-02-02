@@ -220,7 +220,8 @@ streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, Si
 void
 streamWriteVarChunk(int streamID, int varID, const int rect[][2], const double *data, SizeType numMissVals)
 {
-  void (*myCdiStreamWriteVarChunk_)(int streamID, int varID, int memtype, const int rect[3][2], const void *data, SizeType numMissVals)
+  void (*myCdiStreamWriteVarChunk_)(int streamID, int varID, int memtype, const int rect[3][2], const void *data,
+                                    SizeType numMissVals)
       = (void (*)(int, int, int, const int[3][2], const void *, SizeType)) namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_)
             .func;
   myCdiStreamWriteVarChunk_(streamID, varID, MEMTYPE_DOUBLE, rect, data, numMissVals);
@@ -229,7 +230,8 @@ streamWriteVarChunk(int streamID, int varID, const int rect[][2], const double *
 void
 streamWriteVarChunkF(int streamID, int varID, const int rect[][2], const float *data, SizeType numMissVals)
 {
-  void (*myCdiStreamWriteVarChunk_)(int streamID, int varID, int memtype, const int rect[3][2], const void *data, SizeType numMissVals)
+  void (*myCdiStreamWriteVarChunk_)(int streamID, int varID, int memtype, const int rect[3][2], const void *data,
+                                    SizeType numMissVals)
       = (void (*)(int, int, int, const int[3][2], const void *, SizeType)) namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_)
             .func;
   myCdiStreamWriteVarChunk_(streamID, varID, MEMTYPE_FLOAT, rect, data, numMissVals);

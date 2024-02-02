@@ -590,7 +590,8 @@ extReadVarDP(stream_t *streamptr, int varID, double *data, size_t *numMissVals)
   size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   size_t nlevs = (size_t) streamptr->vars[varID].recordTable[0].nlevs;
 
-  for (size_t levID = 0; levID < nlevs; levID++) extReadVarSliceDP(streamptr, varID, (int) levID, &data[levID * gridsize], numMissVals);
+  for (size_t levID = 0; levID < nlevs; levID++)
+    extReadVarSliceDP(streamptr, varID, (int) levID, &data[levID * gridsize], numMissVals);
 }
 
 void

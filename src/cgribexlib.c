@@ -497,10 +497,10 @@ xlc_r -g -O3 -qhot -q64 -qarch=auto -qtune=auto -qreport -DTEST_MINMAXVAL minmax
 
 #include <stdlib.h>
 
-//#undef _GET_X86_COUNTER
-//#undef _GET_IBM_COUNTER
-//#undef _GET_MACH_COUNTER
-//#undef _ARCH_PWR6
+// #undef _GET_X86_COUNTER
+// #undef _GET_IBM_COUNTER
+// #undef _GET_MACH_COUNTER
+// #undef _ARCH_PWR6
 
 #if defined(_GET_IBM_COUNTER)
 #include <libhpc.h>
@@ -1245,10 +1245,10 @@ static const uint32_t HOST_ENDIANNESS_temp[1] = { UINT32_C(0x00030201) };
 #define Error(x, y)
 #endif
 
-//#undef _GET_X86_COUNTER
-//#undef _GET_MACH_COUNTER
-//#undef _GET_IBM_COUNTER
-//#undef _ARCH_PWR6
+// #undef _GET_X86_COUNTER
+// #undef _GET_MACH_COUNTER
+// #undef _GET_IBM_COUNTER
+// #undef _ARCH_PWR6
 
 #if defined _GET_IBM_COUNTER
 #include <libhpc.h>
@@ -1274,7 +1274,7 @@ static const uint32_t HOST_ENDIANNESS_temp[1] = { UINT32_C(0x00030201) };
 #define DISABLE_SIMD_ENCODE
 #endif
 
-//#define DISABLE_SIMD_ENCODE
+// #define DISABLE_SIMD_ENCODE
 
 #ifdef DISABLE_SIMD_ENCODE
 #ifdef ENABLE_AVX
