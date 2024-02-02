@@ -496,9 +496,9 @@ int streamOpenID(const char *filename, char filemode, int filetype, int resH);
 
 void cdiStreamDefVlist_(int streamID, int vlistID);
 
-int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, SizeType nmiss);
+int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, SizeType numMissVals);
 
-void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype, const int rect[][2], const void *data, SizeType nmiss);
+void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype, const int rect[][2], const void *data, SizeType numMissVals);
 void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted);
 
 int cdiStreamDefTimestep_(stream_t *streamptr, int tsID);

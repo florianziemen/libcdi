@@ -1111,7 +1111,7 @@ cdfWriteGridTraj(stream_t *streamptr, int gridID)
 
 static void
 cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, size_t nvals, size_t xsize, size_t ysize,
-                   bool swapxy, size_t *start, size_t *count, int memtype, const void *data, size_t nmiss)
+                   bool swapxy, size_t *start, size_t *count, int memtype, const void *data, size_t numMissVals)
 {
   const double *pdata_dp = (const double *) data;
   double *mdata_dp = NULL;
@@ -1135,7 +1135,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
             memcpy(mdata_sp, pdata_sp, nvals * sizeof(float));
             pdata_sp = mdata_sp;
 
-            if (nmiss > 0)
+            if (numMissVals > 0)
               {
                 for (size_t i = 0; i < nvals; ++i)
                   {
@@ -1165,7 +1165,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
             memcpy(mdata_dp, pdata_dp, nvals * sizeof(double));
             pdata_dp = mdata_dp;
 
-            if (nmiss > 0)
+            if (numMissVals > 0)
               {
                 for (size_t i = 0; i < nvals; ++i)
                   {
@@ -1263,7 +1263,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
               }
           }
 
-        Message("nvals = %zu, nmiss = %d, missval = %g, minval = %g, maxval = %g", nvals, nmiss, missval, fmin, fmax);
+        Message("nvals = %zu, numMissVals = %d, missval = %g, minval = %g, maxval = %g", nvals, numMissVals, missval, fmin, fmax);
       }
   }
 
@@ -1409,7 +1409,7 @@ cdfDefineStartAndCount(stream_t *streamptr, int varID, int xid, int yid, int zid
 }
 
 void
-cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t nmiss)
+cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t numMissVals)
 {
   if (streamptr->accessmode == 0) cdfEndDef(streamptr);
 
@@ -1438,12 +1438,12 @@ cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, siz
 
   int dtype = vlistInqVarDatatype(vlistID, varID);
 
-  if (nmiss > 0) cdfDefVarMissval(streamptr, varID, dtype, 1);
+  if (numMissVals > 0) cdfDefVarMissval(streamptr, varID, dtype, 1);
 
   size_t nvals = gridInqSize(gridID) * (size_t) (zaxisInqSize(zaxisID));
 
   bool swapxy = false;
-  cdf_write_var_data(fileID, vlistID, varID, ncvarID, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, nmiss);
+  cdf_write_var_data(fileID, vlistID, varID, ncvarID, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, numMissVals);
 }
 
 static void
@@ -1504,7 +1504,7 @@ cdfDefineStartAndCountChunk(stream_t *streamptr, const int rect[][2], int varID,
 }
 
 void
-cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype, const int rect[][2], const void *data, size_t nmiss)
+cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype, const int rect[][2], const void *data, size_t numMissVals)
 {
   if (streamptr->accessmode == 0) cdfEndDef(streamptr);
 
@@ -1535,12 +1535,12 @@ cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype, const int rect[
 
   int dtype = vlistInqVarDatatype(vlistID, varID);
 
-  if (nmiss > 0) cdfDefVarMissval(streamptr, varID, dtype, 1);
+  if (numMissVals > 0) cdfDefVarMissval(streamptr, varID, dtype, 1);
 
   size_t nvals = gridInqSize(gridID) * (size_t) (zaxisInqSize(zaxisID));
 
   bool swapxy = false;
-  cdf_write_var_data(fileID, vlistID, varID, ncvarID, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, nmiss);
+  cdf_write_var_data(fileID, vlistID, varID, ncvarID, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, numMissVals);
 }
 
 static void
@@ -1595,7 +1595,7 @@ cdfDefineStartAndCountSlice(stream_t *streamptr, int varID, int levelID, int dim
 }
 
 void
-cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t nmiss)
+cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t numMissVals)
 {
   if (streamptr->accessmode == 0) cdfEndDef(streamptr);
 
@@ -1622,19 +1622,19 @@ cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
 
   int dtype = vlistInqVarDatatype(vlistID, varID);
 
-  if (nmiss > 0) cdfDefVarMissval(streamptr, varID, dtype, 1);
+  if (numMissVals > 0) cdfDefVarMissval(streamptr, varID, dtype, 1);
 
   size_t nvals = gridInqSize(gridID);
 
-  cdf_write_var_data(fileID, vlistID, varID, ncvarID, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, nmiss);
+  cdf_write_var_data(fileID, vlistID, varID, ncvarID, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, numMissVals);
 }
 
 void
-cdf_write_record(stream_t *streamptr, int memtype, const void *data, size_t nmiss)
+cdf_write_record(stream_t *streamptr, int memtype, const void *data, size_t numMissVals)
 {
   int varID = streamptr->record->varID;
   int levelID = streamptr->record->levelID;
-  cdf_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
+  cdf_write_var_slice(streamptr, varID, levelID, memtype, data, numMissVals);
 }
 
 #endif

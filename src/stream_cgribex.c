@@ -1337,7 +1337,7 @@ cgribexScanTimestep(stream_t *streamptr)
 
 int
 cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced,
-              size_t *nmiss, double missval)
+              size_t *numMissVals, double missval)
 {
   int status = 0;
 
@@ -1367,14 +1367,14 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
     gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double *) data, (int) datasize, (int *) gribbuffer, (int) gribsize,
              &iword, hoper, &iret);
 
-  *nmiss = (ISEC1_Sec2Or3Flag & 64) ? ISEC4_NumValues - ISEC4_NumNonMissValues : 0;
+  *numMissVals = (ISEC1_Sec2Or3Flag & 64) ? ISEC4_NumValues - ISEC4_NumNonMissValues : 0;
 
   if (ISEC1_CenterID == 215 && (isec1[34] != 0 && isec1[34] != 255))
     {
       double undef_pds, undef_eps;
       MCH_get_undef(isec1, &undef_pds, &undef_eps);
 
-      *nmiss = 0;
+      *numMissVals = 0;
       if (memtype == MEMTYPE_FLOAT)
         {
           float *restrict dataf = (float *) data;
@@ -1382,7 +1382,7 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
             if ((fabs(dataf[i] - undef_pds) < undef_eps) || IS_EQUAL(dataf[i], FSEC3_MissVal))
               {
                 dataf[i] = (float) missval;
-                (*nmiss)++;
+                (*numMissVals)++;
               }
         }
       else
@@ -1392,7 +1392,7 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
             if ((fabs(datad[i] - undef_pds) < undef_eps) || IS_EQUAL(datad[i], FSEC3_MissVal))
               {
                 datad[i] = missval;
-                (*nmiss)++;
+                (*numMissVals)++;
               }
         }
     }
@@ -2060,7 +2060,7 @@ cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 
 size_t
 cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime, int tsteptype,
-              int numavg, size_t datasize, const void *data, size_t nmiss, void *gribbuffer, size_t gribbuffersize)
+              int numavg, size_t datasize, const void *data, size_t numMissVals, void *gribbuffer, size_t gribbuffersize)
 {
   cgribexrec_t *cgribexp = (cgribexrec_t *) cgribexNew();
 
@@ -2114,7 +2114,7 @@ cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int 
   ISEC4_NumValues = (int) datasize;
   ISEC4_NumBits = grbBitsPerValue(datatype);
 
-  if (nmiss > 0)
+  if (numMissVals > 0)
     {
       FSEC3_MissVal = vlistInqVarMissval(vlistID, varID);
       ISEC1_Sec2Or3Flag |= 64;
