@@ -94,16 +94,19 @@ fdb_fill_itemlist(fdb_handle_t *fdb, fdb_request_t *request, char ***itemList)
   const char **item = (const char **) malloc(sizeof(const char *));
 
   fdb_listiterator_t *it;
-  fdb_new_listiterator(&it);
+  // fdb_new_listiterator(&it);
 
-  fdb_list(fdb, request, it);
+  // fdb_list(fdb, request, it);
+  fdb_list(fdb, request, &it, true);
 
   int numItems = 0;
   while (true)
     {
-      bool exist;
-      fdb_listiterator_next(it, &exist, item);
-      if (!exist) break;
+      // bool exist;
+      // fdb_listiterator_next(it, &exist, item);
+      int err = fdb_listiterator_next(it);
+      // if (!exist) break;
+      if (err != FDB_SUCCESS) break;
 
       numItems++;
     }
@@ -111,14 +114,16 @@ fdb_fill_itemlist(fdb_handle_t *fdb, fdb_request_t *request, char ***itemList)
 
   if (*itemList == NULL) *itemList = (char **) malloc(numItems * sizeof(char *));
 
-  fdb_list(fdb, request, it);
+  fdb_list(fdb, request, &it, true);
 
   int itemNum = 0;
   while (true)
     {
-      bool exist;
-      fdb_listiterator_next(it, &exist, item);
-      if (!exist) break;
+      // bool exist;
+      // fdb_listiterator_next(it, &exist, item);
+      int err = fdb_listiterator_next(it);
+      // if (!exist) break;
+      if (err != FDB_SUCCESS) break;
 
       (*itemList)[itemNum++] = strdup(*item);
     }

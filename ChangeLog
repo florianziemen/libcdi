@@ -2,6 +2,10 @@
 
 	* Version 2.4.0 released
 
+2024-02-05  Uwe Schulzweida
+
+	* fdb5 interface: update to release 5.11.29
+
 2024-02-02  Uwe Schulzweida
 
 	* improve support for time units second [Bug #11740]
