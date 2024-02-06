@@ -81,7 +81,7 @@ cdiGetFiletype(const char *uri, int *byteorder)
   switch (protocol)
     {
     case CDI_PROTOCOL_ACROSS: return CDI_FILETYPE_GRB2;
-    case CDI_PROTOCOL_FDB:    return CDI_FILETYPE_UNDEF;
+    case CDI_PROTOCOL_FDB:    return CDI_FILETYPE_GRB2;
     case CDI_PROTOCOL_OTHER:  return CDI_FILETYPE_NC4;  // support for NetCDF remote types and ESDM
     case CDI_PROTOCOL_FILE:
       // handled below;
@@ -493,7 +493,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
 #endif
 
     case CDI_PROTOCOL_FDB:
-#if defined(HAVE_FDB5) && defined(HAVE_LIBGRIB_API)
+#if defined(HAVE_LIBFDB5) && defined(HAVE_LIBGRIB_API)
 
       if (filetype != CDI_FILETYPE_GRB && filetype != CDI_FILETYPE_GRB2)
         {
@@ -511,9 +511,9 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
         }
       return 88;
 
-#else  // !(defined(HAVE_FDB5) && defined(HAVE_LIBGRIB_API))
+#else  // !(defined(HAVE_LIBFDB5) && defined(HAVE_LIBGRIB_API))
 
-#ifdef HAVE_FDB5
+#ifdef HAVE_LIBFDB5
       Warning("ecCodes support not compiled in (Needed for FDB5)!");
 #else
       Warning("FDB5 support not compiled in!");
