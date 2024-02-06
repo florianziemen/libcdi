@@ -47,9 +47,10 @@ decode_fdbitem(const char *fdbItem, KeyValueEntry *keyValue)
         }
     }
 
-  keyValue->numKeys = numKeys;
+  // keyValue->numKeys = numKeys;
   // for (int i = 0; i < numKeys; i++)  printf("%d <%s>\n", i, itemKeys[i]);
 
+  int n = 0;
   for (int i = 0; i < numKeys; i++)
     {
       char *itemKey = itemKeys[i];
@@ -57,6 +58,7 @@ decode_fdbitem(const char *fdbItem, KeyValueEntry *keyValue)
       for (int k = 0; k < len; k++)
         if (itemKey[k] == '=')
           {
+            n++;
             itemKey[k] = 0;
             itemValues[i] = &itemKey[k + 1];
             break;
@@ -64,6 +66,8 @@ decode_fdbitem(const char *fdbItem, KeyValueEntry *keyValue)
 
       // printf("key <%s> value <%s>\n", itemKeys[i], itemValues[i]);
     }
+
+  keyValue->numKeys = n;
 }
 
 static int
@@ -372,11 +376,11 @@ fdb_request_t *
 create_fdb_request(const char *filename)
 {
   size_t len = strlen(filename);
-  if (len == 4) Error("Empty FDB request!");
+  if (len == 6) Error("Empty FDB request!");
 
   KeyValueEntry keyValue;
   keyValue.item = NULL;
-  decode_fdbitem(filename + 4, &keyValue);
+  decode_fdbitem(filename + 6, &keyValue);
 
   if (keyValue.numKeys == 0) Error("Empty FDB request!");
 

@@ -122,11 +122,11 @@ cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nb
 {
 #ifdef HAVE_LIBFDB5
   size_t len = strlen(filename);
-  if (len == 4) Error("FDB keys missing!");
+  if (len == 6) Error("FDB keys missing!");
 
   KeyValueEntry keyValue;
   keyValue.item = NULL;
-  decode_fdbitem(filename + 4, &keyValue);
+  decode_fdbitem(filename + 6, &keyValue);
 
   if (keyValue.numKeys == 0) Error("FDB keys missing!");
 
