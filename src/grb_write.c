@@ -124,7 +124,7 @@ cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nb
   size_t len = strlen(filename);
   if (len == 6) Error("FDB keys missing!");
 
-  KeyValueEntry keyValue;
+  KeyValueItem keyValue;
   keyValue.item = NULL;
   decode_fdbitem(filename + 6, &keyValue);
 
@@ -233,11 +233,11 @@ grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   if (streamptr1->protocol == CDI_PROTOCOL_FDB)
     {
 #ifdef HAVE_LIBFDB5
-      void *fdbItem = streamptr1->tsteps[tsID].records[recID].fdbItem;
-      if (!fdbItem) Error("fdbItem not available!");
+      int fdbItemIndex = streamptr1->tsteps[tsID].records[recID].fdbItemIndex;
+      if (fdbItemIndex == -1) Error("fdbItem not available!");
 
       size_t buffersize = 0;
-      recsize = fdb_read_record(streamptr1->protocolData, fdbItem, &buffersize, &gribbuffer);
+      recsize = fdb_read_record(streamptr1->protocolData, &(streamptr1->fdbKeyValueList[fdbItemIndex]), &buffersize, &gribbuffer);
 
       // round up recsize to next multiple of 8
       size_t gribbuffersize = ((recsize + 7U) & ~7U);

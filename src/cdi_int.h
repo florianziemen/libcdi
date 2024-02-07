@@ -13,6 +13,10 @@
 #include "config.h"
 #endif
 
+#ifdef HAVE_LIBFDB5
+#include "cdi_fdb.h"
+#endif
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -185,7 +189,7 @@ typedef struct
   VarScanKeys scanKeys;
   var_tile_t tiles;  // tile-related meta-data, currently for GRIB-API only.
 #ifdef HAVE_LIBFDB5
-  void *fdbItem;
+  int fdbItemIndex;
 #endif
 } record_t;
 
@@ -325,6 +329,11 @@ typedef struct
 
   int protocol;
   void *protocolData;
+
+#ifdef HAVE_LIBFDB5
+  int fdbNumItems;
+  fdbKeyValueEntry *fdbKeyValueList;
+#endif
 } stream_t;
 
 // Length of optional keyword/value pair list

@@ -13,7 +13,21 @@ int cdi_fdb_dummy;
 void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer);
 
 void
-decode_fdbitem(const char *fdbItem, KeyValueEntry *keyValue)
+fdb_delete_kvlist(int numItems, fdbKeyValueEntry *keyValueList)
+{
+  for (int i = 0; i < numItems; ++i)
+    {
+      for (int k = 0; k < keyValueList[i].numKeys; ++k)
+        {
+          if (keyValueList[i].keys[k]) free(keyValueList[i].keys[k]);
+          if (keyValueList[i].values[k]) free(keyValueList[i].values[k]);
+        }
+    }
+  free(keyValueList);
+}
+
+void
+decode_fdbitem(const char *fdbItem, KeyValueItem *keyValue)
 {
   keyValue->item = strdup(fdbItem);
   char *pItem = keyValue->item;
@@ -77,78 +91,90 @@ fdb_request_add1(fdb_request_t *req, const char *param, const char *value)
 }
 
 static void
-fdbitem_to_request(const char *fdbItem, fdb_request_t *request)
+fdbitem_to_request(const fdbKeyValueEntry *keyValue, fdb_request_t *request)
 {
-  KeyValueEntry keyValue;
-  keyValue.item = NULL;
-  decode_fdbitem(fdbItem, &keyValue);
-
-  for (int i = 0; i < keyValue.numKeys; i++)
+  // printf("numKeys: %d\n", keyValue->numKeys);
+  for (int i = 0; i < keyValue->numKeys; i++)
     {
-      // printf("key <%s> value <%s>\n", keyValue.keys[i], keyValue.values[i]);
-      fdb_request_add1(request, keyValue.keys[i], keyValue.values[i]);
+      // printf("%d: key <%s> value <%s>\n", i, keyValue->keys[i], keyValue->values[i]);
+      fdb_request_add1(request, keyValue->keys[i], keyValue->values[i]);
     }
-
-  if (keyValue.item) free(keyValue.item);
 }
 
 int
-fdb_fill_itemlist(fdb_handle_t *fdb, fdb_request_t *request, char ***itemList)
+fdb_fill_kvlist(fdb_handle_t *fdb, fdb_request_t *request, fdbKeyValueEntry **pkeyValueList)
 {
-  const char **item = (const char **) malloc(sizeof(const char *));
-
   fdb_listiterator_t *it;
-  // fdb_new_listiterator(&it);
 
-  // fdb_list(fdb, request, it);
   fdb_list(fdb, request, &it, true);
 
   int numItems = 0;
   while (true)
     {
-      // bool exist;
-      // fdb_listiterator_next(it, &exist, item);
       int err = fdb_listiterator_next(it);
-      // if (!exist) break;
       if (err != FDB_SUCCESS) break;
 
       numItems++;
     }
   if (CDI_Debug) Message("numItems = %d", numItems);
+  // Message("numItems = %d", numItems);
 
-  if (*itemList == NULL) *itemList = (char **) malloc(numItems * sizeof(char *));
+  if (*pkeyValueList == NULL) *pkeyValueList = (fdbKeyValueEntry *) malloc(numItems * sizeof(fdbKeyValueEntry));
 
   fdb_list(fdb, request, &it, true);
 
   int itemNum = 0;
   while (true)
     {
-      // bool exist;
-      // fdb_listiterator_next(it, &exist, item);
       int err = fdb_listiterator_next(it);
-      // if (!exist) break;
       if (err != FDB_SUCCESS) break;
 
-      (*itemList)[itemNum++] = strdup(*item);
+      // const char *uri;
+      // size_t off, attr_len;
+      // fdb_listiterator_attrs(it, &uri, &off, &attr_len);
+      // printf("uri=%s, off=%zu, attr_len=%zu\n", uri, off, attr_len);
+
+      fdb_split_key_t *sk = NULL;
+      fdb_new_splitkey(&sk);
+      err = fdb_listiterator_splitkey(it, sk);
+      assert(err == FDB_SUCCESS);
+
+      int keyNum = 0;
+      while (true)
+        {
+          const char *k;
+          const char *v;
+          size_t l;
+          bool checkLevel = true;
+          err = fdb_splitkey_next_metadata(sk, &k, &v, checkLevel ? &l : NULL);
+          if (err != FDB_SUCCESS) break;
+          // printf("k, v, l %s %s %zu\n", k, v, l);
+          if (keyNum < 32)
+            {
+              (*pkeyValueList)[itemNum].keys[keyNum] = strdup(k);
+              (*pkeyValueList)[itemNum].values[keyNum] = strdup(v);
+              keyNum++;
+            }
+        }
+
+      (*pkeyValueList)[itemNum++].numKeys = keyNum;
+
+      err = fdb_delete_splitkey(sk);
     }
 
   fdb_delete_listiterator(it);
-
-  free(item);
 
   return numItems;
 }
 
 long
-fdb_read_record(fdb_handle_t *fdb, char *item, size_t *buffersize, void **gribbuffer)
+fdb_read_record(fdb_handle_t *fdb, const fdbKeyValueEntry *keyValue, size_t *buffersize, void **gribbuffer)
 {
-  // Message("%s", item);
-
   fdb_datareader_t *dataReader = NULL;
   fdb_new_datareader(&dataReader);
   fdb_request_t *singleRequest = NULL;
   fdb_new_request(&singleRequest);
-  fdbitem_to_request(item, singleRequest);
+  fdbitem_to_request(keyValue, singleRequest);
   int status = fdb_retrieve(fdb, singleRequest, dataReader);
   fdb_delete_request(singleRequest);
   if (status != FDB_SUCCESS) Error("fdb_retrieve failed!");
@@ -188,10 +214,10 @@ check_numKey(const char *key, int numKeys, int numItems)
 }
 
 int
-check_keyvalueList(int numItems, KeyValueEntry *keyValueList)
+check_keyvalueList(int numItems, fdbKeyValueEntry *keyValueList)
 {
   const char *searchKeys[] = { "date", "time", "param", "levtype" };
-  const int numSearchKeys = sizeof(searchKeys) / sizeof(searchKeys[0]);
+  int numSearchKeys = sizeof(searchKeys) / sizeof(searchKeys[0]);
   int searchKeysCount[numSearchKeys];
   for (int k = 0; k < numSearchKeys; k++) searchKeysCount[k] = 0;
 
@@ -201,7 +227,6 @@ check_keyvalueList(int numItems, KeyValueEntry *keyValueList)
       char **itemKeys = keyValueList[i].keys;
       for (int k = 0; k < numSearchKeys; k++)
         {
-
           for (int j = 0; j < numKeys; j++)
             {
               if (str_is_equal(itemKeys[j], searchKeys[k]))
@@ -266,8 +291,8 @@ compare_cmpkeys(const CmpKeys *cmpKeys1, const CmpKeys *cmpKeys2)
 int
 get_num_records(int numItems, RecordInfoEntry *recordInfoList)
 {
-  const int date = recordInfoList[0].date;
-  const int time = recordInfoList[0].time;
+  int date = recordInfoList[0].date;
+  int time = recordInfoList[0].time;
 
   int numRecords = 0;
   for (int i = 0; i < numItems; i++)
@@ -308,14 +333,14 @@ get_ilevtype(const char *levtype)
   // clang-format off
   if      (str_is_equal(levtype, "sfc")) ilevtype = levTypeSFC;
   else if (str_is_equal(levtype, "ml"))  ilevtype = levTypeML;
-  else if (str_is_equal(levtype, "pl"))  ilevtype = levTypeML;
+  else if (str_is_equal(levtype, "pl"))  ilevtype = levTypePL;
   // clang-format on
 
   return ilevtype;
 }
 
 void
-decode_keyvalue(KeyValueEntry *keyValue, RecordInfoEntry *recordInfo)
+decode_keyvalue(fdbKeyValueEntry *keyValue, RecordInfoEntry *recordInfo)
 {
   char **itemKeys = keyValue->keys;
   char **itemValues = keyValue->values;
@@ -346,7 +371,7 @@ remove_duplicate_timesteps(RecordInfoEntry *recordInfoList, int numRecords, int 
       int k = 0;
       for (k = 0; k < numTimesteps; k++)
         {
-          const int index = (i + k) * numRecords;
+          int index = (i + k) * numRecords;
           if (date != recordInfoList[index].date || time != recordInfoList[index].time) break;
         }
 
@@ -378,7 +403,7 @@ create_fdb_request(const char *filename)
   size_t len = strlen(filename);
   if (len == 6) Error("Empty FDB request!");
 
-  KeyValueEntry keyValue;
+  KeyValueItem keyValue;
   keyValue.item = NULL;
   decode_fdbitem(filename + 6, &keyValue);
 

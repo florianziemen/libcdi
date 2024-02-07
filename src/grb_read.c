@@ -144,10 +144,11 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memType, void *g
   if (streamptr->protocol == CDI_PROTOCOL_FDB)
     {
 #ifdef HAVE_LIBFDB5
-      void *fdbItem = streamptr->tsteps[tsID].records[recID].fdbItem;
-      if (!fdbItem) Error("fdbItem not available!");
+      int fdbItemIndex = streamptr->tsteps[tsID].records[recID].fdbItemIndex;
+      if (fdbItemIndex == -1) Error("fdbItem not available!");
 
-      recsize = fdb_read_record(streamptr->protocolData, fdbItem, &(streamptr->record->buffersize), &gribbuffer);
+      recsize = fdb_read_record(streamptr->protocolData, &(streamptr->fdbKeyValueList[fdbItemIndex]),
+                                &(streamptr->record->buffersize), &gribbuffer);
 #endif
     }
   else

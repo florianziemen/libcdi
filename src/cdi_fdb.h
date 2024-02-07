@@ -17,7 +17,14 @@ typedef struct
   char *keys[32];
   char *values[32];
   int numKeys;
-} KeyValueEntry;
+} KeyValueItem;
+
+typedef struct
+{
+  char *keys[32];
+  char *values[32];
+  int numKeys;
+} fdbKeyValueEntry;
 
 typedef struct
 {
@@ -28,13 +35,14 @@ typedef struct
   int ilevel;
 } RecordInfoEntry;
 
-void decode_fdbitem(const char *fdbItem, KeyValueEntry *keyValue);
-int fdb_fill_itemlist(fdb_handle_t *fdb, fdb_request_t *request, char ***itemList);
-long fdb_read_record(fdb_handle_t *fdb, char *item, size_t *buffersize, void **gribbuffer);
-int check_keyvalueList(int numItems, KeyValueEntry *keyValueList);
+void fdb_delete_kvlist(int numItems, fdbKeyValueEntry *keyValueList);
+void decode_fdbitem(const char *fdbItem, KeyValueItem *keyValue);
+int fdb_fill_kvlist(fdb_handle_t *fdb, fdb_request_t *request, fdbKeyValueEntry **keyValueList);
+long fdb_read_record(fdb_handle_t *fdb, const fdbKeyValueEntry *keyValue, size_t *buffersize, void **gribbuffer);
+int check_keyvalueList(int numItems, fdbKeyValueEntry *keyValueList);
 void record_info_entry_init(RecordInfoEntry *recordInfo);
 int get_num_records(int numItems, RecordInfoEntry *recordInfoList);
-void decode_keyvalue(KeyValueEntry *keyValue, RecordInfoEntry *recordInfo);
+void decode_keyvalue(fdbKeyValueEntry *keyValue, RecordInfoEntry *recordInfo);
 int remove_duplicate_timesteps(RecordInfoEntry *recordInfoList, int numRecords, int numTimesteps, int *timestepRecordOffset);
 fdb_request_t *create_fdb_request(const char *filename);
 

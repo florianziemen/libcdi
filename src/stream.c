@@ -1067,6 +1067,11 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->jobManager = NULL;
 
   streamptr->protocolData = NULL;
+
+#ifdef HAVE_LIBFDB5
+  streamptr->fdbNumItems = 0;
+  streamptr->fdbKeyValueList = NULL;
+#endif
 }
 
 static stream_t *
@@ -1251,9 +1256,6 @@ streamDestroy(stream_t *streamptr)
       for (int index = 0; index < maxSteps; ++index)
         {
           tsteps_t *tstep = &(streamptr->tsteps[index]);
-#ifdef HAVE_LIBFDB5
-          if (tstep->records && tstep->records->fdbItem) free(tstep->records->fdbItem);
-#endif
           if (tstep->records) Free(tstep->records);
           if (tstep->recIDs) Free(tstep->recIDs);
           taxisDestroyKernel(&(tstep->taxis));
@@ -1262,6 +1264,15 @@ streamDestroy(stream_t *streamptr)
       Free(streamptr->tsteps);
       streamptr->tsteps = NULL;
     }
+
+#ifdef HAVE_LIBFDB5
+  if (streamptr->fdbKeyValueList)
+    {
+      fdb_delete_kvlist(streamptr->fdbNumItems, streamptr->fdbKeyValueList);
+      streamptr->fdbNumItems = 0;
+      streamptr->fdbKeyValueList = NULL;
+    }
+#endif
 
   if (vlistID != -1)
     {
