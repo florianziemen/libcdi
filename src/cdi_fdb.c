@@ -430,19 +430,6 @@ create_fdb_request(const char *filename)
   if (!streamDefined) Error("FDB parameter <stream> undefined!");
   if (!expverDefined) Error("FDB parameter <expver> undefined!");
 
-  /*
-  fdb_request_add1(request, "class", "ea");
-  fdb_request_add1(request, "expver", "0001");
-  fdb_request_add1(request, "stream", "oper");
-  fdb_request_add1(request, "domain", "g");
-  fdb_request_add1(request, "date", "20180601");
-  // fdb_request_add1(request, "time", "1800");
-  fdb_request_add1(request, "type", "an");
-  fdb_request_add1(request, "levtype", "sfc");
-  fdb_request_add1(request, "step", "0");
-  fdb_request_add1(request, "param", "139");
-  // fdb_request_add1(request, "levelist", "300");
-  */
   if (keyValue.item) free(keyValue.item);
 
   return request;
