@@ -201,12 +201,12 @@ check_numKey(const char *key, int numKeys, int numItems)
 {
   if (numKeys == 0)
     {
-      Warning("Key %s is missing in all of the FDB records!", key);
+      Warning("Key %s is missing in all FDB records!", key);
       return -1;
     }
   else if (numKeys < numItems)
     {
-      Warning("Key %s is missing in some of the FDB records!", key);
+      Warning("Key %s is missing in some FDB records!", key);
       return -2;
     }
 
@@ -216,7 +216,7 @@ check_numKey(const char *key, int numKeys, int numItems)
 int
 check_keyvalueList(int numItems, fdbKeyValueEntry *keyValueList)
 {
-  const char *searchKeys[] = { "date", "time", "param", "levtype" };
+  const char *searchKeys[] = { "param", "levtype" /*, "date", "time"*/ };
   int numSearchKeys = sizeof(searchKeys) / sizeof(searchKeys[0]);
   int searchKeysCount[numSearchKeys];
   for (int k = 0; k < numSearchKeys; k++) searchKeysCount[k] = 0;

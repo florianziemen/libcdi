@@ -1048,7 +1048,7 @@ fdbScanTimesteps(stream_t *streamptr)
   RecordInfoEntry *recordInfoList = (RecordInfoEntry *) malloc(numItems * sizeof(RecordInfoEntry));
   for (int i = 0; i < numItems; ++i) record_info_entry_init(&recordInfoList[i]);
 
-  if (check_keyvalueList(numItems, keyValueList) != 0) return 1;
+  if (check_keyvalueList(numItems, keyValueList) != 0) return CDI_EUFSTRUCT;
 
   for (int i = 0; i < numItems; ++i) decode_keyvalue(&keyValueList[i], &recordInfoList[i]);
 

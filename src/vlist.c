@@ -965,23 +965,15 @@ vlistNrecs(int vlistID)
 int
 vlistNumber(int vlistID)
 {
-  int number, number2;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   int datatype = vlistptr->vars[0].datatype;
-  if (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64)
-    number = CDI_COMP;
-  else
-    number = CDI_REAL;
+  int number = (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64) ? CDI_COMP :CDI_REAL;
 
   for (int varID = 1; varID < vlistptr->nvars; varID++)
     {
       datatype = vlistptr->vars[varID].datatype;
-      if (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64)
-        number2 = CDI_COMP;
-      else
-        number2 = CDI_REAL;
-
+      int number2 = (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64) ? CDI_COMP : CDI_REAL;
       if (number2 != number)
         {
           number = CDI_BOTH;
