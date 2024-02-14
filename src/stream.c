@@ -501,8 +501,8 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
           return CDI_EUFTYPE;
         }
 
-      fdb_initialise();
-      fdb_new_handle((fdb_handle_t **) &(streamptr->protocolData));
+      check_fdb_error(fdb_initialise());
+      check_fdb_error(fdb_new_handle((fdb_handle_t **) &(streamptr->protocolData)));
       streamptr->filetype = filetype;
       if (recordBufIsToBeCreated)
         {
@@ -1115,7 +1115,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 
     case CDI_PROTOCOL_FDB:
 #ifdef HAVE_LIBFDB5
-      if (streamptr->protocolData) fdb_delete_handle(streamptr->protocolData);
+      if (streamptr->protocolData) check_fdb_error(fdb_delete_handle(streamptr->protocolData));
       streamptr->protocolData = NULL;
 #endif
       return;

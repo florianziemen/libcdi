@@ -13,6 +13,13 @@ int cdi_fdb_dummy;
 void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer);
 
 void
+check_fdb_error(int errorNum)
+{
+  // This routine provides a simple interface to FDB error message routine.
+  if (errorNum != FDB_SUCCESS) Error("%s", fdb_error_string(errorNum));
+}
+
+void
 fdb_delete_kvlist(int numItems, fdbKeyValueEntry *keyValueList)
 {
   for (int i = 0; i < numItems; ++i)
@@ -97,7 +104,7 @@ fdbitem_to_request(const fdbKeyValueEntry *keyValue, fdb_request_t *request)
   for (int i = 0; i < keyValue->numKeys; i++)
     {
       // printf("%d: key <%s> value <%s>\n", i, keyValue->keys[i], keyValue->values[i]);
-      fdb_request_add1(request, keyValue->keys[i], keyValue->values[i]);
+      check_fdb_error(fdb_request_add1(request, keyValue->keys[i], keyValue->values[i]));
     }
 }
 
@@ -106,7 +113,8 @@ fdb_fill_kvlist(fdb_handle_t *fdb, fdb_request_t *request, fdbKeyValueEntry **pk
 {
   fdb_listiterator_t *it;
 
-  fdb_list(fdb, request, &it, true);
+  bool reportDuplicatedListElements = false;
+  check_fdb_error(fdb_list(fdb, request, &it, reportDuplicatedListElements));
 
   int numItems = 0;
   while (true)
@@ -121,7 +129,7 @@ fdb_fill_kvlist(fdb_handle_t *fdb, fdb_request_t *request, fdbKeyValueEntry **pk
 
   if (*pkeyValueList == NULL) *pkeyValueList = (fdbKeyValueEntry *) malloc(numItems * sizeof(fdbKeyValueEntry));
 
-  fdb_list(fdb, request, &it, true);
+  check_fdb_error(fdb_list(fdb, request, &it, reportDuplicatedListElements));
 
   int itemNum = 0;
   while (true)
@@ -135,9 +143,8 @@ fdb_fill_kvlist(fdb_handle_t *fdb, fdb_request_t *request, fdbKeyValueEntry **pk
       // printf("uri=%s, off=%zu, attr_len=%zu\n", uri, off, attr_len);
 
       fdb_split_key_t *sk = NULL;
-      fdb_new_splitkey(&sk);
-      err = fdb_listiterator_splitkey(it, sk);
-      assert(err == FDB_SUCCESS);
+      check_fdb_error(fdb_new_splitkey(&sk));
+      check_fdb_error(fdb_listiterator_splitkey(it, sk));
 
       int keyNum = 0;
       while (true)
@@ -159,10 +166,10 @@ fdb_fill_kvlist(fdb_handle_t *fdb, fdb_request_t *request, fdbKeyValueEntry **pk
 
       (*pkeyValueList)[itemNum++].numKeys = keyNum;
 
-      err = fdb_delete_splitkey(sk);
+      check_fdb_error(fdb_delete_splitkey(sk));
     }
 
-  fdb_delete_listiterator(it);
+  check_fdb_error(fdb_delete_listiterator(it));
 
   return numItems;
 }
@@ -171,27 +178,26 @@ long
 fdb_read_record(fdb_handle_t *fdb, const fdbKeyValueEntry *keyValue, size_t *buffersize, void **gribbuffer)
 {
   fdb_datareader_t *dataReader = NULL;
-  fdb_new_datareader(&dataReader);
+  check_fdb_error(fdb_new_datareader(&dataReader));
   fdb_request_t *singleRequest = NULL;
-  fdb_new_request(&singleRequest);
+  check_fdb_error(fdb_new_request(&singleRequest));
   fdbitem_to_request(keyValue, singleRequest);
-  int status = fdb_retrieve(fdb, singleRequest, dataReader);
-  fdb_delete_request(singleRequest);
-  if (status != FDB_SUCCESS) Error("fdb_retrieve failed!");
+  check_fdb_error(fdb_retrieve(fdb, singleRequest, dataReader));
+  check_fdb_error(fdb_delete_request(singleRequest));
 
   long recordSize = 0;
-  fdb_datareader_open(dataReader, &recordSize);
+  check_fdb_error(fdb_datareader_open(dataReader, &recordSize));
   if (recordSize == 0) Error("fdb_datareader empty!");
 
   ensureBufferSize(recordSize, buffersize, gribbuffer);
 
   long readSize = 0;
-  fdb_datareader_read(dataReader, *gribbuffer, recordSize, &readSize);
+  check_fdb_error(fdb_datareader_read(dataReader, *gribbuffer, recordSize, &readSize));
   // printf("fdb_datareader_read: size=%ld/%ld\n", recordSize, readSize);
   if (readSize != recordSize) Error("fdb_datareader_read failed!");
 
-  fdb_datareader_close(dataReader);
-  fdb_delete_datareader(dataReader);
+  check_fdb_error(fdb_datareader_close(dataReader));
+  check_fdb_error(fdb_delete_datareader(dataReader));
 
   return recordSize;
 }
@@ -412,23 +418,20 @@ create_fdb_request(const char *filename)
   fdb_request_t *request = NULL;
   fdb_new_request(&request);
 
-  bool classDefined = false;
-  bool streamDefined = false;
   bool expverDefined = false;
-  for (int i = 0; i < keyValue.numKeys; i++)
+  bool classDefined = false;
+  for (int k = 0; k < keyValue.numKeys; k++)
     {
       // clang-format off
-      if      (str_is_equal(keyValue.keys[i], "class"))  classDefined = true;
-      else if (str_is_equal(keyValue.keys[i], "stream")) streamDefined = true;
-      else if (str_is_equal(keyValue.keys[i], "expver")) expverDefined = true;
+      if      (!expverDefined && str_is_equal(keyValue.keys[k], "expver")) expverDefined = true;
+      else if (!classDefined  && str_is_equal(keyValue.keys[k], "class")) classDefined = true;
       // clang-format on
 
-      fdb_request_add1(request, keyValue.keys[i], keyValue.values[i]);
+      check_fdb_error(fdb_request_add1(request, keyValue.keys[k], keyValue.values[k]));
     }
 
-  if (!classDefined) Error("FDB parameter <class> undefined!");
-  if (!streamDefined) Error("FDB parameter <stream> undefined!");
   if (!expverDefined) Error("FDB parameter <expver> undefined!");
+  if (!classDefined) Error("FDB parameter <class> undefined!");
 
   if (keyValue.item) free(keyValue.item);
 

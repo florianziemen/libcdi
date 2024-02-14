@@ -968,7 +968,7 @@ vlistNumber(int vlistID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   int datatype = vlistptr->vars[0].datatype;
-  int number = (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64) ? CDI_COMP :CDI_REAL;
+  int number = (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64) ? CDI_COMP : CDI_REAL;
 
   for (int varID = 1; varID < vlistptr->nvars; varID++)
     {

@@ -35,6 +35,7 @@ typedef struct
   int ilevel;
 } RecordInfoEntry;
 
+void check_fdb_error(int errorNum);
 void fdb_delete_kvlist(int numItems, fdbKeyValueEntry *keyValueList);
 void decode_fdbitem(const char *fdbItem, KeyValueItem *keyValue);
 int fdb_fill_kvlist(fdb_handle_t *fdb, fdb_request_t *request, fdbKeyValueEntry **keyValueList);

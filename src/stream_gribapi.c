@@ -1041,8 +1041,12 @@ fdbScanTimesteps(stream_t *streamptr)
   if (CDI_Debug)
     for (int i = 0; i < numItems; ++i)
       {
+        printf("item=%d ", i + 1);
         for (int k = 0; k < keyValueList[i].numKeys; ++k)
-          printf("item=%d %s=%s\n", i + 1, keyValueList[i].keys[k], keyValueList[i].values[k]);
+          {
+            printf("%s%s=%s", (k > 0) ? "," : "", keyValueList[i].keys[k], keyValueList[i].values[k]);
+          }
+        printf("\n");
       }
 
   RecordInfoEntry *recordInfoList = (RecordInfoEntry *) malloc(numItems * sizeof(RecordInfoEntry));

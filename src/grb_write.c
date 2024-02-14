@@ -130,49 +130,51 @@ cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nb
 
   if (keyValue.numKeys == 0) Error("FDB keys missing!");
 
-  const char *class = NULL;
-  const char *stream = NULL;
-  const char *expver = NULL;
-  for (int i = 0; i < keyValue.numKeys; i++)
+  bool expverDefined = false;
+  bool classDefined = false;
+  for (int k = 0; k < keyValue.numKeys; k++)
     {
       // clang-format off
-      if      (str_is_equal(keyValue.keys[i], "class"))  class = keyValue.values[i];
-      else if (str_is_equal(keyValue.keys[i], "stream")) stream = keyValue.values[i];
-      else if (str_is_equal(keyValue.keys[i], "expver")) expver = keyValue.values[i];
-      else Error("Unsupported FDB parameter: %s=%s", keyValue.keys[i], keyValue.values[i]);
+      if      (!expverDefined && str_is_equal(keyValue.keys[k], "expver")) expverDefined = true;
+      else if (!classDefined  && str_is_equal(keyValue.keys[k], "class")) classDefined = true;
       // clang-format on
     }
 
-  if (!class) Error("FDB parameter <class> undefined!");
-  if (!stream) Error("FDB parameter <stream> undefined!");
-  if (!expver) Error("FDB parameter <expver> undefined!");
+  if (!expverDefined) Error("FDB parameter <expver> undefined!");
+  if (!classDefined) Error("FDB parameter <class> undefined!");
 
   if (CDI_Debug)
     {
-      printf("{class=%s,expver=%s,stream=%s,date=%s,time=%s,domain=g}", class, expver, stream, fdbKeys->date, fdbKeys->time);
+      printf("{");
+      for (int k = 0; k < keyValue.numKeys; k++)
+        {
+          printf("%s%s=%s", (k > 0) ? "," : "", keyValue.keys[k], keyValue.values[k]);
+        }
+      printf(",date=%s,time=%s,domain=g}", fdbKeys->date, fdbKeys->time);
       printf("{type=an,levtype=%s}{step=0,", fdbKeys->levtype);
       if (fdbKeys->levelist[0]) printf("levelist=%s,", fdbKeys->levelist);
       printf("param=%s},length=%zu\n", fdbKeys->param, nbytes);
     }
 
   fdb_key_t *key;
-  fdb_new_key(&key);
-  fdb_key_add(key, "class", class);
-  fdb_key_add(key, "expver", expver);
-  fdb_key_add(key, "stream", stream);
-  fdb_key_add(key, "domain", "g");
-  fdb_key_add(key, "date", fdbKeys->date);
-  fdb_key_add(key, "time", fdbKeys->time);
-  fdb_key_add(key, "type", "an");
-  fdb_key_add(key, "levtype", fdbKeys->levtype);
-  fdb_key_add(key, "step", "0");
-  fdb_key_add(key, "param", fdbKeys->param);
-  if (fdbKeys->levelist[0]) fdb_key_add(key, "levelist", fdbKeys->levelist);
+  check_fdb_error(fdb_new_key(&key));
+  for (int k = 0; k < keyValue.numKeys; k++)
+    {
+      check_fdb_error(fdb_key_add(key, keyValue.keys[k], keyValue.values[k]));
+    }
+  check_fdb_error(fdb_key_add(key, "domain", "g"));
+  check_fdb_error(fdb_key_add(key, "date", fdbKeys->date));
+  check_fdb_error(fdb_key_add(key, "time", fdbKeys->time));
+  check_fdb_error(fdb_key_add(key, "type", "an"));
+  check_fdb_error(fdb_key_add(key, "levtype", fdbKeys->levtype));
+  check_fdb_error(fdb_key_add(key, "step", "0"));
+  check_fdb_error(fdb_key_add(key, "param", fdbKeys->param));
+  if (fdbKeys->levelist[0]) check_fdb_error(fdb_key_add(key, "levelist", fdbKeys->levelist));
 
-  fdb_archive(fdbHandle, key, gribbuffer, nbytes);
+  check_fdb_error(fdb_archive(fdbHandle, key, gribbuffer, nbytes));
   // alternative: write to tmpfile and use C++ code from fdb_write
 
-  fdb_delete_key(key);
+  check_fdb_error(fdb_delete_key(key));
 #endif
 }
 
