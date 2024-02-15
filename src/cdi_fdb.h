@@ -28,6 +28,7 @@ typedef struct
 
 typedef struct
 {
+  int fdbIndex;
   int date;
   int time;
   int param;
@@ -36,16 +37,18 @@ typedef struct
 } RecordInfoEntry;
 
 void check_fdb_error(int errorNum);
-void fdb_delete_kvlist(int numItems, fdbKeyValueEntry *keyValueList);
+void cdi_fdb_delete_kvlist(int numItems, fdbKeyValueEntry *keyValueList);
 void decode_fdbitem(const char *fdbItem, KeyValueItem *keyValue);
-int fdb_fill_kvlist(fdb_handle_t *fdb, fdb_request_t *request, fdbKeyValueEntry **keyValueList);
-long fdb_read_record(fdb_handle_t *fdb, const fdbKeyValueEntry *keyValue, size_t *buffersize, void **gribbuffer);
-int check_keyvalueList(int numItems, fdbKeyValueEntry *keyValueList);
-void record_info_entry_init(RecordInfoEntry *recordInfo);
+int cdi_fdb_fill_kvlist(fdb_handle_t *fdb, fdb_request_t *request, fdbKeyValueEntry **keyValueList);
+long cdi_fdb_read_record(fdb_handle_t *fdb, const fdbKeyValueEntry *keyValue, size_t *buffersize, void **gribbuffer);
+//int check_keyvalueList(int numItems, fdbKeyValueEntry *keyValueList);
+void print_keyvalueList(int numItems, fdbKeyValueEntry *keyValueList);
+void print_keyvalueList_sorted(int numItems, fdbKeyValueEntry *keyValueList, RecordInfoEntry *recordInfoList);
+void cdi_fdb_sort_datetime(int numItems, RecordInfoEntry *recordInfo);
 int get_num_records(int numItems, RecordInfoEntry *recordInfoList);
-void decode_keyvalue(fdbKeyValueEntry *keyValue, RecordInfoEntry *recordInfo);
+int decode_keyvalue(int numItems, fdbKeyValueEntry *keyValueList, RecordInfoEntry *recordInfoList);
 int remove_duplicate_timesteps(RecordInfoEntry *recordInfoList, int numRecords, int numTimesteps, int *timestepRecordOffset);
-fdb_request_t *create_fdb_request(const char *filename);
+fdb_request_t *cdi_create_fdb_request(const char *filename);
 
 #endif
 

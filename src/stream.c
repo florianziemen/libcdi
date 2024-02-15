@@ -1268,7 +1268,7 @@ streamDestroy(stream_t *streamptr)
 #ifdef HAVE_LIBFDB5
   if (streamptr->fdbKeyValueList)
     {
-      fdb_delete_kvlist(streamptr->fdbNumItems, streamptr->fdbKeyValueList);
+      cdi_fdb_delete_kvlist(streamptr->fdbNumItems, streamptr->fdbKeyValueList);
       streamptr->fdbNumItems = 0;
       streamptr->fdbKeyValueList = NULL;
     }

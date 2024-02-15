@@ -147,7 +147,7 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memType, void *g
       int fdbItemIndex = streamptr->tsteps[tsID].records[recID].fdbItemIndex;
       if (fdbItemIndex == -1) Error("fdbItem not available!");
 
-      recsize = fdb_read_record(streamptr->protocolData, &(streamptr->fdbKeyValueList[fdbItemIndex]),
+      recsize = cdi_fdb_read_record(streamptr->protocolData, &(streamptr->fdbKeyValueList[fdbItemIndex]),
                                 &(streamptr->record->buffersize), &gribbuffer);
 #endif
     }

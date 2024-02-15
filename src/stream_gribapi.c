@@ -1032,35 +1032,36 @@ fdbScanTimesteps(stream_t *streamptr)
 
   fdb_handle_t *fdbHandle = streamptr->protocolData;
 
-  fdb_request_t *request = create_fdb_request(streamptr->filename);
+  fdb_request_t *request = cdi_create_fdb_request(streamptr->filename);
 
   fdbKeyValueEntry *keyValueList = NULL;
-  int numItems = fdb_fill_kvlist(fdbHandle, request, &keyValueList);
+  int numItems = cdi_fdb_fill_kvlist(fdbHandle, request, &keyValueList);
   fdb_delete_request(request);
   if (numItems == 0) Error("FDB request doesn't find any database entries!");
   if (CDI_Debug)
-    for (int i = 0; i < numItems; ++i)
-      {
-        printf("item=%d ", i + 1);
-        for (int k = 0; k < keyValueList[i].numKeys; ++k)
-          {
-            printf("%s%s=%s", (k > 0) ? "," : "", keyValueList[i].keys[k], keyValueList[i].values[k]);
-          }
-        printf("\n");
-      }
+    {
+      printf("Original FDB items:\n");
+      print_keyvalueList(numItems, keyValueList);
+    }
+
+  // if (check_keyvalueList(numItems, keyValueList) != 0) return CDI_EUFSTRUCT;
 
   RecordInfoEntry *recordInfoList = (RecordInfoEntry *) malloc(numItems * sizeof(RecordInfoEntry));
-  for (int i = 0; i < numItems; ++i) record_info_entry_init(&recordInfoList[i]);
+  if (decode_keyvalue(numItems, keyValueList, recordInfoList) != 0) return CDI_EUFSTRUCT;
 
-  if (check_keyvalueList(numItems, keyValueList) != 0) return CDI_EUFSTRUCT;
+  cdi_fdb_sort_datetime(numItems, recordInfoList);
 
-  for (int i = 0; i < numItems; ++i) decode_keyvalue(&keyValueList[i], &recordInfoList[i]);
+  if (CDI_Debug)
+    {
+      printf("Sorted FDB items:\n");
+      print_keyvalueList_sorted(numItems, keyValueList, recordInfoList);
+    }
 
   int numRecords = get_num_records(numItems, recordInfoList);
+  if (numRecords == 0) return CDI_EUFSTRUCT;
+
   int numTimesteps = numItems / numRecords;
   if (CDI_Debug) Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
-
-  if (numRecords == 0) return CDI_EUFSTRUCT;
 
   int *timestepRecordOffset = (int *) malloc(numTimesteps * sizeof(int));
   for (int i = 0; i < numTimesteps; i++) timestepRecordOffset[i] = i * numRecords;
@@ -1068,8 +1069,8 @@ fdbScanTimesteps(stream_t *streamptr)
   if (CDI_Debug) Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
   // Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
 
-  CdiDateTime vDateTime0;
-  cdiDateTime_init(&vDateTime0);
+  // CdiDateTime vDateTime0;
+  // cdiDateTime_init(&vDateTime0);
   int fcast = 0;
 
   streamptr->curTsID = 0;
@@ -1081,7 +1082,11 @@ fdbScanTimesteps(stream_t *streamptr)
 
   for (int recID = 0; recID < numRecords; recID++)
     {
-      long recsize = fdb_read_record(fdbHandle, &keyValueList[recID], &buffersize, &gribbuffer);
+      int fdbItem = recordInfoList[recID].fdbIndex;
+      int vdate = recordInfoList[recID].date;
+      int vtime = recordInfoList[recID].time * 100;
+
+      long recsize = cdi_fdb_read_record(fdbHandle, &keyValueList[fdbItem], &buffersize, &gribbuffer);
 
       int datatype, comptype = 0;
       gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype);
@@ -1099,13 +1104,15 @@ fdbScanTimesteps(stream_t *streamptr)
       int param = gribapiGetParam(gh);
 
       CdiDateTime sDateTime;
-      CdiDateTime vDateTime = gribapiGetValidityDateTime(gh, &sDateTime);
+      // CdiDateTime vDateTime = gribapiGetValidityDateTime(gh, &sDateTime);
+      CdiDateTime vDateTime = cdiDateTime_set(vdate, vtime);
+      sDateTime = vDateTime;
 
       VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
       if (recID == 0)
         {
-          vDateTime0 = vDateTime;
+          // vDateTime0 = vDateTime;
           taxis->rDateTime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapi_get_timeunits(gh);
@@ -1125,7 +1132,7 @@ fdbScanTimesteps(stream_t *streamptr)
       var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
       int recpos = 0;
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2, lbounds, level1,
-                       level2, level_sf, level_unit, &scanKeys, ptiles, true, recID);
+                       level2, level_sf, level_unit, &scanKeys, ptiles, true, fdbItem);
 
       grib_handle_delete(gh);
       gh = NULL;
@@ -1180,7 +1187,7 @@ fdbScanTimesteps(stream_t *streamptr)
 
           records[recID].position = 0;
           records[recID].size = 0;
-          records[recID].fdbItemIndex = recordOffset + recID;
+          records[recID].fdbItemIndex = recordInfoList[recordOffset + recID].fdbIndex;
         }
 
       if (tsID == 1) streamptr->tsteps[1].nrecs = numRecords;
