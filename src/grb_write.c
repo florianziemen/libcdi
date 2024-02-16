@@ -239,7 +239,8 @@ grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
       if (fdbItemIndex == -1) Error("fdbItem not available!");
 
       size_t buffersize = 0;
-      recsize = cdi_fdb_read_record(streamptr1->protocolData, &(streamptr1->fdbKeyValueList[fdbItemIndex]), &buffersize, &gribbuffer);
+      recsize
+          = cdi_fdb_read_record(streamptr1->protocolData, &(streamptr1->fdbKeyValueList[fdbItemIndex]), &buffersize, &gribbuffer);
 
       // round up recsize to next multiple of 8
       size_t gribbuffersize = ((recsize + 7U) & ~7U);

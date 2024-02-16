@@ -41,7 +41,7 @@ void cdi_fdb_delete_kvlist(int numItems, fdbKeyValueEntry *keyValueList);
 void decode_fdbitem(const char *fdbItem, KeyValueItem *keyValue);
 int cdi_fdb_fill_kvlist(fdb_handle_t *fdb, fdb_request_t *request, fdbKeyValueEntry **keyValueList);
 long cdi_fdb_read_record(fdb_handle_t *fdb, const fdbKeyValueEntry *keyValue, size_t *buffersize, void **gribbuffer);
-//int check_keyvalueList(int numItems, fdbKeyValueEntry *keyValueList);
+// int check_keyvalueList(int numItems, fdbKeyValueEntry *keyValueList);
 void print_keyvalueList(int numItems, fdbKeyValueEntry *keyValueList);
 void print_keyvalueList_sorted(int numItems, fdbKeyValueEntry *keyValueList, RecordInfoEntry *recordInfoList);
 void cdi_fdb_sort_datetime(int numItems, RecordInfoEntry *recordInfo);
