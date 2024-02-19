@@ -4249,10 +4249,18 @@ wrf_read_timestep(int fileID, int nctimevarid, int tsID)
 }
 
 static double
-get_timevalue(int fileID, int nctimevarid, size_t ncStepIndex)
+get_timevalue(int fileID, int nctimevarid, size_t ncStepIndex, double *timevarBuffer)
 {
   double timevalue = 0.0;
-  cdf_get_var1_double(fileID, nctimevarid, &ncStepIndex, &timevalue);
+
+  if (timevarBuffer)
+    {
+      timevalue = timevarBuffer[ncStepIndex];
+    }
+  else
+    {
+      cdf_get_var1_double(fileID, nctimevarid, &ncStepIndex, &timevalue);
+    }
 
   if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
 
@@ -4295,8 +4303,11 @@ cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
             }
           else
             {
+              double *timevarBuffer = (double *) malloc(numTimesteps * sizeof(double));
+              cdf_get_var_double(fileID, nctimevarid, timevarBuffer);
               for (int tsID = 0; tsID < numTimesteps; ++tsID)
-                vDateTimeList[tsID] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID), taxis0);
+                vDateTimeList[tsID] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID, timevarBuffer), taxis0);
+              if (timevarBuffer) free(timevarBuffer);
             }
         }
 
@@ -4367,7 +4378,7 @@ cdf_read_timesteps(int numTimesteps, stream_t *streamptr, taxis_t *taxis0)
                 {
                   size_t ncStepIndex = streamptr->tsteps[tsID].ncStepIndex;
                   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
-                  cdi_set_forecast_period(get_timevalue(fileID, leadtimeid, ncStepIndex), taxis);
+                  cdi_set_forecast_period(get_timevalue(fileID, leadtimeid, ncStepIndex, NULL), taxis);
                 }
             }
         }

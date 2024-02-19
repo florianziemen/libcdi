@@ -2,6 +2,10 @@
 
 	* Version 2.4.0 released
 
+2024-02-19  Uwe Schulzweida
+
+	* netCDF: use timevar buffer
+
 2024-02-05  Uwe Schulzweida
 
 	* fdb5 interface: update to release 5.11.29
