@@ -414,11 +414,11 @@ param_to_name(int param, char *name)
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
   if (pdis == 255)
     {
-      sprintf(name, "code%d", pnum);
+      snprintf(name, 256, "code%d", pnum);
     }
   else
     {
-      sprintf(name, "param%d.%d.%d", pnum, pcat, pdis);
+      snprintf(name, 256, "param%d.%d.%d", pnum, pcat, pdis);
     }
 }
 
@@ -699,7 +699,7 @@ gribapiDefProjHEALPIX(grib_handle *gh, int gridID)
 static void
 gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize, off_t position, int datatype, int comptype,
                  const char *varname, int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf,
-                 int level_unit, VarScanKeys *scanKeys, const var_tile_t *tiles, bool lread_additional_keys, void *fdbItem)
+                 int level_unit, VarScanKeys *scanKeys, const var_tile_t *tiles, bool lread_additional_keys, int fdbItemIndex)
 {
   int vlistID = streamptr->vlistID;
   int tsID = streamptr->curTsID;
@@ -721,9 +721,9 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   record->scanKeys = *scanKeys;
   record->tiles = tiles ? *tiles : dummy_tiles;
 #ifdef HAVE_LIBFDB5
-  record->fdbItem = fdbItem;
+  record->fdbItemIndex = fdbItemIndex;
 #else
-  (void) fdbItem;
+  (void) fdbItemIndex;
 #endif
 
   strncpy(record->varname, varname, sizeof(record->varname) - 1);
@@ -743,21 +743,21 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
 
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-  grid_t *grid = (grid_t *) Malloc(sizeof(*grid));
-  bool uvRelativeToGrid = gribapiGetGrid(gh, grid);
+  grid_t *gridptr = (grid_t *) Malloc(sizeof(*gridptr));
+  bool uvRelativeToGrid = gribapiGetGrid(gh, gridptr);
 
-  struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
+  struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
   int gridID = gridAdded.Id;
   // clang-format off
   if (!gridAdded.isNew)
     {
-      grid_free(grid);
-      Free(grid);
+      grid_free(gridptr);
+      Free(gridptr);
     }
-  else if (grid->projtype == CDI_PROJ_RLL)     gribapiDefProjRLL(gh, gridID);
-  else if (grid->projtype == CDI_PROJ_LCC)     gribapiDefProjLCC(gh, gridID);
-  else if (grid->projtype == CDI_PROJ_STERE)   gribapiDefProjSTERE(gh, gridID);
-  else if (grid->projtype == CDI_PROJ_HEALPIX) gribapiDefProjHEALPIX(gh, gridID);
+  else if (gridptr->projtype == CDI_PROJ_RLL)     gribapiDefProjRLL(gh, gridID);
+  else if (gridptr->projtype == CDI_PROJ_LCC)     gribapiDefProjLCC(gh, gridID);
+  else if (gridptr->projtype == CDI_PROJ_STERE)   gribapiDefProjSTERE(gh, gridID);
+  else if (gridptr->projtype == CDI_PROJ_HEALPIX) gribapiDefProjHEALPIX(gh, gridID);
   // clang-format on
 
   int zaxistype = gribapi_get_zaxis_type(gribEditionNumber(gh), leveltype1);
@@ -786,7 +786,7 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
         unsigned char uuid[CDI_UUID_SIZE];
         long lpar;
         GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
-        if (lpar != 6) fprintf(stderr, "Warning ...\n");
+        // if (lpar != 6) fprintf(stderr, "Warning ...\n");
         GRIB_CHECK(grib_get_long(gh, "nlev", &lpar), 0);
         int nhlev = (int) lpar;
         GRIB_CHECK(grib_get_long(gh, "numberOfVGridUsed", &lpar), 0);
@@ -1032,41 +1032,45 @@ fdbScanTimesteps(stream_t *streamptr)
 
   fdb_handle_t *fdbHandle = streamptr->protocolData;
 
-  char **fdbItemList = NULL;
-  fdb_request_t *request = create_fdb_request(streamptr->filename);
-  int numItems = fdb_fill_itemlist(fdbHandle, request, &fdbItemList);
-  fdb_delete_request(request);
-  if (numItems == 0) Error("FDB request does not find any database entries!");
-  if (CDI_Debug)
-    for (int i = 0; i < numItems; ++i) printf("item[%d] = %s\n", i + 1, fdbItemList[i]);
+  fdb_request_t *request = cdi_create_fdb_request(streamptr->filename);
 
-  KeyValueEntry *keyValueList = (KeyValueEntry *) malloc(numItems * sizeof(KeyValueEntry));
-  for (int i = 0; i < numItems; ++i) keyValueList[i].item = NULL;
+  fdbKeyValueEntry *keyValueList = NULL;
+  int numItems = cdi_fdb_fill_kvlist(fdbHandle, request, &keyValueList);
+  fdb_delete_request(request);
+  if (numItems == 0) Error("FDB request doesn't find any database entries!");
+  if (CDI_Debug)
+    {
+      printf("Original FDB items:\n");
+      print_keyvalueList(numItems, keyValueList);
+    }
+
+  // if (check_keyvalueList(numItems, keyValueList) != 0) return CDI_EUFSTRUCT;
 
   RecordInfoEntry *recordInfoList = (RecordInfoEntry *) malloc(numItems * sizeof(RecordInfoEntry));
-  for (int i = 0; i < numItems; ++i) record_info_entry_init(&recordInfoList[i]);
+  if (decode_keyvalue(numItems, keyValueList, recordInfoList) != 0) return CDI_EUFSTRUCT;
 
-  for (int i = 0; i < numItems; ++i) decode_fdbitem(fdbItemList[i], &keyValueList[i]);
-  if (check_keyvalueList(numItems, keyValueList) != 0) return 1;
-  for (int i = 0; i < numItems; ++i) decode_keyvalue(&keyValueList[i], &recordInfoList[i]);
+  cdi_fdb_sort_datetime(numItems, recordInfoList);
+
+  if (CDI_Debug)
+    {
+      printf("Sorted FDB items:\n");
+      print_keyvalueList_sorted(numItems, keyValueList, recordInfoList);
+    }
 
   int numRecords = get_num_records(numItems, recordInfoList);
+  if (numRecords == 0) return CDI_EUFSTRUCT;
+
   int numTimesteps = numItems / numRecords;
   if (CDI_Debug) Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
-
-  for (int i = 0; i < numItems; ++i)
-    if (keyValueList[i].item) free(keyValueList[i].item);
-  free(keyValueList);
-
-  if (numRecords == 0) return CDI_EUFSTRUCT;
 
   int *timestepRecordOffset = (int *) malloc(numTimesteps * sizeof(int));
   for (int i = 0; i < numTimesteps; i++) timestepRecordOffset[i] = i * numRecords;
   numTimesteps = remove_duplicate_timesteps(recordInfoList, numRecords, numTimesteps, timestepRecordOffset);
   if (CDI_Debug) Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
+  // Message("numRecords=%d  numTimesteps=%d", numRecords, numTimesteps);
 
-  CdiDateTime vDateTime0;
-  cdiDateTime_init(&vDateTime0);
+  // CdiDateTime vDateTime0;
+  // cdiDateTime_init(&vDateTime0);
   int fcast = 0;
 
   streamptr->curTsID = 0;
@@ -1078,7 +1082,11 @@ fdbScanTimesteps(stream_t *streamptr)
 
   for (int recID = 0; recID < numRecords; recID++)
     {
-      long recsize = fdb_read_record(fdbHandle, fdbItemList[recID], &buffersize, &gribbuffer);
+      int fdbItem = recordInfoList[recID].fdbIndex;
+      int vdate = recordInfoList[recID].date;
+      int vtime = recordInfoList[recID].time * 100;
+
+      long recsize = cdi_fdb_read_record(fdbHandle, &keyValueList[fdbItem], &buffersize, &gribbuffer);
 
       int datatype, comptype = 0;
       gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype);
@@ -1096,13 +1104,15 @@ fdbScanTimesteps(stream_t *streamptr)
       int param = gribapiGetParam(gh);
 
       CdiDateTime sDateTime;
-      CdiDateTime vDateTime = gribapiGetValidityDateTime(gh, &sDateTime);
+      // CdiDateTime vDateTime = gribapiGetValidityDateTime(gh, &sDateTime);
+      CdiDateTime vDateTime = cdiDateTime_set(vdate, vtime);
+      sDateTime = vDateTime;
 
       VarScanKeys scanKeys = gribapiGetScanKeys(gh);
 
       if (recID == 0)
         {
-          vDateTime0 = vDateTime;
+          // vDateTime0 = vDateTime;
           taxis->rDateTime = gribapiGetDataDateTime(gh);
           fcast = gribapiTimeIsFC(gh);
           if (fcast) taxis->unit = gribapi_get_timeunits(gh);
@@ -1122,8 +1132,7 @@ fdbScanTimesteps(stream_t *streamptr)
       var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
       int recpos = 0;
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2, lbounds, level1,
-                       level2, level_sf, level_unit, &scanKeys, ptiles, true, fdbItemList[recID]);
-      fdbItemList[recID] = NULL;
+                       level2, level_sf, level_unit, &scanKeys, ptiles, true, fdbItem);
 
       grib_handle_delete(gh);
       gh = NULL;
@@ -1178,8 +1187,7 @@ fdbScanTimesteps(stream_t *streamptr)
 
           records[recID].position = 0;
           records[recID].size = 0;
-          records[recID].fdbItem = fdbItemList[recordOffset + recID];
-          fdbItemList[recordOffset + recID] = NULL;
+          records[recID].fdbItemIndex = recordInfoList[recordOffset + recID].fdbIndex;
         }
 
       if (tsID == 1) streamptr->tsteps[1].nrecs = numRecords;
@@ -1188,10 +1196,9 @@ fdbScanTimesteps(stream_t *streamptr)
   streamptr->rtsteps = numTimesteps;
   streamptr->ntsteps = numTimesteps;
 
-  for (int i = 0; i < numItems; ++i)
-    if (fdbItemList[i]) free(fdbItemList[i]);
+  streamptr->fdbNumItems = numItems;
+  streamptr->fdbKeyValueList = keyValueList;
 
-  if (fdbItemList) free(fdbItemList);
   if (recordInfoList) free(recordInfoList);
   if (timestepRecordOffset) free(timestepRecordOffset);
 #endif
@@ -1311,7 +1318,7 @@ gribapiScanTimestep1(stream_t *streamptr)
 
       var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2, lbounds, level1,
-                       level2, level_sf, level_unit, &scanKeys, ptiles, true, NULL);
+                       level2, level_sf, level_unit, &scanKeys, ptiles, true, -1);
 
       grib_handle_delete(gh);
       gh = NULL;
@@ -1760,7 +1767,7 @@ unpack_alternative_rows(grib_handle *gh, int memType, void *data)
 }
 
 int
-gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t gridsize, int unreduced, size_t *nmiss,
+gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t gridsize, int unreduced, size_t *numMissVals,
               double missval)
 {
   int status = 0;
@@ -1786,7 +1793,7 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
   // GRIB_CHECK(grib_get_long(gh, "numberOfPoints", &numberOfPoints), 0);
   // printf("values_size = %d  numberOfPoints = %ld\n", datasize, numberOfPoints);
 
-  if (gridsize != datasize) Error("Internal problem: gridsize(%zu) != datasize(%zu)!", gridsize, datasize);
+  if (datasize != gridsize) Error("numberOfPoint (%zu) and gridSize (%zu) differ!", datasize, gridsize);
   size_t dummy = datasize;
 
   if (memType == MEMTYPE_FLOAT)
@@ -1813,12 +1820,12 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
   GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
   int gridtype = (int) lpar;
 
-  *nmiss = 0;
+  *numMissVals = 0;
   if (gridtype < 50 || gridtype > 53)
     {
       GRIB_CHECK(grib_get_long(gh, "numberOfMissing", &lpar), 0);
-      *nmiss = (int) lpar;
-      // printf("gridtype %d, nmiss %d\n", gridtype, nmiss);
+      *numMissVals = (int) lpar;
+      // printf("gridtype %d, numMissVals %d\n", gridtype, numMissVals);
     }
 
   grib_handle_delete(gh);
@@ -3283,8 +3290,8 @@ gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const void *data
 
 size_t
 gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime, int tsteptype,
-              int numavg, size_t datasize, const void *data, size_t nmiss, void **gribbuffer, size_t *gribbuffersize, int comptype,
-              void *gribContainer)
+              int numavg, size_t datasize, const void *data, size_t numMissVals, void **gribbuffer, size_t *gribbuffersize,
+              int comptype, void *gribContainer)
 {
   long editionNumber = 2;
 
@@ -3452,7 +3459,7 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
       }
   }
 
-  if (nmiss > 0)
+  if (numMissVals > 0)
     {
       GRIB_CHECK(my_grib_set_long(gh, "bitmapPresent", 1), 0);
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
@@ -3473,7 +3480,7 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
       GRIB_CHECK(grib_set_double_array(gh, "values", (const double *) data, datasize), 0);
     }
 
-  if (nmiss)
+  if (numMissVals)
     {
       long numberOfMissing = -1;
       GRIB_CHECK(grib_get_long(gh, "numberOfMissing", &numberOfMissing), 0);

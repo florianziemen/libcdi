@@ -422,35 +422,35 @@ int     streamInqNvars(int streamID);
 // STREAM var I/O routines (random access)
 
 //      streamWriteVar: Write a variable
-void    streamWriteVar(int streamID, int varID, const double data[], SizeType nmiss);
-void    streamWriteVarF(int streamID, int varID, const float data[], SizeType nmiss);
+void    streamWriteVar(int streamID, int varID, const double data[], SizeType numMissVals);
+void    streamWriteVarF(int streamID, int varID, const float data[], SizeType numMissVals);
 
 //      streamReadVar: Read a variable
-void    streamReadVar(int streamID, int varID, double data[], SizeType *nmiss);
-void    streamReadVarF(int streamID, int varID, float data[], SizeType *nmiss);
-void    streamReadVarPart(int streamID, int varID, int varType, int start, SizeType size, void *data, SizeType *nmiss, int memtype);
+void    streamReadVar(int streamID, int varID, double data[], SizeType *numMissVals);
+void    streamReadVarF(int streamID, int varID, float data[], SizeType *numMissVals);
+void    streamReadVarPart(int streamID, int varID, int varType, int start, SizeType size, void *data, SizeType *numMissVals, int memtype);
 
 //      streamWriteVarSlice: Write a horizontal slice of a variable
-void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], SizeType nmiss);
-void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], SizeType nmiss);
-void    streamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, SizeType size, void *data, SizeType *nmiss, int memtype);
+void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], SizeType numMissVals);
+void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], SizeType numMissVals);
+void    streamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, SizeType size, void *data, SizeType *numMissVals, int memtype);
 
 //      streamReadVarSlice: Read a horizontal slice of a variable
-void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], SizeType *nmiss);
-void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], SizeType *nmiss);
+void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], SizeType *numMissVals);
+void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], SizeType *numMissVals);
 
-void    streamWriteVarChunk(int streamID, int varID, const int rect[][2], const double data[], SizeType nmiss);
-void    streamWriteVarChunkF(int streamID, int varID, const int rect[][2], const float data[], SizeType nmiss);
+void    streamWriteVarChunk(int streamID, int varID, const int rect[][2], const double data[], SizeType numMissVals);
+void    streamWriteVarChunkF(int streamID, int varID, const int rect[][2], const float data[], SizeType numMissVals);
 
 
 // STREAM record I/O routines (sequential access)
 
 void    streamDefRecord(int streamID, int  varID, int  levelID);
 void    streamInqRecord(int streamID, int *varID, int *levelID);
-void    streamWriteRecord(int streamID, const double data[], SizeType nmiss);
-void    streamWriteRecordF(int streamID, const float data[], SizeType nmiss);
-void    streamReadRecord(int streamID, double data[], SizeType *nmiss);
-void    streamReadRecordF(int streamID, float data[], SizeType *nmiss);
+void    streamWriteRecord(int streamID, const double data[], SizeType numMissVals);
+void    streamWriteRecordF(int streamID, const float data[], SizeType numMissVals);
+void    streamReadRecord(int streamID, double data[], SizeType *numMissVals);
+void    streamReadRecordF(int streamID, float data[], SizeType *numMissVals);
 void    streamCopyRecord(int streamIDdest, int streamIDsrc);
 
 void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);
@@ -489,8 +489,8 @@ char *cdiIterator_inqVariableName(CdiIterator *me);     // The caller is respons
 int cdiIterator_inqGridId(CdiIterator *me);             // The returned id is only valid until the next call to cdiIteratorNextField().
 
 // Reading data
-void cdiIterator_readField(CdiIterator *me, double data[], SizeType *nmiss_optional);
-void cdiIterator_readFieldF(CdiIterator *me, float data[], SizeType *nmiss_optional);
+void cdiIterator_readField(CdiIterator *me, double data[], SizeType *numMissVals_optional);
+void cdiIterator_readFieldF(CdiIterator *me, float data[], SizeType *numMissVals_optional);
 // TODO[NH]: Add functions to read partial fields.
 
 

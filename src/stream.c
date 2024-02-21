@@ -81,7 +81,7 @@ cdiGetFiletype(const char *uri, int *byteorder)
   switch (protocol)
     {
     case CDI_PROTOCOL_ACROSS: return CDI_FILETYPE_GRB2;
-    case CDI_PROTOCOL_FDB:    return CDI_FILETYPE_UNDEF;
+    case CDI_PROTOCOL_FDB:    return CDI_FILETYPE_GRB2;
     case CDI_PROTOCOL_OTHER:  return CDI_FILETYPE_NC4;  // support for NetCDF remote types and ESDM
     case CDI_PROTOCOL_FILE:
       // handled below;
@@ -493,7 +493,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
 #endif
 
     case CDI_PROTOCOL_FDB:
-#if defined(HAVE_FDB5) && defined(HAVE_LIBGRIB_API)
+#if defined(HAVE_LIBFDB5) && defined(HAVE_LIBGRIB_API)
 
       if (filetype != CDI_FILETYPE_GRB && filetype != CDI_FILETYPE_GRB2)
         {
@@ -501,8 +501,8 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
           return CDI_EUFTYPE;
         }
 
-      fdb_initialise();
-      fdb_new_handle((fdb_handle_t **) &(streamptr->protocolData));
+      check_fdb_error(fdb_initialise());
+      check_fdb_error(fdb_new_handle((fdb_handle_t **) &(streamptr->protocolData)));
       streamptr->filetype = filetype;
       if (recordBufIsToBeCreated)
         {
@@ -511,9 +511,9 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
         }
       return 88;
 
-#else  // !(defined(HAVE_FDB5) && defined(HAVE_LIBGRIB_API))
+#else  // !(defined(HAVE_LIBFDB5) && defined(HAVE_LIBGRIB_API))
 
-#ifdef HAVE_FDB5
+#ifdef HAVE_LIBFDB5
       Warning("ecCodes support not compiled in (Needed for FDB5)!");
 #else
       Warning("FDB5 support not compiled in!");
@@ -663,6 +663,18 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
   stream_t *streamptr = stream_new_entry(resH);
   int streamID = CDI_ESYSTEM;
 
+#ifndef HAVE_NC4HDF5_THREADSAFE
+  if (CDI_Threadsafe)
+    {
+#ifndef HAVE_LIBPTHREAD
+      Error("CDI threadsafe failed, pthread support not compiled!");
+#endif
+      if (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C) streamptr->lockIO = true;
+    }
+#endif
+
+  if (streamptr->lockIO) CDI_IO_LOCK();
+
   int (*streamOpenDelegate)(const char *filename, char filemode, int filetype, stream_t *streamptr, int recordBufIsToBeCreated)
       = (int (*)(const char *, char, int, stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
 
@@ -680,9 +692,11 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
       if (streamID < 0) return CDI_ELIMIT;
 
       streamptr->filemode = filemode;
-      streamptr->filename = strdupx(filename);
+      streamptr->filename = strdup(filename);
       streamptr->fileID = fileID;
     }
+
+  if (streamptr->lockIO) CDI_IO_UNLOCK();
 
   return streamID;
 }
@@ -717,7 +731,7 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
   int streamID = streamptr->self;
 
   streamptr->filemode = tolower(*filemode);
-  streamptr->filename = strdupx(filename);
+  streamptr->filename = strdup(filename);
   streamptr->fileID = fileID;
 
   streamptr->vlistID = vlistCreate();
@@ -1002,12 +1016,12 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->globalatts = 0;
   streamptr->localatts = 0;
   streamptr->unreduced = cdiDataUnreduced;
-  streamptr->sortname = cdiSortName > 0;
-  streamptr->sortparam = cdiSortParam > 0;
   streamptr->have_missval = cdiHaveMissval;
   streamptr->comptype = CDI_COMPRESS_NONE;
   streamptr->complevel = 0;
   streamptr->shuffle = 0;
+  streamptr->sortname = (cdiSortName > 0);
+  streamptr->lockIO = CDI_Lock_IO;
   // netcdf4/HDF5 filter
   streamptr->filterId = 0;
   streamptr->numParams = 0;
@@ -1053,6 +1067,11 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->jobManager = NULL;
 
   streamptr->protocolData = NULL;
+
+#ifdef HAVE_LIBFDB5
+  streamptr->fdbNumItems = 0;
+  streamptr->fdbKeyValueList = NULL;
+#endif
 }
 
 static stream_t *
@@ -1096,7 +1115,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 
     case CDI_PROTOCOL_FDB:
 #ifdef HAVE_LIBFDB5
-      if (streamptr->protocolData) fdb_delete_handle(streamptr->protocolData);
+      if (streamptr->protocolData) check_fdb_error(fdb_delete_handle(streamptr->protocolData));
       streamptr->protocolData = NULL;
 #endif
       return;
@@ -1237,9 +1256,6 @@ streamDestroy(stream_t *streamptr)
       for (int index = 0; index < maxSteps; ++index)
         {
           tsteps_t *tstep = &(streamptr->tsteps[index]);
-#ifdef HAVE_LIBFDB5
-          if (tstep->records && tstep->records->fdbItem) free(tstep->records->fdbItem);
-#endif
           if (tstep->records) Free(tstep->records);
           if (tstep->recIDs) Free(tstep->recIDs);
           taxisDestroyKernel(&(tstep->taxis));
@@ -1248,6 +1264,15 @@ streamDestroy(stream_t *streamptr)
       Free(streamptr->tsteps);
       streamptr->tsteps = NULL;
     }
+
+#ifdef HAVE_LIBFDB5
+  if (streamptr->fdbKeyValueList)
+    {
+      cdi_fdb_delete_kvlist(streamptr->fdbNumItems, streamptr->fdbKeyValueList);
+      streamptr->fdbNumItems = 0;
+      streamptr->fdbKeyValueList = NULL;
+    }
+#endif
 
   if (vlistID != -1)
     {
@@ -1287,10 +1312,15 @@ streamClose(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
+  bool lockIO = streamptr->lockIO;
+  if (lockIO) CDI_IO_LOCK();
+
   if (CDI_Debug) Message("streamID = %d filename = %s", streamID, streamptr->filename);
   streamDestroy(streamptr);
   reshRemove(streamID, &streamOps);
   if (CDI_Debug) Message("Removed stream %d from stream list", streamID);
+
+  if (lockIO) CDI_IO_UNLOCK();
 }
 
 void
@@ -1418,9 +1448,16 @@ int
 streamDefTimestep(int streamID, int tsID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
+
+  if (streamptr->lockIO) CDI_IO_LOCK();
+
   int (*myStreamDefTimestep_)(stream_t * streamptr, int tsID)
       = (int (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_DEF_TIMESTEP_).func;
-  return myStreamDefTimestep_(streamptr, tsID);
+  int status = myStreamDefTimestep_(streamptr, tsID);
+
+  if (streamptr->lockIO) CDI_IO_UNLOCK();
+
+  return status;
 }
 
 int
@@ -1476,6 +1513,8 @@ streamInqTimestep(int streamID, int tsID)
 
   if (CDI_Debug) Message("streamID = %d  tsID = %d  filetype = %d", streamID, tsID, filetype);
 
+  if (streamptr->lockIO) CDI_IO_LOCK();
+
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
@@ -1527,6 +1566,8 @@ streamInqTimestep(int streamID, int tsID)
       }
     }
 
+  if (streamptr->lockIO) CDI_IO_UNLOCK();
+
   int taxisID = vlistInqTaxis(vlistID);
   if (taxisID == -1) Error("Timestep undefined for fileID = %d", streamID);
 
@@ -1576,10 +1617,14 @@ cdiStreamDefVlist_(int streamID, int vlistID)
 
   if (streamptr->vlistID == CDI_UNDEFID)
     {
+      if (streamptr->lockIO) CDI_IO_LOCK();
+
       int vlistCopy = vlistDuplicate(vlistID);
       cdiVlistMakeInternal(vlistCopy);
       cdiVlistMakeImmutable(vlistID);
       cdiStreamSetupVlist(streamptr, vlistCopy);
+
+      if (streamptr->lockIO) CDI_IO_UNLOCK();
     }
   else
     Warning("vlist already defined for %s!", streamptr->filename);
