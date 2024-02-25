@@ -110,7 +110,7 @@ str_is_equal(const char *x, const char *y)
 #endif
 
 #ifndef DBL_IS_EQUAL
-//#define DBL_IS_EQUAL(x,y) (!(x < y || y < x))
+// #define DBL_IS_EQUAL(x,y) (!(x < y || y < x))
 #define DBL_IS_EQUAL(x, y) (DBL_IS_NAN(x) || DBL_IS_NAN(y) ? (DBL_IS_NAN(x) && DBL_IS_NAN(y)) : !(x < y || y < x))
 #endif
 
