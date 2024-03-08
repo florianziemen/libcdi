@@ -316,8 +316,8 @@ var_copy_entries(var_t *var2, var_t *var1)
 
 @Prototype void vlistCopy(int vlistID2, int vlistID1)
 @Parameter
-    @Item  vlistID2  Target variable list ID.
     @Item  vlistID1  Source variable list ID.
+    @Item  vlistID2  Target variable list ID.
 
 @Description
 The function @func{vlistCopy} copies all entries from vlistID1 to vlistID2.
@@ -325,7 +325,7 @@ The function @func{vlistCopy} copies all entries from vlistID1 to vlistID2.
 @EndFunction
 */
 void
-vlistCopy(int vlistID2, int vlistID1)
+vlistCopy(int vlistID1, int vlistID2)
 {
   vlist_t *vlistptr1 = vlist_to_pointer(vlistID1);
   vlist_t *vlistptr2 = vlist_to_pointer(vlistID2);
@@ -391,7 +391,7 @@ vlistDuplicate(int vlistID)
   if (CDI_Debug) Message("call to vlistDuplicate");
 
   int vlistIDnew = vlistCreate();
-  vlistCopy(vlistIDnew, vlistID);
+  vlistCopy(vlistID, vlistIDnew);
   return vlistIDnew;
 }
 
