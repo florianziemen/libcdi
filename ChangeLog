@@ -1,3 +1,7 @@
+2024-03-08  Uwe Schulzweida
+
+	* Remove  interface function vlistCopy(), use vlistDuplicate()
+
 2024-02-22  Uwe Schulzweida
 
 	* Version 2.4.0 released

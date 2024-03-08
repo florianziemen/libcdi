@@ -526,9 +526,6 @@ void    vlistDestroy(int vlistID);
 //      vlistDuplicate: Duplicate a variable list
 int     vlistDuplicate(int vlistID);
 
-//      vlistCopy: Copy a variable list
-void    vlistCopy(int vlistID2, int vlistID1);
-
 //      vlistCopyFlag: Copy some entries of a variable list
 void    vlistCopyFlag(int vlistID2, int vlistID1);
 
