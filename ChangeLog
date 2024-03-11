@@ -1,3 +1,7 @@
+2024-03-11 Uwe Schulzweida
+
+	* GRIB1: add check for full pressure levels
+
 2024-03-08  Uwe Schulzweida
 
 	* Remove  interface function vlistCopy(), use vlistDuplicate()

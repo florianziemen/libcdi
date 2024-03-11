@@ -1974,6 +1974,13 @@ cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
         else
           level = level / 100;
 
+        static bool lwarn = true;
+        if (lwarn && modf(level, &dum) > 0.001)
+          {
+            lwarn = false;
+            Warning("GRIB1 can store only full pressure levels! Level changed from %ghPa to %dhPa.", level, level2int(level));
+          }
+
         isec1DefLevel(isec1, grib_ltype, level2int(level), 0);
         break;
       }

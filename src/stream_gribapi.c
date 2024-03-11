@@ -2818,9 +2818,18 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
               grib_ltype = GRIB1_LTYPE_ISOBARIC_PA;
             else
               level /= 100;
+
+            static bool lwarn = true;
+            if (lwarn && modf(level, &dum) > 0.001)
+              {
+                lwarn = false;
+                Warning("GRIB1 can store only full pressure levels! Level changed from %ghPa to %dhPa.", level,
+                        (int) lround(level));
+              }
           }
         else if (ltype2 == -1)
           ltype2 = GRIB2_LTYPE_ISOBARIC;
+
         defLevel(gh, gcinit, grib_ltype, ltype2, hasBounds, level, dlevel1, dlevel2);
 
         break;
