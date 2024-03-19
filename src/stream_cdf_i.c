@@ -1898,11 +1898,13 @@ verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncvars,
               else if (str_is_equal(ncvar->units, "level") || str_is_equal(ncvar->units, "1"))
                 {
                   // clang-format off
-                  if      (str_is_equal(ncvar->longname, "hybrid level at layer midpoints"))  ncvar->zaxistype = ZAXIS_HYBRID;
-                  else if (strStartsWith(ncvar->longname, "hybrid level at midpoints"))       ncvar->zaxistype = ZAXIS_HYBRID;
-                  else if (str_is_equal(ncvar->longname, "hybrid level at layer interfaces")) ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-                  else if (strStartsWith(ncvar->longname, "hybrid level at interfaces"))      ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-                  else if (str_is_equal(ncvar->units, "level"))                               ncvar->zaxistype = ZAXIS_GENERIC;
+                  if      (str_is_equal(ncvar->longname, "hybrid level at layer midpoints"))        ncvar->zaxistype = ZAXIS_HYBRID;
+                  else if (str_is_equal(ncvar->longname, "hybrid model level at layer midpoints"))  ncvar->zaxistype = ZAXIS_HYBRID;
+                  else if (strStartsWith(ncvar->longname, "hybrid level at midpoints"))             ncvar->zaxistype = ZAXIS_HYBRID;
+                  else if (str_is_equal(ncvar->longname, "hybrid level at layer interfaces"))       ncvar->zaxistype = ZAXIS_HYBRID_HALF;
+                  else if (str_is_equal(ncvar->longname, "hybrid model level at layer interfaces")) ncvar->zaxistype = ZAXIS_HYBRID_HALF;
+                  else if (strStartsWith(ncvar->longname, "hybrid level at interfaces"))            ncvar->zaxistype = ZAXIS_HYBRID_HALF;
+                  else if (str_is_equal(ncvar->units, "level"))                                     ncvar->zaxistype = ZAXIS_GENERIC;
                   // clang-format on
                 }
               else if (is_DBL_axis(ncvar->longname))
@@ -1985,11 +1987,13 @@ verify_coordinates_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
               else if (ncvar->zaxistype == CDI_UNDEFID && (str_is_equal(ncvar->units, "level") || str_is_equal(ncvar->units, "1")))
                 {
                   // clang-format off
-                  if      (str_is_equal(ncvar->longname, "hybrid level at layer midpoints"))  ncvar->zaxistype = ZAXIS_HYBRID;
-                  else if (strStartsWith(ncvar->longname, "hybrid level at midpoints"))       ncvar->zaxistype = ZAXIS_HYBRID;
-                  else if (str_is_equal(ncvar->longname, "hybrid level at layer interfaces")) ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-                  else if (strStartsWith(ncvar->longname, "hybrid level at interfaces"))      ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-                  else if (str_is_equal(ncvar->units, "level"))                               ncvar->zaxistype = ZAXIS_GENERIC;
+                  if      (str_is_equal(ncvar->longname, "hybrid level at layer midpoints"))        ncvar->zaxistype = ZAXIS_HYBRID;
+                  else if (str_is_equal(ncvar->longname, "hybrid model level at layer midpoints"))  ncvar->zaxistype = ZAXIS_HYBRID;
+                  else if (strStartsWith(ncvar->longname, "hybrid level at midpoints"))             ncvar->zaxistype = ZAXIS_HYBRID;
+                  else if (str_is_equal(ncvar->longname, "hybrid level at layer interfaces"))       ncvar->zaxistype = ZAXIS_HYBRID_HALF;
+                  else if (str_is_equal(ncvar->longname, "hybrid model level at layer interfaces")) ncvar->zaxistype = ZAXIS_HYBRID_HALF;
+                  else if (strStartsWith(ncvar->longname, "hybrid level at interfaces"))            ncvar->zaxistype = ZAXIS_HYBRID_HALF;
+                  else if (str_is_equal(ncvar->units, "level"))                                     ncvar->zaxistype = ZAXIS_GENERIC;
                   // clang-format on
                   continue;
                 }
