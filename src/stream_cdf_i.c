@@ -110,6 +110,8 @@ typedef struct
   size_t chunkCacheNelems;
   float chunkCachePreemption;
   size_t gridSize;
+  size_t xSize;
+  size_t ySize;
   size_t numLevels;
   int natts;
   int *atts;
@@ -644,6 +646,8 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
       ncvar->chunkCacheNelems = 0;
       ncvar->chunkCachePreemption = 0.0;
       ncvar->gridSize = 0;
+      ncvar->xSize = 0;
+      ncvar->ySize = 0;
       ncvar->numLevels = 0;
       ncvar->natts = 0;
       ncvar->atts = NULL;
@@ -2918,6 +2922,8 @@ cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int
               ncvar2->chunkType = ncvar1->chunkType;
               ncvar2->chunkSize = ncvar1->chunkSize;
               ncvar2->gridSize = ncvar1->gridSize;
+              ncvar2->xSize = ncvar1->xSize;
+              ncvar2->ySize = ncvar1->ySize;
             }
         }
     }
@@ -3077,6 +3083,8 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
           gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 1);
           ncvar->gridID = gridAdded.Id;
           ncvar->gridSize = grid->size;
+          ncvar->xSize = grid->x.size;
+          ncvar->ySize = grid->y.size;
 
           int gridID = ncvar->gridID;
 
@@ -3508,21 +3516,31 @@ cdf_xtype_to_numbytes(int xtype)
   return numBytes;
 }
 
+static inline size_t
+size_of_dim_chunks(size_t n, size_t c)
+{
+  return (n / c + (n % c > 0)) * c;
+}
+
 static size_t
 calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
 {
-  size_t chunkCacheSize = ncvar->gridSize;
-
-  chunkCacheSize *= (ncvar->dimids[0] == timedimid) ? ncvar->chunks[0] : 1;
-
+  size_t nx = 0, ny = 0, nz = 0;
+  size_t cx = 0, cy = 0, cz = 0;
   for (int i = 0; i < ncvar->ndims; i++)
     {
-      if (ncvar->dimtypes[i] == Z_AXIS)
-        {
-          chunkCacheSize *= ncvar->chunks[i];
-          break;
-        }
+      int dimtype = ncvar->dimtypes[i];
+      // clang-format off
+      if      (dimtype == Z_AXIS) { cz = ncvar->chunks[i]; nz = ncvar->numLevels; }
+      else if (dimtype == Y_AXIS) { cy = ncvar->chunks[i]; ny = ncvar->ySize; }
+      else if (dimtype == X_AXIS) { cx = ncvar->chunks[i]; nx = ncvar->xSize; }
+      // clang-format on
     }
+
+  size_t chunkCacheSize = (ncvar->dimids[0] == timedimid) ? ncvar->chunks[0] : 1;
+  if (nz > 0 && cz > 0) chunkCacheSize *= (chunkCacheSize == 1) ? cz : size_of_dim_chunks(nz, cz);
+  if (ny > 0 && cy > 0) chunkCacheSize *= size_of_dim_chunks(ny, cy);
+  if (nx > 0 && cx > 0) chunkCacheSize *= size_of_dim_chunks(nx, cx);
 
   chunkCacheSize *= cdf_xtype_to_numbytes(ncvar->xtype);
 

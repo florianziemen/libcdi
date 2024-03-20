@@ -1,3 +1,7 @@
+2024-03-20 Uwe Schulzweida
+
+	* calc_chunk_cache_size:  improve for 4D chunked data
+
 2024-03-11 Uwe Schulzweida
 
 	* GRIB1: add check for full pressure levels
