@@ -87,8 +87,14 @@ gribapi_get_timeunits(grib_handle *gh)
 {
   long unitsOfTime = -1;
   grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime);
+  if (unitsOfTime == -1) grib_get_long(gh, "indicatorOfUnitForTimeIncrement", &unitsOfTime);
 
-  GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
+  if (unitsOfTime != -1)
+    {
+      long stepUnits = -1;
+      grib_get_long(gh, "stepUnits", &stepUnits);
+      if (stepUnits == -1 && stepUnits != unitsOfTime) GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
+    }
 
   return get_timeunits(unitsOfTime);
 }
@@ -114,7 +120,7 @@ gribapiGetSteps(grib_handle *gh, int timeunits, int *startStep, int *endStep)
   *endStep = *startStep;
   status = grib_get_long(gh, "endStep", &lpar);
   if (status == 0) *endStep = (int) (((double) lpar * timeunits_factor(timeunits, timeunits2)) + 0.5);
-  // printf("%d %d %d %d %d %g\n", *startStep, *endStep, lpar, timeunits, timeunits2, timeunits_factor(timeunits, timeunits2));
+  // printf("%d %d %ld %d %d %g\n", *startStep, *endStep, lpar, timeunits, timeunits2, timeunits_factor(timeunits, timeunits2));
 }
 
 static CdiDateTime

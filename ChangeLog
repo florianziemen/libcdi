@@ -1,3 +1,7 @@
+2024-03-22 Uwe Schulzweida
+
+	* gribapi_get_timeunits: check unitsOfTime (bug fix) [report: Chris Barnard]
+
 2024-03-20 Uwe Schulzweida
 
 	* calc_chunk_cache_size:  improve for 4D chunked data
