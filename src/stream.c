@@ -713,6 +713,40 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
   return streamID;
 }
 
+int
+streamOpenReadNCMem(int ncidp)
+{
+
+  stream_t *streamptr = stream_new_entry(CDI_UNDEFID);
+  int streamID = CDI_ESYSTEM;
+
+  streamID = streamptr->self;
+  if (streamID < 0) return CDI_ELIMIT;
+
+  size_t max_file_path_length = 128;
+  size_t actual_length = 0;
+  char *filename = (char *) malloc(sizeof(char) * max_file_path_length);
+
+  nc_inq_path(ncidp, &actual_length, filename);
+
+  streamptr->filename = strdup(filename);
+  streamptr->filemode = 'r';
+  streamptr->filetype = CDI_FILETYPE_NC4;
+  streamptr->fileID = ncidp;
+
+  int status = stream_create_vlist(streamptr, NULL);
+  if (status < 0)
+    {
+      streamID = status;
+      if (streamptr->record) Free(streamptr->record);
+      reshRemove(streamptr->self, &streamOps);
+    }
+
+  streamPrintP(streamptr, stdout);
+
+  return streamID;
+}
+
 static int
 streamOpen(const char *filename, const char *filemode, int filetype)
 {
@@ -760,7 +794,7 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
   if (str_is_equal(filemode, "r")) cdiVlistMakeImmutable(streamptr->vlistID);
 
   {
-    void (*streamCloseDelegate)(stream_t * streamptr, int recordBufIsToBeDeleted)
+    void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
         = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
 
     streamCloseDelegate(streamptr, 0);
@@ -897,6 +931,7 @@ streamOpenRead(const char *filename)
           if (streamptr->record) Free(streamptr->record);
           reshRemove(streamptr->self, &streamOps);
         }
+      streamPrintP(streamptr, stdout);
     }
 
   return streamID;
@@ -1234,7 +1269,7 @@ streamDestroy(stream_t *streamptr)
   xassert(streamptr);
   int vlistID = streamptr->vlistID;
 
-  void (*streamCloseDelegate)(stream_t * streamptr, int recordBufIsToBeDeleted)
+  void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
       = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
 
   if (streamptr->filetype != CDI_FILETYPE_UNDEF) streamCloseDelegate(streamptr, 1);
@@ -1397,7 +1432,7 @@ streamSync(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  void (*myStreamSync_)(stream_t * streamptr) = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_STREAM_SYNC).func;
+  void (*myStreamSync_)(stream_t *streamptr) = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_STREAM_SYNC).func;
   myStreamSync_(streamptr);
 }
 
@@ -1431,7 +1466,7 @@ cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
       /* usually points to cdfDefTimestep in serial mode but
        * to cdiPioCdfDefTimestep on servers and to a null-op on
        * clients in client/server mode */
-      void (*myCdfDefTimestep)(stream_t * streamptr, int tsID, size_t)
+      void (*myCdfDefTimestep)(stream_t *streamptr, int tsID, size_t)
           = (void (*)(stream_t *, int, size_t)) namespaceSwitchGet(NSSWITCH_CDF_DEF_TIMESTEP).func;
       myCdfDefTimestep(streamptr, tsID, 1);
     }
@@ -1469,7 +1504,7 @@ streamDefTimestep(int streamID, int tsID)
 
   if (streamptr->lockIO) CDI_IO_LOCK();
 
-  int (*myStreamDefTimestep_)(stream_t * streamptr, int tsID)
+  int (*myStreamDefTimestep_)(stream_t *streamptr, int tsID)
       = (int (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_DEF_TIMESTEP_).func;
   int status = myStreamDefTimestep_(streamptr, tsID);
 
@@ -1770,7 +1805,7 @@ streamTxCode(void *s)
 void
 cdiStreamSetupVlist(stream_t *s, int vlistID)
 {
-  void (*myStreamSetupVlist)(stream_t * s, int vlistID)
+  void (*myStreamSetupVlist)(stream_t *s, int vlistID)
       = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_SETUP_VLIST).func;
   myStreamSetupVlist(s, vlistID);
 }
@@ -1828,7 +1863,7 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
             /* calls cdfDefCoordinateVars in serial mode but
              * cdiPioClientStreamNOP (i.e. nothing) on client ranks
              * and cdiPioServerCdfDefVars on server ranks in parallel mode*/
-            void (*myCdfDefVars)(stream_t * streamptr) = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
+            void (*myCdfDefVars)(stream_t *streamptr) = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
             myCdfDefVars(streamptr);
           }
           break;
