@@ -565,7 +565,7 @@ int     vlistZaxis(int vlistID, int index);
 int     vlistZaxisIndex(int vlistID, int zaxisID);
 void    vlistChangeZaxisIndex(int vlistID, int index, int zaxisID);
 void    vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2);
-int     vlistNrecs(int vlistID);
+int     vlistNumRecords(int vlistID);
 int     vlistSubtype(int vlistID, int index);
 int     vlistSubtypeIndex(int vlistID, int subtypeID);
 
