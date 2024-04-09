@@ -416,7 +416,7 @@ printGridInfoKernel(int gridID, int index, bool lproj)
 void
 printGridInfo(int vlistID)
 {
-  int ngrids = vlistNgrids(vlistID);
+  int ngrids = vlistNumGrids(vlistID);
   for (int index = 0; index < ngrids; index++)
     {
       int gridID = vlistGrid(vlistID, index);
