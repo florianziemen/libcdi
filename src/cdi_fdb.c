@@ -4,11 +4,11 @@ int cdi_fdb_dummy;
 
 #ifdef HAVE_LIBFDB5
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "error.h"
 #include "cdi_int.h"
+#include "error.h"
 
 void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer);
 
@@ -413,15 +413,15 @@ decode_keyvalue(int numItems, fdbKeyValueEntry *keyValueList, RecordInfoEntry *r
       bool foundParam = false;
       bool foundLtype = false;
       bool foundLlist = false;
-      for (int i = 0; i < keyValue->numKeys; i++)
+      for (int k = 0; k < keyValue->numKeys; k++)
         {
-          // printf("key <%s> value <%s>\n", itemKeys[i], itemValues[i]);
+          // printf("key <%s> value <%s>\n", keys[k], values[k]);
           // clang-format off
-          if      (!foundDate  && str_is_equal(keys[i], "date"))     { foundDate = true;  numKeyDate++;  rentry->date = atoi(values[i]); }
-          else if (!foundTime  && str_is_equal(keys[i], "time"))     { foundTime = true;  numKeyTime++;  rentry->time = atoi(values[i]); }
-          else if (!foundParam && str_is_equal(keys[i], "param"))    { foundParam = true; numKeyParam++; rentry->param = atoi(values[i]); }
-          else if (!foundLtype && str_is_equal(keys[i], "levtype"))  { foundLtype = true; numKeyLtype++; rentry->levtype = get_ilevtype(values[i]); }
-          else if (!foundLlist && str_is_equal(keys[i], "levelist")) { foundLlist = true; rentry->ilevel = atoi(values[i]); }
+          if      (!foundDate  && str_is_equal(keys[k], "date"))     { foundDate = true;  numKeyDate++;  rentry->date = atoi(values[k]); }
+          else if (!foundTime  && str_is_equal(keys[k], "time"))     { foundTime = true;  numKeyTime++;  rentry->time = atoi(values[k]); }
+          else if (!foundParam && str_is_equal(keys[k], "param"))    { foundParam = true; numKeyParam++; rentry->param = atoi(values[k]); }
+          else if (!foundLtype && str_is_equal(keys[k], "levtype"))  { foundLtype = true; numKeyLtype++; rentry->levtype = get_ilevtype(values[k]); }
+          else if (!foundLlist && str_is_equal(keys[k], "levelist")) { foundLlist = true; rentry->ilevel = atoi(values[k]); }
           // clang-format on
           if (foundDate && foundTime && foundParam && foundLtype && foundLlist) break;
         }
