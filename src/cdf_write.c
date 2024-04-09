@@ -432,7 +432,7 @@ nc_grid_index(stream_t *streamptr, int gridID)
 {
   int index = 0;
   int vlistID = streamptr->vlistID;
-  int ngrids = vlistNgrids(vlistID);
+  int ngrids = vlistNumGrids(vlistID);
   for (index = 0; index < ngrids; ++index)
     if (streamptr->ncgrid[index].gridID == gridID) break;
 

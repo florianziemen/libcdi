@@ -2236,7 +2236,7 @@ cdfDefCoordinateVars(stream_t *streamptr)
 
   if (vlistHasTime(vlistID)) cdfDefTime(streamptr);
 
-  int ngrids = vlistNgrids(vlistID);
+  int ngrids = vlistNumGrids(vlistID);
   if (2 * ngrids > MAX_GRIDS_PS) Error("Internal problem! Too many grids per stream (max=%d)\n", MAX_GRIDS_PS);
 
   struct cdfPostDefActionList *delayed = NULL;

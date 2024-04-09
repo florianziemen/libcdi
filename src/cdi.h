@@ -545,8 +545,8 @@ int     vlistNumber(int vlistID);
 //      vlistNvars: Number of variables in a variable list
 int     vlistNvars(int vlistID);
 
-//      vlistNgrids: Number of grids in a variable list
-int     vlistNgrids(int vlistID);
+//      vlistNumGrids: Number of grids in a variable list
+int     vlistNumGrids(int vlistID);
 
 //      vlistNzaxis: Number of zaxis in a variable list
 int     vlistNzaxis(int vlistID);

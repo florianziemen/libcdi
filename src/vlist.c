@@ -985,23 +985,23 @@ vlistNumber(int vlistID)
 }
 
 /*
-@Function  vlistNgrids
+@Function  vlistNumGrids
 @Title     Number of grids in a variable list
 
-@Prototype int vlistNgrids(int vlistID)
+@Prototype int vlistNumGrids(int vlistID)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
 
 @Description
-The function @func{vlistNgrids} returns the number of grids in the variable list vlistID.
+The function @func{vlistNumGrids} returns the number of grids in the variable list vlistID.
 
 @Result
-@func{vlistNgrids} returns the number of grids in a variable list.
+@func{vlistNumGrids} returns the number of grids in a variable list.
 
 @EndFunction
 */
 int
-vlistNgrids(int vlistID)
+vlistNumGrids(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 

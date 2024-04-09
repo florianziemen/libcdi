@@ -1901,7 +1901,7 @@ cdiPioCdfGridAccess(int streamID, int vlistID)
       if (cdiPioStream2Owner(streamID) != CDI_PIO_COLLECTIVE_OPEN)
 #endif
         {
-          int nGrids = vlistNgrids(vlistID);
+          int nGrids = vlistNumGrids(vlistID);
           for (int gridIdx = 0; gridIdx < nGrids; ++gridIdx)
             {
               int gridID = vlistGrid(vlistID, gridIdx);
