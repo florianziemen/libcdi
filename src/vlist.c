@@ -1009,23 +1009,23 @@ vlistNumGrids(int vlistID)
 }
 
 /*
-@Function  vlistNzaxis
+@Function  vlistNumZaxis
 @Title     Number of zaxis in a variable list
 
-@Prototype int vlistNzaxis(int vlistID)
+@Prototype int vlistNumZaxis(int vlistID)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
 
 @Description
-The function @func{vlistNzaxis} returns the number of zaxis in the variable list vlistID.
+The function @func{vlistNumZaxis} returns the number of zaxis in the variable list vlistID.
 
 @Result
-@func{vlistNzaxis} returns the number of zaxis in a variable list.
+@func{vlistNumZaxis} returns the number of zaxis in a variable list.
 
 @EndFunction
 */
 int
-vlistNzaxis(int vlistID)
+vlistNumZaxis(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1586,7 +1586,7 @@ vlistUnpack(char *buf, int size, int *position, int originNamespace, void *conte
 void
 vlist_check_contents(int vlistID)
 {
-  int nzaxis = vlistNzaxis(vlistID);
+  int nzaxis = vlistNumZaxis(vlistID);
   for (int index = 0; index < nzaxis; index++)
     {
       int zaxisID = vlistZaxis(vlistID, index);
