@@ -61,11 +61,11 @@ The function {\texttt{vlistCopy}} copies all entries from vlistID1 to vlistID2.
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\texttt{vlistID2}\ }
-\item[\texttt{vlistID2}]
-Target variable list ID.
+\begin{deflist}{\texttt{vlistID1}\ }
 \item[\texttt{vlistID1}]
 Source variable list ID.
+\item[\texttt{vlistID2}]
+Target variable list ID.
 
 \end{deflist}
 \end{minipage}
@@ -169,16 +169,16 @@ Variable list ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistC
 
 
 
-\subsection{Number of grids in a variable list: \texttt{vlistNgrids}}
-\index{vlistNgrids}
-\label{vlistNgrids}
+\subsection{Number of grids in a variable list: \texttt{vlistNumGrids}}
+\index{vlistNumGrids}
+\label{vlistNumGrids}
 
-The function {\texttt{vlistNgrids}} returns the number of grids in the variable list vlistID.
+The function {\texttt{vlistNumGrids}} returns the number of grids in the variable list vlistID.
 
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    int vlistNgrids(int vlistID);
+    int vlistNumGrids(int vlistID);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -191,20 +191,20 @@ Variable list ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistC
 
 \subsubsection*{Result}
 
-{\texttt{vlistNgrids}} returns the number of grids in a variable list.
+{\texttt{vlistNumGrids}} returns the number of grids in a variable list.
 
 
 
-\subsection{Number of zaxis in a variable list: \texttt{vlistNzaxis}}
-\index{vlistNzaxis}
-\label{vlistNzaxis}
+\subsection{Number of zaxis in a variable list: \texttt{vlistNumZaxis}}
+\index{vlistNumZaxis}
+\label{vlistNumZaxis}
 
-The function {\texttt{vlistNzaxis}} returns the number of zaxis in the variable list vlistID.
+The function {\texttt{vlistNumZaxis}} returns the number of zaxis in the variable list vlistID.
 
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    int vlistNzaxis(int vlistID);
+    int vlistNumZaxis(int vlistID);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -217,7 +217,7 @@ Variable list ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistC
 
 \subsubsection*{Result}
 
-{\texttt{vlistNzaxis}} returns the number of zaxis in a variable list.
+{\texttt{vlistNumZaxis}} returns the number of zaxis in a variable list.
 
 
 
