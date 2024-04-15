@@ -487,7 +487,6 @@ struct cdi_generate_varinfo
   int varid;
   const char *name;
 };
-
 /*
 static int
 cdi_generate_cmp_varname(const void *s1, const void *s2)
@@ -496,7 +495,6 @@ cdi_generate_cmp_varname(const void *s1, const void *s2)
   return strcmp(x->name, y->name);
 }
 */
-
 void
 cdi_generate_vars(stream_t *streamptr)
 {
@@ -505,30 +503,30 @@ cdi_generate_vars(stream_t *streamptr)
   int *varids = (int *) Malloc(varTableUsed * sizeof(int));
   for (int varID = 0; varID < varTableUsed; varID++) varids[varID] = (int) varID;
   /*
-  if ( streamptr->sortname )
-    {
-      size_t varID;
-      for (varID = 0; varID < varTableUsed; varID++)
-        if (!vartable[varID].name) break;
+    if (streamptr->sortname)
+      {
+        int varID;
+        for (varID = 0; varID < varTableUsed; varID++)
+          if (!vartable[varID].name) break;
 
-      if ( varID == varTableUsed )
-        {
-          struct cdi_generate_varinfo *varInfo
-            = (struct cdi_generate_varinfo *) Malloc((size_t)varTableUsed * sizeof(struct cdi_generate_varinfo));
+        if (varID == varTableUsed)
+          {
+            struct cdi_generate_varinfo *varInfo
+                = (struct cdi_generate_varinfo *) Malloc((size_t) varTableUsed * sizeof(struct cdi_generate_varinfo));
 
-          for (size_t varID = 0; varID < varTableUsed; varID++)
-            {
-              varInfo[varID].varid = varids[varID];
-              varInfo[varID].name = vartable[varids[varID]].name;
-            }
-          qsort(varInfo, varTableUsed, sizeof(varInfo[0]), cdi_generate_cmp_varname);
-          for (size_t varID = 0; varID < varTableUsed; varID++)
-            {
-              varids[varID] = varInfo[varID].varid;
-            }
-          Free(varInfo);
-        }
-    }
+            for (int varID = 0; varID < varTableUsed; varID++)
+              {
+                varInfo[varID].varid = varids[varID];
+                varInfo[varID].name = vartable[varids[varID]].name;
+              }
+            qsort(varInfo, varTableUsed, sizeof(varInfo[0]), cdi_generate_cmp_varname);
+            for (int varID = 0; varID < varTableUsed; varID++)
+              {
+                varids[varID] = varInfo[varID].varid;
+              }
+            Free(varInfo);
+          }
+      }
   */
   for (int index = 0; index < varTableUsed; index++)
     {
