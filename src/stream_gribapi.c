@@ -1212,6 +1212,21 @@ fdbScanTimesteps(stream_t *streamptr)
   return 0;
 }
 
+static int
+records_cmp_varname(const void *s1, const void *s2)
+{
+  const record_t *x = (const record_t *) s1, *y = (const record_t *) s2;
+  return strcmp(x->varname, y->varname);
+}
+
+void
+sort_records(stream_t *streamptr)
+{
+  record_t *records = streamptr->tsteps[0].records;
+  int numRecords = streamptr->tsteps[0].recordSize;
+  qsort(records, numRecords, sizeof(records[0]), records_cmp_varname);
+}
+
 int
 gribapiScanTimestep1(stream_t *streamptr)
 {
@@ -1359,6 +1374,8 @@ gribapiScanTimestep1(stream_t *streamptr)
 
   streamScanTsFixNtsteps(streamptr, recpos);
   streamScanTimeConstAdjust(streamptr, taxis);
+
+  if (streamptr->sortname) sort_records(streamptr);
 
   return 0;
 }

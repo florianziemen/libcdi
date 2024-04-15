@@ -481,13 +481,13 @@ varCopyKeys(int vlistID, int varID)
   cdiInitKeys(&vlistptr->vars[varID].keys);
   cdiCopyVarKeys(&vartable[varID].keys, &vlistptr->vars[varID].keys);
 }
-
+/*
 struct cdi_generate_varinfo
 {
   int varid;
   const char *name;
 };
-/*
+
 static int
 cdi_generate_cmp_varname(const void *s1, const void *s2)
 {
@@ -505,11 +505,11 @@ cdi_generate_vars(stream_t *streamptr)
   /*
     if (streamptr->sortname)
       {
-        int varID;
-        for (varID = 0; varID < varTableUsed; varID++)
-          if (!vartable[varID].name) break;
+        bool hasName = true;
+        for (int varID = 0; varID < varTableUsed; varID++)
+          if (!vartable[varID].name) hasName = false;
 
-        if (varID == varTableUsed)
+        if (hasName)
           {
             struct cdi_generate_varinfo *varInfo
                 = (struct cdi_generate_varinfo *) Malloc((size_t) varTableUsed * sizeof(struct cdi_generate_varinfo));

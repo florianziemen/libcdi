@@ -1,3 +1,7 @@
+2024-04-15 Uwe Schulzweida
+
+	* gribapi: added support for sortname option
+
 2024-03-22 Uwe Schulzweida
 
 	* gribapi_get_timeunits: check unitsOfTime (bug fix) [report: Chris Barnard]
