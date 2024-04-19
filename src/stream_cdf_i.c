@@ -4233,7 +4233,7 @@ cdfVerifyVars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
               ncvar->varStatus = CoordVar;
               Warning("Inconsistent number of dimensions, skipped variable %s!", ncvar->name);
             }
-
+          /* check failed with cdo option --cmor
           int zdimid = -1;
           for (int i = 0; i < ncvar->ndims; ++i)
             {
@@ -4246,6 +4246,7 @@ cdfVerifyVars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
               ncvar->varStatus = CoordVar;
               Warning("Unsupported dimension >%s<, skipped variable %s!", ncdims[zdimid].name, ncvar->name);
             }
+          */
         }
     }
 }

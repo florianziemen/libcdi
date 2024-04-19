@@ -1,3 +1,7 @@
+2024-04-19 Uwe Schulzweida
+
+	* cdfVerifyVars: disable check failed with cdo option --cmor
+
 2024-04-15 Uwe Schulzweida
 
 	* gribapi: added support for sortname option
