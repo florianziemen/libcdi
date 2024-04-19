@@ -714,9 +714,9 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
 }
 
 int
-streamOpenReadNCMem(int ncidp)
+streamOpenNCMem(int ncidp, char mode)
 {
-
+  cdiInitialize();
   stream_t *streamptr = stream_new_entry(CDI_UNDEFID);
   int streamID = CDI_ESYSTEM;
 
@@ -730,23 +730,34 @@ streamOpenReadNCMem(int ncidp)
   nc_inq_path(ncidp, &actual_length, filename);
 
   streamptr->filename = strdup(filename);
-  streamptr->filemode = 'r';
+  streamptr->filemode = mode;
   streamptr->filetype = CDI_FILETYPE_NC4;
   streamptr->fileID = ncidp;
 
-  int status = stream_create_vlist(streamptr, NULL);
-  if (status < 0)
+  if (mode == 'r')
     {
-      streamID = status;
-      if (streamptr->record) Free(streamptr->record);
-      reshRemove(streamptr->self, &streamOps);
+      int status = stream_create_vlist(streamptr, NULL);
+      if (status < 0)
+        {
+          streamID = status;
+          if (streamptr->record) Free(streamptr->record);
+          reshRemove(streamptr->self, &streamOps);
+        }
     }
-
-  streamPrintP(streamptr, stdout);
 
   return streamID;
 }
 
+int
+streamOpenReadNCMem(int ncidp)
+{
+  return streamOpenNCMem(ncidp, 'r');
+}
+int
+streamOpenWriteNCMem(int ncidp)
+{
+  return streamOpenNCMem(ncidp, 'w');
+}
 static int
 streamOpen(const char *filename, const char *filemode, int filetype)
 {
@@ -931,7 +942,6 @@ streamOpenRead(const char *filename)
           if (streamptr->record) Free(streamptr->record);
           reshRemove(streamptr->self, &streamOps);
         }
-      streamPrintP(streamptr, stdout);
     }
 
   return streamID;
