@@ -1366,7 +1366,14 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                   cdf_set_var(ncvar, CoordVar);
                 }
               else
-                Warning("%s - %s", nc_strerror(status), attstring);
+                {
+                  static bool printWarning = true;
+                  if (printWarning)
+                    {
+                      printWarning = false;
+                      Warning("%s - %s", nc_strerror(status), attstring);
+                    }
+                }
             }
           else if (isText && str_is_equal(attname, "formula_terms"))
             {
