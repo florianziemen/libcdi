@@ -1,8 +1,8 @@
+#include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
 
-#include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
 
@@ -110,12 +110,13 @@ parTableFinalize(void)
         int npars = parTable[tableID].npars;
         for (int item = 0; item < npars; ++item)
           {
-            if (parTable[tableID].pars[item].dupflags & TABLE_DUP_NAME) Free((void *) parTable[tableID].pars[item].name);
-            if (parTable[tableID].pars[item].dupflags & TABLE_DUP_LONGNAME) Free((void *) parTable[tableID].pars[item].longname);
-            if (parTable[tableID].pars[item].dupflags & TABLE_DUP_UNITS) Free((void *) parTable[tableID].pars[item].units);
+            param_type *param = &parTable[tableID].pars[item];
+            if (param->dupflags & TABLE_DUP_NAME) free((void *) param->name);
+            if (param->dupflags & TABLE_DUP_LONGNAME) free((void *) param->longname);
+            if (param->dupflags & TABLE_DUP_UNITS) free((void *) param->units);
           }
-        Free(parTable[tableID].pars);
-        Free(parTable[tableID].name);
+        free(parTable[tableID].pars);
+        free(parTable[tableID].name);
       }
 }
 
@@ -390,7 +391,7 @@ tableFromEnv(int modelID, int tablenum)
   if (tablePath) lenp = strlen(tablePath);
   // if (tablePath) printf("tablePath = %s\n", tablePath);
   // if (tablename) printf("tableName = %s\n", tablename);
-  char *tablefile = (char *) Malloc(lenp + lenf + 3);
+  char *tablefile = (char *) malloc(lenp + lenf + 3);
   if (tablePath)
     {
       strcpy(tablefile, tablePath);
@@ -408,7 +409,7 @@ tableFromEnv(int modelID, int tablenum)
       tableDefNum(tableID, tablenum);
     }
   // printf("tableID = %d %s\n", tableID, tablefile);
-  Free(tablefile);
+  free(tablefile);
 
   return tableID;
 }
@@ -502,7 +503,7 @@ tableDef(int modelID, int tablenum, const char *tablename)
       parTable[tableID].number = tablenum;
       if (tablename) parTable[tableID].name = strdup(tablename);
 
-      parTable[tableID].pars = (param_type *) Malloc(MAX_PARS * sizeof(param_type));
+      parTable[tableID].pars = (param_type *) malloc(MAX_PARS * sizeof(param_type));
     }
 
   return tableID;

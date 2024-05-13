@@ -31,7 +31,6 @@ show_stackframe(void)
 #endif
 }
 
-#include "dmemory.h"
 #include "resource_handle.h"
 #include "namespace.h"
 #include "serialize.h"
@@ -196,7 +195,7 @@ listInitResources(int nsp)
   xassert(nsp < resHListSize && nsp >= 0);
   int size = resHList[nsp].size = MIN_LIST_SIZE;
   xassert(resHList[nsp].resources == NULL);
-  resHList[nsp].resources = (listElem_t *) Calloc(MIN_LIST_SIZE, sizeof(listElem_t));
+  resHList[nsp].resources = (listElem_t *) calloc(MIN_LIST_SIZE, sizeof(listElem_t));
   listElem_t *p = resHList[nsp].resources;
 
   for (int i = 0; i < size; i++)
@@ -232,7 +231,7 @@ reshListCreate(int namespaceID)
   LIST_LOCK();
   if (resHListSize <= namespaceID)
     {
-      resHList = (struct resHList_t *) Realloc(resHList, (size_t) (namespaceID + 1) * sizeof(resHList[0]));
+      resHList = (struct resHList_t *) realloc(resHList, (size_t) (namespaceID + 1) * sizeof(resHList[0]));
       for (int i = resHListSize; i <= namespaceID; ++i) reshListClearEntry(i);
       resHListSize = namespaceID + 1;
     }
@@ -261,7 +260,7 @@ reshListDestruct(int namespaceID)
               reshRemove_(namespaceID, j, __func__);
             }
         }
-      Free(resHList[namespaceID].resources);
+      free(resHList[namespaceID].resources);
       resHList[namespaceID].resources = NULL;
       reshListClearEntry(namespaceID);
     }
@@ -276,7 +275,7 @@ listDestroy(void)
   for (int i = resHListSize; i > 0; --i)
     if (resHList[i - 1].resources) namespaceDelete(i - 1);
   resHListSize = 0;
-  Free(resHList);
+  free(resHList);
   resHList = NULL;
   cdiReset();
   LIST_UNLOCK();
@@ -315,7 +314,7 @@ listSizeExtend(void)
   int oldSize = resHList[nsp].size;
   size_t newListSize = (size_t) oldSize + MIN_LIST_SIZE;
 
-  resHList[nsp].resources = (listElem_t *) Realloc(resHList[nsp].resources, newListSize * sizeof(listElem_t));
+  resHList[nsp].resources = (listElem_t *) realloc(resHList[nsp].resources, newListSize * sizeof(listElem_t));
 
   listElem_t *r = resHList[nsp].resources;
   for (size_t i = (size_t) oldSize; i < newListSize; ++i)
@@ -710,7 +709,7 @@ reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
   int nsp = namespaceGetActive();
 
   int pBSize = *packBufferSize = getPackBufferSize(context);
-  char *pB = *packBuffer = (char *) Malloc((size_t) pBSize);
+  char *pB = *packBuffer = (char *) malloc((size_t) pBSize);
 
   {
     int header[resHPackHeaderNInt] = { START, nsp };
