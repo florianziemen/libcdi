@@ -83,9 +83,7 @@ tunitNamePtr(int unitID)
     size = sizeof(Timeunits) / sizeof(Timeunits[0])
   };
 
-  const char *name = unitID > 0 && unitID < size ? Timeunits[unitID] : Timeunits[0];
-
-  return name;
+  return (unitID > 0 && unitID < size) ? Timeunits[unitID] : Timeunits[0];
 }
 
 void
