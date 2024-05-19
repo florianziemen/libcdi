@@ -1,3 +1,7 @@
+2024-05-21  Uwe Schulzweida
+
+	* Version 2.4.1 released
+
 2024-04-19 Uwe Schulzweida
 
 	* cdfVerifyVars: disable check failed with cdo option --cmor
@@ -12,7 +16,7 @@
 
 2024-03-20 Uwe Schulzweida
 
-	* calc_chunk_cache_size:  improve for 4D chunked data
+	* calc_chunk_cache_size:  improved for 4D chunked data
 
 2024-03-11 Uwe Schulzweida
 
@@ -20,7 +24,7 @@
 
 2024-03-08  Uwe Schulzweida
 
-	* Remove  interface function vlistCopy(), use vlistDuplicate()
+	* Removed  interface function vlistCopy(), use vlistDuplicate()
 
 2024-02-22  Uwe Schulzweida
 

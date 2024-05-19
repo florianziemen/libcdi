@@ -1,6 +1,14 @@
 CDI NEWS
 --------
 
+Version 2.4.1 (21 May 2024):
+
+   Changes:
+     * Removed  interface function vlistCopy(), use vlistDuplicate()
+     * calc_chunk_cache_size:  improved for 4D chunked data
+   Fixed bugs:
+     * gribapi_get_timeunits: check unitsOfTime (bug fix) [report: Chris Barnard]
+
 Version 2.4.0 (22 February 2024):
 
    New features:
