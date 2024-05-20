@@ -1722,7 +1722,7 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
   int length = CDI_MAX_NAME;
   cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, axisname, &length);
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-  int nzaxis = vlistNzaxis(vlistID);
+  int nzaxis = vlistNumZaxis(vlistID);
   int fileID = streamptr->fileID;
 
   checkZaxisName(axisname, fileID, vlistID, zaxisID, nzaxis);
@@ -2236,7 +2236,7 @@ cdfDefCoordinateVars(stream_t *streamptr)
 
   if (vlistHasTime(vlistID)) cdfDefTime(streamptr);
 
-  int ngrids = vlistNgrids(vlistID);
+  int ngrids = vlistNumGrids(vlistID);
   if (2 * ngrids > MAX_GRIDS_PS) Error("Internal problem! Too many grids per stream (max=%d)\n", MAX_GRIDS_PS);
 
   struct cdfPostDefActionList *delayed = NULL;
@@ -2270,7 +2270,7 @@ cdfDefCoordinateVars(stream_t *streamptr)
       }
   }
 
-  int nzaxis = vlistNzaxis(vlistID);
+  int nzaxis = vlistNumZaxis(vlistID);
   for (int index = 0; index < nzaxis; ++index)
     {
       int zaxisID = vlistZaxis(vlistID, index);

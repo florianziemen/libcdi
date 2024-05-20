@@ -1271,17 +1271,32 @@ Get the Zaxis ID of a Variable
 
 \section*{\texttt{ 
 \ifpdf
-\hyperref[vlistNgrids]{vlistNgrids}
+\hyperref[vlistNumGrids]{vlistNumGrids}
 \else
-vlistNgrids
+vlistNumGrids
 \fi
 }}
 \begin{verbatim}
-    int vlistNgrids(int vlistID);
+    int vlistNumGrids(int vlistID);
 \end{verbatim}
 
 Number of grids in a variable list
-\ifpdfoutput{}{(\ref{vlistNgrids})}
+\ifpdfoutput{}{(\ref{vlistNumGrids})}
+
+
+\section*{\texttt{ 
+\ifpdf
+\hyperref[vlistNumZaxis]{vlistNumZaxis}
+\else
+vlistNumZaxis
+\fi
+}}
+\begin{verbatim}
+    int vlistNumZaxis(int vlistID);
+\end{verbatim}
+
+Number of zaxis in a variable list
+\ifpdfoutput{}{(\ref{vlistNumZaxis})}
 
 
 \section*{\texttt{ 
@@ -1297,21 +1312,6 @@ vlistNvars
 
 Number of variables in a variable list
 \ifpdfoutput{}{(\ref{vlistNvars})}
-
-
-\section*{\texttt{ 
-\ifpdf
-\hyperref[vlistNzaxis]{vlistNzaxis}
-\else
-vlistNzaxis
-\fi
-}}
-\begin{verbatim}
-    int vlistNzaxis(int vlistID);
-\end{verbatim}
-
-Number of zaxis in a variable list
-\ifpdfoutput{}{(\ref{vlistNzaxis})}
 
 
 \section*{\texttt{ 

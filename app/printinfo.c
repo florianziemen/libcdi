@@ -416,7 +416,7 @@ printGridInfoKernel(int gridID, int index, bool lproj)
 void
 printGridInfo(int vlistID)
 {
-  int ngrids = vlistNgrids(vlistID);
+  int ngrids = vlistNumGrids(vlistID);
   for (int index = 0; index < ngrids; index++)
     {
       int gridID = vlistGrid(vlistID, index);
@@ -526,7 +526,7 @@ printZaxisInfo(int vlistID)
 {
   char zaxisname[CDI_MAX_NAME], zname[CDI_MAX_NAME], zunits[CDI_MAX_NAME];
 
-  int nzaxis = vlistNzaxis(vlistID);
+  int nzaxis = vlistNumZaxis(vlistID);
   for (int index = 0; index < nzaxis; index++)
     {
       int dig = 7;

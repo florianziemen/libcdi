@@ -45,8 +45,8 @@ Function catalog:
    vlistCat             Concatenate two variable lists
    vlistCopyFlag        Copy some entries of a variable list
    vlistNvars           Number of variables in a variable list
-   vlistNgrids          Number of grids in a variable list
-   vlistNzaxis          Number of zaxis in a variable list
+   vlistNumGrids        Number of grids in a variable list
+   vlistNumZaxis        Number of zaxis in a variable list
    vlistDefTaxis        Define the time axis
    vlistInqTaxis        Get the time axis
 -------------------------------------------------------------

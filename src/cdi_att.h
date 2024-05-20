@@ -9,6 +9,8 @@
 #include "cdi_limits.h"
 #endif
 
+#include <stdio.h>
+
 // CDI attribute
 // clang-format off
 typedef struct

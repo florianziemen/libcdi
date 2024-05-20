@@ -253,43 +253,7 @@ AC_ARG_WITH([eccodes],
              AC_MSG_RESULT([suppressed])])
 AC_SUBST([ECCODES_INCLUDE])
 AC_SUBST([ECCODES_LIBS])
-# AM_CONDITIONAL([HAVE_LIBGRIB_API],[test "x$with_eccodes" != 'x' -a "x$with_eccodes" != 'xno' ])
-#  ----------------------------------------------------------------------
-#  Compile application with GRIB_API library (for GRIB2 support)
-GRIB_API_INCLUDE=''
-GRIB_API_LIBS=''
-AC_ARG_WITH([grib_api],
-            [AS_HELP_STRING([--with-grib_api=<yes|no|directory>],
-                            [location of GRIB_API library for grib2 encoding/decoding (lib and include subdirs)])],
-            [AS_CASE(["$with_grib_api"],
-                     [no],[AC_MSG_CHECKING([for GRIB_API library])
-                           AC_MSG_RESULT([suppressed])],
-                     [yes],[AC_CHECK_HEADERS([grib_api.h],,
-                                             [AC_MSG_ERROR([Could not find grib_api.h])],
-                                             [AC_INCLUDES_DEFAULT])
-                            AC_SEARCH_LIBS([grib_get_message],
-                                           [grib_api],
-                                           [AC_DEFINE([HAVE_LIBGRIB_API],[1],[GRIB_API library is present if defined to 1])],
-                                           [AC_MSG_ERROR([Could not link to grib_api library])])],
-                     [*],[GRIB_API_ROOT=$with_grib_api
-                          AS_IF([test -d "$GRIB_API_ROOT"],
-                                [LDFLAGS="-L$GRIB_API_ROOT/lib $LDFLAGS"
-                                 CPPFLAGS="-I$GRIB_API_ROOT/include $CPPFLAGS"
-                                 AC_CHECK_HEADERS([grib_api.h],,
-                                                  [AC_MSG_ERROR([Could not find grib_api.h])],
-                                                  [AC_INCLUDES_DEFAULT])
-                                 AC_SEARCH_LIBS([grib_get_message],
-                                                [grib_api],
-                                                [AC_DEFINE([HAVE_LIBGRIB_API],[1],[GRIB_API library is present if defined to 1])],
-                                                [AC_MSG_ERROR([Could not link to grib_api library])])
-                                 GRIB_API_LIBS=" -L$GRIB_API_ROOT/lib -lgrib_api"
-                                 GRIB_API_INCLUDE=" -I$GRIB_API_ROOT/include"],
-                                [AC_MSG_ERROR([$GRIB_API_ROOT is not a directory! GRIB_API suppressed])])])],
-            [AC_MSG_CHECKING([for the GRIB_API library])
-             AC_MSG_RESULT([suppressed])])
-AC_SUBST([GRIB_API_INCLUDE])
-AC_SUBST([GRIB_API_LIBS])
-AM_CONDITIONAL([HAVE_LIBGRIB_API],[test \( "x$with_grib_api" != 'x' -a "x$with_grib_api" != 'xno' \) -o \( "x$with_eccodes" != 'x' -a "x$with_eccodes" != 'xno' \) ])
+AM_CONDITIONAL([HAVE_LIBGRIB_API],[test "x$with_eccodes" != 'x' -a "x$with_eccodes" != 'xno' ])
 #  ----------------------------------------------------------------------
 #  Enable GRIB support
 AC_MSG_CHECKING([for GRIB support])

@@ -432,7 +432,7 @@ nc_grid_index(stream_t *streamptr, int gridID)
 {
   int index = 0;
   int vlistID = streamptr->vlistID;
-  int ngrids = vlistNgrids(vlistID);
+  int ngrids = vlistNumGrids(vlistID);
   for (index = 0; index < ngrids; ++index)
     if (streamptr->ncgrid[index].gridID == gridID) break;
 
@@ -981,7 +981,7 @@ cdfDefVar(stream_t *streamptr, int varID)
     cdfGenVarname(fileID, name, pnum, pcat, &pdis, &code);
 
   int dtype = vlistInqVarDatatype(vlistID, varID);
-  const nc_type xtype = cdfDefDatatype(dtype, streamptr);
+  nc_type xtype = cdfDefDatatype(dtype, streamptr);
 
   if (streamptr->ncmode == 2)
     {
@@ -1364,7 +1364,7 @@ cdfDefineStartAndCount(stream_t *streamptr, int varID, int xid, int yid, int zid
   int vlistID = streamptr->vlistID;
   int fileID = streamptr->fileID;
 
-  const long ntsteps = streamptr->ntsteps;
+  long ntsteps = streamptr->ntsteps;
   if (CDI_Debug) Message("ntsteps = %ld", ntsteps);
 
   int timetype = vlistInqVarTimetype(vlistID, varID);
@@ -1457,7 +1457,7 @@ cdfDefineStartAndCountChunk(stream_t *streamptr, const int rect[][2], int varID,
   int vlistID = streamptr->vlistID;
   int fileID = streamptr->fileID;
 
-  const long ntsteps = streamptr->ntsteps;
+  long ntsteps = streamptr->ntsteps;
   if (CDI_Debug) Message("ntsteps = %ld", ntsteps);
 
   int timetype = vlistInqVarTimetype(vlistID, varID);
@@ -1554,7 +1554,7 @@ cdfDefineStartAndCountSlice(stream_t *streamptr, int varID, int levelID, int dim
   int vlistID = streamptr->vlistID;
   int fileID = streamptr->fileID;
 
-  const long ntsteps = streamptr->ntsteps;
+  long ntsteps = streamptr->ntsteps;
   if (CDI_Debug) Message("ntsteps = %ld", ntsteps);
 
   int timetype = vlistInqVarTimetype(vlistID, varID);

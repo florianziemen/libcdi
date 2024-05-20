@@ -163,9 +163,7 @@ defineVlist(int gridID, int zaxisID, int taxisID)
   vlistDefVarName(vlistID, varID2, "varname2");
   cdiDefAttTxt(vlistID, varID2, "txt demo", 6, "banana");
   vlistDefTaxis(vlistID, taxisID);
-  int vlistID2 = vlistCreate();
-  vlistDefVar(vlistID2, gridID, zaxisID, TIME_VARIABLE);
-  vlistCopy(vlistID2, vlistID);
+  int vlistID2 = vlistDuplicate(vlistID);
   return (struct idPair){ vlistID, vlistID2 };
 }
 

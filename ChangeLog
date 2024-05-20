@@ -1,3 +1,31 @@
+2024-05-21  Uwe Schulzweida
+
+	* Version 2.4.1 released
+
+2024-04-19 Uwe Schulzweida
+
+	* cdfVerifyVars: disable check failed with cdo option --cmor
+
+2024-04-15 Uwe Schulzweida
+
+	* gribapi: added support for sortname option
+
+2024-03-22 Uwe Schulzweida
+
+	* gribapi_get_timeunits: check unitsOfTime (bug fix) [report: Chris Barnard]
+
+2024-03-20 Uwe Schulzweida
+
+	* calc_chunk_cache_size:  improved for 4D chunked data
+
+2024-03-11 Uwe Schulzweida
+
+	* GRIB1: add check for full pressure levels
+
+2024-03-08  Uwe Schulzweida
+
+	* Removed  interface function vlistCopy(), use vlistDuplicate()
+
 2024-02-22  Uwe Schulzweida
 
 	* Version 2.4.0 released

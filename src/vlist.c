@@ -316,8 +316,8 @@ var_copy_entries(var_t *var2, var_t *var1)
 
 @Prototype void vlistCopy(int vlistID2, int vlistID1)
 @Parameter
-    @Item  vlistID2  Target variable list ID.
     @Item  vlistID1  Source variable list ID.
+    @Item  vlistID2  Target variable list ID.
 
 @Description
 The function @func{vlistCopy} copies all entries from vlistID1 to vlistID2.
@@ -325,7 +325,7 @@ The function @func{vlistCopy} copies all entries from vlistID1 to vlistID2.
 @EndFunction
 */
 void
-vlistCopy(int vlistID2, int vlistID1)
+vlistCopy(int vlistID1, int vlistID2)
 {
   vlist_t *vlistptr1 = vlist_to_pointer(vlistID1);
   vlist_t *vlistptr2 = vlist_to_pointer(vlistID2);
@@ -391,7 +391,7 @@ vlistDuplicate(int vlistID)
   if (CDI_Debug) Message("call to vlistDuplicate");
 
   int vlistIDnew = vlistCreate();
-  vlistCopy(vlistIDnew, vlistID);
+  vlistCopy(vlistID, vlistIDnew);
   return vlistIDnew;
 }
 
@@ -952,7 +952,7 @@ vlistNvars(int vlistID)
 }
 
 int
-vlistNrecs(int vlistID)
+vlistNumRecords(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -985,23 +985,23 @@ vlistNumber(int vlistID)
 }
 
 /*
-@Function  vlistNgrids
+@Function  vlistNumGrids
 @Title     Number of grids in a variable list
 
-@Prototype int vlistNgrids(int vlistID)
+@Prototype int vlistNumGrids(int vlistID)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
 
 @Description
-The function @func{vlistNgrids} returns the number of grids in the variable list vlistID.
+The function @func{vlistNumGrids} returns the number of grids in the variable list vlistID.
 
 @Result
-@func{vlistNgrids} returns the number of grids in a variable list.
+@func{vlistNumGrids} returns the number of grids in a variable list.
 
 @EndFunction
 */
 int
-vlistNgrids(int vlistID)
+vlistNumGrids(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1009,23 +1009,23 @@ vlistNgrids(int vlistID)
 }
 
 /*
-@Function  vlistNzaxis
+@Function  vlistNumZaxis
 @Title     Number of zaxis in a variable list
 
-@Prototype int vlistNzaxis(int vlistID)
+@Prototype int vlistNumZaxis(int vlistID)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
 
 @Description
-The function @func{vlistNzaxis} returns the number of zaxis in the variable list vlistID.
+The function @func{vlistNumZaxis} returns the number of zaxis in the variable list vlistID.
 
 @Result
-@func{vlistNzaxis} returns the number of zaxis in a variable list.
+@func{vlistNumZaxis} returns the number of zaxis in a variable list.
 
 @EndFunction
 */
 int
-vlistNzaxis(int vlistID)
+vlistNumZaxis(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1586,7 +1586,7 @@ vlistUnpack(char *buf, int size, int *position, int originNamespace, void *conte
 void
 vlist_check_contents(int vlistID)
 {
-  int nzaxis = vlistNzaxis(vlistID);
+  int nzaxis = vlistNumZaxis(vlistID);
   for (int index = 0; index < nzaxis; index++)
     {
       int zaxisID = vlistZaxis(vlistID, index);

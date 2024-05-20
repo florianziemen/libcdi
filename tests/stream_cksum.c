@@ -50,8 +50,8 @@ cksum_stream(const char *fname, size_t *table_len)
       int fileType = streamInqFiletype(streamID);
       bool isLegacyFile = fileType == CDI_FILETYPE_SRV || fileType == CDI_FILETYPE_EXT;
       nvars = vlistNvars(vlistID);
-      int ngrids = vlistNgrids(vlistID);
-      int nzaxis = vlistNzaxis(vlistID);
+      int ngrids = vlistNumGrids(vlistID);
+      int nzaxis = vlistNumZaxis(vlistID);
       if (nzaxis < 0 || ngrids < 0)
         {
           fprintf(stderr, "Error in grid/zaxis count query %d:%d\n", ngrids, nzaxis);

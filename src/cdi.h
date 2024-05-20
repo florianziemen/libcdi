@@ -526,9 +526,6 @@ void    vlistDestroy(int vlistID);
 //      vlistDuplicate: Duplicate a variable list
 int     vlistDuplicate(int vlistID);
 
-//      vlistCopy: Copy a variable list
-void    vlistCopy(int vlistID2, int vlistID1);
-
 //      vlistCopyFlag: Copy some entries of a variable list
 void    vlistCopyFlag(int vlistID2, int vlistID1);
 
@@ -548,11 +545,11 @@ int     vlistNumber(int vlistID);
 //      vlistNvars: Number of variables in a variable list
 int     vlistNvars(int vlistID);
 
-//      vlistNgrids: Number of grids in a variable list
-int     vlistNgrids(int vlistID);
+//      vlistNumGrids: Number of grids in a variable list
+int     vlistNumGrids(int vlistID);
 
-//      vlistNzaxis: Number of zaxis in a variable list
-int     vlistNzaxis(int vlistID);
+//      vlistNumZaxis: Number of zaxis in a variable list
+int     vlistNumZaxis(int vlistID);
 
 //      vlistNsubtypes: Number of subtypes in a variable list
 int     vlistNsubtypes(int vlistID);
@@ -568,7 +565,7 @@ int     vlistZaxis(int vlistID, int index);
 int     vlistZaxisIndex(int vlistID, int zaxisID);
 void    vlistChangeZaxisIndex(int vlistID, int index, int zaxisID);
 void    vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2);
-int     vlistNrecs(int vlistID);
+int     vlistNumRecords(int vlistID);
 int     vlistSubtype(int vlistID, int index);
 int     vlistSubtypeIndex(int vlistID, int subtypeID);
 

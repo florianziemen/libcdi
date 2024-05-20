@@ -28,8 +28,8 @@ vlistDuplicate        vlist
 vlistCat              vlist
 vlistCopyFlag         vlist
 vlistNvars            vlist
-vlistNgrids           vlist
-vlistNzaxis           vlist
+vlistNumGrids         vlist
+vlistNumZaxis         vlist
 vlistDefTaxis         vlist
 vlistInqTaxis         vlist
 vlistDefVar           vlist_var

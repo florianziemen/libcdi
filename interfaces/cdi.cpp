@@ -401,7 +401,7 @@ void
 Cdi::getZaxes()
 {
   int zaxisID;
-  nzaxes = vlistNzaxis(vlistID);
+  nzaxes = vlistNumZaxis(vlistID);
   for (int i = 0; i < nzaxes; i++)
     {
       zaxisID = vlistZaxis(vlistID, i);
@@ -414,7 +414,7 @@ void
 Cdi::getGrids()
 {
   int gridID;
-  ngrids = vlistNgrids(vlistID);
+  ngrids = vlistNumGrids(vlistID);
   std::cout << "ngrids=" << ngrids << std::endl;
   for (int i = 0; i < ngrids; i++)
     {

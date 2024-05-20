@@ -1,7 +1,7 @@
 #include <assert.h>
+#include <stdlib.h>
 #include <limits.h>
 
-#include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
 #include "resource_handle.h"
@@ -147,7 +147,7 @@ institutInq(int center, int subcenter, const char *name, const char *longname)
 static institute_t *
 instituteNewEntry(cdiResH resH, int center, int subcenter, const char *name, const char *longname)
 {
-  institute_t *instituteptr = (institute_t *) Malloc(sizeof(institute_t));
+  institute_t *instituteptr = (institute_t *) malloc(sizeof(institute_t));
   instituteDefaultValue(instituteptr);
   if (resH == CDI_UNDEFID)
     instituteptr->self = reshPut(instituteptr, &instituteOps);
@@ -205,9 +205,9 @@ static void
 instituteDestroyP(institute_t *instituteptr)
 {
   xassert(instituteptr);
-  Free(instituteptr->name);
-  Free(instituteptr->longname);
-  Free(instituteptr);
+  free(instituteptr->name);
+  free(instituteptr->longname);
+  free(instituteptr);
 }
 
 static void
@@ -277,7 +277,7 @@ instituteUnpack(void *buf, int size, int *position, int originNamespace, void *c
   int tempbuf[institute_nints];
   int instituteID;
   serializeUnpack(buf, size, position, tempbuf, institute_nints, CDI_DATATYPE_INT, context);
-  char *name = (char *) Malloc((size_t) tempbuf[INSTITUTE_PACK_INT_NAMELEN] + (size_t) tempbuf[INSTITUTE_PACK_INT_LNAMELEN]),
+  char *name = (char *) malloc((size_t) tempbuf[INSTITUTE_PACK_INT_NAMELEN] + (size_t) tempbuf[INSTITUTE_PACK_INT_LNAMELEN]),
        *longname = name + tempbuf[INSTITUTE_PACK_INT_NAMELEN];
   serializeUnpack(buf, size, position, name, tempbuf[INSTITUTE_PACK_INT_NAMELEN], CDI_DATATYPE_TXT, context);
   serializeUnpack(buf, size, position, longname, tempbuf[INSTITUTE_PACK_INT_LNAMELEN], CDI_DATATYPE_TXT, context);
@@ -286,7 +286,7 @@ instituteUnpack(void *buf, int size, int *position, int originNamespace, void *c
       = instituteNewEntry(targetID, tempbuf[INSTITUTE_PACK_INT_CENTER], tempbuf[INSTITUTE_PACK_INT_SUBCENTER], name, longname);
   instituteID = ip->self;
   xassert(!force_id || instituteID == targetID);
-  Free(name);
+  free(name);
   reshSetStatus(instituteID, &instituteOps, reshGetStatus(instituteID, &instituteOps) & ~RESH_SYNC_BIT);
 #undef adaptKey
   return instituteID;

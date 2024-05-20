@@ -67,7 +67,7 @@ cdfGetTimeUnits(taxis_t *taxis)
       if (taxis->type == TAXIS_ABSOLUTE)
         {
           static const char *const unitstrfmt[3] = { "year as %Y.%f", "month as %Y%m.%f", "day as %Y%m%d.%f" };
-          size_t fmtidx = (taxis->unit == TUNIT_YEAR ? 0 : (taxis->unit == TUNIT_MONTH ? 1 : 2));
+          size_t fmtidx = ((taxis->unit == TUNIT_YEAR) ? 0 : ((taxis->unit == TUNIT_MONTH) ? 1 : 2));
           unitstr = unitstrfmt[fmtidx];
         }
       else

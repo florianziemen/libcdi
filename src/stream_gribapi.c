@@ -87,8 +87,14 @@ gribapi_get_timeunits(grib_handle *gh)
 {
   long unitsOfTime = -1;
   grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime);
+  if (unitsOfTime == -1) grib_get_long(gh, "indicatorOfUnitForTimeIncrement", &unitsOfTime);
 
-  GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
+  if (unitsOfTime != -1)
+    {
+      long stepUnits = -1;
+      grib_get_long(gh, "stepUnits", &stepUnits);
+      if (stepUnits == -1 && stepUnits != unitsOfTime) GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
+    }
 
   return get_timeunits(unitsOfTime);
 }
@@ -114,7 +120,7 @@ gribapiGetSteps(grib_handle *gh, int timeunits, int *startStep, int *endStep)
   *endStep = *startStep;
   status = grib_get_long(gh, "endStep", &lpar);
   if (status == 0) *endStep = (int) (((double) lpar * timeunits_factor(timeunits, timeunits2)) + 0.5);
-  // printf("%d %d %d %d %d %g\n", *startStep, *endStep, lpar, timeunits, timeunits2, timeunits_factor(timeunits, timeunits2));
+  // printf("%d %d %ld %d %d %g\n", *startStep, *endStep, lpar, timeunits, timeunits2, timeunits_factor(timeunits, timeunits2));
 }
 
 static CdiDateTime
@@ -1206,6 +1212,21 @@ fdbScanTimesteps(stream_t *streamptr)
   return 0;
 }
 
+static int
+records_cmp_varname(const void *s1, const void *s2)
+{
+  const record_t *x = (const record_t *) s1, *y = (const record_t *) s2;
+  return strcmp(x->varname, y->varname);
+}
+
+void
+sort_records(stream_t *streamptr)
+{
+  record_t *records = streamptr->tsteps[0].records;
+  int numRecords = streamptr->tsteps[0].recordSize;
+  qsort(records, numRecords, sizeof(records[0]), records_cmp_varname);
+}
+
 int
 gribapiScanTimestep1(stream_t *streamptr)
 {
@@ -1353,6 +1374,8 @@ gribapiScanTimestep1(stream_t *streamptr)
 
   streamScanTsFixNtsteps(streamptr, recpos);
   streamScanTimeConstAdjust(streamptr, taxis);
+
+  if (streamptr->sortname) sort_records(streamptr);
 
   return 0;
 }
@@ -2818,9 +2841,18 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
               grib_ltype = GRIB1_LTYPE_ISOBARIC_PA;
             else
               level /= 100;
+
+            static bool lwarn = true;
+            if (lwarn && modf(level, &dum) > 0.001)
+              {
+                lwarn = false;
+                Warning("GRIB1 can store only full pressure levels! Level changed from %ghPa to %dhPa.", level,
+                        (int) lround(level));
+              }
           }
         else if (ltype2 == -1)
           ltype2 = GRIB2_LTYPE_ISOBARIC;
+
         defLevel(gh, gcinit, grib_ltype, ltype2, hasBounds, level, dlevel1, dlevel2);
 
         break;

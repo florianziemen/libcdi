@@ -70,7 +70,7 @@ cdf_create_records(stream_t *streamptr, int tsID)
   tsteps_t *sourceTstep = streamptr->tsteps;
   tsteps_t *destTstep = sourceTstep + tsID;
 
-  int numRecs = vlistNrecs(vlistID);
+  int numRecs = vlistNumRecords(vlistID);
   if (numRecs <= 0) return;
 
   if (tsID == 0)

@@ -1,6 +1,6 @@
+#include <stdlib.h>
 #include <limits.h>
 
-#include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
 #include "model.h"
@@ -43,7 +43,7 @@ modelDefaultValue(model_t *modelptr)
 static model_t *
 modelNewEntry(cdiResH resH, int instID, int modelgribID, const char *name)
 {
-  model_t *modelptr = (model_t *) Malloc(sizeof(model_t));
+  model_t *modelptr = (model_t *) malloc(sizeof(model_t));
   modelDefaultValue(modelptr);
   if (resH == CDI_UNDEFID)
     modelptr->self = reshPut(modelptr, &modelOps);
@@ -220,8 +220,8 @@ void
 modelDestroyP(void *modelptr)
 {
   model_t *mp = (model_t *) modelptr;
-  if (mp->name) Free(mp->name);
-  Free(mp);
+  if (mp->name) free(mp->name);
+  free(mp);
 }
 
 void
@@ -288,7 +288,7 @@ modelUnpack(void *buf, int size, int *position, int originNamespace, void *conte
   if (tempbuf[MODEL_PACK_INT_NAMELEN] != 0)
     {
       size_t len = (size_t) tempbuf[MODEL_PACK_INT_NAMELEN];
-      name = (char *) Malloc(len + 1);
+      name = (char *) malloc(len + 1);
       serializeUnpack(buf, size, position, name, tempbuf[MODEL_PACK_INT_NAMELEN], CDI_DATATYPE_TXT, context);
       name[len] = '\0';
     }
@@ -299,7 +299,7 @@ modelUnpack(void *buf, int size, int *position, int originNamespace, void *conte
   int targetID = adaptKey(tempbuf[MODEL_PACK_INT_SELF]);
   model_t *mp = modelNewEntry(force_id ? targetID : CDI_UNDEFID, adaptKey(tempbuf[MODEL_PACK_INT_INSTID]),
                               tempbuf[MODEL_PACK_INT_MODELGRIBID], name);
-  if (tempbuf[MODEL_PACK_INT_NAMELEN] != 0) Free(name);
+  if (tempbuf[MODEL_PACK_INT_NAMELEN] != 0) free(name);
   xassert(!force_id || (mp->self == adaptKey(tempbuf[0])));
   reshSetStatus(mp->self, &modelOps, reshGetStatus(mp->self, &modelOps) & ~RESH_SYNC_BIT);
 #undef adaptKey
