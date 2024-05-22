@@ -1,3 +1,7 @@
+2024-05-22  Uwe Schulzweida
+
+	* cdiInqContents: missing lock of non thread-safe netCDF4/HDF5 calls (bug fix)
+
 2024-05-21  Uwe Schulzweida
 
 	* Version 2.4.1 released

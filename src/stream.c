@@ -380,6 +380,8 @@ streamFilename(int streamID)
 static int
 cdiInqContents(stream_t *streamptr)
 {
+  if (streamptr->lockIO) CDI_IO_LOCK();
+
   int status = 0;
   int filetype = streamptr->filetype;
 
@@ -417,6 +419,8 @@ cdiInqContents(stream_t *streamptr)
         if (CDI_Debug) Message("%s support not compiled in!", strfiletype(filetype));
       }
     }
+
+  if (streamptr->lockIO) CDI_IO_UNLOCK();
 
   if (status == 0)
     {
@@ -667,7 +671,7 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
   if (CDI_Threadsafe)
     {
 #ifndef HAVE_LIBPTHREAD
-      Error("CDI threadsafe failed, pthread support not compiled!");
+      Error("CDI threadsafe failed, pthread support not compiled in!");
 #endif
       if (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C) streamptr->lockIO = true;
     }
