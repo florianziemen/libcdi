@@ -19,8 +19,8 @@ enum
 
 union SRV_HEADER
 {
-  INT32 i32[SRV_HEADER_LEN];
-  INT64 i64[SRV_HEADER_LEN];
+  int32_t i32[SRV_HEADER_LEN];
+  int64_t i64[SRV_HEADER_LEN];
 };
 
 static int initSrvLib = 0;
@@ -29,7 +29,7 @@ static int srvDefaultDprec = 0;
 
 // A version string.
 #undef LIBVERSION
-#define LIBVERSION 1.5.0
+#define LIBVERSION 2.0.0
 #define XSTRING(x) #x
 #define STRING(x) XSTRING(x)
 static const char srv_libvers[] = STRING(LIBVERSION);
@@ -141,8 +141,8 @@ srvCheckFiletype(int fileID, int *swap)
 
   if (fileRead(fileID, buffer, 4) != 4) return 0;
 
-  size_t blocklen = (size_t) get_UINT32(buffer);
-  size_t sblocklen = (size_t) get_SUINT32(buffer);
+  size_t blocklen = (size_t) get_uint32(buffer);
+  size_t sblocklen = (size_t) get_swap_uint32(buffer);
 
   if (SRV_Debug) Message("blocklen = %d sblocklen = %d", blocklen, sblocklen);
 
@@ -152,36 +152,36 @@ srvCheckFiletype(int fileID, int *swap)
      *swap = 0;
       fact = blocklen>>3;
       if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
-      pbuf = buffer+4*fact;      dimx = (size_t) get_UINT32(pbuf);
-      pbuf = buffer+5*fact;      dimy = (size_t) get_UINT32(pbuf);
-      pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
+      pbuf = buffer+4*fact;      dimx = (size_t) get_uint32(pbuf);
+      pbuf = buffer+5*fact;      dimy = (size_t) get_uint32(pbuf);
+      pbuf = buffer+blocklen+4;  data = (size_t) get_uint32(pbuf);
     }
   else if (blocklen == 64)
     {
      *swap = 0;
       fact = blocklen>>3;
       if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
-      pbuf = buffer+4*fact;      dimx = (size_t) get_UINT64(pbuf);
-      pbuf = buffer+5*fact;      dimy = (size_t) get_UINT64(pbuf);
-      pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
+      pbuf = buffer+4*fact;      dimx = (size_t) get_uint64(pbuf);
+      pbuf = buffer+5*fact;      dimy = (size_t) get_uint64(pbuf);
+      pbuf = buffer+blocklen+4;  data = (size_t) get_uint32(pbuf);
     }
   else if (sblocklen == 32)
     {
      *swap = 1;
       fact = sblocklen>>3;
       if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
-      pbuf = buffer+4*fact;       dimx = (size_t) get_SUINT32(pbuf);
-      pbuf = buffer+5*fact;       dimy = (size_t) get_SUINT32(pbuf);
-      pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
+      pbuf = buffer+4*fact;       dimx = (size_t) get_swap_uint32(pbuf);
+      pbuf = buffer+5*fact;       dimy = (size_t) get_swap_uint32(pbuf);
+      pbuf = buffer+sblocklen+4;  data = (size_t) get_swap_uint32(pbuf);
     }
   else if (sblocklen == 64)
     {
      *swap = 1;
       fact = sblocklen>>3;
       if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
-      pbuf = buffer+4*fact;       dimx = (size_t) get_SUINT64(pbuf);
-      pbuf = buffer+5*fact;       dimy = (size_t) get_SUINT64(pbuf);
-      pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
+      pbuf = buffer+4*fact;       dimx = (size_t) get_swap_uint64(pbuf);
+      pbuf = buffer+5*fact;       dimy = (size_t) get_swap_uint64(pbuf);
+      pbuf = buffer+sblocklen+4;  data = (size_t) get_swap_uint32(pbuf);
     }
   // clang-format on
 
@@ -233,34 +233,34 @@ srvInqData(srvrec_t *srvp, int prec, void *data)
     {
     case EXSE_SINGLE_PRECISION:
       {
-        if (sizeof(FLT32) == 4)
+        if (sizeof(float) == 4)
           {
             if (byteswap) swap4byte(buffer, datasize);
 
             if (dprec == prec)
-              memcpy(data, buffer, datasize * sizeof(FLT32));
+              memcpy(data, buffer, datasize * sizeof(float));
             else
               for (size_t i = 0; i < datasize; i++) ((double *) data)[i] = (double) ((float *) buffer)[i];
           }
         else
           {
-            Error("not implemented for %d byte float", sizeof(FLT32));
+            Error("not implemented for %d byte float", sizeof(float));
           }
         break;
       }
     case EXSE_DOUBLE_PRECISION:
-      if (sizeof(FLT64) == 8)
+      if (sizeof(double) == 8)
         {
           if (byteswap) swap8byte(buffer, datasize);
 
           if (dprec == prec)
-            memcpy(data, buffer, datasize * sizeof(FLT64));
+            memcpy(data, buffer, datasize * sizeof(double));
           else
             for (size_t i = 0; i < datasize; i++) ((float *) data)[i] = (float) ((double *) buffer)[i];
         }
       else
         {
-          Error("not implemented for %d byte float", sizeof(FLT64));
+          Error("not implemented for %d byte float", sizeof(double));
         }
       break;
     default:
@@ -314,7 +314,7 @@ srvDefData(void *srv, int prec, const void *data)
     case EXSE_SINGLE_PRECISION:
       {
         if (dprec == prec)
-          memcpy(srvp->buffer, data, datasize * sizeof(FLT32));
+          memcpy(srvp->buffer, data, datasize * sizeof(float));
         else
           for (size_t i = 0; i < datasize; i++) ((float *) srvp->buffer)[i] = (float) ((double *) data)[i];
 
@@ -323,7 +323,7 @@ srvDefData(void *srv, int prec, const void *data)
     case EXSE_DOUBLE_PRECISION:
       {
         if (dprec == prec)
-          memcpy(srvp->buffer, data, datasize * sizeof(FLT64));
+          memcpy(srvp->buffer, data, datasize * sizeof(double));
         else
           for (size_t i = 0; i < datasize; i++) ((double *) srvp->buffer)[i] = (double) ((float *) data)[i];
 
@@ -460,13 +460,13 @@ srvWrite(int fileID, void *srv)
     {
     case EXSE_SINGLE_PRECISION:
       {
-        for (int i = 0; i < SRV_HEADER_LEN; i++) tempheader.i32[i] = (INT32) header[i];
+        for (int i = 0; i < SRV_HEADER_LEN; i++) tempheader.i32[i] = (int32_t) header[i];
         binWriteInt32(fileID, byteswap, SRV_HEADER_LEN, tempheader.i32);
         break;
       }
     case EXSE_DOUBLE_PRECISION:
       {
-        for (int i = 0; i < SRV_HEADER_LEN; i++) tempheader.i64[i] = (INT64) header[i];
+        for (int i = 0; i < SRV_HEADER_LEN; i++) tempheader.i64[i] = (int64_t) header[i];
         binWriteInt64(fileID, byteswap, SRV_HEADER_LEN, tempheader.i64);
         break;
       }
@@ -488,12 +488,12 @@ srvWrite(int fileID, void *srv)
     {
     case EXSE_SINGLE_PRECISION:
       {
-        binWriteFlt32(fileID, byteswap, srvp->datasize, (FLT32 *) srvp->buffer);
+        binWriteFlt32(fileID, byteswap, srvp->datasize, (float *) srvp->buffer);
         break;
       }
     case EXSE_DOUBLE_PRECISION:
       {
-        binWriteFlt64(fileID, byteswap, srvp->datasize, (FLT64 *) srvp->buffer);
+        binWriteFlt64(fileID, byteswap, srvp->datasize, (double *) srvp->buffer);
         break;
       }
     default:
