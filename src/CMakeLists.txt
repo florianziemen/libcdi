@@ -45,7 +45,6 @@ list( APPEND cdi_src_files
   cksum.h
   dmemory.c
   dmemory.h
-  dtypes.h
   error.c
   error.h
   exse.h

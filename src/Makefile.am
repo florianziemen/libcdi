@@ -122,7 +122,6 @@ libcdi_la_SOURCES = \
   cksum.h \
   dmemory.c \
   dmemory.h \
-  dtypes.h \
   error.c \
   error.h \
   exse.h \
