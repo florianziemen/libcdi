@@ -50,6 +50,7 @@ list( APPEND cdi_src_files
   exse.h
   extra.h
   extralib.c
+  float16.h
   file.c
   file.h
   gaussian_latitudes.c

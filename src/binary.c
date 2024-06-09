@@ -170,9 +170,19 @@ binWriteFlt64(int fileID, int byteswap, size_t size, double *ptr)
 {
   if (byteswap) swap8byte(ptr, size);
   fileWrite(fileID, (void *) ptr, 8 * size);
-
   return 0;
 }
+
+#ifdef HAVE_FLOAT16
+int
+binWriteFlt16(int fileID, int byteswap, size_t size, _Float16 *ptr)
+{
+  if (byteswap) swap4byte(ptr, size);
+  fileWrite(fileID, (void *) ptr, 2 * size);
+  return 0;
+}
+#endif
+
 /*
  * Local Variables:
  * c-file-style: "Java"
