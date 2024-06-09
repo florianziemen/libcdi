@@ -4,7 +4,7 @@
 // CAUTION: __is_identifier behaves opposite how you would expect!
 // '__is_identifier' returns '0' if '__x' is a reserved identifier provided by
 // the compiler and '1' otherwise.
-// borrowed from LLVM __config header under Apache license 2. 
+// borrowed from LLVM __config header under Apache license 2.
 // (https://www.mend.io/blog/top-10-apache-license-questions-answered/)
 #ifndef __is_identifier       // Optional of course.
 #define __is_identifier(x) 1  // Compatibility with non-clang compilers.
