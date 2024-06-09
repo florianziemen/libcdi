@@ -592,7 +592,7 @@ cdfCheckDataFP32_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t l
 
 static void
 cdfReadDataFP64(stream_t *streamptr, int varID, size_t length, size_t start[MAX_DIMENSIONS], size_t count[MAX_DIMENSIONS],
-              double *data)
+                double *data)
 {
   int vlistID = streamptr->vlistID;
   int fileID = streamptr->fileID;
@@ -628,7 +628,7 @@ cdfReadDataFP64(stream_t *streamptr, int varID, size_t length, size_t start[MAX_
 
 static void
 cdfReadDataFP32(stream_t *streamptr, int varID, size_t length, size_t start[MAX_DIMENSIONS], size_t count[MAX_DIMENSIONS],
-              float *data)
+                float *data)
 {
   int vlistID = streamptr->vlistID;
   int fileID = streamptr->fileID;

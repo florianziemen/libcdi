@@ -12,8 +12,8 @@ typedef struct
   int checked;
   int byteswap;
   int header[4];
-  int prec;   // single or double precison
-  int number; // real or complex
+  int prec;    // single or double precison
+  int number;  // real or complex
   size_t datasize;
   size_t buffersize;
   void *buffer;
