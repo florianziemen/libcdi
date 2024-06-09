@@ -22,7 +22,7 @@
 static int
 iegInqDatatype(int prec)
 {
-  return (prec == EXSE_DOUBLE_PRECISION) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
+  return (prec == EXSE_PREC_FP64) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
 }
 
 static int
@@ -32,7 +32,7 @@ iegDefDatatype(int datatype)
 
   if (datatype != CDI_DATATYPE_FLT32 && datatype != CDI_DATATYPE_FLT64) datatype = CDI_DATATYPE_FLT32;
 
-  return (datatype == CDI_DATATYPE_FLT64) ? EXSE_DOUBLE_PRECISION : EXSE_SINGLE_PRECISION;
+  return (datatype == CDI_DATATYPE_FLT64) ? EXSE_PREC_FP64 : EXSE_PREC_FP32;
 }
 
 static void
@@ -52,7 +52,7 @@ ieg_read_recordSP(stream_t *streamptr, float *data, size_t *numMissVals)
   void *iegp = streamptr->record->objectp;
   if (iegRead(fileID, iegp) < 0) Error("Could not read IEG record!");
 
-  iegInqDataSP(iegp, data);
+  iegInqDataFP32(iegp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
   size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
@@ -79,7 +79,7 @@ ieg_read_recordDP(stream_t *streamptr, double *data, size_t *numMissVals)
   void *iegp = streamptr->record->objectp;
   if (iegRead(fileID, iegp) < 0) Error("Could not read IEG record!");
 
-  iegInqDataDP(iegp, data);
+  iegInqDataFP64(iegp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
   size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
@@ -487,7 +487,7 @@ ieg_write_recordSP(stream_t *streamptr, const float *data)
 
   iegp->refval = calc_refvalSP(gridsize, data);
 
-  iegDefDataSP(iegp, data);
+  iegDefDataFP32(iegp, data);
   iegWrite(fileID, iegp);
 }
 
@@ -502,7 +502,7 @@ ieg_write_recordDP(stream_t *streamptr, const double *data)
 
   iegp->refval = calc_refvalDP(gridsize, data);
 
-  iegDefDataDP(iegp, data);
+  iegDefDataFP64(iegp, data);
   iegWrite(fileID, iegp);
 }
 
@@ -1025,7 +1025,7 @@ iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_
   off_t recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
   iegRead(fileID, iegp);
-  iegInqDataDP(iegp, data);
+  iegInqDataFP64(iegp, data);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
@@ -1076,7 +1076,7 @@ iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   size_t gridsize = gridInqSize(gridID);
   iegp->refval = calc_refvalDP(gridsize, data);
 
-  iegDefDataDP(iegp, data);
+  iegDefDataFP64(iegp, data);
   iegWrite(fileID, iegp);
 }
 

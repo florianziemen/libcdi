@@ -10,6 +10,7 @@
 #include "binary.h"
 #include "exse.h"
 #include "swap.h"
+#include "float16.h"
 
 enum
 {
@@ -65,8 +66,9 @@ extLibInit(void)
                 extDefaultNumber = EXT_REAL;
                 switch ((int) envString[1])
                   {
-                  case '4': extDefaultPrec = EXSE_SINGLE_PRECISION; break;
-                  case '8': extDefaultPrec = EXSE_DOUBLE_PRECISION; break;
+                  case '2': extDefaultPrec = EXSE_PREC_FP16; break;
+                  case '4': extDefaultPrec = EXSE_PREC_FP32; break;
+                  case '8': extDefaultPrec = EXSE_PREC_FP64; break;
                   default: Warning("Invalid digit in %s: %s", envName, envString);
                   }
                 break;
@@ -76,8 +78,8 @@ extLibInit(void)
                 extDefaultNumber = EXT_COMP;
                 switch ((int) envString[1])
                   {
-                  case '4': extDefaultPrec = EXSE_SINGLE_PRECISION; break;
-                  case '8': extDefaultPrec = EXSE_DOUBLE_PRECISION; break;
+                  case '4': extDefaultPrec = EXSE_PREC_FP32; break;
+                  case '8': extDefaultPrec = EXSE_PREC_FP64; break;
                   default: Warning("Invalid digit in %s: %s", envName, envString);
                   }
                 break;
@@ -149,7 +151,7 @@ extCheckFiletype(int fileID, int *swap)
   if (blocklen == 16)
     {
      *swap = 0;
-      fact = blocklen/4;
+      fact = blocklen / 4;
       if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
       pbuf = buffer+3*fact;      dimxy = (size_t) get_uint32(pbuf);
       pbuf = buffer+blocklen+4;  data  = (size_t) get_uint32(pbuf);
@@ -157,7 +159,7 @@ extCheckFiletype(int fileID, int *swap)
   else if (blocklen == 32)
     {
      *swap = 0;
-      fact = blocklen/4;
+      fact = blocklen / 4;
       if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
       pbuf = buffer+3*fact;      dimxy = (size_t) get_uint64(pbuf);
       pbuf = buffer+blocklen+4;  data  = (size_t) get_uint32(pbuf);
@@ -165,7 +167,7 @@ extCheckFiletype(int fileID, int *swap)
   else if (sblocklen == 16)
     {
      *swap = 1;
-      fact = sblocklen/4;
+      fact = sblocklen / 4;
       if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
       pbuf = buffer+3*fact;       dimxy = (size_t) get_swap_uint32(pbuf);
       pbuf = buffer+sblocklen+4;  data  = (size_t) get_swap_uint32(pbuf);
@@ -173,7 +175,7 @@ extCheckFiletype(int fileID, int *swap)
   else if (sblocklen == 32)
     {
      *swap = 1;
-      fact = sblocklen/4;
+      fact = sblocklen / 4;
       if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
       pbuf = buffer+3*fact;       dimxy = (size_t) get_swap_uint64(pbuf);
       pbuf = buffer+sblocklen+4;  data  = (size_t) get_swap_uint32(pbuf);
@@ -185,7 +187,7 @@ extCheckFiletype(int fileID, int *swap)
   if (EXT_Debug) Message("swap = %d fact = %d", *swap, fact);
   if (EXT_Debug) Message("dimxy = %lu data = %lu", dimxy, data);
 
-  int found = data && (dimxy * fact == data || dimxy * fact * 2 == data);
+  int found = data && (dimxy * fact == data || dimxy * fact * 2 == data || dimxy * fact / 2 == data);
   return found;
 }
 
@@ -227,38 +229,44 @@ extInqData(extrec_t *extp, int prec, void *data)
 
   switch (rprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
       {
-        if (sizeof(float) == 4)
-          {
-            if (byteswap) swap4byte(buffer, datasize);
+        if (byteswap) swap4byte(buffer, datasize);
 
-            if (rprec == prec)
-              memcpy(data, buffer, datasize * sizeof(float));
-            else
-              for (size_t i = 0; i < datasize; ++i) ((double *) data)[i] = (double) ((float *) buffer)[i];
-          }
-        else
-          {
-            Error("not implemented for %d byte float", sizeof(float));
-          }
+        if (EXSE_PREC_FP32 == prec)
+          memcpy(data, buffer, datasize * prec);
+        else if (EXSE_PREC_FP64 == prec)
+          for (size_t i = 0; i < datasize; ++i) ((double *) data)[i] = (double) ((float *) buffer)[i];
+#ifdef HAVE_FLOAT16
+        else if (EXSE_PREC_FP16 == prec)
+          for (size_t i = 0; i < datasize; ++i) ((_Float16 *) data)[i] = (_Float16) ((float *) buffer)[i];
+#endif
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
-      if (sizeof(double) == 8)
-        {
-          if (byteswap) swap8byte(buffer, datasize);
+    case EXSE_PREC_FP64:
+      if (byteswap) swap8byte(buffer, datasize);
 
-          if (rprec == prec)
-            memcpy(data, buffer, datasize * sizeof(double));
-          else
-            for (size_t i = 0; i < datasize; ++i) ((float *) data)[i] = (float) ((double *) buffer)[i];
-        }
-      else
-        {
-          Error("not implemented for %d byte float", sizeof(double));
-        }
+      if (EXSE_PREC_FP64 == prec)
+        memcpy(data, buffer, datasize * prec);
+      else if (EXSE_PREC_FP32 == prec)
+        for (size_t i = 0; i < datasize; ++i) ((float *) data)[i] = (float) ((double *) buffer)[i];
+#ifdef HAVE_FLOAT16
+      else if (EXSE_PREC_FP16 == prec)
+        for (size_t i = 0; i < datasize; ++i) ((_Float16 *) data)[i] = (_Float16) ((double *) buffer)[i];
+#endif
+
       break;
+#ifdef HAVE_FLOAT16
+    case EXSE_PREC_FP16:
+      if (EXSE_PREC_FP16 == prec)
+        memcpy(data, buffer, datasize * prec);
+      else if (EXSE_PREC_FP64 == prec)
+        for (size_t i = 0; i < datasize; ++i) ((double *) data)[i] = (double) ((_Float16 *) buffer)[i];
+      else if (EXSE_PREC_FP32 == prec)
+        for (size_t i = 0; i < datasize; ++i) ((float *) data)[i] = (float) ((_Float16 *) buffer)[i];
+
+      break;
+#endif
     default:
       {
         Error("unexpected data precision %d", rprec);
@@ -270,16 +278,23 @@ extInqData(extrec_t *extp, int prec, void *data)
 }
 
 int
-extInqDataSP(void *ext, float *data)
+extInqDataFP32(void *ext, float *data)
 {
-  return extInqData((extrec_t *) ext, EXSE_SINGLE_PRECISION, (void *) data);
+  return extInqData((extrec_t *) ext, EXSE_PREC_FP32, (void *) data);
 }
 
 int
-extInqDataDP(void *ext, double *data)
+extInqDataFP64(void *ext, double *data)
 {
-  return extInqData((extrec_t *) ext, EXSE_DOUBLE_PRECISION, (void *) data);
+  return extInqData((extrec_t *) ext, EXSE_PREC_FP64, (void *) data);
 }
+#ifdef HAVE_FLOAT16
+int
+extInqDataFP16(void *ext, _Float16 *data)
+{
+  return extInqData((extrec_t *) ext, EXSE_PREC_FP16, (void *) data);
+}
+#endif
 
 static int
 extDefData(void *ext, int prec, const void *data)
@@ -305,24 +320,43 @@ extDefData(void *ext, int prec, const void *data)
 
   switch (rprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
       {
-        if (rprec == prec)
-          memcpy(extp->buffer, data, datasize * sizeof(float));
-        else
+        if (EXSE_PREC_FP32 == prec)
+          memcpy(extp->buffer, data, datasize * prec);
+        else if (EXSE_PREC_FP64 == prec)
           for (size_t i = 0; i < datasize; i++) ((float *) extp->buffer)[i] = (float) ((double *) data)[i];
-
+#ifdef HAVE_FLOAT16
+        else if (EXSE_PREC_FP16 == prec)
+          for (size_t i = 0; i < datasize; i++) ((float *) extp->buffer)[i] = (float) ((_Float16 *) data)[i];
+#endif
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
-        if (rprec == prec)
-          memcpy(extp->buffer, data, datasize * sizeof(double));
-        else
+        if (EXSE_PREC_FP64 == prec)
+          memcpy(extp->buffer, data, datasize * prec);
+        else if (EXSE_PREC_FP32 == prec)
           for (size_t i = 0; i < datasize; i++) ((double *) extp->buffer)[i] = (double) ((float *) data)[i];
+#ifdef HAVE_FLOAT16
+        else if (EXSE_PREC_FP16 == prec)
+          for (size_t i = 0; i < datasize; i++) ((double *) extp->buffer)[i] = (double) ((_Float16 *) data)[i];
+#endif
+        break;
+      }
+#ifdef HAVE_FLOAT16
+    case EXSE_PREC_FP16:
+      {
+        if (EXSE_PREC_FP16 == prec)
+          memcpy(extp->buffer, data, datasize * prec);
+        else if (EXSE_PREC_FP32 == prec)
+          for (size_t i = 0; i < datasize; i++) ((_Float16 *) extp->buffer)[i] = (_Float16) ((float *) data)[i];
+        else if (EXSE_PREC_FP64 == prec)
+          for (size_t i = 0; i < datasize; i++) ((_Float16 *) extp->buffer)[i] = (_Float16) ((double *) data)[i];
 
         break;
       }
+#endif
     default:
       {
         Error("unexpected data precision %d", rprec);
@@ -334,16 +368,23 @@ extDefData(void *ext, int prec, const void *data)
 }
 
 int
-extDefDataSP(void *ext, const float *data)
+extDefDataFP32(void *ext, const float *data)
 {
-  return extDefData(ext, EXSE_SINGLE_PRECISION, (void *) data);
+  return extDefData(ext, EXSE_PREC_FP32, (void *) data);
 }
 
 int
-extDefDataDP(void *ext, const double *data)
+extDefDataFP64(void *ext, const double *data)
 {
-  return extDefData(ext, EXSE_DOUBLE_PRECISION, (void *) data);
+  return extDefData(ext, EXSE_PREC_FP64, (void *) data);
 }
+#ifdef HAVE_FLOAT16
+int
+extDefDataFP16(void *ext, const _Float16 *data)
+{
+  return extDefData(ext, EXSE_PREC_FP16, (void *) data);
+}
+#endif
 
 int
 extRead(int fileID, void *ext)
@@ -367,19 +408,19 @@ extRead(int fileID, void *ext)
   if (EXT_Debug) Message("blocklen = %lu", blocklen);
 
   size_t hprec = blocklen / EXT_HEADER_LEN;
-
-  extp->prec = (int) hprec;
+  // extp->prec = (int) hprec;
 
   union EXT_HEADER tempheader;
   switch (hprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
+    case EXSE_PREC_FP16:
       {
         binReadInt32(fileID, byteswap, EXT_HEADER_LEN, tempheader.i32);
         for (int i = 0; i < EXT_HEADER_LEN; i++) extp->header[i] = (int) tempheader.i32[i];
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
         binReadInt64(fileID, byteswap, EXT_HEADER_LEN, tempheader.i64);
         for (int i = 0; i < EXT_HEADER_LEN; i++) extp->header[i] = (int) tempheader.i64[i];
@@ -413,19 +454,20 @@ extRead(int fileID, void *ext)
     }
 
   size_t dprec = blocklen / extp->datasize;
+  extp->prec = (int) dprec;
 
-  if (dprec == hprec)
+  if (dprec == hprec || dprec == hprec / 2)
     {
       extp->number = EXT_REAL;
     }
-  else if (dprec == 2 * hprec)
+  else if (dprec == hprec * 2)
     {
       dprec /= 2;
       extp->datasize *= 2;
       extp->number = EXT_COMP;
     }
 
-  if (dprec != EXSE_SINGLE_PRECISION && dprec != EXSE_DOUBLE_PRECISION)
+  if (dprec != EXSE_PREC_FP32 && dprec != EXSE_PREC_FP64 && dprec != EXSE_PREC_FP16)
     {
       Warning("Unexpected data precision %d", dprec);
       return -1;
@@ -455,19 +497,20 @@ extWrite(int fileID, void *ext)
   int *header = extp->header;
 
   // write header record
-  size_t blocklen = EXT_HEADER_LEN * (size_t) rprec;
+  size_t blocklen = EXT_HEADER_LEN * (size_t) ((rprec == EXSE_PREC_FP16) ? EXSE_PREC_FP32 : rprec);
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
   switch (rprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP16:
+    case EXSE_PREC_FP32:
       {
         for (int i = 0; i < EXT_HEADER_LEN; i++) tempheader.i32[i] = (int32_t) header[i];
         binWriteInt32(fileID, byteswap, EXT_HEADER_LEN, tempheader.i32);
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
         for (int i = 0; i < EXT_HEADER_LEN; i++) tempheader.i64[i] = (int64_t) header[i];
         binWriteInt64(fileID, byteswap, EXT_HEADER_LEN, tempheader.i64);
@@ -490,12 +533,19 @@ extWrite(int fileID, void *ext)
 
   switch (rprec)
     {
-    case EXSE_SINGLE_PRECISION:
+#ifdef HAVE_FLOAT16
+    case EXSE_PREC_FP16:
+      {
+        binWriteFlt16(fileID, byteswap, extp->datasize, (_Float16 *) extp->buffer);
+        break;
+      }
+#endif
+    case EXSE_PREC_FP32:
       {
         binWriteFlt32(fileID, byteswap, extp->datasize, (float *) extp->buffer);
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
         binWriteFlt64(fileID, byteswap, extp->datasize, (double *) extp->buffer);
         break;

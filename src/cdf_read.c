@@ -561,7 +561,7 @@ cdfReadDataSliceDP2SP(int fileID, int ncvarid, size_t length, size_t start[MAX_D
 }
 
 static void
-cdfCheckDataDP_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t length, double *data)
+cdfCheckDataFP64_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t length, double *data)
 {
   if (vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8)
     {
@@ -576,7 +576,7 @@ cdfCheckDataDP_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t len
 }
 
 static void
-cdfCheckDataSP_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t length, float *data)
+cdfCheckDataFP32_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t length, float *data)
 {
   if (vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8)
     {
@@ -591,7 +591,7 @@ cdfCheckDataSP_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t len
 }
 
 static void
-cdfReadDataDP(stream_t *streamptr, int varID, size_t length, size_t start[MAX_DIMENSIONS], size_t count[MAX_DIMENSIONS],
+cdfReadDataFP64(stream_t *streamptr, int varID, size_t length, size_t start[MAX_DIMENSIONS], size_t count[MAX_DIMENSIONS],
               double *data)
 {
   int vlistID = streamptr->vlistID;
@@ -621,13 +621,13 @@ cdfReadDataDP(stream_t *streamptr, int varID, size_t length, size_t start[MAX_DI
         {
           cdf_get_vara_double(fileID, ncvarid, start, count, data);
 
-          cdfCheckDataDP_UINT8(fileID, ncvarid, vlistID, varID, length, data);
+          cdfCheckDataFP64_UINT8(fileID, ncvarid, vlistID, varID, length, data);
         }
     }
 }
 
 static void
-cdfReadDataSP(stream_t *streamptr, int varID, size_t length, size_t start[MAX_DIMENSIONS], size_t count[MAX_DIMENSIONS],
+cdfReadDataFP32(stream_t *streamptr, int varID, size_t length, size_t start[MAX_DIMENSIONS], size_t count[MAX_DIMENSIONS],
               float *data)
 {
   int vlistID = streamptr->vlistID;
@@ -663,7 +663,7 @@ cdfReadDataSP(stream_t *streamptr, int varID, size_t length, size_t start[MAX_DI
         {
           cdf_get_vara_float(fileID, ncvarid, start, count, data);
 
-          cdfCheckDataSP_UINT8(fileID, ncvarid, vlistID, varID, length, data);
+          cdfCheckDataFP32_UINT8(fileID, ncvarid, vlistID, varID, length, data);
         }
     }
 }
@@ -679,7 +679,7 @@ cdfReadVarDP(stream_t *streamptr, int varID, double *data, size_t *numMissVals)
   cdfGetSlapDescription(streamptr, varID, &start, &count);
 
   size_t length = getSizeVar3D(vlistID, varID);
-  cdfReadDataDP(streamptr, varID, length, start, count, data);
+  cdfReadDataFP64(streamptr, varID, length, start, count, data);
 
   *numMissVals = cdfDoInputDataTransformationDP(vlistID, varID, length, data);
 }
@@ -695,7 +695,7 @@ cdfReadVarSP(stream_t *streamptr, int varID, float *data, size_t *numMissVals)
   cdfGetSlapDescription(streamptr, varID, &start, &count);
 
   size_t length = getSizeVar3D(vlistID, varID);
-  cdfReadDataSP(streamptr, varID, length, start, count, data);
+  cdfReadDataFP32(streamptr, varID, length, start, count, data);
 
   *numMissVals = cdfDoInputDataTransformationSP(vlistID, varID, length, data);
 }
@@ -721,7 +721,7 @@ cdf_read_var_slice_DP(stream_t *streamptr, int tsID, int varID, int levelID, dou
   int vlistID = streamptr->vlistID;
   int gridId = vlistInqVarGrid(vlistID, varID);
   size_t length = gridInqSize(gridId);
-  cdfReadDataDP(streamptr, varID, length, start, count, data);
+  cdfReadDataFP64(streamptr, varID, length, start, count, data);
 
   if (swapxy) transpose2dArrayDP(gridId, data);
 
@@ -746,7 +746,7 @@ cdf_read_var_slice_SP(stream_t *streamptr, int tsID, int varID, int levelID, flo
   int vlistID = streamptr->vlistID;
   int gridId = vlistInqVarGrid(vlistID, varID);
   size_t length = gridInqSize(gridId);
-  cdfReadDataSP(streamptr, varID, length, start, count, data);
+  cdfReadDataFP32(streamptr, varID, length, start, count, data);
 
   if (swapxy) transpose2dArraySP(gridId, data);
 
@@ -982,7 +982,7 @@ cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varType, 
   start[position] = start[position] + startpoint;
   count[position] = length;
 
-  cdfReadDataDP(streamptr, varID, length, start, count, data);
+  cdfReadDataFP64(streamptr, varID, length, start, count, data);
 
   if (swapxy) transpose2dArrayDP(gridId, data);
 
@@ -1013,7 +1013,7 @@ cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varType, 
   start[position] = start[position] + startpoint;
   count[position] = length;
 
-  cdfReadDataSP(streamptr, varID, length, start, count, data);
+  cdfReadDataFP32(streamptr, varID, length, start, count, data);
 
   if (swapxy) transpose2dArraySP(gridId, data);
 

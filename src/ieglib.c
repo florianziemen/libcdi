@@ -47,8 +47,8 @@ iegLibInit(void)
               {
                 switch ((int) envString[pos + 1])
                   {
-                  case '4': iegDefaultDprec = EXSE_SINGLE_PRECISION; break;
-                  case '8': iegDefaultDprec = EXSE_DOUBLE_PRECISION; break;
+                  case '4': iegDefaultDprec = EXSE_PREC_FP32; break;
+                  case '8': iegDefaultDprec = EXSE_PREC_FP64; break;
                   default: Warning("Invalid digit in %s: %s", envName, envString);
                   }
                 break;
@@ -208,7 +208,7 @@ iegInqData(void *ieg, int prec, void *data)
 
   switch (dprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
       {
         if (sizeof(float) == 4)
           {
@@ -229,7 +229,7 @@ iegInqData(void *ieg, int prec, void *data)
           }
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
         if (sizeof(double) == 8)
           {
@@ -261,15 +261,15 @@ iegInqData(void *ieg, int prec, void *data)
 }
 
 int
-iegInqDataSP(void *ieg, float *data)
+iegInqDataFP32(void *ieg, float *data)
 {
-  return iegInqData(ieg, EXSE_SINGLE_PRECISION, (void *) data);
+  return iegInqData(ieg, EXSE_PREC_FP32, (void *) data);
 }
 
 int
-iegInqDataDP(void *ieg, double *data)
+iegInqDataFP64(void *ieg, double *data)
 {
-  return iegInqData(ieg, EXSE_DOUBLE_PRECISION, (void *) data);
+  return iegInqData(ieg, EXSE_PREC_FP64, (void *) data);
 }
 
 static int
@@ -291,7 +291,7 @@ iegDefData(iegrec_t *iegp, int prec, const void *data)
 
   switch (dprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
       {
         if (dprec == prec)
           memcpy(iegp->buffer, data, datasize * sizeof(float));
@@ -303,7 +303,7 @@ iegDefData(iegrec_t *iegp, int prec, const void *data)
           }
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
         if (dprec == prec)
           memcpy(iegp->buffer, data, datasize * sizeof(double));
@@ -326,15 +326,15 @@ iegDefData(iegrec_t *iegp, int prec, const void *data)
 }
 
 int
-iegDefDataSP(void *ieg, const float *data)
+iegDefDataFP32(void *ieg, const float *data)
 {
-  return iegDefData((iegrec_t *) ieg, EXSE_SINGLE_PRECISION, (void *) data);
+  return iegDefData((iegrec_t *) ieg, EXSE_PREC_FP32, (void *) data);
 }
 
 int
-iegDefDataDP(void *ieg, const double *data)
+iegDefDataFP64(void *ieg, const double *data)
 {
-  return iegDefData((iegrec_t *) ieg, EXSE_DOUBLE_PRECISION, (void *) data);
+  return iegDefData((iegrec_t *) ieg, EXSE_PREC_FP64, (void *) data);
 }
 
 int
@@ -399,7 +399,7 @@ iegRead(int fileID, void *ieg)
   binReadInt32(fileID, byteswap, 3, buf.i32);
   for (int i = 0; i < 3; i++) iegp->igdb[18 + i] = (int) buf.i32[i];
 
-  if (dprec == EXSE_SINGLE_PRECISION)
+  if (dprec == EXSE_PREC_FP32)
     {
       fileRead(fileID, buf.f, 400);
       if (byteswap) swap4byte(buf.f, 100);
@@ -464,7 +464,7 @@ iegWrite(int fileID, void *ieg)
   int byteswap = iegp->byteswap;
 
   // write header record
-  size_t blocklen = (dprec == EXSE_SINGLE_PRECISION) ? 636 : 1040;
+  size_t blocklen = (dprec == EXSE_PREC_FP32) ? 636 : 1040;
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
@@ -476,7 +476,7 @@ iegWrite(int fileID, void *ieg)
 
   double refval = (double) iegp->refval;
   float refvalf = (float) iegp->refval;
-  if (dprec == EXSE_SINGLE_PRECISION)
+  if (dprec == EXSE_PREC_FP32)
     binWriteFlt32(fileID, byteswap, 1, &refvalf);
   else
     binWriteFlt64(fileID, byteswap, 1, &refval);
@@ -484,7 +484,7 @@ iegWrite(int fileID, void *ieg)
   for (int i = 0; i < 3; i++) buf.i32[i] = (int32_t) iegp->igdb[18 + i];
   binWriteInt32(fileID, byteswap, 3, buf.i32);
 
-  if (dprec == EXSE_SINGLE_PRECISION)
+  if (dprec == EXSE_PREC_FP32)
     {
       for (int i = 0; i < 100; i++) buf.fvct[i] = (float) iegp->vct[i];
       binWriteFlt32(fileID, byteswap, 100, buf.fvct);
@@ -503,12 +503,12 @@ iegWrite(int fileID, void *ieg)
 
   switch (dprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
       {
         binWriteFlt32(fileID, byteswap, iegp->datasize, (float *) iegp->buffer);
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
         binWriteFlt64(fileID, byteswap, iegp->datasize, (double *) iegp->buffer);
         break;

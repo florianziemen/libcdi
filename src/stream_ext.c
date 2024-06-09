@@ -21,9 +21,9 @@ static int
 extInqDatatype(int prec, int number)
 {
   if (number == 2)
-    return (prec == EXSE_DOUBLE_PRECISION) ? CDI_DATATYPE_CPX64 : CDI_DATATYPE_CPX32;
+    return (prec == EXSE_PREC_FP64) ? CDI_DATATYPE_CPX64 : CDI_DATATYPE_CPX32;
   else
-    return (prec == EXSE_DOUBLE_PRECISION) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
+    return (prec == EXSE_PREC_FP64) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
 }
 
 static void
@@ -35,7 +35,7 @@ extDefDatatype(int datatype, int *prec, int *number)
 
   *number = (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64) ? 2 : 1;
 
-  *prec = (datatype == CDI_DATATYPE_FLT64 || datatype == CDI_DATATYPE_CPX64) ? EXSE_DOUBLE_PRECISION : EXSE_SINGLE_PRECISION;
+  *prec = (datatype == CDI_DATATYPE_FLT64 || datatype == CDI_DATATYPE_CPX64) ? EXSE_PREC_FP64 : EXSE_PREC_FP32;
 }
 
 /* not used
@@ -94,7 +94,7 @@ ext_read_recordSP(stream_t *streamptr, float *data, size_t *numMissVals)
 
   int header[4];
   extInqHeader(extp, header);
-  extInqDataSP(extp, data);
+  extInqDataFP32(extp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
   size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
@@ -126,7 +126,7 @@ ext_read_recordDP(stream_t *streamptr, double *data, size_t *numMissVals)
 
   int header[4];
   extInqHeader(extp, header);
-  extInqDataDP(extp, data);
+  extInqDataFP64(extp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
   size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
@@ -179,7 +179,7 @@ static void
 ext_write_recordSP(stream_t *streamptr, const float *data)
 {
   void *extp = streamptr->record->objectp;
-  extDefDataSP(extp, data);
+  extDefDataFP32(extp, data);
   extWrite(streamptr->fileID, extp);
 }
 
@@ -187,7 +187,7 @@ static void
 ext_write_recordDP(stream_t *streamptr, const double *data)
 {
   void *extp = streamptr->record->objectp;
-  extDefDataDP(extp, data);
+  extDefDataFP64(extp, data);
   extWrite(streamptr->fileID, extp);
 }
 
@@ -571,7 +571,7 @@ extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_
   extRead(fileID, extp);
   int header[4];
   extInqHeader(extp, header);
-  extInqDataDP(extp, data);
+  extInqDataFP64(extp, data);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
@@ -619,7 +619,7 @@ extWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   extDefDatatype(vlistInqVarDatatype(vlistID, varID), &extp->prec, &extp->number);
   extDefHeader(extp, header);
 
-  extDefDataDP(extp, data);
+  extDefDataFP64(extp, data);
   extWrite(fileID, extp);
 }
 

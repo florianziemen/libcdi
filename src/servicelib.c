@@ -67,8 +67,8 @@ srvLibInit(void)
               {
                 switch ((int) envString[pos + 1])
                   {
-                  case '4': srvDefaultHprec = EXSE_SINGLE_PRECISION; break;
-                  case '8': srvDefaultHprec = EXSE_DOUBLE_PRECISION; break;
+                  case '4': srvDefaultHprec = EXSE_PREC_FP32; break;
+                  case '8': srvDefaultHprec = EXSE_PREC_FP64; break;
                   default: Warning("Invalid digit in %s: %s", envName, envString);
                   }
                 break;
@@ -77,8 +77,8 @@ srvLibInit(void)
               {
                 switch ((int) envString[pos + 1])
                   {
-                  case '4': srvDefaultDprec = EXSE_SINGLE_PRECISION; break;
-                  case '8': srvDefaultDprec = EXSE_DOUBLE_PRECISION; break;
+                  case '4': srvDefaultDprec = EXSE_PREC_FP32; break;
+                  case '8': srvDefaultDprec = EXSE_PREC_FP64; break;
                   default: Warning("Invalid digit in %s: %s", envName, envString);
                   }
                 break;
@@ -231,7 +231,7 @@ srvInqData(srvrec_t *srvp, int prec, void *data)
 
   switch (dprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
       {
         if (sizeof(float) == 4)
           {
@@ -248,7 +248,7 @@ srvInqData(srvrec_t *srvp, int prec, void *data)
           }
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       if (sizeof(double) == 8)
         {
           if (byteswap) swap8byte(buffer, datasize);
@@ -274,15 +274,15 @@ srvInqData(srvrec_t *srvp, int prec, void *data)
 }
 
 int
-srvInqDataSP(void *srv, float *data)
+srvInqDataFP32(void *srv, float *data)
 {
-  return srvInqData((srvrec_t *) srv, EXSE_SINGLE_PRECISION, (void *) data);
+  return srvInqData((srvrec_t *) srv, EXSE_PREC_FP32, (void *) data);
 }
 
 int
-srvInqDataDP(void *srv, double *data)
+srvInqDataFP64(void *srv, double *data)
 {
-  return srvInqData((srvrec_t *) srv, EXSE_DOUBLE_PRECISION, (void *) data);
+  return srvInqData((srvrec_t *) srv, EXSE_PREC_FP64, (void *) data);
 }
 
 static int
@@ -311,7 +311,7 @@ srvDefData(void *srv, int prec, const void *data)
 
   switch (dprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
       {
         if (dprec == prec)
           memcpy(srvp->buffer, data, datasize * sizeof(float));
@@ -320,7 +320,7 @@ srvDefData(void *srv, int prec, const void *data)
 
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
         if (dprec == prec)
           memcpy(srvp->buffer, data, datasize * sizeof(double));
@@ -340,15 +340,15 @@ srvDefData(void *srv, int prec, const void *data)
 }
 
 int
-srvDefDataSP(void *srv, const float *data)
+srvDefDataFP32(void *srv, const float *data)
 {
-  return srvDefData(srv, EXSE_SINGLE_PRECISION, (void *) data);
+  return srvDefData(srv, EXSE_PREC_FP32, (void *) data);
 }
 
 int
-srvDefDataDP(void *srv, const double *data)
+srvDefDataFP64(void *srv, const double *data)
 {
-  return srvDefData(srv, EXSE_DOUBLE_PRECISION, (void *) data);
+  return srvDefData(srv, EXSE_PREC_FP64, (void *) data);
 }
 
 int
@@ -379,13 +379,13 @@ srvRead(int fileID, void *srv)
 
   switch (hprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
       {
         binReadInt32(fileID, byteswap, SRV_HEADER_LEN, tempheader.i32);
         for (int i = 0; i < SRV_HEADER_LEN; i++) srvp->header[i] = (int) tempheader.i32[i];
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
         binReadInt64(fileID, byteswap, SRV_HEADER_LEN, tempheader.i64);
         for (int i = 0; i < SRV_HEADER_LEN; i++) srvp->header[i] = (int) tempheader.i64[i];
@@ -422,7 +422,7 @@ srvRead(int fileID, void *srv)
 
   srvp->dprec = (int) dprec;
 
-  if (dprec != EXSE_SINGLE_PRECISION && dprec != EXSE_DOUBLE_PRECISION)
+  if (dprec != EXSE_PREC_FP32 && dprec != EXSE_PREC_FP64)
     {
       Warning("Unexpected data precision %d", dprec);
       return -1;
@@ -458,13 +458,13 @@ srvWrite(int fileID, void *srv)
 
   switch (hprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
       {
         for (int i = 0; i < SRV_HEADER_LEN; i++) tempheader.i32[i] = (int32_t) header[i];
         binWriteInt32(fileID, byteswap, SRV_HEADER_LEN, tempheader.i32);
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
         for (int i = 0; i < SRV_HEADER_LEN; i++) tempheader.i64[i] = (int64_t) header[i];
         binWriteInt64(fileID, byteswap, SRV_HEADER_LEN, tempheader.i64);
@@ -486,12 +486,12 @@ srvWrite(int fileID, void *srv)
 
   switch (dprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
       {
         binWriteFlt32(fileID, byteswap, srvp->datasize, (float *) srvp->buffer);
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
         binWriteFlt64(fileID, byteswap, srvp->datasize, (double *) srvp->buffer);
         break;

@@ -20,7 +20,7 @@
 static int
 srvInqDatatype(int prec)
 {
-  return (prec == EXSE_DOUBLE_PRECISION) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
+  return (prec == EXSE_PREC_FP64) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
 }
 
 static int
@@ -31,7 +31,7 @@ srvDefDatatype(int datatype)
 
   if (datatype != CDI_DATATYPE_FLT32 && datatype != CDI_DATATYPE_FLT64) datatype = CDI_DATATYPE_FLT32;
 
-  return (datatype == CDI_DATATYPE_FLT64) ? EXSE_DOUBLE_PRECISION : EXSE_SINGLE_PRECISION;
+  return (datatype == CDI_DATATYPE_FLT64) ? EXSE_PREC_FP64 : EXSE_PREC_FP32;
 }
 
 /* not used
@@ -90,7 +90,7 @@ srv_read_recordSP(stream_t *streamptr, float *data, size_t *numMissVals)
 
   int header[8];
   srvInqHeader(srvp, header);
-  srvInqDataSP(srvp, data);
+  srvInqDataFP32(srvp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
   size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
@@ -119,7 +119,7 @@ srv_read_recordDP(stream_t *streamptr, double *data, size_t *numMissVals)
 
   int header[8];
   srvInqHeader(srvp, header);
-  srvInqDataDP(srvp, data);
+  srvInqDataFP64(srvp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
   size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
@@ -185,7 +185,7 @@ static void
 srv_write_recordSP(stream_t *streamptr, const float *data)
 {
   void *srvp = streamptr->record->objectp;
-  srvDefDataSP(srvp, data);
+  srvDefDataFP32(srvp, data);
   srvWrite(streamptr->fileID, srvp);
 }
 
@@ -193,7 +193,7 @@ static void
 srv_write_recordDP(stream_t *streamptr, const double *data)
 {
   void *srvp = streamptr->record->objectp;
-  srvDefDataDP(srvp, data);
+  srvDefDataFP64(srvp, data);
   srvWrite(streamptr->fileID, srvp);
 }
 
@@ -579,7 +579,7 @@ srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_
 
   int header[8];
   srvInqHeader(srvp, header);
-  srvInqDataDP(srvp, data);
+  srvInqDataFP64(srvp, data);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
@@ -645,7 +645,7 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   srvp->dprec = srvDefDatatype(datatype);
 
   srvDefHeader(srvp, header);
-  srvDefDataDP(srvp, data);
+  srvDefDataFP64(srvp, data);
   srvWrite(fileID, srvp);
 }
 
