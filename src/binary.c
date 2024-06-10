@@ -177,7 +177,6 @@ binWriteFlt64(int fileID, int byteswap, size_t size, double *ptr)
 int
 binWriteFlt16(int fileID, int byteswap, size_t size, _Float16 *ptr)
 {
-  if (byteswap) swap4byte(ptr, size);
   fileWrite(fileID, (void *) ptr, 2 * size);
   return 0;
 }
