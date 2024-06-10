@@ -35,7 +35,7 @@ int binWriteFlt32(int fileID, int byteswap, size_t size, float *ptr);
 int binWriteFlt64(int fileID, int byteswap, size_t size, double *ptr);
 
 #ifdef HAVE__FLOAT16
-int binWriteFlt16(int fileID, int byteswap, size_t size, _Float16 *ptr);
+int binWriteFlt16(int fileID, size_t size, _Float16 *ptr);
 #endif
 
 #endif /* BINARY_H */

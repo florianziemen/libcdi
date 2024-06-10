@@ -233,36 +233,26 @@ srvInqData(srvrec_t *srvp, int prec, void *data)
     {
     case EXSE_PREC_FP32:
       {
-        if (sizeof(float) == 4)
-          {
-            if (byteswap) swap4byte(buffer, datasize);
+        if (byteswap) swap4byte(buffer, datasize);
 
-            if (dprec == prec)
-              memcpy(data, buffer, datasize * sizeof(float));
-            else
-              for (size_t i = 0; i < datasize; i++) ((double *) data)[i] = (double) ((float *) buffer)[i];
-          }
+        if (dprec == prec)
+          memcpy(data, buffer, datasize * sizeof(float));
         else
-          {
-            Error("not implemented for %d byte float", sizeof(float));
-          }
+          for (size_t i = 0; i < datasize; i++) ((double *) data)[i] = (double) ((float *) buffer)[i];
+
         break;
       }
     case EXSE_PREC_FP64:
-      if (sizeof(double) == 8)
-        {
-          if (byteswap) swap8byte(buffer, datasize);
+      {
+        if (byteswap) swap8byte(buffer, datasize);
 
-          if (dprec == prec)
-            memcpy(data, buffer, datasize * sizeof(double));
-          else
-            for (size_t i = 0; i < datasize; i++) ((float *) data)[i] = (float) ((double *) buffer)[i];
-        }
-      else
-        {
-          Error("not implemented for %d byte float", sizeof(double));
-        }
-      break;
+        if (dprec == prec)
+          memcpy(data, buffer, datasize * sizeof(double));
+        else
+          for (size_t i = 0; i < datasize; i++) ((float *) data)[i] = (float) ((double *) buffer)[i];
+
+        break;
+      }
     default:
       {
         Error("unexpected data precision %d", dprec);

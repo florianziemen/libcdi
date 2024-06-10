@@ -176,7 +176,7 @@ binWriteFlt64(int fileID, int byteswap, size_t size, double *ptr)
 
 #ifdef HAVE__FLOAT16
 int
-binWriteFlt16(int fileID, int byteswap, size_t size, _Float16 *ptr)
+binWriteFlt16(int fileID, size_t size, _Float16 *ptr)
 {
   fileWrite(fileID, (void *) ptr, 2 * size);
   return 0;

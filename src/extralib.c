@@ -243,28 +243,31 @@ extInqData(extrec_t *extp, int prec, void *data)
         break;
       }
     case EXSE_PREC_FP64:
-      if (byteswap) swap8byte(buffer, datasize);
+      {
+        if (byteswap) swap8byte(buffer, datasize);
 
-      if (EXSE_PREC_FP64 == prec)
-        memcpy(data, buffer, datasize * prec);
-      else if (EXSE_PREC_FP32 == prec)
-        for (size_t i = 0; i < datasize; ++i) ((float *) data)[i] = (float) ((double *) buffer)[i];
+        if (EXSE_PREC_FP64 == prec)
+          memcpy(data, buffer, datasize * prec);
+        else if (EXSE_PREC_FP32 == prec)
+          for (size_t i = 0; i < datasize; ++i) ((float *) data)[i] = (float) ((double *) buffer)[i];
 #ifdef HAVE__FLOAT16
-      else if (EXSE_PREC_FP16 == prec)
-        for (size_t i = 0; i < datasize; ++i) ((_Float16 *) data)[i] = (_Float16) ((double *) buffer)[i];
+        else if (EXSE_PREC_FP16 == prec)
+          for (size_t i = 0; i < datasize; ++i) ((_Float16 *) data)[i] = (_Float16) ((double *) buffer)[i];
 #endif
-
-      break;
+        break;
+      }
 #ifdef HAVE__FLOAT16
     case EXSE_PREC_FP16:
-      if (EXSE_PREC_FP16 == prec)
-        memcpy(data, buffer, datasize * prec);
-      else if (EXSE_PREC_FP64 == prec)
-        for (size_t i = 0; i < datasize; ++i) ((double *) data)[i] = (double) ((_Float16 *) buffer)[i];
-      else if (EXSE_PREC_FP32 == prec)
-        for (size_t i = 0; i < datasize; ++i) ((float *) data)[i] = (float) ((_Float16 *) buffer)[i];
+      {
+        if (EXSE_PREC_FP16 == prec)
+          memcpy(data, buffer, datasize * prec);
+        else if (EXSE_PREC_FP64 == prec)
+          for (size_t i = 0; i < datasize; ++i) ((double *) data)[i] = (double) ((_Float16 *) buffer)[i];
+        else if (EXSE_PREC_FP32 == prec)
+          for (size_t i = 0; i < datasize; ++i) ((float *) data)[i] = (float) ((_Float16 *) buffer)[i];
 
-      break;
+        break;
+      }
 #endif
     default:
       {
@@ -535,7 +538,7 @@ extWrite(int fileID, void *ext)
 #ifdef HAVE__FLOAT16
     case EXSE_PREC_FP16:
       {
-        binWriteFlt16(fileID, byteswap, extp->datasize, (_Float16 *) extp->buffer);
+        binWriteFlt16(fileID, extp->datasize, (_Float16 *) extp->buffer);
         break;
       }
 #endif

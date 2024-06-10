@@ -210,44 +210,32 @@ iegInqData(void *ieg, int prec, void *data)
     {
     case EXSE_PREC_FP32:
       {
-        if (sizeof(float) == 4)
-          {
-            if (byteswap) swap4byte(buffer, datasize);
+        if (byteswap) swap4byte(buffer, datasize);
 
-            if (dprec == prec)
-              memcpy(data, buffer, datasize * sizeof(float));
-            else
-              {
-                const float *restrict p = (float *) buffer;
-                double *restrict q = (double *) data;
-                for (size_t i = 0; i < datasize; i++) q[i] = p[i];
-              }
-          }
+        if (dprec == prec)
+          memcpy(data, buffer, datasize * sizeof(float));
         else
           {
-            Error("not implemented for %d byte float", sizeof(float));
+            const float *restrict p = (float *) buffer;
+            double *restrict q = (double *) data;
+            for (size_t i = 0; i < datasize; i++) q[i] = p[i];
           }
+
         break;
       }
     case EXSE_PREC_FP64:
       {
-        if (sizeof(double) == 8)
-          {
-            if (byteswap) swap8byte(buffer, datasize);
+        if (byteswap) swap8byte(buffer, datasize);
 
-            if (dprec == prec)
-              memcpy(data, buffer, datasize * sizeof(double));
-            else
-              {
-                const double *restrict p = (double *) buffer;
-                float *restrict q = (float *) data;
-                for (size_t i = 0; i < datasize; i++) q[i] = (float) p[i];
-              }
-          }
+        if (dprec == prec)
+          memcpy(data, buffer, datasize * sizeof(double));
         else
           {
-            Error("not implemented for %d byte float", sizeof(double));
+            const double *restrict p = (double *) buffer;
+            float *restrict q = (float *) data;
+            for (size_t i = 0; i < datasize; i++) q[i] = (float) p[i];
           }
+
         break;
       }
     default:
