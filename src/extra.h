@@ -1,6 +1,10 @@
 #ifndef _EXTRA_H
 #define _EXTRA_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 enum
 {
   EXT_REAL = 1,
@@ -39,8 +43,7 @@ int extDefHeader(void *ext, const int *header);
 int extDefDataFP32(void *ext, const float *data);
 int extDefDataFP64(void *ext, const double *data);
 
-#include "float16.h"
-#ifdef HAVE_FLOAT16
+#ifdef HAVE__FLOAT16
 int extInqDataFP16(void *ext, _Float16 *data);
 int extDefDataFP16(void *ext, const _Float16 *data);
 #endif

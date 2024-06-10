@@ -1,4 +1,5 @@
-#include "cdi.h"
+#define CDI_BIGENDIAN 0     // Byte order BIGENDIAN
+#define CDI_LITTLEENDIAN 1  // Byte order LITTLEENDIAN
 #include "error.h"
 #include "file.h"
 #include "swap.h"
@@ -173,7 +174,7 @@ binWriteFlt64(int fileID, int byteswap, size_t size, double *ptr)
   return 0;
 }
 
-#ifdef HAVE_FLOAT16
+#ifdef HAVE__FLOAT16
 int
 binWriteFlt16(int fileID, int byteswap, size_t size, _Float16 *ptr)
 {

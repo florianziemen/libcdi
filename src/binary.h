@@ -1,9 +1,12 @@
 #ifndef BINARY_H
 #define BINARY_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <inttypes.h>
-#include "float16.h"
 
 #ifndef HOST_ENDIANNESS
 #ifdef __cplusplus
@@ -31,7 +34,7 @@ int binWriteInt64(int fileID, int byteswap, size_t size, int64_t *ptr);
 int binWriteFlt32(int fileID, int byteswap, size_t size, float *ptr);
 int binWriteFlt64(int fileID, int byteswap, size_t size, double *ptr);
 
-#ifdef HAVE_FLOAT16
+#ifdef HAVE__FLOAT16
 int binWriteFlt16(int fileID, int byteswap, size_t size, _Float16 *ptr);
 #endif
 

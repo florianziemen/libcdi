@@ -10,7 +10,6 @@
 #include "binary.h"
 #include "exse.h"
 #include "swap.h"
-#include "float16.h"
 
 enum
 {
@@ -237,7 +236,7 @@ extInqData(extrec_t *extp, int prec, void *data)
           memcpy(data, buffer, datasize * prec);
         else if (EXSE_PREC_FP64 == prec)
           for (size_t i = 0; i < datasize; ++i) ((double *) data)[i] = (double) ((float *) buffer)[i];
-#ifdef HAVE_FLOAT16
+#ifdef HAVE__FLOAT16
         else if (EXSE_PREC_FP16 == prec)
           for (size_t i = 0; i < datasize; ++i) ((_Float16 *) data)[i] = (_Float16) ((float *) buffer)[i];
 #endif
@@ -250,13 +249,13 @@ extInqData(extrec_t *extp, int prec, void *data)
         memcpy(data, buffer, datasize * prec);
       else if (EXSE_PREC_FP32 == prec)
         for (size_t i = 0; i < datasize; ++i) ((float *) data)[i] = (float) ((double *) buffer)[i];
-#ifdef HAVE_FLOAT16
+#ifdef HAVE__FLOAT16
       else if (EXSE_PREC_FP16 == prec)
         for (size_t i = 0; i < datasize; ++i) ((_Float16 *) data)[i] = (_Float16) ((double *) buffer)[i];
 #endif
 
       break;
-#ifdef HAVE_FLOAT16
+#ifdef HAVE__FLOAT16
     case EXSE_PREC_FP16:
       if (EXSE_PREC_FP16 == prec)
         memcpy(data, buffer, datasize * prec);
@@ -288,7 +287,7 @@ extInqDataFP64(void *ext, double *data)
 {
   return extInqData((extrec_t *) ext, EXSE_PREC_FP64, (void *) data);
 }
-#ifdef HAVE_FLOAT16
+#ifdef HAVE__FLOAT16
 int
 extInqDataFP16(void *ext, _Float16 *data)
 {
@@ -326,7 +325,7 @@ extDefData(void *ext, int prec, const void *data)
           memcpy(extp->buffer, data, datasize * prec);
         else if (EXSE_PREC_FP64 == prec)
           for (size_t i = 0; i < datasize; i++) ((float *) extp->buffer)[i] = (float) ((double *) data)[i];
-#ifdef HAVE_FLOAT16
+#ifdef HAVE__FLOAT16
         else if (EXSE_PREC_FP16 == prec)
           for (size_t i = 0; i < datasize; i++) ((float *) extp->buffer)[i] = (float) ((_Float16 *) data)[i];
 #endif
@@ -338,13 +337,13 @@ extDefData(void *ext, int prec, const void *data)
           memcpy(extp->buffer, data, datasize * prec);
         else if (EXSE_PREC_FP32 == prec)
           for (size_t i = 0; i < datasize; i++) ((double *) extp->buffer)[i] = (double) ((float *) data)[i];
-#ifdef HAVE_FLOAT16
+#ifdef HAVE__FLOAT16
         else if (EXSE_PREC_FP16 == prec)
           for (size_t i = 0; i < datasize; i++) ((double *) extp->buffer)[i] = (double) ((_Float16 *) data)[i];
 #endif
         break;
       }
-#ifdef HAVE_FLOAT16
+#ifdef HAVE__FLOAT16
     case EXSE_PREC_FP16:
       {
         if (EXSE_PREC_FP16 == prec)
@@ -378,7 +377,7 @@ extDefDataFP64(void *ext, const double *data)
 {
   return extDefData(ext, EXSE_PREC_FP64, (void *) data);
 }
-#ifdef HAVE_FLOAT16
+#ifdef HAVE__FLOAT16
 int
 extDefDataFP16(void *ext, const _Float16 *data)
 {
@@ -533,7 +532,7 @@ extWrite(int fileID, void *ext)
 
   switch (rprec)
     {
-#ifdef HAVE_FLOAT16
+#ifdef HAVE__FLOAT16
     case EXSE_PREC_FP16:
       {
         binWriteFlt16(fileID, byteswap, extp->datasize, (_Float16 *) extp->buffer);
