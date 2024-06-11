@@ -784,6 +784,7 @@ gribapiGetGridProj(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 static void
 gribapiGetGridHealpix(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 {
+  (void)gh;
   grid->size = numberOfPoints;
 }
 
