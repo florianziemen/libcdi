@@ -3191,7 +3191,6 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
       if (ncvar->varStatus == DataVar && ncvar->zaxisID == CDI_UNDEFID)
         {
           bool isScalar = false;
-          bool withBounds = false;
           int zdimid = CDI_UNDEFID;
           int zvarid = CDI_UNDEFID;
           size_t zsize = 1;
@@ -3285,7 +3284,6 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
                       int nvertex = (int) ncdims[ncvars[ncvars[zvarid].bounds].dimids[1 - isScalar]].len;
                       if (nlevel == zsize && nvertex == 2)
                         {
-                          withBounds = true;
                           lbounds = (double *) Malloc(4 * nlevel * sizeof(double));
                           ubounds = lbounds + nlevel;
                           double *zbounds = lbounds + 2 * nlevel;
