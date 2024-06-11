@@ -121,7 +121,7 @@ secofday_decode(double secondOfDay)
   CdiTime time;
 
   double secondOfDayIntegral;
-  time.ms = lround(modf(secondOfDay, &secondOfDayIntegral) * 1000);
+  time.ms = (short) lround(modf(secondOfDay, &secondOfDayIntegral) * 1000);
 
   /* because of the limited value range this can be safely improved
    * to use multiplication with inverse */

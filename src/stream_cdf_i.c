@@ -891,7 +891,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
         {
           int attint = 0;
           int *pattint = (attlen > 1) ? Malloc(attlen * sizeof(int)) : &attint;
-          for (size_t i = 0; i < attlen; ++i) pattint[i] = pattint64[i];
+          for (size_t i = 0; i < attlen; ++i) pattint[i] = (int) pattint64[i];
           cdiDefAttInt(cdiID, varID, attname, CDI_DATATYPE_INT32, (int) attlen, pattint);
           if (attlen > 1) Free(pattint);
         }

@@ -250,7 +250,7 @@ streamDefNumWorker(int streamID, int numWorker)
               if (CDI_Test) Message("maxGlobalRecs=%ld", streamptr->maxGlobalRecs);
               if (streamptr->maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
               if (streamptr->maxGlobalRecs == 1) numWorker = 0;
-              if (numWorker > streamptr->maxGlobalRecs) numWorker = streamptr->maxGlobalRecs;
+              if (numWorker > streamptr->maxGlobalRecs) numWorker = (int) streamptr->maxGlobalRecs;
               if (streamptr->chunkSizeTdim > 1 && numWorker > streamptr->nvars) numWorker = streamptr->nvars;
               if (streamptr->chunkSizeZdim > 1) numWorker = 0;
               if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", streamptr->chunkSizeTdim, streamptr->chunkSizeZdim);

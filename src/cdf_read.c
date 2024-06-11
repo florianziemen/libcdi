@@ -817,7 +817,7 @@ job_args_init(stream_t *streamptr, long tsID, long recID, int memtype, void *dat
 {
   int varID = streamptr->tsteps[tsID].records[recID].varID;
   int levelID = streamptr->tsteps[tsID].records[recID].levelID;
-  size_t gridsize = gridInqSize(vlistInqVarGrid(streamptr->vlistID, varID));
+  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(streamptr->vlistID, varID));
 
   if (!data) data = Malloc(gridsize * ((memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
 
@@ -916,7 +916,7 @@ cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
       // if this is the first call, init and start worker threads
       if (!jobs)
         {
-          jobs = (JobDescriptor *) malloc(workerCount * sizeof(*jobs));
+          jobs = (JobDescriptor *) Malloc((size_t) workerCount * sizeof(*jobs));
           streamptr->jobs = jobs;
           for (int i = 0; i < workerCount; i++) jobs[i].args.recID = -1;
           for (int i = 0; i < workerCount; i++) jobs[i].args.tsID = -1;
