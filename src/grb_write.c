@@ -24,8 +24,8 @@
 #include "namespace.h"
 
 static size_t
-grb_encode(int filetype, int memType, int datatype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
-           CdiDateTime vDateTime, int tsteptype, int numavg, SizeType datasize, const void *data, SizeType numMissVals,
+grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int gridID, int zaxisID,
+           CdiDateTime vDateTime, int tsteptype, int numavg, SizeType datasize, const void *data, size_t numMissVals,
            void **gribbuffer, int comptype, void *gribContainers)
 {
   size_t nbytes = 0;
@@ -48,8 +48,6 @@ grb_encode(int filetype, int memType, int datatype, int varID, int levelID, int 
 #else
       void *gribContainer = (void *) &((gribContainer_t *) gribContainers)[varID];
 #endif
-      // bool useFloatInterface = (have_gribapi_float_interface() && datatype != CDI_DATATYPE_FLT32 && datatype !=
-      // CDI_DATATYPE_FLT64);
       bool useFloatInterface = false;
       int memTypeX = useFloatInterface ? memType : MEMTYPE_DOUBLE;
       const void *datap = data;
@@ -389,7 +387,6 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
   CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
   int numavg = (tsteptype == TSTEP_AVG) ? streamptr->tsteps[tsID].taxis.numavg : 0;
   int comptype = streamptr->comptype;
-  int datatype = vlistInqVarDatatype(vlistID, varID);
 
   if (CDI_Debug) Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
@@ -405,7 +402,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     }
 
   void *gribbuffer = NULL;
-  size_t nbytes = grb_encode(filetype, memtype, datatype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg,
+  size_t nbytes = grb_encode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg,
                              datasize, data, numMissVals, &gribbuffer, comptype, streamptr->gribContainers);
 
   if (filetype == CDI_FILETYPE_GRB && (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC))
