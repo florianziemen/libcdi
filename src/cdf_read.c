@@ -446,7 +446,7 @@ enum
 };
 
 static void
-cdfGetSliceSlapDescription(stream_t *streamptr, int tsID, int varID, int levelID, bool *outSwapXY, size_t start[cdfSliceNDim],
+cdfGetSliceSlapDescription(stream_t *streamptr, long tsID, int varID, int levelID, bool *outSwapXY, size_t start[cdfSliceNDim],
                            size_t count[cdfSliceNDim])
 {
   int fileId = streamptr->fileID;
@@ -710,9 +710,9 @@ cdf_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nu
 }
 
 static void
-cdf_read_var_slice_DP(stream_t *streamptr, int tsID, int varID, int levelID, double *data, size_t *numMissVals)
+cdf_read_var_slice_DP(stream_t *streamptr, long tsID, int varID, int levelID, double *data, size_t *numMissVals)
 {
-  if (CDI_Debug) Message("streamID=%d  tsID=%d varID=%d  levelID=%d", streamptr->self, tsID, varID, levelID);
+  if (CDI_Debug) Message("streamID=%d  tsID=%ld varID=%d  levelID=%d", streamptr->self, tsID, varID, levelID);
 
   bool swapxy = false;
   size_t start[cdfSliceNDim], count[cdfSliceNDim];
@@ -735,9 +735,9 @@ cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, siz
 }
 
 static void
-cdf_read_var_slice_SP(stream_t *streamptr, int tsID, int varID, int levelID, float *data, size_t *numMissVals)
+cdf_read_var_slice_SP(stream_t *streamptr, long tsID, int varID, int levelID, float *data, size_t *numMissVals)
 {
-  if (CDI_Debug) Message("streamID=%d  tsID=%d varID=%d  levelID=%d", streamptr->self, tsID, varID, levelID);
+  if (CDI_Debug) Message("streamID=%d  tsID=%ld varID=%d  levelID=%d", streamptr->self, tsID, varID, levelID);
 
   bool swapxy = false;
   size_t start[cdfSliceNDim], count[cdfSliceNDim];
@@ -771,8 +771,8 @@ cdf_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, voi
 typedef struct JobArgs
 {
   stream_t *streamptr;
-  int varID, levelID;
-  int recID, tsID, memtype;
+  int varID, levelID, memtype;
+  long recID, tsID;
   void *data;
   size_t gridsize, numMissVals;
 } JobArgs;
@@ -813,7 +813,7 @@ typedef struct JobDescriptor
 } JobDescriptor;
 
 static JobArgs
-job_args_init(stream_t *streamptr, int tsID, int recID, int memtype, void *data)
+job_args_init(stream_t *streamptr, long tsID, long recID, int memtype, void *data)
 {
   int varID = streamptr->tsteps[tsID].records[recID].varID;
   int levelID = streamptr->tsteps[tsID].records[recID].levelID;
@@ -835,7 +835,7 @@ job_args_init(stream_t *streamptr, int tsID, int recID, int memtype, void *data)
 }
 
 static void
-JobDescriptor_startJob(AsyncManager *jobManager, JobDescriptor *me, stream_t *streamptr, int tsID, int recID, int memtype)
+JobDescriptor_startJob(AsyncManager *jobManager, JobDescriptor *me, stream_t *streamptr, long tsID, long recID, int memtype)
 {
   me->args = job_args_init(streamptr, tsID, recID, memtype, NULL);
   me->job = AsyncWorker_requestWork(jobManager, cdf_read_data_async, &me->args);
@@ -865,8 +865,12 @@ get_global_recId(stream_t *streamptr, int tsID, int recID)
 }
 */
 
-static void
-get_local_step_and_recId(stream_t *streamptr, long globalRecId, int *tsID, int *recID)
+struct recTsId {
+  long recID, tsID;
+};
+
+static struct recTsId
+get_local_step_and_recId(stream_t *streamptr, long globalRecId)
 {
   int localTsId = 0;
   long numSteps = streamptr->ntsteps;
@@ -882,15 +886,15 @@ get_local_step_and_recId(stream_t *streamptr, long globalRecId, int *tsID, int *
       globalRecId -= tsteps[1].nrecs;
     }
 
-  *tsID = localTsId;
-  *recID = globalRecId;
+  return (struct recTsId) { .recID = globalRecId, .tsID = localTsId };
 }
 
 static void
 read_next_record(AsyncManager *jobManager, JobDescriptor *jd, stream_t *streamptr, int memtype)
 {
-  int tsId = -1, recId = -1;
-  get_local_step_and_recId(streamptr, streamptr->nextGlobalRecId, &tsId, &recId);
+  struct recTsId ids
+    = get_local_step_and_recId(streamptr, streamptr->nextGlobalRecId);
+  long recId = ids.recID, tsId = ids.tsID;
   int xRecId = streamptr->tsteps[tsId].recIDs[recId];
   JobDescriptor_startJob(jobManager, jd, streamptr, tsId, xRecId, memtype);
   streamptr->nextGlobalRecId++;
