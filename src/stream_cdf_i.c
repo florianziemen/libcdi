@@ -4227,7 +4227,9 @@ cdf_check_variables(stream_t *streamptr, int nvars, ncvar_t *ncvars, size_t ntst
 }
 
 static void
-cdfVerifyVars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
+cdfVerifyVars(int nvars, ncvar_t *ncvars
+              //, ncdim_t *ncdims
+              )
 {
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
@@ -4704,7 +4706,8 @@ cdfInqContents(stream_t *streamptr)
   if (status < 0) return status;
 
   // verify vars
-  cdfVerifyVars(nvars, ncvars, ncdims);
+  cdfVerifyVars(nvars, ncvars//, ncdims
+                );
 
   // select vars
   int nvarsData = 0;
