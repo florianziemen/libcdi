@@ -343,7 +343,7 @@ cgribexGetGridReduced(int *isec2, int *isec4, grid_t *grid)
   grid->size = (size_t) ISEC4_NumValues;
 
   size_t reducedPointsSize = (size_t) ISEC2_NumLat;
-  grid->reducedPointsSize = reducedPointsSize;
+  grid->reducedPointsSize = ISEC2_NumLat;
   grid->reducedPoints = (int *) Malloc(reducedPointsSize * sizeof(int));
   memcpy(grid->reducedPoints, ISEC2_ReducedPointsPtr, reducedPointsSize * sizeof(int));
 
@@ -540,7 +540,7 @@ cgribexDefProjLCC(int *isec2, int gridID)
 static size_t
 cgribexGetGridsize(const int *isec4)
 {
-  return ISEC4_NumValues;
+  return (size_t) ISEC4_NumValues;
 }
 
 static void
