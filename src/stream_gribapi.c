@@ -1220,7 +1220,7 @@ void
 sort_records(stream_t *streamptr)
 {
   record_t *records = streamptr->tsteps[0].records;
-  int numRecords = streamptr->tsteps[0].recordSize;
+  size_t numRecords = (size_t) streamptr->tsteps[0].recordSize;
   qsort(records, numRecords, sizeof(records[0]), records_cmp_varname);
 }
 
@@ -2372,7 +2372,7 @@ gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
 
   long shapeOfTheEarth = encode_shapeOfTheEarth(&gpp);
   if (shapeOfTheEarth) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
-  if (shapeOfTheEarth == 1) GRIB_CHECK(my_grib_set_long(gh, "radiusOfTheEarth", gpp.a), 0);
+  if (shapeOfTheEarth == 1) GRIB_CHECK(my_grib_set_long(gh, "radiusOfTheEarth", (long) gpp.a), 0);
 
   long earthIsOblate = (shapeOfTheEarth == 2 || shapeOfTheEarth == 3 || shapeOfTheEarth == 4);
   if (earthIsOblate) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
@@ -2416,7 +2416,7 @@ gribapiDefGridSTERE(grib_handle *gh, int gridID, int uvRelativeToGrid)
 
   long shapeOfTheEarth = encode_shapeOfTheEarth(&gpp);
   if (shapeOfTheEarth) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
-  if (shapeOfTheEarth == 1) GRIB_CHECK(my_grib_set_long(gh, "radiusOfTheEarth", gpp.a), 0);
+  if (shapeOfTheEarth == 1) GRIB_CHECK(my_grib_set_long(gh, "radiusOfTheEarth", (long) gpp.a), 0);
 
   long earthIsOblate = (shapeOfTheEarth == 2 || shapeOfTheEarth == 3 || shapeOfTheEarth == 4);
   if (earthIsOblate) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
