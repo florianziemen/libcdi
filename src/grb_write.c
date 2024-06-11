@@ -37,7 +37,7 @@ grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int g
       *gribbuffer = Malloc(gribbuffersize);
 
       nbytes = cgribexEncode(memType, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize, data,
-                             numMissVals, *gribbuffer, gribbuffersize);
+                             (SizeType) numMissVals, *gribbuffer, gribbuffersize);
     }
   else
 #endif
@@ -65,7 +65,7 @@ grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int g
 
       size_t gribbuffersize;
       nbytes = gribapiEncode(memTypeX, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, (size_t) datasize,
-                             datap, numMissVals, gribbuffer, &gribbuffersize, comptype, gribContainer);
+                             datap, (SizeType) numMissVals, gribbuffer, &gribbuffersize, comptype, gribContainer);
 
       if (!useFloatInterface && memType == MEMTYPE_FLOAT) Free((void *) datap);
     }
