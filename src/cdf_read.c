@@ -925,23 +925,18 @@ cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
 
           // Start as many new jobs as possible.
           for (int i = 0; streamptr->nextGlobalRecId < streamptr->maxGlobalRecs && i < workerCount; i++)
-            {
-              JobDescriptor *jd = &jobs[i];
-              if (jd->args.recID < 0 && jd->args.tsID < 0) read_next_record(jobManager, jd, streamptr, memtype);
-            }
+            if (jobs[i].args.recID < 0 && jobs[i].args.tsID < 0)
+              read_next_record(jobManager, jobs+i, streamptr, memtype);
         }
 
       // search for a job descriptor with the given tsID and recID, and use its results if it exists
       for (int i = 0; !jobFound && i < workerCount; i++)
-        {
-          JobDescriptor *jd = &jobs[i];
-          if (jd->args.recID == recID && jd->args.tsID == tsID)
-            {
-              jobFound = true;
-              JobDescriptor_finishJob(jobManager, jd, data, numMissVals);
-              if (streamptr->nextGlobalRecId < streamptr->maxGlobalRecs) read_next_record(jobManager, jd, streamptr, memtype);
-            }
-        }
+        if (jobs[i].args.recID == recID && jobs[i].args.tsID == tsID)
+          {
+            jobFound = true;
+            JobDescriptor_finishJob(jobManager, jobs+i, data, numMissVals);
+            if (streamptr->nextGlobalRecId < streamptr->maxGlobalRecs) read_next_record(jobManager, jobs+i, streamptr, memtype);
+          }
     }
 
   // perform the work synchronously if we didn't start a job for it yet
