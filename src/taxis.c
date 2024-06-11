@@ -1302,7 +1302,7 @@ datetime2seconds(CdiDateTime datetime)
   JulianDate julianDate = julianDate_encode(calendar, datetime);
 
   int64_t days = julianDate.julianDay - julianDate0.julianDay;
-  int64_t seconds = days * 86400 + julianDate.secondOfDay;
+  int64_t seconds = days * 86400 + (int64_t) julianDate.secondOfDay;
 
   return seconds;
 }
@@ -1325,7 +1325,7 @@ cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis)
         }
       else if (taxis->unit == TUNIT_SECOND)
         {
-          timeValue = datetime2seconds(datetime);
+          timeValue = (double) datetime2seconds(datetime);
         }
       else
         {
