@@ -378,7 +378,7 @@ cdiInitialize(void)
       if (value >= 0) CDI_Chunk_Cache_Max = (size_t) value;
 
       value = cdi_getenv_int("CDI_TEST");
-      if (value >= 0) CDI_Test = (size_t) value;
+      if (value >= 0) CDI_Test = (int) value;
 
       envstr = getenv("CDI_GRIB1_TEMPLATE");
       if (envstr) CDI_GRIB1_Template = envstr;
