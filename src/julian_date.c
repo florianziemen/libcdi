@@ -61,7 +61,8 @@ encode_julday(int calendar, int year, int month, int day)
         }
     }
 
-  int64_t julianDay = (int64_t) (floor(365.25 * iy) + trunc(30.6001 * (im + 1)) + ib + 1720996.5 + day + 0.5);
+  int64_t julianDay = (int64_t) (floor(365.25*iy) + trunc(30.6001*(im+1))
+                                 + ib + 1720996.5 + day + 0.5);
 
   return julianDay;
 }
@@ -269,20 +270,25 @@ main(void)
   CdiDateTime dt;
   dt.date = cdiDate_encode(year, month, day);
   dt.time = cdiTime_encode(hour, minute, second, ms);
-  printf("%d/%02d/%02d %02d:%02d:%02d.%03d\n", dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute,
-         dt.time.second, dt.time.ms);
+  printf("%d/%02d/%02d %02d:%02d:%02d.%03d\n",
+         dt.date.year, dt.date.month, dt.date.day,
+         dt.time.hour, dt.time.minute, dt.time.second, dt.time.ms);
 
   JulianDate julianDate = julianDate_encode(calendar, dt);
 
   dt = julianDate_decode(calendar, julianDate);
-  printf("%d/%02d/%02d %02d:%02d:%02d.%03d   %d %g\n", dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute,
-         dt.time.second, dt.time.ms, (int) julianDate.julianDay, julianDate.secondOfDay);
+  /* FIXME: using PRI64 seems more appropriate */
+  printf("%d/%02d/%02d %02d:%02d:%02d.%03d   %d %g\n",
+         dt.date.year, dt.date.month, dt.date.day,
+         dt.time.hour, dt.time.minute, dt.time.second, dt.time.ms,
+         (int)julianDate.julianDay, julianDate.secondOfDay);
 
   for (int i = 0; i < 420; i++)
     {
       dt = julianDate_decode(calendar, julianDate);
-      printf("%2d %d/%02d/%02d %02d:%02d:%02d.%03d\n", i, dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute,
-             dt.time.second, dt.time.ms);
+      printf("%2d %d/%02d/%02d %02d:%02d:%02d.%03d\n",
+             i, dt.date.year, dt.date.month, dt.date.day,
+             dt.time.hour, dt.time.minute, dt.time.second, dt.time.ms);
       julianDate = julianDate_add_seconds(julianDate, value * factor);
     }
 
