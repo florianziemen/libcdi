@@ -316,7 +316,7 @@ cdiPioClientStreamWriteVar_(int streamID, int varID, int memtype, const void *da
     xabort("data type does not match pre-declared conversion for stream %d,"
            " variable ID %d!",
            streamID, varID);
-  cdiPioStreamWriteVarPart_(streamID, varID, memtype, data, numMissVals, clientDeco.lists[varID]);
+  cdiPioStreamWriteVarPart_(streamID, varID, memtype, data, (SizeType) numMissVals, clientDeco.lists[varID]);
 }
 
 static struct cdiPioIdxlistCache *clientIdxlistCache;

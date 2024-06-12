@@ -749,7 +749,7 @@ pioWriteTimestep(void)
 
 void
 cdiPioStreamWriteVarPart_(int streamID, int varID, int memtype,
-                          const void *data, size_t numMissVals,
+                          const void *data, SizeType numMissVals,
                           Xt_idxlist partDesc)
 {
   if (CDI_Debug) Message("streamID = %d varID = %d", streamID, varID);
@@ -762,7 +762,7 @@ cdiPioStreamWriteVarPart_(int streamID, int varID, int memtype,
 
   if (!myStreamWriteVarPart) xabort("local part writing is unsupported!");
 
-  myStreamWriteVarPart(streamID, varID, memtype, data, numMissVals, partDesc);
+  myStreamWriteVarPart(streamID, varID, memtype, data, (size_t) numMissVals, partDesc);
 }
 
 void
