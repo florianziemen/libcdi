@@ -768,19 +768,19 @@ cdf_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, voi
     cdfReadVarSliceSP(streamptr, varID, levelID, (float *) data, numMissVals);
 }
 
-typedef struct JobArgs
+typedef struct JobArgsCDF
 {
   stream_t *streamptr;
   int varID, levelID, memtype;
   long recID, tsID;
   void *data;
   size_t gridsize, numMissVals;
-} JobArgs;
+} JobArgsCDF;
 
 static int
 cdf_read_data_async(void *untypedArgs)
 {
-  JobArgs *args = (JobArgs *) untypedArgs;
+  JobArgsCDF *args = (JobArgsCDF *) untypedArgs;
 
   if (args->memtype == MEMTYPE_DOUBLE)
     cdf_read_var_slice_DP(args->streamptr, args->tsID, args->varID, args->levelID, (double *) args->data, &args->numMissVals);
@@ -806,13 +806,13 @@ cdf_read_data(stream_t *streamptr, int recID, int memtype, void *data)
   return numMissVals;
 }
 
-typedef struct JobDescriptor
+typedef struct JobDescriptorCDF
 {
-  JobArgs args;
+  JobArgsCDF args;
   AsyncJob *job;
-} JobDescriptor;
+} JobDescriptorCDF;
 
-static JobArgs
+static JobArgsCDF
 job_args_init(stream_t *streamptr, long tsID, long recID, int memtype, void *data)
 {
   int varID = streamptr->tsteps[tsID].records[recID].varID;
@@ -821,7 +821,7 @@ job_args_init(stream_t *streamptr, long tsID, long recID, int memtype, void *dat
 
   if (!data) data = Malloc(gridsize * ((memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
 
-  return (JobArgs){
+  return (JobArgsCDF){
     .streamptr = streamptr,
     .varID = varID,
     .levelID = levelID,
@@ -835,7 +835,7 @@ job_args_init(stream_t *streamptr, long tsID, long recID, int memtype, void *dat
 }
 
 static void
-JobDescriptor_startJob(AsyncManager *jobManager, JobDescriptor *me, stream_t *streamptr, long tsID, long recID, int memtype)
+JobDescriptor_startJob(AsyncManager *jobManager, JobDescriptorCDF *me, stream_t *streamptr, long tsID, long recID, int memtype)
 {
   me->args = job_args_init(streamptr, tsID, recID, memtype, NULL);
   me->job = AsyncWorker_requestWork(jobManager, cdf_read_data_async, &me->args);
@@ -843,7 +843,7 @@ JobDescriptor_startJob(AsyncManager *jobManager, JobDescriptor *me, stream_t *st
 }
 
 static void
-JobDescriptor_finishJob(AsyncManager *jobManager, JobDescriptor *me, void *data, size_t *numMissVals)
+JobDescriptor_finishJob(AsyncManager *jobManager, JobDescriptorCDF *me, void *data, size_t *numMissVals)
 {
   if (AsyncWorker_wait(jobManager, me->job)) xabort("error executing job in worker thread");
   memcpy(data, me->args.data, me->args.gridsize * ((me->args.memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
@@ -890,7 +890,7 @@ get_local_step_and_recId(stream_t *streamptr, long globalRecId)
 }
 
 static void
-read_next_record(AsyncManager *jobManager, JobDescriptor *jd, stream_t *streamptr, int memtype)
+read_next_record(AsyncManager *jobManager, JobDescriptorCDF *jd, stream_t *streamptr, int memtype)
 {
   struct recTsId ids
     = get_local_step_and_recId(streamptr, streamptr->nextGlobalRecId);
@@ -911,12 +911,12 @@ cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
       int tsID = streamptr->curTsID;
 
       AsyncManager *jobManager = (AsyncManager *) streamptr->jobManager;
-      JobDescriptor *jobs = (JobDescriptor *) streamptr->jobs;
+      JobDescriptorCDF *jobs = (JobDescriptorCDF *) streamptr->jobs;
 
       // if this is the first call, init and start worker threads
       if (!jobs)
         {
-          jobs = (JobDescriptor *) Malloc((size_t) workerCount * sizeof(*jobs));
+          jobs = (JobDescriptorCDF *) Malloc((size_t) workerCount * sizeof(*jobs));
           streamptr->jobs = jobs;
           for (int i = 0; i < workerCount; i++) jobs[i].args.recID = -1;
           for (int i = 0; i < workerCount; i++) jobs[i].args.tsID = -1;
