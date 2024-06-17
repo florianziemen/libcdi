@@ -6,7 +6,8 @@
 
 2024-06-17  Uwe Schulzweida
 
-	* cdfDefVarFilter: added support for list of filterSpec
+	* streamDefFilter(): changed interface
+	* cdfDefVarFilter(): added support for list of filterSpec
 
 2024-05-22  Uwe Schulzweida
 
