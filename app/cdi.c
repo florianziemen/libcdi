@@ -65,10 +65,7 @@ static int DefaultFileType = CDI_UNDEFID;
 static int DefaultDataType = CDI_UNDEFID;
 static int DefaultByteorder = CDI_UNDEFID;
 
-static int filterId = 0;
-static int params[8];
-static int maxParams = sizeof(params) / sizeof(params[0]);
-static int numParams = 0;
+static char filterSpec[CDI_MAX_NAME] = { 0 };
 static int comptype = CDI_COMPRESS_NONE;  // Compression type
 static int complevel = 0;                 // Compression level
 
@@ -732,11 +729,11 @@ define_compress(const char *arg)
     }
   else if (strncmp(arg, "zstd", 4) == 0)
     {
-      if (filterId == 0)
+      if (filterSpec == NULL)
         {
-          filterId = 32015;
-          numParams = 1;
-          params[0] = (len >= 6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
+          int filterid = 32015;
+          int level = (len >= 6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
+          snprintf(filterSpec, sizeof(filterSpec), "%d,%d", filterid, level);
         }
       else
         {
@@ -751,31 +748,13 @@ static void
 define_filter(const char *arg)
 {
   size_t len = strlen(arg);
-
-  if (len > 0 && isdigit(arg[0]))
+  if (len > 0)
     {
-      filterId = atoi(arg);
-      const char *next;
-      const char *parg = arg;
-      while ((next = strchr(parg, ',')))
-        {
-          parg = ++next;
-          len = strlen(parg);
-          if (len > 0 && isdigit(parg[0]))
-            {
-              if (numParams >= maxParams)
-                {
-                  fprintf(stderr, "Too many filter parameter (max=%d)!\n", maxParams);
-                  return;
-                }
-              params[numParams] = atoi(parg);
-              numParams++;
-            }
-        }
+      strncpy(filterSpec, arg, sizeof(filterSpec));
     }
   else
     {
-      fprintf(stderr, "Filter id missing!\n");
+      fprintf(stderr, "Filter spec missing!\n");
     }
 }
 
@@ -959,9 +938,9 @@ main(int argc, char *argv[])
 
           if (DefaultByteorder != CDI_UNDEFID) streamDefByteorder(streamID2, DefaultByteorder);
 
-          if (filterId != 0)
+          if (filterSpec)
             {
-              streamDefFilter(streamID2, filterId, numParams, params);
+              streamDefFilter(streamID2, filterSpec);
             }
 
           if (comptype != CDI_COMPRESS_NONE)

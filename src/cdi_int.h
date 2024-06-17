@@ -309,10 +309,7 @@ typedef struct
   int have_missval;
   int shuffle;
   // netcdf4/HDF5 filter
-  unsigned int filterId;
-  size_t numParams;
-  size_t maxParams;
-  unsigned int params[8];
+  char *filterSpec;
 
   int comptype;   // compression type
   int complevel;  // compression level

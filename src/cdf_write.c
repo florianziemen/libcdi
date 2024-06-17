@@ -1040,6 +1040,8 @@ cdfDefVar(stream_t *streamptr, int varID)
       length = CDI_MAX_NAME;
       if (cdiInqKeyString(vlistID, varID, CDI_KEY_FILTERSPEC, filterSpec, &length) == CDI_NOERR)
         cdfDefVarFilter(fileID, fileType, ncvarID, filterSpec);
+      else if (streamptr->filterSpec)
+        cdfDefVarFilter(fileID, fileType, ncvarID, streamptr->filterSpec);
     }
 
   if (*stdname) cdf_put_att_text(fileID, ncvarID, "standard_name", strlen(stdname), stdname);
