@@ -14,23 +14,49 @@
 #include "vlist_var.h"
 
 // #include <netcdf_filter.h>
+#ifdef HAVE_NETCDF4
+#include "netcdf_aux.h"
+#endif
 
-void
-cdf_def_var_filter(int ncid, int ncvarID, unsigned int id, size_t nparams, const unsigned int *params)
+static void
+cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
 {
 #ifdef HAVE_NETCDF4
-  int status;
-  if ((status = nc_def_var_filter(ncid, ncvarID, id, nparams, params)))
+  if (filterSpec)
     {
-      Message("filterId=%u  numParams=%zu", id, nparams);
-      Error("nc_def_var_filter failed; %s", nc_strerror(status));
+      size_t nfilters = 0;
+      NC_H5_Filterspec **filters = NULL;
+      int status = ncaux_h5filterspec_parselist(filterSpec, NULL, &nfilters, &filters);
+      if (status != NC_NOERR)
+        {
+          Message("filterSpec=%s", filterSpec);
+          Error("ncaux_h5filterspec_parselist failed; %s", nc_strerror(status));
+        }
+
+      if (filters != NULL)
+        {
+          for (size_t i = 0; i < nfilters; i++)
+            {
+              unsigned int filterid = filters[i]->filterid;
+              // printf("filter %zu id:%d nparams:%zu param1 %d\n", i + 1, filterid, filters[i]->nparams, filters[i]->params[0]);
+              status = nc_def_var_filter(ncid, ncvarID, filterid, filters[i]->nparams, filters[i]->params);
+              if (status != NC_NOERR)
+                {
+                  Message("filterid=%u  numParams=%zu", filterid, filters[i]->nparams);
+                  Error("nc_def_var_filter failed; %s", nc_strerror(status));
+                }
+            }
+
+          for (size_t i = 0; i < nfilters; i++) ncaux_h5filterspec_free(filters[i]);
+          free(filters);
+        }
     }
 #else
   static bool lwarn = true;
   if (lwarn)
     {
       lwarn = false;
-      Warning("filter failed, NetCDF4 not available!");
+      Warning("Filter failed, NetCDF4 not available!");
     }
 #endif
 }
@@ -460,13 +486,13 @@ xtype2ppb(nc_type xtype)
 }
 
 static void
-cdfDefVarFilter(const stream_t *s, int ncvarID)
+cdfDefVarFilter(int fileID, int fileType, int ncvarID, const char *filterSpec)
 {
-  if (s->filterId != 0)
+  if (filterSpec)
     {
-      if (s->filetype == CDI_FILETYPE_NC4 || s->filetype == CDI_FILETYPE_NC4C || s->filetype == CDI_FILETYPE_NCZARR)
+      if (fileType == CDI_FILETYPE_NC4 || fileType == CDI_FILETYPE_NC4C || fileType == CDI_FILETYPE_NCZARR)
         {
-          cdf_def_var_filter(s->fileID, ncvarID, s->filterId, s->numParams, s->params);
+          cdf_def_var_filter(fileID, ncvarID, filterSpec);
         }
       else
         {
@@ -920,6 +946,7 @@ cdfDefVar(stream_t *streamptr, int varID)
   if (streamptr->vars[varID].ncvarid != CDI_UNDEFID) return streamptr->vars[varID].ncvarid;
 
   int fileID = streamptr->fileID;
+  int fileType = streamptr->filetype;
   if (CDI_Debug) Message("streamID = %d, fileID = %d, varID = %d", streamptr->self, fileID, varID);
 
   int vlistID = streamptr->vlistID;
@@ -1002,14 +1029,18 @@ cdfDefVar(stream_t *streamptr, int varID)
     }
 #endif
 
-  if (useChunks
-      && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
-          || streamptr->filetype == CDI_FILETYPE_NCZARR))
+  if (useChunks && (fileType == CDI_FILETYPE_NC4 || fileType == CDI_FILETYPE_NC4C || fileType == CDI_FILETYPE_NCZARR))
     cdf_def_var_chunking(fileID, ncvarID, NC_CHUNKED, chunks);
 #endif
 
   if (useChunks) cdfDefVarCompression(streamptr, ncvarID, xtype);
-  if (useChunks) cdfDefVarFilter(streamptr, ncvarID);
+  if (useChunks)
+    {
+      char filterSpec[CDI_MAX_NAME];
+      length = CDI_MAX_NAME;
+      if (cdiInqKeyString(vlistID, varID, CDI_KEY_FILTERSPEC, filterSpec, &length) == CDI_NOERR)
+        cdfDefVarFilter(fileID, fileType, ncvarID, filterSpec);
+    }
 
   if (*stdname) cdf_put_att_text(fileID, ncvarID, "standard_name", strlen(stdname), stdname);
   if (*longname) cdf_put_att_text(fileID, ncvarID, "long_name", strlen(longname), longname);
@@ -1056,7 +1087,7 @@ cdfDefVar(stream_t *streamptr, int varID)
   cdfDefineCellMethods(streamptr, vlistID, varID, fileID, ncvarID);
 
   // Attributes
-  cdfDefineAttributes(streamptr->filetype, vlistID, varID, fileID, ncvarID);
+  cdfDefineAttributes(fileType, vlistID, varID, fileID, ncvarID);
 
   // Institute
   if (vlistInqInstitut(vlistID) == CDI_UNDEFID) cdfDefineInstituteName(vlistID, varID, fileID, ncvarID);
