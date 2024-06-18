@@ -3597,11 +3597,8 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
           if (ncvar->chunkType != CDI_UNDEFID) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, ncvar->chunkType);
           if (ncvar->chunkSize > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, ncvar->chunkSize);
 
-          size_t varChunkCacheSize = calc_chunk_cache_size(timedimid, ncvar);
-          if (CDI_Chunk_Cache > 0)
-            cdf_set_var_chunk_cache(ncvar, ncvarid, CDI_Chunk_Cache);
-          else if (varChunkCacheSize > ncvar->chunkCacheSize)
-            cdf_set_var_chunk_cache(ncvar, ncvarid, varChunkCacheSize);
+          size_t cacheSize = (CDI_Chunk_Cache > 0) ? CDI_Chunk_Cache : calc_chunk_cache_size(timedimid, ncvar);
+          cdf_set_var_chunk_cache(ncvar, ncvarid, cacheSize);
         }
 #endif
 

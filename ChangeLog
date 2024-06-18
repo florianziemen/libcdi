@@ -1,8 +1,12 @@
-2024-10-21  Uwe Schulzweida
+2024-06-21  Uwe Schulzweida
 
         * using CGRIBEX library version 2.3.0
         * using EXSE library version 2.0.0
 	* Version 2.4.2 released
+
+2024-06-18  Uwe Schulzweida
+
+	* NetCDF4: set always the CDI calculate chunk cache size
 
 2024-06-17  Uwe Schulzweida
 
