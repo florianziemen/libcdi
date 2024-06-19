@@ -835,7 +835,7 @@ job_args_init(stream_t *streamptr, long tsID, long recID, int memtype, void *dat
 }
 
 static void
-JobDescriptor_startJob(AsyncManager *jobManager, JobDescriptorCDF *me, stream_t *streamptr, long tsID, long recID, int memtype)
+JobDescriptor_startJobCDF(AsyncManager *jobManager, JobDescriptorCDF *me, stream_t *streamptr, long tsID, long recID, int memtype)
 {
   me->args = job_args_init(streamptr, tsID, recID, memtype, NULL);
   me->job = AsyncWorker_requestWork(jobManager, cdf_read_data_async, &me->args);
@@ -843,7 +843,7 @@ JobDescriptor_startJob(AsyncManager *jobManager, JobDescriptorCDF *me, stream_t 
 }
 
 static void
-JobDescriptor_finishJob(AsyncManager *jobManager, JobDescriptorCDF *me, void *data, size_t *numMissVals)
+cdf_JobDescriptor_finishJob(AsyncManager *jobManager, JobDescriptorCDF *me, void *data, size_t *numMissVals)
 {
   if (AsyncWorker_wait(jobManager, me->job)) xabort("error executing job in worker thread");
   memcpy(data, me->args.data, me->args.gridsize * ((me->args.memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
@@ -870,7 +870,7 @@ struct recTsId {
 };
 
 static struct recTsId
-get_local_step_and_recId(stream_t *streamptr, long globalRecId)
+cdf_get_local_step_and_recId(stream_t *streamptr, long globalRecId)
 {
   int localTsId = 0;
   long numSteps = streamptr->ntsteps;
@@ -890,13 +890,12 @@ get_local_step_and_recId(stream_t *streamptr, long globalRecId)
 }
 
 static void
-read_next_record(AsyncManager *jobManager, JobDescriptorCDF *jd, stream_t *streamptr, int memtype)
+cdf_read_next_record_async(AsyncManager *jobManager, JobDescriptorCDF *jd, stream_t *streamptr, int memtype)
 {
   struct recTsId ids
-    = get_local_step_and_recId(streamptr, streamptr->nextGlobalRecId);
-  long recId = ids.recID, tsId = ids.tsID;
-  int xRecId = streamptr->tsteps[tsId].recIDs[recId];
-  JobDescriptor_startJob(jobManager, jd, streamptr, tsId, xRecId, memtype);
+    = cdf_get_local_step_and_recId(streamptr, streamptr->nextGlobalRecId);
+  int xRecId = streamptr->tsteps[ids.tsID].recIDs[ids.recID];
+  JobDescriptor_startJobCDF(jobManager, jd, streamptr, ids.tsID, xRecId, memtype);
   streamptr->nextGlobalRecId++;
 }
 
@@ -926,7 +925,7 @@ cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
           // Start as many new jobs as possible.
           for (int i = 0; streamptr->nextGlobalRecId < streamptr->maxGlobalRecs && i < workerCount; i++)
             if (jobs[i].args.recID < 0 && jobs[i].args.tsID < 0)
-              read_next_record(jobManager, jobs+i, streamptr, memtype);
+              cdf_read_next_record_async(jobManager, jobs+i, streamptr, memtype);
         }
 
       // search for a job descriptor with the given tsID and recID, and use its results if it exists
@@ -934,8 +933,8 @@ cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
         if (jobs[i].args.recID == recID && jobs[i].args.tsID == tsID)
           {
             jobFound = true;
-            JobDescriptor_finishJob(jobManager, jobs+i, data, numMissVals);
-            if (streamptr->nextGlobalRecId < streamptr->maxGlobalRecs) read_next_record(jobManager, jobs+i, streamptr, memtype);
+            cdf_JobDescriptor_finishJob(jobManager, jobs+i, data, numMissVals);
+            if (streamptr->nextGlobalRecId < streamptr->maxGlobalRecs) cdf_read_next_record_async(jobManager, jobs+i, streamptr, memtype);
           }
     }
 
