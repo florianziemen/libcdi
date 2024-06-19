@@ -1358,7 +1358,7 @@ void cdiQueryPrintEntriesNotFound(const CdiQuery *query);
 // streamOpenReadQuery: Open a dataset for reading and apply query
 int streamOpenReadQuery(const char *path, CdiQuery *query);
 
-// CDI interface for  paraview vtkCDIReader.cxx
+// CDI interface for paraview vtkCDIReader.cxx
 
 #include "cdi_datetime.h"
 
@@ -1428,6 +1428,9 @@ extern int (*proj_lonlat_to_lcc_func)(struct CDI_GridProjParams gpp, size_t, dou
 extern int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double*, double*);
 extern int (*proj_lonlat_to_stere_func)(struct CDI_GridProjParams gpp, size_t, double*, double*);
 extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double*, double*);
+
+// Used on CDO remap_scrip_io.cc
+void cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec);
 
 #ifdef __cplusplus
 }

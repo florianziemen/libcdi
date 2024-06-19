@@ -18,7 +18,7 @@
 #include "netcdf_aux.h"
 #endif
 
-static void
+void
 cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
 {
 #ifdef HAVE_NETCDF4
@@ -30,7 +30,7 @@ cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
       if (status != NC_NOERR)
         {
           Message("filterSpec=%s", filterSpec);
-          Error("ncaux_h5filterspec_parselist failed; %s", nc_strerror(status));
+          Error("ncaux_h5filterspec_parselist failed: %s", nc_strerror(status));
         }
 
       if (filters != NULL)
@@ -43,7 +43,7 @@ cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
               if (status != NC_NOERR)
                 {
                   Message("filterid=%u  numParams=%zu", filterid, filters[i]->nparams);
-                  Error("nc_def_var_filter failed; %s", nc_strerror(status));
+                  Error("nc_def_var_filter failed: %s", nc_strerror(status));
                 }
             }
 
@@ -74,7 +74,7 @@ cdfDefVarDeflate(int ncid, int ncvarID, int shuffle, int compLevel)
   int status;
   if ((status = nc_def_var_deflate(ncid, ncvarID, shuffle, deflate, compLevel)))
     {
-      Error("nc_def_var_deflate failed; %s", nc_strerror(status));
+      Error("nc_def_var_deflate failed: %s", nc_strerror(status));
     }
 #else
   static bool lwarn = true;
@@ -101,7 +101,7 @@ cdfDefVarSzip(int ncid, int ncvarID, int pixels_per_block)
   int options_mask = 38;
   int status;
   if ((status = nc_def_var_szip(ncid, ncvarID, options_mask, pixels_per_block)))
-    Error("nc_def_var_szip failed; %s", nc_strerror(status));
+    Error("nc_def_var_szip failed: %s", nc_strerror(status));
 #else
   (void) ncid;
   (void) ncvarID;
