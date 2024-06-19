@@ -112,7 +112,6 @@ typedef struct
   size_t gridSize;
   size_t xSize;
   size_t ySize;
-  size_t numLevels;
   int natts;
   int *atts;
   size_t vctsize;
@@ -648,7 +647,6 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
       ncvar->gridSize = 0;
       ncvar->xSize = 0;
       ncvar->ySize = 0;
-      ncvar->numLevels = 0;
       ncvar->natts = 0;
       ncvar->atts = NULL;
       ncvar->vctsize = 0;
@@ -3309,7 +3307,6 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
               return CDI_EDIMSIZE;
             }
 
-          ncvar->numLevels = zsize;
           ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (const char **) zcvals, zclength, withBounds, lbounds,
                                        ubounds, (int) vctsize, vct, pname, plongname, punits, zdatatype, 1, 0, -1);
 
@@ -3532,20 +3529,23 @@ size_of_dim_chunks(size_t n, size_t c)
 static size_t
 calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
 {
-  size_t nx = 0, ny = 0, nz = 0;
+  size_t nx = 0, ny = 0;
   size_t cx = 0, cy = 0, cz = 0;
   for (int i = 0; i < ncvar->ndims; i++)
     {
       int dimtype = ncvar->dimtypes[i];
       // clang-format off
-      if      (dimtype == Z_AXIS) { cz = ncvar->chunks[i]; nz = ncvar->numLevels; }
+      if      (dimtype == Z_AXIS) { cz = ncvar->chunks[i]; }
       else if (dimtype == Y_AXIS) { cy = ncvar->chunks[i]; ny = ncvar->ySize; }
       else if (dimtype == X_AXIS) { cx = ncvar->chunks[i]; nx = ncvar->xSize; }
       // clang-format on
     }
 
   size_t chunkCacheSize = (ncvar->dimids[0] == timedimid) ? ncvar->chunks[0] : 1;
-  if (nz > 0 && cz > 0) chunkCacheSize *= (chunkCacheSize == 1) ? cz : size_of_dim_chunks(nz, cz);
+  if (cz > 0) chunkCacheSize *= cz;
+
+  if (chunkCacheSize == 1) return 0;  // no chunk cache needed because the full field is read
+
   if (ny > 0 && cy > 0) chunkCacheSize *= size_of_dim_chunks(ny, cy);
   if (nx > 0 && cx > 0) chunkCacheSize *= size_of_dim_chunks(nx, cx);
 
@@ -3559,7 +3559,7 @@ calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
 static void
 cdf_set_var_chunk_cache(ncvar_t *ncvar, int ncvarid, size_t chunkCacheSize)
 {
-  if (CDI_Debug) Message("%s: chunkCacheSize=%zu", ncvar->name, chunkCacheSize);
+  if (CDI_Debug || CDI_Chunk_Cache_Info) Message("%s: chunkCacheSize=%zu", ncvar->name, chunkCacheSize);
   nc_set_var_chunk_cache(ncvar->ncid, ncvarid, chunkCacheSize, ncvar->chunkCacheNelems, ncvar->chunkCachePreemption);
 }
 
@@ -3597,7 +3597,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
           if (ncvar->chunkType != CDI_UNDEFID) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, ncvar->chunkType);
           if (ncvar->chunkSize > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, ncvar->chunkSize);
 
-          size_t cacheSize = (CDI_Chunk_Cache > 0) ? CDI_Chunk_Cache : calc_chunk_cache_size(timedimid, ncvar);
+          size_t cacheSize = (CDI_Chunk_Cache >= 0) ? (size_t) CDI_Chunk_Cache : calc_chunk_cache_size(timedimid, ncvar);
           cdf_set_var_chunk_cache(ncvar, ncvarid, cacheSize);
         }
 #endif
