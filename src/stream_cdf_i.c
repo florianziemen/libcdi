@@ -6,6 +6,7 @@
 
 #include <ctype.h>
 #include <limits.h>
+#include <strings.h>
 
 #include "dmemory.h"
 #include "cdi_int.h"
@@ -1254,23 +1255,6 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
               ncvar->param = cdiEncodeParam(pnum, pcat, pdis);
               cdf_set_var(ncvar, DataVar);
             }
-          else if (isNumber && str_is_equal(attname, "code"))
-            {
-              cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvar->code);
-              cdf_set_var(ncvar, DataVar);
-            }
-          else if (isNumber && str_is_equal(attname, "table"))
-            {
-              int tablenum;
-              cdfGetAttInt(ncid, ncvarid, attname, 1, &tablenum);
-              if (tablenum > 0)
-                {
-                  ncvar->tabnum = tablenum;
-                  ncvar->tableID = tableInq(modelID, tablenum, NULL);
-                  if (ncvar->tableID == CDI_UNDEFID) ncvar->tableID = tableDef(modelID, tablenum, NULL);
-                }
-              cdf_set_var(ncvar, DataVar);
-            }
           else if (isText && str_is_equal(attname, "trunc_type"))
             {
               if (str_is_equal(attstring, "Triangular")) ncvar->gridtype = GRID_SPECTRAL;
@@ -1307,6 +1291,23 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
               else
                 Warning("%s - %s", nc_strerror(status), attstring);
 
+              cdf_set_var(ncvar, DataVar);
+            }
+          else if (isNumber && str_is_equal(attname, "code"))
+            {
+              cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvar->code);
+              cdf_set_var(ncvar, DataVar);
+            }
+          else if (isNumber && str_is_equal(attname, "table"))
+            {
+              int tablenum;
+              cdfGetAttInt(ncid, ncvarid, attname, 1, &tablenum);
+              if (tablenum > 0)
+                {
+                  ncvar->tabnum = tablenum;
+                  ncvar->tableID = tableInq(modelID, tablenum, NULL);
+                  if (ncvar->tableID == CDI_UNDEFID) ncvar->tableID = tableDef(modelID, tablenum, NULL);
+                }
               cdf_set_var(ncvar, DataVar);
             }
           else if (isNumber && str_is_equal(attname, "CDI_grid_num_LPE"))
@@ -1515,6 +1516,27 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                   ncvar->atts[ncvar->natts++] = iatt;
                 }
             }
+          else if (isText && str_is_equal(attname, "cdi"))
+            {
+              if (!strcasecmp(attstring, "ignore"))
+                {
+                  ncvar->ignoreVar = true;
+                  cdf_set_var(ncvar, CoordVar);
+                }
+            }
+          else if (isText && str_is_equal(attname, "_Unsigned"))
+            {
+              if (!strcasecmp(attstring, "true"))
+                {
+                  ncvar->isUnsigned = true;
+                  /*
+                  ncvar->validrangeDefined = true;
+                  ncvar->validrange[0] = 0;
+                  ncvar->validrange[1] = 255;
+                  */
+                }
+              // cdf_set_var(ncvar, DataVar);
+            }
           else if (isNumber && str_is_equal(attname, "_FillValue"))
             {
               cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvar->fillval);
@@ -1569,30 +1591,6 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
               else if (ignoreDatatype)
                 {
                   Warning("Inconsistent data type for attribute %s:valid_max, ignored!", name);
-                }
-            }
-          else if (isText && str_is_equal(attname, "_Unsigned"))
-            {
-              str_to_lower(attstring);
-              if (str_is_equal(attstring, "true"))
-                {
-                  ncvar->isUnsigned = true;
-                  /*
-                  ncvar->validrangeDefined = true;
-                  ncvar->validrange[0] = 0;
-                  ncvar->validrange[1] = 255;
-                  */
-                }
-              // cdf_set_var(ncvar, DataVar);
-            }
-          else if (isText && str_is_equal(attname, "cdi"))
-            {
-              str_to_lower(attstring);
-
-              if (str_is_equal(attstring, "ignore"))
-                {
-                  ncvar->ignoreVar = true;
-                  cdf_set_var(ncvar, CoordVar);
                 }
             }
           else if (isNumber
