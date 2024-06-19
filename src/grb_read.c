@@ -56,6 +56,7 @@ grb_decode(int filetype, int memType, int datatype, void *cgribexp, void *gribbu
     }
 #else
   {
+    (void)datatype;
     Error("ecCodes support not compiled in!");
   }
 #endif
