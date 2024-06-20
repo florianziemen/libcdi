@@ -109,6 +109,10 @@ modelRun(const struct model_config *setup, MPI_Comm comm)
   {
     double lscale = 1.0 / (double) (setup->max_nlev - 1);
     for (size_t i = 0; i < (size_t) setup->max_nlev; ++i) levs[i] = 101300.0 - 13000.0 * expm1(2.173 * (double) i * lscale);
+    /* GRIB1 only supports integral hPa values in pressure levels */
+    if (setup->filetype == CDI_FILETYPE_GRB)
+      for (size_t i = 0; i < (size_t) setup->max_nlev; ++i)
+        levs[i] = round(levs[i]*0.01) * 100.0;
   }
   vlistID = vlistCreate();
 
