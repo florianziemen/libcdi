@@ -2189,6 +2189,7 @@ cdiPioCollectorMessageLoop()
             }
           if (rxWin)
             {
+              if (!conf->batchedRMA) Free(rxWin[0].clientBuf[0].mem);
               Free(rxWin[0].clientBuf);
               Free(rxWin);
             }
