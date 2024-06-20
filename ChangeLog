@@ -4,9 +4,13 @@
         * using EXSE library version 2.0.0
 	* Version 2.4.2 released
 
+2024-06-20  Uwe Schulzweida
+
+	* NetCDF4: switched off output chunk cache
+
 2024-06-19  Uwe Schulzweida
 
-	* NetCDF4: improved calculation of chunk cache size
+	* NetCDF4: improved calculation of input chunk cache size
 
 2024-06-17  Uwe Schulzweida
 

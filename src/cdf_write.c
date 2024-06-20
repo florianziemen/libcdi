@@ -940,6 +940,15 @@ cdfGenVarname(int fileID, char name[CDI_MAX_NAME], int pnum, int pcat, int *pdis
   *pdis = 255;
 }
 
+static void
+cdfDefVarChunkCache(int fileID, int ncvarID)
+{
+  size_t size = 0;
+  size_t nelems = 0;
+  float preemption = 0;
+  nc_set_var_chunk_cache(fileID, ncvarID, size, nelems, preemption);
+}
+
 int
 cdfDefVar(stream_t *streamptr, int varID)
 {
@@ -1018,6 +1027,8 @@ cdfDefVar(stream_t *streamptr, int varID)
 
   int ncvarID = -1;
   cdf_def_var(fileID, name, xtype, ndims, dims, &ncvarID);
+
+  cdfDefVarChunkCache(fileID, ncvarID);
 
 #ifdef HAVE_NETCDF4
 #ifdef NC_QUANTIZE_BITROUND
