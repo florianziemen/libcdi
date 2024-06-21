@@ -435,7 +435,7 @@ gribapiGetEnsembleInfo(grib_handle *gh, long *numberOfForecastsInEnsemble, long 
   if (grib_get_long(gh, "numberOfForecastsInEnsemble", numberOfForecastsInEnsemble) == 0)
     {
       if (*numberOfForecastsInEnsemble > 0) status = 1;
-      GRIB_CHECK(grib_get_long(gh, "perturbationNumber", perturbationNumber), 0);
+      grib_get_long(gh, "perturbationNumber", perturbationNumber);
       grib_get_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast);
     }
 

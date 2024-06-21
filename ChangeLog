@@ -4,6 +4,10 @@
         * using EXSE library version 2.0.0
 	* Version 2.4.2 released
 
+2024-06-21  Uwe Schulzweida
+
+	* gribapiGetEnsembleInfo: don't check perturbationNumber (bug fix)
+
 2024-06-20  Uwe Schulzweida
 
 	* NetCDF4: switched off output chunk cache
