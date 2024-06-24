@@ -714,7 +714,6 @@ fillPartExts(const int *partSizes,
              size_t headerIdx)
 {
   int conversion = (wHECast(clientBuf[0].mem))[headerIdx].id;
-  int varID = wHECast(clientBuf[0].mem)[headerIdx].specific.dataRecord.varID;
   size_t elemSize
     = conversion == DATA_HEADER_FLOAT ? sizeof (float) : sizeof (double);
 #ifdef USE_XT_REDIST_P2P_AEXT_NEW
@@ -726,6 +725,7 @@ fillPartExts(const int *partSizes,
   struct Xt_offset_ext *partExts = extRes.partExts
     = Malloc(numClients * sizeof (partExts[0]));
 #ifdef USE_XT_REDIST_P2P_AEXT_NEW
+  int varID = wHECast(clientBuf[0].mem)[headerIdx].specific.dataRecord.varID;
   for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
     {
       unsigned char *clientMem = clientBuf[clientIdx].mem;
