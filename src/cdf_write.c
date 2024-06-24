@@ -803,7 +803,7 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
   if (chunkType == CDI_CHUNK_GRID && gridsize > ChunkSizeLim)
     {
       if (CDI_Debug) fprintf(stderr, "gridsize > %u, changed chunkType to CDI_CHUNK_LINES!\n", ChunkSizeLim);
-      chunkType = CDI_CHUNK_LINES;
+      chunkType = CDI_CHUNK_AUTO;
     }
 
   for (int id = 0; id < 3; ++id)
