@@ -958,7 +958,7 @@ cdfDefVarChunkCache(int fileID, int ncvarID)
   float preemption = 0;
   if (CDI_Chunk_Cache > 0 && nc_get_var_chunk_cache(fileID, ncvarID, &size, &nelems, &preemption) == NC_NOERR)
     {
-      size = CDI_Chunk_Cache;
+      size = (size_t) CDI_Chunk_Cache;
     }
 
   nc_set_var_chunk_cache(fileID, ncvarID, size, nelems, preemption);
