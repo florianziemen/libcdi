@@ -1448,7 +1448,7 @@ gridInqXCvalsSerial(grid_t *gridptr, char **xcvals)
   const char **gridptr_xcvals = gridptr->vtable->inqXCvalsPtr(gridptr);
   if (gridptr_xcvals && size && xcvals)
     {
-      maxclength = gridptr->x.clength;
+      maxclength = (size_t) gridptr->x.clength;
       for (size_t i = 0; i < size; i++) memcpy(xcvals[i], gridptr_xcvals[i], maxclength * sizeof(char));
     }
 
@@ -1550,8 +1550,8 @@ gridInqYCvalsSerial(grid_t *gridptr, char **ycvals)
   const char **gridptr_ycvals = gridptr->vtable->inqYCvalsPtr(gridptr);
   if (gridptr_ycvals && size && ycvals)
     {
-      maxclength = gridptr->y.clength;
-      for (size_t i = 0; i < size; i++) memcpy(ycvals[i], gridptr_ycvals[i], maxclength * sizeof(char));
+      maxclength = (size_t) gridptr->y.clength;
+      for (size_t i = 0; i < size; i++) memcpy(ycvals[i], gridptr_ycvals[i], maxclength);
     }
 
   return (SizeType) maxclength;

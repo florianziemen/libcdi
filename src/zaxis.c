@@ -582,7 +582,7 @@ zaxisDefCvals(int zaxisID, const char **cvals, int clen)
   if (cvals && clen)
     {
       zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-      const size_t size = zaxisptr->size;
+      const size_t size = (size_t) zaxisptr->size;
       xassert(size);
 
       zaxisptr->clength = clen;
@@ -590,8 +590,8 @@ zaxisDefCvals(int zaxisID, const char **cvals, int clen)
 
       for (size_t ilev = 0; ilev < size; ++ilev)
         {
-          zaxisptr->cvals[ilev] = (char *) Malloc(clen * sizeof(char));
-          memcpy(zaxisptr->cvals[ilev], cvals[ilev], clen * sizeof(char));
+          zaxisptr->cvals[ilev] = (char *) Malloc(clen);
+          memcpy(zaxisptr->cvals[ilev], cvals[ilev], (size_t)clen);
         }
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
