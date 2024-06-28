@@ -89,6 +89,9 @@ CONTAINS
       TYPE(xt_idxlist) :: partdesc
     END TYPE var1ddeco
     TYPE(var1ddeco) :: vardeco1, vardeco2
+#else
+#define XT_UNUSED(x) IF (SIZE( (/(x)/) ) < 0) CONTINUE
+    XT_UNUSED(commModel)
 #endif
 
     lons = (/0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330/)
