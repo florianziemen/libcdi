@@ -42,6 +42,8 @@ CC="${MPICC}" \
 CPPFLAGS="${CPPFLAGS}" \
 FC="${MPIFC}" \
 LDFLAGS="${LDFLAGS}" \
+BUILD_CFLAGS="-Wall -Werror" \
+BUILD_FCFLAGS="-Wall -Werror" \
 MPI_LAUNCH="${MPI_LAUNCH}" \
 PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 
