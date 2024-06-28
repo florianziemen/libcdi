@@ -1,3 +1,7 @@
+2024-06-28  Uwe Schulzweida
+
+	* Added check for NetCDF4.8 function ncaux_h5filterspec_parselist()
+
 2024-06-21  Uwe Schulzweida
 
         * using CGRIBEX library version 2.3.0

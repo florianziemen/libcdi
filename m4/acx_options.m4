@@ -202,6 +202,10 @@ AS_VAR_IF([ENABLE_NETCDF], [yes],
              [AC_DEFINE([HAVE_NC4SZLIB],[1],[Define to 1 for NetCDF4/szlib support])
               ENABLE_NC4SZLIB=yes])])
 
+AS_IF([test "x$ENABLE_NC4" = "xyes"],
+      [AC_SEARCH_LIBS([ncaux_h5filterspec_parselist], [netcdf],
+               [AC_DEFINE([HAVE_NCAUX_H5FILTERSPEC_PARSELIST],[1],[Define to 1 for NetCDF4 ncaux_h5filterspec_parselist support])],,)])
+
 AS_IF([test "x$ENABLE_NC4SZLIB" = "xyes"],
       [AC_SEARCH_LIBS([nc_def_var_szip], [netcdf],
                [AC_DEFINE([HAVE_NC_DEF_VAR_SZIP],[1],[Define to 1 for NetCDF4 nc_def_var_szip support])],,)])

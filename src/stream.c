@@ -1245,6 +1245,8 @@ streamDestroy(stream_t *streamptr)
       streamptr->filename = NULL;
     }
 
+  if (streamptr->filterSpec) free(streamptr->filterSpec);
+
   if (streamptr->vars)
     {
       for (int index = 0; index < streamptr->nvars; index++)

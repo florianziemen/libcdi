@@ -729,7 +729,7 @@ define_compress(const char *arg)
     }
   else if (strncmp(arg, "zstd", 4) == 0)
     {
-      if (filterSpec == NULL)
+      if (filterSpec[0] == 0)
         {
           int filterid = 32015;
           int level = (len >= 6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
@@ -938,10 +938,7 @@ main(int argc, char *argv[])
 
           if (DefaultByteorder != CDI_UNDEFID) streamDefByteorder(streamID2, DefaultByteorder);
 
-          if (filterSpec)
-            {
-              streamDefFilter(streamID2, filterSpec);
-            }
+          if (filterSpec[0]) streamDefFilter(streamID2, filterSpec);
 
           if (comptype != CDI_COMPRESS_NONE)
             {

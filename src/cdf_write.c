@@ -3,7 +3,6 @@
 #endif
 
 #ifdef HAVE_LIBNETCDF
-
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -12,8 +11,8 @@
 #include "cdf_int.h"
 #include "vlist.h"
 #include "vlist_var.h"
+#endif
 
-// #include <netcdf_filter.h>
 #ifdef HAVE_NETCDF4
 #include "netcdf_aux.h"
 #endif
@@ -21,9 +20,9 @@
 void
 cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
 {
-#ifdef HAVE_NETCDF4
   if (filterSpec)
     {
+#ifdef HAVE_NCAUX_H5FILTERSPEC_PARSELIST
       size_t nfilters = 0;
       NC_H5_Filterspec **filters = NULL;
       int status = ncaux_h5filterspec_parselist(filterSpec, NULL, &nfilters, &filters);
@@ -51,16 +50,18 @@ cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
           for (size_t i = 0; i < nfilters; i++) ncaux_h5filterspec_free(filters[i]);
           free(filters);
         }
-    }
 #else
-  static bool lwarn = true;
-  if (lwarn)
-    {
-      lwarn = false;
-      Warning("Filter failed, NetCDF4 not available!");
-    }
+      static bool lwarn = true;
+      if (lwarn)
+        {
+          lwarn = false;
+          Warning("Filter failed, NetCDF4 function ncaux_h5filterspec_parselist() not available!");
+        }
 #endif
+    }
 }
+
+#ifdef HAVE_LIBNETCDF
 
 void
 cdfDefVarDeflate(int ncid, int ncvarID, int shuffle, int compLevel)
@@ -501,7 +502,7 @@ cdfDefVarFilter(int fileID, int fileType, int ncvarID, const char *filterSpec)
           if (lwarn)
             {
               lwarn = false;
-              Warning("Filter is only available for NetCDF4!");
+              Warning("Filter is only available with NetCDF4!");
             }
         }
     }
@@ -1056,9 +1057,13 @@ cdfDefVar(stream_t *streamptr, int varID)
       char filterSpec[CDI_MAX_NAME];
       length = CDI_MAX_NAME;
       if (cdiInqKeyString(vlistID, varID, CDI_KEY_FILTERSPEC, filterSpec, &length) == CDI_NOERR)
-        cdfDefVarFilter(fileID, fileType, ncvarID, filterSpec);
+        {
+          cdfDefVarFilter(fileID, fileType, ncvarID, filterSpec);
+        }
       else if (streamptr->filterSpec)
-        cdfDefVarFilter(fileID, fileType, ncvarID, streamptr->filterSpec);
+        {
+          cdfDefVarFilter(fileID, fileType, ncvarID, streamptr->filterSpec);
+        }
     }
 
   if (*stdname) cdf_put_att_text(fileID, ncvarID, "standard_name", strlen(stdname), stdname);
