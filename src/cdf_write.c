@@ -2,6 +2,9 @@
 #include "config.h"
 #endif
 
+#include <stdbool.h>
+#include "error.h"
+
 #ifdef HAVE_LIBNETCDF
 #include "dmemory.h"
 #include "cdi.h"
