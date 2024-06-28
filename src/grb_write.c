@@ -24,16 +24,16 @@
 #include "namespace.h"
 
 static size_t
-grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int gridID, int zaxisID,
-           CdiDateTime vDateTime, int tsteptype, int numavg, SizeType datasize, const void *data, size_t numMissVals,
-           void **gribbuffer, int comptype, void *gribContainers)
+grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime,
+           int tsteptype, int numavg, SizeType datasize, const void *data, size_t numMissVals, void **gribbuffer, int comptype,
+           void *gribContainers)
 {
   size_t nbytes = 0;
 
 #ifdef HAVE_LIBCGRIBEX
   if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
     {
-      size_t gribbuffersize = (size_t)datasize * 4 + 3000;
+      size_t gribbuffersize = (size_t) datasize * 4 + 3000;
       *gribbuffer = Malloc(gribbuffersize);
 
       nbytes = cgribexEncode(memType, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize, data,
@@ -58,8 +58,8 @@ grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int g
         {
           // printf("gribapi write: convert float to double\n");
           const float *dataf = (const float *) data;
-          double *datad = Malloc((size_t)datasize * sizeof(double));
-          for (size_t i = 0; i < (size_t)datasize; ++i) datad[i] = (double) dataf[i];
+          double *datad = Malloc((size_t) datasize * sizeof(double));
+          for (size_t i = 0; i < (size_t) datasize; ++i) datad[i] = (double) dataf[i];
           datap = (const void *) datad;
         }
 
@@ -402,8 +402,8 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     }
 
   void *gribbuffer = NULL;
-  size_t nbytes = grb_encode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg,
-                             datasize, data, numMissVals, &gribbuffer, comptype, streamptr->gribContainers);
+  size_t nbytes = grb_encode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize,
+                             data, numMissVals, &gribbuffer, comptype, streamptr->gribContainers);
 
   if (filetype == CDI_FILETYPE_GRB && (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC))
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
@@ -459,14 +459,14 @@ grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, siz
 {
   int vlistID = streamptr->vlistID, gridID = vlistInqVarGrid(vlistID, varID), zaxisID = vlistInqVarZaxis(vlistID, varID),
       nlevs = zaxisInqSize(zaxisID);
-  size_t gridsize = (size_t)gridInqSize(gridID);
+  size_t gridsize = (size_t) gridInqSize(gridID);
   double missval = vlistInqVarMissval(vlistID, varID);
 
   size_t chunkLen = gridsize;
   if (memtype == MEMTYPE_FLOAT)
     for (int levelID = 0; levelID < nlevs; levelID++)
       {
-        const float *restrict fdata = ((const float *) data) + (size_t)levelID * gridsize;
+        const float *restrict fdata = ((const float *) data) + (size_t) levelID * gridsize;
 
         size_t numMissVals_slice = 0;
         if (numMissVals)
@@ -477,7 +477,7 @@ grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, siz
   else
     for (int levelID = 0; levelID < nlevs; levelID++)
       {
-        const double *restrict ddata = ((const double *) data) + (size_t)levelID * gridsize;
+        const double *restrict ddata = ((const double *) data) + (size_t) levelID * gridsize;
 
         size_t numMissVals_slice = 0;
         if (numMissVals)

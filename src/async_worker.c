@@ -145,13 +145,11 @@ AsyncWorker_init(AsyncManager **jobManager, int threadCount)
   if (*jobManager) return CDI_NOERR;
 
 #ifdef HAVE_LIBPTHREAD
-  AsyncManager *jobManager_ = *jobManager
-    = Malloc(sizeof(AsyncManager));
+  AsyncManager *jobManager_ = *jobManager = Malloc(sizeof(AsyncManager));
   jobManager_->workerCount = threadCount;
-  jobManager_->communicators = Malloc((size_t)threadCount * sizeof(AsyncJob));
+  jobManager_->communicators = Malloc((size_t) threadCount * sizeof(AsyncJob));
 
-  for (int i = 0; i < threadCount; i++)
-    startWorker(jobManager_->communicators+i);
+  for (int i = 0; i < threadCount; i++) startWorker(jobManager_->communicators + i);
   jobManager_->idleWorkerCount = threadCount;
 #else
 

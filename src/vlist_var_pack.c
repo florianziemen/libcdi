@@ -1,7 +1,7 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
  * circumstances as long as it's the autoconf configuration header
@@ -86,7 +86,7 @@ vlistVarPack(vlist_t *p, int varID, char *buf, int size, int *position, void *co
   }
   if (nlevs)
     {
-      int *levbuf = Malloc((size_t)nlevs * sizeof(int));
+      int *levbuf = Malloc((size_t) nlevs * sizeof(int));
       for (int levID = 0; levID < nlevs; ++levID) levbuf[levID] = var->levinfo[levID].flag;
       serializePack(levbuf, nlevs, CDI_DATATYPE_INT, buf, size, position, context);
       for (int levID = 0; levID < nlevs; ++levID) levbuf[levID] = var->levinfo[levID].index;
@@ -134,7 +134,7 @@ vlistVarUnpack(int vlistID, char *buf, int size, int *position, int originNamesp
       int i, flagSetLev = 0;
       cdiVlistCreateVarLevInfo(vlistptr, newvar);
 
-      int *levbuf = Malloc((size_t)nlevs * sizeof(int));
+      int *levbuf = Malloc((size_t) nlevs * sizeof(int));
       serializeUnpack(buf, size, position, levbuf, nlevs, CDI_DATATYPE_INT, context);
       for (i = 0; i < nlevs; ++i) vlistDefFlag(vlistID, newvar, i, levbuf[i]);
       for (i = 0; i < nlevs; ++i)

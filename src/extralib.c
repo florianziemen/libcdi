@@ -1,7 +1,7 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
  * circumstances as long as it's the autoconf configuration header
@@ -234,8 +234,7 @@ extInqData(extrec_t *extp, int prec, void *data)
 {
   int ierr = 0;
   int byteswap = extp->byteswap;
-  size_t datasize = extp->datasize,
-    buffer_size = datasize * (size_t) prec;
+  size_t datasize = extp->datasize, buffer_size = datasize * (size_t) prec;
   void *buffer = extp->buffer;
   int rprec = extp->prec;
 

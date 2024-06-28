@@ -34,7 +34,7 @@ serializeKeysGetPackSize(const cdi_keys_t *keysp, void *context)
 {
   int packBuffSize = 0;
 
-  int nelems = (int)keysp->nelems;
+  int nelems = (int) keysp->nelems;
   packBuffSize += serializeGetSize(1, CDI_DATATYPE_INT, context);
   for (int keyid = 0; keyid < nelems; keyid++)
     {
@@ -65,7 +65,7 @@ serializeKeysPack(const cdi_keys_t *keysp, void *buf, int buf_size, int *positio
 {
   uint32_t d = 0;
 
-  int nelems = (int)keysp->nelems;
+  int nelems = (int) keysp->nelems;
   serializePack(&nelems, 1, CDI_DATATYPE_INT, buf, buf_size, position, context);
   for (int keyid = 0; keyid < nelems; keyid++)
     {
@@ -115,7 +115,7 @@ serializeKeysUnpack(const void *buf, int buf_size, int *position, cdi_keys_t *ke
           if (length > buffersize)
             {
               buffersize = length;
-              buffer = Realloc(buffer, (size_t)buffersize);
+              buffer = Realloc(buffer, (size_t) buffersize);
             }
           serializeUnpack(buf, buf_size, position, buffer, length, CDI_DATATYPE_TXT, context);
           cdiDefVarKeyBytes(keysp, key, (unsigned char *) buffer, length);

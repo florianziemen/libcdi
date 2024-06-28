@@ -1,7 +1,7 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
  * circumstances as long as it's the autoconf configuration header
@@ -591,14 +591,14 @@ zaxisDefCvals(int zaxisID, const char **cvals, int clen)
       for (size_t ilev = 0; ilev < size; ++ilev)
         {
           zaxisptr->cvals[ilev] = (char *) Malloc(clen);
-          memcpy(zaxisptr->cvals[ilev], cvals[ilev], (size_t)clen);
+          memcpy(zaxisptr->cvals[ilev], cvals[ilev], (size_t) clen);
         }
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
 #else
-  (void)zaxisID;
-  (void)cvals;
-  (void)clen;
+  (void) zaxisID;
+  (void) cvals;
+  (void) clen;
   Error("This function was disabled!");
 #endif
 }
@@ -840,7 +840,7 @@ zaxisInqCLen(int zaxisID)
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if (zaxisptr->cvals && zaxisptr->clength) clen = zaxisptr->clength;
 #else
-  (void)zaxisID;
+  (void) zaxisID;
 #endif
 
   return clen;
@@ -867,8 +867,8 @@ zaxisInqCVals(int zaxisID, char ***clevels)
         }
     }
 #else
-  (void)zaxisID;
-  (void)clevels;
+  (void) zaxisID;
+  (void) clevels;
 #endif
 
   return size;

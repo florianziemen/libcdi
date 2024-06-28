@@ -15,14 +15,14 @@
 void
 datetime2str(CdiDateTime dt, char *datetimestr, int maxlen)
 {
-  snprintf(datetimestr, (size_t)maxlen, DATE_FORMAT "T" TIME_FORMAT, dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute,
-           dt.time.second);
+  snprintf(datetimestr, (size_t) maxlen, DATE_FORMAT "T" TIME_FORMAT, dt.date.year, dt.date.month, dt.date.day, dt.time.hour,
+           dt.time.minute, dt.time.second);
 }
 
 void
 date2str(CdiDate date, char *datestr, int maxlen)
 {
-  snprintf(datestr, (size_t)maxlen, DATE_FORMAT, date.year, date.month, date.day);
+  snprintf(datestr, (size_t) maxlen, DATE_FORMAT, date.year, date.month, date.day);
 }
 
 void
@@ -36,17 +36,17 @@ time2str(CdiTime time, char *timestr, int maxlen)
       char *envString = getenv("CDI_MS_DIGITS");
       if (envString)
         {
-          int ival = (int)atol(envString);
+          int ival = (int) atol(envString);
           if (ival > 0) msDigitsNum = ival;
           if (ival > 3) msDigitsNum = 3;
         }
     }
 
   if (msDigitsNum)
-    snprintf(timestr, (size_t)maxlen, "%2.2d:%2.2d:%0*.*f", time.hour, time.minute, msDigitsNum + 3, msDigitsNum,
+    snprintf(timestr, (size_t) maxlen, "%2.2d:%2.2d:%0*.*f", time.hour, time.minute, msDigitsNum + 3, msDigitsNum,
              time.second + time.ms / 1000.0);
   else
-    snprintf(timestr, (size_t)maxlen, TIME_FORMAT, time.hour, time.minute, time.second);
+    snprintf(timestr, (size_t) maxlen, TIME_FORMAT, time.hour, time.minute, time.second);
 }
 
 const char *
@@ -180,7 +180,7 @@ print_xyvals2D(int gridID, int dig)
       length = CDI_MAX_NAME;
       cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, yunits, &length);
 
-      size_t gridsize = (size_t)gridInqSize(gridID);
+      size_t gridsize = (size_t) gridInqSize(gridID);
       double *xvals2D = (double *) malloc(gridsize * sizeof(double));
       double *yvals2D = (double *) malloc(gridsize * sizeof(double));
 
@@ -204,13 +204,13 @@ print_xyvals2D(int gridID, int dig)
       int gridtype = gridInqType(gridID);
       if (gridtype == GRID_CURVILINEAR)
         {
-          size_t xsize = (size_t)gridInqXsize(gridID);
-          size_t ysize = (size_t)gridInqYsize(gridID);
+          size_t xsize = (size_t) gridInqXsize(gridID);
+          size_t ysize = (size_t) gridInqYsize(gridID);
           if (xsize > 1)
             {
               double *xvals = (double *) malloc((size_t) xsize * sizeof(double));
               for (size_t i = 0; i < xsize; ++i) xvals[i] = xvals2D[i];
-              xinc = fabs(xvals[xsize - 1] - xvals[0]) / (double)(xsize - 1);
+              xinc = fabs(xvals[xsize - 1] - xvals[0]) / (double) (xsize - 1);
               for (size_t i = 1; i < xsize; i++)
                 if (fabs(fabs(xvals[i - 1] - xvals[i]) - xinc) > 0.01 * xinc)
                   {
@@ -233,7 +233,7 @@ print_xyvals2D(int gridID, int dig)
             {
               double *yvals = (double *) malloc((size_t) ysize * sizeof(double));
               for (size_t i = 0; i < ysize; ++i) yvals[i] = yvals2D[i * xsize];
-              yinc = fabs(yvals[ysize - 1] - yvals[0]) / (double)(ysize - 1);
+              yinc = fabs(yvals[ysize - 1] - yvals[0]) / (double) (ysize - 1);
               for (size_t i = 1; i < ysize; i++)
                 if (fabs(fabs(yvals[i - 1] - yvals[i]) - yinc) > 0.01 * yinc)
                   {
@@ -296,9 +296,9 @@ printGridInfoKernel(int gridID, int index, bool lproj)
     fprintf(stderr, "Internal problem (%s): sub grid not equal GRID_PROJECTION!\n", __func__);
 
   int trunc = gridInqTrunc(gridID);
-  size_t gridsize = (size_t)gridInqSize(gridID);
-  size_t xsize = (size_t)gridInqXsize(gridID);
-  size_t ysize = (size_t)gridInqYsize(gridID);
+  size_t gridsize = (size_t) gridInqSize(gridID);
+  size_t xsize = (size_t) gridInqXsize(gridID);
+  size_t ysize = (size_t) gridInqYsize(gridID);
 
   // int prec     = gridInqDatatype(gridID);
   // int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;

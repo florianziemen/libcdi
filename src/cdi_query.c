@@ -1,7 +1,7 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
  * circumstances as long as it's the autoconf configuration header
@@ -125,8 +125,8 @@ cdiQuerySetNames(CdiQuery *query, int numEntries, char **names)
     {
       query->numEntries += numEntries;
       query->numNames = numEntries;
-      query->namesFound = (bool *)Calloc((size_t)numEntries, sizeof(bool));
-      query->names = (char **)Malloc((size_t)numEntries * sizeof(char *));
+      query->namesFound = (bool *) Calloc((size_t) numEntries, sizeof(bool));
+      query->names = (char **) Malloc((size_t) numEntries * sizeof(char *));
       for (int i = 0; i < numEntries; ++i) query->names[i] = strdup(names[i]);
     }
 }
@@ -138,8 +138,8 @@ cdiQuerySetCellidx(CdiQuery *query, int numEntries, size_t *cellidx)
     {
       query->numEntries += numEntries;
       query->numCellidx = numEntries;
-      query->cellidxFound = Calloc((size_t)numEntries, sizeof(bool));
-      query->cellidx = Malloc((size_t)numEntries * sizeof(size_t));
+      query->cellidxFound = Calloc((size_t) numEntries, sizeof(bool));
+      query->cellidx = Malloc((size_t) numEntries * sizeof(size_t));
       for (int i = 0; i < numEntries; ++i) query->cellidx[i] = cellidx[i];
     }
 }
@@ -151,8 +151,8 @@ cdiQuerySetLevidx(CdiQuery *query, int numEntries, int *levidx)
     {
       query->numEntries += numEntries;
       query->numLevidx = numEntries;
-      query->levidxFound = Calloc((size_t)numEntries, sizeof(bool));
-      query->levidx = Malloc((size_t)numEntries * sizeof(int));
+      query->levidxFound = Calloc((size_t) numEntries, sizeof(bool));
+      query->levidx = Malloc((size_t) numEntries * sizeof(int));
       for (int i = 0; i < numEntries; ++i) query->levidx[i] = levidx[i];
     }
 }
@@ -164,8 +164,8 @@ cdiQuerySetStepidx(CdiQuery *query, int numEntries, int *stepidx)
     {
       query->numEntries += numEntries;
       query->numStepidx = numEntries;
-      query->stepidxFound = Calloc((size_t)numEntries, sizeof(bool));
-      query->stepidx = Malloc((size_t)numEntries * sizeof(int));
+      query->stepidxFound = Calloc((size_t) numEntries, sizeof(bool));
+      query->stepidx = Malloc((size_t) numEntries * sizeof(int));
       for (int i = 0; i < numEntries; ++i) query->stepidx[i] = stepidx[i];
     }
 }

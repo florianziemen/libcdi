@@ -1,7 +1,7 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
  * circumstances as long as it's the autoconf configuration header
@@ -15,7 +15,6 @@
 #include <math.h>
 #include "cdi_datetime.h"
 
-
 // convert Julian calendar day into year, months, day
 static void
 decode_julday(int calendar, int64_t julianDay,  // Julian day number to convert
@@ -23,8 +22,8 @@ decode_julday(int calendar, int64_t julianDay,  // Julian day number to convert
               int *mon,                         // Gregorian month (1-12) (out)
               int *day)                         // Gregorian day (1-31) (out)
 {
-  double a = (double)julianDay;
-  assert((int64_t)a == julianDay);
+  double a = (double) julianDay;
+  assert((int64_t) a == julianDay);
   double b = floor((a - 1867216.25) / 36524.25);
   double c = a + b - floor(b / 4) + 1525;
 
@@ -61,8 +60,7 @@ encode_julday(int calendar, int year, int month, int day)
         }
     }
 
-  int64_t julianDay = (int64_t) (floor(365.25*iy) + trunc(30.6001*(im+1))
-                                 + ib + 1720996.5 + day + 0.5);
+  int64_t julianDay = (int64_t) (floor(365.25 * iy) + trunc(30.6001 * (im + 1)) + ib + 1720996.5 + day + 0.5);
 
   return julianDay;
 }
@@ -72,8 +70,7 @@ date_to_julday(int calendar, int64_t date)
 {
   CdiDate date_struct = cdiDate_set(date);
 
-  return encode_julday(calendar,
-                       date_struct.year, date_struct.month, date_struct.day);
+  return encode_julday(calendar, date_struct.year, date_struct.month, date_struct.day);
 }
 
 int64_t
@@ -125,13 +122,12 @@ secofday_decode(double secondOfDay)
 
   /* because of the limited value range this can be safely improved
    * to use multiplication with inverse */
-  double hour = trunc(secondOfDayIntegral / 3600.),
-    minute = trunc(secondOfDayIntegral / 60. - hour * 60.),
-    second = secondOfDayIntegral - hour * 3600. - minute * 60.;
+  double hour = trunc(secondOfDayIntegral / 3600.), minute = trunc(secondOfDayIntegral / 60. - hour * 60.),
+         second = secondOfDayIntegral - hour * 3600. - minute * 60.;
 
-  time.hour = (short)hour;
-  time.minute = (short)minute;
-  time.second = (short)second;
+  time.hour = (short) hour;
+  time.minute = (short) minute;
+  time.second = (short) second;
 
   return time;
 }
@@ -160,8 +156,8 @@ calendarDay_decode(int calendar, int64_t julday)
 
   CdiDate date;
   date.year = year;
-  date.month = (short)month;
-  date.day = (short)day;
+  date.month = (short) month;
+  date.day = (short) day;
 
   return date;
 }
@@ -210,8 +206,8 @@ adjust_seconds(JulianDate *julianDate)
 JulianDate
 julianDate_add_seconds(JulianDate julianDate, int64_t seconds)
 {
-  assert(seconds == (int64_t)(double)seconds);
-  julianDate.secondOfDay += (double)seconds;
+  assert(seconds == (int64_t) (double) seconds);
+  julianDate.secondOfDay += (double) seconds;
 
   adjust_seconds(&julianDate);
 
@@ -247,8 +243,8 @@ julianDate_sub(JulianDate julianDate1, JulianDate julianDate2)
 double
 julianDate_to_seconds(JulianDate julianDate)
 {
-  assert(julianDate.julianDay == (int64_t)(double)julianDate.julianDay);
-  return (double)julianDate.julianDay * 86400.0 + julianDate.secondOfDay;
+  assert(julianDate.julianDay == (int64_t) (double) julianDate.julianDay);
+  return (double) julianDate.julianDay * 86400.0 + julianDate.secondOfDay;
 }
 
 #ifdef TEST2
@@ -270,25 +266,21 @@ main(void)
   CdiDateTime dt;
   dt.date = cdiDate_encode(year, month, day);
   dt.time = cdiTime_encode(hour, minute, second, ms);
-  printf("%d/%02d/%02d %02d:%02d:%02d.%03d\n",
-         dt.date.year, dt.date.month, dt.date.day,
-         dt.time.hour, dt.time.minute, dt.time.second, dt.time.ms);
+  printf("%d/%02d/%02d %02d:%02d:%02d.%03d\n", dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute,
+         dt.time.second, dt.time.ms);
 
   JulianDate julianDate = julianDate_encode(calendar, dt);
 
   dt = julianDate_decode(calendar, julianDate);
   /* FIXME: using PRI64 seems more appropriate */
-  printf("%d/%02d/%02d %02d:%02d:%02d.%03d   %d %g\n",
-         dt.date.year, dt.date.month, dt.date.day,
-         dt.time.hour, dt.time.minute, dt.time.second, dt.time.ms,
-         (int)julianDate.julianDay, julianDate.secondOfDay);
+  printf("%d/%02d/%02d %02d:%02d:%02d.%03d   %d %g\n", dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute,
+         dt.time.second, dt.time.ms, (int) julianDate.julianDay, julianDate.secondOfDay);
 
   for (int i = 0; i < 420; i++)
     {
       dt = julianDate_decode(calendar, julianDate);
-      printf("%2d %d/%02d/%02d %02d:%02d:%02d.%03d\n",
-             i, dt.date.year, dt.date.month, dt.date.day,
-             dt.time.hour, dt.time.minute, dt.time.second, dt.time.ms);
+      printf("%2d %d/%02d/%02d %02d:%02d:%02d.%03d\n", i, dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute,
+             dt.time.second, dt.time.ms);
       julianDate = julianDate_add_seconds(julianDate, value * factor);
     }
 

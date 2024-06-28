@@ -447,7 +447,7 @@ cdiGetProtocol(const char *uri, const char **filename)
       return CDI_PROTOCOL_FILE;
     }
 
-  size_t protocollen = (size_t)(pos - uri);
+  size_t protocollen = (size_t) (pos - uri);
   *filename = pos + 3;
 
   // if (strncmp(uri, "file", protocollen) == 0) return CDI_PROTOCOL_FILE; // file is already used in NetCDF
@@ -743,7 +743,7 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
   cdiVlistMakeInternal(streamptr->vlistID);
   // cdiReadByteorder(streamID);
   long status = cdiInqContents(streamptr);
-  if (status < 0) return (int)status;
+  if (status < 0) return (int) status;
   vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
   vlistptr->ntsteps = streamInqNumSteps(streamID);
 
@@ -886,7 +886,7 @@ streamOpenRead(const char *filename)
       long status = stream_create_vlist(streamptr, NULL);
       if (status < 0)
         {
-          streamID = (int)status;
+          streamID = (int) status;
           if (streamptr->record) Free(streamptr->record);
           reshRemove(streamptr->self, &streamOps);
         }
@@ -915,7 +915,7 @@ streamOpenReadQuery(const char *filename, CdiQuery *query)
       long status = stream_create_vlist(streamptr, query);
       if (status < 0)
         {
-          streamID = (int)status;
+          streamID = (int) status;
           if (streamptr->record) Free(streamptr->record);
           reshRemove(streamptr->self, &streamOps);
         }

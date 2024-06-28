@@ -56,7 +56,7 @@ grb_decode(int filetype, int memType, int datatype, void *cgribexp, void *gribbu
     }
 #else
   {
-    (void)datatype;
+    (void) datatype;
     Error("ecCodes support not compiled in!");
   }
 #endif
@@ -135,7 +135,7 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memType, void *g
   size_t recsize = streamptr->tsteps[tsID].records[recID].size;
 
   int gridID = vlistInqVarGrid(vlistID, varID);
-  size_t gridsize = (size_t)gridInqSize(gridID);
+  size_t gridsize = (size_t) gridInqSize(gridID);
   if (CDI_Debug) Message("gridID = %d gridsize = %zu", gridID, gridsize);
 
   void *cgribexp = (gribbuffer && streamptr->record->objectp) ? streamptr->record->objectp : NULL;
@@ -164,7 +164,7 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memType, void *g
       if (fileRead(fileID, gribbuffer, recsize) != recsize) Error("Failed to read GRIB record!");
 
       if (resetFilePos) fileSetPos(fileID, currentfilepos, SEEK_SET);
-      if (!resetFilePos) streamptr->numvals += (SizeType)gridsize;
+      if (!resetFilePos) streamptr->numvals += (SizeType) gridsize;
     }
 
   return (JobArgsGRB){
@@ -232,8 +232,7 @@ get_global_recId(stream_t *streamptr, int tsID, int recID)
 */
 
 static void
-grb_get_local_step_and_recId(stream_t *streamptr, long globalRecId,
-                         int *tsID, long *recID)
+grb_get_local_step_and_recId(stream_t *streamptr, long globalRecId, int *tsID, long *recID)
 {
   int localTsId = 0;
   long numSteps = streamptr->ntsteps;
@@ -246,7 +245,7 @@ grb_get_local_step_and_recId(stream_t *streamptr, long globalRecId,
   if (globalRecId >= tsteps[1].nrecs)
     {
       ldiv_t nadjust = ldiv(globalRecId, tsteps[1].nrecs);
-      localTsId += (int)nadjust.quot;
+      localTsId += (int) nadjust.quot;
       globalRecId = nadjust.rem;
     }
 
@@ -281,7 +280,7 @@ grb_read_next_record(stream_t *streamptr, int recID, int memType, void *data, si
       // if this is the first call, init and start worker threads
       if (!jobs)
         {
-          jobs = Malloc((size_t)workerCount * sizeof(*jobs));
+          jobs = Malloc((size_t) workerCount * sizeof(*jobs));
           streamptr->jobs = jobs;
           for (int i = 0; i < workerCount; i++) jobs[i].args.recID = -1;
           for (int i = 0; i < workerCount; i++) jobs[i].args.tsID = -1;
@@ -290,7 +289,8 @@ grb_read_next_record(stream_t *streamptr, int recID, int memType, void *data, si
 
           // Start as many new jobs as possible.
           for (int i = 0; streamptr->nextGlobalRecId < streamptr->maxGlobalRecs && i < workerCount; i++)
-            if (jobs[i].args.recID < 0 && jobs[i].args.tsID < 0) grb_read_next_record_async(jobManager, jobs+i, streamptr, memType);
+            if (jobs[i].args.recID < 0 && jobs[i].args.tsID < 0)
+              grb_read_next_record_async(jobManager, jobs + i, streamptr, memType);
         }
 
       // search for a job descriptor with the given tsID and recID, and use its results if it exists
@@ -298,8 +298,9 @@ grb_read_next_record(stream_t *streamptr, int recID, int memType, void *data, si
         if (jobs[i].args.recID == recID && jobs[i].args.tsID == tsID)
           {
             jobFound = true;
-            grb_JobDescriptor_finishJob(jobManager, jobs+i, data, numMissVals);
-            if (streamptr->nextGlobalRecId < streamptr->maxGlobalRecs) grb_read_next_record_async(jobManager, jobs+i, streamptr, memType);
+            grb_JobDescriptor_finishJob(jobManager, jobs + i, data, numMissVals);
+            if (streamptr->nextGlobalRecId < streamptr->maxGlobalRecs)
+              grb_read_next_record_async(jobManager, jobs + i, streamptr, memType);
           }
     }
 
@@ -333,7 +334,7 @@ grb_read_var(stream_t *streamptr, int varID, int memType, void *data, size_t *nu
   int fileID = streamptr->fileID;
 
   int gridID = vlistInqVarGrid(vlistID, varID);
-  size_t gridsize = (size_t)gridInqSize(gridID);
+  size_t gridsize = (size_t) gridInqSize(gridID);
 
   off_t currentfilepos = fileGetPos(fileID);
 
@@ -346,7 +347,7 @@ grb_read_var(stream_t *streamptr, int varID, int memType, void *data, size_t *nu
   for (int levelID = 0; levelID < nlevs; levelID++)
     {
       int recID = streamptr->vars[varID].recordTable[isub].recordID[levelID];
-      size_t offset = (size_t)levelID * gridsize;
+      size_t offset = (size_t) levelID * gridsize;
       void *datap = (memType == MEMTYPE_FLOAT) ? (void *) ((float *) data + offset) : (void *) ((double *) data + offset);
 
       *numMissVals += grb_read_and_decode_record(streamptr, recID, memType, datap, false);

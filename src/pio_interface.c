@@ -189,8 +189,7 @@ cdiPioClientStreamWinCreate(int streamID, struct collSpec *cspec)
    * platforms that block the servers in MPI_Win_complete
    */
   collWaitAll();
-  struct clientBufSize bufSize
-    = cdiPioClientStreamBufSize(streamID, cspec);
+  struct clientBufSize bufSize = cdiPioClientStreamBufSize(streamID, cspec);
   MPI_Info no_locks_info;
   xmpi(MPI_Info_create(&no_locks_info));
   xmpi(MPI_Info_set(no_locks_info, "no_locks", "true"));
@@ -326,7 +325,7 @@ cdiPioBufferPartData_(int streamID, int varID, int memtype, const void *packData
   xassert(varID >= 0 && varID < streamInqNvars(streamID));
   collWaitAll();
   int dataHeaderID = memtype == MEMTYPE_DOUBLE ? DATA_HEADER_DOUBLE : DATA_HEADER_FLOAT;
-  struct winHeaderEntry dataHeader = { .id = dataHeaderID, .specific.dataRecord = { varID, (int)numMissVals }, .offset = -1 };
+  struct winHeaderEntry dataHeader = { .id = dataHeaderID, .specific.dataRecord = { varID, (int) numMissVals }, .offset = -1 };
   modelWinEnqueue(streamIdx, dataHeader, packData, packDataFunc);
   {
     struct winHeaderEntry partHeader = { .id = PARTDESCMARKER, .offset = 0 };
@@ -748,9 +747,7 @@ pioWriteTimestep(void)
 }
 
 void
-cdiPioStreamWriteVarPart_(int streamID, int varID, int memtype,
-                          const void *data, SizeType numMissVals,
-                          Xt_idxlist partDesc)
+cdiPioStreamWriteVarPart_(int streamID, int varID, int memtype, const void *data, SizeType numMissVals, Xt_idxlist partDesc)
 {
   if (CDI_Debug) Message("streamID = %d varID = %d", streamID, varID);
 
@@ -766,15 +763,13 @@ cdiPioStreamWriteVarPart_(int streamID, int varID, int memtype,
 }
 
 void
-streamWriteVarPart(int streamID, int varID, const double *data,
-                   SizeType numMissVals, Xt_idxlist partDesc)
+streamWriteVarPart(int streamID, int varID, const double *data, SizeType numMissVals, Xt_idxlist partDesc)
 {
   cdiPioStreamWriteVarPart_(streamID, varID, MEMTYPE_DOUBLE, data, numMissVals, partDesc);
 }
 
 void
-streamWriteVarPartF(int streamID, int varID, const float *data,
-                    SizeType numMissVals, Xt_idxlist partDesc)
+streamWriteVarPartF(int streamID, int varID, const float *data, SizeType numMissVals, Xt_idxlist partDesc)
 {
   cdiPioStreamWriteVarPart_(streamID, varID, MEMTYPE_FLOAT, data, numMissVals, partDesc);
 }

@@ -337,8 +337,7 @@ memListChangeEntry(intptr_t ptrold, void *ptr, size_t size, const char *function
 
   while (memID < memTableSize)
     {
-      if (memTable[memID].item != MEM_UNDEFID
-          && (intptr_t) memTable[memID].ptr == ptrold) break;
+      if (memTable[memID].item != MEM_UNDEFID && (intptr_t) memTable[memID].ptr == ptrold) break;
       memID++;
     }
 

@@ -95,11 +95,11 @@ main(void)
       // Init var1 and var2
       for (size_t i = 0; i < nlon * nlat; ++i) var1[i] = 1.1;
       for (size_t k = 0; k < nflev; ++k)
-        for (size_t i = 0; i < nlon * nlat; ++i) var2[i + k * nlon * nlat] = 2.2 + (double)k;
+        for (size_t i = 0; i < nlon * nlat; ++i) var2[i + k * nlon * nlat] = 2.2 + (double) k;
       for (size_t k = 0; k < nhlev; ++k)
-        for (size_t i = 0; i < nlon * nlat; ++i) var3[i + k * nlon * nlat] = -2.2 - (double)k;
+        for (size_t i = 0; i < nlon * nlat; ++i) var3[i + k * nlon * nlat] = -2.2 - (double) k;
       for (size_t k = 0; k < nflev; ++k)
-        for (size_t i = 0; i < nlon * nlat; ++i) var4[i + k * nlon * nlat] = 100.0 + (double)k;
+        for (size_t i = 0; i < nlon * nlat; ++i) var4[i + k * nlon * nlat] = 100.0 + (double) k;
 
       // Write var1 and var2
       streamWriteVar(streamID, varID1, var1, numMissVals);

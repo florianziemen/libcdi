@@ -89,11 +89,10 @@ cdfGetTimeUnits(taxis_t *taxis)
             timeunit = TUNIT_HOUR;
 
           char *unitstr_ = ptaxisAllocUnits(taxis, CDF_MAX_TIME_UNIT_STR);
-          assert(month >= 1 && month <= 12 && day > 0 && day <=31 &&
-                 hour >= 0 && hour <= 24 && minute >= 0 && minute < 60
+          assert(month >= 1 && month <= 12 && day > 0 && day <= 31 && hour >= 0 && hour <= 24 && minute >= 0 && minute < 60
                  && second >= 0 && second <= 60);
-          snprintf(unitstr_, CDF_MAX_TIME_UNIT_STR, "%s since %d-%d-%d %02d:%02d:%02d", tunitNamePtr(timeunit), year, month&31, day&63,
-                   hour&63, minute&63, second&63);
+          snprintf(unitstr_, CDF_MAX_TIME_UNIT_STR, "%s since %d-%d-%d %02d:%02d:%02d", tunitNamePtr(timeunit), year, month & 31,
+                   day & 63, hour & 63, minute & 63, second & 63);
           unitstr = unitstr_;
         }
     }
@@ -164,7 +163,7 @@ cdfDefTime(stream_t *streamptr)
       if (streamptr->maxSteps == CDI_UNDEFID)
         fprintf(stderr, "Max. number of timesteps undefined for NCZarr!\n");
       else
-        timeDimLen = (size_t)streamptr->maxSteps;
+        timeDimLen = (size_t) streamptr->maxSteps;
     }
 
   int timeDimId;

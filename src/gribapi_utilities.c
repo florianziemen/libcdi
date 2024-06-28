@@ -271,19 +271,21 @@ addToDate(struct tm *me, long long amount, long unit)
 static char *
 makeDateString(struct tm *me)
 {
-  enum { size = 4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 4 + 1 };
+  enum
+  {
+    size = 4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 4 + 1
+  };
   char *result = Malloc(size);
-  assert(me->tm_year + 1900 < 10000 && me->tm_year + 1900 > -1000
-         && me->tm_mon >= 0 && me->tm_mon < 12
-         && me->tm_mday >= 1 && me->tm_mday <= 31
-         && me->tm_hour >= 0 && me->tm_hour <= 24
-         && me->tm_min >= 0 && me->tm_min < 60
-         && me->tm_sec >= 0 && me->tm_sec <= 60);
+  assert(me->tm_year + 1900 < 10000 && me->tm_year + 1900 > -1000 && me->tm_mon >= 0 && me->tm_mon < 12 && me->tm_mday >= 1
+         && me->tm_mday <= 31 && me->tm_hour >= 0 && me->tm_hour <= 24 && me->tm_min >= 0 && me->tm_min < 60 && me->tm_sec >= 0
+         && me->tm_sec <= 60);
   int year = me->tm_year + 1900;
-  if (year > 10000) year = 9999;
-  else if (year < -999) year = -999;
-  snprintf(result, size, "%04d-%02d-%02dT%02d:%02d:%02d.000", year, (me->tm_mon + 1)&31, me->tm_mday&31, me->tm_hour&31,
-           me->tm_min&63, me->tm_sec&63);
+  if (year > 10000)
+    year = 9999;
+  else if (year < -999)
+    year = -999;
+  snprintf(result, size, "%04d-%02d-%02dT%02d:%02d:%02d.000", year, (me->tm_mon + 1) & 31, me->tm_mday & 31, me->tm_hour & 31,
+           me->tm_min & 63, me->tm_sec & 63);
   return result;
 }
 
@@ -736,7 +738,7 @@ gribapiGetGridRegular(grib_handle *gh, grid_t *grid, long editionNumber, int gri
           // correct xinc if necessary
           if (IS_EQUAL(grid->x.first, 0) && grid->x.last > 354 && grid->x.last < 360)
             {
-              double xinc = 360. / (double)grid->x.size;
+              double xinc = 360. / (double) grid->x.size;
               if (fabs(grid->x.inc - xinc) > 0.0)
                 {
                   grid->x.inc = xinc;
@@ -793,7 +795,7 @@ gribapiGetGridProj(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 static void
 gribapiGetGridHealpix(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 {
-  (void)gh;
+  (void) gh;
   grid->size = numberOfPoints;
 }
 
@@ -955,7 +957,7 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
       GRIB_CHECK(grib_get_long(gh, "jScansPositively", &jScansPositively), 0);
       GRIB_CHECK(grib_get_long(gh, "jPointsAreConsecutive", &jPointsAreConsecutive), 0);
 
-      int scanningMode = (int)(128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive);
+      int scanningMode = (int) (128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive);
       cdiDefVarKeyInt(&grid->keys, CDI_KEY_SCANNINGMODE, scanningMode);
       /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
                    64  = 128 * 0                + 64 *        1         + 32 * 0

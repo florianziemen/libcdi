@@ -1,7 +1,7 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
  * circumstances as long as it's the autoconf configuration header
@@ -72,8 +72,8 @@ cdi_create_timesteps(size_t numTimesteps, stream_t *streamptr)
 
   streamptr->tsteps = Malloc(ntsteps * sizeof(tsteps_t));
 
-  streamptr->tstepsTableSize = (int)ntsteps;
-  streamptr->tstepsNextID = (int)ntsteps;
+  streamptr->tstepsTableSize = (int) ntsteps;
+  streamptr->tstepsNextID = (int) ntsteps;
 
   for (size_t tsID = 0; tsID < ntsteps; tsID++)
     {

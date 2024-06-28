@@ -11,11 +11,9 @@ void cdiPioCollectorMessageLoop(void);
 
 int cdiPioStream2Owner(int streamID);
 
-int
-cdiPioNcID2streamID(int ncid);
+int cdiPioNcID2streamID(int ncid);
 
-int
-cdiPioNcID2OwnerRank(int ncid);
+int cdiPioNcID2OwnerRank(int ncid);
 
 #endif
 /*

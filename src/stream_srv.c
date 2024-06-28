@@ -95,7 +95,7 @@ srv_read_recordSP(stream_t *streamptr, float *data, size_t *numMissVals)
   double missval = vlistInqVarMissval(vlistID, varID);
   SizeType size = gridInqSize(vlistInqVarGrid(vlistID, varID));
 
-  *numMissVals = get_num_missvalsSP((size_t)size, data, (float) missval);
+  *numMissVals = get_num_missvalsSP((size_t) size, data, (float) missval);
 
   streamptr->numvals += size;
 }
@@ -124,7 +124,7 @@ srv_read_recordDP(stream_t *streamptr, double *data, size_t *numMissVals)
   double missval = vlistInqVarMissval(vlistID, varID);
   SizeType size = gridInqSize(vlistInqVarGrid(vlistID, varID));
 
-  *numMissVals = get_num_missvalsDP((size_t)size, data, missval);
+  *numMissVals = get_num_missvalsDP((size_t) size, data, missval);
 
   streamptr->numvals += size;
 }
@@ -308,7 +308,7 @@ srvScanTimestep1(stream_t *streamptr)
 
       if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", nrecs, (int) recpos, rcode, rlevel, vdate, vtime);
 
-      srv_add_record(streamptr, param, rlevel, (size_t)rxsize, (size_t)rysize, recsize, recpos, prec);
+      srv_add_record(streamptr, param, rlevel, (size_t) rxsize, (size_t) rysize, recsize, recpos, prec);
     }
 
 tstepScanLoopFinished:
@@ -586,7 +586,7 @@ srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_
   double missval = vlistInqVarMissval(vlistID, varID);
   SizeType size = gridInqSize(vlistInqVarGrid(vlistID, varID));
 
-  *numMissVals = get_num_missvalsDP((size_t)size, data, missval);
+  *numMissVals = get_num_missvalsDP((size_t) size, data, missval);
 }
 
 void
@@ -595,7 +595,7 @@ srvReadVarDP(stream_t *streamptr, int varID, double *data, size_t *numMissVals)
   if (CDI_Debug) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  size_t gridsize = (size_t)gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
   size_t nlevs = (size_t) streamptr->vars[varID].recordTable[0].nlevs;
 
   for (size_t levID = 0; levID < nlevs; levID++)
@@ -622,8 +622,7 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   header[2] = (int) cdiDate_get(vDateTime.date);
   header[3] = cdiTime_get(vDateTime.time);
 
-  SizeType xsize = gridInqXsize(gridID),
-    ysize = gridInqYsize(gridID);
+  SizeType xsize = gridInqXsize(gridID), ysize = gridInqYsize(gridID);
   if (xsize == 0 || ysize == 0)
     {
       xsize = gridInqSize(gridID);
@@ -634,8 +633,8 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
 
   cdi_check_gridsize_int_limit("SERVICE", gridInqSize(gridID));
 
-  header[4] = (int)xsize;
-  header[5] = (int)ysize;
+  header[4] = (int) xsize;
+  header[5] = (int) ysize;
   header[6] = 0;
   header[7] = 0;
 
@@ -659,7 +658,7 @@ srvWriteVarDP(stream_t *streamptr, int varID, const double *data)
   int nlevs = zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
   for (int levID = 0; levID < nlevs; levID++)
-    srvWriteVarSliceDP(streamptr, varID, levID, data + (size_t)levID*(size_t)gridsize);
+    srvWriteVarSliceDP(streamptr, varID, levID, data + (size_t) levID * (size_t) gridsize);
 }
 
 #endif /* HAVE_LIBSERVICE */

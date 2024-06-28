@@ -136,9 +136,9 @@ gribapiGetDataDateTime(grib_handle *gh)
 
   CdiDateTime dt;
   dt.date = cdiDate_set(date);
-  dt.time.hour = (short)hour;
-  dt.time.minute = (short)minute;
-  dt.time.second = (short)second;
+  dt.time.hour = (short) hour;
+  dt.time.minute = (short) minute;
+  dt.time.second = (short) second;
   dt.time.ms = 0;
 
   return dt;
@@ -559,9 +559,9 @@ gribapiGetKeys(grib_handle *gh, int varID)
           else if (grib_get_long(gh, "mpimType", &mpimType) == 0 && grib_get_long(gh, "mpimClass", &mpimClass) == 0
                    && grib_get_long(gh, "mpimUser", &mpimUser) == 0)
             {
-              varDefKeyInt(varID, CDI_KEY_MPIMTYPE, (int)mpimType);
-              varDefKeyInt(varID, CDI_KEY_MPIMCLASS, (int)mpimClass);
-              varDefKeyInt(varID, CDI_KEY_MPIMUSER, (int)mpimUser);
+              varDefKeyInt(varID, CDI_KEY_MPIMTYPE, (int) mpimType);
+              varDefKeyInt(varID, CDI_KEY_MPIMCLASS, (int) mpimClass);
+              varDefKeyInt(varID, CDI_KEY_MPIMUSER, (int) mpimUser);
 
               size_t revNumLen = 20;
               unsigned char revNumber[revNumLen];
@@ -570,7 +570,7 @@ gribapiGetKeys(grib_handle *gh, int varID)
 
               long revStatus;
               grib_get_long(gh, "revStatus", &revStatus);
-              varDefKeyInt(varID, CDI_KEY_REVSTATUS, (int)revStatus);
+              varDefKeyInt(varID, CDI_KEY_REVSTATUS, (int) revStatus);
             }
         }
     }
@@ -2217,8 +2217,7 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
   double xfirst = 0.0, xlast = 0.0, xinc = 0.0;
   double yfirst = 0.0, ylast = 0.0, yinc = 0.0;
 
-  SizeType nlon = gridInqXsize(gridID),
-    nlat = gridInqYsize(gridID);
+  SizeType nlon = gridInqXsize(gridID), nlat = gridInqYsize(gridID);
 
   if (gridtype == GRID_GAUSSIAN_REDUCED)
     {
@@ -2227,12 +2226,12 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
 
       nlon = 0;
 
-      long *pl = Malloc((size_t)nlat * sizeof(long) + (size_t)nlat * sizeof(int));
-      int *reducedPoints = (int *)(pl + nlat);
+      long *pl = Malloc((size_t) nlat * sizeof(long) + (size_t) nlat * sizeof(int));
+      int *reducedPoints = (int *) (pl + nlat);
       gridInqReducedPoints(gridID, reducedPoints);
       for (long i = 0; i < nlat; ++i) pl[i] = reducedPoints[i];
 
-      GRIB_CHECK(grib_set_long_array(gh, "pl", pl, (size_t)nlat), 0);
+      GRIB_CHECK(grib_set_long_array(gh, "pl", pl, (size_t) nlat), 0);
 
       Free(pl);
     }
@@ -2411,7 +2410,7 @@ gribapiDefGridSTERE(grib_handle *gh, int gridID, int uvRelativeToGrid)
   GRIB_CHECK(my_grib_set_double(gh, "LaDInDegrees", gpp.lat_1), 0);
   GRIB_CHECK(my_grib_set_double(gh, "orientationOfTheGridInDegrees", gpp.lon_0), 0);
   long southPoleOnProjectionPlane = IS_EQUAL(gpp.lat_0, -90.0);
-  GRIB_CHECK(my_grib_set_double(gh, "southPoleOnProjectionPlane", (double)southPoleOnProjectionPlane), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "southPoleOnProjectionPlane", (double) southPoleOnProjectionPlane), 0);
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
   long shapeOfTheEarth = encode_shapeOfTheEarth(&gpp);
@@ -2899,7 +2898,7 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
             GRIB_CHECK(my_grib_set_long(gh, "nlev", nlev), 0);
             unsigned char uuid[CDI_UUID_SIZE];
             int length = CDI_UUID_SIZE;
-            memset(uuid, 0, (size_t)length);
+            memset(uuid, 0, (size_t) length);
             cdiInqKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
             size_t len = CDI_UUID_SIZE;
             if (grib_set_bytes(gh, "uuidOfVGrid", uuid, &len) != 0) Warning("Can't write UUID!");
@@ -3422,7 +3421,7 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
           unsigned char revNumber[revNumLen];
           if (cdiInqKeyBytes(vlistID, varID, CDI_KEY_REVNUMBER, revNumber, &revNumLen) == CDI_NOERR)
             {
-              size_t revNumLenS = (size_t)revNumLen;
+              size_t revNumLenS = (size_t) revNumLen;
               grib_set_bytes(gh, "revNumber", revNumber, &revNumLenS);
             }
           int revStatus;
@@ -3433,9 +3432,9 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
         {
           grib_set_long(gh, "grib2LocalSectionPresent", 1);
           grib_set_long(gh, "grib2LocalSectionNumber", grib2LocalSectionNumber);
-          unsigned char *section2Padding = Malloc((size_t)section2PaddingLength);
+          unsigned char *section2Padding = Malloc((size_t) section2PaddingLength);
           cdiInqKeyBytes(vlistID, varID, CDI_KEY_SECTION2PADDING, section2Padding, &section2PaddingLength);
-          size_t len = (size_t)section2PaddingLength;
+          size_t len = (size_t) section2PaddingLength;
           // Does not work anymore with ecCodes 2.22.0/2.25.0!!!
           // ECCODES ERROR   :  pack_bytes: Wrong size (10) for section2Padding. It is 0 bytes long
           grib_set_bytes(gh, "section2Padding", section2Padding, &len);
@@ -3493,19 +3492,19 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
     }
 
-  gribapiSetExtMode(gh, gridID, (size_t)datasize, data);
+  gribapiSetExtMode(gh, gridID, (size_t) datasize, data);
 
   if (memType == MEMTYPE_FLOAT)
     {
 #ifdef HAVE_GRIBAPI_FLOAT_INTERFACE
-      GRIB_CHECK(grib_set_float_array(gh, "values", (const float *) data, (size_t)datasize), 0);
+      GRIB_CHECK(grib_set_float_array(gh, "values", (const float *) data, (size_t) datasize), 0);
 #else
       Error("grib_set_float_array() not found!");
 #endif
     }
   else
     {
-      GRIB_CHECK(grib_set_double_array(gh, "values", (const double *) data, (size_t)datasize), 0);
+      GRIB_CHECK(grib_set_double_array(gh, "values", (const double *) data, (size_t) datasize), 0);
     }
 
   if (numMissVals)

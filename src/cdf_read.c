@@ -305,8 +305,8 @@ min_size(size_t a, size_t b)
 static void
 transpose2dArrayDP(int gridId, double *data)
 {
-  size_t inWidth = (size_t)gridInqYsize(gridId);
-  size_t inHeight = (size_t)gridInqXsize(gridId);
+  size_t inWidth = (size_t) gridInqYsize(gridId);
+  size_t inHeight = (size_t) gridInqXsize(gridId);
 
   size_t cacheBlockSize = 256;  // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                 // which should be a decent compromise on many architectures.
@@ -339,8 +339,8 @@ transpose2dArrayDP(int gridId, double *data)
 static void
 transpose2dArraySP(int gridId, float *data)
 {
-  size_t inWidth = (size_t)gridInqYsize(gridId);
-  size_t inHeight = (size_t)gridInqXsize(gridId);
+  size_t inWidth = (size_t) gridInqYsize(gridId);
+  size_t inHeight = (size_t) gridInqXsize(gridId);
 
   size_t cacheBlockSize = 256;  // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                 // which should be a decent compromise on many architectures.
@@ -503,7 +503,7 @@ cdfGetSliceSlapDescription(stream_t *streamptr, long tsID, int varID, int levelI
         case 2:
         case 4:
           if (readPart && curDimId == dimIds[0])
-            addDimension((size_t)ncGrid->start, (size_t)ncGrid->count);
+            addDimension((size_t) ncGrid->start, (size_t) ncGrid->count);
           else
             addDimension(0, stream_inq_dimlen(streamptr, curDimId));
           break;
@@ -537,7 +537,7 @@ getSizeVar3D(int vlistID, int varID)
 {
   int gridID = vlistInqVarGrid(vlistID, varID);
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
-  return (size_t)gridInqSize(gridID) * (size_t) zaxisInqSize(zaxisID);
+  return (size_t) gridInqSize(gridID) * (size_t) zaxisInqSize(zaxisID);
 }
 
 static void
@@ -720,7 +720,7 @@ cdf_read_var_slice_DP(stream_t *streamptr, long tsID, int varID, int levelID, do
 
   int vlistID = streamptr->vlistID;
   int gridId = vlistInqVarGrid(vlistID, varID);
-  size_t length = (size_t)gridInqSize(gridId);
+  size_t length = (size_t) gridInqSize(gridId);
   cdfReadDataFP64(streamptr, varID, length, start, count, data);
 
   if (swapxy) transpose2dArrayDP(gridId, data);
@@ -745,7 +745,7 @@ cdf_read_var_slice_SP(stream_t *streamptr, long tsID, int varID, int levelID, fl
 
   int vlistID = streamptr->vlistID;
   int gridId = vlistInqVarGrid(vlistID, varID);
-  size_t length = (size_t)gridInqSize(gridId);
+  size_t length = (size_t) gridInqSize(gridId);
   cdfReadDataFP32(streamptr, varID, length, start, count, data);
 
   if (swapxy) transpose2dArraySP(gridId, data);
@@ -865,7 +865,8 @@ get_global_recId(stream_t *streamptr, int tsID, int recID)
 }
 */
 
-struct recTsId {
+struct recTsId
+{
   long recID, tsID;
 };
 
@@ -886,14 +887,13 @@ cdf_get_local_step_and_recId(stream_t *streamptr, long globalRecId)
       globalRecId -= tsteps[1].nrecs;
     }
 
-  return (struct recTsId) { .recID = globalRecId, .tsID = localTsId };
+  return (struct recTsId){ .recID = globalRecId, .tsID = localTsId };
 }
 
 static void
 cdf_read_next_record_async(AsyncManager *jobManager, JobDescriptorCDF *jd, stream_t *streamptr, int memtype)
 {
-  struct recTsId ids
-    = cdf_get_local_step_and_recId(streamptr, streamptr->nextGlobalRecId);
+  struct recTsId ids = cdf_get_local_step_and_recId(streamptr, streamptr->nextGlobalRecId);
   int xRecId = streamptr->tsteps[ids.tsID].recIDs[ids.recID];
   JobDescriptor_startJobCDF(jobManager, jd, streamptr, ids.tsID, xRecId, memtype);
   streamptr->nextGlobalRecId++;
@@ -925,7 +925,7 @@ cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
           // Start as many new jobs as possible.
           for (int i = 0; streamptr->nextGlobalRecId < streamptr->maxGlobalRecs && i < workerCount; i++)
             if (jobs[i].args.recID < 0 && jobs[i].args.tsID < 0)
-              cdf_read_next_record_async(jobManager, jobs+i, streamptr, memtype);
+              cdf_read_next_record_async(jobManager, jobs + i, streamptr, memtype);
         }
 
       // search for a job descriptor with the given tsID and recID, and use its results if it exists
@@ -933,8 +933,9 @@ cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
         if (jobs[i].args.recID == recID && jobs[i].args.tsID == tsID)
           {
             jobFound = true;
-            cdf_JobDescriptor_finishJob(jobManager, jobs+i, data, numMissVals);
-            if (streamptr->nextGlobalRecId < streamptr->maxGlobalRecs) cdf_read_next_record_async(jobManager, jobs+i, streamptr, memtype);
+            cdf_JobDescriptor_finishJob(jobManager, jobs + i, data, numMissVals);
+            if (streamptr->nextGlobalRecId < streamptr->maxGlobalRecs)
+              cdf_read_next_record_async(jobManager, jobs + i, streamptr, memtype);
           }
     }
 
@@ -975,9 +976,9 @@ cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varType, 
 
   int position = 0;
   for (int i = 0; i < MAX_DIMENSIONS; ++i)
-    if (count[i] == (size_t)gridsize) position = i;
+    if (count[i] == (size_t) gridsize) position = i;
 
-  start[position] += (size_t)startpoint;
+  start[position] += (size_t) startpoint;
   count[position] = length;
 
   cdfReadDataFP64(streamptr, varID, length, start, count, data);
@@ -1006,9 +1007,9 @@ cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varType, 
 
   int position = 0;
   for (int i = 0; i < MAX_DIMENSIONS; ++i)
-    if (count[i] == (size_t)gridsize) position = i;
+    if (count[i] == (size_t) gridsize) position = i;
 
-  start[position] += (size_t)startpoint;
+  start[position] += (size_t) startpoint;
   count[position] = length;
 
   cdfReadDataFP32(streamptr, varID, length, start, count, data);
@@ -1078,7 +1079,7 @@ cdfReadVarDPPart(stream_t *streamptr, int varID, int varType, int startpoint, si
   cdfGetSlapDescription(streamptr, varID, &start, &count);
 
   int ltime = (TIME_CONSTANT != vlistInqVarTimetype(vlistID, varID));
-  start[1 + ltime] += (size_t)startpoint;
+  start[1 + ltime] += (size_t) startpoint;
   count[1 + ltime] = length;
 
   cdf_get_vara_double(streamptr->fileID, ncvarid, start, count, data);
@@ -1099,7 +1100,7 @@ cdfReadVarSPPart(stream_t *streamptr, int varID, int varType, int startpoint, si
   cdfGetSlapDescription(streamptr, varID, &start, &count);
 
   int ltime = (TIME_CONSTANT != vlistInqVarTimetype(vlistID, varID));
-  start[1 + ltime] = (size_t)startpoint;
+  start[1 + ltime] = (size_t) startpoint;
   count[1 + ltime] = length;
 
   cdf_get_vara_float(streamptr->fileID, ncvarid, start, count, data);
@@ -1155,8 +1156,7 @@ streamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int st
                        SizeType *numMissVals, int memtype)
 {
   size_t numMiss = 0;
-  if (cdiStreamReadVarSlicePart(streamID, varID, levelID, varType,
-                                start, (size_t)size, memtype, data, &numMiss))
+  if (cdiStreamReadVarSlicePart(streamID, varID, levelID, varType, start, (size_t) size, memtype, data, &numMiss))
     {
       Error("Unexpected error returned from cdiStreamReadVarSlicePart()!");
     }
@@ -1167,7 +1167,7 @@ void
 streamReadVarPart(int streamID, int varID, int varType, int start, SizeType size, void *data, SizeType *numMissVals, int memtype)
 {
   size_t numMiss = 0;
-  cdiStreamReadVarPart(streamID, varID, varType, start, (size_t)size, memtype, data, &numMiss);
+  cdiStreamReadVarPart(streamID, varID, varType, start, (size_t) size, memtype, data, &numMiss);
   *numMissVals = (SizeType) numMiss;
 }
 

@@ -137,8 +137,7 @@ struct collSpec
   bool sendRPCData;
 };
 
-struct clientBufSize
-cdiPioClientStreamBufSize(int streamID, const struct collSpec *collector);
+struct clientBufSize cdiPioClientStreamBufSize(int streamID, const struct collSpec *collector);
 
 struct partDescPreset
 {

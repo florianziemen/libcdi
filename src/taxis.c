@@ -1,7 +1,7 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
  * circumstances as long as it's the autoconf configuration header
@@ -971,19 +971,19 @@ cdi_encode_timevalue(int64_t days, double secs, int timeunit)
 
   if (timeunit == TUNIT_SECOND)
     {
-      timevalue = (double)days * 86400.0 + secs;
+      timevalue = (double) days * 86400.0 + secs;
     }
   else if (timeunit == TUNIT_MINUTE || timeunit == TUNIT_QUARTER || timeunit == TUNIT_30MINUTES)
     {
-      timevalue = (double)days * 1440. + secs / 60.;
+      timevalue = (double) days * 1440. + secs / 60.;
     }
   else if (timeunit == TUNIT_HOUR || timeunit == TUNIT_3HOURS || timeunit == TUNIT_6HOURS || timeunit == TUNIT_12HOURS)
     {
-      timevalue = (double)days * 24. + secs / 3600.;
+      timevalue = (double) days * 24. + secs / 3600.;
     }
   else if (timeunit == TUNIT_DAY)
     {
-      timevalue = (double)days + secs / 86400.;
+      timevalue = (double) days + secs / 86400.;
     }
   else
     {
@@ -1024,7 +1024,7 @@ rtimeval2datetime(double timevalue, const taxis_t *taxis)
 
       double fmon = fmod(timevalue, 1.0);
 
-      month += (int)timevalue;
+      month += (int) timevalue;
 
       struct YearMonth ym = normalize_month(year, month);
       year = ym.year;
@@ -1034,7 +1034,7 @@ rtimeval2datetime(double timevalue, const taxis_t *taxis)
       timevalue = fmon * days_per_month(calendar, year, month);
 
       rDateTime.date.year = year;
-      rDateTime.date.month = (short)month;
+      rDateTime.date.month = (short) month;
     }
 
   JulianDate julianDate = julianDate_encode(calendar, rDateTime);
@@ -1081,11 +1081,11 @@ datetime2rtimeval(CdiDateTime vDateTime, const taxis_t *taxis)
       int dpm = days_per_month(calendar, year, month);
 
       vDateTime.date.year = year;
-      vDateTime.date.month = (short)month;
+      vDateTime.date.month = (short) month;
       JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
       JulianDate dateDifference = julianDate_sub(julianDate2, julianDate1);
 
-      value += ((double)dateDifference.julianDay + dateDifference.secondOfDay / 86400.0) / dpm;
+      value += ((double) dateDifference.julianDay + dateDifference.secondOfDay / 86400.0) / dpm;
       if (timeunits == TUNIT_YEAR) value = value / 12;
     }
   else
@@ -1264,8 +1264,7 @@ cdi_set_forecast_period(double timevalue, taxis_t *taxis)
 
       double fmon = fmod(timevalue, 1.0);
 
-      month -= (int)timevalue;
-
+      month -= (int) timevalue;
 
       struct YearMonth ym = normalize_month(year, month);
       year = ym.year;
@@ -1275,7 +1274,7 @@ cdi_set_forecast_period(double timevalue, taxis_t *taxis)
       timevalue = fmon * days_per_month(calendar, year, month);
 
       vDateTime.date.year = year;
-      vDateTime.date.month = (short)month;
+      vDateTime.date.month = (short) month;
     }
 
   JulianDate julianDate = julianDate_encode(calendar, vDateTime);
@@ -1321,7 +1320,7 @@ cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis)
       else if (taxis->unit == TUNIT_MONTH)
         {
           int64_t xdate = cdiDate_get(datetime.date);
-          timeValue = (double)xdate / 100 + copysign((double) (datetime.date.day != 0) * 0.5, (double) xdate);
+          timeValue = (double) xdate / 100 + copysign((double) (datetime.date.day != 0) * 0.5, (double) xdate);
         }
       else if (taxis->unit == TUNIT_SECOND)
         {

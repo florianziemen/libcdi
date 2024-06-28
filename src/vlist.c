@@ -1140,8 +1140,7 @@ vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
             fp);
       for (int varID = 0; varID < nvars; varID++)
         fprintf(fp, "%3d %8zu\n", varID,
-                (size_t)zaxisInqSize(vlistptr->vars[varID].zaxisID)
-                * (size_t)gridInqSize(vlistptr->vars[varID].gridID));
+                (size_t) zaxisInqSize(vlistptr->vars[varID].zaxisID) * (size_t) gridInqSize(vlistptr->vars[varID].gridID));
     }
 }
 

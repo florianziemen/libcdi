@@ -255,7 +255,7 @@ printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, i
             }
         }
 
-      if (datasize > 0) arrmean /= (double)datasize;
+      if (datasize > 0) arrmean /= (double) datasize;
 
       fprintf(stdout, "%#12.5g%#12.5g%#12.5g", arrmin, arrmean, arrmax);
     }
@@ -280,8 +280,8 @@ printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, i
 
       imiss = datasize - nvals_r;
 
-      if (nvals_r > 0) arrmean_r = arrsum_r / (double)nvals_r;
-      if (nvals_i > 0) arrmean_i = arrsum_i / (double)nvals_i;
+      if (nvals_r > 0) arrmean_r = arrsum_r / (double) nvals_r;
+      if (nvals_i > 0) arrmean_i = arrsum_i / (double) nvals_i;
       fprintf(stdout, "  -  (%#12.5g,%#12.5g)  -", arrmean_r, arrmean_i);
     }
 
@@ -421,7 +421,7 @@ print_short_info(int streamID, int vlistID, int vardis)
       fprintf(stdout, "%3d ", vlistZaxisIndex(vlistID, zaxisID) + 1);
 
       // grid info
-      size_t gridsize = (size_t)gridInqSize(gridID);
+      size_t gridsize = (size_t) gridInqSize(gridID);
       fprintf(stdout, "%9zu ", gridsize);
       fprintf(stdout, "%3d ", vlistGridIndex(vlistID, gridID) + 1);
 
@@ -911,10 +911,10 @@ main(int argc, char *argv[])
       for (varID = 0; varID < nvars; varID++)
         {
           int gridID = vlistInqVarGrid(vlistID1, varID);
-          size_t gridsize = (size_t)gridInqSize(gridID);
+          size_t gridsize = (size_t) gridInqSize(gridID);
           if (gridsize > datasize) datasize = gridsize;
           int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-          size_t nlev = (size_t)zaxisInqSize(zaxisID);
+          size_t nlev = (size_t) zaxisInqSize(zaxisID);
           if (nlev > maxlev) maxlev = nlev;
           if (fname2)
             {
@@ -1034,7 +1034,7 @@ main(int argc, char *argv[])
 
                     if (Debug) fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
 
-                    size_t gridsize = (size_t)gridInqSize(gridID);
+                    size_t gridsize = (size_t) gridInqSize(gridID);
                     double missval = vlistInqVarMissval(vlistID1, varID);
 
                     streamReadVar(streamID1, varID, data, &nmiss);
@@ -1043,8 +1043,9 @@ main(int argc, char *argv[])
                     for (levelID = 0; levelID < nlevs; levelID++)
                       {
                         double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
-                        size_t offset = (size_t)levelID * gridsize;
-                        if (Info) printInfo(vdatetime, varname, level, gridsize, number, (size_t)nmiss, missval, data + offset, Vardis);
+                        size_t offset = (size_t) levelID * gridsize;
+                        if (Info)
+                          printInfo(vdatetime, varname, level, gridsize, number, (size_t) nmiss, missval, data + offset, Vardis);
                       }
 
                     if (fname2) streamWriteVar(streamID2, varID, data, nmiss);
@@ -1070,7 +1071,7 @@ main(int argc, char *argv[])
 
                     if (Debug) fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
 
-                    size_t gridsize = (size_t)gridInqSize(gridID);
+                    size_t gridsize = (size_t) gridInqSize(gridID);
                     double missval = vlistInqVarMissval(vlistID1, varID);
 
                     int nlevs = zaxisInqSize(zaxisID);
@@ -1079,7 +1080,7 @@ main(int argc, char *argv[])
                         double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
                         streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
 
-                        if (Info) printInfo(vdatetime, varname, level, gridsize, number, (size_t)nmiss, missval, data, Vardis);
+                        if (Info) printInfo(vdatetime, varname, level, gridsize, number, (size_t) nmiss, missval, data, Vardis);
 
                         if (fname2) streamWriteVarSlice(streamID2, varID, levelID, data, nmiss);
                       }

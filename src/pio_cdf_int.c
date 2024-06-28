@@ -58,18 +58,22 @@ cdiPio_nc__create(const char *path, int cmode, size_t initialsz, size_t *chunksi
         {
           cmode |= NC_MPIPOSIX;
           status = nc_create_par(path, cmode, commInqCommColl(), MPI_INFO_NULL, ncidp);
-          if (status == NC_NOERR) {
-            cdiPioCdfJmpBuf->openRank = CDI_PIO_COLLECTIVE_OPEN;
-          } else {
-            int rank = commInqRankColl();
-            if (rank == 0)
-              fputs("warning: parallel create not implemented"
-                    " for NetCDF4/HDF5 format!\n", stderr);
-            if (rank == cdiPioCdfJmpBuf->openRank)
-              status = nc__create(path, cmode, initialsz, chunksizehintp, ncidp);
-            else
-              longjmp(cdiPioCdfJmpBuf->jmpBuf, 1);
-          }
+          if (status == NC_NOERR)
+            {
+              cdiPioCdfJmpBuf->openRank = CDI_PIO_COLLECTIVE_OPEN;
+            }
+          else
+            {
+              int rank = commInqRankColl();
+              if (rank == 0)
+                fputs("warning: parallel create not implemented"
+                      " for NetCDF4/HDF5 format!\n",
+                      stderr);
+              if (rank == cdiPioCdfJmpBuf->openRank)
+                status = nc__create(path, cmode, initialsz, chunksizehintp, ncidp);
+              else
+                longjmp(cdiPioCdfJmpBuf->jmpBuf, 1);
+            }
         }
       else
         {
@@ -132,8 +136,7 @@ cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims, const int 
   int cf_format;
   int status = nc_inq_format(ncid, &cf_format);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
-  if (commInqIOMode() != PIO_NONE && cf_format == NC_FORMAT_NETCDF4
-      && cdiPioNcID2OwnerRank(ncid) == CDI_PIO_COLLECTIVE_OPEN)
+  if (commInqIOMode() != PIO_NONE && cf_format == NC_FORMAT_NETCDF4 && cdiPioNcID2OwnerRank(ncid) == CDI_PIO_COLLECTIVE_OPEN)
     {
       xdebug("%s", "calling nc_var_par_access");
       int status = nc_var_par_access(ncid, *varidp, NC_COLLECTIVE);

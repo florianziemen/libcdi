@@ -291,12 +291,12 @@ cgribexGetGridRegular(int *isec2, int *isec4, grid_t *grid, int gridtype, bool c
           }
 
         // recompute xinc if necessary
-        if (recompinc) grid->x.inc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / ((double)grid->x.size - 1);
+        if (recompinc) grid->x.inc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / ((double) grid->x.size - 1);
 
         // correct xinc if necessary
         if (ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 && ISEC2_LastLon < 360000)
           {
-            double xinc = 360. / (double)grid->x.size;
+            double xinc = 360. / (double) grid->x.size;
             if (fabs(grid->x.inc - xinc) > 0.0)
               {
                 grid->x.inc = xinc;
@@ -324,7 +324,7 @@ cgribexGetGridRegular(int *isec2, int *isec4, grid_t *grid, int gridtype, bool c
           }
 
         // recompute yinc if necessary
-        if (recompinc) grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / ((double)grid->y.size - 1);
+        if (recompinc) grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / ((double) grid->y.size - 1);
       }
     grid->y.first = ISEC2_FirstLat * 0.001;
     grid->y.last = ISEC2_LastLat * 0.001;
@@ -373,7 +373,7 @@ cgribexGetGridReduced(int *isec2, int *isec4, grid_t *grid)
         if (ijDirectionIncrementGiven && ISEC2_LatIncr > 0)
           grid->y.inc = ISEC2_LatIncr * 0.001;
         else
-          grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / ((double)grid->y.size - 1);
+          grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / ((double) grid->y.size - 1);
       }
     grid->y.first = ISEC2_FirstLat * 0.001;
     grid->y.last = ISEC2_LastLat * 0.001;
@@ -1328,7 +1328,7 @@ cgribexScanTimestep(stream_t *streamptr)
 
   /* this will need work for files containing more than INT_MAX timesteps! */
   assert(streamptr->ntsteps <= INT_MAX);
-  return (int)streamptr->ntsteps;
+  return (int) streamptr->ntsteps;
 }
 
 #ifdef gribWarning
@@ -1367,7 +1367,7 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
     gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double *) data, (int) datasize, (int *) gribbuffer, (int) gribsize,
              &iword, hoper, &iret);
 
-  *numMissVals = (ISEC1_Sec2Or3Flag & 64) ? (size_t)ISEC4_NumValues - (size_t)ISEC4_NumNonMissValues : 0;
+  *numMissVals = (ISEC1_Sec2Or3Flag & 64) ? (size_t) ISEC4_NumValues - (size_t) ISEC4_NumNonMissValues : 0;
 
   if (ISEC1_CenterID == 215 && (isec1[34] != 0 && isec1[34] != 255))
     {
@@ -2071,7 +2071,7 @@ cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int 
 {
   cgribexrec_t *cgribexp = (cgribexrec_t *) cgribexNew();
 
-  size_t sec2len = 1024 + 2 * (size_t)gridInqYsize(gridID);  // Gaussian reduced grid
+  size_t sec2len = 1024 + 2 * (size_t) gridInqYsize(gridID);  // Gaussian reduced grid
   if (sec2len > cgribexp->sec2len)
     {
       cgribexp->sec2len = sec2len;

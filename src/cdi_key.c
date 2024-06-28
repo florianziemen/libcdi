@@ -1,7 +1,7 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
  * circumstances as long as it's the autoconf configuration header
@@ -114,8 +114,7 @@ cdi_key_compare(cdi_keys_t *keyspa, cdi_keys_t *keyspb, int keynum)
   if (keypa->type != keypb->type) return 1;
   if (keypa->length != keypb->length) return 1;
 
-  if (keypa->type == KEY_BYTES) return (memcmp(keypa->v.s, keypb->v.s,
-                                               (size_t)keypa->length) != 0);
+  if (keypa->type == KEY_BYTES) return (memcmp(keypa->v.s, keypb->v.s, (size_t) keypa->length) != 0);
   if (keypa->type == KEY_FLOAT) return (IS_NOT_EQUAL(keypa->v.d, keypb->v.d));
   if (keypa->type == KEY_INT) return (keypa->v.i != keypb->v.i);
 
@@ -486,7 +485,7 @@ cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, int le
   cdi_key_t *keyp = find_key(keysp, key);
   if (keyp == NULL) keyp = new_key(keysp, key);
 
-  size_t length_ = length >= 0 ? (size_t)length : (size_t)0;
+  size_t length_ = length >= 0 ? (size_t) length : (size_t) 0;
   if (keyp != NULL)
     {
       if (keyp->length != 0 && keyp->length != length)
@@ -553,7 +552,7 @@ cdiInqVarKeyBytes(const cdi_keys_t *keysp, int key, unsigned char *bytes, int *l
             *length = val_len;
           else
             val_len = *length;
-          memcpy(bytes, keyp->v.s, (size_t)val_len);
+          memcpy(bytes, keyp->v.s, (size_t) val_len);
           status = CDI_NOERR;
         }
     }
@@ -635,8 +634,7 @@ cdiDefKeyString(int cdiID, int varID, int key, const char *string)
   xassert(string != NULL);
 
   size_t length = strlen(string) + 1;
-  int status = cdiDefKeyBytes(cdiID, varID, key,
-                              (const unsigned char *)string, (int)length);
+  int status = cdiDefKeyBytes(cdiID, varID, key, (const unsigned char *) string, (int) length);
 
   return status;
 }

@@ -500,7 +500,7 @@ cdi_generate_vars(stream_t *streamptr)
 {
   int vlistID = streamptr->vlistID;
 
-  int *varids = Malloc((size_t)varTableUsed * sizeof(int));
+  int *varids = Malloc((size_t) varTableUsed * sizeof(int));
   for (int varID = 0; varID < varTableUsed; varID++) varids[varID] = (int) varID;
   /*
     if (streamptr->sortname)
@@ -582,7 +582,7 @@ cdi_generate_vars(stream_t *streamptr)
 
       if (ltype1 == 0 && zaxistype == ZAXIS_GENERIC && nlevels == 1 && levelTable[0].level1 == 0) zaxistype = ZAXIS_SURFACE;
 
-      double *dlevels = Malloc((size_t)nlevels * sizeof(double));
+      double *dlevels = Malloc((size_t) nlevels * sizeof(double));
 
       /*
       if ( hasBounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
@@ -609,7 +609,7 @@ cdi_generate_vars(stream_t *streamptr)
            */
           if ((!linc && !ldec) && zaxistype == ZAXIS_PRESSURE)
             {
-              qsort(levelTable, (size_t)nlevels, sizeof(leveltable_t), cmpLevelTableInv);
+              qsort(levelTable, (size_t) nlevels, sizeof(leveltable_t), cmpLevelTableInv);
               lsort = true;
             }
           /*
@@ -619,7 +619,7 @@ cdi_generate_vars(stream_t *streamptr)
            */
           else if ((!linc && !ldec) || zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_DEPTH_BELOW_LAND)
             {
-              qsort(levelTable, (size_t)nlevels, sizeof(leveltable_t), cmpLevelTable);
+              qsort(levelTable, (size_t) nlevels, sizeof(leveltable_t), cmpLevelTable);
               lsort = true;
             }
 
@@ -638,16 +638,16 @@ cdi_generate_vars(stream_t *streamptr)
       double *dlevels1 = NULL, *dlevels2 = NULL;
       if (hasBounds)
         {
-          dlevels1 = Malloc(2 * (size_t)nlevels * sizeof(double));
-          dlevels2 = dlevels1+nlevels;
+          dlevels1 = Malloc(2 * (size_t) nlevels * sizeof(double));
+          dlevels2 = dlevels1 + nlevels;
           for (int levelID = 0; levelID < nlevels; levelID++) dlevels1[levelID] = level_sf * levelTable[levelID].level1;
           for (int levelID = 0; levelID < nlevels; levelID++) dlevels2[levelID] = level_sf * levelTable[levelID].level2;
         }
 
       const char **cvals = NULL;
       const char *unitptr = cdiUnitNamePtr(vartable[varid].level_unit);
-      int zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, cvals, 0, dlevels1, dlevels2, (int) Vctsize,
-                                Vct, NULL, NULL, unitptr, 0, 0, ltype1, ltype2);
+      int zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, cvals, 0, dlevels1, dlevels2, (int) Vctsize, Vct, NULL, NULL,
+                                unitptr, 0, 0, ltype1, ltype2);
 
       if (CDI_CMOR_Mode && nlevels == 1 && zaxistype != ZAXIS_HYBRID) zaxisDefScalar(zaxisID);
 
@@ -793,15 +793,16 @@ zaxis_compare(int zaxisID, int zaxistype, int nlevels, const double *levels, con
           if (dlevels && levels)
             {
               for (int levelID = 0; levelID < nlevels; levelID++)
-                if (fabs(dlevels[levelID] - levels[levelID]) > 1.e-9) {
-                  differ = true;
-                  break;
-                }
+                if (fabs(dlevels[levelID] - levels[levelID]) > 1.e-9)
+                  {
+                    differ = true;
+                    break;
+                  }
             }
 
           if (!differ && hasBounds)
             {
-              double *bounds = Malloc(2 * (size_t)nlevels * sizeof(double));
+              double *bounds = Malloc(2 * (size_t) nlevels * sizeof(double));
               zaxisInqLbounds(zaxisID, bounds);
               zaxisInqUbounds(zaxisID, bounds + nlevels);
               for (int levelID = 0; levelID < nlevels; levelID++)
@@ -1026,7 +1027,7 @@ varDefKeyBytes(int varID, int key, const unsigned char *bytes, int length)
 void
 varDefKeyString(int varID, int key, const char *string)
 {
-  int length = (int)strlen(string) + 1;
+  int length = (int) strlen(string) + 1;
   cdi_keys_t *keysp = &(vartable[varID].keys);
   cdiDefVarKeyBytes(keysp, key, (const unsigned char *) string, length);
 }

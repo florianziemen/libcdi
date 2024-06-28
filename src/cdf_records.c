@@ -1,7 +1,7 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
  * circumstances as long as it's the autoconf configuration header
@@ -73,8 +73,7 @@ cdf_init_records_step1(int numRecs, int *recIDs, record_t *records, int vlistID)
 void
 cdf_create_records(stream_t *streamptr, size_t tsID)
 {
-  if ((streamptr->ntsteps < 0 || tsID >= (size_t)streamptr->ntsteps)
-      && tsID > 0) return;
+  if ((streamptr->ntsteps < 0 || tsID >= (size_t) streamptr->ntsteps) && tsID > 0) return;
 
   if (streamptr->tsteps[tsID].nallrecs > 0) return;
 
