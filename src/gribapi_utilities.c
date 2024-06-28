@@ -271,10 +271,19 @@ addToDate(struct tm *me, long long amount, long unit)
 static char *
 makeDateString(struct tm *me)
 {
-  const size_t length = 4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 4 + 1;
-  char *result = (char *) Malloc(length);
-  snprintf(result, length, "%04d-%02d-%02dT%02d:%02d:%02d.000", me->tm_year + 1900, me->tm_mon + 1, me->tm_mday, me->tm_hour,
-           me->tm_min, me->tm_sec);
+  enum { size = 4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 4 + 1 };
+  char *result = Malloc(size);
+  assert(me->tm_year + 1900 < 10000 && me->tm_year + 1900 > -1000
+         && me->tm_mon >= 0 && me->tm_mon < 12
+         && me->tm_mday >= 1 && me->tm_mday <= 31
+         && me->tm_hour >= 0 && me->tm_hour <= 24
+         && me->tm_min >= 0 && me->tm_min < 60
+         && me->tm_sec >= 0 && me->tm_sec <= 60);
+  int year = me->tm_year + 1900;
+  if (year > 10000) year = 9999;
+  else if (year < -999) year = -999;
+  snprintf(result, size, "%04d-%02d-%02dT%02d:%02d:%02d.000", year, (me->tm_mon + 1)&31, me->tm_mday&31, me->tm_hour&31,
+           me->tm_min&63, me->tm_sec&63);
   return result;
 }
 
