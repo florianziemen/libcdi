@@ -16,8 +16,8 @@ case $(uname -s) in
         test_environment='breeze-mpim' ;;
       levante*.lvt.dkrz.de\ *)
         test_environment='levante-dkrz' ;;
-      daint*.login.cscs.ch\ *)
-        test_environment='daint-cscs' ;;
+#      daint*.login.cscs.ch\ *)
+#        test_environment='daint-cscs' ;;
     esac
 esac
 
