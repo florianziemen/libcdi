@@ -1380,7 +1380,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
 
   char p0name[CDI_MAX_NAME];
   p0name[0] = 0;
-  double p0value = 1;
+  static double p0value = 1;
   int p0varid = CDI_UNDEFID;
   int p0status = cdiInqKeyFloat(zaxisID, CDI_GLOBAL, CDI_KEY_P0VALUE, &p0value);
   if (p0status == CDI_NOERR)
@@ -1524,9 +1524,11 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
       streamptr->ncmode = 2;
     }
 
-  if (p0varid != CDI_UNDEFID) cdf_put_var_double(fileID, p0varid, &p0value);
-
   struct cdfPostDefActionList *delayed = NULL;
+
+  if (p0varid != CDI_UNDEFID)
+    cdfPostDefActionAddPutVal(&delayed, fileID, p0varid, &p0value, (void (*)(void *))(void (*)(void)) memFree);
+
   cdfPostDefActionAddPutVal(&delayed, fileID, ncvarid, levels,
                             hasLevels ? (void (*)(void *))(void (*)(void)) memFree : cdfDelayedPutVarDeepCleanup);
 
