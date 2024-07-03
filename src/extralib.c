@@ -1,3 +1,15 @@
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -222,7 +234,7 @@ extInqData(extrec_t *extp, int prec, void *data)
 {
   int ierr = 0;
   int byteswap = extp->byteswap;
-  size_t datasize = extp->datasize;
+  size_t datasize = extp->datasize, buffer_size = datasize * (size_t) prec;
   void *buffer = extp->buffer;
   int rprec = extp->prec;
 
@@ -233,7 +245,7 @@ extInqData(extrec_t *extp, int prec, void *data)
         if (byteswap) swap4byte(buffer, datasize);
 
         if (EXSE_PREC_FP32 == prec)
-          memcpy(data, buffer, datasize * prec);
+          memcpy(data, buffer, buffer_size);
         else if (EXSE_PREC_FP64 == prec)
           for (size_t i = 0; i < datasize; ++i) ((double *) data)[i] = (double) ((float *) buffer)[i];
 #ifdef HAVE__FLOAT16
@@ -247,7 +259,7 @@ extInqData(extrec_t *extp, int prec, void *data)
         if (byteswap) swap8byte(buffer, datasize);
 
         if (EXSE_PREC_FP64 == prec)
-          memcpy(data, buffer, datasize * prec);
+          memcpy(data, buffer, buffer_size);
         else if (EXSE_PREC_FP32 == prec)
           for (size_t i = 0; i < datasize; ++i) ((float *) data)[i] = (float) ((double *) buffer)[i];
 #ifdef HAVE__FLOAT16
@@ -260,7 +272,7 @@ extInqData(extrec_t *extp, int prec, void *data)
     case EXSE_PREC_FP16:
       {
         if (EXSE_PREC_FP16 == prec)
-          memcpy(data, buffer, datasize * prec);
+          memcpy(data, buffer, buffer_size);
         else if (EXSE_PREC_FP64 == prec)
           for (size_t i = 0; i < datasize; ++i) ((double *) data)[i] = (double) ((_Float16 *) buffer)[i];
         else if (EXSE_PREC_FP32 == prec)
@@ -325,7 +337,7 @@ extDefData(void *ext, int prec, const void *data)
     case EXSE_PREC_FP32:
       {
         if (EXSE_PREC_FP32 == prec)
-          memcpy(extp->buffer, data, datasize * prec);
+          memcpy(extp->buffer, data, blocklen);
         else if (EXSE_PREC_FP64 == prec)
           for (size_t i = 0; i < datasize; i++) ((float *) extp->buffer)[i] = (float) ((double *) data)[i];
 #ifdef HAVE__FLOAT16
@@ -337,7 +349,7 @@ extDefData(void *ext, int prec, const void *data)
     case EXSE_PREC_FP64:
       {
         if (EXSE_PREC_FP64 == prec)
-          memcpy(extp->buffer, data, datasize * prec);
+          memcpy(extp->buffer, data, blocklen);
         else if (EXSE_PREC_FP32 == prec)
           for (size_t i = 0; i < datasize; i++) ((double *) extp->buffer)[i] = (double) ((float *) data)[i];
 #ifdef HAVE__FLOAT16
@@ -350,7 +362,7 @@ extDefData(void *ext, int prec, const void *data)
     case EXSE_PREC_FP16:
       {
         if (EXSE_PREC_FP16 == prec)
-          memcpy(extp->buffer, data, datasize * prec);
+          memcpy(extp->buffer, data, blocklen);
         else if (EXSE_PREC_FP32 == prec)
           for (size_t i = 0; i < datasize; i++) ((_Float16 *) extp->buffer)[i] = (_Float16) ((float *) data)[i];
         else if (EXSE_PREC_FP64 == prec)

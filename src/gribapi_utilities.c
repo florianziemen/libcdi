@@ -271,10 +271,21 @@ addToDate(struct tm *me, long long amount, long unit)
 static char *
 makeDateString(struct tm *me)
 {
-  const size_t length = 4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 4 + 1;
-  char *result = (char *) Malloc(length);
-  snprintf(result, length, "%04d-%02d-%02dT%02d:%02d:%02d.000", me->tm_year + 1900, me->tm_mon + 1, me->tm_mday, me->tm_hour,
-           me->tm_min, me->tm_sec);
+  enum
+  {
+    size = 4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 4 + 1
+  };
+  char *result = Malloc(size);
+  assert(me->tm_year + 1900 < 10000 && me->tm_year + 1900 > -1000 && me->tm_mon >= 0 && me->tm_mon < 12 && me->tm_mday >= 1
+         && me->tm_mday <= 31 && me->tm_hour >= 0 && me->tm_hour <= 24 && me->tm_min >= 0 && me->tm_min < 60 && me->tm_sec >= 0
+         && me->tm_sec <= 60);
+  int year = me->tm_year + 1900;
+  if (year > 10000)
+    year = 9999;
+  else if (year < -999)
+    year = -999;
+  snprintf(result, size, "%04d-%02d-%02dT%02d:%02d:%02d.000", year, (me->tm_mon + 1) & 31, me->tm_mday & 31, me->tm_hour & 31,
+           me->tm_min & 63, me->tm_sec & 63);
   return result;
 }
 
@@ -617,7 +628,7 @@ gribapiGetGridsize(grib_handle *gh)
 }
 
 static void
-gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, int editionNumber, size_t numberOfPoints)
+gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, long editionNumber, size_t numberOfPoints)
 {
   long lpar;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar);
@@ -672,7 +683,7 @@ gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, int editionNumber, 
 }
 
 static void
-gribapiGetGridRegular(grib_handle *gh, grid_t *grid, int editionNumber, int gridtype, size_t numberOfPoints)
+gribapiGetGridRegular(grib_handle *gh, grid_t *grid, long editionNumber, int gridtype, size_t numberOfPoints)
 {
   long lpar;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ni", &lpar);
@@ -727,7 +738,7 @@ gribapiGetGridRegular(grib_handle *gh, grid_t *grid, int editionNumber, int grid
           // correct xinc if necessary
           if (IS_EQUAL(grid->x.first, 0) && grid->x.last > 354 && grid->x.last < 360)
             {
-              double xinc = 360. / grid->x.size;
+              double xinc = 360. / (double) grid->x.size;
               if (fabs(grid->x.inc - xinc) > 0.0)
                 {
                   grid->x.inc = xinc;
@@ -784,6 +795,7 @@ gribapiGetGridProj(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 static void
 gribapiGetGridHealpix(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 {
+  (void) gh;
   grid->size = numberOfPoints;
 }
 
@@ -945,7 +957,7 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
       GRIB_CHECK(grib_get_long(gh, "jScansPositively", &jScansPositively), 0);
       GRIB_CHECK(grib_get_long(gh, "jPointsAreConsecutive", &jPointsAreConsecutive), 0);
 
-      int scanningMode = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
+      int scanningMode = (int) (128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive);
       cdiDefVarKeyInt(&grid->keys, CDI_KEY_SCANNINGMODE, scanningMode);
       /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
                    64  = 128 * 0                + 64 *        1         + 32 * 0
@@ -954,7 +966,7 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
          Default / implicit scanning mode is 64:
                             i and j scan positively, i points are consecutive (row-major)        */
 #ifdef HIRLAM_EXTENSIONS
-      if (cdiDebugExt >= 30 && gribEditionNumber(gh) <= 1)
+      if (cdiDebugExt >= 30 && edititionnumber <= 1)
         {
           //  indicatorOfParameter=33,indicatorOfTypeOfLevel=105,level
           long paramId, levelTypeId, levelId;

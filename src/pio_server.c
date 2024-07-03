@@ -271,14 +271,12 @@ resizeVarGatherBuf(size_t size, void **buf, size_t *bufSize)
 #define wHECast(buf) ((struct winHeaderEntry *) (void *) buf)
 
 static Xt_xmap
-buildVarXmap(struct Xt_offset_ext *restrict partExts, const struct clientBuf *restrict clientBuf, size_t headerIdx,
-             Xt_idxlist dstList, Xt_idxlist *partDescPreset, MPI_Comm pioInterComm, MPI_Comm collComm, int varID,
-             const struct cdiPioConf *conf)
+buildVarXmap(int *restrict partSizes, const struct clientBuf *restrict clientBuf, size_t headerIdx, Xt_idxlist dstList,
+             Xt_idxlist *partDescPreset, MPI_Comm pioInterComm, MPI_Comm collComm, int varID, const struct cdiPioConf *conf)
 {
   size_t numClients = (size_t) numClients_;
   Xt_idxlist *part = partDescPreset ? partDescPreset : Malloc(numClients * sizeof(part[0]));
   int conversion = (wHECast(clientBuf[0].mem))[headerIdx].id;
-  size_t elemSize = conversion == DATA_HEADER_FLOAT ? sizeof(float) : sizeof(double);
   for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
     {
       unsigned char *clientMem = clientBuf[clientIdx].mem;
@@ -292,13 +290,7 @@ buildVarXmap(struct Xt_offset_ext *restrict partExts, const struct clientBuf *re
                   && ((size_t) position < clientBuf[clientIdx].size));
           part[clientIdx] = xt_idxlist_unpack(clientMem, (int) clientBuf[clientIdx].size, &position, pioInterComm);
         }
-      unsigned partSize = (unsigned) xt_idxlist_get_num_indices(part[clientIdx]);
-      size_t charOfs = (size_t) ((clientMem + (wHECast(clientMem))[headerIdx].offset) - clientBuf[0].mem);
-      xassert(charOfs % elemSize == 0 && charOfs / elemSize + partSize <= INT_MAX);
-      int elemOfs = (int) (charOfs / elemSize);
-      partExts[clientIdx].start = elemOfs;
-      partExts[clientIdx].size = (int) partSize;
-      partExts[clientIdx].stride = 1;
+      partSizes[clientIdx + 1] = xt_idxlist_get_num_indices(part[clientIdx]);
     }
   Xt_idxlist srcList = xt_idxlist_collection_new(part, (int) numClients);
   if (!partDescPreset)
@@ -704,6 +696,69 @@ buildDecoPresetXmaps(int streamID, struct partDescPreset clientDeco, MPI_Comm co
     }
 }
 
+struct partExtRes
+{
+  void *partExts;
+  bool needAExt;
+};
+
+static struct partExtRes
+fillPartExts(const int *partSizes, const struct clientBuf *restrict clientBuf, size_t headerIdx)
+{
+  int conversion = (wHECast(clientBuf[0].mem))[headerIdx].id;
+  size_t elemSize = conversion == DATA_HEADER_FLOAT ? sizeof(float) : sizeof(double);
+#ifdef USE_XT_REDIST_P2P_AEXT_NEW
+  struct Xt_aoffset_ext *partAExts = NULL;
+  bool needAExt = false;
+#endif
+  size_t numClients = (size_t) numClients_;
+  struct partExtRes extRes;
+  struct Xt_offset_ext *partExts = extRes.partExts = Malloc(numClients * sizeof(partExts[0]));
+#ifdef USE_XT_REDIST_P2P_AEXT_NEW
+  int varID = wHECast(clientBuf[0].mem)[headerIdx].specific.dataRecord.varID;
+  for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
+    {
+      unsigned char *clientMem = clientBuf[clientIdx].mem;
+      xassert((wHECast(clientMem))[headerIdx].specific.dataRecord.varID == varID
+              && (wHECast(clientMem))[headerIdx].id == conversion);
+      size_t charOfs = (size_t) ((clientMem + (wHECast(clientMem))[headerIdx].offset) - clientBuf[0].mem);
+      int partSize = partSizes[clientIdx + 1];
+      // FIXME: prevent overflow in second expression
+      needAExt |= (charOfs % elemSize != 0) | (charOfs + (size_t) partSize * elemSize > (size_t) INT_MAX * elemSize);
+    }
+  extRes.needAExt = needAExt;
+  if (needAExt)
+    {
+      extRes.partExts = partAExts = Realloc(partExts, numClients * sizeof(partAExts[0]));
+      partExts = NULL;
+    }
+#endif
+  for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
+    {
+      unsigned char *clientMem = clientBuf[clientIdx].mem;
+      size_t charOfs = (size_t) ((clientMem + (wHECast(clientMem))[headerIdx].offset) - clientBuf[0].mem);
+      int partSize = partSizes[clientIdx + 1];
+#ifndef USE_XT_REDIST_P2P_AEXT_NEW
+      xassert(charOfs % elemSize == 0 && charOfs / elemSize + (size_t) partSize <= INT_MAX);
+#else
+      if (needAExt)
+        {
+          partAExts[clientIdx].start = (MPI_Aint) charOfs;
+          partAExts[clientIdx].size = partSize;
+          partAExts[clientIdx].stride = (MPI_Aint) elemSize;
+        }
+      else
+#endif
+      {
+        int elemOfs = (int) (charOfs / elemSize);
+        partExts[clientIdx].start = elemOfs;
+        partExts[clientIdx].size = partSize;
+        partExts[clientIdx].stride = 1;
+      }
+    }
+  return extRes;
+}
+
 static Xt_redist
 buildVarRedist(int headerIdx, size_t streamIdx,
                /* index list representing the data elements gathered on
@@ -714,18 +769,21 @@ buildVarRedist(int headerIdx, size_t streamIdx,
   const struct winHeaderEntry *winDict = wHECast(clientBuf[0].mem);
   int varID = winDict[headerIdx].specific.dataRecord.varID;
   int conversion = winDict[headerIdx].id;
+#if USE_XT_REDIST_P2P_AEXT_NEW
   size_t elemSize = conversion == DATA_HEADER_FLOAT ? sizeof(float) : sizeof(double);
+#endif
   size_t numClients = (size_t) numClients_;
-  struct Xt_offset_ext *partExts = Malloc(numClients * sizeof(partExts[0]));
   MPI_Comm pioInterComm = cdiPioInqInterComm(), collComm = commInqCommColl();
   Xt_xmap gatherXmap;
   struct Xt_offset_ext gatherExt = { .start = 0, .size = xt_idxlist_get_num_indices(dstList), .stride = 1 };
   Xt_uid *restrict uids = NULL;
+  void *tmpBuf = NULL;
   int *restrict partSizes = NULL;
   bool cacheXmaps = conf->cacheXmaps;
   if (cacheXmaps)
     {
       allocUIDLookup(numClients, &uids, &partSizes);
+      tmpBuf = uids;
       uids[0] = xt_idxlist_get_uid(dstList);
       for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
         {
@@ -736,35 +794,36 @@ buildVarRedist(int headerIdx, size_t streamIdx,
         }
       if ((gatherXmap = cdiPioXmapCacheLookup(XmapCache, uids, partSizes)))
         {
-          for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
-            {
-              unsigned char *clientMem = clientBuf[clientIdx].mem;
-              struct dataRecord *dataHeader = &(wHECast(clientMem))[headerIdx].specific.dataRecord;
-              xassert(dataHeader->varID == varID && (wHECast(clientMem))[headerIdx].id == conversion);
-              size_t charOfs = (size_t) ((clientMem + (wHECast(clientMem))[headerIdx].offset) - clientBuf[0].mem);
-              int partSize = partSizes[clientIdx + 1];
-              xassert(charOfs % elemSize == 0 && charOfs / elemSize + (size_t) partSize <= INT_MAX);
-              int elemOfs = (int) (charOfs / elemSize);
-              partExts[clientIdx].start = elemOfs;
-              partExts[clientIdx].size = partSize;
-              partExts[clientIdx].stride = 1;
-            }
-          goto finishXmapCaching;
+          goto afterNewXmapCacheEntry;
         }
     }
-  gatherXmap = buildVarXmap(partExts, clientBuf, (size_t) headerIdx, dstList, partDescPreset, pioInterComm, collComm, varID, conf);
+  else
+    {
+      tmpBuf = partSizes = Malloc(sizeof(*partSizes) * (numClients + 1));
+    }
+  partSizes[0] = gatherExt.size;
+  gatherXmap = buildVarXmap(partSizes, clientBuf, (size_t) headerIdx, dstList, partDescPreset, pioInterComm, collComm, varID, conf);
   if (cacheXmaps)
     {
-      partSizes[0] = gatherExt.size;
-      for (size_t i = 0; i < numClients; ++i) partSizes[i + 1] = partExts[i].size;
       cdiPioXmapCacheAdd(XmapCache, uids, partSizes, gatherXmap);
-    finishXmapCaching:
-      Free(uids);
     }
+afterNewXmapCacheEntry:;
+  struct partExtRes extRes = fillPartExts(partSizes, clientBuf, (size_t) headerIdx);
+  Free(tmpBuf);
   MPI_Datatype elemDt = conversion == DATA_HEADER_FLOAT ? MPI_FLOAT : MPI_DOUBLE;
-  Xt_redist varRedist = xt_redist_p2p_ext_new(gatherXmap, (int) numClients, partExts, 1, &gatherExt, elemDt);
+  Xt_redist varRedist;
+#if USE_XT_REDIST_P2P_AEXT_NEW
+  if (extRes.needAExt)
+    {
+      struct Xt_aoffset_ext gatherAExt = { .start = 0, .size = gatherExt.size, .stride = (MPI_Aint) elemSize };
+
+      varRedist = xt_redist_p2p_aext_new(gatherXmap, (int) numClients, extRes.partExts, 1, &gatherAExt, elemDt);
+    }
+  else
+#endif
+    varRedist = xt_redist_p2p_ext_new(gatherXmap, (int) numClients, extRes.partExts, 1, &gatherExt, elemDt);
   if (!cacheXmaps) xt_xmap_delete(gatherXmap);
-  Free(partExts);
+  Free(extRes.partExts);
   return varRedist;
 }
 
@@ -979,6 +1038,32 @@ cdiPioStream2Owner(int streamID)
   size_t streamIdx = indexOfID(&openStreams, streamID);
   xassert(streamIdx < SIZE_MAX);
   return rxWin[streamIdx].ownerRank;
+}
+
+int
+cdiPioNcID2streamID(int ncid)
+{
+  size_t nstreams = openStreams.size;
+  for (size_t streamIdx = 0; streamIdx < nstreams; ++streamIdx)
+    {
+      int streamID = openStreams.entries[streamIdx];
+      int ftype = cdiBaseFiletype(streamInqFiletype(streamID));
+      if (ftype == CDI_FILETYPE_NETCDF && streamInqFileID(streamID) == ncid) return streamID;
+    }
+  return CDI_UNDEFID;
+}
+
+int
+cdiPioNcID2OwnerRank(int ncid)
+{
+  size_t nstreams = openStreams.size;
+  for (size_t streamIdx = 0; streamIdx < nstreams; ++streamIdx)
+    {
+      int streamID = openStreams.entries[streamIdx];
+      int ftype = cdiBaseFiletype(streamInqFiletype(streamID));
+      if (ftype == CDI_FILETYPE_NETCDF && streamInqFileID(streamID) == ncid) return rxWin[streamIdx].ownerRank;
+    }
+  return CDI_UNDEFID;
 }
 
 /* for load-balancing purposes, count number of files per process */
@@ -1619,6 +1704,8 @@ clearModelWinBuffer(size_t streamIdx)
 
 /************************************************************************/
 
+static MPI_Datatype rmaElemDt = MPI_DATATYPE_NULL;
+
 static void
 getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
 {
@@ -1631,10 +1718,12 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
       {
         clearModelWinBuffer(streamIdx);
         xmpi(MPI_Win_start(clientGroup, 0, rxWin[streamIdx].getWin));
-        /* FIXME: this needs to use MPI_PACKED for portability */
         for (size_t i = 0; i < (size_t) numClients_; ++i)
-          xmpi(MPI_Get(rxWin[streamIdx].clientBuf[i].mem, (int) rxWin[streamIdx].clientBuf[i].size, MPI_UNSIGNED_CHAR,
-                       clientRanks_[i], 0, (int) rxWin[streamIdx].clientBuf[i].size, MPI_UNSIGNED_CHAR, rxWin[streamIdx].getWin));
+          {
+            int tx_count = (int) (rxWin[streamIdx].clientBuf[i].size / PIO_WIN_ALIGN);
+            xmpi(MPI_Get(rxWin[streamIdx].clientBuf[i].mem, tx_count, rmaElemDt, clientRanks_[i], 0, tx_count, rmaElemDt,
+                         rxWin[streamIdx].getWin));
+          }
         xmpi(MPI_Win_complete(rxWin[streamIdx].getWin));
         if (!conf->batchedRMA) readGetBuffers(streamIdx, conf);
       }
@@ -1940,10 +2029,10 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
     {
       collectorData.partDesc = NULL;
       collectorData.conversion = NULL;
-      bufSizes[0] = computeClientStreamBufSize(serverStreamID, &collectorData);
+      bufSizes[0] = cdiPioClientStreamBufSize(serverStreamID, &collectorData);
       collectorData.sendRPCData = 0;
       for (size_t clientIdx = 1; clientIdx < (size_t) numClients_; ++clientIdx)
-        bufSizes[clientIdx] = computeClientStreamBufSize(serverStreamID, &collectorData);
+        bufSizes[clientIdx] = cdiPioClientStreamBufSize(serverStreamID, &collectorData);
     }
   else /* tag == STREAM_DEF_DECOMPOSED_VLIST */
     {
@@ -1980,7 +2069,7 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
           remainingSize -= clientPos;
           *pos += clientPos;
           collectorData.partDesc = clientPartDesc;
-          bufSizes[clientIdx] = computeClientStreamBufSize(serverStreamID, &collectorData);
+          bufSizes[clientIdx] = cdiPioClientStreamBufSize(serverStreamID, &collectorData);
           collectorData.sendRPCData = 0;
         }
       Free(clientPartDesc);
@@ -2034,6 +2123,10 @@ cdiPioCollectorMessageLoop()
   namespaceSwitchSet(NSSWITCH_CDF_STREAM_SETUP, NSSW_FUNC(cdiPioServerCdfDefVars));
 #endif
 
+  /* FIXME: this needs to use MPI_PACKED for portability */
+  xmpi(MPI_Type_contiguous(PIO_WIN_ALIGN, MPI_UNSIGNED_CHAR, &rmaElemDt));
+  xmpi(MPI_Type_commit(&rmaElemDt));
+
   int *streamActivity = NULL;
   setupClientRanks();
   if (conf->cacheXmaps) XmapCache = cdiPioXmapCacheNew(16, (size_t) numClients_ + 1);
@@ -2055,6 +2148,7 @@ cdiPioCollectorMessageLoop()
             }
           if (rxWin)
             {
+              if (!conf->batchedRMA) Free(rxWin[0].clientBuf[0].mem);
               Free(rxWin[0].clientBuf);
               Free(rxWin);
             }
@@ -2070,6 +2164,7 @@ cdiPioCollectorMessageLoop()
           if (conf->cacheXmaps) cdiPioXmapCacheDelete(XmapCache);
           cdiPioIdxlistCacheDelete(DstIdxlistCache);
           xdebug("%s", "RETURN");
+          xmpi(MPI_Type_free(&rmaElemDt));
           return;
         case RESOURCES:
         case STREAMOPEN:

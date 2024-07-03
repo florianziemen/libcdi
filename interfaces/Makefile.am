@@ -7,6 +7,7 @@ test_PROGRAMS_ = CdiInfo
 
 CdiInfo_SOURCES = CdiInfo.cpp
 CdiInfo_LDADD = libcdipp.la
+AM_CXXFLAGS = -static
 
 AM_CPPFLAGS = -I$(abs_top_srcdir)/src
 
@@ -14,6 +15,8 @@ all_local =
 install_exec_local =
 uninstall_local =
 clean_local =
+
+SUBDIRS = python
 
 if ENABLE_RUBY_INTERFACE
 V_MAKERUBY = $(v_MAKERUBY_@AM_V@)
@@ -40,7 +43,7 @@ ruby/Cdi.la: ruby/cdi_wrapper.cpp ruby/Makefile libcdipp.la
 	    TIMESTAMP_DIR='.dirstamp' \
 	    CDI_INCFLAGS='-I$(abs_srcdir)' \
 	    CDI_CPPFLAGS='$(AM_CPPFLAGS) $(CPPFLAGS)' \
-	    CDI_CXXFLAGS='$(AM_CXXFLAGS) -shared $(CXXFLAGS)' \
+	    CDI_CXXFLAGS='-shared $(CXXFLAGS)' \
 	    CDI_LDFLAGS='$(AM_LDFLAGS) -module -avoid-version $(LDFLAGS) -rpath $$(RUBYARCHDIR)' \
 	    CDI_LIBS='$(LIBS)' \
 	    CCDLFLAGS= \
@@ -101,16 +104,8 @@ endif !with_on_demand_check_programs
 endif ENABLE_RUBY_INTERFACE
 
 AUTOMAKE_OPTIONS = subdir-objects
+
 if ENABLE_PYTHON_INTERFACE
-
-python_PYTHON = python/Cdi.py
-pyexec_LTLIBRARIES = python/_Cdi.la
-python__Cdi_la_SOURCES = python/cdi_wrapper.cpp
-python__Cdi_la_CPPFLAGS = $(AM_CPPFLAGS) $(PYTHON_CPPFLAGS)
-python__Cdi_la_CXXFLAGS = $(AM_CXXFLAGS) -shared
-python__Cdi_la_LDFLAGS = $(AM_LDFLAGS) -module -avoid-version
-python__Cdi_la_LIBADD = libcdipp.la $(PYTHON_LIBS)
-
 if with_on_demand_check_programs
 check_PROGRAMS = $(test_PROGRAMS_)
 else !with_on_demand_check_programs
@@ -122,12 +117,6 @@ if MAINTAINER_MODE
 ruby/cdi_wrapper.cpp: cdi.i cdi.hpp
 	$(AM_V_GEN)$(MKDIR_P) $(@D) && $(SWIG) -ruby -c++ -globalmodule -o $@ $<
 
-python/Cdi.py: cdi.i cdi.hpp
-	$(AM_V_GEN)$(SWIG) -python -c++ -o python/cdi_wrapper.cpp $<
-
-python/cdi_wrapper.cpp: python/Cdi.py
-	$(AM_V_at)test -f $@ || rm -f $<
-	$(AM_V_at)test -f $@ || $(MAKE) $(AM_MAKEFLAGS) $<
 else !MAINTAINER_MODE
 ruby/cdi_wrapper.cpp python/Cdi.py python/cdi_wrapper.cpp:
 	@:;{ \

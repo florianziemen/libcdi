@@ -1,3 +1,15 @@
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
 #include <stddef.h>
 #include <stdio.h>
 
@@ -903,7 +915,8 @@ timevalue_decode(int timeunits, double timevalue)
   if (timeunits == TUNIT_SECOND)
     {
       julianDate.julianDay = (int64_t) (timevalue / 86400.0);
-      double seconds = timevalue - julianDate.julianDay * 86400.0;
+      double seconds = fmod(timevalue, 86400.0);
+      /* FIXME: does the following line serve a definable purpose? */
       julianDate.secondOfDay = round(seconds * 1000.0) / 1000.0;
       if (julianDate.secondOfDay < 0)
         {
@@ -921,7 +934,9 @@ timevalue_decode(int timeunits, double timevalue)
   else if (timeunits == TUNIT_DAY)
     {
       julianDate.julianDay = (int64_t) timevalue;
-      double seconds = (timevalue - julianDate.julianDay) * 86400.0;
+      double days, seconds = modf(timevalue, &days) * 86400.0;
+      /* FIXME: why does the seconds value have to be integral? If that's
+       * needed why not use modf? */
       julianDate.secondOfDay = (int) lround(seconds);
       if (julianDate.secondOfDay < 0)
         {
@@ -950,25 +965,25 @@ timevalue_decode(int timeunits, double timevalue)
 }
 
 static double
-cdi_encode_timevalue(int days, double secs, int timeunit)
+cdi_encode_timevalue(int64_t days, double secs, int timeunit)
 {
   double timevalue = 0.0;
 
   if (timeunit == TUNIT_SECOND)
     {
-      timevalue = days * 86400.0 + secs;
+      timevalue = (double) days * 86400.0 + secs;
     }
   else if (timeunit == TUNIT_MINUTE || timeunit == TUNIT_QUARTER || timeunit == TUNIT_30MINUTES)
     {
-      timevalue = days * 1440. + secs / 60.;
+      timevalue = (double) days * 1440. + secs / 60.;
     }
   else if (timeunit == TUNIT_HOUR || timeunit == TUNIT_3HOURS || timeunit == TUNIT_6HOURS || timeunit == TUNIT_12HOURS)
     {
-      timevalue = days * 24. + secs / 3600.;
+      timevalue = (double) days * 24. + secs / 3600.;
     }
   else if (timeunit == TUNIT_DAY)
     {
-      timevalue = days + secs / 86400.;
+      timevalue = (double) days + secs / 86400.;
     }
   else
     {
@@ -1007,10 +1022,9 @@ rtimeval2datetime(double timevalue, const taxis_t *taxis)
 
       if (timeunits == TUNIT_YEAR) timevalue *= 12;
 
-      int nmon = (int) timevalue;
-      double fmon = timevalue - nmon;
+      double fmon = fmod(timevalue, 1.0);
 
-      month += nmon;
+      month += (int) timevalue;
 
       struct YearMonth ym = normalize_month(year, month);
       year = ym.year;
@@ -1020,7 +1034,7 @@ rtimeval2datetime(double timevalue, const taxis_t *taxis)
       timevalue = fmon * days_per_month(calendar, year, month);
 
       rDateTime.date.year = year;
-      rDateTime.date.month = month;
+      rDateTime.date.month = (short) month;
     }
 
   JulianDate julianDate = julianDate_encode(calendar, rDateTime);
@@ -1067,11 +1081,11 @@ datetime2rtimeval(CdiDateTime vDateTime, const taxis_t *taxis)
       int dpm = days_per_month(calendar, year, month);
 
       vDateTime.date.year = year;
-      vDateTime.date.month = month;
+      vDateTime.date.month = (short) month;
       JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
       JulianDate dateDifference = julianDate_sub(julianDate2, julianDate1);
 
-      value += (dateDifference.julianDay + dateDifference.secondOfDay / 86400.0) / dpm;
+      value += ((double) dateDifference.julianDay + dateDifference.secondOfDay / 86400.0) / dpm;
       if (timeunits == TUNIT_YEAR) value = value / 12;
     }
   else
@@ -1107,19 +1121,16 @@ static CdiDateTime
 absTimeval2datetime(double timevalue)
 {
   int64_t vdate = (int64_t) timevalue;
-  double tmpval = (timevalue - vdate) * 86400.0;
+  double days, tmpval = modf(timevalue, &days) * 86400.0;
+  /* FIXME: why +0.01? */
   int daysec = (vdate < 0) ? (int) (-tmpval + 0.01) : (int) (tmpval + 0.01);
 
-  int year, month, day;
-  cdiDecodeDate(vdate, &year, &month, &day);
-
+  CdiDateTime datetime;
+  datetime.date = cdiDate_set(vdate);
   int hour = daysec / 3600;
   int minute = (daysec - hour * 3600) / 60;
   int second = daysec - hour * 3600 - minute * 60;
   int ms = 0;
-
-  CdiDateTime datetime;
-  datetime.date = cdiDate_encode(year, month, day);
   datetime.time = cdiTime_encode(hour, minute, second, ms);
 
   return datetime;
@@ -1153,7 +1164,7 @@ split_timevalue(double timevalue, int timeunit)
     {
       {
         static bool lwarn = true;
-        if (lwarn && (fabs(timevalue - (int64_t) timevalue) > 0))
+        if (lwarn && (fabs(timevalue - trunc(timevalue)) > 0))
           {
             Warning("Fraction of a year is not supported!!");
             lwarn = false;
@@ -1251,10 +1262,9 @@ cdi_set_forecast_period(double timevalue, taxis_t *taxis)
 
       if (timeunits == TUNIT_YEAR) timevalue *= 12;
 
-      int nmon = (int) timevalue;
-      double fmon = timevalue - nmon;
+      double fmon = fmod(timevalue, 1.0);
 
-      month -= nmon;
+      month -= (int) timevalue;
 
       struct YearMonth ym = normalize_month(year, month);
       year = ym.year;
@@ -1264,7 +1274,7 @@ cdi_set_forecast_period(double timevalue, taxis_t *taxis)
       timevalue = fmon * days_per_month(calendar, year, month);
 
       vDateTime.date.year = year;
-      vDateTime.date.month = month;
+      vDateTime.date.month = (short) month;
     }
 
   JulianDate julianDate = julianDate_encode(calendar, vDateTime);
@@ -1291,7 +1301,7 @@ datetime2seconds(CdiDateTime datetime)
   JulianDate julianDate = julianDate_encode(calendar, datetime);
 
   int64_t days = julianDate.julianDay - julianDate0.julianDay;
-  int64_t seconds = days * 86400 + julianDate.secondOfDay;
+  int64_t seconds = days * 86400 + (int64_t) julianDate.secondOfDay;
 
   return seconds;
 }
@@ -1310,11 +1320,11 @@ cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis)
       else if (taxis->unit == TUNIT_MONTH)
         {
           int64_t xdate = cdiDate_get(datetime.date);
-          timeValue = xdate / 100 + copysign((double) (datetime.date.day != 0) * 0.5, (double) xdate);
+          timeValue = (double) xdate / 100 + copysign((double) (datetime.date.day != 0) * 0.5, (double) xdate);
         }
       else if (taxis->unit == TUNIT_SECOND)
         {
-          timeValue = datetime2seconds(datetime);
+          timeValue = (double) datetime2seconds(datetime);
         }
       else
         {

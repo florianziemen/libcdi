@@ -250,7 +250,7 @@ streamDefNumWorker(int streamID, int numWorker)
               if (CDI_Test) Message("maxGlobalRecs=%ld", streamptr->maxGlobalRecs);
               if (streamptr->maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
               if (streamptr->maxGlobalRecs == 1) numWorker = 0;
-              if (numWorker > streamptr->maxGlobalRecs) numWorker = streamptr->maxGlobalRecs;
+              if (numWorker > streamptr->maxGlobalRecs) numWorker = (int) streamptr->maxGlobalRecs;
               if (streamptr->chunkSizeTdim > 1 && numWorker > streamptr->nvars) numWorker = streamptr->nvars;
               if (streamptr->chunkSizeZdim > 1) numWorker = 0;
               if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", streamptr->chunkSizeTdim, streamptr->chunkSizeZdim);
@@ -352,12 +352,12 @@ streamInqByteorder(int streamID)
 const char *
 streamFilesuffix(int filetype)
 {
-  static const char *noSuffix = "";
-  static const char *ncSuffix = ".nc";
-  static const char *grbSuffix = ".grb";
-  static const char *srvSuffix = ".srv";
-  static const char *extSuffix = ".ext";
-  static const char *iegSuffix = ".ieg";
+  static const char noSuffix[] = "";
+  static const char ncSuffix[] = ".nc";
+  static const char grbSuffix[] = ".grb";
+  static const char srvSuffix[] = ".srv";
+  static const char extSuffix[] = ".ext";
+  static const char iegSuffix[] = ".ieg";
 
   switch (cdiBaseFiletype(filetype))
     {
@@ -377,12 +377,12 @@ streamFilename(int streamID)
   return streamptr->filename;
 }
 
-static int
+static long
 cdiInqContents(stream_t *streamptr)
 {
   if (streamptr->lockIO) CDI_IO_LOCK();
 
-  int status = 0;
+  long status = 0;
   int filetype = streamptr->filetype;
 
   switch (cdiBaseFiletype(filetype))
@@ -392,8 +392,9 @@ cdiInqContents(stream_t *streamptr)
       {
         switch (streamptr->protocol)
           {
+#ifdef HAVE_LIBFDB5
           case CDI_PROTOCOL_FDB: status = fdbInqContents(streamptr); break;
-
+#endif
           case CDI_PROTOCOL_ACROSS:  // TODO read from ACROSS
           case CDI_PROTOCOL_OTHER:
           case CDI_PROTOCOL_FILE: status = grbInqContents(streamptr); break;
@@ -446,7 +447,7 @@ cdiGetProtocol(const char *uri, const char **filename)
       return CDI_PROTOCOL_FILE;
     }
 
-  int protocollen = pos - uri;
+  size_t protocollen = (size_t) (pos - uri);
   *filename = pos + 3;
 
   // if (strncmp(uri, "file", protocollen) == 0) return CDI_PROTOCOL_FILE; // file is already used in NetCDF
@@ -635,7 +636,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
   return fileID;
 }
 
-static int
+static long
 stream_create_vlist(stream_t *streamptr, CdiQuery *query)
 {
   int vlistID = vlistCreate();
@@ -646,7 +647,7 @@ stream_create_vlist(stream_t *streamptr, CdiQuery *query)
 
   if (query) streamptr->query = query;
 
-  int status = cdiInqContents(streamptr);
+  long status = cdiInqContents(streamptr);
   if (status >= 0)
     {
       vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
@@ -741,8 +742,8 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
   streamptr->vlistID = vlistCreate();
   cdiVlistMakeInternal(streamptr->vlistID);
   // cdiReadByteorder(streamID);
-  int status = cdiInqContents(streamptr);
-  if (status < 0) return status;
+  long status = cdiInqContents(streamptr);
+  if (status < 0) return (int) status;
   vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
   vlistptr->ntsteps = streamInqNumSteps(streamID);
 
@@ -882,10 +883,10 @@ streamOpenRead(const char *filename)
       stream_t *streamptr = stream_to_pointer(streamID);
       streamptr->byteorder = byteorder;
 
-      int status = stream_create_vlist(streamptr, NULL);
+      long status = stream_create_vlist(streamptr, NULL);
       if (status < 0)
         {
-          streamID = status;
+          streamID = (int) status;
           if (streamptr->record) Free(streamptr->record);
           reshRemove(streamptr->self, &streamOps);
         }
@@ -911,10 +912,10 @@ streamOpenReadQuery(const char *filename, CdiQuery *query)
       stream_t *streamptr = stream_to_pointer(streamID);
       streamptr->byteorder = byteorder;
 
-      int status = stream_create_vlist(streamptr, query);
+      long status = stream_create_vlist(streamptr, query);
       if (status < 0)
         {
-          streamID = status;
+          streamID = (int) status;
           if (streamptr->record) Free(streamptr->record);
           reshRemove(streamptr->self, &streamOps);
         }
@@ -1292,7 +1293,7 @@ streamDestroy(stream_t *streamptr)
       mycdiVlistDestroy_(vlistID, true);
     }
 
-  if (streamptr->jobs) free(streamptr->jobs);
+  if (streamptr->jobs) Free(streamptr->jobs);
   if (streamptr->jobManager) AsyncWorker_finalize((AsyncManager *) streamptr->jobManager);
 
   Free(streamptr);

@@ -3,6 +3,7 @@
 #endif
 
 #include <stdbool.h>
+
 #include "error.h"
 
 #ifdef HAVE_LIBNETCDF
@@ -16,8 +17,9 @@
 #include "vlist_var.h"
 #endif
 
-#ifdef HAVE_NETCDF4
-#include "netcdf_aux.h"
+// #include <netcdf_filter.h>
+#if defined HAVE_NETCDF4 && defined HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST && HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST
+#include <netcdf_aux.h>
 #endif
 
 void
@@ -25,7 +27,7 @@ cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
 {
   if (filterSpec)
     {
-#ifdef HAVE_NCAUX_H5FILTERSPEC_PARSELIST
+#if defined HAVE_NETCDF4 && defined HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST && HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST
       size_t nfilters = 0;
       NC_H5_Filterspec **filters = NULL;
       int status = ncaux_h5filterspec_parselist(filterSpec, NULL, &nfilters, &filters);
@@ -54,6 +56,9 @@ cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
           free(filters);
         }
 #else
+      (void) ncid;
+      (void) ncvarID;
+      (void) filterSpec;
       static bool lwarn = true;
       if (lwarn)
         {
@@ -763,10 +768,10 @@ calc_chunksize_y(int chunkType, size_t gridsize, size_t xsize, size_t ysize)
 }
 
 size_t
-calc_chunksize_x(int chunkType, int chunkSize, size_t xsize, bool yIsUndefined)
+calc_chunksize_x(int chunkType, long chunkSize, size_t xsize, bool yIsUndefined)
 {
   if (chunkType == CDI_CHUNK_AUTO && yIsUndefined)
-    return (chunkSize > 0 && chunkSize < (int) xsize) ? (size_t) chunkSize : ((xsize <= chunkSizeMin) ? xsize : chunkSizeMin);
+    return (chunkSize > 0 && (size_t) chunkSize < xsize) ? (size_t) chunkSize : ((xsize <= chunkSizeMin) ? xsize : chunkSizeMin);
   else
     return calc_chunksize(chunkSizeLim, xsize);
 }
@@ -953,7 +958,7 @@ cdfDefVarChunkCache(int fileID, int ncvarID)
   float preemption = 0;
   if (CDI_Chunk_Cache > 0 && nc_get_var_chunk_cache(fileID, ncvarID, &size, &nelems, &preemption) == NC_NOERR)
     {
-      size = CDI_Chunk_Cache;
+      size = (size_t) CDI_Chunk_Cache;
     }
 
   nc_set_var_chunk_cache(fileID, ncvarID, size, nelems, preemption);
@@ -1003,7 +1008,8 @@ cdfDefVar(stream_t *streamptr, int varID)
   char axis[5];
   int dims[4];
   size_t chunks[4];
-  int ndims = cdfDefineDimsAndChunks(streamptr, varID, xid, yid, zid, gridsize, dimorder, dims, useChunks, chunks, axis, &iax);
+  int ndims
+      = cdfDefineDimsAndChunks(streamptr, varID, xid, yid, zid, (size_t) gridsize, dimorder, dims, useChunks, chunks, axis, &iax);
 
   char name[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
@@ -1091,7 +1097,7 @@ cdfDefVar(stream_t *streamptr, int varID)
   bool zaxisIsScalar = (zid == CDI_UNDEFID) ? (zaxisInqScalar(zaxisID) > 0) : false;
   int nczvarID = (zaxisIsScalar || zaxistype == ZAXIS_CHAR) ? streamptr->nczvarID[zaxisindex] : CDI_UNDEFID;
 
-  cdfDefineCoordinates(streamptr, ncvarID, nczvarID, gridtype, gridID, gridindex, xid, yid, gridsize, axis, iax);
+  cdfDefineCoordinates(streamptr, ncvarID, nczvarID, gridtype, gridID, gridindex, xid, yid, (size_t) gridsize, axis, iax);
 
   cdfDefVarPacking(streamptr, ncvarID, xtype, vlistID, varID);
 
@@ -1498,7 +1504,7 @@ cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, siz
 
   if (numMissVals > 0) cdfDefVarMissval(streamptr, varID, dtype, 1);
 
-  size_t nvals = gridInqSize(gridID) * (size_t) (zaxisInqSize(zaxisID));
+  size_t nvals = (size_t) gridInqSize(gridID) * (size_t) (zaxisInqSize(zaxisID));
 
   bool swapxy = false;
   cdf_write_var_data(fileID, vlistID, varID, ncvarID, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, numMissVals);
@@ -1595,7 +1601,7 @@ cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype, const int rect[
 
   if (numMissVals > 0) cdfDefVarMissval(streamptr, varID, dtype, 1);
 
-  size_t nvals = gridInqSize(gridID) * (size_t) (zaxisInqSize(zaxisID));
+  size_t nvals = (size_t) gridInqSize(gridID) * (size_t) zaxisInqSize(zaxisID);
 
   bool swapxy = false;
   cdf_write_var_data(fileID, vlistID, varID, ncvarID, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, numMissVals);
@@ -1682,7 +1688,7 @@ cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
 
   if (numMissVals > 0) cdfDefVarMissval(streamptr, varID, dtype, 1);
 
-  size_t nvals = gridInqSize(gridID);
+  size_t nvals = (size_t) gridInqSize(gridID);
 
   cdf_write_var_data(fileID, vlistID, varID, ncvarID, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, numMissVals);
 }

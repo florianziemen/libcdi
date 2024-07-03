@@ -24,20 +24,20 @@
 #include "namespace.h"
 
 static size_t
-grb_encode(int filetype, int memType, int datatype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
-           CdiDateTime vDateTime, int tsteptype, int numavg, size_t datasize, const void *data, size_t numMissVals,
-           void **gribbuffer, int comptype, void *gribContainers)
+grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime,
+           int tsteptype, int numavg, SizeType datasize, const void *data, size_t numMissVals, void **gribbuffer, int comptype,
+           void *gribContainers)
 {
   size_t nbytes = 0;
 
 #ifdef HAVE_LIBCGRIBEX
   if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
     {
-      size_t gribbuffersize = datasize * 4 + 3000;
+      size_t gribbuffersize = (size_t) datasize * 4 + 3000;
       *gribbuffer = Malloc(gribbuffersize);
 
       nbytes = cgribexEncode(memType, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize, data,
-                             numMissVals, *gribbuffer, gribbuffersize);
+                             (SizeType) numMissVals, *gribbuffer, gribbuffersize);
     }
   else
 #endif
@@ -48,8 +48,6 @@ grb_encode(int filetype, int memType, int datatype, int varID, int levelID, int 
 #else
       void *gribContainer = (void *) &((gribContainer_t *) gribContainers)[varID];
 #endif
-      // bool useFloatInterface = (have_gribapi_float_interface() && datatype != CDI_DATATYPE_FLT32 && datatype !=
-      // CDI_DATATYPE_FLT64);
       bool useFloatInterface = false;
       int memTypeX = useFloatInterface ? memType : MEMTYPE_DOUBLE;
       const void *datap = data;
@@ -60,14 +58,14 @@ grb_encode(int filetype, int memType, int datatype, int varID, int levelID, int 
         {
           // printf("gribapi write: convert float to double\n");
           const float *dataf = (const float *) data;
-          double *datad = (double *) Malloc(datasize * sizeof(double));
-          for (size_t i = 0; i < datasize; ++i) datad[i] = (double) dataf[i];
+          double *datad = Malloc((size_t) datasize * sizeof(double));
+          for (size_t i = 0; i < (size_t) datasize; ++i) datad[i] = (double) dataf[i];
           datap = (const void *) datad;
         }
 
       size_t gribbuffersize;
-      nbytes = gribapiEncode(memTypeX, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, (long) datasize,
-                             datap, numMissVals, gribbuffer, &gribbuffersize, comptype, gribContainer);
+      nbytes = gribapiEncode(memTypeX, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, (size_t) datasize,
+                             datap, (SizeType) numMissVals, gribbuffer, &gribbuffersize, comptype, gribContainer);
 
       if (!useFloatInterface && memType == MEMTYPE_FLOAT) Free((void *) datap);
     }
@@ -117,10 +115,10 @@ typedef struct
   char levelist[8];
 } FDB_Keys;
 
-void
+#ifdef HAVE_LIBFDB5
+static void
 cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nbytes, const FDB_Keys *fdbKeys)
 {
-#ifdef HAVE_LIBFDB5
   size_t len = strlen(filename);
   if (len == 6) Error("FDB keys missing!");
 
@@ -175,8 +173,8 @@ cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nb
   // alternative: write to tmpfile and use C++ code from fdb_write
 
   check_fdb_error(fdb_delete_key(key));
-#endif
 }
+#endif
 
 static int
 map_grib2_param(int pnum, int pcat, int pdis)
@@ -389,11 +387,10 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
   CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
   int numavg = (tsteptype == TSTEP_AVG) ? streamptr->tsteps[tsID].taxis.numavg : 0;
   int comptype = streamptr->comptype;
-  int datatype = vlistInqVarDatatype(vlistID, varID);
 
   if (CDI_Debug) Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
-  size_t datasize = gridInqSize(gridID);
+  SizeType datasize = gridInqSize(gridID);
 
   if (comptype != CDI_COMPRESS_JPEG && comptype != CDI_COMPRESS_SZIP && comptype != CDI_COMPRESS_AEC) comptype = CDI_COMPRESS_NONE;
 
@@ -405,8 +402,8 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     }
 
   void *gribbuffer = NULL;
-  size_t nbytes = grb_encode(filetype, memtype, datatype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg,
-                             datasize, data, numMissVals, &gribbuffer, comptype, streamptr->gribContainers);
+  size_t nbytes = grb_encode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize,
+                             data, numMissVals, &gribbuffer, comptype, streamptr->gribContainers);
 
   if (filetype == CDI_FILETYPE_GRB && (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC))
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
@@ -462,14 +459,14 @@ grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, siz
 {
   int vlistID = streamptr->vlistID, gridID = vlistInqVarGrid(vlistID, varID), zaxisID = vlistInqVarZaxis(vlistID, varID),
       nlevs = zaxisInqSize(zaxisID);
-  size_t gridsize = gridInqSize(gridID);
+  size_t gridsize = (size_t) gridInqSize(gridID);
   double missval = vlistInqVarMissval(vlistID, varID);
 
   size_t chunkLen = gridsize;
   if (memtype == MEMTYPE_FLOAT)
     for (int levelID = 0; levelID < nlevs; levelID++)
       {
-        const float *restrict fdata = ((const float *) data) + levelID * gridsize;
+        const float *restrict fdata = ((const float *) data) + (size_t) levelID * gridsize;
 
         size_t numMissVals_slice = 0;
         if (numMissVals)
@@ -480,7 +477,7 @@ grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, siz
   else
     for (int levelID = 0; levelID < nlevs; levelID++)
       {
-        const double *restrict ddata = ((const double *) data) + levelID * gridsize;
+        const double *restrict ddata = ((const double *) data) + (size_t) levelID * gridsize;
 
         size_t numMissVals_slice = 0;
         if (numMissVals)

@@ -2,6 +2,7 @@
 #include "config.h"
 #endif
 
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -329,20 +330,20 @@ memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj, const char *func
 }
 
 static int
-memListChangeEntry(void *ptrold, void *ptr, size_t size, const char *functionname, const char *file, int line)
+memListChangeEntry(intptr_t ptrold, void *ptr, size_t size, const char *functionname, const char *file, int line)
 {
   int item = MEM_UNDEFID;
   size_t memID = 0;
 
   while (memID < memTableSize)
     {
-      if (memTable[memID].item != MEM_UNDEFID && memTable[memID].ptr == ptrold) break;
+      if (memTable[memID].item != MEM_UNDEFID && (intptr_t) memTable[memID].ptr == ptrold) break;
       memID++;
     }
 
   if (memID == memTableSize)
     {
-      if (ptrold != NULL) memInternalProblem(__func__, "Item at %p not found.", ptrold);
+      if ((void *) ptrold != NULL) memInternalProblem(__func__, "Item at %p not found.", ptrold);
     }
   else
     {
@@ -434,6 +435,7 @@ memRealloc(void *ptrold, size_t size, const char *file, const char *functionname
 
   if (size > 0)
     {
+      intptr_t ptrold_ = (intptr_t) ptrold;
       ptr = realloc(ptrold, size);
 
       if (MEM_Info)
@@ -443,7 +445,7 @@ memRealloc(void *ptrold, size_t size, const char *file, const char *functionname
           int item = MEM_UNDEFID;
           if (ptr)
             {
-              item = memListChangeEntry(ptrold, ptr, size, functionname, file, line);
+              item = memListChangeEntry(ptrold_, ptr, size, functionname, file, line);
               if (item == MEM_UNDEFID) item = memListNewEntry(REALLOC_FUNC, ptr, size, 1, functionname, file, line);
             }
 

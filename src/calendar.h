@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-void decode_calday(int daysPerYear, int days, int *year, int *month, int *day);
+void decode_calday(int daysPerYear, int64_t days, int *year, int *month, int *day);
 int64_t encode_calday(int daysPerYear, int year, int month, int day);
 
 static inline int

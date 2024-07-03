@@ -1,3 +1,15 @@
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
 #include "cdi_across.h"
 
 #ifdef HAVE_ACROSS
@@ -21,8 +33,8 @@ static uint16_t
 swap_endianness16(uint16_t v)
 {
   // clang-format off
-  return ((v >> 8) & 0xff)
-       | ((v << 8) & 0xff00);
+  return (uint16_t)((  (uint16_t)(v >> 8) & UINT16_C(0xff))
+                    | ((uint16_t)(v << 8) & UINT16_C(0xff00)));
   // clang-format on
 }
 
@@ -83,6 +95,13 @@ set64(unsigned char *buf, uint64_t v)
   return sizeof(v);
 }
 
+/* gcc versions 4.5 up to 9.4 generate an incorrect warning for the
+ * summation below */
+#if defined __GNUC__ && ((__GNUC__ == 4 && __GNUC_MINOR__ > 5) || __GNUC__ > 4) && __GNUC__ <= 9
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
 static void
 fletcher8(const unsigned char *buf, size_t len, uint8_t *sum1out, uint8_t *sum2out)
 {
@@ -90,25 +109,29 @@ fletcher8(const unsigned char *buf, size_t len, uint8_t *sum1out, uint8_t *sum2o
   uint16_t sum2 = 0;
   for (size_t i = 0; i < len; ++i)
     {
-      sum1 += *buf++;
+      sum1 += buf[i];
       if (sum1 >= 255) sum1 -= 255;
       sum2 += sum1;
       if (sum2 >= 255) sum2 -= 255;
     }
-  *sum1out = sum1;
-  *sum2out = sum2;
+  *sum1out = (uint8_t) sum1;
+  *sum2out = (uint8_t) sum2;
 }
+
+#if defined __GNUC__ && ((__GNUC__ == 4 && __GNUC_MINOR__ > 5) || __GNUC__ > 4) && __GNUC__ <= 9
+#pragma GCC diagnostic pop
+#endif
 
 static uint8_t
 fletcher8_check1(uint8_t sum1, uint8_t sum2)
 {
-  return 255 - ((sum1 + sum2) % 255);
+  return (uint8_t) (255 - ((sum1 + sum2) % 255));
 }
 
 static uint8_t
 fletcher8_check2(uint8_t sum1, uint8_t sum2)
 {
-  return 255 - ((sum1 + fletcher8_check1(sum1, sum2)) % 255);
+  return (uint8_t) (255 - ((sum1 + fletcher8_check1(sum1, sum2)) % 255));
 }
 
 static int
@@ -124,7 +147,7 @@ across_write_buf(int sock, const void *buf, size_t nbytes)
           perror(__func__);
           return 1;
         }
-      nbytes_left -= nbytes_written;
+      nbytes_left -= (size_t) nbytes_written;
       bufpos += nbytes_written;
     }
   return 0;
@@ -172,7 +195,7 @@ across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nb
 
   across_info_t *info = (across_info_t *) streamptr->protocolData;
 
-  int expid_len = strlen(info->expid);
+  size_t expid_len = strlen(info->expid);
   if (expid_len < EXPID_MIN_LENGTH)
     {
       Error("expid is too short");
@@ -183,32 +206,32 @@ across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nb
       Error("expid is too long");
       return 1;
     }
-  uint32_t section2_len = 4                // section size
-                          + 1              // section number ("2")
-                          + 2              // local section number ("0")
-                          + 1              // across local section version
-                          + 1              // expid length
-                          + expid_len + 4  // expver
-                          + 4              // timestamp
-                          + 2              // check bytes
+  uint32_t section2_len = 4                           // section size
+                          + 1                         // section number ("2")
+                          + 2                         // local section number ("0")
+                          + 1                         // across local section version
+                          + 1                         // expid length
+                          + (uint32_t) expid_len + 4  // expver
+                          + 4                         // timestamp
+                          + 2                         // check bytes
       ;
   unsigned char *section2 = (unsigned char *) Malloc(section2_len);
   {
-    unsigned char pos = 0;
-    pos += set32(section2 + pos, section2_len);
-    pos += set8(section2 + pos, 2);   // section number
-    pos += set16(section2 + pos, 0);  // local section number
-    pos += set8(section2 + pos, ACROSS_SECTION2_VERSION);
-    pos += set8(section2 + pos, expid_len);
+    size_t pos = 0;
+    pos += (size_t) set32(section2 + pos, section2_len);
+    pos += (size_t) set8(section2 + pos, 2);   // section number
+    pos += (size_t) set16(section2 + pos, 0);  // local section number
+    pos += (size_t) set8(section2 + pos, ACROSS_SECTION2_VERSION);
+    pos += (size_t) set8(section2 + pos, (uint8_t) expid_len);
     memcpy(section2 + pos, info->expid, expid_len);
     pos += expid_len;
-    pos += set32(section2 + pos, info->expver);
-    pos += set32(section2 + pos, time(NULL));
+    pos += (size_t) set32(section2 + pos, (uint32_t) info->expver);
+    pos += (size_t) set32(section2 + pos, (uint32_t) time(NULL));
     uint8_t fletchersum1;
     uint8_t fletchersum2;
     fletcher8(section2 + 5, section2_len - 7, &fletchersum1, &fletchersum2);
-    pos += set8(section2 + pos, fletcher8_check1(fletchersum1, fletchersum2));
-    pos += set8(section2 + pos, fletcher8_check2(fletchersum1, fletchersum2));
+    pos += (size_t) set8(section2 + pos, fletcher8_check1(fletchersum1, fletchersum2));
+    pos += (size_t) set8(section2 + pos, fletcher8_check2(fletchersum1, fletchersum2));
     assert(pos == section2_len);
   }
 
@@ -224,15 +247,16 @@ across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nb
   return res;
 }
 
-int
+static int
 across_connect_int(char *path, char filemode, stream_t *streamptr)
 {
+  (void) filemode;
   // parse ACROSS address format: across://<host>[:<port>]/<expid>[@<expver>]
-
+  // note: cdiGetProtocol already advanced path up to after the across:// part
   const char *host = path;
   const char *port = ACROSS_DEFAULT_PORT;
   const char *expid = NULL;
-  int expver = 1;
+  unsigned long expver = 1;
 
   char *c = path;
   while (*c != '\0')
@@ -403,7 +427,8 @@ across_connect_int(char *path, char filemode, stream_t *streamptr)
 
   across_info_t *info = (across_info_t *) Malloc(sizeof(across_info_t));
   info->expid = strdup(expid);
-  info->expver = expver;
+  assert(expver <= INT_MAX);
+  info->expver = (int) expver;
   streamptr->protocolData = info;
 
   return sock;

@@ -1,3 +1,15 @@
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
 #include "dmemory.h"
 #include "cdi_int.h"
 
@@ -59,9 +71,9 @@ cdf_init_records_step1(int numRecs, int *recIDs, record_t *records, int vlistID)
 }
 
 void
-cdf_create_records(stream_t *streamptr, int tsID)
+cdf_create_records(stream_t *streamptr, size_t tsID)
 {
-  if (tsID < 0 || (tsID >= streamptr->ntsteps && tsID > 0)) return;
+  if ((streamptr->ntsteps < 0 || tsID >= (size_t) streamptr->ntsteps) && tsID > 0) return;
 
   if (streamptr->tsteps[tsID].nallrecs > 0) return;
 
