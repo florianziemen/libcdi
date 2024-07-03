@@ -1224,8 +1224,9 @@ cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID, int 
       double *restrict vctptr = (double *) zaxisInqVctPtr(zaxisID);
       if (p0status == 0 && IS_NOT_EQUAL(p0value, 0))
         {
-          double *restrict temp = (double *) Malloc((size_t) ilev * sizeof(*temp));
-          for (size_t i = 0; i < (size_t) ilev; ++i) temp[i] = vctptr[i] / p0value;
+          double *restrict temp = (double *) Malloc((size_t) 2 * ilev * sizeof(*temp));
+          memcpy(temp, vctptr, (size_t) 2 * ilev * sizeof(*temp));
+          for (size_t i = 0; i < (size_t) ilev; ++i) temp[i] /= p0value;
           vctptr = temp;
         }
 
