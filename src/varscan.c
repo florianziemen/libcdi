@@ -792,12 +792,10 @@ zaxis_compare(int zaxisID, int zaxistype, int nlevels, const double *levels, con
           const double *dlevels = zaxisInqLevelsPtr(zaxisID);
           if (dlevels && levels)
             {
-              for (int levelID = 0; levelID < nlevels; levelID++)
-                if (fabs(dlevels[levelID] - levels[levelID]) > 1.e-9)
-                  {
-                    differ = true;
-                    break;
-                  }
+              int levelID;
+              for (levelID = 0; levelID < nlevels; levelID++)
+                if (fabs(dlevels[levelID] - levels[levelID]) > 1.e-9) break;
+              if (levelID == nlevels) differ = false;
             }
 
           if (!differ && hasBounds)
