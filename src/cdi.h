@@ -828,7 +828,6 @@ SizeType gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_DATATYPE                      946  // Data type
 #define  CDI_KEY_REFERENCEURI                  947  // Reference URI to grid file
 #define  CDI_KEY_CHUNKS                        948  // Chunks
-#define  CDI_KEY_FILTERSPEC                    949  // NetCDF filter spec
 
 // Integer keys
 #define  CDI_KEY_NUMBEROFGRIDUSED              961  // GRIB2 numberOfGridUsed
@@ -842,6 +841,8 @@ SizeType gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_MISSVAL                       701  // Missing value
 #define  CDI_KEY_ADDOFFSET                     702  // Add offset
 #define  CDI_KEY_SCALEFACTOR                   703  // Scale factor
+#define  CDI_KEY_FILTERSPEC_IN                 720  // NetCDF4 filter specification read in
+#define  CDI_KEY_FILTERSPEC                    721  // NetCDF4 filter specification
 
 // Byte array keys
 #define  CDI_KEY_UUID                          960  // UUID for grid/Z-axis reference [size: CDI_UUID_SIZE]

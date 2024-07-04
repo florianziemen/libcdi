@@ -10,6 +10,8 @@ list( APPEND cdi_src_files
   cdf.c
   cdf.h
   cdf_config.h
+  cdf_filter.c
+  cdf_filter.h
   cdf_int.c
   cdf_int.h
   cdf_lazy_grid.c

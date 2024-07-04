@@ -17,6 +17,7 @@
 #include "vlist.h"
 #include "cdf_util.h"
 #include "cdf_lazy_grid.h"
+#include "cdf_filter.h"
 
 enum VarStatus
 {
@@ -136,6 +137,7 @@ typedef struct
   char stdname[CDI_MAX_NAME];
   char units[CDI_MAX_NAME];
   char extra[CDI_MAX_NAME];
+  char filterSpec[CDI_MAX_NAME];
 } ncvar_t;
 
 typedef struct
@@ -674,6 +676,7 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
       memset(ncvar->stdname, 0, CDI_MAX_NAME);
       memset(ncvar->units, 0, CDI_MAX_NAME);
       memset(ncvar->extra, 0, CDI_MAX_NAME);
+      memset(ncvar->filterSpec, 0, CDI_MAX_NAME);
     }
 }
 
@@ -1132,20 +1135,8 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
           nc_inq_var_szip(ncid, ncvarid, &options_mask, &pixels_per_block);
           if (options_mask && pixels_per_block) ncvar->hasSzip = true;
 #endif
-#if defined HAVE_DECL_NC_INQ_VAR_FILTER && HAVE_DECL_NC_INQ_VAR_FILTER
-          unsigned filterId;
-          size_t numParams;
-          nc_inq_var_filter(ncid, ncvarid, &filterId, &numParams, NULL);
-          if (filterId > 0) ncvar->hasFilter = true;
-          if (filterId > 0 && numParams <= 16 && CDI_Debug)
-            {
-              unsigned int params[16];
-              nc_inq_var_filter(ncid, ncvarid, &filterId, &numParams, params);
-              fprintf(stderr, "%s: filterId=%d  params=", ncvar->name, filterId);
-              for (int i = 0; i < (int) numParams; ++i) fprintf(stderr, " %u", params[i]);
-              fprintf(stderr, "\n");
-            }
-#endif
+          ncvar->hasFilter = cdf_get_var_filter(ncid, ncvarid, ncvar->filterSpec, CDI_MAX_NAME);
+          // if (ncvar->hasFilter) printf("filterSpec: %s=%s\n", ncvar->name, ncvar->filterSpec);
 
           size_t chunks[nvdims];
           int storageIn;
@@ -3598,6 +3589,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       int varID = vlistDefVar(vlistID, gridID, zaxisID, ncvar->timetype);
 
 #ifdef HAVE_NETCDF4
+      if (ncvar->hasFilter) cdiDefKeyString(vlistID, varID, CDI_KEY_FILTERSPEC_IN, ncvar->filterSpec);
       if (ncvar->hasFilter) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_FILTER);
       if (ncvar->hasDeflate) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_ZIP);
       if (ncvar->hasSzip) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_SZIP);

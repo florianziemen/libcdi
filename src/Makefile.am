@@ -89,6 +89,8 @@ libcdi_la_SOURCES = \
   cdf.c \
   cdf.h \
   cdf_config.h \
+  cdf_filter.c \
+  cdf_filter.h \
   cdf_int.c \
   cdf_int.h \
   cdf_lazy_grid.c \
