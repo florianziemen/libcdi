@@ -2,11 +2,10 @@
 #include "config.h"
 #endif
 
+#ifdef HAVE_LIBNETCDF
 #include <stdbool.h>
 
 #include "error.h"
-
-#ifdef HAVE_LIBNETCDF
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -15,61 +14,6 @@
 #include "cdf_int.h"
 #include "vlist.h"
 #include "vlist_var.h"
-#endif
-
-// #include <netcdf_filter.h>
-#if defined HAVE_NETCDF4 && defined HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST && HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST
-#include <netcdf_aux.h>
-#endif
-
-void
-cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
-{
-  if (filterSpec)
-    {
-#if defined HAVE_NETCDF4 && defined HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST && HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST
-      size_t nfilters = 0;
-      NC_H5_Filterspec **filters = NULL;
-      int status = ncaux_h5filterspec_parselist(filterSpec, NULL, &nfilters, &filters);
-      if (status != NC_NOERR)
-        {
-          Message("filterSpec=%s", filterSpec);
-          Error("ncaux_h5filterspec_parselist failed: %s", nc_strerror(status));
-        }
-
-      if (filters != NULL)
-        {
-          for (size_t i = 0; i < nfilters; i++)
-            {
-              unsigned int filterid = filters[i]->filterid;
-              // printf("filter %zu id:%d nparams:%zu param1 %d %d\n", i + 1, filterid, filters[i]->nparams, filters[i]->params[0],
-              // filters[i]->params[1]);
-              status = nc_def_var_filter(ncid, ncvarID, filterid, filters[i]->nparams, filters[i]->params);
-              if (status != NC_NOERR)
-                {
-                  Message("filterid=%u  numParams=%zu", filterid, filters[i]->nparams);
-                  Error("nc_def_var_filter failed: %s", nc_strerror(status));
-                }
-            }
-
-          for (size_t i = 0; i < nfilters; i++) ncaux_h5filterspec_free(filters[i]);
-          free(filters);
-        }
-#else
-      (void) ncid;
-      (void) ncvarID;
-      (void) filterSpec;
-      static bool lwarn = true;
-      if (lwarn)
-        {
-          lwarn = false;
-          Warning("Filter failed, NetCDF4 function ncaux_h5filterspec_parselist() not available!");
-        }
-#endif
-    }
-}
-
-#ifdef HAVE_LIBNETCDF
 
 void
 cdfDefVarDeflate(int ncid, int ncvarID, int shuffle, int compLevel)
