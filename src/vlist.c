@@ -1351,6 +1351,8 @@ vlistChangeGridIndex(int vlistID, int index, int gridID)
             int chunkSize = 0;
             cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, &chunkSize);
             if (chunkSize > 0) cdiDeleteKey(vlistID, varID, CDI_KEY_CHUNKSIZE);
+            if (gridInqXsize(gridIDold) == 0 && gridInqXsize(gridID) > 0 && vlistInqVarXYZ(vlistID, varID) != 0)
+              vlistDefVarXYZ(vlistID, varID, 0);
           }
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
