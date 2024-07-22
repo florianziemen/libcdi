@@ -49,7 +49,7 @@ ZaxistypeEntry[] = {
   { /*  7 */ 2, "depth",             "depth_below_land",            "",               "cm"},
   { /*  8 */ 0, "lev",               "isentropic",                  "",               "K"},
   { /*  9 */ 0, "lev",               "trajectory",                  "",               ""},
-  { /* 10 */ 1, "alt",               "height above mean sea level", "altitude",       "m"},
+  { /* 10 */ 1, "alt",               "height_above_mean_sea_level", "altitude",       "m"},
   { /* 11 */ 0, "lev",               "sigma",                       "",               "level"},
   { /* 12 */ 0, "lev",               "meansea",                     "",               "level"},
   { /* 13 */ 0, "toa",               "top_of_atmosphere",           "",               ""},
