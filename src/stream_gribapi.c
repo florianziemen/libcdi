@@ -2229,7 +2229,7 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
       long *pl = (long *) Malloc((size_t) nlat * sizeof(long) + (size_t) nlat * sizeof(int));
       int *reducedPoints = (int *) (pl + nlat);
       gridInqReducedPoints(gridID, reducedPoints);
-      for (long i = 0; i < nlat; ++i) pl[i] = reducedPoints[i];
+      for (SizeType i = 0; i < nlat; ++i) pl[i] = reducedPoints[i];
 
       GRIB_CHECK(grib_set_long_array(gh, "pl", pl, (size_t) nlat), 0);
 
@@ -2383,7 +2383,7 @@ gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
 }
 
 static void
-gribapiDefGridSTERE(grib_handle *gh, int gridID, int uvRelativeToGrid)
+gribapiDefGridSTERE(grib_handle *gh, int editionNumber, int gridID, int uvRelativeToGrid)
 {
   long xsize = (long) gridInqXsize(gridID);
   long ysize = (long) gridInqYsize(gridID);
@@ -2407,7 +2407,7 @@ gribapiDefGridSTERE(grib_handle *gh, int gridID, int uvRelativeToGrid)
   GRIB_CHECK(my_grib_set_double(gh, "DyInMetres", yinc), 0);
   GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", gpp.xval_0), 0);
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", gpp.yval_0), 0);
-  GRIB_CHECK(my_grib_set_double(gh, "LaDInDegrees", gpp.lat_1), 0);
+  if (editionNumber > 1) GRIB_CHECK(my_grib_set_double(gh, "LaDInDegrees", gpp.lat_1), 0);
   GRIB_CHECK(my_grib_set_double(gh, "orientationOfTheGridInDegrees", gpp.lon_0), 0);
   long southPoleOnProjectionPlane = IS_EQUAL(gpp.lat_0, -90.0);
   GRIB_CHECK(my_grib_set_double(gh, "southPoleOnProjectionPlane", (double) southPoleOnProjectionPlane), 0);
@@ -2613,7 +2613,7 @@ gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int
       }
     case CDI_PROJ_STERE:
       {
-        gribapiDefGridSTERE(gh, gridID, uvRelativeToGrid);
+        gribapiDefGridSTERE(gh, editionNumber, gridID, uvRelativeToGrid);
         break;
       }
     case CDI_PROJ_HEALPIX:
