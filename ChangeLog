@@ -1,3 +1,7 @@
+2024-07-23  Uwe Schulzweida
+
+	* Make code c++20 compliant
+
 2024-06-28  Uwe Schulzweida
 
 	* Added check for NetCDF4.8 function ncaux_h5filterspec_parselist()

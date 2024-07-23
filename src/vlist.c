@@ -67,16 +67,12 @@ static int vlistGetSizeP(void *vlistptr, void *context);
 static void vlistPackP(void *vlistptr, void *buff, int size, int *position, void *context);
 static int vlistTxCode(void *vlistptr);
 
-#if !defined(__cplusplus)
-const
-#endif
-    resOps vlistOps
-    = { (valCompareFunc) vlist_compare,
-        (valDestroyFunc) vlist_delete,
-        (valPrintFunc) vlistPrintKernel,
-        vlistGetSizeP,
-        vlistPackP,
-        vlistTxCode };
+const resOps vlistOps = { (valCompareFunc) vlist_compare,
+                          (valDestroyFunc) vlist_delete,
+                          (valPrintFunc) vlistPrintKernel,
+                          vlistGetSizeP,
+                          vlistPackP,
+                          vlistTxCode };
 
 vlist_t *
 vlist_to_pointer(int vlistID)

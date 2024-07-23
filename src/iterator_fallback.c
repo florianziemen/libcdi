@@ -355,14 +355,9 @@ int
 cdiFallbackIterator_inqTile(CdiIterator *super, int *outTileIndex, int *outTileAttribute)
 {
   CdiFallbackIterator *me = (CdiFallbackIterator *) (void *) super;
-#ifndef __cplusplus
-  if (!outTileIndex) outTileIndex = &(int){ 0 };
-  if (!outTileAttribute) outTileAttribute = &(int){ 0 };
-#else
   int dummy = 0;
   if (!outTileIndex) outTileIndex = &dummy;
   if (!outTileAttribute) outTileAttribute = &dummy;
-#endif
 
   int error = CDI_NOERR;
   if (me->subtypeId == CDI_UNDEFID)  // must not call subtypeInqAttribute() with an invalid subtype ID, because it would abort the
@@ -383,14 +378,9 @@ int
 cdiFallbackIterator_inqTileCount(CdiIterator *super, int *outTileCount, int *outTileAttributeCount)
 {
   CdiFallbackIterator *me = (CdiFallbackIterator *) (void *) super;
-#ifndef __cplusplus
-  if (!outTileCount) outTileCount = &(int){ 0 };
-  if (!outTileAttributeCount) outTileAttributeCount = &(int){ 0 };
-#else
   int temp = 0;
   if (!outTileCount) outTileCount = &temp;
   if (!outTileAttributeCount) outTileAttributeCount = &temp;
-#endif
 
   int error = CDI_NOERR;
   if (me->subtypeId == CDI_UNDEFID)  // must not call subtypeInqAttribute() with an invalid subtype ID, because it would abort the

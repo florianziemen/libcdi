@@ -2226,7 +2226,7 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
 
       nlon = 0;
 
-      long *pl = Malloc((size_t) nlat * sizeof(long) + (size_t) nlat * sizeof(int));
+      long *pl = (long *) Malloc((size_t) nlat * sizeof(long) + (size_t) nlat * sizeof(int));
       int *reducedPoints = (int *) (pl + nlat);
       gridInqReducedPoints(gridID, reducedPoints);
       for (long i = 0; i < nlat; ++i) pl[i] = reducedPoints[i];
@@ -3432,7 +3432,7 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
         {
           grib_set_long(gh, "grib2LocalSectionPresent", 1);
           grib_set_long(gh, "grib2LocalSectionNumber", grib2LocalSectionNumber);
-          unsigned char *section2Padding = Malloc((size_t) section2PaddingLength);
+          unsigned char *section2Padding = (unsigned char *) Malloc((size_t) section2PaddingLength);
           cdiInqKeyBytes(vlistID, varID, CDI_KEY_SECTION2PADDING, section2Padding, &section2PaddingLength);
           size_t len = (size_t) section2PaddingLength;
           // Does not work anymore with ecCodes 2.22.0/2.25.0!!!

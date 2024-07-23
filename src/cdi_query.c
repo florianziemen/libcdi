@@ -54,7 +54,7 @@ cdiQueryInit(CdiQuery *query)
 CdiQuery *
 cdiQueryCreate(void)
 {
-  CdiQuery *query = Malloc(sizeof(CdiQuery));
+  CdiQuery *query = (CdiQuery *) Malloc(sizeof(CdiQuery));
   cdiQueryInit(query);
   return query;
 }
@@ -138,8 +138,8 @@ cdiQuerySetCellidx(CdiQuery *query, int numEntries, size_t *cellidx)
     {
       query->numEntries += numEntries;
       query->numCellidx = numEntries;
-      query->cellidxFound = Calloc((size_t) numEntries, sizeof(bool));
-      query->cellidx = Malloc((size_t) numEntries * sizeof(size_t));
+      query->cellidxFound = (bool *) Calloc((size_t) numEntries, sizeof(bool));
+      query->cellidx = (size_t *) Malloc((size_t) numEntries * sizeof(size_t));
       for (int i = 0; i < numEntries; ++i) query->cellidx[i] = cellidx[i];
     }
 }
@@ -151,8 +151,8 @@ cdiQuerySetLevidx(CdiQuery *query, int numEntries, int *levidx)
     {
       query->numEntries += numEntries;
       query->numLevidx = numEntries;
-      query->levidxFound = Calloc((size_t) numEntries, sizeof(bool));
-      query->levidx = Malloc((size_t) numEntries * sizeof(int));
+      query->levidxFound = (bool *) Calloc((size_t) numEntries, sizeof(bool));
+      query->levidx = (int *) Malloc((size_t) numEntries * sizeof(int));
       for (int i = 0; i < numEntries; ++i) query->levidx[i] = levidx[i];
     }
 }
@@ -164,8 +164,8 @@ cdiQuerySetStepidx(CdiQuery *query, int numEntries, int *stepidx)
     {
       query->numEntries += numEntries;
       query->numStepidx = numEntries;
-      query->stepidxFound = Calloc((size_t) numEntries, sizeof(bool));
-      query->stepidx = Malloc((size_t) numEntries * sizeof(int));
+      query->stepidxFound = (bool *) Calloc((size_t) numEntries, sizeof(bool));
+      query->stepidx = (int *) Malloc((size_t) numEntries * sizeof(int));
       for (int i = 0; i < numEntries; ++i) query->stepidx[i] = stepidx[i];
     }
 }

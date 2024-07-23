@@ -70,7 +70,7 @@ cdi_create_timesteps(size_t numTimesteps, stream_t *streamptr)
 
   size_t ntsteps = (numTimesteps == 0) ? 1 : numTimesteps;
 
-  streamptr->tsteps = Malloc(ntsteps * sizeof(tsteps_t));
+  streamptr->tsteps = (tsteps_t *) Malloc(ntsteps * sizeof(tsteps_t));
 
   streamptr->tstepsTableSize = (int) ntsteps;
   streamptr->tstepsNextID = (int) ntsteps;

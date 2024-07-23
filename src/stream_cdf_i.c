@@ -210,7 +210,7 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
       len--;
     }
   char tmp[32], *tu = tmp;
-  if (len + 1 > sizeof(tmp)) tu = Malloc(len + 1);
+  if (len + 1 > sizeof(tmp)) tu = (char *) Malloc(len + 1);
 
   for (size_t i = 0; i < len; i++) tu[i] = (char) tolower((int) timeUnitsStr[i]);
   tu[len] = 0;
@@ -397,7 +397,7 @@ cdfGetAttInt(int fileID, int ncvarid, const char *attname, size_t attlen, int *a
   if (xtypeIsFloat(atttype) || xtypeIsInt(atttype))
     {
       bool needAlloc = (nc_attlen > attlen);
-      int *pintatt = needAlloc ? Malloc(nc_attlen * sizeof(int)) : attint;
+      int *pintatt = needAlloc ? (int *) Malloc(nc_attlen * sizeof(int)) : attint;
       cdf_get_att_int(fileID, ncvarid, attname, pintatt);
       if (needAlloc)
         {
@@ -419,7 +419,7 @@ cdfGetAttInt64(int fileID, int ncvarid, const char *attname, size_t attlen, int6
 
   if (xtypeIsFloat(atttype) || xtypeIsInt(atttype) || xtypeIsInt64(atttype))
     {
-      long long *plongatt = Malloc(nc_attlen * sizeof(long long));
+      long long *plongatt = (long long *) Malloc(nc_attlen * sizeof(long long));
       cdf_get_att_longlong(fileID, ncvarid, attname, plongatt);
       for (size_t i = 0; i < attlen; ++i) attint[i] = plongatt[i];
       Free(plongatt);
@@ -439,7 +439,7 @@ cdfGetAttDouble(int fileID, int ncvarid, char *attname, size_t attlen, double *a
   if (xtypeIsFloat(atttype) || xtypeIsInt(atttype))
     {
       bool needAlloc = (nc_attlen > attlen);
-      double *pdoubleatt = needAlloc ? Malloc(nc_attlen * sizeof(double)) : attdouble;
+      double *pdoubleatt = needAlloc ? (double *) Malloc(nc_attlen * sizeof(double)) : attdouble;
       cdf_get_att_double(fileID, ncvarid, attname, pdoubleatt);
       if (needAlloc)
         {
@@ -865,7 +865,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
   if (xtypeIsInt(atttype))
     {
       int attint = 0;
-      int *pattint = (attlen > 1) ? Malloc(attlen * sizeof(int)) : &attint;
+      int *pattint = (attlen > 1) ? (int *) Malloc(attlen * sizeof(int)) : &attint;
       cdfGetAttInt(ncid, ncvarid, attname, attlen, pattint);
       // clang-format off
       int datatype = (atttype == NC_SHORT)  ? CDI_DATATYPE_INT16 :
@@ -883,7 +883,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
   else if (xtypeIsInt64(atttype))
     {
       int64_t attint64 = 0;
-      int64_t *pattint64 = (attlen > 1) ? Malloc(attlen * sizeof(int64_t)) : &attint64;
+      int64_t *pattint64 = (attlen > 1) ? (int64_t *) Malloc(attlen * sizeof(int64_t)) : &attint64;
       cdfGetAttInt64(ncid, ncvarid, attname, attlen, pattint64);
       bool defineAtts = true;
       for (size_t i = 0; i < attlen; ++i)
@@ -891,7 +891,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
       if (defineAtts)
         {
           int attint = 0;
-          int *pattint = (attlen > 1) ? Malloc(attlen * sizeof(int)) : &attint;
+          int *pattint = (attlen > 1) ? (int *) Malloc(attlen * sizeof(int)) : &attint;
           for (size_t i = 0; i < attlen; ++i) pattint[i] = (int) pattint64[i];
           cdiDefAttInt(cdiID, varID, attname, CDI_DATATYPE_INT32, (int) attlen, pattint);
           if (attlen > 1) Free(pattint);
@@ -901,7 +901,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
   else if (xtypeIsFloat(atttype))
     {
       double attflt = 0.0;
-      double *pattflt = (attlen > 1) ? Malloc(attlen * sizeof(double)) : &attflt;
+      double *pattflt = (attlen > 1) ? (double *) Malloc(attlen * sizeof(double)) : &attflt;
       cdfGetAttDouble(ncid, ncvarid, attname, attlen, pattflt);
       int datatype = (atttype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
       cdiDefAttFlt(cdiID, varID, attname, datatype, (int) attlen, pattflt);
@@ -4315,14 +4315,14 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
       int nctimeboundsid = streamptr->basetime.ncvarboundsid;
       bool hasTimesteps = (nctimevarid != CDI_UNDEFID && streamptr->basetime.hasUnits);
 
-      int *ncStepIndices = Malloc(numTimesteps * sizeof(int));
+      int *ncStepIndices = (int *) Malloc(numTimesteps * sizeof(int));
       for (size_t tsID = 0; tsID < numTimesteps; ++tsID) ncStepIndices[tsID] = (int) tsID;
 
       CdiDateTime *vDateTimeList = NULL;
 
       if (hasTimesteps)
         {
-          vDateTimeList = Malloc(numTimesteps * sizeof(CdiDateTime));
+          vDateTimeList = (CdiDateTime *) Malloc(numTimesteps * sizeof(CdiDateTime));
 
           if (streamptr->basetime.isWRF)
             {
@@ -4331,7 +4331,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
             }
           else
             {
-              double *timevarBuffer = Malloc(numTimesteps * sizeof(double));
+              double *timevarBuffer = (double *) Malloc(numTimesteps * sizeof(double));
               cdf_get_var_double(fileID, nctimevarid, timevarBuffer);
               for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
                 vDateTimeList[tsID] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID, timevarBuffer), taxis0);

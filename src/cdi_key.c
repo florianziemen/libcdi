@@ -495,7 +495,7 @@ cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, int le
         }
       if (keyp->length == 0)
         {
-          keyp->v.s = Malloc(length_);
+          keyp->v.s = (unsigned char *) Malloc(length_);
           keyp->length = length;
         }
 

@@ -173,6 +173,7 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memType, void *g
     .outZip = &streamptr->tsteps[tsID].records[recID].zip,
     .filetype = streamptr->filetype,
     .memType = memType,
+    .datatype = vlistInqVarDatatype(vlistID, varID),
     .unreduced = streamptr->unreduced,
     .cgribexp = cgribexp,
     .gribbuffer = gribbuffer,
@@ -181,7 +182,6 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memType, void *g
     .gridsize = gridsize,
     .numMissVals = 0,
     .missval = vlistInqVarMissval(vlistID, varID),
-    .datatype = vlistInqVarDatatype(vlistID, varID),
   };
 }
 
@@ -280,7 +280,7 @@ grb_read_next_record(stream_t *streamptr, int recID, int memType, void *data, si
       // if this is the first call, init and start worker threads
       if (!jobs)
         {
-          jobs = Malloc((size_t) workerCount * sizeof(*jobs));
+          jobs = (JobDescriptorGRB *) Malloc((size_t) workerCount * sizeof(*jobs));
           streamptr->jobs = jobs;
           for (int i = 0; i < workerCount; i++) jobs[i].args.recID = -1;
           for (int i = 0; i < workerCount; i++) jobs[i].args.tsID = -1;

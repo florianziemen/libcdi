@@ -654,7 +654,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
               const double *pvals = gridAxisInq->axisValsPtr(gridID);
               genBounds = true;
               nvertex = 2;
-              pbounds = Malloc(2 * (size_t) dimlen * sizeof(double));
+              pbounds = (double *) Malloc(2 * (size_t) dimlen * sizeof(double));
               for (size_t i = 0; i < (size_t) dimlen - 1; ++i)
                 {
                   pbounds[i * 2 + 1] = (pvals[i] + pvals[i + 1]) * 0.5;
@@ -1456,7 +1456,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
   int ncbvarid = CDI_UNDEFID;
   int nvdimID = CDI_UNDEFID;
 
-  double *buffer = Malloc(2 * dimlen * sizeof(double));
+  double *buffer = (double *) Malloc(2 * dimlen * sizeof(double));
   double *lbounds = buffer;
   double *ubounds = buffer + dimlen;
   double *restrict levels;
@@ -1466,7 +1466,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
     levels = (double *) zaxisInqLevelsPtr(zaxisID);
   else
     {
-      levels = Malloc(sizeof(*levels) * dimlen);
+      levels = (double *) Malloc(sizeof(*levels) * dimlen);
       for (size_t i = 0; i < dimlen; ++i) levels[i] = (double) (i + 1);
     }
 
@@ -1535,7 +1535,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
 
   if (ncbvarid != CDI_UNDEFID)
     {
-      double *restrict zbounds = Malloc(2 * dimlen * sizeof(*zbounds));
+      double *zbounds = (double *) Malloc(2 * dimlen * sizeof(*zbounds));
       for (size_t i = 0; i < dimlen; ++i)
         {
           zbounds[2 * i] = lbounds[i];
@@ -1804,8 +1804,8 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
                     cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen + sizeof(bndsName), axisname);
                   }
                   {
-                    double *restrict zbounds = (double *) Malloc(4 * dimlen * sizeof(*zbounds)),
-                                     *restrict lbounds = zbounds + 2 * dimlen, *restrict ubounds = zbounds + 3 * dimlen;
+                    double *zbounds = (double *) Malloc(4 * dimlen * sizeof(*zbounds)), *lbounds = zbounds + 2 * dimlen,
+                           *ubounds = zbounds + 3 * dimlen;
                     zaxisInqLbounds(zaxisID, lbounds);
                     zaxisInqUbounds(zaxisID, ubounds);
                     for (size_t i = 0; i < dimlen; ++i)
@@ -2033,7 +2033,7 @@ cdfDefReducedGrid(stream_t *streamptr, int gridID, int gridIndex)
         cdf_enddef(fileID, streamptr->self);
         streamptr->ncmode = 2;
 
-        int *reducedPoints = Malloc((size_t) dimlen * sizeof(int));
+        int *reducedPoints = (int *) Malloc((size_t) dimlen * sizeof(int));
         gridInqReducedPoints(gridID, reducedPoints);
         cdf_put_var_int(fileID, ncvarid, reducedPoints);
         Free(reducedPoints);
@@ -2248,7 +2248,7 @@ cdfDefCoordinateVars(stream_t *streamptr)
 
   struct cdfPostDefActionList *delayed = NULL;
 
-  ncgrid_t *restrict ncgrid = streamptr->ncgrid;
+  ncgrid_t *ncgrid = streamptr->ncgrid;
   for (int index = 0; index < 2 * ngrids; ++index)
     {
       ncgrid[index].gridID = CDI_UNDEFID;

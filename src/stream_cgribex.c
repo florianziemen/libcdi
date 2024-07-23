@@ -2075,7 +2075,7 @@ cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int 
   if (sec2len > cgribexp->sec2len)
     {
       cgribexp->sec2len = sec2len;
-      cgribexp->sec2 = Realloc(cgribexp->sec2, sec2len * sizeof(int));
+      cgribexp->sec2 = (int *) Realloc(cgribexp->sec2, sec2len * sizeof(int));
     }
 
   int *isec0 = cgribexp->sec0;

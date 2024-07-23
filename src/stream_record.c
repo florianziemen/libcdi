@@ -51,7 +51,7 @@ recordNewEntry(stream_t *streamptr, int tsID)
   else  // Create the table the first time through.
     {
       recordSize = 1;  //  <<<<----
-      records = Malloc((size_t) recordSize * sizeof(record_t));
+      records = (record_t *) Malloc((size_t) recordSize * sizeof(record_t));
       for (int i = recordID; i < recordSize; i++) records[i].used = CDI_UNDEFID;
     }
 
@@ -63,7 +63,7 @@ recordNewEntry(stream_t *streamptr, int tsID)
       else if (recordSize < INT_MAX)      recordSize = INT_MAX;
       else Error("Cannot handle this many records!\n");
       // clang-format on
-      records = Realloc(records, (size_t) recordSize * sizeof(record_t));
+      records = (record_t *) Realloc(records, (size_t) recordSize * sizeof(record_t));
 
       for (int i = recordID; i < recordSize; i++) records[i].used = CDI_UNDEFID;
     }

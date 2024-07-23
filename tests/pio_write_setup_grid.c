@@ -133,18 +133,10 @@ setupGrid(const struct model_config *setup, MPI_Comm comm)
           {
             double *grid_chunk = (double *) Malloc(2 * grid_chunk_size * sizeof(*grid_chunk));
             /* anti-clockwise coordinates around Amazonia */
-            static const struct cart_coord region[4]
-#ifdef __cplusplus
-                = { { DEG2RAD(-25.0), DEG2RAD(-85.0) },
-                    { DEG2RAD(-18.0), DEG2RAD(-44.0) },
-                    { DEG2RAD(-7.0), DEG2RAD(-50.0) },
-                    { DEG2RAD(10.0), DEG2RAD(-80.0) } };
-#else
-                = { { .lon = DEG2RAD(-85.0), .lat = DEG2RAD(-25.0) },
-                    { .lon = DEG2RAD(-44.0), .lat = DEG2RAD(-18.0) },
-                    { .lon = DEG2RAD(-50.0), .lat = DEG2RAD(7.0) },
-                    { .lon = DEG2RAD(-80.0), .lat = DEG2RAD(10.0) } };
-#endif
+            static const struct cart_coord region[4] = { { .lon = DEG2RAD(-85.0), .lat = DEG2RAD(-25.0) },
+                                                         { .lon = DEG2RAD(-44.0), .lat = DEG2RAD(-18.0) },
+                                                         { .lon = DEG2RAD(-50.0), .lat = DEG2RAD(7.0) },
+                                                         { .lon = DEG2RAD(-80.0), .lat = DEG2RAD(10.0) } };
             const size_t xyRange[2][2] = { { (size_t) grid_local_chunk_start[1], (size_t) grid_local_chunk_start[0] },
                                            { (size_t) grid_local_chunk_shape[1], (size_t) grid_local_chunk_shape[0] } };
             computeCurvilinearChunk(grid_chunk, region, (size_t) nlon, (size_t) nlat, xyRange);

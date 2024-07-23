@@ -9,12 +9,7 @@
 #include <inttypes.h>
 
 #ifndef HOST_ENDIANNESS
-#ifdef __cplusplus
-static const uint32_t HOST_ENDIANNESS_temp[1] = { UINT32_C(0x00030201) };
-#define HOST_ENDIANNESS (((const unsigned char *) HOST_ENDIANNESS_temp)[0])
-#else
 #define HOST_ENDIANNESS (((const unsigned char *) &(const uint32_t[1]){ UINT32_C(0x00030201) })[0])
-#endif
 #endif
 
 uint32_t get_uint32(unsigned char *x);

@@ -2,6 +2,7 @@
 #include "config.h"
 #endif
 
+#include "cdi.h"
 #include "cdf_filter.h"
 #include "error.h"
 

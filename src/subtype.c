@@ -788,13 +788,6 @@ subtypeInqAttribute(int subtypeID, int index, const char *key, int *outValue)
              subtype_ptr->nentries, index);
     }
 
-#ifndef __cplusplus
-  if (!outValue) outValue = &(int){ 0 };
-#else
-  int dummy = 0;
-  if (!outValue) outValue = &dummy;
-#endif
-
   if (!key) return CDI_EINVAL;
   int iKey = attribute_to_index(key);
   if (iKey < 0) return CDI_EINVAL;
@@ -809,7 +802,7 @@ subtypeInqAttribute(int subtypeID, int index, const char *key, int *outValue)
     {
       if (attribute->key == iKey)
         {
-          *outValue = attribute->val;
+          if (outValue) *outValue = attribute->val;
           return CDI_NOERR;
         }
     }

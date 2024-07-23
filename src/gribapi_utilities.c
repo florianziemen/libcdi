@@ -275,7 +275,7 @@ makeDateString(struct tm *me)
   {
     size = 4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 4 + 1
   };
-  char *result = Malloc(size);
+  char *result = (char *) Malloc(size);
   assert(me->tm_year + 1900 < 10000 && me->tm_year + 1900 > -1000 && me->tm_mon >= 0 && me->tm_mon < 12 && me->tm_mday >= 1
          && me->tm_mday <= 31 && me->tm_hour >= 0 && me->tm_hour <= 24 && me->tm_min >= 0 && me->tm_min < 60 && me->tm_sec >= 0
          && me->tm_sec <= 60);
@@ -425,6 +425,7 @@ gribapiTimeIsFC(grib_handle *gh)
 
 struct cdiGribAPI_ts_str_map_elem cdiGribAPI_ts_str_map[] = {
   // clang-format off
+  [0]             = {  0, "" },
   [TSTEP_INSTANT] = {  0, "instant" },
   [TSTEP_AVG]     = {  8, "avg" },
   [TSTEP_ACCUM]   = {  8, "accum" },
@@ -435,8 +436,7 @@ struct cdiGribAPI_ts_str_map_elem cdiGribAPI_ts_str_map[] = {
   [TSTEP_SD]      = {  8, "sd" },
   [TSTEP_COV]     = {  8, "cov" },
   [TSTEP_RATIO]   = {  8, "ratio" },
-  [TSTEP_SUM]     = {  8, "sum" },
-                    {  0, "" }
+  [TSTEP_SUM]     = {  8, "sum" }
   // clang-format on
 };
 
@@ -454,7 +454,7 @@ gribapiGetTsteptype(grib_handle *gh)
       int status = grib_get_string(gh, "stepType", stepType, &len);
       if (status == 0 && len > 1 && len < 256)
         {
-          for (int i = TSTEP_INSTANT; cdiGribAPI_ts_str_map[i].sname[0]; ++i)
+          for (int i = TSTEP_INSTANT; i <= TSTEP_SUM; ++i)
             if (strncmp(cdiGribAPI_ts_str_map[i].sname, stepType, len) == 0)
               {
                 tsteptype = i;

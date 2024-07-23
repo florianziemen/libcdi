@@ -500,7 +500,7 @@ cdi_generate_vars(stream_t *streamptr)
 {
   int vlistID = streamptr->vlistID;
 
-  int *varids = Malloc((size_t) varTableUsed * sizeof(int));
+  int *varids = (int *) Malloc((size_t) varTableUsed * sizeof(int));
   for (int varID = 0; varID < varTableUsed; varID++) varids[varID] = (int) varID;
   /*
     if (streamptr->sortname)
@@ -582,7 +582,7 @@ cdi_generate_vars(stream_t *streamptr)
 
       if (ltype1 == 0 && zaxistype == ZAXIS_GENERIC && nlevels == 1 && levelTable[0].level1 == 0) zaxistype = ZAXIS_SURFACE;
 
-      double *dlevels = Malloc((size_t) nlevels * sizeof(double));
+      double *dlevels = (double *) Malloc((size_t) nlevels * sizeof(double));
 
       /*
       if ( hasBounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
@@ -638,7 +638,7 @@ cdi_generate_vars(stream_t *streamptr)
       double *dlevels1 = NULL, *dlevels2 = NULL;
       if (hasBounds)
         {
-          dlevels1 = Malloc(2 * (size_t) nlevels * sizeof(double));
+          dlevels1 = (double *) Malloc(2 * (size_t) nlevels * sizeof(double));
           dlevels2 = dlevels1 + nlevels;
           for (int levelID = 0; levelID < nlevels; levelID++) dlevels1[levelID] = level_sf * levelTable[levelID].level1;
           for (int levelID = 0; levelID < nlevels; levelID++) dlevels2[levelID] = level_sf * levelTable[levelID].level2;
@@ -800,7 +800,7 @@ zaxis_compare(int zaxisID, int zaxistype, int nlevels, const double *levels, con
 
           if (!differ && hasBounds)
             {
-              double *bounds = Malloc(2 * (size_t) nlevels * sizeof(double));
+              double *bounds = (double *) Malloc(2 * (size_t) nlevels * sizeof(double));
               zaxisInqLbounds(zaxisID, bounds);
               zaxisInqUbounds(zaxisID, bounds + nlevels);
               for (int levelID = 0; levelID < nlevels; levelID++)

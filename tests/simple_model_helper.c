@@ -76,7 +76,7 @@ void
 composeFilename(char **buf, const char *fname_prefix, int tfID, const char *suffix)
 {
   size_t fnSize = strlen(fname_prefix) + (tfID >= 0 ? 1 + sizeof(int) * 3 : 0) + 1 + strlen(suffix) + 1;
-  char *filename = Realloc(*buf, fnSize);
+  char *filename = (char *) Realloc(*buf, fnSize);
   int plen = tfID >= 0 ? snprintf(filename, fnSize, "%s_%d.%s", fname_prefix, tfID, suffix)
                        : snprintf(filename, fnSize, "%s.%s", fname_prefix, suffix);
   if ((size_t) plen >= fnSize)
@@ -140,18 +140,10 @@ createLocalCurvilinearGrid(int sizex, int sizey)
   gridDefYsize(gridID, sizey);
   {
     /* anti-clockwise coordinates around Amazonia */
-    static const struct cart_coord region[4]
-#ifdef __cplusplus
-        = { { DEG2RAD(-25.0), DEG2RAD(-85.0) },
-            { DEG2RAD(-18.0), DEG2RAD(-44.0) },
-            { DEG2RAD(-7.0), DEG2RAD(-50.0) },
-            { DEG2RAD(10.0), DEG2RAD(-80.0) } };
-#else
-        = { { .lon = DEG2RAD(-85.0), .lat = DEG2RAD(-25.0) },
-            { .lon = DEG2RAD(-44.0), .lat = DEG2RAD(-18.0) },
-            { .lon = DEG2RAD(-50.0), .lat = DEG2RAD(7.0) },
-            { .lon = DEG2RAD(-80.0), .lat = DEG2RAD(10.0) } };
-#endif
+    static const struct cart_coord region[4] = { { .lon = DEG2RAD(-85.0), .lat = DEG2RAD(-25.0) },
+                                                 { .lon = DEG2RAD(-44.0), .lat = DEG2RAD(-18.0) },
+                                                 { .lon = DEG2RAD(-50.0), .lat = DEG2RAD(7.0) },
+                                                 { .lon = DEG2RAD(-80.0), .lat = DEG2RAD(10.0) } };
     double(*gridCoords)[sizey][sizex] = (double(*)[sizey][sizex]) Malloc(sizeof(*gridCoords) * gridsize * 2);
     {
       const size_t xyRange[2][2] = { { 0, 0 }, { (size_t) sizex, (size_t) sizey } };
@@ -178,7 +170,7 @@ intermediateCoord(struct cart_coord p1, struct cart_coord p2, double f)
   double d = cartDistance(p1, p2), sine_of_d = sin(d), A = sin((1 - f) * d) / sine_of_d, B = sin(f * d) / sine_of_d,
          x = A * cos(p1.lat) * cos(p1.lon) + B * cos(p2.lat) * cos(p2.lon),
          y = A * cos(p1.lat) * sin(p1.lon) + B * cos(p2.lat) * sin(p2.lon), z = A * sin(p1.lat) + B * sin(p2.lat);
-  struct cart_coord ic = { .lat = atan2(z, sqrt(x * x + y * y)), .lon = atan2(y, x) };
+  struct cart_coord ic = { .lon = atan2(y, x), .lat = atan2(z, sqrt(x * x + y * y)) };
   return ic;
 }
 
@@ -232,7 +224,7 @@ int
 PPM_prime_factorization_32(uint32_t n, uint32_t **factors)
 {
   if (n <= 1) return 0;
-  uint32_t *restrict pfactors = Realloc(*factors, 32 * sizeof(pfactors[0]));
+  uint32_t *restrict pfactors = (uint32_t *) Realloc(*factors, 32 * sizeof(pfactors[0]));
   size_t numFactors = 0;
   uint32_t unfactored = n;
   while (!(unfactored & 1))

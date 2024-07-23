@@ -86,7 +86,7 @@ cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int attl
   if (atttype == CDI_DATATYPE_INT32)
     {
       int attint = 0;
-      int *pattint = attlen > 1 ? Malloc((size_t) attlen * sizeof(int)) : &attint;
+      int *pattint = attlen > 1 ? (int *) Malloc((size_t) attlen * sizeof(int)) : &attint;
       cdiInqAttInt(gridID, CDI_GLOBAL, attname, attlen, pattint);
       for (int i = 0; i < attlen; ++i) attflt[i] = (double) pattint[i];
       if (attlen > 1) Free(pattint);
@@ -358,7 +358,7 @@ gridGenXvals(size_t xsize, double xfirst, double xlast, double xinc, double *res
 static void
 calc_gaussgrid(double *restrict yvals, size_t ysize, double yfirst, double ylast)
 {
-  double *restrict yw = Malloc(ysize * sizeof(double));
+  double *restrict yw = (double *) Malloc(ysize * sizeof(double));
   gaussianLatitudes(ysize, yvals, yw);
   Free(yw);
   for (size_t i = 0; i < ysize; i++) yvals[i] = asin(yvals[i]) / M_PI * 180.0;
@@ -390,7 +390,7 @@ gridGenYvalsGaussian(size_t ysize, double yfirst, double ylast, double *restrict
         ny -= ny % 2;
         if (ny > 0 && (size_t) ny > ysize && ny < 4096)
           {
-            double *ytmp = Malloc((size_t) ny * sizeof(double));
+            double *ytmp = (double *) Malloc((size_t) ny * sizeof(double));
             calc_gaussgrid(ytmp, (size_t) ny, yfirst, ylast);
 
             size_t nstart = (size_t) ny - ysize;
@@ -2649,7 +2649,7 @@ grid_complete(grid_t *grid)
         if (grid->x.flag == 2)
           {
             assert(gridtype != GRID_UNSTRUCTURED && gridtype != GRID_CURVILINEAR);
-            double *xvals = Malloc(grid->x.size * sizeof(double));
+            double *xvals = (double *) Malloc(grid->x.size * sizeof(double));
             gridGenXvals(grid->x.size, grid->x.first, grid->x.last, grid->x.inc, xvals);
             grid->x.vals = xvals;
             // gridDefXinc(gridID, grid->x.inc);
@@ -4559,7 +4559,7 @@ gridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, int unpackBu
   if (memberMask & gridHasReducedPointsFlag)
     {
       xassert(gridP->reducedPointsSize);
-      gridP->reducedPoints = Malloc((size_t) gridP->reducedPointsSize * sizeof(int));
+      gridP->reducedPoints = (int *) Malloc((size_t) gridP->reducedPointsSize * sizeof(int));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, gridP->reducedPoints, gridP->reducedPointsSize,
                       CDI_DATATYPE_INT, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);
@@ -4571,7 +4571,7 @@ gridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, int unpackBu
     {
       size_t size = isIrregular ? gridP->size : gridP->x.size;
       xassert(size <= INT_MAX);
-      gridP->x.vals = Malloc(size * sizeof(double));
+      gridP->x.vals = (double *) Malloc(size * sizeof(double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, gridP->x.vals, (int) size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);
       xassert(cdiCheckSum(CDI_DATATYPE_FLT, (int) size, gridP->x.vals) == d);
@@ -4581,7 +4581,7 @@ gridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, int unpackBu
     {
       size_t size = isIrregular ? gridP->size : gridP->y.size;
       xassert(size > 0 && size <= INT_MAX);
-      gridP->y.vals = Malloc(size * sizeof(double));
+      gridP->y.vals = (double *) Malloc(size * sizeof(double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, gridP->y.vals, (int) size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);
       xassert(cdiCheckSum(CDI_DATATYPE_FLT, (int) size, gridP->y.vals) == d);
@@ -4591,7 +4591,7 @@ gridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, int unpackBu
     {
       size_t size = gridP->size;
       xassert(size > 0 && size <= INT_MAX);
-      gridP->area = Malloc(size * sizeof(double));
+      gridP->area = (double *) Malloc(size * sizeof(double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, gridP->area, (int) size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);
       xassert(cdiCheckSum(CDI_DATATYPE_FLT, (int) size, gridP->area) == d);
@@ -4602,7 +4602,7 @@ gridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, int unpackBu
       size_t size = (size_t) gridP->nvertex * (isIrregular ? gridP->size : gridP->x.size);
       xassert(size > 0 && size <= INT_MAX);
 
-      gridP->x.bounds = Malloc(size * sizeof(double));
+      gridP->x.bounds = (double *) Malloc(size * sizeof(double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, gridP->x.bounds, (int) size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);
       xassert(cdiCheckSum(CDI_DATATYPE_FLT, (int) size, gridP->x.bounds) == d);
@@ -4612,7 +4612,7 @@ gridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, int unpackBu
     {
       size_t size = (size_t) gridP->nvertex * (isIrregular ? gridP->size : gridP->y.size);
       xassert(size && size <= INT_MAX);
-      gridP->y.bounds = Malloc(size * sizeof(double));
+      gridP->y.bounds = (double *) Malloc(size * sizeof(double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, gridP->y.bounds, (int) size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);
       xassert(cdiCheckSum(CDI_DATATYPE_FLT, (int) size, gridP->y.bounds) == d);
@@ -4622,7 +4622,7 @@ gridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, int unpackBu
     {
       size_t size = gridP->size;
       xassert(size && size <= INT_MAX);
-      gridP->mask = Malloc(size * sizeof(mask_t));
+      gridP->mask = (mask_t *) Malloc(size * sizeof(mask_t));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, gridP->mask, (int) size, CDI_DATATYPE_UCHAR, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);
       xassert(cdiCheckSum(CDI_DATATYPE_UCHAR, (int) size, gridP->mask) == d);
@@ -4632,7 +4632,7 @@ gridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, int unpackBu
     {
       size_t size = gridP->size;
       xassert(size && size <= INT_MAX);
-      gridP->mask_gme = Malloc(size * sizeof(mask_t));
+      gridP->mask_gme = (mask_t *) Malloc(size * sizeof(mask_t));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, gridP->mask_gme, (int) size, CDI_DATATYPE_UCHAR, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);
       xassert(cdiCheckSum(CDI_DATATYPE_UCHAR, (int) size, gridP->mask_gme) == d);

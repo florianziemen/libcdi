@@ -1219,12 +1219,7 @@ xlc_r -g -O3 -qhot -q64 -qarch=auto -qtune=auto -qreport -DTEST_ENCODE encode_ar
 #define GRIBPACK unsigned char
 
 #ifndef HOST_ENDIANNESS
-#ifdef __cplusplus
-static const uint32_t HOST_ENDIANNESS_temp[1] = { UINT32_C(0x00030201) };
-#define HOST_ENDIANNESS (((const unsigned char *) HOST_ENDIANNESS_temp)[0])
-#else
 #define HOST_ENDIANNESS (((const unsigned char *) &(const uint32_t[1]){ UINT32_C(0x00030201) })[0])
-#endif
 #endif
 
 #define IS_BIGENDIAN() (HOST_ENDIANNESS == 0)

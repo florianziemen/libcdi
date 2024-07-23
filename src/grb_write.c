@@ -58,7 +58,7 @@ grb_encode(int filetype, int memType, int varID, int levelID, int vlistID, int g
         {
           // printf("gribapi write: convert float to double\n");
           const float *dataf = (const float *) data;
-          double *datad = Malloc((size_t) datasize * sizeof(double));
+          double *datad = (double *) Malloc((size_t) datasize * sizeof(double));
           for (size_t i = 0; i < (size_t) datasize; ++i) datad[i] = (double) dataf[i];
           datap = (const void *) datad;
         }
