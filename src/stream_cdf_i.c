@@ -533,7 +533,7 @@ cdf_time_dimid(int fileID, int ndims, int nvars, ncdim_t *ncdims)
     {
       dimname[0] = 0;
       cdf_inq_dimname(fileID, ncdims[dimid].dimid, dimname);
-      if ((dimname[0] = 'T' || dimname[0] == 't') && dimname[1] == 'i' && dimname[2] == 'm' && dimname[3] == 'e') return dimid;
+      if ((dimname[0] == 'T' || dimname[0] == 't') && dimname[1] == 'i' && dimname[2] == 'm' && dimname[3] == 'e') return dimid;
     }
 
   for (int varid = 0; varid < nvars; ++varid)

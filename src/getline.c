@@ -42,7 +42,6 @@
 #include <limits.h>
 #include <unistd.h>
 #include <string.h>
-#include <limits.h>
 
 #ifndef SSIZE_MAX
 #define SSIZE_MAX LONG_MAX

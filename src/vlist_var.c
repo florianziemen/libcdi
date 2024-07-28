@@ -1081,13 +1081,10 @@ vlistInqFlag(int vlistID, int varID, int levID)
 {
   var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->levinfo)
-    return varptr->levinfo[levID].flag;
-  else
-    {
-      levinfo_t li = DEFAULT_LEVINFO(levID);
-      return li.flag;
-    }
+  if (varptr->levinfo) return varptr->levinfo[levID].flag;
+
+  levinfo_t li = DEFAULT_LEVINFO(levID);
+  return li.flag;
 }
 
 int
@@ -1147,13 +1144,10 @@ vlistMergedLevel(int vlistID, int varID, int levelID)
 {
   var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->levinfo)
-    return varptr->levinfo[levelID].mlevelID;
-  else
-    {
-      levinfo_t li = DEFAULT_LEVINFO(levelID);
-      return li.mlevelID;
-    }
+  if (varptr->levinfo) return varptr->levinfo[levelID].mlevelID;
+
+  levinfo_t li = DEFAULT_LEVINFO(levelID);
+  return li.mlevelID;
 }
 
 void
@@ -1179,13 +1173,10 @@ vlistInqIndex(int vlistID, int varID, int levelID)
 {
   var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->levinfo)
-    return varptr->levinfo[levelID].index;
-  else
-    {
-      levinfo_t li = DEFAULT_LEVINFO(levelID);
-      return li.index;
-    }
+  if (varptr->levinfo) return varptr->levinfo[levelID].index;
+
+  levinfo_t li = DEFAULT_LEVINFO(levelID);
+  return li.index;
 }
 
 void

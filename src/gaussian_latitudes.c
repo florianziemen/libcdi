@@ -21,7 +21,7 @@
 #endif
 
 static void
-cpledn(size_t kn, size_t kodd, double *pfn, double pdx, int kflag, double *pw, double *pdxn, double *pxmod)
+cpledn(size_t kn, size_t kodd, const double *pfn, double pdx, int kflag, double *pw, double *pdxn, double *pxmod)
 {
   // 1.0 Newton iteration step
 
@@ -60,8 +60,6 @@ cpledn(size_t kn, size_t kodd, double *pfn, double pdx, int kflag, double *pw, d
         }
       *pw = (double) (2 * kn + 1) / (zdlldn * zdlldn);
     }
-
-  return;
 }
 
 static void
@@ -92,8 +90,6 @@ gawl(double *pfn, double *pl, double *pw, size_t kn)
 
   *pl = zdlxn;
   *pw = zw;
-
-  return;
 }
 
 static void
@@ -169,8 +165,6 @@ gauaw(size_t kn, double *restrict pl, double *restrict pw)
 
   free(zfnlat);
   free(zfn);
-
-  return;
 }
 
 void

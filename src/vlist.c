@@ -428,8 +428,8 @@ vgzZAxisSearch(int id, void *res, void *data)
       state->resIDValue = id;
       return CDI_APPLY_STOP;
     }
-  else
-    return CDI_APPLY_GO_ON;
+
+  return CDI_APPLY_GO_ON;
 }
 
 static int
@@ -1596,31 +1596,26 @@ vlist_check_contents(int vlistID)
 void
 resize_opt_grib_entries(var_t *var, int nentries)
 {
-  if (var->opt_grib_kvpair_size >= nentries)
-    {
-      return; /* nothing to do; array is still large enough */
-    }
-  else
-    {
-      if (CDI_Debug) Message("resize data structure, %d -> %d", var->opt_grib_kvpair_size, nentries);
+  if (var->opt_grib_kvpair_size >= nentries) return;  // nothing to do; array is still large enough
 
-      int new_size = (2 * var->opt_grib_kvpair_size) > nentries ? (2 * var->opt_grib_kvpair_size) : nentries;
-      opt_key_val_pair_t *tmp = (opt_key_val_pair_t *) Malloc((size_t) new_size * sizeof(opt_key_val_pair_t));
-      for (int i = 0; i < var->opt_grib_kvpair_size; ++i)
-        {
-          tmp[i] = var->opt_grib_kvpair[i];
-        }
-      for (int i = var->opt_grib_kvpair_size; i < new_size; ++i)
-        {
-          tmp[i].int_val = 0;
-          tmp[i].dbl_val = 0;
-          tmp[i].update = false;
-          tmp[i].keyword = NULL;
-        }  // for
-      var->opt_grib_kvpair_size = new_size;
-      Free(var->opt_grib_kvpair);
-      var->opt_grib_kvpair = tmp;
+  if (CDI_Debug) Message("resize data structure, %d -> %d", var->opt_grib_kvpair_size, nentries);
+
+  int new_size = (2 * var->opt_grib_kvpair_size) > nentries ? (2 * var->opt_grib_kvpair_size) : nentries;
+  opt_key_val_pair_t *tmp = (opt_key_val_pair_t *) Malloc((size_t) new_size * sizeof(opt_key_val_pair_t));
+  for (int i = 0; i < var->opt_grib_kvpair_size; ++i)
+    {
+      tmp[i] = var->opt_grib_kvpair[i];
     }
+  for (int i = var->opt_grib_kvpair_size; i < new_size; ++i)
+    {
+      tmp[i].int_val = 0;
+      tmp[i].dbl_val = 0;
+      tmp[i].update = false;
+      tmp[i].keyword = NULL;
+    }  // for
+  var->opt_grib_kvpair_size = new_size;
+  Free(var->opt_grib_kvpair);
+  var->opt_grib_kvpair = tmp;
 }
 
 /*

@@ -93,7 +93,6 @@ static void
 memInternalProblem(const char *caller, const char *fmt, ...)
 {
   va_list args;
-
   va_start(args, fmt);
 
   printf("\n");
