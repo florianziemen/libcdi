@@ -252,7 +252,7 @@ dnl Checks for header files:
 AC_CHECK_HEADERS([malloc.h sys/time.h],,,[AC_INCLUDES_DEFAULT])
 AX_EXECINFO
 dnl Checks for the availability of functions:
-AC_CHECK_FUNCS([mallinfo pwrite])
+AC_CHECK_FUNCS([mallinfo pwrite timegm])
 AC_REPLACE_FUNCS([getline])
 dnl Check for UUID library:
 ACX_UUID
