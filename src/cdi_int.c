@@ -47,7 +47,8 @@ int CDI_Reduce_Dim = 0;
 int CDI_Shuffle = 0;
 int CDI_Test = 0;
 size_t CDI_Netcdf_Hdr_Pad = 0UL;
-size_t CDI_Chunk_Cache = 0UL;
+bool CDI_Chunk_Cache_Info = false;
+long CDI_Chunk_Cache = -1L;
 size_t CDI_Chunk_Cache_Max = 0UL;
 bool CDI_Netcdf_Lazy_Grid_Load = false;
 
@@ -367,14 +368,17 @@ cdiInitialize(void)
       value = cdi_getenv_int("CDI_NETCDF_HDR_PAD");
       if (value >= 0) CDI_Netcdf_Hdr_Pad = (size_t) value;
 
+      value = cdi_getenv_int("CDI_CHUNK_CACHE_INFO");
+      if (value > 0) CDI_Chunk_Cache_Info = true;
+
       value = cdi_getenv_int("CDI_CHUNK_CACHE");
-      if (value >= 0) CDI_Chunk_Cache = (size_t) value;
+      if (value >= 0) CDI_Chunk_Cache = value;
 
       value = cdi_getenv_int("CDI_CHUNK_CACHE_MAX");
       if (value >= 0) CDI_Chunk_Cache_Max = (size_t) value;
 
       value = cdi_getenv_int("CDI_TEST");
-      if (value >= 0) CDI_Test = (size_t) value;
+      if (value >= 0) CDI_Test = (int) value;
 
       envstr = getenv("CDI_GRIB1_TEMPLATE");
       if (envstr) CDI_GRIB1_Template = envstr;
@@ -470,13 +474,13 @@ cdiInitialize(void)
       if (envstr)
         {
           // clang-format off
-	  if      (strncmp(envstr, "standard", 8)  == 0) CDI_Default_Calendar = CALENDAR_STANDARD;
-	  else if (strncmp(envstr, "gregorian", 9) == 0) CDI_Default_Calendar = CALENDAR_GREGORIAN;
-	  else if (strncmp(envstr, "proleptic", 9) == 0) CDI_Default_Calendar = CALENDAR_PROLEPTIC;
-	  else if (strncmp(envstr, "360days", 7)   == 0) CDI_Default_Calendar = CALENDAR_360DAYS;
-	  else if (strncmp(envstr, "365days", 7)   == 0) CDI_Default_Calendar = CALENDAR_365DAYS;
-	  else if (strncmp(envstr, "366days", 7)   == 0) CDI_Default_Calendar = CALENDAR_366DAYS;
-	  else if (strncmp(envstr, "none", 4)      == 0) CDI_Default_Calendar = CALENDAR_NONE;
+	      if      (strncmp(envstr, "standard", 8)  == 0) CDI_Default_Calendar = CALENDAR_STANDARD;
+	      else if (strncmp(envstr, "gregorian", 9) == 0) CDI_Default_Calendar = CALENDAR_GREGORIAN;
+	      else if (strncmp(envstr, "proleptic", 9) == 0) CDI_Default_Calendar = CALENDAR_PROLEPTIC;
+	      else if (strncmp(envstr, "360days", 7)   == 0) CDI_Default_Calendar = CALENDAR_360DAYS;
+	      else if (strncmp(envstr, "365days", 7)   == 0) CDI_Default_Calendar = CALENDAR_365DAYS;
+	      else if (strncmp(envstr, "366days", 7)   == 0) CDI_Default_Calendar = CALENDAR_366DAYS;
+	      else if (strncmp(envstr, "none", 4)      == 0) CDI_Default_Calendar = CALENDAR_NONE;
           // clang-format on
           if (CDI_Debug) Message("Default calendar set to %s!", envstr);
         }

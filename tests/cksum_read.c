@@ -11,10 +11,6 @@
 #include "var_cksum.h"
 #include "stream_cksum.h"
 
-#ifdef __cplusplus
-#define PRIx32 ""
-#endif
-
 static struct cksum_table *
 read_table(const char *table_fname, size_t *table_len)
 {

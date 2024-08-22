@@ -53,7 +53,7 @@ int createLocalCurvilinearGrid(int sizex, int sizey);
 
 struct cart_coord
 {
-  double lat, lon;
+  double lon, lat;
 };
 
 /*

@@ -1,3 +1,15 @@
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
 #include <limits.h>
 
 #include "cdi.h"
@@ -51,19 +63,19 @@ tstepsNewEntry(stream_t *streamptr)
 }
 
 void
-cdi_create_timesteps(int numTimesteps, stream_t *streamptr)
+cdi_create_timesteps(size_t numTimesteps, stream_t *streamptr)
 {
   streamptr->ntsteps = (long) numTimesteps;
-  if (numTimesteps < 0 || streamptr->tstepsTableSize > 0) return;
+  if (streamptr->tstepsTableSize > 0) return;
 
-  int ntsteps = (numTimesteps == 0) ? 1 : numTimesteps;
+  size_t ntsteps = (numTimesteps == 0) ? 1 : numTimesteps;
 
-  streamptr->tsteps = (tsteps_t *) Malloc((size_t) ntsteps * sizeof(tsteps_t));
+  streamptr->tsteps = (tsteps_t *) Malloc(ntsteps * sizeof(tsteps_t));
 
-  streamptr->tstepsTableSize = ntsteps;
-  streamptr->tstepsNextID = ntsteps;
+  streamptr->tstepsTableSize = (int) ntsteps;
+  streamptr->tstepsNextID = (int) ntsteps;
 
-  for (int tsID = 0; tsID < ntsteps; tsID++)
+  for (size_t tsID = 0; tsID < ntsteps; tsID++)
     {
       tstepsInitEntry(&streamptr->tsteps[tsID]);
     }

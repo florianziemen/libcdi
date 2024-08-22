@@ -309,10 +309,7 @@ typedef struct
   int have_missval;
   int shuffle;
   // netcdf4/HDF5 filter
-  unsigned int filterId;
-  size_t numParams;
-  size_t maxParams;
-  unsigned int params[8];
+  char *filterSpec;
 
   int comptype;   // compression type
   int complevel;  // compression level
@@ -411,7 +408,8 @@ extern int CDI_CMOR_Mode;
 extern int CDI_Reduce_Dim;
 extern int CDI_Shuffle;
 extern size_t CDI_Netcdf_Hdr_Pad;
-extern size_t CDI_Chunk_Cache;
+extern bool CDI_Chunk_Cache_Info;
+extern long CDI_Chunk_Cache;
 extern size_t CDI_Chunk_Cache_Max;
 extern bool CDI_Netcdf_Lazy_Grid_Load;
 extern int STREAM_Debug;
@@ -463,7 +461,7 @@ void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *c
 
 int recordNewEntry(stream_t *streamptr, int tsID);
 
-void cdi_create_timesteps(int numTimesteps, stream_t *streamptr);
+void cdi_create_timesteps(size_t numTimesteps, stream_t *streamptr);
 
 void recordInitEntry(record_t *record);
 
@@ -536,8 +534,8 @@ extern "C" {
 
 void cdiDefTableID(int tableID);
 
-void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals);
-void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals);
+void gridGenXvals(size_t xsize, double xfirst, double xlast, double xinc, double *xvals);
+void gridGenYvals(int gridtype, size_t ysize, double yfirst, double ylast, double yinc, double *yvals);
 
 static inline
 void cdi_check_gridsize_int_limit(const char *format, SizeType gridsize)

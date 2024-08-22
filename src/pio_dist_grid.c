@@ -133,7 +133,7 @@ struct cdiPioDistGridExtraData
 #endif
 
 #ifdef HAVE_PPM_DIST_ARRAY_H
-static void cdiPioDistGridInit(grid_t *gridptr, int gridtype, int size, int xsize, int ysize, int nvertex,
+static void cdiPioDistGridInit(grid_t *gridptr, int gridtype, size_t size, size_t xsize, size_t ysize, int nvertex,
                                const int (*xy_decomposition)[2], Xt_idxlist partDesc2D, Xt_idxlist partDescX, Xt_idxlist partDescY);
 #endif
 
@@ -150,7 +150,8 @@ cdiPioDistGridCreate(int gridtype, int size, int xsize, int ysize, int nvertex, 
     }
   gridDefNvertex(gridID, nvertex);
   grid_t *gridptr = grid_to_pointer(gridID);
-  cdiPioDistGridInit(gridptr, gridtype, size, xsize, ysize, nvertex, xy_decomposition, partDesc2D, partDescX, partDescY);
+  cdiPioDistGridInit(gridptr, gridtype, (size_t) size, (size_t) xsize, (size_t) ysize, nvertex, xy_decomposition, partDesc2D,
+                     partDescX, partDescY);
   return gridID;
 #else
   (void) gridtype;
@@ -421,11 +422,11 @@ static bool cdiPioDistGridInitOnceState = false;
 #endif
 
 static void
-cdiPioDistGridInit(grid_t *gridptr, int gridtype, int size, int xsize, int ysize, int nvertex, const int (*xy_decomposition)[2],
-                   Xt_idxlist partDesc2D, Xt_idxlist partDescX, Xt_idxlist partDescY)
+cdiPioDistGridInit(grid_t *gridptr, int gridtype, size_t size, size_t xsize, size_t ysize, int nvertex,
+                   const int (*xy_decomposition)[2], Xt_idxlist partDesc2D, Xt_idxlist partDescX, Xt_idxlist partDescY)
 {
   CDI_PIO_DIST_GRID_INIT_ONCE();
-  struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) (gridptr->extraData = Malloc(sizeof(*extraData)));
+  struct cdiPioDistGridExtraData *extraData = gridptr->extraData = Malloc(sizeof(*extraData));
   extraData->rmaEnabled = false;
   struct PPM_global_array_desc *sub_arrays = extraData->sub_arrays;
   sub_arrays[cdiPioGDsaXVals].element_dt = MPI_DOUBLE;
@@ -447,15 +448,15 @@ cdiPioDistGridInit(grid_t *gridptr, int gridtype, int size, int xsize, int ysize
         {
           sub_arrays[saIdx].a_rank = 2;
           sub_arrays[saIdx].rect[0].first = 0;
-          sub_arrays[saIdx].rect[0].size = ysize;
+          sub_arrays[saIdx].rect[0].size = (int32_t) ysize;
           sub_arrays[saIdx].rect[1].first = 0;
-          sub_arrays[saIdx].rect[1].size = xsize;
+          sub_arrays[saIdx].rect[1].size = (int32_t) xsize;
           extraData->defRedists[saIdx] = NULL;
         }
       irregular = true;
       break;
     case GRID_UNSTRUCTURED:
-      for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx) sub_arrays[saIdx].rect[0].size = size;
+      for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx) sub_arrays[saIdx].rect[0].size = (int32_t) size;
       irregular = true;
       /*-fallthrough*/
     case GRID_GENERIC:
@@ -476,13 +477,13 @@ cdiPioDistGridInit(grid_t *gridptr, int gridtype, int size, int xsize, int ysize
         }
       if (irregular) break;
       /* FIXME: make the following three 2D */
-      sub_arrays[cdiPioGDsaArea].rect[0].size = size;
-      sub_arrays[cdiPioGDsaMask].rect[0].size = size;
-      sub_arrays[cdiPioGDsaMaskGME].rect[0].size = size;
-      sub_arrays[cdiPioGDsaXVals].rect[0].size = xsize;
-      sub_arrays[cdiPioGDsaYVals].rect[0].size = ysize;
-      sub_arrays[cdiPioGDsaXBounds].rect[0].size = xsize;
-      sub_arrays[cdiPioGDsaYBounds].rect[0].size = ysize;
+      sub_arrays[cdiPioGDsaArea].rect[0].size = (int32_t) size;
+      sub_arrays[cdiPioGDsaMask].rect[0].size = (int32_t) size;
+      sub_arrays[cdiPioGDsaMaskGME].rect[0].size = (int32_t) size;
+      sub_arrays[cdiPioGDsaXVals].rect[0].size = (int32_t) xsize;
+      sub_arrays[cdiPioGDsaYVals].rect[0].size = (int32_t) ysize;
+      sub_arrays[cdiPioGDsaXBounds].rect[0].size = (int32_t) xsize;
+      sub_arrays[cdiPioGDsaYBounds].rect[0].size = (int32_t) ysize;
       break;
     case GRID_GAUSSIAN_REDUCED:
     default: Error("Unexpected or unsupported grid type %d", gridtype);
@@ -1079,7 +1080,7 @@ cdiPioDistGridDefYVals(grid_t *gridptr, const double *yvals)
 }
 
 static double
-cdiPioDistGridInqXorYVal(grid_t *gridptr, enum cdiPioGDsa saIdx, const double *vals, int index)
+cdiPioDistGridInqXorYVal(grid_t *gridptr, enum cdiPioGDsa saIdx, const double *vals, SizeType index)
 {
   double val = 0;
   if (vals)
@@ -1090,7 +1091,7 @@ cdiPioDistGridInqXorYVal(grid_t *gridptr, enum cdiPioGDsa saIdx, const double *v
           struct axisReduction *aReduce = extraData->aReduce + saIdx;
           return aReduce->first;
         }
-      else if (index == gridptr->size - 1)
+      else if ((size_t) index == gridptr->size - 1)
         {
           struct axisReduction *aReduce = extraData->aReduce + saIdx;
           return aReduce->last;
@@ -1112,13 +1113,13 @@ cdiPioDistGridInqXorYVal(grid_t *gridptr, enum cdiPioGDsa saIdx, const double *v
 }
 
 static double
-cdiPioDistGridInqXVal(grid_t *gridptr, int index)
+cdiPioDistGridInqXVal(grid_t *gridptr, SizeType index)
 {
   return cdiPioDistGridInqXorYVal(gridptr, cdiPioGDsaXVals, gridptr->x.vals, index);
 }
 
 static double
-cdiPioDistGridInqYVal(grid_t *gridptr, int index)
+cdiPioDistGridInqYVal(grid_t *gridptr, SizeType index)
 {
   return cdiPioDistGridInqXorYVal(gridptr, cdiPioGDsaYVals, gridptr->y.vals, index);
 }
@@ -1480,9 +1481,10 @@ cdiPioDistGridUnpackArrays(grid_t *gridptr, int memberMask, char *unpackBuffer, 
       }
     else if (type == GRID_CURVILINEAR)
       {
-        Xt_int global_size[cdiPioGDsaMaxRank] = { gridptr->y.size, gridptr->x.size }, local_start[cdiPioGDsaMaxRank];
+        Xt_int global_size[cdiPioGDsaMaxRank] = { (Xt_int) gridptr->y.size, (Xt_int) gridptr->x.size },
+               local_start[cdiPioGDsaMaxRank];
         int local_size[cdiPioGDsaMaxRank];
-        Xt_idxlist *partDescClient2D = (Xt_idxlist *) (Malloc((size_t) numClientsInGroup * sizeof(*partDescClient2D)));
+        Xt_idxlist *partDescClient2D = Malloc((size_t) numClientsInGroup * sizeof(*partDescClient2D));
         for (size_t rankOfs = 0; rankOfs < (size_t) numClientsInGroup; ++rankOfs)
           {
             for (size_t dim = 0; dim < cdiPioGDsaMaxRank; ++dim)
@@ -1499,7 +1501,8 @@ cdiPioDistGridUnpackArrays(grid_t *gridptr, int memberMask, char *unpackBuffer, 
       }
     else
       {
-        Xt_int global_size[cdiPioGDsaMaxRank] = { gridptr->y.size, gridptr->x.size }, local_start[cdiPioGDsaMaxRank];
+        Xt_int global_size[cdiPioGDsaMaxRank] = { (Xt_int) gridptr->y.size, (Xt_int) gridptr->x.size },
+               local_start[cdiPioGDsaMaxRank];
         int local_size[cdiPioGDsaMaxRank];
         /* describe 2D decomposition via section for later collection
          * construction */
@@ -1593,19 +1596,19 @@ static bool
 cdiPioDistGridCompareXYvals(grid_t *gridRef, grid_t *gridTest)
 {
   bool differ = false;
-  int xsizeTest = gridTest->x.size, ysizeTest = gridTest->y.size;
+  size_t xsizeTest = gridTest->x.size, ysizeTest = gridTest->y.size;
   if (gridRef->vtable == &cdiPioDistGridVtable && gridTest->vtable == &cdiPioDistGridVtable)
     {
-      if (!differ && xsizeTest > 0 && xsizeTest == gridRef->vtable->inqXVals(gridRef, NULL))
+      if (!differ && xsizeTest > 0 && xsizeTest == (size_t) gridRef->vtable->inqXVals(gridRef, NULL))
         {
           const double *restrict xvalsRef = gridRef->x.vals, *restrict xvalsTest = gridTest->x.vals;
-          differ = compareGridVals((size_t) xsizeTest, xvalsRef, xvalsTest);
+          differ = compareGridVals(xsizeTest, xvalsRef, xvalsTest);
         }
 
-      if (!differ && ysizeTest > 0 && ysizeTest == gridRef->vtable->inqYVals(gridRef, NULL))
+      if (!differ && ysizeTest > 0 && ysizeTest == (size_t) gridRef->vtable->inqYVals(gridRef, NULL))
         {
           const double *restrict yvalsRef = gridRef->y.vals, *restrict yvalsTest = gridTest->y.vals;
-          differ = compareGridVals((size_t) ysizeTest, yvalsRef, yvalsTest);
+          differ = compareGridVals(ysizeTest, yvalsRef, yvalsTest);
         }
       int differReduce = differ;
       xmpi(MPI_Allreduce(MPI_IN_PLACE, &differReduce, 1, MPI_INT, MPI_LOR, commInqCommCalc()));
@@ -1613,7 +1616,8 @@ cdiPioDistGridCompareXYvals(grid_t *gridRef, grid_t *gridTest)
     }
   else
     {
-      if (xsizeTest != gridRef->vtable->inqXVals(gridRef, NULL) || ysizeTest != gridRef->vtable->inqYVals(gridRef, NULL))
+      if (xsizeTest != (size_t) gridRef->vtable->inqXVals(gridRef, NULL)
+          || ysizeTest != (size_t) gridRef->vtable->inqYVals(gridRef, NULL))
         {
           differ = true;
         }
@@ -1622,14 +1626,14 @@ cdiPioDistGridCompareXYvals(grid_t *gridRef, grid_t *gridTest)
           /* warn about grid compare of distributed vs. undistributed grid */
           Warning("efficiency: comparing data of distributed "
                   "vs. non-distributed grid!");
-          double *valsRefCopy = Malloc((size_t) MAX(xsizeTest, ysizeTest) * sizeof(double));
+          double *valsRefCopy = Malloc(MAX(xsizeTest, ysizeTest) * sizeof(double));
           /* fetch X data */
           gridRef->vtable->inqXVals(gridRef, valsRefCopy);
-          differ = compareGridVals((size_t) xsizeTest, valsRefCopy, gridTest->vtable->inqXValsPtr(gridTest));
+          differ = compareGridVals(xsizeTest, valsRefCopy, gridTest->vtable->inqXValsPtr(gridTest));
           if (!differ)
             {
               gridRef->vtable->inqYVals(gridRef, valsRefCopy);
-              differ = compareGridVals((size_t) ysizeTest, valsRefCopy, gridTest->vtable->inqYValsPtr(gridTest));
+              differ = compareGridVals(ysizeTest, valsRefCopy, gridTest->vtable->inqYValsPtr(gridTest));
             }
           /* todo: handle this collectively, i.e. only compare
            * indices from chunk and allreduce result */

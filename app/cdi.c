@@ -65,10 +65,7 @@ static int DefaultFileType = CDI_UNDEFID;
 static int DefaultDataType = CDI_UNDEFID;
 static int DefaultByteorder = CDI_UNDEFID;
 
-static int filterId = 0;
-static int params[8];
-static int maxParams = sizeof(params) / sizeof(params[0]);
-static int numParams = 0;
+static char filterSpec[CDI_MAX_NAME] = { 0 };
 static int comptype = CDI_COMPRESS_NONE;  // Compression type
 static int complevel = 0;                 // Compression level
 
@@ -258,7 +255,7 @@ printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, i
             }
         }
 
-      if (datasize > 0) arrmean /= datasize;
+      if (datasize > 0) arrmean /= (double) datasize;
 
       fprintf(stdout, "%#12.5g%#12.5g%#12.5g", arrmin, arrmean, arrmax);
     }
@@ -283,8 +280,8 @@ printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, i
 
       imiss = datasize - nvals_r;
 
-      if (nvals_r > 0) arrmean_r = arrsum_r / nvals_r;
-      if (nvals_i > 0) arrmean_i = arrsum_i / nvals_i;
+      if (nvals_r > 0) arrmean_r = arrsum_r / (double) nvals_r;
+      if (nvals_i > 0) arrmean_i = arrsum_i / (double) nvals_i;
       fprintf(stdout, "  -  (%#12.5g,%#12.5g)  -", arrmean_r, arrmean_i);
     }
 
@@ -424,7 +421,7 @@ print_short_info(int streamID, int vlistID, int vardis)
       fprintf(stdout, "%3d ", vlistZaxisIndex(vlistID, zaxisID) + 1);
 
       // grid info
-      size_t gridsize = gridInqSize(gridID);
+      size_t gridsize = (size_t) gridInqSize(gridID);
       fprintf(stdout, "%9zu ", gridsize);
       fprintf(stdout, "%3d ", vlistGridIndex(vlistID, gridID) + 1);
 
@@ -732,11 +729,11 @@ define_compress(const char *arg)
     }
   else if (strncmp(arg, "zstd", 4) == 0)
     {
-      if (filterId == 0)
+      if (filterSpec[0] == 0)
         {
-          filterId = 32015;
-          numParams = 1;
-          params[0] = (len >= 6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
+          int filterid = 32015;
+          int level = (len >= 6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
+          snprintf(filterSpec, sizeof(filterSpec), "%d,%d", filterid, level);
         }
       else
         {
@@ -751,31 +748,13 @@ static void
 define_filter(const char *arg)
 {
   size_t len = strlen(arg);
-
-  if (len > 0 && isdigit(arg[0]))
+  if (len > 0)
     {
-      filterId = atoi(arg);
-      const char *next;
-      const char *parg = arg;
-      while ((next = strchr(parg, ',')))
-        {
-          parg = ++next;
-          len = strlen(parg);
-          if (len > 0 && isdigit(parg[0]))
-            {
-              if (numParams >= maxParams)
-                {
-                  fprintf(stderr, "Too many filter parameter (max=%d)!\n", maxParams);
-                  return;
-                }
-              params[numParams] = atoi(parg);
-              numParams++;
-            }
-        }
+      strncpy(filterSpec, arg, sizeof(filterSpec));
     }
   else
     {
-      fprintf(stderr, "Filter id missing!\n");
+      fprintf(stderr, "Filter spec missing!\n");
     }
 }
 
@@ -823,7 +802,7 @@ main(int argc, char *argv[])
       switch (c)
 	{
 	case 'b': setDefaultDataType(optarg); break;
-	case 'C': queryCellidx[numQueryCellidx++] = atol(optarg); break;
+	case 'C': queryCellidx[numQueryCellidx++] = (size_t)atol(optarg); break;
 	case 'd': Debug = 1; break;
         case 'E': cdiDefGlobal("ECCODES_GRIB1", true); break;
 	case 'f': setDefaultFileType(optarg); break;
@@ -932,10 +911,10 @@ main(int argc, char *argv[])
       for (varID = 0; varID < nvars; varID++)
         {
           int gridID = vlistInqVarGrid(vlistID1, varID);
-          size_t gridsize = gridInqSize(gridID);
+          size_t gridsize = (size_t) gridInqSize(gridID);
           if (gridsize > datasize) datasize = gridsize;
           int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-          size_t nlev = zaxisInqSize(zaxisID);
+          size_t nlev = (size_t) zaxisInqSize(zaxisID);
           if (nlev > maxlev) maxlev = nlev;
           if (fname2)
             {
@@ -959,10 +938,7 @@ main(int argc, char *argv[])
 
           if (DefaultByteorder != CDI_UNDEFID) streamDefByteorder(streamID2, DefaultByteorder);
 
-          if (filterId != 0)
-            {
-              streamDefFilter(streamID2, filterId, numParams, params);
-            }
+          if (filterSpec[0]) streamDefFilter(streamID2, filterSpec);
 
           if (comptype != CDI_COMPRESS_NONE)
             {
@@ -1058,7 +1034,7 @@ main(int argc, char *argv[])
 
                     if (Debug) fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
 
-                    size_t gridsize = gridInqSize(gridID);
+                    size_t gridsize = (size_t) gridInqSize(gridID);
                     double missval = vlistInqVarMissval(vlistID1, varID);
 
                     streamReadVar(streamID1, varID, data, &nmiss);
@@ -1067,8 +1043,9 @@ main(int argc, char *argv[])
                     for (levelID = 0; levelID < nlevs; levelID++)
                       {
                         double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
-                        size_t offset = levelID * gridsize;
-                        if (Info) printInfo(vdatetime, varname, level, gridsize, number, nmiss, missval, data + offset, Vardis);
+                        size_t offset = (size_t) levelID * gridsize;
+                        if (Info)
+                          printInfo(vdatetime, varname, level, gridsize, number, (size_t) nmiss, missval, data + offset, Vardis);
                       }
 
                     if (fname2) streamWriteVar(streamID2, varID, data, nmiss);
@@ -1094,7 +1071,7 @@ main(int argc, char *argv[])
 
                     if (Debug) fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
 
-                    size_t gridsize = gridInqSize(gridID);
+                    size_t gridsize = (size_t) gridInqSize(gridID);
                     double missval = vlistInqVarMissval(vlistID1, varID);
 
                     int nlevs = zaxisInqSize(zaxisID);
@@ -1103,7 +1080,7 @@ main(int argc, char *argv[])
                         double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
                         streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
 
-                        if (Info) printInfo(vdatetime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
+                        if (Info) printInfo(vdatetime, varname, level, gridsize, number, (size_t) nmiss, missval, data, Vardis);
 
                         if (fname2) streamWriteVarSlice(streamID2, varID, levelID, data, nmiss);
                       }

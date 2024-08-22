@@ -21,9 +21,9 @@ static int
 extInqDatatype(int prec, int number)
 {
   if (number == 2)
-    return (prec == EXSE_DOUBLE_PRECISION) ? CDI_DATATYPE_CPX64 : CDI_DATATYPE_CPX32;
+    return (prec == EXSE_PREC_FP64) ? CDI_DATATYPE_CPX64 : CDI_DATATYPE_CPX32;
   else
-    return (prec == EXSE_DOUBLE_PRECISION) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
+    return (prec == EXSE_PREC_FP64) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
 }
 
 static void
@@ -35,7 +35,7 @@ extDefDatatype(int datatype, int *prec, int *number)
 
   *number = (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64) ? 2 : 1;
 
-  *prec = (datatype == CDI_DATATYPE_FLT64 || datatype == CDI_DATATYPE_CPX64) ? EXSE_DOUBLE_PRECISION : EXSE_SINGLE_PRECISION;
+  *prec = (datatype == CDI_DATATYPE_FLT64 || datatype == CDI_DATATYPE_CPX64) ? EXSE_PREC_FP64 : EXSE_PREC_FP32;
 }
 
 /* not used
@@ -94,17 +94,17 @@ ext_read_recordSP(stream_t *streamptr, float *data, size_t *numMissVals)
 
   int header[4];
   extInqHeader(extp, header);
-  extInqDataSP(extp, data);
+  extInqDataFP32(extp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
-  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t size = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
 
   if (vlistInqVarNumber(vlistID, varID) == CDI_REAL)
-    *numMissVals = get_num_missvalsSP(size, data, missval);
+    *numMissVals = get_num_missvalsSP(size, data, (float) missval);
   else
-    *numMissVals = get_cplx_num_missvalsSP(size, data, missval);
+    *numMissVals = get_cplx_num_missvalsSP(size, data, (float) missval);
 
-  streamptr->numvals += size;
+  streamptr->numvals += (SizeType) size;
 }
 
 static void
@@ -126,17 +126,17 @@ ext_read_recordDP(stream_t *streamptr, double *data, size_t *numMissVals)
 
   int header[4];
   extInqHeader(extp, header);
-  extInqDataDP(extp, data);
+  extInqDataFP64(extp, data);
 
   double missval = vlistInqVarMissval(vlistID, varID);
-  size_t size = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t size = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
 
   if (vlistInqVarNumber(vlistID, varID) == CDI_REAL)
     *numMissVals = get_num_missvalsDP(size, data, missval);
   else
     *numMissVals = get_cplx_num_missvalsDP(size, data, missval);
 
-  streamptr->numvals += size;
+  streamptr->numvals += (SizeType) size;
 }
 
 void
@@ -179,7 +179,7 @@ static void
 ext_write_recordSP(stream_t *streamptr, const float *data)
 {
   void *extp = streamptr->record->objectp;
-  extDefDataSP(extp, data);
+  extDefDataFP32(extp, data);
   extWrite(streamptr->fileID, extp);
 }
 
@@ -187,7 +187,7 @@ static void
 ext_write_recordDP(stream_t *streamptr, const double *data)
 {
   void *extp = streamptr->record->objectp;
-  extDefDataDP(extp, data);
+  extDefDataFP64(extp, data);
   extWrite(streamptr->fileID, extp);
 }
 
@@ -299,7 +299,7 @@ extScanTimestep1(stream_t *streamptr)
 
       if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", nrecs, (int) recpos, rcode, rlevel, vdate, vtime);
 
-      extAddRecord(streamptr, param, rlevel, rxysize, recsize, recpos, extp->prec, extp->number);
+      extAddRecord(streamptr, param, rlevel, (size_t) rxysize, recsize, recpos, extp->prec, extp->number);
     }
 
 tstepScanLoopFinished:
@@ -560,7 +560,7 @@ extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_
   int fileID = streamptr->fileID;
 
   double missval = vlistInqVarMissval(vlistID, varID);
-  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
   int tsid = streamptr->curTsID;
 
   off_t currentfilepos = fileGetPos(fileID);
@@ -571,7 +571,7 @@ extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_
   extRead(fileID, extp);
   int header[4];
   extInqHeader(extp, header);
-  extInqDataDP(extp, data);
+  extInqDataFP64(extp, data);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
@@ -587,7 +587,7 @@ extReadVarDP(stream_t *streamptr, int varID, double *data, size_t *numMissVals)
   if (CDI_Debug) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
   size_t nlevs = (size_t) streamptr->vars[varID].recordTable[0].nlevs;
 
   for (size_t levID = 0; levID < nlevs; levID++)
@@ -619,7 +619,7 @@ extWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
   extDefDatatype(vlistInqVarDatatype(vlistID, varID), &extp->prec, &extp->number);
   extDefHeader(extp, header);
 
-  extDefDataDP(extp, data);
+  extDefDataFP64(extp, data);
   extWrite(fileID, extp);
 }
 
@@ -629,7 +629,7 @@ extWriteVarDP(stream_t *streamptr, int varID, const double *data)
   if (CDI_Debug) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
   size_t nlevs = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
   for (size_t levID = 0; levID < nlevs; levID++) extWriteVarSliceDP(streamptr, varID, (int) levID, &data[levID * gridsize]);

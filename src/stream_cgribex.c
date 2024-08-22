@@ -95,14 +95,14 @@ extern "C"
 static size_t
 cgribexSection2Length(void *gribbuffer, size_t gribbuffersize)
 {
-  long sec2len = 0;
+  size_t sec2len = 0;
 
   if (gribbuffersize && gribbuffer)
     {
       unsigned char *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
       long gribrecsize;
       int status = grib1Sections((unsigned char *) gribbuffer, (long) gribbuffersize, &pds, &gds, &bms, &bds, &gribrecsize);
-      if (status >= 0 && gds != NULL) sec2len = (unsigned) ((gds[0] << 16) + (gds[1] << 8) + (gds[3]));
+      if (status >= 0 && gds != NULL) sec2len = (size_t) ((gds[0] << 16) + (gds[1] << 8) + (gds[3]));
     }
 
   return sec2len;
@@ -291,12 +291,12 @@ cgribexGetGridRegular(int *isec2, int *isec4, grid_t *grid, int gridtype, bool c
           }
 
         // recompute xinc if necessary
-        if (recompinc) grid->x.inc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->x.size - 1);
+        if (recompinc) grid->x.inc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / ((double) grid->x.size - 1);
 
         // correct xinc if necessary
         if (ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 && ISEC2_LastLon < 360000)
           {
-            double xinc = 360. / grid->x.size;
+            double xinc = 360. / (double) grid->x.size;
             if (fabs(grid->x.inc - xinc) > 0.0)
               {
                 grid->x.inc = xinc;
@@ -324,7 +324,7 @@ cgribexGetGridRegular(int *isec2, int *isec4, grid_t *grid, int gridtype, bool c
           }
 
         // recompute yinc if necessary
-        if (recompinc) grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->y.size - 1);
+        if (recompinc) grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / ((double) grid->y.size - 1);
       }
     grid->y.first = ISEC2_FirstLat * 0.001;
     grid->y.last = ISEC2_LastLat * 0.001;
@@ -343,7 +343,7 @@ cgribexGetGridReduced(int *isec2, int *isec4, grid_t *grid)
   grid->size = (size_t) ISEC4_NumValues;
 
   size_t reducedPointsSize = (size_t) ISEC2_NumLat;
-  grid->reducedPointsSize = reducedPointsSize;
+  grid->reducedPointsSize = ISEC2_NumLat;
   grid->reducedPoints = (int *) Malloc(reducedPointsSize * sizeof(int));
   memcpy(grid->reducedPoints, ISEC2_ReducedPointsPtr, reducedPointsSize * sizeof(int));
 
@@ -373,7 +373,7 @@ cgribexGetGridReduced(int *isec2, int *isec4, grid_t *grid)
         if (ijDirectionIncrementGiven && ISEC2_LatIncr > 0)
           grid->y.inc = ISEC2_LatIncr * 0.001;
         else
-          grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->y.size - 1);
+          grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / ((double) grid->y.size - 1);
       }
     grid->y.first = ISEC2_FirstLat * 0.001;
     grid->y.last = ISEC2_LastLat * 0.001;
@@ -540,7 +540,7 @@ cgribexDefProjLCC(int *isec2, int gridID)
 static size_t
 cgribexGetGridsize(const int *isec4)
 {
-  return ISEC4_NumValues;
+  return (size_t) ISEC4_NumValues;
 }
 
 static void
@@ -554,8 +554,6 @@ cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t 
   double *fsec3 = cgribexp->fsec3;
 
   int datatype = (ISEC4_NumBits > 0 && ISEC4_NumBits <= 32) ? ISEC4_NumBits : CDI_DATATYPE_PACK;
-  if (datatype > 32) datatype = CDI_DATATYPE_PACK32;
-  if (datatype < 0) datatype = CDI_DATATYPE_PACK;
 
   int vlistID = streamptr->vlistID;
   int tsID = streamptr->curTsID;
@@ -1328,7 +1326,9 @@ cgribexScanTimestep(stream_t *streamptr)
       streamptr->ntsteps = tsID;
     }
 
-  return streamptr->ntsteps;
+  /* this will need work for files containing more than INT_MAX timesteps! */
+  assert(streamptr->ntsteps <= INT_MAX);
+  return (int) streamptr->ntsteps;
 }
 
 #ifdef gribWarning
@@ -1367,7 +1367,7 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
     gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double *) data, (int) datasize, (int *) gribbuffer, (int) gribsize,
              &iword, hoper, &iret);
 
-  *numMissVals = (ISEC1_Sec2Or3Flag & 64) ? ISEC4_NumValues - ISEC4_NumNonMissValues : 0;
+  *numMissVals = (ISEC1_Sec2Or3Flag & 64) ? (size_t) ISEC4_NumValues - (size_t) ISEC4_NumNonMissValues : 0;
 
   if (ISEC1_CenterID == 215 && (isec1[34] != 0 && isec1[34] != 255))
     {
@@ -1827,7 +1827,7 @@ cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID, in
   ISEC2_Reduced = false;
   ISEC2_ScanFlag = 0;
 
-  int gridsize = (int) gridInqSize(gridID);
+  SizeType gridsize = gridInqSize(gridID);
   bool gridIsRotated = false;
   bool gridIsCurvilinear = false;
   int gridtype = grbGetGridtype(&gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
@@ -2067,11 +2067,11 @@ cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 
 size_t
 cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiDateTime vDateTime, int tsteptype,
-              int numavg, size_t datasize, const void *data, size_t numMissVals, void *gribbuffer, size_t gribbuffersize)
+              int numavg, SizeType datasize, const void *data, SizeType numMissVals, void *gribbuffer, size_t gribbuffersize)
 {
   cgribexrec_t *cgribexp = (cgribexrec_t *) cgribexNew();
 
-  size_t sec2len = 1024 + 2 * gridInqYsize(gridID);  // Gaussian reduced grid
+  size_t sec2len = 1024 + 2 * (size_t) gridInqYsize(gridID);  // Gaussian reduced grid
   if (sec2len > cgribexp->sec2len)
     {
       cgribexp->sec2len = sec2len;

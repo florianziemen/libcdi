@@ -72,7 +72,9 @@ libcdiresunpack_la_SOURCES = \
 libcdiresunpack_la_LIBADD = libcdi.la
 
 make_fint_SOURCES = make_fint.c
-make_fint_CFLAGS = -static
+# the following must be passed via AM_CFLAGS, or the generic libtool recipes won't
+# be used (but a custom, non-libtool one instead)
+# make_fint_CFLAGS = -static
 make_fint_LDADD = $(LIBOBJS)
 
 libcdi_la_SOURCES = \
@@ -87,6 +89,8 @@ libcdi_la_SOURCES = \
   cdf.c \
   cdf.h \
   cdf_config.h \
+  cdf_filter.c \
+  cdf_filter.h \
   cdf_int.c \
   cdf_int.h \
   cdf_lazy_grid.c \
@@ -122,7 +126,6 @@ libcdi_la_SOURCES = \
   cksum.h \
   dmemory.c \
   dmemory.h \
-  dtypes.h \
   error.c \
   error.h \
   exse.h \
@@ -285,14 +288,14 @@ libcdipio_la_LIBADD = libcdi.la $(LIBRT) $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(MPI_C
 
 if MAINTAINER_MODE
 cdi.inc: cdi.h make_fint.c
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) make_fint
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) AM_CFLAGS=-static make_fint
 	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute ./make_fint -o $(@D) $<
 cdiFortran.c: cdi.inc
 	$(AM_V_at)test -f $@ || rm -f $<
 	$(AM_V_at)test -f $@ || $(MAKE) $(AM_MAKEFLAGS) $<
 
 cdipio.inc: cdipio.h make_fint.c cdi.inc
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) make_fint
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) AM_CFLAGS=-static make_fint
 	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute ./make_fint -o $(@D) $<
 cdipioFortran.c: cdipio.inc
 	$(AM_V_at)test -f $@ || rm -f $<

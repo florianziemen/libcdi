@@ -29,6 +29,18 @@
 /*                 .  |--- atts              [subtype_attr_t]          */
 /*                 .                                                   */
 
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
 #include "cdi.h"
 #include "cdi_int.h"
 #include "dmemory.h"
@@ -776,13 +788,6 @@ subtypeInqAttribute(int subtypeID, int index, const char *key, int *outValue)
              subtype_ptr->nentries, index);
     }
 
-#ifndef __cplusplus
-  if (!outValue) outValue = &(int){ 0 };
-#else
-  int dummy = 0;
-  if (!outValue) outValue = &dummy;
-#endif
-
   if (!key) return CDI_EINVAL;
   int iKey = attribute_to_index(key);
   if (iKey < 0) return CDI_EINVAL;
@@ -797,7 +802,7 @@ subtypeInqAttribute(int subtypeID, int index, const char *key, int *outValue)
     {
       if (attribute->key == iKey)
         {
-          *outValue = attribute->val;
+          if (outValue) *outValue = attribute->val;
           return CDI_NOERR;
         }
     }

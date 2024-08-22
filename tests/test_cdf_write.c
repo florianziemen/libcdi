@@ -79,7 +79,7 @@ my_gamma_dist(double x)
   };
   const double theta = 0.5;
   x *= 20.0;
-  double pdf_x = 1.0 / (tgamma(k) * pow(theta, k)) * pow(x, k - 1) * exp(-x / theta);
+  double pdf_x = 1.0 / (tgamma((double) k) * pow(theta, k)) * pow(x, k - 1) * exp(-x / theta);
   return pdf_x;
 }
 

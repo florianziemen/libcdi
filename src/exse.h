@@ -3,8 +3,9 @@
 
 enum
 {
-  EXSE_SINGLE_PRECISION = 4,
-  EXSE_DOUBLE_PRECISION = 8,
+  EXSE_PREC_FP16 = 2,
+  EXSE_PREC_FP32 = 4,
+  EXSE_PREC_FP64 = 8,
 };
 
 #endif

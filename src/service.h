@@ -26,12 +26,12 @@ int srvRead(int fileID, void *srv);
 void srvWrite(int fileID, void *srv);
 
 int srvInqHeader(void *srv, int *header);
-int srvInqDataSP(void *srv, float *data);
-int srvInqDataDP(void *srv, double *data);
+int srvInqDataFP32(void *srv, float *data);
+int srvInqDataFP64(void *srv, double *data);
 
 int srvDefHeader(void *srv, const int *header);
-int srvDefDataSP(void *srv, const float *data);
-int srvDefDataDP(void *srv, const double *data);
+int srvDefDataFP32(void *srv, const float *data);
+int srvDefDataFP64(void *srv, const double *data);
 
 #endif /* _SERVICE_H */
 /*

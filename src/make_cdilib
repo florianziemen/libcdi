@@ -36,7 +36,7 @@ cat > ${PROG} << EOR
 #if defined(_WIN32) || defined(_WIN64)
 #define restrict
 #define ssize_t long
-#else
+#elif ! defined HAVE_CONFIG_H
 #define HAVE_UNISTD_H
 #endif
 

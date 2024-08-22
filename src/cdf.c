@@ -53,7 +53,7 @@ has_uri_scheme(const char *uri)
   const char *pos = strstr(uri, "://");
   if (pos)
     {
-      int len = pos - uri;
+      size_t len = (size_t) (pos - uri);
       if (strncmp(uri, "file", len) == 0 || strncmp(uri, "https", len) == 0 || strncmp(uri, "s3", len) == 0) return true;
     }
 

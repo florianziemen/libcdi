@@ -1,9 +1,22 @@
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
 #include "cdi.h"
 #include "cdi_int.h"
 #include "zaxis.h"
 #include "grid.h"
 #include "vlist.h"
 #include "resource_unpack.h"
+#include "dmemory.h"
 
 static cdi_keys_t *
 vlist_get_keysp(vlist_t *vlistptr, int varID)
@@ -101,7 +114,7 @@ cdi_key_compare(cdi_keys_t *keyspa, cdi_keys_t *keyspb, int keynum)
   if (keypa->type != keypb->type) return 1;
   if (keypa->length != keypb->length) return 1;
 
-  if (keypa->type == KEY_BYTES) return (memcmp(keypa->v.s, keypb->v.s, keypa->length) != 0);
+  if (keypa->type == KEY_BYTES) return (memcmp(keypa->v.s, keypb->v.s, (size_t) keypa->length) != 0);
   if (keypa->type == KEY_FLOAT) return (IS_NOT_EQUAL(keypa->v.d, keypb->v.d));
   if (keypa->type == KEY_INT) return (keypa->v.i != keypb->v.i);
 
@@ -116,7 +129,7 @@ cdi_delete_key(cdi_key_t *keyp)
       keyp->length = 0;
       if (keyp->type == KEY_BYTES)
         {
-          if (keyp->v.s) free(keyp->v.s);
+          if (keyp->v.s) Free(keyp->v.s);
           keyp->v.s = NULL;
         }
       else if (keyp->type == KEY_FLOAT)
@@ -472,20 +485,21 @@ cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, int le
   cdi_key_t *keyp = find_key(keysp, key);
   if (keyp == NULL) keyp = new_key(keysp, key);
 
+  size_t length_ = length >= 0 ? (size_t) length : (size_t) 0;
   if (keyp != NULL)
     {
       if (keyp->length != 0 && keyp->length != length)
         {
-          if (keyp->v.s) free(keyp->v.s);
+          if (keyp->v.s) Free(keyp->v.s);
           keyp->length = 0;
         }
       if (keyp->length == 0)
         {
-          keyp->v.s = (unsigned char *) malloc((size_t) length);
+          keyp->v.s = (unsigned char *) Malloc(length_);
           keyp->length = length;
         }
 
-      memcpy(keyp->v.s, bytes, length);
+      memcpy(keyp->v.s, bytes, length_);
       keyp->type = KEY_BYTES;
     }
 }
@@ -529,12 +543,16 @@ cdiInqVarKeyBytes(const cdi_keys_t *keysp, int key, unsigned char *bytes, int *l
   int status = -1;
 
   const cdi_key_t *keyp = find_key_const(keysp, key);
-  if (keyp != NULL && keyp->length > 0)  // key in use
+  int val_len;
+  if (keyp != NULL && (val_len = keyp->length) > 0)  // key in use
     {
       if (keyp->type == KEY_BYTES)
         {
-          if (keyp->length < *length) *length = keyp->length;
-          memcpy(bytes, keyp->v.s, *length);
+          if (val_len < *length)
+            *length = val_len;
+          else
+            val_len = *length;
+          memcpy(bytes, keyp->v.s, (size_t) val_len);
           status = CDI_NOERR;
         }
     }
@@ -615,8 +633,8 @@ cdiDefKeyString(int cdiID, int varID, int key, const char *string)
 {
   xassert(string != NULL);
 
-  int length = strlen(string) + 1;
-  int status = cdiDefKeyBytes(cdiID, varID, key, (const unsigned char *) string, length);
+  size_t length = strlen(string) + 1;
+  int status = cdiDefKeyBytes(cdiID, varID, key, (const unsigned char *) string, (int) length);
 
   return status;
 }

@@ -67,16 +67,12 @@ static int vlistGetSizeP(void *vlistptr, void *context);
 static void vlistPackP(void *vlistptr, void *buff, int size, int *position, void *context);
 static int vlistTxCode(void *vlistptr);
 
-#if !defined(__cplusplus)
-const
-#endif
-    resOps vlistOps
-    = { (valCompareFunc) vlist_compare,
-        (valDestroyFunc) vlist_delete,
-        (valPrintFunc) vlistPrintKernel,
-        vlistGetSizeP,
-        vlistPackP,
-        vlistTxCode };
+const resOps vlistOps = { (valCompareFunc) vlist_compare,
+                          (valDestroyFunc) vlist_delete,
+                          (valPrintFunc) vlistPrintKernel,
+                          vlistGetSizeP,
+                          vlistPackP,
+                          vlistTxCode };
 
 vlist_t *
 vlist_to_pointer(int vlistID)
@@ -432,8 +428,8 @@ vgzZAxisSearch(int id, void *res, void *data)
       state->resIDValue = id;
       return CDI_APPLY_STOP;
     }
-  else
-    return CDI_APPLY_GO_ON;
+
+  return CDI_APPLY_GO_ON;
 }
 
 static int
@@ -826,8 +822,8 @@ vlistMerge(int vlistID2, int vlistID1)
       char name1[CDI_MAX_NAME], name2[CDI_MAX_NAME];
       for (varID = 0; varID < nvars2; varID++)
         {
-          size_t ngp1 = gridInqSize(vars1[varID].gridID);
-          size_t ngp2 = gridInqSize(vars2[varID].gridID);
+          SizeType ngp1 = gridInqSize(vars1[varID].gridID);
+          SizeType ngp2 = gridInqSize(vars2[varID].gridID);
           if (ngp1 != ngp2) break;
 
           int length = CDI_MAX_NAME;
@@ -1140,7 +1136,7 @@ vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
             fp);
       for (int varID = 0; varID < nvars; varID++)
         fprintf(fp, "%3d %8zu\n", varID,
-                (size_t) zaxisInqSize(vlistptr->vars[varID].zaxisID) * gridInqSize(vlistptr->vars[varID].gridID));
+                (size_t) zaxisInqSize(vlistptr->vars[varID].zaxisID) * (size_t) gridInqSize(vlistptr->vars[varID].gridID));
     }
 }
 
@@ -1351,6 +1347,8 @@ vlistChangeGridIndex(int vlistID, int index, int gridID)
             int chunkSize = 0;
             cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, &chunkSize);
             if (chunkSize > 0) cdiDeleteKey(vlistID, varID, CDI_KEY_CHUNKSIZE);
+            if (gridInqXsize(gridIDold) == 0 && gridInqXsize(gridID) > 0 && vlistInqVarXYZ(vlistID, varID) != 0)
+              vlistDefVarXYZ(vlistID, varID, 0);
           }
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
@@ -1598,31 +1596,26 @@ vlist_check_contents(int vlistID)
 void
 resize_opt_grib_entries(var_t *var, int nentries)
 {
-  if (var->opt_grib_kvpair_size >= nentries)
-    {
-      return; /* nothing to do; array is still large enough */
-    }
-  else
-    {
-      if (CDI_Debug) Message("resize data structure, %d -> %d", var->opt_grib_kvpair_size, nentries);
+  if (var->opt_grib_kvpair_size >= nentries) return;  // nothing to do; array is still large enough
 
-      int new_size = (2 * var->opt_grib_kvpair_size) > nentries ? (2 * var->opt_grib_kvpair_size) : nentries;
-      opt_key_val_pair_t *tmp = (opt_key_val_pair_t *) Malloc((size_t) new_size * sizeof(opt_key_val_pair_t));
-      for (int i = 0; i < var->opt_grib_kvpair_size; ++i)
-        {
-          tmp[i] = var->opt_grib_kvpair[i];
-        }
-      for (int i = var->opt_grib_kvpair_size; i < new_size; ++i)
-        {
-          tmp[i].int_val = 0;
-          tmp[i].dbl_val = 0;
-          tmp[i].update = false;
-          tmp[i].keyword = NULL;
-        }  // for
-      var->opt_grib_kvpair_size = new_size;
-      Free(var->opt_grib_kvpair);
-      var->opt_grib_kvpair = tmp;
+  if (CDI_Debug) Message("resize data structure, %d -> %d", var->opt_grib_kvpair_size, nentries);
+
+  int new_size = (2 * var->opt_grib_kvpair_size) > nentries ? (2 * var->opt_grib_kvpair_size) : nentries;
+  opt_key_val_pair_t *tmp = (opt_key_val_pair_t *) Malloc((size_t) new_size * sizeof(opt_key_val_pair_t));
+  for (int i = 0; i < var->opt_grib_kvpair_size; ++i)
+    {
+      tmp[i] = var->opt_grib_kvpair[i];
     }
+  for (int i = var->opt_grib_kvpair_size; i < new_size; ++i)
+    {
+      tmp[i].int_val = 0;
+      tmp[i].dbl_val = 0;
+      tmp[i].update = false;
+      tmp[i].keyword = NULL;
+    }  // for
+  var->opt_grib_kvpair_size = new_size;
+  Free(var->opt_grib_kvpair);
+  var->opt_grib_kvpair = tmp;
 }
 
 /*

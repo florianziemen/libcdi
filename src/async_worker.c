@@ -9,6 +9,7 @@
 #include "async_worker.h"
 
 #include "cdi.h"
+#include "dmemory.h"
 #include "error.h"
 
 #include <stdbool.h>
@@ -144,14 +145,12 @@ AsyncWorker_init(AsyncManager **jobManager, int threadCount)
   if (*jobManager) return CDI_NOERR;
 
 #ifdef HAVE_LIBPTHREAD
-  *jobManager = (AsyncManager *) malloc(sizeof(AsyncManager));
-  if (!*jobManager) return CDI_ESYSTEM;
-  (*jobManager)->workerCount = threadCount;
-  (*jobManager)->communicators = (AsyncJob *) malloc(threadCount * sizeof(AsyncJob));
-  if (!(*jobManager)->communicators) xabort("memory allocation failure");
+  AsyncManager *jobManager_ = *jobManager = (AsyncManager *) Malloc(sizeof(AsyncManager));
+  jobManager_->workerCount = threadCount;
+  jobManager_->communicators = (AsyncJob *) Malloc((size_t) threadCount * sizeof(AsyncJob));
 
-  for (int i = 0; i < threadCount; i++) startWorker(&((*jobManager)->communicators[i]));
-  (*jobManager)->idleWorkerCount = threadCount;
+  for (int i = 0; i < threadCount; i++) startWorker(jobManager_->communicators + i);
+  jobManager_->idleWorkerCount = threadCount;
 #else
 
   Error("pthread support not compiled in!");
@@ -254,8 +253,8 @@ AsyncWorker_finalize(AsyncManager *jobManager)
       AsyncWorker_wait(jobManager, curWorker);
     }
 
-  free(jobManager->communicators);
-  free(jobManager);
+  Free(jobManager->communicators);
+  Free(jobManager);
 
   return result;
 }

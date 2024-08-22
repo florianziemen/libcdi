@@ -12,6 +12,7 @@
 
 //FINT_ON  <--- don't change or remove this line!!!
 // Start of fortran interface for the following routines (make_fint.c)
+#include <stdbool.h>
 
 #include <mpi.h>
 
@@ -38,6 +39,8 @@
 /* parallel IO routines */
 #include <yaxt.h>
 
+#include "cdi.h"
+
 void pioEndDef(void);
 void pioEndTimestepping(void);
 void pioFinalize(void);
@@ -47,7 +50,8 @@ void pioFinalize(void);
 void cdiPioNoPostCommSetup(void);
 /* pioInit: initialize I/O server processes and communication
  * Deprecated, use cdiPioInit instead! */
-MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode, int *pioNamespace, float partInflate,
+MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode,
+                 int *pioNamespace, float partInflate,
                  void (*postCommSetupActions)(void));
 /*      cdiPioInit: initialize I/O server processes and communication */
 MPI_Comm cdiPioInit(MPI_Comm commSuper, int confResH, int *pioNamespace);
@@ -67,7 +71,9 @@ void cdiPioRDMAProgress(void);
  * conversion[varID] == CDI_DATATYPE_FLT64 or with streamWriteVarF
  * (i.e. as float) with conversion[varID] == CDI_DATATYPE_FLT32
  */
-void cdiPioStreamDefDecomposedVlist(int streamID, int vlistID, const Xt_idxlist partDesc[], const int conversion[]);
+void cdiPioStreamDefDecomposedVlist(int streamID, int vlistID,
+                                    const Xt_idxlist partDesc[],
+                                    const int conversion[]);
 
 /* streamWriteVarPart: Write part of the data making up variable varID
  * of stream streamID.
@@ -80,14 +86,16 @@ void cdiPioStreamDefDecomposedVlist(int streamID, int vlistID, const Xt_idxlist 
  * the corresponding array passed to streamWriteVar in the serial version.
  * The group of processes collectively calling streamWriteVarPart
  * must provide data for all indices or the behaviour is undefined. */
-void streamWriteVarPart(int streamID, int varID, const double *data, int numMissVals, Xt_idxlist partDesc);
+void streamWriteVarPart(int streamID, int varID, const double *data,
+                        SizeType numMissVals, Xt_idxlist partDesc);
 
 /* streamWriteVarPartF: Write part of the data making up variable
  * varID of stream streamID.
  *
  * Single-precision version of streamWriteVarPart.
  */
-void streamWriteVarPartF(int streamID, int varID, const float *data, int numMissVals, Xt_idxlist partDesc);
+void streamWriteVarPartF(int streamID, int varID, const float *data,
+                         SizeType numMissVals, Xt_idxlist partDesc);
 
 /* streamWriteScatteredVarPart: Write part of the data making up
  * variable varID of stream streamID.
@@ -96,16 +104,20 @@ void streamWriteVarPartF(int streamID, int varID, const float *data, int numMiss
  * contiguous sequence but instead the numBlocks chunks of length
  * blocklengths[i] and starting displacements[i] each for i in [0,numBlocks)
  */
-void streamWriteScatteredVarPart(int streamID, int varID, const double *data, int numBlocks, const int blocklengths[],
-                                 const int displacements[], int numMissVals, Xt_idxlist partDesc);
+void streamWriteScatteredVarPart(int streamID, int varID, const double *data,
+                                 int numBlocks, const int blocklengths[],
+                                 const int displacements[],
+                                 SizeType numMissVals, Xt_idxlist partDesc);
 
 /* streamWriteScatteredVarPartF: Write part of the data making up
  * variable varID of stream streamID.
  *
  * Single-precision version of streamWriteScatteredVarPart.
  */
-void streamWriteScatteredVarPartF(int streamID, int varID, const float *data, int numBlocks, const int blocklengths[],
-                                  const int displacements[], int numMissVals, Xt_idxlist partDesc);
+void streamWriteScatteredVarPartF(int streamID, int varID, const float *data,
+                                  int numBlocks, const int blocklengths[],
+                                  const int displacements[],
+                                  SizeType numMissVals, Xt_idxlist partDesc);
 /* cdiPioCSRLastN: return role codes appropriate to use the last
    \textit{nProcsIO} tasks as I/O servers */
 int cdiPioCSRLastN(MPI_Comm commSuper, int IOMode, int nProcsIO);
@@ -156,7 +168,8 @@ int cdiPioConfGetCSRole(int confResH);
  * setup of client/server communications of configuration object.
  * Deprecated: use cdiPioConfSetCallBackActions with
  * trigger == CDIPIO_CALLBACK_POSTCOMMSETUP in new programs! */
-void cdiPioConfSetPostCommSetupActions(int confResH, void (*postCommSetupActions)(void));
+void cdiPioConfSetPostCommSetupActions(int confResH,
+                                       void (*postCommSetupActions)(void));
 
 /* cdiPioConfGetPostCommSetupActions: get function to be called after
  * setup of client/server communications from configuration object.
@@ -183,7 +196,8 @@ void (*cdiPioConfGetPostCommSetupActions(int confResH))(void);
 /* cdiPioConfSetCallBack: set function to be called at
  * indicated trigger of configuration object, action will be cast to
  * the appropriate type as indicated for the respective trigger */
-void cdiPioConfSetCallBackActions(int confResH, int trigger, void (*action)(void));
+void cdiPioConfSetCallBackActions(int confResH, int trigger,
+                                  void (*action)(void));
 
 /* cdiPioConfGetCallBack: query function to be called at
  * indicated trigger of configuration object */
@@ -304,8 +318,10 @@ int cdiPioConfGetBatchedRMA(int confResH);
  * specify the part size of the y-dimension and chunk_decomposition[0][0] the x dimension start
  * index. For unstructured grids only the x-dimension applies.
  */
-int cdiPioDistGridCreate(int gridtype, int size, int xsize, int ysize, int nvertex, const int xy_decomposition_optional[][2],
-                         Xt_idxlist partDesc2D, Xt_idxlist partDescX, Xt_idxlist partDescY);
+int cdiPioDistGridCreate(int gridtype, int size, int xsize, int ysize,
+                         int nvertex, const int xy_decomposition_optional[][2],
+                         Xt_idxlist partDesc2D, Xt_idxlist partDescX,
+                         Xt_idxlist partDescY);
 
 /* cdiPioDistGridEnableIndividualQueries: for the provided gridID, the
  * queries

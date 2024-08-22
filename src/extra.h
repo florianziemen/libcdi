@@ -1,16 +1,23 @@
 #ifndef _EXTRA_H
 #define _EXTRA_H
 
-#define EXT_REAL 1
-#define EXT_COMP 2
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+enum
+{
+  EXT_REAL = 1,
+  EXT_COMP = 2,
+};
 
 typedef struct
 {
   int checked;
   int byteswap;
   int header[4];
-  int prec;   /* single or double precison */
-  int number; /* real or complex */
+  int prec;    // single or double precison
+  int number;  // real or complex
   size_t datasize;
   size_t buffersize;
   void *buffer;
@@ -29,12 +36,17 @@ int extRead(int fileID, void *ext);
 int extWrite(int fileID, void *ext);
 
 int extInqHeader(void *ext, int *header);
-int extInqDataSP(void *ext, float *data);
-int extInqDataDP(void *ext, double *data);
+int extInqDataFP32(void *ext, float *data);
+int extInqDataFP64(void *ext, double *data);
 
 int extDefHeader(void *ext, const int *header);
-int extDefDataSP(void *ext, const float *data);
-int extDefDataDP(void *ext, const double *data);
+int extDefDataFP32(void *ext, const float *data);
+int extDefDataFP64(void *ext, const double *data);
+
+#ifdef HAVE__FLOAT16
+int extInqDataFP16(void *ext, _Float16 *data);
+int extDefDataFP16(void *ext, const _Float16 *data);
+#endif
 
 #endif /* _EXTRA_H */
 /*

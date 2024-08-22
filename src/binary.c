@@ -1,19 +1,32 @@
-#include "cdi.h"
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
+#define CDI_BIGENDIAN 0     // Byte order BIGENDIAN
+#define CDI_LITTLEENDIAN 1  // Byte order LITTLEENDIAN
 #include "error.h"
 #include "file.h"
 #include "swap.h"
 #include "binary.h"
 
-UINT32
-get_UINT32(unsigned char *x)
+uint32_t
+get_uint32(unsigned char *x)
 {
   // clang-format off
   switch (HOST_ENDIANNESS)
     {
     case CDI_BIGENDIAN:
-      return (((UINT32)x[0])<<24) + (((UINT32)x[1])<<16) + (((UINT32)x[2])<< 8) + (UINT32)x[3];
+      return (((uint32_t)x[0])<<24) + (((uint32_t)x[1])<<16) + (((uint32_t)x[2])<< 8) + (uint32_t)x[3];
     case CDI_LITTLEENDIAN:
-      return (((UINT32)x[3])<<24) + (((UINT32)x[2])<<16) + (((UINT32)x[1])<< 8) + (UINT32)x[0];
+      return (((uint32_t)x[3])<<24) + (((uint32_t)x[2])<<16) + (((uint32_t)x[1])<< 8) + (uint32_t)x[0];
     default:
       Error("Unhandled endianness %d", HOST_ENDIANNESS);
       return UINT32_C(0xFFFFFFFF);
@@ -21,16 +34,16 @@ get_UINT32(unsigned char *x)
   // clang-format on
 }
 
-UINT32
-get_SUINT32(unsigned char *x)
+uint32_t
+get_swap_uint32(unsigned char *x)
 {
   // clang-format off
   switch (HOST_ENDIANNESS)
     {
     case CDI_BIGENDIAN:
-      return (((UINT32)x[3])<<24) + (((UINT32)x[2])<<16) + (((UINT32)x[1])<< 8) + (UINT32)x[0];
+      return (((uint32_t)x[3])<<24) + (((uint32_t)x[2])<<16) + (((uint32_t)x[1])<< 8) + (uint32_t)x[0];
     case CDI_LITTLEENDIAN:
-      return (((UINT32)x[0])<<24) + (((UINT32)x[1])<<16) + (((UINT32)x[2])<< 8) + (UINT32)x[3];
+      return (((uint32_t)x[0])<<24) + (((uint32_t)x[1])<<16) + (((uint32_t)x[2])<< 8) + (uint32_t)x[3];
     default:
       Error("Unhandled endianness %d", HOST_ENDIANNESS);
       return UINT32_C(0xFFFFFFFF);
@@ -38,18 +51,18 @@ get_SUINT32(unsigned char *x)
   // clang-format on
 }
 
-UINT64
-get_UINT64(unsigned char *x)
+uint64_t
+get_uint64(unsigned char *x)
 {
   // clang-format off
   switch (HOST_ENDIANNESS)
     {
     case CDI_BIGENDIAN:
-      return (((UINT64)x[0])<<56) + (((UINT64)x[1])<<48) + (((UINT64)x[2])<<40) + (((UINT64)x[3])<<32) +
-             (((UINT64)x[4])<<24) + (((UINT64)x[5])<<16) + (((UINT64)x[6])<< 8) + (UINT64)x[7];
+      return (((uint64_t)x[0])<<56) + (((uint64_t)x[1])<<48) + (((uint64_t)x[2])<<40) + (((uint64_t)x[3])<<32) +
+             (((uint64_t)x[4])<<24) + (((uint64_t)x[5])<<16) + (((uint64_t)x[6])<< 8) +   (uint64_t)x[7];
     case CDI_LITTLEENDIAN:
-      return (((UINT64)x[7])<<56) + (((UINT64)x[6])<<48) + (((UINT64)x[5])<<40) + (((UINT64)x[4])<<32) +
-             (((UINT64)x[3])<<24) + (((UINT64)x[2])<<16) + (((UINT64)x[1])<< 8) + (UINT64)x[0];
+      return (((uint64_t)x[7])<<56) + (((uint64_t)x[6])<<48) + (((uint64_t)x[5])<<40) + (((uint64_t)x[4])<<32) +
+             (((uint64_t)x[3])<<24) + (((uint64_t)x[2])<<16) + (((uint64_t)x[1])<< 8) +   (uint64_t)x[0];
     default:
       Error("Unhandled endianness %d", HOST_ENDIANNESS);
       return UINT64_C(0xFFFFFFFFFFFFFFFF);
@@ -57,18 +70,18 @@ get_UINT64(unsigned char *x)
   // clang-format on
 }
 
-UINT64
-get_SUINT64(unsigned char *x)
+uint64_t
+get_swap_uint64(unsigned char *x)
 {
   // clang-format off
   switch (HOST_ENDIANNESS)
     {
     case CDI_BIGENDIAN:
-      return (((UINT64)x[7])<<56) + (((UINT64)x[6])<<48) + (((UINT64)x[5])<<40) + (((UINT64)x[4])<<32) +
-             (((UINT64)x[3])<<24) + (((UINT64)x[2])<<16) + (((UINT64)x[1])<< 8) + (UINT64)x[0];
+      return (((uint64_t)x[7])<<56) + (((uint64_t)x[6])<<48) + (((uint64_t)x[5])<<40) + (((uint64_t)x[4])<<32) +
+             (((uint64_t)x[3])<<24) + (((uint64_t)x[2])<<16) + (((uint64_t)x[1])<< 8) +   (uint64_t)x[0];
     case CDI_LITTLEENDIAN:
-      return (((UINT64)x[0])<<56) + (((UINT64)x[1])<<48) + (((UINT64)x[2])<<40) + (((UINT64)x[3])<<32) +
-             (((UINT64)x[4])<<24) + (((UINT64)x[5])<<16) + (((UINT64)x[6])<< 8) + (UINT64)x[7];
+      return (((uint64_t)x[0])<<56) + (((uint64_t)x[1])<<48) + (((uint64_t)x[2])<<40) + (((uint64_t)x[3])<<32) +
+             (((uint64_t)x[4])<<24) + (((uint64_t)x[5])<<16) + (((uint64_t)x[6])<< 8) +   (uint64_t)x[7];
     default:
       Error("Unhandled endianness %d", HOST_ENDIANNESS);
       return UINT64_C(0xFFFFFFFFFFFFFFFF);
@@ -84,7 +97,7 @@ binReadF77Block(int fileID, int byteswap)
 
   if (fileRead(fileID, f77block, 4) == 4)
     {
-      blocklen = byteswap ? get_SUINT32(f77block) : get_UINT32(f77block);
+      blocklen = byteswap ? get_swap_uint32(f77block) : get_uint32(f77block);
     }
 
   return blocklen;
@@ -126,70 +139,62 @@ binWriteF77Block(int fileID, int byteswap, size_t blocksize)
 }
 
 int
-binReadInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
+binReadInt32(int fileID, int byteswap, size_t size, int32_t *ptr)
 {
-  if (sizeof(INT32) != 4) Error("Not implemented for %d byte integer!", sizeof(INT32));
-
   fileRead(fileID, (void *) ptr, 4 * size);
   if (byteswap) swap4byte(ptr, size);
-
   return 0;
 }
 
 int
-binReadInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
+binReadInt64(int fileID, int byteswap, size_t size, int64_t *ptr)
 {
-  if (sizeof(INT64) != 8) Error("Not implemented for %d byte integer!", sizeof(INT64));
-
   fileRead(fileID, (void *) ptr, 8 * size);
   if (byteswap) swap8byte(ptr, size);
-
   return 0;
 }
 
 int
-binWriteInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
+binWriteInt32(int fileID, int byteswap, size_t size, int32_t *ptr)
 {
-  if (sizeof(INT32) != 4) Error("Not implemented for %d byte integer!", sizeof(INT32));
-
   if (byteswap) swap4byte(ptr, size);
   fileWrite(fileID, (void *) ptr, 4 * size);
-
   return 0;
 }
 
 int
-binWriteInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
+binWriteInt64(int fileID, int byteswap, size_t size, int64_t *ptr)
 {
-  if (sizeof(INT64) != 8) Error("Not implemented for %d byte integer!", sizeof(INT64));
-
   if (byteswap) swap8byte(ptr, size);
   fileWrite(fileID, (void *) ptr, 8 * size);
-
   return 0;
 }
 
 int
-binWriteFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
+binWriteFlt32(int fileID, int byteswap, size_t size, float *ptr)
 {
-  if (sizeof(FLT32) != 4) Error("Not implemented for %d byte float!", sizeof(FLT32));
-
   if (byteswap) swap4byte(ptr, size);
   fileWrite(fileID, (void *) ptr, 4 * size);
-
   return 0;
 }
 
 int
-binWriteFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
+binWriteFlt64(int fileID, int byteswap, size_t size, double *ptr)
 {
-  if (sizeof(FLT64) != 8) Error("Not implemented for %d byte float!", sizeof(FLT64));
-
   if (byteswap) swap8byte(ptr, size);
   fileWrite(fileID, (void *) ptr, 8 * size);
-
   return 0;
 }
+
+#ifdef HAVE__FLOAT16
+int
+binWriteFlt16(int fileID, size_t size, _Float16 *ptr)
+{
+  fileWrite(fileID, (void *) ptr, 2 * size);
+  return 0;
+}
+#endif
+
 /*
  * Local Variables:
  * c-file-style: "Java"

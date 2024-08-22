@@ -27,7 +27,7 @@ gribbyte_clear_bit(int *number, int bit)
 int grbBitsPerValue(int datatype);
 
 int fdbInqContents(stream_t *streamptr);
-int grbInqContents(stream_t *streamptr);
+long grbInqContents(stream_t *streamptr);
 int fdbInqTimestep(stream_t *streamptr, int tsID);
 int grbInqTimestep(stream_t *streamptr, int tsID);
 
@@ -49,7 +49,7 @@ int grib2ltypeToZaxisType(int grib_ltype);
 int zaxisTypeToGrib1ltype(int zaxistype);
 int zaxisTypeToGrib2ltype(int zaxistype);
 
-int grbGetGridtype(int *gridID, size_t gridsize, bool *gridIsRotated, bool *gridIsCurvilinear);
+int grbGetGridtype(int *gridID, SizeType gridsize, bool *gridIsRotated, bool *gridIsCurvilinear);
 
 struct cdiGribParamChange
 {

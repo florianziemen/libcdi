@@ -33,36 +33,20 @@
 
 static const char default_fname_prefix[] = "example";
 
-static const struct model_config default_setup
-#ifdef __cplusplus
-    = { 12,
-        6,
-        3,
-        5,
-        5,
-        CDI_FILETYPE_GRB,
-        CDI_DATATYPE_PACK24,
-        PIO_WRITE_CONFIG_CHECKSUM_FLAG,
-        TAXIS_ABSOLUTE,
-        -1,
-        "grb",
-        default_fname_prefix };
-#else
-    = {
-        .nlon = 12,
-        .nlat = 6,
-        .nts = 3,
-        .max_nlev = 5,
-        .nvars = 5,
-        .filetype = CDI_FILETYPE_GRB,
-        .datatype = CDI_DATATYPE_PACK24,
-        .flags = PIO_WRITE_CONFIG_CHECKSUM_FLAG,
-        .taxistype = TAXIS_ABSOLUTE,
-        .taxisunit = -1,
-        .suffix = "grb",
-        .prefix = default_fname_prefix,
-      };
-#endif
+static const struct model_config default_setup = {
+  .nlon = 12,
+  .nlat = 6,
+  .nts = 3,
+  .max_nlev = 5,
+  .nvars = 5,
+  .filetype = CDI_FILETYPE_GRB,
+  .datatype = CDI_DATATYPE_PACK24,
+  .flags = PIO_WRITE_CONFIG_CHECKSUM_FLAG,
+  .taxistype = TAXIS_ABSOLUTE,
+  .taxisunit = -1,
+  .suffix = "grb",
+  .prefix = default_fname_prefix,
+};
 
 static const struct
 {

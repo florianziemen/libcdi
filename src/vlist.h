@@ -177,11 +177,7 @@ extern int cdiNAdditionalGRIBKeys;
 extern char *cdiAdditionalGRIBKeys[];
 #endif
 
-extern
-#ifndef __cplusplus
-    const
-#endif
-    resOps vlistOps;
+extern const resOps vlistOps;
 
 #endif /* VLIST_H */
 /*

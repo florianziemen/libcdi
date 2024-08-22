@@ -1,6 +1,19 @@
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
 #include <string.h>
 #include <stdlib.h>
 #include "cdi.h"
+#include "dmemory.h"
 
 static int
 sum_found(int listSize, bool *listFound)
@@ -41,7 +54,7 @@ cdiQueryInit(CdiQuery *query)
 CdiQuery *
 cdiQueryCreate(void)
 {
-  CdiQuery *query = (CdiQuery *) malloc(sizeof(CdiQuery));
+  CdiQuery *query = (CdiQuery *) Malloc(sizeof(CdiQuery));
   cdiQueryInit(query);
   return query;
 }
@@ -53,31 +66,31 @@ cdiQueryDelete(CdiQuery *query)
     {
       if (query->numNames)
         {
-          for (int i = 0; i < query->numNames; ++i) free(query->names[i]);
-          free(query->names);
-          free(query->namesFound);
+          for (int i = 0; i < query->numNames; ++i) Free(query->names[i]);
+          Free(query->names);
+          Free(query->namesFound);
         }
 
       if (query->numCellidx)
         {
-          free(query->cellidx);
-          free(query->cellidxFound);
+          Free(query->cellidx);
+          Free(query->cellidxFound);
         }
 
       if (query->numLevidx)
         {
-          free(query->levidx);
-          free(query->levidxFound);
+          Free(query->levidx);
+          Free(query->levidxFound);
         }
 
       if (query->numStepidx)
         {
-          free(query->stepidx);
-          free(query->stepidxFound);
+          Free(query->stepidx);
+          Free(query->stepidxFound);
         }
 
       cdiQueryInit(query);
-      free(query);
+      Free(query);
     }
 }
 
@@ -108,12 +121,12 @@ cdiQueryNumEntries(const CdiQuery *query)
 void
 cdiQuerySetNames(CdiQuery *query, int numEntries, char **names)
 {
-  if (numEntries)
+  if (numEntries > 0)
     {
       query->numEntries += numEntries;
       query->numNames = numEntries;
-      query->namesFound = (bool *) calloc(numEntries, sizeof(bool));
-      query->names = (char **) malloc(numEntries * sizeof(char *));
+      query->namesFound = (bool *) Calloc((size_t) numEntries, sizeof(bool));
+      query->names = (char **) Malloc((size_t) numEntries * sizeof(char *));
       for (int i = 0; i < numEntries; ++i) query->names[i] = strdup(names[i]);
     }
 }
@@ -121,12 +134,12 @@ cdiQuerySetNames(CdiQuery *query, int numEntries, char **names)
 void
 cdiQuerySetCellidx(CdiQuery *query, int numEntries, size_t *cellidx)
 {
-  if (numEntries)
+  if (numEntries > 0)
     {
       query->numEntries += numEntries;
       query->numCellidx = numEntries;
-      query->cellidxFound = (bool *) calloc(numEntries, sizeof(bool));
-      query->cellidx = (size_t *) malloc(numEntries * sizeof(size_t));
+      query->cellidxFound = (bool *) Calloc((size_t) numEntries, sizeof(bool));
+      query->cellidx = (size_t *) Malloc((size_t) numEntries * sizeof(size_t));
       for (int i = 0; i < numEntries; ++i) query->cellidx[i] = cellidx[i];
     }
 }
@@ -134,12 +147,12 @@ cdiQuerySetCellidx(CdiQuery *query, int numEntries, size_t *cellidx)
 void
 cdiQuerySetLevidx(CdiQuery *query, int numEntries, int *levidx)
 {
-  if (numEntries)
+  if (numEntries > 0)
     {
       query->numEntries += numEntries;
       query->numLevidx = numEntries;
-      query->levidxFound = (bool *) calloc(numEntries, sizeof(bool));
-      query->levidx = (int *) malloc(numEntries * sizeof(int));
+      query->levidxFound = (bool *) Calloc((size_t) numEntries, sizeof(bool));
+      query->levidx = (int *) Malloc((size_t) numEntries * sizeof(int));
       for (int i = 0; i < numEntries; ++i) query->levidx[i] = levidx[i];
     }
 }
@@ -147,12 +160,12 @@ cdiQuerySetLevidx(CdiQuery *query, int numEntries, int *levidx)
 void
 cdiQuerySetStepidx(CdiQuery *query, int numEntries, int *stepidx)
 {
-  if (numEntries)
+  if (numEntries > 0)
     {
       query->numEntries += numEntries;
       query->numStepidx = numEntries;
-      query->stepidxFound = (bool *) calloc(numEntries, sizeof(bool));
-      query->stepidx = (int *) malloc(numEntries * sizeof(int));
+      query->stepidxFound = (bool *) Calloc((size_t) numEntries, sizeof(bool));
+      query->stepidx = (int *) Malloc((size_t) numEntries * sizeof(int));
       for (int i = 0; i < numEntries; ++i) query->stepidx[i] = stepidx[i];
     }
 }

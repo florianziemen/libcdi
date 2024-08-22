@@ -1,3 +1,15 @@
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
 #include <float.h> /* FLT_MAX */
 #include "dmemory.h"
 #include "cdi.h"
@@ -1069,13 +1081,10 @@ vlistInqFlag(int vlistID, int varID, int levID)
 {
   var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->levinfo)
-    return varptr->levinfo[levID].flag;
-  else
-    {
-      levinfo_t li = DEFAULT_LEVINFO(levID);
-      return li.flag;
-    }
+  if (varptr->levinfo) return varptr->levinfo[levID].flag;
+
+  levinfo_t li = DEFAULT_LEVINFO(levID);
+  return li.flag;
 }
 
 int
@@ -1135,13 +1144,10 @@ vlistMergedLevel(int vlistID, int varID, int levelID)
 {
   var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->levinfo)
-    return varptr->levinfo[levelID].mlevelID;
-  else
-    {
-      levinfo_t li = DEFAULT_LEVINFO(levelID);
-      return li.mlevelID;
-    }
+  if (varptr->levinfo) return varptr->levinfo[levelID].mlevelID;
+
+  levinfo_t li = DEFAULT_LEVINFO(levelID);
+  return li.mlevelID;
 }
 
 void
@@ -1167,13 +1173,10 @@ vlistInqIndex(int vlistID, int varID, int levelID)
 {
   var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->levinfo)
-    return varptr->levinfo[levelID].index;
-  else
-    {
-      levinfo_t li = DEFAULT_LEVINFO(levelID);
-      return li.index;
-    }
+  if (varptr->levinfo) return varptr->levinfo[levelID].index;
+
+  levinfo_t li = DEFAULT_LEVINFO(levelID);
+  return li.index;
 }
 
 void

@@ -1,3 +1,15 @@
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -9,7 +21,7 @@
 #endif
 
 static void
-cpledn(size_t kn, size_t kodd, double *pfn, double pdx, int kflag, double *pw, double *pdxn, double *pxmod)
+cpledn(size_t kn, size_t kodd, const double *pfn, double pdx, int kflag, double *pw, double *pdxn, double *pxmod)
 {
   // 1.0 Newton iteration step
 
@@ -48,8 +60,6 @@ cpledn(size_t kn, size_t kodd, double *pfn, double pdx, int kflag, double *pw, d
         }
       *pw = (double) (2 * kn + 1) / (zdlldn * zdlldn);
     }
-
-  return;
 }
 
 static void
@@ -80,8 +90,6 @@ gawl(double *pfn, double *pl, double *pw, size_t kn)
 
   *pl = zdlxn;
   *pw = zw;
-
-  return;
 }
 
 static void
@@ -157,8 +165,6 @@ gauaw(size_t kn, double *restrict pl, double *restrict pw)
 
   free(zfnlat);
   free(zfn);
-
-  return;
 }
 
 void

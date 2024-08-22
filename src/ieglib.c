@@ -1,3 +1,15 @@
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +28,7 @@ static int iegDefaultDprec = 0;
 
 // A version string.
 #undef LIBVERSION
-#define LIBVERSION 1.5.0
+#define LIBVERSION 2.0.0
 #define XSTRING(x) #x
 #define STRING(x) XSTRING(x)
 static const char ieg_libvers[] = STRING(LIBVERSION);
@@ -47,8 +59,8 @@ iegLibInit(void)
               {
                 switch ((int) envString[pos + 1])
                   {
-                  case '4': iegDefaultDprec = EXSE_SINGLE_PRECISION; break;
-                  case '8': iegDefaultDprec = EXSE_DOUBLE_PRECISION; break;
+                  case '4': iegDefaultDprec = EXSE_PREC_FP32; break;
+                  case '8': iegDefaultDprec = EXSE_PREC_FP64; break;
                   default: Warning("Invalid digit in %s: %s", envName, envString);
                   }
                 break;
@@ -128,8 +140,8 @@ iegCheckFiletype(int fileID, int *swap)
 
   if (fileRead(fileID, buffer, 4) != 4) return 0;
 
-  size_t blocklen = get_UINT32(buffer);
-  size_t sblocklen = get_SUINT32(buffer);
+  size_t blocklen = get_uint32(buffer);
+  size_t sblocklen = get_swap_uint32(buffer);
 
   if (IEG_Debug) Message("blocklen = %d sblocklen = %d", blocklen, sblocklen);
 
@@ -139,36 +151,36 @@ iegCheckFiletype(int fileID, int *swap)
      *swap = 0;
       fact = 4;
       if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
-      pbuf = buffer+(37+4)*4;    dimx = (size_t) get_UINT32(pbuf);
-      pbuf = buffer+(37+5)*4;    dimy = (size_t) get_UINT32(pbuf);
-      pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
+      pbuf = buffer+(37+4)*4;    dimx = (size_t) get_uint32(pbuf);
+      pbuf = buffer+(37+5)*4;    dimy = (size_t) get_uint32(pbuf);
+      pbuf = buffer+blocklen+4;  data = (size_t) get_uint32(pbuf);
     }
   else if (blocklen == 1040 || blocklen == 1036)
     {
      *swap = 0;
       fact = 8;
       if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
-      pbuf = buffer+(37+4)*4;    dimx = (size_t) get_UINT32(pbuf);
-      pbuf = buffer+(37+5)*4;    dimy = (size_t) get_UINT32(pbuf);
-      pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
+      pbuf = buffer+(37+4)*4;    dimx = (size_t) get_uint32(pbuf);
+      pbuf = buffer+(37+5)*4;    dimy = (size_t) get_uint32(pbuf);
+      pbuf = buffer+blocklen+4;  data = (size_t) get_uint32(pbuf);
     }
   else if (sblocklen == 636 || sblocklen == 640)
     {
      *swap = 1;
       fact = 4;
       if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
-      pbuf = buffer+(37+4)*4;     dimx = (size_t) get_SUINT32(pbuf);
-      pbuf = buffer+(37+5)*4;     dimy = (size_t) get_SUINT32(pbuf);
-      pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
+      pbuf = buffer+(37+4)*4;     dimx = (size_t) get_swap_uint32(pbuf);
+      pbuf = buffer+(37+5)*4;     dimy = (size_t) get_swap_uint32(pbuf);
+      pbuf = buffer+sblocklen+4;  data = (size_t) get_swap_uint32(pbuf);
     }
   else if (sblocklen == 1040 || sblocklen == 1036)
     {
      *swap = 1;
       fact = 8;
       if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
-      pbuf = buffer+(37+4)*4;     dimx = (size_t) get_SUINT32(pbuf);
-      pbuf = buffer+(37+5)*4;     dimy = (size_t) get_SUINT32(pbuf);
-      pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
+      pbuf = buffer+(37+4)*4;     dimx = (size_t) get_swap_uint32(pbuf);
+      pbuf = buffer+(37+5)*4;     dimy = (size_t) get_swap_uint32(pbuf);
+      pbuf = buffer+sblocklen+4;  data = (size_t) get_swap_uint32(pbuf);
     }
   // clang-format on
 
@@ -208,46 +220,34 @@ iegInqData(void *ieg, int prec, void *data)
 
   switch (dprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
       {
-        if (sizeof(FLT32) == 4)
-          {
-            if (byteswap) swap4byte(buffer, datasize);
+        if (byteswap) swap4byte(buffer, datasize);
 
-            if (dprec == prec)
-              memcpy(data, buffer, datasize * sizeof(FLT32));
-            else
-              {
-                const float *restrict p = (float *) buffer;
-                double *restrict q = (double *) data;
-                for (size_t i = 0; i < datasize; i++) q[i] = p[i];
-              }
-          }
+        if (dprec == prec)
+          memcpy(data, buffer, datasize * sizeof(float));
         else
           {
-            Error("not implemented for %d byte float", sizeof(FLT32));
+            const float *restrict p = (float *) buffer;
+            double *restrict q = (double *) data;
+            for (size_t i = 0; i < datasize; i++) q[i] = p[i];
           }
+
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
-        if (sizeof(FLT64) == 8)
-          {
-            if (byteswap) swap8byte(buffer, datasize);
+        if (byteswap) swap8byte(buffer, datasize);
 
-            if (dprec == prec)
-              memcpy(data, buffer, datasize * sizeof(FLT64));
-            else
-              {
-                const double *restrict p = (double *) buffer;
-                float *restrict q = (float *) data;
-                for (size_t i = 0; i < datasize; i++) q[i] = (float) p[i];
-              }
-          }
+        if (dprec == prec)
+          memcpy(data, buffer, datasize * sizeof(double));
         else
           {
-            Error("not implemented for %d byte float", sizeof(FLT64));
+            const double *restrict p = (double *) buffer;
+            float *restrict q = (float *) data;
+            for (size_t i = 0; i < datasize; i++) q[i] = (float) p[i];
           }
+
         break;
       }
     default:
@@ -261,15 +261,15 @@ iegInqData(void *ieg, int prec, void *data)
 }
 
 int
-iegInqDataSP(void *ieg, float *data)
+iegInqDataFP32(void *ieg, float *data)
 {
-  return iegInqData(ieg, EXSE_SINGLE_PRECISION, (void *) data);
+  return iegInqData(ieg, EXSE_PREC_FP32, (void *) data);
 }
 
 int
-iegInqDataDP(void *ieg, double *data)
+iegInqDataFP64(void *ieg, double *data)
 {
-  return iegInqData(ieg, EXSE_DOUBLE_PRECISION, (void *) data);
+  return iegInqData(ieg, EXSE_PREC_FP64, (void *) data);
 }
 
 static int
@@ -291,10 +291,10 @@ iegDefData(iegrec_t *iegp, int prec, const void *data)
 
   switch (dprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
       {
         if (dprec == prec)
-          memcpy(iegp->buffer, data, datasize * sizeof(FLT32));
+          memcpy(iegp->buffer, data, datasize * sizeof(float));
         else
           {
             const double *restrict p = (const double *) data;
@@ -303,10 +303,10 @@ iegDefData(iegrec_t *iegp, int prec, const void *data)
           }
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
         if (dprec == prec)
-          memcpy(iegp->buffer, data, datasize * sizeof(FLT64));
+          memcpy(iegp->buffer, data, datasize * sizeof(double));
         else
           {
             const float *restrict p = (const float *) data;
@@ -326,15 +326,15 @@ iegDefData(iegrec_t *iegp, int prec, const void *data)
 }
 
 int
-iegDefDataSP(void *ieg, const float *data)
+iegDefDataFP32(void *ieg, const float *data)
 {
-  return iegDefData((iegrec_t *) ieg, EXSE_SINGLE_PRECISION, (void *) data);
+  return iegDefData((iegrec_t *) ieg, EXSE_PREC_FP32, (void *) data);
 }
 
 int
-iegDefDataDP(void *ieg, const double *data)
+iegDefDataFP64(void *ieg, const double *data)
 {
-  return iegDefData((iegrec_t *) ieg, EXSE_DOUBLE_PRECISION, (void *) data);
+  return iegDefData((iegrec_t *) ieg, EXSE_PREC_FP64, (void *) data);
 }
 
 int
@@ -399,7 +399,7 @@ iegRead(int fileID, void *ieg)
   binReadInt32(fileID, byteswap, 3, buf.i32);
   for (int i = 0; i < 3; i++) iegp->igdb[18 + i] = (int) buf.i32[i];
 
-  if (dprec == EXSE_SINGLE_PRECISION)
+  if (dprec == EXSE_PREC_FP32)
     {
       fileRead(fileID, buf.f, 400);
       if (byteswap) swap4byte(buf.f, 100);
@@ -457,34 +457,34 @@ iegWrite(int fileID, void *ieg)
   iegrec_t *iegp = (iegrec_t *) ieg;
   union
   {
-    INT32 i32[200];
+    int32_t i32[200];
     float fvct[100];
   } buf;
   int dprec = iegp->dprec;
   int byteswap = iegp->byteswap;
 
   // write header record
-  size_t blocklen = (dprec == EXSE_SINGLE_PRECISION) ? 636 : 1040;
+  size_t blocklen = (dprec == EXSE_PREC_FP32) ? 636 : 1040;
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
-  for (int i = 0; i < 37; i++) buf.i32[i] = (INT32) iegp->ipdb[i];
+  for (int i = 0; i < 37; i++) buf.i32[i] = (int32_t) iegp->ipdb[i];
   binWriteInt32(fileID, byteswap, 37, buf.i32);
 
-  for (int i = 0; i < 18; i++) buf.i32[i] = (INT32) iegp->igdb[i];
+  for (int i = 0; i < 18; i++) buf.i32[i] = (int32_t) iegp->igdb[i];
   binWriteInt32(fileID, byteswap, 18, buf.i32);
 
-  FLT64 refval = (FLT64) iegp->refval;
-  FLT32 refvalf = (FLT32) iegp->refval;
-  if (dprec == EXSE_SINGLE_PRECISION)
+  double refval = (double) iegp->refval;
+  float refvalf = (float) iegp->refval;
+  if (dprec == EXSE_PREC_FP32)
     binWriteFlt32(fileID, byteswap, 1, &refvalf);
   else
     binWriteFlt64(fileID, byteswap, 1, &refval);
 
-  for (int i = 0; i < 3; i++) buf.i32[i] = (INT32) iegp->igdb[18 + i];
+  for (int i = 0; i < 3; i++) buf.i32[i] = (int32_t) iegp->igdb[18 + i];
   binWriteInt32(fileID, byteswap, 3, buf.i32);
 
-  if (dprec == EXSE_SINGLE_PRECISION)
+  if (dprec == EXSE_PREC_FP32)
     {
       for (int i = 0; i < 100; i++) buf.fvct[i] = (float) iegp->vct[i];
       binWriteFlt32(fileID, byteswap, 100, buf.fvct);
@@ -503,14 +503,14 @@ iegWrite(int fileID, void *ieg)
 
   switch (dprec)
     {
-    case EXSE_SINGLE_PRECISION:
+    case EXSE_PREC_FP32:
       {
-        binWriteFlt32(fileID, byteswap, iegp->datasize, (FLT32 *) iegp->buffer);
+        binWriteFlt32(fileID, byteswap, iegp->datasize, (float *) iegp->buffer);
         break;
       }
-    case EXSE_DOUBLE_PRECISION:
+    case EXSE_PREC_FP64:
       {
-        binWriteFlt64(fileID, byteswap, iegp->datasize, (FLT64 *) iegp->buffer);
+        binWriteFlt64(fileID, byteswap, iegp->datasize, (double *) iegp->buffer);
         break;
       }
     default:

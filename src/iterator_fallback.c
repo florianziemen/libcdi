@@ -1,3 +1,15 @@
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
 #include "iterator_fallback.h"
 
 #include "cdi.h"
@@ -333,7 +345,7 @@ cdiFallbackIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outL
   if (outUuid)
     {
       int length = CDI_UUID_SIZE;
-      memset(outUuid, 0, length);
+      memset(outUuid, 0, (size_t) length);
       cdiInqKeyBytes(zaxisId, CDI_GLOBAL, CDI_KEY_UUID, outUuid, &length);
     }
   return CDI_NOERR;
@@ -343,14 +355,9 @@ int
 cdiFallbackIterator_inqTile(CdiIterator *super, int *outTileIndex, int *outTileAttribute)
 {
   CdiFallbackIterator *me = (CdiFallbackIterator *) (void *) super;
-#ifndef __cplusplus
-  if (!outTileIndex) outTileIndex = &(int){ 0 };
-  if (!outTileAttribute) outTileAttribute = &(int){ 0 };
-#else
   int dummy = 0;
   if (!outTileIndex) outTileIndex = &dummy;
   if (!outTileAttribute) outTileAttribute = &dummy;
-#endif
 
   int error = CDI_NOERR;
   if (me->subtypeId == CDI_UNDEFID)  // must not call subtypeInqAttribute() with an invalid subtype ID, because it would abort the
@@ -371,14 +378,9 @@ int
 cdiFallbackIterator_inqTileCount(CdiIterator *super, int *outTileCount, int *outTileAttributeCount)
 {
   CdiFallbackIterator *me = (CdiFallbackIterator *) (void *) super;
-#ifndef __cplusplus
-  if (!outTileCount) outTileCount = &(int){ 0 };
-  if (!outTileAttributeCount) outTileAttributeCount = &(int){ 0 };
-#else
   int temp = 0;
   if (!outTileCount) outTileCount = &temp;
   if (!outTileAttributeCount) outTileAttributeCount = &temp;
-#endif
 
   int error = CDI_NOERR;
   if (me->subtypeId == CDI_UNDEFID)  // must not call subtypeInqAttribute() with an invalid subtype ID, because it would abort the

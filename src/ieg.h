@@ -84,12 +84,12 @@ int iegWrite(int fileID, void *ieg);
 
 void iegCopyMeta(void *dieg, void *sieg);
 int iegInqHeader(void *ieg, int *header);
-int iegInqDataSP(void *ieg, float *data);
-int iegInqDataDP(void *ieg, double *data);
+int iegInqDataFP32(void *ieg, float *data);
+int iegInqDataFP64(void *ieg, double *data);
 
 int iegDefHeader(void *ieg, const int *header);
-int iegDefDataSP(void *ieg, const float *data);
-int iegDefDataDP(void *ieg, const double *data);
+int iegDefDataFP32(void *ieg, const float *data);
+int iegDefDataFP64(void *ieg, const double *data);
 
 #endif /* _IEG_H */
 /*

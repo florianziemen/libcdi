@@ -1,3 +1,15 @@
+/* DO NOT REMOVE the config.h include file under any circumstances,
+ * it's very much needed on some platforms */
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
+/* DO NOT REMOVE the above config.h include file under any
+ * circumstances as long as it's the autoconf configuration header
+ * used to build this package. When it's missing on some platforms,
+ * some poor person has to do long, tedious debugging sessions, where
+ * struct offsets almost imperceptibly change from one file to the
+ * next to find out what happened */
+
 #include <stdio.h>
 
 #include "calendar.h"
@@ -47,9 +59,9 @@ days_per_year(int calendar, int year)
 }
 
 void
-decode_calday(int daysPerYear, int days, int *year, int *month, int *day)
+decode_calday(int daysPerYear, int64_t days, int *year, int *month, int *day)
 {
-  *year = (days - 1) / daysPerYear;
+  *year = (int) ((days - 1) / daysPerYear);
   days -= (*year * daysPerYear);
 
   const int *daysPerMonthArray = get_dayspermonth_array(daysPerYear);
@@ -65,7 +77,7 @@ decode_calday(int daysPerYear, int days, int *year, int *month, int *day)
       }
 
   *month = i + 1;
-  *day = days;
+  *day = (int) days;
 }
 
 int64_t

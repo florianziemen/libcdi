@@ -389,7 +389,7 @@ int     streamInqByteorder(int streamID);
 
 void    streamDefShuffle(int streamID, int shuffle);
 
-void    streamDefFilter(int streamID, int filterId, int nparams, const int *params);
+void    streamDefFilter(int streamID, const char *filterSpec);
 
 //      streamDefCompType: Define compression type
 void    streamDefCompType(int streamID, int comptype);
@@ -841,6 +841,8 @@ SizeType gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_MISSVAL                       701  // Missing value
 #define  CDI_KEY_ADDOFFSET                     702  // Add offset
 #define  CDI_KEY_SCALEFACTOR                   703  // Scale factor
+#define  CDI_KEY_FILTERSPEC_IN                 720  // NetCDF4 filter specification read in
+#define  CDI_KEY_FILTERSPEC                    721  // NetCDF4 filter specification
 
 // Byte array keys
 #define  CDI_KEY_UUID                          960  // UUID for grid/Z-axis reference [size: CDI_UUID_SIZE]
@@ -1357,7 +1359,7 @@ void cdiQueryPrintEntriesNotFound(const CdiQuery *query);
 // streamOpenReadQuery: Open a dataset for reading and apply query
 int streamOpenReadQuery(const char *path, CdiQuery *query);
 
-// CDI interface for  paraview vtkCDIReader.cxx
+// CDI interface for paraview vtkCDIReader.cxx
 
 #include "cdi_datetime.h"
 
@@ -1427,6 +1429,9 @@ extern int (*proj_lonlat_to_lcc_func)(struct CDI_GridProjParams gpp, size_t, dou
 extern int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double*, double*);
 extern int (*proj_lonlat_to_stere_func)(struct CDI_GridProjParams gpp, size_t, double*, double*);
 extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double*, double*);
+
+// Used on CDO remap_scrip_io.cc
+void cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec);
 
 #ifdef __cplusplus
 }
