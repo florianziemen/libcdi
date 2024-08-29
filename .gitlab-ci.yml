@@ -15,6 +15,7 @@ workflow:
 stages:
   - basic
   - levante
+  - breeze
 
 .colorized:
   variables:
@@ -95,6 +96,16 @@ include:
   script:
     - "${CI_PROJECT_DIR}/.ci/bb/levante-dkrz/${CI_JOB_NAME}"
 
+.common-breeze:
+  stage: breeze
+  extends: .common
+  before_script:
+    - module purge
+  script:
+    - "${CI_PROJECT_DIR}/.ci/bb/breeze-mpim/${CI_JOB_NAME}"
+  tags:
+    - mpim, breeze1-3
+
 test.all.gcc:
   extends: .common-levante
 
@@ -106,3 +117,15 @@ test.icon-pio.intel-classic:
 
 test.icon.gcc:
   extends: .common-levante
+
+test.all.clang:
+  extends: .common-breeze
+
+test.all.nag:
+  extends: .common-breeze
+
+test.all.nv:
+  extends: .common-breeze
+
+test.ru-py.gcc:
+  extends: .common-breeze

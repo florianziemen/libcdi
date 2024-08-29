@@ -34,7 +34,7 @@ FC="${MPIFC}" \
 MPI_LAUNCH="${MPI_LAUNCH}" \
 PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig:${PPM_ROOT}/lib/pkgconfig"
 
-make -j8
+make
 
 # Check that an executable is not overlinked to libscalesppmcore.so:
 tested_file='examples/pio/collectData.parallel'
@@ -55,7 +55,7 @@ if test -n "${invalid_needed}"; then
   exit 1
 fi
 
-make -j8 check || { cat tests/test-suite.log; exit 1; }
+make check || { cat tests/test-suite.log; exit 1; }
 
 check_all_tests_passed tests/test-suite.log
 
