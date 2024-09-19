@@ -1,3 +1,11 @@
+2024-09-19  Uwe Schulzweida
+
+	* Version 2.4.4 released
+
+2024-09-18  Uwe Schulzweida
+
+	* absolute timeaxis failed with timeunits seconds [Bug #11916]
+
 2024-08-14  Uwe Schulzweida
 
 	* Version 2.4.3 released

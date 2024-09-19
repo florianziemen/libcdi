@@ -1289,6 +1289,7 @@ cdi_decode_timeval(double timevalue, const taxis_t *taxis)
   return (taxis->type == TAXIS_ABSOLUTE) ? split_timevalue(timevalue, taxis->unit) : rtimeval2datetime(timevalue, taxis);
 }
 
+/*
 static int64_t
 datetime2seconds(CdiDateTime datetime)
 {
@@ -1305,7 +1306,7 @@ datetime2seconds(CdiDateTime datetime)
 
   return seconds;
 }
-
+*/
 double
 cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis)
 {
@@ -1322,10 +1323,12 @@ cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis)
           int64_t xdate = cdiDate_get(datetime.date);
           timeValue = (double) xdate / 100 + copysign((double) (datetime.date.day != 0) * 0.5, (double) xdate);
         }
+      /*
       else if (taxis->unit == TUNIT_SECOND)
         {
           timeValue = (double) datetime2seconds(datetime);
         }
+      */
       else
         {
           int hour, minute, second, ms;
