@@ -199,6 +199,8 @@ cdf4Open(const char *filename, const char *mode, int *filetype)
 static void
 cdfCloseFile(int fileID)
 {
+
+  if (CDF_Debug) Message( "Closing cdf file: %d", fileID);
   cdf_close(fileID);
 }
 

@@ -355,6 +355,7 @@ int     cdiGetProtocol(const char *uri, const char **filename);
 
 int     streamOpenReadNCMem(int ncid);
 int     streamOpenWriteNCMem(int ncid);
+int     streamCloseNCMem(int ncid);
 
 //      streamOpenRead: Open a dataset for reading
 int     streamOpenRead(const char *path);

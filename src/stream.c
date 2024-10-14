@@ -747,17 +747,6 @@ streamOpenNCMem(int ncidp, char mode)
 
   return streamID;
 }
-
-int
-streamOpenReadNCMem(int ncidp)
-{
-  return streamOpenNCMem(ncidp, 'r');
-}
-int
-streamOpenWriteNCMem(int ncidp)
-{
-  return streamOpenNCMem(ncidp, 'w');
-}
 static int
 streamOpen(const char *filename, const char *filemode, int filetype)
 {
@@ -1274,14 +1263,10 @@ deallocate_sleveltable_t(sleveltable_t *entry)
 }
 
 static void
-streamDestroy(stream_t *streamptr)
+streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted))
 {
+
   xassert(streamptr);
-  int vlistID = streamptr->vlistID;
-
-  void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
-      = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
-
   if (streamptr->filetype != CDI_FILETYPE_UNDEF) streamCloseDelegate(streamptr, 1);
 
   if (streamptr->record)
@@ -1337,6 +1322,7 @@ streamDestroy(stream_t *streamptr)
     }
 #endif
 
+  int vlistID = streamptr->vlistID;
   if (vlistID != -1)
     {
       int taxisID = (streamptr->filemode != 'w') ? vlistInqTaxis(vlistID) : -1;
@@ -1349,6 +1335,16 @@ streamDestroy(stream_t *streamptr)
   if (streamptr->jobManager) AsyncWorker_finalize((AsyncManager *) streamptr->jobManager);
 
   Free(streamptr);
+}
+
+
+static void
+streamDestroy(stream_t *streamptr)
+{
+  void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
+      = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
+
+  streamDestroyViaDelegate(streamptr, streamCloseDelegate);
 }
 
 static void
@@ -2039,6 +2035,65 @@ streamUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int
   streamptr->have_missval = intBuffer[9];
   struct streamAssoc retval = { streamID, intBuffer[3] };
   return retval;
+}
+
+
+/* *
+ * This function does not really close the memio,
+ * this has to be done outside cdi to access the memory buffer*/
+void
+freePtrAfterNCMem(stream_t *streamptr, int recordBufIsToBeDeleted)
+{
+  int fileID = streamptr->fileID;
+  int filetype = streamptr->filetype;
+
+  if (fileID == CDI_UNDEFID)
+    {
+      Warning("File %s not open!", streamptr->filename);
+      return;
+    }
+
+  if (streamptr->ntsteps == 0 && streamptr->tsteps != NULL)
+    {
+      if (streamptr->tsteps[0].records)
+        {
+          Free(streamptr->tsteps[0].records);
+          streamptr->tsteps[0].records = NULL;
+        }
+      if (streamptr->tsteps[0].recIDs)
+        {
+          Free(streamptr->tsteps[0].recIDs);
+          streamptr->tsteps[0].recIDs = NULL;
+        }
+    }
+}
+
+
+int
+streamCloseNCMem(int streamID)
+{
+  stream_t *streamptr = stream_to_pointer(streamID);
+
+  bool lockIO = streamptr->lockIO;
+  if (lockIO) CDI_IO_LOCK();
+
+  if (CDI_Debug) Message("streamID = %d filename = %s", streamID, streamptr->filename);
+  streamDestroyViaDelegate(streamptr,freePtrAfterNCMem);
+  reshRemove(streamID, &streamOps);
+  if (CDI_Debug) Message("Removed stream %d from stream list", streamID);
+
+  if (lockIO) CDI_IO_UNLOCK();
+}
+
+int
+streamOpenReadNCMem(int ncidp)
+{
+  return streamOpenNCMem(ncidp, 'r');
+}
+int
+streamOpenWriteNCMem(int ncidp)
+{
+  return streamOpenNCMem(ncidp, 'w');
 }
 
 /*
