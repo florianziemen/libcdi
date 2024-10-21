@@ -1078,17 +1078,63 @@ is_valid_coordinate(ncvar_t *ncvar)
 }
 
 static void
-read_aux_vars(int ncid, char *pstring, ncvar_t *ncvar, ncvar_t *ncvars)
+read_coordinates_vars(int ncid, char *attstring, ncvar_t *ncvar, ncvar_t *ncvars, int *nchecked_vars, char *checked_vars[],
+                      int max_check_vars)
 {
   bool lstop = false;
-  for (int i = 0; i < MAX_AUXVARS; i++)
+  for (int i = 0; i < MAX_COORDVARS && !lstop; i++)
     {
-      while (isspace((int) *pstring)) pstring++;
-      if (*pstring == 0) break;
-      char *varname = pstring;
-      while (!isspace((int) *pstring) && *pstring != 0) pstring++;
-      if (*pstring == 0) lstop = true;
-      *pstring++ = 0;
+      while (isspace((int) *attstring)) attstring++;
+      if (*attstring == 0) break;
+      char *varname = attstring;
+      while (!isspace((int) *attstring) && *attstring != 0) attstring++;
+      if (*attstring == 0) lstop = true;
+      if (*(attstring - 1) == ',') *(attstring - 1) = 0;
+      *attstring++ = 0;
+
+      int dimvarid;
+      int status = nc_inq_varid(ncid, varname, &dimvarid);
+      if (status == NC_NOERR)
+        {
+          if (is_valid_coordinate(&ncvars[dimvarid]))
+            {
+              cdf_set_var(&ncvars[dimvarid], CoordVar);
+              if (!CDI_Ignore_Att_Coordinates)
+                {
+                  ncvar->coordvarids[i] = dimvarid;
+                  ncvar->ncoordvars++;
+                }
+            }
+        }
+      else
+        {
+          if (!CDI_Ignore_Att_Coordinates) ncvar->ncoordvars++;
+
+          int k;
+          for (k = 0; k < *nchecked_vars; ++k)
+            if (str_is_equal(checked_vars[k], varname)) break;
+
+          if (k == *nchecked_vars)
+            {
+              if (*nchecked_vars < max_check_vars) checked_vars[*nchecked_vars++] = strdup(varname);
+              Warning("%s - >%s<", nc_strerror(status), varname);
+            }
+        }
+    }
+}
+
+static void
+read_auxiliary_vars(int ncid, char *attstring, ncvar_t *ncvar, ncvar_t *ncvars)
+{
+  bool lstop = false;
+  for (int i = 0; i < MAX_AUXVARS && !lstop; i++)
+    {
+      while (isspace((int) *attstring)) attstring++;
+      if (*attstring == 0) break;
+      char *varname = attstring;
+      while (!isspace((int) *attstring) && *attstring != 0) attstring++;
+      if (*attstring == 0) lstop = true;
+      *attstring++ = 0;
 
       int dimvarid;
       int status = nc_inq_varid(ncid, varname, &dimvarid);
@@ -1103,8 +1149,6 @@ read_aux_vars(int ncid, char *pstring, ncvar_t *ncvar, ncvar_t *ncvars)
         }
       else
         Warning("%s - %s", nc_strerror(status), varname);
-
-      if (lstop) break;
     }
 }
 
@@ -1416,54 +1460,12 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
           else if (isText && (str_is_equal(attname, "associate") || str_is_equal(attname, "coordinates")))
             {
-              bool lstop = false;
-              char *pstring = attstring;
-
-              for (int i = 0; i < MAX_COORDVARS && !lstop; i++)
-                {
-                  while (isspace((int) *pstring)) pstring++;
-                  if (*pstring == 0) break;
-                  char *varname = pstring;
-                  while (!isspace((int) *pstring) && *pstring != 0) pstring++;
-                  if (*pstring == 0) lstop = true;
-                  if (*(pstring - 1) == ',') *(pstring - 1) = 0;
-                  *pstring++ = 0;
-
-                  int dimvarid;
-                  int status = nc_inq_varid(ncid, varname, &dimvarid);
-                  if (status == NC_NOERR)
-                    {
-                      if (is_valid_coordinate(&ncvars[dimvarid]))
-                        {
-                          cdf_set_var(&ncvars[dimvarid], CoordVar);
-                          if (!CDI_Ignore_Att_Coordinates)
-                            {
-                              ncvar->coordvarids[i] = dimvarid;
-                              ncvar->ncoordvars++;
-                            }
-                        }
-                    }
-                  else
-                    {
-                      if (!CDI_Ignore_Att_Coordinates) ncvar->ncoordvars++;
-
-                      int k;
-                      for (k = 0; k < nchecked_vars; ++k)
-                        if (str_is_equal(checked_vars[k], varname)) break;
-
-                      if (k == nchecked_vars)
-                        {
-                          if (nchecked_vars < max_check_vars) checked_vars[nchecked_vars++] = strdup(varname);
-                          Warning("%s - >%s<", nc_strerror(status), varname);
-                        }
-                    }
-                }
-
+              read_coordinates_vars(ncid, attstring, ncvar, ncvars, &nchecked_vars, checked_vars, max_check_vars);
               cdf_set_var(ncvar, DataVar);
             }
           else if (isText && str_is_equal(attname, "auxiliary_variable"))
             {
-              read_aux_vars(ncid, attstring, ncvar, ncvars);
+              read_auxiliary_vars(ncid, attstring, ncvar, ncvars);
               cdf_set_var(ncvar, DataVar);
             }
           else if (isText && str_is_equal(attname, "grid_mapping"))
