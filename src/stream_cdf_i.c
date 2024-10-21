@@ -4424,28 +4424,64 @@ stream_set_ncdims(stream_t *streamptr, int ndims, ncdim_t *ncdims)
   for (int i = 0; i < n; i++) streamptr->ncDimLen[i] = ncdims[i].len;
 }
 
+static void
+read_ncdims(int fileID, int ndims, ncdim_t *ncdims)
+{
+  if (ndims)
+    {
+      int ncdimid = 0;
+      for (int dimid = 0; dimid < NC_MAX_DIMS; ++dimid)
+        {
+          if (nc_inq_dimlen(fileID, dimid, NULL) == NC_NOERR)
+            {
+              ncdims[ncdimid++].dimid = dimid;
+              if (ncdimid == ndims) break;
+            }
+        }
+    }
+}
+
+static void
+check_ncgroups(int fileID)
+{
+  int numgrps = 0;
+  int ncids[NC_MAX_VARS];
+  char gname[CDI_MAX_NAME];
+  nc_inq_grps(fileID, &numgrps, ncids);
+  for (int i = 0; i < numgrps; ++i)
+    {
+      int ncid = ncids[i];
+      nc_inq_grpname(ncid, gname);
+      int gndims, gnvars, gngatts, gunlimdimid;
+      cdf_inq(ncid, &gndims, &gnvars, &gngatts, &gunlimdimid);
+
+      if (CDI_Debug) Message("%s: ndims %d, nvars %d, ngatts %d", gname, gndims, gnvars, gngatts);
+
+      if (gndims == 0)
+        {
+        }
+    }
+  if (numgrps) Warning("NetCDF4 groups not supported! Found %d root group%s.", numgrps, (numgrps > 1) ? "s" : "");
+}
+
 int
 cdfInqContents(stream_t *streamptr)
 {
-  bool timeHasUnits = false;
-  bool timeHasBounds = false;
-  bool timeClimatology = false;
-  int leadtime_id = CDI_UNDEFID;
-  int format = 0;
   char fcreftime[CDI_MAX_NAME];
+  fcreftime[0] = 0;
+
   GridInfo gridInfo;
   gridInfo.gridfile[0] = 0;
   memset(gridInfo.uuid, 0, CDI_UUID_SIZE);
   gridInfo.number_of_grid_used = CDI_UNDEFID;
   gridInfo.timedimid = CDI_UNDEFID;
 
-  fcreftime[0] = 0;
-
   int vlistID = streamptr->vlistID;
   int fileID = streamptr->fileID;
 
   if (CDI_Debug) Message("streamID = %d, fileID = %d", streamptr->self, fileID);
 
+  int format = 0;
 #ifdef HAVE_NETCDF4
   nc_inq_format(fileID, &format);
 #endif
@@ -4464,42 +4500,10 @@ cdfInqContents(stream_t *streamptr)
   // alloc ncdims
   ncdim_t *ncdims = ndims ? (ncdim_t *) Malloc((size_t) ndims * sizeof(ncdim_t)) : NULL;
   init_ncdims(ndims, ncdims);
-
-  if (ndims)
-    {
-      int ncdimid = 0;
-      for (int dimid = 0; dimid < NC_MAX_DIMS; ++dimid)
-        {
-          if (nc_inq_dimlen(fileID, dimid, NULL) == NC_NOERR)
-            {
-              ncdims[ncdimid++].dimid = dimid;
-              if (ncdimid == ndims) break;
-            }
-        }
-    }
+  read_ncdims(fileID, ndims, ncdims);
 
 #ifdef HAVE_NETCDF4
-  if (format == NC_FORMAT_NETCDF4)
-    {
-      int numgrps = 0;
-      int ncids[NC_MAX_VARS];
-      char gname[CDI_MAX_NAME];
-      nc_inq_grps(fileID, &numgrps, ncids);
-      for (int i = 0; i < numgrps; ++i)
-        {
-          int ncid = ncids[i];
-          nc_inq_grpname(ncid, gname);
-          int gndims, gnvars, gngatts, gunlimdimid;
-          cdf_inq(ncid, &gndims, &gnvars, &gngatts, &gunlimdimid);
-
-          if (CDI_Debug) Message("%s: ndims %d, nvars %d, ngatts %d", gname, gndims, gnvars, gngatts);
-
-          if (gndims == 0)
-            {
-            }
-        }
-      if (numgrps) Warning("NetCDF4 groups not supported! Found %d root group%s.", numgrps, (numgrps > 1) ? "s" : "");
-    }
+  if (format == NC_FORMAT_NETCDF4) check_ncgroups(fileID);
 #endif
 
   if (nvars == 0)
@@ -4589,9 +4593,12 @@ cdfInqContents(stream_t *streamptr)
     }
 
   // find time vars
+  bool timeHasUnits = false;
+  bool timeHasBounds = false;
+  bool timeClimatology = false;
   find_time_vars(nvars, ncvars, ncdims, timedimid, streamptr, &timeHasUnits, &timeHasBounds, &timeClimatology);
 
-  leadtime_id = find_leadtime(nvars, ncvars, timedimid);
+  int leadtime_id = find_leadtime(nvars, ncvars, timedimid);
   if (leadtime_id != CDI_UNDEFID) ncvars[leadtime_id].varStatus = CoordVar;
 
   // check ncvars
