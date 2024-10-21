@@ -528,12 +528,11 @@ static int
 cdf_time_dimid(int fileID, int ndims, int nvars, ncdim_t *ncdims)
 {
   char dimname[CDI_MAX_NAME];
-
   for (int dimid = 0; dimid < ndims; ++dimid)
     {
       dimname[0] = 0;
       cdf_inq_dimname(fileID, ncdims[dimid].dimid, dimname);
-      if ((dimname[0] == 'T' || dimname[0] == 't') && dimname[1] == 'i' && dimname[2] == 'm' && dimname[3] == 'e') return dimid;
+      if (str_is_equal("time", str_to_lower(dimname))) return dimid;
     }
 
   for (int varid = 0; varid < nvars; ++varid)
@@ -560,7 +559,6 @@ cdf_time_dimid(int fileID, int ndims, int nvars, ncdim_t *ncdims)
                 {
                   cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
                   str_to_lower(sbuf);
-
                   if (is_time_units(sbuf)) return dimids[0];
                 }
             }
@@ -1079,6 +1077,37 @@ is_valid_coordinate(ncvar_t *ncvar)
   return status;
 }
 
+static void
+read_aux_vars(int ncid, char *pstring, ncvar_t *ncvar, ncvar_t *ncvars)
+{
+  bool lstop = false;
+  for (int i = 0; i < MAX_AUXVARS; i++)
+    {
+      while (isspace((int) *pstring)) pstring++;
+      if (*pstring == 0) break;
+      char *varname = pstring;
+      while (!isspace((int) *pstring) && *pstring != 0) pstring++;
+      if (*pstring == 0) lstop = true;
+      *pstring++ = 0;
+
+      int dimvarid;
+      int status = nc_inq_varid(ncid, varname, &dimvarid);
+      if (status == NC_NOERR)
+        {
+          cdf_set_var(&ncvars[dimvarid], CoordVar);
+          //  if ( !CDI_Ignore_Att_Coordinates )
+          {
+            ncvar->auxvarids[i] = dimvarid;
+            ncvar->nauxvars++;
+          }
+        }
+      else
+        Warning("%s - %s", nc_strerror(status), varname);
+
+      if (lstop) break;
+    }
+}
+
 #if defined __GNUC__ || (__GNUC__ == 4 && __GNUC_MINOR__ == 9)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic warning "-Wstrict-overflow"
@@ -1434,35 +1463,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
           else if (isText && str_is_equal(attname, "auxiliary_variable"))
             {
-              bool lstop = false;
-              char *pstring = attstring;
-
-              for (int i = 0; i < MAX_AUXVARS; i++)
-                {
-                  while (isspace((int) *pstring)) pstring++;
-                  if (*pstring == 0) break;
-                  char *varname = pstring;
-                  while (!isspace((int) *pstring) && *pstring != 0) pstring++;
-                  if (*pstring == 0) lstop = true;
-                  *pstring++ = 0;
-
-                  int dimvarid;
-                  int status = nc_inq_varid(ncid, varname, &dimvarid);
-                  if (status == NC_NOERR)
-                    {
-                      cdf_set_var(&ncvars[dimvarid], CoordVar);
-                      //  if ( !CDI_Ignore_Att_Coordinates )
-                      {
-                        ncvar->auxvarids[i] = dimvarid;
-                        ncvar->nauxvars++;
-                      }
-                    }
-                  else
-                    Warning("%s - %s", nc_strerror(status), varname);
-
-                  if (lstop) break;
-                }
-
+              read_aux_vars(ncid, attstring, ncvar, ncvars);
               cdf_set_var(ncvar, DataVar);
             }
           else if (isText && str_is_equal(attname, "grid_mapping"))

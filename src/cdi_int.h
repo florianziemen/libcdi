@@ -55,7 +55,7 @@ bool strStartsWith(const char *vstr, const char *cstr);
 static inline bool
 str_is_equal(const char *x, const char *y)
 {
-  return (*x == *y) && strcmp(x, y) == 0;
+  return (*x == *y) && (strcmp(x, y) == 0);
 }
 
 #ifndef M_PI
