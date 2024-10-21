@@ -1485,22 +1485,24 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
           else if (isText && str_is_equal(attname, "positive"))
             {
               str_to_lower(attstring);
-
               if (str_is_equal(attstring, "down"))
                 ncvar->positive = POSITIVE_DOWN;
               else if (str_is_equal(attstring, "up"))
                 ncvar->positive = POSITIVE_UP;
 
-              if (ncvar->ndims == 1)
+              if (ncvar->varStatus == UndefVar && (ncvar->ndims == 0 || (ncvar->ndims == 1 && ncvar->dimtypes[0] == CDI_UNDEFID)))
                 {
-                  cdf_set_var(ncvar, CoordVar);
-                  cdf_set_dim(ncvar, 0, Z_AXIS);
-                  ncdims[ncvar->dimids[0]].dimtype = Z_AXIS;
-                }
-              else if (ncvar->ndims == 0)
-                {
-                  cdf_set_var(ncvar, CoordVar);
-                  ncvar->isZaxis = true;
+                  if (ncvar->ndims == 1)
+                    {
+                      cdf_set_var(ncvar, CoordVar);
+                      cdf_set_dim(ncvar, 0, Z_AXIS);
+                      ncdims[ncvar->dimids[0]].dimtype = Z_AXIS;
+                    }
+                  else if (ncvar->ndims == 0)
+                    {
+                      cdf_set_var(ncvar, CoordVar);
+                      ncvar->isZaxis = true;
+                    }
                 }
               else
                 {

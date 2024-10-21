@@ -1,3 +1,7 @@
+2024-10-21  Uwe Schulzweida
+
+	* NetCDF: use positive attribute only for variables with undefined status
+
 2024-09-19  Uwe Schulzweida
 
 	* Version 2.4.4 released
