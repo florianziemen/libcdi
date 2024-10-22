@@ -530,8 +530,7 @@ cdf_time_dimid(int fileID, int ndims, int nvars, ncdim_t *ncdims)
   char dimname[CDI_MAX_NAME];
   for (int dimid = 0; dimid < ndims; ++dimid)
     {
-      dimname[0] = 0;
-      cdf_inq_dimname(fileID, ncdims[dimid].dimid, dimname);
+      strcpy(dimname, ncdims[dimid].name);
       if (str_is_equal("time", str_to_lower(dimname))) return dimid;
     }
 
@@ -558,8 +557,7 @@ cdf_time_dimid(int fileID, int ndims, int nvars, ncdim_t *ncdims)
               if (strStartsWith(sbuf, "units"))
                 {
                   cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
-                  str_to_lower(sbuf);
-                  if (is_time_units(sbuf)) return dimids[0];
+                  if (is_time_units(str_to_lower(sbuf))) return dimids[0];
                 }
             }
         }
@@ -1204,7 +1202,7 @@ set_vars_chunks(int ncid, int ncvarid, int nvdims, ncvar_t *ncvar)
 #endif
 
 static void
-cdf_read_vars_info(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int format)
+cdf_vars_read_info(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int format)
 {
   int nvdims, nvatts;
   nc_type xtype;
@@ -1242,7 +1240,7 @@ cdf_read_vars_info(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int f
 }
 
 static void
-cdf_scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timedimid, int modelID)
+set_vars_timetype(int nvars, ncvar_t *ncvars, int timedimid)
 {
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
@@ -1269,7 +1267,11 @@ cdf_scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int t
             }
         }
     }
+}
 
+static void
+cdf_scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int modelID)
+{
   int nchecked_vars = 0;
   enum
   {
@@ -4569,10 +4571,10 @@ cdfInqContents(stream_t *streamptr)
   init_ncdims(ndims, ncdims);
   set_ncdim_ids(fileID, ndims, ncdims);
   // read ncdims
-  for (int ncdimid = 0; ncdimid < ndims; ncdimid++)
+  for (int dimid = 0; dimid < ndims; dimid++)
     {
-      cdf_inq_dimlen(fileID, ncdims[ncdimid].dimid, &ncdims[ncdimid].len);
-      cdf_inq_dimname(fileID, ncdims[ncdimid].dimid, ncdims[ncdimid].name);
+      cdf_inq_dimlen(fileID, ncdims[dimid].dimid, &ncdims[dimid].len);
+      cdf_inq_dimname(fileID, ncdims[dimid].dimid, ncdims[dimid].name);
     }
 
 #ifdef HAVE_NETCDF4
@@ -4588,6 +4590,9 @@ cdfInqContents(stream_t *streamptr)
   // alloc ncvars
   ncvar_t *ncvars = (ncvar_t *) Malloc((size_t) nvars * sizeof(ncvar_t));
   init_ncvars(nvars, ncvars, fileID);
+
+  cdf_vars_read_info(nvars, ncvars, ndims, ncdims, format);
+  find_coordinates_vars(ndims, ncdims, nvars, ncvars);
 
   // scan global attributes
   int instID = CDI_UNDEFID;
@@ -4620,16 +4625,15 @@ cdfInqContents(stream_t *streamptr)
 
   if (CDI_Debug) cdf_print_vars(ncvars, nvars, "cdf_scan_vars_attr");
 
-  cdf_read_vars_info(nvars, ncvars, ndims, ncdims, format);
   // scan attributes of all variables
-  cdf_scan_vars_attr(nvars, ncvars, ndims, ncdims, timedimid, modelID);
+  set_vars_timetype(nvars, ncvars, timedimid);
+  cdf_scan_vars_attr(nvars, ncvars, ndims, ncdims, modelID);
   cdfVerifyVarAttr(nvars, ncvars, ncdims);
 
   if (CDI_Convert_Cubesphere) check_cube_sphere(vlistID, nvars, ncvars, ncdims);
 
   if (CDI_Debug) cdf_print_vars(ncvars, nvars, "find coordinates vars");
 
-  find_coordinates_vars(ndims, ncdims, nvars, ncvars);
   find_varying_data_vars(timedimid, nvars, ncvars);
 
   // find time vars
