@@ -926,9 +926,9 @@ cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
     {
       const ncvar_t *ncvar = &ncvars[ncvarid];
       int ndim = 0;
-      if (ncvar->varStatus == DataVar)
+      if (ncvar->varStatus == DataVar || ncvar->varStatus == UndefVar)
         {
-          axis[ndim++] = 'v';
+          axis[ndim++] = (ncvar->varStatus == DataVar) ? 'v' : 'u';
           axis[ndim++] = ':';
           for (int i = 0; i < ncvar->ndims; i++)
             {
@@ -1152,28 +1152,63 @@ read_auxiliary_vars(int ncid, char *attstring, ncvar_t *ncvar, ncvar_t *ncvars)
     }
 }
 
+static void
+set_vars_chunks(int ncid, int ncvarid, int nvdims, ncvar_t *ncvar)
+{
+  int shuffle = 0, deflate = 0, deflateLevel = 0;
+  nc_inq_var_deflate(ncid, ncvarid, &shuffle, &deflate, &deflateLevel);
+  if (deflate > 0) ncvar->hasDeflate = true;
+
+#ifdef HAVE_NC_DEF_VAR_SZIP
+  int options_mask = 0, pixels_per_block = 0;
+  nc_inq_var_szip(ncid, ncvarid, &options_mask, &pixels_per_block);
+  if (options_mask && pixels_per_block) ncvar->hasSzip = true;
+#endif
+  ncvar->hasFilter = cdf_get_var_filter(ncid, ncvarid, ncvar->filterSpec, CDI_MAX_NAME);
+  // if (ncvar->hasFilter) printf("filterSpec: %s=%s\n", ncvar->name, ncvar->filterSpec);
+
+  size_t chunks[nvdims];
+  int storageIn;
+  if (nc_inq_var_chunking(ncid, ncvarid, &storageIn, chunks) == NC_NOERR)
+    {
+      if (storageIn == NC_CHUNKED)
+        {
+          ncvar->isChunked = true;
+          for (int i = 0; i < nvdims; ++i) ncvar->chunks[i] = chunks[i];
+          if (CDI_Debug)
+            {
+              fprintf(stderr, "%s: chunking %d %d %d  chunks ", ncvar->name, storageIn, NC_CONTIGUOUS, NC_CHUNKED);
+              for (int i = 0; i < nvdims; ++i) fprintf(stderr, "%zu ", chunks[i]);
+              fprintf(stderr, "\n");
+            }
+
+          set_extra_attr(ncvar->extra, nvdims, chunks);
+        }
+    }
+
+  size_t size;
+  size_t nelems;
+  float preemption;
+  if (nc_get_var_chunk_cache(ncid, ncvarid, &size, &nelems, &preemption) == NC_NOERR)
+    {
+      ncvar->chunkCacheSize = size;
+      ncvar->chunkCacheNelems = nelems;
+      ncvar->chunkCachePreemption = preemption;
+      if (CDI_Debug) fprintf(stderr, "%s: chunkCacheSize=%zu nelems=%zu preemption=%g\n", ncvar->name, size, nelems, preemption);
+    }
+}
+
 #if defined __GNUC__ || (__GNUC__ == 4 && __GNUC_MINOR__ == 9)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic warning "-Wstrict-overflow"
 #endif
 
 static void
-cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timedimid, int modelID, int format)
+cdf_read_vars_info(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int format)
 {
   int nvdims, nvatts;
-  nc_type xtype, atttype;
-  size_t attlen;
+  nc_type xtype;
   char name[CDI_MAX_NAME];
-  char attname[CDI_MAX_NAME];
-  char attstring[8192];
-
-  int nchecked_vars = 0;
-  enum
-  {
-    max_check_vars = 9
-  };
-  char *checked_vars[max_check_vars];
-  for (int i = 0; i < max_check_vars; ++i) checked_vars[i] = NULL;
 
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
@@ -1182,6 +1217,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
       int *dimidsp = ncvar->dimids;
 
       cdf_inq_var(ncid, ncvarid, name, &xtype, &nvdims, dimidsp, &nvatts);
+
       for (int i = 0; i < nvdims; ++i)
         for (int dimid = 0; dimid < ndims; ++dimid)
           if (ncdims[dimid].dimid == dimidsp[i])
@@ -1199,52 +1235,21 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
 #ifdef HAVE_NETCDF4
       if (format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4)
         {
-          int shuffle = 0, deflate = 0, deflateLevel = 0;
-          nc_inq_var_deflate(ncid, ncvarid, &shuffle, &deflate, &deflateLevel);
-          if (deflate > 0) ncvar->hasDeflate = true;
-
-#ifdef HAVE_NC_DEF_VAR_SZIP
-          int options_mask = 0, pixels_per_block = 0;
-          nc_inq_var_szip(ncid, ncvarid, &options_mask, &pixels_per_block);
-          if (options_mask && pixels_per_block) ncvar->hasSzip = true;
-#endif
-          ncvar->hasFilter = cdf_get_var_filter(ncid, ncvarid, ncvar->filterSpec, CDI_MAX_NAME);
-          // if (ncvar->hasFilter) printf("filterSpec: %s=%s\n", ncvar->name, ncvar->filterSpec);
-
-          size_t chunks[nvdims];
-          int storageIn;
-          if (nc_inq_var_chunking(ncid, ncvarid, &storageIn, chunks) == NC_NOERR)
-            {
-              if (storageIn == NC_CHUNKED)
-                {
-                  ncvar->isChunked = true;
-                  for (int i = 0; i < nvdims; ++i) ncvar->chunks[i] = chunks[i];
-                  if (CDI_Debug)
-                    {
-                      fprintf(stderr, "%s: chunking %d %d %d  chunks ", name, storageIn, NC_CONTIGUOUS, NC_CHUNKED);
-                      for (int i = 0; i < nvdims; ++i) fprintf(stderr, "%zu ", chunks[i]);
-                      fprintf(stderr, "\n");
-                    }
-
-                  set_extra_attr(ncvar->extra, nvdims, chunks);
-                }
-            }
-
-          size_t size;
-          size_t nelems;
-          float preemption;
-          if (nc_get_var_chunk_cache(ncid, ncvarid, &size, &nelems, &preemption) == NC_NOERR)
-            {
-              ncvar->chunkCacheSize = size;
-              ncvar->chunkCacheNelems = nelems;
-              ncvar->chunkCachePreemption = preemption;
-              if (CDI_Debug) fprintf(stderr, "%s: chunkCacheSize=%zu nelems=%zu preemption=%g\n", name, size, nelems, preemption);
-            }
+          set_vars_chunks(ncid, ncvarid, nvdims, ncvar);
         }
 #endif
+    }
+}
 
-      if (nvdims > 0)
+static void
+cdf_scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timedimid, int modelID)
+{
+  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+    {
+      ncvar_t *ncvar = &ncvars[ncvarid];
+      if (ncvar->ndims > 0)
         {
+          int *dimidsp = ncvar->dimids;
           if (timedimid == dimidsp[0])
             {
               ncvar->timetype = TIME_VARYING;
@@ -1252,6 +1257,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
             }
           else
             {
+              int nvdims = ncvar->ndims;
               for (int ncdimid = 1; ncdimid < nvdims; ncdimid++)
                 {
                   if (timedimid == dimidsp[ncdimid])
@@ -1264,12 +1270,30 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
         }
     }
 
+  int nchecked_vars = 0;
+  enum
+  {
+    max_check_vars = 9
+  };
+  char *checked_vars[max_check_vars];
+  for (int i = 0; i < max_check_vars; ++i) checked_vars[i] = NULL;
+
+  char name[CDI_MAX_NAME];
+  int nvatts;
+  nc_type atttype;
+  nc_type xtype;
+  size_t attlen;
+  char attname[CDI_MAX_NAME];
+  char attstring[8192];
+
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
       int ncid = ncvar->ncid;
+      int nvdims = ncvar->ndims;
       int *dimidsp = ncvar->dimids;
 
+      // read nvatts
       cdf_inq_var(ncid, ncvarid, name, &xtype, &nvdims, dimidsp, &nvatts);
 
       if (ncvar->natts == 0 && nvatts > 0) ncvar->atts = (int *) Malloc((size_t) nvatts * sizeof(int));
@@ -1490,15 +1514,15 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
               else if (str_is_equal(attstring, "up"))
                 ncvar->positive = POSITIVE_UP;
 
-              if (ncvar->varStatus == UndefVar && (ncvar->ndims == 0 || (ncvar->ndims == 1 && ncvar->dimtypes[0] == CDI_UNDEFID)))
+              if (ncvar->varStatus == UndefVar && (nvdims == 0 || (nvdims == 1 && ncvar->dimtypes[0] == CDI_UNDEFID)))
                 {
-                  if (ncvar->ndims == 1)
+                  if (nvdims == 1)
                     {
                       cdf_set_var(ncvar, CoordVar);
                       cdf_set_dim(ncvar, 0, Z_AXIS);
                       ncdims[ncvar->dimids[0]].dimtype = Z_AXIS;
                     }
-                  else if (ncvar->ndims == 0)
+                  else if (nvdims == 0)
                     {
                       cdf_set_var(ncvar, CoordVar);
                       ncvar->isZaxis = true;
@@ -3744,7 +3768,7 @@ cdf_copy_attflt(int fileID, int vlistID, nc_type xtype, size_t attlen, char *att
   if (attlen > 8) Free(pattflt);
 }
 
-static bool
+static void
 check_cube_sphere(int vlistID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
   bool isGeosData = false;
@@ -3826,7 +3850,7 @@ check_cube_sphere(int vlistID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
         }
     }
 
-  return isGeosData;
+  if (CDI_Debug) Message("isGeosData %d", isGeosData);
 }
 
 static void
@@ -4594,18 +4618,14 @@ cdfInqContents(stream_t *streamptr)
 
   stream_set_ncdims(streamptr, ndims, ncdims);
 
-  if (CDI_Debug) cdf_print_vars(ncvars, nvars, "cdfScanVarAttr");
+  if (CDI_Debug) cdf_print_vars(ncvars, nvars, "cdf_scan_vars_attr");
 
+  cdf_read_vars_info(nvars, ncvars, ndims, ncdims, format);
   // scan attributes of all variables
-  cdfScanVarAttr(nvars, ncvars, ndims, ncdims, timedimid, modelID, format);
-
+  cdf_scan_vars_attr(nvars, ncvars, ndims, ncdims, timedimid, modelID);
   cdfVerifyVarAttr(nvars, ncvars, ncdims);
 
-  if (CDI_Convert_Cubesphere)
-    {
-      bool isGeosData = check_cube_sphere(vlistID, nvars, ncvars, ncdims);
-      if (CDI_Debug) Message("isGeosData %d", isGeosData);
-    }
+  if (CDI_Convert_Cubesphere) check_cube_sphere(vlistID, nvars, ncvars, ncdims);
 
   if (CDI_Debug) cdf_print_vars(ncvars, nvars, "find coordinates vars");
 
