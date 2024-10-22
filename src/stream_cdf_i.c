@@ -525,7 +525,7 @@ cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor)
 }
 
 static int
-cdf_time_dimid(int fileID, int ndims, int nvars, ncdim_t *ncdims)
+cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
 {
   char dimname[CDI_MAX_NAME];
   for (int dimid = 0; dimid < ndims; ++dimid)
@@ -554,7 +554,7 @@ cdf_time_dimid(int fileID, int ndims, int nvars, ncdim_t *ncdims)
             {
               sbuf[0] = 0;
               cdf_inq_attname(fileID, varid, iatt, sbuf);
-              if (strStartsWith(sbuf, "units"))
+              if (str_is_equal(sbuf, "units"))
                 {
                   cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
                   if (is_time_units(str_to_lower(sbuf))) return dimids[0];
@@ -4602,7 +4602,7 @@ cdfInqContents(stream_t *streamptr)
   cdf_scan_global_attr(fileID, vlistID, ngatts, &instID, &modelID, &ucla_les, uuidOfVGrid, &gridInfo);
 
   // find time dim
-  int timedimid = (unlimdimid >= 0) ? unlimdimid : cdf_time_dimid(fileID, ndims, nvars, ncdims);
+  int timedimid = (unlimdimid >= 0) ? unlimdimid : cdf_time_dimid(fileID, ndims, ncdims, nvars, ncvars);
   streamptr->basetime.ncdimid = timedimid;
 
   size_t ntsteps = (timedimid == CDI_UNDEFID) ? 0 : ncdims[timedimid].len;
