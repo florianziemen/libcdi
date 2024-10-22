@@ -114,6 +114,7 @@ typedef struct
   size_t gridSize;
   size_t xSize;
   size_t ySize;
+  int nattsNC;
   int natts;
   int *atts;
   size_t vctsize;
@@ -534,30 +535,37 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
       if (str_is_equal("time", str_to_lower(dimname))) return dimid;
     }
 
+  bool check_dimids[MAX_DIMS_CDF];
+  for (int i = 0; i < MAX_DIMS_CDF; ++i) check_dimids[i] = false;
+
   for (int varid = 0; varid < nvars; ++varid)
     {
+      ncvar_t *ncvar = &ncvars[varid];
       if (ncvars[varid].ndims == 1)
         {
-          nc_type xtype;
-          int nvdims, nvatts, dimids[9];
-          cdf_inq_var(fileID, varid, NULL, &xtype, &nvdims, dimids, &nvatts);
-          for (int i = 0; i < nvdims; ++i)
-            for (int dimid = 0; dimid < ndims; ++dimid)
-              if (ncdims[dimid].dimid == dimids[i])
-                {
-                  dimids[i] = dimid;
-                  break;
-                }
+          int dimid0 = CDI_UNDEFID;
+          for (int dimid = 0; dimid < ndims; ++dimid)
+            if (ncdims[dimid].dimid == ncvar->dimids[0])
+              {
+                dimid0 = dimid;
+                break;
+              }
 
-          char sbuf[CDI_MAX_NAME];
-          for (int iatt = 0; iatt < nvatts; ++iatt)
+          if (dimid0 != CDI_UNDEFID && check_dimids[dimid0] == false)
             {
-              sbuf[0] = 0;
-              cdf_inq_attname(fileID, varid, iatt, sbuf);
-              if (str_is_equal(sbuf, "units"))
+              check_dimids[dimid0] = true;
+              if (ncdims[dimid0].ncvarid != CDI_UNDEFID && ncdims[dimid0].ncvarid != varid) continue;
+
+              char sbuf[CDI_MAX_NAME];
+              for (int iatt = 0; iatt < ncvar->nattsNC; ++iatt)
                 {
-                  cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
-                  if (is_time_units(str_to_lower(sbuf))) return dimids[0];
+                  sbuf[0] = 0;
+                  cdf_inq_attname(fileID, varid, iatt, sbuf);
+                  if (str_is_equal(sbuf, "units"))
+                    {
+                      cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
+                      if (is_time_units(str_to_lower(sbuf))) return dimid0;
+                    }
                 }
             }
         }
@@ -583,9 +591,9 @@ init_ncdims(int ndims, ncdim_t *ncdims)
 static void
 init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
 {
-  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+  for (int varid = 0; varid < nvars; varid++)
     {
-      ncvar_t *ncvar = &ncvars[ncvarid];
+      ncvar_t *ncvar = &ncvars[varid];
       ncvar->ncid = ncid;
       ncvar->varStatus = UndefVar;
       ncvar->ignoreVar = false;
@@ -648,6 +656,7 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
       ncvar->gridSize = 0;
       ncvar->xSize = 0;
       ncvar->ySize = 0;
+      ncvar->nattsNC = 0;
       ncvar->natts = 0;
       ncvar->atts = NULL;
       ncvar->vctsize = 0;
@@ -920,9 +929,9 @@ cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
 
   fprintf(stderr, "%s:\n", oname);
 
-  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+  for (int varid = 0; varid < nvars; varid++)
     {
-      const ncvar_t *ncvar = &ncvars[ncvarid];
+      const ncvar_t *ncvar = &ncvars[varid];
       int ndim = 0;
       if (ncvar->varStatus == DataVar || ncvar->varStatus == UndefVar)
         {
@@ -953,7 +962,7 @@ cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
 
       axis[ndim++] = 0;
 
-      fprintf(stderr, "%3d %3d  %-6s %s\n", ncvarid, ndim-3, axis, ncvar->name);
+      fprintf(stderr, "%3d %3d  %-6s %s\n", varid, ndim-3, axis, ncvar->name);
     }
   // clang-format on
 }
@@ -1208,13 +1217,13 @@ cdf_vars_read_info(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int f
   nc_type xtype;
   char name[CDI_MAX_NAME];
 
-  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+  for (int varid = 0; varid < nvars; varid++)
     {
-      ncvar_t *ncvar = &ncvars[ncvarid];
+      ncvar_t *ncvar = &ncvars[varid];
       int ncid = ncvar->ncid;
       int *dimidsp = ncvar->dimids;
 
-      cdf_inq_var(ncid, ncvarid, name, &xtype, &nvdims, dimidsp, &nvatts);
+      cdf_inq_var(ncid, varid, name, &xtype, &nvdims, dimidsp, &nvatts);
 
       for (int i = 0; i < nvdims; ++i)
         for (int dimid = 0; dimid < ndims; ++dimid)
@@ -1225,15 +1234,16 @@ cdf_vars_read_info(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int f
             }
       strcpy(ncvar->name, name);
 
-      for (int ncdimid = 0; ncdimid < nvdims; ncdimid++) ncvar->dimtypes[ncdimid] = -1;
+      for (int dimid = 0; dimid < nvdims; dimid++) ncvar->dimtypes[dimid] = -1;
 
       ncvar->xtype = xtype;
       ncvar->ndims = nvdims;
+      ncvar->nattsNC = nvatts;
 
 #ifdef HAVE_NETCDF4
       if (format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4)
         {
-          set_vars_chunks(ncid, ncvarid, nvdims, ncvar);
+          set_vars_chunks(ncid, varid, nvdims, ncvar);
         }
 #endif
     }
@@ -1242,9 +1252,9 @@ cdf_vars_read_info(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int f
 static void
 set_vars_timetype(int nvars, ncvar_t *ncvars, int timedimid)
 {
-  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+  for (int varid = 0; varid < nvars; varid++)
     {
-      ncvar_t *ncvar = &ncvars[ncvarid];
+      ncvar_t *ncvar = &ncvars[varid];
       if (ncvar->ndims > 0)
         {
           int *dimidsp = ncvar->dimids;
@@ -1256,9 +1266,9 @@ set_vars_timetype(int nvars, ncvar_t *ncvars, int timedimid)
           else
             {
               int nvdims = ncvar->ndims;
-              for (int ncdimid = 1; ncdimid < nvdims; ncdimid++)
+              for (int dimid = 1; dimid < nvdims; dimid++)
                 {
-                  if (timedimid == dimidsp[ncdimid])
+                  if (timedimid == dimidsp[dimid])
                     {
                       Warning("Time must be the first dimension! Unsupported array structure, skipped variable %s!", ncvar->name);
                       ncvar->varStatus = CoordVar;
@@ -4494,16 +4504,16 @@ check_ncgroups(int fileID)
 static void
 find_coordinates_vars(int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
 {
-  for (int ncdimid = 0; ncdimid < ndims; ncdimid++)
+  for (int dimid = 0; dimid < ndims; dimid++)
     {
-      for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+      for (int varid = 0; varid < nvars; varid++)
         {
-          ncvar_t *ncvar = &ncvars[ncvarid];
-          if (ncvar->ndims == 1 && ncdimid == ncvar->dimids[0] && ncdims[ncdimid].ncvarid == CDI_UNDEFID)
+          ncvar_t *ncvar = &ncvars[varid];
+          if (ncvar->ndims == 1 && dimid == ncvar->dimids[0] && ncdims[dimid].ncvarid == CDI_UNDEFID)
             {
-              if (str_is_equal(ncvar->name, ncdims[ncdimid].name))
+              if (str_is_equal(ncvar->name, ncdims[dimid].name))
                 {
-                  ncdims[ncdimid].ncvarid = ncvarid;
+                  ncdims[dimid].ncvarid = varid;
                   ncvar->varStatus = CoordVar;
                 }
             }
