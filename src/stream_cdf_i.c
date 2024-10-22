@@ -4430,7 +4430,7 @@ stream_set_ncdims(stream_t *streamptr, int ndims, ncdim_t *ncdims)
 }
 
 static void
-read_ncdims(int fileID, int ndims, ncdim_t *ncdims)
+set_ncdim_ids(int fileID, int ndims, ncdim_t *ncdims)
 {
   if (ndims)
     {
@@ -4461,12 +4461,50 @@ check_ncgroups(int fileID)
       cdf_inq(ncid, &gndims, &gnvars, &gngatts, &gunlimdimid);
 
       if (CDI_Debug) Message("%s: ndims %d, nvars %d, ngatts %d", gname, gndims, gnvars, gngatts);
-
-      if (gndims == 0)
-        {
-        }
     }
   if (numgrps) Warning("NetCDF4 groups not supported! Found %d root group%s.", numgrps, (numgrps > 1) ? "s" : "");
+}
+
+static void
+find_coordinates_vars(int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
+{
+  for (int ncdimid = 0; ncdimid < ndims; ncdimid++)
+    {
+      for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+        {
+          ncvar_t *ncvar = &ncvars[ncvarid];
+          if (ncvar->ndims == 1 && ncdimid == ncvar->dimids[0] && ncdims[ncdimid].ncvarid == CDI_UNDEFID)
+            {
+              if (str_is_equal(ncvar->name, ncdims[ncdimid].name))
+                {
+                  ncdims[ncdimid].ncvarid = ncvarid;
+                  ncvar->varStatus = CoordVar;
+                }
+            }
+        }
+    }
+}
+
+// set time dependent data vars
+static void
+find_varying_data_vars(int timedimid, int nvars, ncvar_t *ncvars)
+{
+  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+    {
+      ncvar_t *ncvar = &ncvars[ncvarid];
+      if (ncvar->ndims == 1)
+        {
+          if (timedimid != CDI_UNDEFID && timedimid == ncvar->dimids[0])
+            {
+              if (ncvar->varStatus != CoordVar) cdf_set_var(ncvar, DataVar);
+            }
+          else
+            {
+              //  if ( ncvar->varStatus != DataVar ) cdf_set_var(ncvar, CoordVar);
+            }
+          // if ( ncvar->varStatus != DataVar ) cdf_set_var(ncvar, CoordVar);
+        }
+    }
 }
 
 int
@@ -4505,7 +4543,13 @@ cdfInqContents(stream_t *streamptr)
   // alloc ncdims
   ncdim_t *ncdims = ndims ? (ncdim_t *) Malloc((size_t) ndims * sizeof(ncdim_t)) : NULL;
   init_ncdims(ndims, ncdims);
-  read_ncdims(fileID, ndims, ncdims);
+  set_ncdim_ids(fileID, ndims, ncdims);
+  // read ncdims
+  for (int ncdimid = 0; ncdimid < ndims; ncdimid++)
+    {
+      cdf_inq_dimlen(fileID, ncdims[ncdimid].dimid, &ncdims[ncdimid].len);
+      cdf_inq_dimname(fileID, ncdims[ncdimid].dimid, ncdims[ncdimid].name);
+    }
 
 #ifdef HAVE_NETCDF4
   if (format == NC_FORMAT_NETCDF4) check_ncgroups(fileID);
@@ -4530,11 +4574,9 @@ cdfInqContents(stream_t *streamptr)
 
   // find time dim
   int timedimid = (unlimdimid >= 0) ? unlimdimid : cdf_time_dimid(fileID, ndims, nvars, ncdims);
-
   streamptr->basetime.ncdimid = timedimid;
 
-  size_t ntsteps = 0;
-  if (timedimid != CDI_UNDEFID) cdf_inq_dimlen(fileID, ncdims[timedimid].dimid, &ntsteps);
+  size_t ntsteps = (timedimid == CDI_UNDEFID) ? 0 : ncdims[timedimid].len;
   if (ntsteps > INT_MAX)
     {
       Warning("Size limit exceeded for time dimension (limit=%d)!", INT_MAX);
@@ -4544,11 +4586,9 @@ cdfInqContents(stream_t *streamptr)
   if (CDI_Debug) Message("Number of timesteps = %zu", ntsteps);
   if (CDI_Debug) Message("Time dimid = %d", streamptr->basetime.ncdimid);
 
-  // read ncdims
+  // set T_AXIS dimtype
   for (int ncdimid = 0; ncdimid < ndims; ncdimid++)
     {
-      cdf_inq_dimlen(fileID, ncdims[ncdimid].dimid, &ncdims[ncdimid].len);
-      cdf_inq_dimname(fileID, ncdims[ncdimid].dimid, ncdims[ncdimid].name);
       if (timedimid == ncdimid) ncdims[ncdimid].dimtype = T_AXIS;
     }
 
@@ -4569,33 +4609,8 @@ cdfInqContents(stream_t *streamptr)
 
   if (CDI_Debug) cdf_print_vars(ncvars, nvars, "find coordinates vars");
 
-  // find coordinates vars
-  for (int ncdimid = 0; ncdimid < ndims; ncdimid++)
-    {
-      for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
-        {
-          ncvar_t *ncvar = &ncvars[ncvarid];
-          if (ncvar->ndims == 1)
-            {
-              if (timedimid != CDI_UNDEFID && timedimid == ncvar->dimids[0])
-                {
-                  if (ncvar->varStatus != CoordVar) cdf_set_var(ncvar, DataVar);
-                }
-              else
-                {
-                  //  if ( ncvar->varStatus != DataVar ) cdf_set_var(ncvar, CoordVar);
-                }
-              // if ( ncvar->varStatus != DataVar ) cdf_set_var(ncvar, CoordVar);
-
-              if (ncdimid == ncvar->dimids[0] && ncdims[ncdimid].ncvarid == CDI_UNDEFID)
-                if (str_is_equal(ncvar->name, ncdims[ncdimid].name))
-                  {
-                    ncdims[ncdimid].ncvarid = ncvarid;
-                    ncvar->varStatus = CoordVar;
-                  }
-            }
-        }
-    }
+  find_coordinates_vars(ndims, ncdims, nvars, ncvars);
+  find_varying_data_vars(timedimid, nvars, ncvars);
 
   // find time vars
   bool timeHasUnits = false;
