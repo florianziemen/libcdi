@@ -536,19 +536,19 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
 
   for (int varid = 0; varid < nvars; ++varid)
     {
-      nc_type xtype;
-      int nvdims, nvatts, dimids[9];
-      cdf_inq_var(fileID, varid, NULL, &xtype, &nvdims, dimids, &nvatts);
-      for (int i = 0; i < nvdims; ++i)
-        for (int dimid = 0; dimid < ndims; ++dimid)
-          if (ncdims[dimid].dimid == dimids[i])
-            {
-              dimids[i] = dimid;
-              break;
-            }
-
-      if (nvdims == 1)
+      if (ncvars[varid].ndims == 1)
         {
+          nc_type xtype;
+          int nvdims, nvatts, dimids[9];
+          cdf_inq_var(fileID, varid, NULL, &xtype, &nvdims, dimids, &nvatts);
+          for (int i = 0; i < nvdims; ++i)
+            for (int dimid = 0; dimid < ndims; ++dimid)
+              if (ncdims[dimid].dimid == dimids[i])
+                {
+                  dimids[i] = dimid;
+                  break;
+                }
+
           char sbuf[CDI_MAX_NAME];
           for (int iatt = 0; iatt < nvatts; ++iatt)
             {
