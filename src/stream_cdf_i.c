@@ -190,15 +190,6 @@ scan_time_units(const char *unitstr)
   return timeunit;
 }
 
-static void
-set_forecast_time(const char *timestr, taxis_t *taxis)
-{
-  if (strlen(timestr) != 0)
-    taxis->fDateTime = scan_time_string(timestr);
-  else
-    cdiDateTime_init(&(taxis->fDateTime));
-}
-
 static int
 set_base_time(const char *timeUnitsStr, taxis_t *taxis)
 {
@@ -3926,12 +3917,6 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
               else if (str_is_equal(attname, "CDO"))
                 {
                 }
-              /*
-              else if ( str_is_equal(attname, "forecast_reference_time") )
-                {
-                  memcpy(fcreftime, attstring, attstrlen+1);
-                }
-              */
               else if (str_is_equal(attname, "grid_file_uri"))
                 {
                   memcpy(gridInfo->gridfile, attstring, attstrlen + 1);
@@ -4546,9 +4531,6 @@ find_varying_data_vars(int timedimid, int nvars, ncvar_t *ncvars)
 int
 cdfInqContents(stream_t *streamptr)
 {
-  char fcreftime[CDI_MAX_NAME];
-  fcreftime[0] = 0;
-
   GridInfo gridInfo;
   gridInfo.gridfile[0] = 0;
   memset(gridInfo.uuid, 0, CDI_UUID_SIZE);
@@ -4802,8 +4784,6 @@ cdfInqContents(stream_t *streamptr)
           if (ncvars[leadtime_id].units[0] != 0) timeunit = scan_time_units(ncvars[leadtime_id].units);
           if (timeunit == -1) timeunit = taxis0.unit;
           taxis0.fc_unit = timeunit;
-
-          set_forecast_time(fcreftime, &taxis0);
         }
     }
 
