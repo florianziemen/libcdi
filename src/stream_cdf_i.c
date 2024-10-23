@@ -535,10 +535,10 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
       if (ncvars[varid].ndims == 1)
         {
           int dimid0 = CDI_UNDEFID;
-          for (int dimid = 0; dimid < ndims; ++dimid)
-            if (ncdims[dimid].dimid == ncvar->dimids[0])
+          for (int gdimid = 0; gdimid < ndims; ++gdimid)
+            if (ncdims[gdimid].dimid == ncvar->dimids[0])
               {
-                dimid0 = dimid;
+                dimid0 = gdimid;
                 break;
               }
 
@@ -568,9 +568,9 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
 static void
 init_ncdims(int ndims, ncdim_t *ncdims)
 {
-  for (int dimid = 0; dimid < ndims; dimid++)
+  for (int gdimid = 0; gdimid < ndims; gdimid++)
     {
-      ncdim_t *ncdim = &ncdims[dimid];
+      ncdim_t *ncdim = &ncdims[gdimid];
       ncdim->dimid = CDI_UNDEFID;
       ncdim->ncvarid = CDI_UNDEFID;
       ncdim->dimtype = CDI_UNDEFID;
@@ -1202,39 +1202,27 @@ set_vars_chunks(int ncid, int ncvarid, int nvdims, ncvar_t *ncvar)
 #endif
 
 static void
-cdf_vars_read_info(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int format)
+read_vars_info(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int format)
 {
-  int nvdims, nvatts;
-  nc_type xtype;
-  char name[CDI_MAX_NAME];
-
   for (int varid = 0; varid < nvars; varid++)
     {
       ncvar_t *ncvar = &ncvars[varid];
-      int ncid = ncvar->ncid;
-      int *dimidsp = ncvar->dimids;
+      cdf_inq_var(ncvar->ncid, varid, ncvar->name, &ncvar->xtype, &ncvar->ndims, ncvar->dimids, &ncvar->nattsNC);
 
-      cdf_inq_var(ncid, varid, name, &xtype, &nvdims, dimidsp, &nvatts);
-
-      for (int i = 0; i < nvdims; ++i)
-        for (int dimid = 0; dimid < ndims; ++dimid)
-          if (ncdims[dimid].dimid == dimidsp[i])
+      for (int vdimid = 0; vdimid < ncvar->ndims; ++vdimid)
+        for (int gdimid = 0; gdimid < ndims; ++gdimid)
+          if (ncdims[gdimid].dimid == ncvar->dimids[vdimid])
             {
-              dimidsp[i] = dimid;
+              ncvar->dimids[vdimid] = gdimid;
               break;
             }
-      strcpy(ncvar->name, name);
 
-      for (int dimid = 0; dimid < nvdims; dimid++) ncvar->dimtypes[dimid] = -1;
-
-      ncvar->xtype = xtype;
-      ncvar->ndims = nvdims;
-      ncvar->nattsNC = nvatts;
+      for (int vdimid = 0; vdimid < ncvar->ndims; vdimid++) ncvar->dimtypes[vdimid] = -1;
 
 #ifdef HAVE_NETCDF4
       if (format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4)
         {
-          set_vars_chunks(ncid, varid, nvdims, ncvar);
+          set_vars_chunks(ncvar->ncid, varid, ncvar->ndims, ncvar);
         }
 #endif
     }
@@ -1281,11 +1269,6 @@ cdf_scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int m
   char *checked_vars[max_check_vars];
   for (int i = 0; i < max_check_vars; ++i) checked_vars[i] = NULL;
 
-  char name[CDI_MAX_NAME];
-  int nvatts;
-  nc_type atttype;
-  nc_type xtype;
-  size_t attlen;
   char attname[CDI_MAX_NAME];
   char attstring[8192];
 
@@ -1293,11 +1276,10 @@ cdf_scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int m
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
       int ncid = ncvar->ncid;
+      const char *name = ncvar->name;
       int nvdims = ncvar->ndims;
-      int *dimidsp = ncvar->dimids;
-
-      // read nvatts
-      cdf_inq_var(ncid, ncvarid, name, &xtype, &nvdims, dimidsp, &nvatts);
+      nc_type xtype = ncvar->xtype;
+      int nvatts = ncvar->nattsNC;
 
       if (ncvar->natts == 0 && nvatts > 0) ncvar->atts = (int *) Malloc((size_t) nvatts * sizeof(int));
 
@@ -1305,6 +1287,8 @@ cdf_scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int m
         {
           int nc_cell_id = CDI_UNDEFID;
 
+          nc_type atttype;
+          size_t attlen;
           cdf_inq_attname(ncid, ncvarid, iatt, attname);
           cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
           cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
@@ -1523,7 +1507,7 @@ cdf_scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int m
                     {
                       cdf_set_var(ncvar, CoordVar);
                       cdf_set_dim(ncvar, 0, Z_AXIS);
-                      ncdims[ncvar->dimids[0]].dimtype = Z_AXIS;
+                      if (ncvar->dimids[0] < ndims) ncdims[ncvar->dimids[0]].dimtype = Z_AXIS;
                     }
                   else if (nvdims == 0)
                     {
@@ -4455,13 +4439,13 @@ set_ncdim_ids(int fileID, int ndims, ncdim_t *ncdims)
 {
   if (ndims)
     {
-      int ncdimid = 0;
-      for (int dimid = 0; dimid < NC_MAX_DIMS; ++dimid)
+      int gdimid = 0;
+      for (int i = 0; i < NC_MAX_DIMS; ++i)
         {
-          if (nc_inq_dimlen(fileID, dimid, NULL) == NC_NOERR)
+          if (nc_inq_dimlen(fileID, i, NULL) == NC_NOERR)
             {
-              ncdims[ncdimid++].dimid = dimid;
-              if (ncdimid == ndims) break;
+              ncdims[gdimid++].dimid = i;
+              if (gdimid == ndims) break;
             }
         }
     }
@@ -4470,10 +4454,10 @@ set_ncdim_ids(int fileID, int ndims, ncdim_t *ncdims)
 static void
 read_ncdims(int fileID, int ndims, ncdim_t *ncdims)
 {
-  for (int dimid = 0; dimid < ndims; dimid++)
+  for (int gdimid = 0; gdimid < ndims; gdimid++)
     {
-      cdf_inq_dimlen(fileID, ncdims[dimid].dimid, &ncdims[dimid].len);
-      cdf_inq_dimname(fileID, ncdims[dimid].dimid, ncdims[dimid].name);
+      cdf_inq_dimlen(fileID, ncdims[gdimid].dimid, &ncdims[gdimid].len);
+      cdf_inq_dimname(fileID, ncdims[gdimid].dimid, ncdims[gdimid].name);
     }
 }
 
@@ -4499,16 +4483,16 @@ check_ncgroups(int fileID)
 static void
 find_coordinates_vars(int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
 {
-  for (int dimid = 0; dimid < ndims; dimid++)
+  for (int gdimid = 0; gdimid < ndims; gdimid++)
     {
       for (int varid = 0; varid < nvars; varid++)
         {
           ncvar_t *ncvar = &ncvars[varid];
-          if (ncvar->ndims == 1 && dimid == ncvar->dimids[0] && ncdims[dimid].ncvarid == CDI_UNDEFID)
+          if (ncvar->ndims == 1 && gdimid == ncvar->dimids[0] && ncdims[gdimid].ncvarid == CDI_UNDEFID)
             {
-              if (str_is_equal(ncvar->name, ncdims[dimid].name))
+              if (str_is_equal(ncvar->name, ncdims[gdimid].name))
                 {
-                  ncdims[dimid].ncvarid = varid;
+                  ncdims[gdimid].ncvarid = varid;
                   ncvar->varStatus = CoordVar;
                 }
             }
@@ -4556,13 +4540,7 @@ cdfInqContents(stream_t *streamptr)
   cdf_inq(fileID, &ndims, &nvars, &ngatts, &unlimdimid);
 
   if (CDI_Debug) Message("root: ndims %d, nvars %d, ngatts %d", ndims, nvars, ngatts);
-  /*
-  if ( ndims == 0 )
-    {
-      Warning("No dimensions found!");
-      return CDI_EUFSTRUCT;
-    }
-  */
+
   // alloc ncdims
   ncdim_t *ncdims = ndims ? (ncdim_t *) Malloc((size_t) ndims * sizeof(ncdim_t)) : NULL;
   init_ncdims(ndims, ncdims);
@@ -4585,7 +4563,7 @@ cdfInqContents(stream_t *streamptr)
   ncvar_t *ncvars = (ncvar_t *) Malloc((size_t) nvars * sizeof(ncvar_t));
   init_ncvars(nvars, ncvars, fileID);
 
-  cdf_vars_read_info(nvars, ncvars, ndims, ncdims, format);
+  read_vars_info(nvars, ncvars, ndims, ncdims, format);
   find_coordinates_vars(ndims, ncdims, nvars, ncvars);
 
   // scan global attributes
@@ -4610,9 +4588,9 @@ cdfInqContents(stream_t *streamptr)
   if (CDI_Debug) Message("Time dimid = %d", streamptr->basetime.ncdimid);
 
   // set T_AXIS dimtype
-  for (int ncdimid = 0; ncdimid < ndims; ncdimid++)
+  for (int gdimid = 0; gdimid < ndims; gdimid++)
     {
-      if (timedimid == ncdimid) ncdims[ncdimid].dimtype = T_AXIS;
+      if (timedimid == gdimid) ncdims[gdimid].dimtype = T_AXIS;
     }
 
   stream_set_ncdims(streamptr, ndims, ncdims);
