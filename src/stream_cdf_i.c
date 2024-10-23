@@ -568,9 +568,9 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
 static void
 init_ncdims(int ndims, ncdim_t *ncdims)
 {
-  for (int ncdimid = 0; ncdimid < ndims; ncdimid++)
+  for (int dimid = 0; dimid < ndims; dimid++)
     {
-      ncdim_t *ncdim = &ncdims[ncdimid];
+      ncdim_t *ncdim = &ncdims[dimid];
       ncdim->dimid = CDI_UNDEFID;
       ncdim->ncvarid = CDI_UNDEFID;
       ncdim->dimtype = CDI_UNDEFID;
@@ -4468,6 +4468,16 @@ set_ncdim_ids(int fileID, int ndims, ncdim_t *ncdims)
 }
 
 static void
+read_ncdims(int fileID, int ndims, ncdim_t *ncdims)
+{
+  for (int dimid = 0; dimid < ndims; dimid++)
+    {
+      cdf_inq_dimlen(fileID, ncdims[dimid].dimid, &ncdims[dimid].len);
+      cdf_inq_dimname(fileID, ncdims[dimid].dimid, ncdims[dimid].name);
+    }
+}
+
+static void
 check_ncgroups(int fileID)
 {
   int numgrps = 0;
@@ -4542,11 +4552,6 @@ cdfInqContents(stream_t *streamptr)
 
   if (CDI_Debug) Message("streamID = %d, fileID = %d", streamptr->self, fileID);
 
-  int format = 0;
-#ifdef HAVE_NETCDF4
-  nc_inq_format(fileID, &format);
-#endif
-
   int ndims = 0, nvars = 0, ngatts = 0, unlimdimid = 0;
   cdf_inq(fileID, &ndims, &nvars, &ngatts, &unlimdimid);
 
@@ -4562,14 +4567,11 @@ cdfInqContents(stream_t *streamptr)
   ncdim_t *ncdims = ndims ? (ncdim_t *) Malloc((size_t) ndims * sizeof(ncdim_t)) : NULL;
   init_ncdims(ndims, ncdims);
   set_ncdim_ids(fileID, ndims, ncdims);
-  // read ncdims
-  for (int dimid = 0; dimid < ndims; dimid++)
-    {
-      cdf_inq_dimlen(fileID, ncdims[dimid].dimid, &ncdims[dimid].len);
-      cdf_inq_dimname(fileID, ncdims[dimid].dimid, ncdims[dimid].name);
-    }
+  read_ncdims(fileID, ndims, ncdims);
 
+  int format = 0;
 #ifdef HAVE_NETCDF4
+  nc_inq_format(fileID, &format);
   if (format == NC_FORMAT_NETCDF4) check_ncgroups(fileID);
 #endif
 
