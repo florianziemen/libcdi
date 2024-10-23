@@ -1,3 +1,12 @@
+2024-11-??  Uwe Schulzweida
+
+        * using CGRIBEX library version 2.3.1
+	* Version 2.5.0 released
+
+2024-10-22  Uwe Schulzweida
+
+	* NetCDF: search for time dimension only if it is undefined
+
 2024-10-21  Uwe Schulzweida
 
 	* NetCDF: use positive attribute only for variables with undefined status

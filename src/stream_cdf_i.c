@@ -1236,8 +1236,7 @@ set_vars_timetype(int nvars, ncvar_t *ncvars, int timedimid)
       ncvar_t *ncvar = &ncvars[varid];
       if (ncvar->ndims > 0)
         {
-          int *dimidsp = ncvar->dimids;
-          if (timedimid == dimidsp[0])
+          if (timedimid == ncvar->dimids[0])
             {
               ncvar->timetype = TIME_VARYING;
               cdf_set_dim(ncvar, 0, T_AXIS);
@@ -1245,9 +1244,9 @@ set_vars_timetype(int nvars, ncvar_t *ncvars, int timedimid)
           else
             {
               int nvdims = ncvar->ndims;
-              for (int dimid = 1; dimid < nvdims; dimid++)
+              for (int vdimid = 1; vdimid < nvdims; vdimid++)
                 {
-                  if (timedimid == dimidsp[dimid])
+                  if (timedimid == ncvar->dimids[vdimid])
                     {
                       Warning("Time must be the first dimension! Unsupported array structure, skipped variable %s!", ncvar->name);
                       ncvar->varStatus = CoordVar;
@@ -1259,7 +1258,7 @@ set_vars_timetype(int nvars, ncvar_t *ncvars, int timedimid)
 }
 
 static void
-cdf_scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int modelID)
+scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int modelID)
 {
   int nchecked_vars = 0;
   enum
@@ -1501,13 +1500,15 @@ cdf_scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int m
               else if (str_is_equal(attstring, "up"))
                 ncvar->positive = POSITIVE_UP;
 
-              if (ncvar->varStatus == UndefVar && (nvdims == 0 || (nvdims == 1 && ncvar->dimtypes[0] == CDI_UNDEFID)))
+              int dimid0 = ncvar->dimids[0];
+              if (ncvar->varStatus == UndefVar
+                  && (nvdims == 0 || (nvdims == 1 && ncvar->dimtypes[0] == CDI_UNDEFID && ncdims[dimid0].ncvarid == CDI_UNDEFID)))
                 {
                   if (nvdims == 1)
                     {
                       cdf_set_var(ncvar, CoordVar);
                       cdf_set_dim(ncvar, 0, Z_AXIS);
-                      if (ncvar->dimids[0] < ndims) ncdims[ncvar->dimids[0]].dimtype = Z_AXIS;
+                      if (dimid0 < ndims) ncdims[dimid0].dimtype = Z_AXIS;
                     }
                   else if (nvdims == 0)
                     {
@@ -1654,7 +1655,7 @@ cdf_set_chunk_info(stream_t *streamptr, int nvars, ncvar_t *ncvars)
 }
 
 static void
-cdfVerifyVarAttr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
+verify_vars_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
   nc_type atttype;
   size_t attlen;
@@ -4627,16 +4628,16 @@ cdfInqContents(stream_t *streamptr)
 
   stream_set_ncdims(streamptr, ndims, ncdims);
 
-  if (CDI_Debug) cdf_print_vars(ncvars, nvars, "cdf_scan_vars_attr");
+  if (CDI_Debug) cdf_print_vars(ncvars, nvars, "scan_vars_attr");
 
   // scan attributes of all variables
   set_vars_timetype(nvars, ncvars, timedimid);
-  cdf_scan_vars_attr(nvars, ncvars, ndims, ncdims, modelID);
-  cdfVerifyVarAttr(nvars, ncvars, ncdims);
+  scan_vars_attr(nvars, ncvars, ndims, ncdims, modelID);
+  verify_vars_attr(nvars, ncvars, ncdims);
 
   if (CDI_Convert_Cubesphere) check_cube_sphere(vlistID, nvars, ncvars, ncdims);
 
-  if (CDI_Debug) cdf_print_vars(ncvars, nvars, "find coordinates vars");
+  if (CDI_Debug) cdf_print_vars(ncvars, nvars, "find_varying_data_vars");
 
   find_varying_data_vars(timedimid, nvars, ncvars);
 
