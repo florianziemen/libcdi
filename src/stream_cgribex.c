@@ -758,6 +758,8 @@ cgribexSkipRecords(int fileID)
       size_t recsize = gribGetSize(fileID);
       if (recsize == 0) Error("Skipping of %d records failed!", CDI_Skip_Records);
 
+      grib_check_recsize(0, recsize);
+
       off_t recpos = fileGetPos(fileID);
       fileSetPos(fileID, recpos, SEEK_CUR);
     }
@@ -818,6 +820,7 @@ cgribexScanTimestep1(stream_t *streamptr)
           break;
         }
 
+      grib_check_recsize(1, recsize);
       ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
       size_t readsize = recsize;
@@ -984,6 +987,7 @@ cgribexScanTimestep2(stream_t *streamptr)
           break;
         }
 
+      grib_check_recsize(1, recsize);
       ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
       size_t readsize = recsize;
@@ -1172,6 +1176,7 @@ cgribexScanTimestep(stream_t *streamptr)
               break;
             }
 
+          grib_check_recsize(1, recsize);
           ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
           size_t readsize = recsize;

@@ -1258,6 +1258,7 @@ gribapiScanTimestep1(stream_t *streamptr)
           break;
         }
 
+      grib_check_recsize(2, recsize);
       ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
       size_t readsize = recsize;
@@ -1419,6 +1420,7 @@ gribapiScanTimestep2(stream_t *streamptr)
           break;
         }
 
+      grib_check_recsize(2, recsize);
       ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
       size_t readsize = recsize;
@@ -1594,6 +1596,7 @@ gribapiScanTimestep(stream_t *streamptr)
               break;
             }
 
+          grib_check_recsize(2, recsize);
           ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
           size_t readsize = recsize;
