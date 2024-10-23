@@ -1704,9 +1704,9 @@ cdfVerifyVarAttr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 static void
 cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
-  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+  for (int varid = 0; varid < nvars; varid++)
     {
-      ncvar_t *ncvar = &ncvars[ncvarid];
+      ncvar_t *ncvar = &ncvars[varid];
       if (ncvar->varStatus == DataVar)
         {
           int ndims = ncvar->ndims;
@@ -1719,16 +1719,16 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 
           if (CDI_Debug)
             {
-              Message("var %d %s", ncvarid, ncvar->name);
+              Message("var %d %s", varid, ncvar->name);
               for (int i = 0; i < ndims; i++) printf("  dim%d type=%d  ", i, ncvar->dimtypes[i]);
               printf("\n");
             }
         }
     }
 
-  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+  for (int varid = 0; varid < nvars; varid++)
     {
-      ncvar_t *ncvar = &ncvars[ncvarid];
+      ncvar_t *ncvar = &ncvars[varid];
       if (ncvar->varStatus == DataVar)
         {
           bool lxdim = false, lydim = false, lzdim = false /* , ltdim = false */;
@@ -1770,9 +1770,9 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
         }
     }
 
-  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+  for (int varid = 0; varid < nvars; varid++)
     {
-      ncvar_t *ncvar = &ncvars[ncvarid];
+      ncvar_t *ncvar = &ncvars[varid];
       int ndims = ncvar->ndims;
       for (int i = 0; i < ndims; i++)
         {
@@ -1788,9 +1788,9 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
         }
     }
 
-  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
+  for (int varid = 0; varid < nvars; varid++)
     {
-      ncvar_t *ncvar = &ncvars[ncvarid];
+      ncvar_t *ncvar = &ncvars[varid];
       if (ncvar->varStatus == DataVar)
         {
           bool lxdim = false, lydim = false, lzdim = false /*, ltdim = false */;
@@ -4522,6 +4522,38 @@ find_varying_data_vars(int timedimid, int nvars, ncvar_t *ncvars)
     }
 }
 
+static void
+set_coordinates_varids(int nvars, ncvar_t *ncvars)
+{
+  for (int varid = 0; varid < nvars; varid++)
+    {
+      ncvar_t *ncvar = &ncvars[varid];
+      if (ncvar->varStatus == DataVar && ncvar->ncoordvars)
+        {
+          for (int i = 0; i < ncvar->ncoordvars; i++)
+            {
+              int ncvaridc = ncvar->coordvarids[i];
+              if (ncvaridc != CDI_UNDEFID)
+                {
+                  ncvar_t *ncvarc = &ncvars[ncvaridc];
+                  // clang-format off
+                  if      (ncvarc->isLon || ncvarc->isXaxis) ncvar->xvarid = ncvaridc;
+                  else if (ncvarc->isLat || ncvarc->isYaxis) ncvar->yvarid = ncvaridc;
+                  else if (ncvarc->isZaxis)                  ncvar->zvarid = ncvaridc;
+                  else if (ncvarc->isTaxis)                  ncvar->tvarid = ncvaridc;
+                  else if (ncvarc->isCharAxis)               ncvar->cvarids[i] = ncvaridc;
+                  else if (ncvarc->printWarning)
+                    {
+                      Warning("Coordinates variable %s can't be assigned!", ncvarc->name);
+                      ncvarc->printWarning = false;
+                    }
+                  // clang-format on
+                }
+            }
+        }
+    }
+}
+
 int
 cdfInqContents(stream_t *streamptr)
 {
@@ -4650,36 +4682,8 @@ cdfInqContents(stream_t *streamptr)
     }
   */
 
-  // Set coordinates varids (att: associate)
-  for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
-    {
-      ncvar_t *ncvar = &ncvars[ncvarid];
-      if (ncvar->varStatus == DataVar && ncvar->ncoordvars)
-        {
-          for (int i = 0; i < ncvar->ncoordvars; i++)
-            {
-              int ncvaridc = ncvar->coordvarids[i];
-              if (ncvaridc != CDI_UNDEFID)
-                {
-                  ncvar_t *ncvarc = &ncvars[ncvaridc];
-                  // clang-format off
-                  if      (ncvarc->isLon || ncvarc->isXaxis) ncvar->xvarid = ncvaridc;
-                  else if (ncvarc->isLat || ncvarc->isYaxis) ncvar->yvarid = ncvaridc;
-                  else if (ncvarc->isZaxis)                  ncvar->zvarid = ncvaridc;
-                  else if (ncvarc->isTaxis)                  ncvar->tvarid = ncvaridc;
-                  else if (ncvarc->isCharAxis)               ncvar->cvarids[i] = ncvaridc;
-                  else if (ncvarc->printWarning)
-                    {
-                      Warning("Coordinates variable %s can't be assigned!", ncvarc->name);
-                      ncvarc->printWarning = false;
-                    }
-                  // clang-format on
-                }
-            }
-        }
-    }
+  set_coordinates_varids(nvars, ncvars);
 
-  // set dim type
   cdf_set_dimtype(nvars, ncvars, ncdims);
 
   // read ECHAM VCT if present
@@ -4760,8 +4764,7 @@ cdfInqContents(stream_t *streamptr)
           streamptr->basetime.leadtimeid = leadtime_id;
           taxis0.type = TAXIS_FORECAST;
 
-          int timeunit = -1;
-          if (ncvars[leadtime_id].units[0] != 0) timeunit = scan_time_units(ncvars[leadtime_id].units);
+          int timeunit = (ncvars[leadtime_id].units[0] != 0) ? scan_time_units(ncvars[leadtime_id].units) : -1;
           if (timeunit == -1) timeunit = taxis0.unit;
           taxis0.fc_unit = timeunit;
         }
