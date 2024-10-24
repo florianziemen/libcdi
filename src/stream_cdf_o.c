@@ -33,14 +33,14 @@ cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   void *data = Malloc(datasize * ((memtype == MEMTYPE_DOUBLE) ? sizeof(double) : sizeof(float)));
 
   size_t numMissVals;
-  cdf_read_record(streamptr1, memtype, data, &numMissVals);
-  cdf_write_record(streamptr2, memtype, data, numMissVals);
+  cdf_read_field(streamptr1, memtype, data, &numMissVals);
+  cdf_write_field(streamptr2, memtype, data, numMissVals);
 
   Free(data);
 }
 
 void
-cdfDefRecord(stream_t *streamptr)
+cdfDefField(stream_t *streamptr)
 {
   (void) streamptr;
 }

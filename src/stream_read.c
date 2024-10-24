@@ -237,19 +237,19 @@ stream_read_record(int streamID, int memtype, void *data, size_t *numMissVals)
   switch (cdiBaseFiletype(streamptr->filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB: grb_read_record(streamptr, memtype, data, numMissVals); break;
+    case CDI_FILETYPE_GRIB: grb_read_field(streamptr, memtype, data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV: srv_read_record(streamptr, memtype, data, numMissVals); break;
+    case CDI_FILETYPE_SRV: srv_read_field(streamptr, memtype, data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT: ext_read_record(streamptr, memtype, data, numMissVals); break;
+    case CDI_FILETYPE_EXT: ext_read_field(streamptr, memtype, data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG: ieg_read_record(streamptr, memtype, data, numMissVals); break;
+    case CDI_FILETYPE_IEG: ieg_read_field(streamptr, memtype, data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdf_read_record(streamptr, memtype, data, numMissVals); break;
+    case CDI_FILETYPE_NETCDF: cdf_read_field(streamptr, memtype, data, numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(streamptr->filetype));
     }
@@ -258,7 +258,7 @@ stream_read_record(int streamID, int memtype, void *data, size_t *numMissVals)
 }
 
 void
-streamReadRecord(int streamID, double *data, SizeType *numMissVals)
+streamReadField(int streamID, double *data, SizeType *numMissVals)
 {
   size_t numMiss = 0;
   stream_read_record(streamID, MEMTYPE_DOUBLE, (void *) data, &numMiss);
@@ -266,7 +266,7 @@ streamReadRecord(int streamID, double *data, SizeType *numMissVals)
 }
 
 void
-streamReadRecordF(int streamID, float *data, SizeType *numMissVals)
+streamReadFieldF(int streamID, float *data, SizeType *numMissVals)
 {
   size_t numMiss = 0;
   stream_read_record(streamID, MEMTYPE_FLOAT, (void *) data, &numMiss);

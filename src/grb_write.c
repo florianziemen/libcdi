@@ -216,7 +216,7 @@ fillup_gribbuffer(size_t nbytes, unsigned char *gribbuffer)
 }
 
 void
-grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
+grbCopyField(stream_t *streamptr2, stream_t *streamptr1)
 {
   int filetype = streamptr1->filetype;
   int fileID1 = streamptr1->fileID;
@@ -488,7 +488,7 @@ grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, siz
 }
 
 void
-grb_write_record(stream_t *streamptr, int memtype, const void *data, size_t numMissVals)
+grb_write_field(stream_t *streamptr, int memtype, const void *data, size_t numMissVals)
 {
   int varID = streamptr->record->varID;
   int levelID = streamptr->record->levelID;

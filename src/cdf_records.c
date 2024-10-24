@@ -82,19 +82,19 @@ cdf_create_records(stream_t *streamptr, size_t tsID)
   tsteps_t *sourceTstep = streamptr->tsteps;
   tsteps_t *destTstep = sourceTstep + tsID;
 
-  int numRecs = vlistNumRecords(vlistID);
-  if (numRecs <= 0) return;
+  int numFields = vlistNumFields(vlistID);
+  if (numFields <= 0) return;
 
   if (tsID == 0)
     {
-      int numRecsAvail = numRecs;  // use all records at first timestep
+      int numRecsAvail = numFields;  // use all records at first timestep
 
-      streamptr->nrecs += numRecs;
+      streamptr->nrecs += numFields;
 
-      cdf_init_timestep(destTstep, numRecs, numRecsAvail);
+      cdf_init_timestep(destTstep, numFields, numRecsAvail);
 
       destTstep->recIDs = (int *) Malloc((size_t) numRecsAvail * sizeof(int));
-      cdf_init_records_step0(numRecs, destTstep->recIDs, destTstep->records, vlistID);
+      cdf_init_records_step0(numFields, destTstep->recIDs, destTstep->records, vlistID);
     }
   else if (tsID == 1)
     {
@@ -102,14 +102,14 @@ cdf_create_records(stream_t *streamptr, size_t tsID)
 
       streamptr->nrecs += numRecsAvail;
 
-      cdf_init_timestep(destTstep, numRecs, numRecsAvail);
+      cdf_init_timestep(destTstep, numFields, numRecsAvail);
 
-      memcpy(destTstep->records, sourceTstep->records, (size_t) numRecs * sizeof(record_t));
+      memcpy(destTstep->records, sourceTstep->records, (size_t) numFields * sizeof(record_t));
 
       if (numRecsAvail)
         {
           destTstep->recIDs = (int *) Malloc((size_t) numRecsAvail * sizeof(int));
-          cdf_init_records_step1(numRecs, destTstep->recIDs, destTstep->records, vlistID);
+          cdf_init_records_step1(numFields, destTstep->recIDs, destTstep->records, vlistID);
         }
     }
   else
@@ -120,9 +120,9 @@ cdf_create_records(stream_t *streamptr, size_t tsID)
 
       streamptr->nrecs += numRecsAvail;
 
-      cdf_init_timestep(destTstep, numRecs, numRecsAvail);
+      cdf_init_timestep(destTstep, numFields, numRecsAvail);
 
-      memcpy(destTstep->records, sourceTstep->records, (size_t) numRecs * sizeof(record_t));
+      memcpy(destTstep->records, sourceTstep->records, (size_t) numFields * sizeof(record_t));
 
       if (numRecsAvail)
         {

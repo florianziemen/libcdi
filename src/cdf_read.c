@@ -944,7 +944,7 @@ cdf_read_next_record(stream_t *streamptr, int recID, int memtype, void *data, si
 }
 
 void
-cdf_read_record(stream_t *streamptr, int memtype, void *data, size_t *numMissVals)
+cdf_read_field(stream_t *streamptr, int memtype, void *data, size_t *numMissVals)
 {
   int tsID = streamptr->curTsID;
   int vrecID = streamptr->tsteps[tsID].curRecID;

@@ -948,7 +948,7 @@ vlistNvars(int vlistID)
 }
 
 int
-vlistNumRecords(int vlistID)
+vlistNumFields(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 

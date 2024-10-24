@@ -8,11 +8,10 @@
 int srvInqContents(stream_t *streamptr);
 int srvInqTimestep(stream_t *streamptr, int tsID);
 
-int srvInqRecord(stream_t *streamptr, int *varID, int *levelID);
-void srvDefRecord(stream_t *streamptr);
-void srvCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
-void srv_read_record(stream_t *streamptr, int memtype, void *data, size_t *numMissVals);
-void srv_write_record(stream_t *streamptr, int memtype, const void *data);
+void srvDefField(stream_t *streamptr);
+void srvCopyField(stream_t *streamptr2, stream_t *streamptr1);
+void srv_read_field(stream_t *streamptr, int memtype, void *data, size_t *numMissVals);
+void srv_write_field(stream_t *streamptr, int memtype, const void *data);
 
 void srvReadVarDP(stream_t *streamptr, int varID, double *data, size_t *numMissVals);
 void srvWriteVarDP(stream_t *streamptr, int varID, const double *data);

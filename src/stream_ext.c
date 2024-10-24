@@ -38,43 +38,6 @@ extDefDatatype(int datatype, int *prec, int *number)
   *prec = (datatype == CDI_DATATYPE_FLT64 || datatype == CDI_DATATYPE_CPX64) ? EXSE_PREC_FP64 : EXSE_PREC_FP32;
 }
 
-/* not used
-int extInqRecord(stream_t *streamptr, int *varID, int *levelID)
-{
-  int status;
-  int fileID;
-  int icode, ilevel;
-  int zaxisID = -1;
-  int header[4];
-  int vlistID;
-  void *extp = streamptr->record->objectp;
-
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
-
-  *varID   = -1;
-  *levelID = -1;
-
-  status = extRead(fileID, extp);
-  if ( status != 0 ) return 0;
-
-  extInqHeader(extp, header);
-
-  icode  = header[1];
-  ilevel = header[2];
-
-  *varID = vlistInqVarID(vlistID, icode);
-
-  if ( *varID == CDI_UNDEFID ) Error("Code %d undefined", icode);
-
-  zaxisID = vlistInqVarZaxis(vlistID, *varID);
-
-  *levelID = zaxisInqLevelID(zaxisID, (double) ilevel);
-
-  return 1;
-}
-*/
-
 static void
 ext_read_recordSP(stream_t *streamptr, float *data, size_t *numMissVals)
 {
@@ -140,7 +103,7 @@ ext_read_recordDP(stream_t *streamptr, double *data, size_t *numMissVals)
 }
 
 void
-ext_read_record(stream_t *streamptr, int memtype, void *data, size_t *numMissVals)
+ext_read_field(stream_t *streamptr, int memtype, void *data, size_t *numMissVals)
 {
   if (memtype == MEMTYPE_DOUBLE)
     ext_read_recordDP(streamptr, (double *) data, numMissVals);
@@ -149,13 +112,13 @@ ext_read_record(stream_t *streamptr, int memtype, void *data, size_t *numMissVal
 }
 
 void
-extCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
+extCopyField(stream_t *streamptr2, stream_t *streamptr1)
 {
   streamFCopyRecord(streamptr2, streamptr1, "EXTRA");
 }
 
 void
-extDefRecord(stream_t *streamptr)
+extDefField(stream_t *streamptr)
 {
   Record *record = streamptr->record;
 
@@ -192,7 +155,7 @@ ext_write_recordDP(stream_t *streamptr, const double *data)
 }
 
 void
-ext_write_record(stream_t *streamptr, int memtype, const void *data)
+ext_write_field(stream_t *streamptr, int memtype, const void *data)
 {
   if (memtype == MEMTYPE_DOUBLE)
     ext_write_recordDP(streamptr, (const double *) data);

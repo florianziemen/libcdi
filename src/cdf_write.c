@@ -1638,7 +1638,7 @@ cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
 }
 
 void
-cdf_write_record(stream_t *streamptr, int memtype, const void *data, size_t numMissVals)
+cdf_write_field(stream_t *streamptr, int memtype, const void *data, size_t numMissVals)
 {
   int varID = streamptr->record->varID;
   int levelID = streamptr->record->levelID;

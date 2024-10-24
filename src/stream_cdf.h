@@ -30,14 +30,14 @@ int cdfInqTimestep(stream_t *streamptr, int tsID);
 int cdfInqContents(stream_t *streamptr);
 
 void cdfEndDef(stream_t *streamptr);
-void cdfDefRecord(stream_t *streamptr);
+void cdfDefField(stream_t *streamptr);
 
 void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
 
 void cdfDefineAttributes(int filetype, int vlistID, int varID, int fileID, int ncvarID);
 
-void cdf_read_record(stream_t *streamptr, int memtype, void *data, size_t *numMissVals);
-void cdf_write_record(stream_t *streamptr, int memtype, const void *data, size_t numMissVals);
+void cdf_read_field(stream_t *streamptr, int memtype, void *data, size_t *numMissVals);
+void cdf_write_field(stream_t *streamptr, int memtype, const void *data, size_t numMissVals);
 
 void cdf_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *numMissVals);
 void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t numMissVals);

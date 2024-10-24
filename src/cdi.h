@@ -443,15 +443,15 @@ void    streamWriteVarChunk(int streamID, int varID, const int rect[][2], const 
 void    streamWriteVarChunkF(int streamID, int varID, const int rect[][2], const float data[], SizeType numMissVals);
 
 
-// STREAM record I/O routines (sequential access)
+// STREAM field I/O routines (sequential access)
 
-void    streamDefRecord(int streamID, int  varID, int  levelID);
-void    streamInqRecord(int streamID, int *varID, int *levelID);
-void    streamWriteRecord(int streamID, const double data[], SizeType numMissVals);
-void    streamWriteRecordF(int streamID, const float data[], SizeType numMissVals);
-void    streamReadRecord(int streamID, double data[], SizeType *numMissVals);
-void    streamReadRecordF(int streamID, float data[], SizeType *numMissVals);
-void    streamCopyRecord(int streamIDdest, int streamIDsrc);
+void    streamDefField(int streamID, int  varID, int  levelID);
+void    streamInqField(int streamID, int *varID, int *levelID);
+void    streamWriteField(int streamID, const double data[], SizeType numMissVals);
+void    streamWriteFieldF(int streamID, const float data[], SizeType numMissVals);
+void    streamReadField(int streamID, double data[], SizeType *numMissVals);
+void    streamReadFieldF(int streamID, float data[], SizeType *numMissVals);
+void    streamCopyField(int streamIDdest, int streamIDsrc);
 
 void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);
 
@@ -565,7 +565,7 @@ int     vlistZaxis(int vlistID, int index);
 int     vlistZaxisIndex(int vlistID, int zaxisID);
 void    vlistChangeZaxisIndex(int vlistID, int index, int zaxisID);
 void    vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2);
-int     vlistNumRecords(int vlistID);
+int     vlistNumFields(int vlistID);
 int     vlistSubtype(int vlistID, int index);
 int     vlistSubtypeIndex(int vlistID, int subtypeID);
 

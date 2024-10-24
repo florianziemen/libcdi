@@ -3,6 +3,10 @@
         * using CGRIBEX library version 2.3.1
 	* Version 2.5.0 released
 
+2024-10-24  Uwe Schulzweida
+
+	* Renamed interface functions streamXXXRecord to streamXXXField
+
 2024-10-22  Uwe Schulzweida
 
 	* NetCDF: search for time dimension only if it is undefined

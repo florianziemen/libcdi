@@ -34,43 +34,6 @@ srvDefDatatype(int datatype)
   return (datatype == CDI_DATATYPE_FLT64) ? EXSE_PREC_FP64 : EXSE_PREC_FP32;
 }
 
-/* not used
-int srvInqRecord(stream_t *streamptr, int *varID, int *levelID)
-{
-  int status;
-  int fileID;
-  int icode, ilevel;
-  int zaxisID = -1;
-  int header[8];
-  int vlistID;
-  void *srvp = streamptr->record->objectp;
-
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
-
-  *varID   = -1;
-  *levelID = -1;
-
-  status = srvRead(fileID, srvp);
-  if ( status != 0 ) return (0);
-
-  srvInqHeader(srvp, header);
-
-  icode  = header[0];
-  ilevel = header[1];
-
-  *varID = vlistInqVarID(vlistID, icode);
-
-  if ( *varID == CDI_UNDEFID ) Error("Code %d undefined", icode);
-
-  zaxisID = vlistInqVarZaxis(vlistID, *varID);
-
-  *levelID = zaxisInqLevelID(zaxisID, (double) ilevel);
-
-  return 1;
-}
-*/
-
 static void
 srv_read_recordSP(stream_t *streamptr, float *data, size_t *numMissVals)
 {
@@ -130,7 +93,7 @@ srv_read_recordDP(stream_t *streamptr, double *data, size_t *numMissVals)
 }
 
 void
-srv_read_record(stream_t *streamptr, int memtype, void *data, size_t *numMissVals)
+srv_read_field(stream_t *streamptr, int memtype, void *data, size_t *numMissVals)
 {
   if (memtype == MEMTYPE_DOUBLE)
     srv_read_recordDP(streamptr, (double *) data, numMissVals);
@@ -139,13 +102,13 @@ srv_read_record(stream_t *streamptr, int memtype, void *data, size_t *numMissVal
 }
 
 void
-srvCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
+srvCopyField(stream_t *streamptr2, stream_t *streamptr1)
 {
   streamFCopyRecord(streamptr2, streamptr1, "SRV");
 }
 
 void
-srvDefRecord(stream_t *streamptr)
+srvDefField(stream_t *streamptr)
 {
   Record *record = streamptr->record;
 
@@ -198,7 +161,7 @@ srv_write_recordDP(stream_t *streamptr, const double *data)
 }
 
 void
-srv_write_record(stream_t *streamptr, int memtype, const void *data)
+srv_write_field(stream_t *streamptr, int memtype, const void *data)
 {
   if (memtype == MEMTYPE_DOUBLE)
     srv_write_recordDP(streamptr, (const double *) data);

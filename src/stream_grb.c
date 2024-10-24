@@ -250,19 +250,8 @@ grbBitsPerValue(int datatype)
   return bitsPerValue;
 }
 
-/*
-int grbInqRecord(stream_t * streamptr, int *varID, int *levelID)
-{
-  int status;
-
-  status = cgribexInqRecord(streamptr, varID, levelID);
-
-  return (status);
-}
-*/
-
 void
-grbDefRecord(stream_t *streamptr)
+grbDefField(stream_t *streamptr)
 {
   UNUSED(streamptr);
 }
