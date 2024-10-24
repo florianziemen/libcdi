@@ -5,6 +5,7 @@
 
 2024-10-24  Uwe Schulzweida
 
+	* lock access to NCZARR in CDI_Threadsafe mode
 	* Renamed interface functions streamXXXRecord to streamXXXField
 
 2024-10-22  Uwe Schulzweida
