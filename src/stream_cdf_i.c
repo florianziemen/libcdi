@@ -4270,7 +4270,7 @@ cdfVerifyVars(int nvars, ncvar_t *ncvars
 }
 
 static CdiDateTime
-wrf_read_timestep(int fileID, int nctimevarid, int tsID)
+wrf_read_timestep(int fileID, int nctimevarid, size_t tsID)
 {
   enum
   {
@@ -4278,7 +4278,7 @@ wrf_read_timestep(int fileID, int nctimevarid, int tsID)
     dateTimeSepPos = 19,
     dateTimeStrSize = 128,
   };
-  size_t start[2] = { (size_t) tsID, 0 }, count[2] = { 1, dateTimeSepPos };
+  size_t start[2] = { tsID, 0 }, count[2] = { 1, dateTimeSepPos };
   char stvalue[dateTimeStrSize];
   stvalue[0] = 0;
   cdf_get_vara_text(fileID, nctimevarid, start, count, stvalue);
@@ -4324,7 +4324,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
       int fileID = streamptr->fileID;
       int nctimevarid = streamptr->basetime.ncvarid;
       int nctimeboundsid = streamptr->basetime.ncvarboundsid;
-      bool hasTimesteps = (nctimevarid != CDI_UNDEFID && streamptr->basetime.hasUnits);
+      bool hasTimesteps = (nctimevarid != CDI_UNDEFID /*&& streamptr->basetime.hasUnits*/);
 
       int *ncStepIndices = (int *) Malloc(numTimesteps * sizeof(int));
       for (size_t tsID = 0; tsID < numTimesteps; ++tsID) ncStepIndices[tsID] = (int) tsID;
@@ -4337,16 +4337,19 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
 
           if (streamptr->basetime.isWRF)
             {
-              for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
-                vDateTimeList[tsID] = wrf_read_timestep(fileID, nctimevarid, (int) tsID);
+              for (size_t tsID = 0; tsID < numTimesteps; ++tsID) vDateTimeList[tsID] = wrf_read_timestep(fileID, nctimevarid, tsID);
             }
-          else
+          else if (streamptr->basetime.hasUnits)
             {
               double *timevarBuffer = (double *) Malloc(numTimesteps * sizeof(double));
               cdf_get_var_double(fileID, nctimevarid, timevarBuffer);
               for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
                 vDateTimeList[tsID] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID, timevarBuffer), taxis0);
               if (timevarBuffer) Free(timevarBuffer);
+            }
+          else
+            {
+              hasTimesteps = false;
             }
         }
 
@@ -4383,6 +4386,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
         }
 
       if (ncStepIndices) Free(ncStepIndices);
+      if (vDateTimeList) Free(vDateTimeList);
 
       if (hasTimesteps)
         {
@@ -4421,8 +4425,6 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
                 }
             }
         }
-
-      if (vDateTimeList) Free(vDateTimeList);
     }
 }
 
@@ -4503,7 +4505,7 @@ find_coordinates_vars(int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
 
 // set time dependent data vars
 static void
-find_varying_data_vars(int timedimid, int nvars, ncvar_t *ncvars)
+find_varying_data_vars1d(int timedimid, int nvars, ncvar_t *ncvars)
 {
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
@@ -4637,9 +4639,9 @@ cdfInqContents(stream_t *streamptr)
 
   if (CDI_Convert_Cubesphere) check_cube_sphere(vlistID, nvars, ncvars, ncdims);
 
-  if (CDI_Debug) cdf_print_vars(ncvars, nvars, "find_varying_data_vars");
+  if (CDI_Debug) cdf_print_vars(ncvars, nvars, "find_varying_data_vars1d");
 
-  find_varying_data_vars(timedimid, nvars, ncvars);
+  find_varying_data_vars1d(timedimid, nvars, ncvars);
 
   // find time vars
   bool timeHasUnits = false;
