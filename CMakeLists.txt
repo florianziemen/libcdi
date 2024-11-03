@@ -1,8 +1,4 @@
-# cmake options:
-#
-#       -DCMAKE_INSTALL_PREFIX=/path/to/install
-
-cmake_minimum_required( VERSION 3.12 FATAL_ERROR )
+cmake_minimum_required( VERSION 3.30 FATAL_ERROR )
 
 project(libcdi VERSION 2.4.0 LANGUAGES C )
 set(CMAKE_C_STANDARD 11)
