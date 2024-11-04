@@ -2075,19 +2075,21 @@ grid_set_chunktype(grid_t *grid, ncvar_t *ncvar)
   if (ncvar->isChunked)
     {
       int ndims = ncvar->ndims;
+      size_t chunkSizeAllDims = 1;
+      for (int i = 0; i < ndims; ++i) chunkSizeAllDims *= ncvar->chunks[i];
 
+      size_t dimN = ncvar->chunks[ndims - 1];
       if (grid->type == GRID_UNSTRUCTURED)
         {
-          size_t chunkSize = ncvar->chunks[ndims - 1];
+          size_t chunkSize = (chunkSizeAllDims == dimN) ? dimN : 0;
           ncvar->chunkType = (chunkSize == grid->size) ? CDI_CHUNK_GRID : CDI_CHUNK_AUTO;
           if (ncvar->chunkType == CDI_CHUNK_AUTO && chunkSize > 1) ncvar->chunkSize = (int) chunkSize;
         }
       else
         {
-          if (grid->x.size > 1 && grid->y.size > 1 && ndims > 1 && grid->x.size == ncvar->chunks[ndims - 1]
-              && grid->y.size == ncvar->chunks[ndims - 2])
+          if (grid->x.size > 1 && grid->y.size > 1 && ndims > 1 && grid->x.size == dimN && grid->y.size == ncvar->chunks[ndims - 2])
             ncvar->chunkType = CDI_CHUNK_GRID;
-          else if (grid->x.size > 1 && grid->x.size == ncvar->chunks[ndims - 1])
+          else if (grid->x.size > 1 && grid->x.size == dimN && chunkSizeAllDims == dimN)
             ncvar->chunkType = CDI_CHUNK_LINES;
           else
             ncvar->chunkType = CDI_CHUNK_AUTO;
