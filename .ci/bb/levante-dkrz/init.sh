@@ -6,7 +6,7 @@
 #
 init_env ()
 {
-  switch_for_module ruby/3.0.2-gcc-11.2.0
+  switch_for_module git ruby/3.0.2-gcc-11.2.0
 }
 
 #
