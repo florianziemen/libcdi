@@ -544,8 +544,8 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
 
           if (dimid0 != CDI_UNDEFID && check_dimids[dimid0] == false)
             {
-              check_dimids[dimid0] = true;
               if (ncdims[dimid0].ncvarid != CDI_UNDEFID && ncdims[dimid0].ncvarid != varid) continue;
+              check_dimids[dimid0] = true;
 
               char sbuf[CDI_MAX_NAME];
               for (int iatt = 0; iatt < ncvar->nattsNC; ++iatt)
