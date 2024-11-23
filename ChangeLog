@@ -1,7 +1,11 @@
-2024-11-??  Uwe Schulzweida
+2024-11-28  Uwe Schulzweida
 
         * using CGRIBEX library version 2.3.1
 	* Version 2.5.0 released
+
+2024-11-23  Uwe Schulzweida
+
+	* NetCDF: improved HealPIX support
 
 2024-11-04  Uwe Schulzweida
 

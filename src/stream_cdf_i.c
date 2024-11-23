@@ -55,6 +55,7 @@ typedef struct
   int ncid;
   int varStatus;
   bool ignoreVar;
+  bool isHealPIX;
   bool isCubeSphere;
   bool isCharAxis;
   bool isXaxis;
@@ -588,6 +589,7 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
       ncvar->ncid = ncid;
       ncvar->varStatus = UndefVar;
       ncvar->ignoreVar = false;
+      ncvar->isHealPIX = false;
       ncvar->isCubeSphere = false;
       ncvar->isCharAxis = false;
       ncvar->isXaxis = false;
@@ -1486,6 +1488,14 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
                 {
                   ncvar->gmapid = nc_gmap_id;
                   cdf_set_var(&ncvars[ncvar->gmapid], CoordVar);
+                  int nc_gmap_varid = ncvars[ncvar->gmapid].ncid;
+                  if (cdfCheckAttText(nc_gmap_varid, nc_gmap_id, "grid_mapping_name"))
+                    {
+                      char gridMappingName[CDI_MAX_NAME];
+                      cdfGetAttText(nc_gmap_varid, nc_gmap_id, "grid_mapping_name", CDI_MAX_NAME, gridMappingName);
+                      // if (str_is_equal(gridMappingName, "healpix")) ncvars[ncvar->gmapid].isHealPIX = true;
+                      if (str_is_equal(gridMappingName, "healpix")) ncvar->isHealPIX = true;
+                    }
                 }
               else
                 Warning("%s - %s", nc_strerror(status), attstring);
@@ -1830,7 +1840,7 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                       dimtype = X_AXIS;
                       lxdim = true;
                     }
-                  else if (!lydim && ncvar->gridtype != GRID_UNSTRUCTURED)
+                  else if (!lydim && ncvar->gridtype != GRID_UNSTRUCTURED && ncvar->isHealPIX == false)
                     // else if ( !lydim && ! (ncvars[ncvar->xvarid].dimids[0] == ncvars[ncvar->yvarid].dimids[0] &&
                     //                        ncvars[ncvar->xvarid].ndims == 1 && ncvars[ncvar->yvarid].ndims == 1))
                     {
