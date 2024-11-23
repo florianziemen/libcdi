@@ -1703,6 +1703,31 @@ verify_vars_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 }
 
 static void
+find_dimtypes(ncvar_t *ncvars, ncvar_t *ncvar, bool *plxdim, bool *plydim, bool *plzdim, int *plcdim)
+{
+  bool lxdim = false, lydim = false, lzdim = false /*, ltdim = false */;
+  int lcdim = 0;
+  int ndims = ncvar->ndims;
+  for (int i = 0; i < ndims; i++)
+    {
+      int dimtype = ncvar->dimtypes[i];
+      lxdim |= (dimtype == X_AXIS);
+      lydim |= (dimtype == Y_AXIS);
+      lzdim |= (dimtype == Z_AXIS);
+      if (ncvar->cvarids[i] != CDI_UNDEFID) lcdim++;
+      // ltdim |= (dimtype == T_AXIS);
+    }
+
+  if (!lxdim && ncvar->xvarid != CDI_UNDEFID && ncvars[ncvar->xvarid].ndims == 0) lxdim = true;
+  if (!lydim && ncvar->yvarid != CDI_UNDEFID && ncvars[ncvar->yvarid].ndims == 0) lydim = true;
+
+  *plxdim = lxdim;
+  *plydim = lydim;
+  *plzdim = lzdim;
+  *plcdim = lcdim;
+}
+
+static void
 cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
   for (int varid = 0; varid < nvars; varid++)
@@ -1733,22 +1758,10 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
       if (ncvar->varStatus == DataVar)
         {
           bool lxdim = false, lydim = false, lzdim = false /* , ltdim = false */;
-          int lcdim = 0;
-          int ndims = ncvar->ndims;
-          for (int i = 0; i < ndims; i++)
-            {
-              int dimtype = ncvar->dimtypes[i];
-              lxdim |= (dimtype == X_AXIS);
-              lydim |= (dimtype == Y_AXIS);
-              lzdim |= (dimtype == Z_AXIS);
-              if (ncvar->cvarids[i] != CDI_UNDEFID) lcdim++;
-              // ltdim |= (dimtype == T_AXIS);
-            }
-
+          int lcdim;
+          find_dimtypes(ncvars, ncvar, &lxdim, &lydim, &lzdim, &lcdim);
           int allcdims = lcdim;
-
-          if (!lxdim && ncvar->xvarid != CDI_UNDEFID && ncvars[ncvar->xvarid].ndims == 0) lxdim = true;
-          if (!lydim && ncvar->yvarid != CDI_UNDEFID && ncvars[ncvar->yvarid].ndims == 0) lydim = true;
+          int ndims = ncvar->ndims;
 
           if (lxdim && (lydim || ncvar->gridtype == GRID_UNSTRUCTURED))
             for (int i = ndims - 1; i >= 0; i--)
@@ -1796,21 +1809,9 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
         {
           bool lxdim = false, lydim = false, lzdim = false /*, ltdim = false */;
           int lcdim = 0;
-          int ndims = ncvar->ndims;
-          for (int i = 0; i < ndims; i++)
-            {
-              int dimtype = ncvar->dimtypes[i];
-              lxdim |= (dimtype == X_AXIS);
-              lydim |= (dimtype == Y_AXIS);
-              lzdim |= (dimtype == Z_AXIS);
-              if (ncvar->cvarids[i] != CDI_UNDEFID) lcdim++;
-              // ltdim |= (dimtype == T_AXIS);
-            }
-
+          find_dimtypes(ncvars, ncvar, &lxdim, &lydim, &lzdim, &lcdim);
           int allcdims = lcdim;
-
-          if (!lxdim && ncvar->xvarid != CDI_UNDEFID && ncvars[ncvar->xvarid].ndims == 0) lxdim = true;
-          if (!lydim && ncvar->yvarid != CDI_UNDEFID && ncvars[ncvar->yvarid].ndims == 0) lydim = true;
+          int ndims = ncvar->ndims;
 
           //   if ( ndims > 1 )
           for (int i = ndims - 1; i >= 0; i--)
