@@ -2045,7 +2045,6 @@ void
 freePtrAfterNCMem(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
   int fileID = streamptr->fileID;
-  int filetype = streamptr->filetype;
 
   if (fileID == CDI_UNDEFID)
     {
@@ -2069,7 +2068,7 @@ freePtrAfterNCMem(stream_t *streamptr, int recordBufIsToBeDeleted)
 }
 
 
-int
+void
 streamCloseNCMem(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
