@@ -720,6 +720,7 @@ streamOpenNCMem(int ncidp, char mode)
   stream_t *streamptr = stream_new_entry(CDI_UNDEFID);
   int streamID = CDI_ESYSTEM;
 
+#ifdef HAVE_NETCDF4
   streamID = streamptr->self;
   if (streamID < 0) return CDI_ELIMIT;
 
@@ -744,6 +745,7 @@ streamOpenNCMem(int ncidp, char mode)
           reshRemove(streamptr->self, &streamOps);
         }
     }
+#endif
 
   return streamID;
 }
