@@ -1,3 +1,37 @@
+2024-11-28  Uwe Schulzweida
+
+        * using CGRIBEX library version 2.3.1
+	* Version 2.5.0 released
+
+2024-11-23  Uwe Schulzweida
+
+	* NetCDF: improved HealPIX support
+
+2024-11-04  Uwe Schulzweida
+
+	* reset chunktype if z and t are chunked
+
+2024-10-24  Uwe Schulzweida
+
+	* lock access to NCZARR in CDI_Threadsafe mode
+	* Renamed interface functions streamXXXRecord to streamXXXField
+
+2024-10-22  Uwe Schulzweida
+
+	* NetCDF: search for time dimension only if it is undefined
+
+2024-10-21  Uwe Schulzweida
+
+	* NetCDF: use positive attribute only for variables with undefined status
+
+2024-09-19  Uwe Schulzweida
+
+	* Version 2.4.4 released
+
+2024-09-18  Uwe Schulzweida
+
+	* absolute timeaxis failed with timeunits seconds [Bug #11916]
+
 2024-08-14  Uwe Schulzweida
 
 	* Version 2.4.3 released

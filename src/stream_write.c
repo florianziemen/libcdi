@@ -286,19 +286,19 @@ stream_write_record(int streamID, int memtype, const void *data, SizeType numMis
   switch (cdiBaseFiletype(streamptr->filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB: grb_write_record(streamptr, memtype, data, (size_t) numMissVals); break;
+    case CDI_FILETYPE_GRIB: grb_write_field(streamptr, memtype, data, (size_t) numMissVals); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV: srv_write_record(streamptr, memtype, data); break;
+    case CDI_FILETYPE_SRV: srv_write_field(streamptr, memtype, data); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT: ext_write_record(streamptr, memtype, data); break;
+    case CDI_FILETYPE_EXT: ext_write_field(streamptr, memtype, data); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG: ieg_write_record(streamptr, memtype, data); break;
+    case CDI_FILETYPE_IEG: ieg_write_field(streamptr, memtype, data); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdf_write_record(streamptr, memtype, data, (size_t) numMissVals); break;
+    case CDI_FILETYPE_NETCDF: cdf_write_field(streamptr, memtype, data, (size_t) numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(streamptr->filetype));
     }
@@ -322,13 +322,13 @@ The values are converted to the external data type of the variable, if necessary
 @EndFunction
 */
 void
-streamWriteRecord(int streamID, const double *data, SizeType numMissVals)
+streamWriteField(int streamID, const double *data, SizeType numMissVals)
 {
   stream_write_record(streamID, MEMTYPE_DOUBLE, (const void *) data, numMissVals);
 }
 
 void
-streamWriteRecordF(int streamID, const float *data, SizeType numMissVals)
+streamWriteFieldF(int streamID, const float *data, SizeType numMissVals)
 {
   stream_write_record(streamID, MEMTYPE_FLOAT, (const void *) data, numMissVals);
 }

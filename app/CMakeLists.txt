@@ -7,6 +7,6 @@ target_include_directories(cdi PUBLIC
   $<INSTALL_INTERFACE:include
 )
 
-target_link_libraries(cdi PUBLIC cdilib)
+target_link_libraries(cdi PUBLIC cdilib netCDF::netcdf ${HDF5_LIBS} pthread)
 
 target_compile_definitions(cdi PUBLIC HAVE_CONFIG_H)

@@ -97,7 +97,7 @@ cdiInitRecord(stream_t *streamptr)
 }
 
 void
-streamInqRecord(int streamID, int *varID, int *levelID)
+streamInqField(int streamID, int *varID, int *levelID)
 {
   check_parg(varID);
   check_parg(levelID);
@@ -146,7 +146,7 @@ The function streamDefRecord defines the meta-data of the next record.
 @EndFunction
 */
 void
-streamDefRecord(int streamID, int varID, int levelID)
+streamDefField(int streamID, int varID, int levelID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
@@ -178,21 +178,21 @@ streamDefRecord(int streamID, int varID, int levelID)
   switch (cdiBaseFiletype(streamptr->filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB: grbDefRecord(streamptr); break;
+    case CDI_FILETYPE_GRIB: grbDefField(streamptr); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV: srvDefRecord(streamptr); break;
+    case CDI_FILETYPE_SRV: srvDefField(streamptr); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT: extDefRecord(streamptr); break;
+    case CDI_FILETYPE_EXT: extDefField(streamptr); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG: iegDefRecord(streamptr); break;
+    case CDI_FILETYPE_IEG: iegDefField(streamptr); break;
 #endif
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF:
       if (streamptr->accessmode == 0) cdfEndDef(streamptr);
-      cdfDefRecord(streamptr);
+      cdfDefField(streamptr);
       break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(streamptr->filetype)); break;
@@ -200,7 +200,7 @@ streamDefRecord(int streamID, int varID, int levelID)
 }
 
 void
-streamCopyRecord(int streamID2, int streamID1)
+streamCopyField(int streamID2, int streamID1)
 {
   stream_t *streamptr1 = stream_to_pointer(streamID1), *streamptr2 = stream_to_pointer(streamID2);
   int filetype1 = streamptr1->filetype, filetype2 = streamptr2->filetype, filetype = CDI_FILETYPE_UNDEF;
@@ -213,16 +213,16 @@ streamCopyRecord(int streamID2, int streamID1)
   switch (cdiBaseFiletype(filetype))
     {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB: grbCopyRecord(streamptr2, streamptr1); break;
+    case CDI_FILETYPE_GRIB: grbCopyField(streamptr2, streamptr1); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV: srvCopyRecord(streamptr2, streamptr1); break;
+    case CDI_FILETYPE_SRV: srvCopyField(streamptr2, streamptr1); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT: extCopyRecord(streamptr2, streamptr1); break;
+    case CDI_FILETYPE_EXT: extCopyField(streamptr2, streamptr1); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG: iegCopyRecord(streamptr2, streamptr1); break;
+    case CDI_FILETYPE_IEG: iegCopyField(streamptr2, streamptr1); break;
 #endif
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF: cdfCopyRecord(streamptr2, streamptr1); break;

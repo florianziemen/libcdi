@@ -142,5 +142,7 @@ add_library(cdilib
   ${cdi_src_files}
 #  INSTALL_HEADERS_LIST  cdi.h
 )
+find_package(HDF5 REQUIRED COMPONENTS C REQUIRED)
 
+target_link_libraries(cdilib PUBLIC netCDF::netcdf ${HDF5_LIBS})
 target_compile_definitions(cdilib PUBLIC HAVE_CONFIG_H)

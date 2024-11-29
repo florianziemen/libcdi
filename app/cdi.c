@@ -175,8 +175,8 @@ usage(void)
   fprintf(stderr, "    -E             Use ecCodes to decode/encode GRIB1 messages\n");
   fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext or ieg)\n");
   fprintf(stderr, "    -i <num>       Number of worker to decode/decompress GRIB records\n");
-  fprintf(stderr, "    -m             Move records\n");
-  fprintf(stderr, "    -r             Use CDI record API\n");
+  fprintf(stderr, "    -m             Move fields\n");
+  fprintf(stderr, "    -r             Use CDI field API\n");
   fprintf(stderr, "    -s             give short information if ofile is missing\n");
   fprintf(stderr, "    -T             Pre scan hole GRIB file to get the number of timesteps\n");
   fprintf(stderr, "    -t <table>     Parameter table name/file\n");
@@ -765,7 +765,7 @@ main(int argc, char *argv[])
   char *wTable = NULL;
   bool preScan = false;
   int Move = 0;
-  int Record = 0;
+  int Field = 0;
   int Variable = 0;
   int Debug = 0;
   int Vardis = 0;
@@ -816,7 +816,7 @@ main(int argc, char *argv[])
 	case 'N': queryNames[numQueryNames++] = strdup(optarg); break;
 	case 'n': Info = 0;  NoInfo = 1;  break;
 	case 'R': cdiDefGlobal("REGULARGRID", 1); break;
-	case 'r': Record = 1; break;
+	case 'r': Field = 1; break;
 	case 'X': Variable = 1; break;
 	case 'S': queryStepidx[numQueryStepidx++] = atoi(optarg); break;
 	case 's': Shortinfo = 1; break;
@@ -976,12 +976,12 @@ main(int argc, char *argv[])
 
             CdiDateTime vdatetime = taxisInqVdatetime(taxisID1);
 
-            if (Record)
+            if (Field)
               {
                 for (recID = 0; recID < nrecs; recID++)
                   {
-                    streamInqRecord(streamID1, &varID, &levelID);
-                    streamReadRecord(streamID1, data, &nmiss);
+                    streamInqField(streamID1, &varID, &levelID);
+                    streamReadField(streamID1, data, &nmiss);
 
                     int number = vlistInqVarNumber(vlistID1, varID);
                     int gridID = vlistInqVarGrid(vlistID1, varID);
@@ -1006,11 +1006,11 @@ main(int argc, char *argv[])
 
                     if (fname2)
                       {
-                        streamDefRecord(streamID2, varID, levelID);
+                        streamDefField(streamID2, varID, levelID);
                         if (Move)
-                          streamCopyRecord(streamID2, streamID1);
+                          streamCopyField(streamID2, streamID1);
                         else
-                          streamWriteRecord(streamID2, data, nmiss);
+                          streamWriteField(streamID2, data, nmiss);
                       }
                   }
               }

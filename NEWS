@@ -1,6 +1,26 @@
 CDI NEWS
 --------
 
+Version 2.5.0 (28 Nov 2024):
+
+   Changes:
+     * NetCDF: improved HealPIX support
+     * reset chunktype if z and t are chunked
+     * lock access to NCZARR in CDI_Threadsafe mode
+
+Version 2.4.4 (19 Sep 2024):
+
+   Fixed bugs:
+     * absolute timeaxis failed with timeunits seconds [Bug #11916]
+
+Version 2.4.2 (21 Jun 2024):
+
+   Changes:
+     * NetCDF4: improved calculation of input chunk cache size
+     * NetCDF4: switched off output chunk cache
+   Fixed bugs:
+     * cdiInqContents: missing lock of non thread-safe netCDF4/HDF5 calls (bug fix)
+
 Version 2.4.1 (21 May 2024):
 
    Changes:

@@ -203,11 +203,9 @@ cdfDefTime(stream_t *streamptr)
     }
   else
     {
-      /* define bogus value since at this time, streamDefTimestep has
-       * not been called yet
-       * but since taxis->units is not set, it clearly will not
-       * exceed the size of unitstr_, i.e. when defining the units
-       * attribute to this value, a later redefinition will not
+      /* define bogus value since at this time, streamDefTimestep has not been called yet
+       * but since taxis->units is not set, it clearly will not exceed the size of unitstr_,
+       * i.e. when defining the units attribute to this value, a later redefinition will not
        * cause a recreation of on-disk data
        */
       for (size_t i = 0; i < CDF_MAX_TIME_UNIT_STR; ++i) unitsStr_[i] = 'a';

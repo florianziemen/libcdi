@@ -309,7 +309,7 @@ grb_read_next_record(stream_t *streamptr, int recID, int memType, void *data, si
 }
 
 void
-grb_read_record(stream_t *streamptr, int memType, void *data, size_t *numMissVals)
+grb_read_field(stream_t *streamptr, int memType, void *data, size_t *numMissVals)
 {
   int tsID = streamptr->curTsID;
   int vrecID = streamptr->tsteps[tsID].curRecID;

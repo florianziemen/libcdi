@@ -8,6 +8,12 @@ bool zaxis_units_is_Pa(int zaxisID);
 void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer);
 int grbDecompress(size_t recsize, size_t *buffersize, void **gribbuffer);
 
+static inline void
+grib_check_recsize(int version, size_t recsize)
+{
+  if (recsize > 0xFFFFFFFF) Error("GRIB%d record size=%zu limit exceeded (max=%zu)", version, recsize, 0xFFFFFFFF);
+}
+
 static inline bool
 gribbyte_get_bit(int number, int bit)
 {
@@ -31,11 +37,10 @@ long grbInqContents(stream_t *streamptr);
 int fdbInqTimestep(stream_t *streamptr, int tsID);
 int grbInqTimestep(stream_t *streamptr, int tsID);
 
-int grbInqRecord(stream_t *streamptr, int *varID, int *levelID);
-void grbDefRecord(stream_t *streamptr);
-void grb_read_record(stream_t *streamptr, int memtype, void *data, size_t *numMissVals);
-void grb_write_record(stream_t *streamptr, int memtype, const void *data, size_t numMissVals);
-void grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
+void grbDefField(stream_t *streamptr);
+void grb_read_field(stream_t *streamptr, int memtype, void *data, size_t *numMissVals);
+void grb_write_field(stream_t *streamptr, int memtype, const void *data, size_t numMissVals);
+void grbCopyField(stream_t *streamptr2, stream_t *streamptr1);
 
 void grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *numMissVals);
 void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t numMissVals);

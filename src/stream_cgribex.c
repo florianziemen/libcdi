@@ -82,16 +82,6 @@ cgribexDelete(void *cgribex)
     }
 }
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-  int grib1Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **pdsp, unsigned char **gdsp, unsigned char **bmsp,
-                    unsigned char **bdsp, long *gribrecsize);
-#ifdef __cplusplus
-}
-#endif
-
 static size_t
 cgribexSection2Length(void *gribbuffer, size_t gribbuffersize)
 {
@@ -201,10 +191,10 @@ cgribexGetTimeUnit(int *isec1)
     case ISEC1_TABLE4_DAY:       timeunit = TUNIT_DAY;       break;
     default:
       if (lprint)
-	{
-	  Warning("GRIB time unit %d unsupported!", ISEC1_TimeUnit);
-	  lprint = false;
-	}
+	    {
+	      Warning("GRIB time unit %d unsupported!", ISEC1_TimeUnit);
+	      lprint = false;
+	    }
       break;
     }
   // clang-format on
@@ -237,10 +227,10 @@ cgribexGetTsteptype(int timerange)
     case 10:  tsteptype = TSTEP_INSTANT3; break;
     default:
       if (lprint)
-	{
-	  Warning("Time range indicator %d unsupported, set to 0!", timerange);
-	  lprint = false;
-	}
+    	{
+	      Warning("Time range indicator %d unsupported, set to 0!", timerange);
+	      lprint = false;
+	    }
       break;
     }
   // clang-format on
@@ -758,6 +748,8 @@ cgribexSkipRecords(int fileID)
       size_t recsize = gribGetSize(fileID);
       if (recsize == 0) Error("Skipping of %d records failed!", CDI_Skip_Records);
 
+      grib_check_recsize(0, recsize);
+
       off_t recpos = fileGetPos(fileID);
       fileSetPos(fileID, recpos, SEEK_CUR);
     }
@@ -818,6 +810,7 @@ cgribexScanTimestep1(stream_t *streamptr)
           break;
         }
 
+      grib_check_recsize(1, recsize);
       ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
       size_t readsize = recsize;
@@ -984,6 +977,7 @@ cgribexScanTimestep2(stream_t *streamptr)
           break;
         }
 
+      grib_check_recsize(1, recsize);
       ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
       size_t readsize = recsize;
@@ -1172,6 +1166,7 @@ cgribexScanTimestep(stream_t *streamptr)
               break;
             }
 
+          grib_check_recsize(1, recsize);
           ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
           size_t readsize = recsize;

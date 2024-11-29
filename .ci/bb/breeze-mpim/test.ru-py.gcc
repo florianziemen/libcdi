@@ -29,16 +29,16 @@ fi
 CC="${CC}" \
 CXX="${CXX}"
 
-make -j8
+make
 
-make -j8 check || { cat interfaces/test-suite.log tests/test-suite.log; exit 1; }
+make check || { cat interfaces/test-suite.log tests/test-suite.log; exit 1; }
 
 check_all_tests_passed interfaces/test-suite.log
 
 check_no_git_untracked
 
 # Check the installation:
-make -j8 install
+make install
 export RUBYLIB="$(find "${install_dir}" -name 'Cdi.so' -printf '%h'):${RUBYLIB-}"
 ruby ./interfaces/ruby/test.rb ./interfaces/testdata/mulval.grb
 ruby ./interfaces/ruby/test.rb ./interfaces/testdata/mulval.nc
@@ -47,7 +47,7 @@ python ./interfaces/python/test.py ./interfaces/testdata/mulval.grb
 python ./interfaces/python/test.py ./interfaces/testdata/mulval.nc
 
 # Check the uninstallation:
-make -j8 uninstall
+make uninstall
 remaining_files=$(find "${install_dir}" -type f) || {
   echo "ERROR: failed to get the list of files in the installation prefix '${install_dir}'" >&2
   exit 1

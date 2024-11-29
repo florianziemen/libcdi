@@ -671,10 +671,17 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
 #ifndef HAVE_NC4HDF5_THREADSAFE
   if (CDI_Threadsafe)
     {
-#ifndef HAVE_LIBPTHREAD
-      Error("CDI threadsafe failed, pthread support not compiled in!");
+#ifdef HAVE_LIBPTHREAD
+      if (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR)
+        streamptr->lockIO = true;
+#else
+      static bool lwarn = true;
+      if (lwarn)
+        {
+          lwarn = false;
+          Warning("CDI threadsafe failed, pthread support not compiled in!");
+        }
 #endif
-      if (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C) streamptr->lockIO = true;
     }
 #endif
 
@@ -706,6 +713,42 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
   return streamID;
 }
 
+int
+streamOpenNCMem(int ncidp, char mode)
+{
+  cdiInitialize();
+  stream_t *streamptr = stream_new_entry(CDI_UNDEFID);
+  int streamID = CDI_ESYSTEM;
+
+#ifdef HAVE_NETCDF4
+  streamID = streamptr->self;
+  if (streamID < 0) return CDI_ELIMIT;
+
+  size_t max_file_path_length = 128;
+  size_t actual_length = 0;
+  char *filename = (char *) malloc(sizeof(char) * max_file_path_length);
+
+  nc_inq_path(ncidp, &actual_length, filename);
+
+  streamptr->filename = strdup(filename);
+  streamptr->filemode = mode;
+  streamptr->filetype = CDI_FILETYPE_NC4;
+  streamptr->fileID = ncidp;
+
+  if (mode == 'r')
+    {
+      int status = stream_create_vlist(streamptr, NULL);
+      if (status < 0)
+        {
+          streamID = status;
+          if (streamptr->record) Free(streamptr->record);
+          reshRemove(streamptr->self, &streamOps);
+        }
+    }
+#endif
+
+  return streamID;
+}
 static int
 streamOpen(const char *filename, const char *filemode, int filetype)
 {
@@ -753,7 +796,7 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
   if (str_is_equal(filemode, "r")) cdiVlistMakeImmutable(streamptr->vlistID);
 
   {
-    void (*streamCloseDelegate)(stream_t * streamptr, int recordBufIsToBeDeleted)
+    void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
         = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
 
     streamCloseDelegate(streamptr, 0);
@@ -1222,14 +1265,10 @@ deallocate_sleveltable_t(sleveltable_t *entry)
 }
 
 static void
-streamDestroy(stream_t *streamptr)
+streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted))
 {
+
   xassert(streamptr);
-  int vlistID = streamptr->vlistID;
-
-  void (*streamCloseDelegate)(stream_t * streamptr, int recordBufIsToBeDeleted)
-      = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
-
   if (streamptr->filetype != CDI_FILETYPE_UNDEF) streamCloseDelegate(streamptr, 1);
 
   if (streamptr->record)
@@ -1285,6 +1324,7 @@ streamDestroy(stream_t *streamptr)
     }
 #endif
 
+  int vlistID = streamptr->vlistID;
   if (vlistID != -1)
     {
       int taxisID = (streamptr->filemode != 'w') ? vlistInqTaxis(vlistID) : -1;
@@ -1297,6 +1337,16 @@ streamDestroy(stream_t *streamptr)
   if (streamptr->jobManager) AsyncWorker_finalize((AsyncManager *) streamptr->jobManager);
 
   Free(streamptr);
+}
+
+
+static void
+streamDestroy(stream_t *streamptr)
+{
+  void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
+      = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
+
+  streamDestroyViaDelegate(streamptr, streamCloseDelegate);
 }
 
 static void
@@ -1390,7 +1440,7 @@ streamSync(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  void (*myStreamSync_)(stream_t * streamptr) = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_STREAM_SYNC).func;
+  void (*myStreamSync_)(stream_t *streamptr) = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_STREAM_SYNC).func;
   myStreamSync_(streamptr);
 }
 
@@ -1424,7 +1474,7 @@ cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
       /* usually points to cdfDefTimestep in serial mode but
        * to cdiPioCdfDefTimestep on servers and to a null-op on
        * clients in client/server mode */
-      void (*myCdfDefTimestep)(stream_t * streamptr, int tsID, size_t)
+      void (*myCdfDefTimestep)(stream_t *streamptr, int tsID, size_t)
           = (void (*)(stream_t *, int, size_t)) namespaceSwitchGet(NSSWITCH_CDF_DEF_TIMESTEP).func;
       myCdfDefTimestep(streamptr, tsID, 1);
     }
@@ -1462,7 +1512,7 @@ streamDefTimestep(int streamID, int tsID)
 
   if (streamptr->lockIO) CDI_IO_LOCK();
 
-  int (*myStreamDefTimestep_)(stream_t * streamptr, int tsID)
+  int (*myStreamDefTimestep_)(stream_t *streamptr, int tsID)
       = (int (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_DEF_TIMESTEP_).func;
   int status = myStreamDefTimestep_(streamptr, tsID);
 
@@ -1763,7 +1813,7 @@ streamTxCode(void *s)
 void
 cdiStreamSetupVlist(stream_t *s, int vlistID)
 {
-  void (*myStreamSetupVlist)(stream_t * s, int vlistID)
+  void (*myStreamSetupVlist)(stream_t *s, int vlistID)
       = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_SETUP_VLIST).func;
   myStreamSetupVlist(s, vlistID);
 }
@@ -1821,7 +1871,7 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
             /* calls cdfDefCoordinateVars in serial mode but
              * cdiPioClientStreamNOP (i.e. nothing) on client ranks
              * and cdiPioServerCdfDefVars on server ranks in parallel mode*/
-            void (*myCdfDefVars)(stream_t * streamptr) = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
+            void (*myCdfDefVars)(stream_t *streamptr) = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
             myCdfDefVars(streamptr);
           }
           break;
@@ -1987,6 +2037,64 @@ streamUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int
   streamptr->have_missval = intBuffer[9];
   struct streamAssoc retval = { streamID, intBuffer[3] };
   return retval;
+}
+
+
+/* *
+ * This function does not really close the memio,
+ * this has to be done outside cdi to access the memory buffer*/
+void
+freePtrAfterNCMem(stream_t *streamptr, int recordBufIsToBeDeleted)
+{
+  int fileID = streamptr->fileID;
+
+  if (fileID == CDI_UNDEFID)
+    {
+      Warning("File %s not open!", streamptr->filename);
+      return;
+    }
+
+  if (streamptr->ntsteps == 0 && streamptr->tsteps != NULL)
+    {
+      if (streamptr->tsteps[0].records)
+        {
+          Free(streamptr->tsteps[0].records);
+          streamptr->tsteps[0].records = NULL;
+        }
+      if (streamptr->tsteps[0].recIDs)
+        {
+          Free(streamptr->tsteps[0].recIDs);
+          streamptr->tsteps[0].recIDs = NULL;
+        }
+    }
+}
+
+
+void
+streamCloseNCMem(int streamID)
+{
+  stream_t *streamptr = stream_to_pointer(streamID);
+
+  bool lockIO = streamptr->lockIO;
+  if (lockIO) CDI_IO_LOCK();
+
+  if (CDI_Debug) Message("streamID = %d filename = %s", streamID, streamptr->filename);
+  streamDestroyViaDelegate(streamptr,freePtrAfterNCMem);
+  reshRemove(streamID, &streamOps);
+  if (CDI_Debug) Message("Removed stream %d from stream list", streamID);
+
+  if (lockIO) CDI_IO_UNLOCK();
+}
+
+int
+streamOpenReadNCMem(int ncidp)
+{
+  return streamOpenNCMem(ncidp, 'r');
+}
+int
+streamOpenWriteNCMem(int ncidp)
+{
+  return streamOpenNCMem(ncidp, 'w');
 }
 
 /*

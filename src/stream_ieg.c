@@ -90,7 +90,7 @@ ieg_read_recordDP(stream_t *streamptr, double *data, size_t *numMissVals)
 }
 
 void
-ieg_read_record(stream_t *streamptr, int memtype, void *data, size_t *numMissVals)
+ieg_read_field(stream_t *streamptr, int memtype, void *data, size_t *numMissVals)
 {
   if (memtype == MEMTYPE_DOUBLE)
     ieg_read_recordDP(streamptr, (double *) data, numMissVals);
@@ -418,13 +418,13 @@ iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 }
 
 void
-iegCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
+iegCopyField(stream_t *streamptr2, stream_t *streamptr1)
 {
   streamFCopyRecord(streamptr2, streamptr1, "IEG");
 }
 
 void
-iegDefRecord(stream_t *streamptr)
+iegDefField(stream_t *streamptr)
 {
   Record *record = streamptr->record;
 
@@ -507,7 +507,7 @@ ieg_write_recordDP(stream_t *streamptr, const double *data)
 }
 
 void
-ieg_write_record(stream_t *streamptr, int memtype, const void *data)
+ieg_write_field(stream_t *streamptr, int memtype, const void *data)
 {
   if (memtype == MEMTYPE_DOUBLE)
     ieg_write_recordDP(streamptr, (const double *) data);
