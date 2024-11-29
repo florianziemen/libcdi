@@ -117,15 +117,3 @@ test.icon-pio.intel-classic:
 
 test.icon.gcc:
   extends: .common-levante
-
-test.all.clang:
-  extends: .common-breeze
-
-test.all.nag:
-  extends: .common-breeze
-
-test.all.nv:
-  extends: .common-breeze
-
-test.ru-py.gcc:
-  extends: .common-breeze
