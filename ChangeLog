@@ -1,3 +1,7 @@
+2024-12-23  Uwe Schulzweida
+
+	* NetCDF4: improved calculation of input chunk cache size for numStep>1 and zSize>1
+
 2024-11-28  Uwe Schulzweida
 
         * using CGRIBEX library version 2.3.1

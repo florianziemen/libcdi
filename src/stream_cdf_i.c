@@ -115,6 +115,7 @@ typedef struct
   size_t gridSize;
   size_t xSize;
   size_t ySize;
+  size_t zSize;
   int nattsNC;
   int natts;
   int *atts;
@@ -649,6 +650,7 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
       ncvar->gridSize = 0;
       ncvar->xSize = 0;
       ncvar->ySize = 0;
+      ncvar->zSize = 0;
       ncvar->nattsNC = 0;
       ncvar->natts = 0;
       ncvar->atts = NULL;
@@ -2115,7 +2117,7 @@ cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridva
 {
   if (CDI_Netcdf_Lazy_Grid_Load)
     {
-      *valsGet = (struct xyValGet){
+      *valsGet = (struct xyValGet) {
         .scalefactor = ncvar->scalefactor,
         .addoffset = ncvar->addoffset,
         .start = { start[0], start[1], start[2] },
@@ -3261,12 +3263,12 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 	          if      (ncvars[zvarid].xtype == NC_FLOAT) zdatatype = CDI_DATATYPE_FLT32;
 	          else if (ncvars[zvarid].xtype == NC_INT)   zdatatype = CDI_DATATYPE_INT32;
 	          else if (ncvars[zvarid].xtype == NC_SHORT) zdatatype = CDI_DATATYPE_INT16;
-                // clang-format on
-                // don't change the name !!!
-                /*
-                  if ((len = strlen(pname)) > 2)
-                  if (pname[len-2] == '_' && isdigit((int) pname[len-1])) pname[len-2] = 0;
-                */
+              // clang-format on
+              // don't change the name !!!
+              /*
+                if ((len = strlen(pname)) > 2)
+                if (pname[len-2] == '_' && isdigit((int) pname[len-1])) pname[len-2] = 0;
+              */
 #ifndef USE_MPI
               if (zaxisType == ZAXIS_CHAR && ncvars[zvarid].ndims == 2)
                 {
@@ -3339,6 +3341,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 
           ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (const char **) zcvals, zclength, lbounds, ubounds,
                                        (int) vctsize, vct, pname, plongname, punits, zdatatype, 1, 0, -1);
+          ncvar->zSize = zsize;
 
           int zaxisID = ncvar->zaxisID;
 
@@ -3559,20 +3562,21 @@ size_of_dim_chunks(size_t n, size_t c)
 static size_t
 calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
 {
-  size_t nx = 0, ny = 0;
+  size_t nx = 0, ny = 0, nz = 0;
   size_t cx = 0, cy = 0, cz = 0;
   for (int i = 0; i < ncvar->ndims; i++)
     {
       int dimtype = ncvar->dimtypes[i];
       // clang-format off
-      if      (dimtype == Z_AXIS) { cz = ncvar->chunks[i]; }
+      if      (dimtype == Z_AXIS) { cz = ncvar->chunks[i]; nz = ncvar->zSize; }
       else if (dimtype == Y_AXIS) { cy = ncvar->chunks[i]; ny = ncvar->ySize; }
       else if (dimtype == X_AXIS) { cx = ncvar->chunks[i]; nx = ncvar->xSize; }
       // clang-format on
     }
 
-  size_t chunkCacheSize = (ncvar->dimids[0] == timedimid) ? ncvar->chunks[0] : 1;
-  if (cz > 0) chunkCacheSize *= cz;
+  size_t numSteps = (ncvar->dimids[0] == timedimid) ? ncvar->chunks[0] : 1;
+  size_t chunkCacheSize = numSteps;
+  if (nz > 0 && cz > 0) chunkCacheSize *= (numSteps == 1) ? cz : size_of_dim_chunks(nz, cz);
 
   if (chunkCacheSize == 1) return 0;  // no chunk cache needed because the full field is read
 
