@@ -703,18 +703,40 @@ static const size_t chunkSizeMin = 262144;    // 256k
 static const size_t chunkSizeLim = 16777216;  // 16m
 
 size_t
+auto_chunksize_y(size_t gridsize, size_t xsize, size_t ysize)
+{
+  size_t gridChunkSize = calc_chunksize(chunkSizeLim, gridsize);
+  size_t yChunkSize = gridChunkSize / xsize;
+  size_t numChunks = (ysize % yChunkSize == 0) ? (ysize / yChunkSize) : (ysize / yChunkSize) + 1;
+  size_t modChunk = ysize % numChunks;
+  size_t maxChunks = numChunks * 2;
+  for (size_t i = numChunks; i < maxChunks; ++i)
+    {
+      size_t imod = ysize % i;
+      if (imod == 0 || imod > modChunk)
+        {
+          numChunks = i;
+          modChunk = imod;
+          if (modChunk == 0) break;
+        }
+    }
+  yChunkSize = ysize / numChunks;
+  return yChunkSize;
+}
+
+size_t
 calc_chunksize_y(int chunkType, size_t gridsize, size_t xsize, size_t ysize)
 {
   if (chunkType == CDI_CHUNK_AUTO)
-    return (gridsize <= chunkSizeMin) ? ysize : chunkSizeMin / xsize;
+    return auto_chunksize_y(gridsize, xsize, ysize);
   else
     return (chunkType == CDI_CHUNK_LINES) ? 1 : ysize;
 }
 
 size_t
-calc_chunksize_x(int chunkType, long chunkSize, size_t xsize, bool yIsUndefined)
+calc_chunksize_x(int chunkType, long chunkSize, size_t xsize, bool isReg2dGrid)
 {
-  if (chunkType == CDI_CHUNK_AUTO && yIsUndefined)
+  if (chunkType == CDI_CHUNK_AUTO && !isReg2dGrid)
     return (chunkSize > 0 && (size_t) chunkSize < xsize) ? (size_t) chunkSize : ((xsize <= chunkSizeMin) ? xsize : chunkSizeMin);
   else
     return calc_chunksize(chunkSizeLim, xsize);
@@ -753,9 +775,10 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
   cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, &chunkSize);
   if (chunkSize > 0 && yid == CDI_UNDEFID) chunkType = CDI_CHUNK_AUTO;
 
-  if (chunkType == CDI_CHUNK_GRID && gridsize > ChunkSizeLim)
+  bool isReg2dGrid = (yid != CDI_UNDEFID && xid != CDI_UNDEFID);
+  if (chunkType == CDI_CHUNK_GRID && gridsize > ChunkSizeLim && isReg2dGrid)
     {
-      if (CDI_Debug) fprintf(stderr, "gridsize > %u, changed chunkType to CDI_CHUNK_LINES!\n", ChunkSizeLim);
+      if (CDI_Debug) fprintf(stderr, "gridsize > %u, changed chunkType to CDI_CHUNK_AUTO!\n", ChunkSizeLim);
       chunkType = CDI_CHUNK_AUTO;
     }
 
@@ -776,7 +799,7 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
         }
       else if (dimorder[id] == 1 && xid != CDI_UNDEFID)
         {
-          chunks[ndims] = calc_chunksize_x(chunkType, chunkSize, xsize, (yid == CDI_UNDEFID));
+          chunks[ndims] = calc_chunksize_x(chunkType, chunkSize, xsize, isReg2dGrid);
           dims[ndims] = xid;
           ndims++;
         }
