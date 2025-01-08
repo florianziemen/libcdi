@@ -13,7 +13,7 @@ void cdf_close(int ncid);
 
 void cdf_redef(int ncid);
 void cdf_enddef(int ncid, int streamID);
-void cdf__enddef(int ncid, int streamID, const size_t hdr_pad);
+void cdf__enddef(int ncid, int streamID, size_t hdr_pad);
 void cdf_sync(int ncid);
 
 void cdf_inq(int ncid, int *ndimsp, int *nvarsp, int *ngattsp, int *unlimdimidp);

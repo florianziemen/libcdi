@@ -32,7 +32,6 @@ cdf__create(const char *path, int cmode, int *ncidp)
 {
   int status = -1;
   size_t chunksizehint = 0;
-
   size_t initialsz = 0;
 
 #if defined(__SX__) || defined(ES)
@@ -128,11 +127,11 @@ cdf_enddef(int ncid, int streamID)
 }
 
 void
-cdf__enddef(int ncid, int streamID, const size_t hdr_pad)
+cdf__enddef(int ncid, int streamID, size_t hdr_pad)
 {
-  const size_t v_align = 4UL;    // [B] Alignment of beginning of data section for fixed variables
-  const size_t v_minfree = 0UL;  // [B] Pad at end of data section for fixed size variables
-  const size_t r_align = 4UL;    // [B] Alignment of beginning of data section for record variables
+  size_t v_align = 4UL;    // [B] Alignment of beginning of data section for fixed variables
+  size_t v_minfree = 0UL;  // [B] Pad at end of data section for fixed size variables
+  size_t r_align = 4UL;    // [B] Alignment of beginning of data section for record variables
 
   // nc_enddef(ncid) is equivalent to nc__enddef(ncid, 0, 4, 0, 4)
   cdi_nc__enddef_funcp my_nc__enddef = (cdi_nc__enddef_funcp) namespaceSwitchGet(NSSWITCH_NC_ENDDEF).func;
@@ -163,7 +162,7 @@ cdf_def_dim(int ncid, const char *name, size_t len, int *dimidp)
 {
   int status = nc_def_dim(ncid, name, len, dimidp);
 
-  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  name=%s  len=%d", ncid, name, len);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  name=%s  len=%zu", ncid, name, len);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
@@ -183,7 +182,7 @@ cdf_inq_dim(int ncid, int dimid, char *name, size_t *lengthp)
 {
   int status = nc_inq_dim(ncid, dimid, name, lengthp);
 
-  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  dimid=%d  length=%d  name=%s", ncid, dimid, *lengthp, name);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  dimid=%d  length=%zu  name=%s", ncid, dimid, *lengthp, name);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
@@ -203,7 +202,7 @@ cdf_inq_dimlen(int ncid, int dimid, size_t *lengthp)
 {
   int status = nc_inq_dimlen(ncid, dimid, lengthp);
 
-  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  dimid=%d  length=%d", ncid, dimid, *lengthp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  dimid=%d  length=%zu", ncid, dimid, *lengthp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
@@ -767,7 +766,7 @@ cdf_inq_attlen(int ncid, int varid, const char *name, size_t *lenp)
 {
   int status = nc_inq_attlen(ncid, varid, name, lenp);
 
-  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  len=%d", ncid, varid, name, *lenp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  len=%zu", ncid, varid, name, *lenp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
