@@ -726,14 +726,14 @@ scan_hybrid_formulaterms(int ncid, int ncfvarid, int *avarid, int *bvarid, int *
       char *tagname = pstring;
       while (!isspace((int) *pstring) && *pstring != 0) pstring++;
       if (*pstring == 0) lstop = true;
-      *pstring++ = 0;
+      *(pstring++) = 0;
 
       while (isspace((int) *pstring)) pstring++;
       if (*pstring == 0) break;
       char *varname = pstring;
       while (!isspace((int) *pstring) && *pstring != 0) pstring++;
       if (*pstring == 0) lstop = true;
-      *pstring++ = 0;
+      *(pstring++) = 0;
 
       int dimvarid;
       int status_nc = nc_inq_varid(ncid, varname, &dimvarid);
@@ -1033,11 +1033,11 @@ cdf_get_cell_varid(char *attstring, int ncid)
   while (isspace((int) *pstring)) pstring++;
   char *cell_measures = pstring;
   while (isalnum((int) *pstring)) pstring++;
-  *pstring++ = 0;
+  *(pstring++) = 0;
   while (isspace((int) *pstring)) pstring++;
   char *cell_var = pstring;
   while (!isspace((int) *pstring) && *pstring != 0) pstring++;
-  *pstring++ = 0;
+  *(pstring++) = 0;
   /*
     printf("cell_measures >%s<\n", cell_measures);
     printf("cell_var >%s<\n", cell_var);
@@ -1092,7 +1092,7 @@ read_coordinates_vars(int ncid, char *attstring, ncvar_t *ncvar, ncvar_t *ncvars
       while (!isspace((int) *attstring) && *attstring != 0) attstring++;
       if (*attstring == 0) lstop = true;
       if (*(attstring - 1) == ',') *(attstring - 1) = 0;
-      *attstring++ = 0;
+      *(attstring++) = 0;
 
       int dimvarid;
       int status = nc_inq_varid(ncid, varname, &dimvarid);
@@ -1118,7 +1118,7 @@ read_coordinates_vars(int ncid, char *attstring, ncvar_t *ncvar, ncvar_t *ncvars
 
           if (k == *nchecked_vars)
             {
-              if (*nchecked_vars < max_check_vars) checked_vars[*nchecked_vars++] = strdup(varname);
+              if (*nchecked_vars < max_check_vars) checked_vars[(*nchecked_vars)++] = strdup(varname);
               Warning("%s - >%s<", nc_strerror(status), varname);
             }
         }
@@ -1136,7 +1136,7 @@ read_auxiliary_vars(int ncid, char *attstring, ncvar_t *ncvar, ncvar_t *ncvars)
       char *varname = attstring;
       while (!isspace((int) *attstring) && *attstring != 0) attstring++;
       if (*attstring == 0) lstop = true;
-      *attstring++ = 0;
+      *(attstring++) = 0;
 
       int dimvarid;
       int status = nc_inq_varid(ncid, varname, &dimvarid);
@@ -2117,7 +2117,7 @@ cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridva
 {
   if (CDI_Netcdf_Lazy_Grid_Load)
     {
-      *valsGet = (struct xyValGet) {
+      *valsGet = (struct xyValGet){
         .scalefactor = ncvar->scalefactor,
         .addoffset = ncvar->addoffset,
         .start = { start[0], start[1], start[2] },
@@ -3263,12 +3263,12 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 	          if      (ncvars[zvarid].xtype == NC_FLOAT) zdatatype = CDI_DATATYPE_FLT32;
 	          else if (ncvars[zvarid].xtype == NC_INT)   zdatatype = CDI_DATATYPE_INT32;
 	          else if (ncvars[zvarid].xtype == NC_SHORT) zdatatype = CDI_DATATYPE_INT16;
-              // clang-format on
-              // don't change the name !!!
-              /*
-                if ((len = strlen(pname)) > 2)
-                if (pname[len-2] == '_' && isdigit((int) pname[len-1])) pname[len-2] = 0;
-              */
+                // clang-format on
+                // don't change the name !!!
+                /*
+                  if ((len = strlen(pname)) > 2)
+                  if (pname[len-2] == '_' && isdigit((int) pname[len-1])) pname[len-2] = 0;
+                */
 #ifndef USE_MPI
               if (zaxisType == ZAXIS_CHAR && ncvars[zvarid].ndims == 2)
                 {

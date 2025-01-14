@@ -2,6 +2,10 @@
 
 	* Version 2.5.1 released
 
+2025-01-14  Uwe Schulzweida
+
+	* NetCDF: Fix error in scanning coordinates attribute
+
 2024-12-28  Uwe Schulzweida
 
 	* NetCDF4: improved calculation of output chunk size
