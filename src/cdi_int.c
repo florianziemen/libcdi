@@ -564,6 +564,17 @@ cdiBaseFiletype(int filetype)
   return filetype;
 }
 
+void
+stream_def_accesstype(stream_t *s, int type)
+{
+  if (s->accesstype == CDI_UNDEFID)
+    {
+      s->accesstype = type;
+    }
+  else if (s->accesstype != type)
+    Error("Changing access type from %s not allowed!", s->accesstype == TYPE_REC ? "REC to VAR" : "VAR to REC");
+}
+
 /*
  * Local Variables:
  * c-file-style: "Java"

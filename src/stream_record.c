@@ -104,7 +104,7 @@ streamInqField(int streamID, int *varID, int *levelID)
 
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  cdiDefAccesstype(streamID, TYPE_REC);
+  stream_def_accesstype(streamptr, TYPE_REC);
 
   if (!streamptr->record) cdiInitRecord(streamptr);
 

@@ -467,8 +467,7 @@ void recordInitEntry(record_t *record);
 
 void cdiCheckZaxis(int zaxisID);
 
-void cdiDefAccesstype(int streamID, int type);
-int cdiInqAccesstype(int streamID);
+void stream_def_accesstype(stream_t *s, int type);
 
 int getByteswap(int byteorder);
 
