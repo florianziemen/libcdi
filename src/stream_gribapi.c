@@ -28,12 +28,12 @@ static const var_tile_t dummy_tiles = { 0, -1, -1, -1, -1, -1 };
 
 typedef struct
 {
+  size_t gridsize;
   int param;
   int level1;
   int level2;
-  int ltype;
-  int tsteptype;
-  size_t gridsize;
+  short ltype;
+  short tsteptype;
   char name[32];
   VarScanKeys scanKeys;
   var_tile_t tiles;
@@ -721,7 +721,7 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   record->param = param;
   record->ilevel = level1;
   record->ilevel2 = level2;
-  record->ltype = leveltype1;
+  record->ltype = (short) leveltype1;
   record->tsteptype = (short) tsteptype;
   record->gridsize = gribapiGetGridsize(gh);
   record->scanKeys = *scanKeys;
@@ -910,8 +910,8 @@ gribapiVarCompare(const compvar2_t *compVar, const record_t *record, int flag)
   compVar0.param = record->param;
   compVar0.level1 = record->ilevel;
   compVar0.level2 = record->ilevel2;
-  compVar0.ltype = record->ltype;
-  compVar0.tsteptype = record->tsteptype;
+  compVar0.ltype = (short) record->ltype;
+  compVar0.tsteptype = (short) record->tsteptype;
   compVar0.gridsize = record->gridsize;
   memcpy(compVar0.name, record->varname, sizeof(compVar->name));
 
@@ -2749,7 +2749,7 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
   }
   long grib_ltype2 = (ltype != ltype2 && ltype2 != -1) ? ltype2 : grib_ltype;
 
-  void (*defLevel)(grib_handle * gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level, double dlevel1,
+  void (*defLevel)(grib_handle *gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level, double dlevel1,
                    double dlevel2)
       = (editionNumber <= 1) ? grib1DefLevel : grib2DefLevel;
 
@@ -3176,7 +3176,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
               // printf(".\n");
             }
         }  // end if (scanModeOUT==96)
-    }      // end if (scanModeIN==64)
+    }  // end if (scanModeIN==64)
 
   if (scanModeIN
       == 00)  // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
@@ -3206,7 +3206,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
               for (size_t i = 0; i < iDim; i++) data[j + i * jDim] = dataCopy[i + jInv * iDim];  // source data has -j
             }
         }  // end if (scanModeOUT==96)
-    }      // end if (scanModeIN==00)
+    }  // end if (scanModeIN==00)
 
   if (scanModeIN
       == 96)  // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
@@ -3239,7 +3239,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
                 data[i + jXiDim] = dataCopy[jInv + i * jDim];  // target data has -j
             }
         }  // end if (scanModeOUT==00)
-    }      // end if (scanModeIN==96)
+    }  // end if (scanModeIN==96)
 
   if (cdiDebugExt >= 100)
     {

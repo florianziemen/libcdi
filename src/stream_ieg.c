@@ -541,7 +541,7 @@ iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, si
   record->param = param;
   record->ilevel = level1;
   record->ilevel2 = level2;
-  record->ltype = IEG_P_LevelType(pdb);
+  record->ltype = (short) IEG_P_LevelType(pdb);
 
   int gridtype = (IEG_G_GridType(gdb) == 0)    ? GRID_LONLAT
                  : (IEG_G_GridType(gdb) == 10) ? GRID_PROJECTION

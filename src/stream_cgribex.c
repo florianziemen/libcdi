@@ -32,12 +32,12 @@ typedef struct
 
 typedef struct
 {
+  size_t gridsize;
   int param;
   int level1;
   int level2;
-  int ltype;
-  int tsteptype;
-  size_t gridsize;
+  short ltype;
+  short tsteptype;
 } compvar_t;
 
 typedef struct
@@ -562,7 +562,7 @@ cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t 
   record->param = param;
   record->ilevel = level1;
   record->ilevel2 = level2;
-  record->ltype = leveltype;
+  record->ltype = (short) leveltype;
   record->tsteptype = (short) tsteptype;
   record->gridsize = cgribexGetGridsize(cgribexp->sec4);
 
@@ -717,8 +717,8 @@ cgribexVarSet(int param, int level1, int level2, int leveltype, int trange, size
   compVar.param = param;
   compVar.level1 = level1;
   compVar.level2 = level2;
-  compVar.ltype = leveltype;
-  compVar.tsteptype = tsteptype;
+  compVar.ltype = (short) leveltype;
+  compVar.tsteptype = (short) tsteptype;
   compVar.gridsize = gridsize;
 
   return compVar;

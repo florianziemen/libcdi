@@ -407,9 +407,7 @@ streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  int filetype = streamptr->filetype;
-
-  if (filetype == CDI_FILETYPE_GRB)
+  if (streamptr->filetype == CDI_FILETYPE_GRB)
     {
       int tsID = streamptr->curTsID;
       int vrecID = streamptr->tsteps[tsID].curRecID;

@@ -180,11 +180,11 @@ typedef struct
   int param;
   int ilevel;
   int ilevel2;
-  int ltype;
+  short ltype;
   short tsteptype;
   short varID;
-  int levelID;
   short used;
+  int levelID;
   char varname[32];  // needed for grib decoding with GRIB_API
   VarScanKeys scanKeys;
   var_tile_t tiles;  // tile-related meta-data, currently for GRIB-API only.
