@@ -14,7 +14,7 @@
 #include "stream_grb.h"
 #include "stream_cgribex.h"
 
-#ifdef HAVE_LIBCGRIBEX
+#if defined(HAVE_LIBCGRIBEX) && defined(HAVE_LIBGRIB)
 
 #include "cgribex.h"
 

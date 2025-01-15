@@ -28,9 +28,13 @@ recordInitEntry(record_t *record)
   record->tsteptype = CDI_UNDEFID;
   record->varID = CDI_UNDEFID;
   record->levelID = CDI_UNDEFID;
-  memset(record->varname, 0, sizeof(record->varname));
+#ifdef HAVE_LIBGRIB
   varScanKeysInit(&record->scanKeys);
   memset(&record->tiles, 0, sizeof(record->tiles));
+#ifdef HAVE_LIBGRIB_API
+  memset(record->varname, 0, sizeof(record->varname));
+#endif
+#endif
 #ifdef HAVE_LIBFDB5
   record->fdbItemIndex = -1;
 #endif

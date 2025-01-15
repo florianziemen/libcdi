@@ -176,18 +176,22 @@ typedef struct
   off_t position;
   size_t size;
   size_t gridsize;
-  int zip;
   int param;
   int ilevel;
   int ilevel2;
-  short ltype;
-  short tsteptype;
+  int levelID;
   short varID;
   short used;
-  int levelID;
-  char varname[32];  // needed for grib decoding with GRIB_API
+  short ltype;
+  short tsteptype;
+#ifdef HAVE_LIBGRIB
+  int zip;
   VarScanKeys scanKeys;
   var_tile_t tiles;  // tile-related meta-data, currently for GRIB-API only.
+#ifdef HAVE_LIBGRIB_API
+  char varname[32];
+#endif
+#endif
 #ifdef HAVE_LIBFDB5
   int fdbItemIndex;
 #endif

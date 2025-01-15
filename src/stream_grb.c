@@ -256,6 +256,7 @@ grbDefField(stream_t *streamptr)
   UNUSED(streamptr);
 }
 
+#ifdef HAVE_LIBGRIB
 static long
 grbScanTimestep1(stream_t *streamptr)
 {
@@ -318,6 +319,7 @@ grbScanTimestep(stream_t *streamptr)
 
   return status;
 }
+#endif
 
 #ifdef HAVE_LIBGRIB
 long
@@ -345,7 +347,6 @@ fdbInqContents(stream_t *streamptr)
   return -1;
 #endif
 }
-#endif
 #endif
 
 int
@@ -399,30 +400,6 @@ grbInqTimestep(stream_t *streamptr, int tsID)
     }
 
   return nrecs;
-}
-
-// used in CDO!!!
-void
-streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
-{
-  stream_t *streamptr = stream_to_pointer(streamID);
-
-  if (streamptr->filetype == CDI_FILETYPE_GRB)
-    {
-      int tsID = streamptr->curTsID;
-      int vrecID = streamptr->tsteps[tsID].curRecID;
-      int recID = streamptr->tsteps[tsID].recIDs[vrecID];
-      off_t recpos = streamptr->tsteps[tsID].records[recID].position;
-      int zip = streamptr->tsteps[tsID].records[recID].zip;
-
-      void *gribbuffer = streamptr->record->buffer;
-      size_t gribbuffersize = streamptr->record->buffersize;
-
-      if (zip > 0)
-        Error("Compressed GRIB records unsupported!");
-      else
-        grib_info_for_grads(recpos, (long) gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum, bignum);
-    }
 }
 
 int
@@ -494,6 +471,35 @@ grbGetGridtype(int *gridID, SizeType gridsize, bool *gridIsRotated, bool *gridIs
     }
 
   return gridtype;
+}
+#endif
+
+// used in CDO!!!
+void
+streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
+{
+  stream_t *streamptr = stream_to_pointer(streamID);
+
+  if (streamptr->filetype == CDI_FILETYPE_GRB)
+    {
+#ifdef HAVE_LIBGRIB
+      int tsID = streamptr->curTsID;
+      int vrecID = streamptr->tsteps[tsID].curRecID;
+      int recID = streamptr->tsteps[tsID].recIDs[vrecID];
+      off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+      int zip = streamptr->tsteps[tsID].records[recID].zip;
+
+      void *gribbuffer = streamptr->record->buffer;
+      size_t gribbuffersize = streamptr->record->buffersize;
+
+      if (zip > 0)
+        Error("Compressed GRIB records unsupported!");
+      else
+        grib_info_for_grads(recpos, (long) gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum, bignum);
+#else
+      Error("GRIB support unavailable!");
+#endif
+    }
 }
 
 /*
