@@ -206,8 +206,11 @@ streamDefField(int streamID, int varID, int levelID)
 void
 streamCopyField(int streamID2, int streamID1)
 {
-  stream_t *streamptr1 = stream_to_pointer(streamID1), *streamptr2 = stream_to_pointer(streamID2);
-  int filetype1 = streamptr1->filetype, filetype2 = streamptr2->filetype, filetype = CDI_FILETYPE_UNDEF;
+  stream_t *streamptr1 = stream_to_pointer(streamID1);
+  stream_t *streamptr2 = stream_to_pointer(streamID2);
+  int filetype1 = streamptr1->filetype;
+  int filetype2 = streamptr2->filetype;
+  int filetype = CDI_FILETYPE_UNDEF;
 
   if (cdiBaseFiletype(filetype1) == cdiBaseFiletype(filetype2)) filetype = filetype2;
 
@@ -229,7 +232,7 @@ streamCopyField(int streamID2, int streamID1)
     case CDI_FILETYPE_IEG: iegCopyField(streamptr2, streamptr1); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdfCopyRecord(streamptr2, streamptr1); break;
+    case CDI_FILETYPE_NETCDF: cdfCopyField(streamptr2, streamptr1); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(filetype));
     }
