@@ -457,6 +457,10 @@ void    streamReadField(int streamID, double data[], SizeType *numMissVals);
 void    streamReadFieldF(int streamID, float data[], SizeType *numMissVals);
 void    streamCopyField(int streamIDdest, int streamIDsrc);
 
+void *  stream_get_pointer(int streamID);
+void *  stream_get_vlist_pointer(int streamID);
+void    pstreamInqField(void *streamPtr, int *varID, int *levelID);
+
 void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);
 
 
@@ -694,6 +698,8 @@ int     vlistFindVar(int vlistID, int fvarID);
 int     vlistFindLevel(int vlistID, int fvarID, int flevelID);
 int     vlistMergedVar(int vlistID, int varID);
 int     vlistMergedLevel(int vlistID, int varID, int levelID);
+
+int     pvlistInqFlag(void *vlistPtr, int varID, int levelID);
 
 //      cdiClearAdditionalKeys: Clear the list of additional GRIB keys
 void    cdiClearAdditionalKeys(void);

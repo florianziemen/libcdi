@@ -111,38 +111,48 @@ cdiInitRecord(stream_t *streamptr)
 }
 
 void
-streamInqField(int streamID, int *varID, int *levelID)
+stream_inq_field(stream_t *streamPtr, int *varID, int *levelID)
 {
   check_parg(varID);
   check_parg(levelID);
 
-  stream_t *streamptr = stream_to_pointer(streamID);
+  stream_def_accesstype(streamPtr, TYPE_REC);
 
-  stream_def_accesstype(streamptr, TYPE_REC);
+  if (!streamPtr->record) cdiInitRecord(streamPtr);
 
-  if (!streamptr->record) cdiInitRecord(streamptr);
+  const int tsID = streamPtr->curTsID;
+  tsteps_t *tstep = &(streamPtr->tsteps[tsID]);
 
-  int tsID = streamptr->curTsID;
-  int rindex = streamptr->tsteps[tsID].curRecID + 1;
+  int rindex = tstep->curRecID + 1;
+  if (rindex >= tstep->nrecs) Error("record %d not available at timestep %d", rindex + 1, tsID + 1);
 
-  if (rindex >= streamptr->tsteps[tsID].nrecs) Error("record %d not available at timestep %d", rindex + 1, tsID + 1);
+  int recID = tstep->recIDs[rindex];
+  if (recID == -1 || recID >= tstep->nallrecs) Error("Internal problem! tsID = %d recID = %d", tsID, recID);
 
-  int recID = streamptr->tsteps[tsID].recIDs[rindex];
-
-  if (recID == -1 || recID >= streamptr->tsteps[tsID].nallrecs) Error("Internal problem! tsID = %d recID = %d", tsID, recID);
-
-  *varID = streamptr->tsteps[tsID].recinfo[recID].varID;
+  *varID = tstep->recinfo[recID].varID;
   if (*varID == -1) Error("Internal problem! varID = %d recID = %d", *varID, recID);
 
-  int lindex = streamptr->tsteps[tsID].recinfo[recID].levelID;
+  int lindex = tstep->recinfo[recID].levelID;
+  int isub = subtypeInqActiveIndex(streamPtr->vars[*varID].subtypeID);
+  *levelID = streamPtr->vars[*varID].recordTable[isub].lindex[lindex];
 
-  int isub = subtypeInqActiveIndex(streamptr->vars[*varID].subtypeID);
-  *levelID = streamptr->vars[*varID].recordTable[isub].lindex[lindex];
+  if (CDI_Debug)
+    Message("streamID = %d tsID = %d, recID = %d, varID = %d, levelID = %d", streamPtr->self, tsID, recID, *varID, *levelID);
 
-  if (CDI_Debug) Message("streamID = %d tsID = %d, recID = %d, varID = %d, levelID = %d", streamID, tsID, recID, *varID, *levelID);
+  streamPtr->curTsID = tsID;
+  tstep->curRecID = rindex;
+}
 
-  streamptr->curTsID = tsID;
-  streamptr->tsteps[tsID].curRecID = rindex;
+void
+pstreamInqField(void *streamPtr, int *varID, int *levelID)
+{
+  stream_inq_field((stream_t *) streamPtr, varID, levelID);
+}
+
+void
+streamInqField(int streamID, int *varID, int *levelID)
+{
+  stream_inq_field(stream_to_pointer(streamID), varID, levelID);
 }
 
 /*

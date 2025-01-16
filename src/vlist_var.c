@@ -1077,14 +1077,26 @@ vlistDefFlag(int vlistID, int varID, int levID, int flag)
 }
 
 int
-vlistInqFlag(int vlistID, int varID, int levID)
+vlist_inq_flag(vlist_t *vlistPtr, int varID, int levelID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varPtr = vlistptr_get_varptr(__func__, vlistPtr, varID);
 
-  if (varptr->levinfo) return varptr->levinfo[levID].flag;
+  if (varPtr->levinfo) return varPtr->levinfo[levelID].flag;
 
-  levinfo_t li = DEFAULT_LEVINFO(levID);
+  levinfo_t li = DEFAULT_LEVINFO(levelID);
   return li.flag;
+}
+
+int
+pvlistInqFlag(void *vlistPtr, int varID, int levelID)
+{
+  return vlist_inq_flag((vlist_t *) vlistPtr, varID, levelID);
+}
+
+int
+vlistInqFlag(int vlistID, int varID, int levelID)
+{
+  return vlist_inq_flag(vlist_to_pointer(vlistID), varID, levelID);
 }
 
 int

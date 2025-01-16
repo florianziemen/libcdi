@@ -44,6 +44,19 @@ static bool vlistIsInitialized = false;
   if (!vlistIsInitialized) vlist_initialize()
 #endif
 
+void *
+stream_get_pointer(int streamID)
+{
+  return stream_to_pointer(streamID);
+}
+
+void *
+stream_get_vlist_pointer(int streamID)
+{
+  stream_t *streamPtr = stream_to_pointer(streamID);
+  return vlist_to_pointer(streamPtr->vlistID);
+}
+
 static int
 vlist_compare(vlist_t *a, vlist_t *b)
 {
