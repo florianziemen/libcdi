@@ -259,16 +259,31 @@ enum cdfIDIdx
   CDF_VARID_Y,
   CDF_VARID_RP,  // reducedPoints
   CDF_VARID_A,
-  CDF_SIZE_ncIDs,
+  CDF_SIZE_NCID,
 };
 
 typedef struct
 {
-  int ncIDs[CDF_SIZE_ncIDs];
+  int ncIdVec[CDF_SIZE_NCID];
   int gridID;
   long start;
   long count;
-} ncgrid_t;
+} CdfGrid;
+
+typedef struct
+{
+  int complexFloatId;
+  int complexDoubleId;
+  CdfGrid cdfGridVec[MAX_GRIDS_PS];
+  int zaxisIdVec[MAX_ZAXES_PS];  // Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
+  int ncZvarIdVec[MAX_ZAXES_PS];
+  int ncDimIdVec[MAX_DIMS_PS];
+  size_t ncDimLenVec[MAX_DIMS_PS];
+  int ncNumDims;
+  size_t chunkSizeTdim;
+  size_t chunkSizeZdim;
+  VCT vct;
+} CdfInfo;
 #endif
 
 typedef struct
@@ -299,17 +314,7 @@ typedef struct
   int ncmode;
   int vlistID;
 #ifdef HAVE_LIBNETCDF
-  int nc_complex_float_id;
-  int nc_complex_double_id;
-  ncgrid_t ncgrid[MAX_GRIDS_PS];
-  int zaxisID[MAX_ZAXES_PS];  // Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
-  int nczvarID[MAX_ZAXES_PS];
-  int ncNumDims;
-  int ncDimID[MAX_DIMS_PS];
-  size_t ncDimLen[MAX_DIMS_PS];
-  VCT vct;
-  size_t chunkSizeTdim;
-  size_t chunkSizeZdim;
+  CdfInfo cdfInfo;
 #endif
   long maxGlobalRecs;
   int globalatts;

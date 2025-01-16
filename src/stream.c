@@ -251,9 +251,10 @@ streamDefNumWorker(int streamID, int numWorker)
               if (streamptr->maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
               if (streamptr->maxGlobalRecs == 1) numWorker = 0;
               if (numWorker > streamptr->maxGlobalRecs) numWorker = (int) streamptr->maxGlobalRecs;
-              if (streamptr->chunkSizeTdim > 1 && numWorker > streamptr->nvars) numWorker = streamptr->nvars;
-              if (streamptr->chunkSizeZdim > 1) numWorker = 0;
-              if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", streamptr->chunkSizeTdim, streamptr->chunkSizeZdim);
+              CdfInfo *cdfInfo = &(streamptr->cdfInfo);
+              if (cdfInfo->chunkSizeTdim > 1 && numWorker > streamptr->nvars) numWorker = streamptr->nvars;
+              if (cdfInfo->chunkSizeZdim > 1) numWorker = 0;
+              if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", cdfInfo->chunkSizeTdim, cdfInfo->chunkSizeZdim);
             }
 #endif
           else
@@ -1076,31 +1077,32 @@ streamDefaultValue(stream_t *streamptr)
   basetimeInit(&streamptr->basetime);
 
 #ifdef HAVE_LIBNETCDF
-  streamptr->nc_complex_float_id = CDI_UNDEFID;
-  streamptr->nc_complex_double_id = CDI_UNDEFID;
+  CdfInfo *cdfInfo = &(streamptr->cdfInfo);
+  cdfInfo->complexFloatId = CDI_UNDEFID;
+  cdfInfo->complexDoubleId = CDI_UNDEFID;
 
-  for (int i = 0; i < MAX_ZAXES_PS; i++) streamptr->zaxisID[i] = CDI_UNDEFID;
-  for (int i = 0; i < MAX_ZAXES_PS; i++) streamptr->nczvarID[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_ZAXES_PS; i++) cdfInfo->zaxisIdVec[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_ZAXES_PS; i++) cdfInfo->ncZvarIdVec[i] = CDI_UNDEFID;
 
   for (int i = 0; i < MAX_GRIDS_PS; i++)
     {
-      streamptr->ncgrid[i].start = CDI_UNDEFID;
-      streamptr->ncgrid[i].count = CDI_UNDEFID;
-      streamptr->ncgrid[i].gridID = CDI_UNDEFID;
-      for (size_t j = 0; j < CDF_SIZE_ncIDs; ++j) streamptr->ncgrid[i].ncIDs[j] = CDI_UNDEFID;
+      cdfInfo->cdfGridVec[i].start = CDI_UNDEFID;
+      cdfInfo->cdfGridVec[i].count = CDI_UNDEFID;
+      cdfInfo->cdfGridVec[i].gridID = CDI_UNDEFID;
+      for (size_t j = 0; j < CDF_SIZE_NCID; ++j) cdfInfo->cdfGridVec[i].ncIdVec[j] = CDI_UNDEFID;
     }
 
-  streamptr->ncNumDims = 0;
-  for (int i = 0; i < MAX_DIMS_PS; i++) streamptr->ncDimID[i] = CDI_UNDEFID;
-  for (int i = 0; i < MAX_DIMS_PS; i++) streamptr->ncDimLen[i] = 0;
+  cdfInfo->ncNumDims = 0;
+  for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimIdVec[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimLenVec[i] = 0;
 
-  streamptr->vct.ilev = 0;
-  streamptr->vct.mlev = 0;
-  streamptr->vct.ilevID = CDI_UNDEFID;
-  streamptr->vct.mlevID = CDI_UNDEFID;
+  cdfInfo->chunkSizeTdim = 0;
+  cdfInfo->chunkSizeZdim = 0;
 
-  streamptr->chunkSizeTdim = 0;
-  streamptr->chunkSizeZdim = 0;
+  cdfInfo->vct.ilev = 0;
+  cdfInfo->vct.mlev = 0;
+  cdfInfo->vct.ilevID = CDI_UNDEFID;
+  cdfInfo->vct.mlevID = CDI_UNDEFID;
 #endif
   streamptr->maxGlobalRecs = CDI_UNDEFID;
 

@@ -344,7 +344,8 @@ cdfInqDatatype(stream_t *streamptr, int xtype, bool isUnsigned)
   else if (xtype == NC_UINT64)  datatype = CDI_DATATYPE_FLT64;
   else
     {
-      if (xtype != streamptr->nc_complex_float_id && xtype != streamptr->nc_complex_double_id)
+      CdfInfo *cdfInfo = &(streamptr->cdfInfo);
+      if (xtype != cdfInfo->complexFloatId && xtype != cdfInfo->complexDoubleId)
         {
           bool isUserDefinedType = false;
 #ifdef NC_FIRSTUSERTYPEID
@@ -363,14 +364,14 @@ cdfInqDatatype(stream_t *streamptr, int xtype, bool isUnsigned)
                   nc_inq_compound_field(fileID, xtype, 1, NULL, NULL, &field_type2, &field_dims2, NULL);
                   if (field_type1 == field_type2 && field_dims1 == 0 && field_dims2 == 0)
                     {
-                      if      (field_type1 == NC_FLOAT)  streamptr->nc_complex_float_id = xtype;
-                      else if (field_type1 == NC_DOUBLE) streamptr->nc_complex_double_id = xtype;
+                      if      (field_type1 == NC_FLOAT)  cdfInfo->complexFloatId = xtype;
+                      else if (field_type1 == NC_DOUBLE) cdfInfo->complexDoubleId = xtype;
                     }
                 }
             }
         }
-      if      (xtype == streamptr->nc_complex_float_id )  datatype = CDI_DATATYPE_CPX32;
-      else if (xtype == streamptr->nc_complex_double_id)  datatype = CDI_DATATYPE_CPX64;
+      if      (xtype == cdfInfo->complexFloatId )  datatype = CDI_DATATYPE_CPX32;
+      else if (xtype == cdfInfo->complexDoubleId)  datatype = CDI_DATATYPE_CPX64;
     }
 #endif
   // clang-format on
@@ -1643,6 +1644,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
 static void
 cdf_set_chunk_info(stream_t *streamptr, int nvars, ncvar_t *ncvars)
 {
+  CdfInfo *cdfInfo = &(streamptr->cdfInfo);
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
@@ -1657,8 +1659,8 @@ cdf_set_chunk_info(stream_t *streamptr, int nvars, ncvar_t *ncvars)
                 {
                   int dimType = ncvar->dimtypes[i];
                   // clang-format off
-                  if      (dimType == T_AXIS && chunkSize > streamptr->chunkSizeTdim) streamptr->chunkSizeTdim = chunkSize;
-                  else if (dimType == Z_AXIS && chunkSize > streamptr->chunkSizeZdim) streamptr->chunkSizeZdim = chunkSize;
+                  if      (dimType == T_AXIS && chunkSize > cdfInfo->chunkSizeTdim) cdfInfo->chunkSizeTdim = chunkSize;
+                  else if (dimType == Z_AXIS && chunkSize > cdfInfo->chunkSizeZdim) cdfInfo->chunkSizeZdim = chunkSize;
                   // clang-format on
                 }
             }
@@ -2117,7 +2119,7 @@ cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridva
 {
   if (CDI_Netcdf_Lazy_Grid_Load)
     {
-      *valsGet = (struct xyValGet){
+      *valsGet = (struct xyValGet) {
         .scalefactor = ncvar->scalefactor,
         .addoffset = ncvar->addoffset,
         .start = { start[0], start[1], start[2] },
@@ -2983,7 +2985,7 @@ destroy_grid(struct cdfLazyGrid *lazyGrid, grid_t *grid)
 }
 
 static int
-cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
+cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                      GridInfo *gridInfo)
 {
   for (int ncvarid = 0; ncvarid < nvars; ++ncvarid)
@@ -3157,14 +3159,14 @@ cdf_define_all_grids(stream_t *streamptr, ncgrid_t *ncgrid, int vlistID, ncdim_t
           ncgrid[gridindex].gridID = gridID;
           if (grid->type == GRID_TRAJECTORY)
             {
-              ncgrid[gridindex].ncIDs[CDF_VARID_X] = xvarid;
-              ncgrid[gridindex].ncIDs[CDF_VARID_Y] = yvarid;
+              ncgrid[gridindex].ncIdVec[CDF_VARID_X] = xvarid;
+              ncgrid[gridindex].ncIdVec[CDF_VARID_Y] = yvarid;
             }
           else
             {
-              if (xdimid != CDI_UNDEFID) ncgrid[gridindex].ncIDs[CDF_DIMID_X] = ncdims[xdimid].dimid;
-              if (ydimid != CDI_UNDEFID) ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ncdims[ydimid].dimid;
-              if (ncvar->isCubeSphere) ncgrid[gridindex].ncIDs[CDF_DIMID_E] = ncdims[ncvar->dimids[ndims - 3]].dimid;
+              if (xdimid != CDI_UNDEFID) ncgrid[gridindex].ncIdVec[CDF_DIMID_X] = ncdims[xdimid].dimid;
+              if (ydimid != CDI_UNDEFID) ncgrid[gridindex].ncIdVec[CDF_DIMID_Y] = ncdims[ydimid].dimid;
+              if (ncvar->isCubeSphere) ncgrid[gridindex].ncIdVec[CDF_DIMID_E] = ncdims[ncvar->dimids[ndims - 3]].dimid;
             }
 
           if (xdimid == CDI_UNDEFID && ydimid == CDI_UNDEFID && grid->size == 1) gridDefHasDims(gridID, CoordVar);
@@ -3263,12 +3265,12 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 	          if      (ncvars[zvarid].xtype == NC_FLOAT) zdatatype = CDI_DATATYPE_FLT32;
 	          else if (ncvars[zvarid].xtype == NC_INT)   zdatatype = CDI_DATATYPE_INT32;
 	          else if (ncvars[zvarid].xtype == NC_SHORT) zdatatype = CDI_DATATYPE_INT16;
-                // clang-format on
-                // don't change the name !!!
-                /*
-                  if ((len = strlen(pname)) > 2)
-                  if (pname[len-2] == '_' && isdigit((int) pname[len-1])) pname[len-2] = 0;
-                */
+              // clang-format on
+              // don't change the name !!!
+              /*
+                if ((len = strlen(pname)) > 2)
+                if (pname[len-2] == '_' && isdigit((int) pname[len-1])) pname[len-2] = 0;
+              */
 #ifndef USE_MPI
               if (zaxisType == ZAXIS_CHAR && ncvars[zvarid].ndims == 2)
                 {
@@ -3389,7 +3391,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
             }
 
           int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-          streamptr->zaxisID[zaxisindex] = zdimid >= 0 ? ncdims[zdimid].dimid : zdimid;
+          streamptr->cdfInfo.zaxisIdVec[zaxisindex] = zdimid >= 0 ? ncdims[zdimid].dimid : zdimid;
 
           if (CDI_Debug) Message("zaxisID %d %d %s", zaxisID, ncvarid, ncvar->name);
 
@@ -3671,11 +3673,12 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
         Message("varID = %d  gridID = %d  zaxisID = %d", varID, vlistInqVarGrid(vlistID, varID), vlistInqVarZaxis(vlistID, varID));
 
       int gridindex = vlistGridIndex(vlistID, gridID);
-      int xdimid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
-      int ydimid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
+      const CdfGrid *ncGrid = &(streamptr->cdfInfo.cdfGridVec[gridindex]);
+      int xdimid = ncGrid->ncIdVec[CDF_DIMID_X];
+      int ydimid = ncGrid->ncIdVec[CDF_DIMID_Y];
 
       int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-      int zdimid = streamptr->zaxisID[zaxisindex];
+      int zdimid = streamptr->cdfInfo.zaxisIdVec[zaxisindex];
 
       int ndims = ncvar->ndims;
       static const int ipow10[4] = { 1, 10, 100, 1000 };
@@ -4449,9 +4452,10 @@ static void
 stream_set_ncdims(stream_t *streamptr, int ndims, ncdim_t *ncdims)
 {
   int n = (ndims > MAX_DIMS_PS) ? MAX_DIMS_PS : ndims;
-  streamptr->ncNumDims = n;
-  for (int i = 0; i < n; i++) streamptr->ncDimID[i] = ncdims[i].dimid;
-  for (int i = 0; i < n; i++) streamptr->ncDimLen[i] = ncdims[i].len;
+  CdfInfo *cdfInfo = &(streamptr->cdfInfo);
+  cdfInfo->ncNumDims = n;
+  for (int i = 0; i < n; i++) cdfInfo->ncDimIdVec[i] = ncdims[i].dimid;
+  for (int i = 0; i < n; i++) cdfInfo->ncDimLenVec[i] = ncdims[i].len;
 }
 
 static void
@@ -4726,7 +4730,7 @@ cdfInqContents(stream_t *streamptr)
 
   // define all grids
   gridInfo.timedimid = timedimid;
-  int status = cdf_define_all_grids(streamptr, streamptr->ncgrid, vlistID, ncdims, nvars, ncvars, &gridInfo);
+  int status = cdf_define_all_grids(streamptr, streamptr->cdfInfo.cdfGridVec, vlistID, ncdims, nvars, ncvars, &gridInfo);
   if (status < 0) return status;
 
   // define all zaxes

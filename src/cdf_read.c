@@ -24,8 +24,9 @@ cdfReadGridTraj(stream_t *streamptr, int gridID)
   int fileID = streamptr->fileID;
 
   int gridindex = vlistGridIndex(vlistID, gridID);
-  int ncLonId = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
-  int ncLatId = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
+  const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridVec[gridindex]);
+  int ncLonId = cdfGrid->ncIdVec[CDF_VARID_X];
+  int ncLatId = cdfGrid->ncIdVec[CDF_VARID_Y];
 
   int tsID = streamptr->curTsID;
   size_t ncStepIndex = (size_t) streamptr->tsteps[tsID].ncStepIndex;
@@ -47,6 +48,7 @@ cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[MAX_DIMENS
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
   int timetype = vlistInqVarTimetype(vlistID, varID);
   int gridindex = vlistGridIndex(vlistID, gridID);
+  const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridVec[gridindex]);
   size_t ncStepIndex = (size_t) streamptr->tsteps[tsID].ncStepIndex;
 
   int xid = CDI_UNDEFID, yid = CDI_UNDEFID;
@@ -56,11 +58,11 @@ cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[MAX_DIMENS
     }
   else
     {
-      xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
-      yid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
+      xid = cdfGrid->ncIdVec[CDF_DIMID_X];
+      yid = cdfGrid->ncIdVec[CDF_DIMID_Y];
     }
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-  int zid = streamptr->zaxisID[zaxisindex];
+  int zid = streamptr->cdfInfo.zaxisIdVec[zaxisindex];
 
   int ndims = 0;
 #define addDimension(startCoord, length) \
@@ -376,7 +378,7 @@ cdf_inq_dimIds(stream_t *streamptr, int varId, int (*outDimIds)[4])
   int vlistID = streamptr->vlistID;
   int gridId = vlistInqVarGrid(vlistID, varId);
   int gridindex = vlistGridIndex(vlistID, gridId);
-  const int *ncIDs = streamptr->ncgrid[gridindex].ncIDs;
+  const int *ncIDs = streamptr->cdfInfo.cdfGridVec[gridindex].ncIdVec;
 
   switch (gridInqType(gridId))
     {
@@ -395,15 +397,16 @@ cdf_inq_dimIds(stream_t *streamptr, int varId, int (*outDimIds)[4])
 
   int zaxisID = vlistInqVarZaxis(vlistID, varId);
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-  (*outDimIds)[2] = streamptr->zaxisID[zaxisindex];
+  (*outDimIds)[2] = streamptr->cdfInfo.zaxisIdVec[zaxisindex];
 }
 
 static size_t
 stream_inq_dimlen(stream_t *streamptr, int dimid)
 {
-  int ndims = streamptr->ncNumDims;
-  int *ncdimid = streamptr->ncDimID;
-  size_t *ncdimlen = streamptr->ncDimLen;
+  const CdfInfo *cdfInfo = &(streamptr->cdfInfo);
+  int ndims = cdfInfo->ncNumDims;
+  const int *ncdimid = cdfInfo->ncDimIdVec;
+  const size_t *ncdimlen = cdfInfo->ncDimLenVec;
   for (int i = 0; i < ndims; ++i)
     {
       if (dimid == ncdimid[i]) return ncdimlen[i];
@@ -490,8 +493,8 @@ cdfGetSliceSlapDescription(stream_t *streamptr, long tsID, int varID, int levelI
   if (skipdim == 1) addDimension(0, 1);
 
   int gridindex = vlistGridIndex(vlistID, gridId);
-  const ncgrid_t *ncGrid = &streamptr->ncgrid[gridindex];
-  bool readPart = (ncGrid->gridID == gridId && ncGrid->start != -1 && ncGrid->count != -1);
+  const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridVec[gridindex]);
+  bool readPart = (cdfGrid->gridID == gridId && cdfGrid->start != -1 && cdfGrid->count != -1);
 
   for (int id = 0; id < 4; ++id)
     {
@@ -503,7 +506,7 @@ cdfGetSliceSlapDescription(stream_t *streamptr, long tsID, int varID, int levelI
         case 2:
         case 4:
           if (readPart && curDimId == dimIds[0])
-            addDimension((size_t) ncGrid->start, (size_t) ncGrid->count);
+            addDimension((size_t) cdfGrid->start, (size_t) cdfGrid->count);
           else
             addDimension(0, stream_inq_dimlen(streamptr, curDimId));
           break;
