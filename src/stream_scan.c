@@ -16,10 +16,11 @@
 void
 streamScanResizeRecords1(stream_t *streamptr)
 {
-  const int nrecords = streamptr->tsteps[0].nallrecs;
+  int nrecords = streamptr->tsteps[0].nallrecs;
   if (nrecords < streamptr->tsteps[0].recordSize)
     {
       streamptr->tsteps[0].recordSize = nrecords;
+      streamptr->tsteps[0].recinfo = (recinfo_t *) Realloc(streamptr->tsteps[0].recinfo, (size_t) nrecords * sizeof(recinfo_t));
       streamptr->tsteps[0].records = (record_t *) Realloc(streamptr->tsteps[0].records, (size_t) nrecords * sizeof(record_t));
     }
 
@@ -31,7 +32,7 @@ streamScanResizeRecords1(stream_t *streamptr)
 int
 streamScanInitRecords2(stream_t *streamptr)
 {
-  const int nrecords = streamptr->tsteps[1].nallrecs;
+  int nrecords = streamptr->tsteps[1].nallrecs;
   streamptr->tsteps[1].recIDs = (int *) Malloc((size_t) nrecords * sizeof(int));
   streamptr->tsteps[1].nrecs = 0;
 
@@ -48,7 +49,7 @@ streamScanInitRecords2(stream_t *streamptr)
 int
 streamScanInitRecords(stream_t *streamptr, int tsID)
 {
-  const int nrecs = streamptr->tsteps[1].nrecs;
+  int nrecs = streamptr->tsteps[1].nrecs;
 
   streamptr->tsteps[tsID].nrecs = nrecs;
   streamptr->tsteps[tsID].recIDs = (int *) Malloc((size_t) nrecs * sizeof(int));
@@ -61,7 +62,7 @@ streamScanInitRecords(stream_t *streamptr, int tsID)
 void
 streamScanTimeConstAdjust(stream_t *streamptr, const taxis_t *taxis)
 {
-  const int vlistID = streamptr->vlistID;
+  int vlistID = streamptr->vlistID;
   if (streamptr->ntsteps == 1 && cdiDateTime_isNull(taxis->vDateTime))
     {
       streamptr->ntsteps = 0;
@@ -74,7 +75,7 @@ streamScanTsFixNtsteps(stream_t *streamptr, off_t recpos)
 {
   if (streamptr->ntsteps == -1)
     {
-      const int tsID = tstepsNewEntry(streamptr);
+      int tsID = tstepsNewEntry(streamptr);
       if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
 
       streamptr->tsteps[tsID - 1].next = true;

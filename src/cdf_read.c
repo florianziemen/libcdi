@@ -794,14 +794,13 @@ static size_t
 cdf_read_data(stream_t *streamptr, int recID, int memtype, void *data)
 {
   int tsID = streamptr->curTsID;
-  int varID = streamptr->tsteps[tsID].records[recID].varID;
-  int levelID = streamptr->tsteps[tsID].records[recID].levelID;
+  recinfo_t *recInfo = &(streamptr->tsteps[tsID].recinfo[recID]);
 
   size_t numMissVals = 0;
   if (memtype == MEMTYPE_DOUBLE)
-    cdf_read_var_slice_DP(streamptr, tsID, varID, levelID, (double *) data, &numMissVals);
+    cdf_read_var_slice_DP(streamptr, tsID, recInfo->varID, recInfo->levelID, (double *) data, &numMissVals);
   else
-    cdf_read_var_slice_SP(streamptr, tsID, varID, levelID, (float *) data, &numMissVals);
+    cdf_read_var_slice_SP(streamptr, tsID, recInfo->varID, recInfo->levelID, (float *) data, &numMissVals);
 
   return numMissVals;
 }
@@ -815,16 +814,15 @@ typedef struct JobDescriptorCDF
 static JobArgsCDF
 job_args_init(stream_t *streamptr, long tsID, long recID, int memtype, void *data)
 {
-  int varID = streamptr->tsteps[tsID].records[recID].varID;
-  int levelID = streamptr->tsteps[tsID].records[recID].levelID;
-  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(streamptr->vlistID, varID));
+  recinfo_t *recInfo = &(streamptr->tsteps[tsID].recinfo[recID]);
+  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(streamptr->vlistID, recInfo->varID));
 
   if (!data) data = Malloc(gridsize * ((memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
 
-  return (JobArgsCDF){
+  return (JobArgsCDF) {
     .streamptr = streamptr,
-    .varID = varID,
-    .levelID = levelID,
+    .varID = recInfo->varID,
+    .levelID = recInfo->levelID,
     .memtype = memtype,
     .recID = recID,
     .tsID = tsID,
@@ -887,7 +885,7 @@ cdf_get_local_step_and_recId(stream_t *streamptr, long globalRecId)
       globalRecId -= tsteps[1].nrecs;
     }
 
-  return (struct recTsId){ .recID = globalRecId, .tsID = localTsId };
+  return (struct recTsId) { .recID = globalRecId, .tsID = localTsId };
 }
 
 static void

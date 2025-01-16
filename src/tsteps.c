@@ -20,6 +20,7 @@ static void
 tstepsInitEntry(tsteps_t *tstep)
 {
   tstep->recIDs = NULL;
+  tstep->recinfo = NULL;
   tstep->records = NULL;
   tstep->recordSize = 0;
   tstep->nrecs = 0;
@@ -35,7 +36,7 @@ tstepsInitEntry(tsteps_t *tstep)
 int
 tstepsNewEntry(stream_t *streamptr)
 {
-  const int tsID = streamptr->tstepsNextID++;
+  int tsID = streamptr->tstepsNextID++;
   int tstepsTableSize = streamptr->tstepsTableSize;
   tsteps_t *tstepsTable = streamptr->tsteps;
 

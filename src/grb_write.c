@@ -224,7 +224,8 @@ grbCopyField(stream_t *streamptr2, stream_t *streamptr1)
   int tsID = streamptr1->curTsID;
   int vrecID = streamptr1->tsteps[tsID].curRecID;
   int recID = streamptr1->tsteps[tsID].recIDs[vrecID];
-  const record_t *record = &streamptr1->tsteps[tsID].records[recID];
+  const recinfo_t *recinfo = &(streamptr1->tsteps[tsID].recinfo[recID]);
+  const record_t *record = &(streamptr1->tsteps[tsID].records[recID]);
   off_t recpos = record->position;
   size_t recsize = record->size;
 
@@ -347,8 +348,7 @@ grbCopyField(stream_t *streamptr2, stream_t *streamptr1)
   if (streamptr2->protocol == CDI_PROTOCOL_FDB)
     {
       int vlistID = streamptr1->vlistID;
-      int varID = record->varID;
-      int zaxisID = vlistInqVarZaxis(vlistID, varID);
+      int zaxisID = vlistInqVarZaxis(vlistID, recinfo->varID);
       int zaxisType = zaxisInqType(zaxisID);
       CdiDateTime vDateTime = streamptr1->tsteps[tsID].taxis.vDateTime;
 
@@ -443,7 +443,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     case CDI_PROTOCOL_FILE:
       {
         size_t (*myFileWrite)(int fileID, const void *restrict buffer, size_t len)
-            = (size_t(*)(int, const void *restrict, size_t)) namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
+            = (size_t (*)(int, const void *restrict, size_t)) namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
 
         size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes);
         if (nwrite != nbytes) SysError("Failed to write GRIB slice!");

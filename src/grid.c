@@ -989,9 +989,7 @@ gridInqSize(int gridID)
     {
       size_t xsize = gridptr->x.size;
       size_t ysize = gridptr->y.size;
-
       size = ysize ? xsize * ysize : xsize;
-
       gridptr->size = size;
     }
 
@@ -2194,7 +2192,7 @@ compareXYvals2(grid_t *gridRef, grid_t *gridTest)
                 || ((gridTest->x.bounds == NULL) ^ (gridRef->x.bounds == NULL))
                 || ((gridTest->y.bounds == NULL) ^ (gridRef->y.bounds == NULL));
 
-  typedef double (*inqVal)(grid_t * grid, SizeType index);
+  typedef double (*inqVal)(grid_t *grid, SizeType index);
   inqVal inqXValRef = gridRef->vtable->inqXVal, inqYValRef = gridRef->vtable->inqYVal, inqXValTest = gridTest->vtable->inqXVal,
          inqYValTest = gridTest->vtable->inqYVal;
 
@@ -4871,7 +4869,7 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
         }
     }
 
-  return (struct addIfNewRes){ .Id = gridID, .isNew = (!gridIsDefined && !gridIsDefinedGlobal) };
+  return (struct addIfNewRes) { .Id = gridID, .isNew = (!gridIsDefined && !gridIsDefinedGlobal) };
 }
 
 const struct gridVirtTable cdiGridVtable = {

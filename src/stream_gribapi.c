@@ -710,7 +710,8 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   int vlistID = streamptr->vlistID;
   int tsID = streamptr->curTsID;
   int recID = recordNewEntry(streamptr, tsID);
-  record_t *record = &streamptr->tsteps[tsID].records[recID];
+  recinfo_t *recinfo = &(streamptr->tsteps[tsID].recinfo[recID]);
+  record_t *record = &(streamptr->tsteps[tsID].records[recID]);
 
   int tsteptype = gribapiGetTsteptype(gh);
 
@@ -743,7 +744,7 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   CdiQuery *query = streamptr->query;
   if (query && cdiQueryName(query, varname) < 0)
     {
-      record->used = false;
+      recinfo->used = false;
       return;
     }
 
@@ -814,8 +815,8 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, level_sf, level_unit, datatype, &varID, &levelID,
                tsteptype, leveltype1, leveltype2, varname, scanKeys, tiles, &tile_index);
 
-  record->varID = (short) varID;
-  record->levelID = levelID;
+  recinfo->varID = (short) varID;
+  recinfo->levelID = levelID;
 
   varDefCompType(varID, comptype);
 
@@ -1173,7 +1174,8 @@ fdbScanTimesteps(stream_t *streamptr)
 
       taxis = &streamptr->tsteps[tsID].taxis;
 
-      cdi_create_records(streamptr, tsID);
+      cdi_create_records(streamptr, tsID, true);
+      recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
       record_t *records = streamptr->tsteps[tsID].records;
 
       int nrecs = (tsID == 1) ? streamScanInitRecords2(streamptr) : streamScanInitRecords(streamptr, tsID);
@@ -1184,7 +1186,7 @@ fdbScanTimesteps(stream_t *streamptr)
       int rindex = 0;
       for (int recID = 0; recID < numRecords; recID++)
         {
-          records[recID].used = true;
+          recinfo[recID].used = true;
           streamptr->tsteps[tsID].recIDs[rindex] = recID;
           rindex++;
 
@@ -1216,6 +1218,7 @@ records_cmp_varname(const void *s1, const void *s2)
   return strcmp(x->varname, y->varname);
 }
 
+/*
 void
 sort_records(stream_t *streamptr)
 {
@@ -1223,6 +1226,7 @@ sort_records(stream_t *streamptr)
   size_t numRecords = (size_t) streamptr->tsteps[0].recordSize;
   qsort(records, numRecords, sizeof(records[0]), records_cmp_varname);
 }
+*/
 
 long
 gribapiScanTimestep1(stream_t *streamptr)
@@ -1373,7 +1377,7 @@ gribapiScanTimestep1(stream_t *streamptr)
   streamScanTsFixNtsteps(streamptr, recpos);
   streamScanTimeConstAdjust(streamptr, taxis);
 
-  if (streamptr->sortname) sort_records(streamptr);
+  // if (streamptr->sortname) sort_records(streamptr);
 
   return 0;
 }
@@ -1404,7 +1408,8 @@ gribapiScanTimestep2(stream_t *streamptr)
 
   fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
-  cdi_create_records(streamptr, tsID);
+  cdi_create_records(streamptr, tsID, true);
+  recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
   record_t *records = streamptr->tsteps[tsID].records;
 
   int nrecords = streamScanInitRecords2(streamptr);
@@ -1492,7 +1497,7 @@ gribapiScanTimestep2(stream_t *streamptr)
             }
         }
 
-      if (records[recID].used)
+      if (recinfo[recID].used)
         {
           if (CDI_Inventory_Mode == 1)
             break;
@@ -1505,7 +1510,7 @@ gribapiScanTimestep2(stream_t *streamptr)
             }
         }
 
-      records[recID].used = true;
+      recinfo[recID].used = true;
       streamptr->tsteps[tsID].recIDs[rindex] = recID;
 
       if (CDI_Debug)
@@ -1526,7 +1531,7 @@ gribapiScanTimestep2(stream_t *streamptr)
       records[recID].position = recpos;
       records[recID].size = recsize;
 
-      int varID = records[recID].varID;
+      int varID = recinfo[recID].varID;
 
       if (tsteptype != vlistInqVarTsteptype(vlistID, varID)) vlistDefVarTsteptype(vlistID, varID, tsteptype);
 
@@ -1539,10 +1544,10 @@ gribapiScanTimestep2(stream_t *streamptr)
   int nrecs = 0;
   for (recID = 0; recID < nrecords; recID++)
     {
-      if (records[recID].used)
+      if (recinfo[recID].used)
         nrecs++;
       else
-        vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
+        vlistDefVarTimetype(vlistID, recinfo[recID].varID, TIME_CONSTANT);
     }
   streamptr->tsteps[tsID].nrecs = nrecs;
 
@@ -1570,7 +1575,8 @@ gribapiScanTimestep(stream_t *streamptr)
       void *gribbuffer = streamptr->record->buffer;
       size_t buffersize = streamptr->record->buffersize;
 
-      cdi_create_records(streamptr, tsID);
+      cdi_create_records(streamptr, tsID, true);
+      recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
       record_t *records = streamptr->tsteps[tsID].records;
 
       nrecs = streamScanInitRecords(streamptr, tsID);
@@ -1679,7 +1685,7 @@ gribapiScanTimestep(stream_t *streamptr)
 
           if (CDI_Inventory_Mode != 1)
             {
-              if (records[recID].used)
+              if (recinfo[recID].used)
                 {
                   if (cdiDateTime_isNE(vDateTime, vDateTime0)) break;
 
@@ -1690,7 +1696,7 @@ gribapiScanTimestep(stream_t *streamptr)
                 }
             }
 
-          records[recID].used = true;
+          recinfo[recID].used = true;
           streamptr->tsteps[tsID].recIDs[rindex] = recID;
 
           if (CDI_Debug)
@@ -1717,7 +1723,7 @@ gribapiScanTimestep(stream_t *streamptr)
       for (vrecID = 0; vrecID < nrecs; vrecID++)
         {
           recID = streamptr->tsteps[tsID].recIDs[vrecID];
-          if (!records[recID].used) break;
+          if (!recinfo[recID].used) break;
         }
 
       if (vrecID < nrecs)

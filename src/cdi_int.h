@@ -173,15 +173,19 @@ varScanKeysIsEqual(const VarScanKeys *s1, const VarScanKeys *s2)
 
 typedef struct
 {
+  int levelID;
+  short varID;
+  short used;
+} recinfo_t;
+
+typedef struct
+{
   off_t position;
   size_t size;
   size_t gridsize;
   int param;
   int ilevel;
   int ilevel2;
-  int levelID;
-  short varID;
-  short used;
   short ltype;
   short tsteptype;
 #ifdef HAVE_LIBGRIB
@@ -200,6 +204,7 @@ typedef struct
 typedef struct
 {
   int *recIDs;  // IDs of non constant records
+  recinfo_t *recinfo;
   record_t *records;
   int recordSize;   // number of allocated records
   int nrecs;        // number of used records
@@ -459,7 +464,7 @@ void cdi_generate_vars(stream_t *streamptr);
 
 void vlist_check_contents(int vlistID);
 
-void cdi_create_records(stream_t *streamptr, int tsID);
+void cdi_create_records(stream_t *streamptr, int tsID, bool allocRecords);
 
 void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *container_name);
 
@@ -467,7 +472,7 @@ int recordNewEntry(stream_t *streamptr, int tsID);
 
 void cdi_create_timesteps(size_t numTimesteps, stream_t *streamptr);
 
-void recordInitEntry(record_t *record);
+void recinfoInitEntry(recinfo_t *recinfo);
 
 void cdiCheckZaxis(int zaxisID);
 

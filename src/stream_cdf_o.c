@@ -24,7 +24,7 @@ cdfCopyField(stream_t *streamptr2, stream_t *streamptr1)
   int tsID = streamptr1->curTsID;
   int vrecID = streamptr1->tsteps[tsID].curRecID;
   int recID = streamptr1->tsteps[tsID].recIDs[vrecID];
-  int ivarID = streamptr1->tsteps[tsID].records[recID].varID;
+  int ivarID = streamptr1->tsteps[tsID].recinfo[recID].varID;
   int gridID = vlistInqVarGrid(vlistID1, ivarID);
   size_t datasize = (size_t) gridInqSize(gridID);
   int datatype = vlistInqVarDatatype(vlistID1, ivarID);

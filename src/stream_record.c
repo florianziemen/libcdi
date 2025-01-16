@@ -17,6 +17,14 @@
 #include "stream_ieg.h"
 
 void
+recinfoInitEntry(recinfo_t *recinfo)
+{
+  recinfo->varID = CDI_UNDEFID;
+  recinfo->levelID = CDI_UNDEFID;
+  recinfo->used = false;
+}
+
+static void
 recordInitEntry(record_t *record)
 {
   record->position = CDI_UNDEFID;
@@ -24,10 +32,7 @@ recordInitEntry(record_t *record)
   record->gridsize = 0;
   record->param = 0;
   record->ilevel = CDI_UNDEFID;
-  record->used = false;
   record->tsteptype = CDI_UNDEFID;
-  record->varID = CDI_UNDEFID;
-  record->levelID = CDI_UNDEFID;
 #ifdef HAVE_LIBGRIB
   varScanKeysInit(&record->scanKeys);
   memset(&record->tiles, 0, sizeof(record->tiles));
@@ -44,19 +49,21 @@ int
 recordNewEntry(stream_t *streamptr, int tsID)
 {
   int recordSize = streamptr->tsteps[tsID].recordSize;
+  recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
   record_t *records = streamptr->tsteps[tsID].records;
 
   // Look for a free slot in record.
   int recordID = 0;
   if (recordSize)
     {
-      while (recordID < recordSize && records[recordID].used != CDI_UNDEFID) ++recordID;
+      while (recordID < recordSize && recinfo[recordID].used != CDI_UNDEFID) ++recordID;
     }
   else  // Create the table the first time through.
     {
       recordSize = 1;  //  <<<<----
+      recinfo = (recinfo_t *) Malloc((size_t) recordSize * sizeof(recinfo_t));
       records = (record_t *) Malloc((size_t) recordSize * sizeof(record_t));
-      for (int i = recordID; i < recordSize; i++) records[i].used = CDI_UNDEFID;
+      for (int i = recordID; i < recordSize; i++) recinfo[i].used = CDI_UNDEFID;
     }
 
   // If the table overflows, double its size.
@@ -67,16 +74,19 @@ recordNewEntry(stream_t *streamptr, int tsID)
       else if (recordSize < INT_MAX)      recordSize = INT_MAX;
       else Error("Cannot handle this many records!\n");
       // clang-format on
+      recinfo = (recinfo_t *) Realloc(recinfo, (size_t) recordSize * sizeof(recinfo_t));
       records = (record_t *) Realloc(records, (size_t) recordSize * sizeof(record_t));
 
-      for (int i = recordID; i < recordSize; i++) records[i].used = CDI_UNDEFID;
+      for (int i = recordID; i < recordSize; i++) recinfo[i].used = CDI_UNDEFID;
     }
 
+  recinfoInitEntry(&recinfo[recordID]);
   recordInitEntry(&records[recordID]);
 
-  records[recordID].used = true;
+  recinfo[recordID].used = true;
 
   streamptr->tsteps[tsID].recordSize = recordSize;
+  streamptr->tsteps[tsID].recinfo = recinfo;
   streamptr->tsteps[tsID].records = records;
 
   return recordID;
@@ -121,10 +131,10 @@ streamInqField(int streamID, int *varID, int *levelID)
 
   if (recID == -1 || recID >= streamptr->tsteps[tsID].nallrecs) Error("Internal problem! tsID = %d recID = %d", tsID, recID);
 
-  *varID = streamptr->tsteps[tsID].records[recID].varID;
+  *varID = streamptr->tsteps[tsID].recinfo[recID].varID;
   if (*varID == -1) Error("Internal problem! varID = %d recID = %d", *varID, recID);
 
-  int lindex = streamptr->tsteps[tsID].records[recID].levelID;
+  int lindex = streamptr->tsteps[tsID].recinfo[recID].levelID;
 
   int isub = subtypeInqActiveIndex(streamptr->vars[*varID].subtypeID);
   *levelID = streamptr->vars[*varID].recordTable[isub].lindex[lindex];
@@ -239,14 +249,14 @@ streamCopyField(int streamID2, int streamID1)
 }
 
 void
-cdi_create_records(stream_t *streamptr, int tsID)
+cdi_create_records(stream_t *streamptr, int tsID, bool allocRecords)
 {
   unsigned nrecords, maxrecords;
 
   tsteps_t *sourceTstep = streamptr->tsteps;
   tsteps_t *destTstep = sourceTstep + tsID;
 
-  if (destTstep->records) return;
+  if (destTstep->recinfo) return;
 
   int vlistID = streamptr->vlistID;
 
@@ -275,7 +285,7 @@ cdi_create_records(stream_t *streamptr, int tsID)
         {
           for (size_t recID = 0; recID < maxrecords; recID++)
             {
-              int varID = sourceTstep->records[recID].varID;
+              int varID = sourceTstep->recinfo[recID].varID;
               nrecords += (varID == CDI_UNDEFID /* varID = CDI_UNDEFID for write mode !!! */
                            || vlistInqVarTimetype(vlistID, varID) != TIME_CONSTANT);
               //    printf("varID nrecords %d %d %d \n", varID, nrecords, vlistInqVarTsteptype(vlistID, varID));
@@ -292,8 +302,10 @@ cdi_create_records(stream_t *streamptr, int tsID)
     }
   //  printf("tsID, nrecords %d %d\n", tsID, nrecords);
 
-  record_t *records = (maxrecords > 0) ? (record_t *) (Malloc(maxrecords * sizeof(record_t))) : (record_t *) NULL;
+  recinfo_t *recinfo = (maxrecords > 0) ? (recinfo_t *) Malloc(maxrecords * sizeof(recinfo_t)) : (recinfo_t *) NULL;
+  record_t *records = (allocRecords && maxrecords > 0) ? (record_t *) Malloc(maxrecords * sizeof(record_t)) : (record_t *) NULL;
 
+  destTstep->recinfo = recinfo;
   destTstep->records = records;
   destTstep->recordSize = (int) maxrecords;
   destTstep->nallrecs = (int) nrecords;
@@ -303,23 +315,26 @@ cdi_create_records(stream_t *streamptr, int tsID)
 
   if (tsID == 0)
     {
-      for (unsigned recID = 0; recID < maxrecords; recID++) recordInitEntry(&destTstep->records[recID]);
+      for (unsigned recID = 0; recID < maxrecords; recID++) recinfoInitEntry(&destTstep->recinfo[recID]);
+      if (allocRecords)
+        for (unsigned recID = 0; recID < maxrecords; recID++) recordInitEntry(&destTstep->records[recID]);
     }
-  else if (sourceTstep->records)
+  else if (sourceTstep->recinfo)
     {
-      memcpy(destTstep->records, sourceTstep->records, (size_t) maxrecords * sizeof(record_t));
+      memcpy(destTstep->recinfo, sourceTstep->recinfo, (size_t) maxrecords * sizeof(recinfo_t));
+      if (allocRecords) memcpy(destTstep->records, sourceTstep->records, (size_t) maxrecords * sizeof(record_t));
 
       for (size_t recID = 0; recID < maxrecords; recID++)
         {
-          record_t *curRecord = &sourceTstep->records[recID];
-          destTstep->records[recID].used = curRecord->used;
+          recinfo_t *curRecord = &sourceTstep->recinfo[recID];
+          destTstep->recinfo[recID].used = curRecord->used;
           if (curRecord->used != CDI_UNDEFID && curRecord->varID != -1)  // curRecord->varID = -1 for write mode !!!
             {
               if (vlistInqVarTimetype(vlistID, curRecord->varID) != TIME_CONSTANT)
                 {
-                  destTstep->records[recID].position = CDI_UNDEFID;
-                  destTstep->records[recID].size = 0;
-                  destTstep->records[recID].used = false;
+                  if (allocRecords) destTstep->records[recID].position = CDI_UNDEFID;
+                  if (allocRecords) destTstep->records[recID].size = 0;
+                  destTstep->recinfo[recID].used = false;
                 }
             }
         }

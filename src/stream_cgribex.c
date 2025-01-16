@@ -548,7 +548,8 @@ cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t 
   int vlistID = streamptr->vlistID;
   int tsID = streamptr->curTsID;
   int recID = recordNewEntry(streamptr, tsID);
-  record_t *record = &streamptr->tsteps[tsID].records[recID];
+  recinfo_t *recinfo = &(streamptr->tsteps[tsID].recinfo[recID]);
+  record_t *record = &(streamptr->tsteps[tsID].records[recID]);
 
   int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
 
@@ -602,8 +603,8 @@ cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0, 0, datatype, &varID, &levelID, tsteptype, leveltype, -1,
                NULL, NULL, NULL, NULL);
 
-  record->varID = (short) varID;
-  record->levelID = levelID;
+  recinfo->varID = (short) varID;
+  recinfo->levelID = levelID;
 
   varDefCompType(varID, comptype);
 
@@ -958,7 +959,8 @@ cgribexScanTimestep2(stream_t *streamptr)
 
   fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
-  cdi_create_records(streamptr, tsID);
+  cdi_create_records(streamptr, tsID, true);
+  recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
   record_t *records = streamptr->tsteps[tsID].records;
 
   int nrecords = streamScanInitRecords2(streamptr);
@@ -1044,19 +1046,19 @@ cgribexScanTimestep2(stream_t *streamptr)
 
       if (CDI_Inventory_Mode == 1)
         {
-          if (records[recID].used)
+          if (recinfo[recID].used)
             {
               break;
             }
           else
             {
-              records[recID].used = true;
+              recinfo[recID].used = true;
               streamptr->tsteps[tsID].recIDs[rindex] = recID;
             }
         }
       else
         {
-          if (records[recID].used)
+          if (recinfo[recID].used)
             {
               if (cdiDateTime_isNE(vDateTime, vDateTime0)) break;
 
@@ -1065,7 +1067,7 @@ cgribexScanTimestep2(stream_t *streamptr)
             }
           else
             {
-              records[recID].used = true;
+              recinfo[recID].used = true;
               streamptr->tsteps[tsID].recIDs[rindex] = recID;
             }
         }
@@ -1084,7 +1086,7 @@ cgribexScanTimestep2(stream_t *streamptr)
       records[recID].position = recpos;
       records[recID].size = recsize;
 
-      int varID = records[recID].varID;
+      int varID = recinfo[recID].varID;
       int gridID = vlistInqVarGrid(vlistID, varID);
       if (gridInqSize(gridID) == 1 && gridInqType(gridID) == GRID_LONLAT)
         {
@@ -1102,10 +1104,10 @@ cgribexScanTimestep2(stream_t *streamptr)
   int nrecs = 0;
   for (recID = 0; recID < nrecords; recID++)
     {
-      if (records[recID].used)
+      if (recinfo[recID].used)
         nrecs++;
       else
-        vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
+        vlistDefVarTimetype(vlistID, recinfo[recID].varID, TIME_CONSTANT);
     }
   streamptr->tsteps[tsID].nrecs = nrecs;
 
@@ -1143,7 +1145,8 @@ cgribexScanTimestep(stream_t *streamptr)
       void *gribbuffer = streamptr->record->buffer;
       size_t buffersize = streamptr->record->buffersize;
 
-      cdi_create_records(streamptr, tsID);
+      cdi_create_records(streamptr, tsID, true);
+      recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
       record_t *records = streamptr->tsteps[tsID].records;
 
       nrecs = streamScanInitRecords(streamptr, tsID);
@@ -1243,12 +1246,12 @@ cgribexScanTimestep(stream_t *streamptr)
 
           if (CDI_Inventory_Mode == 1)
             {
-              records[recID].used = true;
+              recinfo[recID].used = true;
               streamptr->tsteps[tsID].recIDs[rindex] = recID;
             }
           else
             {
-              if (records[recID].used)
+              if (recinfo[recID].used)
                 {
                   char paramstr_[32];
                   cdiParamToString(param, paramstr_, sizeof(paramstr_));
@@ -1262,7 +1265,7 @@ cgribexScanTimestep(stream_t *streamptr)
                 }
               else
                 {
-                  records[recID].used = true;
+                  recinfo[recID].used = true;
                   streamptr->tsteps[tsID].recIDs[rindex] = recID;
                 }
             }
@@ -1287,7 +1290,7 @@ cgribexScanTimestep(stream_t *streamptr)
       for (vrecID = 0; vrecID < nrecs; vrecID++)
         {
           recID = streamptr->tsteps[tsID].recIDs[vrecID];
-          if (!records[recID].used) break;
+          if (!recinfo[recID].used) break;
         }
 
       if (vrecID < nrecs)

@@ -1233,16 +1233,12 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
         cdfClose(fileID);
         if (streamptr->ntsteps == 0 && streamptr->tsteps != NULL)
           {
-            if (streamptr->tsteps[0].records)
-              {
-                Free(streamptr->tsteps[0].records);
-                streamptr->tsteps[0].records = NULL;
-              }
-            if (streamptr->tsteps[0].recIDs)
-              {
-                Free(streamptr->tsteps[0].recIDs);
-                streamptr->tsteps[0].recIDs = NULL;
-              }
+            tsteps_t *tstep = &(streamptr->tsteps[0]);
+            // clang-format off
+            if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
+            if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
+            if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
+            // clang-format on
           }
         break;
       }
@@ -1306,8 +1302,11 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
       for (int index = 0; index < maxSteps; ++index)
         {
           tsteps_t *tstep = &(streamptr->tsteps[index]);
-          if (tstep->records) Free(tstep->records);
-          if (tstep->recIDs) Free(tstep->recIDs);
+          // clang-format off
+          if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
+          if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
+          if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
+          // clang-format on
           taxisDestroyKernel(&(tstep->taxis));
         }
 
@@ -1466,9 +1465,10 @@ cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
   streamptr->curTsID = tsID;
   streamptr->ntsteps = tsID + 1;
 
+  bool baseFiletypeIsNetCDF = (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF);
 #ifdef HAVE_LIBNETCDF
   int timeIsVarying = vlistHasTime(vlistID);
-  if (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF && timeIsVarying)
+  if (baseFiletypeIsNetCDF && timeIsVarying)
     {
       /* usually points to cdfDefTimestep in serial mode but
        * to cdiPioCdfDefTimestep on servers and to a null-op on
@@ -1479,7 +1479,7 @@ cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
     }
 #endif
 
-  cdi_create_records(streamptr, tsID);
+  cdi_create_records(streamptr, tsID, !baseFiletypeIsNetCDF);
 
   return (int) streamptr->ntsteps;
 }
@@ -2035,16 +2035,12 @@ freePtrAfterNCMem(stream_t *streamptr, int recordBufIsToBeDeleted)
 
   if (streamptr->ntsteps == 0 && streamptr->tsteps != NULL)
     {
-      if (streamptr->tsteps[0].records)
-        {
-          Free(streamptr->tsteps[0].records);
-          streamptr->tsteps[0].records = NULL;
-        }
-      if (streamptr->tsteps[0].recIDs)
-        {
-          Free(streamptr->tsteps[0].recIDs);
-          streamptr->tsteps[0].recIDs = NULL;
-        }
+      tsteps_t *tstep = &(streamptr->tsteps[0]);
+      // clang-format off
+      if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
+      if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
+      if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
+      // clang-format on
     }
 }
 
