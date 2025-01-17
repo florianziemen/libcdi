@@ -1211,6 +1211,7 @@ fdbScanTimesteps(stream_t *streamptr)
 }
 #endif
 
+/*
 static int
 records_cmp_varname(const void *s1, const void *s2)
 {
@@ -1218,8 +1219,7 @@ records_cmp_varname(const void *s1, const void *s2)
   return strcmp(x->varname, y->varname);
 }
 
-/*
-void
+static void
 sort_records(stream_t *streamptr)
 {
   record_t *records = streamptr->tsteps[0].records;
