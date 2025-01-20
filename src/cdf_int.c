@@ -134,7 +134,7 @@ cdf__enddef(int ncid, int streamID, size_t hdr_pad)
   size_t r_align = 4UL;    // [B] Alignment of beginning of data section for record variables
 
   // nc_enddef(ncid) is equivalent to nc__enddef(ncid, 0, 4, 0, 4)
-  cdi_nc__enddef_funcp my_nc__enddef = (cdi_nc__enddef_funcp) namespaceSwitchGet(NSSWITCH_NC_ENDDEF).func;
+  cdi_nc__enddef_funcp my_nc__enddef = (cdi_nc__enddef_funcp) namespaceSwitchGet(NSSWITCH_NC__ENDDEF).func;
   int status = my_nc__enddef(ncid, streamID, hdr_pad, v_align, v_minfree, r_align);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
@@ -646,7 +646,7 @@ cdf_put_att_text(int ncid, int varid, const char *name, size_t len, const char *
 {
   int status = nc_put_att_text(ncid, varid, name, len, tp);
 
-  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  text=%.*s", ncid, varid, name, (int) len, tp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  text='%.*s'", ncid, varid, name, (int) len, tp);
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
