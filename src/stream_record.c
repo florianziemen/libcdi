@@ -320,7 +320,7 @@ cdi_create_records(stream_t *streamptr, int tsID, bool allocRecords)
   destTstep->recordSize = (int) maxrecords;
   destTstep->nallrecs = (int) nrecords;
 #ifdef HAVE_LIBFDB5
-  destTstep->records->fdbItemIndex = -1;
+  if (destTstep->records) destTstep->records->fdbItemIndex = -1;
 #endif
 
   if (tsID == 0)
