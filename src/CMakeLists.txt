@@ -137,12 +137,60 @@ list( APPEND cdi_src_files
   zaxis.c
   zaxis.h
 )
+list( APPEND cdi_pio_files
+  cdipio.h
+  pio.c
+  pio.h
+  pio_cdf_int.c
+  pio_cdf_int.h
+  pio_client.c
+  pio_client.h
+  pio_comm.c
+  pio_comm.h
+  pio_conf.c
+  pio_conf.h
+  pio_dbuffer.c
+  pio_dbuffer.h
+  pio_dist_grid.c
+  pio_dist_grid.h
+  pio_id_set.h
+  pio_idxlist_cache.c
+  pio_idxlist_cache.h
+  pio_impl.h
+  pio_interface.c
+  pio_interface.h
+  pio_mpi_fw_at_all.c
+  pio_mpi_fw_at_reblock.c
+  pio_mpi_fw_ordered.c
+  pio_mpinonb.c
+  pio_posixasynch.c
+  pio_posixfpguardsendrecv.c
+  pio_posixnonb.c
+  pio_record_send.c
+  pio_roles.c
+  pio_rpc.c
+  pio_rpc.h
+  pio_serialize.c
+  pio_serialize.h
+  pio_server.c
+  pio_server.h
+  pio_util.c
+  pio_util.h
+  pio_xmap_cache.c
+  pio_xmap_cache.h
+)
+
+list( APPEND cdi_unknown
+  cfortran.h
+  getline.c
+  gribapi_utilities.c
+  make_fint.c
+  resource_unpack.c
+  resource_unpack.h
+  stream_gribapi.c
+)
 
 add_library(cdilib
-  ${cdi_src_files}
+  ${cdi_src_files} ${cdi_unknown}
 #  INSTALL_HEADERS_LIST  cdi.h
 )
-find_package(HDF5 REQUIRED COMPONENTS C REQUIRED)
-
-target_link_libraries(cdilib PUBLIC netCDF::netcdf ${HDF5_LIBS})
-target_compile_definitions(cdilib PUBLIC HAVE_CONFIG_H)
