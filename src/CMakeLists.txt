@@ -1,3 +1,6 @@
+
+
+
 list( APPEND cdi_src_files
   async_worker.c
   async_worker.h
@@ -194,3 +197,9 @@ add_library(cdilib
   ${cdi_src_files} ${cdi_unknown}
 #  INSTALL_HEADERS_LIST  cdi.h
 )
+if(${eccodes_FOUND})
+  target_link_libraries(cdilib eccodes)
+endif()
+target_compile_definitions(cdilib PRIVATE CDI=1)
+target_compile_definitions(cdilib PRIVATE PACKAGE_NAME="cdilib")
+target_compile_definitions(cdilib PRIVATE VERSION="${CMAKE_PROJECT_VERSION}")
