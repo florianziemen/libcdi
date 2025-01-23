@@ -198,7 +198,7 @@ add_library(cdilib
 #  INSTALL_HEADERS_LIST  cdi.h
 )
 if(${eccodes_FOUND})
-  target_link_libraries(cdilib eccodes)
+  target_link_libraries(cdilib eccodes ${netcdf_LIBS})
 endif()
 target_compile_definitions(cdilib PRIVATE CDI=1)
 target_compile_definitions(cdilib PRIVATE PACKAGE_NAME="cdilib")
