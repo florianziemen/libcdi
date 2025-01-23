@@ -7,23 +7,29 @@ set(CMAKE_C_STANDARD 11)
 include(CTest)
 include(CheckIncludeFile)
 
+# enable default internal libs
+add_compile_definitions(HAVE_LIBGRIB=1)
+add_compile_definitions(HAVE_LIBCGRIBEX=1)
+add_compile_definitions(HAVE_LIBEXTRA=1)
+add_compile_definitions(HAVE_LIBSERVICE=1)
+add_compile_definitions(HAVE_LIBIEG=1)
+
+# ecCodes
 find_package(eccodes)
 if (${eccodes_FOUND})
-  add_compile_definitions(HAVE_ECCODES=${eccodes_FOUND})
-  message(STATUS "added compile definition HAVE_ECCODES=${eccodes_FOUND}")
-  add_compile_definitions(HAVE_LIBGRIB=${eccodes_FOUND})
-  message(STATUS "added compile definition HAVE_LIBGRIB=${eccodes_FOUND}")
   add_compile_definitions(HAVE_LIBGRIB_API=${eccodes_FOUND})
   message(STATUS "added compile definition HAVE_LIBGRIB_API=${eccodes_FOUND}")
 else()
   message(WARNING "netcdf not found, compiling without netcdf")
 endif ()
-#NetCDF
+
+# NetCDF
 find_package(netCDF COMPONENTS C REQUIRED)
 check_include_file("netcdf.h" ${netcdf_flag} C)
 if (${netCDF_FOUND})
     message(STATUS "added compile definition HAVE_LIBNETCDF=${netCDF_FOUND}")
     add_compile_definitions(HAVE_LIBNETCDF=${netCDF_FOUND})
+    add_compile_definitions(HAVE_NETCDF4=1)
 else()
   message(WARNING "netcdf not found, compiling without netcdf")
 endif ()
