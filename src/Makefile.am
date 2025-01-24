@@ -3,6 +3,7 @@ check_LTLIBRARIES =
 noinst_LTLIBRARIES =
 EXTRA_PROGRAMS = make_fint
 EXTRA_DIST = \
+  CMakeLists.txt \
   cdilib.c \
   make_cdilib
 
