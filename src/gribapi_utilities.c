@@ -966,7 +966,7 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
          Default / implicit scanning mode is 64:
                             i and j scan positively, i points are consecutive (row-major)        */
 #ifdef HIRLAM_EXTENSIONS
-      if (cdiDebugExt >= 30 && edititionnumber <= 1)
+      if (cdiDebugExt >= 30 && editionNumber <= 1)
         {
           //  indicatorOfParameter=33,indicatorOfTypeOfLevel=105,level
           long paramId, levelTypeId, levelId;
