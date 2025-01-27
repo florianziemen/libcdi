@@ -1,6 +1,3 @@
-
-
-
 list( APPEND cdi_src_files
   async_worker.c
   async_worker.h
@@ -64,6 +61,7 @@ list( APPEND cdi_src_files
   grb_write.c
   gribapi.c
   gribapi.h
+  gribapi_utilities.c
   gribapi_utilities.h
   grid.c
   grid.h
@@ -106,6 +104,7 @@ list( APPEND cdi_src_files
   stream_ext.h
   stream_grb.c
   stream_grb.h
+  stream_gribapi.c
   stream_gribapi.h
   stream_ieg.c
   stream_ieg.h
@@ -186,17 +185,16 @@ list( APPEND cdi_pio_files
 list( APPEND cdi_unknown
   cfortran.h
   getline.c
-  gribapi_utilities.c
   make_fint.c
   resource_unpack.c
   resource_unpack.h
-  stream_gribapi.c
 )
 
 add_library(cdilib
   ${cdi_src_files} ${cdi_unknown}
 #  INSTALL_HEADERS_LIST  cdi.h
 )
+
 target_link_libraries(cdilib eccodes ${netCDF_LIBRARIES})
 target_compile_definitions(cdilib PRIVATE CDI=1)
 target_compile_definitions(cdilib PRIVATE PACKAGE_NAME="cdilib")
