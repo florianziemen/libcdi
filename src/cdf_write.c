@@ -747,8 +747,9 @@ calc_chunksize_x(int chunkType, long chunkSize, size_t xsize, bool isReg2dGrid)
 
 static int
 cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, int zid, size_t gridsize, const int dimorder[3],
-                       int dims[4], bool useChunks, size_t chunks[4], char axis[5], size_t *piax)
+                       int dims[4], bool useChunks, size_t chunks[4], char axis[5], size_t *piax, size_t *pchunkCacheSize)
 {
+  size_t chunkCacheSize = 1;
   int fileID = streamptr->fileID;
   int vlistID = streamptr->vlistID;
 
@@ -757,21 +758,22 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
 
   for (int i = 0; i < 4; ++i) chunks[i] = 0;
 
-  size_t xsize = 0, ysize = 0;
+  size_t xsize = 0, ysize = 0, zsize = 0;
   if (xid != CDI_UNDEFID) cdf_inq_dimlen(fileID, xid, &xsize);
   if (yid != CDI_UNDEFID) cdf_inq_dimlen(fileID, yid, &ysize);
+  if (zid != CDI_UNDEFID) cdf_inq_dimlen(fileID, zid, &zsize);
 
   int timetype = vlistInqVarTimetype(vlistID, varID);
   if (vlistHasTime(vlistID) && timetype != TIME_CONSTANT)
     {
-      int chunkSize = 0;
-      cdiInqKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_CHUNKSIZE_DIMT, &chunkSize);
-      printf("chunkSize %d\n", chunkSize);
+      int chunkSizeDimT = 0;
+      cdiInqKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_CHUNKSIZE_DIMT, &chunkSizeDimT);
       int tid = streamptr->basetime.ncdimid;
       if (tid == CDI_UNDEFID) Error("Internal problem, time undefined!");
       axis[iax++] = 'T';
-      chunks[ndims] = (chunkSize > 0) ? chunkSize : 1;
+      chunks[ndims] = (chunkSizeDimT > 0) ? chunkSizeDimT : 1;
       dims[ndims] = tid;
+      chunkCacheSize *= chunks[ndims];
       ndims++;
     }
 
@@ -792,21 +794,27 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
     {
       if (dimorder[id] == 3 && zid != CDI_UNDEFID)
         {
+          int chunkSizeDimZ = 0;
+          cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMZ, &chunkSizeDimZ);
+          if (chunkSizeDimZ == -1) chunkSizeDimZ = zsize;
           axis[iax++] = 'Z';
-          chunks[ndims] = 1;
+          chunks[ndims] = (chunkSizeDimZ > 0) ? chunkSizeDimZ : 1;
           dims[ndims] = zid;
+          chunkCacheSize *= (chunkCacheSize > 1) ? zsize : chunks[ndims];
           ndims++;
         }
       else if (dimorder[id] == 2 && yid != CDI_UNDEFID)
         {
           chunks[ndims] = calc_chunksize_y(chunkType, gridsize, xsize, ysize);
           dims[ndims] = yid;
+          chunkCacheSize *= ysize;
           ndims++;
         }
       else if (dimorder[id] == 1 && xid != CDI_UNDEFID)
         {
           chunks[ndims] = calc_chunksize_x(chunkType, chunkSize, xsize, isReg2dGrid);
           dims[ndims] = xid;
+          chunkCacheSize *= xsize;
           ndims++;
         }
     }
@@ -815,6 +823,7 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
     fprintf(stderr, "useChunks %d chunkType %d chunkSize %d  chunks %zu %zu %zu %zu\n", useChunks, chunkType, chunkSize, chunks[0],
             chunks[1], chunks[2], chunks[3]);
 
+  *pchunkCacheSize = chunkCacheSize;
   *piax = iax;
   return ndims;
 }
@@ -924,14 +933,15 @@ cdfGenVarname(int fileID, char name[CDI_MAX_NAME], int pnum, int pcat, int *pdis
 }
 
 static void
-cdfDefVarChunkCache(int fileID, int ncvarID)
+cdfDefVarChunkCache(int fileID, int ncvarID, size_t chunkCacheSize)
 {
   size_t size = 0;
   size_t nelems = 0;
   float preemption = 0;
-  if (CDI_Chunk_Cache > 0 && nc_get_var_chunk_cache(fileID, ncvarID, &size, &nelems, &preemption) == NC_NOERR)
+  if (nc_get_var_chunk_cache(fileID, ncvarID, &size, &nelems, &preemption) == NC_NOERR)
     {
-      size = (size_t) CDI_Chunk_Cache;
+      if (chunkCacheSize > size) size = chunkCacheSize;
+      if (CDI_Chunk_Cache > 0) size = (size_t) CDI_Chunk_Cache;
     }
 
   nc_set_var_chunk_cache(fileID, ncvarID, size, nelems, preemption);
@@ -982,8 +992,9 @@ cdfDefVar(stream_t *streamptr, int varID)
   char axis[5];
   int dims[4];
   size_t chunks[4];
-  int ndims
-      = cdfDefineDimsAndChunks(streamptr, varID, xid, yid, zid, (size_t) gridsize, dimorder, dims, useChunks, chunks, axis, &iax);
+  size_t chunkCacheSize = 1;
+  int ndims = cdfDefineDimsAndChunks(streamptr, varID, xid, yid, zid, (size_t) gridsize, dimorder, dims, useChunks, chunks, axis,
+                                     &iax, &chunkCacheSize);
 
   char name[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
@@ -1006,19 +1017,20 @@ cdfDefVar(stream_t *streamptr, int varID)
   else
     cdfGenVarname(fileID, name, pnum, pcat, &pdis, &code);
 
-  int dtype = vlistInqVarDatatype(vlistID, varID);
-  nc_type xtype = cdfDefDatatype(dtype, streamptr);
-
   if (streamptr->ncmode == 2)
     {
       cdf_redef(fileID);
       streamptr->ncmode = 1;
     }
 
+  int dtype = vlistInqVarDatatype(vlistID, varID);
+  nc_type xtype = cdfDefDatatype(dtype, streamptr);
+
   int ncvarID = -1;
   cdf_def_var(fileID, name, xtype, ndims, dims, &ncvarID);
 
-  cdfDefVarChunkCache(fileID, ncvarID);
+  chunkCacheSize *= cdf_xtype_to_numbytes(xtype);
+  cdfDefVarChunkCache(fileID, ncvarID, chunkCacheSize);
 
 #ifdef HAVE_NETCDF4
 #ifdef NC_QUANTIZE_BITROUND

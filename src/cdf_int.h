@@ -99,6 +99,9 @@ int cdi_nc_enddef_serial(int ncid, int streamID);
 int cdi_nc__enddef_serial(int ncid, int streamID, size_t hdr_pad, size_t v_align, size_t v_minfree, size_t r_align);
 typedef int (*cdi_nc_enddef_funcp)(int ncid, int streamID);
 typedef int (*cdi_nc__enddef_funcp)(int ncid, int streamID, size_t hdr_pad, size_t v_align, size_t v_minfree, size_t r_align);
+
+size_t cdf_xtype_to_numbytes(nc_type xtype);
+
 #endif
 
 #endif /* CDF_INT_H */

@@ -800,6 +800,28 @@ cdf_def_var_chunking(int ncid, int varid, int storage, const size_t *chunksizesp
 }
 #endif
 
+size_t
+cdf_xtype_to_numbytes(nc_type xtype)
+{
+  size_t numBytes = 8;
+
+  // clang-format off
+  if      (xtype == NC_BYTE  )  numBytes = 1;
+  else if (xtype == NC_CHAR  )  numBytes = 1;
+  else if (xtype == NC_SHORT )  numBytes = 2;
+  else if (xtype == NC_INT   )  numBytes = 4;
+  else if (xtype == NC_FLOAT )  numBytes = 4;
+#ifdef HAVE_NETCDF4
+  else if (xtype == NC_UBYTE )  numBytes = 1;
+  else if (xtype == NC_USHORT)  numBytes = 2;
+  else if (xtype == NC_LONG  )  numBytes = 4;
+  else if (xtype == NC_UINT  )  numBytes = 4;
+#endif
+  // clang-format on
+
+  return numBytes;
+}
+
 #endif
 /*
  * Local Variables:

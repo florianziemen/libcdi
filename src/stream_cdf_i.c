@@ -3533,28 +3533,6 @@ cdf_define_institut_and_model_id(int vlistID, int varID)
   if (varTableID != CDI_UNDEFID) vlistDefVarTable(vlistID, varID, varTableID);
 }
 
-static size_t
-cdf_xtype_to_numbytes(int xtype)
-{
-  size_t numBytes = 8;
-
-  // clang-format off
-  if      (xtype == NC_BYTE  )  numBytes = 1;
-  else if (xtype == NC_CHAR  )  numBytes = 1;
-  else if (xtype == NC_SHORT )  numBytes = 2;
-  else if (xtype == NC_INT   )  numBytes = 4;
-  else if (xtype == NC_FLOAT )  numBytes = 4;
-#ifdef HAVE_NETCDF4
-  else if (xtype == NC_UBYTE )  numBytes = 1;
-  else if (xtype == NC_USHORT)  numBytes = 2;
-  else if (xtype == NC_LONG  )  numBytes = 4;
-  else if (xtype == NC_UINT  )  numBytes = 4;
-#endif
-  // clang-format on
-
-  return numBytes;
-}
-
 static inline size_t
 size_of_dim_chunks(size_t n, size_t c)
 {

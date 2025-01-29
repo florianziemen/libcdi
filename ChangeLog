@@ -4,6 +4,7 @@
 
 2025-01-29  Uwe Schulzweida
 
+	* Added CDI_KEY_CHUNKSIZE_DIMZ
 	* Added CDI_KEY_CHUNKSIZE_DIMT
 
 2025-01-14  Uwe Schulzweida

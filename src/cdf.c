@@ -200,7 +200,7 @@ static void
 cdfCloseFile(int fileID)
 {
 
-  if (CDF_Debug) Message( "Closing cdf file: %d", fileID);
+  if (CDF_Debug) Message("Closing cdf file: %d", fileID);
   cdf_close(fileID);
 }
 
@@ -209,6 +209,7 @@ cdfClose(int fileID)
 {
   cdfCloseFile(fileID);
 }
+
 #endif
 /*
  * Local Variables:
