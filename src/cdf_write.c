@@ -764,10 +764,13 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
   int timetype = vlistInqVarTimetype(vlistID, varID);
   if (vlistHasTime(vlistID) && timetype != TIME_CONSTANT)
     {
+      int chunkSize = 0;
+      cdiInqKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_CHUNKSIZE_DIMT, &chunkSize);
+      printf("chunkSize %d\n", chunkSize);
       int tid = streamptr->basetime.ncdimid;
       if (tid == CDI_UNDEFID) Error("Internal problem, time undefined!");
       axis[iax++] = 'T';
-      chunks[ndims] = 1;
+      chunks[ndims] = (chunkSize > 0) ? chunkSize : 1;
       dims[ndims] = tid;
       ndims++;
     }

@@ -846,6 +846,7 @@ SizeType gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_NLEV                          964  // GRIB2 nlev
 #define  CDI_KEY_CHUNKTYPE                     965  // ChunkType: CDI_CHUNK_AUTO/CDI_CHUNK_GRID/CDI_CHUNK_LINES
 #define  CDI_KEY_CHUNKSIZE                     966  // ChunkSize
+#define  CDI_KEY_CHUNKSIZE_DIMT                967  // ChunkSize time dimension
 
 // Floating point keys
 #define  CDI_KEY_MISSVAL                       701  // Missing value
