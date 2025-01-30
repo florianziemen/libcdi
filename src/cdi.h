@@ -848,6 +848,8 @@ SizeType gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_CHUNKSIZE                     966  // ChunkSize
 #define  CDI_KEY_CHUNKSIZE_DIMT                967  // ChunkSize time dimension
 #define  CDI_KEY_CHUNKSIZE_DIMZ                968  // ChunkSize zaxis dimension
+#define  CDI_KEY_CHUNKSIZE_DIMY                969  // ChunkSize yaxis dimension
+#define  CDI_KEY_CHUNKSIZE_DIMX                970  // ChunkSize xaxis dimension
 
 // Floating point keys
 #define  CDI_KEY_MISSVAL                       701  // Missing value

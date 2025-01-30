@@ -52,6 +52,7 @@ typedef struct
 
 typedef struct
 {
+  int cdiVarID;
   int ncid;
   int varStatus;
   bool ignoreVar;
@@ -551,7 +552,7 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
               check_dimids[dimid0] = true;
 
               char sbuf[CDI_MAX_NAME];
-              for (int iatt = 0; iatt < ncvar->nattsNC; ++iatt)
+              for (int iatt = 0, n = ncvar->nattsNC; iatt < n; ++iatt)
                 {
                   sbuf[0] = 0;
                   cdf_inq_attname(fileID, varid, iatt, sbuf);
@@ -588,6 +589,7 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
   for (int varid = 0; varid < nvars; varid++)
     {
       ncvar_t *ncvar = &ncvars[varid];
+      ncvar->cdiVarID = CDI_UNDEFID;
       ncvar->ncid = ncid;
       ncvar->varStatus = UndefVar;
       ncvar->ignoreVar = false;
@@ -1248,10 +1250,9 @@ set_vars_timetype(int nvars, ncvar_t *ncvars, int timedimid)
             }
           else
             {
-              int nvdims = ncvar->ndims;
-              for (int vdimid = 1; vdimid < nvdims; vdimid++)
+              for (int i = 1, n = ncvar->ndims; i < n; i++)
                 {
-                  if (timedimid == ncvar->dimids[vdimid])
+                  if (timedimid == ncvar->dimids[i])
                     {
                       Warning("Time must be the first dimension! Unsupported array structure, skipped variable %s!", ncvar->name);
                       ncvar->varStatus = CoordVar;
@@ -1644,15 +1645,15 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
 static void
 cdf_set_chunk_info(stream_t *streamptr, int nvars, ncvar_t *ncvars)
 {
+  int vlistID = streamptr->vlistID;
   CdfInfo *cdfInfo = &(streamptr->cdfInfo);
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
-      if (ncvar->varStatus == DataVar)
+      int varID = ncvar->cdiVarID;
+      if (ncvar->varStatus == DataVar && ncvar->isChunked && varID != CDI_UNDEFID)
         {
-          int ndims = ncvar->ndims;
-          ncvar->isChunked = true;
-          for (int i = 0; i < ndims; ++i)
+          for (int i = 0, n = ncvar->ndims; i < n; ++i)
             {
               size_t chunkSize = ncvar->chunks[i];
               if (chunkSize > 1)
@@ -1661,6 +1662,14 @@ cdf_set_chunk_info(stream_t *streamptr, int nvars, ncvar_t *ncvars)
                   // clang-format off
                   if      (dimType == T_AXIS && chunkSize > cdfInfo->chunkSizeTdim) cdfInfo->chunkSizeTdim = chunkSize;
                   else if (dimType == Z_AXIS && chunkSize > cdfInfo->chunkSizeZdim) cdfInfo->chunkSizeZdim = chunkSize;
+
+                  if (CDI_CopyChunkSpec)
+                    {
+                      if      (dimType == T_AXIS) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMT, chunkSize);
+                      else if (dimType == Z_AXIS) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMZ, chunkSize);
+                      else if (dimType == Y_AXIS) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMY, chunkSize);
+                      else if (dimType == X_AXIS) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMX, chunkSize);
+                    }
                   // clang-format on
                 }
             }
@@ -1692,9 +1701,9 @@ verify_vars_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
           cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
 
           size_t attstringsize = sizeof(attstring);
-          bool isText = xtypeIsText(atttype);
           // bool isNumber = (xtypeIsFloat(atttype) || xtypeIsInt(atttype));
 
+          bool isText = xtypeIsText(atttype);
           if (isText)
             {
               cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
@@ -1721,8 +1730,7 @@ find_dimtypes(ncvar_t *ncvars, ncvar_t *ncvar, bool *plxdim, bool *plydim, bool 
 {
   bool lxdim = false, lydim = false, lzdim = false /*, ltdim = false */;
   int lcdim = 0;
-  int ndims = ncvar->ndims;
-  for (int i = 0; i < ndims; i++)
+  for (int i = 0, n = ncvar->ndims; i < n; i++)
     {
       int dimtype = ncvar->dimtypes[i];
       lxdim |= (dimtype == X_AXIS);
@@ -1749,8 +1757,7 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
       ncvar_t *ncvar = &ncvars[varid];
       if (ncvar->varStatus == DataVar)
         {
-          int ndims = ncvar->ndims;
-          for (int i = 0; i < ndims; i++)
+          for (int i = 0, n = ncvar->ndims; i < n; i++)
             {
               int ncdimid = ncvar->dimids[i];
               int dimtype = ncdims[ncdimid].dimtype;
@@ -1760,7 +1767,7 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
           if (CDI_Debug)
             {
               Message("var %d %s", varid, ncvar->name);
-              for (int i = 0; i < ndims; i++) printf("  dim%d type=%d  ", i, ncvar->dimtypes[i]);
+              for (int i = 0, n = ncvar->ndims; i < n; i++) printf("  dim%d type=%d  ", i, ncvar->dimtypes[i]);
               printf("\n");
             }
         }
@@ -1801,8 +1808,7 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
   for (int varid = 0; varid < nvars; varid++)
     {
       ncvar_t *ncvar = &ncvars[varid];
-      int ndims = ncvar->ndims;
-      for (int i = 0; i < ndims; i++)
+      for (int i = 0, n = ncvar->ndims; i < n; i++)
         {
           if (ncvar->dimtypes[i] == CDI_UNDEFID)
             {
@@ -3601,6 +3607,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
 
       stream_new_var(streamptr, gridID, zaxisID, CDI_UNDEFID);
       int varID = vlistDefVar(vlistID, gridID, zaxisID, ncvar->timetype);
+      ncvar->cdiVarID = varID;
 
 #ifdef HAVE_NETCDF4
       if (ncvar->hasFilter) cdiDefKeyString(vlistID, varID, CDI_KEY_FILTERSPEC_IN, ncvar->filterSpec);
@@ -4717,8 +4724,7 @@ cdfInqContents(stream_t *streamptr)
   if (status < 0) return status;
 
   // verify vars
-  cdfVerifyVars(nvars, ncvars  //, ncdims
-  );
+  cdfVerifyVars(nvars, ncvars);
 
   // select vars
   int nvarsData = 0;

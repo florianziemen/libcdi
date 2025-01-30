@@ -47,6 +47,7 @@ int CDI_Reduce_Dim = 0;
 int CDI_Shuffle = 0;
 int CDI_Test = 0;
 size_t CDI_Netcdf_Hdr_Pad = 0UL;
+bool CDI_CopyChunkSpec = false;
 bool CDI_Chunk_Cache_Info = false;
 long CDI_Chunk_Cache = -1L;
 size_t CDI_Chunk_Cache_Max = 0UL;
@@ -367,6 +368,9 @@ cdiInitialize(void)
 
       value = cdi_getenv_int("CDI_NETCDF_HDR_PAD");
       if (value >= 0) CDI_Netcdf_Hdr_Pad = (size_t) value;
+
+      value = cdi_getenv_int("CDI_COPY_CHUNKSPEC");
+      if (value >= 0) CDI_CopyChunkSpec = (value > 0);
 
       value = cdi_getenv_int("CDI_CHUNK_CACHE_INFO");
       if (value > 0) CDI_Chunk_Cache_Info = true;
