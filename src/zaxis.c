@@ -1139,7 +1139,7 @@ static inline void
 zaxisCopyKeyStr(zaxis_t *zaxisptr1, zaxis_t *zaxisptr2, int key)
 {
   cdi_key_t *keyp = find_key(&zaxisptr1->keys, key);
-  if (keyp && keyp->type == KEY_BYTES)
+  if (keyp && keyp->type == KeyBytes)
     cdiDefVarKeyBytes(&zaxisptr2->keys, key, (const unsigned char *) keyp->v.s, (int) keyp->length);
 }
 
