@@ -2,6 +2,10 @@
 
 	* Version 2.5.1 released
 
+2025-02-01  Uwe Schulzweida
+
+	* Added support for READ_CELL_CENTER=false
+
 2025-01-30  Uwe Schulzweida
 
 	* Added CDI_KEY_CHUNKSIZE_DIMX

@@ -41,6 +41,7 @@ int CDI_Inventory_Mode = 1;
 int CDI_Version_Info = 1;
 int CDI_Query_Abort = 1;
 int CDI_Convert_Cubesphere = 1;
+int CDI_Read_Cell_Center = 1;
 int CDI_Read_Cell_Corners = 1;
 int CDI_CMOR_Mode = 0;
 int CDI_Reduce_Dim = 0;
@@ -348,6 +349,9 @@ cdiInitialize(void)
       value = cdi_getenv_int("CDI_LOCK_IO");
       if (value >= 0) CDI_Lock_IO = (bool) value;
 
+      value = cdi_getenv_int("CDI_READ_CELL_CENTER");
+      if (value >= 0) CDI_Read_Cell_Center = (int) value;
+
       value = cdi_getenv_int("CDI_READ_CELL_CORNERS");
       if (value >= 0) CDI_Read_Cell_Corners = (int) value;
 
@@ -519,6 +523,7 @@ cdiDefGlobal(const char *string, int value)
   else if (str_is_equal(string, "SORTNAME"))              cdiSortName = value;
   else if (str_is_equal(string, "HAVE_MISSVAL"))          cdiHaveMissval = value;
   else if (str_is_equal(string, "NC_CHUNKSIZEHINT"))      CDI_Netcdf_Chunksizehint = value;
+  else if (str_is_equal(string, "READ_CELL_CENTER"))      CDI_Read_Cell_Center = value;
   else if (str_is_equal(string, "READ_CELL_CORNERS"))     CDI_Read_Cell_Corners = value;
   else if (str_is_equal(string, "CMOR_MODE"))             CDI_CMOR_Mode = value;
   else if (str_is_equal(string, "REDUCE_DIM"))            CDI_Reduce_Dim = value;

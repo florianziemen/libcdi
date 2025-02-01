@@ -417,6 +417,7 @@ extern int CDI_Inventory_Mode;
 extern int CDI_Query_Abort;
 extern int CDI_Version_Info;
 extern int CDI_Convert_Cubesphere;
+extern int CDI_Read_Cell_Center;
 extern int CDI_Read_Cell_Corners;
 extern int CDI_CMOR_Mode;
 extern int CDI_Reduce_Dim;

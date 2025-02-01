@@ -2295,6 +2295,7 @@ cdf_check_gridtype(int *gridtype, bool isLon, bool isLat, size_t xsize, size_t y
 {
   if (isLat && (isLon || xsize == 0))
     {
+      // Failed with CDI_Netcdf_Lazy_Grid_Load
       double yinc = 0.0;
       if (isLon && ysize > 1)
         {
@@ -2397,8 +2398,10 @@ cdf_read_xcoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdi
       grid->x.clength = size / (*xsize);
 #endif
     }
-  else
-    cdf_load_vals(size, ndims, xvarid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, hasTimeDim, readPart, start, count);
+  else if (CDI_Read_Cell_Center)
+    {
+      cdf_load_vals(size, ndims, xvarid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, hasTimeDim, readPart, start, count);
+    }
 
   cdf_copy_grid_axis_attr(axisvar, &grid->x);
 
@@ -2479,8 +2482,10 @@ cdf_read_ycoord(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdi
       grid->y.clength = size / (*ysize);
 #endif
     }
-  else
-    cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet, hasTimeDim, readPart, start, count);
+  else if (CDI_Read_Cell_Center)
+    {
+      cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet, hasTimeDim, readPart, start, count);
+    }
 
   cdf_copy_grid_axis_attr(axisvar, &grid->y);
 
