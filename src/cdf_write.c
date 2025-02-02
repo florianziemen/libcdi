@@ -805,14 +805,22 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
         }
       else if (dimorder[id] == 2 && yid != CDI_UNDEFID)
         {
-          chunks[ndims] = calc_chunksize_y(chunkType, gridsize, xsize, ysize);
+          int chunkSizeDimY = 0;
+          cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMY, &chunkSizeDimY);
+          if (chunkSizeDimY == -1) chunkSizeDimY = ysize;
+          if (chunkSizeDimY == 0) chunkSizeDimY = calc_chunksize_y(chunkType, gridsize, xsize, ysize);
+          chunks[ndims] = chunkSizeDimY;
           dims[ndims] = yid;
           chunkCacheSize *= ysize;
           ndims++;
         }
       else if (dimorder[id] == 1 && xid != CDI_UNDEFID)
         {
-          chunks[ndims] = calc_chunksize_x(chunkType, chunkSize, xsize, isReg2dGrid);
+          int chunkSizeDimX = 0;
+          cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMX, &chunkSizeDimX);
+          if (chunkSizeDimX == -1) chunkSizeDimX = xsize;
+          if (chunkSizeDimX == 0) chunkSizeDimX = calc_chunksize_x(chunkType, chunkSize, xsize, isReg2dGrid);
+          chunks[ndims] = chunkSizeDimX;
           dims[ndims] = xid;
           chunkCacheSize *= xsize;
           ndims++;

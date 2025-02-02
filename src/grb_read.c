@@ -111,7 +111,8 @@ grib1_unzip_record(void *gribbuffer, size_t *gribsize)
 
 typedef struct JobArgsGRB
 {
-  int recID, tsID, *outZip, filetype, memType, datatype, unreduced;
+  int *outZip;
+  int recID, tsID, filetype, memType, datatype, unreduced;
   void *cgribexp, *gribbuffer, *data;
   size_t recsize, gridsize, numMissVals;
   double missval;
