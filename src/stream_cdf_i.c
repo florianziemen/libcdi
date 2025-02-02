@@ -2293,9 +2293,14 @@ cdf_get_xydimid(int ndims, int *dimids, int *dimtypes, int *xdimid, int *ydimid)
 static void
 cdf_check_gridtype(int *gridtype, bool isLon, bool isLat, size_t xsize, size_t ysize, grid_t *grid)
 {
+  if (grid->y.vals == NULL)
+    {
+      *gridtype = GRID_GENERIC;
+      return;
+    }
+
   if (isLat && (isLon || xsize == 0))
     {
-      // Failed with CDI_Netcdf_Lazy_Grid_Load
       double yinc = 0.0;
       if (isLon && ysize > 1)
         {
