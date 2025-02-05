@@ -590,6 +590,24 @@ stream_def_accesstype(stream_t *s, int type)
     Error("Changing access type from %s not allowed!", s->accesstype == TYPE_REC ? "REC to VAR" : "VAR to REC");
 }
 
+int
+cdi_has_dap()
+{
+#ifdef HAVE_LIBNC_DAP
+  return 1;
+#endif
+  return 0;
+}
+
+int
+cdi_has_cgribex()
+{
+#ifdef HAVE_LIBCGRIBEX
+  return 1;
+#endif
+  return 0;
+}
+
 /*
  * Local Variables:
  * c-file-style: "Java"
