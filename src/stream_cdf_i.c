@@ -1649,6 +1649,10 @@ cdf_set_chunk_info(stream_t *streamptr, int nvars, ncvar_t *ncvars)
   CdfInfo *cdfInfo = &(streamptr->cdfInfo);
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
+      int chunkSizeDimT = 0;
+      int chunkSizeDimZ = 0;
+      int chunkSizeDimY = 0;
+      int chunkSizeDimX = 0;
       ncvar_t *ncvar = &ncvars[ncvarid];
       int varID = ncvar->cdiVarID;
       if (ncvar->varStatus == DataVar && ncvar->isChunked && varID != CDI_UNDEFID)
@@ -1660,18 +1664,22 @@ cdf_set_chunk_info(stream_t *streamptr, int nvars, ncvar_t *ncvars)
                 {
                   int dimType = ncvar->dimtypes[i];
                   // clang-format off
-                  if      (dimType == T_AXIS && chunkSize > cdfInfo->chunkSizeTdim) cdfInfo->chunkSizeTdim = chunkSize;
-                  else if (dimType == Z_AXIS && chunkSize > cdfInfo->chunkSizeZdim) cdfInfo->chunkSizeZdim = chunkSize;
+                  if      (dimType == T_AXIS && chunkSize > cdfInfo->chunkSizeDimT) cdfInfo->chunkSizeDimT = chunkSize;
+                  else if (dimType == Z_AXIS && chunkSize > cdfInfo->chunkSizeDimZ) cdfInfo->chunkSizeDimZ = chunkSize;
 
-                  if (CDI_CopyChunkSpec)
-                    {
-                      if      (dimType == T_AXIS) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMT, chunkSize);
-                      else if (dimType == Z_AXIS) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMZ, chunkSize);
-                      else if (dimType == Y_AXIS) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMY, chunkSize);
-                      else if (dimType == X_AXIS) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMX, chunkSize);
-                    }
-                  // clang-format on
+                  if      (dimType == T_AXIS) chunkSizeDimT = chunkSize;
+                  else if (dimType == Z_AXIS) chunkSizeDimZ = chunkSize;
+                  else if (dimType == Y_AXIS) chunkSizeDimY = chunkSize;
+                  else if (dimType == X_AXIS) chunkSizeDimX = chunkSize;
+                  // clang-format onw
                 }
+            }
+          if ((CDI_CopyChunkSpec || chunkSizeDimT == 0) && CDI_RemoveChunkSpec == false)
+            {
+              if (chunkSizeDimT > 0) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMT, chunkSizeDimT);
+              if (chunkSizeDimZ > 0) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMZ, chunkSizeDimZ);
+              if (chunkSizeDimY > 0) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMY, chunkSizeDimY);
+              if (chunkSizeDimX > 0) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMX, chunkSizeDimX);
             }
         }
     }

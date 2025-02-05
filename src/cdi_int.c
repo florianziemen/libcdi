@@ -49,6 +49,7 @@ int CDI_Shuffle = 0;
 int CDI_Test = 0;
 size_t CDI_Netcdf_Hdr_Pad = 0UL;
 bool CDI_CopyChunkSpec = false;
+bool CDI_RemoveChunkSpec = false;
 bool CDI_Chunk_Cache_Info = false;
 long CDI_Chunk_Cache = -1L;
 size_t CDI_Chunk_Cache_Max = 0UL;
@@ -376,6 +377,9 @@ cdiInitialize(void)
       value = cdi_getenv_int("CDI_COPY_CHUNKSPEC");
       if (value >= 0) CDI_CopyChunkSpec = (value > 0);
 
+      value = cdi_getenv_int("CDI_REMOVE_CHUNKSPEC");
+      if (value >= 0) CDI_RemoveChunkSpec = (value > 0);
+
       value = cdi_getenv_int("CDI_CHUNK_CACHE_INFO");
       if (value > 0) CDI_Chunk_Cache_Info = true;
 
@@ -529,6 +533,8 @@ cdiDefGlobal(const char *string, int value)
   else if (str_is_equal(string, "REDUCE_DIM"))            CDI_Reduce_Dim = value;
   else if (str_is_equal(string, "NETCDF_HDR_PAD"))        CDI_Netcdf_Hdr_Pad = (size_t) value;
   else if (str_is_equal(string, "NETCDF_LAZY_GRID_LOAD")) CDI_Netcdf_Lazy_Grid_Load = (bool) value;
+  else if (str_is_equal(string, "COPY_CHUNKSPEC"))        CDI_CopyChunkSpec = (bool) value;
+  else if (str_is_equal(string, "REMOVE_CHUNKSPEC"))      CDI_RemoveChunkSpec = (bool) value;
   else Warning("Unsupported global key: %s", string);
   // clang-format on
 }

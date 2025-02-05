@@ -280,8 +280,8 @@ typedef struct
   int ncDimIdVec[MAX_DIMS_PS];
   size_t ncDimLenVec[MAX_DIMS_PS];
   int ncNumDims;
-  size_t chunkSizeTdim;
-  size_t chunkSizeZdim;
+  size_t chunkSizeDimT;
+  size_t chunkSizeDimZ;
   VCT vct;
 } CdfInfo;
 #endif
@@ -424,6 +424,7 @@ extern int CDI_Reduce_Dim;
 extern int CDI_Shuffle;
 extern size_t CDI_Netcdf_Hdr_Pad;
 extern bool CDI_CopyChunkSpec;
+extern bool CDI_RemoveChunkSpec;
 extern bool CDI_Chunk_Cache_Info;
 extern long CDI_Chunk_Cache;
 extern size_t CDI_Chunk_Cache_Max;

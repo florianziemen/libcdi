@@ -252,9 +252,9 @@ streamDefNumWorker(int streamID, int numWorker)
               if (streamptr->maxGlobalRecs == 1) numWorker = 0;
               if (numWorker > streamptr->maxGlobalRecs) numWorker = (int) streamptr->maxGlobalRecs;
               CdfInfo *cdfInfo = &(streamptr->cdfInfo);
-              if (cdfInfo->chunkSizeTdim > 1 && numWorker > streamptr->nvars) numWorker = streamptr->nvars;
-              if (cdfInfo->chunkSizeZdim > 1) numWorker = 0;
-              if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", cdfInfo->chunkSizeTdim, cdfInfo->chunkSizeZdim);
+              if (cdfInfo->chunkSizeDimT > 1 && numWorker > streamptr->nvars) numWorker = streamptr->nvars;
+              if (cdfInfo->chunkSizeDimZ > 1) numWorker = 0;
+              if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", cdfInfo->chunkSizeDimT, cdfInfo->chunkSizeDimZ);
             }
 #endif
           else
@@ -1096,8 +1096,8 @@ streamDefaultValue(stream_t *streamptr)
   for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimIdVec[i] = CDI_UNDEFID;
   for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimLenVec[i] = 0;
 
-  cdfInfo->chunkSizeTdim = 0;
-  cdfInfo->chunkSizeZdim = 0;
+  cdfInfo->chunkSizeDimT = 0;
+  cdfInfo->chunkSizeDimZ = 0;
 
   cdfInfo->vct.ilev = 0;
   cdfInfo->vct.mlev = 0;
