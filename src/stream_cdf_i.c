@@ -140,7 +140,6 @@ typedef struct
   char longname[CDI_MAX_NAME];
   char stdname[CDI_MAX_NAME];
   char units[CDI_MAX_NAME];
-  char extra[CDI_MAX_NAME];
   char filterSpec[CDI_MAX_NAME];
 } ncvar_t;
 
@@ -678,7 +677,6 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
       memset(ncvar->longname, 0, CDI_MAX_NAME);
       memset(ncvar->stdname, 0, CDI_MAX_NAME);
       memset(ncvar->units, 0, CDI_MAX_NAME);
-      memset(ncvar->extra, 0, CDI_MAX_NAME);
       memset(ncvar->filterSpec, 0, CDI_MAX_NAME);
     }
 }
@@ -1059,21 +1057,6 @@ cdf_get_cell_varid(char *attstring, int ncid)
   return nc_cell_id;
 }
 
-static void
-set_extra_attr(char *buf, int nvdims, const size_t *chunks)
-{
-  size_t pos = strlen(buf);
-  static const char prefix[] = "chunks=";
-  memcpy(buf + pos, prefix, sizeof(prefix));
-  pos += sizeof(prefix) - 1;
-  for (int i = nvdims - 1; i >= 0; --i)
-    {
-      pos += (size_t) (snprintf(buf + pos, CDI_MAX_NAME - pos, "%zu%s", chunks[i], i > 0 ? "x" : ""));
-    }
-  buf[pos] = ' ';
-  buf[pos + 1] = 0;
-}
-
 static bool
 is_valid_coordinate(ncvar_t *ncvar)
 {
@@ -1186,8 +1169,6 @@ set_vars_chunks(int ncid, int ncvarid, int nvdims, ncvar_t *ncvar)
               for (int i = 0; i < nvdims; ++i) fprintf(stderr, "%zu ", chunks[i]);
               fprintf(stderr, "\n");
             }
-
-          set_extra_attr(ncvar->extra, nvdims, chunks);
         }
     }
 
@@ -3724,8 +3705,6 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
           if (ncvar->numberOfForecastsInEnsemble != -1)
             cdiDefKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, ncvar->typeOfEnsembleForecast);
         }
-
-      if (ncvar->extra[0] != 0) cdiDefKeyString(vlistID, varID, CDI_KEY_CHUNKS, ncvar->extra);
     }
 
   for (int varID = 0; varID < nvars; varID++)
