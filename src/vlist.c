@@ -1013,8 +1013,13 @@ int
 vlistNumGrids(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
   return vlistptr->ngrids;
+}
+
+int
+vlistNgrids(int vlistID)
+{
+  return vlistNumGrids(vlistID);
 }
 
 /*
@@ -1037,15 +1042,19 @@ int
 vlistNumZaxis(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
   return vlistptr->nzaxis;
+}
+
+int
+vlistNzaxis(int vlistID)
+{
+  return vlistNumZaxis(vlistID);
 }
 
 int
 vlistNsubtypes(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
   return vlistptr->nsubtypes;
 }
 
@@ -1066,7 +1075,6 @@ int
 vlistNtsteps(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
   return (int) vlistptr->ntsteps;
 }
 

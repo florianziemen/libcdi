@@ -2,6 +2,10 @@
 
 	* Version 2.5.1 released
 
+2025-02-06  Uwe Schulzweida
+
+	* Added obsolete functions vlistNgrids() and vlistNzaxis() for ParaView vtkCDIReader
+
 2025-02-01  Uwe Schulzweida
 
 	* Added support for READ_CELL_CENTER=false

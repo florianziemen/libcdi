@@ -1315,6 +1315,10 @@ int  vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID);
 void vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGeneratingProcess);
 void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDefinitionTemplate);
 
+// Compatibility functions for ParaView vtkCDIReader (obsolete functions)
+int vlistNgrids(int vlistID); // calls vlistNumGrids()
+int vlistNzaxis(int vlistID); // calls vlistNumZaxis()
+
 #ifdef __cplusplus
 }
 #endif
