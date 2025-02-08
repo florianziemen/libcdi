@@ -21,6 +21,9 @@ AM_INIT_AUTOMAKE([1.16.1 foreign])
 AM_MAINTAINER_MODE([enable])
 AM_EXTRA_RECURSIVE_TARGETS([examples])
 
+AC_MSG_NOTICE([setting up libtool])
+LT_INIT
+
 dnl Tests for the C compiler:
 dnl   Make sure conftest.dSYM is removed when configured on MacOS with
 dnl   CFLAGS='-g':
