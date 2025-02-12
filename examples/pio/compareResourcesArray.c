@@ -60,7 +60,7 @@ defineGrid()
   cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, "myXunits");
   cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, "myYunits");
 
-  gridDefDatatype(gridID, DOUBLE_PRECISION);
+  cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, DOUBLE_PRECISION);
   gridDefTrunc(gridID, 1);
 
   cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, 6);

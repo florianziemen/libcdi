@@ -63,7 +63,7 @@ defineGrid(void)
   cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_UNITS, "myXunits");
   cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, "myYunits");
 
-  gridDefDatatype(gridID, DOUBLE_PRECISION);
+  cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, DOUBLE_PRECISION);
   gridDefTrunc(gridID, 1);
   gridDefParamGME(gridID, 2, 3, 4, 5);
 
@@ -164,7 +164,7 @@ defineVlist(int gridID, int zaxisID, int taxisID)
   cdiDefAttTxt(vlistID, varID2, "txt demo", 6, "banana");
   vlistDefTaxis(vlistID, taxisID);
   int vlistID2 = vlistDuplicate(vlistID);
-  return (struct idPair){ vlistID, vlistID2 };
+  return (struct idPair) { vlistID, vlistID2 };
 }
 
 static int
