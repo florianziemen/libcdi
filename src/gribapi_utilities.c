@@ -591,6 +591,7 @@ gribapiGetGridType(grib_handle *gh)
     case GRIB2_GTYPE_GAUSSIAN: return has_ni(gh) ? GRID_GAUSSIAN : GRID_GAUSSIAN_REDUCED;
     case GRIB2_GTYPE_LATLON_ROT: return GRID_PROJECTION;
     case GRIB2_GTYPE_LCC: return CDI_PROJ_LCC;
+    case GRIB2_GTYPE_LLAM: return CDI_PROJ_LCC;  // Handle LLAM as LCC
     case GRIB2_GTYPE_STERE: return CDI_PROJ_STERE;
     case GRIB2_GTYPE_SPECTRAL: return GRID_SPECTRAL;
     case GRIB2_GTYPE_GME: return GRID_GME;

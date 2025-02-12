@@ -2,6 +2,10 @@
 
 	* Version 2.5.1 released
 
+2025-02-12  Uwe Schulzweida
+
+	* GRIB_API: Handle LLAM as LCC
+
 2025-02-06  Uwe Schulzweida
 
 	* Added obsolete functions vlistNgrids() and vlistNzaxis() for ParaView vtkCDIReader
