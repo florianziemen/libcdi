@@ -11,8 +11,8 @@ include(CheckIncludeFile)
 # Finding libraries
 ### -------------- Pthread ---------------------------
 
-option(enable_pthread "Use the pthread library [default=ON]" ON)
-if(${enable_pthread})
+option(CDI_PTHREAD "Use the pthread library [default=ON]" ON)
+if(${CDI_PTHREAD})
   include(FindThreads)
   find_package(Threads REQUIRED)
   set_target_properties(Threads::Threads PROPERTIES THREADS_PREFER_PTHREAD_FLAG TRUE)
@@ -20,35 +20,35 @@ if(${enable_pthread})
 endif()
 
 # enable default internal libs
-option(enable_libgrib "GRIB support [default=ON]" ON)
-if(${enable_libgrib})
+option(CDI_LIBGRIB "GRIB support [default=ON]" ON)
+if(${CDI_LIBGRIB})
   list(APPEND cdi_compile_defs HAVE_LIBGRIB=1)
 endif()
 
-option(enable_cgribex "Use the CGRIBEX library [default=ON]" ON)
-if(${enable_cgribex})
+option(CDI_LIBGRIBEX "Use the CGRIBEX library [default=ON]" ON)
+if(${CDI_LIBGRIBEX})
   list(APPEND cdi_compile_defs LIBCGRIBEX=1)
 endif()
 
-option(enable_extra "Use the extra library [default=ON]" ON)
-if(${enable_extra})
+option(CDI_EXTRA "Use the extra library [default=ON]" ON)
+if(${CDI_EXTRA})
   list(APPEND cdi_compile_defs HAVE_LIBEXTRA=1)
 endif()
 
-option(enable_ieg "Use the extra library [default=ON]" ON)
-if(${enable_ieg})
+option(CDI_IEG "Use the extra library [default=ON]" ON)
+if(${CDI_IEG})
   list(APPEND cdi_compile_defs HAVE_LIBIEG=1)
 endif()
 
-option(enable_service "Use the extra library [default=ON]" ON)
-if(${enable_service})
+option(CDI_SERVICE "Use the extra library [default=ON]" ON)
+if(${CDI_SERVICE})
   list(APPEND cdi_compile_defs HAVE_LIBSERVICE=1)
 endif()
 
 
 # ecCodes
-option(enable_eccodes "Use the eccodes library [default=ON]" ON)
-if(${enable_eccodes} OR eccodes_ROOT)
+option(CDI_ECCODES "Use the eccodes library [default=ON]" ON)
+if(${CDI_ECCODES} OR eccodes_ROOT)
   find_package(eccodes)
   if (${eccodes_FOUND})
     list(APPEND cdi_compile_defs HAVE_LIBGRIB_API=${eccodes_FOUND})
@@ -59,8 +59,8 @@ if(${enable_eccodes} OR eccodes_ROOT)
 endif()
 
 # NetCDF
-option(enable_netcdf "Use the netcdf library [default=ON]" ON)
-if(${enable_netcdf} OR netCDF_ROOT )
+option(CDI_NETCDF "Use the netcdf library [default=ON]" ON)
+if(${CDI_NETCDF} OR netCDF_ROOT )
   find_package(netCDF COMPONENTS C REQUIRED)
   if (TARGET netCDF::netcdf)
     list(APPEND cdi_compile_defs
