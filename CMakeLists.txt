@@ -17,13 +17,30 @@ set_target_properties(Threads::Threads PROPERTIES THREADS_PREFER_PTHREAD_FLAG TR
 list(APPEND cdi_compile_defs HAVE_PTHREAD=1)
 
 # enable default internal libs
-list(APPEND cdi_compile_defs
-  HAVE_LIBGRIB=1
-  HAVE_LIBCGRIBEX=1
-  HAVE_LIBEXTRA=1
-  HAVE_LIBSERVICE=1
-  HAVE_LIBIEG=1
-)
+option(enable_libgrib "GRIB support [default=ON]" ON)
+if(${enable_libgrib})
+  list(APPEND cdi_compile_defs HAVE_LIBGRIB=1)
+endif()
+
+option(enable_cgribex "Use the CGRIBEX library [default=ON]" ON)
+if(${enable_cgribex})
+  list(APPEND cdi_compile_defs LIBCGRIBEX=1)
+endif()
+
+option(enable_extra "Use the extra library [default=ON]" ON)
+if(${enable_extra})
+  list(APPEND cdi_compile_defs HAVE_LIBEXTRA=1)
+endif()
+
+option(enable_ieg "Use the extra library [default=ON]" ON)
+if(${enable_ieg})
+  list(APPEND cdi_compile_defs HAVE_LIBIEG=1)
+endif()
+
+option(enable_service "Use the extra library [default=ON]" ON)
+if(${enable_service})
+  list(APPEND cdi_compile_defs HAVE_LIBSERVICE=1)
+endif()
 
 # ecCodes
 find_package(eccodes)
