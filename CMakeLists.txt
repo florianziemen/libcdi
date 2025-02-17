@@ -10,11 +10,14 @@ include(CheckIncludeFile)
 
 # Finding libraries
 ### -------------- Pthread ---------------------------
-message("Start check for pthread")
-include(FindThreads)
-find_package(Threads REQUIRED)
-set_target_properties(Threads::Threads PROPERTIES THREADS_PREFER_PTHREAD_FLAG TRUE)
-list(APPEND cdi_compile_defs HAVE_PTHREAD=1)
+
+option(enable_pthread "Use the pthread library [default=ON]" ON)
+if(${enable_pthread})
+  include(FindThreads)
+  find_package(Threads REQUIRED)
+  set_target_properties(Threads::Threads PROPERTIES THREADS_PREFER_PTHREAD_FLAG TRUE)
+  list(APPEND cdi_compile_defs HAVE_PTHREAD=1)
+endif()
 
 # enable default internal libs
 option(enable_libgrib "GRIB support [default=ON]" ON)
@@ -42,29 +45,35 @@ if(${enable_service})
   list(APPEND cdi_compile_defs HAVE_LIBSERVICE=1)
 endif()
 
+
 # ecCodes
-find_package(eccodes)
-if (${eccodes_FOUND})
-  list(APPEND cdi_compile_defs HAVE_LIBGRIB_API=${eccodes_FOUND})
-  message(VERBOSE "added compile definition HAVE_LIBGRIB_API=${eccodes_FOUND}")
-else()
-  message(WARNING "eccodes not found, compiling without eccodes")
-endif ()
+option(enable_eccodes "Use the eccodes library [default=ON]" ON)
+if(${enable_eccodes} OR eccodes_ROOT)
+  find_package(eccodes)
+  if (${eccodes_FOUND})
+    list(APPEND cdi_compile_defs HAVE_LIBGRIB_API=${eccodes_FOUND})
+    message(VERBOSE "added compile definition HAVE_LIBGRIB_API=${eccodes_FOUND}")
+  else()
+    message(WARNING "eccodes not found, compiling without eccodes")
+  endif ()
+endif()
 
 # NetCDF
-find_package(netCDF COMPONENTS C REQUIRED)
-if (TARGET netCDF::netcdf)
-  list(APPEND cdi_compile_defs
-    HAVE_LIBNETCDF=${netCDF_FOUND}
-    HAVE_LIBNC_DAP=${netCDF_FOUND}
-    HAVE_NETCDF4=${netCDF_FOUND}
-    HAVE_LIBGRIB_API=${netCDF_FOUND}
-    HAVE_LIBGRIB=${netCDF_FOUND}
-  )
-  message(VERBOSE "added to list of definitions: ${cdi_compile_defs} ")
-else()
-  message(WARNING "netcdf not found, compiling without netcdf")
-endif ()
+option(enable_netcdf "Use the netcdf library [default=ON]" ON)
+if(${enable_netcdf} OR netCDF_ROOT )
+  find_package(netCDF COMPONENTS C REQUIRED)
+  if (TARGET netCDF::netcdf)
+    list(APPEND cdi_compile_defs
+      HAVE_LIBNETCDF=${netCDF_FOUND}
+      HAVE_LIBNC_DAP=${netCDF_FOUND}
+      HAVE_NETCDF4=${netCDF_FOUND}
+      HAVE_LIBGRIB_API=${netCDF_FOUND}
+      HAVE_LIBGRIB=${netCDF_FOUND}
+    )
+  else()
+    message(WARNING "netcdf target not found, compiling without netcdf")
+  endif ()
+endif()
 
 message(VERBOSE "looking for config.h in: ${PROJECT_BINARY_DIR}/src")
 
