@@ -8,6 +8,13 @@ include(CTest)
 include(CheckIncludeFile)
 
 
+# Finding libraries
+### -------------- Pthread ---------------------------
+message("Start check for pthread")
+include(FindThreads)
+find_package(Threads REQUIRED)
+set_target_properties(Threads::Threads PROPERTIES THREADS_PREFER_PTHREAD_FLAG TRUE)
+list(APPEND cdi_compile_defs HAVE_PTHREAD=1)
 
 # enable default internal libs
 list(APPEND cdi_compile_defs
