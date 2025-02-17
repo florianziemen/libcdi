@@ -6,7 +6,7 @@
 
 #include <ctype.h>
 #include <limits.h>
-#include <strings.h>
+#include <unistd.h>
 
 #include "dmemory.h"
 #include "cdi_int.h"
