@@ -2,6 +2,7 @@
 #include "config.h"
 #endif
 
+#include <unistd.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
