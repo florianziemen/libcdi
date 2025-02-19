@@ -1155,7 +1155,7 @@ set_vars_chunks(int ncid, int ncvarid, int nvdims, ncvar_t *ncvar)
   ncvar->hasFilter = cdf_get_var_filter(ncid, ncvarid, ncvar->filterSpec, CDI_MAX_NAME);
   // if (ncvar->hasFilter) printf("filterSpec: %s=%s\n", ncvar->name, ncvar->filterSpec);
 
-  size_t* chunks = malloc(sizeof(size_t) * nvdims);
+  size_t chunks[MAX_DIMS_CDF];
   int storageIn;
   if (nc_inq_var_chunking(ncid, ncvarid, &storageIn, chunks) == NC_NOERR)
     {
@@ -1171,7 +1171,6 @@ set_vars_chunks(int ncid, int ncvarid, int nvdims, ncvar_t *ncvar)
             }
         }
     }
-  free (chunks);
 
   size_t size;
   size_t nelems;
