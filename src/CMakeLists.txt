@@ -199,7 +199,7 @@ add_library(cdilib
 )
 
 target_include_directories(cdilib PRIVATE "${PROJECT_BINARY_DIR}/src/config.h")
-target_link_libraries(cdilib eccodes netCDF::netcdf)
+target_link_libraries(cdilib ${cdi_linked_libs})
 target_compile_definitions(cdilib PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
 
 add_library(cdilib::cdilib ALIAS cdilib)

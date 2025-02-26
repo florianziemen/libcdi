@@ -17,6 +17,7 @@ if(${CDI_PTHREAD})
   find_package(Threads REQUIRED)
   set_target_properties(Threads::Threads PROPERTIES THREADS_PREFER_PTHREAD_FLAG TRUE)
   list(APPEND cdi_compile_defs HAVE_PTHREAD=1)
+  list(APPEND cdi_linked_libs pthread)
 endif()
 
 # enable default internal libs
@@ -53,6 +54,7 @@ if(${CDI_ECCODES} OR eccodes_ROOT)
   if (${eccodes_FOUND})
     list(APPEND cdi_compile_defs HAVE_LIBGRIB_API=${eccodes_FOUND})
     message(VERBOSE "added compile definition HAVE_LIBGRIB_API=${eccodes_FOUND}")
+    list(APPEND cdi_linked_libs eccodes)
   else()
     message(WARNING "eccodes not found, compiling without eccodes")
   endif ()
@@ -70,6 +72,7 @@ if(${CDI_NETCDF} OR netCDF_ROOT )
       HAVE_LIBGRIB_API=${netCDF_FOUND}
       HAVE_LIBGRIB=${netCDF_FOUND}
     )
+    list(APPEND cdi_linked_libs netCDF::netcdf)
   else()
     message(WARNING "netcdf target not found, compiling without netcdf")
   endif ()
