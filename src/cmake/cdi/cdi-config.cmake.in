@@ -1,9 +1,9 @@
 # Config file for lib CDI project
 # run cmake with CDI_DIR pointing to the directory containing this file.
 
-# set(CDI_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../..")
+set(CDI_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../..")
 # use following line instead of previous if this file can be configured 
-set(CDI_ROOT_DIR "@prefix@")
+# set(CDI_ROOT_DIR "@prefix@")
 
 find_path(CDI_INCLUDE_DIRECTORY
   cdi.h
@@ -15,7 +15,7 @@ find_path(CDI_INCLUDE_DIRECTORY
 mark_as_advanced(CDI_INCLUDE_DIRECTORY)
 
 find_library(CDI_LIBRARY
-  NAMES cdi
+  NAMES cdilib
   PATHS "${CDI_ROOT_DIR}/lib"
   # use following line instead of previous if this file can be configured 
   # PATHS "@libdir@"
