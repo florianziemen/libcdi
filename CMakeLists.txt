@@ -7,7 +7,6 @@ set(CMAKE_C_STANDARD 11)
 include(CTest)
 include(CheckIncludeFile)
 
-
 # Finding libraries
 ### -------------- Pthread ---------------------------
 
@@ -45,7 +44,6 @@ option(CDI_SERVICE "Use the extra library [default=ON]" ON)
 if(${CDI_SERVICE})
   list(APPEND cdi_compile_defs HAVE_LIBSERVICE=1)
 endif()
-
 
 # ecCodes
 option(CDI_ECCODES "Use the eccodes library [default=ON]" ON)
@@ -85,8 +83,13 @@ message(VERBOSE "looking for config.h in: ${PROJECT_BINARY_DIR}/src")
 list(APPEND cdi_compile_defs CDI=1 CDI_SIZE_TYPE=size_t PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}")
 add_subdirectory(src)
 
+#app
+option(CDI_BUILD_APP "Build the app" ON)
+if (CDI_BUILD_APP)
+  add_subdirectory(app)
+endif ()
+
 #tests
-add_subdirectory(app)
-add_subdirectory(tests)
-
-
+if (BUILD_TESTING)
+  add_subdirectory(tests)
+endif ()
