@@ -18,8 +18,16 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <io.h>
 #include <string.h>
+
+// On Windows, define ssize_t and pread manually
+#ifdef _WIN32
+#define ssize_t __int64
+#define pread read
+#else
 #include <unistd.h>
+#endif
 
 #if HAVE_PTHREAD
 #include <pthread.h>

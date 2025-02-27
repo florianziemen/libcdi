@@ -6,7 +6,6 @@
 
 #include <ctype.h>
 #include <limits.h>
-#include <unistd.h>
 
 #include "dmemory.h"
 #include "cdi_int.h"
@@ -18,6 +17,13 @@
 #include "cdf_util.h"
 #include "cdf_lazy_grid.h"
 #include "cdf_filter.h"
+
+// On Windows, define strcasecmp manually
+#ifdef _WIN32
+#define strcasecmp _stricmp
+#else
+#include <unistd.h>
+#endif
 
 enum VarStatus
 {
