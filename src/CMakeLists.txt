@@ -190,6 +190,9 @@ list( APPEND cdi_unknown
   resource_unpack.h
 )
 
+# Support exporting all symbolds on Windows
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 add_library(cdilib
   ${cdi_src_files} ${cdi_unknown}
 #  INSTALL_HEADERS_LIST  cdi.h
