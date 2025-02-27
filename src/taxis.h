@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include "cdi.h"
 
+#include "cdi_key.h"
+
 #ifndef RESOURCE_HANDLE_H
 #include "resource_handle.h"
 #endif
@@ -29,6 +31,7 @@ typedef struct
   char *units;
   bool climatology;
   bool hasBounds;
+  cdi_keys_t keys;
 } taxis_t;
 
 //      taxisInqSdatetime: Get the start date/time
