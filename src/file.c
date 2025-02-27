@@ -14,7 +14,6 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <io.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -26,6 +25,7 @@
 // On Windows, define ssize_t manually
 #ifdef _WIN32
 #define ssize_t __int64
+#include <io.h>
 #else
 #include <unistd.h>
 #endif
