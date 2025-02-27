@@ -100,6 +100,7 @@ cdiUnescapeSpaces(const char *string, const char **outStringEnd)
   return result;
 }
 
+#ifndef _WIN32
 #if defined(HAVE_DECL_UUID_GENERATE) && defined(HAVE_UUID_UUID_H)
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -251,6 +252,7 @@ cdiCreateUUID(unsigned char *uuid)
   seed48(caller_rand_state);
 #endif
 }
+#endif
 #endif
 
 /*
