@@ -14,6 +14,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <float.h>
+
+// Required on windows to be able to use M_PI
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 #ifndef M_SQRT2
