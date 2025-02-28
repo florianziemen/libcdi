@@ -190,11 +190,17 @@ list( APPEND cdi_unknown
   resource_unpack.h
 )
 
+option(CDI_BUILD_UNKNOWN "Build unknown sources in libcdi" ON)
+mark_as_advanced(CDI_BUILD_UNKNOWN)
+if (CDI_BUILD_UNKNOWN)
+  list(APPEND cdi_src_files ${cdi_unknown})
+endif ()
+
 # Support exporting all symbolds on Windows
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 add_library(cdilib
-  ${cdi_src_files} ${cdi_unknown}
+  ${cdi_src_files}
 #  INSTALL_HEADERS_LIST  cdi.h
 )
 
