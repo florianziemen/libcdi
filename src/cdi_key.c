@@ -12,6 +12,7 @@
 
 #include "cdi.h"
 #include "cdi_int.h"
+#include "taxis.h"
 #include "zaxis.h"
 #include "grid.h"
 #include "vlist.h"
@@ -41,6 +42,12 @@ static cdi_keys_t *
 zaxis_get_keysp(zaxis_t *zaxisptr, int varID)
 {
   return (varID == CDI_GLOBAL) ? &zaxisptr->keys : NULL;
+}
+
+static cdi_keys_t *
+taxis_get_keysp(taxis_t *taxisptr, int varID)
+{
+  return (varID == CDI_GLOBAL) ? &taxisptr->keys : NULL;
 }
 
 static cdi_key_t *
@@ -100,6 +107,7 @@ cdi_get_keysp(int objID, int varID)
   if (reshID == GRID) return grid_get_keysp(grid_to_pointer(objID), varID);
   if (reshID == DIST_GRID) return grid_get_keysp(grid_to_pointer(objID), varID);
   if (reshID == ZAXIS) return zaxis_get_keysp(zaxis_to_pointer(objID), varID);
+  if (reshID == TAXIS) return taxis_get_keysp(taxis_to_pointer(objID), varID);
   if (reshID == VLIST) return vlist_get_keysp(vlist_to_pointer(objID), varID);
 
   return NULL;

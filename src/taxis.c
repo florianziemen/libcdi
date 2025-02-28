@@ -122,7 +122,6 @@ ptaxisInit(taxis_t *taxisptr)
 
   cdiInitKeys(&taxisptr->keys);
   cdiDefVarKeyInt(&taxisptr->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
-  taxisptr->datatype = CDI_DATATYPE_FLT64;
 }
 
 static taxis_t *
@@ -239,7 +238,6 @@ taxisDefType(int taxisID, int taxistype)
     {
       taxisptr->type = taxistype;
       cdiDefVarKeyInt(&taxisptr->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
-      taxisptr->datatype = CDI_DATATYPE_FLT64;
       delete_refcount_string(taxisptr->units);
       taxisptr->units = NULL;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
@@ -844,7 +842,7 @@ taxisInqNumavg(int taxisID)
 }
 
 taxis_t *
-taxisPtr(int taxisID)
+taxis_to_pointer(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return taxisptr;
@@ -854,7 +852,6 @@ void
 ptaxisDefDatatype(taxis_t *taxisptr, int datatype)
 {
   cdiDefVarKeyInt(&taxisptr->keys, CDI_KEY_DATATYPE, datatype);
-  taxisptr->datatype = datatype;
 }
 
 void
@@ -1378,7 +1375,6 @@ ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->units = dup_refcount_string(source->units);
   if (dest->self != CDI_UNDEFID) reshSetStatus(dest->self, &taxisOps, RESH_DESYNC_IN_USE);
 
-  dest->datatype = source->datatype;
   cdiInitKeys(&dest->keys);
   cdiCopyVarKeys(&source->keys, &dest->keys);
 

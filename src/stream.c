@@ -430,7 +430,7 @@ cdiInqContents(stream_t *streamptr)
       if (taxisID != CDI_UNDEFID)
         {
           taxis_t *taxisptr1 = &streamptr->tsteps[0].taxis;
-          taxis_t *taxisptr2 = taxisPtr(taxisID);
+          taxis_t *taxisptr2 = taxis_to_pointer(taxisID);
           ptaxisCopy(taxisptr2, taxisptr1);
         }
     }
@@ -1462,7 +1462,7 @@ cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
     }
 
   int taxisID = vlistInqTaxis(vlistID);
-  if (taxisID != CDI_UNDEFID) ptaxisCopy(&streamptr->tsteps[tsID].taxis, taxisPtr(taxisID));
+  if (taxisID != CDI_UNDEFID) ptaxisCopy(&streamptr->tsteps[tsID].taxis, taxis_to_pointer(taxisID));
 
   streamptr->curTsID = tsID;
   streamptr->ntsteps = tsID + 1;
@@ -1564,7 +1564,7 @@ streamInqTimestep(int streamID, int tsID)
       streamptr->tsteps[tsID].curRecID = CDI_UNDEFID;
       int taxisID = vlistInqTaxis(vlistID);
       if (taxisID == -1) Error("Timestep undefined for fileID = %d", streamID);
-      ptaxisCopy(taxisPtr(taxisID), &streamptr->tsteps[tsID].taxis);
+      ptaxisCopy(taxis_to_pointer(taxisID), &streamptr->tsteps[tsID].taxis);
 
       return nrecs;
     }
@@ -1633,7 +1633,7 @@ streamInqTimestep(int streamID, int tsID)
   int taxisID = vlistInqTaxis(vlistID);
   if (taxisID == -1) Error("Timestep undefined for fileID = %d", streamID);
 
-  ptaxisCopy(taxisPtr(taxisID), &streamptr->tsteps[tsID].taxis);
+  ptaxisCopy(taxis_to_pointer(taxisID), &streamptr->tsteps[tsID].taxis);
 
   return nrecs;
 }
@@ -1832,7 +1832,7 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             if (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF)
               {
-                const taxis_t *taxisptr = taxisPtr(taxisID);
+                const taxis_t *taxisptr = taxis_to_pointer(taxisID);
                 if (cdiDateTime_isNull(taxisptr->rDateTime))
                   {
                     int vdate = taxisInqVdate(taxisID);
@@ -1841,7 +1841,7 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
                   }
               }
 #endif
-          ptaxisCopy(&streamptr->tsteps[0].taxis, taxisPtr(taxisID));
+          ptaxisCopy(&streamptr->tsteps[0].taxis, taxis_to_pointer(taxisID));
         }
 
       switch (cdiBaseFiletype(streamptr->filetype))
