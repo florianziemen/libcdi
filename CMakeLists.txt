@@ -22,7 +22,9 @@ endif()
 # enable default internal libs
 option(CDI_LIBGRIB "GRIB support [default=ON]" ON)
 if(${CDI_LIBGRIB})
-  list(APPEND cdi_compile_defs HAVE_LIBGRIB=1)
+  list(APPEND cdi_compile_defs
+       HAVE_LIBGRIB=1
+       HAVE_LIBGRIB_API=1)
 endif()
 
 option(CDI_LIBGRIBEX "Use the CGRIBEX library [default=ON]" ON)
@@ -50,8 +52,6 @@ option(CDI_ECCODES "Use the eccodes library [default=ON]" ON)
 if(${CDI_ECCODES} OR eccodes_ROOT)
   find_package(eccodes)
   if (${eccodes_FOUND})
-    list(APPEND cdi_compile_defs HAVE_LIBGRIB_API=${eccodes_FOUND})
-    message(VERBOSE "added compile definition HAVE_LIBGRIB_API=${eccodes_FOUND}")
     list(APPEND cdi_linked_libs eccodes)
   else()
     message(WARNING "eccodes not found, compiling without eccodes")
@@ -67,8 +67,6 @@ if(${CDI_NETCDF} OR netCDF_ROOT )
       HAVE_LIBNETCDF=${netCDF_FOUND}
       HAVE_LIBNC_DAP=${netCDF_FOUND}
       HAVE_NETCDF4=${netCDF_FOUND}
-      HAVE_LIBGRIB_API=${netCDF_FOUND}
-      HAVE_LIBGRIB=${netCDF_FOUND}
     )
     list(APPEND cdi_linked_libs netCDF::netcdf)
   else()
