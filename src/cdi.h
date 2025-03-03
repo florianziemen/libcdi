@@ -1450,8 +1450,8 @@ extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams gpp, double, d
 // Used on CDO remap_scrip_io.cc
 void cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec);
 
-int cdi_has_dap();
-int cdi_has_cgribex();
+int cdi_has_dap(void);
+int cdi_has_cgribex(void);
 
 #ifdef __cplusplus
 }
