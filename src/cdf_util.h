@@ -1,6 +1,7 @@
 #ifndef CDF_UTIL_H_
 #define CDF_UTIL_H_
 
+#include <stdlib.h>
 #include <stdbool.h>
 
 bool xtypeIsText(int xtype);

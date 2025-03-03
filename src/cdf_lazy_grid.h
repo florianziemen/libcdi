@@ -19,8 +19,6 @@
 
 #include <string.h>
 
-#include "dmemory.h"
-#include "cdf_int.h"
 #include "grid.h"
 
 struct xyValGet

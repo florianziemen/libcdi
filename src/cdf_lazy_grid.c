@@ -3,7 +3,9 @@
 #endif
 
 #ifdef HAVE_LIBNETCDF
+#include "dmemory.h"
 #include "stream_cdf.h"
+#include "cdf_int.h"
 #include "cdf_lazy_grid.h"
 
 static struct gridVirtTable cdfLazyGridVtable;

@@ -10,10 +10,8 @@
 
 #include "cdi.h"
 #include "cdi_int.h"
-#include "dmemory.h"
 #include "stream_cdf.h"
 #include "cdf_int.h"
-#include "vlist.h"
 
 static int
 cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *taxis_name, taxis_t *taxis)

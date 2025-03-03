@@ -15,7 +15,6 @@
 #include "stream_cdf.h"
 #include "cdf_int.h"
 #include "vlist.h"
-#include "vlist_var.h"
 
 static void
 cdfReadGridTraj(stream_t *streamptr, int gridID)

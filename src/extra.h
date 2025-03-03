@@ -5,6 +5,8 @@
 #include "config.h"
 #endif
 
+#include <stdlib.h>
+
 enum
 {
   EXT_REAL = 1,

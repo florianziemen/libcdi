@@ -13,7 +13,6 @@
 #include "cdf.h"
 #include "cdf_int.h"
 #include "vlist.h"
-#include "vlist_var.h"
 
 void
 cdfDefVarDeflate(int ncid, int ncvarID, int shuffle, int compLevel)

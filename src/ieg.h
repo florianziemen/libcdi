@@ -1,6 +1,8 @@
 #ifndef _IEG_H
 #define _IEG_H
 
+#include <stdlib.h>
+
 // clang-format off
 
 /* Level Types */
