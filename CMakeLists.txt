@@ -50,11 +50,9 @@ endif()
 # ecCodes
 option(CDI_ECCODES "Use the eccodes library [default=ON]" ON)
 if(${CDI_ECCODES} OR eccodes_ROOT)
-  find_package(eccodes)
+  find_package(eccodes REQUIRED)
   if (${eccodes_FOUND})
     list(APPEND cdi_linked_libs eccodes)
-  else()
-    message(WARNING "eccodes not found, compiling without eccodes")
   endif ()
 endif()
 
@@ -69,8 +67,6 @@ if(${CDI_NETCDF} OR netCDF_ROOT )
       HAVE_NETCDF4=${netCDF_FOUND}
     )
     list(APPEND cdi_linked_libs netCDF::netcdf)
-  else()
-    message(WARNING "netcdf target not found, compiling without netcdf")
   endif ()
 endif()
 
