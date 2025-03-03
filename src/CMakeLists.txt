@@ -216,24 +216,3 @@ target_link_libraries(cdilib ${cdi_linked_libs})
 target_compile_definitions(cdilib PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
 
 
-include(GNUInstallDirs)
-install(FILES cdi.h calendar.h cdi_datetime.h julian_date.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-install(TARGETS cdilib
-  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cdi/cdi-config.cmake.in" "${CMAKE_BINARY_DIR}/cmake/cdi-config.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/cdi")
-write_basic_package_version_file(
-  "${CMAKE_BINARY_DIR}/cmake/cdi-config-version.cmake"
-  VERSION "${PACKAGE_VERSION}"
-  COMPATIBILITY SameMajorVersion)
-install(
-  FILES
-    "${CMAKE_BINARY_DIR}/cmake/cdi-config.cmake"
-    "${CMAKE_BINARY_DIR}/cmake/cdi-config-version.cmake"
-  DESTINATION
-    "${CMAKE_INSTALL_LIBDIR}/cmake/cdi")

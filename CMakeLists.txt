@@ -91,3 +91,33 @@ endif ()
 if (BUILD_TESTING)
   add_subdirectory(tests)
 endif ()
+
+# --- Installation
+# packages required for installation
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+install(TARGETS cdilib
+  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+
+get_target_property(cdi_install_files cdilib CDI_INSTALL_HEADERS)
+install(FILES ${cdi_install_files} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+
+# -- create configuration files
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/cdi/cdi-config.cmake.in" "${CMAKE_BINARY_DIR}/cmake/cdi-config.cmake"
+  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/cdi")
+write_basic_package_version_file(
+  "${CMAKE_BINARY_DIR}/cmake/cdi-config-version.cmake"
+  VERSION "${PACKAGE_VERSION}"
+  COMPATIBILITY SameMajorVersion)
+
+#Install CMake configuration files to 
+install(
+  FILES
+  "${CMAKE_BINARY_DIR}/cmake/cdi-config.cmake"
+  "${CMAKE_BINARY_DIR}/cmake/cdi-config-version.cmake"
+  DESTINATION
+  "${CMAKE_INSTALL_LIBDIR}/cmake/cdi")
