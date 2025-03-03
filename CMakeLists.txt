@@ -19,36 +19,34 @@ if(${CDI_PTHREAD})
   include(FindThreads)
   find_package(Threads REQUIRED)
   set_target_properties(Threads::Threads PROPERTIES THREADS_PREFER_PTHREAD_FLAG TRUE)
-  list(APPEND cdi_compile_defs HAVE_PTHREAD=1)
-  list(APPEND cdi_linked_libs pthread)
+  target_compile_definitions(cdilib PRIVATE HAVE_PTHREAD=1)
+  target_link_libraries(cdilib pthread)
 endif()
 
 # enable default internal libs
 option(CDI_LIBGRIB "GRIB support [default=ON]" ON)
 if(${CDI_LIBGRIB})
-  list(APPEND cdi_compile_defs
-       HAVE_LIBGRIB=1
-       HAVE_LIBGRIB_API=1)
+  target_compile_definitions(cdilib PRIVATE HAVE_LIBGRIB=1 HAVE_LIBGRIB_API=1)
 endif()
 
 option(CDI_LIBGRIBEX "Use the CGRIBEX library [default=ON]" ON)
 if(${CDI_LIBGRIBEX})
-  list(APPEND cdi_compile_defs LIBCGRIBEX=1)
+  target_compile_definitions(cdilib PRIVATE LIBCGRIBEX=1)
 endif()
 
 option(CDI_EXTRA "Use the extra library [default=ON]" ON)
 if(${CDI_EXTRA})
-  list(APPEND cdi_compile_defs HAVE_LIBEXTRA=1)
+  target_compile_definitions(cdilib PRIVATE HAVE_LIBEXTRA=1)
 endif()
 
 option(CDI_IEG "Use the extra library [default=ON]" ON)
 if(${CDI_IEG})
-  list(APPEND cdi_compile_defs HAVE_LIBIEG=1)
+  target_compile_definitions(cdilib PRIVATE HAVE_LIBIEG=1)
 endif()
 
 option(CDI_SERVICE "Use the extra library [default=ON]" ON)
 if(${CDI_SERVICE})
-  list(APPEND cdi_compile_defs HAVE_LIBSERVICE=1)
+  target_compile_definitions(cdilib PRIVATE HAVE_LIBSERVICE=1)
 endif()
 
 # ecCodes
@@ -56,7 +54,9 @@ option(CDI_ECCODES "Use the eccodes library [default=ON]" ON)
 if(${CDI_ECCODES} OR eccodes_ROOT)
   find_package(eccodes REQUIRED)
   if (${eccodes_FOUND})
-    list(APPEND cdi_linked_libs eccodes)
+    target_compile_definitions(cdilib PRIVATE HAVE_LIBGRIB_API=${eccodes_FOUND})
+    message(VERBOSE "added compile definition HAVE_LIBGRIB_API=${eccodes_FOUND}")
+    target_link_libraries(cdilib eccodes)
   endif ()
 endif()
 
@@ -70,7 +70,7 @@ if(${CDI_NETCDF} OR netCDF_ROOT )
       HAVE_LIBNC_DAP=${netCDF_FOUND}
       HAVE_NETCDF4=${netCDF_FOUND}
     )
-    list(APPEND cdi_linked_libs netCDF::netcdf)
+    target_link_libraries(cdilib netCDF::netcdf)
   endif ()
 endif()
 
@@ -78,7 +78,7 @@ message(VERBOSE "looking for config.h in: ${PROJECT_BINARY_DIR}/src")
 
 #adding subdirectories
 ## lib and general files
-list(APPEND cdi_compile_defs CDI=1 CDI_SIZE_TYPE=size_t PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}")
+target_compile_definitions(cdilib PRIVATE CDI=1 CDI_SIZE_TYPE=size_t PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}")
 add_subdirectory(src)
 
 #app
