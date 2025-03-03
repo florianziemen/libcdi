@@ -1,8 +1,12 @@
 cmake_minimum_required( VERSION 3.27 FATAL_ERROR )
 
-message(VERBOSE "Entering libcdi")
+message(VERBOSE "Entering cdilib")
 project(cdilib VERSION 2.5.1 LANGUAGES C )
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
+
+add_library(cdilib)
+add_library(cdilib::cdilib ALIAS cdilib)
 
 include(CTest)
 include(CheckIncludeFile)

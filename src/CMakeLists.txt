@@ -199,16 +199,12 @@ endif ()
 # Support exporting all symbolds on Windows
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-add_library(cdilib
-  ${cdi_src_files}
-#  INSTALL_HEADERS_LIST  cdi.h
 )
 
 target_include_directories(cdilib PRIVATE "${PROJECT_BINARY_DIR}/src/config.h")
 target_link_libraries(cdilib ${cdi_linked_libs})
 target_compile_definitions(cdilib PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
 
-add_library(cdilib::cdilib ALIAS cdilib)
 
 include(GNUInstallDirs)
 install(FILES cdi.h calendar.h cdi_datetime.h julian_date.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
