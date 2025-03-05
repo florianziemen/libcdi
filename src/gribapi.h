@@ -49,6 +49,7 @@
 #define  GRIB2_GTYPE_LATLON_ROTSTR         3  // Stretched and Rotated Latitude/longitude
 #define  GRIB2_GTYPE_STERE                20  // Polar stereographic projection
 #define  GRIB2_GTYPE_LCC                  30  // Lambert conformal
+#define  GRIB2_GTYPE_LLAM                 33  // Lambert LAM
 #define  GRIB2_GTYPE_GAUSSIAN             40  // Gaussian latitude/longitude
 #define  GRIB2_GTYPE_GAUSSIAN_ROT         41  // Rotated Gaussian latitude/longitude
 #define  GRIB2_GTYPE_GAUSSIAN_STR         42  // Stretched Gaussian latitude/longitude

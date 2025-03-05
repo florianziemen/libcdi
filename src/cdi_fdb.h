@@ -5,8 +5,6 @@
 #include "config.h"
 #endif
 
-extern int cdi_fdb_dummy;
-
 #ifdef HAVE_LIBFDB5
 
 #include <fdb5/api/fdb_c.h>

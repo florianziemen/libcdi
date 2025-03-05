@@ -300,8 +300,8 @@ printGridInfoKernel(int gridID, int index, bool lproj)
   size_t xsize = (size_t) gridInqXsize(gridID);
   size_t ysize = (size_t) gridInqYsize(gridID);
 
-  // int prec     = gridInqDatatype(gridID);
-  // int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
+  // int datatype;
+  // cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
   int dig = 7;
 
   if (!lproj)
@@ -537,8 +537,9 @@ printZaxisInfo(int vlistID)
       int ltype = 0;
       cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
       int levelsize = zaxisInqSize(zaxisID);
-      // int prec      = zaxisInqDatatype(zaxisID);
-      // int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
+      // int datatype;
+      // cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
+      // int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
 
       zaxisName(zaxistype, zaxisname);
       int length = CDI_MAX_NAME;

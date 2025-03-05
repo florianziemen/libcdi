@@ -457,6 +457,10 @@ void    streamReadField(int streamID, double data[], SizeType *numMissVals);
 void    streamReadFieldF(int streamID, float data[], SizeType *numMissVals);
 void    streamCopyField(int streamIDdest, int streamIDsrc);
 
+void *  stream_get_pointer(int streamID);
+void *  stream_get_vlist_pointer(int streamID);
+void    pstreamInqField(void *streamPtr, int *varID, int *levelID);
+
 void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);
 
 
@@ -695,6 +699,8 @@ int     vlistFindLevel(int vlistID, int fvarID, int flevelID);
 int     vlistMergedVar(int vlistID, int varID);
 int     vlistMergedLevel(int vlistID, int varID, int levelID);
 
+int     pvlistInqFlag(void *vlistPtr, int varID, int levelID);
+
 //      cdiClearAdditionalKeys: Clear the list of additional GRIB keys
 void    cdiClearAdditionalKeys(void);
 //      cdiDefAdditionalKey: Register an additional GRIB key which is read when file is opened
@@ -831,7 +837,6 @@ SizeType gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_UNITS                         945  // Units of the variable
 #define  CDI_KEY_DATATYPE                      946  // Data type
 #define  CDI_KEY_REFERENCEURI                  947  // Reference URI to grid file
-#define  CDI_KEY_CHUNKS                        948  // Chunks
 
 // Integer keys
 #define  CDI_KEY_NUMBEROFGRIDUSED              961  // GRIB2 numberOfGridUsed
@@ -840,6 +845,10 @@ SizeType gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_NLEV                          964  // GRIB2 nlev
 #define  CDI_KEY_CHUNKTYPE                     965  // ChunkType: CDI_CHUNK_AUTO/CDI_CHUNK_GRID/CDI_CHUNK_LINES
 #define  CDI_KEY_CHUNKSIZE                     966  // ChunkSize
+#define  CDI_KEY_CHUNKSIZE_DIMT                967  // ChunkSize time dimension
+#define  CDI_KEY_CHUNKSIZE_DIMZ                968  // ChunkSize zaxis dimension
+#define  CDI_KEY_CHUNKSIZE_DIMY                969  // ChunkSize yaxis dimension
+#define  CDI_KEY_CHUNKSIZE_DIMX                970  // ChunkSize xaxis dimension
 
 // Floating point keys
 #define  CDI_KEY_MISSVAL                       701  // Missing value
@@ -1306,6 +1315,10 @@ int  vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID);
 void vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGeneratingProcess);
 void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDefinitionTemplate);
 
+// Compatibility functions for ParaView vtkCDIReader (obsolete functions)
+int vlistNgrids(int vlistID); // calls vlistNumGrids()
+int vlistNzaxis(int vlistID); // calls vlistNumZaxis()
+
 #ifdef __cplusplus
 }
 #endif
@@ -1436,6 +1449,9 @@ extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams gpp, double, d
 
 // Used on CDO remap_scrip_io.cc
 void cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec);
+
+int cdi_has_dap(void);
+int cdi_has_cgribex(void);
 
 #ifdef __cplusplus
 }

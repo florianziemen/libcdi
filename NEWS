@@ -1,6 +1,12 @@
 CDI NEWS
 --------
 
+Version 2.5.1 (05 Mar 2025):
+
+   Changes:
+     * NetCDF4: improved calculation of output chunk size
+     * NetCDF4: improved calculation of input chunk cache size for numStep>1 and zSize>1
+
 Version 2.5.0 (28 Nov 2024):
 
    Changes:

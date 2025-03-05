@@ -246,8 +246,8 @@ readFuncCall(struct winHeaderEntry *header, size_t streamIdx)
         int position = header->offset;
         int changedTaxisID = taxisUnpack((char *) rxWin[streamIdx].clientBuf[0].mem, (int) rxWin[streamIdx].clientBuf[0].size,
                                          &position, originNamespace, &pioInterComm, 0);
-        taxis_t *oldTaxisPtr = taxisPtr(oldTaxisID);
-        taxis_t *changedTaxisPtr = taxisPtr(changedTaxisID);
+        taxis_t *oldTaxisPtr = taxis_to_pointer(oldTaxisID);
+        taxis_t *changedTaxisPtr = taxis_to_pointer(changedTaxisID);
         ptaxisCopy(oldTaxisPtr, changedTaxisPtr);
         taxisDestroy(changedTaxisID);
         streamDefTimestep(streamID, funcArgs->streamNewTimestep.tsID);

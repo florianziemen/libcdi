@@ -7,7 +7,7 @@
 AC_PREREQ([2.69])
 LT_PREREQ([2.4.6])
 
-AC_INIT([cdi],[2.5.0],[https://mpimet.mpg.de/cdi])
+AC_INIT([cdi],[2.5.1],[https://mpimet.mpg.de/cdi])
 AC_DEFINE_UNQUOTED(CDI, ["$PACKAGE_VERSION"], [CDI version])
 
 AC_CONFIG_AUX_DIR([config])
@@ -20,6 +20,9 @@ AC_CANONICAL_BUILD
 AM_INIT_AUTOMAKE([1.16.1 foreign])
 AM_MAINTAINER_MODE([enable])
 AM_EXTRA_RECURSIVE_TARGETS([examples])
+
+AC_MSG_NOTICE([setting up libtool])
+LT_INIT
 
 dnl Tests for the C compiler:
 dnl   Make sure conftest.dSYM is removed when configured on MacOS with

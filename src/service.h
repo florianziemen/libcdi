@@ -1,6 +1,8 @@
 #ifndef _SERVICE_H
 #define _SERVICE_H
 
+#include <stdlib.h>
+
 typedef struct
 {
   int checked;

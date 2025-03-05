@@ -24,7 +24,9 @@ int cdiUUIDIsNull(const unsigned char uuid[])
   return isNull;
 }
 
+#ifndef _WIN32
 void cdiCreateUUID(unsigned char uuid[CDI_UUID_SIZE]);
+#endif
 
 int cdiUUID2Str(const unsigned char uuid[], char uuidstr[]);
 int cdiStr2UUID(const char *uuidstr, unsigned char uuid[]);

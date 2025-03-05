@@ -11,7 +11,6 @@
  * next to find out what happened */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>

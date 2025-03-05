@@ -1,3 +1,45 @@
+2025-03-05  Uwe Schulzweida
+
+	* Version 2.5.1 released
+
+2025-02-28  Uwe Schulzweida
+
+	* taxis: added support for CDI_KEY_DATATYPE
+
+2025-02-12  Uwe Schulzweida
+
+	* GRIB_API: Handle LLAM as LCC
+
+2025-02-06  Uwe Schulzweida
+
+	* Added obsolete functions vlistNgrids() and vlistNzaxis() for ParaView vtkCDIReader
+
+2025-02-01  Uwe Schulzweida
+
+	* Added support for READ_CELL_CENTER=false
+
+2025-01-30  Uwe Schulzweida
+
+	* Added CDI_KEY_CHUNKSIZE_DIMX
+	* Added CDI_KEY_CHUNKSIZE_DIMY
+
+2025-01-29  Uwe Schulzweida
+
+	* Added CDI_KEY_CHUNKSIZE_DIMZ
+	* Added CDI_KEY_CHUNKSIZE_DIMT
+
+2025-01-14  Uwe Schulzweida
+
+	* NetCDF: Fix error in scanning coordinates attribute
+
+2024-12-28  Uwe Schulzweida
+
+	* NetCDF4: improved calculation of output chunk size
+
+2024-12-23  Uwe Schulzweida
+
+	* NetCDF4: improved calculation of input chunk cache size for numStep>1 and zSize>1
+
 2024-11-28  Uwe Schulzweida
 
         * using CGRIBEX library version 2.3.1

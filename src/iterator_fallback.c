@@ -20,6 +20,13 @@
 #include <limits.h>
 #include <stdlib.h>
 
+// On Windows, define ssize_t manually
+#ifdef _WIN32
+#define ssize_t __int64
+#else
+#include <unistd.h>
+#endif
+
 struct CdiFallbackIterator
 {
   CdiIterator super;

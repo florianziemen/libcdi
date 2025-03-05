@@ -2,14 +2,15 @@
 #define CDI_KEY_H
 
 #include <stdio.h>
+#include <stdint.h>
 #include "cdi_limits.h"
 
 // CDI key
 typedef struct
 {
-  int key;     // CDI key
-  int type;    // KEY_INT, KEY_FLOAT, KEY_BYTES
-  int length;  // number of bytes in v.s
+  uint16_t key;   // CDI key
+  uint16_t type;  // KEY_INT, KEY_FLOAT, KEY_BYTES
+  int length;     // number of bytes in v.s
   union
   {
     int i;
@@ -20,16 +21,16 @@ typedef struct
 
 typedef struct
 {
-  size_t nalloc;  // number allocated >= nelems
-  size_t nelems;  // length of the array
+  uint16_t nalloc;  // number allocated >= nelems
+  uint16_t nelems;  // length of the array
   cdi_key_t value[MAX_KEYS];
 } cdi_keys_t;
 
 enum
 {
-  KEY_INT = 1,
-  KEY_FLOAT,
-  KEY_BYTES
+  KeyInt = 1,
+  KeyFloat,
+  KeyBytes
 };
 
 void cdiDefVarKeyInt(cdi_keys_t *keysp, int key, int value);

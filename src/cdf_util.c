@@ -13,7 +13,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
 #include "cdf_util.h"

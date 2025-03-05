@@ -16,7 +16,7 @@
 static void
 cdf_init_timestep(tsteps_t *timeStep, int numRecs, int numRecsAvail)
 {
-  timeStep->records = (record_t *) Malloc((size_t) numRecs * sizeof(record_t));
+  timeStep->recinfo = (recinfo_t *) Malloc((size_t) numRecs * sizeof(recinfo_t));
   timeStep->nrecs = numRecsAvail;
   timeStep->nallrecs = numRecs;
   timeStep->recordSize = numRecs;
@@ -39,7 +39,7 @@ cdf_get_numRecsAvail(int vlistID)
 }
 
 static void
-cdf_init_records_step0(int numRecs, int *recIDs, record_t *records, int vlistID)
+cdf_init_records_step0(int numRecs, int *recIDs, recinfo_t *recinfo, int vlistID)
 {
   for (int recID = 0; recID < numRecs; recID++) recIDs[recID] = recID;
 
@@ -50,20 +50,20 @@ cdf_init_records_step0(int numRecs, int *recIDs, record_t *records, int vlistID)
       int nlevels = zaxisInqSize(zaxisID);
       for (int levelID = 0; levelID < nlevels; levelID++)
         {
-          recordInitEntry(&records[recID]);
-          records[recID].varID = (short) varID;
-          records[recID].levelID = levelID;
+          recinfoInitEntry(&recinfo[recID]);
+          recinfo[recID].varID = (short) varID;
+          recinfo[recID].levelID = levelID;
           recID++;
         }
     }
 }
 
 static void
-cdf_init_records_step1(int numRecs, int *recIDs, record_t *records, int vlistID)
+cdf_init_records_step1(int numRecs, int *recIDs, recinfo_t *recinfo, int vlistID)
 {
   for (int recID = 0, vrecID = 0; recID < numRecs; recID++)
     {
-      if (vlistInqVarTimetype(vlistID, records[recID].varID) != TIME_CONSTANT)
+      if (vlistInqVarTimetype(vlistID, recinfo[recID].varID) != TIME_CONSTANT)
         {
           recIDs[vrecID++] = recID;
         }
@@ -94,7 +94,7 @@ cdf_create_records(stream_t *streamptr, size_t tsID)
       cdf_init_timestep(destTstep, numFields, numRecsAvail);
 
       destTstep->recIDs = (int *) Malloc((size_t) numRecsAvail * sizeof(int));
-      cdf_init_records_step0(numFields, destTstep->recIDs, destTstep->records, vlistID);
+      cdf_init_records_step0(numFields, destTstep->recIDs, destTstep->recinfo, vlistID);
     }
   else if (tsID == 1)
     {
@@ -104,17 +104,17 @@ cdf_create_records(stream_t *streamptr, size_t tsID)
 
       cdf_init_timestep(destTstep, numFields, numRecsAvail);
 
-      memcpy(destTstep->records, sourceTstep->records, (size_t) numFields * sizeof(record_t));
+      memcpy(destTstep->recinfo, sourceTstep->recinfo, (size_t) numFields * sizeof(recinfo_t));
 
       if (numRecsAvail)
         {
           destTstep->recIDs = (int *) Malloc((size_t) numRecsAvail * sizeof(int));
-          cdf_init_records_step1(numFields, destTstep->recIDs, destTstep->records, vlistID);
+          cdf_init_records_step1(numFields, destTstep->recIDs, destTstep->recinfo, vlistID);
         }
     }
   else
     {
-      if (streamptr->tsteps[1].records == 0) cdf_create_records(streamptr, 1);
+      if (streamptr->tsteps[1].recinfo == 0) cdf_create_records(streamptr, 1);
 
       int numRecsAvail = streamptr->tsteps[1].nrecs;
 
@@ -122,7 +122,7 @@ cdf_create_records(stream_t *streamptr, size_t tsID)
 
       cdf_init_timestep(destTstep, numFields, numRecsAvail);
 
-      memcpy(destTstep->records, sourceTstep->records, (size_t) numFields * sizeof(record_t));
+      memcpy(destTstep->recinfo, sourceTstep->recinfo, (size_t) numFields * sizeof(recinfo_t));
 
       if (numRecsAvail)
         {

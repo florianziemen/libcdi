@@ -3,7 +3,9 @@
 #endif
 
 #ifdef HAVE_LIBNETCDF
+#include "dmemory.h"
 #include "stream_cdf.h"
+#include "cdf_int.h"
 #include "cdf_lazy_grid.h"
 
 static struct gridVirtTable cdfLazyGridVtable;
@@ -42,7 +44,7 @@ static void
 cdfLazyGridDelete(grid_t *grid)
 {
   struct cdfLazyGrid *cdfGrid = (struct cdfLazyGrid *) grid;
-  void (*baseDestroy)(grid_t * grid) = cdfGrid->baseVtable->destroy;
+  void (*baseDestroy)(grid_t *grid) = cdfGrid->baseVtable->destroy;
   cdfLazyGridDestroy(cdfGrid);
   baseDestroy(grid);
 }
@@ -194,7 +196,7 @@ cdfLazyGridInqXVal(grid_t *grid, SizeType index)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *) grid;
   lock_lazy_load(lazyGrid);
-  const double rv = cdfLazyGridInqXYVal(grid, (size_t) index, &lazyGrid->xValsGet, grid->x.vals, grid->vtable->inqXValsPtr);
+  double rv = cdfLazyGridInqXYVal(grid, (size_t) index, &lazyGrid->xValsGet, grid->x.vals, grid->vtable->inqXValsPtr);
   unlock_lazy_load(lazyGrid);
   return rv;
 }
@@ -204,7 +206,7 @@ cdfLazyGridInqYVal(grid_t *grid, SizeType index)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *) grid;
   lock_lazy_load(lazyGrid);
-  const double rv = cdfLazyGridInqXYVal(grid, (size_t) index, &lazyGrid->yValsGet, grid->y.vals, grid->vtable->inqYValsPtr);
+  double rv = cdfLazyGridInqXYVal(grid, (size_t) index, &lazyGrid->yValsGet, grid->y.vals, grid->vtable->inqYValsPtr);
   unlock_lazy_load(lazyGrid);
   return rv;
 }
@@ -315,10 +317,10 @@ cdfLazyGridCopyScalarFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 static void
 cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 {
-  const size_t reducedPointsSize = (size_t) gridptrOrig->reducedPointsSize;
-  const size_t gridsize = gridptrOrig->size;
-  const int gridtype = gridptrOrig->type;
-  const int irregular = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED);
+  size_t reducedPointsSize = (size_t) gridptrOrig->reducedPointsSize;
+  size_t gridsize = gridptrOrig->size;
+  int gridtype = gridptrOrig->type;
+  int irregular = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED);
 
   if (reducedPointsSize)
     {
@@ -328,28 +330,28 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 
   if (gridptrOrig->x.vals != NULL && gridptrOrig->x.vals != cdfPendingLoad)
     {
-      const size_t size = irregular ? gridsize : gridptrOrig->x.size;
+      size_t size = irregular ? gridsize : gridptrOrig->x.size;
       gridptrDup->x.vals = (double *) Malloc(size * sizeof(double));
       memcpy(gridptrDup->x.vals, gridptrOrig->x.vals, size * sizeof(double));
     }
 
   if (gridptrOrig->y.vals != NULL && gridptrOrig->y.vals != cdfPendingLoad)
     {
-      const size_t size = irregular ? gridsize : gridptrOrig->y.size;
+      size_t size = irregular ? gridsize : gridptrOrig->y.size;
       gridptrDup->y.vals = (double *) Malloc(size * sizeof(double));
       memcpy(gridptrDup->y.vals, gridptrOrig->y.vals, size * sizeof(double));
     }
 
   if (gridptrOrig->x.bounds != NULL && gridptrOrig->x.bounds != cdfPendingLoad)
     {
-      const size_t size = (irregular ? gridsize : gridptrOrig->x.size) * (size_t) gridptrOrig->nvertex;
+      size_t size = (irregular ? gridsize : gridptrOrig->x.size) * (size_t) gridptrOrig->nvertex;
       gridptrDup->x.bounds = (double *) Malloc(size * sizeof(double));
       memcpy(gridptrDup->x.bounds, gridptrOrig->x.bounds, size * sizeof(double));
     }
 
   if (gridptrOrig->y.bounds != NULL && gridptrOrig->y.bounds != cdfPendingLoad)
     {
-      const size_t size = (irregular ? gridsize : gridptrOrig->y.size) * (size_t) gridptrOrig->nvertex;
+      size_t size = (irregular ? gridsize : gridptrOrig->y.size) * (size_t) gridptrOrig->nvertex;
       gridptrDup->y.bounds = (double *) Malloc(size * sizeof(double));
       memcpy(gridptrDup->y.bounds, gridptrOrig->y.bounds, size * sizeof(double));
     }
@@ -357,7 +359,7 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
   {
     if (gridptrOrig->area != NULL && gridptrOrig->area != cdfPendingLoad)
       {
-        const size_t size = gridsize;
+        size_t size = gridsize;
         gridptrDup->area = (double *) Malloc(size * sizeof(double));
         memcpy(gridptrDup->area, gridptrOrig->area, size * sizeof(double));
       }
@@ -365,14 +367,14 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 
   if (gridptrOrig->mask != NULL)
     {
-      const size_t size = gridsize;
+      size_t size = gridsize;
       gridptrDup->mask = (mask_t *) Malloc(size * sizeof(mask_t));
       memcpy(gridptrDup->mask, gridptrOrig->mask, size * sizeof(mask_t));
     }
 
   if (gridptrOrig->mask_gme != NULL)
     {
-      const size_t size = gridsize;
+      size_t size = gridsize;
       gridptrDup->mask_gme = (mask_t *) Malloc(size * sizeof(mask_t));
       memcpy(gridptrDup->mask_gme, gridptrOrig->mask_gme, size * sizeof(mask_t));
     }

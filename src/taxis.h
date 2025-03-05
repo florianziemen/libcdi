@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include "cdi.h"
 
+#include "cdi_key.h"
+
 #ifndef RESOURCE_HANDLE_H
 #include "resource_handle.h"
 #endif
@@ -11,8 +13,7 @@
 typedef struct
 {
   int self;
-  int datatype;  // datatype
-  int type;      // time type
+  int type;  // time type
   int calendar;
   int unit;  // time units
   int numavg;
@@ -29,6 +30,7 @@ typedef struct
   char *units;
   bool climatology;
   bool hasBounds;
+  cdi_keys_t keys;
 } taxis_t;
 
 //      taxisInqSdatetime: Get the start date/time
@@ -36,7 +38,7 @@ CdiDateTime taxisInqSdatetime(int taxisID);
 
 void ptaxisInit(taxis_t *taxis);
 void ptaxisCopy(taxis_t *dest, taxis_t *source);
-taxis_t *taxisPtr(int taxisID);
+taxis_t *taxis_to_pointer(int taxisID);
 void cdi_set_forecast_period(double timevalue, taxis_t *taxis);
 CdiDateTime cdi_decode_timeval(double timevalue, const taxis_t *taxis);
 double cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis);

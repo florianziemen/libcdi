@@ -102,7 +102,6 @@ void
 ptaxisInit(taxis_t *taxisptr)
 {
   taxisptr->self = CDI_UNDEFID;
-  taxisptr->datatype = CDI_DATATYPE_FLT64;
   taxisptr->type = DefaultTimeType;
   taxisptr->calendar = CDI_Default_Calendar;
   taxisptr->unit = DefaultTimeUnit;
@@ -120,6 +119,9 @@ ptaxisInit(taxis_t *taxisptr)
   taxisptr->name = NULL;
   taxisptr->longname = NULL;
   taxisptr->units = NULL;
+
+  cdiInitKeys(&taxisptr->keys);
+  cdiDefVarKeyInt(&taxisptr->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
 }
 
 static taxis_t *
@@ -235,7 +237,7 @@ taxisDefType(int taxisID, int taxistype)
   if (taxisptr->type != taxistype)
     {
       taxisptr->type = taxistype;
-      taxisptr->datatype = CDI_DATATYPE_FLT64;
+      cdiDefVarKeyInt(&taxisptr->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
       delete_refcount_string(taxisptr->units);
       taxisptr->units = NULL;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
@@ -840,7 +842,7 @@ taxisInqNumavg(int taxisID)
 }
 
 taxis_t *
-taxisPtr(int taxisID)
+taxis_to_pointer(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return taxisptr;
@@ -849,7 +851,7 @@ taxisPtr(int taxisID)
 void
 ptaxisDefDatatype(taxis_t *taxisptr, int datatype)
 {
-  taxisptr->datatype = datatype;
+  cdiDefVarKeyInt(&taxisptr->keys, CDI_KEY_DATATYPE, datatype);
 }
 
 void
@@ -1349,7 +1351,6 @@ ptaxisCopy(taxis_t *dest, taxis_t *source)
   reshLock();
 
   // memcpy(dest, source, sizeof(taxis_t));
-  dest->datatype = source->datatype;
   dest->type = source->type;
   dest->calendar = source->calendar;
   dest->unit = source->unit;
@@ -1373,6 +1374,9 @@ ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->longname = dup_refcount_string(source->longname);
   dest->units = dup_refcount_string(source->units);
   if (dest->self != CDI_UNDEFID) reshSetStatus(dest->self, &taxisOps, RESH_DESYNC_IN_USE);
+
+  cdiInitKeys(&dest->keys);
+  cdiCopyVarKeys(&source->keys, &dest->keys);
 
   reshUnlock();
 }
@@ -1480,6 +1484,7 @@ taxisGetPackSize(void *p, void *context)
                        + (taxisptr->longname ? serializeGetSize((int) strlen(taxisptr->longname), CDI_DATATYPE_TXT, context) : 0)
                        + (taxisptr->units ? serializeGetSize((int) strlen(taxisptr->units), CDI_DATATYPE_TXT, context) : 0)
                        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+  packBufferSize += serializeKeysGetPackSize(&taxisptr->keys, context);
   return packBufferSize;
 }
 
@@ -1546,6 +1551,8 @@ taxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int 
       taxisP->units = units;
     }
 
+  serializeKeysUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &taxisP->keys, context);
+
   reshSetStatus(taxisP->self, &taxisOps, reshGetStatus(taxisP->self, &taxisOps) & ~RESH_SYNC_BIT);
 #undef adaptKey
 
@@ -1596,6 +1603,8 @@ taxisPack(void *voidP, void *packBuffer, int packBufferSize, int *packBufferPos,
   if (taxisP->longname)
     serializePack(taxisP->longname, lnameLen, CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
   if (taxisP->units) serializePack(taxisP->units, unitsLen, CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
+
+  serializeKeysPack(&taxisP->keys, packBuffer, packBufferSize, packBufferPos, context);
 }
 
 /*

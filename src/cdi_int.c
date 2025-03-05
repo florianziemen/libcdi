@@ -41,12 +41,15 @@ int CDI_Inventory_Mode = 1;
 int CDI_Version_Info = 1;
 int CDI_Query_Abort = 1;
 int CDI_Convert_Cubesphere = 1;
+int CDI_Read_Cell_Center = 1;
 int CDI_Read_Cell_Corners = 1;
 int CDI_CMOR_Mode = 0;
 int CDI_Reduce_Dim = 0;
 int CDI_Shuffle = 0;
 int CDI_Test = 0;
 size_t CDI_Netcdf_Hdr_Pad = 0UL;
+bool CDI_CopyChunkSpec = false;
+bool CDI_RemoveChunkSpec = false;
 bool CDI_Chunk_Cache_Info = false;
 long CDI_Chunk_Cache = -1L;
 size_t CDI_Chunk_Cache_Max = 0UL;
@@ -347,6 +350,9 @@ cdiInitialize(void)
       value = cdi_getenv_int("CDI_LOCK_IO");
       if (value >= 0) CDI_Lock_IO = (bool) value;
 
+      value = cdi_getenv_int("CDI_READ_CELL_CENTER");
+      if (value >= 0) CDI_Read_Cell_Center = (int) value;
+
       value = cdi_getenv_int("CDI_READ_CELL_CORNERS");
       if (value >= 0) CDI_Read_Cell_Corners = (int) value;
 
@@ -367,6 +373,12 @@ cdiInitialize(void)
 
       value = cdi_getenv_int("CDI_NETCDF_HDR_PAD");
       if (value >= 0) CDI_Netcdf_Hdr_Pad = (size_t) value;
+
+      value = cdi_getenv_int("CDI_COPY_CHUNKSPEC");
+      if (value >= 0) CDI_CopyChunkSpec = (value > 0);
+
+      value = cdi_getenv_int("CDI_REMOVE_CHUNKSPEC");
+      if (value >= 0) CDI_RemoveChunkSpec = (value > 0);
 
       value = cdi_getenv_int("CDI_CHUNK_CACHE_INFO");
       if (value > 0) CDI_Chunk_Cache_Info = true;
@@ -515,11 +527,14 @@ cdiDefGlobal(const char *string, int value)
   else if (str_is_equal(string, "SORTNAME"))              cdiSortName = value;
   else if (str_is_equal(string, "HAVE_MISSVAL"))          cdiHaveMissval = value;
   else if (str_is_equal(string, "NC_CHUNKSIZEHINT"))      CDI_Netcdf_Chunksizehint = value;
+  else if (str_is_equal(string, "READ_CELL_CENTER"))      CDI_Read_Cell_Center = value;
   else if (str_is_equal(string, "READ_CELL_CORNERS"))     CDI_Read_Cell_Corners = value;
   else if (str_is_equal(string, "CMOR_MODE"))             CDI_CMOR_Mode = value;
   else if (str_is_equal(string, "REDUCE_DIM"))            CDI_Reduce_Dim = value;
   else if (str_is_equal(string, "NETCDF_HDR_PAD"))        CDI_Netcdf_Hdr_Pad = (size_t) value;
   else if (str_is_equal(string, "NETCDF_LAZY_GRID_LOAD")) CDI_Netcdf_Lazy_Grid_Load = (bool) value;
+  else if (str_is_equal(string, "COPY_CHUNKSPEC"))        CDI_CopyChunkSpec = (bool) value;
+  else if (str_is_equal(string, "REMOVE_CHUNKSPEC"))      CDI_RemoveChunkSpec = (bool) value;
   else Warning("Unsupported global key: %s", string);
   // clang-format on
 }
@@ -562,6 +577,35 @@ cdiBaseFiletype(int filetype)
     }
 
   return filetype;
+}
+
+void
+stream_def_accesstype(stream_t *s, int type)
+{
+  if (s->accesstype == CDI_UNDEFID)
+    {
+      s->accesstype = type;
+    }
+  else if (s->accesstype != type)
+    Error("Changing access type from %s not allowed!", s->accesstype == TYPE_REC ? "REC to VAR" : "VAR to REC");
+}
+
+int
+cdi_has_dap(void)
+{
+#ifdef HAVE_LIBNC_DAP
+  return 1;
+#endif
+  return 0;
+}
+
+int
+cdi_has_cgribex(void)
+{
+#ifdef HAVE_LIBCGRIBEX
+  return 1;
+#endif
+  return 0;
 }
 
 /*

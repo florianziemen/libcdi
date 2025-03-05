@@ -1367,8 +1367,8 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
             cline += strspn(cline, " \t*");
             char *eol = strchr(cline, '\n');
             if (!eol) eol = comment + commentLen;
-            size_t lineLen = (size_t)(eol - cline);
-            fprintf(fpinc, "!  %.*s\n", (int)lineLen, cline);
+            size_t lineLen2 = (size_t)(eol - cline);
+            fprintf(fpinc, "!  %.*s\n", (int)lineLen2, cline);
             cline = (eol != comment + commentLen) ? eol + 1: NULL;
           } while (cline);
           fputs("!\n", fpinc);

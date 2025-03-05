@@ -18,9 +18,20 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <pthread.h>
 #include <string.h>
+
+// On Windows, define ssize_t and pread manually
+#ifdef _WIN32
+#define ssize_t __int64
+#define pread read
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
+
+#if HAVE_PTHREAD
+#include <pthread.h>
+#endif
 
 static void cdiInputFile_destruct(CdiInputFile *me);
 
@@ -64,7 +75,9 @@ success:
 
 static CdiInputFile **openFileList = NULL;
 static size_t openFileCount = 0, openFileListSize = 0;
+#if HAVE_PTHREAD
 static pthread_mutex_t openFileListLock = PTHREAD_MUTEX_INITIALIZER;
+#endif
 
 // This either returns a new object, or retains and returns a preexisting open file.
 CdiInputFile *
@@ -72,8 +85,10 @@ cdiInputFile_make(const char *path)
 {
   CdiInputFile *result = NULL;
   xassert(path);
+#if HAVE_PTHREAD
   int error = pthread_mutex_lock(&openFileListLock);
   xassert(!error);
+#endif
   {
     // Check the list of open files for the given path.
     for (size_t i = openFileCount; i-- && !result;)
@@ -108,8 +123,10 @@ cdiInputFile_make(const char *path)
           }
       }
   }
+#if HAVE_PTHREAD
   error = pthread_mutex_unlock(&openFileListLock);
   xassert(!error);
+#endif
   return result;
 }
 
@@ -142,8 +159,10 @@ cdiInputFile_getPath(const CdiInputFile *me)
 void
 cdiInputFile_destruct(CdiInputFile *me)
 {
+#if HAVE_PTHREAD
   int error = pthread_mutex_lock(&openFileListLock);
   xassert(!error);
+#endif
   {
     // Find the position of me in the list of open files.
     ssize_t position = (ssize_t) openFileCount;
@@ -152,8 +171,10 @@ cdiInputFile_destruct(CdiInputFile *me)
     // Remove me from the list
     openFileList[position] = openFileList[--openFileCount];
   }
+#if HAVE_PTHREAD
   error = pthread_mutex_unlock(&openFileListLock);
   xassert(!error);
+#endif
   cdiInputFile_condestruct(me, NULL);
 }
 

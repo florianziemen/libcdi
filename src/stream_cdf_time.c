@@ -10,10 +10,8 @@
 
 #include "cdi.h"
 #include "cdi_int.h"
-#include "dmemory.h"
 #include "stream_cdf.h"
 #include "cdf_int.h"
-#include "vlist.h"
 
 static int
 cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *taxis_name, taxis_t *taxis)
@@ -153,7 +151,7 @@ cdfDefTime(stream_t *streamptr)
   if (streamptr->ncmode == 0) streamptr->ncmode = 1;
   if (streamptr->ncmode == 2) cdf_redef(fileID);
 
-  taxis_t *taxis = taxisPtr(vlistInqTaxis(streamptr->vlistID));
+  taxis_t *taxis = taxis_to_pointer(vlistInqTaxis(streamptr->vlistID));
 
   const char *taxisName = (taxis->name && taxis->name[0]) ? taxis->name : defaultTimeAxisName;
 
@@ -170,7 +168,8 @@ cdfDefTime(stream_t *streamptr)
   cdf_def_dim(fileID, taxisName, timeDimLen, &timeDimId);
   streamptr->basetime.ncdimid = timeDimId;
 
-  int datatype = taxis->datatype;
+  int datatype = CDI_UNDEFID;
+  cdiInqKeyInt(taxis->self, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
   nc_type xtype = (datatype == CDI_DATATYPE_INT32) ? NC_INT : ((datatype == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE);
 
   int timeVarId;
@@ -245,7 +244,7 @@ cdfDefTimestep(stream_t *streamptr, int tsID, size_t valCount)
   int time_varid = streamptr->basetime.ncvarid;
   if (time_varid != CDI_UNDEFID && tsID == 0)
     {
-      taxis_t *taxis = taxisPtr(vlistInqTaxis(streamptr->vlistID));
+      taxis_t *taxis = taxis_to_pointer(vlistInqTaxis(streamptr->vlistID));
       int fileID = streamptr->fileID;
       const char *unitstr = cdfGetTimeUnits(taxis);
       size_t len = strlen(unitstr);

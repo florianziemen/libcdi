@@ -111,7 +111,8 @@ grib1_unzip_record(void *gribbuffer, size_t *gribsize)
 
 typedef struct JobArgsGRB
 {
-  int recID, tsID, *outZip, filetype, memType, datatype, unreduced;
+  int *outZip;
+  int recID, tsID, filetype, memType, datatype, unreduced;
   void *cgribexp, *gribbuffer, *data;
   size_t recsize, gridsize, numMissVals;
   double missval;
@@ -131,7 +132,7 @@ static JobArgsGRB
 grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memType, void *gribbuffer, void *data, bool resetFilePos)
 {
   int vlistID = streamptr->vlistID;
-  int varID = streamptr->tsteps[tsID].records[recID].varID;
+  int varID = streamptr->tsteps[tsID].recinfo[recID].varID;
   size_t recsize = streamptr->tsteps[tsID].records[recID].size;
 
   int gridID = vlistInqVarGrid(vlistID, varID);
@@ -167,7 +168,7 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memType, void *g
       if (!resetFilePos) streamptr->numvals += (SizeType) gridsize;
     }
 
-  return (JobArgsGRB){
+  return (JobArgsGRB) {
     .recID = recID,
     .tsID = tsID,
     .outZip = &streamptr->tsteps[tsID].records[recID].zip,

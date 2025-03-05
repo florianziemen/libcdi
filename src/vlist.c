@@ -44,6 +44,19 @@ static bool vlistIsInitialized = false;
   if (!vlistIsInitialized) vlist_initialize()
 #endif
 
+void *
+stream_get_pointer(int streamID)
+{
+  return stream_to_pointer(streamID);
+}
+
+void *
+stream_get_vlist_pointer(int streamID)
+{
+  stream_t *streamPtr = stream_to_pointer(streamID);
+  return vlist_to_pointer(streamPtr->vlistID);
+}
+
 static int
 vlist_compare(vlist_t *a, vlist_t *b)
 {
@@ -1000,8 +1013,13 @@ int
 vlistNumGrids(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
   return vlistptr->ngrids;
+}
+
+int
+vlistNgrids(int vlistID)
+{
+  return vlistNumGrids(vlistID);
 }
 
 /*
@@ -1024,15 +1042,19 @@ int
 vlistNumZaxis(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
   return vlistptr->nzaxis;
+}
+
+int
+vlistNzaxis(int vlistID)
+{
+  return vlistNumZaxis(vlistID);
 }
 
 int
 vlistNsubtypes(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
   return vlistptr->nsubtypes;
 }
 
@@ -1053,7 +1075,6 @@ int
 vlistNtsteps(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
   return (int) vlistptr->ntsteps;
 }
 
@@ -1329,6 +1350,22 @@ vlistGridIndex(int vlistID, int gridID)
   return index;
 }
 
+static void
+delete_chunks(int vlistID, int varID)
+{
+  int chunkKeys[4] = { CDI_KEY_CHUNKSIZE_DIMX, CDI_KEY_CHUNKSIZE_DIMY, CDI_KEY_CHUNKSIZE_DIMZ, CDI_KEY_CHUNKSIZE_DIMT };
+  for (int i = 0; i < 4; ++i)
+    {
+      int chunkSize = 0;
+      cdiInqKeyInt(vlistID, varID, chunkKeys[i], &chunkSize);
+      if (chunkSize != 0) cdiDeleteKey(vlistID, varID, chunkKeys[i]);
+    }
+
+  int chunkSize = 0;
+  cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, &chunkSize);
+  if (chunkSize > 0) cdiDeleteKey(vlistID, varID, CDI_KEY_CHUNKSIZE);
+}
+
 void
 vlistChangeGridIndex(int vlistID, int index, int gridID)
 {
@@ -1344,9 +1381,7 @@ vlistChangeGridIndex(int vlistID, int index, int gridID)
         if (vlistptr->vars[varID].gridID == gridIDold)
           {
             vlistptr->vars[varID].gridID = gridID;
-            int chunkSize = 0;
-            cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, &chunkSize);
-            if (chunkSize > 0) cdiDeleteKey(vlistID, varID, CDI_KEY_CHUNKSIZE);
+            delete_chunks(vlistID, varID);
             if (gridInqXsize(gridIDold) == 0 && gridInqXsize(gridID) > 0 && vlistInqVarXYZ(vlistID, varID) != 0)
               vlistDefVarXYZ(vlistID, varID, 0);
           }
@@ -1372,7 +1407,11 @@ vlistChangeGrid(int vlistID, int gridID1, int gridID2)
         }
       int nvars = vlistptr->nvars;
       for (int varID = 0; varID < nvars; varID++)
-        if (vlistptr->vars[varID].gridID == gridID1) vlistptr->vars[varID].gridID = gridID2;
+        if (vlistptr->vars[varID].gridID == gridID1)
+          {
+            vlistptr->vars[varID].gridID = gridID2;
+            delete_chunks(vlistID, varID);
+          }
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }

@@ -173,21 +173,29 @@ varScanKeysIsEqual(const VarScanKeys *s1, const VarScanKeys *s2)
 
 typedef struct
 {
+  int levelID;
+  short varID;
+  short used;
+} recinfo_t;
+
+typedef struct
+{
   off_t position;
   size_t size;
   size_t gridsize;
-  int zip;
   int param;
   int ilevel;
   int ilevel2;
-  int ltype;
+  short ltype;
   short tsteptype;
-  short varID;
-  int levelID;
-  short used;
-  char varname[32];  // needed for grib decoding with GRIB_API
+#ifdef HAVE_LIBGRIB
+  int zip;
   VarScanKeys scanKeys;
   var_tile_t tiles;  // tile-related meta-data, currently for GRIB-API only.
+#ifdef HAVE_LIBGRIB_API
+  char varname[32];
+#endif
+#endif
 #ifdef HAVE_LIBFDB5
   int fdbItemIndex;
 #endif
@@ -196,6 +204,7 @@ typedef struct
 typedef struct
 {
   int *recIDs;  // IDs of non constant records
+  recinfo_t *recinfo;
   record_t *records;
   int recordSize;   // number of allocated records
   int nrecs;        // number of used records
@@ -250,16 +259,31 @@ enum cdfIDIdx
   CDF_VARID_Y,
   CDF_VARID_RP,  // reducedPoints
   CDF_VARID_A,
-  CDF_SIZE_ncIDs,
+  CDF_SIZE_NCID,
 };
 
 typedef struct
 {
-  int ncIDs[CDF_SIZE_ncIDs];
+  int ncIdVec[CDF_SIZE_NCID];
   int gridID;
   long start;
   long count;
-} ncgrid_t;
+} CdfGrid;
+
+typedef struct
+{
+  int complexFloatId;
+  int complexDoubleId;
+  CdfGrid cdfGridVec[MAX_GRIDS_PS];
+  int zaxisIdVec[MAX_ZAXES_PS];  // Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
+  int ncZvarIdVec[MAX_ZAXES_PS];
+  int ncDimIdVec[MAX_DIMS_PS];
+  size_t ncDimLenVec[MAX_DIMS_PS];
+  int ncNumDims;
+  size_t chunkSizeDimT;
+  size_t chunkSizeDimZ;
+  VCT vct;
+} CdfInfo;
 #endif
 
 typedef struct
@@ -290,17 +314,7 @@ typedef struct
   int ncmode;
   int vlistID;
 #ifdef HAVE_LIBNETCDF
-  int nc_complex_float_id;
-  int nc_complex_double_id;
-  ncgrid_t ncgrid[MAX_GRIDS_PS];
-  int zaxisID[MAX_ZAXES_PS];  // Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
-  int nczvarID[MAX_ZAXES_PS];
-  int ncNumDims;
-  int ncDimID[MAX_DIMS_PS];
-  size_t ncDimLen[MAX_DIMS_PS];
-  VCT vct;
-  size_t chunkSizeTdim;
-  size_t chunkSizeZdim;
+  CdfInfo cdfInfo;
 #endif
   long maxGlobalRecs;
   int globalatts;
@@ -403,11 +417,14 @@ extern int CDI_Inventory_Mode;
 extern int CDI_Query_Abort;
 extern int CDI_Version_Info;
 extern int CDI_Convert_Cubesphere;
+extern int CDI_Read_Cell_Center;
 extern int CDI_Read_Cell_Corners;
 extern int CDI_CMOR_Mode;
 extern int CDI_Reduce_Dim;
 extern int CDI_Shuffle;
 extern size_t CDI_Netcdf_Hdr_Pad;
+extern bool CDI_CopyChunkSpec;
+extern bool CDI_RemoveChunkSpec;
 extern bool CDI_Chunk_Cache_Info;
 extern long CDI_Chunk_Cache;
 extern size_t CDI_Chunk_Cache_Max;
@@ -455,7 +472,7 @@ void cdi_generate_vars(stream_t *streamptr);
 
 void vlist_check_contents(int vlistID);
 
-void cdi_create_records(stream_t *streamptr, int tsID);
+void cdi_create_records(stream_t *streamptr, int tsID, bool allocRecords);
 
 void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *container_name);
 
@@ -463,12 +480,11 @@ int recordNewEntry(stream_t *streamptr, int tsID);
 
 void cdi_create_timesteps(size_t numTimesteps, stream_t *streamptr);
 
-void recordInitEntry(record_t *record);
+void recinfoInitEntry(recinfo_t *recinfo);
 
 void cdiCheckZaxis(int zaxisID);
 
-void cdiDefAccesstype(int streamID, int type);
-int cdiInqAccesstype(int streamID);
+void stream_def_accesstype(stream_t *s, int type);
 
 int getByteswap(int byteorder);
 

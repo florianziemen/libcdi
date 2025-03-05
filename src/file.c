@@ -10,19 +10,25 @@
 #include "config.h"
 #endif
 
-#include <unistd.h>
-
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+
+// On Windows, define ssize_t manually
+#ifdef _WIN32
+#define ssize_t __int64
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>  // gettimeofday()
@@ -392,7 +398,7 @@ fileFlush(int fileID)
     {
       FILE *fp = fileptr->fp;
       retval = fflush(fp);
-      if (retval == 0) retval = fsync(fileno(fp));
+      if (retval == 0) retval = fflush(fp);
       if (retval != 0) retval = errno;
     }
 

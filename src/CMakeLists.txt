@@ -61,6 +61,7 @@ list( APPEND cdi_src_files
   grb_write.c
   gribapi.c
   gribapi.h
+  gribapi_utilities.c
   gribapi_utilities.h
   grid.c
   grid.h
@@ -103,6 +104,7 @@ list( APPEND cdi_src_files
   stream_ext.h
   stream_grb.c
   stream_grb.h
+  stream_gribapi.c
   stream_gribapi.h
   stream_ieg.c
   stream_ieg.h
@@ -137,12 +139,95 @@ list( APPEND cdi_src_files
   zaxis.c
   zaxis.h
 )
+list( APPEND cdi_pio_files
+  cdipio.h
+  pio.c
+  pio.h
+  pio_cdf_int.c
+  pio_cdf_int.h
+  pio_client.c
+  pio_client.h
+  pio_comm.c
+  pio_comm.h
+  pio_conf.c
+  pio_conf.h
+  pio_dbuffer.c
+  pio_dbuffer.h
+  pio_dist_grid.c
+  pio_dist_grid.h
+  pio_id_set.h
+  pio_idxlist_cache.c
+  pio_idxlist_cache.h
+  pio_impl.h
+  pio_interface.c
+  pio_interface.h
+  pio_mpi_fw_at_all.c
+  pio_mpi_fw_at_reblock.c
+  pio_mpi_fw_ordered.c
+  pio_mpinonb.c
+  pio_posixasynch.c
+  pio_posixfpguardsendrecv.c
+  pio_posixnonb.c
+  pio_record_send.c
+  pio_roles.c
+  pio_rpc.c
+  pio_rpc.h
+  pio_serialize.c
+  pio_serialize.h
+  pio_server.c
+  pio_server.h
+  pio_util.c
+  pio_util.h
+  pio_xmap_cache.c
+  pio_xmap_cache.h
+)
+
+list( APPEND cdi_unknown
+  cfortran.h
+  getline.c
+  make_fint.c
+  resource_unpack.c
+  resource_unpack.h
+)
+
+option(CDI_BUILD_UNKNOWN "Build unknown sources in libcdi" ON)
+mark_as_advanced(CDI_BUILD_UNKNOWN)
+if (CDI_BUILD_UNKNOWN)
+  list(APPEND cdi_src_files ${cdi_unknown})
+endif ()
+
+# Support exporting all symbolds on Windows
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 add_library(cdilib
   ${cdi_src_files}
 #  INSTALL_HEADERS_LIST  cdi.h
 )
-find_package(HDF5 REQUIRED COMPONENTS C REQUIRED)
 
-target_link_libraries(cdilib PUBLIC netCDF::netcdf ${HDF5_LIBS})
-target_compile_definitions(cdilib PUBLIC HAVE_CONFIG_H)
+target_include_directories(cdilib PRIVATE "${PROJECT_BINARY_DIR}/src/config.h")
+target_link_libraries(cdilib ${cdi_linked_libs})
+target_compile_definitions(cdilib PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
+
+add_library(cdilib::cdilib ALIAS cdilib)
+
+include(GNUInstallDirs)
+install(FILES cdi.h calendar.h cdi_datetime.h julian_date.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(TARGETS cdilib
+  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cdi/cdi-config.cmake.in" "${CMAKE_BINARY_DIR}/cmake/cdi-config.cmake"
+  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/cdi")
+write_basic_package_version_file(
+  "${CMAKE_BINARY_DIR}/cmake/cdi-config-version.cmake"
+  VERSION "${PACKAGE_VERSION}"
+  COMPATIBILITY SameMajorVersion)
+install(
+  FILES
+    "${CMAKE_BINARY_DIR}/cmake/cdi-config.cmake"
+    "${CMAKE_BINARY_DIR}/cmake/cdi-config-version.cmake"
+  DESTINATION
+    "${CMAKE_INSTALL_LIBDIR}/cmake/cdi")

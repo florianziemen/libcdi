@@ -32,7 +32,7 @@ int cdfInqContents(stream_t *streamptr);
 void cdfEndDef(stream_t *streamptr);
 void cdfDefField(stream_t *streamptr);
 
-void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
+void cdfCopyField(stream_t *streamptr2, stream_t *streamptr1);
 
 void cdfDefineAttributes(int filetype, int vlistID, int varID, int fileID, int ncvarID);
 

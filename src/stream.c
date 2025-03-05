@@ -251,9 +251,10 @@ streamDefNumWorker(int streamID, int numWorker)
               if (streamptr->maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
               if (streamptr->maxGlobalRecs == 1) numWorker = 0;
               if (numWorker > streamptr->maxGlobalRecs) numWorker = (int) streamptr->maxGlobalRecs;
-              if (streamptr->chunkSizeTdim > 1 && numWorker > streamptr->nvars) numWorker = streamptr->nvars;
-              if (streamptr->chunkSizeZdim > 1) numWorker = 0;
-              if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", streamptr->chunkSizeTdim, streamptr->chunkSizeZdim);
+              CdfInfo *cdfInfo = &(streamptr->cdfInfo);
+              if (cdfInfo->chunkSizeDimT > 1 && numWorker > streamptr->nvars) numWorker = streamptr->nvars;
+              if (cdfInfo->chunkSizeDimZ > 1) numWorker = 0;
+              if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", cdfInfo->chunkSizeDimT, cdfInfo->chunkSizeDimZ);
             }
 #endif
           else
@@ -429,7 +430,7 @@ cdiInqContents(stream_t *streamptr)
       if (taxisID != CDI_UNDEFID)
         {
           taxis_t *taxisptr1 = &streamptr->tsteps[0].taxis;
-          taxis_t *taxisptr2 = taxisPtr(taxisID);
+          taxis_t *taxisptr2 = taxis_to_pointer(taxisID);
           ptaxisCopy(taxisptr2, taxisptr1);
         }
     }
@@ -1076,31 +1077,32 @@ streamDefaultValue(stream_t *streamptr)
   basetimeInit(&streamptr->basetime);
 
 #ifdef HAVE_LIBNETCDF
-  streamptr->nc_complex_float_id = CDI_UNDEFID;
-  streamptr->nc_complex_double_id = CDI_UNDEFID;
+  CdfInfo *cdfInfo = &(streamptr->cdfInfo);
+  cdfInfo->complexFloatId = CDI_UNDEFID;
+  cdfInfo->complexDoubleId = CDI_UNDEFID;
 
-  for (int i = 0; i < MAX_ZAXES_PS; i++) streamptr->zaxisID[i] = CDI_UNDEFID;
-  for (int i = 0; i < MAX_ZAXES_PS; i++) streamptr->nczvarID[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_ZAXES_PS; i++) cdfInfo->zaxisIdVec[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_ZAXES_PS; i++) cdfInfo->ncZvarIdVec[i] = CDI_UNDEFID;
 
   for (int i = 0; i < MAX_GRIDS_PS; i++)
     {
-      streamptr->ncgrid[i].start = CDI_UNDEFID;
-      streamptr->ncgrid[i].count = CDI_UNDEFID;
-      streamptr->ncgrid[i].gridID = CDI_UNDEFID;
-      for (size_t j = 0; j < CDF_SIZE_ncIDs; ++j) streamptr->ncgrid[i].ncIDs[j] = CDI_UNDEFID;
+      cdfInfo->cdfGridVec[i].start = CDI_UNDEFID;
+      cdfInfo->cdfGridVec[i].count = CDI_UNDEFID;
+      cdfInfo->cdfGridVec[i].gridID = CDI_UNDEFID;
+      for (size_t j = 0; j < CDF_SIZE_NCID; ++j) cdfInfo->cdfGridVec[i].ncIdVec[j] = CDI_UNDEFID;
     }
 
-  streamptr->ncNumDims = 0;
-  for (int i = 0; i < MAX_DIMS_PS; i++) streamptr->ncDimID[i] = CDI_UNDEFID;
-  for (int i = 0; i < MAX_DIMS_PS; i++) streamptr->ncDimLen[i] = 0;
+  cdfInfo->ncNumDims = 0;
+  for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimIdVec[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimLenVec[i] = 0;
 
-  streamptr->vct.ilev = 0;
-  streamptr->vct.mlev = 0;
-  streamptr->vct.ilevID = CDI_UNDEFID;
-  streamptr->vct.mlevID = CDI_UNDEFID;
+  cdfInfo->chunkSizeDimT = 0;
+  cdfInfo->chunkSizeDimZ = 0;
 
-  streamptr->chunkSizeTdim = 0;
-  streamptr->chunkSizeZdim = 0;
+  cdfInfo->vct.ilev = 0;
+  cdfInfo->vct.mlev = 0;
+  cdfInfo->vct.ilevID = CDI_UNDEFID;
+  cdfInfo->vct.mlevID = CDI_UNDEFID;
 #endif
   streamptr->maxGlobalRecs = CDI_UNDEFID;
 
@@ -1233,16 +1235,12 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
         cdfClose(fileID);
         if (streamptr->ntsteps == 0 && streamptr->tsteps != NULL)
           {
-            if (streamptr->tsteps[0].records)
-              {
-                Free(streamptr->tsteps[0].records);
-                streamptr->tsteps[0].records = NULL;
-              }
-            if (streamptr->tsteps[0].recIDs)
-              {
-                Free(streamptr->tsteps[0].recIDs);
-                streamptr->tsteps[0].recIDs = NULL;
-              }
+            tsteps_t *tstep = &(streamptr->tsteps[0]);
+            // clang-format off
+            if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
+            if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
+            if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
+            // clang-format on
           }
         break;
       }
@@ -1306,8 +1304,11 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
       for (int index = 0; index < maxSteps; ++index)
         {
           tsteps_t *tstep = &(streamptr->tsteps[index]);
-          if (tstep->records) Free(tstep->records);
-          if (tstep->recIDs) Free(tstep->recIDs);
+          // clang-format off
+          if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
+          if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
+          if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
+          // clang-format on
           taxisDestroyKernel(&(tstep->taxis));
         }
 
@@ -1338,7 +1339,6 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
 
   Free(streamptr);
 }
-
 
 static void
 streamDestroy(stream_t *streamptr)
@@ -1462,14 +1462,15 @@ cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
     }
 
   int taxisID = vlistInqTaxis(vlistID);
-  if (taxisID != CDI_UNDEFID) ptaxisCopy(&streamptr->tsteps[tsID].taxis, taxisPtr(taxisID));
+  if (taxisID != CDI_UNDEFID) ptaxisCopy(&streamptr->tsteps[tsID].taxis, taxis_to_pointer(taxisID));
 
   streamptr->curTsID = tsID;
   streamptr->ntsteps = tsID + 1;
 
+  bool baseFiletypeIsNetCDF = (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF);
 #ifdef HAVE_LIBNETCDF
   int timeIsVarying = vlistHasTime(vlistID);
-  if (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF && timeIsVarying)
+  if (baseFiletypeIsNetCDF && timeIsVarying)
     {
       /* usually points to cdfDefTimestep in serial mode but
        * to cdiPioCdfDefTimestep on servers and to a null-op on
@@ -1480,7 +1481,7 @@ cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
     }
 #endif
 
-  cdi_create_records(streamptr, tsID);
+  cdi_create_records(streamptr, tsID, !baseFiletypeIsNetCDF);
 
   return (int) streamptr->ntsteps;
 }
@@ -1563,7 +1564,7 @@ streamInqTimestep(int streamID, int tsID)
       streamptr->tsteps[tsID].curRecID = CDI_UNDEFID;
       int taxisID = vlistInqTaxis(vlistID);
       if (taxisID == -1) Error("Timestep undefined for fileID = %d", streamID);
-      ptaxisCopy(taxisPtr(taxisID), &streamptr->tsteps[tsID].taxis);
+      ptaxisCopy(taxis_to_pointer(taxisID), &streamptr->tsteps[tsID].taxis);
 
       return nrecs;
     }
@@ -1632,7 +1633,7 @@ streamInqTimestep(int streamID, int tsID)
   int taxisID = vlistInqTaxis(vlistID);
   if (taxisID == -1) Error("Timestep undefined for fileID = %d", streamID);
 
-  ptaxisCopy(taxisPtr(taxisID), &streamptr->tsteps[tsID].taxis);
+  ptaxisCopy(taxis_to_pointer(taxisID), &streamptr->tsteps[tsID].taxis);
 
   return nrecs;
 }
@@ -1783,26 +1784,6 @@ streamInqFileID(int streamID)
   return s->fileID;
 }
 
-void
-cdiDefAccesstype(int streamID, int type)
-{
-  stream_t *s = (stream_t *) reshGetVal(streamID, &streamOps);
-
-  if (s->accesstype == CDI_UNDEFID)
-    {
-      s->accesstype = type;
-    }
-  else if (s->accesstype != type)
-    Error("Changing access type from %s not allowed!", s->accesstype == TYPE_REC ? "REC to VAR" : "VAR to REC");
-}
-
-int
-cdiInqAccesstype(int streamID)
-{
-  stream_t *s = (stream_t *) reshGetVal(streamID, &streamOps);
-  return s->accesstype;
-}
-
 static int
 streamTxCode(void *s)
 {
@@ -1851,7 +1832,7 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
           if (taxisInqType(taxisID) == TAXIS_RELATIVE)
             if (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF)
               {
-                const taxis_t *taxisptr = taxisPtr(taxisID);
+                const taxis_t *taxisptr = taxis_to_pointer(taxisID);
                 if (cdiDateTime_isNull(taxisptr->rDateTime))
                   {
                     int vdate = taxisInqVdate(taxisID);
@@ -1860,7 +1841,7 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
                   }
               }
 #endif
-          ptaxisCopy(&streamptr->tsteps[0].taxis, taxisPtr(taxisID));
+          ptaxisCopy(&streamptr->tsteps[0].taxis, taxis_to_pointer(taxisID));
         }
 
       switch (cdiBaseFiletype(streamptr->filetype))
@@ -2039,13 +2020,13 @@ streamUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int
   return retval;
 }
 
-
 /* *
  * This function does not really close the memio,
  * this has to be done outside cdi to access the memory buffer*/
 void
 freePtrAfterNCMem(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
+  (void) recordBufIsToBeDeleted;
   int fileID = streamptr->fileID;
 
   if (fileID == CDI_UNDEFID)
@@ -2056,19 +2037,14 @@ freePtrAfterNCMem(stream_t *streamptr, int recordBufIsToBeDeleted)
 
   if (streamptr->ntsteps == 0 && streamptr->tsteps != NULL)
     {
-      if (streamptr->tsteps[0].records)
-        {
-          Free(streamptr->tsteps[0].records);
-          streamptr->tsteps[0].records = NULL;
-        }
-      if (streamptr->tsteps[0].recIDs)
-        {
-          Free(streamptr->tsteps[0].recIDs);
-          streamptr->tsteps[0].recIDs = NULL;
-        }
+      tsteps_t *tstep = &(streamptr->tsteps[0]);
+      // clang-format off
+      if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
+      if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
+      if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
+      // clang-format on
     }
 }
-
 
 void
 streamCloseNCMem(int streamID)
@@ -2079,7 +2055,7 @@ streamCloseNCMem(int streamID)
   if (lockIO) CDI_IO_LOCK();
 
   if (CDI_Debug) Message("streamID = %d filename = %s", streamID, streamptr->filename);
-  streamDestroyViaDelegate(streamptr,freePtrAfterNCMem);
+  streamDestroyViaDelegate(streamptr, freePtrAfterNCMem);
   reshRemove(streamID, &streamOps);
   if (CDI_Debug) Message("Removed stream %d from stream list", streamID);
 

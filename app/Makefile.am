@@ -2,6 +2,8 @@ bin_PROGRAMS    =
 noinst_PROGRAMS =
 check_PROGRAMS  =
 
+EXTRA_DIST = CMakeLists.txt
+
 if ENABLE_CDI_APP
 if ENABLE_CDI_LIB
 bin_PROGRAMS += cdi
