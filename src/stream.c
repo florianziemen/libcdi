@@ -721,7 +721,7 @@ streamOpenNCMem(int ncidp, char mode)
   stream_t *streamptr = stream_new_entry(CDI_UNDEFID);
   int streamID = CDI_ESYSTEM;
 
-#ifdef HAVE_NETCDF4
+#ifdef HAVE_NETCDF5
   streamID = streamptr->self;
   if (streamID < 0) return CDI_ELIMIT;
 
@@ -733,7 +733,7 @@ streamOpenNCMem(int ncidp, char mode)
 
   streamptr->filename = strdup(filename);
   streamptr->filemode = mode;
-  streamptr->filetype = CDI_FILETYPE_NC4;
+  streamptr->filetype = CDI_FILETYPE_NC5;
   streamptr->fileID = ncidp;
 
   if (mode == 'r')
