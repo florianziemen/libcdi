@@ -316,8 +316,8 @@ grbCopyField(stream_t *streamptr2, stream_t *streamptr1)
           size_t numMissVals = 0;
 
           int vlistID = streamptr1->vlistID;
-          int varID = record->varID;
-          int levelID = record->levelID;
+          int varID = recinfo->varID;
+          int levelID = recinfo->levelID;
           int gridID = vlistInqVarGrid(vlistID, varID);
 
           size_t gridsize = gridInqSize(gridID);
