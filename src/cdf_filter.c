@@ -95,8 +95,6 @@ cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
             {
               unsigned int filterid = filters[i]->filterid;
               // printf("filter %zu id:%d nparams:%zu param1 %d\n", i + 1, filterid, filters[i]->nparams, filters[i]->params[0]);
-              status = nc_inq_filter_avail(ncid, filterid);
-              if (status != NC_NOERR) Error("%s", nc_strerror(status));
               status = nc_def_var_filter(ncid, ncvarID, filterid, filters[i]->nparams, filters[i]->params);
               if (status != NC_NOERR)
                 {
