@@ -1,3 +1,7 @@
+2025-03-27  Uwe Schulzweida
+
+	* vlistChangeZaxis: added call to delete_chunks() (bug fix)
+
 2025-03-14  Uwe Schulzweida
 
 	* enable-hirlam-extensions failed since release 2.5.1 (bug fix)

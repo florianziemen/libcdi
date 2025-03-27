@@ -507,6 +507,22 @@ vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *leve
   return zaxisID;
 }
 
+static void
+delete_chunks(int vlistID, int varID)
+{
+  int chunkKeys[4] = { CDI_KEY_CHUNKSIZE_DIMX, CDI_KEY_CHUNKSIZE_DIMY, CDI_KEY_CHUNKSIZE_DIMZ, CDI_KEY_CHUNKSIZE_DIMT };
+  for (int i = 0; i < 4; ++i)
+    {
+      int chunkSize = 0;
+      cdiInqKeyInt(vlistID, varID, chunkKeys[i], &chunkSize);
+      if (chunkSize != 0) cdiDeleteKey(vlistID, varID, chunkKeys[i]);
+    }
+
+  int chunkSize = 0;
+  cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, &chunkSize);
+  if (chunkSize > 0) cdiDeleteKey(vlistID, varID, CDI_KEY_CHUNKSIZE);
+}
+
 /*
 @Function  vlistCopyFlag
 @Title     Copy some entries of a variable list
@@ -708,6 +724,7 @@ vlistCopyFlag(int vlistID2, int vlistID1)
 
                 zaxisID = zaxisID2;
                 vars2[varID2].zaxisID = zaxisID2;
+                delete_chunks(vlistID2, varID2);
               }
 
             for (int levID = 0; levID < nlevs2; levID++)
@@ -1350,22 +1367,6 @@ vlistGridIndex(int vlistID, int gridID)
   return index;
 }
 
-static void
-delete_chunks(int vlistID, int varID)
-{
-  int chunkKeys[4] = { CDI_KEY_CHUNKSIZE_DIMX, CDI_KEY_CHUNKSIZE_DIMY, CDI_KEY_CHUNKSIZE_DIMZ, CDI_KEY_CHUNKSIZE_DIMT };
-  for (int i = 0; i < 4; ++i)
-    {
-      int chunkSize = 0;
-      cdiInqKeyInt(vlistID, varID, chunkKeys[i], &chunkSize);
-      if (chunkSize != 0) cdiDeleteKey(vlistID, varID, chunkKeys[i]);
-    }
-
-  int chunkSize = 0;
-  cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, &chunkSize);
-  if (chunkSize > 0) cdiDeleteKey(vlistID, varID, CDI_KEY_CHUNKSIZE);
-}
-
 void
 vlistChangeGridIndex(int vlistID, int index, int gridID)
 {
@@ -1457,6 +1458,7 @@ vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
         if (vlistptr->vars[varID].zaxisID == zaxisIDold)
           {
             vlistptr->vars[varID].zaxisID = zaxisID;
+            delete_chunks(vlistID, varID);
             if (vlistptr->vars[varID].levinfo && nlevs != nlevsOld)
               {
                 vlistptr->vars[varID].levinfo
@@ -1490,6 +1492,7 @@ vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
     if (vlistptr->vars[varID].zaxisID == zaxisID1)
       {
         vlistptr->vars[varID].zaxisID = zaxisID2;
+        delete_chunks(vlistID, varID);
 
         if (vlistptr->vars[varID].levinfo && nlevs2 != nlevs1)
           {
