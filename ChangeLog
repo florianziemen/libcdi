@@ -1,3 +1,7 @@
+2025-03-30  Uwe Schulzweida
+
+	* changed chunkSizeLim from 16mb to 4mb
+
 2025-03-27  Uwe Schulzweida
 
 	* vlistChangeZaxis: added call to delete_chunks() (bug fix)

@@ -701,8 +701,9 @@ calc_chunksize(size_t chunkSizeLim, size_t size)
   return chunkSize;
 }
 
-static const size_t chunkSizeMin = 262144;    // 256k
-static const size_t chunkSizeLim = 16777216;  // 16m
+static const size_t chunkSizeMin = 262144;  // 256kb
+// static const size_t chunkSizeLim = 16777216;  // 16mb
+static const size_t chunkSizeLim = 4194304;  // 4mb
 
 size_t
 auto_chunksize_y(size_t gridsize, size_t xsize, size_t ysize)
