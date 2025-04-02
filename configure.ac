@@ -239,6 +239,12 @@ by default: change CFLAGS to disable it])])],
 dnl Set up libtool:
 AC_MSG_NOTICE([setting up libtool])
 ACX_USE_LIBTOOL_CONFIGURATION([pic-only])
+dnl LT_INIT is expanded by the macro above (after the required patches).
+dnl The following suppresses the warning:
+dnl libtoolize: Remember to add 'LT_INIT' to configure.ac.
+m4_pushdef([LT_INIT])dnl
+LT_INIT[]dnl
+m4_popdef([LT_INIT])dnl
 
 dnl Check endianess of system:
 AC_C_BIGENDIAN
