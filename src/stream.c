@@ -669,7 +669,6 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
   stream_t *streamptr = stream_new_entry(resH);
   int streamID = CDI_ESYSTEM;
 
-#ifndef HAVE_NC4HDF5_THREADSAFE
   if (CDI_Threadsafe)
     {
 #ifdef HAVE_LIBPTHREAD
@@ -684,7 +683,6 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
         }
 #endif
     }
-#endif
 
   if (streamptr->lockIO) CDI_IO_LOCK();
 
