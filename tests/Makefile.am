@@ -1,7 +1,5 @@
 TEST_EXTENSIONS = @EXEEXT@ .run
 
-EXTRA_DIST = CMakeLists.txt
-
 # Serial tests:
 TESTS = \
   calendar_test1 \

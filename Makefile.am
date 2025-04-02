@@ -11,7 +11,6 @@ doc/cdi_fman.pdf:
 
 EXTRA_DIST = \
   LICENSE \
-  CMakeLists.txt \
   config/interface.rb \
   doc/cdi_cman.pdf \
   doc/cdi_fman.pdf \
