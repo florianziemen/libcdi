@@ -2120,7 +2120,7 @@ cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridva
 {
   if (CDI_Netcdf_Lazy_Grid_Load)
     {
-      *valsGet = (struct xyValGet) {
+      *valsGet = (struct xyValGet){
         .scalefactor = ncvar->scalefactor,
         .addoffset = ncvar->addoffset,
         .start = { start[0], start[1], start[2] },
@@ -3212,7 +3212,6 @@ static int
 cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, size_t vctsize_echam,
                      double *vct_echam, unsigned char *uuidOfVGrid)
 {
-  char *pname, *plongname, *punits, *pstdname;
   size_t vctsize = vctsize_echam;
   double *vct = vct_echam;
 
@@ -3265,6 +3264,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
           double *lbounds = NULL;
           double *ubounds = NULL;
 
+          char *pname = NULL, *plongname = NULL, *punits = NULL, *pstdname = NULL;
           if (zvarid != CDI_UNDEFID)
             {
               positive = ncvars[zvarid].positive;
@@ -3276,12 +3276,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 	          if      (ncvars[zvarid].xtype == NC_FLOAT) zdatatype = CDI_DATATYPE_FLT32;
 	          else if (ncvars[zvarid].xtype == NC_INT)   zdatatype = CDI_DATATYPE_INT32;
 	          else if (ncvars[zvarid].xtype == NC_SHORT) zdatatype = CDI_DATATYPE_INT16;
-              // clang-format on
-              // don't change the name !!!
-              /*
-                if ((len = strlen(pname)) > 2)
-                if (pname[len-2] == '_' && isdigit((int) pname[len-1])) pname[len-2] = 0;
-              */
+                // clang-format on
 #ifndef USE_MPI
               if (zaxisType == ZAXIS_CHAR && ncvars[zvarid].ndims == 2)
                 {
@@ -3306,19 +3301,20 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
                   cdf_get_var_double(ncvars[zvarid].ncid, zvarid, zvar);
                 }
 
-              if (ncvars[zvarid].bounds != CDI_UNDEFID)
+              int boundsId = ncvars[zvarid].bounds;
+              if (boundsId != CDI_UNDEFID)
                 {
-                  int nbdims = ncvars[ncvars[zvarid].bounds].ndims;
+                  int nbdims = ncvars[boundsId].ndims;
                   if (nbdims == 2 || isScalar)
                     {
-                      size_t nlevel = isScalar ? 1 : ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
-                      int nvertex = (int) ncdims[ncvars[ncvars[zvarid].bounds].dimids[1 - isScalar]].len;
+                      size_t nlevel = isScalar ? 1 : ncdims[ncvars[boundsId].dimids[0]].len;
+                      int nvertex = (int) ncdims[ncvars[boundsId].dimids[1 - isScalar]].len;
                       if (nlevel == zsize && nvertex == 2)
                         {
                           lbounds = (double *) Malloc(4 * nlevel * sizeof(double));
                           ubounds = lbounds + nlevel;
                           double *zbounds = lbounds + 2 * nlevel;
-                          cdf_get_var_double(ncvars[zvarid].ncid, ncvars[zvarid].bounds, zbounds);
+                          cdf_get_var_double(ncvars[zvarid].ncid, boundsId, zbounds);
                           for (size_t i = 0; i < nlevel; ++i)
                             {
                               lbounds[i] = zbounds[i * 2];
@@ -3331,9 +3327,6 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
           else
             {
               pname = (zdimid != CDI_UNDEFID) ? ncdims[zdimid].name : NULL;
-              plongname = NULL;
-              punits = NULL;
-              pstdname = NULL;
 
               if (zsize == 1 && zdimid == CDI_UNDEFID)
                 {
