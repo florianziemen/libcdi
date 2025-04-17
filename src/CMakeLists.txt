@@ -1,5 +1,8 @@
 
-target_sources(cdilib PRIVATE
+target_sources(cdilib
+  INTERFACE
+  cdi.h
+  PRIVATE
   async_worker.c
   async_worker.h
   basetime.c
@@ -22,7 +25,6 @@ target_sources(cdilib PRIVATE
   cdf_util.c
   cdf_util.h
   cdf_write.c
-  cdi.h
   cdi_across.c
   cdi_across.h
   cdi_att.c
@@ -203,6 +205,8 @@ endif ()
 # Support exporting all symbols on Windows
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
+set_target_properties(cdilib PROPERTIES PUBLIC_HEADER cdi.h)
+
 set_property(TARGET cdilib PROPERTY CDI_INSTALL_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/cdi.h
   ${CMAKE_CURRENT_SOURCE_DIR}/calendar.h
@@ -210,7 +214,14 @@ set_property(TARGET cdilib PROPERTY CDI_INSTALL_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/julian_date.h
 )
 
-target_include_directories(cdilib PRIVATE "${PROJECT_BINARY_DIR}/src/config.h")
+target_include_directories(cdilib
+  PRIVATE 
+  ${CMARE_CURRENT_BINARY_DIR}
+  PUBLIC
+  # where top-level project will look for the library's public headers
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  # where external projects will look for the library's public headers
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 target_link_libraries(cdilib ${cdi_linked_libs})
 target_compile_definitions(cdilib PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
