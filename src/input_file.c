@@ -29,7 +29,7 @@
 #include <unistd.h>
 #endif
 
-#if HAVE_PTHREAD
+#if HAVE_LIBPTHREAD
 #include <pthread.h>
 #endif
 
@@ -75,7 +75,7 @@ success:
 
 static CdiInputFile **openFileList = NULL;
 static size_t openFileCount = 0, openFileListSize = 0;
-#if HAVE_PTHREAD
+#if HAVE_LIBPTHREAD
 static pthread_mutex_t openFileListLock = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
@@ -85,7 +85,7 @@ cdiInputFile_make(const char *path)
 {
   CdiInputFile *result = NULL;
   xassert(path);
-#if HAVE_PTHREAD
+#if HAVE_LIBPTHREAD
   int error = pthread_mutex_lock(&openFileListLock);
   xassert(!error);
 #endif
@@ -123,7 +123,7 @@ cdiInputFile_make(const char *path)
           }
       }
   }
-#if HAVE_PTHREAD
+#if HAVE_LIBPTHREAD
   error = pthread_mutex_unlock(&openFileListLock);
   xassert(!error);
 #endif
@@ -159,7 +159,7 @@ cdiInputFile_getPath(const CdiInputFile *me)
 void
 cdiInputFile_destruct(CdiInputFile *me)
 {
-#if HAVE_PTHREAD
+#if HAVE_LIBPTHREAD
   int error = pthread_mutex_lock(&openFileListLock);
   xassert(!error);
 #endif
@@ -171,7 +171,7 @@ cdiInputFile_destruct(CdiInputFile *me)
     // Remove me from the list
     openFileList[position] = openFileList[--openFileCount];
   }
-#if HAVE_PTHREAD
+#if HAVE_LIBPTHREAD
   error = pthread_mutex_unlock(&openFileListLock);
   xassert(!error);
 #endif

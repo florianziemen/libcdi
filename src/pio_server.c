@@ -1755,7 +1755,7 @@ cdiPioServerStreamOpen(const char *filename, char filemode, int filetype, stream
       {
         struct cdiPioNcCreateLongJmpRetBuf retJmpBuf;
         retJmpBuf.openRank = cdiPioNextOpenRank();
-#if !defined TLS && defined HAVE_PTHREAD
+#if !defined TLS && defined HAVE_LIBPTHREAD
         pthread_setspecific(cdiPioCdfJmpKey, &jmpBuf);
 #else
         cdiPioCdfJmpBuf = &retJmpBuf;
