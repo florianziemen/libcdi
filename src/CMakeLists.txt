@@ -1,7 +1,5 @@
 
 target_sources(cdilib
-  INTERFACE
-  cdi.h
   PRIVATE
   async_worker.c
   async_worker.h
@@ -143,14 +141,13 @@ target_sources(cdilib
   zaxis.h
 )
 
-option(CDI_BUILD_PIO "Build unknown sources in libcdi" OFF)
-mark_as_advanced(CDI_BUILD_PIO)
-if (CDI_BUILD_PIO)
-  target_sources(cdilib PRIVATE
+
+if(${CDI_PIO})
+  target_sources(libcdipio
+    PRIVATE
     cdipio.h
     pio.c
     pio.h
-    pio_cdf_int.c
     pio_cdf_int.h
     pio_client.c
     pio_client.h
@@ -187,41 +184,39 @@ if (CDI_BUILD_PIO)
     pio_util.h
     pio_xmap_cache.c
     pio_xmap_cache.h
-  )
-endif()
-
-option(CDI_BUILD_UNKNOWN "Build unknown sources in libcdi" ON)
-mark_as_advanced(CDI_BUILD_UNKNOWN)
-if (CDI_BUILD_UNKNOWN)
-  target_sources( cdilib PRIVATE
-    cfortran.h
-    getline.c
-    make_fint.c
     resource_unpack.c
     resource_unpack.h
   )
-endif ()
+  target_link_libraries( libcdipio PRIVATE cdilib YAXT::YAXT_C)
+
+  if(${CDI_ENABLE_CF_INTERFACE})
+    target_sources(libcdipio PRIVATE cdipioFortran.c cfortran.c)
+    add_executable(make_fint make_fint.c)
+    #target_link_libraries(make_fint ...) #TODO fix generation of fortran interface generation script
+  endif()
+
+  add_library(libcdiresunpack)
+  target_sources(libcdiresunpack PRIVATE
+    resource_unpack.c
+    resource_unpack.h)
+  target_link_libraries(libcdiresunpack PRIVATE cdilib)
+
+endif()
 
 # Support exporting all symbols on Windows
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-set_target_properties(cdilib PROPERTIES PUBLIC_HEADER cdi.h)
-
-set_property(TARGET cdilib PROPERTY CDI_INSTALL_HEADERS
-  ${CMAKE_CURRENT_SOURCE_DIR}/cdi.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/calendar.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/cdi_datetime.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/julian_date.h
+set_target_properties(cdilib PROPERTIES
+  PUBLIC_HEADER
+  "${CMAKE_CURRENT_SOURCE_DIR}/cdi.h;${CMAKE_CURRENT_SOURCE_DIR}/calendar.h;${CMAKE_CURRENT_SOURCE_DIR}/cdi_datetime.h;${CMAKE_CURRENT_SOURCE_DIR}/julian_date.h"
 )
 
 target_include_directories(cdilib
-  PRIVATE 
-  ${CMARE_CURRENT_BINARY_DIR}
   PUBLIC
   # where top-level project will look for the library's public headers
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   # where external projects will look for the library's public headers
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/cdilib>)
 
 target_link_libraries(cdilib ${cdi_linked_libs})
 target_compile_definitions(cdilib PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
