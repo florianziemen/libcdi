@@ -21,7 +21,7 @@ struct cdiPioNcCreateLongJmpRetBuf
   int openRank;
 };
 
-#if !defined TLS && defined HAVE_PTHREAD
+#if !defined TLS && defined HAVE_LIBPTHREAD
 extern pthread_key_t cdiPioCdfJmpKey;
 #else
 extern TLS struct cdiPioNcCreateLongJmpRetBuf *cdiPioCdfJmpBuf;

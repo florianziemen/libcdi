@@ -28,7 +28,7 @@
 #include "pio_server.h"
 
 #if defined HAVE_PARALLEL_NC4
-#if !defined TLS && defined HAVE_PTHREAD
+#if !defined TLS && defined HAVE_LIBPTHREAD
 pthread_key_t cdiPioCdfJmpKey;
 #else
 TLS struct cdiPioNcCreateLongJmpRetBuf *cdiPioCdfJmpBuf;
@@ -51,7 +51,7 @@ cdiPio_nc__create(const char *path, int cmode, size_t initialsz, size_t *chunksi
   int status = NC_EINVAL, ioMode = commInqIOMode();
   if (ioMode != PIO_NONE)
     {
-#if !defined TLS && defined HAVE_PTHREAD
+#if !defined TLS && defined HAVE_LIBPTHREAD
       struct cdiPioNcCreateLongJmpRetBuf *cdiPioCdfJmpBuf = pthread_getspecific(cdiPioCdfJmpKey);
 #endif
       if (cmode & NC_NETCDF4)
@@ -199,7 +199,7 @@ cdiPioEnableNetCDFParAccess(void)
   namespaceSwitchSet(NSSWITCH_NC__ENDDEF, NSSW_FUNC(cdiPio_nc__enddef));
 #endif
   namespaceSwitchSet(NSSWITCH_CDF_DEF_VAR, NSSW_FUNC(cdiPioCdfDefVar));
-#if !defined TLS && defined HAVE_PTHREAD
+#if !defined TLS && defined HAVE_LIBPTHREAD
   int ierror = pthread_key_create(&cdiPioCdfJmpKey, NULL);
   if (ierror)
     {
@@ -211,7 +211,7 @@ cdiPioEnableNetCDFParAccess(void)
 void
 cdiPioDisableNetCDFParAccess(void)
 {
-#if !defined TLS && defined HAVE_PTHREAD
+#if !defined TLS && defined HAVE_LIBPTHREAD
   int ierror = pthread_key_delete(cdiPioCdfJmpKey);
   if (ierror)
     {

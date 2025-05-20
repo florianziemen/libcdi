@@ -721,7 +721,9 @@ streamOpenNCMem(int ncidp, char mode)
   stream_t *streamptr = stream_new_entry(CDI_UNDEFID);
   int streamID = CDI_ESYSTEM;
 
-#ifdef HAVE_NETCDF4
+#ifdef NC_FORMAT_64BIT_DATA // so that we ran reliably use NC5 filetype
+                            // Not doing this can result in an error message
+                            // that falsely states a NC3 file is being used
   streamID = streamptr->self;
   if (streamID < 0) return CDI_ELIMIT;
 
@@ -733,7 +735,7 @@ streamOpenNCMem(int ncidp, char mode)
 
   streamptr->filename = strdup(filename);
   streamptr->filemode = mode;
-  streamptr->filetype = CDI_FILETYPE_NC4;
+  streamptr->filetype = CDI_FILETYPE_NC5;
   streamptr->fileID = ncidp;
 
   if (mode == 'r')
@@ -746,6 +748,8 @@ streamOpenNCMem(int ncidp, char mode)
           reshRemove(streamptr->self, &streamOps);
         }
     }
+#else
+  Error("tried to use in memory capabilities without Netcdf4 enabled");
 #endif
 
   return streamID;
