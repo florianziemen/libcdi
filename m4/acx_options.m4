@@ -190,21 +190,7 @@ AS_VAR_IF([ENABLE_NETCDF], [yes],
                    acx_cv_have_nc4hdf5=yes])
    AS_VAR_IF([acx_cv_have_nc4hdf5], [yes],
      [AC_DEFINE([HAVE_NC4HDF5],[1],[Define to 1 for NetCDF4/HDF5 support])
-      ENABLE_NC4HDF5=yes
-      AC_CHECK_DECLS([nc_inq_var_filter],,,
-        [AC_INCLUDES_DEFAULT
-@%:@include <netcdf.h>])
-      AC_SEARCH_LIBS([nc_inq_var_filter_ids], [netcdf],
-        [AC_CHECK_DECLS([nc_inq_var_filter_ids],,,
-           [AC_INCLUDES_DEFAULT
-@%:@include <netcdf.h>
-@%:@include <netcdf_filter.h>])])
-      AC_SEARCH_LIBS([ncaux_h5filterspec_parselist], [netcdf],
-        [AC_CHECK_DECLS([ncaux_h5filterspec_parselist],,,
-           [AC_INCLUDES_DEFAULT
-@%:@include <netcdf.h>
-@%:@include <netcdf_aux.h>])])])
-
+      ENABLE_NC4HDF5=yes])
 
    AC_CACHE_CHECK([netcdf's nc4/szlib support],
                   [acx_cv_have_nc4szlib],
