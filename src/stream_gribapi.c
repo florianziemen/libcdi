@@ -3354,6 +3354,8 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
 
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
+  if (!gc->init) gribapiDefInstitut(gh, vlistID, varID);
+
   if (editionNumber == 2)
     {
       if (!gc->init)
@@ -3397,7 +3399,6 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
     if (status == 0) grib_set_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast);
   }
 
-  if (!gc->init) gribapiDefInstitut(gh, vlistID, varID);
   if (!gc->init) gribapiDefModel(gh, vlistID, varID);
 
   if (!gc->init)
