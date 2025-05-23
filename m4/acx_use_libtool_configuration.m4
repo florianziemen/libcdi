@@ -51,7 +51,7 @@ AC_DEFUN([_ACX_LT_FORT_FLAGS_MANGLE],
      [AS_VAR_PUSHDEF([acx_FC],[F77])dnl
       AS_VAR_PUSHDEF([acx_FCFLAGS],[FFLAGS])dnl
       AS_VAR_PUSHDEF([acx_LDFLAGS],[F77LDFLAGS])])
-   acx_temp=`$acx_FC -V 2>&1 | sed -n 1,5p`
+   acx_temp=`$acx_FC -V 2>&1 | sed -n 1,15p`
 dnl fix problems from NAG compiler
    AS_CASE(["$acx_temp"],
      [*NAG\ Fortran\ Compiler\ Release*],
@@ -82,19 +82,33 @@ dnl newer PGI or NAG configurations particularly well
      [m4_pushdef([_LT_COMPILER_PIC],
        m4_bpatsubst(m4_dquote(
        m4_bpatsubst(m4_dquote(
-       m4_bpatsubst(m4_dquote(m4_defn([_LT_COMPILER_PIC])),[;;
+       m4_bpatsubst(m4_dquote(
+       m4_bpatsubst(m4_dquote(m4_defn([_LT_COMPILER_PIC])),
+         [;;
 	\*Portland\\ ],[;; @%:@(
 	*NAG\\ Fortran\\ Compiler*)
 	  _LT_TAGVAR(lt_prog_compiler_wl, $][1)='-Wl,-Wl,,'
 	  _LT_TAGVAR(lt_prog_compiler_pic, $][1)='-PIC'
 	  _LT_TAGVAR(lt_prog_compiler_static, $][1)='-Bstatic'
 	  ;;
-	*PGI\\ Compilers\\ and\\ Tools*|*NVIDIA\\ Compilers\\ and\\ Tools*|*Port][land\\ ])),acx_lt_sed[ 5q`],acx_lt_sed[ -n 1,5p`])),[pgcpp\*],[pgcpp* | pgc++* ]))dnl
+	*PGI\\ Compilers\\ and\\ Tools*|*NVIDIA\\ Compilers\\ and\\ Tools*|*Port][land\\ ])),
+         acx_lt_sed[ 5q`],acx_lt_sed[ -n 1,15p`])),
+         [\*Portland\\ [^;]*;;],[\& @%:@(
+	*)
+          case `$CC --version 2>&1 | $SED -n 1,15p` in @%:@(
+            *flang*version*)
+	      _LT_TAGVAR(lt_prog_compiler_wl, $][1)='-Wl,'
+	      _LT_TAGVAR(lt_prog_compiler_pic, $][1)='-fPIC'
+	      _LT_TAGVAR(lt_prog_compiler_static, $][1)='-static'
+	      ;;
+          esac
+          ;;])),
+         [pgcpp\*],[pgcpp* | pgc++* ]))dnl
       m4_pushdef([_LT_LANG_CXX_CONFIG],
         m4_bpatsubst(m4_dquote(
         m4_bpatsubst(m4_dquote(
         m4_bpatsubst(m4_dquote(m4_defn([_LT_LANG_CXX_CONFIG])),
-          acx_lt_sed[ 5q`],acx_lt_sed[ -n 1,5p`])),
+          acx_lt_sed[ 5q`],acx_lt_sed[ -n 1,15p`])),
           [\$CC\( \$pic_flag\)? -shared -nostdlib \$predep_objects \$libobjs \$deplibs \$postdep_objects ],
           [$CC\1 -shared $libobjs $deplibs ])),
           [pgcpp\*],[pgcpp* | pgc++* ]))dnl
@@ -114,7 +128,7 @@ dnl newer PGI or NAG configurations particularly well
 ],[\&	*NAG\\ Fortran\\ Compiler*\1
 	  tmp_sharedflag='-Wl,-shared'
 	  tmp_compiler_flags='`echo " \$compiler_flags " | sed -E -e '"'"': start'"'"' -e '"'"'s/ -W@<:@cl@:>@,-no-pie@<:@@<:@:blank:@:>@@:>@/ /g;t start'"'"' -e '"'"'s/^ //;s/ $//'"'"'`' ;;
-])),acx_lt_sed[ 5q`],acx_lt_sed[ -n 1,5p`]))dnl
+])),acx_lt_sed[ 5q`],acx_lt_sed[ -n 1,15p`]))dnl
       m4_pushdef([_LT_SYS_HIDDEN_LIBDEPS],[AS_UNSET([output_verbose_link_cmd])]
         m4_bpatsubst(m4_dquote(m4_bpatsubst(m4_dquote(
           m4_defn([_LT_SYS_HIDDEN_LIBDEPS])),[test x-\([LR]\) = "\$p"],
@@ -125,14 +139,22 @@ dnl newer PGI or NAG configurations particularly well
      [m4_pushdef(acx_ltconfig,m4_bpatsubst(m4_dquote(
         m4_bpatsubst(m4_dquote(m4_defn(acx_ltconfig)),[_LT_TAG_COMPILER
 ],
-       [\&  _LT_TAGDECL([with_nagfor], [acx_is_nagfor], [0], [Is the compiler the NAG Fortran compiler?])])),
+       [\&  _LT_TAGDECL([compiler_lineage], [acx_compiler_lineage], [0], [For inherited options, we need to know how to deal with those when using a library built with compiler X in compiler Y.])])),
        [_LT_CONFIG],
-       [AC_MSG_CHECKING([whether this is the NAG Fortran compiler])
-    $CC -V 2>&1 | grep '^NAG Fortran Compiler Release' >/dev/null 2>&1
-    _lt_result=$?
-    AS_IF([test $_lt_result -eq 0],[_lt_result=yes],[_lt_result=no])
+       [AC_MSG_CHECKING([for the compiler family])
+    case `$CC -V 2>&1 | sed -n '1,20p'` in #(
+    *NAG\\ Fortran\\ Compiler\\ Release*\)
+      _lt_result=NAG
+      ;; #(
+    *PGI\\ Compilers\\ and\\ Tools*|*Portland\\ *\)
+      _lt_result=PGI
+      ;;
+    *\)
+      _lt_result=other
+      ;;
+    esac
     AC_MSG_RESULT([$_lt_result])
-    _LT_TAGVAR([acx_is_nagfor], $][1)=$_lt_result
+    _LT_TAGVAR([acx_compiler_lineage], $][1)=$_lt_result
     \&]))])dnl
    LT_INIT([$1])
    m4_popdef([_LT_LANG_F77_CONFIG])dnl
@@ -164,7 +186,8 @@ dnl only causes overhead and potential problems.
      [AC_LANG_CASE([Fortran],[m4_pushdef([acx_flags_var],[FCFLAGS])m4_pushdef([acx_lt_tag],[FC])],
         [Fortran 77],[m4_pushdef([acx_flags_var],[FFLAGS])m4_pushdef([acx_lt_tag],[F77])],
         [C],[m4_pushdef([acx_flags_var],[CFLAGS])m4_pushdef([acx_lt_tag],[])])dnl
-      AS_IF([test x"$_LT_TAGVAR([acx_is_nagfor],m4_defn([acx_lt_tag]))" = xyes],
+      AS_CASE([$_LT_TAGVAR([acx_compiler_lineage],m4_defn([acx_lt_tag]))],
+	[NAG],
         [AS_CASE([" $acx_flags_var $LDFLAGS "],
            [*\ -B*\ *],
            [extrasub="${extrasub+$extrasub$as_nl}/^\# skip internal symbols for stubs created by xlf/i \\\\${as_nl}\# ignore symbols nagfor injects into our shared objects\\\\${as_nl}/"'^${exp_sym_prefix}'"${acx_symprfx}"'(__NAGf90_|f90_)/b'
