@@ -6438,7 +6438,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
     acx_cv_fc_cf_flag=-DNAGf90Fortran ;; #(
   *GNU\ Fortran*g77*) :
     acx_cv_fc_cf_flag=-Dg77Fortran ;; #(
-  *GNU\ Fortran*) :
+  *GNU\ Fortran*|flang*version*) :
                 case " $FCFLAGS " in #(
   *\ -ff2c\ *) :
     acx_cv_fc_cf_flag=-Df2cFortran ;; #(
@@ -6518,7 +6518,7 @@ ac_compiler_gnu=$ac_cv_f77_compiler_gnu
     acx_cv_f77_cf_flag=-DNAGf90Fortran ;; #(
   *GNU\ Fortran*g77*) :
     acx_cv_f77_cf_flag=-Dg77Fortran ;; #(
-  *GNU\ Fortran*) :
+  *GNU\ Fortran*|flang*version*) :
                 case " $FFLAGS " in #(
   *\ -ff2c\ *) :
     acx_cv_f77_cf_flag=-Df2cFortran ;; #(
@@ -12227,7 +12227,7 @@ lt_prog_compiler_static=
 	lt_prog_compiler_static='-qstaticlink'
 	;;
       *)
-	case `$CC -V 2>&1 | sed -n 1,5p` in
+	case `$CC -V 2>&1 | sed -n 1,15p` in
 	*Sun\ Ceres\ Fortran* | *Sun*Fortran*\ [1-7].* | *Sun*Fortran*\ 8.[0-3]*)
 	  # Sun Fortran 8.3 passes all unrecognized flags to the linker
 	  lt_prog_compiler_pic='-KPIC'
@@ -12259,7 +12259,16 @@ lt_prog_compiler_static=
 	  lt_prog_compiler_wl='-Wl,'
 	  lt_prog_compiler_pic='-fpic'
 	  lt_prog_compiler_static='-Bstatic'
-	  ;;
+	  ;; #(
+	*)
+          case `$CC --version 2>&1 | $SED -n 1,15p` in #(
+            *flang*version*)
+	      lt_prog_compiler_wl='-Wl,'
+	      lt_prog_compiler_pic='-fPIC'
+	      lt_prog_compiler_static='-static'
+	      ;;
+          esac
+          ;;
 	esac
 	;;
       esac
@@ -12664,6 +12673,9 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
   openbsd* | bitrig*)
     with_gnu_ld=no
     ;;
+  linux* | k*bsd*-gnu | gnu*)
+    link_all_deplibs=no
+    ;;
   esac
 
   ld_shlibs=yes
@@ -12881,7 +12893,7 @@ _LT_EOF
 	  compiler_needs_object=yes
 	  ;;
 	esac
-	case `$CC -V 2>&1 | sed -n 1,5p` in
+	case `$CC -V 2>&1 | sed -n 1,15p` in
 	*Sun\ C*)			# Sun C 5.9
 	  whole_archive_flag_spec='$wl--whole-archive`new_convenience=; for conv in $convenience\"\"; do test -z \"$conv\" || new_convenience=\"$new_convenience,$conv\"; done; func_echo_all \"$new_convenience\"` $wl--no-whole-archive'
 	  compiler_needs_object=yes
@@ -13593,6 +13605,7 @@ $as_echo "$lt_cv_irix_exported_symbol" >&6; }
 	if test yes = "$lt_cv_irix_exported_symbol"; then
           archive_expsym_cmds='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags $wl-soname $wl$soname `test -n "$verstring" && func_echo_all "$wl-set_version $wl$verstring"` $wl-update_registry $wl$output_objdir/so_locations $wl-exports_file $wl$export_symbols -o $lib'
 	fi
+	link_all_deplibs=no
       else
 	archive_cmds='$CC -shared $libobjs $deplibs $compiler_flags -soname $soname `test -n "$verstring" && func_echo_all "-set_version $verstring"` -update_registry $output_objdir/so_locations -o $lib'
 	archive_expsym_cmds='$CC -shared $libobjs $deplibs $compiler_flags -soname $soname `test -n "$verstring" && func_echo_all "-set_version $verstring"` -update_registry $output_objdir/so_locations -exports_file $export_symbols -o $lib'
@@ -15702,18 +15715,22 @@ $as_echo_n "checking whether to build static libraries... " >&6; }
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_static" >&5
 $as_echo "$enable_static" >&6; }
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether this is the NAG Fortran compiler" >&5
-$as_echo_n "checking whether this is the NAG Fortran compiler... " >&6; }
-    $CC -V 2>&1 | grep '^NAG Fortran Compiler Release' >/dev/null 2>&1
-    _lt_result=$?
-    if test $_lt_result -eq 0; then :
-  _lt_result=yes
-else
-  _lt_result=no
-fi
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the compiler family" >&5
+$as_echo_n "checking for the compiler family... " >&6; }
+    case `$CC -V 2>&1 | sed -n '1,20p'` in #(
+    *NAG\ Fortran\ Compiler\ Release*)
+      _lt_result=NAG
+      ;; #(
+    *PGI\ Compilers\ and\ Tools*|*Portland\ *)
+      _lt_result=PGI
+      ;;
+    *)
+      _lt_result=other
+      ;;
+    esac
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $_lt_result" >&5
 $as_echo "$_lt_result" >&6; }
-    acx_is_nagfor=$_lt_result
+    acx_compiler_lineage=$_lt_result
 
 
 
@@ -16871,7 +16888,7 @@ fi
 	    fi
 	    ;;
 	  *)
-	    case `$CC -V 2>&1 | sed -n 1,5p` in
+	    case `$CC -V 2>&1 | sed -n 1,15p` in
 	    *Sun\ C*)
 	      # Sun C++ 5.9
 	      no_undefined_flag_CXX=' -zdefs'
@@ -17613,7 +17630,7 @@ lt_prog_compiler_static_CXX=
 	    lt_prog_compiler_static_CXX='-qstaticlink'
 	    ;;
 	  *)
-	    case `$CC -V 2>&1 | sed -n 1,5p` in
+	    case `$CC -V 2>&1 | sed -n 1,15p` in
 	    *Sun\ C*)
 	      # Sun C++ 5.9
 	      lt_prog_compiler_pic_CXX='-KPIC'
@@ -18011,6 +18028,9 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
       exclude_expsyms_CXX='[_]+GLOBAL_OFFSET_TABLE_|[_]+GLOBAL__[FID]_.*|[_]+head_[A-Za-z0-9_]+_dll|[A-Za-z0-9_]+_dll_iname'
       ;;
     esac
+    ;;
+  linux* | k*bsd*-gnu | gnu*)
+    link_all_deplibs_CXX=no
     ;;
   *)
     export_symbols_cmds_CXX='$NM $libobjs $convenience | $global_symbol_pipe | $SED '\''s/.* //'\'' | sort | uniq > $export_symbols'
@@ -19407,7 +19427,7 @@ lt_prog_compiler_static_F77=
 	lt_prog_compiler_static_F77='-qstaticlink'
 	;;
       *)
-	case `$CC -V 2>&1 | sed -n 1,5p` in
+	case `$CC -V 2>&1 | sed -n 1,15p` in
 	*Sun\ Ceres\ Fortran* | *Sun*Fortran*\ [1-7].* | *Sun*Fortran*\ 8.[0-3]*)
 	  # Sun Fortran 8.3 passes all unrecognized flags to the linker
 	  lt_prog_compiler_pic_F77='-KPIC'
@@ -19439,7 +19459,16 @@ lt_prog_compiler_static_F77=
 	  lt_prog_compiler_wl_F77='-Wl,'
 	  lt_prog_compiler_pic_F77='-fpic'
 	  lt_prog_compiler_static_F77='-Bstatic'
-	  ;;
+	  ;; #(
+	*)
+          case `$CC --version 2>&1 | $SED -n 1,15p` in #(
+            *flang*version*)
+	      lt_prog_compiler_wl_F77='-Wl,'
+	      lt_prog_compiler_pic_F77='-fPIC'
+	      lt_prog_compiler_static_F77='-static'
+	      ;;
+          esac
+          ;;
 	esac
 	;;
       esac
@@ -19829,6 +19858,9 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
   openbsd* | bitrig*)
     with_gnu_ld=no
     ;;
+  linux* | k*bsd*-gnu | gnu*)
+    link_all_deplibs_F77=no
+    ;;
   esac
 
   ld_shlibs_F77=yes
@@ -20046,7 +20078,7 @@ _LT_EOF
 	  compiler_needs_object_F77=yes
 	  ;;
 	esac
-	case `$CC -V 2>&1 | sed -n 1,5p` in
+	case `$CC -V 2>&1 | sed -n 1,15p` in
 	*Sun\ C*)			# Sun C 5.9
 	  whole_archive_flag_spec_F77='$wl--whole-archive`new_convenience=; for conv in $convenience\"\"; do test -z \"$conv\" || new_convenience=\"$new_convenience,$conv\"; done; func_echo_all \"$new_convenience\"` $wl--no-whole-archive'
 	  compiler_needs_object_F77=yes
@@ -20708,6 +20740,7 @@ $as_echo "$lt_cv_irix_exported_symbol" >&6; }
 	if test yes = "$lt_cv_irix_exported_symbol"; then
           archive_expsym_cmds_F77='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags $wl-soname $wl$soname `test -n "$verstring" && func_echo_all "$wl-set_version $wl$verstring"` $wl-update_registry $wl$output_objdir/so_locations $wl-exports_file $wl$export_symbols -o $lib'
 	fi
+	link_all_deplibs_F77=no
       else
 	archive_cmds_F77='$CC -shared $libobjs $deplibs $compiler_flags -soname $soname `test -n "$verstring" && func_echo_all "-set_version $verstring"` -update_registry $output_objdir/so_locations -o $lib'
 	archive_expsym_cmds_F77='$CC -shared $libobjs $deplibs $compiler_flags -soname $soname `test -n "$verstring" && func_echo_all "-set_version $verstring"` -update_registry $output_objdir/so_locations -exports_file $export_symbols -o $lib'
@@ -21970,18 +22003,22 @@ fi
 
 
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether this is the NAG Fortran compiler" >&5
-$as_echo_n "checking whether this is the NAG Fortran compiler... " >&6; }
-    $CC -V 2>&1 | grep '^NAG Fortran Compiler Release' >/dev/null 2>&1
-    _lt_result=$?
-    if test $_lt_result -eq 0; then :
-  _lt_result=yes
-else
-  _lt_result=no
-fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the compiler family" >&5
+$as_echo_n "checking for the compiler family... " >&6; }
+    case `$CC -V 2>&1 | sed -n '1,20p'` in #(
+    *NAG\ Fortran\ Compiler\ Release*)
+      _lt_result=NAG
+      ;; #(
+    *PGI\ Compilers\ and\ Tools*|*Portland\ *)
+      _lt_result=PGI
+      ;;
+    *)
+      _lt_result=other
+      ;;
+    esac
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $_lt_result" >&5
 $as_echo "$_lt_result" >&6; }
-    acx_is_nagfor_F77=$_lt_result
+    acx_compiler_lineage_F77=$_lt_result
 
 
 
@@ -22523,7 +22560,7 @@ lt_prog_compiler_static_FC=
 	lt_prog_compiler_static_FC='-qstaticlink'
 	;;
       *)
-	case `$CC -V 2>&1 | sed -n 1,5p` in
+	case `$CC -V 2>&1 | sed -n 1,15p` in
 	*Sun\ Ceres\ Fortran* | *Sun*Fortran*\ [1-7].* | *Sun*Fortran*\ 8.[0-3]*)
 	  # Sun Fortran 8.3 passes all unrecognized flags to the linker
 	  lt_prog_compiler_pic_FC='-KPIC'
@@ -22555,7 +22592,16 @@ lt_prog_compiler_static_FC=
 	  lt_prog_compiler_wl_FC='-Wl,'
 	  lt_prog_compiler_pic_FC='-fpic'
 	  lt_prog_compiler_static_FC='-Bstatic'
-	  ;;
+	  ;; #(
+	*)
+          case `$CC --version 2>&1 | $SED -n 1,15p` in #(
+            *flang*version*)
+	      lt_prog_compiler_wl_FC='-Wl,'
+	      lt_prog_compiler_pic_FC='-fPIC'
+	      lt_prog_compiler_static_FC='-static'
+	      ;;
+          esac
+          ;;
 	esac
 	;;
       esac
@@ -22945,6 +22991,9 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
   openbsd* | bitrig*)
     with_gnu_ld=no
     ;;
+  linux* | k*bsd*-gnu | gnu*)
+    link_all_deplibs_FC=no
+    ;;
   esac
 
   ld_shlibs_FC=yes
@@ -23162,7 +23211,7 @@ _LT_EOF
 	  compiler_needs_object_FC=yes
 	  ;;
 	esac
-	case `$CC -V 2>&1 | sed -n 1,5p` in
+	case `$CC -V 2>&1 | sed -n 1,15p` in
 	*Sun\ C*)			# Sun C 5.9
 	  whole_archive_flag_spec_FC='$wl--whole-archive`new_convenience=; for conv in $convenience\"\"; do test -z \"$conv\" || new_convenience=\"$new_convenience,$conv\"; done; func_echo_all \"$new_convenience\"` $wl--no-whole-archive'
 	  compiler_needs_object_FC=yes
@@ -23824,6 +23873,7 @@ $as_echo "$lt_cv_irix_exported_symbol" >&6; }
 	if test yes = "$lt_cv_irix_exported_symbol"; then
           archive_expsym_cmds_FC='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags $wl-soname $wl$soname `test -n "$verstring" && func_echo_all "$wl-set_version $wl$verstring"` $wl-update_registry $wl$output_objdir/so_locations $wl-exports_file $wl$export_symbols -o $lib'
 	fi
+	link_all_deplibs_FC=no
       else
 	archive_cmds_FC='$CC -shared $libobjs $deplibs $compiler_flags -soname $soname `test -n "$verstring" && func_echo_all "-set_version $verstring"` -update_registry $output_objdir/so_locations -o $lib'
 	archive_expsym_cmds_FC='$CC -shared $libobjs $deplibs $compiler_flags -soname $soname `test -n "$verstring" && func_echo_all "-set_version $verstring"` -update_registry $output_objdir/so_locations -exports_file $export_symbols -o $lib'
@@ -25086,18 +25136,22 @@ fi
 
 
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether this is the NAG Fortran compiler" >&5
-$as_echo_n "checking whether this is the NAG Fortran compiler... " >&6; }
-    $CC -V 2>&1 | grep '^NAG Fortran Compiler Release' >/dev/null 2>&1
-    _lt_result=$?
-    if test $_lt_result -eq 0; then :
-  _lt_result=yes
-else
-  _lt_result=no
-fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the compiler family" >&5
+$as_echo_n "checking for the compiler family... " >&6; }
+    case `$CC -V 2>&1 | sed -n '1,20p'` in #(
+    *NAG\ Fortran\ Compiler\ Release*)
+      _lt_result=NAG
+      ;; #(
+    *PGI\ Compilers\ and\ Tools*|*Portland\ *)
+      _lt_result=PGI
+      ;;
+    *)
+      _lt_result=other
+      ;;
+    esac
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $_lt_result" >&5
 $as_echo "$_lt_result" >&6; }
-    acx_is_nagfor_FC=$_lt_result
+    acx_compiler_lineage_FC=$_lt_result
 
 
 
@@ -25647,7 +25701,7 @@ lt_sysroot='`$ECHO "$lt_sysroot" | $SED "$delay_single_quote_subst"`'
 lt_cv_truncate_bin='`$ECHO "$lt_cv_truncate_bin" | $SED "$delay_single_quote_subst"`'
 objdir='`$ECHO "$objdir" | $SED "$delay_single_quote_subst"`'
 MAGIC_CMD='`$ECHO "$MAGIC_CMD" | $SED "$delay_single_quote_subst"`'
-acx_is_nagfor='`$ECHO "$acx_is_nagfor" | $SED "$delay_single_quote_subst"`'
+acx_compiler_lineage='`$ECHO "$acx_compiler_lineage" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag='`$ECHO "$lt_prog_compiler_no_builtin_flag" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_pic='`$ECHO "$lt_prog_compiler_pic" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_wl='`$ECHO "$lt_prog_compiler_wl" | $SED "$delay_single_quote_subst"`'
@@ -25742,9 +25796,9 @@ compiler_FC='`$ECHO "$compiler_FC" | $SED "$delay_single_quote_subst"`'
 GCC_CXX='`$ECHO "$GCC_CXX" | $SED "$delay_single_quote_subst"`'
 GCC_F77='`$ECHO "$GCC_F77" | $SED "$delay_single_quote_subst"`'
 GCC_FC='`$ECHO "$GCC_FC" | $SED "$delay_single_quote_subst"`'
-acx_is_nagfor_CXX='`$ECHO "$acx_is_nagfor_CXX" | $SED "$delay_single_quote_subst"`'
-acx_is_nagfor_F77='`$ECHO "$acx_is_nagfor_F77" | $SED "$delay_single_quote_subst"`'
-acx_is_nagfor_FC='`$ECHO "$acx_is_nagfor_FC" | $SED "$delay_single_quote_subst"`'
+acx_compiler_lineage_CXX='`$ECHO "$acx_compiler_lineage_CXX" | $SED "$delay_single_quote_subst"`'
+acx_compiler_lineage_F77='`$ECHO "$acx_compiler_lineage_F77" | $SED "$delay_single_quote_subst"`'
+acx_compiler_lineage_FC='`$ECHO "$acx_compiler_lineage_FC" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag_CXX='`$ECHO "$lt_prog_compiler_no_builtin_flag_CXX" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag_F77='`$ECHO "$lt_prog_compiler_no_builtin_flag_F77" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag_FC='`$ECHO "$lt_prog_compiler_no_builtin_flag_FC" | $SED "$delay_single_quote_subst"`'
@@ -26470,8 +26524,8 @@ CC=$lt_compiler
 # Is the compiler the GNU compiler?
 with_gcc=$GCC
 
-# Is the compiler the NAG Fortran compiler?
-with_nagfor=$acx_is_nagfor
+# For inherited options,we need to know how to deal with those when using a library built with compiler X in compiler Y.
+compiler_lineage=$acx_compiler_lineage
 
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag
@@ -26715,8 +26769,8 @@ CC=$lt_compiler_CXX
 # Is the compiler the GNU compiler?
 with_gcc=$GCC_CXX
 
-# Is the compiler the NAG Fortran compiler?
-with_nagfor=$acx_is_nagfor_CXX
+# For inherited options,we need to know how to deal with those when using a library built with compiler X in compiler Y.
+compiler_lineage=$acx_compiler_lineage_CXX
 
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag_CXX
@@ -26871,8 +26925,8 @@ CC=$lt_compiler_F77
 # Is the compiler the GNU compiler?
 with_gcc=$GCC_F77
 
-# Is the compiler the NAG Fortran compiler?
-with_nagfor=$acx_is_nagfor_F77
+# For inherited options,we need to know how to deal with those when using a library built with compiler X in compiler Y.
+compiler_lineage=$acx_compiler_lineage_F77
 
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag_F77
@@ -27027,8 +27081,8 @@ CC=$lt_compiler_FC
 # Is the compiler the GNU compiler?
 with_gcc=$GCC_FC
 
-# Is the compiler the NAG Fortran compiler?
-with_nagfor=$acx_is_nagfor_FC
+# For inherited options,we need to know how to deal with those when using a library built with compiler X in compiler Y.
+compiler_lineage=$acx_compiler_lineage_FC
 
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag_FC
@@ -27253,15 +27307,18 @@ as_fn_error $? "unable to link a C program using libtool
 See \`config.log' for more details" "$LINENO" 5; }
 fi
 
-               if test x"$acx_is_nagfor" = xyes; then :
-  case " $CFLAGS $LDFLAGS " in #(
+               case $acx_compiler_lineage in #(
+  NAG) :
+    case " $CFLAGS $LDFLAGS " in #(
   *\ -B*\ *) :
     extrasub="${extrasub+$extrasub$as_nl}/^\# skip internal symbols for stubs created by xlf/i \\\\${as_nl}\# ignore symbols nagfor injects into our shared objects\\\\${as_nl}/"'^${exp_sym_prefix}'"${acx_symprfx}"'(__NAGf90_|f90_)/b'
  ;; #(
   *) :
     CFLAGS="$CFLAGS -XCClinker -Wl,-B${ac_abs_confdir}/util/nagdynlib" ;;
+esac ;; #(
+  *) :
+     ;;
 esac
-fi
          ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -27281,7 +27338,7 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=FC $ac_compile"
 
 
 
-   acx_temp=`$FC -V 2>&1 | sed -n 1,5p`
+   acx_temp=`$FC -V 2>&1 | sed -n 1,15p`
    case "$acx_temp" in #(
   *NAG\ Fortran\ Compiler\ Release*) :
     if test x${FCFLAGS+set} = xset; then :
@@ -27331,15 +27388,18 @@ as_fn_error $? "unable to link a Fortran program using libtool
 See \`config.log' for more details" "$LINENO" 5; }
 fi
 
-               if test x"$acx_is_nagfor_FC" = xyes; then :
-  case " $FCFLAGS $LDFLAGS " in #(
+               case $acx_compiler_lineage_FC in #(
+  NAG) :
+    case " $FCFLAGS $LDFLAGS " in #(
   *\ -B*\ *) :
     extrasub="${extrasub+$extrasub$as_nl}/^\# skip internal symbols for stubs created by xlf/i \\\\${as_nl}\# ignore symbols nagfor injects into our shared objects\\\\${as_nl}/"'^${exp_sym_prefix}'"${acx_symprfx}"'(__NAGf90_|f90_)/b'
  ;; #(
   *) :
     FCFLAGS="$FCFLAGS -XCClinker -Wl,-B${ac_abs_confdir}/util/nagdynlib" ;;
+esac ;; #(
+  *) :
+     ;;
 esac
-fi
          ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -27359,7 +27419,7 @@ ac_compile="$ac_pwd/libtool --mode=compile --tag=F77 $ac_compile"
 
 
 
-   acx_temp=`$F77 -V 2>&1 | sed -n 1,5p`
+   acx_temp=`$F77 -V 2>&1 | sed -n 1,15p`
    case "$acx_temp" in #(
   *NAG\ Fortran\ Compiler\ Release*) :
     if test x${FFLAGS+set} = xset; then :
@@ -27404,15 +27464,18 @@ as_fn_error $? "unable to link a Fortran 77 program using libtool
 See \`config.log' for more details" "$LINENO" 5; }
 fi
 
-               if test x"$acx_is_nagfor_F77" = xyes; then :
-  case " $FFLAGS $LDFLAGS " in #(
+               case $acx_compiler_lineage_F77 in #(
+  NAG) :
+    case " $FFLAGS $LDFLAGS " in #(
   *\ -B*\ *) :
     extrasub="${extrasub+$extrasub$as_nl}/^\# skip internal symbols for stubs created by xlf/i \\\\${as_nl}\# ignore symbols nagfor injects into our shared objects\\\\${as_nl}/"'^${exp_sym_prefix}'"${acx_symprfx}"'(__NAGf90_|f90_)/b'
  ;; #(
   *) :
     FFLAGS="$FFLAGS -XCClinker -Wl,-B${ac_abs_confdir}/util/nagdynlib" ;;
+esac ;; #(
+  *) :
+     ;;
 esac
-fi
          ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -27464,15 +27527,18 @@ as_fn_error $? "unable to link a C++ program using libtool
 See \`config.log' for more details" "$LINENO" 5; }
 fi
 
-               if test x"$acx_is_nagfor_F77" = xyes; then :
-  case " $FFLAGS $LDFLAGS " in #(
+               case $acx_compiler_lineage_F77 in #(
+  NAG) :
+    case " $FFLAGS $LDFLAGS " in #(
   *\ -B*\ *) :
     extrasub="${extrasub+$extrasub$as_nl}/^\# skip internal symbols for stubs created by xlf/i \\\\${as_nl}\# ignore symbols nagfor injects into our shared objects\\\\${as_nl}/"'^${exp_sym_prefix}'"${acx_symprfx}"'(__NAGf90_|f90_)/b'
  ;; #(
   *) :
     FFLAGS="$FFLAGS -XCClinker -Wl,-B${ac_abs_confdir}/util/nagdynlib" ;;
+esac ;; #(
+  *) :
+     ;;
 esac
-fi
          ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -35957,7 +36023,7 @@ lt_sysroot='`$ECHO "$lt_sysroot" | $SED "$delay_single_quote_subst"`'
 lt_cv_truncate_bin='`$ECHO "$lt_cv_truncate_bin" | $SED "$delay_single_quote_subst"`'
 objdir='`$ECHO "$objdir" | $SED "$delay_single_quote_subst"`'
 MAGIC_CMD='`$ECHO "$MAGIC_CMD" | $SED "$delay_single_quote_subst"`'
-acx_is_nagfor='`$ECHO "$acx_is_nagfor" | $SED "$delay_single_quote_subst"`'
+acx_compiler_lineage='`$ECHO "$acx_compiler_lineage" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag='`$ECHO "$lt_prog_compiler_no_builtin_flag" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_pic='`$ECHO "$lt_prog_compiler_pic" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_wl='`$ECHO "$lt_prog_compiler_wl" | $SED "$delay_single_quote_subst"`'
@@ -36052,9 +36118,9 @@ compiler_FC='`$ECHO "$compiler_FC" | $SED "$delay_single_quote_subst"`'
 GCC_CXX='`$ECHO "$GCC_CXX" | $SED "$delay_single_quote_subst"`'
 GCC_F77='`$ECHO "$GCC_F77" | $SED "$delay_single_quote_subst"`'
 GCC_FC='`$ECHO "$GCC_FC" | $SED "$delay_single_quote_subst"`'
-acx_is_nagfor_CXX='`$ECHO "$acx_is_nagfor_CXX" | $SED "$delay_single_quote_subst"`'
-acx_is_nagfor_F77='`$ECHO "$acx_is_nagfor_F77" | $SED "$delay_single_quote_subst"`'
-acx_is_nagfor_FC='`$ECHO "$acx_is_nagfor_FC" | $SED "$delay_single_quote_subst"`'
+acx_compiler_lineage_CXX='`$ECHO "$acx_compiler_lineage_CXX" | $SED "$delay_single_quote_subst"`'
+acx_compiler_lineage_F77='`$ECHO "$acx_compiler_lineage_F77" | $SED "$delay_single_quote_subst"`'
+acx_compiler_lineage_FC='`$ECHO "$acx_compiler_lineage_FC" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag_CXX='`$ECHO "$lt_prog_compiler_no_builtin_flag_CXX" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag_F77='`$ECHO "$lt_prog_compiler_no_builtin_flag_F77" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag_FC='`$ECHO "$lt_prog_compiler_no_builtin_flag_FC" | $SED "$delay_single_quote_subst"`'
@@ -37533,8 +37599,8 @@ CC=$lt_compiler
 # Is the compiler the GNU compiler?
 with_gcc=$GCC
 
-# Is the compiler the NAG Fortran compiler?
-with_nagfor=$acx_is_nagfor
+# For inherited options,we need to know how to deal with those when using a library built with compiler X in compiler Y.
+compiler_lineage=$acx_compiler_lineage
 
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag
@@ -37778,8 +37844,8 @@ CC=$lt_compiler_CXX
 # Is the compiler the GNU compiler?
 with_gcc=$GCC_CXX
 
-# Is the compiler the NAG Fortran compiler?
-with_nagfor=$acx_is_nagfor_CXX
+# For inherited options,we need to know how to deal with those when using a library built with compiler X in compiler Y.
+compiler_lineage=$acx_compiler_lineage_CXX
 
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag_CXX
@@ -37934,8 +38000,8 @@ CC=$lt_compiler_F77
 # Is the compiler the GNU compiler?
 with_gcc=$GCC_F77
 
-# Is the compiler the NAG Fortran compiler?
-with_nagfor=$acx_is_nagfor_F77
+# For inherited options,we need to know how to deal with those when using a library built with compiler X in compiler Y.
+compiler_lineage=$acx_compiler_lineage_F77
 
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag_F77
@@ -38090,8 +38156,8 @@ CC=$lt_compiler_FC
 # Is the compiler the GNU compiler?
 with_gcc=$GCC_FC
 
-# Is the compiler the NAG Fortran compiler?
-with_nagfor=$acx_is_nagfor_FC
+# For inherited options,we need to know how to deal with those when using a library built with compiler X in compiler Y.
+compiler_lineage=$acx_compiler_lineage_FC
 
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=$lt_lt_prog_compiler_no_builtin_flag_FC

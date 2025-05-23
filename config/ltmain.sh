@@ -7250,7 +7250,9 @@ func_mode_link ()
 	arg=$func_stripname_result
 	;;
 
-      -Wl,--start-group|-Wl,--end-group|-Wl,-\(|-Wl,-\))
+      -Wl,--start-group|-Wl,--end-group|-Wl,-\(|-Wl,-\)| \
+      -Wl,--as-needed|-Wl,-as-needed|-Wl,--no-as-needed|-Wl,-no-as-needed| \
+      -Wl,--whole-archive|-Wl,-whole-archive|-Wl,--no-whole-archive|-Wl,-no-whole-archive)
 	func_append deplibs " $arg"
 	continue
 	;;
@@ -7646,7 +7648,10 @@ func_mode_link ()
 	case $pass in
 	dlopen) libs=$dlfiles ;;
 	dlpreopen) libs=$dlprefiles ;;
-	link) libs="$deplibs %DEPLIBS% $dependency_libs" ;;
+	link)
+	  libs="$deplibs %DEPLIBS%"
+	  test "X$link_all_deplibs" != Xno && libs="$libs $dependency_libs"
+	  ;;
 	esac
       fi
       if test lib,dlpreopen = "$linkmode,$pass"; then
@@ -7908,7 +7913,9 @@ func_mode_link ()
 	  alldeplibs=:
 	  continue
 	  ;;
-	-Wl,--start-group|-Wl,--end-group|-Wl,-\(|-Wl,-\))
+	-Wl,--start-group|-Wl,--end-group|-Wl,-\(|-Wl,-\)| \
+	-Wl,--as-needed|-Wl,-as-needed|-Wl,--no-as-needed|-Wl,-no-as-needed| \
+	-Wl,--whole-archive|-Wl,-whole-archive|-Wl,--no-whole-archive|-Wl,-no-whole-archive)
 	  if test "$linkmode,$pass" = "prog,link"; then
 	    compile_deplibs="$deplib $compile_deplibs"
 	    finalize_deplibs="$deplib $finalize_deplibs"
@@ -7951,9 +7958,14 @@ func_mode_link ()
 	  tmp_inherited_linker_flags=`$ECHO "$inherited_linker_flags" | $SED 's/-framework \([^ $]*\)/\1.ltframework/g'`
 
 	  # Additionally convert " -pthread" to " -Wl,-pthread" for nagfor
-	  if test yes = "$with_nagfor" ; then
-	    tmp_inherited_linker_flags=`$ECHO " $tmp_inherited_linker_flags " | $SED 's/ -pthread[[:blank:]]/ -Wl,-pthread /g'`
-	  fi
+	  case $compiler_lineage in #(
+           NAG)
+	      tmp_inherited_linker_flags=`$ECHO " $tmp_inherited_linker_flags " | $SED 's/ -pthread[[:blank:]]/ -Wl,-pthread /g'`
+	      ;; #(
+	    PGI)
+	      tmp_inherited_linker_flags=`$ECHO " $tmp_inherited_linker_flags " | $SED 's/ -pthread[[:blank:]]//g'`
+	      ;;
+	  esac
 
 	  for tmp_inherited_linker_flag in $tmp_inherited_linker_flags; do
 	    case " $new_inherited_linker_flags " in
@@ -7980,19 +7992,19 @@ func_mode_link ()
 	    # It is a libtool convenience library, so add in its objects.
 	    func_append convenience " $ladir/$objdir/$old_library"
 	    func_append old_convenience " $ladir/$objdir/$old_library"
+	    tmp_libs=
+	    for deplib in $dependency_libs; do
+	      deplibs="$deplib $deplibs"
+	      if $opt_preserve_dup_deps; then
+		case "$tmp_libs " in
+		*" $deplib "*) func_append specialdeplibs " $deplib" ;;
+		esac
+	      fi
+	      func_append tmp_libs " $deplib"
+	    done
 	  elif test prog != "$linkmode" && test lib != "$linkmode"; then
 	    func_fatal_error "'$lib' is not a convenience library"
 	  fi
-	  tmp_libs=
-	  for deplib in $dependency_libs; do
-	    deplibs="$deplib $deplibs"
-	    if $opt_preserve_dup_deps; then
-	      case "$tmp_libs " in
-	      *" $deplib "*) func_append specialdeplibs " $deplib" ;;
-	      esac
-	    fi
-	    func_append tmp_libs " $deplib"
-	  done
 	  continue
 	fi # $pass = conv
 
@@ -8681,6 +8693,10 @@ func_mode_link ()
                 func_stripname '-R' '' "$deplib"
                 func_add2xrpath "$func_stripname_result"
                 ;;
+	    -Wl,--as-needed|-Wl,-as-needed|-Wl,--no-as-needed|-Wl,-no-as-needed| \
+	    -Wl,--whole-archive|-Wl,-whole-archive|-Wl,--no-whole-archive|-Wl,-no-whole-archive)
+                new_libs="$deplib $new_libs"
+                ;;
 	    *)
 	      # And here is the reason: when a library appears more
 	      # than once as an explicit dependence of a library, or
@@ -8977,8 +8993,8 @@ func_mode_link ()
 	  xlcverstring="$wl-compatibility_version $wl$minor_current $wl-current_version $wl$minor_current.$revision"
 	  verstring="-compatibility_version $minor_current -current_version $minor_current.$revision"
           # On Darwin other compilers
-          case $with_nagfor in
-              yes)
+          case $compiler_lineage in
+              NAG)
                   verstring="$wl-compatibility_version $wl$minor_current $wl-current_version $wl$minor_current.$revision"
                   ;;
               *)
@@ -9599,9 +9615,11 @@ EOF
       # better not to revert the changes, otherwise, uncomment the following
       # lines.
 
-      if test yes = "$with_nagfor" ; then
-        new_inherited_linker_flags=`$ECHO " $new_inherited_linker_flags " | $SED 's/ -Wl,-pthread / -pthread /g;s/^ *//;s/ *$//'`
-      fi
+      case $compiler_lineage in #(
+	NAG)
+	  new_inherited_linker_flags=`$ECHO " $new_inherited_linker_flags " | $SED 's/ -Wl,-pthread / -pthread /g;s/^ *//;s/ *$//'`
+	  ;;
+      esac
 
       # move library search paths that coincide with paths to not yet
       # installed libraries to the beginning of the library search list
