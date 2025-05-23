@@ -12267,6 +12267,14 @@ lt_prog_compiler_static=
 	      lt_prog_compiler_pic='-fPIC'
 	      lt_prog_compiler_static='-static'
 	      ;;
+            *NEC\ Corporation*)
+	      lt_prog_compiler_wl='-Wl,'
+	      lt_prog_compiler_pic='-fpic'
+	      # It might be better to use -Bstatic in general, but the C and C++
+	      # NEC compilers are recognised as GNU and get the variable set to
+	      # -static. We do the same for consistency:
+	      lt_prog_compiler_static='-Bstatic'
+	      ;;
           esac
           ;;
 	esac
@@ -19467,6 +19475,14 @@ lt_prog_compiler_static_F77=
 	      lt_prog_compiler_pic_F77='-fPIC'
 	      lt_prog_compiler_static_F77='-static'
 	      ;;
+            *NEC\ Corporation*)
+	      lt_prog_compiler_wl_F77='-Wl,'
+	      lt_prog_compiler_pic_F77='-fpic'
+	      # It might be better to use -Bstatic in general, but the C and C++
+	      # NEC compilers are recognised as GNU and get the variable set to
+	      # -static. We do the same for consistency:
+	      lt_prog_compiler_static_F77='-Bstatic'
+	      ;;
           esac
           ;;
 	esac
@@ -22599,6 +22615,14 @@ lt_prog_compiler_static_FC=
 	      lt_prog_compiler_wl_FC='-Wl,'
 	      lt_prog_compiler_pic_FC='-fPIC'
 	      lt_prog_compiler_static_FC='-static'
+	      ;;
+            *NEC\ Corporation*)
+	      lt_prog_compiler_wl_FC='-Wl,'
+	      lt_prog_compiler_pic_FC='-fpic'
+	      # It might be better to use -Bstatic in general, but the C and C++
+	      # NEC compilers are recognised as GNU and get the variable set to
+	      # -static. We do the same for consistency:
+	      lt_prog_compiler_static_FC='-Bstatic'
 	      ;;
           esac
           ;;

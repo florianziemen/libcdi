@@ -101,6 +101,14 @@ dnl newer PGI or NAG configurations particularly well
 	      _LT_TAGVAR(lt_prog_compiler_pic, $][1)='-fPIC'
 	      _LT_TAGVAR(lt_prog_compiler_static, $][1)='-static'
 	      ;;
+            *NEC\\ Corporation*)
+	      _LT_TAGVAR(lt_prog_compiler_wl, $][1)='-Wl,'
+	      _LT_TAGVAR(lt_prog_compiler_pic, $][1)='-fpic'
+	      # It might be better to use -Bstatic in general, but the C and C++
+	      # NEC compilers are recognised as GNU and get the variable set to
+	      # -static. We do the same for consistency:
+	      _LT_TAGVAR(lt_prog_compiler_static, $][1)='-Bstatic'
+	      ;;
           esac
           ;;])),
          [pgcpp\*],[pgcpp* | pgc++* ]))dnl
