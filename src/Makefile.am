@@ -346,13 +346,4 @@ MAINTAINERCLEANFILES = \
   cdipioFortran.c \
   mo_cdi.f90
 
-# Compile programs using Libtool:
-COMPILE = $(LTCOMPILE)
-FCCOMPILE = $(LTFCCOMPILE)
-PPFCCOMPILE = $(LTPPFCCOMPILE)
-CXXCOMPILE = $(LTCXXCOMPILE)
-
-# Compile *.F90 without CPPFLAGS, which are normally meant for the C compiler
-# and might not be compatible with the Fortran compiler:
-LTPPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+include $(top_srcdir)/config/lt_overrides_Makefile.inc
