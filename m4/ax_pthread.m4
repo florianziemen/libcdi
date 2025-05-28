@@ -520,3 +520,6 @@ else
 fi
 AC_LANG_POP
 ])dnl AX_PTHREAD
+dnl Local Variables:
+dnl mode: autoconf
+dnl End:
