@@ -1,6 +1,8 @@
 #ifndef CDF_INT_H
 #define CDF_INT_H
 
+const char *cdf_strerror(int cdfErrorNo);
+
 #ifdef HAVE_LIBNETCDF
 
 #include <netcdf.h>

@@ -46,7 +46,7 @@ extern "C" {
 
 // Error identifier
 
-#define	 CDI_NOERR        	    0   // No Error
+#define  CDI_NOERR                  0   // No Error
 #define  CDI_EEOF                  -1   // The end of file was encountered
 #define  CDI_ETMOF                 -9   // Too many open files
 #define  CDI_ESYSTEM              -10   // Operating system error

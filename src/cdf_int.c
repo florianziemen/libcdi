@@ -10,6 +10,16 @@
 #include "cdf_int.h"
 #include "namespace.h"
 
+const char *
+cdf_strerror(int cdfErrorNo)
+{
+#ifdef HAVE_LIBNETCDF
+  return nc_strerror(cdfErrorNo);
+#else
+  return NULL;
+#endif
+}
+
 #ifdef HAVE_LIBNETCDF
 
 void
@@ -86,6 +96,7 @@ cdf_open(const char *path, int omode, int *ncidp)
   if (CDF_Debug) Message("ncid=%d  mode=%d  file=%s", *ncidp, omode, path);
 
   if (CDF_Debug && status != NC_NOERR) Message("%s", nc_strerror(status));
+  if (status != NC_NOERR && status < 0) status -= 1000;
 
   return status;
 }

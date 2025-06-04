@@ -67,6 +67,7 @@ cdf_open_read(const char *filename, int *filetype)
   int readmode = NC_NOWRITE;
   int status = cdf_open(filename, readmode, &ncid);
   if (status > 0 && ncid < 0) ncid = CDI_ESYSTEM;
+  if (status < -1000 && ncid == -1) ncid = status;
 #ifdef HAVE_NETCDF4
   else
     {
