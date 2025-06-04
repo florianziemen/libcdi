@@ -2120,7 +2120,7 @@ cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridva
 {
   if (CDI_Netcdf_Lazy_Grid_Load)
     {
-      *valsGet = (struct xyValGet){
+      *valsGet = (struct xyValGet) {
         .scalefactor = ncvar->scalefactor,
         .addoffset = ncvar->addoffset,
         .start = { start[0], start[1], start[2] },
@@ -3276,7 +3276,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 	          if      (ncvars[zvarid].xtype == NC_FLOAT) zdatatype = CDI_DATATYPE_FLT32;
 	          else if (ncvars[zvarid].xtype == NC_INT)   zdatatype = CDI_DATATYPE_INT32;
 	          else if (ncvars[zvarid].xtype == NC_SHORT) zdatatype = CDI_DATATYPE_INT16;
-                // clang-format on
+              // clang-format on
 #ifndef USE_MPI
               if (zaxisType == ZAXIS_CHAR && ncvars[zvarid].ndims == 2)
                 {
@@ -3617,7 +3617,11 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
           if (ncvar->chunkType != CDI_UNDEFID) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, ncvar->chunkType);
           if (ncvar->chunkSize > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, ncvar->chunkSize);
 
-          size_t cacheSize = (CDI_Chunk_Cache >= 0) ? (size_t) CDI_Chunk_Cache : calc_chunk_cache_size(timedimid, ncvar);
+          size_t cacheSize = calc_chunk_cache_size(timedimid, ncvar);
+          if (CDI_Chunk_Cache_In >= 0)
+            {
+              cacheSize = (size_t) CDI_Chunk_Cache_In;
+            }
           cdf_set_var_chunk_cache(ncvar, ncvarid, cacheSize);
         }
 #endif

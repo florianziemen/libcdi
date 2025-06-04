@@ -1,3 +1,7 @@
+2025-06-04  Uwe Schulzweida
+
+	* Renamed CDI_CHUNK_CACHE to CDI_CHUNK_CACHE_IN/CDI_CHUNK_CACHE_OUT
+
 2025-05-21  Uwe Schulzweida
 
 	* Version 2.5.2.1 released
