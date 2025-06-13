@@ -20,8 +20,8 @@ set_target_properties(cdilib PROPERTIES
 
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
-option(CDI_PIO  "Use CDI-PIO" ON)
-option(CDI_YAXT "Use the yaxt library" ON)
+option(CDI_PIO  "Use CDI-PIO" OFF)
+option(CDI_YAXT "Use the yaxt library" OFF)
 option(CDI_ENABLE_CF_INTERFACE "TODO" OFF)
 option(CDI_IEG "Use the extra library [default=ON]" ON)
 option(CDI_LIBGRIB "GRIB support [default=ON]" ON)
