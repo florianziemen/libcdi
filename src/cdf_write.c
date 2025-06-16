@@ -561,7 +561,7 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
   int fileID = streamptr->fileID;
 
   if (gridtype != GRID_GENERIC && gridtype != GRID_LONLAT && gridtype != GRID_PROJECTION && gridtype != GRID_CURVILINEAR
-      && gridtype != GRID_CHARXY)
+      && gridtype != GRID_HEALPIX && gridtype != GRID_CHARXY)
     {
       size_t len = strlen(gridNamePtr(gridtype));
       if (len > 0) cdf_put_att_text(fileID, ncvarID, "CDI_grid_type", len, gridNamePtr(gridtype));

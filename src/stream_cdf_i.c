@@ -62,7 +62,8 @@ typedef struct
   int ncid;
   int varStatus;
   bool ignoreVar;
-  bool isHealPIX;
+  bool isLonLatMapping;
+  bool isHealpixMapping;
   bool isCubeSphere;
   bool isCharAxis;
   bool isXaxis;
@@ -177,7 +178,7 @@ scan_time_string(const char *ptu)
   int second = (int) fseconds;
   double aseconds;
   double ms = modf(fseconds, &aseconds) * 1000;
-  assert(aseconds == second);
+  assert((int) aseconds == second);
   CdiDateTime datetime;
   datetime.date.year = year;
   datetime.date.month = (short) month;
@@ -598,7 +599,8 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
       ncvar->ncid = ncid;
       ncvar->varStatus = UndefVar;
       ncvar->ignoreVar = false;
-      ncvar->isHealPIX = false;
+      ncvar->isLonLatMapping = false;
+      ncvar->isHealpixMapping = false;
       ncvar->isCubeSphere = false;
       ncvar->isCharAxis = false;
       ncvar->isXaxis = false;
@@ -1147,6 +1149,31 @@ read_auxiliary_vars(int ncid, char *attstring, ncvar_t *ncvar, ncvar_t *ncvars)
 }
 
 static void
+read_grid_mapping(int ncid, char *attstring, ncvar_t *ncvar, ncvar_t *ncvars)
+{
+  int nc_gmap_id;
+  int status = nc_inq_varid(ncid, attstring, &nc_gmap_id);
+  if (status == NC_NOERR)
+    {
+      ncvar->gmapid = nc_gmap_id;
+      cdf_set_var(&ncvars[ncvar->gmapid], CoordVar);
+      int nc_gmap_varid = ncvars[ncvar->gmapid].ncid;
+      if (cdfCheckAttText(nc_gmap_varid, nc_gmap_id, "grid_mapping_name"))
+        {
+          char gridMappingName[CDI_MAX_NAME];
+          cdfGetAttText(nc_gmap_varid, nc_gmap_id, "grid_mapping_name", CDI_MAX_NAME, gridMappingName);
+          // if (str_is_equal(gridMappingName, "healpix")) ncvars[ncvar->gmapid].isHealPIX = true;
+          if (str_is_equal(gridMappingName, "healpix"))
+            ncvar->isHealpixMapping = true;
+          else if (str_is_equal(gridMappingName, "latitude_longitude"))
+            ncvar->isLonLatMapping = true;
+        }
+    }
+  else
+    Warning("%s - %s", nc_strerror(status), attstring);
+}
+
+static void
 set_vars_chunks(int ncid, int ncvarid, int nvdims, ncvar_t *ncvar)
 {
   int shuffle = 0, deflate = 0, deflateLevel = 0;
@@ -1473,24 +1500,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
             }
           else if (isText && str_is_equal(attname, "grid_mapping"))
             {
-              int nc_gmap_id;
-              int status = nc_inq_varid(ncid, attstring, &nc_gmap_id);
-              if (status == NC_NOERR)
-                {
-                  ncvar->gmapid = nc_gmap_id;
-                  cdf_set_var(&ncvars[ncvar->gmapid], CoordVar);
-                  int nc_gmap_varid = ncvars[ncvar->gmapid].ncid;
-                  if (cdfCheckAttText(nc_gmap_varid, nc_gmap_id, "grid_mapping_name"))
-                    {
-                      char gridMappingName[CDI_MAX_NAME];
-                      cdfGetAttText(nc_gmap_varid, nc_gmap_id, "grid_mapping_name", CDI_MAX_NAME, gridMappingName);
-                      // if (str_is_equal(gridMappingName, "healpix")) ncvars[ncvar->gmapid].isHealPIX = true;
-                      if (str_is_equal(gridMappingName, "healpix")) ncvar->isHealPIX = true;
-                    }
-                }
-              else
-                Warning("%s - %s", nc_strerror(status), attstring);
-
+              read_grid_mapping(ncid, attstring, ncvar, ncvars);
               cdf_set_var(ncvar, DataVar);
             }
           else if (isText && str_is_equal(attname, "positive"))
@@ -1845,7 +1855,7 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                       dimtype = X_AXIS;
                       lxdim = true;
                     }
-                  else if (!lydim && ncvar->gridtype != GRID_UNSTRUCTURED && ncvar->isHealPIX == false)
+                  else if (!lydim && ncvar->gridtype != GRID_UNSTRUCTURED && ncvar->isHealpixMapping == false)
                     // else if ( !lydim && ! (ncvars[ncvar->xvarid].dimids[0] == ncvars[ncvar->yvarid].dimids[0] &&
                     //                        ncvars[ncvar->xvarid].ndims == 1 && ncvars[ncvar->yvarid].ndims == 1))
                     {
@@ -2611,23 +2621,17 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
         cdf_check_gridtype(&ncvar->gridtype, isLon, isLat, xsize, ysize, grid);
     }
 
-  int gridtype = grid->type;
-  if (gridtype != GRID_PROJECTION)
+  int gridType = grid->type;
+  if (gridType != GRID_PROJECTION)
     {
-      gridtype = ncvar->gridtype;
+      gridType = ncvar->gridtype;
     }
-  else if (gridtype == GRID_PROJECTION && ncvar->gridtype == GRID_LONLAT)
+  else if (gridType == GRID_PROJECTION && ncvar->gridtype == GRID_LONLAT && ncvar->isLonLatMapping)
     {
-      int gmapvarid = ncvar->gmapid;
-      if (gmapvarid != CDI_UNDEFID && cdfCheckAttText(ncvar->ncid, gmapvarid, "grid_mapping_name"))
-        {
-          char attstring[CDI_MAX_NAME];
-          cdfGetAttText(ncvar->ncid, gmapvarid, "grid_mapping_name", CDI_MAX_NAME, attstring);
-          if (str_is_equal(attstring, "latitude_longitude")) gridtype = ncvar->gridtype;
-        }
+      gridType = ncvar->gridtype;
     }
 
-  switch (gridtype)
+  switch (gridType)
     {
     case GRID_GENERIC:
     case GRID_LONLAT:
@@ -2735,7 +2739,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
 
         if (ncvar->cellarea != CDI_UNDEFID) cdf_load_cellarea(size, ncvar, &grid->area, &lazyGrid->cellAreaGet);
 
-        if (gridtype == GRID_GAUSSIAN)
+        if (gridType == GRID_GAUSSIAN)
           {
             if (ncvar->numLPE > 0) grid->np = ncvar->numLPE;
           }
@@ -2805,11 +2809,11 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
     }
 
   // if ( grid->type != GRID_PROJECTION && grid->type != ncvar->gridtype )
-  if (grid->type != gridtype)
+  if (grid->type != gridType)
     {
       // int gridtype = ncvar->gridtype;
-      grid->type = gridtype;
-      cdiGridTypeInit(grid, gridtype, grid->size);
+      grid->type = gridType;
+      cdiGridTypeInit(grid, gridType, grid->size);
     }
 
   if (grid->size == 0)
