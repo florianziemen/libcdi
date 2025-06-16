@@ -2896,7 +2896,7 @@ cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *ydimid,
 }
 
 static void
-cdf_read_mapping_atts(int ncid, int gmapvarid, int projID)
+cdf_read_mapping_atts(int ncid, int gmapvarid, int nvatts, int projID)
 {
   if (cdfCheckAttText(ncid, gmapvarid, "grid_mapping_name"))
     {
@@ -2905,10 +2905,8 @@ cdf_read_mapping_atts(int ncid, int gmapvarid, int projID)
       cdiDefKeyString(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, attstring);
     }
 
-  int nvatts;
-  cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
   bool removeFillValue = true;
-  for (int attnum = 0; attnum < nvatts; ++attnum) cdf_set_cdi_attr(ncid, gmapvarid, attnum, projID, CDI_GLOBAL, removeFillValue);
+  for (int i = 0; i < nvatts; ++i) cdf_set_cdi_attr(ncid, gmapvarid, i, projID, CDI_GLOBAL, removeFillValue);
 }
 
 static void
@@ -3152,9 +3150,10 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t 
                   int projID = lgrid ? grid->proj : gridID;
                   int ncid = ncvars[gmapvarid].ncid;
                   int gmapvartype = ncvars[gmapvarid].xtype;
+                  int nvatts = ncvars[gmapvarid].natts;
                   cdiDefKeyInt(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, gmapvartype);
                   const char *gmapvarname = ncvars[gmapvarid].name;
-                  cdf_read_mapping_atts(ncid, gmapvarid, projID);
+                  cdf_read_mapping_atts(ncid, gmapvarid, nvatts, projID);
                   cdiDefKeyString(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname);
                   gridVerifyProj(projID);
                 }
