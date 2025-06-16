@@ -35,7 +35,7 @@ static const char Grids[][17] = {
   /*  8 */ "trajectory",
   /*  9 */ "unstructured",
   /* 10 */ "curvilinear",
-  /* 11 */ "lcc",
+  /* 11 */ "healpix",
   /* 12 */ "projection",
   /* 13 */ "characterXY",
 };
@@ -2192,7 +2192,7 @@ compareXYvals2(grid_t *gridRef, grid_t *gridTest)
                 || ((gridTest->x.bounds == NULL) ^ (gridRef->x.bounds == NULL))
                 || ((gridTest->y.bounds == NULL) ^ (gridRef->y.bounds == NULL));
 
-  typedef double (*inqVal)(grid_t *grid, SizeType index);
+  typedef double (*inqVal)(grid_t * grid, SizeType index);
   inqVal inqXValRef = gridRef->vtable->inqXVal, inqYValRef = gridRef->vtable->inqYVal, inqXValTest = gridTest->vtable->inqXVal,
          inqYValTest = gridTest->vtable->inqYVal;
 
@@ -4869,7 +4869,7 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
         }
     }
 
-  return (struct addIfNewRes) { .Id = gridID, .isNew = (!gridIsDefined && !gridIsDefinedGlobal) };
+  return (struct addIfNewRes){ .Id = gridID, .isNew = (!gridIsDefined && !gridIsDefinedGlobal) };
 }
 
 const struct gridVirtTable cdiGridVtable = {

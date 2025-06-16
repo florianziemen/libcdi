@@ -121,7 +121,7 @@ cdfSearchIDBySize(size_t startIdx, size_t numIDs, const CdfGrid cdfGridVec[/*num
             }
         }
     }
-  return (struct idSearch) { .numNonMatching = numNonMatching, .foundID = foundID, .foundIdx = foundIdx };
+  return (struct idSearch){ .numNonMatching = numNonMatching, .foundID = foundID, .foundIdx = foundIdx };
 }
 
 static SizeType
@@ -522,7 +522,7 @@ cdfPostDefActionAddPutVal(struct cdfPostDefActionList **list_, int fileID, int n
   delayedPutVals->fileID = fileID;
   delayedPutVals->ncvarid = ncvarid;
   *list_ = cdfPostDefActionAdd(
-      *list_, (struct cdfPostDefAction) { .data = (void *) delayedPutVals, .action = cdfDelayedPutVarDouble, .cleanup = cleanup });
+      *list_, (struct cdfPostDefAction){ .data = (void *) delayedPutVals, .action = cdfDelayedPutVarDouble, .cleanup = cleanup });
 }
 
 static inline void
@@ -533,7 +533,7 @@ cdfPostDefActionAddPut1Int(struct cdfPostDefActionList **list_, int fileID, int 
   delayedPutVals->fileID = fileID;
   delayedPutVals->ncvarid = ncvarid;
   *list_ = cdfPostDefActionAdd(
-      *list_, (struct cdfPostDefAction) { .data = (void *) delayedPutVals, .action = cdfDelayedPutVarInt1, .cleanup = cleanup });
+      *list_, (struct cdfPostDefAction){ .data = (void *) delayedPutVals, .action = cdfDelayedPutVarInt1, .cleanup = cleanup });
 }
 
 static void
@@ -930,7 +930,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xsize, size_t 
       streamptr->ncmode = 2;
     }
 
-  return (struct cdfDefIrregularGridCommonIDs) {
+  return (struct cdfDefIrregularGridCommonIDs){
     .xdimID = xdimID, .ydimID = ydimID, .ncxvarid = ncxvarid, .ncyvarid = ncyvarid, .ncavarid = ncavarid, .delayed = delayed
   };
 }
@@ -1562,7 +1562,7 @@ static struct cdfPostDefActionList *
 cdf_def_zaxis_hybrid(stream_t *streamptr, int type, int *ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID,
                      char *axisname)
 {
-  struct cdfPostDefActionList *(*def_zaxis_hybrid_delegate)(stream_t *streamptr, int type, int *ncvarid, int zaxisID,
+  struct cdfPostDefActionList *(*def_zaxis_hybrid_delegate)(stream_t * streamptr, int type, int *ncvarid, int zaxisID,
                                                             int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
       = ((!CDI_CMOR_Mode && CDI_Convention == CDI_CONVENTION_ECHAM) || type == ZAXIS_HYBRID_HALF) ? cdf_def_zaxis_hybrid_echam
                                                                                                   : cdf_def_zaxis_hybrid_cf;
@@ -2142,6 +2142,14 @@ cdf_define_grid(stream_t *streamptr, int gridID, int gridIndex)
 
       if (ndims == 1 && xsize == 0 && ysize == 0 && gridtype == GRID_PROJECTION)
         cdf_define_generic_dim(streamptr, gridID, gridIndex);
+
+      struct cdfPostDefActionList *mdelayed = cdf_def_mapping(streamptr, gridID);
+      delayed = cdfPostDefActionConcat(delayed, mdelayed);
+      Free(mdelayed);
+    }
+  else if (gridtype == GRID_HEALPIX)
+    {
+      cdf_define_generic_dim(streamptr, gridID, gridIndex);
 
       struct cdfPostDefActionList *mdelayed = cdf_def_mapping(streamptr, gridID);
       delayed = cdfPostDefActionConcat(delayed, mdelayed);

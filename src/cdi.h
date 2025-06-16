@@ -180,6 +180,7 @@ extern "C" {
 #define  GRID_TRAJECTORY            8  // Trajectory
 #define  GRID_UNSTRUCTURED          9  // General unstructured grid
 #define  GRID_CURVILINEAR          10  // Curvilinear grid
+#define  GRID_HEALPIX              11  // HealPIX grid
 #define  GRID_PROJECTION           12  // Projected coordinates
 #define  GRID_CHARXY               13  // One horizontal character dimension
 

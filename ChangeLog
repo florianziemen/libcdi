@@ -1,3 +1,7 @@
+2025-06-16  Uwe Schulzweida
+
+	* Added GRID_HEALPIX
+
 2025-06-04  Uwe Schulzweida
 
 	* Renamed CDI_CHUNK_CACHE to CDI_CHUNK_CACHE_IN/CDI_CHUNK_CACHE_OUT
