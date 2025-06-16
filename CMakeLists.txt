@@ -153,7 +153,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_INSTALL_LIBDIR}/cdi)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_LIBDIR}/cdi)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_INSTALL_BINDIR})
 
-get_target_property(cdi_install_files cdilib CDI_INSTALL_HEADERS)
 # -- create configuration files
 configure_package_config_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/cdi/cdi-config.cmake.in" "${CMAKE_BINARY_DIR}/cmake/cdi-config.cmake"
