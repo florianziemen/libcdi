@@ -216,7 +216,7 @@ target_include_directories(cdilib
   # where top-level project will look for the library's public headers
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   # where external projects will look for the library's public headers
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/cdilib>)
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/cdi>)
 
 target_link_libraries(cdilib ${cdi_linked_libs})
 target_compile_definitions(cdilib PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
