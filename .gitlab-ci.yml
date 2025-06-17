@@ -108,6 +108,8 @@ include:
 
 .test.cmake:
   stage: levante
+  variables:
+    SCHEDULER_PARAMETERS: "--account=$ACCOUNT --partition=shared -n $SLURM_NTASKS"
   extends:
     - .default
     - .common
