@@ -27,10 +27,10 @@
 
     {
       "$comment": [
-        "Levante preset"
+        "Levante gcc preset"
       ],
       "name": "levante-gcc",
-      "displayName": "Levante  Gcc Config",
+      "displayName": "Levante Gcc Config",
       "description": "Default TODO build using makefiles generator",
       "generator": "Unix Makefiles",
       "cacheVariables" : {
@@ -44,10 +44,10 @@
 
     {
       "$comment": [
-        "Levante preset"
+        "Levante intel preset"
       ],
       "name": "levante-intel",
-      "displayName": "Levante  Intel Config",
+      "displayName": "Levante Intel Config",
       "description": "Default build using makefiles generator",
       "generator": "Unix Makefiles",
       "cacheVariables" : {
