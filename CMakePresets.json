@@ -39,7 +39,6 @@
         "PPM_ROOT":"/work/mh0287/m300488/libcdi-ci-sw/install/ppm-1.0.8-gcc-11.2.0",
         "YAXT_ROOT":"/work/mh0287/m300488/libcdi-ci-sw/install/yaxt-0.9.3-gcc-11.2.0",
         "MPI_ROOT" : "/sw/spack-levante/openmpi-4.1.2-mnmady/",
-      },
 
       {
         "$comment": [
