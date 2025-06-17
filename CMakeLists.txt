@@ -1,13 +1,14 @@
 cmake_minimum_required( VERSION 3.27 FATAL_ERROR )
 message(VERBOSE "Entering cdilib")
 
+project(cdilib VERSION 2.5.1 LANGUAGES C )
+
 include(CMakePackageConfigHelpers)
 include(CTest)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(GNUInstallDirs)
 
-project(cdilib VERSION 2.5.1 LANGUAGES C )
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
