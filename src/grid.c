@@ -2635,6 +2635,7 @@ grid_complete(grid_t *grid)
     case GRID_CURVILINEAR:
     case GRID_GENERIC:
     case GRID_PROJECTION:
+    case GRID_HEALPIX:
     case GRID_CHARXY:
       {
         if (grid->x.size > 0) gridDefXsize(gridID, (SizeType) grid->x.size);

@@ -452,6 +452,15 @@ cdfGetAttDouble(int fileID, int ncvarid, char *attname, size_t attlen, double *a
 }
 
 static bool
+cdfCheckAttInt(int fileID, int ncvarid, const char *attname)
+{
+  nc_type atttype;
+  int status_nc = nc_inq_atttype(fileID, ncvarid, attname, &atttype);
+
+  return (status_nc == NC_NOERR && xtypeIsInt(atttype));
+}
+
+static bool
 cdfCheckAttText(int fileID, int ncvarid, const char *attname)
 {
   nc_type atttype;
@@ -2130,7 +2139,7 @@ cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridva
 {
   if (CDI_Netcdf_Lazy_Grid_Load)
     {
-      *valsGet = (struct xyValGet) {
+      *valsGet = (struct xyValGet){
         .scalefactor = ncvar->scalefactor,
         .addoffset = ncvar->addoffset,
         .start = { start[0], start[1], start[2] },
@@ -2639,6 +2648,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
     case GRID_UNSTRUCTURED:
     case GRID_CURVILINEAR:
     case GRID_PROJECTION:
+    case GRID_HEALPIX:
       {
         grid->size = size;
         grid->x.size = xsize;
@@ -2997,6 +3007,13 @@ destroy_grid(struct cdfLazyGrid *lazyGrid, grid_t *grid)
     }
 }
 
+static bool
+is_healpix_grid(int ncid, int gmapvarid)
+{
+  if (gmapvarid == CDI_UNDEFID) return false;
+  return cdfCheckAttInt(ncid, gmapvarid, "refinement_level");
+}
+
 static int
 cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                      GridInfo *gridInfo)
@@ -3034,6 +3051,11 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t 
 
           int gmapvarid = ncvar->gmapid;
           bool lproj = (gmapvarid != CDI_UNDEFID);
+          bool isHealpixGrid = (lproj && ncvar->isHealpixMapping) ? is_healpix_grid(ncvars[gmapvarid].ncid, gmapvarid) : false;
+          if (isHealpixGrid)
+            {
+              ncvar->gridtype = GRID_HEALPIX;
+            }
 
           if (!lproj && xaxisid != CDI_UNDEFID && xaxisid != xvarid && yaxisid != CDI_UNDEFID && yaxisid != yvarid) lproj = true;
 
@@ -3055,7 +3077,7 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t 
           struct cdfLazyGrid *lazyGrid = NULL, *lazyProj = NULL;
 
           {
-            int gridtype = (!lgrid) ? GRID_PROJECTION : ncvar->gridtype;
+            int gridtype = (!lgrid && !isHealpixGrid) ? GRID_PROJECTION : ncvar->gridtype;
             if (CDI_Netcdf_Lazy_Grid_Load)
               {
                 cdfLazyGridRenew(&lazyGrid, gridtype);
@@ -3279,7 +3301,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 	          if      (ncvars[zvarid].xtype == NC_FLOAT) zdatatype = CDI_DATATYPE_FLT32;
 	          else if (ncvars[zvarid].xtype == NC_INT)   zdatatype = CDI_DATATYPE_INT32;
 	          else if (ncvars[zvarid].xtype == NC_SHORT) zdatatype = CDI_DATATYPE_INT16;
-              // clang-format on
+                // clang-format on
 #ifndef USE_MPI
               if (zaxisType == ZAXIS_CHAR && ncvars[zvarid].ndims == 2)
                 {
