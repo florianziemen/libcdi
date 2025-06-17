@@ -108,8 +108,9 @@ include:
 
 test.cmake:
   stage: levante
-  extends: .default
-  extends: .common
+  extends:
+    - .default
+    - .common
   before_script:
     - module purge
     - export PATH="/work/ka1125/m300433/sw/cmake-master-utovky/bin:${PATH}"
@@ -131,7 +132,6 @@ test.cmake.gcc:
     - cd  ${CI_JOB_NAME}
     - cmake --fresh --preset levante-gcc --log-level=VERBOSE ../
     - make -j 12
-
 
 test.all.gcc:
   extends: .common-levante
