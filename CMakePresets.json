@@ -16,11 +16,10 @@
       "description": "Default build using makefiles generator",
       "generator": "Unix Makefiles",
       "cacheVariables" : {
-        "CMAKE_C_FLAGS" : "-Wall -Werror"
-        "CMAKE_Fortran_FLAGS" : "-Wall -Werror"
-        "ECCODES_ROOT":"/sw/spack-levante/eccodes-2.21.0-3ehkbb"
-        "NETCDF_ROOT":"/sw/spack-levante/netcdf-c-4.8.1-2k3cmu"
-
+        "CMAKE_C_FLAGS" : "-Wall -Werror",
+        "CMAKE_Fortran_FLAGS" : "-Wall -Werror",
+        "ECCODES_ROOT":"/sw/spack-levante/eccodes-2.21.0-3ehkbb",
+        "NETCDF_ROOT":"/sw/spack-levante/netcdf-c-4.8.1-2k3cmu",
         "BUILDING_TESTS" : "OFF",
         "CDI_BUILD_PIO": "OFF"
       }
@@ -37,8 +36,8 @@
       "cacheVariables" : {
         "CMAKE_C_COMPILER" : "/sw/spack-levante/gcc-13.3.0-s2dxrt/bin/gcc",
         "CMAKE_Fortran_COMPILER" : "/sw/spack-levante/gcc-13.3.0-s2dxrt/bin/gfortran",
-        "PPM_ROOT":"/work/mh0287/m300488/libcdi-ci-sw/install/ppm-1.0.8-gcc-11.2.0"
-        "YAXT_ROOT":"/work/mh0287/m300488/libcdi-ci-sw/install/yaxt-0.9.3-gcc-11.2.0"
+        "PPM_ROOT":"/work/mh0287/m300488/libcdi-ci-sw/install/ppm-1.0.8-gcc-11.2.0",
+        "YAXT_ROOT":"/work/mh0287/m300488/libcdi-ci-sw/install/yaxt-0.9.3-gcc-11.2.0",
         "MPI_ROOT" : "/sw/spack-levante/openmpi-4.1.2-mnmady/",
       },
 
@@ -53,7 +52,7 @@
         "cacheVariables" : {
           "CMAKE_C_COMPILER" : "/sw/spack-levante/gcc-13.3.0-s2dxrt/bin/gcc",
           "CMAKE_Fortran_COMPILER" : "/sw/spack-levante/gcc-13.3.0-s2dxrt/bin/gfortran",
-          "PPM_ROOT":"/work/mh0287/m300488/libcdi-ci-sw/install/ppm-1.0.8-intel-classic-2021.5.0"
+          "PPM_ROOT":"/work/mh0287/m300488/libcdi-ci-sw/install/ppm-1.0.8-intel-classic-2021.5.0",
           "YAXT_ROOT":"/work/mh0287/m300488/libcdi-ci-sw/install/yaxt-0.9.3-intel-classic-2021.5.0"
         }
       }]
