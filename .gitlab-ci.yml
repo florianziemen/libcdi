@@ -112,6 +112,7 @@ test.cmake:
   extends: .common
   before_script:
     - module purge
+    - export PATH="/work/ka1125/m300433/sw/cmake-master-utovky/bin:${PATH}"
   tags:
     - levante, dkrz, hpc
 
