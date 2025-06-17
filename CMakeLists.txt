@@ -13,12 +13,6 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-add_library(cdilib)
-add_library(cdilib::cdilib ALIAS cdilib)
-set_target_properties(cdilib PROPERTIES
-  POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS}
-)
-
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 option(CDI_PIO  "Use CDI-PIO" OFF)
@@ -33,6 +27,12 @@ option(CDI_SERVICE "Use the extra library [default=ON]" ON)
 option(CDI_ECCODES "Use the eccodes library [default=ON]" ON)
 option(CDI_NETCDF "Use the netcdf library [default=ON]" ON)
 option(CDI_BUILD_APP "Build the app" ON)
+
+add_library(cdilib)
+add_library(cdilib::cdilib ALIAS cdilib)
+set_target_properties(cdilib PROPERTIES
+  POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS}
+)
 
 mark_as_advanced(CDI_PIO)
 mark_as_advanced(CDI_YAXT)
