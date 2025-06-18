@@ -61,6 +61,7 @@
         "Levante gcc preset"
       ],
       "name": "levante-gcc",
+      "inherits" : "levante"
       "displayName": "Levante Gcc Config",
       "description": "Default TODO build using makefiles generator",
       "generator": "Unix Makefiles",
@@ -78,6 +79,7 @@
         "Levante intel preset"
       ],
       "name": "levante-intel",
+      "inherits" : "levante"
       "displayName": "Levante Intel Config",
       "description": "Default build using makefiles generator",
       "generator": "Unix Makefiles",
