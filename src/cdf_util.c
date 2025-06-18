@@ -246,7 +246,7 @@ bool
 is_x_axis(const char *units, const char *stdname)
 {
   (void) units;
-  return (str_is_equal(stdname, "projection_x_coordinate"));
+  return (str_is_equal(stdname, "projection_x_coordinate") || str_is_equal(stdname, "healpix_index"));
 }
 
 bool
@@ -262,8 +262,8 @@ cdf_set_gridtype(const char *attstring, int *gridtype)
   // clang-format off
   if      (str_is_equal(attstring, "gaussian_reduced")) *gridtype = GRID_GAUSSIAN_REDUCED;
   else if (str_is_equal(attstring, "gaussian"))         *gridtype = GRID_GAUSSIAN;
-  else if (strStartsWith(attstring, "spectral"))      *gridtype = GRID_SPECTRAL;
-  else if (strStartsWith(attstring, "fourier"))       *gridtype = GRID_FOURIER;
+  else if (strStartsWith(attstring, "spectral"))        *gridtype = GRID_SPECTRAL;
+  else if (strStartsWith(attstring, "fourier"))         *gridtype = GRID_FOURIER;
   else if (str_is_equal(attstring, "trajectory"))       *gridtype = GRID_TRAJECTORY;
   else if (str_is_equal(attstring, "generic"))          *gridtype = GRID_GENERIC;
   else if (str_is_equal(attstring, "cell"))             *gridtype = GRID_UNSTRUCTURED;
