@@ -208,6 +208,12 @@ createSeed()
 }
 
 #endif
+void encodeUUID(unsigned char * uuid){
+  /* encode variant into msb of octet 8 */
+  uuid[8] = (unsigned char) ((uuid[8] & 0x3f) | (1 << 7));
+  /* encode version 4 ((pseudo-)random uuid) into msb of octet 7 */
+  uuid[7] = (unsigned char) ((uuid[7] & 0x0f) | (4 << 4));
+}
 void
 cdiCreateUUID(unsigned char *uuid)
 {
