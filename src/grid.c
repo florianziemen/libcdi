@@ -176,7 +176,7 @@ grid_init(grid_t *gridptr)
 static void
 grid_free_components(grid_t *gridptr)
 {
-  void *p2free[] = { gridptr->mask,     gridptr->mask_gme, gridptr->x.vals,        gridptr->y.vals,
+  void *p2free[] = { gridptr->indices,  gridptr->mask,     gridptr->mask_gme,      gridptr->x.vals, gridptr->y.vals,
 #ifndef USE_MPI
                      gridptr->x.cvals,  gridptr->y.cvals,
 #endif
@@ -531,7 +531,6 @@ gridCreate(int gridtype, SizeType size)
   if (!gridptr) Error("No memory");
 
   int gridID = gridptr->self;
-
   if (CDI_Debug) Message("gridID: %d", gridID);
 
   cdiGridTypeInit(gridptr, gridtype, (size_t) size);
@@ -576,10 +575,7 @@ const char *
 gridNamePtr(int gridtype)
 {
   int size = (int) (sizeof(Grids) / sizeof(Grids[0]));
-
-  const char *name = (gridtype >= 0 && gridtype < size) ? Grids[gridtype] : Grids[GRID_GENERIC];
-
-  return name;
+  return (gridtype >= 0 && gridtype < size) ? Grids[gridtype] : Grids[GRID_GENERIC];
 }
 
 void
@@ -897,11 +893,7 @@ gridInqIndicesSerial(grid_t *gridptr, int64_t *indices)
 
   if (gridptr->x.vals)
     {
-      if (size && indices)
-        {
-          const int64_t *gridptr_indices = gridptr->vtable->inqIndicesPtr(gridptr);
-          memcpy(indices, gridptr_indices, size * sizeof(int64_t));
-        }
+      if (size && indices) memcpy(indices, gridptr->vtable->inqIndicesPtr(gridptr), size * sizeof(int64_t));
     }
   else
     size = 0;
@@ -1448,11 +1440,7 @@ gridInqXValsSerial(grid_t *gridptr, double *xvals)
 
   if (gridptr->x.vals)
     {
-      if (size && xvals)
-        {
-          const double *gridptr_xvals = gridptr->vtable->inqXValsPtr(gridptr);
-          copy_darray(size, gridptr_xvals, xvals);
-        }
+      if (size && xvals) copy_darray(size, gridptr->vtable->inqXValsPtr(gridptr), xvals);
     }
   else
     size = 0;
@@ -1637,11 +1625,7 @@ gridInqYValsSerial(grid_t *gridptr, double *yvals)
 
   if (gridptr->y.vals)
     {
-      if (size && yvals)
-        {
-          const double *gridptr_yvals = gridptr->vtable->inqYValsPtr(gridptr);
-          copy_darray(size, gridptr_yvals, yvals);
-        }
+      if (size && yvals) copy_darray(size, gridptr->vtable->inqYValsPtr(gridptr), yvals);
     }
   else
     size = 0;
@@ -1767,8 +1751,7 @@ gridDefYvals(int gridID, const double *yvals)
 static double
 gridInqXValSerial(grid_t *gridptr, SizeType index)
 {
-  const double xval = gridptr->x.vals ? gridptr->x.vals[index] : 0;
-  return xval;
+  return gridptr->x.vals ? gridptr->x.vals[index] : 0;
 }
 
 double
@@ -1781,8 +1764,7 @@ gridInqXval(int gridID, SizeType index)
 static double
 gridInqYValSerial(grid_t *gridptr, SizeType index)
 {
-  const double yval = gridptr->y.vals ? gridptr->y.vals[index] : 0;
-  return yval;
+  return gridptr->y.vals ? gridptr->y.vals[index] : 0;
 }
 
 /*
@@ -1808,7 +1790,7 @@ grid_calc_increment(size_t size, const double *vals)
   if (size > 1)
     {
       double inc = (vals[size - 1] - vals[0]) / (double) (size - 1);
-      const double abs_inc = fabs(inc);
+      double abs_inc = fabs(inc);
       for (size_t i = 1; i < size; ++i)
         if (fabs(fabs(vals[i - 1] - vals[i]) - abs_inc) > 0.01 * abs_inc)
           {
@@ -1827,7 +1809,7 @@ grid_calc_increment_in_meter(size_t size, const double *vals)
 {
   if (size > 1)
     {
-      const double inc = (vals[size - 1] - vals[0]) / (double) (size - 1);
+      double inc = (vals[size - 1] - vals[0]) / (double) (size - 1);
       return round(fabs(inc));
     }
 
@@ -3015,7 +2997,6 @@ static void
 gridDefAreaSerial(grid_t *gridptr, const double *area)
 {
   size_t size = gridptr->size;
-
   if (size == 0) Error("size undefined for gridID = %d", gridptr->self);
 
   if (gridptr->area == NULL)
@@ -3169,11 +3150,7 @@ gridInqXBoundsSerial(grid_t *gridptr, double *xbounds)
 
   if (gridptr->x.bounds)
     {
-      if (size && xbounds)
-        {
-          const double *gridptr_xbounds = gridptr->vtable->inqXBoundsPtr(gridptr);
-          copy_darray(size, gridptr_xbounds, xbounds);
-        }
+      if (size && xbounds) copy_darray(size, gridptr->vtable->inqXBoundsPtr(gridptr), xbounds);
     }
   else
     size = 0;
@@ -3283,11 +3260,7 @@ gridInqYBoundsSerial(grid_t *gridptr, double *ybounds)
 
   if (gridptr->y.bounds)
     {
-      if (size && ybounds)
-        {
-          const double *gridptr_ybounds = gridptr->vtable->inqYBoundsPtr(gridptr);
-          copy_darray(size, gridptr_ybounds, ybounds);
-        }
+      if (size && ybounds) copy_darray(size, gridptr->vtable->inqYBoundsPtr(gridptr), ybounds);
     }
   else
     size = 0;
@@ -4119,7 +4092,7 @@ gridDefComplexPacking(int gridID, int lcomplex)
 
   if (gridptr->lcomplex != lcomplex)
     {
-      gridptr->lcomplex = lcomplex != 0;
+      gridptr->lcomplex = (lcomplex != 0);
       gridMark4Update(gridID);
     }
 }
@@ -4139,7 +4112,7 @@ gridDefHasDims(int gridID, int hasdims)
 
   if (gridptr->hasdims != (hasdims != 0))
     {
-      gridptr->hasdims = hasdims != 0;
+      gridptr->hasdims = (hasdims != 0);
       gridMark4Update(gridID);
     }
 }
@@ -4417,7 +4390,6 @@ gridGetPackSize(void *voidP, void *context)
 }
 
 static int gridGetPackSizeScalars(grid_t *gridP, void *context);
-
 static int gridGetPackSizeArrays(grid_t *gridP, void *context);
 
 static int
@@ -4432,7 +4404,6 @@ gridGetPackSizeScalars(grid_t *gridP, void *context)
   int packBuffSize = 0, ui32PackSize = serializeGetSize(1, CDI_DATATYPE_UINT32, context);
 
   packBuffSize += serializeGetSize(gridNint, CDI_DATATYPE_INT, context) + ui32PackSize;
-
   packBuffSize += serializeGetSize(gridNdouble, CDI_DATATYPE_FLT64, context) + ui32PackSize;
 
   packBuffSize += serializeKeysGetPackSize(&gridP->keys, context);
@@ -4446,7 +4417,6 @@ static int
 gridGetPackSizeArrays(grid_t *gridP, void *context)
 {
   int packBuffSize = 0, ui32PackSize = serializeGetSize(1, CDI_DATATYPE_UINT32, context);
-  size_t count;
 
   if (gridP->reducedPoints)
     {
@@ -4456,27 +4426,21 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
 
   if (gridP->vtable->inqXValsPtr(gridP))
     {
-      if (gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR)
-        count = gridP->size;
-      else
-        count = gridP->x.size;
+      size_t count = grid_is_irregular(gridP->type) ? gridP->size : gridP->x.size;
       xassert(count && count <= INT_MAX);
       packBuffSize += serializeGetSize((int) count, CDI_DATATYPE_FLT64, context) + ui32PackSize;
     }
 
   if (gridP->vtable->inqYValsPtr(gridP))
     {
-      if (gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR)
-        count = gridP->size;
-      else
-        count = gridP->y.size;
+      size_t count = grid_is_irregular(gridP->type) ? gridP->size : gridP->y.size;
       xassert(count && count <= INT_MAX);
       packBuffSize += serializeGetSize((int) count, CDI_DATATYPE_FLT64, context) + ui32PackSize;
     }
 
   if (gridP->vtable->inqAreaPtr(gridP))
     {
-      count = gridP->size;
+      size_t count = gridP->size;
       xassert(count && count <= INT_MAX);
       packBuffSize += serializeGetSize((int) count, CDI_DATATYPE_FLT64, context) + ui32PackSize;
     }
@@ -4484,7 +4448,7 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
   if (gridP->x.bounds)
     {
       xassert(gridP->nvertex);
-      count = (grid_is_irregular(gridP->type) ? gridP->size : gridP->x.size) * (size_t) gridP->nvertex;
+      size_t count = (grid_is_irregular(gridP->type) ? gridP->size : gridP->x.size) * (size_t) gridP->nvertex;
       xassert(count && count <= INT_MAX);
       packBuffSize += serializeGetSize((int) count, CDI_DATATYPE_FLT64, context) + ui32PackSize;
     }
@@ -4492,21 +4456,21 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
   if (gridP->y.bounds)
     {
       xassert(gridP->nvertex);
-      count = (grid_is_irregular(gridP->type) ? gridP->size : gridP->y.size) * (size_t) gridP->nvertex;
+      size_t count = (grid_is_irregular(gridP->type) ? gridP->size : gridP->y.size) * (size_t) gridP->nvertex;
       xassert(count && count <= INT_MAX);
       packBuffSize += (serializeGetSize((int) count, CDI_DATATYPE_FLT64, context) + ui32PackSize);
     }
 
   if (gridP->mask)
     {
-      count = gridP->size;
+      size_t count = gridP->size;
       xassert(count && count <= INT_MAX);
       packBuffSize += serializeGetSize((int) count, CDI_DATATYPE_UCHAR, context) + ui32PackSize;
     }
 
   if (gridP->mask_gme)
     {
-      count = gridP->size;
+      size_t count = gridP->size;
       xassert(count && count <= INT_MAX);
       packBuffSize += serializeGetSize((int) count, CDI_DATATYPE_UCHAR, context) + ui32PackSize;
     }
