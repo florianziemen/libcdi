@@ -1,3 +1,7 @@
+2025-06-18  Uwe Schulzweida
+
+	* Added interface functions gridDefIndices()/gridInqIndices()
+
 2025-06-16  Uwe Schulzweida
 
 	* Added GRID_HEALPIX

@@ -29,6 +29,9 @@ struct gridVirtTable
   grid_t *(*copy)(grid_t *gridptr);
   void (*copyScalarFields)(grid_t *gridptrOrig, grid_t *gridptrDup);
   void (*copyArrayFields)(grid_t *gridptrOrig, grid_t *gridptrDup);
+  void (*defIndices)(grid_t *gridptr, const int64_t *indices);
+  SizeType (*inqIndices)(grid_t *gridptr, int64_t *indices);
+  const int64_t *(*inqIndicesPtr)(grid_t *gridptr);
   void (*defXVals)(grid_t *gridptr, const double *xvals);
   void (*defYVals)(grid_t *gridptr, const double *yvals);
   void (*defMask)(grid_t *gridptr, const int *mask);
@@ -114,6 +117,7 @@ struct grid_t
   int projtype;  // grid projection type
   mask_t *mask;
   mask_t *mask_gme;
+  int64_t *indices;
   double *area;
   struct grid_gme_t gme;
   int trunc;  // parameter for GRID_SPECTRAL

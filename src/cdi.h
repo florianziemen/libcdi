@@ -795,6 +795,9 @@ void    gridDefYsize(int gridID, SizeType ysize);
 //      gridInqYsize: Get the size of a Y-axis
 SizeType gridInqYsize(int gridID);
 
+void    gridDefIndices(int gridID, const int64_t *indices);
+SizeType gridInqIndices(int gridID, int64_t *indices);
+
 //      gridDefNP: Define the number of parallels between a pole and the equator
 void    gridDefNP(int gridID, int np);
 

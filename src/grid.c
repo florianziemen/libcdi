@@ -141,6 +141,7 @@ grid_init(grid_t *gridptr)
   grid_axis_init(&gridptr->x);
   grid_axis_init(&gridptr->y);
 
+  gridptr->indices = NULL;
   gridptr->area = NULL;
   gridptr->reducedPoints = NULL;
   gridptr->reducedPointsSize = 0;
@@ -863,6 +864,58 @@ gridInqYunits(int gridID, char *units)
   (void) cdiInqKeyString(gridID, CDI_YAXIS, CDI_KEY_UNITS, units, &length);
 }
 
+static void
+gridDefIndicesSerial(grid_t *gridptr, const int64_t *indices)
+{
+  size_t size = gridptr->size;
+  if (size == 0) Error("Size undefined for gridID = %d", gridptr->self);
+
+  if (gridptr->indices && CDI_Debug) Warning("values already defined!");
+  gridptr->indices = (int64_t *) Realloc(gridptr->indices, size * sizeof(int64_t));
+  memcpy(gridptr->indices, indices, size * sizeof(int64_t));
+}
+
+void
+gridDefIndices(int gridID, const int64_t *indices)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  gridptr->vtable->defIndices(gridptr, indices);
+  gridMark4Update(gridID);
+}
+
+static const int64_t *
+gridInqIndicesPtrSerial(grid_t *gridptr)
+{
+  return gridptr->indices;
+}
+
+static SizeType
+gridInqIndicesSerial(grid_t *gridptr, int64_t *indices)
+{
+  size_t size = gridptr->size;
+  if (CDI_Debug && size == 0) Warning("size undefined for gridID = %d", gridptr->self);
+
+  if (gridptr->x.vals)
+    {
+      if (size && indices)
+        {
+          const int64_t *gridptr_indices = gridptr->vtable->inqIndicesPtr(gridptr);
+          memcpy(indices, gridptr_indices, size * sizeof(int64_t));
+        }
+    }
+  else
+    size = 0;
+
+  return (SizeType) size;
+}
+
+SizeType
+gridInqIndices(int gridID, int64_t *indices)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  return gridptr->vtable->inqIndices(gridptr, indices);
+}
+
 void
 gridDefProj(int gridID, int projID)
 {
@@ -1390,9 +1443,7 @@ copy_darray(size_t n, const double *restrict in, double *restrict out)
 static SizeType
 gridInqXValsSerial(grid_t *gridptr, double *xvals)
 {
-  int gridtype = gridptr->type;
-  size_t size = grid_is_irregular(gridtype) ? gridptr->size : gridptr->x.size;
-
+  size_t size = grid_is_irregular(gridptr->type) ? gridptr->size : gridptr->x.size;
   if (CDI_Debug && size == 0) Warning("size undefined for gridID = %d", gridptr->self);
 
   if (gridptr->x.vals)
@@ -1412,9 +1463,7 @@ gridInqXValsSerial(grid_t *gridptr, double *xvals)
 static SizeType
 gridInqXValsPartSerial(grid_t *gridptr, int start, SizeType length, double *xvals)
 {
-  int gridtype = gridptr->type;
-  size_t size = grid_is_irregular(gridtype) ? gridptr->size : gridptr->x.size;
-
+  size_t size = grid_is_irregular(gridptr->type) ? gridptr->size : gridptr->x.size;
   if (CDI_Debug && size == 0) Warning("size undefined for gridID = %d", gridptr->self);
 
   if (gridptr->x.vals)
@@ -1523,9 +1572,7 @@ gridInqXIsc(int gridID)
 static void
 gridDefXValsSerial(grid_t *gridptr, const double *xvals)
 {
-  int gridtype = gridptr->type;
-  size_t size = grid_is_irregular(gridtype) ? gridptr->size : gridptr->x.size;
-
+  size_t size = grid_is_irregular(gridptr->type) ? gridptr->size : gridptr->x.size;
   if (size == 0) Error("Size undefined for gridID = %d", gridptr->self);
 
   if (gridptr->x.vals && CDI_Debug) Warning("values already defined!");
@@ -1585,9 +1632,7 @@ gridDefXvals(int gridID, const double *xvals)
 static SizeType
 gridInqYValsSerial(grid_t *gridptr, double *yvals)
 {
-  int gridtype = gridptr->type;
-  size_t size = grid_is_irregular(gridtype) ? gridptr->size : gridptr->y.size;
-
+  size_t size = grid_is_irregular(gridptr->type) ? gridptr->size : gridptr->y.size;
   if (CDI_Debug && size == 0) Warning("size undefined for gridID = %d!", gridptr->self);
 
   if (gridptr->y.vals)
@@ -1607,9 +1652,7 @@ gridInqYValsSerial(grid_t *gridptr, double *yvals)
 static SizeType
 gridInqYValsPartSerial(grid_t *gridptr, int start, SizeType length, double *yvals)
 {
-  int gridtype = gridptr->type;
-  size_t size = grid_is_irregular(gridtype) ? gridptr->size : gridptr->y.size;
-
+  size_t size = grid_is_irregular(gridptr->type) ? gridptr->size : gridptr->y.size;
   if (CDI_Debug && size == 0) Warning("size undefined for gridID = %d!", gridptr->self);
 
   if (gridptr->y.vals)
@@ -2047,7 +2090,7 @@ grid_check_cyclic(grid_t *gridptr)
   };
   size_t xsize = gridptr->x.size, ysize = gridptr->y.size;
   const double *xvals = gridptr->vtable->inqXValsPtr(gridptr), *yvals = gridptr->vtable->inqYValsPtr(gridptr),
-               (*xbounds)[numVertices] = (const double(*)[numVertices]) gridptr->vtable->inqXBoundsPtr(gridptr);
+               (*xbounds)[numVertices] = (const double (*)[numVertices]) gridptr->vtable->inqXBoundsPtr(gridptr);
 
   if (gridptr->type == GRID_GAUSSIAN || gridptr->type == GRID_LONLAT)
     {
@@ -2192,7 +2235,7 @@ compareXYvals2(grid_t *gridRef, grid_t *gridTest)
                 || ((gridTest->x.bounds == NULL) ^ (gridRef->x.bounds == NULL))
                 || ((gridTest->y.bounds == NULL) ^ (gridRef->y.bounds == NULL));
 
-  typedef double (*inqVal)(grid_t * grid, SizeType index);
+  typedef double (*inqVal)(grid_t *grid, SizeType index);
   inqVal inqXValRef = gridRef->vtable->inqXVal, inqYValRef = gridRef->vtable->inqYVal, inqXValTest = gridTest->vtable->inqXVal,
          inqYValTest = gridTest->vtable->inqYVal;
 
@@ -2761,8 +2804,8 @@ grid_complete(grid_t *grid)
 int
 gridGenerate(const grid_t *grid)
 {
-  int gridtype = grid->type;
-  int gridID = gridCreate(gridtype, (SizeType) grid->size);
+  int gridType = grid->type;
+  int gridID = gridCreate(gridType, (SizeType) grid->size);
   grid_t *restrict gridptr = grid_to_pointer(gridID);
   cdiCopyVarKey(&grid->keys, CDI_KEY_DATATYPE, &gridptr->keys);
   gridptr->x.size = grid->x.size;
@@ -2772,9 +2815,9 @@ gridGenerate(const grid_t *grid)
   gridptr->x.flag = grid->x.flag;
   int valdef_group1 = 0;
   static const int valdef_group1_tab[]
-      = { GRID_LONLAT, GRID_GAUSSIAN, GRID_UNSTRUCTURED, GRID_CURVILINEAR, GRID_GENERIC, GRID_PROJECTION };
+      = { GRID_LONLAT, GRID_GAUSSIAN, GRID_UNSTRUCTURED, GRID_CURVILINEAR, GRID_GENERIC, GRID_PROJECTION, GRID_HEALPIX };
   for (size_t i = 0; i < sizeof(valdef_group1_tab) / sizeof(valdef_group1_tab[0]); ++i)
-    valdef_group1 |= (gridtype == valdef_group1_tab[i]);
+    valdef_group1 |= (gridType == valdef_group1_tab[i]);
   if (valdef_group1 && grid->x.flag == 1)
     {
       gridDefXvals(gridID, grid->x.vals);
@@ -2784,7 +2827,7 @@ gridGenerate(const grid_t *grid)
   gridptr->x.last = grid->x.last;
   gridptr->x.inc = grid->x.inc;
   gridptr->y.flag = grid->y.flag;
-  if ((valdef_group1 || gridtype == GRID_GAUSSIAN_REDUCED) && grid->y.flag == 1)
+  if ((valdef_group1 || gridType == GRID_GAUSSIAN_REDUCED) && grid->y.flag == 1)
     {
       gridDefYvals(gridID, grid->y.vals);
       if (grid->y.bounds) gridDefYbounds(gridID, grid->y.bounds);
@@ -2800,8 +2843,8 @@ gridGenerate(const grid_t *grid)
 
   cdiCopyVarKey(&grid->keys, CDI_KEY_SCANNINGMODE, &gridptr->keys);
 
-  if (gridtype == GRID_PROJECTION) gridptr->name = strdup(grid->name);
-  if (gridtype == GRID_GAUSSIAN_REDUCED) gridDefReducedPoints(gridID, (int) grid->y.size, grid->reducedPoints);
+  if (gridType == GRID_PROJECTION) gridptr->name = strdup(grid->name);
+  if (gridType == GRID_GAUSSIAN_REDUCED) gridDefReducedPoints(gridID, (int) grid->y.size, grid->reducedPoints);
   gridptr->trunc = grid->trunc;
   gridptr->lcomplex = grid->lcomplex;
   gridptr->gme.nd = grid->gme.nd;
@@ -4870,7 +4913,7 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
         }
     }
 
-  return (struct addIfNewRes){ .Id = gridID, .isNew = (!gridIsDefined && !gridIsDefinedGlobal) };
+  return (struct addIfNewRes) { .Id = gridID, .isNew = (!gridIsDefined && !gridIsDefinedGlobal) };
 }
 
 const struct gridVirtTable cdiGridVtable = {
@@ -4878,6 +4921,9 @@ const struct gridVirtTable cdiGridVtable = {
   .copy = grid_copy_base,
   .copyScalarFields = grid_copy_base_scalar_fields,
   .copyArrayFields = grid_copy_base_array_fields,
+  .defIndices = gridDefIndicesSerial,
+  .inqIndices = gridInqIndicesSerial,
+  .inqIndicesPtr = gridInqIndicesPtrSerial,
   .defXVals = gridDefXValsSerial,
   .defYVals = gridDefYValsSerial,
   .defMask = gridDefMaskSerial,
