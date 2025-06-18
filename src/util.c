@@ -186,6 +186,27 @@ cdiCreateUUID(unsigned char *uuid)
 #else
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+unsigned
+createSeed()
+{
+  struct timeval tv;
+  int status = gettimeofday(&tv, NULL);
+  if (status != 0)
+    {
+      perror("failed seed generation!");
+      exit(1);
+    }
+  unsigned seed = tv.tv_sec ^ tv.tv_usec;
+  return seed;
+}
+
+#else
+unsigned
+createSeed()
+{
+  return 0;
+}
+
 #endif
 void
 cdiCreateUUID(unsigned char *uuid)
