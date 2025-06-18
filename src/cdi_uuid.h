@@ -25,7 +25,11 @@ int cdiUUIDIsNull(const unsigned char uuid[])
 }
 
 #ifndef _WIN32
-void cdiCreateUUID(unsigned char uuid[CDI_UUID_SIZE]);
+#if defined(HAVE_DECL_UUID_GENERATE) && defined(HAVE_UUID_UUID_H)
+void cdiCreateUUID(unsigned char uuid[CDI_UUID_SIZE])
+#else
+void cdiCreateUUID(unsigned char* uuid);
+#endif
 #endif
 
 int cdiUUID2Str(const unsigned char uuid[], char uuidstr[]);
