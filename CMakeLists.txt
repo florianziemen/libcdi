@@ -120,7 +120,7 @@ endif()
 # NetCDF
 
 if(${CDI_NETCDF} OR NETCDF_ROOT )
-  find_package(netCDF COMPONENTS C REQUIRED)
+  find_package(NetCDF COMPONENTS C REQUIRED)
   if (TARGET netCDF::netcdf)
     list(APPEND cdi_compile_defs
       HAVE_LIBNETCDF=${netCDF_FOUND}
