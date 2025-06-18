@@ -9,6 +9,35 @@
   "configurePresets": [
     {
       "$comment": [
+        "Default preset"
+      ],
+      "name": "default",
+      "displayName": "Default Config",
+      "description": "Default build using makefiles generator",
+      "generator": "Unix Makefiles",
+      "cacheVariables" : {
+        "CMAKE_C_COMPILER" : "gcc",
+        "CMAKE_C_FLAGS" : "-Wall -Werror",
+        "CMAKE_Fortran_FLAGS" : "-Wall -Werror",
+        "CDI_IEG" : "ON",
+        "CDI_LIBGRIB" : "ON",
+        "CDI_PTHREAD" : "ON",
+        "CDI_LIBGRIBEX" : "ON",
+        "CDI_EXTRA" : "ON",
+        "CDI_SERVICE" : "ON",
+        "CDI_ECCODES" : "ON",
+        "CDI_NETCDF" : "ON",
+        "CDI_BUILD_APP": "ON",
+
+        "BUILD_SHARED_LIBS": "OFF",
+        "CDI_PIO" : "OFF",
+        "CDI_YAXT" : "OFF",
+        "CDI_ENABLE_CF_INTERFACE": "OFF"
+      }
+    },
+
+    {
+      "$comment": [
         "Levante preset"
       ],
       "name": "levante",
