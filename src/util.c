@@ -230,6 +230,7 @@ cdiCreateUUID(unsigned char *uuid)
     uuid_seeded = 1;
   }
   for (size_t i = 0; i < CDI_UUID_SIZE; ++i) uuid[i] = (unsigned char) random();
+  encodeUUID(uuid);
 #else
   unsigned short caller_rand_state[3];
   {
@@ -248,11 +249,8 @@ cdiCreateUUID(unsigned char *uuid)
     memcpy(caller_rand_state, p, sizeof(caller_rand_state));
   }
   for (size_t i = 0; i < CDI_UUID_SIZE; ++i) uuid[i] = (unsigned char) lrand48();
+  encodeUUID(uuid);
 #endif
-  /* encode variant into msb of octet 8 */
-  uuid[8] = (unsigned char) ((uuid[8] & 0x3f) | (1 << 7));
-  /* encode version 4 ((pseudo-)random uuid) into msb of octet 7 */
-  uuid[7] = (unsigned char) ((uuid[7] & 0x0f) | (4 << 4));
 #ifndef _SX
   setstate(caller_rand_state);
 #else
