@@ -268,7 +268,7 @@ makeDateString(struct tm *me)
 {
   enum
   {
-    size = 4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 4 + 1
+    size = 4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 4 + 1 + 1
   };
   char *result = (char *) Malloc(size);
   assert(me->tm_year + 1900 < 10000 && me->tm_year + 1900 > -1000 && me->tm_mon >= 0 && me->tm_mon < 12 && me->tm_mday >= 1
