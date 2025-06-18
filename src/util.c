@@ -231,6 +231,7 @@ cdiCreateUUID(unsigned char *uuid)
   }
   for (size_t i = 0; i < CDI_UUID_SIZE; ++i) uuid[i] = (unsigned char) random();
   encodeUUID(uuid);
+  setstate(caller_rand_state);
 #else
   unsigned short caller_rand_state[3];
   {
@@ -250,10 +251,6 @@ cdiCreateUUID(unsigned char *uuid)
   }
   for (size_t i = 0; i < CDI_UUID_SIZE; ++i) uuid[i] = (unsigned char) lrand48();
   encodeUUID(uuid);
-#endif
-#ifndef _SX
-  setstate(caller_rand_state);
-#else
   seed48(caller_rand_state);
 #endif
 }
