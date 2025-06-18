@@ -108,7 +108,7 @@ if(${CDI_SERVICE})
 endif()
 
 # ecCodes
-if(${CDI_ECCODES} OR eccodes_ROOT)
+if(${CDI_ECCODES} OR ECCODES_ROOT)
   find_package(eccodes REQUIRED)
   if (${eccodes_FOUND})
     target_compile_definitions(cdilib PRIVATE HAVE_LIBGRIB_API=${eccodes_FOUND})
@@ -119,7 +119,7 @@ endif()
 
 # NetCDF
 
-if(${CDI_NETCDF} OR netCDF_ROOT )
+if(${CDI_NETCDF} OR NETCDF_ROOT )
   find_package(netCDF COMPONENTS C REQUIRED)
   if (TARGET netCDF::netcdf)
     list(APPEND cdi_compile_defs

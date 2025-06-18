@@ -45,6 +45,8 @@
       "description": "Default build using makefiles generator",
       "generator": "Unix Makefiles",
       "cacheVariables" : {
+        "CDI_NETCDF" : "ON",
+        "CDI_ECCODES" : "ON",
         "CMAKE_C_FLAGS" : "-Wall -Werror",
         "CMAKE_Fortran_FLAGS" : "-Wall -Werror",
         "ECCODES_ROOT":"/sw/spack-levante/eccodes-2.21.0-3ehkbb",
