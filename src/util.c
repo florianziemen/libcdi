@@ -192,10 +192,10 @@ createSeed()
   struct timeval tv;
   int status = gettimeofday(&tv, NULL);
   if (status != 0)
-    {
-      perror("failed seed generation!");
-      exit(1);
-    }
+  {
+    perror("failed seed generation!");
+    exit(1);
+  }
   unsigned seed = tv.tv_sec ^ tv.tv_usec;
   return seed;
 }
@@ -219,18 +219,7 @@ cdiCreateUUID(unsigned char *uuid)
     caller_rand_state = setstate(uuid_rand_state);
   else
   {
-#ifdef HAVE_SYS_TIME_H
-    struct timeval tv;
-    int status = gettimeofday(&tv, NULL);
-    if (status != 0)
-    {
-      perror("failed seed generation!");
-      exit(1);
-    }
-    unsigned seed = tv.tv_sec ^ tv.tv_usec;
-#else
-    unsigned seed = 0;
-#endif
+    unsigned seed = createSeed();
     caller_rand_state = initstate(seed, uuid_rand_state, sizeof(uuid_rand_state));
     uuid_seeded = 1;
   }
@@ -241,18 +230,9 @@ cdiCreateUUID(unsigned char *uuid)
     static unsigned short our_rand_state[3];
     if (!uuid_seeded)
     {
-#ifdef HAVE_SYS_TIME_H
-      struct timeval tv;
-      int status = gettimeofday(&tv, NULL);
-      if (status != 0)
-      {
-        perror("failed seed generation!");
-        exit(1);
-      }
-      unsigned seed = tv.tv_sec ^ tv.tv_usec;
-#else
-      unsigned seed = 0;
-#endif
+
+      unsigned seed = createSeed();
+
       our_rand_state[0] = 0x330E;
       our_rand_state[1] = (unsigned short) (seed & 0xFFFFU);
       our_rand_state[2] = (unsigned short) ((seed >> 16) & 0xFFFFU);
