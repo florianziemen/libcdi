@@ -42,6 +42,7 @@ void cdf_put_var_uchar(int ncid, int varid, const unsigned char *up);
 void cdf_put_var_schar(int ncid, int varid, const signed char *cp);
 void cdf_put_var_short(int ncid, int varid, const short *sp);
 void cdf_put_var_int(int ncid, int varid, const int *ip);
+void cdf_put_var_int64(int ncid, int varid, const int64_t *ip);
 void cdf_put_var_long(int ncid, int varid, const long *lp);
 void cdf_put_var_float(int ncid, int varid, const float *fp);
 void cdf_put_var_double(int ncid, int varid, const double *dp);

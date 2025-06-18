@@ -891,7 +891,7 @@ gridInqIndicesSerial(grid_t *gridptr, int64_t *indices)
   size_t size = gridptr->size;
   if (CDI_Debug && size == 0) Warning("size undefined for gridID = %d", gridptr->self);
 
-  if (gridptr->x.vals)
+  if (gridptr->indices)
     {
       if (size && indices) memcpy(indices, gridptr->vtable->inqIndicesPtr(gridptr), size * sizeof(int64_t));
     }
