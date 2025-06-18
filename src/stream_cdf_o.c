@@ -1843,7 +1843,6 @@ cdf_def_grid_indices(stream_t *streamptr, int gridID, int gridIndex)
 {
 #ifdef HAVE_NETCDF4
   int fileID = streamptr->fileID;
-  int ndims = 1;
   SizeType dimlen = gridInqSize(gridID);
 
   bool switchNCMode = (streamptr->ncmode == 2);

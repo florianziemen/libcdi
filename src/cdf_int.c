@@ -323,8 +323,9 @@ void
 cdf_put_var_int64(int ncid, int varid, const int64_t *ip)
 {
 #ifdef HAVE_NETCDF4
-  int status = nc_put_var_longlong(ncid, varid, (const long long *) ip);
-  if (CDF_Debug || status != NC_NOERR) Message("%d %d %d", ncid, varid, *ip);
+  long long *llp = (long long *) ip;
+  int status = nc_put_var_longlong(ncid, varid, (const long long *) llp);
+  if (CDF_Debug || status != NC_NOERR) Message("%d %d %lld", ncid, varid, *llp);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 #endif
 }
