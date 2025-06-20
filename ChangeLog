@@ -1,3 +1,7 @@
+2025-06-20  Uwe Schulzweida
+
+	* NetCDF4: added support for GRIB_HEALPIX cell indices
+
 2025-06-18  Uwe Schulzweida
 
 	* Added interface functions gridDefIndices()/gridInqIndices()

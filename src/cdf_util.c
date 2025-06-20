@@ -246,7 +246,7 @@ bool
 is_x_axis(const char *units, const char *stdname)
 {
   (void) units;
-  return (str_is_equal(stdname, "projection_x_coordinate") || str_is_equal(stdname, "healpix_index"));
+  return (str_is_equal(stdname, "projection_x_coordinate"));
 }
 
 bool
@@ -317,18 +317,24 @@ cdf_set_zaxistype(const char *attstring, int *zaxistype)
 int
 attribute_to_calendar(const char *attstring)
 {
-  int calendar = CALENDAR_STANDARD;
   // clang-format off
-  if      (strStartsWith(attstring, "standard"))  calendar = CALENDAR_STANDARD;
-  else if (strStartsWith(attstring, "gregorian")) calendar = CALENDAR_GREGORIAN;
-  else if (strStartsWith(attstring, "none"))      calendar = CALENDAR_NONE;
-  else if (strStartsWith(attstring, "proleptic")) calendar = CALENDAR_PROLEPTIC;
-  else if (strStartsWith(attstring, "360"))       calendar = CALENDAR_360DAYS;
-  else if (strStartsWith(attstring, "365") ||
-           strStartsWith(attstring, "noleap"))    calendar = CALENDAR_365DAYS;
-  else if (strStartsWith(attstring, "366") ||
-           strStartsWith(attstring, "all_leap"))  calendar = CALENDAR_366DAYS;
-  else Warning("calendar >%s< unsupported!", attstring);
+  if (strStartsWith(attstring, "standard"))  return CALENDAR_STANDARD;
+  if (strStartsWith(attstring, "gregorian")) return CALENDAR_GREGORIAN;
+  if (strStartsWith(attstring, "none"))      return CALENDAR_NONE;
+  if (strStartsWith(attstring, "proleptic")) return CALENDAR_PROLEPTIC;
+  if (strStartsWith(attstring, "360"))       return CALENDAR_360DAYS;
+  if (strStartsWith(attstring, "365") ||
+      strStartsWith(attstring, "noleap"))    return CALENDAR_365DAYS;
+  if (strStartsWith(attstring, "366") ||
+      strStartsWith(attstring, "all_leap"))  return CALENDAR_366DAYS;
   // clang-format on
-  return calendar;
+
+  static bool warn = true;
+  if (warn)
+    {
+      warn = false;
+      Warning("Calendar >%s< unsupported!", attstring);
+    }
+
+  return CALENDAR_STANDARD;
 }

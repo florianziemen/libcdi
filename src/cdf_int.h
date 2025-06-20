@@ -52,6 +52,7 @@ void cdf_get_var_uchar(int ncid, int varid, unsigned char *up);
 void cdf_get_var_schar(int ncid, int varid, signed char *cp);
 void cdf_get_var_short(int ncid, int varid, short *sp);
 void cdf_get_var_int(int ncid, int varid, int *ip);
+void cdf_get_var_int64(int ncid, int varid, int64_t *ip);
 void cdf_get_var_long(int ncid, int varid, long *lp);
 void cdf_get_var_float(int ncid, int varid, float *fp);
 void cdf_get_var_double(int ncid, int varid, double *dp);
