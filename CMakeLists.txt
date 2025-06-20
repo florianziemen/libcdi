@@ -27,6 +27,7 @@ option(CDI_SERVICE "Use the extra library [default=ON]" ON)
 option(CDI_ECCODES "Use the eccodes library [default=ON]" ON)
 option(CDI_NETCDF "Use the netcdf library [default=ON]" ON)
 option(CDI_BUILD_APP "Build the app" ON)
+option(CDI_BUILD_EXAMPLES "Build the cdi examples" OFF)
 
 add_library(cdilib)
 add_library(cdilib::cdilib ALIAS cdilib)
@@ -147,6 +148,10 @@ endif ()
 if (BUILD_TESTING)
   add_subdirectory(tests)
 endif ()
+
+if(CDI_BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
 
 # --- Installation
 
