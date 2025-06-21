@@ -617,7 +617,6 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
         {
           if (dimname[0] == 0) strcpy(dimname, axisname);
           dimID = checkDimName(fileID, (size_t) dimlen, dimname);
-
           if (dimID == CDI_UNDEFID) cdf_def_dim(fileID, dimname, (size_t) dimlen, &dimID);
         }
 
@@ -1617,7 +1616,6 @@ cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimID, si
     Error("Maximal string length value is 0.\nA given character axis requires a dimension to save the maximal string length.");
   int strlenID = CDI_UNDEFID;
   strlenID = checkDimName(fileID, clen, strlen);
-
   if (strlenID == CDI_UNDEFID) cdf_def_dim(fileID, strlen, clen, &strlenID);
 
   // Check 'areatype'dimID
@@ -1859,6 +1857,7 @@ cdf_def_grid_indices(stream_t *streamptr, int gridID, int gridIndex)
   if (dimname[0] == 0) strcpy(dimname, "cell");
 
   int dimID = checkDimName(fileID, (size_t) dimlen, dimname);
+  if (dimID == CDI_UNDEFID) cdf_def_dim(fileID, dimname, (size_t) dimlen, &dimID);
 
   nc_type xtype = NC_INT64;
   static const char axisname[] = "cell_index";
@@ -2128,10 +2127,9 @@ cdf_define_generic_dim(stream_t *streamptr, int gridID, int gridIndex)
       char dimname[CDI_MAX_NAME];
       int length = sizeof(dimname);
       cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_DIMNAME, dimname, &length);
-      if (dimname[0] == 0) strcpy(dimname, "gsize");
+      if (dimname[0] == 0) strcpy(dimname, "cell");
 
       dimID = checkDimName(fileID, (size_t) dimlen, dimname);
-
       if (dimID == CDI_UNDEFID)
         {
           bool switchNCMode = (streamptr->ncmode == 2);

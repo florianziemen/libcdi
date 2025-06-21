@@ -3248,7 +3248,8 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t 
 
           if (xdimid == CDI_UNDEFID && ydimid == CDI_UNDEFID && grid->size == 1) gridDefHasDims(gridID, CoordVar);
 
-          if (xdimid != CDI_UNDEFID) cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_DIMNAME, ncdims[xdimid].name);
+          int xaxisVarID = (ncvar->gridtype == GRID_HEALPIX) ? CDI_XAXIS : CDI_XAXIS;
+          if (xdimid != CDI_UNDEFID) cdiDefKeyString(gridID, xaxisVarID, CDI_KEY_DIMNAME, ncdims[xdimid].name);
           if (ydimid != CDI_UNDEFID) cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_DIMNAME, ncdims[ydimid].name);
           if (vdimid != CDI_UNDEFID) cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_VDIMNAME, ncdims[vdimid].name);
 
@@ -4428,8 +4429,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
       CdiQuery *query = streamptr->query;
       if (query && cdiQueryNumStepidx(query) > 0)
         {
-          /* currently, the query interface does not support more
-           * than INT_MAX-1 steps! */
+          // currently, the query interface does not support more than INT_MAX-1 steps!
           assert(numTimesteps < INT_MAX);
           for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
             if (cdiQueryStepidx(query, (int) tsID + 1) < 0) ncStepIndices[tsID] = -1;
