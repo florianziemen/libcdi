@@ -1859,7 +1859,11 @@ cdf_def_grid_indices(stream_t *streamptr, int gridID, int gridIndex)
   int dimID = checkDimName(fileID, (size_t) dimlen, dimname);
   if (dimID == CDI_UNDEFID) cdf_def_dim(fileID, dimname, (size_t) dimlen, &dimID);
 
+  int dataType = CDI_UNDEFID;
+  cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, &dataType);
   nc_type xtype = NC_INT64;
+  if (dataType == CDI_DATATYPE_INT32) xtype = NC_INT;
+
   static const char axisname[] = "cell_index";
   static const char stdname[] = "healpix_index";
   static const char units[] = "1";
