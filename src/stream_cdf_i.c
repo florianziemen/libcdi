@@ -1897,7 +1897,7 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                   cdf_set_dim(ncvar, i, dimtype);
                 }
             }
-          if (lcdim > 0) Warning("Could not assign all character coordinates to data variable!");
+          // if (lcdim > 0) Warning("Could not assign all character coordinates to data variable!");
         }
     }
 }
@@ -2149,7 +2149,7 @@ cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridva
 {
   if (CDI_Netcdf_Lazy_Grid_Load)
     {
-      *valsGet = (struct xyValGet) {
+      *valsGet = (struct xyValGet){
         .scalefactor = ncvar->scalefactor,
         .addoffset = ncvar->addoffset,
         .start = { start[0], start[1], start[2] },
@@ -2822,6 +2822,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
       {
         grid->size = size;
         if (ncvar->ivarid != CDI_UNDEFID) cdf_load_cellindices(size, ncvar, &grid->indices);
+        break;
       }
     case GRID_GAUSSIAN_REDUCED:
       {
@@ -3343,7 +3344,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 	          if      (ncvars[zvarid].xtype == NC_FLOAT) zdatatype = CDI_DATATYPE_FLT32;
 	          else if (ncvars[zvarid].xtype == NC_INT)   zdatatype = CDI_DATATYPE_INT32;
 	          else if (ncvars[zvarid].xtype == NC_SHORT) zdatatype = CDI_DATATYPE_INT16;
-              // clang-format on
+                // clang-format on
 #ifndef USE_MPI
               if (zaxisType == ZAXIS_CHAR && ncvars[zvarid].ndims == 2)
                 {
