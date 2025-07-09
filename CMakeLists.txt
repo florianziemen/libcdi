@@ -1,7 +1,7 @@
 cmake_minimum_required( VERSION 3.27 FATAL_ERROR )
 message(VERBOSE "Entering cdilib")
 
-project(cdilib VERSION 2.5.1 LANGUAGES C )
+project(cdilib VERSION 2.5.1 LANGUAGES C Fortran) 
 
 include(CMakePackageConfigHelpers)
 include(CTest)
@@ -13,11 +13,8 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-
-option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
-option(CDI_PIO  "Use CDI-PIO" OFF)
+#Library Options
 option(CDI_YAXT "Use the yaxt library" OFF)
-option(CDI_ENABLE_CF_INTERFACE "TODO" OFF)
 option(CDI_IEG "Use the extra library [default=ON]" ON)
 option(CDI_LIBGRIB "GRIB support [default=ON]" ON)
 option(CDI_PTHREAD "Use the pthread library [default=ON]" ON)
@@ -26,8 +23,13 @@ option(CDI_EXTRA "Use the extra library [default=ON]" ON)
 option(CDI_SERVICE "Use the extra library [default=ON]" ON)
 option(CDI_ECCODES "Use the eccodes library [default=ON]" ON)
 option(CDI_NETCDF "Use the netcdf library [default=ON]" ON)
+
+#Build Options/ Feature Options
+option(CDI_PIO  "Use CDI-PIO" OFF)
+option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 option(CDI_BUILD_APP "Build the app" ON)
 option(CDI_BUILD_EXAMPLES "Build the cdi examples" OFF)
+option(CDI_ENABLE_CF_INTERFACE "TODO" OFF)
 
 add_library(cdilib)
 add_library(cdilib::cdilib ALIAS cdilib)
@@ -140,16 +142,16 @@ target_compile_definitions(cdilib PRIVATE CDI=1 CDI_SIZE_TYPE=size_t PACKAGE_NAM
 add_subdirectory(src)
 
 #app
-if (CDI_BUILD_APP)
+if (${CDI_BUILD_APP})
   add_subdirectory(app)
 endif ()
 
 #tests
-if (BUILD_TESTING)
+if (${BUILD_TESTING})
   add_subdirectory(tests)
 endif ()
 
-if(CDI_BUILD_EXAMPLES)
+if(${CDI_BUILD_EXAMPLES})
   add_subdirectory(examples)
 endif()
 
