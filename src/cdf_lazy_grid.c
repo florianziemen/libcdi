@@ -44,7 +44,7 @@ static void
 cdfLazyGridDelete(grid_t *grid)
 {
   struct cdfLazyGrid *cdfGrid = (struct cdfLazyGrid *) grid;
-  void (*baseDestroy)(grid_t *grid) = cdfGrid->baseVtable->destroy;
+  void (*baseDestroy)(grid_t * grid) = cdfGrid->baseVtable->destroy;
   cdfLazyGridDestroy(cdfGrid);
   baseDestroy(grid);
 }

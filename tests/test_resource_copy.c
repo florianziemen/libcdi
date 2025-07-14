@@ -164,7 +164,7 @@ defineVlist(int gridID, int zaxisID, int taxisID)
   cdiDefAttTxt(vlistID, varID2, "txt demo", 6, "banana");
   vlistDefTaxis(vlistID, taxisID);
   int vlistID2 = vlistDuplicate(vlistID);
-  return (struct idPair) { vlistID, vlistID2 };
+  return (struct idPair){ vlistID, vlistID2 };
 }
 
 static int

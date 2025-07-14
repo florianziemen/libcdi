@@ -46,8 +46,7 @@ cdiInputFile_condestruct(CdiInputFile *me, const char *path)
   cdiRefObject_construct(super());
   me->path = strdup(path);
   if (!me->path) goto destructSuper;
-  do
-    {
+  do {
       me->fileDescriptor = open(me->path, O_RDONLY);
     }
   while (me->fileDescriptor == -1 && (errno == EINTR || errno == EAGAIN));
@@ -96,10 +95,7 @@ cdiInputFile_make(const char *path)
         if (!strcmp(path, openFileList[i]->path)) result = openFileList[i];
       }
     // If no open file was found, we open one, otherwise we just retain the existing one one more time.
-    if (result)
-      {
-        cdiRefObject_retain(&result->super);
-      }
+    if (result) { cdiRefObject_retain(&result->super); }
     else
       {
         result = (CdiInputFile *) Malloc(sizeof(*result));

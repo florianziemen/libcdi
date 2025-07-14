@@ -74,10 +74,7 @@ decode_fdbitem(const char *fdbItem, KeyValueItem *keyValue)
               i += 2;
             }
         }
-      else if (i > start && i == (len - 1))
-        {
-          numKeys++;
-        }
+      else if (i > start && i == (len - 1)) { numKeys++; }
     }
 
   // keyValue->numKeys = numKeys;

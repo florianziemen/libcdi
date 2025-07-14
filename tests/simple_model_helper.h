@@ -90,8 +90,7 @@ int PPM_prime_factorization_32(uint32_t n, uint32_t **factors);
 #define cdi_omp_pragma(prg)
 #endif
 #define cdi_seed_repeatable_random(seed)                                                                                \
-  do                                                                                                                    \
-    {                                                                                                                   \
+  do {                                                                                                                  \
       int seed_ = (int) seed;                                                                                           \
       MPI_Comm comm_ = MPI_COMM_WORLD;                                                                                  \
       cdi_omp_pragma("omp parallel") if ((!PPM_initialized() || PPM_finalized())) PPM_initialize(&comm_, &seed_, NULL); \
@@ -107,8 +106,7 @@ int PPM_prime_factorization_32(uint32_t n, uint32_t **factors);
 void cdi_seed_repeatable_random(unsigned seed);
 long cdi_repeatable_random(void);
 #define cdi_repeatable_finalize() \
-  do                              \
-    {                             \
+  do {                            \
     }                             \
   while (0)
 #endif

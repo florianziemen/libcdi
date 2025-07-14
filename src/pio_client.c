@@ -50,10 +50,7 @@ cdiPioClientUpdateResHList()
   int sendRPCData = (clientRank == groupLeader);
   char *msgBuffer = NULL;
   int msgSize = 0, msgBufPos = 0;
-  if (sendRPCData)
-    {
-      msgBufPos = reshPackBufferCreate(&msgBuffer, &msgSize, &comm);
-    }
+  if (sendRPCData) { msgBufPos = reshPackBufferCreate(&msgBuffer, &msgSize, &comm); }
 #ifdef HAVE_PPM_DIST_ARRAY_H
   else
     cdiPioDistGridPackAssist();
@@ -106,10 +103,7 @@ cdiPioClientStreamOpen(const char *filename, char filemode, int filetype, stream
                             MPI_STATUS_IGNORE));
           Free(msgBuffer);
         }
-      else
-        {
-          xmpi(MPI_Recv(&fileID, 1, MPI_INT, collRank, STREAMOPEN, comm, MPI_STATUS_IGNORE));
-        }
+      else { xmpi(MPI_Recv(&fileID, 1, MPI_INT, collRank, STREAMOPEN, comm, MPI_STATUS_IGNORE)); }
       if (fileID >= 0)
         {
           streamptr->filetype = filetype;

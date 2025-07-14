@@ -278,15 +278,9 @@ cdi_create_records(stream_t *streamptr, int tsID, bool allocRecords)
         for (int isub = 0; isub < streamptr->vars[varID].subtypeSize; isub++)
           maxrecords += (unsigned) streamptr->vars[varID].recordTable[isub].nlevs;
     }
-  else
-    {
-      maxrecords = (unsigned) sourceTstep->recordSize;
-    }
+  else { maxrecords = (unsigned) sourceTstep->recordSize; }
 
-  if (tsID == 0)
-    {
-      nrecords = maxrecords;
-    }
+  if (tsID == 0) { nrecords = maxrecords; }
   else if (tsID == 1)
     {
       nrecords = 0;
@@ -301,15 +295,9 @@ cdi_create_records(stream_t *streamptr, int tsID, bool allocRecords)
               //    printf("varID nrecords %d %d %d \n", varID, nrecords, vlistInqVarTsteptype(vlistID, varID));
             }
         }
-      else
-        {
-          nrecords = maxrecords;
-        }
+      else { nrecords = maxrecords; }
     }
-  else
-    {
-      nrecords = (unsigned) streamptr->tsteps[1].nallrecs;
-    }
+  else { nrecords = (unsigned) streamptr->tsteps[1].nallrecs; }
   //  printf("tsID, nrecords %d %d\n", tsID, nrecords);
 
   recinfo_t *recinfo = (maxrecords > 0) ? (recinfo_t *) Malloc(maxrecords * sizeof(recinfo_t)) : (recinfo_t *) NULL;

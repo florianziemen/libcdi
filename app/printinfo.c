@@ -314,10 +314,7 @@ printGridInfoKernel(int gridID, int index, bool lproj)
   if (gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION || gridtype == GRID_GENERIC || gridtype == GRID_CHARXY
       || gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED)
     {
-      if (!lproj)
-        {
-          printGridNp(gridtype, gridID, gridsize, xsize, ysize);
-        }
+      if (!lproj) { printGridNp(gridtype, gridID, gridsize, xsize, ysize); }
 
       char name[CDI_MAX_NAME];
       int length = CDI_MAX_NAME;
@@ -345,10 +342,7 @@ printGridInfoKernel(int gridID, int index, bool lproj)
       fprintf(stdout, "points=%zu  nsp=%zu  T%d%s\n", gridsize, gridsize / 2, trunc,
               gridInqComplexPacking(gridID) ? "  complexPacking" : "");
     }
-  else if (gridtype == GRID_FOURIER)
-    {
-      fprintf(stdout, "points=%zu  nfc=%zu  T%d\n", gridsize, gridsize / 2, trunc);
-    }
+  else if (gridtype == GRID_FOURIER) { fprintf(stdout, "points=%zu  nfc=%zu  T%d\n", gridsize, gridsize / 2, trunc); }
   else if (gridtype == GRID_GME)
     {
       int nd, ni, ni2, ni3;
@@ -406,10 +400,7 @@ printGridInfoKernel(int gridID, int index, bool lproj)
     {
       char uuidOfHGridStr[37];
       cdiUUID2Str(uuidOfHGrid, uuidOfHGridStr);
-      if (uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36)
-        {
-          fprintf(stdout, "%33s : %s\n", "uuid", uuidOfHGridStr);
-        }
+      if (uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36) { fprintf(stdout, "%33s : %s\n", "uuid", uuidOfHGridStr); }
     }
 }
 
@@ -502,10 +493,7 @@ printZaxisReferenceInfo(int zaxisID)
 {
   int referenceNumber = 0;
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, &referenceNumber);
-  if (referenceNumber > 0)
-    {
-      fprintf(stdout, "%33s : number=%d\n", "zaxis", referenceNumber);
-    }
+  if (referenceNumber > 0) { fprintf(stdout, "%33s : number=%d\n", "zaxis", referenceNumber); }
 
   unsigned char uuidOfVGrid[CDI_UUID_SIZE];
   int length = CDI_UUID_SIZE;
@@ -514,10 +502,7 @@ printZaxisReferenceInfo(int zaxisID)
     {
       char uuidOfVGridStr[37];
       cdiUUID2Str(uuidOfVGrid, uuidOfVGridStr);
-      if (uuidOfVGridStr[0] != 0 && strlen(uuidOfVGridStr) == 36)
-        {
-          fprintf(stdout, "%33s : %s\n", "uuid", uuidOfVGridStr);
-        }
+      if (uuidOfVGridStr[0] != 0 && strlen(uuidOfVGridStr) == 36) { fprintf(stdout, "%33s : %s\n", "uuid", uuidOfVGridStr); }
     }
 }
 
@@ -557,10 +542,7 @@ printZaxisInfo(int vlistID)
       const bool zscalar = (levelsize == 1) ? zaxisInqScalar(zaxisID) : false;
       fprintf(stdout, " levels=%d%s\n", levelsize, zscalar ? "  scalar" : "");
 
-      if (zaxisInqLevels(zaxisID, NULL))
-        {
-          printZaxisLevelInfo(levelsize, zaxisID, zaxistype, zinc, dig, zname, zunits);
-        }
+      if (zaxisInqLevels(zaxisID, NULL)) { printZaxisLevelInfo(levelsize, zaxisID, zaxistype, zinc, dig, zname, zunits); }
 
       if (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL))
         {
@@ -664,10 +646,7 @@ printTimesteps(int streamID, int taxisID, int verbose)
 
       const CdiDateTime vdatetime = taxisInqVdatetime(taxisID);
 
-      if (verbose || tsID < NUM_TIMESTEP)
-        {
-          ntimeout = printDateTime(ntimeout, vdatetime);
-        }
+      if (verbose || tsID < NUM_TIMESTEP) { ntimeout = printDateTime(ntimeout, vdatetime); }
       else
         {
           if (tsID == 2 * NUM_TIMESTEP) fprintf(stdout, "\n   ");

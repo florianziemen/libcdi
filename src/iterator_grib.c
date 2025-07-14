@@ -261,10 +261,7 @@ scanToGribMarker(CdiGribIterator *me)
       if (status != CDI_NOERR && status != CDI_EEOF) return -1;
 
       const unsigned char *startPosition = positionOfGribMarker(me->gribBuffer, scanSize);
-      if (startPosition)
-        {
-          return (ssize_t) (me->fileOffset + (off_t) scannedBytes + (off_t) (startPosition - me->gribBuffer));
-        }
+      if (startPosition) { return (ssize_t) (me->fileOffset + (off_t) scannedBytes + (off_t) (startPosition - me->gribBuffer)); }
 
       // Get the offset for the next iteration if there is a next iteration.
       scanSize -= 3;                           // so that we won't miss a 'GRIB' sequence that happens to be cut off
@@ -523,9 +520,7 @@ cdiGribIterator_level(CdiIterator *super, int levelSelector, double *outValue1, 
   else
     {
       long levelType = (uint8_t) gribGetLongDefault(me->gribHandle, "indicatorOfTypeOfLevel", -1);  // 1 byte
-      if (levelType == 255)
-        {
-        }
+      if (levelType == 255) {}
       else if (isGrib1DualLevel((int) levelType))
         {
           *outValue1 = (double) (gribGetLongDefault(me->gribHandle, (levelSelector ? "bottomLevel" : "topLevel"), 0));

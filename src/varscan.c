@@ -131,10 +131,7 @@ varGetEntry(int param, int gridID, int zaxistype, int ltype1, int tsteptype, con
                 {
                   if (str_is_equal(name, vartable[varID].name)) return varID;
                 }
-              else
-                {
-                  return varID;
-                }
+              else { return varID; }
             }
         }
     }
@@ -1042,10 +1039,7 @@ resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
       int new_size = ((2 * var->opt_grib_kvpair_size) > nentries) ? (2 * var->opt_grib_kvpair_size) : nentries;
       if (CDI_Debug) Message("resize vartable opt_grib_entries array to size %d", new_size);
       opt_key_val_pair_t *tmp = (opt_key_val_pair_t *) Malloc((size_t) new_size * sizeof(opt_key_val_pair_t));
-      for (int i = 0; i < var->opt_grib_kvpair_size; i++)
-        {
-          tmp[i] = var->opt_grib_kvpair[i];
-        }
+      for (int i = 0; i < var->opt_grib_kvpair_size; i++) { tmp[i] = var->opt_grib_kvpair[i]; }
       for (int i = var->opt_grib_kvpair_size; i < new_size; i++)
         {
           tmp[i].int_val = 0;

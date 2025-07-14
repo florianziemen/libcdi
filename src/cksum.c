@@ -85,8 +85,7 @@ memcrc_r(uint32_t *state, const unsigned char *block, size_t block_len)
 
 #ifdef WORDS_BIGENDIAN
 #define SWAP_CSUM(BITWIDTH, BYTEWIDTH, NACC)                               \
-  do                                                                       \
-    {                                                                      \
+  do {                                                                     \
       register const uint##BITWIDTH##_t *b = (uint##BITWIDTH##_t *) elems; \
       for (size_t i = 0; i < num_elems; ++i)                               \
         {                                                                  \

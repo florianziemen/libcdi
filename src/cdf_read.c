@@ -51,10 +51,7 @@ cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[MAX_DIMENS
   size_t ncStepIndex = (size_t) streamptr->tsteps[tsID].ncStepIndex;
 
   int xid = CDI_UNDEFID, yid = CDI_UNDEFID;
-  if (gridInqType(gridID) == GRID_TRAJECTORY)
-    {
-      cdfReadGridTraj(streamptr, gridID);
-    }
+  if (gridInqType(gridID) == GRID_TRAJECTORY) { cdfReadGridTraj(streamptr, gridID); }
   else
     {
       xid = cdfGrid->ncIdVec[CDF_DIMID_X];
@@ -65,8 +62,7 @@ cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[MAX_DIMENS
 
   int ndims = 0;
 #define addDimension(startCoord, length) \
-  do                                     \
-    {                                    \
+  do {                                   \
       (*start)[ndims] = startCoord;      \
       (*count)[ndims] = length;          \
       ndims++;                           \
@@ -327,10 +323,7 @@ transpose2dArrayDP(int gridId, double *data)
   for (size_t yBlock = 0; yBlock < inHeight; yBlock += cacheBlockSize)
     for (size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize)
       for (size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++)
-        for (size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++)
-          {
-            out[x][y] = temp[y][x];
-          }
+        for (size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++) { out[x][y] = temp[y][x]; }
 
   free(out);
   free(temp[0]);
@@ -361,10 +354,7 @@ transpose2dArraySP(int gridId, float *data)
   for (size_t yBlock = 0; yBlock < inHeight; yBlock += cacheBlockSize)
     for (size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize)
       for (size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++)
-        for (size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++)
-          {
-            out[x][y] = temp[y][x];
-          }
+        for (size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++) { out[x][y] = temp[y][x]; }
 
   free(out);
   free(temp[0]);
@@ -480,8 +470,7 @@ cdfGetSliceSlapDescription(stream_t *streamptr, long tsID, int varID, int levelI
   int ndims = 0;
 
 #define addDimension(startIndex, extent) \
-  do                                     \
-    {                                    \
+  do {                                   \
       start[ndims] = startIndex;         \
       count[ndims] = extent;             \
       ndims++;                           \
@@ -615,10 +604,7 @@ cdfReadDataFP64(stream_t *streamptr, int varID, size_t length, size_t start[MAX_
     }
   else
     {
-      if (datatype == CDI_DATATYPE_FLT32)
-        {
-          cdfReadDataSliceSP2DP(fileID, ncvarid, length, start, count, data);
-        }
+      if (datatype == CDI_DATATYPE_FLT32) { cdfReadDataSliceSP2DP(fileID, ncvarid, length, start, count, data); }
       else
         {
           cdf_get_vara_double(fileID, ncvarid, start, count, data);
@@ -650,17 +636,11 @@ cdfReadDataFP32(stream_t *streamptr, int varID, size_t length, size_t start[MAX_
             }
           Free(cdata);
         }
-      else
-        {
-          cdf_get_vara(fileID, ncvarid, start, count, data);
-        }
+      else { cdf_get_vara(fileID, ncvarid, start, count, data); }
     }
   else
     {
-      if (datatype == CDI_DATATYPE_FLT64)
-        {
-          cdfReadDataSliceDP2SP(fileID, ncvarid, length, start, count, data);
-        }
+      if (datatype == CDI_DATATYPE_FLT64) { cdfReadDataSliceDP2SP(fileID, ncvarid, length, start, count, data); }
       else
         {
           cdf_get_vara_float(fileID, ncvarid, start, count, data);
@@ -821,7 +801,7 @@ job_args_init(stream_t *streamptr, long tsID, long recID, int memtype, void *dat
 
   if (!data) data = Malloc(gridsize * ((memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
 
-  return (JobArgsCDF) {
+  return (JobArgsCDF){
     .streamptr = streamptr,
     .varID = recInfo->varID,
     .levelID = recInfo->levelID,
@@ -887,7 +867,7 @@ cdf_get_local_step_and_recId(stream_t *streamptr, long globalRecId)
       globalRecId -= tsteps[1].nrecs;
     }
 
-  return (struct recTsId) { .recID = globalRecId, .tsID = localTsId };
+  return (struct recTsId){ .recID = globalRecId, .tsID = localTsId };
 }
 
 static void

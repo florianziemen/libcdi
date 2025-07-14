@@ -328,8 +328,7 @@ findMaxDivision(unsigned npartMax, unsigned composite_div)
   for (int numAssigned = 1; numAssigned <= numFactors; ++numAssigned)
     {
       uint_fast32_t pattern = (UINT32_C(1) << numAssigned) - 1, lastPattern = pattern << (numFactors - numAssigned);
-      do
-        {
+      do {
           divAttempt = 1;
           /* loop over all factors */
           for (uint_fast32_t i = 0; i < (uint_fast32_t) numFactors; ++i)
@@ -792,21 +791,12 @@ buildVarRedist(int headerIdx, size_t streamIdx,
           xassert(partHeader->id == PARTDESCMARKER);
           uids[clientIdx + 1] = unpackXTUID(partHeader->specific.partDesc.packedUID);
         }
-      if ((gatherXmap = cdiPioXmapCacheLookup(XmapCache, uids, partSizes)))
-        {
-          goto afterNewXmapCacheEntry;
-        }
+      if ((gatherXmap = cdiPioXmapCacheLookup(XmapCache, uids, partSizes))) { goto afterNewXmapCacheEntry; }
     }
-  else
-    {
-      tmpBuf = partSizes = Malloc(sizeof(*partSizes) * (numClients + 1));
-    }
+  else { tmpBuf = partSizes = Malloc(sizeof(*partSizes) * (numClients + 1)); }
   partSizes[0] = gatherExt.size;
   gatherXmap = buildVarXmap(partSizes, clientBuf, (size_t) headerIdx, dstList, partDescPreset, pioInterComm, collComm, varID, conf);
-  if (cacheXmaps)
-    {
-      cdiPioXmapCacheAdd(XmapCache, uids, partSizes, gatherXmap);
-    }
+  if (cacheXmaps) { cdiPioXmapCacheAdd(XmapCache, uids, partSizes, gatherXmap); }
 afterNewXmapCacheEntry:;
   struct partExtRes extRes = fillPartExts(partSizes, clientBuf, (size_t) headerIdx);
   Free(tmpBuf);
@@ -1375,8 +1365,7 @@ planPasses(const struct streamMapping *mapping, const struct cdiPioConf *conf, s
       struct passPlan *passes = NULL;
 #endif
       size_t sizeof_pass = collSize * sizeof(struct passPlan);
-      do
-        {
+      do {
           size_t taskBegin = firstRecordOfPass;
           curRecord = firstRecordOfPass - 1;
           passes = Realloc(passes, sizeof_pass * (numPasses + 1));

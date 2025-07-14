@@ -209,10 +209,7 @@ zaxisCreate_(int zaxistype, int size, int id)
 
       zaxisptr->positive = ZaxistypeEntry[zaxistype].positive;
     }
-  else
-    {
-      Error("Internal problem! zaxistype=%d out of range (min=0/max=%d)!", zaxistype, CDI_NumZaxistype - 1);
-    }
+  else { Error("Internal problem! zaxistype=%d out of range (min=0/max=%d)!", zaxistype, CDI_NumZaxistype - 1); }
 
   return zaxisID;
 }
@@ -1015,18 +1012,9 @@ cdiCheckZaxis(int zaxisID)
                   ups += (zaxisptr->vals[i] > zaxisptr->vals[i - 1]);
                   downs += (zaxisptr->vals[i] < zaxisptr->vals[i - 1]);
                 }
-              if (ups == size - 1)
-                {
-                  zaxisptr->direction = LevelUp;
-                }
-              else if (downs == size - 1)
-                {
-                  zaxisptr->direction = LevelDown;
-                }
-              else /* !zaxisptr->direction */
-                {
-                  Warning("Direction undefined for zaxisID %d", zaxisID);
-                }
+              if (ups == size - 1) { zaxisptr->direction = LevelUp; }
+              else if (downs == size - 1) { zaxisptr->direction = LevelDown; }
+              else /* !zaxisptr->direction */ { Warning("Direction undefined for zaxisID %d", zaxisID); }
             }
         }
     }

@@ -43,10 +43,7 @@ main(int argc, char *argv[])
       switch (c)
         {
         case 'd':
-          if (!strncmp(cstring, "debug", len))
-            {
-              debug = 1;
-            }
+          if (!strncmp(cstring, "debug", len)) { debug = 1; }
           break;
         case 'h':
           if (!strncmp(cstring, "help", len))

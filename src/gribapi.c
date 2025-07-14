@@ -66,10 +66,7 @@ gribHandleNew(int editionNumber)
           fclose(fp);
           if (gh == NULL) Error("grib_handle_new_from_file failed!");
         }
-      else
-        {
-          Error("Open failed on >%s<!", fname);
-        }
+      else { Error("Open failed on >%s<!", fname); }
     }
 
   if (gh == NULL)
@@ -105,9 +102,7 @@ gribContainersNew(stream_t *streamptr)
   const int editionNumber = (streamptr->filetype == CDI_FILETYPE_GRB) ? 1 : 2;
 
 #ifdef HAVE_LIBCGRIBEX
-  if (editionNumber == 1 && !CDI_gribapi_grib1)
-    {
-    }
+  if (editionNumber == 1 && !CDI_gribapi_grib1) {}
   else
 #endif
     {
@@ -157,19 +152,13 @@ gribContainersDelete(stream_t *streamptr)
       for (int varID = 0; varID < nvars; ++varID)
         {
           const int nlevs = streamptr->vars[varID].nlevs;
-          for (int levelID = 0; levelID < nlevs; ++levelID)
-            {
-              gribHandleDelete(gribContainers[varID][levelID].gribHandle);
-            }
+          for (int levelID = 0; levelID < nlevs; ++levelID) { gribHandleDelete(gribContainers[varID][levelID].gribHandle); }
           Free(gribContainers[varID]);
         }
 #else
       gribContainer_t *gribContainers = (gribContainer_t *) streamptr->gribContainers;
 
-      for (int varID = 0; varID < nvars; ++varID)
-        {
-          gribHandleDelete(gribContainers[varID].gribHandle);
-        }
+      for (int varID = 0; varID < nvars; ++varID) { gribHandleDelete(gribContainers[varID].gribHandle); }
 #endif
 
       Free(gribContainers);

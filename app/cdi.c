@@ -714,14 +714,8 @@ define_compress(const char *arg)
 {
   size_t len = strlen(arg);
 
-  if (strncmp(arg, "szip", len) == 0)
-    {
-      comptype = CDI_COMPRESS_SZIP;
-    }
-  else if (strncmp(arg, "jpeg", len) == 0)
-    {
-      comptype = CDI_COMPRESS_JPEG;
-    }
+  if (strncmp(arg, "szip", len) == 0) { comptype = CDI_COMPRESS_SZIP; }
+  else if (strncmp(arg, "jpeg", len) == 0) { comptype = CDI_COMPRESS_JPEG; }
   else if (strncmp(arg, "zip", 3) == 0)
     {
       comptype = CDI_COMPRESS_ZIP;
@@ -735,10 +729,7 @@ define_compress(const char *arg)
           int level = (len >= 6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
           snprintf(filterSpec, sizeof(filterSpec), "%d,%d", filterid, level);
         }
-      else
-        {
-          fprintf(stderr, "Filter already defined!\n");
-        }
+      else { fprintf(stderr, "Filter already defined!\n"); }
     }
   else
     fprintf(stderr, "%s compression unsupported!\n", arg);
@@ -748,14 +739,8 @@ static void
 define_filter(const char *arg)
 {
   size_t len = strlen(arg);
-  if (len > 0)
-    {
-      strncpy(filterSpec, arg, sizeof(filterSpec));
-    }
-  else
-    {
-      fprintf(stderr, "Filter spec missing!\n");
-    }
+  if (len > 0) { strncpy(filterSpec, arg, sizeof(filterSpec)); }
+  else { fprintf(stderr, "Filter spec missing!\n"); }
 }
 
 int

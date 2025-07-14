@@ -56,8 +56,7 @@ getMPICommWorldRank()
 
 void pcdiXMPI(int iret, const char *, int);
 #define xmpi(ret)                                                        \
-  do                                                                     \
-    {                                                                    \
+  do {                                                                   \
       int tmpIRet = (ret);                                               \
       if (tmpIRet != MPI_SUCCESS) pcdiXMPI(tmpIRet, __FILE__, __LINE__); \
     }                                                                    \
@@ -65,8 +64,7 @@ void pcdiXMPI(int iret, const char *, int);
 
 void pcdiXMPIStat(int, const char *, int, MPI_Status *);
 #define xmpiStat(ret, stat)                                                    \
-  do                                                                           \
-    {                                                                          \
+  do {                                                                         \
       int tmpIRet = (ret);                                                     \
       if (tmpIRet != MPI_SUCCESS) pcdiXMPIStat(ret, __FILE__, __LINE__, stat); \
     }                                                                          \
@@ -74,8 +72,7 @@ void pcdiXMPIStat(int, const char *, int, MPI_Status *);
 
 void pcdiXMPIStats(int, const char *, int, int, MPI_Status *);
 #define xmpiStats(ret, n, stats)                                                    \
-  do                                                                                \
-    {                                                                               \
+  do {                                                                              \
       int tmpIRet = (ret);                                                          \
       if (tmpIRet != MPI_SUCCESS) pcdiXMPIStats(ret, __FILE__, __LINE__, n, stats); \
     }                                                                               \
@@ -94,8 +91,7 @@ void cdiPioAssertConsistentIntVec(size_t n, const int *restrict a, MPI_Comm comm
                                   int rankRangeEnd);
 #else
 #define cdiPioAssertConsistentIntVec(n, a, comm, r, rs, re) \
-  do                                                        \
-    {                                                       \
+  do {                                                      \
     }                                                       \
   while (0)
 #endif

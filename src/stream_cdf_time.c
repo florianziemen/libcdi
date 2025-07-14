@@ -57,10 +57,7 @@ static const char *
 cdfGetTimeUnits(taxis_t *taxis)
 {
   const char *unitstr;
-  if (taxis->units && taxis->units[0])
-    {
-      unitstr = taxis->units;
-    }
+  if (taxis->units && taxis->units[0]) { unitstr = taxis->units; }
   else
     {
       if (taxis->type == TAXIS_ABSOLUTE)
@@ -263,10 +260,7 @@ cdfDefTimestep(stream_t *streamptr, int tsID, size_t valCount)
       streamptr->ncmode = 2;
     }
 
-  if (streamptr->accessmode == 0)
-    {
-      cdfEndDef(streamptr);
-    }
+  if (streamptr->accessmode == 0) { cdfEndDef(streamptr); }
 
   const size_t start[2] = { [0] = (size_t) tsID, [1] = 0 }, count[2] = { [0] = valCount, [1] = 2 * valCount };
 

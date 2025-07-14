@@ -95,10 +95,7 @@ binReadF77Block(int fileID, int byteswap)
   unsigned char f77block[4];
   size_t blocklen = 0;
 
-  if (fileRead(fileID, f77block, 4) == 4)
-    {
-      blocklen = byteswap ? get_swap_uint32(f77block) : get_uint32(f77block);
-    }
+  if (fileRead(fileID, f77block, 4) == 4) { blocklen = byteswap ? get_swap_uint32(f77block) : get_uint32(f77block); }
 
   return blocklen;
 }

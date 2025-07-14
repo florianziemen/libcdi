@@ -306,10 +306,7 @@ stream_read_record_par(int streamID, int *varID, int *levelID, double *array, si
 
           dispatch(parIO->iothread, readRecord, read_arg);
         }
-      else
-        {
-          destroy_iothread(parIO->iothread);
-        }
+      else { destroy_iothread(parIO->iothread); }
     }
 #endif
 }

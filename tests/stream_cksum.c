@@ -34,8 +34,7 @@ cksum_stream(const char *fname, size_t *table_len)
   double *buf = NULL;
   struct cksum_table *file_vars = NULL;
 
-  do
-    {
+  do {
       // Open the dataset
       int streamID = streamOpenRead(fname);
       if (streamID < 0)

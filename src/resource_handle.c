@@ -86,8 +86,7 @@ static pthread_mutex_t listMutex;
 #define LIST_LOCK() pthread_mutex_lock(&listMutex)
 #define LIST_UNLOCK() pthread_mutex_unlock(&listMutex)
 #define LIST_INIT(init0)                                                       \
-  do                                                                           \
-    {                                                                          \
+  do {                                                                         \
       pthread_once(&listInitThread, listInitialize);                           \
       pthread_mutex_lock(&listMutex);                                          \
       if ((init0) && (!resHList || !resHList[0].resources)) reshListCreate(0); \
@@ -102,8 +101,7 @@ static int listInit = 0;
 #define LIST_LOCK()
 #define LIST_UNLOCK()
 #define LIST_INIT(init0)                                                           \
-  do                                                                               \
-    {                                                                              \
+  do {                                                                             \
       if (!listInit)                                                               \
         {                                                                          \
           listInitialize();                                                        \
@@ -643,10 +641,7 @@ getPackBufferSize(void *context)
   for (int i = 0; i < resHList[nsp].size; i++)
     if (r[i].status & RESH_SYNC_BIT)
       {
-        if (r[i].status == RESH_DESYNC_DELETED)
-          {
-            packBufferSize += resHDeleteNInt * intpacksize;
-          }
+        if (r[i].status == RESH_DESYNC_DELETED) { packBufferSize += resHDeleteNInt * intpacksize; }
         else if (r[i].status == RESH_DESYNC_IN_USE)
           {
             xassert(r[i].res.v.ops);

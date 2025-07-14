@@ -113,8 +113,7 @@ namespaceInitialize(void)
 #else
 
 #define NAMESPACE_INIT() \
-  do                     \
-    {                    \
+  do {                   \
     }                    \
   while (0)
 #define NAMESPACE_LOCK()

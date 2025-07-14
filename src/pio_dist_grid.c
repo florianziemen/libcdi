@@ -410,8 +410,7 @@ static pthread_once_t cdiPioDistGridInitOnceState = PTHREAD_ONCE_INIT;
 #else
 static bool cdiPioDistGridInitOnceState = false;
 #define CDI_PIO_DIST_GRID_INIT_ONCE()         \
-  do                                          \
-    {                                         \
+  do {                                        \
       if (!cdiPioDistGridInitOnceState)       \
         {                                     \
           cdiPioDistGridInitOnce();           \
@@ -699,10 +698,7 @@ cdiPioDistGridDestroy(grid_t *gridptr)
           Xt_xmap xmap = extraData->defXmaps[i];
           xt_xmap_delete(xmap);
         }
-      if (extraData->distList[i])
-        {
-          xt_idxlist_delete(extraData->distList[i]);
-        }
+      if (extraData->distList[i]) { xt_idxlist_delete(extraData->distList[i]); }
     }
   for (size_t i = 0; i < cdiPioGDsaNum; ++i)
     if (extraData->defRedists[i])

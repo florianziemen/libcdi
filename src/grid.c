@@ -95,10 +95,7 @@ cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int attl
     {
       cdiInqAttFlt(gridID, CDI_GLOBAL, attname, attlen, attflt);
     }
-  else
-    {
-      status = false;
-    }
+  else { status = false; }
 
   return status;
 }
@@ -347,10 +344,7 @@ gridGenXvals(size_t xsize, double xfirst, double xlast, double xinc, double *res
           while (xfirst >= xlast) xlast += 360;
           xinc = (xlast - xfirst) / (double) xsize;
         }
-      else
-        {
-          xinc = (xlast - xfirst) / (double) (xsize - 1);
-        }
+      else { xinc = (xlast - xfirst) / (double) (xsize - 1); }
     }
 
   for (size_t i = 0; i < xsize; ++i) xvals[i] = xfirst + (double) i * xinc;
@@ -458,10 +452,7 @@ gridGenYvals(int gridtype, size_t ysize, double yfirst, double ylast, double yin
 {
   if (gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED)
     {
-      if (ysize > 2)
-        {
-          gridGenYvalsGaussian(ysize, yfirst, ylast, yvals);
-        }
+      if (ysize > 2) { gridGenYvalsGaussian(ysize, yfirst, ylast, yvals); }
       else
         {
           yvals[0] = yfirst;
@@ -469,10 +460,7 @@ gridGenYvals(int gridtype, size_t ysize, double yfirst, double ylast, double yin
         }
     }
   // else if (gridtype == GRID_LONLAT || gridtype == GRID_GENERIC)
-  else
-    {
-      gridGenYvalsRegular(ysize, yfirst, ylast, yinc, yvals);
-    }
+  else { gridGenYvalsRegular(ysize, yfirst, ylast, yinc, yvals); }
   /*
     else
     Error("unable to calculate values for %s grid!", gridNamePtr(gridtype));
@@ -2072,7 +2060,7 @@ grid_check_cyclic(grid_t *gridptr)
   };
   size_t xsize = gridptr->x.size, ysize = gridptr->y.size;
   const double *xvals = gridptr->vtable->inqXValsPtr(gridptr), *yvals = gridptr->vtable->inqYValsPtr(gridptr),
-               (*xbounds)[numVertices] = (const double (*)[numVertices]) gridptr->vtable->inqXBoundsPtr(gridptr);
+               (*xbounds)[numVertices] = (const double(*)[numVertices]) gridptr->vtable->inqXBoundsPtr(gridptr);
 
   if (gridptr->type == GRID_GAUSSIAN || gridptr->type == GRID_LONLAT)
     {
@@ -2217,7 +2205,7 @@ compareXYvals2(grid_t *gridRef, grid_t *gridTest)
                 || ((gridTest->x.bounds == NULL) ^ (gridRef->x.bounds == NULL))
                 || ((gridTest->y.bounds == NULL) ^ (gridRef->y.bounds == NULL));
 
-  typedef double (*inqVal)(grid_t *grid, SizeType index);
+  typedef double (*inqVal)(grid_t * grid, SizeType index);
   inqVal inqXValRef = gridRef->vtable->inqXVal, inqYValRef = gridRef->vtable->inqYVal, inqXValTest = gridTest->vtable->inqXVal,
          inqYValTest = gridTest->vtable->inqYVal;
 
@@ -2324,9 +2312,7 @@ compare_generic(const grid_t *grid, const grid_t *gridRef)
       if (grid->x.flag == 1 && grid->y.flag == 1 && grid->x.vals && grid->y.vals)
         differ = gridRef->vtable->compareXYFull((grid_t *) gridRef, (grid_t *) grid);
     }
-  else if ((grid->y.size == 0 || grid->y.size == 1) && grid->x.size == gridRef->x.size * gridRef->y.size)
-    {
-    }
+  else if ((grid->y.size == 0 || grid->y.size == 1) && grid->x.size == gridRef->x.size * gridRef->y.size) {}
   else
     differ = true;
 
@@ -2441,30 +2427,12 @@ gridCompare(int gridID, const grid_t *grid, bool compareCoord)
       if (grid->size == gridRef->size)
         {
           differ = false;
-          if (grid->type == GRID_LONLAT)
-            {
-              differ = compare_lonlat(gridID, grid, gridRef);
-            }
-          else if (grid->type == GRID_PROJECTION)
-            {
-              differ = compare_projection(gridID, grid, gridRef);
-            }
-          else if (grid->type == GRID_GENERIC)
-            {
-              differ = compare_generic(grid, gridRef);
-            }
-          else if (grid->type == GRID_GAUSSIAN)
-            {
-              differ = compare_gaussian(gridID, grid, gridRef);
-            }
-          else if (grid->type == GRID_CURVILINEAR)
-            {
-              differ = compare_curvilinear(grid, gridRef);
-            }
-          else if (grid->type == GRID_UNSTRUCTURED)
-            {
-              differ = compare_unstructured(grid, gridRef, compareCoord);
-            }
+          if (grid->type == GRID_LONLAT) { differ = compare_lonlat(gridID, grid, gridRef); }
+          else if (grid->type == GRID_PROJECTION) { differ = compare_projection(gridID, grid, gridRef); }
+          else if (grid->type == GRID_GENERIC) { differ = compare_generic(grid, gridRef); }
+          else if (grid->type == GRID_GAUSSIAN) { differ = compare_gaussian(gridID, grid, gridRef); }
+          else if (grid->type == GRID_CURVILINEAR) { differ = compare_curvilinear(grid, gridRef); }
+          else if (grid->type == GRID_UNSTRUCTURED) { differ = compare_unstructured(grid, gridRef, compareCoord); }
         }
     }
 
@@ -3700,10 +3668,7 @@ gridDefParamsCommon(int gridID, struct CDI_GridProjParams gpp)
           cdiDefAttFlt(gridID, CDI_GLOBAL, "semi_major_axis", CDI_DATATYPE_FLT64, 1, &gpp.a);
           cdiDefAttFlt(gridID, CDI_GLOBAL, "semi_minor_axis", CDI_DATATYPE_FLT64, 1, &gpp.b);
         }
-      else
-        {
-          cdiDefAttFlt(gridID, CDI_GLOBAL, "earth_radius", CDI_DATATYPE_FLT64, 1, &gpp.a);
-        }
+      else { cdiDefAttFlt(gridID, CDI_GLOBAL, "earth_radius", CDI_DATATYPE_FLT64, 1, &gpp.a); }
     }
   if (IS_NOT_EQUAL(gpp.rf, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "inverse_flattening", CDI_DATATYPE_FLT64, 1, &gpp.rf);
   if (IS_NOT_EQUAL(gpp.x_0, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_easting", CDI_DATATYPE_FLT64, 1, &gpp.x_0);
@@ -4877,7 +4842,7 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
         }
     }
 
-  return (struct addIfNewRes) { .Id = gridID, .isNew = (!gridIsDefined && !gridIsDefinedGlobal) };
+  return (struct addIfNewRes){ .Id = gridID, .isNew = (!gridIsDefined && !gridIsDefinedGlobal) };
 }
 
 const struct gridVirtTable cdiGridVtable = {

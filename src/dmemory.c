@@ -251,10 +251,7 @@ set_filename(const char *file, char *memEntyFilename)
       (void) memcpy(memEntyFilename, filename, len);
       memEntyFilename[len] = '\0';
     }
-  else
-    {
-      (void) strcpy(memEntyFilename, "unknown");
-    }
+  else { (void) strcpy(memEntyFilename, "unknown"); }
 }
 
 static void
@@ -268,10 +265,7 @@ set_functionname(const char *functionname, char *memEntyFunctionname)
       (void) memcpy(memEntyFunctionname, functionname, len);
       memEntyFunctionname[len] = '\0';
     }
-  else
-    {
-      (void) strcpy(memEntyFunctionname, "unknown");
-    }
+  else { (void) strcpy(memEntyFunctionname, "unknown"); }
 }
 
 static int

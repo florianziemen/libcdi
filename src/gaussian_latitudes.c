@@ -111,10 +111,7 @@ gauaw(size_t kn, double *restrict pl, double *restrict pw)
   for (size_t jn = 1; jn <= kn; ++jn)
     {
       double zfnn = zfn[0];
-      for (size_t jgl = 1; jgl <= jn; ++jgl)
-        {
-          zfnn *= sqrt(1.0 - 0.25 / ((double) (jgl * jgl)));
-        }
+      for (size_t jgl = 1; jgl <= jn; ++jgl) { zfnn *= sqrt(1.0 - 0.25 / ((double) (jgl * jgl))); }
 
       zfn[jn * (kn + 1) + jn] = zfnn;
 

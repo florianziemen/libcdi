@@ -948,10 +948,7 @@ vlistMerge(int vlistID2, int vlistID1)
 
       Free(lvar);
     }
-  else
-    {
-      vlistCat(vlistID2, vlistID1);
-    }
+  else { vlistCat(vlistID2, vlistID1); }
 }
 
 /*
@@ -1593,10 +1590,7 @@ vlistPackP(void *vlistptr, void *buf, int size, int *position, void *context)
   serializePack(&p->ntsteps, 1, CDI_DATATYPE_LONG, buf, size, position, context);
 
   cdiAttsPack(p, CDI_GLOBAL, buf, size, position, context);
-  for (int varID = 0; varID < p->nvars; varID++)
-    {
-      vlistVarPack(p, varID, (char *) buf, size, position, context);
-    }
+  for (int varID = 0; varID < p->nvars; varID++) { vlistVarPack(p, varID, (char *) buf, size, position, context); }
 }
 
 int
@@ -1644,10 +1638,7 @@ resize_opt_grib_entries(var_t *var, int nentries)
 
   int new_size = (2 * var->opt_grib_kvpair_size) > nentries ? (2 * var->opt_grib_kvpair_size) : nentries;
   opt_key_val_pair_t *tmp = (opt_key_val_pair_t *) Malloc((size_t) new_size * sizeof(opt_key_val_pair_t));
-  for (int i = 0; i < var->opt_grib_kvpair_size; ++i)
-    {
-      tmp[i] = var->opt_grib_kvpair[i];
-    }
+  for (int i = 0; i < var->opt_grib_kvpair_size; ++i) { tmp[i] = var->opt_grib_kvpair[i]; }
   for (int i = var->opt_grib_kvpair_size; i < new_size; ++i)
     {
       tmp[i].int_val = 0;

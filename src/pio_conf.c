@@ -255,10 +255,7 @@ void
 cdiPioConfSetCallBackActions(int confResH, int trigger, void (*callback)(void))
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
-  if (trigger >= 0 && trigger < CDIPIO_NUM_CALLBACKS)
-    {
-      conf->callbacks[trigger] = callback;
-    }
+  if (trigger >= 0 && trigger < CDIPIO_NUM_CALLBACKS) { conf->callbacks[trigger] = callback; }
   else
     Error("invalid trigger callback query: %d", trigger);
 }
@@ -267,10 +264,7 @@ void (*cdiPioConfGetCallBackActions(int confResH, int trigger))(void)
 {
   void (*callback)(void) = (void (*)(void)) 0;
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
-  if (trigger >= 0 && trigger < CDIPIO_NUM_CALLBACKS)
-    {
-      callback = conf->callbacks[trigger];
-    }
+  if (trigger >= 0 && trigger < CDIPIO_NUM_CALLBACKS) { callback = conf->callbacks[trigger]; }
   else
     Error("invalid trigger callback query: %d", trigger);
   return callback;

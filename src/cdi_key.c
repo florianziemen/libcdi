@@ -141,14 +141,8 @@ cdi_delete_key(cdi_key_t *keyp)
           if (keyp->v.s) Free(keyp->v.s);
           keyp->v.s = NULL;
         }
-      else if (keyp->type == KeyFloat)
-        {
-          keyp->v.d = 0.0;
-        }
-      else if (keyp->type == KeyInt)
-        {
-          keyp->v.i = 0;
-        }
+      else if (keyp->type == KeyFloat) { keyp->v.d = 0.0; }
+      else if (keyp->type == KeyInt) { keyp->v.i = 0; }
     }
 }
 
@@ -156,10 +150,7 @@ void
 cdiDeleteVarKeys(cdi_keys_t *keysp)
 {
   uint16_t nelems = keysp ? keysp->nelems : 0;
-  for (uint16_t keyid = 0; keyid < nelems; keyid++)
-    {
-      cdi_delete_key(&(keysp->value[keyid]));
-    }
+  for (uint16_t keyid = 0; keyid < nelems; keyid++) { cdi_delete_key(&(keysp->value[keyid])); }
 
   keysp->nelems = 0;
 }
@@ -185,14 +176,8 @@ cdiPrintVarKeys(cdi_keys_t *keysp)
         {
           fprintf(stdout, "%d key %d length %d value %s\n", keyid + 1, keyp->key, keyp->length, keyp->v.s);
         }
-      else if (keyp->type == KeyFloat)
-        {
-          fprintf(stdout, "%d key %d value %g\n", keyid + 1, keyp->key, keyp->v.d);
-        }
-      else if (keyp->type == KeyInt)
-        {
-          fprintf(stdout, "%d key %d value %d\n", keyid + 1, keyp->key, keyp->v.i);
-        }
+      else if (keyp->type == KeyFloat) { fprintf(stdout, "%d key %d value %g\n", keyid + 1, keyp->key, keyp->v.d); }
+      else if (keyp->type == KeyInt) { fprintf(stdout, "%d key %d value %d\n", keyid + 1, keyp->key, keyp->v.i); }
     }
 }
 

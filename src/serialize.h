@@ -47,14 +47,8 @@ serializeKeysGetPackSize(const cdi_keys_t *keysp, void *context)
           int length = keyp->length;
           packBuffSize += serializeGetSize(1, CDI_DATATYPE_INT, context) + serializeGetSize(length, CDI_DATATYPE_TXT, context);
         }
-      else if (type == KeyInt)
-        {
-          packBuffSize += serializeGetSize(1, CDI_DATATYPE_INT, context);
-        }
-      else if (type == KeyFloat)
-        {
-          packBuffSize += serializeGetSize(1, CDI_DATATYPE_FLT64, context);
-        }
+      else if (type == KeyInt) { packBuffSize += serializeGetSize(1, CDI_DATATYPE_INT, context); }
+      else if (type == KeyFloat) { packBuffSize += serializeGetSize(1, CDI_DATATYPE_FLT64, context); }
     }
   packBuffSize += serializeGetSize(1, CDI_DATATYPE_UINT32, context);
   return packBuffSize;
@@ -81,14 +75,8 @@ serializeKeysPack(const cdi_keys_t *keysp, void *buf, int buf_size, int *positio
           serializePack(keyp->v.s, length, CDI_DATATYPE_TXT, buf, buf_size, position, context);
           d ^= cdiCheckSum(CDI_DATATYPE_TXT, length, keyp->v.s);
         }
-      else if (type == KeyInt)
-        {
-          serializePack(&keyp->v.i, 1, CDI_DATATYPE_INT, buf, buf_size, position, context);
-        }
-      else if (type == KeyFloat)
-        {
-          serializePack(&keyp->v.d, 1, CDI_DATATYPE_FLT64, buf, buf_size, position, context);
-        }
+      else if (type == KeyInt) { serializePack(&keyp->v.i, 1, CDI_DATATYPE_INT, buf, buf_size, position, context); }
+      else if (type == KeyFloat) { serializePack(&keyp->v.d, 1, CDI_DATATYPE_FLT64, buf, buf_size, position, context); }
     }
 
   serializePack(&d, 1, CDI_DATATYPE_UINT32, buf, buf_size, position, context);

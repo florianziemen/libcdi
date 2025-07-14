@@ -144,10 +144,7 @@ cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nb
   if (CDI_Debug)
     {
       printf("{");
-      for (int k = 0; k < keyValue.numKeys; k++)
-        {
-          printf("%s%s=%s", (k > 0) ? "," : "", keyValue.keys[k], keyValue.values[k]);
-        }
+      for (int k = 0; k < keyValue.numKeys; k++) { printf("%s%s=%s", (k > 0) ? "," : "", keyValue.keys[k], keyValue.values[k]); }
       printf(",date=%s,time=%s,domain=g}", fdbKeys->date, fdbKeys->time);
       printf("{type=an,levtype=%s}{step=0,", fdbKeys->levtype);
       if (fdbKeys->levelist[0]) printf("levelist=%s,", fdbKeys->levelist);
@@ -156,10 +153,7 @@ cdi_fdb_store(void *fdbHandle, const char *filename, void *gribbuffer, size_t nb
 
   fdb_key_t *key;
   check_fdb_error(fdb_new_key(&key));
-  for (int k = 0; k < keyValue.numKeys; k++)
-    {
-      check_fdb_error(fdb_key_add(key, keyValue.keys[k], keyValue.values[k]));
-    }
+  for (int k = 0; k < keyValue.numKeys; k++) { check_fdb_error(fdb_key_add(key, keyValue.keys[k], keyValue.values[k])); }
   check_fdb_error(fdb_key_add(key, "domain", "g"));
   check_fdb_error(fdb_key_add(key, "date", fdbKeys->date));
   check_fdb_error(fdb_key_add(key, "time", fdbKeys->time));
@@ -443,7 +437,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     case CDI_PROTOCOL_FILE:
       {
         size_t (*myFileWrite)(int fileID, const void *restrict buffer, size_t len)
-            = (size_t (*)(int, const void *restrict, size_t)) namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
+            = (size_t(*)(int, const void *restrict, size_t)) namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
 
         size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes);
         if (nwrite != nbytes) SysError("Failed to write GRIB slice!");

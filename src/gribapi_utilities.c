@@ -16,8 +16,7 @@
 #include <time.h>
 
 #define FAIL_ON_GRIB_ERROR(function, gribHandle, key, ...)                                                                 \
-  do                                                                                                                       \
-    {                                                                                                                      \
+  do {                                                                                                                     \
       int errorCode = (int) function(gribHandle, key, __VA_ARGS__);                                                        \
       if (errorCode)                                                                                                       \
         {                                                                                                                  \
@@ -196,10 +195,7 @@ resetTz(char *savedTz)
       setenv("TZ", savedTz, 1);
       Free(savedTz);
     }
-  else
-    {
-      unsetenv("TZ");
-    }
+  else { unsetenv("TZ"); }
 }
 
 // This function uses the system functions to normalize the date representation according to the gregorian calendar.
@@ -675,9 +671,7 @@ gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, long editionNumber,
   {
     if (grid->y.size > 1)
       {
-        if (editionNumber <= 1)
-          {
-          }
+        if (editionNumber <= 1) {}
       }
     grid->y.flag = 2;
   }
@@ -756,9 +750,7 @@ gribapiGetGridRegular(grib_handle *gh, grid_t *grid, long editionNumber, int gri
   {
     if (grid->y.size > 1)
       {
-        if (editionNumber <= 1)
-          {
-          }
+        if (editionNumber <= 1) {}
       }
     grid->y.flag = 2;
   }
@@ -905,42 +897,15 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
     {
       gribapiGetGridRegular(gh, grid, editionNumber, gridtype, numberOfPoints);
     }
-  else if (gridtype == GRID_GAUSSIAN_REDUCED)
-    {
-      gribapiGetGridGaussianReduced(gh, grid, editionNumber, numberOfPoints);
-    }
-  else if (projtype == CDI_PROJ_LCC)
-    {
-      gribapiGetGridProj(gh, grid, numberOfPoints);
-    }
-  else if (projtype == CDI_PROJ_STERE)
-    {
-      gribapiGetGridProj(gh, grid, numberOfPoints);
-    }
-  else if (projtype == CDI_PROJ_HEALPIX)
-    {
-      gribapiGetGridHealpix(gh, grid, numberOfPoints);
-    }
-  else if (gridtype == GRID_SPECTRAL)
-    {
-      gribapiGetGridSpectral(gh, grid, datasize);
-    }
-  else if (gridtype == GRID_GME)
-    {
-      gribapiGetGridGME(gh, grid, numberOfPoints);
-    }
-  else if (gridtype == GRID_UNSTRUCTURED)
-    {
-      gribapiGetGridUnstructured(gh, grid, numberOfPoints);
-    }
-  else if (gridtype == GRID_GENERIC)
-    {
-      gribapiGetGridGeneric(gh, grid, numberOfPoints);
-    }
-  else
-    {
-      Error("Unsupported grid type: %s", gridNamePtr(gridtype));
-    }
+  else if (gridtype == GRID_GAUSSIAN_REDUCED) { gribapiGetGridGaussianReduced(gh, grid, editionNumber, numberOfPoints); }
+  else if (projtype == CDI_PROJ_LCC) { gribapiGetGridProj(gh, grid, numberOfPoints); }
+  else if (projtype == CDI_PROJ_STERE) { gribapiGetGridProj(gh, grid, numberOfPoints); }
+  else if (projtype == CDI_PROJ_HEALPIX) { gribapiGetGridHealpix(gh, grid, numberOfPoints); }
+  else if (gridtype == GRID_SPECTRAL) { gribapiGetGridSpectral(gh, grid, datasize); }
+  else if (gridtype == GRID_GME) { gribapiGetGridGME(gh, grid, numberOfPoints); }
+  else if (gridtype == GRID_UNSTRUCTURED) { gribapiGetGridUnstructured(gh, grid, numberOfPoints); }
+  else if (gridtype == GRID_GENERIC) { gribapiGetGridGeneric(gh, grid, numberOfPoints); }
+  else { Error("Unsupported grid type: %s", gridNamePtr(gridtype)); }
 
   if (gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || projtype == CDI_PROJ_RLL || projtype == CDI_PROJ_LCC
       || projtype == CDI_PROJ_HEALPIX)

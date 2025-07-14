@@ -206,10 +206,7 @@ iegDefGrid(int *gdb, int gridID)
           gridChangeType(gridID, gridtype);
         }
     }
-  else if (gridtype == GRID_CURVILINEAR)
-    {
-      gridtype = GRID_LONLAT;
-    }
+  else if (gridtype == GRID_CURVILINEAR) { gridtype = GRID_LONLAT; }
 
   bool lrotated = (projtype == CDI_PROJ_RLL);
 
@@ -285,15 +282,9 @@ iegDefGrid(int *gdb, int gridID)
           IEG_G_LonSP(gdb) = (int) lround((xpole + 180) * resfac);
           IEG_G_Size(gdb) = 42;
         }
-      else
-        {
-          IEG_G_Size(gdb) = 32;
-        }
+      else { IEG_G_Size(gdb) = 32; }
     }
-  else
-    {
-      Error("Unsupported grid type: %s", gridNamePtr(gridtype));
-    }
+  else { Error("Unsupported grid type: %s", gridNamePtr(gridtype)); }
 
   IEG_G_ScanFlag(gdb) = 64;
 }
@@ -830,10 +821,7 @@ iegScanTimestep2(stream_t *streamptr)
         {
           if (param == records[recID].param && rlevel == records[recID].ilevel)
             {
-              if (recinfo[recID].used)
-                {
-                  nextstep = true;
-                }
+              if (recinfo[recID].used) { nextstep = true; }
               else
                 {
                   recinfo[recID].used = true;

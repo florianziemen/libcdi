@@ -328,8 +328,7 @@ fwFileWriteAtReblock(int fileID, const void *buffer, size_t len)
     if (of->collWriteSize[collRank])
       {
         long remaining = of->collWriteSize[collRank];
-        do
-          {
+        do {
             MPI_Offset collBlockSize = (MPI_Offset) blockSize * (MPI_Offset) sizePio;
             int pass = (int) (fWOfs / collBlockSize / numBlockBuf);
             int inBlockPos = (int) (fWOfs % (MPI_Offset) blockSize);

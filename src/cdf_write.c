@@ -609,10 +609,7 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
 
   if (nczvarID != CDI_UNDEFID) cdfAppendCoordinates(fileID, nczvarID, coordinates);
 
-  if (gridtype == GRID_TRAJECTORY)
-    {
-      cdf_put_att_text(fileID, ncvarID, "coordinates", 9, "tlon tlat");
-    }
+  if (gridtype == GRID_TRAJECTORY) { cdf_put_att_text(fileID, ncvarID, "coordinates", 9, "tlon tlat"); }
   else if (gridtype == GRID_LONLAT && xid == CDI_UNDEFID && yid == CDI_UNDEFID && gridsize == 1)
     {
       int ncxvarID = cdfGrid->ncIdVec[CDF_VARID_X];
@@ -890,8 +887,7 @@ cdfCheckVarname(int fileID, char name[CDI_MAX_NAME])
       char *varname2 = varname + len;
       unsigned iz = 0;
 
-      do
-        {
+      do {
           if (iz) snprintf(varname2, sizeof(varname) - len, "_%u", iz + 1);
 
           if (nc_inq_varid(fileID, varname, &ncvarID) != NC_NOERR) break;
@@ -928,8 +924,7 @@ cdfGenVarname(int fileID, char name[CDI_MAX_NAME], int pnum, int pcat, int *pdis
   int ncvarID;
   unsigned iz = 0;
 
-  do
-    {
+  do {
       if (iz) snprintf(varname2, sizeof(varname) - len, "_%u", iz + 1);
 
       if (nc_inq_varid(fileID, varname, &ncvarID) != NC_NOERR) break;
@@ -1068,10 +1063,7 @@ cdfDefVar(stream_t *streamptr, int varID)
         {
           cdfDefVarFilter(fileID, fileType, ncvarID, filterSpec);
         }
-      else if (streamptr->filterSpec)
-        {
-          cdfDefVarFilter(fileID, fileType, ncvarID, streamptr->filterSpec);
-        }
+      else if (streamptr->filterSpec) { cdfDefVarFilter(fileID, fileType, ncvarID, streamptr->filterSpec); }
     }
 
   if (*stdname) cdf_put_att_text(fileID, ncvarID, "standard_name", strlen(stdname), stdname);
@@ -1401,10 +1393,7 @@ cdfGetXYZid(stream_t *streamptr, int gridID, int zaxisID, int *xid, int *yid, in
   *yid = CDI_UNDEFID;
 
   int gridtype = gridInqType(gridID);
-  if (gridtype == GRID_TRAJECTORY)
-    {
-      cdfWriteGridTraj(streamptr, gridID);
-    }
+  if (gridtype == GRID_TRAJECTORY) { cdfWriteGridTraj(streamptr, gridID); }
   else
     {
       int gridindex = nc_grid_index(streamptr, gridID);

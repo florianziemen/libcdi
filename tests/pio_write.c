@@ -259,10 +259,7 @@ parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRol
     }
   else if (!strncmp(str, prefixOptionStr, sizeof(prefixOptionStr) - 1))
     {
-      if (str[sizeof(prefixOptionStr) - 1] == '=')
-        {
-          setup->prefix = str + sizeof(prefixOptionStr);
-        }
+      if (str[sizeof(prefixOptionStr) - 1] == '=') { setup->prefix = str + sizeof(prefixOptionStr); }
       else
         invalidOptionDie("long option %s needs argument\n", prefixOptionStr);
     }

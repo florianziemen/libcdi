@@ -445,10 +445,7 @@ vlistInqVarName(int vlistID, int varID, char *name)
           tableInqEntry(tableID, code, -1, name, NULL, NULL);
           if (!name[0]) snprintf(name, 8, "var%d", code);
         }
-      else
-        {
-          snprintf(name, CDI_MAX_NAME, "param%d.%d.%d", pnum, pcat, pdis);
-        }
+      else { snprintf(name, CDI_MAX_NAME, "param%d.%d.%d", pnum, pcat, pdis); }
     }
 }
 

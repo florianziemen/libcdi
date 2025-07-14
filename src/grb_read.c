@@ -98,10 +98,7 @@ grib1_unzip_record(void *gribbuffer, size_t *gribsize)
 
           if (ogribsize <= 0) Error("Decompression problem!");
         }
-      else
-        {
-          Error("Decompression for %d not implemented!", izip);
-        }
+      else { Error("Decompression for %d not implemented!", izip); }
     }
 
   *gribsize = ogribsize;
@@ -168,7 +165,7 @@ grb_read_raw_data(stream_t *streamptr, int tsID, int recID, int memType, void *g
       if (!resetFilePos) streamptr->numvals += (SizeType) gridsize;
     }
 
-  return (JobArgsGRB) {
+  return (JobArgsGRB){
     .recID = recID,
     .tsID = tsID,
     .outZip = &streamptr->tsteps[tsID].records[recID].zip,

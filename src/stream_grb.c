@@ -357,10 +357,7 @@ fdbInqTimestep(stream_t *streamptr, int tsID)
   if (CDI_Debug) Message("tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
 
   int nrecs;
-  if (tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID)
-    {
-      nrecs = 0;
-    }
+  if (tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID) { nrecs = 0; }
   else
     {
       streamptr->curTsID = tsID;
@@ -389,10 +386,7 @@ grbInqTimestep(stream_t *streamptr, int tsID)
     }
 
   int nrecs;
-  if (tsID >= streamptr->ntsteps && streamptr->ntsteps != -1)
-    {
-      nrecs = 0;
-    }
+  if (tsID >= streamptr->ntsteps && streamptr->ntsteps != -1) { nrecs = 0; }
   else
     {
       streamptr->curTsID = tsID;
@@ -418,14 +412,8 @@ grbGetGridtype(int *gridID, SizeType gridsize, bool *gridIsRotated, bool *gridIs
         {
           gridtype = GRID_GAUSSIAN;
         }
-      else if (gridsize == 1)
-        {
-          gridtype = GRID_LONLAT;
-        }
-      else if (gridInqXvals(*gridID, NULL) && gridInqYvals(*gridID, NULL))
-        {
-          gridtype = GRID_LONLAT;
-        }
+      else if (gridsize == 1) { gridtype = GRID_LONLAT; }
+      else if (gridInqXvals(*gridID, NULL) && gridInqYvals(*gridID, NULL)) { gridtype = GRID_LONLAT; }
     }
   else if (gridtype == GRID_CURVILINEAR)
     {
@@ -456,18 +444,9 @@ grbGetGridtype(int *gridID, SizeType gridsize, bool *gridIsRotated, bool *gridIs
           gridtype = GRID_LONLAT;
           *gridIsRotated = true;
         }
-      else if (projtype == CDI_PROJ_LCC)
-        {
-          gridtype = CDI_PROJ_LCC;
-        }
-      else if (projtype == CDI_PROJ_STERE)
-        {
-          gridtype = CDI_PROJ_STERE;
-        }
-      else if (projtype == CDI_PROJ_HEALPIX)
-        {
-          gridtype = CDI_PROJ_HEALPIX;
-        }
+      else if (projtype == CDI_PROJ_LCC) { gridtype = CDI_PROJ_LCC; }
+      else if (projtype == CDI_PROJ_STERE) { gridtype = CDI_PROJ_STERE; }
+      else if (projtype == CDI_PROJ_HEALPIX) { gridtype = CDI_PROJ_HEALPIX; }
     }
 
   return gridtype;

@@ -138,14 +138,8 @@ printAtts(int vlistID)
               break;
             }
 
-          if (rc == CDI_NOERR)
-            {
-              putchar('\n');
-            }
-          else
-            {
-              puts("error retrieving value");
-            }
+          if (rc == CDI_NOERR) { putchar('\n'); }
+          else { puts("error retrieving value"); }
         }
     }
   free(buf);

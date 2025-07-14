@@ -257,10 +257,7 @@ streamDefNumWorker(int streamID, int numWorker)
               if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", cdfInfo->chunkSizeDimT, cdfInfo->chunkSizeDimZ);
             }
 #endif
-          else
-            {
-              numWorker = 0;
-            }
+          else { numWorker = 0; }
 
           streamptr->numWorker = numWorker;
           if (CDI_Debug || CDI_Test) Message("Number of asynchronous worker: %d", numWorker);
@@ -801,7 +798,7 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
   if (str_is_equal(filemode, "r")) cdiVlistMakeImmutable(streamptr->vlistID);
 
   {
-    void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
+    void (*streamCloseDelegate)(stream_t * streamptr, int recordBufIsToBeDeleted)
         = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
 
     streamCloseDelegate(streamptr, 0);
@@ -1347,7 +1344,7 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
 static void
 streamDestroy(stream_t *streamptr)
 {
-  void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
+  void (*streamCloseDelegate)(stream_t * streamptr, int recordBufIsToBeDeleted)
       = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
 
   streamDestroyViaDelegate(streamptr, streamCloseDelegate);
@@ -1444,7 +1441,7 @@ streamSync(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  void (*myStreamSync_)(stream_t *streamptr) = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_STREAM_SYNC).func;
+  void (*myStreamSync_)(stream_t * streamptr) = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_STREAM_SYNC).func;
   myStreamSync_(streamptr);
 }
 
@@ -1479,7 +1476,7 @@ cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
       /* usually points to cdfDefTimestep in serial mode but
        * to cdiPioCdfDefTimestep on servers and to a null-op on
        * clients in client/server mode */
-      void (*myCdfDefTimestep)(stream_t *streamptr, int tsID, size_t)
+      void (*myCdfDefTimestep)(stream_t * streamptr, int tsID, size_t)
           = (void (*)(stream_t *, int, size_t)) namespaceSwitchGet(NSSWITCH_CDF_DEF_TIMESTEP).func;
       myCdfDefTimestep(streamptr, tsID, 1);
     }
@@ -1517,7 +1514,7 @@ streamDefTimestep(int streamID, int tsID)
 
   if (streamptr->lockIO) CDI_IO_LOCK();
 
-  int (*myStreamDefTimestep_)(stream_t *streamptr, int tsID)
+  int (*myStreamDefTimestep_)(stream_t * streamptr, int tsID)
       = (int (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_DEF_TIMESTEP_).func;
   int status = myStreamDefTimestep_(streamptr, tsID);
 
@@ -1798,7 +1795,7 @@ streamTxCode(void *s)
 void
 cdiStreamSetupVlist(stream_t *s, int vlistID)
 {
-  void (*myStreamSetupVlist)(stream_t *s, int vlistID)
+  void (*myStreamSetupVlist)(stream_t * s, int vlistID)
       = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_SETUP_VLIST).func;
   myStreamSetupVlist(s, vlistID);
 }
@@ -1856,7 +1853,7 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
             /* calls cdfDefCoordinateVars in serial mode but
              * cdiPioClientStreamNOP (i.e. nothing) on client ranks
              * and cdiPioServerCdfDefVars on server ranks in parallel mode*/
-            void (*myCdfDefVars)(stream_t *streamptr) = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
+            void (*myCdfDefVars)(stream_t * streamptr) = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
             myCdfDefVars(streamptr);
           }
           break;

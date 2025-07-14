@@ -442,10 +442,7 @@ fileGetPos(int fileID)
   off_t filepos = 0;
 
   bfile_t *fileptr = file_to_pointer(fileID);
-  if (fileptr)
-    {
-      filepos = (fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN) ? fileptr->position : ftell(fileptr->fp);
-    }
+  if (fileptr) { filepos = (fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN) ? fileptr->position : ftell(fileptr->fp); }
 
   if (FileDebug) Message("Position %ld", filepos);
 
@@ -807,10 +804,7 @@ file_fill_buffer(bfile_t *fileptr)
 #ifdef HAVE_MMAP
   if (fileptr->bufferType == FILE_BUFTYPE_MMAP)
     {
-      if (fileptr->bufferPos >= fileptr->size)
-        {
-          nread = 0;
-        }
+      if (fileptr->bufferPos >= fileptr->size) { nread = 0; }
       else
         {
 #ifdef CDI
@@ -1202,10 +1196,7 @@ filePtrRead(void *vfileptr, void *restrict ptr, size_t size)
   bfile_t *fileptr = (bfile_t *) vfileptr;
   if (fileptr)
     {
-      if (fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN)
-        {
-          nread = file_read_from_buffer(fileptr, ptr, size);
-        }
+      if (fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN) { nread = file_read_from_buffer(fileptr, ptr, size); }
       else
         {
           nread = fread(ptr, 1, size, fileptr->fp);
@@ -1234,10 +1225,7 @@ fileRead(int fileID, void *restrict ptr, size_t size)
 
       if (FileInfo) t_begin = file_time();
 
-      if (fileptr->type == FILE_TYPE_OPEN)
-        {
-          nread = file_read_from_buffer(fileptr, ptr, size);
-        }
+      if (fileptr->type == FILE_TYPE_OPEN) { nread = file_read_from_buffer(fileptr, ptr, size); }
       else
         {
           nread = fread(ptr, 1, size, fileptr->fp);
@@ -1268,10 +1256,7 @@ fileWrite(int fileID, const void *restrict ptr, size_t size)
 
       if (FileInfo) t_begin = file_time();
 
-      if (fileptr->type == FILE_TYPE_FOPEN)
-        {
-          nwrite = fwrite(ptr, 1, size, fileptr->fp);
-        }
+      if (fileptr->type == FILE_TYPE_FOPEN) { nwrite = fwrite(ptr, 1, size, fileptr->fp); }
       else
         {
           ssize_t temp = write(fileptr->fd, ptr, size);

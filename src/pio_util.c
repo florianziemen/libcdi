@@ -208,8 +208,7 @@ cdiPioDeco1D_CCP(size_t nelems, const size_t *restrict weightPfxSums, size_t npa
   while (k < nparts)
     {
       size_t target = k * weightTotal / nparts;
-      do
-        {
+      do {
           ++i;
         }
       while (i < nelems && weightPfxSums[i] < target);

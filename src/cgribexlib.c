@@ -483,10 +483,10 @@ xlc_r -g -O3 -qhot -q64 -qarch=auto -qtune=auto -qreport -DTEST_MINMAXVAL minmax
 
 #include <stdlib.h>
 
-//#undef _GET_X86_COUNTER
-//#undef _GET_IBM_COUNTER
-//#undef _GET_MACH_COUNTER
-//#undef _ARCH_PWR6
+// #undef _GET_X86_COUNTER
+// #undef _GET_IBM_COUNTER
+// #undef _GET_MACH_COUNTER
+// #undef _ARCH_PWR6
 
 #if defined(_GET_IBM_COUNTER)
 #include <libhpc.h>
@@ -1231,10 +1231,10 @@ static const uint32_t HOST_ENDIANNESS_temp[1] = { UINT32_C(0x00030201) };
 #define Error(x, y)
 #endif
 
-//#undef _GET_X86_COUNTER
-//#undef _GET_MACH_COUNTER
-//#undef _GET_IBM_COUNTER
-//#undef _ARCH_PWR6
+// #undef _GET_X86_COUNTER
+// #undef _GET_MACH_COUNTER
+// #undef _GET_IBM_COUNTER
+// #undef _ARCH_PWR6
 
 #if defined _GET_IBM_COUNTER
 #include <libhpc.h>
@@ -1260,7 +1260,7 @@ static const uint32_t HOST_ENDIANNESS_temp[1] = { UINT32_C(0x00030201) };
 #define DISABLE_SIMD_ENCODE
 #endif
 
-//#define DISABLE_SIMD_ENCODE
+// #define DISABLE_SIMD_ENCODE
 
 #ifdef DISABLE_SIMD_ENCODE
 #ifdef ENABLE_AVX
@@ -1986,10 +1986,7 @@ gribDecodeRefDate(const int *isec1, int *year, int *month, int *day)
   if (century < 0) century = -century;
   century -= 1;
 
-  if (century == -255 && ryear == 127)
-    {
-      ryear = 0;
-    }
+  if (century == -255 && ryear == 127) { ryear = 0; }
   else
     {
       // if ( century != 0 )
@@ -2005,10 +2002,7 @@ gribDecodeRefDate(const int *isec1, int *year, int *month, int *day)
             ryear = century * 100 + ryear;
             if (ISEC1_Century < 0) ryear = -ryear;
           }
-        else
-          {
-            ryear = 1;
-          }
+        else { ryear = 1; }
       }
     }
 
@@ -2048,10 +2042,7 @@ gribTimeIsFC(const int *isec1)
 
   const int time_period = (ISEC1_TimeRange == 10) ? (ISEC1_TimePeriod1 << 8) + ISEC1_TimePeriod2 : ISEC1_TimePeriod1;
 
-  if (time_period > 0 && ISEC1_Day > 0)
-    {
-      isFC = (ISEC1_TimeRange == 0 || ISEC1_TimeRange == 10);
-    }
+  if (time_period > 0 && ISEC1_Day > 0) { isFC = (ISEC1_TimeRange == 0 || ISEC1_TimeRange == 10); }
 
   return isFC;
 }
@@ -2368,10 +2359,7 @@ gribPrintSec1(int *isec0, int *isec1)
       iyear = date / 10000;
       fprintf(grprsm, " Year of reference time of data.      %9d  (%4d)\n", isec1[9], iyear);
     }
-  else
-    {
-      fprintf(grprsm, " Year of reference time of data MISSING  (=255)\n");
-    }
+  else { fprintf(grprsm, " Year of reference time of data MISSING  (=255)\n"); }
 
   fprintf(grprsm, " Month of reference time of data.     %9d\n", isec1[10]);
   fprintf(grprsm, " Day of reference time of data.       %9d\n", isec1[11]);
@@ -2553,10 +2541,7 @@ gribPrintSec1(int *isec0, int *isec1)
             Horizontal coordinate supplement.
           */
           fprintf(grprsm, " Horizontal coordinate supplement.\n");
-          if (isec1[70] == 0)
-            {
-              fprintf(grprsm, "(None).\n");
-            }
+          if (isec1[70] == 0) { fprintf(grprsm, "(None).\n"); }
           else
             {
               fprintf(grprsm, "Number of items = %d\n", isec1[70]);
@@ -2566,10 +2551,7 @@ gribPrintSec1(int *isec0, int *isec1)
             Mixed coordinate definition.
           */
           fprintf(grprsm, " Mixed coordinate definition.\n");
-          if (isec1[71] == 0)
-            {
-              fprintf(grprsm, "(None).\n");
-            }
+          if (isec1[71] == 0) { fprintf(grprsm, "(None).\n"); }
           else
             {
               fprintf(grprsm, "Number of items = %d\n", isec1[71]);
@@ -2580,10 +2562,7 @@ gribPrintSec1(int *isec0, int *isec1)
             Grid coordinate list.
           */
           fprintf(grprsm, " Grid coordinate list. \n");
-          if (isec1[72] == 0)
-            {
-              fprintf(grprsm, "(None).\n");
-            }
+          if (isec1[72] == 0) { fprintf(grprsm, "(None).\n"); }
           else
             {
               fprintf(grprsm, "Number of items = %d\n", isec1[72]);
@@ -2594,10 +2573,7 @@ gribPrintSec1(int *isec0, int *isec1)
             Auxiliary array.
           */
           fprintf(grprsm, " Auxiliary array.      \n");
-          if (isec1[73] == 0)
-            {
-              fprintf(grprsm, "(None).\n");
-            }
+          if (isec1[73] == 0) { fprintf(grprsm, "(None).\n"); }
           else
             {
               fprintf(grprsm, "Number of items = %d\n", isec1[73]);
@@ -2609,10 +2585,7 @@ gribPrintSec1(int *isec0, int *isec1)
           */
           fprintf(grprsm, " Post-auxiliary array. \n");
           ioffset = 74 + isec1[70] + isec1[71] + isec1[72] + isec1[73];
-          if (isec1[ioffset] == 0)
-            {
-              fprintf(grprsm, "(None).\n");
-            }
+          if (isec1[ioffset] == 0) { fprintf(grprsm, "(None).\n"); }
           else
             {
               fprintf(grprsm, "Number of items = %d\n", isec1[ioffset]);
@@ -2949,8 +2922,7 @@ gribPrintSec1(int *isec0, int *isec1)
     products.
   */
   if ((isec1[1] == 7 && isec1[23] == 1) && (!(ISEC1_SubCenterID == 98)))
-    {
-      /*   CALL KWPRS1 (iSEC0,iSEC1)*/
+    { /*   CALL KWPRS1 (iSEC0,iSEC1)*/
     }
   /*
     -----------------------------------------------------------------
@@ -3656,10 +3628,7 @@ gribOpen(const char *filename, const char *mode)
   int fileID = fileOpen(filename, mode);
 
 #if defined(__sun)
-  if (fileID != FILE_UNDEFID && tolower(*mode) == 'r')
-    {
-      fileSetBufferType(fileID, FILE_BUFTYPE_MMAP);
-    }
+  if (fileID != FILE_UNDEFID && tolower(*mode) == 'r') { fileSetBufferType(fileID, FILE_BUFTYPE_MMAP); }
 #endif
 
   return fileID;
@@ -4849,10 +4818,7 @@ grib2Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **idsp,
 
       *gdsp = section;
     }
-  else if (sec_num == 3)
-    {
-      *gdsp = section;
-    }
+  else if (sec_num == 3) { *gdsp = section; }
   else
     {
       fprintf(stderr, "Unexpected section3 number %d\n", sec_num);
@@ -5167,10 +5133,7 @@ gribPrintALL(int nrec, long offset, long recpos, long recsize, unsigned char *gr
     grib1PrintALL(nrec, offset, recpos, recsize, gribbuffer);
   else if (gribversion == 2)
     grib2PrintALL(nrec, offset, recpos, recsize, gribbuffer);
-  else
-    {
-      fprintf(stdout, "%5d :%4ld%9ld%7ld : GRIB version %d unsupported\n", nrec, offset, recpos, recsize, gribversion);
-    }
+  else { fprintf(stdout, "%5d :%4ld%9ld%7ld : GRIB version %d unsupported\n", nrec, offset, recpos, recsize, gribversion); }
 }
 
 static void
@@ -5227,10 +5190,7 @@ grib1PrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
       date = (-year) * 10000 + (int) PDS_Month * 100 + (int) PDS_Day;
       century = -century;
     }
-  else
-    {
-      date = year * 10000 + (int) PDS_Month * 100 + (int) PDS_Day;
-    }
+  else { date = year * 10000 + (int) PDS_Month * 100 + (int) PDS_Day; }
 
   fprintf(stdout, "%5d :%4d%4d%4d%4d%4d %4d %4d%4d%7d%7d %8d%6d%3d%3d%3d%3d%5d%6d%5d%4d", nrec, PDS_Len, PDS_CodeTable,
           PDS_CenterID, subcenter, PDS_ModelID, PDS_GridDefinition, PDS_Parameter, PDS_LevelType, PDS_Level1, PDS_Level2, date,
@@ -5250,10 +5210,7 @@ gribPrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
   else if ( gribversion == 2 )
     grib2PrintPDS(nrec, recpos, recsize, gribbuffer);
   */
-  else
-    {
-      fprintf(stdout, "%5d :%4ld%9ld%7ld : GRIB version %d unsupported\n", nrec, 0L, recpos, recsize, gribversion);
-    }
+  else { fprintf(stdout, "%5d :%4ld%9ld%7ld : GRIB version %d unsupported\n", nrec, 0L, recpos, recsize, gribversion); }
 }
 
 static void
@@ -5301,10 +5258,7 @@ gribPrintGDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
   else if ( gribversion == 2 )
     grib2PrintGDS(nrec, recpos, recsize, gribbuffer);
   */
-  else
-    {
-      fprintf(stdout, "%5d :%4ld%9ld%7ld : GRIB version %d unsupported\n", nrec, 0L, recpos, recsize, gribversion);
-    }
+  else { fprintf(stdout, "%5d :%4ld%9ld%7ld : GRIB version %d unsupported\n", nrec, 0L, recpos, recsize, gribversion); }
 }
 
 static void
@@ -5353,10 +5307,7 @@ gribPrintBMS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
   else if ( gribversion == 2 )
     grib2PrintBMS(nrec, recpos, recsize, gribbuffer);
   */
-  else
-    {
-      fprintf(stdout, "%5d :%4ld%9ld%7ld : GRIB version %d unsupported\n", nrec, 0L, recpos, recsize, gribversion);
-    }
+  else { fprintf(stdout, "%5d :%4ld%9ld%7ld : GRIB version %d unsupported\n", nrec, 0L, recpos, recsize, gribversion); }
 }
 
 static void
@@ -5423,10 +5374,7 @@ gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
   else if ( gribversion == 2 )
     grib2PrintBDS(nrec, recpos, recsize, gribbuffer);
   */
-  else
-    {
-      fprintf(stdout, "%5d :%4ld%9ld%7ld : GRIB version %d unsupported\n", nrec, 0L, recpos, recsize, gribversion);
-    }
+  else { fprintf(stdout, "%5d :%4ld%9ld%7ld : GRIB version %d unsupported\n", nrec, 0L, recpos, recsize, gribversion); }
 }
 
 void
@@ -5502,10 +5450,7 @@ repair1(unsigned char *gbuf, long gbufsize)
           ioff = (jup + 1) * (jup + 2);
           bds_ext = 4 + 3 + 4 * ioff;
         }
-      else
-        {
-          bds_ext = 4;
-        }
+      else { bds_ext = 4; }
     }
 
   size_t datstart = bds_head + bds_ext;
@@ -5864,14 +5809,9 @@ gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize)
 
             SetLen3(bds, 0, bdslen);
           }
-        else
-          {
-            SetLen3(dbuf, 4, gribLen);
-          }
+        else { SetLen3(dbuf, 4, gribLen); }
       }
-    else
-      {
-      }
+    else {}
     /*
     fprintf(stderr, "%3d %3d griblen in %6d  out %6d  CR %g   slen %6d dlen %6d  CR %g\n",
             PDS_Parameter, PDS_Level1, gribLenOld, gribLen,
@@ -5953,10 +5893,7 @@ gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize
           int ioff = (jup + 1) * (jup + 2);
           bds_ext = 4 + 3 + 4 * ioff;
         }
-      else
-        {
-          bds_ext = 4;
-        }
+      else { bds_ext = 4; }
     }
 
   size_t datstart = bds_head + (size_t) bds_ext;
@@ -6092,10 +6029,7 @@ gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize
 
         SetLen3(bds, 0, bdsLen);
       }
-    else
-      {
-        SetLen3(dbuf, 4, recLen);
-      }
+    else { SetLen3(dbuf, 4, recLen); }
     /*
     fprintf(stderr, "recLen, gribLen, bdsLen %d %d %d\n", recLen, gribLen, bdsLen);
     */

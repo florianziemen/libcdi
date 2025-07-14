@@ -65,8 +65,7 @@ string2FileType(const char *fileType, const char **outRestString)
   // use fileType2string() to check whether support for this type has been compiled in. This is to avoid throwing "invalid type
   // string" errors when we just have a library version mismatch.
 #define check(givenString, typeString, typeConstant)                                                               \
-  do                                                                                                               \
-    {                                                                                                              \
+  do {                                                                                                             \
       if (givenString == strstr(givenString, typeString))                                                          \
         {                                                                                                          \
           if (outRestString) *outRestString = givenString + strlen(typeString);                                    \
@@ -184,8 +183,7 @@ baseIter_constructFromString(CdiIterator *me, const char *description)
 }
 
 #define sanityCheck(me)                                                                                                       \
-  do                                                                                                                          \
-    {                                                                                                                         \
+  do {                                                                                                                        \
       if (!me) xabort("NULL was passed to %s as an iterator. Please check the return value of cdiIterator_new().", __func__); \
       if (!me->isAdvanced) xabort("Calling %s is not allowed without calling cdiIterator_nextField() first.", __func__);      \
     }                                                                                                                         \

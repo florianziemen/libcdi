@@ -351,10 +351,7 @@ srvScanTimestep2(stream_t *streamptr)
         {
           if (param == records[recID].param && rlevel == records[recID].ilevel)
             {
-              if (recinfo[recID].used)
-                {
-                  nextstep = true;
-                }
+              if (recinfo[recID].used) { nextstep = true; }
               else
                 {
                   recinfo[recID].used = true;

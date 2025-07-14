@@ -488,10 +488,7 @@ iegWrite(int fileID, void *ieg)
       for (int i = 0; i < 100; i++) buf.fvct[i] = (float) iegp->vct[i];
       binWriteFlt32(fileID, byteswap, 100, buf.fvct);
     }
-  else
-    {
-      binWriteFlt64(fileID, byteswap, 100, iegp->vct);
-    }
+  else { binWriteFlt64(fileID, byteswap, 100, iegp->vct); }
 
   binWriteF77Block(fileID, byteswap, blocklen);
 

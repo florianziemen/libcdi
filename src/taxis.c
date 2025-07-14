@@ -971,10 +971,7 @@ cdi_encode_timevalue(int64_t days, double secs, int timeunit)
 {
   double timevalue = 0.0;
 
-  if (timeunit == TUNIT_SECOND)
-    {
-      timevalue = (double) days * 86400.0 + secs;
-    }
+  if (timeunit == TUNIT_SECOND) { timevalue = (double) days * 86400.0 + secs; }
   else if (timeunit == TUNIT_MINUTE || timeunit == TUNIT_QUARTER || timeunit == TUNIT_30MINUTES)
     {
       timevalue = (double) days * 1440. + secs / 60.;
@@ -983,10 +980,7 @@ cdi_encode_timevalue(int64_t days, double secs, int timeunit)
     {
       timevalue = (double) days * 24. + secs / 3600.;
     }
-  else if (timeunit == TUNIT_DAY)
-    {
-      timevalue = (double) days + secs / 86400.;
-    }
+  else if (timeunit == TUNIT_DAY) { timevalue = (double) days + secs / 86400.; }
   else
     {
       static bool lwarn = true;
@@ -1144,19 +1138,13 @@ split_timevalue(double timevalue, int timeunit)
   CdiDateTime datetime;
   cdiDateTime_init(&datetime);
 
-  if (timeunit == TUNIT_SECOND)
-    {
-      datetime = seconds2datetime(timevalue);
-    }
+  if (timeunit == TUNIT_SECOND) { datetime = seconds2datetime(timevalue); }
   else if (timeunit == TUNIT_HOUR)
     {
       timevalue /= 24;
       datetime = absTimeval2datetime(timevalue);
     }
-  else if (timeunit == TUNIT_DAY)
-    {
-      datetime = absTimeval2datetime(timevalue);
-    }
+  else if (timeunit == TUNIT_DAY) { datetime = absTimeval2datetime(timevalue); }
   else if (timeunit == TUNIT_MONTH)
     {
       int64_t vdate = (int64_t) timevalue * 100 - ((timevalue < 0) * 2 - 1);
@@ -1316,10 +1304,7 @@ cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis)
 
   if (taxis->type == TAXIS_ABSOLUTE)
     {
-      if (taxis->unit == TUNIT_YEAR)
-        {
-          timeValue = datetime.date.year;
-        }
+      if (taxis->unit == TUNIT_YEAR) { timeValue = datetime.date.year; }
       else if (taxis->unit == TUNIT_MONTH)
         {
           int64_t xdate = cdiDate_get(datetime.date);

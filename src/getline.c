@@ -79,8 +79,7 @@ getline(char **linebuf, size_t *linebuf_size, FILE *fp)
       len = strlen(buf);
       if (buf[len - 1] != '\n')
         {
-          do
-            {
+          do {
               size_t increment = 2 * buf_size - len <= INT_MAX ? 2 * buf_size - len : INT_MAX - (buf_size - len);
               void *temp = realloc(buf, buf_size + increment);
               if (!temp)

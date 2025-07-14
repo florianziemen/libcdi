@@ -30,10 +30,7 @@ cdf_get_numRecsAvail(int vlistID)
   int numVars = vlistNvars(vlistID);
   for (int varID = 0; varID < numVars; varID++)
     {
-      if (vlistInqVarTimetype(vlistID, varID) != TIME_CONSTANT)
-        {
-          numRecsAvail += zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
-        }
+      if (vlistInqVarTimetype(vlistID, varID) != TIME_CONSTANT) { numRecsAvail += zaxisInqSize(vlistInqVarZaxis(vlistID, varID)); }
     }
   return numRecsAvail;
 }
@@ -63,10 +60,7 @@ cdf_init_records_step1(int numRecs, int *recIDs, recinfo_t *recinfo, int vlistID
 {
   for (int recID = 0, vrecID = 0; recID < numRecs; recID++)
     {
-      if (vlistInqVarTimetype(vlistID, recinfo[recID].varID) != TIME_CONSTANT)
-        {
-          recIDs[vrecID++] = recID;
-        }
+      if (vlistInqVarTimetype(vlistID, recinfo[recID].varID) != TIME_CONSTANT) { recIDs[vrecID++] = recID; }
     }
 }
 

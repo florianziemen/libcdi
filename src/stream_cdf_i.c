@@ -265,10 +265,7 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
                       timeUnits = -1;
                     }
                 }
-              else
-                {
-                  Warning("Unsupported format for time units: %s!", tu);
-                }
+              else { Warning("Unsupported format for time units: %s!", tu); }
             }
           else if (taxisType == TAXIS_RELATIVE)
             {
@@ -768,10 +765,7 @@ scan_hybrid_formulaterms(int ncid, int ncfvarid, int *avarid, int *bvarid, int *
           else if (str_is_equal(tagname, "p0:")) *p0varid = dimvarid;
           // clang-format on
         }
-      else if (!str_is_equal(tagname, "ps:"))
-        {
-          Warning("%s - %s", nc_strerror(status_nc), varname);
-        }
+      else if (!str_is_equal(tagname, "ps:")) { Warning("%s - %s", nc_strerror(status_nc), varname); }
 
       if (lstop) break;
     }
@@ -1334,23 +1328,14 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
               if (attstringsize > CDI_MAX_NAME) attstringsize = CDI_MAX_NAME;
             }
 
-          if (isText && str_is_equal(attname, "long_name"))
-            {
-              memcpy(ncvar->longname, attstring, attstringsize);
-            }
-          else if (isText && str_is_equal(attname, "standard_name"))
-            {
-              memcpy(ncvar->stdname, attstring, attstringsize);
-            }
+          if (isText && str_is_equal(attname, "long_name")) { memcpy(ncvar->longname, attstring, attstringsize); }
+          else if (isText && str_is_equal(attname, "standard_name")) { memcpy(ncvar->stdname, attstring, attstringsize); }
           else if (isText && str_is_equal(attname, "units"))
             {
               ncvar->unitsLen = (int) attstringsize;
               memcpy(ncvar->units, attstring, attstringsize);
             }
-          else if (isText && str_is_equal(attname, "calendar"))
-            {
-              ncvar->hasCalendar = true;
-            }
+          else if (isText && str_is_equal(attname, "calendar")) { ncvar->hasCalendar = true; }
           else if (isText && str_is_equal(attname, "param"))
             {
               int pnum = 0, pcat = 255, pdis = 255;
@@ -1427,10 +1412,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvar->truncation);
             }
-          else if (isNumber && str_is_equal(attname, "truncation"))
-            {
-              cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvar->truncation);
-            }
+          else if (isNumber && str_is_equal(attname, "truncation")) { cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvar->truncation); }
           else if (isNumber && str_is_equal(attname, "number_of_grid_in_reference"))
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvar->position);
@@ -1489,10 +1471,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
                     }
                 }
             }
-          else if (isText && str_is_equal(attname, "formula_terms"))
-            {
-              ncvar->hasFormulaterms = true;
-            }
+          else if (isText && str_is_equal(attname, "formula_terms")) { ncvar->hasFormulaterms = true; }
           else if (isText && str_is_equal(attname, "cell_measures")
                    && (nc_cell_id = cdf_get_cell_varid(attstring, ncid)) != CDI_UNDEFID)
             {
@@ -1539,10 +1518,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
                       ncvar->isZaxis = true;
                     }
                 }
-              else
-                {
-                  ncvar->atts[ncvar->natts++] = iatt;
-                }
+              else { ncvar->atts[ncvar->natts++] = iatt; }
             }
           else if (isText && str_is_equal(attname, "cdi"))
             {
@@ -1589,10 +1565,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
                       if (((int) ncvar->validrange[0]) == 0 && ((int) ncvar->validrange[1]) == 255) ncvar->isUnsigned = true;
                       // cdf_set_var(ncvar, DataVar);
                     }
-                  else if (ignoreDatatype)
-                    {
-                      Warning("Inconsistent data type for attribute %s:valid_range, ignored!", name);
-                    }
+                  else if (ignoreDatatype) { Warning("Inconsistent data type for attribute %s:valid_range, ignored!", name); }
                 }
             }
           else if (isNumber && str_is_equal(attname, "valid_min") && attlen == 1)
@@ -1603,10 +1576,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
                   cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvar->validrange)[0]);
                   ncvar->validrangeDefined = true;
                 }
-              else if (ignoreDatatype)
-                {
-                  Warning("Inconsistent data type for attribute %s:valid_min, ignored!", name);
-                }
+              else if (ignoreDatatype) { Warning("Inconsistent data type for attribute %s:valid_min, ignored!", name); }
             }
           else if (isNumber && str_is_equal(attname, "valid_max") && attlen == 1)
             {
@@ -1616,10 +1586,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
                   cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvar->validrange)[1]);
                   ncvar->validrangeDefined = true;
                 }
-              else if (ignoreDatatype)
-                {
-                  Warning("Inconsistent data type for attribute %s:valid_max, ignored!", name);
-                }
+              else if (ignoreDatatype) { Warning("Inconsistent data type for attribute %s:valid_max, ignored!", name); }
             }
           else if (isNumber
                    && ((isRealization = str_is_equal(attname, "realization"))
@@ -1637,10 +1604,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
 
               cdf_set_var(ncvar, DataVar);
             }
-          else
-            {
-              ncvar->atts[ncvar->natts++] = iatt;
-            }
+          else { ncvar->atts[ncvar->natts++] = iatt; }
         }
     }
 
@@ -1972,10 +1936,7 @@ verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncvars,
                   else if (str_is_equal(ncvar->units, "level"))                                     ncvar->zaxistype = ZAXIS_GENERIC;
                   // clang-format on
                 }
-              else if (is_DBL_axis(ncvar->longname))
-                {
-                  ncvar->zaxistype = ZAXIS_DEPTH_BELOW_LAND;
-                }
+              else if (is_DBL_axis(ncvar->longname)) { ncvar->zaxistype = ZAXIS_DEPTH_BELOW_LAND; }
               else if (is_height_units(ncvar->units))
                 {
                   // clang-format off
@@ -2091,10 +2052,7 @@ verify_coordinates_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
             {
               ncvar->isCharAxis = true;
             }
-          else if (str_is_equal(ncvar->stdname, "air_pressure"))
-            {
-              ncvar->zaxistype = ZAXIS_PRESSURE;
-            }
+          else if (str_is_equal(ncvar->stdname, "air_pressure")) { ncvar->zaxistype = ZAXIS_PRESSURE; }
 
           // not needed anymore for rotated grids
           if (!ncvar->isLon && (ncvar->longname[0] != 0) && !ncvar->isLat && (ncvar->longname[1] != 0))
@@ -2348,15 +2306,9 @@ cdf_check_gridtype(int *gridtype, bool isLon, bool isLat, size_t xsize, size_t y
           *gridtype = GRID_GAUSSIAN;
           grid->np = (int) (ysize / 2);
         }
-      else
-        {
-          *gridtype = GRID_LONLAT;
-        }
+      else { *gridtype = GRID_LONLAT; }
     }
-  else
-    {
-      *gridtype = (isLon && !isLat && ysize == 0) ? GRID_LONLAT : GRID_GENERIC;
-    }
+  else { *gridtype = (isLon && !isLat && ysize == 0) ? GRID_LONLAT : GRID_GENERIC; }
 }
 
 static bool
@@ -2782,14 +2734,8 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
     }
 
   int gridType = grid->type;
-  if (gridType != GRID_PROJECTION)
-    {
-      gridType = ncvar->gridtype;
-    }
-  else if (gridType == GRID_PROJECTION && ncvar->gridtype == GRID_LONLAT && ncvar->isLonLatMapping)
-    {
-      gridType = ncvar->gridtype;
-    }
+  if (gridType != GRID_PROJECTION) { gridType = ncvar->gridtype; }
+  else if (gridType == GRID_PROJECTION && ncvar->gridtype == GRID_LONLAT && ncvar->isLonLatMapping) { gridType = ncvar->gridtype; }
 
   switch (gridType)
     {
@@ -2984,10 +2930,7 @@ cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int
               ydimid2 = dimids2[i];
               ydimidx = i;
             }
-          else if (dimtypes2[i] == Z_AXIS)
-            {
-              zdimid2 = dimids2[i];
-            }
+          else if (dimtypes2[i] == Z_AXIS) { zdimid2 = dimids2[i]; }
         }
 
       if (!ncvar2->isCubeSphere)
@@ -3007,10 +2950,7 @@ cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int
                   ydimid2 = CDI_UNDEFID;
                 }
             }
-          else if (ncvar2->gridtype == GRID_GAUSSIAN_REDUCED && gridtype == GRID_GAUSSIAN_REDUCED)
-            {
-              ydimid = CDI_UNDEFID;
-            }
+          else if (ncvar2->gridtype == GRID_GAUSSIAN_REDUCED && gridtype == GRID_GAUSSIAN_REDUCED) { ydimid = CDI_UNDEFID; }
         }
 
       if (xdimid == xdimid2 && (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == CDI_UNDEFID)))
@@ -3094,10 +3034,7 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t 
           int gmapvarid = ncvar->gmapid;
           bool lproj = (gmapvarid != CDI_UNDEFID);
           bool isHealpixGrid = (lproj && ncvar->isHealpixMapping) ? is_healpix_grid(ncvars[gmapvarid].ncid, gmapvarid) : false;
-          if (isHealpixGrid)
-            {
-              ncvar->gridtype = GRID_HEALPIX;
-            }
+          if (isHealpixGrid) { ncvar->gridtype = GRID_HEALPIX; }
 
           if (!lproj && xaxisid != CDI_UNDEFID && xaxisid != xvarid && yaxisid != CDI_UNDEFID && yaxisid != yvarid) lproj = true;
 
@@ -3525,10 +3462,7 @@ cdf_sort_varnames(int *varids, int nvars, const ncvar_t *ncvars)
       varInfo[varID].name = ncvars[ncvarid].name;
     }
   qsort(varInfo, (size_t) nvars, sizeof(varInfo[0]), cdf_cmp_varname);
-  for (int varID = 0; varID < nvars; varID++)
-    {
-      varids[varID] = varInfo[varID].varid;
-    }
+  for (int varID = 0; varID < nvars; varID++) { varids[varID] = varInfo[varID].varid; }
   Free(varInfo);
   if (CDI_Debug)
     for (int i = 0; i < nvars; i++) Message("sorted varids[%d] = %d", i, varids[i]);
@@ -3591,10 +3525,7 @@ cdf_define_institut_and_model_id(int vlistID, int varID)
               if (longname[0]) cdiDefKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname);
               if (units[0]) cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units);
             }
-          else
-            {
-              varTableID = CDI_Default_TableID;
-            }
+          else { varTableID = CDI_Default_TableID; }
         }
 
       if (CDI_Default_ModelID != CDI_UNDEFID) varModelID = CDI_Default_ModelID;
@@ -3686,10 +3617,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
           if (ncvar->chunkSize > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, ncvar->chunkSize);
 
           size_t cacheSize = calc_chunk_cache_size(timedimid, ncvar);
-          if (CDI_Chunk_Cache_In >= 0)
-            {
-              cacheSize = (size_t) CDI_Chunk_Cache_In;
-            }
+          if (CDI_Chunk_Cache_In >= 0) { cacheSize = (size_t) CDI_Chunk_Cache_In; }
           cdf_set_var_chunk_cache(ncvar, ncvarid, cacheSize);
         }
 #endif
@@ -3966,27 +3894,12 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
                 {
                 }
               */
-              else if (str_is_equal(attname, "_NCProperties"))
-                {
-                }
-              else if (str_is_equal(attname, "CDI"))
-                {
-                }
-              else if (str_is_equal(attname, "CDO"))
-                {
-                }
-              else if (str_is_equal(attname, "grid_file_uri"))
-                {
-                  memcpy(gridInfo->gridfile, attstring, attstrlen + 1);
-                }
-              else if (attstrlen == 36 && str_is_equal(attname, "uuidOfHGrid"))
-                {
-                  cdiStr2UUID(attstring, gridInfo->uuid);
-                }
-              else if (attstrlen == 36 && str_is_equal(attname, "uuidOfVGrid"))
-                {
-                  cdiStr2UUID(attstring, uuidOfVGrid);
-                }
+              else if (str_is_equal(attname, "_NCProperties")) {}
+              else if (str_is_equal(attname, "CDI")) {}
+              else if (str_is_equal(attname, "CDO")) {}
+              else if (str_is_equal(attname, "grid_file_uri")) { memcpy(gridInfo->gridfile, attstring, attstrlen + 1); }
+              else if (attstrlen == 36 && str_is_equal(attname, "uuidOfHGrid")) { cdiStr2UUID(attstring, gridInfo->uuid); }
+              else if (attstrlen == 36 && str_is_equal(attname, "uuidOfVGrid")) { cdiStr2UUID(attstring, uuidOfVGrid); }
               else
                 {
                   if (str_is_equal(attname, "ICON_grid_file_uri") && gridInfo->gridfile[0] == 0)
@@ -3995,10 +3908,7 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
                   cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
                 }
             }
-          else
-            {
-              cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
-            }
+          else { cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring); }
         }
       else if (xtype == NC_SHORT || xtype == NC_INT)
         {
@@ -4007,15 +3917,9 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
               gridInfo->number_of_grid_used = CDI_UNDEFID;
               cdfGetAttInt(fileID, NC_GLOBAL, attname, 1, &gridInfo->number_of_grid_used);
             }
-          else
-            {
-              cdf_copy_attint(fileID, vlistID, xtype, attlen, attname);
-            }
+          else { cdf_copy_attint(fileID, vlistID, xtype, attlen, attname); }
         }
-      else if (xtype == NC_FLOAT || xtype == NC_DOUBLE)
-        {
-          cdf_copy_attflt(fileID, vlistID, xtype, attlen, attname);
-        }
+      else if (xtype == NC_FLOAT || xtype == NC_DOUBLE) { cdf_copy_attflt(fileID, vlistID, xtype, attlen, attname); }
     }
 }
 
@@ -4087,10 +3991,7 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
                   hasTimeVar = true;
                   streamptr->basetime.ncvarid = ncvarid;
                 }
-              else
-                {
-                  Warning("Found more than one time variable, skipped variable %s!", ncvar->name);
-                }
+              else { Warning("Found more than one time variable, skipped variable %s!", ncvar->name); }
             }
         }
 
@@ -4367,14 +4268,8 @@ get_timevalue(int fileID, int nctimevarid, size_t ncStepIndex, double *timevarBu
 {
   double timevalue = 0.0;
 
-  if (timevarBuffer)
-    {
-      timevalue = timevarBuffer[ncStepIndex];
-    }
-  else
-    {
-      cdf_get_var1_double(fileID, nctimevarid, &ncStepIndex, &timevalue);
-    }
+  if (timevarBuffer) { timevalue = timevarBuffer[ncStepIndex]; }
+  else { cdf_get_var1_double(fileID, nctimevarid, &ncStepIndex, &timevalue); }
 
   if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
 
@@ -4420,10 +4315,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
                 vDateTimeList[tsID] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID, timevarBuffer), taxis0);
               if (timevarBuffer) Free(timevarBuffer);
             }
-          else
-            {
-              hasTimesteps = false;
-            }
+          else { hasTimesteps = false; }
         }
 
       // process query information if available
@@ -4875,14 +4767,8 @@ cdfInqContents(stream_t *streamptr)
   if (streamptr->basetime.isWRF) taxis0.type = TAXIS_ABSOLUTE;
 
   int taxisID;
-  if (taxis0.type == TAXIS_FORECAST)
-    {
-      taxisID = taxisCreate(TAXIS_FORECAST);
-    }
-  else if (taxis0.type == TAXIS_RELATIVE)
-    {
-      taxisID = taxisCreate(TAXIS_RELATIVE);
-    }
+  if (taxis0.type == TAXIS_FORECAST) { taxisID = taxisCreate(TAXIS_FORECAST); }
+  else if (taxis0.type == TAXIS_RELATIVE) { taxisID = taxisCreate(TAXIS_RELATIVE); }
   else
     {
       taxisID = taxisCreate(TAXIS_ABSOLUTE);

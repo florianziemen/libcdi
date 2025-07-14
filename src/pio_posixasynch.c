@@ -119,8 +119,7 @@ destroyBFiledataPA(struct fileFunnelAIO *bfd)
         if (ctrlBlks[i].aio_buf != NULL) cBP[numCBP++] = ctrlBlks + i;
       assert(numCBP == numQueuedWrites);
       xdebug("file: %s, numQueuedWrites=%zu", bfd->name, numQueuedWrites);
-      do
-        {
+      do {
           iret = aio_suspend((const struct aiocb **) cBP, (int) numQueuedWrites, NULL);
           if (iret < 0 && errno != EINTR) xabort("aio_suspend(2) failed");
         }
@@ -174,8 +173,7 @@ completeSomeAIOWrites(struct fileFunnelAIO *bfd, const struct cdiPioConf *conf)
   assert(aioQueueDepth == numQueuedWrites);
   /* complete aio_write of at least one control block */
   int iret;
-  do
-    {
+  do {
       iret = aio_suspend((const struct aiocb **) bfd->cBP, (int) aioQueueDepth, NULL);
       if (iret < 0 && errno != EINTR) xabort("aio_suspend(2) failed");
     }
@@ -263,10 +261,7 @@ writePA(struct fileFunnelAIO *bfd, int source, size_t nProcsColl, size_t amount,
          "iret=aio_write()=%d",
          bfd->name, bfd->ctrlBlks[cbIdx].aio_nbytes, bfd->ctrlBlks[cbIdx].aio_offset, (int) iret);
 
-  if (iret == -1)
-    {
-      SysError("did not succeed writing buffer");
-    }
+  if (iret == -1) { SysError("did not succeed writing buffer"); }
   else
     xdebug("buffer written to %s", bfd->name);
 

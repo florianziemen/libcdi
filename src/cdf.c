@@ -128,10 +128,7 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
   int ncid = -1;
 
-  if (filename == NULL)
-    {
-      ncid = CDI_EINVAL;
-    }
+  if (filename == NULL) { ncid = CDI_EINVAL; }
   else
     {
       int fmode = tolower(*mode);
@@ -175,10 +172,7 @@ cdfOpen(const char *filename, const char *mode, int filetype)
 
       if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
     }
-  else
-    {
-      fileID = CDI_ELIBNAVAIL;
-    }
+  else { fileID = CDI_ELIBNAVAIL; }
 
   return fileID;
 }

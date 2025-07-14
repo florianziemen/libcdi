@@ -72,10 +72,7 @@ CdiGrid::getValues()
       std::copy(xvals, xvals + xsize, xvalues.begin());
       free(xvals);
     }
-  else
-    {
-      std::cout << "grid " << gridID << " has no YValues" << std::endl;
-    }
+  else { std::cout << "grid " << gridID << " has no YValues" << std::endl; }
 
   if (hasYValues)
     {
@@ -84,10 +81,7 @@ CdiGrid::getValues()
       std::copy(yvals, yvals + ysize, yvalues.begin());
       free(yvals);
     }
-  else
-    {
-      std::cout << "grid " << gridID << " has no YValues" << std::endl;
-    }
+  else { std::cout << "grid " << gridID << " has no YValues" << std::endl; }
 }
 
 void
@@ -130,10 +124,7 @@ CdiGrid::getValuesAsPointer(double *xvals, double *yvals)
       std::copy(xvalues.begin(), xvalues.end(), xvals);
       std::copy(yvalues.begin(), yvalues.end(), yvals);
     }
-  else
-    {
-      std::cout << "No Values available." << std::endl;
-    }
+  else { std::cout << "No Values available." << std::endl; }
 }
 
 void
@@ -144,10 +135,7 @@ CdiGrid::getBoundsAsPointer(double *xbnds, double *ybnds)
       std::copy(xbounds.begin(), xbounds.end(), xbnds);
       std::copy(ybounds.begin(), ybounds.end(), ybnds);
     }
-  else
-    {
-      std::cout << "No bounds available." << std::endl;
-    }
+  else { std::cout << "No bounds available." << std::endl; }
 }
 /* } */
 /*
@@ -171,10 +159,7 @@ CdiGrid::getFloatBounds(float *xbndsF, float *ybndsF)
           ybndsF[i] = (float) ybounds[i];
         }
     }
-  else
-    {
-      std::cout << "No bounds available." << std::endl;
-    }
+  else { std::cout << "No bounds available." << std::endl; }
 }
 /* } */
 /* } */

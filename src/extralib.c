@@ -469,10 +469,7 @@ extRead(int fileID, void *ext)
   size_t dprec = blocklen / extp->datasize;
   extp->prec = (int) dprec;
 
-  if (dprec == hprec || dprec == hprec / 2)
-    {
-      extp->number = EXT_REAL;
-    }
+  if (dprec == hprec || dprec == hprec / 2) { extp->number = EXT_REAL; }
   else if (dprec == hprec * 2)
     {
       dprec /= 2;

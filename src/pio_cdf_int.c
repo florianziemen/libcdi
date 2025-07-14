@@ -58,10 +58,7 @@ cdiPio_nc__create(const char *path, int cmode, size_t initialsz, size_t *chunksi
         {
           cmode |= NC_MPIPOSIX;
           status = nc_create_par(path, cmode, commInqCommColl(), MPI_INFO_NULL, ncidp);
-          if (status == NC_NOERR)
-            {
-              cdiPioCdfJmpBuf->openRank = CDI_PIO_COLLECTIVE_OPEN;
-            }
+          if (status == NC_NOERR) { cdiPioCdfJmpBuf->openRank = CDI_PIO_COLLECTIVE_OPEN; }
           else
             {
               int rank = commInqRankColl();
@@ -201,10 +198,7 @@ cdiPioEnableNetCDFParAccess(void)
   namespaceSwitchSet(NSSWITCH_CDF_DEF_VAR, NSSW_FUNC(cdiPioCdfDefVar));
 #if !defined TLS && defined HAVE_LIBPTHREAD
   int ierror = pthread_key_create(&cdiPioCdfJmpKey, NULL);
-  if (ierror)
-    {
-      Error("%s: error creating pthread key: %s\n", __func__, strerror(ierror));
-    }
+  if (ierror) { Error("%s: error creating pthread key: %s\n", __func__, strerror(ierror)); }
 #endif
 }
 
@@ -213,10 +207,7 @@ cdiPioDisableNetCDFParAccess(void)
 {
 #if !defined TLS && defined HAVE_LIBPTHREAD
   int ierror = pthread_key_delete(cdiPioCdfJmpKey);
-  if (ierror)
-    {
-      Error("%s: error deleting pthread key: %s\n", __func__, strerror(ierror));
-    }
+  if (ierror) { Error("%s: error deleting pthread key: %s\n", __func__, strerror(ierror)); }
 #endif
 }
 #endif /* ifdef HAVE_PARALLEL_NC4 */

@@ -726,10 +726,7 @@ pioWriteTimestep(void)
 
   size_t nStreams = openStreams.size;
   int *hasUpdates = Malloc(nStreams * sizeof(hasUpdates[0]));
-  for (size_t streamIdx = 0; streamIdx < nStreams; ++streamIdx)
-    {
-      hasUpdates[streamIdx] = txWin[streamIdx].pendingUpdate;
-    }
+  for (size_t streamIdx = 0; streamIdx < nStreams; ++streamIdx) { hasUpdates[streamIdx] = txWin[streamIdx].pendingUpdate; }
 
   if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
     {

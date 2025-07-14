@@ -46,8 +46,7 @@ findPartition2D(int npart[2], int num_parts)
   for (int assign2X = 1; assign2X <= numFactors; ++assign2X)
     {
       uint_fast32_t pattern = (UINT32_C(1) << assign2X) - 1, lastPattern = pattern << (numFactors - assign2X);
-      do
-        {
+      do {
           npart_attempt[0] = 1;
           npart_attempt[1] = 1;
           /* loop over all factors */

@@ -137,10 +137,7 @@ subtypeAttrInsert(struct subtype_entry_t *head, int key, int val)
   else
     {
       struct subtype_attr_t **predec = &head->atts;
-      while (((*predec)->next != NULL) && ((*predec)->next->key < key))
-        {
-          predec = &((*predec)->next);
-        }
+      while (((*predec)->next != NULL) && ((*predec)->next->key < key)) { predec = &((*predec)->next); }
       ptr->next = (*predec)->next;
       (*predec)->next = ptr;
     }
@@ -178,19 +175,10 @@ subtypeAttsCompare(struct subtype_attr_t *a1, struct subtype_attr_t *a2)
 {
   if ((a1 == NULL) && (a2 == NULL))
     return 0;
-  else if ((a1 == NULL) && (a2 != NULL))
-    {
-      return differ;
-    }
-  else if ((a1 != NULL) && (a2 == NULL))
-    {
-      return differ;
-    }
+  else if ((a1 == NULL) && (a2 != NULL)) { return differ; }
+  else if ((a1 != NULL) && (a2 == NULL)) { return differ; }
 
-  if (a1->key != a2->key)
-    {
-      return differ;
-    }
+  if (a1->key != a2->key) { return differ; }
   if (a1->val != a2->val) return differ;
 
   return subtypeAttsCompare(a1->next, a2->next);
@@ -257,10 +245,7 @@ subtypeEntryInsert(subtype_t *head)
   else
     {
       struct subtype_entry_t **predec = &head->entries;
-      while (((*predec)->next != NULL) && ((*predec)->next->self < ptr->self))
-        {
-          predec = &((*predec)->next);
-        }
+      while (((*predec)->next != NULL) && ((*predec)->next->self < ptr->self)) { predec = &((*predec)->next); }
       ptr->next = (*predec)->next;
       (*predec)->next = ptr;
     }
@@ -617,10 +602,7 @@ tilesetInsertP(subtype_t *s1, subtype_t *s2)
               found &= (subtypeAttsCompare(entry1->atts, entry2->atts) != differ);
               entry2 = entry2->next;
             }
-          if (found)
-            {
-              return;
-            }
+          if (found) { return; }
           entry1 = entry1->next;
         }
 
@@ -702,10 +684,7 @@ subtypeCompare(int subtypeID1, int subtypeID2)
 int
 subtypeInqSize(int subtypeID)
 {
-  if (subtypeID == CDI_UNDEFID)
-    {
-      return 0;
-    }
+  if (subtypeID == CDI_UNDEFID) { return 0; }
   else
     {
       subtype_t *subtype_ptr = (subtype_t *) reshGetVal(subtypeID, &subtypeOps);

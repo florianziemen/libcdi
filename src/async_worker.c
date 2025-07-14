@@ -73,8 +73,7 @@ sema_wait(sema_t *s)
 #else
   int r;
 
-  do
-    {
+  do {
       r = sem_wait(&s->sem);
     }
   while (r == -1 && errno == EINTR);

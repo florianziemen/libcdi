@@ -161,8 +161,7 @@ cdiFallbackIterator_deserialize(const char *description)
 
     // This reads one variable from the description string, does error checking, and advances the given string pointer.
 #define decodeValue(variable, description)                                                                                      \
-  do                                                                                                                            \
-    {                                                                                                                           \
+  do {                                                                                                                          \
       const char *savedStart = description;                                                                                     \
       long long decodedValue                                                                                                    \
           = strtoll(description, (char **) &description, 0); /*The cast is a workaround for the wrong signature of strtoll().*/ \
@@ -277,8 +276,7 @@ cdiFallbackIterator_levelType(CdiIterator *super, int levelSelector, char **outN
   int zaxisId = vlistInqVarZaxis(me->vlistId, me->curVariable);
   (void) levelSelector;
 #define copyString(outPointer, key)                                       \
-  do                                                                      \
-    {                                                                     \
+  do {                                                                    \
       if (outPointer)                                                     \
         {                                                                 \
           char tempBuffer[CDI_MAX_NAME];                                  \

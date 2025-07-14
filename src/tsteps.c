@@ -76,10 +76,7 @@ cdi_create_timesteps(size_t numTimesteps, stream_t *streamptr)
   streamptr->tstepsTableSize = (int) ntsteps;
   streamptr->tstepsNextID = (int) ntsteps;
 
-  for (size_t tsID = 0; tsID < ntsteps; tsID++)
-    {
-      tstepsInitEntry(&streamptr->tsteps[tsID]);
-    }
+  for (size_t tsID = 0; tsID < ntsteps; tsID++) { tstepsInitEntry(&streamptr->tsteps[tsID]); }
 }
 /*
  * Local Variables:
