@@ -17,10 +17,10 @@ main(void)
   // Open the dataset
   streamID = streamOpenRead("example.grb");
   if (streamID < 0)
-    {
-      fprintf(stderr, "%s\n", cdiStringError(streamID));
-      return (1);
-    }
+  {
+    fprintf(stderr, "%s\n", cdiStringError(streamID));
+    return (1);
+  }
 
   // Get the variable list of the dataset
   vlistID = streamInqVlist(streamID);
@@ -34,19 +34,19 @@ main(void)
 
   // Loop over the number of time steps
   for (int tsID = 0; tsID < nts; tsID++)
-    {
-      // Inquire the time step
-      streamInqTimestep(streamID, tsID);
+  {
+    // Inquire the time step
+    streamInqTimestep(streamID, tsID);
 
-      // Get the verification date and time
-      int vdate = taxisInqVdate(taxisID);
-      int vtime = taxisInqVtime(taxisID);
+    // Get the verification date and time
+    int vdate = taxisInqVdate(taxisID);
+    int vtime = taxisInqVtime(taxisID);
 
-      // Read var1 and var2
-      streamReadVarF(streamID, varID1, var1, &numMissVals);
-      streamReadVarF(streamID, varID2, var2, &numMissVals);
-      printf("tsID %d %d %d %g %g\n", tsID, vdate, vtime, var1[0], var2[0]);
-    }
+    // Read var1 and var2
+    streamReadVarF(streamID, varID1, var1, &numMissVals);
+    streamReadVarF(streamID, varID2, var2, &numMissVals);
+    printf("tsID %d %d %d %g %g\n", tsID, vdate, vtime, var1[0], var2[0]);
+  }
 
   // Close the input stream
   streamClose(streamID);

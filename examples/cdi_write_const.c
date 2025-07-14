@@ -51,10 +51,10 @@ main(void)
   // Create a dataset in netCDF format
   streamID = streamOpenWrite("example_const.nc", CDI_FILETYPE_NC);
   if (streamID < 0)
-    {
-      fprintf(stderr, "%s\n", cdiStringError(streamID));
-      return 1;
-    }
+  {
+    fprintf(stderr, "%s\n", cdiStringError(streamID));
+    return 1;
+  }
 
   // Assign the variable list to the dataset
   streamDefVlist(streamID, vlistID);

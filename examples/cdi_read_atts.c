@@ -17,10 +17,10 @@ main(void)
   // Open the dataset
   streamID = streamOpenRead("example_att.nc");
   if (streamID < 0)
-    {
-      fprintf(stderr, "%s\n", cdiStringError(streamID));
-      return (1);
-    }
+  {
+    fprintf(stderr, "%s\n", cdiStringError(streamID));
+    return (1);
+  }
 
   // Get the variable list of the dataset
   vlistID = streamInqVlist(streamID);
@@ -32,10 +32,10 @@ main(void)
   int type, len;
   char attname[256];
   for (int i = 0; i < natts; ++i)
-    {
-      status = vlistInqAtt(vlistID, -1, i, attname, &type, &len);
-      printf("vlistInqAtt status = %d  name = %s  len = %d\n", status, attname, len);
-    }
+  {
+    status = vlistInqAtt(vlistID, -1, i, attname, &type, &len);
+    printf("vlistInqAtt status = %d  name = %s  len = %d\n", status, attname, len);
+  }
 
   int ival;
   status = vlistInqAttInt(vlistID, -1, "iii", 1, &ival);
@@ -54,18 +54,18 @@ main(void)
 
   // Loop over the number of time steps
   for (int tsID = 0; tsID < nts; tsID++)
-    {
-      // Inquire the time step
-      streamInqTimestep(streamID, tsID);
+  {
+    // Inquire the time step
+    streamInqTimestep(streamID, tsID);
 
-      // Get the verification date and time
-      int vdate = taxisInqVdate(taxisID);
-      int vtime = taxisInqVtime(taxisID);
+    // Get the verification date and time
+    int vdate = taxisInqVdate(taxisID);
+    int vtime = taxisInqVtime(taxisID);
 
-      // Read var1 and var2
-      streamReadVar(streamID, varID1, var1, &numMissVals);
-      streamReadVar(streamID, varID2, var2, &numMissVals);
-    }
+    // Read var1 and var2
+    streamReadVar(streamID, varID1, var1, &numMissVals);
+    streamReadVar(streamID, varID2, var2, &numMissVals);
+  }
 
   // Close the input stream
   streamClose(streamID);

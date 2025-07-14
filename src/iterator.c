@@ -31,7 +31,7 @@ static const char *
 fileType2String(int fileType)
 {
   switch (fileType)
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB: return "CDI::Iterator::GRIB1";
     case CDI_FILETYPE_GRB2: return "CDI::Iterator::GRIB2";
@@ -55,7 +55,7 @@ fileType2String(int fileType)
 #endif
 
     default: return NULL;
-    }
+  }
 }
 
 static int
@@ -64,19 +64,18 @@ string2FileType(const char *fileType, const char **outRestString)
   // This first part unconditionally checks all known type strings, and only if the given string matches one of these strings, we
   // use fileType2string() to check whether support for this type has been compiled in. This is to avoid throwing "invalid type
   // string" errors when we just have a library version mismatch.
-#define check(givenString, typeString, typeConstant)                                                               \
-  do {                                                                                                             \
-      if (givenString == strstr(givenString, typeString))                                                          \
-        {                                                                                                          \
-          if (outRestString) *outRestString = givenString + strlen(typeString);                                    \
-          if (fileType2String(typeConstant)) return typeConstant;                                                  \
-          Error("Support for " typeString                                                                          \
-                " not compiled in. Please check that the result of `cdiIterator_serialize()` is only passed to a " \
-                "`cdiIterator_deserialize()` implementation of the same CDI library version.");                    \
-          return CDI_FILETYPE_UNDEF;                                                                               \
-        }                                                                                                          \
-    }                                                                                                              \
-  while (0)
+#define check(givenString, typeString, typeConstant)                                                           \
+  do {                                                                                                         \
+    if (givenString == strstr(givenString, typeString))                                                        \
+    {                                                                                                          \
+      if (outRestString) *outRestString = givenString + strlen(typeString);                                    \
+      if (fileType2String(typeConstant)) return typeConstant;                                                  \
+      Error("Support for " typeString                                                                          \
+            " not compiled in. Please check that the result of `cdiIterator_serialize()` is only passed to a " \
+            "`cdiIterator_deserialize()` implementation of the same CDI library version.");                    \
+      return CDI_FILETYPE_UNDEF;                                                                               \
+    }                                                                                                          \
+  } while (0)
   check(fileType, "CDI::Iterator::GRIB1", CDI_FILETYPE_GRB);
   check(fileType, "CDI::Iterator::GRIB2", CDI_FILETYPE_GRB2);
   check(fileType, "CDI::Iterator::NetCDF", CDI_FILETYPE_NC);
@@ -121,7 +120,7 @@ cdiIterator_new(const char *path)
   int trash;
   const int filetype = cdiGetFiletype(path, &trash);
   switch (cdiBaseFiletype(filetype))
-    {
+  {
     case CDI_FILETYPE_UNDEF: Warning("Can't open file \"%s\": unknown format\n", path); return NULL;
 
 #ifdef HAVE_LIBGRIB_API
@@ -145,7 +144,7 @@ cdiIterator_new(const char *path)
     default:
       Warning("the file \"%s\" is of type %s, but support for this format is not compiled in!", path, strfiletype(filetype));
       return NULL;
-    }
+  }
 }
 
 void
@@ -165,29 +164,28 @@ baseIter_constructFromString(CdiIterator *me, const char *description)
   for (; *result && isspace(*result); result++)
     ;
   if (result == strstr(result, kAdvancedString))
-    {
-      me->isAdvanced = true;
-      result += sizeof(kAdvancedString) - 1;
-    }
+  {
+    me->isAdvanced = true;
+    result += sizeof(kAdvancedString) - 1;
+  }
   else if (result == strstr(result, kUnadvancedString))
-    {
-      me->isAdvanced = false;
-      result += sizeof(kUnadvancedString) - 1;
-    }
+  {
+    me->isAdvanced = false;
+    result += sizeof(kUnadvancedString) - 1;
+  }
   else
-    {
-      Error("Invalid iterator description string \"%s\". Please check the origin of this string.", description);
-      return NULL;
-    }
+  {
+    Error("Invalid iterator description string \"%s\". Please check the origin of this string.", description);
+    return NULL;
+  }
   return result;
 }
 
-#define sanityCheck(me)                                                                                                       \
-  do {                                                                                                                        \
-      if (!me) xabort("NULL was passed to %s as an iterator. Please check the return value of cdiIterator_new().", __func__); \
-      if (!me->isAdvanced) xabort("Calling %s is not allowed without calling cdiIterator_nextField() first.", __func__);      \
-    }                                                                                                                         \
-  while (0)
+#define sanityCheck(me)                                                                                                     \
+  do {                                                                                                                      \
+    if (!me) xabort("NULL was passed to %s as an iterator. Please check the return value of cdiIterator_new().", __func__); \
+    if (!me->isAdvanced) xabort("Calling %s is not allowed without calling cdiIterator_nextField() first.", __func__);      \
+  } while (0)
 
 /*
 @Function cdiIterator_clone
@@ -214,7 +212,7 @@ cdiIterator_clone(CdiIterator *me)
 {
   sanityCheck(me);
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: return cdiGribIterator_getSuper(cdiGribIterator_clone(me));
 #endif
@@ -234,7 +232,7 @@ cdiIterator_clone(CdiIterator *me)
       return cdiFallbackIterator_getSuper(cdiFallbackIterator_clone(me));
 
     default: Error(kUnexpectedFileTypeMessage); return NULL;
-    }
+  }
 }
 
 /*
@@ -259,13 +257,13 @@ cdiGribIterator_clone(CdiIterator *me)
 {
   sanityCheck(me);
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: return cdiGribIterator_makeClone(me);
 #endif
 
     default: return NULL;
-    }
+  }
 }
 
 /*
@@ -287,7 +285,7 @@ cdiIterator_serialize(CdiIterator *me)
   if (!me) xabort("NULL was passed to %s as an iterator. Please check the return value of cdiIterator_new().", __func__);
   char *subclassDescription = NULL;
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: subclassDescription = cdiGribIterator_serialize(me); break;
 #endif
@@ -308,7 +306,7 @@ cdiIterator_serialize(CdiIterator *me)
       break;
 
     default: Error(kUnexpectedFileTypeMessage); return NULL;
-    }
+  }
 
   const char *ftypeStr = fileType2String(me->filetype), *advStr = me->isAdvanced ? kAdvancedString : kUnadvancedString;
   size_t len = strlen(ftypeStr) + 1 + strlen(advStr) + 1 + strlen(subclassDescription) + 1;
@@ -339,7 +337,7 @@ CdiIterator *
 cdiIterator_deserialize(const char *description)
 {
   switch (cdiBaseFiletype(string2FileType(description, NULL)))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: return cdiGribIterator_getSuper(cdiGribIterator_deserialize(description));
 #endif
@@ -359,7 +357,7 @@ cdiIterator_deserialize(const char *description)
       return cdiFallbackIterator_getSuper(cdiFallbackIterator_deserialize(description));
 
     default: Error(kUnexpectedFileTypeMessage); return NULL;
-    }
+  }
 }
 
 /*
@@ -404,7 +402,7 @@ cdiIterator_nextField(CdiIterator *me)
   if (!me) xabort("NULL was passed in as an iterator. Please check the return value of cdiIterator_new().");
   me->isAdvanced = true;
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: return cdiGribIterator_nextField(me);
 #endif
@@ -424,7 +422,7 @@ cdiIterator_nextField(CdiIterator *me)
       return cdiFallbackIterator_nextField(me);
 
     default: Error(kUnexpectedFileTypeMessage); return CDI_EINVAL;
-    }
+  }
 }
 
 static char *
@@ -432,7 +430,7 @@ cdiIterator_inqTime(CdiIterator *me, CdiTimeType timeType)
 {
   sanityCheck(me);
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: return cdiGribIterator_inqTime(me, timeType);
 #endif
@@ -452,7 +450,7 @@ cdiIterator_inqTime(CdiIterator *me, CdiTimeType timeType)
       return cdiFallbackIterator_inqTime(me, timeType);
 
     default: Error(kUnexpectedFileTypeMessage); return NULL;
-    }
+  }
 }
 
 /*
@@ -592,7 +590,7 @@ cdiIterator_inqLevelType(CdiIterator *me, int levelSelector, char **outName, cha
 {
   sanityCheck(me);
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: return cdiGribIterator_levelType(me, levelSelector, outName, outLongName, outStdName, outUnit);
 #endif
@@ -612,7 +610,7 @@ cdiIterator_inqLevelType(CdiIterator *me, int levelSelector, char **outName, cha
       return cdiFallbackIterator_levelType(me, levelSelector, outName, outLongName, outStdName, outUnit);
 
     default: Error(kUnexpectedFileTypeMessage); return CDI_UNDEFID;
-    }
+  }
 }
 
 /*
@@ -638,7 +636,7 @@ cdiIterator_inqLevel(CdiIterator *me, int levelSelector, double *outValue1, doub
 {
   sanityCheck(me);
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: return cdiGribIterator_level(me, levelSelector, outValue1, outValue2);
 #endif
@@ -658,7 +656,7 @@ cdiIterator_inqLevel(CdiIterator *me, int levelSelector, double *outValue1, doub
       return cdiFallbackIterator_level(me, levelSelector, outValue1, outValue2);
 
     default: Error(kUnexpectedFileTypeMessage); return CDI_EINVAL;
-    }
+  }
 }
 
 /*
@@ -682,7 +680,7 @@ cdiIterator_inqLevelUuid(CdiIterator *me, int *outVgridNumber, int *outLevelCoun
 {
   sanityCheck(me);
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: return cdiGribIterator_zaxisUuid(me, outVgridNumber, outLevelCount, outUuid);
 #endif
@@ -702,7 +700,7 @@ cdiIterator_inqLevelUuid(CdiIterator *me, int *outVgridNumber, int *outLevelCoun
       return cdiFallbackIterator_zaxisUuid(me, outVgridNumber, outLevelCount, outUuid);
 
     default: Error(kUnexpectedFileTypeMessage); return CDI_ELIBNAVAIL;
-    }
+  }
 }
 
 /*
@@ -725,7 +723,7 @@ cdiIterator_inqTile(CdiIterator *me, int *outTileIndex, int *outTileAttribute)
 {
   sanityCheck(me);
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: return cdiGribIterator_inqTile(me, outTileIndex, outTileAttribute);
 #endif
@@ -745,7 +743,7 @@ cdiIterator_inqTile(CdiIterator *me, int *outTileIndex, int *outTileAttribute)
       return cdiFallbackIterator_inqTile(me, outTileIndex, outTileAttribute);
 
     default: Error(kUnexpectedFileTypeMessage); return CDI_ELIBNAVAIL;
-    }
+  }
 }
 
 /**
@@ -770,7 +768,7 @@ cdiIterator_inqTileCount(CdiIterator *me, int *outTileCount, int *outTileAttribu
 {
   sanityCheck(me);
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: return cdiGribIterator_inqTileCount(me, outTileCount, outTileAttributeCount);
 #endif
@@ -790,7 +788,7 @@ cdiIterator_inqTileCount(CdiIterator *me, int *outTileCount, int *outTileAttribu
       return cdiFallbackIterator_inqTileCount(me, outTileCount, outTileAttributeCount);
 
     default: Error(kUnexpectedFileTypeMessage); return CDI_ELIBNAVAIL;
-    }
+  }
 }
 
 /*
@@ -918,7 +916,7 @@ cdiIterator_inqVariableName(CdiIterator *me)
 {
   sanityCheck(me);
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: return cdiGribIterator_copyVariableName(me);
 #endif
@@ -938,7 +936,7 @@ cdiIterator_inqVariableName(CdiIterator *me)
       return cdiFallbackIterator_copyVariableName(me);
 
     default: Error(kUnexpectedFileTypeMessage); return NULL;
-    }
+  }
 }
 
 /*
@@ -983,7 +981,7 @@ cdiIterator_readField(CdiIterator *me, double *buffer, SizeType *numMissVals)
   sanityCheck(me);
   if (!buffer) xabort("NULL was passed in a buffer. Please provide a suitable buffer.");
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: cdiGribIterator_readField(me, buffer, &numMiss); return;
 #endif
@@ -1003,7 +1001,7 @@ cdiIterator_readField(CdiIterator *me, double *buffer, SizeType *numMissVals)
       cdiFallbackIterator_readField(me, buffer, &numMiss);
       return;
     default: Error(kUnexpectedFileTypeMessage);
-    }
+  }
 
   *numMissVals = (SizeType) numMiss;
 }
@@ -1029,7 +1027,7 @@ cdiIterator_readFieldF(CdiIterator *me, float *buffer, SizeType *numMissVals)
   sanityCheck(me);
   if (!buffer) xabort("NULL was passed in a buffer. Please provide a suitable buffer.");
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: cdiGribIterator_readFieldF(me, buffer, &numMiss); return;
 #endif
@@ -1049,7 +1047,7 @@ cdiIterator_readFieldF(CdiIterator *me, float *buffer, SizeType *numMissVals)
       cdiFallbackIterator_readFieldF(me, buffer, &numMiss);
       return;
     default: Error(kUnexpectedFileTypeMessage);
-    }
+  }
 
   *numMissVals = (SizeType) numMiss;
 }
@@ -1070,7 +1068,7 @@ cdiIterator_delete(CdiIterator *me)
 {
   if (!me) xabort("NULL was passed in as an iterator. Please check the return value of cdiIterator_new().");
   switch (cdiBaseFiletype(me->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRIB: cdiGribIterator_delete((CdiGribIterator *) me); break;
 #endif
@@ -1091,7 +1089,7 @@ cdiIterator_delete(CdiIterator *me)
       break;
 
     default: Error(kUnexpectedFileTypeMessage);
-    }
+  }
 }
 
 void

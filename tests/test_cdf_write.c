@@ -24,10 +24,10 @@ main(int argc, const char **argv)
 
   int streamID = streamOpenWrite(fname, CDI_FILETYPE_NC);
   if (streamID < 0)
-    {
-      fprintf(stderr, "Open failed on %s: %s\n", fname, cdiStringError(streamID));
-      return EXIT_FAILURE;
-    }
+  {
+    fprintf(stderr, "Open failed on %s: %s\n", fname, cdiStringError(streamID));
+    return EXIT_FAILURE;
+  }
 
   enum
   {

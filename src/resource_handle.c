@@ -24,10 +24,10 @@ show_stackframe(void)
 
   fprintf(stderr, "[bt] Execution path:\n");
   if (messages)
-    {
-      for (backtrace_size_t i = 0; i < trace_size; ++i) fprintf(stderr, "[bt] %s\n", messages[i]);
-      free(messages);
-    }
+  {
+    for (backtrace_size_t i = 0; i < trace_size; ++i) fprintf(stderr, "[bt] %s\n", messages[i]);
+    free(messages);
+  }
 #endif
 }
 
@@ -85,14 +85,13 @@ static pthread_mutex_t listMutex;
 
 #define LIST_LOCK() pthread_mutex_lock(&listMutex)
 #define LIST_UNLOCK() pthread_mutex_unlock(&listMutex)
-#define LIST_INIT(init0)                                                       \
-  do {                                                                         \
-      pthread_once(&listInitThread, listInitialize);                           \
-      pthread_mutex_lock(&listMutex);                                          \
-      if ((init0) && (!resHList || !resHList[0].resources)) reshListCreate(0); \
-      pthread_mutex_unlock(&listMutex);                                        \
-    }                                                                          \
-  while (0)
+#define LIST_INIT(init0)                                                     \
+  do {                                                                       \
+    pthread_once(&listInitThread, listInitialize);                           \
+    pthread_mutex_lock(&listMutex);                                          \
+    if ((init0) && (!resHList || !resHList[0].resources)) reshListCreate(0); \
+    pthread_mutex_unlock(&listMutex);                                        \
+  } while (0)
 
 #else
 
@@ -100,16 +99,15 @@ static int listInit = 0;
 
 #define LIST_LOCK()
 #define LIST_UNLOCK()
-#define LIST_INIT(init0)                                                           \
-  do {                                                                             \
-      if (!listInit)                                                               \
-        {                                                                          \
-          listInitialize();                                                        \
-          if ((init0) && (!resHList || !resHList[0].resources)) reshListCreate(0); \
-          listInit = 1;                                                            \
-        }                                                                          \
-    }                                                                              \
-  while (0)
+#define LIST_INIT(init0)                                                       \
+  do {                                                                         \
+    if (!listInit)                                                             \
+    {                                                                          \
+      listInitialize();                                                        \
+      if ((init0) && (!resHList || !resHList[0].resources)) reshListCreate(0); \
+      listInit = 1;                                                            \
+    }                                                                          \
+  } while (0)
 
 #endif
 
@@ -119,26 +117,26 @@ checkListLinear(const char *caller, int nsp)
 {
   const listElem_t *restrict r = resHList[nsp].resources;
   for (int i = 0; i < resHList[nsp].size; i++)
+  {
+    if (r[i].status != RESH_UNUSED) continue;
+
+    int prev = r[i].res.free.prev;
+    int next = r[i].res.free.next;
+
+    if (prev < -1 || prev >= resHList[nsp].size) xabortC(caller, "error: found invalid back-link in free-list!");
+    if (prev != -1)
     {
-      if (r[i].status != RESH_UNUSED) continue;
-
-      int prev = r[i].res.free.prev;
-      int next = r[i].res.free.next;
-
-      if (prev < -1 || prev >= resHList[nsp].size) xabortC(caller, "error: found invalid back-link in free-list!");
-      if (prev != -1)
-        {
-          if (r[prev].res.free.next != i) xabortC(caller, "error: found incomplete back link in free-list!");
-          if (r[prev].status & RESH_IN_USE_BIT) xabortC(caller, "error: found in-use back link element in free-list!");
-        }
-
-      if (next < -1 || next >= resHList[nsp].size) xabortC(caller, "error: found invalid forward-link in free-list!");
-      if (next != -1)
-        {
-          if (r[next].res.free.prev != i) xabortC(caller, "error: found incomplete forward link in free-list!");
-          if (r[next].status & RESH_IN_USE_BIT) xabortC(caller, "error: found in-use next element in free-list!");
-        }
+      if (r[prev].res.free.next != i) xabortC(caller, "error: found incomplete back link in free-list!");
+      if (r[prev].status & RESH_IN_USE_BIT) xabortC(caller, "error: found in-use back link element in free-list!");
     }
+
+    if (next < -1 || next >= resHList[nsp].size) xabortC(caller, "error: found invalid forward-link in free-list!");
+    if (next != -1)
+    {
+      if (r[next].res.free.prev != i) xabortC(caller, "error: found incomplete forward link in free-list!");
+      if (r[next].status & RESH_IN_USE_BIT) xabortC(caller, "error: found in-use next element in free-list!");
+    }
+  }
 }
 
 static void
@@ -149,30 +147,30 @@ checkListFwdBwd(const char *caller, int nsp)
   int next = resHList[nsp].freeHead, loopLimit = resHList[nsp].size + 1;
   int i = 0, cur = -1;
   while (next != -1)
-    {
-      if (next < 0 || next >= resHList[nsp].size) xabortC(caller, "error: found invalid index in free-list!");
-      if (r[next].status & RESH_IN_USE_BIT) xabortC(caller, "error: found in-use next element in free-list!");
+  {
+    if (next < 0 || next >= resHList[nsp].size) xabortC(caller, "error: found invalid index in free-list!");
+    if (r[next].status & RESH_IN_USE_BIT) xabortC(caller, "error: found in-use next element in free-list!");
 
-      cur = next;
-      next = r[next].res.free.next;
+    cur = next;
+    next = r[next].res.free.next;
 
-      if (++i > loopLimit) xabortC(caller, "error: found loop in free-list!");
-    }
+    if (++i > loopLimit) xabortC(caller, "error: found loop in free-list!");
+  }
 
   i = 0;
   int prev = cur;
   while (prev != -1)
-    {
-      if (prev < 0 || prev >= resHList[nsp].size) xabortC(caller, "error: found invalid index in free-list!");
-      if (r[prev].status & RESH_IN_USE_BIT) xabortC(caller, "error: found in-use prev element in free-list!");
+  {
+    if (prev < 0 || prev >= resHList[nsp].size) xabortC(caller, "error: found invalid index in free-list!");
+    if (r[prev].status & RESH_IN_USE_BIT) xabortC(caller, "error: found in-use prev element in free-list!");
 
-      cur = prev;
-      prev = r[prev].res.free.prev;
+    cur = prev;
+    prev = r[prev].res.free.prev;
 
-      if (prev == -1) break;
+    if (prev == -1) break;
 
-      if (++i > loopLimit) xabortC(caller, "error: found loop in free-list!");
-    }
+    if (++i > loopLimit) xabortC(caller, "error: found loop in free-list!");
+  }
 }
 
 static void
@@ -197,11 +195,11 @@ listInitResources(int nsp)
   listElem_t *p = resHList[nsp].resources;
 
   for (int i = 0; i < size; i++)
-    {
-      p[i].res.free.next = i + 1;
-      p[i].res.free.prev = i - 1;
-      p[i].status = RESH_UNUSED;
-    }
+  {
+    p[i].res.free.next = i + 1;
+    p[i].res.free.prev = i - 1;
+    p[i].status = RESH_UNUSED;
+  }
   p[size - 1].res.free.next = -1;
   resHList[nsp].freeHead = 0;
 
@@ -228,11 +226,11 @@ reshListCreate(int namespaceID)
   LIST_INIT(namespaceID != 0);
   LIST_LOCK();
   if (resHListSize <= namespaceID)
-    {
-      resHList = (struct resHList_t *) realloc(resHList, (size_t) (namespaceID + 1) * sizeof(resHList[0]));
-      for (int i = resHListSize; i <= namespaceID; ++i) reshListClearEntry(i);
-      resHListSize = namespaceID + 1;
-    }
+  {
+    resHList = (struct resHList_t *) realloc(resHList, (size_t) (namespaceID + 1) * sizeof(resHList[0]));
+    for (int i = resHListSize; i <= namespaceID; ++i) reshListClearEntry(i);
+    resHListSize = namespaceID + 1;
+  }
   listInitResources(namespaceID);
   LIST_UNLOCK();
 }
@@ -248,20 +246,20 @@ reshListDestruct(int namespaceID)
   int callerNamespaceID = namespaceGetActive();
   namespaceSetActive(namespaceID);
   if (resHList[namespaceID].resources)
+  {
+    for (int j = 0; j < resHList[namespaceID].size; j++)
     {
-      for (int j = 0; j < resHList[namespaceID].size; j++)
-        {
-          listElem_t *listElem = resHList[namespaceID].resources + j;
-          if (listElem->status & RESH_IN_USE_BIT)
-            {
-              listElem->res.v.ops->valDestroy(listElem->res.v.val);
-              reshRemove_(namespaceID, j, __func__);
-            }
-        }
-      free(resHList[namespaceID].resources);
-      resHList[namespaceID].resources = NULL;
-      reshListClearEntry(namespaceID);
+      listElem_t *listElem = resHList[namespaceID].resources + j;
+      if (listElem->status & RESH_IN_USE_BIT)
+      {
+        listElem->res.v.ops->valDestroy(listElem->res.v.val);
+        reshRemove_(namespaceID, j, __func__);
+      }
     }
+    free(resHList[namespaceID].resources);
+    resHList[namespaceID].resources = NULL;
+    reshListClearEntry(namespaceID);
+  }
   if (resHList[callerNamespaceID].resources) namespaceSetActive(callerNamespaceID);
   LIST_UNLOCK();
 }
@@ -316,11 +314,11 @@ listSizeExtend(void)
 
   listElem_t *r = resHList[nsp].resources;
   for (size_t i = (size_t) oldSize; i < newListSize; ++i)
-    {
-      r[i].res.free.next = (int) i + 1;
-      r[i].res.free.prev = (int) i - 1;
-      r[i].status = RESH_UNUSED;
-    }
+  {
+    r[i].res.free.next = (int) i + 1;
+    r[i].res.free.prev = (int) i - 1;
+    r[i].status = RESH_UNUSED;
+  }
 
   if (resHList[nsp].freeHead != -1) r[resHList[nsp].freeHead].res.free.prev = (int) newListSize - 1;
   r[newListSize - 1].res.free.next = resHList[nsp].freeHead;
@@ -409,10 +407,10 @@ reshDestroy(cdiResH resH)
   xassert(nspT.nsp == nsp && nspT.idx >= 0 && nspT.idx < resHList[nsp].size && r->res.v.ops);
 
   if (r->status & RESH_IN_USE_BIT)
-    {
-      r->res.v.ops->valDestroy(r->res.v.val);
-      reshRemove_(nsp, nspT.idx, __func__);
-    }
+  {
+    r->res.v.ops->valDestroy(r->res.v.val);
+    reshRemove_(nsp, nspT.idx, __func__);
+  }
 
   LIST_UNLOCK();
 }
@@ -454,10 +452,10 @@ reshReplace(cdiResH resH, void *p, const resOps *ops)
   while (resHList[nsp].size <= nspT.idx) listSizeExtend();
   listElem_t *q = resHList[nsp].resources + nspT.idx;
   if (q->status & RESH_IN_USE_BIT)
-    {
-      q->res.v.ops->valDestroy(q->res.v.val);
-      reshRemove_(nsp, nspT.idx, __func__);
-    }
+  {
+    q->res.v.ops->valDestroy(q->res.v.val);
+    reshRemove_(nsp, nspT.idx, __func__);
+  }
   reshPut_(nsp, nspT.idx, p, ops);
   LIST_UNLOCK();
 
@@ -480,39 +478,39 @@ reshGetElem(const char *caller, const char *expressionString, cdiResH resH, cons
   assert(nspT.idx >= 0);
 
   if (nspT.nsp == nsp && nspT.idx < resHList[nsp].size)
-    {
-      listElem = resHList[nsp].resources + nspT.idx;
-      LIST_UNLOCK();
-    }
+  {
+    listElem = resHList[nsp].resources + nspT.idx;
+    LIST_UNLOCK();
+  }
   else
-    {
-      LIST_UNLOCK();
-      show_stackframe();
+  {
+    LIST_UNLOCK();
+    show_stackframe();
 
-      if (resH == CDI_UNDEFID)
-        {
-          xabortC(caller,
-                  "Error while trying to resolve the ID \"%s\" in `%s()`: the value is CDI_UNDEFID (= %d).\n\tThis is most likely "
-                  "the result of a failed earlier call. Please check the IDs returned by CDI.",
-                  expressionString, caller, resH);
-        }
-      else
-        {
-          xabortC(caller,
-                  "Error while trying to resolve the ID \"%s\" in `%s()`: the value is garbage (= %d, which resolves to namespace "
-                  "= %d, index = %d).\n\tThis is either the result of using an uninitialized variable,\n\tof using a value as an "
-                  "ID that is not an ID,\n\tor of using an ID after it has been invalidated.",
-                  expressionString, caller, resH, nspT.nsp, nspT.idx);
-        }
+    if (resH == CDI_UNDEFID)
+    {
+      xabortC(caller,
+              "Error while trying to resolve the ID \"%s\" in `%s()`: the value is CDI_UNDEFID (= %d).\n\tThis is most likely "
+              "the result of a failed earlier call. Please check the IDs returned by CDI.",
+              expressionString, caller, resH);
     }
+    else
+    {
+      xabortC(caller,
+              "Error while trying to resolve the ID \"%s\" in `%s()`: the value is garbage (= %d, which resolves to namespace "
+              "= %d, index = %d).\n\tThis is either the result of using an uninitialized variable,\n\tof using a value as an "
+              "ID that is not an ID,\n\tor of using an ID after it has been invalidated.",
+              expressionString, caller, resH, nspT.nsp, nspT.idx);
+    }
+  }
 
   if (!(listElem && listElem->res.v.ops == ops))
-    {
-      show_stackframe();
+  {
+    show_stackframe();
 
-      xabortC(caller, "Error while trying to resolve the ID \"%s\" in `%s()`: list element not found. The failed ID is %d",
-              expressionString, caller, (int) resH);
-    }
+    xabortC(caller, "Error while trying to resolve the ID \"%s\" in `%s()`: list element not found. The failed ID is %d",
+            expressionString, caller, (int) resH);
+  }
 
   return listElem;
 }
@@ -640,15 +638,15 @@ getPackBufferSize(void *context)
   listElem_t *r = resHList[nsp].resources;
   for (int i = 0; i < resHList[nsp].size; i++)
     if (r[i].status & RESH_SYNC_BIT)
+    {
+      if (r[i].status == RESH_DESYNC_DELETED) { packBufferSize += resHDeleteNInt * intpacksize; }
+      else if (r[i].status == RESH_DESYNC_IN_USE)
       {
-        if (r[i].status == RESH_DESYNC_DELETED) { packBufferSize += resHDeleteNInt * intpacksize; }
-        else if (r[i].status == RESH_DESYNC_IN_USE)
-          {
-            xassert(r[i].res.v.ops);
-            /* packed resource plus 1 int for type */
-            packBufferSize += r[i].res.v.ops->valGetPackSize(r[i].res.v.val, context) + intpacksize;
-          }
+        xassert(r[i].res.v.ops);
+        /* packed resource plus 1 int for type */
+        packBufferSize += r[i].res.v.ops->valGetPackSize(r[i].res.v.val, context) + intpacksize;
       }
+    }
   /* end marker */
   packBufferSize += intpacksize;
 
@@ -678,11 +676,11 @@ reshGetTxCode(cdiResH resH)
   assert(nspT.idx >= 0);
 
   if (nspT.nsp == nsp && nspT.idx < resHList[nsp].size)
-    {
-      listElem_t *listElem = resHList[nsp].resources + nspT.idx;
-      xassert(listElem->res.v.ops);
-      type = listElem->res.v.ops->valTxCode(listElem->res.v.val);
-    }
+  {
+    listElem_t *listElem = resHList[nsp].resources + nspT.idx;
+    xassert(listElem->res.v.ops);
+    type = listElem->res.v.ops->valTxCode(listElem->res.v.val);
+  }
 
   LIST_UNLOCK();
 
@@ -714,23 +712,23 @@ reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
   listElem_t *r = resHList[nsp].resources;
   for (int i = 0; i < resHList[nsp].size; i++)
     if (r[i].status & RESH_SYNC_BIT)
+    {
+      if (r[i].status == RESH_DESYNC_DELETED)
       {
-        if (r[i].status == RESH_DESYNC_DELETED)
-          {
-            int temp[resHDeleteNInt] = { RESH_DELETE, namespaceIdxEncode2(nsp, i) };
-            serializePack(temp, resHDeleteNInt, CDI_DATATYPE_INT, pB, pBSize, &packBufferPos, context);
-          }
-        else
-          {
-            listElem_t *curr = r + i;
-            xassert(curr->res.v.ops);
-            int type = curr->res.v.ops->valTxCode(curr->res.v.val);
-            if (!type) continue;
-            serializePack(&type, 1, CDI_DATATYPE_INT, pB, pBSize, &packBufferPos, context);
-            curr->res.v.ops->valPack(curr->res.v.val, pB, pBSize, &packBufferPos, context);
-          }
-        r[i].status &= ~RESH_SYNC_BIT;
+        int temp[resHDeleteNInt] = { RESH_DELETE, namespaceIdxEncode2(nsp, i) };
+        serializePack(temp, resHDeleteNInt, CDI_DATATYPE_INT, pB, pBSize, &packBufferPos, context);
       }
+      else
+      {
+        listElem_t *curr = r + i;
+        xassert(curr->res.v.ops);
+        int type = curr->res.v.ops->valTxCode(curr->res.v.val);
+        if (!type) continue;
+        serializePack(&type, 1, CDI_DATATYPE_INT, pB, pBSize, &packBufferPos, context);
+        curr->res.v.ops->valPack(curr->res.v.val, pB, pBSize, &packBufferPos, context);
+      }
+      r[i].status &= ~RESH_SYNC_BIT;
+    }
 
   LIST_UNLOCK();
 
@@ -787,12 +785,12 @@ reshGetStatus(cdiResH resH, const resOps *ops)
 
   int status = RESH_UNUSED;
   if (nspT.idx < resHList[nsp].size)
-    {
-      listElem_t *listElem = resHList[nsp].resources + nspT.idx;
-      const resOps *elemOps = listElem->res.v.ops;
-      xassert(listElem && (!(listElem->status & RESH_IN_USE_BIT) || elemOps == ops || !ops));
-      status = listElem->status;
-    }
+  {
+    listElem_t *listElem = resHList[nsp].resources + nspT.idx;
+    const resOps *elemOps = listElem->res.v.ops;
+    xassert(listElem && (!(listElem->status & RESH_IN_USE_BIT) || elemOps == ops || !ops));
+    status = listElem->status;
+  }
 
   LIST_UNLOCK();
 
@@ -829,24 +827,24 @@ reshListCompare(int nsp0, int nsp1)
   int i, listSizeMin = (resHList[nsp0].size <= resHList[nsp1].size) ? resHList[nsp0].size : resHList[nsp1].size;
   listElem_t *resources0 = resHList[nsp0].resources, *resources1 = resHList[nsp1].resources;
   for (i = 0; i < listSizeMin; i++)
+  {
+    int occupied0 = (resources0[i].status & RESH_IN_USE_BIT) != 0, occupied1 = (resources1[i].status & RESH_IN_USE_BIT) != 0;
+    /* occupation mismatch ? */
+    int diff = occupied0 ^ occupied1;
+    valCompare |= (diff << cdiResHListOccupationMismatch);
+    if (!diff && occupied0)
     {
-      int occupied0 = (resources0[i].status & RESH_IN_USE_BIT) != 0, occupied1 = (resources1[i].status & RESH_IN_USE_BIT) != 0;
-      /* occupation mismatch ? */
-      int diff = occupied0 ^ occupied1;
-      valCompare |= (diff << cdiResHListOccupationMismatch);
-      if (!diff && occupied0)
-        {
-          /* both occupied, do resource types match? */
-          diff = (resources0[i].res.v.ops != resources1[i].res.v.ops || resources0[i].res.v.ops == NULL);
-          valCompare |= (diff << cdiResHListResourceTypeMismatch);
-          if (!diff)
-            {
-              /* types match, does content match also? */
-              diff = resources0[i].res.v.ops->valCompare(resources0[i].res.v.val, resources1[i].res.v.val);
-              valCompare |= (diff << cdiResHListResourceContentMismatch);
-            }
-        }
+      /* both occupied, do resource types match? */
+      diff = (resources0[i].res.v.ops != resources1[i].res.v.ops || resources0[i].res.v.ops == NULL);
+      valCompare |= (diff << cdiResHListResourceTypeMismatch);
+      if (!diff)
+      {
+        /* types match, does content match also? */
+        diff = resources0[i].res.v.ops->valCompare(resources0[i].res.v.val, resources1[i].res.v.val);
+        valCompare |= (diff << cdiResHListResourceContentMismatch);
+      }
     }
+  }
   /* find resources in nsp 0 beyond end of nsp 1 */
   for (int j = listSizeMin; j < resHList[nsp0].size; ++j)
     valCompare |= (((resources0[j].status & RESH_IN_USE_BIT) != 0) << cdiResHListOccupationMismatch);
@@ -875,28 +873,28 @@ reshListPrint(FILE *fp)
               "global resource list \n#\n");
 
   for (i = 0; i < namespaceGetNumber(); i++)
+  {
+    namespaceSetActive(i);
+
+    fprintf(fp, "\n");
+    fprintf(fp, "##################################\n");
+    fprintf(fp, "#\n");
+    fprintf(fp, "# namespace=%d\n", i);
+    fprintf(fp, "#\n");
+    fprintf(fp, "##################################\n\n");
+
+    fprintf(fp, "resHList[%d].size=%d\n", i, resHList[i].size);
+
+    for (j = 0; j < resHList[i].size; j++)
     {
-      namespaceSetActive(i);
-
-      fprintf(fp, "\n");
-      fprintf(fp, "##################################\n");
-      fprintf(fp, "#\n");
-      fprintf(fp, "# namespace=%d\n", i);
-      fprintf(fp, "#\n");
-      fprintf(fp, "##################################\n\n");
-
-      fprintf(fp, "resHList[%d].size=%d\n", i, resHList[i].size);
-
-      for (j = 0; j < resHList[i].size; j++)
-        {
-          curr = resHList[i].resources + j;
-          if (!(curr->status & RESH_IN_USE_BIT))
-            {
-              curr->res.v.ops->valPrint(curr->res.v.val, fp);
-              fprintf(fp, "\n");
-            }
-        }
+      curr = resHList[i].resources + j;
+      if (!(curr->status & RESH_IN_USE_BIT))
+      {
+        curr->res.v.ops->valPrint(curr->res.v.val, fp);
+        fprintf(fp, "\n");
+      }
     }
+  }
   fprintf(fp, "#\n#  end global resource list"
               "\n#\n##########################################\n\n");
 

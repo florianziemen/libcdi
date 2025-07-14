@@ -99,32 +99,32 @@ cdi_getenv_int(const char *envName)
 
   char *envString = getenv(envName);
   if (envString)
+  {
+    long fact = 1;
+    int len = (int) strlen(envString);
+    for (int loop = 0; loop < len; loop++)
     {
-      long fact = 1;
-      int len = (int) strlen(envString);
-      for (int loop = 0; loop < len; loop++)
+      if (!isdigit((int) envString[loop]))
+      {
+        switch (tolower((int) envString[loop]))
         {
-          if (!isdigit((int) envString[loop]))
-            {
-              switch (tolower((int) envString[loop]))
-                {
-                case 'k': fact = 1024; break;
-                case 'm': fact = 1048576; break;
-                case 'g': fact = 1073741824; break;
-                default:
-                  fact = 0;
-                  Warning("Invalid number string in %s: %s", envName, envString);
-                  Warning("%s must comprise only digits [0-9].", envName);
-                  break;
-                }
-              break;
-            }
+          case 'k': fact = 1024; break;
+          case 'm': fact = 1048576; break;
+          case 'g': fact = 1073741824; break;
+          default:
+            fact = 0;
+            Warning("Invalid number string in %s: %s", envName, envString);
+            Warning("%s must comprise only digits [0-9].", envName);
+            break;
         }
-
-      if (fact) envValue = fact * atol(envString);
-
-      if (CDI_Debug) Message("set %s to %ld", envName, envValue);
+        break;
+      }
     }
+
+    if (fact) envValue = fact * atol(envString);
+
+    if (CDI_Debug) Message("set %s to %ld", envName, envValue);
+  }
 
   return envValue;
 }
@@ -225,29 +225,29 @@ cdiDebug(int level)
   if (ulevel & 8) fileDebug(1);
 
   if (ulevel & 16)
-    {
+  {
 #ifdef HAVE_LIBCGRIBEX
-      gribSetDebug(1);
+    gribSetDebug(1);
 #endif
 #ifdef HAVE_LIBNETCDF
-      cdfDebug(1);
+    cdfDebug(1);
 #endif
 #ifdef HAVE_LIBSERVICE
-      srvDebug(1);
+    srvDebug(1);
 #endif
 #ifdef HAVE_LIBEXTRA
-      extDebug(1);
+    extDebug(1);
 #endif
 #ifdef HAVE_LIBIEG
-      iegDebug(1);
+    iegDebug(1);
 #endif
-    }
+  }
 
   if (CDI_Debug)
-    {
-      cdiPrintDefaults();
-      cdiPrintDatatypes();
-    }
+  {
+    cdiPrintDefaults();
+    cdiPrintDatatypes();
+  }
 }
 
 int
@@ -256,7 +256,7 @@ cdiHaveFiletype(int filetype)
   int status = 0;
 
   switch (filetype)
-    {
+  {
 #ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV: status = 1; break;
 #endif
@@ -291,7 +291,7 @@ cdiHaveFiletype(int filetype)
 #endif
 #endif
     default: status = 0; break;
-    }
+  }
 
   return status;
 }
@@ -309,10 +309,10 @@ cdiSetEccodesGrib1(bool value)
 {
 #ifndef HAVE_LIBGRIB_API
   if (value)
-    {
-      Warning("ecCodes support not compiled in, used CGRIBEX to decode/encode GRIB1 records!");
-      value = false;
-    }
+  {
+    Warning("ecCodes support not compiled in, used CGRIBEX to decode/encode GRIB1 records!");
+    value = false;
+  }
 #endif
   CDI_gribapi_grib1 = value;
 }
@@ -323,173 +323,173 @@ cdiInitialize(void)
   static bool Init_CDI = false;
 
   if (!Init_CDI)
-    {
-      Init_CDI = true;
-      char *envstr;
-      long value;
+  {
+    Init_CDI = true;
+    char *envstr;
+    long value;
 
 #ifdef HAVE_LIBCGRIBEX
-      gribFixZSE(1);    // 1: Fix ZeroShiftError of simple packed spherical harmonics
-      gribSetConst(1);  // 1: Don't pack constant fields on regular grids
+    gribFixZSE(1);    // 1: Fix ZeroShiftError of simple packed spherical harmonics
+    gribSetConst(1);  // 1: Don't pack constant fields on regular grids
 #endif
 #ifdef HAVE_LIBGRIB_API
-      grib_multi_support_off(NULL);
+    grib_multi_support_off(NULL);
 #endif
 
-      value = cdi_getenv_int("CDI_DEBUG");
-      if (value >= 0) CDI_Debug = (int) value;
+    value = cdi_getenv_int("CDI_DEBUG");
+    if (value >= 0) CDI_Debug = (int) value;
 
-      value = cdi_getenv_int("CDI_GRIBAPI_DEBUG");
-      if (value >= 0) CDI_gribapi_debug = (bool) value;
+    value = cdi_getenv_int("CDI_GRIBAPI_DEBUG");
+    if (value >= 0) CDI_gribapi_debug = (bool) value;
 
-      value = cdi_getenv_int("CDI_ECCODES_DEBUG");
-      if (value >= 0) CDI_gribapi_debug = (bool) value;
+    value = cdi_getenv_int("CDI_ECCODES_DEBUG");
+    if (value >= 0) CDI_gribapi_debug = (bool) value;
 
-      value = cdi_getenv_int("CDI_ECCODES_GRIB1");
-      if (value >= 0) cdiSetEccodesGrib1((bool) value);
+    value = cdi_getenv_int("CDI_ECCODES_GRIB1");
+    if (value >= 0) cdiSetEccodesGrib1((bool) value);
 
-      value = cdi_getenv_int("CDI_LOCK_IO");
-      if (value >= 0) CDI_Lock_IO = (bool) value;
+    value = cdi_getenv_int("CDI_LOCK_IO");
+    if (value >= 0) CDI_Lock_IO = (bool) value;
 
-      value = cdi_getenv_int("CDI_READ_CELL_CENTER");
-      if (value >= 0) CDI_Read_Cell_Center = (int) value;
+    value = cdi_getenv_int("CDI_READ_CELL_CENTER");
+    if (value >= 0) CDI_Read_Cell_Center = (int) value;
 
-      value = cdi_getenv_int("CDI_READ_CELL_CORNERS");
-      if (value >= 0) CDI_Read_Cell_Corners = (int) value;
+    value = cdi_getenv_int("CDI_READ_CELL_CORNERS");
+    if (value >= 0) CDI_Read_Cell_Corners = (int) value;
 
-      value = cdi_getenv_int("CDI_RECOPT");
-      if (value >= 0) CDI_Recopt = (int) value;
+    value = cdi_getenv_int("CDI_RECOPT");
+    if (value >= 0) CDI_Recopt = (int) value;
 
-      value = cdi_getenv_int("CDI_REGULARGRID");
-      if (value >= 0) cdiDataUnreduced = (int) value;
+    value = cdi_getenv_int("CDI_REGULARGRID");
+    if (value >= 0) cdiDataUnreduced = (int) value;
 
-      value = cdi_getenv_int("CDI_SORTNAME");
-      if (value >= 0) cdiSortName = (int) value;
+    value = cdi_getenv_int("CDI_SORTNAME");
+    if (value >= 0) cdiSortName = (int) value;
 
-      value = cdi_getenv_int("CDI_HAVE_MISSVAL");
-      if (value >= 0) cdiHaveMissval = (int) value;
+    value = cdi_getenv_int("CDI_HAVE_MISSVAL");
+    if (value >= 0) cdiHaveMissval = (int) value;
 
-      value = cdi_getenv_int("CDI_LEVELTYPE");
-      if (value >= 0) cdiDefaultLeveltype = (int) value;
+    value = cdi_getenv_int("CDI_LEVELTYPE");
+    if (value >= 0) cdiDefaultLeveltype = (int) value;
 
-      value = cdi_getenv_int("CDI_NETCDF_HDR_PAD");
-      if (value >= 0) CDI_Netcdf_Hdr_Pad = (size_t) value;
+    value = cdi_getenv_int("CDI_NETCDF_HDR_PAD");
+    if (value >= 0) CDI_Netcdf_Hdr_Pad = (size_t) value;
 
-      value = cdi_getenv_int("CDI_COPY_CHUNKSPEC");
-      if (value >= 0) CDI_CopyChunkSpec = (value > 0);
+    value = cdi_getenv_int("CDI_COPY_CHUNKSPEC");
+    if (value >= 0) CDI_CopyChunkSpec = (value > 0);
 
-      value = cdi_getenv_int("CDI_REMOVE_CHUNKSPEC");
-      if (value >= 0) CDI_RemoveChunkSpec = (value > 0);
+    value = cdi_getenv_int("CDI_REMOVE_CHUNKSPEC");
+    if (value >= 0) CDI_RemoveChunkSpec = (value > 0);
 
-      value = cdi_getenv_int("CDI_CHUNK_CACHE_INFO");
-      if (value > 0) CDI_Chunk_Cache_Info = true;
+    value = cdi_getenv_int("CDI_CHUNK_CACHE_INFO");
+    if (value > 0) CDI_Chunk_Cache_Info = true;
 
-      value = cdi_getenv_int("CDI_CHUNK_CACHE_IN");
-      if (value >= 0) CDI_Chunk_Cache_In = value;
+    value = cdi_getenv_int("CDI_CHUNK_CACHE_IN");
+    if (value >= 0) CDI_Chunk_Cache_In = value;
 
-      value = cdi_getenv_int("CDI_CHUNK_CACHE_OUT");
-      if (value >= 0) CDI_Chunk_Cache_Out = value;
+    value = cdi_getenv_int("CDI_CHUNK_CACHE_OUT");
+    if (value >= 0) CDI_Chunk_Cache_Out = value;
 
-      value = cdi_getenv_int("CDI_CHUNK_CACHE_MAX");
-      if (value >= 0) CDI_Chunk_Cache_Max = (size_t) value;
+    value = cdi_getenv_int("CDI_CHUNK_CACHE_MAX");
+    if (value >= 0) CDI_Chunk_Cache_Max = (size_t) value;
 
-      value = cdi_getenv_int("CDI_TEST");
-      if (value >= 0) CDI_Test = (int) value;
+    value = cdi_getenv_int("CDI_TEST");
+    if (value >= 0) CDI_Test = (int) value;
 
-      envstr = getenv("CDI_GRIB1_TEMPLATE");
-      if (envstr) CDI_GRIB1_Template = envstr;
+    envstr = getenv("CDI_GRIB1_TEMPLATE");
+    if (envstr) CDI_GRIB1_Template = envstr;
 
-      envstr = getenv("CDI_GRIB2_TEMPLATE");
-      if (envstr) CDI_GRIB2_Template = envstr;
+    envstr = getenv("CDI_GRIB2_TEMPLATE");
+    if (envstr) CDI_GRIB2_Template = envstr;
 
-      envstr = getenv("CDI_SHUFFLE");
-      if (envstr) CDI_Shuffle = atoi(envstr);
+    envstr = getenv("CDI_SHUFFLE");
+    if (envstr) CDI_Shuffle = atoi(envstr);
 
-      envstr = getenv("CDI_MISSVAL");
-      if (envstr) CDI_Default_Missval = atof(envstr);
-      /*
-      envstr = getenv("NC_MISSING_VALUE");
-      if ( envstr ) cdiNcMissingValue = atoi(envstr);
-      */
-      envstr = getenv("NC_CHUNKSIZEHINT");
-      if (envstr) CDI_Netcdf_Chunksizehint = atoi(envstr);
+    envstr = getenv("CDI_MISSVAL");
+    if (envstr) CDI_Default_Missval = atof(envstr);
+    /*
+    envstr = getenv("NC_MISSING_VALUE");
+    if ( envstr ) cdiNcMissingValue = atoi(envstr);
+    */
+    envstr = getenv("NC_CHUNKSIZEHINT");
+    if (envstr) CDI_Netcdf_Chunksizehint = atoi(envstr);
 
-      envstr = getenv("SPLIT_LTYPE_105");
-      if (envstr) CDI_Split_Ltype105 = atoi(envstr);
+    envstr = getenv("SPLIT_LTYPE_105");
+    if (envstr) CDI_Split_Ltype105 = atoi(envstr);
 
-      envstr = getenv("IGNORE_ATT_COORDINATES");
-      if (envstr) CDI_Ignore_Att_Coordinates = atoi(envstr) > 0;
+    envstr = getenv("IGNORE_ATT_COORDINATES");
+    if (envstr) CDI_Ignore_Att_Coordinates = atoi(envstr) > 0;
 
-      envstr = getenv("CDI_COORDINATES_LONLAT");
-      if (envstr) CDI_Coordinates_Lon_Lat = atoi(envstr) > 0;
+    envstr = getenv("CDI_COORDINATES_LONLAT");
+    if (envstr) CDI_Coordinates_Lon_Lat = atoi(envstr) > 0;
 
-      envstr = getenv("IGNORE_VALID_RANGE");
-      if (envstr) CDI_Ignore_Valid_Range = atoi(envstr) > 0;
+    envstr = getenv("IGNORE_VALID_RANGE");
+    if (envstr) CDI_Ignore_Valid_Range = atoi(envstr) > 0;
 
-      envstr = getenv("CDI_SKIP_RECORDS");
-      if (envstr)
-        {
-          CDI_Skip_Records = atoi(envstr);
-          CDI_Skip_Records = CDI_Skip_Records > 0 ? CDI_Skip_Records : 0;
-        }
+    envstr = getenv("CDI_SKIP_RECORDS");
+    if (envstr)
+    {
+      CDI_Skip_Records = atoi(envstr);
+      CDI_Skip_Records = CDI_Skip_Records > 0 ? CDI_Skip_Records : 0;
+    }
 
-      envstr = getenv("CDI_CONVENTION");
-      if (envstr)
-        {
-          if (str_is_equal(envstr, "CF") || str_is_equal(envstr, "cf"))
-            {
-              CDI_Convention = CDI_CONVENTION_CF;
-              if (CDI_Debug) Message("CDI convention was set to CF!");
-            }
-        }
+    envstr = getenv("CDI_CONVENTION");
+    if (envstr)
+    {
+      if (str_is_equal(envstr, "CF") || str_is_equal(envstr, "cf"))
+      {
+        CDI_Convention = CDI_CONVENTION_CF;
+        if (CDI_Debug) Message("CDI convention was set to CF!");
+      }
+    }
 
-      envstr = getenv("CDI_INVENTORY_MODE");
-      if (envstr)
-        {
-          if (strncmp(envstr, "time", 4) == 0)
-            {
-              CDI_Inventory_Mode = 2;
-              if (CDI_Debug) Message("Inventory mode was set to timestep!");
-            }
-        }
+    envstr = getenv("CDI_INVENTORY_MODE");
+    if (envstr)
+    {
+      if (strncmp(envstr, "time", 4) == 0)
+      {
+        CDI_Inventory_Mode = 2;
+        if (CDI_Debug) Message("Inventory mode was set to timestep!");
+      }
+    }
 
-      envstr = getenv("CDI_QUERY_ABORT");
-      if (envstr)
-        {
-          int ival = atoi(envstr);
-          if (ival == 0 || ival == 1)
-            {
-              CDI_Query_Abort = ival;
-              if (CDI_Debug) Message("CDI_Query_Abort = %s", envstr);
-            }
-        }
+    envstr = getenv("CDI_QUERY_ABORT");
+    if (envstr)
+    {
+      int ival = atoi(envstr);
+      if (ival == 0 || ival == 1)
+      {
+        CDI_Query_Abort = ival;
+        if (CDI_Debug) Message("CDI_Query_Abort = %s", envstr);
+      }
+    }
 
-      envstr = getenv("CDI_VERSION_INFO");
-      if (envstr)
-        {
-          int ival = atoi(envstr);
-          if (ival == 0 || ival == 1)
-            {
-              CDI_Version_Info = ival;
-              if (CDI_Debug) Message("CDI_Version_Info = %s", envstr);
-            }
-        }
+    envstr = getenv("CDI_VERSION_INFO");
+    if (envstr)
+    {
+      int ival = atoi(envstr);
+      if (ival == 0 || ival == 1)
+      {
+        CDI_Version_Info = ival;
+        if (CDI_Debug) Message("CDI_Version_Info = %s", envstr);
+      }
+    }
 
-      envstr = getenv("CDI_CONVERT_CUBESPHERE");
-      if (envstr)
-        {
-          int ival = atoi(envstr);
-          if (ival == 0 || ival == 1)
-            {
-              CDI_Convert_Cubesphere = ival;
-              if (CDI_Debug) Message("CDI_Convert_Cubesphere = %s", envstr);
-            }
-        }
+    envstr = getenv("CDI_CONVERT_CUBESPHERE");
+    if (envstr)
+    {
+      int ival = atoi(envstr);
+      if (ival == 0 || ival == 1)
+      {
+        CDI_Convert_Cubesphere = ival;
+        if (CDI_Debug) Message("CDI_Convert_Cubesphere = %s", envstr);
+      }
+    }
 
-      envstr = getenv("CDI_CALENDAR");
-      if (envstr)
-        {
-          // clang-format off
+    envstr = getenv("CDI_CALENDAR");
+    if (envstr)
+    {
+      // clang-format off
 	      if      (strncmp(envstr, "standard", 8)  == 0) CDI_Default_Calendar = CALENDAR_STANDARD;
 	      else if (strncmp(envstr, "gregorian", 9) == 0) CDI_Default_Calendar = CALENDAR_GREGORIAN;
 	      else if (strncmp(envstr, "proleptic", 9) == 0) CDI_Default_Calendar = CALENDAR_PROLEPTIC;
@@ -497,19 +497,19 @@ cdiInitialize(void)
 	      else if (strncmp(envstr, "365days", 7)   == 0) CDI_Default_Calendar = CALENDAR_365DAYS;
 	      else if (strncmp(envstr, "366days", 7)   == 0) CDI_Default_Calendar = CALENDAR_366DAYS;
 	      else if (strncmp(envstr, "none", 4)      == 0) CDI_Default_Calendar = CALENDAR_NONE;
-          // clang-format on
-          if (CDI_Debug) Message("Default calendar set to %s!", envstr);
-        }
+      // clang-format on
+      if (CDI_Debug) Message("Default calendar set to %s!", envstr);
+    }
 #ifdef HAVE_LIBCGRIBEX
-      gribSetCalendar(CDI_Default_Calendar);
+    gribSetCalendar(CDI_Default_Calendar);
 #endif
 
-      envstr = getenv("PARTAB_INTERN");
-      if (envstr) cdiPartabIntern = atoi(envstr);
+    envstr = getenv("PARTAB_INTERN");
+    if (envstr) cdiPartabIntern = atoi(envstr);
 
-      envstr = getenv("PARTAB_PATH");
-      if (envstr) cdiPartabPath = strdup(envstr);
-    }
+    envstr = getenv("PARTAB_PATH");
+    if (envstr) cdiPartabPath = strdup(envstr);
+  }
 }
 
 const char *
@@ -569,7 +569,7 @@ int
 cdiBaseFiletype(int filetype)
 {
   switch (filetype)
-    {
+  {
     case CDI_FILETYPE_GRB:
     case CDI_FILETYPE_GRB2: return CDI_FILETYPE_GRIB;
     case CDI_FILETYPE_NC:
@@ -578,7 +578,7 @@ cdiBaseFiletype(int filetype)
     case CDI_FILETYPE_NC4C:
     case CDI_FILETYPE_NCZARR:
     case CDI_FILETYPE_NC5: return CDI_FILETYPE_NETCDF;
-    }
+  }
 
   return filetype;
 }

@@ -42,17 +42,17 @@ tstepsNewEntry(stream_t *streamptr)
 
   // If the table overflows, double its size.
   if (tsID == tstepsTableSize)
-    {
-      if (tstepsTableSize == 0) tstepsTableSize = 1;
-      if (tstepsTableSize <= INT_MAX / 2)
-        tstepsTableSize *= 2;
-      else if (tstepsTableSize < INT_MAX)
-        tstepsTableSize = INT_MAX;
-      else
-        Error("Resizing of tstep table failed!");
+  {
+    if (tstepsTableSize == 0) tstepsTableSize = 1;
+    if (tstepsTableSize <= INT_MAX / 2)
+      tstepsTableSize *= 2;
+    else if (tstepsTableSize < INT_MAX)
+      tstepsTableSize = INT_MAX;
+    else
+      Error("Resizing of tstep table failed!");
 
-      tstepsTable = (tsteps_t *) Realloc(tstepsTable, (size_t) tstepsTableSize * sizeof(tsteps_t));
-    }
+    tstepsTable = (tsteps_t *) Realloc(tstepsTable, (size_t) tstepsTableSize * sizeof(tsteps_t));
+  }
 
   streamptr->tstepsTableSize = tstepsTableSize;
   streamptr->tsteps = tstepsTable;

@@ -53,10 +53,10 @@ dtDictFixMPIType(size_t i, int typeclass, int size)
   MPI_Aint lb, extent;
   xmpi(MPI_Type_get_extent(dtDict[i].mpidt, &lb, &extent));
   if ((int) extent != size)
-    {
-      /* type size mismatch needs to be fixed */
-      MPI_Type_match_size(typeclass, size, &dtDict[i].mpidt);
-    }
+  {
+    /* type size mismatch needs to be fixed */
+    MPI_Type_match_size(typeclass, size, &dtDict[i].mpidt);
+  }
 }
 
 static void

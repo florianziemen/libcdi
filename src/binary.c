@@ -108,29 +108,29 @@ binWriteF77Block(int fileID, int byteswap, size_t blocksize)
   unsigned char f77block[4];
 
   switch (HOST_ENDIANNESS)
-    {
+  {
     case CDI_BIGENDIAN:
       if (byteswap)
-        {
-          for (int i = 0; i <= 3; ++i) f77block[i] = (unsigned char) (ublocksize >> s[i]);
-        }
+      {
+        for (int i = 0; i <= 3; ++i) f77block[i] = (unsigned char) (ublocksize >> s[i]);
+      }
       else
-        {
-          for (int i = 0; i <= 3; ++i) f77block[3 - i] = (unsigned char) (ublocksize >> s[i]);
-        }
+      {
+        for (int i = 0; i <= 3; ++i) f77block[3 - i] = (unsigned char) (ublocksize >> s[i]);
+      }
       break;
     case CDI_LITTLEENDIAN:
       if (byteswap)
-        {
-          for (int i = 0; i <= 3; ++i) f77block[3 - i] = (unsigned char) (ublocksize >> s[i]);
-        }
+      {
+        for (int i = 0; i <= 3; ++i) f77block[3 - i] = (unsigned char) (ublocksize >> s[i]);
+      }
       else
-        {
-          for (int i = 0; i <= 3; ++i) f77block[i] = (unsigned char) (ublocksize >> s[i]);
-        }
+      {
+        for (int i = 0; i <= 3; ++i) f77block[i] = (unsigned char) (ublocksize >> s[i]);
+      }
       break;
     default: Error("Unhandled endianness %d", HOST_ENDIANNESS);
-    }
+  }
 
   if (fileWrite(fileID, f77block, 4) != 4) Error("Write failed on %s", fileInqName(fileID));
 }

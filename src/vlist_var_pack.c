@@ -85,17 +85,17 @@ vlistVarPack(vlist_t *p, int varID, char *buf, int size, int *position, void *co
     serializePack(dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64, buf, size, position, context);
   }
   if (nlevs)
-    {
-      int *levbuf = (int *) Malloc((size_t) nlevs * sizeof(int));
-      for (int levID = 0; levID < nlevs; ++levID) levbuf[levID] = var->levinfo[levID].flag;
-      serializePack(levbuf, nlevs, CDI_DATATYPE_INT, buf, size, position, context);
-      for (int levID = 0; levID < nlevs; ++levID) levbuf[levID] = var->levinfo[levID].index;
-      serializePack(levbuf, nlevs, CDI_DATATYPE_INT, buf, size, position, context);
-      for (int levID = 0; levID < nlevs; ++levID) levbuf[levID] = var->levinfo[levID].mlevelID;
-      serializePack(levbuf, nlevs, CDI_DATATYPE_INT, buf, size, position, context);
-      for (int levID = 0; levID < nlevs; ++levID) levbuf[levID] = var->levinfo[levID].flevelID;
-      Free(levbuf);
-    }
+  {
+    int *levbuf = (int *) Malloc((size_t) nlevs * sizeof(int));
+    for (int levID = 0; levID < nlevs; ++levID) levbuf[levID] = var->levinfo[levID].flag;
+    serializePack(levbuf, nlevs, CDI_DATATYPE_INT, buf, size, position, context);
+    for (int levID = 0; levID < nlevs; ++levID) levbuf[levID] = var->levinfo[levID].index;
+    serializePack(levbuf, nlevs, CDI_DATATYPE_INT, buf, size, position, context);
+    for (int levID = 0; levID < nlevs; ++levID) levbuf[levID] = var->levinfo[levID].mlevelID;
+    serializePack(levbuf, nlevs, CDI_DATATYPE_INT, buf, size, position, context);
+    for (int levID = 0; levID < nlevs; ++levID) levbuf[levID] = var->levinfo[levID].flevelID;
+    Free(levbuf);
+  }
 
   serializeKeysPack(&var->keys, buf, size, position, context);
 
@@ -130,24 +130,24 @@ vlistVarUnpack(int vlistID, char *buf, int size, int *position, int originNamesp
   const int nlevs = tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS];
   var_t *var = vlistptr->vars + newvar;
   if (nlevs)
-    {
-      int i, flagSetLev = 0;
-      cdiVlistCreateVarLevInfo(vlistptr, newvar);
+  {
+    int i, flagSetLev = 0;
+    cdiVlistCreateVarLevInfo(vlistptr, newvar);
 
-      int *levbuf = (int *) Malloc((size_t) nlevs * sizeof(int));
-      serializeUnpack(buf, size, position, levbuf, nlevs, CDI_DATATYPE_INT, context);
-      for (i = 0; i < nlevs; ++i) vlistDefFlag(vlistID, newvar, i, levbuf[i]);
-      for (i = 0; i < nlevs; ++i)
-        if (levbuf[i] == tempbuf[0]) flagSetLev = i;
-      vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev]);
-      serializeUnpack(buf, size, position, levbuf, nlevs, CDI_DATATYPE_INT, context);
-      for (i = 0; i < nlevs; ++i) vlistDefIndex(vlistID, newvar, i, levbuf[i]);
-      serializeUnpack(buf, size, position, levbuf, nlevs, CDI_DATATYPE_INT, context);
-      for (i = 0; i < nlevs; ++i) var->levinfo[i].mlevelID = levbuf[i];
-      serializeUnpack(buf, size, position, levbuf, nlevs, CDI_DATATYPE_INT, context);
-      for (i = 0; i < nlevs; ++i) var->levinfo[i].flevelID = levbuf[i];
-      Free(levbuf);
-    }
+    int *levbuf = (int *) Malloc((size_t) nlevs * sizeof(int));
+    serializeUnpack(buf, size, position, levbuf, nlevs, CDI_DATATYPE_INT, context);
+    for (i = 0; i < nlevs; ++i) vlistDefFlag(vlistID, newvar, i, levbuf[i]);
+    for (i = 0; i < nlevs; ++i)
+      if (levbuf[i] == tempbuf[0]) flagSetLev = i;
+    vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev]);
+    serializeUnpack(buf, size, position, levbuf, nlevs, CDI_DATATYPE_INT, context);
+    for (i = 0; i < nlevs; ++i) vlistDefIndex(vlistID, newvar, i, levbuf[i]);
+    serializeUnpack(buf, size, position, levbuf, nlevs, CDI_DATATYPE_INT, context);
+    for (i = 0; i < nlevs; ++i) var->levinfo[i].mlevelID = levbuf[i];
+    serializeUnpack(buf, size, position, levbuf, nlevs, CDI_DATATYPE_INT, context);
+    for (i = 0; i < nlevs; ++i) var->levinfo[i].flevelID = levbuf[i];
+    Free(levbuf);
+  }
 
   serializeKeysUnpack(buf, size, position, &var->keys, context);
 

@@ -49,7 +49,7 @@ static int
 get_timeunits(long unitsOfTime)
 {
   switch (unitsOfTime)
-    {
+  {
     case 13: return TUNIT_SECOND;
     case 0: return TUNIT_MINUTE;
     case 1: return TUNIT_HOUR;
@@ -57,7 +57,7 @@ get_timeunits(long unitsOfTime)
     case 11: return TUNIT_6HOURS;
     case 12: return TUNIT_12HOURS;
     case 2: return TUNIT_DAY;
-    }
+  }
 
   return TUNIT_HOUR;
 }
@@ -66,18 +66,18 @@ static double
 timeunits_factor(int timeUnits1, int timeUnits2)
 {
   if (timeUnits2 == TUNIT_HOUR)
+  {
+    switch (timeUnits1)
     {
-      switch (timeUnits1)
-        {
-        case TUNIT_SECOND: return 3600;
-        case TUNIT_MINUTE: return 60;
-        case TUNIT_HOUR: return 1;
-        case TUNIT_3HOURS: return 1.0 / 3;
-        case TUNIT_6HOURS: return 1.0 / 6;
-        case TUNIT_12HOURS: return 1.0 / 12;
-        case TUNIT_DAY: return 1.0 / 24;
-        }
+      case TUNIT_SECOND: return 3600;
+      case TUNIT_MINUTE: return 60;
+      case TUNIT_HOUR: return 1;
+      case TUNIT_3HOURS: return 1.0 / 3;
+      case TUNIT_6HOURS: return 1.0 / 6;
+      case TUNIT_12HOURS: return 1.0 / 12;
+      case TUNIT_DAY: return 1.0 / 24;
     }
+  }
 
   return 1;
 }
@@ -90,11 +90,11 @@ gribapi_get_timeunits(grib_handle *gh)
   if (unitsOfTime == -1) grib_get_long(gh, "indicatorOfUnitForTimeIncrement", &unitsOfTime);
 
   if (unitsOfTime != -1)
-    {
-      long stepUnits = -1;
-      grib_get_long(gh, "stepUnits", &stepUnits);
-      if (stepUnits == -1 && stepUnits != unitsOfTime) GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
-    }
+  {
+    long stepUnits = -1;
+    grib_get_long(gh, "stepUnits", &stepUnits);
+    if (stepUnits == -1 && stepUnits != unitsOfTime) GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
+  }
 
   return get_timeunits(unitsOfTime);
 }
@@ -112,10 +112,10 @@ gribapiGetSteps(grib_handle *gh, int timeunits, int *startStep, int *endStep)
   if (status == 0)
     *startStep = (int) lpar;
   else
-    {
-      status = grib_get_long(gh, "startStep", &lpar);
-      if (status == 0) *startStep = (int) (((double) lpar * timeunits_factor(timeunits, timeunits2)) + 0.5);
-    }
+  {
+    status = grib_get_long(gh, "startStep", &lpar);
+    if (status == 0) *startStep = (int) (((double) lpar * timeunits_factor(timeunits, timeunits2)) + 0.5);
+  }
 
   *endStep = *startStep;
   status = grib_get_long(gh, "endStep", &lpar);
@@ -162,7 +162,7 @@ gribapi_get_timeunits_factor(int timeUnits)
 {
   static bool lprint = true;
   switch (timeUnits)
-    {
+  {
     case TUNIT_SECOND: return 1;
     case TUNIT_MINUTE: return 60;
     case TUNIT_HOUR: return 3600;
@@ -172,11 +172,11 @@ gribapi_get_timeunits_factor(int timeUnits)
     case TUNIT_DAY: return 86400;
     default:
       if (lprint)
-        {
-          Warning("Time unit %d unsupported", timeUnits);
-          lprint = false;
-        }
-    }
+      {
+        Warning("Time unit %d unsupported", timeUnits);
+        lprint = false;
+      }
+  }
 
   return 0;
 }
@@ -196,35 +196,35 @@ gribapiGetValidityDateTime(grib_handle *gh, CdiDateTime *sDateTime)
   if (sigofrtime
       == 3)  // XXX: This looks like a bug to me, because timeRangeIndicator == 3 does not seem to have the same meaning as
              // significanceOfReferenceTime == 3. I would recommend replacing this condition with `if(!gribapiTimeIsFC())`.
-    {
-      vDateTime = gribapiGetDataDateTime(gh);
-    }
+  {
+    vDateTime = gribapiGetDataDateTime(gh);
+  }
   else
+  {
+    CdiDateTime rDateTime = gribapiGetDataDateTime(gh);
+
+    int timeUnits = gribapi_get_timeunits(gh);
+    int startStep = 0, endStep = 0;
+    gribapiGetSteps(gh, timeUnits, &startStep, &endStep);
+
+    if (rDateTime.date.day > 0)
     {
-      CdiDateTime rDateTime = gribapiGetDataDateTime(gh);
+      extern int CGRIBEX_grib_calendar;
+      JulianDate julianDate = julianDate_encode(CGRIBEX_grib_calendar, rDateTime);
 
-      int timeUnits = gribapi_get_timeunits(gh);
-      int startStep = 0, endStep = 0;
-      gribapiGetSteps(gh, timeUnits, &startStep, &endStep);
+      int64_t timeUnitFactor = gribapi_get_timeunits_factor(timeUnits);
 
-      if (rDateTime.date.day > 0)
-        {
-          extern int CGRIBEX_grib_calendar;
-          JulianDate julianDate = julianDate_encode(CGRIBEX_grib_calendar, rDateTime);
+      // if (startStep > 0)
+      {
+        JulianDate julianDate2 = julianDate_add_seconds(julianDate, timeUnitFactor * startStep);
+        *sDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate2);
+      }
 
-          int64_t timeUnitFactor = gribapi_get_timeunits_factor(timeUnits);
-
-          // if (startStep > 0)
-          {
-            JulianDate julianDate2 = julianDate_add_seconds(julianDate, timeUnitFactor * startStep);
-            *sDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate2);
-          }
-
-          rDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate_add_seconds(julianDate, timeUnitFactor * endStep));
-        }
-
-      vDateTime = rDateTime;
+      rDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate_add_seconds(julianDate, timeUnitFactor * endStep));
     }
+
+    vDateTime = rDateTime;
+  }
 
   return vDateTime;
 }
@@ -239,48 +239,48 @@ grib1_get_level(grib_handle *gh, int *leveltype, int *lbounds, int *level1, int 
 
   long lpar;
   if (!grib_get_long(gh, "indicatorOfTypeOfLevel", &lpar))  // 1 byte
+  {
+    *leveltype = (int) lpar;
+
+    switch (*leveltype)
     {
-      *leveltype = (int) lpar;
-
-      switch (*leveltype)
-        {
-        case GRIB1_LTYPE_SIGMA_LAYER:
-        case GRIB1_LTYPE_HYBRID_LAYER:
-        case GRIB1_LTYPE_LANDDEPTH_LAYER:
-          {
-            *lbounds = 1;
-            break;
-          }
-        }
-
-      if (*lbounds)
-        {
-          GRIB_CHECK(grib_get_long(gh, "topLevel", &lpar), 0);  // 1 byte
-          if (lpar == GRIB_MISSING_LONG) lpar = 0;
-          *level1 = (int) lpar;
-          GRIB_CHECK(grib_get_long(gh, "bottomLevel", &lpar), 0);  // 1 byte
-          if (lpar == GRIB_MISSING_LONG) lpar = 0;
-          *level2 = (int) lpar;
-        }
-      else
-        {
-          double dlevel;
-          GRIB_CHECK(grib_get_double(gh, "level", &dlevel), 0);  // 2 byte
-          if (*leveltype == GRIB1_LTYPE_ISOBARIC) dlevel *= 100;
-          if (dlevel < -2.e9 || dlevel > 2.e9) dlevel = 0;
-          if (*leveltype == GRIB1_LTYPE_99 || *leveltype == GRIB1_LTYPE_ISOBARIC_PA) *leveltype = GRIB1_LTYPE_ISOBARIC;
-
-          *level1 = (int) dlevel;
-          *level2 = 0;
-        }
+      case GRIB1_LTYPE_SIGMA_LAYER:
+      case GRIB1_LTYPE_HYBRID_LAYER:
+      case GRIB1_LTYPE_LANDDEPTH_LAYER:
+      {
+        *lbounds = 1;
+        break;
+      }
     }
+
+    if (*lbounds)
+    {
+      GRIB_CHECK(grib_get_long(gh, "topLevel", &lpar), 0);  // 1 byte
+      if (lpar == GRIB_MISSING_LONG) lpar = 0;
+      *level1 = (int) lpar;
+      GRIB_CHECK(grib_get_long(gh, "bottomLevel", &lpar), 0);  // 1 byte
+      if (lpar == GRIB_MISSING_LONG) lpar = 0;
+      *level2 = (int) lpar;
+    }
+    else
+    {
+      double dlevel;
+      GRIB_CHECK(grib_get_double(gh, "level", &dlevel), 0);  // 2 byte
+      if (*leveltype == GRIB1_LTYPE_ISOBARIC) dlevel *= 100;
+      if (dlevel < -2.e9 || dlevel > 2.e9) dlevel = 0;
+      if (*leveltype == GRIB1_LTYPE_99 || *leveltype == GRIB1_LTYPE_ISOBARIC_PA) *leveltype = GRIB1_LTYPE_ISOBARIC;
+
+      *level1 = (int) dlevel;
+      *level2 = 0;
+    }
+  }
 }
 
 static double
 grib2ScaleFactor(long factor)
 {
   switch (factor)
-    {
+  {
     case GRIB_MISSING_LONG: return 1;
     case -9: return 1000000000;
     case -8: return 100000000;
@@ -302,7 +302,7 @@ grib2ScaleFactor(long factor)
     case 8: return 0.00000001;
     case 9: return 0.000000001;
     default: return 0;
-    }
+  }
 }
 
 static int
@@ -329,45 +329,45 @@ grib2_get_level(grib_handle *gh, int *leveltype1, int *leveltype2, int *lbounds,
   long lpar;
   int status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);  // 1 byte
   if (status == 0)
+  {
+    *leveltype1 = (int) lpar;
+
+    status = grib_get_long(gh, "typeOfSecondFixedSurface", &lpar);  // 1 byte
+    /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
+    if (status == 0) *leveltype2 = (int) lpar;
+
+    if (*leveltype1 != 255 && *leveltype2 != 255 && *leveltype2 > 0) *lbounds = 1;
+    switch (*leveltype1)
     {
-      *leveltype1 = (int) lpar;
-
-      status = grib_get_long(gh, "typeOfSecondFixedSurface", &lpar);  // 1 byte
-      /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-      if (status == 0) *leveltype2 = (int) lpar;
-
-      if (*leveltype1 != 255 && *leveltype2 != 255 && *leveltype2 > 0) *lbounds = 1;
-      switch (*leveltype1)
-        {
-        case GRIB2_LTYPE_REFERENCE:
-          if (*leveltype2 == 1) *lbounds = 0;
-          break;
-        case GRIB2_LTYPE_LANDDEPTH:
-          *level_sf = 1000;
-          *level_unit = CDI_UNIT_M;
-          break;
-        case GRIB2_LTYPE_ISOBARIC:
-          *level_sf = 1000;
-          *level_unit = CDI_UNIT_PA;
-          break;
-        case GRIB2_LTYPE_SIGMA:
-          *level_sf = 1000;
-          *level_unit = 0;
-          break;
-        }
-
-      long factor, llevel;
-      GRIB_CHECK(grib_get_long(gh, "scaleFactorOfFirstFixedSurface", &factor), 0);  // 1 byte
-      GRIB_CHECK(grib_get_long(gh, "scaledValueOfFirstFixedSurface", &llevel), 0);  // 4 byte
-      *level1 = calc_level(*level_sf, factor, llevel);
-
-      if (*lbounds)
-        {
-          GRIB_CHECK(grib_get_long(gh, "scaleFactorOfSecondFixedSurface", &factor), 0);  // 1 byte
-          GRIB_CHECK(grib_get_long(gh, "scaledValueOfSecondFixedSurface", &llevel), 0);  // 4 byte
-          *level2 = calc_level(*level_sf, factor, llevel);
-        }
+      case GRIB2_LTYPE_REFERENCE:
+        if (*leveltype2 == 1) *lbounds = 0;
+        break;
+      case GRIB2_LTYPE_LANDDEPTH:
+        *level_sf = 1000;
+        *level_unit = CDI_UNIT_M;
+        break;
+      case GRIB2_LTYPE_ISOBARIC:
+        *level_sf = 1000;
+        *level_unit = CDI_UNIT_PA;
+        break;
+      case GRIB2_LTYPE_SIGMA:
+        *level_sf = 1000;
+        *level_unit = 0;
+        break;
     }
+
+    long factor, llevel;
+    GRIB_CHECK(grib_get_long(gh, "scaleFactorOfFirstFixedSurface", &factor), 0);  // 1 byte
+    GRIB_CHECK(grib_get_long(gh, "scaledValueOfFirstFixedSurface", &llevel), 0);  // 4 byte
+    *level1 = calc_level(*level_sf, factor, llevel);
+
+    if (*lbounds)
+    {
+      GRIB_CHECK(grib_get_long(gh, "scaleFactorOfSecondFixedSurface", &factor), 0);  // 1 byte
+      GRIB_CHECK(grib_get_long(gh, "scaledValueOfSecondFixedSurface", &llevel), 0);  // 4 byte
+      *level2 = calc_level(*level_sf, factor, llevel);
+    }
+  }
 }
 
 static void
@@ -375,25 +375,25 @@ grib_get_level(grib_handle *gh, int *leveltype1, int *leveltype2, int *lbounds, 
                int *level_unit, var_tile_t *tiles)
 {
   if (gribEditionNumber(gh) <= 1)
-    {
-      grib1_get_level(gh, leveltype1, lbounds, level1, level2);
-      *leveltype2 = -1;
-      *level_sf = 0;
-      *level_unit = 0;
-    }
+  {
+    grib1_get_level(gh, leveltype1, lbounds, level1, level2);
+    *leveltype2 = -1;
+    *level_sf = 0;
+    *level_unit = 0;
+  }
   else
-    {
-      grib2_get_level(gh, leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit);
+  {
+    grib2_get_level(gh, leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit);
 
-      // read in tiles attributes (if there are any)
-      tiles->tileindex = (int) gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILEINDEX], 0);
-      tiles->totalno_of_tileattr_pairs
-          = (int) gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS], -1);
-      tiles->tileClassification = (int) gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILE_CLASSIFICATION], -1);
-      tiles->numberOfTiles = (int) gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_TILES], -1);
-      tiles->numberOfAttributes = (int) gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_ATTR], -1);
-      tiles->attribute = (int) gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], -1);
-    }
+    // read in tiles attributes (if there are any)
+    tiles->tileindex = (int) gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILEINDEX], 0);
+    tiles->totalno_of_tileattr_pairs
+        = (int) gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS], -1);
+    tiles->tileClassification = (int) gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILE_CLASSIFICATION], -1);
+    tiles->numberOfTiles = (int) gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_TILES], -1);
+    tiles->numberOfAttributes = (int) gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_ATTR], -1);
+    tiles->attribute = (int) gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], -1);
+  }
 }
 
 static void
@@ -403,10 +403,10 @@ gribapi_get_string(grib_handle *gh, const char *key, char *string, size_t length
 
   int ret = grib_get_string(gh, key, string, &length);
   if (ret != 0)
-    {
-      fprintf(stderr, "grib_get_string(gh, \"%s\", ...) failed!\n", key);
-      GRIB_CHECK(ret, 0);
-    }
+  {
+    fprintf(stderr, "grib_get_string(gh, \"%s\", ...) failed!\n", key);
+    GRIB_CHECK(ret, 0);
+  }
   // clang-format off
   if      (length == 8 && memcmp(string, "unknown", length) == 0) string[0] = 0;
   else if (length == 2 && memcmp(string, "~", length) == 0)       string[0] = 0;
@@ -427,18 +427,18 @@ gribapiGetEnsembleInfo(grib_handle *gh, long *numberOfForecastsInEnsemble, long 
 {
   int status = 0;
   if (grib_get_long(gh, "numberOfForecastsInEnsemble", numberOfForecastsInEnsemble) == 0)
-    {
-      if (*numberOfForecastsInEnsemble > 0) status = 1;
-      grib_get_long(gh, "perturbationNumber", perturbationNumber);
-      grib_get_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast);
-    }
+  {
+    if (*numberOfForecastsInEnsemble > 0) status = 1;
+    grib_get_long(gh, "perturbationNumber", perturbationNumber);
+    grib_get_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast);
+  }
 
   if (status == 0)
-    {
-      *numberOfForecastsInEnsemble = -1;
-      *perturbationNumber = -1;
-      *typeOfEnsembleForecast = -1;
-    }
+  {
+    *numberOfForecastsInEnsemble = -1;
+    *perturbationNumber = -1;
+    *typeOfEnsembleForecast = -1;
+  }
 
   return status;
 }
@@ -524,50 +524,50 @@ gribapiGetKeys(grib_handle *gh, int varID)
   long numberOfForecastsInEnsemble = -1, perturbationNumber = -1, typeOfEnsembleForecast = -1;
   gribapiGetEnsembleInfo(gh, &numberOfForecastsInEnsemble, &perturbationNumber, &typeOfEnsembleForecast);
   if (numberOfForecastsInEnsemble > 0)
-    {
-      varDefKeyInt(varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, (int) numberOfForecastsInEnsemble);
-      varDefKeyInt(varID, CDI_KEY_PERTURBATIONNUMBER, (int) perturbationNumber);
-      if (typeOfEnsembleForecast != -1) varDefKeyInt(varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, (int) typeOfEnsembleForecast);
-    }
+  {
+    varDefKeyInt(varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, (int) numberOfForecastsInEnsemble);
+    varDefKeyInt(varID, CDI_KEY_PERTURBATIONNUMBER, (int) perturbationNumber);
+    if (typeOfEnsembleForecast != -1) varDefKeyInt(varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, (int) typeOfEnsembleForecast);
+  }
 
   long section2Length = 0;
   int status = grib_get_long(gh, "section2Length", &section2Length);
   if (status == 0 && section2Length > 0)
+  {
+    long grib2LocalSectionNumber;
+    long mpimType, mpimClass, mpimUser;
+    status = grib_get_long(gh, "grib2LocalSectionNumber", &grib2LocalSectionNumber);
+    if (status == 0)
     {
-      long grib2LocalSectionNumber;
-      long mpimType, mpimClass, mpimUser;
-      status = grib_get_long(gh, "grib2LocalSectionNumber", &grib2LocalSectionNumber);
-      if (status == 0)
-        {
-          size_t section2PaddingLength = 0;
-          status = grib_get_size(gh, "section2Padding", &section2PaddingLength);
-          if (status == 0 && section2PaddingLength > 0)
-            {
-              varDefKeyInt(varID, CDI_KEY_GRIB2LOCALSECTIONNUMBER, (int) grib2LocalSectionNumber);
-              varDefKeyInt(varID, CDI_KEY_SECTION2PADDINGLENGTH, (int) section2PaddingLength);
-              unsigned char *section2Padding = (unsigned char *) Malloc(section2PaddingLength);
-              grib_get_bytes(gh, "section2Padding", section2Padding, &section2PaddingLength);
-              varDefKeyBytes(varID, CDI_KEY_SECTION2PADDING, section2Padding, (int) section2PaddingLength);
-              Free(section2Padding);
-            }
-          else if (grib_get_long(gh, "mpimType", &mpimType) == 0 && grib_get_long(gh, "mpimClass", &mpimClass) == 0
-                   && grib_get_long(gh, "mpimUser", &mpimUser) == 0)
-            {
-              varDefKeyInt(varID, CDI_KEY_MPIMTYPE, (int) mpimType);
-              varDefKeyInt(varID, CDI_KEY_MPIMCLASS, (int) mpimClass);
-              varDefKeyInt(varID, CDI_KEY_MPIMUSER, (int) mpimUser);
+      size_t section2PaddingLength = 0;
+      status = grib_get_size(gh, "section2Padding", &section2PaddingLength);
+      if (status == 0 && section2PaddingLength > 0)
+      {
+        varDefKeyInt(varID, CDI_KEY_GRIB2LOCALSECTIONNUMBER, (int) grib2LocalSectionNumber);
+        varDefKeyInt(varID, CDI_KEY_SECTION2PADDINGLENGTH, (int) section2PaddingLength);
+        unsigned char *section2Padding = (unsigned char *) Malloc(section2PaddingLength);
+        grib_get_bytes(gh, "section2Padding", section2Padding, &section2PaddingLength);
+        varDefKeyBytes(varID, CDI_KEY_SECTION2PADDING, section2Padding, (int) section2PaddingLength);
+        Free(section2Padding);
+      }
+      else if (grib_get_long(gh, "mpimType", &mpimType) == 0 && grib_get_long(gh, "mpimClass", &mpimClass) == 0
+               && grib_get_long(gh, "mpimUser", &mpimUser) == 0)
+      {
+        varDefKeyInt(varID, CDI_KEY_MPIMTYPE, (int) mpimType);
+        varDefKeyInt(varID, CDI_KEY_MPIMCLASS, (int) mpimClass);
+        varDefKeyInt(varID, CDI_KEY_MPIMUSER, (int) mpimUser);
 
-              size_t revNumLen = 20;
-              unsigned char revNumber[revNumLen];
-              if (grib_get_bytes(gh, "revNumber", revNumber, &revNumLen) == 0)
-                varDefKeyBytes(varID, CDI_KEY_REVNUMBER, revNumber, (int) revNumLen);
+        size_t revNumLen = 20;
+        unsigned char revNumber[revNumLen];
+        if (grib_get_bytes(gh, "revNumber", revNumber, &revNumLen) == 0)
+          varDefKeyBytes(varID, CDI_KEY_REVNUMBER, revNumber, (int) revNumLen);
 
-              long revStatus;
-              grib_get_long(gh, "revStatus", &revStatus);
-              varDefKeyInt(varID, CDI_KEY_REVSTATUS, (int) revStatus);
-            }
-        }
+        long revStatus;
+        grib_get_long(gh, "revStatus", &revStatus);
+        varDefKeyInt(varID, CDI_KEY_REVSTATUS, (int) revStatus);
+      }
     }
+  }
 }
 
 static void
@@ -626,23 +626,23 @@ gribapiDefProjLCC(grib_handle *gh, int gridID)
   grib_get_long(gh, "projectionCentreFlag", &projflag);
   bool isSouthPole = gribbyte_get_bit((int) projflag, 1);
   if (isSouthPole)
-    {
-      gpp.lat_1 = -gpp.lat_1;
-      gpp.lat_2 = -gpp.lat_2;
-    }
+  {
+    gpp.lat_1 = -gpp.lat_1;
+    gpp.lat_2 = -gpp.lat_2;
+  }
 
   gpp.lat_0 = gpp.lat_2;
 
   if (proj_lonlat_to_lcc_func)
+  {
+    double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
+    proj_lonlat_to_lcc_func(gpp, (size_t) 1, &x_0, &y_0);
+    if (IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv))
     {
-      double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
-      proj_lonlat_to_lcc_func(gpp, (size_t) 1, &x_0, &y_0);
-      if (IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv))
-        {
-          gpp.x_0 = -x_0;
-          gpp.y_0 = -y_0;
-        }
+      gpp.x_0 = -x_0;
+      gpp.y_0 = -y_0;
     }
+  }
 
   gridDefParamsLCC(gridID, gpp);
 }
@@ -665,15 +665,15 @@ gribapiDefProjSTERE(grib_handle *gh, int gridID)
   gpp.lat_0 = southPoleOnProjectionPlane ? -90.0 : 90.0;
 
   if (proj_lonlat_to_stere_func)
+  {
+    double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
+    proj_lonlat_to_stere_func(gpp, (size_t) 1, &x_0, &y_0);
+    if (IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv))
     {
-      double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
-      proj_lonlat_to_stere_func(gpp, (size_t) 1, &x_0, &y_0);
-      if (IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv))
-        {
-          gpp.x_0 = -x_0;
-          gpp.y_0 = -y_0;
-        }
+      gpp.x_0 = -x_0;
+      gpp.y_0 = -y_0;
     }
+  }
 
   gridDefParamsSTERE(gridID, gpp);
 }
@@ -737,10 +737,10 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
 
   CdiQuery *query = streamptr->query;
   if (query && cdiQueryName(query, varname) < 0)
-    {
-      recinfo->used = false;
-      return;
-    }
+  {
+    recinfo->used = false;
+    return;
+  }
 
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -764,41 +764,41 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   int zaxistype = gribapi_get_zaxis_type(gribEditionNumber(gh), leveltype1);
 
   switch (zaxistype)
-    {
+  {
     case ZAXIS_HYBRID:
     case ZAXIS_HYBRID_HALF:
+    {
+      long lpar;
+      GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
+      /* FIXME: assert(lpar >= 0) */
+      size_t vctsize = (size_t) lpar;
+      if (vctsize > 0)
       {
-        long lpar;
-        GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
-        /* FIXME: assert(lpar >= 0) */
-        size_t vctsize = (size_t) lpar;
-        if (vctsize > 0)
-          {
-            double *vctptr = (double *) Malloc(vctsize * sizeof(double));
-            size_t dummy = vctsize;
-            GRIB_CHECK(grib_get_double_array(gh, "pv", vctptr, &dummy), 0);
-            varDefVCT(vctsize, vctptr);
-            Free(vctptr);
-          }
-        break;
+        double *vctptr = (double *) Malloc(vctsize * sizeof(double));
+        size_t dummy = vctsize;
+        GRIB_CHECK(grib_get_double_array(gh, "pv", vctptr, &dummy), 0);
+        varDefVCT(vctsize, vctptr);
+        Free(vctptr);
       }
-    case ZAXIS_REFERENCE:
-      {
-        unsigned char uuid[CDI_UUID_SIZE];
-        long lpar;
-        GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
-        // if (lpar != 6) fprintf(stderr, "Warning ...\n");
-        GRIB_CHECK(grib_get_long(gh, "nlev", &lpar), 0);
-        int nhlev = (int) lpar;
-        GRIB_CHECK(grib_get_long(gh, "numberOfVGridUsed", &lpar), 0);
-        int nvgrid = (int) lpar;
-        size_t len = (size_t) CDI_UUID_SIZE;
-        memset(uuid, 0, CDI_UUID_SIZE);
-        GRIB_CHECK(grib_get_bytes(gh, "uuidOfVGrid", uuid, &len), 0);
-        varDefZAxisReference(nhlev, nvgrid, uuid);
-        break;
-      }
+      break;
     }
+    case ZAXIS_REFERENCE:
+    {
+      unsigned char uuid[CDI_UUID_SIZE];
+      long lpar;
+      GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
+      // if (lpar != 6) fprintf(stderr, "Warning ...\n");
+      GRIB_CHECK(grib_get_long(gh, "nlev", &lpar), 0);
+      int nhlev = (int) lpar;
+      GRIB_CHECK(grib_get_long(gh, "numberOfVGridUsed", &lpar), 0);
+      int nvgrid = (int) lpar;
+      size_t len = (size_t) CDI_UUID_SIZE;
+      memset(uuid, 0, CDI_UUID_SIZE);
+      GRIB_CHECK(grib_get_bytes(gh, "uuidOfVGrid", uuid, &len), 0);
+      varDefZAxisReference(nhlev, nvgrid, uuid);
+      break;
+    }
+  }
 
   // if ( datatype > 32 ) datatype = CDI_DATATYPE_PACK32;
   if (datatype < 0) datatype = CDI_DATATYPE_PACK;
@@ -820,54 +820,54 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   gribapiGetKeys(gh, varID);
 
   if (lread_additional_keys)
+  {
+    long lval;
+    double dval;
+    for (int i = 0; i < cdiNAdditionalGRIBKeys; i++)
     {
-      long lval;
-      double dval;
-      for (int i = 0; i < cdiNAdditionalGRIBKeys; i++)
-        {
-          // note: if the key is not defined, we do not throw an error!
-          if (grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0)
-            varDefOptGribInt(varID, tile_index, lval, cdiAdditionalGRIBKeys[i]);
-          if (grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0)
-            varDefOptGribDbl(varID, tile_index, dval, cdiAdditionalGRIBKeys[i]);
-        }
+      // note: if the key is not defined, we do not throw an error!
+      if (grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0)
+        varDefOptGribInt(varID, tile_index, lval, cdiAdditionalGRIBKeys[i]);
+      if (grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0)
+        varDefOptGribDbl(varID, tile_index, dval, cdiAdditionalGRIBKeys[i]);
     }
+  }
 
   if (varInqInst(varID) == CDI_UNDEFID)
-    {
-      long center, subcenter;
-      GRIB_CHECK(grib_get_long(gh, "centre", &center), 0);
-      GRIB_CHECK(grib_get_long(gh, "subCentre", &subcenter), 0);
-      int instID = institutInq((int) center, (int) subcenter, NULL, NULL);
-      if (instID == CDI_UNDEFID) instID = institutDef((int) center, (int) subcenter, NULL, NULL);
-      varDefInst(varID, instID);
-    }
+  {
+    long center, subcenter;
+    GRIB_CHECK(grib_get_long(gh, "centre", &center), 0);
+    GRIB_CHECK(grib_get_long(gh, "subCentre", &subcenter), 0);
+    int instID = institutInq((int) center, (int) subcenter, NULL, NULL);
+    if (instID == CDI_UNDEFID) instID = institutDef((int) center, (int) subcenter, NULL, NULL);
+    varDefInst(varID, instID);
+  }
 
   if (varInqModel(varID) == CDI_UNDEFID)
+  {
+    long processID;
+    if (grib_get_long(gh, "generatingProcessIdentifier", &processID) == 0)
     {
-      long processID;
-      if (grib_get_long(gh, "generatingProcessIdentifier", &processID) == 0)
-        {
-          /* FIXME: assert(processID >= INT_MIN && processID <= INT_MAX) */
-          int modelID = modelInq(varInqInst(varID), (int) processID, NULL);
-          if (modelID == CDI_UNDEFID) modelID = modelDef(varInqInst(varID), (int) processID, NULL);
-          varDefModel(varID, modelID);
-        }
+      /* FIXME: assert(processID >= INT_MIN && processID <= INT_MAX) */
+      int modelID = modelInq(varInqInst(varID), (int) processID, NULL);
+      if (modelID == CDI_UNDEFID) modelID = modelDef(varInqInst(varID), (int) processID, NULL);
+      varDefModel(varID, modelID);
     }
+  }
 
   if (varInqTable(varID) == CDI_UNDEFID)
-    {
-      int pdis, pcat, pnum;
-      cdiDecodeParam(param, &pnum, &pcat, &pdis);
+  {
+    int pdis, pcat, pnum;
+    cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
-      if (pdis == 255)
-        {
-          int tabnum = pcat;
-          int tableID = tableInq(varInqModel(varID), tabnum, NULL);
-          if (tableID == CDI_UNDEFID) tableID = tableDef(varInqModel(varID), tabnum, NULL);
-          varDefTable(varID, tableID);
-        }
+    if (pdis == 255)
+    {
+      int tabnum = pcat;
+      int tableID = tableInq(varInqModel(varID), tabnum, NULL);
+      if (tableID == CDI_UNDEFID) tableID = tableDef(varInqModel(varID), tabnum, NULL);
+      varDefTable(varID, tableID);
     }
+  }
 
   if (CDI_Debug)
     Message("varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d", varID, param, zaxistype, gridID, levelID);
@@ -911,10 +911,10 @@ gribapiVarCompare(const compvar2_t *compVar, const record_t *record, int flag)
   memcpy(compVar0.name, record->varname, sizeof(compVar->name));
 
   if (flag == 0)
-    {
-      if (compVar0.tsteptype == TSTEP_INSTANT && compVar->tsteptype == TSTEP_INSTANT3) compVar0.tsteptype = TSTEP_INSTANT3;
-      if (compVar0.tsteptype == TSTEP_INSTANT3 && compVar->tsteptype == TSTEP_INSTANT) compVar0.tsteptype = TSTEP_INSTANT;
-    }
+  {
+    if (compVar0.tsteptype == TSTEP_INSTANT && compVar->tsteptype == TSTEP_INSTANT3) compVar0.tsteptype = TSTEP_INSTANT3;
+    if (compVar0.tsteptype == TSTEP_INSTANT3 && compVar->tsteptype == TSTEP_INSTANT) compVar0.tsteptype = TSTEP_INSTANT;
+  }
 
   compVar0.scanKeys = record->scanKeys;
   compVar0.tiles = record->tiles;
@@ -937,36 +937,36 @@ gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, void **gribbuff
   bool lieee = false;
 
   if (gribversion > 1)
+  {
+    size_t len = 256;
+    char typeOfPacking[256];
+    if (grib_get_string(gh, "packingType", typeOfPacking, &len) == 0)
     {
-      size_t len = 256;
-      char typeOfPacking[256];
-      if (grib_get_string(gh, "packingType", typeOfPacking, &len) == 0)
-        {
-          // fprintf(stderr, "packingType %zu %s\n", len, typeOfPacking);
-          if (strncmp(typeOfPacking, "grid_jpeg", len) == 0)
-            *outCompressionType = CDI_COMPRESS_JPEG;
-          else if (strncmp(typeOfPacking, "grid_ccsds", len) == 0)
-            *outCompressionType = CDI_COMPRESS_AEC;
-          else if (strncmp(typeOfPacking, "grid_ieee", len) == 0)
-            lieee = true;
-        }
+      // fprintf(stderr, "packingType %zu %s\n", len, typeOfPacking);
+      if (strncmp(typeOfPacking, "grid_jpeg", len) == 0)
+        *outCompressionType = CDI_COMPRESS_JPEG;
+      else if (strncmp(typeOfPacking, "grid_ccsds", len) == 0)
+        *outCompressionType = CDI_COMPRESS_AEC;
+      else if (strncmp(typeOfPacking, "grid_ieee", len) == 0)
+        lieee = true;
     }
+  }
 
   if (lieee)
-    {
-      long precision;
-      int status = grib_get_long(gh, "precision", &precision);
-      *outDatatype = (status == 0 && precision == 1) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
-    }
+  {
+    long precision;
+    int status = grib_get_long(gh, "precision", &precision);
+    *outDatatype = (status == 0 && precision == 1) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
+  }
   else
+  {
+    *outDatatype = CDI_DATATYPE_PACK;
+    long bitsPerValue;
+    if (grib_get_long(gh, "bitsPerValue", &bitsPerValue) == 0)
     {
-      *outDatatype = CDI_DATATYPE_PACK;
-      long bitsPerValue;
-      if (grib_get_long(gh, "bitsPerValue", &bitsPerValue) == 0)
-        {
-          if (bitsPerValue > 0 && bitsPerValue <= 32) *outDatatype = (int) bitsPerValue;
-        }
+      if (bitsPerValue > 0 && bitsPerValue <= 32) *outDatatype = (int) bitsPerValue;
     }
+  }
 
   return gh;
 }
@@ -985,9 +985,9 @@ checkTime(stream_t *streamptr, const compvar2_t *compVar, CdiDateTime verificati
   // First determine whether the current record exists already.
   int recID = 0;
   for (; recID < streamptr->nrecs; recID++)
-    {
-      if (gribapiVarCompare(compVar, &streamptr->tsteps[0].records[recID], 1) == 0) break;
-    }
+  {
+    if (gribapiVarCompare(compVar, &streamptr->tsteps[0].records[recID], 1) == 0) break;
+  }
   bool recordExists = (recID < streamptr->nrecs);
 
   // Then we need to know whether the verification time is consistent.
@@ -995,27 +995,26 @@ checkTime(stream_t *streamptr, const compvar2_t *compVar, CdiDateTime verificati
 
   // Finally, we make a decision.
   if (CDI_Inventory_Mode == 1)
-    {
-      if (recordExists) return CHECKTIME_STOP;
-      if (!consistentTime) return CHECKTIME_INCONSISTENT;
-    }
+  {
+    if (recordExists) return CHECKTIME_STOP;
+    if (!consistentTime) return CHECKTIME_INCONSISTENT;
+  }
   else
-    {
-      if (!consistentTime) return CHECKTIME_STOP;
-      if (recordExists) return CHECKTIME_SKIP;
-    }
+  {
+    if (!consistentTime) return CHECKTIME_STOP;
+    if (recordExists) return CHECKTIME_SKIP;
+  }
 
   return CHECKTIME_OK;
 }
 
-#define gribWarning(text, nrecs, timestep, varname, param, level1, level2)                                                      \
-  do {                                                                                                                          \
-      char paramstr[32];                                                                                                        \
-      cdiParamToString(param, paramstr, sizeof(paramstr));                                                                      \
-      Warning("Record %2d (name=%s id=%s lev1=%d lev2=%d) timestep %d: %s", nrecs, varname, paramstr, level1, level2, timestep, \
-              text);                                                                                                            \
-    }                                                                                                                           \
-  while (0)
+#define gribWarning(text, nrecs, timestep, varname, param, level1, level2)                                                    \
+  do {                                                                                                                        \
+    char paramstr[32];                                                                                                        \
+    cdiParamToString(param, paramstr, sizeof(paramstr));                                                                      \
+    Warning("Record %2d (name=%s id=%s lev1=%d lev2=%d) timestep %d: %s", nrecs, varname, paramstr, level1, level2, timestep, \
+            text);                                                                                                            \
+  } while (0)
 
 #ifdef HAVE_LIBFDB5
 #include "cdi_fdb.h"
@@ -1036,10 +1035,10 @@ fdbScanTimesteps(stream_t *streamptr)
   fdb_delete_request(request);
   if (numItems == 0) Error("FDB request doesn't find any database entries!");
   if (CDI_Debug)
-    {
-      printf("Original FDB items:\n");
-      print_keyvalueList(numItems, keyValueList);
-    }
+  {
+    printf("Original FDB items:\n");
+    print_keyvalueList(numItems, keyValueList);
+  }
 
   // if (check_keyvalueList(numItems, keyValueList) != 0) return CDI_EUFSTRUCT;
 
@@ -1049,10 +1048,10 @@ fdbScanTimesteps(stream_t *streamptr)
   cdi_fdb_sort_datetime(numItems, recordInfoList);
 
   if (CDI_Debug)
-    {
-      printf("Sorted FDB items:\n");
-      print_keyvalueList_sorted(numItems, keyValueList, recordInfoList);
-    }
+  {
+    printf("Sorted FDB items:\n");
+    print_keyvalueList_sorted(numItems, keyValueList, recordInfoList);
+  }
 
   int numRecords = get_num_records(numItems, recordInfoList);
   if (numRecords == 0) return CDI_EUFSTRUCT;
@@ -1078,62 +1077,62 @@ fdbScanTimesteps(stream_t *streamptr)
   taxis_t *taxis = &streamptr->tsteps[tsIDnew].taxis;
 
   for (int recID = 0; recID < numRecords; recID++)
+  {
+    int fdbItem = recordInfoList[recID].fdbIndex;
+    int vdate = recordInfoList[recID].date;
+    int vtime = recordInfoList[recID].time * 100;
+
+    long recsize = cdi_fdb_read_record(fdbHandle, &keyValueList[fdbItem], &buffersize, &gribbuffer);
+
+    int datatype, comptype = 0;
+    gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype);
+
+    GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
+
+    int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
+    var_tile_t tiles = dummy_tiles;
+    int level1 = 0, level2 = 0;
+    grib_get_level(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
+
+    char varname[256];
+    gribapi_get_string(gh, "shortName", varname, sizeof(varname));
+
+    int param = gribapiGetParam(gh);
+
+    CdiDateTime sDateTime;
+    // CdiDateTime vDateTime = gribapiGetValidityDateTime(gh, &sDateTime);
+    CdiDateTime vDateTime = cdiDateTime_set(vdate, vtime);
+    sDateTime = vDateTime;
+
+    VarScanKeys scanKeys = gribapiGetScanKeys(gh);
+
+    if (recID == 0)
     {
-      int fdbItem = recordInfoList[recID].fdbIndex;
-      int vdate = recordInfoList[recID].date;
-      int vtime = recordInfoList[recID].time * 100;
-
-      long recsize = cdi_fdb_read_record(fdbHandle, &keyValueList[fdbItem], &buffersize, &gribbuffer);
-
-      int datatype, comptype = 0;
-      gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype);
-
-      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
-
-      int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
-      var_tile_t tiles = dummy_tiles;
-      int level1 = 0, level2 = 0;
-      grib_get_level(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
-
-      char varname[256];
-      gribapi_get_string(gh, "shortName", varname, sizeof(varname));
-
-      int param = gribapiGetParam(gh);
-
-      CdiDateTime sDateTime;
-      // CdiDateTime vDateTime = gribapiGetValidityDateTime(gh, &sDateTime);
-      CdiDateTime vDateTime = cdiDateTime_set(vdate, vtime);
-      sDateTime = vDateTime;
-
-      VarScanKeys scanKeys = gribapiGetScanKeys(gh);
-
-      if (recID == 0)
-        {
-          // vDateTime0 = vDateTime;
-          taxis->rDateTime = gribapiGetDataDateTime(gh);
-          fcast = gribapiTimeIsFC(gh);
-          if (fcast) taxis->unit = gribapi_get_timeunits(gh);
-          taxis->fDateTime = taxis->rDateTime;
-          taxis->sDateTime = sDateTime;
-          taxis->vDateTime = vDateTime;
-        }
-
-      if (CDI_Debug)
-        {
-          char paramstr[32];
-          cdiParamToString(param, paramstr, sizeof(paramstr));
-          Message("%4d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", recID + 1, varname, paramstr, leveltype1, level1,
-                  level2, CdiDateTime_string(vDateTime));
-        }
-
-      var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
-      int recpos = 0;
-      gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2, lbounds, level1,
-                       level2, level_sf, level_unit, &scanKeys, ptiles, true, fdbItem);
-
-      grib_handle_delete(gh);
-      gh = NULL;
+      // vDateTime0 = vDateTime;
+      taxis->rDateTime = gribapiGetDataDateTime(gh);
+      fcast = gribapiTimeIsFC(gh);
+      if (fcast) taxis->unit = gribapi_get_timeunits(gh);
+      taxis->fDateTime = taxis->rDateTime;
+      taxis->sDateTime = sDateTime;
+      taxis->vDateTime = vDateTime;
     }
+
+    if (CDI_Debug)
+    {
+      char paramstr[32];
+      cdiParamToString(param, paramstr, sizeof(paramstr));
+      Message("%4d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", recID + 1, varname, paramstr, leveltype1, level1, level2,
+              CdiDateTime_string(vDateTime));
+    }
+
+    var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
+    int recpos = 0;
+    gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2, lbounds, level1,
+                     level2, level_sf, level_unit, &scanKeys, ptiles, true, fdbItem);
+
+    grib_handle_delete(gh);
+    gh = NULL;
+  }
 
   if (gh) grib_handle_delete(gh);
 
@@ -1153,43 +1152,43 @@ fdbScanTimesteps(stream_t *streamptr)
   streamScanTimeConstAdjust(streamptr, taxis);
 
   for (int tsID = 1; tsID < numTimesteps; tsID++)
+  {
+    int recordOffset = timestepRecordOffset[tsID];
+    int vdate = recordInfoList[recordOffset].date;
+    int vtime = recordInfoList[recordOffset].time * 100;
+    // printf("timestep=%d recOffset=%d date=%d time=%d\n", tsID + 1, recordOffset, vdate, vtime);
+
+    int tsIDnext = tstepsNewEntry(streamptr);
+    if (tsIDnext != tsID) Error("Internal error. tsID = %d", tsID);
+
+    streamptr->tsteps[tsID - 1].next = true;
+    streamptr->tsteps[tsID].position = 0;
+
+    taxis = &streamptr->tsteps[tsID].taxis;
+
+    cdi_create_records(streamptr, tsID, true);
+    recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
+    record_t *records = streamptr->tsteps[tsID].records;
+
+    int nrecs = (tsID == 1) ? streamScanInitRecords2(streamptr) : streamScanInitRecords(streamptr, tsID);
+    if (nrecs != numRecords) Error("Internal error. nrecs = %d", nrecs);
+
+    taxis->vDateTime = cdiDateTime_set(vdate, vtime);
+
+    int rindex = 0;
+    for (int recID = 0; recID < numRecords; recID++)
     {
-      int recordOffset = timestepRecordOffset[tsID];
-      int vdate = recordInfoList[recordOffset].date;
-      int vtime = recordInfoList[recordOffset].time * 100;
-      // printf("timestep=%d recOffset=%d date=%d time=%d\n", tsID + 1, recordOffset, vdate, vtime);
+      recinfo[recID].used = true;
+      streamptr->tsteps[tsID].recIDs[rindex] = recID;
+      rindex++;
 
-      int tsIDnext = tstepsNewEntry(streamptr);
-      if (tsIDnext != tsID) Error("Internal error. tsID = %d", tsID);
-
-      streamptr->tsteps[tsID - 1].next = true;
-      streamptr->tsteps[tsID].position = 0;
-
-      taxis = &streamptr->tsteps[tsID].taxis;
-
-      cdi_create_records(streamptr, tsID, true);
-      recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
-      record_t *records = streamptr->tsteps[tsID].records;
-
-      int nrecs = (tsID == 1) ? streamScanInitRecords2(streamptr) : streamScanInitRecords(streamptr, tsID);
-      if (nrecs != numRecords) Error("Internal error. nrecs = %d", nrecs);
-
-      taxis->vDateTime = cdiDateTime_set(vdate, vtime);
-
-      int rindex = 0;
-      for (int recID = 0; recID < numRecords; recID++)
-        {
-          recinfo[recID].used = true;
-          streamptr->tsteps[tsID].recIDs[rindex] = recID;
-          rindex++;
-
-          records[recID].position = 0;
-          records[recID].size = 0;
-          records[recID].fdbItemIndex = recordInfoList[recordOffset + recID].fdbIndex;
-        }
-
-      if (tsID == 1) streamptr->tsteps[1].nrecs = numRecords;
+      records[recID].position = 0;
+      records[recID].size = 0;
+      records[recID].fdbItemIndex = recordInfoList[recordOffset + recID].fdbIndex;
     }
+
+    if (tsID == 1) streamptr->tsteps[1].nrecs = numRecords;
+  }
 
   streamptr->rtsteps = numTimesteps;
   streamptr->ntsteps = numTimesteps;
@@ -1245,100 +1244,100 @@ gribapiScanTimestep1(stream_t *streamptr)
 
   unsigned nrecs = 0;
   while (true)
+  {
+    size_t recsize = gribGetSize(fileID);
+    recpos = fileGetPos(fileID);
+
+    if (recsize == 0)
     {
-      size_t recsize = gribGetSize(fileID);
-      recpos = fileGetPos(fileID);
-
-      if (recsize == 0)
-        {
-          streamptr->ntsteps = 1;
-          break;
-        }
-
-      grib_check_recsize(2, recsize);
-      ensureBufferSize(recsize, &buffersize, &gribbuffer);
-
-      size_t readsize = recsize;
-      // Search for next 'GRIB', read the following record, and position file offset after it.
-      if (gribRead(fileID, gribbuffer, &readsize)) break;
-
-      nrecsScanned++;
-
-      int datatype, comptype = 0;
-      gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype);
-
-      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
-
-      int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
-      var_tile_t tiles = dummy_tiles;
-      int level1 = 0, level2 = 0;
-      grib_get_level(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
-
-      char varname[256];
-      gribapi_get_string(gh, "shortName", varname, sizeof(varname));
-
-      int param = gribapiGetParam(gh);
-
-      if (!varname[0]) param_to_name(param, varname);
-
-      CdiDateTime sDateTime;
-      CdiDateTime vDateTime = gribapiGetValidityDateTime(gh, &sDateTime);
-
-      VarScanKeys scanKeys = gribapiGetScanKeys(gh);
-
-      if (nrecs == 0)
-        {
-          vDateTime0 = vDateTime;
-          taxis->rDateTime = gribapiGetDataDateTime(gh);
-          fcast = gribapiTimeIsFC(gh);
-          if (fcast) taxis->unit = gribapi_get_timeunits(gh);
-          taxis->fDateTime = taxis->rDateTime;
-          taxis->sDateTime = sDateTime;
-          taxis->vDateTime = vDateTime;
-        }
-      else
-        {
-          if (cdiDateTime_isLT(sDateTime, taxis->sDateTime)) taxis->sDateTime = sDateTime;
-
-          int tsteptype = gribapiGetTsteptype(gh);
-          size_t gridsize = gribapiGetGridsize(gh);
-          compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
-          checkTimeResult result = checkTime(streamptr, &compVar, vDateTime, vDateTime0);
-          if (result == CHECKTIME_STOP)
-            {
-              nrecsScanned--;
-              break;
-            }
-          else if (result == CHECKTIME_SKIP)
-            {
-              gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
-              continue;
-            }
-          else if (result == CHECKTIME_INCONSISTENT && warn_time)
-            {
-              gribWarning("Inconsistent verification time!", nrecsScanned, tsID + 1, varname, param, level1, level2);
-              warn_time = false;
-            }
-          assert(result == CHECKTIME_OK || result == CHECKTIME_INCONSISTENT);
-        }
-
-      nrecs++;
-
-      if (CDI_Debug)
-        {
-          char paramstr[32];
-          cdiParamToString(param, paramstr, sizeof(paramstr));
-          Message("%4u %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", nrecs, (int) recpos, varname, paramstr, leveltype1,
-                  level1, level2, CdiDateTime_string(vDateTime));
-        }
-
-      var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
-      gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2, lbounds, level1,
-                       level2, level_sf, level_unit, &scanKeys, ptiles, true, -1);
-
-      grib_handle_delete(gh);
-      gh = NULL;
+      streamptr->ntsteps = 1;
+      break;
     }
+
+    grib_check_recsize(2, recsize);
+    ensureBufferSize(recsize, &buffersize, &gribbuffer);
+
+    size_t readsize = recsize;
+    // Search for next 'GRIB', read the following record, and position file offset after it.
+    if (gribRead(fileID, gribbuffer, &readsize)) break;
+
+    nrecsScanned++;
+
+    int datatype, comptype = 0;
+    gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype);
+
+    GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
+
+    int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
+    var_tile_t tiles = dummy_tiles;
+    int level1 = 0, level2 = 0;
+    grib_get_level(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
+
+    char varname[256];
+    gribapi_get_string(gh, "shortName", varname, sizeof(varname));
+
+    int param = gribapiGetParam(gh);
+
+    if (!varname[0]) param_to_name(param, varname);
+
+    CdiDateTime sDateTime;
+    CdiDateTime vDateTime = gribapiGetValidityDateTime(gh, &sDateTime);
+
+    VarScanKeys scanKeys = gribapiGetScanKeys(gh);
+
+    if (nrecs == 0)
+    {
+      vDateTime0 = vDateTime;
+      taxis->rDateTime = gribapiGetDataDateTime(gh);
+      fcast = gribapiTimeIsFC(gh);
+      if (fcast) taxis->unit = gribapi_get_timeunits(gh);
+      taxis->fDateTime = taxis->rDateTime;
+      taxis->sDateTime = sDateTime;
+      taxis->vDateTime = vDateTime;
+    }
+    else
+    {
+      if (cdiDateTime_isLT(sDateTime, taxis->sDateTime)) taxis->sDateTime = sDateTime;
+
+      int tsteptype = gribapiGetTsteptype(gh);
+      size_t gridsize = gribapiGetGridsize(gh);
+      compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
+      checkTimeResult result = checkTime(streamptr, &compVar, vDateTime, vDateTime0);
+      if (result == CHECKTIME_STOP)
+      {
+        nrecsScanned--;
+        break;
+      }
+      else if (result == CHECKTIME_SKIP)
+      {
+        gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
+        continue;
+      }
+      else if (result == CHECKTIME_INCONSISTENT && warn_time)
+      {
+        gribWarning("Inconsistent verification time!", nrecsScanned, tsID + 1, varname, param, level1, level2);
+        warn_time = false;
+      }
+      assert(result == CHECKTIME_OK || result == CHECKTIME_INCONSISTENT);
+    }
+
+    nrecs++;
+
+    if (CDI_Debug)
+    {
+      char paramstr[32];
+      cdiParamToString(param, paramstr, sizeof(paramstr));
+      Message("%4u %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", nrecs, (int) recpos, varname, paramstr, leveltype1,
+              level1, level2, CdiDateTime_string(vDateTime));
+    }
+
+    var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
+    gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2, lbounds, level1,
+                     level2, level_sf, level_unit, &scanKeys, ptiles, true, -1);
+
+    grib_handle_delete(gh);
+    gh = NULL;
+  }
 
   if (gh) grib_handle_delete(gh);
 
@@ -1347,12 +1346,12 @@ gribapiScanTimestep1(stream_t *streamptr)
   if (nrecs == 0) return CDI_EUFSTRUCT;
 
   if (streamptr->query)
-    {
-      int numEntries = cdiQueryNumEntries(streamptr->query);
-      int numEntriesFound = cdiQueryNumEntriesFound(streamptr->query);
-      cdiQueryPrintEntriesNotFound(streamptr->query);
-      if (numEntriesFound == 0 || (CDI_Query_Abort && numEntries != numEntriesFound)) return CDI_EQENF;
-    }
+  {
+    int numEntries = cdiQueryNumEntries(streamptr->query);
+    int numEntriesFound = cdiQueryNumEntriesFound(streamptr->query);
+    cdiQueryPrintEntriesNotFound(streamptr->query);
+    if (numEntriesFound == 0 || (CDI_Query_Abort && numEntries != numEntriesFound)) return CDI_EQENF;
+  }
 
   cdi_generate_vars(streamptr);
 
@@ -1409,136 +1408,136 @@ gribapiScanTimestep2(stream_t *streamptr)
 
   int nrecsScanned = nrecords;  // Only used for debug output
   for (int rindex = 0; rindex <= nrecords; ++rindex)
+  {
+    size_t recsize = gribGetSize(fileID);
+    recpos = fileGetPos(fileID);
+    if (recsize == 0)
     {
-      size_t recsize = gribGetSize(fileID);
-      recpos = fileGetPos(fileID);
-      if (recsize == 0)
-        {
-          streamptr->ntsteps = 2;
-          break;
-        }
-
-      grib_check_recsize(2, recsize);
-      ensureBufferSize(recsize, &buffersize, &gribbuffer);
-
-      size_t readsize = recsize;
-      if (gribRead(fileID, gribbuffer, &readsize)) break;
-
-      grbDecompress(recsize, &buffersize, &gribbuffer);
-
-      nrecsScanned++;
-      gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
-      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
-
-      int level1 = 0, level2 = 0, leveltype1, leveltype2, lbounds, level_sf, level_unit;
-      var_tile_t tiles = dummy_tiles;
-      grib_get_level(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
-
-      char varname[256];
-      gribapi_get_string(gh, "shortName", varname, sizeof(varname));
-
-      int param = gribapiGetParam(gh);
-
-      if (!varname[0]) param_to_name(param, varname);
-
-      CdiDateTime sDateTime;
-      CdiDateTime vDateTime = gribapiGetValidityDateTime(gh, &sDateTime);
-
-      if (rindex == 0)
-        {
-          vDateTime0 = vDateTime;
-          int taxisID = vlistInqTaxis(vlistID);
-          if (taxisInqType(taxisID) == TAXIS_RELATIVE)
-            {
-              taxis->type = TAXIS_RELATIVE;
-              taxis->unit = gribapi_get_timeunits(gh);
-              taxis->rDateTime = gribapiGetDataDateTime(gh);
-            }
-          else { taxis->type = TAXIS_ABSOLUTE; }
-          taxis->fDateTime = taxis->rDateTime;
-          taxis->vDateTime = vDateTime;
-          taxis->sDateTime = sDateTime;
-        }
-      else
-        {
-          if (cdiDateTime_isLT(sDateTime, taxis->sDateTime)) taxis->sDateTime = sDateTime;
-        }
-
-      VarScanKeys scanKeys = gribapiGetScanKeys(gh);
-
-      int tsteptype = gribapiGetTsteptype(gh);
-      size_t gridsize = gribapiGetGridsize(gh);
-      compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
-
-      for (recID = 0; recID < nrecords; recID++)
-        if (gribapiVarCompare(&compVar, &records[recID], 0) == 0) break;
-
-      if (recID == nrecords)
-        {
-          if (CDI_Inventory_Mode == 1)
-            {
-              gribWarning("Parameter not defined at timestep 1!", nrecsScanned, tsID + 1, varname, param, level1, level2);
-              return CDI_EUFSTRUCT;
-            }
-          else
-            {
-              gribWarning("Parameter not defined at timestep 1, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
-              continue;
-            }
-        }
-
-      if (recinfo[recID].used)
-        {
-          if (CDI_Inventory_Mode == 1)
-            break;
-          else
-            {
-              if (cdiDateTime_isNE(vDateTime, vDateTime0)) break;
-
-              gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
-              continue;
-            }
-        }
-
-      recinfo[recID].used = true;
-      streamptr->tsteps[tsID].recIDs[rindex] = recID;
-
-      if (CDI_Debug)
-        {
-          char paramstr[32];
-          cdiParamToString(param, paramstr, sizeof(paramstr));
-          Message("%4d %8lld name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", nrecsScanned, (long long) recpos, varname,
-                  paramstr, leveltype1, level1, level2, CdiDateTime_string(vDateTime));
-        }
-
-      if (gribapiVarCompare(&compVar, &records[recID], 0) != 0)
-        {
-          Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
-                  records[recID].ilevel, level1);
-          return CDI_EUFSTRUCT;
-        }
-
-      records[recID].position = recpos;
-      records[recID].size = recsize;
-
-      int varID = recinfo[recID].varID;
-
-      if (tsteptype != vlistInqVarTsteptype(vlistID, varID)) vlistDefVarTsteptype(vlistID, varID, tsteptype);
-
-      grib_handle_delete(gh);
-      gh = NULL;
+      streamptr->ntsteps = 2;
+      break;
     }
+
+    grib_check_recsize(2, recsize);
+    ensureBufferSize(recsize, &buffersize, &gribbuffer);
+
+    size_t readsize = recsize;
+    if (gribRead(fileID, gribbuffer, &readsize)) break;
+
+    grbDecompress(recsize, &buffersize, &gribbuffer);
+
+    nrecsScanned++;
+    gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
+    GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
+
+    int level1 = 0, level2 = 0, leveltype1, leveltype2, lbounds, level_sf, level_unit;
+    var_tile_t tiles = dummy_tiles;
+    grib_get_level(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
+
+    char varname[256];
+    gribapi_get_string(gh, "shortName", varname, sizeof(varname));
+
+    int param = gribapiGetParam(gh);
+
+    if (!varname[0]) param_to_name(param, varname);
+
+    CdiDateTime sDateTime;
+    CdiDateTime vDateTime = gribapiGetValidityDateTime(gh, &sDateTime);
+
+    if (rindex == 0)
+    {
+      vDateTime0 = vDateTime;
+      int taxisID = vlistInqTaxis(vlistID);
+      if (taxisInqType(taxisID) == TAXIS_RELATIVE)
+      {
+        taxis->type = TAXIS_RELATIVE;
+        taxis->unit = gribapi_get_timeunits(gh);
+        taxis->rDateTime = gribapiGetDataDateTime(gh);
+      }
+      else { taxis->type = TAXIS_ABSOLUTE; }
+      taxis->fDateTime = taxis->rDateTime;
+      taxis->vDateTime = vDateTime;
+      taxis->sDateTime = sDateTime;
+    }
+    else
+    {
+      if (cdiDateTime_isLT(sDateTime, taxis->sDateTime)) taxis->sDateTime = sDateTime;
+    }
+
+    VarScanKeys scanKeys = gribapiGetScanKeys(gh);
+
+    int tsteptype = gribapiGetTsteptype(gh);
+    size_t gridsize = gribapiGetGridsize(gh);
+    compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
+
+    for (recID = 0; recID < nrecords; recID++)
+      if (gribapiVarCompare(&compVar, &records[recID], 0) == 0) break;
+
+    if (recID == nrecords)
+    {
+      if (CDI_Inventory_Mode == 1)
+      {
+        gribWarning("Parameter not defined at timestep 1!", nrecsScanned, tsID + 1, varname, param, level1, level2);
+        return CDI_EUFSTRUCT;
+      }
+      else
+      {
+        gribWarning("Parameter not defined at timestep 1, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
+        continue;
+      }
+    }
+
+    if (recinfo[recID].used)
+    {
+      if (CDI_Inventory_Mode == 1)
+        break;
+      else
+      {
+        if (cdiDateTime_isNE(vDateTime, vDateTime0)) break;
+
+        gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
+        continue;
+      }
+    }
+
+    recinfo[recID].used = true;
+    streamptr->tsteps[tsID].recIDs[rindex] = recID;
+
+    if (CDI_Debug)
+    {
+      char paramstr[32];
+      cdiParamToString(param, paramstr, sizeof(paramstr));
+      Message("%4d %8lld name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", nrecsScanned, (long long) recpos, varname, paramstr,
+              leveltype1, level1, level2, CdiDateTime_string(vDateTime));
+    }
+
+    if (gribapiVarCompare(&compVar, &records[recID], 0) != 0)
+    {
+      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
+              records[recID].ilevel, level1);
+      return CDI_EUFSTRUCT;
+    }
+
+    records[recID].position = recpos;
+    records[recID].size = recsize;
+
+    int varID = recinfo[recID].varID;
+
+    if (tsteptype != vlistInqVarTsteptype(vlistID, varID)) vlistDefVarTsteptype(vlistID, varID, tsteptype);
+
+    grib_handle_delete(gh);
+    gh = NULL;
+  }
 
   if (gh) grib_handle_delete(gh);
 
   int nrecs = 0;
   for (recID = 0; recID < nrecords; recID++)
-    {
-      if (recinfo[recID].used)
-        nrecs++;
-      else
-        vlistDefVarTimetype(vlistID, recinfo[recID].varID, TIME_CONSTANT);
-    }
+  {
+    if (recinfo[recID].used)
+      nrecs++;
+    else
+      vlistDefVarTimetype(vlistID, recinfo[recID].varID, TIME_CONSTANT);
+  }
   streamptr->tsteps[tsID].nrecs = nrecs;
 
   streamptr->rtsteps = 2;
@@ -1561,188 +1560,185 @@ gribapiScanTimestep(stream_t *streamptr)
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   if (streamptr->tsteps[tsID].recordSize == 0)
+  {
+    void *gribbuffer = streamptr->record->buffer;
+    size_t buffersize = streamptr->record->buffersize;
+
+    cdi_create_records(streamptr, tsID, true);
+    recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
+    record_t *records = streamptr->tsteps[tsID].records;
+
+    nrecs = streamScanInitRecords(streamptr, tsID);
+
+    int fileID = streamptr->fileID;
+
+    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+
+    int nrecsScanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs * (tsID - 1);  // Only used for debug output.
+    off_t recpos = 0;
+    CdiDateTime vDateTime0;
+    cdiDateTime_init(&vDateTime0);
+    grib_handle *gh = NULL;
+    char varname[256];
+    for (int rindex = 0; rindex <= nrecs; ++rindex)
     {
-      void *gribbuffer = streamptr->record->buffer;
-      size_t buffersize = streamptr->record->buffersize;
+      varname[0] = 0;
+      size_t recsize = gribGetSize(fileID);
+      recpos = fileGetPos(fileID);
+      if (recsize == 0)
+      {
+        streamptr->ntsteps = streamptr->rtsteps + 1;
+        break;
+      }
 
-      cdi_create_records(streamptr, tsID, true);
-      recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
-      record_t *records = streamptr->tsteps[tsID].records;
+      grib_check_recsize(2, recsize);
+      ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
-      nrecs = streamScanInitRecords(streamptr, tsID);
+      size_t readsize = recsize;
+      if (gribRead(fileID, gribbuffer, &readsize))
+      {
+        Warning("Inconsistent timestep %d (GRIB record %d/%d)!", tsID + 1, rindex + 1, streamptr->tsteps[tsID].recordSize);
+        break;
+      }
 
-      int fileID = streamptr->fileID;
+      grbDecompress(recsize, &buffersize, &gribbuffer);
 
-      fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+      nrecsScanned++;
+      gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
+      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
 
-      int nrecsScanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs * (tsID - 1);  // Only used for debug output.
-      off_t recpos = 0;
-      CdiDateTime vDateTime0;
-      cdiDateTime_init(&vDateTime0);
-      grib_handle *gh = NULL;
-      char varname[256];
-      for (int rindex = 0; rindex <= nrecs; ++rindex)
+      int level1 = 0, level2 = 0, leveltype1, leveltype2 = -1, lbounds, level_sf, level_unit;
+      var_tile_t tiles = dummy_tiles;
+      grib_get_level(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
+
+      CdiDateTime sDateTime;
+      CdiDateTime vDateTime = gribapiGetValidityDateTime(gh, &sDateTime);
+
+      if (rindex == nrecs) break;
+
+      gribapi_get_string(gh, "shortName", varname, sizeof(varname));
+
+      int param = gribapiGetParam(gh);
+
+      if (!varname[0]) param_to_name(param, varname);
+
+      if (rindex == 0)
+      {
+        vDateTime0 = vDateTime;
+        int taxisID = vlistInqTaxis(vlistID);
+        if (taxisInqType(taxisID) == TAXIS_RELATIVE)
         {
-          varname[0] = 0;
-          size_t recsize = gribGetSize(fileID);
-          recpos = fileGetPos(fileID);
-          if (recsize == 0)
-            {
-              streamptr->ntsteps = streamptr->rtsteps + 1;
-              break;
-            }
-
-          grib_check_recsize(2, recsize);
-          ensureBufferSize(recsize, &buffersize, &gribbuffer);
-
-          size_t readsize = recsize;
-          if (gribRead(fileID, gribbuffer, &readsize))
-            {
-              Warning("Inconsistent timestep %d (GRIB record %d/%d)!", tsID + 1, rindex + 1, streamptr->tsteps[tsID].recordSize);
-              break;
-            }
-
-          grbDecompress(recsize, &buffersize, &gribbuffer);
-
-          nrecsScanned++;
-          gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
-          GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_Default_Missval), 0);
-
-          int level1 = 0, level2 = 0, leveltype1, leveltype2 = -1, lbounds, level_sf, level_unit;
-          var_tile_t tiles = dummy_tiles;
-          grib_get_level(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
-
-          CdiDateTime sDateTime;
-          CdiDateTime vDateTime = gribapiGetValidityDateTime(gh, &sDateTime);
-
-          if (rindex == nrecs) break;
-
-          gribapi_get_string(gh, "shortName", varname, sizeof(varname));
-
-          int param = gribapiGetParam(gh);
-
-          if (!varname[0]) param_to_name(param, varname);
-
-          if (rindex == 0)
-            {
-              vDateTime0 = vDateTime;
-              int taxisID = vlistInqTaxis(vlistID);
-              if (taxisInqType(taxisID) == TAXIS_RELATIVE)
-                {
-                  taxis->type = TAXIS_RELATIVE;
-                  taxis->unit = gribapi_get_timeunits(gh);
-                  taxis->rDateTime = gribapiGetDataDateTime(gh);
-                }
-              else { taxis->type = TAXIS_ABSOLUTE; }
-              taxis->fDateTime = taxis->rDateTime;
-              taxis->vDateTime = vDateTime;
-              taxis->sDateTime = sDateTime;
-            }
-          else
-            {
-              if (cdiDateTime_isLT(sDateTime, taxis->sDateTime)) taxis->sDateTime = sDateTime;
-            }
-
-          VarScanKeys scanKeys = gribapiGetScanKeys(gh);
-
-          int tsteptype = gribapiGetTsteptype(gh);
-          size_t gridsize = gribapiGetGridsize(gh);
-          compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
-
-          for (vrecID = 0; vrecID < nrecs; vrecID++)
-            {
-              recID = streamptr->tsteps[1].recIDs[vrecID];
-              if (gribapiVarCompare(&compVar, &records[recID], 0) == 0) break;
-            }
-
-          if (vrecID == nrecs)
-            {
-              if (CDI_Inventory_Mode == 1)
-                {
-                  gribWarning("Parameter not defined at timestep 1!", nrecsScanned, tsID + 1, varname, param, level1, level2);
-                  return CDI_EUFSTRUCT;
-                }
-              else
-                {
-                  gribWarning("Parameter not defined at timestep 1, skipped!", nrecsScanned, tsID + 1, varname, param, level1,
-                              level2);
-                  continue;
-                }
-            }
-
-          if (CDI_Inventory_Mode != 1)
-            {
-              if (recinfo[recID].used)
-                {
-                  if (cdiDateTime_isNE(vDateTime, vDateTime0)) break;
-
-                  if (CDI_Debug)
-                    gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
-
-                  continue;
-                }
-            }
-
-          recinfo[recID].used = true;
-          streamptr->tsteps[tsID].recIDs[rindex] = recID;
-
-          if (CDI_Debug)
-            Message("%4d %8lld %4d %8d %8s", rindex + 1, (long long) recpos, param, level1, CdiDateTime_string(vDateTime));
-
-          if (gribapiVarCompare(&compVar, &records[recID], 0) != 0)
-            {
-              Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
-                      records[recID].ilevel, level1);
-              Error("Invalid, unsupported or inconsistent record structure");
-            }
-
-          records[recID].position = recpos;
-          records[recID].size = recsize;
-
-          if (CDI_Debug) Message("%4d %8lld %4d %8d %s", rindex, (long long) recpos, param, level1, CdiDateTime_string(vDateTime));
-
-          grib_handle_delete(gh);
-          gh = NULL;
+          taxis->type = TAXIS_RELATIVE;
+          taxis->unit = gribapi_get_timeunits(gh);
+          taxis->rDateTime = gribapiGetDataDateTime(gh);
         }
+        else { taxis->type = TAXIS_ABSOLUTE; }
+        taxis->fDateTime = taxis->rDateTime;
+        taxis->vDateTime = vDateTime;
+        taxis->sDateTime = sDateTime;
+      }
+      else
+      {
+        if (cdiDateTime_isLT(sDateTime, taxis->sDateTime)) taxis->sDateTime = sDateTime;
+      }
 
-      if (gh) grib_handle_delete(gh);
+      VarScanKeys scanKeys = gribapiGetScanKeys(gh);
+
+      int tsteptype = gribapiGetTsteptype(gh);
+      size_t gridsize = gribapiGetGridsize(gh);
+      compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
 
       for (vrecID = 0; vrecID < nrecs; vrecID++)
-        {
-          recID = streamptr->tsteps[tsID].recIDs[vrecID];
-          if (!recinfo[recID].used) break;
-        }
+      {
+        recID = streamptr->tsteps[1].recIDs[vrecID];
+        if (gribapiVarCompare(&compVar, &records[recID], 0) == 0) break;
+      }
 
-      if (vrecID < nrecs)
+      if (vrecID == nrecs)
+      {
+        if (CDI_Inventory_Mode == 1)
         {
-          gribWarning("Parameter not found!", nrecsScanned, tsID + 1, varname, records[recID].param, records[recID].ilevel,
-                      records[recID].ilevel2);
+          gribWarning("Parameter not defined at timestep 1!", nrecsScanned, tsID + 1, varname, param, level1, level2);
           return CDI_EUFSTRUCT;
         }
-
-      streamptr->rtsteps++;
-
-      if (streamptr->ntsteps != streamptr->rtsteps)
+        else
         {
-          tsID = tstepsNewEntry(streamptr);
-          if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
-
-          streamptr->tsteps[tsID - 1].next = true;
-          streamptr->tsteps[tsID].position = recpos;
+          gribWarning("Parameter not defined at timestep 1, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
+          continue;
         }
+      }
 
-      fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
-      streamptr->tsteps[tsID].position = recpos;
+      if (CDI_Inventory_Mode != 1)
+      {
+        if (recinfo[recID].used)
+        {
+          if (cdiDateTime_isNE(vDateTime, vDateTime0)) break;
 
-      streamptr->record->buffer = gribbuffer;
-      streamptr->record->buffersize = buffersize;
+          if (CDI_Debug) gribWarning("Parameter already exist, skipped!", nrecsScanned, tsID + 1, varname, param, level1, level2);
+
+          continue;
+        }
+      }
+
+      recinfo[recID].used = true;
+      streamptr->tsteps[tsID].recIDs[rindex] = recID;
+
+      if (CDI_Debug) Message("%4d %8lld %4d %8d %8s", rindex + 1, (long long) recpos, param, level1, CdiDateTime_string(vDateTime));
+
+      if (gribapiVarCompare(&compVar, &records[recID], 0) != 0)
+      {
+        Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
+                records[recID].ilevel, level1);
+        Error("Invalid, unsupported or inconsistent record structure");
+      }
+
+      records[recID].position = recpos;
+      records[recID].size = recsize;
+
+      if (CDI_Debug) Message("%4d %8lld %4d %8d %s", rindex, (long long) recpos, param, level1, CdiDateTime_string(vDateTime));
+
+      grib_handle_delete(gh);
+      gh = NULL;
     }
+
+    if (gh) grib_handle_delete(gh);
+
+    for (vrecID = 0; vrecID < nrecs; vrecID++)
+    {
+      recID = streamptr->tsteps[tsID].recIDs[vrecID];
+      if (!recinfo[recID].used) break;
+    }
+
+    if (vrecID < nrecs)
+    {
+      gribWarning("Parameter not found!", nrecsScanned, tsID + 1, varname, records[recID].param, records[recID].ilevel,
+                  records[recID].ilevel2);
+      return CDI_EUFSTRUCT;
+    }
+
+    streamptr->rtsteps++;
+
+    if (streamptr->ntsteps != streamptr->rtsteps)
+    {
+      tsID = tstepsNewEntry(streamptr);
+      if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
+
+      streamptr->tsteps[tsID - 1].next = true;
+      streamptr->tsteps[tsID].position = recpos;
+    }
+
+    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+    streamptr->tsteps[tsID].position = recpos;
+
+    streamptr->record->buffer = gribbuffer;
+    streamptr->record->buffersize = buffersize;
+  }
 
   if (nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs)
-    {
-      Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
-      streamptr->ntsteps = tsID;
-    }
+  {
+    Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
+    streamptr->ntsteps = tsID;
+  }
 
   return streamptr->ntsteps;
 }
@@ -1759,27 +1755,27 @@ unpack_alternative_rows(grib_handle *gh, int memType, void *data)
   grib_get_long(gh, "Ny", &ysize);
 
   if (memType == MEMTYPE_FLOAT)
-    {
-      float *pdata = (float *) data;
-      for (int j = 1; j < ysize; j += 2)
-        for (int i = 0; i < xsize / 2; i++)
-          {
-            float tmp = pdata[j * xsize + i];
-            pdata[j * xsize + i] = pdata[j * xsize + xsize - i - 1];
-            pdata[j * xsize + xsize - i - 1] = tmp;
-          }
-    }
+  {
+    float *pdata = (float *) data;
+    for (int j = 1; j < ysize; j += 2)
+      for (int i = 0; i < xsize / 2; i++)
+      {
+        float tmp = pdata[j * xsize + i];
+        pdata[j * xsize + i] = pdata[j * xsize + xsize - i - 1];
+        pdata[j * xsize + xsize - i - 1] = tmp;
+      }
+  }
   else
-    {
-      double *pdata = (double *) data;
-      for (int j = 1; j < ysize; j += 2)
-        for (int i = 0; i < xsize / 2; i++)
-          {
-            double tmp = pdata[j * xsize + i];
-            pdata[j * xsize + i] = pdata[j * xsize + xsize - i - 1];
-            pdata[j * xsize + xsize - i - 1] = tmp;
-          }
-    }
+  {
+    double *pdata = (double *) data;
+    for (int j = 1; j < ysize; j += 2)
+      for (int i = 0; i < xsize / 2; i++)
+      {
+        double tmp = pdata[j * xsize + i];
+        pdata[j * xsize + i] = pdata[j * xsize + xsize - i - 1];
+        pdata[j * xsize + xsize - i - 1] = tmp;
+      }
+  }
 }
 
 int
@@ -1789,14 +1785,14 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
   int status = 0;
 
   if (unreduced)
+  {
+    static bool lwarn = true;
+    if (lwarn)
     {
-      static bool lwarn = true;
-      if (lwarn)
-        {
-          lwarn = false;
-          Warning("Conversion of gaussian reduced grids unsupported!");
-        }
+      lwarn = false;
+      Warning("Conversion of gaussian reduced grids unsupported!");
     }
+  }
 
   size_t recsize = (size_t) gribsize;
   grib_handle *gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
@@ -1813,21 +1809,21 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
   size_t dummy = datasize;
 
   if (memType == MEMTYPE_FLOAT)
-    {
+  {
 #ifdef HAVE_GRIBAPI_FLOAT_INTERFACE
-      GRIB_CHECK(grib_get_float_array(gh, "values", (float *) data, &dummy), 0);
+    GRIB_CHECK(grib_get_float_array(gh, "values", (float *) data, &dummy), 0);
 #else
-      Error("grib_get_float_array() not found!");
+    Error("grib_get_float_array() not found!");
 #endif
-    }
+  }
   else { GRIB_CHECK(grib_get_double_array(gh, "values", (double *) data, &dummy), 0); }
 
   if (gribEditionNumber(gh) > 1)
-    {
-      long alternativeRowScanning = false;
-      grib_get_long(gh, "alternativeRowScanning", &alternativeRowScanning);
-      if (alternativeRowScanning) unpack_alternative_rows(gh, memType, data);
-    }
+  {
+    long alternativeRowScanning = false;
+    grib_get_long(gh, "alternativeRowScanning", &alternativeRowScanning);
+    if (alternativeRowScanning) unpack_alternative_rows(gh, memType, data);
+  }
 
   long lpar;
   GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
@@ -1835,11 +1831,11 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
 
   *numMissVals = 0;
   if (gridtype < 50 || gridtype > 53)
-    {
-      GRIB_CHECK(grib_get_long(gh, "numberOfMissing", &lpar), 0);
-      *numMissVals = (size_t) lpar;
-      // printf("gridtype %d, numMissVals %d\n", gridtype, numMissVals);
-    }
+  {
+    GRIB_CHECK(grib_get_long(gh, "numberOfMissing", &lpar), 0);
+    *numMissVals = (size_t) lpar;
+    // printf("gridtype %d, numMissVals %d\n", gridtype, numMissVals);
+  }
 
   grib_handle_delete(gh);
 
@@ -1854,17 +1850,17 @@ gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
   if (instID == CDI_UNDEFID) instID = vlistInqVarInstitut(vlistID, varID);
 
   if (instID != CDI_UNDEFID)
-    {
-      long center = institutInqCenter(instID);
-      long subcenter = institutInqSubcenter(instID);
+  {
+    long center = institutInqCenter(instID);
+    long subcenter = institutInqSubcenter(instID);
 
-      long center0, subcenter0;
-      GRIB_CHECK(grib_get_long(gh, "centre", &center0), 0);
-      GRIB_CHECK(grib_get_long(gh, "subCentre", &subcenter0), 0);
+    long center0, subcenter0;
+    GRIB_CHECK(grib_get_long(gh, "centre", &center0), 0);
+    GRIB_CHECK(grib_get_long(gh, "subCentre", &subcenter0), 0);
 
-      if (center != center0) GRIB_CHECK(my_grib_set_long(gh, "centre", center), 0);
-      if (subcenter != subcenter0) GRIB_CHECK(my_grib_set_long(gh, "subCentre", subcenter), 0);
-    }
+    if (center != center0) GRIB_CHECK(my_grib_set_long(gh, "centre", center), 0);
+    if (subcenter != subcenter0) GRIB_CHECK(my_grib_set_long(gh, "subCentre", subcenter), 0);
+  }
 
   int status;
   int centre, subCentre;
@@ -1897,64 +1893,64 @@ gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *name,
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
   if (pnum < 0)
+  {
+    size_t len = strlen(stdname);
+    if (len)
     {
-      size_t len = strlen(stdname);
-      if (len)
-        {
-          int status = my_grib_set_string(gh, "cfName", stdname, &len);
-          if (status == 0)
-            ldefined = true;
-          else
-            Warning("grib_api: No match for cfName=%s", stdname);
-        }
-
-      if (ldefined == false)
-        {
-          len = strlen(name);
-          int status = my_grib_set_string(gh, "shortName", name, &len);
-          if (status == 0)
-            ldefined = true;
-          else
-            Warning("grib_api: No match for shortName=%s", name);
-        }
+      int status = my_grib_set_string(gh, "cfName", stdname, &len);
+      if (status == 0)
+        ldefined = true;
+      else
+        Warning("grib_api: No match for cfName=%s", stdname);
     }
+
+    if (ldefined == false)
+    {
+      len = strlen(name);
+      int status = my_grib_set_string(gh, "shortName", name, &len);
+      if (status == 0)
+        ldefined = true;
+      else
+        Warning("grib_api: No match for shortName=%s", name);
+    }
+  }
 
   if (ldefined == false)
+  {
+    if (pnum < 0) pnum = -pnum;
+
+    if (pnum > 255)
     {
-      if (pnum < 0) pnum = -pnum;
-
-      if (pnum > 255)
-        {
-          static bool lwarn_pnum = true;
-          if (lwarn_pnum)
-            {
-              Warning("Parameter number %d out of range (1-255), set to %d!", pnum, pnum % 256);
-              lwarn_pnum = false;
-            }
-          pnum = pnum % 256;
-        }
-
-      if (editionNumber <= 1)
-        {
-          static bool lwarn_pdis = true;
-          if (pdis != 255 && lwarn_pdis)
-            {
-              char paramstr[32];
-              cdiParamToString(param, paramstr, sizeof(paramstr));
-              Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
-              lwarn_pdis = false;
-            }
-
-          GRIB_CHECK(my_grib_set_long(gh, "table2Version", pcat), 0);
-          GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", pnum), 0);
-        }
-      else
-        {
-          GRIB_CHECK(my_grib_set_long(gh, "discipline", pdis), 0);
-          GRIB_CHECK(my_grib_set_long(gh, "parameterCategory", pcat), 0);
-          GRIB_CHECK(my_grib_set_long(gh, "parameterNumber", pnum), 0);
-        }
+      static bool lwarn_pnum = true;
+      if (lwarn_pnum)
+      {
+        Warning("Parameter number %d out of range (1-255), set to %d!", pnum, pnum % 256);
+        lwarn_pnum = false;
+      }
+      pnum = pnum % 256;
     }
+
+    if (editionNumber <= 1)
+    {
+      static bool lwarn_pdis = true;
+      if (pdis != 255 && lwarn_pdis)
+      {
+        char paramstr[32];
+        cdiParamToString(param, paramstr, sizeof(paramstr));
+        Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
+        lwarn_pdis = false;
+      }
+
+      GRIB_CHECK(my_grib_set_long(gh, "table2Version", pcat), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", pnum), 0);
+    }
+    else
+    {
+      GRIB_CHECK(my_grib_set_long(gh, "discipline", pdis), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "parameterCategory", pcat), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "parameterNumber", pnum), 0);
+    }
+  }
 
   // printf("param: %d.%d.%d %s\n", pnum, pcat, pdis, name);
 }
@@ -1963,7 +1959,7 @@ static int
 getTimeunitFactor(int timeunit)
 {
   switch (timeunit)
-    {
+  {
     case TUNIT_SECOND: return 1;
     case TUNIT_MINUTE: return 60;
     case TUNIT_HOUR: return 3600;
@@ -1971,7 +1967,7 @@ getTimeunitFactor(int timeunit)
     case TUNIT_6HOURS: return 21600;
     case TUNIT_12HOURS: return 43200;
     case TUNIT_DAY: return 86400;
-    }
+  }
 
   return 3600;
 }
@@ -1980,7 +1976,7 @@ static int
 grib2ProDefTempHasStatisticalDef(int proDefTempNum)
 {
   switch (proDefTempNum)
-    {
+  {
     case 8:
     case 9:
     case 10:
@@ -2000,7 +1996,7 @@ grib2ProDefTempHasStatisticalDef(int proDefTempNum)
     case 1001:
     case 1101:
     case 40034: return 1;
-    }
+  }
 
   return 0;
 }
@@ -2009,7 +2005,7 @@ static int
 getUnitsOfTime(int timeunit)
 {
   switch (timeunit)
-    {
+  {
     case TUNIT_SECOND: return 13;
     case TUNIT_MINUTE: return 0;
     case TUNIT_HOUR: return 1;
@@ -2017,7 +2013,7 @@ getUnitsOfTime(int timeunit)
     case TUNIT_6HOURS: return 11;
     case TUNIT_12HOURS: return 12;
     case TUNIT_DAY: return 2;
-    }
+  }
 
   return 1;
 }
@@ -2026,23 +2022,23 @@ static void
 gribapiDefStepUnits(int editionNumber, grib_handle *gh, int timeunit, int proDefTempNum, int gcinit)
 {
   if (!gcinit)
-    {
-      long unitsOfTime = getUnitsOfTime(timeunit);
+  {
+    long unitsOfTime = getUnitsOfTime(timeunit);
 
-      grib_set_long(gh, "stepUnits", unitsOfTime);
-      if (editionNumber == 1) { grib_set_long(gh, "unitOfTimeRange", unitsOfTime); }
-      else if (grib2ProDefTempHasStatisticalDef(proDefTempNum))
-        {
-          grib_set_long(gh, "indicatorOfUnitForTimeRange", unitsOfTime);
-          grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime);
-        }
-      else
-        {
-          // NOTE KNMI:  HIRLAM model files LAMH_D11 are in grib1 and do NOT have key indicatorOfUnitForTimeRange
-          // Watch out for compatibility issues.
-          grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime);
-        }
+    grib_set_long(gh, "stepUnits", unitsOfTime);
+    if (editionNumber == 1) { grib_set_long(gh, "unitOfTimeRange", unitsOfTime); }
+    else if (grib2ProDefTempHasStatisticalDef(proDefTempNum))
+    {
+      grib_set_long(gh, "indicatorOfUnitForTimeRange", unitsOfTime);
+      grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime);
     }
+    else
+    {
+      // NOTE KNMI:  HIRLAM model files LAMH_D11 are in grib1 and do NOT have key indicatorOfUnitForTimeRange
+      // Watch out for compatibility issues.
+      grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime);
+    }
+  }
 }
 
 static int
@@ -2053,10 +2049,10 @@ gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinitionTemp
   long proDefTempNum = 0;
 
   if (tsteptype >= TSTEP_INSTANT && tsteptype <= TSTEP_SUM)
-    {
-      stepType = cdiGribAPI_ts_str_map[tsteptype].sname;
-      proDefTempNum = cdiGribAPI_ts_str_map[tsteptype].productionTemplate;
-    }
+  {
+    stepType = cdiGribAPI_ts_str_map[tsteptype].sname;
+    proDefTempNum = cdiGribAPI_ts_str_map[tsteptype].productionTemplate;
+  }
 
   if (productDefinitionTemplate != -1)
     proDefTempNum = productDefinitionTemplate;
@@ -2064,12 +2060,12 @@ gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinitionTemp
     proDefTempNum = (proDefTempNum == 8) ? 11 : 1;
 
   if (!gcinit)
-    {
-      if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
-      size_t len = strlen(stepType);
-      int status = my_grib_set_string(gh, "stepType", stepType, &len);
-      if (status != 0) GRIB_CHECK(my_grib_set_long(gh, "productDefinitionTemplateNumber", 0), 0);
-    }
+  {
+    if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
+    size_t len = strlen(stepType);
+    int status = my_grib_set_string(gh, "stepType", stepType, &len);
+    if (status != 0) GRIB_CHECK(my_grib_set_long(gh, "productDefinitionTemplateNumber", 0), 0);
+  }
 
   return (int) proDefTempNum;
 }
@@ -2104,52 +2100,52 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, CdiDateTime fDateTime,
   int factor = getTimeunitFactor(timeunit);
 
   if (!(int) (fmod(julianDate_to_seconds(julianDate), factor)))
+  {
+    int proDefTempNum
+        = gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
+    gribapiDefStepUnits(editionNumber, gh, timeunit, proDefTempNum, gcinit);
+
+    long startStep = 0;
+    double endStepF = julianDate_to_seconds(julianDate) / factor;
+    long maxStep = (editionNumber > 1) ? INT_MAX : 65000;
+    if (endStepF > maxStep) return status;
+    long endStep = lround(endStepF);
+
+    bool hasStartDate = (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF
+                         || tsteptype == TSTEP_MIN || tsteptype == TSTEP_MAX || tsteptype == TSTEP_RMS || tsteptype == TSTEP_SD
+                         || tsteptype == TSTEP_COV || tsteptype == TSTEP_RATIO || tsteptype == TSTEP_SUM);
+    if (!cdiDateTime_isNull(sDateTime) && hasStartDate)
     {
-      int proDefTempNum
-          = gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
-      gribapiDefStepUnits(editionNumber, gh, timeunit, proDefTempNum, gcinit);
-
-      long startStep = 0;
-      double endStepF = julianDate_to_seconds(julianDate) / factor;
-      long maxStep = (editionNumber > 1) ? INT_MAX : 65000;
-      if (endStepF > maxStep) return status;
-      long endStep = lround(endStepF);
-
-      bool hasStartDate = (tsteptype == TSTEP_RANGE || tsteptype == TSTEP_AVG || tsteptype == TSTEP_ACCUM || tsteptype == TSTEP_DIFF
-                           || tsteptype == TSTEP_MIN || tsteptype == TSTEP_MAX || tsteptype == TSTEP_RMS || tsteptype == TSTEP_SD
-                           || tsteptype == TSTEP_COV || tsteptype == TSTEP_RATIO || tsteptype == TSTEP_SUM);
-      if (!cdiDateTime_isNull(sDateTime) && hasStartDate)
-        {
-          julianDate2 = julianDate_encode(calendar, sDateTime);
-          startStep = lround(julianDate_to_seconds(julianDate_sub(julianDate2, julianDate1)) / factor);
-        }
-
-      if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
-      if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "stepRange", 0), 0);
-
-      if (cdiDateTime_isNull(fDateTime)) fDateTime.date = cdiDate_set(10101);
-      gribapiSetDataDateTime(gh, fDateTime);
-
-      // printf(">>>>> tsteptype %d  startStep %ld  endStep %ld\n", tsteptype, startStep, endStep);
-
-      // Product Definition Template Number: defined in GRIB_API file 4.0.table point in time products:
-      if ((proDefTempNum >= 0 && proDefTempNum <= 7) || proDefTempNum == 55 || proDefTempNum == 40055)  // Tile
-        startStep = endStep;
-
-      if (endStep < startStep) return status;
-
-      if (editionNumber == 1 && (startStep > 255 || endStep > 255))
-        {
-          startStep = 0;
-          endStep = 0;
-        }
-      else { status = 0; }
-
-      if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "forecastTime", startStep), 0);
-      // if ( editionNumber == 1 && startStep > 0) GRIB_CHECK(my_grib_set_long(gh, "startStep", startStep), 0);
-      if (editionNumber == 1) GRIB_CHECK(my_grib_set_long(gh, "startStep", startStep), 0);
-      GRIB_CHECK(my_grib_set_long(gh, "endStep", endStep), 0);
+      julianDate2 = julianDate_encode(calendar, sDateTime);
+      startStep = lround(julianDate_to_seconds(julianDate_sub(julianDate2, julianDate1)) / factor);
     }
+
+    if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
+    if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "stepRange", 0), 0);
+
+    if (cdiDateTime_isNull(fDateTime)) fDateTime.date = cdiDate_set(10101);
+    gribapiSetDataDateTime(gh, fDateTime);
+
+    // printf(">>>>> tsteptype %d  startStep %ld  endStep %ld\n", tsteptype, startStep, endStep);
+
+    // Product Definition Template Number: defined in GRIB_API file 4.0.table point in time products:
+    if ((proDefTempNum >= 0 && proDefTempNum <= 7) || proDefTempNum == 55 || proDefTempNum == 40055)  // Tile
+      startStep = endStep;
+
+    if (endStep < startStep) return status;
+
+    if (editionNumber == 1 && (startStep > 255 || endStep > 255))
+    {
+      startStep = 0;
+      endStep = 0;
+    }
+    else { status = 0; }
+
+    if (editionNumber > 1) GRIB_CHECK(my_grib_set_long(gh, "forecastTime", startStep), 0);
+    // if ( editionNumber == 1 && startStep > 0) GRIB_CHECK(my_grib_set_long(gh, "startStep", startStep), 0);
+    if (editionNumber == 1) GRIB_CHECK(my_grib_set_long(gh, "startStep", startStep), 0);
+    GRIB_CHECK(my_grib_set_long(gh, "endStep", endStep), 0);
+  }
 
   return status;
 }
@@ -2163,26 +2159,26 @@ gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGener
   int taxistype = (taxisID == -1) ? TAXIS_ABSOLUTE : taxisInqType(taxisID);
 
   if (typeOfGeneratingProcess == 196)
-    {
-      vDateTime = cdiDateTime_set(10101, 0);
-      taxistype = TAXIS_ABSOLUTE;
-    }
+  {
+    vDateTime = cdiDateTime_set(10101, 0);
+    taxistype = TAXIS_ABSOLUTE;
+  }
 
   if (taxistype == TAXIS_RELATIVE)
-    {
-      int timeunit = taxisInqTunit(taxisID);
-      int calendar = taxisInqCalendar(taxisID);
+  {
+    int timeunit = taxisInqTunit(taxisID);
+    int calendar = taxisInqCalendar(taxisID);
 
-      CdiDateTime fDateTime = taxisInqFdatetime(taxisID);
-      if (cdiDateTime_isNull(fDateTime)) fDateTime = taxisInqRdatetime(taxisID);
-      if (cdiDateTime_isLT(vDateTime, fDateTime)) fDateTime = vDateTime;
+    CdiDateTime fDateTime = taxisInqFdatetime(taxisID);
+    if (cdiDateTime_isNull(fDateTime)) fDateTime = taxisInqRdatetime(taxisID);
+    if (cdiDateTime_isLT(vDateTime, fDateTime)) fDateTime = vDateTime;
 
-      CdiDateTime sDateTime = taxisInqSdatetime(taxisID);
+    CdiDateTime sDateTime = taxisInqSdatetime(taxisID);
 
-      int status = gribapiDefDateTimeRel(editionNumber, gh, fDateTime, vDateTime, sDateTime, productDefinitionTemplate,
-                                         typeOfGeneratingProcess, tsteptype, timeunit, calendar, gcinit);
-      if (status != 0) taxistype = TAXIS_ABSOLUTE;
-    }
+    int status = gribapiDefDateTimeRel(editionNumber, gh, fDateTime, vDateTime, sDateTime, productDefinitionTemplate,
+                                       typeOfGeneratingProcess, tsteptype, timeunit, calendar, gcinit);
+    if (status != 0) taxistype = TAXIS_ABSOLUTE;
+  }
 
   if (taxistype == TAXIS_ABSOLUTE)
     gribapiDefDateTimeAbs(editionNumber, gh, vDateTime, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
@@ -2207,41 +2203,41 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
   SizeType nlon = gridInqXsize(gridID), nlat = gridInqYsize(gridID);
 
   if (gridtype == GRID_GAUSSIAN_REDUCED)
-    {
-      xfirst = (nlon == 2) ? gridInqXval(gridID, 0) : 0.0;
-      xlast = (nlon == 2) ? gridInqXval(gridID, 1) : 360.0 - 360.0 * 0.5 / (double) nlat;
+  {
+    xfirst = (nlon == 2) ? gridInqXval(gridID, 0) : 0.0;
+    xlast = (nlon == 2) ? gridInqXval(gridID, 1) : 360.0 - 360.0 * 0.5 / (double) nlat;
 
-      nlon = 0;
+    nlon = 0;
 
-      long *pl = (long *) Malloc((size_t) nlat * sizeof(long) + (size_t) nlat * sizeof(int));
-      int *reducedPoints = (int *) (pl + nlat);
-      gridInqReducedPoints(gridID, reducedPoints);
-      for (SizeType i = 0; i < nlat; ++i) pl[i] = reducedPoints[i];
+    long *pl = (long *) Malloc((size_t) nlat * sizeof(long) + (size_t) nlat * sizeof(int));
+    int *reducedPoints = (int *) (pl + nlat);
+    gridInqReducedPoints(gridID, reducedPoints);
+    for (SizeType i = 0; i < nlat; ++i) pl[i] = reducedPoints[i];
 
-      GRIB_CHECK(grib_set_long_array(gh, "pl", pl, (size_t) nlat), 0);
+    GRIB_CHECK(grib_set_long_array(gh, "pl", pl, (size_t) nlat), 0);
 
-      Free(pl);
-    }
+    Free(pl);
+  }
   else
+  {
+    if (nlon == 0)
+      nlon = 1;
+    else
     {
-      if (nlon == 0)
-        nlon = 1;
-      else
-        {
-          xfirst = gridInqXval(gridID, 0);
-          xlast = gridInqXval(gridID, (gridIsCurvilinear ? nlon * nlat : nlon) - 1);
-          xinc = fabs(gridInqXinc(gridID));
-        }
+      xfirst = gridInqXval(gridID, 0);
+      xlast = gridInqXval(gridID, (gridIsCurvilinear ? nlon * nlat : nlon) - 1);
+      xinc = fabs(gridInqXinc(gridID));
     }
+  }
 
   if (nlat == 0)
     nlat = 1;
   else
-    {
-      yfirst = gridInqYval(gridID, 0);
-      ylast = gridInqYval(gridID, (gridIsCurvilinear ? nlon * nlat : nlat) - 1);
-      yinc = fabs(gridInqYinc(gridID));
-    }
+  {
+    yfirst = gridInqYval(gridID, 0);
+    ylast = gridInqYval(gridID, (gridIsCurvilinear ? nlon * nlat : nlat) - 1);
+    yinc = fabs(gridInqYinc(gridID));
+  }
 
   double xfirsto = xfirst;
   double xlasto = xlast;
@@ -2263,25 +2259,25 @@ gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRota
   GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", (yfirst < ylast)), 0);
 
   if (gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED)
-    {
-      long np = gridInqNP(gridID);
-      if (np == 0) np = nlat / 2;
-      GRIB_CHECK(my_grib_set_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", np), 0);
-    }
+  {
+    long np = gridInqNP(gridID);
+    if (np == 0) np = nlat / 2;
+    GRIB_CHECK(my_grib_set_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", np), 0);
+  }
   else { GRIB_CHECK(my_grib_set_double(gh, "jDirectionIncrementInDegrees", yinc), 0); }
 
   if (gridIsRotated)
-    {
-      double xpole = 0.0, ypole = 0.0, angle = 0.0;
-      gridInqParamRLL(gridID, &xpole, &ypole, &angle);
+  {
+    double xpole = 0.0, ypole = 0.0, angle = 0.0;
+    gridInqParamRLL(gridID, &xpole, &ypole, &angle);
 
-      xpole += 180.0;
-      if (fabs(ypole) > 0.0) ypole = -ypole;  // change from north to south pole
-      if (fabs(angle) > 0.0) angle = -angle;
-      GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees", ypole), 0);
-      GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", xpole), 0);
-      GRIB_CHECK(my_grib_set_double(gh, "angleOfRotation", angle), 0);
-    }
+    xpole += 180.0;
+    if (fabs(ypole) > 0.0) ypole = -ypole;  // change from north to south pole
+    if (fabs(angle) > 0.0) angle = -angle;
+    GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees", ypole), 0);
+    GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", xpole), 0);
+    GRIB_CHECK(my_grib_set_double(gh, "angleOfRotation", angle), 0);
+  }
 }
 
 static int
@@ -2312,20 +2308,20 @@ gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
   struct CDI_GridProjParams gpp;
   gridInqParamsLCC(gridID, &gpp);
   if (IS_EQUAL(gpp.x_0, gpp.mv) && IS_EQUAL(gpp.y_0, gpp.mv) && (IS_EQUAL(gpp.xval_0, gpp.mv) || IS_EQUAL(gpp.yval_0, gpp.mv)))
-    {
-      gpp.x_0 = gridInqXval(gridID, 0);
-      gpp.y_0 = gridInqYval(gridID, 0);
-    }
+  {
+    gpp.x_0 = gridInqXval(gridID, 0);
+    gpp.y_0 = gridInqYval(gridID, 0);
+  }
   gridVerifyProjParamsLCC(&gpp);
   if (gpp.xval_0 < 0.0) gpp.xval_0 += 360.0;
   if (gpp.lon_0 < 0.0) gpp.lon_0 += 360.0;
 
   bool isSouthPole = (gpp.lat_1 < 0.0);
   if (isSouthPole)
-    {
-      gpp.lat_1 = -gpp.lat_2;
-      gpp.lat_2 = -gpp.lat_2;
-    }
+  {
+    gpp.lat_1 = -gpp.lat_2;
+    gpp.lat_2 = -gpp.lat_2;
+  }
   int projflag = 0;
   if (isSouthPole) gribbyte_set_bit(&projflag, 1);
 
@@ -2462,44 +2458,44 @@ gribapiDefGridUnstructured(grib_handle *gh, int gridID)
 
   int status = my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
   if (status != 0 && warning)
+  {
+    warning = false;
+    Warning("Can't write reference grid!");
+    Warning("gridDefinitionTemplateNumber %d not found (grib2/template.3.%d.def)!", GRIB2_GTYPE_UNSTRUCTURED,
+            GRIB2_GTYPE_UNSTRUCTURED);
+  }
+  else
+  {
+    int errCount = 0;
+    int number = 0;
+    status = cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, &number);
+    if (status < 0) errCount++;
+    if (number < 0) number = 0;
+    GRIB_CHECK(my_grib_set_long(gh, "numberOfGridUsed", number), 0);
+
+    int position = 0;
+    status = cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDINREFERENCE, &position);
+    if (status < 0) errCount++;
+    if (position < 0) position = 0;
+    GRIB_CHECK(my_grib_set_long(gh, "numberOfGridInReference", position), 0);
+
+    unsigned char uuid[CDI_UUID_SIZE];
+    size_t len = CDI_UUID_SIZE;
+    memset(uuid, 0, len);
+    int length = CDI_UUID_SIZE;
+    status = cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
+    if (status < 0) errCount++;
+    if (grib_set_bytes(gh, "uuidOfHGrid", uuid, &len) != 0) Warning("Can't write UUID!");
+
+    if (warning && errCount > 0)
     {
       warning = false;
-      Warning("Can't write reference grid!");
-      Warning("gridDefinitionTemplateNumber %d not found (grib2/template.3.%d.def)!", GRIB2_GTYPE_UNSTRUCTURED,
-              GRIB2_GTYPE_UNSTRUCTURED);
+      char uuidStr[uuidNumHexChars + 1] = { 0 };
+      cdiUUID2Str(uuid, uuidStr);
+      Warning("GRIB2 grid parameter missing: numberOfGridUsed=%d numberOfGridInReference=%d uuidOfHGrid=%s", number, position,
+              uuidStr);
     }
-  else
-    {
-      int errCount = 0;
-      int number = 0;
-      status = cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDUSED, &number);
-      if (status < 0) errCount++;
-      if (number < 0) number = 0;
-      GRIB_CHECK(my_grib_set_long(gh, "numberOfGridUsed", number), 0);
-
-      int position = 0;
-      status = cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_NUMBEROFGRIDINREFERENCE, &position);
-      if (status < 0) errCount++;
-      if (position < 0) position = 0;
-      GRIB_CHECK(my_grib_set_long(gh, "numberOfGridInReference", position), 0);
-
-      unsigned char uuid[CDI_UUID_SIZE];
-      size_t len = CDI_UUID_SIZE;
-      memset(uuid, 0, len);
-      int length = CDI_UUID_SIZE;
-      status = cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
-      if (status < 0) errCount++;
-      if (grib_set_bytes(gh, "uuidOfHGrid", uuid, &len) != 0) Warning("Can't write UUID!");
-
-      if (warning && errCount > 0)
-        {
-          warning = false;
-          char uuidStr[uuidNumHexChars + 1] = { 0 };
-          cdiUUID2Str(uuid, uuidStr);
-          Warning("GRIB2 grid parameter missing: numberOfGridUsed=%d numberOfGridInReference=%d uuidOfHGrid=%s", number, position,
-                  uuidStr);
-        }
-    }
+  }
 }
 
 static void
@@ -2514,10 +2510,10 @@ gribapiDefGridSpectral(grib_handle *gh, int gridID)
   for (size_t i = 0; i < numTruncAtt; ++i) GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], trunc), 0);
 
   if (gridInqComplexPacking(gridID))
-    {
-      static const char truncAttNames2[numTruncAtt][3] = { "JS", "KS", "MS" };
-      for (size_t i = 0; i < numTruncAtt; ++i) GRIB_CHECK(my_grib_set_long(gh, truncAttNames2[i], 20), 0);
-    }
+  {
+    static const char truncAttNames2[numTruncAtt][3] = { "JS", "KS", "MS" };
+    for (size_t i = 0; i < numTruncAtt; ++i) GRIB_CHECK(my_grib_set_long(gh, truncAttNames2[i], 20), 0);
+  }
 }
 
 static void
@@ -2556,11 +2552,11 @@ gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int
   if (lspectral) lieee = false;
 
   if (lspectral)  // gridType needs to be defined before packingType !!!
-    {
-      static const char mesg[] = "sh";
-      size_t len = sizeof(mesg) - 1;
-      GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
-    }
+  {
+    static const char mesg[] = "sh";
+    size_t len = sizeof(mesg) - 1;
+    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
+  }
 
   gribapiDefPackingType(gh, lieee, lspectral, lcomplex, comptype, gridsize);
 
@@ -2569,54 +2565,54 @@ gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int
   if (editionNumber == 2) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", (long) gridsize), 0);
 
   switch (gridtype)
-    {
+  {
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
     case GRID_GAUSSIAN_REDUCED:
     case GRID_TRAJECTORY:
-      {
-        gribapiDefGridRegular(gh, gridID, gridtype, gridIsRotated, gridIsCurvilinear, uvRelativeToGrid);
-        break;
-      }
-    case CDI_PROJ_LCC:
-      {
-        gribapiDefGridLCC(gh, editionNumber, gridID, uvRelativeToGrid);
-        break;
-      }
-    case CDI_PROJ_STERE:
-      {
-        gribapiDefGridSTERE(gh, editionNumber, gridID, uvRelativeToGrid);
-        break;
-      }
-    case CDI_PROJ_HEALPIX:
-      {
-        if (editionNumber <= 1) Error("HEALPix grid can't be stored in GRIB edition %d!", editionNumber);
-        gribapiDefGridHEALPIX(gh, gridID, uvRelativeToGrid);
-        break;
-      }
-    case GRID_SPECTRAL:
-      {
-        gribapiDefGridSpectral(gh, gridID);
-        break;
-      }
-    case GRID_GME:
-      {
-        if (editionNumber <= 1) Error("GME grid can't be stored in GRIB edition %d!", editionNumber);
-        gribapiDefGridGME(gh, gridID, (long) gridsize);
-        break;
-      }
-    case GRID_UNSTRUCTURED:
-      {
-        if (editionNumber <= 1) Error("Unstructured grid can't be stored in GRIB edition %d!", editionNumber);
-        gribapiDefGridUnstructured(gh, gridID);
-        break;
-      }
-    default:
-      {
-        Error("Unsupported grid type: %s", gridNamePtr(gridtype));
-        break;
-      }
+    {
+      gribapiDefGridRegular(gh, gridID, gridtype, gridIsRotated, gridIsCurvilinear, uvRelativeToGrid);
+      break;
     }
+    case CDI_PROJ_LCC:
+    {
+      gribapiDefGridLCC(gh, editionNumber, gridID, uvRelativeToGrid);
+      break;
+    }
+    case CDI_PROJ_STERE:
+    {
+      gribapiDefGridSTERE(gh, editionNumber, gridID, uvRelativeToGrid);
+      break;
+    }
+    case CDI_PROJ_HEALPIX:
+    {
+      if (editionNumber <= 1) Error("HEALPix grid can't be stored in GRIB edition %d!", editionNumber);
+      gribapiDefGridHEALPIX(gh, gridID, uvRelativeToGrid);
+      break;
+    }
+    case GRID_SPECTRAL:
+    {
+      gribapiDefGridSpectral(gh, gridID);
+      break;
+    }
+    case GRID_GME:
+    {
+      if (editionNumber <= 1) Error("GME grid can't be stored in GRIB edition %d!", editionNumber);
+      gribapiDefGridGME(gh, gridID, (long) gridsize);
+      break;
+    }
+    case GRID_UNSTRUCTURED:
+    {
+      if (editionNumber <= 1) Error("Unstructured grid can't be stored in GRIB edition %d!", editionNumber);
+      gribapiDefGridUnstructured(gh, gridID);
+      break;
+    }
+    default:
+    {
+      Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+      break;
+    }
+  }
 }
 
 static void
@@ -2629,10 +2625,10 @@ getLevelFactor(double level, long *factor, long *out_scaled_value)
 
   long i;
   for (i = 0; (iscaled_value < (4294967295 / 10)) && (fabs(scaled_value - (double) iscaled_value) >= eps) && i < 7; i++)
-    {
-      scaled_value *= 10.0;
-      iscaled_value = lround(scaled_value);
-    }
+  {
+    scaled_value *= 10.0;
+    iscaled_value = lround(scaled_value);
+  }
 
   (*factor) = i;
   (*out_scaled_value) = iscaled_value;
@@ -2643,9 +2639,9 @@ gribapiDefLevelType(grib_handle *gh, int gcinit, const char *keyname, long level
 {
   bool lset = false;
   if ((leveltype == GRIB1_LTYPE_ISOBARIC_PA || leveltype == 99 || leveltype == 100) && gribEditionNumber(gh) == 1)
-    {
-      if (gribGetLong(gh, "indicatorOfTypeOfLevel") != leveltype) lset = true;
-    }
+  {
+    if (gribGetLong(gh, "indicatorOfTypeOfLevel") != leveltype) lset = true;
+  }
 
   if (!gcinit || lset) GRIB_CHECK(my_grib_set_long(gh, keyname, leveltype), 0);
 }
@@ -2658,10 +2654,10 @@ grib1DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2, boo
   gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", leveltype1);
 
   if (hasBounds)
-    {
-      GRIB_CHECK(my_grib_set_long(gh, "topLevel", lround(dlevel1)), 0);
-      GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", lround(dlevel2)), 0);
-    }
+  {
+    GRIB_CHECK(my_grib_set_long(gh, "topLevel", lround(dlevel1)), 0);
+    GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", lround(dlevel2)), 0);
+  }
   else { GRIB_CHECK(my_grib_set_long(gh, "level", lround(level)), 0); }
 }
 
@@ -2680,11 +2676,11 @@ grib2DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2, boo
   GRIB_CHECK(my_grib_set_long(gh, "scaledValueOfFirstFixedSurface", scaled_level), 0);
 
   if (hasBounds)
-    {
-      getLevelFactor(dlevel2, &factor, &scaled_level);
-      GRIB_CHECK(my_grib_set_long(gh, "scaleFactorOfSecondFixedSurface", factor), 0);
-      GRIB_CHECK(my_grib_set_long(gh, "scaledValueOfSecondFixedSurface", scaled_level), 0);
-    }
+  {
+    getLevelFactor(dlevel2, &factor, &scaled_level);
+    GRIB_CHECK(my_grib_set_long(gh, "scaleFactorOfSecondFixedSurface", factor), 0);
+    GRIB_CHECK(my_grib_set_long(gh, "scaledValueOfSecondFixedSurface", scaled_level), 0);
+  }
 }
 
 static void
@@ -2701,12 +2697,12 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
   double dlevel2 = hasBounds ? zaxisInqUbound(zaxisID, levelID) : 0.0;
 
   if (zaxistype == ZAXIS_GENERIC && ltype == 0)
-    {
-      Warning("Changed zaxis type from %s to %s", zaxisNamePtr(zaxistype), zaxisNamePtr(ZAXIS_PRESSURE));
-      zaxistype = ZAXIS_PRESSURE;
-      zaxisChangeType(zaxisID, zaxistype);
-      cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, "Pa");
-    }
+  {
+    Warning("Changed zaxis type from %s to %s", zaxisNamePtr(zaxistype), zaxisNamePtr(ZAXIS_PRESSURE));
+    zaxistype = ZAXIS_PRESSURE;
+    zaxisChangeType(zaxisID, zaxistype);
+    cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, "Pa");
+  }
 
   long grib_ltype;
   {
@@ -2720,7 +2716,7 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
       = (editionNumber <= 1) ? grib1DefLevel : grib2DefLevel;
 
   switch (zaxistype)
-    {
+  {
     case ZAXIS_SURFACE:
     case ZAXIS_MEANSEA:
     case ZAXIS_HEIGHT:
@@ -2728,28 +2724,28 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
     case ZAXIS_SIGMA:
     case ZAXIS_DEPTH_BELOW_SEA:
     case ZAXIS_ISENTROPIC:
+    {
+      if (zaxistype == ZAXIS_HEIGHT)
       {
-        if (zaxistype == ZAXIS_HEIGHT)
-          {
-            double sf = zaxis_units_to_meter(zaxisID);
-            level *= sf;
-            dlevel1 *= sf;
-            dlevel2 *= sf;
-          }
-
-        /* GRIB2: PRODUCT DEFINITION TEMPLATE NUMBER 32:
-
-           "Analysis or forecast at a horizontal level or in a
-           horizontal layer at a point in time for simulate
-           (synthetic) satellite data"
-
-           The key/value pairs that are set in "grib2DefLevel" do not
-           exist for this template. */
-        if (editionNumber <= 1 || proddef_template_num != 32)
-          defLevel(gh, gcinit, grib_ltype, grib_ltype2, hasBounds, level, dlevel1, dlevel2);
-
-        break;
+        double sf = zaxis_units_to_meter(zaxisID);
+        level *= sf;
+        dlevel1 *= sf;
+        dlevel2 *= sf;
       }
+
+      /* GRIB2: PRODUCT DEFINITION TEMPLATE NUMBER 32:
+
+         "Analysis or forecast at a horizontal level or in a
+         horizontal layer at a point in time for simulate
+         (synthetic) satellite data"
+
+         The key/value pairs that are set in "grib2DefLevel" do not
+         exist for this template. */
+      if (editionNumber <= 1 || proddef_template_num != 32)
+        defLevel(gh, gcinit, grib_ltype, grib_ltype2, hasBounds, level, dlevel1, dlevel2);
+
+      break;
+    }
     case ZAXIS_CLOUD_BASE:
     case ZAXIS_CLOUD_TOP:
     case ZAXIS_ISOTHERM_ZERO:
@@ -2762,62 +2758,61 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
     case ZAXIS_SEDIMENT_BOTTOM_TW:
     case ZAXIS_MIX_LAYER:
     case ZAXIS_ATMOSPHERE:
-      {
-        defLevel(gh, gcinit, grib_ltype, grib_ltype, hasBounds, level, dlevel1, dlevel2);
-      }
-      break;
+    {
+      defLevel(gh, gcinit, grib_ltype, grib_ltype, hasBounds, level, dlevel1, dlevel2);
+    }
+    break;
     case ZAXIS_HYBRID:
     case ZAXIS_HYBRID_HALF:
+    {
+      if (editionNumber <= 1) { grib_ltype = hasBounds ? GRIB1_LTYPE_HYBRID_LAYER : GRIB1_LTYPE_HYBRID; }
+      defLevel(gh, gcinit, grib_ltype, grib_ltype, hasBounds, level, dlevel1, dlevel2);
+
+      if (!gcinit)
       {
-        if (editionNumber <= 1) { grib_ltype = hasBounds ? GRIB1_LTYPE_HYBRID_LAYER : GRIB1_LTYPE_HYBRID; }
-        defLevel(gh, gcinit, grib_ltype, grib_ltype, hasBounds, level, dlevel1, dlevel2);
-
-        if (!gcinit)
-          {
-            int vctsize = zaxisInqVctSize(zaxisID);
-            if (vctsize > 0)
-              {
-                GRIB_CHECK(my_grib_set_long(gh, "PVPresent", 1), 0);
-                GRIB_CHECK(grib_set_double_array(gh, "pv", zaxisInqVctPtr(zaxisID), (size_t) vctsize), 0);
-              }
-          }
-
-        break;
+        int vctsize = zaxisInqVctSize(zaxisID);
+        if (vctsize > 0)
+        {
+          GRIB_CHECK(my_grib_set_long(gh, "PVPresent", 1), 0);
+          GRIB_CHECK(grib_set_double_array(gh, "pv", zaxisInqVctPtr(zaxisID), (size_t) vctsize), 0);
+        }
       }
+
+      break;
+    }
     case ZAXIS_PRESSURE:
+    {
+      if (level < 0) Warning("Pressure level of %f Pa is below zero!", level);
+
+      if (!zaxis_units_is_Pa(zaxisID))
       {
-        if (level < 0) Warning("Pressure level of %f Pa is below zero!", level);
-
-        if (!zaxis_units_is_Pa(zaxisID))
-          {
-            level *= 100;
-            dlevel1 *= 100;
-            dlevel2 *= 100;
-          }
-
-        if (editionNumber <= 1)
-          {
-            double dum;
-            if (level < 32768 && (level < 100 || modf(level / 100, &dum) > 0))
-              grib_ltype = GRIB1_LTYPE_ISOBARIC_PA;
-            else
-              level /= 100;
-
-            static bool lwarn = true;
-            if (lwarn && modf(level, &dum) > 0.001)
-              {
-                lwarn = false;
-                Warning("GRIB1 can store only full pressure levels! Level changed from %ghPa to %dhPa.", level,
-                        (int) lround(level));
-              }
-          }
-        else if (ltype2 == -1)
-          ltype2 = GRIB2_LTYPE_ISOBARIC;
-
-        defLevel(gh, gcinit, grib_ltype, ltype2, hasBounds, level, dlevel1, dlevel2);
-
-        break;
+        level *= 100;
+        dlevel1 *= 100;
+        dlevel2 *= 100;
       }
+
+      if (editionNumber <= 1)
+      {
+        double dum;
+        if (level < 32768 && (level < 100 || modf(level / 100, &dum) > 0))
+          grib_ltype = GRIB1_LTYPE_ISOBARIC_PA;
+        else
+          level /= 100;
+
+        static bool lwarn = true;
+        if (lwarn && modf(level, &dum) > 0.001)
+        {
+          lwarn = false;
+          Warning("GRIB1 can store only full pressure levels! Level changed from %ghPa to %dhPa.", level, (int) lround(level));
+        }
+      }
+      else if (ltype2 == -1)
+        ltype2 = GRIB2_LTYPE_ISOBARIC;
+
+      defLevel(gh, gcinit, grib_ltype, ltype2, hasBounds, level, dlevel1, dlevel2);
+
+      break;
+    }
     case ZAXIS_SNOW:
       if (editionNumber <= 1)
         ;  // not available
@@ -2825,58 +2820,58 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
 
       break;
     case ZAXIS_DEPTH_BELOW_LAND:
-      {
-        double sf = editionNumber <= 1 ? zaxis_units_to_centimeter(zaxisID) : zaxis_units_to_meter(zaxisID);
-        grib_ltype = editionNumber <= 1 ? (hasBounds ? GRIB1_LTYPE_LANDDEPTH_LAYER : GRIB1_LTYPE_LANDDEPTH) : grib_ltype;
-        defLevel(gh, gcinit, grib_ltype, grib_ltype, hasBounds, level * sf, dlevel1 * sf, dlevel2 * sf);
+    {
+      double sf = editionNumber <= 1 ? zaxis_units_to_centimeter(zaxisID) : zaxis_units_to_meter(zaxisID);
+      grib_ltype = editionNumber <= 1 ? (hasBounds ? GRIB1_LTYPE_LANDDEPTH_LAYER : GRIB1_LTYPE_LANDDEPTH) : grib_ltype;
+      defLevel(gh, gcinit, grib_ltype, grib_ltype, hasBounds, level * sf, dlevel1 * sf, dlevel2 * sf);
 
-        break;
-      }
-    case ZAXIS_REFERENCE:
-      {
-        if (!gcinit) GRIB_CHECK(my_grib_set_long(gh, "genVertHeightCoords", 1), 0);
-
-        if (editionNumber <= 1)
-          ;  // not available
-        else
-          {
-            if (hasBounds)
-              {
-                gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", grib_ltype);
-                gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", grib_ltype2);
-                GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
-                GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
-              }
-            else { grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype2, hasBounds, level, dlevel1, dlevel2); }
-
-            GRIB_CHECK(my_grib_set_long(gh, "NV", 6), 0);
-            int number = 0;
-            cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, &number);
-            GRIB_CHECK(my_grib_set_long(gh, "numberOfVGridUsed", number), 0);
-            int nlev = 0;
-            cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NLEV, &nlev);
-            GRIB_CHECK(my_grib_set_long(gh, "nlev", nlev), 0);
-            unsigned char uuid[CDI_UUID_SIZE];
-            int length = CDI_UUID_SIZE;
-            memset(uuid, 0, (size_t) length);
-            cdiInqKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
-            size_t len = CDI_UUID_SIZE;
-            if (grib_set_bytes(gh, "uuidOfVGrid", uuid, &len) != 0) Warning("Can't write UUID!");
-          }
-
-        break;
-      }
-    case ZAXIS_GENERIC:
-      {
-        defLevel(gh, gcinit, ltype, ltype, hasBounds, level, dlevel1, dlevel2);
-        break;
-      }
-    default:
-      {
-        Error("Unsupported zaxis type: %s", zaxisNamePtr(zaxistype));
-        break;
-      }
+      break;
     }
+    case ZAXIS_REFERENCE:
+    {
+      if (!gcinit) GRIB_CHECK(my_grib_set_long(gh, "genVertHeightCoords", 1), 0);
+
+      if (editionNumber <= 1)
+        ;  // not available
+      else
+      {
+        if (hasBounds)
+        {
+          gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", grib_ltype);
+          gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", grib_ltype2);
+          GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
+          GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
+        }
+        else { grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype2, hasBounds, level, dlevel1, dlevel2); }
+
+        GRIB_CHECK(my_grib_set_long(gh, "NV", 6), 0);
+        int number = 0;
+        cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, &number);
+        GRIB_CHECK(my_grib_set_long(gh, "numberOfVGridUsed", number), 0);
+        int nlev = 0;
+        cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NLEV, &nlev);
+        GRIB_CHECK(my_grib_set_long(gh, "nlev", nlev), 0);
+        unsigned char uuid[CDI_UUID_SIZE];
+        int length = CDI_UUID_SIZE;
+        memset(uuid, 0, (size_t) length);
+        cdiInqKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
+        size_t len = CDI_UUID_SIZE;
+        if (grib_set_bytes(gh, "uuidOfVGrid", uuid, &len) != 0) Warning("Can't write UUID!");
+      }
+
+      break;
+    }
+    case ZAXIS_GENERIC:
+    {
+      defLevel(gh, gcinit, ltype, ltype, hasBounds, level, dlevel1, dlevel2);
+      break;
+    }
+    default:
+    {
+      Error("Unsupported zaxis type: %s", zaxisNamePtr(zaxistype));
+      break;
+    }
+  }
 }
 
 int
@@ -2905,17 +2900,17 @@ gribapiSetScanningMode(grib_handle *gh, int scanningMode)
   long jPointsAreConsecutive = (scanningMode & 32) / 32;
 
   if (cdiDebugExt >= 30 && gribEditionNumber(gh) <= 1)
-    {
-      long paramId, levelTypeId, levelId, uvRelativeToGrid;
-      GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &uvRelativeToGrid), 0);
-      GRIB_CHECK(grib_get_long(gh, "indicatorOfParameter", &paramId), 0);
-      GRIB_CHECK(grib_get_long(gh, "indicatorOfTypeOfLevel", &levelTypeId), 0);
-      GRIB_CHECK(grib_get_long(gh, "level", &levelId), 0);
-      printf("gribapiSetScanningMode(): (param,ltype,level) = (%3d,%3d,%4d); Scanning mode = %02d (%1d%1d%1d)*32;  "
-             "uvRelativeToGrid = %02d\n",
-             (int) paramId, (int) levelTypeId, (int) levelId, scanningMode, (int) jPointsAreConsecutive, (int) jScansPositively,
-             (int) iScansNegatively, (int) uvRelativeToGrid);
-    }
+  {
+    long paramId, levelTypeId, levelId, uvRelativeToGrid;
+    GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &uvRelativeToGrid), 0);
+    GRIB_CHECK(grib_get_long(gh, "indicatorOfParameter", &paramId), 0);
+    GRIB_CHECK(grib_get_long(gh, "indicatorOfTypeOfLevel", &levelTypeId), 0);
+    GRIB_CHECK(grib_get_long(gh, "level", &levelId), 0);
+    printf("gribapiSetScanningMode(): (param,ltype,level) = (%3d,%3d,%4d); Scanning mode = %02d (%1d%1d%1d)*32;  "
+           "uvRelativeToGrid = %02d\n",
+           (int) paramId, (int) levelTypeId, (int) levelId, scanningMode, (int) jPointsAreConsecutive, (int) jScansPositively,
+           (int) iScansNegatively, (int) uvRelativeToGrid);
+  }
 
   GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", iScansNegatively), 0);
   GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jScansPositively), 0);
@@ -2998,13 +2993,13 @@ verticallyFlipGridDefinitionWhenScanningModeChanged(grib_handle *gh, double yfir
   // GRIB_CHECK(my_grib_set_double(gh, "jDirectionIncrementInDegrees", yinc), 0);
 
   if (cdiDebugExt >= 10)
-    {
-      GRIB_CHECK(grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &latitudeOfFirstGridPointInDegrees), 0);  // yfirst
-      GRIB_CHECK(grib_get_double(gh, "latitudeOfLastGridPointInDegrees", &latitudeOfLastGridPointInDegrees), 0);    // ylast
-      GRIB_CHECK(grib_get_double(gh, "jDirectionIncrementInDegrees", &jDirectionIncrementInDegrees), 0);            // yinc
-      Message("CHANGED INTO:  yfirst = %f, ylast = %f, yinc = %f", latitudeOfFirstGridPointInDegrees,
-              latitudeOfLastGridPointInDegrees, jDirectionIncrementInDegrees);
-    }
+  {
+    GRIB_CHECK(grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &latitudeOfFirstGridPointInDegrees), 0);  // yfirst
+    GRIB_CHECK(grib_get_double(gh, "latitudeOfLastGridPointInDegrees", &latitudeOfLastGridPointInDegrees), 0);    // ylast
+    GRIB_CHECK(grib_get_double(gh, "jDirectionIncrementInDegrees", &jDirectionIncrementInDegrees), 0);            // yinc
+    Message("CHANGED INTO:  yfirst = %f, ylast = %f, yinc = %f", latitudeOfFirstGridPointInDegrees,
+            latitudeOfLastGridPointInDegrees, jDirectionIncrementInDegrees);
+  }
 }
 
 static void
@@ -3014,204 +3009,204 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
 
   // 127: reserved for testing; it will generate test data in 64 scanning mode
   if (scanModeOUT == 127)  // fill with testdata ...
+  {
+    scanModeOUT = 64;
+    if (cdiDebugExt >= 30) printf("convertDataScanningMode(): Generating test data in 64 scanning mode..\n");
+    for (size_t j = 0; j < jDim; j++)
     {
-      scanModeOUT = 64;
-      if (cdiDebugExt >= 30) printf("convertDataScanningMode(): Generating test data in 64 scanning mode..\n");
-      for (size_t j = 0; j < jDim; j++)
-        {
-          size_t jXiDim = j * iDim;
-          for (size_t i = 0; i < iDim; i++)
-            {
-              idxIN = i + jXiDim;
-              data[idxIN] = (double) (100.0 * j + i);
-            }
-        }
+      size_t jXiDim = j * iDim;
+      for (size_t i = 0; i < iDim; i++)
+      {
+        idxIN = i + jXiDim;
+        data[idxIN] = (double) (100.0 * j + i);
+      }
     }
+  }
 
   if ((iDim * jDim) != gridsize)
-    {
-      if (cdiDebugExt >= 30)
-        printf("convertDataScanningMode(): ERROR: (iDim*jDim)!= gridsize;  (%zu * %zu) != %zu\n", iDim, jDim, gridsize);
-      return;
-    }
+  {
+    if (cdiDebugExt >= 30)
+      printf("convertDataScanningMode(): ERROR: (iDim*jDim)!= gridsize;  (%zu * %zu) != %zu\n", iDim, jDim, gridsize);
+    return;
+  }
   if (cdiDebugExt >= 30)
     printf("convertDataScanningMode(): scanModeIN=%02d => scanModeOUT=%02d ; where: (iDim * jDim == gridsize)  (%zu*%zu == %zu)\n",
            scanModeIN, scanModeOUT, iDim, jDim, gridsize);
 
   if (cdiDebugExt >= 100)
+  {
+    printf("convertDataScanningMode(): data IN:\n");
+    for (size_t j = 0; j < jDim; j++)
     {
-      printf("convertDataScanningMode(): data IN:\n");
-      for (size_t j = 0; j < jDim; j++)
-        {
-          size_t jXiDim = j * iDim;
-          for (size_t i = 0; i < iDim; i++)
-            {
-              idxIN = i + jXiDim;
-              printf("%03.0f, ", data[idxIN]);
-            }
-          printf("\n");
-        }
+      size_t jXiDim = j * iDim;
+      for (size_t i = 0; i < iDim; i++)
+      {
+        idxIN = i + jXiDim;
+        printf("%03.0f, ", data[idxIN]);
+      }
+      printf("\n");
     }
+  }
 
   if (scanModeIN == scanModeOUT)
-    {
-      if (cdiDebugExt >= 30) printf("convertDataScanningMode(): INFO: Nothing to do;  scanModeIN==scanModeOUT..\n");
-      return;
-    }
+  {
+    if (cdiDebugExt >= 30) printf("convertDataScanningMode(): INFO: Nothing to do;  scanModeIN==scanModeOUT..\n");
+    return;
+  }
 
   if (0)
+  {
+    return;
+    if (scanModeOUT == 00)
     {
+      if (cdiDebugExt > 0) printf("convertDataScanningMode(): Leave data unchaged BUT set scanModeOUT=00.\n");
+      // CHECK:  Looks like that GRIB-API provide (no matter what) data in the scannning mode 00, even it is store in the
+      // gribfile as 64 !!
       return;
-      if (scanModeOUT == 00)
-        {
-          if (cdiDebugExt > 0) printf("convertDataScanningMode(): Leave data unchaged BUT set scanModeOUT=00.\n");
-          // CHECK:  Looks like that GRIB-API provide (no matter what) data in the scannning mode 00, even it is store in the
-          // gribfile as 64 !!
-          return;
-        }
     }
+  }
   double *dataCopy = (double *) Malloc(gridsize * sizeof(double));
   memcpy((void *) dataCopy, (void *) data, gridsize * sizeof(double));
 
   if (scanModeIN
       == 64)  // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
-    {         // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
+  {           // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
               // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
-      if (scanModeOUT == 00)
-      // CHECK:  Looks like that GRIB-API provide (no matter what) data in the scannning mode 00, even it is store in the gribfile
-      // as 64 !!
+    if (scanModeOUT == 00)
+    // CHECK:  Looks like that GRIB-API provide (no matter what) data in the scannning mode 00, even it is store in the gribfile
+    // as 64 !!
 #define VERTICAL_FLIP
 #ifdef VERTICAL_FLIP
-        {  // flip the data vertically ..
-          idxIN = 0;
-          idxOUT = (jDim - 1) * iDim;
-          if (cdiDebugExt >= 30) printf("convertDataScanningMode():  copying rows nr. (%04d : %04zu)\n", 0, jDim - 1);
-          for (size_t j = 0; j < jDim; j++)
-            {
-              memcpy((void *) &data[idxOUT], (void *) &dataCopy[idxIN], iDim * sizeof(double));
-              idxIN += iDim;
-              idxOUT -= iDim;
-            }
-        }  // end if (scanModeOUT==00)*/
+    {  // flip the data vertically ..
+      idxIN = 0;
+      idxOUT = (jDim - 1) * iDim;
+      if (cdiDebugExt >= 30) printf("convertDataScanningMode():  copying rows nr. (%04d : %04zu)\n", 0, jDim - 1);
+      for (size_t j = 0; j < jDim; j++)
+      {
+        memcpy((void *) &data[idxOUT], (void *) &dataCopy[idxIN], iDim * sizeof(double));
+        idxIN += iDim;
+        idxOUT -= iDim;
+      }
+    }  // end if (scanModeOUT==00)*/
 #endif
 #ifdef HORIZONTAL_FLIP
-      {  // flip data horizontally ...
-        if (1)
+    {  // flip data horizontally ...
+      if (1)
+      {
+        if (cdiDebugExt >= 30) printf("convertDataScanningMode():  copying columns nr. (%04d : %04d);\n", 0, iDim - 1);
+        for (size_t i = 0; i < iDim; i++)
+        {
+          for (size_t j = 0; j < jDim; j++)
           {
-            if (cdiDebugExt >= 30) printf("convertDataScanningMode():  copying columns nr. (%04d : %04d);\n", 0, iDim - 1);
-            for (size_t i = 0; i < iDim; i++)
-              {
-                for (size_t j = 0; j < jDim; j++)
-                  {
-                    size_t jXiDim = j * iDim;
-                    idxIN = i + jXiDim;
-                    // data[idxIN] = (double) (100.0*j +i);  // just some testdata ..
-                    idxOUT = iDim - i - 1 + jXiDim;
-                    // printf("[%03d=>%03d] = %f;",idxIN,idxOUT,dataCopy[idxIN]);
-                    data[idxOUT] = dataCopy[idxIN];
-                  }
-              }
+            size_t jXiDim = j * iDim;
+            idxIN = i + jXiDim;
+            // data[idxIN] = (double) (100.0*j +i);  // just some testdata ..
+            idxOUT = iDim - i - 1 + jXiDim;
+            // printf("[%03d=>%03d] = %f;",idxIN,idxOUT,dataCopy[idxIN]);
+            data[idxOUT] = dataCopy[idxIN];
           }
-      }  // end if (scanModeOUT==00)
+        }
+      }
+    }  // end if (scanModeOUT==00)
 #endif
 
-      if (scanModeOUT == 96)
-        {  // transpose the data
-          if (cdiDebugExt >= 30)
-            printf("convertDataScanningMode():  transpose data rows=>columns nr. (%04d : %04zu) => (%04d : %04zu);\n", 0, iDim - 1,
-                   0, jDim - 1);
-          for (size_t j = 0; j < jDim; j++)
-            {
-              size_t jXiDim = j * iDim;
-              for (size_t i = 0; i < iDim; i++)
-                {
-                  idxIN = i + jXiDim;
-                  idxOUT = j + i * jDim;
-                  // printf("[%03d=>%03d] = %f;",idxIN,idxOUT,dataCopy[idxIN]);
-                  data[idxOUT] = dataCopy[idxIN];
-                }
-              // printf(".\n");
-            }
-        }  // end if (scanModeOUT==96)
-    }      // end if (scanModeIN==64)
+    if (scanModeOUT == 96)
+    {  // transpose the data
+      if (cdiDebugExt >= 30)
+        printf("convertDataScanningMode():  transpose data rows=>columns nr. (%04d : %04zu) => (%04d : %04zu);\n", 0, iDim - 1, 0,
+               jDim - 1);
+      for (size_t j = 0; j < jDim; j++)
+      {
+        size_t jXiDim = j * iDim;
+        for (size_t i = 0; i < iDim; i++)
+        {
+          idxIN = i + jXiDim;
+          idxOUT = j + i * jDim;
+          // printf("[%03d=>%03d] = %f;",idxIN,idxOUT,dataCopy[idxIN]);
+          data[idxOUT] = dataCopy[idxIN];
+        }
+        // printf(".\n");
+      }
+    }  // end if (scanModeOUT==96)
+  }    // end if (scanModeIN==64)
 
   if (scanModeIN
       == 00)  // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
-    {         // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
+  {           // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
               // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
-      if (scanModeOUT == 64)
-        {  // flip the data vertically ..
-          idxIN = 0;
-          idxOUT = (jDim - 1) * iDim;
-          for (size_t j = 0; j < jDim; j++)
-            {
-              if (cdiDebugExt >= 25)
-                printf("convertDataScanningMode():  copying row nr. %04zu; [idxIN=%08zu] => [idxOUT=%08zu]\n", j, idxIN, idxOUT);
-              memcpy((void *) &data[idxOUT], (void *) &dataCopy[idxIN], iDim * sizeof(double));
-              idxIN += iDim;
-              idxOUT -= iDim;
-            }
-        }  // end if (scanModeOUT==64)
+    if (scanModeOUT == 64)
+    {  // flip the data vertically ..
+      idxIN = 0;
+      idxOUT = (jDim - 1) * iDim;
+      for (size_t j = 0; j < jDim; j++)
+      {
+        if (cdiDebugExt >= 25)
+          printf("convertDataScanningMode():  copying row nr. %04zu; [idxIN=%08zu] => [idxOUT=%08zu]\n", j, idxIN, idxOUT);
+        memcpy((void *) &data[idxOUT], (void *) &dataCopy[idxIN], iDim * sizeof(double));
+        idxIN += iDim;
+        idxOUT -= iDim;
+      }
+    }  // end if (scanModeOUT==64)
 
-      if (scanModeOUT == 96)
-        {  // transpose the data
-          size_t jInv;
-          for (size_t j = 0; j < jDim; j++)
-            {
-              if (cdiDebugExt >= 30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
-              jInv = (jDim - 1) - j;
-              for (size_t i = 0; i < iDim; i++) data[j + i * jDim] = dataCopy[i + jInv * iDim];  // source data has -j
-            }
-        }  // end if (scanModeOUT==96)
-    }      // end if (scanModeIN==00)
+    if (scanModeOUT == 96)
+    {  // transpose the data
+      size_t jInv;
+      for (size_t j = 0; j < jDim; j++)
+      {
+        if (cdiDebugExt >= 30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
+        jInv = (jDim - 1) - j;
+        for (size_t i = 0; i < iDim; i++) data[j + i * jDim] = dataCopy[i + jInv * iDim];  // source data has -j
+      }
+    }  // end if (scanModeOUT==96)
+  }    // end if (scanModeIN==00)
 
   if (scanModeIN
       == 96)  // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
-    {         // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
+  {           // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
               // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
-      if (scanModeOUT == 64)
-        {  // transpose the data
-          for (size_t j = 0; j < jDim; j++)
-            {
-              if (cdiDebugExt >= 30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
-              size_t jXiDim = j * iDim;
-              for (size_t i = 0; i < iDim; i++)
-                // data[j + i*jDim] =  dataCopy[i + j*iDim];
-                data[i + jXiDim] = dataCopy[j + i * jDim];
-            }
-        }  // end if (scanModeOUT==64)
+    if (scanModeOUT == 64)
+    {  // transpose the data
+      for (size_t j = 0; j < jDim; j++)
+      {
+        if (cdiDebugExt >= 30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
+        size_t jXiDim = j * iDim;
+        for (size_t i = 0; i < iDim; i++)
+          // data[j + i*jDim] =  dataCopy[i + j*iDim];
+          data[i + jXiDim] = dataCopy[j + i * jDim];
+      }
+    }  // end if (scanModeOUT==64)
 
-      if (scanModeOUT == 00)
-        {  // transpose the data
-          idxIN = 0;
-          idxOUT = 0;
-          size_t jInv;
-          for (size_t j = 0; j < jDim; j++)
-            {
-              if (cdiDebugExt >= 30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
-              jInv = (jDim - 1) - j;
-              size_t jXiDim = j * iDim;
-              for (size_t i = 0; i < iDim; i++)
-                // data[jInv + iXjDim] =  dataCopy[i + jXiDim];  // target data has -j
-                data[i + jXiDim] = dataCopy[jInv + i * jDim];  // target data has -j
-            }
-        }  // end if (scanModeOUT==00)
-    }      // end if (scanModeIN==96)
+    if (scanModeOUT == 00)
+    {  // transpose the data
+      idxIN = 0;
+      idxOUT = 0;
+      size_t jInv;
+      for (size_t j = 0; j < jDim; j++)
+      {
+        if (cdiDebugExt >= 30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
+        jInv = (jDim - 1) - j;
+        size_t jXiDim = j * iDim;
+        for (size_t i = 0; i < iDim; i++)
+          // data[jInv + iXjDim] =  dataCopy[i + jXiDim];  // target data has -j
+          data[i + jXiDim] = dataCopy[jInv + i * jDim];  // target data has -j
+      }
+    }  // end if (scanModeOUT==00)
+  }    // end if (scanModeIN==96)
 
   if (cdiDebugExt >= 100)
+  {
+    printf("convertDataScanningMode(): data OUT (new scanning mode):\n");
+    for (size_t j = 0; j < jDim; j++)
     {
-      printf("convertDataScanningMode(): data OUT (new scanning mode):\n");
-      for (size_t j = 0; j < jDim; j++)
-        {
-          size_t jXiDim = j * iDim;
-          for (size_t i = 0; i < iDim; i++)
-            {
-              idxIN = i + jXiDim;
-              printf("%03.0f, ", data[idxIN]);
-            }
-          printf("\n");
-        }
+      size_t jXiDim = j * iDim;
+      for (size_t i = 0; i < iDim; i++)
+      {
+        idxIN = i + jXiDim;
+        printf("%03.0f, ", data[idxIN]);
+      }
+      printf("\n");
     }
+  }
 
   free(dataCopy);
 }
@@ -3227,50 +3222,50 @@ gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const void *data
 #endif
   int gridtype = gridInqType(gridID);
   if (gridtype == GRID_PROJECTION)
-    {
-      int projtype = gridInqProjType(gridID);
-      // clang-format off
+  {
+    int projtype = gridInqProjType(gridID);
+    // clang-format off
       if      (projtype == CDI_PROJ_RLL)   gridtype = GRID_LONLAT;
       else if (projtype == CDI_PROJ_LCC)   gridtype = CDI_PROJ_LCC;
       else if (projtype == CDI_PROJ_STERE) gridtype = CDI_PROJ_STERE;
-      // clang-format on
-    }
+    // clang-format on
+  }
 
   if (gridtype == GRID_GENERIC || gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED
       || gridtype == CDI_PROJ_LCC)
-    {
+  {
 #ifdef HIRLAM_EXTENSIONS
-      int scanModeIN = 0;
-      cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_SCANNINGMODE, &scanModeIN);
+    int scanModeIN = 0;
+    cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_SCANNINGMODE, &scanModeIN);
 
-      if (cdiDebugExt >= 100) Message("scanModeIN=%d; gridsize=%zu", scanModeIN, gridInqSize(gridID));
+    if (cdiDebugExt >= 100) Message("scanModeIN=%d; gridsize=%zu", scanModeIN, gridInqSize(gridID));
 
-      if (cdiGribDataScanningMode.active)  // allowed modes: <0, 64, 96>; Default is 64
-        {
-          size_t iDim = gridInqXsize(gridID);
-          size_t jDim = gridInqYsize(gridID);
+    if (cdiGribDataScanningMode.active)  // allowed modes: <0, 64, 96>; Default is 64
+    {
+      size_t iDim = gridInqXsize(gridID);
+      size_t jDim = gridInqYsize(gridID);
 
-          double yfirst = gridInqYval(gridID, 0);
-          double ylast = gridInqYval(gridID, jDim - 1);
-          double yinc = gridInqYinc(gridID);
+      double yfirst = gridInqYval(gridID, 0);
+      double ylast = gridInqYval(gridID, jDim - 1);
+      double yinc = gridInqYinc(gridID);
 
-          int scanModeOUT = cdiGribDataScanningMode.value;
-          convertDataScanningMode(scanModeIN, scanModeOUT, (double *) data, datasize, iDim, jDim);
-          // This will overrule the old scanning mode of the given grid
-          if (cdiDebugExt >= 10) Message("Set GribDataScanningMode (%d) => (%d)", scanModeIN, cdiGribDataScanningMode.value);
-          gribapiSetScanningMode(gh, cdiGribDataScanningMode.value);
+      int scanModeOUT = cdiGribDataScanningMode.value;
+      convertDataScanningMode(scanModeIN, scanModeOUT, (double *) data, datasize, iDim, jDim);
+      // This will overrule the old scanning mode of the given grid
+      if (cdiDebugExt >= 10) Message("Set GribDataScanningMode (%d) => (%d)", scanModeIN, cdiGribDataScanningMode.value);
+      gribapiSetScanningMode(gh, cdiGribDataScanningMode.value);
 
-          if (((scanModeIN == 00) && (cdiGribDataScanningMode.value == 64))
-              || ((scanModeIN == 64) && (cdiGribDataScanningMode.value == 00)))
-            verticallyFlipGridDefinitionWhenScanningModeChanged(gh, yfirst, ylast, yinc);
-        }
-      else
-        {
-          if (cdiDebugExt >= 100) Message("Set GribDataScanningMode => (%d) based on used grid", scanModeIN);
-          gribapiSetScanningMode(gh, scanModeIN);
-        }
-#endif
+      if (((scanModeIN == 00) && (cdiGribDataScanningMode.value == 64))
+          || ((scanModeIN == 64) && (cdiGribDataScanningMode.value == 00)))
+        verticallyFlipGridDefinitionWhenScanningModeChanged(gh, yfirst, ylast, yinc);
     }
+    else
+    {
+      if (cdiDebugExt >= 100) Message("Set GribDataScanningMode => (%d) based on used grid", scanModeIN);
+      gribapiSetScanningMode(gh, scanModeIN);
+    }
+#endif
+  }
 }
 
 // #define GRIBAPIENCODETEST 1
@@ -3308,28 +3303,28 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
   if (!gc->init) gribapiDefInstitut(gh, vlistID, varID);
 
   if (editionNumber == 2)
+  {
+    if (!gc->init)
     {
-      if (!gc->init)
-        {
-          int backgroundProcess = 0;
-          cdiInqKeyInt(vlistID, varID, CDI_KEY_BACKGROUNDPROCESS, &backgroundProcess);
-          GRIB_CHECK(my_grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);
-          GRIB_CHECK(my_grib_set_long(gh, "backgroundProcess", backgroundProcess), 0);
-          int status, tablesVersion, localTablesVersion;
-          status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TABLESVERSION, &tablesVersion);
-          if (status == 0) GRIB_CHECK(my_grib_set_long(gh, "tablesVersion", (long) tablesVersion), 0);
-          status = cdiInqKeyInt(vlistID, varID, CDI_KEY_LOCALTABLESVERSION, &localTablesVersion);
-          if (status == 0) GRIB_CHECK(my_grib_set_long(gh, "localTablesVersion", (long) localTablesVersion), 0);
-          int typeOfProcessedData = 0;
-          status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFPROCESSEDDATA, &typeOfProcessedData);
-          if (status == 0) GRIB_CHECK(my_grib_set_long(gh, "typeOfProcessedData", (long) typeOfProcessedData), 0);
-          /*
-          int constituentType = 0;
-          status = cdiInqKeyInt(vlistID, varID, CDI_KEY_CONSTITUENTTYPE, &constituentType);
-          if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "constituentType", (long)constituentType), 0);
-          */
-        }
+      int backgroundProcess = 0;
+      cdiInqKeyInt(vlistID, varID, CDI_KEY_BACKGROUNDPROCESS, &backgroundProcess);
+      GRIB_CHECK(my_grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "backgroundProcess", backgroundProcess), 0);
+      int status, tablesVersion, localTablesVersion;
+      status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TABLESVERSION, &tablesVersion);
+      if (status == 0) GRIB_CHECK(my_grib_set_long(gh, "tablesVersion", (long) tablesVersion), 0);
+      status = cdiInqKeyInt(vlistID, varID, CDI_KEY_LOCALTABLESVERSION, &localTablesVersion);
+      if (status == 0) GRIB_CHECK(my_grib_set_long(gh, "localTablesVersion", (long) localTablesVersion), 0);
+      int typeOfProcessedData = 0;
+      status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFPROCESSEDDATA, &typeOfProcessedData);
+      if (status == 0) GRIB_CHECK(my_grib_set_long(gh, "typeOfProcessedData", (long) typeOfProcessedData), 0);
+      /*
+      int constituentType = 0;
+      status = cdiInqKeyInt(vlistID, varID, CDI_KEY_CONSTITUENTTYPE, &constituentType);
+      if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "constituentType", (long)constituentType), 0);
+      */
     }
+  }
 
   gribapiDefTime((int) editionNumber, productDefinitionTemplate, typeOfGeneratingProcess, gh, vDateTime, tsteptype, numavg,
                  vlistInqTaxis(vlistID), gc->init);
@@ -3353,55 +3348,55 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
   if (!gc->init) gribapiDefModel(gh, vlistID, varID);
 
   if (!gc->init)
-    {
-      char name[256], stdname[256];
-      vlistInqVarName(vlistID, varID, name);
-      vlistInqVarStdname(vlistID, varID, stdname);
-      gribapiDefParam((int) editionNumber, gh, param, name, stdname);
-    }
+  {
+    char name[256], stdname[256];
+    vlistInqVarName(vlistID, varID, name);
+    vlistInqVarStdname(vlistID, varID, stdname);
+    gribapiDefParam((int) editionNumber, gh, param, name, stdname);
+  }
 
   if (!gc->init && editionNumber == 2)
+  {
+    int shapeOfTheEarth = 0;
+    cdiInqKeyInt(vlistID, varID, CDI_KEY_SHAPEOFTHEEARTH, &shapeOfTheEarth);
+    GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", (long) shapeOfTheEarth), 0);
+
+    int grib2LocalSectionNumber, section2PaddingLength;
+    int mpimType, mpimClass, mpimUser;
+    if (cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMTYPE, &mpimType) == CDI_NOERR
+        && cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMCLASS, &mpimClass) == CDI_NOERR
+        && cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMUSER, &mpimUser) == CDI_NOERR)
     {
-      int shapeOfTheEarth = 0;
-      cdiInqKeyInt(vlistID, varID, CDI_KEY_SHAPEOFTHEEARTH, &shapeOfTheEarth);
-      GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", (long) shapeOfTheEarth), 0);
+      grib_set_long(gh, "grib2LocalSectionPresent", 1);
+      grib_set_long(gh, "grib2LocalSectionNumber", 1);
+      grib_set_long(gh, "mpimType", mpimType);
+      grib_set_long(gh, "mpimClass", mpimClass);
+      grib_set_long(gh, "mpimUser", mpimUser);
 
-      int grib2LocalSectionNumber, section2PaddingLength;
-      int mpimType, mpimClass, mpimUser;
-      if (cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMTYPE, &mpimType) == CDI_NOERR
-          && cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMCLASS, &mpimClass) == CDI_NOERR
-          && cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMUSER, &mpimUser) == CDI_NOERR)
-        {
-          grib_set_long(gh, "grib2LocalSectionPresent", 1);
-          grib_set_long(gh, "grib2LocalSectionNumber", 1);
-          grib_set_long(gh, "mpimType", mpimType);
-          grib_set_long(gh, "mpimClass", mpimClass);
-          grib_set_long(gh, "mpimUser", mpimUser);
-
-          int revNumLen = 20;
-          unsigned char revNumber[revNumLen];
-          if (cdiInqKeyBytes(vlistID, varID, CDI_KEY_REVNUMBER, revNumber, &revNumLen) == CDI_NOERR)
-            {
-              size_t revNumLenS = (size_t) revNumLen;
-              grib_set_bytes(gh, "revNumber", revNumber, &revNumLenS);
-            }
-          int revStatus;
-          if (cdiInqKeyInt(vlistID, varID, CDI_KEY_REVSTATUS, &revStatus) == CDI_NOERR) grib_set_long(gh, "revStatus", revStatus);
-        }
-      else if (cdiInqKeyInt(vlistID, varID, CDI_KEY_GRIB2LOCALSECTIONNUMBER, &grib2LocalSectionNumber) == CDI_NOERR
-               && cdiInqKeyInt(vlistID, varID, CDI_KEY_SECTION2PADDINGLENGTH, &section2PaddingLength) == CDI_NOERR)
-        {
-          grib_set_long(gh, "grib2LocalSectionPresent", 1);
-          grib_set_long(gh, "grib2LocalSectionNumber", grib2LocalSectionNumber);
-          unsigned char *section2Padding = (unsigned char *) Malloc((size_t) section2PaddingLength);
-          cdiInqKeyBytes(vlistID, varID, CDI_KEY_SECTION2PADDING, section2Padding, &section2PaddingLength);
-          size_t len = (size_t) section2PaddingLength;
-          // Does not work anymore with ecCodes 2.22.0/2.25.0!!!
-          // ECCODES ERROR   :  pack_bytes: Wrong size (10) for section2Padding. It is 0 bytes long
-          grib_set_bytes(gh, "section2Padding", section2Padding, &len);
-          Free(section2Padding);
-        }
+      int revNumLen = 20;
+      unsigned char revNumber[revNumLen];
+      if (cdiInqKeyBytes(vlistID, varID, CDI_KEY_REVNUMBER, revNumber, &revNumLen) == CDI_NOERR)
+      {
+        size_t revNumLenS = (size_t) revNumLen;
+        grib_set_bytes(gh, "revNumber", revNumber, &revNumLenS);
+      }
+      int revStatus;
+      if (cdiInqKeyInt(vlistID, varID, CDI_KEY_REVSTATUS, &revStatus) == CDI_NOERR) grib_set_long(gh, "revStatus", revStatus);
     }
+    else if (cdiInqKeyInt(vlistID, varID, CDI_KEY_GRIB2LOCALSECTIONNUMBER, &grib2LocalSectionNumber) == CDI_NOERR
+             && cdiInqKeyInt(vlistID, varID, CDI_KEY_SECTION2PADDINGLENGTH, &section2PaddingLength) == CDI_NOERR)
+    {
+      grib_set_long(gh, "grib2LocalSectionPresent", 1);
+      grib_set_long(gh, "grib2LocalSectionNumber", grib2LocalSectionNumber);
+      unsigned char *section2Padding = (unsigned char *) Malloc((size_t) section2PaddingLength);
+      cdiInqKeyBytes(vlistID, varID, CDI_KEY_SECTION2PADDING, section2Padding, &section2PaddingLength);
+      size_t len = (size_t) section2PaddingLength;
+      // Does not work anymore with ecCodes 2.22.0/2.25.0!!!
+      // ECCODES ERROR   :  pack_bytes: Wrong size (10) for section2Padding. It is 0 bytes long
+      grib_set_bytes(gh, "section2Padding", section2Padding, &len);
+      Free(section2Padding);
+    }
+  }
 
   // bitsPerValue have to be defined first (complex packing)
   GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", (long) grbBitsPerValue(datatype)), 0);
@@ -3419,58 +3414,58 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
     // NOTE: Optional key/value pairs: Note that we do not distinguish between tiles here!
 
     for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; i++)
+    {
+      if (vlistptr->vars[varID].opt_grib_kvpair[i].update)
       {
-        if (vlistptr->vars[varID].opt_grib_kvpair[i].update)
-          {
-            // DR: Fix for multi-level fields (otherwise only the 1st level is correct)
-            if (zaxisSize == (levelID + 1)) vlistptr->vars[varID].opt_grib_kvpair[i].update = false;
+        // DR: Fix for multi-level fields (otherwise only the 1st level is correct)
+        if (zaxisSize == (levelID + 1)) vlistptr->vars[varID].opt_grib_kvpair[i].update = false;
 
-            if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)
-              {
-                if (CDI_Debug)
-                  Message("key \"%s\"  :   double value = %g", vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
-                          vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val);
-                my_grib_set_double(gh, vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
-                                   vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val);
-                GRIB_CHECK(ret, 0);
-              }
-            if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_int)
-              {
-                if (CDI_Debug)
-                  Message("key \"%s\"  :   integer value = %d", vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
-                          vlistptr->vars[varID].opt_grib_kvpair[i].int_val);
-                my_grib_set_long(gh, vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
-                                 (long) vlistptr->vars[varID].opt_grib_kvpair[i].int_val);
-                GRIB_CHECK(ret, 0);
-              }
-          }
+        if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)
+        {
+          if (CDI_Debug)
+            Message("key \"%s\"  :   double value = %g", vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+                    vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val);
+          my_grib_set_double(gh, vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+                             vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val);
+          GRIB_CHECK(ret, 0);
+        }
+        if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_int)
+        {
+          if (CDI_Debug)
+            Message("key \"%s\"  :   integer value = %d", vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+                    vlistptr->vars[varID].opt_grib_kvpair[i].int_val);
+          my_grib_set_long(gh, vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+                           (long) vlistptr->vars[varID].opt_grib_kvpair[i].int_val);
+          GRIB_CHECK(ret, 0);
+        }
       }
+    }
   }
 
   if (numMissVals > 0)
-    {
-      GRIB_CHECK(my_grib_set_long(gh, "bitmapPresent", 1), 0);
-      GRIB_CHECK(my_grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
-    }
+  {
+    GRIB_CHECK(my_grib_set_long(gh, "bitmapPresent", 1), 0);
+    GRIB_CHECK(my_grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
+  }
 
   gribapiSetExtMode(gh, gridID, (size_t) datasize, data);
 
   if (memType == MEMTYPE_FLOAT)
-    {
+  {
 #ifdef HAVE_GRIBAPI_FLOAT_INTERFACE
-      GRIB_CHECK(grib_set_float_array(gh, "values", (const float *) data, (size_t) datasize), 0);
+    GRIB_CHECK(grib_set_float_array(gh, "values", (const float *) data, (size_t) datasize), 0);
 #else
-      Error("grib_set_float_array() not found!");
+    Error("grib_set_float_array() not found!");
 #endif
-    }
+  }
   else { GRIB_CHECK(grib_set_double_array(gh, "values", (const double *) data, (size_t) datasize), 0); }
 
   if (numMissVals)
-    {
-      long numberOfMissing = -1;
-      GRIB_CHECK(grib_get_long(gh, "numberOfMissing", &numberOfMissing), 0);
-      if (numberOfMissing == 0) GRIB_CHECK(my_grib_set_long(gh, "bitmapPresent", 0), 0);
-    }
+  {
+    long numberOfMissing = -1;
+    GRIB_CHECK(grib_get_long(gh, "numberOfMissing", &numberOfMissing), 0);
+    if (numberOfMissing == 0) GRIB_CHECK(my_grib_set_long(gh, "bitmapPresent", 0), 0);
+  }
 
   // get the size of coded message
   const void *dummy = NULL;
@@ -3481,24 +3476,24 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
   *gribbuffer = Malloc(*gribbuffersize);
 
   if (CDI_Debug && !gc->init && editionNumber == 2)
+  {
+    long pdis;
+    grib_get_long(gh, "discipline", &pdis);
+    if (pdis != 255)
     {
-      long pdis;
-      grib_get_long(gh, "discipline", &pdis);
-      if (pdis != 255)
-        {
-          char cdi_name[CDI_MAX_NAME];
-          cdi_name[0] = 0;
-          vlistInqVarName(vlistID, varID, cdi_name);
-          char grb_name[256];
-          gribapi_get_string(gh, "shortName", grb_name, sizeof(grb_name));
-          str_to_lower(cdi_name);
-          str_to_lower(grb_name);
-          bool checkName = (!grb_name[0] && strncmp(cdi_name, "param", 5) == 0) ? false : true;
-          if (checkName && ((strlen(cdi_name) != strlen(grb_name)) || !strStartsWith(cdi_name, grb_name)))
-            Warning("*** GRIB2 shortName does not correspond to chosen variable name: \"%s\" (\"%s\").",
-                    grb_name[0] ? grb_name : "unknown", cdi_name);
-        }
+      char cdi_name[CDI_MAX_NAME];
+      cdi_name[0] = 0;
+      vlistInqVarName(vlistID, varID, cdi_name);
+      char grb_name[256];
+      gribapi_get_string(gh, "shortName", grb_name, sizeof(grb_name));
+      str_to_lower(cdi_name);
+      str_to_lower(grb_name);
+      bool checkName = (!grb_name[0] && strncmp(cdi_name, "param", 5) == 0) ? false : true;
+      if (checkName && ((strlen(cdi_name) != strlen(grb_name)) || !strStartsWith(cdi_name, grb_name)))
+        Warning("*** GRIB2 shortName does not correspond to chosen variable name: \"%s\" (\"%s\").",
+                grb_name[0] ? grb_name : "unknown", cdi_name);
     }
+  }
 
   // get a copy of the coded message
   GRIB_CHECK(grib_get_message_copy(gh, *gribbuffer, &recsize), 0);
@@ -3517,11 +3512,11 @@ gribapiChangeParameterIdentification(grib_handle *gh, int code, int ltype, int l
 {
   //  timeRangeIndicator: could be included later
   if (gribEditionNumber(gh) <= 1)
-    {
-      if (code != -1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", code), 0);
-      if (ltype != -1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfTypeOfLevel", ltype), 0);
-      if (level != -1) GRIB_CHECK(my_grib_set_long(gh, "level", level), 0);
-    }
+  {
+    if (code != -1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", code), 0);
+    if (ltype != -1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfTypeOfLevel", ltype), 0);
+    if (level != -1) GRIB_CHECK(my_grib_set_long(gh, "level", level), 0);
+  }
 }
 
 #endif

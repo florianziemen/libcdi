@@ -27,38 +27,38 @@ vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
       break;
 
   if (idx < vlistptr->vars[varID].opt_grib_nentries)
-    {
-      vlistptr->vars[varID].opt_grib_kvpair[idx].int_val = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update = true;
-    }
+  {
+    vlistptr->vars[varID].opt_grib_kvpair[idx].int_val = value;
+    vlistptr->vars[varID].opt_grib_kvpair[idx].update = true;
+  }
   else
-    {
-      resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries + 1);
-      vlistptr->vars[varID].opt_grib_nentries += 1;
-      idx = vlistptr->vars[varID].opt_grib_nentries - 1;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].data_type = t_int;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].int_val = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update = true;
-      if (name)
-        vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdup(name);
-      else
-        Error("Internal error, name undefined!");
-    }
+  {
+    resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries + 1);
+    vlistptr->vars[varID].opt_grib_nentries += 1;
+    idx = vlistptr->vars[varID].opt_grib_nentries - 1;
+    vlistptr->vars[varID].opt_grib_kvpair[idx].data_type = t_int;
+    vlistptr->vars[varID].opt_grib_kvpair[idx].int_val = value;
+    vlistptr->vars[varID].opt_grib_kvpair[idx].update = true;
+    if (name)
+      vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdup(name);
+    else
+      Error("Internal error, name undefined!");
+  }
 
   if (CDI_Debug)
-    {
-      Message("define additional GRIB2 key \"%s\" (integer): %d", name, value);
-      Message("total list of registered, additional GRIB2 keys (total: %d):", vlistptr->vars[varID].opt_grib_nentries);
-      for (idx = 0; idx < vlistptr->vars[varID].opt_grib_nentries; idx++)
-        if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_int)
-          Message("%s -> integer %d", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
-                  vlistptr->vars[varID].opt_grib_kvpair[idx].int_val);
-        else if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_double)
-          Message("%s -> double %d", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
-                  vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val);
-        else
-          Message("%s -> unknown", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword);
-    }
+  {
+    Message("define additional GRIB2 key \"%s\" (integer): %d", name, value);
+    Message("total list of registered, additional GRIB2 keys (total: %d):", vlistptr->vars[varID].opt_grib_nentries);
+    for (idx = 0; idx < vlistptr->vars[varID].opt_grib_nentries; idx++)
+      if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_int)
+        Message("%s -> integer %d", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
+                vlistptr->vars[varID].opt_grib_kvpair[idx].int_val);
+      else if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_double)
+        Message("%s -> double %d", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
+                vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val);
+      else
+        Message("%s -> unknown", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword);
+  }
 
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 #else
@@ -90,38 +90,38 @@ vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
       break;
 
   if (idx < vlistptr->vars[varID].opt_grib_nentries)
-    {
-      vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update = true;
-    }
+  {
+    vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val = value;
+    vlistptr->vars[varID].opt_grib_kvpair[idx].update = true;
+  }
   else
-    {
-      resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries + 1);
-      vlistptr->vars[varID].opt_grib_nentries += 1;
-      idx = vlistptr->vars[varID].opt_grib_nentries - 1;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].data_type = t_double;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update = true;
-      if (name)
-        vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdup(name);
-      else
-        Error("Internal error, name undefined!");
-    }
+  {
+    resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries + 1);
+    vlistptr->vars[varID].opt_grib_nentries += 1;
+    idx = vlistptr->vars[varID].opt_grib_nentries - 1;
+    vlistptr->vars[varID].opt_grib_kvpair[idx].data_type = t_double;
+    vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val = value;
+    vlistptr->vars[varID].opt_grib_kvpair[idx].update = true;
+    if (name)
+      vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdup(name);
+    else
+      Error("Internal error, name undefined!");
+  }
 
   if (CDI_Debug)
-    {
-      Message("define additional GRIB2 key \"%s\" (double): %d", name, value);
-      Message("total list of registered, additional GRIB2 keys (total: %d):", vlistptr->vars[varID].opt_grib_nentries);
-      for (idx = 0; idx < vlistptr->vars[varID].opt_grib_nentries; idx++)
-        if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_int)
-          Message("%s -> integer %d", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
-                  vlistptr->vars[varID].opt_grib_kvpair[idx].int_val);
-        else if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_double)
-          Message("%s -> double %d", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
-                  vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val);
-        else
-          Message("%s -> unknown", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword);
-    }
+  {
+    Message("define additional GRIB2 key \"%s\" (double): %d", name, value);
+    Message("total list of registered, additional GRIB2 keys (total: %d):", vlistptr->vars[varID].opt_grib_nentries);
+    for (idx = 0; idx < vlistptr->vars[varID].opt_grib_nentries; idx++)
+      if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_int)
+        Message("%s -> integer %d", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
+                vlistptr->vars[varID].opt_grib_kvpair[idx].int_val);
+      else if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_double)
+        Message("%s -> double %d", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
+                vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val);
+      else
+        Message("%s -> unknown", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword);
+  }
 
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 #else
@@ -168,9 +168,9 @@ vlistHasVarKey(int vlistID, int varID, const char *name)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
-    {
-      if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)) return 1;
-    }
+  {
+    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)) return 1;
+  }
 #else
   (void) vlistID;
   (void) varID;
@@ -189,13 +189,13 @@ vlistInqVarDblKey(int vlistID, int varID, const char *name)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
-    {
-      int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
-      if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)
-          && (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)
-          && (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub))
-        return vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val;
-    }
+  {
+    int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
+    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)
+        && (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)
+        && (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub))
+      return vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val;
+  }
 #else
   (void) vlistID;
   (void) varID;
@@ -214,13 +214,13 @@ vlistInqVarIntKey(int vlistID, int varID, const char *name)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
-    {
-      int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
-      if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)
-          && (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_int)
-          && (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub))
-        return vlistptr->vars[varID].opt_grib_kvpair[i].int_val;
-    }
+  {
+    int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
+    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)
+        && (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_int)
+        && (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub))
+      return vlistptr->vars[varID].opt_grib_kvpair[i].int_val;
+  }
 
 #else
   (void) vlistID;

@@ -87,34 +87,34 @@ instituteCompareKernel(institute_t *ip1, institute_t *ip2)
   int differ = 0;
 
   if (ip1->name)
-    {
-      if (ip1->center > 0 && ip2->center != ip1->center) differ = 1;
-      if (ip1->subcenter > 0 && ip2->subcenter != ip1->subcenter) differ = 1;
+  {
+    if (ip1->center > 0 && ip2->center != ip1->center) differ = 1;
+    if (ip1->subcenter > 0 && ip2->subcenter != ip1->subcenter) differ = 1;
 
-      if (!differ)
-        {
-          if (ip2->name)
-            {
-              const size_t len1 = strlen(ip1->name);
-              const size_t len2 = strlen(ip2->name);
-              if ((len1 != len2) || memcmp(ip2->name, ip1->name, len2)) differ = 1;
-            }
-        }
+    if (!differ)
+    {
+      if (ip2->name)
+      {
+        const size_t len1 = strlen(ip1->name);
+        const size_t len2 = strlen(ip2->name);
+        if ((len1 != len2) || memcmp(ip2->name, ip1->name, len2)) differ = 1;
+      }
     }
+  }
   else if (ip1->longname)
+  {
+    if (ip2->longname)
     {
-      if (ip2->longname)
-        {
-          const size_t len1 = strlen(ip1->longname);
-          const size_t len2 = strlen(ip2->longname);
-          if ((len1 != len2) || memcmp(ip2->longname, ip1->longname, len2)) differ = 1;
-        }
+      const size_t len1 = strlen(ip1->longname);
+      const size_t len2 = strlen(ip2->longname);
+      if ((len1 != len2) || memcmp(ip2->longname, ip1->longname, len2)) differ = 1;
     }
+  }
   else
-    {
-      if (!(ip2->center == ip1->center && ip2->subcenter == ip1->subcenter)) differ = 1;
-      if (ip1->subcenter > 0 && ip1->subcenter != 255 && ip2->subcenter != ip1->subcenter) differ = 1;
-    }
+  {
+    if (!(ip2->center == ip1->center && ip2->subcenter == ip1->subcenter)) differ = 1;
+    if (ip1->subcenter > 0 && ip1->subcenter != 255 && ip2->subcenter != ip1->subcenter) differ = 1;
+  }
 
   return differ;
 }
@@ -131,10 +131,10 @@ findInstitute(int id, void *res, void *data)
   institute_t *ip1 = ((struct instLoc *) data)->ip;
   institute_t *ip2 = (institute_t *) res;
   if (!instituteCompareKernel(ip1, ip2))
-    {
-      ((struct instLoc *) data)->id = id;
-      return CDI_APPLY_STOP;
-    }
+  {
+    ((struct instLoc *) data)->id = id;
+    return CDI_APPLY_STOP;
+  }
   else
     return CDI_APPLY_GO_ON;
 }
@@ -163,10 +163,10 @@ instituteNewEntry(cdiResH resH, int center, int subcenter, const char *name, con
   if (resH == CDI_UNDEFID)
     instituteptr->self = reshPut(instituteptr, &instituteOps);
   else
-    {
-      instituteptr->self = resH;
-      reshReplace(resH, instituteptr, &instituteOps);
-    }
+  {
+    instituteptr->self = resH;
+    reshReplace(resH, instituteptr, &instituteOps);
+  }
   instituteptr->center = center;
   instituteptr->subcenter = subcenter;
   if (name && *name) instituteptr->name = strdup(name);

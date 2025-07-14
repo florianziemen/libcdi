@@ -60,10 +60,10 @@ modelNewEntry(cdiResH resH, int instID, int modelgribID, const char *name)
   if (resH == CDI_UNDEFID)
     modelptr->self = reshPut(modelptr, &modelOps);
   else
-    {
-      modelptr->self = resH;
-      reshReplace(resH, modelptr, &modelOps);
-    }
+  {
+    modelptr->self = resH;
+    reshReplace(resH, modelptr, &modelOps);
+  }
   modelptr->instID = instID;
   modelptr->modelgribID = modelgribID;
   if (name && *name) modelptr->name = strdup(name);
@@ -130,10 +130,10 @@ findModelByID(int resID, void *res, void *data)
   struct modelLoc *ret = (struct modelLoc *) data;
   int instID = ret->instID, modelgribID = ret->modelgribID;
   if (modelptr->instID == instID && modelptr->modelgribID == modelgribID)
-    {
-      ret->resID = resID;
-      return CDI_APPLY_STOP;
-    }
+  {
+    ret->resID = resID;
+    return CDI_APPLY_STOP;
+  }
   else
     return CDI_APPLY_GO_ON;
 }
@@ -146,15 +146,15 @@ findModelByName(int resID, void *res, void *data)
   int instID = ret->instID, modelgribID = ret->modelgribID;
   const char *name = ret->name;
   if ((instID == -1 || modelptr->instID == instID) && (modelgribID == 0 || modelptr->modelgribID == modelgribID) && modelptr->name)
+  {
+    const char *p = name, *q = modelptr->name;
+    while (*p != '\0' && *p == *q) ++p, ++q;
+    if (*p == '\0' || *q == '\0')
     {
-      const char *p = name, *q = modelptr->name;
-      while (*p != '\0' && *p == *q) ++p, ++q;
-      if (*p == '\0' || *q == '\0')
-        {
-          ret->resID = resID;
-          return CDI_APPLY_STOP;
-        }
+      ret->resID = resID;
+      return CDI_APPLY_STOP;
     }
+  }
   return CDI_APPLY_GO_ON;
 }
 
@@ -298,12 +298,12 @@ modelUnpack(void *buf, int size, int *position, int originNamespace, void *conte
   char *name;
   serializeUnpack(buf, size, position, tempbuf, modelNints, CDI_DATATYPE_INT, context);
   if (tempbuf[MODEL_PACK_INT_NAMELEN] != 0)
-    {
-      size_t len = (size_t) tempbuf[MODEL_PACK_INT_NAMELEN];
-      name = (char *) malloc(len + 1);
-      serializeUnpack(buf, size, position, name, tempbuf[MODEL_PACK_INT_NAMELEN], CDI_DATATYPE_TXT, context);
-      name[len] = '\0';
-    }
+  {
+    size_t len = (size_t) tempbuf[MODEL_PACK_INT_NAMELEN];
+    name = (char *) malloc(len + 1);
+    serializeUnpack(buf, size, position, name, tempbuf[MODEL_PACK_INT_NAMELEN], CDI_DATATYPE_TXT, context);
+    name[len] = '\0';
+  }
   else { name = (char *) ""; }
   int targetID = adaptKey(tempbuf[MODEL_PACK_INT_SELF]);
   model_t *mp = modelNewEntry(force_id ? targetID : CDI_UNDEFID, adaptKey(tempbuf[MODEL_PACK_INT_INSTID]),

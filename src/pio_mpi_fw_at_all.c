@@ -127,33 +127,33 @@ fowFileWriteAtAll(const char *filename, const char *mode)
 
   for (size_t i = 0; i < openFilesSize; ++i)
     if (openFiles[i].name && !strcmp(openFiles[i].name, filename))
-      {
-        Warning("filename %s is already open!"
-                " CDI-PIO does not support concurrent access"
-                " through different filehandles.",
-                filename);
-        return CDI_EINVAL;
-      }
+    {
+      Warning("filename %s is already open!"
+              " CDI-PIO does not support concurrent access"
+              " through different filehandles.",
+              filename);
+      return CDI_EINVAL;
+    }
 
   size_t fileID = SIZE_MAX;
   if (openFilesSize == openFilesFill)
-    {
-      fileID = openFilesSize;
-      if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
-      openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
-      if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
-      openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
-      for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
-    }
+  {
+    fileID = openFilesSize;
+    if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
+    openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
+    if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
+    openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
+    for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
+  }
   else
-    {
-      for (size_t i = 0; i < openFilesSize; ++i)
-        if (openFiles[i].name == NULL)
-          {
-            fileID = i;
-            break;
-          }
-    }
+  {
+    for (size_t i = 0; i < openFilesSize; ++i)
+      if (openFiles[i].name == NULL)
+      {
+        fileID = i;
+        break;
+      }
+  }
   struct fileMPIFWAA *of = openFiles + fileID;
   ++openFilesFill;
   initAFiledataFileWriteAtAll(of, filename, conf->writeAggBufLim);

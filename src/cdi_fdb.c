@@ -35,13 +35,13 @@ void
 cdi_fdb_delete_kvlist(int numItems, fdbKeyValueEntry *keyValueList)
 {
   for (int i = 0; i < numItems; ++i)
+  {
+    for (int k = 0; k < keyValueList[i].numKeys; ++k)
     {
-      for (int k = 0; k < keyValueList[i].numKeys; ++k)
-        {
-          if (keyValueList[i].keys[k]) free(keyValueList[i].keys[k]);
-          if (keyValueList[i].values[k]) free(keyValueList[i].values[k]);
-        }
+      if (keyValueList[i].keys[k]) free(keyValueList[i].keys[k]);
+      if (keyValueList[i].values[k]) free(keyValueList[i].values[k]);
     }
+  }
   free(keyValueList);
 }
 
@@ -57,45 +57,45 @@ decode_fdbitem(const char *fdbItem, KeyValueItem *keyValue)
   int start = (*pItem == '{');
   itemKeys[0] = pItem + start;
   for (int i = start; i < len; i++)
+  {
+    if (pItem[i] == ',')
     {
-      if (pItem[i] == ',')
-        {
-          pItem[i] = 0;
-          numKeys++;
-          itemKeys[numKeys] = &pItem[++i];
-        }
-      else if (pItem[i] == '}')
-        {
-          pItem[i] = 0;
-          numKeys++;
-          if (pItem[i + 1] == '{')
-            {
-              itemKeys[numKeys] = &pItem[i + 2];
-              i += 2;
-            }
-        }
-      else if (i > start && i == (len - 1)) { numKeys++; }
+      pItem[i] = 0;
+      numKeys++;
+      itemKeys[numKeys] = &pItem[++i];
     }
+    else if (pItem[i] == '}')
+    {
+      pItem[i] = 0;
+      numKeys++;
+      if (pItem[i + 1] == '{')
+      {
+        itemKeys[numKeys] = &pItem[i + 2];
+        i += 2;
+      }
+    }
+    else if (i > start && i == (len - 1)) { numKeys++; }
+  }
 
   // keyValue->numKeys = numKeys;
   // for (int i = 0; i < numKeys; i++)  printf("%d <%s>\n", i, itemKeys[i]);
 
   int n = 0;
   for (int i = 0; i < numKeys; i++)
-    {
-      char *itemKey = itemKeys[i];
-      len = strlen(itemKey);
-      for (int k = 0; k < len; k++)
-        if (itemKey[k] == '=')
-          {
-            n++;
-            itemKey[k] = 0;
-            itemValues[i] = &itemKey[k + 1];
-            break;
-          }
+  {
+    char *itemKey = itemKeys[i];
+    len = strlen(itemKey);
+    for (int k = 0; k < len; k++)
+      if (itemKey[k] == '=')
+      {
+        n++;
+        itemKey[k] = 0;
+        itemValues[i] = &itemKey[k + 1];
+        break;
+      }
 
-      // printf("key <%s> value <%s>\n", itemKeys[i], itemValues[i]);
-    }
+    // printf("key <%s> value <%s>\n", itemKeys[i], itemValues[i]);
+  }
 
   keyValue->numKeys = n;
 }
@@ -111,10 +111,10 @@ fdbitem_to_request(const fdbKeyValueEntry *keyValue, fdb_request_t *request)
 {
   // printf("numKeys: %d\n", keyValue->numKeys);
   for (int i = 0; i < keyValue->numKeys; i++)
-    {
-      // printf("%d: key <%s> value <%s>\n", i, keyValue->keys[i], keyValue->values[i]);
-      check_fdb_error(fdb_request_add1(request, keyValue->keys[i], keyValue->values[i]));
-    }
+  {
+    // printf("%d: key <%s> value <%s>\n", i, keyValue->keys[i], keyValue->values[i]);
+    check_fdb_error(fdb_request_add1(request, keyValue->keys[i], keyValue->values[i]));
+  }
 }
 
 int
@@ -127,12 +127,12 @@ cdi_fdb_fill_kvlist(fdb_handle_t *fdb, fdb_request_t *request, fdbKeyValueEntry 
 
   int numItems = 0;
   while (true)
-    {
-      int err = fdb_listiterator_next(it);
-      if (err != FDB_SUCCESS) break;
+  {
+    int err = fdb_listiterator_next(it);
+    if (err != FDB_SUCCESS) break;
 
-      numItems++;
-    }
+    numItems++;
+  }
   if (CDI_Debug) Message("numItems = %d", numItems);
   // Message("numItems = %d", numItems);
 
@@ -142,41 +142,41 @@ cdi_fdb_fill_kvlist(fdb_handle_t *fdb, fdb_request_t *request, fdbKeyValueEntry 
 
   int itemNum = 0;
   while (true)
+  {
+    int err = fdb_listiterator_next(it);
+    if (err != FDB_SUCCESS) break;
+
+    // const char *uri;
+    // size_t off, attr_len;
+    // fdb_listiterator_attrs(it, &uri, &off, &attr_len);
+    // printf("uri=%s, off=%zu, attr_len=%zu\n", uri, off, attr_len);
+
+    fdb_split_key_t *sk = NULL;
+    check_fdb_error(fdb_new_splitkey(&sk));
+    check_fdb_error(fdb_listiterator_splitkey(it, sk));
+
+    int keyNum = 0;
+    while (true)
     {
-      int err = fdb_listiterator_next(it);
+      const char *k;
+      const char *v;
+      size_t l;
+      bool checkLevel = true;
+      err = fdb_splitkey_next_metadata(sk, &k, &v, checkLevel ? &l : NULL);
       if (err != FDB_SUCCESS) break;
-
-      // const char *uri;
-      // size_t off, attr_len;
-      // fdb_listiterator_attrs(it, &uri, &off, &attr_len);
-      // printf("uri=%s, off=%zu, attr_len=%zu\n", uri, off, attr_len);
-
-      fdb_split_key_t *sk = NULL;
-      check_fdb_error(fdb_new_splitkey(&sk));
-      check_fdb_error(fdb_listiterator_splitkey(it, sk));
-
-      int keyNum = 0;
-      while (true)
-        {
-          const char *k;
-          const char *v;
-          size_t l;
-          bool checkLevel = true;
-          err = fdb_splitkey_next_metadata(sk, &k, &v, checkLevel ? &l : NULL);
-          if (err != FDB_SUCCESS) break;
-          // printf("k, v, l %s %s %zu\n", k, v, l);
-          if (keyNum < 32)
-            {
-              (*pkeyValueList)[itemNum].keys[keyNum] = strdup(k);
-              (*pkeyValueList)[itemNum].values[keyNum] = strdup(v);
-              keyNum++;
-            }
-        }
-
-      (*pkeyValueList)[itemNum++].numKeys = keyNum;
-
-      check_fdb_error(fdb_delete_splitkey(sk));
+      // printf("k, v, l %s %s %zu\n", k, v, l);
+      if (keyNum < 32)
+      {
+        (*pkeyValueList)[itemNum].keys[keyNum] = strdup(k);
+        (*pkeyValueList)[itemNum].values[keyNum] = strdup(v);
+        keyNum++;
+      }
     }
+
+    (*pkeyValueList)[itemNum++].numKeys = keyNum;
+
+    check_fdb_error(fdb_delete_splitkey(sk));
+  }
 
   check_fdb_error(fdb_delete_listiterator(it));
 
@@ -215,15 +215,15 @@ static int
 check_numKey(const char *key, int numKeys, int numItems)
 {
   if (numKeys == 0)
-    {
-      Warning("Key %s is missing in all FDB records!", key);
-      return -1;
-    }
+  {
+    Warning("Key %s is missing in all FDB records!", key);
+    return -1;
+  }
   else if (numKeys < numItems)
-    {
-      Warning("Key %s is missing in some FDB records!", key);
-      return -2;
-    }
+  {
+    Warning("Key %s is missing in some FDB records!", key);
+    return -2;
+  }
 
   return 0;
 }
@@ -265,25 +265,25 @@ void
 print_keyvalueList(int numItems, fdbKeyValueEntry *keyValueList)
 {
   for (int i = 0; i < numItems; ++i)
-    {
-      printf("item=%d ", i + 1);
-      const fdbKeyValueEntry *e = &keyValueList[i];
-      for (int k = 0; k < e->numKeys; ++k) printf("%s%s=%s", (k > 0) ? "," : "", e->keys[k], e->values[k]);
-      printf("\n");
-    }
+  {
+    printf("item=%d ", i + 1);
+    const fdbKeyValueEntry *e = &keyValueList[i];
+    for (int k = 0; k < e->numKeys; ++k) printf("%s%s=%s", (k > 0) ? "," : "", e->keys[k], e->values[k]);
+    printf("\n");
+  }
 }
 
 void
 print_keyvalueList_sorted(int numItems, fdbKeyValueEntry *keyValueList, RecordInfoEntry *recordInfoList)
 {
   for (int i = 0; i < numItems; ++i)
-    {
-      int fdbIndex = recordInfoList[i].fdbIndex;
-      printf("item=%d ", fdbIndex + 1);
-      const fdbKeyValueEntry *e = &keyValueList[fdbIndex];
-      for (int k = 0; k < e->numKeys; ++k) printf("%s%s=%s", (k > 0) ? "," : "", e->keys[k], e->values[k]);
-      printf("\n");
-    }
+  {
+    int fdbIndex = recordInfoList[i].fdbIndex;
+    printf("item=%d ", fdbIndex + 1);
+    const fdbKeyValueEntry *e = &keyValueList[fdbIndex];
+    for (int k = 0; k < e->numKeys; ++k) printf("%s%s=%s", (k > 0) ? "," : "", e->keys[k], e->values[k]);
+    printf("\n");
+  }
 }
 
 static int
@@ -303,11 +303,11 @@ isSorted_dateTime(int numItems, RecordInfoEntry *recordInfo)
 {
   int64_t datetime1 = (int64_t) recordInfo[0].date * 100000 + recordInfo[0].time;
   for (int i = 1; i < numItems; ++i)
-    {
-      int64_t datetime2 = (int64_t) recordInfo[i].date * 100000 + recordInfo[i].time;
-      if (datetime1 > datetime2) return false;
-      datetime1 = datetime2;
-    }
+  {
+    int64_t datetime2 = (int64_t) recordInfo[i].date * 100000 + recordInfo[i].time;
+    if (datetime1 > datetime2) return false;
+    datetime1 = datetime2;
+  }
 
   return true;
 }
@@ -349,24 +349,24 @@ get_num_records(int numItems, RecordInfoEntry *recordInfo)
 {
   int numRecords = 0;
   for (int i = 0; i < numItems; i++)
-    {
-      if (recordInfo[0].date != recordInfo[i].date || recordInfo[0].time != recordInfo[i].time) break;
-      numRecords++;
-    }
+  {
+    if (recordInfo[0].date != recordInfo[i].date || recordInfo[0].time != recordInfo[i].time) break;
+    numRecords++;
+  }
 
   int numTimesteps = numItems / numRecords;
   if (numTimesteps * numRecords != numItems) return 0;
 
   for (int k = 1; k < numTimesteps; ++k)
+  {
+    int date = recordInfo[k * numRecords].date;
+    int time = recordInfo[k * numRecords].time;
+    for (int i = 1; i < numRecords; i++)
     {
-      int date = recordInfo[k * numRecords].date;
-      int time = recordInfo[k * numRecords].time;
-      for (int i = 1; i < numRecords; i++)
-        {
-          int index = k * numRecords + i;
-          if (date != recordInfo[index].date || time != recordInfo[index].time) return 0;
-        }
+      int index = k * numRecords + i;
+      if (date != recordInfo[index].date || time != recordInfo[index].time) return 0;
     }
+  }
   /*
   for (int i = 1; i < numRecords; i++)
     {
@@ -410,31 +410,31 @@ decode_keyvalue(int numItems, fdbKeyValueEntry *keyValueList, RecordInfoEntry *r
   int numKeyParam = 0;
   int numKeyLtype = 0;
   for (int i = 0; i < numItems; ++i)
+  {
+    fdbKeyValueEntry *keyValue = &keyValueList[i];
+    RecordInfoEntry *rentry = &recordInfoList[i];
+    record_info_entry_init(rentry);
+    rentry->fdbIndex = i;
+    char **keys = keyValue->keys;
+    char **values = keyValue->values;
+    bool foundDate = false;
+    bool foundTime = false;
+    bool foundParam = false;
+    bool foundLtype = false;
+    bool foundLlist = false;
+    for (int k = 0; k < keyValue->numKeys; k++)
     {
-      fdbKeyValueEntry *keyValue = &keyValueList[i];
-      RecordInfoEntry *rentry = &recordInfoList[i];
-      record_info_entry_init(rentry);
-      rentry->fdbIndex = i;
-      char **keys = keyValue->keys;
-      char **values = keyValue->values;
-      bool foundDate = false;
-      bool foundTime = false;
-      bool foundParam = false;
-      bool foundLtype = false;
-      bool foundLlist = false;
-      for (int k = 0; k < keyValue->numKeys; k++)
-        {
-          // printf("key <%s> value <%s>\n", keys[k], values[k]);
-          // clang-format off
+      // printf("key <%s> value <%s>\n", keys[k], values[k]);
+      // clang-format off
           if      (!foundDate  && str_is_equal(keys[k], "date"))     { foundDate = true;  numKeyDate++;  rentry->date = atoi(values[k]); }
           else if (!foundTime  && str_is_equal(keys[k], "time"))     { foundTime = true;  numKeyTime++;  rentry->time = atoi(values[k]); }
           else if (!foundParam && str_is_equal(keys[k], "param"))    { foundParam = true; numKeyParam++; rentry->param = atoi(values[k]); }
           else if (!foundLtype && str_is_equal(keys[k], "levtype"))  { foundLtype = true; numKeyLtype++; rentry->levtype = get_ilevtype(values[k]); }
           else if (!foundLlist && str_is_equal(keys[k], "levelist")) { foundLlist = true; rentry->ilevel = atoi(values[k]); }
-          // clang-format on
-          if (foundDate && foundTime && foundParam && foundLtype && foundLlist) break;
-        }
+      // clang-format on
+      if (foundDate && foundTime && foundParam && foundLtype && foundLlist) break;
     }
+  }
 
   int status = 0;
   if (check_numKey("date", numKeyDate, numItems) != 0) status = -1;
@@ -454,32 +454,32 @@ remove_duplicate_timesteps(RecordInfoEntry *recordInfoList, int numRecords, int 
   int time = recordInfoList[0].time;
 
   for (int i = 1; i < numTimesteps; ++i)
+  {
+    int k = 0;
+    for (k = 0; k < numTimesteps; k++)
     {
-      int k = 0;
-      for (k = 0; k < numTimesteps; k++)
-        {
-          int index = (i + k) * numRecords;
-          if (date != recordInfoList[index].date || time != recordInfoList[index].time) break;
-        }
-
-      int index = i * numRecords;
-      if (k > 0 && k < numTimesteps)
-        {
-          index = (i + k) * numRecords;
-          int n = k;
-          for (k = 0; k < n; k++)
-            {
-              Warning("Skip timestep %d", i + k + 1);
-              numTimestepsNew--;
-              for (int j = i; j < numTimestepsNew; j++) timestepRecordOffset[j] = timestepRecordOffset[j + 1];
-            }
-          i += k;
-          if (i >= numTimesteps) break;
-        }
-
-      date = recordInfoList[index].date;
-      time = recordInfoList[index].time;
+      int index = (i + k) * numRecords;
+      if (date != recordInfoList[index].date || time != recordInfoList[index].time) break;
     }
+
+    int index = i * numRecords;
+    if (k > 0 && k < numTimesteps)
+    {
+      index = (i + k) * numRecords;
+      int n = k;
+      for (k = 0; k < n; k++)
+      {
+        Warning("Skip timestep %d", i + k + 1);
+        numTimestepsNew--;
+        for (int j = i; j < numTimestepsNew; j++) timestepRecordOffset[j] = timestepRecordOffset[j + 1];
+      }
+      i += k;
+      if (i >= numTimesteps) break;
+    }
+
+    date = recordInfoList[index].date;
+    time = recordInfoList[index].time;
+  }
 
   return numTimestepsNew;
 }
@@ -502,14 +502,14 @@ cdi_create_fdb_request(const char *filename)
   bool expverDefined = false;
   bool classDefined = false;
   for (int k = 0; k < keyValue.numKeys; k++)
-    {
-      // clang-format off
+  {
+    // clang-format off
       if      (!expverDefined && str_is_equal(keyValue.keys[k], "expver")) expverDefined = true;
       else if (!classDefined  && str_is_equal(keyValue.keys[k], "class")) classDefined = true;
-      // clang-format on
+    // clang-format on
 
-      check_fdb_error(fdb_request_add1(request, keyValue.keys[k], keyValue.values[k]));
-    }
+    check_fdb_error(fdb_request_add1(request, keyValue.keys[k], keyValue.values[k]));
+  }
 
   if (!expverDefined) Error("FDB parameter <expver> undefined!");
   if (!classDefined) Error("FDB parameter <class> undefined!");

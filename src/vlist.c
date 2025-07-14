@@ -127,10 +127,10 @@ vlist_new_entry(cdiResH resH)
   if (resH == CDI_UNDEFID)
     vlistptr->self = reshPut(vlistptr, &vlistOps);
   else
-    {
-      vlistptr->self = resH;
-      reshReplace(resH, vlistptr, &vlistOps);
-    }
+  {
+    vlistptr->self = resH;
+    reshReplace(resH, vlistptr, &vlistOps);
+  }
   return vlistptr;
 }
 
@@ -228,24 +228,24 @@ vlist_delete(vlist_t *vlistptr)
   var_t *vars = vlistptr->vars;
 
   for (int varID = 0; varID < nvars; varID++)
+  {
+    if (vars[varID].levinfo) Free(vars[varID].levinfo);
+
+    if (vlistptr->vars[varID].opt_grib_kvpair)
     {
-      if (vars[varID].levinfo) Free(vars[varID].levinfo);
-
-      if (vlistptr->vars[varID].opt_grib_kvpair)
-        {
-          for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; i++)
-            {
-              if (vlistptr->vars[varID].opt_grib_kvpair[i].keyword) Free(vlistptr->vars[varID].opt_grib_kvpair[i].keyword);
-            }
-          Free(vlistptr->vars[varID].opt_grib_kvpair);
-        }
-      vlistptr->vars[varID].opt_grib_nentries = 0;
-      vlistptr->vars[varID].opt_grib_kvpair_size = 0;
-      vlistptr->vars[varID].opt_grib_kvpair = NULL;
-
-      cdiDeleteKeys(vlistID, varID);
-      cdiDeleteAtts(vlistID, varID);
+      for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; i++)
+      {
+        if (vlistptr->vars[varID].opt_grib_kvpair[i].keyword) Free(vlistptr->vars[varID].opt_grib_kvpair[i].keyword);
+      }
+      Free(vlistptr->vars[varID].opt_grib_kvpair);
     }
+    vlistptr->vars[varID].opt_grib_nentries = 0;
+    vlistptr->vars[varID].opt_grib_kvpair_size = 0;
+    vlistptr->vars[varID].opt_grib_kvpair = NULL;
+
+    cdiDeleteKeys(vlistID, varID);
+    cdiDeleteAtts(vlistID, varID);
+  }
 
   if (vars) Free(vars);
 
@@ -265,10 +265,10 @@ cdiVlistDestroy_(int vlistID, bool assertInternal)
       warningTextInternalByUser[] = "Attempt to destroy an internal vlist object by the user (vlistID=%d).";
   static const char *const wText[2] = { warningTextUserByInternal, warningTextInternalByUser };
   if (vlistptr->internal == assertInternal)
-    {
-      vlist_delete(vlistptr);
-      vlist_delete_entry(vlistID);
-    }
+  {
+    vlist_delete(vlistptr);
+    vlist_delete_entry(vlistID);
+  }
   else
     Warning(wText[!assertInternal], vlistID);
 }
@@ -302,21 +302,21 @@ var_copy_entries(var_t *var2, var_t *var1)
   if ((var2->opt_grib_nentries > 0) && CDI_Debug) Message("copy %d optional GRIB keywords", var2->opt_grib_nentries);
 
   for (int i = 0; i < var1->opt_grib_nentries; i++)
+  {
+    if (CDI_Debug) Message("copy entry \"%s\" ...", var1->opt_grib_kvpair[i].keyword);
+    var2->opt_grib_kvpair[i].keyword = NULL;
+    if (var1->opt_grib_kvpair[i].keyword != NULL)
     {
-      if (CDI_Debug) Message("copy entry \"%s\" ...", var1->opt_grib_kvpair[i].keyword);
-      var2->opt_grib_kvpair[i].keyword = NULL;
-      if (var1->opt_grib_kvpair[i].keyword != NULL)
-        {
-          var2->opt_grib_kvpair[i] = var1->opt_grib_kvpair[i];
-          var2->opt_grib_kvpair[i].keyword = strdup(var1->opt_grib_kvpair[i].keyword);
-          var2->opt_grib_kvpair[i].update = true;
-          if (CDI_Debug) Message("done.");
-        }
-      else
-        {
-          if (CDI_Debug) Message("not done.");
-        }
+      var2->opt_grib_kvpair[i] = var1->opt_grib_kvpair[i];
+      var2->opt_grib_kvpair[i].keyword = strdup(var1->opt_grib_kvpair[i].keyword);
+      var2->opt_grib_kvpair[i].update = true;
+      if (CDI_Debug) Message("done.");
     }
+    else
+    {
+      if (CDI_Debug) Message("not done.");
+    }
+  }
 }
 
 /*
@@ -350,32 +350,32 @@ vlistCopy(int vlistID1, int vlistID2)
   cdiCopyAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
 
   if (vars1)
+  {
+    int nvars = vlistptr1->nvars;
+    // vlistptr2->varsAllocated = nvars;
+
+    size_t n = (size_t) vlistptr2->varsAllocated;
+    vars2 = (var_t *) Realloc(vars2, n * sizeof(var_t));
+    memcpy(vars2, vars1, n * sizeof(var_t));
+    vlistptr2->vars = vars2;
+
+    for (int varID = 0; varID < nvars; varID++)
     {
-      int nvars = vlistptr1->nvars;
-      // vlistptr2->varsAllocated = nvars;
+      var_copy_entries(&vars2[varID], &vars1[varID]);
+      vlistptr2->vars[varID].keys.nelems = 0;
+      cdiCopyKeys(vlistID1, varID, vlistID2, varID);
 
-      size_t n = (size_t) vlistptr2->varsAllocated;
-      vars2 = (var_t *) Realloc(vars2, n * sizeof(var_t));
-      memcpy(vars2, vars1, n * sizeof(var_t));
-      vlistptr2->vars = vars2;
+      vlistptr2->vars[varID].atts.nelems = 0;
+      cdiCopyAtts(vlistID1, varID, vlistID2, varID);
 
-      for (int varID = 0; varID < nvars; varID++)
-        {
-          var_copy_entries(&vars2[varID], &vars1[varID]);
-          vlistptr2->vars[varID].keys.nelems = 0;
-          cdiCopyKeys(vlistID1, varID, vlistID2, varID);
-
-          vlistptr2->vars[varID].atts.nelems = 0;
-          cdiCopyAtts(vlistID1, varID, vlistID2, varID);
-
-          if (vars1[varID].levinfo)
-            {
-              n = (size_t) zaxisInqSize(vars1[varID].zaxisID);
-              vars2[varID].levinfo = (levinfo_t *) Malloc(n * sizeof(levinfo_t));
-              memcpy(vars2[varID].levinfo, vars1[varID].levinfo, n * sizeof(levinfo_t));
-            }
-        }
+      if (vars1[varID].levinfo)
+      {
+        n = (size_t) zaxisInqSize(vars1[varID].zaxisID);
+        vars2[varID].levinfo = (levinfo_t *) Malloc(n * sizeof(levinfo_t));
+        memcpy(vars2[varID].levinfo, vars1[varID].levinfo, n * sizeof(levinfo_t));
+      }
     }
+  }
 }
 
 /*
@@ -410,14 +410,14 @@ vlistClearFlag(int vlistID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   for (int varID = 0; varID < vlistptr->nvars; varID++)
+  {
+    vlistptr->vars[varID].flag = false;
+    if (vlistptr->vars[varID].levinfo)
     {
-      vlistptr->vars[varID].flag = false;
-      if (vlistptr->vars[varID].levinfo)
-        {
-          int nlevs = zaxisInqSize(vlistptr->vars[varID].zaxisID);
-          for (int levID = 0; levID < nlevs; levID++) vlistptr->vars[varID].levinfo[levID].flag = false;
-        }
+      int nlevs = zaxisInqSize(vlistptr->vars[varID].zaxisID);
+      for (int levID = 0; levID < nlevs; levID++) vlistptr->vars[varID].levinfo[levID].flag = false;
     }
+  }
 }
 
 struct vgzSearchState
@@ -437,10 +437,10 @@ vgzZAxisSearch(int id, void *res, void *data)
   (void) res;
   if (zaxis_compare(id, state->zaxistype, state->nlevels, state->levels, state->lbounds, state->ubounds, NULL, NULL, 0, -1)
       == false)
-    {
-      state->resIDValue = id;
-      return CDI_APPLY_STOP;
-    }
+  {
+    state->resIDValue = id;
+    return CDI_APPLY_STOP;
+  }
 
   return CDI_APPLY_GO_ON;
 }
@@ -458,51 +458,51 @@ vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *leve
   bool hasBounds = (lbounds && ubounds);
 
   for (int index = 0; index < nzaxis; ++index)
-    {
-      zaxisID = vlistptr->zaxisIDs[index];
+  {
+    zaxisID = vlistptr->zaxisIDs[index];
 
-      if (zaxis_compare(zaxisID, zaxistype, nlevels, levels, lbounds, ubounds, NULL, NULL, 0, -1) == false)
-        {
-          zaxisdefined = true;
-          break;
-        }
+    if (zaxis_compare(zaxisID, zaxistype, nlevels, levels, lbounds, ubounds, NULL, NULL, 0, -1) == false)
+    {
+      zaxisdefined = true;
+      break;
     }
+  }
 
   if (!zaxisdefined)
-    {
-      struct vgzSearchState query;
-      query.zaxistype = zaxistype;
-      query.nlevels = nlevels;
-      query.levels = levels;
-      query.lbounds = lbounds;
-      query.ubounds = ubounds;
+  {
+    struct vgzSearchState query;
+    query.zaxistype = zaxistype;
+    query.nlevels = nlevels;
+    query.levels = levels;
+    query.lbounds = lbounds;
+    query.ubounds = ubounds;
 
-      if ((zaxisglobdefined = (cdiResHFilterApply(getZaxisOps(), vgzZAxisSearch, &query) == CDI_APPLY_STOP)))
-        zaxisID = query.resIDValue;
-    }
+    if ((zaxisglobdefined = (cdiResHFilterApply(getZaxisOps(), vgzZAxisSearch, &query) == CDI_APPLY_STOP)))
+      zaxisID = query.resIDValue;
+  }
 
   if (!zaxisdefined)
+  {
+    if (!zaxisglobdefined)
     {
-      if (!zaxisglobdefined)
-        {
-          zaxisID = zaxisCreate(zaxistype, nlevels);
-          zaxisDefLevels(zaxisID, levels);
+      zaxisID = zaxisCreate(zaxistype, nlevels);
+      zaxisDefLevels(zaxisID, levels);
 
-          if (zaxistype == ZAXIS_CHAR) zaxisDefCvals(zaxisID, cvals, (int) clen);
+      if (zaxistype == ZAXIS_CHAR) zaxisDefCvals(zaxisID, cvals, (int) clen);
 
-          if (hasBounds)
-            {
-              zaxisDefLbounds(zaxisID, lbounds);
-              zaxisDefUbounds(zaxisID, ubounds);
-            }
+      if (hasBounds)
+      {
+        zaxisDefLbounds(zaxisID, lbounds);
+        zaxisDefUbounds(zaxisID, ubounds);
+      }
 
-          if (zaxistype == ZAXIS_HYBRID && vctsize > 0) zaxisDefVct(zaxisID, vctsize, vct);
-        }
-
-      nzaxis = vlistptr->nzaxis;
-      vlistptr->zaxisIDs[nzaxis] = zaxisID;
-      vlistptr->nzaxis++;
+      if (zaxistype == ZAXIS_HYBRID && vctsize > 0) zaxisDefVct(zaxisID, vctsize, vct);
     }
+
+    nzaxis = vlistptr->nzaxis;
+    vlistptr->zaxisIDs[nzaxis] = zaxisID;
+    vlistptr->nzaxis++;
+  }
 
   return zaxisID;
 }
@@ -512,11 +512,11 @@ delete_chunks(int vlistID, int varID)
 {
   int chunkKeys[4] = { CDI_KEY_CHUNKSIZE_DIMX, CDI_KEY_CHUNKSIZE_DIMY, CDI_KEY_CHUNKSIZE_DIMZ, CDI_KEY_CHUNKSIZE_DIMT };
   for (int i = 0; i < 4; ++i)
-    {
-      int chunkSize = 0;
-      cdiInqKeyInt(vlistID, varID, chunkKeys[i], &chunkSize);
-      if (chunkSize != 0) cdiDeleteKey(vlistID, varID, chunkKeys[i]);
-    }
+  {
+    int chunkSize = 0;
+    cdiInqKeyInt(vlistID, varID, chunkKeys[i], &chunkSize);
+    if (chunkSize != 0) cdiDeleteKey(vlistID, varID, chunkKeys[i]);
+  }
 
   int chunkSize = 0;
   cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, &chunkSize);
@@ -553,202 +553,202 @@ vlistCopyFlag(int vlistID2, int vlistID1)
   cdiCopyAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
 
   if (vlistptr1->vars)
-    {
-      vlistptr2->ngrids = 0;
-      vlistptr2->nzaxis = 0;
+  {
+    vlistptr2->ngrids = 0;
+    vlistptr2->nzaxis = 0;
 
-      int nvars = vlistptr1->nvars;
-      int nvars2 = 0;
-      for (int varID = 0; varID < nvars; varID++) nvars2 += vars1[varID].flag;
+    int nvars = vlistptr1->nvars;
+    int nvars2 = 0;
+    for (int varID = 0; varID < nvars; varID++) nvars2 += vars1[varID].flag;
 
-      vlistptr2->nvars = nvars2;
-      vlistptr2->varsAllocated = nvars2;
-      vars2 = (nvars2 > 0) ? (var_t *) Malloc((size_t) nvars2 * sizeof(var_t)) : NULL;
+    vlistptr2->nvars = nvars2;
+    vlistptr2->varsAllocated = nvars2;
+    vars2 = (nvars2 > 0) ? (var_t *) Malloc((size_t) nvars2 * sizeof(var_t)) : NULL;
 
-      vlistptr2->vars = vars2;
+    vlistptr2->vars = vars2;
 
-      int varID2 = 0;
-      for (int varID = 0; varID < nvars; varID++)
-        if (vars1[varID].flag)
+    int varID2 = 0;
+    for (int varID = 0; varID < nvars; varID++)
+      if (vars1[varID].flag)
+      {
+        vlistptr2->vars[varID2].flag = false;
+        int zaxisID = vlistptr1->vars[varID].zaxisID;
+        int gridID = vlistptr1->vars[varID].gridID;
+        int subtypeID = vlistptr1->vars[varID].subtypeID;
+
+        memcpy(&vars2[varID2], &vars1[varID], sizeof(var_t));
+
+        vars1[varID].fvarID = varID2;
+        vars2[varID2].fvarID = varID;
+
+        vars2[varID2].mvarID = varID2;
+
+        var_copy_entries(&vars2[varID2], &vars1[varID]);
+        vlistptr2->vars[varID2].keys.nelems = 0;
+        cdiCopyKeys(vlistID1, varID, vlistID2, varID2);
+
+        vlistptr2->vars[varID2].atts.nelems = 0;
+        cdiCopyAtts(vlistID1, varID, vlistID2, varID2);
+
+        int nlevs = zaxisInqSize(vars1[varID].zaxisID);
+        int nlevs2 = 0;
+        if (vars1[varID].levinfo)
+          for (int levID = 0; levID < nlevs; levID++) nlevs2 += vars1[varID].levinfo[levID].flag;
+
+        vars2[varID2].levinfo = (levinfo_t *) Malloc((size_t) nlevs2 * sizeof(levinfo_t));
+
+        if (nlevs != nlevs2)
+        {
+          int nvct = 0;
+          double *levels = NULL;
+          double *lbounds = NULL, *ubounds = NULL;
+          const double *vct = NULL;
+
+          if (!vars1[varID].levinfo) cdiVlistCreateVarLevInfo(vlistptr1, varID);
+
+          zaxisID = vars1[varID].zaxisID;
+          int zaxisType = zaxisInqType(zaxisID);
+
+          int levID2 = 0;
+          for (int levID = 0; levID < nlevs; levID++)
+            if (vars1[varID].levinfo[levID].flag)
+            {
+              vars1[varID].levinfo[levID].flevelID = levID2;
+              vars1[varID].levinfo[levID].mlevelID = levID2;
+            }
+
+          if (zaxisInqLevels(zaxisID, NULL))
           {
-            vlistptr2->vars[varID2].flag = false;
-            int zaxisID = vlistptr1->vars[varID].zaxisID;
-            int gridID = vlistptr1->vars[varID].gridID;
-            int subtypeID = vlistptr1->vars[varID].subtypeID;
+            levels = (double *) Malloc((size_t) nlevs2 * sizeof(double));
 
-            memcpy(&vars2[varID2], &vars1[varID], sizeof(var_t));
+            levID2 = 0;
+            for (int levID = 0; levID < nlevs; ++levID)
+              if (vars1[varID].levinfo[levID].flag) levels[levID2++] = zaxisInqLevel(zaxisID, levID);
+          }
 
-            vars1[varID].fvarID = varID2;
-            vars2[varID2].fvarID = varID;
+          if (zaxisType == ZAXIS_HYBRID)
+          {
+            nvct = zaxisInqVctSize(zaxisID);
+            vct = zaxisInqVctPtr(zaxisID);
+          }
 
-            vars2[varID2].mvarID = varID2;
-
-            var_copy_entries(&vars2[varID2], &vars1[varID]);
-            vlistptr2->vars[varID2].keys.nelems = 0;
-            cdiCopyKeys(vlistID1, varID, vlistID2, varID2);
-
-            vlistptr2->vars[varID2].atts.nelems = 0;
-            cdiCopyAtts(vlistID1, varID, vlistID2, varID2);
-
-            int nlevs = zaxisInqSize(vars1[varID].zaxisID);
-            int nlevs2 = 0;
-            if (vars1[varID].levinfo)
-              for (int levID = 0; levID < nlevs; levID++) nlevs2 += vars1[varID].levinfo[levID].flag;
-
-            vars2[varID2].levinfo = (levinfo_t *) Malloc((size_t) nlevs2 * sizeof(levinfo_t));
-
-            if (nlevs != nlevs2)
-              {
-                int nvct = 0;
-                double *levels = NULL;
-                double *lbounds = NULL, *ubounds = NULL;
-                const double *vct = NULL;
-
-                if (!vars1[varID].levinfo) cdiVlistCreateVarLevInfo(vlistptr1, varID);
-
-                zaxisID = vars1[varID].zaxisID;
-                int zaxisType = zaxisInqType(zaxisID);
-
-                int levID2 = 0;
-                for (int levID = 0; levID < nlevs; levID++)
-                  if (vars1[varID].levinfo[levID].flag)
-                    {
-                      vars1[varID].levinfo[levID].flevelID = levID2;
-                      vars1[varID].levinfo[levID].mlevelID = levID2;
-                    }
-
-                if (zaxisInqLevels(zaxisID, NULL))
-                  {
-                    levels = (double *) Malloc((size_t) nlevs2 * sizeof(double));
-
-                    levID2 = 0;
-                    for (int levID = 0; levID < nlevs; ++levID)
-                      if (vars1[varID].levinfo[levID].flag) levels[levID2++] = zaxisInqLevel(zaxisID, levID);
-                  }
-
-                if (zaxisType == ZAXIS_HYBRID)
-                  {
-                    nvct = zaxisInqVctSize(zaxisID);
-                    vct = zaxisInqVctPtr(zaxisID);
-                  }
-
-                size_t clen2 = 0;
-                char **cvals2 = NULL;
+          size_t clen2 = 0;
+          char **cvals2 = NULL;
 #ifndef USE_MPI
-                if (zaxisType == ZAXIS_CHAR)
-                  {
-                    char **cvals1 = zaxisInqCValsPtr(zaxisID);
-                    size_t clen1 = (size_t) zaxisInqCLen(zaxisID);
-                    for (int levID = 0; levID < nlevs; ++levID)
-                      if (vars1[varID].levinfo[levID].flag)
-                        {
-                          size_t testlen = clen1;
-                          while (cvals1[levID][testlen] == ' ') testlen--;
-                          if (clen2 < testlen) clen2 = testlen;
-                        }
-                    cvals2 = (char **) Malloc((size_t) nlevs2 * sizeof(char *));
-                    levID2 = 0;
+          if (zaxisType == ZAXIS_CHAR)
+          {
+            char **cvals1 = zaxisInqCValsPtr(zaxisID);
+            size_t clen1 = (size_t) zaxisInqCLen(zaxisID);
+            for (int levID = 0; levID < nlevs; ++levID)
+              if (vars1[varID].levinfo[levID].flag)
+              {
+                size_t testlen = clen1;
+                while (cvals1[levID][testlen] == ' ') testlen--;
+                if (clen2 < testlen) clen2 = testlen;
+              }
+            cvals2 = (char **) Malloc((size_t) nlevs2 * sizeof(char *));
+            levID2 = 0;
 
-                    for (int levID = 0; levID < nlevs; ++levID)
-                      if (vars1[varID].levinfo[levID].flag)
-                        {
-                          cvals2[levID2] = (char *) Malloc((size_t) (clen2) * sizeof(char));
-                          memcpy(cvals2[levID2], cvals1[levID], clen2 * sizeof(char));
-                          levID2++;
-                        }
-                  }
+            for (int levID = 0; levID < nlevs; ++levID)
+              if (vars1[varID].levinfo[levID].flag)
+              {
+                cvals2[levID2] = (char *) Malloc((size_t) (clen2) * sizeof(char));
+                memcpy(cvals2[levID2], cvals1[levID], clen2 * sizeof(char));
+                levID2++;
+              }
+          }
 #endif
 
-                if (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL))
-                  {
-                    lbounds = (double *) Malloc(2 * (size_t) nlevs2 * sizeof(double));
-                    ubounds = lbounds + nlevs2;
+          if (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL))
+          {
+            lbounds = (double *) Malloc(2 * (size_t) nlevs2 * sizeof(double));
+            ubounds = lbounds + nlevs2;
 
-                    double *lbounds1 = (double *) Malloc(2 * (size_t) nlevs * sizeof(double)), *ubounds1 = lbounds1 + nlevs;
+            double *lbounds1 = (double *) Malloc(2 * (size_t) nlevs * sizeof(double)), *ubounds1 = lbounds1 + nlevs;
 
-                    zaxisInqLbounds(zaxisID, lbounds1);
-                    zaxisInqUbounds(zaxisID, ubounds1);
+            zaxisInqLbounds(zaxisID, lbounds1);
+            zaxisInqUbounds(zaxisID, ubounds1);
 
-                    levID2 = 0;
-                    for (int levID = 0; levID < nlevs; ++levID)
-                      if (vars1[varID].levinfo[levID].flag)
-                        {
-                          lbounds[levID2] = lbounds1[levID];
-                          ubounds[levID2] = ubounds1[levID];
-                          levID2++;
-                        }
-
-                    Free(lbounds1);
-                  }
-
-                int zaxisID2 = vlist_generate_zaxis(vlistID2, zaxisType, nlevs2, levels, lbounds, ubounds, nvct, vct,
-                                                    (const char **) cvals2, clen2);
-                if (levels) Free(levels);
-                if (lbounds) Free(lbounds);
-                if (cvals2)
-                  {
-                    for (int levID = 0; levID < nlevs2; ++levID) Free(cvals2[levID]);
-                    Free(cvals2);
-                  }
-
-                char ctemp[CDI_MAX_NAME];
-                int length = CDI_MAX_NAME;
-                cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, ctemp, &length);
-                cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_NAME, ctemp);
-                length = CDI_MAX_NAME;
-                cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, ctemp, &length);
-                cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_LONGNAME, ctemp);
-                length = CDI_MAX_NAME;
-                cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, ctemp, &length);
-                cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_UNITS, ctemp);
-
-                zaxisDefDatatype(zaxisID2, zaxisInqDatatype(zaxisID));
-                zaxisDefPositive(zaxisID2, zaxisInqPositive(zaxisID));
-
-                if (zaxisType == ZAXIS_CHAR)
-                  {
-                    char dimname[CDI_MAX_NAME + 3];
-                    length = sizeof(dimname);
-                    cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_DIMNAME, dimname, &length);
-                    if (dimname[0] == 0)
-                      {
-                        memcpy(dimname, "area_type", 10);
-                        dimname[10] = 0;
-                      }
-                    cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_DIMNAME, dimname);
-                  }
-
-                if (zaxisType == ZAXIS_GENERIC) cdiCopyKey(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, zaxisID2);
-
-                cdiCopyAtts(zaxisID, CDI_GLOBAL, zaxisID2, CDI_GLOBAL);
-
-                zaxisID = zaxisID2;
-                vars2[varID2].zaxisID = zaxisID2;
-                delete_chunks(vlistID2, varID2);
-              }
-
-            for (int levID = 0; levID < nlevs2; levID++)
-              {
-                vars2[varID2].levinfo[levID].flag = false;
-                vars2[varID2].levinfo[levID].index = -1;
-              }
-
-            int levID2 = 0;
-            for (int levID = 0; levID < nlevs; levID++)
+            levID2 = 0;
+            for (int levID = 0; levID < nlevs; ++levID)
               if (vars1[varID].levinfo[levID].flag)
-                {
-                  vars2[varID2].levinfo[levID2].flevelID = levID;
-                  vars2[varID2].levinfo[levID2].mlevelID = levID2;
-                  levID2++;
-                }
+              {
+                lbounds[levID2] = lbounds1[levID];
+                ubounds[levID2] = ubounds1[levID];
+                levID2++;
+              }
 
-            vlistAdd2GridIDs(vlistptr2, gridID);
-            vlistAdd2ZaxisIDs(vlistptr2, zaxisID);
-            vlistAdd2SubtypeIDs(vlistptr2, subtypeID);
-
-            varID2++;
+            Free(lbounds1);
           }
-    }
+
+          int zaxisID2 = vlist_generate_zaxis(vlistID2, zaxisType, nlevs2, levels, lbounds, ubounds, nvct, vct,
+                                              (const char **) cvals2, clen2);
+          if (levels) Free(levels);
+          if (lbounds) Free(lbounds);
+          if (cvals2)
+          {
+            for (int levID = 0; levID < nlevs2; ++levID) Free(cvals2[levID]);
+            Free(cvals2);
+          }
+
+          char ctemp[CDI_MAX_NAME];
+          int length = CDI_MAX_NAME;
+          cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, ctemp, &length);
+          cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_NAME, ctemp);
+          length = CDI_MAX_NAME;
+          cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, ctemp, &length);
+          cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_LONGNAME, ctemp);
+          length = CDI_MAX_NAME;
+          cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, ctemp, &length);
+          cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_UNITS, ctemp);
+
+          zaxisDefDatatype(zaxisID2, zaxisInqDatatype(zaxisID));
+          zaxisDefPositive(zaxisID2, zaxisInqPositive(zaxisID));
+
+          if (zaxisType == ZAXIS_CHAR)
+          {
+            char dimname[CDI_MAX_NAME + 3];
+            length = sizeof(dimname);
+            cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_DIMNAME, dimname, &length);
+            if (dimname[0] == 0)
+            {
+              memcpy(dimname, "area_type", 10);
+              dimname[10] = 0;
+            }
+            cdiDefKeyString(zaxisID2, CDI_GLOBAL, CDI_KEY_DIMNAME, dimname);
+          }
+
+          if (zaxisType == ZAXIS_GENERIC) cdiCopyKey(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, zaxisID2);
+
+          cdiCopyAtts(zaxisID, CDI_GLOBAL, zaxisID2, CDI_GLOBAL);
+
+          zaxisID = zaxisID2;
+          vars2[varID2].zaxisID = zaxisID2;
+          delete_chunks(vlistID2, varID2);
+        }
+
+        for (int levID = 0; levID < nlevs2; levID++)
+        {
+          vars2[varID2].levinfo[levID].flag = false;
+          vars2[varID2].levinfo[levID].index = -1;
+        }
+
+        int levID2 = 0;
+        for (int levID = 0; levID < nlevs; levID++)
+          if (vars1[varID].levinfo[levID].flag)
+          {
+            vars2[varID2].levinfo[levID2].flevelID = levID;
+            vars2[varID2].levinfo[levID2].mlevelID = levID2;
+            levID2++;
+          }
+
+        vlistAdd2GridIDs(vlistptr2, gridID);
+        vlistAdd2ZaxisIDs(vlistptr2, zaxisID);
+        vlistAdd2SubtypeIDs(vlistptr2, subtypeID);
+
+        varID2++;
+      }
+  }
 }
 
 /*
@@ -778,48 +778,48 @@ vlistCat(int vlistID2, int vlistID1)
   vlistptr2->nvars = nvars;
 
   if (nvars > vlistptr2->varsAllocated)
-    {
-      vlistptr2->varsAllocated = nvars;
-      vars2 = (var_t *) Realloc(vars2, (size_t) nvars * sizeof(var_t));
-      vlistptr2->vars = vars2;
-    }
+  {
+    vlistptr2->varsAllocated = nvars;
+    vars2 = (var_t *) Realloc(vars2, (size_t) nvars * sizeof(var_t));
+    vlistptr2->vars = vars2;
+  }
   memcpy(vars2 + nvars2, vars1, (size_t) nvars1 * sizeof(var_t));
 
   for (int varID = 0; varID < nvars1; varID++)
+  {
+    int varID2 = varID + nvars2;
+    vars1[varID].fvarID = varID2;
+    vars2[varID2].fvarID = varID;
+
+    vars1[varID].mvarID = varID2;
+    vars2[varID2].mvarID = varID;
+
+    if (vars1[varID].param < 0)
     {
-      int varID2 = varID + nvars2;
-      vars1[varID].fvarID = varID2;
-      vars2[varID2].fvarID = varID;
-
-      vars1[varID].mvarID = varID2;
-      vars2[varID2].mvarID = varID;
-
-      if (vars1[varID].param < 0)
-        {
-          int pnum, pcat, pdis;
-          cdiDecodeParam(vars1[varID].param, &pnum, &pcat, &pdis);
-          pnum = -(varID2 + 1);
-          vars2[varID2].param = cdiEncodeParam(pnum, pcat, pdis);
-        }
-
-      var_copy_entries(&vars2[varID2], &vars1[varID]);
-      vars2[varID2].keys.nelems = 0;
-      cdiCopyKeys(vlistID1, varID, vlistID2, varID2);
-
-      if (vars1[varID].levinfo)
-        {
-          size_t nlevs = (size_t) zaxisInqSize(vars1[varID].zaxisID);
-          vars2[varID2].levinfo = (levinfo_t *) Malloc(nlevs * sizeof(levinfo_t));
-          memcpy(vars2[varID2].levinfo, vars1[varID].levinfo, nlevs * sizeof(levinfo_t));
-        }
-
-      vars2[varID2].atts.nelems = 0;
-      cdiCopyAtts(vlistID1, varID, vlistID2, varID2);
-
-      vlistAdd2GridIDs(vlistptr2, vars1[varID].gridID);
-      vlistAdd2ZaxisIDs(vlistptr2, vars1[varID].zaxisID);
-      vlistAdd2SubtypeIDs(vlistptr2, vars1[varID].subtypeID);
+      int pnum, pcat, pdis;
+      cdiDecodeParam(vars1[varID].param, &pnum, &pcat, &pdis);
+      pnum = -(varID2 + 1);
+      vars2[varID2].param = cdiEncodeParam(pnum, pcat, pdis);
     }
+
+    var_copy_entries(&vars2[varID2], &vars1[varID]);
+    vars2[varID2].keys.nelems = 0;
+    cdiCopyKeys(vlistID1, varID, vlistID2, varID2);
+
+    if (vars1[varID].levinfo)
+    {
+      size_t nlevs = (size_t) zaxisInqSize(vars1[varID].zaxisID);
+      vars2[varID2].levinfo = (levinfo_t *) Malloc(nlevs * sizeof(levinfo_t));
+      memcpy(vars2[varID2].levinfo, vars1[varID].levinfo, nlevs * sizeof(levinfo_t));
+    }
+
+    vars2[varID2].atts.nelems = 0;
+    cdiCopyAtts(vlistID1, varID, vlistID2, varID2);
+
+    vlistAdd2GridIDs(vlistptr2, vars1[varID].gridID);
+    vlistAdd2ZaxisIDs(vlistptr2, vars1[varID].zaxisID);
+    vlistAdd2SubtypeIDs(vlistptr2, vars1[varID].subtypeID);
+  }
 }
 
 /*
@@ -848,106 +848,106 @@ vlistMerge(int vlistID2, int vlistID1)
   int nvars2 = vlistptr2->nvars;
 
   if (nvars1 == nvars2)
+  {
+    char name1[CDI_MAX_NAME], name2[CDI_MAX_NAME];
+    for (varID = 0; varID < nvars2; varID++)
     {
-      char name1[CDI_MAX_NAME], name2[CDI_MAX_NAME];
-      for (varID = 0; varID < nvars2; varID++)
-        {
-          SizeType ngp1 = gridInqSize(vars1[varID].gridID);
-          SizeType ngp2 = gridInqSize(vars2[varID].gridID);
-          if (ngp1 != ngp2) break;
+      SizeType ngp1 = gridInqSize(vars1[varID].gridID);
+      SizeType ngp2 = gridInqSize(vars2[varID].gridID);
+      if (ngp1 != ngp2) break;
 
-          int length = CDI_MAX_NAME;
-          (void) cdiInqKeyString(vlistID1, varID, CDI_KEY_NAME, name1, &length);
-          length = CDI_MAX_NAME;
-          (void) cdiInqKeyString(vlistID2, varID, CDI_KEY_NAME, name2, &length);
+      int length = CDI_MAX_NAME;
+      (void) cdiInqKeyString(vlistID1, varID, CDI_KEY_NAME, name1, &length);
+      length = CDI_MAX_NAME;
+      (void) cdiInqKeyString(vlistID2, varID, CDI_KEY_NAME, name2, &length);
 
-          if (*name1 && *name2)
-            {
-              if (!str_is_equal(name1, name2)) break;
-            }
-          else
-            {
-              if (vars1[varID].param != vars2[varID].param) break;
-            }
-        }
+      if (*name1 && *name2)
+      {
+        if (!str_is_equal(name1, name2)) break;
+      }
+      else
+      {
+        if (vars1[varID].param != vars2[varID].param) break;
+      }
     }
+  }
 
   if (varID == nvars2) /* same variables in vlistID1 and vlistID2 */
+  {
+    for (varID = 0; varID < nvars2; varID++)
     {
-      for (varID = 0; varID < nvars2; varID++)
-        {
-          vars1[varID].fvarID = varID;
-          vars2[varID].fvarID = varID;
+      vars1[varID].fvarID = varID;
+      vars2[varID].fvarID = varID;
 
-          vars1[varID].mvarID = varID;
-          vars2[varID].mvarID = varID;
+      vars1[varID].mvarID = varID;
+      vars2[varID].mvarID = varID;
 
-          int nlevs1 = zaxisInqSize(vars1[varID].zaxisID);
-          int nlevs2 = zaxisInqSize(vars2[varID].zaxisID);
+      int nlevs1 = zaxisInqSize(vars1[varID].zaxisID);
+      int nlevs2 = zaxisInqSize(vars2[varID].zaxisID);
 
-          int nlevs = nlevs1 + nlevs2;
+      int nlevs = nlevs1 + nlevs2;
 
-          /*
-          fprintf(stderr, "var %d %d %d %d %d\n", varID, nlevs1, nlevs2, nlevs, sizeof(levinfo_t));
-          */
-          if (vars1[varID].levinfo)
-            {
-              vars2[varID].levinfo = (levinfo_t *) Realloc(vars2[varID].levinfo, (size_t) nlevs * sizeof(levinfo_t));
+      /*
+      fprintf(stderr, "var %d %d %d %d %d\n", varID, nlevs1, nlevs2, nlevs, sizeof(levinfo_t));
+      */
+      if (vars1[varID].levinfo)
+      {
+        vars2[varID].levinfo = (levinfo_t *) Realloc(vars2[varID].levinfo, (size_t) nlevs * sizeof(levinfo_t));
 
-              memcpy(vars2[varID].levinfo + nlevs2, vars1[varID].levinfo, (size_t) nlevs1 * sizeof(levinfo_t));
-            }
-          else
-            cdiVlistCreateVarLevInfo(vlistptr1, varID);
+        memcpy(vars2[varID].levinfo + nlevs2, vars1[varID].levinfo, (size_t) nlevs1 * sizeof(levinfo_t));
+      }
+      else
+        cdiVlistCreateVarLevInfo(vlistptr1, varID);
 
-          for (int levID = 0; levID < nlevs1; levID++) vars1[varID].levinfo[levID].mlevelID = nlevs2 + levID;
-        }
-
-      bool *lvar = (bool *) Calloc((size_t) nvars2, sizeof(bool));
-
-      for (varID = 0; varID < nvars2; varID++)
-        {
-          if (lvar[varID] == true) continue;
-
-          int zaxisID1 = vars1[varID].zaxisID;
-          int zaxisID2 = vars2[varID].zaxisID;
-          // nlevs1 = zaxisInqSize(vars1[varID].zaxisID);
-          // nlevs2 = zaxisInqSize(vars2[varID].zaxisID);
-          int nlevs1 = zaxisInqSize(zaxisID1);
-          int nlevs2 = zaxisInqSize(zaxisID2);
-          // fprintf(stderr, "zaxis %d %d %d %d\n", zaxisID1, zaxisID2, nlevs1, nlevs2);
-
-          int nlevs = nlevs1 + nlevs2;
-
-          int zaxisID = zaxisDuplicate(zaxisID2);
-          zaxisResize(zaxisID, nlevs);
-
-          if (zaxisInqLevels(zaxisID1, NULL))
-            {
-              double *levels = (double *) Malloc((size_t) nlevs1 * sizeof(double));
-
-              zaxisInqLevels(zaxisID1, levels);
-              /*
-                for (int levID = 0; levID < nlevs1; levID++)
-                  fprintf(stderr, "%d %d %d %d %d %g\n", varID, levID, nlevs1, nlevs2, vars2[varID].nlevs, levels[levID]);
-              */
-              for (int levID = 0; levID < nlevs1; levID++) zaxisDefLevel(zaxisID, nlevs2 + levID, levels[levID]);
-
-              Free(levels);
-            }
-
-          for (int index = 0; index < vlistptr2->nzaxis; index++)
-            if (vlistptr2->zaxisIDs[index] == zaxisID2) vlistptr2->zaxisIDs[index] = zaxisID;
-
-          for (int varID2 = 0; varID2 < nvars2; varID2++)
-            if (lvar[varID2] == false && vars2[varID2].zaxisID == zaxisID2)
-              {
-                vars2[varID2].zaxisID = zaxisID;
-                lvar[varID2] = true;
-              }
-        }
-
-      Free(lvar);
+      for (int levID = 0; levID < nlevs1; levID++) vars1[varID].levinfo[levID].mlevelID = nlevs2 + levID;
     }
+
+    bool *lvar = (bool *) Calloc((size_t) nvars2, sizeof(bool));
+
+    for (varID = 0; varID < nvars2; varID++)
+    {
+      if (lvar[varID] == true) continue;
+
+      int zaxisID1 = vars1[varID].zaxisID;
+      int zaxisID2 = vars2[varID].zaxisID;
+      // nlevs1 = zaxisInqSize(vars1[varID].zaxisID);
+      // nlevs2 = zaxisInqSize(vars2[varID].zaxisID);
+      int nlevs1 = zaxisInqSize(zaxisID1);
+      int nlevs2 = zaxisInqSize(zaxisID2);
+      // fprintf(stderr, "zaxis %d %d %d %d\n", zaxisID1, zaxisID2, nlevs1, nlevs2);
+
+      int nlevs = nlevs1 + nlevs2;
+
+      int zaxisID = zaxisDuplicate(zaxisID2);
+      zaxisResize(zaxisID, nlevs);
+
+      if (zaxisInqLevels(zaxisID1, NULL))
+      {
+        double *levels = (double *) Malloc((size_t) nlevs1 * sizeof(double));
+
+        zaxisInqLevels(zaxisID1, levels);
+        /*
+          for (int levID = 0; levID < nlevs1; levID++)
+            fprintf(stderr, "%d %d %d %d %d %g\n", varID, levID, nlevs1, nlevs2, vars2[varID].nlevs, levels[levID]);
+        */
+        for (int levID = 0; levID < nlevs1; levID++) zaxisDefLevel(zaxisID, nlevs2 + levID, levels[levID]);
+
+        Free(levels);
+      }
+
+      for (int index = 0; index < vlistptr2->nzaxis; index++)
+        if (vlistptr2->zaxisIDs[index] == zaxisID2) vlistptr2->zaxisIDs[index] = zaxisID;
+
+      for (int varID2 = 0; varID2 < nvars2; varID2++)
+        if (lvar[varID2] == false && vars2[varID2].zaxisID == zaxisID2)
+        {
+          vars2[varID2].zaxisID = zaxisID;
+          lvar[varID2] = true;
+        }
+    }
+
+    Free(lvar);
+  }
   else { vlistCat(vlistID2, vlistID1); }
 }
 
@@ -994,15 +994,15 @@ vlistNumber(int vlistID)
   int number = (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64) ? CDI_COMP : CDI_REAL;
 
   for (int varID = 1; varID < vlistptr->nvars; varID++)
+  {
+    datatype = vlistptr->vars[varID].datatype;
+    int number2 = (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64) ? CDI_COMP : CDI_REAL;
+    if (number2 != number)
     {
-      datatype = vlistptr->vars[varID].datatype;
-      int number2 = (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64) ? CDI_COMP : CDI_REAL;
-      if (number2 != number)
-        {
-          number = CDI_BOTH;
-          break;
-        }
+      number = CDI_BOTH;
+      break;
     }
+  }
 
   return number;
 }
@@ -1078,10 +1078,10 @@ vlistDefNtsteps(int vlistID, int nts)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   if (vlistptr->ntsteps != nts)
-    {
-      vlistptr->ntsteps = nts;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
+  {
+    vlistptr->ntsteps = nts;
+    reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+  }
 }
 
 // This function is used in CDO!
@@ -1113,66 +1113,66 @@ vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
           vlistptr->tableID);
 
   if (nvars > 0)
+  {
+    fprintf(fp, " varID param    gridID zaxisID stypeID tsteptype flag name     longname         units\n");
+    for (int varID = 0; varID < nvars; varID++)
     {
-      fprintf(fp, " varID param    gridID zaxisID stypeID tsteptype flag name     longname         units\n");
-      for (int varID = 0; varID < nvars; varID++)
-        {
-          int param = vlistptr->vars[varID].param;
-          int gridID = vlistptr->vars[varID].gridID;
-          int zaxisID = vlistptr->vars[varID].zaxisID;
-          int subtypeID = vlistptr->vars[varID].subtypeID;
-          int tsteptype = vlistptr->vars[varID].tsteptype;
-          char name[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
-          int length = CDI_MAX_NAME;
-          (void) cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
-          length = CDI_MAX_NAME;
-          (void) cdiInqKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname, &length);
-          length = CDI_MAX_NAME;
-          (void) cdiInqKeyString(vlistID, varID, CDI_KEY_UNITS, units, &length);
-          int flag = vlistptr->vars[varID].flag;
+      int param = vlistptr->vars[varID].param;
+      int gridID = vlistptr->vars[varID].gridID;
+      int zaxisID = vlistptr->vars[varID].zaxisID;
+      int subtypeID = vlistptr->vars[varID].subtypeID;
+      int tsteptype = vlistptr->vars[varID].tsteptype;
+      char name[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
+      int length = CDI_MAX_NAME;
+      (void) cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
+      length = CDI_MAX_NAME;
+      (void) cdiInqKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname, &length);
+      length = CDI_MAX_NAME;
+      (void) cdiInqKeyString(vlistID, varID, CDI_KEY_UNITS, units, &length);
+      int flag = vlistptr->vars[varID].flag;
 
-          char paramstr[32];
-          cdiParamToString(param, paramstr, sizeof(paramstr));
-          fprintf(fp, "%6d %-8s %6d  %6d  %6d  %6d  %5d %-8s %s [%s]\n", varID, paramstr, gridID, zaxisID, subtypeID, tsteptype,
-                  flag, name, longname, units);
-        }
-
-      fputs("\n"
-            " varID  levID fvarID flevID mvarID mlevID  index  dtype  flag  level\n",
-            fp);
-      for (int varID = 0; varID < nvars; varID++)
-        {
-          int zaxisID = vlistptr->vars[varID].zaxisID;
-          int nlevs = zaxisInqSize(zaxisID);
-          int fvarID = vlistptr->vars[varID].fvarID;
-          int mvarID = vlistptr->vars[varID].mvarID;
-          int dtype = vlistptr->vars[varID].datatype;
-          for (int levID = 0; levID < nlevs; levID++)
-            {
-              levinfo_t li;
-              if (vlistptr->vars[varID].levinfo)
-                li = vlistptr->vars[varID].levinfo[levID];
-              else
-                li = DEFAULT_LEVINFO(levID);
-              int flevID = li.flevelID;
-              int mlevID = li.mlevelID;
-              int index = li.index;
-              int flag = li.flag;
-
-              double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levID) : levID + 1;
-
-              fprintf(fp, "%6d %6d %6d %6d %6d %6d %6d %6d %5d  %.9g\n", varID, levID, fvarID, flevID, mvarID, mlevID, index, dtype,
-                      flag, level);
-            }
-        }
-
-      fputs("\n"
-            " varID  size\n",
-            fp);
-      for (int varID = 0; varID < nvars; varID++)
-        fprintf(fp, "%3d %8zu\n", varID,
-                (size_t) zaxisInqSize(vlistptr->vars[varID].zaxisID) * (size_t) gridInqSize(vlistptr->vars[varID].gridID));
+      char paramstr[32];
+      cdiParamToString(param, paramstr, sizeof(paramstr));
+      fprintf(fp, "%6d %-8s %6d  %6d  %6d  %6d  %5d %-8s %s [%s]\n", varID, paramstr, gridID, zaxisID, subtypeID, tsteptype, flag,
+              name, longname, units);
     }
+
+    fputs("\n"
+          " varID  levID fvarID flevID mvarID mlevID  index  dtype  flag  level\n",
+          fp);
+    for (int varID = 0; varID < nvars; varID++)
+    {
+      int zaxisID = vlistptr->vars[varID].zaxisID;
+      int nlevs = zaxisInqSize(zaxisID);
+      int fvarID = vlistptr->vars[varID].fvarID;
+      int mvarID = vlistptr->vars[varID].mvarID;
+      int dtype = vlistptr->vars[varID].datatype;
+      for (int levID = 0; levID < nlevs; levID++)
+      {
+        levinfo_t li;
+        if (vlistptr->vars[varID].levinfo)
+          li = vlistptr->vars[varID].levinfo[levID];
+        else
+          li = DEFAULT_LEVINFO(levID);
+        int flevID = li.flevelID;
+        int mlevID = li.mlevelID;
+        int index = li.index;
+        int flag = li.flag;
+
+        double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levID) : levID + 1;
+
+        fprintf(fp, "%6d %6d %6d %6d %6d %6d %6d %6d %5d  %.9g\n", varID, levID, fvarID, flevID, mvarID, mlevID, index, dtype, flag,
+                level);
+      }
+    }
+
+    fputs("\n"
+          " varID  size\n",
+          fp);
+    for (int varID = 0; varID < nvars; varID++)
+      fprintf(fp, "%3d %8zu\n", varID,
+              (size_t) zaxisInqSize(vlistptr->vars[varID].zaxisID) * (size_t) gridInqSize(vlistptr->vars[varID].gridID));
+  }
 }
 
 void
@@ -1203,11 +1203,11 @@ vlistDefTaxis(int vlistID, int taxisID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   if (vlistptr->taxisID != taxisID)
-    {
-      // FIXME: This code seems to leak a taxis_t object if `vlistptr->taxisID` was valid before the call to vlistDefTaxis.
-      vlistptr->taxisID = taxisID;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
+  {
+    // FIXME: This code seems to leak a taxis_t object if `vlistptr->taxisID` was valid before the call to vlistDefTaxis.
+    vlistptr->taxisID = taxisID;
+    reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+  }
 }
 
 /*
@@ -1239,10 +1239,10 @@ vlistDefTable(int vlistID, int tableID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   if (vlistptr->tableID != tableID)
-    {
-      vlistptr->tableID = tableID;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
+  {
+    vlistptr->tableID = tableID;
+    reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+  }
 }
 
 int
@@ -1258,10 +1258,10 @@ vlistDefInstitut(int vlistID, int instID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   if (vlistptr->instID != instID)
-    {
-      vlistptr->instID = instID;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
+  {
+    vlistptr->instID = instID;
+    reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+  }
 }
 
 int
@@ -1272,17 +1272,17 @@ vlistInqInstitut(int vlistID)
   int instID = vlistptr->instID;
 
   if (instID == CDI_UNDEFID)
-    {
-      instID = vlistInqVarInstitut(vlistID, 0);
+  {
+    instID = vlistInqVarInstitut(vlistID, 0);
 
-      for (int varID = 1; varID < vlistptr->nvars; varID++)
-        if (instID != vlistInqVarInstitut(vlistID, varID))
-          {
-            instID = CDI_UNDEFID;
-            break;
-          }
-      vlistDefInstitut(vlistID, instID);
-    }
+    for (int varID = 1; varID < vlistptr->nvars; varID++)
+      if (instID != vlistInqVarInstitut(vlistID, varID))
+      {
+        instID = CDI_UNDEFID;
+        break;
+      }
+    vlistDefInstitut(vlistID, instID);
+  }
 
   return instID;
 }
@@ -1293,10 +1293,10 @@ vlistDefModel(int vlistID, int modelID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   if (vlistptr->modelID != modelID)
-    {
-      vlistptr->modelID = modelID;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
+  {
+    vlistptr->modelID = modelID;
+    reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+  }
 }
 
 int
@@ -1307,18 +1307,18 @@ vlistInqModel(int vlistID)
   int modelID = vlistptr->modelID;
 
   if (modelID == CDI_UNDEFID)
-    {
-      modelID = vlistInqVarModel(vlistID, 0);
+  {
+    modelID = vlistInqVarModel(vlistID, 0);
 
-      for (int varID = 1; varID < vlistptr->nvars; varID++)
-        if (modelID != vlistInqVarModel(vlistID, varID))
-          {
-            modelID = CDI_UNDEFID;
-            break;
-          }
+    for (int varID = 1; varID < vlistptr->nvars; varID++)
+      if (modelID != vlistInqVarModel(vlistID, varID))
+      {
+        modelID = CDI_UNDEFID;
+        break;
+      }
 
-      vlistDefModel(vlistID, modelID);
-    }
+    vlistDefModel(vlistID, modelID);
+  }
 
   return modelID;
 }
@@ -1330,11 +1330,11 @@ vlistGridsizeMax(int vlistID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   for (int index = 0; index < vlistptr->ngrids; index++)
-    {
-      int gridID = vlistptr->gridIDs[index];
-      SizeType gridsize = gridInqSize(gridID);
-      if (gridsize > gridsizemax) gridsizemax = gridsize;
-    }
+  {
+    int gridID = vlistptr->gridIDs[index];
+    SizeType gridsize = gridInqSize(gridID);
+    if (gridsize > gridsizemax) gridsizemax = gridsize;
+  }
 
   return gridsizemax;
 }
@@ -1371,20 +1371,20 @@ vlistChangeGridIndex(int vlistID, int index, int gridID)
 
   int gridIDold = vlistptr->gridIDs[index];
   if (gridIDold != gridID)
-    {
-      vlistptr->gridIDs[index] = gridID;
+  {
+    vlistptr->gridIDs[index] = gridID;
 
-      int nvars = vlistptr->nvars;
-      for (int varID = 0; varID < nvars; varID++)
-        if (vlistptr->vars[varID].gridID == gridIDold)
-          {
-            vlistptr->vars[varID].gridID = gridID;
-            delete_chunks(vlistID, varID);
-            if (gridInqXsize(gridIDold) == 0 && gridInqXsize(gridID) > 0 && vlistInqVarXYZ(vlistID, varID) != 0)
-              vlistDefVarXYZ(vlistID, varID, 0);
-          }
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
+    int nvars = vlistptr->nvars;
+    for (int varID = 0; varID < nvars; varID++)
+      if (vlistptr->vars[varID].gridID == gridIDold)
+      {
+        vlistptr->vars[varID].gridID = gridID;
+        delete_chunks(vlistID, varID);
+        if (gridInqXsize(gridIDold) == 0 && gridInqXsize(gridID) > 0 && vlistInqVarXYZ(vlistID, varID) != 0)
+          vlistDefVarXYZ(vlistID, varID, 0);
+      }
+    reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+  }
 }
 
 void
@@ -1393,25 +1393,25 @@ vlistChangeGrid(int vlistID, int gridID1, int gridID2)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   if (gridID1 != gridID2)
+  {
+    int ngrids = vlistptr->ngrids;
+    for (int index = 0; index < ngrids; index++)
     {
-      int ngrids = vlistptr->ngrids;
-      for (int index = 0; index < ngrids; index++)
-        {
-          if (vlistptr->gridIDs[index] == gridID1)
-            {
-              vlistptr->gridIDs[index] = gridID2;
-              break;
-            }
-        }
-      int nvars = vlistptr->nvars;
-      for (int varID = 0; varID < nvars; varID++)
-        if (vlistptr->vars[varID].gridID == gridID1)
-          {
-            vlistptr->vars[varID].gridID = gridID2;
-            delete_chunks(vlistID, varID);
-          }
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+      if (vlistptr->gridIDs[index] == gridID1)
+      {
+        vlistptr->gridIDs[index] = gridID2;
+        break;
+      }
     }
+    int nvars = vlistptr->nvars;
+    for (int varID = 0; varID < nvars; varID++)
+      if (vlistptr->vars[varID].gridID == gridID1)
+      {
+        vlistptr->vars[varID].gridID = gridID2;
+        delete_chunks(vlistID, varID);
+      }
+    reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+  }
 }
 
 int
@@ -1446,26 +1446,25 @@ vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
 
   int zaxisIDold = vlistptr->zaxisIDs[index];
   if (zaxisIDold != zaxisID)
-    {
-      vlistptr->zaxisIDs[index] = zaxisID;
+  {
+    vlistptr->zaxisIDs[index] = zaxisID;
 
-      int nlevs = zaxisInqSize(zaxisID), nlevsOld = zaxisInqSize(zaxisIDold);
-      int nvars = vlistptr->nvars;
-      for (int varID = 0; varID < nvars; varID++)
-        if (vlistptr->vars[varID].zaxisID == zaxisIDold)
-          {
-            vlistptr->vars[varID].zaxisID = zaxisID;
-            delete_chunks(vlistID, varID);
-            if (vlistptr->vars[varID].levinfo && nlevs != nlevsOld)
-              {
-                vlistptr->vars[varID].levinfo
-                    = (levinfo_t *) Realloc(vlistptr->vars[varID].levinfo, (size_t) nlevs * sizeof(levinfo_t));
+    int nlevs = zaxisInqSize(zaxisID), nlevsOld = zaxisInqSize(zaxisIDold);
+    int nvars = vlistptr->nvars;
+    for (int varID = 0; varID < nvars; varID++)
+      if (vlistptr->vars[varID].zaxisID == zaxisIDold)
+      {
+        vlistptr->vars[varID].zaxisID = zaxisID;
+        delete_chunks(vlistID, varID);
+        if (vlistptr->vars[varID].levinfo && nlevs != nlevsOld)
+        {
+          vlistptr->vars[varID].levinfo = (levinfo_t *) Realloc(vlistptr->vars[varID].levinfo, (size_t) nlevs * sizeof(levinfo_t));
 
-                for (int levID = 0; levID < nlevs; levID++) vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
-              }
-          }
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
+          for (int levID = 0; levID < nlevs; levID++) vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
+        }
+      }
+    reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+  }
 }
 
 void
@@ -1476,29 +1475,28 @@ vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
 
   int nzaxis = vlistptr->nzaxis;
   for (int index = 0; index < nzaxis; index++)
+  {
+    if (vlistptr->zaxisIDs[index] == zaxisID1)
     {
-      if (vlistptr->zaxisIDs[index] == zaxisID1)
-        {
-          vlistptr->zaxisIDs[index] = zaxisID2;
-          break;
-        }
+      vlistptr->zaxisIDs[index] = zaxisID2;
+      break;
     }
+  }
 
   int nvars = vlistptr->nvars;
   for (int varID = 0; varID < nvars; varID++)
     if (vlistptr->vars[varID].zaxisID == zaxisID1)
+    {
+      vlistptr->vars[varID].zaxisID = zaxisID2;
+      delete_chunks(vlistID, varID);
+
+      if (vlistptr->vars[varID].levinfo && nlevs2 != nlevs1)
       {
-        vlistptr->vars[varID].zaxisID = zaxisID2;
-        delete_chunks(vlistID, varID);
+        vlistptr->vars[varID].levinfo = (levinfo_t *) Realloc(vlistptr->vars[varID].levinfo, (size_t) nlevs2 * sizeof(levinfo_t));
 
-        if (vlistptr->vars[varID].levinfo && nlevs2 != nlevs1)
-          {
-            vlistptr->vars[varID].levinfo
-                = (levinfo_t *) Realloc(vlistptr->vars[varID].levinfo, (size_t) nlevs2 * sizeof(levinfo_t));
-
-            for (int levID = 0; levID < nlevs2; levID++) vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
-          }
+        for (int levID = 0; levID < nlevs2; levID++) vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
       }
+    }
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
@@ -1532,16 +1530,16 @@ vlistHasTime(int vlistID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   if (!(CDI_Reduce_Dim && vlistptr->ntsteps == 1))
-    {
-      size_t nvars = vlistptr->nvars > 0 ? (size_t) vlistptr->nvars : (size_t) 0;
-      var_t *restrict vars = vlistptr->vars;
-      for (size_t varID = 0; varID < nvars; varID++)
-        if (vars[varID].timetype != TIME_CONSTANT)
-          {
-            hastime = true;
-            break;
-          }
-    }
+  {
+    size_t nvars = vlistptr->nvars > 0 ? (size_t) vlistptr->nvars : (size_t) 0;
+    var_t *restrict vars = vlistptr->vars;
+    for (size_t varID = 0; varID < nvars; varID++)
+      if (vars[varID].timetype != TIME_CONSTANT)
+      {
+        hastime = true;
+        break;
+      }
+  }
 
   return (int) hastime;
 }
@@ -1622,10 +1620,10 @@ vlist_check_contents(int vlistID)
 {
   int nzaxis = vlistNumZaxis(vlistID);
   for (int index = 0; index < nzaxis; index++)
-    {
-      int zaxisID = vlistZaxis(vlistID, index);
-      if (zaxisInqType(zaxisID) == ZAXIS_GENERIC) cdiCheckZaxis(zaxisID);
-    }
+  {
+    int zaxisID = vlistZaxis(vlistID, index);
+    if (zaxisInqType(zaxisID) == ZAXIS_GENERIC) cdiCheckZaxis(zaxisID);
+  }
 }
 
 /* Resizes and initializes opt_grib_kvpair data structure. */
@@ -1640,12 +1638,12 @@ resize_opt_grib_entries(var_t *var, int nentries)
   opt_key_val_pair_t *tmp = (opt_key_val_pair_t *) Malloc((size_t) new_size * sizeof(opt_key_val_pair_t));
   for (int i = 0; i < var->opt_grib_kvpair_size; ++i) { tmp[i] = var->opt_grib_kvpair[i]; }
   for (int i = var->opt_grib_kvpair_size; i < new_size; ++i)
-    {
-      tmp[i].int_val = 0;
-      tmp[i].dbl_val = 0;
-      tmp[i].update = false;
-      tmp[i].keyword = NULL;
-    }  // for
+  {
+    tmp[i].int_val = 0;
+    tmp[i].dbl_val = 0;
+    tmp[i].update = false;
+    tmp[i].keyword = NULL;
+  }  // for
   var->opt_grib_kvpair_size = new_size;
   Free(var->opt_grib_kvpair);
   var->opt_grib_kvpair = tmp;

@@ -113,23 +113,23 @@ fowFileWriteOrdered(const char *filename, const char *mode)
 
   size_t fileID = SIZE_MAX;
   if (openFilesSize == openFilesFill)
-    {
-      fileID = openFilesSize;
-      if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
-      openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
-      if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
-      openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
-      for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
-    }
+  {
+    fileID = openFilesSize;
+    if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
+    openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
+    if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
+    openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
+    for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
+  }
   else
-    {
-      for (size_t i = 0; i < openFilesSize; ++i)
-        if (openFiles[i].name == NULL)
-          {
-            fileID = i;
-            break;
-          }
-    }
+  {
+    for (size_t i = 0; i < openFilesSize; ++i)
+      if (openFiles[i].name == NULL)
+      {
+        fileID = i;
+        break;
+      }
+  }
   struct fileMPIFWO *of = openFiles + fileID;
   ++openFilesFill;
   initAFiledataFileWriteOrdered(of, filename, conf->writeAggBufLim);

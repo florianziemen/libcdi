@@ -40,10 +40,10 @@ mapSearchStr(const struct intCodeStrMap map[], size_t mapSize, const char *str)
   size_t retval = SIZE_MAX;
   for (size_t i = 0; i < mapSize; ++i)
     if (!strcmp(str, map[i].text))
-      {
-        retval = i;
-        break;
-      }
+    {
+      retval = i;
+      break;
+    }
   return retval;
 }
 
@@ -53,10 +53,10 @@ mapSearchCode(const struct intCodeStrMap map[], size_t mapSize, int code)
   size_t retval = SIZE_MAX;
   for (size_t i = 0; i < mapSize; ++i)
     if (code == map[i].code)
-      {
-        retval = i;
-        break;
-      }
+    {
+      retval = i;
+      break;
+    }
   return retval;
 }
 
@@ -164,16 +164,16 @@ findWriteAccumBufsize()
   size_t buffersize = (size_t) 16 * 1024 * 1024;
   const char *p = getenv("BUFSIZE");
   if (p)
+  {
+    char *end;
+    long temp = strtol(p, &end, 0);
+    if ((errno == ERANGE && (temp == LONG_MAX || temp == LONG_MIN)) || (errno != 0 && temp == 0))
     {
-      char *end;
-      long temp = strtol(p, &end, 0);
-      if ((errno == ERANGE && (temp == LONG_MAX || temp == LONG_MIN)) || (errno != 0 && temp == 0))
-        {
-          perror("failed to parse BUFSIZE environment variable");
-        }
-      else if (temp > 0 && (unsigned long) temp > buffersize)
-        buffersize = (unsigned long) temp;
+      perror("failed to parse BUFSIZE environment variable");
     }
+    else if (temp > 0 && (unsigned long) temp > buffersize)
+      buffersize = (unsigned long) temp;
+  }
   return buffersize;
 }
 

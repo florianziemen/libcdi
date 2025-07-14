@@ -15,10 +15,10 @@ main(void)
   // Open the dataset
   int streamID = streamOpenRead("/Users/m214003/tmp/ATNeu.synth.hourly.allvars_ebc.nc");
   if (streamID < 0)
-    {
-      fprintf(stderr, "%s\n", cdiStringError(streamID));
-      return 1;
-    }
+  {
+    fprintf(stderr, "%s\n", cdiStringError(streamID));
+    return 1;
+  }
 
   // Get the variable list of the dataset
   int vlistID = streamInqVlist(streamID);
@@ -32,19 +32,19 @@ main(void)
 
   // Loop over the number of time steps
   for (int tsID = 4; tsID < nts; tsID++)
-    {
-      // Inquire the time step
-      streamInqTimestep(streamID, tsID);
+  {
+    // Inquire the time step
+    streamInqTimestep(streamID, tsID);
 
-      // Get the verification date and time
-      int vdate = taxisInqVdate(taxisID);
-      int vtime = taxisInqVtime(taxisID);
-      printf("read timestep %d:  date=%d  time=%d\n", tsID + 1, vdate, vtime);
+    // Get the verification date and time
+    int vdate = taxisInqVdate(taxisID);
+    int vtime = taxisInqVtime(taxisID);
+    printf("read timestep %d:  date=%d  time=%d\n", tsID + 1, vdate, vtime);
 
-      // Read var1 and var2
-      // streamReadVar(streamID, varID1, var1, &numMissVals);
-      // streamReadVar(streamID, varID2, var2, &numMissVals);
-    }
+    // Read var1 and var2
+    // streamReadVar(streamID, varID1, var1, &numMissVals);
+    // streamReadVar(streamID, varID2, var2, &numMissVals);
+  }
 
   // Close the input stream
   streamClose(streamID);

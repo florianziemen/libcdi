@@ -44,39 +44,38 @@ findPartition2D(int npart[2], int num_parts)
    * only one assigned to x dim (omitting 0 because that would
    * always give npart[1] > npart[0] */
   for (int assign2X = 1; assign2X <= numFactors; ++assign2X)
-    {
-      uint_fast32_t pattern = (UINT32_C(1) << assign2X) - 1, lastPattern = pattern << (numFactors - assign2X);
-      do {
-          npart_attempt[0] = 1;
-          npart_attempt[1] = 1;
-          /* loop over all factors */
-          for (uint_fast32_t i = 0; i < (uint_fast32_t) numFactors; ++i)
-            {
-              uint_fast32_t dim_idx = (pattern >> i) & 1;
-              npart_attempt[dim_idx] *= factors[i];
-            }
-          uint64_t ratio = ((uint64_t) npart_attempt[0] * rscale) / (uint64_t) npart_attempt[1];
-          uint64_t diff = (uint64_t) llabs((long long) (ratio - optimumRatio));
-          if (diff < bestDiff)
-            {
-              npart[0] = (int) npart_attempt[0];
-              npart[1] = (int) npart_attempt[1];
-              bestDiff = diff;
-              bestRatio = ratio;
-            }
-          {
-            uint_fast32_t t;
+  {
+    uint_fast32_t pattern = (UINT32_C(1) << assign2X) - 1, lastPattern = pattern << (numFactors - assign2X);
+    do {
+      npart_attempt[0] = 1;
+      npart_attempt[1] = 1;
+      /* loop over all factors */
+      for (uint_fast32_t i = 0; i < (uint_fast32_t) numFactors; ++i)
+      {
+        uint_fast32_t dim_idx = (pattern >> i) & 1;
+        npart_attempt[dim_idx] *= factors[i];
+      }
+      uint64_t ratio = ((uint64_t) npart_attempt[0] * rscale) / (uint64_t) npart_attempt[1];
+      uint64_t diff = (uint64_t) llabs((long long) (ratio - optimumRatio));
+      if (diff < bestDiff)
+      {
+        npart[0] = (int) npart_attempt[0];
+        npart[1] = (int) npart_attempt[1];
+        bestDiff = diff;
+        bestRatio = ratio;
+      }
+      {
+        uint_fast32_t t;
 #if HAVE_DECL___BUILTIN_CTZ
-            t = pattern | (pattern - 1);
-            pattern = (t + 1) | (((~t & -~t) - 1) >> (__builtin_ctz((unsigned) pattern) + 1));
+        t = pattern | (pattern - 1);
+        pattern = (t + 1) | (((~t & -~t) - 1) >> (__builtin_ctz((unsigned) pattern) + 1));
 #else
-            t = (pattern | (pattern - 1)) + 1;
-            pattern = t | ((((t & -t) / (pattern & -pattern)) >> 1) - 1);
+        t = (pattern | (pattern - 1)) + 1;
+        pattern = t | ((((t & -t) / (pattern & -pattern)) >> 1) - 1);
 #endif
-          }
-        }
-      while (pattern <= lastPattern);
-    }
+      }
+    } while (pattern <= lastPattern);
+  }
   Free(factors);
 }
 #endif
@@ -93,87 +92,86 @@ setupGrid(const struct model_config *setup, MPI_Comm comm)
   (void) comm;
 #endif
   if (setup->flags & PIO_WRITE_CONFIG_USE_DIST_GRID_FLAG)
-    {
+  {
 #if USE_MPI
-      if (setup->flags & PIO_WRITE_CONFIG_CREATE_CURVILINEAR_GRID_FLAG)
-        {
-          size_t gridsize = (size_t) nlon * (size_t) nlat;
-          Xt_int grid_global_shape[2] = { (Xt_int) nlat, (Xt_int) nlon }, grid_local_chunk_start[2];
-          int nprocs;
-          xmpi(MPI_Comm_size(comm, &nprocs));
-          int nprocs2D[2], grid_local_chunk_shape[2];
-          findPartition2D(nprocs2D, nprocs);
-          {
-            struct PPM_extent set_interval_y = { 0, nlat },
-                              part_interval_y = PPM_uniform_partition(set_interval_y, nprocs2D[1], rank / nprocs2D[0]);
-            grid_local_chunk_shape[0] = part_interval_y.size;
-            grid_local_chunk_start[0] = part_interval_y.first;
-          }
-          {
-            struct PPM_extent set_interval_x = { 0, nlon },
-                              part_interval_x = PPM_uniform_partition(set_interval_x, nprocs2D[0], rank % nprocs2D[0]);
-            grid_local_chunk_shape[1] = part_interval_x.size;
-            grid_local_chunk_start[1] = part_interval_x.first;
-          }
-          {
-            Xt_idxlist partDesc2D
-                = xt_idxsection_new((Xt_int) 0, 2, grid_global_shape, grid_local_chunk_shape, grid_local_chunk_start);
-            const int gridDecoChunks[2][2] = { [0] = {
+    if (setup->flags & PIO_WRITE_CONFIG_CREATE_CURVILINEAR_GRID_FLAG)
+    {
+      size_t gridsize = (size_t) nlon * (size_t) nlat;
+      Xt_int grid_global_shape[2] = { (Xt_int) nlat, (Xt_int) nlon }, grid_local_chunk_start[2];
+      int nprocs;
+      xmpi(MPI_Comm_size(comm, &nprocs));
+      int nprocs2D[2], grid_local_chunk_shape[2];
+      findPartition2D(nprocs2D, nprocs);
+      {
+        struct PPM_extent set_interval_y = { 0, nlat },
+                          part_interval_y = PPM_uniform_partition(set_interval_y, nprocs2D[1], rank / nprocs2D[0]);
+        grid_local_chunk_shape[0] = part_interval_y.size;
+        grid_local_chunk_start[0] = part_interval_y.first;
+      }
+      {
+        struct PPM_extent set_interval_x = { 0, nlon },
+                          part_interval_x = PPM_uniform_partition(set_interval_x, nprocs2D[0], rank % nprocs2D[0]);
+        grid_local_chunk_shape[1] = part_interval_x.size;
+        grid_local_chunk_start[1] = part_interval_x.first;
+      }
+      {
+        Xt_idxlist partDesc2D = xt_idxsection_new((Xt_int) 0, 2, grid_global_shape, grid_local_chunk_shape, grid_local_chunk_start);
+        const int gridDecoChunks[2][2] = { [0] = {
                 [0] = (int)grid_local_chunk_start[0],
                 [1] = (int)grid_local_chunk_shape[0],
               }, [1] = {
                 [0] = (int)grid_local_chunk_start[1],
                 [1] = (int)grid_local_chunk_shape[1],
               } };
-            gridID = cdiPioDistGridCreate(GRID_CURVILINEAR, (int) gridsize, nlon, nlat, 0, gridDecoChunks, partDesc2D, NULL, NULL);
-            xt_idxlist_delete(partDesc2D);
-          }
-          size_t grid_chunk_size = (size_t) grid_local_chunk_shape[0] * (size_t) grid_local_chunk_shape[1];
-          {
-            double *grid_chunk = (double *) Malloc(2 * grid_chunk_size * sizeof(*grid_chunk));
-            /* anti-clockwise coordinates around Amazonia */
-            static const struct cart_coord region[4] = { { .lon = DEG2RAD(-85.0), .lat = DEG2RAD(-25.0) },
-                                                         { .lon = DEG2RAD(-44.0), .lat = DEG2RAD(-18.0) },
-                                                         { .lon = DEG2RAD(-50.0), .lat = DEG2RAD(7.0) },
-                                                         { .lon = DEG2RAD(-80.0), .lat = DEG2RAD(10.0) } };
-            const size_t xyRange[2][2] = { { (size_t) grid_local_chunk_start[1], (size_t) grid_local_chunk_start[0] },
-                                           { (size_t) grid_local_chunk_shape[1], (size_t) grid_local_chunk_shape[0] } };
-            computeCurvilinearChunk(grid_chunk, region, (size_t) nlon, (size_t) nlat, xyRange);
-            gridDefXvals(gridID, grid_chunk + grid_chunk_size);
-            gridDefYvals(gridID, grid_chunk);
-            Free(grid_chunk);
-          }
-        }
-      else
-        {
-          fputs("Error: distributed lat-lon grids are unsupported"
-                " at this moment.\n",
-                stderr);
-          abort();
-        }
-#else
-      fputs("Error: distributed grids are unsupported for"
-            " non-MPI configurations.\n",
+        gridID = cdiPioDistGridCreate(GRID_CURVILINEAR, (int) gridsize, nlon, nlat, 0, gridDecoChunks, partDesc2D, NULL, NULL);
+        xt_idxlist_delete(partDesc2D);
+      }
+      size_t grid_chunk_size = (size_t) grid_local_chunk_shape[0] * (size_t) grid_local_chunk_shape[1];
+      {
+        double *grid_chunk = (double *) Malloc(2 * grid_chunk_size * sizeof(*grid_chunk));
+        /* anti-clockwise coordinates around Amazonia */
+        static const struct cart_coord region[4] = { { .lon = DEG2RAD(-85.0), .lat = DEG2RAD(-25.0) },
+                                                     { .lon = DEG2RAD(-44.0), .lat = DEG2RAD(-18.0) },
+                                                     { .lon = DEG2RAD(-50.0), .lat = DEG2RAD(7.0) },
+                                                     { .lon = DEG2RAD(-80.0), .lat = DEG2RAD(10.0) } };
+        const size_t xyRange[2][2] = { { (size_t) grid_local_chunk_start[1], (size_t) grid_local_chunk_start[0] },
+                                       { (size_t) grid_local_chunk_shape[1], (size_t) grid_local_chunk_shape[0] } };
+        computeCurvilinearChunk(grid_chunk, region, (size_t) nlon, (size_t) nlat, xyRange);
+        gridDefXvals(gridID, grid_chunk + grid_chunk_size);
+        gridDefYvals(gridID, grid_chunk);
+        Free(grid_chunk);
+      }
+    }
+    else
+    {
+      fputs("Error: distributed lat-lon grids are unsupported"
+            " at this moment.\n",
             stderr);
       abort();
-#endif
     }
+#else
+    fputs("Error: distributed grids are unsupported for"
+          " non-MPI configurations.\n",
+          stderr);
+    abort();
+#endif
+  }
   else
-    {
-      if (setup->flags & PIO_WRITE_CONFIG_CREATE_CURVILINEAR_GRID_FLAG)
-        gridID = createLocalCurvilinearGrid(nlon, nlat);
-      else
-        gridID = createGlobalLatLonGrid(nlon, nlat);
-    }
+  {
+    if (setup->flags & PIO_WRITE_CONFIG_CREATE_CURVILINEAR_GRID_FLAG)
+      gridID = createLocalCurvilinearGrid(nlon, nlat);
+    else
+      gridID = createGlobalLatLonGrid(nlon, nlat);
+  }
   if (setup->flags & PIO_WRITE_CONFIG_CREATE_UUID_FLAG)
-    {
-      unsigned char uuid[CDI_UUID_SIZE];
-      if (rank == 0) cdiCreateUUID(uuid);
+  {
+    unsigned char uuid[CDI_UUID_SIZE];
+    if (rank == 0) cdiCreateUUID(uuid);
 #if USE_MPI
-      MPI_Bcast(uuid, CDI_UUID_SIZE, MPI_UNSIGNED_CHAR, 0, comm);
+    MPI_Bcast(uuid, CDI_UUID_SIZE, MPI_UNSIGNED_CHAR, 0, comm);
 #endif
-      gridDefUUID(gridID, uuid);
-    }
+    gridDefUUID(gridID, uuid);
+  }
   return gridID;
 }
 

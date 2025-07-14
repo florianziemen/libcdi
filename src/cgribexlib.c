@@ -561,64 +561,64 @@ avx_minmax_val_double(const double *restrict buf, size_t nframes, double *min, d
 
   // Work input until "buf" reaches 32 byte alignment
   while (((unsigned long) buf) % 32 != 0 && nframes > 0)
-    {
+  {
 
-      // Load the next double into the work buffer
-      work = _mm256_set1_pd(*buf);
-      current_min = _mm256_min_pd(current_min, work);
-      current_max = _mm256_max_pd(current_max, work);
-      buf++;
-      nframes--;
-    }
+    // Load the next double into the work buffer
+    work = _mm256_set1_pd(*buf);
+    current_min = _mm256_min_pd(current_min, work);
+    current_max = _mm256_max_pd(current_max, work);
+    buf++;
+    nframes--;
+  }
 
   while (nframes >= 16)
-    {
+  {
 
-      (void) _mm_prefetch((const char *) (buf + 8), _MM_HINT_NTA);
+    (void) _mm_prefetch((const char *) (buf + 8), _MM_HINT_NTA);
 
-      work = _mm256_load_pd(buf);
-      current_min = _mm256_min_pd(current_min, work);
-      current_max = _mm256_max_pd(current_max, work);
-      buf += 4;
+    work = _mm256_load_pd(buf);
+    current_min = _mm256_min_pd(current_min, work);
+    current_max = _mm256_max_pd(current_max, work);
+    buf += 4;
 
-      work = _mm256_load_pd(buf);
-      current_min = _mm256_min_pd(current_min, work);
-      current_max = _mm256_max_pd(current_max, work);
-      buf += 4;
+    work = _mm256_load_pd(buf);
+    current_min = _mm256_min_pd(current_min, work);
+    current_max = _mm256_max_pd(current_max, work);
+    buf += 4;
 
-      (void) _mm_prefetch((const char *) (buf + 8), _MM_HINT_NTA);
+    (void) _mm_prefetch((const char *) (buf + 8), _MM_HINT_NTA);
 
-      work = _mm256_load_pd(buf);
-      current_min = _mm256_min_pd(current_min, work);
-      current_max = _mm256_max_pd(current_max, work);
-      buf += 4;
+    work = _mm256_load_pd(buf);
+    current_min = _mm256_min_pd(current_min, work);
+    current_max = _mm256_max_pd(current_max, work);
+    buf += 4;
 
-      work = _mm256_load_pd(buf);
-      current_min = _mm256_min_pd(current_min, work);
-      current_max = _mm256_max_pd(current_max, work);
-      buf += 4;
-      nframes -= 16;
-    }
+    work = _mm256_load_pd(buf);
+    current_min = _mm256_min_pd(current_min, work);
+    current_max = _mm256_max_pd(current_max, work);
+    buf += 4;
+    nframes -= 16;
+  }
 
   // work through aligned buffers
   while (nframes >= 4)
-    {
-      work = _mm256_load_pd(buf);
-      current_min = _mm256_min_pd(current_min, work);
-      current_max = _mm256_max_pd(current_max, work);
-      buf += 4;
-      nframes -= 4;
-    }
+  {
+    work = _mm256_load_pd(buf);
+    current_min = _mm256_min_pd(current_min, work);
+    current_max = _mm256_max_pd(current_max, work);
+    buf += 4;
+    nframes -= 4;
+  }
 
   // work through the remainung values
   while (nframes > 0)
-    {
-      work = _mm256_set1_pd(*buf);
-      current_min = _mm256_min_pd(current_min, work);
-      current_max = _mm256_max_pd(current_max, work);
-      buf++;
-      nframes--;
-    }
+  {
+    work = _mm256_set1_pd(*buf);
+    current_min = _mm256_min_pd(current_min, work);
+    current_max = _mm256_max_pd(current_max, work);
+    buf++;
+    nframes--;
+  }
 
   // find min & max value through shuffle tricks
 
@@ -658,60 +658,60 @@ sse2_minmax_val_double(const double *restrict buf, size_t nframes, double *min, 
 
   // work on input until buf reaches 16 byte alignment
   while (((unsigned long) buf) % 16 != 0 && nframes > 0)
-    {
+  {
 
-      // load one double and replicate
-      work = _mm_set1_pd(*buf);
-      current_min = _mm_min_pd(current_min, work);
-      current_max = _mm_max_pd(current_max, work);
-      buf++;
-      nframes--;
-    }
+    // load one double and replicate
+    work = _mm_set1_pd(*buf);
+    current_min = _mm_min_pd(current_min, work);
+    current_max = _mm_max_pd(current_max, work);
+    buf++;
+    nframes--;
+  }
 
   while (nframes >= 8)
-    {
-      // use 64 byte prefetch for double octetts
-      // __builtin_prefetch(buf+64,0,0); // for GCC 4.3.2 +
+  {
+    // use 64 byte prefetch for double octetts
+    // __builtin_prefetch(buf+64,0,0); // for GCC 4.3.2 +
 
-      work = _mm_load_pd(buf);
-      current_min = _mm_min_pd(current_min, work);
-      current_max = _mm_max_pd(current_max, work);
-      buf += 2;
-      work = _mm_load_pd(buf);
-      current_min = _mm_min_pd(current_min, work);
-      current_max = _mm_max_pd(current_max, work);
-      buf += 2;
-      work = _mm_load_pd(buf);
-      current_min = _mm_min_pd(current_min, work);
-      current_max = _mm_max_pd(current_max, work);
-      buf += 2;
-      work = _mm_load_pd(buf);
-      current_min = _mm_min_pd(current_min, work);
-      current_max = _mm_max_pd(current_max, work);
-      buf += 2;
-      nframes -= 8;
-    }
+    work = _mm_load_pd(buf);
+    current_min = _mm_min_pd(current_min, work);
+    current_max = _mm_max_pd(current_max, work);
+    buf += 2;
+    work = _mm_load_pd(buf);
+    current_min = _mm_min_pd(current_min, work);
+    current_max = _mm_max_pd(current_max, work);
+    buf += 2;
+    work = _mm_load_pd(buf);
+    current_min = _mm_min_pd(current_min, work);
+    current_max = _mm_max_pd(current_max, work);
+    buf += 2;
+    work = _mm_load_pd(buf);
+    current_min = _mm_min_pd(current_min, work);
+    current_max = _mm_max_pd(current_max, work);
+    buf += 2;
+    nframes -= 8;
+  }
 
   // work through smaller chunks of aligned buffers without prefetching
   while (nframes >= 2)
-    {
-      work = _mm_load_pd(buf);
-      current_min = _mm_min_pd(current_min, work);
-      current_max = _mm_max_pd(current_max, work);
-      buf += 2;
-      nframes -= 2;
-    }
+  {
+    work = _mm_load_pd(buf);
+    current_min = _mm_min_pd(current_min, work);
+    current_max = _mm_max_pd(current_max, work);
+    buf += 2;
+    nframes -= 2;
+  }
 
   // work through the remaining value
   while (nframes > 0)
-    {
-      // load the last double and replicate
-      work = _mm_set1_pd(*buf);
-      current_min = _mm_min_pd(current_min, work);
-      current_max = _mm_max_pd(current_max, work);
-      buf++;
-      nframes--;
-    }
+  {
+    // load the last double and replicate
+    work = _mm_set1_pd(*buf);
+    current_min = _mm_min_pd(current_min, work);
+    current_max = _mm_max_pd(current_max, work);
+    buf++;
+    nframes--;
+  }
 
   // find final min and max value through shuffle tricks
   work = current_min;
@@ -743,31 +743,31 @@ pwr6_minmax_val_double_unrolled6(const double *restrict data, size_t datasize, d
     double dmax[__UNROLL_DEPTH_1];
 
     for (size_t j = 0; j < __UNROLL_DEPTH_1; ++j)
-      {
-        dmin[j] = data[0];
-        dmax[j] = data[0];
-      }
+    {
+      dmin[j] = data[0];
+      dmax[j] = data[0];
+    }
 
     for (size_t i = 0; i < datasize - residual; i += __UNROLL_DEPTH_1)
+    {
+      for (size_t j = 0; j < __UNROLL_DEPTH_1; ++j)
       {
-        for (size_t j = 0; j < __UNROLL_DEPTH_1; ++j)
-          {
-            dmin[j] = __fsel(dmin[j] - data[i + j], data[i + j], dmin[j]);
-            dmax[j] = __fsel(data[i + j] - dmax[j], data[i + j], dmax[j]);
-          }
+        dmin[j] = __fsel(dmin[j] - data[i + j], data[i + j], dmin[j]);
+        dmax[j] = __fsel(data[i + j] - dmax[j], data[i + j], dmax[j]);
       }
+    }
 
     for (size_t j = 0; j < residual; ++j)
-      {
-        dmin[j] = __fsel(dmin[j] - data[ofs + j], data[ofs + j], dmin[j]);
-        dmax[j] = __fsel(data[ofs + j] - dmax[j], data[ofs + j], dmax[j]);
-      }
+    {
+      dmin[j] = __fsel(dmin[j] - data[ofs + j], data[ofs + j], dmin[j]);
+      dmax[j] = __fsel(data[ofs + j] - dmax[j], data[ofs + j], dmax[j]);
+    }
 
     for (size_t j = 0; j < __UNROLL_DEPTH_1; ++j)
-      {
-        *fmin = __fsel(*fmin - dmin[j], dmin[j], *fmin);
-        *fmax = __fsel(dmax[j] - *fmax, dmax[j], *fmax);
-      }
+    {
+      *fmin = __fsel(*fmin - dmin[j], dmin[j], *fmin);
+      *fmax = __fsel(dmax[j] - *fmax, dmax[j], *fmax);
+    }
   }
 #undef __UNROLL_DEPTH_1
 }
@@ -802,10 +802,10 @@ minmax_val_double_orig(const double *restrict data, size_t datasize, double *fmi
 #pragma ivdep
 #endif
   for (size_t i = 0; i < datasize; ++i)
-    {
-      dmin = (dmin < data[i]) ? dmin : data[i];
-      dmax = (dmax > data[i]) ? dmax : data[i];
-    }
+  {
+    dmin = (dmin < data[i]) ? dmin : data[i];
+    dmax = (dmax > data[i]) ? dmax : data[i];
+  }
 
   *fmin = dmin;
   *fmax = dmax;
@@ -827,10 +827,10 @@ minmax_val_float(const float *restrict data, long idatasize, float *fmin, float 
 #pragma ivdep
 #endif
   for (size_t i = 0; i < datasize; ++i)
-    {
-      dmin = (dmin < data[i]) ? dmin : data[i];
-      dmax = (dmax > data[i]) ? dmax : data[i];
-    }
+  {
+    dmin = (dmin < data[i]) ? dmin : data[i];
+    dmax = (dmax > data[i]) ? dmax : data[i];
+  }
 
   *fmin = dmin;
   *fmax = dmax;
@@ -855,10 +855,10 @@ minmax_val_double_omp(const double *restrict data, size_t datasize, double *fmin
 #pragma omp parallel for simd reduction(min : dmin) reduction(max : dmax)
 #endif
   for (size_t i = 0; i < datasize; ++i)
-    {
-      dmin = (dmin < data[i]) ? dmin : data[i];
-      dmax = (dmax > data[i]) ? dmax : data[i];
-    }
+  {
+    dmin = (dmin < data[i]) ? dmin : data[i];
+    dmax = (dmax > data[i]) ? dmax : data[i];
+  }
 
   *fmin = dmin;
   *fmax = dmax;
@@ -873,10 +873,10 @@ minmax_val_double_simd(const double *restrict data, size_t datasize, double *fmi
 #pragma omp simd reduction(min : dmin) reduction(max : dmax)
 #endif
   for (size_t i = 0; i < datasize; ++i)
-    {
-      dmin = (dmin < data[i]) ? dmin : data[i];
-      dmax = (dmax > data[i]) ? dmax : data[i];
-    }
+  {
+    dmin = (dmin < data[i]) ? dmin : data[i];
+    dmax = (dmax > data[i]) ? dmax : data[i];
+  }
 
   *fmin = dmin;
   *fmax = dmax;
@@ -891,10 +891,10 @@ minmax_val_float_simd(const float *restrict data, size_t datasize, float *fmin, 
 #pragma omp simd reduction(min : dmin) reduction(max : dmax)
 #endif
   for (size_t i = 0; i < datasize; ++i)
-    {
-      dmin = (dmin < data[i]) ? dmin : data[i];
-      dmax = (dmax > data[i]) ? dmax : data[i];
-    }
+  {
+    dmin = (dmin < data[i]) ? dmin : data[i];
+    dmax = (dmax > data[i]) ? dmax : data[i];
+  }
 
   *fmin = dmin;
   *fmax = dmax;
@@ -1035,20 +1035,20 @@ main(void)
 
     t_begin = dtime();
     for (int i = 0; i < NRUN; ++i)
-      {
-        fmin = fmax = data_sp[0];
-        minmax_val_float(data_sp, datasize, &fmin, &fmax);
-      }
+    {
+      fmin = fmax = data_sp[0];
+      minmax_val_float(data_sp, datasize, &fmin, &fmax);
+    }
     t_end = dtime();
     printf("minmax_val: fmin: %ld  fmax: %ld  time: %6.2fs\n", (long) fmin, (long) fmax, t_end - t_begin);
 
 #if defined(OMP_SIMD)
     t_begin = dtime();
     for (int i = 0; i < NRUN; ++i)
-      {
-        fmin = fmax = data_sp[0];
-        minmax_val_float_simd(data_sp, datasize, &fmin, &fmax);
-      }
+    {
+      fmin = fmax = data_sp[0];
+      minmax_val_float_simd(data_sp, datasize, &fmin, &fmax);
+    }
     t_end = dtime();
     printf("simd      : fmin: %ld  fmax: %ld  time: %6.2fs\n", (long) fmin, (long) fmax, t_end - t_begin);
 #endif
@@ -1068,38 +1068,38 @@ main(void)
 
     t_begin = dtime();
     for (int i = 0; i < NRUN; ++i)
-      {
-        fmin = fmax = data_dp[0];
-        minmax_val_double(data_dp, datasize, &fmin, &fmax);
-      }
+    {
+      fmin = fmax = data_dp[0];
+      minmax_val_double(data_dp, datasize, &fmin, &fmax);
+    }
     t_end = dtime();
     printf("minmax_val: fmin: %ld  fmax: %ld  time: %6.2fs\n", (long) fmin, (long) fmax, t_end - t_begin);
 
     t_begin = dtime();
     for (int i = 0; i < NRUN; ++i)
-      {
-        fmin = fmax = data_dp[0];
-        minmax_val_double_orig(data_dp, datasize, &fmin, &fmax);
-      }
+    {
+      fmin = fmax = data_dp[0];
+      minmax_val_double_orig(data_dp, datasize, &fmin, &fmax);
+    }
     t_end = dtime();
     printf("orig      : fmin: %ld  fmax: %ld  time: %6.2fs\n", (long) fmin, (long) fmax, t_end - t_begin);
 
 #if defined(OMP_SIMD)
     t_begin = dtime();
     for (int i = 0; i < NRUN; ++i)
-      {
-        fmin = fmax = data_dp[0];
-        minmax_val_double_simd(data_dp, datasize, &fmin, &fmax);
-      }
+    {
+      fmin = fmax = data_dp[0];
+      minmax_val_double_simd(data_dp, datasize, &fmin, &fmax);
+    }
     t_end = dtime();
     printf("simd      : fmin: %ld  fmax: %ld  time: %6.2fs\n", (long) fmin, (long) fmax, t_end - t_begin);
 
     t_begin = dtime();
     for (int i = 0; i < NRUN; ++i)
-      {
-        fmin = fmax = data_dp[0];
-        minmax_val_double_omp(data_dp, datasize, &fmin, &fmax);
-      }
+    {
+      fmin = fmax = data_dp[0];
+      minmax_val_double_omp(data_dp, datasize, &fmin, &fmax);
+    }
     t_end = dtime();
     printf("openmp %d  : fmin: %ld  fmax: %ld  time: %6.2fs\n", omp_get_max_threads(), (long) fmin, (long) fmax, t_end - t_begin);
 #endif
@@ -1107,29 +1107,29 @@ main(void)
 #if defined(_ENABLE_AVX)
     t_begin = dtime();
     for (int i = 0; i < NRUN; ++i)
-      {
-        fmin = fmax = data_dp[0];
-        avx_minmax_val_double(data_dp, datasize, &fmin, &fmax);
-      }
+    {
+      fmin = fmax = data_dp[0];
+      avx_minmax_val_double(data_dp, datasize, &fmin, &fmax);
+    }
     t_end = dtime();
     printf("avx       : fmin: %ld  fmax: %ld  time: %6.2fs\n", (long) fmin, (long) fmax, t_end - t_begin);
 #elif defined(_ENABLE_SSE2)
     t_begin = dtime();
     for (int i = 0; i < NRUN; ++i)
-      {
-        fmin = fmax = data_dp[0];
-        sse2_minmax_val_double(data_dp, datasize, &fmin, &fmax);
-      }
+    {
+      fmin = fmax = data_dp[0];
+      sse2_minmax_val_double(data_dp, datasize, &fmin, &fmax);
+    }
     t_end = dtime();
     printf("sse2      : fmin: %ld  fmax: %ld  time: %6.2fs\n", (long) fmin, (long) fmax, t_end - t_begin);
 #endif
 #if defined(_ARCH_PWR6)
     t_begin = dtime();
     for (int i = 0; i < NRUN; ++i)
-      {
-        fmin = fmax = data_dp[0];
-        pwr6_minmax_val_double_unrolled6(data_dp, datasize, &fmin, &fmax);
-      }
+    {
+      fmin = fmax = data_dp[0];
+      pwr6_minmax_val_double_unrolled6(data_dp, datasize, &fmin, &fmax);
+    }
     t_end = dtime();
     printf("pwr6u6  : fmin: %ld  fmax: %ld  time: %6.2fs\n", (long) fmin, (long) fmax, t_end - t_begin);
 #endif
@@ -1311,76 +1311,76 @@ avx_encode_array_2byte_double(size_t datasize, unsigned char *restrict lGrib, co
 
   size_t i;
   for (i = 0; i < (datasize - residual); i += 16)
-    {
-      (void) _mm_prefetch((const char *) (dval + 8), _MM_HINT_NTA);
-      //_____________________________________________________________________________
+  {
+    (void) _mm_prefetch((const char *) (dval + 8), _MM_HINT_NTA);
+    //_____________________________________________________________________________
 
-      d0 = _mm256_loadu_pd(dval);
-      d0 = _mm256_sub_pd(d0, c0);
-      d0 = _mm256_mul_pd(d0, c1);
-      d0 = _mm256_add_pd(d0, c2);
+    d0 = _mm256_loadu_pd(dval);
+    d0 = _mm256_sub_pd(d0, c0);
+    d0 = _mm256_mul_pd(d0, c1);
+    d0 = _mm256_add_pd(d0, c2);
 
-      i0 = _mm256_cvttpd_epi32(d0);
+    i0 = _mm256_cvttpd_epi32(d0);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      d1 = _mm256_loadu_pd(dval + 4);
-      d1 = _mm256_sub_pd(d1, c0);
-      d1 = _mm256_mul_pd(d1, c1);
-      d1 = _mm256_add_pd(d1, c2);
+    d1 = _mm256_loadu_pd(dval + 4);
+    d1 = _mm256_sub_pd(d1, c0);
+    d1 = _mm256_mul_pd(d1, c1);
+    d1 = _mm256_add_pd(d1, c2);
 
-      i1 = _mm256_cvttpd_epi32(d1);
+    i1 = _mm256_cvttpd_epi32(d1);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      s0 = _mm_packus_epi32(i0, i1);
-      s0 = _mm_shuffle_epi8(s0, swap);
-      (void) _mm_storeu_si128(sgrib, s0);
+    s0 = _mm_packus_epi32(i0, i1);
+    s0 = _mm_shuffle_epi8(s0, swap);
+    (void) _mm_storeu_si128(sgrib, s0);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      (void) _mm_prefetch((const char *) (dval + 16), _MM_HINT_NTA);
+    (void) _mm_prefetch((const char *) (dval + 16), _MM_HINT_NTA);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      d2 = _mm256_loadu_pd(dval + 8);
-      d2 = _mm256_sub_pd(d2, c0);
-      d2 = _mm256_mul_pd(d2, c1);
-      d2 = _mm256_add_pd(d2, c2);
+    d2 = _mm256_loadu_pd(dval + 8);
+    d2 = _mm256_sub_pd(d2, c0);
+    d2 = _mm256_mul_pd(d2, c1);
+    d2 = _mm256_add_pd(d2, c2);
 
-      i2 = _mm256_cvttpd_epi32(d2);
+    i2 = _mm256_cvttpd_epi32(d2);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      d3 = _mm256_loadu_pd(dval + 12);
-      d3 = _mm256_sub_pd(d3, c0);
-      d3 = _mm256_mul_pd(d3, c1);
-      d3 = _mm256_add_pd(d3, c2);
+    d3 = _mm256_loadu_pd(dval + 12);
+    d3 = _mm256_sub_pd(d3, c0);
+    d3 = _mm256_mul_pd(d3, c1);
+    d3 = _mm256_add_pd(d3, c2);
 
-      i3 = _mm256_cvttpd_epi32(d3);
+    i3 = _mm256_cvttpd_epi32(d3);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      s1 = _mm_packus_epi32(i2, i3);
-      s1 = _mm_shuffle_epi8(s1, swap);
-      (void) _mm_storeu_si128(sgrib + 1, s1);
+    s1 = _mm_packus_epi32(i2, i3);
+    s1 = _mm_shuffle_epi8(s1, swap);
+    (void) _mm_storeu_si128(sgrib + 1, s1);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      dval += 16;
-      sgrib += 2;
-    }
+    dval += 16;
+    sgrib += 2;
+  }
 
   if (i != datasize)
+  {
+    uint16_t ui16;
+    for (size_t j = i; j < datasize; ++j)
     {
-      uint16_t ui16;
-      for (size_t j = i; j < datasize; ++j)
-        {
-          ui16 = (uint16_t) ((data[j] - zref) * factor + 0.5);
-          lGrib[*gz + 2 * j] = ui16 >> 8;
-          lGrib[*gz + 2 * j + 1] = ui16;
-        }
+      ui16 = (uint16_t) ((data[j] - zref) * factor + 0.5);
+      lGrib[*gz + 2 * j] = ui16 >> 8;
+      lGrib[*gz + 2 * j + 1] = ui16;
     }
+  }
 
   *gz += 2 * datasize;
 
@@ -1412,104 +1412,104 @@ sse41_encode_array_2byte_double(size_t datasize, unsigned char *restrict lGrib, 
 
   size_t i;
   for (i = 0; i < (datasize - residual); i += 16)
-    {
-      (void) _mm_prefetch((const char *) (dval + 8), _MM_HINT_NTA);
-      //_____________________________________________________________________________
+  {
+    (void) _mm_prefetch((const char *) (dval + 8), _MM_HINT_NTA);
+    //_____________________________________________________________________________
 
-      d0 = _mm_loadu_pd(dval);
-      d0 = _mm_sub_pd(d0, c0);
-      d0 = _mm_mul_pd(d0, c1);
-      d0 = _mm_add_pd(d0, c2);
+    d0 = _mm_loadu_pd(dval);
+    d0 = _mm_sub_pd(d0, c0);
+    d0 = _mm_mul_pd(d0, c1);
+    d0 = _mm_add_pd(d0, c2);
 
-      d4 = _mm_loadu_pd(dval + 2);
-      d4 = _mm_sub_pd(d4, c0);
-      d4 = _mm_mul_pd(d4, c1);
-      d4 = _mm_add_pd(d4, c2);
+    d4 = _mm_loadu_pd(dval + 2);
+    d4 = _mm_sub_pd(d4, c0);
+    d4 = _mm_mul_pd(d4, c1);
+    d4 = _mm_add_pd(d4, c2);
 
-      i0 = _mm_cvttpd_epi32(d0);
-      i4 = _mm_cvttpd_epi32(d4);
-      i0 = _mm_unpacklo_epi64(i0, i4);
+    i0 = _mm_cvttpd_epi32(d0);
+    i4 = _mm_cvttpd_epi32(d4);
+    i0 = _mm_unpacklo_epi64(i0, i4);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      d1 = _mm_loadu_pd(dval + 4);
-      d1 = _mm_sub_pd(d1, c0);
-      d1 = _mm_mul_pd(d1, c1);
-      d1 = _mm_add_pd(d1, c2);
+    d1 = _mm_loadu_pd(dval + 4);
+    d1 = _mm_sub_pd(d1, c0);
+    d1 = _mm_mul_pd(d1, c1);
+    d1 = _mm_add_pd(d1, c2);
 
-      d4 = _mm_loadu_pd(dval + 6);
-      d4 = _mm_sub_pd(d4, c0);
-      d4 = _mm_mul_pd(d4, c1);
-      d4 = _mm_add_pd(d4, c2);
+    d4 = _mm_loadu_pd(dval + 6);
+    d4 = _mm_sub_pd(d4, c0);
+    d4 = _mm_mul_pd(d4, c1);
+    d4 = _mm_add_pd(d4, c2);
 
-      i1 = _mm_cvttpd_epi32(d1);
-      i4 = _mm_cvttpd_epi32(d4);
-      i1 = _mm_unpacklo_epi64(i1, i4);
+    i1 = _mm_cvttpd_epi32(d1);
+    i4 = _mm_cvttpd_epi32(d4);
+    i1 = _mm_unpacklo_epi64(i1, i4);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      s0 = _mm_packus_epi32(i0, i1);
-      s0 = _mm_shuffle_epi8(s0, swap);
-      (void) _mm_storeu_si128(sgrib, s0);
+    s0 = _mm_packus_epi32(i0, i1);
+    s0 = _mm_shuffle_epi8(s0, swap);
+    (void) _mm_storeu_si128(sgrib, s0);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      (void) _mm_prefetch((const char *) (dval + 16), _MM_HINT_NTA);
+    (void) _mm_prefetch((const char *) (dval + 16), _MM_HINT_NTA);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      d2 = _mm_loadu_pd(dval + 8);
-      d2 = _mm_sub_pd(d2, c0);
-      d2 = _mm_mul_pd(d2, c1);
-      d2 = _mm_add_pd(d2, c2);
+    d2 = _mm_loadu_pd(dval + 8);
+    d2 = _mm_sub_pd(d2, c0);
+    d2 = _mm_mul_pd(d2, c1);
+    d2 = _mm_add_pd(d2, c2);
 
-      d4 = _mm_loadu_pd(dval + 10);
-      d4 = _mm_sub_pd(d4, c0);
-      d4 = _mm_mul_pd(d4, c1);
-      d4 = _mm_add_pd(d4, c2);
+    d4 = _mm_loadu_pd(dval + 10);
+    d4 = _mm_sub_pd(d4, c0);
+    d4 = _mm_mul_pd(d4, c1);
+    d4 = _mm_add_pd(d4, c2);
 
-      i2 = _mm_cvttpd_epi32(d2);
-      i4 = _mm_cvttpd_epi32(d4);
-      i2 = _mm_unpacklo_epi64(i2, i4);
+    i2 = _mm_cvttpd_epi32(d2);
+    i4 = _mm_cvttpd_epi32(d4);
+    i2 = _mm_unpacklo_epi64(i2, i4);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      d3 = _mm_loadu_pd(dval + 12);
-      d3 = _mm_sub_pd(d3, c0);
-      d3 = _mm_mul_pd(d3, c1);
-      d3 = _mm_add_pd(d3, c2);
+    d3 = _mm_loadu_pd(dval + 12);
+    d3 = _mm_sub_pd(d3, c0);
+    d3 = _mm_mul_pd(d3, c1);
+    d3 = _mm_add_pd(d3, c2);
 
-      d4 = _mm_loadu_pd(dval + 14);
-      d4 = _mm_sub_pd(d4, c0);
-      d4 = _mm_mul_pd(d4, c1);
-      d4 = _mm_add_pd(d4, c2);
+    d4 = _mm_loadu_pd(dval + 14);
+    d4 = _mm_sub_pd(d4, c0);
+    d4 = _mm_mul_pd(d4, c1);
+    d4 = _mm_add_pd(d4, c2);
 
-      i3 = _mm_cvttpd_epi32(d3);
-      i4 = _mm_cvttpd_epi32(d4);
-      i3 = _mm_unpacklo_epi64(i3, i4);
+    i3 = _mm_cvttpd_epi32(d3);
+    i4 = _mm_cvttpd_epi32(d4);
+    i3 = _mm_unpacklo_epi64(i3, i4);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      s1 = _mm_packus_epi32(i2, i3);
-      s1 = _mm_shuffle_epi8(s1, swap);
-      (void) _mm_storeu_si128(sgrib + 1, s1);
+    s1 = _mm_packus_epi32(i2, i3);
+    s1 = _mm_shuffle_epi8(s1, swap);
+    (void) _mm_storeu_si128(sgrib + 1, s1);
 
-      //_____________________________________________________________________________
+    //_____________________________________________________________________________
 
-      dval += 16;
-      sgrib += 2;
-    }
+    dval += 16;
+    sgrib += 2;
+  }
 
   if (i != datasize)
+  {
+    uint16_t ui16;
+    for (size_t j = i; j < datasize; ++j)
     {
-      uint16_t ui16;
-      for (size_t j = i; j < datasize; ++j)
-        {
-          ui16 = (uint16_t) ((data[j] - zref) * factor + 0.5);
-          lGrib[*gz + 2 * j] = ui16 >> 8;
-          lGrib[*gz + 2 * j + 1] = ui16;
-        }
+      ui16 = (uint16_t) ((data[j] - zref) * factor + 0.5);
+      lGrib[*gz + 2 * j] = ui16 >> 8;
+      lGrib[*gz + 2 * j + 1] = ui16;
     }
+  }
 
   *gz += 2 * datasize;
 
@@ -1586,10 +1586,10 @@ main(void)
   int s = 256;
 
   if (0)
-    {
-      encode_array_float(0, 0, 0, NULL, NULL, 0, 0, NULL);
-      encode_array_double(0, 0, 0, NULL, NULL, 0, 0, NULL);
-    }
+  {
+    encode_array_float(0, 0, 0, NULL, NULL, 0, 0, NULL);
+    encode_array_double(0, 0, 0, NULL, NULL, 0, 0, NULL);
+  }
 
 #if defined(__ICC)
   printf("icc\n");
@@ -1603,19 +1603,19 @@ main(void)
 
   t_begin = dtime();
   for (int i = 0; i < NRUN; ++i)
-    {
-      z = 0;
-      encode_array_2byte_float(datasize, lgrib, dataf, (float) zref, (float) factor, &z);
-    }
+  {
+    z = 0;
+    encode_array_2byte_float(datasize, lgrib, dataf, (float) zref, (float) factor, &z);
+  }
   t_end = dtime();
   pout("orig", s, lgrib, datasize, t_end - t_begin);
 
   t_begin = dtime();
   for (int i = 0; i < NRUN; ++i)
-    {
-      z = 0;
-      encode_array_unrolled_float(nbpv, PackStart, datasize, lgrib, dataf, (float) zref, (float) factor, &z);
-    }
+  {
+    z = 0;
+    encode_array_unrolled_float(nbpv, PackStart, datasize, lgrib, dataf, (float) zref, (float) factor, &z);
+  }
   t_end = dtime();
   pout("unrolled", s, lgrib, datasize, t_end - t_begin);
 
@@ -1623,38 +1623,38 @@ main(void)
 
   t_begin = dtime();
   for (int i = 0; i < NRUN; ++i)
-    {
-      z = 0;
-      encode_array_2byte_double(datasize, lgrib, data, zref, factor, &z);
-    }
+  {
+    z = 0;
+    encode_array_2byte_double(datasize, lgrib, data, zref, factor, &z);
+  }
   t_end = dtime();
   pout("orig", s, lgrib, datasize, t_end - t_begin);
 
   t_begin = dtime();
   for (int i = 0; i < NRUN; ++i)
-    {
-      z = 0;
-      encode_array_unrolled_double(nbpv, PackStart, datasize, lgrib, data, zref, factor, &z);
-    }
+  {
+    z = 0;
+    encode_array_unrolled_double(nbpv, PackStart, datasize, lgrib, data, zref, factor, &z);
+  }
   t_end = dtime();
   pout("unrolled", s, lgrib, datasize, t_end - t_begin);
 
 #if defined _ENABLE_AVX
   t_begin = dtime();
   for (int i = 0; i < NRUN; ++i)
-    {
-      z = 0;
-      avx_encode_array_2byte_double(datasize, lgrib, data, zref, factor, &z);
-    }
+  {
+    z = 0;
+    avx_encode_array_2byte_double(datasize, lgrib, data, zref, factor, &z);
+  }
   t_end = dtime();
   pout("avx", s, lgrib, datasize, t_end - t_begin);
 #elif defined _ENABLE_SSE4_1
   t_begin = dtime();
   for (int i = 0; i < NRUN; ++i)
-    {
-      z = 0;
-      sse41_encode_array_2byte_double(datasize, lgrib, data, zref, factor, &z);
-    }
+  {
+    z = 0;
+    sse41_encode_array_2byte_double(datasize, lgrib, data, zref, factor, &z);
+  }
   t_end = dtime();
   pout("sse41", s, lgrib, datasize, t_end - t_begin);
 #endif
@@ -1746,23 +1746,23 @@ confp3(double pval, int *kexp, int *kmant, int kbits, int kround)
 
   int iround = kround;
   if (iround != 0 && iround != 1)
-    {
-      Error("Invalid conversion type = %d", iround);
+  {
+    Error("Invalid conversion type = %d", iround);
 
-      // If not aborting, arbitrarily set rounding to 'up'.
-      iround = 1;
-    }
+    // If not aborting, arbitrarily set rounding to 'up'.
+    iround = 1;
+  }
 
   /* ----------------------------------------------------------------- */
   /*   Section 2 . Convert value of zero.                              */
   /* ----------------------------------------------------------------- */
 
   if (fabs(pval) <= 0)
-    {
-      *kexp = 0;
-      *kmant = 0;
-      goto LABEL900;
-    }
+  {
+    *kexp = 0;
+    *kmant = 0;
+    goto LABEL900;
+  }
 
   /* ----------------------------------------------------------------- */
   /*   Section 3 . Convert other values.                               */
@@ -1789,64 +1789,64 @@ confp3(double pval, int *kexp, int *kmant, int kbits, int kround)
 
     // Mantissa.
     if (iround == 0)
+    {
+      /*  Closest number in GRIB format less than original number. */
+      /*  Truncate for positive numbers. */
+      /*  Round up for negative numbers. */
+      *kmant = (isign == 0) ? (int) rpowref : (int) lround(rpowref + 0.5);
+    }
+    else
+    {
+      /*  Closest number in GRIB format to the original number   */
+      /*  (equal to, greater than or less than original number). */
+      *kmant = (int) lround(rpowref);
+    }
+
+    /*  Check that mantissa value does not exceed 24 bits. */
+    /*  If it does, adjust the exponent upwards and recalculate the mantissa. */
+    /*  16777215 = 2**24 - 1 */
+    if (*kmant > 16777215)
+    {
+
+    LABEL350:
+
+      ++iexp;
+
+      // Check for exponent overflow during adjustment
+      if (iexp > 127)
+      {
+        Message("Exponent overflow");
+        Message("Original number = %30.20f", pval);
+        Message("Sign = %3d, Exponent = %3d, Mantissa = %12d", isign, iexp, *kmant);
+
+        Error("Exponent overflow");
+
+        // If not aborting, arbitrarily set value to zero
+        Message("Value arbitrarily set to zero.");
+        *kexp = 0;
+        *kmant = 0;
+        goto LABEL900;
+      }
+
+      rpowref = ldexp(zref, 4 * -(iexp - 70));
+
+      if (iround == 0)
       {
         /*  Closest number in GRIB format less than original number. */
         /*  Truncate for positive numbers. */
         /*  Round up for negative numbers. */
         *kmant = (isign == 0) ? (int) rpowref : (int) lround(rpowref + 0.5);
       }
-    else
+      else
       {
-        /*  Closest number in GRIB format to the original number   */
-        /*  (equal to, greater than or less than original number). */
+        /*  Closest number in GRIB format to the original number */
+        /*  (equal to, greater or less than original number). */
         *kmant = (int) lround(rpowref);
       }
 
-    /*  Check that mantissa value does not exceed 24 bits. */
-    /*  If it does, adjust the exponent upwards and recalculate the mantissa. */
-    /*  16777215 = 2**24 - 1 */
-    if (*kmant > 16777215)
-      {
-
-      LABEL350:
-
-        ++iexp;
-
-        // Check for exponent overflow during adjustment
-        if (iexp > 127)
-          {
-            Message("Exponent overflow");
-            Message("Original number = %30.20f", pval);
-            Message("Sign = %3d, Exponent = %3d, Mantissa = %12d", isign, iexp, *kmant);
-
-            Error("Exponent overflow");
-
-            // If not aborting, arbitrarily set value to zero
-            Message("Value arbitrarily set to zero.");
-            *kexp = 0;
-            *kmant = 0;
-            goto LABEL900;
-          }
-
-        rpowref = ldexp(zref, 4 * -(iexp - 70));
-
-        if (iround == 0)
-          {
-            /*  Closest number in GRIB format less than original number. */
-            /*  Truncate for positive numbers. */
-            /*  Round up for negative numbers. */
-            *kmant = (isign == 0) ? (int) rpowref : (int) lround(rpowref + 0.5);
-          }
-        else
-          {
-            /*  Closest number in GRIB format to the original number */
-            /*  (equal to, greater or less than original number). */
-            *kmant = (int) lround(rpowref);
-          }
-
-        // Repeat calculation (with modified exponent) if still have mantissa overflow.
-        if (*kmant > 16777215) goto LABEL350;
-      }
+      // Repeat calculation (with modified exponent) if still have mantissa overflow.
+      if (*kmant > 16777215) goto LABEL350;
+    }
 
     // Add sign bit to exponent.
     *kexp = iexp + isign;
@@ -1988,23 +1988,23 @@ gribDecodeRefDate(const int *isec1, int *year, int *month, int *day)
 
   if (century == -255 && ryear == 127) { ryear = 0; }
   else
+  {
+    // if ( century != 0 )
     {
-      // if ( century != 0 )
+      if (ryear == 100)
       {
-        if (ryear == 100)
-          {
-            ryear = 0;
-            century += 1;
-          }
-
-        if (ryear != 255)
-          {
-            ryear = century * 100 + ryear;
-            if (ISEC1_Century < 0) ryear = -ryear;
-          }
-        else { ryear = 1; }
+        ryear = 0;
+        century += 1;
       }
+
+      if (ryear != 255)
+      {
+        ryear = century * 100 + ryear;
+        if (ISEC1_Century < 0) ryear = -ryear;
+      }
+      else { ryear = 1; }
     }
+  }
 
   *year = ryear;
   *month = ISEC1_Month;
@@ -2087,31 +2087,31 @@ gribDateTimeX(int *isec1, int *date, int *time, int *startDate, int *startTime)
   if (ISEC1_TimeRange == 10)
     time_period = (ISEC1_TimePeriod1 << 8) + ISEC1_TimePeriod2;
   else if (ISEC1_TimeRange >= 2 && ISEC1_TimeRange <= 5)
-    {
-      time_period_x = ISEC1_TimePeriod1;
-      time_period = ISEC1_TimePeriod2;
-    }
+  {
+    time_period_x = ISEC1_TimePeriod1;
+    time_period = ISEC1_TimePeriod2;
+  }
   else if (ISEC1_TimeRange == 0)
     time_period = ISEC1_TimePeriod1;
 
   if (time_period > 0 && rDateTime.date.day > 0)
+  {
+    JulianDate julianDate = julianDate_encode(CGRIBEX_grib_calendar, rDateTime);
+
+    const int timeUnitFactor = getTimeUnitFactor(ISEC1_TimeUnit);
+
+    if (time_period_x > 0)
     {
-      JulianDate julianDate = julianDate_encode(CGRIBEX_grib_calendar, rDateTime);
-
-      const int timeUnitFactor = getTimeUnitFactor(ISEC1_TimeUnit);
-
-      if (time_period_x > 0)
-        {
-          JulianDate julianDate2 = julianDate_add_seconds(julianDate, timeUnitFactor * time_period_x);
-          CdiDateTime sDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate2);
-          sDateTime.time.second = 0;
-          *startDate = (int) cdiDate_get(sDateTime.date);
-          *startTime = cdiTime_get(sDateTime.time);
-        }
-
-      julianDate = julianDate_add_seconds(julianDate, timeUnitFactor * time_period);
-      rDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate);
+      JulianDate julianDate2 = julianDate_add_seconds(julianDate, timeUnitFactor * time_period_x);
+      CdiDateTime sDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate2);
+      sDateTime.time.second = 0;
+      *startDate = (int) cdiDate_get(sDateTime.date);
+      *startTime = cdiTime_get(sDateTime.time);
     }
+
+    julianDate = julianDate_add_seconds(julianDate, timeUnitFactor * time_period);
+    rDateTime = julianDate_decode(CGRIBEX_grib_calendar, julianDate);
+  }
 
   *date = (int) cdiDate_get(rDateTime.date);
   *time = cdiTime_get(rDateTime.time);
@@ -2340,25 +2340,25 @@ gribPrintSec1(int *isec0, int *isec1)
   fprintf(grprsm, " Parameter identifier (Code Table 2). %9d\n", isec1[5]);
 
   if (isec1[5] != 127)
-    {
-      fprintf(grprsm, " Type of level (Code Table 3).        %9d\n", isec1[6]);
-      fprintf(grprsm, " Value 1 of level (Code Table 3).     %9d\n", isec1[7]);
-      fprintf(grprsm, " Value 2 of level (Code Table 3).     %9d\n", isec1[8]);
-    }
+  {
+    fprintf(grprsm, " Type of level (Code Table 3).        %9d\n", isec1[6]);
+    fprintf(grprsm, " Value 1 of level (Code Table 3).     %9d\n", isec1[7]);
+    fprintf(grprsm, " Value 2 of level (Code Table 3).     %9d\n", isec1[8]);
+  }
   else
-    {
-      fprintf(grprsm, " Satellite identifier.                %9d\n", isec1[6]);
-      fprintf(grprsm, " Spectral band.                       %9d\n", isec1[7]);
-    }
+  {
+    fprintf(grprsm, " Satellite identifier.                %9d\n", isec1[6]);
+    fprintf(grprsm, " Spectral band.                       %9d\n", isec1[7]);
+  }
 
   iyear = isec1[9];
   if (iyear != 255)
-    {
-      int date, time;
-      gribDateTime(isec1, &date, &time);
-      iyear = date / 10000;
-      fprintf(grprsm, " Year of reference time of data.      %9d  (%4d)\n", isec1[9], iyear);
-    }
+  {
+    int date, time;
+    gribDateTime(isec1, &date, &time);
+    iyear = date / 10000;
+    fprintf(grprsm, " Year of reference time of data.      %9d  (%4d)\n", isec1[9], iyear);
+  }
   else { fprintf(grprsm, " Year of reference time of data MISSING  (=255)\n"); }
 
   fprintf(grprsm, " Month of reference time of data.     %9d\n", isec1[10]);
@@ -2392,28 +2392,28 @@ gribPrintSec1(int *isec0, int *isec1)
     -----------------------------------------------------------------
   */
   if ((ISEC1_CenterID == 78 || ISEC1_CenterID == 215 || ISEC1_CenterID == 250) && (isec1[36] == 253 || isec1[36] == 254))
-    {
-      fprintf(grprsm, " DWD local usage identifier.          %9d\n", isec1[36]);
-      if (isec1[36] == 253) fprintf(grprsm, " (Database labelling and ensemble forecast)\n");
-      if (isec1[36] == 254) fprintf(grprsm, " (Database labelling)\n");
+  {
+    fprintf(grprsm, " DWD local usage identifier.          %9d\n", isec1[36]);
+    if (isec1[36] == 253) fprintf(grprsm, " (Database labelling and ensemble forecast)\n");
+    if (isec1[36] == 254) fprintf(grprsm, " (Database labelling)\n");
 
-      fprintf(grprsm, " Year of database entry                     %3d  (%4d)\n", isec1[43], 1900 + isec1[43]);
-      fprintf(grprsm, " Month of database entry                    %3d\n", isec1[44]);
-      fprintf(grprsm, " Day of database entry                      %3d\n", isec1[45]);
-      fprintf(grprsm, " Hour of database entry                     %3d\n", isec1[46]);
-      fprintf(grprsm, " Minute of database entry                   %3d\n", isec1[47]);
-      fprintf(grprsm, " DWD experiment number                %9d\n", isec1[48]);
-      fprintf(grprsm, " DWD run type                         %9d\n", isec1[49]);
-      if (isec1[36] == 253)
-        {
-          fprintf(grprsm, " User id                              %9d\n", isec1[50]);
-          fprintf(grprsm, " Experiment identifier                %9d\n", isec1[51]);
-          fprintf(grprsm, " Ensemble identification type         %9d\n", isec1[52]);
-          fprintf(grprsm, " Number of ensemble members           %9d\n", isec1[53]);
-          fprintf(grprsm, " Actual number of ensemble member     %9d\n", isec1[54]);
-          fprintf(grprsm, " Model version                            %2d.%2.2d\n", isec1[55], isec1[56]);
-        }
+    fprintf(grprsm, " Year of database entry                     %3d  (%4d)\n", isec1[43], 1900 + isec1[43]);
+    fprintf(grprsm, " Month of database entry                    %3d\n", isec1[44]);
+    fprintf(grprsm, " Day of database entry                      %3d\n", isec1[45]);
+    fprintf(grprsm, " Hour of database entry                     %3d\n", isec1[46]);
+    fprintf(grprsm, " Minute of database entry                   %3d\n", isec1[47]);
+    fprintf(grprsm, " DWD experiment number                %9d\n", isec1[48]);
+    fprintf(grprsm, " DWD run type                         %9d\n", isec1[49]);
+    if (isec1[36] == 253)
+    {
+      fprintf(grprsm, " User id                              %9d\n", isec1[50]);
+      fprintf(grprsm, " Experiment identifier                %9d\n", isec1[51]);
+      fprintf(grprsm, " Ensemble identification type         %9d\n", isec1[52]);
+      fprintf(grprsm, " Number of ensemble members           %9d\n", isec1[53]);
+      fprintf(grprsm, " Actual number of ensemble member     %9d\n", isec1[54]);
+      fprintf(grprsm, " Model version                            %2d.%2.2d\n", isec1[55], isec1[56]);
     }
+  }
 
   /*
     -----------------------------------------------------------------
@@ -2425,493 +2425,493 @@ gribPrintSec1(int *isec0, int *isec1)
   */
   if ((ISEC1_CenterID == 98 && ISEC1_LocalFLag == 1) || (ISEC1_SubCenterID == 98 && ISEC1_LocalFLag == 1)
       || (ISEC1_CenterID == 7 && ISEC1_SubCenterID == 98))
+  {
+    /*   Parameters common to all definitions.  */
+
+    fprintf(grprsm, " ECMWF local usage identifier.        %9d\n", isec1[36]);
+    if (isec1[36] == 1) fprintf(grprsm, " (Mars labelling or ensemble forecast)\n");
+    if (isec1[36] == 2) fprintf(grprsm, " (Cluster means and standard deviations)\n");
+    if (isec1[36] == 3) fprintf(grprsm, " (Satellite image data)\n");
+    if (isec1[36] == 4) fprintf(grprsm, " (Ocean model data)\n");
+    if (isec1[36] == 5) fprintf(grprsm, " (Forecast probability data)\n");
+    if (isec1[36] == 6) fprintf(grprsm, " (Surface temperature data)\n");
+    if (isec1[36] == 7) fprintf(grprsm, " (Sensitivity data)\n");
+    if (isec1[36] == 8) fprintf(grprsm, " (ECMWF re-analysis data)\n");
+    if (isec1[36] == 9) fprintf(grprsm, " (Singular vectors and ensemble perturbations)\n");
+    if (isec1[36] == 10) fprintf(grprsm, " (EPS tubes)\n");
+    if (isec1[36] == 11) fprintf(grprsm, " (Supplementary data used by analysis)\n");
+    if (isec1[36] == 13) fprintf(grprsm, " (Wave 2D spectra direction and frequency)\n");
+
+    fprintf(grprsm, " Class.                               %9d\n", isec1[37]);
+    fprintf(grprsm, " Type.                                %9d\n", isec1[38]);
+    fprintf(grprsm, " Stream.                              %9d\n", isec1[39]);
+    snprintf(hversion, sizeof(hversion), "%4s", (char *) &isec1[40]);
+    hversion[4] = 0;
+    fprintf(grprsm, " Version number or Experiment identifier.  %4s\n", hversion);
+    /*
+      ECMWF Local definition 1.
+      (MARS labelling or ensemble forecast data)
+    */
+    if (isec1[36] == 1)
     {
-      /*   Parameters common to all definitions.  */
+      fprintf(grprsm, " Forecast number.                     %9d\n", isec1[41]);
+      if (isec1[39] != 1090) fprintf(grprsm, " Total number of forecasts.           %9d\n", isec1[42]);
 
-      fprintf(grprsm, " ECMWF local usage identifier.        %9d\n", isec1[36]);
-      if (isec1[36] == 1) fprintf(grprsm, " (Mars labelling or ensemble forecast)\n");
-      if (isec1[36] == 2) fprintf(grprsm, " (Cluster means and standard deviations)\n");
-      if (isec1[36] == 3) fprintf(grprsm, " (Satellite image data)\n");
-      if (isec1[36] == 4) fprintf(grprsm, " (Ocean model data)\n");
-      if (isec1[36] == 5) fprintf(grprsm, " (Forecast probability data)\n");
-      if (isec1[36] == 6) fprintf(grprsm, " (Surface temperature data)\n");
-      if (isec1[36] == 7) fprintf(grprsm, " (Sensitivity data)\n");
-      if (isec1[36] == 8) fprintf(grprsm, " (ECMWF re-analysis data)\n");
-      if (isec1[36] == 9) fprintf(grprsm, " (Singular vectors and ensemble perturbations)\n");
-      if (isec1[36] == 10) fprintf(grprsm, " (EPS tubes)\n");
-      if (isec1[36] == 11) fprintf(grprsm, " (Supplementary data used by analysis)\n");
-      if (isec1[36] == 13) fprintf(grprsm, " (Wave 2D spectra direction and frequency)\n");
+      return;
+    }
+    /*
+      ECMWF Local definition 2.
+      (Cluster means and standard deviations)
+    */
+    if (isec1[36] == 2)
+    {
+      fprintf(grprsm, " Cluster number.                      %9d\n", isec1[41]);
+      fprintf(grprsm, " Total number of clusters.            %9d\n", isec1[42]);
+      fprintf(grprsm, " Clustering method.                   %9d\n", isec1[43]);
+      fprintf(grprsm, " Start time step when clustering.     %9d\n", isec1[44]);
+      fprintf(grprsm, " End time step when clustering.       %9d\n", isec1[45]);
+      fprintf(grprsm, " Northern latitude of domain.         %9d\n", isec1[46]);
+      fprintf(grprsm, " Western longitude of domain.         %9d\n", isec1[47]);
+      fprintf(grprsm, " Southern latitude of domain.         %9d\n", isec1[48]);
+      fprintf(grprsm, " Eastern longitude of domain.         %9d\n", isec1[49]);
+      fprintf(grprsm, " Operational forecast in cluster      %9d\n", isec1[50]);
+      fprintf(grprsm, " Control forecast in cluster          %9d\n", isec1[51]);
+      fprintf(grprsm, " Number of forecasts in cluster.      %9d\n", isec1[52]);
 
-      fprintf(grprsm, " Class.                               %9d\n", isec1[37]);
-      fprintf(grprsm, " Type.                                %9d\n", isec1[38]);
-      fprintf(grprsm, " Stream.                              %9d\n", isec1[39]);
-      snprintf(hversion, sizeof(hversion), "%4s", (char *) &isec1[40]);
-      hversion[4] = 0;
-      fprintf(grprsm, " Version number or Experiment identifier.  %4s\n", hversion);
-      /*
-        ECMWF Local definition 1.
-        (MARS labelling or ensemble forecast data)
-      */
-      if (isec1[36] == 1)
-        {
-          fprintf(grprsm, " Forecast number.                     %9d\n", isec1[41]);
-          if (isec1[39] != 1090) fprintf(grprsm, " Total number of forecasts.           %9d\n", isec1[42]);
+      for (int jloop = 0; jloop < isec1[52]; jloop++)
+        fprintf(grprsm, " Forecast number                      %9d\n", isec1[jloop + 53]);
 
-          return;
-        }
+      return;
+    }
+    /*
+      ECMWF Local definition 3.
+      (Satellite image data)
+    */
+    if (isec1[36] == 3)
+    {
+      fprintf(grprsm, " Satellite spectral band.             %9d\n", isec1[41]);
+      fprintf(grprsm, " Function code.                       %9d\n", isec1[42]);
+      return;
+    }
+    /*
+      ECMWF Local definition 4.
+      (Ocean model data)
+    */
+    if (isec1[36] == 4)
+    {
+      fprintf(grprsm, " Satellite spectral band.             %9d\n", isec1[41]);
+      if (isec1[39] != 1090) fprintf(grprsm, " Function code.                       %9d\n", isec1[42]);
+      fprintf(grprsm, " Coordinate structure definition.\n");
+      fprintf(grprsm, " Fundamental spatial reference system.%9d\n", isec1[43]);
+      fprintf(grprsm, " Fundamental time reference.          %9d\n", isec1[44]);
+      fprintf(grprsm, " Space unit flag.                     %9d\n", isec1[45]);
+      fprintf(grprsm, " Vertical coordinate definition.      %9d\n", isec1[46]);
+      fprintf(grprsm, " Horizontal coordinate definition.    %9d\n", isec1[47]);
+      fprintf(grprsm, " Time unit flag.                      %9d\n", isec1[48]);
+      fprintf(grprsm, " Time coordinate definition.          %9d\n", isec1[49]);
+      fprintf(grprsm, " Position definition.     \n");
+      fprintf(grprsm, " Mixed coordinate field flag.         %9d\n", isec1[50]);
+      fprintf(grprsm, " Coordinate 1 flag.                   %9d\n", isec1[51]);
+      fprintf(grprsm, " Averaging flag.                      %9d\n", isec1[52]);
+      fprintf(grprsm, " Position of level 1.                 %9d\n", isec1[53]);
+      fprintf(grprsm, " Position of level 2.                 %9d\n", isec1[54]);
+      fprintf(grprsm, " Coordinate 2 flag.                   %9d\n", isec1[55]);
+      fprintf(grprsm, " Averaging flag.                      %9d\n", isec1[56]);
+      fprintf(grprsm, " Position of level 1.                 %9d\n", isec1[57]);
+      fprintf(grprsm, " Position of level 2.                 %9d\n", isec1[58]);
+      fprintf(grprsm, " Grid Definition.\n");
+      fprintf(grprsm, " Coordinate 3 flag (x-axis)           %9d\n", isec1[59]);
+      fprintf(grprsm, " Coordinate 4 flag (y-axis)           %9d\n", isec1[60]);
+      fprintf(grprsm, " Coordinate 4 of first grid point.    %9d\n", isec1[61]);
+      fprintf(grprsm, " Coordinate 3 of first grid point.    %9d\n", isec1[62]);
+      fprintf(grprsm, " Coordinate 4 of last grid point.     %9d\n", isec1[63]);
+      fprintf(grprsm, " Coordinate 3 of last grid point.     %9d\n", isec1[64]);
+      fprintf(grprsm, " i - increment.                       %9d\n", isec1[65]);
+      fprintf(grprsm, " j - increment.                       %9d\n", isec1[66]);
+      fprintf(grprsm, " Flag for irregular grid coordinates. %9d\n", isec1[67]);
+      fprintf(grprsm, " Flag for normal or staggered grids.  %9d\n", isec1[68]);
+      fprintf(grprsm, " Further information.\n");
+      fprintf(grprsm, " Further information flag.            %9d\n", isec1[69]);
+      fprintf(grprsm, " Auxiliary information.\n");
+      fprintf(grprsm, " No. entries in horizontal coordinate %9d\n", isec1[70]);
+      fprintf(grprsm, " No. entries in mixed coordinate defn.%9d\n", isec1[71]);
+      fprintf(grprsm, " No. entries in grid coordinate list. %9d\n", isec1[72]);
+      fprintf(grprsm, " No. entries in auxiliary array.      %9d\n", isec1[73]);
       /*
-        ECMWF Local definition 2.
-        (Cluster means and standard deviations)
+        Horizontal coordinate supplement.
       */
-      if (isec1[36] == 2)
-        {
-          fprintf(grprsm, " Cluster number.                      %9d\n", isec1[41]);
-          fprintf(grprsm, " Total number of clusters.            %9d\n", isec1[42]);
-          fprintf(grprsm, " Clustering method.                   %9d\n", isec1[43]);
-          fprintf(grprsm, " Start time step when clustering.     %9d\n", isec1[44]);
-          fprintf(grprsm, " End time step when clustering.       %9d\n", isec1[45]);
-          fprintf(grprsm, " Northern latitude of domain.         %9d\n", isec1[46]);
-          fprintf(grprsm, " Western longitude of domain.         %9d\n", isec1[47]);
-          fprintf(grprsm, " Southern latitude of domain.         %9d\n", isec1[48]);
-          fprintf(grprsm, " Eastern longitude of domain.         %9d\n", isec1[49]);
-          fprintf(grprsm, " Operational forecast in cluster      %9d\n", isec1[50]);
-          fprintf(grprsm, " Control forecast in cluster          %9d\n", isec1[51]);
-          fprintf(grprsm, " Number of forecasts in cluster.      %9d\n", isec1[52]);
+      fprintf(grprsm, " Horizontal coordinate supplement.\n");
+      if (isec1[70] == 0) { fprintf(grprsm, "(None).\n"); }
+      else
+      {
+        fprintf(grprsm, "Number of items = %d\n", isec1[70]);
+        for (int jloop = 0; jloop < isec1[70]; jloop++) fprintf(grprsm, "         %12d\n", isec1[74 + jloop]);
+      }
+      /*
+        Mixed coordinate definition.
+      */
+      fprintf(grprsm, " Mixed coordinate definition.\n");
+      if (isec1[71] == 0) { fprintf(grprsm, "(None).\n"); }
+      else
+      {
+        fprintf(grprsm, "Number of items = %d\n", isec1[71]);
+        ioffset = 74 + isec1[70];
+        for (int jloop = 0; jloop < isec1[71]; jloop++) fprintf(grprsm, "         %12d\n", isec1[ioffset + jloop]);
+      }
+      /*
+        Grid coordinate list.
+      */
+      fprintf(grprsm, " Grid coordinate list. \n");
+      if (isec1[72] == 0) { fprintf(grprsm, "(None).\n"); }
+      else
+      {
+        fprintf(grprsm, "Number of items = %d\n", isec1[72]);
+        ioffset = 74 + isec1[70] + isec1[71];
+        for (int jloop = 0; jloop < isec1[72]; jloop++) fprintf(grprsm, "         %12d\n", isec1[ioffset + jloop]);
+      }
+      /*
+        Auxiliary array.
+      */
+      fprintf(grprsm, " Auxiliary array.      \n");
+      if (isec1[73] == 0) { fprintf(grprsm, "(None).\n"); }
+      else
+      {
+        fprintf(grprsm, "Number of items = %d\n", isec1[73]);
+        ioffset = 74 + isec1[70] + isec1[71] + isec1[72];
+        for (int jloop = 0; jloop < isec1[73]; jloop++) fprintf(grprsm, "         %12d\n", isec1[ioffset + jloop]);
+      }
+      /*
+        Post-auxiliary array.
+      */
+      fprintf(grprsm, " Post-auxiliary array. \n");
+      ioffset = 74 + isec1[70] + isec1[71] + isec1[72] + isec1[73];
+      if (isec1[ioffset] == 0) { fprintf(grprsm, "(None).\n"); }
+      else
+      {
+        fprintf(grprsm, "Number of items = %d\n", isec1[ioffset]);
+        for (int jloop = 1; jloop < isec1[ioffset]; jloop++) fprintf(grprsm, "         %12d\n", isec1[ioffset + jloop]);
+      }
 
-          for (int jloop = 0; jloop < isec1[52]; jloop++)
-            fprintf(grprsm, " Forecast number                      %9d\n", isec1[jloop + 53]);
+      return;
+    }
+    /*
+      ECMWF Local definition 5.
+      (Forecast probability data)
+    */
+    if (isec1[36] == 5)
+    {
+      fprintf(grprsm, " Forecast probability number          %9d\n", isec1[41]);
+      fprintf(grprsm, " Total number of forecast probabilities %7d\n", isec1[42]);
+      fprintf(grprsm, " Threshold units decimal scale factor %9d\n", isec1[43]);
+      fprintf(grprsm, " Threshold indicator(1=lower,2=upper,3=both) %2d\n", isec1[44]);
+      if (isec1[44] != 2) fprintf(grprsm, " Lower threshold value                %9d\n", isec1[45]);
+      if (isec1[44] != 1) fprintf(grprsm, " Upper threshold value                %9d\n", isec1[46]);
+      return;
+    }
+    /*
+      ECMWF Local definition 6.
+      (Surface temperature data)
+    */
+    if (isec1[36] == 6)
+    {
+      iyear = isec1[43];
+      if (iyear > 100)
+      {
+        if (iyear < 19000000) iyear = iyear + 19000000;
+        fprintf(grprsm, " Date of SST field used               %9d\n", iyear);
+      }
+      else
+        fprintf(grprsm, "Date of SST field used               Not given\n");
+    }
+    if (isec1[44] == 0) fprintf(grprsm, " Type of SST field (= climatology)    %9d\n", isec1[44]);
+    if (isec1[44] == 1) fprintf(grprsm, " Type of SST field (= 1/1 degree)     %9d\n", isec1[44]);
+    if (isec1[44] == 2) fprintf(grprsm, " Type of SST field (= 2/2 degree)     %9d\n", isec1[44]);
 
-          return;
-        }
-      /*
-        ECMWF Local definition 3.
-        (Satellite image data)
-      */
-      if (isec1[36] == 3)
-        {
-          fprintf(grprsm, " Satellite spectral band.             %9d\n", isec1[41]);
-          fprintf(grprsm, " Function code.                       %9d\n", isec1[42]);
-          return;
-        }
-      /*
-        ECMWF Local definition 4.
-        (Ocean model data)
-      */
-      if (isec1[36] == 4)
-        {
-          fprintf(grprsm, " Satellite spectral band.             %9d\n", isec1[41]);
-          if (isec1[39] != 1090) fprintf(grprsm, " Function code.                       %9d\n", isec1[42]);
-          fprintf(grprsm, " Coordinate structure definition.\n");
-          fprintf(grprsm, " Fundamental spatial reference system.%9d\n", isec1[43]);
-          fprintf(grprsm, " Fundamental time reference.          %9d\n", isec1[44]);
-          fprintf(grprsm, " Space unit flag.                     %9d\n", isec1[45]);
-          fprintf(grprsm, " Vertical coordinate definition.      %9d\n", isec1[46]);
-          fprintf(grprsm, " Horizontal coordinate definition.    %9d\n", isec1[47]);
-          fprintf(grprsm, " Time unit flag.                      %9d\n", isec1[48]);
-          fprintf(grprsm, " Time coordinate definition.          %9d\n", isec1[49]);
-          fprintf(grprsm, " Position definition.     \n");
-          fprintf(grprsm, " Mixed coordinate field flag.         %9d\n", isec1[50]);
-          fprintf(grprsm, " Coordinate 1 flag.                   %9d\n", isec1[51]);
-          fprintf(grprsm, " Averaging flag.                      %9d\n", isec1[52]);
-          fprintf(grprsm, " Position of level 1.                 %9d\n", isec1[53]);
-          fprintf(grprsm, " Position of level 2.                 %9d\n", isec1[54]);
-          fprintf(grprsm, " Coordinate 2 flag.                   %9d\n", isec1[55]);
-          fprintf(grprsm, " Averaging flag.                      %9d\n", isec1[56]);
-          fprintf(grprsm, " Position of level 1.                 %9d\n", isec1[57]);
-          fprintf(grprsm, " Position of level 2.                 %9d\n", isec1[58]);
-          fprintf(grprsm, " Grid Definition.\n");
-          fprintf(grprsm, " Coordinate 3 flag (x-axis)           %9d\n", isec1[59]);
-          fprintf(grprsm, " Coordinate 4 flag (y-axis)           %9d\n", isec1[60]);
-          fprintf(grprsm, " Coordinate 4 of first grid point.    %9d\n", isec1[61]);
-          fprintf(grprsm, " Coordinate 3 of first grid point.    %9d\n", isec1[62]);
-          fprintf(grprsm, " Coordinate 4 of last grid point.     %9d\n", isec1[63]);
-          fprintf(grprsm, " Coordinate 3 of last grid point.     %9d\n", isec1[64]);
-          fprintf(grprsm, " i - increment.                       %9d\n", isec1[65]);
-          fprintf(grprsm, " j - increment.                       %9d\n", isec1[66]);
-          fprintf(grprsm, " Flag for irregular grid coordinates. %9d\n", isec1[67]);
-          fprintf(grprsm, " Flag for normal or staggered grids.  %9d\n", isec1[68]);
-          fprintf(grprsm, " Further information.\n");
-          fprintf(grprsm, " Further information flag.            %9d\n", isec1[69]);
-          fprintf(grprsm, " Auxiliary information.\n");
-          fprintf(grprsm, " No. entries in horizontal coordinate %9d\n", isec1[70]);
-          fprintf(grprsm, " No. entries in mixed coordinate defn.%9d\n", isec1[71]);
-          fprintf(grprsm, " No. entries in grid coordinate list. %9d\n", isec1[72]);
-          fprintf(grprsm, " No. entries in auxiliary array.      %9d\n", isec1[73]);
-          /*
-            Horizontal coordinate supplement.
-          */
-          fprintf(grprsm, " Horizontal coordinate supplement.\n");
-          if (isec1[70] == 0) { fprintf(grprsm, "(None).\n"); }
-          else
-            {
-              fprintf(grprsm, "Number of items = %d\n", isec1[70]);
-              for (int jloop = 0; jloop < isec1[70]; jloop++) fprintf(grprsm, "         %12d\n", isec1[74 + jloop]);
-            }
-          /*
-            Mixed coordinate definition.
-          */
-          fprintf(grprsm, " Mixed coordinate definition.\n");
-          if (isec1[71] == 0) { fprintf(grprsm, "(None).\n"); }
-          else
-            {
-              fprintf(grprsm, "Number of items = %d\n", isec1[71]);
-              ioffset = 74 + isec1[70];
-              for (int jloop = 0; jloop < isec1[71]; jloop++) fprintf(grprsm, "         %12d\n", isec1[ioffset + jloop]);
-            }
-          /*
-            Grid coordinate list.
-          */
-          fprintf(grprsm, " Grid coordinate list. \n");
-          if (isec1[72] == 0) { fprintf(grprsm, "(None).\n"); }
-          else
-            {
-              fprintf(grprsm, "Number of items = %d\n", isec1[72]);
-              ioffset = 74 + isec1[70] + isec1[71];
-              for (int jloop = 0; jloop < isec1[72]; jloop++) fprintf(grprsm, "         %12d\n", isec1[ioffset + jloop]);
-            }
-          /*
-            Auxiliary array.
-          */
-          fprintf(grprsm, " Auxiliary array.      \n");
-          if (isec1[73] == 0) { fprintf(grprsm, "(None).\n"); }
-          else
-            {
-              fprintf(grprsm, "Number of items = %d\n", isec1[73]);
-              ioffset = 74 + isec1[70] + isec1[71] + isec1[72];
-              for (int jloop = 0; jloop < isec1[73]; jloop++) fprintf(grprsm, "         %12d\n", isec1[ioffset + jloop]);
-            }
-          /*
-            Post-auxiliary array.
-          */
-          fprintf(grprsm, " Post-auxiliary array. \n");
-          ioffset = 74 + isec1[70] + isec1[71] + isec1[72] + isec1[73];
-          if (isec1[ioffset] == 0) { fprintf(grprsm, "(None).\n"); }
-          else
-            {
-              fprintf(grprsm, "Number of items = %d\n", isec1[ioffset]);
-              for (int jloop = 1; jloop < isec1[ioffset]; jloop++) fprintf(grprsm, "         %12d\n", isec1[ioffset + jloop]);
-            }
+    fprintf(grprsm, " Number of ICE fields used:           %9d\n", isec1[45]);
 
-          return;
-        }
-      /*
-        ECMWF Local definition 5.
-        (Forecast probability data)
-      */
-      if (isec1[36] == 5)
+    for (int jloop = 1; jloop <= isec1[45]; jloop++)
+    {
+      iyear = isec1[44 + (jloop * 2)];
+      if (iyear > 100)
+      {
+        if (iyear < 19000000) iyear = iyear + 19000000;
+        fprintf(grprsm, " Date of ICE field%3d                 %9d\n", jloop, iyear);
+        fprintf(grprsm, " Satellite number (ICE field%3d)      %9d\n", jloop, isec1[45 + (jloop * 2)]);
+      }
+      else
+        fprintf(grprsm, "Date of SST field used               Not given\n");
+    }
+    /*
+      ECMWF Local definition 7.
+      (Sensitivity data)
+    */
+    if (isec1[36] == 7)
+    {
+      if (isec1[38] == 51) fprintf(grprsm, " Forecast number                      %9d\n", isec1[41]);
+      if (isec1[38] != 51) fprintf(grprsm, " Iteration number                     %9d\n", isec1[41]);
+      if (isec1[38] != 52) fprintf(grprsm, " Total number of diagnostics          %9d\n", isec1[42]);
+      if (isec1[38] == 52) fprintf(grprsm, " No.interations in diag. minimisation %9d\n", isec1[42]);
+      fprintf(grprsm, " Domain(0=Global,1=Europe,2=N.Hem.,3=S.Hem.) %2d\n", isec1[43]);
+      fprintf(grprsm, " Diagnostic number                    %9d\n", isec1[44]);
+    }
+    /*
+      ECMWF Local definition 8.
+      (ECMWF re-analysis data)
+    */
+    if (isec1[36] == 8)
+    {
+      if ((isec1[39] == 1043) || (isec1[39] == 1070) || (isec1[39] == 1071))
+      {
+        fprintf(grprsm, " Interval between reference times     %9d\n", isec1[41]);
+        for (int jloop = 43; jloop <= 54; jloop++)
         {
-          fprintf(grprsm, " Forecast probability number          %9d\n", isec1[41]);
-          fprintf(grprsm, " Total number of forecast probabilities %7d\n", isec1[42]);
-          fprintf(grprsm, " Threshold units decimal scale factor %9d\n", isec1[43]);
-          fprintf(grprsm, " Threshold indicator(1=lower,2=upper,3=both) %2d\n", isec1[44]);
-          if (isec1[44] != 2) fprintf(grprsm, " Lower threshold value                %9d\n", isec1[45]);
-          if (isec1[44] != 1) fprintf(grprsm, " Upper threshold value                %9d\n", isec1[46]);
-          return;
+          jiloop = jloop + 8;
+          fprintf(grprsm, " ERA section 1 octet %2d.              %9d\n", jiloop, isec1[jloop - 1]);
         }
-      /*
-        ECMWF Local definition 6.
-        (Surface temperature data)
-      */
-      if (isec1[36] == 6)
+      }
+      else
+      {
+        for (int jloop = 42; jloop <= 54; jloop++)
         {
-          iyear = isec1[43];
-          if (iyear > 100)
-            {
-              if (iyear < 19000000) iyear = iyear + 19000000;
-              fprintf(grprsm, " Date of SST field used               %9d\n", iyear);
-            }
-          else
-            fprintf(grprsm, "Date of SST field used               Not given\n");
+          jiloop = jloop + 8;
+          fprintf(grprsm, " ERA section 1 octet %2d.              %9d\n", jiloop, isec1[jloop - 1]);
         }
-      if (isec1[44] == 0) fprintf(grprsm, " Type of SST field (= climatology)    %9d\n", isec1[44]);
-      if (isec1[44] == 1) fprintf(grprsm, " Type of SST field (= 1/1 degree)     %9d\n", isec1[44]);
-      if (isec1[44] == 2) fprintf(grprsm, " Type of SST field (= 2/2 degree)     %9d\n", isec1[44]);
+      }
+      return;
+    }
 
-      fprintf(grprsm, " Number of ICE fields used:           %9d\n", isec1[45]);
+    if (isec1[38] > 4 && isec1[38] < 9)
+    {
+      fprintf(grprsm, " Simulation number.                   %9d\n", isec1[41]);
+      fprintf(grprsm, " Total number of simulations.         %9d\n", isec1[42]);
+    }
+    /*
+      ECMWF Local definition 9.
+      (Singular vectors and ensemble perturbations)
+    */
+    if (isec1[36] == 9)
+    {
+      if (isec1[38] == 60) fprintf(grprsm, " Perturbed ensemble forecast number   %9d\n", isec1[41]);
+      if (isec1[38] == 61) fprintf(grprsm, " Initial state perturbation number    %9d\n", isec1[41]);
+      if (isec1[38] == 62) fprintf(grprsm, " Singular vector number               %9d\n", isec1[41]);
+      if (isec1[38] == 62)
+      {
+        fprintf(grprsm, " Number of iterations                 %9d\n", isec1[42]);
+        fprintf(grprsm, " Number of singular vectors computed  %9d\n", isec1[43]);
+        fprintf(grprsm, " Norm used at initial time            %9d\n", isec1[44]);
+        fprintf(grprsm, " Norm used at final time              %9d\n", isec1[45]);
+        fprintf(grprsm, " Multiplication factor                %9d\n", isec1[46]);
+        fprintf(grprsm, " Latitude of north-west corner        %9d\n", isec1[47]);
+        fprintf(grprsm, " Longitude of north-west corner       %9d\n", isec1[48]);
+        fprintf(grprsm, " Latitude of south-east corner        %9d\n", isec1[49]);
+        fprintf(grprsm, " Longitude of south-east corner       %9d\n", isec1[50]);
+        fprintf(grprsm, " Accuracy                             %9d\n", isec1[51]);
+        fprintf(grprsm, " Number of singular vectors evolved   %9d\n", isec1[52]);
+        fprintf(grprsm, " Ritz number one                      %9d\n", isec1[53]);
+        fprintf(grprsm, " Ritz number two                      %9d\n", isec1[54]);
+      }
+    }
+    /*
+      ECMWF Local definition 10.
+      (EPS tubes)
+    */
+    if (isec1[36] == 10)
+    {
+      fprintf(grprsm, " Tube number                          %9d\n", isec1[41]);
+      fprintf(grprsm, " Total number of tubes                %9d\n", isec1[42]);
+      fprintf(grprsm, " Central cluster definition           %9d\n", isec1[43]);
+      fprintf(grprsm, " Parameter                            %9d\n", isec1[44]);
+      fprintf(grprsm, " Type of level                        %9d\n", isec1[45]);
+      fprintf(grprsm, " Northern latitude of domain of tubing%9d\n", isec1[46]);
+      fprintf(grprsm, " Western longitude of domain of tubing%9d\n", isec1[47]);
+      fprintf(grprsm, " Southern latitude of domain of tubing%9d\n", isec1[48]);
+      fprintf(grprsm, " Eastern longitude of domain of tubing%9d\n", isec1[49]);
+      fprintf(grprsm, " Tube number of operational forecast  %9d\n", isec1[50]);
+      fprintf(grprsm, " Tube number of control forecast      %9d\n", isec1[51]);
+      fprintf(grprsm, " Height/pressure of level             %9d\n", isec1[52]);
+      fprintf(grprsm, " Reference step                       %9d\n", isec1[53]);
+      fprintf(grprsm, " Radius of central cluster            %9d\n", isec1[54]);
+      fprintf(grprsm, " Ensemble standard deviation          %9d\n", isec1[55]);
+      fprintf(grprsm, " Dist.of tube extreme to ensemble mean%9d\n", isec1[56]);
+      fprintf(grprsm, " Number of forecasts in the tube      %9d\n", isec1[57]);
 
-      for (int jloop = 1; jloop <= isec1[45]; jloop++)
-        {
-          iyear = isec1[44 + (jloop * 2)];
-          if (iyear > 100)
-            {
-              if (iyear < 19000000) iyear = iyear + 19000000;
-              fprintf(grprsm, " Date of ICE field%3d                 %9d\n", jloop, iyear);
-              fprintf(grprsm, " Satellite number (ICE field%3d)      %9d\n", jloop, isec1[45 + (jloop * 2)]);
-            }
-          else
-            fprintf(grprsm, "Date of SST field used               Not given\n");
-        }
+      fprintf(grprsm, " List of ensemble forecast numbers:\n");
+      for (int jloop = 1; jloop <= isec1[57]; jloop++) fprintf(grprsm, "    %9d\n", isec1[57 + jloop]);
+    }
+    /*
+      ECMWF Local definition 11.
+      (Supplementary data used by the analysis)
+    */
+    if (isec1[36] == 11)
+    {
+      fprintf(grprsm, " Details of analysis which used the supplementary data:\n");
+      fprintf(grprsm, "   Class                              %9d\n", isec1[41]);
+      fprintf(grprsm, "   Type                               %9d\n", isec1[42]);
+      fprintf(grprsm, "   Stream                             %9d\n", isec1[43]);
       /*
-        ECMWF Local definition 7.
-        (Sensitivity data)
+      snprintf(hversion, sizeof(hversion), "%8d", isec1[44]);
+      fprintf(grprsm, "   Version number/experiment identifier:   %4s\n", &hversion[4]);
       */
-      if (isec1[36] == 7)
-        {
-          if (isec1[38] == 51) fprintf(grprsm, " Forecast number                      %9d\n", isec1[41]);
-          if (isec1[38] != 51) fprintf(grprsm, " Iteration number                     %9d\n", isec1[41]);
-          if (isec1[38] != 52) fprintf(grprsm, " Total number of diagnostics          %9d\n", isec1[42]);
-          if (isec1[38] == 52) fprintf(grprsm, " No.interations in diag. minimisation %9d\n", isec1[42]);
-          fprintf(grprsm, " Domain(0=Global,1=Europe,2=N.Hem.,3=S.Hem.) %2d\n", isec1[43]);
-          fprintf(grprsm, " Diagnostic number                    %9d\n", isec1[44]);
-        }
-      /*
-        ECMWF Local definition 8.
-        (ECMWF re-analysis data)
-      */
-      if (isec1[36] == 8)
-        {
-          if ((isec1[39] == 1043) || (isec1[39] == 1070) || (isec1[39] == 1071))
-            {
-              fprintf(grprsm, " Interval between reference times     %9d\n", isec1[41]);
-              for (int jloop = 43; jloop <= 54; jloop++)
-                {
-                  jiloop = jloop + 8;
-                  fprintf(grprsm, " ERA section 1 octet %2d.              %9d\n", jiloop, isec1[jloop - 1]);
-                }
-            }
-          else
-            {
-              for (int jloop = 42; jloop <= 54; jloop++)
-                {
-                  jiloop = jloop + 8;
-                  fprintf(grprsm, " ERA section 1 octet %2d.              %9d\n", jiloop, isec1[jloop - 1]);
-                }
-            }
-          return;
-        }
+      iyear = isec1[45];
+      iyear = iyear + ((iyear > 50) ? 1900 : 2000);
 
-      if (isec1[38] > 4 && isec1[38] < 9)
+      fprintf(grprsm, "   Year                               %9d\n", iyear);
+      fprintf(grprsm, "   Month                              %9d\n", isec1[46]);
+      fprintf(grprsm, "   Day                                %9d\n", isec1[47]);
+      fprintf(grprsm, "   Hour                               %9d\n", isec1[48]);
+      fprintf(grprsm, "   Minute                             %9d\n", isec1[49]);
+      fprintf(grprsm, "   Century                            %9d\n", isec1[50]);
+      fprintf(grprsm, "   Originating centre                 %9d\n", isec1[51]);
+      fprintf(grprsm, "   Sub-centre                         %9d\n", isec1[52]);
+    }
+    /*
+      ECMWF Local definition 12.
+    */
+    if (isec1[36] == 12)
+    {
+      fprintf(grprsm, " (Mean, average, etc)\n");
+      fprintf(grprsm, " Start date of the period              %8d\n", isec1[41]);
+      fprintf(grprsm, " Start time of the period                  %4.4d\n", isec1[42]);
+      fprintf(grprsm, " Finish date of the period             %8d\n", isec1[43]);
+      fprintf(grprsm, " Finish time of the period                 %4.4d\n", isec1[44]);
+      fprintf(grprsm, " Verifying date of the period          %8d\n", isec1[45]);
+      fprintf(grprsm, " Verifying time of the period              %4.4d\n", isec1[46]);
+      fprintf(grprsm, " Code showing method                   %8d\n", isec1[47]);
+      fprintf(grprsm, " Number of different time intervals used  %5d\n", isec1[48]);
+      fprintf(grprsm, " List of different time intervals used:\n");
+      iprev = isec1[49];
+      unsigned icount = 0;
+      for (int jloop = 1; jloop <= isec1[48]; jloop++)
+      {
+        icurr = isec1[48 + jloop];
+        if (icurr != iprev)
         {
-          fprintf(grprsm, " Simulation number.                   %9d\n", isec1[41]);
-          fprintf(grprsm, " Total number of simulations.         %9d\n", isec1[42]);
-        }
-      /*
-        ECMWF Local definition 9.
-        (Singular vectors and ensemble perturbations)
-      */
-      if (isec1[36] == 9)
-        {
-          if (isec1[38] == 60) fprintf(grprsm, " Perturbed ensemble forecast number   %9d\n", isec1[41]);
-          if (isec1[38] == 61) fprintf(grprsm, " Initial state perturbation number    %9d\n", isec1[41]);
-          if (isec1[38] == 62) fprintf(grprsm, " Singular vector number               %9d\n", isec1[41]);
-          if (isec1[38] == 62)
-            {
-              fprintf(grprsm, " Number of iterations                 %9d\n", isec1[42]);
-              fprintf(grprsm, " Number of singular vectors computed  %9d\n", isec1[43]);
-              fprintf(grprsm, " Norm used at initial time            %9d\n", isec1[44]);
-              fprintf(grprsm, " Norm used at final time              %9d\n", isec1[45]);
-              fprintf(grprsm, " Multiplication factor                %9d\n", isec1[46]);
-              fprintf(grprsm, " Latitude of north-west corner        %9d\n", isec1[47]);
-              fprintf(grprsm, " Longitude of north-west corner       %9d\n", isec1[48]);
-              fprintf(grprsm, " Latitude of south-east corner        %9d\n", isec1[49]);
-              fprintf(grprsm, " Longitude of south-east corner       %9d\n", isec1[50]);
-              fprintf(grprsm, " Accuracy                             %9d\n", isec1[51]);
-              fprintf(grprsm, " Number of singular vectors evolved   %9d\n", isec1[52]);
-              fprintf(grprsm, " Ritz number one                      %9d\n", isec1[53]);
-              fprintf(grprsm, " Ritz number two                      %9d\n", isec1[54]);
-            }
-        }
-      /*
-        ECMWF Local definition 10.
-        (EPS tubes)
-      */
-      if (isec1[36] == 10)
-        {
-          fprintf(grprsm, " Tube number                          %9d\n", isec1[41]);
-          fprintf(grprsm, " Total number of tubes                %9d\n", isec1[42]);
-          fprintf(grprsm, " Central cluster definition           %9d\n", isec1[43]);
-          fprintf(grprsm, " Parameter                            %9d\n", isec1[44]);
-          fprintf(grprsm, " Type of level                        %9d\n", isec1[45]);
-          fprintf(grprsm, " Northern latitude of domain of tubing%9d\n", isec1[46]);
-          fprintf(grprsm, " Western longitude of domain of tubing%9d\n", isec1[47]);
-          fprintf(grprsm, " Southern latitude of domain of tubing%9d\n", isec1[48]);
-          fprintf(grprsm, " Eastern longitude of domain of tubing%9d\n", isec1[49]);
-          fprintf(grprsm, " Tube number of operational forecast  %9d\n", isec1[50]);
-          fprintf(grprsm, " Tube number of control forecast      %9d\n", isec1[51]);
-          fprintf(grprsm, " Height/pressure of level             %9d\n", isec1[52]);
-          fprintf(grprsm, " Reference step                       %9d\n", isec1[53]);
-          fprintf(grprsm, " Radius of central cluster            %9d\n", isec1[54]);
-          fprintf(grprsm, " Ensemble standard deviation          %9d\n", isec1[55]);
-          fprintf(grprsm, " Dist.of tube extreme to ensemble mean%9d\n", isec1[56]);
-          fprintf(grprsm, " Number of forecasts in the tube      %9d\n", isec1[57]);
-
-          fprintf(grprsm, " List of ensemble forecast numbers:\n");
-          for (int jloop = 1; jloop <= isec1[57]; jloop++) fprintf(grprsm, "    %9d\n", isec1[57 + jloop]);
-        }
-      /*
-        ECMWF Local definition 11.
-        (Supplementary data used by the analysis)
-      */
-      if (isec1[36] == 11)
-        {
-          fprintf(grprsm, " Details of analysis which used the supplementary data:\n");
-          fprintf(grprsm, "   Class                              %9d\n", isec1[41]);
-          fprintf(grprsm, "   Type                               %9d\n", isec1[42]);
-          fprintf(grprsm, "   Stream                             %9d\n", isec1[43]);
-          /*
-          snprintf(hversion, sizeof(hversion), "%8d", isec1[44]);
-          fprintf(grprsm, "   Version number/experiment identifier:   %4s\n", &hversion[4]);
-          */
-          iyear = isec1[45];
-          iyear = iyear + ((iyear > 50) ? 1900 : 2000);
-
-          fprintf(grprsm, "   Year                               %9d\n", iyear);
-          fprintf(grprsm, "   Month                              %9d\n", isec1[46]);
-          fprintf(grprsm, "   Day                                %9d\n", isec1[47]);
-          fprintf(grprsm, "   Hour                               %9d\n", isec1[48]);
-          fprintf(grprsm, "   Minute                             %9d\n", isec1[49]);
-          fprintf(grprsm, "   Century                            %9d\n", isec1[50]);
-          fprintf(grprsm, "   Originating centre                 %9d\n", isec1[51]);
-          fprintf(grprsm, "   Sub-centre                         %9d\n", isec1[52]);
-        }
-      /*
-        ECMWF Local definition 12.
-      */
-      if (isec1[36] == 12)
-        {
-          fprintf(grprsm, " (Mean, average, etc)\n");
-          fprintf(grprsm, " Start date of the period              %8d\n", isec1[41]);
-          fprintf(grprsm, " Start time of the period                  %4.4d\n", isec1[42]);
-          fprintf(grprsm, " Finish date of the period             %8d\n", isec1[43]);
-          fprintf(grprsm, " Finish time of the period                 %4.4d\n", isec1[44]);
-          fprintf(grprsm, " Verifying date of the period          %8d\n", isec1[45]);
-          fprintf(grprsm, " Verifying time of the period              %4.4d\n", isec1[46]);
-          fprintf(grprsm, " Code showing method                   %8d\n", isec1[47]);
-          fprintf(grprsm, " Number of different time intervals used  %5d\n", isec1[48]);
-          fprintf(grprsm, " List of different time intervals used:\n");
-          iprev = isec1[49];
-          unsigned icount = 0;
-          for (int jloop = 1; jloop <= isec1[48]; jloop++)
-            {
-              icurr = isec1[48 + jloop];
-              if (icurr != iprev)
-                {
-                  if (icount == 1) fprintf(grprsm, "  - interval %5.4d used       once\n", iprev);
-                  if (icount == 2) fprintf(grprsm, "  - interval %5.4d used       twice\n", iprev);
-                  if (icount > 2) fprintf(grprsm, "  - interval %5.4d used %5u times\n", iprev, icount);
-                  iprev = icurr;
-                  icount = 1;
-                }
-              else
-                icount = icount + 1;
-            }
           if (icount == 1) fprintf(grprsm, "  - interval %5.4d used       once\n", iprev);
           if (icount == 2) fprintf(grprsm, "  - interval %5.4d used       twice\n", iprev);
           if (icount > 2) fprintf(grprsm, "  - interval %5.4d used %5u times\n", iprev, icount);
+          iprev = icurr;
+          icount = 1;
         }
-      /*
-        ECMWF Local definition 13.
-        (Wave 2D spectra direction and frequency)
-      */
-      if (isec1[36] == 13)
-        {
-          fprintf(grprsm, " Direction number                     %9d\n", isec1[43]);
-          fprintf(grprsm, " Frequency number                     %9d\n", isec1[44]);
-          fprintf(grprsm, " Total number of directions           %9d\n", isec1[45]);
-          fprintf(grprsm, " Total number of frequencies          %9d\n", isec1[46]);
-          fprintf(grprsm, " Scale factor applied to directions   %9d\n", isec1[47]);
-          fprintf(grprsm, " Scale factor applied to frequencies  %9d\n", isec1[48]);
-          fprintf(grprsm, " List of directions:\n");
-          for (int jloop = 1; jloop <= isec1[45]; jloop++)
-            {
-              value = (float) (isec1[48 + jloop]) / (float) (isec1[47]);
-              if (isec1[43] == jloop)
-                fprintf(grprsm, " %2.2d:%15.7f   <-- this field value\n", jloop, value);
-              else
-                fprintf(grprsm, "%2.2d:%15.7f\n", jloop, value);
-            }
-          fprintf(grprsm, " List of frequencies:\n");
-          for (int jloop = 1; jloop <= isec1[46]; jloop++)
-            {
-              value = (float) (isec1[48 + isec1[45] + jloop]) / (float) (isec1[48]);
-              if (isec1[44] == jloop)
-                fprintf(grprsm, " %2.2d:%15.7f   <-- this field value\n", jloop, value);
-              else
-                fprintf(grprsm, "%2.2d:%15.7f\n", jloop, value);
-
-              if (isec1[49 + isec1[45] + isec1[46]] != 0)
-                {
-                  fprintf(grprsm, " System number (65535 = missing)      %9d\n", isec1[49 + isec1[45] + isec1[46]]);
-                  fprintf(grprsm, " Method number (65535 = missing)      %9d\n", isec1[50 + isec1[45] + isec1[46]]);
-                }
-            }
-          /*
-            ECMWF Local definition 14.
-            (Brightness temperature)
-          */
-          if (isec1[36] == 14)
-            {
-              fprintf(grprsm, " Channel number                       %9d\n", isec1[43]);
-              fprintf(grprsm, " Scale factor applied to frequencies  %9d\n", isec1[44]);
-              fprintf(grprsm, " Total number of frequencies          %9d\n", isec1[45]);
-              fprintf(grprsm, " List of frequencies:\n");
-              for (int jloop = 1; jloop <= isec1[45]; jloop++)
-                {
-                  value = (float) (isec1[45 + jloop]) / (float) (isec1[44]);
-                  if (isec1[43] == jloop)
-                    fprintf(grprsm, " %3d:%15.9f   <-- this channel\n", jloop, value);
-                  else
-                    fprintf(grprsm, " %3d:%15.9f\n", jloop, value);
-                }
-            }
-          /*
-            ECMWF Local definition 15.
-            (Ocean ensemble seasonal forecast)
-          */
-          if (isec1[36] == 15)
-            {
-              fprintf(grprsm, " Ensemble member number               %9d\n", isec1[41]);
-              fprintf(grprsm, " System number                        %9d\n", isec1[42]);
-              fprintf(grprsm, " Method number                        %9d\n", isec1[43]);
-            }
-          /*
-            ECMWF Local definition 16.
-            (Seasonal forecast monthly mean atmosphere data)
-          */
-          if (isec1[36] == 16)
-            {
-              fprintf(grprsm, " Ensemble member number               %9d\n", isec1[41]);
-              fprintf(grprsm, " System number                        %9d\n", isec1[43]);
-              fprintf(grprsm, " Method number                        %9d\n", isec1[44]);
-              fprintf(grprsm, " Verifying month                      %9d\n", isec1[45]);
-              fprintf(grprsm, " Averaging period                     %9d\n", isec1[46]);
-            }
-          /*
-            ECMWF Local definition 17.
-            (Sst or sea-ice used by analysis)
-          */
-          if (isec1[36] == 17)
-            {
-              iyear = isec1[43];
-              if (iyear > 100)
-                {
-                  if (iyear < 19000000) iyear = iyear + 19000000;
-                  fprintf(grprsm, " Date of sst/ice field used           %9d\n", iyear);
-                }
-              else
-                fprintf(grprsm, " Date of sst/ice field used           Not given\n");
-
-              if (isec1[44] == 0) fprintf(grprsm, " Type of sst/ice field (= climatology)%9d\n", isec1[44]);
-              if (isec1[44] == 1) fprintf(grprsm, " Type of sst/ice field (= 1/1 degree) %9d\n", isec1[44]);
-              if (isec1[44] == 2) fprintf(grprsm, " Type of sst/ice field (= 2/2 degree) %9d\n", isec1[44]);
-
-              fprintf(grprsm, " Number of ICE fields used:           %9d\n", isec1[45]);
-
-              for (int jloop = 1; jloop < isec1[45]; jloop++)
-                {
-                  iyear = isec1[44 + (jloop * 2)];
-                  if (iyear > 100)
-                    {
-                      if (iyear < 19000000) iyear = iyear + 19000000;
-                      fprintf(grprsm, " Date of ICE field%3d                 %9d\n", jloop, iyear);
-                      fprintf(grprsm, " Satellite number (ICE field%3d)      %9d\n", jloop, isec1[45 + (jloop * 2)]);
-                    }
-                  else
-                    fprintf(grprsm, "Date of sst/ice field used           Not given\n");
-                }
-            }
-        }
+        else
+          icount = icount + 1;
+      }
+      if (icount == 1) fprintf(grprsm, "  - interval %5.4d used       once\n", iprev);
+      if (icount == 2) fprintf(grprsm, "  - interval %5.4d used       twice\n", iprev);
+      if (icount > 2) fprintf(grprsm, "  - interval %5.4d used %5u times\n", iprev, icount);
     }
+    /*
+      ECMWF Local definition 13.
+      (Wave 2D spectra direction and frequency)
+    */
+    if (isec1[36] == 13)
+    {
+      fprintf(grprsm, " Direction number                     %9d\n", isec1[43]);
+      fprintf(grprsm, " Frequency number                     %9d\n", isec1[44]);
+      fprintf(grprsm, " Total number of directions           %9d\n", isec1[45]);
+      fprintf(grprsm, " Total number of frequencies          %9d\n", isec1[46]);
+      fprintf(grprsm, " Scale factor applied to directions   %9d\n", isec1[47]);
+      fprintf(grprsm, " Scale factor applied to frequencies  %9d\n", isec1[48]);
+      fprintf(grprsm, " List of directions:\n");
+      for (int jloop = 1; jloop <= isec1[45]; jloop++)
+      {
+        value = (float) (isec1[48 + jloop]) / (float) (isec1[47]);
+        if (isec1[43] == jloop)
+          fprintf(grprsm, " %2.2d:%15.7f   <-- this field value\n", jloop, value);
+        else
+          fprintf(grprsm, "%2.2d:%15.7f\n", jloop, value);
+      }
+      fprintf(grprsm, " List of frequencies:\n");
+      for (int jloop = 1; jloop <= isec1[46]; jloop++)
+      {
+        value = (float) (isec1[48 + isec1[45] + jloop]) / (float) (isec1[48]);
+        if (isec1[44] == jloop)
+          fprintf(grprsm, " %2.2d:%15.7f   <-- this field value\n", jloop, value);
+        else
+          fprintf(grprsm, "%2.2d:%15.7f\n", jloop, value);
+
+        if (isec1[49 + isec1[45] + isec1[46]] != 0)
+        {
+          fprintf(grprsm, " System number (65535 = missing)      %9d\n", isec1[49 + isec1[45] + isec1[46]]);
+          fprintf(grprsm, " Method number (65535 = missing)      %9d\n", isec1[50 + isec1[45] + isec1[46]]);
+        }
+      }
+      /*
+        ECMWF Local definition 14.
+        (Brightness temperature)
+      */
+      if (isec1[36] == 14)
+      {
+        fprintf(grprsm, " Channel number                       %9d\n", isec1[43]);
+        fprintf(grprsm, " Scale factor applied to frequencies  %9d\n", isec1[44]);
+        fprintf(grprsm, " Total number of frequencies          %9d\n", isec1[45]);
+        fprintf(grprsm, " List of frequencies:\n");
+        for (int jloop = 1; jloop <= isec1[45]; jloop++)
+        {
+          value = (float) (isec1[45 + jloop]) / (float) (isec1[44]);
+          if (isec1[43] == jloop)
+            fprintf(grprsm, " %3d:%15.9f   <-- this channel\n", jloop, value);
+          else
+            fprintf(grprsm, " %3d:%15.9f\n", jloop, value);
+        }
+      }
+      /*
+        ECMWF Local definition 15.
+        (Ocean ensemble seasonal forecast)
+      */
+      if (isec1[36] == 15)
+      {
+        fprintf(grprsm, " Ensemble member number               %9d\n", isec1[41]);
+        fprintf(grprsm, " System number                        %9d\n", isec1[42]);
+        fprintf(grprsm, " Method number                        %9d\n", isec1[43]);
+      }
+      /*
+        ECMWF Local definition 16.
+        (Seasonal forecast monthly mean atmosphere data)
+      */
+      if (isec1[36] == 16)
+      {
+        fprintf(grprsm, " Ensemble member number               %9d\n", isec1[41]);
+        fprintf(grprsm, " System number                        %9d\n", isec1[43]);
+        fprintf(grprsm, " Method number                        %9d\n", isec1[44]);
+        fprintf(grprsm, " Verifying month                      %9d\n", isec1[45]);
+        fprintf(grprsm, " Averaging period                     %9d\n", isec1[46]);
+      }
+      /*
+        ECMWF Local definition 17.
+        (Sst or sea-ice used by analysis)
+      */
+      if (isec1[36] == 17)
+      {
+        iyear = isec1[43];
+        if (iyear > 100)
+        {
+          if (iyear < 19000000) iyear = iyear + 19000000;
+          fprintf(grprsm, " Date of sst/ice field used           %9d\n", iyear);
+        }
+        else
+          fprintf(grprsm, " Date of sst/ice field used           Not given\n");
+
+        if (isec1[44] == 0) fprintf(grprsm, " Type of sst/ice field (= climatology)%9d\n", isec1[44]);
+        if (isec1[44] == 1) fprintf(grprsm, " Type of sst/ice field (= 1/1 degree) %9d\n", isec1[44]);
+        if (isec1[44] == 2) fprintf(grprsm, " Type of sst/ice field (= 2/2 degree) %9d\n", isec1[44]);
+
+        fprintf(grprsm, " Number of ICE fields used:           %9d\n", isec1[45]);
+
+        for (int jloop = 1; jloop < isec1[45]; jloop++)
+        {
+          iyear = isec1[44 + (jloop * 2)];
+          if (iyear > 100)
+          {
+            if (iyear < 19000000) iyear = iyear + 19000000;
+            fprintf(grprsm, " Date of ICE field%3d                 %9d\n", jloop, iyear);
+            fprintf(grprsm, " Satellite number (ICE field%3d)      %9d\n", jloop, isec1[45 + (jloop * 2)]);
+          }
+          else
+            fprintf(grprsm, "Date of sst/ice field used           Not given\n");
+        }
+      }
+    }
+  }
   /*
     -----------------------------------------------------------------
     Section 3 . Print Washington ensemble product information.
@@ -2922,20 +2922,20 @@ gribPrintSec1(int *isec0, int *isec1)
     products.
   */
   if ((isec1[1] == 7 && isec1[23] == 1) && (!(ISEC1_SubCenterID == 98)))
-    { /*   CALL KWPRS1 (iSEC0,iSEC1)*/
-    }
+  { /*   CALL KWPRS1 (iSEC0,iSEC1)*/
+  }
   /*
     -----------------------------------------------------------------
     Section 4 . Print local MPIM information.
     -----------------------------------------------------------------
   */
   if (isec1[1] == 252 && isec1[36] == 1)
-    {
-      fprintf(grprsm, " MPIM local usage identifier.         %9d\n", isec1[36]);
-      fprintf(grprsm, " Type of ensemble forecast            %9d\n", isec1[37]);
-      fprintf(grprsm, " Individual ensemble member           %9d\n", isec1[38]);
-      fprintf(grprsm, " Number of forecasts in ensemble      %9d\n", isec1[39]);
-    }
+  {
+    fprintf(grprsm, " MPIM local usage identifier.         %9d\n", isec1[36]);
+    fprintf(grprsm, " Type of ensemble forecast            %9d\n", isec1[37]);
+    fprintf(grprsm, " Individual ensemble member           %9d\n", isec1[38]);
+    fprintf(grprsm, " Number of forecasts in ensemble      %9d\n", isec1[39]);
+  }
 }
 
 static void
@@ -2981,33 +2981,33 @@ printQuasi(int *isec2)
   memset(yout, ' ', (size_t) 11);
 
   for (int j = 0; j < latcnt; ++j)
+  {
+    nextlat = nextlat + 1;
+    snprintf(yout, sizeof(yout), "%4d", nextlat);
+
+    // Finished?
+    if (nextlat > latcnt) break;
+    if (nextlat == latcnt)
     {
-      nextlat = nextlat + 1;
-      snprintf(yout, sizeof(yout), "%4d", nextlat);
-
-      // Finished?
-      if (nextlat > latcnt) break;
-      if (nextlat == latcnt)
-        {
-          fprintf(grprsm, " %5d                %-12s\n", isec2[nextlat + 21], yout);
-          break;
-        }
-      // Look for neighbouring latitudes with same number of points
-      unsigned nrepeat = 0;
-
-    LABEL110:
-      // If neighbouring latitudes have same number of points increase the repeat count.
-      if (isec2[nextlat + 21 + 1] == isec2[nextlat + 21])
-        {
-          nrepeat = nrepeat + 1;
-          nextlat = nextlat + 1;
-          if (nextlat < latcnt) goto LABEL110;
-        }
-      // Display neighbouring latitudes with same number of points as 'nn to mm'.
-      if (nrepeat >= 1) snprintf(yout + 4, sizeof(yout) - 4, "to %5d", nextlat);
       fprintf(grprsm, " %5d                %-12s\n", isec2[nextlat + 21], yout);
-      memset(yout, ' ', (size_t) 11);
+      break;
     }
+    // Look for neighbouring latitudes with same number of points
+    unsigned nrepeat = 0;
+
+  LABEL110:
+    // If neighbouring latitudes have same number of points increase the repeat count.
+    if (isec2[nextlat + 21 + 1] == isec2[nextlat + 21])
+    {
+      nrepeat = nrepeat + 1;
+      nextlat = nextlat + 1;
+      if (nextlat < latcnt) goto LABEL110;
+    }
+    // Display neighbouring latitudes with same number of points as 'nn to mm'.
+    if (nrepeat >= 1) snprintf(yout + 4, sizeof(yout) - 4, "to %5d", nextlat);
+    fprintf(grprsm, " %5d                %-12s\n", isec2[nextlat + 21], yout);
+    memset(yout, ' ', (size_t) 11);
+  }
 }
 
 void
@@ -3057,194 +3057,194 @@ gribPrintSec2DP(int *isec0, int *isec2, double *fsec2)
     -----------------------------------------------------------------
   */
   if (isec2[0] == 50 || isec2[0] == 60 || isec2[0] == 70 || isec2[0] == 80)
-    {
-      fprintf(grprsm, " Data represent type = spectral     (Table 6) %9d\n", isec2[0]);
-      fprintf(grprsm, " J - Pentagonal resolution parameter.         %9d\n", isec2[1]);
-      fprintf(grprsm, " K - Pentagonal resolution parameter.         %9d\n", isec2[2]);
-      fprintf(grprsm, " M - Pentagonal resolution parameter.         %9d\n", isec2[3]);
-      fprintf(grprsm, " Representation type (Table 9)                %9d\n", isec2[4]);
-      fprintf(grprsm, " Representation mode (Table 10).              %9d\n", isec2[5]);
-      for (int i = 7; i <= 11; ++i) fprintf(grprsm, " Not used.                                    %9d\n", isec2[i - 1]);
-      fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
-      goto LABEL800;
-    }
+  {
+    fprintf(grprsm, " Data represent type = spectral     (Table 6) %9d\n", isec2[0]);
+    fprintf(grprsm, " J - Pentagonal resolution parameter.         %9d\n", isec2[1]);
+    fprintf(grprsm, " K - Pentagonal resolution parameter.         %9d\n", isec2[2]);
+    fprintf(grprsm, " M - Pentagonal resolution parameter.         %9d\n", isec2[3]);
+    fprintf(grprsm, " Representation type (Table 9)                %9d\n", isec2[4]);
+    fprintf(grprsm, " Representation mode (Table 10).              %9d\n", isec2[5]);
+    for (int i = 7; i <= 11; ++i) fprintf(grprsm, " Not used.                                    %9d\n", isec2[i - 1]);
+    fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
+    goto LABEL800;
+  }
   /*
     -----------------------------------------------------------------
     Section 3 . Print Gaussian grid data.
     -----------------------------------------------------------------
   */
   if (isec2[0] == 4 || isec2[0] == 14 || isec2[0] == 24 || isec2[0] == 34)
-    {
-      fprintf(grprsm, " (Southern latitudes and Western longitudes are negative.)\n");
-      fprintf(grprsm, " Data represent type = gaussian     (Table 6) %9d\n", isec2[0]);
-      /*
-        Quasi-regular grids introduced in Edition 1.
-      */
-      if (isec2[16] == 0 || iedit < 1)
-        fprintf(grprsm, " Number of points along a parallel.           %9d\n", isec2[1]);
-      else
-        printQuasi(isec2);
+  {
+    fprintf(grprsm, " (Southern latitudes and Western longitudes are negative.)\n");
+    fprintf(grprsm, " Data represent type = gaussian     (Table 6) %9d\n", isec2[0]);
+    /*
+      Quasi-regular grids introduced in Edition 1.
+    */
+    if (isec2[16] == 0 || iedit < 1)
+      fprintf(grprsm, " Number of points along a parallel.           %9d\n", isec2[1]);
+    else
+      printQuasi(isec2);
 
-      fprintf(grprsm, " Number of points along a meridian.           %9d\n", isec2[2]);
-      fprintf(grprsm, " Latitude of first grid point.                %9d\n", isec2[3]);
-      fprintf(grprsm, " Longitude of first grid point.               %9d\n", isec2[4]);
+    fprintf(grprsm, " Number of points along a meridian.           %9d\n", isec2[2]);
+    fprintf(grprsm, " Latitude of first grid point.                %9d\n", isec2[3]);
+    fprintf(grprsm, " Longitude of first grid point.               %9d\n", isec2[4]);
 
-      ibit = 8;
-      iresol = isec2[5] + isec2[17] + isec2[18];
-      prtbin(iresol, ibit, &iout, &ierr);
+    ibit = 8;
+    iresol = isec2[5] + isec2[17] + isec2[18];
+    prtbin(iresol, ibit, &iout, &ierr);
 
-      fprintf(grprsm, " Resolution and components flag.               %8.8d\n", iout);
-      fprintf(grprsm, " Latitude of last grid point.                 %9d\n", isec2[6]);
-      fprintf(grprsm, " Longitude of last grid point.                %9d\n", isec2[7]);
-      /*
-        Print increment if given.
-      */
-      if (isec2[5] == 128)
-        fprintf(grprsm, " i direction (East-West) increment.           %9d\n", isec2[8]);
-      else
-        fprintf(grprsm, " i direction (East-West) increment            Not given\n");
+    fprintf(grprsm, " Resolution and components flag.               %8.8d\n", iout);
+    fprintf(grprsm, " Latitude of last grid point.                 %9d\n", isec2[6]);
+    fprintf(grprsm, " Longitude of last grid point.                %9d\n", isec2[7]);
+    /*
+      Print increment if given.
+    */
+    if (isec2[5] == 128)
+      fprintf(grprsm, " i direction (East-West) increment.           %9d\n", isec2[8]);
+    else
+      fprintf(grprsm, " i direction (East-West) increment            Not given\n");
 
-      fprintf(grprsm, " Number of parallels between pole and equator.%9d\n", isec2[9]);
+    fprintf(grprsm, " Number of parallels between pole and equator.%9d\n", isec2[9]);
 
-      ibit = 8;
-      prtbin(isec2[10], ibit, &iout, &ierr);
+    ibit = 8;
+    prtbin(isec2[10], ibit, &iout, &ierr);
 
-      fprintf(grprsm, " Scanning mode flags (Code Table 8)            %8.8d\n", iout);
-      fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
-      goto LABEL800;
-    }
+    fprintf(grprsm, " Scanning mode flags (Code Table 8)            %8.8d\n", iout);
+    fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
+    goto LABEL800;
+  }
   /*
     -----------------------------------------------------------------
     Section 4 . Print Latitude / longitude grid data.
     -----------------------------------------------------------------
   */
   if (isec2[0] == 0 || isec2[0] == 10 || isec2[0] == 20 || isec2[0] == 30)
-    {
-      fprintf(grprsm, " (Southern latitudes and Western longitudes are negative.)\n");
-      fprintf(grprsm, " Data represent type = lat/long     (Table 6) %9d\n", isec2[0]);
-      /*
-        Quasi-regular lat/long grids also possible.
-      */
-      if (isec2[16] == 0)
-        fprintf(grprsm, " Number of points along a parallel.           %9d\n", isec2[1]);
-      else
-        printQuasi(isec2);
+  {
+    fprintf(grprsm, " (Southern latitudes and Western longitudes are negative.)\n");
+    fprintf(grprsm, " Data represent type = lat/long     (Table 6) %9d\n", isec2[0]);
+    /*
+      Quasi-regular lat/long grids also possible.
+    */
+    if (isec2[16] == 0)
+      fprintf(grprsm, " Number of points along a parallel.           %9d\n", isec2[1]);
+    else
+      printQuasi(isec2);
 
-      fprintf(grprsm, " Number of points along a meridian.           %9d\n", isec2[2]);
-      fprintf(grprsm, " Latitude of first grid point.                %9d\n", isec2[3]);
-      fprintf(grprsm, " Longitude of first grid point.               %9d\n", isec2[4]);
+    fprintf(grprsm, " Number of points along a meridian.           %9d\n", isec2[2]);
+    fprintf(grprsm, " Latitude of first grid point.                %9d\n", isec2[3]);
+    fprintf(grprsm, " Longitude of first grid point.               %9d\n", isec2[4]);
 
-      ibit = 8;
-      iresol = isec2[5] + isec2[17] + isec2[18];
-      prtbin(iresol, ibit, &iout, &ierr);
+    ibit = 8;
+    iresol = isec2[5] + isec2[17] + isec2[18];
+    prtbin(iresol, ibit, &iout, &ierr);
 
-      fprintf(grprsm, " Resolution and components flag.               %8.8d\n", iout);
-      fprintf(grprsm, " Latitude of last grid point.                 %9d\n", isec2[6]);
-      fprintf(grprsm, " Longitude of last grid point.                %9d\n", isec2[7]);
-      /*
-        Print increment if given.
-      */
-      if (isec2[8] < 0)
-        fprintf(grprsm, " i direction (East-West) increment            Not given\n");
-      else
-        fprintf(grprsm, " i direction (East-West) increment.           %9d\n", isec2[8]);
+    fprintf(grprsm, " Resolution and components flag.               %8.8d\n", iout);
+    fprintf(grprsm, " Latitude of last grid point.                 %9d\n", isec2[6]);
+    fprintf(grprsm, " Longitude of last grid point.                %9d\n", isec2[7]);
+    /*
+      Print increment if given.
+    */
+    if (isec2[8] < 0)
+      fprintf(grprsm, " i direction (East-West) increment            Not given\n");
+    else
+      fprintf(grprsm, " i direction (East-West) increment.           %9d\n", isec2[8]);
 
-      if (isec2[9] < 0)
-        fprintf(grprsm, " j direction (North-South) increment          Not given\n");
-      else
-        fprintf(grprsm, " j direction (North-South) increment.         %9d\n", isec2[9]);
+    if (isec2[9] < 0)
+      fprintf(grprsm, " j direction (North-South) increment          Not given\n");
+    else
+      fprintf(grprsm, " j direction (North-South) increment.         %9d\n", isec2[9]);
 
-      ibit = 8;
-      prtbin(isec2[10], ibit, &iout, &ierr);
+    ibit = 8;
+    prtbin(isec2[10], ibit, &iout, &ierr);
 
-      fprintf(grprsm, " Scanning mode flags (Code Table 8)            %8.8d\n", iout);
-      fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
-      goto LABEL800;
-    }
+    fprintf(grprsm, " Scanning mode flags (Code Table 8)            %8.8d\n", iout);
+    fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
+    goto LABEL800;
+  }
   /*
     -----------------------------------------------------------------
     Section 5 . Print polar stereographic data.
     -----------------------------------------------------------------
   */
   if (isec2[0] == 5)
-    {
-      fprintf(grprsm, " (Southern latitudes and Western longitudes are negative.)\n");
-      fprintf(grprsm, " Data represent type = polar stereo (Table 6) %9d\n", isec2[0]);
-      fprintf(grprsm, " Number of points along X axis.               %9d\n", isec2[1]);
-      fprintf(grprsm, " Number of points along Y axis.               %9d\n", isec2[2]);
-      fprintf(grprsm, " Latitude of first grid point.                %9d\n", isec2[3]);
-      fprintf(grprsm, " Longitude of first grid point.               %9d\n", isec2[4]);
-      ibit = 8;
-      iresol = isec2[17] + isec2[18];
-      prtbin(iresol, ibit, &iout, &ierr);
-      fprintf(grprsm, " Resolution and components flag.               %8.8d\n", iout);
-      fprintf(grprsm, " Orientation of the grid.                     %9d\n", isec2[6]);
-      fprintf(grprsm, " X direction increment.                       %9d\n", isec2[8]);
-      fprintf(grprsm, " Y direction increment.                       %9d\n", isec2[9]);
-      ibit = 8;
-      prtbin(isec2[10], ibit, &iout, &ierr);
-      fprintf(grprsm, " Scanning mode flags (Code Table 8)            %8.8d\n", iout);
-      fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
-      fprintf(grprsm, " Projection centre flag.                      %9d\n", isec2[12]);
-      goto LABEL800;
-    }
+  {
+    fprintf(grprsm, " (Southern latitudes and Western longitudes are negative.)\n");
+    fprintf(grprsm, " Data represent type = polar stereo (Table 6) %9d\n", isec2[0]);
+    fprintf(grprsm, " Number of points along X axis.               %9d\n", isec2[1]);
+    fprintf(grprsm, " Number of points along Y axis.               %9d\n", isec2[2]);
+    fprintf(grprsm, " Latitude of first grid point.                %9d\n", isec2[3]);
+    fprintf(grprsm, " Longitude of first grid point.               %9d\n", isec2[4]);
+    ibit = 8;
+    iresol = isec2[17] + isec2[18];
+    prtbin(iresol, ibit, &iout, &ierr);
+    fprintf(grprsm, " Resolution and components flag.               %8.8d\n", iout);
+    fprintf(grprsm, " Orientation of the grid.                     %9d\n", isec2[6]);
+    fprintf(grprsm, " X direction increment.                       %9d\n", isec2[8]);
+    fprintf(grprsm, " Y direction increment.                       %9d\n", isec2[9]);
+    ibit = 8;
+    prtbin(isec2[10], ibit, &iout, &ierr);
+    fprintf(grprsm, " Scanning mode flags (Code Table 8)            %8.8d\n", iout);
+    fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
+    fprintf(grprsm, " Projection centre flag.                      %9d\n", isec2[12]);
+    goto LABEL800;
+  }
   /*
     -----------------------------------------------------------------
     Section 6 . Print Lambert conformal data.
     -----------------------------------------------------------------
   */
   if (isec2[0] == 3)
-    {
-      fprintf(grprsm, " (Southern latitudes and Western longitudes are negative.)\n");
-      fprintf(grprsm, " Data represent type = Lambert      (Table 6) %9d\n", isec2[0]);
-      fprintf(grprsm, " Number of points along X axis.               %9d\n", isec2[1]);
-      fprintf(grprsm, " Number of points along Y axis.               %9d\n", isec2[2]);
-      fprintf(grprsm, " Latitude of first grid point.                %9d\n", isec2[3]);
-      fprintf(grprsm, " Longitude of first grid point.               %9d\n", isec2[4]);
-      ibit = 8;
-      iresol = isec2[17] + isec2[18] + isec2[5];
-      prtbin(iresol, ibit, &iout, &ierr);
-      fprintf(grprsm, " Resolution and components flag.               %8.8d\n", iout);
-      fprintf(grprsm, " Orientation of the grid.                     %9d\n", isec2[6]);
-      fprintf(grprsm, " X direction increment.                       %9d\n", isec2[8]);
-      fprintf(grprsm, " Y direction increment.                       %9d\n", isec2[9]);
-      ibit = 8;
-      prtbin(isec2[10], ibit, &iout, &ierr);
-      fprintf(grprsm, " Scanning mode flags (Code Table 8)            %8.8d\n", iout);
-      fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
-      fprintf(grprsm, " Projection centre flag.                      %9d\n", isec2[12]);
-      fprintf(grprsm, " Latitude intersection 1 - Latin 1 -.         %9d\n", isec2[13]);
-      fprintf(grprsm, " Latitude intersection 2 - Latin 2 -.         %9d\n", isec2[14]);
-      fprintf(grprsm, " Latitude of Southern Pole.                   %9d\n", isec2[19]);
-      fprintf(grprsm, " Longitude of Southern Pole.                  %9d\n", isec2[20]);
-      goto LABEL800;
-    }
+  {
+    fprintf(grprsm, " (Southern latitudes and Western longitudes are negative.)\n");
+    fprintf(grprsm, " Data represent type = Lambert      (Table 6) %9d\n", isec2[0]);
+    fprintf(grprsm, " Number of points along X axis.               %9d\n", isec2[1]);
+    fprintf(grprsm, " Number of points along Y axis.               %9d\n", isec2[2]);
+    fprintf(grprsm, " Latitude of first grid point.                %9d\n", isec2[3]);
+    fprintf(grprsm, " Longitude of first grid point.               %9d\n", isec2[4]);
+    ibit = 8;
+    iresol = isec2[17] + isec2[18] + isec2[5];
+    prtbin(iresol, ibit, &iout, &ierr);
+    fprintf(grprsm, " Resolution and components flag.               %8.8d\n", iout);
+    fprintf(grprsm, " Orientation of the grid.                     %9d\n", isec2[6]);
+    fprintf(grprsm, " X direction increment.                       %9d\n", isec2[8]);
+    fprintf(grprsm, " Y direction increment.                       %9d\n", isec2[9]);
+    ibit = 8;
+    prtbin(isec2[10], ibit, &iout, &ierr);
+    fprintf(grprsm, " Scanning mode flags (Code Table 8)            %8.8d\n", iout);
+    fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
+    fprintf(grprsm, " Projection centre flag.                      %9d\n", isec2[12]);
+    fprintf(grprsm, " Latitude intersection 1 - Latin 1 -.         %9d\n", isec2[13]);
+    fprintf(grprsm, " Latitude intersection 2 - Latin 2 -.         %9d\n", isec2[14]);
+    fprintf(grprsm, " Latitude of Southern Pole.                   %9d\n", isec2[19]);
+    fprintf(grprsm, " Longitude of Southern Pole.                  %9d\n", isec2[20]);
+    goto LABEL800;
+  }
   /*
     -----------------------------------------------------------------
     Section 7 . Print space view perspective or orthographic data.
     -----------------------------------------------------------------
   */
   if (isec2[0] == 90)
-    {
-      fprintf(grprsm, " (Southern latitudes and Western longitudes are negative.)\n");
-      fprintf(grprsm, " Data represent type = space/ortho  (Table 6) %9d\n", isec2[0]);
-      fprintf(grprsm, " Number of points along X axis.               %9d\n", isec2[1]);
-      fprintf(grprsm, " Number of points along Y axis.               %9d\n", isec2[2]);
-      fprintf(grprsm, " Latitude of sub-satellite point.             %9d\n", isec2[3]);
-      fprintf(grprsm, " Longitude of sub-satellite point.            %9d\n", isec2[4]);
-      // iresol = isec2[17] + isec2[18];
-      fprintf(grprsm, " Diameter of the earth in x direction.        %9d\n", isec2[6]);
-      fprintf(grprsm, " Y coordinate of sub-satellite point.         %9d\n", isec2[9]);
-      ibit = 8;
-      prtbin(isec2[10], ibit, &iout, &ierr);
-      fprintf(grprsm, " Scanning mode flags (Code Table 8)            %8.8d\n", iout);
-      fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
-      fprintf(grprsm, " Orientation of the grid.                     %9d\n", isec2[6]);
-      fprintf(grprsm, " Altitude of the camera.                      %9d\n", isec2[13]);
-      fprintf(grprsm, " Y coordinate of origin of sector image.      %9d\n", isec2[14]);
-      fprintf(grprsm, " X coordinate of origin of sector image.      %9d\n", isec2[15]);
-      goto LABEL800;
-    }
+  {
+    fprintf(grprsm, " (Southern latitudes and Western longitudes are negative.)\n");
+    fprintf(grprsm, " Data represent type = space/ortho  (Table 6) %9d\n", isec2[0]);
+    fprintf(grprsm, " Number of points along X axis.               %9d\n", isec2[1]);
+    fprintf(grprsm, " Number of points along Y axis.               %9d\n", isec2[2]);
+    fprintf(grprsm, " Latitude of sub-satellite point.             %9d\n", isec2[3]);
+    fprintf(grprsm, " Longitude of sub-satellite point.            %9d\n", isec2[4]);
+    // iresol = isec2[17] + isec2[18];
+    fprintf(grprsm, " Diameter of the earth in x direction.        %9d\n", isec2[6]);
+    fprintf(grprsm, " Y coordinate of sub-satellite point.         %9d\n", isec2[9]);
+    ibit = 8;
+    prtbin(isec2[10], ibit, &iout, &ierr);
+    fprintf(grprsm, " Scanning mode flags (Code Table 8)            %8.8d\n", iout);
+    fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
+    fprintf(grprsm, " Orientation of the grid.                     %9d\n", isec2[6]);
+    fprintf(grprsm, " Altitude of the camera.                      %9d\n", isec2[13]);
+    fprintf(grprsm, " Y coordinate of origin of sector image.      %9d\n", isec2[14]);
+    fprintf(grprsm, " X coordinate of origin of sector image.      %9d\n", isec2[15]);
+    goto LABEL800;
+  }
   /*
     -----------------------------------------------------------------
     Section 7.5 . Print ocean data
@@ -3276,21 +3276,21 @@ gribPrintSec2DP(int *isec0, int *isec2, double *fsec2)
     -----------------------------------------------------------------
   */
   if (isec2[0] == 192 /* && ISEC1_CenterID == 78 */)
-    {
-      fprintf(grprsm, " Data represent type = triangular   (Table 6) %9d\n", isec2[0]);
-      fprintf(grprsm, " Number of factor 2 in factorisation of Ni.   %9d\n", isec2[1]);
-      fprintf(grprsm, " Number of factor 3 in factorisation of Ni.   %9d\n", isec2[2]);
-      fprintf(grprsm, " Number of diamonds (Nd).                     %9d\n", isec2[3]);
-      fprintf(grprsm, " Number of triangular subdivisions of the\n");
-      fprintf(grprsm, "           icosahedron (Ni).                  %9d\n", isec2[4]);
-      fprintf(grprsm, " Flag for orientation of diamonds (Table A).  %9d\n", isec2[5]);
-      fprintf(grprsm, " Latitude of pole point.                      %9d\n", isec2[6]);
-      fprintf(grprsm, " Longitude of pole point.                     %9d\n", isec2[7]);
-      fprintf(grprsm, " Longitude of the first diamond.              %9d\n", isec2[8]);
-      fprintf(grprsm, " Flag for storage sequence (Table B).         %9d\n", isec2[9]);
-      fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
-      goto LABEL800;
-    }
+  {
+    fprintf(grprsm, " Data represent type = triangular   (Table 6) %9d\n", isec2[0]);
+    fprintf(grprsm, " Number of factor 2 in factorisation of Ni.   %9d\n", isec2[1]);
+    fprintf(grprsm, " Number of factor 3 in factorisation of Ni.   %9d\n", isec2[2]);
+    fprintf(grprsm, " Number of diamonds (Nd).                     %9d\n", isec2[3]);
+    fprintf(grprsm, " Number of triangular subdivisions of the\n");
+    fprintf(grprsm, "           icosahedron (Ni).                  %9d\n", isec2[4]);
+    fprintf(grprsm, " Flag for orientation of diamonds (Table A).  %9d\n", isec2[5]);
+    fprintf(grprsm, " Latitude of pole point.                      %9d\n", isec2[6]);
+    fprintf(grprsm, " Longitude of pole point.                     %9d\n", isec2[7]);
+    fprintf(grprsm, " Longitude of the first diamond.              %9d\n", isec2[8]);
+    fprintf(grprsm, " Flag for storage sequence (Table B).         %9d\n", isec2[9]);
+    fprintf(grprsm, " Number of vertical coordinate parameters.    %9d\n", isec2[11]);
+    goto LABEL800;
+  }
   /*
     -----------------------------------------------------------------
     Drop through to here => representation type not catered for.
@@ -3311,12 +3311,12 @@ LABEL800:;
     Vertical coordinate parameters ...
   */
   if (isec2[11] != 0)
-    {
-      fprintf(grprsm, " \n");
-      fprintf(grprsm, " Vertical Coordinate Parameters.\n");
-      fprintf(grprsm, " -------------------------------\n");
-      for (int i = 10; i < isec2[11] + 10; ++i) fprintf(grprsm, "    %20.12f\n", fsec2[i]);
-    }
+  {
+    fprintf(grprsm, " \n");
+    fprintf(grprsm, " Vertical Coordinate Parameters.\n");
+    fprintf(grprsm, " -------------------------------\n");
+    for (int i = 10; i < isec2[11] + 10; ++i) fprintf(grprsm, "    %20.12f\n", fsec2[i]);
+  }
   /*
     Rotated and stretched grids introduced in Edition 1.
   */
@@ -3325,22 +3325,22 @@ LABEL800:;
     Rotated grid information ...
   */
   if (isec2[0] == 10 || isec2[0] == 30 || isec2[0] == 14 || isec2[0] == 34 || isec2[0] == 60 || isec2[0] == 80 || isec2[0] == 30)
-    {
-      fprintf(grprsm, " \n");
-      fprintf(grprsm, " Latitude of southern pole of rotation.       %9d\n", isec2[12]);
-      fprintf(grprsm, " Longitude of southern pole of rotation.      %9d\n", isec2[13]);
-      fprintf(grprsm, " Angle of rotation.                     %20.10f\n", fsec2[0]);
-    }
+  {
+    fprintf(grprsm, " \n");
+    fprintf(grprsm, " Latitude of southern pole of rotation.       %9d\n", isec2[12]);
+    fprintf(grprsm, " Longitude of southern pole of rotation.      %9d\n", isec2[13]);
+    fprintf(grprsm, " Angle of rotation.                     %20.10f\n", fsec2[0]);
+  }
   /*
     Stretched grid information ...
   */
   if (isec2[0] == 20 || isec2[0] == 30 || isec2[0] == 24 || isec2[0] == 34 || isec2[0] == 70 || isec2[0] == 80)
-    {
-      fprintf(grprsm, " \n");
-      fprintf(grprsm, " Latitude of pole of stretching.              %9d\n", isec2[14]);
-      fprintf(grprsm, " Longitude of pole of stretching.             %9d\n", isec2[15]);
-      fprintf(grprsm, " Stretching factor.                     %20.10f\n", fsec2[1]);
-    }
+  {
+    fprintf(grprsm, " \n");
+    fprintf(grprsm, " Latitude of pole of stretching.              %9d\n", isec2[14]);
+    fprintf(grprsm, " Longitude of pole of stretching.             %9d\n", isec2[15]);
+    fprintf(grprsm, " Stretching factor.                     %20.10f\n", fsec2[1]);
+  }
 
 LABEL900:;
 
@@ -3465,23 +3465,23 @@ gribPrintSec4DP(int *isec0, int *isec4, double *fsec4)
     If complex packing ..
   */
   if (isec4[3] == 64)
+  {
+    if (isec4[2] == 128)
     {
-      if (isec4[2] == 128)
-        {
-          fprintf(grprsm, " Byte offset of start of packed data (N).     %9d\n", isec4[15]);
-          fprintf(grprsm, " Power (P * 1000).                            %9d\n", isec4[16]);
-          fprintf(grprsm, " Pentagonal resolution parameter J for subset.%9d\n", isec4[17]);
-          fprintf(grprsm, " Pentagonal resolution parameter K for subset.%9d\n", isec4[18]);
-          fprintf(grprsm, " Pentagonal resolution parameter M for subset.%9d\n", isec4[19]);
-        }
-      else
-        {
-          fprintf(grprsm, " Bits number of 2nd order values    (none=>0).%9d\n", isec4[10]);
-          fprintf(grprsm, " General extend. 2-order packing (0=no,8=yes).%9d\n", isec4[11]);
-          fprintf(grprsm, " Boustrophedonic ordering        (0=no,4=yes).%9d\n", isec4[12]);
-          fprintf(grprsm, " Spatial differencing order          (0=none).%9d\n", isec4[13] + isec4[14]);
-        }
+      fprintf(grprsm, " Byte offset of start of packed data (N).     %9d\n", isec4[15]);
+      fprintf(grprsm, " Power (P * 1000).                            %9d\n", isec4[16]);
+      fprintf(grprsm, " Pentagonal resolution parameter J for subset.%9d\n", isec4[17]);
+      fprintf(grprsm, " Pentagonal resolution parameter K for subset.%9d\n", isec4[18]);
+      fprintf(grprsm, " Pentagonal resolution parameter M for subset.%9d\n", isec4[19]);
     }
+    else
+    {
+      fprintf(grprsm, " Bits number of 2nd order values    (none=>0).%9d\n", isec4[10]);
+      fprintf(grprsm, " General extend. 2-order packing (0=no,8=yes).%9d\n", isec4[11]);
+      fprintf(grprsm, " Boustrophedonic ordering        (0=no,4=yes).%9d\n", isec4[12]);
+      fprintf(grprsm, " Spatial differencing order          (0=none).%9d\n", isec4[13] + isec4[14]);
+    }
+  }
   /*
     Number of non-missing values
   */
@@ -3490,18 +3490,18 @@ gribPrintSec4DP(int *isec0, int *isec4, double *fsec4)
     Information on matrix of values , if present.
   */
   if (isec4[7] == 64)
-    {
-      fprintf(grprsm, " First dimension (rows) of each matrix.       %9d\n", isec4[49]);
-      fprintf(grprsm, " Second dimension (columns) of each matrix.   %9d\n", isec4[50]);
-      fprintf(grprsm, " First dimension coordinate values definition.%9d\n", isec4[51]);
-      fprintf(grprsm, " (Code Table 12)\n");
-      fprintf(grprsm, " NC1 - Number of coefficients for 1st dimension.%7d\n", isec4[52]);
-      fprintf(grprsm, " Second dimension coordinate values definition.%8d\n", isec4[53]);
-      fprintf(grprsm, " (Code Table 12)\n");
-      fprintf(grprsm, " NC2 - Number of coefficients for 2nd dimension.%7d\n", isec4[54]);
-      fprintf(grprsm, " 1st dimension physical signifance (Table 13). %8d\n", isec4[55]);
-      fprintf(grprsm, " 2nd dimension physical signifance (Table 13).%8d\n", isec4[56]);
-    }
+  {
+    fprintf(grprsm, " First dimension (rows) of each matrix.       %9d\n", isec4[49]);
+    fprintf(grprsm, " Second dimension (columns) of each matrix.   %9d\n", isec4[50]);
+    fprintf(grprsm, " First dimension coordinate values definition.%9d\n", isec4[51]);
+    fprintf(grprsm, " (Code Table 12)\n");
+    fprintf(grprsm, " NC1 - Number of coefficients for 1st dimension.%7d\n", isec4[52]);
+    fprintf(grprsm, " Second dimension coordinate values definition.%8d\n", isec4[53]);
+    fprintf(grprsm, " (Code Table 12)\n");
+    fprintf(grprsm, " NC2 - Number of coefficients for 2nd dimension.%7d\n", isec4[54]);
+    fprintf(grprsm, " 1st dimension physical signifance (Table 13). %8d\n", isec4[55]);
+    fprintf(grprsm, " 2nd dimension physical signifance (Table 13).%8d\n", isec4[56]);
+  }
   /*
     -----------------------------------------------------------------
     Section 2. Print values from fsec4.
@@ -3518,40 +3518,40 @@ gribPrintSec4DP(int *isec0, int *isec4, double *fsec4)
   fprintf(grprsm, " First %4d data values.\n", inum);
 
   if (isec4[4] == 0)
+  {
+    /*
+      Print real values ...
+    */
+    for (int j = 0; j < inum; ++j)
     {
-      /*
-        Print real values ...
-      */
-      for (int j = 0; j < inum; ++j)
-        {
-          if (fabs(fsec4[j]) > 0)
-            {
-              if (fabs(fsec4[j]) >= 0.1 && fabs(fsec4[j]) <= 1.e8)
-                fprintf(grprsm, " %#16.8G    \n", fsec4[j]);
-              else
-                fprintf(grprsm, " %#20.8E\n", fsec4[j]);
-            }
-          else
-            fprintf(grprsm, " %#16.0f    \n", fabs(fsec4[j]));
-        }
+      if (fabs(fsec4[j]) > 0)
+      {
+        if (fabs(fsec4[j]) >= 0.1 && fabs(fsec4[j]) <= 1.e8)
+          fprintf(grprsm, " %#16.8G    \n", fsec4[j]);
+        else
+          fprintf(grprsm, " %#20.8E\n", fsec4[j]);
+      }
+      else
+        fprintf(grprsm, " %#16.0f    \n", fabs(fsec4[j]));
     }
+  }
   else
-    {
-      /*
-        Print integer values ...
-      */
-      fprintf(grprsm, " Print of integer values not supported\n");
-      /*
-        CALL SETPAR(IBIT,IDUM,IDUM)
-        DO 212 J=1,INUM
-           INSPT = 0
-           CALL INXBIT(IVALUE,1,INSPT,FSEC4(J),1,IBIT,IBIT,'C',IRET)
-           WRITE (*,9033) IVALUE
- 9033 FORMAT(' ',I15)
-  212   CONTINUE
-      ENDIF
-      */
-    }
+  {
+    /*
+      Print integer values ...
+    */
+    fprintf(grprsm, " Print of integer values not supported\n");
+    /*
+      CALL SETPAR(IBIT,IDUM,IDUM)
+      DO 212 J=1,INUM
+         INSPT = 0
+         CALL INXBIT(IVALUE,1,INSPT,FSEC4(J),1,IBIT,IBIT,'C',IRET)
+         WRITE (*,9033) IVALUE
+9033 FORMAT(' ',I15)
+212   CONTINUE
+    ENDIF
+    */
+  }
 }
 
 void
@@ -3603,18 +3603,18 @@ gribPrintSec4Wave(int *isec4)
   */
   fprintf(grprsm, " Coefficients defining first dimension coordinates:\n");
   for (int jloop = 0; jloop < isec4[52]; jloop++)
-    {
-      ntemp[jloop] = isec4[59 + jloop];
-      ptemp = (float *) &ntemp[jloop];
-      fprintf(grprsm, "%20.10f\n", *ptemp);
-    }
+  {
+    ntemp[jloop] = isec4[59 + jloop];
+    ptemp = (float *) &ntemp[jloop];
+    fprintf(grprsm, "%20.10f\n", *ptemp);
+  }
   fprintf(grprsm, " Coefficients defining second dimension coordinates:\n");
   for (int jloop = 0; jloop < isec4[54]; jloop++)
-    {
-      ntemp[jloop] = isec4[59 + isec4[52] + jloop];
-      ptemp = (float *) &ntemp[jloop];
-      fprintf(grprsm, "%20.10f\n", *ptemp);
-    }
+  {
+    ntemp[jloop] = isec4[59 + isec4[52] + jloop];
+    ptemp = (float *) &ntemp[jloop];
+    fprintf(grprsm, "%20.10f\n", *ptemp);
+  }
 }
 #ifdef HAVE_CONFIG_H
 #endif
@@ -3653,10 +3653,10 @@ gribCheckSeek(int fileID, long *offset, int *version)
 
   *version = -1;
   if (!ierr)
-    {
-      char buffer[4];
-      if (fileRead(fileID, buffer, 4) == 4) *version = buffer[3];
-    }
+  {
+    char buffer[4];
+    if (fileRead(fileID, buffer, 4) == 4) *version = buffer[3];
+  }
 
   return ierr;
 }
@@ -3674,19 +3674,19 @@ gribFileSeek(int fileID, long *offset)
   void *fileptr = filePtr(fileID);
 
   while (retry--)
+  {
+    int ch = filePtrGetc(fileptr);
+    if (ch == EOF) return -1;
+
+    code = ((code << 8) + ch) & 0xFFFFFFFF;
+    if (code == GRIB)
     {
-      int ch = filePtrGetc(fileptr);
-      if (ch == EOF) return -1;
-
-      code = ((code << 8) + ch) & 0xFFFFFFFF;
-      if (code == GRIB)
-        {
-          if (CGRIBEX_Debug) Message("record offset = %ld", *offset);
-          return 0;
-        }
-
-      (*offset)++;
+      if (CGRIBEX_Debug) Message("record offset = %ld", *offset);
+      return 0;
     }
+
+    (*offset)++;
+  }
 
   if (CGRIBEX_Debug) Message("record offset = %ld", *offset);
 
@@ -3718,104 +3718,104 @@ gribReadSize(int fileID)
   if (CGRIBEX_Debug) Message("gribversion = %d", gribversion);
 
   if (gribversion == 0)
-    {
-      unsigned gdssize = 0, bmssize = 0;
-      unsigned issize = 4, essize = 4;
+  {
+    unsigned gdssize = 0, bmssize = 0;
+    unsigned issize = 4, essize = 4;
 
-      unsigned pdssize = gribsize;
-      fileSetPos(fileID, (off_t) 3, SEEK_CUR);
+    unsigned pdssize = gribsize;
+    fileSetPos(fileID, (off_t) 3, SEEK_CUR);
+    if (CGRIBEX_Debug) Message("pdssize     = %u", pdssize);
+    int flag = filePtrGetc(fileptr);
+    if (CGRIBEX_Debug) Message("flag        = %d", flag);
+
+    fileSetPos(fileID, (off_t) pdssize - 8, SEEK_CUR);
+
+    if (flag & 128)
+    {
+      gdssize = read3ByteMSBFirst(fileptr);
+      fileSetPos(fileID, (off_t) gdssize - 3, SEEK_CUR);
+      if (CGRIBEX_Debug) Message("gdssize     = %u", gdssize);
+    }
+
+    if (flag & 64)
+    {
+      bmssize = read3ByteMSBFirst(fileptr);
+      fileSetPos(fileID, (off_t) bmssize - 3, SEEK_CUR);
+      if (CGRIBEX_Debug) Message("bmssize     = %u", bmssize);
+    }
+
+    unsigned bdssize = read3ByteMSBFirst(fileptr);
+    if (CGRIBEX_Debug) Message("bdssize     = %u", bdssize);
+
+    gribsize = issize + pdssize + gdssize + bmssize + bdssize + essize;
+    rgribsize = (size_t) gribsize;
+  }
+  else if (gribversion == 1)
+  {
+    if (gribsize > JP23SET)  // Large GRIB record
+    {
+      unsigned pdssize = read3ByteMSBFirst(fileptr);
       if (CGRIBEX_Debug) Message("pdssize     = %u", pdssize);
-      int flag = filePtrGetc(fileptr);
+
+      int flag = 0;
+      for (int i = 0; i < 5; ++i) flag = filePtrGetc(fileptr);
       if (CGRIBEX_Debug) Message("flag        = %d", flag);
 
       fileSetPos(fileID, (off_t) pdssize - 8, SEEK_CUR);
 
+      unsigned gdssize = 0;
       if (flag & 128)
-        {
-          gdssize = read3ByteMSBFirst(fileptr);
-          fileSetPos(fileID, (off_t) gdssize - 3, SEEK_CUR);
-          if (CGRIBEX_Debug) Message("gdssize     = %u", gdssize);
-        }
+      {
+        gdssize = read3ByteMSBFirst(fileptr);
+        fileSetPos(fileID, (off_t) gdssize - 3, SEEK_CUR);
+        if (CGRIBEX_Debug) Message("gdssize     = %u", gdssize);
+      }
 
+      unsigned bmssize = 0;
       if (flag & 64)
-        {
-          bmssize = read3ByteMSBFirst(fileptr);
-          fileSetPos(fileID, (off_t) bmssize - 3, SEEK_CUR);
-          if (CGRIBEX_Debug) Message("bmssize     = %u", bmssize);
-        }
+      {
+        bmssize = read3ByteMSBFirst(fileptr);
+        fileSetPos(fileID, (off_t) bmssize - 3, SEEK_CUR);
+        if (CGRIBEX_Debug) Message("bmssize     = %u", bmssize);
+      }
 
       unsigned bdssize = read3ByteMSBFirst(fileptr);
       if (CGRIBEX_Debug) Message("bdssize     = %u", bdssize);
-
-      gribsize = issize + pdssize + gdssize + bmssize + bdssize + essize;
-      rgribsize = (size_t) gribsize;
-    }
-  else if (gribversion == 1)
-    {
-      if (gribsize > JP23SET)  // Large GRIB record
-        {
-          unsigned pdssize = read3ByteMSBFirst(fileptr);
-          if (CGRIBEX_Debug) Message("pdssize     = %u", pdssize);
-
-          int flag = 0;
-          for (int i = 0; i < 5; ++i) flag = filePtrGetc(fileptr);
-          if (CGRIBEX_Debug) Message("flag        = %d", flag);
-
-          fileSetPos(fileID, (off_t) pdssize - 8, SEEK_CUR);
-
-          unsigned gdssize = 0;
-          if (flag & 128)
-            {
-              gdssize = read3ByteMSBFirst(fileptr);
-              fileSetPos(fileID, (off_t) gdssize - 3, SEEK_CUR);
-              if (CGRIBEX_Debug) Message("gdssize     = %u", gdssize);
-            }
-
-          unsigned bmssize = 0;
-          if (flag & 64)
-            {
-              bmssize = read3ByteMSBFirst(fileptr);
-              fileSetPos(fileID, (off_t) bmssize - 3, SEEK_CUR);
-              if (CGRIBEX_Debug) Message("bmssize     = %u", bmssize);
-            }
-
-          unsigned bdssize = read3ByteMSBFirst(fileptr);
-          if (CGRIBEX_Debug) Message("bdssize     = %u", bdssize);
-          if (bdssize <= 120)
-            {
-              enum
-              {
-                issize = 4
-              };
-              gribsize &= JP23SET;
-              gribsize *= 120;
-              bdssize = correct_bdslen(bdssize, gribsize, issize + pdssize + gdssize + bmssize);
-              if (CGRIBEX_Debug) Message("bdssize     = %u", bdssize);
-
-              gribsize = issize + pdssize + gdssize + bmssize + bdssize + 4;
-            }
-        }
-      rgribsize = (size_t) gribsize;
-    }
-  else if (gribversion == 2)
-    {
-      /* we set gribsize the following way because it doesn't matter then
-         whether int is 4 or 8 bytes long - we don't have to care if the size
-         really fits: if it does not, the record can not be read at all */
-      rgribsize = 0;
-      enum
+      if (bdssize <= 120)
       {
-        g2size_bytes = 8
-      };
-      unsigned char g2size[g2size_bytes];
-      filePtrRead(fileptr, g2size, g2size_bytes);
-      for (int i = 0; i < g2size_bytes; ++i) rgribsize = (rgribsize << 8) | g2size[i];
+        enum
+        {
+          issize = 4
+        };
+        gribsize &= JP23SET;
+        gribsize *= 120;
+        bdssize = correct_bdslen(bdssize, gribsize, issize + pdssize + gdssize + bmssize);
+        if (CGRIBEX_Debug) Message("bdssize     = %u", bdssize);
+
+        gribsize = issize + pdssize + gdssize + bmssize + bdssize + 4;
+      }
     }
-  else
+    rgribsize = (size_t) gribsize;
+  }
+  else if (gribversion == 2)
+  {
+    /* we set gribsize the following way because it doesn't matter then
+       whether int is 4 or 8 bytes long - we don't have to care if the size
+       really fits: if it does not, the record can not be read at all */
+    rgribsize = 0;
+    enum
     {
-      rgribsize = 0;
-      Warning("GRIB version %d unsupported!", gribversion);
-    }
+      g2size_bytes = 8
+    };
+    unsigned char g2size[g2size_bytes];
+    filePtrRead(fileptr, g2size, g2size_bytes);
+    for (int i = 0; i < g2size_bytes; ++i) rgribsize = (rgribsize << 8) | g2size[i];
+  }
+  else
+  {
+    rgribsize = 0;
+    Warning("GRIB version %d unsupported!", gribversion);
+  }
 
   if (filePtrEOF(fileptr)) rgribsize = 0;
 
@@ -3832,10 +3832,10 @@ gribGetSize(int fileID)
   long offset;
   int ierr = gribFileSeek(fileID, &offset);  // position file pointer after GRIB
   if (ierr > 0)
-    {
-      Warning("GRIB record not found!");
-      return 0;
-    }
+  {
+    Warning("GRIB record not found!");
+    return 0;
+  }
 
   if (ierr == -1) return 0;
 
@@ -3854,26 +3854,26 @@ gribRead(int fileID, void *buffer, size_t *buffersize)
   long offset;
   int ierr = gribFileSeek(fileID, &offset);  // position file pointer after GRIB
   if (ierr > 0)
-    {
-      Warning("GRIB record not found!");
-      *buffersize = 0;
-      return -2;
-    }
+  {
+    Warning("GRIB record not found!");
+    *buffersize = 0;
+    return -2;
+  }
 
   if (ierr == -1)
-    {
-      *buffersize = 0;
-      return -1;
-    }
+  {
+    *buffersize = 0;
+    return -1;
+  }
 
   size_t recSize = gribReadSize(fileID);
   size_t readSize = recSize;
 
   if (readSize > *buffersize)
-    {
-      readSize = *buffersize;
-      ierr = -3;  // Tell the caller that the buffer was insufficient.
-    }
+  {
+    readSize = *buffersize;
+    ierr = -3;  // Tell the caller that the buffer was insufficient.
+  }
 
   *buffersize = recSize;  // Inform the caller about the record size.
 
@@ -3894,10 +3894,10 @@ gribWrite(int fileID, void *buffer, size_t buffersize)
 {
   int nwrite = (int) (fileWrite(fileID, buffer, buffersize));
   if (nwrite != (int) buffersize)
-    {
-      perror(__func__);
-      nwrite = -1;
-    }
+  {
+    perror(__func__);
+    nwrite = -1;
+  }
 
   return nwrite;
 }
@@ -4000,65 +4000,65 @@ C     ----------------------------------------------------------------
   */
   // Set GRIB calendar.
   if (CGRIBEX_grib_calendar == -1)
-    {
-      CGRIBEX_grib_calendar = CALENDAR_PROLEPTIC;
+  {
+    CGRIBEX_grib_calendar = CALENDAR_PROLEPTIC;
 
-      envString = getenv("GRIB_CALENDAR");
-      if (envString)
-        {
-          if (strncmp(envString, "standard", 8) == 0)
-            CGRIBEX_grib_calendar = CALENDAR_STANDARD;
-          else if (strncmp(envString, "proleptic", 9) == 0)
-            CGRIBEX_grib_calendar = CALENDAR_PROLEPTIC;
-          else if (strncmp(envString, "360days", 7) == 0)
-            CGRIBEX_grib_calendar = CALENDAR_360DAYS;
-          else if (strncmp(envString, "365days", 7) == 0)
-            CGRIBEX_grib_calendar = CALENDAR_365DAYS;
-          else if (strncmp(envString, "366days", 7) == 0)
-            CGRIBEX_grib_calendar = CALENDAR_366DAYS;
-          else if (strncmp(envString, "none", 4) == 0)
-            CGRIBEX_grib_calendar = CALENDAR_NONE;
-        }
+    envString = getenv("GRIB_CALENDAR");
+    if (envString)
+    {
+      if (strncmp(envString, "standard", 8) == 0)
+        CGRIBEX_grib_calendar = CALENDAR_STANDARD;
+      else if (strncmp(envString, "proleptic", 9) == 0)
+        CGRIBEX_grib_calendar = CALENDAR_PROLEPTIC;
+      else if (strncmp(envString, "360days", 7) == 0)
+        CGRIBEX_grib_calendar = CALENDAR_360DAYS;
+      else if (strncmp(envString, "365days", 7) == 0)
+        CGRIBEX_grib_calendar = CALENDAR_365DAYS;
+      else if (strncmp(envString, "366days", 7) == 0)
+        CGRIBEX_grib_calendar = CALENDAR_366DAYS;
+      else if (strncmp(envString, "none", 4) == 0)
+        CGRIBEX_grib_calendar = CALENDAR_NONE;
     }
+  }
   // Set GRIBEX compatibility mode.
   envString = getenv("GRIB_GRIBEX_MODE_ON");
   if (envString != NULL)
-    {
-      if (atoi(envString) == 1) CGRIBEX_Const = 0;
-    }
+  {
+    if (atoi(envString) == 1) CGRIBEX_Const = 0;
+  }
 
   // See if output stream needs changing
   grprsm = stdout;
   env_stream = getenv("GRPRS_STREAM");
   if (env_stream)
+  {
+    if (isdigit((int) env_stream[0]))
     {
-      if (isdigit((int) env_stream[0]))
-        {
-          int unit;
-          unit = atoi(env_stream);
-          if (unit < 1 || unit > 99)
-            Warning("Invalid number for GRPRS_STREAM: %d", unit);
-          else if (unit == 2)
-            grprsm = stderr;
-          else if (unit == 6)
-            grprsm = stdout;
-          else
-            {
-              char filename[] = "unit.00";
-              snprintf(filename, sizeof(filename), "%2.2d", unit);
-              grprsm = fopen(filename, "w");
-              if (!grprsm) SysError("GRPRS_STREAM = %d", unit);
-            }
-        }
+      int unit;
+      unit = atoi(env_stream);
+      if (unit < 1 || unit > 99)
+        Warning("Invalid number for GRPRS_STREAM: %d", unit);
+      else if (unit == 2)
+        grprsm = stderr;
+      else if (unit == 6)
+        grprsm = stdout;
       else
-        {
-          if (env_stream[0])
-            {
-              grprsm = fopen(env_stream, "w");
-              if (!grprsm) SysError("GRPRS_STREAM = %s", env_stream);
-            }
-        }
+      {
+        char filename[] = "unit.00";
+        snprintf(filename, sizeof(filename), "%2.2d", unit);
+        grprsm = fopen(filename, "w");
+        if (!grprsm) SysError("GRPRS_STREAM = %d", unit);
+      }
     }
+    else
+    {
+      if (env_stream[0])
+      {
+        grprsm = fopen(env_stream, "w");
+        if (!grprsm) SysError("GRPRS_STREAM = %s", env_stream);
+      }
+    }
+  }
   // Mark common area values set by user.
   lfirst = false;
 }
@@ -4507,11 +4507,11 @@ prtbin(int kin, int knbit, int *kout, int *kerr)
     it fit in a Cray 48 bit integer?
   */
   if (knbit < 1 || knbit > 14)
-    {
-      *kerr = 1;
-      printf(" prtbin : Error in binary number length - %3d bits.\n", knbit);
-      return;
-    }
+  {
+    *kerr = 1;
+    printf(" prtbin : Error in binary number length - %3d bits.\n", knbit);
+    return;
+  }
   else
     *kerr = 0;
   /*
@@ -4524,12 +4524,12 @@ prtbin(int kin, int knbit, int *kout, int *kerr)
   idec = 1;
 
   for (int j = 0; j < knbit; ++j)
-    {
-      itemp = ik - ((ik / 2) * 2);
-      *kout = (*kout) + itemp * idec;
-      ik = ik / 2;
-      idec = idec * 10;
-    }
+  {
+    itemp = ik - ((ik / 2) * 2);
+    *kout = (*kout) + itemp * idec;
+    ik = ik / 2;
+    idec = idec * 10;
+  }
 
   return;
 }
@@ -4619,31 +4619,31 @@ ref2ibm(double *pref, int kbits)
   /*  than the reference value.                         */
 
   if (ztemp < *pref)
+  {
+    /*  Convert floating point to GRIB representation */
+    /*  using truncation to ensure that the converted */
+    /*  number is smaller than the original one.      */
+
+    itrnd = 0;
+    zdumm = ztemp;
+    confp3(zdumm, &kexp, &kmant, kbits, itrnd);
+
+    /*  Set reference value to that stored in the GRIB code. */
+
+    *pref = decfp2(kexp, kmant);
+
+    if (ztemp < *pref)
     {
-      /*  Convert floating point to GRIB representation */
-      /*  using truncation to ensure that the converted */
-      /*  number is smaller than the original one.      */
-
-      itrnd = 0;
-      zdumm = ztemp;
-      confp3(zdumm, &kexp, &kmant, kbits, itrnd);
-
-      /*  Set reference value to that stored in the GRIB code. */
-
-      *pref = decfp2(kexp, kmant);
-
-      if (ztemp < *pref)
-        {
-          if (CGRIBEX_Debug)
-            {
-              Message("Reference value error.");
-              Message("Notify Met.Applications Section.");
-              Message("ZTEMP = ", ztemp);
-              Message("PREF = ", pref);
-            }
-          *pref = ztemp;
-        }
+      if (CGRIBEX_Debug)
+      {
+        Message("Reference value error.");
+        Message("Notify Met.Applications Section.");
+        Message("ZTEMP = ", ztemp);
+        Message("PREF = ", pref);
+      }
+      *pref = ztemp;
     }
+  }
 
   return;
 } /* ref2ibm */
@@ -4678,19 +4678,19 @@ grib1Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **pdsp,
   unsigned char *section = gribbuffer;
   unsigned char *is = gribbuffer;
   if (!GRIB_START(section))
-    {
-      fprintf(stderr, "Wrong GRIB indicator section: found >%c%c%c%c<\n", section[0], section[1], section[2], section[3]);
-      return -1;
-    }
+  {
+    fprintf(stderr, "Wrong GRIB indicator section: found >%c%c%c%c<\n", section[0], section[1], section[2], section[3]);
+    return -1;
+  }
 
   unsigned recsize = GET_UINT3(section[4], section[5], section[6]);
 
   int gribversion = GRIB_EDITION(section);
   if (gribversion != 0 && gribversion != 1)
-    {
-      fprintf(stderr, "Error while decoding GRIB1 sections: GRIB edition %d records not supported!\n", gribversion);
-      return -1;
-    }
+  {
+    fprintf(stderr, "Error while decoding GRIB1 sections: GRIB edition %d records not supported!\n", gribversion);
+    return -1;
+  }
 
   unsigned grib1offset = (gribversion == 1) ? 4 : 0;
 
@@ -4700,28 +4700,28 @@ grib1Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **pdsp,
 
   unsigned char *gds = NULL;
   if (PDS_HAS_GDS)
-    {
-      gds = bufpointer;
-      bufpointer += GDS_Len;
-      gribsize += GDS_Len;
-    }
+  {
+    gds = bufpointer;
+    bufpointer += GDS_Len;
+    gribsize += GDS_Len;
+  }
 
   unsigned char *bms = NULL;
   if (PDS_HAS_BMS)
-    {
-      bms = bufpointer;
-      bufpointer += BMS_Len;
-      gribsize += BMS_Len;
-    }
+  {
+    bms = bufpointer;
+    bufpointer += BMS_Len;
+    gribsize += BMS_Len;
+  }
 
   unsigned char *bds = bufpointer;
   unsigned bdslen = BDS_Len;
   if (recsize > JP23SET && bdslen <= 120)
-    {
-      recsize &= JP23SET;
-      recsize *= 120;
-      bdslen = correct_bdslen(bdslen, recsize, gribsize);
-    }
+  {
+    recsize &= JP23SET;
+    recsize *= 120;
+    bdslen = correct_bdslen(bdslen, recsize, gribsize);
+  }
   bufpointer += bdslen;
   gribsize += bdslen;
   gribsize += 4;
@@ -4733,16 +4733,16 @@ grib1Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **pdsp,
 
   *gribrecsize = gribsize;
   if (gribbufsize < gribsize)
-    {
-      fprintf(stderr, "Inconsistent length of GRIB message (grib_buffer_size=%ld < grib_record_size=%u)!\n", gribbufsize, gribsize);
-      return 1;
-    }
+  {
+    fprintf(stderr, "Inconsistent length of GRIB message (grib_buffer_size=%ld < grib_record_size=%u)!\n", gribbufsize, gribsize);
+    return 1;
+  }
 
   if (!GRIB_FIN(bufpointer))  // end section - "7777" in ASCII
-    {
-      fprintf(stderr, "Missing GRIB end section: found >%c%c%c%c<\n", bufpointer[0], bufpointer[1], bufpointer[2], bufpointer[3]);
-      return -2;
-    }
+  {
+    fprintf(stderr, "Missing GRIB end section: found >%c%c%c%c<\n", bufpointer[0], bufpointer[1], bufpointer[2], bufpointer[3]);
+    return -2;
+  }
 
   return 0;
 }
@@ -4765,17 +4765,17 @@ grib2Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **idsp,
   unsigned sec_len = 16;
 
   if (!GRIB_START(section))
-    {
-      fprintf(stderr, "wrong indicator section >%c%c%c%c<\n", section[0], section[1], section[2], section[3]);
-      return -1;
-    }
+  {
+    fprintf(stderr, "wrong indicator section >%c%c%c%c<\n", section[0], section[1], section[2], section[3]);
+    return -1;
+  }
 
   int gribversion = GRIB_EDITION(section);
   if (gribversion != 2)
-    {
-      fprintf(stderr, "wrong GRIB version %d\n", gribversion);
-      return -1;
-    }
+  {
+    fprintf(stderr, "wrong GRIB version %d\n", gribversion);
+    return -1;
+  }
 
   unsigned gribsize = 0;
   for (int i = 0; i < 8; ++i) gribsize = (gribsize << 8) | section[8 + i];
@@ -4789,10 +4789,10 @@ grib2Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **idsp,
   // fprintf(stderr, "ids %d %ld\n", sec_num, sec_len);
 
   if (sec_num != 1)
-    {
-      fprintf(stderr, "Unexpected section1 number %d\n", sec_num);
-      return -1;
-    }
+  {
+    fprintf(stderr, "Unexpected section1 number %d\n", sec_num);
+    return -1;
+  }
 
   *idsp = section;
 
@@ -4805,25 +4805,25 @@ grib2Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **idsp,
   // fprintf(stderr, "lus %d %ld\n", sec_num, sec_len);
 
   if (sec_num == 2)
-    {
-      *lusp = section;
+  {
+    *lusp = section;
 
-      grib_len += sec_len;
-      section += sec_len;
+    grib_len += sec_len;
+    section += sec_len;
 
-      /* section 3 */
-      sec_len = GRIB2_SECLEN(section);
-      // sec_num = GRIB2_SECNUM(section);
-      // fprintf(stderr, "gds %d %ld\n", sec_num, sec_len);
+    /* section 3 */
+    sec_len = GRIB2_SECLEN(section);
+    // sec_num = GRIB2_SECNUM(section);
+    // fprintf(stderr, "gds %d %ld\n", sec_num, sec_len);
 
-      *gdsp = section;
-    }
+    *gdsp = section;
+  }
   else if (sec_num == 3) { *gdsp = section; }
   else
-    {
-      fprintf(stderr, "Unexpected section3 number %d\n", sec_num);
-      return -1;
-    }
+  {
+    fprintf(stderr, "Unexpected section3 number %d\n", sec_num);
+    return -1;
+  }
 
   grib_len += sec_len;
   section += sec_len;
@@ -4834,10 +4834,10 @@ grib2Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **idsp,
   // fprintf(stderr, "pds %d %ld\n", sec_num, sec_len);
 
   if (sec_num != 4)
-    {
-      fprintf(stderr, "Unexpected section4 number %d\n", sec_num);
-      return -1;
-    }
+  {
+    fprintf(stderr, "Unexpected section4 number %d\n", sec_num);
+    return -1;
+  }
 
   *pdsp = section;
 
@@ -4850,10 +4850,10 @@ grib2Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **idsp,
   // fprintf(stderr, "drs %d %ld\n", sec_num, sec_len);
 
   if (sec_num != 5)
-    {
-      fprintf(stderr, "Unexpected section5 number %d\n", sec_num);
-      return -1;
-    }
+  {
+    fprintf(stderr, "Unexpected section5 number %d\n", sec_num);
+    return -1;
+  }
 
   *drsp = section;
 
@@ -4866,10 +4866,10 @@ grib2Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **idsp,
   // fprintf(stderr, "bms %d %ld\n", sec_num, sec_len);
 
   if (sec_num != 6)
-    {
-      fprintf(stderr, "Unexpected section6 number %d\n", sec_num);
-      return -1;
-    }
+  {
+    fprintf(stderr, "Unexpected section6 number %d\n", sec_num);
+    return -1;
+  }
 
   *bmsp = section;
 
@@ -4882,10 +4882,10 @@ grib2Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **idsp,
   // fprintf(stderr, "bds %d %ld\n", sec_num, sec_len);
 
   if (sec_num != 7)
-    {
-      fprintf(stderr, "Unexpected section7 number %d\n", sec_num);
-      return -1;
-    }
+  {
+    fprintf(stderr, "Unexpected section7 number %d\n", sec_num);
+    return -1;
+  }
 
   *bdsp = section;
 
@@ -4895,26 +4895,26 @@ grib2Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **idsp,
   /* skip multi GRIB sections */
   int msec = 1;
   while (!GRIB_FIN(section))
-    {
-      sec_len = GRIB2_SECLEN(section);
-      sec_num = GRIB2_SECNUM(section);
+  {
+    sec_len = GRIB2_SECLEN(section);
+    sec_num = GRIB2_SECNUM(section);
 
-      if (sec_num < 1 || sec_num > 7) break;
+    if (sec_num < 1 || sec_num > 7) break;
 
-      if (sec_num == 7) fprintf(stderr, "Skipped unsupported multi GRIB section %d!\n", ++msec);
+    if (sec_num == 7) fprintf(stderr, "Skipped unsupported multi GRIB section %d!\n", ++msec);
 
-      if ((grib_len + sec_len) > gribsize) break;
+    if ((grib_len + sec_len) > gribsize) break;
 
-      grib_len += sec_len;
-      section += sec_len;
-    }
+    grib_len += sec_len;
+    section += sec_len;
+  }
 
   /* end section - "7777" in ASCII */
   if (!GRIB_FIN(section))
-    {
-      fprintf(stderr, "Missing end section >%2x %2x %2x %2x<\n", section[0], section[1], section[2], section[3]);
-      return -2;
-    }
+  {
+    fprintf(stderr, "Missing end section >%2x %2x %2x %2x<\n", section[0], section[1], section[2], section[3]);
+    return -2;
+  }
 
   return 0;
 }
@@ -4928,10 +4928,10 @@ grib_info_for_grads(off_t recpos, long recsize, unsigned char *gribbuffer, int *
   unsigned char *section = gribbuffer;
   unsigned char *is = gribbuffer;
   if (!GRIB_START(section))
-    {
-      fprintf(stderr, "wrong indicator section >%c%c%c%c<\n", section[0], section[1], section[2], section[3]);
-      return -1;
-    }
+  {
+    fprintf(stderr, "wrong indicator section >%c%c%c%c<\n", section[0], section[1], section[2], section[3]);
+    return -1;
+  }
 
   int gribversion = GRIB_EDITION(section);
   if (recsize == 24 && gribversion == 0) gribversion = 0;
@@ -4944,20 +4944,20 @@ grib_info_for_grads(off_t recpos, long recsize, unsigned char *gribbuffer, int *
 
   unsigned char *gds = NULL;
   if (PDS_HAS_GDS)
-    {
-      gds = bufpointer;
-      bufpointer += GDS_Len;
-      gribsize += GDS_Len;
-    }
+  {
+    gds = bufpointer;
+    bufpointer += GDS_Len;
+    gribsize += GDS_Len;
+  }
 
   unsigned char *bms = NULL;
   if (PDS_HAS_BMS)
-    {
-      bms = bufpointer;
-      bufpointer += BMS_Len;
-      bpos = recpos + gribsize + 6;
-      gribsize += BMS_Len;
-    }
+  {
+    bms = bufpointer;
+    bufpointer += BMS_Len;
+    bpos = recpos + gribsize + 6;
+    gribsize += BMS_Len;
+  }
 
   unsigned char *bds = bufpointer;
 
@@ -4970,16 +4970,16 @@ grib_info_for_grads(off_t recpos, long recsize, unsigned char *gribbuffer, int *
   gribsize += 4;
 
   if (gribsize > recsize)
-    {
-      fprintf(stderr, "GRIB buffer size %ld too small! Min size = %ld\n", recsize, gribsize);
-      return 1;
-    }
+  {
+    fprintf(stderr, "GRIB buffer size %ld too small! Min size = %ld\n", recsize, gribsize);
+    return 1;
+  }
 
   /* end section - "7777" in ascii */
   if (!GRIB_FIN(bufpointer))
-    {
-      fprintf(stderr, "Missing end section >%2x %2x %2x %2x<\n", bufpointer[0], bufpointer[1], bufpointer[2], bufpointer[3]);
-    }
+  {
+    fprintf(stderr, "Missing end section >%2x %2x %2x %2x<\n", bufpointer[0], bufpointer[1], bufpointer[2], bufpointer[3]);
+  }
 
   int bs = BDS_BinScale;
   if (bs > 32767) bs = 32768 - bs;
@@ -5030,11 +5030,11 @@ grib1PrintALL(int nrec, long offset, long recpos, long recsize, unsigned char *g
   unsigned char *is = NULL, *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
 
   if (header)
-    {
-      fprintf(stdout, "  Rec : Off Position   Size : V PDS  GDS    BMS    BDS : Code Level :  LType GType: CR LL\n");
-      //               ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+
-      header = false;
-    }
+  {
+    fprintf(stdout, "  Rec : Off Position   Size : V PDS  GDS    BMS    BDS : Code Level :  LType GType: CR LL\n");
+    //               ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+
+    header = false;
+  }
 
   is = gribbuffer;
 
@@ -5043,10 +5043,10 @@ grib1PrintALL(int nrec, long offset, long recpos, long recsize, unsigned char *g
   long gribrecsize;
   int nerr = grib1Sections(gribbuffer, recsize, &pds, &gds, &bms, &bds, &gribrecsize);
   if (nerr < 0)
-    {
-      fprintf(stdout, "%5d :%4ld %8ld %6ld : GRIB message error\n", nrec, offset, recpos, recsize);
-      return;
-    }
+  {
+    fprintf(stdout, "%5d :%4ld %8ld %6ld : GRIB message error\n", nrec, offset, recpos, recsize);
+    return;
+  }
 
   int GridType = (gds == NULL) ? -1 : (int) GDS_GridType;
 
@@ -5078,21 +5078,20 @@ grib2PrintALL(int nrec, long offset, long recpos, long recsize, unsigned char *g
   double cr = 1;
 
   if (header)
-    {
-      fprintf(stdout,
-              "  Rec : Off Position   Size : V IDS LUS GDS PDS  DRS    BMS    BDS : Parameter   Level :  LType GType: CR\n");
-      //       ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+
-      header = false;
-    }
+  {
+    fprintf(stdout, "  Rec : Off Position   Size : V IDS LUS GDS PDS  DRS    BMS    BDS : Parameter   Level :  LType GType: CR\n");
+    //       ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+
+    header = false;
+  }
 
   is = gribbuffer;
 
   int nerr = grib2Sections(gribbuffer, recsize, &ids, &lus, &gds, &pds, &drs, &bms, &bds);
   if (nerr)
-    {
-      fprintf(stdout, "%5d :%4ld %8ld %6ld : error\n", nrec, offset, recpos, recsize);
-      return;
-    }
+  {
+    fprintf(stdout, "%5d :%4ld %8ld %6ld : error\n", nrec, offset, recpos, recsize);
+    return;
+  }
 
   if (ids) ids_len = GRIB2_SECLEN(ids);
   if (lus) lus_len = GRIB2_SECLEN(lus);
@@ -5148,24 +5147,24 @@ grib1PrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
   UNUSED(recpos);
 
   if (header)
-    {
-      fprintf(stdout, "  Rec : PDS Tab Cen Sub Ver Grid Code LTyp Level1 Level2    Date  Time P1 P2 TU TR NAVE Scale FCnum CT\n");
-      //               ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+
-      header = 0;
-    }
+  {
+    fprintf(stdout, "  Rec : PDS Tab Cen Sub Ver Grid Code LTyp Level1 Level2    Date  Time P1 P2 TU TR NAVE Scale FCnum CT\n");
+    //               ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+
+    header = 0;
+  }
 
   is = gribbuffer;
 
   long gribrecsize;
   int nerr = grib1Sections(gribbuffer, recsize, &pds, &gds, &bms, &bds, &gribrecsize);
   if (nerr < 0)
-    {
-      fprintf(stdout, "%5d : GRIB message error\n", nrec);
-      return;
-    }
+  {
+    fprintf(stdout, "%5d : GRIB message error\n", nrec);
+    return;
+  }
 
   switch (GRIB_EDITION(is))
-    {
+  {
     case 0:
       year = GET_UINT1(pds[12]);
       century = 1;
@@ -5179,17 +5178,17 @@ grib1PrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
       decimalscale = PDS_DecimalScale;
       break;
     default: fprintf(stderr, "Grib version %d not supported!", GRIB_EDITION(is)); exit(EXIT_FAILURE);
-    }
+  }
 
   if (PDS_Len > 28)
     if (PDS_CenterID == 98 || PDS_Subcenter == 98 || (PDS_CenterID == 7 && PDS_Subcenter == 98))
       if (pds[40] == 1) fc_num = GET_UINT1(pds[49]);
 
   if (year < 0)
-    {
-      date = (-year) * 10000 + (int) PDS_Month * 100 + (int) PDS_Day;
-      century = -century;
-    }
+  {
+    date = (-year) * 10000 + (int) PDS_Month * 100 + (int) PDS_Day;
+    century = -century;
+  }
   else { date = year * 10000 + (int) PDS_Month * 100 + (int) PDS_Day; }
 
   fprintf(stdout, "%5d :%4d%4d%4d%4d%4d %4d %4d%4d%7d%7d %8d%6d%3d%3d%3d%3d%5d%6d%5d%4d", nrec, PDS_Len, PDS_CodeTable,
@@ -5222,19 +5221,19 @@ grib1PrintGDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
   UNUSED(recpos);
 
   if (header)
-    {
-      fprintf(stdout, "  Rec : GDS  NV PVPL Typ : xsize ysize   Lat1   Lon1   Lat2   Lon2    dx    dy\n");
-      //               ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+
-      header = 0;
-    }
+  {
+    fprintf(stdout, "  Rec : GDS  NV PVPL Typ : xsize ysize   Lat1   Lon1   Lat2   Lon2    dx    dy\n");
+    //               ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+
+    header = 0;
+  }
 
   long gribrecsize;
   int nerr = grib1Sections(gribbuffer, recsize, &pds, &gds, &bms, &bds, &gribrecsize);
   if (nerr < 0)
-    {
-      fprintf(stdout, "%5d : GRIB message error\n", nrec);
-      return;
-    }
+  {
+    fprintf(stdout, "%5d : GRIB message error\n", nrec);
+    return;
+  }
 
   fprintf(stdout, "%5d :", nrec);
 
@@ -5270,19 +5269,19 @@ grib1PrintBMS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
   UNUSED(recpos);
 
   if (header)
-    {
-      fprintf(stdout, "  Rec : Code Level     BMS    Size\n");
-      //               ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+
-      header = 0;
-    }
+  {
+    fprintf(stdout, "  Rec : Code Level     BMS    Size\n");
+    //               ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+
+    header = 0;
+  }
 
   long gribrecsize;
   int nerr = grib1Sections(gribbuffer, recsize, &pds, &gds, &bms, &bds, &gribrecsize);
   if (nerr < 0)
-    {
-      fprintf(stdout, "%5d : GRIB message error\n", nrec);
-      return;
-    }
+  {
+    fprintf(stdout, "%5d : GRIB message error\n", nrec);
+    return;
+  }
 
   int level = get_level(pds);
 
@@ -5320,19 +5319,19 @@ grib1PrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
   UNUSED(recpos);
 
   if (header)
-    {
-      fprintf(stdout, "  Rec : Code Level     BDS Flag     Scale   RefValue Bits  CR\n");
-      //               ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+
-      header = 0;
-    }
+  {
+    fprintf(stdout, "  Rec : Code Level     BDS Flag     Scale   RefValue Bits  CR\n");
+    //               ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+
+    header = 0;
+  }
 
   long gribrecsize;
   int nerr = grib1Sections(gribbuffer, recsize, &pds, &gds, &bms, &bds, &gribrecsize);
   if (nerr < 0)
-    {
-      fprintf(stdout, "%5d : GRIB message error\n", nrec);
-      return;
-    }
+  {
+    fprintf(stdout, "%5d : GRIB message error\n", nrec);
+    return;
+  }
 
   int level = get_level(pds);
 
@@ -5346,11 +5345,11 @@ grib1PrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
     scale = pow(2.0, (double) BDS_BinScale);
 
   if (PDS_DecimalScale != 0)
-    {
-      double decscale = pow(10.0, (double) -PDS_DecimalScale);
-      refval *= decscale;
-      scale *= decscale;
-    }
+  {
+    double decscale = pow(10.0, (double) -PDS_DecimalScale);
+    refval *= decscale;
+    scale *= decscale;
+  }
 
   fprintf(stdout, "%5d :", nrec);
 
@@ -5387,16 +5386,16 @@ gribCheck1(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
   long gribrecsize;
   int nerr = grib1Sections(gribbuffer, recsize, &pds, &gds, &bms, &bds, &gribrecsize);
   if (nerr < 0)
-    {
-      fprintf(stdout, "%5d : GRIB message error\n", nrec);
-      return;
-    }
+  {
+    fprintf(stdout, "%5d : GRIB message error\n", nrec);
+    return;
+  }
 
   if (nerr > 0)
-    {
-      fprintf(stdout, "%5d : <-- GRIB data corrupted!\n", nrec);
-      return;
-    }
+  {
+    fprintf(stdout, "%5d : <-- GRIB data corrupted!\n", nrec);
+    return;
+  }
 
   int level = get_level(pds);
 
@@ -5422,16 +5421,16 @@ repair1(unsigned char *gbuf, long gbufsize)
   long gribrecsize;
   int nerr = grib1Sections(gbuf, gbufsize, &pds, &gds, &bms, &bds, &gribrecsize);
   if (nerr < 0)
-    {
-      fprintf(stdout, "GRIB message error\n");
-      return;
-    }
+  {
+    fprintf(stdout, "GRIB message error\n");
+    return;
+  }
 
   if (nerr > 0)
-    {
-      fprintf(stdout, "GRIB data corrupted!\n");
-      return;
-    }
+  {
+    fprintf(stdout, "GRIB data corrupted!\n");
+    return;
+  }
 
   unsigned bds_len = BDS_Len;
   bds_nbits = BDS_NumBits;
@@ -5442,16 +5441,16 @@ repair1(unsigned char *gbuf, long gbufsize)
   /* lcompress = (bds_flag >> 4)&1; */
 
   if (lspherc)
+  {
+    if (lcomplex)
     {
-      if (lcomplex)
-        {
-          size_t jup, ioff;
-          jup = (size_t) bds[15];
-          ioff = (jup + 1) * (jup + 2);
-          bds_ext = 4 + 3 + 4 * ioff;
-        }
-      else { bds_ext = 4; }
+      size_t jup, ioff;
+      jup = (size_t) bds[15];
+      ioff = (jup + 1) * (jup + 2);
+      bds_ext = 4 + 3 + 4 * ioff;
     }
+    else { bds_ext = 4; }
+  }
 
   size_t datstart = bds_head + bds_ext;
 
@@ -5460,19 +5459,19 @@ repair1(unsigned char *gbuf, long gbufsize)
   size_t sourceLen = ((((bds_len - datstart) * 8 - bds_ubits) / bds_nbits) * bds_nbits) / 8;
 
   if (bds_nbits == 24)
+  {
+    unsigned char *pbuf = (unsigned char *) Malloc(sourceLen);
+    ;
+    size_t nelem = sourceLen / 3;
+    for (size_t i = 0; i < nelem; ++i)
     {
-      unsigned char *pbuf = (unsigned char *) Malloc(sourceLen);
-      ;
-      size_t nelem = sourceLen / 3;
-      for (size_t i = 0; i < nelem; ++i)
-        {
-          pbuf[3 * i] = source[i];
-          pbuf[3 * i + 1] = source[nelem + i];
-          pbuf[3 * i + 2] = source[2 * nelem + i];
-        }
-      memcpy(source, pbuf, sourceLen);
-      Free(pbuf);
+      pbuf[3 * i] = source[i];
+      pbuf[3 * i + 1] = source[nelem + i];
+      pbuf[3 * i + 2] = source[2 * nelem + i];
     }
+    memcpy(source, pbuf, sourceLen);
+    Free(pbuf);
+  }
 }
 
 void
@@ -5483,26 +5482,26 @@ gribRepair1(int nrec, long recsize, unsigned char *gribbuffer)
   long gribrecsize;
   int nerr = grib1Sections(gribbuffer, recsize, &pds, &gds, &bms, &bds, &gribrecsize);
   if (nerr < 0)
-    {
-      fprintf(stdout, "%5d : GRIB message error\n", nrec);
-      return;
-    }
+  {
+    fprintf(stdout, "%5d : GRIB message error\n", nrec);
+    return;
+  }
 
   if (nerr > 0)
-    {
-      fprintf(stdout, "%5d : <-- GRIB data corrupted!\n", nrec);
-      return;
-    }
+  {
+    fprintf(stdout, "%5d : <-- GRIB data corrupted!\n", nrec);
+    return;
+  }
 
   int level = get_level(pds);
 
   double cr = (((BDS_Flag >> 4) & 1) && BDS_Z == 128) ? get_cr(&bds[17], &bds[20]) : 1;
 
   if (IS_EQUAL(cr, 1) && BDS_NumBits == 24)
-    {
-      fprintf(stdout, "Repair GRIB record %5d : code = %4d   level = %7d\n", nrec, PDS_Parameter, level);
-      repair1(gribbuffer, recsize);
-    }
+  {
+    fprintf(stdout, "Repair GRIB record %5d : code = %4d   level = %7d\n", nrec, PDS_Parameter, level);
+    repair1(gribbuffer, recsize);
+  }
 }
 #include <stdio.h>
 #include <string.h>
@@ -5558,16 +5557,16 @@ gribGetZip(size_t recsize, unsigned char *gribbuffer, size_t *urecsize)
   long gribrecsize;
   int nerr = grib1Sections(gribbuffer, (long) recsize, &pds, &gds, &bms, &bds, &gribrecsize);
   if (nerr < 0)
-    {
-      fprintf(stdout, "GRIB message error\n");
-      return compress;
-    }
+  {
+    fprintf(stdout, "GRIB message error\n");
+    return compress;
+  }
 
   if (nerr > 0)
-    {
-      fprintf(stdout, "GRIB data corrupted!\n");
-      return compress;
-    }
+  {
+    fprintf(stdout, "GRIB data corrupted!\n");
+    return compress;
+  }
 
   /* bds_len   = BDS_Len; */
   /* bds_nbits = BDS_NumBits; */
@@ -5578,10 +5577,10 @@ gribGetZip(size_t recsize, unsigned char *gribbuffer, size_t *urecsize)
 
   size_t gribsize = 0;
   if (lcompress)
-    {
-      compress = BDS_Z;
-      if (compress == Z_SZIP) gribsize = (size_t) GET_UINT3(bds[14], bds[15], bds[16]);
-    }
+  {
+    compress = BDS_Z;
+    if (compress == Z_SZIP) gribsize = (size_t) GET_UINT3(bds[14], bds[15], bds[16]);
+  }
 
   *urecsize = gribsize;
 
@@ -5604,28 +5603,28 @@ gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize)
   long gribrecsize;
   int nerr = grib1Sections(dbuf, dbufsize, &pds, &gds, &bms, &bds, &gribrecsize);
   if (nerr < 0)
-    {
-      fprintf(stdout, "GRIB message error\n");
-      return (int) gribrecsize;
-    }
+  {
+    fprintf(stdout, "GRIB message error\n");
+    return (int) gribrecsize;
+  }
 
   if (nerr > 0)
-    {
-      fprintf(stdout, "GRIB data corrupted!\n");
-      return (int) gribrecsize;
-    }
+  {
+    fprintf(stdout, "GRIB data corrupted!\n");
+    return (int) gribrecsize;
+  }
 
   int bds_zoffset = 12;
 
   unsigned bds_len = BDS_Len;
   if (gribLen > JP23SET && bds_len <= 120)
-    {
-      gribLen &= JP23SET;
-      gribLen *= 120;
-      bds_len = correct_bdslen(bds_len, gribLen, bds - dbuf);
-      llarge = true;
-      bds_zoffset += 2;
-    }
+  {
+    gribLen &= JP23SET;
+    gribLen *= 120;
+    bds_len = correct_bdslen(bds_len, gribLen, bds - dbuf);
+    llarge = true;
+    bds_zoffset += 2;
+  }
 
   if (gribLen > JP24SET || llarge) return (int) gribLen;
 
@@ -5645,15 +5644,15 @@ gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize)
     /* lcompress = (bds_flag >> 4)&1; */
 
     if (bds_nbits != 8 && bds_nbits != 16 && bds_nbits != 24 && bds_nbits != 32)
+    {
+      static bool linfo = true;
+      if (linfo && bds_nbits != 0)
       {
-        static bool linfo = true;
-        if (linfo && bds_nbits != 0)
-          {
-            linfo = false;
-            fprintf(stderr, "GRIB szip supports only 8, 16, 24 and 32 bit data!\n");
-          }
-        return rec_len;
+        linfo = false;
+        fprintf(stderr, "GRIB szip supports only 8, 16, 24 and 32 bit data!\n");
       }
+      return rec_len;
+    }
 
     int bits_per_sample = (bds_nbits == 24) ? 8 : bds_nbits;
 
@@ -5664,15 +5663,15 @@ gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize)
     sz_param.pixels_per_scanline = PIXELS_PER_SCANLINE;
 
     if (lspherc)
+    {
+      bds_ext = 4;
+      if (lcomplex)
       {
-        bds_ext = 4;
-        if (lcomplex)
-          {
-            int jup = bds[15];
-            int ioff = (jup + 1) * (jup + 2);
-            bds_ext += 3 + 4 * ioff;
-          }
+        int jup = bds[15];
+        int ioff = (jup + 1) * (jup + 2);
+        bds_ext += 3 + 4 * ioff;
       }
+    }
 
     size_t datstart = bds_head + bds_ext;
 
@@ -5689,128 +5688,128 @@ gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize)
     unsigned char *dest = sbuf;
 
     if (bds_nbits == 24)
+    {
+      long nelem = sourceLen / 3;
+      pbuf = (unsigned char *) Malloc(sourceLen);
+      for (long i = 0; i < nelem; ++i)
       {
-        long nelem = sourceLen / 3;
-        pbuf = (unsigned char *) Malloc(sourceLen);
-        for (long i = 0; i < nelem; ++i)
-          {
-            pbuf[i] = source[3 * i];
-            pbuf[nelem + i] = source[3 * i + 1];
-            pbuf[2 * nelem + i] = source[3 * i + 2];
-          }
-        source = pbuf;
+        pbuf[i] = source[3 * i];
+        pbuf[nelem + i] = source[3 * i + 1];
+        pbuf[2 * nelem + i] = source[3 * i + 2];
       }
+      source = pbuf;
+    }
 
     int status = SZ_BufftoBuffCompress(dest, &destLen, source, sourceLen, &sz_param);
     if (status != SZ_OK)
-      {
-        if (status == SZ_NO_ENCODER_ERROR)
-          Warning("SZ_NO_ENCODER_ERROR code %3d level %3d", PDS_Parameter, PDS_Level2);
-        else if (status == SZ_PARAM_ERROR)
-          Warning("SZ_PARAM_ERROR code %3d level %3d", PDS_Parameter, PDS_Level2);
-        else if (status == SZ_MEM_ERROR)
-          Warning("SZ_MEM_ERROR code %3d level %3d", PDS_Parameter, PDS_Level2);
-        else if (status == SZ_OUTBUFF_FULL)
-          /*Warning("SZ_OUTBUFF_FULL code %3d level %3d", PDS_Parameter, PDS_Level2)*/;
-        else
-          Warning("SZ ERROR: %d code %3d level %3d", status, PDS_Parameter, PDS_Level2);
-      }
+    {
+      if (status == SZ_NO_ENCODER_ERROR)
+        Warning("SZ_NO_ENCODER_ERROR code %3d level %3d", PDS_Parameter, PDS_Level2);
+      else if (status == SZ_PARAM_ERROR)
+        Warning("SZ_PARAM_ERROR code %3d level %3d", PDS_Parameter, PDS_Level2);
+      else if (status == SZ_MEM_ERROR)
+        Warning("SZ_MEM_ERROR code %3d level %3d", PDS_Parameter, PDS_Level2);
+      else if (status == SZ_OUTBUFF_FULL)
+        /*Warning("SZ_OUTBUFF_FULL code %3d level %3d", PDS_Parameter, PDS_Level2)*/;
+      else
+        Warning("SZ ERROR: %d code %3d level %3d", status, PDS_Parameter, PDS_Level2);
+    }
 
     if (pbuf) Free(pbuf);
     /*
     fprintf(stderr, "sourceLen, destLen %d %d\n", sourceLen, destLen);
     */
     if (destLen < MIN_COMPRESS * sourceLen)
+    {
+      source = bds + datstart + bds_zoffset;
+      memcpy(source, dest, destLen);
+
+      /* ----++++ number of unused bits at end of section) */
+
+      BDS_Flag -= bds_ubits;
+
+      gribLenOld = gribLen;
+
+      if (bds_ext)
+        for (long i = bds_ext - 1; i >= 0; --i) bds[bds_zoffset + bds_head + i] = bds[bds_head + i];
+
+      /*
+      fprintf(stderr, "destLen, datsize, datstart %d %d %d\n", destLen, datsize, datstart);
+      */
+      /*	memcpy(bds + datstart + bds_zoffset, source, destLen); */
+      /*
+        fprintf(stderr, "z>>> %d %d %d %d <<<\n", (int) bds[0+datstart+bds_zoffset],
+          (int)bds[1+datstart+bds_zoffset], (int)bds[2+datstart+bds_zoffset], (int)bds[3+datstart+bds_zoffset]);
+      */
+      if (llarge)
       {
-        source = bds + datstart + bds_zoffset;
-        memcpy(source, dest, destLen);
+        if (gribLenOld % 120)
+        {
+          fprintf(stderr, "Internal problem, record length not multiple of 120!");
+          while (gribLenOld % 120) gribLenOld++;
+        }
+        // gribLenOld = gribLenOld / (-120);
+        // gribLenOld = JP23SET - gribLenOld + 1;
 
-        /* ----++++ number of unused bits at end of section) */
-
-        BDS_Flag -= bds_ubits;
-
-        gribLenOld = gribLen;
-
-        if (bds_ext)
-          for (long i = bds_ext - 1; i >= 0; --i) bds[bds_zoffset + bds_head + i] = bds[bds_head + i];
-
-        /*
-        fprintf(stderr, "destLen, datsize, datstart %d %d %d\n", destLen, datsize, datstart);
-        */
-        /*	memcpy(bds + datstart + bds_zoffset, source, destLen); */
-        /*
-          fprintf(stderr, "z>>> %d %d %d %d <<<\n", (int) bds[0+datstart+bds_zoffset],
-            (int)bds[1+datstart+bds_zoffset], (int)bds[2+datstart+bds_zoffset], (int)bds[3+datstart+bds_zoffset]);
-        */
-        if (llarge)
-          {
-            if (gribLenOld % 120)
-              {
-                fprintf(stderr, "Internal problem, record length not multiple of 120!");
-                while (gribLenOld % 120) gribLenOld++;
-              }
-            // gribLenOld = gribLenOld / (-120);
-            // gribLenOld = JP23SET - gribLenOld + 1;
-
-            SetLen3(bds, bds_zstart, gribLenOld);
-            SetLen4(bds, bds_zstart + 3, sourceLen);
-            SetLen4(bds, bds_zstart + 7, destLen);
-          }
-        else
-          {
-            SetLen3(bds, bds_zstart, gribLenOld);
-            SetLen3(bds, bds_zstart + 3, sourceLen);
-            SetLen3(bds, bds_zstart + 6, destLen);
-          }
-
-        int bdsLen = datstart + bds_zoffset + destLen;
-
-        bds[11] = 0;
-        bds[12] = 0;
-
-        BDS_Z = Z_SZIP;
-
-        BDS_Flag += 16;
-        if ((bdsLen % 2) == 1)
-          {
-            BDS_Flag += 8;
-            bds[bdsLen++] = 0;
-          }
-
-        SetLen3(bds, 0, bdsLen);
-
-        gribLen = (bds - dbuf) + bdsLen;
-
-        dbuf[gribLen++] = '7';
-        dbuf[gribLen++] = '7';
-        dbuf[gribLen++] = '7';
-        dbuf[gribLen++] = '7';
-
-        if (llarge)
-          {
-            long bdslen = gribLen - 4;
-
-            /*
-              If a very large product, the section 4 length field holds
-              the number of bytes in the product after section 4 upto
-              the end of the padding bytes.
-              This is a fixup to get round the restriction on product lengths
-              due to the count being only 24 bits. It is only possible because
-              the (default) rounding for GRIB products is 120 bytes.
-            */
-            while (gribLen % 120) dbuf[gribLen++] = 0;
-
-            long itemp = gribLen / (-120);
-            itemp = JP23SET - itemp + 1;
-
-            SetLen3(dbuf, 4, itemp);
-
-            bdslen = gribLen - bdslen;
-
-            SetLen3(bds, 0, bdslen);
-          }
-        else { SetLen3(dbuf, 4, gribLen); }
+        SetLen3(bds, bds_zstart, gribLenOld);
+        SetLen4(bds, bds_zstart + 3, sourceLen);
+        SetLen4(bds, bds_zstart + 7, destLen);
       }
+      else
+      {
+        SetLen3(bds, bds_zstart, gribLenOld);
+        SetLen3(bds, bds_zstart + 3, sourceLen);
+        SetLen3(bds, bds_zstart + 6, destLen);
+      }
+
+      int bdsLen = datstart + bds_zoffset + destLen;
+
+      bds[11] = 0;
+      bds[12] = 0;
+
+      BDS_Z = Z_SZIP;
+
+      BDS_Flag += 16;
+      if ((bdsLen % 2) == 1)
+      {
+        BDS_Flag += 8;
+        bds[bdsLen++] = 0;
+      }
+
+      SetLen3(bds, 0, bdsLen);
+
+      gribLen = (bds - dbuf) + bdsLen;
+
+      dbuf[gribLen++] = '7';
+      dbuf[gribLen++] = '7';
+      dbuf[gribLen++] = '7';
+      dbuf[gribLen++] = '7';
+
+      if (llarge)
+      {
+        long bdslen = gribLen - 4;
+
+        /*
+          If a very large product, the section 4 length field holds
+          the number of bytes in the product after section 4 upto
+          the end of the padding bytes.
+          This is a fixup to get round the restriction on product lengths
+          due to the count being only 24 bits. It is only possible because
+          the (default) rounding for GRIB products is 120 bytes.
+        */
+        while (gribLen % 120) dbuf[gribLen++] = 0;
+
+        long itemp = gribLen / (-120);
+        itemp = JP23SET - itemp + 1;
+
+        SetLen3(dbuf, 4, itemp);
+
+        bdslen = gribLen - bdslen;
+
+        SetLen3(bds, 0, bdslen);
+      }
+      else { SetLen3(dbuf, 4, gribLen); }
+    }
     else {}
     /*
     fprintf(stderr, "%3d %3d griblen in %6d  out %6d  CR %g   slen %6d dlen %6d  CR %g\n",
@@ -5826,10 +5825,10 @@ gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize)
   UNUSED(sbufsize);
 
   if (libszwarn)
-    {
-      Warning("Compression disabled, szlib not available!");
-      libszwarn = 0;
-    }
+  {
+    Warning("Compression disabled, szlib not available!");
+    libszwarn = 0;
+  }
 #endif
 
   if (llarge)
@@ -5862,16 +5861,16 @@ gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize
   long gribrecsize;
   int nerr = grib1Sections(sbuf, sbufsize, &pds, &gds, &bms, &bds, &gribrecsize);
   if (nerr < 0)
-    {
-      fprintf(stdout, "GRIB message error\n");
-      return 0;
-    }
+  {
+    fprintf(stdout, "GRIB message error\n");
+    return 0;
+  }
 
   if (nerr > 0)
-    {
-      fprintf(stdout, "GRIB data corrupted!\n");
-      return 0;
-    }
+  {
+    fprintf(stdout, "GRIB data corrupted!\n");
+    return 0;
+  }
 
   // unsigned bds_len = BDS_Len;
   bool llarge = false;
@@ -5886,15 +5885,15 @@ gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize
   /* lcompress = (bds_flag >> 4)&1; */
 
   if (lspherc)
+  {
+    if (lcomplex)
     {
-      if (lcomplex)
-        {
-          int jup = bds[bds_zoffset + 15];
-          int ioff = (jup + 1) * (jup + 2);
-          bds_ext = 4 + 3 + 4 * ioff;
-        }
-      else { bds_ext = 4; }
+      int jup = bds[bds_zoffset + 15];
+      int ioff = (jup + 1) * (jup + 2);
+      bds_ext = 4 + 3 + 4 * ioff;
     }
+    else { bds_ext = 4; }
+  }
 
   size_t datstart = bds_head + (size_t) bds_ext;
 
@@ -5906,16 +5905,16 @@ gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize
 
   nerr = grib1Sections(dbuf, sbufsize, &pds, &gds, &bms, &bds, &gribrecsize);
   if (nerr < 0)
-    {
-      fprintf(stdout, "GRIB message error\n");
-      return 0;
-    }
+  {
+    fprintf(stdout, "GRIB message error\n");
+    return 0;
+  }
 
   if (nerr > 0)
-    {
-      fprintf(stdout, "GRIB data corrupted!\n");
-      return 0;
-    }
+  {
+    fprintf(stdout, "GRIB data corrupted!\n");
+    return 0;
+  }
 
   unsigned char *dest = bds + datstart;
   if (llarge)
@@ -5952,18 +5951,18 @@ gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize
 
     int status = SZ_BufftoBuffDecompress(dest, &tmpLen, source, sourceLen, &sz_param);
     if (status != SZ_OK)
-      {
-        if (status == SZ_NO_ENCODER_ERROR)
-          Warning("SZ_NO_ENCODER_ERROR code %3d level %3d", PDS_Parameter, PDS_Level2);
-        else if (status == SZ_PARAM_ERROR)
-          Warning("SZ_PARAM_ERROR code %3d level %3d", PDS_Parameter, PDS_Level2);
-        else if (status == SZ_MEM_ERROR)
-          Warning("SZ_MEM_ERROR code %3d level %3d", PDS_Parameter, PDS_Level2);
-        else if (status == SZ_OUTBUFF_FULL)
-          Warning("SZ_OUTBUFF_FULL code %3d level %3d", PDS_Parameter, PDS_Level2);
-        else
-          Warning("SZ ERROR: %d code %3d level %3d", status, PDS_Parameter, PDS_Level2);
-      }
+    {
+      if (status == SZ_NO_ENCODER_ERROR)
+        Warning("SZ_NO_ENCODER_ERROR code %3d level %3d", PDS_Parameter, PDS_Level2);
+      else if (status == SZ_PARAM_ERROR)
+        Warning("SZ_PARAM_ERROR code %3d level %3d", PDS_Parameter, PDS_Level2);
+      else if (status == SZ_MEM_ERROR)
+        Warning("SZ_MEM_ERROR code %3d level %3d", PDS_Parameter, PDS_Level2);
+      else if (status == SZ_OUTBUFF_FULL)
+        Warning("SZ_OUTBUFF_FULL code %3d level %3d", PDS_Parameter, PDS_Level2);
+      else
+        Warning("SZ ERROR: %d code %3d level %3d", status, PDS_Parameter, PDS_Level2);
+    }
     /*
     fprintf(stderr, "gribUnzip: sl = %ld  dl = %ld   tl = %ld\n",
             (long)sourceLen, (long)destLen,(long) tmpLen);
@@ -5973,27 +5972,27 @@ gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize
               (long) tmpLen);
 
     if (bds_nbits == 24)
+    {
+      long nelem = tmpLen / 3;
+      unsigned char *pbuf = (unsigned char *) Malloc(tmpLen);
+      for (long i = 0; i < nelem; ++i)
       {
-        long nelem = tmpLen / 3;
-        unsigned char *pbuf = (unsigned char *) Malloc(tmpLen);
-        for (long i = 0; i < nelem; ++i)
-          {
-            pbuf[3 * i] = dest[i];
-            pbuf[3 * i + 1] = dest[nelem + i];
-            pbuf[3 * i + 2] = dest[2 * nelem + i];
-          }
-        memcpy(dest, pbuf, tmpLen);
-        Free(pbuf);
+        pbuf[3 * i] = dest[i];
+        pbuf[3 * i + 1] = dest[nelem + i];
+        pbuf[3 * i + 2] = dest[2 * nelem + i];
       }
+      memcpy(dest, pbuf, tmpLen);
+      Free(pbuf);
+    }
 
     int bds_ubits = BDS_Flag & 15;
     BDS_Flag -= bds_ubits;
 
     if ((bdsLen % 2) == 1)
-      {
-        BDS_Flag += 8;
-        bds[bdsLen++] = 0;
-      }
+    {
+      BDS_Flag += 8;
+      bds[bdsLen++] = 0;
+    }
 
     SetLen3(bds, 0, bdsLen);
 
@@ -6005,30 +6004,30 @@ gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize
     dbuf[gribLen++] = '7';
 
     if (llarge)
-      {
-        long itemp;
-        bdsLen = gribLen - 4;
-        /*
-          If a very large product, the section 4 length field holds
-          the number of bytes in the product after section 4 upto
-          the end of the padding bytes.
-          This is a fixup to get round the restriction on product lengths
-          due to the count being only 24 bits. It is only possible because
-          the (default) rounding for GRIB products is 120 bytes.
-        */
-        while (gribLen % 120) dbuf[gribLen++] = 0;
+    {
+      long itemp;
+      bdsLen = gribLen - 4;
+      /*
+        If a very large product, the section 4 length field holds
+        the number of bytes in the product after section 4 upto
+        the end of the padding bytes.
+        This is a fixup to get round the restriction on product lengths
+        due to the count being only 24 bits. It is only possible because
+        the (default) rounding for GRIB products is 120 bytes.
+      */
+      while (gribLen % 120) dbuf[gribLen++] = 0;
 
-        if (gribLen != (size_t) recLen) fprintf(stderr, "Internal problem, recLen and gribLen differ!\n");
+      if (gribLen != (size_t) recLen) fprintf(stderr, "Internal problem, recLen and gribLen differ!\n");
 
-        itemp = gribLen / (-120);
-        itemp = JP23SET - itemp + 1;
+      itemp = gribLen / (-120);
+      itemp = JP23SET - itemp + 1;
 
-        SetLen3(dbuf, 4, itemp);
+      SetLen3(dbuf, 4, itemp);
 
-        bdsLen = gribLen - bdsLen;
+      bdsLen = gribLen - bdsLen;
 
-        SetLen3(bds, 0, bdsLen);
-      }
+      SetLen3(bds, 0, bdsLen);
+    }
     else { SetLen3(dbuf, 4, recLen); }
     /*
     fprintf(stderr, "recLen, gribLen, bdsLen %d %d %d\n", recLen, gribLen, bdsLen);
@@ -6049,10 +6048,10 @@ gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize
   UNUSED(dest);
 
   if (libszwarn)
-    {
-      Warning("Decompression disabled, szlib not available!");
-      libszwarn = 0;
-    }
+  {
+    Warning("Decompression disabled, szlib not available!");
+    libszwarn = 0;
+  }
 #endif
 
   return (int) gribLen;
@@ -7884,17 +7883,17 @@ decodeIS(unsigned char *is, int *isec0, int *iret)
 
   // Data is not GRIB or pseudo-grib.
   if (lgrib == false && lbudg == false && ltide == false)
-    {
-      *iret = 305;
-      gprintf(__func__, "Input data is not GRIB or pseudo-grib.");
-      gprintf(__func__, "Return code = %d", *iret);
-    }
+  {
+    *iret = 305;
+    gprintf(__func__, "Input data is not GRIB or pseudo-grib.");
+    gprintf(__func__, "Return code = %d", *iret);
+  }
   if (lbudg || ltide)
-    {
-      *iret = 305;
-      gprintf(__func__, "Pseudo-grib data unsupported.");
-      gprintf(__func__, "Return code = %d", *iret);
-    }
+  {
+    *iret = 305;
+    gprintf(__func__, "Pseudo-grib data unsupported.");
+    gprintf(__func__, "Return code = %d", *iret);
+  }
 
   // Octets 5 - 7 : Length of message. One 24 bit field.
   ISEC0_GRIB_Len = (int) (GRIB1_SECLEN(is));
@@ -10233,46 +10232,46 @@ encodeES(GRIBPACK *lGrib, long *gribLen, long bdsstart)
   lGrib[z++] = '7';
 
   if (z > JP24SET)
+  {
+    long bdslen = z - 4;
+    // fprintf(stderr, "Abort: GRIB record too large (max = %d)!\n", JP23SET);
+    // exit(1);
+    /*
+      If a very large product, the section 4 length field holds
+      the number of bytes in the product after section 4 upto
+      the end of the padding bytes.
+      This is a fixup to get round the restriction on product lengths
+      due to the count being only 24 bits. It is only possible because
+      the (default) rounding for GRIB products is 120 bytes.
+    */
+    while (z % 120) lGrib[z++] = 0;
+
+    if (z > JP23SET * 120)
     {
-      long bdslen = z - 4;
-      // fprintf(stderr, "Abort: GRIB record too large (max = %d)!\n", JP23SET);
-      // exit(1);
-      /*
-        If a very large product, the section 4 length field holds
-        the number of bytes in the product after section 4 upto
-        the end of the padding bytes.
-        This is a fixup to get round the restriction on product lengths
-        due to the count being only 24 bits. It is only possible because
-        the (default) rounding for GRIB products is 120 bytes.
-      */
-      while (z % 120) lGrib[z++] = 0;
-
-      if (z > JP23SET * 120)
-        {
-          fprintf(stderr, "Abort: GRIB1 record too large (size = %ld; max = %d)!\n", z, JP23SET * 120);
-          exit(1);
-        }
-
-      long itemp = z / (-120);
-      itemp = JP23SET - itemp + 1;
-
-      lGrib[4] = (GRIBPACK) (itemp >> 16);
-      lGrib[5] = (GRIBPACK) (itemp >> 8);
-      lGrib[6] = (GRIBPACK) itemp;
-
-      bdslen = z - bdslen;
-      lGrib[bdsstart] = (GRIBPACK) (bdslen >> 16);
-      lGrib[bdsstart + 1] = (GRIBPACK) (bdslen >> 8);
-      lGrib[bdsstart + 2] = (GRIBPACK) bdslen;
+      fprintf(stderr, "Abort: GRIB1 record too large (size = %ld; max = %d)!\n", z, JP23SET * 120);
+      exit(1);
     }
+
+    long itemp = z / (-120);
+    itemp = JP23SET - itemp + 1;
+
+    lGrib[4] = (GRIBPACK) (itemp >> 16);
+    lGrib[5] = (GRIBPACK) (itemp >> 8);
+    lGrib[6] = (GRIBPACK) itemp;
+
+    bdslen = z - bdslen;
+    lGrib[bdsstart] = (GRIBPACK) (bdslen >> 16);
+    lGrib[bdsstart + 1] = (GRIBPACK) (bdslen >> 8);
+    lGrib[bdsstart + 2] = (GRIBPACK) bdslen;
+  }
   else
-    {
-      lGrib[4] = (GRIBPACK) (z >> 16);
-      lGrib[5] = (GRIBPACK) (z >> 8);
-      lGrib[6] = (GRIBPACK) z;
+  {
+    lGrib[4] = (GRIBPACK) (z >> 16);
+    lGrib[5] = (GRIBPACK) (z >> 8);
+    lGrib[6] = (GRIBPACK) z;
 
-      while (z % 8) lGrib[z++] = 0;
-    }
+    while (z % 8) lGrib[z++] = 0;
+  }
 
   *gribLen = z;
 }
@@ -10290,23 +10289,23 @@ getLocalExtLen(int *isec1)
   long extlen = 0;
 
   if (ISEC1_LocalFLag)
+  {
+    if (ISEC1_CenterID == 78 || ISEC1_CenterID == 215 || ISEC1_CenterID == 250)
     {
-      if (ISEC1_CenterID == 78 || ISEC1_CenterID == 215 || ISEC1_CenterID == 250)
-        {
-          if (isec1[36] == 254)
-            extlen = DWD_extension_254_len;
-          else if (isec1[36] == 253)
-            extlen = DWD_extension_253_len;
-        }
-      else if (ISEC1_CenterID == 98)
-        {
-          if (isec1[36] == 1) extlen = ECMWF_extension_1_len;
-        }
-      else if (ISEC1_CenterID == 252)
-        {
-          if (isec1[36] == 1) extlen = MPIM_extension_1_len;
-        }
+      if (isec1[36] == 254)
+        extlen = DWD_extension_254_len;
+      else if (isec1[36] == 253)
+        extlen = DWD_extension_253_len;
     }
+    else if (ISEC1_CenterID == 98)
+    {
+      if (isec1[36] == 1) extlen = ECMWF_extension_1_len;
+    }
+    else if (ISEC1_CenterID == 252)
+    {
+      if (isec1[36] == 1) extlen = MPIM_extension_1_len;
+    }
+  }
 
   return extlen;
 }
@@ -10413,10 +10412,10 @@ encodePDS(GRIBPACK *lpds, long pdsLen, int *isec1)
   int year = ISEC1_Year;
 
   if (century < 0)
-    {
-      century = -century;
-      year = -year;
-    }
+  {
+    century = -century;
+    year = -year;
+  }
 
   Put3Byte(pdsLen);               /*  0 Length of Block 1        */
   Put1Byte(ISEC1_CodeTable);      /*  3 Local table number       */
@@ -10461,25 +10460,25 @@ encodePDS(GRIBPACK *lpds, long pdsLen, int *isec1)
 
   Put1Byte(ISEC1_TimeUnit); /* 17 Time unit                */
   if (ISEC1_TimeRange == 10)
-    {
-      Put1Byte(ISEC1_TimePeriod1);
-      Put1Byte(ISEC1_TimePeriod2);
-    }
+  {
+    Put1Byte(ISEC1_TimePeriod1);
+    Put1Byte(ISEC1_TimePeriod2);
+  }
   else if (ISEC1_TimeRange == 113 || ISEC1_TimeRange == 0)
-    {
-      Put1Byte(ISEC1_TimePeriod1);
-      Put1Byte(0);
-    }
+  {
+    Put1Byte(ISEC1_TimePeriod1);
+    Put1Byte(0);
+  }
   else if (ISEC1_TimeRange == 5 || ISEC1_TimeRange == 4 || ISEC1_TimeRange == 3 || ISEC1_TimeRange == 2)
-    {
-      Put1Byte(ISEC1_TimePeriod1);
-      Put1Byte(ISEC1_TimePeriod2);
-    }
+  {
+    Put1Byte(ISEC1_TimePeriod1);
+    Put1Byte(ISEC1_TimePeriod2);
+  }
   else
-    {
-      Put1Byte(0);
-      Put1Byte(0);
-    }
+  {
+    Put1Byte(0);
+    Put1Byte(0);
+  }
   Put1Byte(ISEC1_TimeRange); /* 20 Timerange flag           */
   Put2Byte(ISEC1_AvgNum);    /* 21 Average                  */
 
@@ -10489,28 +10488,28 @@ encodePDS(GRIBPACK *lpds, long pdsLen, int *isec1)
   Put2Int(ISEC1_DecScaleFactor); /* 26 Decimal scale factor     */
 
   if (ISEC1_LocalFLag)
+  {
+    if (ISEC1_CenterID == 78 || ISEC1_CenterID == 215 || ISEC1_CenterID == 250)
     {
-      if (ISEC1_CenterID == 78 || ISEC1_CenterID == 215 || ISEC1_CenterID == 250)
-        {
-          if (isec1[36] == 254)
-            encodePDS_DWD_local_Extension_254(lGrib, &z, isec1);
-          else if (isec1[36] == 253)
-            encodePDS_DWD_local_Extension_253(lGrib, &z, isec1);
-        }
-      else if (ISEC1_CenterID == 98)
-        {
-          if (isec1[36] == 1) encodePDS_ECMWF_local_Extension_1(lGrib, &z, isec1);
-        }
-      else if (ISEC1_CenterID == 252)
-        {
-          if (isec1[36] == 1) encodePDS_MPIM_local_Extension_1(lGrib, &z, isec1);
-        }
-      else
-        {
-          const long localextlen = getLocalExtLen(isec1);
-          for (long i = 0; i < localextlen; i++) Put1Byte(isec1[24 + i]);
-        }
+      if (isec1[36] == 254)
+        encodePDS_DWD_local_Extension_254(lGrib, &z, isec1);
+      else if (isec1[36] == 253)
+        encodePDS_DWD_local_Extension_253(lGrib, &z, isec1);
     }
+    else if (ISEC1_CenterID == 98)
+    {
+      if (isec1[36] == 1) encodePDS_ECMWF_local_Extension_1(lGrib, &z, isec1);
+    }
+    else if (ISEC1_CenterID == 252)
+    {
+      if (isec1[36] == 1) encodePDS_MPIM_local_Extension_1(lGrib, &z, isec1);
+    }
+    else
+    {
+      const long localextlen = getLocalExtLen(isec1);
+      for (long i = 0; i < localextlen; i++) Put1Byte(isec1[24 + i]);
+    }
+  }
 }
 
 // clang-format off

@@ -185,10 +185,10 @@ extAddRecord(stream_t *streamptr, int param, int level, size_t xysize, size_t re
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
   if (!gridAdded.isNew)
-    {
-      grid_free(grid);
-      Free(grid);
-    }
+  {
+    grid_free(grid);
+    Free(grid);
+  }
 
   int leveltype = ZAXIS_GENERIC;
   int datatype = extInqDatatype(prec, number);
@@ -225,46 +225,46 @@ extScanTimestep1(stream_t *streamptr)
 
   int nrecs = 0;
   while (true)
+  {
+    recpos = fileGetPos(fileID);
+    if (extRead(fileID, extp) != 0)
     {
-      recpos = fileGetPos(fileID);
-      if (extRead(fileID, extp) != 0)
-        {
-          streamptr->ntsteps = 1;
-          break;
-        }
-
-      size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
-
-      extInqHeader(extp, header);
-
-      int vdate = header[0];
-      int vtime = 0;
-      int rcode = header[1];
-      int rlevel = header[2];
-      int rxysize = header[3];
-      int param = cdiEncodeParam(rcode, 255, 255);
-      CdiDateTime datetime = cdiDateTime_set(vdate, vtime);
-
-      if (nrecs == 0)
-        {
-          datetime0 = datetime;
-          taxis->vDateTime = datetime;
-        }
-      else
-        {
-          record_t *records = streamptr->tsteps[tsID].records;
-          for (int recID = 0; recID < nrecs; recID++)
-            if (param == records[recID].param && rlevel == records[recID].ilevel) goto tstepScanLoopFinished;
-
-          if (cdiDateTime_isNE(datetime, datetime0)) Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
-        }
-
-      nrecs++;
-
-      if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", nrecs, (int) recpos, rcode, rlevel, vdate, vtime);
-
-      extAddRecord(streamptr, param, rlevel, (size_t) rxysize, recsize, recpos, extp->prec, extp->number);
+      streamptr->ntsteps = 1;
+      break;
     }
+
+    size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+
+    extInqHeader(extp, header);
+
+    int vdate = header[0];
+    int vtime = 0;
+    int rcode = header[1];
+    int rlevel = header[2];
+    int rxysize = header[3];
+    int param = cdiEncodeParam(rcode, 255, 255);
+    CdiDateTime datetime = cdiDateTime_set(vdate, vtime);
+
+    if (nrecs == 0)
+    {
+      datetime0 = datetime;
+      taxis->vDateTime = datetime;
+    }
+    else
+    {
+      record_t *records = streamptr->tsteps[tsID].records;
+      for (int recID = 0; recID < nrecs; recID++)
+        if (param == records[recID].param && rlevel == records[recID].ilevel) goto tstepScanLoopFinished;
+
+      if (cdiDateTime_isNE(datetime, datetime0)) Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
+    }
+
+    nrecs++;
+
+    if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", nrecs, (int) recpos, rcode, rlevel, vdate, vtime);
+
+    extAddRecord(streamptr, param, rlevel, (size_t) rxysize, recsize, recpos, extp->prec, extp->number);
+  }
 
 tstepScanLoopFinished:
   streamptr->rtsteps = 1;
@@ -312,74 +312,74 @@ extScanTimestep2(stream_t *streamptr)
   int nrecords = streamScanInitRecords2(streamptr);
 
   for (int rindex = 0; rindex <= nrecords; rindex++)
+  {
+    recpos = fileGetPos(fileID);
+    if (extRead(fileID, extp) != 0)
     {
-      recpos = fileGetPos(fileID);
-      if (extRead(fileID, extp) != 0)
-        {
-          streamptr->ntsteps = 2;
-          break;
-        }
-
-      size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
-
-      extInqHeader(extp, header);
-
-      int vdate = header[0];
-      int vtime = 0;
-      int rcode = header[1];
-      int rlevel = header[2];
-      int param = cdiEncodeParam(rcode, 255, 255);
-
-      if (rindex == 0)
-        {
-          taxis->type = TAXIS_ABSOLUTE;
-          taxis->vDateTime = cdiDateTime_set(vdate, vtime);
-        }
-
-      bool nextstep = false;
-      int recID;
-      for (recID = 0; recID < nrecords; recID++)
-        {
-          if (param == records[recID].param && rlevel == records[recID].ilevel)
-            {
-              if (recinfo[recID].used) { nextstep = true; }
-              else
-                {
-                  recinfo[recID].used = true;
-                  streamptr->tsteps[tsID].recIDs[rindex] = recID;
-                }
-              break;
-            }
-        }
-      if (recID == nrecords)
-        {
-          Warning("Code %d level %d not found at timestep %d", rcode, rlevel, tsID + 1);
-          return CDI_EUFSTRUCT;
-        }
-
-      if (nextstep) break;
-
-      if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", rindex + 1, (int) recpos, rcode, rlevel, vdate, vtime);
-
-      if (param != records[recID].param || rlevel != records[recID].ilevel)
-        {
-          Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
-                  records[recID].ilevel, rlevel);
-          return CDI_EUFSTRUCT;
-        }
-
-      records[recID].position = recpos;
-      records[recID].size = recsize;
+      streamptr->ntsteps = 2;
+      break;
     }
+
+    size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+
+    extInqHeader(extp, header);
+
+    int vdate = header[0];
+    int vtime = 0;
+    int rcode = header[1];
+    int rlevel = header[2];
+    int param = cdiEncodeParam(rcode, 255, 255);
+
+    if (rindex == 0)
+    {
+      taxis->type = TAXIS_ABSOLUTE;
+      taxis->vDateTime = cdiDateTime_set(vdate, vtime);
+    }
+
+    bool nextstep = false;
+    int recID;
+    for (recID = 0; recID < nrecords; recID++)
+    {
+      if (param == records[recID].param && rlevel == records[recID].ilevel)
+      {
+        if (recinfo[recID].used) { nextstep = true; }
+        else
+        {
+          recinfo[recID].used = true;
+          streamptr->tsteps[tsID].recIDs[rindex] = recID;
+        }
+        break;
+      }
+    }
+    if (recID == nrecords)
+    {
+      Warning("Code %d level %d not found at timestep %d", rcode, rlevel, tsID + 1);
+      return CDI_EUFSTRUCT;
+    }
+
+    if (nextstep) break;
+
+    if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", rindex + 1, (int) recpos, rcode, rlevel, vdate, vtime);
+
+    if (param != records[recID].param || rlevel != records[recID].ilevel)
+    {
+      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
+              records[recID].ilevel, rlevel);
+      return CDI_EUFSTRUCT;
+    }
+
+    records[recID].position = recpos;
+    records[recID].size = recsize;
+  }
 
   int nrecs = 0;
   for (int recID = 0; recID < nrecords; recID++)
-    {
-      if (recinfo[recID].used)
-        nrecs++;
-      else
-        vlistDefVarTimetype(vlistID, recinfo[recID].varID, TIME_CONSTANT);
-    }
+  {
+    if (recinfo[recID].used)
+      nrecs++;
+    else
+      vlistDefVarTimetype(vlistID, recinfo[recID].varID, TIME_CONSTANT);
+  }
   streamptr->tsteps[tsID].nrecs = nrecs;
 
   streamptr->rtsteps = 2;
@@ -415,78 +415,78 @@ extScanTimestep(stream_t *streamptr)
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   if (streamptr->tsteps[tsID].recordSize == 0)
+  {
+    cdi_create_records(streamptr, tsID, true);
+    record_t *records = streamptr->tsteps[tsID].records;
+
+    nrecs = streamScanInitRecords(streamptr, tsID);
+
+    int fileID = streamptr->fileID;
+
+    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+
+    for (int rindex = 0; rindex <= nrecs; rindex++)
     {
-      cdi_create_records(streamptr, tsID, true);
-      record_t *records = streamptr->tsteps[tsID].records;
+      recpos = fileGetPos(fileID);
+      if (extRead(fileID, extp) != 0)
+      {
+        streamptr->ntsteps = streamptr->rtsteps + 1;
+        break;
+      }
 
-      nrecs = streamScanInitRecords(streamptr, tsID);
+      size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
 
-      int fileID = streamptr->fileID;
+      extInqHeader(extp, header);
 
-      fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+      int vdate = header[0];
+      int vtime = 0;
+      int rcode = header[1];
+      int rlevel = header[2];
+      int param = cdiEncodeParam(rcode, 255, 255);
 
-      for (int rindex = 0; rindex <= nrecs; rindex++)
-        {
-          recpos = fileGetPos(fileID);
-          if (extRead(fileID, extp) != 0)
-            {
-              streamptr->ntsteps = streamptr->rtsteps + 1;
-              break;
-            }
+      // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
+      if (rindex == nrecs) continue;
+      int recID = streamptr->tsteps[tsID].recIDs[rindex];
 
-          size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+      if (rindex == 0)
+      {
+        taxis->type = TAXIS_ABSOLUTE;
+        taxis->vDateTime = cdiDateTime_set(vdate, vtime);
+      }
 
-          extInqHeader(extp, header);
+      if (param != records[recID].param || rlevel != records[recID].ilevel)
+      {
+        Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
+                records[recID].ilevel, rlevel);
+        Error("Invalid, unsupported or inconsistent record structure!");
+      }
 
-          int vdate = header[0];
-          int vtime = 0;
-          int rcode = header[1];
-          int rlevel = header[2];
-          int param = cdiEncodeParam(rcode, 255, 255);
+      records[recID].position = recpos;
+      records[recID].size = recsize;
 
-          // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
-          if (rindex == nrecs) continue;
-          int recID = streamptr->tsteps[tsID].recIDs[rindex];
+      if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", rindex, (int) recpos, rcode, rlevel, vdate, vtime);
+    }
 
-          if (rindex == 0)
-            {
-              taxis->type = TAXIS_ABSOLUTE;
-              taxis->vDateTime = cdiDateTime_set(vdate, vtime);
-            }
+    streamptr->rtsteps++;
 
-          if (param != records[recID].param || rlevel != records[recID].ilevel)
-            {
-              Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
-                      records[recID].ilevel, rlevel);
-              Error("Invalid, unsupported or inconsistent record structure!");
-            }
+    if (streamptr->ntsteps != streamptr->rtsteps)
+    {
+      tsID = tstepsNewEntry(streamptr);
+      if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
 
-          records[recID].position = recpos;
-          records[recID].size = recsize;
-
-          if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", rindex, (int) recpos, rcode, rlevel, vdate, vtime);
-        }
-
-      streamptr->rtsteps++;
-
-      if (streamptr->ntsteps != streamptr->rtsteps)
-        {
-          tsID = tstepsNewEntry(streamptr);
-          if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
-
-          streamptr->tsteps[tsID - 1].next = true;
-          streamptr->tsteps[tsID].position = recpos;
-        }
-
-      fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+      streamptr->tsteps[tsID - 1].next = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 
+    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+    streamptr->tsteps[tsID].position = recpos;
+  }
+
   if (nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs)
-    {
-      Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
-      streamptr->ntsteps = tsID;
-    }
+  {
+    Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
+    streamptr->ntsteps = tsID;
+  }
 
   return streamptr->ntsteps;
 }
@@ -503,10 +503,10 @@ extInqTimestep(stream_t *streamptr, int tsID)
 
   int nrecs = 0;
   if (!(tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID))
-    {
-      streamptr->curTsID = tsID;
-      nrecs = streamptr->tsteps[tsID].nrecs;
-    }
+  {
+    streamptr->curTsID = tsID;
+    nrecs = streamptr->tsteps[tsID].nrecs;
+  }
 
   return nrecs;
 }

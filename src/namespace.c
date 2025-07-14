@@ -114,8 +114,7 @@ namespaceInitialize(void)
 
 #define NAMESPACE_INIT() \
   do {                   \
-    }                    \
-  while (0)
+  } while (0)
 #define NAMESPACE_LOCK()
 #define NAMESPACE_UNLOCK()
 
@@ -168,36 +167,36 @@ namespaceNew(void)
   NAMESPACE_INIT();
   NAMESPACE_LOCK();
   if (namespacesSize > nNamespaces)
-    {
-      /* namespace is already available and only needs reinitialization */
-      for (unsigned i = 0; i < namespacesSize; ++i)
-        if (namespaces[i].resStage == NAMESPACE_STATUS_UNUSED)
-          {
-            newNamespaceID = (int) i;
-            break;
-          }
-    }
+  {
+    /* namespace is already available and only needs reinitialization */
+    for (unsigned i = 0; i < namespacesSize; ++i)
+      if (namespaces[i].resStage == NAMESPACE_STATUS_UNUSED)
+      {
+        newNamespaceID = (int) i;
+        break;
+      }
+  }
   else if (namespacesSize == 1)
-    {
-      /* make room for additional namespace */
-      struct Namespace *newNameSpaces = (struct Namespace *) Malloc(((size_t) namespacesSize + 1) * sizeof(namespaces[0]));
-      memcpy(newNameSpaces, namespaces, sizeof(namespaces[0]));
-      namespaces = newNameSpaces;
-      ++namespacesSize;
-      newNamespaceID = 1;
-    }
+  {
+    /* make room for additional namespace */
+    struct Namespace *newNameSpaces = (struct Namespace *) Malloc(((size_t) namespacesSize + 1) * sizeof(namespaces[0]));
+    memcpy(newNameSpaces, namespaces, sizeof(namespaces[0]));
+    namespaces = newNameSpaces;
+    ++namespacesSize;
+    newNamespaceID = 1;
+  }
   else if (namespacesSize < NUM_NAMESPACES)
-    {
-      /* make room for additional namespace */
-      newNamespaceID = (int) namespacesSize;
-      namespaces = (struct Namespace *) Realloc(namespaces, ((size_t) namespacesSize + 1) * sizeof(namespaces[0]));
-      ++namespacesSize;
-    }
+  {
+    /* make room for additional namespace */
+    newNamespaceID = (int) namespacesSize;
+    namespaces = (struct Namespace *) Realloc(namespaces, ((size_t) namespacesSize + 1) * sizeof(namespaces[0]));
+    ++namespacesSize;
+  }
   else /* implicit: namespacesSize >= NUM_NAMESPACES */
-    {
-      NAMESPACE_UNLOCK();
-      return -1;
-    }
+  {
+    NAMESPACE_UNLOCK();
+    return -1;
+  }
   xassert(newNamespaceID >= 0 && newNamespaceID < NUM_NAMESPACES);
   ++nNamespaces;
   namespaces[newNamespaceID].resStage = NAMESPACE_STATUS_INUSE;
@@ -280,18 +279,18 @@ namespaceSwitchSet(int sw, union namespaceSwitchValue value)
   int nsp = namespaceGetActive();
   NAMESPACE_LOCK();
   if (namespaces[nsp].numSwitches <= (unsigned) sw)
+  {
+    if (namespaces[nsp].switches != initialSwitches)
+      namespaces[nsp].switches
+          = (union namespaceSwitchValue *) Realloc(namespaces[nsp].switches, ((unsigned) sw + 1) * sizeof value);
+    else
     {
-      if (namespaces[nsp].switches != initialSwitches)
-        namespaces[nsp].switches
-            = (union namespaceSwitchValue *) Realloc(namespaces[nsp].switches, ((unsigned) sw + 1) * sizeof value);
-      else
-        {
-          void *temp = Malloc(((unsigned) sw + 1) * sizeof value);
-          memcpy(temp, (void *) namespaces[nsp].switches, namespaces[nsp].numSwitches * sizeof value);
-          namespaces[nsp].switches = (union namespaceSwitchValue *) temp;
-        }
-      namespaces[nsp].numSwitches = (unsigned) sw + 1;
+      void *temp = Malloc(((unsigned) sw + 1) * sizeof value);
+      memcpy(temp, (void *) namespaces[nsp].switches, namespaces[nsp].numSwitches * sizeof value);
+      namespaces[nsp].switches = (union namespaceSwitchValue *) temp;
     }
+    namespaces[nsp].numSwitches = (unsigned) sw + 1;
+  }
   namespaces[nsp].switches[sw] = value;
   NAMESPACE_UNLOCK();
 }
@@ -331,11 +330,11 @@ cdiReset(void)
   for (unsigned namespaceID = 0; namespaceID < namespacesSize; ++namespaceID)
     if (namespaces[namespaceID].resStage != NAMESPACE_STATUS_UNUSED) namespaceDelete((int) namespaceID);
   if (namespaces != &initialNamespace)
-    {
-      Free(namespaces);
-      namespaces = &initialNamespace;
-      namespaces[0].resStage = NAMESPACE_STATUS_UNUSED;
-    }
+  {
+    Free(namespaces);
+    namespaces = &initialNamespace;
+    namespaces[0].resStage = NAMESPACE_STATUS_UNUSED;
+  }
   namespacesSize = 1;
   nNamespaces = 0;
   NAMESPACE_UNLOCK();

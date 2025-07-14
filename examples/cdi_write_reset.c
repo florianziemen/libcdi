@@ -53,32 +53,32 @@ run(int irun)
   // Create a dataset in netCDF format
   streamID = streamOpenWrite("example.nc", CDI_FILETYPE_NC);
   if (streamID < 0)
-    {
-      fprintf(stderr, "%s\n", cdiStringError(streamID));
-      return (1);
-    }
+  {
+    fprintf(stderr, "%s\n", cdiStringError(streamID));
+    return (1);
+  }
 
   // Assign the variable list to the dataset
   streamDefVlist(streamID, vlistID);
 
   // Loop over the number of time steps
   for (int tsID = 0; tsID < nts; tsID++)
-    {
-      // Set the verification date to 1985-01-01 + tsID
-      taxisDefVdate(taxisID, 19850101 + tsID);
-      // Set the verification time to 12:00:00
-      taxisDefVtime(taxisID, 120000);
-      // Define the time step
-      streamDefTimestep(streamID, tsID);
+  {
+    // Set the verification date to 1985-01-01 + tsID
+    taxisDefVdate(taxisID, 19850101 + tsID);
+    // Set the verification time to 12:00:00
+    taxisDefVtime(taxisID, 120000);
+    // Define the time step
+    streamDefTimestep(streamID, tsID);
 
-      // Init var1 and var2
-      for (size_t i = 0; i < nlon * nlat; i++) var1[i] = 1.1;
-      for (size_t i = 0; i < nlon * nlat * nlev; i++) var2[i] = 2.2;
+    // Init var1 and var2
+    for (size_t i = 0; i < nlon * nlat; i++) var1[i] = 1.1;
+    for (size_t i = 0; i < nlon * nlat * nlev; i++) var2[i] = 2.2;
 
-      // Write var1 and var2
-      streamWriteVar(streamID, varID1, var1, numMissVals);
-      streamWriteVar(streamID, varID2, var2, numMissVals);
-    }
+    // Write var1 and var2
+    streamWriteVar(streamID, varID1, var1, numMissVals);
+    streamWriteVar(streamID, varID2, var2, numMissVals);
+  }
 
   fprintf(stderr, "%d gridID=%d, zaxisID1=%d, vlistID=%d, streamID=%d\n", irun, gridID, zaxisID1, vlistID, streamID);
 
@@ -101,10 +101,10 @@ main(void)
   int irun;
 
   for (irun = 0; irun < nrun; ++irun)
-    {
-      run(irun);
-      cdiReset();
-    }
+  {
+    run(irun);
+    cdiReset();
+  }
 
   return 0;
 }

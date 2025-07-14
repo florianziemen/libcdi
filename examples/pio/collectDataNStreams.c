@@ -92,15 +92,15 @@ modelRun(MPI_Comm commModel)
   gridDefYvals(gridID, lats);
 
   for (i = 0; i < nStreams; i++)
+  {
+    for (j = 0; j < nVars; j++)
     {
-      for (j = 0; j < nVars; j++)
-        {
-          xassert(nlev[i][j] > 0 && nlev[i][j] <= MAXNLEV);
-          zaxisID[i][j] = zaxisCreate(ZAXIS_PRESSURE, nlev[i][j]);
-          zaxisDefLevels(zaxisID[i][j], levs);
-        }
-      vlistID[i] = vlistCreate();
+      xassert(nlev[i][j] > 0 && nlev[i][j] <= MAXNLEV);
+      zaxisID[i][j] = zaxisCreate(ZAXIS_PRESSURE, nlev[i][j]);
+      zaxisDefLevels(zaxisID[i][j], levs);
     }
+    vlistID[i] = vlistCreate();
+  }
 
 #if USE_MPI
   xmpi(MPI_Comm_rank(commModel, &rank));
@@ -110,86 +110,86 @@ modelRun(MPI_Comm commModel)
     size_t maxChunkSize = 0;
     for (i = 0; i < nStreams; i++)
       for (j = 0; j < nVars; j++)
-        {
-          varID[i][j] = vlistDefVar(vlistID[i], gridID, zaxisID[i][j], TIME_VARIABLE);
-          varSize[i][j] = nlon * nlat * (size_t) nlev[i][j];
+      {
+        varID[i][j] = vlistDefVar(vlistID[i], gridID, zaxisID[i][j], TIME_VARIABLE);
+        varSize[i][j] = nlon * nlat * (size_t) nlev[i][j];
 #ifdef USE_MPI
-          {
-            int start = uniform_partition_start((int[2]){ 0, (int) varSize[i][j] - 1 }, comm_size, rank),
-                chunkSize = uniform_partition_start((int[2]){ 0, (int) varSize[i][j] - 1 }, comm_size, rank + 1) - start;
-            if (maxChunkSize < (size_t) chunkSize) maxChunkSize = (size_t) chunkSize;
-            fprintf(stderr, "%d: start=%d, chunkSize = %d\n", rank, start, chunkSize);
-            Xt_idxlist idxlist = xt_idxstripes_new(&(struct Xt_stripe){ .start = start, .nstrides = chunkSize, .stride = 1 }, 1);
-            varDeco[i][j] = (struct var1DDeco){ .start = start, .chunkSize = chunkSize, .partDesc = idxlist };
-          }
-#else
-          if (maxChunkSize < varSize[i][j]) maxChunkSize = varSize[i][j];
-#endif
+        {
+          int start = uniform_partition_start((int[2]){ 0, (int) varSize[i][j] - 1 }, comm_size, rank),
+              chunkSize = uniform_partition_start((int[2]){ 0, (int) varSize[i][j] - 1 }, comm_size, rank + 1) - start;
+          if (maxChunkSize < (size_t) chunkSize) maxChunkSize = (size_t) chunkSize;
+          fprintf(stderr, "%d: start=%d, chunkSize = %d\n", rank, start, chunkSize);
+          Xt_idxlist idxlist = xt_idxstripes_new(&(struct Xt_stripe){ .start = start, .nstrides = chunkSize, .stride = 1 }, 1);
+          varDeco[i][j] = (struct var1DDeco){ .start = start, .chunkSize = chunkSize, .partDesc = idxlist };
         }
+#else
+        if (maxChunkSize < varSize[i][j]) maxChunkSize = varSize[i][j];
+#endif
+      }
     var = (double *) malloc(maxChunkSize * sizeof(var[0]));
   }
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
   for (i = 0; i < nStreams; i++) vlistDefTaxis(vlistID[i], taxisID);
 
   for (i = 0; i < nStreams; i++)
-    {
-      memset(filename, 0, 1024);
-      snprintf(&filename[0], sizeof(filename), "%s%c_%d.grb", nameExp, asciiA + i, tfID);
-      streamID[i] = streamOpenWrite(filename, filetype);
-      xassert(streamID[i] >= 0);
-      streamDefVlist(streamID[i], vlistID[i]);
-    }
+  {
+    memset(filename, 0, 1024);
+    snprintf(&filename[0], sizeof(filename), "%s%c_%d.grb", nameExp, asciiA + i, tfID);
+    streamID[i] = streamOpenWrite(filename, filetype);
+    xassert(streamID[i] >= 0);
+    streamDefVlist(streamID[i], vlistID[i]);
+  }
 
 #ifdef USE_MPI
   pioEndDef();
 #endif
 
   for (tfID = 0; tfID < ntfiles; tfID++)
+  {
+    if (tfID > 0)
     {
-      if (tfID > 0)
-        {
-          for (i = 0; i < nStreams; i++)
-            {
-              streamClose(streamID[i]);
-              snprintf(&filename[0], sizeof(filename), "%s%c_%d.grb", nameExp, asciiA + i, tfID);
-              streamID[i] = streamOpenWrite(filename, filetype);
-              xassert(streamID[i] >= 0);
-              streamDefVlist(streamID[i], vlistID[i]);
-            }
-        }
+      for (i = 0; i < nStreams; i++)
+      {
+        streamClose(streamID[i]);
+        snprintf(&filename[0], sizeof(filename), "%s%c_%d.grb", nameExp, asciiA + i, tfID);
+        streamID[i] = streamOpenWrite(filename, filetype);
+        xassert(streamID[i] >= 0);
+        streamDefVlist(streamID[i], vlistID[i]);
+      }
+    }
 
-      for (tsID = 0; tsID < ntsteps; tsID++)
+    for (tsID = 0; tsID < ntsteps; tsID++)
+    {
+      hoursPassingHack(&vdate, &vtime, hourStep);
+      taxisDefVdate(taxisID, vdate);
+      taxisDefVtime(taxisID, vtime);
+      for (i = 0; i < nStreams; i++)
+      {
+        streamDefTimestep(streamID[i], tsID);
+        for (j = 0; j < nVars; j++)
         {
-          hoursPassingHack(&vdate, &vtime, hourStep);
-          taxisDefVdate(taxisID, vdate);
-          taxisDefVtime(taxisID, vtime);
-          for (i = 0; i < nStreams; i++)
-            {
-              streamDefTimestep(streamID[i], tsID);
-              for (j = 0; j < nVars; j++)
-                {
 #ifdef USE_MPI
-                  int start = varDeco[i][j].start;
-                  int chunk = varDeco[i][j].chunkSize;
+          int start = varDeco[i][j].start;
+          int chunk = varDeco[i][j].chunkSize;
 #else
-                  int start = 0, chunk = (int) varSize[i][j];
+          int start = 0, chunk = (int) varSize[i][j];
 #endif
-                  for (int k = 0; k < chunk; k++) var[k] = 3.3 * (double) (k + start);
+          for (int k = 0; k < chunk; k++) var[k] = 3.3 * (double) (k + start);
 #ifdef USE_MPI
-                  streamWriteVarPart(streamID[i], varID[i][j], var, nmiss, varDeco[i][j].partDesc);
+          streamWriteVarPart(streamID[i], varID[i][j], var, nmiss, varDeco[i][j].partDesc);
 #else
-                  streamWriteVar(streamID[i], varID[i][j], var, nmiss);
-#endif
-                }
-            }
-#ifdef USE_MPI
-          pioWriteTimestep();
+          streamWriteVar(streamID[i], varID[i][j], var, nmiss);
 #endif
         }
+      }
 #ifdef USE_MPI
-      MPI_Barrier(commModel);
+      pioWriteTimestep();
 #endif
     }
+#ifdef USE_MPI
+    MPI_Barrier(commModel);
+#endif
+  }
 
 #ifdef USE_MPI
   for (size_t streamIdx = 0; streamIdx < (size_t) nStreams; ++streamIdx)
@@ -197,10 +197,10 @@ modelRun(MPI_Comm commModel)
 #endif
 
   for (i = 0; i < nStreams; i++)
-    {
-      streamClose(streamID[i]);
-      vlistDestroy(vlistID[i]);
-    }
+  {
+    streamClose(streamID[i]);
+    vlistDestroy(vlistID[i]);
+  }
   taxisDestroy(taxisID);
   for (i = 0; i < nStreams; i++)
     for (j = 0; j < nVars; j++) zaxisDestroy(zaxisID[i][j]);
@@ -238,32 +238,32 @@ main(int argc, char *argv[])
   xmpi(MPI_Comm_rank(commGlob, &rankGlob));
 
   if (argc > 1)
-    {
-      xassert(argc >= 3);
-      IOMode = atoi(argv[1]);
-      nProcsIO = atoi(argv[2]);
-      xassert(IOMode >= PIO_MINIOMODE && IOMode <= PIO_MAXIOMODE && nProcsIO >= 0 && nProcsIO <= sizeGlob);
-      printf("IOMode=%d, nProcsIO=%d", IOMode, nProcsIO);
-    }
+  {
+    xassert(argc >= 3);
+    IOMode = atoi(argv[1]);
+    nProcsIO = atoi(argv[2]);
+    xassert(IOMode >= PIO_MINIOMODE && IOMode <= PIO_MAXIOMODE && nProcsIO >= 0 && nProcsIO <= sizeGlob);
+    printf("IOMode=%d, nProcsIO=%d", IOMode, nProcsIO);
+  }
   else
-    {
-      IOMode = IOModeDef;
-      nProcsIO = nProcsIODef;
-    }
+  {
+    IOMode = IOModeDef;
+    nProcsIO = nProcsIODef;
+  }
 
   commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0f, cdiPioNoPostCommSetup);
   if (commModel != MPI_COMM_NULL)
-    {
-      namespaceSetActive(pioNamespace);
+  {
+    namespaceSetActive(pioNamespace);
 #else
   (void) argc;
   (void) argv;
 #endif
 
-      modelRun(commModel);
+    modelRun(commModel);
 
 #ifdef USE_MPI
-    }
+  }
   pioFinalize();
   xt_finalize();
   MPI_Finalize();

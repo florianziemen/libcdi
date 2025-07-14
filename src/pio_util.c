@@ -77,25 +77,25 @@ pcdiXMPIStat(int iret, const char *filename, int line, MPI_Status *status)
   char errorString[MPI_MAX_ERROR_STRING + 1];
 
   if (iret == MPI_ERR_IN_STATUS)
+  {
+    fprintf(stderr, "------- checking error in request ----------\n");
+    switch (status->MPI_ERROR)
     {
-      fprintf(stderr, "------- checking error in request ----------\n");
-      switch (status->MPI_ERROR)
-        {
-        case MPI_SUCCESS: fprintf(stderr, "-------- mpi_success -----------\n"); break;
-        case MPI_ERR_PENDING: fprintf(stderr, "-------- mpi_err_pending ----------\n"); break;
-        default:
-          {
-            int len, rank = getMPICommWorldRank();
-            MPI_Error_string(status->MPI_ERROR, errorString, &len);
-            errorString[len] = '\0';
-            fprintf(stderr,
-                    "MPI ERROR in request, pe%d, %s, line %d,"
-                    "return value: %d, error_string: %s\n",
-                    rank, filename, line, iret, errorString);
-            MPI_Abort(MPI_COMM_WORLD, iret);
-          }
-        }
+      case MPI_SUCCESS: fprintf(stderr, "-------- mpi_success -----------\n"); break;
+      case MPI_ERR_PENDING: fprintf(stderr, "-------- mpi_err_pending ----------\n"); break;
+      default:
+      {
+        int len, rank = getMPICommWorldRank();
+        MPI_Error_string(status->MPI_ERROR, errorString, &len);
+        errorString[len] = '\0';
+        fprintf(stderr,
+                "MPI ERROR in request, pe%d, %s, line %d,"
+                "return value: %d, error_string: %s\n",
+                rank, filename, line, iret, errorString);
+        MPI_Abort(MPI_COMM_WORLD, iret);
+      }
     }
+  }
   else if (iret != MPI_SUCCESS)
     pcdiXMPI(iret, filename, line);
 
@@ -106,11 +106,11 @@ void
 pcdiXMPIStats(int iret, const char *filename, int line, int n, MPI_Status *restrict statuses)
 {
   if (iret == MPI_ERR_IN_STATUS)
-    {
-      for (size_t i = 0; i < (size_t) n; ++i)
-        if (statuses[i].MPI_ERROR != MPI_SUCCESS && statuses[i].MPI_ERROR != MPI_ERR_PENDING)
-          pcdiXMPIStat(iret, filename, line, statuses + i);
-    }
+  {
+    for (size_t i = 0; i < (size_t) n; ++i)
+      if (statuses[i].MPI_ERROR != MPI_SUCCESS && statuses[i].MPI_ERROR != MPI_ERR_PENDING)
+        pcdiXMPIStat(iret, filename, line, statuses + i);
+  }
   else if (iret != MPI_SUCCESS)
     pcdiXMPI(iret, filename, line);
 }
@@ -150,7 +150,7 @@ printArray(const char *cdiPioDebugString, const char *ps, const void *array, int
   }
 
   switch (datatype)
-    {
+  {
     case CDI_DATATYPE_INT:
       iArray = (int *) array;
       for (i = 0; i < n - 1; i++) fprintf(stdout, "%d ", *(iArray + i));
@@ -162,7 +162,7 @@ printArray(const char *cdiPioDebugString, const char *ps, const void *array, int
       fprintf(stdout, "%.2f\n", *(dArray + n - 1));
       break;
     default: fprintf(stdout, " ... no datatype defined\n");
-    }
+  }
 
   return;
 }
@@ -174,7 +174,7 @@ cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
   int gridType = gridInqType(gridID);
   switch (gridType)
-    {
+  {
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
     case GRID_CURVILINEAR:
@@ -192,7 +192,7 @@ cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
     case GRID_GENERIC:
     case GRID_PROJECTION:
     case GRID_GME: xabort("unimplemented grid type: %d", gridType);
-    }
+  }
   varShape[2] = zaxisInqSize(zaxisID);
   /* FIXME: other grids have different dimensionality */
   return (varShape[2] > 1) ? 2 : 3;
@@ -206,16 +206,15 @@ cdiPioDeco1D_CCP(size_t nelems, const size_t *restrict weightPfxSums, size_t npa
   size_t i = 0, k = 1;
   size_t weightTotal = weightPfxSums[nelems];
   while (k < nparts)
-    {
-      size_t target = k * weightTotal / nparts;
-      do {
-          ++i;
-        }
-      while (i < nelems && weightPfxSums[i] < target);
-      separators[k] = i;
-      ++k;
-      --i;
-    }
+  {
+    size_t target = k * weightTotal / nparts;
+    do {
+      ++i;
+    } while (i < nelems && weightPfxSums[i] < target);
+    separators[k] = i;
+    ++k;
+    --i;
+  }
   /* todo: implement h2 and dp+ algorithms from
    * A. Pınar, C. Aykanat
    * Fast optimal load balancing algorithms for 1D partitioning

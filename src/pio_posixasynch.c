@@ -66,10 +66,10 @@ initBFiledataPA(struct fileFunnelAIO *bfd, const char *filename, const struct cd
     char *name = bfd->name = (char *) (bfd->perCollAmounts + nc * 2);
     memcpy(name, filename, nameSize);
     for (size_t i = 0; i < nc; ++i)
-      {
-        perCollAmounts[i] = 0;
-        perCollAmounts[nc + i] = -1;
-      }
+    {
+      perCollAmounts[i] = 0;
+      perCollAmounts[nc + i] = -1;
+    }
   }
 
   if ((bfd->handle = open(bfd->name, O_CREAT | O_WRONLY, 0666)) == -1) xabort("Failed to open %s", bfd->name);
@@ -82,12 +82,12 @@ initBFiledataPA(struct fileFunnelAIO *bfd, const char *filename, const struct cd
                **cBP = bfd->cBP = Malloc(aioQueueDepth * sizeof(*cBP));
 
   for (size_t i = 0; i < aioQueueDepth; i++)
-    {
-      ctrlBlks[i].aio_fildes = bfd->handle;
-      ctrlBlks[i].aio_reqprio = 0;
-      ctrlBlks[i].aio_sigevent.sigev_notify = SIGEV_NONE;
-      cBP[i] = ctrlBlks + i;
-    }
+  {
+    ctrlBlks[i].aio_fildes = bfd->handle;
+    ctrlBlks[i].aio_reqprio = 0;
+    ctrlBlks[i].aio_sigevent.sigev_notify = SIGEV_NONE;
+    cBP[i] = ctrlBlks + i;
+  }
 
   bfd->aioQueueDepth = (unsigned) aioQueueDepth;
   bfd->numQueuedWrites = 0;
@@ -113,39 +113,38 @@ destroyBFiledataPA(struct fileFunnelAIO *bfd)
   /* close file */
   struct aiocb *ctrlBlks = bfd->ctrlBlks, **cBP = bfd->cBP;
   while (numQueuedWrites > 0)
-    {
-      size_t numCBP = 0;
-      for (size_t i = 0; i < aioQueueDepth; ++i)
-        if (ctrlBlks[i].aio_buf != NULL) cBP[numCBP++] = ctrlBlks + i;
-      assert(numCBP == numQueuedWrites);
-      xdebug("file: %s, numQueuedWrites=%zu", bfd->name, numQueuedWrites);
-      do {
-          iret = aio_suspend((const struct aiocb **) cBP, (int) numQueuedWrites, NULL);
-          if (iret < 0 && errno != EINTR) xabort("aio_suspend(2) failed");
-        }
-      while (iret != 0);
-      for (size_t i = 0; i < numQueuedWrites; ++i)
-        if ((iret = aio_error(cBP[i])) == 0)
-          {
-            if (aio_return(cBP[i]) == -1)
-              {
-                errno = iret;
-                SysError("aio_write(2) failed");
-              }
-            --numQueuedWrites;
-            cBP[i]->aio_buf = NULL;
-          }
-        else if (iret > 0 && iret != EINPROGRESS)
+  {
+    size_t numCBP = 0;
+    for (size_t i = 0; i < aioQueueDepth; ++i)
+      if (ctrlBlks[i].aio_buf != NULL) cBP[numCBP++] = ctrlBlks + i;
+    assert(numCBP == numQueuedWrites);
+    xdebug("file: %s, numQueuedWrites=%zu", bfd->name, numQueuedWrites);
+    do {
+      iret = aio_suspend((const struct aiocb **) cBP, (int) numQueuedWrites, NULL);
+      if (iret < 0 && errno != EINTR) xabort("aio_suspend(2) failed");
+    } while (iret != 0);
+    for (size_t i = 0; i < numQueuedWrites; ++i)
+      if ((iret = aio_error(cBP[i])) == 0)
+      {
+        if (aio_return(cBP[i]) == -1)
+        {
+          errno = iret;
           SysError("aio_write(2) failed");
-    }
+        }
+        --numQueuedWrites;
+        cBP[i]->aio_buf = NULL;
+      }
+      else if (iret > 0 && iret != EINPROGRESS)
+        SysError("aio_write(2) failed");
+  }
   bfd->numQueuedWrites = (unsigned) numQueuedWrites;
 
   if ((iret = ftruncate(bfd->handle, bfd->offset)) == -1) xabort("failed to truncate file %s: %s", bfd->name, strerror(errno));
   if ((iret = close(bfd->handle)) == -1)
-    {
-      iret = errno;
-      Warning("failed to close %s", bfd->name);
-    }
+  {
+    iret = errno;
+    Warning("failed to close %s", bfd->name);
+  }
 
   /* file closed, cleanup */
 
@@ -174,10 +173,9 @@ completeSomeAIOWrites(struct fileFunnelAIO *bfd, const struct cdiPioConf *conf)
   /* complete aio_write of at least one control block */
   int iret;
   do {
-      iret = aio_suspend((const struct aiocb **) bfd->cBP, (int) aioQueueDepth, NULL);
-      if (iret < 0 && errno != EINTR) xabort("aio_suspend(2) failed");
-    }
-  while (iret != 0);
+    iret = aio_suspend((const struct aiocb **) bfd->cBP, (int) aioQueueDepth, NULL);
+    if (iret < 0 && errno != EINTR) xabort("aio_suspend(2) failed");
+  } while (iret != 0);
   struct aiocb *ctrlBlks = bfd->ctrlBlks;
   size_t bufSize = conf->writeAggBufLim;
   /* only initialized to silence the compiler, the semantics of
@@ -188,18 +186,18 @@ completeSomeAIOWrites(struct fileFunnelAIO *bfd, const struct cdiPioConf *conf)
   unsigned *bufAssign = bfd->bufAssign;
   for (size_t i = 0; i < aioQueueDepth; ++i)
     if ((iret = aio_error(ctrlBlks + i)) == 0)
+    {
+      if (aio_return(ctrlBlks + i) == -1)
       {
-        if (aio_return(ctrlBlks + i) == -1)
-          {
-            errno = iret;
-            SysError("failed aio_write");
-          }
-        --numQueuedWrites;
-        cbIdx = i;
-        cbBufIdx = (size_t) (ptrdiff_t) ((unsigned char *) ctrlBlks[i].aio_buf - (unsigned char *) bfd->fb.buffer) / bufSize;
-        bufAssign[cbBufIdx] = BUF_UNUSED;
-        ctrlBlks[i].aio_buf = NULL;
+        errno = iret;
+        SysError("failed aio_write");
       }
+      --numQueuedWrites;
+      cbIdx = i;
+      cbBufIdx = (size_t) (ptrdiff_t) ((unsigned char *) ctrlBlks[i].aio_buf - (unsigned char *) bfd->fb.buffer) / bufSize;
+      bufAssign[cbBufIdx] = BUF_UNUSED;
+      ctrlBlks[i].aio_buf = NULL;
+    }
     else if (iret > 0 && iret != EINPROGRESS)
       SysError("failed aio_write");
   bfd->numQueuedWrites = (unsigned) numQueuedWrites;
@@ -221,30 +219,30 @@ writePA(struct fileFunnelAIO *bfd, int source, size_t nProcsColl, size_t amount,
   if (numQueuedWrites >= aioQueueDepth)
     bufReUse = completeSomeAIOWrites(bfd, conf);
   else
-    {
-      /* silence compiler uninitialized warning */
-      bufReUse = (struct awComplete){ SIZE_MAX, SIZE_MAX };
-      for (size_t i = 0; i < aioQueueDepth; ++i)
-        if (ctrlBlks[i].aio_buf == NULL)
-          {
-            bufReUse.cbIdx = i;
-            break;
-          }
-      for (size_t i = 0; i < numBuf; ++i)
-        if (bufAssign[i] == BUF_UNUSED)
-          {
-            bufReUse.bufIdx = i;
-            break;
-          }
-    }
+  {
+    /* silence compiler uninitialized warning */
+    bufReUse = (struct awComplete){ SIZE_MAX, SIZE_MAX };
+    for (size_t i = 0; i < aioQueueDepth; ++i)
+      if (ctrlBlks[i].aio_buf == NULL)
+      {
+        bufReUse.cbIdx = i;
+        break;
+      }
+    for (size_t i = 0; i < numBuf; ++i)
+      if (bufAssign[i] == BUF_UNUSED)
+      {
+        bufReUse.bufIdx = i;
+        break;
+      }
+  }
 
   size_t sourceBufIdx = SIZE_MAX;
   for (size_t i = 0; i < numBuf; ++i)
     if (bufAssign[i] == (unsigned) ((unsigned) source + aioQueueDepth))
-      {
-        sourceBufIdx = i;
-        break;
-      }
+    {
+      sourceBufIdx = i;
+      break;
+    }
   assert(sourceBufIdx != SIZE_MAX);
   size_t cbIdx = bufReUse.cbIdx, bufSize = conf->writeAggBufLim;
   ctrlBlks[cbIdx].aio_buf = bfd->fb.buffer + bufSize * sourceBufIdx;
@@ -318,12 +316,12 @@ funnelFileCleanup(struct fileFunnelAIO *openFileFunnels, int fileID, size_t *ope
   int retval = destroyBFiledataPA(bfd);
   --(*openFileFunnelsFill);
   if ((size_t) fileID + 1 == *maxOpenFileIDp1)
-    {
-      size_t j = (size_t) fileID + 1;
-      while (j > 0 && !openFileFunnels[j - 1].name) --j;
-      *maxOpenFileIDp1 = j;
-      *numOpenRequests = (size_t) nProcsColl * (numMetaOp + *maxOpenFileIDp1);
-    }
+  {
+    size_t j = (size_t) fileID + 1;
+    while (j > 0 && !openFileFunnels[j - 1].name) --j;
+    *maxOpenFileIDp1 = j;
+    *numOpenRequests = (size_t) nProcsColl * (numMetaOp + *maxOpenFileIDp1);
+  }
   xmpi(MPI_Bcast(&retval, 1, MPI_INT, nProcsColl, commPio));
 }
 
@@ -375,185 +373,185 @@ pioWriterAIO(void)
   int numCompleted, *completed = Malloc(sizeof(*completed) * (size_t) nProcsColl * (numMetaOp + openFileFunnelsSize));
   size_t numOpenSends = 0, maxOpenFileIDp1 = 0, numOpenRequests = (size_t) nProcsColl * (numMetaOp + maxOpenFileIDp1);
   for (size_t i = 0; i < (size_t) nProcsColl; ++i)
-    {
-      xmpi(MPI_Irecv(openReqBuffer + i * openMsgSize, (int) openMsgSize, MPI_PACKED, (int) i, IO_Open_file, commPio,
-                     req[MOOpenRx] + i));
-      xmpi(MPI_Irecv(syncMsgs + i, 1, cdiPioSyncMsgDt, (int) i, IO_Sync_file, commPio, req[MOSyncRx] + i));
-      req[MOSyncTx][i] = MPI_REQUEST_NULL;
-    }
+  {
+    xmpi(MPI_Irecv(openReqBuffer + i * openMsgSize, (int) openMsgSize, MPI_PACKED, (int) i, IO_Open_file, commPio,
+                   req[MOOpenRx] + i));
+    xmpi(MPI_Irecv(syncMsgs + i, 1, cdiPioSyncMsgDt, (int) i, IO_Sync_file, commPio, req[MOSyncRx] + i));
+    req[MOSyncTx][i] = MPI_REQUEST_NULL;
+  }
   for (size_t j = 0; j < openFileFunnelsSize; ++j)
     for (size_t i = 0; i < (size_t) nProcsColl; ++i) req[numMetaOp + j][i] = MPI_REQUEST_NULL;
 
   for (;;)
+  {
+    assert(numOpenRequests <= INT_MAX);
+    xmpiStats(MPI_Waitsome((int) numOpenRequests, *req, &numCompleted, completed, statui), numCompleted, statui);
+    for (size_t cmpltIdx = 0; cmpltIdx < (size_t) numCompleted; ++cmpltIdx)
     {
-      assert(numOpenRequests <= INT_MAX);
-      xmpiStats(MPI_Waitsome((int) numOpenRequests, *req, &numCompleted, completed, statui), numCompleted, statui);
-      for (size_t cmpltIdx = 0; cmpltIdx < (size_t) numCompleted; ++cmpltIdx)
+      int rcvIdx = completed[cmpltIdx];
+      int source = rcvIdx % nProcsColl;
+      int command;
+      switch (rcvIdx / nProcsColl)
+      {
+        case MOOpenRx: command = IO_Open_file; break;
+        case MOSyncRx: command = syncMsgs[source].command; break;
+        case MOSyncTx: --numOpenSends; continue;
+        default: command = IO_Send_buffer;
+      }
+
+      xdebug("receive message from source=%d, command=%d (%s)", source, command, cdiPioCmdStrTab[command]);
+
+      switch (command)
+      {
+        case IO_Open_file:
         {
-          int rcvIdx = completed[cmpltIdx];
-          int source = rcvIdx % nProcsColl;
-          int command;
-          switch (rcvIdx / nProcsColl)
-            {
-            case MOOpenRx: command = IO_Open_file; break;
-            case MOSyncRx: command = syncMsgs[source].command; break;
-            case MOSyncTx: --numOpenSends; continue;
-            default: command = IO_Send_buffer;
-            }
+          int openMsgHdr[2];
+          int position = 0;
+          unsigned char *reqBuffer = openReqBuffer + (size_t) source * openMsgSize;
+          xmpi(MPI_Unpack(reqBuffer, (int) openMsgSize, &position, openMsgHdr, 2, MPI_INT, commPio));
+          size_t len = (size_t) openMsgHdr[1];
+          assert(len <= maxPathLen);
+          xmpi(MPI_Unpack(reqBuffer, (int) openMsgSize, &position, filename, openMsgHdr[1], MPI_CHAR, commPio));
+          filename[len] = '\0';
+          size_t buffersize = conf->writeAggBufLim;
+          xdebug("command %s, filename=%s, buffersize=%zu", cdiPioCmdStrTab[command], filename, buffersize);
 
-          xdebug("receive message from source=%d, command=%d (%s)", source, command, cdiPioCmdStrTab[command]);
-
-          switch (command)
-            {
-            case IO_Open_file:
-              {
-                int openMsgHdr[2];
-                int position = 0;
-                unsigned char *reqBuffer = openReqBuffer + (size_t) source * openMsgSize;
-                xmpi(MPI_Unpack(reqBuffer, (int) openMsgSize, &position, openMsgHdr, 2, MPI_INT, commPio));
-                size_t len = (size_t) openMsgHdr[1];
-                assert(len <= maxPathLen);
-                xmpi(MPI_Unpack(reqBuffer, (int) openMsgSize, &position, filename, openMsgHdr[1], MPI_CHAR, commPio));
-                filename[len] = '\0';
-                size_t buffersize = conf->writeAggBufLim;
-                xdebug("command %s, filename=%s, buffersize=%zu", cdiPioCmdStrTab[command], filename, buffersize);
-
-                int fileID = openMsgHdr[0];
-                size_t prevOpenFileFunnelsSize = openFileFunnelsSize;
-                if (openFileFunnelsSize <= (unsigned) fileID)
-                  {
-                    while (openFileFunnelsSize <= (unsigned) fileID) openFileFunnelsSize *= 2;
-                    if (openFileFunnelsSize > (unsigned) INT_MAX + 1) openFileFunnelsSize = (unsigned) INT_MAX + 1;
-                    openFileFunnels = Realloc(openFileFunnels, sizeof(*openFileFunnels) * openFileFunnelsSize);
-                    for (size_t i = prevOpenFileFunnelsSize; i < openFileFunnelsSize; ++i) openFileFunnels[i].name = NULL;
-                    req = Realloc(req, sizeof(*req) * (openFileFunnelsSize + numMetaOp));
-                    statui = Realloc(statui, sizeof(*statui) * (size_t) nProcsColl * (openFileFunnelsSize + numMetaOp));
-                    completed = Realloc(completed, sizeof(*completed) * (size_t) nProcsColl * (openFileFunnelsSize + numMetaOp));
-                    for (size_t j = prevOpenFileFunnelsSize; j < openFileFunnelsSize; ++j)
-                      for (size_t i = 0; i < (size_t) nProcsColl; ++i) req[numMetaOp + j][i] = MPI_REQUEST_NULL;
-                    maxOpenFileIDp1 = (size_t) fileID + 1;
-                  }
-                else if (maxOpenFileIDp1 < (size_t) fileID + 1)
-                  maxOpenFileIDp1 = (size_t) fileID + 1;
-                struct fileFunnelAIO *bfd = openFileFunnels + fileID;
-                if (!bfd->name)
-                  {
-                    for (size_t i = 0; i < prevOpenFileFunnelsSize; ++i)
-                      if (openFileFunnels[i].name && !strcmp(openFileFunnels[i].name, filename))
-                        xabort("filename %s is already open!"
-                               " CDI-PIO does not support concurrent access"
-                               " through different filehandles.",
-                               filename);
-                    initBFiledataPA(bfd, filename, conf, (size_t) nProcsColl);
-                    ++openFileFunnelsFill;
-                  }
-                else if (strcmp(filename, bfd->name) != 0)
-                  xabort("filename is not consistent, fileID=%d,"
-                         " \"%s\" vs. \"%s\"",
-                         fileID, filename, bfd->name);
-                reinstallListenReq(bfd, fileID, source, (size_t) nProcsColl, bufSize, aioQueueDepth, req, commPio, conf);
-                xmpi(MPI_Irecv(reqBuffer, (int) openMsgSize, MPI_PACKED, source, IO_Open_file, commPio, req[MOOpenRx] + source));
-                numOpenRequests = (size_t) nProcsColl * (numMetaOp + maxOpenFileIDp1);
-              }
-              break;
-
-            case IO_Send_buffer:
-              {
-                int fileID = rcvIdx / nProcsColl - numMetaOp;
-                assert(fileID >= 0 && (size_t) fileID < openFileFunnelsSize && openFileFunnels[fileID].name);
-                struct fileFunnelAIO *bfd = openFileFunnels + fileID;
-
-                xdebug("command: %s, fileID=%d, name=%s", cdiPioCmdStrTab[command], fileID, bfd->name);
-
-                int messagesize;
-                xmpi(MPI_Get_count(statui + cmpltIdx, MPI_UNSIGNED_CHAR, &messagesize));
-                size_t amount = (size_t) messagesize;
-
-                writePA(bfd, source, (size_t) nProcsColl, amount, conf);
-                if (!bfd->outstandingSync && bfd->syncOffset == bfd->offset)
-                  sendCollSync(bfd, fileID, commPio, nProcsColl, req, &numOpenSends, wstats);
-                off_t *restrict perCollAmounts = bfd->perCollAmounts;
-                /* end of collector stream not yet reached? */
-                if (perCollAmounts[source] != perCollAmounts[nProcsColl + source])
-                  reinstallListenReq(bfd, fileID, source, (size_t) nProcsColl, bufSize, aioQueueDepth, req, commPio, conf);
-                /* end of collector stream reached */
-                else if (!--bfd->activeCollectors)
-                  funnelFileCleanup(openFileFunnels, fileID, &openFileFunnelsFill, &maxOpenFileIDp1, &numOpenRequests, commPio,
-                                    nProcsColl);
-              }
-              break;
-
-            case IO_Sync_file:
-              {
-                int fileID = syncMsgs[source].fileID;
-                assert(fileID >= 0 && (size_t) fileID < openFileFunnelsSize && openFileFunnels[fileID].name);
-                struct fileFunnelAIO *bfd = openFileFunnels + fileID;
-                xdebug("COMMAND %s,  FILE%d, SOURCE%d", cdiPioCmdStrTab[command], fileID, source);
-                bfd->syncOffset += syncMsgs[source].amount;
-                if (!--bfd->outstandingSync && bfd->syncOffset == bfd->offset)
-                  sendCollSync(bfd, fileID, commPio, nProcsColl, req, &numOpenSends, wstats);
-                xmpi(MPI_Irecv(syncMsgs + source, 1, cdiPioSyncMsgDt, source, IO_Sync_file, commPio, req[MOSyncRx] + source));
-              }
-              break;
-
-            case IO_Close_file:
-              {
-                int fileID = syncMsgs[source].fileID;
-                assert(fileID >= 0 && (size_t) fileID < openFileFunnelsSize && openFileFunnels[fileID].name);
-                struct fileFunnelAIO *bfd = openFileFunnels + fileID;
-                xdebug("COMMAND %s,  FILE%d, SOURCE%d", cdiPioCmdStrTab[command], fileID, source);
-                bfd->syncOffset += syncMsgs[source].amount;
-                off_t *restrict perCollAmounts = bfd->perCollAmounts;
-                perCollAmounts[nProcsColl + source] = syncMsgs[source].amount;
-                /* did this source collector already send enough data? */
-                if (perCollAmounts[source] == perCollAmounts[nProcsColl + source])
-                  {
-                    size_t fileReqIdx = numMetaOp + (size_t) fileID;
-                    assert(req[fileReqIdx][source] != MPI_REQUEST_NULL);
-                    xmpi(MPI_Cancel(req[fileReqIdx] + source));
-                    xmpi(MPI_Request_free(req[fileReqIdx] + source));
-                    if (!--bfd->activeCollectors)
-                      funnelFileCleanup(openFileFunnels, fileID, &openFileFunnelsFill, &maxOpenFileIDp1, &numOpenRequests, commPio,
-                                        nProcsColl);
-                  }
-                xmpi(MPI_Irecv(syncMsgs + source, 1, cdiPioSyncMsgDt, source, IO_Sync_file, commPio, req[MOSyncRx] + source));
-              }
-              break;
-
-            case IO_Finalize:
-              if (req[MOSyncTx][source] != MPI_REQUEST_NULL)
-                {
-                  xmpiStat(MPI_Wait(req[MOSyncTx] + source, wstats), wstats);
-                  --numOpenSends;
-                }
-              if (req[MOOpenRx][source] != MPI_REQUEST_NULL)
-                {
-                  xmpi(MPI_Cancel(req[MOOpenRx] + source));
-                  xmpi(MPI_Request_free(req[MOOpenRx] + source));
-                }
-              if (!--outstandingFinalizations)
-                {
-                  if (openFileFunnelsFill)
-                    xabort("some files still not closed.");
-                  else
-                    {
-                      xdebug("%s", "all files are finished, destroy file set,"
-                                   " return");
-                    }
-                  Free(completed);
-                  Free(wstats);
-                  Free(statui);
-                  Free(req);
-                  Free(syncMsgs);
-                  Free(openReqBuffer);
-                  Free(openFileFunnels);
-                  return;
-                }
-              break;
-            default: xabort("COMMAND NOT IMPLEMENTED");
-            }
+          int fileID = openMsgHdr[0];
+          size_t prevOpenFileFunnelsSize = openFileFunnelsSize;
+          if (openFileFunnelsSize <= (unsigned) fileID)
+          {
+            while (openFileFunnelsSize <= (unsigned) fileID) openFileFunnelsSize *= 2;
+            if (openFileFunnelsSize > (unsigned) INT_MAX + 1) openFileFunnelsSize = (unsigned) INT_MAX + 1;
+            openFileFunnels = Realloc(openFileFunnels, sizeof(*openFileFunnels) * openFileFunnelsSize);
+            for (size_t i = prevOpenFileFunnelsSize; i < openFileFunnelsSize; ++i) openFileFunnels[i].name = NULL;
+            req = Realloc(req, sizeof(*req) * (openFileFunnelsSize + numMetaOp));
+            statui = Realloc(statui, sizeof(*statui) * (size_t) nProcsColl * (openFileFunnelsSize + numMetaOp));
+            completed = Realloc(completed, sizeof(*completed) * (size_t) nProcsColl * (openFileFunnelsSize + numMetaOp));
+            for (size_t j = prevOpenFileFunnelsSize; j < openFileFunnelsSize; ++j)
+              for (size_t i = 0; i < (size_t) nProcsColl; ++i) req[numMetaOp + j][i] = MPI_REQUEST_NULL;
+            maxOpenFileIDp1 = (size_t) fileID + 1;
+          }
+          else if (maxOpenFileIDp1 < (size_t) fileID + 1)
+            maxOpenFileIDp1 = (size_t) fileID + 1;
+          struct fileFunnelAIO *bfd = openFileFunnels + fileID;
+          if (!bfd->name)
+          {
+            for (size_t i = 0; i < prevOpenFileFunnelsSize; ++i)
+              if (openFileFunnels[i].name && !strcmp(openFileFunnels[i].name, filename))
+                xabort("filename %s is already open!"
+                       " CDI-PIO does not support concurrent access"
+                       " through different filehandles.",
+                       filename);
+            initBFiledataPA(bfd, filename, conf, (size_t) nProcsColl);
+            ++openFileFunnelsFill;
+          }
+          else if (strcmp(filename, bfd->name) != 0)
+            xabort("filename is not consistent, fileID=%d,"
+                   " \"%s\" vs. \"%s\"",
+                   fileID, filename, bfd->name);
+          reinstallListenReq(bfd, fileID, source, (size_t) nProcsColl, bufSize, aioQueueDepth, req, commPio, conf);
+          xmpi(MPI_Irecv(reqBuffer, (int) openMsgSize, MPI_PACKED, source, IO_Open_file, commPio, req[MOOpenRx] + source));
+          numOpenRequests = (size_t) nProcsColl * (numMetaOp + maxOpenFileIDp1);
         }
+        break;
+
+        case IO_Send_buffer:
+        {
+          int fileID = rcvIdx / nProcsColl - numMetaOp;
+          assert(fileID >= 0 && (size_t) fileID < openFileFunnelsSize && openFileFunnels[fileID].name);
+          struct fileFunnelAIO *bfd = openFileFunnels + fileID;
+
+          xdebug("command: %s, fileID=%d, name=%s", cdiPioCmdStrTab[command], fileID, bfd->name);
+
+          int messagesize;
+          xmpi(MPI_Get_count(statui + cmpltIdx, MPI_UNSIGNED_CHAR, &messagesize));
+          size_t amount = (size_t) messagesize;
+
+          writePA(bfd, source, (size_t) nProcsColl, amount, conf);
+          if (!bfd->outstandingSync && bfd->syncOffset == bfd->offset)
+            sendCollSync(bfd, fileID, commPio, nProcsColl, req, &numOpenSends, wstats);
+          off_t *restrict perCollAmounts = bfd->perCollAmounts;
+          /* end of collector stream not yet reached? */
+          if (perCollAmounts[source] != perCollAmounts[nProcsColl + source])
+            reinstallListenReq(bfd, fileID, source, (size_t) nProcsColl, bufSize, aioQueueDepth, req, commPio, conf);
+          /* end of collector stream reached */
+          else if (!--bfd->activeCollectors)
+            funnelFileCleanup(openFileFunnels, fileID, &openFileFunnelsFill, &maxOpenFileIDp1, &numOpenRequests, commPio,
+                              nProcsColl);
+        }
+        break;
+
+        case IO_Sync_file:
+        {
+          int fileID = syncMsgs[source].fileID;
+          assert(fileID >= 0 && (size_t) fileID < openFileFunnelsSize && openFileFunnels[fileID].name);
+          struct fileFunnelAIO *bfd = openFileFunnels + fileID;
+          xdebug("COMMAND %s,  FILE%d, SOURCE%d", cdiPioCmdStrTab[command], fileID, source);
+          bfd->syncOffset += syncMsgs[source].amount;
+          if (!--bfd->outstandingSync && bfd->syncOffset == bfd->offset)
+            sendCollSync(bfd, fileID, commPio, nProcsColl, req, &numOpenSends, wstats);
+          xmpi(MPI_Irecv(syncMsgs + source, 1, cdiPioSyncMsgDt, source, IO_Sync_file, commPio, req[MOSyncRx] + source));
+        }
+        break;
+
+        case IO_Close_file:
+        {
+          int fileID = syncMsgs[source].fileID;
+          assert(fileID >= 0 && (size_t) fileID < openFileFunnelsSize && openFileFunnels[fileID].name);
+          struct fileFunnelAIO *bfd = openFileFunnels + fileID;
+          xdebug("COMMAND %s,  FILE%d, SOURCE%d", cdiPioCmdStrTab[command], fileID, source);
+          bfd->syncOffset += syncMsgs[source].amount;
+          off_t *restrict perCollAmounts = bfd->perCollAmounts;
+          perCollAmounts[nProcsColl + source] = syncMsgs[source].amount;
+          /* did this source collector already send enough data? */
+          if (perCollAmounts[source] == perCollAmounts[nProcsColl + source])
+          {
+            size_t fileReqIdx = numMetaOp + (size_t) fileID;
+            assert(req[fileReqIdx][source] != MPI_REQUEST_NULL);
+            xmpi(MPI_Cancel(req[fileReqIdx] + source));
+            xmpi(MPI_Request_free(req[fileReqIdx] + source));
+            if (!--bfd->activeCollectors)
+              funnelFileCleanup(openFileFunnels, fileID, &openFileFunnelsFill, &maxOpenFileIDp1, &numOpenRequests, commPio,
+                                nProcsColl);
+          }
+          xmpi(MPI_Irecv(syncMsgs + source, 1, cdiPioSyncMsgDt, source, IO_Sync_file, commPio, req[MOSyncRx] + source));
+        }
+        break;
+
+        case IO_Finalize:
+          if (req[MOSyncTx][source] != MPI_REQUEST_NULL)
+          {
+            xmpiStat(MPI_Wait(req[MOSyncTx] + source, wstats), wstats);
+            --numOpenSends;
+          }
+          if (req[MOOpenRx][source] != MPI_REQUEST_NULL)
+          {
+            xmpi(MPI_Cancel(req[MOOpenRx] + source));
+            xmpi(MPI_Request_free(req[MOOpenRx] + source));
+          }
+          if (!--outstandingFinalizations)
+          {
+            if (openFileFunnelsFill)
+              xabort("some files still not closed.");
+            else
+            {
+              xdebug("%s", "all files are finished, destroy file set,"
+                           " return");
+            }
+            Free(completed);
+            Free(wstats);
+            Free(statui);
+            Free(req);
+            Free(syncMsgs);
+            Free(openReqBuffer);
+            Free(openFileFunnels);
+            return;
+          }
+          break;
+        default: xabort("COMMAND NOT IMPLEMENTED");
+      }
     }
+  }
 }
 
 /***************************************************************/

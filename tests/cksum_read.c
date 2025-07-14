@@ -21,18 +21,18 @@ read_table(const char *table_fname, size_t *table_len)
   int code;
 
   if (!(tablefp = fopen(table_fname, "r")))
-    {
-      perror("failed to open table file");
-      *table_len = (size_t) -1;
-      return NULL;
-    }
+  {
+    perror("failed to open table file");
+    *table_len = (size_t) -1;
+    return NULL;
+  }
   while (fscanf(tablefp, "%08" PRIx32 " %d\n", &cksum_temp, &code) == 2)
-    {
-      ENSURE_ARRAY_SIZE(table, table_size, table_used + 1);
-      table[table_used].code = code;
-      table[table_used].cksum = cksum_temp;
-      ++table_used;
-    }
+  {
+    ENSURE_ARRAY_SIZE(table, table_size, table_used + 1);
+    table[table_used].code = code;
+    table[table_used].cksum = cksum_temp;
+    ++table_used;
+  }
   fclose(tablefp);
   *table_len = table_used;
   return table;
@@ -56,10 +56,10 @@ main(int argc, char *argv[])
     size_t num_ref_entries;
     struct cksum_table *ref_var_table = read_table(table_fname, &num_ref_entries);
     if (num_ref_entries == (size_t) -1)
-      {
-        free(file_vars);
-        exit(EXIT_FAILURE);
-      }
+    {
+      free(file_vars);
+      exit(EXIT_FAILURE);
+    }
     retcode = compare_checksums(file_vars, nvars, "file", ref_var_table, num_ref_entries, "reference table");
     free(file_vars);
     free(ref_var_table);

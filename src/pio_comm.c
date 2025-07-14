@@ -97,22 +97,22 @@ pioInfoInit(struct cdiPioComms *p, MPI_Comm commGlob, int clientServerRole)
     };
     int globRankOfGroupLeader[numGroups] = { 0, 0 };
     if (isProcIO)
-      {
-        p->commPio = temp;
-        xmpi(MPI_Comm_rank(temp, &p->rankPio));
-        p->commCalc = MPI_COMM_NULL;
-        p->rankCalc = -1;
-        if (p->rankPio == 0) globRankOfGroupLeader[PIO] = p->rankGlob;
-      }
+    {
+      p->commPio = temp;
+      xmpi(MPI_Comm_rank(temp, &p->rankPio));
+      p->commCalc = MPI_COMM_NULL;
+      p->rankCalc = -1;
+      if (p->rankPio == 0) globRankOfGroupLeader[PIO] = p->rankGlob;
+    }
     else
-      {
-        p->commPio = MPI_COMM_NULL;
-        p->rankPio = -1;
-        p->commCalc = temp;
-        xmpi(MPI_Comm_rank(temp, &p->rankCalc));
-        xmpi(MPI_Comm_size(temp, &p->sizeCalc));
-        if (p->rankCalc == 0) globRankOfGroupLeader[Client] = p->rankGlob;
-      }
+    {
+      p->commPio = MPI_COMM_NULL;
+      p->rankPio = -1;
+      p->commCalc = temp;
+      xmpi(MPI_Comm_rank(temp, &p->rankCalc));
+      xmpi(MPI_Comm_size(temp, &p->sizeCalc));
+      if (p->rankCalc == 0) globRankOfGroupLeader[Client] = p->rankGlob;
+    }
     int nProcsIO;
     {
       enum
@@ -129,29 +129,29 @@ pioInfoInit(struct cdiPioComms *p, MPI_Comm commGlob, int clientServerRole)
       globRankOfGroupLeader[1] = iBuf[3];
     }
     if (isProcIO)
+    {
+      MPI_Group pioGroup, collGroup;
+      int collRange[1][3] = { { 0, p->sizeColl - 1, 1 } };
+      xmpi(MPI_Comm_group(p->commPio, &pioGroup));
+      xmpi(MPI_Group_range_incl(pioGroup, 1, collRange, &collGroup));
+      xmpi(MPI_Comm_create(p->commPio, collGroup, &temp));
+      if (isCollector)
       {
-        MPI_Group pioGroup, collGroup;
-        int collRange[1][3] = { { 0, p->sizeColl - 1, 1 } };
-        xmpi(MPI_Comm_group(p->commPio, &pioGroup));
-        xmpi(MPI_Group_range_incl(pioGroup, 1, collRange, &collGroup));
-        xmpi(MPI_Comm_create(p->commPio, collGroup, &temp));
-        if (isCollector)
-          {
-            xmpi(MPI_Comm_rank(temp, &p->rankColl));
-            xt_mpi_comm_mark_exclusive(temp);
-          }
-        xmpi(MPI_Group_free(&pioGroup));
-        xmpi(MPI_Group_free(&collGroup));
-        p->commColl = temp;
+        xmpi(MPI_Comm_rank(temp, &p->rankColl));
+        xt_mpi_comm_mark_exclusive(temp);
       }
+      xmpi(MPI_Group_free(&pioGroup));
+      xmpi(MPI_Group_free(&collGroup));
+      p->commColl = temp;
+    }
     if (isCollector || !isProcIO)
       setupCollectorInterComm(p, isCollector, temp, globRankOfGroupLeader);
     else /* isProcIO && !isCollector */
-      {
-        p->pioInterComm = MPI_COMM_NULL;
-        p->collClientIntraComm = MPI_COMM_NULL;
-        p->remoteGroup = MPI_GROUP_NULL;
-      }
+    {
+      p->pioInterComm = MPI_COMM_NULL;
+      p->collClientIntraComm = MPI_COMM_NULL;
+      p->remoteGroup = MPI_GROUP_NULL;
+    }
 
     /* match output method and process distribution */
     int IOMode = p->IOMode, sizeGlob = p->sizeGlob;
@@ -173,17 +173,17 @@ setupCollectorInterComm(struct cdiPioComms *p, int isCollector, MPI_Comm localGr
   xmpi(MPI_Comm_group(p->collClientIntraComm, &collClientGroup));
   int numClients = p->sizeCalc, numColl = p->sizeColl;
   if (isCollector)
-    {
-      int collRank = p->rankColl;
-      remoteRanksRange[0] = cdiPioClientRangeStart(collRank, numClients, numColl);
-      remoteRanksRange[1] = cdiPioClientRangeStart(collRank + 1, numClients, numColl) - 1;
-    }
+  {
+    int collRank = p->rankColl;
+    remoteRanksRange[0] = cdiPioClientRangeStart(collRank, numClients, numColl);
+    remoteRanksRange[1] = cdiPioClientRangeStart(collRank + 1, numClients, numColl) - 1;
+  }
   else /* !isProcIO i.e. is client */
-    {
-      int clientRank = p->rankCalc;
-      int collRank = cdiPioCollRank(clientRank, numClients, numColl);
-      remoteRanksRange[1] = remoteRanksRange[0] = numClients + collRank;
-    }
+  {
+    int clientRank = p->rankCalc;
+    int collRank = cdiPioCollRank(clientRank, numClients, numColl);
+    remoteRanksRange[1] = remoteRanksRange[0] = numClients + collRank;
+  }
   remoteRanksRange[2] = 1;
   xmpi(MPI_Group_range_incl(collClientGroup, 1, &remoteRanksRange, &p->remoteGroup));
   xmpi(MPI_Group_free(&collClientGroup));

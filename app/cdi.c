@@ -203,16 +203,16 @@ printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, i
   double arrmean, arrmin, arrmax;
 
   if (!rec)
-    {
-      if (vardis)
-        fprintf(stdout,
-                "   Rec :       Date     Time   Level Gridsize    Miss :     Minimum        Mean     Maximum : Parameter name\n");
-      //         ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+
-      else
-        fprintf(stdout,
-                "   Rec :       Date     Time   Level Gridsize    Miss :     Minimum        Mean     Maximum : Parameter ID\n");
-      //         ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+
-    }
+  {
+    if (vardis)
+      fprintf(stdout,
+              "   Rec :       Date     Time   Level Gridsize    Miss :     Minimum        Mean     Maximum : Parameter name\n");
+    //         ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+
+    else
+      fprintf(stdout,
+              "   Rec :       Date     Time   Level Gridsize    Miss :     Minimum        Mean     Maximum : Parameter ID\n");
+    //         ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+
+  }
 
   char vdatestr[32], vtimestr[32];
   date2str(vdatetime.date, vdatestr, sizeof(vdatestr));
@@ -223,67 +223,67 @@ printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, i
   fprintf(stdout, "%7zu :", nmiss);
 
   if (number == CDI_REAL)
+  {
+    if (nmiss > 0)
     {
-      if (nmiss > 0)
-        {
-          arrmean = 0;
-          arrmin = 1.e300;
-          arrmax = -1.e300;
-          for (size_t i = 0; i < datasize; i++)
-            {
-              if (!DBL_IS_EQUAL(data[i], missval))
-                {
-                  if (data[i] < arrmin) arrmin = data[i];
-                  if (data[i] > arrmax) arrmax = data[i];
-                  arrmean += data[i];
-                  ivals++;
-                }
-            }
-          imiss = datasize - ivals;
-          datasize = ivals;
-        }
-      else
-        {
-          arrmean = data[0];
-          arrmin = data[0];
-          arrmax = data[0];
-          for (size_t i = 1; i < datasize; i++)
-            {
-              if (data[i] < arrmin) arrmin = data[i];
-              if (data[i] > arrmax) arrmax = data[i];
-              arrmean += data[i];
-            }
-        }
-
-      if (datasize > 0) arrmean /= (double) datasize;
-
-      fprintf(stdout, "%#12.5g%#12.5g%#12.5g", arrmin, arrmean, arrmax);
-    }
-  else
-    {
-      size_t nvals_r = 0, nvals_i = 0;
-      double arrsum_r = 0, arrsum_i = 0, arrmean_r = 0, arrmean_i = 0;
-
+      arrmean = 0;
+      arrmin = 1.e300;
+      arrmax = -1.e300;
       for (size_t i = 0; i < datasize; i++)
+      {
+        if (!DBL_IS_EQUAL(data[i], missval))
         {
-          if (!DBL_IS_EQUAL(data[i * 2], missval))
-            {
-              arrsum_r += data[i * 2];
-              nvals_r++;
-            }
-          if (!DBL_IS_EQUAL(data[i * 2 + 1], missval))
-            {
-              arrsum_i += data[i * 2 + 1];
-              nvals_i++;
-            }
+          if (data[i] < arrmin) arrmin = data[i];
+          if (data[i] > arrmax) arrmax = data[i];
+          arrmean += data[i];
+          ivals++;
         }
-
-      imiss = datasize - nvals_r;
-
-      if (nvals_r > 0) arrmean_r = arrsum_r / (double) nvals_r;
-      if (nvals_i > 0) arrmean_i = arrsum_i / (double) nvals_i;
-      fprintf(stdout, "  -  (%#12.5g,%#12.5g)  -", arrmean_r, arrmean_i);
+      }
+      imiss = datasize - ivals;
+      datasize = ivals;
     }
+    else
+    {
+      arrmean = data[0];
+      arrmin = data[0];
+      arrmax = data[0];
+      for (size_t i = 1; i < datasize; i++)
+      {
+        if (data[i] < arrmin) arrmin = data[i];
+        if (data[i] > arrmax) arrmax = data[i];
+        arrmean += data[i];
+      }
+    }
+
+    if (datasize > 0) arrmean /= (double) datasize;
+
+    fprintf(stdout, "%#12.5g%#12.5g%#12.5g", arrmin, arrmean, arrmax);
+  }
+  else
+  {
+    size_t nvals_r = 0, nvals_i = 0;
+    double arrsum_r = 0, arrsum_i = 0, arrmean_r = 0, arrmean_i = 0;
+
+    for (size_t i = 0; i < datasize; i++)
+    {
+      if (!DBL_IS_EQUAL(data[i * 2], missval))
+      {
+        arrsum_r += data[i * 2];
+        nvals_r++;
+      }
+      if (!DBL_IS_EQUAL(data[i * 2 + 1], missval))
+      {
+        arrsum_i += data[i * 2 + 1];
+        nvals_i++;
+      }
+    }
+
+    imiss = datasize - nvals_r;
+
+    if (nvals_r > 0) arrmean_r = arrsum_r / (double) nvals_r;
+    if (nvals_i > 0) arrmean_i = arrsum_i / (double) nvals_i;
+    fprintf(stdout, "  -  (%#12.5g,%#12.5g)  -", arrmean_r, arrmean_i);
+  }
 
   fprintf(stdout, " : %-14s\n", varname);
 
@@ -329,14 +329,14 @@ limit_string_length(char *string, size_t maxlen)
   size_t len = strlen(string);
 
   if (len > 10)
-    {
-      for (size_t i = 3; i < len; ++i)
-        if (string[i] == ' ' || string[i] == ',' || (i > 10 && string[i] == '.'))
-          {
-            string[i] = 0;
-            break;
-          }
-    }
+  {
+    for (size_t i = 3; i < len; ++i)
+      if (string[i] == ' ' || string[i] == ',' || (i > 10 && string[i] == '.'))
+      {
+        string[i] = 0;
+        break;
+      }
+  }
 }
 
 static void
@@ -366,34 +366,34 @@ print_short_info(int streamID, int vlistID, int vardis)
     fprintf(stdout, "Parameter ID\n");
 
   for (int varID = 0; varID < nvars; varID++)
-    {
-      int param = vlistInqVarParam(vlistID, varID);
-      int gridID = vlistInqVarGrid(vlistID, varID);
-      int zaxisID = vlistInqVarZaxis(vlistID, varID);
+  {
+    int param = vlistInqVarParam(vlistID, varID);
+    int gridID = vlistInqVarGrid(vlistID, varID);
+    int zaxisID = vlistInqVarZaxis(vlistID, varID);
 
-      fprintf(stdout, "%6d : ", varID + 1);
+    fprintf(stdout, "%6d : ", varID + 1);
 
-      // institute info
-      const char *instptr = institutInqNamePtr(vlistInqVarInstitut(vlistID, varID));
-      strcpy(tmpname, "unknown");
-      if (instptr) strncpy(tmpname, instptr, CDI_MAX_NAME - 1);
-      limit_string_length(tmpname, CDI_MAX_NAME);
-      fprintf(stdout, "%-8s ", tmpname);
+    // institute info
+    const char *instptr = institutInqNamePtr(vlistInqVarInstitut(vlistID, varID));
+    strcpy(tmpname, "unknown");
+    if (instptr) strncpy(tmpname, instptr, CDI_MAX_NAME - 1);
+    limit_string_length(tmpname, CDI_MAX_NAME);
+    fprintf(stdout, "%-8s ", tmpname);
 
-      // source info
-      const char *modelptr = modelInqNamePtr(vlistInqVarModel(vlistID, varID));
-      strcpy(tmpname, "unknown");
-      if (modelptr) strncpy(tmpname, modelptr, CDI_MAX_NAME - 1);
-      limit_string_length(tmpname, CDI_MAX_NAME);
-      fprintf(stdout, "%-8s ", tmpname);
+    // source info
+    const char *modelptr = modelInqNamePtr(vlistInqVarModel(vlistID, varID));
+    strcpy(tmpname, "unknown");
+    if (modelptr) strncpy(tmpname, modelptr, CDI_MAX_NAME - 1);
+    limit_string_length(tmpname, CDI_MAX_NAME);
+    fprintf(stdout, "%-8s ", tmpname);
 
-      // timetype
-      int timetype = vlistInqVarTimetype(vlistID, varID);
-      fprintf(stdout, "%c ", timetype == TIME_CONSTANT ? 'c' : 'v');
+    // timetype
+    int timetype = vlistInqVarTimetype(vlistID, varID);
+    fprintf(stdout, "%c ", timetype == TIME_CONSTANT ? 'c' : 'v');
 
-      // tsteptype
-      int tsteptype = vlistInqVarTsteptype(vlistID, varID);
-      // clang-format off
+    // tsteptype
+    int tsteptype = vlistInqVarTsteptype(vlistID, varID);
+    // clang-format off
 	  if      (tsteptype == TSTEP_INSTANT ) fprintf(stdout, "%-8s ", "instant");
 	  else if (tsteptype == TSTEP_INSTANT2) fprintf(stdout, "%-8s ", "instant");
 	  else if (tsteptype == TSTEP_INSTANT3) fprintf(stdout, "%-8s ", "instant");
@@ -405,29 +405,29 @@ print_short_info(int streamID, int vlistID, int vardis)
 	  else if (tsteptype == TSTEP_DIFF    ) fprintf(stdout, "%-8s ", "diff");
 	  else if (tsteptype == TSTEP_SUM     ) fprintf(stdout, "%-8s ", "sum");
 	  else                                  fprintf(stdout, "%-8s ", "unknown");
-      // clang-format on
+    // clang-format on
 
-      if (nsubtypes > 0)
-        {
-          int subtypeID = vlistInqVarSubtype(vlistID, varID);
-          int subtypesize = subtypeInqSize(subtypeID);
-          fprintf(stdout, " %6d  ", subtypesize);
-          fprintf(stdout, "%3d ", vlistSubtypeIndex(vlistID, subtypeID) + 1);
-        }
+    if (nsubtypes > 0)
+    {
+      int subtypeID = vlistInqVarSubtype(vlistID, varID);
+      int subtypesize = subtypeInqSize(subtypeID);
+      fprintf(stdout, " %6d  ", subtypesize);
+      fprintf(stdout, "%3d ", vlistSubtypeIndex(vlistID, subtypeID) + 1);
+    }
 
-      // layer info
-      int levelsize = zaxisInqSize(zaxisID);
-      fprintf(stdout, "%6d ", levelsize);
-      fprintf(stdout, "%3d ", vlistZaxisIndex(vlistID, zaxisID) + 1);
+    // layer info
+    int levelsize = zaxisInqSize(zaxisID);
+    fprintf(stdout, "%6d ", levelsize);
+    fprintf(stdout, "%3d ", vlistZaxisIndex(vlistID, zaxisID) + 1);
 
-      // grid info
-      size_t gridsize = (size_t) gridInqSize(gridID);
-      fprintf(stdout, "%9zu ", gridsize);
-      fprintf(stdout, "%3d ", vlistGridIndex(vlistID, gridID) + 1);
+    // grid info
+    size_t gridsize = (size_t) gridInqSize(gridID);
+    fprintf(stdout, "%9zu ", gridsize);
+    fprintf(stdout, "%3d ", vlistGridIndex(vlistID, gridID) + 1);
 
-      // datatype
-      int datatype = vlistInqVarDatatype(vlistID, varID);
-      // clang-format off
+    // datatype
+    int datatype = vlistInqVarDatatype(vlistID, varID);
+    // clang-format off
       if      (datatype == CDI_DATATYPE_PACK  ) strcpy(pstr, "P0");
       else if (datatype > 0 && datatype <= 32 ) snprintf(pstr, sizeof(pstr), "P%d", datatype);
       else if (datatype == CDI_DATATYPE_CPX32 ) strcpy(pstr, "C32");
@@ -441,29 +441,29 @@ print_short_info(int streamID, int vlistID, int vardis)
       else if (datatype == CDI_DATATYPE_UINT16) strcpy(pstr, "U16");
       else if (datatype == CDI_DATATYPE_UINT32) strcpy(pstr, "U32");
       else                                      strcpy(pstr, "-1");
-      // clang-format on
+    // clang-format on
 
-      fprintf(stdout, " %-3s", pstr);
+    fprintf(stdout, " %-3s", pstr);
 
-      int compType = vlistInqVarCompType(vlistID, varID);
-      bool isCompressed = (compType != CDI_COMPRESS_NONE);
-      fprintf(stdout, "%c ", isCompressed ? (int) comptype_to_name(compType)[0] : ' ');
+    int compType = vlistInqVarCompType(vlistID, varID);
+    bool isCompressed = (compType != CDI_COMPRESS_NONE);
+    fprintf(stdout, "%c ", isCompressed ? (int) comptype_to_name(compType)[0] : ' ');
 
-      // parameter info
-      fprintf(stdout, ": ");
+    // parameter info
+    fprintf(stdout, ": ");
 
-      cdiParamToString(param, paramstr, sizeof(paramstr));
+    cdiParamToString(param, paramstr, sizeof(paramstr));
 
-      if (vardis)
-        {
-          vlistInqVarName(vlistID, varID, varname);
-          fprintf(stdout, "%-14s", varname);
-        }
-      else
-        fprintf(stdout, "%-14s", paramstr);
-
-      fprintf(stdout, "\n");
+    if (vardis)
+    {
+      vlistInqVarName(vlistID, varID, varname);
+      fprintf(stdout, "%-14s", varname);
     }
+    else
+      fprintf(stdout, "%-14s", paramstr);
+
+    fprintf(stdout, "\n");
+  }
 
   fprintf(stdout, "   Grid coordinates");
   fprintf(stdout, " :\n");
@@ -476,51 +476,51 @@ print_short_info(int streamID, int vlistID, int vardis)
   printZaxisInfo(vlistID);
 
   if (nsubtypes > 0)
-    {
-      fprintf(stdout, "   Subtypes");
-      fprintf(stdout, " :\n");
+  {
+    fprintf(stdout, "   Subtypes");
+    fprintf(stdout, " :\n");
 
-      printSubtypeInfo(vlistID);
-    }
+    printSubtypeInfo(vlistID);
+  }
 
   int taxisID = vlistInqTaxis(vlistID);
   int ntsteps = vlistNtsteps(vlistID);
 
   if (ntsteps != 0)
+  {
+    if (ntsteps == CDI_UNDEFID)
+      fprintf(stdout, "   Time coordinate :  unlimited steps\n");
+    else
+      fprintf(stdout, "   Time coordinate :  %d step%s\n", ntsteps, ntsteps == 1 ? "" : "s");
+
+    if (taxisID != CDI_UNDEFID)
     {
-      if (ntsteps == CDI_UNDEFID)
-        fprintf(stdout, "   Time coordinate :  unlimited steps\n");
-      else
-        fprintf(stdout, "   Time coordinate :  %d step%s\n", ntsteps, ntsteps == 1 ? "" : "s");
+      if (taxisInqType(taxisID) == TAXIS_RELATIVE)
+      {
+        CdiDateTime dt = taxisInqRdatetime(taxisID);
 
-      if (taxisID != CDI_UNDEFID)
-        {
-          if (taxisInqType(taxisID) == TAXIS_RELATIVE)
-            {
-              CdiDateTime dt = taxisInqRdatetime(taxisID);
+        fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", dt.date.year, dt.date.month, dt.date.day,
+                dt.time.hour, dt.time.minute, dt.time.second);
+        if (dt.time.ms) fprintf(stdout, ".%d", dt.time.ms);
 
-              fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", dt.date.year, dt.date.month, dt.date.day,
-                      dt.time.hour, dt.time.minute, dt.time.second);
-              if (dt.time.ms) fprintf(stdout, ".%d", dt.time.ms);
+        int tunits = taxisInqTunit(taxisID);
+        if (tunits != CDI_UNDEFID) fprintf(stdout, "  Units = %s", tunit2str(tunits));
 
-              int tunits = taxisInqTunit(taxisID);
-              if (tunits != CDI_UNDEFID) fprintf(stdout, "  Units = %s", tunit2str(tunits));
+        int calendar = taxisInqCalendar(taxisID);
+        if (calendar != CDI_UNDEFID) fprintf(stdout, "  Calendar = %s", calendar2str(calendar));
 
-              int calendar = taxisInqCalendar(taxisID);
-              if (calendar != CDI_UNDEFID) fprintf(stdout, "  Calendar = %s", calendar2str(calendar));
+        if (taxisHasBounds(taxisID)) fprintf(stdout, "  Bounds = true");
 
-              if (taxisHasBounds(taxisID)) fprintf(stdout, "  Bounds = true");
-
-              fprintf(stdout, "\n");
-            }
-        }
-
-      fprintf(stdout, "  YYYY-MM-DD hh:mm:ss  YYYY-MM-DD hh:mm:ss  YYYY-MM-DD hh:mm:ss  YYYY-MM-DD hh:mm:ss\n");
-
-      printTimesteps(streamID, taxisID, 0);
-
-      fprintf(stdout, "\n");
+        fprintf(stdout, "\n");
+      }
     }
+
+    fprintf(stdout, "  YYYY-MM-DD hh:mm:ss  YYYY-MM-DD hh:mm:ss  YYYY-MM-DD hh:mm:ss  YYYY-MM-DD hh:mm:ss\n");
+
+    printTimesteps(streamID, taxisID, 0);
+
+    fprintf(stdout, "\n");
+  }
 }
 
 static void
@@ -546,110 +546,109 @@ setDefaultDataType(char *datatypestr)
   // clang-format on
 
   if (isdigit((int) *datatypestr))
-    {
-      nbits = atoi(datatypestr);
-      datatypestr += 1;
-      if (nbits >= 10) datatypestr += 1;
+  {
+    nbits = atoi(datatypestr);
+    datatypestr += 1;
+    if (nbits >= 10) datatypestr += 1;
 
-      if (dtype == -1)
+    if (dtype == -1)
+    {
+      if (nbits > 0 && nbits < 32)
+        DefaultDataType = nbits;
+      else if (nbits == 32)
+        DefaultDataType = (DefaultFileType == CDI_FILETYPE_GRB) ? CDI_DATATYPE_PACK32 : CDI_DATATYPE_FLT32;
+      else if (nbits == 64)
+        DefaultDataType = CDI_DATATYPE_FLT64;
+      else
+      {
+        fprintf(stderr, "Unsupported number of bits %d!\n", nbits);
+        fprintf(stderr,
+                "Use I8/I16/I32/F32/F64 for nc/nc2/nc4/nc4c/nc5/nczarr; F32/F64 for grb2/srv/ext/ieg; P1 - P24 for grb/grb2.\n");
+        exit(EXIT_FAILURE);
+      }
+    }
+    else
+    {
+      if (dtype == D_INT)
+      {
+        if (nbits == 8)
+          DefaultDataType = CDI_DATATYPE_INT8;
+        else if (nbits == 16)
+          DefaultDataType = CDI_DATATYPE_INT16;
+        else if (nbits == 32)
+          DefaultDataType = CDI_DATATYPE_INT32;
+        else
         {
-          if (nbits > 0 && nbits < 32)
-            DefaultDataType = nbits;
-          else if (nbits == 32)
-            DefaultDataType = (DefaultFileType == CDI_FILETYPE_GRB) ? CDI_DATATYPE_PACK32 : CDI_DATATYPE_FLT32;
-          else if (nbits == 64)
-            DefaultDataType = CDI_DATATYPE_FLT64;
+          fprintf(stderr, "Unsupported number of bits = %d for datatype INT!\n", nbits);
+          exit(EXIT_FAILURE);
+        }
+      }
+      /*
+      else if ( dtype == D_UINT )
+        {
+          if      ( nbits ==  8 ) DefaultDataType = CDI_DATATYPE_UINT8;
           else
             {
-              fprintf(stderr, "Unsupported number of bits %d!\n", nbits);
-              fprintf(
-                  stderr,
-                  "Use I8/I16/I32/F32/F64 for nc/nc2/nc4/nc4c/nc5/nczarr; F32/F64 for grb2/srv/ext/ieg; P1 - P24 for grb/grb2.\n");
+              fprintf(stderr, "Unsupported number of bits = %d for datatype UINT!\n", nbits);
               exit(EXIT_FAILURE);
             }
         }
-      else
+      */
+      else if (dtype == D_FLT)
+      {
+        if (nbits == 32)
+          DefaultDataType = CDI_DATATYPE_FLT32;
+        else if (nbits == 64)
+          DefaultDataType = CDI_DATATYPE_FLT64;
+        else
         {
-          if (dtype == D_INT)
-            {
-              if (nbits == 8)
-                DefaultDataType = CDI_DATATYPE_INT8;
-              else if (nbits == 16)
-                DefaultDataType = CDI_DATATYPE_INT16;
-              else if (nbits == 32)
-                DefaultDataType = CDI_DATATYPE_INT32;
-              else
-                {
-                  fprintf(stderr, "Unsupported number of bits = %d for datatype INT!\n", nbits);
-                  exit(EXIT_FAILURE);
-                }
-            }
-          /*
-          else if ( dtype == D_UINT )
-            {
-              if      ( nbits ==  8 ) DefaultDataType = CDI_DATATYPE_UINT8;
-              else
-                {
-                  fprintf(stderr, "Unsupported number of bits = %d for datatype UINT!\n", nbits);
-                  exit(EXIT_FAILURE);
-                }
-            }
-          */
-          else if (dtype == D_FLT)
-            {
-              if (nbits == 32)
-                DefaultDataType = CDI_DATATYPE_FLT32;
-              else if (nbits == 64)
-                DefaultDataType = CDI_DATATYPE_FLT64;
-              else
-                {
-                  fprintf(stderr, "Unsupported number of bits = %d for datatype FLT!\n", nbits);
-                  exit(EXIT_FAILURE);
-                }
-            }
-          else if (dtype == D_CPX)
-            {
-              if (nbits == 32)
-                DefaultDataType = CDI_DATATYPE_CPX32;
-              else if (nbits == 64)
-                DefaultDataType = CDI_DATATYPE_CPX64;
-              else
-                {
-                  fprintf(stderr, "Unsupported number of bits = %d for datatype CPX!\n", nbits);
-                  exit(EXIT_FAILURE);
-                }
-            }
-        }
-    }
-
-  if (*datatypestr != 0)
-    {
-      if (*datatypestr == 'l' || *datatypestr == 'L')
-        {
-          if (HOST_ENDIANNESS == CDI_BIGENDIAN) DefaultByteorder = CDI_LITTLEENDIAN;
-          datatypestr++;
-        }
-      else if (*datatypestr == 'b' || *datatypestr == 'B')
-        {
-          if (HOST_ENDIANNESS == CDI_LITTLEENDIAN) DefaultByteorder = CDI_BIGENDIAN;
-          datatypestr++;
-        }
-      else
-        {
-          fprintf(stderr, "Unsupported character in number of bytes: >%s< !\n", datatypestr);
+          fprintf(stderr, "Unsupported number of bits = %d for datatype FLT!\n", nbits);
           exit(EXIT_FAILURE);
         }
+      }
+      else if (dtype == D_CPX)
+      {
+        if (nbits == 32)
+          DefaultDataType = CDI_DATATYPE_CPX32;
+        else if (nbits == 64)
+          DefaultDataType = CDI_DATATYPE_CPX64;
+        else
+        {
+          fprintf(stderr, "Unsupported number of bits = %d for datatype CPX!\n", nbits);
+          exit(EXIT_FAILURE);
+        }
+      }
     }
+  }
+
+  if (*datatypestr != 0)
+  {
+    if (*datatypestr == 'l' || *datatypestr == 'L')
+    {
+      if (HOST_ENDIANNESS == CDI_BIGENDIAN) DefaultByteorder = CDI_LITTLEENDIAN;
+      datatypestr++;
+    }
+    else if (*datatypestr == 'b' || *datatypestr == 'B')
+    {
+      if (HOST_ENDIANNESS == CDI_LITTLEENDIAN) DefaultByteorder = CDI_BIGENDIAN;
+      datatypestr++;
+    }
+    else
+    {
+      fprintf(stderr, "Unsupported character in number of bytes: >%s< !\n", datatypestr);
+      exit(EXIT_FAILURE);
+    }
+  }
 }
 
 static void
 setDefaultFileType(char *filetypestr)
 {
   if (filetypestr)
-    {
-      char *ftstr = filetypestr;
+  {
+    char *ftstr = filetypestr;
 
-      // clang-format off
+    // clang-format off
       if      (memcmp(filetypestr, "grb2",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB2;}
       else if (memcmp(filetypestr, "grb1",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB; }
       else if (memcmp(filetypestr, "grb",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_GRB; }
@@ -669,26 +668,26 @@ setDefaultFileType(char *filetypestr)
 	  fprintf(stderr, "Available filetypes: grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext and ieg\n");
 	  exit(EXIT_FAILURE);
 	}
-      // clang-format on
+    // clang-format on
 
-      if (DefaultFileType != CDI_UNDEFID && *ftstr != 0)
-        {
-          if (*ftstr == '_')
-            {
-              ftstr++;
+    if (DefaultFileType != CDI_UNDEFID && *ftstr != 0)
+    {
+      if (*ftstr == '_')
+      {
+        ftstr++;
 
-              setDefaultDataType(ftstr);
-            }
-          else
-            {
-              fprintf(stderr, "Unexpected character >%c< in file type >%s<!\n", *ftstr, filetypestr);
-              fprintf(stderr, "Use format[_nbits] with:\n");
-              fprintf(stderr, "    format = grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext or ieg\n");
-              fprintf(stderr, "    nbits  = 32/64 for grb2/nc/nc2/nc4/nc4c/nc5/nczarr/srv/ext/ieg; 1 - 24 for grb/grb2\n");
-              exit(EXIT_FAILURE);
-            }
-        }
+        setDefaultDataType(ftstr);
+      }
+      else
+      {
+        fprintf(stderr, "Unexpected character >%c< in file type >%s<!\n", *ftstr, filetypestr);
+        fprintf(stderr, "Use format[_nbits] with:\n");
+        fprintf(stderr, "    format = grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext or ieg\n");
+        fprintf(stderr, "    nbits  = 32/64 for grb2/nc/nc2/nc4/nc4c/nc5/nczarr/srv/ext/ieg; 1 - 24 for grb/grb2\n");
+        exit(EXIT_FAILURE);
+      }
     }
+  }
 }
 
 static int
@@ -717,20 +716,20 @@ define_compress(const char *arg)
   if (strncmp(arg, "szip", len) == 0) { comptype = CDI_COMPRESS_SZIP; }
   else if (strncmp(arg, "jpeg", len) == 0) { comptype = CDI_COMPRESS_JPEG; }
   else if (strncmp(arg, "zip", 3) == 0)
-    {
-      comptype = CDI_COMPRESS_ZIP;
-      complevel = (len == 5 && arg[3] == '_' && isdigit(arg[4])) ? atoi(&arg[4]) : 1;
-    }
+  {
+    comptype = CDI_COMPRESS_ZIP;
+    complevel = (len == 5 && arg[3] == '_' && isdigit(arg[4])) ? atoi(&arg[4]) : 1;
+  }
   else if (strncmp(arg, "zstd", 4) == 0)
+  {
+    if (filterSpec[0] == 0)
     {
-      if (filterSpec[0] == 0)
-        {
-          int filterid = 32015;
-          int level = (len >= 6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
-          snprintf(filterSpec, sizeof(filterSpec), "%d,%d", filterid, level);
-        }
-      else { fprintf(stderr, "Filter already defined!\n"); }
+      int filterid = 32015;
+      int level = (len >= 6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
+      snprintf(filterSpec, sizeof(filterSpec), "%d,%d", filterid, level);
     }
+    else { fprintf(stderr, "Filter already defined!\n"); }
+  }
   else
     fprintf(stderr, "%s compression unsupported!\n", arg);
 }
@@ -826,267 +825,265 @@ main(int argc, char *argv[])
   if (Debug) cdiDebug(Debug);
 
   if (rTable)
-    {
-      itableID = tableInq(-1, 0, rTable);
-      if (itableID != CDI_UNDEFID) cdiDefTableID(itableID);
-      otableID = itableID;
-    }
+  {
+    itableID = tableInq(-1, 0, rTable);
+    if (itableID != CDI_UNDEFID) cdiDefTableID(itableID);
+    otableID = itableID;
+  }
 
   if (fname1 == NULL && !(Debug || Version))
-    {
-      usage();
-      exit(0);
-    }
+  {
+    usage();
+    exit(0);
+  }
 
   // for (int i = 0; i < numQueryNames; ++i) printf("queryName[%d] = %s\n", i+1, queryNames[i]);
 
   if (fname1)
+  {
+    SizeType nmiss;
+    size_t datasize = 0;
+    size_t maxlev = 0;
+    int streamID2 = CDI_UNDEFID;
+    int filetype;
+    int nrecs;
+    int levelID;
+    int nts = 0;
+    int recID;
+    int taxisID2 = CDI_UNDEFID;
+    int vlistID2 = CDI_UNDEFID;
+
+    bool useQuery = (numQueryNames > 0) || (numQueryCellidx > 0) || (numQueryLevidx > 0) || (numQueryStepidx > 0);
+    CdiQuery *query = NULL;
+    if (useQuery)
     {
-      SizeType nmiss;
-      size_t datasize = 0;
-      size_t maxlev = 0;
-      int streamID2 = CDI_UNDEFID;
-      int filetype;
-      int nrecs;
-      int levelID;
-      int nts = 0;
-      int recID;
-      int taxisID2 = CDI_UNDEFID;
-      int vlistID2 = CDI_UNDEFID;
-
-      bool useQuery = (numQueryNames > 0) || (numQueryCellidx > 0) || (numQueryLevidx > 0) || (numQueryStepidx > 0);
-      CdiQuery *query = NULL;
-      if (useQuery)
-        {
-          query = cdiQueryCreate();
-          if (numQueryNames) cdiQuerySetNames(query, numQueryNames, queryNames);
-          if (numQueryCellidx) cdiQuerySetCellidx(query, numQueryCellidx, queryCellidx);
-          if (numQueryLevidx) cdiQuerySetLevidx(query, numQueryLevidx, queryLevidx);
-          if (numQueryStepidx) cdiQuerySetStepidx(query, numQueryStepidx, queryStepidx);
-          if (Debug) cdiQueryPrint(query);
-        }
-
-      int streamID1 = useQuery ? streamOpenReadQuery(fname1, query) : streamOpenRead(fname1);
-      if (streamID1 < 0) return handle_error(streamID1, "Open failed on %s", fname1);
-
-      if (useQuery) cdiQueryPrintEntriesNotFound(query);
-      if (query) cdiQueryDelete(query);
-
-      if (numWorkerIn > 0) streamDefNumWorker(streamID1, numWorkerIn);
-
-      if (preScan) fprintf(stdout, "numSteps=%d\n", streamInqNumSteps(streamID1));
-
-      int vlistID1 = streamInqVlist(streamID1);
-
-      if (Longinfo) vlistPrint(vlistID1);
-
-      int nvars = vlistNvars(vlistID1);
-      int taxisID1 = vlistInqTaxis(vlistID1);
-      int ntsteps = vlistNtsteps(vlistID1);
-
-      if (Debug) fprintf(stderr, "nvars   = %d\nntsteps = %d\n", nvars, ntsteps);
-
-      if (fname2)
-        {
-          vlistID2 = vlistDuplicate(vlistID1);
-          taxisID2 = taxisDuplicate(taxisID1);
-          vlistDefTaxis(vlistID2, taxisID2);
-        }
-
-      for (varID = 0; varID < nvars; varID++)
-        {
-          int gridID = vlistInqVarGrid(vlistID1, varID);
-          size_t gridsize = (size_t) gridInqSize(gridID);
-          if (gridsize > datasize) datasize = gridsize;
-          int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-          size_t nlev = (size_t) zaxisInqSize(zaxisID);
-          if (nlev > maxlev) maxlev = nlev;
-          if (fname2)
-            {
-              if (DefaultDataType != CDI_UNDEFID) vlistDefVarDatatype(vlistID2, varID, DefaultDataType);
-            }
-        }
-
-      if (fname2)
-        {
-          Info = 0;
-          filetype = streamInqFiletype(streamID1);
-
-          if (DefaultFileType != CDI_UNDEFID) filetype = DefaultFileType;
-
-          streamID2 = streamOpenWrite(fname2, filetype);
-          if (streamID2 < 0) return handle_error(streamID2, "Open failed on %s", fname2);
-
-          int maxSteps = vlistNtsteps(vlistID1);
-          if (filetype == CDI_FILETYPE_NCZARR && maxSteps >= 0) streamDefMaxSteps(streamID2, maxSteps);
-          if (numWorkerOut > 0) streamDefNumWorker(streamID2, numWorkerOut);
-
-          if (DefaultByteorder != CDI_UNDEFID) streamDefByteorder(streamID2, DefaultByteorder);
-
-          if (filterSpec[0]) streamDefFilter(streamID2, filterSpec);
-
-          if (comptype != CDI_COMPRESS_NONE)
-            {
-              streamDefCompType(streamID2, comptype);
-              streamDefCompLevel(streamID2, complevel);
-            }
-
-          streamDefVlist(streamID2, vlistID2);
-
-          if (otableID == CDI_UNDEFID) otableID = itableID;
-        }
-
-      if (vlistNumber(vlistID1) != CDI_REAL) datasize *= 2;
-      if (Variable) datasize *= maxlev;
-      double *data = (double *) malloc(datasize * sizeof(double));
-
-      // nts = cdiInqTimeSize(streamID1);
-      if (Debug) printf("nts = %d streamID1 = %d, streamID2 = %d\n", nts, streamID1, streamID2);
-
-      if (Shortinfo)
-        {
-          Info = 0;
-          print_short_info(streamID1, vlistID1, Vardis);
-        }
-
-      int tsID = 0;
-      if (Info || fname2 || NoInfo)
-        while ((nrecs = streamInqTimestep(streamID1, tsID)) > 0)
-          {
-            if (fname2 /* && ntsteps != 0*/)
-              {
-                taxisCopyTimestep(taxisID2, taxisID1);
-                streamDefTimestep(streamID2, tsID);
-              }
-
-            CdiDateTime vdatetime = taxisInqVdatetime(taxisID1);
-
-            if (Field)
-              {
-                for (recID = 0; recID < nrecs; recID++)
-                  {
-                    streamInqField(streamID1, &varID, &levelID);
-                    streamReadField(streamID1, data, &nmiss);
-
-                    int number = vlistInqVarNumber(vlistID1, varID);
-                    int gridID = vlistInqVarGrid(vlistID1, varID);
-                    int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-                    int param = vlistInqVarParam(vlistID1, varID);
-
-                    cdiParamToString(param, paramstr, sizeof(paramstr));
-
-                    if (Vardis)
-                      vlistInqVarName(vlistID1, varID, varname);
-                    else
-                      strcpy(varname, paramstr);
-
-                    // printf("varID=%d, param=%d, gridID=%d, zaxisID=%d levelID=%d\n", varID, param, gridID, zaxisID, levelID);
-
-                    SizeType gridsize = gridInqSize(gridID);
-                    double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
-                    double missval = vlistInqVarMissval(vlistID1, varID);
-
-                    if (Info)
-                      printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, data, Vardis);
-
-                    if (fname2)
-                      {
-                        streamDefField(streamID2, varID, levelID);
-                        if (Move)
-                          streamCopyField(streamID2, streamID1);
-                        else
-                          streamWriteField(streamID2, data, nmiss);
-                      }
-                  }
-              }
-            else if (Variable)
-              {
-                for (varID = 0; varID < nvars; varID++)
-                  {
-                    if (vlistInqVarTimetype(vlistID1, varID) == TIME_CONSTANT && tsID > 0) continue;
-
-                    int number = vlistInqVarNumber(vlistID1, varID);
-                    int gridID = vlistInqVarGrid(vlistID1, varID);
-                    int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-                    int param = vlistInqVarParam(vlistID1, varID);
-
-                    cdiParamToString(param, paramstr, sizeof(paramstr));
-
-                    if (Vardis)
-                      vlistInqVarName(vlistID1, varID, varname);
-                    else
-                      strcpy(varname, paramstr);
-
-                    if (Debug) fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
-
-                    size_t gridsize = (size_t) gridInqSize(gridID);
-                    double missval = vlistInqVarMissval(vlistID1, varID);
-
-                    streamReadVar(streamID1, varID, data, &nmiss);
-
-                    int nlevs = zaxisInqSize(zaxisID);
-                    for (levelID = 0; levelID < nlevs; levelID++)
-                      {
-                        double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
-                        size_t offset = (size_t) levelID * gridsize;
-                        if (Info)
-                          printInfo(vdatetime, varname, level, gridsize, number, (size_t) nmiss, missval, data + offset, Vardis);
-                      }
-
-                    if (fname2) streamWriteVar(streamID2, varID, data, nmiss);
-                  }
-              }
-            else
-              {
-                for (varID = 0; varID < nvars; varID++)
-                  {
-                    if (vlistInqVarTimetype(vlistID1, varID) == TIME_CONSTANT && tsID > 0) continue;
-
-                    int number = vlistInqVarNumber(vlistID1, varID);
-                    int gridID = vlistInqVarGrid(vlistID1, varID);
-                    int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-                    int param = vlistInqVarParam(vlistID1, varID);
-
-                    cdiParamToString(param, paramstr, sizeof(paramstr));
-
-                    if (Vardis)
-                      vlistInqVarName(vlistID1, varID, varname);
-                    else
-                      strcpy(varname, paramstr);
-
-                    if (Debug) fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
-
-                    size_t gridsize = (size_t) gridInqSize(gridID);
-                    double missval = vlistInqVarMissval(vlistID1, varID);
-
-                    int nlevs = zaxisInqSize(zaxisID);
-                    for (levelID = 0; levelID < nlevs; levelID++)
-                      {
-                        double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
-                        streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
-
-                        if (Info) printInfo(vdatetime, varname, level, gridsize, number, (size_t) nmiss, missval, data, Vardis);
-
-                        if (fname2) streamWriteVarSlice(streamID2, varID, levelID, data, nmiss);
-                      }
-                  }
-              }
-
-            tsID++;
-          }
-
-      free(data);
-
-      // fprintf(stderr, "%ld\n", (long) streamNvals(streamID1));
-
-      if (fname2)
-        {
-          streamClose(streamID2);
-          vlistDestroy(vlistID2);
-          taxisDestroy(taxisID2);
-        }
-      streamClose(streamID1);
+      query = cdiQueryCreate();
+      if (numQueryNames) cdiQuerySetNames(query, numQueryNames, queryNames);
+      if (numQueryCellidx) cdiQuerySetCellidx(query, numQueryCellidx, queryCellidx);
+      if (numQueryLevidx) cdiQuerySetLevidx(query, numQueryLevidx, queryLevidx);
+      if (numQueryStepidx) cdiQuerySetStepidx(query, numQueryStepidx, queryStepidx);
+      if (Debug) cdiQueryPrint(query);
     }
+
+    int streamID1 = useQuery ? streamOpenReadQuery(fname1, query) : streamOpenRead(fname1);
+    if (streamID1 < 0) return handle_error(streamID1, "Open failed on %s", fname1);
+
+    if (useQuery) cdiQueryPrintEntriesNotFound(query);
+    if (query) cdiQueryDelete(query);
+
+    if (numWorkerIn > 0) streamDefNumWorker(streamID1, numWorkerIn);
+
+    if (preScan) fprintf(stdout, "numSteps=%d\n", streamInqNumSteps(streamID1));
+
+    int vlistID1 = streamInqVlist(streamID1);
+
+    if (Longinfo) vlistPrint(vlistID1);
+
+    int nvars = vlistNvars(vlistID1);
+    int taxisID1 = vlistInqTaxis(vlistID1);
+    int ntsteps = vlistNtsteps(vlistID1);
+
+    if (Debug) fprintf(stderr, "nvars   = %d\nntsteps = %d\n", nvars, ntsteps);
+
+    if (fname2)
+    {
+      vlistID2 = vlistDuplicate(vlistID1);
+      taxisID2 = taxisDuplicate(taxisID1);
+      vlistDefTaxis(vlistID2, taxisID2);
+    }
+
+    for (varID = 0; varID < nvars; varID++)
+    {
+      int gridID = vlistInqVarGrid(vlistID1, varID);
+      size_t gridsize = (size_t) gridInqSize(gridID);
+      if (gridsize > datasize) datasize = gridsize;
+      int zaxisID = vlistInqVarZaxis(vlistID1, varID);
+      size_t nlev = (size_t) zaxisInqSize(zaxisID);
+      if (nlev > maxlev) maxlev = nlev;
+      if (fname2)
+      {
+        if (DefaultDataType != CDI_UNDEFID) vlistDefVarDatatype(vlistID2, varID, DefaultDataType);
+      }
+    }
+
+    if (fname2)
+    {
+      Info = 0;
+      filetype = streamInqFiletype(streamID1);
+
+      if (DefaultFileType != CDI_UNDEFID) filetype = DefaultFileType;
+
+      streamID2 = streamOpenWrite(fname2, filetype);
+      if (streamID2 < 0) return handle_error(streamID2, "Open failed on %s", fname2);
+
+      int maxSteps = vlistNtsteps(vlistID1);
+      if (filetype == CDI_FILETYPE_NCZARR && maxSteps >= 0) streamDefMaxSteps(streamID2, maxSteps);
+      if (numWorkerOut > 0) streamDefNumWorker(streamID2, numWorkerOut);
+
+      if (DefaultByteorder != CDI_UNDEFID) streamDefByteorder(streamID2, DefaultByteorder);
+
+      if (filterSpec[0]) streamDefFilter(streamID2, filterSpec);
+
+      if (comptype != CDI_COMPRESS_NONE)
+      {
+        streamDefCompType(streamID2, comptype);
+        streamDefCompLevel(streamID2, complevel);
+      }
+
+      streamDefVlist(streamID2, vlistID2);
+
+      if (otableID == CDI_UNDEFID) otableID = itableID;
+    }
+
+    if (vlistNumber(vlistID1) != CDI_REAL) datasize *= 2;
+    if (Variable) datasize *= maxlev;
+    double *data = (double *) malloc(datasize * sizeof(double));
+
+    // nts = cdiInqTimeSize(streamID1);
+    if (Debug) printf("nts = %d streamID1 = %d, streamID2 = %d\n", nts, streamID1, streamID2);
+
+    if (Shortinfo)
+    {
+      Info = 0;
+      print_short_info(streamID1, vlistID1, Vardis);
+    }
+
+    int tsID = 0;
+    if (Info || fname2 || NoInfo)
+      while ((nrecs = streamInqTimestep(streamID1, tsID)) > 0)
+      {
+        if (fname2 /* && ntsteps != 0*/)
+        {
+          taxisCopyTimestep(taxisID2, taxisID1);
+          streamDefTimestep(streamID2, tsID);
+        }
+
+        CdiDateTime vdatetime = taxisInqVdatetime(taxisID1);
+
+        if (Field)
+        {
+          for (recID = 0; recID < nrecs; recID++)
+          {
+            streamInqField(streamID1, &varID, &levelID);
+            streamReadField(streamID1, data, &nmiss);
+
+            int number = vlistInqVarNumber(vlistID1, varID);
+            int gridID = vlistInqVarGrid(vlistID1, varID);
+            int zaxisID = vlistInqVarZaxis(vlistID1, varID);
+            int param = vlistInqVarParam(vlistID1, varID);
+
+            cdiParamToString(param, paramstr, sizeof(paramstr));
+
+            if (Vardis)
+              vlistInqVarName(vlistID1, varID, varname);
+            else
+              strcpy(varname, paramstr);
+
+            // printf("varID=%d, param=%d, gridID=%d, zaxisID=%d levelID=%d\n", varID, param, gridID, zaxisID, levelID);
+
+            SizeType gridsize = gridInqSize(gridID);
+            double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
+            double missval = vlistInqVarMissval(vlistID1, varID);
+
+            if (Info) printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, data, Vardis);
+
+            if (fname2)
+            {
+              streamDefField(streamID2, varID, levelID);
+              if (Move)
+                streamCopyField(streamID2, streamID1);
+              else
+                streamWriteField(streamID2, data, nmiss);
+            }
+          }
+        }
+        else if (Variable)
+        {
+          for (varID = 0; varID < nvars; varID++)
+          {
+            if (vlistInqVarTimetype(vlistID1, varID) == TIME_CONSTANT && tsID > 0) continue;
+
+            int number = vlistInqVarNumber(vlistID1, varID);
+            int gridID = vlistInqVarGrid(vlistID1, varID);
+            int zaxisID = vlistInqVarZaxis(vlistID1, varID);
+            int param = vlistInqVarParam(vlistID1, varID);
+
+            cdiParamToString(param, paramstr, sizeof(paramstr));
+
+            if (Vardis)
+              vlistInqVarName(vlistID1, varID, varname);
+            else
+              strcpy(varname, paramstr);
+
+            if (Debug) fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
+
+            size_t gridsize = (size_t) gridInqSize(gridID);
+            double missval = vlistInqVarMissval(vlistID1, varID);
+
+            streamReadVar(streamID1, varID, data, &nmiss);
+
+            int nlevs = zaxisInqSize(zaxisID);
+            for (levelID = 0; levelID < nlevs; levelID++)
+            {
+              double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
+              size_t offset = (size_t) levelID * gridsize;
+              if (Info) printInfo(vdatetime, varname, level, gridsize, number, (size_t) nmiss, missval, data + offset, Vardis);
+            }
+
+            if (fname2) streamWriteVar(streamID2, varID, data, nmiss);
+          }
+        }
+        else
+        {
+          for (varID = 0; varID < nvars; varID++)
+          {
+            if (vlistInqVarTimetype(vlistID1, varID) == TIME_CONSTANT && tsID > 0) continue;
+
+            int number = vlistInqVarNumber(vlistID1, varID);
+            int gridID = vlistInqVarGrid(vlistID1, varID);
+            int zaxisID = vlistInqVarZaxis(vlistID1, varID);
+            int param = vlistInqVarParam(vlistID1, varID);
+
+            cdiParamToString(param, paramstr, sizeof(paramstr));
+
+            if (Vardis)
+              vlistInqVarName(vlistID1, varID, varname);
+            else
+              strcpy(varname, paramstr);
+
+            if (Debug) fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
+
+            size_t gridsize = (size_t) gridInqSize(gridID);
+            double missval = vlistInqVarMissval(vlistID1, varID);
+
+            int nlevs = zaxisInqSize(zaxisID);
+            for (levelID = 0; levelID < nlevs; levelID++)
+            {
+              double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
+              streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
+
+              if (Info) printInfo(vdatetime, varname, level, gridsize, number, (size_t) nmiss, missval, data, Vardis);
+
+              if (fname2) streamWriteVarSlice(streamID2, varID, levelID, data, nmiss);
+            }
+          }
+        }
+
+        tsID++;
+      }
+
+    free(data);
+
+    // fprintf(stderr, "%ld\n", (long) streamNvals(streamID1));
+
+    if (fname2)
+    {
+      streamClose(streamID2);
+      vlistDestroy(vlistID2);
+      taxisDestroy(taxisID2);
+    }
+    streamClose(streamID1);
+  }
 
   for (int i = 0; i < numQueryNames; ++i) free(queryNames[i]);
 

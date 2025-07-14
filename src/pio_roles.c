@@ -34,7 +34,7 @@ cdiPioCSRSelectRange(MPI_Comm commSuper, int IOMode, int clientRangeStart, int c
   xmpi(MPI_Comm_rank(commSuper, &commRank));
   int role;
   switch (IOMode)
-    {
+  {
     case PIO_NONE:
       xassert(commRank == 0 && commSize == 1);
       role = PIO_NONE;
@@ -57,7 +57,7 @@ cdiPioCSRSelectRange(MPI_Comm commSuper, int IOMode, int clientRangeStart, int c
                  : ((commRank == specialRank) ? PIO_ROLE_FPGUARD : PIO_ROLE_WRITER_COLLECTOR);
       break;
     default: xabort("Invalid mode requested %d", IOMode);
-    }
+  }
   return role;
 }
 
@@ -70,7 +70,7 @@ cdiPioCSRBalanced(MPI_Comm commSuper, int IOMode, int nProcsIO)
   numClients = commSize - nProcsIO;
   int role, specialRole = PIO_ROLE_FPGUARD, collType = PIO_ROLE_WRITER_COLLECTOR;
   switch (IOMode)
-    {
+  {
     case PIO_NONE:
       xassert(commRank == 0 && commSize == 1);
       role = PIO_NONE;
@@ -110,6 +110,6 @@ cdiPioCSRBalanced(MPI_Comm commSuper, int IOMode, int nProcsIO)
                    : collType;
       break;
     default: xabort("Invalid mode requested %d", IOMode);
-    }
+  }
   return role;
 }

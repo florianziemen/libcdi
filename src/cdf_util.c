@@ -32,11 +32,11 @@ strStartsWith(const char *vstr, const char *cstr)
 {
   bool is_equal = false;
   if (vstr && cstr)
-    {
-      size_t clen = strlen(cstr);
-      size_t vlen = strlen(vstr);
-      if (clen <= vlen) is_equal = (memcmp(vstr, cstr, clen) == 0);
-    }
+  {
+    size_t clen = strlen(cstr);
+    size_t vlen = strlen(vstr);
+    if (clen <= vlen) is_equal = (memcmp(vstr, cstr, clen) == 0);
+  }
   return is_equal;
 }
 
@@ -46,10 +46,10 @@ get_time_units(size_t len, const char *ptu)
   int timeunit = -1;
 
   while (isspace(*ptu) && len)
-    {
-      ptu++;
-      len--;
-    }
+  {
+    ptu++;
+    len--;
+  }
 
   // clang-format off
   if (len > 2)
@@ -96,16 +96,16 @@ is_timeaxis_units(const char *timeunits)
 
   int timeunit = get_time_units(len, tu);
   if (timeunit != -1)
+  {
+    size_t pos = 0;
+    while (!isspace(tu[pos]) && tu[pos] != 0) pos++;
+    if (tu[pos])
     {
-      size_t pos = 0;
-      while (!isspace(tu[pos]) && tu[pos] != 0) pos++;
-      if (tu[pos])
-        {
-          while (isspace(tu[pos])) pos++;
+      while (isspace(tu[pos])) pos++;
 
-          status = strStartsWith(tu + pos, "as") || strStartsWith(tu + pos, "since");
-        }
+      status = strStartsWith(tu + pos, "as") || strStartsWith(tu + pos, "since");
     }
+  }
 
   free(tu);
 
@@ -200,17 +200,17 @@ is_lon_axis(const char *units, const char *stdname)
 
   if ((strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian"))
       && (strStartsWith(stdname, "grid_longitude") || strStartsWith(stdname, "longitude")))
-    {
-      status = true;
-    }
+  {
+    status = true;
+  }
   else if (strStartsWith(lc_units, "degree") && !strStartsWith(stdname, "grid_latitude") && !strStartsWith(stdname, "latitude"))
-    {
-      int ioff = 6;
-      if (lc_units[ioff] == 's') ioff++;
-      if (lc_units[ioff] == ' ') ioff++;
-      if (lc_units[ioff] == '_') ioff++;
-      if (lc_units[ioff] == 'e') status = true;
-    }
+  {
+    int ioff = 6;
+    if (lc_units[ioff] == 's') ioff++;
+    if (lc_units[ioff] == ' ') ioff++;
+    if (lc_units[ioff] == '_') ioff++;
+    if (lc_units[ioff] == 'e') status = true;
+  }
 
   return status;
 }
@@ -227,17 +227,17 @@ is_lat_axis(const char *units, const char *stdname)
 
   if ((strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian"))
       && (strStartsWith(stdname, "grid_latitude") || strStartsWith(stdname, "latitude")))
-    {
-      status = true;
-    }
+  {
+    status = true;
+  }
   else if (strStartsWith(lc_units, "degree") && !strStartsWith(stdname, "grid_longitude") && !strStartsWith(stdname, "longitude"))
-    {
-      int ioff = 6;
-      if (lc_units[ioff] == 's') ioff++;
-      if (lc_units[ioff] == ' ') ioff++;
-      if (lc_units[ioff] == '_') ioff++;
-      if (lc_units[ioff] == 'n' || lc_units[ioff] == 's') status = true;
-    }
+  {
+    int ioff = 6;
+    if (lc_units[ioff] == 's') ioff++;
+    if (lc_units[ioff] == ' ') ioff++;
+    if (lc_units[ioff] == '_') ioff++;
+    if (lc_units[ioff] == 'n' || lc_units[ioff] == 's') status = true;
+  }
 
   return status;
 }
@@ -331,10 +331,10 @@ attribute_to_calendar(const char *attstring)
 
   static bool warn = true;
   if (warn)
-    {
-      warn = false;
-      Warning("Calendar >%s< unsupported!", attstring);
-    }
+  {
+    warn = false;
+    Warning("Calendar >%s< unsupported!", attstring);
+  }
 
   return CALENDAR_STANDARD;
 }

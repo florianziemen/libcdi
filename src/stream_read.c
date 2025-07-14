@@ -32,7 +32,7 @@ cdiStreamReadVar(int streamID, int varID, int memtype, void *data, size_t *numMi
   if (memtype == MEMTYPE_FLOAT && cdiFiletypeIsExse(filetype)) return 1;
 
   switch (cdiBaseFiletype(filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRIB: grb_read_var(streamptr, varID, memtype, data, numMissVals); break;
 #endif
@@ -49,7 +49,7 @@ cdiStreamReadVar(int streamID, int varID, int memtype, void *data, size_t *numMi
     case CDI_FILETYPE_NETCDF: cdf_read_var(streamptr, varID, memtype, data, numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(filetype));
-    }
+  }
 
   return status;
 }
@@ -101,16 +101,16 @@ streamReadVarF(int streamID, int varID, float *data, SizeType *numMissVals)
 {
   size_t numMiss = 0;
   if (cdiStreamReadVar(streamID, varID, MEMTYPE_FLOAT, data, &numMiss))
-    {
-      // In case the file format does not support single precision reading,
-      // we fall back to double precision reading, converting the data on the fly.
-      size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
-      elementCount *= (size_t) zaxisInqSize(vlistInqVarZaxis(streamInqVlist(streamID), varID));
-      double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
-      streamReadVar(streamID, varID, conversionBuffer, numMissVals);
-      for (size_t i = elementCount; i--;) data[i] = (float) conversionBuffer[i];
-      Free(conversionBuffer);
-    }
+  {
+    // In case the file format does not support single precision reading,
+    // we fall back to double precision reading, converting the data on the fly.
+    size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+    elementCount *= (size_t) zaxisInqSize(vlistInqVarZaxis(streamInqVlist(streamID), varID));
+    double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
+    streamReadVar(streamID, varID, conversionBuffer, numMissVals);
+    for (size_t i = elementCount; i--;) data[i] = (float) conversionBuffer[i];
+    Free(conversionBuffer);
+  }
   *numMissVals = (SizeType) numMiss;
 }
 
@@ -134,7 +134,7 @@ cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, void *d
   if (memtype == MEMTYPE_FLOAT && cdiFiletypeIsExse(filetype)) return 1;
 
   switch (cdiBaseFiletype(filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRIB: grb_read_var_slice(streamptr, varID, levelID, memtype, data, numMissVals); break;
 #endif
@@ -151,7 +151,7 @@ cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, void *d
     case CDI_FILETYPE_NETCDF: cdf_read_var_slice(streamptr, varID, levelID, memtype, data, numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(filetype));
-    }
+  }
 
   return status;
 }
@@ -179,11 +179,11 @@ streamReadVarSlice(int streamID, int varID, int levelID, double *data, SizeType 
 {
   size_t numMiss = 0;
   if (cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, &numMiss))
-    {
-      Warning("Unexpected error returned from cdiStreamReadVarSlice()!");
-      size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
-      memset(data, 0, elementCount * sizeof(*data));
-    }
+  {
+    Warning("Unexpected error returned from cdiStreamReadVarSlice()!");
+    size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+    memset(data, 0, elementCount * sizeof(*data));
+  }
   *numMissVals = (SizeType) numMiss;
 }
 
@@ -210,15 +210,15 @@ streamReadVarSliceF(int streamID, int varID, int levelID, float *data, SizeType 
 {
   size_t numMiss = 0;
   if (cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_FLOAT, data, &numMiss))
-    {
-      // In case the file format does not support single precision reading,
-      // we fall back to double precision reading, converting the data on the fly.
-      size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
-      double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
-      streamReadVarSlice(streamID, varID, levelID, conversionBuffer, numMissVals);
-      for (size_t i = elementCount; i--;) data[i] = (float) conversionBuffer[i];
-      Free(conversionBuffer);
-    }
+  {
+    // In case the file format does not support single precision reading,
+    // we fall back to double precision reading, converting the data on the fly.
+    size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+    double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
+    streamReadVarSlice(streamID, varID, levelID, conversionBuffer, numMissVals);
+    for (size_t i = elementCount; i--;) data[i] = (float) conversionBuffer[i];
+    Free(conversionBuffer);
+  }
   *numMissVals = (SizeType) numMiss;
 }
 
@@ -235,7 +235,7 @@ stream_read_record(int streamID, int memtype, void *data, size_t *numMissVals)
   *numMissVals = 0;
 
   switch (cdiBaseFiletype(streamptr->filetype))
-    {
+  {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRIB: grb_read_field(streamptr, memtype, data, numMissVals); break;
 #endif
@@ -252,7 +252,7 @@ stream_read_record(int streamID, int memtype, void *data, size_t *numMissVals)
     case CDI_FILETYPE_NETCDF: cdf_read_field(streamptr, memtype, data, numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(streamptr->filetype));
-    }
+  }
 
   if (streamptr->lockIO) CDI_IO_UNLOCK();
 }

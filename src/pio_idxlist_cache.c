@@ -79,22 +79,22 @@ cdiPioIdxlistCacheResize(struct cdiPioIdxlistCache *cache, size_t sizeEntries)
   if (sizeEntries > MAX_CACHE_SIZE) xabort("cache cannot hold more than %zu entries", MAX_CACHE_SIZE);
   struct cdiPioIdxlistCache *newCache;
   if (sizeEntries < cacheSize)
-    {
-      struct idxlistDesc *restrict entries = cache->entries;
-      size_t numEntries = cache->numEntries;
-      for (size_t i = sizeEntries; i < numEntries; ++i) xt_idxlist_delete(entries[i].idxlist);
-      cache->numEntries = numEntries > sizeEntries ? sizeEntries : numEntries;
-      cache->size = sizeEntries;
-      newCache = Realloc(cache, (sizeEntries ? sizeof(struct cdiPioIdxlistCache) : 0) + sizeof(struct idxlistDesc) * sizeEntries);
-    }
+  {
+    struct idxlistDesc *restrict entries = cache->entries;
+    size_t numEntries = cache->numEntries;
+    for (size_t i = sizeEntries; i < numEntries; ++i) xt_idxlist_delete(entries[i].idxlist);
+    cache->numEntries = numEntries > sizeEntries ? sizeEntries : numEntries;
+    cache->size = sizeEntries;
+    newCache = Realloc(cache, (sizeEntries ? sizeof(struct cdiPioIdxlistCache) : 0) + sizeof(struct idxlistDesc) * sizeEntries);
+  }
   else if (sizeEntries > cacheSize)
-    {
-      newCache = Realloc(cache, sizeof(struct cdiPioIdxlistCache) + sizeof(struct idxlistDesc) * sizeEntries);
-      if (!cache) newCache->numEntries = 0;
-      newCache->size = sizeEntries;
-      struct idxlistDesc *restrict entries = newCache->entries;
-      for (size_t i = cacheSize; i < sizeEntries; ++i) entries[i].type = CDIPIO_IDXLISTTYPE_EMPTY;
-    }
+  {
+    newCache = Realloc(cache, sizeof(struct cdiPioIdxlistCache) + sizeof(struct idxlistDesc) * sizeEntries);
+    if (!cache) newCache->numEntries = 0;
+    newCache->size = sizeEntries;
+    struct idxlistDesc *restrict entries = newCache->entries;
+    for (size_t i = cacheSize; i < sizeEntries; ++i) entries[i].type = CDIPIO_IDXLISTTYPE_EMPTY;
+  }
   else
     newCache = cache;
   return newCache;
@@ -104,12 +104,12 @@ void
 cdiPioIdxlistCacheDelete(struct cdiPioIdxlistCache *cache)
 {
   if (cache)
-    {
-      size_t numEntries = cache->numEntries;
-      struct idxlistDesc *restrict entries = cache->entries;
-      for (size_t i = 0; i < numEntries; ++i) xt_idxlist_delete(entries[i].idxlist);
-      Free(cache);
-    }
+  {
+    size_t numEntries = cache->numEntries;
+    struct idxlistDesc *restrict entries = cache->entries;
+    for (size_t i = 0; i < numEntries; ++i) xt_idxlist_delete(entries[i].idxlist);
+    Free(cache);
+  }
 }
 
 static Xt_idxlist
@@ -120,36 +120,36 @@ cdiPioIdxlistCacheAddSectionND(struct cdiPioIdxlistCache *cache, enum cdiPioIdxl
   struct idxlistDesc *restrict entries = cache->entries;
   for (size_t i = 0; i < cacheFill; ++i)
     if (entries[i].type == type)
-      {
-        bool equal = true;
-        for (size_t j = 0; j < ndims; ++j)
-          equal &= ((entries[i].desc.sectionND.wholeShape[j] == wholeShape[j])
-                    & (entries[i].desc.sectionND.sliceOrigin[j] == sliceOrigin[j])
-                    & (entries[i].desc.sectionND.sliceShape[j] == sliceShape[j]));
-        if (equal) return entries[i].idxlist;
-      }
+    {
+      bool equal = true;
+      for (size_t j = 0; j < ndims; ++j)
+        equal &= ((entries[i].desc.sectionND.wholeShape[j] == wholeShape[j])
+                  & (entries[i].desc.sectionND.sliceOrigin[j] == sliceOrigin[j])
+                  & (entries[i].desc.sectionND.sliceShape[j] == sliceShape[j]));
+      if (equal) return entries[i].idxlist;
+    }
   /* at this point it's definite that the requested section is not
    * in the cache, determine to replace or append is next */
   if (cacheFill < cacheSize)
-    {
-      cacheInsertPos = cacheFill;
-      cache->numEntries = ++cacheFill;
-    }
+  {
+    cacheInsertPos = cacheFill;
+    cache->numEntries = ++cacheFill;
+  }
   else
-    {
-      /* we use lrand48 because it's guaranteed to generate 31 bits
-       * per call */
-      cacheInsertPos = (size_t) (lrand48());
-      cacheInsertPos %= cacheSize;
-      xt_idxlist_delete(entries[cacheInsertPos].idxlist);
-    }
+  {
+    /* we use lrand48 because it's guaranteed to generate 31 bits
+     * per call */
+    cacheInsertPos = (size_t) (lrand48());
+    cacheInsertPos %= cacheSize;
+    xt_idxlist_delete(entries[cacheInsertPos].idxlist);
+  }
   entries[cacheInsertPos].type = type;
   for (size_t j = 0; j < ndims; ++j)
-    {
-      entries[cacheInsertPos].desc.sectionND.wholeShape[j] = wholeShape[j];
-      entries[cacheInsertPos].desc.sectionND.sliceOrigin[j] = sliceOrigin[j];
-      entries[cacheInsertPos].desc.sectionND.sliceShape[j] = sliceShape[j];
-    }
+  {
+    entries[cacheInsertPos].desc.sectionND.wholeShape[j] = wholeShape[j];
+    entries[cacheInsertPos].desc.sectionND.sliceOrigin[j] = sliceOrigin[j];
+    entries[cacheInsertPos].desc.sectionND.sliceShape[j] = sliceShape[j];
+  }
   entries[cacheInsertPos].idxlist = xt_idxsection_new(0, (int) ndims, wholeShape, sliceShape, sliceOrigin);
   return entries[cacheInsertPos].idxlist;
 }
@@ -180,18 +180,18 @@ cdiPioIdxlistCacheAddStripes1(struct cdiPioIdxlistCache *cache, Xt_int start, in
   /* at this point it's definite that the requested section is not
    * in the cache, determine to replace or append is next */
   if (cacheFill < cacheSize)
-    {
-      cacheInsertPos = cacheFill;
-      cache->numEntries = ++cacheFill;
-    }
+  {
+    cacheInsertPos = cacheFill;
+    cache->numEntries = ++cacheFill;
+  }
   else
-    {
-      /* we use lrand48 because it's guaranteed to generate 31 bits
-       * per call */
-      cacheInsertPos = (size_t) (lrand48());
-      cacheInsertPos %= cacheSize;
-      xt_idxlist_delete(entries[cacheInsertPos].idxlist);
-    }
+  {
+    /* we use lrand48 because it's guaranteed to generate 31 bits
+     * per call */
+    cacheInsertPos = (size_t) (lrand48());
+    cacheInsertPos %= cacheSize;
+    xt_idxlist_delete(entries[cacheInsertPos].idxlist);
+  }
   entries[cacheInsertPos].type = CDIPIO_IDXLISTTYPE_STRIPES1;
   entries[cacheInsertPos].desc.stripes1.start = start;
   entries[cacheInsertPos].desc.stripes1.nstrides = nstrides;
