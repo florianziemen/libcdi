@@ -2292,7 +2292,7 @@ encode_shapeOfTheEarth(struct CDI_GridProjParams *gpp)
 }
 
 static void
-gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelativeToGrid)
+gribapiDefProjLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelativeToGrid)
 {
   long xsize = (long) gridInqXsize(gridID);
   long ysize = (long) gridInqYsize(gridID);
@@ -2355,7 +2355,7 @@ gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
 }
 
 static void
-gribapiDefGridSTERE(grib_handle *gh, int editionNumber, int gridID, int uvRelativeToGrid)
+gribapiDefProjSTERE(grib_handle *gh, int editionNumber, int gridID, int uvRelativeToGrid)
 {
   long xsize = (long) gridInqXsize(gridID);
   long ysize = (long) gridInqYsize(gridID);
@@ -2399,7 +2399,7 @@ gribapiDefGridSTERE(grib_handle *gh, int editionNumber, int gridID, int uvRelati
 }
 
 static void
-gribapiDefGridHEALPIX(grib_handle *gh, int gridID, int uvRelativeToGrid)
+gribapiDefProjHEALPIX(grib_handle *gh, int gridID, int uvRelativeToGrid)
 {
   struct CDI_GridProjParams gpp;
   gridInqParamsHEALPIX(gridID, &gpp);
@@ -2568,18 +2568,18 @@ gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int
     }
     case CDI_PROJ_LCC:
     {
-      gribapiDefGridLCC(gh, editionNumber, gridID, uvRelativeToGrid);
+      gribapiDefProjLCC(gh, editionNumber, gridID, uvRelativeToGrid);
       break;
     }
     case CDI_PROJ_STERE:
     {
-      gribapiDefGridSTERE(gh, editionNumber, gridID, uvRelativeToGrid);
+      gribapiDefProjSTERE(gh, editionNumber, gridID, uvRelativeToGrid);
       break;
     }
     case CDI_PROJ_HEALPIX:
     {
       if (editionNumber <= 1) Error("HEALPix grid can't be stored in GRIB edition %d!", editionNumber);
-      gribapiDefGridHEALPIX(gh, gridID, uvRelativeToGrid);
+      gribapiDefProjHEALPIX(gh, gridID, uvRelativeToGrid);
       break;
     }
     case GRID_SPECTRAL:
