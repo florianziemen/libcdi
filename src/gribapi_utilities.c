@@ -592,6 +592,7 @@ gribapiGetGridType(grib_handle *gh)
     case GRIB2_GTYPE_GME: return GRID_GME;
     case GRIB2_GTYPE_UNSTRUCTURED: return GRID_UNSTRUCTURED;
     case GRIB2_GTYPE_HEALPIX: return CDI_PROJ_HEALPIX;
+    // case GRIB2_GTYPE_HEALPIX: return GRID_HEALPIX;
     default:
     {
       static bool lwarn = true;
@@ -785,6 +786,13 @@ gribapiGetGridProj(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 }
 
 static void
+gribapiGetProjHealpix(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
+{
+  (void) gh;
+  grid->size = numberOfPoints;
+}
+
+static void
 gribapiGetGridHealpix(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 {
   (void) gh;
@@ -899,7 +907,8 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
   else if (gridtype == GRID_GAUSSIAN_REDUCED) { gribapiGetGridGaussianReduced(gh, grid, editionNumber, numberOfPoints); }
   else if (projtype == CDI_PROJ_LCC) { gribapiGetGridProj(gh, grid, numberOfPoints); }
   else if (projtype == CDI_PROJ_STERE) { gribapiGetGridProj(gh, grid, numberOfPoints); }
-  else if (projtype == CDI_PROJ_HEALPIX) { gribapiGetGridHealpix(gh, grid, numberOfPoints); }
+  else if (projtype == CDI_PROJ_HEALPIX) { gribapiGetProjHealpix(gh, grid, numberOfPoints); }
+  else if (gridtype == GRID_HEALPIX) { gribapiGetGridHealpix(gh, grid, numberOfPoints); }
   else if (gridtype == GRID_SPECTRAL) { gribapiGetGridSpectral(gh, grid, datasize); }
   else if (gridtype == GRID_GME) { gribapiGetGridGME(gh, grid, numberOfPoints); }
   else if (gridtype == GRID_UNSTRUCTURED) { gribapiGetGridUnstructured(gh, grid, numberOfPoints); }

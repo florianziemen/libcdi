@@ -696,6 +696,28 @@ gribapiInqProjHEALPIX(grib_handle *gh, int gridID)
 }
 
 static void
+gribapiInqGridHEALPIX(grib_handle *gh, int gridID)
+{
+  long lval = -1;
+  grib_get_long(gh, "Nside", &lval);
+  int nside = (int) lval;
+  lval = -1;
+  grib_get_long(gh, "ordering", &lval);
+  int order = (int) lval;
+
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, "healpix");
+
+  const char *gmapname = "healpix";
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname);
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int) (strlen(gmapname)), gmapname);
+
+  int refinementLevel = log2(nside);
+  cdiDefAttInt(gridID, CDI_GLOBAL, "refinement_level", CDI_DATATYPE_INT32, 1, &refinementLevel);
+  const char *orderName = (order == 1) ? "nested" : "ring";
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "indexing_scheme", (int) (strlen(orderName)), orderName);
+}
+
+static void
 gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize, off_t position, int datatype, int comptype,
                  const char *varname, int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf,
                  int level_unit, VarScanKeys *scanKeys, const var_tile_t *tiles, bool lread_additional_keys, int fdbItemIndex)
@@ -749,15 +771,12 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
   int gridID = gridAdded.Id;
   // clang-format off
-  if (!gridAdded.isNew)
-    {
-      grid_free(gridptr);
-      Free(gridptr);
-    }
+  if (!gridAdded.isNew) { grid_free(gridptr); Free(gridptr); }
   else if (gridptr->projtype == CDI_PROJ_RLL)     gribapiInqProjRLL(gh, gridID);
   else if (gridptr->projtype == CDI_PROJ_LCC)     gribapiInqProjLCC(gh, gridID);
   else if (gridptr->projtype == CDI_PROJ_STERE)   gribapiInqProjSTERE(gh, gridID);
   else if (gridptr->projtype == CDI_PROJ_HEALPIX) gribapiInqProjHEALPIX(gh, gridID);
+  else if (gridptr->type == GRID_HEALPIX)         gribapiInqGridHEALPIX(gh, gridID);
   // clang-format on
 
   int zaxistype = gribapi_get_zaxis_type(gribEditionNumber(gh), leveltype1);

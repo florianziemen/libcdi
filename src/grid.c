@@ -3905,6 +3905,7 @@ gridDefParamsSTERE(int gridID, struct CDI_GridProjParams gpp)
 
   gridVerifyProj(gridID);
 }
+
 void
 gridDefParamsHEALPIX(int gridID, struct CDI_GridProjParams gpp)
 {
