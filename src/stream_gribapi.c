@@ -464,7 +464,6 @@ static void
 gribapiGetNameKeys(grib_handle *gh, int varID)
 {
   char string[CDI_MAX_NAME];
-
   size_t vlen = CDI_MAX_NAME;
   gribapi_get_string(gh, "name", string, vlen);  // longname
   if (string[0]) varDefKeyString(varID, CDI_KEY_LONGNAME, string);
@@ -571,7 +570,7 @@ gribapiGetKeys(grib_handle *gh, int varID)
 }
 
 static void
-gribapiDefProjRLL(grib_handle *gh, int gridID)
+gribapiInqProjRLL(grib_handle *gh, int gridID)
 {
   double xpole = 0, ypole = 0, angle = 0;
   grib_get_double(gh, "latitudeOfSouthernPoleInDegrees", &ypole);
@@ -608,7 +607,7 @@ decode_shapeOfTheEarth(grib_handle *gh, struct CDI_GridProjParams *gpp)
 }
 
 static void
-gribapiDefProjLCC(grib_handle *gh, int gridID)
+gribapiInqProjLCC(grib_handle *gh, int gridID)
 {
   struct CDI_GridProjParams gpp;
   gridProjParamsInit(&gpp);
@@ -648,7 +647,7 @@ gribapiDefProjLCC(grib_handle *gh, int gridID)
 }
 
 static void
-gribapiDefProjSTERE(grib_handle *gh, int gridID)
+gribapiInqProjSTERE(grib_handle *gh, int gridID)
 {
   struct CDI_GridProjParams gpp;
   gridProjParamsInit(&gpp);
@@ -679,7 +678,7 @@ gribapiDefProjSTERE(grib_handle *gh, int gridID)
 }
 
 static void
-gribapiDefProjHEALPIX(grib_handle *gh, int gridID)
+gribapiInqProjHEALPIX(grib_handle *gh, int gridID)
 {
   struct CDI_GridProjParams gpp;
   gridProjParamsInit(&gpp);
@@ -755,10 +754,10 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
       grid_free(gridptr);
       Free(gridptr);
     }
-  else if (gridptr->projtype == CDI_PROJ_RLL)     gribapiDefProjRLL(gh, gridID);
-  else if (gridptr->projtype == CDI_PROJ_LCC)     gribapiDefProjLCC(gh, gridID);
-  else if (gridptr->projtype == CDI_PROJ_STERE)   gribapiDefProjSTERE(gh, gridID);
-  else if (gridptr->projtype == CDI_PROJ_HEALPIX) gribapiDefProjHEALPIX(gh, gridID);
+  else if (gridptr->projtype == CDI_PROJ_RLL)     gribapiInqProjRLL(gh, gridID);
+  else if (gridptr->projtype == CDI_PROJ_LCC)     gribapiInqProjLCC(gh, gridID);
+  else if (gridptr->projtype == CDI_PROJ_STERE)   gribapiInqProjSTERE(gh, gridID);
+  else if (gridptr->projtype == CDI_PROJ_HEALPIX) gribapiInqProjHEALPIX(gh, gridID);
   // clang-format on
 
   int zaxistype = gribapi_get_zaxis_type(gribEditionNumber(gh), leveltype1);
@@ -929,7 +928,6 @@ static grib_handle *
 gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, void **gribbuffer, int *outDatatype, int *outCompressionType)
 {
   int gribversion = (int) ((char *) *gribbuffer)[7];
-
   if (gribversion <= 1) *outCompressionType = grbDecompress(recsize, buffersize, gribbuffer);
 
   grib_handle *gh = grib_handle_new_from_message(NULL, *gribbuffer, recsize);
@@ -943,12 +941,9 @@ gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, void **gribbuff
     if (grib_get_string(gh, "packingType", typeOfPacking, &len) == 0)
     {
       // fprintf(stderr, "packingType %zu %s\n", len, typeOfPacking);
-      if (strncmp(typeOfPacking, "grid_jpeg", len) == 0)
-        *outCompressionType = CDI_COMPRESS_JPEG;
-      else if (strncmp(typeOfPacking, "grid_ccsds", len) == 0)
-        *outCompressionType = CDI_COMPRESS_AEC;
-      else if (strncmp(typeOfPacking, "grid_ieee", len) == 0)
-        lieee = true;
+      if (strncmp(typeOfPacking, "grid_jpeg", len) == 0) { *outCompressionType = CDI_COMPRESS_JPEG; }
+      else if (strncmp(typeOfPacking, "grid_ccsds", len) == 0) { *outCompressionType = CDI_COMPRESS_AEC; }
+      else if (strncmp(typeOfPacking, "grid_ieee", len) == 0) { lieee = true; }
     }
   }
 
@@ -1277,7 +1272,6 @@ gribapiScanTimestep1(stream_t *streamptr)
     gribapi_get_string(gh, "shortName", varname, sizeof(varname));
 
     int param = gribapiGetParam(gh);
-
     if (!varname[0]) param_to_name(param, varname);
 
     CdiDateTime sDateTime;
@@ -1437,7 +1431,6 @@ gribapiScanTimestep2(stream_t *streamptr)
     gribapi_get_string(gh, "shortName", varname, sizeof(varname));
 
     int param = gribapiGetParam(gh);
-
     if (!varname[0]) param_to_name(param, varname);
 
     CdiDateTime sDateTime;
@@ -1619,7 +1612,6 @@ gribapiScanTimestep(stream_t *streamptr)
       gribapi_get_string(gh, "shortName", varname, sizeof(varname));
 
       int param = gribapiGetParam(gh);
-
       if (!varname[0]) param_to_name(param, varname);
 
       if (rindex == 0)
