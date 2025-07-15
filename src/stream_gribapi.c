@@ -2399,30 +2399,43 @@ gribapiDefProjSTERE(grib_handle *gh, int editionNumber, int gridID, int uvRelati
 }
 
 static void
+define_healpix_grid(grib_handle *gh, int nside, int order, int uvRelativeToGrid)
+{
+  static const char mesg[] = "healpix";
+  size_t len = sizeof(mesg) - 1;
+  GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "Nside", nside), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "ordering", order), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", 45.0), 0);
+  if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+}
+
+static void
 gribapiDefProjHEALPIX(grib_handle *gh, int gridID, int uvRelativeToGrid)
 {
   struct CDI_GridProjParams gpp;
   gridInqParamsHEALPIX(gridID, &gpp);
   gridVerifyProjParamsHEALPIX(&gpp);
-  // if (gpp.xval_0 < 0.0) gpp.xval_0 += 360.0;
 
-  static const char mesg[] = "healpix";
-  size_t len = sizeof(mesg) - 1;
-  GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
+  define_healpix_grid(gh, gpp.nside, gpp.order, uvRelativeToGrid);
+}
 
-  GRIB_CHECK(my_grib_set_long(gh, "Nside", gpp.nside), 0);
-  GRIB_CHECK(my_grib_set_long(gh, "ordering", gpp.order), 0);
-  GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", 45.0), 0);
-  // GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", gpp.xval_0), 0);
-  /*
-  long shapeOfTheEarth = encode_shapeOfTheEarth(&gpp);
-  if (shapeOfTheEarth) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
-  if (shapeOfTheEarth == 1) GRIB_CHECK(my_grib_set_long(gh, "radiusOfTheEarth", gpp.a), 0);
+static void
+gribapiDefGridHEALPIX(grib_handle *gh, int gridID, int uvRelativeToGrid)
+{
+  int order = 0;
+  int nside = 0;
+  char attstring[256];
+  if (cdiInqAttTxt(gridID, CDI_GLOBAL, "indexing_scheme", (int) sizeof(attstring), attstring) == 0)
+  {
+    int attlen = cdiInqAttLen(gridID, CDI_GLOBAL, "indexing_scheme");
+    attstring[attlen] = 0;
+    order = strStartsWith(attstring, "nest");
+  }
+  int attint = 0;
+  if (cdiInqAttInt(gridID, CDI_GLOBAL, "refinement_level", 1, &attint) == 0) nside = lround(pow(2.0, attint));
 
-  long earthIsOblate = (shapeOfTheEarth == 2 || shapeOfTheEarth == 3 || shapeOfTheEarth == 4);
-  if (earthIsOblate) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
-  */
-  if (uvRelativeToGrid >= 0) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+  define_healpix_grid(gh, nside, order, uvRelativeToGrid);
 }
 
 static void
@@ -2580,6 +2593,12 @@ gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int
     {
       if (editionNumber <= 1) Error("HEALPix grid can't be stored in GRIB edition %d!", editionNumber);
       gribapiDefProjHEALPIX(gh, gridID, uvRelativeToGrid);
+      break;
+    }
+    case GRID_HEALPIX:
+    {
+      if (editionNumber <= 1) Error("HEALPix grid can't be stored in GRIB edition %d!", editionNumber);
+      gribapiDefGridHEALPIX(gh, gridID, uvRelativeToGrid);
       break;
     }
     case GRID_SPECTRAL:
