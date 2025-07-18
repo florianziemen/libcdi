@@ -2977,6 +2977,41 @@ is_healpix_grid(int ncid, int gmapvarid)
 }
 
 static int
+process_grid_query(CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncvar, size_t *xsize, size_t *ysize, GridPart *gridPart)
+{
+  // process grid query information if available
+  if (query)
+  {
+    int numCellidx = cdiQueryNumCellidx(query);
+    if (numCellidx > 0)
+    {
+      // if (ncvar->gridtype != GRID_UNSTRUCTURED)
+      if (xdimid != CDI_UNDEFID && ydimid != CDI_UNDEFID)
+      {
+        Warning("Query parameter cell is only available for 1D grids, skipped variable %s!", ncvar->name);
+        ncvar->varStatus = UndefVar;
+        // continue;
+        return -1;
+      }
+
+      size_t start = cdiQueryGetCellidx(query, 0);
+      size_t count = (numCellidx == 2) ? cdiQueryGetCellidx(query, 1) : 1;
+      if ((start + count) <= *xsize)
+      {
+        cdiQueryCellidx(query, start);
+        if (numCellidx == 2) cdiQueryCellidx(query, count);
+        *xsize = count;
+        *ysize = count;
+        gridPart->start = (long) start - 1;
+        gridPart->count = (long) count;
+        gridPart->readPart = true;
+      }
+    }
+  }
+  return 0;
+}
+
+static int
 cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                      GridInfo *gridInfo)
 {
@@ -3054,35 +3089,8 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t 
       xaxisid = (xdimid != CDI_UNDEFID) ? ncdims[xdimid].ncvarid : CDI_UNDEFID;
       yaxisid = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].ncvarid : CDI_UNDEFID;
 
-      // process query information if available
-      CdiQuery *query = streamptr->query;
-      if (query)
-      {
-        int numCellidx = cdiQueryNumCellidx(query);
-        if (numCellidx > 0)
-        {
-          // if (ncvar->gridtype != GRID_UNSTRUCTURED)
-          if (xdimid != CDI_UNDEFID && ydimid != CDI_UNDEFID)
-          {
-            Warning("Query parameter cell is only available for 1D grids, skipped variable %s!", ncvar->name);
-            ncvar->varStatus = UndefVar;
-            continue;
-          }
-
-          size_t start = cdiQueryGetCellidx(query, 0);
-          size_t count = (numCellidx == 2) ? cdiQueryGetCellidx(query, 1) : 1;
-          if ((start + count) <= xsize)
-          {
-            cdiQueryCellidx(query, start);
-            if (numCellidx == 2) cdiQueryCellidx(query, count);
-            xsize = count;
-            ysize = count;
-            gridPart.start = (long) start - 1;
-            gridPart.count = (long) count;
-            gridPart.readPart = true;
-          }
-        }
-      }
+      // process grid query information if available
+      if (process_grid_query(streamptr->query, xdimid, ydimid, ncvar, &xsize, &ysize, &gridPart) < 0) continue;
 
       if (cdf_read_coordinates(streamptr, lazyGrid, ncvar, ncvars, ncdims, gridInfo->timedimid, xvarid, yvarid, xsize, ysize,
                                &vdimid, &gridPart))
@@ -4295,7 +4303,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
       else { hasTimesteps = false; }
     }
 
-    // process query information if available
+    // process time query information if available
     CdiQuery *query = streamptr->query;
     if (query && cdiQueryNumStepidx(query) > 0)
     {
@@ -4503,7 +4511,7 @@ set_coordinates_varids(int numVars, ncvar_t *ncvars)
 static void
 process_var_query(CdiQuery *query, int nvars, ncvar_t *ncvars)
 {
-  // process query information if available
+  // process var query information if available
   if (query && cdiQueryNumNames(query) > 0)
   {
     for (int ncvarid = 0; ncvarid < nvars; ++ncvarid)
@@ -4651,7 +4659,7 @@ cdfInqContents(stream_t *streamptr)
   double *vct = NULL;
   if (!isHybridCF) read_vct_echam(fileID, nvars, ncvars, ncdims, &vct, &vctsize);
 
-  // process query information if available
+  // process var query information if available
   process_var_query(streamptr->query, nvars, ncvars);
 
   if (CDI_Debug) cdf_print_vars(ncvars, nvars, "cdf_define_all_grids");
