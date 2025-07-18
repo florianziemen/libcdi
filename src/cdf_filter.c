@@ -3,10 +3,11 @@
 #endif
 
 #include "cdi.h"
+#include "cdf_config.h"
 #include "cdf_filter.h"
 #include "error.h"
 
-#if defined HAVE_NETCDF4 && HAVE_DECL_NC_INQ_VAR_FILTER_IDS && HAVE_DECL_NC_INQ_VAR_FILTER_IDS
+#ifdef HAVE_NC4FILTER
 #include <netcdf.h>
 #include <netcdf_filter.h>
 #include <netcdf_aux.h>
@@ -24,7 +25,7 @@ bool
 cdf_get_var_filter(int ncid, int varid, char *filterSpec, size_t maxLength)
 {
   bool hasFilter = false;
-#if defined HAVE_NETCDF4 && HAVE_DECL_NC_INQ_VAR_FILTER_IDS && HAVE_DECL_NC_INQ_VAR_FILTER_IDS
+#ifdef HAVE_NC4FILTER
   size_t numFilters = 0;
   nc_inq_var_filter_ids(ncid, varid, &numFilters, NULL);
   if (numFilters > 0 && numFilters < 16)
@@ -75,7 +76,7 @@ cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
 {
   if (filterSpec)
   {
-#if defined HAVE_NETCDF4 && HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST && HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST
+#ifdef HAVE_NC4FILTER
     size_t nfilters = 0;
     NC_H5_Filterspec **filters = NULL;
     int status = ncaux_h5filterspec_parselist(filterSpec, NULL, &nfilters, &filters);
