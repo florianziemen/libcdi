@@ -1,5 +1,5 @@
-#ifndef CDF_CONFIG_H_
-#define CDF_CONFIG_H_
+#ifndef CDF_CONFIG_H
+#define CDF_CONFIG_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -13,10 +13,15 @@
 #define HAVE_NETCDF5 1
 #endif
 
-#if defined HAVE_NETCDF4 && HAVE_DECL_NC_INQ_VAR_FILTER_IDS && HAVE_DECL_NCAUX_H5FILTERSPEC_PARSELIST
+#ifdef HAVE_NETCDF_META_H
+#include <netcdf_meta.h>
+
+#if ((NC_VERSION_MAJOR == 4 && NC_VERSION_MINOR >= 9) || NC_VERSION_MAJOR >= 5)
 #define HAVE_NC4FILTER 1
 #endif
 
-#endif
+#endif  // HAVE_NETCDF_META_H
 
-#endif
+#endif  // HAVE_LIBNETCDF
+
+#endif  // CDF_CONFIG_H
