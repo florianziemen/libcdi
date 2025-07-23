@@ -15,10 +15,10 @@ case ${suffix} in
     @ENABLE_NETCDF_FALSE@exit 77
     ;;
   nc2)
-    test 'x@ENABLE_NC2@' = xyes || exit 77
+    @ENABLE_NETCDF_FALSE@exit 77
     ;;
   nc4)
-    test 'x@ENABLE_NC4@' = xyes || exit 77
+    @ENABLE_NETCDF_FALSE@exit 77
     ;;
   srv)
     test 'x@ENABLE_SERVICE@' = xyes || exit 77
