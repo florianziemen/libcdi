@@ -107,6 +107,9 @@ version(void)
 #endif
 #ifdef HAVE_NETCDF4
   fprintf(stderr, " NC4");
+#ifdef HAVE_NC4S3
+  fprintf(stderr, "/S3");
+#endif
 #ifdef HAVE_NC4HDF5
   fprintf(stderr, "/HDF5");
 #ifdef HAVE_NC4HDF5_THREADSAFE

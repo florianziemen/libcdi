@@ -102,7 +102,6 @@ NETCDF_ROOT=''
 NETCDF_INCLUDE=''
 NETCDF_LIBS=''
 ENABLE_NETCDF=no
-ENABLE_NC4SZLIB=no
 AC_ARG_WITH([netcdf],
             [AS_HELP_STRING([--with-netcdf=<yes|no|directory> (default=no)],[location of NetCDF library (lib and include subdirs)])],
             [AS_CASE(["$with_netcdf"],
@@ -137,25 +136,10 @@ AC_ARG_WITH([netcdf],
                                                  ENABLE_NETCDF=yes],
                                                 [AC_MSG_ERROR([Could not link to NetCDF library])])
                                  NETCDF_LIBS=" -L$NETCDF_ROOT/lib -lnetcdf"
-                                 NETCDF_INCLUDE=" -I$NETCDF_ROOT/include"
-                                 AC_CHECK_PROG(NC_CONFIG,nc-config,[$NETCDF_ROOT/bin/nc-config],,["$NETCDF_ROOT/bin"])],
+                                 NETCDF_INCLUDE=" -I$NETCDF_ROOT/include"],
                                 [AC_MSG_NOTICE([$with_netcdf is not a directory! NetCDF suppressed])])])],
             [AC_MSG_CHECKING([for NetCDF library])
              AC_MSG_RESULT([suppressed])])
-
-AS_VAR_IF([ENABLE_NETCDF], [yes],
-  [AS_VAR_IF([NC_CONFIG],,
-             [AC_MSG_WARN([Could not find nc-config! go on with default configuration])])
-
-   AC_CACHE_CHECK([netcdf's nc4/szlib support],
-                  [acx_cv_have_nc4szlib],
-                  [acx_cv_have_nc4szlib=no
-                   test "x$NC_CONFIG" != "x" && \
-                   test "x$($NC_CONFIG --has-szlib)" = "xyes" && \
-                   acx_cv_have_nc4szlib=yes])
-   AS_VAR_IF([acx_cv_have_nc4szlib], [yes],
-             [AC_DEFINE([HAVE_NC4SZLIB],[1],[Define to 1 for NetCDF4/szlib support])
-              ENABLE_NC4SZLIB=yes])])
 
 AS_IF([test "x$ENABLE_NETCDF" = "xyes"],
       [AC_SEARCH_LIBS([nc_def_var_szip], [netcdf],
@@ -170,7 +154,6 @@ AS_IF([test "x$ENABLE_NETCDF" = "xyes"],
                [AC_DEFINE([HAVE_H5GET_LIBVERSION],[1],[Define to 1 for H5get_libversion support])],,[-lhdf5])])
 
 AC_SUBST([ENABLE_NETCDF])
-AC_SUBST([ENABLE_NC4SZLIB])
 AC_SUBST([NETCDF_ROOT])
 AC_SUBST([NETCDF_INCLUDE])
 AC_SUBST([NETCDF_LIBS])
