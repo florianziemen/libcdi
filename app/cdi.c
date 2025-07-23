@@ -12,7 +12,8 @@
 #include <unistd.h>
 #include <math.h>
 
-#include <cdi.h>
+#include "cdi.h"
+#include "cdf_config.h"
 
 int vlistInqVarMissvalUsed(int vlistID, int varID);
 #ifndef DBL_IS_NAN
@@ -39,7 +40,7 @@ int vlistInqVarMissvalUsed(int vlistID, int varID);
 static const uint32_t HOST_ENDIANNESS_temp[1] = { UINT32_C(0x00030201) };
 #define HOST_ENDIANNESS (((const unsigned char *) HOST_ENDIANNESS_temp)[0])
 #else
-#define HOST_ENDIANNESS (((const unsigned char *) &(const uint32_t[1]){ UINT32_C(0x00030201) })[0])
+#define HOST_ENDIANNESS (((const unsigned char *) &(const uint32_t[1]) { UINT32_C(0x00030201) })[0])
 #endif
 #endif
 
@@ -165,8 +166,6 @@ version(void)
 static void
 usage(void)
 {
-  const char *name;
-
   fprintf(stderr, "usage : %s  [Option]  [ifile]  [ofile]\n", Progname);
 
   fprintf(stderr, "\n");
@@ -181,6 +180,7 @@ usage(void)
   fprintf(stderr, "    -T             Pre scan hole GRIB file to get the number of timesteps\n");
   fprintf(stderr, "    -t <table>     Parameter table name/file\n");
   fprintf(stderr, "                   Predefined tables: ");
+  const char *name;
   for (int id = 0; id < tableInqNumber(); id++)
     if ((name = tableInqNamePtr(id))) fprintf(stderr, " %s", name);
   fprintf(stderr, "\n");
@@ -294,18 +294,18 @@ static const char *
 tunit2str(int tunits)
 {
   // clang-format off
-  if      (tunits == TUNIT_YEAR)       return ("years");
-  else if (tunits == TUNIT_MONTH)      return ("months");
-  else if (tunits == TUNIT_DAY)        return ("days");
-  else if (tunits == TUNIT_12HOURS)    return ("12hours");
-  else if (tunits == TUNIT_6HOURS)     return ("6hours");
-  else if (tunits == TUNIT_3HOURS)     return ("3hours");
-  else if (tunits == TUNIT_HOUR)       return ("hours");
-  else if (tunits == TUNIT_30MINUTES)  return ("30minutes");
-  else if (tunits == TUNIT_QUARTER)    return ("15minutes");
-  else if (tunits == TUNIT_MINUTE)     return ("minutes");
-  else if (tunits == TUNIT_SECOND)     return ("seconds");
-  else                                 return ("unknown");
+  if      (tunits == TUNIT_YEAR)       return "years";
+  else if (tunits == TUNIT_MONTH)      return "months";
+  else if (tunits == TUNIT_DAY)        return "days";
+  else if (tunits == TUNIT_12HOURS)    return "12hours";
+  else if (tunits == TUNIT_6HOURS)     return "6hours";
+  else if (tunits == TUNIT_3HOURS)     return "3hours";
+  else if (tunits == TUNIT_HOUR)       return "hours";
+  else if (tunits == TUNIT_30MINUTES)  return "30minutes";
+  else if (tunits == TUNIT_QUARTER)    return "15minutes";
+  else if (tunits == TUNIT_MINUTE)     return "minutes";
+  else if (tunits == TUNIT_SECOND)     return "seconds";
+  else                                 return "unknown";
   // clang-format on
 }
 
@@ -313,12 +313,12 @@ static const char *
 calendar2str(int calendar)
 {
   // clang-format off
-  if      (calendar == CALENDAR_STANDARD)  return ("standard");
-  else if (calendar == CALENDAR_PROLEPTIC) return ("proleptic_gregorian");
-  else if (calendar == CALENDAR_360DAYS)   return ("360_day");
-  else if (calendar == CALENDAR_365DAYS)   return ("365_day");
-  else if (calendar == CALENDAR_366DAYS)   return ("366_day");
-  else                                     return ("unknown");
+  if      (calendar == CALENDAR_STANDARD)  return "standard";
+  else if (calendar == CALENDAR_PROLEPTIC) return "proleptic_gregorian";
+  else if (calendar == CALENDAR_360DAYS)   return "360_day";
+  else if (calendar == CALENDAR_365DAYS)   return "365_day";
+  else if (calendar == CALENDAR_366DAYS)   return "366_day";
+  else                                     return "unknown";
   // clang-format on
 }
 
@@ -571,12 +571,9 @@ setDefaultDataType(char *datatypestr)
     {
       if (dtype == D_INT)
       {
-        if (nbits == 8)
-          DefaultDataType = CDI_DATATYPE_INT8;
-        else if (nbits == 16)
-          DefaultDataType = CDI_DATATYPE_INT16;
-        else if (nbits == 32)
-          DefaultDataType = CDI_DATATYPE_INT32;
+        if (nbits == 8) { DefaultDataType = CDI_DATATYPE_INT8; }
+        else if (nbits == 16) { DefaultDataType = CDI_DATATYPE_INT16; }
+        else if (nbits == 32) { DefaultDataType = CDI_DATATYPE_INT32; }
         else
         {
           fprintf(stderr, "Unsupported number of bits = %d for datatype INT!\n", nbits);
@@ -596,10 +593,8 @@ setDefaultDataType(char *datatypestr)
       */
       else if (dtype == D_FLT)
       {
-        if (nbits == 32)
-          DefaultDataType = CDI_DATATYPE_FLT32;
-        else if (nbits == 64)
-          DefaultDataType = CDI_DATATYPE_FLT64;
+        if (nbits == 32) { DefaultDataType = CDI_DATATYPE_FLT32; }
+        else if (nbits == 64) { DefaultDataType = CDI_DATATYPE_FLT64; }
         else
         {
           fprintf(stderr, "Unsupported number of bits = %d for datatype FLT!\n", nbits);
@@ -649,20 +644,20 @@ setDefaultFileType(char *filetypestr)
     char *ftstr = filetypestr;
 
     // clang-format off
-      if      (memcmp(filetypestr, "grb2",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB2;}
-      else if (memcmp(filetypestr, "grb1",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB; }
-      else if (memcmp(filetypestr, "grb",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_GRB; }
-      else if (memcmp(filetypestr, "nc2",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC2; }
-      else if (memcmp(filetypestr, "nc4c",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_NC4C;}
-      else if (memcmp(filetypestr, "nc4",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC4; }
-      else if (memcmp(filetypestr, "nc5",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC5; }
-      else if (memcmp(filetypestr, "nc1",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC;  }
-      else if (memcmp(filetypestr, "nczarr", 6)  == 0) { ftstr += 6; DefaultFileType = CDI_FILETYPE_NCZARR;  }
-      else if (memcmp(filetypestr, "nc",     2)  == 0) { ftstr += 2; DefaultFileType = CDI_FILETYPE_NC2; }
-      else if (memcmp(filetypestr, "srv",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_SRV; }
-      else if (memcmp(filetypestr, "ext",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_EXT; }
-      else if (memcmp(filetypestr, "ieg",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_IEG; }
-      else
+    if      (memcmp(filetypestr, "grb2",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB2;   }
+    else if (memcmp(filetypestr, "grb1",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB;    }
+    else if (memcmp(filetypestr, "grb",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_GRB;    }
+    else if (memcmp(filetypestr, "nc2",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC2;    }
+    else if (memcmp(filetypestr, "nc4c",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_NC4C;   }
+    else if (memcmp(filetypestr, "nc4",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC4;    }
+    else if (memcmp(filetypestr, "nc5",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC5;    }
+    else if (memcmp(filetypestr, "nc1",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC;     }
+    else if (memcmp(filetypestr, "nczarr", 6)  == 0) { ftstr += 6; DefaultFileType = CDI_FILETYPE_NCZARR; }
+    else if (memcmp(filetypestr, "nc",     2)  == 0) { ftstr += 2; DefaultFileType = CDI_FILETYPE_NC2;    }
+    else if (memcmp(filetypestr, "srv",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_SRV;    }
+    else if (memcmp(filetypestr, "ext",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_EXT;    }
+    else if (memcmp(filetypestr, "ieg",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_IEG;    }
+    else
 	{
 	  fprintf(stderr, "Unsupported filetype %s!\n", filetypestr);
 	  fprintf(stderr, "Available filetypes: grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext and ieg\n");
@@ -672,12 +667,7 @@ setDefaultFileType(char *filetypestr)
 
     if (DefaultFileType != CDI_UNDEFID && *ftstr != 0)
     {
-      if (*ftstr == '_')
-      {
-        ftstr++;
-
-        setDefaultDataType(ftstr);
-      }
+      if (*ftstr == '_') { setDefaultDataType(++ftstr); }
       else
       {
         fprintf(stderr, "Unexpected character >%c< in file type >%s<!\n", *ftstr, filetypestr);
@@ -779,42 +769,40 @@ main(int argc, char *argv[])
   else
     Progname++;
 
-  // clang-format off
   int c;
   while ((c = getopt(argc, argv, "b:C:F:f:i:L:o:N:S:t:w:z:cdEhlMmnRrsTvVxXZ")) != EOF)
+  {
+    switch (c)
     {
-      switch (c)
-	{
-	case 'b': setDefaultDataType(optarg); break;
-	case 'C': queryCellidx[numQueryCellidx++] = (size_t)atol(optarg); break;
-	case 'd': Debug = 1; break;
-        case 'E': cdiDefGlobal("ECCODES_GRIB1", true); break;
-	case 'f': setDefaultFileType(optarg); break;
-	case 'h': usage(); exit (0);
-	case 'i': numWorkerIn = atoi(optarg);  break;
-	case 'o': numWorkerOut = atoi(optarg); break;
-	case 'L': queryLevidx[numQueryLevidx++] = atoi(optarg); break;
-	case 'l': Longinfo = 1; break;
-	case 'M': cdiDefGlobal("HAVE_MISSVAL", 1); break;
-	case 'm': Move = 1; break;
-	case 'N': queryNames[numQueryNames++] = strdup(optarg); break;
-	case 'n': Info = 0;  NoInfo = 1;  break;
-	case 'R': cdiDefGlobal("REGULARGRID", 1); break;
-	case 'r': Field = 1; break;
-	case 'X': Variable = 1; break;
-	case 'S': queryStepidx[numQueryStepidx++] = atoi(optarg); break;
-	case 's': Shortinfo = 1; break;
-	case 'T': preScan = true;  break;
-	case 't': rTable = optarg;  break;
-	case 'v': Vardis = 1; break;
-	case 'V': Version = 1; break;
-	case 'w': wTable = optarg; break;
-	case 'x': datamode = SP_MODE; break;
-	case 'z': define_compress(optarg); break;
-	case 'F': define_filter(optarg); break;
-	}
+      case 'b': setDefaultDataType(optarg); break;
+      case 'C': queryCellidx[numQueryCellidx++] = (size_t) atol(optarg); break;
+      case 'd': Debug = 1; break;
+      case 'E': cdiDefGlobal("ECCODES_GRIB1", true); break;
+      case 'f': setDefaultFileType(optarg); break;
+      case 'h': usage(); exit(0);
+      case 'i': numWorkerIn = atoi(optarg); break;
+      case 'o': numWorkerOut = atoi(optarg); break;
+      case 'L': queryLevidx[numQueryLevidx++] = atoi(optarg); break;
+      case 'l': Longinfo = 1; break;
+      case 'M': cdiDefGlobal("HAVE_MISSVAL", 1); break;
+      case 'm': Move = 1; break;
+      case 'N': queryNames[numQueryNames++] = strdup(optarg); break;
+      case 'n': Info = 0, NoInfo = 1; break;
+      case 'R': cdiDefGlobal("REGULARGRID", 1); break;
+      case 'r': Field = 1; break;
+      case 'X': Variable = 1; break;
+      case 'S': queryStepidx[numQueryStepidx++] = atoi(optarg); break;
+      case 's': Shortinfo = 1; break;
+      case 'T': preScan = true; break;
+      case 't': rTable = optarg; break;
+      case 'v': Vardis = 1; break;
+      case 'V': Version = 1; break;
+      case 'w': wTable = optarg; break;
+      case 'x': datamode = SP_MODE; break;
+      case 'z': define_compress(optarg); break;
+      case 'F': define_filter(optarg); break;
     }
-  // clang-format on
+  }
 
   char *fname1 = (optind < argc) ? argv[optind++] : NULL;
   char *fname2 = (optind < argc) ? argv[optind++] : NULL;

@@ -67,8 +67,7 @@ if(${CDI_NETCDF} OR netCDF_ROOT )
   if (TARGET netCDF::netcdf)
     list(APPEND cdi_compile_defs
       HAVE_LIBNETCDF=${netCDF_FOUND}
-      HAVE_LIBNC_DAP=${netCDF_FOUND}
-      HAVE_NETCDF4=${netCDF_FOUND}
+      HAVE_NETCDF_META_H=${netCDF_FOUND}
     )
     target_link_libraries(cdilib netCDF::netcdf)
   endif ()
@@ -114,7 +113,7 @@ write_basic_package_version_file(
   VERSION "${PACKAGE_VERSION}"
   COMPATIBILITY SameMajorVersion)
 
-#Install CMake configuration files to 
+#Install CMake configuration files to
 install(
   FILES
   "${CMAKE_BINARY_DIR}/cmake/cdi-config.cmake"
