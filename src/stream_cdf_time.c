@@ -11,6 +11,7 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "stream_cdf.h"
+#include "cdf_config.h"
 #include "cdf_int.h"
 
 static int

@@ -6,6 +6,7 @@
 
 #include "cdi.h"
 #include "cdi_int.h"
+#include "cdf_config.h"
 #include "cdf.h"
 #include "cdf_int.h"
 #include "namespace.h"

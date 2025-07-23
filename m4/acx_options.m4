@@ -102,8 +102,6 @@ NETCDF_ROOT=''
 NETCDF_INCLUDE=''
 NETCDF_LIBS=''
 ENABLE_NETCDF=no
-ENABLE_NC2=no
-ENABLE_NC4=no
 ENABLE_NC4HDF5=no
 ENABLE_NC4SZLIB=no
 AC_ARG_WITH([netcdf],
@@ -159,16 +157,6 @@ AS_VAR_IF([ENABLE_NETCDF], [yes],
    AS_VAR_IF([acx_cv_have_libnc_dap], [yes],
              [AC_DEFINE([HAVE_LIBNC_DAP],[1],[Define to 1 for NetCDF OpenDAP])])
 
-   AC_CACHE_CHECK([netcdf's nc4 support],
-                  [acx_cv_have_netcdf4],
-                  [acx_cv_have_netcdf4=no
-                   test "x$NC_CONFIG" != "x" && \
-                   test "x$($NC_CONFIG --has-nc4)" = "xyes" && \
-                   acx_cv_have_netcdf4=yes])
-   AS_VAR_IF([acx_cv_have_netcdf4], [yes],
-             [AC_DEFINE([HAVE_NETCDF4],[1],[Define to 1 for NetCDF4 support])
-              ENABLE_NC4=yes])
-
    AC_CACHE_CHECK([netcdf's nc4/hdf5 support],
                   [acx_cv_have_nc4hdf5],
                   [acx_cv_have_nc4hdf5=no
@@ -202,7 +190,6 @@ AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
                [AC_DEFINE([HAVE_H5GET_LIBVERSION],[1],[Define to 1 for H5get_libversion support])],,[-lhdf5])])
 
 AC_SUBST([ENABLE_NETCDF])
-AC_SUBST([ENABLE_NC4])
 AC_SUBST([ENABLE_NC4HDF5])
 AC_SUBST([ENABLE_NC4SZLIB])
 AC_SUBST([NETCDF_ROOT])
