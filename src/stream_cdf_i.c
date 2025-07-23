@@ -15,6 +15,7 @@
 #include "cdf_int.h"
 #include "varscan.h"
 #include "vlist.h"
+#include "cdf_config.h"
 #include "cdf_util.h"
 #include "cdf_lazy_grid.h"
 #include "cdf_filter.h"

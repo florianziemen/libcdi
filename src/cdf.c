@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 
+#include "cdf_config.h"
 #include "cdf.h"
 #include "cdi.h"
 #include "cdi_int.h"
