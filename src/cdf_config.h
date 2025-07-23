@@ -34,6 +34,10 @@
 #define HAVE_NCZARR 1
 #endif
 
+#if defined NC_HAS_S3_INTERNAL && NC_HAS_S3_INTERNAL
+#define HAVE_NC4S3 1
+#endif
+
 #if ((NC_VERSION_MAJOR == 4 && NC_VERSION_MINOR >= 9) || NC_VERSION_MAJOR >= 5)
 #define HAVE_NC4FILTER 1
 #endif
