@@ -16,6 +16,10 @@
 #ifdef HAVE_NETCDF_META_H
 #include <netcdf_meta.h>
 
+#if defined NC_HAS_NCZARR && NC_HAS_NCZARR
+#define HAVE_NCZARR 1
+#endif
+
 #if ((NC_VERSION_MAJOR == 4 && NC_VERSION_MINOR >= 9) || NC_VERSION_MAJOR >= 5)
 #define HAVE_NC4FILTER 1
 #endif
