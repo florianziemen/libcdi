@@ -624,7 +624,7 @@ gribapiInqProjLCC(grib_handle *gh, int gridID)
   grib_get_double(gh, "Latin2InDegrees", &gpp.lat_2);
   grib_get_long(gh, "projectionCentreFlag", &projflag);
   bool isSouthPole = gribbyte_get_bit((int) projflag, 1);
-  if (isSouthPole)
+  if (isSouthPole && gribEditionNumber(gh) == 1)
   {
     gpp.lat_1 = -gpp.lat_1;
     gpp.lat_2 = -gpp.lat_2;
@@ -2328,7 +2328,7 @@ gribapiDefProjLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
   if (gpp.lon_0 < 0.0) gpp.lon_0 += 360.0;
 
   bool isSouthPole = (gpp.lat_1 < 0.0);
-  if (isSouthPole)
+  if (isSouthPole && gribEditionNumber(gh) == 1)
   {
     gpp.lat_1 = -gpp.lat_2;
     gpp.lat_2 = -gpp.lat_2;
@@ -2741,7 +2741,7 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
   }
   long grib_ltype2 = (ltype != ltype2 && ltype2 != -1) ? ltype2 : grib_ltype;
 
-  void (*defLevel)(grib_handle * gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level, double dlevel1,
+  void (*defLevel)(grib_handle *gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level, double dlevel1,
                    double dlevel2)
       = (editionNumber <= 1) ? grib1DefLevel : grib2DefLevel;
 
@@ -3158,7 +3158,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
         // printf(".\n");
       }
     }  // end if (scanModeOUT==96)
-  }    // end if (scanModeIN==64)
+  }  // end if (scanModeIN==64)
 
   if (scanModeIN
       == 00)  // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
@@ -3188,7 +3188,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
         for (size_t i = 0; i < iDim; i++) data[j + i * jDim] = dataCopy[i + jInv * iDim];  // source data has -j
       }
     }  // end if (scanModeOUT==96)
-  }    // end if (scanModeIN==00)
+  }  // end if (scanModeIN==00)
 
   if (scanModeIN
       == 96)  // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
@@ -3221,7 +3221,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
           data[i + jXiDim] = dataCopy[jInv + i * jDim];  // target data has -j
       }
     }  // end if (scanModeOUT==00)
-  }    // end if (scanModeIN==96)
+  }  // end if (scanModeIN==96)
 
   if (cdiDebugExt >= 100)
   {
