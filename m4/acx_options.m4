@@ -118,8 +118,7 @@ AC_ARG_WITH([netcdf],
                                            [AC_DEFINE([HAVE_LIBNETCDF],[1],[Define to 1 for NetCDF support])
                                             ENABLE_NETCDF=yes],
                                            [AC_MSG_ERROR([Could not link to NetCDF library])])
-                            NETCDF_LIBS=" -lnetcdf"
-                            AC_CHECK_PROG(NC_CONFIG,nc-config,nc-config)],
+                            NETCDF_LIBS=" -lnetcdf"],
                      [*],[AS_IF([test -d "$with_netcdf"],
                                 [NETCDF_ROOT=$with_netcdf
                                  LDFLAGS="-L$NETCDF_ROOT/lib $LDFLAGS"
