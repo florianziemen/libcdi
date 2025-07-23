@@ -114,6 +114,9 @@ AC_ARG_WITH([netcdf],
                      [yes],[AC_CHECK_HEADERS([netcdf.h],,
                                              [AC_MSG_ERROR([Could not find netcdf.h])],
                                              [AC_INCLUDES_DEFAULT])
+                            AC_CHECK_HEADERS([netcdf_meta.h],,
+                                             [AC_MSG_ERROR([Could not find netcdf_meta.h])],
+                                             [AC_INCLUDES_DEFAULT])
                             AC_SEARCH_LIBS([nc_open],
                                            [netcdf],
                                            [AC_DEFINE([HAVE_LIBNETCDF],[1],[Define to 1 for NetCDF support])
@@ -127,6 +130,9 @@ AC_ARG_WITH([netcdf],
                                  CPPFLAGS="-I$NETCDF_ROOT/include $CPPFLAGS"
                                  AC_CHECK_HEADERS([netcdf.h],,
                                                   [AC_MSG_ERROR([Could not find netcdf.h])],
+                                                  [AC_INCLUDES_DEFAULT])
+                                 AC_CHECK_HEADERS([netcdf_meta.h],,
+                                                  [AC_MSG_ERROR([Could not find netcdf_meta.h])],
                                                   [AC_INCLUDES_DEFAULT])
                                  AC_SEARCH_LIBS([nc_open],
                                                 [netcdf],
@@ -152,15 +158,6 @@ AS_VAR_IF([ENABLE_NETCDF], [yes],
                    acx_cv_have_libnc_dap=yes])
    AS_VAR_IF([acx_cv_have_libnc_dap], [yes],
              [AC_DEFINE([HAVE_LIBNC_DAP],[1],[Define to 1 for NetCDF OpenDAP])])
-
-   AC_CACHE_CHECK([netcdf's Zarr support],
-                  [acx_cv_have_nczarr],
-                  [acx_cv_have_nczarr=no
-                   test "x$NC_CONFIG" != "x" && \
-                   test "x$($NC_CONFIG --has-nczarr)" = "xyes" && \
-                   acx_cv_have_nczarr=yes])
-   AS_VAR_IF([acx_cv_have_nczarr], [yes],
-             [AC_DEFINE([HAVE_NCZARR],[1],[Define to 1 for NetCDF Zarr])])
 
    AC_CACHE_CHECK([netcdf's nc2 support],
                   [acx_cv_have_netcdf2],
