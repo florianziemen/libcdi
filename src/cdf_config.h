@@ -16,6 +16,10 @@
 #ifdef HAVE_NETCDF_META_H
 #include <netcdf_meta.h>
 
+#if defined NC_HAS_NC2 && NC_HAS_NC2
+#define HAVE_NETCDF2 1
+#endif
+
 #if defined NC_HAS_NCZARR && NC_HAS_NCZARR
 #define HAVE_NCZARR 1
 #endif
