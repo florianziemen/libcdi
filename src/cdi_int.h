@@ -27,7 +27,6 @@
 #include <sys/types.h>
 
 #include "cdi.h"
-#include "cdf_config.h"
 
 #ifdef HAVE_LIBPTHREAD
 #include <pthread.h>

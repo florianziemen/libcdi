@@ -105,7 +105,7 @@ version(void)
 #ifdef _OPENMP
   fprintf(stderr, " OpenMP");
 #endif
-#ifdef HAVE_NETCDF4
+#ifdef HAVE_LIBNETCDF
   fprintf(stderr, " NC4");
 #ifdef HAVE_NC4S3
   fprintf(stderr, "/S3");

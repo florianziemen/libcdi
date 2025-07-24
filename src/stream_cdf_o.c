@@ -9,7 +9,6 @@
 #include "cdi_uuid.h"
 #include "stream_cdf.h"
 #include "stream_cdf_postdef.h"
-#include "cdf_config.h"
 #include "cdf_int.h"
 #include "cdf_util.h"
 #include "namespace.h"
@@ -534,7 +533,6 @@ cdfPostDefActionAddPut1Int(struct cdfPostDefActionList **list_, int fileID, int 
 static void
 cdfGridCompress(int fileID, int ncvarid, size_t gridsize, int filetype, int comptype, size_t *chunks)
 {
-#ifdef HAVE_NETCDF4
   if (gridsize >= 32 && comptype == CDI_COMPRESS_ZIP
       && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR))
   {
@@ -542,7 +540,6 @@ cdfGridCompress(int fileID, int ncvarid, size_t gridsize, int filetype, int comp
     int shuffle = 1, compLevel = 1;
     cdfDefVarDeflate(fileID, ncvarid, shuffle, compLevel);
   }
-#endif
 }
 
 static struct cdfPostDefActionList *
@@ -1828,7 +1825,6 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
 static struct cdfPostDefActionList *
 cdf_def_grid_indices(stream_t *streamptr, int gridID, int gridIndex)
 {
-#ifdef HAVE_NETCDF4
   int fileID = streamptr->fileID;
   SizeType dimlen = gridInqSize(gridID);
 
@@ -1876,7 +1872,6 @@ cdf_def_grid_indices(stream_t *streamptr, int gridID, int gridIndex)
   CdfGrid *cdfGridVec = streamptr->cdfInfo.cdfGridVec;
   cdfGridVec[gridIndex].gridID = gridID;
   cdfGridVec[gridIndex].ncIdVec[CDF_VARID_I] = ncivarid;
-#endif
   struct cdfPostDefActionList *delayed = NULL;
   return delayed;
 }

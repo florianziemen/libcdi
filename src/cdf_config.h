@@ -8,15 +8,11 @@
 #ifdef HAVE_LIBNETCDF
 
 #include <netcdf.h>
+#include <netcdf_meta.h>
 
 #ifdef NC_FORMAT_64BIT_DATA
 #define HAVE_NETCDF5 1
 #endif
-
-#ifdef HAVE_NETCDF_META_H
-#include <netcdf_meta.h>
-
-#define HAVE_NETCDF4 1
 
 #if defined NC_HAS_NC2 && NC_HAS_NC2
 #define HAVE_NETCDF2 1
@@ -41,8 +37,6 @@
 #if ((NC_VERSION_MAJOR == 4 && NC_VERSION_MINOR >= 9) || NC_VERSION_MAJOR >= 5)
 #define HAVE_NC4FILTER 1
 #endif
-
-#endif  // HAVE_NETCDF_META_H
 
 #endif  // HAVE_LIBNETCDF
 

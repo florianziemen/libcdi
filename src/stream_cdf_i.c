@@ -15,7 +15,6 @@
 #include "cdf_int.h"
 #include "varscan.h"
 #include "vlist.h"
-#include "cdf_config.h"
 #include "cdf_util.h"
 #include "cdf_lazy_grid.h"
 #include "cdf_filter.h"
@@ -291,11 +290,7 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
 bool
 xtypeIsText(int xtype)
 {
-  bool isText = (xtype == NC_CHAR)
-#ifdef HAVE_NETCDF4
-                || (xtype == NC_STRING)
-#endif
-      ;
+  bool isText = (xtype == NC_CHAR) || (xtype == NC_STRING);
   return isText;
 }
 
@@ -308,23 +303,15 @@ xtypeIsFloat(nc_type xtype)
 static bool
 xtypeIsInt(nc_type xtype)
 {
-  bool isInt = xtype == NC_SHORT || xtype == NC_INT || xtype == NC_BYTE
-#ifdef HAVE_NETCDF4
-               || xtype == NC_USHORT || xtype == NC_UINT || xtype == NC_UBYTE
-#endif
-      ;
-
+  bool isInt
+      = xtype == NC_SHORT || xtype == NC_INT || xtype == NC_BYTE || xtype == NC_USHORT || xtype == NC_UINT || xtype == NC_UBYTE;
   return isInt;
 }
 
 static bool
 xtypeIsInt64(nc_type xtype)
 {
-#ifdef HAVE_NETCDF4
   return (xtype == NC_INT64 || xtype == NC_UINT64);
-#else
-  return false;
-#endif
 }
 
 static int
@@ -332,9 +319,7 @@ cdfInqDatatype(stream_t *streamptr, int xtype, bool isUnsigned)
 {
   int datatype = -1;
 
-#ifdef HAVE_NETCDF4
   if (xtype == NC_BYTE && isUnsigned) xtype = NC_UBYTE;
-#endif
 
   // clang-format off
   if      (xtype == NC_BYTE  )  datatype = CDI_DATATYPE_INT8;
@@ -343,7 +328,6 @@ cdfInqDatatype(stream_t *streamptr, int xtype, bool isUnsigned)
   else if (xtype == NC_INT   )  datatype = CDI_DATATYPE_INT32;
   else if (xtype == NC_FLOAT )  datatype = CDI_DATATYPE_FLT32;
   else if (xtype == NC_DOUBLE)  datatype = CDI_DATATYPE_FLT64;
-#ifdef HAVE_NETCDF4
   else if (xtype == NC_UBYTE )  datatype = CDI_DATATYPE_UINT8;
   else if (xtype == NC_LONG  )  datatype = CDI_DATATYPE_INT32;
   else if (xtype == NC_USHORT)  datatype = CDI_DATATYPE_UINT16;
@@ -381,7 +365,6 @@ cdfInqDatatype(stream_t *streamptr, int xtype, bool isUnsigned)
     if      (xtype == cdfInfo->complexFloatId )  datatype = CDI_DATATYPE_CPX32;
     else if (xtype == cdfInfo->complexDoubleId)  datatype = CDI_DATATYPE_CPX64;
   }
-#endif
   // clang-format on
 
   return datatype;
@@ -466,13 +449,7 @@ cdfCheckAttText(int fileID, int ncvarid, const char *attname)
 {
   nc_type atttype;
   int status_nc = nc_inq_atttype(fileID, ncvarid, attname, &atttype);
-
-  return (status_nc == NC_NOERR
-          && (atttype == NC_CHAR
-#ifdef HAVE_NETCDF4
-              || atttype == NC_STRING
-#endif
-              ));
+  return (status_nc == NC_NOERR && (atttype == NC_CHAR || atttype == NC_STRING));
 }
 
 static void
@@ -498,7 +475,6 @@ cdfGetAttText(int fileID, int ncvarid, const char *attname, size_t attlen, char 
       memcpy(atttext, attbuf, nc_attlen);
     }
   }
-#ifdef HAVE_NETCDF4
   else if (atttype == NC_STRING)
   {
     if (nc_attlen == 1)
@@ -513,7 +489,6 @@ cdfGetAttText(int fileID, int ncvarid, const char *attname, size_t attlen, char 
       Free(attbuf);
     }
   }
-#endif
 }
 
 void
@@ -887,11 +862,9 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
     // clang-format off
     int datatype = (atttype == NC_SHORT)  ? CDI_DATATYPE_INT16 :
                    (atttype == NC_BYTE)   ? CDI_DATATYPE_INT8 :
-#ifdef HAVE_NETCDF4
                    (atttype == NC_UBYTE)  ? CDI_DATATYPE_UINT8 :
                    (atttype == NC_USHORT) ? CDI_DATATYPE_UINT16 :
                    (atttype == NC_UINT)   ? CDI_DATATYPE_UINT32 :
-#endif
                                             CDI_DATATYPE_INT32;
     // clang-format on
     cdiDefAttInt(cdiID, varID, attname, datatype, (int) attlen, pattint);
@@ -1245,12 +1218,10 @@ read_vars_info(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int forma
 
     for (int vdimid = 0; vdimid < ncvar->ndims; vdimid++) ncvar->dimtypes[vdimid] = -1;
 
-#ifdef HAVE_NETCDF4
     if (format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4)
     {
       set_vars_chunks(ncvar->ncid, varid, ncvar->ndims, ncvar);
     }
-#endif
   }
 }
 
@@ -3594,7 +3565,6 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
     int varID = vlistDefVar(vlistID, gridID, zaxisID, ncvar->timetype);
     ncvar->cdiVarID = varID;
 
-#ifdef HAVE_NETCDF4
     if (ncvar->hasFilter) cdiDefKeyString(vlistID, varID, CDI_KEY_FILTERSPEC_IN, ncvar->filterSpec);
     if (ncvar->hasFilter) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_FILTER);
     if (ncvar->hasDeflate) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_ZIP);
@@ -3608,7 +3578,6 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       if (CDI_Chunk_Cache_In >= 0) { cacheSize = (size_t) CDI_Chunk_Cache_In; }
       cdf_set_var_chunk_cache(ncvar, ncvarid, cacheSize);
     }
-#endif
 
     streamptr->vars[varID1].defmiss = false;
     streamptr->vars[varID1].ncvarid = ncvarid;
@@ -4549,10 +4518,8 @@ cdfInqContents(stream_t *streamptr)
   read_ncdims(fileID, ndims, ncdims);
 
   int format = 0;
-#ifdef HAVE_NETCDF4
   nc_inq_format(fileID, &format);
   if (format == NC_FORMAT_NETCDF4) check_ncgroups(fileID);
-#endif
 
   if (nvars == 0)
   {

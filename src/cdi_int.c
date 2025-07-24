@@ -280,10 +280,8 @@ cdiHaveFiletype(int filetype)
 #ifdef HAVE_NETCDF2
     case CDI_FILETYPE_NC2: status = 1; break;
 #endif
-#ifdef HAVE_NETCDF4
     case CDI_FILETYPE_NC4: status = 1; break;
     case CDI_FILETYPE_NC4C: status = 1; break;
-#endif
 #ifdef HAVE_NCZARR
     case CDI_FILETYPE_NCZARR: status = 1; break;
 #endif
