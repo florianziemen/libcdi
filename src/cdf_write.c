@@ -10,7 +10,6 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "stream_cdf.h"
-#include "cdf_config.h"
 #include "cdf.h"
 #include "cdf_int.h"
 #include "vlist.h"
@@ -18,7 +17,6 @@
 void
 cdfDefVarDeflate(int ncid, int ncvarID, int shuffle, int compLevel)
 {
-#ifdef HAVE_NETCDF4
   int deflate = 1;
 
   if (CDI_Shuffle > 0 && shuffle == 0) shuffle = 1;
@@ -30,14 +28,6 @@ cdfDefVarDeflate(int ncid, int ncvarID, int shuffle, int compLevel)
   {
     Error("nc_def_var_deflate failed: %s", nc_strerror(status));
   }
-#else
-  static bool lwarn = true;
-  if (lwarn)
-  {
-    lwarn = false;
-    Warning("Deflate compression failed, NetCDF4 not available!");
-  }
-#endif
 }
 
 void
@@ -69,7 +59,6 @@ cdfDefVarSzip(int ncid, int ncvarID, int pixels_per_block)
 #endif
 }
 
-#ifdef HAVE_NETCDF4
 static nc_type
 cdfTypeComplexFloat(stream_t *streamptr)
 {
@@ -119,7 +108,6 @@ cdfTypeComplexDouble(stream_t *streamptr)
 
   return (nc_type) cdfInfo->complexDoubleId;
 }
-#endif
 
 nc_type
 cdfDefDatatype(int datatype, stream_t *streamptr)
@@ -128,39 +116,31 @@ cdfDefDatatype(int datatype, stream_t *streamptr)
 
   // clang-format off
   if (streamptr->filetype == CDI_FILETYPE_NC4)
-    {
-      if      (datatype == CDI_DATATYPE_INT8  ) xtype = NC_BYTE;
-      else if (datatype == CDI_DATATYPE_INT16 ) xtype = NC_SHORT;
-      else if (datatype == CDI_DATATYPE_INT32 ) xtype = NC_INT;
-#ifdef  HAVE_NETCDF4
-      else if (datatype == CDI_DATATYPE_UINT8 ) xtype = NC_UBYTE;
-      else if (datatype == CDI_DATATYPE_UINT16) xtype = NC_USHORT;
-      else if (datatype == CDI_DATATYPE_UINT32) xtype = NC_UINT;
-      else if (datatype == CDI_DATATYPE_CPX32 ) xtype = cdfTypeComplexFloat(streamptr);
-      else if (datatype == CDI_DATATYPE_CPX64 ) xtype = cdfTypeComplexDouble(streamptr);
-#else
-      else if (datatype == CDI_DATATYPE_UINT8 ) xtype = NC_SHORT;
-      else if (datatype == CDI_DATATYPE_UINT16) xtype = NC_INT;
-      else if (datatype == CDI_DATATYPE_UINT32) xtype = NC_INT;
-      else if (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64)
-        Error("CDI library does not support complex numbers with NetCDF4 classic!");
-#endif
-      else if (datatype == CDI_DATATYPE_FLT64 ) xtype = NC_DOUBLE;
-      else if (datatype == CDI_DATATYPE_FLT32 ) xtype = NC_FLOAT;
-    }
+  {
+    if      (datatype == CDI_DATATYPE_INT8  ) xtype = NC_BYTE;
+    else if (datatype == CDI_DATATYPE_INT16 ) xtype = NC_SHORT;
+    else if (datatype == CDI_DATATYPE_INT32 ) xtype = NC_INT;
+    else if (datatype == CDI_DATATYPE_UINT8 ) xtype = NC_UBYTE;
+    else if (datatype == CDI_DATATYPE_UINT16) xtype = NC_USHORT;
+    else if (datatype == CDI_DATATYPE_UINT32) xtype = NC_UINT;
+    else if (datatype == CDI_DATATYPE_CPX32 ) xtype = cdfTypeComplexFloat(streamptr);
+    else if (datatype == CDI_DATATYPE_CPX64 ) xtype = cdfTypeComplexDouble(streamptr);
+    else if (datatype == CDI_DATATYPE_FLT64 ) xtype = NC_DOUBLE;
+    else if (datatype == CDI_DATATYPE_FLT32 ) xtype = NC_FLOAT;
+  }
   else
-    {
-      if      (datatype == CDI_DATATYPE_INT8  ) xtype = NC_BYTE;
-      else if (datatype == CDI_DATATYPE_INT16 ) xtype = NC_SHORT;
-      else if (datatype == CDI_DATATYPE_INT32 ) xtype = NC_INT;
-      else if (datatype == CDI_DATATYPE_UINT8 ) xtype = NC_SHORT;
-      else if (datatype == CDI_DATATYPE_UINT16) xtype = NC_INT;
-      else if (datatype == CDI_DATATYPE_UINT32) xtype = NC_INT;
-      else if (datatype == CDI_DATATYPE_FLT64 ) xtype = NC_DOUBLE;
-      else if (datatype == CDI_DATATYPE_FLT32 ) xtype = NC_FLOAT;
-      else if (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64)
-        Error("CDI library does not support complex numbers with NetCDF classic!");
-    }
+  {
+    if      (datatype == CDI_DATATYPE_INT8  ) xtype = NC_BYTE;
+    else if (datatype == CDI_DATATYPE_INT16 ) xtype = NC_SHORT;
+    else if (datatype == CDI_DATATYPE_INT32 ) xtype = NC_INT;
+    else if (datatype == CDI_DATATYPE_UINT8 ) xtype = NC_SHORT;
+    else if (datatype == CDI_DATATYPE_UINT16) xtype = NC_INT;
+    else if (datatype == CDI_DATATYPE_UINT32) xtype = NC_INT;
+    else if (datatype == CDI_DATATYPE_FLT64 ) xtype = NC_DOUBLE;
+    else if (datatype == CDI_DATATYPE_FLT32 ) xtype = NC_FLOAT;
+    else if (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64)
+      Error("CDI library does not support complex numbers with NetCDF classic!");
+  }
   // clang-format on
 
   return xtype;
@@ -285,16 +265,14 @@ int_datatype_to_xtype(int filetype, int datatype)
 {
   // clang-format off
   if (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR)
-    {
-      return (datatype == CDI_DATATYPE_INT8)   ? NC_BYTE :
-             (datatype == CDI_DATATYPE_INT16)  ? NC_SHORT :
-#ifdef  HAVE_NETCDF4
-             (datatype == CDI_DATATYPE_UINT8)  ? NC_UBYTE :
-             (datatype == CDI_DATATYPE_UINT16) ? NC_USHORT :
-             (datatype == CDI_DATATYPE_UINT32) ? NC_UINT :
-#endif
-                                                 NC_INT;
-    }
+  {
+    return (datatype == CDI_DATATYPE_INT8)   ? NC_BYTE :
+           (datatype == CDI_DATATYPE_INT16)  ? NC_SHORT :
+           (datatype == CDI_DATATYPE_UINT8)  ? NC_UBYTE :
+           (datatype == CDI_DATATYPE_UINT16) ? NC_USHORT :
+           (datatype == CDI_DATATYPE_UINT32) ? NC_UINT :
+                                               NC_INT;
+  }
 
   return (datatype == CDI_DATATYPE_INT8)   ? NC_BYTE :
          (datatype == CDI_DATATYPE_INT16)  ? NC_SHORT :
@@ -432,10 +410,8 @@ xtype2ppb(nc_type xtype)
   // clang-format off
   if      (xtype == NC_BYTE)   ppb = 8;
   else if (xtype == NC_SHORT)  ppb = 16;
-#ifdef  HAVE_NETCDF4
   else if (xtype == NC_UBYTE)  ppb = 8;
   else if (xtype == NC_USHORT) ppb = 16;
-#endif
   // clang-format on
 
   return ppb;
@@ -1039,7 +1015,6 @@ cdfDefVar(stream_t *streamptr, int varID)
   chunkCacheSize *= cdf_xtype_to_numbytes(xtype);
   cdfDefVarChunkCache(fileID, ncvarID, chunkCacheSize);
 
-#ifdef HAVE_NETCDF4
 #ifdef NC_QUANTIZE_BITROUND
   if (xtype == NC_FLOAT || xtype == NC_DOUBLE)
   {
@@ -1051,7 +1026,6 @@ cdfDefVar(stream_t *streamptr, int varID)
 
   if (useChunks && (fileType == CDI_FILETYPE_NC4 || fileType == CDI_FILETYPE_NC4C || fileType == CDI_FILETYPE_NCZARR))
     cdf_def_var_chunking(fileID, ncvarID, NC_CHUNKED, chunks);
-#endif
 
   if (useChunks) cdfDefVarCompression(streamptr, ncvarID, xtype);
   if (useChunks)

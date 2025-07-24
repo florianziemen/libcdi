@@ -11,7 +11,6 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "stream_cdf.h"
-#include "cdf_config.h"
 #include "cdf_int.h"
 
 static int
@@ -174,13 +173,11 @@ cdfDefTime(stream_t *streamptr)
   cdf_def_var(fileID, taxisName, xtype, 1, &timeDimId, &timeVarId);
   streamptr->basetime.ncvarid = timeVarId;
 
-#ifdef HAVE_NETCDF4
   if (timeDimLen == NC_UNLIMITED && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C))
   {
     static const size_t chunk = 512;
     cdf_def_var_chunking(fileID, timeVarId, NC_CHUNKED, &chunk);
   }
-#endif
 
   static const char timeStr[] = "time";
   cdf_put_att_text(fileID, timeVarId, "standard_name", sizeof(timeStr) - 1, timeStr);

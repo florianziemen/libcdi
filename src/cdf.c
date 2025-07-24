@@ -4,7 +4,6 @@
 
 #include <ctype.h>
 
-#include "cdf_config.h"
 #include "cdf.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -68,8 +67,8 @@ cdf_open_read(const char *filename, int *filetype)
   int readmode = NC_NOWRITE;
   int status = cdf_open(filename, readmode, &ncid);
   if (status > 0 && ncid < 0) ncid = CDI_ESYSTEM;
-  if (status < -1000 && ncid == -1) ncid = status;
-#ifdef HAVE_NETCDF4
+  if (status < -1000 && ncid == -1)
+    ncid = status;
   else
   {
     int format = -1;
@@ -82,7 +81,6 @@ cdf_open_read(const char *filename, int *filetype)
     if (status == NC_NOERR && format == NC_FORMATX_NCZARR) *filetype = CDI_FILETYPE_NCZARR;
 #endif
   }
-#endif
 
   return ncid;
 }
@@ -99,11 +97,9 @@ cdf_open_write(const char *filename, int *filetype)
 #ifdef NC_64BIT_DATA
   if (*filetype == CDI_FILETYPE_NC5) writemode |= NC_64BIT_DATA;
 #endif
-#ifdef HAVE_NETCDF4
   if (*filetype == CDI_FILETYPE_NC4C) writemode |= (NC_NETCDF4 | NC_CLASSIC_MODEL);
   if (*filetype == CDI_FILETYPE_NC4) writemode |= NC_NETCDF4;
   if (*filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
-#endif
   if (*filetype == CDI_FILETYPE_NCZARR)
   {
     if (!has_uri_scheme(filename))
@@ -183,13 +179,9 @@ cdf4Open(const char *filename, const char *mode, int *filetype)
 {
   if (CDF_Debug) Message("Open %s with mode %c", filename, *mode);
 
-#ifdef HAVE_NETCDF4
   int fileID = cdfOpenFile(filename, mode, filetype);
   if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
   return fileID;
-#else
-  return CDI_ELIBNAVAIL;
-#endif
 }
 
 static void

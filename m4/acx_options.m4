@@ -110,9 +110,6 @@ AC_ARG_WITH([netcdf],
                      [yes],[AC_CHECK_HEADERS([netcdf.h],,
                                              [AC_MSG_ERROR([Could not find netcdf.h])],
                                              [AC_INCLUDES_DEFAULT])
-                            AC_CHECK_HEADERS([netcdf_meta.h],,
-                                             [AC_MSG_ERROR([Could not find netcdf_meta.h])],
-                                             [AC_INCLUDES_DEFAULT])
                             AC_SEARCH_LIBS([nc_open],
                                            [netcdf],
                                            [AC_DEFINE([HAVE_LIBNETCDF],[1],[Define to 1 for NetCDF support])
@@ -125,9 +122,6 @@ AC_ARG_WITH([netcdf],
                                  CPPFLAGS="-I$NETCDF_ROOT/include $CPPFLAGS"
                                  AC_CHECK_HEADERS([netcdf.h],,
                                                   [AC_MSG_ERROR([Could not find netcdf.h])],
-                                                  [AC_INCLUDES_DEFAULT])
-                                 AC_CHECK_HEADERS([netcdf_meta.h],,
-                                                  [AC_MSG_ERROR([Could not find netcdf_meta.h])],
                                                   [AC_INCLUDES_DEFAULT])
                                  AC_SEARCH_LIBS([nc_open],
                                                 [netcdf],

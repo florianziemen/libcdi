@@ -67,7 +67,6 @@ if(${CDI_NETCDF} OR netCDF_ROOT )
   if (TARGET netCDF::netcdf)
     list(APPEND cdi_compile_defs
       HAVE_LIBNETCDF=${netCDF_FOUND}
-      HAVE_NETCDF_META_H=${netCDF_FOUND}
     )
     target_link_libraries(cdilib netCDF::netcdf)
   endif ()

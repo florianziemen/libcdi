@@ -6,7 +6,6 @@
 
 #include "cdi.h"
 #include "cdi_int.h"
-#include "cdf_config.h"
 #include "cdf.h"
 #include "cdf_int.h"
 #include "namespace.h"
@@ -323,12 +322,10 @@ cdf_put_var_int(int ncid, int varid, const int *ip)
 void
 cdf_put_var_int64(int ncid, int varid, const int64_t *ip)
 {
-#ifdef HAVE_NETCDF4
   const long long *llp = (const long long *) ip;
   int status = nc_put_var_longlong(ncid, varid, llp);
   if (CDF_Debug || status != NC_NOERR) Message("%d %d %lld", ncid, varid, *llp);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
-#endif
 }
 
 void
@@ -359,14 +356,12 @@ cdf_var_type(nc_type xtype)
   else if (xtype == NC_INT   )  ctype = "NC_INT";
   else if (xtype == NC_FLOAT )  ctype = "NC_FLOAT";
   else if (xtype == NC_DOUBLE)  ctype = "NC_DOUBLE";
-#ifdef  HAVE_NETCDF4
   else if (xtype == NC_UBYTE )  ctype = "NC_UBYTE";
   else if (xtype == NC_LONG  )  ctype = "NC_LONG";
   else if (xtype == NC_USHORT)  ctype = "NC_USHORT";
   else if (xtype == NC_UINT  )  ctype = "NC_UINT";
   else if (xtype == NC_INT64 )  ctype = "NC_INT64";
   else if (xtype == NC_UINT64)  ctype = "NC_UINT64";
-#endif
   // clang-format on
 
   return ctype;
@@ -561,12 +556,10 @@ cdf_get_var_int(int ncid, int varid, int *ip)
 void
 cdf_get_var_int64(int ncid, int varid, int64_t *ip)
 {
-#ifdef HAVE_NETCDF4
   long long *llp = (long long *) ip;
   int status = nc_get_var_longlong(ncid, varid, llp);
   if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
-#endif
 }
 
 void
@@ -645,11 +638,9 @@ cdf_get_att_text(int ncid, int varid, const char *name, char *tp)
 void
 cdf_get_att_string(int ncid, int varid, const char *name, char **tp)
 {
-#ifdef HAVE_NETCDF4
   int status = nc_get_att_string(ncid, varid, name, tp);
   if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  name=%s", ncid, varid, name);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
-#endif
 }
 
 void
@@ -664,12 +655,10 @@ cdf_get_att_int(int ncid, int varid, const char *name, int *ip)
 void
 cdf_get_att_longlong(int ncid, int varid, const char *name, long long *llp)
 {
-#ifdef HAVE_NETCDF4
   int status = nc_get_att_longlong(ncid, varid, name, llp);
   if (status == NC_ERANGE) status = NC_NOERR;
   if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  att=%s  val=%lld", ncid, varid, name, *llp);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
-#endif
 }
 
 void
@@ -720,7 +709,6 @@ cdf_inq_attid(int ncid, int varid, const char *name, int *attnump)
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-#ifdef HAVE_NETCDF4
 void
 cdf_def_var_chunking(int ncid, int varid, int storage, const size_t *chunksizesp)
 {
@@ -729,7 +717,6 @@ cdf_def_var_chunking(int ncid, int varid, int storage, const size_t *chunksizesp
     Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0], chunksizesp[1], chunksizesp[2], chunksizesp[3]);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
-#endif
 
 size_t
 cdf_xtype_to_numbytes(nc_type xtype)
@@ -742,12 +729,10 @@ cdf_xtype_to_numbytes(nc_type xtype)
   else if (xtype == NC_SHORT )  numBytes = 2;
   else if (xtype == NC_INT   )  numBytes = 4;
   else if (xtype == NC_FLOAT )  numBytes = 4;
-#ifdef HAVE_NETCDF4
   else if (xtype == NC_UBYTE )  numBytes = 1;
   else if (xtype == NC_USHORT)  numBytes = 2;
   else if (xtype == NC_LONG  )  numBytes = 4;
   else if (xtype == NC_UINT  )  numBytes = 4;
-#endif
   // clang-format on
 
   return numBytes;
