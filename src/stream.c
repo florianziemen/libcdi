@@ -6,6 +6,10 @@
 #define _XOPEN_SOURCE 600
 #endif
 
+#ifdef HAVE_LIBNETCDF
+#include <netcdf.h> // NC_FORMAT_64BIT_DATA
+#endif
+
 #ifdef HAVE_LIBFDB5
 #include "cdi_fdb.h"
 #endif
@@ -13,8 +17,6 @@
 #include <sys/stat.h>  // struct stat
 #include <ctype.h>
 #include <string.h>
-
-#include <netcdf.h> // NC_FORMAT_64BIT_DATA
 
 #include "binary.h"
 #include "cdi.h"
