@@ -239,8 +239,7 @@ cdi_features=`"${tested_file}" -d 2>&1 | grep '^Features: '` || {
 case " ${cdi_features} " in
   *' OPeNDAP '*)
     echo "ERROR: CDI is built with the unwanted dependency on cURL (i.e. OPeNDAP support is enabled)" 2>&1
-    ;;
-#    exit 1 ;;
+    exit 1 ;;
 esac
 
 make check || { cat tests/test-suite.log; exit 1; }
