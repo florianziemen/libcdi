@@ -14,6 +14,8 @@
 #include <ctype.h>
 #include <string.h>
 
+#include <netcdf.h> // NC_FORMAT_64BIT_DATA
+
 #include "binary.h"
 #include "cdi.h"
 #include "cdi_across.h"
