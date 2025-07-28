@@ -4,7 +4,7 @@
 
 2025-07-24  Uwe Schulzweida
 
-	* NetCDF support for versions <4 has been discontinued
+	* NetCDF support for versions <4.3.3 has been discontinued
 
 2025-07-23  Uwe Schulzweida
 
