@@ -1,6 +1,8 @@
 #ifndef CDF_INT_H
 #define CDF_INT_H
 
+const char *cdf_strerror(int cdfErrorNo);
+
 #ifdef HAVE_LIBNETCDF
 
 #include <netcdf.h>
@@ -40,6 +42,7 @@ void cdf_put_var_uchar(int ncid, int varid, const unsigned char *up);
 void cdf_put_var_schar(int ncid, int varid, const signed char *cp);
 void cdf_put_var_short(int ncid, int varid, const short *sp);
 void cdf_put_var_int(int ncid, int varid, const int *ip);
+void cdf_put_var_int64(int ncid, int varid, const int64_t *ip);
 void cdf_put_var_long(int ncid, int varid, const long *lp);
 void cdf_put_var_float(int ncid, int varid, const float *fp);
 void cdf_put_var_double(int ncid, int varid, const double *dp);
@@ -49,6 +52,7 @@ void cdf_get_var_uchar(int ncid, int varid, unsigned char *up);
 void cdf_get_var_schar(int ncid, int varid, signed char *cp);
 void cdf_get_var_short(int ncid, int varid, short *sp);
 void cdf_get_var_int(int ncid, int varid, int *ip);
+void cdf_get_var_int64(int ncid, int varid, int64_t *ip);
 void cdf_get_var_long(int ncid, int varid, long *lp);
 void cdf_get_var_float(int ncid, int varid, float *fp);
 void cdf_get_var_double(int ncid, int varid, double *dp);

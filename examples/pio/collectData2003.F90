@@ -9,9 +9,10 @@ PROGRAM collectdata2003
   IMPLICIT NONE
 
   INCLUDE 'cdi.inc'
-  INCLUDE 'cdipio.inc'
 
 #ifdef USE_MPI
+  INCLUDE 'cdipio.inc'
+
   INTEGER, PARAMETER :: i4 = SELECTED_INT_KIND(9)
   INTEGER, PARAMETER :: i8 = SELECTED_INT_KIND(14)
 #endif

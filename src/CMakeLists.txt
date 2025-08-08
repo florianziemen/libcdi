@@ -1,4 +1,8 @@
-list( APPEND cdi_src_files
+
+target_sources(cdilib
+  INTERFACE
+  cdi.h
+  PRIVATE
   async_worker.c
   async_worker.h
   basetime.c
@@ -21,7 +25,6 @@ list( APPEND cdi_src_files
   cdf_util.c
   cdf_util.h
   cdf_write.c
-  cdi.h
   cdi_across.c
   cdi_across.h
   cdi_att.c
@@ -139,95 +142,88 @@ list( APPEND cdi_src_files
   zaxis.c
   zaxis.h
 )
-list( APPEND cdi_pio_files
-  cdipio.h
-  pio.c
-  pio.h
-  pio_cdf_int.c
-  pio_cdf_int.h
-  pio_client.c
-  pio_client.h
-  pio_comm.c
-  pio_comm.h
-  pio_conf.c
-  pio_conf.h
-  pio_dbuffer.c
-  pio_dbuffer.h
-  pio_dist_grid.c
-  pio_dist_grid.h
-  pio_id_set.h
-  pio_idxlist_cache.c
-  pio_idxlist_cache.h
-  pio_impl.h
-  pio_interface.c
-  pio_interface.h
-  pio_mpi_fw_at_all.c
-  pio_mpi_fw_at_reblock.c
-  pio_mpi_fw_ordered.c
-  pio_mpinonb.c
-  pio_posixasynch.c
-  pio_posixfpguardsendrecv.c
-  pio_posixnonb.c
-  pio_record_send.c
-  pio_roles.c
-  pio_rpc.c
-  pio_rpc.h
-  pio_serialize.c
-  pio_serialize.h
-  pio_server.c
-  pio_server.h
-  pio_util.c
-  pio_util.h
-  pio_xmap_cache.c
-  pio_xmap_cache.h
-)
 
-list( APPEND cdi_unknown
-  cfortran.h
-  getline.c
-  make_fint.c
-  resource_unpack.c
-  resource_unpack.h
-)
+option(CDI_BUILD_PIO "Build unknown sources in libcdi" OFF)
+mark_as_advanced(CDI_BUILD_PIO)
+if (CDI_BUILD_PIO)
+  target_sources(cdilib PRIVATE
+    cdipio.h
+    pio.c
+    pio.h
+    pio_cdf_int.c
+    pio_cdf_int.h
+    pio_client.c
+    pio_client.h
+    pio_comm.c
+    pio_comm.h
+    pio_conf.c
+    pio_conf.h
+    pio_dbuffer.c
+    pio_dbuffer.h
+    pio_dist_grid.c
+    pio_dist_grid.h
+    pio_id_set.h
+    pio_idxlist_cache.c
+    pio_idxlist_cache.h
+    pio_impl.h
+    pio_interface.c
+    pio_interface.h
+    pio_mpi_fw_at_all.c
+    pio_mpi_fw_at_reblock.c
+    pio_mpi_fw_ordered.c
+    pio_mpinonb.c
+    pio_posixasynch.c
+    pio_posixfpguardsendrecv.c
+    pio_posixnonb.c
+    pio_record_send.c
+    pio_roles.c
+    pio_rpc.c
+    pio_rpc.h
+    pio_serialize.c
+    pio_serialize.h
+    pio_server.c
+    pio_server.h
+    pio_util.c
+    pio_util.h
+    pio_xmap_cache.c
+    pio_xmap_cache.h
+  )
+endif()
 
 option(CDI_BUILD_UNKNOWN "Build unknown sources in libcdi" ON)
 mark_as_advanced(CDI_BUILD_UNKNOWN)
 if (CDI_BUILD_UNKNOWN)
-  list(APPEND cdi_src_files ${cdi_unknown})
+  target_sources( cdilib PRIVATE
+    cfortran.h
+    getline.c
+    make_fint.c
+    resource_unpack.c
+    resource_unpack.h
+  )
 endif ()
 
-# Support exporting all symbolds on Windows
+# Support exporting all symbols on Windows
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-add_library(cdilib
-  ${cdi_src_files}
-#  INSTALL_HEADERS_LIST  cdi.h
+set_target_properties(cdilib PROPERTIES PUBLIC_HEADER cdi.h)
+
+set_property(TARGET cdilib PROPERTY CDI_INSTALL_HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/cdi.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/calendar.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/cdi_datetime.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/julian_date.h
 )
 
-target_include_directories(cdilib PRIVATE "${PROJECT_BINARY_DIR}/src/config.h")
+target_include_directories(cdilib
+  PRIVATE 
+  ${CMARE_CURRENT_BINARY_DIR}
+  PUBLIC
+  # where top-level project will look for the library's public headers
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  # where external projects will look for the library's public headers
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
 target_link_libraries(cdilib ${cdi_linked_libs})
 target_compile_definitions(cdilib PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
 
-add_library(cdilib::cdilib ALIAS cdilib)
 
-include(GNUInstallDirs)
-install(FILES cdi.h calendar.h cdi_datetime.h julian_date.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-install(TARGETS cdilib
-  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cdi/cdi-config.cmake.in" "${CMAKE_BINARY_DIR}/cmake/cdi-config.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/cdi")
-write_basic_package_version_file(
-  "${CMAKE_BINARY_DIR}/cmake/cdi-config-version.cmake"
-  VERSION "${PACKAGE_VERSION}"
-  COMPATIBILITY SameMajorVersion)
-install(
-  FILES
-    "${CMAKE_BINARY_DIR}/cmake/cdi-config.cmake"
-    "${CMAKE_BINARY_DIR}/cmake/cdi-config-version.cmake"
-  DESTINATION
-    "${CMAKE_INSTALL_LIBDIR}/cmake/cdi")

@@ -27,10 +27,10 @@ cdiUUID2Str(const unsigned char *uuid, char *uuidstr)
                       uuid[8], uuid[9], uuid[10], uuid[11], uuid[12], uuid[13], uuid[14], uuid[15]);
 
   if (iret != uuidNumHexChars)
-    {
-      uuidstr[0] = 0;
-      iret = -1;
-    }
+  {
+    uuidstr[0] = 0;
+    iret = -1;
+  }
 
   return iret;
 }
@@ -60,10 +60,10 @@ cdiEscapeSpaces(const char *string)
 
   // Do the escaping.
   for (size_t in = 0, out = 0; in < length; ++out, ++in)
-    {
-      if (string[in] == ' ' || string[in] == '\\') result[out++] = '\\';
-      result[out] = string[in];
-    }
+  {
+    if (string[in] == ' ' || string[in] == '\\') result[out++] = '\\';
+    result[out] = string[in];
+  }
   result[length + escapeCount] = 0;  // termination!
   return result;
 }
@@ -77,24 +77,24 @@ cdiUnescapeSpaces(const char *string, const char **outStringEnd)
   // How much memory do we need?
   size_t escapeCount = 0, length = 0;
   for (const char *current = string; *current && *current != ' '; current++)
+  {
+    if (*current == '\\')
     {
-      if (*current == '\\')
-        {
-          current++, escapeCount++;
-          if (!current) return NULL;
-        }
-      length++;
+      current++, escapeCount++;
+      if (!current) return NULL;
     }
+    length++;
+  }
 
   char *result = (char *) Malloc(length + 1);
   if (!result) return NULL;
 
   // Do the unescaping.
   for (size_t in = 0, out = 0; out < length;)
-    {
-      if (string[in] == '\\') in++;
-      result[out++] = string[in++];
-    }
+  {
+    if (string[in] == '\\') in++;
+    result[out++] = string[in++];
+  }
   result[length] = 0;  // termination!
   if (outStringEnd) *outStringEnd = &string[length + escapeCount];
   return result;
@@ -115,18 +115,18 @@ cdiCreateUUID(unsigned char uuid[CDI_UUID_SIZE])
   if (uuid_seeded)
     caller_rand_state = setstate(uuid_rand_state);
   else
+  {
+    struct timeval tv;
+    int status = gettimeofday(&tv, NULL);
+    if (status != 0)
     {
-      struct timeval tv;
-      int status = gettimeofday(&tv, NULL);
-      if (status != 0)
-        {
-          perror("uuid random seed generation failed!");
-          exit(1);
-        }
-      unsigned seed = (unsigned) (tv.tv_sec ^ tv.tv_usec);
-      caller_rand_state = initstate(seed, uuid_rand_state, sizeof(uuid_rand_state));
-      uuid_seeded = 1;
+      perror("uuid random seed generation failed!");
+      exit(1);
     }
+    unsigned seed = (unsigned) (tv.tv_sec ^ tv.tv_usec);
+    caller_rand_state = initstate(seed, uuid_rand_state, sizeof(uuid_rand_state));
+    uuid_seeded = 1;
+  }
   uuid_generate(uuid);
   setstate(caller_rand_state);
 }
@@ -142,23 +142,23 @@ cdiCreateUUID(unsigned char *uuid)
   int stage = 0;
   uuid_rc_t status;
   if ((status = uuid_create(&objuuid)) == UUID_RC_OK)
+  {
+    ++stage;
+    if ((status = uuid_create(&nsuuid)) == UUID_RC_OK)
     {
       ++stage;
-      if ((status = uuid_create(&nsuuid)) == UUID_RC_OK)
+      if ((status = uuid_load(nsuuid, "ns:OID")) == UUID_RC_OK)
+      {
+        ++stage;
+        if ((status = uuid_make(objuuid, UUID_MAKE_V5, nsuuid, cdiLibraryVersion())) == UUID_RC_OK)
         {
           ++stage;
-          if ((status = uuid_load(nsuuid, "ns:OID")) == UUID_RC_OK)
-            {
-              ++stage;
-              if ((status = uuid_make(objuuid, UUID_MAKE_V5, nsuuid, cdiLibraryVersion())) == UUID_RC_OK)
-                {
-                  ++stage;
-                  size_t datalen = CDI_UUID_SIZE;
-                  status = uuid_export(objuuid, UUID_FMT_BIN, &uuid, &datalen);
-                }
-            }
+          size_t datalen = CDI_UUID_SIZE;
+          status = uuid_export(objuuid, UUID_FMT_BIN, &uuid, &datalen);
         }
+      }
     }
+  }
   if (status != UUID_RC_OK) Error("failed to generate UUID at stage %s\n", error_stage[stage]);
   stage = 5;
   if ((status = uuid_destroy(nsuuid)) != UUID_RC_OK) Error("failed to generate UUID at stage %s\n", error_stage[stage]);
@@ -177,10 +177,10 @@ cdiCreateUUID(unsigned char *uuid)
   uint32_t status;
   uuid_create((uuid_t *) (void *) uuid, &status);
   if (status != uuid_s_ok)
-    {
-      perror("uuid generation failed!");
-      exit(1);
-    }
+  {
+    perror("uuid generation failed!");
+    exit(1);
+  }
 }
 #endif
 #else
@@ -197,45 +197,45 @@ cdiCreateUUID(unsigned char *uuid)
   if (uuid_seeded)
     caller_rand_state = setstate(uuid_rand_state);
   else
-    {
+  {
 #ifdef HAVE_SYS_TIME_H
-      struct timeval tv;
-      int status = gettimeofday(&tv, NULL);
-      if (status != 0)
-        {
-          perror("failed seed generation!");
-          exit(1);
-        }
-      unsigned seed = tv.tv_sec ^ tv.tv_usec;
-#else
-      unsigned seed = 0;
-#endif
-      caller_rand_state = initstate(seed, uuid_rand_state, sizeof(uuid_rand_state));
-      uuid_seeded = 1;
+    struct timeval tv;
+    int status = gettimeofday(&tv, NULL);
+    if (status != 0)
+    {
+      perror("failed seed generation!");
+      exit(1);
     }
+    unsigned seed = tv.tv_sec ^ tv.tv_usec;
+#else
+    unsigned seed = 0;
+#endif
+    caller_rand_state = initstate(seed, uuid_rand_state, sizeof(uuid_rand_state));
+    uuid_seeded = 1;
+  }
   for (size_t i = 0; i < CDI_UUID_SIZE; ++i) uuid[i] = (unsigned char) random();
 #else
   unsigned short caller_rand_state[3];
   {
     static unsigned short our_rand_state[3];
     if (!uuid_seeded)
-      {
+    {
 #ifdef HAVE_SYS_TIME_H
-        struct timeval tv;
-        int status = gettimeofday(&tv, NULL);
-        if (status != 0)
-          {
-            perror("failed seed generation!");
-            exit(1);
-          }
-        unsigned seed = tv.tv_sec ^ tv.tv_usec;
-#else
-        unsigned seed = 0;
-#endif
-        our_rand_state[0] = 0x330E;
-        our_rand_state[1] = (unsigned short) (seed & 0xFFFFU);
-        our_rand_state[2] = (unsigned short) ((seed >> 16) & 0xFFFFU);
+      struct timeval tv;
+      int status = gettimeofday(&tv, NULL);
+      if (status != 0)
+      {
+        perror("failed seed generation!");
+        exit(1);
       }
+      unsigned seed = tv.tv_sec ^ tv.tv_usec;
+#else
+      unsigned seed = 0;
+#endif
+      our_rand_state[0] = 0x330E;
+      our_rand_state[1] = (unsigned short) (seed & 0xFFFFU);
+      our_rand_state[2] = (unsigned short) ((seed >> 16) & 0xFFFFU);
+    }
     unsigned short *p = seed48(our_rand_state);
     uuid_seeded = 1;
     memcpy(caller_rand_state, p, sizeof(caller_rand_state));

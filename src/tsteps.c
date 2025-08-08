@@ -42,17 +42,17 @@ tstepsNewEntry(stream_t *streamptr)
 
   // If the table overflows, double its size.
   if (tsID == tstepsTableSize)
-    {
-      if (tstepsTableSize == 0) tstepsTableSize = 1;
-      if (tstepsTableSize <= INT_MAX / 2)
-        tstepsTableSize *= 2;
-      else if (tstepsTableSize < INT_MAX)
-        tstepsTableSize = INT_MAX;
-      else
-        Error("Resizing of tstep table failed!");
+  {
+    if (tstepsTableSize == 0) tstepsTableSize = 1;
+    if (tstepsTableSize <= INT_MAX / 2)
+      tstepsTableSize *= 2;
+    else if (tstepsTableSize < INT_MAX)
+      tstepsTableSize = INT_MAX;
+    else
+      Error("Resizing of tstep table failed!");
 
-      tstepsTable = (tsteps_t *) Realloc(tstepsTable, (size_t) tstepsTableSize * sizeof(tsteps_t));
-    }
+    tstepsTable = (tsteps_t *) Realloc(tstepsTable, (size_t) tstepsTableSize * sizeof(tsteps_t));
+  }
 
   streamptr->tstepsTableSize = tstepsTableSize;
   streamptr->tsteps = tstepsTable;
@@ -76,10 +76,7 @@ cdi_create_timesteps(size_t numTimesteps, stream_t *streamptr)
   streamptr->tstepsTableSize = (int) ntsteps;
   streamptr->tstepsNextID = (int) ntsteps;
 
-  for (size_t tsID = 0; tsID < ntsteps; tsID++)
-    {
-      tstepsInitEntry(&streamptr->tsteps[tsID]);
-    }
+  for (size_t tsID = 0; tsID < ntsteps; tsID++) { tstepsInitEntry(&streamptr->tsteps[tsID]); }
 }
 /*
  * Local Variables:

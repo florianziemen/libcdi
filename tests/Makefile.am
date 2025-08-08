@@ -1,7 +1,5 @@
 TEST_EXTENSIONS = @EXEEXT@ .run
 
-EXTRA_DIST = CMakeLists.txt
-
 # Serial tests:
 TESTS = \
   calendar_test1 \
@@ -212,24 +210,6 @@ clean-local:
 
 AUTOMAKE_OPTIONS = color-tests
 
-# Compile programs using Libtool:
-COMPILE = $(LTCOMPILE)
-FCCOMPILE = $(LTFCCOMPILE)
-PPFCCOMPILE = $(LTPPFCCOMPILE)
-CXXCOMPILE = $(LTCXXCOMPILE)
-
-# Compile *.F90 without CPPFLAGS, which are normally meant for the C compiler
-# and might not be compatible with the Fortran compiler:
-LTPPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
-
-# Avoid compiling twice by running Libtool with '-static'
-#   This is safe because all Libtool libraries in this directory are
-#   static-only and contain PIC objects:
-AM_CFLAGS += -static
-AM_FCFLAGS = -static
-AM_CXXFLAGS = -static
-
 # Generate source files for parallel versions of the programs. We do this to
 # avoid target-specific flags, which result into rules that do not use the
 # compilation commands above.
@@ -240,3 +220,5 @@ SUFFIXES = .parallel.c
 	  echo '#define USE_MPI 1'; \
 	  echo '#include "$<"'; \
 	  } >$@
+
+include $(top_srcdir)/config/lt_overrides_Makefile.inc

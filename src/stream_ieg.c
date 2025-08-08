@@ -124,19 +124,19 @@ iegDefTime(int *pdb, CdiDateTime datetime, int taxisID)
 {
   int timetype = (taxisID != -1) ? taxisInqType(taxisID) : -1;
   if (timetype == TAXIS_ABSOLUTE || timetype == TAXIS_RELATIVE)
-    {
-      IEG_P_Year(pdb) = datetime.date.year;
-      IEG_P_Month(pdb) = datetime.date.month;
-      IEG_P_Day(pdb) = datetime.date.day;
-      IEG_P_Hour(pdb) = datetime.time.hour;
-      IEG_P_Minute(pdb) = datetime.time.minute;
+  {
+    IEG_P_Year(pdb) = datetime.date.year;
+    IEG_P_Month(pdb) = datetime.date.month;
+    IEG_P_Day(pdb) = datetime.date.day;
+    IEG_P_Hour(pdb) = datetime.time.hour;
+    IEG_P_Minute(pdb) = datetime.time.minute;
 
-      pdb[15] = 1;
-      pdb[16] = 0;
-      pdb[17] = 0;
-      pdb[18] = 10;
-      pdb[36] = 1;
-    }
+    pdb[15] = 1;
+    pdb[16] = 0;
+    pdb[17] = 0;
+    pdb[18] = 10;
+    pdb[36] = 1;
+  }
 
   pdb[5] = 128;
 }
@@ -156,19 +156,19 @@ calc_resfac(double xfirst, double xlast, double xinc, double yfirst, double ylas
   const double vals[nMultTests] = { xfirst, xlast, xinc, yfirst, ylast, yinc };
 
   for (size_t j = 0; j < nPwrOf10; ++j)
+  {
+    double scaleBy = scaleFactors[j];
+    bool fractionalScale = false;
+    for (size_t i = 0; i < nMultTests; ++i)
     {
-      double scaleBy = scaleFactors[j];
-      bool fractionalScale = false;
-      for (size_t i = 0; i < nMultTests; ++i)
-        {
-          fractionalScale = fractionalScale || fabs(vals[i] * scaleBy - round(vals[i] * scaleBy)) > FLT_EPSILON;
-        }
-      if (!fractionalScale)
-        {
-          resfac = scaleBy;
-          break;
-        }
+      fractionalScale = fractionalScale || fabs(vals[i] * scaleBy - round(vals[i] * scaleBy)) > FLT_EPSILON;
     }
+    if (!fractionalScale)
+    {
+      resfac = scaleBy;
+      break;
+    }
+  }
 
   return resfac;
 }
@@ -189,111 +189,102 @@ iegDefGrid(int *gdb, int gridID)
   cdi_check_gridsize_int_limit("IEG", xsize * ysize);
 
   if (gridtype == GRID_GENERIC)
+  {
+    if ((ysize == 32 || ysize == 48 || ysize == 64 || ysize == 96 || ysize == 160) && (xsize == 2 * ysize || xsize == 1))
     {
-      if ((ysize == 32 || ysize == 48 || ysize == 64 || ysize == 96 || ysize == 160) && (xsize == 2 * ysize || xsize == 1))
-        {
-          gridtype = GRID_GAUSSIAN;
-          gridChangeType(gridID, gridtype);
-        }
-      else if ((xsize == 1 && ysize == 1) || (xsize == 0 && ysize == 0))
-        {
-          gridtype = GRID_LONLAT;
-          gridChangeType(gridID, gridtype);
-        }
-      else if (gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL))
-        {
-          gridtype = GRID_LONLAT;
-          gridChangeType(gridID, gridtype);
-        }
+      gridtype = GRID_GAUSSIAN;
+      gridChangeType(gridID, gridtype);
     }
-  else if (gridtype == GRID_CURVILINEAR)
+    else if ((xsize == 1 && ysize == 1) || (xsize == 0 && ysize == 0))
     {
       gridtype = GRID_LONLAT;
+      gridChangeType(gridID, gridtype);
     }
+    else if (gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL))
+    {
+      gridtype = GRID_LONLAT;
+      gridChangeType(gridID, gridtype);
+    }
+  }
+  else if (gridtype == GRID_CURVILINEAR) { gridtype = GRID_LONLAT; }
 
   bool lrotated = (projtype == CDI_PROJ_RLL);
 
   if (gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN || projtype == CDI_PROJ_RLL)
+  {
+    double xfirst = 0.0, xlast = 0.0, xinc = 0.0;
+    double yfirst = 0.0, ylast = 0.0, yinc = 0.0;
+
+    if (xsize == 0)
+      xsize = 1;
+    else
     {
-      double xfirst = 0.0, xlast = 0.0, xinc = 0.0;
-      double yfirst = 0.0, ylast = 0.0, yinc = 0.0;
-
-      if (xsize == 0)
-        xsize = 1;
-      else
-        {
-          xfirst = gridInqXval(gridID, 0);
-          xlast = gridInqXval(gridID, xsize - 1);
-          xinc = gridInqXinc(gridID);
-        }
-
-      if (ysize == 0)
-        ysize = 1;
-      else
-        {
-          yfirst = gridInqYval(gridID, 0);
-          ylast = gridInqYval(gridID, ysize - 1);
-          yinc = gridInqYinc(gridID);
-        }
-
-      if (gridtype == GRID_GAUSSIAN)
-        IEG_G_GridType(gdb) = 4;
-      else if (lrotated)
-        IEG_G_GridType(gdb) = 10;
-      else
-        IEG_G_GridType(gdb) = 0;
-
-      double resfac = calc_resfac(xfirst, xlast, xinc, yfirst, ylast, yinc);
-      int iresfac = (int) resfac;
-      if (iresfac == 1000) iresfac = 0;
-
-      IEG_G_ResFac(gdb) = iresfac;
-
-      IEG_G_NumLon(gdb) = (int) xsize;
-      IEG_G_NumLat(gdb) = (int) ysize;
-      IEG_G_FirstLat(gdb) = (int) lround(yfirst * resfac);
-      IEG_G_LastLat(gdb) = (int) lround(ylast * resfac);
-      IEG_G_FirstLon(gdb) = (int) lround(xfirst * resfac);
-      IEG_G_LastLon(gdb) = (int) lround(xlast * resfac);
-      IEG_G_LonIncr(gdb) = (int) lround(xinc * resfac);
-      if (fabs(xinc * resfac - IEG_G_LonIncr(gdb)) > FLT_EPSILON) IEG_G_LonIncr(gdb) = 0;
-
-      if (gridtype == GRID_GAUSSIAN)
-        IEG_G_LatIncr(gdb) = (int) ysize / 2;
-      else
-        {
-          IEG_G_LatIncr(gdb) = (int) lround(yinc * resfac);
-          if (fabs(yinc * resfac - IEG_G_LatIncr(gdb)) > FLT_EPSILON) IEG_G_LatIncr(gdb) = 0;
-
-          if (IEG_G_LatIncr(gdb) < 0) IEG_G_LatIncr(gdb) = -IEG_G_LatIncr(gdb);
-        }
-
-      if (IEG_G_NumLon(gdb) > 1 && IEG_G_NumLat(gdb) == 1)
-        if (IEG_G_LonIncr(gdb) != 0 && IEG_G_LatIncr(gdb) == 0) IEG_G_LatIncr(gdb) = IEG_G_LonIncr(gdb);
-
-      if (IEG_G_NumLon(gdb) == 1 && IEG_G_NumLat(gdb) > 1)
-        if (IEG_G_LonIncr(gdb) == 0 && IEG_G_LatIncr(gdb) != 0) IEG_G_LonIncr(gdb) = IEG_G_LatIncr(gdb);
-
-      IEG_G_ResFlag(gdb) = (IEG_G_LatIncr(gdb) == 0 || IEG_G_LonIncr(gdb) == 0) ? 0 : 128;
-
-      if (lrotated)
-        {
-          double xpole = 0.0, ypole = 0.0, angle = 0.0;
-          gridInqParamRLL(gridID, &xpole, &ypole, &angle);
-
-          IEG_G_LatSP(gdb) = -(int) lround(ypole * resfac);
-          IEG_G_LonSP(gdb) = (int) lround((xpole + 180) * resfac);
-          IEG_G_Size(gdb) = 42;
-        }
-      else
-        {
-          IEG_G_Size(gdb) = 32;
-        }
+      xfirst = gridInqXval(gridID, 0);
+      xlast = gridInqXval(gridID, xsize - 1);
+      xinc = gridInqXinc(gridID);
     }
-  else
+
+    if (ysize == 0)
+      ysize = 1;
+    else
     {
-      Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+      yfirst = gridInqYval(gridID, 0);
+      ylast = gridInqYval(gridID, ysize - 1);
+      yinc = gridInqYinc(gridID);
     }
+
+    if (gridtype == GRID_GAUSSIAN)
+      IEG_G_GridType(gdb) = 4;
+    else if (lrotated)
+      IEG_G_GridType(gdb) = 10;
+    else
+      IEG_G_GridType(gdb) = 0;
+
+    double resfac = calc_resfac(xfirst, xlast, xinc, yfirst, ylast, yinc);
+    int iresfac = (int) resfac;
+    if (iresfac == 1000) iresfac = 0;
+
+    IEG_G_ResFac(gdb) = iresfac;
+
+    IEG_G_NumLon(gdb) = (int) xsize;
+    IEG_G_NumLat(gdb) = (int) ysize;
+    IEG_G_FirstLat(gdb) = (int) lround(yfirst * resfac);
+    IEG_G_LastLat(gdb) = (int) lround(ylast * resfac);
+    IEG_G_FirstLon(gdb) = (int) lround(xfirst * resfac);
+    IEG_G_LastLon(gdb) = (int) lround(xlast * resfac);
+    IEG_G_LonIncr(gdb) = (int) lround(xinc * resfac);
+    if (fabs(xinc * resfac - IEG_G_LonIncr(gdb)) > FLT_EPSILON) IEG_G_LonIncr(gdb) = 0;
+
+    if (gridtype == GRID_GAUSSIAN)
+      IEG_G_LatIncr(gdb) = (int) ysize / 2;
+    else
+    {
+      IEG_G_LatIncr(gdb) = (int) lround(yinc * resfac);
+      if (fabs(yinc * resfac - IEG_G_LatIncr(gdb)) > FLT_EPSILON) IEG_G_LatIncr(gdb) = 0;
+
+      if (IEG_G_LatIncr(gdb) < 0) IEG_G_LatIncr(gdb) = -IEG_G_LatIncr(gdb);
+    }
+
+    if (IEG_G_NumLon(gdb) > 1 && IEG_G_NumLat(gdb) == 1)
+      if (IEG_G_LonIncr(gdb) != 0 && IEG_G_LatIncr(gdb) == 0) IEG_G_LatIncr(gdb) = IEG_G_LonIncr(gdb);
+
+    if (IEG_G_NumLon(gdb) == 1 && IEG_G_NumLat(gdb) > 1)
+      if (IEG_G_LonIncr(gdb) == 0 && IEG_G_LatIncr(gdb) != 0) IEG_G_LonIncr(gdb) = IEG_G_LatIncr(gdb);
+
+    IEG_G_ResFlag(gdb) = (IEG_G_LatIncr(gdb) == 0 || IEG_G_LonIncr(gdb) == 0) ? 0 : 128;
+
+    if (lrotated)
+    {
+      double xpole = 0.0, ypole = 0.0, angle = 0.0;
+      gridInqParamRLL(gridID, &xpole, &ypole, &angle);
+
+      IEG_G_LatSP(gdb) = -(int) lround(ypole * resfac);
+      IEG_G_LonSP(gdb) = (int) lround((xpole + 180) * resfac);
+      IEG_G_Size(gdb) = 42;
+    }
+    else { IEG_G_Size(gdb) = 32; }
+  }
+  else { Error("Unsupported grid type: %s", gridNamePtr(gridtype)); }
 
   IEG_G_ScanFlag(gdb) = 64;
 }
@@ -313,108 +304,108 @@ iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 
   int leveltype = zaxisInqType(zaxisID);
   if (leveltype == ZAXIS_GENERIC)
-    {
-      Warning("Changed zaxis type from %s to %s", zaxisNamePtr(leveltype), zaxisNamePtr(ZAXIS_PRESSURE));
-      leveltype = ZAXIS_PRESSURE;
-      zaxisChangeType(zaxisID, leveltype);
-      cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, "Pa");
-    }
+  {
+    Warning("Changed zaxis type from %s to %s", zaxisNamePtr(leveltype), zaxisNamePtr(ZAXIS_PRESSURE));
+    leveltype = ZAXIS_PRESSURE;
+    zaxisChangeType(zaxisID, leveltype);
+    cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, "Pa");
+  }
 
   // IEG_G_NumVCP(gdb) = 0;
 
   switch (leveltype)
-    {
+  {
     case ZAXIS_SURFACE:
-      {
-        pdbDefLevel(pdb, IEG_LTYPE_SURFACE, 0, (int) (zaxisInqLevel(zaxisID, levelID)));
-        break;
-      }
-    case ZAXIS_HYBRID:
-      {
-        if (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL))
-          pdbDefLevel(pdb, IEG_LTYPE_HYBRID_LAYER, (int) (zaxisInqLbound(zaxisID, levelID)),
-                      (int) (zaxisInqUbound(zaxisID, levelID)));
-        else
-          pdbDefLevel(pdb, IEG_LTYPE_HYBRID, 0, (int) (zaxisInqLevel(zaxisID, levelID)));
-
-        int vctsize = zaxisInqVctSize(zaxisID);
-        if (vctsize > 100)
-          {
-            static bool vct_warning = true;
-            // IEG_G_NumVCP(gdb) = 0;
-            if (vct_warning)
-              {
-                Warning("VCT size of %d is too large (maximum is 100). Set to 0!", vctsize);
-                vct_warning = false;
-              }
-          }
-        else
-          {
-            IEG_G_Size(gdb) += (vctsize * 4);
-            memcpy(vct, zaxisInqVctPtr(zaxisID), (size_t) vctsize / 2 * sizeof(double));
-            memcpy(vct + 50, zaxisInqVctPtr(zaxisID) + vctsize / 2, (size_t) vctsize / 2 * sizeof(double));
-          }
-        break;
-      }
-    case ZAXIS_PRESSURE:
-      {
-        level = zaxisInqLevel(zaxisID, levelID);
-        if (level < 0) Warning("pressure level of %f Pa is below 0.", level);
-
-        char units[CDI_MAX_NAME];
-        int length = CDI_MAX_NAME;
-        cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
-        if (memcmp(units, "hPa", 3) == 0 || memcmp(units, "mb", 2) == 0) level = level * 100;
-
-        double dum;
-        int ilevel = (int) level;
-        if (level < 32768 && (level < 100 || modf(level / 100, &dum) > 0))
-          pdbDefLevel(pdb, IEG_LTYPE_99, 0, ilevel);
-        else
-          pdbDefLevel(pdb, IEG_LTYPE_ISOBARIC, 0, ilevel / 100);
-
-        break;
-      }
-    case ZAXIS_HEIGHT:
-      {
-        level = zaxisInqLevel(zaxisID, levelID);
-        pdbDefLevel(pdb, IEG_LTYPE_HEIGHT, 0, (int) level);
-        break;
-      }
-    case ZAXIS_ALTITUDE:
-      {
-        level = zaxisInqLevel(zaxisID, levelID);
-        pdbDefLevel(pdb, IEG_LTYPE_ALTITUDE, 0, (int) level);
-        break;
-      }
-    case ZAXIS_DEPTH_BELOW_LAND:
-      {
-        if (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL))
-          pdbDefLevel(pdb, IEG_LTYPE_LANDDEPTH_LAYER, (int) (zaxisInqLbound(zaxisID, levelID)),
-                      (int) (zaxisInqUbound(zaxisID, levelID)));
-        else
-          pdbDefLevel(pdb, IEG_LTYPE_LANDDEPTH, 0, (int) (zaxisInqLevel(zaxisID, levelID)));
-
-        break;
-      }
-    case ZAXIS_DEPTH_BELOW_SEA:
-      {
-        level = zaxisInqLevel(zaxisID, levelID);
-        pdbDefLevel(pdb, IEG_LTYPE_SEADEPTH, 0, (int) level);
-        break;
-      }
-    case ZAXIS_ISENTROPIC:
-      {
-        level = zaxisInqLevel(zaxisID, levelID);
-        pdbDefLevel(pdb, 113, 0, (int) level);
-        break;
-      }
-    default:
-      {
-        Error("Unsupported zaxis type: %s", zaxisNamePtr(leveltype));
-        break;
-      }
+    {
+      pdbDefLevel(pdb, IEG_LTYPE_SURFACE, 0, (int) (zaxisInqLevel(zaxisID, levelID)));
+      break;
     }
+    case ZAXIS_HYBRID:
+    {
+      if (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL))
+        pdbDefLevel(pdb, IEG_LTYPE_HYBRID_LAYER, (int) (zaxisInqLbound(zaxisID, levelID)),
+                    (int) (zaxisInqUbound(zaxisID, levelID)));
+      else
+        pdbDefLevel(pdb, IEG_LTYPE_HYBRID, 0, (int) (zaxisInqLevel(zaxisID, levelID)));
+
+      int vctsize = zaxisInqVctSize(zaxisID);
+      if (vctsize > 100)
+      {
+        static bool vct_warning = true;
+        // IEG_G_NumVCP(gdb) = 0;
+        if (vct_warning)
+        {
+          Warning("VCT size of %d is too large (maximum is 100). Set to 0!", vctsize);
+          vct_warning = false;
+        }
+      }
+      else
+      {
+        IEG_G_Size(gdb) += (vctsize * 4);
+        memcpy(vct, zaxisInqVctPtr(zaxisID), (size_t) vctsize / 2 * sizeof(double));
+        memcpy(vct + 50, zaxisInqVctPtr(zaxisID) + vctsize / 2, (size_t) vctsize / 2 * sizeof(double));
+      }
+      break;
+    }
+    case ZAXIS_PRESSURE:
+    {
+      level = zaxisInqLevel(zaxisID, levelID);
+      if (level < 0) Warning("pressure level of %f Pa is below 0.", level);
+
+      char units[CDI_MAX_NAME];
+      int length = CDI_MAX_NAME;
+      cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units, &length);
+      if (memcmp(units, "hPa", 3) == 0 || memcmp(units, "mb", 2) == 0) level = level * 100;
+
+      double dum;
+      int ilevel = (int) level;
+      if (level < 32768 && (level < 100 || modf(level / 100, &dum) > 0))
+        pdbDefLevel(pdb, IEG_LTYPE_99, 0, ilevel);
+      else
+        pdbDefLevel(pdb, IEG_LTYPE_ISOBARIC, 0, ilevel / 100);
+
+      break;
+    }
+    case ZAXIS_HEIGHT:
+    {
+      level = zaxisInqLevel(zaxisID, levelID);
+      pdbDefLevel(pdb, IEG_LTYPE_HEIGHT, 0, (int) level);
+      break;
+    }
+    case ZAXIS_ALTITUDE:
+    {
+      level = zaxisInqLevel(zaxisID, levelID);
+      pdbDefLevel(pdb, IEG_LTYPE_ALTITUDE, 0, (int) level);
+      break;
+    }
+    case ZAXIS_DEPTH_BELOW_LAND:
+    {
+      if (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL))
+        pdbDefLevel(pdb, IEG_LTYPE_LANDDEPTH_LAYER, (int) (zaxisInqLbound(zaxisID, levelID)),
+                    (int) (zaxisInqUbound(zaxisID, levelID)));
+      else
+        pdbDefLevel(pdb, IEG_LTYPE_LANDDEPTH, 0, (int) (zaxisInqLevel(zaxisID, levelID)));
+
+      break;
+    }
+    case ZAXIS_DEPTH_BELOW_SEA:
+    {
+      level = zaxisInqLevel(zaxisID, levelID);
+      pdbDefLevel(pdb, IEG_LTYPE_SEADEPTH, 0, (int) level);
+      break;
+    }
+    case ZAXIS_ISENTROPIC:
+    {
+      level = zaxisInqLevel(zaxisID, levelID);
+      pdbDefLevel(pdb, 113, 0, (int) level);
+      break;
+    }
+    default:
+    {
+      Error("Unsupported zaxis type: %s", zaxisNamePtr(leveltype));
+      break;
+    }
+  }
 }
 
 void
@@ -526,16 +517,16 @@ iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, si
 
   int level1, level2;
   if (IEG_P_LevelType(pdb) == IEG_LTYPE_HYBRID_LAYER)
-    {
-      level1 = IEG_P_Level1(pdb);
-      level2 = IEG_P_Level2(pdb);
-    }
+  {
+    level1 = IEG_P_Level1(pdb);
+    level2 = IEG_P_Level2(pdb);
+  }
   else
-    {
-      level1 = IEG_P_Level2(pdb);
-      level2 = 0;
-      if (IEG_P_LevelType(pdb) == 100) level1 *= 100;
-    }
+  {
+    level1 = IEG_P_Level2(pdb);
+    level2 = 0;
+    if (IEG_P_LevelType(pdb) == 100) level1 *= 100;
+  }
 
   record->size = recsize;
   record->position = position;
@@ -567,24 +558,24 @@ iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, si
   // if ( IEG_G_FirstLon != 0 || IEG_G_LastLon != 0 )
   {
     if (xsize > 1)
-      {
-        if (IEG_G_ResFlag(gdb) && IEG_G_LonIncr(gdb) > 0)
-          grid->x.inc = IEG_G_LonIncr(gdb) * resfac;
-        else
-          grid->x.inc = (IEG_G_LastLon(gdb) - IEG_G_FirstLon(gdb)) * resfac / ((double) xsize - 1);
+    {
+      if (IEG_G_ResFlag(gdb) && IEG_G_LonIncr(gdb) > 0)
+        grid->x.inc = IEG_G_LonIncr(gdb) * resfac;
+      else
+        grid->x.inc = (IEG_G_LastLon(gdb) - IEG_G_FirstLon(gdb)) * resfac / ((double) xsize - 1);
 
-        // correct xinc if necessary
-        if (IEG_G_FirstLon(gdb) == 0 && IEG_G_LastLon(gdb) > 354000)
-          {
-            double xinc = 360. / (double) xsize;
-            // FIXME: why not use grid->x.inc != xinc as condition?
-            if (fabs(grid->x.inc - xinc) > 0.0)
-              {
-                grid->x.inc = xinc;
-                if (CDI_Debug) Message("set xinc to %g", grid->x.inc);
-              }
-          }
+      // correct xinc if necessary
+      if (IEG_G_FirstLon(gdb) == 0 && IEG_G_LastLon(gdb) > 354000)
+      {
+        double xinc = 360. / (double) xsize;
+        // FIXME: why not use grid->x.inc != xinc as condition?
+        if (fabs(grid->x.inc - xinc) > 0.0)
+        {
+          grid->x.inc = xinc;
+          if (CDI_Debug) Message("set xinc to %g", grid->x.inc);
+        }
       }
+    }
     grid->x.first = IEG_G_FirstLon(gdb) * resfac;
     grid->x.last = IEG_G_LastLon(gdb) * resfac;
     grid->x.flag = 2;
@@ -593,12 +584,12 @@ iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, si
   // if ( IEG_G_FirstLat != 0 || IEG_G_LastLat != 0 )
   {
     if (ysize > 1)
-      {
-        if (IEG_G_ResFlag(gdb) && IEG_G_LatIncr(gdb) > 0)
-          grid->y.inc = IEG_G_LatIncr(gdb) * resfac;
-        else
-          grid->y.inc = (IEG_G_LastLat(gdb) - IEG_G_FirstLat(gdb)) * resfac / (double) (ysize - 1);
-      }
+    {
+      if (IEG_G_ResFlag(gdb) && IEG_G_LatIncr(gdb) > 0)
+        grid->y.inc = IEG_G_LatIncr(gdb) * resfac;
+      else
+        grid->y.inc = (IEG_G_LastLat(gdb) - IEG_G_FirstLat(gdb)) * resfac / (double) (ysize - 1);
+    }
     grid->y.first = IEG_G_FirstLat(gdb) * resfac;
     grid->y.last = IEG_G_LastLat(gdb) * resfac;
     grid->y.flag = 2;
@@ -606,33 +597,33 @@ iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, si
 
   double xpole = 0, ypole = 0;
   if (IEG_G_GridType(gdb) == 10)
-    {
-      xpole = IEG_G_LonSP(gdb) * resfac - 180;
-      ypole = -IEG_G_LatSP(gdb) * resfac;
-      grid->projtype = CDI_PROJ_RLL;
-    }
+  {
+    xpole = IEG_G_LonSP(gdb) * resfac - 180;
+    ypole = -IEG_G_LatSP(gdb) * resfac;
+    grid->projtype = CDI_PROJ_RLL;
+  }
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
   if (!gridAdded.isNew)
-    {
-      grid_free(grid);
-      Free(grid);
-    }
+  {
+    grid_free(grid);
+    Free(grid);
+  }
   else if (gridtype == GRID_PROJECTION)
     gridDefParamRLL(gridID, xpole, ypole, 0);
 
   int leveltype = iegGetZaxisType(IEG_P_LevelType(pdb));
   if (leveltype == ZAXIS_HYBRID)
-    {
-      double tmpvct[100];
-      size_t vctsize = (size_t) IEG_G_NumVCP(gdb);
+  {
+    double tmpvct[100];
+    size_t vctsize = (size_t) IEG_G_NumVCP(gdb);
 
-      for (size_t i = 0; i < vctsize / 2; i++) tmpvct[i] = vct[i];
-      for (size_t i = 0; i < vctsize / 2; i++) tmpvct[i + vctsize / 2] = vct[i + 50];
+    for (size_t i = 0; i < vctsize / 2; i++) tmpvct[i] = vct[i];
+    for (size_t i = 0; i < vctsize / 2; i++) tmpvct[i + vctsize / 2] = vct[i + 50];
 
-      varDefVCT(vctsize, tmpvct);
-    }
+    varDefVCT(vctsize, tmpvct);
+  }
 
   int lbounds = IEG_P_LevelType(pdb) == IEG_LTYPE_HYBRID_LAYER ? 1 : 0;
 
@@ -713,46 +704,46 @@ iegScanTimestep1(stream_t *streamptr)
 
   int nrecs = 0;
   while (true)
+  {
+    recpos = fileGetPos(fileID);
+    if (iegRead(fileID, iegp) != 0)
     {
-      recpos = fileGetPos(fileID);
-      if (iegRead(fileID, iegp) != 0)
-        {
-          streamptr->ntsteps = 1;
-          break;
-        }
-
-      size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
-
-      int prec = iegp->dprec;
-      int rcode = IEG_P_Parameter(iegp->ipdb);
-      int tabnum = IEG_P_CodeTable(iegp->ipdb);
-      int param = cdiEncodeParam(rcode, tabnum, 255);
-      int rlevel = (IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER) ? IEG_P_Level1(iegp->ipdb) : IEG_P_Level2(iegp->ipdb);
-
-      if (IEG_P_LevelType(iegp->ipdb) == 100) rlevel *= 100;
-
-      CdiDateTime datetime = iegDateTime(iegp->ipdb);
-
-      if (nrecs == 0)
-        {
-          datetime0 = datetime;
-          taxis->vDateTime = datetime;
-        }
-      else
-        {
-          record_t *records = streamptr->tsteps[tsID].records;
-          for (int recID = 0; recID < nrecs; recID++)
-            if (param == records[recID].param && rlevel == records[recID].ilevel) goto tstepScanLoopFinished;
-
-          if (cdiDateTime_isNE(datetime, datetime0)) Warning("Inconsistent verification time for param %d level %d", param, rlevel);
-        }
-
-      nrecs++;
-
-      if (CDI_Debug) Message("%4d%8d%4d%8d %s", nrecs, (int) recpos, param, rlevel, CdiDateTime_string(datetime));
-
-      iegAddRecord(streamptr, param, iegp->ipdb, iegp->igdb, iegp->vct, recsize, recpos, prec);
+      streamptr->ntsteps = 1;
+      break;
     }
+
+    size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+
+    int prec = iegp->dprec;
+    int rcode = IEG_P_Parameter(iegp->ipdb);
+    int tabnum = IEG_P_CodeTable(iegp->ipdb);
+    int param = cdiEncodeParam(rcode, tabnum, 255);
+    int rlevel = (IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER) ? IEG_P_Level1(iegp->ipdb) : IEG_P_Level2(iegp->ipdb);
+
+    if (IEG_P_LevelType(iegp->ipdb) == 100) rlevel *= 100;
+
+    CdiDateTime datetime = iegDateTime(iegp->ipdb);
+
+    if (nrecs == 0)
+    {
+      datetime0 = datetime;
+      taxis->vDateTime = datetime;
+    }
+    else
+    {
+      record_t *records = streamptr->tsteps[tsID].records;
+      for (int recID = 0; recID < nrecs; recID++)
+        if (param == records[recID].param && rlevel == records[recID].ilevel) goto tstepScanLoopFinished;
+
+      if (cdiDateTime_isNE(datetime, datetime0)) Warning("Inconsistent verification time for param %d level %d", param, rlevel);
+    }
+
+    nrecs++;
+
+    if (CDI_Debug) Message("%4d%8d%4d%8d %s", nrecs, (int) recpos, param, rlevel, CdiDateTime_string(datetime));
+
+    iegAddRecord(streamptr, param, iegp->ipdb, iegp->igdb, iegp->vct, recsize, recpos, prec);
+  }
 
 tstepScanLoopFinished:
   streamptr->rtsteps = 1;
@@ -799,80 +790,77 @@ iegScanTimestep2(stream_t *streamptr)
   int nrecords = streamScanInitRecords2(streamptr);
 
   for (int rindex = 0; rindex <= nrecords; rindex++)
+  {
+    recpos = fileGetPos(fileID);
+    if (iegRead(fileID, iegp) != 0)
     {
-      recpos = fileGetPos(fileID);
-      if (iegRead(fileID, iegp) != 0)
-        {
-          streamptr->ntsteps = 2;
-          break;
-        }
-
-      size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
-
-      int rcode = IEG_P_Parameter(iegp->ipdb);
-      int tabnum = IEG_P_CodeTable(iegp->ipdb);
-      int param = cdiEncodeParam(rcode, tabnum, 255);
-      int rlevel = (IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER) ? IEG_P_Level1(iegp->ipdb) : IEG_P_Level2(iegp->ipdb);
-
-      if (IEG_P_LevelType(iegp->ipdb) == 100) rlevel *= 100;
-
-      CdiDateTime datetime = iegDateTime(iegp->ipdb);
-
-      if (rindex == 0)
-        {
-          taxis->type = TAXIS_ABSOLUTE;
-          taxis->vDateTime = datetime;
-        }
-
-      bool nextstep = false;
-      int recID = 0;
-      for (recID = 0; recID < nrecords; recID++)
-        {
-          if (param == records[recID].param && rlevel == records[recID].ilevel)
-            {
-              if (recinfo[recID].used)
-                {
-                  nextstep = true;
-                }
-              else
-                {
-                  recinfo[recID].used = true;
-                  streamptr->tsteps[tsID].recIDs[rindex] = recID;
-                }
-              break;
-            }
-        }
-      if (recID == nrecords)
-        {
-          char paramstr[32];
-          cdiParamToString(param, paramstr, sizeof(paramstr));
-          Warning("param %s level %d not defined at timestep 1", paramstr, rlevel);
-          return CDI_EUFSTRUCT;
-        }
-
-      if (nextstep) break;
-
-      if (CDI_Debug) Message("%4d%8d%4d%8d %s", rindex + 1, (int) recpos, param, rlevel, CdiDateTime_string(datetime));
-
-      if (param != records[recID].param || rlevel != records[recID].ilevel)
-        {
-          Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
-                  records[recID].ilevel, rlevel);
-          return CDI_EUFSTRUCT;
-        }
-
-      records[recID].position = recpos;
-      records[recID].size = recsize;
+      streamptr->ntsteps = 2;
+      break;
     }
+
+    size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+
+    int rcode = IEG_P_Parameter(iegp->ipdb);
+    int tabnum = IEG_P_CodeTable(iegp->ipdb);
+    int param = cdiEncodeParam(rcode, tabnum, 255);
+    int rlevel = (IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER) ? IEG_P_Level1(iegp->ipdb) : IEG_P_Level2(iegp->ipdb);
+
+    if (IEG_P_LevelType(iegp->ipdb) == 100) rlevel *= 100;
+
+    CdiDateTime datetime = iegDateTime(iegp->ipdb);
+
+    if (rindex == 0)
+    {
+      taxis->type = TAXIS_ABSOLUTE;
+      taxis->vDateTime = datetime;
+    }
+
+    bool nextstep = false;
+    int recID = 0;
+    for (recID = 0; recID < nrecords; recID++)
+    {
+      if (param == records[recID].param && rlevel == records[recID].ilevel)
+      {
+        if (recinfo[recID].used) { nextstep = true; }
+        else
+        {
+          recinfo[recID].used = true;
+          streamptr->tsteps[tsID].recIDs[rindex] = recID;
+        }
+        break;
+      }
+    }
+    if (recID == nrecords)
+    {
+      char paramstr[32];
+      cdiParamToString(param, paramstr, sizeof(paramstr));
+      Warning("param %s level %d not defined at timestep 1", paramstr, rlevel);
+      return CDI_EUFSTRUCT;
+    }
+
+    if (nextstep) break;
+
+    if (CDI_Debug) Message("%4d%8d%4d%8d %s", rindex + 1, (int) recpos, param, rlevel, CdiDateTime_string(datetime));
+
+    if (param != records[recID].param || rlevel != records[recID].ilevel)
+    {
+      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
+              records[recID].ilevel, rlevel);
+      return CDI_EUFSTRUCT;
+    }
+
+    records[recID].position = recpos;
+    records[recID].size = recsize;
+  }
 
   int nrecs = 0;
   for (int recID = 0; recID < nrecords; recID++)
-    {
-      if (recinfo[recID].used)
-        nrecs++;
-      else
-        vlistDefVarTimetype(vlistID, recinfo[recID].varID, TIME_CONSTANT);
-    }
+  {
+    if (recinfo[recID].used)
+      nrecs++;
+    else
+      vlistDefVarTimetype(vlistID, recinfo[recID].varID, TIME_CONSTANT);
+  }
   streamptr->tsteps[tsID].nrecs = nrecs;
 
   streamptr->rtsteps = 2;
@@ -909,80 +897,79 @@ iegScanTimestep(stream_t *streamptr)
 
   int nrecs = 0;
   if (streamptr->tsteps[tsID].recordSize == 0)
+  {
+    cdi_create_records(streamptr, tsID, true);
+    record_t *records = streamptr->tsteps[tsID].records;
+
+    nrecs = streamScanInitRecords(streamptr, tsID);
+
+    int fileID = streamptr->fileID;
+
+    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+
+    for (int rindex = 0; rindex <= nrecs; rindex++)
     {
-      cdi_create_records(streamptr, tsID, true);
-      record_t *records = streamptr->tsteps[tsID].records;
+      recpos = fileGetPos(fileID);
+      if (iegRead(fileID, iegp) != 0)
+      {
+        streamptr->ntsteps = streamptr->rtsteps + 1;
+        break;
+      }
 
-      nrecs = streamScanInitRecords(streamptr, tsID);
+      size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
 
-      int fileID = streamptr->fileID;
+      int rcode = IEG_P_Parameter(iegp->ipdb);
+      int tabnum = IEG_P_CodeTable(iegp->ipdb);
+      int param = cdiEncodeParam(rcode, tabnum, 255);
+      int rlevel = (IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER) ? IEG_P_Level1(iegp->ipdb) : IEG_P_Level2(iegp->ipdb);
 
-      fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+      if (IEG_P_LevelType(iegp->ipdb) == 100) rlevel *= 100;
 
-      for (int rindex = 0; rindex <= nrecs; rindex++)
-        {
-          recpos = fileGetPos(fileID);
-          if (iegRead(fileID, iegp) != 0)
-            {
-              streamptr->ntsteps = streamptr->rtsteps + 1;
-              break;
-            }
+      CdiDateTime datetime = iegDateTime(iegp->ipdb);
 
-          size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+      // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
+      if (rindex == nrecs) continue;
+      int recID = streamptr->tsteps[tsID].recIDs[rindex];
 
-          int rcode = IEG_P_Parameter(iegp->ipdb);
-          int tabnum = IEG_P_CodeTable(iegp->ipdb);
-          int param = cdiEncodeParam(rcode, tabnum, 255);
-          int rlevel
-              = (IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER) ? IEG_P_Level1(iegp->ipdb) : IEG_P_Level2(iegp->ipdb);
+      if (rindex == 0)
+      {
+        taxis->type = TAXIS_ABSOLUTE;
+        taxis->vDateTime = datetime;
+      }
 
-          if (IEG_P_LevelType(iegp->ipdb) == 100) rlevel *= 100;
+      if (param != records[recID].param || rlevel != records[recID].ilevel)
+      {
+        Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
+                records[recID].ilevel, rlevel);
+        Error("Invalid, unsupported or inconsistent record structure");
+      }
 
-          CdiDateTime datetime = iegDateTime(iegp->ipdb);
+      records[recID].position = recpos;
+      records[recID].size = recsize;
 
-          // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
-          if (rindex == nrecs) continue;
-          int recID = streamptr->tsteps[tsID].recIDs[rindex];
+      if (CDI_Debug) Message("%4d%8d%4d%8d %s", rindex, (int) recpos, param, rlevel, CdiDateTime_string(datetime));
+    }
 
-          if (rindex == 0)
-            {
-              taxis->type = TAXIS_ABSOLUTE;
-              taxis->vDateTime = datetime;
-            }
+    streamptr->rtsteps++;
 
-          if (param != records[recID].param || rlevel != records[recID].ilevel)
-            {
-              Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
-                      records[recID].ilevel, rlevel);
-              Error("Invalid, unsupported or inconsistent record structure");
-            }
+    if (streamptr->ntsteps != streamptr->rtsteps)
+    {
+      tsID = tstepsNewEntry(streamptr);
+      if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
 
-          records[recID].position = recpos;
-          records[recID].size = recsize;
-
-          if (CDI_Debug) Message("%4d%8d%4d%8d %s", rindex, (int) recpos, param, rlevel, CdiDateTime_string(datetime));
-        }
-
-      streamptr->rtsteps++;
-
-      if (streamptr->ntsteps != streamptr->rtsteps)
-        {
-          tsID = tstepsNewEntry(streamptr);
-          if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
-
-          streamptr->tsteps[tsID - 1].next = true;
-          streamptr->tsteps[tsID].position = recpos;
-        }
-
-      fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+      streamptr->tsteps[tsID - 1].next = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 
+    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+    streamptr->tsteps[tsID].position = recpos;
+  }
+
   if (nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs)
-    {
-      Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
-      streamptr->ntsteps = tsID;
-    }
+  {
+    Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
+    streamptr->ntsteps = tsID;
+  }
 
   return streamptr->ntsteps;
 }
@@ -999,10 +986,10 @@ iegInqTimestep(stream_t *streamptr, int tsID)
 
   int nrecs = 0;
   if (!(tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID))
-    {
-      streamptr->curTsID = tsID;
-      nrecs = streamptr->tsteps[tsID].nrecs;
-    }
+  {
+    streamptr->curTsID = tsID;
+    nrecs = streamptr->tsteps[tsID].nrecs;
+  }
 
   return nrecs;
 }

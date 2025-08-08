@@ -171,11 +171,11 @@ fwPOSIXFPGUARDSENDRECV(int fileID, const void *buffer, size_t len, int tsID)
   bool flush = tsID != afd->tsID;
 
   if (flush)
-    {
-      xdebug("fileID %d, tsID = %d, flush buffer", fileID, tsID);
-      flushOp(afd, tsID);
-      xmpi(MPI_Barrier(commInqCommColl()));
-    }
+  {
+    xdebug("fileID %d, tsID = %d, flush buffer", fileID, tsID);
+    flushOp(afd, tsID);
+    xmpi(MPI_Barrier(commInqCommColl()));
+  }
 
   int filled = cdiPioDbufferAppend(&afd->db, buffer, len);
 
@@ -183,16 +183,16 @@ fwPOSIXFPGUARDSENDRECV(int fileID, const void *buffer, size_t len, int tsID)
 
   int error = 0;
   if (filled == 1)
+  {
+    if (flush)
+      error = filled;
+    else
     {
-      if (flush)
-        error = filled;
-      else
-        {
-          writePF(afd);
+      writePF(afd);
 
-          error = cdiPioDbufferAppend(&afd->db, buffer, len);
-        }
+      error = cdiPioDbufferAppend(&afd->db, buffer, len);
     }
+  }
 
   if (error == 1) xabort("did not succeed filling output buffer, fileID=%d", fileID);
 
@@ -231,33 +231,33 @@ fowPOSIXFPGUARDSENDRECV(const char *filename, const char *mode)
 
   for (size_t i = 0; i < openFilesSize; ++i)
     if (openFiles[i].name && !strcmp(openFiles[i].name, filename))
-      {
-        Warning("filename %s is already open!"
-                " CDI-PIO does not support concurrent access"
-                " through different filehandles.",
-                filename);
-        return CDI_EINVAL;
-      }
+    {
+      Warning("filename %s is already open!"
+              " CDI-PIO does not support concurrent access"
+              " through different filehandles.",
+              filename);
+      return CDI_EINVAL;
+    }
 
   size_t fileID = SIZE_MAX;
   if (openFilesSize == openFilesFill)
-    {
-      fileID = openFilesSize;
-      if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
-      openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
-      if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
-      openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
-      for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
-    }
+  {
+    fileID = openFilesSize;
+    if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
+    openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
+    if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
+    openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
+    for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
+  }
   else
-    {
-      for (size_t i = 0; i < openFilesSize; ++i)
-        if (openFiles[i].name == NULL)
-          {
-            fileID = i;
-            break;
-          }
-    }
+  {
+    for (size_t i = 0; i < openFilesSize; ++i)
+      if (openFiles[i].name == NULL)
+      {
+        fileID = i;
+        break;
+      }
+  }
   struct mwFileBuf *afd = openFiles + fileID;
 
   newMultiwriterFileBuf(afd, filename, conf->writeAggBufLim);
@@ -304,12 +304,12 @@ initPOSIXFPGUARDSENDRECV(void)
   if (!isCollector)
     fpgPOSIXFPGUARDSENDRECV();
   else
-    {
-      namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowPOSIXFPGUARDSENDRECV));
-      namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcPOSIXFPGUARDSENDRECV));
-      namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwPOSIXFPGUARDSENDRECV));
-      namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(finalizePOSIXFPGUARDSENDRECV));
-    }
+  {
+    namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowPOSIXFPGUARDSENDRECV));
+    namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcPOSIXFPGUARDSENDRECV));
+    namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwPOSIXFPGUARDSENDRECV));
+    namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(finalizePOSIXFPGUARDSENDRECV));
+  }
 }
 
 /***************************************************************/
@@ -371,68 +371,68 @@ fpgPOSIXFPGUARDSENDRECV(void)
   for (size_t i = 0; i < nProcsColl; ++i)
     xmpi(MPI_Irecv(msgWords + i, 1, cdiPioSyncMsgDt, (int) i, collGuardTag, commPio, msgReq + i));
   for (;;)
+  {
+    CDIPIO_MPICH33_WORKAROUND(--msgReq; ++nProcsColl);
+    xmpiStat(MPI_Waitany((int) nProcsColl, msgReq, &source, &status), &status);
+    CDIPIO_MPICH33_WORKAROUND(++msgReq; --nProcsColl; --source);
+    int fileID = msgWords[source].fileID;
+    assert(fileID >= 0);
+    int opcode = msgWords[source].command;
+    off_t amount = msgWords[source].amount;
+    /* re-instate listening */
+    if (opcode != IO_Finalize)
+      xmpi(MPI_Irecv(msgWords + source, 1, cdiPioSyncMsgDt, source, collGuardTag, commPio, msgReq + source));
+
+    xdebug("receive message from source=%d, id=%d, command=%d (%s)", source, fileID, opcode, cdiPioCmdStrTab[opcode]);
+
+    if (opcode >= IO_Open_file && opcode < IO_Send_buffer)
     {
-      CDIPIO_MPICH33_WORKAROUND(--msgReq; ++nProcsColl);
-      xmpiStat(MPI_Waitany((int) nProcsColl, msgReq, &source, &status), &status);
-      CDIPIO_MPICH33_WORKAROUND(++msgReq; --nProcsColl; --source);
-      int fileID = msgWords[source].fileID;
-      assert(fileID >= 0);
-      int opcode = msgWords[source].command;
-      off_t amount = msgWords[source].amount;
-      /* re-instate listening */
-      if (opcode != IO_Finalize)
-        xmpi(MPI_Irecv(msgWords + source, 1, cdiPioSyncMsgDt, source, collGuardTag, commPio, msgReq + source));
-
-      xdebug("receive message from source=%d, id=%d, command=%d (%s)", source, fileID, opcode, cdiPioCmdStrTab[opcode]);
-
-      if (opcode >= IO_Open_file && opcode < IO_Send_buffer)
+      if (opcode == IO_Open_file)
+      {
+        if (sharedFPsSize <= (size_t) fileID)
         {
-          if (opcode == IO_Open_file)
-            {
-              if (sharedFPsSize <= (size_t) fileID)
-                {
-                  size_t oldSize = sharedFPsSize;
-                  sharedFPsSize = sharedFPsSize ? sharedFPsSize * 2 : 2;
-                  sharedFPs = Realloc(sharedFPs, sharedFPsSize * sizeof(*sharedFPs));
-                  for (size_t i = oldSize; i < sharedFPsSize; ++i) sharedFPs[i].offset = -1;
-                }
-              if (sharedFPs[fileID].offset < 0)
-                {
-                  initSharedFP(sharedFPs + fileID, (int) nProcsColl);
-                  ++sharedFPsFill;
-                }
-            }
-          xdebug("id=%d, command=%d (%s), send offset=%lld", fileID, opcode, cdiPioCmdStrTab[opcode],
-                 (long long) sharedFPs[fileID].offset);
-
-          int unfinished = sharedFPs[fileID].unfinished;
-          if (opcode == IO_Close_file && unfinished == 1) sharedFPs[fileID].offset = -sharedFPs[fileID].offset - 1;
-          xmpi(MPI_Send(&sharedFPs[fileID].offset, 1, cdiPioOffsetDt, source, collGuardTag, commPio));
-
-          xdebug("id=%d, command=%d (%s), recv amount=%lld, set offset=%ld", fileID, opcode, cdiPioCmdStrTab[opcode],
-                 (long long) amount, sharedFPs[fileID].offset);
-
-          if (opcode == IO_Close_file && !(sharedFPs[fileID].unfinished = --unfinished))
-            --sharedFPsFill;
-          else
-            sharedFPs[fileID].offset += amount;
+          size_t oldSize = sharedFPsSize;
+          sharedFPsSize = sharedFPsSize ? sharedFPsSize * 2 : 2;
+          sharedFPs = Realloc(sharedFPs, sharedFPsSize * sizeof(*sharedFPs));
+          for (size_t i = oldSize; i < sharedFPsSize; ++i) sharedFPs[i].offset = -1;
         }
-      else if (opcode == IO_Finalize)
+        if (sharedFPs[fileID].offset < 0)
         {
-          if (!--sentFinalize)
-            {
-              if (sharedFPsFill) xabort("still files open");
-              Free(sharedFPs);
-              CDIPIO_MPICH33_WORKAROUND(--msgReq);
-              Free(msgReq);
-              Free(msgWords);
-              cdiPioDestroySyncMsgDt();
-              return;
-            }
+          initSharedFP(sharedFPs + fileID, (int) nProcsColl);
+          ++sharedFPsFill;
         }
+      }
+      xdebug("id=%d, command=%d (%s), send offset=%lld", fileID, opcode, cdiPioCmdStrTab[opcode],
+             (long long) sharedFPs[fileID].offset);
+
+      int unfinished = sharedFPs[fileID].unfinished;
+      if (opcode == IO_Close_file && unfinished == 1) sharedFPs[fileID].offset = -sharedFPs[fileID].offset - 1;
+      xmpi(MPI_Send(&sharedFPs[fileID].offset, 1, cdiPioOffsetDt, source, collGuardTag, commPio));
+
+      xdebug("id=%d, command=%d (%s), recv amount=%lld, set offset=%ld", fileID, opcode, cdiPioCmdStrTab[opcode],
+             (long long) amount, sharedFPs[fileID].offset);
+
+      if (opcode == IO_Close_file && !(sharedFPs[fileID].unfinished = --unfinished))
+        --sharedFPsFill;
       else
-        xabort("COMMAND NOT IMPLEMENTED: %d", opcode);
+        sharedFPs[fileID].offset += amount;
     }
+    else if (opcode == IO_Finalize)
+    {
+      if (!--sentFinalize)
+      {
+        if (sharedFPsFill) xabort("still files open");
+        Free(sharedFPs);
+        CDIPIO_MPICH33_WORKAROUND(--msgReq);
+        Free(msgReq);
+        Free(msgWords);
+        cdiPioDestroySyncMsgDt();
+        return;
+      }
+    }
+    else
+      xabort("COMMAND NOT IMPLEMENTED: %d", opcode);
+  }
 }
 
 /*

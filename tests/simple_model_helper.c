@@ -25,7 +25,7 @@ var_scale(int datatype, double *mscale, double *mrscale)
 {
   int mant_bits;
   switch (datatype)
-    {
+  {
     case CDI_DATATYPE_PACK8: mant_bits = 7; break;
     case CDI_DATATYPE_PACK16: mant_bits = 15; break;
     case CDI_DATATYPE_PACK24: mant_bits = 23; break;
@@ -35,7 +35,7 @@ var_scale(int datatype, double *mscale, double *mrscale)
     case CDI_DATATYPE_INT16:
     case CDI_DATATYPE_INT32:
     default: fprintf(stderr, "Unexpected or unusable content format: %d\n", datatype); exit(EXIT_FAILURE);
-    }
+  }
   *mscale = (double) (INT64_C(1) << mant_bits);
   *mrscale = 1.0 / *mscale;
 }
@@ -80,13 +80,13 @@ composeFilename(char **buf, const char *fname_prefix, int tfID, const char *suff
   int plen = tfID >= 0 ? snprintf(filename, fnSize, "%s_%d.%s", fname_prefix, tfID, suffix)
                        : snprintf(filename, fnSize, "%s.%s", fname_prefix, suffix);
   if ((size_t) plen >= fnSize)
-    {
-      fprintf(stderr,
-              "unexpected error: printing to string of size %zu"
-              " results in %d chars to write\n",
-              fnSize, plen);
-      abort();
-    }
+  {
+    fprintf(stderr,
+            "unexpected error: printing to string of size %zu"
+            " results in %d chars to write\n",
+            fnSize, plen);
+    abort();
+  }
   filename[fnSize - 1] = 0;
   *buf = filename;
 }
@@ -98,10 +98,10 @@ composeStream(char **buf, const char *fname_prefix, int tfID, const char *suffix
   composeFilename(&temp, fname_prefix, tfID, suffix);
   int streamID = streamOpenWrite(temp, filetype);
   if (streamID < 0)
-    {
-      fprintf(stderr, "Failed to open stream: %s\n", cdiStringError(streamID));
-      abort();
-    }
+  {
+    fprintf(stderr, "Failed to open stream: %s\n", cdiStringError(streamID));
+    abort();
+  }
   if (!buf)
     free(temp);
   else
@@ -186,18 +186,18 @@ computeCurvilinearChunk(double *coords_, const struct cart_coord a[4], size_t si
   double(*coords)[chunkSizeY][chunkSizeX] = (double(*)[sizey][sizex]) coords_;
 #endif
   for (size_t j = starty; j < endy; ++j)
+  {
+    double g = (double) j / (double) (sizey - 1);
+    /* compute start/end coordinates of great circle in x direction */
+    struct cart_coord gc_left = intermediateCoord(a[0], a[3], g), gc_right = intermediateCoord(a[1], a[2], g);
+    for (size_t i = startx; i < endx; ++i)
     {
-      double g = (double) j / (double) (sizey - 1);
-      /* compute start/end coordinates of great circle in x direction */
-      struct cart_coord gc_left = intermediateCoord(a[0], a[3], g), gc_right = intermediateCoord(a[1], a[2], g);
-      for (size_t i = startx; i < endx; ++i)
-        {
-          double f = (double) i / (double) (sizex - 1);
-          struct cart_coord pij = intermediateCoord(gc_left, gc_right, f);
-          coords[0][j - starty][i - startx] = RAD2DEG(pij.lat);
-          coords[1][j - starty][i - startx] = RAD2DEG(pij.lon);
-        }
+      double f = (double) i / (double) (sizex - 1);
+      struct cart_coord pij = intermediateCoord(gc_left, gc_right, f);
+      coords[0][j - starty][i - startx] = RAD2DEG(pij.lat);
+      coords[1][j - starty][i - startx] = RAD2DEG(pij.lon);
     }
+  }
 }
 
 #if defined USE_MPI && !defined HAVE_PPM_CORE
@@ -228,22 +228,22 @@ PPM_prime_factorization_32(uint32_t n, uint32_t **factors)
   size_t numFactors = 0;
   uint32_t unfactored = n;
   while (!(unfactored & 1))
-    {
-      pfactors[numFactors] = 2;
-      ++numFactors;
-      unfactored >>= 1;
-    }
+  {
+    pfactors[numFactors] = 2;
+    ++numFactors;
+    unfactored >>= 1;
+  }
   uint32_t divisor = 3;
   while (unfactored > 1)
+  {
+    while (unfactored % divisor == 0)
     {
-      while (unfactored % divisor == 0)
-        {
-          unfactored /= divisor;
-          pfactors[numFactors] = divisor;
-          ++numFactors;
-        }
-      divisor += 1;
+      unfactored /= divisor;
+      pfactors[numFactors] = divisor;
+      ++numFactors;
     }
+    divisor += 1;
+  }
   *factors = pfactors;
   return numFactors;
 }

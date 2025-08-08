@@ -75,10 +75,10 @@ void
 ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer)
 {
   if (*curSize < requiredSize)
-    {
-      *curSize = requiredSize;
-      *buffer = Realloc(*buffer, *curSize);
-    }
+  {
+    *curSize = requiredSize;
+    *buffer = Realloc(*buffer, *curSize);
+  }
 }
 
 int
@@ -88,11 +88,11 @@ grbDecompress(size_t recsize, size_t *buffersize, void **gribbuffer)
 
   size_t unzipsize;
   if (gribGetZip(recsize, (unsigned char *) *gribbuffer, &unzipsize) > 0)
-    {
-      comptype = CDI_COMPRESS_SZIP;
-      unzipsize += 100;  // need 0 to 1 bytes for rounding of bds
-      ensureBufferSize(unzipsize, buffersize, gribbuffer);
-    }
+  {
+    comptype = CDI_COMPRESS_SZIP;
+    unzipsize += 100;  // need 0 to 1 bytes for rounding of bds
+    ensureBufferSize(unzipsize, buffersize, gribbuffer);
+  }
 
   return comptype;
 }
@@ -238,14 +238,14 @@ grbBitsPerValue(int datatype)
   if (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64) Error("CDI/GRIB library does not support complex numbers!");
 
   if (datatype != CDI_UNDEFID)
-    {
-      if (datatype > 0 && datatype <= 32)
-        bitsPerValue = datatype;
-      else if (datatype == CDI_DATATYPE_FLT64)
-        bitsPerValue = 24;
-      else
-        bitsPerValue = 16;
-    }
+  {
+    if (datatype > 0 && datatype <= 32)
+      bitsPerValue = datatype;
+    else if (datatype == CDI_DATATYPE_FLT64)
+      bitsPerValue = 24;
+    else
+      bitsPerValue = 16;
+  }
 
   return bitsPerValue;
 }
@@ -357,15 +357,12 @@ fdbInqTimestep(stream_t *streamptr, int tsID)
   if (CDI_Debug) Message("tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
 
   int nrecs;
-  if (tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID)
-    {
-      nrecs = 0;
-    }
+  if (tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID) { nrecs = 0; }
   else
-    {
-      streamptr->curTsID = tsID;
-      nrecs = streamptr->tsteps[tsID].nrecs;
-    }
+  {
+    streamptr->curTsID = tsID;
+    nrecs = streamptr->tsteps[tsID].nrecs;
+  }
 
   return nrecs;
 }
@@ -379,25 +376,22 @@ grbInqTimestep(stream_t *streamptr, int tsID)
 
   long ntsteps = -1;
   while ((tsID + 1) > streamptr->rtsteps && ntsteps == -1)
+  {
+    ntsteps = grbScanTimestep(streamptr);
+    if (ntsteps == CDI_EUFSTRUCT)
     {
-      ntsteps = grbScanTimestep(streamptr);
-      if (ntsteps == CDI_EUFSTRUCT)
-        {
-          streamptr->ntsteps = streamptr->rtsteps;
-          break;
-        }
+      streamptr->ntsteps = streamptr->rtsteps;
+      break;
     }
+  }
 
   int nrecs;
-  if (tsID >= streamptr->ntsteps && streamptr->ntsteps != -1)
-    {
-      nrecs = 0;
-    }
+  if (tsID >= streamptr->ntsteps && streamptr->ntsteps != -1) { nrecs = 0; }
   else
-    {
-      streamptr->curTsID = tsID;
-      nrecs = streamptr->tsteps[tsID].nrecs;
-    }
+  {
+    streamptr->curTsID = tsID;
+    nrecs = streamptr->tsteps[tsID].nrecs;
+  }
 
   return nrecs;
 }
@@ -408,67 +402,52 @@ grbGetGridtype(int *gridID, SizeType gridsize, bool *gridIsRotated, bool *gridIs
   int gridtype = gridInqType(*gridID);
 
   if (gridtype == GRID_GENERIC)
-    {
-      int xsize = (int) gridInqXsize(*gridID);
-      int ysize = (int) gridInqYsize(*gridID);
+  {
+    int xsize = (int) gridInqXsize(*gridID);
+    int ysize = (int) gridInqYsize(*gridID);
 
-      if ((ysize == 32 || ysize == 48 || ysize == 64 || ysize == 96 || ysize == 160 || ysize == 192 || ysize == 240 || ysize == 320
-           || ysize == 384 || ysize == 480 || ysize == 768)
-          && (xsize == 2 * ysize || xsize == 1))
-        {
-          gridtype = GRID_GAUSSIAN;
-        }
-      else if (gridsize == 1)
-        {
-          gridtype = GRID_LONLAT;
-        }
-      else if (gridInqXvals(*gridID, NULL) && gridInqYvals(*gridID, NULL))
-        {
-          gridtype = GRID_LONLAT;
-        }
-    }
-  else if (gridtype == GRID_CURVILINEAR)
+    if ((ysize == 32 || ysize == 48 || ysize == 64 || ysize == 96 || ysize == 160 || ysize == 192 || ysize == 240 || ysize == 320
+         || ysize == 384 || ysize == 480 || ysize == 768)
+        && (xsize == 2 * ysize || xsize == 1))
     {
-      int projID = gridInqProj(*gridID);
-      if (projID != CDI_UNDEFID && gridInqType(projID) == GRID_PROJECTION)
-        {
-          *gridID = projID;
-          gridtype = GRID_PROJECTION;
-        }
-      else
-        {
-          static bool lwarning = true;
-          if (lwarning && gridsize > 1)
-            {
-              lwarning = false;
-              Warning("Curvilinear grid is unsupported in GRIB format! Created wrong Grid Description Section!");
-            }
-          *gridIsCurvilinear = true;
-          gridtype = GRID_LONLAT;
-        }
+      gridtype = GRID_GAUSSIAN;
     }
+    else if (gridsize == 1) { gridtype = GRID_LONLAT; }
+    else if (gridInqXvals(*gridID, NULL) && gridInqYvals(*gridID, NULL)) { gridtype = GRID_LONLAT; }
+  }
+  else if (gridtype == GRID_CURVILINEAR)
+  {
+    int projID = gridInqProj(*gridID);
+    if (projID != CDI_UNDEFID && gridInqType(projID) == GRID_PROJECTION)
+    {
+      *gridID = projID;
+      gridtype = GRID_PROJECTION;
+    }
+    else
+    {
+      static bool lwarning = true;
+      if (lwarning && gridsize > 1)
+      {
+        lwarning = false;
+        Warning("Curvilinear grid is unsupported in GRIB format! Created wrong Grid Description Section!");
+      }
+      *gridIsCurvilinear = true;
+      gridtype = GRID_LONLAT;
+    }
+  }
 
   if (gridtype == GRID_PROJECTION)
+  {
+    int projtype = gridInqProjType(*gridID);
+    if (projtype == CDI_PROJ_RLL)
     {
-      int projtype = gridInqProjType(*gridID);
-      if (projtype == CDI_PROJ_RLL)
-        {
-          gridtype = GRID_LONLAT;
-          *gridIsRotated = true;
-        }
-      else if (projtype == CDI_PROJ_LCC)
-        {
-          gridtype = CDI_PROJ_LCC;
-        }
-      else if (projtype == CDI_PROJ_STERE)
-        {
-          gridtype = CDI_PROJ_STERE;
-        }
-      else if (projtype == CDI_PROJ_HEALPIX)
-        {
-          gridtype = CDI_PROJ_HEALPIX;
-        }
+      gridtype = GRID_LONLAT;
+      *gridIsRotated = true;
     }
+    else if (projtype == CDI_PROJ_LCC) { gridtype = CDI_PROJ_LCC; }
+    else if (projtype == CDI_PROJ_STERE) { gridtype = CDI_PROJ_STERE; }
+    else if (projtype == CDI_PROJ_HEALPIX) { gridtype = CDI_PROJ_HEALPIX; }
+  }
 
   return gridtype;
 }
@@ -481,25 +460,25 @@ streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
   stream_t *streamptr = stream_to_pointer(streamID);
 
   if (streamptr->filetype == CDI_FILETYPE_GRB)
-    {
+  {
 #ifdef HAVE_LIBGRIB
-      int tsID = streamptr->curTsID;
-      int vrecID = streamptr->tsteps[tsID].curRecID;
-      int recID = streamptr->tsteps[tsID].recIDs[vrecID];
-      off_t recpos = streamptr->tsteps[tsID].records[recID].position;
-      int zip = streamptr->tsteps[tsID].records[recID].zip;
+    int tsID = streamptr->curTsID;
+    int vrecID = streamptr->tsteps[tsID].curRecID;
+    int recID = streamptr->tsteps[tsID].recIDs[vrecID];
+    off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+    int zip = streamptr->tsteps[tsID].records[recID].zip;
 
-      void *gribbuffer = streamptr->record->buffer;
-      size_t gribbuffersize = streamptr->record->buffersize;
+    void *gribbuffer = streamptr->record->buffer;
+    size_t gribbuffersize = streamptr->record->buffersize;
 
-      if (zip > 0)
-        Error("Compressed GRIB records unsupported!");
-      else
-        grib_info_for_grads(recpos, (long) gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum, bignum);
+    if (zip > 0)
+      Error("Compressed GRIB records unsupported!");
+    else
+      grib_info_for_grads(recpos, (long) gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum, bignum);
 #else
-      Error("GRIB support unavailable!");
+    Error("GRIB support unavailable!");
 #endif
-    }
+  }
 }
 
 /*

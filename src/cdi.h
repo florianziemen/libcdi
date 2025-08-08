@@ -46,7 +46,7 @@ extern "C" {
 
 // Error identifier
 
-#define	 CDI_NOERR        	    0   // No Error
+#define  CDI_NOERR                  0   // No Error
 #define  CDI_EEOF                  -1   // The end of file was encountered
 #define  CDI_ETMOF                 -9   // Too many open files
 #define  CDI_ESYSTEM              -10   // Operating system error
@@ -180,6 +180,7 @@ extern "C" {
 #define  GRID_TRAJECTORY            8  // Trajectory
 #define  GRID_UNSTRUCTURED          9  // General unstructured grid
 #define  GRID_CURVILINEAR          10  // Curvilinear grid
+#define  GRID_HEALPIX              11  // HealPIX grid
 #define  GRID_PROJECTION           12  // Projected coordinates
 #define  GRID_CHARXY               13  // One horizontal character dimension
 
@@ -793,6 +794,9 @@ void    gridDefYsize(int gridID, SizeType ysize);
 
 //      gridInqYsize: Get the size of a Y-axis
 SizeType gridInqYsize(int gridID);
+
+void    gridDefIndices(int gridID, const int64_t *indices);
+SizeType gridInqIndices(int gridID, int64_t *indices);
 
 //      gridDefNP: Define the number of parallels between a pole and the equator
 void    gridDefNP(int gridID, int np);
@@ -1450,7 +1454,8 @@ extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams gpp, double, d
 // Used on CDO remap_scrip_io.cc
 void cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec);
 
-int cdi_has_dap(void);
+int cdi_has_ncfilter(void);
+int cdi_has_ncdap(void);
 int cdi_has_cgribex(void);
 
 #ifdef __cplusplus

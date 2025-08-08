@@ -82,10 +82,10 @@ static inline void
 packXTUID(unsigned *restrict packedUID, Xt_uid uid)
 {
   for (size_t i = 0; i < uidInts; ++i)
-    {
-      packedUID[i] = uid & ~0U;
-      uid >>= packUIDShift;
-    }
+  {
+    packedUID[i] = uid & ~0U;
+    uid >>= packUIDShift;
+  }
 }
 
 static inline Xt_uid

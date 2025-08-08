@@ -90,10 +90,10 @@ parse_intarg(const char msg[])
   char *end;
   long temp = strtol(optarg, &end, 0);
   if ((errno == ERANGE && (temp == LONG_MAX || temp == LONG_MIN)) || (errno != 0 && temp == 0))
-    {
-      perror(msg);
-      exit(EXIT_FAILURE);
-    }
+  {
+    perror(msg);
+    exit(EXIT_FAILURE);
+  }
   if (temp > INT_MAX || temp < INT_MIN) invalidOptionDie("range error: %ld\n", temp);
   return (int) temp;
 }
@@ -104,10 +104,10 @@ parse_unsignedarg(const char msg[])
   char *end;
   unsigned long temp = strtoul(optarg, &end, 0);
   if ((errno == ERANGE && (temp == ULONG_MAX)) || (errno != 0 && temp == 0))
-    {
-      perror(msg);
-      exit(EXIT_FAILURE);
-    }
+  {
+    perror(msg);
+    exit(EXIT_FAILURE);
+  }
   if (temp > UINT_MAX) invalidOptionDie("range error: %ld\n", temp);
   return (unsigned) temp;
 }
@@ -125,17 +125,17 @@ parseBooleanLongOption(size_t optionStrSize, const char *optionStr, const char *
   bool invert;
   struct boolOptionParse result;
   if ((invert = !strncmp(argStr, optionStr, optionStrSize - 1)) || !strncmp(argStr, optionStr + 3, optionStrSize - 4))
-    {
-      result.matched = true;
-      result.invert = invert;
-      size_t valOfs = optionStrSize - (invert ? 1 : 4);
-      if (argStr[valOfs] == '\0' || !strcmp(argStr + valOfs, "=true"))
-        result.value = !invert;
-      else if (!strcmp(argStr + valOfs, "=false"))
-        result.value = invert;
-      else
-        invalidOptionDie("invalid option argument to -q%s: %s\n", optionStr + (invert ? 0 : 3), argStr + valOfs);
-    }
+  {
+    result.matched = true;
+    result.invert = invert;
+    size_t valOfs = optionStrSize - (invert ? 1 : 4);
+    if (argStr[valOfs] == '\0' || !strcmp(argStr + valOfs, "=true"))
+      result.value = !invert;
+    else if (!strcmp(argStr + valOfs, "=false"))
+      result.value = invert;
+    else
+      invalidOptionDie("invalid option argument to -q%s: %s\n", optionStr + (invert ? 0 : 3), argStr + valOfs);
+  }
   else
     result = (struct boolOptionParse){ .matched = false, .value = false };
   return result;
@@ -152,22 +152,22 @@ parseLongOptionArgStringToInt(const char *str, size_t optionStrLen, const char *
                               const struct string2int *map, int argc, char *argv[], int *out)
 {
   if (!strncmp(str, optionStr, optionStrLen))
-    {
-      const char *optargArg;
-      if (str[optionStrLen] == '=')
-        optargArg = str + optionStrLen + 1;
-      else if (str[sizeof(optionStr) - 1] == 0 && optind < argc)
-        optargArg = argv[optind++];
-      else
-        invalidOptionDie("missing argument to -q%s", optionStr);
-      for (size_t i = 0; i < mapSize; ++i)
-        if (!strcmp(optargArg, map[i].key))
-          {
-            *out = map[i].val;
-            return true;
-          }
-      invalidOptionDie("unknown argument \"%s\" to -q%s", optargArg, optionStr);
-    }
+  {
+    const char *optargArg;
+    if (str[optionStrLen] == '=')
+      optargArg = str + optionStrLen + 1;
+    else if (str[sizeof(optionStr) - 1] == 0 && optind < argc)
+      optargArg = argv[optind++];
+    else
+      invalidOptionDie("missing argument to -q%s", optionStr);
+    for (size_t i = 0; i < mapSize; ++i)
+      if (!strcmp(optargArg, map[i].key))
+      {
+        *out = map[i].val;
+        return true;
+      }
+    invalidOptionDie("unknown argument \"%s\" to -q%s", optargArg, optionStr);
+  }
   return false;
 }
 
@@ -219,13 +219,13 @@ parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRol
   };
   struct boolOptionParse bop;
   if ((bop = parseBooleanLongOption(sizeof(cacheRedistStr), cacheRedistStr, str)).matched)
-    {
+  {
 #ifdef USE_MPI
-      cdiPioConfSetRedistCache(pioConfHandle, bop.value);
+    cdiPioConfSetRedistCache(pioConfHandle, bop.value);
 #else
-      invalidOptionDie("CDI-PIO option -q%s unavailable in non-MPI mode\n", cacheRedistStr + (bop.invert ? 0 : 3));
+    invalidOptionDie("CDI-PIO option -q%s unavailable in non-MPI mode\n", cacheRedistStr + (bop.invert ? 0 : 3));
 #endif
-    }
+  }
   else if (parseLongOptionArgStringToInt(str, sizeof(taxistypeOptionStr) - 1, taxistypeOptionStr, taxistypeArgMapSize,
                                          taxistypeArgMap, argc, argv, &setup->taxistype))
     ;
@@ -236,76 +236,73 @@ parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRol
                                          argc, argv, &setup->datatype))
     ;
   else if (!strncmp(str, pioRoleSchemeOptionStr, sizeof(pioRoleSchemeOptionStr) - 1))
-    {
+  {
 #ifdef USE_MPI
-      static const char pioRoleSchemeLastN[] = "last", pioRoleSchemeFirstN[] = "first", pioRoleSchemeBalanced[] = "balanced";
-      if (str[sizeof(pioRoleSchemeOptionStr) - 1] == '=')
-        {
-          const char *optargArg = str + sizeof(pioRoleSchemeOptionStr);
-          if (!strcmp(optargArg, pioRoleSchemeLastN))
-            *pioRoleAssign = cdiPioCSRLastN;
-          else if (!strcmp(optargArg, pioRoleSchemeFirstN))
-            *pioRoleAssign = cdiPioCSRFirstN;
-          else if (!strcmp(optargArg, pioRoleSchemeBalanced))
-            *pioRoleAssign = cdiPioCSRBalanced;
-          else
-            invalidOptionDie("unknown scheme argument \"%s\" to -q%s", optargArg, pioRoleSchemeOptionStr);
-        }
+    static const char pioRoleSchemeLastN[] = "last", pioRoleSchemeFirstN[] = "first", pioRoleSchemeBalanced[] = "balanced";
+    if (str[sizeof(pioRoleSchemeOptionStr) - 1] == '=')
+    {
+      const char *optargArg = str + sizeof(pioRoleSchemeOptionStr);
+      if (!strcmp(optargArg, pioRoleSchemeLastN))
+        *pioRoleAssign = cdiPioCSRLastN;
+      else if (!strcmp(optargArg, pioRoleSchemeFirstN))
+        *pioRoleAssign = cdiPioCSRFirstN;
+      else if (!strcmp(optargArg, pioRoleSchemeBalanced))
+        *pioRoleAssign = cdiPioCSRBalanced;
       else
-        invalidOptionDie("long option %s needs argument\n", pioRoleSchemeOptionStr);
-#else
-      invalidOptionDie("CDI-PIO option -q%s ignored in non-MPI mode\n", pioRoleSchemeOptionStr);
-#endif
+        invalidOptionDie("unknown scheme argument \"%s\" to -q%s", optargArg, pioRoleSchemeOptionStr);
     }
+    else
+      invalidOptionDie("long option %s needs argument\n", pioRoleSchemeOptionStr);
+#else
+    invalidOptionDie("CDI-PIO option -q%s ignored in non-MPI mode\n", pioRoleSchemeOptionStr);
+#endif
+  }
   else if (!strncmp(str, prefixOptionStr, sizeof(prefixOptionStr) - 1))
-    {
-      if (str[sizeof(prefixOptionStr) - 1] == '=')
-        {
-          setup->prefix = str + sizeof(prefixOptionStr);
-        }
-      else
-        invalidOptionDie("long option %s needs argument\n", prefixOptionStr);
-    }
+  {
+    if (str[sizeof(prefixOptionStr) - 1] == '=') { setup->prefix = str + sizeof(prefixOptionStr); }
+    else
+      invalidOptionDie("long option %s needs argument\n", prefixOptionStr);
+  }
   else if ((bop = parseBooleanLongOption(sizeof(useDistGridOptionStr), useDistGridOptionStr, str)).matched)
-    {
+  {
 #if defined USE_MPI && defined HAVE_PPM_DIST_ARRAY_H
-      setup->flags = (setup->flags & ~PIO_WRITE_CONFIG_USE_DIST_GRID_FLAG) | (bop.value << PIO_WRITE_CONFIG_USE_DIST_GRID_BIT);
+    setup->flags = (setup->flags & ~PIO_WRITE_CONFIG_USE_DIST_GRID_FLAG) | (bop.value << PIO_WRITE_CONFIG_USE_DIST_GRID_BIT);
 #else
-      invalidOptionDie("CDI-PIO option -q%s feature unavailable %s\n", useDistGridOptionStr + (bop.invert ? 0 : 3),
+    invalidOptionDie("CDI-PIO option -q%s feature unavailable %s\n", useDistGridOptionStr + (bop.invert ? 0 : 3),
 #ifndef USE_MPI
-                       "in non-MPI mode"
+                     "in non-MPI mode"
 #else
-                       "without PPM feature distributed multi-array"
+                     "without PPM feature distributed multi-array"
 #endif
-      );
+    );
 #endif
-    }
+  }
   else if ((bop = parseBooleanLongOption(sizeof(uuidCreateOptionStr), uuidCreateOptionStr, str)).matched)
-    {
-      setup->flags = (setup->flags & ~PIO_WRITE_CONFIG_CREATE_UUID_FLAG) | (bop.value << PIO_WRITE_CONFIG_CREATE_UUID_BIT);
-    }
+  {
+    setup->flags = (setup->flags & ~PIO_WRITE_CONFIG_CREATE_UUID_FLAG) | (bop.value << PIO_WRITE_CONFIG_CREATE_UUID_BIT);
+  }
   else if ((bop = parseBooleanLongOption(sizeof(presetDecoOptionStr), presetDecoOptionStr, str)).matched)
-    {
+  {
 #ifdef USE_MPI
-      setup->flags
-          = (setup->flags & ~PIO_WRITE_CONFIG_PRESET_DECOMPOSITION_FLAG) | (bop.value << PIO_WRITE_CONFIG_PRESET_DECOMPOSITION_BIT);
+    setup->flags
+        = (setup->flags & ~PIO_WRITE_CONFIG_PRESET_DECOMPOSITION_FLAG) | (bop.value << PIO_WRITE_CONFIG_PRESET_DECOMPOSITION_BIT);
 #else
-      invalidOptionDie("CDI-PIO option -q%s unavailable in non-MPI mode\n", presetDecoOptionStr + (bop.invert ? 0 : 3));
+    invalidOptionDie("CDI-PIO option -q%s unavailable in non-MPI mode\n", presetDecoOptionStr + (bop.invert ? 0 : 3));
 #endif
-    }
+  }
   else if ((bop = parseBooleanLongOption(sizeof(batchedRmaOptionStr), batchedRmaOptionStr, str)).matched)
-    {
+  {
 #ifdef USE_MPI
-      cdiPioConfSetBatchedRMA(pioConfHandle, bop.value);
+    cdiPioConfSetBatchedRMA(pioConfHandle, bop.value);
 #else
-      invalidOptionDie("CDI-PIO option -q%s unavailable in non-MPI mode\n", batchedRmaOptionStr + (bop.invert ? 0 : 3));
+    invalidOptionDie("CDI-PIO option -q%s unavailable in non-MPI mode\n", batchedRmaOptionStr + (bop.invert ? 0 : 3));
 #endif
-    }
+  }
   else if ((bop = parseBooleanLongOption(sizeof(curvilinearGridOptionStr), curvilinearGridOptionStr, str)).matched)
-    {
-      setup->flags = (setup->flags & ~PIO_WRITE_CONFIG_CREATE_CURVILINEAR_GRID_FLAG)
-                     | (bop.value << PIO_WRITE_CONFIG_CREATE_CURVILINEAR_GRID_BIT);
-    }
+  {
+    setup->flags = (setup->flags & ~PIO_WRITE_CONFIG_CREATE_CURVILINEAR_GRID_FLAG)
+                   | (bop.value << PIO_WRITE_CONFIG_CREATE_CURVILINEAR_GRID_BIT);
+  }
   else
     invalidOptionDie("unknown long option: %s\n", str);
 }
@@ -342,16 +339,16 @@ main(int argc, char *argv[])
 #ifdef USE_MPI
     if (rankGlob == 0)
 #endif
+    {
+      struct timeval tv;
+      int status = gettimeofday(&tv, NULL);
+      if (status != 0)
       {
-        struct timeval tv;
-        int status = gettimeofday(&tv, NULL);
-        if (status != 0)
-          {
-            perror("failed seed generation!");
-            exit(1);
-          }
-        randSeed = (unsigned) (tv.tv_sec ^ tv.tv_usec);
+        perror("failed seed generation!");
+        exit(1);
       }
+      randSeed = (unsigned) (tv.tv_sec ^ tv.tv_usec);
+    }
   }
 
   {
@@ -364,70 +361,70 @@ main(int argc, char *argv[])
                          ))
            != -1)
       switch (opt)
-        {
+      {
 #ifdef USE_MPI
         case 'p':
           IOMode = cdiPioStr2IOMode(optarg);
           if (IOMode < 0)
-            {
-              fprintf(stderr, "Unsupported PIO mode requested: %s\n", optarg);
-              exit(EXIT_FAILURE);
-            }
-          break;
-        case 'w':
           {
-            long temp = strtol(optarg, NULL, 0);
-            if (temp < 0 || temp > INT_MAX / 2)
-              {
-                fprintf(stderr, "Unsupported number of I/O servers: %ld\n", temp);
-                exit(EXIT_FAILURE);
-              }
-            nProcsIO = (int) temp;
+            fprintf(stderr, "Unsupported PIO mode requested: %s\n", optarg);
+            exit(EXIT_FAILURE);
           }
           break;
+        case 'w':
+        {
+          long temp = strtol(optarg, NULL, 0);
+          if (temp < 0 || temp > INT_MAX / 2)
+          {
+            fprintf(stderr, "Unsupported number of I/O servers: %ld\n", temp);
+            exit(EXIT_FAILURE);
+          }
+          nProcsIO = (int) temp;
+        }
+        break;
 #endif
         case 'q': parse_long_option(&setup, pioConfHandle, &pioRoleAssign, optarg, argc, argv); break;
         case 'f':
+        {
+          int found = 0;
+          for (size_t i = 0; i < sizeof(suffix2type) / sizeof(suffix2type[0]); ++i)
+            if (!strcmp(optarg, suffix2type[i].suffix))
+            {
+              found = 1;
+              setup.filetype = suffix2type[i].type;
+              setup.suffix = suffix2type[i].suffix;
+              setup.datatype = suffix2type[i].defaultDT;
+              break;
+            }
+          if (!found)
           {
-            int found = 0;
-            for (size_t i = 0; i < sizeof(suffix2type) / sizeof(suffix2type[0]); ++i)
-              if (!strcmp(optarg, suffix2type[i].suffix))
-                {
-                  found = 1;
-                  setup.filetype = suffix2type[i].type;
-                  setup.suffix = suffix2type[i].suffix;
-                  setup.datatype = suffix2type[i].defaultDT;
-                  break;
-                }
-            if (!found)
-              {
-                fprintf(stderr, "Unsupported format requested: %s\n", optarg);
-                exit(EXIT_FAILURE);
-              }
+            fprintf(stderr, "Unsupported format requested: %s\n", optarg);
+            exit(EXIT_FAILURE);
           }
-          break;
+        }
+        break;
         case 'm': setup.nlon = parse_intarg("error parsing number of longitudes"); break;
         case 'n': setup.nlat = parse_intarg("error parsing number of latitudes"); break;
         case 'y':
           setup.nvars = parse_intarg("error parsing number of variables");
           if (setup.nvars < 1)
-            {
-              fputs("number of variables must be greater than zero!\n", stderr);
-              exit(EXIT_FAILURE);
-            }
+          {
+            fputs("number of variables must be greater than zero!\n", stderr);
+            exit(EXIT_FAILURE);
+          }
           if (setup.nvars > 127)
-            {
-              fputs("number of variables must not exceed 127!\n", stderr);
-              exit(EXIT_FAILURE);
-            }
+          {
+            fputs("number of variables must not exceed 127!\n", stderr);
+            exit(EXIT_FAILURE);
+          }
           break;
         case 'z':
           setup.max_nlev = parse_intarg("error parsing number of levels");
           if (setup.max_nlev < 1)
-            {
-              fputs("number of levels must be greater than zero!\n", stderr);
-              exit(EXIT_FAILURE);
-            }
+          {
+            fputs("number of levels must be greater than zero!\n", stderr);
+            exit(EXIT_FAILURE);
+          }
           break;
         case 't': setup.nts = parse_intarg("error parsing number of timesteps"); break;
         case 'c': setup.flags &= ~PIO_WRITE_CONFIG_CHECKSUM_FLAG; break;
@@ -442,7 +439,7 @@ main(int argc, char *argv[])
                   "\n",
                   argv[0]);
           exit(EXIT_FAILURE);
-        }
+      }
   }
 
 #ifdef USE_MPI
@@ -462,16 +459,16 @@ main(int argc, char *argv[])
   int initNamespace = namespaceGetActive();
   commModel = cdiPioInit(commGlob, pioConfHandle, &pioNamespace);
   if (commModel != MPI_COMM_NULL)
-    {
-      namespaceSetActive(pioNamespace);
+  {
+    namespaceSetActive(pioNamespace);
 #else
   commModel = -1;
 #endif
 
-      modelRun(&setup, commModel);
+    modelRun(&setup, commModel);
 
 #ifdef USE_MPI
-    }
+  }
   cdi_repeatable_finalize();
   pioFinalize();
   namespaceSetActive(initNamespace);

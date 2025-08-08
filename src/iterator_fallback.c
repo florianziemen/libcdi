@@ -61,16 +61,16 @@ cdiFallbackIterator_new(const char *path, int filetype)
   me->curLevel = -1;
   me->streamId = streamOpenRead(path);
   if (me->streamId != CDI_UNDEFID)
+  {
+    me->vlistId = streamInqVlist(me->streamId);
+    if (me->vlistId != CDI_UNDEFID && (me->variableCount = vlistNvars(me->vlistId)) > 0
+        && streamInqTimestep(me->streamId, me->curTimestep) > 0 && (me->path = strdup(path)))
     {
-      me->vlistId = streamInqVlist(me->streamId);
-      if (me->vlistId != CDI_UNDEFID && (me->variableCount = vlistNvars(me->vlistId)) > 0
-          && streamInqTimestep(me->streamId, me->curTimestep) > 0 && (me->path = strdup(path)))
-        {
-          return (CdiIterator *) me;
-        }
-      Free(me->path);
-      streamClose(me->streamId);
+      return (CdiIterator *) me;
     }
+    Free(me->path);
+    streamClose(me->streamId);
+  }
   baseIterDestruct(&me->super);
   Free(me);
   return NULL;
@@ -111,19 +111,19 @@ cdiFallbackIterator_clone(CdiIterator *super)
   // Make another stream for this file. This yields an unadvanced iterator.
   CdiFallbackIterator *clone = (CdiFallbackIterator *) (void *) cdiFallbackIterator_new(me->path, me->super.filetype);
   if (clone)
-    {
-      // Point the clone to the same position in the file.
-      clone->variableCount = me->variableCount;
-      clone->curVariable = me->curVariable;
-      clone->curLevelCount = me->curLevelCount;
-      clone->curLevel = me->curLevel;
-      clone->curSubtypeCount = me->curSubtypeCount;
-      clone->curSubtype = me->curSubtype;
-      clone->curTimestep = me->curTimestep;
+  {
+    // Point the clone to the same position in the file.
+    clone->variableCount = me->variableCount;
+    clone->curVariable = me->curVariable;
+    clone->curLevelCount = me->curLevelCount;
+    clone->curLevel = me->curLevel;
+    clone->curSubtypeCount = me->curSubtypeCount;
+    clone->curSubtype = me->curSubtype;
+    clone->curTimestep = me->curTimestep;
 
-      clone->super.isAdvanced = super->isAdvanced;
-      if (super->isAdvanced) fetchVariableInfo(clone);
-    }
+    clone->super.isAdvanced = super->isAdvanced;
+    if (super->isAdvanced) fetchVariableInfo(clone);
+  }
 
   return clone;
 }
@@ -160,17 +160,15 @@ cdiFallbackIterator_deserialize(const char *description)
   if (me->vlistId == CDI_UNDEFID) goto closeStream;
 
     // This reads one variable from the description string, does error checking, and advances the given string pointer.
-#define decodeValue(variable, description)                                                                                      \
-  do                                                                                                                            \
-    {                                                                                                                           \
-      const char *savedStart = description;                                                                                     \
-      long long decodedValue                                                                                                    \
-          = strtoll(description, (char **) &description, 0); /*The cast is a workaround for the wrong signature of strtoll().*/ \
-      variable = (int) decodedValue;                                                                                            \
-      if (savedStart == description) goto closeStream;                                                                          \
-      if ((long long) decodedValue != (long long) variable) goto closeStream;                                                   \
-    }                                                                                                                           \
-  while (0)
+#define decodeValue(variable, description)                                                                                    \
+  do {                                                                                                                        \
+    const char *savedStart = description;                                                                                     \
+    long long decodedValue                                                                                                    \
+        = strtoll(description, (char **) &description, 0); /*The cast is a workaround for the wrong signature of strtoll().*/ \
+    variable = (int) decodedValue;                                                                                            \
+    if (savedStart == description) goto closeStream;                                                                          \
+    if ((long long) decodedValue != (long long) variable) goto closeStream;                                                   \
+  } while (0)
   decodeValue(me->variableCount, description);
   decodeValue(me->curVariable, description);
   decodeValue(me->curLevelCount, description);
@@ -201,21 +199,21 @@ advance(CdiFallbackIterator *me)
 {
   me->curLevel++;
   if (me->curLevel >= me->curLevelCount)
+  {
+    me->curLevel = 0;
+    me->curSubtype++;
+    if (me->curSubtype >= me->curSubtypeCount)
     {
-      me->curLevel = 0;
-      me->curSubtype++;
-      if (me->curSubtype >= me->curSubtypeCount)
-        {
-          me->curSubtype = 0;
-          me->curVariable++;
-          if (me->curVariable >= me->variableCount)
-            {
-              me->curVariable = 0;
-              me->curTimestep++;
-              if (streamInqTimestep(me->streamId, me->curTimestep) <= 0) return CDI_EEOF;
-            }
-        }
+      me->curSubtype = 0;
+      me->curVariable++;
+      if (me->curVariable >= me->variableCount)
+      {
+        me->curVariable = 0;
+        me->curTimestep++;
+        if (streamInqTimestep(me->streamId, me->curTimestep) <= 0) return CDI_EEOF;
+      }
     }
+  }
   return CDI_NOERR;
 }
 
@@ -241,7 +239,7 @@ cdiFallbackIterator_inqTime(CdiIterator *super, CdiTimeType timeType)
   int taxisId = vlistInqTaxis(me->vlistId);
   int date = 0, time = 0;
   switch (timeType)
-    {
+  {
     case kCdiTimeType_referenceTime:
       date = taxisInqRdate(taxisId);
       time = taxisInqRtime(taxisId);
@@ -257,7 +255,7 @@ cdiFallbackIterator_inqTime(CdiIterator *super, CdiTimeType timeType)
                     // of time data, returning the validity time as the start time.
 
     default: assert(0 && "internal error, please report this bug");
-    }
+  }
 
   // decode the time information and reencode it into an ISO-compliant string
   int year, month, day, hour, minute, second;
@@ -276,18 +274,16 @@ cdiFallbackIterator_levelType(CdiIterator *super, int levelSelector, char **outN
   CdiFallbackIterator *me = (CdiFallbackIterator *) (void *) super;
   int zaxisId = vlistInqVarZaxis(me->vlistId, me->curVariable);
   (void) levelSelector;
-#define copyString(outPointer, key)                                       \
-  do                                                                      \
-    {                                                                     \
-      if (outPointer)                                                     \
-        {                                                                 \
-          char tempBuffer[CDI_MAX_NAME];                                  \
-          int length = CDI_MAX_NAME;                                      \
-          cdiInqKeyString(zaxisId, CDI_GLOBAL, key, tempBuffer, &length); \
-          *outPointer = strdup(tempBuffer);                               \
-        }                                                                 \
-    }                                                                     \
-  while (0)
+#define copyString(outPointer, key)                                   \
+  do {                                                                \
+    if (outPointer)                                                   \
+    {                                                                 \
+      char tempBuffer[CDI_MAX_NAME];                                  \
+      int length = CDI_MAX_NAME;                                      \
+      cdiInqKeyString(zaxisId, CDI_GLOBAL, key, tempBuffer, &length); \
+      *outPointer = strdup(tempBuffer);                               \
+    }                                                                 \
+  } while (0)
   copyString(outName, CDI_KEY_NAME);
   copyString(outLongName, CDI_KEY_LONGNAME);
   copyString(outStdName, CDI_KEY_STDNAME);
@@ -311,23 +307,23 @@ cdiFallbackIterator_level(CdiIterator *super, int levelSelector, double *outValu
 
   // get the level value
   if (levelSelector)
-    {
-      *outValue1 = (zaxisInqLbounds(zaxisId, NULL)) ? zaxisInqLbound(zaxisId, me->curLevel) : zaxisInqLevel(zaxisId, me->curLevel);
-    }
+  {
+    *outValue1 = (zaxisInqLbounds(zaxisId, NULL)) ? zaxisInqLbound(zaxisId, me->curLevel) : zaxisInqLevel(zaxisId, me->curLevel);
+  }
   else
-    {
-      *outValue1 = (zaxisInqUbounds(zaxisId, NULL)) ? zaxisInqUbound(zaxisId, me->curLevel) : zaxisInqLevel(zaxisId, me->curLevel);
-    }
+  {
+    *outValue1 = (zaxisInqUbounds(zaxisId, NULL)) ? zaxisInqUbound(zaxisId, me->curLevel) : zaxisInqLevel(zaxisId, me->curLevel);
+  }
   *outValue2 = 0.0;
 
   // if this is a hybrid zaxis, lookup the coordinates in the vertical coordinate table
   ssize_t intLevel = (ssize_t) (2 * *outValue1);
   if (0 <= intLevel && intLevel < zaxisInqVctSize(zaxisId) - 1)
-    {
-      const double *coordinateTable = zaxisInqVctPtr(zaxisId);
-      *outValue1 = coordinateTable[intLevel];
-      *outValue2 = coordinateTable[intLevel + 1];
-    }
+  {
+    const double *coordinateTable = zaxisInqVctPtr(zaxisId);
+    *outValue1 = coordinateTable[intLevel];
+    *outValue2 = coordinateTable[intLevel + 1];
+  }
   return CDI_NOERR;
 }
 
@@ -340,21 +336,21 @@ cdiFallbackIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outL
   cdiInqKeyInt(zaxisId, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
   if (ltype != ZAXIS_HYBRID) return CDI_EINVAL;
   if (outVgridNumber)
-    {
-      *outVgridNumber = 0;
-      cdiInqKeyInt(zaxisId, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, outVgridNumber);
-    }
+  {
+    *outVgridNumber = 0;
+    cdiInqKeyInt(zaxisId, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, outVgridNumber);
+  }
   if (outLevelCount)
-    {
-      *outLevelCount = 0;
-      cdiInqKeyInt(zaxisId, CDI_GLOBAL, CDI_KEY_NLEV, outLevelCount);
-    }
+  {
+    *outLevelCount = 0;
+    cdiInqKeyInt(zaxisId, CDI_GLOBAL, CDI_KEY_NLEV, outLevelCount);
+  }
   if (outUuid)
-    {
-      int length = CDI_UUID_SIZE;
-      memset(outUuid, 0, (size_t) length);
-      cdiInqKeyBytes(zaxisId, CDI_GLOBAL, CDI_KEY_UUID, outUuid, &length);
-    }
+  {
+    int length = CDI_UUID_SIZE;
+    memset(outUuid, 0, (size_t) length);
+    cdiInqKeyBytes(zaxisId, CDI_GLOBAL, CDI_KEY_UUID, outUuid, &length);
+  }
   return CDI_NOERR;
 }
 
@@ -369,14 +365,14 @@ cdiFallbackIterator_inqTile(CdiIterator *super, int *outTileIndex, int *outTileA
   int error = CDI_NOERR;
   if (me->subtypeId == CDI_UNDEFID)  // must not call subtypeInqAttribute() with an invalid subtype ID, because it would abort the
                                      // program instead of returning an error
-    {
-      error = CDI_EINVAL;
-    }
+  {
+    error = CDI_EINVAL;
+  }
   else
-    {
-      if (subtypeInqAttribute(me->subtypeId, me->curSubtype, "tileIndex", outTileIndex)) error = CDI_EINVAL;
-      if (subtypeInqAttribute(me->subtypeId, me->curSubtype, "tileAttribute", outTileAttribute)) error = CDI_EINVAL;
-    }
+  {
+    if (subtypeInqAttribute(me->subtypeId, me->curSubtype, "tileIndex", outTileIndex)) error = CDI_EINVAL;
+    if (subtypeInqAttribute(me->subtypeId, me->curSubtype, "tileAttribute", outTileAttribute)) error = CDI_EINVAL;
+  }
   if (error) *outTileIndex = *outTileAttribute = -1;  // Guarantee defined values in case of an error.
   return error;
 }
@@ -392,14 +388,14 @@ cdiFallbackIterator_inqTileCount(CdiIterator *super, int *outTileCount, int *out
   int error = CDI_NOERR;
   if (me->subtypeId == CDI_UNDEFID)  // must not call subtypeInqAttribute() with an invalid subtype ID, because it would abort the
                                      // program instead of returning an error
-    {
-      error = CDI_EINVAL;
-    }
+  {
+    error = CDI_EINVAL;
+  }
   else
-    {
-      if (subtypeInqAttribute(me->subtypeId, me->curSubtype, "numberOfTiles", outTileCount)) error = CDI_EINVAL;
-      if (subtypeInqAttribute(me->subtypeId, me->curSubtype, "numberOfTileAttributes", outTileAttributeCount)) error = CDI_EINVAL;
-    }
+  {
+    if (subtypeInqAttribute(me->subtypeId, me->curSubtype, "numberOfTiles", outTileCount)) error = CDI_EINVAL;
+    if (subtypeInqAttribute(me->subtypeId, me->curSubtype, "numberOfTileAttributes", outTileAttributeCount)) error = CDI_EINVAL;
+  }
   if (error) *outTileCount = *outTileAttributeCount = -1;  // Guarantee defined values in case of an error.
   return CDI_NOERR;
 }

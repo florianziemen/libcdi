@@ -49,7 +49,7 @@ serializeGetSizeInCore(int count, int datatype, void *context)
   int elemSize;
   (void) context;
   switch (datatype)
-    {
+  {
     case CDI_DATATYPE_INT8: elemSize = sizeof(int8_t); break;
     case CDI_DATATYPE_INT16: elemSize = sizeof(int16_t); break;
     case CDI_DATATYPE_UINT32: elemSize = sizeof(uint32_t); break;
@@ -61,7 +61,7 @@ serializeGetSizeInCore(int count, int datatype, void *context)
     case CDI_DATATYPE_UCHAR: elemSize = 1; break;
     case CDI_DATATYPE_LONG: elemSize = sizeof(long); break;
     default: xabort("Unexpected datatype");
-    }
+  }
   return count * elemSize;
 }
 

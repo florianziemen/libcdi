@@ -10,6 +10,16 @@
 #include "cdf_int.h"
 #include "namespace.h"
 
+const char *
+cdf_strerror(int cdfErrorNo)
+{
+#ifdef HAVE_LIBNETCDF
+  return nc_strerror(cdfErrorNo);
+#else
+  return NULL;
+#endif
+}
+
 #ifdef HAVE_LIBNETCDF
 
 void
@@ -44,10 +54,10 @@ cdf__create(const char *path, int cmode, int *ncidp)
   status = my_nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
 
   if (status != NC_NOERR)
-    {
-      if (CDF_Debug) Message("ncid=%d  mode=%d  chunksizehint=%zu  file=%s", *ncidp, cmode, chunksizehint, path);
-      Error("%s: %s", path, nc_strerror(status));
-    }
+  {
+    if (CDF_Debug) Message("ncid=%d  mode=%d  chunksizehint=%zu  file=%s", *ncidp, cmode, chunksizehint, path);
+    Error("%s: %s", path, nc_strerror(status));
+  }
 
   int oldfill;
   status = nc_set_fill(*ncidp, NC_NOFILL, &oldfill);
@@ -61,31 +71,32 @@ cdf_open(const char *path, int omode, int *ncidp)
   int status = 0;
 
   if (strstr(path, ":/"))  // ESDM and DAP
-    {
-      status = nc_open(path, omode, ncidp);
-    }
+  {
+    status = nc_open(path, omode, ncidp);
+  }
   else
-    {
-      struct stat filestat;
-      if (stat(path, &filestat) != 0) SysError(path);
+  {
+    struct stat filestat;
+    if (stat(path, &filestat) != 0) SysError(path);
 
-      size_t chunksizehint = 0;
+    size_t chunksizehint = 0;
 #ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
-      chunksizehint = (size_t) filestat.st_blksize * 4;
-      if (chunksizehint > (size_t) filestat.st_size) chunksizehint = (size_t) filestat.st_size;
+    chunksizehint = (size_t) filestat.st_blksize * 4;
+    if (chunksizehint > (size_t) filestat.st_size) chunksizehint = (size_t) filestat.st_size;
 #endif
-      // if (chunksizehint < ChunkSizeMin) chunksizehint = ChunkSizeMin;
-      if (CDI_Netcdf_Chunksizehint != CDI_UNDEFID) chunksizehint = (size_t) CDI_Netcdf_Chunksizehint;
+    // if (chunksizehint < ChunkSizeMin) chunksizehint = ChunkSizeMin;
+    if (CDI_Netcdf_Chunksizehint != CDI_UNDEFID) chunksizehint = (size_t) CDI_Netcdf_Chunksizehint;
 
-      // FIXME: parallel part missing
-      status = nc__open(path, omode, &chunksizehint, ncidp);
+    // FIXME: parallel part missing
+    status = nc__open(path, omode, &chunksizehint, ncidp);
 
-      if (CDF_Debug) Message("chunksizehint %zu", chunksizehint);
-    }
+    if (CDF_Debug) Message("chunksizehint %zu", chunksizehint);
+  }
 
   if (CDF_Debug) Message("ncid=%d  mode=%d  file=%s", *ncidp, omode, path);
 
   if (CDF_Debug && status != NC_NOERR) Message("%s", nc_strerror(status));
+  if (status != NC_NOERR && status < 0) status -= 1000;
 
   return status;
 }
@@ -209,12 +220,12 @@ cdf_def_var_serial(int ncid, const char *name, nc_type xtype, int ndims, const i
   int status = nc_def_var(ncid, name, xtype, ndims, dimids, varidp);
   if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  name=%s  xtype=%d  ndims=%d  varid=%d", ncid, name, xtype, ndims, *varidp);
   if (status == NC_NOERR)
-    {
-      int fileFormat;
-      status = nc_inq_format(ncid, &fileFormat);
-      if (status == NC_NOERR && (fileFormat == NC_FORMAT_NETCDF4 || fileFormat == NC_FORMAT_NETCDF4_CLASSIC))
-        status = nc_def_var_fill(ncid, *varidp, 1, NULL);
-    }
+  {
+    int fileFormat;
+    status = nc_inq_format(ncid, &fileFormat);
+    if (status == NC_NOERR && (fileFormat == NC_FORMAT_NETCDF4 || fileFormat == NC_FORMAT_NETCDF4_CLASSIC))
+      status = nc_def_var_fill(ncid, *varidp, 1, NULL);
+  }
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
@@ -309,6 +320,17 @@ cdf_put_var_int(int ncid, int varid, const int *ip)
 }
 
 void
+cdf_put_var_int64(int ncid, int varid, const int64_t *ip)
+{
+#ifdef HAVE_NETCDF4
+  const long long *llp = (const long long *) ip;
+  int status = nc_put_var_longlong(ncid, varid, llp);
+  if (CDF_Debug || status != NC_NOERR) Message("%d %d %lld", ncid, varid, *llp);
+  if (status != NC_NOERR) Error("%s", nc_strerror(status));
+#endif
+}
+
+void
 cdf_put_var_long(int ncid, int varid, const long *lp)
 {
   int status = nc_put_var_long(ncid, varid, lp);
@@ -355,10 +377,10 @@ minmaxval(size_t nvals, const double *array, double *minval, double *maxval)
   double minv = array[0];
   double maxv = array[0];
   for (size_t i = 0; i < nvals; ++i)
-    {
-      minv = (array[i] < minv) ? array[i] : minv;
-      maxv = (array[i] > maxv) ? array[i] : maxv;
-    }
+  {
+    minv = (array[i] < minv) ? array[i] : minv;
+    maxv = (array[i] > maxv) ? array[i] : maxv;
+  }
 
   *minval = minv;
   *maxval = maxv;
@@ -370,10 +392,10 @@ minmaxvalf(size_t nvals, const float *array, double *minval, double *maxval)
   float minv = array[0];
   float maxv = array[0];
   for (size_t i = 0; i < nvals; ++i)
-    {
-      minv = (array[i] < minv) ? array[i] : minv;
-      maxv = (array[i] > maxv) ? array[i] : maxv;
-    }
+  {
+    minv = (array[i] < minv) ? array[i] : minv;
+    maxv = (array[i] > maxv) ? array[i] : maxv;
+  }
 
   *minval = minv;
   *maxval = maxv;
@@ -384,19 +406,19 @@ cdf_put_vara_double(int ncid, int varid, const size_t start[], const size_t coun
 {
   int status = nc_put_vara_double(ncid, varid, start, count, dp);
   if (CDF_Debug || status != NC_NOERR)
-    {
-      char name[256];
-      nc_inq_varname(ncid, varid, name);
-      nc_type xtype;
-      nc_inq_vartype(ncid, varid, &xtype);
-      int ndims;
-      nc_inq_varndims(ncid, varid, &ndims);
-      double minval = 0.0, maxval = 0.0;
-      size_t nvals = 1;
-      for (int i = 0; i < ndims; ++i) nvals *= count[i];
-      minmaxval(nvals, dp, &minval, &maxval);
-      Message("name=%s  type=%s  minval=%f  maxval=%f", name, cdf_var_type(xtype), minval, maxval);
-    }
+  {
+    char name[256];
+    nc_inq_varname(ncid, varid, name);
+    nc_type xtype;
+    nc_inq_vartype(ncid, varid, &xtype);
+    int ndims;
+    nc_inq_varndims(ncid, varid, &ndims);
+    double minval = 0.0, maxval = 0.0;
+    size_t nvals = 1;
+    for (int i = 0; i < ndims; ++i) nvals *= count[i];
+    minmaxval(nvals, dp, &minval, &maxval);
+    Message("name=%s  type=%s  minval=%f  maxval=%f", name, cdf_var_type(xtype), minval, maxval);
+  }
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
@@ -406,19 +428,19 @@ cdf_put_vara_float(int ncid, int varid, const size_t start[], const size_t count
 {
   int status = nc_put_vara_float(ncid, varid, start, count, fp);
   if (CDF_Debug || status != NC_NOERR)
-    {
-      char name[256];
-      nc_inq_varname(ncid, varid, name);
-      nc_type xtype;
-      nc_inq_vartype(ncid, varid, &xtype);
-      int ndims;
-      nc_inq_varndims(ncid, varid, &ndims);
-      double minval = 0.0, maxval = 0.0;
-      size_t nvals = 1;
-      for (int i = 0; i < ndims; ++i) nvals *= count[i];
-      minmaxvalf(nvals, fp, &minval, &maxval);
-      Message("name=%s  type=%s  minval=%f  maxval=%f", name, cdf_var_type(xtype), minval, maxval);
-    }
+  {
+    char name[256];
+    nc_inq_varname(ncid, varid, name);
+    nc_type xtype;
+    nc_inq_vartype(ncid, varid, &xtype);
+    int ndims;
+    nc_inq_varndims(ncid, varid, &ndims);
+    double minval = 0.0, maxval = 0.0;
+    size_t nvals = 1;
+    for (int i = 0; i < ndims; ++i) nvals *= count[i];
+    minmaxvalf(nvals, fp, &minval, &maxval);
+    Message("name=%s  type=%s  minval=%f  maxval=%f", name, cdf_var_type(xtype), minval, maxval);
+  }
 
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
@@ -533,6 +555,17 @@ cdf_get_var_int(int ncid, int varid, int *ip)
   int status = nc_get_var_int(ncid, varid, ip);
   if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
+}
+
+void
+cdf_get_var_int64(int ncid, int varid, int64_t *ip)
+{
+#ifdef HAVE_NETCDF4
+  long long *llp = (long long *) ip;
+  int status = nc_get_var_longlong(ncid, varid, llp);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
+  if (status != NC_NOERR) Error("%s", nc_strerror(status));
+#endif
 }
 
 void

@@ -33,16 +33,16 @@ cdfComment(int ncid)
   static bool init = false;
 
   if (!init)
-    {
-      init = true;
-      const char *libvers = cdiLibraryVersion();
+  {
+    init = true;
+    const char *libvers = cdiLibraryVersion();
 
-      if (!isdigit((int) *libvers))
-        strcat(comment, "??");
-      else
-        strcat(comment, libvers);
-      strcat(comment, " (https://mpimet.mpg.de/cdi)");
-    }
+    if (!isdigit((int) *libvers))
+      strcat(comment, "??");
+    else
+      strcat(comment, libvers);
+    strcat(comment, " (https://mpimet.mpg.de/cdi)");
+  }
 
   cdf_put_att_text(ncid, NC_GLOBAL, "CDI", strlen(comment), comment);
 }
@@ -52,10 +52,10 @@ has_uri_scheme(const char *uri)
 {
   const char *pos = strstr(uri, "://");
   if (pos)
-    {
-      size_t len = (size_t) (pos - uri);
-      if (strncmp(uri, "file", len) == 0 || strncmp(uri, "https", len) == 0 || strncmp(uri, "s3", len) == 0) return true;
-    }
+  {
+    size_t len = (size_t) (pos - uri);
+    if (strncmp(uri, "file", len) == 0 || strncmp(uri, "https", len) == 0 || strncmp(uri, "s3", len) == 0) return true;
+  }
 
   return false;
 }
@@ -67,19 +67,20 @@ cdf_open_read(const char *filename, int *filetype)
   int readmode = NC_NOWRITE;
   int status = cdf_open(filename, readmode, &ncid);
   if (status > 0 && ncid < 0) ncid = CDI_ESYSTEM;
+  if (status < -1000 && ncid == -1) ncid = status;
 #ifdef HAVE_NETCDF4
   else
-    {
-      int format = -1;
-      status = nc_inq_format(ncid, &format);
-      if (status == NC_NOERR && format == NC_FORMAT_NETCDF4_CLASSIC) *filetype = CDI_FILETYPE_NC4C;
+  {
+    int format = -1;
+    status = nc_inq_format(ncid, &format);
+    if (status == NC_NOERR && format == NC_FORMAT_NETCDF4_CLASSIC) *filetype = CDI_FILETYPE_NC4C;
 
 #ifdef NC_FORMATX_NCZARR
-      int modeNC;
-      status = nc_inq_format_extended(ncid, &format, &modeNC);
-      if (status == NC_NOERR && format == NC_FORMATX_NCZARR) *filetype = CDI_FILETYPE_NCZARR;
+    int modeNC;
+    status = nc_inq_format_extended(ncid, &format, &modeNC);
+    if (status == NC_NOERR && format == NC_FORMATX_NCZARR) *filetype = CDI_FILETYPE_NCZARR;
 #endif
-    }
+  }
 #endif
 
   return ncid;
@@ -103,21 +104,21 @@ cdf_open_write(const char *filename, int *filetype)
   if (*filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
 #endif
   if (*filetype == CDI_FILETYPE_NCZARR)
+  {
+    if (!has_uri_scheme(filename))
     {
-      if (!has_uri_scheme(filename))
-        {
-          fprintf(stderr, "URI scheme is missing in NCZarr path!\n");
-          return CDI_EINVAL;
-        }
-
-      cdf_create(filename, writemode, &ncid);
+      fprintf(stderr, "URI scheme is missing in NCZarr path!\n");
+      return CDI_EINVAL;
     }
+
+    cdf_create(filename, writemode, &ncid);
+  }
   else
-    {
-      if (has_uri_scheme(filename)) fprintf(stderr, "URI scheme defined for non NCZarr Data Model!\n");
+  {
+    if (has_uri_scheme(filename)) fprintf(stderr, "URI scheme defined for non NCZarr Data Model!\n");
 
-      cdf__create(filename, writemode, &ncid);
-    }
+    cdf__create(filename, writemode, &ncid);
+  }
 
   return ncid;
 }
@@ -127,28 +128,25 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
   int ncid = -1;
 
-  if (filename == NULL)
-    {
-      ncid = CDI_EINVAL;
-    }
+  if (filename == NULL) { ncid = CDI_EINVAL; }
   else
+  {
+    int fmode = tolower(*mode);
+    switch (fmode)
     {
-      int fmode = tolower(*mode);
-      switch (fmode)
+      case 'r': ncid = cdf_open_read(filename, filetype); break;
+      case 'w':
+        ncid = cdf_open_write(filename, filetype);
+        if (ncid != CDI_EINVAL)
         {
-        case 'r': ncid = cdf_open_read(filename, filetype); break;
-        case 'w':
-          ncid = cdf_open_write(filename, filetype);
-          if (ncid != CDI_EINVAL)
-            {
-              if (CDI_Version_Info) cdfComment(ncid);
-              cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.6");
-            }
-          break;
-        case 'a': cdf_open(filename, NC_WRITE, &ncid); break;
-        default: ncid = CDI_EINVAL;
+          if (CDI_Version_Info) cdfComment(ncid);
+          cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.6");
         }
+        break;
+      case 'a': cdf_open(filename, NC_WRITE, &ncid); break;
+      default: ncid = CDI_EINVAL;
     }
+  }
 
   return ncid;
 }
@@ -169,15 +167,12 @@ cdfOpen(const char *filename, const char *mode, int filetype)
 #endif
 
   if (open_file)
-    {
-      fileID = cdfOpenFile(filename, mode, &filetype);
+  {
+    fileID = cdfOpenFile(filename, mode, &filetype);
 
-      if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
-    }
-  else
-    {
-      fileID = CDI_ELIBNAVAIL;
-    }
+    if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
+  }
+  else { fileID = CDI_ELIBNAVAIL; }
 
   return fileID;
 }

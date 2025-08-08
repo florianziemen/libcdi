@@ -46,14 +46,14 @@ days_per_year(int calendar, int year)
 {
   int daysPerYear = calendar_dpy(calendar);
   if (daysPerYear == 0)
-    {
-      if (year == 1582 && (calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN))
-        daysPerYear = 355;
-      else if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)
-        daysPerYear = 366;
-      else
-        daysPerYear = 365;
-    }
+  {
+    if (year == 1582 && (calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN))
+      daysPerYear = 355;
+    else if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)
+      daysPerYear = 366;
+    else
+      daysPerYear = 365;
+  }
 
   return daysPerYear;
 }
@@ -69,12 +69,12 @@ decode_calday(int daysPerYear, int64_t days, int *year, int *month, int *day)
   int i = 0;
   if (daysPerMonthArray)
     for (i = 0; i < 12; i++)
-      {
-        if (days > daysPerMonthArray[i])
-          days -= daysPerMonthArray[i];
-        else
-          break;
-      }
+    {
+      if (days > daysPerMonthArray[i])
+        days -= daysPerMonthArray[i];
+      else
+        break;
+    }
 
   *month = i + 1;
   *day = (int) days;

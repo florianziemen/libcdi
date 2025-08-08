@@ -127,17 +127,17 @@ vlistAdd2GridIDs(vlist_t *vlistptr, int gridID)
 {
   int index, ngrids = vlistptr->ngrids;
   for (index = 0; index < ngrids; index++)
-    {
-      if (vlistptr->gridIDs[index] == gridID) break;
-      //      if ( gridIsEqual(vlistptr->gridIDs[index], gridID) ) break;
-    }
+  {
+    if (vlistptr->gridIDs[index] == gridID) break;
+    //      if ( gridIsEqual(vlistptr->gridIDs[index], gridID) ) break;
+  }
 
   if (index == ngrids)
-    {
-      if (ngrids >= MAX_GRIDS_PS) Error("Internal limit exceeded: more than %d grids.", MAX_GRIDS_PS);
-      vlistptr->gridIDs[ngrids] = gridID;
-      ++(vlistptr->ngrids);
-    }
+  {
+    if (ngrids >= MAX_GRIDS_PS) Error("Internal limit exceeded: more than %d grids.", MAX_GRIDS_PS);
+    vlistptr->gridIDs[ngrids] = gridID;
+    ++(vlistptr->ngrids);
+  }
 }
 
 static inline void
@@ -148,11 +148,11 @@ vlistAdd2ZaxisIDs(vlist_t *vlistptr, int zaxisID)
     if (zaxisID == vlistptr->zaxisIDs[index]) break;
 
   if (index == nzaxis)
-    {
-      if (nzaxis >= MAX_ZAXES_PS) Error("Internal limit exceeded: more than %d zaxis.", MAX_ZAXES_PS);
-      vlistptr->zaxisIDs[nzaxis] = zaxisID;
-      ++(vlistptr->nzaxis);
-    }
+  {
+    if (nzaxis >= MAX_ZAXES_PS) Error("Internal limit exceeded: more than %d zaxis.", MAX_ZAXES_PS);
+    vlistptr->zaxisIDs[nzaxis] = zaxisID;
+    ++(vlistptr->nzaxis);
+  }
 }
 
 static inline void
@@ -165,11 +165,11 @@ vlistAdd2SubtypeIDs(vlist_t *vlistptr, int subtypeID)
     if (vlistptr->subtypeIDs[index] == subtypeID) break;
 
   if (index == nsubs)
-    {
-      if (nsubs >= MAX_SUBTYPES_PS) Error("Internal limit exceeded: more than %d subs.", MAX_SUBTYPES_PS);
-      vlistptr->subtypeIDs[nsubs] = subtypeID;
-      ++(vlistptr->nsubtypes);
-    }
+  {
+    if (nsubs >= MAX_SUBTYPES_PS) Error("Internal limit exceeded: more than %d subs.", MAX_SUBTYPES_PS);
+    vlistptr->subtypeIDs[nsubs] = subtypeID;
+    ++(vlistptr->nsubtypes);
+  }
 }
 
 #ifdef HAVE_LIBGRIB_API

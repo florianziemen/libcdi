@@ -38,13 +38,13 @@ gribapiLibraryVersionString(void)
 {
 #ifdef HAVE_LIBGRIB_API
   if (!gribapi_libvers_init)
-    {
-      int major_version, minor_version, revision_version;
-      gribapiLibraryVersion(&major_version, &minor_version, &revision_version);
+  {
+    int major_version, minor_version, revision_version;
+    gribapiLibraryVersion(&major_version, &minor_version, &revision_version);
 
-      snprintf(gribapi_libvers, sizeof(gribapi_libvers), "%d.%d.%d", major_version, minor_version, revision_version);
-      gribapi_libvers_init = true;
-    }
+    snprintf(gribapi_libvers, sizeof(gribapi_libvers), "%d.%d.%d", major_version, minor_version, revision_version);
+    gribapi_libvers_init = true;
+  }
 #endif
 
   return gribapi_libvers;
@@ -57,30 +57,27 @@ gribHandleNew(int editionNumber)
   grib_handle *gh = NULL;
   const char *fname = (editionNumber == 1) ? CDI_GRIB1_Template : CDI_GRIB2_Template;
   if (fname)
+  {
+    FILE *fp = fopen(fname, "r");
+    if (fp)
     {
-      FILE *fp = fopen(fname, "r");
-      if (fp)
-        {
-          int error;
-          gh = grib_handle_new_from_file(NULL, fp, &error);
-          fclose(fp);
-          if (gh == NULL) Error("grib_handle_new_from_file failed!");
-        }
-      else
-        {
-          Error("Open failed on >%s<!", fname);
-        }
+      int error;
+      gh = grib_handle_new_from_file(NULL, fp, &error);
+      fclose(fp);
+      if (gh == NULL) Error("grib_handle_new_from_file failed!");
     }
+    else { Error("Open failed on >%s<!", fname); }
+  }
 
   if (gh == NULL)
-    {
-      gh = grib_handle_new_from_samples(NULL, (editionNumber == 1) ? "GRIB1" : "GRIB2");
-      if (gh == NULL) Error("grib_handle_new_from_samples failed!");
+  {
+    gh = grib_handle_new_from_samples(NULL, (editionNumber == 1) ? "GRIB1" : "GRIB2");
+    if (gh == NULL) Error("grib_handle_new_from_samples failed!");
 
-      if (editionNumber == 1) GRIB_CHECK(my_grib_set_long(gh, "deleteLocalDefinition", 1L), 0);
-      if (editionNumber == 2) GRIB_CHECK(my_grib_set_long(gh, "grib2LocalSectionPresent", 0L), 0);
-      if (editionNumber == 2) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", 0L), 0);
-    }
+    if (editionNumber == 1) GRIB_CHECK(my_grib_set_long(gh, "deleteLocalDefinition", 1L), 0);
+    if (editionNumber == 2) GRIB_CHECK(my_grib_set_long(gh, "grib2LocalSectionPresent", 0L), 0);
+    if (editionNumber == 2) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", 0L), 0);
+  }
 
   return gh;
 #else
@@ -105,77 +102,69 @@ gribContainersNew(stream_t *streamptr)
   const int editionNumber = (streamptr->filetype == CDI_FILETYPE_GRB) ? 1 : 2;
 
 #ifdef HAVE_LIBCGRIBEX
-  if (editionNumber == 1 && !CDI_gribapi_grib1)
-    {
-    }
+  if (editionNumber == 1 && !CDI_gribapi_grib1) {}
   else
 #endif
-    {
-      const int nvars = streamptr->nvars;
+  {
+    const int nvars = streamptr->nvars;
 
 #ifdef GRIBCONTAINER2D
-      gribContainer_t **gribContainers;
-      gribContainers = (gribContainer_t **) Malloc(nvars * sizeof(gribContainer_t *));
+    gribContainer_t **gribContainers;
+    gribContainers = (gribContainer_t **) Malloc(nvars * sizeof(gribContainer_t *));
 
-      for (int varID = 0; varID < nvars; ++varID)
-        {
-          const int nlevs = streamptr->vars[varID].nlevs;
-          gribContainers[varID] = (gribContainer_t *) Malloc(nlevs * sizeof(gribContainer_t));
+    for (int varID = 0; varID < nvars; ++varID)
+    {
+      const int nlevs = streamptr->vars[varID].nlevs;
+      gribContainers[varID] = (gribContainer_t *) Malloc(nlevs * sizeof(gribContainer_t));
 
-          for (int levelID = 0; levelID < nlevs; ++levelID)
-            {
-              gribContainers[varID][levelID].gribHandle = gribHandleNew(editionNumber);
-              gribContainers[varID][levelID].init = false;
-            }
-        }
+      for (int levelID = 0; levelID < nlevs; ++levelID)
+      {
+        gribContainers[varID][levelID].gribHandle = gribHandleNew(editionNumber);
+        gribContainers[varID][levelID].init = false;
+      }
+    }
 
-      streamptr->gribContainers = (void *) gribContainers;
+    streamptr->gribContainers = (void *) gribContainers;
 #else
     gribContainer_t *gribContainers = (gribContainer_t *) Malloc((size_t) nvars * sizeof(gribContainer_t));
 
     for (int varID = 0; varID < nvars; ++varID)
-      {
-        gribContainers[varID].gribHandle = gribHandleNew(editionNumber);
-        gribContainers[varID].init = false;
-      }
+    {
+      gribContainers[varID].gribHandle = gribHandleNew(editionNumber);
+      gribContainers[varID].init = false;
+    }
 
     streamptr->gribContainers = (void *) gribContainers;
 #endif
-    }
+  }
 }
 
 void
 gribContainersDelete(stream_t *streamptr)
 {
   if (streamptr->gribContainers)
-    {
-      const int nvars = streamptr->nvars;
+  {
+    const int nvars = streamptr->nvars;
 
 #ifdef GRIBCONTAINER2D
-      gribContainer_t **gribContainers = (gribContainer_t **) streamptr->gribContainers;
+    gribContainer_t **gribContainers = (gribContainer_t **) streamptr->gribContainers;
 
-      for (int varID = 0; varID < nvars; ++varID)
-        {
-          const int nlevs = streamptr->vars[varID].nlevs;
-          for (int levelID = 0; levelID < nlevs; ++levelID)
-            {
-              gribHandleDelete(gribContainers[varID][levelID].gribHandle);
-            }
-          Free(gribContainers[varID]);
-        }
+    for (int varID = 0; varID < nvars; ++varID)
+    {
+      const int nlevs = streamptr->vars[varID].nlevs;
+      for (int levelID = 0; levelID < nlevs; ++levelID) { gribHandleDelete(gribContainers[varID][levelID].gribHandle); }
+      Free(gribContainers[varID]);
+    }
 #else
-      gribContainer_t *gribContainers = (gribContainer_t *) streamptr->gribContainers;
+    gribContainer_t *gribContainers = (gribContainer_t *) streamptr->gribContainers;
 
-      for (int varID = 0; varID < nvars; ++varID)
-        {
-          gribHandleDelete(gribContainers[varID].gribHandle);
-        }
+    for (int varID = 0; varID < nvars; ++varID) { gribHandleDelete(gribContainers[varID].gribHandle); }
 #endif
 
-      Free(gribContainers);
+    Free(gribContainers);
 
-      streamptr->gribContainers = NULL;
-    }
+    streamptr->gribContainers = NULL;
+  }
 }
 /*
  * Local Variables:

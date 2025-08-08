@@ -2,8 +2,6 @@ bin_PROGRAMS    =
 noinst_PROGRAMS =
 check_PROGRAMS  =
 
-EXTRA_DIST = CMakeLists.txt
-
 if ENABLE_CDI_APP
 if ENABLE_CDI_LIB
 bin_PROGRAMS += cdi
@@ -38,20 +36,4 @@ createtable_SOURCES = createtable.c
 clean-local:
 	-rm -rf *.dSYM
 
-# Compile programs using Libtool:
-COMPILE = $(LTCOMPILE)
-FCCOMPILE = $(LTFCCOMPILE)
-PPFCCOMPILE = $(LTPPFCCOMPILE)
-CXXCOMPILE = $(LTCXXCOMPILE)
-
-# Compile *.F90 without CPPFLAGS, which are normally meant for the C compiler
-# and might not be compatible with the Fortran compiler:
-LTPPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
-        $(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
-
-# Avoid compiling twice by running Libtool with '-static'
-#   This is safe because all Libtool libraries in this directory are
-#   static-only and contain PIC objects:
-AM_CFLAGS = -static
-AM_FCFLAGS = -static
-AM_CXXFLAGS = -static
+include $(top_srcdir)/config/lt_overrides_Makefile.inc

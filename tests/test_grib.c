@@ -48,11 +48,11 @@ main(void)
 
   streamID1 = streamOpenWrite(fname, filetype);
   if (streamID1 < 0)
-    {
-      fprintf(stderr, "Open failed on %s\n", fname);
-      fprintf(stderr, "%s\n", cdiStringError(streamID1));
-      return (-1);
-    }
+  {
+    fprintf(stderr, "Open failed on %s\n", fname);
+    fprintf(stderr, "%s\n", cdiStringError(streamID1));
+    return (-1);
+  }
 
   streamDefVlist(streamID1, vlistID);
 
@@ -69,24 +69,24 @@ main(void)
 
   streamID2 = streamOpenWrite(fname, filetype);
   if (streamID2 < 0)
-    {
-      fprintf(stderr, "Open failed on %s\n", fname);
-      fprintf(stderr, "%s\n", cdiStringError(streamID2));
-      return (-1);
-    }
+  {
+    fprintf(stderr, "Open failed on %s\n", fname);
+    fprintf(stderr, "%s\n", cdiStringError(streamID2));
+    return (-1);
+  }
 
   streamDefVlist(streamID2, vlistID);
 
   nvars = vlistNvars(vlistID);
 
   for (varID = 0; varID < nvars; varID++)
-    {
-      int varGridID = vlistInqVarGrid(vlistID, varID);
-      int varZaxisID = vlistInqVarZaxis(vlistID, varID);
-      size_t gridsize = (size_t) gridInqSize(varGridID);
-      size_t varNlevel = (size_t) zaxisInqSize(varZaxisID);
-      if (gridsize * varNlevel > datasize) datasize = gridsize * varNlevel;
-    }
+  {
+    int varGridID = vlistInqVarGrid(vlistID, varID);
+    int varZaxisID = vlistInqVarZaxis(vlistID, varID);
+    size_t gridsize = (size_t) gridInqSize(varGridID);
+    size_t varNlevel = (size_t) zaxisInqSize(varZaxisID);
+    if (gridsize * varNlevel > datasize) datasize = gridsize * varNlevel;
+  }
 
   data = (double *) Realloc(data, datasize * sizeof(double));
   memset(data, 0, datasize * sizeof(double));
@@ -95,34 +95,34 @@ main(void)
 
   tsID = 0;
   while (streamInqTimestep(streamID1, tsID))
+  {
+    /* int vdate =  */ taxisInqVdate(taxisID);
+    /* int vtime =  */ taxisInqVtime(taxisID);
+
+    streamDefTimestep(streamID2, tsID);
+
+    for (varID = 0; varID < nvars; varID++)
     {
-      /* int vdate =  */ taxisInqVdate(taxisID);
-      /* int vtime =  */ taxisInqVtime(taxisID);
+      streamReadVar(streamID1, varID, data, &nmiss);
 
-      streamDefTimestep(streamID2, tsID);
+      /* int code = */ vlistInqVarCode(vlistID, varID);
+      gridID = vlistInqVarGrid(vlistID, varID);
+      zaxisID = vlistInqVarZaxis(vlistID, varID);
+      /* int gridtype = */ gridInqType(gridID);
+      /* int gridsize = */ gridInqSize(gridID);
+      nlevel = zaxisInqSize(zaxisID);
+      /* double missval = */ vlistInqVarMissval(vlistID, varID);
 
-      for (varID = 0; varID < nvars; varID++)
-        {
-          streamReadVar(streamID1, varID, data, &nmiss);
+      for (levelID = 0; levelID < nlevel; levelID++)
+      {
+        /* int level  = (int) */ zaxisInqLevel(zaxisID, levelID);
+        /* int offset = gridsize*levelID; */
+      }
 
-          /* int code = */ vlistInqVarCode(vlistID, varID);
-          gridID = vlistInqVarGrid(vlistID, varID);
-          zaxisID = vlistInqVarZaxis(vlistID, varID);
-          /* int gridtype = */ gridInqType(gridID);
-          /* int gridsize = */ gridInqSize(gridID);
-          nlevel = zaxisInqSize(zaxisID);
-          /* double missval = */ vlistInqVarMissval(vlistID, varID);
-
-          for (levelID = 0; levelID < nlevel; levelID++)
-            {
-              /* int level  = (int) */ zaxisInqLevel(zaxisID, levelID);
-              /* int offset = gridsize*levelID; */
-            }
-
-          streamWriteVar(streamID2, varID, data, nmiss);
-        }
-      tsID++;
+      streamWriteVar(streamID2, varID, data, nmiss);
     }
+    tsID++;
+  }
 
   free(data);
 

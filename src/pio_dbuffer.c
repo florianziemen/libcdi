@@ -34,23 +34,23 @@ cdiPioDbufferInit(struct dBuffer *db, size_t bufSize)
   void *buf = NULL;
   int status;
   if ((status = posix_memalign(&buf, pagesize, bufSize)) != 0)
+  {
+    switch (status)
     {
-      switch (status)
-        {
-        case EINVAL:
-          xabort("The alignment argument was not a power of two,"
-                 " or was not a multiple of sizeof(void *).");
+      case EINVAL:
+        xabort("The alignment argument was not a power of two,"
+               " or was not a multiple of sizeof(void *).");
 #ifndef __GNUC__
-          break;
+        break;
 #endif
-        case ENOMEM:
-          xabort("There was insufficient memory to fulfill the"
-                 " allocation request.");
+      case ENOMEM:
+        xabort("There was insufficient memory to fulfill the"
+               " allocation request.");
 #ifndef __GNUC__
-          break;
+        break;
 #endif
-        }
     }
+  }
   db->buffer = (unsigned char *) buf;
 #else
   db->size = bufSize;
@@ -77,11 +77,11 @@ cdiPioDbufferAppend(struct dBuffer *dbuffer, const void *data, size_t dataLen)
   size_t space_left = dbufferFreesize(dbuffer);
   bool enoughSpaceLeft = dataLen <= space_left;
   if (dataLen <= space_left)
-    {
-      size_t wr_ptr = dbuffer->wr_pointer;
-      memcpy(dbuffer->buffer + wr_ptr, data, dataLen);
-      dbuffer->wr_pointer = wr_ptr + dataLen;
-    }
+  {
+    size_t wr_ptr = dbuffer->wr_pointer;
+    memcpy(dbuffer->buffer + wr_ptr, data, dataLen);
+    dbuffer->wr_pointer = wr_ptr + dataLen;
+  }
   return !enoughSpaceLeft;
 }
 

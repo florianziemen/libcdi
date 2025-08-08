@@ -84,39 +84,39 @@ do_work(void *p)
   iothread_t *iothread = (iothread_t *) p;
 
   while (1)
+  {
+    pthread_mutex_lock(&(iothread->lock));
+
+    while (iothread->used == 0)
     {
-      pthread_mutex_lock(&(iothread->lock));
-
-      while (iothread->used == 0)
-        {
-          if (iothread->shutdown)
-            {
-              pthread_mutex_unlock(&(iothread->lock));
-              //    pthread_exit(NULL);
-              return (NULL);
-            }
-          // wait until the condition says its no emtpy and give up the lock.
-          pthread_mutex_unlock(&(iothread->lock));
-          pthread_cond_wait(&(iothread->not_empty), &(iothread->lock));
-
-          if (iothread->shutdown)
-            {
-              pthread_mutex_unlock(&(iothread->lock));
-              //    pthread_exit(NULL);
-              return (NULL);
-            }
-        }
-
-      (iothread->work->routine)(iothread->work->arg);  // actually do work.
-      free(iothread->work);
-
-      iothread->used = 0;
-
-      // now signal that its empty.
-      pthread_cond_signal(&(iothread->empty));
-
+      if (iothread->shutdown)
+      {
+        pthread_mutex_unlock(&(iothread->lock));
+        //    pthread_exit(NULL);
+        return (NULL);
+      }
+      // wait until the condition says its no emtpy and give up the lock.
       pthread_mutex_unlock(&(iothread->lock));
+      pthread_cond_wait(&(iothread->not_empty), &(iothread->lock));
+
+      if (iothread->shutdown)
+      {
+        pthread_mutex_unlock(&(iothread->lock));
+        //    pthread_exit(NULL);
+        return (NULL);
+      }
     }
+
+    (iothread->work->routine)(iothread->work->arg);  // actually do work.
+    free(iothread->work);
+
+    iothread->used = 0;
+
+    // now signal that its empty.
+    pthread_cond_signal(&(iothread->empty));
+
+    pthread_mutex_unlock(&(iothread->lock));
+  }
 }
 #endif
 
@@ -128,29 +128,29 @@ create_iothread()
 
   iothread = (iothread_t *) malloc(sizeof(iothread_t));
   if (iothread == NULL)
-    {
-      fprintf(stderr, "Out of memory creating a new iothread!\n");
-      return (NULL);
-    }
+  {
+    fprintf(stderr, "Out of memory creating a new iothread!\n");
+    return (NULL);
+  }
 
   // initialize mutex and condition variables.
   if (pthread_mutex_init(&iothread->lock, NULL))
-    {
-      fprintf(stderr, "Mutex initiation error!\n");
-      return (NULL);
-    }
+  {
+    fprintf(stderr, "Mutex initiation error!\n");
+    return (NULL);
+  }
 
   if (pthread_cond_init(&(iothread->empty), NULL))
-    {
-      fprintf(stderr, "CV initiation error!\n");
-      return (NULL);
-    }
+  {
+    fprintf(stderr, "CV initiation error!\n");
+    return (NULL);
+  }
 
   if (pthread_cond_init(&(iothread->not_empty), NULL))
-    {
-      fprintf(stderr, "CV initiation error!\n");
-      return (NULL);
-    }
+  {
+    fprintf(stderr, "CV initiation error!\n");
+    return (NULL);
+  }
 
   pthread_attr_init(&(iothread->attr));
   pthread_attr_setdetachstate(&(iothread->attr), PTHREAD_CREATE_JOINABLE);
@@ -160,10 +160,10 @@ create_iothread()
 
   // make thread
   if (pthread_create(&(iothread->thrID), &(iothread->attr), do_work, (void *) iothread))
-    {
-      fprintf(stderr, "Thread initiation error!\n");
-      return NULL;
-    }
+  {
+    fprintf(stderr, "Thread initiation error!\n");
+    return NULL;
+  }
 
   return (iothread);
 }
@@ -178,11 +178,11 @@ check_iothread(void *p)
   pthread_mutex_lock(&(iothread->lock));
 
   while (iothread->used == 1)
-    {
-      // wait until the condition says its emtpy and give up the lock.
-      pthread_mutex_unlock(&(iothread->lock));  // get the lock.
-      pthread_cond_wait(&(iothread->empty), &(iothread->lock));
-    }
+  {
+    // wait until the condition says its emtpy and give up the lock.
+    pthread_mutex_unlock(&(iothread->lock));  // get the lock.
+    pthread_cond_wait(&(iothread->empty), &(iothread->lock));
+  }
 
   pthread_mutex_unlock(&(iothread->lock));
 }
@@ -200,10 +200,10 @@ dispatch(void *p, dispatch_fn dispatch_to_here, void *arg)
   // make a work element.
   work = (work_t *) malloc(sizeof(work_t));
   if (work == NULL)
-    {
-      fprintf(stderr, "Out of memory creating a work struct!\n");
-      return;
-    }
+  {
+    fprintf(stderr, "Out of memory creating a work struct!\n");
+    return;
+  }
 
   work->routine = dispatch_to_here;
   work->arg = arg;
@@ -238,10 +238,10 @@ destroy_iothread(void *p)
 
   status = pthread_join(iothread->thrID, NULL);
   if (status > 0)
-    {
-      fprintf(stderr, "pthread_join error!\n");
-      return;
-    }
+  {
+    fprintf(stderr, "pthread_join error!\n");
+    return;
+  }
 
   pthread_mutex_destroy(&(iothread->lock));
   pthread_cond_destroy(&(iothread->empty));
@@ -260,57 +260,54 @@ stream_read_record_par(int streamID, int *varID, int *levelID, double *array, si
 
 #if defined(HAVE_LIBPTHREAD)
   if (parIO)
-    {
-      lpario = 1;
-      recID = parIO->recID;
-      nrecs = parIO->nrecs;
-    }
+  {
+    lpario = 1;
+    recID = parIO->recID;
+    nrecs = parIO->nrecs;
+  }
 #endif
 
   if (recID == 0 || lpario == 0)
-    {
-      read_arg_t read_arg;
-      read_arg.streamID = streamID;
-      read_arg.varID = varID;
-      read_arg.levelID = levelID;
-      read_arg.numMissVals = numMissVals;
-      read_arg.array = array;
+  {
+    read_arg_t read_arg;
+    read_arg.streamID = streamID;
+    read_arg.varID = varID;
+    read_arg.levelID = levelID;
+    read_arg.numMissVals = numMissVals;
+    read_arg.array = array;
 
-      readRecord(&read_arg);
-    }
+    readRecord(&read_arg);
+  }
 #if defined(HAVE_LIBPTHREAD)
   else
-    {
-      check_iothread(parIO->iothread);
+  {
+    check_iothread(parIO->iothread);
 
-      *varID = parIO->varID;
-      *levelID = parIO->levelID;
-      *numMissVals = parIO->numMissVals;
+    *varID = parIO->varID;
+    *levelID = parIO->levelID;
+    *numMissVals = parIO->numMissVals;
 
-      memcpy(array, parIO->array, parIO->array_size * sizeof(double));
-    }
+    memcpy(array, parIO->array, parIO->array_size * sizeof(double));
+  }
 
   if (lpario && nrecs > 1)
+  {
+    if ((recID + 1) < nrecs)
     {
-      if ((recID + 1) < nrecs)
-        {
-          read_arg_t *read_arg = &(parIO->read_arg);
+      read_arg_t *read_arg = &(parIO->read_arg);
 
-          if (recID == 0) parIO->iothread = create_iothread();
+      if (recID == 0) parIO->iothread = create_iothread();
 
-          read_arg->streamID = streamID;
-          read_arg->varID = &parIO->varID;
-          read_arg->levelID = &parIO->levelID;
-          read_arg->numMissVals = &parIO->numMissVals;
-          read_arg->array = parIO->array;
+      read_arg->streamID = streamID;
+      read_arg->varID = &parIO->varID;
+      read_arg->levelID = &parIO->levelID;
+      read_arg->numMissVals = &parIO->numMissVals;
+      read_arg->array = parIO->array;
 
-          dispatch(parIO->iothread, readRecord, read_arg);
-        }
-      else
-        {
-          destroy_iothread(parIO->iothread);
-        }
+      dispatch(parIO->iothread, readRecord, read_arg);
     }
+    else { destroy_iothread(parIO->iothread); }
+  }
 #endif
 }
 
@@ -335,20 +332,20 @@ main(int argc, char *argv[])
   char *fname = NULL;
 
   if (argc != 2)
-    {
-      fprintf(stderr, "usage: %s filename\n", argv[0]);
-      return (-1);
-    }
+  {
+    fprintf(stderr, "usage: %s filename\n", argv[0]);
+    return (-1);
+  }
 
   fname = argv[1];
 
   /* Open the dataset */
   streamID = streamOpenRead(fname);
   if (streamID < 0)
-    {
-      fprintf(stderr, "%s\n", cdiStringError(streamID));
-      return (1);
-    }
+  {
+    fprintf(stderr, "%s\n", cdiStringError(streamID));
+    return (1);
+  }
 
   /* Get the variable list of the dataset */
   vlistID = streamInqVlist(streamID);
@@ -366,39 +363,39 @@ main(int argc, char *argv[])
   /* Loop over all time steps */
   tsID = 0;
   while ((nrecs = streamInqTimestep(streamID, tsID)))
+  {
+    /* Get the verification date and time */
+    vdate = taxisInqVdate(taxisID);
+    vtime = taxisInqVtime(taxisID);
+
+    /* Read all records */
+    for (recID = 0; recID < nrecs; recID++)
     {
-      /* Get the verification date and time */
-      vdate = taxisInqVdate(taxisID);
-      vtime = taxisInqVtime(taxisID);
-
-      /* Read all records */
-      for (recID = 0; recID < nrecs; recID++)
-        {
-          parIO.recID = recID;
-          parIO.nrecs = nrecs;
+      parIO.recID = recID;
+      parIO.nrecs = nrecs;
 #ifdef PARIO
-          stream_read_record_par(streamID, &varID, &levelID, data, &numMissVals, &parIO);
+      stream_read_record_par(streamID, &varID, &levelID, data, &numMissVals, &parIO);
 #else
-          stream_read_record(streamID, &varID, &levelID, data, &numMissVals);
+      stream_read_record(streamID, &varID, &levelID, data, &numMissVals);
 #endif
-          code = vlistInqVarCode(vlistID, varID);
-          gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
-          fmin = 1.e33;
-          fmax = -1.e33;
-          fmean = 0;
-          for (int j = 0; j < 2; ++j)
-            for (i = 0; i < gridsize; ++i)
-              {
-                if (data[i] < fmin) fmin = data[i];
-                if (data[i] > fmax) fmax = data[i];
-                fmean += data[i];
-              }
-          fmean /= gridsize;
-          fprintf(stdout, "%3d %3d %3d %d %g %g %g\n", code, varID, levelID, gridsize, fmin, fmean, fmax);
+      code = vlistInqVarCode(vlistID, varID);
+      gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+      fmin = 1.e33;
+      fmax = -1.e33;
+      fmean = 0;
+      for (int j = 0; j < 2; ++j)
+        for (i = 0; i < gridsize; ++i)
+        {
+          if (data[i] < fmin) fmin = data[i];
+          if (data[i] > fmax) fmax = data[i];
+          fmean += data[i];
         }
-
-      tsID++;
+      fmean /= gridsize;
+      fprintf(stdout, "%3d %3d %3d %d %g %g %g\n", code, varID, levelID, gridsize, fmin, fmean, fmax);
     }
+
+    tsID++;
+  }
 
   /* Close the input stream */
   streamClose(streamID);

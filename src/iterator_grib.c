@@ -102,21 +102,21 @@ cdiGribIterator_makeClone(CdiIterator *super)
   result->gribHandle = NULL;
 
   if (me->gribBuffer)
-    {
-      result->gribBuffer = (unsigned char *) Malloc(me->bufferSize);
-      if (!result->gribBuffer) goto freeResult;
-      memcpy(result->gribBuffer, me->gribBuffer, me->curRecordSize);
-    }
+  {
+    result->gribBuffer = (unsigned char *) Malloc(me->bufferSize);
+    if (!result->gribBuffer) goto freeResult;
+    memcpy(result->gribBuffer, me->gribBuffer, me->curRecordSize);
+  }
   if (me->gribHandle)
-    {
-      result->gribHandle = grib_handle_new_from_message(NULL, result->gribBuffer, result->curRecordSize);
-      if (!result->gribHandle) goto freeBuffer;
-    }
+  {
+    result->gribHandle = grib_handle_new_from_message(NULL, result->gribBuffer, result->curRecordSize);
+    if (!result->gribHandle) goto freeBuffer;
+  }
   if (super->gridId != CDI_UNDEFID)
-    {
-      result->super.gridId = gridDuplicate(super->gridId);
-      if (result->super.gridId == CDI_UNDEFID) goto deleteGribHandle;
-    }
+  {
+    result->super.gridId = gridDuplicate(super->gridId);
+    if (result->super.gridId == CDI_UNDEFID) goto deleteGribHandle;
+  }
 
   // Finish construction. (operations that cannot fail)
   baseIterConstruct(&result->super, super->filetype);
@@ -200,18 +200,18 @@ static void
 cdiGribIterator_ensureBuffer(CdiGribIterator *me, size_t requiredSize)
 {
   if (me->bufferSize < requiredSize)
-    {
-      me->bufferSize *= 2;
-      if (me->bufferSize < requiredSize) me->bufferSize = requiredSize;
-      me->gribBuffer = (unsigned char *) Realloc(me->gribBuffer, me->bufferSize);
-    }
+  {
+    me->bufferSize *= 2;
+    if (me->bufferSize < requiredSize) me->bufferSize = requiredSize;
+    me->gribBuffer = (unsigned char *) Realloc(me->gribBuffer, me->bufferSize);
+  }
 }
 
 static bool
 isGrib1DualLevel(int levelType)
 {
   switch (levelType)
-    {
+  {
     case 101:
     case 104:
     case 106:
@@ -227,20 +227,20 @@ isGrib1DualLevel(int levelType)
                // cdi/src/stream_gribapi.c:grib1GetLevel() seems to be incomplete.
       return true;
     default: return false;
-    }
+  }
 }
 
 static const unsigned char *
 positionOfGribMarker(const unsigned char *data, size_t size)
 {
   for (const unsigned char *currentPosition = data, *end = data + size; currentPosition < end; currentPosition++)
-    {
-      currentPosition = (unsigned char *) memchr(
-          currentPosition, 'G',
-          size - (size_t) (currentPosition - data) - 3);  //-3 to ensure that we don't overrun the buffer during the strncmp() call.
-      if (!currentPosition) return NULL;
-      if (!strncmp((const char *) currentPosition, "GRIB", 4)) return currentPosition;
-    }
+  {
+    currentPosition = (unsigned char *) memchr(currentPosition, 'G',
+                                               size - (size_t) (currentPosition - data)
+                                                   - 3);  //-3 to ensure that we don't overrun the buffer during the strncmp() call.
+    if (!currentPosition) return NULL;
+    if (!strncmp((const char *) currentPosition, "GRIB", 4)) return currentPosition;
+  }
   return NULL;
 }
 
@@ -252,25 +252,22 @@ scanToGribMarker(CdiGribIterator *me)
   cdiGribIterator_ensureBuffer(me, 8 * 1024);
   const size_t kMaxScanSize = 16 * 1024 * 1024;
   for (size_t scannedBytes = 0, scanSize; scannedBytes < kMaxScanSize; scannedBytes += scanSize)
-    {
-      // Load a chunk of data into our buffer.
-      scanSize = me->bufferSize;
-      if (scannedBytes + scanSize > kMaxScanSize) scanSize = kMaxScanSize - scannedBytes;
-      assert(scanSize <= me->bufferSize);
-      int status = cdiInputFile_read(me->file, me->fileOffset + (off_t) scannedBytes, scanSize, &scanSize, me->gribBuffer);
-      if (status != CDI_NOERR && status != CDI_EEOF) return -1;
+  {
+    // Load a chunk of data into our buffer.
+    scanSize = me->bufferSize;
+    if (scannedBytes + scanSize > kMaxScanSize) scanSize = kMaxScanSize - scannedBytes;
+    assert(scanSize <= me->bufferSize);
+    int status = cdiInputFile_read(me->file, me->fileOffset + (off_t) scannedBytes, scanSize, &scanSize, me->gribBuffer);
+    if (status != CDI_NOERR && status != CDI_EEOF) return -1;
 
-      const unsigned char *startPosition = positionOfGribMarker(me->gribBuffer, scanSize);
-      if (startPosition)
-        {
-          return (ssize_t) (me->fileOffset + (off_t) scannedBytes + (off_t) (startPosition - me->gribBuffer));
-        }
+    const unsigned char *startPosition = positionOfGribMarker(me->gribBuffer, scanSize);
+    if (startPosition) { return (ssize_t) (me->fileOffset + (off_t) scannedBytes + (off_t) (startPosition - me->gribBuffer)); }
 
-      // Get the offset for the next iteration if there is a next iteration.
-      scanSize -= 3;                           // so that we won't miss a 'GRIB' sequence that happens to be cut off
-      scanSize &= ~(size_t) 0xf;               // make 16 bytes aligned
-      if ((ssize_t) scanSize <= 0) return -1;  // ensure that we make progress
-    }
+    // Get the offset for the next iteration if there is a next iteration.
+    scanSize -= 3;                           // so that we won't miss a 'GRIB' sequence that happens to be cut off
+    scanSize &= ~(size_t) 0xf;               // make 16 bytes aligned
+    if ((ssize_t) scanSize <= 0) return -1;  // ensure that we make progress
+  }
   return -1;
 }
 
@@ -301,23 +298,23 @@ getRecordSize(CdiGribIterator *me, off_t gribFileOffset, size_t *outRecordSize)
   if (readSize < sizeof(buffer)) return CDI_EEOF;
   *outRecordSize = 0;
   switch (buffer[7])
-    {
+  {
     case 1:
       *outRecordSize = decode24(&buffer[4]);
       if (*outRecordSize & (1 << 23))
-        {
-          *outRecordSize = 120 * (*outRecordSize & ((1 << 23) - 1));  // Rescaling for long records.
-          // The corresponding code in cgribexlib.c:4532-4570: is much more complicated
-          // due to the fact that it subtracts the padding bytes that are inserted after section 4.
-          // However, we are only interested in the total size of data we need to read here,
-          // so we can ignore the presence of some padding bytes.
-        }
+      {
+        *outRecordSize = 120 * (*outRecordSize & ((1 << 23) - 1));  // Rescaling for long records.
+        // The corresponding code in cgribexlib.c:4532-4570: is much more complicated
+        // due to the fact that it subtracts the padding bytes that are inserted after section 4.
+        // However, we are only interested in the total size of data we need to read here,
+        // so we can ignore the presence of some padding bytes.
+      }
       return CDI_NOERR;
 
     case 2: *outRecordSize = decode64(&buffer[8]); return CDI_NOERR;
 
     default: return CDI_EUFTYPE;
-    }
+  }
 }
 
 #if 0
@@ -412,17 +409,17 @@ cdiGribIterator_levelType(CdiIterator *super, int levelSelector, char **outName,
   // First determine the zaxis type corresponding to the given level.
   int zaxisType = ZAXIS_GENERIC;
   if (gribEditionNumber(me->gribHandle) <= 1)
-    {
-      int levelType = (int) gribGetLongDefault(me->gribHandle, "indicatorOfTypeOfLevel", 255);
-      if (levelSelector && !isGrib1DualLevel(levelType)) levelType = 255;
-      zaxisType = grib1ltypeToZaxisType(levelType);
-    }
+  {
+    int levelType = (int) gribGetLongDefault(me->gribHandle, "indicatorOfTypeOfLevel", 255);
+    if (levelSelector && !isGrib1DualLevel(levelType)) levelType = 255;
+    zaxisType = grib1ltypeToZaxisType(levelType);
+  }
   else
-    {
-      int levelType
-          = (int) gribGetLongDefault(me->gribHandle, levelSelector ? "typeOfSecondFixedSurface" : "typeOfFirstFixedSurface", 255);
-      zaxisType = grib2ltypeToZaxisType(levelType);
-    }
+  {
+    int levelType
+        = (int) gribGetLongDefault(me->gribHandle, levelSelector ? "typeOfSecondFixedSurface" : "typeOfFirstFixedSurface", 255);
+    zaxisType = grib2ltypeToZaxisType(levelType);
+  }
 
   // Then lookup the requested names.
   const char *name, *longName, *stdName, *unit;
@@ -442,7 +439,7 @@ logicalLevelValue2(long gribType, long storedValue, long power)
   assert(power >= 0);
   while (power--) factor *= 10;  // this is precise up to factor == 22.
   switch (gribType)
-    {
+  {
     case GRIB2_LTYPE_LANDDEPTH:
     case GRIB2_LTYPE_ISOBARIC:
     case GRIB2_LTYPE_SIGMA:
@@ -452,7 +449,7 @@ logicalLevelValue2(long gribType, long storedValue, long power)
     case 255: return 0;
 
     default: return (double) storedValue / factor;
-    }
+  }
 }
 
 // The output values must be preinitialized, this function does not always write them.
@@ -464,37 +461,37 @@ readLevel2(grib_handle *gribHandle, const char *levelTypeKey, const char *powerK
 
   long levelType = gribGetLongDefault(gribHandle, levelTypeKey, 255);  // 1 byte
   switch (levelType)
-    {
+  {
     case 255: break;
 
     case 105:
     case 113:
+    {
+      unsigned long value = (unsigned long) gribGetLongDefault(gribHandle, valueKey, 0);
+      unsigned long coordinateCount = (unsigned long) gribGetLongDefault(gribHandle, "numberOfCoordinatesValues", 0);
+      if (value >= coordinateCount / 2)
       {
-        unsigned long value = (unsigned long) gribGetLongDefault(gribHandle, valueKey, 0);
-        unsigned long coordinateCount = (unsigned long) gribGetLongDefault(gribHandle, "numberOfCoordinatesValues", 0);
-        if (value >= coordinateCount / 2)
-          {
-            Error("Invalid level coordinate: Level has the hybrid coordinate index %lu, but only %lu coordinate pairs are present.",
-                  value, coordinateCount / 2);
-            return CDI_EUFSTRUCT;
-          }
-        int status;
-        // XXX: I'm not 100% sure about how the coordinate pairs are stored in the file.
-        //     I'm assuming an array of pairs due to the example code in grib_api-1.12.3/examples/F90/set_pv.f90, but that may be
-        //     wrong.
-        if ((status = grib_get_double_element(gribHandle, "pv", (int) value * 2, outValue1))) return status;
-        if ((status = grib_get_double_element(gribHandle, "pv", (int) value * 2 + 1, outValue2))) return status;
-        break;
+        Error("Invalid level coordinate: Level has the hybrid coordinate index %lu, but only %lu coordinate pairs are present.",
+              value, coordinateCount / 2);
+        return CDI_EUFSTRUCT;
       }
+      int status;
+      // XXX: I'm not 100% sure about how the coordinate pairs are stored in the file.
+      //     I'm assuming an array of pairs due to the example code in grib_api-1.12.3/examples/F90/set_pv.f90, but that may be
+      //     wrong.
+      if ((status = grib_get_double_element(gribHandle, "pv", (int) value * 2, outValue1))) return status;
+      if ((status = grib_get_double_element(gribHandle, "pv", (int) value * 2 + 1, outValue2))) return status;
+      break;
+    }
 
     default:
-      {
-        long power = 255 & gribGetLongDefault(gribHandle, powerKey, 0);  // 1 byte
-        if (power == 255) power = 0;
-        long value = gribGetLongDefault(gribHandle, valueKey, 0);  // 4 bytes
-        *outValue1 = logicalLevelValue2(levelType, value, power);
-      }
+    {
+      long power = 255 & gribGetLongDefault(gribHandle, powerKey, 0);  // 1 byte
+      if (power == 255) power = 0;
+      long value = gribGetLongDefault(gribHandle, valueKey, 0);  // 4 bytes
+      *outValue1 = logicalLevelValue2(levelType, value, power);
     }
+  }
   return CDI_NOERR;
 }
 
@@ -508,37 +505,35 @@ cdiGribIterator_level(CdiIterator *super, int levelSelector, double *outValue1, 
   *outValue1 = *outValue2 = 0;
 
   if (gribEditionNumber(me->gribHandle) > 1)
+  {
+    if (levelSelector)
     {
-      if (levelSelector)
-        {
-          return readLevel2(me->gribHandle, "typeOfFirstFixedSurface", "scaleFactorOfFirstFixedSurface",
-                            "scaledValueOfFirstFixedSurface", outValue1, outValue2);
-        }
-      else
-        {
-          return readLevel2(me->gribHandle, "typeOfSecondFixedSurface", "scaleFactorOfSecondFixedSurface",
-                            "scaledValueOfSecondFixedSurface", outValue1, outValue2);
-        }
+      return readLevel2(me->gribHandle, "typeOfFirstFixedSurface", "scaleFactorOfFirstFixedSurface",
+                        "scaledValueOfFirstFixedSurface", outValue1, outValue2);
     }
+    else
+    {
+      return readLevel2(me->gribHandle, "typeOfSecondFixedSurface", "scaleFactorOfSecondFixedSurface",
+                        "scaledValueOfSecondFixedSurface", outValue1, outValue2);
+    }
+  }
   else
+  {
+    long levelType = (uint8_t) gribGetLongDefault(me->gribHandle, "indicatorOfTypeOfLevel", -1);  // 1 byte
+    if (levelType == 255) {}
+    else if (isGrib1DualLevel((int) levelType))
     {
-      long levelType = (uint8_t) gribGetLongDefault(me->gribHandle, "indicatorOfTypeOfLevel", -1);  // 1 byte
-      if (levelType == 255)
-        {
-        }
-      else if (isGrib1DualLevel((int) levelType))
-        {
-          *outValue1 = (double) (gribGetLongDefault(me->gribHandle, (levelSelector ? "bottomLevel" : "topLevel"), 0));
-        }
-      else if (levelType == 100)
-        {
-          *outValue1 = 100 * (double) (gribGetLongDefault(me->gribHandle, "level", 0));  // 2 bytes
-        }
-      else
-        {
-          *outValue1 = (double) (gribGetLongDefault(me->gribHandle, "level", 0));  // 2 bytes
-        }
+      *outValue1 = (double) (gribGetLongDefault(me->gribHandle, (levelSelector ? "bottomLevel" : "topLevel"), 0));
     }
+    else if (levelType == 100)
+    {
+      *outValue1 = 100 * (double) (gribGetLongDefault(me->gribHandle, "level", 0));  // 2 bytes
+    }
+    else
+    {
+      *outValue1 = (double) (gribGetLongDefault(me->gribHandle, "level", 0));  // 2 bytes
+    }
+  }
   return CDI_NOERR;
 }
 
@@ -548,23 +543,23 @@ cdiGribIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outLevel
   CdiGribIterator *me = (CdiGribIterator *) (void *) super;
 
   if (outVgridNumber)
-    {
-      long temp;
-      if (grib_get_long(me->gribHandle, "numberOfVGridUsed", &temp)) return CDI_EINVAL;
-      *outVgridNumber = (int) temp;
-    }
+  {
+    long temp;
+    if (grib_get_long(me->gribHandle, "numberOfVGridUsed", &temp)) return CDI_EINVAL;
+    *outVgridNumber = (int) temp;
+  }
   if (outLevelCount)
-    {
-      long temp;
-      if (grib_get_long(me->gribHandle, "nlev", &temp)) return CDI_EINVAL;
-      *outLevelCount = (int) temp;
-    }
+  {
+    long temp;
+    if (grib_get_long(me->gribHandle, "nlev", &temp)) return CDI_EINVAL;
+    *outLevelCount = (int) temp;
+  }
   if (outUuid)
-    {
-      size_t size = CDI_UUID_SIZE;
-      if (grib_get_bytes(me->gribHandle, "uuidOfVGrid", outUuid, &size)) return CDI_EINVAL;
-      if (size != CDI_UUID_SIZE) return CDI_EUFSTRUCT;
-    }
+  {
+    size_t size = CDI_UUID_SIZE;
+    if (grib_get_bytes(me->gribHandle, "uuidOfVGrid", outUuid, &size)) return CDI_EINVAL;
+    if (size != CDI_UUID_SIZE) return CDI_EUFSTRUCT;
+  }
 
   return CDI_NOERR;
 }
@@ -627,10 +622,10 @@ cdiGribIterator_readField(CdiIterator *super, double *buffer, size_t *numMissVal
   gribGetDoubleArray(me->gribHandle, "values", buffer);
   long gridType = gribGetLong(me->gribHandle, "gridDefinitionTemplateNumber");
   if (numMissVals)
-    {
-      // The condition excludes harmonic data.
-      *numMissVals = (gridType >= 50 && gridType <= 53) ? (size_t) 0 : (size_t) gribGetLong(me->gribHandle, "numberOfMissing");
-    }
+  {
+    // The condition excludes harmonic data.
+    *numMissVals = (gridType >= 50 && gridType <= 53) ? (size_t) 0 : (size_t) gribGetLong(me->gribHandle, "numberOfMissing");
+  }
 }
 
 void

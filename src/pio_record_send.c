@@ -90,23 +90,23 @@ sendP(struct remoteFileBuf *rfile)
   struct dBuffer *restrict dbuf = rfile->dbuf;
   size_t amount = cdiPioDbufferGetPos(dbuf + dbufIdx);
   if (amount)
-    {
-      int fileID = (int) (rfile - openRemoteFiles);
-      int tag = encodeFileOpTag(fileID, IO_Send_buffer);
+  {
+    int fileID = (int) (rfile - openRemoteFiles);
+    int tag = encodeFileOpTag(fileID, IO_Send_buffer);
 
-      xdebug("send buffer for %s, size: %zu bytes, command=%s, in", rfile->name, amount, cdiPioCmdStrTab[IO_Send_buffer]);
+    xdebug("send buffer for %s, size: %zu bytes, command=%s, in", rfile->name, amount, cdiPioCmdStrTab[IO_Send_buffer]);
 
-      /* FIXME: amount > INT_MAX unhandled */
-      xmpi(MPI_Isend(dbuf[dbufIdx].buffer, (int) amount, MPI_UNSIGNED_CHAR, commInqSizePio() - 1, tag, commInqCommPio(),
-                     rfile->request + dbufIdx));
-      rfile->amount += (off_t) amount;
+    /* FIXME: amount > INT_MAX unhandled */
+    xmpi(MPI_Isend(dbuf[dbufIdx].buffer, (int) amount, MPI_UNSIGNED_CHAR, commInqSizePio() - 1, tag, commInqCommPio(),
+                   rfile->request + dbufIdx));
+    rfile->amount += (off_t) amount;
 
-      /* change outputBuffer */
-      dbufIdx ^= 1;
-      xmpiStat(MPI_Wait(rfile->request + dbufIdx, statui), statui);
-      cdiPioDbufferReset(dbuf + dbufIdx);
-      rfile->dbufIdx = (unsigned) dbufIdx;
-    }
+    /* change outputBuffer */
+    dbufIdx ^= 1;
+    xmpiStat(MPI_Wait(rfile->request + dbufIdx, statui), statui);
+    cdiPioDbufferReset(dbuf + dbufIdx);
+    rfile->dbufIdx = (unsigned) dbufIdx;
+  }
 }
 
 static void
@@ -139,11 +139,11 @@ pioSendWrite(int fileID, const void *buffer, size_t len, int tsID)
   struct dBuffer *restrict dbuf = rfile->dbuf;
 
   if (flush)
-    {
-      xdebug("tsID = %d, flush buffer for fileID=%d", tsID, fileID);
-      flushOp(rfile, tsID);
-      dbufIdx ^= 1;
-    }
+  {
+    xdebug("tsID = %d, flush buffer for fileID=%d", tsID, fileID);
+    flushOp(rfile, tsID);
+    dbufIdx ^= 1;
+  }
 
   int filled = cdiPioDbufferAppend(dbuf + dbufIdx, buffer, len);
 
@@ -151,16 +151,16 @@ pioSendWrite(int fileID, const void *buffer, size_t len, int tsID)
 
   int error = 0;
   if (filled == 1)
+  {
+    if (flush)
+      error = filled;
+    else
     {
-      if (flush)
-        error = filled;
-      else
-        {
-          sendP(rfile);
-          dbufIdx = rfile->dbufIdx;
-          error = cdiPioDbufferAppend(dbuf + dbufIdx, buffer, len);
-        }
+      sendP(rfile);
+      dbufIdx = rfile->dbufIdx;
+      error = cdiPioDbufferAppend(dbuf + dbufIdx, buffer, len);
     }
+  }
 
   if (error == 1) xabort("did not succeed filling output buffer, id=%d", fileID);
 
@@ -203,33 +203,33 @@ pioSendOpen(const char *filename, const char *mode)
   /* init and add struct remoteFileBuf */
   for (size_t i = 0; i < openRemoteFilesSize; ++i)
     if (openRemoteFiles[i].name && !strcmp(openRemoteFiles[i].name, filename))
-      {
-        Warning("filename %s is already open!"
-                " CDI-PIO does not support concurrent access"
-                " through different filehandles.",
-                filename);
-        return CDI_EINVAL;
-      }
+    {
+      Warning("filename %s is already open!"
+              " CDI-PIO does not support concurrent access"
+              " through different filehandles.",
+              filename);
+      return CDI_EINVAL;
+    }
 
   int fileID = CDI_ELIMIT;
   if (openRemoteFilesSize == openRemoteFilesFill)
-    {
-      fileID = (int) openRemoteFilesSize;
-      if (openRemoteFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
-      openRemoteFilesSize = openRemoteFilesSize ? openRemoteFilesSize * 2 : 4;
-      if (openRemoteFilesSize > (size_t) INT_MAX + 1) openRemoteFilesSize = (size_t) INT_MAX + 1;
-      openRemoteFiles = Realloc(openRemoteFiles, sizeof(*openRemoteFiles) * openRemoteFilesSize);
-      for (size_t i = (size_t) fileID; i < openRemoteFilesSize; ++i) openRemoteFiles[i].name = NULL;
-    }
+  {
+    fileID = (int) openRemoteFilesSize;
+    if (openRemoteFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
+    openRemoteFilesSize = openRemoteFilesSize ? openRemoteFilesSize * 2 : 4;
+    if (openRemoteFilesSize > (size_t) INT_MAX + 1) openRemoteFilesSize = (size_t) INT_MAX + 1;
+    openRemoteFiles = Realloc(openRemoteFiles, sizeof(*openRemoteFiles) * openRemoteFilesSize);
+    for (size_t i = (size_t) fileID; i < openRemoteFilesSize; ++i) openRemoteFiles[i].name = NULL;
+  }
   else
-    {
-      for (size_t i = 0; i < openRemoteFilesSize; ++i)
-        if (openRemoteFiles[i].name == NULL)
-          {
-            fileID = (int) i;
-            break;
-          }
-    }
+  {
+    for (size_t i = 0; i < openRemoteFilesSize; ++i)
+      if (openRemoteFiles[i].name == NULL)
+      {
+        fileID = (int) i;
+        break;
+      }
+  }
   struct remoteFileBuf *rfile = openRemoteFiles + fileID;
   initRemoteFileBuf(rfile, filename, conf->writeAggBufLim);
 
@@ -270,10 +270,10 @@ pioSendFinalize(void)
   if (openRemoteFilesFill)
     xabort("files still open.");
   else
-    {
-      xdebug("%s", "destroy set");
-      Free(openRemoteFiles);
-    }
+  {
+    xdebug("%s", "destroy set");
+    Free(openRemoteFiles);
+  }
   cdiPioDestroySyncMsgDt();
 }
 
@@ -286,23 +286,23 @@ pioSendInitialize(void)
 
   int isCollector = commInqRankColl() != -1;
   if (!isCollector)
+  {
+    switch (commInqIOMode())
     {
-      switch (commInqIOMode())
-        {
-        case PIO_WRITER: pioWriterStdIO(); break;
+      case PIO_WRITER: pioWriterStdIO(); break;
 #ifdef _POSIX_ASYNCHRONOUS_IO
-        case PIO_ASYNCH: pioWriterAIO(); break;
+      case PIO_ASYNCH: pioWriterAIO(); break;
 #endif
-        }
-      cdiPioDestroySyncMsgDt();
     }
+    cdiPioDestroySyncMsgDt();
+  }
   else
-    {
-      namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioSendOpen));
-      namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioSendClose));
-      namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(pioSendWrite));
-      namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(pioSendFinalize));
-    }
+  {
+    namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioSendOpen));
+    namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioSendClose));
+    namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(pioSendWrite));
+    namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(pioSendFinalize));
+  }
 }
 
 /*

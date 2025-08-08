@@ -32,3 +32,6 @@ for f in $(find "${distdir}" -type f -o -type l); do
   git add -f "${f#"${distdir}/"}";
 done
 rm -rf "${distdir}"
+
+git status
+echo "git commit -m 'Add automatically generated files.'"

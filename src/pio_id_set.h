@@ -34,10 +34,10 @@ insertID(struct idList *list, int ID)
 {
   size_t index = indexOfID(list, CDI_UNDEFID);
   if (index == SIZE_MAX)
-    {
-      index = list->size;
-      list->entries = Realloc(list->entries, ++list->size * sizeof(list->entries[0]));
-    }
+  {
+    index = list->size;
+    list->entries = Realloc(list->entries, ++list->size * sizeof(list->entries[0]));
+  }
   list->entries[index] = ID;
   return index;
 }

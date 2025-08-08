@@ -89,15 +89,13 @@ int PPM_prime_factorization_32(uint32_t n, uint32_t **factors);
 #else
 #define cdi_omp_pragma(prg)
 #endif
-#define cdi_seed_repeatable_random(seed)                                                                                \
-  do                                                                                                                    \
-    {                                                                                                                   \
-      int seed_ = (int) seed;                                                                                           \
-      MPI_Comm comm_ = MPI_COMM_WORLD;                                                                                  \
-      cdi_omp_pragma("omp parallel") if ((!PPM_initialized() || PPM_finalized())) PPM_initialize(&comm_, &seed_, NULL); \
-      else PPM_ya_rand_init(MPI_COMM_WORLD, seed_);                                                                     \
-    }                                                                                                                   \
-  while (0)
+#define cdi_seed_repeatable_random(seed)                                                                              \
+  do {                                                                                                                \
+    int seed_ = (int) seed;                                                                                           \
+    MPI_Comm comm_ = MPI_COMM_WORLD;                                                                                  \
+    cdi_omp_pragma("omp parallel") if ((!PPM_initialized() || PPM_finalized())) PPM_initialize(&comm_, &seed_, NULL); \
+    else PPM_ya_rand_init(MPI_COMM_WORLD, seed_);                                                                     \
+  } while (0)
 #define cdi_repeatable_random() ((long) (PPM_irandp()))
 #define cdi_repeatable_finalize() PPM_finalize()
 
@@ -107,10 +105,8 @@ int PPM_prime_factorization_32(uint32_t n, uint32_t **factors);
 void cdi_seed_repeatable_random(unsigned seed);
 long cdi_repeatable_random(void);
 #define cdi_repeatable_finalize() \
-  do                              \
-    {                             \
-    }                             \
-  while (0)
+  do {                            \
+  } while (0)
 #endif
 
 #endif

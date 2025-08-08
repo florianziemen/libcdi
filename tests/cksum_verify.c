@@ -34,23 +34,23 @@ main(void)
 
   /* repeat block and rotate */
   for (size_t i = 1; i < block_size; ++i)
-    {
-      memcpy(init_block + block_size * i, init_block + block_size - i, i);
-      memcpy(init_block + block_size * i + i, init_block, block_size - i);
-    }
+  {
+    memcpy(init_block + block_size * i, init_block + block_size - i, i);
+    memcpy(init_block + block_size * i + i, init_block, block_size - i);
+  }
 
   for (size_t i = 0; i < num_blocks; ++i)
-    {
-      size_t block_idx = ((size_t) lrand48()) % block_size;
-      memcpy(test_data + i, init_block + block_idx * block_size, block_size);
-    }
+  {
+    size_t block_idx = ((size_t) lrand48()) % block_size;
+    memcpy(test_data + i, init_block + block_idx * block_size, block_size);
+  }
 
   uint32_t cksum_result = memcrc(test_data, num_blocks * block_size);
   if (cksum_result != UINT32_C(0xc47779cd))
-    {
-      printf("unexpected crc result: 0x%8" PRIx32 "\n", cksum_result);
-      return EXIT_FAILURE;
-    }
+  {
+    printf("unexpected crc result: 0x%8" PRIx32 "\n", cksum_result);
+    return EXIT_FAILURE;
+  }
 
   if (test_data) free(test_data);
   if (init_block) free(init_block);

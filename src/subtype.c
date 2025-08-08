@@ -129,21 +129,18 @@ subtypeAttrInsert(struct subtype_entry_t *head, int key, int val)
 
   /* find the right place for insertion: */
   if (head->atts->key >= key)
-    {
-      /* insert at position 0 */
-      ptr->next = head->atts;
-      head->atts = ptr;
-    }
+  {
+    /* insert at position 0 */
+    ptr->next = head->atts;
+    head->atts = ptr;
+  }
   else
-    {
-      struct subtype_attr_t **predec = &head->atts;
-      while (((*predec)->next != NULL) && ((*predec)->next->key < key))
-        {
-          predec = &((*predec)->next);
-        }
-      ptr->next = (*predec)->next;
-      (*predec)->next = ptr;
-    }
+  {
+    struct subtype_attr_t **predec = &head->atts;
+    while (((*predec)->next != NULL) && ((*predec)->next->key < key)) { predec = &((*predec)->next); }
+    ptr->next = (*predec)->next;
+    (*predec)->next = ptr;
+  }
   return ptr;
 }
 
@@ -178,19 +175,10 @@ subtypeAttsCompare(struct subtype_attr_t *a1, struct subtype_attr_t *a2)
 {
   if ((a1 == NULL) && (a2 == NULL))
     return 0;
-  else if ((a1 == NULL) && (a2 != NULL))
-    {
-      return differ;
-    }
-  else if ((a1 != NULL) && (a2 == NULL))
-    {
-      return differ;
-    }
+  else if ((a1 == NULL) && (a2 != NULL)) { return differ; }
+  else if ((a1 != NULL) && (a2 == NULL)) { return differ; }
 
-  if (a1->key != a2->key)
-    {
-      return differ;
-    }
+  if (a1->key != a2->key) { return differ; }
   if (a1->val != a2->val) return differ;
 
   return subtypeAttsCompare(a1->next, a2->next);
@@ -249,21 +237,18 @@ subtypeEntryInsert(subtype_t *head)
 
   /* find the right place for insertion: */
   if (head->entries->self >= ptr->self)
-    {
-      /* insert at position 0 */
-      ptr->next = head->entries;
-      head->entries = ptr;
-    }
+  {
+    /* insert at position 0 */
+    ptr->next = head->entries;
+    head->entries = ptr;
+  }
   else
-    {
-      struct subtype_entry_t **predec = &head->entries;
-      while (((*predec)->next != NULL) && ((*predec)->next->self < ptr->self))
-        {
-          predec = &((*predec)->next);
-        }
-      ptr->next = (*predec)->next;
-      (*predec)->next = ptr;
-    }
+  {
+    struct subtype_entry_t **predec = &head->entries;
+    while (((*predec)->next != NULL) && ((*predec)->next->self < ptr->self)) { predec = &((*predec)->next); }
+    ptr->next = (*predec)->next;
+    (*predec)->next = ptr;
+  }
   return ptr;
 }
 
@@ -343,25 +328,25 @@ subtypePrintKernel(subtype_t *subtype_ptr, FILE *fp)
   struct subtype_attr_t *ptr = subtype_ptr->globals.atts;
   if (ptr != NULL) fprintf(fp, "#\n# global attributes:\n");
   while (ptr != NULL)
-    {
-      fprintf(fp, "#   %-40s   (%2d) : %d\n", cdiSubtypeAttributeName[ptr->key], ptr->key, ptr->val);
-      ptr = ptr->next;
-    }
+  {
+    fprintf(fp, "#   %-40s   (%2d) : %d\n", cdiSubtypeAttributeName[ptr->key], ptr->key, ptr->val);
+    ptr = ptr->next;
+  }
   /* print attributes for each subtype */
   fprintf(fp, "# %d local entries:\n", subtype_ptr->nentries);
   struct subtype_entry_t *entry = subtype_ptr->entries;
   while (entry != NULL)
+  {
+    fprintf(fp, "# subtype entry %d\n", entry->self);
+    ptr = entry->atts;
+    if (ptr != NULL) fprintf(fp, "#   attributes:\n");
+    while (ptr != NULL)
     {
-      fprintf(fp, "# subtype entry %d\n", entry->self);
-      ptr = entry->atts;
-      if (ptr != NULL) fprintf(fp, "#   attributes:\n");
-      while (ptr != NULL)
-        {
-          fprintf(fp, "#     %-40s (%2d) : %d\n", cdiSubtypeAttributeName[ptr->key], ptr->key, ptr->val);
-          ptr = ptr->next;
-        }
-      entry = entry->next;
+      fprintf(fp, "#     %-40s (%2d) : %d\n", cdiSubtypeAttributeName[ptr->key], ptr->key, ptr->val);
+      ptr = ptr->next;
     }
+    entry = entry->next;
+  }
   fprintf(fp, "\n");
 }
 
@@ -377,11 +362,11 @@ subtypeCompareP(subtype_t *s1, subtype_t *s2)
   struct subtype_entry_t *entry1 = s1->entries;
   struct subtype_entry_t *entry2 = s2->entries;
   while ((entry1 != NULL) && (entry2 != NULL))
-    {
-      if (subtypeEntryCompare(entry1, entry2) != 0) return differ;
-      entry1 = entry1->next;
-      entry2 = entry2->next;
-    }
+  {
+    if (subtypeEntryCompare(entry1, entry2) != 0) return differ;
+    entry1 = entry1->next;
+    entry2 = entry2->next;
+  }
   /* compare list lengths: */
   if ((entry1 != NULL) || (entry2 != NULL)) return differ;
   return 0;
@@ -570,16 +555,16 @@ matchAND(subtype_query_t q1, subtype_query_t q2)
   memset(&result, 0, sizeof(subtype_query_t));
   result.nAND = q1.nAND;
   for (int i = 0; i < q1.nAND; i++)
-    {
-      result.key_value_pairs[0][i] = q1.key_value_pairs[0][i];
-      result.key_value_pairs[1][i] = q1.key_value_pairs[1][i];
-    }
+  {
+    result.key_value_pairs[0][i] = q1.key_value_pairs[0][i];
+    result.key_value_pairs[1][i] = q1.key_value_pairs[1][i];
+  }
   for (int i = 0; i < q2.nAND; i++)
-    {
-      result.key_value_pairs[0][result.nAND] = q2.key_value_pairs[0][i];
-      result.key_value_pairs[1][result.nAND] = q2.key_value_pairs[1][i];
-      result.nAND++;
-    }
+  {
+    result.key_value_pairs[0][result.nAND] = q2.key_value_pairs[0][i];
+    result.key_value_pairs[1][result.nAND] = q2.key_value_pairs[1][i];
+    result.nAND++;
+  }
 
   if (CDI_Debug) Message("combined criterion:");
   if (CDI_Debug)
@@ -607,45 +592,42 @@ tilesetInsertP(subtype_t *s1, subtype_t *s2)
   /* test all entries of set 2 against set 1, to check if entry
      already exists: */
   if (subtypeAttsCompare(s1->globals.atts, s2->globals.atts) != differ)
+  {
+    while (entry1 != NULL)
     {
-      while (entry1 != NULL)
-        {
-          int found = 1;
-          entry2 = s2->entries;
-          while (entry2 != NULL)
-            {
-              found &= (subtypeAttsCompare(entry1->atts, entry2->atts) != differ);
-              entry2 = entry2->next;
-            }
-          if (found)
-            {
-              return;
-            }
-          entry1 = entry1->next;
-        }
-
+      int found = 1;
       entry2 = s2->entries;
       while (entry2 != NULL)
-        {
-          entry1 = subtypeEntryInsert(s1);
+      {
+        found &= (subtypeAttsCompare(entry1->atts, entry2->atts) != differ);
+        entry2 = entry2->next;
+      }
+      if (found) { return; }
+      entry1 = entry1->next;
+    }
 
-          att_ptr2 = entry2->atts;
-          while (att_ptr2 != NULL)
-            {
-              (void) subtypeAttrInsert(entry1, att_ptr2->key, att_ptr2->val);
-              att_ptr2 = att_ptr2->next;
-            }
-          entry2 = entry2->next;
-        }
-    }
-  else
+    entry2 = s2->entries;
+    while (entry2 != NULL)
     {
-      fprintf(stderr, "\n# SUBTYPE A:\n");
-      subtypePrintKernel(s1, stderr);
-      fprintf(stderr, "\n# SUBTYPE B:\n");
-      subtypePrintKernel(s2, stderr);
-      Error("Attempting to insert subtype entry into subtype with different global attributes!");
+      entry1 = subtypeEntryInsert(s1);
+
+      att_ptr2 = entry2->atts;
+      while (att_ptr2 != NULL)
+      {
+        (void) subtypeAttrInsert(entry1, att_ptr2->key, att_ptr2->val);
+        att_ptr2 = att_ptr2->next;
+      }
+      entry2 = entry2->next;
     }
+  }
+  else
+  {
+    fprintf(stderr, "\n# SUBTYPE A:\n");
+    subtypePrintKernel(s1, stderr);
+    fprintf(stderr, "\n# SUBTYPE B:\n");
+    subtypePrintKernel(s2, stderr);
+    Error("Attempting to insert subtype entry into subtype with different global attributes!");
+  }
 }
 
 /* ------------------------------------------------------------------- */
@@ -702,15 +684,12 @@ subtypeCompare(int subtypeID1, int subtypeID2)
 int
 subtypeInqSize(int subtypeID)
 {
-  if (subtypeID == CDI_UNDEFID)
-    {
-      return 0;
-    }
+  if (subtypeID == CDI_UNDEFID) { return 0; }
   else
-    {
-      subtype_t *subtype_ptr = (subtype_t *) reshGetVal(subtypeID, &subtypeOps);
-      return subtype_ptr->nentries;
-    }
+  {
+    subtype_t *subtype_ptr = (subtype_t *) reshGetVal(subtypeID, &subtypeOps);
+    return subtype_ptr->nentries;
+  }
 }
 
 /* Get the currently active index of a subtype (e.g. current tile index). */
@@ -739,30 +718,30 @@ subtypeInqSubEntry(int subtypeID, subtype_query_t criterion)
   struct subtype_entry_t *entry = subtype_ptr->entries;
   /* loop over all entries of this subtype */
   while (entry != NULL)
+  {
     {
+      int match = 1;
+      /* test if this entry matches ALL criteria. */
+      for (int j = 0; (j < criterion.nAND) && (match); j++)
       {
-        int match = 1;
-        /* test if this entry matches ALL criteria. */
-        for (int j = 0; (j < criterion.nAND) && (match); j++)
-          {
-            if (CDI_Debug)
-              Message("check criterion %d :  %d --?-- %d", j, criterion.key_value_pairs[0][j], criterion.key_value_pairs[1][j]);
-            struct subtype_attr_t *att_ptr = subtypeAttrFind(entry->atts, criterion.key_value_pairs[0][j]);
-            if (att_ptr == NULL)
-              {
-                match = 0;
-                if (CDI_Debug) Message("did not find %d", criterion.key_value_pairs[0][j]);
-              }
-            else
-              {
-                if (CDI_Debug) Message("found %d", criterion.key_value_pairs[0][j]);
-                match &= (att_ptr->val == criterion.key_value_pairs[1][j]);
-              }
-          }
-        if (match) return entry->self;
+        if (CDI_Debug)
+          Message("check criterion %d :  %d --?-- %d", j, criterion.key_value_pairs[0][j], criterion.key_value_pairs[1][j]);
+        struct subtype_attr_t *att_ptr = subtypeAttrFind(entry->atts, criterion.key_value_pairs[0][j]);
+        if (att_ptr == NULL)
+        {
+          match = 0;
+          if (CDI_Debug) Message("did not find %d", criterion.key_value_pairs[0][j]);
+        }
+        else
+        {
+          if (CDI_Debug) Message("found %d", criterion.key_value_pairs[0][j]);
+          match &= (att_ptr->val == criterion.key_value_pairs[1][j]);
+        }
       }
-      entry = entry->next;
+      if (match) return entry->self;
     }
+    entry = entry->next;
+  }
   return CDI_UNDEFID;
 }
 
@@ -783,10 +762,10 @@ subtypeInqAttribute(int subtypeID, int index, const char *key, int *outValue)
   if (!subtype_ptr) xabort("Internal error: subtypeID %d resolved to NULL.", subtypeID);
 
   if ((unsigned) index >= (unsigned) subtype_ptr->nentries)
-    {
-      xabort("index argument of %s() is out of range. Expected 0 <= index < %d, but got index = %d.", __func__,
-             subtype_ptr->nentries, index);
-    }
+  {
+    xabort("index argument of %s() is out of range. Expected 0 <= index < %d, but got index = %d.", __func__, subtype_ptr->nentries,
+           index);
+  }
 
   if (!key) return CDI_EINVAL;
   int iKey = attribute_to_index(key);
@@ -799,13 +778,13 @@ subtypeInqAttribute(int subtypeID, int index, const char *key, int *outValue)
 
   // Find the attribute.
   for (struct subtype_attr_t *attribute = entry->atts; attribute; attribute = attribute->next)
+  {
+    if (attribute->key == iKey)
     {
-      if (attribute->key == iKey)
-        {
-          if (outValue) *outValue = attribute->val;
-          return CDI_NOERR;
-        }
+      if (outValue) *outValue = attribute->val;
+      return CDI_NOERR;
     }
+  }
 
   // Failed to find the attribute if this point is reached.
   return CDI_EINVAL;
@@ -826,23 +805,23 @@ vlistDefTileSubtype(int vlistID, subtype_t *tiles)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   int tileset_defined = 0;
   for (int isub = 0; isub < vlistptr->nsubtypes; isub++)
+  {
+    /* get the ID of the "isub"th subtype */
+    subtypeID = vlistptr->subtypeIDs[isub];
+    if (subtypeComparePtr(subtypeID, tiles) == 0)
     {
-      /* get the ID of the "isub"th subtype */
-      subtypeID = vlistptr->subtypeIDs[isub];
-      if (subtypeComparePtr(subtypeID, tiles) == 0)
-        {
-          tileset_defined = 1;
-          break;
-        }
+      tileset_defined = 1;
+      break;
     }
+  }
 
   /* tile set seems to be new: register at resource handler. */
   if (tileset_defined == 0)
-    {
-      subtype_t *tiles_duplicate = NULL;
-      subtypeDuplicate(tiles, &tiles_duplicate);
-      subtypeID = vlistptr->subtypeIDs[vlistptr->nsubtypes++] = subtypePush(tiles_duplicate);
-    }
+  {
+    subtype_t *tiles_duplicate = NULL;
+    subtypeDuplicate(tiles, &tiles_duplicate);
+    subtypeID = vlistptr->subtypeIDs[vlistptr->nsubtypes++] = subtypePush(tiles_duplicate);
+  }
 
   return subtypeID;
 }

@@ -92,11 +92,11 @@ static inline size_t
 gcd(size_t a, size_t b)
 {
   while (b != 0)
-    {
-      size_t t = a;
-      a = b;
-      b = t % b;
-    }
+  {
+    size_t t = a;
+    a = b;
+    b = t % b;
+  }
   return a;
 }
 
@@ -147,11 +147,11 @@ initAFiledataFileWriteAtReblock(struct fileMPIFWAR *of, const char *filename, co
     struct stat posixstat;
     int rc = stat(filename, &posixstat);
     if (rc < 0)
-      {
-        perror("failed to stat file after open, block size unavailable,"
-               " assuming 4MiB");
-        posixstat.st_blksize = 4 * 1024 * 1024;
-      }
+    {
+      perror("failed to stat file after open, block size unavailable,"
+             " assuming 4MiB");
+      posixstat.st_blksize = 4 * 1024 * 1024;
+    }
     blockSize = (size_t) posixstat.st_blksize < SIZE_MAX ? (size_t) posixstat.st_blksize : SIZE_MAX / 2;
     /* prevent inefficiently small writes on granular file systems */
 #define MINBLOCKSIZE ((size_t) 1 << 19)
@@ -169,10 +169,10 @@ initAFiledataFileWriteAtReblock(struct fileMPIFWAR *of, const char *filename, co
   assert(blockSize <= INT_MAX && numBlockBuf <= INT_MAX);
   /* never go less than double-buffering */
   if (numBlockBuf < 2)
-    {
-      numBlockBuf = 2;
-      bufSize = blockSize * 2;
-    }
+  {
+    numBlockBuf = 2;
+    bufSize = blockSize * 2;
+  }
   of->collWriteSize = Malloc(sizeof(of->collWriteSize[0]) * (size_t) sizePio);
   of->fh = fh;
   of->name = Malloc(nameSize);
@@ -187,10 +187,10 @@ initAFiledataFileWriteAtReblock(struct fileMPIFWAR *of, const char *filename, co
   }
   of->pending = (struct pendingBufWrite *) Malloc(numBlockBuf * sizeof(struct pendingBufWrite));
   for (size_t i = 0; i < numBlockBuf; ++i)
-    {
-      of->pending[i].pass = -1;
-      of->pending[i].incoming = 0;
-    }
+  {
+    of->pending[i].pass = -1;
+    of->pending[i].incoming = 0;
+  }
   of->blockSize = (int) blockSize;
   of->numBlockBuf = (int) numBlockBuf;
   size_t numPeers = (size_t) commInqSizePio();
@@ -218,10 +218,10 @@ destroyAFiledataFileWriteAtReblock(struct fileMPIFWAR *restrict of)
   xmpi(MPI_Waitall(of->numMsg, of->reqs, MPI_STATUSES_IGNORE));
   of->numMsg = 0;
   for (size_t block = 0; block < numBlockBuf; ++block)
-    {
-      of->pending[block].incoming = 0;
-      if (of->pending[block].pass != -1) flushReblockBuffer(of, (int) block);
-    }
+  {
+    of->pending[block].incoming = 0;
+    if (of->pending[block].pass != -1) flushReblockBuffer(of, (int) block);
+  }
   /* close file */
   MPI_Offset endpos, fsize;
   endpos = of->pos;
@@ -259,24 +259,24 @@ flushReblockBuffer(struct fileMPIFWAR *of, int blockBufIdx)
   unsigned char *blockBuf = of->blockBuf + blockSize * blockBufIdx;
   int finIdx, numMsg = of->numMsg;
   while (of->pending[blockBufIdx].incoming)
+  {
+    /* todo: switch to MPI_Waitsome */
+    xmpi(MPI_Waitany(numMsg, of->reqs, &finIdx, MPI_STATUS_IGNORE));
+    if (finIdx != MPI_UNDEFINED)
     {
-      /* todo: switch to MPI_Waitsome */
-      xmpi(MPI_Waitany(numMsg, of->reqs, &finIdx, MPI_STATUS_IGNORE));
-      if (finIdx != MPI_UNDEFINED)
-        {
-          int blockBufIdxOfTx = of->msgs[finIdx].pos;
-          if (blockBufIdxOfTx >= 0 && of->msgs[finIdx].direction == RECV)
-            --(of->pending[blockBufIdxOfTx].incoming);
-          else if (of->msgs[finIdx].direction == SEND)
-            Free(of->msgs[finIdx].sendBuf);
-          else
-            xabort("internal error");
-          of->msgs[finIdx] = of->msgs[numMsg - 1];
-          of->msgs[numMsg - 1].sendBuf = NULL;
-          of->reqs[finIdx] = of->reqs[numMsg - 1];
-          --numMsg;
-        }
+      int blockBufIdxOfTx = of->msgs[finIdx].pos;
+      if (blockBufIdxOfTx >= 0 && of->msgs[finIdx].direction == RECV)
+        --(of->pending[blockBufIdxOfTx].incoming);
+      else if (of->msgs[finIdx].direction == SEND)
+        Free(of->msgs[finIdx].sendBuf);
+      else
+        xabort("internal error");
+      of->msgs[finIdx] = of->msgs[numMsg - 1];
+      of->msgs[numMsg - 1].sendBuf = NULL;
+      of->reqs[finIdx] = of->reqs[numMsg - 1];
+      --numMsg;
     }
+  }
   int sizePio = commInqSizePio(), rankPio = commInqRankPio();
   MPI_Offset ofs = (MPI_Offset) blockSize
                    * (((MPI_Offset) of->pending[blockBufIdx].pass * (MPI_Offset) sizePio * of->numBlockBuf)
@@ -292,14 +292,14 @@ reblockMoreMsgs(struct fileMPIFWAR *of, int numMsg)
 {
   /* optimize with MPI_Testsome */
   if (of->msgSize == numMsg)
-    {
-      size_t newMsgSize = (size_t) numMsg * 2;
-      of->msgs = Realloc(of->msgs, sizeof(of->msgs[0]) * newMsgSize);
-      of->reqs = Realloc(of->reqs, sizeof(of->reqs[0]) * newMsgSize);
-      for (size_t i = (size_t) numMsg; i < newMsgSize; ++i) initReblockPendingMsg(of, i);
-      assert(newMsgSize <= INT_MAX);
-      of->msgSize = (int) newMsgSize;
-    }
+  {
+    size_t newMsgSize = (size_t) numMsg * 2;
+    of->msgs = Realloc(of->msgs, sizeof(of->msgs[0]) * newMsgSize);
+    of->reqs = Realloc(of->reqs, sizeof(of->reqs[0]) * newMsgSize);
+    for (size_t i = (size_t) numMsg; i < newMsgSize; ++i) initReblockPendingMsg(of, i);
+    assert(newMsgSize <= INT_MAX);
+    of->msgSize = (int) newMsgSize;
+  }
 }
 
 static size_t
@@ -326,81 +326,79 @@ fwFileWriteAtReblock(int fileID, const void *buffer, size_t len)
   MPI_Offset directWriteOfs = 0;
   for (int collRank = 0; collRank < sizePio; ++collRank)
     if (of->collWriteSize[collRank])
-      {
-        long remaining = of->collWriteSize[collRank];
-        do
+    {
+      long remaining = of->collWriteSize[collRank];
+      do {
+        MPI_Offset collBlockSize = (MPI_Offset) blockSize * (MPI_Offset) sizePio;
+        int pass = (int) (fWOfs / collBlockSize / numBlockBuf);
+        int inBlockPos = (int) (fWOfs % (MPI_Offset) blockSize);
+        int txLen = (int) lmin(blockSize - inBlockPos, remaining);
+        int destRank = (int) (fWOfs / (MPI_Offset) blockSize) % sizePio;
+        if (txLen == blockSize)
+        {
+          /* a properly aligned portion can be written directly */
+          txLen = (int) (remaining - remaining % blockSize);
+          if (collRank == rankPio)
           {
-            MPI_Offset collBlockSize = (MPI_Offset) blockSize * (MPI_Offset) sizePio;
-            int pass = (int) (fWOfs / collBlockSize / numBlockBuf);
-            int inBlockPos = (int) (fWOfs % (MPI_Offset) blockSize);
-            int txLen = (int) lmin(blockSize - inBlockPos, remaining);
-            int destRank = (int) (fWOfs / (MPI_Offset) blockSize) % sizePio;
-            if (txLen == blockSize)
-              {
-                /* a properly aligned portion can be written directly */
-                txLen = (int) (remaining - remaining % blockSize);
-                if (collRank == rankPio)
-                  {
-                    directWriteBuf = inBuf;
-                    inBuf += txLen;
-                    directWriteSize = txLen;
-                    directWriteOfs = fWOfs;
-                  }
-              }
-            else if (destRank == rankPio)
-              {
-                int blockBufIdx = (int) (fWOfs / collBlockSize) % numBlockBuf;
-                if (of->pending[blockBufIdx].pass >= 0 && of->pending[blockBufIdx].pass != pass)
-                  {
-                    of->numMsg = numMsg;
-                    flushReblockBuffer(of, blockBufIdx);
-                    numMsg = of->numMsg;
-                  }
-                if (collRank != rankPio)
-                  {
-                    reblockMoreMsgs(of, numMsg);
-                    /* this rank is to write out (part of) the data, but it
-                     * resides on another rank */
-                    of->msgs[numMsg] = (struct IOmsg){
-                      .pos = blockBufIdx,
-                      .len = txLen,
-                      .rank = collRank,
-                      .direction = RECV,
-                    };
-                    xmpi(MPI_Irecv(of->blockBuf + (size_t) blockBufIdx * (size_t) blockSize + (size_t) inBlockPos, txLen,
-                                   MPI_UNSIGNED_CHAR, collRank, BLOCK_XFER, commPio, of->reqs + numMsg));
-                    ++numMsg;
-                    ++(of->pending[blockBufIdx].incoming);
-                  }
-                else /* if (collRank == rankPio) */
-                  {
-                    memcpy(of->blockBuf + (size_t) blockBufIdx * (size_t) blockSize + (size_t) inBlockPos, inBuf, (size_t) txLen);
-                    inBuf += txLen;
-                  }
-                of->pending[blockBufIdx].pass = pass;
-              }
-            else if (collRank == rankPio)
-              {
-                reblockMoreMsgs(of, numMsg);
-                /* this rank has the data and will send it to the one doing
-                 * the writing */
-                of->msgs[numMsg] = (struct IOmsg){
-                  .pos = -1,
-                  .len = txLen,
-                  .rank = destRank,
-                  .direction = SEND,
-                };
-                void *restrict buf = of->msgs[numMsg].sendBuf = Realloc(of->msgs[numMsg].sendBuf, (size_t) txLen);
-                memcpy(buf, inBuf, (size_t) txLen);
-                xmpi(MPI_Isend(buf, txLen, MPI_UNSIGNED_CHAR, destRank, BLOCK_XFER, commPio, of->reqs + numMsg));
-                inBuf += txLen;
-                ++numMsg;
-              }
-            fWOfs += txLen;
-            remaining -= txLen;
+            directWriteBuf = inBuf;
+            inBuf += txLen;
+            directWriteSize = txLen;
+            directWriteOfs = fWOfs;
           }
-        while (remaining);
-      }
+        }
+        else if (destRank == rankPio)
+        {
+          int blockBufIdx = (int) (fWOfs / collBlockSize) % numBlockBuf;
+          if (of->pending[blockBufIdx].pass >= 0 && of->pending[blockBufIdx].pass != pass)
+          {
+            of->numMsg = numMsg;
+            flushReblockBuffer(of, blockBufIdx);
+            numMsg = of->numMsg;
+          }
+          if (collRank != rankPio)
+          {
+            reblockMoreMsgs(of, numMsg);
+            /* this rank is to write out (part of) the data, but it
+             * resides on another rank */
+            of->msgs[numMsg] = (struct IOmsg){
+              .pos = blockBufIdx,
+              .len = txLen,
+              .rank = collRank,
+              .direction = RECV,
+            };
+            xmpi(MPI_Irecv(of->blockBuf + (size_t) blockBufIdx * (size_t) blockSize + (size_t) inBlockPos, txLen, MPI_UNSIGNED_CHAR,
+                           collRank, BLOCK_XFER, commPio, of->reqs + numMsg));
+            ++numMsg;
+            ++(of->pending[blockBufIdx].incoming);
+          }
+          else /* if (collRank == rankPio) */
+          {
+            memcpy(of->blockBuf + (size_t) blockBufIdx * (size_t) blockSize + (size_t) inBlockPos, inBuf, (size_t) txLen);
+            inBuf += txLen;
+          }
+          of->pending[blockBufIdx].pass = pass;
+        }
+        else if (collRank == rankPio)
+        {
+          reblockMoreMsgs(of, numMsg);
+          /* this rank has the data and will send it to the one doing
+           * the writing */
+          of->msgs[numMsg] = (struct IOmsg){
+            .pos = -1,
+            .len = txLen,
+            .rank = destRank,
+            .direction = SEND,
+          };
+          void *restrict buf = of->msgs[numMsg].sendBuf = Realloc(of->msgs[numMsg].sendBuf, (size_t) txLen);
+          memcpy(buf, inBuf, (size_t) txLen);
+          xmpi(MPI_Isend(buf, txLen, MPI_UNSIGNED_CHAR, destRank, BLOCK_XFER, commPio, of->reqs + numMsg));
+          inBuf += txLen;
+          ++numMsg;
+        }
+        fWOfs += txLen;
+        remaining -= txLen;
+      } while (remaining);
+    }
   if (directWriteSize > -1)
     xmpi(MPI_File_write_at(of->fh, directWriteOfs, (unsigned char *) directWriteBuf, directWriteSize, MPI_UNSIGNED_CHAR,
                            MPI_STATUS_IGNORE));
@@ -433,33 +431,33 @@ fowFileWriteAtReblock(const char *filename, const char *mode)
 
   for (size_t i = 0; i < openFilesSize; ++i)
     if (openFiles[i].name && !strcmp(openFiles[i].name, filename))
-      {
-        Warning("filename %s is already open!"
-                " CDI-PIO does not support concurrent access"
-                " through different filehandles.",
-                filename);
-        return CDI_EINVAL;
-      }
+    {
+      Warning("filename %s is already open!"
+              " CDI-PIO does not support concurrent access"
+              " through different filehandles.",
+              filename);
+      return CDI_EINVAL;
+    }
 
   size_t fileID = SIZE_MAX;
   if (openFilesSize == openFilesFill)
-    {
-      fileID = openFilesSize;
-      if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
-      openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
-      if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
-      openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
-      for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
-    }
+  {
+    fileID = openFilesSize;
+    if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
+    openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
+    if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
+    openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
+    for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
+  }
   else
-    {
-      for (size_t i = 0; i < openFilesSize; ++i)
-        if (openFiles[i].name == NULL)
-          {
-            fileID = i;
-            break;
-          }
-    }
+  {
+    for (size_t i = 0; i < openFilesSize; ++i)
+      if (openFiles[i].name == NULL)
+      {
+        fileID = i;
+        break;
+      }
+  }
   struct fileMPIFWAR *of = openFiles + fileID;
   ++openFilesFill;
   initAFiledataFileWriteAtReblock(of, filename, conf);

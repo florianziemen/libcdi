@@ -14,6 +14,7 @@
 #include <string.h>
 #include <errno.h>
 #include "cdi.h"
+#include "cdf_int.h"
 
 const char *
 cdiStringError(int cdiErrno)
@@ -32,6 +33,12 @@ cdiStringError(int cdiErrno)
   static const char _EQENF[]       = "Query entries not found";
   static const char _EQNAVAIL[]    = "Query not available for file type";
   static const char _ELIMIT[]      = "Internal limits exceeded";
+
+  if (cdiErrno < -1000)
+    {
+      const char *cdfErrorString = cdf_strerror(cdiErrno + 1000);
+      if (cdfErrorString) return cdfErrorString;
+    }
 
   switch (cdiErrno) {
   case CDI_ESYSTEM:

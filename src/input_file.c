@@ -29,7 +29,7 @@
 #include <unistd.h>
 #endif
 
-#if HAVE_PTHREAD
+#if HAVE_LIBPTHREAD
 #include <pthread.h>
 #endif
 
@@ -46,11 +46,9 @@ cdiInputFile_condestruct(CdiInputFile *me, const char *path)
   cdiRefObject_construct(super());
   me->path = strdup(path);
   if (!me->path) goto destructSuper;
-  do
-    {
-      me->fileDescriptor = open(me->path, O_RDONLY);
-    }
-  while (me->fileDescriptor == -1 && (errno == EINTR || errno == EAGAIN));
+  do {
+    me->fileDescriptor = open(me->path, O_RDONLY);
+  } while (me->fileDescriptor == -1 && (errno == EINTR || errno == EAGAIN));
   if (me->fileDescriptor == -1) goto freePath;
   // construction successfull, now we can set our own destructor
   super()->destructor = (void (*)(CdiReferencedObject *)) cdiInputFile_destruct;
@@ -75,7 +73,7 @@ success:
 
 static CdiInputFile **openFileList = NULL;
 static size_t openFileCount = 0, openFileListSize = 0;
-#if HAVE_PTHREAD
+#if HAVE_LIBPTHREAD
 static pthread_mutex_t openFileListLock = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
@@ -85,45 +83,42 @@ cdiInputFile_make(const char *path)
 {
   CdiInputFile *result = NULL;
   xassert(path);
-#if HAVE_PTHREAD
+#if HAVE_LIBPTHREAD
   int error = pthread_mutex_lock(&openFileListLock);
   xassert(!error);
 #endif
   {
     // Check the list of open files for the given path.
     for (size_t i = openFileCount; i-- && !result;)
-      {
-        if (!strcmp(path, openFileList[i]->path)) result = openFileList[i];
-      }
+    {
+      if (!strcmp(path, openFileList[i]->path)) result = openFileList[i];
+    }
     // If no open file was found, we open one, otherwise we just retain the existing one one more time.
-    if (result)
-      {
-        cdiRefObject_retain(&result->super);
-      }
+    if (result) { cdiRefObject_retain(&result->super); }
     else
+    {
+      result = (CdiInputFile *) Malloc(sizeof(*result));
+      if (!cdiInputFile_condestruct(result, path))
       {
-        result = (CdiInputFile *) Malloc(sizeof(*result));
-        if (!cdiInputFile_condestruct(result, path))
-          {
-            // An error occured during construction, avoid a memory leak.
-            Free(result);
-            result = NULL;
-          }
-        else
-          {
-            // Add the new file to the list of open files.
-            if (openFileCount == openFileListSize)
-              {
-                openFileListSize *= 2;
-                if (openFileListSize < 16) openFileListSize = 16;
-                openFileList = (CdiInputFile **) Realloc(openFileList, openFileListSize);
-              }
-            xassert(openFileCount < openFileListSize);
-            openFileList[openFileCount++] = result;
-          }
+        // An error occured during construction, avoid a memory leak.
+        Free(result);
+        result = NULL;
       }
+      else
+      {
+        // Add the new file to the list of open files.
+        if (openFileCount == openFileListSize)
+        {
+          openFileListSize *= 2;
+          if (openFileListSize < 16) openFileListSize = 16;
+          openFileList = (CdiInputFile **) Realloc(openFileList, openFileListSize);
+        }
+        xassert(openFileCount < openFileListSize);
+        openFileList[openFileCount++] = result;
+      }
+    }
   }
-#if HAVE_PTHREAD
+#if HAVE_LIBPTHREAD
   error = pthread_mutex_unlock(&openFileListLock);
   xassert(!error);
 #endif
@@ -138,15 +133,15 @@ cdiInputFile_read(const CdiInputFile *me, off_t readPosition, size_t readSize, s
   if (!outActualReadSize) outActualReadSize = &trash;
   *outActualReadSize = 0;
   while (readSize)
-    {
-      ssize_t bytesRead = pread(me->fileDescriptor, byteBuffer, readSize, readPosition);
-      if (bytesRead == -1) return (errno == EINVAL) ? CDI_EINVAL : CDI_ESYSTEM;
-      if (bytesRead == 0) return CDI_EEOF;
-      byteBuffer += bytesRead;
-      readPosition += bytesRead;
-      readSize -= (size_t) bytesRead;
-      *outActualReadSize += (size_t) bytesRead;
-    }
+  {
+    ssize_t bytesRead = pread(me->fileDescriptor, byteBuffer, readSize, readPosition);
+    if (bytesRead == -1) return (errno == EINVAL) ? CDI_EINVAL : CDI_ESYSTEM;
+    if (bytesRead == 0) return CDI_EEOF;
+    byteBuffer += bytesRead;
+    readPosition += bytesRead;
+    readSize -= (size_t) bytesRead;
+    *outActualReadSize += (size_t) bytesRead;
+  }
   return CDI_NOERR;
 }
 
@@ -159,7 +154,7 @@ cdiInputFile_getPath(const CdiInputFile *me)
 void
 cdiInputFile_destruct(CdiInputFile *me)
 {
-#if HAVE_PTHREAD
+#if HAVE_LIBPTHREAD
   int error = pthread_mutex_lock(&openFileListLock);
   xassert(!error);
 #endif
@@ -171,7 +166,7 @@ cdiInputFile_destruct(CdiInputFile *me)
     // Remove me from the list
     openFileList[position] = openFileList[--openFileCount];
   }
-#if HAVE_PTHREAD
+#if HAVE_LIBPTHREAD
   error = pthread_mutex_unlock(&openFileListLock);
   xassert(!error);
 #endif

@@ -9,7 +9,7 @@ AlignEscapedNewlinesLeft: true
 AlignOperands:   true
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: false
-AllowShortBlocksOnASingleLine: false
+AllowShortBlocksOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: true
@@ -33,7 +33,7 @@ BraceWrapping:
   BeforeElse:      true
   IndentBraces:    true
 BreakBeforeBinaryOperators: All
-BreakBeforeBraces: GNU
+BreakBeforeBraces: Allman
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: false
 ColumnLimit:     132
@@ -53,7 +53,7 @@ IncludeCategories:
     Priority:        3
   - Regex:           '.*'
     Priority:        1
-IndentCaseLabels: false
+IndentCaseLabels: true
 IndentWidth:     2
 IndentWrappedFunctionNames: false
 KeepEmptyLinesAtTheStartOfBlocks: true

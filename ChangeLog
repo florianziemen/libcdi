@@ -1,3 +1,51 @@
+2025-07-24  Uwe Schulzweida
+
+	* Version 2.5.3 released
+
+2025-07-17  Uwe Schulzweida
+
+	* NetCDF: fix problem with axis attribute and unstructured data
+
+2025-06-20  Uwe Schulzweida
+
+	* NetCDF4: added support for GRIB_HEALPIX cell indices
+
+2025-06-18  Uwe Schulzweida
+
+	* Added interface functions gridDefIndices()/gridInqIndices()
+
+2025-06-16  Uwe Schulzweida
+
+	* Added GRID_HEALPIX
+
+2025-06-04  Uwe Schulzweida
+
+	* Renamed CDI_CHUNK_CACHE to CDI_CHUNK_CACHE_IN/CDI_CHUNK_CACHE_OUT
+
+2025-05-21  Uwe Schulzweida
+
+	* Version 2.5.2.1 released
+
+2025-05-21  Uwe Schulzweida
+
+	* gribapiEncode: moved gribapiDefInstitut() to the front
+
+2025-04-08  Uwe Schulzweida
+
+	* Version 2.5.2 released
+
+2025-03-30  Uwe Schulzweida
+
+	* changed chunkSizeLim from 16mb to 4mb
+
+2025-03-27  Uwe Schulzweida
+
+	* vlistChangeZaxis: added call to delete_chunks() (bug fix)
+
+2025-03-14  Uwe Schulzweida
+
+	* enable-hirlam-extensions failed since release 2.5.1 (bug fix)
+
 2025-03-05  Uwe Schulzweida
 
 	* Version 2.5.1 released

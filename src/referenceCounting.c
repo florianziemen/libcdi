@@ -35,10 +35,10 @@ cdiRefObject_release(CdiReferencedObject *me)
   size_t oldCount = me->refCount--;
   xassert(oldCount && "A reference counted object was released too often.");
   if (oldCount == 1)
-    {
-      me->destructor(me);
-      Free(me);
-    }
+  {
+    me->destructor(me);
+    Free(me);
+  }
 }
 
 void

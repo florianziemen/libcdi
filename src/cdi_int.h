@@ -259,6 +259,7 @@ enum cdfIDIdx
   CDF_VARID_Y,
   CDF_VARID_RP,  // reducedPoints
   CDF_VARID_A,
+  CDF_VARID_I,  // cellIndices
   CDF_SIZE_NCID,
 };
 
@@ -426,7 +427,8 @@ extern size_t CDI_Netcdf_Hdr_Pad;
 extern bool CDI_CopyChunkSpec;
 extern bool CDI_RemoveChunkSpec;
 extern bool CDI_Chunk_Cache_Info;
-extern long CDI_Chunk_Cache;
+extern long CDI_Chunk_Cache_In;
+extern long CDI_Chunk_Cache_Out;
 extern size_t CDI_Chunk_Cache_Max;
 extern bool CDI_Netcdf_Lazy_Grid_Load;
 extern int STREAM_Debug;

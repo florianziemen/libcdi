@@ -24,10 +24,10 @@ main(int argc, const char **argv)
 
   int streamID = streamOpenWrite(fname, CDI_FILETYPE_NC);
   if (streamID < 0)
-    {
-      fprintf(stderr, "Open failed on %s: %s\n", fname, cdiStringError(streamID));
-      return EXIT_FAILURE;
-    }
+  {
+    fprintf(stderr, "Open failed on %s: %s\n", fname, cdiStringError(streamID));
+    return EXIT_FAILURE;
+  }
 
   enum
   {
@@ -56,10 +56,7 @@ main(int argc, const char **argv)
   {
     double(*data)[sizex] = (double(*)[sizex]) Malloc(sizeof(**data) * sizex * sizey);
     for (size_t j = 0; j < sizey; ++j)
-      for (size_t i = 0; i < sizex; ++i)
-        {
-          data[j][i] = my_gamma_dist((double) i / (double) (sizex - 1));
-        }
+      for (size_t i = 0; i < sizex; ++i) { data[j][i] = my_gamma_dist((double) i / (double) (sizex - 1)); }
     data[sizey / 3][sizex / 2] = missValue;
     streamWriteVar(streamID, 0, (const double *) data, 1);
     Free(data);

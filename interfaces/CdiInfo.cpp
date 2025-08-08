@@ -21,9 +21,9 @@ main(int argc, char *argv[])
   std::cout << "#===============================" << std::endl;
   std::cout << "#= Available GridIDs are: ";
   for (std::map<int, CdiGrid>::iterator iter = info.grids.begin(); iter != info.grids.end(); ++iter)
-    {
-      std::cout << (*iter).first << ' ';
-    };
+  {
+    std::cout << (*iter).first << ' ';
+  };
   std::cout << std::endl;
   std::cout << "first grid:" << info.grids[0].size << std::endl;
   if (info.grids[0].hasXValues)
@@ -48,29 +48,29 @@ main(int argc, char *argv[])
   std::cout << "Gridname:" << var.grid.name << std::endl;
   std::cout << "GridBounds: NumberOfCorners = " << var.grid.ncorner << std::endl;
   if (var.grid.hasYValues)
-    {
-      float *xvals = (float *) malloc(var.grid.xsize * sizeof(float));
-      float *yvals = (float *) malloc(var.grid.ysize * sizeof(float));
-      var.grid.getFloatVals(xvals, yvals);
-      std::cout << "xvals " << xvals[0] << std::endl;
-      std::cout << "yvals " << yvals[0] << std::endl;
-      std::cout << "xvalues " << var.grid.xvalues[0] << std::endl;
-      std::cout << "xvalues " << var.grid.xvalues.front() << std::endl;
-      std::cout << "xvalues " << var.grid.xvalues.back() << std::endl;
-    }
+  {
+    float *xvals = (float *) malloc(var.grid.xsize * sizeof(float));
+    float *yvals = (float *) malloc(var.grid.ysize * sizeof(float));
+    var.grid.getFloatVals(xvals, yvals);
+    std::cout << "xvals " << xvals[0] << std::endl;
+    std::cout << "yvals " << yvals[0] << std::endl;
+    std::cout << "xvalues " << var.grid.xvalues[0] << std::endl;
+    std::cout << "xvalues " << var.grid.xvalues.front() << std::endl;
+    std::cout << "xvalues " << var.grid.xvalues.back() << std::endl;
+  }
   else
     std::cout << "no grid values available" << std::endl;
   if (var.grid.hasBounds)
-    {
-      float *xbnds = (float *) malloc(var.grid.size * var.grid.ncorner * sizeof(float));
-      float *ybnds = (float *) malloc(var.grid.size * var.grid.ncorner * sizeof(float));
-      var.grid.getFloatBounds(xbnds, ybnds);
-      std::cout << "xbnds " << xbnds[var.grid.size * var.grid.ncorner - 1] << std::endl;
-      std::cout << "ybnds " << ybnds[var.grid.size * var.grid.ncorner - 1] << std::endl;
-      std::cout << "xbounds " << var.grid.xbounds[0] << std::endl;
-      std::cout << "xbounds " << var.grid.xbounds.front() << std::endl;
-      std::cout << "xbounds " << var.grid.xbounds.back() << std::endl;
-    }
+  {
+    float *xbnds = (float *) malloc(var.grid.size * var.grid.ncorner * sizeof(float));
+    float *ybnds = (float *) malloc(var.grid.size * var.grid.ncorner * sizeof(float));
+    var.grid.getFloatBounds(xbnds, ybnds);
+    std::cout << "xbnds " << xbnds[var.grid.size * var.grid.ncorner - 1] << std::endl;
+    std::cout << "ybnds " << ybnds[var.grid.size * var.grid.ncorner - 1] << std::endl;
+    std::cout << "xbounds " << var.grid.xbounds[0] << std::endl;
+    std::cout << "xbounds " << var.grid.xbounds.front() << std::endl;
+    std::cout << "xbounds " << var.grid.xbounds.back() << std::endl;
+  }
   else
     std::cout << "no grid bounds available" << std::endl;
   {
@@ -93,11 +93,11 @@ main(int argc, char *argv[])
   std::cout << "# field values on different levels ================" << std::endl;
   var.getValuesWithLevel();
   for (int ilev = 0; ilev < var.zaxis.size; ilev++)
-    {
-      std::cout << "Level:" << ilev << std::endl;
-      std::cout << "valuesWithLevel[" << ilev << "][0]  = " << var.valuesWithLevel[ilev][0] << ' ';
-      std::cout << "valuesWithLevel[" << ilev << "][-1] = " << var.valuesWithLevel[ilev][var.grid.size - 1] << std::endl;
-    }
+  {
+    std::cout << "Level:" << ilev << std::endl;
+    std::cout << "valuesWithLevel[" << ilev << "][0]  = " << var.valuesWithLevel[ilev][0] << ' ';
+    std::cout << "valuesWithLevel[" << ilev << "][-1] = " << var.valuesWithLevel[ilev][var.grid.size - 1] << std::endl;
+  }
   std::cout << "# field values (FLOAT) ================" << std::endl;
   std::vector<float> floats;
   floats = var.getFValues();
@@ -108,9 +108,9 @@ main(int argc, char *argv[])
   std::vector<std::vector<float>> floatsWithLevel;
   floatsWithLevel = var.getFValuesWithLevel();
   for (int i = 0; i < floatsWithLevel.size(); ++i)
-    {
-      std::cout << "floatsWithLevel[" << i << "] = " << floatsWithLevel[i].front() << ' ' << floatsWithLevel[i].back() << std::endl;
-    }
+  {
+    std::cout << "floatsWithLevel[" << i << "] = " << floatsWithLevel[i].front() << ' ' << floatsWithLevel[i].back() << std::endl;
+  }
 
   std::cout << "#===============================" << std::endl;
   std::cout << "#== Reading from the var map ===" << std::endl;

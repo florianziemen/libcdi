@@ -40,46 +40,40 @@ getMPICommWorldRank()
   return rank;
 }
 
-#define xdebug(fmt, ...)                                                                                                      \
-  if (ddebug)                                                                                                                 \
-    {                                                                                                                         \
-      int rank = getMPICommWorldRank();                                                                                       \
-      fprintf(stderr, "%s pe%d in %s, %s, line %d: " fmt "\n", debugString, rank, __func__, __FILE__, __LINE__, __VA_ARGS__); \
-    }
+#define xdebug(fmt, ...)                                                                                                    \
+  if (ddebug)                                                                                                               \
+  {                                                                                                                         \
+    int rank = getMPICommWorldRank();                                                                                       \
+    fprintf(stderr, "%s pe%d in %s, %s, line %d: " fmt "\n", debugString, rank, __func__, __FILE__, __LINE__, __VA_ARGS__); \
+  }
 
-#define xdebug3(fmt, ...)                                                                                     \
-  if (ddebug == MAXDEBUG)                                                                                     \
-    {                                                                                                         \
-      int rank = getMPICommWorldRank();                                                                       \
-      fprintf(stderr, "pe%d in %s, %s, line %d: " fmt "\n", rank, __func__, __FILE__, __LINE__, __VA_ARGS__); \
-    }
+#define xdebug3(fmt, ...)                                                                                   \
+  if (ddebug == MAXDEBUG)                                                                                   \
+  {                                                                                                         \
+    int rank = getMPICommWorldRank();                                                                       \
+    fprintf(stderr, "pe%d in %s, %s, line %d: " fmt "\n", rank, __func__, __FILE__, __LINE__, __VA_ARGS__); \
+  }
 
 void pcdiXMPI(int iret, const char *, int);
-#define xmpi(ret)                                                        \
-  do                                                                     \
-    {                                                                    \
-      int tmpIRet = (ret);                                               \
-      if (tmpIRet != MPI_SUCCESS) pcdiXMPI(tmpIRet, __FILE__, __LINE__); \
-    }                                                                    \
-  while (0)
+#define xmpi(ret)                                                      \
+  do {                                                                 \
+    int tmpIRet = (ret);                                               \
+    if (tmpIRet != MPI_SUCCESS) pcdiXMPI(tmpIRet, __FILE__, __LINE__); \
+  } while (0)
 
 void pcdiXMPIStat(int, const char *, int, MPI_Status *);
-#define xmpiStat(ret, stat)                                                    \
-  do                                                                           \
-    {                                                                          \
-      int tmpIRet = (ret);                                                     \
-      if (tmpIRet != MPI_SUCCESS) pcdiXMPIStat(ret, __FILE__, __LINE__, stat); \
-    }                                                                          \
-  while (0)
+#define xmpiStat(ret, stat)                                                  \
+  do {                                                                       \
+    int tmpIRet = (ret);                                                     \
+    if (tmpIRet != MPI_SUCCESS) pcdiXMPIStat(ret, __FILE__, __LINE__, stat); \
+  } while (0)
 
 void pcdiXMPIStats(int, const char *, int, int, MPI_Status *);
-#define xmpiStats(ret, n, stats)                                                    \
-  do                                                                                \
-    {                                                                               \
-      int tmpIRet = (ret);                                                          \
-      if (tmpIRet != MPI_SUCCESS) pcdiXMPIStats(ret, __FILE__, __LINE__, n, stats); \
-    }                                                                               \
-  while (0)
+#define xmpiStats(ret, n, stats)                                                  \
+  do {                                                                            \
+    int tmpIRet = (ret);                                                          \
+    if (tmpIRet != MPI_SUCCESS) pcdiXMPIStats(ret, __FILE__, __LINE__, n, stats); \
+  } while (0)
 
 static inline int
 sum_int(size_t n, int *a)
@@ -94,10 +88,8 @@ void cdiPioAssertConsistentIntVec(size_t n, const int *restrict a, MPI_Comm comm
                                   int rankRangeEnd);
 #else
 #define cdiPioAssertConsistentIntVec(n, a, comm, r, rs, re) \
-  do                                                        \
-    {                                                       \
-    }                                                       \
-  while (0)
+  do {                                                      \
+  } while (0)
 #endif
 
 void printArray(const char *, const char *, const void *, int, int, const char *, const char *, int);
@@ -134,11 +126,11 @@ cdiPioElemSizeInference(size_t varID, const int *conversion)
   int conv = conversion ? conversion[varID] : CDI_DATATYPE_FLT64;
   size_t elemSize;
   switch (conv)
-    {
+  {
     case CDI_DATATYPE_FLT32: elemSize = sizeof(float); break;
     case CDI_DATATYPE_FLT64: elemSize = sizeof(double); break;
     default: Error("Invalid conversion specification: %d\n", conv); elemSize = (size_t) -1;
-    }
+  }
   return elemSize;
 }
 

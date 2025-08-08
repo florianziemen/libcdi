@@ -73,11 +73,9 @@ sema_wait(sema_t *s)
 #else
   int r;
 
-  do
-    {
-      r = sem_wait(&s->sem);
-    }
-  while (r == -1 && errno == EINTR);
+  do {
+    r = sem_wait(&s->sem);
+  } while (r == -1 && errno == EINTR);
 #endif
   return 0;
 }
@@ -99,20 +97,20 @@ workerMain(void *arg)
   AsyncJob *communicator = (AsyncJob *) arg;
 
   while (true)
+  {
+    while (sema_wait(&communicator->request))
+      ;
+    if (communicator->work)
     {
-      while (sema_wait(&communicator->request))
-        ;
-      if (communicator->work)
-        {
-          communicator->result = communicator->work(communicator->data);
-          if (sema_post(&communicator->completion)) xabort("sema_post() failed");
-        }
-      else
-        {
-          if (sema_post(&communicator->completion)) xabort("sema_post() failed");
-          break;
-        }
+      communicator->result = communicator->work(communicator->data);
+      if (sema_post(&communicator->completion)) xabort("sema_post() failed");
     }
+    else
+    {
+      if (sema_post(&communicator->completion)) xabort("sema_post() failed");
+      break;
+    }
+  }
 
   return NULL;
 }
@@ -137,10 +135,10 @@ int
 AsyncWorker_init(AsyncManager **jobManager, int threadCount)
 {
   if (threadCount <= 0)
-    {
-      xabort("CPU core count discovery not implemented yet");
-      return CDI_EINVAL;  // TODO: discover CPU core count, and set threadCount to a sensible positive value
-    }
+  {
+    xabort("CPU core count discovery not implemented yet");
+    return CDI_EINVAL;  // TODO: discover CPU core count, and set threadCount to a sensible positive value
+  }
 
   if (*jobManager) return CDI_NOERR;
 
@@ -172,13 +170,13 @@ AsyncWorker_requestWork(AsyncManager *jobManager, int (*work)(void *data), void 
 
   AsyncJob *worker = NULL;
   for (int i = 0; i < jobManager->workerCount; i++)
+  {
+    if (!jobManager->communicators[i].inUse)
     {
-      if (!jobManager->communicators[i].inUse)
-        {
-          worker = &jobManager->communicators[i];
-          break;
-        }
+      worker = &jobManager->communicators[i];
+      break;
     }
+  }
   if (!worker) xabort("internal error: idleWorkerCount is not in sync with the worker states, please report this bug");
 
   // pass the request to that worker
@@ -231,27 +229,27 @@ AsyncWorker_finalize(AsyncManager *jobManager)
   if (!jobManager) return CDI_NOERR;
 
   for (int i = 0; i < jobManager->workerCount; i++)
+  {
+    AsyncJob *curWorker = &jobManager->communicators[i];
+
+    // finish any pending job
+    if (curWorker->inUse)
     {
-      AsyncJob *curWorker = &jobManager->communicators[i];
-
-      // finish any pending job
-      if (curWorker->inUse)
-        {
-          AsyncWorker_wait(jobManager, curWorker);
-          if (curWorker->result) result = curWorker->result;
-        }
-
-      // send the teardown signal
-      curWorker->inUse = true;
-      curWorker->work = NULL;
-      curWorker->data = NULL;
-      curWorker->result = 0;
-#ifdef HAVE_LIBPTHREAD
-      if (sema_post(&curWorker->request)) xabort("sema_post() failed");
-#endif
-      // wait for the worker to exit
       AsyncWorker_wait(jobManager, curWorker);
+      if (curWorker->result) result = curWorker->result;
     }
+
+    // send the teardown signal
+    curWorker->inUse = true;
+    curWorker->work = NULL;
+    curWorker->data = NULL;
+    curWorker->result = 0;
+#ifdef HAVE_LIBPTHREAD
+    if (sema_post(&curWorker->request)) xabort("sema_post() failed");
+#endif
+    // wait for the worker to exit
+    AsyncWorker_wait(jobManager, curWorker);
+  }
 
   Free(jobManager->communicators);
   Free(jobManager);

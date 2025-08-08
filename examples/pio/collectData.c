@@ -72,11 +72,11 @@ modelRun(MPI_Comm commModel)
   gridDefYvals(gridID, lats);
 
   for (i = 0; i < nVars; i++)
-    {
-      zaxisID[i] = zaxisCreate(ZAXIS_PRESSURE, nlev[i]);
-      zaxisDefLevels(zaxisID[i], levs);
-      varSize[i] = nlon * nlat * (size_t) nlev[i];
-    }
+  {
+    zaxisID[i] = zaxisCreate(ZAXIS_PRESSURE, nlev[i]);
+    zaxisDefLevels(zaxisID[i], levs);
+    varSize[i] = nlon * nlat * (size_t) nlev[i];
+  }
   vlistID = vlistCreate();
 
 #if USE_MPI
@@ -84,18 +84,18 @@ modelRun(MPI_Comm commModel)
   xmpi(MPI_Comm_size(commModel, &comm_size));
 #endif
   for (i = 0; i < nVars; i++)
-    {
-      varID[i] = vlistDefVar(vlistID, gridID, zaxisID[i], TIME_VARIABLE);
+  {
+    varID[i] = vlistDefVar(vlistID, gridID, zaxisID[i], TIME_VARIABLE);
 #ifdef USE_MPI
-      {
-        int start = uniform_partition_start((int[2]){ 0, (int) varSize[i] - 1 }, comm_size, rank),
-            chunkSize = uniform_partition_start((int[2]){ 0, (int) varSize[i] - 1 }, comm_size, rank + 1) - start;
-        fprintf(stderr, "%d: start=%d, chunkSize = %d\n", rank, start, chunkSize);
-        Xt_idxlist idxlist = xt_idxstripes_new(&(struct Xt_stripe){ .start = start, .nstrides = chunkSize, .stride = 1 }, 1);
-        varDeco[i] = (struct var1DDeco){ .start = start, .chunkSize = chunkSize, .partDesc = idxlist };
-      }
-#endif
+    {
+      int start = uniform_partition_start((int[2]){ 0, (int) varSize[i] - 1 }, comm_size, rank),
+          chunkSize = uniform_partition_start((int[2]){ 0, (int) varSize[i] - 1 }, comm_size, rank + 1) - start;
+      fprintf(stderr, "%d: start=%d, chunkSize = %d\n", rank, start, chunkSize);
+      Xt_idxlist idxlist = xt_idxstripes_new(&(struct Xt_stripe){ .start = start, .nstrides = chunkSize, .stride = 1 }, 1);
+      varDeco[i] = (struct var1DDeco){ .start = start, .chunkSize = chunkSize, .partDesc = idxlist };
     }
+#endif
+  }
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
   vlistDefTaxis(vlistID, taxisID);
 
@@ -108,39 +108,39 @@ modelRun(MPI_Comm commModel)
   pioEndDef();
 #endif
   for (tfID = 0; tfID < ntfiles; tfID++)
+  {
+    /* if ( tfID > 0 ) */
     {
-      /* if ( tfID > 0 ) */
-      {
-        streamClose(streamID);
-        snprintf(&filename[0], sizeof(filename), "%s_%d.grb", name, tfID);
-        streamID = streamOpenWrite(filename, filetype);
-        xassert(streamID >= 0);
-        streamDefVlist(streamID, vlistID);
-      }
-      for (tsID = 0; tsID < ntsteps; tsID++)
-        {
-          taxisDefVdate(taxisID, vdate);
-          taxisDefVtime(taxisID, vtime);
-          streamDefTimestep(streamID, tsID);
-          for (i = 0; i < nVars; i++)
-            {
-#ifdef USE_MPI
-              int chunk = varDeco[i].chunkSize;
-#else
-              int chunk = (int) varSize[i];
-#endif
-              for (j = 0; j < chunk; ++j) var[j] = 2.2;
-#ifdef USE_MPI
-              streamWriteVarPart(streamID, varID[i], var, nmiss, varDeco[i].partDesc);
-#else
-              streamWriteVar(streamID, varID[i], var, nmiss);
-#endif
-            }
-#ifdef USE_MPI
-          pioWriteTimestep();
-#endif
-        }
+      streamClose(streamID);
+      snprintf(&filename[0], sizeof(filename), "%s_%d.grb", name, tfID);
+      streamID = streamOpenWrite(filename, filetype);
+      xassert(streamID >= 0);
+      streamDefVlist(streamID, vlistID);
     }
+    for (tsID = 0; tsID < ntsteps; tsID++)
+    {
+      taxisDefVdate(taxisID, vdate);
+      taxisDefVtime(taxisID, vtime);
+      streamDefTimestep(streamID, tsID);
+      for (i = 0; i < nVars; i++)
+      {
+#ifdef USE_MPI
+        int chunk = varDeco[i].chunkSize;
+#else
+        int chunk = (int) varSize[i];
+#endif
+        for (j = 0; j < chunk; ++j) var[j] = 2.2;
+#ifdef USE_MPI
+        streamWriteVarPart(streamID, varID[i], var, nmiss, varDeco[i].partDesc);
+#else
+        streamWriteVar(streamID, varID[i], var, nmiss);
+#endif
+      }
+#ifdef USE_MPI
+      pioWriteTimestep();
+#endif
+    }
+  }
   streamClose(streamID);
   vlistDestroy(vlistID);
   taxisDestroy(taxisID);
@@ -172,42 +172,42 @@ main(int argc, char *argv[])
   {
     int opt;
     while ((opt = getopt(argc, argv, "p:w:")) != -1) switch (opt)
-        {
+      {
         case 'p':
           IOMode = cdiPioStr2IOMode(optarg);
           if (IOMode < 0)
-            {
-              fprintf(stderr, "Unsupported PIO mode requested: %s\n", optarg);
-              exit(EXIT_FAILURE);
-            }
+          {
+            fprintf(stderr, "Unsupported PIO mode requested: %s\n", optarg);
+            exit(EXIT_FAILURE);
+          }
           break;
         case 'w':
+        {
+          long temp = strtol(optarg, NULL, 0);
+          if (temp < 0 || temp > INT_MAX / 2)
           {
-            long temp = strtol(optarg, NULL, 0);
-            if (temp < 0 || temp > INT_MAX / 2)
-              {
-                fprintf(stderr, "Unsupported number of I/O servers: %ld\n", temp);
-                exit(EXIT_FAILURE);
-              }
-            nProcsIO = (int) temp;
-            break;
+            fprintf(stderr, "Unsupported number of I/O servers: %ld\n", temp);
+            exit(EXIT_FAILURE);
           }
+          nProcsIO = (int) temp;
+          break;
         }
+      }
   }
 
   commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0f, cdiPioNoPostCommSetup);
   if (commModel != MPI_COMM_NULL)
-    {
-      namespaceSetActive(pioNamespace);
+  {
+    namespaceSetActive(pioNamespace);
 #else
   (void) argc;
   (void) argv;
 #endif
 
-      modelRun(commModel);
+    modelRun(commModel);
 
 #ifdef USE_MPI
-    }
+  }
   pioFinalize();
   xt_finalize();
   MPI_Finalize();

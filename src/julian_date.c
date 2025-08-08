@@ -48,17 +48,17 @@ encode_julday(int calendar, int year, int month, int day)
   int ib = (iy < 0) ? ((iy + 1) / 400 - (iy + 1) / 100) : (iy / 400 - iy / 100);
 
   if (calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN)
+  {
+    if (year > 1582 || (year == 1582 && (month > 10 || (month == 10 && day >= 15))))
     {
-      if (year > 1582 || (year == 1582 && (month > 10 || (month == 10 && day >= 15))))
-        {
-          // 15th October 1582 AD or later
-        }
-      else
-        {
-          // 4th October 1582 AD or earlier
-          ib = -2;
-        }
+      // 15th October 1582 AD or later
     }
+    else
+    {
+      // 4th October 1582 AD or earlier
+      ib = -2;
+    }
+  }
 
   int64_t julianDay = (int64_t) (floor(365.25 * iy) + trunc(30.6001 * (im + 1)) + ib + 1720996.5 + day + 0.5);
 
@@ -190,16 +190,16 @@ adjust_seconds(JulianDate *julianDate)
   double SecondsPerDay = 86400.0;
 
   while (julianDate->secondOfDay >= SecondsPerDay)
-    {
-      julianDate->secondOfDay -= SecondsPerDay;
-      julianDate->julianDay++;
-    }
+  {
+    julianDate->secondOfDay -= SecondsPerDay;
+    julianDate->julianDay++;
+  }
 
   while (julianDate->secondOfDay < 0.0)
-    {
-      julianDate->secondOfDay += SecondsPerDay;
-      julianDate->julianDay--;
-    }
+  {
+    julianDate->secondOfDay += SecondsPerDay;
+    julianDate->julianDay--;
+  }
 }
 
 // add seconds to julianDate
@@ -277,12 +277,12 @@ main(void)
          dt.time.second, dt.time.ms, (int) julianDate.julianDay, julianDate.secondOfDay);
 
   for (int i = 0; i < 420; i++)
-    {
-      dt = julianDate_decode(calendar, julianDate);
-      printf("%2d %d/%02d/%02d %02d:%02d:%02d.%03d\n", i, dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute,
-             dt.time.second, dt.time.ms);
-      julianDate = julianDate_add_seconds(julianDate, value * factor);
-    }
+  {
+    dt = julianDate_decode(calendar, julianDate);
+    printf("%2d %d/%02d/%02d %02d:%02d:%02d.%03d\n", i, dt.date.year, dt.date.month, dt.date.day, dt.time.hour, dt.time.minute,
+           dt.time.second, dt.time.ms);
+    julianDate = julianDate_add_seconds(julianDate, value * factor);
+  }
 
   return 0;
 }

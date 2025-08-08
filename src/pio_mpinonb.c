@@ -156,15 +156,15 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
   bool flush = tsID != of->tsID;
 
   if (flush)
-    {
-      xdebug3("IOPE%d: tsID = %d, flush buffer", commInqRankPio(), tsID);
-      writeMPINONB(of);
-      of->tsID = tsID;
-      MPI_Status status;
-      xmpiStat(MPI_Wait(&of->request, &status), &status);
-      POSTWAIT_WORKAROUND(of->request);
-      xmpi(MPI_Barrier(commInqCommPio()));
-    }
+  {
+    xdebug3("IOPE%d: tsID = %d, flush buffer", commInqRankPio(), tsID);
+    writeMPINONB(of);
+    of->tsID = tsID;
+    MPI_Status status;
+    xmpiStat(MPI_Wait(&of->request, &status), &status);
+    POSTWAIT_WORKAROUND(of->request);
+    xmpi(MPI_Barrier(commInqCommPio()));
+  }
 
   size_t dbufIdx = of->dbufIdx;
   int filled = cdiPioDbufferAppend(of->db + dbufIdx, buffer, len);
@@ -175,16 +175,16 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
 
   int error = 0;
   if (filled == 1)
+  {
+    if (flush)
+      error = filled;
+    else
     {
-      if (flush)
-        error = filled;
-      else
-        {
-          writeMPINONB(of);
-          dbufIdx ^= 1;
-          error = cdiPioDbufferAppend(of->db + dbufIdx, buffer, len);
-        }
+      writeMPINONB(of);
+      dbufIdx ^= 1;
+      error = cdiPioDbufferAppend(of->db + dbufIdx, buffer, len);
     }
+  }
 
   if (error == 1) xabort("did not succeed filling output buffer, fileID=%d", fileID);
 
@@ -223,33 +223,33 @@ fowMPINONB(const char *filename, const char *mode)
 
   for (size_t i = 0; i < openFilesSize; ++i)
     if (openFiles[i].name && !strcmp(openFiles[i].name, filename))
-      {
-        Warning("filename %s is already open!"
-                " CDI-PIO does not support concurrent access"
-                " through different filehandles.",
-                filename);
-        return CDI_EINVAL;
-      }
+    {
+      Warning("filename %s is already open!"
+              " CDI-PIO does not support concurrent access"
+              " through different filehandles.",
+              filename);
+      return CDI_EINVAL;
+    }
 
   size_t fileID = SIZE_MAX;
   if (openFilesSize == openFilesFill)
-    {
-      fileID = openFilesSize;
-      if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
-      openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
-      if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
-      openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
-      for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
-    }
+  {
+    fileID = openFilesSize;
+    if (openFilesSize == (size_t) INT_MAX + 1) return CDI_ELIMIT;
+    openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
+    if (openFilesSize > (size_t) INT_MAX + 1) openFilesSize = (size_t) INT_MAX + 1;
+    openFiles = Realloc(openFiles, sizeof(*openFiles) * openFilesSize);
+    for (size_t i = fileID; i < openFilesSize; ++i) openFiles[i].name = NULL;
+  }
   else
-    {
-      for (size_t i = 0; i < openFilesSize; ++i)
-        if (openFiles[i].name == NULL)
-          {
-            fileID = i;
-            break;
-          }
-    }
+  {
+    for (size_t i = 0; i < openFilesSize; ++i)
+      if (openFiles[i].name == NULL)
+      {
+        fileID = i;
+        break;
+      }
+  }
   struct fileMPIFWS *of = openFiles + fileID;
   ++openFilesFill;
   initAFiledataMPINONB(of, filename, conf->writeAggBufLim);

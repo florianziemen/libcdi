@@ -39,10 +39,10 @@ SysError_(const char *caller, const char *fmt, ...)
   va_end(args);
 
   if (saved_errno)
-    {
-      errno = saved_errno;
-      perror("System error message");
-    }
+  {
+    errno = saved_errno;
+    perror("System error message");
+  }
 
   exit(EXIT_FAILURE);
 }
@@ -101,10 +101,10 @@ Warning_(const char *caller, const char *fmt, ...)
   va_start(args, fmt);
 
   if (_Verbose)
-    {
-      cdiWarningFunc cdiWarning_p = (cdiWarningFunc) namespaceSwitchGet(NSSWITCH_WARNING).func;
-      cdiWarning_p(caller, fmt, args);
-    }
+  {
+    cdiWarningFunc cdiWarning_p = (cdiWarningFunc) namespaceSwitchGet(NSSWITCH_WARNING).func;
+    cdiWarning_p(caller, fmt, args);
+  }
 
   va_end(args);
 }

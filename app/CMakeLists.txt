@@ -7,6 +7,6 @@ target_include_directories(cdi PRIVATE
   $<INSTALL_INTERFACE:include
 )
 
-target_link_libraries(cdi PRIVATE cdilib ${cdi_linked_libs})
+target_link_libraries(cdi PRIVATE cdilib)
 target_include_directories(cdi PRIVATE "${PROJECT_BINARY_DIR}/src/config.h")
 target_compile_definitions(cdi PRIVATE  ${cdi_netcdf_definitions})

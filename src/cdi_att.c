@@ -49,10 +49,10 @@ find_att(cdi_atts_t *attsp, const char *name)
 
   cdi_att_t *atts = attsp->value;
   for (size_t attid = 0; attid < attsp->nelems; attid++)
-    {
-      cdi_att_t *attp = atts + attid;
-      if (attp->namesz == slen && memcmp(attp->name, name, slen) == 0) return attp;  // Normal return
-    }
+  {
+    cdi_att_t *attp = atts + attid;
+    if (attp->namesz == slen && memcmp(attp->name, name, slen) == 0) return attp;  // Normal return
+  }
 
   return NULL;
 }
@@ -90,10 +90,10 @@ fill_att(cdi_att_t *attp, int indtype, int exdtype, size_t nelems, size_t xsz, c
   attp->nelems = nelems;
 
   if (xsz > 0)
-    {
-      attp->xvalue = Realloc(attp->xvalue, xsz);
-      memcpy(attp->xvalue, xvalue, xsz);
-    }
+  {
+    attp->xvalue = Realloc(attp->xvalue, xsz);
+    memcpy(attp->xvalue, xvalue, xsz);
+  }
 }
 
 static cdi_atts_t *
@@ -102,20 +102,20 @@ cdi_get_attsp(int objID, int varID)
   cdi_atts_t *attsp = NULL;
 
   if (varID == CDI_GLOBAL && reshGetTxCode(objID) == GRID)
-    {
-      grid_t *gridptr = grid_to_pointer(objID);
-      attsp = &gridptr->atts;
-    }
+  {
+    grid_t *gridptr = grid_to_pointer(objID);
+    attsp = &gridptr->atts;
+  }
   else if (varID == CDI_GLOBAL && reshGetTxCode(objID) == ZAXIS)
-    {
-      zaxis_t *zaxisptr = zaxis_to_pointer(objID);
-      attsp = &zaxisptr->atts;
-    }
+  {
+    zaxis_t *zaxisptr = zaxis_to_pointer(objID);
+    attsp = &zaxisptr->atts;
+  }
   else
-    {
-      vlist_t *vlistptr = vlist_to_pointer(objID);
-      attsp = get_attsp(vlistptr, varID);
-    }
+  {
+    vlist_t *vlistptr = vlist_to_pointer(objID);
+    attsp = get_attsp(vlistptr, varID);
+  }
 
   return attsp;
 }
@@ -182,18 +182,18 @@ cdiInqAtt(int cdiID, int varID, int attnum, char *name, int *typep, int *lenp)
   if (attnum >= 0 && attnum < (int) attsp->nelems) attp = &(attsp->value[attnum]);
 
   if (attp != NULL && attp->name)  // name in use
-    {
-      memcpy(name, attp->name, attp->namesz + 1);
-      *typep = attp->exdtype;
-      *lenp = (int) attp->nelems;
-    }
+  {
+    memcpy(name, attp->name, attp->namesz + 1);
+    *typep = attp->exdtype;
+    *lenp = (int) attp->nelems;
+  }
   else
-    {
-      name[0] = 0;
-      *typep = -1;
-      *lenp = 0;
-      status = -1;
-    }
+  {
+    name[0] = 0;
+    *typep = -1;
+    *lenp = 0;
+    status = -1;
+  }
 
   return status;
 }
@@ -209,10 +209,10 @@ cdiInqAttLen(int cdiID, int varID, const char *name)
   xassert(attsp != NULL);
 
   for (int attid = 0; attid < (int) attsp->nelems; attid++)
-    {
-      cdi_att_t *attp = &(attsp->value[attid]);
-      if (attp->name && str_is_equal(attp->name, name)) length = (int) attp->nelems;
-    }
+  {
+    cdi_att_t *attp = &(attsp->value[attid]);
+    if (attp->name && str_is_equal(attp->name, name)) length = (int) attp->nelems;
+  }
 
   return length;
 }
@@ -228,10 +228,10 @@ cdiInqAttType(int cdiID, int varID, const char *name)
   xassert(attsp != NULL);
 
   for (int attid = 0; attid < (int) attsp->nelems; attid++)
-    {
-      cdi_att_t *attp = &(attsp->value[attid]);
-      if (attp->name && str_is_equal(attp->name, name)) type = attp->exdtype;
-    }
+  {
+    cdi_att_t *attp = &(attsp->value[attid]);
+    if (attp->name && str_is_equal(attp->name, name)) type = attp->exdtype;
+  }
 
   return type;
 }
@@ -240,16 +240,16 @@ static void
 cdi_attribute_free(cdi_att_t *attp)
 {
   if (attp->name)
-    {
-      Free(attp->name);
-      attp->name = NULL;
-      attp->namesz = 0;
-    }
+  {
+    Free(attp->name);
+    attp->name = NULL;
+    attp->namesz = 0;
+  }
   if (attp->xvalue)
-    {
-      Free(attp->xvalue);
-      attp->xvalue = NULL;
-    }
+  {
+    Free(attp->xvalue);
+    attp->xvalue = NULL;
+  }
 }
 
 int
@@ -261,10 +261,10 @@ cdiDeleteAtts(int cdiID, int varID)
   xassert(attsp != NULL);
 
   for (int attid = 0; attid < (int) attsp->nelems; attid++)
-    {
-      cdi_att_t *attp = &(attsp->value[attid]);
-      cdi_attribute_free(attp);
-    }
+  {
+    cdi_att_t *attp = &(attsp->value[attid]);
+    cdi_attribute_free(attp);
+  }
 
   attsp->nelems = 0;
 
@@ -280,15 +280,15 @@ cdiDelAtt(int cdiID, int varID, const char *name)
   xassert(attsp != NULL);
 
   for (int attid = 0; attid < (int) attsp->nelems; attid++)
+  {
+    cdi_att_t *attp = &(attsp->value[attid]);
+    if (attp->name && str_is_equal(attp->name, name))
     {
-      cdi_att_t *attp = &(attsp->value[attid]);
-      if (attp->name && str_is_equal(attp->name, name))
-        {
-          cdi_attribute_free(attp);
-          status = CDI_NOERR;
-          break;
-        }
+      cdi_attribute_free(attp);
+      status = CDI_NOERR;
+      break;
     }
+  }
 
   return status;
 }
@@ -323,24 +323,24 @@ cdi_inq_att(int indtype, int cdiID, int varID, const char *name, size_t mxsz, vo
 
   cdi_att_t *attp = find_att(attsp, name);
   if (attp != NULL)  // name in use
+  {
+    if (attp->indtype == indtype)
     {
-      if (attp->indtype == indtype)
-        {
-          size_t xsz = attp->xsz;
-          if (mxsz < xsz) xsz = mxsz;
-          if (xsz > 0) memcpy(xp, attp->xvalue, xsz);
-        }
-      else
-        {
-          Warning("Attribute %s has wrong data type!", name);
-          status = -2;
-        }
+      size_t xsz = attp->xsz;
+      if (mxsz < xsz) xsz = mxsz;
+      if (xsz > 0) memcpy(xp, attp->xvalue, xsz);
     }
+    else
+    {
+      Warning("Attribute %s has wrong data type!", name);
+      status = -2;
+    }
+  }
   else
-    {
-      // Warning("Internal problem, attribute %s not found!", name);
-      status = -1;
-    }
+  {
+    // Warning("Internal problem, attribute %s not found!", name);
+    status = -1;
+  }
 
   return status;
 }
@@ -354,10 +354,10 @@ cdiCopyAtts(int cdiID1, int varID1, int cdiID2, int varID2)
   xassert(attsp1 != NULL);
 
   for (size_t attid = 0; attid < attsp1->nelems; attid++)
-    {
-      cdi_att_t *attp = &(attsp1->value[attid]);
-      cdi_def_att(attp->indtype, attp->exdtype, cdiID2, varID2, attp->name, attp->nelems, attp->xsz, attp->xvalue);
-    }
+  {
+    cdi_att_t *attp = &(attsp1->value[attid]);
+    cdi_def_att(attp->indtype, attp->exdtype, cdiID2, varID2, attp->name, attp->nelems, attp->xsz, attp->xvalue);
+  }
 
   return status;
 }
@@ -530,12 +530,12 @@ cdiAttTypeLookup(cdi_att_t *attp)
 {
   int type;
   switch (attp->indtype)
-    {
+  {
     case CDI_DATATYPE_FLT: type = CDI_DATATYPE_FLT64; break;
     case CDI_DATATYPE_INT:
     case CDI_DATATYPE_TXT: type = attp->indtype; break;
     default: xabort("Unknown datatype encountered in attribute %s: %d\n", attp->name, attp->indtype);
-    }
+  }
   return type;
 }
 
@@ -616,7 +616,7 @@ cdiAttUnpack(int cdiID, int varID, void *buf, int size, int *position, void *con
   int attVDt;
   size_t elemSize;
   switch (tempbuf[2])
-    {
+  {
     case CDI_DATATYPE_FLT:
       attVDt = CDI_DATATYPE_FLT64;
       elemSize = sizeof(double);
@@ -630,7 +630,7 @@ cdiAttUnpack(int cdiID, int varID, void *buf, int size, int *position, void *con
       elemSize = 1;
       break;
     default: xabort("Unknown datatype encountered in attribute %s: %d\n", attName, tempbuf[2]);
-    }
+  }
   void *attData = Malloc(elemSize * (size_t) tempbuf[3]);
   serializeUnpack(buf, size, position, attData, tempbuf[3], attVDt, context);
   cdi_def_att(tempbuf[2], tempbuf[1], cdiID, varID, attName, (size_t) tempbuf[3], (size_t) tempbuf[3] * elemSize, attData);

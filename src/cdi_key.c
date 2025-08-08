@@ -76,10 +76,10 @@ find_key(cdi_keys_t *keysp, int key)
   if (keysp->nelems == 0) return NULL;
 
   for (uint16_t keyid = 0; keyid < keysp->nelems; keyid++)
-    {
-      cdi_key_t *keyp = &(keysp->value[keyid]);
-      if (keyp->key == key) return keyp;  // Normal return
-    }
+  {
+    cdi_key_t *keyp = &(keysp->value[keyid]);
+    if (keyp->key == key) return keyp;  // Normal return
+  }
 
   return NULL;
 }
@@ -92,10 +92,10 @@ find_key_const(const cdi_keys_t *keysp, int key)
   if (keysp->nelems == 0) return NULL;
 
   for (uint16_t keyid = 0; keyid < keysp->nelems; keyid++)
-    {
-      const cdi_key_t *keyp = &(keysp->value[keyid]);
-      if (keyp->key == key) return keyp;  // Normal return
-    }
+  {
+    const cdi_key_t *keyp = &(keysp->value[keyid]);
+    if (keyp->key == key) return keyp;  // Normal return
+  }
 
   return NULL;
 }
@@ -134,32 +134,23 @@ static void
 cdi_delete_key(cdi_key_t *keyp)
 {
   if (keyp != NULL && keyp->length)  // key in use
+  {
+    keyp->length = 0;
+    if (keyp->type == KeyBytes)
     {
-      keyp->length = 0;
-      if (keyp->type == KeyBytes)
-        {
-          if (keyp->v.s) Free(keyp->v.s);
-          keyp->v.s = NULL;
-        }
-      else if (keyp->type == KeyFloat)
-        {
-          keyp->v.d = 0.0;
-        }
-      else if (keyp->type == KeyInt)
-        {
-          keyp->v.i = 0;
-        }
+      if (keyp->v.s) Free(keyp->v.s);
+      keyp->v.s = NULL;
     }
+    else if (keyp->type == KeyFloat) { keyp->v.d = 0.0; }
+    else if (keyp->type == KeyInt) { keyp->v.i = 0; }
+  }
 }
 
 void
 cdiDeleteVarKeys(cdi_keys_t *keysp)
 {
   uint16_t nelems = keysp ? keysp->nelems : 0;
-  for (uint16_t keyid = 0; keyid < nelems; keyid++)
-    {
-      cdi_delete_key(&(keysp->value[keyid]));
-    }
+  for (uint16_t keyid = 0; keyid < nelems; keyid++) { cdi_delete_key(&(keysp->value[keyid])); }
 
   keysp->nelems = 0;
 }
@@ -178,22 +169,16 @@ cdiPrintVarKeys(cdi_keys_t *keysp)
 {
   uint16_t nelems = keysp ? (int) keysp->nelems : 0;
   for (uint16_t keyid = 0; keyid < nelems; keyid++)
+  {
+    cdi_key_t *keyp = &(keysp->value[keyid]);
+    if (keyp->length == 0) continue;
+    if (keyp->type == KeyBytes)
     {
-      cdi_key_t *keyp = &(keysp->value[keyid]);
-      if (keyp->length == 0) continue;
-      if (keyp->type == KeyBytes)
-        {
-          fprintf(stdout, "%d key %d length %d value %s\n", keyid + 1, keyp->key, keyp->length, keyp->v.s);
-        }
-      else if (keyp->type == KeyFloat)
-        {
-          fprintf(stdout, "%d key %d value %g\n", keyid + 1, keyp->key, keyp->v.d);
-        }
-      else if (keyp->type == KeyInt)
-        {
-          fprintf(stdout, "%d key %d value %d\n", keyid + 1, keyp->key, keyp->v.i);
-        }
+      fprintf(stdout, "%d key %d length %d value %s\n", keyid + 1, keyp->key, keyp->length, keyp->v.s);
     }
+    else if (keyp->type == KeyFloat) { fprintf(stdout, "%d key %d value %g\n", keyid + 1, keyp->key, keyp->v.d); }
+    else if (keyp->type == KeyInt) { fprintf(stdout, "%d key %d value %d\n", keyid + 1, keyp->key, keyp->v.i); }
+  }
 }
 
 void
@@ -216,10 +201,10 @@ cdiInqKeyLen(int cdiID, int varID, int key, int *length)
 
   const cdi_key_t *keyp = find_key_const(keysp, key);
   if (keyp != NULL && keyp->length > 0)
-    {
-      *length = keyp->length;
-      status = CDI_NOERR;
-    }
+  {
+    *length = keyp->length;
+    status = CDI_NOERR;
+  }
 
   return status;
 }
@@ -251,10 +236,10 @@ void
 cdiCopyVarKeys(const cdi_keys_t *keysp1, cdi_keys_t *keysp2)
 {
   for (uint16_t keyid = 0; keyid < keysp1->nelems; keyid++)
-    {
-      const cdi_key_t *keyp = &(keysp1->value[keyid]);
-      if (keyp->length > 0) cdi_define_key(keyp, keysp2);
-    }
+  {
+    const cdi_key_t *keyp = &(keysp1->value[keyid]);
+    if (keyp->length > 0) cdi_define_key(keyp, keysp2);
+  }
 }
 
 int
@@ -305,14 +290,14 @@ cdiDefVarKeyInt(cdi_keys_t *keysp, int key, int value)
   if (keyp == NULL) keyp = new_key(keysp, key);
 
   if (keyp != NULL)
+  {
+    // if ( keyp->v.i != value )
     {
-      // if ( keyp->v.i != value )
-      {
-        keyp->type = KeyInt;
-        keyp->v.i = value;
-        keyp->length = 1;
-      }
+      keyp->type = KeyInt;
+      keyp->v.i = value;
+      keyp->length = 1;
     }
+  }
 }
 
 /*
@@ -378,13 +363,13 @@ cdiInqKeyInt(int cdiID, int varID, int key, int *value)
 
   const cdi_key_t *keyp = find_key_const(keysp, key);
   if (keyp != NULL && keyp->length == 1)  // key in use
+  {
+    if (keyp->type == KeyInt)
     {
-      if (keyp->type == KeyInt)
-        {
-          *value = keyp->v.i;
-          status = CDI_NOERR;
-        }
+      *value = keyp->v.i;
+      status = CDI_NOERR;
     }
+  }
 
   return status;
 }
@@ -407,11 +392,11 @@ cdiDefVarKeyFloat(cdi_keys_t *keysp, int key, double value)
   if (keyp == NULL) keyp = new_key(keysp, key);
 
   if (keyp != NULL)
-    {
-      keyp->type = KeyFloat;
-      keyp->v.d = value;
-      keyp->length = 1;
-    }
+  {
+    keyp->type = KeyFloat;
+    keyp->v.d = value;
+    keyp->length = 1;
+  }
 }
 
 /*
@@ -477,13 +462,13 @@ cdiInqKeyFloat(int cdiID, int varID, int key, double *value)
 
   const cdi_key_t *keyp = find_key_const(keysp, key);
   if (keyp != NULL && keyp->length == 1)  // key in use
+  {
+    if (keyp->type == KeyFloat)
     {
-      if (keyp->type == KeyFloat)
-        {
-          *value = keyp->v.d;
-          status = CDI_NOERR;
-        }
+      *value = keyp->v.d;
+      status = CDI_NOERR;
     }
+  }
 
   return status;
 }
@@ -496,21 +481,21 @@ cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, int le
 
   size_t length_ = length >= 0 ? (size_t) length : (size_t) 0;
   if (keyp != NULL)
+  {
+    if (keyp->length != 0 && keyp->length != length)
     {
-      if (keyp->length != 0 && keyp->length != length)
-        {
-          if (keyp->v.s) Free(keyp->v.s);
-          keyp->length = 0;
-        }
-      if (keyp->length == 0)
-        {
-          keyp->v.s = (unsigned char *) Malloc(length_);
-          keyp->length = length;
-        }
-
-      memcpy(keyp->v.s, bytes, length_);
-      keyp->type = KeyBytes;
+      if (keyp->v.s) Free(keyp->v.s);
+      keyp->length = 0;
     }
+    if (keyp->length == 0)
+    {
+      keyp->v.s = (unsigned char *) Malloc(length_);
+      keyp->length = length;
+    }
+
+    memcpy(keyp->v.s, bytes, length_);
+    keyp->type = KeyBytes;
+  }
 }
 
 /*
@@ -554,17 +539,17 @@ cdiInqVarKeyBytes(const cdi_keys_t *keysp, int key, unsigned char *bytes, int *l
   const cdi_key_t *keyp = find_key_const(keysp, key);
   int val_len;
   if (keyp != NULL && (val_len = keyp->length) > 0)  // key in use
+  {
+    if (keyp->type == KeyBytes)
     {
-      if (keyp->type == KeyBytes)
-        {
-          if (val_len < *length)
-            *length = val_len;
-          else
-            val_len = *length;
-          memcpy(bytes, keyp->v.s, (size_t) val_len);
-          status = CDI_NOERR;
-        }
+      if (val_len < *length)
+        *length = val_len;
+      else
+        val_len = *length;
+      memcpy(bytes, keyp->v.s, (size_t) val_len);
+      status = CDI_NOERR;
     }
+  }
 
   return status;
 }
@@ -710,9 +695,9 @@ cdiInqVarKeyStringPtr(const cdi_keys_t *keysp, int key)
 {
   const cdi_key_t *keyp = find_key_const(keysp, key);
   if (keyp != NULL)  // key in use
-    {
-      if (keyp->type == KeyBytes) return (const char *) keyp->v.s;
-    }
+  {
+    if (keyp->type == KeyBytes) return (const char *) keyp->v.s;
+  }
 
   return NULL;
 }

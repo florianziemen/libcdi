@@ -124,10 +124,10 @@ srvDefField(stream_t *streamptr)
   int gridID = record->gridID;
   SizeType xsize = gridInqXsize(gridID), ysize = gridInqYsize(gridID);
   if (xsize == 0 || ysize == 0)
-    {
-      xsize = gridInqSize(gridID);
-      ysize = 1;
-    }
+  {
+    xsize = gridInqSize(gridID);
+    ysize = 1;
+  }
   if (gridInqType(gridID) == GRID_UNSTRUCTURED) ysize = 1;
   if (gridInqSize(gridID) != xsize * ysize) Error("Internal problem with gridsize!");
 
@@ -191,10 +191,10 @@ srv_add_record(stream_t *streamptr, int param, int level, size_t xsize, size_t y
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
   if (!gridAdded.isNew)
-    {
-      grid_free(grid);
-      Free(grid);
-    }
+  {
+    grid_free(grid);
+    Free(grid);
+  }
 
   int leveltype = ZAXIS_GENERIC;
   int datatype = srvInqDatatype(prec);
@@ -231,49 +231,49 @@ srvScanTimestep1(stream_t *streamptr)
 
   int nrecs = 0;
   while (true)
+  {
+    recpos = fileGetPos(fileID);
+    if (srvRead(fileID, srvp) != 0)
     {
-      recpos = fileGetPos(fileID);
-      if (srvRead(fileID, srvp) != 0)
-        {
-          streamptr->ntsteps = 1;
-          break;
-        }
-
-      size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
-
-      int header[8];
-      srvInqHeader(srvp, header);
-
-      int prec = srvp->dprec;
-      int rcode = header[0];
-      int rlevel = header[1];
-      int vdate = header[2];
-      int vtime = header[3];
-      int rxsize = header[4];
-      int rysize = header[5];
-      int param = cdiEncodeParam(rcode, 255, 255);
-      CdiDateTime datetime = cdiDateTime_set(vdate, vtime);
-
-      if (nrecs == 0)
-        {
-          datetime0 = datetime;
-          taxis->vDateTime = datetime;
-        }
-      else
-        {
-          record_t *records = streamptr->tsteps[tsID].records;
-          for (int recID = 0; recID < nrecs; recID++)
-            if (param == records[recID].param && rlevel == records[recID].ilevel) goto tstepScanLoopFinished;
-
-          if (cdiDateTime_isNE(datetime, datetime0)) Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
-        }
-
-      nrecs++;
-
-      if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", nrecs, (int) recpos, rcode, rlevel, vdate, vtime);
-
-      srv_add_record(streamptr, param, rlevel, (size_t) rxsize, (size_t) rysize, recsize, recpos, prec);
+      streamptr->ntsteps = 1;
+      break;
     }
+
+    size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+
+    int header[8];
+    srvInqHeader(srvp, header);
+
+    int prec = srvp->dprec;
+    int rcode = header[0];
+    int rlevel = header[1];
+    int vdate = header[2];
+    int vtime = header[3];
+    int rxsize = header[4];
+    int rysize = header[5];
+    int param = cdiEncodeParam(rcode, 255, 255);
+    CdiDateTime datetime = cdiDateTime_set(vdate, vtime);
+
+    if (nrecs == 0)
+    {
+      datetime0 = datetime;
+      taxis->vDateTime = datetime;
+    }
+    else
+    {
+      record_t *records = streamptr->tsteps[tsID].records;
+      for (int recID = 0; recID < nrecs; recID++)
+        if (param == records[recID].param && rlevel == records[recID].ilevel) goto tstepScanLoopFinished;
+
+      if (cdiDateTime_isNE(datetime, datetime0)) Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
+    }
+
+    nrecs++;
+
+    if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", nrecs, (int) recpos, rcode, rlevel, vdate, vtime);
+
+    srv_add_record(streamptr, param, rlevel, (size_t) rxsize, (size_t) rysize, recsize, recpos, prec);
+  }
 
 tstepScanLoopFinished:
   streamptr->rtsteps = 1;
@@ -321,77 +321,74 @@ srvScanTimestep2(stream_t *streamptr)
   int nrecords = streamScanInitRecords2(streamptr);
 
   for (int rindex = 0; rindex <= nrecords; rindex++)
+  {
+    recpos = fileGetPos(fileID);
+    if (srvRead(fileID, srvp) != 0)
     {
-      recpos = fileGetPos(fileID);
-      if (srvRead(fileID, srvp) != 0)
-        {
-          streamptr->ntsteps = 2;
-          break;
-        }
-
-      size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
-
-      srvInqHeader(srvp, header);
-
-      int rcode = header[0];
-      int rlevel = header[1];
-      int vdate = header[2];
-      int vtime = header[3];
-      int param = cdiEncodeParam(rcode, 255, 255);
-
-      if (rindex == 0)
-        {
-          taxis->type = TAXIS_ABSOLUTE;
-          taxis->vDateTime = cdiDateTime_set(vdate, vtime);
-        }
-
-      bool nextstep = false;
-      int recID;
-      for (recID = 0; recID < nrecords; recID++)
-        {
-          if (param == records[recID].param && rlevel == records[recID].ilevel)
-            {
-              if (recinfo[recID].used)
-                {
-                  nextstep = true;
-                }
-              else
-                {
-                  recinfo[recID].used = true;
-                  streamptr->tsteps[tsID].recIDs[rindex] = recID;
-                }
-              break;
-            }
-        }
-      if (recID == nrecords)
-        {
-          Warning("Code %d level %d not found at timestep %d", rcode, rlevel, tsID + 1);
-          return CDI_EUFSTRUCT;
-        }
-
-      if (nextstep) break;
-
-      if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", rindex + 1, (int) recpos, rcode, rlevel, vdate, vtime);
-
-      if (param != records[recID].param || rlevel != records[recID].ilevel)
-        {
-          Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
-                  records[recID].ilevel, rlevel);
-          return CDI_EUFSTRUCT;
-        }
-
-      records[recID].position = recpos;
-      records[recID].size = recsize;
+      streamptr->ntsteps = 2;
+      break;
     }
+
+    size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+
+    srvInqHeader(srvp, header);
+
+    int rcode = header[0];
+    int rlevel = header[1];
+    int vdate = header[2];
+    int vtime = header[3];
+    int param = cdiEncodeParam(rcode, 255, 255);
+
+    if (rindex == 0)
+    {
+      taxis->type = TAXIS_ABSOLUTE;
+      taxis->vDateTime = cdiDateTime_set(vdate, vtime);
+    }
+
+    bool nextstep = false;
+    int recID;
+    for (recID = 0; recID < nrecords; recID++)
+    {
+      if (param == records[recID].param && rlevel == records[recID].ilevel)
+      {
+        if (recinfo[recID].used) { nextstep = true; }
+        else
+        {
+          recinfo[recID].used = true;
+          streamptr->tsteps[tsID].recIDs[rindex] = recID;
+        }
+        break;
+      }
+    }
+    if (recID == nrecords)
+    {
+      Warning("Code %d level %d not found at timestep %d", rcode, rlevel, tsID + 1);
+      return CDI_EUFSTRUCT;
+    }
+
+    if (nextstep) break;
+
+    if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", rindex + 1, (int) recpos, rcode, rlevel, vdate, vtime);
+
+    if (param != records[recID].param || rlevel != records[recID].ilevel)
+    {
+      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
+              records[recID].ilevel, rlevel);
+      return CDI_EUFSTRUCT;
+    }
+
+    records[recID].position = recpos;
+    records[recID].size = recsize;
+  }
 
   int nrecs = 0;
   for (int recID = 0; recID < nrecords; recID++)
-    {
-      if (recinfo[recID].used)
-        nrecs++;
-      else
-        vlistDefVarTimetype(vlistID, recinfo[recID].varID, TIME_CONSTANT);
-    }
+  {
+    if (recinfo[recID].used)
+      nrecs++;
+    else
+      vlistDefVarTimetype(vlistID, recinfo[recID].varID, TIME_CONSTANT);
+  }
   streamptr->tsteps[tsID].nrecs = nrecs;
 
   streamptr->rtsteps = 2;
@@ -427,78 +424,78 @@ srvScanTimestep(stream_t *streamptr)
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   if (streamptr->tsteps[tsID].recordSize == 0)
+  {
+    cdi_create_records(streamptr, tsID, true);
+    record_t *records = streamptr->tsteps[tsID].records;
+
+    nrecs = streamScanInitRecords(streamptr, tsID);
+
+    int fileID = streamptr->fileID;
+
+    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+
+    for (int rindex = 0; rindex <= nrecs; rindex++)
     {
-      cdi_create_records(streamptr, tsID, true);
-      record_t *records = streamptr->tsteps[tsID].records;
+      recpos = fileGetPos(fileID);
+      if (srvRead(fileID, srvp) != 0)
+      {
+        streamptr->ntsteps = streamptr->rtsteps + 1;
+        break;
+      }
 
-      nrecs = streamScanInitRecords(streamptr, tsID);
+      size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
 
-      int fileID = streamptr->fileID;
+      srvInqHeader(srvp, header);
 
-      fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+      int rcode = header[0];
+      int rlevel = header[1];
+      int vdate = header[2];
+      int vtime = header[3];
+      int param = cdiEncodeParam(rcode, 255, 255);
 
-      for (int rindex = 0; rindex <= nrecs; rindex++)
-        {
-          recpos = fileGetPos(fileID);
-          if (srvRead(fileID, srvp) != 0)
-            {
-              streamptr->ntsteps = streamptr->rtsteps + 1;
-              break;
-            }
+      // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
+      if (rindex == nrecs) continue;
+      int recID = streamptr->tsteps[tsID].recIDs[rindex];
 
-          size_t recsize = (size_t) (fileGetPos(fileID) - recpos);
+      if (rindex == 0)
+      {
+        taxis->type = TAXIS_ABSOLUTE;
+        taxis->vDateTime = cdiDateTime_set(vdate, vtime);
+      }
 
-          srvInqHeader(srvp, header);
+      if (param != records[recID].param || rlevel != records[recID].ilevel)
+      {
+        Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
+                records[recID].ilevel, rlevel);
+        Error("Invalid, unsupported or inconsistent record structure!");
+      }
 
-          int rcode = header[0];
-          int rlevel = header[1];
-          int vdate = header[2];
-          int vtime = header[3];
-          int param = cdiEncodeParam(rcode, 255, 255);
+      records[recID].position = recpos;
+      records[recID].size = recsize;
 
-          // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
-          if (rindex == nrecs) continue;
-          int recID = streamptr->tsteps[tsID].recIDs[rindex];
+      if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", rindex, (int) recpos, rcode, rlevel, vdate, vtime);
+    }
 
-          if (rindex == 0)
-            {
-              taxis->type = TAXIS_ABSOLUTE;
-              taxis->vDateTime = cdiDateTime_set(vdate, vtime);
-            }
+    streamptr->rtsteps++;
 
-          if (param != records[recID].param || rlevel != records[recID].ilevel)
-            {
-              Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
-                      records[recID].ilevel, rlevel);
-              Error("Invalid, unsupported or inconsistent record structure!");
-            }
+    if (streamptr->ntsteps != streamptr->rtsteps)
+    {
+      tsID = tstepsNewEntry(streamptr);
+      if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
 
-          records[recID].position = recpos;
-          records[recID].size = recsize;
-
-          if (CDI_Debug) Message("%4d%8d%4d%8d%8d%6d", rindex, (int) recpos, rcode, rlevel, vdate, vtime);
-        }
-
-      streamptr->rtsteps++;
-
-      if (streamptr->ntsteps != streamptr->rtsteps)
-        {
-          tsID = tstepsNewEntry(streamptr);
-          if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
-
-          streamptr->tsteps[tsID - 1].next = true;
-          streamptr->tsteps[tsID].position = recpos;
-        }
-
-      fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+      streamptr->tsteps[tsID - 1].next = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 
+    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+    streamptr->tsteps[tsID].position = recpos;
+  }
+
   if (nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs)
-    {
-      Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
-      streamptr->ntsteps = tsID;
-    }
+  {
+    Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
+    streamptr->ntsteps = tsID;
+  }
 
   return streamptr->ntsteps;
 }
@@ -515,10 +512,10 @@ srvInqTimestep(stream_t *streamptr, int tsID)
 
   int nrecs = 0;
   if (!(tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID))
-    {
-      streamptr->curTsID = tsID;
-      nrecs = streamptr->tsteps[tsID].nrecs;
-    }
+  {
+    streamptr->curTsID = tsID;
+    nrecs = streamptr->tsteps[tsID].nrecs;
+  }
 
   return nrecs;
 }
@@ -589,10 +586,10 @@ srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
 
   SizeType xsize = gridInqXsize(gridID), ysize = gridInqYsize(gridID);
   if (xsize == 0 || ysize == 0)
-    {
-      xsize = gridInqSize(gridID);
-      ysize = 1;
-    }
+  {
+    xsize = gridInqSize(gridID);
+    ysize = 1;
+  }
   if (gridInqType(gridID) == GRID_UNSTRUCTURED) ysize = 1;
   if (gridInqSize(gridID) != xsize * ysize) Error("Internal problem with gridsize!");
 

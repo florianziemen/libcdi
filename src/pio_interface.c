@@ -138,10 +138,10 @@ cdiPioClientStreamWinDestroy(int streamID)
   collWaitAll();
   size_t streamIdx = indexOfID(&openStreams, streamID);
   if (txWin[streamIdx].clientDeco.lists)
-    {
-      size_t nVars = (size_t) (vlistNvars(streamInqVlist(streamID)));
-      cdiPioDestroyPartDescPreset(1, nVars, &txWin[streamIdx].clientDeco);
-    }
+  {
+    size_t nVars = (size_t) (vlistNvars(streamInqVlist(streamID)));
+    cdiPioDestroyPartDescPreset(1, nVars, &txWin[streamIdx].clientDeco);
+  }
   if (txWin[streamIdx].postSet) xmpi(MPI_Win_wait(txWin[streamIdx].win));
   if (txWin[streamIdx].win != MPI_WIN_NULL) xmpi(MPI_Win_free(&txWin[streamIdx].win));
   if (txWin[streamIdx].buffer) xmpi(MPI_Free_mem(txWin[streamIdx].buffer));
@@ -155,19 +155,19 @@ cdiPioSetStreamPartDescPreset(int streamID, size_t nVars, const Xt_idxlist *rest
   Xt_idxlist *restrict partDescCopy = Malloc(nVars * sizeof(Xt_idxlist));
   Xt_uid *restrict partDescUID = Malloc(nVars * sizeof(Xt_uid));
   for (size_t i = 0; i < nVars; ++i)
-    {
-      Xt_uid uid = partDescUID[i] = xt_idxlist_get_uid(partDesc[i]);
-      for (size_t j = 0; j < i; ++j)
-        if (partDescUID[j] != uid)
-          ;
-        else
-          {
-            partDescCopy[i] = partDescCopy[j];
-            goto next_index_list;
-          }
-      partDescCopy[i] = xt_idxlist_copy(partDesc[i]);
-    next_index_list:;
-    }
+  {
+    Xt_uid uid = partDescUID[i] = xt_idxlist_get_uid(partDesc[i]);
+    for (size_t j = 0; j < i; ++j)
+      if (partDescUID[j] != uid)
+        ;
+      else
+      {
+        partDescCopy[i] = partDescCopy[j];
+        goto next_index_list;
+      }
+    partDescCopy[i] = xt_idxlist_copy(partDesc[i]);
+  next_index_list:;
+  }
   txWin[streamIdx].clientDeco.uids = partDescUID;
   txWin[streamIdx].clientDeco.lists = partDescCopy;
   int *restrict conversionCopy = Malloc(nVars * sizeof(*conversion));
@@ -227,55 +227,55 @@ modelWinEnqueue(size_t streamIdx, struct winHeaderEntry header, const void *data
   else
     targetEntry = txWin[streamIdx].dictSize - ++(txWin[streamIdx].dictRPCUsed);
   if (header.id > 0)
-    {
-      size_t alignTo = header.id == DATA_HEADER_DOUBLE ? sizeof(double) : sizeof(float);
-      int offset = header.offset = (int) roundUpToMultiple((size_t) (txWin[streamIdx].head - txWin[streamIdx].buffer), alignTo);
-      MPI_Comm comm = cdiPioInqInterComm();
-      packFunc((void *) data, txWin[streamIdx].buffer, (int) txWin[streamIdx].size, &offset, &comm);
-      txWin[streamIdx].head = txWin[streamIdx].buffer + offset;
-    }
+  {
+    size_t alignTo = header.id == DATA_HEADER_DOUBLE ? sizeof(double) : sizeof(float);
+    int offset = header.offset = (int) roundUpToMultiple((size_t) (txWin[streamIdx].head - txWin[streamIdx].buffer), alignTo);
+    MPI_Comm comm = cdiPioInqInterComm();
+    packFunc((void *) data, txWin[streamIdx].buffer, (int) txWin[streamIdx].size, &offset, &comm);
+    txWin[streamIdx].head = txWin[streamIdx].buffer + offset;
+  }
   else if (header.id == PARTDESCMARKER)
+  {
+    Xt_uid uid = unpackXTUID(header.specific.partDesc.packedUID);
+    Xt_idxlist(*restrict partDescPreset) = txWin[streamIdx].clientDeco.lists;
+    if (!partDescPreset)
     {
-      Xt_uid uid = unpackXTUID(header.specific.partDesc.packedUID);
-      Xt_idxlist(*restrict partDescPreset) = txWin[streamIdx].clientDeco.lists;
-      if (!partDescPreset)
+      /* search if same uid entry has already been enqueued */
+      for (int entry = 2; entry < targetEntry; entry += 2)
+      {
+        xassert(winDict[entry].id == PARTDESCMARKER);
+        if (unpackXTUID(winDict[entry].specific.partDesc.packedUID) == uid)
         {
-          /* search if same uid entry has already been enqueued */
-          for (int entry = 2; entry < targetEntry; entry += 2)
-            {
-              xassert(winDict[entry].id == PARTDESCMARKER);
-              if (unpackXTUID(winDict[entry].specific.partDesc.packedUID) == uid)
-                {
-                  /* duplicate entries are copied only once per timestep */
-                  header.offset = winDict[entry].offset;
-                  goto partDescHeaderFinished;
-                }
-            }
-          /* not yet used partition descriptor, serialize at
-           * current position */
-          int position = header.offset = (int) (txWin[streamIdx].head - txWin[streamIdx].buffer);
-          MPI_Comm comm = cdiPioInqInterComm();
-          packFunc((void *) data, txWin[streamIdx].buffer, (int) txWin[streamIdx].size, &position, &comm);
-          txWin[streamIdx].head = txWin[streamIdx].buffer + position;
+          /* duplicate entries are copied only once per timestep */
+          header.offset = winDict[entry].offset;
+          goto partDescHeaderFinished;
         }
-      else
-        {
-          int varID = winDict[targetEntry - 1].specific.dataRecord.varID;
-          Xt_uid(*restrict uids) = txWin[streamIdx].clientDeco.uids;
-          if (uid != uids[varID] && data != partDescPreset[varID])
-            xabort("error: incorrect index list passed to streamWriteVarPart"
-                   " or streamWriteVarPartF!");
-          header.offset = -1;
-        }
-    partDescHeaderFinished:;
-    }
-  else
-    {
+      }
+      /* not yet used partition descriptor, serialize at
+       * current position */
       int position = header.offset = (int) (txWin[streamIdx].head - txWin[streamIdx].buffer);
       MPI_Comm comm = cdiPioInqInterComm();
       packFunc((void *) data, txWin[streamIdx].buffer, (int) txWin[streamIdx].size, &position, &comm);
       txWin[streamIdx].head = txWin[streamIdx].buffer + position;
     }
+    else
+    {
+      int varID = winDict[targetEntry - 1].specific.dataRecord.varID;
+      Xt_uid(*restrict uids) = txWin[streamIdx].clientDeco.uids;
+      if (uid != uids[varID] && data != partDescPreset[varID])
+        xabort("error: incorrect index list passed to streamWriteVarPart"
+               " or streamWriteVarPartF!");
+      header.offset = -1;
+    }
+  partDescHeaderFinished:;
+  }
+  else
+  {
+    int position = header.offset = (int) (txWin[streamIdx].head - txWin[streamIdx].buffer);
+    MPI_Comm comm = cdiPioInqInterComm();
+    packFunc((void *) data, txWin[streamIdx].buffer, (int) txWin[streamIdx].size, &position, &comm);
+    txWin[streamIdx].head = txWin[streamIdx].buffer + position;
+  }
   txWin[streamIdx].pendingUpdate = true;
   winDict[targetEntry] = header;
 }
@@ -293,10 +293,10 @@ static inline void
 collWait(size_t streamIdx)
 {
   if (txWin[streamIdx].postSet)
-    {
-      xmpi(MPI_Win_wait(txWin[streamIdx].win));
-      modelWinFlushBuffer(streamIdx);
-    }
+  {
+    xmpi(MPI_Win_wait(txWin[streamIdx].win));
+    modelWinFlushBuffer(streamIdx);
+  }
 }
 
 static inline void
@@ -374,21 +374,21 @@ scatterGatherPackFunc(void *dataDesc, void *buf, int size, int *pos, void *conte
   const unsigned char *data = p->data;
   unsigned copyCount = 0, numElems = p->numElems;
   for (unsigned j = 0; j < numBlocks && copyCount < numElems; ++j)
+  {
+    int bl = bls[j];
+    if (bl > 0)
     {
-      int bl = bls[j];
-      if (bl > 0)
-        {
-          if ((unsigned) bl + copyCount > numElems)
-            {
-              bl = (int) (numElems - copyCount);
-              Warning("%s: %s", "streamWriteScatteredVarPart", "blocks longer than number of elements in index list!");
-            }
-          size_t bsize = (size_t) bl * elemSize;
-          xassert(dstBuf + bsize <= bufEnd);
-          memcpy(dstBuf, data + (ssize_t) elemSize * (ssize_t) disps[j], bsize);
-          dstBuf += bsize;
-        }
+      if ((unsigned) bl + copyCount > numElems)
+      {
+        bl = (int) (numElems - copyCount);
+        Warning("%s: %s", "streamWriteScatteredVarPart", "blocks longer than number of elements in index list!");
+      }
+      size_t bsize = (size_t) bl * elemSize;
+      xassert(dstBuf + bsize <= bufEnd);
+      memcpy(dstBuf, data + (ssize_t) elemSize * (ssize_t) disps[j], bsize);
+      dstBuf += bsize;
     }
+  }
   *pos = (int) (dstBuf - (unsigned char *) buf);
 }
 
@@ -525,10 +525,10 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   namespaceSetActive(prevNamespace);
   // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
   if (sizeGlob == 1)
-    {
-      *pioNamespace = pioNamespace_;
-      return commInqCommGlob();
-    }
+  {
+    *pioNamespace = pioNamespace_;
+    return commInqCommGlob();
+  }
   reshRemove(confResH, &cdiPioConfOps);
   namespaceSetActive(pioNamespace_);
 
@@ -560,38 +560,38 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   }
   MPI_Comm modelComm;
   if (commInqIsProcIO())
+  {
+    int serverNamespace = pioNamespace_;
+    namespaceSetActive(serverNamespace);
+    namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKConf], NSSW_DATA(conf));
+    cdiPioSerializeSetMPI();
+    conf->callbacks[CDIPIO_CALLBACK_POSTCOMMSETUP]();
+    cdiPioFileWritingInit();
+    if (commInqRankColl() >= 0)
     {
-      int serverNamespace = pioNamespace_;
-      namespaceSetActive(serverNamespace);
-      namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKConf], NSSW_DATA(conf));
-      cdiPioSerializeSetMPI();
-      conf->callbacks[CDIPIO_CALLBACK_POSTCOMMSETUP]();
-      cdiPioFileWritingInit();
-      if (commInqRankColl() >= 0)
-        {
-          cdiPioCollectorMessageLoop();
-          void (*cdiPioFileWritingFinalize)(void) = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize]).func;
-          cdiPioFileWritingFinalize();
-        }
-      reshListDestruct(serverNamespace);
+      cdiPioCollectorMessageLoop();
+      void (*cdiPioFileWritingFinalize)(void) = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize]).func;
+      cdiPioFileWritingFinalize();
+    }
+    reshListDestruct(serverNamespace);
 #ifdef HAVE_PPM_DIST_ARRAY_H
-      if (commInqRankColl() >= 0) cdiPioDistGridFinalizeOnce(serverNamespace);
+    if (commInqRankColl() >= 0) cdiPioDistGridFinalizeOnce(serverNamespace);
 #endif
-      cdiPioCommFinalize();
-      if (xtInitByCDI) xt_finalize();
+    cdiPioCommFinalize();
+    if (xtInitByCDI) xt_finalize();
 #ifdef HAVE_PPM_CORE
-      if (ppmInitByCDI) PPM_finalize();
+    if (ppmInitByCDI) PPM_finalize();
 #endif
-      modelComm = MPI_COMM_NULL;
-      namespaceSetActive(prevNamespace);
-      namespaceDelete(serverNamespace);
-    }
+    modelComm = MPI_COMM_NULL;
+    namespaceSetActive(prevNamespace);
+    namespaceDelete(serverNamespace);
+  }
   else
-    {
-      *pioNamespace = pioNamespace_;
-      cdiPioClientSetup(pioNamespace_, conf);
-      modelComm = commInqCommModel();
-    }
+  {
+    *pioNamespace = pioNamespace_;
+    cdiPioClientSetup(pioNamespace_, conf);
+    modelComm = commInqCommModel();
+  }
   namespaceSetActive(prevNamespace);
   reshReplace(confResH, conf, &cdiPioConfOps);
   return modelComm;
@@ -615,7 +615,7 @@ cdiPioFileWritingInit(void)
   xassert(IOMode != PIO_NONE || commInqSizeGlob() == 1);
 
   switch (IOMode)
-    {
+  {
     case PIO_NONE: break;
     case PIO_MPI: initMPINONB(); break;
     case PIO_ASYNCH:
@@ -624,7 +624,7 @@ cdiPioFileWritingInit(void)
     case PIO_MPI_FW_ORDERED: cdiPioFileWriteOrderedInit(); break;
     case PIO_MPI_FW_AT_ALL: cdiPioFileWriteAtAllInit(); break;
     case PIO_MPI_FW_AT_REBLOCK: cdiPioFileWriteAtReblockInit(); break;
-    }
+  }
 }
 
 /*****************************************************************************/
@@ -638,12 +638,12 @@ pioEndDef(void)
       collRank = cdiPioCollRank(clientRank, numClients, numColl);
 
   if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
-    {
-      MPI_Comm comm = cdiPioInqInterComm();
-      reshPackBufferCreate(&buffer, &bufferSize, &comm);
-      xmpi(MPI_Send(buffer, bufferSize, MPI_PACKED, collRank, RESOURCES, comm));
-      reshPackBufferDestroy(&buffer);
-    }
+  {
+    MPI_Comm comm = cdiPioInqInterComm();
+    reshPackBufferCreate(&buffer, &bufferSize, &comm);
+    xmpi(MPI_Send(buffer, bufferSize, MPI_PACKED, collRank, RESOURCES, comm));
+    reshPackBufferDestroy(&buffer);
+  }
 #if HAVE_PPM_DIST_ARRAY_H
   else
     cdiPioDistGridPackAssist();
@@ -726,16 +726,13 @@ pioWriteTimestep(void)
 
   size_t nStreams = openStreams.size;
   int *hasUpdates = Malloc(nStreams * sizeof(hasUpdates[0]));
-  for (size_t streamIdx = 0; streamIdx < nStreams; ++streamIdx)
-    {
-      hasUpdates[streamIdx] = txWin[streamIdx].pendingUpdate;
-    }
+  for (size_t streamIdx = 0; streamIdx < nStreams; ++streamIdx) { hasUpdates[streamIdx] = txWin[streamIdx].pendingUpdate; }
 
   if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
-    {
-      xmpi(MPI_Send(hasUpdates, (int) nStreams, MPI_INT, collRank, WRITETS, cdiPioInqInterComm()));
-      xdebug("%s", "SENT MESSAGE WITH TAG \"WRITETS\"");
-    }
+  {
+    xmpi(MPI_Send(hasUpdates, (int) nStreams, MPI_INT, collRank, WRITETS, cdiPioInqInterComm()));
+    xdebug("%s", "SENT MESSAGE WITH TAG \"WRITETS\"");
+  }
 
   MPI_Group remoteGroup = cdiPioInqRemoteGroup();
   for (size_t streamIdx = 0; streamIdx < nStreams; ++streamIdx)

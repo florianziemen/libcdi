@@ -85,25 +85,25 @@ cdiGetPageSize(bool largePageAlign)
   int name = 0;
 #if HAVE_DECL__SC_LARGE_PAGESIZE
   if (largePageAlign)
-    {
-      name = _SC_LARGE_PAGESIZE;
-      nameAssigned = true;
-    }
+  {
+    name = _SC_LARGE_PAGESIZE;
+    nameAssigned = true;
+  }
   else
 #else
   (void) largePageAlign;
 #endif
-    {
+  {
 #if HAVE_DECL__SC_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE
-      name =
+    name =
 #if HAVE_DECL__SC_PAGESIZE
-          _SC_PAGESIZE;
+        _SC_PAGESIZE;
 #else
-          _SC_PAGE_SIZE;
+        _SC_PAGE_SIZE;
 #endif
-      nameAssigned = true;
+    nameAssigned = true;
 #endif
-    }
+  }
   if (nameAssigned) pagesize = sysconf(name);
 #endif
   if (pagesize == -1L)

@@ -144,10 +144,10 @@ cdiPioDistGridCreate(int gridtype, int size, int xsize, int ysize, int nvertex, 
 #ifdef HAVE_PPM_DIST_ARRAY_H
   int gridID = gridCreate(gridtype, size);
   if (gridtype != GRID_UNSTRUCTURED)
-    {
-      gridDefXsize(gridID, xsize);
-      gridDefYsize(gridID, ysize);
-    }
+  {
+    gridDefXsize(gridID, xsize);
+    gridDefYsize(gridID, ysize);
+  }
   gridDefNvertex(gridID, nvertex);
   grid_t *gridptr = grid_to_pointer(gridID);
   cdiPioDistGridInit(gridptr, gridtype, (size_t) size, (size_t) xsize, (size_t) ysize, nvertex, xy_decomposition, partDesc2D,
@@ -175,15 +175,15 @@ cdiPioDistGridSwitchSyncMode(int gridID, int mode)
   bool switched = false;
   grid_t *gridptr = grid_to_pointer(gridID);
   if (gridptr->vtable == &cdiPioDistGridVtable)
-    {
-      struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
-      PPM_dist_mult_array_set_sync_mode(extraData->distData, (enum PPM_dma_sync_mode) mode, 0);
-      bool dataDefined = gridptr->x.vals || gridptr->y.vals || gridptr->x.bounds || gridptr->y.bounds || gridptr->area
-                         || gridptr->mask || gridptr->mask_gme;
-      if (dataDefined) PPM_dist_mult_array_expose(extraData->distData);
-      extraData->rmaEnabled = mode == PPM_dma_sync_mode_passive_target;
-      switched = true;
-    }
+  {
+    struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
+    PPM_dist_mult_array_set_sync_mode(extraData->distData, (enum PPM_dma_sync_mode) mode, 0);
+    bool dataDefined = gridptr->x.vals || gridptr->y.vals || gridptr->x.bounds || gridptr->y.bounds || gridptr->area
+                       || gridptr->mask || gridptr->mask_gme;
+    if (dataDefined) PPM_dist_mult_array_expose(extraData->distData);
+    extraData->rmaEnabled = mode == PPM_dma_sync_mode_passive_target;
+    switched = true;
+  }
   return switched;
 }
 #endif
@@ -255,110 +255,110 @@ cdiPioParCdfPostDefActionGridProp(stream_t *streamptr, int gridID, int ncvarid, 
 #ifdef HAVE_PARALLEL_NC4
   int ownerRank = cdiPioStream2Owner(streamptr->self);
   if (gridptr->vtable == &cdiPioDistGridVtable && ownerRank == CDI_PIO_COLLECTIVE_OPEN)
+  {
+    struct cdfPostDefPutVarADouble *put = (struct cdfPostDefPutVarADouble *) Malloc(sizeof(*put));
+    put->fileID = fileID;
+    put->ncvarid = ncvarid;
+    const struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
+    size_t saMaxRank = gridptr->type == GRID_UNSTRUCTURED ? 1 : 2;
+    const struct PPM_extent(*local_chunks)[saMaxRank] = (const struct PPM_extent(*)[saMaxRank]) extraData->local_chunks;
+    size_t saIdx = 0;
+    switch (gridProp)
     {
-      struct cdfPostDefPutVarADouble *put = (struct cdfPostDefPutVarADouble *) Malloc(sizeof(*put));
-      put->fileID = fileID;
-      put->ncvarid = ncvarid;
-      const struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
-      size_t saMaxRank = gridptr->type == GRID_UNSTRUCTURED ? 1 : 2;
-      const struct PPM_extent(*local_chunks)[saMaxRank] = (const struct PPM_extent(*)[saMaxRank]) extraData->local_chunks;
-      size_t saIdx = 0;
-      switch (gridProp)
-        {
-        case GRID_PROP_XVALS:
-          put->values = gridptr->x.vals;
-          saIdx = cdiPioGDsaXVals;
-          break;
-        case GRID_PROP_YVALS:
-          put->values = gridptr->y.vals;
-          saIdx = cdiPioGDsaYVals;
-          break;
-        case GRID_PROP_XBOUNDS:
-          put->values = gridptr->x.bounds;
-          saIdx = cdiPioGDsaXBounds;
-          break;
-        case GRID_PROP_YBOUNDS:
-          put->values = gridptr->y.bounds;
-          saIdx = cdiPioGDsaYBounds;
-          break;
-        case GRID_PROP_AREA:
-          put->values = gridptr->area;
-          saIdx = cdiPioGDsaArea;
-          break;
-        case GRID_PROP_MASK:
-        case GRID_PROP_MASK_GME: Error("unsupported key: %d", (int) gridProp); break;
-        }
-      size_t aRank = extraData->sub_arrays[saIdx].a_rank;
-      for (size_t dim = 0; dim < aRank; ++dim)
-        {
-          put->start[dim] = (size_t) local_chunks[saIdx][dim].first;
-          put->count[dim] = (size_t) local_chunks[saIdx][dim].size;
-        }
-      if (gridProp == GRID_PROP_XBOUNDS || gridProp == GRID_PROP_YBOUNDS)
-        {
-          /* on NetCDF-level, bounds have an extra dimension that's
-           * indirectly represent in the distributed multi-array, where the
-           * nvertex dimension is replaced by a contiguous MPI datatype */
-          put->start[aRank] = 0;
-          put->count[aRank] = (size_t) gridptr->nvertex;
-        }
-      struct cdfPostDefAction addendum;
-      addendum.data = put;
-      addendum.action = cdiPioDistGridCdfDelayedPutVarDouble;
-      addendum.cleanup = (void (*)(void *))(void (*)(void)) memFree;
-      *delayed = cdfPostDefActionAdd(*delayed, addendum);
+      case GRID_PROP_XVALS:
+        put->values = gridptr->x.vals;
+        saIdx = cdiPioGDsaXVals;
+        break;
+      case GRID_PROP_YVALS:
+        put->values = gridptr->y.vals;
+        saIdx = cdiPioGDsaYVals;
+        break;
+      case GRID_PROP_XBOUNDS:
+        put->values = gridptr->x.bounds;
+        saIdx = cdiPioGDsaXBounds;
+        break;
+      case GRID_PROP_YBOUNDS:
+        put->values = gridptr->y.bounds;
+        saIdx = cdiPioGDsaYBounds;
+        break;
+      case GRID_PROP_AREA:
+        put->values = gridptr->area;
+        saIdx = cdiPioGDsaArea;
+        break;
+      case GRID_PROP_MASK:
+      case GRID_PROP_MASK_GME: Error("unsupported key: %d", (int) gridProp); break;
     }
+    size_t aRank = extraData->sub_arrays[saIdx].a_rank;
+    for (size_t dim = 0; dim < aRank; ++dim)
+    {
+      put->start[dim] = (size_t) local_chunks[saIdx][dim].first;
+      put->count[dim] = (size_t) local_chunks[saIdx][dim].size;
+    }
+    if (gridProp == GRID_PROP_XBOUNDS || gridProp == GRID_PROP_YBOUNDS)
+    {
+      /* on NetCDF-level, bounds have an extra dimension that's
+       * indirectly represent in the distributed multi-array, where the
+       * nvertex dimension is replaced by a contiguous MPI datatype */
+      put->start[aRank] = 0;
+      put->count[aRank] = (size_t) gridptr->nvertex;
+    }
+    struct cdfPostDefAction addendum;
+    addendum.data = put;
+    addendum.action = cdiPioDistGridCdfDelayedPutVarDouble;
+    addendum.cleanup = (void (*)(void *))(void (*)(void)) memFree;
+    *delayed = cdfPostDefActionAdd(*delayed, addendum);
+  }
   else
 #endif
       if (gridptr->vtable == &cdiPioDistGridVtable)
+  {
+    const struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
+    /*
+     * size_t saMaxRank = gridptr->type == GRID_UNSTRUCTURED ? 1 : 2;
+     * const struct PPM_extent (*local_chunks)[saMaxRank]
+     *   = (const struct PPM_extent (*)[saMaxRank])extraData->local_chunks;
+     */
+    const struct PPM_global_array_desc *sub_arrays = extraData->sub_arrays;
+    struct PPM_dist_mult_array *distData = extraData->distData;
+    size_t saIdx = 0;
+    size_t stride = (gridProp == GRID_PROP_XBOUNDS || gridProp == GRID_PROP_YBOUNDS) ? (size_t) gridptr->nvertex : 1;
+    switch (gridProp)
     {
-      const struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
-      /*
-       * size_t saMaxRank = gridptr->type == GRID_UNSTRUCTURED ? 1 : 2;
-       * const struct PPM_extent (*local_chunks)[saMaxRank]
-       *   = (const struct PPM_extent (*)[saMaxRank])extraData->local_chunks;
-       */
-      const struct PPM_global_array_desc *sub_arrays = extraData->sub_arrays;
-      struct PPM_dist_mult_array *distData = extraData->distData;
-      size_t saIdx = 0;
-      size_t stride = (gridProp == GRID_PROP_XBOUNDS || gridProp == GRID_PROP_YBOUNDS) ? (size_t) gridptr->nvertex : 1;
-      switch (gridProp)
-        {
-        case GRID_PROP_XVALS: saIdx = cdiPioGDsaXVals; break;
-        case GRID_PROP_YVALS: saIdx = cdiPioGDsaYVals; break;
-        case GRID_PROP_AREA: saIdx = cdiPioGDsaArea; break;
-        case GRID_PROP_XBOUNDS: saIdx = cdiPioGDsaXBounds; break;
-        case GRID_PROP_YBOUNDS: saIdx = cdiPioGDsaYBounds; break;
-        case GRID_PROP_MASK:
-        case GRID_PROP_MASK_GME: Error("unsupported key: %d", (int) gridProp); break;
-        }
-      size_t aRank = sub_arrays[saIdx].a_rank;
-      double *values = (double *) Malloc(sizeof(*values) * stride * (size_t) (PPM_extents_size(aRank, sub_arrays[saIdx].rect)));
-      int32_t coord[cdiPioGDsaMaxRank];
-      if (aRank == 2)
-        {
-          size_t xsize = (size_t) gridptr->x.size, ysize = (size_t) gridptr->y.size;
-          for (size_t j = 0; j < ysize; ++j)
-            {
-              coord[0] = (int32_t) j;
-              for (size_t i = 0; i < xsize; ++i)
-                {
-                  coord[1] = (int32_t) i;
-                  PPM_dist_mult_array_get(distData, saIdx, coord, values + (j * xsize + i) * stride);
-                }
-            }
-        }
-      else /* aRank == 1 */
-        {
-          size_t dimsize = (size_t) sub_arrays[saIdx].rect[0].size;
-          for (size_t i = 0; i < dimsize; ++i)
-            {
-              coord[0] = (int32_t) i;
-              PPM_dist_mult_array_get(distData, saIdx, coord, values + i * stride);
-            }
-        }
-      cdfPostDefActionAddPutVal(delayed, fileID, ncvarid, values, cdfDelayedPutVarDeepCleanup);
+      case GRID_PROP_XVALS: saIdx = cdiPioGDsaXVals; break;
+      case GRID_PROP_YVALS: saIdx = cdiPioGDsaYVals; break;
+      case GRID_PROP_AREA: saIdx = cdiPioGDsaArea; break;
+      case GRID_PROP_XBOUNDS: saIdx = cdiPioGDsaXBounds; break;
+      case GRID_PROP_YBOUNDS: saIdx = cdiPioGDsaYBounds; break;
+      case GRID_PROP_MASK:
+      case GRID_PROP_MASK_GME: Error("unsupported key: %d", (int) gridProp); break;
     }
+    size_t aRank = sub_arrays[saIdx].a_rank;
+    double *values = (double *) Malloc(sizeof(*values) * stride * (size_t) (PPM_extents_size(aRank, sub_arrays[saIdx].rect)));
+    int32_t coord[cdiPioGDsaMaxRank];
+    if (aRank == 2)
+    {
+      size_t xsize = (size_t) gridptr->x.size, ysize = (size_t) gridptr->y.size;
+      for (size_t j = 0; j < ysize; ++j)
+      {
+        coord[0] = (int32_t) j;
+        for (size_t i = 0; i < xsize; ++i)
+        {
+          coord[1] = (int32_t) i;
+          PPM_dist_mult_array_get(distData, saIdx, coord, values + (j * xsize + i) * stride);
+        }
+      }
+    }
+    else /* aRank == 1 */
+    {
+      size_t dimsize = (size_t) sub_arrays[saIdx].rect[0].size;
+      for (size_t i = 0; i < dimsize; ++i)
+      {
+        coord[0] = (int32_t) i;
+        PPM_dist_mult_array_get(distData, saIdx, coord, values + i * stride);
+      }
+    }
+    cdfPostDefActionAddPutVal(delayed, fileID, ncvarid, values, cdfDelayedPutVarDeepCleanup);
+  }
   else
     cdfPostDefActionGridProp(streamptr, gridID, ncvarid, gridProp, delayed);
 }
@@ -382,12 +382,12 @@ cdiPioDistGridInitOnce(void)
   bool inClientGroup = !commInqIsProcIO();
   MPI_Comm comm = inClientGroup ? commInqCommModel() : commInqCommColl();
   if (inClientGroup)
-    {
-      xmpi(MPI_Comm_dup(comm, &cdiPioDistGridComm));
-      /* our copy of the client communicator is fine to be used by
-       * yaxt directly, since no conflicting use can happen */
-      xt_mpi_comm_mark_exclusive(cdiPioDistGridComm);
-    }
+  {
+    xmpi(MPI_Comm_dup(comm, &cdiPioDistGridComm));
+    /* our copy of the client communicator is fine to be used by
+     * yaxt directly, since no conflicting use can happen */
+    xt_mpi_comm_mark_exclusive(cdiPioDistGridComm);
+  }
   else
     cdiPioDistGridComm = comm;
 #ifdef HAVE_LIBNETCDF
@@ -409,16 +409,14 @@ static pthread_once_t cdiPioDistGridInitOnceState = PTHREAD_ONCE_INIT;
 #define CDI_PIO_DIST_GRID_INIT_ONCE() pthread_once(&cdiPioDistGridInitOnceState, cdiPioDistGridInitOnce)
 #else
 static bool cdiPioDistGridInitOnceState = false;
-#define CDI_PIO_DIST_GRID_INIT_ONCE()         \
-  do                                          \
-    {                                         \
-      if (!cdiPioDistGridInitOnceState)       \
-        {                                     \
-          cdiPioDistGridInitOnce();           \
-          cdiPioDistGridInitOnceState = true; \
-        }                                     \
-    }                                         \
-  while (0)
+#define CDI_PIO_DIST_GRID_INIT_ONCE()     \
+  do {                                    \
+    if (!cdiPioDistGridInitOnceState)     \
+    {                                     \
+      cdiPioDistGridInitOnce();           \
+      cdiPioDistGridInitOnceState = true; \
+    }                                     \
+  } while (0)
 #endif
 
 static void
@@ -441,18 +439,18 @@ cdiPioDistGridInit(grid_t *gridptr, int gridtype, size_t size, size_t xsize, siz
   bool irregular = false;
   size_t saMaxRank = 0;
   switch (gridtype)
-    {
+  {
     case GRID_CURVILINEAR:
       saMaxRank = 2;
       for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx)
-        {
-          sub_arrays[saIdx].a_rank = 2;
-          sub_arrays[saIdx].rect[0].first = 0;
-          sub_arrays[saIdx].rect[0].size = (int32_t) ysize;
-          sub_arrays[saIdx].rect[1].first = 0;
-          sub_arrays[saIdx].rect[1].size = (int32_t) xsize;
-          extraData->defRedists[saIdx] = NULL;
-        }
+      {
+        sub_arrays[saIdx].a_rank = 2;
+        sub_arrays[saIdx].rect[0].first = 0;
+        sub_arrays[saIdx].rect[0].size = (int32_t) ysize;
+        sub_arrays[saIdx].rect[1].first = 0;
+        sub_arrays[saIdx].rect[1].size = (int32_t) xsize;
+        extraData->defRedists[saIdx] = NULL;
+      }
       irregular = true;
       break;
     case GRID_UNSTRUCTURED:
@@ -470,11 +468,11 @@ cdiPioDistGridInit(grid_t *gridptr, int gridtype, size_t size, size_t xsize, siz
     case GRID_PROJECTION:
       saMaxRank = 1;
       for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx)
-        {
-          sub_arrays[saIdx].rect[0].first = 0;
-          sub_arrays[saIdx].a_rank = 1;
-          extraData->defRedists[saIdx] = NULL;
-        }
+      {
+        sub_arrays[saIdx].rect[0].first = 0;
+        sub_arrays[saIdx].a_rank = 1;
+        extraData->defRedists[saIdx] = NULL;
+      }
       if (irregular) break;
       /* FIXME: make the following three 2D */
       sub_arrays[cdiPioGDsaArea].rect[0].size = (int32_t) size;
@@ -487,14 +485,14 @@ cdiPioDistGridInit(grid_t *gridptr, int gridtype, size_t size, size_t xsize, siz
       break;
     case GRID_GAUSSIAN_REDUCED:
     default: Error("Unexpected or unsupported grid type %d", gridtype);
-    }
+  }
 
   extraData->distTypes = cdiPioGridDist[!irregular];
   for (size_t i = 0; i < cdiPioGDdtNum; ++i)
-    {
-      extraData->distList[i] = NULL;
-      extraData->defXmaps[i] = NULL;
-    }
+  {
+    extraData->distList[i] = NULL;
+    extraData->defXmaps[i] = NULL;
+  }
 
   bool inClientGroup = !commInqIsProcIO();
   int (*rankQuery)(void) = inClientGroup ? commInqRankModel : commInqRankColl;
@@ -503,59 +501,59 @@ cdiPioDistGridInit(grid_t *gridptr, int gridtype, size_t size, size_t xsize, siz
     struct PPM_extent(*local_chunks)[saMaxRank] = (struct PPM_extent(*)[saMaxRank]) extraData->local_chunks;
     /* improve automatic finding of partitioning if saMaxRank == 2 */
     if (!xy_decomposition)
+    {
+      int (*commSizeQuery)(void) = inClientGroup ? cdiPioCommInqSizeClients : commInqSizeColl;
+      int numClients = commSizeQuery();
+      for (size_t j = 0; j < cdiPioGDsaNum; ++j)
       {
-        int (*commSizeQuery)(void) = inClientGroup ? cdiPioCommInqSizeClients : commInqSizeColl;
-        int numClients = commSizeQuery();
-        for (size_t j = 0; j < cdiPioGDsaNum; ++j)
-          {
-            size_t aRank = (size_t) sub_arrays[j].a_rank;
-            local_chunks[j][0] = PPM_uniform_partition(sub_arrays[j].rect[0], numClients, commRank);
-            for (size_t i = 1; i < aRank; ++i) local_chunks[j][i] = sub_arrays[j].rect[i];
-          }
+        size_t aRank = (size_t) sub_arrays[j].a_rank;
+        local_chunks[j][0] = PPM_uniform_partition(sub_arrays[j].rect[0], numClients, commRank);
+        for (size_t i = 1; i < aRank; ++i) local_chunks[j][i] = sub_arrays[j].rect[i];
       }
+    }
     else
+    {
+      /* check if hints are in range */
+      static const char dimName[2] = { 'X', 'Y' }, caller[] = "cdiPioDistGridCreate";
+      for (size_t aRank = 0; aRank < saMaxRank; ++aRank)
       {
-        /* check if hints are in range */
-        static const char dimName[2] = { 'X', 'Y' }, caller[] = "cdiPioDistGridCreate";
-        for (size_t aRank = 0; aRank < saMaxRank; ++aRank)
+        int32_t dimUB = sub_arrays[cdiPioGDsaArea].rect[aRank].first + sub_arrays[cdiPioGDsaArea].rect[aRank].size;
+        if (xy_decomposition[aRank][0] < 0 || xy_decomposition[aRank][0] > dimUB)
+          Errorc("decomposition hint for %c start out "
+                 "of range [0,%d]\n",
+                 dimName[aRank], (int) dimUB - 1);
+        if (xy_decomposition[aRank][1] < 0 || (xy_decomposition[aRank][0] + xy_decomposition[aRank][1] > dimUB))
+          Errorc("decomposition hint value %d for %c size out "
+                 "of range [0,%d]\n",
+                 (int) xy_decomposition[aRank][1], dimName[aRank], (int) dimUB - xy_decomposition[aRank][0]);
+      }
+      if (irregular) /* for irregular grids, all arrays are decomposed identically */
+        for (size_t j = 0; j < cdiPioGDsaNum; ++j)
+          for (size_t i = 0; i < saMaxRank; ++i)
           {
-            int32_t dimUB = sub_arrays[cdiPioGDsaArea].rect[aRank].first + sub_arrays[cdiPioGDsaArea].rect[aRank].size;
-            if (xy_decomposition[aRank][0] < 0 || xy_decomposition[aRank][0] > dimUB)
-              Errorc("decomposition hint for %c start out "
-                     "of range [0,%d]\n",
-                     dimName[aRank], (int) dimUB - 1);
-            if (xy_decomposition[aRank][1] < 0 || (xy_decomposition[aRank][0] + xy_decomposition[aRank][1] > dimUB))
-              Errorc("decomposition hint value %d for %c size out "
-                     "of range [0,%d]\n",
-                     (int) xy_decomposition[aRank][1], dimName[aRank], (int) dimUB - xy_decomposition[aRank][0]);
+            local_chunks[j][i].first = (int32_t) xy_decomposition[i][0];
+            local_chunks[j][i].size = (int32_t) xy_decomposition[i][1];
           }
-        if (irregular) /* for irregular grids, all arrays are decomposed identically */
-          for (size_t j = 0; j < cdiPioGDsaNum; ++j)
-            for (size_t i = 0; i < saMaxRank; ++i)
-              {
-                local_chunks[j][i].first = (int32_t) xy_decomposition[i][0];
-                local_chunks[j][i].size = (int32_t) xy_decomposition[i][1];
-              }
-        else
+      else
+      {
+        /* handle 1d-decomposed arrays first */
+        for (size_t saIdx = 0; saIdx < cdiPioGDsaArea; ++saIdx)
+        {
+          /* for the first 4 arrays, disttype is alternatively
+           * cdiPioGDdtX==0 and cdiPioGDdtY==1 */
+          int distType = extraData->distTypes[saIdx];
+          local_chunks[saIdx][0].first = (int32_t) xy_decomposition[distType][0];
+          local_chunks[saIdx][0].size = (int32_t) xy_decomposition[distType][1];
+        }
+        /* then rest of 2D-decomposed parts */
+        for (size_t saIdx = cdiPioGDsaArea; saIdx < cdiPioGDsaNum; ++saIdx)
+          for (size_t dim = 0; dim < 2; ++dim)
           {
-            /* handle 1d-decomposed arrays first */
-            for (size_t saIdx = 0; saIdx < cdiPioGDsaArea; ++saIdx)
-              {
-                /* for the first 4 arrays, disttype is alternatively
-                 * cdiPioGDdtX==0 and cdiPioGDdtY==1 */
-                int distType = extraData->distTypes[saIdx];
-                local_chunks[saIdx][0].first = (int32_t) xy_decomposition[distType][0];
-                local_chunks[saIdx][0].size = (int32_t) xy_decomposition[distType][1];
-              }
-            /* then rest of 2D-decomposed parts */
-            for (size_t saIdx = cdiPioGDsaArea; saIdx < cdiPioGDsaNum; ++saIdx)
-              for (size_t dim = 0; dim < 2; ++dim)
-                {
-                  local_chunks[saIdx][dim].first = (int32_t) xy_decomposition[dim][0];
-                  local_chunks[saIdx][dim].size = (int32_t) xy_decomposition[dim][1];
-                }
+            local_chunks[saIdx][dim].first = (int32_t) xy_decomposition[dim][0];
+            local_chunks[saIdx][dim].size = (int32_t) xy_decomposition[dim][1];
           }
       }
+    }
     extraData->distData = PPM_dist_mult_array_new(cdiPioGDsaNum, sub_arrays, (struct PPM_extent *) local_chunks, cdiPioDistGridComm,
                                                   0, PPM_dma_sync_mode_local_only);
   }
@@ -583,13 +581,13 @@ cdiPioDistGridInit(grid_t *gridptr, int gridtype, size_t size, size_t xsize, siz
     };
     bool haveCoord[NUM_COORD][NUM_IDX];
     for (size_t saIdx = cdiPioGDsaXVals; saIdx <= cdiPioGDsaYVals; ++saIdx)
-      {
-        size_t a_rank = sub_arrays[saIdx].a_rank;
-        for (size_t dim = 0; dim < a_rank; ++dim) coord[dim] = sub_arrays[saIdx].rect[dim].first;
-        haveCoord[saIdx][IDX_FIRST] = PPM_coord_is_contained_in_extents(a_rank, coord, local_chunks[saIdx]);
-        for (size_t dim = 0; dim < a_rank; ++dim) coord[dim] += sub_arrays[cdiPioGDsaXVals].rect[dim].size - 1;
-        haveCoord[saIdx][IDX_LAST] = PPM_coord_is_contained_in_extents(a_rank, coord, local_chunks[saIdx]);
-      }
+    {
+      size_t a_rank = sub_arrays[saIdx].a_rank;
+      for (size_t dim = 0; dim < a_rank; ++dim) coord[dim] = sub_arrays[saIdx].rect[dim].first;
+      haveCoord[saIdx][IDX_FIRST] = PPM_coord_is_contained_in_extents(a_rank, coord, local_chunks[saIdx]);
+      for (size_t dim = 0; dim < a_rank; ++dim) coord[dim] += sub_arrays[cdiPioGDsaXVals].rect[dim].size - 1;
+      haveCoord[saIdx][IDX_LAST] = PPM_coord_is_contained_in_extents(a_rank, coord, local_chunks[saIdx]);
+    }
     {
       int ownerRanks[NUM_COORD][NUM_IDX];
       for (size_t saIdx = cdiPioGDsaXVals; saIdx <= cdiPioGDsaYVals; ++saIdx)
@@ -600,13 +598,13 @@ cdiPioDistGridInit(grid_t *gridptr, int gridtype, size_t size, size_t xsize, siz
       };
       xmpi(MPI_Allreduce(MPI_IN_PLACE, ownerRanks, REDUCE_COUNT, MPI_INT, MPI_MAX, cdiPioDistGridComm));
       for (size_t saIdx = cdiPioGDsaXVals; saIdx <= cdiPioGDsaYVals; ++saIdx)
-        {
-          extraData->aReduce[saIdx].ownerRankFirst = ownerRanks[saIdx][IDX_FIRST];
-          extraData->aReduce[saIdx].ownerRankLast = ownerRanks[saIdx][IDX_LAST];
-          extraData->aReduce[saIdx].first = (double) NAN;
-          extraData->aReduce[saIdx].last = (double) NAN;
-          extraData->aReduce[saIdx].dist2scanRedist = NULL;
-        }
+      {
+        extraData->aReduce[saIdx].ownerRankFirst = ownerRanks[saIdx][IDX_FIRST];
+        extraData->aReduce[saIdx].ownerRankLast = ownerRanks[saIdx][IDX_LAST];
+        extraData->aReduce[saIdx].first = (double) NAN;
+        extraData->aReduce[saIdx].last = (double) NAN;
+        extraData->aReduce[saIdx].dist2scanRedist = NULL;
+      }
     }
   }
 }
@@ -623,56 +621,56 @@ cdiPioDistGridLazyRedistCreate(grid_t *gridptr, enum cdiPioGDsa saIdx)
   Xt_redist defRedist = extraData->defRedists[saIdx];
   const struct PPM_global_array_desc *sub_arrays = extraData->sub_arrays;
   if (!distList)
+  {
+    size_t saMaxRank = gridptr->type == GRID_UNSTRUCTURED ? 1 : 2;
+    const struct PPM_extent(*local_chunks)[saMaxRank] = (const struct PPM_extent(*)[saMaxRank]) extraData->local_chunks;
+    if (sub_arrays[saIdx].a_rank == 1)
     {
-      size_t saMaxRank = gridptr->type == GRID_UNSTRUCTURED ? 1 : 2;
-      const struct PPM_extent(*local_chunks)[saMaxRank] = (const struct PPM_extent(*)[saMaxRank]) extraData->local_chunks;
-      if (sub_arrays[saIdx].a_rank == 1)
-        {
-          struct Xt_stripe stripe = { .start = local_chunks[saIdx][0].first, .stride = 1, .nstrides = local_chunks[saIdx][0].size };
-          distList = xt_idxstripes_new(&stripe, 1);
-        }
-      else /* sub_arrays[saIdx].a_rank > 1 */
-        {
-          size_t aRank = sub_arrays[saIdx].a_rank;
-          Xt_int global_size[cdiPioGDsaMaxRank], local_start[cdiPioGDsaMaxRank];
-          int local_size[cdiPioGDsaMaxRank];
-          for (size_t i = 0; i < aRank; ++i)
-            {
-              global_size[i] = sub_arrays[saIdx].rect[i].size;
-              local_start[i] = (Xt_int) local_chunks[saIdx][i].first;
-              local_size[i] = (int) local_chunks[saIdx][i].size;
-            }
-          distList = xt_idxsection_new(0, (int) aRank, global_size, local_size, local_start);
-        }
-      extraData->distList[distType] = distList;
+      struct Xt_stripe stripe = { .start = local_chunks[saIdx][0].first, .stride = 1, .nstrides = local_chunks[saIdx][0].size };
+      distList = xt_idxstripes_new(&stripe, 1);
     }
+    else /* sub_arrays[saIdx].a_rank > 1 */
+    {
+      size_t aRank = sub_arrays[saIdx].a_rank;
+      Xt_int global_size[cdiPioGDsaMaxRank], local_start[cdiPioGDsaMaxRank];
+      int local_size[cdiPioGDsaMaxRank];
+      for (size_t i = 0; i < aRank; ++i)
+      {
+        global_size[i] = sub_arrays[saIdx].rect[i].size;
+        local_start[i] = (Xt_int) local_chunks[saIdx][i].first;
+        local_size[i] = (int) local_chunks[saIdx][i].size;
+      }
+      distList = xt_idxsection_new(0, (int) aRank, global_size, local_size, local_start);
+    }
+    extraData->distList[distType] = distList;
+  }
   if (!defXmap)
-    {
-      MPI_Comm comm = cdiPioDistGridComm;
-      xmap_new_func_ptr xmapNew = cdiPioGetConf()->xmap_new;
-      extraData->defXmaps[distType] = defXmap = xmapNew(extraData->partDesc[distType], distList, comm);
-    }
+  {
+    MPI_Comm comm = cdiPioDistGridComm;
+    xmap_new_func_ptr xmapNew = cdiPioGetConf()->xmap_new;
+    extraData->defXmaps[distType] = defXmap = xmapNew(extraData->partDesc[distType], distList, comm);
+  }
 
   if (!defRedist)
+  {
+    switch (saIdx)
     {
-      switch (saIdx)
-        {
-        case cdiPioGDsaXVals:
-        case cdiPioGDsaMask:
-        case cdiPioGDsaXBounds: defRedist = xt_redist_p2p_new(defXmap, sub_arrays[saIdx].element_dt); break;
-        case cdiPioGDsaYVals:
-        case cdiPioGDsaArea:
-          if (distType == extraData->distTypes[cdiPioGDsaXVals])
-            defRedist = cdiPioDistGridLazyRedistCreate(gridptr, cdiPioGDsaXVals);
-          else
-            defRedist = xt_redist_p2p_new(defXmap, MPI_DOUBLE);
-          break;
-        case cdiPioGDsaYBounds: defRedist = cdiPioDistGridLazyRedistCreate(gridptr, cdiPioGDsaXBounds); break;
-        case cdiPioGDsaMaskGME: defRedist = cdiPioDistGridLazyRedistCreate(gridptr, cdiPioGDsaMask); break;
-        default: abort();
-        }
-      extraData->defRedists[saIdx] = defRedist;
+      case cdiPioGDsaXVals:
+      case cdiPioGDsaMask:
+      case cdiPioGDsaXBounds: defRedist = xt_redist_p2p_new(defXmap, sub_arrays[saIdx].element_dt); break;
+      case cdiPioGDsaYVals:
+      case cdiPioGDsaArea:
+        if (distType == extraData->distTypes[cdiPioGDsaXVals])
+          defRedist = cdiPioDistGridLazyRedistCreate(gridptr, cdiPioGDsaXVals);
+        else
+          defRedist = xt_redist_p2p_new(defXmap, MPI_DOUBLE);
+        break;
+      case cdiPioGDsaYBounds: defRedist = cdiPioDistGridLazyRedistCreate(gridptr, cdiPioGDsaXBounds); break;
+      case cdiPioGDsaMaskGME: defRedist = cdiPioDistGridLazyRedistCreate(gridptr, cdiPioGDsaMask); break;
+      default: abort();
     }
+    extraData->defRedists[saIdx] = defRedist;
+  }
   return defRedist;
 }
 
@@ -693,26 +691,23 @@ cdiPioDistGridDestroy(grid_t *gridptr)
   xt_idxlist_delete(extraData->partDesc[cdiPioGDdt2D]);
   xmpi(MPI_Type_free(&extraData->sub_arrays[cdiPioGDsaXBounds].element_dt));
   for (size_t i = 0; i < cdiPioGDdtNum; ++i)
+  {
+    if (extraData->defXmaps[i])
     {
-      if (extraData->defXmaps[i])
-        {
-          Xt_xmap xmap = extraData->defXmaps[i];
-          xt_xmap_delete(xmap);
-        }
-      if (extraData->distList[i])
-        {
-          xt_idxlist_delete(extraData->distList[i]);
-        }
+      Xt_xmap xmap = extraData->defXmaps[i];
+      xt_xmap_delete(xmap);
     }
+    if (extraData->distList[i]) { xt_idxlist_delete(extraData->distList[i]); }
+  }
   for (size_t i = 0; i < cdiPioGDsaNum; ++i)
     if (extraData->defRedists[i])
-      {
-        Xt_redist redist = extraData->defRedists[i];
-        extraData->defRedists[i] = NULL;
-        xt_redist_delete(redist);
-        for (size_t j = i + 1; j < cdiPioGDsaNum; ++j)
-          if (extraData->defRedists[j] == redist) extraData->defRedists[j] = NULL;
-      }
+    {
+      Xt_redist redist = extraData->defRedists[i];
+      extraData->defRedists[i] = NULL;
+      xt_redist_delete(redist);
+      for (size_t j = i + 1; j < cdiPioGDsaNum; ++j)
+        if (extraData->defRedists[j] == redist) extraData->defRedists[j] = NULL;
+    }
   for (size_t saIdx = cdiPioGDsaXVals; saIdx <= cdiPioGDsaYVals; ++saIdx)
     if (extraData->aReduce[saIdx].dist2scanRedist) xt_redist_delete(extraData->aReduce[saIdx].dist2scanRedist);
   gridptr->extraData = NULL;
@@ -728,26 +723,26 @@ cdiPioDistGridCopy(grid_t *gridptr)
   struct cdiPioDistGridExtraData *restrict extraData = (struct cdiPioDistGridExtraData *) Malloc(sizeof(*extraData));
   memcpy(extraData, gridptr->extraData, sizeof(*extraData));
   for (size_t i = 0; i < cdiPioGDdtNum; ++i)
-    {
-      if (extraData->partDesc[i]) extraData->partDesc[i] = xt_idxlist_copy(extraData->partDesc[i]);
-      if (extraData->distList[i]) extraData->distList[i] = xt_idxlist_copy(extraData->distList[i]);
-      if (extraData->defXmaps[i]) extraData->defXmaps[i] = xt_xmap_copy(extraData->defXmaps[i]);
-    }
+  {
+    if (extraData->partDesc[i]) extraData->partDesc[i] = xt_idxlist_copy(extraData->partDesc[i]);
+    if (extraData->distList[i]) extraData->distList[i] = xt_idxlist_copy(extraData->distList[i]);
+    if (extraData->defXmaps[i]) extraData->defXmaps[i] = xt_xmap_copy(extraData->defXmaps[i]);
+  }
   {
     bool nodup[cdiPioGDsaNum];
     for (size_t i = 0; i < cdiPioGDsaNum; ++i) nodup[i] = true;
     for (size_t i = 0; i < cdiPioGDsaNum; ++i)
       if (extraData->defRedists[i] && nodup[i])
-        {
-          Xt_redist redist = extraData->defRedists[i];
-          extraData->defRedists[i] = xt_redist_copy(redist);
-          for (size_t j = i + 1; j < cdiPioGDsaNum; ++j)
-            if (extraData->defRedists[j] == redist)
-              {
-                extraData->defRedists[j] = extraData->defRedists[i];
-                nodup[j] = false;
-              }
-        }
+      {
+        Xt_redist redist = extraData->defRedists[i];
+        extraData->defRedists[i] = xt_redist_copy(redist);
+        for (size_t j = i + 1; j < cdiPioGDsaNum; ++j)
+          if (extraData->defRedists[j] == redist)
+          {
+            extraData->defRedists[j] = extraData->defRedists[i];
+            nodup[j] = false;
+          }
+      }
   }
   gridptrDup->extraData = extraData;
   gridptr->vtable->copyArrayFields(gridptr, gridptrDup);
@@ -773,10 +768,10 @@ cdiPioDistGridCopyArrays(grid_t *gridptrOrig, grid_t *gridptrDup)
                                                    commInqCommModel(), 0, PPM_dma_sync_mode_passive_target);
 
   if (reducedPointsSize)
-    {
-      gridptrDup->reducedPoints = (int *) Malloc(reducedPointsSize * sizeof(int));
-      memcpy(gridptrDup->reducedPoints, gridptrOrig->reducedPoints, reducedPointsSize * sizeof(int));
-    }
+  {
+    gridptrDup->reducedPoints = (int *) Malloc(reducedPointsSize * sizeof(int));
+    memcpy(gridptrDup->reducedPoints, gridptrOrig->reducedPoints, reducedPointsSize * sizeof(int));
+  }
 
   void *saPtr[cdiPioGDsaNum] = { [cdiPioGDsaXVals] = gridptrOrig->x.vals,     [cdiPioGDsaYVals] = gridptrOrig->y.vals,
                                  [cdiPioGDsaXBounds] = gridptrOrig->x.bounds, [cdiPioGDsaYBounds] = gridptrOrig->y.bounds,
@@ -786,14 +781,14 @@ cdiPioDistGridCopyArrays(grid_t *gridptrOrig, grid_t *gridptrDup)
   size_t nvertex = (size_t) gridptrOrig->nvertex;
   for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx)
     if (saPtr[saIdx])
-      {
-        size_t size = (size_t) (PPM_extents_size(sub_arrays[saIdx].a_rank, local_chunks[saIdx]));
-        void *src = PPM_dist_mult_array_local_ptr(extraDataOrig->distData, saIdx),
-             *dest = PPM_dist_mult_array_local_ptr(extraDataDup->distData, saIdx);
-        if (saIdx == cdiPioGDsaXBounds || saIdx == cdiPioGDsaYBounds) size *= nvertex;
-        memcpy(dest, src, size * cdiPioDistArrayElemSize[saIdx]);
-        saPtr[saIdx] = dest;
-      }
+    {
+      size_t size = (size_t) (PPM_extents_size(sub_arrays[saIdx].a_rank, local_chunks[saIdx]));
+      void *src = PPM_dist_mult_array_local_ptr(extraDataOrig->distData, saIdx),
+           *dest = PPM_dist_mult_array_local_ptr(extraDataDup->distData, saIdx);
+      if (saIdx == cdiPioGDsaXBounds || saIdx == cdiPioGDsaYBounds) size *= nvertex;
+      memcpy(dest, src, size * cdiPioDistArrayElemSize[saIdx]);
+      saPtr[saIdx] = dest;
+    }
 
   gridptrDup->x.vals = saPtr[cdiPioGDsaXVals];
   gridptrDup->y.vals = saPtr[cdiPioGDsaYVals];
@@ -840,30 +835,30 @@ cdiPioDistGridGetPart(grid_t *gridptr, enum cdiPioGDsa saIdx, void *out, size_t 
   Xt_idxlist partDesc = extraData->partDesc[distType];
   size_t num_vals = (size_t) xt_idxlist_get_num_indices(partDesc);
   if (out)
+  {
+    Xt_int *indices = (Xt_int *) Malloc(num_vals * sizeof(indices[0]));
+    xt_idxlist_get_indices(partDesc, indices);
+    struct PPM_dist_mult_array *distData = extraData->distData;
+    int32_t coord[cdiPioGDsaMaxRank];
+    const struct PPM_global_array_desc *sub_array_desc = extraData->sub_arrays + saIdx;
+    if (sub_array_desc->a_rank == 1)
+      for (size_t i = 0; i < num_vals; ++i)
+      {
+        coord[0] = (int32_t) indices[i];
+        PPM_dist_mult_array_get(distData, saIdx, coord, (unsigned char *) out + elem_size * i);
+      }
+    else
     {
-      Xt_int *indices = (Xt_int *) Malloc(num_vals * sizeof(indices[0]));
-      xt_idxlist_get_indices(partDesc, indices);
-      struct PPM_dist_mult_array *distData = extraData->distData;
-      int32_t coord[cdiPioGDsaMaxRank];
-      const struct PPM_global_array_desc *sub_array_desc = extraData->sub_arrays + saIdx;
-      if (sub_array_desc->a_rank == 1)
-        for (size_t i = 0; i < num_vals; ++i)
-          {
-            coord[0] = (int32_t) indices[i];
-            PPM_dist_mult_array_get(distData, saIdx, coord, (unsigned char *) out + elem_size * i);
-          }
-      else
-        {
-          int xsize = (int) sub_array_desc->rect[1].size;
-          for (size_t i = 0; i < num_vals; ++i)
-            {
-              coord[0] = (int32_t) (indices[i] / xsize);
-              coord[1] = (int32_t) (indices[i] % xsize);
-              PPM_dist_mult_array_get(distData, saIdx, coord, (unsigned char *) out + elem_size * i);
-            }
-        }
-      Free(indices);
+      int xsize = (int) sub_array_desc->rect[1].size;
+      for (size_t i = 0; i < num_vals; ++i)
+      {
+        coord[0] = (int32_t) (indices[i] / xsize);
+        coord[1] = (int32_t) (indices[i] % xsize);
+        PPM_dist_mult_array_get(distData, saIdx, coord, (unsigned char *) out + elem_size * i);
+      }
     }
+    Free(indices);
+  }
   return (int) num_vals;
 }
 
@@ -873,21 +868,21 @@ inqMaskData(grid_t *gridptr, enum cdiPioGDsa saIdx, mask_t **localMaskData, int 
   (void) saIdx;
   int size = 0;
   if (*localMaskData)
+  {
+    struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
+    size = xt_idxlist_get_num_indices(extraData->partDesc[cdiPioGDdt2D]);
+    if (mask)
     {
-      struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
-      size = xt_idxlist_get_num_indices(extraData->partDesc[cdiPioGDdt2D]);
-      if (mask)
-        {
-          size_t numLocalMaskVals = (size_t) size;
-          mask_t *convMask = Malloc(numLocalMaskVals * sizeof(*convMask));
+      size_t numLocalMaskVals = (size_t) size;
+      mask_t *convMask = Malloc(numLocalMaskVals * sizeof(*convMask));
 #ifndef NDEBUG
-          int getSize = cdiPioDistGridGetPart(gridptr, saIdx, convMask, sizeof(convMask[0]));
+      int getSize = cdiPioDistGridGetPart(gridptr, saIdx, convMask, sizeof(convMask[0]));
 #endif
-          assert(getSize == size);
-          for (size_t i = 0; i < numLocalMaskVals; ++i) mask[i] = (int) convMask[i];
-          Free(convMask);
-        }
+      assert(getSize == size);
+      for (size_t i = 0; i < numLocalMaskVals; ++i) mask[i] = (int) convMask[i];
+      Free(convMask);
     }
+  }
   return size;
 }
 
@@ -896,14 +891,14 @@ defMaskData(grid_t *gridptr, const int *mask, enum cdiPioGDsa saIdx)
 {
   mask_t *maskPtr;
   if (mask)
-    {
-      struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
-      size_t numLocalMaskVals = (size_t) xt_idxlist_get_num_indices(extraData->partDesc[cdiPioGDdt2D]);
-      mask_t *convMask = Malloc(numLocalMaskVals * sizeof(*convMask));
-      for (size_t i = 0; i < numLocalMaskVals; ++i) convMask[i] = (mask_t) (mask[i] != 0);
-      maskPtr = defDistData(gridptr, convMask, saIdx);
-      Free(convMask);
-    }
+  {
+    struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
+    size_t numLocalMaskVals = (size_t) xt_idxlist_get_num_indices(extraData->partDesc[cdiPioGDdt2D]);
+    mask_t *convMask = Malloc(numLocalMaskVals * sizeof(*convMask));
+    for (size_t i = 0; i < numLocalMaskVals; ++i) convMask[i] = (mask_t) (mask[i] != 0);
+    maskPtr = defDistData(gridptr, convMask, saIdx);
+    Free(convMask);
+  }
   else
     maskPtr = NULL;
   return maskPtr;
@@ -951,20 +946,19 @@ cdiPioDistGridDefAReductions(grid_t *gridptr, size_t saIdx)
   int (*rankQuery)(void) = inClientGroup ? commInqRankModel : commInqRankColl;
   int commRank = rankQuery();
   if (commRank == aReduce->ownerRankFirst)
-    {
-      int coord[cdiPioGDsaMaxRank];
-      for (size_t dim = 0; dim < aRank; ++dim) coord[dim] = sub_arrays[saIdx].rect[dim].first;
-      PPM_dist_mult_array_get(distData, saIdx, coord, &aReduce->first);
-    }
+  {
+    int coord[cdiPioGDsaMaxRank];
+    for (size_t dim = 0; dim < aRank; ++dim) coord[dim] = sub_arrays[saIdx].rect[dim].first;
+    PPM_dist_mult_array_get(distData, saIdx, coord, &aReduce->first);
+  }
   else
     aReduce->first = (double) NAN;
   if (commRank == aReduce->ownerRankLast)
-    {
-      int coord[cdiPioGDsaMaxRank];
-      for (size_t dim = 0; dim < aRank; ++dim)
-        coord[dim] = sub_arrays[saIdx].rect[dim].first + sub_arrays[saIdx].rect[dim].size - 1;
-      PPM_dist_mult_array_get(distData, saIdx, coord, &aReduce->last);
-    }
+  {
+    int coord[cdiPioGDsaMaxRank];
+    for (size_t dim = 0; dim < aRank; ++dim) coord[dim] = sub_arrays[saIdx].rect[dim].first + sub_arrays[saIdx].rect[dim].size - 1;
+    PPM_dist_mult_array_get(distData, saIdx, coord, &aReduce->last);
+  }
   else
     aReduce->last = (double) NAN;
   xmpi(MPI_Bcast(&aReduce->first, 1, MPI_DOUBLE, aReduce->ownerRankFirst, cdiPioDistGridComm));
@@ -972,90 +966,90 @@ cdiPioDistGridDefAReductions(grid_t *gridptr, size_t saIdx)
   Xt_int gsize = (Xt_int) PPM_extents_size(aRank, sub_arrays[saIdx].rect);
   double refInc = 0.0;
   if (gsize > 1)
+  {
+    int (*commSizeQuery)(void) = inClientGroup ? cdiPioCommInqSizeClients : commInqSizeColl;
+    int commSize = commSizeQuery();
+    struct PPM_extent gridScanChunk
+        = PPM_uniform_partition((struct PPM_extent){ .first = 0, .size = (int32_t) gsize }, commSize, commRank);
+    Xt_redist dist2scanRedist;
+    if (!(dist2scanRedist = aReduce->dist2scanRedist))
     {
-      int (*commSizeQuery)(void) = inClientGroup ? cdiPioCommInqSizeClients : commInqSizeColl;
-      int commSize = commSizeQuery();
-      struct PPM_extent gridScanChunk
-          = PPM_uniform_partition((struct PPM_extent){ .first = 0, .size = (int32_t) gsize }, commSize, commRank);
-      Xt_redist dist2scanRedist;
-      if (!(dist2scanRedist = aReduce->dist2scanRedist))
-        {
-          struct Xt_stripe stripes[2];
-          int numStripes = 1;
-          stripes[0] = (struct Xt_stripe){ .start = gridScanChunk.first, .stride = 1, .nstrides = gridScanChunk.size };
-          if (commRank == 0)
-            {
-              stripes[numStripes++] = (struct Xt_stripe){ .start = gsize - (Xt_int) 1, .stride = 1, .nstrides = 1 };
-              int nstrides = stripes[0].nstrides;
-              gridScanChunk.size = stripes[0].nstrides = nstrides > 0 ? nstrides : 1;
-            }
-          else
-            {
-              stripes[0].start = (Xt_int) (stripes[0].start - 1);
-              /* add predecessor reference if there is something to
-               * compare it to */
-              stripes[0].nstrides += stripes[0].nstrides > 0;
-              gridScanChunk.size = stripes[0].nstrides;
-            }
-          Xt_idxlist scanList = xt_idxstripes_new(stripes, numStripes);
-          enum cdiPioGDdistType distType = extraData->distTypes[saIdx];
-          Xt_idxlist distList = extraData->distList[distType];
-          xmap_new_func_ptr xmapNew = cdiPioGetConf()->xmap_new;
-          Xt_xmap scanXmap = xmapNew(distList, scanList, cdiPioDistGridComm);
-          xt_idxlist_delete(scanList);
-          dist2scanRedist = aReduce->dist2scanRedist = xt_redist_p2p_new(scanXmap, MPI_DOUBLE);
-          xt_xmap_delete(scanXmap);
-        }
-      size_t lsize = (size_t) gridScanChunk.size;
-      double *restrict scanVals = Malloc((lsize + (size_t) (commRank == 0)) * sizeof(*scanVals));
-      {
-        double *distVals = PPM_dist_mult_array_local_ptr(distData, saIdx);
-        xt_redist_s_exchange1(dist2scanRedist, distVals, scanVals);
-      }
+      struct Xt_stripe stripes[2];
+      int numStripes = 1;
+      stripes[0] = (struct Xt_stripe){ .start = gridScanChunk.first, .stride = 1, .nstrides = gridScanChunk.size };
       if (commRank == 0)
-        {
-          if (saIdx == cdiPioGDsaXVals)
-            {
-              double xval0 = scanVals[0], xvalW = scanVals[lsize];
-              refInc = (fabs(xvalW) - fabs(xval0)) / (double) (gsize - 1);
-            }
-          else if (saIdx == cdiPioGDsaYVals)
-            {
-              double yval0 = scanVals[0], yval1 = scanVals[1];
-              refInc = yval1 - yval0;
-            }
-          else
-            xabort("Internal error");
-        }
+      {
+        stripes[numStripes++] = (struct Xt_stripe){ .start = gsize - (Xt_int) 1, .stride = 1, .nstrides = 1 };
+        int nstrides = stripes[0].nstrides;
+        gridScanChunk.size = stripes[0].nstrides = nstrides > 0 ? nstrides : 1;
+      }
       else
-        refInc = (double) NAN;
-      xmpi(MPI_Bcast(&refInc, 1, MPI_DOUBLE, 0, cdiPioDistGridComm));
-      if (lsize > 1)
-        {
-          if (saIdx == cdiPioGDsaXVals)
-            {
-              double eps = 0.01 * refInc;
-              for (size_t i = 1; i < lsize; i++)
-                if (fabs(fabs(scanVals[i] - scanVals[i - 1]) - refInc) > eps)
-                  {
-                    refInc = 0;
-                    break;
-                  }
-            }
-          else if (saIdx == cdiPioGDsaYVals)
-            {
-              double absYinc = fabs(refInc), eps = 0.01 * absYinc;
-              for (size_t i = 2; i < lsize; ++i)
-                if (fabs(fabs(scanVals[i] - scanVals[i - 1]) - absYinc) > eps)
-                  {
-                    refInc = 0;
-                    break;
-                  }
-            }
-        }
-      Free(scanVals);
-      xmpi(MPI_Allreduce(MPI_IN_PLACE, &refInc, 1, MPI_DOUBLE, MPI_MIN, cdiPioDistGridComm));
+      {
+        stripes[0].start = (Xt_int) (stripes[0].start - 1);
+        /* add predecessor reference if there is something to
+         * compare it to */
+        stripes[0].nstrides += stripes[0].nstrides > 0;
+        gridScanChunk.size = stripes[0].nstrides;
+      }
+      Xt_idxlist scanList = xt_idxstripes_new(stripes, numStripes);
+      enum cdiPioGDdistType distType = extraData->distTypes[saIdx];
+      Xt_idxlist distList = extraData->distList[distType];
+      xmap_new_func_ptr xmapNew = cdiPioGetConf()->xmap_new;
+      Xt_xmap scanXmap = xmapNew(distList, scanList, cdiPioDistGridComm);
+      xt_idxlist_delete(scanList);
+      dist2scanRedist = aReduce->dist2scanRedist = xt_redist_p2p_new(scanXmap, MPI_DOUBLE);
+      xt_xmap_delete(scanXmap);
     }
+    size_t lsize = (size_t) gridScanChunk.size;
+    double *restrict scanVals = Malloc((lsize + (size_t) (commRank == 0)) * sizeof(*scanVals));
+    {
+      double *distVals = PPM_dist_mult_array_local_ptr(distData, saIdx);
+      xt_redist_s_exchange1(dist2scanRedist, distVals, scanVals);
+    }
+    if (commRank == 0)
+    {
+      if (saIdx == cdiPioGDsaXVals)
+      {
+        double xval0 = scanVals[0], xvalW = scanVals[lsize];
+        refInc = (fabs(xvalW) - fabs(xval0)) / (double) (gsize - 1);
+      }
+      else if (saIdx == cdiPioGDsaYVals)
+      {
+        double yval0 = scanVals[0], yval1 = scanVals[1];
+        refInc = yval1 - yval0;
+      }
+      else
+        xabort("Internal error");
+    }
+    else
+      refInc = (double) NAN;
+    xmpi(MPI_Bcast(&refInc, 1, MPI_DOUBLE, 0, cdiPioDistGridComm));
+    if (lsize > 1)
+    {
+      if (saIdx == cdiPioGDsaXVals)
+      {
+        double eps = 0.01 * refInc;
+        for (size_t i = 1; i < lsize; i++)
+          if (fabs(fabs(scanVals[i] - scanVals[i - 1]) - refInc) > eps)
+          {
+            refInc = 0;
+            break;
+          }
+      }
+      else if (saIdx == cdiPioGDsaYVals)
+      {
+        double absYinc = fabs(refInc), eps = 0.01 * absYinc;
+        for (size_t i = 2; i < lsize; ++i)
+          if (fabs(fabs(scanVals[i] - scanVals[i - 1]) - absYinc) > eps)
+          {
+            refInc = 0;
+            break;
+          }
+      }
+    }
+    Free(scanVals);
+    xmpi(MPI_Allreduce(MPI_IN_PLACE, &refInc, 1, MPI_DOUBLE, MPI_MIN, cdiPioDistGridComm));
+  }
   return refInc;
 }
 
@@ -1084,31 +1078,31 @@ cdiPioDistGridInqXorYVal(grid_t *gridptr, enum cdiPioGDsa saIdx, const double *v
 {
   double val = 0;
   if (vals)
+  {
+    struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
+    if (index == 0)
     {
-      struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
-      if (index == 0)
-        {
-          struct axisReduction *aReduce = extraData->aReduce + saIdx;
-          return aReduce->first;
-        }
-      else if ((size_t) index == gridptr->size - 1)
-        {
-          struct axisReduction *aReduce = extraData->aReduce + saIdx;
-          return aReduce->last;
-        }
-      const struct PPM_global_array_desc *sub_array_desc = extraData->sub_arrays + saIdx;
-      int32_t coord[cdiPioGDsaMaxRank];
-      if (sub_array_desc->a_rank == 1)
-        coord[0] = index;
-      else
-        {
-          /* 2D decomposition */
-          int32_t xsize = sub_array_desc->rect[1].size;
-          coord[0] = index / xsize;
-          coord[1] = index % xsize;
-        }
-      PPM_dist_mult_array_get(extraData->distData, saIdx, coord, &val);
+      struct axisReduction *aReduce = extraData->aReduce + saIdx;
+      return aReduce->first;
     }
+    else if ((size_t) index == gridptr->size - 1)
+    {
+      struct axisReduction *aReduce = extraData->aReduce + saIdx;
+      return aReduce->last;
+    }
+    const struct PPM_global_array_desc *sub_array_desc = extraData->sub_arrays + saIdx;
+    int32_t coord[cdiPioGDsaMaxRank];
+    if (sub_array_desc->a_rank == 1)
+      coord[0] = index;
+    else
+    {
+      /* 2D decomposition */
+      int32_t xsize = sub_array_desc->rect[1].size;
+      coord[0] = index / xsize;
+      coord[1] = index % xsize;
+    }
+    PPM_dist_mult_array_get(extraData->distData, saIdx, coord, &val);
+  }
   return val;
 }
 
@@ -1263,55 +1257,55 @@ cdiPioDistGridPackSizeArrays(grid_t *gridptr, void *context)
       collRank = cdiPioCollRank(clientRank, numClients, numColl);
   int packBufferSize = 0;
   if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
+  {
+    /* encode present flags in 1 int and number of aggregated ranks
+     * in another */
+    packBufferSize += serializeGetSize(2, CDI_DATATYPE_INT, context);
+    struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
+    bool presence[cdiPioGDsaNum]
+        = { [cdiPioGDsaXVals] = gridptr->x.vals != NULL,     [cdiPioGDsaYVals] = gridptr->y.vals != NULL,
+            [cdiPioGDsaXBounds] = gridptr->x.bounds != NULL, [cdiPioGDsaYBounds] = gridptr->y.bounds != NULL,
+            [cdiPioGDsaArea] = gridptr->area != NULL,        [cdiPioGDsaMask] = gridptr->mask != NULL,
+            [cdiPioGDsaMaskGME] = gridptr->mask_gme != NULL };
+    int lastClientInGroup = cdiPioClientRangeStart(collRank + 1, numClients, numColl) - 1,
+        numClientsInGroup = lastClientInGroup - clientRank + 1;
+    struct PPM_dist_mult_array *distData = extraData->distData;
+    const struct PPM_global_array_desc *sub_arrays = extraData->sub_arrays;
+    size_t saMaxRank = gridptr->type == GRID_UNSTRUCTURED ? 1 : 2;
     {
-      /* encode present flags in 1 int and number of aggregated ranks
-       * in another */
-      packBufferSize += serializeGetSize(2, CDI_DATATYPE_INT, context);
-      struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridptr->extraData;
-      bool presence[cdiPioGDsaNum]
-          = { [cdiPioGDsaXVals] = gridptr->x.vals != NULL,     [cdiPioGDsaYVals] = gridptr->y.vals != NULL,
-              [cdiPioGDsaXBounds] = gridptr->x.bounds != NULL, [cdiPioGDsaYBounds] = gridptr->y.bounds != NULL,
-              [cdiPioGDsaArea] = gridptr->area != NULL,        [cdiPioGDsaMask] = gridptr->mask != NULL,
-              [cdiPioGDsaMaskGME] = gridptr->mask_gme != NULL };
-      int lastClientInGroup = cdiPioClientRangeStart(collRank + 1, numClients, numColl) - 1,
-          numClientsInGroup = lastClientInGroup - clientRank + 1;
-      struct PPM_dist_mult_array *distData = extraData->distData;
-      const struct PPM_global_array_desc *sub_arrays = extraData->sub_arrays;
-      size_t saMaxRank = gridptr->type == GRID_UNSTRUCTURED ? 1 : 2;
-      {
-        packBufferSize +=
-            /* description of outermost dimension chunks for all sending
-             * ranks, 2D decomposition for both, regular and irregular grids
-             * plus x-/y- axis decomposition for regular grids
-             */
-            serializeGetSize(numClientsInGroup * 2 * (int) saMaxRank, CDI_DATATYPE_INT32, context);
-      }
-      int nvertex = gridptr->nvertex;
-      int extraDimLen[cdiPioGDsaNum] = {
-        [cdiPioGDsaXVals] = 1, [cdiPioGDsaYVals] = 1, [cdiPioGDsaXBounds] = nvertex, [cdiPioGDsaYBounds] = nvertex,
-        [cdiPioGDsaArea] = 1,  [cdiPioGDsaMask] = 1,  [cdiPioGDsaMaskGME] = 1,
-      };
-
-      struct PPM_extent(*local_chunks)[saMaxRank] = (struct PPM_extent(*)[saMaxRank]) extraData->local_chunks;
-      for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx)
-        if (presence[saIdx])
-          {
-            size_t aRank = sub_arrays[saIdx].a_rank;
-            int numElem = (int) (PPM_extents_size(aRank, local_chunks[saIdx]));
-            for (int rank = clientRank + 1; rank <= lastClientInGroup; ++rank)
-              {
-                struct PPM_extent rankChunk[cdiPioGDsaMaxRank];
-                PPM_dist_mult_array_rank_rect(distData, saIdx, rank, rankChunk);
-                numElem += (int) (PPM_extents_size(aRank, rankChunk));
-              }
-            numElem *= extraDimLen[saIdx];
-            packBufferSize +=
-                /* data of chunks in client group for collector */
-                +serializeGetSize(numElem, cdiPioDistArrayCDIDt[saIdx], context)
-                /* check-sum of chunks */
-                + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
-          }
+      packBufferSize +=
+          /* description of outermost dimension chunks for all sending
+           * ranks, 2D decomposition for both, regular and irregular grids
+           * plus x-/y- axis decomposition for regular grids
+           */
+          serializeGetSize(numClientsInGroup * 2 * (int) saMaxRank, CDI_DATATYPE_INT32, context);
     }
+    int nvertex = gridptr->nvertex;
+    int extraDimLen[cdiPioGDsaNum] = {
+      [cdiPioGDsaXVals] = 1, [cdiPioGDsaYVals] = 1, [cdiPioGDsaXBounds] = nvertex, [cdiPioGDsaYBounds] = nvertex,
+      [cdiPioGDsaArea] = 1,  [cdiPioGDsaMask] = 1,  [cdiPioGDsaMaskGME] = 1,
+    };
+
+    struct PPM_extent(*local_chunks)[saMaxRank] = (struct PPM_extent(*)[saMaxRank]) extraData->local_chunks;
+    for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx)
+      if (presence[saIdx])
+      {
+        size_t aRank = sub_arrays[saIdx].a_rank;
+        int numElem = (int) (PPM_extents_size(aRank, local_chunks[saIdx]));
+        for (int rank = clientRank + 1; rank <= lastClientInGroup; ++rank)
+        {
+          struct PPM_extent rankChunk[cdiPioGDsaMaxRank];
+          PPM_dist_mult_array_rank_rect(distData, saIdx, rank, rankChunk);
+          numElem += (int) (PPM_extents_size(aRank, rankChunk));
+        }
+        numElem *= extraDimLen[saIdx];
+        packBufferSize +=
+            /* data of chunks in client group for collector */
+            +serializeGetSize(numElem, cdiPioDistArrayCDIDt[saIdx], context)
+            /* check-sum of chunks */
+            + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+      }
+  }
   return packBufferSize;
 }
 
@@ -1339,81 +1333,80 @@ cdiPioDistGridPackArrays(grid_t *gridptr, int memberMask, void *packBuffer, int 
   size_t saMaxRank = type == GRID_UNSTRUCTURED ? 1 : 2;
   const struct PPM_extent(*local_chunks)[saMaxRank] = (const struct PPM_extent(*)[saMaxRank]) extraData->local_chunks;
   if (clientRank == groupLeader)
+  {
     {
-      {
-        int presentFlags = 0;
-        for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx) presentFlags |= ((saPtr[saIdx] != NULL) << saIdx);
-        serializePack(&presentFlags, 1, CDI_DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
-      }
-      int lastClientInGroup = cdiPioClientRangeStart(collRank + 1, numClients, numColl) - 1,
-          numClientsInGroup = lastClientInGroup - clientRank + 1;
-      serializePack(&numClientsInGroup, 1, CDI_DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
-      struct PPM_dist_mult_array *distData = extraData->distData;
-      struct PPM_extent *chunks;
-      {
-        size_t numChunksForGroup = saMaxRank * (size_t) numClientsInGroup;
-        chunks = (struct PPM_extent *) (Malloc(numChunksForGroup * sizeof(*chunks)));
-        /* area is always fully decomposed (only x-axis if grid is
-         * unstructured, but then saMaxRank = 1) */
-        memcpy(chunks, local_chunks[cdiPioGDsaArea], saMaxRank * sizeof(*chunks));
-        for (int rank = clientRank + 1, rankOfs = 1; rank <= lastClientInGroup; ++rank, ++rankOfs)
-          /* area is always 2D-decomposed */
-          PPM_dist_mult_array_rank_rect(distData, cdiPioGDsaArea, rank, chunks + saMaxRank * (size_t) rankOfs);
-        serializePack(chunks, 2 * (int) numChunksForGroup, CDI_DATATYPE_INT32, packBuffer, packBufferSize, packBufferPos, context);
-      }
-      int *shardSize = (int *) (Malloc((size_t) numClientsInGroup * sizeof(*shardSize)));
-      const enum cdiPioGDdistType *distTypes = extraData->distTypes;
-      void *shardBuf = NULL;
-      for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx)
-        if (saPtr[saIdx] != NULL)
-          {
-            size_t elemSize = cdiPioDistArrayElemSize[saIdx];
-            size_t aRank = sub_arrays[saIdx].a_rank;
-            int numElem = PPM_extents_size(aRank, local_chunks[saIdx]);
-            shardSize[0] = numElem;
-            int maxShardSize = 0;
-            size_t distOfs = (size_t) distTypes[saIdx] & (size_t) 1;
-            for (int rank = clientRank + 1; rank <= lastClientInGroup; ++rank)
-              {
-                size_t rankOfs = (size_t) (rank - clientRank);
-                /* 0 for x and 2d decomposed data, 1 for y-decompositions */
-                struct PPM_extent *rankChunk = chunks + saMaxRank * rankOfs + distOfs;
-                numElem += (shardSize[rankOfs] = (int) (PPM_extents_size(aRank, rankChunk)));
-                maxShardSize = MAX(shardSize[rankOfs], maxShardSize);
-              }
-            if (maxShardSize > 0) shardBuf = Realloc(shardBuf, elemSize * (size_t) maxShardSize * (size_t) extraDimLen[saIdx]);
-            struct cdiCheckSumState crcState;
-            cdiCheckSumRStart(&crcState);
-            /* pack own shard */
-            serializePack(saPtr[saIdx], shardSize[0] * extraDimLen[saIdx], cdiPioDistArrayCDIDt[saIdx], packBuffer, packBufferSize,
-                          packBufferPos, context);
-            cdiCheckSumRAdd(&crcState, cdiPioDistArrayCDIDt[saIdx], shardSize[0] * extraDimLen[saIdx], saPtr[saIdx]);
-            /* recv and pack other shards in client group */
-            for (int rank = clientRank + 1; rank <= lastClientInGroup; ++rank)
-              {
-                size_t rankOfs = (size_t) (rank - clientRank);
-                xmpi(MPI_Recv(shardBuf, shardSize[rankOfs], sub_arrays[saIdx].element_dt, rank, DIST_DATA_AGG, aggComm,
-                              MPI_STATUS_IGNORE));
-                serializePack(shardBuf, shardSize[rankOfs] * extraDimLen[saIdx], cdiPioDistArrayCDIDt[saIdx], packBuffer,
-                              packBufferSize, packBufferPos, context);
-                cdiCheckSumRAdd(&crcState, cdiPioDistArrayCDIDt[saIdx], shardSize[rankOfs] * extraDimLen[saIdx], shardBuf);
-              }
-            uint32_t d = cdiCheckSumRValue(crcState);
-            /* append check-sum of shards to packed data */
-            serializePack(&d, 1, CDI_DATATYPE_UINT32, packBuffer, packBufferSize, packBufferPos, context);
-          }
-      Free(shardSize);
-      Free(chunks);
-      Free(shardBuf);
+      int presentFlags = 0;
+      for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx) presentFlags |= ((saPtr[saIdx] != NULL) << saIdx);
+      serializePack(&presentFlags, 1, CDI_DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
     }
+    int lastClientInGroup = cdiPioClientRangeStart(collRank + 1, numClients, numColl) - 1,
+        numClientsInGroup = lastClientInGroup - clientRank + 1;
+    serializePack(&numClientsInGroup, 1, CDI_DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
+    struct PPM_dist_mult_array *distData = extraData->distData;
+    struct PPM_extent *chunks;
+    {
+      size_t numChunksForGroup = saMaxRank * (size_t) numClientsInGroup;
+      chunks = (struct PPM_extent *) (Malloc(numChunksForGroup * sizeof(*chunks)));
+      /* area is always fully decomposed (only x-axis if grid is
+       * unstructured, but then saMaxRank = 1) */
+      memcpy(chunks, local_chunks[cdiPioGDsaArea], saMaxRank * sizeof(*chunks));
+      for (int rank = clientRank + 1, rankOfs = 1; rank <= lastClientInGroup; ++rank, ++rankOfs) /* area is always 2D-decomposed */
+        PPM_dist_mult_array_rank_rect(distData, cdiPioGDsaArea, rank, chunks + saMaxRank * (size_t) rankOfs);
+      serializePack(chunks, 2 * (int) numChunksForGroup, CDI_DATATYPE_INT32, packBuffer, packBufferSize, packBufferPos, context);
+    }
+    int *shardSize = (int *) (Malloc((size_t) numClientsInGroup * sizeof(*shardSize)));
+    const enum cdiPioGDdistType *distTypes = extraData->distTypes;
+    void *shardBuf = NULL;
+    for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx)
+      if (saPtr[saIdx] != NULL)
+      {
+        size_t elemSize = cdiPioDistArrayElemSize[saIdx];
+        size_t aRank = sub_arrays[saIdx].a_rank;
+        int numElem = PPM_extents_size(aRank, local_chunks[saIdx]);
+        shardSize[0] = numElem;
+        int maxShardSize = 0;
+        size_t distOfs = (size_t) distTypes[saIdx] & (size_t) 1;
+        for (int rank = clientRank + 1; rank <= lastClientInGroup; ++rank)
+        {
+          size_t rankOfs = (size_t) (rank - clientRank);
+          /* 0 for x and 2d decomposed data, 1 for y-decompositions */
+          struct PPM_extent *rankChunk = chunks + saMaxRank * rankOfs + distOfs;
+          numElem += (shardSize[rankOfs] = (int) (PPM_extents_size(aRank, rankChunk)));
+          maxShardSize = MAX(shardSize[rankOfs], maxShardSize);
+        }
+        if (maxShardSize > 0) shardBuf = Realloc(shardBuf, elemSize * (size_t) maxShardSize * (size_t) extraDimLen[saIdx]);
+        struct cdiCheckSumState crcState;
+        cdiCheckSumRStart(&crcState);
+        /* pack own shard */
+        serializePack(saPtr[saIdx], shardSize[0] * extraDimLen[saIdx], cdiPioDistArrayCDIDt[saIdx], packBuffer, packBufferSize,
+                      packBufferPos, context);
+        cdiCheckSumRAdd(&crcState, cdiPioDistArrayCDIDt[saIdx], shardSize[0] * extraDimLen[saIdx], saPtr[saIdx]);
+        /* recv and pack other shards in client group */
+        for (int rank = clientRank + 1; rank <= lastClientInGroup; ++rank)
+        {
+          size_t rankOfs = (size_t) (rank - clientRank);
+          xmpi(MPI_Recv(shardBuf, shardSize[rankOfs], sub_arrays[saIdx].element_dt, rank, DIST_DATA_AGG, aggComm,
+                        MPI_STATUS_IGNORE));
+          serializePack(shardBuf, shardSize[rankOfs] * extraDimLen[saIdx], cdiPioDistArrayCDIDt[saIdx], packBuffer, packBufferSize,
+                        packBufferPos, context);
+          cdiCheckSumRAdd(&crcState, cdiPioDistArrayCDIDt[saIdx], shardSize[rankOfs] * extraDimLen[saIdx], shardBuf);
+        }
+        uint32_t d = cdiCheckSumRValue(crcState);
+        /* append check-sum of shards to packed data */
+        serializePack(&d, 1, CDI_DATATYPE_UINT32, packBuffer, packBufferSize, packBufferPos, context);
+      }
+    Free(shardSize);
+    Free(chunks);
+    Free(shardBuf);
+  }
   else
     for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx)
       if (saPtr[saIdx] != NULL)
-        {
-          size_t aRank = sub_arrays[saIdx].a_rank;
-          int numElem = PPM_extents_size(aRank, local_chunks[saIdx]);
-          xmpi(MPI_Send((void *) saPtr[saIdx], numElem, sub_arrays[saIdx].element_dt, groupLeader, DIST_DATA_AGG, aggComm));
-        }
+      {
+        size_t aRank = sub_arrays[saIdx].a_rank;
+        int numElem = PPM_extents_size(aRank, local_chunks[saIdx]);
+        xmpi(MPI_Send((void *) saPtr[saIdx], numElem, sub_arrays[saIdx].element_dt, groupLeader, DIST_DATA_AGG, aggComm));
+      }
 }
 
 static enum cdiApplyRet
@@ -1424,10 +1417,10 @@ cdiPioDistGridPackAssistFunc(int id, void *res, void *data)
   grid_t *gridptr = (grid_t *) res;
   int resStatus = reshGetStatus(id, NULL);
   if (gridptr->vtable == &cdiPioDistGridVtable && (resStatus & RESH_SYNC_BIT))
-    {
-      cdiPioDistGridPackArrays(gridptr, 0, NULL, 0, NULL, NULL);
-      reshSetStatus(id, NULL, resStatus & ~RESH_SYNC_BIT);
-    }
+  {
+    cdiPioDistGridPackArrays(gridptr, 0, NULL, 0, NULL, NULL);
+    reshSetStatus(id, NULL, resStatus & ~RESH_SYNC_BIT);
+  }
   return CDI_APPLY_GO_ON;
 }
 
@@ -1470,73 +1463,73 @@ cdiPioDistGridUnpackArrays(grid_t *gridptr, int memberMask, char *unpackBuffer, 
   {
     Xt_idxlist partDesc2D, partDescX, partDescY;
     if (type == GRID_UNSTRUCTURED)
-      {
-        struct Xt_stripe *stripes = (struct Xt_stripe *) (Malloc((size_t) numClientsInGroup * sizeof(*stripes)));
-        for (size_t rankOfs = 0; rankOfs < (size_t) numClientsInGroup; ++rankOfs)
-          stripes[rankOfs]
-              = (struct Xt_stripe){ .start = (Xt_int) chunks[rankOfs].first, .stride = 1, .nstrides = (int) chunks[rankOfs].size };
-        partDesc2D = xt_idxstripes_new(stripes, numClientsInGroup);
-        partDescY = partDescX = NULL;
-        Free(stripes);
-      }
+    {
+      struct Xt_stripe *stripes = (struct Xt_stripe *) (Malloc((size_t) numClientsInGroup * sizeof(*stripes)));
+      for (size_t rankOfs = 0; rankOfs < (size_t) numClientsInGroup; ++rankOfs)
+        stripes[rankOfs]
+            = (struct Xt_stripe){ .start = (Xt_int) chunks[rankOfs].first, .stride = 1, .nstrides = (int) chunks[rankOfs].size };
+      partDesc2D = xt_idxstripes_new(stripes, numClientsInGroup);
+      partDescY = partDescX = NULL;
+      Free(stripes);
+    }
     else if (type == GRID_CURVILINEAR)
+    {
+      Xt_int global_size[cdiPioGDsaMaxRank] = { (Xt_int) gridptr->y.size, (Xt_int) gridptr->x.size },
+             local_start[cdiPioGDsaMaxRank];
+      int local_size[cdiPioGDsaMaxRank];
+      Xt_idxlist *partDescClient2D = Malloc((size_t) numClientsInGroup * sizeof(*partDescClient2D));
+      for (size_t rankOfs = 0; rankOfs < (size_t) numClientsInGroup; ++rankOfs)
       {
-        Xt_int global_size[cdiPioGDsaMaxRank] = { (Xt_int) gridptr->y.size, (Xt_int) gridptr->x.size },
-               local_start[cdiPioGDsaMaxRank];
-        int local_size[cdiPioGDsaMaxRank];
-        Xt_idxlist *partDescClient2D = Malloc((size_t) numClientsInGroup * sizeof(*partDescClient2D));
-        for (size_t rankOfs = 0; rankOfs < (size_t) numClientsInGroup; ++rankOfs)
-          {
-            for (size_t dim = 0; dim < cdiPioGDsaMaxRank; ++dim)
-              {
-                local_size[dim] = chunks[cdiPioGDsaMaxRank * rankOfs + dim].size;
-                local_start[dim] = (Xt_int) chunks[cdiPioGDsaMaxRank * rankOfs + dim].first;
-              }
-            partDescClient2D[rankOfs] = xt_idxsection_new(0, cdiPioGDsaMaxRank, global_size, local_size, local_start);
-          }
-        partDesc2D = xt_idxlist_collection_new(partDescClient2D, numClientsInGroup);
-        partDescY = partDescX = NULL;
-        for (size_t rankOfs = 0; rankOfs < (size_t) numClientsInGroup; ++rankOfs) xt_idxlist_delete(partDescClient2D[rankOfs]);
-        Free(partDescClient2D);
+        for (size_t dim = 0; dim < cdiPioGDsaMaxRank; ++dim)
+        {
+          local_size[dim] = chunks[cdiPioGDsaMaxRank * rankOfs + dim].size;
+          local_start[dim] = (Xt_int) chunks[cdiPioGDsaMaxRank * rankOfs + dim].first;
+        }
+        partDescClient2D[rankOfs] = xt_idxsection_new(0, cdiPioGDsaMaxRank, global_size, local_size, local_start);
       }
+      partDesc2D = xt_idxlist_collection_new(partDescClient2D, numClientsInGroup);
+      partDescY = partDescX = NULL;
+      for (size_t rankOfs = 0; rankOfs < (size_t) numClientsInGroup; ++rankOfs) xt_idxlist_delete(partDescClient2D[rankOfs]);
+      Free(partDescClient2D);
+    }
     else
+    {
+      Xt_int global_size[cdiPioGDsaMaxRank] = { (Xt_int) gridptr->y.size, (Xt_int) gridptr->x.size },
+             local_start[cdiPioGDsaMaxRank];
+      int local_size[cdiPioGDsaMaxRank];
+      /* describe 2D decomposition via section for later collection
+       * construction */
+      Xt_idxlist *partDescClient2D = (Xt_idxlist *) (Malloc((size_t) numClientsInGroup * sizeof(*partDescClient2D)));
+      /* describe x- and y-decomposition via stripes */
+      struct Xt_stripe(*stripes)[numClientsInGroup]
+          = (struct Xt_stripe(*)[numClientsInGroup])(Malloc((size_t) numClientsInGroup * 2 * sizeof(*stripes)));
+      for (size_t rankOfs = 0; rankOfs < (size_t) numClientsInGroup; ++rankOfs)
       {
-        Xt_int global_size[cdiPioGDsaMaxRank] = { (Xt_int) gridptr->y.size, (Xt_int) gridptr->x.size },
-               local_start[cdiPioGDsaMaxRank];
-        int local_size[cdiPioGDsaMaxRank];
-        /* describe 2D decomposition via section for later collection
-         * construction */
-        Xt_idxlist *partDescClient2D = (Xt_idxlist *) (Malloc((size_t) numClientsInGroup * sizeof(*partDescClient2D)));
-        /* describe x- and y-decomposition via stripes */
-        struct Xt_stripe(*stripes)[numClientsInGroup]
-            = (struct Xt_stripe(*)[numClientsInGroup])(Malloc((size_t) numClientsInGroup * 2 * sizeof(*stripes)));
-        for (size_t rankOfs = 0; rankOfs < (size_t) numClientsInGroup; ++rankOfs)
-          {
-            for (size_t dim = 0; dim < cdiPioGDsaMaxRank; ++dim)
-              {
-                size_t chunkDimRankOfs = cdiPioGDsaMaxRank * rankOfs + dim;
-                local_size[dim] = chunks[chunkDimRankOfs].size;
-                local_start[dim] = (Xt_int) chunks[chunkDimRankOfs].first;
-              }
-            partDescClient2D[rankOfs] = xt_idxsection_new(0, cdiPioGDsaMaxRank, global_size, local_size, local_start);
-            for (size_t i = cdiPioGDdtX; i <= cdiPioGDdtY; ++i)
-              stripes[i][rankOfs] = (struct Xt_stripe){ .start = (Xt_int) chunks[cdiPioGDsaMaxRank * rankOfs + i].first,
-                                                        .stride = 1,
-                                                        .nstrides = (int) chunks[cdiPioGDsaMaxRank * rankOfs + i].size };
-          }
-        partDesc2D = xt_idxlist_collection_new(partDescClient2D, numClientsInGroup);
-        partDescX = xt_idxstripes_new(stripes[cdiPioGDdtX], numClientsInGroup);
-        partDescY = xt_idxstripes_new(stripes[cdiPioGDdtY], numClientsInGroup);
-        Free(stripes);
-        Free(partDescClient2D);
+        for (size_t dim = 0; dim < cdiPioGDsaMaxRank; ++dim)
+        {
+          size_t chunkDimRankOfs = cdiPioGDsaMaxRank * rankOfs + dim;
+          local_size[dim] = chunks[chunkDimRankOfs].size;
+          local_start[dim] = (Xt_int) chunks[chunkDimRankOfs].first;
+        }
+        partDescClient2D[rankOfs] = xt_idxsection_new(0, cdiPioGDsaMaxRank, global_size, local_size, local_start);
+        for (size_t i = cdiPioGDdtX; i <= cdiPioGDdtY; ++i)
+          stripes[i][rankOfs] = (struct Xt_stripe){ .start = (Xt_int) chunks[cdiPioGDsaMaxRank * rankOfs + i].first,
+                                                    .stride = 1,
+                                                    .nstrides = (int) chunks[cdiPioGDsaMaxRank * rankOfs + i].size };
       }
+      partDesc2D = xt_idxlist_collection_new(partDescClient2D, numClientsInGroup);
+      partDescX = xt_idxstripes_new(stripes[cdiPioGDdtX], numClientsInGroup);
+      partDescY = xt_idxstripes_new(stripes[cdiPioGDdtY], numClientsInGroup);
+      Free(stripes);
+      Free(partDescClient2D);
+    }
     cdiPioDistGridInit(gridptr, type, gridptr->size, gridptr->x.size, gridptr->y.size, nvertex, NULL, partDesc2D, partDescX,
                        partDescY);
     if (!irregular)
-      {
-        xt_idxlist_delete(partDescY);
-        xt_idxlist_delete(partDescX);
-      }
+    {
+      xt_idxlist_delete(partDescY);
+      xt_idxlist_delete(partDescX);
+    }
     xt_idxlist_delete(partDesc2D);
   }
   void *buf = NULL;
@@ -1558,23 +1551,23 @@ cdiPioDistGridUnpackArrays(grid_t *gridptr, int memberMask, char *unpackBuffer, 
   struct PPM_global_array_desc *sub_arrays = extraData->sub_arrays;
   for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx)
     if (presentFlags & (1 << saIdx))
-      {
-        /* choose chunks to use by decomposition for saIdx */
-        size_t decoOfs = (size_t) distTypes[saIdx] % (size_t) 2;
-        /* sum chunk sizes aggregated on this collector */
-        size_t aRank = sub_arrays[saIdx].a_rank;
-        int numElem = 0;
-        for (size_t rankOfs = 0; rankOfs < (size_t) numClientsInGroup; ++rankOfs)
-          numElem += PPM_extents_size(aRank, chunks + decoOfs + chunksPerRank * rankOfs);
-        numElem *= extraDimLen[saIdx];
-        size_t elemSize = cdiPioDistArrayElemSize[saIdx];
-        buf = Realloc(buf, (size_t) numElem * elemSize);
-        serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, buf, numElem, cdiPioDistArrayCDIDt[saIdx], context);
-        uint32_t d = cdiCheckSum(cdiPioDistArrayCDIDt[saIdx], numElem, buf), dRef;
-        serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &dRef, 1, CDI_DATATYPE_UINT32, context);
-        xassert(d == dRef);
-        saDefFunc[saIdx](gridptr, buf);
-      }
+    {
+      /* choose chunks to use by decomposition for saIdx */
+      size_t decoOfs = (size_t) distTypes[saIdx] % (size_t) 2;
+      /* sum chunk sizes aggregated on this collector */
+      size_t aRank = sub_arrays[saIdx].a_rank;
+      int numElem = 0;
+      for (size_t rankOfs = 0; rankOfs < (size_t) numClientsInGroup; ++rankOfs)
+        numElem += PPM_extents_size(aRank, chunks + decoOfs + chunksPerRank * rankOfs);
+      numElem *= extraDimLen[saIdx];
+      size_t elemSize = cdiPioDistArrayElemSize[saIdx];
+      buf = Realloc(buf, (size_t) numElem * elemSize);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, buf, numElem, cdiPioDistArrayCDIDt[saIdx], context);
+      uint32_t d = cdiCheckSum(cdiPioDistArrayCDIDt[saIdx], numElem, buf), dRef;
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &dRef, 1, CDI_DATATYPE_UINT32, context);
+      xassert(d == dRef);
+      saDefFunc[saIdx](gridptr, buf);
+    }
   Free(chunks);
   Free(buf);
 }
@@ -1585,10 +1578,10 @@ compareGridVals(size_t numVals, const double *restrict valsRef, const double *re
   bool differ = false;
   for (size_t i = 0; i < numVals; ++i)
     if (fabs(valsTest[i] - valsRef[i]) > 1.e-10)
-      {
-        differ = true;
-        break;
-      }
+    {
+      differ = true;
+      break;
+    }
   return differ;
 }
 
@@ -1598,48 +1591,48 @@ cdiPioDistGridCompareXYvals(grid_t *gridRef, grid_t *gridTest)
   bool differ = false;
   size_t xsizeTest = gridTest->x.size, ysizeTest = gridTest->y.size;
   if (gridRef->vtable == &cdiPioDistGridVtable && gridTest->vtable == &cdiPioDistGridVtable)
+  {
+    if (!differ && xsizeTest > 0 && xsizeTest == (size_t) gridRef->vtable->inqXVals(gridRef, NULL))
     {
-      if (!differ && xsizeTest > 0 && xsizeTest == (size_t) gridRef->vtable->inqXVals(gridRef, NULL))
-        {
-          const double *restrict xvalsRef = gridRef->x.vals, *restrict xvalsTest = gridTest->x.vals;
-          differ = compareGridVals(xsizeTest, xvalsRef, xvalsTest);
-        }
+      const double *restrict xvalsRef = gridRef->x.vals, *restrict xvalsTest = gridTest->x.vals;
+      differ = compareGridVals(xsizeTest, xvalsRef, xvalsTest);
+    }
 
-      if (!differ && ysizeTest > 0 && ysizeTest == (size_t) gridRef->vtable->inqYVals(gridRef, NULL))
-        {
-          const double *restrict yvalsRef = gridRef->y.vals, *restrict yvalsTest = gridTest->y.vals;
-          differ = compareGridVals(ysizeTest, yvalsRef, yvalsTest);
-        }
-      int differReduce = differ;
-      xmpi(MPI_Allreduce(MPI_IN_PLACE, &differReduce, 1, MPI_INT, MPI_LOR, commInqCommCalc()));
-      differ = differReduce;
-    }
-  else
+    if (!differ && ysizeTest > 0 && ysizeTest == (size_t) gridRef->vtable->inqYVals(gridRef, NULL))
     {
-      if (xsizeTest != (size_t) gridRef->vtable->inqXVals(gridRef, NULL)
-          || ysizeTest != (size_t) gridRef->vtable->inqYVals(gridRef, NULL))
-        {
-          differ = true;
-        }
-      else
-        {
-          /* warn about grid compare of distributed vs. undistributed grid */
-          Warning("efficiency: comparing data of distributed "
-                  "vs. non-distributed grid!");
-          double *valsRefCopy = Malloc(MAX(xsizeTest, ysizeTest) * sizeof(double));
-          /* fetch X data */
-          gridRef->vtable->inqXVals(gridRef, valsRefCopy);
-          differ = compareGridVals(xsizeTest, valsRefCopy, gridTest->vtable->inqXValsPtr(gridTest));
-          if (!differ)
-            {
-              gridRef->vtable->inqYVals(gridRef, valsRefCopy);
-              differ = compareGridVals(ysizeTest, valsRefCopy, gridTest->vtable->inqYValsPtr(gridTest));
-            }
-          /* todo: handle this collectively, i.e. only compare
-           * indices from chunk and allreduce result */
-          Free(valsRefCopy);
-        }
+      const double *restrict yvalsRef = gridRef->y.vals, *restrict yvalsTest = gridTest->y.vals;
+      differ = compareGridVals(ysizeTest, yvalsRef, yvalsTest);
     }
+    int differReduce = differ;
+    xmpi(MPI_Allreduce(MPI_IN_PLACE, &differReduce, 1, MPI_INT, MPI_LOR, commInqCommCalc()));
+    differ = differReduce;
+  }
+  else
+  {
+    if (xsizeTest != (size_t) gridRef->vtable->inqXVals(gridRef, NULL)
+        || ysizeTest != (size_t) gridRef->vtable->inqYVals(gridRef, NULL))
+    {
+      differ = true;
+    }
+    else
+    {
+      /* warn about grid compare of distributed vs. undistributed grid */
+      Warning("efficiency: comparing data of distributed "
+              "vs. non-distributed grid!");
+      double *valsRefCopy = Malloc(MAX(xsizeTest, ysizeTest) * sizeof(double));
+      /* fetch X data */
+      gridRef->vtable->inqXVals(gridRef, valsRefCopy);
+      differ = compareGridVals(xsizeTest, valsRefCopy, gridTest->vtable->inqXValsPtr(gridTest));
+      if (!differ)
+      {
+        gridRef->vtable->inqYVals(gridRef, valsRefCopy);
+        differ = compareGridVals(ysizeTest, valsRefCopy, gridTest->vtable->inqYValsPtr(gridTest));
+      }
+      /* todo: handle this collectively, i.e. only compare
+       * indices from chunk and allreduce result */
+      Free(valsRefCopy);
+    }
+  }
   return differ;
 }
 
