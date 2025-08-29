@@ -23,7 +23,7 @@
 #ifdef _WIN32
 #define strcasecmp _stricmp
 #else
-#include <unistd.h>
+#include <strings.h>
 #endif
 
 enum VarStatus
