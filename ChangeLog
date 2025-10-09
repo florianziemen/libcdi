@@ -1,3 +1,7 @@
+2025-10-09  Uwe Schulzweida
+
+	* is_timeaxis_units: tu string is not null terminated (bug fix)
+
 2025-08-29  Uwe Schulzweida
 
 	* strcasecmp not defined [Bug #12250]
