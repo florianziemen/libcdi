@@ -266,7 +266,10 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
             timeUnits = -1;
           }
         }
-        else { Warning("Unsupported format for time units: %s!", tu); }
+        else
+        {
+          Warning("Unsupported format for time units: %s!", tu);
+        }
       }
       else if (taxisType == TAXIS_RELATIVE)
       {
@@ -1482,7 +1485,10 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
             ncvar->isZaxis = true;
           }
         }
-        else { ncvar->atts[ncvar->natts++] = iatt; }
+        else
+        {
+          ncvar->atts[ncvar->natts++] = iatt;
+        }
       }
       else if (isText && str_is_equal(attname, "cdi"))
       {
@@ -1568,7 +1574,10 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
 
         cdf_set_var(ncvar, DataVar);
       }
-      else { ncvar->atts[ncvar->natts++] = iatt; }
+      else
+      {
+        ncvar->atts[ncvar->natts++] = iatt;
+      }
     }
   }
 
@@ -2259,9 +2268,15 @@ cdf_check_gridtype(int *gridtype, bool isLon, bool isLat, size_t xsize, size_t y
       *gridtype = GRID_GAUSSIAN;
       grid->np = (int) (ysize / 2);
     }
-    else { *gridtype = GRID_LONLAT; }
+    else
+    {
+      *gridtype = GRID_LONLAT;
+    }
   }
-  else { *gridtype = (isLon && !isLat && ysize == 0) ? GRID_LONLAT : GRID_GENERIC; }
+  else
+  {
+    *gridtype = (isLon && !isLat && ysize == 0) ? GRID_LONLAT : GRID_GENERIC;
+  }
 }
 
 static bool
@@ -3145,7 +3160,8 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t 
 
       if (xdimid == CDI_UNDEFID && ydimid == CDI_UNDEFID && grid->size == 1) gridDefHasDims(gridID, CoordVar);
 
-      int xaxisVarID = (ncvar->gridtype == GRID_HEALPIX) ? CDI_XAXIS : CDI_XAXIS;
+      // int xaxisVarID = (ncvar->gridtype == GRID_HEALPIX) ? CDI_XAXIS : CDI_XAXIS;
+      int xaxisVarID = CDI_XAXIS;
       if (xdimid != CDI_UNDEFID) cdiDefKeyString(gridID, xaxisVarID, CDI_KEY_DIMNAME, ncdims[xdimid].name);
       if (ydimid != CDI_UNDEFID) cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_DIMNAME, ncdims[ydimid].name);
       if (vdimid != CDI_UNDEFID) cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_VDIMNAME, ncdims[vdimid].name);
@@ -3484,7 +3500,10 @@ cdf_define_institut_and_model_id(int vlistID, int varID)
         if (longname[0]) cdiDefKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname);
         if (units[0]) cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units);
       }
-      else { varTableID = CDI_Default_TableID; }
+      else
+      {
+        varTableID = CDI_Default_TableID;
+      }
     }
 
     if (CDI_Default_ModelID != CDI_UNDEFID) varModelID = CDI_Default_ModelID;
@@ -3864,7 +3883,10 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
           cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
         }
       }
-      else { cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring); }
+      else
+      {
+        cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
+      }
     }
     else if (xtype == NC_SHORT || xtype == NC_INT)
     {
@@ -3873,7 +3895,10 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
         gridInfo->number_of_grid_used = CDI_UNDEFID;
         cdfGetAttInt(fileID, NC_GLOBAL, attname, 1, &gridInfo->number_of_grid_used);
       }
-      else { cdf_copy_attint(fileID, vlistID, xtype, attlen, attname); }
+      else
+      {
+        cdf_copy_attint(fileID, vlistID, xtype, attlen, attname);
+      }
     }
     else if (xtype == NC_FLOAT || xtype == NC_DOUBLE) { cdf_copy_attflt(fileID, vlistID, xtype, attlen, attname); }
   }
@@ -3947,7 +3972,10 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
           hasTimeVar = true;
           streamptr->basetime.ncvarid = ncvarid;
         }
-        else { Warning("Found more than one time variable, skipped variable %s!", ncvar->name); }
+        else
+        {
+          Warning("Found more than one time variable, skipped variable %s!", ncvar->name);
+        }
       }
     }
 
@@ -4224,7 +4252,10 @@ get_timevalue(int fileID, int nctimevarid, size_t ncStepIndex, double *timevarBu
   double timevalue = 0.0;
 
   if (timevarBuffer) { timevalue = timevarBuffer[ncStepIndex]; }
-  else { cdf_get_var1_double(fileID, nctimevarid, &ncStepIndex, &timevalue); }
+  else
+  {
+    cdf_get_var1_double(fileID, nctimevarid, &ncStepIndex, &timevalue);
+  }
 
   if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
 
@@ -4270,7 +4301,10 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
           vDateTimeList[tsID] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID, timevarBuffer), taxis0);
         if (timevarBuffer) Free(timevarBuffer);
       }
-      else { hasTimesteps = false; }
+      else
+      {
+        hasTimesteps = false;
+      }
     }
 
     // process time query information if available

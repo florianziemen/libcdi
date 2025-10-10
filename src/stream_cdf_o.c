@@ -316,7 +316,8 @@ checkDimName(int fileID, size_t dimlen, char *dimname)
   size_t len = strlen(dimname);
   memcpy(name, dimname, len + 1);
 
-  do {
+  do
+  {
     if (iz) snprintf(name + len, CDI_MAX_NAME - len, "_%u", iz + 1);
 
     int dimid0;
@@ -349,7 +350,8 @@ checkGridName(char *axisname, int fileID)
   size_t axisnameLen = strlen(axisname);
   memcpy(axisname2, axisname, axisnameLen + 1);
 
-  do {
+  do
+  {
     if (iz) snprintf(axisname2 + axisnameLen, CDI_MAX_NAME - axisnameLen, "_%u", iz + 1);
 
     if (nc_inq_varid(fileID, axisname2, &ncdimid) != NC_NOERR) break;
@@ -370,7 +372,8 @@ checkZaxisName(char *axisname, int fileID, int vlistID, int zaxisID, int nzaxis)
 
   size_t axisnameLen = strlen(axisname);
   memcpy(axisname2, axisname, axisnameLen + 1);
-  do {
+  do
+  {
     if (iz) snprintf(axisname2 + axisnameLen, CDI_MAX_NAME - axisnameLen, "_%u", iz + 1);
 
     int ncdimid;
@@ -938,7 +941,8 @@ cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridIndex)
   int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
 
   size_t ofs = 0;
-  do {
+  do
+  {
     struct idSearch search
         = cdfSearchIDBySize(ofs, (size_t) gridIndex, cdfGridVec, CDF_DIMID_X, GRID_CURVILINEAR, dimlen, gridInqType, gridInqSize);
     size_t index = search.foundIdx;
@@ -996,7 +1000,8 @@ cdfDefUnstructured(stream_t *streamptr, int gridID, int gridIndex)
   int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
 
   size_t ofs = 0;
-  do {
+  do
+  {
     struct idSearch search
         = cdfSearchIDBySize(ofs, (size_t) gridIndex, cdfGridVec, CDF_DIMID_X, GRID_UNSTRUCTURED, dimlen, gridInqType, gridInqSize);
     size_t index = search.foundIdx;
@@ -1610,7 +1615,7 @@ cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimID, si
   int length = sizeof(dimname);
   cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_DIMNAME, dimname, &length);
   *dimID = checkDimName(fileID, dimlen, dimname);
-  if (dimlen <= 0) Error("No strings delivered for a character axis.");
+  if (dimlen == 0) Error("No strings delivered for a character axis.");
   if (dimname[0] == 0)
   {
     memcpy(dimname, "area_type", 10);
@@ -2279,7 +2284,10 @@ cdf_define_grid(stream_t *streamptr, int gridID, int gridIndex)
     }
   }
 #endif
-  else { Error("Unsupported grid type: %s", gridNamePtr(gridType)); }
+  else
+  {
+    Error("Unsupported grid type: %s", gridNamePtr(gridType));
+  }
   return delayed;
 }
 
