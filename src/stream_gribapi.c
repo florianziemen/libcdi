@@ -2783,9 +2783,20 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
            horizontal layer at a point in time for simulate
            (synthetic) satellite data"
 
+          GRIB2: PRODUCT DEFINITION TEMPLATE NUMBER 101/102:
+
+           "Analysis or forecast at a horizontal level or in a
+           horizontal layer at a point in time for wave 2D spectra
+           with frequencies and directions defined by formulae"
+
+           Similar for ensemble template 102.
+
            The key/value pairs that are set in "grib2DefLevel" do not
-           exist for this template. */
-        if (editionNumber <= 1 || proddef_template_num != 32)
+           exist for this template.
+        */
+        if (editionNumber <= 1 || (proddef_template_num != 32 && proddef_template_num != 101
+            && proddef_template_num != 102))
+
           defLevel(gh, gcinit, grib_ltype, grib_ltype2, hasBounds, level, dlevel1, dlevel2);
 
         break;
