@@ -36,6 +36,7 @@ target_sources(cdilib
   cdi_error.c
   cdi_fdb.c
   cdi_fdb.h
+  cdi_get_config.c
   cdi_int.c
   cdi_int.h
   cdi_key.c
@@ -215,7 +216,7 @@ set_property(TARGET cdilib PROPERTY CDI_INSTALL_HEADERS
 )
 
 target_include_directories(cdilib
-  PRIVATE 
+  PRIVATE
   ${CMARE_CURRENT_BINARY_DIR}
   PUBLIC
   # where top-level project will look for the library's public headers
@@ -225,5 +226,3 @@ target_include_directories(cdilib
 
 target_link_libraries(cdilib ${cdi_linked_libs})
 target_compile_definitions(cdilib PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
-
-

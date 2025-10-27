@@ -2,6 +2,10 @@
 
 	* Version 2.5.4 released
 
+2025-10-27  Uwe Schulzweida
+
+	* Add interface function cdiGetConfig()
+
 2025-10-09  Uwe Schulzweida
 
 	* is_timeaxis_units: tu string is not null terminated (bug fix)
