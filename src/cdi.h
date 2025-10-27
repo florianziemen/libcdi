@@ -1455,10 +1455,9 @@ extern int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams gpp, double, dou
 extern int (*proj_lonlat_to_stere_func)(struct CDI_GridProjParams gpp, size_t, double*, double*);
 extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double*, double*);
 
-// Used on CDO remap_scrip_io.cc
+// Used in CDO remap_scrip_io.cc
 void cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec);
 
-int cdi_has_ncfilter(void);
 int cdi_has_ncdap(void);
 int cdi_has_cgribex(void);
 
