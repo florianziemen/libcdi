@@ -296,8 +296,9 @@ typedef struct  {
 #define  CALENDAR_366DAYS         5
 #define  CALENDAR_NONE            6
 
-#define  CDI_NC_HAS_FILTER        1
-#define  CDI_NC_HAS_DAP           2
+#define  CDI_HAS_CGRIBEX          1
+#define  CDI_NC_HAS_FILTER        2
+#define  CDI_NC_HAS_DAP           3
 
 // number of unsigned char needed to store UUID
 #define  CDI_UUID_SIZE           16
@@ -1458,8 +1459,6 @@ extern int (*proj_stere_to_lonlat_func)(struct CDI_GridProjParams gpp, double, d
 
 // Used in CDO remap_scrip_io.cc
 void cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec);
-
-int cdi_has_cgribex(void);
 
 #ifdef __cplusplus
 }
