@@ -296,6 +296,8 @@ typedef struct  {
 #define  CALENDAR_366DAYS         5
 #define  CALENDAR_NONE            6
 
+#define  CDI_NC_HAS_FILTER        1
+
 // number of unsigned char needed to store UUID
 #define  CDI_UUID_SIZE           16
 
@@ -318,7 +320,9 @@ void    cdiDebug(int debug);
 const char *cdiLibraryVersion(void);
 void    cdiPrintVersion(void);
 
-int     cdiHaveFiletype(int filetype);
+int     cdiHaveFiletype(int fileType);
+int     cdiGetConfig(int confType);
+
 
 void    cdiDefMissval(double missval);
 double  cdiInqMissval(void);
