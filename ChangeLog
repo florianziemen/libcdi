@@ -5,6 +5,7 @@
 2025-10-27  Uwe Schulzweida
 
 	* Replace cdi_has_ncfilter() by cdiGetConfig(CDI_NC_HAS_FILTER)
+	* Replace cdi_has_ncdap() by cdiGetConfig(CDI_NC_HAS_DAP)
 	* Add interface function cdiGetConfig()
 	* cdf_def_var_filter: changed error to warning
 

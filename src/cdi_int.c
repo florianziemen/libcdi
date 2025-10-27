@@ -591,15 +591,6 @@ stream_def_accesstype(stream_t *s, int type)
 }
 
 int
-cdi_has_ncdap(void)
-{
-#ifdef HAVE_LIBNC_DAP
-  return 1;
-#endif
-  return 0;
-}
-
-int
 cdi_has_cgribex(void)
 {
 #ifdef HAVE_LIBCGRIBEX
