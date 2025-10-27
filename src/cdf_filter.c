@@ -21,10 +21,10 @@ check_length(size_t maxLength, size_t len)
 }
 #endif
 
-bool
+int
 cdf_get_var_filter(int ncid, int varid, char *filterSpec, size_t maxLength)
 {
-  bool hasFilter = false;
+  int hasFilter = 0;
 #ifdef HAVE_NC4FILTER
   size_t numFilters = 0;
   nc_inq_var_filter_ids(ncid, varid, &numFilters, NULL);
@@ -60,7 +60,7 @@ cdf_get_var_filter(int ncid, int varid, char *filterSpec, size_t maxLength)
         }
       }
     }
-    if (filterSpec[0]) hasFilter = true;
+    if (filterSpec[0]) hasFilter = 1;
   }
 #else
   (void) ncid;
