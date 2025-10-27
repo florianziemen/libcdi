@@ -22,10 +22,6 @@
 #define HAVE_NC4HDF5 1
 #endif
 
-#if defined NC_HAS_DAP2 && NC_HAS_DAP2
-#define HAVE_LIBNC_DAP 1
-#endif
-
 #if defined NC_HAS_NCZARR && NC_HAS_NCZARR
 #define HAVE_NCZARR 1
 #endif
