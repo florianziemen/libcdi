@@ -107,7 +107,12 @@ cdf_def_var_filter(int ncid, int ncvarID, const char *filterSpec)
     (void) ncid;
     (void) ncvarID;
     (void) filterSpec;
-    Error("Filter failed, NetCDF4 function ncaux_h5filterspec_parselist() not available!");
+    static int lwarn = true;
+    if (lwarn)
+    {
+      lwarn = false;
+      Warning("Filter failed, NetCDF function ncaux_h5filterspec_parselist() not available!");
+    }
 #endif
   }
 }
