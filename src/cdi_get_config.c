@@ -1,11 +1,22 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "cdi.h"
 #include "cdf_config.h"
 
+#ifdef HAVE_LIBNETCDF
 #include <netcdf_meta.h>
+#endif
 
 int
 cdiGetConfig(int confType)
 {
+#if defined HAVE_LIBCGRIBEX
+  static const int cdi_has_cgribex = 1;
+#else
+  static const int cdi_has_cgribex = 0;
+#endif
 #if defined HAVE_NC4FILTER && HAVE_NC4FILTER
   static const int cdi_nc_has_filter = 1;
 #else
@@ -17,6 +28,7 @@ cdiGetConfig(int confType)
   static const int cdi_nc_has_dap = 0;
 #endif
 
+  if (confType == CDI_HAS_CGRIBEX) return cdi_has_cgribex;
   if (confType == CDI_NC_HAS_FILTER) return cdi_nc_has_filter;
   if (confType == CDI_NC_HAS_DAP) return cdi_nc_has_dap;
 
