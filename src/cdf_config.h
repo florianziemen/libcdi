@@ -18,10 +18,6 @@
 #define HAVE_NETCDF2 1
 #endif
 
-#if defined NC_HAS_HDF5 && NC_HAS_HDF5
-#define HAVE_NC4HDF5 1
-#endif
-
 #if defined NC_HAS_NCZARR && NC_HAS_NCZARR
 #define HAVE_NCZARR 1
 #endif

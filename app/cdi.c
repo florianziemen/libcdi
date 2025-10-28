@@ -108,11 +108,9 @@ version(void)
 #ifdef HAVE_LIBNETCDF
   fprintf(stderr, " NC4");
   if (cdiGetConfig(CDI_NC_HAS_S3)) { fprintf(stderr, "/S3"); }
-#ifdef HAVE_NC4HDF5
-  fprintf(stderr, "/HDF5");
+  if (cdiGetConfig(CDI_NC_HAS_HDF5)) { fprintf(stderr, "/HDF5"); }
 #ifdef HAVE_NC4HDF5_THREADSAFE
   fprintf(stderr, "/threadsafe");
-#endif
 #endif
 #endif
 #ifdef HAVE_LIBNC_DAP
