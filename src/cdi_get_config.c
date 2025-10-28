@@ -27,10 +27,16 @@ cdiGetConfig(int confType)
 #else
   static const int cdi_nc_has_dap = 0;
 #endif
+#if defined NC_HAS_S3_INTERNAL && NC_HAS_S3_INTERNAL
+  static const int cdi_nc_has_s3 = 1;
+#else
+  static const int cdi_nc_has_s3 = 0;
+#endif
 
   if (confType == CDI_HAS_CGRIBEX) return cdi_has_cgribex;
   if (confType == CDI_NC_HAS_FILTER) return cdi_nc_has_filter;
   if (confType == CDI_NC_HAS_DAP) return cdi_nc_has_dap;
+  if (confType == CDI_NC_HAS_S3) return cdi_nc_has_s3;
 
   return 0;
 }

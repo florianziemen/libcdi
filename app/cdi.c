@@ -40,7 +40,7 @@ int vlistInqVarMissvalUsed(int vlistID, int varID);
 static const uint32_t HOST_ENDIANNESS_temp[1] = { UINT32_C(0x00030201) };
 #define HOST_ENDIANNESS (((const unsigned char *) HOST_ENDIANNESS_temp)[0])
 #else
-#define HOST_ENDIANNESS (((const unsigned char *) &(const uint32_t[1]) { UINT32_C(0x00030201) })[0])
+#define HOST_ENDIANNESS (((const unsigned char *) &(const uint32_t[1]){ UINT32_C(0x00030201) })[0])
 #endif
 #endif
 
@@ -107,9 +107,7 @@ version(void)
 #endif
 #ifdef HAVE_LIBNETCDF
   fprintf(stderr, " NC4");
-#ifdef HAVE_NC4S3
-  fprintf(stderr, "/S3");
-#endif
+  if (cdiGetConfig(CDI_NC_HAS_S3)) { fprintf(stderr, "/S3"); }
 #ifdef HAVE_NC4HDF5
   fprintf(stderr, "/HDF5");
 #ifdef HAVE_NC4HDF5_THREADSAFE
