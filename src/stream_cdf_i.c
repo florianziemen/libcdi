@@ -2719,7 +2719,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
     case GRID_HEALPIX:
     {
       grid->size = size;
-      if (ncvar->ivarid != CDI_UNDEFID) cdf_load_cellindices(size, ncvar, &grid->indices);
+      if (ncvar->ivarid != CDI_UNDEFID) { cdf_load_cellindices(size, ncvar, &grid->indices); }
       break;
     }
     case GRID_GAUSSIAN_REDUCED:
@@ -3101,6 +3101,11 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t 
       ncvar->ySize = grid->y.size;
 
       int gridID = ncvar->gridID;
+
+      if (grid->type == GRID_HEALPIX && ncvar->ivarid != CDI_UNDEFID)
+      {
+        if (!xtypeIsInt64(ncvars[ncvar->ivarid].xtype)) cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, CDI_DATATYPE_INT32);
+      }
 
       if (lproj && gmapvarid != CDI_UNDEFID)
       {
