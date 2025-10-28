@@ -300,6 +300,7 @@ typedef struct  {
 #define  CDI_NC_HAS_FILTER        2
 #define  CDI_NC_HAS_DAP           3
 #define  CDI_NC_HAS_S3            4
+#define  CDI_NC_HAS_HDF5          5
 
 // number of unsigned char needed to store UUID
 #define  CDI_UUID_SIZE           16
