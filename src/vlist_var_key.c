@@ -133,7 +133,7 @@ vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 }
 
 void
-vlistDefVarIntArrKey(int vlistID, int varID, const char *name, const int *values, size_t nvalues)
+vlistDefVarIntArrKey(int vlistID, int varID, const char *name, const int *values, int nvalues)
 {
 #ifdef HAVE_LIBGRIB_API
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
@@ -198,7 +198,7 @@ vlistDefVarIntArrKey(int vlistID, int varID, const char *name, const int *values
 
 
 void
-vlistDefVarDblArrKey(int vlistID, int varID, const char *name, const double *values, size_t nvalues)
+vlistDefVarDblArrKey(int vlistID, int varID, const char *name, const double *values, int nvalues)
 {
 #ifdef HAVE_LIBGRIB_API
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
