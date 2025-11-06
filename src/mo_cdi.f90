@@ -435,6 +435,8 @@ module mo_cdi
   public :: cdiDefAdditionalKey
   public :: vlistDefVarIntKey
   public :: vlistDefVarDblKey
+  public :: vlistDefVarIntArrKey
+  public :: vlistDefVarDblArrKey
   public :: vlistHasVarKey
   public :: vlistInqVarDblKey
   public :: vlistInqVarIntKey
@@ -4541,6 +4543,72 @@ contains
     call lib_vlistDefVarDblKey(vlistID_dummy, varID_dummy, name_temp,&
     & value_dummy)
   end subroutine vlistDefVarDblKey
+
+  subroutine vlistDefVarIntArrKey(vlistID_dummy, varID_dummy, name_dummy, values_dummy)
+    use iso_c_binding, only: c_int, c_size_t, c_char, c_null_char
+    implicit none
+    integer(c_int), value :: vlistID_dummy
+    integer(c_int), value :: varID_dummy
+    character(kind=c_char, len=*), intent(in) :: name_dummy
+    integer(c_int), dimension(:), intent(in) :: values_dummy
+
+    character(kind=c_char) :: name_temp(len(name_dummy) + 1)
+    integer :: name_i
+    integer(c_size_t) :: nvalues
+
+    interface
+      subroutine lib_vlistDefVarIntArrKey(vlistID, varID, name, values, nvalues) bind(c, name='vlistDefVarIntArrKey')
+        import c_int, c_size_t, c_char
+        integer(c_int), value :: vlistID
+        integer(c_int), value :: varID
+        character(kind=c_char) :: name(*)
+        integer(c_int), intent(in) :: values(*)
+        integer(c_size_t), value :: nvalues
+      end subroutine lib_vlistDefVarIntArrKey
+    end interface
+
+    ! Copy Fortran string into null-terminated C string
+    do name_i = 1, len(name_dummy)
+      name_temp(name_i) = name_dummy(name_i:name_i)
+    end do
+    name_temp(len(name_dummy) + 1) = c_null_char
+
+    nvalues = size(values_dummy, kind=c_size_t)
+    call lib_vlistDefVarIntArrKey(vlistID_dummy, varID_dummy, name_temp, values_dummy, nvalues)
+  end subroutine vlistDefVarIntArrKey
+
+  subroutine vlistDefVarDblArrKey(vlistID_dummy, varID_dummy, name_dummy, values_dummy)
+    use iso_c_binding, only: c_int, c_double, c_size_t, c_char, c_null_char
+    implicit none
+    integer(c_int), value :: vlistID_dummy
+    integer(c_int), value :: varID_dummy
+    character(kind=c_char, len=*), intent(in) :: name_dummy
+    real(c_double), dimension(:), intent(in) :: values_dummy
+
+    character(kind=c_char) :: name_temp(len(name_dummy) + 1)
+    integer :: name_i
+    integer(c_size_t) :: nvalues
+
+    interface
+      subroutine lib_vlistDefVarDblArrKey(vlistID, varID, name, values, nvalues) bind(c, name='vlistDefVarDblArrKey')
+        import c_int, c_double, c_size_t, c_char
+        integer(c_int), value :: vlistID
+        integer(c_int), value :: varID
+        character(kind=c_char) :: name(*)
+        real(c_double), intent(in) :: values(*)
+        integer(c_size_t), value :: nvalues
+      end subroutine lib_vlistDefVarDblArrKey
+    end interface
+
+    ! Copy Fortran string into null-terminated C string
+    do name_i = 1, len(name_dummy)
+      name_temp(name_i) = name_dummy(name_i:name_i)
+    end do
+    name_temp(len(name_dummy) + 1) = c_null_char
+
+    nvalues = size(values_dummy, kind=c_size_t)
+    call lib_vlistDefVarDblArrKey(vlistID_dummy, varID_dummy, name_temp, values_dummy, nvalues)
+  end subroutine vlistDefVarDblArrKey
 
   function vlistHasVarKey(vlistID_dummy, varID_dummy, name_dummy)&
   & result(f_result)

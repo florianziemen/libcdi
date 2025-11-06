@@ -1365,6 +1365,22 @@
 !                                     DOUBLEPRECISION value)
       EXTERNAL        vlistDefVarDblKey
 
+!                     vlistDefVarIntArrKey
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name,
+!                                     INTEGER         values(*),
+!                                     INTEGER         nvalues)
+      EXTERNAL        vlistDefVarIntArrKey
+
+!                     vlistDefVarDblArrKey
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name,
+!                                     DOUBLEPRECISION values(*),
+!                                     INTEGER         nvalues)
+      EXTERNAL        vlistDefVarDblArrKey
+
       INTEGER         vlistHasVarKey
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
