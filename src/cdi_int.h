@@ -360,7 +360,9 @@ enum cdi_convention
 typedef enum
 {
   t_double = 0,
-  t_int = 1
+  t_int = 1,
+  t_intarr = 2,
+  t_doublearr = 3
 } key_val_pair_datatype;
 
 // Data structure holding optional key/value pairs for GRIB
@@ -371,6 +373,9 @@ typedef struct
   key_val_pair_datatype data_type;  // data type of this key/value pair
   double dbl_val;                   // double value (data_type == t_double)
   int int_val;                      // integer value (data_type == t_int)
+  int *int_arr;                     // pointer to integer array (if data_type == t_intarr)
+  double *dbl_arr;                  // pointer to double array (if data_type == t_doublearr)
+  size_t arr_len;                   // length of array (if array type)
   int subtype_index;                // tile index for this key-value pair
 } opt_key_val_pair_t;
 
