@@ -3480,6 +3480,87 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
 
     for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; i++)
       {
+	if (vlistptr->vars[varID].opt_grib_kvpair[i].update)
+	  {
+	    // DR: Fix for multi-level fields (otherwise only the 1st level is correct)
+	    if (zaxisSize == (levelID + 1)) vlistptr->vars[varID].opt_grib_kvpair[i].update = false;
+
+	    int ret = 0;
+
+	    if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)
+	      {
+		if (CDI_Debug)
+		  Message("key \"%s\"  :   double value = %g", vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+			  vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val);
+
+		ret = my_grib_set_double(gh,
+					 vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+					 vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val);
+		GRIB_CHECK(ret, 0);
+	      }
+
+	    if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_int)
+	      {
+		if (CDI_Debug)
+		  Message("key \"%s\"  :   integer value = %d", vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+			  vlistptr->vars[varID].opt_grib_kvpair[i].int_val);
+
+		ret = my_grib_set_long(gh,
+				       vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+				       (long) vlistptr->vars[varID].opt_grib_kvpair[i].int_val);
+		GRIB_CHECK(ret, 0);
+	      }
+
+	    /* ------------------------------------------------------------------
+	     * NEW: Support for integer arrays (t_intarr)
+	     * ------------------------------------------------------------------ */
+	    if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_intarr)
+	      {
+		size_t len = vlistptr->vars[varID].opt_grib_kvpair[i].arr_len;
+		int *src = vlistptr->vars[varID].opt_grib_kvpair[i].int_arr;
+
+		if (src && len > 0)
+		  {
+		    if (CDI_Debug)
+		      Message("key \"%s\"  :   integer array of length %zu", 
+			      vlistptr->vars[varID].opt_grib_kvpair[i].keyword, len);
+
+		    long *long_arr = (long *) Malloc(len * sizeof(long));
+		    for (size_t j = 0; j < len; ++j) long_arr[j] = src[j];
+
+		    ret = grib_set_long_array(gh,
+					      vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+					      long_arr, len);
+		    Free(long_arr);
+		    GRIB_CHECK(ret, 0);
+		  }
+	      }
+
+	    /* ------------------------------------------------------------------
+	     * NEW: Support for double arrays (t_doublearr)
+	     * ------------------------------------------------------------------ */
+	    if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_doublearr)
+	      {
+		size_t len = vlistptr->vars[varID].opt_grib_kvpair[i].arr_len;
+		double *src = vlistptr->vars[varID].opt_grib_kvpair[i].dbl_arr;
+
+		if (src && len > 0)
+		  {
+		    if (CDI_Debug)
+		      Message("key \"%s\"  :   double array of length %zu", 
+			      vlistptr->vars[varID].opt_grib_kvpair[i].keyword, len);
+
+		    ret = grib_set_double_array(gh,
+						vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+						src, len);
+		    GRIB_CHECK(ret, 0);
+		  }
+	      }
+	  }
+      }
+
+/*    for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; i++)
+      {
         if (vlistptr->vars[varID].opt_grib_kvpair[i].update)
           {
             // DR: Fix for multi-level fields (otherwise only the 1st level is correct)
@@ -3504,7 +3585,7 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
                 GRIB_CHECK(ret, 0);
               }
           }
-      }
+      } */
   }
 
   if (numMissVals > 0)
