@@ -829,32 +829,44 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
     {
       long lval;
       double dval;
+      // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> NEW CODE START >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+      // Handle individual long and double keys
       for (int i = 0; i < cdiNAdditionalGRIBKeys; i++)
         {
-          // note: if the key is not defined, we do not throw an error!
+          // Handling individual integer values
           if (grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0)
             varDefOptGribInt(varID, tile_index, lval, cdiAdditionalGRIBKeys[i]);
+
+          // Handling individual double values
           if (grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0)
             varDefOptGribDbl(varID, tile_index, dval, cdiAdditionalGRIBKeys[i]);
 
-          // Check if the key is an array of integers
-          if (grib_get_int_array(gh, cdiAdditionalGRIBKeys[i], NULL, NULL) == 0)
-            {
-              int *intArr = NULL;
-              size_t intArrLen = 0;
-              if (grib_get_int_array(gh, cdiAdditionalGRIBKeys[i], intArr, &intArrLen) == 0)
-                varDefOptGribIntArr(varID, tile_index, intArr, intArrLen, cdiAdditionalGRIBKeys[i]);
+          // Handling long arrays
+          long *larr = NULL;
+          size_t arr_len = 0;
+          if (grib_get_long_array(gh, cdiAdditionalGRIBKeys[i], NULL, &arr_len) == 0) {
+            // Now that we know the array length, allocate memory
+            larr = (long *) Malloc(arr_len * sizeof(long)); 
+            if (grib_get_long_array(gh, cdiAdditionalGRIBKeys[i], larr, &arr_len) == 0) {
+              varDefOptGribIntArr(varID, tile_index, larr, arr_len, cdiAdditionalGRIBKeys[i]);
             }
+            Free(larr);  // Free the long array after use
+          }
 
-          // Check if the key is an array of doubles
-          if (grib_get_double_array(gh, cdiAdditionalGRIBKeys[i], NULL, NULL) == 0)
-            {
-              double *dblArr = NULL;
-              size_t dblArrLen = 0;
-              if (grib_get_double_array(gh, cdiAdditionalGRIBKeys[i], dblArr, &dblArrLen) == 0)
-                varDefOptGribDblArr(varID, tile_index, dblArr, dblArrLen, cdiAdditionalGRIBKeys[i]);
+          // Handling double arrays
+          double *darr = NULL;
+          size_t darr_len = 0;
+          if (grib_get_double_array(gh, cdiAdditionalGRIBKeys[i], NULL, &darr_len) == 0) {
+            // Allocate memory for the double array
+            darr = (double *) Malloc(darr_len * sizeof(double));
+            if (grib_get_double_array(gh, cdiAdditionalGRIBKeys[i], darr, &darr_len) == 0) {
+              varDefOptGribDleArr(varID, tile_index, darr, darr_len, cdiAdditionalGRIBKeys[i]);
             }
+            Free(darr);  // Free the double array after use
+          }
         }
+      // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> NEW CODE END >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     }
 
 /*  if (lread_additional_keys)

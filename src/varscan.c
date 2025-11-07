@@ -1123,83 +1123,112 @@ varDefOptGribDbl(int varID, int tile_index, double dval, const char *keyword)
 #endif
 
 #ifdef HAVE_LIBGRIB_API
-void varDefOptGribIntArr(int varID, int tile_index, const int *array_val, size_t array_len, const char *keyword)
+void
+varDefOptGribIntArr(int varID, int tile_index, const long *larr, size_t arr_len, const char *keyword)
 {
-  int idx = -1;
+    int idx = -1;
 
-  // Search for existing entry with the same keyword, data type, and tile index
-  for (int i = 0; i < vartable[varID].opt_grib_nentries; i++)
+    // Search for an existing entry with the same keyword and tile_index
+    for (int i = 0; i < vartable[varID].opt_grib_nentries; i++)
     {
-      if (str_is_equal(keyword, vartable[varID].opt_grib_kvpair[i].keyword)
-          && (vartable[varID].opt_grib_kvpair[i].data_type == t_intarr)
-          && (vartable[varID].opt_grib_kvpair[i].subtype_index == tile_index))
-        idx = i;
+        if (str_is_equal(keyword, vartable[varID].opt_grib_kvpair[i].keyword)
+            && (vartable[varID].opt_grib_kvpair[i].data_type == t_intarr)
+            && (vartable[varID].opt_grib_kvpair[i].subtype_index == tile_index))
+        {
+            idx = i;
+            break;
+        }
     }
 
-  // If no matching entry is found, create a new entry
-  if (idx == -1)
+    // If entry not found, create a new one
+    if (idx == -1)
     {
-      resize_vartable_opt_grib_entries(&vartable[varID], vartable[varID].opt_grib_nentries + 1);
-      vartable[varID].opt_grib_nentries += 1;
-      idx = vartable[varID].opt_grib_nentries - 1;
+        resize_vartable_opt_grib_entries(&vartable[varID], vartable[varID].opt_grib_nentries + 1);
+        vartable[varID].opt_grib_nentries += 1;
+        idx = vartable[varID].opt_grib_nentries - 1;
     }
-  else
+    else
     {
-      // Free the old keyword and array if they exist
-      if (vartable[varID].opt_grib_kvpair[idx].keyword) Free(vartable[varID].opt_grib_kvpair[idx].keyword);
-      if (vartable[varID].opt_grib_kvpair[idx].int_arr) Free(vartable[varID].opt_grib_kvpair[idx].int_arr);
+        // Free existing keyword and array
+        if (vartable[varID].opt_grib_kvpair[idx].keyword) Free(vartable[varID].opt_grib_kvpair[idx].keyword);
+        if (vartable[varID].opt_grib_kvpair[idx].int_arr) Free(vartable[varID].opt_grib_kvpair[idx].int_arr);
     }
 
-  // Assign new data type and values
-  vartable[varID].opt_grib_kvpair[idx].data_type = t_intarr;
-  vartable[varID].opt_grib_kvpair[idx].arr_len = array_len;
-  vartable[varID].opt_grib_kvpair[idx].keyword = strdup(keyword);
-  vartable[varID].opt_grib_kvpair[idx].subtype_index = tile_index;
+    // Assign keyword, data type, and tile index
+    vartable[varID].opt_grib_kvpair[idx].data_type = t_intarr;
+    vartable[varID].opt_grib_kvpair[idx].keyword = strdup(keyword);
+    vartable[varID].opt_grib_kvpair[idx].subtype_index = tile_index;
 
-  // Allocate memory and copy array data
-  vartable[varID].opt_grib_kvpair[idx].int_arr = (int *) malloc(array_len * sizeof(int));
-  memcpy(vartable[varID].opt_grib_kvpair[idx].int_arr, array_val, array_len * sizeof(int));
+    // Allocate memory for integer array
+    vartable[varID].opt_grib_kvpair[idx].arr_len = arr_len;
+    if (arr_len > 0)
+    {
+        vartable[varID].opt_grib_kvpair[idx].int_arr = (int *)Malloc(arr_len * sizeof(int));
+        for (size_t i = 0; i < arr_len; i++)
+        {
+            vartable[varID].opt_grib_kvpair[idx].int_arr[i] = (int) larr[i]; // convert long to int
+        }
+    }
+    else
+    {
+        vartable[varID].opt_grib_kvpair[idx].int_arr = NULL;
+    }
 }
 #endif
 
 #ifdef HAVE_LIBGRIB_API
-void varDefOptGribDblArr(int varID, int tile_index, const double *array_val, size_t array_len, const char *keyword)
+void
+varDefOptGribDblArr(int varID, int tile_index, const double *darr, size_t arr_len, const char *keyword)
 {
-  int idx = -1;
+    int idx = -1;
 
-  // Search for existing entry with the same keyword, data type, and tile index
-  for (int i = 0; i < vartable[varID].opt_grib_nentries; i++)
+    // Search for an existing entry with the same keyword and tile_index
+    for (int i = 0; i < vartable[varID].opt_grib_nentries; i++)
     {
-      if (str_is_equal(keyword, vartable[varID].opt_grib_kvpair[i].keyword)
-          && (vartable[varID].opt_grib_kvpair[i].data_type == t_doublearr)
-          && (vartable[varID].opt_grib_kvpair[i].subtype_index == tile_index))
-        idx = i;
+        if (str_is_equal(keyword, vartable[varID].opt_grib_kvpair[i].keyword)
+            && (vartable[varID].opt_grib_kvpair[i].data_type == t_doublearr)
+            && (vartable[varID].opt_grib_kvpair[i].subtype_index == tile_index))
+        {
+            idx = i;
+            break;
+        }
     }
 
-  // If no matching entry is found, create a new entry
-  if (idx == -1)
+    // If entry not found, create a new one
+    if (idx == -1)
     {
-      resize_vartable_opt_grib_entries(&vartable[varID], vartable[varID].opt_grib_nentries + 1);
-      vartable[varID].opt_grib_nentries += 1;
-      idx = vartable[varID].opt_grib_nentries - 1;
+        resize_vartable_opt_grib_entries(&vartable[varID], vartable[varID].opt_grib_nentries + 1);
+        vartable[varID].opt_grib_nentries += 1;
+        idx = vartable[varID].opt_grib_nentries - 1;
     }
-  else
+    else
     {
-      // Free the old keyword and array if they exist
-      if (vartable[varID].opt_grib_kvpair[idx].keyword) Free(vartable[varID].opt_grib_kvpair[idx].keyword);
-      if (vartable[varID].opt_grib_kvpair[idx].dbl_arr) Free(vartable[varID].opt_grib_kvpair[idx].dbl_arr);
+        // Free existing keyword and array
+        if (vartable[varID].opt_grib_kvpair[idx].keyword) Free(vartable[varID].opt_grib_kvpair[idx].keyword);
+        if (vartable[varID].opt_grib_kvpair[idx].dbl_arr) Free(vartable[varID].opt_grib_kvpair[idx].dbl_arr);
     }
 
-  // Assign new data type and values
-  vartable[varID].opt_grib_kvpair[idx].data_type = t_doublearr;
-  vartable[varID].opt_grib_kvpair[idx].arr_len = array_len;
-  vartable[varID].opt_grib_kvpair[idx].keyword = strdup(keyword);
-  vartable[varID].opt_grib_kvpair[idx].subtype_index = tile_index;
+    // Assign keyword, data type, and tile index
+    vartable[varID].opt_grib_kvpair[idx].data_type = t_doublearr;
+    vartable[varID].opt_grib_kvpair[idx].keyword = strdup(keyword);
+    vartable[varID].opt_grib_kvpair[idx].subtype_index = tile_index;
 
-  // Allocate memory and copy array data
-  vartable[varID].opt_grib_kvpair[idx].dbl_arr = (double *) malloc(array_len * sizeof(double));
-  memcpy(vartable[varID].opt_grib_kvpair[idx].dbl_arr, array_val, array_len * sizeof(double));
+    // Allocate memory for double array
+    vartable[varID].opt_grib_kvpair[idx].arr_len = arr_len;
+    if (arr_len > 0)
+    {
+        vartable[varID].opt_grib_kvpair[idx].dbl_arr = (double *)Malloc(arr_len * sizeof(double));
+        for (size_t i = 0; i < arr_len; i++)
+        {
+            vartable[varID].opt_grib_kvpair[idx].dbl_arr[i] = darr[i];
+        }
+    }
+    else
+    {
+        vartable[varID].opt_grib_kvpair[idx].dbl_arr = NULL;
+    }
 }
+
 #endif
 
 #ifdef HAVE_LIBGRIB_API
