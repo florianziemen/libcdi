@@ -1399,6 +1399,18 @@
 !                                     CHARACTER*(*)   name)
       EXTERNAL        vlistInqVarIntKey
 
+      DOUBLEPRECISION vlistInqVarDblArrKey
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        vlistInqVarDblArrKey
+
+      INTEGER         vlistInqVarIntArrKey
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        vlistInqVarIntArrKey
+
 !
 !  CDI attributes
 !

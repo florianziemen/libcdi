@@ -440,6 +440,8 @@ module mo_cdi
   public :: vlistHasVarKey
   public :: vlistInqVarDblKey
   public :: vlistInqVarIntKey
+  public :: vlistInqVarDblArrKey
+  public :: vlistInqVarIntArrKey
   public :: cdiInqNatts
   public :: cdiInqAtt
   public :: cdiInqAttLen
@@ -4684,6 +4686,63 @@ contains
     name_temp(len(name_dummy) + 1) = c_null_char
     f_result = lib_vlistInqVarIntKey(vlistID_dummy, varID_dummy, name_temp)
   end function vlistInqVarIntKey
+
+  function vlistInqVarDblArrKey(vlistID_dummy, varID_dummy, name_dummy) &
+  & result(f_result)
+    type(c_ptr) :: f_result
+    integer(c_int), value :: vlistID_dummy
+    integer(c_int), value :: varID_dummy
+    character(kind = c_char, len = *), intent(in) :: name_dummy
+    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
+    integer :: name_i
+
+    interface
+      function lib_vlistInqVarDblArrKey(vlistID_dummy, varID_dummy, name_dummy) &
+             bind(c, name = 'vlistInqVarDblArrKey') result(c_result)
+        import :: c_char, c_ptr, c_int
+        type(c_ptr) :: c_result
+        integer(c_int), value :: vlistID_dummy
+        integer(c_int), value :: varID_dummy
+        character(kind = c_char) :: name_dummy(*)
+      end function lib_vlistInqVarDblArrKey
+    end interface
+
+    do name_i = 1, len(name_dummy)
+        name_temp(name_i) = name_dummy(name_i:name_i)
+    end do
+    name_temp(len(name_dummy) + 1) = c_null_char
+
+    f_result = lib_vlistInqVarDblArrKey(vlistID_dummy, varID_dummy, name_temp)
+  end function vlistInqVarDblArrKey
+
+  function vlistInqVarIntArrKey(vlistID_dummy, varID_dummy, name_dummy) &
+  & result(f_result)
+    type(c_ptr) :: f_result
+    integer(c_int), value :: vlistID_dummy
+    integer(c_int), value :: varID_dummy
+    character(kind = c_char, len = *), intent(in) :: name_dummy
+    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
+    integer :: name_i
+
+    interface
+      function lib_vlistInqVarIntArrKey(vlistID_dummy, varID_dummy, name_dummy) &
+             bind(c, name = 'vlistInqVarIntArrKey') result(c_result)
+        import :: c_char, c_ptr, c_int
+        type(c_ptr) :: c_result
+        integer(c_int), value :: vlistID_dummy
+        integer(c_int), value :: varID_dummy
+        character(kind = c_char) :: name_dummy(*)
+      end function lib_vlistInqVarIntArrKey
+    end interface
+
+    do name_i = 1, len(name_dummy)
+        name_temp(name_i) = name_dummy(name_i:name_i)
+    end do
+    name_temp(len(name_dummy) + 1) = c_null_char
+
+    f_result = lib_vlistInqVarIntArrKey(vlistID_dummy, varID_dummy, name_temp)
+  end function vlistInqVarIntArrKey
+
 
   function cdiInqAtt(cdiID_dummy, varID_dummy, attrnum_dummy, name_dummy,&
   & typep_dummy, lenp_dummy) result(f_result)

@@ -360,6 +360,64 @@ vlistInqVarIntKey(int vlistID, int varID, const char *name)
   return (int) value;
 }
 
+/* vlistInqVarIntArrKey: raw access to GRIB integer array meta-data */
+int *
+vlistInqVarIntArrKey(int vlistID, int varID, const char *name)
+{
+    int *int_arr = NULL;
+
+#ifdef HAVE_LIBGRIB_API
+    vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
+    for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
+    {
+        int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
+        if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)
+            && (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_intarr)
+            && (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub))
+        {
+            int_arr = vlistptr->vars[varID].opt_grib_kvpair[i].int_arr;
+            break;
+        }
+    }
+#else
+    (void) vlistID;
+    (void) varID;
+    (void) name;
+#endif
+
+    return int_arr;
+}
+
+/* vlistInqVarDblArrKey: raw access to GRIB double array meta-data */
+double *
+vlistInqVarDblArrKey(int vlistID, int varID, const char *name)
+{
+    double *dbl_arr = NULL;
+
+#ifdef HAVE_LIBGRIB_API
+    vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
+    for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
+    {
+        int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
+        if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)
+            && (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_doublearr)
+            && (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub))
+        {
+            dbl_arr = vlistptr->vars[varID].opt_grib_kvpair[i].dbl_arr;
+            break;
+        }
+    }
+#else
+    (void) vlistID;
+    (void) varID;
+    (void) name;
+#endif
+
+    return dbl_arr;
+}
+
 /*
  * Local Variables:
  * c-file-style: "Java"

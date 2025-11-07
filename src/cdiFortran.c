@@ -433,6 +433,8 @@ FCALLSCSUB5 (vlistDefVarDblArrKey, VLISTDEFVARDBLARRKEY, vlistdefvardblarrkey, I
 FCALLSCFUN3 (INT, vlistHasVarKey, VLISTHASVARKEY, vlisthasvarkey, INT, INT, STRING)
 FCALLSCFUN3 (DOUBLE, vlistInqVarDblKey, VLISTINQVARDBLKEY, vlistinqvardblkey, INT, INT, STRING)
 FCALLSCFUN3 (INT, vlistInqVarIntKey, VLISTINQVARINTKEY, vlistinqvarintkey, INT, INT, STRING)
+FCALLSCFUN3 (DOUBLE, vlistInqVarDblArrKey, VLISTINQVARDBLARRKEY, vlistinqvardblarrkey, INT, INT, STRING)
+FCALLSCFUN3 (INT, vlistInqVarIntArrKey, VLISTINQVARINTARRKEY, vlistinqvarintarrkey, INT, INT, STRING)
 
 /*  CDI attributes  */
 
