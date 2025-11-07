@@ -829,7 +829,6 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
     {
       long lval;
       double dval;
-      // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> NEW CODE START >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
       // Handle individual long and double keys
       for (int i = 0; i < cdiNAdditionalGRIBKeys; i++)
@@ -861,12 +860,11 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
             // Allocate memory for the double array
             darr = (double *) Malloc(darr_len * sizeof(double));
             if (grib_get_double_array(gh, cdiAdditionalGRIBKeys[i], darr, &darr_len) == 0) {
-              varDefOptGribDleArr(varID, tile_index, darr, darr_len, cdiAdditionalGRIBKeys[i]);
+              varDefOptGribDblArr(varID, tile_index, darr, darr_len, cdiAdditionalGRIBKeys[i]);
             }
             Free(darr);  // Free the double array after use
           }
         }
-      // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> NEW CODE END >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     }
 
 /*  if (lread_additional_keys)
