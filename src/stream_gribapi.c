@@ -836,8 +836,41 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
             varDefOptGribInt(varID, tile_index, lval, cdiAdditionalGRIBKeys[i]);
           if (grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0)
             varDefOptGribDbl(varID, tile_index, dval, cdiAdditionalGRIBKeys[i]);
+
+          // Check if the key is an array of integers
+          if (grib_get_int_array(gh, cdiAdditionalGRIBKeys[i], NULL, NULL) == 0)
+            {
+              int *intArr = NULL;
+              size_t intArrLen = 0;
+              if (grib_get_int_array(gh, cdiAdditionalGRIBKeys[i], intArr, &intArrLen) == 0)
+                varDefOptGribIntArr(varID, tile_index, intArr, intArrLen, cdiAdditionalGRIBKeys[i]);
+            }
+
+          // Check if the key is an array of doubles
+          if (grib_get_double_array(gh, cdiAdditionalGRIBKeys[i], NULL, NULL) == 0)
+            {
+              double *dblArr = NULL;
+              size_t dblArrLen = 0;
+              if (grib_get_double_array(gh, cdiAdditionalGRIBKeys[i], dblArr, &dblArrLen) == 0)
+                varDefOptGribDblArr(varID, tile_index, dblArr, dblArrLen, cdiAdditionalGRIBKeys[i]);
+            }
         }
     }
+
+/*  if (lread_additional_keys)
+    {
+      long lval;
+      double dval;
+      for (int i = 0; i < cdiNAdditionalGRIBKeys; i++)
+        {
+          // note: if the key is not defined, we do not throw an error!
+          if (grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0)
+            varDefOptGribInt(varID, tile_index, lval, cdiAdditionalGRIBKeys[i]);
+          if (grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0)
+            varDefOptGribDbl(varID, tile_index, dval, cdiAdditionalGRIBKeys[i]);
+        }
+    }
+*/
 
   if (varInqInst(varID) == CDI_UNDEFID)
     {
