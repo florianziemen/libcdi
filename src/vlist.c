@@ -1652,6 +1652,8 @@ resize_opt_grib_entries(var_t *var, int nentries)
     {
       tmp[i].int_val = 0;
       tmp[i].dbl_val = 0;
+      tmp[i].int_arr = 0;
+      tmp[i].dbl_arr = 0;
       tmp[i].update = false;
       tmp[i].keyword = NULL;
     }  // for
