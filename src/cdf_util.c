@@ -158,11 +158,11 @@ is_depth_axis(const char *stdname, const char *longname)
   return (str_is_equal(stdname, "depth")
        || str_is_equal(longname, "depth_below_sea")
        || str_is_equal(longname, "depth below sea"));
-  // clang-format ofn
+  // clang-format on
 }
 
-
-bool is_height_axis(const char *stdname, const char *longname)
+bool
+is_height_axis(const char *stdname, const char *longname)
 {
   // clang-format off
   return (str_is_equal(stdname, "height")

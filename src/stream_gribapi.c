@@ -770,14 +770,16 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
   int gridID = gridAdded.Id;
-  // clang-format off
-  if (!gridAdded.isNew) { grid_free(gridptr); Free(gridptr); }
-  else if (gridptr->projtype == CDI_PROJ_RLL)     gribapiInqProjRLL(gh, gridID);
-  else if (gridptr->projtype == CDI_PROJ_LCC)     gribapiInqProjLCC(gh, gridID);
-  else if (gridptr->projtype == CDI_PROJ_STERE)   gribapiInqProjSTERE(gh, gridID);
-  else if (gridptr->projtype == CDI_PROJ_HEALPIX) gribapiInqProjHEALPIX(gh, gridID);
-  else if (gridptr->type == GRID_HEALPIX)         gribapiInqGridHEALPIX(gh, gridID);
-  // clang-format on
+  if (!gridAdded.isNew)
+  {
+    grid_free(gridptr);
+    Free(gridptr);
+  }
+  else if (gridptr->projtype == CDI_PROJ_RLL) { gribapiInqProjRLL(gh, gridID); }
+  else if (gridptr->projtype == CDI_PROJ_LCC) { gribapiInqProjLCC(gh, gridID); }
+  else if (gridptr->projtype == CDI_PROJ_STERE) { gribapiInqProjSTERE(gh, gridID); }
+  else if (gridptr->projtype == CDI_PROJ_HEALPIX) { gribapiInqProjHEALPIX(gh, gridID); }
+  else if (gridptr->type == GRID_HEALPIX) { gribapiInqGridHEALPIX(gh, gridID); }
 
   int zaxistype = gribapi_get_zaxis_type(gribEditionNumber(gh), leveltype1);
 
@@ -2741,7 +2743,7 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
   }
   long grib_ltype2 = (ltype != ltype2 && ltype2 != -1) ? ltype2 : grib_ltype;
 
-  void (*defLevel)(grib_handle *gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level, double dlevel1,
+  void (*defLevel)(grib_handle * gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level, double dlevel1,
                    double dlevel2)
       = (editionNumber <= 1) ? grib1DefLevel : grib2DefLevel;
 
@@ -3158,7 +3160,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
         // printf(".\n");
       }
     }  // end if (scanModeOUT==96)
-  }  // end if (scanModeIN==64)
+  }    // end if (scanModeIN==64)
 
   if (scanModeIN
       == 00)  // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
@@ -3188,7 +3190,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
         for (size_t i = 0; i < iDim; i++) data[j + i * jDim] = dataCopy[i + jInv * iDim];  // source data has -j
       }
     }  // end if (scanModeOUT==96)
-  }  // end if (scanModeIN==00)
+  }    // end if (scanModeIN==00)
 
   if (scanModeIN
       == 96)  // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
@@ -3221,7 +3223,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data, size_t gr
           data[i + jXiDim] = dataCopy[jInv + i * jDim];  // target data has -j
       }
     }  // end if (scanModeOUT==00)
-  }  // end if (scanModeIN==96)
+  }    // end if (scanModeIN==96)
 
   if (cdiDebugExt >= 100)
   {

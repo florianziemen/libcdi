@@ -489,13 +489,13 @@ cdiInitialize(void)
     if (envstr)
     {
       // clang-format off
-	      if      (strncmp(envstr, "standard", 8)  == 0) CDI_Default_Calendar = CALENDAR_STANDARD;
-	      else if (strncmp(envstr, "gregorian", 9) == 0) CDI_Default_Calendar = CALENDAR_GREGORIAN;
-	      else if (strncmp(envstr, "proleptic", 9) == 0) CDI_Default_Calendar = CALENDAR_PROLEPTIC;
-	      else if (strncmp(envstr, "360days", 7)   == 0) CDI_Default_Calendar = CALENDAR_360DAYS;
-	      else if (strncmp(envstr, "365days", 7)   == 0) CDI_Default_Calendar = CALENDAR_365DAYS;
-	      else if (strncmp(envstr, "366days", 7)   == 0) CDI_Default_Calendar = CALENDAR_366DAYS;
-	      else if (strncmp(envstr, "none", 4)      == 0) CDI_Default_Calendar = CALENDAR_NONE;
+	    if      (strncmp(envstr, "standard", 8)  == 0) CDI_Default_Calendar = CALENDAR_STANDARD;
+	    else if (strncmp(envstr, "gregorian", 9) == 0) CDI_Default_Calendar = CALENDAR_GREGORIAN;
+	    else if (strncmp(envstr, "proleptic", 9) == 0) CDI_Default_Calendar = CALENDAR_PROLEPTIC;
+	    else if (strncmp(envstr, "360days", 7)   == 0) CDI_Default_Calendar = CALENDAR_360DAYS;
+	    else if (strncmp(envstr, "365days", 7)   == 0) CDI_Default_Calendar = CALENDAR_365DAYS;
+	    else if (strncmp(envstr, "366days", 7)   == 0) CDI_Default_Calendar = CALENDAR_366DAYS;
+	    else if (strncmp(envstr, "none", 4)      == 0) CDI_Default_Calendar = CALENDAR_NONE;
       // clang-format on
       if (CDI_Debug) Message("Default calendar set to %s!", envstr);
     }

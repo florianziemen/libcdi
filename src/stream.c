@@ -7,7 +7,7 @@
 #endif
 
 #ifdef HAVE_LIBNETCDF
-#include <netcdf.h> // NC_FORMAT_64BIT_DATA
+#include <netcdf.h>  // NC_FORMAT_64BIT_DATA
 #endif
 
 #ifdef HAVE_LIBFDB5
@@ -1241,9 +1241,9 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
       {
         tsteps_t *tstep = &(streamptr->tsteps[0]);
         // clang-format off
-            if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
-            if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
-            if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
+        if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
+        if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
+        if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
         // clang-format on
       }
       break;
@@ -1309,9 +1309,9 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
     {
       tsteps_t *tstep = &(streamptr->tsteps[index]);
       // clang-format off
-          if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
-          if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
-          if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
+      if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
+      if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
+      if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
       // clang-format on
       taxisDestroyKernel(&(tstep->taxis));
     }
@@ -2043,9 +2043,9 @@ freePtrAfterNCMem(stream_t *streamptr, int recordBufIsToBeDeleted)
   {
     tsteps_t *tstep = &(streamptr->tsteps[0]);
     // clang-format off
-      if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
-      if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
-      if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
+    if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
+    if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
+    if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
     // clang-format on
   }
 }
