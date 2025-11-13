@@ -954,6 +954,7 @@ vlistDefVarMissval(int vlistID, int varID, double missval)
   var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
   varptr->missval = missval;
   varptr->missvalused = true;
+  cdiDefKeyFloat(vlistID, varID, CDI_KEY_MISSVAL, missval);
 }
 
 int
