@@ -43,8 +43,6 @@ strStartsWith(const char *vstr, const char *cstr)
 int
 get_time_units(size_t len, const char *ptu)
 {
-  int timeunit = -1;
-
   while (isspace(*ptu) && len)
   {
     ptu++;
@@ -53,19 +51,19 @@ get_time_units(size_t len, const char *ptu)
 
   // clang-format off
   if (len > 2)
-    {
-      if      (strStartsWith(ptu, "sec"))            timeunit = TUNIT_SECOND;
-      else if (strStartsWith(ptu, "minute"))         timeunit = TUNIT_MINUTE;
-      else if (strStartsWith(ptu, "hour"))           timeunit = TUNIT_HOUR;
-      else if (strStartsWith(ptu, "day"))            timeunit = TUNIT_DAY;
-      else if (strStartsWith(ptu, "month"))          timeunit = TUNIT_MONTH;
-      else if (strStartsWith(ptu, "calendar_month")) timeunit = TUNIT_MONTH;
-      else if (strStartsWith(ptu, "year"))           timeunit = TUNIT_YEAR;
-    }
-  else if     (len == 1 && ptu[0] == 's')            timeunit = TUNIT_SECOND;
+  {
+    if (strStartsWith(ptu, "sec"))            return TUNIT_SECOND;
+    if (strStartsWith(ptu, "minute"))         return TUNIT_MINUTE;
+    if (strStartsWith(ptu, "hour"))           return TUNIT_HOUR;
+    if (strStartsWith(ptu, "day"))            return TUNIT_DAY;
+    if (strStartsWith(ptu, "month"))          return TUNIT_MONTH;
+    if (strStartsWith(ptu, "calendar_month")) return TUNIT_MONTH;
+    if (strStartsWith(ptu, "year"))           return TUNIT_YEAR;
+  }
+  else if (len == 1 && ptu[0] == 's')         return TUNIT_SECOND;
   // clang-format on
 
-  return timeunit;
+  return -1;
 }
 
 bool

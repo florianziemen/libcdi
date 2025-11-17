@@ -550,7 +550,7 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
           if (str_is_equal(sbuf, "units"))
           {
             cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
-            if (is_time_units(str_to_lower(sbuf))) return dimid0;
+            if (is_timeaxis_units(sbuf)) return dimid0;
           }
         }
       }
@@ -3921,7 +3921,6 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
       {
         strcpy(timeUnitsStr, ncvar->units);
         str_to_lower(timeUnitsStr);
-
         if (is_time_units(timeUnitsStr))
         {
           streamptr->basetime.ncvarid = ncvarid;

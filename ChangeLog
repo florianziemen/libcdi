@@ -1,3 +1,7 @@
+2025-11-17  Uwe Schulzweida
+
+	* cdf_time_dimid: replaced is_time_units() by is_timeaxis_units() (bug fix)
+
 2025-11-06  Uwe Schulzweida
 
 	* Version 2.5.4 released
