@@ -3071,10 +3071,8 @@ gridDefBoundsGeneric(grid_t *gridptr, const double *bounds, size_t regularSize, 
   size_t size = nvertex * (isIrregular ? gridptr->size : regularSize);
   if (size == 0) Error("size undefined for gridID = %d", gridptr->self);
 
-  if (*field == NULL && size)
-    *field = (double *) Malloc(size * sizeof(double));
-  else if (CDI_Debug)
-    Warning("values already defined!");
+  if (*field == NULL && size) { *field = (double *) Malloc(size * sizeof(double)); }
+  else if (CDI_Debug) { Warning("values already defined!"); }
 
   copy_darray(size, bounds, *field);
 }
