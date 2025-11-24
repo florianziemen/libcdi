@@ -440,8 +440,7 @@ cdfCheckAttInt(int fileID, int ncvarid, const char *attname)
 {
   nc_type atttype;
   int status_nc = nc_inq_atttype(fileID, ncvarid, attname, &atttype);
-
-  return (status_nc == NC_NOERR && xtypeIsInt(atttype));
+  return (status_nc == NC_NOERR && (xtypeIsInt(atttype) || xtypeIsInt64(atttype)));
 }
 
 static bool

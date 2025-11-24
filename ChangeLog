@@ -1,3 +1,7 @@
+2025-11-24  Uwe Schulzweida
+
+	* is_healpix_grid: add support for int64 attributes
+
 2025-11-17  Uwe Schulzweida
 
 	* cdf_time_dimid: replaced is_time_units() by is_timeaxis_units() (bug fix)
