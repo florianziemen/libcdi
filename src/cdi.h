@@ -723,9 +723,9 @@ double  vlistInqVarDblKey(int vlistID, int varID, const char *name);
 //      vlistInqVarIntKey: raw access to GRIB meta-data
 int     vlistInqVarIntKey(int vlistID, int varID, const char *name);
 //      vlistInqVarDblArrKey: raw access to GRIB meta-data
-double  vlistInqVarDblArrKey(int vlistID, int varID, const char *name);
+double *vlistInqVarDblArrKey(int vlistID, int varID, const char *name);
 //      vlistInqVarIntArrKey: raw access to GRIB meta-data
-int     vlistInqVarIntArrKey(int vlistID, int varID, const char *name);
+int    *vlistInqVarIntArrKey(int vlistID, int varID, const char *name);
 
 // CDI attributes
 
