@@ -31,11 +31,11 @@ list(APPEND test_lib_src
 
 add_library(test_lib ${test_lib_src})
 target_include_directories(test_lib PRIVATE ../src/)
-target_link_libraries(test_lib PRIVATE cdilib ${cdi_linked_libs})
+target_link_libraries(test_lib PRIVATE libcdi ${cdi_linked_libs})
 
 foreach(target ${current_targets})
   target_include_directories(${target} PRIVATE ../src/)
-  target_link_libraries(${target} PRIVATE cdilib test_lib ${cdi_linked_libs})
+  target_link_libraries(${target} PRIVATE libcdi test_lib ${cdi_linked_libs})
   add_test(NAME ${target} COMMAND ${target})
   if(labels_${target})
     set_property(TEST ${target} PROPERTY LABELS labels_${target})

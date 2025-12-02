@@ -1,12 +1,12 @@
 cmake_minimum_required( VERSION 3.27 FATAL_ERROR )
 
-message(VERBOSE "Entering cdilib")
-project(cdilib VERSION 2.5.1 LANGUAGES C )
+message(VERBOSE "Entering libcdi")
+project(libcdi VERSION 2.5.1 LANGUAGES C )
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 
-add_library(cdilib)
-add_library(cdilib::cdilib ALIAS cdilib)
+add_library(libcdi)
+add_library(libcdi::libcdi ALIAS libcdi)
 
 include(CTest)
 include(CheckIncludeFile)
@@ -19,34 +19,34 @@ if(${CDI_PTHREAD})
   include(FindThreads)
   find_package(Threads REQUIRED)
   set_target_properties(Threads::Threads PROPERTIES THREADS_PREFER_PTHREAD_FLAG TRUE)
-  target_compile_definitions(cdilib PRIVATE HAVE_LIBPTHREAD=1)
-  target_link_libraries(cdilib pthread)
+  target_compile_definitions(libcdi PRIVATE HAVE_LIBPTHREAD=1)
+  target_link_libraries(libcdi pthread)
 endif()
 
 # enable default internal libs
 option(CDI_LIBGRIB "GRIB support [default=ON]" ON)
 if(${CDI_LIBGRIB})
-  target_compile_definitions(cdilib PRIVATE HAVE_LIBGRIB=1 HAVE_LIBGRIB_API=1)
+  target_compile_definitions(libcdi PRIVATE HAVE_LIBGRIB=1 HAVE_LIBGRIB_API=1)
 endif()
 
 option(CDI_LIBGRIBEX "Use the CGRIBEX library [default=ON]" ON)
 if(${CDI_LIBGRIBEX})
-  target_compile_definitions(cdilib PRIVATE LIBCGRIBEX=1)
+  target_compile_definitions(libcdi PRIVATE LIBCGRIBEX=1)
 endif()
 
 option(CDI_EXTRA "Use the extra library [default=ON]" ON)
 if(${CDI_EXTRA})
-  target_compile_definitions(cdilib PRIVATE HAVE_LIBEXTRA=1)
+  target_compile_definitions(libcdi PRIVATE HAVE_LIBEXTRA=1)
 endif()
 
 option(CDI_IEG "Use the extra library [default=ON]" ON)
 if(${CDI_IEG})
-  target_compile_definitions(cdilib PRIVATE HAVE_LIBIEG=1)
+  target_compile_definitions(libcdi PRIVATE HAVE_LIBIEG=1)
 endif()
 
 option(CDI_SERVICE "Use the extra library [default=ON]" ON)
 if(${CDI_SERVICE})
-  target_compile_definitions(cdilib PRIVATE HAVE_LIBSERVICE=1)
+  target_compile_definitions(libcdi PRIVATE HAVE_LIBSERVICE=1)
 endif()
 
 # ecCodes
@@ -54,9 +54,9 @@ option(CDI_ECCODES "Use the eccodes library [default=ON]" ON)
 if(${CDI_ECCODES} OR eccodes_ROOT)
   find_package(eccodes REQUIRED)
   if (${eccodes_FOUND})
-    target_compile_definitions(cdilib PRIVATE HAVE_LIBGRIB_API=${eccodes_FOUND})
+    target_compile_definitions(libcdi PRIVATE HAVE_LIBGRIB_API=${eccodes_FOUND})
     message(VERBOSE "added compile definition HAVE_LIBGRIB_API=${eccodes_FOUND}")
-    target_link_libraries(cdilib eccodes)
+    target_link_libraries(libcdi eccodes)
   endif ()
 endif()
 
@@ -71,14 +71,14 @@ if(${CDI_NETCDF} OR netCDF_ROOT )
       HAVE_LIBNC_DAP=${netCDF_FOUND}
       HAVE_NETCDF4=${netCDF_FOUND}
     )   
-    target_link_libraries(cdilib netCDF::netcdf)
+    target_link_libraries(libcdi netCDF::netcdf)
   elseif (TARGET NetCDF::NetCDF)
     list(APPEND cdi_compile_defs
            HAVE_LIBNETCDF=${NetCDF_FOUND}
            HAVE_LIBNC_DAP=${NetCDF_FOUND}
            HAVE_NETCDF4=${NetCDF_FOUND}
     )   
-    target_link_libraries(cdilib NetCDF::NetCDF)
+    target_link_libraries(libcdi NetCDF::NetCDF)
   endif ()
 endif()
 
@@ -87,7 +87,7 @@ message(VERBOSE "looking for config.h in: ${PROJECT_BINARY_DIR}/src")
 
 #adding subdirectories
 ## lib and general files
-target_compile_definitions(cdilib PRIVATE CDI=1 CDI_SIZE_TYPE=size_t PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}")
+target_compile_definitions(libcdi PRIVATE CDI=1 CDI_SIZE_TYPE=size_t PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}")
 add_subdirectory(src)
 
 #app
@@ -106,12 +106,12 @@ endif ()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-install(TARGETS cdilib
+install(TARGETS libcdi
   ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 
-get_target_property(cdi_install_files cdilib CDI_INSTALL_HEADERS)
+get_target_property(cdi_install_files libcdi CDI_INSTALL_HEADERS)
 install(FILES ${cdi_install_files} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 # -- create configuration files
