@@ -2957,7 +2957,7 @@ process_grid_query(CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncvar, size
     if (numCellidx > 0)
     {
       // if (ncvar->gridtype != GRID_UNSTRUCTURED)
-      if (xdimid != CDI_UNDEFID && ydimid != CDI_UNDEFID)
+      if (xdimid != CDI_UNDEFID && ydimid != CDI_UNDEFID && xdimid != ydimid)
       {
         Warning("Query parameter cell is only available for 1D grids, skipped variable %s!", ncvar->name);
         ncvar->varStatus = UndefVar;
