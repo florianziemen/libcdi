@@ -1,3 +1,7 @@
+2026-01-02  Uwe Schulzweida
+
+	* process_grid_query: improve HEALPix support
+
 2025-11-24  Uwe Schulzweida
 
 	* is_healpix_grid: add support for int64 attributes

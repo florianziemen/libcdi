@@ -458,9 +458,18 @@ cdf_get_vara(int ncid, int varid, const size_t start[], const size_t count[], vo
 }
 
 void
-cdf_get_vara_int(int ncid, int varid, const size_t start[], const size_t count[], int *dp)
+cdf_get_vara_int(int ncid, int varid, const size_t start[], const size_t count[], int *ip)
 {
-  int status = nc_get_vara_int(ncid, varid, start, count, dp);
+  int status = nc_get_vara_int(ncid, varid, start, count, ip);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
+  if (status != NC_NOERR) Error("%s", nc_strerror(status));
+}
+
+void
+cdf_get_vara_int64(int ncid, int varid, const size_t start[], const size_t count[], int64_t *ip)
+{
+  long long *llp = (long long *) ip;
+  int status = nc_get_vara_longlong(ncid, varid, start, count, llp);
   if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d", ncid, varid);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }

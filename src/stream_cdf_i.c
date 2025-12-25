@@ -2170,10 +2170,19 @@ cdf_load_cellarea(size_t size, ncvar_t *ncvar, double **gridarea, struct cdfLazy
 }
 
 static void
-cdf_load_cellindices(size_t size, ncvar_t *ncvar, int64_t **cellIndices)
+cdf_load_cellindices(size_t size, ncvar_t *ncvar, int64_t **cellIndices, bool readPart, size_t start, size_t count)
 {
   *cellIndices = (int64_t *) Malloc(size * sizeof(int64_t));
-  cdf_get_var_int64(ncvar->ncid, ncvar->ivarid, *cellIndices);
+  if (readPart)
+    cdf_get_vara_int64(ncvar->ncid, ncvar->ivarid, &start, &count, *cellIndices);
+  else
+    cdf_get_var_int64(ncvar->ncid, ncvar->ivarid, *cellIndices);
+}
+
+static void
+set_cellindices(int64_t *cellIndices, size_t start, size_t count)
+{
+  for (size_t i = 0; i < count; ++i) { cellIndices[i] = start + i; }
 }
 
 static void
@@ -2639,6 +2648,12 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
         readPart = true;
       }
     }
+    else if (grid->type == GRID_HEALPIX && (ncvar->ivarid != CDI_UNDEFID || (gridPart && gridPart->readPart)))
+    {
+      start[0] = (size_t) gridPart->start;
+      count[0] = (size_t) gridPart->count;
+      readPart = true;
+    }
 
     if (xvarid != CDI_UNDEFID)
     {
@@ -2674,6 +2689,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
 
     // clang-format off
     if      (ncvar->gridtype == GRID_UNSTRUCTURED)     size = xsize;
+    else if (ncvar->gridtype == GRID_HEALPIX)          size = xsize;
     else if (ncvar->gridtype == GRID_GAUSSIAN_REDUCED) size = xsize;
     else if (ysize == 0)                               size = xsize;
     else if (xsize == 0)                               size = ysize;
@@ -2718,7 +2734,12 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
     case GRID_HEALPIX:
     {
       grid->size = size;
-      if (ncvar->ivarid != CDI_UNDEFID) { cdf_load_cellindices(size, ncvar, &grid->indices); }
+      if (ncvar->ivarid != CDI_UNDEFID) { cdf_load_cellindices(size, ncvar, &grid->indices, readPart, start[0], count[0]); }
+      else if (readPart)
+      {
+        grid->indices = (int64_t *) Malloc(count[0] * sizeof(int64_t));
+        set_cellindices(grid->indices, start[0], count[0]);
+      }
       break;
     }
     case GRID_GAUSSIAN_REDUCED:
@@ -2979,6 +3000,7 @@ process_grid_query(CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncvar, size
       }
     }
   }
+
   return 0;
 }
 
