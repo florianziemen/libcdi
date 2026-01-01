@@ -264,6 +264,16 @@ enum cdfIDIdx
 
 typedef struct
 {
+  void *buffer;
+  size_t start[MAX_DIMENSIONS];
+  size_t count[MAX_DIMENSIONS];
+  size_t size;
+  int numDims;
+  bool used;
+} CdfCache;
+
+typedef struct
+{
   int ncIdVec[CDF_SIZE_NCID];
   int gridID;
   long start;
@@ -272,16 +282,17 @@ typedef struct
 
 typedef struct
 {
-  int complexFloatId;
-  int complexDoubleId;
+  CdfCache cache;
   CdfGrid cdfGridVec[MAX_GRIDS_PS];
+  size_t chunkSizeDimT;
+  size_t chunkSizeDimZ;
+  size_t ncDimLenVec[MAX_DIMS_PS];
   int zaxisIdVec[MAX_ZAXES_PS];  // Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
   int ncZvarIdVec[MAX_ZAXES_PS];
   int ncDimIdVec[MAX_DIMS_PS];
-  size_t ncDimLenVec[MAX_DIMS_PS];
   int ncNumDims;
-  size_t chunkSizeDimT;
-  size_t chunkSizeDimZ;
+  int complexFloatId;
+  int complexDoubleId;
   VCT vct;
 } CdfInfo;
 #endif

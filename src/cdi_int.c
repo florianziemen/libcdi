@@ -254,45 +254,42 @@ cdiDebug(int level)
 int
 cdiHaveFiletype(int filetype)
 {
-  int status = 0;
-
   switch (filetype)
   {
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV: status = 1; break;
+    case CDI_FILETYPE_SRV: return 1;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT: status = 1; break;
+    case CDI_FILETYPE_EXT: return 1;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG: status = 1; break;
+    case CDI_FILETYPE_IEG: return 1;
 #endif
 #ifdef HAVE_LIBGRIB
 #if defined HAVE_LIBGRIB_API || defined HAVE_LIBCGRIBEX
-    case CDI_FILETYPE_GRB: status = 1; break;
+    case CDI_FILETYPE_GRB: return 1;
 #endif
 #ifdef HAVE_LIBGRIB_API
-    case CDI_FILETYPE_GRB2: status = 1; break;
+    case CDI_FILETYPE_GRB2: return 1;
 #endif
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NC: status = 1; break;
+    case CDI_FILETYPE_NC: return 1;
 #ifdef HAVE_NETCDF2
-    case CDI_FILETYPE_NC2: status = 1; break;
+    case CDI_FILETYPE_NC2: return 1;
 #endif
-    case CDI_FILETYPE_NC4: status = 1; break;
-    case CDI_FILETYPE_NC4C: status = 1; break;
+    case CDI_FILETYPE_NC4: return 1;
+    case CDI_FILETYPE_NC4C: return 1;
 #ifdef HAVE_NCZARR
-    case CDI_FILETYPE_NCZARR: status = 1; break;
+    case CDI_FILETYPE_NCZARR: return 1;
 #endif
 #ifdef HAVE_NETCDF5
-    case CDI_FILETYPE_NC5: status = 1; break;
+    case CDI_FILETYPE_NC5: return 1;
 #endif
 #endif
-    default: status = 0; break;
   }
 
-  return status;
+  return 0;
 }
 
 void

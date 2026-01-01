@@ -1,3 +1,4 @@
+#include "cdi_limits.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -55,18 +56,16 @@ const resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP, streamG
 static int
 getByteorder(int byteswap)
 {
-  int byteorder = -1;
-
   switch (HOST_ENDIANNESS)
   {
-    case CDI_BIGENDIAN: byteorder = byteswap ? CDI_LITTLEENDIAN : CDI_BIGENDIAN; break;
-    case CDI_LITTLEENDIAN: byteorder = byteswap ? CDI_BIGENDIAN : CDI_LITTLEENDIAN; break;
+    case CDI_BIGENDIAN: return byteswap ? CDI_LITTLEENDIAN : CDI_BIGENDIAN;
+    case CDI_LITTLEENDIAN: return byteswap ? CDI_BIGENDIAN : CDI_LITTLEENDIAN;
     /* FIXME: does not currently adjust for PDP endianness */
     case CDI_PDPENDIAN:
     default: Error("unhandled endianness");
   }
 
-  return byteorder;
+  return -1;
 }
 
 // used also in CDO
@@ -115,8 +114,8 @@ cdiGetFiletype(const char *uri, int *byteorder)
   if (memcmp(buffer, "GRIB", 4) == 0)
     {
       version = buffer[7];
-      if      (version <= 1) filetype = CDI_FILETYPE_GRB;
-      else if (version == 2) filetype = CDI_FILETYPE_GRB2;
+      if      (version <= 1) { filetype = CDI_FILETYPE_GRB; }
+      else if (version == 2) { filetype = CDI_FILETYPE_GRB2; }
     }
   else if (memcmp(buffer, "CDF\001", 4) == 0) { filetype = CDI_FILETYPE_NC; }
   else if (memcmp(buffer, "CDF\002", 4) == 0) { filetype = CDI_FILETYPE_NC2; }
@@ -134,8 +133,8 @@ cdiGetFiletype(const char *uri, int *byteorder)
 #ifdef HAVE_LIBGRIB
   else if (gribCheckSeek(fileID, &recpos, &version) == 0)
     {
-      if      (version <= 1) filetype = CDI_FILETYPE_GRB;
-      else if (version == 2) filetype = CDI_FILETYPE_GRB2;
+      if      (version <= 1) { filetype = CDI_FILETYPE_GRB; }
+      else if (version == 2) { filetype = CDI_FILETYPE_GRB2; }
     }
 #endif
   // clang-format on
@@ -178,18 +177,16 @@ streamInqFiletype(int streamID)
 int
 getByteswap(int byteorder)
 {
-  int byteswap = -1;
-
   switch (byteorder)
   {
     case CDI_BIGENDIAN:
     case CDI_LITTLEENDIAN:
-    case CDI_PDPENDIAN: byteswap = (HOST_ENDIANNESS != byteorder); break;
+    case CDI_PDPENDIAN: return (HOST_ENDIANNESS != byteorder);
     case -1: break;
     default: Error("unexpected byteorder %d query!", byteorder);
   }
 
-  return byteswap;
+  return -1;
 }
 
 void
@@ -211,7 +208,7 @@ streamInqNumSteps(int streamID)
   if (ntsteps == (long) CDI_UNDEFID)
   {
     int tsID = 0;
-    while (streamInqTimestep(streamID, tsID++)) ntsteps = streamptr->ntsteps;
+    while (streamInqTimestep(streamID, tsID++)) { ntsteps = streamptr->ntsteps; }
   }
 
   return (int) ntsteps;
@@ -1082,11 +1079,12 @@ streamDefaultValue(stream_t *streamptr)
 
 #ifdef HAVE_LIBNETCDF
   CdfInfo *cdfInfo = &(streamptr->cdfInfo);
-  cdfInfo->complexFloatId = CDI_UNDEFID;
-  cdfInfo->complexDoubleId = CDI_UNDEFID;
-
-  for (int i = 0; i < MAX_ZAXES_PS; i++) cdfInfo->zaxisIdVec[i] = CDI_UNDEFID;
-  for (int i = 0; i < MAX_ZAXES_PS; i++) cdfInfo->ncZvarIdVec[i] = CDI_UNDEFID;
+  cdfInfo->cache.buffer = NULL;
+  for (int i = 0; i < MAX_DIMENSIONS; ++i) { cdfInfo->cache.start[i] = 0; }
+  for (int i = 0; i < MAX_DIMENSIONS; ++i) { cdfInfo->cache.count[i] = 0; }
+  cdfInfo->cache.size = 0;
+  cdfInfo->cache.numDims = 0;
+  cdfInfo->cache.used = false;
 
   for (int i = 0; i < MAX_GRIDS_PS; i++)
   {
@@ -1096,12 +1094,17 @@ streamDefaultValue(stream_t *streamptr)
     for (size_t j = 0; j < CDF_SIZE_NCID; ++j) cdfInfo->cdfGridVec[i].ncIdVec[j] = CDI_UNDEFID;
   }
 
-  cdfInfo->ncNumDims = 0;
-  for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimIdVec[i] = CDI_UNDEFID;
-  for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimLenVec[i] = 0;
-
   cdfInfo->chunkSizeDimT = 0;
   cdfInfo->chunkSizeDimZ = 0;
+
+  for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimLenVec[i] = 0;
+  for (int i = 0; i < MAX_ZAXES_PS; i++) cdfInfo->zaxisIdVec[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_ZAXES_PS; i++) cdfInfo->ncZvarIdVec[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimIdVec[i] = CDI_UNDEFID;
+
+  cdfInfo->ncNumDims = 0;
+  cdfInfo->complexFloatId = CDI_UNDEFID;
+  cdfInfo->complexDoubleId = CDI_UNDEFID;
 
   cdfInfo->vct.ilev = 0;
   cdfInfo->vct.mlev = 0;

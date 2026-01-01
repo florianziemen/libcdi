@@ -606,7 +606,6 @@ cdfReadDataFP64(stream_t *streamptr, int varID, size_t length, size_t start[MAX_
     else
     {
       cdf_get_vara_double(fileID, ncvarid, start, count, data);
-
       cdfCheckDataFP64_UINT8(fileID, ncvarid, vlistID, varID, length, data);
     }
   }
@@ -642,7 +641,6 @@ cdfReadDataFP32(stream_t *streamptr, int varID, size_t length, size_t start[MAX_
     else
     {
       cdf_get_vara_float(fileID, ncvarid, start, count, data);
-
       cdfCheckDataFP32_UINT8(fileID, ncvarid, vlistID, varID, length, data);
     }
   }
