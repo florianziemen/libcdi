@@ -227,20 +227,6 @@ typedef struct
 
 typedef struct
 {
-  sleveltable_t *recordTable;  // record IDs for each subtype
-  int ncvarid;
-  int subtypeSize;
-  bool defmiss;  // true: if missval is defined in file
-  bool isUsed;
-
-  int gridID;
-  int zaxisID;
-  int tsteptype;  // TSTEP_*
-  int subtypeID;  // subtype ID, e.g. for tile-related meta-data (currently for GRIB-API only).
-} svarinfo_t;
-
-typedef struct
-{
   int ilev;
   int mlev;
   int ilevID;
@@ -267,7 +253,8 @@ typedef struct
   void *buffer;
   size_t start[MAX_DIMENSIONS];
   size_t count[MAX_DIMENSIONS];
-  size_t size;
+  size_t bufferSize;
+  size_t cacheSize;
   int numDims;
   bool used;
 } CdfCache;
@@ -282,7 +269,6 @@ typedef struct
 
 typedef struct
 {
-  CdfCache cache;
   CdfGrid cdfGridVec[MAX_GRIDS_PS];
   size_t chunkSizeDimT;
   size_t chunkSizeDimZ;
@@ -296,6 +282,23 @@ typedef struct
   VCT vct;
 } CdfInfo;
 #endif
+
+typedef struct
+{
+#ifdef HAVE_LIBNETCDF
+  CdfCache cdfCache;
+#endif
+  sleveltable_t *recordTable;  // record IDs for each subtype
+  int ncvarid;
+  int subtypeSize;
+  bool defmiss;  // true: if missval is defined in file
+  bool isUsed;
+
+  int gridID;
+  int zaxisID;
+  int tsteptype;  // TSTEP_*
+  int subtypeID;  // subtype ID, e.g. for tile-related meta-data (currently for GRIB-API only).
+} svarinfo_t;
 
 typedef struct
 {

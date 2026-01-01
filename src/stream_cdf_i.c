@@ -1600,13 +1600,13 @@ cdf_set_chunk_info(stream_t *streamptr, int nvars, ncvar_t *ncvars)
         {
           int dimType = ncvar->dimtypes[i];
           // clang-format off
-          if      (dimType == T_AXIS && chunkSize > cdfInfo->chunkSizeDimT) cdfInfo->chunkSizeDimT = chunkSize;
-          else if (dimType == Z_AXIS && chunkSize > cdfInfo->chunkSizeDimZ) cdfInfo->chunkSizeDimZ = chunkSize;
+          if      (dimType == T_AXIS && chunkSize > cdfInfo->chunkSizeDimT) { cdfInfo->chunkSizeDimT = chunkSize; }
+          else if (dimType == Z_AXIS && chunkSize > cdfInfo->chunkSizeDimZ) { cdfInfo->chunkSizeDimZ = chunkSize; }
 
-          if      (dimType == T_AXIS) chunkSizeDimT = chunkSize;
-          else if (dimType == Z_AXIS) chunkSizeDimZ = chunkSize;
-          else if (dimType == Y_AXIS) chunkSizeDimY = chunkSize;
-          else if (dimType == X_AXIS) chunkSizeDimX = chunkSize;
+          if      (dimType == T_AXIS) { chunkSizeDimT = chunkSize; }
+          else if (dimType == Z_AXIS) { chunkSizeDimZ = chunkSize; }
+          else if (dimType == Y_AXIS) { chunkSizeDimY = chunkSize; }
+          else if (dimType == X_AXIS) { chunkSizeDimX = chunkSize; }
           // clang-format on
         }
       }
@@ -3566,6 +3566,18 @@ cdf_set_var_chunk_cache(ncvar_t *ncvar, int ncvarid, size_t chunkCacheSize)
   nc_set_var_chunk_cache(ncvar->ncid, ncvarid, chunkCacheSize, ncvar->chunkCacheNelems, ncvar->chunkCachePreemption);
 }
 
+static void
+cdf_init_cache(CdfCache *cache)
+{
+  cache->buffer = NULL;
+  for (int i = 0; i < MAX_DIMENSIONS; ++i) { cache->start[i] = 0; }
+  for (int i = 0; i < MAX_DIMENSIONS; ++i) { cache->count[i] = 0; }
+  cache->bufferSize = 0;
+  cache->cacheSize = 0;
+  cache->numDims = 0;
+  cache->used = false;
+}
+
 // define all input data variables
 static void
 cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int nvars, int num_ncvars, ncvar_t *ncvars,
@@ -3601,9 +3613,18 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       if (ncvar->chunkType != CDI_UNDEFID) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, ncvar->chunkType);
       if (ncvar->chunkSize > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, ncvar->chunkSize);
 
+      cdf_init_cache(&streamptr->vars[varID].cdfCache);
       size_t cacheSize = calc_chunk_cache_size(timedimid, ncvar);
-      if (CDI_Chunk_Cache_In >= 0) { cacheSize = (size_t) CDI_Chunk_Cache_In; }
-      cdf_set_var_chunk_cache(ncvar, ncvarid, cacheSize);
+      if (cacheSize > 0 && streamptr->filetype == CDI_FILETYPE_NCZARR && CDI_NCZ_Chunk_Cache)
+      {
+        streamptr->vars[varID].cdfCache.cacheSize = cacheSize;
+        cdf_set_var_chunk_cache(ncvar, ncvarid, 0);
+      }
+      else
+      {
+        if (CDI_Chunk_Cache_In >= 0) { cacheSize = (size_t) CDI_Chunk_Cache_In; }
+        cdf_set_var_chunk_cache(ncvar, ncvarid, cacheSize);
+      }
     }
 
     streamptr->vars[varID1].defmiss = false;

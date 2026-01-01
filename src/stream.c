@@ -1079,12 +1079,6 @@ streamDefaultValue(stream_t *streamptr)
 
 #ifdef HAVE_LIBNETCDF
   CdfInfo *cdfInfo = &(streamptr->cdfInfo);
-  cdfInfo->cache.buffer = NULL;
-  for (int i = 0; i < MAX_DIMENSIONS; ++i) { cdfInfo->cache.start[i] = 0; }
-  for (int i = 0; i < MAX_DIMENSIONS; ++i) { cdfInfo->cache.count[i] = 0; }
-  cdfInfo->cache.size = 0;
-  cdfInfo->cache.numDims = 0;
-  cdfInfo->cache.used = false;
 
   for (int i = 0; i < MAX_GRIDS_PS; i++)
   {
@@ -1272,7 +1266,6 @@ deallocate_sleveltable_t(sleveltable_t *entry)
 static void
 streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted))
 {
-
   xassert(streamptr);
   if (streamptr->filetype != CDI_FILETYPE_UNDEF) streamCloseDelegate(streamptr, 1);
 
@@ -1397,14 +1390,11 @@ cdiStreamSync_(stream_t *streamptr)
   int fileID = streamptr->fileID;
   int filetype = streamptr->filetype;
   int vlistID = streamptr->vlistID;
-  int nvars = vlistNvars(vlistID);
+  int numVars = vlistNvars(vlistID);
 
-  if (fileID == CDI_UNDEFID)
-    Warning("File %s not open!", streamptr->filename);
-  else if (vlistID == CDI_UNDEFID)
-    Warning("Vlist undefined for file %s!", streamptr->filename);
-  else if (nvars == 0)
-    Warning("No variables defined!");
+  if (fileID == CDI_UNDEFID) { Warning("File %s not open!", streamptr->filename); }
+  else if (vlistID == CDI_UNDEFID) { Warning("Vlist undefined for file %s!", streamptr->filename); }
+  else if (numVars == 0) { Warning("No variables defined!"); }
   else
   {
     if (streamptr->filemode == 'w' || streamptr->filemode == 'a')

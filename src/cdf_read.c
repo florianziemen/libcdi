@@ -392,17 +392,16 @@ static size_t
 stream_inq_dimlen(stream_t *streamptr, int dimid)
 {
   const CdfInfo *cdfInfo = &(streamptr->cdfInfo);
-  int ndims = cdfInfo->ncNumDims;
-  const int *ncdimid = cdfInfo->ncDimIdVec;
   const size_t *ncdimlen = cdfInfo->ncDimLenVec;
+  const int *ncdimid = cdfInfo->ncDimIdVec;
+  int ndims = cdfInfo->ncNumDims;
   for (int i = 0; i < ndims; ++i)
   {
     if (dimid == ncdimid[i]) return ncdimlen[i];
   }
 
   size_t size = 0;
-  int fileId = streamptr->fileID;
-  cdf_inq_dimlen(fileId, dimid, &size);
+  cdf_inq_dimlen(streamptr->fileID, dimid, &size);
   return size;
 }
 
@@ -512,7 +511,6 @@ cdfGetSliceSlapDescription(stream_t *streamptr, long tsID, int varID, int levelI
 
   int nvdims;
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
-
   if (nvdims != ndims)
   {
     char name[CDI_MAX_NAME];
@@ -697,11 +695,11 @@ cdf_read_var_slice_DP(stream_t *streamptr, long tsID, int varID, int levelID, do
   cdfGetSliceSlapDescription(streamptr, tsID, varID, levelID, &swapxy, start, count);
 
   int vlistID = streamptr->vlistID;
-  int gridId = vlistInqVarGrid(vlistID, varID);
-  size_t length = (size_t) gridInqSize(gridId);
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  size_t length = (size_t) gridInqSize(gridID);
   cdfReadDataFP64(streamptr, varID, length, start, count, data);
 
-  if (swapxy) transpose2dArrayDP(gridId, data);
+  if (swapxy) transpose2dArrayDP(gridID, data);
 
   *numMissVals = cdfDoInputDataTransformationDP(vlistID, varID, length, data);
 }
@@ -722,11 +720,11 @@ cdf_read_var_slice_SP(stream_t *streamptr, long tsID, int varID, int levelID, fl
   cdfGetSliceSlapDescription(streamptr, tsID, varID, levelID, &swapxy, start, count);
 
   int vlistID = streamptr->vlistID;
-  int gridId = vlistInqVarGrid(vlistID, varID);
-  size_t length = (size_t) gridInqSize(gridId);
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  size_t length = (size_t) gridInqSize(gridID);
   cdfReadDataFP32(streamptr, varID, length, start, count, data);
 
-  if (swapxy) transpose2dArraySP(gridId, data);
+  if (swapxy) transpose2dArraySP(gridID, data);
 
   *numMissVals = cdfDoInputDataTransformationSP(vlistID, varID, length, data);
 }
