@@ -255,6 +255,8 @@ typedef struct
   size_t count[MAX_DIMENSIONS];
   size_t bufferSize;
   size_t cacheSize;
+  size_t numSteps;
+  size_t maxSteps;
   int numDims;
   bool used;
 } CdfCache;
@@ -286,7 +288,7 @@ typedef struct
 typedef struct
 {
 #ifdef HAVE_LIBNETCDF
-  CdfCache cdfCache;
+  CdfCache *cdfCache;
 #endif
   sleveltable_t *recordTable;  // record IDs for each subtype
   int ncvarid;

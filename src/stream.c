@@ -1131,8 +1131,7 @@ stream_new_entry(int resH)
   stream_t *streamptr = (stream_t *) Malloc(sizeof(stream_t));
   streamDefaultValue(streamptr);
 
-  if (resH == CDI_UNDEFID)
-    streamptr->self = reshPut(streamptr, &streamOps);
+  if (resH == CDI_UNDEFID) { streamptr->self = reshPut(streamptr, &streamOps); }
   else
   {
     streamptr->self = resH;
@@ -1263,6 +1262,15 @@ deallocate_sleveltable_t(sleveltable_t *entry)
   entry->lindex = NULL;
 }
 
+#ifdef HAVE_LIBNETCDF
+static void
+deallocate_cdfCache(CdfCache *cache)
+{
+  if (cache->buffer) Free(cache->buffer);
+  cache->buffer = NULL;
+}
+#endif
+
 static void
 streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted))
 {
@@ -1293,6 +1301,10 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
       unsigned nsub = streamptr->vars[index].subtypeSize >= 0 ? (unsigned) streamptr->vars[index].subtypeSize : 0U;
       for (size_t isub = 0; isub < nsub; isub++) deallocate_sleveltable_t(pslev + isub);
       if (pslev) Free(pslev);
+#ifdef HAVE_LIBNETCDF
+      if (streamptr->vars[index].cdfCache) deallocate_cdfCache(streamptr->vars[index].cdfCache);
+      streamptr->vars[index].cdfCache = NULL;
+#endif
     }
     Free(streamptr->vars);
     streamptr->vars = NULL;
@@ -1800,8 +1812,8 @@ void
 cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
 {
   streamptr->vlistID = vlistID;
-  int nvars = vlistNvars(vlistID);
-  for (int varID = 0; varID < nvars; ++varID)
+  int numVars = vlistNvars(vlistID);
+  for (int varID = 0; varID < numVars; ++varID)
   {
     int gridID = vlistInqVarGrid(vlistID, varID);
     int zaxisID = vlistInqVarZaxis(vlistID, varID);

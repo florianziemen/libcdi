@@ -26,11 +26,15 @@ streamvar_init_recordtable(stream_t *streamptr, int varID, int isub)
 static void
 streamvar_init_entry(stream_t *streamptr, int varID)
 {
+#ifdef HAVE_LIBNETCDF
+  streamptr->vars[varID].cdfCache = NULL;
+#endif
+  streamptr->vars[varID].recordTable = NULL;
+
   streamptr->vars[varID].ncvarid = CDI_UNDEFID;
   streamptr->vars[varID].defmiss = false;
 
   streamptr->vars[varID].subtypeSize = 0;
-  streamptr->vars[varID].recordTable = NULL;
 
   streamptr->vars[varID].gridID = CDI_UNDEFID;
   streamptr->vars[varID].zaxisID = CDI_UNDEFID;

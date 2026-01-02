@@ -3528,9 +3528,27 @@ size_of_dim_chunks(size_t n, size_t c)
   return (n / c + (n % c > 0)) * c;
 }
 
-static size_t
+typedef struct
+{
+  size_t cacheSize;
+  size_t count[MAX_DIMENSIONS];
+  int numDims;
+} ChunkCacheValues;
+
+static void
+chunkCacheValues_init(ChunkCacheValues *chunkCacheValues)
+{
+  chunkCacheValues->cacheSize = 0;
+  chunkCacheValues->numDims = 0;
+  for (int i = 0; i < MAX_DIMENSIONS; ++i) { chunkCacheValues->count[i] = 0; }
+}
+
+static ChunkCacheValues
 calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
 {
+  ChunkCacheValues chunkCacheValues;
+  chunkCacheValues_init(&chunkCacheValues);
+  int numDims = 0;
   size_t nx = 0, ny = 0, nz = 0;
   size_t cx = 0, cy = 0, cz = 0;
   for (int i = 0; i < ncvar->ndims; i++)
@@ -3545,18 +3563,39 @@ calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
 
   size_t numSteps = (ncvar->dimids[0] == timedimid) ? ncvar->chunks[0] : 1;
   size_t chunkCacheSize = numSteps;
-  if (nz > 0 && cz > 0) chunkCacheSize *= (numSteps == 1) ? cz : size_of_dim_chunks(nz, cz);
+  size_t numLevels = 0;
+  if (nz > 0 && cz > 0)
+  {
+    numLevels = (numSteps == 1) ? cz : size_of_dim_chunks(nz, cz);
+    chunkCacheSize *= numLevels;
+  }
 
-  if (chunkCacheSize == 1) return 0;  // no chunk cache needed because the full field is read
+  if (chunkCacheSize == 1) { chunkCacheSize = 0; }  // no chunk cache needed because the full field is read
+  else
+  {
+    if (numSteps > 0) { chunkCacheValues.count[numDims++] = numSteps; }
+    if (numLevels > 0) { chunkCacheValues.count[numDims++] = numLevels; }
+    if (ny > 0 && cy > 0)
+    {
+      size_t size = size_of_dim_chunks(ny, cy);
+      chunkCacheSize *= size;
+      chunkCacheValues.count[numDims++] = size;
+    }
+    if (nx > 0 && cx > 0)
+    {
+      size_t size = size_of_dim_chunks(nx, cx);
+      chunkCacheSize *= size;
+      chunkCacheValues.count[numDims++] = size;
+    }
 
-  if (ny > 0 && cy > 0) chunkCacheSize *= size_of_dim_chunks(ny, cy);
-  if (nx > 0 && cx > 0) chunkCacheSize *= size_of_dim_chunks(nx, cx);
+    chunkCacheSize *= cdf_xtype_to_numbytes(ncvar->xtype);
 
-  chunkCacheSize *= cdf_xtype_to_numbytes(ncvar->xtype);
+    if (CDI_Chunk_Cache_Max > 0 && chunkCacheSize > CDI_Chunk_Cache_Max) chunkCacheSize = CDI_Chunk_Cache_Max;
+  }
 
-  if (CDI_Chunk_Cache_Max > 0 && chunkCacheSize > CDI_Chunk_Cache_Max) chunkCacheSize = CDI_Chunk_Cache_Max;
-
-  return chunkCacheSize;
+  chunkCacheValues.cacheSize = chunkCacheSize;
+  chunkCacheValues.numDims = numDims;
+  return chunkCacheValues;
 }
 
 static void
@@ -3574,6 +3613,8 @@ cdf_init_cache(CdfCache *cache)
   for (int i = 0; i < MAX_DIMENSIONS; ++i) { cache->count[i] = 0; }
   cache->bufferSize = 0;
   cache->cacheSize = 0;
+  cache->numSteps = 0;
+  cache->maxSteps = 0;
   cache->numDims = 0;
   cache->used = false;
 }
@@ -3613,11 +3654,19 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       if (ncvar->chunkType != CDI_UNDEFID) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, ncvar->chunkType);
       if (ncvar->chunkSize > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, ncvar->chunkSize);
 
-      cdf_init_cache(&streamptr->vars[varID].cdfCache);
-      size_t cacheSize = calc_chunk_cache_size(timedimid, ncvar);
-      if (cacheSize > 0 && streamptr->filetype == CDI_FILETYPE_NCZARR && CDI_NCZ_Chunk_Cache)
+      ChunkCacheValues chunkCacheValues = calc_chunk_cache_size(timedimid, ncvar);
+      size_t cacheSize = chunkCacheValues.cacheSize;
+      if (cacheSize > 0 && streamptr->filetype == CDI_FILETYPE_NCZARR && CDI_NCZ_Chunk_Cache && chunkCacheValues.numDims <= 3)
       {
-        streamptr->vars[varID].cdfCache.cacheSize = cacheSize;
+        streamptr->vars[varID].cdfCache = (CdfCache *) Malloc(sizeof(CdfCache));
+        cdf_init_cache(streamptr->vars[varID].cdfCache);
+        streamptr->vars[varID].cdfCache->cacheSize = cacheSize;
+        streamptr->vars[varID].cdfCache->numDims = chunkCacheValues.numDims;
+        streamptr->vars[varID].cdfCache->maxSteps = 425;
+        for (int i = 0; i < chunkCacheValues.numDims; ++i)
+        {
+          streamptr->vars[varID].cdfCache->count[i] = chunkCacheValues.count[i];
+        }
         cdf_set_var_chunk_cache(ncvar, ncvarid, 0);
       }
       else

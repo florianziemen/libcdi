@@ -1,5 +1,6 @@
 2026-01-02  Uwe Schulzweida
 
+	* add CDI input cache for NCZ data (netcdf NCZ cache has performance issues)
 	* process_grid_query: improve HEALPix support
 
 2025-11-24  Uwe Schulzweida

@@ -4,6 +4,7 @@
 
 #ifdef HAVE_LIBNETCDF
 
+#include <assert.h>
 #include <limits.h>
 #include <float.h>
 
@@ -444,9 +445,9 @@ cdfGetSliceSlapDescription(stream_t *streamptr, long tsID, int varID, int levelI
   int ncvarid = streamptr->vars[varID].ncvarid;
   size_t ncStepIndex = (size_t) streamptr->tsteps[tsID].ncStepIndex;
 
-  int gridId = vlistInqVarGrid(vlistID, varID);
+  int gridID = vlistInqVarGrid(vlistID, varID);
   int timetype = vlistInqVarTimetype(vlistID, varID);
-  SizeType gridsize = gridInqSize(gridId);
+  SizeType gridsize = gridInqSize(gridID);
 
   streamptr->numvals += gridsize;
 
@@ -477,9 +478,9 @@ cdfGetSliceSlapDescription(stream_t *streamptr, long tsID, int varID, int levelI
   if (timetype != TIME_CONSTANT) addDimension(ncStepIndex, 1);
   if (skipdim == 1) addDimension(0, 1);
 
-  int gridindex = vlistGridIndex(vlistID, gridId);
+  int gridindex = vlistGridIndex(vlistID, gridID);
   const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridVec[gridindex]);
-  bool readPart = (cdfGrid->gridID == gridId && cdfGrid->start != -1 && cdfGrid->count != -1);
+  bool readPart = (cdfGrid->gridID == gridID && cdfGrid->start != -1 && cdfGrid->count != -1);
 
   for (int id = 0; id < 4; ++id)
   {
@@ -610,6 +611,54 @@ cdfReadDataFP64(stream_t *streamptr, int varID, size_t length, size_t start[MAX_
 }
 
 static void
+print_scarray(int n, const size_t *start, const size_t *count, const char *name)
+{
+  printf("%s: ", name);
+  printf("start:");
+  for (int i = 0; i < n; ++i) printf(" %zu", start[i]);
+  printf(" count:");
+  for (int i = 0; i < n; ++i) printf(" %zu", count[i]);
+  printf("\n");
+}
+
+static void
+cdf_get_vara_float_from_cache(int fileID, int ncvarid, const size_t *start, const size_t *count, float *data, CdfCache *cache)
+{
+  // print_scarray(cache->numDims, cache->start, cache->count, "cache");
+  // print_scarray(cache->numDims, start, count, "data");
+  bool fillCache = false;
+  int lastDim = cache->numDims - 1;
+  assert(cache->numDims <= 3);
+  assert(start[lastDim] == 0);
+  assert(count[0] == 1);
+  if (cache->bufferSize == 0)
+  {
+    assert(cache->numSteps == 0);
+    if (cache->buffer != NULL) Error("Cache buffer already allocated!");
+    cache->buffer = Malloc(cache->cacheSize);
+    cache->bufferSize = cache->cacheSize;
+    fillCache = true;
+    // printf("Cache buffer allocated: size=%zu\n", cache->cacheSize);
+  }
+  if (start[0] >= cache->start[0] + cache->count[0])
+  {
+    cache->start[0] += cache->count[0];
+    fillCache = true;
+  }
+  if (fillCache)
+  {
+    cache->numSteps += cache->count[0];
+    if (cache->numSteps > cache->maxSteps) { cache->count[0] = cache->maxSteps % cache->count[0]; }
+    // print_scarray(cache->numDims, cache->start, cache->count, "cache");
+    cdf_get_vara_float(fileID, ncvarid, cache->start, cache->count, cache->buffer);
+  }
+  size_t offset = (start[0] % cache->count[0]) * cache->count[lastDim];
+  if (cache->numDims == 3) { offset = offset * cache->count[1] + start[1] * cache->count[2]; }
+  // printf("step: %zu %zu %zu\n", start[0], cache->count[0], start[0] % cache->count[0]);
+  memcpy(data, (float *) cache->buffer + offset, sizeof(float) * cache->count[lastDim]);
+}
+
+static void
 cdfReadDataFP32(stream_t *streamptr, int varID, size_t length, size_t start[MAX_DIMENSIONS], size_t count[MAX_DIMENSIONS],
                 float *data)
 {
@@ -638,7 +687,10 @@ cdfReadDataFP32(stream_t *streamptr, int varID, size_t length, size_t start[MAX_
     if (datatype == CDI_DATATYPE_FLT64) { cdfReadDataSliceDP2SP(fileID, ncvarid, length, start, count, data); }
     else
     {
-      cdf_get_vara_float(fileID, ncvarid, start, count, data);
+      if (streamptr->vars[varID].cdfCache)
+        cdf_get_vara_float_from_cache(fileID, ncvarid, start, count, data, streamptr->vars[varID].cdfCache);
+      else
+        cdf_get_vara_float(fileID, ncvarid, start, count, data);
       cdfCheckDataFP32_UINT8(fileID, ncvarid, vlistID, varID, length, data);
     }
   }
