@@ -3414,6 +3414,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
             {
               if (CDI_Debug) Message("zaxisID %d %d %s", zaxisID, ncvarid2, ncvars[ncvarid2].name);
               ncvars[ncvarid2].zaxisID = zaxisID;
+              ncvars[ncvarid2].zSize = zsize;
             }
           }
         }
@@ -3589,7 +3590,6 @@ calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
     }
 
     chunkCacheSize *= cdf_xtype_to_numbytes(ncvar->xtype);
-
     if (CDI_Chunk_Cache_Max > 0 && chunkCacheSize > CDI_Chunk_Cache_Max) chunkCacheSize = CDI_Chunk_Cache_Max;
   }
 
@@ -3627,7 +3627,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
   int *varids = (int *) Malloc((size_t) nvars * sizeof(int));
   int n = 0;
   for (int ncvarid = 0; ncvarid < num_ncvars; ncvarid++)
-    if (ncvars[ncvarid].varStatus == DataVar) varids[n++] = ncvarid;
+    if (ncvars[ncvarid].varStatus == DataVar) { varids[n++] = ncvarid; }
 
   if (CDI_Debug)
     for (int i = 0; i < nvars; i++) Message("varids[%d] = %d", i, varids[i]);
@@ -3658,15 +3658,14 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       size_t cacheSize = chunkCacheValues.cacheSize;
       if (cacheSize > 0 && streamptr->filetype == CDI_FILETYPE_NCZARR && CDI_NCZ_Chunk_Cache && chunkCacheValues.numDims <= 3)
       {
-        streamptr->vars[varID].cdfCache = (CdfCache *) Malloc(sizeof(CdfCache));
-        cdf_init_cache(streamptr->vars[varID].cdfCache);
-        streamptr->vars[varID].cdfCache->cacheSize = cacheSize;
-        streamptr->vars[varID].cdfCache->numDims = chunkCacheValues.numDims;
-        streamptr->vars[varID].cdfCache->maxSteps = 425;
-        for (int i = 0; i < chunkCacheValues.numDims; ++i)
-        {
-          streamptr->vars[varID].cdfCache->count[i] = chunkCacheValues.count[i];
-        }
+        CdfCache *cdfCache = (CdfCache *) Malloc(sizeof(CdfCache));
+        cdf_init_cache(cdfCache);
+        cdfCache->cacheSize = cacheSize;
+        cdfCache->numDims = chunkCacheValues.numDims;
+        cdfCache->maxSteps = 425;
+        for (int i = 0; i < chunkCacheValues.numDims; ++i) { cdfCache->count[i] = chunkCacheValues.count[i]; }
+        if (CDI_Debug || CDI_Chunk_Cache_Info) Message("%s: chunkCacheSize=%zu", ncvar->name, cacheSize);
+        streamptr->vars[varID].cdfCache = cdfCache;
         cdf_set_var_chunk_cache(ncvar, ncvarid, 0);
       }
       else
@@ -3735,9 +3734,9 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       {
         int dimid = ncdims[dimids[idim]].dimid;
         // clang-format off
-        if      (xdimid == dimid) ixyz += 1 * ipow10[ndims - idim - 1];
-        else if (ydimid == dimid) ixyz += 2 * ipow10[ndims - idim - 1];
-        else if (zdimid == dimid) ixyz += 3 * ipow10[ndims - idim - 1];
+        if      (xdimid == dimid) { ixyz += 1 * ipow10[ndims - idim - 1]; }
+        else if (ydimid == dimid) { ixyz += 2 * ipow10[ndims - idim - 1]; }
+        else if (zdimid == dimid) { ixyz += 3 * ipow10[ndims - idim - 1]; }
         // clang-format on
       }
     }

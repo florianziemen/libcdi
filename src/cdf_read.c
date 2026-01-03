@@ -579,38 +579,6 @@ cdfCheckDataFP32_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t l
 }
 
 static void
-cdfReadDataFP64(stream_t *streamptr, int varID, size_t length, size_t start[MAX_DIMENSIONS], size_t count[MAX_DIMENSIONS],
-                double *data)
-{
-  int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
-  int ncvarid = streamptr->vars[varID].ncvarid;
-  int datatype = vlistInqVarDatatype(vlistID, varID);
-
-  if (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64)
-  {
-    cdf_get_vara(fileID, ncvarid, start, count, data);
-    if (datatype == CDI_DATATYPE_CPX32)
-    {
-      for (long i = (long) length - 1; i >= 0; --i)
-      {
-        data[2 * i] = (double) (((float *) data)[2 * i]);
-        data[2 * i + 1] = (double) (((float *) data)[2 * i + 1]);
-      }
-    }
-  }
-  else
-  {
-    if (datatype == CDI_DATATYPE_FLT32) { cdfReadDataSliceSP2DP(fileID, ncvarid, length, start, count, data); }
-    else
-    {
-      cdf_get_vara_double(fileID, ncvarid, start, count, data);
-      cdfCheckDataFP64_UINT8(fileID, ncvarid, vlistID, varID, length, data);
-    }
-  }
-}
-
-static void
 print_scarray(int n, const size_t *start, const size_t *count, const char *name)
 {
   printf("%s: ", name);
@@ -621,8 +589,8 @@ print_scarray(int n, const size_t *start, const size_t *count, const char *name)
   printf("\n");
 }
 
-static void
-cdf_get_vara_float_from_cache(int fileID, int ncvarid, const size_t *start, const size_t *count, float *data, CdfCache *cache)
+static size_t
+get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *count, CdfCache *cache)
 {
   // print_scarray(cache->numDims, cache->start, cache->count, "cache");
   // print_scarray(cache->numDims, start, count, "data");
@@ -655,7 +623,59 @@ cdf_get_vara_float_from_cache(int fileID, int ncvarid, const size_t *start, cons
   size_t offset = (start[0] % cache->count[0]) * cache->count[lastDim];
   if (cache->numDims == 3) { offset = offset * cache->count[1] + start[1] * cache->count[2]; }
   // printf("step: %zu %zu %zu\n", start[0], cache->count[0], start[0] % cache->count[0]);
+
+  return offset;
+}
+
+static void
+cdf_get_vara_float_from_cache(int fileID, int ncvarid, const size_t *start, const size_t *count, float *data, CdfCache *cache)
+{
+  int lastDim = cache->numDims - 1;
+  size_t offset = get_cache_offset(fileID, ncvarid, start, count, cache);
   memcpy(data, (float *) cache->buffer + offset, sizeof(float) * cache->count[lastDim]);
+}
+
+static void
+cdf_get_vara_double_from_cache(int fileID, int ncvarid, const size_t *start, const size_t *count, double *data, CdfCache *cache)
+{
+  int lastDim = cache->numDims - 1;
+  size_t offset = get_cache_offset(fileID, ncvarid, start, count, cache);
+  memcpy(data, (double *) cache->buffer + offset, sizeof(double) * cache->count[lastDim]);
+}
+
+static void
+cdfReadDataFP64(stream_t *streamptr, int varID, size_t length, size_t start[MAX_DIMENSIONS], size_t count[MAX_DIMENSIONS],
+                double *data)
+{
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
+  int ncvarid = streamptr->vars[varID].ncvarid;
+  int datatype = vlistInqVarDatatype(vlistID, varID);
+
+  if (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64)
+  {
+    cdf_get_vara(fileID, ncvarid, start, count, data);
+    if (datatype == CDI_DATATYPE_CPX32)
+    {
+      for (long i = (long) length - 1; i >= 0; --i)
+      {
+        data[2 * i] = (double) (((float *) data)[2 * i]);
+        data[2 * i + 1] = (double) (((float *) data)[2 * i + 1]);
+      }
+    }
+  }
+  else
+  {
+    if (datatype == CDI_DATATYPE_FLT32) { cdfReadDataSliceSP2DP(fileID, ncvarid, length, start, count, data); }
+    else
+    {
+      if (streamptr->vars[varID].cdfCache)
+        cdf_get_vara_double_from_cache(fileID, ncvarid, start, count, data, streamptr->vars[varID].cdfCache);
+      else
+        cdf_get_vara_double(fileID, ncvarid, start, count, data);
+      cdfCheckDataFP64_UINT8(fileID, ncvarid, vlistID, varID, length, data);
+    }
+  }
 }
 
 static void
