@@ -394,7 +394,7 @@ nc_grid_index(stream_t *streamptr, int gridID)
   int vlistID = streamptr->vlistID;
   int ngrids = vlistNumGrids(vlistID);
   for (index = 0; index < ngrids; ++index)
-    if (streamptr->cdfInfo.cdfGridVec[index].gridID == gridID) break;
+    if (streamptr->cdfInfo.cdfGridList[index].gridID == gridID) break;
 
   assert(index < ngrids);
 
@@ -555,10 +555,10 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
     if (numLPE > 0) cdf_put_att_int(fileID, ncvarID, "CDI_grid_num_LPE", NC_INT, 1, &numLPE);
   }
 
-  const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridVec[gridindex]);
+  const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridList[gridindex]);
   if (gridtype == GRID_GAUSSIAN_REDUCED)
   {
-    int ncyvarID = cdfGrid->ncIdVec[CDF_VARID_Y];
+    int ncyvarID = cdfGrid->ncIdList[CDF_VARID_Y];
     if (ncyvarID != CDI_UNDEFID)
     {
       char name[CDI_MAX_NAME];
@@ -568,7 +568,7 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
       cdf_put_att_text(fileID, ncvarID, "CDI_grid_latitudes", len, name);
     }
 
-    int ncrpvarID = cdfGrid->ncIdVec[CDF_VARID_RP];
+    int ncrpvarID = cdfGrid->ncIdList[CDF_VARID_RP];
     if (ncrpvarID != CDI_UNDEFID)
     {
       char name[CDI_MAX_NAME];
@@ -589,14 +589,14 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
   if (gridtype == GRID_TRAJECTORY) { cdf_put_att_text(fileID, ncvarID, "coordinates", 9, "tlon tlat"); }
   else if (gridtype == GRID_LONLAT && xid == CDI_UNDEFID && yid == CDI_UNDEFID && gridsize == 1)
   {
-    int ncxvarID = cdfGrid->ncIdVec[CDF_VARID_X];
-    int ncyvarID = cdfGrid->ncIdVec[CDF_VARID_Y];
+    int ncxvarID = cdfGrid->ncIdList[CDF_VARID_X];
+    int ncyvarID = cdfGrid->ncIdList[CDF_VARID_Y];
     cdfAppendCoordinates(fileID, ncyvarID, coordinates);
     cdfAppendCoordinates(fileID, ncxvarID, coordinates);
   }
   else if (gridtype == GRID_HEALPIX)
   {
-    int ncivarID = cdfGrid->ncIdVec[CDF_VARID_I];
+    int ncivarID = cdfGrid->ncIdList[CDF_VARID_I];
     cdfAppendCoordinates(fileID, ncivarID, coordinates);
   }
   else if (gridtype == GRID_GAUSSIAN_REDUCED)
@@ -610,9 +610,9 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
   }
   else if (gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR)
   {
-    int ncxvarID = cdfGrid->ncIdVec[CDF_VARID_X];
-    int ncyvarID = cdfGrid->ncIdVec[CDF_VARID_Y];
-    int ncavarID = cdfGrid->ncIdVec[CDF_VARID_A];
+    int ncxvarID = cdfGrid->ncIdList[CDF_VARID_X];
+    int ncyvarID = cdfGrid->ncIdList[CDF_VARID_Y];
+    int ncavarID = cdfGrid->ncIdList[CDF_VARID_A];
     // CMOR order: coordinates = "lat lon"
     if (CDI_Coordinates_Lon_Lat)
     {
@@ -652,12 +652,12 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
   {
     if (gridInqXIsc(gridID))
     {
-      int ncxvarID = cdfGrid->ncIdVec[CDF_VARID_X];
+      int ncxvarID = cdfGrid->ncIdList[CDF_VARID_X];
       cdfAppendCoordinates(fileID, ncxvarID, coordinates);
     }
     else if (gridInqYIsc(gridID))
     {
-      int ncyvarID = cdfGrid->ncIdVec[CDF_VARID_Y];
+      int ncyvarID = cdfGrid->ncIdList[CDF_VARID_Y];
       cdfAppendCoordinates(fileID, ncyvarID, coordinates);
     }
   }
@@ -864,8 +864,7 @@ cdfCheckVarname(int fileID, char name[CDI_MAX_NAME])
     char *varname2 = varname + len;
     unsigned iz = 0;
 
-    do
-    {
+    do {
       if (iz) snprintf(varname2, sizeof(varname) - len, "_%u", iz + 1);
 
       if (nc_inq_varid(fileID, varname, &ncvarID) != NC_NOERR) break;
@@ -901,8 +900,7 @@ cdfGenVarname(int fileID, char name[CDI_MAX_NAME], int pnum, int pcat, int *pdis
   int ncvarID;
   unsigned iz = 0;
 
-  do
-  {
+  do {
     if (iz) snprintf(varname2, sizeof(varname) - len, "_%u", iz + 1);
 
     if (nc_inq_varid(fileID, varname, &ncvarID) != NC_NOERR) break;
@@ -952,14 +950,14 @@ cdfDefVar(stream_t *streamptr, int varID)
   int gridtype = gridInqType(gridID);
   int gridindex = nc_grid_index(streamptr, gridID);
   CdfInfo *cdfInfo = &(streamptr->cdfInfo);
-  const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridVec[gridindex]);
-  int xid = (gridtype != GRID_TRAJECTORY) ? cdfGrid->ncIdVec[CDF_DIMID_X] : CDI_UNDEFID;
-  int yid = (gridtype != GRID_TRAJECTORY && gridtype != GRID_GAUSSIAN_REDUCED) ? cdfGrid->ncIdVec[CDF_DIMID_Y] : CDI_UNDEFID;
+  const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridList[gridindex]);
+  int xid = (gridtype != GRID_TRAJECTORY) ? cdfGrid->ncIdList[CDF_DIMID_X] : CDI_UNDEFID;
+  int yid = (gridtype != GRID_TRAJECTORY && gridtype != GRID_GAUSSIAN_REDUCED) ? cdfGrid->ncIdList[CDF_DIMID_Y] : CDI_UNDEFID;
 
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
   int zaxistype = zaxisInqType(zaxisID);
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-  int zid = cdfInfo->zaxisIdVec[zaxisindex];
+  int zid = cdfInfo->zaxisIdList[zaxisindex];
 
   int dimorder[3];  // ZYX/321 and ZXY/312
   vlistInqVarDimorder(vlistID, varID, dimorder);
@@ -1061,7 +1059,7 @@ cdfDefVar(stream_t *streamptr, int varID)
   }
 
   bool zaxisIsScalar = (zid == CDI_UNDEFID) ? (zaxisInqScalar(zaxisID) > 0) : false;
-  int nczvarID = (zaxisIsScalar || zaxistype == ZAXIS_CHAR) ? streamptr->cdfInfo.ncZvarIdVec[zaxisindex] : CDI_UNDEFID;
+  int nczvarID = (zaxisIsScalar || zaxistype == ZAXIS_CHAR) ? streamptr->cdfInfo.ncZvarIdList[zaxisindex] : CDI_UNDEFID;
 
   cdfDefineCoordinates(streamptr, ncvarID, nczvarID, gridtype, gridID, gridindex, xid, yid, (size_t) gridsize, axis, iax);
 
@@ -1128,9 +1126,9 @@ static void
 cdfWriteGridTraj(stream_t *streamptr, int gridID)
 {
   int gridindex = nc_grid_index(streamptr, gridID);
-  const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridVec[gridindex]);
-  int lonID = cdfGrid->ncIdVec[CDF_DIMID_X];
-  int latID = cdfGrid->ncIdVec[CDF_DIMID_Y];
+  const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridList[gridindex]);
+  int lonID = cdfGrid->ncIdList[CDF_DIMID_X];
+  int latID = cdfGrid->ncIdList[CDF_DIMID_Y];
   size_t index = (size_t) streamptr->curTsID;
 
   double xlon = gridInqXval(gridID, 0);
@@ -1372,14 +1370,14 @@ cdfGetXYZid(stream_t *streamptr, int gridID, int zaxisID, int *xid, int *yid, in
   else
   {
     int gridindex = nc_grid_index(streamptr, gridID);
-    const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridVec[gridindex]);
-    *xid = cdfGrid->ncIdVec[CDF_DIMID_X];
-    if (gridtype != GRID_GAUSSIAN_REDUCED) *yid = cdfGrid->ncIdVec[CDF_DIMID_Y];
+    const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridList[gridindex]);
+    *xid = cdfGrid->ncIdList[CDF_DIMID_X];
+    if (gridtype != GRID_GAUSSIAN_REDUCED) *yid = cdfGrid->ncIdList[CDF_DIMID_Y];
   }
 
   int vlistID = streamptr->vlistID;
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-  *zid = streamptr->cdfInfo.zaxisIdVec[zaxisindex];
+  *zid = streamptr->cdfInfo.zaxisIdList[zaxisindex];
 }
 
 static void

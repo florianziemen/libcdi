@@ -257,13 +257,13 @@ typedef struct
   size_t cacheSize;
   size_t numSteps;
   size_t maxSteps;
+  size_t xOffset;
   int numDims;
-  bool used;
 } CdfCache;
 
 typedef struct
 {
-  int ncIdVec[CDF_SIZE_NCID];
+  int ncIdList[CDF_SIZE_NCID];
   int gridID;
   long start;
   long count;
@@ -271,13 +271,13 @@ typedef struct
 
 typedef struct
 {
-  CdfGrid cdfGridVec[MAX_GRIDS_PS];
+  CdfGrid cdfGridList[MAX_GRIDS_PS];
   size_t chunkSizeDimT;
   size_t chunkSizeDimZ;
-  size_t ncDimLenVec[MAX_DIMS_PS];
-  int zaxisIdVec[MAX_ZAXES_PS];  // Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
-  int ncZvarIdVec[MAX_ZAXES_PS];
-  int ncDimIdVec[MAX_DIMS_PS];
+  size_t ncDimLenList[MAX_DIMS_PS];
+  int zaxisIdList[MAX_ZAXES_PS];  // Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
+  int ncZvarIdList[MAX_ZAXES_PS];
+  int ncDimIdList[MAX_DIMS_PS];
   int ncNumDims;
   int complexFloatId;
   int complexDoubleId;

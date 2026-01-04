@@ -1082,19 +1082,19 @@ streamDefaultValue(stream_t *streamptr)
 
   for (int i = 0; i < MAX_GRIDS_PS; i++)
   {
-    cdfInfo->cdfGridVec[i].start = CDI_UNDEFID;
-    cdfInfo->cdfGridVec[i].count = CDI_UNDEFID;
-    cdfInfo->cdfGridVec[i].gridID = CDI_UNDEFID;
-    for (size_t j = 0; j < CDF_SIZE_NCID; ++j) cdfInfo->cdfGridVec[i].ncIdVec[j] = CDI_UNDEFID;
+    cdfInfo->cdfGridList[i].start = CDI_UNDEFID;
+    cdfInfo->cdfGridList[i].count = CDI_UNDEFID;
+    cdfInfo->cdfGridList[i].gridID = CDI_UNDEFID;
+    for (size_t j = 0; j < CDF_SIZE_NCID; ++j) cdfInfo->cdfGridList[i].ncIdList[j] = CDI_UNDEFID;
   }
 
   cdfInfo->chunkSizeDimT = 0;
   cdfInfo->chunkSizeDimZ = 0;
 
-  for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimLenVec[i] = 0;
-  for (int i = 0; i < MAX_ZAXES_PS; i++) cdfInfo->zaxisIdVec[i] = CDI_UNDEFID;
-  for (int i = 0; i < MAX_ZAXES_PS; i++) cdfInfo->ncZvarIdVec[i] = CDI_UNDEFID;
-  for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimIdVec[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimLenList[i] = 0;
+  for (int i = 0; i < MAX_ZAXES_PS; i++) cdfInfo->zaxisIdList[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_ZAXES_PS; i++) cdfInfo->ncZvarIdList[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_DIMS_PS; i++) cdfInfo->ncDimIdList[i] = CDI_UNDEFID;
 
   cdfInfo->ncNumDims = 0;
   cdfInfo->complexFloatId = CDI_UNDEFID;

@@ -2734,6 +2734,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
     case GRID_HEALPIX:
     {
       grid->size = size;
+      grid->x.size = size;
       if (ncvar->ivarid != CDI_UNDEFID) { cdf_load_cellindices(size, ncvar, &grid->indices, readPart, start[0], count[0]); }
       else if (readPart)
       {
@@ -2998,6 +2999,7 @@ process_grid_query(CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncvar, size
         gridPart->count = (long) count;
         gridPart->readPart = true;
       }
+      else { Error("%s: cells %zu-%zu out of range (gridsize=%zu)", ncvar->name, start, start + count - 1, *xsize); }
     }
   }
 
@@ -3159,14 +3161,14 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t 
       ncgrid[gridindex].gridID = gridID;
       if (grid->type == GRID_TRAJECTORY)
       {
-        ncgrid[gridindex].ncIdVec[CDF_VARID_X] = xvarid;
-        ncgrid[gridindex].ncIdVec[CDF_VARID_Y] = yvarid;
+        ncgrid[gridindex].ncIdList[CDF_VARID_X] = xvarid;
+        ncgrid[gridindex].ncIdList[CDF_VARID_Y] = yvarid;
       }
       else
       {
-        if (xdimid != CDI_UNDEFID) ncgrid[gridindex].ncIdVec[CDF_DIMID_X] = ncdims[xdimid].dimid;
-        if (ydimid != CDI_UNDEFID) ncgrid[gridindex].ncIdVec[CDF_DIMID_Y] = ncdims[ydimid].dimid;
-        if (ncvar->isCubeSphere) ncgrid[gridindex].ncIdVec[CDF_DIMID_E] = ncdims[ncvar->dimids[ndims - 3]].dimid;
+        if (xdimid != CDI_UNDEFID) ncgrid[gridindex].ncIdList[CDF_DIMID_X] = ncdims[xdimid].dimid;
+        if (ydimid != CDI_UNDEFID) ncgrid[gridindex].ncIdList[CDF_DIMID_Y] = ncdims[ydimid].dimid;
+        if (ncvar->isCubeSphere) ncgrid[gridindex].ncIdList[CDF_DIMID_E] = ncdims[ncvar->dimids[ndims - 3]].dimid;
       }
 
       if (xdimid == CDI_UNDEFID && ydimid == CDI_UNDEFID && grid->size == 1) gridDefHasDims(gridID, CoordVar);
@@ -3386,7 +3388,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
       }
 
       int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-      streamptr->cdfInfo.zaxisIdVec[zaxisindex] = zdimid >= 0 ? ncdims[zdimid].dimid : zdimid;
+      streamptr->cdfInfo.zaxisIdList[zaxisindex] = zdimid >= 0 ? ncdims[zdimid].dimid : zdimid;
 
       if (CDI_Debug) Message("zaxisID %d %d %s", zaxisID, ncvarid, ncvar->name);
 
@@ -3534,6 +3536,7 @@ typedef struct
   size_t cacheSize;
   size_t count[MAX_DIMENSIONS];
   int numDims;
+  int xDimId;
 } ChunkCacheValues;
 
 static void
@@ -3615,8 +3618,8 @@ cdf_init_cache(CdfCache *cache)
   cache->cacheSize = 0;
   cache->numSteps = 0;
   cache->maxSteps = 0;
+  cache->xOffset = 0;
   cache->numDims = 0;
-  cache->used = false;
 }
 
 // define all input data variables
@@ -3709,12 +3712,12 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       Message("varID = %d  gridID = %d  zaxisID = %d", varID, vlistInqVarGrid(vlistID, varID), vlistInqVarZaxis(vlistID, varID));
 
     int gridindex = vlistGridIndex(vlistID, gridID);
-    const CdfGrid *ncGrid = &(streamptr->cdfInfo.cdfGridVec[gridindex]);
-    int xdimid = ncGrid->ncIdVec[CDF_DIMID_X];
-    int ydimid = ncGrid->ncIdVec[CDF_DIMID_Y];
+    const CdfGrid *ncGrid = &(streamptr->cdfInfo.cdfGridList[gridindex]);
+    int xdimid = ncGrid->ncIdList[CDF_DIMID_X];
+    int ydimid = ncGrid->ncIdList[CDF_DIMID_Y];
 
     int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-    int zdimid = streamptr->cdfInfo.zaxisIdVec[zaxisindex];
+    int zdimid = streamptr->cdfInfo.zaxisIdList[zaxisindex];
 
     int ndims = ncvar->ndims;
     static const int ipow10[4] = { 1, 10, 100, 1000 };
@@ -4448,8 +4451,8 @@ stream_set_ncdims(stream_t *streamptr, int ndims, ncdim_t *ncdims)
   int n = (ndims > MAX_DIMS_PS) ? MAX_DIMS_PS : ndims;
   CdfInfo *cdfInfo = &(streamptr->cdfInfo);
   cdfInfo->ncNumDims = n;
-  for (int i = 0; i < n; i++) cdfInfo->ncDimIdVec[i] = ncdims[i].dimid;
-  for (int i = 0; i < n; i++) cdfInfo->ncDimLenVec[i] = ncdims[i].len;
+  for (int i = 0; i < n; i++) cdfInfo->ncDimIdList[i] = ncdims[i].dimid;
+  for (int i = 0; i < n; i++) cdfInfo->ncDimLenList[i] = ncdims[i].len;
 }
 
 static void
@@ -4729,7 +4732,7 @@ cdfInqContents(stream_t *streamptr)
 
   // define all grids
   gridInfo.timedimid = timedimid;
-  int status = cdf_define_all_grids(streamptr, streamptr->cdfInfo.cdfGridVec, vlistID, ncdims, nvars, ncvars, &gridInfo);
+  int status = cdf_define_all_grids(streamptr, streamptr->cdfInfo.cdfGridList, vlistID, ncdims, nvars, ncvars, &gridInfo);
   if (status < 0) return status;
 
   // define all zaxes
