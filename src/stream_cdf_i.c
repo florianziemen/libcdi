@@ -3659,7 +3659,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
 
       ChunkCacheValues chunkCacheValues = calc_chunk_cache_size(timedimid, ncvar);
       size_t cacheSize = chunkCacheValues.cacheSize;
-      if (cacheSize > 0 && streamptr->filetype == CDI_FILETYPE_NCZARR && CDI_NCZ_Chunk_Cache && chunkCacheValues.numDims <= 3)
+      if (cacheSize > 0 && streamptr->filetype == CDI_FILETYPE_NCZARR && CDI_Chunk_Cache_NCZ && chunkCacheValues.numDims <= 3)
       {
         CdfCache *cdfCache = (CdfCache *) Malloc(sizeof(CdfCache));
         cdf_init_cache(cdfCache);

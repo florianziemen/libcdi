@@ -442,7 +442,7 @@ extern size_t CDI_Netcdf_Hdr_Pad;
 extern bool CDI_CopyChunkSpec;
 extern bool CDI_RemoveChunkSpec;
 extern bool CDI_Chunk_Cache_Info;
-extern bool CDI_NCZ_Chunk_Cache;
+extern bool CDI_Chunk_Cache_NCZ;
 extern long CDI_Chunk_Cache_In;
 extern long CDI_Chunk_Cache_Out;
 extern size_t CDI_Chunk_Cache_Max;
