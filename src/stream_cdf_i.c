@@ -1140,10 +1140,8 @@ read_grid_mapping(int ncid, char *attstring, ncvar_t *ncvar, ncvar_t *ncvars)
       char gridMappingName[CDI_MAX_NAME];
       cdfGetAttText(nc_gmap_varid, nc_gmap_id, "grid_mapping_name", CDI_MAX_NAME, gridMappingName);
       // if (str_is_equal(gridMappingName, "healpix")) ncvars[ncvar->gmapid].isHealPIX = true;
-      if (str_is_equal(gridMappingName, "healpix"))
-        ncvar->isHealpixMapping = true;
-      else if (str_is_equal(gridMappingName, "latitude_longitude"))
-        ncvar->isLonLatMapping = true;
+      if (str_is_equal(gridMappingName, "healpix")) { ncvar->isHealpixMapping = true; }
+      else if (str_is_equal(gridMappingName, "latitude_longitude")) { ncvar->isLonLatMapping = true; }
     }
   }
   else
@@ -3659,7 +3657,8 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
 
       ChunkCacheValues chunkCacheValues = calc_chunk_cache_size(timedimid, ncvar);
       size_t cacheSize = chunkCacheValues.cacheSize;
-      if (cacheSize > 0 && streamptr->filetype == CDI_FILETYPE_NCZARR && CDI_Chunk_Cache_NCZ && chunkCacheValues.numDims <= 3)
+      if (cacheSize > 0 && streamptr->filetype == CDI_FILETYPE_NCZARR && CDI_Chunk_Cache_NCZ && chunkCacheValues.numDims <= 3
+          && (ncvar->gridtype == GRID_UNSTRUCTURED || ncvar->isHealpixMapping))
       {
         CdfCache *cdfCache = (CdfCache *) Malloc(sizeof(CdfCache));
         cdf_init_cache(cdfCache);
