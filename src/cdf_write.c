@@ -924,7 +924,7 @@ cdfDefVarChunkCache(int fileID, int ncvarID, size_t chunkCacheSize)
   if (nc_get_var_chunk_cache(fileID, ncvarID, &size, &nelems, &preemption) == NC_NOERR)
   {
     if (chunkCacheSize > size) size = chunkCacheSize;
-    if (CDI_Chunk_Cache_Out > 0) size = (size_t) CDI_Chunk_Cache_Out;
+    if (CDI_CacheSize_Out > 0) size = (size_t) CDI_CacheSize_Out;
   }
 
   nc_set_var_chunk_cache(fileID, ncvarID, size, nelems, preemption);

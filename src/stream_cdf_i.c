@@ -1608,7 +1608,7 @@ cdf_set_chunk_info(stream_t *streamptr, int nvars, ncvar_t *ncvars)
           // clang-format on
         }
       }
-      if ((CDI_CopyChunkSpec || chunkSizeDimT == 0) && CDI_RemoveChunkSpec == false)
+      if ((CDI_Copy_ChunkSpec || chunkSizeDimT == 0) && CDI_Remove_ChunkSpec == false)
       {
         if (chunkSizeDimT > 0) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMT, chunkSizeDimT);
         if (chunkSizeDimZ > 0) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMZ, chunkSizeDimZ);
@@ -3591,7 +3591,7 @@ calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
     }
 
     chunkCacheSize *= cdf_xtype_to_numbytes(ncvar->xtype);
-    if (CDI_Chunk_Cache_Max > 0 && chunkCacheSize > CDI_Chunk_Cache_Max) chunkCacheSize = CDI_Chunk_Cache_Max;
+    if (CDI_CacheSize_Max > 0 && chunkCacheSize > CDI_CacheSize_Max) chunkCacheSize = CDI_CacheSize_Max;
   }
 
   chunkCacheValues.cacheSize = chunkCacheSize;
@@ -3602,7 +3602,7 @@ calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
 static void
 cdf_set_var_chunk_cache(ncvar_t *ncvar, int ncvarid, size_t chunkCacheSize)
 {
-  if (CDI_Debug || CDI_Chunk_Cache_Info) Message("%s: chunkCacheSize=%zu", ncvar->name, chunkCacheSize);
+  if (CDI_Debug || CDI_Cache_Info) Message("%s: chunkCacheSize=%zu", ncvar->name, chunkCacheSize);
   nc_set_var_chunk_cache(ncvar->ncid, ncvarid, chunkCacheSize, ncvar->chunkCacheNelems, ncvar->chunkCachePreemption);
 }
 
@@ -3657,7 +3657,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
 
       ChunkCacheValues chunkCacheValues = calc_chunk_cache_size(timedimid, ncvar);
       size_t cacheSize = chunkCacheValues.cacheSize;
-      if (cacheSize > 0 && streamptr->filetype == CDI_FILETYPE_NCZARR && CDI_Chunk_Cache_NCZ && chunkCacheValues.numDims <= 3
+      if (cacheSize > 0 && streamptr->filetype == CDI_FILETYPE_NCZARR && CDI_Cache_NCZ && chunkCacheValues.numDims <= 3
           && (ncvar->gridtype == GRID_UNSTRUCTURED || ncvar->isHealpixMapping))
       {
         CdfCache *cdfCache = (CdfCache *) Malloc(sizeof(CdfCache));
@@ -3667,13 +3667,13 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
         size_t ntsteps = (timedimid == CDI_UNDEFID) ? 0 : ncdims[timedimid].len;
         cdfCache->maxSteps = ntsteps;
         for (int i = 0; i < chunkCacheValues.numDims; ++i) { cdfCache->count[i] = chunkCacheValues.count[i]; }
-        if (CDI_Debug || CDI_Chunk_Cache_Info) Message("%s: chunkCacheSize=%zu", ncvar->name, cacheSize);
+        if (CDI_Debug || CDI_Cache_Info) Message("%s: chunkCacheSize=%zu", ncvar->name, cacheSize);
         streamptr->vars[varID].cdfCache = cdfCache;
         cdf_set_var_chunk_cache(ncvar, ncvarid, 0);
       }
       else
       {
-        if (CDI_Chunk_Cache_In >= 0) { cacheSize = (size_t) CDI_Chunk_Cache_In; }
+        if (CDI_CacheSize_In >= 0) { cacheSize = (size_t) CDI_CacheSize_In; }
         cdf_set_var_chunk_cache(ncvar, ncvarid, cacheSize);
       }
     }

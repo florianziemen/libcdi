@@ -49,13 +49,13 @@ int CDI_Reduce_Dim = 0;
 int CDI_Shuffle = 0;
 int CDI_Test = 0;
 size_t CDI_Netcdf_Hdr_Pad = 0UL;
-bool CDI_CopyChunkSpec = false;
-bool CDI_RemoveChunkSpec = false;
-bool CDI_Chunk_Cache_Info = false;
-bool CDI_Chunk_Cache_NCZ = false;
-long CDI_Chunk_Cache_In = -1L;
-long CDI_Chunk_Cache_Out = -1L;
-size_t CDI_Chunk_Cache_Max = 0UL;
+bool CDI_Copy_ChunkSpec = false;
+bool CDI_Remove_ChunkSpec = false;
+bool CDI_Cache_Info = false;
+bool CDI_Cache_NCZ = false;
+long CDI_CacheSize_In = -1L;
+long CDI_CacheSize_Out = -1L;
+size_t CDI_CacheSize_Max = 0UL;
 bool CDI_Netcdf_Lazy_Grid_Load = false;
 
 char *cdiPartabPath = NULL;
@@ -373,25 +373,25 @@ cdiInitialize(void)
     if (value >= 0) CDI_Netcdf_Hdr_Pad = (size_t) value;
 
     value = cdi_getenv_int("CDI_COPY_CHUNKSPEC");
-    if (value >= 0) CDI_CopyChunkSpec = (value > 0);
+    if (value >= 0) CDI_Copy_ChunkSpec = (value > 0);
 
     value = cdi_getenv_int("CDI_REMOVE_CHUNKSPEC");
-    if (value >= 0) CDI_RemoveChunkSpec = (value > 0);
+    if (value >= 0) CDI_Remove_ChunkSpec = (value > 0);
 
-    value = cdi_getenv_int("CDI_CHUNK_CACHE_INFO");
-    if (value >= 0) CDI_Chunk_Cache_Info = (value > 0);
+    value = cdi_getenv_int("CDI_CACHE_INFO");
+    if (value >= 0) CDI_Cache_Info = (value > 0);
 
-    value = cdi_getenv_int("CDI_CHUNK_CACHE_NCZ");
-    if (value >= 0) CDI_Chunk_Cache_NCZ = (value > 0);
+    value = cdi_getenv_int("CDI_CACHE_NCZ");
+    if (value >= 0) CDI_Cache_NCZ = (value > 0);
 
-    value = cdi_getenv_int("CDI_CHUNK_CACHE_IN");
-    if (value >= 0) CDI_Chunk_Cache_In = value;
+    value = cdi_getenv_int("CDI_CACHESIZE_IN");
+    if (value >= 0) CDI_CacheSize_In = value;
 
-    value = cdi_getenv_int("CDI_CHUNK_CACHE_OUT");
-    if (value >= 0) CDI_Chunk_Cache_Out = value;
+    value = cdi_getenv_int("CDI_CACHESIZE_OUT");
+    if (value >= 0) CDI_CacheSize_Out = value;
 
-    value = cdi_getenv_int("CDI_CHUNK_CACHE_MAX");
-    if (value >= 0) CDI_Chunk_Cache_Max = (size_t) value;
+    value = cdi_getenv_int("CDI_CACHESIZE_MAX");
+    if (value >= 0) CDI_CacheSize_Max = (size_t) value;
 
     value = cdi_getenv_int("CDI_TEST");
     if (value >= 0) CDI_Test = (int) value;
@@ -537,8 +537,8 @@ cdiDefGlobal(const char *string, int value)
   else if (str_is_equal(string, "REDUCE_DIM"))            CDI_Reduce_Dim = value;
   else if (str_is_equal(string, "NETCDF_HDR_PAD"))        CDI_Netcdf_Hdr_Pad = (size_t) value;
   else if (str_is_equal(string, "NETCDF_LAZY_GRID_LOAD")) CDI_Netcdf_Lazy_Grid_Load = (bool) value;
-  else if (str_is_equal(string, "COPY_CHUNKSPEC"))        CDI_CopyChunkSpec = (bool) value;
-  else if (str_is_equal(string, "REMOVE_CHUNKSPEC"))      CDI_RemoveChunkSpec = (bool) value;
+  else if (str_is_equal(string, "COPY_CHUNKSPEC"))        CDI_Copy_ChunkSpec = (bool) value;
+  else if (str_is_equal(string, "REMOVE_CHUNKSPEC"))      CDI_Remove_ChunkSpec = (bool) value;
   else Warning("Unsupported global key: %s", string);
   // clang-format on
 }
