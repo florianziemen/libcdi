@@ -3665,7 +3665,8 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
         cdf_init_cache(cdfCache);
         cdfCache->cacheSize = cacheSize;
         cdfCache->numDims = chunkCacheValues.numDims;
-        cdfCache->maxSteps = 425;
+        size_t ntsteps = (timedimid == CDI_UNDEFID) ? 0 : ncdims[timedimid].len;
+        cdfCache->maxSteps = ntsteps;
         for (int i = 0; i < chunkCacheValues.numDims; ++i) { cdfCache->count[i] = chunkCacheValues.count[i]; }
         if (CDI_Debug || CDI_Chunk_Cache_Info) Message("%s: chunkCacheSize=%zu", ncvar->name, cacheSize);
         streamptr->vars[varID].cdfCache = cdfCache;
