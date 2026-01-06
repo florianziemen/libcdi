@@ -577,7 +577,7 @@ cdfCheckDataFP32_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t l
     }
   }
 }
-
+/*
 static void
 print_scarray(int n, const size_t *start, const size_t *count, const char *name)
 {
@@ -588,7 +588,7 @@ print_scarray(int n, const size_t *start, const size_t *count, const char *name)
   for (int i = 0; i < n; ++i) printf(" %zu", count[i]);
   printf("\n");
 }
-
+*/
 static size_t
 get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *count, CdfCache *cache)
 {
