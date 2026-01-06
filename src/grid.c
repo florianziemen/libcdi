@@ -2150,12 +2150,10 @@ grid_check_cyclic(grid_t *gridptr)
 }
 
 int
-gridIsCircular(int gridID)
+gridIsCyclic(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-
   if (gridptr->isCyclic == CDI_UNDEFID) grid_check_cyclic(gridptr);
-
   return gridptr->isCyclic;
 }
 

@@ -994,7 +994,7 @@ double  gridInqYval(int gridID, SizeType index);
 double  gridInqXinc(int gridID);
 double  gridInqYinc(int gridID);
 
-int     gridIsCircular(int gridID);
+int     gridIsCyclic(int gridID);
 
 int     gridInqTrunc(int gridID);
 void    gridDefTrunc(int gridID, int trunc);

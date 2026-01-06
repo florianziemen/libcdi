@@ -636,7 +636,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
       mycdfPostDefActionGridProp(streamptr, gridID, ncvarid, gridAxisInq->valsQueryKey, &delayed);
 
       bool genBounds = false, hasBounds = gridInqPropPresence(gridID, gridAxisInq->bndsQueryKey);
-      bool grid_is_cyclic = (gridIsCircular(gridID) > 0);
+      bool grid_is_cyclic = (gridIsCyclic(gridID) > 0);
       double *restrict pbounds;
       size_t nvertex = (size_t) gridInqNvertex(gridID);
       if (CDI_CMOR_Mode && grid_is_cyclic && !hasBounds)
