@@ -1938,7 +1938,12 @@ verify_coordinates_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
     ncvar_t *ncvar = &ncvars[ncvarid];
     if (ncvar->varStatus == CoordVar)
     {
-      if (ncvar->units[0] != 0)
+      if (str_is_equal(ncvar->stdname, "healpix_index"))
+      {
+        ncvar->isIndexAxis = true;
+        continue;
+      }
+      else if (ncvar->units[0] != 0)
       {
         if (is_lon_axis(ncvar->units, ncvar->stdname))
         {
@@ -1958,11 +1963,6 @@ verify_coordinates_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
         else if (is_y_axis(ncvar->units, ncvar->stdname))
         {
           ncvar->isYaxis = true;
-          continue;
-        }
-        else if (str_is_equal(ncvar->stdname, "healpix_index"))
-        {
-          ncvar->isIndexAxis = true;
           continue;
         }
         else if (ncvar->zaxistype == CDI_UNDEFID && (str_is_equal(ncvar->units, "level") || str_is_equal(ncvar->units, "1")))
@@ -2646,7 +2646,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
         readPart = true;
       }
     }
-    else if (grid->type == GRID_HEALPIX && (ncvar->ivarid != CDI_UNDEFID || (gridPart && gridPart->readPart)))
+    else if (grid->type == GRID_HEALPIX && gridPart && gridPart->readPart)
     {
       start[0] = (size_t) gridPart->start;
       count[0] = (size_t) gridPart->count;
@@ -4559,12 +4559,12 @@ set_coordinates_varids(int numVars, ncvar_t *ncvars)
           ncvar_t *coordVar = &ncvars[coordVarId];
           if (coordVar->isZaxis == false && coordVar->zaxistype != CDI_UNDEFID) { coordVar->isZaxis = true; }
           // clang-format off
-          if      (coordVar->isLon || coordVar->isXaxis) ncvar->xvarid = coordVarId;
-          else if (coordVar->isLat || coordVar->isYaxis) ncvar->yvarid = coordVarId;
-          else if (coordVar->isZaxis)                    ncvar->zvarid = coordVarId;
-          else if (coordVar->isTaxis)                    ncvar->tvarid = coordVarId;
-          else if (coordVar->isCharAxis)                 ncvar->cvarids[i] = coordVarId;
-          else if (coordVar->isIndexAxis)                ncvar->ivarid = coordVarId;
+          if      (coordVar->isLon || coordVar->isXaxis) { ncvar->xvarid = coordVarId; }
+          else if (coordVar->isLat || coordVar->isYaxis) { ncvar->yvarid = coordVarId; }
+          else if (coordVar->isZaxis)                    { ncvar->zvarid = coordVarId; }
+          else if (coordVar->isTaxis)                    { ncvar->tvarid = coordVarId; }
+          else if (coordVar->isCharAxis)                 { ncvar->cvarids[i] = coordVarId; }
+          else if (coordVar->isIndexAxis)                { ncvar->ivarid = coordVarId; }
           else if (coordVar->printWarning)
           {
             Warning("Coordinates variable %s can't be assigned!", coordVar->name);
