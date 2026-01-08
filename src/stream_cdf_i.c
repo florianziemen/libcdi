@@ -46,10 +46,10 @@ static int axisTypeChar[] = { '?', 'X', 'Y', 'Z', 'E', 'T' };
 
 typedef struct
 {
+  size_t len;   // Dimension size
   int dimid;    // NetCDF dim ID
   int ncvarid;  // NetCDF var ID
   int dimtype;  // AxisType
-  size_t len;   // Dimension size
   char name[CDI_MAX_NAME];
 } ncdim_t;
 
@@ -168,7 +168,6 @@ scan_time_string(const char *ptu)
   int hour = 0, minute = 0;
   double fseconds = 0.0;
   char ch = ' ';
-
   if (*ptu) sscanf(ptu, "%d-%d-%d%c%d:%d:%lf", &year, &month, &day, &ch, &hour, &minute, &fseconds);
 
   if (day > 999 && year < 32)
@@ -840,6 +839,19 @@ isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, const nc
   return status;
 }
 
+static int
+atttypeInt_to_datatype(nc_type atttype)
+{
+  // clang-format off
+  int datatype = (atttype == NC_SHORT)  ? CDI_DATATYPE_INT16 :
+                 (atttype == NC_BYTE)   ? CDI_DATATYPE_INT8 :
+                 (atttype == NC_UBYTE)  ? CDI_DATATYPE_UINT8 :
+                 (atttype == NC_USHORT) ? CDI_DATATYPE_UINT16 :
+                 (atttype == NC_UINT)   ? CDI_DATATYPE_UINT32 :
+                                          CDI_DATATYPE_INT32;
+  // clang-format on
+  return datatype;
+}
 static void
 cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool removeFillValue)
 {
@@ -858,15 +870,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
     int attint = 0;
     int *pattint = (attlen > 1) ? (int *) Malloc(attlen * sizeof(int)) : &attint;
     cdfGetAttInt(ncid, ncvarid, attname, attlen, pattint);
-    // clang-format off
-    int datatype = (atttype == NC_SHORT)  ? CDI_DATATYPE_INT16 :
-                   (atttype == NC_BYTE)   ? CDI_DATATYPE_INT8 :
-                   (atttype == NC_UBYTE)  ? CDI_DATATYPE_UINT8 :
-                   (atttype == NC_USHORT) ? CDI_DATATYPE_UINT16 :
-                   (atttype == NC_UINT)   ? CDI_DATATYPE_UINT32 :
-                                            CDI_DATATYPE_INT32;
-    // clang-format on
-    cdiDefAttInt(cdiID, varID, attname, datatype, (int) attlen, pattint);
+    cdiDefAttInt(cdiID, varID, attname, atttypeInt_to_datatype(atttype), (int) attlen, pattint);
     if (attlen > 1) Free(pattint);
   }
   else if (xtypeIsInt64(atttype))
@@ -973,26 +977,23 @@ cdf_scan_attr_axis(ncvar_t *ncvars, ncdim_t *ncdims, int ncvarid, const char *at
   {
     int dimtype;
     bool setVar = false;
-    switch (attstring[attlen])
+    int attchar = toupper(attstring[attlen]);
+    switch (attchar)
     {
-      case 't':
       case 'T':
         if (attlen != 0) Warning("axis attribute 't' not on first position");
         dimtype = T_AXIS;
         break;
-      case 'z':
       case 'Z':
         ncvar->zdim = dimidsp[attlen];
         dimtype = Z_AXIS;
         setVar = (ncvar->ndims == 1);
         break;
-      case 'y':
       case 'Y':
         ncvar->ydim = dimidsp[attlen];
         dimtype = Y_AXIS;
         setVar = (ncvar->ndims == 1);
         break;
-      case 'x':
       case 'X':
         ncvar->xdim = dimidsp[attlen];
         dimtype = X_AXIS;
@@ -1139,7 +1140,6 @@ read_grid_mapping(int ncid, char *attstring, ncvar_t *ncvar, ncvar_t *ncvars)
     {
       char gridMappingName[CDI_MAX_NAME];
       cdfGetAttText(nc_gmap_varid, nc_gmap_id, "grid_mapping_name", CDI_MAX_NAME, gridMappingName);
-      // if (str_is_equal(gridMappingName, "healpix")) ncvars[ncvar->gmapid].isHealPIX = true;
       if (str_is_equal(gridMappingName, "healpix")) { ncvar->isHealpixMapping = true; }
       else if (str_is_equal(gridMappingName, "latitude_longitude")) { ncvar->isLonLatMapping = true; }
     }
@@ -1809,8 +1809,7 @@ cdf_set_dimtype(int numVars, ncvar_t *ncvars, ncdim_t *ncdims)
             dimtype = Z_AXIS;
             lzdim = true;
           }
-          else
-            continue;
+          else { continue; }
           cdf_set_dim(ncvar, i, dimtype);
         }
       }
@@ -1825,6 +1824,22 @@ set_vardim_coord(ncvar_t *ncvar, ncdim_t *ncdim, int axisType)
   cdf_set_var(ncvar, CoordVar);
   cdf_set_dim(ncvar, 0, axisType);
   ncdim->dimtype = axisType;
+}
+
+static int
+get_hybrid_zaxistype(const char *longname, const char *units)
+{
+  if (strStartsWith(longname, "hybrid"))
+  {
+    if (str_is_equal(longname, "hybrid level at layer midpoints")) return ZAXIS_HYBRID;
+    if (str_is_equal(longname, "hybrid model level at layer midpoints")) return ZAXIS_HYBRID;
+    if (strStartsWith(longname, "hybrid level at midpoints")) return ZAXIS_HYBRID;
+    if (str_is_equal(longname, "hybrid level at layer interfaces")) return ZAXIS_HYBRID_HALF;
+    if (str_is_equal(longname, "hybrid model level at layer interfaces")) return ZAXIS_HYBRID_HALF;
+    if (strStartsWith(longname, "hybrid level at interfaces")) return ZAXIS_HYBRID_HALF;
+  }
+  if (str_is_equal(units, "level")) return ZAXIS_GENERIC;
+  return CDI_UNDEFID;
 }
 
 // verify coordinates vars - first scan (dimname == varname)
@@ -1848,6 +1863,12 @@ verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncvars,
       if (isHybridSigmaPressureCoordinate(ncid, ncvarid, ncvars, ncdims))
       {
         *isHybridCF = true;
+        continue;
+      }
+
+      if (str_is_equal(ncvar->stdname, "healpix_index"))
+      {
+        ncvar->isIndexAxis = true;
         continue;
       }
 
@@ -1876,15 +1897,8 @@ verify_coordinates_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncvars,
         else if (is_pressure_units(ncvar->units)) { ncvar->zaxistype = ZAXIS_PRESSURE; }
         else if (str_is_equal(ncvar->units, "level") || str_is_equal(ncvar->units, "1"))
         {
-          // clang-format off
-          if      (str_is_equal(ncvar->longname, "hybrid level at layer midpoints"))        ncvar->zaxistype = ZAXIS_HYBRID;
-          else if (str_is_equal(ncvar->longname, "hybrid model level at layer midpoints"))  ncvar->zaxistype = ZAXIS_HYBRID;
-          else if (strStartsWith(ncvar->longname, "hybrid level at midpoints"))             ncvar->zaxistype = ZAXIS_HYBRID;
-          else if (str_is_equal(ncvar->longname, "hybrid level at layer interfaces"))       ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-          else if (str_is_equal(ncvar->longname, "hybrid model level at layer interfaces")) ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-          else if (strStartsWith(ncvar->longname, "hybrid level at interfaces"))            ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-          else if (str_is_equal(ncvar->units, "level"))                                     ncvar->zaxistype = ZAXIS_GENERIC;
-          // clang-format on
+          int zaxistype = get_hybrid_zaxistype(ncvar->longname, ncvar->units);
+          if (zaxistype != CDI_UNDEFID) ncvar->zaxistype = zaxistype;
         }
         else if (is_DBL_axis(ncvar->longname)) { ncvar->zaxistype = ZAXIS_DEPTH_BELOW_LAND; }
         else if (is_height_units(ncvar->units))
@@ -1967,15 +1981,8 @@ verify_coordinates_vars_2(stream_t *streamptr, int nvars, ncvar_t *ncvars)
         }
         else if (ncvar->zaxistype == CDI_UNDEFID && (str_is_equal(ncvar->units, "level") || str_is_equal(ncvar->units, "1")))
         {
-          // clang-format off
-          if      (str_is_equal(ncvar->longname, "hybrid level at layer midpoints"))        ncvar->zaxistype = ZAXIS_HYBRID;
-          else if (str_is_equal(ncvar->longname, "hybrid model level at layer midpoints"))  ncvar->zaxistype = ZAXIS_HYBRID;
-          else if (strStartsWith(ncvar->longname, "hybrid level at midpoints"))             ncvar->zaxistype = ZAXIS_HYBRID;
-          else if (str_is_equal(ncvar->longname, "hybrid level at layer interfaces"))       ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-          else if (str_is_equal(ncvar->longname, "hybrid model level at layer interfaces")) ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-          else if (strStartsWith(ncvar->longname, "hybrid level at interfaces"))            ncvar->zaxistype = ZAXIS_HYBRID_HALF;
-          else if (str_is_equal(ncvar->units, "level"))                                     ncvar->zaxistype = ZAXIS_GENERIC;
-          // clang-format on
+          int zaxistype = get_hybrid_zaxistype(ncvar->longname, ncvar->units);
+          if (zaxistype != CDI_UNDEFID) ncvar->zaxistype = zaxistype;
           continue;
         }
         else if (ncvar->zaxistype == CDI_UNDEFID && is_pressure_units(ncvar->units))
@@ -3043,6 +3050,11 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t 
       bool lproj = (gmapvarid != CDI_UNDEFID);
       bool isHealpixGrid = (lproj && ncvar->isHealpixMapping) ? is_healpix_grid(ncvars[gmapvarid].ncid, gmapvarid) : false;
       if (isHealpixGrid) { ncvar->gridtype = GRID_HEALPIX; }
+      if (isHealpixGrid && xvarid != CDI_UNDEFID && ncvar->ivarid == CDI_UNDEFID)
+      {
+        ncvar->ivarid = xvarid;
+        xvarid = CDI_UNDEFID;
+      }
 
       if (!lproj && xaxisid != CDI_UNDEFID && xaxisid != xvarid && yaxisid != CDI_UNDEFID && yaxisid != yvarid) lproj = true;
 
@@ -3083,11 +3095,13 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t 
       yaxisid = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].ncvarid : CDI_UNDEFID;
 
       // process grid query information if available
-      if (process_grid_query(streamptr->query, xdimid, ydimid, ncvar, &xsize, &ysize, &gridPart) < 0) continue;
+      if (process_grid_query(streamptr->query, xdimid, ydimid, ncvar, &xsize, &ysize, &gridPart) < 0) { continue; }
 
       if (cdf_read_coordinates(streamptr, lazyGrid, ncvar, ncvars, ncdims, gridInfo->timedimid, xvarid, yvarid, xsize, ysize,
                                &vdimid, &gridPart))
+      {
         continue;
+      }
 
       if (gridInfo->number_of_grid_used != CDI_UNDEFID && (grid->type == CDI_UNDEFID || grid->type == GRID_GENERIC)
           && xdimid != CDI_UNDEFID && xsize > 999)

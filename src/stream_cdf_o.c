@@ -1864,12 +1864,12 @@ cdf_def_grid_indices(stream_t *streamptr, int gridID, int gridIndex)
 
   static const char axisname[] = "cell_index";
   static const char stdname[] = "healpix_index";
-  static const char units[] = "1";
+  // static const char units[] = "1";
   int ncivarid;
   cdf_def_var(fileID, axisname, xtype, 1, &dimID, &ncivarid);
 
   cdf_put_att_text(fileID, ncivarid, "standard_name", sizeof(stdname) - 1, stdname);
-  cdf_put_att_text(fileID, ncivarid, "units", sizeof(units) - 1, units);
+  // cdf_put_att_text(fileID, ncivarid, "units", sizeof(units) - 1, units);
 
   // if (switchNCMode)
   {
