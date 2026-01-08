@@ -4557,6 +4557,7 @@ set_coordinates_varids(int numVars, ncvar_t *ncvars)
         if (coordVarId != CDI_UNDEFID)
         {
           ncvar_t *coordVar = &ncvars[coordVarId];
+          if (coordVar->isZaxis == false && coordVar->zaxistype != CDI_UNDEFID) { coordVar->isZaxis = true; }
           // clang-format off
           if      (coordVar->isLon || coordVar->isXaxis) ncvar->xvarid = coordVarId;
           else if (coordVar->isLat || coordVar->isYaxis) ncvar->yvarid = coordVarId;

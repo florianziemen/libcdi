@@ -1,3 +1,7 @@
+2026-01-08  Uwe Schulzweida
+
+	* Fix problem with scalar zaxis
+
 2026-01-02  Uwe Schulzweida
 
 	* add CDI input cache for NCZ data (netcdf NCZ cache has performance issues)

@@ -1451,8 +1451,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
   double *restrict levels;
 
   bool hasLevels = zaxisInqLevels(zaxisID, NULL) != 0;
-  if (hasLevels)
-    levels = (double *) zaxisInqLevelsPtr(zaxisID);
+  if (hasLevels) { levels = (double *) zaxisInqLevelsPtr(zaxisID); }
   else
   {
     levels = (double *) Malloc(sizeof(*levels) * dimlen);
@@ -1550,10 +1549,10 @@ static struct cdfPostDefActionList *
 cdf_def_zaxis_hybrid(stream_t *streamptr, int type, int *ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID,
                      char *axisname)
 {
+  bool isHybridEcham = ((!CDI_CMOR_Mode && CDI_Convention == CDI_CONVENTION_ECHAM) || type == ZAXIS_HYBRID_HALF);
   struct cdfPostDefActionList *(*def_zaxis_hybrid_delegate)(stream_t * streamptr, int type, int *ncvarid, int zaxisID,
                                                             int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
-      = ((!CDI_CMOR_Mode && CDI_Convention == CDI_CONVENTION_ECHAM) || type == ZAXIS_HYBRID_HALF) ? cdf_def_zaxis_hybrid_echam
-                                                                                                  : cdf_def_zaxis_hybrid_cf;
+      = isHybridEcham ? cdf_def_zaxis_hybrid_echam : cdf_def_zaxis_hybrid_cf;
   return def_zaxis_hybrid_delegate(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, dimID, axisname);
 }
 
@@ -1652,17 +1651,20 @@ cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimID, si
 #endif
 
 static int
+zaxis_datatype_to_xtype(int datatype)
+{
+  if (datatype == CDI_DATATYPE_FLT32) return NC_FLOAT;
+  if (datatype == CDI_DATATYPE_INT32) return NC_INT;
+  if (datatype == CDI_DATATYPE_INT16) return NC_SHORT;
+  return NC_DOUBLE;
+}
+
+static int
 zaxis_inq_xtype(int zaxisID)
 {
   int datatype = CDI_UNDEFID;
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
-  int xtype = NC_DOUBLE;
-  // clang-format off
-  if      (datatype == CDI_DATATYPE_FLT32) xtype = NC_FLOAT;
-  else if (datatype == CDI_DATATYPE_INT32) xtype = NC_INT;
-  else if (datatype == CDI_DATATYPE_INT16) xtype = NC_SHORT;
-  // clang-format on
-  return xtype;
+  return zaxis_datatype_to_xtype(datatype);
 }
 
 static struct cdfPostDefActionList *

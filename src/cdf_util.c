@@ -115,7 +115,6 @@ bool
 is_height_units(const char *units)
 {
   int u0 = units[0];
-
   // clang-format off
   return ((u0=='m' && (!units[1] || strStartsWith(units, "meter")))
        || (!units[2] && units[1]=='m' && (u0=='c' || u0=='d' || u0=='k'))
