@@ -375,15 +375,16 @@ cdfDefGlobalAtts(stream_t *streamptr)
 static void
 cdf_get_gmapvarname(int gridID, char *gmapvarname)
 {
+  gmapvarname[0] = 0;
+
   int length = CDI_MAX_NAME;
-  int pgridID = gridID;
-  cdiInqKeyString(pgridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname, &length);
+  cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname, &length);
 
   if (!gmapvarname[0])
   {
     length = CDI_MAX_NAME;
-    pgridID = gridInqProj(gridID);
-    if (pgridID != CDI_UNDEFID) cdiInqKeyString(pgridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname, &length);
+    gridID = gridInqProj(gridID);
+    if (gridID != CDI_UNDEFID) cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname, &length);
   }
 }
 
@@ -545,7 +546,6 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
   }
 
   char gmapvarname[CDI_MAX_NAME];
-  gmapvarname[0] = 0;
   cdf_get_gmapvarname(gridID, gmapvarname);
   if (gmapvarname[0]) cdf_put_att_text(fileID, ncvarID, "grid_mapping", strlen(gmapvarname), gmapvarname);
 

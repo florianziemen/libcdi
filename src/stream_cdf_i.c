@@ -3012,7 +3012,7 @@ process_grid_query(CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncvar, size
 }
 
 static int
-cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
+cdf_define_all_grids(stream_t *streamptr, CdfGrid *cdfGridList, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                      GridInfo *gridInfo)
 {
   for (int ncvarid = 0; ncvarid < nvars; ++ncvarid)
@@ -3166,22 +3166,23 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *ncgrid, int vlistID, ncdim_t 
       if (ncvar->isChunked) grid_set_chunktype(grid, ncvar);
 
       int gridindex = vlistGridIndex(vlistID, gridID);
+      CdfGrid *cdfGrid = &cdfGridList[gridindex];
       if (gridPart.readPart)
       {
-        ncgrid[gridindex].start = gridPart.start;
-        ncgrid[gridindex].count = gridPart.count;
+        cdfGrid->start = gridPart.start;
+        cdfGrid->count = gridPart.count;
       }
-      ncgrid[gridindex].gridID = gridID;
+      cdfGrid->gridID = gridID;
       if (grid->type == GRID_TRAJECTORY)
       {
-        ncgrid[gridindex].ncIdList[CDF_VARID_X] = xvarid;
-        ncgrid[gridindex].ncIdList[CDF_VARID_Y] = yvarid;
+        cdfGrid->ncIdList[CDF_VARID_X] = xvarid;
+        cdfGrid->ncIdList[CDF_VARID_Y] = yvarid;
       }
       else
       {
-        if (xdimid != CDI_UNDEFID) ncgrid[gridindex].ncIdList[CDF_DIMID_X] = ncdims[xdimid].dimid;
-        if (ydimid != CDI_UNDEFID) ncgrid[gridindex].ncIdList[CDF_DIMID_Y] = ncdims[ydimid].dimid;
-        if (ncvar->isCubeSphere) ncgrid[gridindex].ncIdList[CDF_DIMID_E] = ncdims[ncvar->dimids[ndims - 3]].dimid;
+        if (xdimid != CDI_UNDEFID) cdfGrid->ncIdList[CDF_DIMID_X] = ncdims[xdimid].dimid;
+        if (ydimid != CDI_UNDEFID) cdfGrid->ncIdList[CDF_DIMID_Y] = ncdims[ydimid].dimid;
+        if (ncvar->isCubeSphere) cdfGrid->ncIdList[CDF_DIMID_E] = ncdims[ncvar->dimids[ndims - 3]].dimid;
       }
 
       if (xdimid == CDI_UNDEFID && ydimid == CDI_UNDEFID && grid->size == 1) gridDefHasDims(gridID, CoordVar);

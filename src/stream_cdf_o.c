@@ -337,27 +337,28 @@ checkDimName(int fileID, size_t dimlen, char *dimname)
   return dimid;
 }
 
-static void
+static unsigned
 checkGridName(char *axisname, int fileID)
 {
-  int ncdimid;
-  char axisname2[CDI_MAX_NAME];
-
   // check that the name is not already defined
   unsigned iz = 0;
 
+  char axisname2[CDI_MAX_NAME];
   size_t axisnameLen = strlen(axisname);
   memcpy(axisname2, axisname, axisnameLen + 1);
 
   do {
     if (iz) snprintf(axisname2 + axisnameLen, CDI_MAX_NAME - axisnameLen, "_%u", iz + 1);
 
+    int ncdimid;
     if (nc_inq_varid(fileID, axisname2, &ncdimid) != NC_NOERR) break;
 
     ++iz;
   } while (iz <= 99);
 
   if (iz) snprintf(axisname + axisnameLen, CDI_MAX_NAME - axisnameLen, "_%u", iz + 1);
+
+  return iz;
 }
 
 static int
@@ -1903,6 +1904,7 @@ cdf_def_mapping(stream_t *streamptr, int gridID)
   if (!gmapvarname[0]) strcpy(gmapvarname, "crs");
 
   int fileID = streamptr->fileID;
+  if (checkGridName(gmapvarname, fileID)) { cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, gmapvarname); }
 
   bool switchNCMode = (streamptr->ncmode == 2);
   if (switchNCMode)
