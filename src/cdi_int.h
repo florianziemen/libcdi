@@ -244,7 +244,6 @@ enum cdfIDIdx
   CDF_VARID_Y,
   CDF_VARID_RP,  // reducedPoints
   CDF_VARID_A,
-  CDF_VARID_I,  // cellIndices
   CDF_SIZE_NCID,
 };
 

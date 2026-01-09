@@ -594,11 +594,6 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
     cdfAppendCoordinates(fileID, ncyvarID, coordinates);
     cdfAppendCoordinates(fileID, ncxvarID, coordinates);
   }
-  else if (gridtype == GRID_HEALPIX)
-  {
-    int ncivarID = cdfGrid->ncIdList[CDF_VARID_I];
-    cdfAppendCoordinates(fileID, ncivarID, coordinates);
-  }
   else if (gridtype == GRID_GAUSSIAN_REDUCED)
   {
     /*

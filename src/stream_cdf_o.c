@@ -448,10 +448,7 @@ cdfPostDefActionListDelete(struct cdfPostDefActionList *list)
   {
     void (*cleanup)(void *) = actions[i].cleanup;
     void *data = actions[i].data;
-    if (cleanup == (void (*)(void *))(void (*)(void)) memFree)
-      Free(data);
-    else
-      cleanup(data);
+    (cleanup == (void (*)(void *))(void (*)(void)) memFree) ? Free(data) : cleanup(data);
   }
   Free(list);
 }
@@ -975,12 +972,13 @@ cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridIndex)
     delayed = createdIDs.delayed;
   }
 
-  cdfGridList[gridIndex].gridID = gridID;
-  cdfGridList[gridIndex].ncIdList[CDF_DIMID_X] = xdimID;
-  cdfGridList[gridIndex].ncIdList[CDF_DIMID_Y] = ydimID;
-  cdfGridList[gridIndex].ncIdList[CDF_VARID_X] = ncxvarid;
-  cdfGridList[gridIndex].ncIdList[CDF_VARID_Y] = ncyvarid;
-  cdfGridList[gridIndex].ncIdList[CDF_VARID_A] = ncavarid;
+  CdfGrid *cdfGrid = &cdfGridList[gridIndex];
+  cdfGrid->gridID = gridID;
+  cdfGrid->ncIdList[CDF_DIMID_X] = xdimID;
+  cdfGrid->ncIdList[CDF_DIMID_Y] = ydimID;
+  cdfGrid->ncIdList[CDF_VARID_X] = ncxvarid;
+  cdfGrid->ncIdList[CDF_VARID_Y] = ncyvarid;
+  cdfGrid->ncIdList[CDF_VARID_A] = ncavarid;
 
   return delayed;
 }
@@ -1032,11 +1030,12 @@ cdfDefUnstructured(stream_t *streamptr, int gridID, int gridIndex)
     delayed = createdIDs.delayed;
   }
 
-  cdfGridList[gridIndex].gridID = gridID;
-  cdfGridList[gridIndex].ncIdList[CDF_DIMID_X] = dimID;
-  cdfGridList[gridIndex].ncIdList[CDF_VARID_X] = ncxvarid;
-  cdfGridList[gridIndex].ncIdList[CDF_VARID_Y] = ncyvarid;
-  cdfGridList[gridIndex].ncIdList[CDF_VARID_A] = ncavarid;
+  CdfGrid *cdfGrid = &cdfGridList[gridIndex];
+  cdfGrid->gridID = gridID;
+  cdfGrid->ncIdList[CDF_DIMID_X] = dimID;
+  cdfGrid->ncIdList[CDF_VARID_X] = ncxvarid;
+  cdfGrid->ncIdList[CDF_VARID_Y] = ncyvarid;
+  cdfGrid->ncIdList[CDF_VARID_A] = ncavarid;
 
   return delayed;
 }
@@ -1862,11 +1861,9 @@ cdf_def_grid_indices(stream_t *streamptr, int gridID, int gridIndex)
   int dimID = checkDimName(fileID, (size_t) dimlen, dimname);
   if (dimID == CDI_UNDEFID) cdf_def_dim(fileID, dimname, (size_t) dimlen, &dimID);
 
-  static const char axisname[] = "cell_index";
   static const char stdname[] = "healpix_index";
-  // static const char units[] = "1";
   int ncivarid;
-  cdf_def_var(fileID, axisname, xtype, 1, &dimID, &ncivarid);
+  cdf_def_var(fileID, dimname, xtype, 1, &dimID, &ncivarid);
 
   cdf_put_att_text(fileID, ncivarid, "standard_name", sizeof(stdname) - 1, stdname);
   // cdf_put_att_text(fileID, ncivarid, "units", sizeof(units) - 1, units);
@@ -1884,7 +1881,6 @@ cdf_def_grid_indices(stream_t *streamptr, int gridID, int gridIndex)
 
   CdfGrid *cdfGridList = streamptr->cdfInfo.cdfGridList;
   cdfGridList[gridIndex].gridID = gridID;
-  cdfGridList[gridIndex].ncIdList[CDF_VARID_I] = ncivarid;
   struct cdfPostDefActionList *delayed = NULL;
   return delayed;
 }
@@ -2102,9 +2098,8 @@ static void
 cdf_define_generic_dim(stream_t *streamptr, int gridID, int gridIndex)
 {
   CdfGrid *cdfGridList = streamptr->cdfInfo.cdfGridList;
-  int dimID = CDI_UNDEFID;
-
   SizeType dimlen = gridInqSize(gridID);
+  int dimID = CDI_UNDEFID;
 
   if (gridInqYsize(gridID) == 0)
   {
@@ -2122,12 +2117,12 @@ cdf_define_generic_dim(stream_t *streamptr, int gridID, int gridIndex)
 
   if (dimID == CDI_UNDEFID)
   {
-    int fileID = streamptr->fileID;
     char dimname[CDI_MAX_NAME];
     int length = sizeof(dimname);
     cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_DIMNAME, dimname, &length);
     if (dimname[0] == 0) strcpy(dimname, "cell");
 
+    int fileID = streamptr->fileID;
     dimID = checkDimName(fileID, (size_t) dimlen, dimname);
     if (dimID == CDI_UNDEFID)
     {
@@ -2324,18 +2319,16 @@ cdfDefCoordinateVars(stream_t *streamptr)
     delayed = cdfPostDefActionConcat(delayed, griddelayed);
     Free(griddelayed);
   }
+
+  for (int i = 0, index = ngrids - 1; i < ngrids; ++i)
   {
-    int index = ngrids - 1;
-    for (int i = 0; i < ngrids; ++i)
+    int gridID = vlistGrid(vlistID, i);
+    int projID = gridInqProj(gridID);
+    if (projID != CDI_UNDEFID)
     {
-      int gridID = vlistGrid(vlistID, i);
-      int projID = gridInqProj(gridID);
-      if (projID != CDI_UNDEFID)
-      {
-        struct cdfPostDefActionList *griddelayed = cdf_define_grid(streamptr, projID, ++index);
-        delayed = cdfPostDefActionConcat(delayed, griddelayed);
-        Free(griddelayed);
-      }
+      struct cdfPostDefActionList *griddelayed = cdf_define_grid(streamptr, projID, ++index);
+      delayed = cdfPostDefActionConcat(delayed, griddelayed);
+      Free(griddelayed);
     }
   }
 
