@@ -1,3 +1,7 @@
+2026-01-11  Uwe Schulzweida
+
+	* Wrong datetime returned in gribapiGetValidityDateTime with sub-minute resolution grib file [Bug #12335]
+
 2026-01-09  Uwe Schulzweida
 
 	* Changed healpix_index to coordinate variable

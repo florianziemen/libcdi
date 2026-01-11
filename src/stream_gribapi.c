@@ -78,6 +78,19 @@ timeunits_factor(int timeUnits1, int timeUnits2)
       case TUNIT_DAY: return 1.0 / 24;
     }
   }
+  else if (timeUnits2 == TUNIT_MINUTE)
+  {
+    switch (timeUnits1)
+    {
+      case TUNIT_SECOND: return 60;
+      case TUNIT_MINUTE: return 1;
+      case TUNIT_HOUR: return 1.0 / 60;
+      case TUNIT_3HOURS: return 1.0 / (3 * 60);
+      case TUNIT_6HOURS: return 1.0 / (6 * 60);
+      case TUNIT_12HOURS: return 1.0 / (12 * 60);
+      case TUNIT_DAY: return 1.0 / (24 * 60);
+    }
+  }
 
   return 1;
 }
