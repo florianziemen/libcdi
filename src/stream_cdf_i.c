@@ -2980,7 +2980,7 @@ process_grid_query(CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncvar, size
   // process grid query information if available
   if (query)
   {
-    int numCellidx = cdiQueryNumCellidx(query);
+    int numCellidx = cdiQueryNumCells(query);
     if (numCellidx > 0)
     {
       // if (ncvar->gridtype != GRID_UNSTRUCTURED)
@@ -2992,8 +2992,8 @@ process_grid_query(CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncvar, size
         return -1;
       }
 
-      size_t start = cdiQueryGetCellidx(query, 0);
-      size_t count = (numCellidx == 2) ? cdiQueryGetCellidx(query, 1) : 1;
+      size_t start = cdiQueryGetCell(query, 0);
+      size_t count = (numCellidx == 2) ? cdiQueryGetCell(query, 1) : 1;
       if ((start + count) <= *xsize)
       {
         cdiQueryCellidx(query, start);
@@ -3180,9 +3180,9 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *cdfGridList, int vlistID, ncd
       }
       else
       {
-        if (xdimid != CDI_UNDEFID) cdfGrid->ncIdList[CDF_DIMID_X] = ncdims[xdimid].dimid;
-        if (ydimid != CDI_UNDEFID) cdfGrid->ncIdList[CDF_DIMID_Y] = ncdims[ydimid].dimid;
-        if (ncvar->isCubeSphere) cdfGrid->ncIdList[CDF_DIMID_E] = ncdims[ncvar->dimids[ndims - 3]].dimid;
+        if (xdimid != CDI_UNDEFID) { cdfGrid->ncIdList[CDF_DIMID_X] = ncdims[xdimid].dimid; }
+        if (ydimid != CDI_UNDEFID) { cdfGrid->ncIdList[CDF_DIMID_Y] = ncdims[ydimid].dimid; }
+        if (ncvar->isCubeSphere) { cdfGrid->ncIdList[CDF_DIMID_E] = ncdims[ncvar->dimids[ndims - 3]].dimid; }
       }
 
       if (xdimid == CDI_UNDEFID && ydimid == CDI_UNDEFID && grid->size == 1) gridDefHasDims(gridID, CoordVar);
@@ -3201,8 +3201,8 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *cdfGridList, int vlistID, ncd
       for (int ncvarid2 = ncvarid + 1; ncvarid2 < nvars; ncvarid2++)
         cdf_set_grid_to_similar_vars(ncvar, &ncvars[ncvarid2], grid->type, xdimid, ydimid);
 
-      if (gridAdded.isNew) lazyGrid = NULL;
-      if (projAdded.isNew) lazyProj = NULL;
+      if (gridAdded.isNew) { lazyGrid = NULL; }
+      if (projAdded.isNew) { lazyProj = NULL; }
 
       if (lazyGrid) destroy_grid(lazyGrid, grid);
       if (lazyProj) destroy_grid(lazyProj, proj);
@@ -3278,10 +3278,10 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
         punits = ncvars[zvarid].units;
         pstdname = ncvars[zvarid].stdname;
         // clang-format off
-	    if      (ncvars[zvarid].xtype == NC_FLOAT) zdatatype = CDI_DATATYPE_FLT32;
-	    else if (ncvars[zvarid].xtype == NC_INT)   zdatatype = CDI_DATATYPE_INT32;
-	    else if (ncvars[zvarid].xtype == NC_SHORT) zdatatype = CDI_DATATYPE_INT16;
-          // clang-format on
+	    if      (ncvars[zvarid].xtype == NC_FLOAT) { zdatatype = CDI_DATATYPE_FLT32;}
+	    else if (ncvars[zvarid].xtype == NC_INT)   { zdatatype = CDI_DATATYPE_INT32; }
+	    else if (ncvars[zvarid].xtype == NC_SHORT) { zdatatype = CDI_DATATYPE_INT16; }
+        // clang-format on
 #ifndef USE_MPI
         if (zaxisType == ZAXIS_CHAR && ncvars[zvarid].ndims == 2)
         {
@@ -3295,7 +3295,6 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
         {
           vct = ncvars[zvarid].vct;
           vctsize = ncvars[zvarid].vctsize;
-
           if (ncvars[zvarid].psvarid != -1) psvarid = ncvars[zvarid].psvarid;
           if (ncvars[zvarid].p0varid != -1) p0varid = ncvars[zvarid].p0varid;
         }

@@ -38,9 +38,9 @@ cdiQueryInit(CdiQuery *query)
   query->names = NULL;
   query->namesFound = NULL;
 
-  query->numCellidx = 0;
-  query->cellidx = NULL;
-  query->cellidxFound = NULL;
+  query->numCells = 0;
+  query->cells = NULL;
+  query->cellsFound = NULL;
 
   query->numLayers = 0;
   query->layers = NULL;
@@ -71,10 +71,10 @@ cdiQueryDelete(CdiQuery *query)
       Free(query->namesFound);
     }
 
-    if (query->numCellidx)
+    if (query->numCells)
     {
-      Free(query->cellidx);
-      Free(query->cellidxFound);
+      Free(query->cells);
+      Free(query->cellsFound);
     }
 
     if (query->numLayers)
@@ -101,9 +101,9 @@ cdiQueryNumNames(const CdiQuery *query)
 }
 
 int
-cdiQueryNumCellidx(const CdiQuery *query)
+cdiQueryNumCells(const CdiQuery *query)
 {
-  return query ? query->numCellidx : 0;
+  return query ? query->numCells : 0;
 }
 
 int
@@ -132,15 +132,15 @@ cdiQuerySetNames(CdiQuery *query, int numEntries, char **names)
 }
 
 void
-cdiQuerySetCellidx(CdiQuery *query, int numEntries, size_t *cellidx)
+cdiQuerySetCells(CdiQuery *query, int numEntries, size_t *cellidx)
 {
   if (numEntries > 0)
   {
     query->numEntries += numEntries;
-    query->numCellidx = numEntries;
-    query->cellidxFound = (bool *) Calloc((size_t) numEntries, sizeof(bool));
-    query->cellidx = (size_t *) Malloc((size_t) numEntries * sizeof(size_t));
-    for (int i = 0; i < numEntries; ++i) query->cellidx[i] = cellidx[i];
+    query->numCells = numEntries;
+    query->cellsFound = (bool *) Calloc((size_t) numEntries, sizeof(bool));
+    query->cells = (size_t *) Malloc((size_t) numEntries * sizeof(size_t));
+    for (int i = 0; i < numEntries; ++i) query->cells[i] = cellidx[i];
   }
 }
 
@@ -171,9 +171,9 @@ cdiQuerySetStepidx(CdiQuery *query, int numEntries, int *stepidx)
 }
 
 size_t
-cdiQueryGetCellidx(const CdiQuery *query, int index)
+cdiQueryGetCell(const CdiQuery *query, int index)
 {
-  return (index >= 0 && index < query->numCellidx) ? query->cellidx[index] : (size_t) -1;
+  return (index >= 0 && index < query->numCells) ? query->cells[index] : (size_t) -1;
 }
 
 CdiQuery *
@@ -184,7 +184,7 @@ cdiQueryClone(const CdiQuery *query)
   if (query)
   {
     cdiQuerySetNames(queryOut, query->numNames, query->names);
-    cdiQuerySetCellidx(queryOut, query->numCellidx, query->cellidx);
+    cdiQuerySetCells(queryOut, query->numCells, query->cells);
     cdiQuerySetLayers(queryOut, query->numLayers, query->layers);
     cdiQuerySetStepidx(queryOut, query->numStepidx, query->stepidx);
   }
@@ -222,10 +222,10 @@ cdiQueryPrint(const CdiQuery *query)
       printf("\n");
     }
 
-    if (query->numCellidx)
+    if (query->numCells)
     {
       printf("Cellidx:");
-      for (int i = 0; i < query->numCellidx; ++i) printf(" %zu", query->cellidx[i]);
+      for (int i = 0; i < query->numCells; ++i) printf(" %zu", query->cells[i]);
       printf("\n");
     }
 
@@ -251,7 +251,7 @@ cdiQueryNumEntriesFound(const CdiQuery *query)
   if (query)
   {
     if (query->numNames) numEntriesFound += sum_found(query->numNames, query->namesFound);
-    if (query->numCellidx) numEntriesFound += sum_found(query->numCellidx, query->cellidxFound);
+    if (query->numCells) numEntriesFound += sum_found(query->numCells, query->cellsFound);
     if (query->numLayers) numEntriesFound += sum_found(query->numLayers, query->layersFound);
     if (query->numStepidx) numEntriesFound += sum_found(query->numStepidx, query->stepidxFound);
   }
@@ -278,13 +278,13 @@ cdiQueryPrintEntriesNotFound(const CdiQuery *query)
         }
       }
 
-      if (query->numCellidx)
+      if (query->numCells)
       {
-        if (sum_not_found(query->numCellidx, query->cellidxFound) > 0)
+        if (sum_not_found(query->numCells, query->cellsFound) > 0)
         {
           printf("Grid cell index not found:");
-          for (int i = 0; i < query->numCellidx; ++i)
-            if (!query->cellidxFound[i]) printf(" %zu", query->cellidx[i]);
+          for (int i = 0; i < query->numCells; ++i)
+            if (!query->cellsFound[i]) printf(" %zu", query->cells[i]);
           printf("\n");
         }
       }
@@ -333,12 +333,12 @@ cdiQueryName(CdiQuery *query, const char *name)
 int
 cdiQueryCellidx(CdiQuery *query, size_t cellidx)
 {
-  if (query && query->numCellidx)
+  if (query && query->numCells)
   {
-    for (int i = 0; i < query->numCellidx; ++i)
-      if (query->cellidx[i] == cellidx)
+    for (int i = 0; i < query->numCells; ++i)
+      if (query->cells[i] == cellidx)
       {
-        query->cellidxFound[i] = true;
+        query->cellsFound[i] = true;
         return 0;
       }
   }

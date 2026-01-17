@@ -1352,9 +1352,9 @@ typedef struct
   bool *namesFound;
   char **names;
   // Grid cell indices
-  int numCellidx;
-  bool *cellidxFound;
-  size_t *cellidx;
+  int numCells;
+  bool *cellsFound;
+  size_t *cells;
   // Level indices
   int numLayers;
   bool *layersFound;
@@ -1369,16 +1369,16 @@ CdiQuery *cdiQueryCreate(void);
 CdiQuery *cdiQueryClone(const CdiQuery *query);
 void cdiQueryDelete(CdiQuery *query);
 void cdiQuerySetNames(CdiQuery *query, int numNames, char **names);
-void cdiQuerySetCellidx(CdiQuery *query, int numCellidx, size_t *cellidx);
+void cdiQuerySetCells(CdiQuery *query, int numCells, size_t *cells);
 void cdiQuerySetLayers(CdiQuery *query, int numlayers, int *layers);
 void cdiQuerySetStepidx(CdiQuery *query, int numStepidx, int *stepidx);
-size_t cdiQueryGetCellidx(const CdiQuery *query, int index);
+size_t cdiQueryGetCell(const CdiQuery *query, int index);
 int cdiQueryName(CdiQuery *query, const char *name);
-int cdiQueryCellidx(CdiQuery *query, size_t cellidx);
+int cdiQueryCellidx(CdiQuery *query, size_t cell);
 int cdiQueryLayer(CdiQuery *query, int layer);
 int cdiQueryStepidx(CdiQuery *query, int stepidx);
 int cdiQueryNumNames(const CdiQuery *query);
-int cdiQueryNumCellidx(const CdiQuery *query);
+int cdiQueryNumCells(const CdiQuery *query);
 int cdiQueryNumStepidx(const CdiQuery *query);
 int cdiQueryNumEntries(const CdiQuery *query);
 int cdiQueryNumEntriesFound(const CdiQuery *query);

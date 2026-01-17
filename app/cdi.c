@@ -846,7 +846,7 @@ main(int argc, char *argv[])
     {
       query = cdiQueryCreate();
       if (numQueryNames) cdiQuerySetNames(query, numQueryNames, queryNames);
-      if (numQueryCellidx) cdiQuerySetCellidx(query, numQueryCellidx, queryCellidx);
+      if (numQueryCellidx) cdiQuerySetCells(query, numQueryCellidx, queryCellidx);
       if (numQueryLayers) cdiQuerySetLayers(query, numQueryLayers, queryLayers);
       if (numQueryStepidx) cdiQuerySetStepidx(query, numQueryStepidx, queryStepidx);
       if (Debug) cdiQueryPrint(query);
