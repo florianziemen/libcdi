@@ -757,8 +757,8 @@ main(int argc, char *argv[])
   int numQueryNames = 0;
   size_t queryCellidx[256];
   int numQueryCellidx = 0;
-  int queryLevidx[256];
-  int numQueryLevidx = 0;
+  int queryLayers[256];
+  int numQueryLayers = 0;
   int queryStepidx[256];
   int numQueryStepidx = 0;
 
@@ -781,7 +781,7 @@ main(int argc, char *argv[])
       case 'h': usage(); exit(0);
       case 'i': numWorkerIn = atoi(optarg); break;
       case 'o': numWorkerOut = atoi(optarg); break;
-      case 'L': queryLevidx[numQueryLevidx++] = atoi(optarg); break;
+      case 'L': queryLayers[numQueryLayers++] = atoi(optarg); break;
       case 'l': Longinfo = 1; break;
       case 'M': cdiDefGlobal("HAVE_MISSVAL", 1); break;
       case 'm': Move = 1; break;
@@ -840,14 +840,14 @@ main(int argc, char *argv[])
     int taxisID2 = CDI_UNDEFID;
     int vlistID2 = CDI_UNDEFID;
 
-    bool useQuery = (numQueryNames > 0) || (numQueryCellidx > 0) || (numQueryLevidx > 0) || (numQueryStepidx > 0);
+    bool useQuery = (numQueryNames > 0) || (numQueryCellidx > 0) || (numQueryLayers > 0) || (numQueryStepidx > 0);
     CdiQuery *query = NULL;
     if (useQuery)
     {
       query = cdiQueryCreate();
       if (numQueryNames) cdiQuerySetNames(query, numQueryNames, queryNames);
       if (numQueryCellidx) cdiQuerySetCellidx(query, numQueryCellidx, queryCellidx);
-      if (numQueryLevidx) cdiQuerySetLevidx(query, numQueryLevidx, queryLevidx);
+      if (numQueryLayers) cdiQuerySetLayers(query, numQueryLayers, queryLayers);
       if (numQueryStepidx) cdiQuerySetStepidx(query, numQueryStepidx, queryStepidx);
       if (Debug) cdiQueryPrint(query);
     }

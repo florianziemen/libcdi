@@ -42,9 +42,9 @@ cdiQueryInit(CdiQuery *query)
   query->cellidx = NULL;
   query->cellidxFound = NULL;
 
-  query->numLevidx = 0;
-  query->levidx = NULL;
-  query->levidxFound = NULL;
+  query->numLayers = 0;
+  query->layers = NULL;
+  query->layersFound = NULL;
 
   query->numStepidx = 0;
   query->stepidx = NULL;
@@ -77,10 +77,10 @@ cdiQueryDelete(CdiQuery *query)
       Free(query->cellidxFound);
     }
 
-    if (query->numLevidx)
+    if (query->numLayers)
     {
-      Free(query->levidx);
-      Free(query->levidxFound);
+      Free(query->layers);
+      Free(query->layersFound);
     }
 
     if (query->numStepidx)
@@ -145,15 +145,15 @@ cdiQuerySetCellidx(CdiQuery *query, int numEntries, size_t *cellidx)
 }
 
 void
-cdiQuerySetLevidx(CdiQuery *query, int numEntries, int *levidx)
+cdiQuerySetLayers(CdiQuery *query, int numEntries, int *layers)
 {
   if (numEntries > 0)
   {
     query->numEntries += numEntries;
-    query->numLevidx = numEntries;
-    query->levidxFound = (bool *) Calloc((size_t) numEntries, sizeof(bool));
-    query->levidx = (int *) Malloc((size_t) numEntries * sizeof(int));
-    for (int i = 0; i < numEntries; ++i) query->levidx[i] = levidx[i];
+    query->numLayers = numEntries;
+    query->layersFound = (bool *) Calloc((size_t) numEntries, sizeof(bool));
+    query->layers = (int *) Malloc((size_t) numEntries * sizeof(int));
+    for (int i = 0; i < numEntries; ++i) query->layers[i] = layers[i];
   }
 }
 
@@ -185,7 +185,7 @@ cdiQueryClone(const CdiQuery *query)
   {
     cdiQuerySetNames(queryOut, query->numNames, query->names);
     cdiQuerySetCellidx(queryOut, query->numCellidx, query->cellidx);
-    cdiQuerySetLevidx(queryOut, query->numLevidx, query->levidx);
+    cdiQuerySetLayers(queryOut, query->numLayers, query->layers);
     cdiQuerySetStepidx(queryOut, query->numStepidx, query->stepidx);
   }
 
@@ -229,10 +229,10 @@ cdiQueryPrint(const CdiQuery *query)
       printf("\n");
     }
 
-    if (query->numLevidx)
+    if (query->numLayers)
     {
-      printf("Levidx:");
-      print_list_compact_int(query->numLevidx, query->levidx);
+      printf("Layers:");
+      print_list_compact_int(query->numLayers, query->layers);
     }
 
     if (query->numStepidx)
@@ -252,7 +252,7 @@ cdiQueryNumEntriesFound(const CdiQuery *query)
   {
     if (query->numNames) numEntriesFound += sum_found(query->numNames, query->namesFound);
     if (query->numCellidx) numEntriesFound += sum_found(query->numCellidx, query->cellidxFound);
-    if (query->numLevidx) numEntriesFound += sum_found(query->numLevidx, query->levidxFound);
+    if (query->numLayers) numEntriesFound += sum_found(query->numLayers, query->layersFound);
     if (query->numStepidx) numEntriesFound += sum_found(query->numStepidx, query->stepidxFound);
   }
 
@@ -289,13 +289,13 @@ cdiQueryPrintEntriesNotFound(const CdiQuery *query)
         }
       }
 
-      if (query->numLevidx)
+      if (query->numLayers)
       {
-        if (sum_not_found(query->numLevidx, query->levidxFound) > 0)
+        if (sum_not_found(query->numLayers, query->layersFound) > 0)
         {
-          printf("Level index not found:");
-          for (int i = 0; i < query->numLevidx; ++i)
-            if (!query->levidxFound[i]) printf(" %d", query->levidx[i]);
+          printf("Layer not found:");
+          for (int i = 0; i < query->numLayers; ++i)
+            if (!query->layersFound[i]) printf(" %d", query->layers[i]);
           printf("\n");
         }
       }
@@ -347,14 +347,14 @@ cdiQueryCellidx(CdiQuery *query, size_t cellidx)
 }
 
 int
-cdiQueryLevidx(CdiQuery *query, int levidx)
+cdiQueryLayer(CdiQuery *query, int layer)
 {
-  if (query && query->numLevidx)
+  if (query && query->numLayers)
   {
-    for (int i = 0; i < query->numLevidx; ++i)
-      if (query->levidx[i] == levidx)
+    for (int i = 0; i < query->numLayers; ++i)
+      if (query->layers[i] == layer)
       {
-        query->levidxFound[i] = true;
+        query->layersFound[i] = true;
         return 0;
       }
   }

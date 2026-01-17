@@ -1356,9 +1356,9 @@ typedef struct
   bool *cellidxFound;
   size_t *cellidx;
   // Level indices
-  int numLevidx;
-  bool *levidxFound;
-  int *levidx;
+  int numLayers;
+  bool *layersFound;
+  int *layers;
   // Time step indices
   int numStepidx;
   bool *stepidxFound;
@@ -1370,12 +1370,12 @@ CdiQuery *cdiQueryClone(const CdiQuery *query);
 void cdiQueryDelete(CdiQuery *query);
 void cdiQuerySetNames(CdiQuery *query, int numNames, char **names);
 void cdiQuerySetCellidx(CdiQuery *query, int numCellidx, size_t *cellidx);
-void cdiQuerySetLevidx(CdiQuery *query, int numLevidx, int *levidx);
+void cdiQuerySetLayers(CdiQuery *query, int numlayers, int *layers);
 void cdiQuerySetStepidx(CdiQuery *query, int numStepidx, int *stepidx);
 size_t cdiQueryGetCellidx(const CdiQuery *query, int index);
 int cdiQueryName(CdiQuery *query, const char *name);
 int cdiQueryCellidx(CdiQuery *query, size_t cellidx);
-int cdiQueryLevidx(CdiQuery *query, int levidx);
+int cdiQueryLayer(CdiQuery *query, int layer);
 int cdiQueryStepidx(CdiQuery *query, int stepidx);
 int cdiQueryNumNames(const CdiQuery *query);
 int cdiQueryNumCellidx(const CdiQuery *query);
