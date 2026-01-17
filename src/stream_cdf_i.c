@@ -2996,8 +2996,8 @@ process_grid_query(CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncvar, size
       size_t count = (numCellidx == 2) ? cdiQueryGetCell(query, 1) : 1;
       if ((start + count) <= *xsize)
       {
-        cdiQueryCellidx(query, start);
-        if (numCellidx == 2) cdiQueryCellidx(query, count);
+        cdiQueryCell(query, start);
+        if (numCellidx == 2) cdiQueryCell(query, count);
         *xsize = count;
         *ysize = count;
         gridPart->start = (long) start - 1;
@@ -4386,12 +4386,12 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
 
     // process time query information if available
     CdiQuery *query = streamptr->query;
-    if (query && cdiQueryNumStepidx(query) > 0)
+    if (query && cdiQueryNumSteps(query) > 0)
     {
       // currently, the query interface does not support more than INT_MAX-1 steps!
       assert(numTimesteps < INT_MAX);
       for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
-        if (cdiQueryStepidx(query, (int) tsID + 1) < 0) ncStepIndices[tsID] = -1;
+        if (cdiQueryStep(query, (int) tsID + 1) < 0) ncStepIndices[tsID] = -1;
     }
 
     size_t numSteps = 0;
