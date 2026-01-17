@@ -592,13 +592,17 @@ print_scarray(int n, const size_t *start, const size_t *count, const char *name)
 static size_t
 get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *count, CdfCache *cache)
 {
-  // print_scarray(cache->numDims, cache->start, cache->count, "cache");
-  // print_scarray(cache->numDims, start, count, "data");
+  int numDims = cache->numDims;
+  // print_scarray(numDims, cache->start, cache->count, "cache");
+  // print_scarray(numDims, start, count, "data");
   bool fillCache = false;
-  int lastDim = cache->numDims - 1;
-  assert(cache->numDims <= 3);
-  assert(start[lastDim] == 0);
+  int lastDim = numDims - 1;
+  assert(numDims <= 3);
+  // assert(start[lastDim] == 0);
   assert(count[0] == 1);
+  cache->count[lastDim] = count[lastDim];
+  cache->start[lastDim] = start[lastDim];
+
   if (cache->bufferSize == 0)
   {
     assert(cache->numSteps == 0);
@@ -608,7 +612,7 @@ get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *cou
     fillCache = true;
     // printf("Cache buffer allocated: size=%zu\n", cache->cacheSize);
   }
-  if (start[0] >= cache->start[0] + cache->count[0])
+  if (start[0] >= (cache->start[0] + cache->count[0]))
   {
     cache->start[0] += cache->count[0];
     fillCache = true;
@@ -617,11 +621,11 @@ get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *cou
   {
     cache->numSteps += cache->count[0];
     if (cache->numSteps > cache->maxSteps) { cache->count[0] = cache->maxSteps % cache->count[0]; }
-    // print_scarray(cache->numDims, cache->start, cache->count, "cache");
+    // print_scarray(numDims, cache->start, cache->count, "cache");
     cdf_get_vara_float(fileID, ncvarid, cache->start, cache->count, cache->buffer);
   }
   size_t offset = (start[0] % cache->count[0]) * cache->count[lastDim];
-  if (cache->numDims == 3) { offset = offset * cache->count[1] + start[1] * cache->count[2]; }
+  if (numDims == 3) { offset = offset * cache->count[1] + start[1] * cache->count[2]; }
   // printf("step: %zu %zu %zu\n", start[0], cache->count[0], start[0] % cache->count[0]);
 
   return offset;

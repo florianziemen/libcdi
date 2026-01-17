@@ -3605,7 +3605,7 @@ calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
     }
 
     chunkCacheSize *= cdf_xtype_to_numbytes(ncvar->xtype);
-    if (CDI_CacheSize_Max > 0 && chunkCacheSize > CDI_CacheSize_Max) chunkCacheSize = CDI_CacheSize_Max;
+    if (CDI_CacheSize_Max > 0 && chunkCacheSize > CDI_CacheSize_Max) { chunkCacheSize = CDI_CacheSize_Max; }
   }
 
   chunkCacheValues.cacheSize = chunkCacheSize;
