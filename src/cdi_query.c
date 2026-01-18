@@ -128,6 +128,12 @@ cdiQueryNumCells(const struct CdiQuery *query)
 }
 
 int
+cdiQueryNumLayers(const struct CdiQuery *query)
+{
+  return query ? query->numLayers : 0;
+}
+
+int
 cdiQueryNumSteps(const struct CdiQuery *query)
 {
   return query ? query->numSteps : 0;
@@ -195,6 +201,12 @@ size_t
 cdiQueryGetCell(const struct CdiQuery *query, int index)
 {
   return (index >= 0 && index < query->numCells) ? query->cells[index] : (size_t) -1;
+}
+
+int
+cdiQueryGetLayer(const struct CdiQuery *query, int index)
+{
+  return (index >= 0 && index < query->numLayers) ? query->layers[index] : -1;
 }
 
 struct CdiQuery *

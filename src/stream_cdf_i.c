@@ -2975,13 +2975,42 @@ is_healpix_grid(int ncid, int gmapvarid)
 }
 
 static int
-process_grid_query(struct CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncvar, size_t *xsize, size_t *ysize, GridPart *gridPart)
+process_layer_query(struct CdiQuery *query, ncvar_t *ncvar, size_t *zsize, GridPart *layerPart)
+{
+  // process layer query information if available
+  if (query)
+  {
+    int numLayers = cdiQueryNumLayers(query);
+    if (numLayers > 0)
+    {
+      Error("Query of layers not implemented!");
+      size_t start = cdiQueryGetLayer(query, 0);
+      size_t count = (numLayers == 2) ? cdiQueryGetLayer(query, 1) : 1;
+      if ((start + count) > *zsize)
+      {
+        Error("%s: layers %zu-%zu out of range (numLayers=%zu)", ncvar->name, start, start + count - 1, *zsize);
+      }
+
+      cdiQueryCell(query, start);
+      if (numLayers == 2) cdiQueryCell(query, count);
+      *zsize = count;
+      layerPart->start = (long) start - 1;
+      layerPart->count = (long) count;
+      layerPart->readPart = true;
+    }
+  }
+
+  return 0;
+}
+
+static int
+process_cell_query(struct CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncvar, size_t *xsize, size_t *ysize, GridPart *gridPart)
 {
   // process grid query information if available
   if (query)
   {
-    int numCellidx = cdiQueryNumCells(query);
-    if (numCellidx > 0)
+    int numCells = cdiQueryNumCells(query);
+    if (numCells > 0)
     {
       // if (ncvar->gridtype != GRID_UNSTRUCTURED)
       if (xdimid != CDI_UNDEFID && ydimid != CDI_UNDEFID && xdimid != ydimid)
@@ -2993,18 +3022,19 @@ process_grid_query(struct CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncva
       }
 
       size_t start = cdiQueryGetCell(query, 0);
-      size_t count = (numCellidx == 2) ? cdiQueryGetCell(query, 1) : 1;
-      if ((start + count) <= *xsize)
+      size_t count = (numCells == 2) ? cdiQueryGetCell(query, 1) : 1;
+      if ((start + count) > *xsize)
       {
-        cdiQueryCell(query, start);
-        if (numCellidx == 2) cdiQueryCell(query, count);
-        *xsize = count;
-        *ysize = count;
-        gridPart->start = (long) start - 1;
-        gridPart->count = (long) count;
-        gridPart->readPart = true;
+        Error("%s: cells %zu-%zu out of range (gridsize=%zu)", ncvar->name, start, start + count - 1, *xsize);
       }
-      else { Error("%s: cells %zu-%zu out of range (gridsize=%zu)", ncvar->name, start, start + count - 1, *xsize); }
+
+      cdiQueryCell(query, start);
+      if (numCells == 2) cdiQueryCell(query, count);
+      *xsize = count;
+      *ysize = count;
+      gridPart->start = (long) start - 1;
+      gridPart->count = (long) count;
+      gridPart->readPart = true;
     }
   }
 
@@ -3020,8 +3050,6 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *cdfGridList, int vlistID, ncd
     ncvar_t *ncvar = &ncvars[ncvarid];
     if (ncvar->varStatus == DataVar && ncvar->gridID == CDI_UNDEFID)
     {
-      GridPart gridPart;
-      gridpart_init(&gridPart);
       int ndims = ncvar->ndims;
       int *dimtypes = ncvar->dimtypes;
       int vdimid = CDI_UNDEFID;
@@ -3094,8 +3122,10 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *cdfGridList, int vlistID, ncd
       xaxisid = (xdimid != CDI_UNDEFID) ? ncdims[xdimid].ncvarid : CDI_UNDEFID;
       yaxisid = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].ncvarid : CDI_UNDEFID;
 
-      // process grid query information if available
-      if (process_grid_query(streamptr->query, xdimid, ydimid, ncvar, &xsize, &ysize, &gridPart) < 0) { continue; }
+      // process cell query information if available
+      GridPart gridPart;
+      gridpart_init(&gridPart);
+      if (process_cell_query(streamptr->query, xdimid, ydimid, ncvar, &xsize, &ysize, &gridPart) < 0) { continue; }
 
       if (cdf_read_coordinates(streamptr, lazyGrid, ncvar, ncvars, ncdims, gridInfo->timedimid, xvarid, yvarid, xsize, ysize,
                                &vdimid, &gridPart))
@@ -3257,6 +3287,11 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 
       if (CDI_Debug) Message("nlevs = %zu", zsize);
 
+      // process layer query information if available
+      GridPart layerPart;
+      gridpart_init(&layerPart);
+      if (process_layer_query(streamptr->query, ncvar, &zsize, &layerPart) < 0) { continue; }
+
       double *zvar = NULL;
       char **zcvals = NULL;
       size_t zclength = 0;
@@ -3278,10 +3313,11 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
         punits = ncvars[zvarid].units;
         pstdname = ncvars[zvarid].stdname;
         // clang-format off
-	    if      (ncvars[zvarid].xtype == NC_FLOAT) { zdatatype = CDI_DATATYPE_FLT32;}
-	    else if (ncvars[zvarid].xtype == NC_INT)   { zdatatype = CDI_DATATYPE_INT32; }
-	    else if (ncvars[zvarid].xtype == NC_SHORT) { zdatatype = CDI_DATATYPE_INT16; }
+        if      (ncvars[zvarid].xtype == NC_FLOAT) { zdatatype = CDI_DATATYPE_FLT32;}
+        else if (ncvars[zvarid].xtype == NC_INT)   { zdatatype = CDI_DATATYPE_INT32; }
+        else if (ncvars[zvarid].xtype == NC_SHORT) { zdatatype = CDI_DATATYPE_INT16; }
         // clang-format on
+
 #ifndef USE_MPI
         if (zaxisType == ZAXIS_CHAR && ncvars[zvarid].ndims == 2)
         {
@@ -3547,7 +3583,6 @@ typedef struct
   size_t cacheSize;
   size_t count[MAX_DIMENSIONS];
   int numDims;
-  int xDimId;
 } ChunkCacheValues;
 
 static void
