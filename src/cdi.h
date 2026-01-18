@@ -1344,49 +1344,30 @@ extern "C" {
 
 // CDI query interface
 
-typedef struct
-{
-  int numEntries;
-  // Names
-  int numNames;
-  bool *namesFound;
-  char **names;
-  // Grid cell indices
-  int numCells;
-  bool *cellsFound;
-  size_t *cells;
-  // Level indices
-  int numLayers;
-  bool *layersFound;
-  int *layers;
-  // Time step indices
-  int numSteps;
-  bool *stepsFound;
-  int *steps;
-} CdiQuery;
+struct CdiQuery;
 
-CdiQuery *cdiQueryCreate(void);
-CdiQuery *cdiQueryClone(const CdiQuery *query);
-void cdiQueryDelete(CdiQuery *query);
-void cdiQuerySetNames(CdiQuery *query, int numNames, char **names);
-void cdiQuerySetCells(CdiQuery *query, int numCells, size_t *cells);
-void cdiQuerySetLayers(CdiQuery *query, int numLayers, int *layers);
-void cdiQuerySetSteps(CdiQuery *query, int numSteps, int *steps);
-size_t cdiQueryGetCell(const CdiQuery *query, int index);
-int cdiQueryName(CdiQuery *query, const char *name);
-int cdiQueryCell(CdiQuery *query, size_t cell);
-int cdiQueryLayer(CdiQuery *query, int layer);
-int cdiQueryStep(CdiQuery *query, int step);
-int cdiQueryNumNames(const CdiQuery *query);
-int cdiQueryNumCells(const CdiQuery *query);
-int cdiQueryNumSteps(const CdiQuery *query);
-int cdiQueryNumEntries(const CdiQuery *query);
-int cdiQueryNumEntriesFound(const CdiQuery *query);
-void cdiQueryPrint(const CdiQuery *query);
-void cdiQueryPrintEntriesNotFound(const CdiQuery *query);
+struct CdiQuery *cdiQueryCreate(void);
+struct CdiQuery *cdiQueryClone(const struct CdiQuery *query);
+void cdiQueryDelete(struct CdiQuery *query);
+void cdiQuerySetNames(struct CdiQuery *query, int numNames, char **names);
+void cdiQuerySetCells(struct CdiQuery *query, int numCells, size_t *cells);
+void cdiQuerySetLayers(struct CdiQuery *query, int numLayers, int *layers);
+void cdiQuerySetSteps(struct CdiQuery *query, int numSteps, int *steps);
+size_t cdiQueryGetCell(const struct CdiQuery *query, int index);
+int cdiQueryName(struct CdiQuery *query, const char *name);
+int cdiQueryCell(struct CdiQuery *query, size_t cell);
+int cdiQueryLayer(struct CdiQuery *query, int layer);
+int cdiQueryStep(struct CdiQuery *query, int step);
+int cdiQueryNumNames(const struct CdiQuery *query);
+int cdiQueryNumCells(const struct CdiQuery *query);
+int cdiQueryNumSteps(const struct CdiQuery *query);
+int cdiQueryNumEntries(const struct CdiQuery *query);
+int cdiQueryNumEntriesFound(const struct CdiQuery *query);
+void cdiQueryPrint(const struct CdiQuery *query);
+void cdiQueryPrintEntriesNotFound(const struct CdiQuery *query);
 
 // streamOpenReadQuery: Open a dataset for reading and apply query
-int streamOpenReadQuery(const char *path, CdiQuery *query);
+int streamOpenReadQuery(const char *path, struct CdiQuery *query);
 
 // CDI interface for paraview vtkCDIReader.cxx
 

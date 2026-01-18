@@ -2975,7 +2975,7 @@ is_healpix_grid(int ncid, int gmapvarid)
 }
 
 static int
-process_grid_query(CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncvar, size_t *xsize, size_t *ysize, GridPart *gridPart)
+process_grid_query(struct CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncvar, size_t *xsize, size_t *ysize, GridPart *gridPart)
 {
   // process grid query information if available
   if (query)
@@ -4385,7 +4385,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
     }
 
     // process time query information if available
-    CdiQuery *query = streamptr->query;
+    struct CdiQuery *query = streamptr->query;
     if (query && cdiQueryNumSteps(query) > 0)
     {
       // currently, the query interface does not support more than INT_MAX-1 steps!
@@ -4591,7 +4591,7 @@ set_coordinates_varids(int numVars, ncvar_t *ncvars)
 }
 
 static void
-process_var_query(CdiQuery *query, int nvars, ncvar_t *ncvars)
+process_var_query(struct CdiQuery *query, int nvars, ncvar_t *ncvars)
 {
   // process var query information if available
   if (query && cdiQueryNumNames(query) > 0)

@@ -314,7 +314,7 @@ typedef struct
   SizeType numvals;
   char *filename;
   Record *record;
-  CdiQuery *query;
+  struct CdiQuery *query;
   svarinfo_t *vars;
   int nvars;  // number of variables
   int varsAllocated;

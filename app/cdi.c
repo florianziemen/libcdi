@@ -841,7 +841,7 @@ main(int argc, char *argv[])
     int vlistID2 = CDI_UNDEFID;
 
     bool useQuery = (numQueryNames > 0) || (numQueryCells > 0) || (numQueryLayers > 0) || (numQuerySteps > 0);
-    CdiQuery *query = NULL;
+    struct CdiQuery *query = NULL;
     if (useQuery)
     {
       query = cdiQueryCreate();

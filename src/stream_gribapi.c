@@ -769,7 +769,7 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
 
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-  CdiQuery *query = streamptr->query;
+  struct CdiQuery *query = streamptr->query;
   if (query && cdiQueryName(query, varname) < 0)
   {
     recinfo->used = false;
