@@ -753,7 +753,7 @@ main(int argc, char *argv[])
   int numWorkerOut = 0;
   char varname[CDI_MAX_NAME];
   char paramstr[32];
-  char *queryNames[256];
+  const char *queryNames[256];
   int numQueryNames = 0;
   size_t queryCells[256];
   int numQueryCells = 0;
