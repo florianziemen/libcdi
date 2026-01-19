@@ -256,7 +256,6 @@ typedef struct
   size_t cacheSize;
   size_t numSteps;
   size_t maxSteps;
-  size_t xOffset;
   int numDims;
 } CdfCache;
 

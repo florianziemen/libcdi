@@ -2983,12 +2983,14 @@ process_layer_query(struct CdiQuery *query, ncvar_t *ncvar, size_t *zsize, GridP
     int numLayers = cdiQueryNumLayers(query);
     if (numLayers > 0)
     {
-      Error("Query of layers not implemented!");
+      // Error("Query of layers not implemented!");
       size_t start = cdiQueryGetLayer(query, 0);
       size_t count = (numLayers == 2) ? cdiQueryGetLayer(query, 1) : 1;
       if ((start + count) > *zsize)
       {
-        Error("%s: layers %zu-%zu out of range (numLayers=%zu)", ncvar->name, start, start + count - 1, *zsize);
+        Warning("%s: layers %zu-%zu out of range (numLayers=%zu), skipped", ncvar->name, start, start + count - 1, *zsize);
+        ncvar->varStatus = UndefVar;
+        return -1;
       }
 
       cdiQueryCell(query, start);
@@ -3017,7 +3019,6 @@ process_cell_query(struct CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncva
       {
         Warning("Query parameter cell is only available for 1D grids, skipped variable %s!", ncvar->name);
         ncvar->varStatus = UndefVar;
-        // continue;
         return -1;
       }
 
@@ -3664,7 +3665,6 @@ cdf_init_cache(CdfCache *cache)
   cache->cacheSize = 0;
   cache->numSteps = 0;
   cache->maxSteps = 0;
-  cache->xOffset = 0;
   cache->numDims = 0;
 }
 
