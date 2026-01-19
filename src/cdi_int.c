@@ -323,8 +323,6 @@ cdiInitialize(void)
   if (!Init_CDI)
   {
     Init_CDI = true;
-    char *envstr;
-    long value;
 
 #ifdef HAVE_LIBCGRIBEX
     gribFixZSE(1);    // 1: Fix ZeroShiftError of simple packed spherical harmonics
@@ -334,72 +332,126 @@ cdiInitialize(void)
     grib_multi_support_off(NULL);
 #endif
 
-    value = cdi_getenv_int("CDI_DEBUG");
-    if (value >= 0) CDI_Debug = (int) value;
+    {
+      long value = cdi_getenv_int("CDI_DEBUG");
+      if (value >= 0) { CDI_Debug = (int) value; }
+    }
 
-    value = cdi_getenv_int("CDI_GRIBAPI_DEBUG");
-    if (value >= 0) CDI_gribapi_debug = (bool) value;
+    {
+      long value = cdi_getenv_int("CDI_GRIBAPI_DEBUG");
+      if (value >= 0) { CDI_gribapi_debug = (bool) value; }
+    }
 
-    value = cdi_getenv_int("CDI_ECCODES_DEBUG");
-    if (value >= 0) CDI_gribapi_debug = (bool) value;
+    {
+      long value = cdi_getenv_int("CDI_ECCODES_DEBUG");
+      if (value >= 0) { CDI_gribapi_debug = (bool) value; }
+    }
 
-    value = cdi_getenv_int("CDI_ECCODES_GRIB1");
-    if (value >= 0) cdiSetEccodesGrib1((bool) value);
+    {
+      long value = cdi_getenv_int("CDI_ECCODES_GRIB1");
+      if (value >= 0) { cdiSetEccodesGrib1((bool) value); }
+    }
 
-    value = cdi_getenv_int("CDI_LOCK_IO");
-    if (value >= 0) CDI_Lock_IO = (bool) value;
+    {
+      long value = cdi_getenv_int("CDI_LOCK_IO");
+      if (value >= 0) { CDI_Lock_IO = (bool) value; }
+    }
 
-    value = cdi_getenv_int("CDI_READ_CELL_CENTER");
-    if (value >= 0) CDI_Read_Cell_Center = (int) value;
+    {
+      long value = cdi_getenv_int("CDI_READ_CELL_CENTER");
+      if (value >= 0) { CDI_Read_Cell_Center = (int) value; }
+    }
 
-    value = cdi_getenv_int("CDI_READ_CELL_CORNERS");
-    if (value >= 0) CDI_Read_Cell_Corners = (int) value;
+    {
+      long value = cdi_getenv_int("CDI_READ_CELL_CORNERS");
+      if (value >= 0) { CDI_Read_Cell_Corners = (int) value; }
+    }
 
-    value = cdi_getenv_int("CDI_RECOPT");
-    if (value >= 0) CDI_Recopt = (int) value;
+    {
+      long value = cdi_getenv_int("CDI_RECOPT");
+      if (value >= 0) { CDI_Recopt = (int) value; }
+    }
 
-    value = cdi_getenv_int("CDI_REGULARGRID");
-    if (value >= 0) cdiDataUnreduced = (int) value;
+    {
+      long value = cdi_getenv_int("CDI_REGULARGRID");
+      if (value >= 0) { cdiDataUnreduced = (int) value; }
+    }
 
-    value = cdi_getenv_int("CDI_SORTNAME");
-    if (value >= 0) cdiSortName = (int) value;
+    {
+      long value = cdi_getenv_int("CDI_SORTNAME");
+      if (value >= 0) { cdiSortName = (int) value; }
+    }
 
-    value = cdi_getenv_int("CDI_HAVE_MISSVAL");
-    if (value >= 0) cdiHaveMissval = (int) value;
+    {
+      long value = cdi_getenv_int("CDI_HAVE_MISSVAL");
+      if (value >= 0) { cdiHaveMissval = (int) value; }
+    }
 
-    value = cdi_getenv_int("CDI_LEVELTYPE");
-    if (value >= 0) cdiDefaultLeveltype = (int) value;
+    {
+      long value = cdi_getenv_int("CDI_LEVELTYPE");
+      if (value >= 0) { cdiDefaultLeveltype = (int) value; }
+    }
 
-    value = cdi_getenv_int("CDI_NETCDF_HDR_PAD");
-    if (value >= 0) CDI_Netcdf_Hdr_Pad = (size_t) value;
+    {
+      long value = cdi_getenv_int("CDI_NETCDF_HDR_PAD");
+      if (value >= 0) { CDI_Netcdf_Hdr_Pad = (size_t) value; }
+    }
 
-    value = cdi_getenv_int("CDI_COPY_CHUNKSPEC");
-    if (value >= 0) CDI_Copy_ChunkSpec = (value > 0);
+    {
+      long value = cdi_getenv_int("CDI_COPY_CHUNKSPEC");
+      if (value >= 0) { CDI_Copy_ChunkSpec = (value > 0); }
+    }
 
-    value = cdi_getenv_int("CDI_REMOVE_CHUNKSPEC");
-    if (value >= 0) CDI_Remove_ChunkSpec = (value > 0);
+    {
+      long value = cdi_getenv_int("CDI_REMOVE_CHUNKSPEC");
+      if (value >= 0) { CDI_Remove_ChunkSpec = (value > 0); }
+    }
 
-    value = cdi_getenv_int("CDI_CACHE_INFO");
-    if (value >= 0) CDI_Cache_Info = (value > 0);
+    {
+      long value = cdi_getenv_int("CDI_CACHE_INFO");
+      if (value >= 0) { CDI_Cache_Info = (value > 0); }
+    }
 
-    value = cdi_getenv_int("CDI_CACHE_NC4");
-    if (value >= 0) CDI_Cache_NC4 = (value > 0);
+    {
+      long value = cdi_getenv_int("CDI_CACHE_NC");
+      if (value >= 0)
+      {
+        CDI_Cache_NC4 = (value > 0);
+        CDI_Cache_NCZ = (value > 0);
+      }
+    }
 
-    value = cdi_getenv_int("CDI_CACHE_NCZ");
-    if (value >= 0) CDI_Cache_NCZ = (value > 0);
+    {
+      long value = cdi_getenv_int("CDI_CACHE_NC4");
+      if (value >= 0) { CDI_Cache_NC4 = (value > 0); }
+    }
 
-    value = cdi_getenv_int("CDI_CACHESIZE_IN");
-    if (value >= 0) CDI_CacheSize_In = value;
+    {
+      long value = cdi_getenv_int("CDI_CACHE_NCZ");
+      if (value >= 0) { CDI_Cache_NCZ = (value > 0); }
+    }
 
-    value = cdi_getenv_int("CDI_CACHESIZE_OUT");
-    if (value >= 0) CDI_CacheSize_Out = value;
+    {
+      long value = cdi_getenv_int("CDI_CACHESIZE_IN");
+      if (value >= 0) { CDI_CacheSize_In = value; }
+    }
 
-    value = cdi_getenv_int("CDI_CACHESIZE_MAX");
-    if (value >= 0) CDI_CacheSize_Max = (size_t) value;
+    {
+      long value = cdi_getenv_int("CDI_CACHESIZE_OUT");
+      if (value >= 0) { CDI_CacheSize_Out = value; }
+    }
 
-    value = cdi_getenv_int("CDI_TEST");
-    if (value >= 0) CDI_Test = (int) value;
+    {
+      long value = cdi_getenv_int("CDI_CACHESIZE_MAX");
+      if (value >= 0) { CDI_CacheSize_Max = (size_t) value; }
+    }
 
+    {
+      long value = cdi_getenv_int("CDI_TEST");
+      if (value >= 0) { CDI_Test = (int) value; }
+    }
+
+    char *envstr;
     envstr = getenv("CDI_GRIB1_TEMPLATE");
     if (envstr) CDI_GRIB1_Template = envstr;
 

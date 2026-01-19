@@ -1,5 +1,6 @@
 2026-01-19  Uwe Schulzweida
 
+	* add env. var CDI_CACHE_NC to set CDI_CACHE_NC4 and CDI_CACHE_NCZ
 	* add CDI input cache for NC4 data (netcdf NC4 cache has performance issues)
 
 2026-01-17  Uwe Schulzweida
