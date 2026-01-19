@@ -52,6 +52,7 @@ size_t CDI_Netcdf_Hdr_Pad = 0UL;
 bool CDI_Copy_ChunkSpec = false;
 bool CDI_Remove_ChunkSpec = false;
 bool CDI_Cache_Info = false;
+bool CDI_Cache_NC4 = false;
 bool CDI_Cache_NCZ = false;
 long CDI_CacheSize_In = -1L;
 long CDI_CacheSize_Out = -1L;
@@ -380,6 +381,9 @@ cdiInitialize(void)
 
     value = cdi_getenv_int("CDI_CACHE_INFO");
     if (value >= 0) CDI_Cache_Info = (value > 0);
+
+    value = cdi_getenv_int("CDI_CACHE_NC4");
+    if (value >= 0) CDI_Cache_NC4 = (value > 0);
 
     value = cdi_getenv_int("CDI_CACHE_NCZ");
     if (value >= 0) CDI_Cache_NCZ = (value > 0);
