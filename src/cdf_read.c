@@ -577,7 +577,7 @@ cdfCheckDataFP32_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t l
     }
   }
 }
-/*
+
 static void
 print_scarray(int n, const size_t *start, const size_t *count, const char *name)
 {
@@ -588,20 +588,23 @@ print_scarray(int n, const size_t *start, const size_t *count, const char *name)
   for (int i = 0; i < n; ++i) printf(" %zu", count[i]);
   printf("\n");
 }
-*/
+
 static size_t
 get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *count, CdfCache *cache)
 {
   int numDims = cache->numDims;
-  // print_scarray(numDims, cache->start, cache->count, "cache");
-  // print_scarray(numDims, start, count, "data");
+  if ((CDI_Debug || CDI_Cache_Info) && cache->numSteps == 0)
+  {
+    print_scarray(numDims, cache->start, cache->count, "cache");
+    print_scarray(numDims, start, count, "data");
+  }
   bool fillCache = false;
   int lastDim = numDims - 1;
   assert(numDims <= 3);
   // assert(start[lastDim] == 0);
   assert(count[0] == 1);
-  cache->count[lastDim] = count[lastDim];
-  cache->start[lastDim] = start[lastDim];
+  assert(cache->count[lastDim] == count[lastDim]);
+  // cache->start[lastDim] = start[lastDim];
 
   if (cache->bufferSize == 0)
   {

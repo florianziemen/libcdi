@@ -1,4 +1,5 @@
 #include "cdi.h"
+#include "cdi_limits.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -117,6 +118,12 @@ typedef struct
   int dimids[MAX_DIMS_CDF];    // Netcdf dimension IDs
   int dimtypes[MAX_DIMS_CDF];  // AxisType
   size_t chunks[MAX_DIMS_CDF];
+  size_t xstart;
+  size_t xcount;
+  size_t zstart;
+  size_t zcount;
+  size_t tstart;
+  size_t tcount;
   bool isChunked;
   int chunkType;
   int chunkSize;
@@ -635,6 +642,12 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
     for (int i = 0; i < MAX_DIMS_CDF; ++i) ncvar->dimids[i] = CDI_UNDEFID;
     for (int i = 0; i < MAX_DIMS_CDF; ++i) ncvar->dimtypes[i] = CDI_UNDEFID;
     for (int i = 0; i < MAX_DIMS_CDF; ++i) ncvar->chunks[i] = 0;
+    ncvar->xstart = 0;
+    ncvar->xcount = 0;
+    ncvar->zstart = 0;
+    ncvar->zcount = 0;
+    ncvar->tstart = 0;
+    ncvar->tcount = 0;
     ncvar->isChunked = false;
     ncvar->chunkType = CDI_UNDEFID;
     ncvar->chunkSize = CDI_UNDEFID;
@@ -2996,6 +3009,8 @@ process_layer_query(struct CdiQuery *query, ncvar_t *ncvar, size_t *zsize, GridP
       cdiQueryCell(query, start);
       if (numLayers == 2) cdiQueryCell(query, count);
       *zsize = count;
+      ncvar->zstart = start - 1;
+      ncvar->zcount = count;
       layerPart->start = (long) start - 1;
       layerPart->count = (long) count;
       layerPart->readPart = true;
@@ -3033,6 +3048,8 @@ process_cell_query(struct CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncva
       if (numCells == 2) cdiQueryCell(query, count);
       *xsize = count;
       *ysize = count;
+      ncvar->xstart = start - 1;
+      ncvar->xcount = count;
       gridPart->start = (long) start - 1;
       gridPart->count = (long) count;
       gridPart->readPart = true;
@@ -3043,8 +3060,7 @@ process_cell_query(struct CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncva
 }
 
 static int
-cdf_define_all_grids(stream_t *streamptr, CdfGrid *cdfGridList, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
-                     GridInfo *gridInfo)
+cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, GridInfo *gridInfo)
 {
   for (int ncvarid = 0; ncvarid < nvars; ++ncvarid)
   {
@@ -3196,8 +3212,8 @@ cdf_define_all_grids(stream_t *streamptr, CdfGrid *cdfGridList, int vlistID, ncd
 
       if (ncvar->isChunked) grid_set_chunktype(grid, ncvar);
 
-      int gridindex = vlistGridIndex(vlistID, gridID);
-      CdfGrid *cdfGrid = &cdfGridList[gridindex];
+      int gridIndex = vlistGridIndex(vlistID, gridID);
+      CdfGrid *cdfGrid = &streamptr->cdfInfo.cdfGridList[gridIndex];
       if (gridPart.readPart)
       {
         cdfGrid->start = gridPart.start;
@@ -3582,6 +3598,7 @@ size_of_dim_chunks(size_t n, size_t c)
 typedef struct
 {
   size_t cacheSize;
+  size_t start[MAX_DIMENSIONS];
   size_t count[MAX_DIMENSIONS];
   int numDims;
 } ChunkCacheValues;
@@ -3591,6 +3608,7 @@ chunkCacheValues_init(ChunkCacheValues *chunkCacheValues)
 {
   chunkCacheValues->cacheSize = 0;
   chunkCacheValues->numDims = 0;
+  for (int i = 0; i < MAX_DIMENSIONS; ++i) { chunkCacheValues->start[i] = 0; }
   for (int i = 0; i < MAX_DIMENSIONS; ++i) { chunkCacheValues->count[i] = 0; }
 }
 
@@ -3600,15 +3618,15 @@ calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
   ChunkCacheValues chunkCacheValues;
   chunkCacheValues_init(&chunkCacheValues);
   int numDims = 0;
-  size_t nx = 0, ny = 0, nz = 0;
+  size_t nx = ncvar->xSize, ny = ncvar->ySize, nz = ncvar->zSize;
   size_t cx = 0, cy = 0, cz = 0;
   for (int i = 0; i < ncvar->ndims; i++)
   {
     int dimtype = ncvar->dimtypes[i];
     // clang-format off
-    if      (dimtype == Z_AXIS) { cz = ncvar->chunks[i]; nz = ncvar->zSize; }
-    else if (dimtype == Y_AXIS) { cy = ncvar->chunks[i]; ny = ncvar->ySize; }
-    else if (dimtype == X_AXIS) { cx = ncvar->chunks[i]; nx = ncvar->xSize; }
+    if      (dimtype == Z_AXIS) { cz = ncvar->chunks[i]; }
+    else if (dimtype == Y_AXIS) { cy = ncvar->chunks[i]; }
+    else if (dimtype == X_AXIS) { cx = ncvar->chunks[i]; }
     // clang-format on
   }
 
@@ -3624,18 +3642,66 @@ calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
   if (chunkCacheSize == 1) { chunkCacheSize = 0; }  // no chunk cache needed because the full field is read
   else
   {
+    if (ny > 0 && cy > 0) { chunkCacheSize *= size_of_dim_chunks(ny, cy); }
+    if (nx > 0 && cx > 0) { chunkCacheSize *= size_of_dim_chunks(nx, cx); }
+
+    chunkCacheSize *= cdf_xtype_to_numbytes(ncvar->xtype);
+    if (CDI_CacheSize_Max > 0 && chunkCacheSize > CDI_CacheSize_Max) { chunkCacheSize = CDI_CacheSize_Max; }
+  }
+
+  chunkCacheValues.cacheSize = chunkCacheSize;
+  chunkCacheValues.numDims = numDims;
+  return chunkCacheValues;
+}
+
+static ChunkCacheValues
+get_chunk_cache_size(int timedimid, ncvar_t *ncvar)
+{
+  ChunkCacheValues chunkCacheValues;
+  chunkCacheValues_init(&chunkCacheValues);
+  int numDims = 0;
+  size_t nxc = ncvar->xcount, nzc = ncvar->zcount;
+  size_t nx = ncvar->xSize, ny = ncvar->ySize, nz = ncvar->zSize;
+  size_t cx = 0, cy = 0, cz = 0;
+  for (int i = 0; i < ncvar->ndims; i++)
+  {
+    int dimtype = ncvar->dimtypes[i];
+    // clang-format off
+    if      (dimtype == Z_AXIS) { cz = ncvar->chunks[i]; }
+    else if (dimtype == Y_AXIS) { cy = ncvar->chunks[i]; }
+    else if (dimtype == X_AXIS) { cx = ncvar->chunks[i]; }
+    // clang-format on
+  }
+
+  size_t numSteps = (ncvar->dimids[0] == timedimid) ? ncvar->chunks[0] : 1;
+  size_t chunkCacheSize = numSteps;
+  size_t numLevels = 0;
+  if (nz > 0 && cz > 0)
+  {
+    numLevels = (nzc > 0) ? nzc : ((numSteps == 1) ? cz : nz);
+    chunkCacheSize *= numLevels;
+  }
+
+  if (chunkCacheSize == 1) { chunkCacheSize = 0; }  // no chunk cache needed because the full field is read
+  else
+  {
     if (numSteps > 0) { chunkCacheValues.count[numDims++] = numSteps; }
-    if (numLevels > 0) { chunkCacheValues.count[numDims++] = numLevels; }
+    if (numLevels > 0)
+    {
+      if (nzc > 0) chunkCacheValues.start[numDims] = ncvar->zstart;
+      chunkCacheValues.count[numDims++] = numLevels;
+    }
     if (ny > 0 && cy > 0)
     {
-      size_t size = size_of_dim_chunks(ny, cy);
+      size_t size = ny;
       chunkCacheSize *= size;
       chunkCacheValues.count[numDims++] = size;
     }
     if (nx > 0 && cx > 0)
     {
-      size_t size = size_of_dim_chunks(nx, cx);
+      size_t size = (nxc > 0) ? nxc : nx;
       chunkCacheSize *= size;
+      if (nxc > 0) chunkCacheValues.start[numDims] = ncvar->xstart;
       chunkCacheValues.count[numDims++] = size;
     }
 
@@ -3703,20 +3769,21 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
       if (ncvar->chunkType != CDI_UNDEFID) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKTYPE, ncvar->chunkType);
       if (ncvar->chunkSize > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, ncvar->chunkSize);
 
-      ChunkCacheValues chunkCacheValues = calc_chunk_cache_size(timedimid, ncvar);
-      size_t cacheSize = chunkCacheValues.cacheSize;
       bool cacheGrid = (ncvar->gridtype == GRID_UNSTRUCTURED || ncvar->isHealpixMapping);
       bool cacheFormat
           = (streamptr->filetype == CDI_FILETYPE_NCZARR && CDI_Cache_NCZ)
             || ((streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) && CDI_Cache_NC4);
+      ChunkCacheValues chunkCacheValues
+          = (cacheFormat && cacheGrid) ? get_chunk_cache_size(timedimid, ncvar) : calc_chunk_cache_size(timedimid, ncvar);
+      size_t cacheSize = chunkCacheValues.cacheSize;
       if (cacheSize > 0 && cacheFormat && cacheGrid && chunkCacheValues.numDims <= 3)
       {
         CdfCache *cdfCache = (CdfCache *) Malloc(sizeof(CdfCache));
         cdf_init_cache(cdfCache);
         cdfCache->cacheSize = cacheSize;
         cdfCache->numDims = chunkCacheValues.numDims;
-        size_t ntsteps = (timedimid == CDI_UNDEFID) ? 0 : ncdims[timedimid].len;
-        cdfCache->maxSteps = ntsteps;
+        cdfCache->maxSteps = (timedimid == CDI_UNDEFID) ? 0 : ncdims[timedimid].len;
+        for (int i = 0; i < chunkCacheValues.numDims; ++i) { cdfCache->start[i] = chunkCacheValues.start[i]; }
         for (int i = 0; i < chunkCacheValues.numDims; ++i) { cdfCache->count[i] = chunkCacheValues.count[i]; }
         if (CDI_Debug || CDI_Cache_Info) Message("%s: chunkCacheSize=%zu", ncvar->name, cacheSize);
         streamptr->vars[varID].cdfCache = cdfCache;
@@ -3762,8 +3829,8 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
     if (CDI_Debug)
       Message("varID = %d  gridID = %d  zaxisID = %d", varID, vlistInqVarGrid(vlistID, varID), vlistInqVarZaxis(vlistID, varID));
 
-    int gridindex = vlistGridIndex(vlistID, gridID);
-    const CdfGrid *ncGrid = &(streamptr->cdfInfo.cdfGridList[gridindex]);
+    int gridIndex = vlistGridIndex(vlistID, gridID);
+    const CdfGrid *ncGrid = &(streamptr->cdfInfo.cdfGridList[gridIndex]);
     int xdimid = ncGrid->ncIdList[CDF_DIMID_X];
     int ydimid = ncGrid->ncIdList[CDF_DIMID_Y];
 
@@ -4784,7 +4851,7 @@ cdfInqContents(stream_t *streamptr)
 
   // define all grids
   gridInfo.timedimid = timedimid;
-  int status = cdf_define_all_grids(streamptr, streamptr->cdfInfo.cdfGridList, vlistID, ncdims, nvars, ncvars, &gridInfo);
+  int status = cdf_define_all_grids(streamptr, vlistID, ncdims, nvars, ncvars, &gridInfo);
   if (status < 0) return status;
 
   // define all zaxes
