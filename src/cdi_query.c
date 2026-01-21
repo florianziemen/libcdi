@@ -32,8 +32,8 @@ struct CdiQuery
   int layers[2];
   // Time step indices
   int numSteps;
-  bool *stepsFound;
-  int *steps;
+  bool stepsFound[2];
+  int steps[2];
 };
 
 static int
@@ -68,8 +68,8 @@ cdiQueryInit(struct CdiQuery *query)
   query->layersFound[0] = false;
 
   query->numSteps = 0;
-  query->steps = NULL;
-  query->stepsFound = NULL;
+  query->steps[0] = 0;
+  query->stepsFound[0] = false;
 }
 
 struct CdiQuery *
@@ -87,15 +87,9 @@ cdiQueryDelete(struct CdiQuery *query)
   {
     if (query->numNames)
     {
-      for (int i = 0; i < query->numNames; ++i) Free(query->names[i]);
+      for (int i = 0; i < query->numNames; ++i) Free((void *) query->names[i]);
       Free(query->names);
       Free(query->namesFound);
-    }
-
-    if (query->numSteps)
-    {
-      Free(query->steps);
-      Free(query->stepsFound);
     }
 
     cdiQueryInit(query);
@@ -171,12 +165,10 @@ cdiQuerySetLayers(struct CdiQuery *query, int numLayers, const int *layers)
 void
 cdiQuerySetSteps(struct CdiQuery *query, int numSteps, const int *steps)
 {
-  if (numSteps > 0)
+  if (numSteps > 0 && numSteps <= 2)
   {
     query->numEntries += numSteps;
     query->numSteps = numSteps;
-    query->stepsFound = (bool *) Calloc((size_t) numSteps, sizeof(bool));
-    query->steps = (int *) Malloc((size_t) numSteps * sizeof(int));
     for (int i = 0; i < numSteps; ++i) query->steps[i] = steps[i];
   }
 }
@@ -321,7 +313,7 @@ cdiQueryPrintEntriesNotFound(const struct CdiQuery *query)
       {
         if (sum_not_found(query->numSteps, query->stepsFound) > 0)
         {
-          printf("Step index not found:");
+          printf("Step not found:");
           for (int i = 0; i < query->numSteps; ++i)
             if (!query->stepsFound[i]) printf(" %d", query->steps[i]);
           printf("\n");
