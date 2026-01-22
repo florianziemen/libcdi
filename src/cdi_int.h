@@ -273,9 +273,9 @@ typedef struct
   size_t chunkSizeDimT;
   size_t chunkSizeDimZ;
   size_t ncDimLenList[MAX_DIMS_PS];
+  int ncDimIdList[MAX_DIMS_PS];
   int zaxisIdList[MAX_ZAXES_PS];  // Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
   int ncZvarIdList[MAX_ZAXES_PS];
-  int ncDimIdList[MAX_DIMS_PS];
   int ncNumDims;
   int complexFloatId;
   int complexDoubleId;

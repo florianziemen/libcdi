@@ -2961,6 +2961,8 @@ cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int
         ncvar2->gridSize = ncvar1->gridSize;
         ncvar2->xSize = ncvar1->xSize;
         ncvar2->ySize = ncvar1->ySize;
+        ncvar2->xstart = ncvar1->xstart;
+        ncvar2->xcount = ncvar1->xcount;
       }
     }
   }
@@ -3001,7 +3003,8 @@ process_layer_query(struct CdiQuery *query, ncvar_t *ncvar, size_t *zsize, GridP
       size_t count = (numLayers == 2) ? cdiQueryGetLayer(query, 1) : 1;
       if ((start + count) > *zsize)
       {
-        Warning("%s: layers %zu-%zu out of range (numLayers=%zu), skipped", ncvar->name, start, start + count - 1, *zsize);
+        if (*zsize > 1)
+          Warning("%s: layer %zu-%zu out of range (numLayers=%zu), skipped", ncvar->name, start, start + count - 1, *zsize);
         ncvar->varStatus = UndefVar;
         return -1;
       }
@@ -3047,7 +3050,7 @@ process_cell_query(struct CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncva
       cdiQueryCell(query, start);
       if (numCells == 2) cdiQueryCell(query, count);
       *xsize = count;
-      *ysize = count;
+      *ysize = 0;
       ncvar->xstart = start - 1;
       ncvar->xcount = count;
       gridPart->start = (long) start - 1;
