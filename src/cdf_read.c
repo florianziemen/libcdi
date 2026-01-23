@@ -446,6 +446,7 @@ cdfGetSliceSlapDescription(stream_t *streamptr, long tsID, int varID, int levelI
   size_t ncStepIndex = (size_t) streamptr->tsteps[tsID].ncStepIndex;
 
   int gridID = vlistInqVarGrid(vlistID, varID);
+  int zaxisID = vlistInqVarZaxis(vlistID, varID);
   int timetype = vlistInqVarTimetype(vlistID, varID);
   SizeType gridsize = gridInqSize(gridID);
 
@@ -478,9 +479,13 @@ cdfGetSliceSlapDescription(stream_t *streamptr, long tsID, int varID, int levelI
   if (timetype != TIME_CONSTANT) addDimension(ncStepIndex, 1);
   if (skipdim == 1) addDimension(0, 1);
 
-  int gridindex = vlistGridIndex(vlistID, gridID);
-  const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridList[gridindex]);
-  bool readPart = (cdfGrid->gridID == gridID && cdfGrid->start != -1 && cdfGrid->count != -1);
+  int gridIndex = vlistGridIndex(vlistID, gridID);
+  const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridList[gridIndex]);
+  bool readGridPart = (cdfGrid->gridID == gridID && cdfGrid->start != -1 && cdfGrid->count != -1);
+
+  int zaxisIndex = vlistZaxisIndex(vlistID, zaxisID);
+  const CdfZaxis *cdfZaxis = &(streamptr->cdfInfo.cdfZaxisList[zaxisIndex]);
+  bool readZaxisPart = (cdfZaxis->zaxisID == zaxisID && cdfZaxis->start != -1 && cdfZaxis->count != -1);
 
   for (int id = 0; id < 4; ++id)
   {
@@ -491,12 +496,17 @@ cdfGetSliceSlapDescription(stream_t *streamptr, long tsID, int varID, int levelI
       case 1:
       case 2:
       case 4:
-        if (readPart && curDimId == dimIds[0])
+        if (readGridPart && curDimId == dimIds[0])
           addDimension((size_t) cdfGrid->start, (size_t) cdfGrid->count);
         else
           addDimension(0, stream_inq_dimlen(streamptr, curDimId));
         break;
-      case 3: addDimension((size_t) levelID, 1); break;
+      case 3:
+        if (readZaxisPart)
+          addDimension((size_t) (levelID + cdfZaxis->start), 1);
+        else
+          addDimension((size_t) levelID, 1);
+        break;
       default: Error("Internal errror: Malformed dimension order encountered. Please report this bug.");
     }
   }
@@ -628,7 +638,7 @@ get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *cou
     cdf_get_vara_float(fileID, ncvarid, cache->start, cache->count, cache->buffer);
   }
   size_t offset = (start[0] % cache->count[0]) * cache->count[lastDim];
-  if (numDims == 3) { offset = offset * cache->count[1] + start[1] * cache->count[2]; }
+  if (numDims == 3) { offset = offset * cache->count[1] + (start[1] - cache->start[1]) * cache->count[2]; }
   // printf("step: %zu %zu %zu\n", start[0], cache->count[0], start[0] % cache->count[0]);
 
   return offset;
@@ -693,6 +703,7 @@ cdfReadDataFP32(stream_t *streamptr, int varID, size_t length, size_t start[MAX_
   int fileID = streamptr->fileID;
   int ncvarid = streamptr->vars[varID].ncvarid;
   int datatype = vlistInqVarDatatype(vlistID, varID);
+  CdfCache *cdfCache = streamptr->vars[varID].cdfCache;
 
   if (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64)
   {
@@ -714,8 +725,8 @@ cdfReadDataFP32(stream_t *streamptr, int varID, size_t length, size_t start[MAX_
     if (datatype == CDI_DATATYPE_FLT64) { cdfReadDataSliceDP2SP(fileID, ncvarid, length, start, count, data); }
     else
     {
-      if (streamptr->vars[varID].cdfCache)
-        cdf_get_vara_float_from_cache(fileID, ncvarid, start, count, data, streamptr->vars[varID].cdfCache);
+      if (cdfCache)
+        cdf_get_vara_float_from_cache(fileID, ncvarid, start, count, data, cdfCache);
       else
         cdf_get_vara_float(fileID, ncvarid, start, count, data);
       cdfCheckDataFP32_UINT8(fileID, ncvarid, vlistID, varID, length, data);

@@ -269,7 +269,15 @@ typedef struct
 
 typedef struct
 {
+  int zaxisID;
+  long start;
+  long count;
+} CdfZaxis;
+
+typedef struct
+{
   CdfGrid cdfGridList[MAX_GRIDS_PS];
+  CdfZaxis cdfZaxisList[MAX_ZAXES_PS];
   size_t chunkSizeDimT;
   size_t chunkSizeDimZ;
   size_t ncDimLenList[MAX_DIMS_PS];

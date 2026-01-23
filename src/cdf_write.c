@@ -792,7 +792,7 @@ cdfDefineDimsAndChunks(const stream_t *streamptr, int varID, int xid, int yid, i
     {
       int chunkSizeDimX = 0;
       cdiInqKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMX, &chunkSizeDimX);
-      if (chunkSizeDimX == -1) chunkSizeDimX = xsize;
+      if (chunkSizeDimX == -1 || chunkSizeDimX > (int) xsize) chunkSizeDimX = xsize;
       if (chunkSizeDimX == 0) chunkSizeDimX = calc_chunksize_x(chunkType, chunkSize, xsize, isReg2dGrid);
       chunks[ndims] = chunkSizeDimX;
       dims[ndims] = xid;

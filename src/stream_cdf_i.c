@@ -3411,6 +3411,15 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 
       int zaxisID = ncvar->zaxisID;
 
+      int zaxisIndex = vlistZaxisIndex(vlistID, zaxisID);
+      CdfZaxis *cdfZaxis = &streamptr->cdfInfo.cdfZaxisList[zaxisIndex];
+      if (layerPart.readPart)
+      {
+        cdfZaxis->start = layerPart.start;
+        cdfZaxis->count = layerPart.count;
+        cdfZaxis->zaxisID = zaxisID;
+      }
+
       if (CDI_CMOR_Mode && zsize == 1 && zaxisType != ZAXIS_HYBRID) zaxisDefScalar(zaxisID);
 
       if (pstdname && *pstdname)
@@ -3454,8 +3463,7 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
         }
       }
 
-      int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-      streamptr->cdfInfo.zaxisIdList[zaxisindex] = zdimid >= 0 ? ncdims[zdimid].dimid : zdimid;
+      streamptr->cdfInfo.zaxisIdList[zaxisIndex] = (zdimid >= 0) ? ncdims[zdimid].dimid : zdimid;
 
       if (CDI_Debug) Message("zaxisID %d %d %s", zaxisID, ncvarid, ncvar->name);
 

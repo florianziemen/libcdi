@@ -1088,6 +1088,13 @@ streamDefaultValue(stream_t *streamptr)
     for (size_t j = 0; j < CDF_SIZE_NCID; ++j) cdfInfo->cdfGridList[i].ncIdList[j] = CDI_UNDEFID;
   }
 
+  for (int i = 0; i < MAX_ZAXES_PS; i++)
+  {
+    cdfInfo->cdfZaxisList[i].start = CDI_UNDEFID;
+    cdfInfo->cdfZaxisList[i].count = CDI_UNDEFID;
+    cdfInfo->cdfZaxisList[i].zaxisID = CDI_UNDEFID;
+  }
+
   cdfInfo->chunkSizeDimT = 0;
   cdfInfo->chunkSizeDimZ = 0;
 
