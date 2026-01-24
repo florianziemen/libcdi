@@ -625,7 +625,7 @@ get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *cou
     fillCache = true;
     // printf("Cache buffer allocated: size=%zu\n", cache->cacheSize);
   }
-  if (start[0] >= (cache->start[0] + cache->count[0]))
+  while (start[0] >= (cache->start[0] + cache->count[0]))
   {
     cache->start[0] += cache->count[0];
     fillCache = true;
@@ -634,7 +634,6 @@ get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *cou
   {
     cache->numSteps += cache->count[0];
     if (cache->numSteps > cache->maxSteps) { cache->count[0] = cache->maxSteps % cache->count[0]; }
-    // print_scarray(numDims, cache->start, cache->count, "cache");
     cdf_get_vara_float(fileID, ncvarid, cache->start, cache->count, cache->buffer);
   }
   size_t offset = (start[0] % cache->count[0]) * cache->count[lastDim];
