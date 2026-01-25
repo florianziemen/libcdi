@@ -3009,8 +3009,6 @@ process_layer_query(struct CdiQuery *query, ncvar_t *ncvar, size_t *zsize, GridP
         return -1;
       }
 
-      cdiQueryCell(query, start);
-      if (numLayers == 2) cdiQueryCell(query, count);
       *zsize = count;
       ncvar->zstart = start - 1;
       ncvar->zcount = count;
@@ -3047,8 +3045,6 @@ process_cell_query(struct CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncva
         Error("%s: cells %zu-%zu out of range (gridsize=%zu)", ncvar->name, start, start + count - 1, *xsize);
       }
 
-      cdiQueryCell(query, start);
-      if (numCells == 2) cdiQueryCell(query, count);
       *xsize = count;
       *ysize = 0;
       ncvar->xstart = start - 1;
@@ -4500,14 +4496,20 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
       else { hasTimesteps = false; }
     }
 
-    // process time query information if available
+    // process step query information if available
     struct CdiQuery *query = streamptr->query;
-    if (query && cdiQueryNumSteps(query) > 0)
+    if (query)
     {
-      // currently, the query interface does not support more than INT_MAX-1 steps!
-      assert(numTimesteps < INT_MAX);
-      for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
-        if (cdiQueryStep(query, (int) tsID + 1) < 0) ncStepIndices[tsID] = -1;
+      int queryNumSteps = cdiQueryNumSteps(query);
+      if (queryNumSteps > 0)
+      {
+        int startStep = cdiQueryGetStep(query, 0) - 1;
+        int endStep = startStep + ((queryNumSteps == 2) ? (cdiQueryGetStep(query, 1) - 1) : 0);
+        // currently, the query interface does not support more than INT_MAX-1 steps!
+        assert(numTimesteps < INT_MAX);
+        for (int i = 0; i < startStep; ++i) ncStepIndices[i] = -1;
+        for (int i = endStep + 1; i < (int) numTimesteps; ++i) ncStepIndices[i] = -1;
+      }
     }
 
     size_t numSteps = 0;

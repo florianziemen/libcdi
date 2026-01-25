@@ -1355,10 +1355,11 @@ void cdiQuerySetLayers(struct CdiQuery *query, int numLayers, const int *layers)
 void cdiQuerySetSteps(struct CdiQuery *query, int numSteps, const int *steps);
 size_t cdiQueryGetCell(const struct CdiQuery *query, int index);
 int cdiQueryGetLayer(const struct CdiQuery *query, int index);
+int cdiQueryGetStep(const struct CdiQuery *query, int index);
 int cdiQueryName(struct CdiQuery *query, const char *name);
-int cdiQueryCell(struct CdiQuery *query, size_t cell);
-int cdiQueryLayer(struct CdiQuery *query, int layer);
-int cdiQueryStep(struct CdiQuery *query, int step);
+// int cdiQueryCell(struct CdiQuery *query, size_t cell);
+// int cdiQueryLayer(struct CdiQuery *query, int layer);
+// int cdiQueryStep(struct CdiQuery *query, int step);
 int cdiQueryNumNames(const struct CdiQuery *query);
 int cdiQueryNumCells(const struct CdiQuery *query);
 int cdiQueryNumLayers(const struct CdiQuery *query);
