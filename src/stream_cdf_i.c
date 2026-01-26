@@ -2999,20 +2999,20 @@ process_layer_query(struct CdiQuery *query, ncvar_t *ncvar, size_t *zsize, GridP
     if (numLayers > 0)
     {
       // Error("Query of layers not implemented!");
-      size_t start = cdiQueryGetLayer(query, 0);
+      size_t start = cdiQueryGetLayer(query, 0) - 1;
       size_t count = (numLayers == 2) ? cdiQueryGetLayer(query, 1) : 1;
       if ((start + count) > *zsize)
       {
         if (*zsize > 1)
-          Warning("%s: layer %zu-%zu out of range (numLayers=%zu), skipped", ncvar->name, start, start + count - 1, *zsize);
+          Warning("%s: layer %zu-%zu out of range (numLayers=%zu), skipped", ncvar->name, start + 1, start + count - 1, *zsize);
         ncvar->varStatus = UndefVar;
         return -1;
       }
 
       *zsize = count;
-      ncvar->zstart = start - 1;
+      ncvar->zstart = start;
       ncvar->zcount = count;
-      layerPart->start = (long) start - 1;
+      layerPart->start = (long) start;
       layerPart->count = (long) count;
       layerPart->readPart = true;
     }
