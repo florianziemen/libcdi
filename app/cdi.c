@@ -1072,7 +1072,7 @@ main(int argc, char *argv[])
     streamClose(streamID1);
   }
 
-  for (int i = 0; i < numQueryNames; ++i) free(queryNames[i]);
+  for (int i = 0; i < numQueryNames; ++i) free((void *) queryNames[i]);
 
   if (wTable) tableWrite(wTable, itableID);
 
