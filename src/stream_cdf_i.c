@@ -865,6 +865,7 @@ atttypeInt_to_datatype(nc_type atttype)
   // clang-format on
   return datatype;
 }
+
 static void
 cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool removeFillValue)
 {
@@ -3197,7 +3198,7 @@ cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
           int projID = lgrid ? grid->proj : gridID;
           int ncid = ncvars[gmapvarid].ncid;
           int gmapvartype = ncvars[gmapvarid].xtype;
-          int nvatts = ncvars[gmapvarid].natts;
+          int nvatts = ncvars[gmapvarid].nattsNC;
           cdiDefKeyInt(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARTYPE, gmapvartype);
           const char *gmapvarname = ncvars[gmapvarid].name;
           cdf_read_mapping_atts(ncid, gmapvarid, nvatts, projID);
