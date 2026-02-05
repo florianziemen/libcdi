@@ -644,7 +644,7 @@ stream_create_vlist(stream_t *streamptr, struct CdiQuery *query)
   cdiVlistMakeInternal(vlistID);
   streamptr->vlistID = vlistID;
 
-  if (query) streamptr->query = query;
+  if (query) { streamptr->query = query; }
 
   long status = cdiInqContents(streamptr);
   if (status >= 0)

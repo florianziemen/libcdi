@@ -66,7 +66,7 @@ double CDI_Default_Missval = -9.E33;
 double CDI_Grid_Missval = -9999.;
 
 // clang-format off
-static const char Filetypes[][9] = {
+static const char *Filetypes[] = {
   "UNKNOWN",
   "GRIB",
   "GRIB2",
@@ -571,8 +571,11 @@ cdiInitialize(void)
 const char *
 strfiletype(int filetype)
 {
-  int size = (int) (sizeof(Filetypes) / sizeof(char *));
-  return (filetype > 0 && filetype < size) ? Filetypes[filetype] : Filetypes[0];
+  enum
+  {
+    numFiletypes = (int) (sizeof(Filetypes) / sizeof(Filetypes[0]))
+  };
+  return (filetype > 0 && filetype < numFiletypes) ? Filetypes[filetype] : Filetypes[0];
 }
 
 void
