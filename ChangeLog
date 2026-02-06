@@ -1,3 +1,7 @@
+2026-02-26  Uwe Schulzweida
+
+	* Version 2.6.0 released
+
 2026-01-19  Uwe Schulzweida
 
 	* add env. var CDI_CACHE_NC to set CDI_CACHE_NC4 and CDI_CACHE_NCZ
