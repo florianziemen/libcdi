@@ -694,7 +694,9 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
     streamID = fileID;
     if (streamptr->record) Free(streamptr->record);
     reshRemove(streamptr->self, &streamOps);
+    if (streamptr->lockIO) CDI_IO_UNLOCK();
     Free(streamptr);
+    streamptr = NULL;
   }
   else
   {
@@ -704,9 +706,8 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
     streamptr->filemode = filemode;
     streamptr->filename = strdup(filename);
     streamptr->fileID = fileID;
+    if (streamptr->lockIO) CDI_IO_UNLOCK();
   }
-
-  if (streamptr->lockIO) CDI_IO_UNLOCK();
 
   return streamID;
 }
