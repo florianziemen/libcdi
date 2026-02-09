@@ -3356,7 +3356,6 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
         {
           if (layerPart.count > 0 && layerPart.count == (long) zsize)
           {
-            // zsize = layerPart.count;
             size_t start = layerPart.start;
             size_t count = layerPart.count;
             zvar = (double *) Malloc(zsize * sizeof(double));
