@@ -3354,8 +3354,19 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 
         if (zaxisType != ZAXIS_CHAR)
         {
-          zvar = (double *) Malloc(zsize * sizeof(double));
-          cdf_get_var_double(ncvars[zvarid].ncid, zvarid, zvar);
+          if (layerPart.count > 0 && layerPart.count == (long) zsize)
+          {
+            // zsize = layerPart.count;
+            size_t start = layerPart.start;
+            size_t count = layerPart.count;
+            zvar = (double *) Malloc(zsize * sizeof(double));
+            cdf_get_vara_double(ncvars[zvarid].ncid, zvarid, &start, &count, zvar);
+          }
+          else
+          {
+            zvar = (double *) Malloc(zsize * sizeof(double));
+            cdf_get_var_double(ncvars[zvarid].ncid, zvarid, zvar);
+          }
         }
 
         int boundsId = ncvars[zvarid].bounds;
