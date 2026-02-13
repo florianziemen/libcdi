@@ -441,16 +441,16 @@ void    streamWriteVarF(int streamID, int varID, const float data[], SizeType nu
 //      streamReadVar: Read a variable
 void    streamReadVar(int streamID, int varID, double data[], SizeType *numMissVals);
 void    streamReadVarF(int streamID, int varID, float data[], SizeType *numMissVals);
-void    streamReadVarPart(int streamID, int varID, int varType, int start, SizeType size, void *data, SizeType *numMissVals, int memtype);
+void    streamReadVarPart(int streamID, int varID, int varType, int start, SizeType size, void *data, SizeType *numMissVals, int memType);
 
 //      streamWriteVarSlice: Write a horizontal slice of a variable
 void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], SizeType numMissVals);
 void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], SizeType numMissVals);
-void    streamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, SizeType size, void *data, SizeType *numMissVals, int memtype);
 
 //      streamReadVarSlice: Read a horizontal slice of a variable
 void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], SizeType *numMissVals);
 void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], SizeType *numMissVals);
+void    streamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, SizeType size, void *data, SizeType *numMissVals, int memType);
 
 void    streamWriteVarChunk(int streamID, int varID, const int rect[][2], const double data[], SizeType numMissVals);
 void    streamWriteVarChunkF(int streamID, int varID, const int rect[][2], const float data[], SizeType numMissVals);

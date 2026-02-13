@@ -12,7 +12,6 @@
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
-#include "stream_grb.h"
 #include "stream_cdf.h"
 #include "cdf_int.h"
 #include "vlist.h"
@@ -600,7 +599,7 @@ print_scarray(int n, const size_t *start, const size_t *count, const char *name)
 }
 
 static size_t
-get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *count, CdfCache *cache)
+get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *count, CdfCache *cache, int datatype)
 {
   int numDims = cache->numDims;
   if ((CDI_Debug || CDI_Cache_Info) && cache->numSteps == 0)
@@ -634,7 +633,10 @@ get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *cou
   {
     cache->numSteps += cache->count[0];
     if (cache->numSteps > cache->maxSteps) { cache->count[0] = cache->maxSteps % cache->count[0]; }
-    cdf_get_vara_float(fileID, ncvarid, cache->start, cache->count, cache->buffer);
+    if (datatype == CDI_DATATYPE_FLT32)
+      cdf_get_vara_float(fileID, ncvarid, cache->start, cache->count, cache->buffer);
+    else
+      cdf_get_vara_double(fileID, ncvarid, cache->start, cache->count, cache->buffer);
   }
   size_t offset = (start[0] % cache->count[0]) * cache->count[lastDim];
   if (numDims == 3) { offset = offset * cache->count[1] + (start[1] - cache->start[1]) * cache->count[2]; }
@@ -646,16 +648,18 @@ get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *cou
 static void
 cdf_get_vara_float_from_cache(int fileID, int ncvarid, const size_t *start, const size_t *count, float *data, CdfCache *cache)
 {
+  int datatype = CDI_DATATYPE_FLT32;
   int lastDim = cache->numDims - 1;
-  size_t offset = get_cache_offset(fileID, ncvarid, start, count, cache);
+  size_t offset = get_cache_offset(fileID, ncvarid, start, count, cache, datatype);
   memcpy(data, (float *) cache->buffer + offset, sizeof(float) * cache->count[lastDim]);
 }
 
 static void
 cdf_get_vara_double_from_cache(int fileID, int ncvarid, const size_t *start, const size_t *count, double *data, CdfCache *cache)
 {
+  int datatype = CDI_DATATYPE_FLT64;
   int lastDim = cache->numDims - 1;
-  size_t offset = get_cache_offset(fileID, ncvarid, start, count, cache);
+  size_t offset = get_cache_offset(fileID, ncvarid, start, count, cache, datatype);
   memcpy(data, (double *) cache->buffer + offset, sizeof(double) * cache->count[lastDim]);
 }
 
@@ -1081,51 +1085,14 @@ cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varType, 
   *numMissVals = cdfDoInputDataTransformationSP(vlistID, varID, length, data);
 }
 
-static int
-cdiStreamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, size_t size, int memtype, void *data,
-                          size_t *numMissVals)
+void
+cdf_read_var_slice_part(stream_t *streamPtr, int varID, int levelID, int memType, int varType, int start, size_t size, void *data,
+                        size_t *numMissVals)
 {
-  int status = 0;
-
-  if (CDI_Debug) Message("streamID = %d  varID = %d", streamID, varID);
-
-  check_parg(data);
-  check_parg(numMissVals);
-
-  stream_t *streamptr = stream_to_pointer(streamID);
-  int filetype = streamptr->filetype;
-
-  *numMissVals = 0;
-
-  // currently we only care for netcdf data
-  switch (cdiBaseFiletype(filetype))
-  {
-#ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB:
-    {
-      grb_read_var_slice(streamptr, varID, levelID, memtype, data, numMissVals);
-      break;
-    }
-#endif
-#ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF:
-    {
-      if (memtype == MEMTYPE_FLOAT)
-        cdfReadVarSliceSPPart(streamptr, varID, levelID, varType, start, size, (float *) data, numMissVals);
-      else
-        cdfReadVarSliceDPPart(streamptr, varID, levelID, varType, start, size, (double *) data, numMissVals);
-      break;
-    }
-#endif
-    default:
-    {
-      Error("%s support not compiled in!", strfiletype(filetype));
-      status = 2;
-      break;
-    }
-  }
-
-  return status;
+  if (memType == MEMTYPE_FLOAT)
+    cdfReadVarSliceSPPart(streamPtr, varID, levelID, varType, start, size, (float *) data, numMissVals);
+  else
+    cdfReadVarSliceDPPart(streamPtr, varID, levelID, varType, start, size, (double *) data, numMissVals);
 }
 
 void
@@ -1170,67 +1137,13 @@ cdfReadVarSPPart(stream_t *streamptr, int varID, int varType, int startpoint, si
   *numMissVals = cdfDoInputDataTransformationSP(vlistID, varID, length, data);
 }
 
-static void
-cdiStreamReadVarPart(int streamID, int varID, int varType, int start, size_t size, int memtype, void *data, size_t *numMissVals)
-{
-  (void) (varType);
-  if (CDI_Debug) Message("streamID = %d  varID = %d", streamID, varID);
-
-  check_parg(data);
-  check_parg(numMissVals);
-
-  stream_t *streamptr = stream_to_pointer(streamID);
-  int filetype = streamptr->filetype;
-
-  *numMissVals = 0;
-
-  // currently we only care for netcdf data
-  switch (cdiBaseFiletype(filetype))
-  {
-#ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB:
-    {
-      grb_read_var(streamptr, varID, memtype, data, numMissVals);
-      break;
-    }
-#endif
-#ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF:
-    {
-      if (memtype == MEMTYPE_FLOAT)
-        cdfReadVarSPPart(streamptr, varID, varType, start, size, (float *) data, numMissVals);
-      else
-        cdfReadVarDPPart(streamptr, varID, varType, start, size, (double *) data, numMissVals);
-
-      break;
-    }
-#endif
-    default:
-    {
-      Error("%s support not compiled in!", strfiletype(filetype));
-      break;
-    }
-  }
-}
-
 void
-streamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, SizeType size, void *data,
-                       SizeType *numMissVals, int memtype)
+cdf_read_var_part(stream_t *streamPtr, int varID, int memType, int varType, int start, size_t size, void *data, size_t *numMissVals)
 {
-  size_t numMiss = 0;
-  if (cdiStreamReadVarSlicePart(streamID, varID, levelID, varType, start, (size_t) size, memtype, data, &numMiss))
-  {
-    Error("Unexpected error returned from cdiStreamReadVarSlicePart()!");
-  }
-  *numMissVals = (SizeType) numMiss;
-}
-
-void
-streamReadVarPart(int streamID, int varID, int varType, int start, SizeType size, void *data, SizeType *numMissVals, int memtype)
-{
-  size_t numMiss = 0;
-  cdiStreamReadVarPart(streamID, varID, varType, start, (size_t) size, memtype, data, &numMiss);
-  *numMissVals = (SizeType) numMiss;
+  if (memType == MEMTYPE_FLOAT)
+    cdfReadVarSPPart(streamPtr, varID, varType, start, size, (float *) data, numMissVals);
+  else
+    cdfReadVarDPPart(streamPtr, varID, varType, start, size, (double *) data, numMissVals);
 }
 
 #endif /* HAVE_LIBNETCDF */
