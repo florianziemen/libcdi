@@ -3497,8 +3497,6 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
   int zaxisSize = zaxisInqSize(zaxisID);
   // if (!gc->init)
   {
-    int ret = 0;
-
     // NOTE: Optional key/value pairs: Note that we do not distinguish between tiles here!
 
     for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; i++)

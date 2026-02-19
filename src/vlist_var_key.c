@@ -181,7 +181,7 @@ vlistDefVarIntArrKey(int vlistID, int varID, const char *name, int *values, int 
   if (CDI_Debug)
   {
     Message("define additional GRIB2 key \"%s\" (integer array, len=%zu)", name, nvalues);
-    for (size_t i = 0; i < nvalues; ++i) Message("  [%zu] = %d", i, entry->int_arr[i]);
+    for (int i = 0; i < nvalues; ++i) Message("  [%zu] = %d", i, entry->int_arr[i]);
   }
 
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
@@ -243,7 +243,7 @@ vlistDefVarDblArrKey(int vlistID, int varID, const char *name, double *values, i
   if (CDI_Debug)
   {
     Message("define additional GRIB2 key \"%s\" (double array, len=%zu)", name, nvalues);
-    for (size_t i = 0; i < nvalues; ++i) Message("  [%zu] = %g", i, entry->dbl_arr[i]);
+    for (int i = 0; i < nvalues; ++i) Message("  [%zu] = %g", i, entry->dbl_arr[i]);
   }
 
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
