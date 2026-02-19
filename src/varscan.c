@@ -1039,6 +1039,8 @@ resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
     {
       tmp[i].int_val = 0;
       tmp[i].dbl_val = 0;
+      tmp[i].int_arr = 0;
+      tmp[i].dbl_arr = 0;
       tmp[i].update = false;
       tmp[i].keyword = NULL;
     }  // for
@@ -1106,6 +1108,106 @@ varDefOptGribDbl(int varID, int tile_index, double dval, const char *keyword)
   vartable[varID].opt_grib_kvpair[idx].keyword = strdup(keyword);
   vartable[varID].opt_grib_kvpair[idx].subtype_index = tile_index;
 }
+#endif
+
+#ifdef HAVE_LIBGRIB_API
+void
+varDefOptGribIntArr(int varID, int tile_index, const long *larr, size_t arr_len, const char *keyword)
+{
+  int idx = -1;
+
+  // Search for an existing entry with the same keyword and tile_index
+  for (int i = 0; i < vartable[varID].opt_grib_nentries; i++)
+  {
+    if (str_is_equal(keyword, vartable[varID].opt_grib_kvpair[i].keyword)
+        && (vartable[varID].opt_grib_kvpair[i].data_type == t_intarr)
+        && (vartable[varID].opt_grib_kvpair[i].subtype_index == tile_index))
+    {
+      idx = i;
+      break;
+    }
+  }
+
+  // If entry not found, create a new one
+  if (idx == -1)
+  {
+    resize_vartable_opt_grib_entries(&vartable[varID], vartable[varID].opt_grib_nentries + 1);
+    vartable[varID].opt_grib_nentries += 1;
+    idx = vartable[varID].opt_grib_nentries - 1;
+  }
+  else
+  {
+    // Free existing keyword and array
+    if (vartable[varID].opt_grib_kvpair[idx].keyword) Free(vartable[varID].opt_grib_kvpair[idx].keyword);
+    if (vartable[varID].opt_grib_kvpair[idx].int_arr) Free(vartable[varID].opt_grib_kvpair[idx].int_arr);
+  }
+
+  // Assign keyword, data type, and tile index
+  vartable[varID].opt_grib_kvpair[idx].data_type = t_intarr;
+  vartable[varID].opt_grib_kvpair[idx].keyword = strdup(keyword);
+  vartable[varID].opt_grib_kvpair[idx].subtype_index = tile_index;
+
+  // Allocate memory for integer array
+  vartable[varID].opt_grib_kvpair[idx].arr_len = arr_len;
+  if (arr_len > 0)
+  {
+    vartable[varID].opt_grib_kvpair[idx].int_arr = (int *) Malloc(arr_len * sizeof(int));
+    for (size_t i = 0; i < arr_len; i++)
+    {
+      vartable[varID].opt_grib_kvpair[idx].int_arr[i] = (int) larr[i];  // convert long to int
+    }
+  }
+  else { vartable[varID].opt_grib_kvpair[idx].int_arr = NULL; }
+}
+#endif
+
+#ifdef HAVE_LIBGRIB_API
+void
+varDefOptGribDblArr(int varID, int tile_index, const double *darr, size_t arr_len, const char *keyword)
+{
+  int idx = -1;
+
+  // Search for an existing entry with the same keyword and tile_index
+  for (int i = 0; i < vartable[varID].opt_grib_nentries; i++)
+  {
+    if (str_is_equal(keyword, vartable[varID].opt_grib_kvpair[i].keyword)
+        && (vartable[varID].opt_grib_kvpair[i].data_type == t_doublearr)
+        && (vartable[varID].opt_grib_kvpair[i].subtype_index == tile_index))
+    {
+      idx = i;
+      break;
+    }
+  }
+
+  // If entry not found, create a new one
+  if (idx == -1)
+  {
+    resize_vartable_opt_grib_entries(&vartable[varID], vartable[varID].opt_grib_nentries + 1);
+    vartable[varID].opt_grib_nentries += 1;
+    idx = vartable[varID].opt_grib_nentries - 1;
+  }
+  else
+  {
+    // Free existing keyword and array
+    if (vartable[varID].opt_grib_kvpair[idx].keyword) Free(vartable[varID].opt_grib_kvpair[idx].keyword);
+    if (vartable[varID].opt_grib_kvpair[idx].dbl_arr) Free(vartable[varID].opt_grib_kvpair[idx].dbl_arr);
+  }
+
+  // Assign keyword, data type, and tile index
+  vartable[varID].opt_grib_kvpair[idx].data_type = t_doublearr;
+  vartable[varID].opt_grib_kvpair[idx].keyword = strdup(keyword);
+  vartable[varID].opt_grib_kvpair[idx].subtype_index = tile_index;
+
+  // Allocate memory for double array
+  vartable[varID].opt_grib_kvpair[idx].arr_len = arr_len;
+  if (arr_len > 0)
+  {
+    vartable[varID].opt_grib_kvpair[idx].dbl_arr = (double *) Malloc(arr_len * sizeof(double));
+    for (size_t i = 0; i < arr_len; i++) { vartable[varID].opt_grib_kvpair[idx].dbl_arr[i] = darr[i]; }
+  }
+  else { vartable[varID].opt_grib_kvpair[idx].dbl_arr = NULL; }
+}
+
 #endif
 
 #ifdef HAVE_LIBGRIB_API

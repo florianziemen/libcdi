@@ -2,6 +2,10 @@
 
 	* Version 2.6.0 released
 
+2026-02-19  Uwe Schulzweida
+
+	* Merge wave_spectrum patch from Daniel Reinert
+
 2026-02-13  Uwe Schulzweida
 
 	* Set default CDI_CACHE_NCZ=1

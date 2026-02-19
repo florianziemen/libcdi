@@ -720,12 +720,21 @@ void    vlistDefVarIntKey(int vlistID, int varID, const char *name, int value);
 //      vlistDefVarDblKey: Set an arbitrary keyword/double value pair for GRIB API
 void    vlistDefVarDblKey(int vlistID, int varID, const char *name, double value);
 
+//      vlistDefVarIntArrKey: Set an arbitrary keyword/integer array pair for GRIB API
+void    vlistDefVarIntArrKey(int vlistID, int varID, const char *name, int *values, int nvalues);
+//      vlistDefVarDblArrKey: Set an arbitrary keyword/double array pair for GRIB API
+void    vlistDefVarDblArrKey(int vlistID, int varID, const char *name, double *values, int nvalues);
+
 //      vlistHasVarKey: returns 1 if meta-data key was read, 0 otherwise
 int     vlistHasVarKey(int vlistID, int varID, const char *name);
 //      vlistInqVarDblKey: raw access to GRIB meta-data
 double  vlistInqVarDblKey(int vlistID, int varID, const char *name);
 //      vlistInqVarIntKey: raw access to GRIB meta-data
 int     vlistInqVarIntKey(int vlistID, int varID, const char *name);
+//      vlistInqVarDblArrKey: raw access to GRIB meta-data
+double *vlistInqVarDblArrKey(int vlistID, int varID, const char *name);
+//      vlistInqVarIntArrKey: raw access to GRIB meta-data
+int    *vlistInqVarIntArrKey(int vlistID, int varID, const char *name);
 
 // CDI attributes
 
