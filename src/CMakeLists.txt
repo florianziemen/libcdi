@@ -1,5 +1,5 @@
 
-target_sources(cdilib
+target_sources(libcdi
   INTERFACE
   cdi.h
   PRIVATE
@@ -147,7 +147,7 @@ target_sources(cdilib
 option(CDI_BUILD_PIO "Build unknown sources in libcdi" OFF)
 mark_as_advanced(CDI_BUILD_PIO)
 if (CDI_BUILD_PIO)
-  target_sources(cdilib PRIVATE
+  target_sources(libcdi PRIVATE
     cdipio.h
     pio.c
     pio.h
@@ -194,7 +194,7 @@ endif()
 option(CDI_BUILD_UNKNOWN "Build unknown sources in libcdi" ON)
 mark_as_advanced(CDI_BUILD_UNKNOWN)
 if (CDI_BUILD_UNKNOWN)
-  target_sources( cdilib PRIVATE
+  target_sources( libcdi PRIVATE
     cfortran.h
     getline.c
     make_fint.c
@@ -206,16 +206,16 @@ endif ()
 # Support exporting all symbols on Windows
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-set_target_properties(cdilib PROPERTIES PUBLIC_HEADER cdi.h)
+set_target_properties(libcdi PROPERTIES PUBLIC_HEADER cdi.h)
 
-set_property(TARGET cdilib PROPERTY CDI_INSTALL_HEADERS
+set_property(TARGET libcdi PROPERTY CDI_INSTALL_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/cdi.h
   ${CMAKE_CURRENT_SOURCE_DIR}/calendar.h
   ${CMAKE_CURRENT_SOURCE_DIR}/cdi_datetime.h
   ${CMAKE_CURRENT_SOURCE_DIR}/julian_date.h
 )
 
-target_include_directories(cdilib
+target_include_directories(libcdi
   PRIVATE
   ${CMARE_CURRENT_BINARY_DIR}
   PUBLIC
@@ -224,5 +224,5 @@ target_include_directories(cdilib
   # where external projects will look for the library's public headers
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-target_link_libraries(cdilib ${cdi_linked_libs})
-target_compile_definitions(cdilib PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
+target_link_libraries(libcdi ${cdi_linked_libs})
+target_compile_definitions(libcdi PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})

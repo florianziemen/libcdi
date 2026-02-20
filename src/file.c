@@ -1024,12 +1024,12 @@ fileOpen_serial(const char *filename, const char *mode)
 #endif
 
     // clang-format off
-      if      (fmode == 'r') fileptr->type = FileTypeRead;
-      else if (fmode == 'w') fileptr->type = FileTypeWrite;
-      else                   fileptr->type = FILE_TYPE_FOPEN;
+    if      (fmode == 'r') { fileptr->type = FileTypeRead; }
+    else if (fmode == 'w') { fileptr->type = FileTypeWrite; }
+    else                   { fileptr->type = FILE_TYPE_FOPEN; }
     // clang-format on
 
-    if (fmode == 'r') fileptr->size = filestat.st_size;
+    if (fmode == 'r') { fileptr->size = filestat.st_size; }
 
     // if (fileptr->type == FILE_TYPE_FOPEN) file_set_buffer(fileptr);
     file_set_buffer(fileptr);

@@ -152,8 +152,7 @@ zaxisNewEntry(int id)
   zaxis_t *zaxisptr = (zaxis_t *) Malloc(sizeof(zaxis_t));
   zaxis_init(zaxisptr);
 
-  if (id == CDI_UNDEFID)
-    zaxisptr->self = reshPut(zaxisptr, &zaxisOps);
+  if (id == CDI_UNDEFID) { zaxisptr->self = reshPut(zaxisptr, &zaxisOps); }
   else
   {
     zaxisptr->self = id;
