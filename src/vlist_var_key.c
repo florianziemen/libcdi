@@ -152,7 +152,7 @@ vlistDefVarIntArrKey(int vlistID, int varID, const char *name, int *values, int 
         && (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_intarr))
       break;
 
-  opt_key_val_pair_t *entry;
+  opt_key_val_pair_t *entry = NULL;
 
   if (idx < vlistptr->vars[varID].opt_grib_nentries)
   {

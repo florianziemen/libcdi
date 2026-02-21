@@ -75,7 +75,7 @@ typedef struct
   opt_key_val_pair_t *opt_grib_kvpair;  // (optional) list of keyword/value pairs
 } VarInfo;
 
-static VarInfo *varInfoList;
+static VarInfo *varInfoList = NULL;
 static int varInfoListSize = 0;
 static int varInfoListUsed = 0;
 
@@ -668,8 +668,8 @@ cdi_generate_vars(stream_t *streamptr)
     if (var->tiles) tilesetID = vlistDefTileSubtype(vlistID, var->tiles);
 
     // generate new variable
-    int varID = stream_new_var(streamptr, gridID, zaxisID, tilesetID);
-    varID = vlistDefVarTiles(vlistID, gridID, zaxisID, TIME_VARYING, tilesetID);
+    (void) stream_new_var(streamptr, gridID, zaxisID, tilesetID);
+    int varID = vlistDefVarTiles(vlistID, gridID, zaxisID, TIME_VARYING, tilesetID);
 
     vlistDefVarTsteptype(vlistID, varID, tsteptype);
     vlistDefVarParam(vlistID, varID, param);

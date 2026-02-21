@@ -53,7 +53,10 @@
 #define SSIZE_MAX LONG_MAX
 #endif
 
-#define MAX_FILES 8192
+enum
+{
+  MAX_FILES = 8192
+};
 static int _file_max = MAX_FILES;
 
 static void file_initialize(void);
