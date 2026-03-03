@@ -2,9 +2,6 @@ lib_LTLIBRARIES =
 check_LTLIBRARIES =
 noinst_LTLIBRARIES =
 EXTRA_PROGRAMS = make_fint
-EXTRA_DIST = \
-  cdilib.c \
-  make_cdilib
 
 if FC_MOD_UPPERCASE
 mo_cdi_mod = MO_CDI.$(FCMODEXT)
