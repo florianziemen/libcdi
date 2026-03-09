@@ -272,7 +272,10 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
             timeUnits = -1;
           }
         }
-        else { Warning("Unsupported format for time units: %s!", tu); }
+        else
+        {
+          Warning("Unsupported format for time units: %s!", tu);
+        }
       }
       else if (taxisType == TAXIS_RELATIVE)
       {
@@ -1493,7 +1496,10 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
             ncvar->isZaxis = true;
           }
         }
-        else { ncvar->atts[ncvar->natts++] = iatt; }
+        else
+        {
+          ncvar->atts[ncvar->natts++] = iatt;
+        }
       }
       else if (isText && str_is_equal(attname, "cdi"))
       {
@@ -1579,7 +1585,10 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
 
         cdf_set_var(ncvar, DataVar);
       }
-      else { ncvar->atts[ncvar->natts++] = iatt; }
+      else
+      {
+        ncvar->atts[ncvar->natts++] = iatt;
+      }
     }
   }
 
@@ -1823,7 +1832,10 @@ cdf_set_dimtype(int numVars, ncvar_t *ncvars, ncdim_t *ncdims)
             dimtype = Z_AXIS;
             lzdim = true;
           }
-          else { continue; }
+          else
+          {
+            continue;
+          }
           cdf_set_dim(ncvar, i, dimtype);
         }
       }
@@ -2078,7 +2090,7 @@ cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridva
 {
   if (CDI_Netcdf_Lazy_Grid_Load)
   {
-    *valsGet = (struct xyValGet){
+    *valsGet = (struct xyValGet) {
       .scalefactor = ncvar->scalefactor,
       .addoffset = ncvar->addoffset,
       .start = { start[0], start[1], start[2] },
@@ -2286,9 +2298,15 @@ cdf_check_gridtype(int *gridtype, bool isLon, bool isLat, size_t xsize, size_t y
       *gridtype = GRID_GAUSSIAN;
       grid->np = (int) (ysize / 2);
     }
-    else { *gridtype = GRID_LONLAT; }
+    else
+    {
+      *gridtype = GRID_LONLAT;
+    }
   }
-  else { *gridtype = (isLon && !isLat && ysize == 0) ? GRID_LONLAT : GRID_GENERIC; }
+  else
+  {
+    *gridtype = (isLon && !isLat && ysize == 0) ? GRID_LONLAT : GRID_GENERIC;
+  }
 }
 
 static bool
@@ -3596,7 +3614,10 @@ cdf_define_institut_and_model_id(int vlistID, int varID)
         if (longname[0]) cdiDefKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname);
         if (units[0]) cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units);
       }
-      else { varTableID = CDI_Default_TableID; }
+      else
+      {
+        varTableID = CDI_Default_TableID;
+      }
     }
 
     if (CDI_Default_ModelID != CDI_UNDEFID) varModelID = CDI_Default_ModelID;
@@ -4099,7 +4120,10 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
           cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
         }
       }
-      else { cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring); }
+      else
+      {
+        cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int) attstrlen, attstring);
+      }
     }
     else if (xtype == NC_SHORT || xtype == NC_INT)
     {
@@ -4108,7 +4132,10 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
         gridInfo->number_of_grid_used = CDI_UNDEFID;
         cdfGetAttInt(fileID, NC_GLOBAL, attname, 1, &gridInfo->number_of_grid_used);
       }
-      else { cdf_copy_attint(fileID, vlistID, xtype, attlen, attname); }
+      else
+      {
+        cdf_copy_attint(fileID, vlistID, xtype, attlen, attname);
+      }
     }
     else if (xtype == NC_FLOAT || xtype == NC_DOUBLE) { cdf_copy_attflt(fileID, vlistID, xtype, attlen, attname); }
   }
@@ -4181,7 +4208,10 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
           hasTimeVar = true;
           streamptr->basetime.ncvarid = ncvarid;
         }
-        else { Warning("Found more than one time variable, skipped variable %s!", ncvar->name); }
+        else
+        {
+          Warning("Found more than one time variable, skipped variable %s!", ncvar->name);
+        }
       }
     }
 
@@ -4458,7 +4488,10 @@ get_timevalue(int fileID, int nctimevarid, size_t ncStepIndex, double *timevarBu
   double timevalue = 0.0;
 
   if (timevarBuffer) { timevalue = timevarBuffer[ncStepIndex]; }
-  else { cdf_get_var1_double(fileID, nctimevarid, &ncStepIndex, &timevalue); }
+  else
+  {
+    cdf_get_var1_double(fileID, nctimevarid, &ncStepIndex, &timevalue);
+  }
 
   if (timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE) timevalue = 0.0;
 
@@ -4504,7 +4537,10 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
           vDateTimeList[tsID] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID, timevarBuffer), taxis0);
         if (timevarBuffer) Free(timevarBuffer);
       }
-      else { hasTimesteps = false; }
+      else
+      {
+        hasTimesteps = false;
+      }
     }
 
     // process step query information if available
@@ -4627,11 +4663,11 @@ read_ncdims(int fileID, int ndims, ncdim_t *ncdims)
 static void
 check_ncgroups(int fileID)
 {
-  int numgrps = 0;
+  int numGroups = 0;
   int ncids[NC_MAX_VARS];
   char gname[CDI_MAX_NAME];
-  nc_inq_grps(fileID, &numgrps, ncids);
-  for (int i = 0; i < numgrps; ++i)
+  nc_inq_grps(fileID, &numGroups, ncids);
+  for (int i = 0; i < numGroups; ++i)
   {
     int ncid = ncids[i];
     nc_inq_grpname(ncid, gname);
@@ -4640,7 +4676,7 @@ check_ncgroups(int fileID)
 
     if (CDI_Debug) Message("%s: ndims %d, nvars %d, ngatts %d", gname, gndims, gnvars, gngatts);
   }
-  if (numgrps) Warning("NetCDF4 groups not supported! Found %d root group%s.", numgrps, (numgrps > 1) ? "s" : "");
+  if (numGroups) Warning("NetCDF4 sub-groups not supported! Found %d group%s.", numGroups, (numGroups > 1) ? "s" : "");
 }
 
 static void
@@ -4745,12 +4781,12 @@ cdfInqContents(stream_t *streamptr)
   int vlistID = streamptr->vlistID;
   int fileID = streamptr->fileID;
 
-  if (CDI_Debug) Message("streamID = %d, fileID = %d", streamptr->self, fileID);
+  if (CDI_Debug) Message("streamID=%d, fileID=%d", streamptr->self, fileID);
 
   int ndims = 0, nvars = 0, ngatts = 0, unlimdimid = 0;
   cdf_inq(fileID, &ndims, &nvars, &ngatts, &unlimdimid);
 
-  if (CDI_Debug) Message("root: ndims %d, nvars %d, ngatts %d", ndims, nvars, ngatts);
+  if (CDI_Debug) Message("root: ndims=%d, nvars=%d, ngatts=%d", ndims, nvars, ngatts);
 
   // alloc ncdims
   ncdim_t *ncdims = ndims ? (ncdim_t *) Malloc((size_t) ndims * sizeof(ncdim_t)) : NULL;

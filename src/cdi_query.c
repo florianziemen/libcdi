@@ -18,6 +18,10 @@
 struct CdiQuery
 {
   int numEntries;
+  // Groups
+  int numGroups;
+  bool *groupsFound;
+  const char **groups;
   // Names
   int numNames;
   bool *namesFound;
@@ -55,6 +59,10 @@ cdiQueryInit(struct CdiQuery *query)
 {
   query->numEntries = 0;
 
+  query->numGroups = 0;
+  query->groups = NULL;
+  query->groupsFound = NULL;
+
   query->numNames = 0;
   query->names = NULL;
   query->namesFound = NULL;
@@ -85,6 +93,13 @@ cdiQueryDelete(struct CdiQuery *query)
 {
   if (query)
   {
+    if (query->numGroups)
+    {
+      for (int i = 0; i < query->numGroups; ++i) Free((void *) query->groups[i]);
+      Free(query->groups);
+      Free(query->groupsFound);
+    }
+
     if (query->numNames)
     {
       for (int i = 0; i < query->numNames; ++i) Free((void *) query->names[i]);
@@ -95,6 +110,12 @@ cdiQueryDelete(struct CdiQuery *query)
     cdiQueryInit(query);
     Free(query);
   }
+}
+
+int
+cdiQueryNumGroups(const struct CdiQuery *query)
+{
+  return query ? query->numGroups : 0;
 }
 
 int
@@ -125,6 +146,19 @@ int
 cdiQueryNumEntries(const struct CdiQuery *query)
 {
   return query ? query->numEntries : 0;
+}
+
+void
+cdiQuerySetGroups(struct CdiQuery *query, int numGroups, const char **groups)
+{
+  if (numGroups > 0)
+  {
+    query->numEntries += numGroups;
+    query->numGroups = numGroups;
+    query->groupsFound = (bool *) Calloc((size_t) numGroups, sizeof(bool));
+    query->groups = (const char **) Malloc((size_t) numGroups * sizeof(char *));
+    for (int i = 0; i < numGroups; ++i) query->groups[i] = strdup(groups[i]);
+  }
 }
 
 void
@@ -198,6 +232,7 @@ cdiQueryClone(const struct CdiQuery *query)
 
   if (query)
   {
+    cdiQuerySetGroups(queryOut, query->numGroups, query->groups);
     cdiQuerySetNames(queryOut, query->numNames, query->names);
     cdiQuerySetCells(queryOut, query->numCells, query->cells);
     cdiQuerySetLayers(queryOut, query->numLayers, query->layers);
@@ -230,6 +265,13 @@ cdiQueryPrint(const struct CdiQuery *query)
 {
   if (query)
   {
+    if (query->numGroups)
+    {
+      printf("Groups:");
+      for (int i = 0; i < query->numGroups; ++i) printf(" %s", query->groups[i]);
+      printf("\n");
+    }
+
     if (query->numNames)
     {
       printf("Names:");
@@ -265,10 +307,11 @@ cdiQueryNumEntriesFound(const struct CdiQuery *query)
 
   if (query)
   {
-    if (query->numNames) numEntriesFound += sum_found(query->numNames, query->namesFound);
-    if (query->numCells) numEntriesFound += sum_found(query->numCells, query->cellsFound);
-    if (query->numLayers) numEntriesFound += sum_found(query->numLayers, query->layersFound);
-    if (query->numSteps) numEntriesFound += sum_found(query->numSteps, query->stepsFound);
+    if (query->numGroups) { numEntriesFound += sum_found(query->numGroups, query->groupsFound); }
+    if (query->numNames) { numEntriesFound += sum_found(query->numNames, query->namesFound); }
+    if (query->numCells) { numEntriesFound += sum_found(query->numCells, query->cellsFound); }
+    if (query->numLayers) { numEntriesFound += sum_found(query->numLayers, query->layersFound); }
+    if (query->numSteps) { numEntriesFound += sum_found(query->numSteps, query->stepsFound); }
   }
 
   return numEntriesFound;
@@ -327,6 +370,22 @@ cdiQueryPrintEntriesNotFound(const struct CdiQuery *query)
       }
     }
   }
+}
+
+int
+cdiQueryGroup(struct CdiQuery *query, const char *group)
+{
+  if (query && query->numGroups && group && *group)
+  {
+    for (int i = 0; i < query->numGroups; ++i)
+      if (strcmp(group, query->groups[i]) == 0)
+      {
+        query->groupsFound[i] = true;
+        return 0;
+      }
+  }
+
+  return -1;
 }
 
 int

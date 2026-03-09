@@ -66,19 +66,18 @@ cdf_open_read(const char *filename, int *filetype)
   int ncid = -1;
   int readmode = NC_NOWRITE;
   int status = cdf_open(filename, readmode, &ncid);
-  if (status > 0 && ncid < 0) ncid = CDI_ESYSTEM;
-  if (status < -1000 && ncid == -1)
-    ncid = status;
+  if (status > 0 && ncid < 0) { ncid = CDI_ESYSTEM; }
+  if (status < -1000 && ncid == -1) { ncid = status; }
   else
   {
     int format = -1;
     status = nc_inq_format(ncid, &format);
-    if (status == NC_NOERR && format == NC_FORMAT_NETCDF4_CLASSIC) *filetype = CDI_FILETYPE_NC4C;
+    if (status == NC_NOERR && format == NC_FORMAT_NETCDF4_CLASSIC) { *filetype = CDI_FILETYPE_NC4C; }
 
 #ifdef NC_FORMATX_NCZARR
     int modeNC;
     status = nc_inq_format_extended(ncid, &format, &modeNC);
-    if (status == NC_NOERR && format == NC_FORMATX_NCZARR) *filetype = CDI_FILETYPE_NCZARR;
+    if (status == NC_NOERR && format == NC_FORMATX_NCZARR) { *filetype = CDI_FILETYPE_NCZARR; }
 #endif
   }
 
@@ -169,7 +168,10 @@ cdfOpen(const char *filename, const char *mode, int filetype)
 
     if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
   }
-  else { fileID = CDI_ELIBNAVAIL; }
+  else
+  {
+    fileID = CDI_ELIBNAVAIL;
+  }
 
   return fileID;
 }

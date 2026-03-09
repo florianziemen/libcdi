@@ -1358,6 +1358,7 @@ struct CdiQuery;
 struct CdiQuery *cdiQueryCreate(void);
 struct CdiQuery *cdiQueryClone(const struct CdiQuery *query);
 void cdiQueryDelete(struct CdiQuery *query);
+void cdiQuerySetGroups(struct CdiQuery *query, int numGroups, const char **groups);
 void cdiQuerySetNames(struct CdiQuery *query, int numNames, const char **names);
 void cdiQuerySetCells(struct CdiQuery *query, int numCells, const size_t *cells);
 void cdiQuerySetLayers(struct CdiQuery *query, int numLayers, const int *layers);
