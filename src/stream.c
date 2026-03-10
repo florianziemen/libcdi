@@ -379,12 +379,12 @@ streamFilename(int streamID)
   return streamptr->filename;
 }
 
-static long
+static int
 cdiInqContents(stream_t *streamptr)
 {
   if (streamptr->lockIO) CDI_IO_LOCK();
 
-  long status = 0;
+  int status = 0;
   int filetype = streamptr->filetype;
 
   switch (cdiBaseFiletype(filetype))
@@ -638,7 +638,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
   return fileID;
 }
 
-static long
+static int
 stream_create_vlist(stream_t *streamptr, struct CdiQuery *query)
 {
   int vlistID = vlistCreate();
@@ -649,7 +649,7 @@ stream_create_vlist(stream_t *streamptr, struct CdiQuery *query)
 
   if (query) { streamptr->query = query; }
 
-  long status = cdiInqContents(streamptr);
+  int status = cdiInqContents(streamptr);
   if (status >= 0)
   {
     vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
@@ -741,6 +741,7 @@ streamOpenNCMem(int ncidp, char mode)
 
   if (mode == 'r')
   {
+    streamptr->groupID = ncidp;
     int status = stream_create_vlist(streamptr, NULL);
     if (status < 0)
     {
@@ -932,6 +933,7 @@ streamOpenRead(const char *filename)
     stream_t *streamptr = stream_to_pointer(streamID);
     streamptr->byteorder = byteorder;
 
+    streamptr->groupID = streamptr->fileID;
     long status = stream_create_vlist(streamptr, NULL);
     if (status < 0)
     {
@@ -958,7 +960,6 @@ process_group_query(stream_t *streamptr, struct CdiQuery *query)
     {
       const char *groupName = cdiQueryGetGroup(query, 0);
       groupID = cdf_inq_group(fileID, groupName);
-      printf("group name=%s id=%d fileID %d\n", groupName, groupID, fileID);
     }
   }
 #endif
@@ -989,7 +990,9 @@ streamOpenReadQuery(const char *filename, struct CdiQuery *query)
       return groupID;
     }
 
-    long status = stream_create_vlist(streamptr, query);
+    streamptr->groupID = (groupID > -1) ? groupID : streamptr->fileID;
+
+    int status = stream_create_vlist(streamptr, query);
     if (status < 0)
     {
       streamID = (int) status;
@@ -1077,6 +1080,7 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->filetype = CDI_FILETYPE_UNDEF;
   streamptr->byteorder = CDI_UNDEFID;
   streamptr->fileID = 0;
+  streamptr->groupID = -1;
   streamptr->filemode = 0;
   streamptr->numvals = 0;
   streamptr->filename = NULL;

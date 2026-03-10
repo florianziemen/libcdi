@@ -316,6 +316,7 @@ typedef struct
   int filetype;
   int byteorder;
   int fileID;
+  int groupID;
   int filemode;
   int nrecs;  // number of records
   SizeType numvals;

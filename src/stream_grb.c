@@ -257,10 +257,10 @@ grbDefField(stream_t *streamptr)
 }
 
 #ifdef HAVE_LIBGRIB
-static long
+static int
 grbScanTimestep1(stream_t *streamptr)
 {
-  long status = CDI_EUFTYPE;
+  int status = CDI_EUFTYPE;
 
 #ifdef HAVE_LIBCGRIBEX
   int filetype = streamptr->filetype;
@@ -299,10 +299,10 @@ grbScanTimestep2(stream_t *streamptr)
   return status;
 }
 
-static long
+static int
 grbScanTimestep(stream_t *streamptr)
 {
-  long status = CDI_EUFTYPE;
+  int status = CDI_EUFTYPE;
 
 #ifdef HAVE_LIBCGRIBEX
   int filetype = streamptr->filetype;
@@ -322,12 +322,12 @@ grbScanTimestep(stream_t *streamptr)
 #endif
 
 #ifdef HAVE_LIBGRIB
-long
+int
 grbInqContents(stream_t *streamptr)
 {
   streamptr->curTsID = 0;
 
-  long status = grbScanTimestep1(streamptr);
+  int status = grbScanTimestep1(streamptr);
   if (status == 0 && streamptr->ntsteps == -1) status = grbScanTimestep2(streamptr);
 
   int fileID = streamptr->fileID;

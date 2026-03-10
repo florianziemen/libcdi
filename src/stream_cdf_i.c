@@ -354,7 +354,7 @@ cdfInqDatatype(stream_t *streamptr, int xtype, bool isUnsigned)
 #endif
       if (isUserDefinedType)
       {
-        int fileID = streamptr->fileID;
+        int fileID = streamptr->groupID;
         size_t nfields = 0, compoundsize = 0;
         int status = nc_inq_compound(fileID, xtype, NULL, &compoundsize, &nfields);
         if (status == NC_NOERR && nfields == 2 && (compoundsize == 8 || compoundsize == 16))
@@ -4511,7 +4511,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
   }
   else
   {
-    int fileID = streamptr->fileID;
+    int fileID = streamptr->groupID;
     int nctimevarid = streamptr->basetime.ncvarid;
     int nctimeboundsid = streamptr->basetime.ncvarboundsid;
     bool hasTimesteps = (nctimevarid != CDI_UNDEFID /*&& streamptr->basetime.hasUnits*/);
@@ -4779,7 +4779,7 @@ cdfInqContents(stream_t *streamptr)
   gridInfo.timedimid = CDI_UNDEFID;
 
   int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
+  int fileID = streamptr->groupID;
 
   if (CDI_Debug) Message("streamID=%d, fileID=%d", streamptr->self, fileID);
 
