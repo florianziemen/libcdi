@@ -207,6 +207,12 @@ cdiQuerySetSteps(struct CdiQuery *query, int numSteps, const int *steps)
   }
 }
 
+const char *
+cdiQueryGetGroup(const struct CdiQuery *query, int index)
+{
+  return (index >= 0 && index < query->numGroups) ? query->groups[index] : NULL;
+}
+
 size_t
 cdiQueryGetCell(const struct CdiQuery *query, int index)
 {

@@ -10,6 +10,9 @@
 #include "cdf_int.h"
 
 #ifdef HAVE_LIBNETCDF
+#include "error.h"
+#include <netcdf.h>
+
 const char *
 cdfLibraryVersion(void)
 {
@@ -198,6 +201,33 @@ void
 cdfClose(int fileID)
 {
   cdfCloseFile(fileID);
+}
+
+int
+cdf_inq_group(int fileID, const char *groupName)
+{
+  int ncGroupID = -1;
+  int status = nc_inq_ncid(fileID, groupName, &ncGroupID);
+  int groupID = (status == NC_NOERR) ? ncGroupID : status - 1000;
+
+  if (status != NC_NOERR)
+  {
+    Warning("Group %s not found!", groupName);
+    int numGroups = 0;
+    int ncids[NC_MAX_VARS];
+    char gname[CDI_MAX_NAME];
+    nc_inq_grps(fileID, &numGroups, ncids);
+    printf("Available groups: ");
+    for (int i = 0; i < numGroups; ++i)
+    {
+      nc_inq_grpname(ncids[i], gname);
+      if (i > 0) printf(",");
+      printf("%s", gname);
+    }
+    printf("\n");
+  }
+
+  return groupID;
 }
 
 #endif

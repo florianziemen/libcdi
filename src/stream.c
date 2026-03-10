@@ -944,6 +944,27 @@ streamOpenRead(const char *filename)
   return streamID;
 }
 
+static int
+process_group_query(stream_t *streamptr, struct CdiQuery *query)
+{
+  int groupID = 0;
+#ifdef HAVE_LIBNETCDF
+  int fileID = streamptr->fileID;
+  int filetype = streamptr->filetype;
+  if (cdiBaseFiletype(filetype) == CDI_FILETYPE_NETCDF)
+  {
+    // process var query information if available
+    if (query && cdiQueryNumGroups(query) > 0)
+    {
+      const char *groupName = cdiQueryGetGroup(query, 0);
+      groupID = cdf_inq_group(fileID, groupName);
+      printf("group name=%s id=%d fileID %d\n", groupName, groupID, fileID);
+    }
+  }
+#endif
+  return groupID;
+}
+
 int
 streamOpenReadQuery(const char *filename, struct CdiQuery *query)
 {
@@ -960,6 +981,13 @@ streamOpenReadQuery(const char *filename, struct CdiQuery *query)
   {
     stream_t *streamptr = stream_to_pointer(streamID);
     streamptr->byteorder = byteorder;
+
+    int groupID = process_group_query(streamptr, query);
+    if (groupID < -1)
+    {
+      streamClose(streamID);
+      return groupID;
+    }
 
     long status = stream_create_vlist(streamptr, query);
     if (status < 0)
@@ -2087,6 +2115,7 @@ streamOpenReadNCMem(int ncidp)
 {
   return streamOpenNCMem(ncidp, 'r');
 }
+
 int
 streamOpenWriteNCMem(int ncidp)
 {
