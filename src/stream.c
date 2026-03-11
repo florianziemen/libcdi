@@ -949,7 +949,7 @@ streamOpenRead(const char *filename)
 static int
 process_group_query(stream_t *streamptr, struct CdiQuery *query)
 {
-  int groupID = 0;
+  int groupID = -1;
 #ifdef HAVE_LIBNETCDF
   int fileID = streamptr->fileID;
   int filetype = streamptr->filetype;

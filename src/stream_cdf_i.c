@@ -4676,7 +4676,7 @@ check_ncgroups(int fileID)
 
     if (CDI_Debug) Message("%s: ndims %d, nvars %d, ngatts %d", gname, gndims, gnvars, gngatts);
   }
-  if (numGroups) Warning("NetCDF4 sub-groups not supported! Found %d group%s.", numGroups, (numGroups > 1) ? "s" : "");
+  if (numGroups) Warning("NetCDF4 sub-groups not supported! Skipped %d group%s.", numGroups, (numGroups > 1) ? "s" : "");
 }
 
 static void
