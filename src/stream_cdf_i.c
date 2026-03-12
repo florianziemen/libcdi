@@ -115,7 +115,6 @@ typedef struct
   int gmapid;
   int positive;
   int ndims;
-  int dimid0;
   int dimids[MAX_DIMS_CDF];    // Netcdf dimension IDs
   int dimtypes[MAX_DIMS_CDF];  // AxisType
   size_t chunks[MAX_DIMS_CDF];
@@ -643,7 +642,6 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
     ncvar->gmapid = CDI_UNDEFID;
     ncvar->positive = 0;
     ncvar->ndims = 0;
-    ncvar->dimid0 = 0;
     for (int i = 0; i < MAX_DIMS_CDF; ++i) { ncvar->dimids[i] = CDI_UNDEFID; }
     for (int i = 0; i < MAX_DIMS_CDF; ++i) { ncvar->dimtypes[i] = CDI_UNDEFID; }
     for (int i = 0; i < MAX_DIMS_CDF; ++i) { ncvar->chunks[i] = 0; }
@@ -1217,7 +1215,7 @@ set_vars_chunks(int ncid, int ncvarid, int nvdims, ncvar_t *ncvar)
 #endif
 
 static void
-set_dimension_ids(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims)
+change_dimension_ids(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims)
 {
   for (int varid = 0; varid < nvars; varid++)
   {
@@ -1232,21 +1230,6 @@ set_dimension_ids(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims)
         }
       }
   }
-}
-
-static int
-find_dim_index(int dimid, int ndims, ncdim_t *ncdims)
-{
-  if (dimid != CDI_UNDEFID)
-  {
-    for (int i = 0; i < ndims; ++i)
-    {
-      if (ncdims[i].dimid == dimid) return i;
-    }
-
-    Error("internal error: dimension id=%d not found!", dimid);
-  }
-  return -1;
 }
 
 static void
@@ -1264,18 +1247,12 @@ add_dimid_ifnew(int dimid, int ndims, ncdim_t *ncdims)
 }
 
 static void
-set_dimension_ids_new(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims)
+set_dimension_ids(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims)
 {
   for (int varid = 0; varid < nvars; varid++)
   {
     ncvar_t *ncvar = &ncvars[varid];
     for (int vdimid = 0; vdimid < ncvar->ndims; ++vdimid) { add_dimid_ifnew(ncvar->dimids[vdimid], ndims, ncdims); }
-  }
-
-  for (int varid = 0; varid < nvars; varid++)
-  {
-    ncvar_t *ncvar = &ncvars[varid];
-    if (ncvar->ndims > 0) { ncvar->dimid0 = find_dim_index(ncvar->dimids[0], ndims, ncdims); }
   }
 }
 
@@ -1327,7 +1304,6 @@ set_vars_timetype(int nvars, ncvar_t *ncvars, int timedimid)
 static void
 scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int modelID)
 {
-  // for (int i = 0; i < ndims; ++i) printf("dim %d %d %zu\n", i, ncdims[i].dimid, ncdims[i].len);
   int nchecked_vars = 0;
   enum
   {
@@ -1538,8 +1514,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
         else if (str_is_equal(attstring, "up"))
           ncvar->positive = POSITIVE_UP;
 
-        int dimid0 = find_dim_index(ncvar->dimids[0], ndims, ncdims);
-        // printf("ncvar->dimids[0], dimid0 %d %d\n", ncvar->dimids[0], dimid0);
+        int dimid0 = ncvar->dimids[0];
         if (ncvar->varStatus == UndefVar
             && (nvdims == 0 || (nvdims == 1 && ncvar->dimtypes[0] == CDI_UNDEFID && ncdims[dimid0].ncvarid == CDI_UNDEFID)))
         {
@@ -4693,29 +4668,12 @@ stream_set_ncdims(stream_t *streamptr, int ndims, ncdim_t *ncdims)
 }
 
 static void
-set_ncdim_ids(int fileID, int ndims, ncdim_t *ncdims)
-{
-  if (ndims)
-  {
-    int gdimid = 0;
-    for (int i = 0; i < NC_MAX_DIMS; ++i)
-    {
-      if (nc_inq_dimlen(fileID, i, NULL) == NC_NOERR)
-      {
-        ncdims[gdimid++].dimid = i;
-        if (gdimid == ndims) break;
-      }
-    }
-  }
-}
-
-static void
 read_ncdims(int fileID, int ndims, ncdim_t *ncdims)
 {
-  for (int gdimid = 0; gdimid < ndims; gdimid++)
+  for (int dimIndex = 0; dimIndex < ndims; dimIndex++)
   {
-    cdf_inq_dimlen(fileID, ncdims[gdimid].dimid, &ncdims[gdimid].len);
-    cdf_inq_dimname(fileID, ncdims[gdimid].dimid, ncdims[gdimid].name);
+    cdf_inq_dimlen(fileID, ncdims[dimIndex].dimid, &ncdims[dimIndex].len);
+    cdf_inq_dimname(fileID, ncdims[dimIndex].dimid, ncdims[dimIndex].name);
   }
 }
 
@@ -4867,11 +4825,10 @@ cdfInqContents(stream_t *streamptr)
 
   read_vars_info(nvars, ncvars, format);
 
-  // set_dimension_ids_new(nvars, ncvars, ndims, ncdims);
-  set_ncdim_ids(fileID, ndims, ncdims);
+  set_dimension_ids(nvars, ncvars, ndims, ncdims);
   read_ncdims(fileID, ndims, ncdims);
 
-  set_dimension_ids(nvars, ncvars, ndims, ncdims);
+  change_dimension_ids(nvars, ncvars, ndims, ncdims);
   find_coordinates_vars(ndims, ncdims, nvars, ncvars);
 
   // scan global attributes
