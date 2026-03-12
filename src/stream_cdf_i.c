@@ -3746,12 +3746,12 @@ get_chunk_cache_size(int timedimid, ncvar_t *ncvar)
     // clang-format on
   }
 
-  size_t numSteps = (ncvar->dimids[0] == timedimid) ? ncvar->chunks[0] : 1;
-  size_t chunkCacheSize = numSteps;
+  size_t numSteps = (ncvar->dimids[0] == timedimid) ? ncvar->chunks[0] : 0;
+  size_t chunkCacheSize = (numSteps == 0) ? 1 : numSteps;
   size_t numLevels = 0;
   if (nz > 0 && cz > 0)
   {
-    numLevels = (nzc > 0) ? nzc : ((numSteps == 1) ? cz : nz);
+    numLevels = (nzc > 0) ? nzc : ((numSteps == 0 || numSteps == 1) ? cz : nz);
     chunkCacheSize *= numLevels;
   }
 
