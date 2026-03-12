@@ -539,7 +539,7 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
     {
       int dimid0 = CDI_UNDEFID;
       for (int gdimid = 0; gdimid < ndims; ++gdimid)
-        if (ncdims[gdimid].dimid == ncvar->dimids[0])
+        if (gdimid == ncvar->dimids[0])
         {
           dimid0 = gdimid;
           break;
@@ -1023,7 +1023,8 @@ cdf_scan_attr_axis(ncvar_t *ncvars, ncdim_t *ncdims, int ncvarid, const char *at
     if (setVar)
     {
       cdf_set_var(ncvar, CoordVar);
-      ncdims[ncvar->dimids[0]].dimtype = (ncdims[ncvar->dimids[0]].dimtype == CDI_UNDEFID) ? dimtype : CDI_UNDEFID;
+      int dimid0 = ncvar->dimids[0];
+      ncdims[dimid0].dimtype = (ncdims[dimid0].dimtype == CDI_UNDEFID) ? dimtype : CDI_UNDEFID;
     }
   }
 }
@@ -1750,8 +1751,8 @@ cdf_set_dimtype(int numVars, ncvar_t *ncvars, ncdim_t *ncdims)
     {
       for (int i = 0, n = ncvar->ndims; i < n; ++i)
       {
-        int ncdimid = ncvar->dimids[i];
-        int dimtype = ncdims[ncdimid].dimtype;
+        int dimid = ncvar->dimids[i];
+        int dimtype = ncdims[dimid].dimtype;
         if (dimtype >= X_AXIS && dimtype <= T_AXIS) cdf_set_dim(ncvar, i, dimtype);
       }
 
@@ -1789,8 +1790,8 @@ cdf_set_dimtype(int numVars, ncvar_t *ncvars, ncdim_t *ncdims)
             }
             cdf_set_dim(ncvar, i, Z_AXIS);
             lzdim = true;
-            int ncdimid = ncvar->dimids[i];
-            if (ncdims[ncdimid].dimtype == CDI_UNDEFID) ncdims[ncdimid].dimtype = Z_AXIS;
+            int dimid = ncvar->dimids[i];
+            if (ncdims[dimid].dimtype == CDI_UNDEFID) ncdims[dimid].dimtype = Z_AXIS;
           }
         }
     }
@@ -1803,8 +1804,8 @@ cdf_set_dimtype(int numVars, ncvar_t *ncvars, ncdim_t *ncdims)
     {
       if (ncvar->dimtypes[i] == CDI_UNDEFID)
       {
-        int ncdimid = ncvar->dimids[i];
-        if (ncdims[ncdimid].dimtype == Z_AXIS)
+        int dimid = ncvar->dimids[i];
+        if (ncdims[dimid].dimtype == Z_AXIS)
         {
           ncvar->isZaxis = true;
           cdf_set_dim(ncvar, i, Z_AXIS);
@@ -2696,8 +2697,7 @@ cdf_read_coordinates(stream_t *streamptr, struct cdfLazyGrid *lazyGrid, ncvar_t 
           if (ncvars[xvarid].dimids[0] == timedimid && ncvars[yvarid].dimids[0] == timedimid)
           {
             static bool ltwarn = true;
-            size_t ntsteps = 0;
-            cdf_inq_dimlen(ncvar->ncid, ncdims[timedimid].dimid, &ntsteps);
+            size_t ntsteps = ncdims[timedimid].len;
             if (ltwarn && ntsteps > 1) Warning("Time varying grids unsupported, using grid at time step 1!");
             ltwarn = false;
             hasTimeDim = true;
@@ -4254,8 +4254,9 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
       for (ncvarid = 0; ncvarid < nvars; ncvarid++)
       {
         ncvar_t *ncvar = &ncvars[ncvarid];
+        int dim1len = ncdims[ncvar->dimids[1]].len;
         if (ncvarid != streamptr->basetime.ncvarid && ncvar->ndims == 2 && timedimid == ncvar->dimids[0]
-            && xtypeIsText(ncvar->xtype) && (ncdims[ncvar->dimids[1]].len == 19 || ncdims[ncvar->dimids[1]].len == 64))
+            && xtypeIsText(ncvar->xtype) && (dim1len == 19 || dim1len == 64))
         {
           ncvar->isTaxis = true;
           streamptr->basetime.ncvarid = ncvarid;
