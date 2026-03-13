@@ -716,7 +716,16 @@ cdf_def_var_chunking(int ncid, int varid, int storage, const size_t *chunksizesp
 {
   int status = nc_def_var_chunking(ncid, varid, storage, chunksizesp);
   if (CDF_Debug || status != NC_NOERR)
-    Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0], chunksizesp[1], chunksizesp[2], chunksizesp[3]);
+  {
+    int ndims;
+    cdf_inq_varndims(ncid, varid, &ndims);
+    // clang-format off
+    if      (ndims == 1) Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0]);
+    else if (ndims == 2) Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0], chunksizesp[1]);
+    else if (ndims == 3) Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0], chunksizesp[1], chunksizesp[2]);
+    else if (ndims == 4) Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0], chunksizesp[1], chunksizesp[2], chunksizesp[3]);
+    // clang-format on
+  }
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
