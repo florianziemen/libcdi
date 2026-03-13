@@ -2,6 +2,10 @@
 
 	* Version 2.6.1 released
 
+2026-03-13  Uwe Schulzweida
+
+	* vlistDefVarIntArrKey/vlistDefVarDblArrKey: changed *values to values[]
+
 2026-03-10  Uwe Schulzweida
 
 	* query single NetCDF group

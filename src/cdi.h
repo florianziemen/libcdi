@@ -721,9 +721,9 @@ void    vlistDefVarIntKey(int vlistID, int varID, const char *name, int value);
 void    vlistDefVarDblKey(int vlistID, int varID, const char *name, double value);
 
 //      vlistDefVarIntArrKey: Set an arbitrary keyword/integer array pair for GRIB API
-void    vlistDefVarIntArrKey(int vlistID, int varID, const char *name, int *values, int nvalues);
+void    vlistDefVarIntArrKey(int vlistID, int varID, const char *name, const int values[], int nvalues);
 //      vlistDefVarDblArrKey: Set an arbitrary keyword/double array pair for GRIB API
-void    vlistDefVarDblArrKey(int vlistID, int varID, const char *name, double *values, int nvalues);
+void    vlistDefVarDblArrKey(int vlistID, int varID, const char *name, const double values[], int nvalues);
 
 //      vlistHasVarKey: returns 1 if meta-data key was read, 0 otherwise
 int     vlistHasVarKey(int vlistID, int varID, const char *name);
