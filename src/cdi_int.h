@@ -458,6 +458,7 @@ extern bool CDI_Cache_NC4;
 extern bool CDI_Cache_NCZ;
 extern long CDI_CacheSize_In;
 extern long CDI_CacheSize_Out;
+extern long CDI_FilterSize_Min;
 extern size_t CDI_CacheSize_Max;
 extern bool CDI_Netcdf_Lazy_Grid_Load;
 extern int STREAM_Debug;

@@ -56,6 +56,7 @@ bool CDI_Cache_NC4 = false;
 bool CDI_Cache_NCZ = true;
 long CDI_CacheSize_In = -1L;
 long CDI_CacheSize_Out = -1L;
+long CDI_FilterSize_Min = 0;
 size_t CDI_CacheSize_Max = 0UL;
 bool CDI_Netcdf_Lazy_Grid_Load = false;
 
@@ -444,6 +445,11 @@ cdiInitialize(void)
     {
       long value = cdi_getenv_int("CDI_CACHESIZE_MAX");
       if (value >= 0) { CDI_CacheSize_Max = (size_t) value; }
+    }
+
+    {
+      long value = cdi_getenv_int("CDI_FILTERSIZE_MIN");
+      if (value >= 0) { CDI_FilterSize_Min = value; }
     }
 
     {
