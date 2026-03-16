@@ -109,11 +109,9 @@ void *
 iegNew(void)
 {
   if (!initIegLib) iegLibInit();
-
   iegrec_t *iegp = (iegrec_t *) Malloc(sizeof(iegrec_t));
   iegInit(iegp);
   iegInitMem(iegp);
-
   return (void *) iegp;
 }
 
@@ -121,7 +119,6 @@ void
 iegDelete(void *ieg)
 {
   iegrec_t *iegp = (iegrec_t *) ieg;
-
   if (iegp)
   {
     if (iegp->buffer) Free(iegp->buffer);
@@ -216,44 +213,33 @@ iegInqData(void *ieg, int prec, void *data)
   size_t datasize = iegp->datasize;
   void *buffer = iegp->buffer;
   int dprec = iegp->dprec;
-
-  switch (dprec)
+  if (dprec == EXSE_PREC_FP32)
   {
-    case EXSE_PREC_FP32:
+    if (byteswap) swap4byte(buffer, datasize);
+
+    if (dprec == prec) { memcpy(data, buffer, datasize * sizeof(float)); }
+    else
     {
-      if (byteswap) swap4byte(buffer, datasize);
-
-      if (dprec == prec)
-        memcpy(data, buffer, datasize * sizeof(float));
-      else
-      {
-        const float *restrict p = (float *) buffer;
-        double *restrict q = (double *) data;
-        for (size_t i = 0; i < datasize; i++) q[i] = p[i];
-      }
-
-      break;
+      const float *restrict p = (float *) buffer;
+      double *restrict q = (double *) data;
+      for (size_t i = 0; i < datasize; i++) q[i] = p[i];
     }
-    case EXSE_PREC_FP64:
+  }
+  else if (dprec == EXSE_PREC_FP64)
+  {
+    if (byteswap) swap8byte(buffer, datasize);
+
+    if (dprec == prec) { memcpy(data, buffer, datasize * sizeof(double)); }
+    else
     {
-      if (byteswap) swap8byte(buffer, datasize);
-
-      if (dprec == prec)
-        memcpy(data, buffer, datasize * sizeof(double));
-      else
-      {
-        const double *restrict p = (double *) buffer;
-        float *restrict q = (float *) data;
-        for (size_t i = 0; i < datasize; i++) q[i] = (float) p[i];
-      }
-
-      break;
+      const double *restrict p = (double *) buffer;
+      float *restrict q = (float *) data;
+      for (size_t i = 0; i < datasize; i++) q[i] = (float) p[i];
     }
-    default:
-    {
-      Error("unexpected data precision %d", dprec);
-      break;
-    }
+  }
+  else
+  {
+    Error("unexpected data precision %d", dprec);
   }
 
   return ierr;
@@ -288,37 +274,31 @@ iegDefData(iegrec_t *iegp, int prec, const void *data)
     iegp->buffer = Realloc(iegp->buffer, iegp->buffersize);
   }
 
-  switch (dprec)
+  if (dprec == EXSE_PREC_FP32)
   {
-    case EXSE_PREC_FP32:
+    if (dprec == prec)
+      memcpy(iegp->buffer, data, datasize * sizeof(float));
+    else
     {
-      if (dprec == prec)
-        memcpy(iegp->buffer, data, datasize * sizeof(float));
-      else
-      {
-        const double *restrict p = (const double *) data;
-        float *restrict q = (float *) iegp->buffer;
-        for (size_t i = 0; i < datasize; i++) q[i] = (float) p[i];
-      }
-      break;
+      const double *restrict p = (const double *) data;
+      float *restrict q = (float *) iegp->buffer;
+      for (size_t i = 0; i < datasize; i++) q[i] = (float) p[i];
     }
-    case EXSE_PREC_FP64:
+  }
+  else if (dprec == EXSE_PREC_FP64)
+  {
+    if (dprec == prec)
+      memcpy(iegp->buffer, data, datasize * sizeof(double));
+    else
     {
-      if (dprec == prec)
-        memcpy(iegp->buffer, data, datasize * sizeof(double));
-      else
-      {
-        const float *restrict p = (const float *) data;
-        double *restrict q = (double *) iegp->buffer;
-        for (size_t i = 0; i < datasize; i++) q[i] = p[i];
-      }
-      break;
+      const float *restrict p = (const float *) data;
+      double *restrict q = (double *) iegp->buffer;
+      for (size_t i = 0; i < datasize; i++) q[i] = p[i];
     }
-    default:
-    {
-      Error("unexpected data precision %d", dprec);
-      break;
-    }
+  }
+  else
+  {
+    Error("unexpected data precision %d", dprec);
   }
 
   return 0;
@@ -370,7 +350,7 @@ iegRead(int fileID, void *ieg)
     dprec = 8;
   else
   {
-    Warning("unexpecteted header size %d!", (int) blocklen);
+    Warning("unexpecteted header size %zu!", blocklen);
     return -1;
   }
 
@@ -412,7 +392,6 @@ iegRead(int fileID, void *ieg)
   }
 
   size_t blocklen2 = binReadF77Block(fileID, byteswap);
-
   if (blocklen2 != blocklen)
   {
     Warning("header blocklen differ!");
@@ -420,11 +399,9 @@ iegRead(int fileID, void *ieg)
   }
 
   iegp->datasize = (size_t) IEG_G_NumLon(iegp->igdb) * (size_t) IEG_G_NumLat(iegp->igdb);
-
   if (IEG_Debug) Message("datasize = %zu", iegp->datasize);
 
   blocklen = binReadF77Block(fileID, byteswap);
-
   if (iegp->buffersize < blocklen)
   {
     iegp->buffer = Realloc(iegp->buffer, blocklen);
@@ -433,14 +410,12 @@ iegRead(int fileID, void *ieg)
 
   if (dprec != (int) (blocklen / iegp->datasize))
   {
-    Warning("data precision differ! (h = %d; d = %d)", (int) dprec, (int) (blocklen / iegp->datasize));
+    Warning("data precision differ! (h = %d; d = %zu)", dprec, (blocklen / iegp->datasize));
     return -1;
   }
 
   fileRead(fileID, iegp->buffer, blocklen);
-
   blocklen2 = binReadF77Block(fileID, byteswap);
-
   if (blocklen2 != blocklen)
   {
     Warning("data blocklen differ!");
@@ -500,23 +475,11 @@ iegWrite(int fileID, void *ieg)
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
-  switch (dprec)
+  if (dprec == EXSE_PREC_FP32) { binWriteFlt32(fileID, byteswap, iegp->datasize, (float *) iegp->buffer); }
+  else if (dprec == EXSE_PREC_FP64) { binWriteFlt64(fileID, byteswap, iegp->datasize, (double *) iegp->buffer); }
+  else
   {
-    case EXSE_PREC_FP32:
-    {
-      binWriteFlt32(fileID, byteswap, iegp->datasize, (float *) iegp->buffer);
-      break;
-    }
-    case EXSE_PREC_FP64:
-    {
-      binWriteFlt64(fileID, byteswap, iegp->datasize, (double *) iegp->buffer);
-      break;
-    }
-    default:
-    {
-      Error("unexpected data precision %d", dprec);
-      break;
-    }
+    Error("unexpected data precision %d", dprec);
   }
 
   binWriteF77Block(fileID, byteswap, blocklen);

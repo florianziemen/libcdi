@@ -210,33 +210,25 @@ srvInqData(srvrec_t *srvp, int prec, void *data)
   void *buffer = srvp->buffer;
   int dprec = srvp->dprec;
 
-  switch (dprec)
+  if (dprec == EXSE_PREC_FP32)
   {
-    case EXSE_PREC_FP32:
-    {
-      if (byteswap) swap4byte(buffer, datasize);
+    if (byteswap) swap4byte(buffer, datasize);
 
-      if (dprec == prec) { memcpy(data, buffer, datasize * sizeof(float)); }
-      else
-        for (size_t i = 0; i < datasize; i++) ((double *) data)[i] = (double) ((float *) buffer)[i];
+    if (dprec == prec) { memcpy(data, buffer, datasize * sizeof(float)); }
+    else
+      for (size_t i = 0; i < datasize; i++) ((double *) data)[i] = (double) ((float *) buffer)[i];
+  }
+  else if (dprec == EXSE_PREC_FP64)
+  {
+    if (byteswap) swap8byte(buffer, datasize);
 
-      break;
-    }
-    case EXSE_PREC_FP64:
-    {
-      if (byteswap) swap8byte(buffer, datasize);
-
-      if (dprec == prec) { memcpy(data, buffer, datasize * sizeof(double)); }
-      else
-        for (size_t i = 0; i < datasize; i++) ((float *) data)[i] = (float) ((double *) buffer)[i];
-
-      break;
-    }
-    default:
-    {
-      Error("unexpected data precision %d", dprec);
-      break;
-    }
+    if (dprec == prec) { memcpy(data, buffer, datasize * sizeof(double)); }
+    else
+      for (size_t i = 0; i < datasize; i++) ((float *) data)[i] = (float) ((double *) buffer)[i];
+  }
+  else
+  {
+    Error("unexpected data precision %d", dprec);
   }
 
   return ierr;
@@ -278,31 +270,23 @@ srvDefData(void *srv, int prec, const void *data)
     srvp->buffer = Realloc(srvp->buffer, srvp->buffersize);
   }
 
-  switch (dprec)
+  if (dprec == EXSE_PREC_FP32)
   {
-    case EXSE_PREC_FP32:
-    {
-      if (dprec == prec)
-        memcpy(srvp->buffer, data, datasize * sizeof(float));
-      else
-        for (size_t i = 0; i < datasize; i++) ((float *) srvp->buffer)[i] = (float) ((double *) data)[i];
-
-      break;
-    }
-    case EXSE_PREC_FP64:
-    {
-      if (dprec == prec)
-        memcpy(srvp->buffer, data, datasize * sizeof(double));
-      else
-        for (size_t i = 0; i < datasize; i++) ((double *) srvp->buffer)[i] = (double) ((float *) data)[i];
-
-      break;
-    }
-    default:
-    {
-      Error("unexpected data precision %d", dprec);
-      break;
-    }
+    if (dprec == prec)
+      memcpy(srvp->buffer, data, datasize * sizeof(float));
+    else
+      for (size_t i = 0; i < datasize; i++) ((float *) srvp->buffer)[i] = (float) ((double *) data)[i];
+  }
+  else if (dprec == EXSE_PREC_FP64)
+  {
+    if (dprec == prec)
+      memcpy(srvp->buffer, data, datasize * sizeof(double));
+    else
+      for (size_t i = 0; i < datasize; i++) ((double *) srvp->buffer)[i] = (double) ((float *) data)[i];
+  }
+  else
+  {
+    Error("unexpected data precision %d", dprec);
   }
 
   return 0;
@@ -334,7 +318,6 @@ srvRead(int fileID, void *srv)
   }
 
   int byteswap = srvp->byteswap;
-
   // read header record
   size_t blocklen = binReadF77Block(fileID, byteswap);
 
@@ -343,44 +326,34 @@ srvRead(int fileID, void *srv)
   if (SRV_Debug) Message("blocklen = %lu", blocklen);
 
   size_t hprec = blocklen / SRV_HEADER_LEN;
-
   srvp->hprec = (int) hprec;
 
-  switch (hprec)
+  if (hprec == EXSE_PREC_FP32)
   {
-    case EXSE_PREC_FP32:
-    {
-      binReadInt32(fileID, byteswap, SRV_HEADER_LEN, tempheader.i32);
-      for (int i = 0; i < SRV_HEADER_LEN; i++) srvp->header[i] = (int) tempheader.i32[i];
-      break;
-    }
-    case EXSE_PREC_FP64:
-    {
-      binReadInt64(fileID, byteswap, SRV_HEADER_LEN, tempheader.i64);
-      for (int i = 0; i < SRV_HEADER_LEN; i++) srvp->header[i] = (int) tempheader.i64[i];
-      break;
-    }
-    default:
-    {
-      Error("Unexpected header precision %d", hprec);
-      break;
-    }
+    binReadInt32(fileID, byteswap, SRV_HEADER_LEN, tempheader.i32);
+    for (int i = 0; i < SRV_HEADER_LEN; i++) srvp->header[i] = (int) tempheader.i32[i];
+  }
+  else if (hprec == EXSE_PREC_FP64)
+  {
+    binReadInt64(fileID, byteswap, SRV_HEADER_LEN, tempheader.i64);
+    for (int i = 0; i < SRV_HEADER_LEN; i++) srvp->header[i] = (int) tempheader.i64[i];
+  }
+  else
+  {
+    Error("Unexpected header precision %d", hprec);
   }
 
   size_t blocklen2 = binReadF77Block(fileID, byteswap);
-
   if (blocklen2 != blocklen)
   {
-    Warning("Header blocklen differ (blocklen1=%d; blocklen2=%d)!", blocklen, blocklen2);
+    Warning("Header blocklen differ (blocklen1=%zu; blocklen2=%zu)!", blocklen, blocklen2);
     if (blocklen2 != 0) return -1;
   }
 
   srvp->datasize = (size_t) srvp->header[4] * (size_t) srvp->header[5];
-
   if (SRV_Debug) Message("datasize = %zu", srvp->datasize);
 
   blocklen = binReadF77Block(fileID, byteswap);
-
   if (srvp->buffersize < blocklen)
   {
     srvp->buffersize = blocklen;
@@ -388,22 +361,18 @@ srvRead(int fileID, void *srv)
   }
 
   size_t dprec = blocklen / srvp->datasize;
-
   srvp->dprec = (int) dprec;
-
   if (dprec != EXSE_PREC_FP32 && dprec != EXSE_PREC_FP64)
   {
-    Warning("Unexpected data precision %d", dprec);
+    Warning("Unexpected data precision %zu", dprec);
     return -1;
   }
 
   fileRead(fileID, srvp->buffer, blocklen);
-
   blocklen2 = binReadF77Block(fileID, byteswap);
-
   if (blocklen2 != blocklen)
   {
-    Warning("Data blocklen differ (blocklen1=%d; blocklen2=%d)!", blocklen, blocklen2);
+    Warning("Data blocklen differ (blocklen1=%zu; blocklen2=%zu)!", blocklen, blocklen2);
     if (blocklen2 != 0) return -1;
   }
 
@@ -425,25 +394,19 @@ srvWrite(int fileID, void *srv)
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
-  switch (hprec)
+  if (hprec == EXSE_PREC_FP32)
   {
-    case EXSE_PREC_FP32:
-    {
-      for (int i = 0; i < SRV_HEADER_LEN; i++) tempheader.i32[i] = (int32_t) header[i];
-      binWriteInt32(fileID, byteswap, SRV_HEADER_LEN, tempheader.i32);
-      break;
-    }
-    case EXSE_PREC_FP64:
-    {
-      for (int i = 0; i < SRV_HEADER_LEN; i++) tempheader.i64[i] = (int64_t) header[i];
-      binWriteInt64(fileID, byteswap, SRV_HEADER_LEN, tempheader.i64);
-      break;
-    }
-    default:
-    {
-      Error("unexpected header precision %d", hprec);
-      break;
-    }
+    for (int i = 0; i < SRV_HEADER_LEN; i++) tempheader.i32[i] = (int32_t) header[i];
+    binWriteInt32(fileID, byteswap, SRV_HEADER_LEN, tempheader.i32);
+  }
+  else if (hprec == EXSE_PREC_FP64)
+  {
+    for (int i = 0; i < SRV_HEADER_LEN; i++) tempheader.i64[i] = (int64_t) header[i];
+    binWriteInt64(fileID, byteswap, SRV_HEADER_LEN, tempheader.i64);
+  }
+  else
+  {
+    Error("unexpected header precision %d", hprec);
   }
 
   binWriteF77Block(fileID, byteswap, blocklen);
@@ -453,23 +416,11 @@ srvWrite(int fileID, void *srv)
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
-  switch (dprec)
+  if (dprec == EXSE_PREC_FP32) { binWriteFlt32(fileID, byteswap, srvp->datasize, (float *) srvp->buffer); }
+  else if (dprec == EXSE_PREC_FP64) { binWriteFlt64(fileID, byteswap, srvp->datasize, (double *) srvp->buffer); }
+  else
   {
-    case EXSE_PREC_FP32:
-    {
-      binWriteFlt32(fileID, byteswap, srvp->datasize, (float *) srvp->buffer);
-      break;
-    }
-    case EXSE_PREC_FP64:
-    {
-      binWriteFlt64(fileID, byteswap, srvp->datasize, (double *) srvp->buffer);
-      break;
-    }
-    default:
-    {
-      Error("unexpected data precision %d", dprec);
-      break;
-    }
+    Error("unexpected data precision %d", dprec);
   }
 
   binWriteF77Block(fileID, byteswap, blocklen);
