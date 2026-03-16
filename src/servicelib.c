@@ -40,7 +40,7 @@ static int srvDefaultDprec = 0;
 
 // A version string.
 #undef LIBVERSION
-#define LIBVERSION 2.0.0
+#define LIBVERSION 2.1.0
 #define XSTRING(x) #x
 #define STRING(x) XSTRING(x)
 static const char srv_libvers[] = STRING(LIBVERSION);
@@ -64,44 +64,38 @@ static void
 srvLibInit(void)
 {
   const char *envName = "SRV_PRECISION";
+  const char *envString = getenv(envName);
+  if (!envString) return;
 
-  char *envString = getenv(envName);
-  if (envString)
+  int nrun = (strlen(envString) == 2) ? 1 : 2;
+  int pos = 0;
+  while (nrun--)
   {
-    int nrun = (strlen(envString) == 2) ? 1 : 2;
-    int pos = 0;
-    while (nrun--)
+    int c1 = tolower((int) envString[pos]);
+    int c2 = envString[pos + 1];
+    if (c1 == 'i')
     {
-      switch (tolower((int) envString[pos]))
+      switch (c2)
       {
-        case 'i':
-        {
-          switch ((int) envString[pos + 1])
-          {
-            case '4': srvDefaultHprec = EXSE_PREC_FP32; break;
-            case '8': srvDefaultHprec = EXSE_PREC_FP64; break;
-            default: Warning("Invalid digit in %s: %s", envName, envString);
-          }
-          break;
-        }
-        case 'r':
-        {
-          switch ((int) envString[pos + 1])
-          {
-            case '4': srvDefaultDprec = EXSE_PREC_FP32; break;
-            case '8': srvDefaultDprec = EXSE_PREC_FP64; break;
-            default: Warning("Invalid digit in %s: %s", envName, envString);
-          }
-          break;
-        }
-        default:
-        {
-          Warning("Invalid character in %s: %s", envName, envString);
-          break;
-        }
+        case '4': srvDefaultHprec = EXSE_PREC_FP32; break;
+        case '8': srvDefaultHprec = EXSE_PREC_FP64; break;
+        default: Warning("Invalid digit in %s: %s", envName, envString);
       }
-      pos += 2;
     }
+    else if (c1 == 'r')
+    {
+      switch (c2)
+      {
+        case '4': srvDefaultDprec = EXSE_PREC_FP32; break;
+        case '8': srvDefaultDprec = EXSE_PREC_FP64; break;
+        default: Warning("Invalid digit in %s: %s", envName, envString);
+      }
+    }
+    else
+    {
+      Warning("Invalid character in %s: %s", envName, envString);
+    }
+    pos += 2;
   }
 
   initSrvLib = 1;
@@ -123,10 +117,8 @@ void *
 srvNew(void)
 {
   if (!initSrvLib) srvLibInit();
-
   srvrec_t *srvp = (srvrec_t *) Malloc(sizeof(srvrec_t));
   srvInit(srvp);
-
   return (void *) srvp;
 }
 
@@ -134,7 +126,6 @@ void
 srvDelete(void *srv)
 {
   srvrec_t *srvp = (srvrec_t *) srv;
-
   if (srvp)
   {
     if (srvp->buffer) Free(srvp->buffer);
@@ -157,44 +148,30 @@ srvCheckFiletype(int fileID, int *swap)
 
   if (SRV_Debug) Message("blocklen = %d sblocklen = %d", blocklen, sblocklen);
 
-  // clang-format off
-  if (blocklen == 32)
-    {
-     *swap = 0;
-      fact = blocklen>>3;
-      if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
-      pbuf = buffer+4*fact;      dimx = (size_t) get_uint32(pbuf);
-      pbuf = buffer+5*fact;      dimy = (size_t) get_uint32(pbuf);
-      pbuf = buffer+blocklen+4;  data = (size_t) get_uint32(pbuf);
-    }
-  else if (blocklen == 64)
-    {
-     *swap = 0;
-      fact = blocklen>>3;
-      if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
-      pbuf = buffer+4*fact;      dimx = (size_t) get_uint64(pbuf);
-      pbuf = buffer+5*fact;      dimy = (size_t) get_uint64(pbuf);
-      pbuf = buffer+blocklen+4;  data = (size_t) get_uint32(pbuf);
-    }
-  else if (sblocklen == 32)
-    {
-     *swap = 1;
-      fact = sblocklen>>3;
-      if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
-      pbuf = buffer+4*fact;       dimx = (size_t) get_swap_uint32(pbuf);
-      pbuf = buffer+5*fact;       dimy = (size_t) get_swap_uint32(pbuf);
-      pbuf = buffer+sblocklen+4;  data = (size_t) get_swap_uint32(pbuf);
-    }
-  else if (sblocklen == 64)
-    {
-     *swap = 1;
-      fact = sblocklen>>3;
-      if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
-      pbuf = buffer+4*fact;       dimx = (size_t) get_swap_uint64(pbuf);
-      pbuf = buffer+5*fact;       dimy = (size_t) get_swap_uint64(pbuf);
-      pbuf = buffer+sblocklen+4;  data = (size_t) get_swap_uint32(pbuf);
-    }
-  // clang-format on
+  if (blocklen == 32 || blocklen == 64)
+  {
+    *swap = 0;
+    fact = blocklen >> 3;
+    if (fileRead(fileID, buffer, blocklen + 8) != blocklen + 8) return 0;
+    pbuf = buffer + 4 * fact;
+    dimx = (blocklen == 32) ? (size_t) get_uint32(pbuf) : get_uint64(pbuf);
+    pbuf = buffer + 5 * fact;
+    dimy = (blocklen == 32) ? (size_t) get_uint32(pbuf) : get_uint64(pbuf);
+    pbuf = buffer + blocklen + 4;
+    data = (size_t) get_uint32(pbuf);
+  }
+  else if (sblocklen == 32 || sblocklen == 64)
+  {
+    *swap = 1;
+    fact = sblocklen >> 3;
+    if (fileRead(fileID, buffer, sblocklen + 8) != sblocklen + 8) return 0;
+    pbuf = buffer + 4 * fact;
+    dimx = (sblocklen == 32) ? (size_t) get_swap_uint32(pbuf) : (size_t) get_swap_uint64(pbuf);
+    pbuf = buffer + 5 * fact;
+    dimy = (sblocklen == 32) ? (size_t) get_swap_uint32(pbuf) : (size_t) get_swap_uint64(pbuf);
+    pbuf = buffer + sblocklen + 4;
+    data = (size_t) get_swap_uint32(pbuf);
+  }
 
   fileRewind(fileID);
 
@@ -209,11 +186,8 @@ int
 srvInqHeader(void *srv, int *header)
 {
   srvrec_t *srvp = (srvrec_t *) srv;
-
   for (int i = 0; i < SRV_HEADER_LEN; i++) header[i] = srvp->header[i];
-
   if (SRV_Debug) Message("datasize = %lu", srvp->datasize);
-
   return 0;
 }
 
@@ -221,13 +195,9 @@ int
 srvDefHeader(void *srv, const int *header)
 {
   srvrec_t *srvp = (srvrec_t *) srv;
-
   for (int i = 0; i < SRV_HEADER_LEN; i++) srvp->header[i] = header[i];
-
   srvp->datasize = (size_t) header[4] * (size_t) header[5];
-
   if (SRV_Debug) Message("datasize = %zu", srvp->datasize);
-
   return 0;
 }
 
@@ -246,8 +216,7 @@ srvInqData(srvrec_t *srvp, int prec, void *data)
     {
       if (byteswap) swap4byte(buffer, datasize);
 
-      if (dprec == prec)
-        memcpy(data, buffer, datasize * sizeof(float));
+      if (dprec == prec) { memcpy(data, buffer, datasize * sizeof(float)); }
       else
         for (size_t i = 0; i < datasize; i++) ((double *) data)[i] = (double) ((float *) buffer)[i];
 
@@ -257,8 +226,7 @@ srvInqData(srvrec_t *srvp, int prec, void *data)
     {
       if (byteswap) swap8byte(buffer, datasize);
 
-      if (dprec == prec)
-        memcpy(data, buffer, datasize * sizeof(double));
+      if (dprec == prec) { memcpy(data, buffer, datasize * sizeof(double)); }
       else
         for (size_t i = 0; i < datasize; i++) ((float *) data)[i] = (float) ((double *) buffer)[i];
 

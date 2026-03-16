@@ -27,7 +27,7 @@ static int iegDefaultDprec = 0;
 
 // A version string.
 #undef LIBVERSION
-#define LIBVERSION 2.0.0
+#define LIBVERSION 2.1.0
 #define XSTRING(x) #x
 #define STRING(x) XSTRING(x)
 static const char ieg_libvers[] = STRING(LIBVERSION);
@@ -44,34 +44,34 @@ static void
 iegLibInit(void)
 {
   const char *envName = "IEG_PRECISION";
+  const char *envString = getenv(envName);
+  if (!envString) return;
 
-  char *envString = getenv(envName);
-  if (envString)
+  int nrun = (strlen(envString) == 2) ? 1 : 2;
+  int pos = 0;
+  while (nrun--)
   {
-    int nrun = (strlen(envString) == 2) ? 1 : 2;
-    int pos = 0;
-    while (nrun--)
+    int c1 = tolower((int) envString[pos]);
+    int c2 = envString[pos + 1];
+    switch (c1)
     {
-      switch (tolower((int) envString[pos]))
+      case 'r':
       {
-        case 'r':
+        switch (c2)
         {
-          switch ((int) envString[pos + 1])
-          {
-            case '4': iegDefaultDprec = EXSE_PREC_FP32; break;
-            case '8': iegDefaultDprec = EXSE_PREC_FP64; break;
-            default: Warning("Invalid digit in %s: %s", envName, envString);
-          }
-          break;
+          case '4': iegDefaultDprec = EXSE_PREC_FP32; break;
+          case '8': iegDefaultDprec = EXSE_PREC_FP64; break;
+          default: Warning("Invalid digit in %s: %s", envName, envString);
         }
-        default:
-        {
-          Warning("Invalid character in %s: %s", envName, envString);
-          break;
-        }
+        break;
       }
-      pos += 2;
+      default:
+      {
+        Warning("Invalid character in %s: %s", envName, envString);
+        break;
+      }
     }
+    pos += 2;
   }
 
   initIegLib = 1;
@@ -488,7 +488,10 @@ iegWrite(int fileID, void *ieg)
     for (int i = 0; i < 100; i++) buf.fvct[i] = (float) iegp->vct[i];
     binWriteFlt32(fileID, byteswap, 100, buf.fvct);
   }
-  else { binWriteFlt64(fileID, byteswap, 100, iegp->vct); }
+  else
+  {
+    binWriteFlt64(fileID, byteswap, 100, iegp->vct);
+  }
 
   binWriteF77Block(fileID, byteswap, blocklen);
 

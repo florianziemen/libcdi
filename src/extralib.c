@@ -39,7 +39,7 @@ static int extDefaultNumber = EXT_REAL;
 
 // A version string.
 #undef LIBVERSION
-#define LIBVERSION 2.0.0
+#define LIBVERSION 2.1.0
 #define XSTRING(x) #x
 #define STRING(x) XSTRING(x)
 static const char ext_libvers[] = STRING(LIBVERSION);
@@ -63,44 +63,36 @@ static void
 extLibInit(void)
 {
   const char *envName = "EXT_PRECISION";
+  const char *envString = getenv(envName);
 
-  char *envString = getenv(envName);
-  if (envString)
+  if (!envString || strlen(envString) != 2) return;
+
+  int c1 = tolower((int) envString[0]);
+  int c2 = envString[1];
+  if (c1 == 'r')
   {
-    if (strlen(envString) == 2)
+    extDefaultNumber = EXT_REAL;
+    switch (c2)
     {
-      switch (tolower((int) envString[0]))
-      {
-        case 'r':
-        {
-          extDefaultNumber = EXT_REAL;
-          switch ((int) envString[1])
-          {
-            case '2': extDefaultPrec = EXSE_PREC_FP16; break;
-            case '4': extDefaultPrec = EXSE_PREC_FP32; break;
-            case '8': extDefaultPrec = EXSE_PREC_FP64; break;
-            default: Warning("Invalid digit in %s: %s", envName, envString);
-          }
-          break;
-        }
-        case 'c':
-        {
-          extDefaultNumber = EXT_COMP;
-          switch ((int) envString[1])
-          {
-            case '4': extDefaultPrec = EXSE_PREC_FP32; break;
-            case '8': extDefaultPrec = EXSE_PREC_FP64; break;
-            default: Warning("Invalid digit in %s: %s", envName, envString);
-          }
-          break;
-        }
-        default:
-        {
-          Warning("Invalid character in %s: %s", envName, envString);
-          break;
-        }
-      }
+      case '2': extDefaultPrec = EXSE_PREC_FP16; break;
+      case '4': extDefaultPrec = EXSE_PREC_FP32; break;
+      case '8': extDefaultPrec = EXSE_PREC_FP64; break;
+      default: Warning("Invalid digit in %s: %s", envName, envString);
     }
+  }
+  else if (c1 == 'c')
+  {
+    extDefaultNumber = EXT_COMP;
+    switch (c2)
+    {
+      case '4': extDefaultPrec = EXSE_PREC_FP32; break;
+      case '8': extDefaultPrec = EXSE_PREC_FP64; break;
+      default: Warning("Invalid digit in %s: %s", envName, envString);
+    }
+  }
+  else
+  {
+    Warning("Invalid character in %s: %s", envName, envString);
   }
 
   initExtLib = 1;
@@ -157,40 +149,26 @@ extCheckFiletype(int fileID, int *swap)
 
   if (EXT_Debug) Message("blocklen = %d sblocklen = %d", blocklen, sblocklen);
 
-  // clang-format off
-  if (blocklen == 16)
-    {
-     *swap = 0;
-      fact = blocklen / 4;
-      if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
-      pbuf = buffer+3*fact;      dimxy = (size_t) get_uint32(pbuf);
-      pbuf = buffer+blocklen+4;  data  = (size_t) get_uint32(pbuf);
-    }
-  else if (blocklen == 32)
-    {
-     *swap = 0;
-      fact = blocklen / 4;
-      if (fileRead(fileID, buffer, blocklen+8) != blocklen+8) return 0;
-      pbuf = buffer+3*fact;      dimxy = (size_t) get_uint64(pbuf);
-      pbuf = buffer+blocklen+4;  data  = (size_t) get_uint32(pbuf);
-    }
-  else if (sblocklen == 16)
-    {
-     *swap = 1;
-      fact = sblocklen / 4;
-      if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
-      pbuf = buffer+3*fact;       dimxy = (size_t) get_swap_uint32(pbuf);
-      pbuf = buffer+sblocklen+4;  data  = (size_t) get_swap_uint32(pbuf);
-    }
-  else if (sblocklen == 32)
-    {
-     *swap = 1;
-      fact = sblocklen / 4;
-      if (fileRead(fileID, buffer, sblocklen+8) != sblocklen+8) return 0;
-      pbuf = buffer+3*fact;       dimxy = (size_t) get_swap_uint64(pbuf);
-      pbuf = buffer+sblocklen+4;  data  = (size_t) get_swap_uint32(pbuf);
-    }
-  // clang-format on
+  if (blocklen == 16 || blocklen == 32)
+  {
+    *swap = 0;
+    fact = blocklen / 4;
+    if (fileRead(fileID, buffer, blocklen + 8) != blocklen + 8) return 0;
+    pbuf = buffer + 3 * fact;
+    dimxy = (blocklen == 16) ? (size_t) get_uint32(pbuf) : (size_t) get_uint64(pbuf);
+    pbuf = buffer + blocklen + 4;
+    data = (size_t) get_uint32(pbuf);
+  }
+  else if (sblocklen == 16 || sblocklen == 32)
+  {
+    *swap = 1;
+    fact = sblocklen / 4;
+    if (fileRead(fileID, buffer, sblocklen + 8) != sblocklen + 8) return 0;
+    pbuf = buffer + 3 * fact;
+    dimxy = (sblocklen == 16) ? (size_t) get_swap_uint32(pbuf) : (size_t) get_swap_uint64(pbuf);
+    pbuf = buffer + sblocklen + 4;
+    data = (size_t) get_swap_uint32(pbuf);
+  }
 
   fileRewind(fileID);
 
@@ -205,11 +183,8 @@ int
 extInqHeader(void *ext, int *header)
 {
   extrec_t *extp = (extrec_t *) ext;
-
   for (int i = 0; i < EXT_HEADER_LEN; i++) header[i] = extp->header[i];
-
   if (EXT_Debug) Message("datasize = %zu", extp->datasize);
-
   return 0;
 }
 
@@ -217,14 +192,10 @@ int
 extDefHeader(void *ext, const int *header)
 {
   extrec_t *extp = (extrec_t *) ext;
-
   for (int i = 0; i < EXT_HEADER_LEN; i++) extp->header[i] = header[i];
-
   extp->datasize = (size_t) header[3];
   if (extp->number == EXT_COMP) extp->datasize *= 2;
-
   if (EXT_Debug) Message("datasize = %zu", extp->datasize);
-
   return 0;
 }
 
@@ -317,8 +288,7 @@ extDefData(void *ext, int prec, const void *data)
   int rprec = extDefaultPrec ? extDefaultPrec : extp->prec;
   extp->prec = rprec ? rprec : prec;
 
-  int *header = extp->header;
-
+  const int *header = extp->header;
   size_t datasize = (size_t) header[3];
   if (extp->number == EXT_COMP) datasize *= 2;
   size_t blocklen = datasize * (size_t) rprec;
@@ -447,7 +417,6 @@ extRead(int fileID, void *ext)
   }
 
   size_t blocklen2 = binReadF77Block(fileID, byteswap);
-
   if (blocklen2 != blocklen)
   {
     Warning("Header blocklen differ (blocklen1=%d; blocklen2=%d)!", blocklen, blocklen2);
