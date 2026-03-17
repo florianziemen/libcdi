@@ -6,12 +6,18 @@
 
 #define FILE_UNDEFID -1
 
-#define FILE_TYPE_OPEN 1
-#define FILE_TYPE_FOPEN 2
+enum
+{
+  FILE_TYPE_OPEN = 1,
+  FILE_TYPE_FOPEN = 2
+};
 
 // buffer types for FILE_TYPE_OPEN
-#define FILE_BUFTYPE_STD 1
-#define FILE_BUFTYPE_MMAP 2
+enum
+{
+  FILE_BUFTYPE_STD = 1,
+  FILE_BUFTYPE_MMAP = 2
+};
 
 const char *fileLibraryVersion(void);
 
