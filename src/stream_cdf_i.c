@@ -4198,17 +4198,14 @@ static void
 find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, stream_t *streamptr, bool *timeHasUnits,
                bool *timeHasBounds, bool *timeClimatology)
 {
-  int ncvarid;
-
   if (timedimid == CDI_UNDEFID)
   {
-    char timeUnitsStr[CDI_MAX_NAME];
-
-    for (ncvarid = 0; ncvarid < nvars; ncvarid++)
+    for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
       if (ncvar->ndims == 0 && ncvar->units[0] && str_is_equal(ncvar->name, "time"))
       {
+        char timeUnitsStr[CDI_MAX_NAME];
         strcpy(timeUnitsStr, ncvar->units);
         str_to_lower(timeUnitsStr);
         if (is_time_units(timeUnitsStr))
@@ -4229,7 +4226,7 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
       hasTimeVar = true;
     }
 
-    for (ncvarid = 0; ncvarid < nvars; ncvarid++)
+    for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
       if (ncvarid != streamptr->basetime.ncvarid && ncvar->ndims == 1 && timedimid == ncvar->dimids[0] && !xtypeIsText(ncvar->xtype)
@@ -4251,7 +4248,7 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
 
     if (hasTimeVar == false)  // search for WRF time description
     {
-      for (ncvarid = 0; ncvarid < nvars; ncvarid++)
+      for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
       {
         ncvar_t *ncvar = &ncvars[ncvarid];
         int dim1len = ncdims[ncvar->dimids[1]].len;
@@ -4267,14 +4264,12 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
     }
 
     // time varID
-    ncvarid = streamptr->basetime.ncvarid;
-
+    int ncvarid = streamptr->basetime.ncvarid;
     if (ncvarid == CDI_UNDEFID && ncdims[timedimid].len > 0) Warning("Time variable >%s< not found!", ncdims[timedimid].name);
   }
 
   // time varID
-  ncvarid = streamptr->basetime.ncvarid;
-
+  int ncvarid = streamptr->basetime.ncvarid;
   if (ncvarid != CDI_UNDEFID && streamptr->basetime.isWRF == false)
   {
     ncvar_t *ncvar = &ncvars[ncvarid];
