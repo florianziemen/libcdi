@@ -571,9 +571,9 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
 static void
 init_ncdims(int ndims, ncdim_t *ncdims)
 {
-  for (int gdimid = 0; gdimid < ndims; gdimid++)
+  for (int i = 0; i < ndims; i++)
   {
-    ncdim_t *ncdim = &ncdims[gdimid];
+    ncdim_t *ncdim = &ncdims[i];
     ncdim->dimid = CDI_UNDEFID;
     ncdim->ncvarid = CDI_UNDEFID;
     ncdim->dimtype = CDI_UNDEFID;
@@ -1238,10 +1238,11 @@ add_dimid_ifnew(int dimid, int ndims, ncdim_t *ncdims)
 {
   for (int i = 0; i < ndims; ++i)
   {
-    if (ncdims[i].dimid != -1 && ncdims[i].dimid == dimid) return;
-    if (ncdims[i].dimid == -1)
+    ncdim_t *ncdim = &ncdims[i];
+    if (ncdim->dimid != -1 && ncdim->dimid == dimid) { return; }
+    if (ncdim->dimid == -1)
     {
-      ncdims[i].dimid = dimid;
+      ncdim->dimid = dimid;
       return;
     }
   }
@@ -1253,7 +1254,7 @@ set_dimension_ids(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims)
   for (int varid = 0; varid < nvars; varid++)
   {
     ncvar_t *ncvar = &ncvars[varid];
-    for (int vdimid = 0; vdimid < ncvar->ndims; ++vdimid) { add_dimid_ifnew(ncvar->dimids[vdimid], ndims, ncdims); }
+    for (int i = 0; i < ncvar->ndims; ++i) { add_dimid_ifnew(ncvar->dimids[i], ndims, ncdims); }
   }
 }
 
@@ -1265,7 +1266,7 @@ read_vars_info(int nvars, ncvar_t *ncvars, int format)
     ncvar_t *ncvar = &ncvars[varid];
     cdf_inq_var(ncvar->ncid, varid, ncvar->name, &ncvar->xtype, &ncvar->ndims, ncvar->dimids, &ncvar->nattsNC);
 
-    for (int vdimid = 0; vdimid < ncvar->ndims; vdimid++) { ncvar->dimtypes[vdimid] = -1; }
+    for (int i = 0; i < ncvar->ndims; i++) { ncvar->dimtypes[i] = -1; }
 
     if (format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4)
     {
