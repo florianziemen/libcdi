@@ -523,27 +523,21 @@ static int
 cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
 {
   char dimname[CDI_MAX_NAME];
-  for (int dimid = 0; dimid < ndims; ++dimid)
+  for (int dimIdx = 0; dimIdx < ndims; ++dimIdx)
   {
-    strcpy(dimname, ncdims[dimid].name);
-    if (str_is_equal("time", str_to_lower(dimname))) return dimid;
+    strcpy(dimname, ncdims[dimIdx].name);
+    if (str_is_equal("time", str_to_lower(dimname))) return ncdims[dimIdx].dimid;
   }
 
   bool check_dimids[MAX_DIMS_CDF];
-  for (int i = 0; i < MAX_DIMS_CDF; ++i) check_dimids[i] = false;
+  for (int i = 0; i < MAX_DIMS_CDF; ++i) { check_dimids[i] = false; }
 
   for (int varid = 0; varid < nvars; ++varid)
   {
     ncvar_t *ncvar = &ncvars[varid];
     if (ncvars[varid].ndims == 1)
     {
-      int dimid0 = CDI_UNDEFID;
-      for (int gdimid = 0; gdimid < ndims; ++gdimid)
-        if (gdimid == ncvar->dimids[0])
-        {
-          dimid0 = gdimid;
-          break;
-        }
+      int dimid0 = ncvar->dimids[0];
 
       if (dimid0 != CDI_UNDEFID && check_dimids[dimid0] == false)
       {
@@ -558,7 +552,7 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
           if (str_is_equal(sbuf, "units"))
           {
             cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
-            if (is_timeaxis_units(sbuf)) return dimid0;
+            if (is_timeaxis_units(sbuf)) return ncdims[dimid0].dimid;
           }
         }
       }
@@ -4667,11 +4661,21 @@ stream_set_ncdims(stream_t *streamptr, int ndims, ncdim_t *ncdims)
 static void
 read_ncdims(int fileID, int ndims, ncdim_t *ncdims)
 {
-  for (int dimIndex = 0; dimIndex < ndims; dimIndex++)
+  for (int i = 0; i < ndims; i++)
   {
-    cdf_inq_dimlen(fileID, ncdims[dimIndex].dimid, &ncdims[dimIndex].len);
-    cdf_inq_dimname(fileID, ncdims[dimIndex].dimid, ncdims[dimIndex].name);
+    cdf_inq_dimlen(fileID, ncdims[i].dimid, &ncdims[i].len);
+    cdf_inq_dimname(fileID, ncdims[i].dimid, ncdims[i].name);
   }
+}
+
+static int
+find_dimidx(int nctimedimid, int ndims, ncdim_t *ncdims)
+{
+  for (int i = 0; i < ndims; i++)
+  {
+    if (nctimedimid == ncdims[i].dimid) return i;
+  }
+  return -1;
 }
 
 static void
@@ -4836,7 +4840,8 @@ cdfInqContents(stream_t *streamptr)
   cdf_scan_global_attr(fileID, vlistID, ngatts, &instID, &modelID, &ucla_les, uuidOfVGrid, &gridInfo);
 
   // find time dim
-  int timedimid = (unlimdimid >= 0) ? unlimdimid : cdf_time_dimid(fileID, ndims, ncdims, nvars, ncvars);
+  int nctimedimid = (unlimdimid >= 0) ? unlimdimid : cdf_time_dimid(fileID, ndims, ncdims, nvars, ncvars);
+  int timedimid = (nctimedimid == CDI_UNDEFID) ? CDI_UNDEFID : find_dimidx(nctimedimid, ndims, ncdims);
   streamptr->basetime.ncdimid = timedimid;
 
   size_t ntsteps = (timedimid == CDI_UNDEFID) ? 0 : ncdims[timedimid].len;
@@ -4852,7 +4857,7 @@ cdfInqContents(stream_t *streamptr)
   // set T_AXIS dimtype
   for (int gdimid = 0; gdimid < ndims; gdimid++)
   {
-    if (timedimid == gdimid) ncdims[gdimid].dimtype = T_AXIS;
+    if (timedimid == gdimid) { ncdims[gdimid].dimtype = T_AXIS; }
   }
 
   stream_set_ncdims(streamptr, ndims, ncdims);
