@@ -8,6 +8,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 add_library(libcdi)
 add_library(libcdi::libcdi ALIAS libcdi)
 
+list(APPEND CMAKE_MODULE_PATH
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 include(CTest)
 include(CheckIncludeFile)
 
@@ -100,6 +103,8 @@ endif ()
 if (BUILD_TESTING)
   add_subdirectory(tests)
 endif ()
+
+add_subdirectory(interfaces/f2003)
 
 # --- Installation
 # packages required for installation
