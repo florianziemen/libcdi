@@ -1,0 +1,7 @@
+if(${CDI_PTHREAD})
+  include(FindThreads)
+  find_package(Threads REQUIRED)
+  set_target_properties(Threads::Threads PROPERTIES THREADS_PREFER_PTHREAD_FLAG TRUE)
+  target_compile_definitions(libcdi PRIVATE HAVE_LIBPTHREAD=1)
+  target_link_libraries(libcdi pthread)
+endif()
