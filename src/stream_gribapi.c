@@ -731,6 +731,52 @@ gribapiInqGridHEALPIX(grib_handle *gh, int gridID)
 }
 
 static void
+read_additional_keys(grib_handle *gh, int varID, int tile_index)
+{
+  // Handle individual long and double keys
+  for (int i = 0; i < cdiNAdditionalGRIBKeys; i++)
+  {
+    const char *key = cdiAdditionalGRIBKeys[i];
+
+    size_t numValues = 0;
+    grib_get_size(gh, key, &numValues);
+    if (numValues == 0) continue;
+
+    if (numValues == 1)
+    {
+      // Handling individual integer values
+      long lval;
+      if (grib_get_long(gh, key, &lval) == 0) { varDefOptGribInt(varID, tile_index, lval, key); }
+
+      // Handling individual double values
+      double dval;
+      if (grib_get_double(gh, key, &dval) == 0) { varDefOptGribDbl(varID, tile_index, dval, key); }
+    }
+    else
+    {
+      // Handling double arrays
+      bool readDataLong = true;
+      size_t darr_len = numValues;
+      double *darr = (double *) Malloc(numValues * sizeof(double));
+      if (grib_get_double_array(gh, key, darr, &darr_len) == 0)
+      {
+        readDataLong = false;
+        varDefOptGribDblArr(varID, tile_index, darr, darr_len, key);
+      }
+      Free(darr);
+
+      if (readDataLong)
+      {  // Handling long arrays
+        size_t arr_len = numValues;
+        long *larr = (long *) Malloc(numValues * sizeof(long));
+        if (grib_get_long_array(gh, key, larr, &arr_len) == 0) { varDefOptGribIntArr(varID, tile_index, larr, arr_len, key); }
+        Free(larr);
+      }
+    }
+  }
+}
+
+static void
 gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize, off_t position, int datatype, int comptype,
                  const char *varname, int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf,
                  int level_unit, VarScanKeys *scanKeys, const var_tile_t *tiles, bool lread_additional_keys, int fdbItemIndex)
@@ -852,51 +898,7 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   if (varname[0]) gribapiGetNameKeys(gh, varID);
   gribapiGetKeys(gh, varID);
 
-  if (lread_additional_keys)
-  {
-    long lval;
-    double dval;
-
-    // Handle individual long and double keys
-    for (int i = 0; i < cdiNAdditionalGRIBKeys; i++)
-    {
-      // Handling individual integer values
-      if (grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0)
-        varDefOptGribInt(varID, tile_index, lval, cdiAdditionalGRIBKeys[i]);
-
-      // Handling individual double values
-      if (grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0)
-        varDefOptGribDbl(varID, tile_index, dval, cdiAdditionalGRIBKeys[i]);
-
-      // Handling long arrays
-      long *larr = NULL;
-      size_t arr_len = 0;
-      if (grib_get_long_array(gh, cdiAdditionalGRIBKeys[i], NULL, &arr_len) == 0)
-      {
-        // Now that we know the array length, allocate memory
-        larr = (long *) Malloc(arr_len * sizeof(long));
-        if (grib_get_long_array(gh, cdiAdditionalGRIBKeys[i], larr, &arr_len) == 0)
-        {
-          varDefOptGribIntArr(varID, tile_index, larr, arr_len, cdiAdditionalGRIBKeys[i]);
-        }
-        Free(larr);  // Free the long array after use
-      }
-
-      // Handling double arrays
-      double *darr = NULL;
-      size_t darr_len = 0;
-      if (grib_get_double_array(gh, cdiAdditionalGRIBKeys[i], NULL, &darr_len) == 0)
-      {
-        // Allocate memory for the double array
-        darr = (double *) Malloc(darr_len * sizeof(double));
-        if (grib_get_double_array(gh, cdiAdditionalGRIBKeys[i], darr, &darr_len) == 0)
-        {
-          varDefOptGribDblArr(varID, tile_index, darr, darr_len, cdiAdditionalGRIBKeys[i]);
-        }
-        Free(darr);  // Free the double array after use
-      }
-    }
-  }
+  if (lread_additional_keys) read_additional_keys(gh, varID, tile_index);
 
   if (varInqInst(varID) == CDI_UNDEFID)
   {
@@ -3020,7 +3022,8 @@ gribapiSetScanningMode(grib_handle *gh, int scanningMode)
                   (FORTRAN: (J,I))
 
   => Scanning Mode     0 0 0 0 0 0 0 0  (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & North->South)
-  => Scanning Mode     0 1 0 0 0 0 0 0  (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & South->North )
+  => Scanning Mode     0 1 0 0 0 0 0 0  (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & South->North
+  )
   => Scanning Mode     1 1 0 0 0 0 0 0  (96 dec)  +i, +j; j direction consecutive (column-major order South->North & West->East )
 
   NOTE:  South->North  - As if you would plot the data as image on the screen
