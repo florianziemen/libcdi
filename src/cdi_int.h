@@ -118,6 +118,24 @@ str_is_equal(const char *x, const char *y)
 #define IS_EQUAL(x, y) (!IS_NOT_EQUAL(x, y))
 #endif
 
+static inline bool
+dbl_is_nan(double x)
+{
+#ifdef HAVE_DECL_ISNAN
+  return isnan(x);
+#elif defined(FP_NAN)
+  return (fpclassify(x) == FP_NAN);
+#else
+  return x != x;
+#endif
+}
+
+static inline bool
+dbl_is_equal(double x, double y)
+{
+  return (dbl_is_nan(x) || dbl_is_nan(y)) ? dbl_is_nan(x) && dbl_is_nan(y) : !(x < y || y < x);
+}
+
 enum
 {
   TYPE_REC,
