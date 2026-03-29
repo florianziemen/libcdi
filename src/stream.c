@@ -43,6 +43,10 @@
 #include "namespace.h"
 #include "async_worker.h"
 
+// clang-format off
+#define FREE_AND_NULL(p) do { if (p) { Free(p); (p) = NULL; } } while(0)
+// clang-format on
+
 static stream_t *stream_new_entry(int resH);
 static int streamCompareP(void *streamptr1, void *streamptr2);
 static void streamDestroyP(void *streamptr);
@@ -695,11 +699,10 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
   if (fileID < 0)
   {
     streamID = fileID;
-    if (streamptr->record) Free(streamptr->record);
+    if (streamptr->record) FREE_AND_NULL(streamptr->record);
     reshRemove(streamptr->self, &streamOps);
     if (streamptr->lockIO) CDI_IO_UNLOCK();
-    Free(streamptr);
-    streamptr = NULL;
+    FREE_AND_NULL(streamptr);
   }
   else
   {
@@ -746,7 +749,7 @@ streamOpenNCMem(int ncidp, char mode)
     if (status < 0)
     {
       streamID = status;
-      if (streamptr->record) Free(streamptr->record);
+      if (streamptr->record) FREE_AND_NULL(streamptr->record);
       reshRemove(streamptr->self, &streamOps);
     }
   }
@@ -938,7 +941,7 @@ streamOpenRead(const char *filename)
     if (status < 0)
     {
       streamID = (int) status;
-      if (streamptr->record) Free(streamptr->record);
+      if (streamptr->record) FREE_AND_NULL(streamptr->record);
       reshRemove(streamptr->self, &streamOps);
     }
   }
@@ -996,7 +999,7 @@ streamOpenReadQuery(const char *filename, struct CdiQuery *query)
     if (status < 0)
     {
       streamID = (int) status;
-      if (streamptr->record) Free(streamptr->record);
+      if (streamptr->record) FREE_AND_NULL(streamptr->record);
       reshRemove(streamptr->self, &streamOps);
     }
   }
@@ -1190,11 +1193,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
   int fileID = streamptr->fileID;
   int filetype = streamptr->filetype;
 
-  if (streamptr->filterSpec)
-  {
-    free(streamptr->filterSpec);
-    streamptr->filterSpec = NULL;
-  }
+  if (streamptr->filterSpec) { FREE_AND_NULL(streamptr->filterSpec); }
 
   switch (streamptr->protocol)
   {
@@ -1204,8 +1203,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
       if (streamptr->protocolData)
       {
         Free(((across_info_t *) streamptr->protocolData)->expid);
-        Free(streamptr->protocolData);
-        streamptr->protocolData = NULL;
+        FREE_AND_NULL(streamptr->protocolData);
       }
 #endif
       return;
@@ -1280,9 +1278,9 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
       {
         tsteps_t *tstep = &(streamptr->tsteps[0]);
         // clang-format off
-        if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
-        if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
-        if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
+        if (tstep->recinfo) { FREE_AND_NULL(tstep->recinfo); }
+        if (tstep->records) { FREE_AND_NULL(tstep->records); }
+        if (tstep->recIDs) { FREE_AND_NULL(tstep->recIDs); }
         // clang-format on
       }
       break;
@@ -1299,18 +1297,15 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 static void
 deallocate_sleveltable_t(sleveltable_t *entry)
 {
-  if (entry->recordID) Free(entry->recordID);
-  if (entry->lindex) Free(entry->lindex);
-  entry->recordID = NULL;
-  entry->lindex = NULL;
+  if (entry->recordID) FREE_AND_NULL(entry->recordID);
+  if (entry->lindex) FREE_AND_NULL(entry->lindex);
 }
 
 #ifdef HAVE_LIBNETCDF
 static void
 deallocate_cdfCache(CdfCache *cache)
 {
-  if (cache->buffer) Free(cache->buffer);
-  cache->buffer = NULL;
+  if (cache->buffer) FREE_AND_NULL(cache->buffer);
 }
 #endif
 
@@ -1323,18 +1318,12 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
   if (streamptr->record)
   {
     if (streamptr->record->buffer) Free(streamptr->record->buffer);
-    Free(streamptr->record);
-    streamptr->record = NULL;
+    FREE_AND_NULL(streamptr->record);
   }
 
   streamptr->filetype = CDI_FILETYPE_UNDEF;
-  if (streamptr->filename)
-  {
-    Free(streamptr->filename);
-    streamptr->filename = NULL;
-  }
-
-  if (streamptr->filterSpec) free(streamptr->filterSpec);
+  if (streamptr->filename) { FREE_AND_NULL(streamptr->filename); }
+  if (streamptr->filterSpec) FREE_AND_NULL(streamptr->filterSpec);
 
   if (streamptr->vars)
   {
@@ -1349,8 +1338,7 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
       streamptr->vars[index].cdfCache = NULL;
 #endif
     }
-    Free(streamptr->vars);
-    streamptr->vars = NULL;
+    FREE_AND_NULL(streamptr->vars);
   }
 
   if (streamptr->tsteps)
@@ -1360,15 +1348,14 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
     {
       tsteps_t *tstep = &(streamptr->tsteps[index]);
       // clang-format off
-      if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
-      if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
-      if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
+      if (tstep->recinfo) { FREE_AND_NULL(tstep->recinfo); }
+      if (tstep->records) { FREE_AND_NULL(tstep->records); }
+      if (tstep->recIDs) { FREE_AND_NULL(tstep->recIDs); }
       // clang-format on
       taxisDestroyKernel(&(tstep->taxis));
     }
 
-    Free(streamptr->tsteps);
-    streamptr->tsteps = NULL;
+    FREE_AND_NULL(streamptr->tsteps);
   }
 
 #ifdef HAVE_LIBFDB5
@@ -2091,9 +2078,9 @@ freePtrAfterNCMem(stream_t *streamptr, int recordBufIsToBeDeleted)
   {
     tsteps_t *tstep = &(streamptr->tsteps[0]);
     // clang-format off
-    if (tstep->recinfo) { Free(tstep->recinfo); tstep->recinfo = NULL; }
-    if (tstep->records) { Free(tstep->records); tstep->records = NULL; }
-    if (tstep->recIDs) { Free(tstep->recIDs); tstep->recIDs = NULL; }
+    if (tstep->recinfo) { FREE_AND_NULL(tstep->recinfo); }
+    if (tstep->records) { FREE_AND_NULL(tstep->records); }
+    if (tstep->recIDs) { FREE_AND_NULL(tstep->recIDs); }
     // clang-format on
   }
 }
