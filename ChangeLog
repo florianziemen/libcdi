@@ -4,6 +4,10 @@
 	* using FILE library version 1.9.2
 	* Version 2.6.1 released
 
+2026-03-30  Uwe Schulzweida
+
+	* NetCDF: reading array without dimension failed (bug fix)
+
 2026-03-27  Uwe Schulzweida
 
 	* cdiAdditionalGRIBKeys: fix eccodes warning message for non array keys
