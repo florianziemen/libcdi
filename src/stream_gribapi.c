@@ -866,7 +866,7 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
     }
     case ZAXIS_REFERENCE:
     {
-      unsigned char uuid[CDI_UUID_SIZE];
+      unsigned char uuid[CDI_UUID_SIZE] = { 0 };
       long lpar;
       GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
       // if (lpar != 6) fprintf(stderr, "Warning ...\n");
@@ -875,7 +875,6 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
       GRIB_CHECK(grib_get_long(gh, "numberOfVGridUsed", &lpar), 0);
       int nvgrid = (int) lpar;
       size_t len = (size_t) CDI_UUID_SIZE;
-      memset(uuid, 0, CDI_UUID_SIZE);
       GRIB_CHECK(grib_get_bytes(gh, "uuidOfVGrid", uuid, &len), 0);
       varDefZAxisReference(nhlev, nvgrid, uuid);
       break;
@@ -947,8 +946,7 @@ static compvar2_t
 gribapiVarSet(int param, int level1, int level2, int leveltype, int tsteptype, size_t gridsize, char *name, VarScanKeys scanKeys,
               var_tile_t tiles_data)
 {
-  compvar2_t compVar;
-  memset(&compVar, 0, sizeof(compvar2_t));
+  compvar2_t compVar = { 0 };
   size_t maxlen = sizeof(compVar.name);
   size_t len = strlen(name);
   if (len > maxlen) len = maxlen;
@@ -959,7 +957,6 @@ gribapiVarSet(int param, int level1, int level2, int leveltype, int tsteptype, s
   compVar.ltype = leveltype;
   compVar.tsteptype = tsteptype;
   compVar.gridsize = gridsize;
-  // memset(compVar.name, 0, maxlen);
   memcpy(compVar.name, name, len);
   compVar.scanKeys = scanKeys;
   compVar.tiles = tiles_data;
@@ -970,8 +967,7 @@ gribapiVarSet(int param, int level1, int level2, int leveltype, int tsteptype, s
 static int
 gribapiVarCompare(const compvar2_t *compVar, const record_t *record, int flag)
 {
-  compvar2_t compVar0;
-  memset(&compVar0, 0, sizeof(compvar2_t));
+  compvar2_t compVar0 = { 0 };
   compVar0.param = record->param;
   compVar0.level1 = record->ilevel;
   compVar0.level2 = record->ilevel2;
@@ -2571,12 +2567,11 @@ gribapiDefGridUnstructured(grib_handle *gh, int gridID)
     if (position < 0) position = 0;
     GRIB_CHECK(my_grib_set_long(gh, "numberOfGridInReference", position), 0);
 
-    unsigned char uuid[CDI_UUID_SIZE];
-    size_t len = CDI_UUID_SIZE;
-    memset(uuid, 0, len);
+    unsigned char uuid[CDI_UUID_SIZE] = { 0 };
     int length = CDI_UUID_SIZE;
     status = cdiInqKeyBytes(gridID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
     if (status < 0) errCount++;
+    size_t len = CDI_UUID_SIZE;
     if (grib_set_bytes(gh, "uuidOfHGrid", uuid, &len) != 0) Warning("Can't write UUID!");
 
     if (warning && errCount > 0)
@@ -2969,9 +2964,8 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
         int nlev = 0;
         cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NLEV, &nlev);
         GRIB_CHECK(my_grib_set_long(gh, "nlev", nlev), 0);
-        unsigned char uuid[CDI_UUID_SIZE];
+        unsigned char uuid[CDI_UUID_SIZE] = { 0 };
         int length = CDI_UUID_SIZE;
-        memset(uuid, 0, (size_t) length);
         cdiInqKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, &length);
         size_t len = CDI_UUID_SIZE;
         if (grib_set_bytes(gh, "uuidOfVGrid", uuid, &len) != 0) Warning("Can't write UUID!");

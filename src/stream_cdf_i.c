@@ -4790,9 +4790,7 @@ process_var_query(struct CdiQuery *query, int nvars, ncvar_t *ncvars)
 int
 cdfInqContents(stream_t *streamptr)
 {
-  GridInfo gridInfo;
-  gridInfo.gridfile[0] = 0;
-  memset(gridInfo.uuid, 0, CDI_UUID_SIZE);
+  GridInfo gridInfo = { 0 };
   gridInfo.number_of_grid_used = CDI_UNDEFID;
   gridInfo.timedimid = CDI_UNDEFID;
 

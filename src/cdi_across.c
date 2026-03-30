@@ -393,8 +393,7 @@ across_connect_int(char *path, char filemode, stream_t *streamptr)
     return CDI_EINVAL;
   }
 
-  struct addrinfo hints;
-  memset(&hints, 0, sizeof(hints));
+  struct addrinfo hints = { 0 };
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = 0;
