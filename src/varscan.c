@@ -115,23 +115,26 @@ static int
 varGetEntry(int param, int gridID, int zaxistype, int ltype1, int tsteptype, const char *name, const VarScanKeys *scanKeys,
             const var_tile_t *tiles)
 {
+  int no_of_tiles = tiles ? tiles->numberOfTiles : -1;
+
   for (int varID = 0; varID < varInfoListSize; ++varID)
   {
     VarInfo *var = &varInfoList[varID];
     // testing for "param" implicitly checks if we are beyond the current vartable size:
-    if (var->param == param)
+    if (var->param != param) continue;
+
+    int vt_no_of_tiles = var->tiles ? subtypeGetGlobalDataP(var->tiles, SUBTYPE_ATT_NUMBER_OF_TILES) : -1;
+    if ((var->zaxistype == zaxistype) && (var->ltype1 == ltype1) && (var->tsteptype == tsteptype)
+        && (scanKeys == NULL || varScanKeysIsEqual(&var->scanKeys, scanKeys)) && (var->gridID == gridID)
+        && (vt_no_of_tiles == no_of_tiles))
     {
-      int no_of_tiles = tiles ? tiles->numberOfTiles : -1;
-      int vt_no_of_tiles = var->tiles ? subtypeGetGlobalDataP(var->tiles, SUBTYPE_ATT_NUMBER_OF_TILES) : -1;
-      if ((var->zaxistype == zaxistype) && (var->ltype1 == ltype1) && (var->tsteptype == tsteptype)
-          && (scanKeys == NULL || varScanKeysIsEqual(&var->scanKeys, scanKeys)) && (var->gridID == gridID)
-          && (vt_no_of_tiles == no_of_tiles))
+      if (name && name[0] && var->name && var->name[0])
       {
-        if (name && name[0] && var->name && var->name[0])
-        {
-          if (str_is_equal(name, var->name)) return varID;
-        }
-        else { return varID; }
+        if (str_is_equal(name, var->name)) return varID;
+      }
+      else
+      {
+        return varID;
       }
     }
   }
@@ -309,11 +312,7 @@ paramNewEntry(int param)
   }
   else
   {
-    while (varID < varInfoListSize)
-    {
-      if (varInfoList[varID].param == UNDEF_PARAM) break;
-      varID++;
-    }
+    while (varID < varInfoListSize && varInfoList[varID].param != UNDEF_PARAM) { varID++; }
   }
 
   // If the table overflows, double its size.
@@ -389,7 +388,6 @@ varAddRecord(int recID, int param, int gridID, int zaxistype, int hasBounds, int
     var->level_unit = level_unit;
     var->tsteptype = tsteptype;
     if (scanKeys) var->scanKeys = *scanKeys;
-
     if (name && name[0]) var->name = strdup(name);
   }
   else
@@ -504,7 +502,7 @@ cdi_generate_vars(stream_t *streamptr)
   int vlistID = streamptr->vlistID;
 
   int *varids = (int *) Malloc((size_t) varInfoListUsed * sizeof(int));
-  for (int varID = 0; varID < varInfoListUsed; varID++) varids[varID] = (int) varID;
+  for (int varID = 0; varID < varInfoListUsed; varID++) { varids[varID] = (int) varID; }
   /*
     if (streamptr->sortname)
       {
@@ -592,17 +590,15 @@ cdi_generate_vars(stream_t *streamptr)
         dlevels[levelID] = (level_sf*levelTable[levelID].level1 + level_sf*levelTable[levelID].level2) / 2.0;
     else
     */
-    for (int levelID = 0; levelID < nlevels; levelID++) dlevels[levelID] = level_sf * levelTable[levelID].level1;
+    for (int levelID = 0; levelID < nlevels; levelID++) { dlevels[levelID] = level_sf * levelTable[levelID].level1; }
 
     if (nlevels > 1)
     {
       bool linc = true, ldec = true, lsort = false;
       for (int levelID = 1; levelID < nlevels; levelID++)
       {
-        // check increasing of levels
-        linc &= (dlevels[levelID] > dlevels[levelID - 1]);
-        // check decreasing of levels
-        ldec &= (dlevels[levelID] < dlevels[levelID - 1]);
+        linc &= (dlevels[levelID] > dlevels[levelID - 1]);  // check increasing of levels
+        ldec &= (dlevels[levelID] < dlevels[levelID - 1]);  // check decreasing of levels
       }
       /*
        * always sort pressure z-axis to ensure
@@ -633,7 +629,7 @@ cdi_generate_vars(stream_t *streamptr)
             dlevels[levelID] = (level_sf*levelTable[levelID].level1 + level_sf*levelTable[levelID].level2) / 2.0;
         else
         */
-        for (int levelID = 0; levelID < nlevels; levelID++) dlevels[levelID] = level_sf * levelTable[levelID].level1;
+        for (int levelID = 0; levelID < nlevels; levelID++) { dlevels[levelID] = level_sf * levelTable[levelID].level1; }
       }
     }
 
@@ -642,8 +638,8 @@ cdi_generate_vars(stream_t *streamptr)
     {
       dlevels1 = (double *) Malloc(2 * (size_t) nlevels * sizeof(double));
       dlevels2 = dlevels1 + nlevels;
-      for (int levelID = 0; levelID < nlevels; levelID++) dlevels1[levelID] = level_sf * levelTable[levelID].level1;
-      for (int levelID = 0; levelID < nlevels; levelID++) dlevels2[levelID] = level_sf * levelTable[levelID].level2;
+      for (int levelID = 0; levelID < nlevels; levelID++) { dlevels1[levelID] = level_sf * levelTable[levelID].level1; }
+      for (int levelID = 0; levelID < nlevels; levelID++) { dlevels2[levelID] = level_sf * levelTable[levelID].level2; }
     }
 
     const char **cvals = NULL;
@@ -682,17 +678,17 @@ cdi_generate_vars(stream_t *streamptr)
     if (var->name) cdiDefKeyString(vlistID, varID, CDI_KEY_NAME, var->name);
 
     vlist_t *vlistptr = vlist_to_pointer(vlistID);
+    var_t *varx = &vlistptr->vars[varID];
     for (int i = 0; i < var->opt_grib_nentries; i++)
     {
-      resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries + 1);
-      vlistptr->vars[varID].opt_grib_nentries += 1;
-      int idx = vlistptr->vars[varID].opt_grib_nentries - 1;
+      resize_opt_grib_entries(varx, varx->opt_grib_nentries + 1);
+      varx->opt_grib_nentries += 1;
+      int idx = varx->opt_grib_nentries - 1;
 
-      vlistptr->vars[varID].opt_grib_kvpair[idx] = var->opt_grib_kvpair[i];
-      vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = NULL;
-      if (var->opt_grib_kvpair[i].keyword)
-        vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdup(var->opt_grib_kvpair[i].keyword);
-      vlistptr->vars[varID].opt_grib_kvpair[i].update = true;
+      varx->opt_grib_kvpair[idx] = var->opt_grib_kvpair[i];
+      varx->opt_grib_kvpair[idx].keyword = NULL;
+      if (var->opt_grib_kvpair[i].keyword) { varx->opt_grib_kvpair[idx].keyword = strdup(var->opt_grib_kvpair[i].keyword); }
+      varx->opt_grib_kvpair[i].update = true;
     }
     // note: if the key is not defined, we do not throw an error!
 
@@ -885,7 +881,7 @@ varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   int nzaxis = vlistptr->nzaxis;
 
-  if (ltype2 == 255) ltype2 = -1;
+  if (ltype2 == 255) { ltype2 = -1; }
 
   if (mode == 0)
     for (int index = 0; index < nzaxis; index++)
@@ -1169,7 +1165,10 @@ varDefOptGribIntArr(int varID, int tile_index, const long *larr, size_t arr_len,
       var->opt_grib_kvpair[idx].int_arr[i] = (int) larr[i];  // convert long to int
     }
   }
-  else { var->opt_grib_kvpair[idx].int_arr = NULL; }
+  else
+  {
+    var->opt_grib_kvpair[idx].int_arr = NULL;
+  }
 }
 #endif
 
@@ -1217,7 +1216,10 @@ varDefOptGribDblArr(int varID, int tile_index, const double *darr, size_t arr_le
     var->opt_grib_kvpair[idx].dbl_arr = (double *) Malloc(arr_len * sizeof(double));
     for (size_t i = 0; i < arr_len; i++) { var->opt_grib_kvpair[idx].dbl_arr[i] = darr[i]; }
   }
-  else { var->opt_grib_kvpair[idx].dbl_arr = NULL; }
+  else
+  {
+    var->opt_grib_kvpair[idx].dbl_arr = NULL;
+  }
 }
 
 #endif

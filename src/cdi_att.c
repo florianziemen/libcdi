@@ -51,7 +51,8 @@ find_att(cdi_atts_t *attsp, const char *name)
   for (size_t attid = 0; attid < attsp->nelems; attid++)
   {
     cdi_att_t *attp = atts + attid;
-    if (attp->namesz == slen && memcmp(attp->name, name, slen) == 0) return attp;  // Normal return
+    if (attp->namesz != slen) continue;
+    if (memcmp(attp->name, name, slen) == 0) return attp;  // Normal return
   }
 
   return NULL;
@@ -543,7 +544,8 @@ int
 cdi_att_compare(cdi_atts_t *attspa, cdi_atts_t *attspb, int attnum)
 {
   xassert(attnum >= 0 && attnum < (int) attspa->nelems && attnum < (int) attspb->nelems);
-  cdi_att_t *attpa = attspa->value + attnum, *attpb = attspb->value + attnum;
+  cdi_att_t *attpa = attspa->value + attnum;
+  cdi_att_t *attpb = attspb->value + attnum;
 
   if (attpa->namesz != attpb->namesz) return 1;
 

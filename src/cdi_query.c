@@ -44,7 +44,7 @@ static int
 sum_found(int listSize, const bool *listFound)
 {
   int numFound = 0;
-  for (int i = 0; i < listSize; ++i) numFound += listFound[i];
+  for (int i = 0; i < listSize; ++i) { numFound += listFound[i]; }
   return numFound;
 }
 
@@ -84,7 +84,7 @@ struct CdiQuery *
 cdiQueryCreate(void)
 {
   struct CdiQuery *query = (struct CdiQuery *) Malloc(sizeof(struct CdiQuery));
-  cdiQueryInit(query);
+  if (query) { cdiQueryInit(query); }
   return query;
 }
 
@@ -157,7 +157,7 @@ cdiQuerySetGroups(struct CdiQuery *query, int numGroups, const char **groups)
     query->numGroups = numGroups;
     query->groupsFound = (bool *) Calloc((size_t) numGroups, sizeof(bool));
     query->groups = (const char **) Malloc((size_t) numGroups * sizeof(char *));
-    for (int i = 0; i < numGroups; ++i) query->groups[i] = strdup(groups[i]);
+    for (int i = 0; i < numGroups; ++i) { query->groups[i] = strdup(groups[i]); }
   }
 }
 
@@ -170,7 +170,7 @@ cdiQuerySetNames(struct CdiQuery *query, int numNames, const char **names)
     query->numNames = numNames;
     query->namesFound = (bool *) Calloc((size_t) numNames, sizeof(bool));
     query->names = (const char **) Malloc((size_t) numNames * sizeof(char *));
-    for (int i = 0; i < numNames; ++i) query->names[i] = strdup(names[i]);
+    for (int i = 0; i < numNames; ++i) { query->names[i] = strdup(names[i]); }
   }
 }
 
@@ -181,7 +181,7 @@ cdiQuerySetCells(struct CdiQuery *query, int numCells, const size_t *cells)
   {
     query->numEntries += numCells;
     query->numCells = numCells;
-    for (int i = 0; i < numCells; ++i) query->cells[i] = cells[i];
+    for (int i = 0; i < numCells; ++i) { query->cells[i] = cells[i]; }
   }
 }
 
@@ -192,7 +192,7 @@ cdiQuerySetLayers(struct CdiQuery *query, int numLayers, const int *layers)
   {
     query->numEntries += numLayers;
     query->numLayers = numLayers;
-    for (int i = 0; i < numLayers; ++i) query->layers[i] = layers[i];
+    for (int i = 0; i < numLayers; ++i) { query->layers[i] = layers[i]; }
   }
 }
 
@@ -203,7 +203,7 @@ cdiQuerySetSteps(struct CdiQuery *query, int numSteps, const int *steps)
   {
     query->numEntries += numSteps;
     query->numSteps = numSteps;
-    for (int i = 0; i < numSteps; ++i) query->steps[i] = steps[i];
+    for (int i = 0; i < numSteps; ++i) { query->steps[i] = steps[i]; }
   }
 }
 

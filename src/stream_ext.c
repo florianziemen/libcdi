@@ -34,7 +34,6 @@ extDefDatatype(int datatype, int *prec, int *number)
     datatype = CDI_DATATYPE_FLT32;
 
   *number = (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64) ? 2 : 1;
-
   *prec = (datatype == CDI_DATATYPE_FLT64 || datatype == CDI_DATATYPE_CPX64) ? EXSE_PREC_FP64 : EXSE_PREC_FP32;
 }
 
@@ -168,6 +167,7 @@ extAddRecord(stream_t *streamptr, int param, int level, size_t xysize, size_t re
 {
   int vlistID = streamptr->vlistID;
   int tsID = streamptr->curTsID;
+
   int recID = recordNewEntry(streamptr, tsID);
   recinfo_t *recinfo = &(streamptr->tsteps[tsID].recinfo[recID]);
   record_t *record = &(streamptr->tsteps[tsID].records[recID]);

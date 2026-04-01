@@ -26,13 +26,11 @@ static void
 vlistvar_init_entry(var_t *vlistvars, int varID)
 {
   var_t *varptr = &vlistvars[varID];
-  varptr->flag = false;
-  varptr->lvalidrange = false;
+  memset(varptr, 0, sizeof(var_t));
+
   varptr->xyz = 5;  // xyzStorVals[5] == 321
-  varptr->missvalused = false;
   varptr->mvarID = varID;
   varptr->fvarID = varID;
-  varptr->param = 0;
   varptr->gridID = CDI_UNDEFID;
   varptr->zaxisID = CDI_UNDEFID;
   varptr->timetype = CDI_UNDEFID;
@@ -41,23 +39,15 @@ vlistvar_init_entry(var_t *vlistvars, int varID)
   varptr->instID = CDI_UNDEFID;
   varptr->modelID = CDI_UNDEFID;
   varptr->tableID = CDI_UNDEFID;
-  varptr->timave = 0;
-  varptr->nsb = 0;
   varptr->missval = CDI_Default_Missval;
   varptr->validrange[0] = VALIDMISS;
   varptr->validrange[1] = VALIDMISS;
-  varptr->levinfo = NULL;
   varptr->comptype = CDI_COMPRESS_NONE;
   varptr->complevel = 1;
   varptr->keys.nalloc = MAX_KEYS;
-  varptr->keys.nelems = 0;
   for (int i = 0; i < MAX_KEYS; ++i) varptr->keys.value[i].length = 0;
   varptr->atts.nalloc = MAX_ATTRIBUTES;
-  varptr->atts.nelems = 0;
   varptr->subtypeID = CDI_UNDEFID;
-  varptr->opt_grib_nentries = 0;
-  varptr->opt_grib_kvpair_size = 0;
-  varptr->opt_grib_kvpair = NULL;
 }
 
 static int
@@ -445,7 +435,10 @@ vlistInqVarName(int vlistID, int varID, char *name)
       tableInqEntry(tableID, code, -1, name, NULL, NULL);
       if (!name[0]) snprintf(name, 8, "var%d", code);
     }
-    else { snprintf(name, CDI_MAX_NAME, "param%d.%d.%d", pnum, pcat, pdis); }
+    else
+    {
+      snprintf(name, CDI_MAX_NAME, "param%d.%d.%d", pnum, pcat, pdis);
+    }
   }
 }
 
@@ -723,17 +716,17 @@ vlistDefVarDatatype(int vlistID, int varID, int datatype)
 {
   var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->datatype != datatype)
-  {
-    varptr->datatype = datatype;
+  if (varptr->datatype == datatype) return;
 
-    if (!varptr->missvalused)
+  varptr->datatype = datatype;
+
+  if (!varptr->missvalused)
+  {
+    double missval = varptr->missval;
+    bool missvalIsDefault = DBL_IS_EQUAL(missval, CDI_Default_Missval);
+    if (missvalIsDefault)
     {
-      double missval = varptr->missval;
-      bool missvalIsDefault = DBL_IS_EQUAL(missval, CDI_Default_Missval);
-      if (missvalIsDefault)
-      {
-        // clang-format off
+      // clang-format off
         switch (datatype)
           {
           case CDI_DATATYPE_INT8:   varptr->missval = -SCHAR_MAX; break;
@@ -744,11 +737,11 @@ vlistDefVarDatatype(int vlistID, int varID, int datatype)
           case CDI_DATATYPE_UINT32: varptr->missval =  UINT_MAX;  break;
           case CDI_DATATYPE_FLT32:  varptr->missval =  (float) CDI_Default_Missval;  break;
           }
-        // clang-format on
-      }
-      else
-      {
-        // clang-format off
+      // clang-format on
+    }
+    else
+    {
+      // clang-format off
         switch (datatype)
           {
           case CDI_DATATYPE_INT8:   varptr->missval = check_range(missval, -SCHAR_MAX, SCHAR_MAX) ? missval : -SCHAR_MAX; break;
@@ -759,11 +752,10 @@ vlistDefVarDatatype(int vlistID, int varID, int datatype)
           case CDI_DATATYPE_UINT32: varptr->missval = check_range(missval,          0,  UINT_MAX) ? missval :  UINT_MAX;  break;
           case CDI_DATATYPE_FLT32:  varptr->missval = check_range(missval,   -FLT_MAX,   FLT_MAX) ? missval :  CDI_Default_Missval;  break;
           }
-        // clang-format on
-      }
+      // clang-format on
     }
-    reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
   }
+  reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
 void
@@ -1053,7 +1045,10 @@ vlistDefFlag(int vlistID, int varID, int levID, int flag)
   levinfo_t li = DEFAULT_LEVINFO(levID);
   if (varptr->levinfo) { ; }
   else if (flag != li.flag) { cdiVlistCreateVarLevInfo(vlistptr, varID); }
-  else { return; }
+  else
+  {
+    return;
+  }
 
   varptr->levinfo[levID].flag = flag;
   varptr->flag = 0;
@@ -1166,7 +1161,10 @@ vlistDefIndex(int vlistID, int varID, int levelID, int index)
   levinfo_t li = DEFAULT_LEVINFO(levelID);
   if (varptr->levinfo) { ; }
   else if (index != li.index) { cdiVlistCreateVarLevInfo(vlistptr, varID); }
-  else { return; }
+  else
+  {
+    return;
+  }
 
   varptr->levinfo[levelID].index = index;
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);

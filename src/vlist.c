@@ -124,8 +124,7 @@ vlist_new_entry(cdiResH resH)
 {
   vlist_t *vlistptr = (vlist_t *) Malloc(sizeof(vlist_t));
   vlist_init_entry(vlistptr);
-  if (resH == CDI_UNDEFID)
-    vlistptr->self = reshPut(vlistptr, &vlistOps);
+  if (resH == CDI_UNDEFID) { vlistptr->self = reshPut(vlistptr, &vlistOps); }
   else
   {
     vlistptr->self = resH;
@@ -229,19 +228,20 @@ vlist_delete(vlist_t *vlistptr)
 
   for (int varID = 0; varID < nvars; varID++)
   {
-    if (vars[varID].levinfo) Free(vars[varID].levinfo);
+    var_t *var = &vars[varID];
+    if (var->levinfo) Free(var->levinfo);
 
-    if (vlistptr->vars[varID].opt_grib_kvpair)
+    if (var->opt_grib_kvpair)
     {
-      for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; i++)
+      for (int i = 0; i < var->opt_grib_nentries; i++)
       {
-        if (vlistptr->vars[varID].opt_grib_kvpair[i].keyword) Free(vlistptr->vars[varID].opt_grib_kvpair[i].keyword);
+        if (var->opt_grib_kvpair[i].keyword) Free(var->opt_grib_kvpair[i].keyword);
       }
-      Free(vlistptr->vars[varID].opt_grib_kvpair);
+      Free(var->opt_grib_kvpair);
     }
-    vlistptr->vars[varID].opt_grib_nentries = 0;
-    vlistptr->vars[varID].opt_grib_kvpair_size = 0;
-    vlistptr->vars[varID].opt_grib_kvpair = NULL;
+    var->opt_grib_nentries = 0;
+    var->opt_grib_kvpair_size = 0;
+    var->opt_grib_kvpair = NULL;
 
     cdiDeleteKeys(vlistID, varID);
     cdiDeleteAtts(vlistID, varID);
@@ -345,35 +345,35 @@ vlistCopy(int vlistID1, int vlistID2)
   vlist_copy(vlistptr2, vlistptr1);
 
   vlistptr2->keys.nelems = 0;
-  cdiCopyKeys(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
   vlistptr2->atts.nelems = 0;
+  cdiCopyKeys(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
   cdiCopyAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
 
-  if (vars1)
+  if (!vars1) return;
+
+  int nvars = vlistptr1->nvars;
+  // vlistptr2->varsAllocated = nvars;
+
+  size_t n = (size_t) vlistptr2->varsAllocated;
+  vars2 = (var_t *) Realloc(vars2, n * sizeof(var_t));
+  memcpy(vars2, vars1, n * sizeof(var_t));
+  vlistptr2->vars = vars2;
+
+  for (int varID = 0; varID < nvars; varID++)
   {
-    int nvars = vlistptr1->nvars;
-    // vlistptr2->varsAllocated = nvars;
+    var_t *var1 = &vars1[varID];
+    var_t *var2 = &vars2[varID];
+    var_copy_entries(var2, var1);
+    var2->keys.nelems = 0;
+    var2->atts.nelems = 0;
+    cdiCopyKeys(vlistID1, varID, vlistID2, varID);
+    cdiCopyAtts(vlistID1, varID, vlistID2, varID);
 
-    size_t n = (size_t) vlistptr2->varsAllocated;
-    vars2 = (var_t *) Realloc(vars2, n * sizeof(var_t));
-    memcpy(vars2, vars1, n * sizeof(var_t));
-    vlistptr2->vars = vars2;
-
-    for (int varID = 0; varID < nvars; varID++)
+    if (var1->levinfo)
     {
-      var_copy_entries(&vars2[varID], &vars1[varID]);
-      vlistptr2->vars[varID].keys.nelems = 0;
-      cdiCopyKeys(vlistID1, varID, vlistID2, varID);
-
-      vlistptr2->vars[varID].atts.nelems = 0;
-      cdiCopyAtts(vlistID1, varID, vlistID2, varID);
-
-      if (vars1[varID].levinfo)
-      {
-        n = (size_t) zaxisInqSize(vars1[varID].zaxisID);
-        vars2[varID].levinfo = (levinfo_t *) Malloc(n * sizeof(levinfo_t));
-        memcpy(vars2[varID].levinfo, vars1[varID].levinfo, n * sizeof(levinfo_t));
-      }
+      n = (size_t) zaxisInqSize(var1->zaxisID);
+      var2->levinfo = (levinfo_t *) Malloc(n * sizeof(levinfo_t));
+      memcpy(var2->levinfo, var1->levinfo, n * sizeof(levinfo_t));
     }
   }
 }
@@ -948,7 +948,10 @@ vlistMerge(int vlistID2, int vlistID1)
 
     Free(lvar);
   }
-  else { vlistCat(vlistID2, vlistID1); }
+  else
+  {
+    vlistCat(vlistID2, vlistID1);
+  }
 }
 
 /*

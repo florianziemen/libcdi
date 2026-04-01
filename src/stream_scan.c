@@ -16,31 +16,34 @@
 void
 streamScanResizeRecords1(stream_t *streamptr)
 {
-  int nrecords = streamptr->tsteps[0].nallrecs;
-  if (nrecords < streamptr->tsteps[0].recordSize)
+  tsteps_t *step1 = &streamptr->tsteps[0];
+  int nrecords = step1->nallrecs;
+  if (nrecords < step1->recordSize)
   {
-    streamptr->tsteps[0].recordSize = nrecords;
-    streamptr->tsteps[0].recinfo = (recinfo_t *) Realloc(streamptr->tsteps[0].recinfo, (size_t) nrecords * sizeof(recinfo_t));
-    streamptr->tsteps[0].records = (record_t *) Realloc(streamptr->tsteps[0].records, (size_t) nrecords * sizeof(record_t));
+    step1->recordSize = nrecords;
+    step1->recinfo = (recinfo_t *) Realloc(step1->recinfo, (size_t) nrecords * sizeof(recinfo_t));
+    step1->records = (record_t *) Realloc(step1->records, (size_t) nrecords * sizeof(record_t));
   }
 
-  streamptr->tsteps[0].recIDs = (int *) Malloc((size_t) nrecords * sizeof(int));
-  streamptr->tsteps[0].nrecs = nrecords;
-  for (int recID = 0; recID < nrecords; ++recID) streamptr->tsteps[0].recIDs[recID] = recID;
+  step1->recIDs = (int *) Malloc((size_t) nrecords * sizeof(int));
+  step1->nrecs = nrecords;
+  for (int recID = 0; recID < nrecords; ++recID) step1->recIDs[recID] = recID;
 }
 
 int
 streamScanInitRecords2(stream_t *streamptr)
 {
-  int nrecords = streamptr->tsteps[1].nallrecs;
-  streamptr->tsteps[1].recIDs = (int *) Malloc((size_t) nrecords * sizeof(int));
-  streamptr->tsteps[1].nrecs = 0;
+  tsteps_t *step1 = &streamptr->tsteps[0];
+  tsteps_t *step2 = &streamptr->tsteps[1];
+  int nrecords = step2->nallrecs;
+  step2->recIDs = (int *) Malloc((size_t) nrecords * sizeof(int));
+  step2->nrecs = 0;
 
   for (int recID = 0; recID < nrecords; ++recID)
   {
-    streamptr->tsteps[1].recIDs[recID] = -1;
-    streamptr->tsteps[1].records[recID].position = streamptr->tsteps[0].records[recID].position;
-    streamptr->tsteps[1].records[recID].size = streamptr->tsteps[0].records[recID].size;
+    step2->recIDs[recID] = -1;
+    step2->records[recID].position = step1->records[recID].position;
+    step2->records[recID].size = step1->records[recID].size;
   }
 
   return nrecords;
@@ -49,12 +52,14 @@ streamScanInitRecords2(stream_t *streamptr)
 int
 streamScanInitRecords(stream_t *streamptr, int tsID)
 {
-  int nrecs = streamptr->tsteps[1].nrecs;
+  tsteps_t *step2 = &streamptr->tsteps[1];
+  int nrecs = step2->nrecs;
 
-  streamptr->tsteps[tsID].nrecs = nrecs;
-  streamptr->tsteps[tsID].recIDs = (int *) Malloc((size_t) nrecs * sizeof(int));
+  tsteps_t *step = &streamptr->tsteps[tsID];
+  step->nrecs = nrecs;
+  step->recIDs = (int *) Malloc((size_t) nrecs * sizeof(int));
 
-  for (int recID = 0; recID < nrecs; ++recID) streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
+  for (int recID = 0; recID < nrecs; ++recID) { step->recIDs[recID] = step2->recIDs[recID]; }
 
   return nrecs;
 }
