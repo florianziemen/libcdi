@@ -46,6 +46,10 @@ int CDI_Read_Cell_Center = 1;
 int CDI_Read_Cell_Corners = 1;
 int CDI_CMOR_Mode = 0;
 int CDI_Reduce_Dim = 0;
+int CDI_Reduce_DimX = 0;
+int CDI_Reduce_DimY = 0;
+int CDI_Reduce_DimZ = 0;
+int CDI_Reduce_DimT = 0;
 int CDI_Shuffle = 0;
 int CDI_Test = 0;
 size_t CDI_Netcdf_Hdr_Pad = 0UL;
@@ -316,6 +320,21 @@ cdiSetEccodesGrib1(bool value)
   CDI_gribapi_grib1 = value;
 }
 
+static int
+calendar_from_name(const char *name)
+{
+  // clang-format off
+	if (strncmp(name, "standard", 8)  == 0) return CALENDAR_STANDARD;
+	if (strncmp(name, "gregorian", 9) == 0) return CALENDAR_GREGORIAN;
+	if (strncmp(name, "proleptic", 9) == 0) return CALENDAR_PROLEPTIC;
+	if (strncmp(name, "360days", 7)   == 0) return CALENDAR_360DAYS;
+	if (strncmp(name, "365days", 7)   == 0) return CALENDAR_365DAYS;
+	if (strncmp(name, "366days", 7)   == 0) return CALENDAR_366DAYS;
+	if (strncmp(name, "none", 4)      == 0) return CALENDAR_NONE;
+  // clang-format on
+  return CDI_UNDEFID;
+}
+
 void
 cdiInitialize(void)
 {
@@ -459,34 +478,34 @@ cdiInitialize(void)
 
     char *envstr;
     envstr = getenv("CDI_GRIB1_TEMPLATE");
-    if (envstr) CDI_GRIB1_Template = envstr;
+    if (envstr) { CDI_GRIB1_Template = envstr; }
 
     envstr = getenv("CDI_GRIB2_TEMPLATE");
-    if (envstr) CDI_GRIB2_Template = envstr;
+    if (envstr) { CDI_GRIB2_Template = envstr; }
 
     envstr = getenv("CDI_SHUFFLE");
-    if (envstr) CDI_Shuffle = atoi(envstr);
+    if (envstr) { CDI_Shuffle = atoi(envstr); }
 
     envstr = getenv("CDI_MISSVAL");
-    if (envstr) CDI_Default_Missval = atof(envstr);
+    if (envstr) { CDI_Default_Missval = atof(envstr); }
     /*
     envstr = getenv("NC_MISSING_VALUE");
-    if ( envstr ) cdiNcMissingValue = atoi(envstr);
+    if ( envstr ) {cdiNcMissingValue = atoi(envstr);}
     */
     envstr = getenv("NC_CHUNKSIZEHINT");
-    if (envstr) CDI_Netcdf_Chunksizehint = atoi(envstr);
+    if (envstr) { CDI_Netcdf_Chunksizehint = atoi(envstr); }
 
     envstr = getenv("SPLIT_LTYPE_105");
-    if (envstr) CDI_Split_Ltype105 = atoi(envstr);
+    if (envstr) { CDI_Split_Ltype105 = atoi(envstr); }
 
     envstr = getenv("IGNORE_ATT_COORDINATES");
-    if (envstr) CDI_Ignore_Att_Coordinates = atoi(envstr) > 0;
+    if (envstr) { CDI_Ignore_Att_Coordinates = atoi(envstr) > 0; }
 
     envstr = getenv("CDI_COORDINATES_LONLAT");
-    if (envstr) CDI_Coordinates_Lon_Lat = atoi(envstr) > 0;
+    if (envstr) { CDI_Coordinates_Lon_Lat = atoi(envstr) > 0; }
 
     envstr = getenv("IGNORE_VALID_RANGE");
-    if (envstr) CDI_Ignore_Valid_Range = atoi(envstr) > 0;
+    if (envstr) { CDI_Ignore_Valid_Range = atoi(envstr) > 0; }
 
     envstr = getenv("CDI_SKIP_RECORDS");
     if (envstr)
@@ -551,15 +570,8 @@ cdiInitialize(void)
     envstr = getenv("CDI_CALENDAR");
     if (envstr)
     {
-      // clang-format off
-	    if      (strncmp(envstr, "standard", 8)  == 0) CDI_Default_Calendar = CALENDAR_STANDARD;
-	    else if (strncmp(envstr, "gregorian", 9) == 0) CDI_Default_Calendar = CALENDAR_GREGORIAN;
-	    else if (strncmp(envstr, "proleptic", 9) == 0) CDI_Default_Calendar = CALENDAR_PROLEPTIC;
-	    else if (strncmp(envstr, "360days", 7)   == 0) CDI_Default_Calendar = CALENDAR_360DAYS;
-	    else if (strncmp(envstr, "365days", 7)   == 0) CDI_Default_Calendar = CALENDAR_365DAYS;
-	    else if (strncmp(envstr, "366days", 7)   == 0) CDI_Default_Calendar = CALENDAR_366DAYS;
-	    else if (strncmp(envstr, "none", 4)      == 0) CDI_Default_Calendar = CALENDAR_NONE;
-      // clang-format on
+      int calendar = calendar_from_name(envstr);
+      if (calendar != CDI_UNDEFID) { CDI_Default_Calendar = calendar; }
       if (CDI_Debug) Message("Default calendar set to %s!", envstr);
     }
 #ifdef HAVE_LIBCGRIBEX
@@ -567,10 +579,10 @@ cdiInitialize(void)
 #endif
 
     envstr = getenv("PARTAB_INTERN");
-    if (envstr) cdiPartabIntern = atoi(envstr);
+    if (envstr) { cdiPartabIntern = atoi(envstr); }
 
     envstr = getenv("PARTAB_PATH");
-    if (envstr) cdiPartabPath = strdup(envstr);
+    if (envstr) { cdiPartabPath = strdup(envstr); }
   }
 }
 
@@ -588,22 +600,26 @@ void
 cdiDefGlobal(const char *string, int value)
 {
   // clang-format off
-  if      (str_is_equal(string, "REGULARGRID"))           cdiDataUnreduced = value;
-  else if (str_is_equal(string, "LOCKIO"))                CDI_Lock_IO = (bool) value;
-  else if (str_is_equal(string, "THREADSAFE"))            CDI_Threadsafe = (bool) value;
-  else if (str_is_equal(string, "ECCODES_DEBUG"))         CDI_gribapi_debug = (bool) value;
-  else if (str_is_equal(string, "ECCODES_GRIB1"))         cdiSetEccodesGrib1((bool) value);
-  else if (str_is_equal(string, "SORTNAME"))              cdiSortName = value;
-  else if (str_is_equal(string, "HAVE_MISSVAL"))          cdiHaveMissval = value;
-  else if (str_is_equal(string, "NC_CHUNKSIZEHINT"))      CDI_Netcdf_Chunksizehint = value;
-  else if (str_is_equal(string, "READ_CELL_CENTER"))      CDI_Read_Cell_Center = value;
-  else if (str_is_equal(string, "READ_CELL_CORNERS"))     CDI_Read_Cell_Corners = value;
-  else if (str_is_equal(string, "CMOR_MODE"))             CDI_CMOR_Mode = value;
-  else if (str_is_equal(string, "REDUCE_DIM"))            CDI_Reduce_Dim = value;
-  else if (str_is_equal(string, "NETCDF_HDR_PAD"))        CDI_Netcdf_Hdr_Pad = (size_t) value;
-  else if (str_is_equal(string, "NETCDF_LAZY_GRID_LOAD")) CDI_Netcdf_Lazy_Grid_Load = (bool) value;
-  else if (str_is_equal(string, "COPY_CHUNKSPEC"))        CDI_Copy_ChunkSpec = (bool) value;
-  else if (str_is_equal(string, "REMOVE_CHUNKSPEC"))      CDI_Remove_ChunkSpec = (bool) value;
+  if      (str_is_equal(string, "REGULARGRID"))           { cdiDataUnreduced = value; }
+  else if (str_is_equal(string, "LOCKIO"))                { CDI_Lock_IO = (bool) value; }
+  else if (str_is_equal(string, "THREADSAFE"))            { CDI_Threadsafe = (bool) value; }
+  else if (str_is_equal(string, "ECCODES_DEBUG"))         { CDI_gribapi_debug = (bool) value; }
+  else if (str_is_equal(string, "ECCODES_GRIB1"))         { cdiSetEccodesGrib1((bool) value); }
+  else if (str_is_equal(string, "SORTNAME"))              { cdiSortName = value; }
+  else if (str_is_equal(string, "HAVE_MISSVAL"))          { cdiHaveMissval = value; }
+  else if (str_is_equal(string, "NC_CHUNKSIZEHINT"))      { CDI_Netcdf_Chunksizehint = value; }
+  else if (str_is_equal(string, "READ_CELL_CENTER"))      { CDI_Read_Cell_Center = value; }
+  else if (str_is_equal(string, "READ_CELL_CORNERS"))     { CDI_Read_Cell_Corners = value; }
+  else if (str_is_equal(string, "CMOR_MODE"))             { CDI_CMOR_Mode = value; }
+  else if (str_is_equal(string, "REDUCE_DIMX"))           { CDI_Reduce_DimX = value; }
+  else if (str_is_equal(string, "REDUCE_DIMY"))           { CDI_Reduce_DimY = value; }
+  else if (str_is_equal(string, "REDUCE_DIMZ"))           { CDI_Reduce_DimZ = value; }
+  else if (str_is_equal(string, "REDUCE_DIMT"))           { CDI_Reduce_DimT = value; }
+  else if (str_is_equal(string, "REDUCE_DIM"))            { CDI_Reduce_Dim = value; }
+  else if (str_is_equal(string, "NETCDF_HDR_PAD"))        { CDI_Netcdf_Hdr_Pad = (size_t) value; }
+  else if (str_is_equal(string, "NETCDF_LAZY_GRID_LOAD")) { CDI_Netcdf_Lazy_Grid_Load = (bool) value; }
+  else if (str_is_equal(string, "COPY_CHUNKSPEC"))        { CDI_Copy_ChunkSpec = (bool) value; }
+  else if (str_is_equal(string, "REMOVE_CHUNKSPEC"))      { CDI_Remove_ChunkSpec = (bool) value; }
   else Warning("Unsupported global key: %s", string);
   // clang-format on
 }

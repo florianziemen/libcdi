@@ -1526,25 +1526,18 @@ vlistSubtypeIndex(int vlistID, int subtypeID)
   return index;
 }
 
-int
+bool
 vlistHasTime(int vlistID)
 {
-  bool hastime = false;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  if ((CDI_Reduce_Dim || CDI_Reduce_DimT) && vlistptr->ntsteps == 1) return false;
 
-  if (!(CDI_Reduce_Dim && vlistptr->ntsteps == 1))
-  {
-    size_t nvars = vlistptr->nvars > 0 ? (size_t) vlistptr->nvars : (size_t) 0;
-    var_t *restrict vars = vlistptr->vars;
-    for (size_t varID = 0; varID < nvars; varID++)
-      if (vars[varID].timetype != TIME_CONSTANT)
-      {
-        hastime = true;
-        break;
-      }
-  }
+  size_t nvars = vlistptr->nvars > 0 ? (size_t) vlistptr->nvars : (size_t) 0;
+  var_t *vars = vlistptr->vars;
+  for (size_t varID = 0; varID < nvars; varID++)
+    if (vars[varID].timetype != TIME_CONSTANT) { return true; }
 
-  return (int) hastime;
+  return false;
 }
 
 enum

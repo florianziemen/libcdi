@@ -108,7 +108,7 @@ void cdiVlistMakeInternal(int vlistID);
 void cdiVlistMakeImmutable(int vlistID);
 void cdiVlistDestroy_(int vlistID, bool assertInternal);
 int vlistInqVarMissvalUsed(int vlistID, int varID);
-int vlistHasTime(int vlistID);
+bool vlistHasTime(int vlistID);
 
 int vlistUnpack(char *buffer, int bufferSize, int *pos, int originNamespace, void *context, int force_id);
 
