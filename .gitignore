@@ -29,6 +29,7 @@ Makefile.in
 /**/src/cmake/cdi/*.cmake
 /**/src/config.h
 /**/src/pkgconfig/*.pc
+/**/src/pio/pkgconfig/*.pc
 /**/src/stamp-h1
 /**/tables/gen_tableheaderfile
 /**/tests/*.run

@@ -129,6 +129,10 @@ noinst_PROGRAMS = $(test_PROGRAMS_)
 endif !with_on_demand_check_programs
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
+if ENABLE_MPI
+AM_CPPFLAGS += -I$(top_srcdir)/src/pio
+endif ENABLE_MPI
+
 AM_CFLAGS = $(PPM_CORE_C_INCLUDE) $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 
 AM_LDFLAGS =
@@ -136,7 +140,7 @@ if ENABLE_ALL_STATIC
 AM_LDFLAGS += -all-static
 endif
 
-LDADD = $(top_builddir)/src/libcdi.la
+LDADD = $(top_builddir)/src/libcdi.la $(top_builddir)/src/libcdiresunpack.la
 
 calendar_test1_SOURCES = calendar_test1.c
 
@@ -170,7 +174,7 @@ pio_write_SOURCES = \
   simple_model_helper.c \
   simple_model_helper.h
 nodist_pio_write_parallel_SOURCES = $(pio_write_SOURCES:.c=.parallel.c)
-pio_write_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(LDADD)
+pio_write_parallel_LDADD = $(top_builddir)/src/pio/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(LDADD)
 
 pio_write_deco2d_SOURCES = \
   deco2d_model.c \
@@ -181,7 +185,7 @@ pio_write_deco2d_SOURCES = \
   simple_model_helper.c \
   simple_model_helper.h
 nodist_pio_write_deco2d_parallel_SOURCES = $(pio_write_deco2d_SOURCES:.c=.parallel.c)
-pio_write_deco2d_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(LDADD)
+pio_write_deco2d_parallel_LDADD = $(top_builddir)/src/pio/libcdipio.la $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(LDADD)
 
 test_byteswap_SOURCES = test_byteswap.c
 
@@ -192,7 +196,7 @@ test_month_adjust_SOURCES = test_month_adjust.c
 test_resource_copy_SOURCES = test_resource_copy.c
 test_resource_copy_LDADD = $(top_builddir)/src/libcdiresunpack.la
 nodist_test_resource_copy_parallel_SOURCES = $(test_resource_copy_SOURCES:.c=.parallel.c)
-test_resource_copy_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(LDADD)
+test_resource_copy_parallel_LDADD = $(top_builddir)/src/pio/libcdipio.la $(LDADD)
 
 test_table_SOURCES = test_table.c
 

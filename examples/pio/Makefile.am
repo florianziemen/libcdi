@@ -28,7 +28,7 @@ CLEANFILES += $(EXTRA_PROGRAMS)
 endif !with_example_programs
 examples-local: $(EXTRA_PROGRAMS)
 
-AM_CPPFLAGS = -I$(top_srcdir)/src $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/pio $(YAXT_C_INCLUDE) $(MPI_C_INCLUDE)
 
 AM_FCFLAGS =
 if ENABLE_CF_INTERFACE
@@ -41,22 +41,22 @@ if ENABLE_ALL_STATIC
 AM_LDFLAGS += -all-static
 endif
 
-LDADD = $(top_builddir)/src/libcdi.la
+LDADD = $(top_builddir)/src/libcdi.la $(top_builddir)/src/libcdiresunpack.la
 
 collectData_SOURCES = collectData.c
 nodist_collectData_parallel_SOURCES = $(collectData_SOURCES:.c=.parallel.c)
-collectData_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(YAXT_C_LIB) $(LDADD)
+collectData_parallel_LDADD = $(top_builddir)/src/pio/libcdipio.la $(YAXT_C_LIB) $(LDADD)
 
 collectDataNStreams_SOURCES = collectDataNStreams.c
 nodist_collectDataNStreams_parallel_SOURCES = $(collectDataNStreams_SOURCES:.c=.parallel.c)
-collectDataNStreams_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(YAXT_C_LIB) $(LDADD)
+collectDataNStreams_parallel_LDADD = $(top_builddir)/src/pio/libcdipio.la $(YAXT_C_LIB) $(LDADD)
 
 compareResourcesArray_SOURCES = compareResourcesArray.c
-compareResourcesArray_LDADD = $(top_builddir)/src/libcdipio.la $(YAXT_C_LIB) $(LDADD)
+compareResourcesArray_LDADD = $(top_builddir)/src/pio/libcdipio.la $(YAXT_C_LIB) $(LDADD)
 
 collectData2003_SOURCES = collectData2003.F90
 nodist_collectData2003_parallel_SOURCES = $(collectData2003_SOURCES:.F90=.parallel.F90)
-collectData2003_parallel_LDADD = $(top_builddir)/src/libcdipio.la $(YAXT_FC_LIB) $(MPI_FC_LIB) $(LDADD)
+collectData2003_parallel_LDADD = $(top_builddir)/src/pio/libcdipio.la $(YAXT_FC_LIB) $(MPI_FC_LIB) $(LDADD)
 
 clean-local:
 	-rm -f *.parallel.c *.parallel.F90

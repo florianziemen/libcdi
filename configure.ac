@@ -736,11 +736,12 @@ AC_CONFIG_FILES([
   interfaces/Makefile
   interfaces/python/Makefile
   src/Makefile
+  src/pio/Makefile
   src/cmake/cdi/cdi-config-version.cmake
   src/cmake/cdi/cdi-config.cmake
   src/pkgconfig/cdi.pc
   src/pkgconfig/cdi_f2003.pc
-  src/pkgconfig/cdipio.pc
+  src/pio/pkgconfig/cdipio.pc
   tests/Makefile
   tests/test_cksum_base
 ])

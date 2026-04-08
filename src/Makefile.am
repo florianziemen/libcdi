@@ -6,6 +6,7 @@ EXTRA_DIST = \
   cdilib.c \
   make_cdilib
 
+
 if FC_MOD_UPPERCASE
 mo_cdi_mod = MO_CDI.$(FCMODEXT)
 else !FC_MOD_UPPERCASE
@@ -34,23 +35,13 @@ nodist_include_HEADERS += $(mo_cdi_mod)
 lib_LTLIBRARIES += libcdi_f2003.la
 nodist_pkgconfig_DATA += pkgconfig/cdi_f2003.pc
 endif ENABLE_ISOC_INTERFACE
-if ENABLE_MPI
-include_HEADERS += cdipio.h
-lib_LTLIBRARIES += libcdipio.la
-nodist_pkgconfig_DATA += pkgconfig/cdipio.pc
-if ENABLE_CF_INTERFACE
-include_HEADERS += cdipio.inc
-endif ENABLE_CF_INTERFACE
-endif ENABLE_MPI
 else !ENABLE_CDI_LIB
 noinst_LTLIBRARIES += libcdi.la
 if ENABLE_ISOC_INTERFACE
 noinst_LTLIBRARIES += libcdi_f2003.la
 endif ENABLE_ISOC_INTERFACE
-if ENABLE_MPI
-noinst_LTLIBRARIES += libcdipio.la
-endif ENABLE_MPI
 endif !ENABLE_CDI_LIB
+
 
 if with_on_demand_check_programs
 check_LTLIBRARIES += libcdiresunpack.la
@@ -232,73 +223,11 @@ endif HAVE_LIBGRIB_API
 libcdi_f2003_la_SOURCES = mo_cdi.f90
 libcdi_f2003_la_LIBADD = libcdi.la
 
-libcdipio_la_SOURCES = \
-  cdipio.h \
-  pio.c \
-  pio.h \
-  pio_cdf_int.h \
-  pio_client.c \
-  pio_client.h \
-  pio_comm.c \
-  pio_comm.h \
-  pio_conf.c \
-  pio_conf.h \
-  pio_dbuffer.c \
-  pio_dbuffer.h \
-  pio_dist_grid.c \
-  pio_dist_grid.h \
-  pio_id_set.h \
-  pio_idxlist_cache.c \
-  pio_idxlist_cache.h \
-  pio_impl.h \
-  pio_interface.c \
-  pio_interface.h \
-  pio_mpi_fw_at_all.c \
-  pio_mpi_fw_at_reblock.c \
-  pio_mpi_fw_ordered.c \
-  pio_mpinonb.c \
-  pio_posixasynch.c \
-  pio_posixfpguardsendrecv.c \
-  pio_posixnonb.c \
-  pio_record_send.c \
-  pio_roles.c \
-  pio_rpc.c \
-  pio_rpc.h \
-  pio_serialize.c \
-  pio_serialize.h \
-  pio_server.c \
-  pio_server.h \
-  pio_util.c \
-  pio_util.h \
-  pio_xmap_cache.c \
-  pio_xmap_cache.h \
-  resource_unpack.c \
-  resource_unpack.h
-
-if ENABLE_CF_INTERFACE
-libcdipio_la_SOURCES += \
-  cdipioFortran.c \
-  cfortran.h
-endif ENABLE_CF_INTERFACE
-
-if HAVE_PARALLEL_NC4
-libcdipio_la_SOURCES += pio_cdf_int.c
-endif HAVE_PARALLEL_NC4
-
-libcdipio_la_LIBADD = libcdi.la $(LIBRT) $(PPM_CORE_C_LIB) $(YAXT_C_LIB) $(MPI_C_LIB)
-
 if MAINTAINER_MODE
 cdi.inc: cdi.h make_fint.c
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) AM_CFLAGS=-static make_fint
 	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute ./make_fint -o $(@D) $<
 cdiFortran.c: cdi.inc
-	$(AM_V_at)test -f $@ || rm -f $<
-	$(AM_V_at)test -f $@ || $(MAKE) $(AM_MAKEFLAGS) $<
-
-cdipio.inc: cdipio.h make_fint.c cdi.inc
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) AM_CFLAGS=-static make_fint
-	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute ./make_fint -o $(@D) $<
-cdipioFortran.c: cdipio.inc
 	$(AM_V_at)test -f $@ || rm -f $<
 	$(AM_V_at)test -f $@ || $(MAKE) $(AM_MAKEFLAGS) $<
 
@@ -308,11 +237,19 @@ mo_cdi.f90: cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 cdilib.c: $(libcdi_la_SOURCES) $(srcdir)/make_cdilib
 	$(AM_V_GEN)CPP='$(CPP)' $(srcdir)/make_cdilib $(srcdir)
 else !MAINTAINER_MODE
+if ENABLE_MPI
 cdiFortran.c cdi.inc cdipioFortran.c cdipio.inc mo_cdi.f90 cdilib.c:
 	@:;{ \
 	  echo "ERROR: cannot generate '$@' when the maintainer mode is disabled:"; \
           echo "       re-configure with the '--enable-maintainer-mode' option"; \
 	} >&2; exit 1
+else !ENABLE_MPI
+cdiFortran.c cdi.inc mo_cdi.f90 cdilib.c:
+	@:;{ \
+	  echo "ERROR: cannot generate '$@' when the maintainer mode is disabled:"; \
+          echo "       re-configure with the '--enable-maintainer-mode' option"; \
+	} >&2; exit 1
+endif !ENABLE_MPI
 endif !MAINTAINER_MODE
 
 $(mo_cdi_mod): mo_cdi.lo
@@ -328,9 +265,6 @@ cmake/cdi/cdi-config-version.cmake: $(top_builddir)/config.status cmake/cdi/cdi-
 pkgconfig/cdi.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdi.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-pkgconfig/cdipio.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdipio.pc.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-
 pkgconfig/cdi_f2003.pc: $(top_builddir)/config.status $(srcdir)/pkgconfig/cdi_f2003.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
@@ -343,8 +277,6 @@ MAINTAINERCLEANFILES = \
   cdi.inc \
   cdiFortran.c \
   cdilib.c \
-  cdipio.inc \
-  cdipioFortran.c \
   mo_cdi.f90
 
 include $(top_srcdir)/config/lt_overrides_Makefile.inc
