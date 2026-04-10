@@ -238,7 +238,7 @@ target_include_directories(libcdi
   # where external projects will look for the library's public headers
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-target_link_libraries(libcdi ${cdi_linked_libs})
+target_link_libraries(libcdi PUBLIC m)
 target_compile_definitions(libcdi PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
 
 # --- Installation
