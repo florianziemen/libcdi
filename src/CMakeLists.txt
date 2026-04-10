@@ -3,16 +3,6 @@ add_library(libcdi::libcdi ALIAS libcdi)
 
 target_compile_definitions(libcdi PRIVATE CDI=1 CDI_SIZE_TYPE=size_t PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}")
 
-# Feature configuration
-include(${CMAKE_SOURCE_DIR}/cmake/feature_eccodes.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/feature_grib.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/feature_ieg.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/feature_pthread.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/feature_extra.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/feature_gribex.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/feature_netcdf.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/feature_service.cmake)
-
 target_sources(libcdi
   INTERFACE
   cdi.h
