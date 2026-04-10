@@ -7,7 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 
 
 list(APPEND CMAKE_MODULE_PATH
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+  "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 include(CTest)
 include(CheckIncludeFile)
