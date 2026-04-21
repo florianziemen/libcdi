@@ -53,7 +53,8 @@ bool cdiDateTime_isNE(CdiDateTime cdiDateTime1, CdiDateTime cdiDateTime2);
 bool cdiDateTime_isLT(CdiDateTime cdiDateTime1, CdiDateTime cdiDateTime2);
 bool cdiDateTime_isNull(CdiDateTime cdiDateTime);
 
-const char *CdiDateTime_string(CdiDateTime cdiDateTime);
+const char *cdiDateTime_to_string(CdiDateTime cdiDateTime);
+double cdiDateTime_to_double(CdiDateTime cdiDateTime);
 
 #ifdef __cplusplus
 }

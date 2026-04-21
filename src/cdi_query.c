@@ -38,6 +38,10 @@ struct CdiQuery
   int numSteps;
   bool stepsFound[2];
   int steps[2];
+  // Date indices
+  int numDates;
+  bool datesFound[2];
+  double dates[2];
 };
 
 static int
@@ -78,6 +82,10 @@ cdiQueryInit(struct CdiQuery *query)
   query->numSteps = 0;
   query->steps[0] = 0;
   query->stepsFound[0] = false;
+
+  query->numDates = 0;
+  query->dates[0] = 0;
+  query->datesFound[0] = false;
 }
 
 struct CdiQuery *
@@ -140,6 +148,12 @@ int
 cdiQueryNumSteps(const struct CdiQuery *query)
 {
   return query ? query->numSteps : 0;
+}
+
+int
+cdiQueryNumDates(const struct CdiQuery *query)
+{
+  return query ? query->numDates : 0;
 }
 
 int
@@ -207,6 +221,17 @@ cdiQuerySetSteps(struct CdiQuery *query, int numSteps, const int *steps)
   }
 }
 
+void
+cdiQuerySetDates(struct CdiQuery *query, int numDates, const double *dates)
+{
+  if (numDates > 0 && numDates <= 2)
+  {
+    query->numEntries += numDates;
+    query->numDates = numDates;
+    for (int i = 0; i < numDates; ++i) { query->dates[i] = dates[i]; }
+  }
+}
+
 const char *
 cdiQueryGetGroup(const struct CdiQuery *query, int index)
 {
@@ -231,6 +256,12 @@ cdiQueryGetStep(const struct CdiQuery *query, int index)
   return (index >= 0 && index < query->numSteps) ? query->steps[index] : -1;
 }
 
+double
+cdiQueryGetDate(const struct CdiQuery *query, int index)
+{
+  return (index >= 0 && index < query->numDates) ? query->dates[index] : -1;
+}
+
 struct CdiQuery *
 cdiQueryClone(const struct CdiQuery *query)
 {
@@ -243,6 +274,7 @@ cdiQueryClone(const struct CdiQuery *query)
     cdiQuerySetCells(queryOut, query->numCells, query->cells);
     cdiQuerySetLayers(queryOut, query->numLayers, query->layers);
     cdiQuerySetSteps(queryOut, query->numSteps, query->steps);
+    cdiQuerySetDates(queryOut, query->numDates, query->dates);
   }
 
   return queryOut;
@@ -261,6 +293,24 @@ print_list_compact_int(int n, const int *list)
       int last = list[++i];
       while ((i + 1) < n && (last + 1) == list[i + 1]) last = list[++i];
       printf("%d", last);
+    }
+  }
+  printf("\n");
+}
+
+static void
+print_list_compact_float(int n, const double *list)
+{
+  for (int i = 0; i < n; ++i)
+  {
+    double value = list[i];
+    printf(" %g", value);
+    if ((i + 2) < n && (value + 1) == list[i + 1] && (value + 2) == list[i + 2])
+    {
+      printf("/to/");
+      double last = list[++i];
+      while ((i + 1) < n && (last + 1) == list[i + 1]) last = list[++i];
+      printf("%g", last);
     }
   }
   printf("\n");
@@ -303,6 +353,12 @@ cdiQueryPrint(const struct CdiQuery *query)
       printf("Steps:");
       print_list_compact_int(query->numSteps, query->steps);
     }
+
+    if (query->numDates)
+    {
+      printf("Dates:");
+      print_list_compact_float(query->numDates, query->dates);
+    }
   }
 }
 
@@ -318,6 +374,7 @@ cdiQueryNumEntriesFound(const struct CdiQuery *query)
     if (query->numCells) { numEntriesFound += sum_found(query->numCells, query->cellsFound); }
     if (query->numLayers) { numEntriesFound += sum_found(query->numLayers, query->layersFound); }
     if (query->numSteps) { numEntriesFound += sum_found(query->numSteps, query->stepsFound); }
+    if (query->numDates) { numEntriesFound += sum_found(query->numDates, query->datesFound); }
   }
 
   return numEntriesFound;
@@ -371,6 +428,17 @@ cdiQueryPrintEntriesNotFound(const struct CdiQuery *query)
           printf("Step not found:");
           for (int i = 0; i < query->numSteps; ++i)
             if (!query->stepsFound[i]) printf(" %d", query->steps[i]);
+          printf("\n");
+        }
+      }
+
+      if (query->numDates)
+      {
+        if (sum_not_found(query->numDates, query->datesFound) > 0)
+        {
+          printf("Date not found:");
+          for (int i = 0; i < query->numDates; ++i)
+            if (!query->datesFound[i]) printf(" %g", query->dates[i]);
           printf("\n");
         }
       }

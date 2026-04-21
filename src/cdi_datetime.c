@@ -13,6 +13,7 @@
 #include "cdi_datetime.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 // ==================================================================
 #ifdef __cplusplus
@@ -257,7 +258,7 @@ cdiDateTime_isNull(CdiDateTime cdiDateTime)
 #define TIME_FORMAT "%2.2d:%2.2d:%2.2d"
 
 const char *
-CdiDateTime_string(CdiDateTime cdiDateTime)
+cdiDateTime_to_string(CdiDateTime cdiDateTime)
 {
   int year, month, day;
   cdiDate_decode(cdiDateTime.date, &year, &month, &day);
@@ -268,4 +269,19 @@ CdiDateTime_string(CdiDateTime cdiDateTime)
   snprintf(datetimeString, sizeof(datetimeString), DATE_FORMAT "T" TIME_FORMAT, year, month, day, hour, minute, second);
 
   return datetimeString;
+}
+
+double
+cdiDateTime_to_double(CdiDateTime cdiDateTime)
+{
+  int year, month, day;
+  cdiDate_decode(cdiDateTime.date, &year, &month, &day);
+  int hour, minute, second, ms;
+  cdiTime_decode(cdiDateTime.time, &hour, &minute, &second, &ms);
+
+  double fval = cdiEncodeTime(hour, minute, second);
+  if (fabs(fval) > 0.0) { fval /= 1000000; }
+  fval += abs(cdiEncodeDate(year, month, day));
+  if (year < 0) { fval *= -1; }
+  return fval;
 }

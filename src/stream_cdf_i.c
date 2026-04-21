@@ -4544,6 +4544,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
     if (query)
     {
       int queryNumSteps = cdiQueryNumSteps(query);
+      int queryNumDates = cdiQueryNumDates(query);
       if (queryNumSteps > 0)
       {
         int startStep = cdiQueryGetStep(query, 0) - 1;
@@ -4552,6 +4553,17 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
         assert(numTimesteps < INT_MAX);
         for (int i = 0; i < startStep; ++i) ncStepIndices[i] = -1;
         for (int i = endStep + 1; i < (int) numTimesteps; ++i) ncStepIndices[i] = -1;
+      }
+      else if (queryNumDates > 0)
+      {
+        double startDate = cdiQueryGetDate(query, 0);
+        double endDate = (queryNumDates == 2) ? cdiQueryGetDate(query, 1) : startDate;
+        printf("startDate %g endDate %g\n", startDate, endDate);
+        if (vDateTimeList)
+        {
+          for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
+            printf("%zu %.18g\n", tsID + 1, cdiDateTime_to_double(vDateTimeList[tsID]));
+        }
       }
     }
 

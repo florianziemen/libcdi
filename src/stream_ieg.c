@@ -282,9 +282,15 @@ iegDefGrid(int *gdb, int gridID)
       IEG_G_LonSP(gdb) = (int) lround((xpole + 180) * resfac);
       IEG_G_Size(gdb) = 42;
     }
-    else { IEG_G_Size(gdb) = 32; }
+    else
+    {
+      IEG_G_Size(gdb) = 32;
+    }
   }
-  else { Error("Unsupported grid type: %s", gridNamePtr(gridtype)); }
+  else
+  {
+    Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+  }
 
   IEG_G_ScanFlag(gdb) = 64;
 }
@@ -740,7 +746,7 @@ iegScanTimestep1(stream_t *streamptr)
 
     nrecs++;
 
-    if (CDI_Debug) Message("%4d%8d%4d%8d %s", nrecs, (int) recpos, param, rlevel, CdiDateTime_string(datetime));
+    if (CDI_Debug) Message("%4d%8d%4d%8d %s", nrecs, (int) recpos, param, rlevel, cdiDateTime_to_string(datetime));
 
     iegAddRecord(streamptr, param, iegp->ipdb, iegp->igdb, iegp->vct, recsize, recpos, prec);
   }
@@ -840,7 +846,7 @@ iegScanTimestep2(stream_t *streamptr)
 
     if (nextstep) break;
 
-    if (CDI_Debug) Message("%4d%8d%4d%8d %s", rindex + 1, (int) recpos, param, rlevel, CdiDateTime_string(datetime));
+    if (CDI_Debug) Message("%4d%8d%4d%8d %s", rindex + 1, (int) recpos, param, rlevel, cdiDateTime_to_string(datetime));
 
     if (param != records[recID].param || rlevel != records[recID].ilevel)
     {
@@ -947,7 +953,7 @@ iegScanTimestep(stream_t *streamptr)
       records[recID].position = recpos;
       records[recID].size = recsize;
 
-      if (CDI_Debug) Message("%4d%8d%4d%8d %s", rindex, (int) recpos, param, rlevel, CdiDateTime_string(datetime));
+      if (CDI_Debug) Message("%4d%8d%4d%8d %s", rindex, (int) recpos, param, rlevel, cdiDateTime_to_string(datetime));
     }
 
     streamptr->rtsteps++;

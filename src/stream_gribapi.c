@@ -1185,7 +1185,7 @@ fdbScanTimesteps(stream_t *streamptr)
       char paramstr[32];
       cdiParamToString(param, paramstr, sizeof(paramstr));
       Message("%4d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", recID + 1, varname, paramstr, leveltype1, level1, level2,
-              CdiDateTime_string(vDateTime));
+              cdiDateTime_to_string(vDateTime));
     }
 
     var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
@@ -1390,7 +1390,7 @@ gribapiScanTimestep1(stream_t *streamptr)
       char paramstr[32];
       cdiParamToString(param, paramstr, sizeof(paramstr));
       Message("%4u %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", nrecs, (int) recpos, varname, paramstr, leveltype1,
-              level1, level2, CdiDateTime_string(vDateTime));
+              level1, level2, cdiDateTime_to_string(vDateTime));
     }
 
     var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
@@ -1571,7 +1571,7 @@ gribapiScanTimestep2(stream_t *streamptr)
       char paramstr[32];
       cdiParamToString(param, paramstr, sizeof(paramstr));
       Message("%4d %8lld name=%s id=%s ltype=%d lev1=%d lev2=%d vDateTime=%s", nrecsScanned, (long long) recpos, varname, paramstr,
-              leveltype1, level1, level2, CdiDateTime_string(vDateTime));
+              leveltype1, level1, level2, cdiDateTime_to_string(vDateTime));
     }
 
     if (gribapiVarCompare(&compVar, &records[recID], 0) != 0)
@@ -1749,7 +1749,8 @@ gribapiScanTimestep(stream_t *streamptr)
       recinfo[recID].used = true;
       streamptr->tsteps[tsID].recIDs[rindex] = recID;
 
-      if (CDI_Debug) Message("%4d %8lld %4d %8d %8s", rindex + 1, (long long) recpos, param, level1, CdiDateTime_string(vDateTime));
+      if (CDI_Debug)
+        Message("%4d %8lld %4d %8d %8s", rindex + 1, (long long) recpos, param, level1, cdiDateTime_to_string(vDateTime));
 
       if (gribapiVarCompare(&compVar, &records[recID], 0) != 0)
       {
@@ -1761,7 +1762,7 @@ gribapiScanTimestep(stream_t *streamptr)
       records[recID].position = recpos;
       records[recID].size = recsize;
 
-      if (CDI_Debug) Message("%4d %8lld %4d %8d %s", rindex, (long long) recpos, param, level1, CdiDateTime_string(vDateTime));
+      if (CDI_Debug) Message("%4d %8lld %4d %8d %s", rindex, (long long) recpos, param, level1, cdiDateTime_to_string(vDateTime));
 
       grib_handle_delete(gh);
       gh = NULL;
