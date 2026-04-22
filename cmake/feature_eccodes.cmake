@@ -1,0 +1,8 @@
+if(${CDI_ECCODES} OR eccodes_ROOT)
+  find_package(eccodes REQUIRED)
+  if (${eccodes_FOUND})
+    target_compile_definitions(libcdi PRIVATE HAVE_LIBGRIB_API=${eccodes_FOUND})
+    message(VERBOSE "added compile definition HAVE_LIBGRIB_API=${eccodes_FOUND}")
+    target_link_libraries(libcdi eccodes)
+  endif ()
+endif()

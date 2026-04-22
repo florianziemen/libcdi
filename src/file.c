@@ -53,7 +53,10 @@
 #define SSIZE_MAX LONG_MAX
 #endif
 
-#define MAX_FILES 8192
+enum
+{
+  MAX_FILES = 8192
+};
 static int _file_max = MAX_FILES;
 
 static void file_initialize(void);
@@ -113,9 +116,10 @@ enum FILE_Flags
   FILE_ERROR = 020
 };
 
-#ifndef MIN_BUF_SIZE
-#define MIN_BUF_SIZE 131072L
-#endif
+enum
+{
+  MIN_BUF_SIZE = 131072
+};
 
 static const char *fbtname[] = { "unknown", "standard", "mmap" };
 static const char *ftname[] = { "unknown", "open", "fopen" };
@@ -135,7 +139,7 @@ static void file_table_print(void);
 
 // A version string.
 #undef LIBVERSION
-#define LIBVERSION 1.9.1
+#define LIBVERSION 1.9.2
 #define XSTRING(x) #x
 #define STRING(x) XSTRING(x)
 static const char file_libvers[] = STRING(LIBVERSION);
@@ -159,6 +163,7 @@ static const char file_libvers[] = STRING(LIBVERSION);
   27/06/2013  1.8.2 added env. var. FILE_TYPE_WRITE (1:open; 2:fopen)
   29/04/2020  1.9.0 fileSetPos(): refactored
   30/04/2020  1.9.1 fileSetPos(): not initialized correctly (bug fix)
+  16/03/2026  1.9.2 Code optimisation
  */
 
 typedef struct _filePtrToIdx
@@ -175,7 +180,6 @@ static void
 file_list_new(void)
 {
   assert(_fileList == NULL);
-
   _fileList = (filePtrToIdx *) malloc((size_t) _file_max * sizeof(filePtrToIdx));
 }
 
@@ -200,7 +204,6 @@ file_init_pointer(void)
   }
 
   _fileList[_file_max - 1].next = 0;
-
   _fileAvail = _fileList;
 }
 
@@ -588,32 +591,32 @@ static long
 file_getenv(const char *envName)
 {
   long envValue = -1;
-  char *envString = getenv(envName);
-  if (envString)
+  const char *envString = getenv(envName);
+  if (!envString) return envValue;
+
+  long fact = 1;
+  for (int i = 0, n = (int) strlen(envString); i < n; i++)
   {
-    long fact = 1;
-    for (int i = 0; i < (int) strlen(envString); i++)
+    int c = (int) envString[i];
+    if (!isdigit(c))
     {
-      if (!isdigit((int) envString[i]))
+      switch (tolower(c))
       {
-        switch (tolower((int) envString[i]))
-        {
-          case 'k': fact = 1024; break;
-          case 'm': fact = 1048576; break;
-          case 'g': fact = 1073741824; break;
-          default:
-            fact = 0;
-            Warning("Invalid number string in %s: %s", envName, envString);
-            Warning("%s must comprise only digits [0-9].", envName);
-        }
-        break;
+        case 'k': fact = 1024; break;
+        case 'm': fact = 1048576; break;
+        case 'g': fact = 1073741824; break;
+        default:
+          fact = 0;
+          Warning("Invalid number string in %s: %s", envName, envString);
+          Warning("%s must comprise only digits [0-9].", envName);
       }
+      break;
     }
-
-    if (fact) envValue = fact * atol(envString);
-
-    if (FileDebug) Message("Set %s to %ld", envName, envValue);
   }
+
+  if (fact) envValue = fact * atol(envString);
+
+  if (FileDebug) Message("Set %s to %ld", envName, envValue);
 
   return envValue;
 }
@@ -634,8 +637,7 @@ file_initialize(void)
   if (FileInfo) fprintf(stderr, "FILE_MAX = %d\n", _file_max);
 
   value = file_getenv("FILE_BUFSIZE");
-  if (value >= 0)
-    FileBufferSizeEnv = value;
+  if (value >= 0) { FileBufferSizeEnv = value; }
   else
   {
     value = file_getenv("GRIB_API_IO_BUFFER_SIZE");
@@ -724,10 +726,8 @@ file_get_buffersize(bfile_t *fileptr)
 {
   size_t buffersize = 0;
 
-  if (FileBufferSizeEnv >= 0)
-    buffersize = (size_t) FileBufferSizeEnv;
-  else if (fileptr->bufferSize > 0)
-    buffersize = fileptr->bufferSize;
+  if (FileBufferSizeEnv >= 0) { buffersize = (size_t) FileBufferSizeEnv; }
+  else if (fileptr->bufferSize > 0) { buffersize = fileptr->bufferSize; }
   else
   {
     buffersize = fileptr->blockSize * 4;
@@ -744,10 +744,8 @@ file_set_buffer(bfile_t *fileptr)
 
   if (fileptr->mode == 'r')
   {
-    if (FileBufferTypeEnv)
-      fileptr->bufferType = FileBufferTypeEnv;
-    else if (fileptr->bufferType == 0)
-      fileptr->bufferType = FILE_BUFTYPE_STD;
+    if (FileBufferTypeEnv) { fileptr->bufferType = FileBufferTypeEnv; }
+    else if (fileptr->bufferType == 0) { fileptr->bufferType = FILE_BUFTYPE_STD; }
 
     buffersize = file_get_buffersize(fileptr);
 
@@ -792,11 +790,8 @@ file_fill_buffer(bfile_t *fileptr)
   long offset = 0;
 
   if (FileDebug) Message("file ptr = %p  Cnt = %ld", fileptr, fileptr->bufferCnt);
-
   if ((fileptr->flag & FILE_EOF) != 0) return EOF;
-
   if (fileptr->buffer == NULL) file_set_buffer(fileptr);
-
   if (fileptr->bufferSize == 0) return EOF;
 
   int fd = fileptr->fd;
@@ -821,11 +816,8 @@ file_fill_buffer(bfile_t *fileptr)
       }
 
       fileptr->mappedSize = (size_t) nread;
-
       fileptr->buffer = (char *) mmap(NULL, (size_t) nread, PROT_READ, MAP_PRIVATE, fd, fileptr->bufferPos);
-
       if (fileptr->buffer == MAP_FAILED) SysError("mmap error for read %s", fileptr->name);
-
       offset = fileptr->position - fileptr->bufferPos;
     }
   }
@@ -867,7 +859,6 @@ file_fill_buffer(bfile_t *fileptr)
   if (offset > 0)
   {
     if (offset > nread) Error("Internal problem with buffer handling. nread = %d offset = %d", nread, offset);
-
     fileptr->bufferPtr += offset;
     fileptr->bufferCnt -= (size_t) offset;
   }
@@ -887,14 +878,12 @@ file_copy_from_buffer(bfile_t *fileptr, void *ptr, size_t size)
   if (size == 1)
   {
     ((char *) ptr)[0] = fileptr->bufferPtr[0];
-
     fileptr->bufferPtr++;
     fileptr->bufferCnt--;
   }
   else
   {
     memcpy(ptr, fileptr->bufferPtr, size);
-
     fileptr->bufferPtr += size;
     fileptr->bufferCnt -= size;
   }
@@ -1221,9 +1210,7 @@ fileRead(int fileID, void *restrict ptr, size_t size)
   bfile_t *fileptr = file_to_pointer(fileID);
   if (fileptr)
   {
-    double t_begin = 0.0;
-
-    if (FileInfo) t_begin = file_time();
+    double t_begin = (FileInfo) ? file_time() : 0.0;
 
     if (fileptr->type == FILE_TYPE_OPEN) { nread = file_read_from_buffer(fileptr, ptr, size); }
     else
@@ -1252,9 +1239,7 @@ fileWrite(int fileID, const void *restrict ptr, size_t size)
   bfile_t *fileptr = file_to_pointer(fileID);
   if (fileptr)
   {
-    double t_begin = 0.0;
-
-    if (FileInfo) t_begin = file_time();
+    double t_begin = (FileInfo) ? file_time() : 0.0;
 
     if (fileptr->type == FILE_TYPE_FOPEN) { nwrite = fwrite(ptr, 1, size, fileptr->fp); }
     else

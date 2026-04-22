@@ -230,6 +230,17 @@ resizeBuf(void **buf, size_t *bufSize, size_t reqSize)
   return *buf;
 }
 
+static const char *
+steptype_to_cellmethod(int stepType)
+{
+  return (stepType == TSTEP_AVG)     ? "mean"
+         : (stepType == TSTEP_SUM)   ? "sum"
+         : (stepType == TSTEP_RANGE) ? "range"
+         : (stepType == TSTEP_MIN)   ? "minimum"
+         : (stepType == TSTEP_MAX)   ? "maximum"
+                                     : NULL;
+}
+
 static void
 cdfDefineCellMethods(stream_t *streamptr, int cdiID, int varID, int fileID, int ncvarID)
 {
@@ -242,15 +253,7 @@ cdfDefineCellMethods(stream_t *streamptr, int cdiID, int varID, int fileID, int 
 
   int stepType = vlistInqVarTsteptype(cdiID, varID);
 
-  const char *cellMethod = NULL;
-  // clang-format off
-  if      (stepType == TSTEP_AVG)   cellMethod = "mean";
-  else if (stepType == TSTEP_SUM)   cellMethod = "sum";
-  else if (stepType == TSTEP_RANGE) cellMethod = "range";
-  else if (stepType == TSTEP_MIN)   cellMethod = "minimum";
-  else if (stepType == TSTEP_MAX)   cellMethod = "maximum";
-  // clang-format on
-
+  const char *cellMethod = steptype_to_cellmethod(stepType);
   if (cellMethod)
   {
     const char *attname = "cell_methods";
@@ -406,16 +409,7 @@ nc_grid_index(stream_t *streamptr, int gridID)
 static int
 xtype2ppb(nc_type xtype)
 {
-  int ppb = 32;
-
-  // clang-format off
-  if      (xtype == NC_BYTE)   ppb = 8;
-  else if (xtype == NC_SHORT)  ppb = 16;
-  else if (xtype == NC_UBYTE)  ppb = 8;
-  else if (xtype == NC_USHORT) ppb = 16;
-  // clang-format on
-
-  return ppb;
+  return (xtype == NC_BYTE) ? 8 : (xtype == NC_SHORT) ? 16 : (xtype == NC_UBYTE) ? 8 : (xtype == NC_USHORT) ? 16 : 32;
 }
 
 static void
@@ -1025,7 +1019,7 @@ cdfDefVar(stream_t *streamptr, int varID)
     cdf_def_var_chunking(fileID, ncvarID, NC_CHUNKED, chunks);
 
   if (useChunks) cdfDefVarCompression(streamptr, ncvarID, xtype);
-  if (useChunks)
+  if (useChunks && ((long) chunkCacheSize >= CDI_FilterSize_Min))
   {
     char filterSpec[CDI_MAX_NAME];
     length = CDI_MAX_NAME;

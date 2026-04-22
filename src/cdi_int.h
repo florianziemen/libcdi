@@ -118,6 +118,24 @@ str_is_equal(const char *x, const char *y)
 #define IS_EQUAL(x, y) (!IS_NOT_EQUAL(x, y))
 #endif
 
+static inline bool
+dbl_is_nan(double x)
+{
+#ifdef HAVE_DECL_ISNAN
+  return isnan(x);
+#elif defined(FP_NAN)
+  return (fpclassify(x) == FP_NAN);
+#else
+  return x != x;
+#endif
+}
+
+static inline bool
+dbl_is_equal(double x, double y)
+{
+  return (dbl_is_nan(x) || dbl_is_nan(y)) ? dbl_is_nan(x) && dbl_is_nan(y) : !(x < y || y < x);
+}
+
 enum
 {
   TYPE_REC,
@@ -316,6 +334,7 @@ typedef struct
   int filetype;
   int byteorder;
   int fileID;
+  int groupID;
   int filemode;
   int nrecs;  // number of records
   SizeType numvals;
@@ -448,6 +467,10 @@ extern int CDI_Read_Cell_Center;
 extern int CDI_Read_Cell_Corners;
 extern int CDI_CMOR_Mode;
 extern int CDI_Reduce_Dim;
+extern int CDI_Reduce_DimX;
+extern int CDI_Reduce_DimY;
+extern int CDI_Reduce_DimZ;
+extern int CDI_Reduce_DimT;
 extern int CDI_Shuffle;
 extern size_t CDI_Netcdf_Hdr_Pad;
 extern bool CDI_Copy_ChunkSpec;
@@ -457,6 +480,7 @@ extern bool CDI_Cache_NC4;
 extern bool CDI_Cache_NCZ;
 extern long CDI_CacheSize_In;
 extern long CDI_CacheSize_Out;
+extern long CDI_FilterSize_Min;
 extern size_t CDI_CacheSize_Max;
 extern bool CDI_Netcdf_Lazy_Grid_Load;
 extern int STREAM_Debug;

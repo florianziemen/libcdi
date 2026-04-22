@@ -10,6 +10,9 @@
 #include "cdf_int.h"
 
 #ifdef HAVE_LIBNETCDF
+#include "error.h"
+#include <netcdf.h>
+
 const char *
 cdfLibraryVersion(void)
 {
@@ -66,19 +69,18 @@ cdf_open_read(const char *filename, int *filetype)
   int ncid = -1;
   int readmode = NC_NOWRITE;
   int status = cdf_open(filename, readmode, &ncid);
-  if (status > 0 && ncid < 0) ncid = CDI_ESYSTEM;
-  if (status < -1000 && ncid == -1)
-    ncid = status;
+  if (status > 0 && ncid < 0) { ncid = CDI_ESYSTEM; }
+  if (status < -1000 && ncid == -1) { ncid = status; }
   else
   {
     int format = -1;
     status = nc_inq_format(ncid, &format);
-    if (status == NC_NOERR && format == NC_FORMAT_NETCDF4_CLASSIC) *filetype = CDI_FILETYPE_NC4C;
+    if (status == NC_NOERR && format == NC_FORMAT_NETCDF4_CLASSIC) { *filetype = CDI_FILETYPE_NC4C; }
 
 #ifdef NC_FORMATX_NCZARR
     int modeNC;
     status = nc_inq_format_extended(ncid, &format, &modeNC);
-    if (status == NC_NOERR && format == NC_FORMATX_NCZARR) *filetype = CDI_FILETYPE_NCZARR;
+    if (status == NC_NOERR && format == NC_FORMATX_NCZARR) { *filetype = CDI_FILETYPE_NCZARR; }
 #endif
   }
 
@@ -169,7 +171,10 @@ cdfOpen(const char *filename, const char *mode, int filetype)
 
     if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
   }
-  else { fileID = CDI_ELIBNAVAIL; }
+  else
+  {
+    fileID = CDI_ELIBNAVAIL;
+  }
 
   return fileID;
 }
@@ -196,6 +201,33 @@ void
 cdfClose(int fileID)
 {
   cdfCloseFile(fileID);
+}
+
+int
+cdf_inq_group(int fileID, const char *groupName)
+{
+  int ncGroupID = -1;
+  int status = nc_inq_ncid(fileID, groupName, &ncGroupID);
+  int groupID = (status == NC_NOERR) ? ncGroupID : status - 1000;
+
+  if (status != NC_NOERR)
+  {
+    Warning("Group %s not found!", groupName);
+    int numGroups = 0;
+    int ncids[NC_MAX_VARS];
+    char gname[CDI_MAX_NAME];
+    nc_inq_grps(fileID, &numGroups, ncids);
+    printf("Available groups: ");
+    for (int i = 0; i < numGroups; ++i)
+    {
+      nc_inq_grpname(ncids[i], gname);
+      if (i > 0) printf(",");
+      printf("%s", gname);
+    }
+    printf("\n");
+  }
+
+  return groupID;
 }
 
 #endif

@@ -551,8 +551,7 @@ subtype_query_t
 matchAND(subtype_query_t q1, subtype_query_t q2)
 {
   if ((q1.nAND + q2.nAND) > MAX_KV_PAIRS_MATCH) Error("Internal error");
-  subtype_query_t result;
-  memset(&result, 0, sizeof(subtype_query_t));
+  subtype_query_t result = { 0 };
   result.nAND = q1.nAND;
   for (int i = 0; i < q1.nAND; i++)
   {

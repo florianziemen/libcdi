@@ -1,3 +1,7 @@
+add_library(libcdi)
+add_library(libcdi::libcdi ALIAS libcdi)
+
+target_compile_definitions(libcdi PRIVATE CDI=1 CDI_SIZE_TYPE=size_t PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}")
 
 target_sources(libcdi
   INTERFACE
@@ -224,5 +228,36 @@ target_include_directories(libcdi
   # where external projects will look for the library's public headers
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-target_link_libraries(libcdi ${cdi_linked_libs})
+target_link_libraries(libcdi PUBLIC m)
 target_compile_definitions(libcdi PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
+
+# --- Installation
+# packages required for installation
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+install(TARGETS libcdi
+  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+)
+
+get_target_property(cdi_install_files libcdi CDI_INSTALL_HEADERS)
+install(FILES ${cdi_install_files} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+
+# -- create configuration files
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cdi/cdi-config.cmake.in" "${CMAKE_BINARY_DIR}/cmake/cdi-config.cmake"
+  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/cdi")
+write_basic_package_version_file(
+  "${CMAKE_BINARY_DIR}/cmake/cdi-config-version.cmake"
+  VERSION "${PACKAGE_VERSION}"
+  COMPATIBILITY SameMajorVersion)
+
+#Install CMake configuration files to
+install(
+  FILES
+  "${CMAKE_BINARY_DIR}/cmake/cdi-config.cmake"
+  "${CMAKE_BINARY_DIR}/cmake/cdi-config-version.cmake"
+  DESTINATION
+  "${CMAKE_INSTALL_LIBDIR}/cmake/cdi")

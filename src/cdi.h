@@ -721,9 +721,9 @@ void    vlistDefVarIntKey(int vlistID, int varID, const char *name, int value);
 void    vlistDefVarDblKey(int vlistID, int varID, const char *name, double value);
 
 //      vlistDefVarIntArrKey: Set an arbitrary keyword/integer array pair for GRIB API
-void    vlistDefVarIntArrKey(int vlistID, int varID, const char *name, int *values, int nvalues);
+void    vlistDefVarIntArrKey(int vlistID, int varID, const char *name, const int values[], int nvalues);
 //      vlistDefVarDblArrKey: Set an arbitrary keyword/double array pair for GRIB API
-void    vlistDefVarDblArrKey(int vlistID, int varID, const char *name, double *values, int nvalues);
+void    vlistDefVarDblArrKey(int vlistID, int varID, const char *name, const double values[], int nvalues);
 
 //      vlistHasVarKey: returns 1 if meta-data key was read, 0 otherwise
 int     vlistHasVarKey(int vlistID, int varID, const char *name);
@@ -1358,10 +1358,12 @@ struct CdiQuery;
 struct CdiQuery *cdiQueryCreate(void);
 struct CdiQuery *cdiQueryClone(const struct CdiQuery *query);
 void cdiQueryDelete(struct CdiQuery *query);
+void cdiQuerySetGroups(struct CdiQuery *query, int numGroups, const char **groups);
 void cdiQuerySetNames(struct CdiQuery *query, int numNames, const char **names);
 void cdiQuerySetCells(struct CdiQuery *query, int numCells, const size_t *cells);
 void cdiQuerySetLayers(struct CdiQuery *query, int numLayers, const int *layers);
 void cdiQuerySetSteps(struct CdiQuery *query, int numSteps, const int *steps);
+const char *cdiQueryGetGroup(const struct CdiQuery *query, int index);
 size_t cdiQueryGetCell(const struct CdiQuery *query, int index);
 int cdiQueryGetLayer(const struct CdiQuery *query, int index);
 int cdiQueryGetStep(const struct CdiQuery *query, int index);
@@ -1369,6 +1371,7 @@ int cdiQueryName(struct CdiQuery *query, const char *name);
 // int cdiQueryCell(struct CdiQuery *query, size_t cell);
 // int cdiQueryLayer(struct CdiQuery *query, int layer);
 // int cdiQueryStep(struct CdiQuery *query, int step);
+int cdiQueryNumGroups(const struct CdiQuery *query);
 int cdiQueryNumNames(const struct CdiQuery *query);
 int cdiQueryNumCells(const struct CdiQuery *query);
 int cdiQueryNumLayers(const struct CdiQuery *query);

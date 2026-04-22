@@ -7,9 +7,9 @@
 
 int fdbScanTimesteps(stream_t *streamptr);
 
-long gribapiScanTimestep1(stream_t *streamptr);
-long gribapiScanTimestep2(stream_t *streamptr);
-long gribapiScanTimestep(stream_t *streamptr);
+int gribapiScanTimestep1(stream_t *streamptr);
+int gribapiScanTimestep2(stream_t *streamptr);
+int gribapiScanTimestep(stream_t *streamptr);
 
 int gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced, size_t *numMissVals,
                   double missval);

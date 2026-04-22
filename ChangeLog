@@ -1,3 +1,37 @@
+2026-04-22  Uwe Schulzweida
+
+        * using EXSE library version 2.1.0
+	* using FILE library version 1.9.2
+	* Version 2.6.1 released
+
+2026-04-22  Uwe Schulzweida
+
+        * Removed obsolete function gridName() and zaxisName()
+
+2026-04-21  Uwe Schulzweida
+
+        * query: added date key
+
+2026-03-30  Uwe Schulzweida
+
+	* NetCDF: reading array without dimension failed (bug fix)
+
+2026-03-27  Uwe Schulzweida
+
+	* cdiAdditionalGRIBKeys: fix eccodes warning message for non array keys
+
+2026-03-14  Uwe Schulzweida
+
+	* add env. var CDI_FILTERSIZE_MIN to set the minimum chunkSize for filtering
+
+2026-03-13  Uwe Schulzweida
+
+	* vlistDefVarIntArrKey/vlistDefVarDblArrKey: changed *values to values[]
+
+2026-03-10  Uwe Schulzweida
+
+	* query single NetCDF group
+
 2026-02-20  Uwe Schulzweida
 
 	* Version 2.6.0 released

@@ -40,7 +40,7 @@ int vlistInqVarMissvalUsed(int vlistID, int varID);
 static const uint32_t HOST_ENDIANNESS_temp[1] = { UINT32_C(0x00030201) };
 #define HOST_ENDIANNESS (((const unsigned char *) HOST_ENDIANNESS_temp)[0])
 #else
-#define HOST_ENDIANNESS (((const unsigned char *) &(const uint32_t[1]){ UINT32_C(0x00030201) })[0])
+#define HOST_ENDIANNESS (((const unsigned char *) &(const uint32_t[1]) { UINT32_C(0x00030201) })[0])
 #endif
 #endif
 
@@ -172,6 +172,7 @@ usage(void)
   fprintf(stderr, "    -d             Print debugging information\n");
   fprintf(stderr, "    -E             Use ecCodes to decode/encode GRIB1 messages\n");
   fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext or ieg)\n");
+  fprintf(stderr, "    -G <group>     Select NetCDF4 group\n");
   fprintf(stderr, "    -i <num>       Number of worker to decode/decompress GRIB records\n");
   fprintf(stderr, "    -m             Move fields\n");
   fprintf(stderr, "    -r             Use CDI field API\n");
@@ -717,7 +718,10 @@ define_compress(const char *arg)
       int level = (len >= 6 && len <= 7 && arg[4] == '_' && isdigit(arg[5])) ? atoi(&arg[5]) : 1;
       snprintf(filterSpec, sizeof(filterSpec), "%d,%d", filterid, level);
     }
-    else { fprintf(stderr, "Filter already defined!\n"); }
+    else
+    {
+      fprintf(stderr, "Filter already defined!\n");
+    }
   }
   else
     fprintf(stderr, "%s compression unsupported!\n", arg);
@@ -728,7 +732,10 @@ define_filter(const char *arg)
 {
   size_t len = strlen(arg);
   if (len > 0) { strncpy(filterSpec, arg, sizeof(filterSpec)); }
-  else { fprintf(stderr, "Filter spec missing!\n"); }
+  else
+  {
+    fprintf(stderr, "Filter spec missing!\n");
+  }
 }
 
 int
@@ -753,6 +760,8 @@ main(int argc, char *argv[])
   int numWorkerOut = 0;
   char varname[CDI_MAX_NAME];
   char paramstr[32];
+  const char *queryGroups[256];
+  int numQueryGroups = 0;
   const char *queryNames[256];
   int numQueryNames = 0;
   size_t queryCells[256];
@@ -769,7 +778,7 @@ main(int argc, char *argv[])
     Progname++;
 
   int c;
-  while ((c = getopt(argc, argv, "b:C:F:f:i:L:o:N:S:t:w:z:cdEhlMmnRrsTvVxXZ")) != EOF)
+  while ((c = getopt(argc, argv, "b:C:F:f:G:i:L:o:N:S:t:w:z:cdEhlMmnRrsTvVxXZ")) != EOF)
   {
     switch (c)
     {
@@ -778,6 +787,7 @@ main(int argc, char *argv[])
       case 'd': Debug = 1; break;
       case 'E': cdiDefGlobal("ECCODES_GRIB1", true); break;
       case 'f': setDefaultFileType(optarg); break;
+      case 'G': queryGroups[numQueryGroups++] = strdup(optarg); break;
       case 'h': usage(); exit(0);
       case 'i': numWorkerIn = atoi(optarg); break;
       case 'o': numWorkerOut = atoi(optarg); break;
@@ -840,11 +850,13 @@ main(int argc, char *argv[])
     int taxisID2 = CDI_UNDEFID;
     int vlistID2 = CDI_UNDEFID;
 
-    bool useQuery = (numQueryNames > 0) || (numQueryCells > 0) || (numQueryLayers > 0) || (numQuerySteps > 0);
+    bool useQuery
+        = (numQueryGroups > 0) || (numQueryNames > 0) || (numQueryCells > 0) || (numQueryLayers > 0) || (numQuerySteps > 0);
     struct CdiQuery *query = NULL;
     if (useQuery)
     {
       query = cdiQueryCreate();
+      if (numQueryGroups) cdiQuerySetGroups(query, numQueryGroups, queryGroups);
       if (numQueryNames) cdiQuerySetNames(query, numQueryNames, queryNames);
       if (numQueryCells) cdiQuerySetCells(query, numQueryCells, queryCells);
       if (numQueryLayers) cdiQuerySetLayers(query, numQueryLayers, queryLayers);
@@ -1072,6 +1084,7 @@ main(int argc, char *argv[])
     streamClose(streamID1);
   }
 
+  for (int i = 0; i < numQueryGroups; ++i) free((void *) queryGroups[i]);
   for (int i = 0; i < numQueryNames; ++i) free((void *) queryNames[i]);
 
   if (wTable) tableWrite(wTable, itableID);

@@ -13,6 +13,7 @@ vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
 #ifdef HAVE_LIBGRIB_API
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   if (vlistptr == NULL) Error("Internal error!");
+  var_t *var = &vlistptr->vars[varID];
   int idx;
 
   if (vlistptr->immutable)
@@ -21,26 +22,24 @@ vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
           "or use the stream-internal vlist by calling streamInqVlist().",
           vlistID);
 
-  for (idx = 0; idx < vlistptr->vars[varID].opt_grib_nentries; idx++)
-    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[idx].keyword)
-        && (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_int))
-      break;
+  for (idx = 0; idx < var->opt_grib_nentries; idx++)
+    if (str_is_equal(name, var->opt_grib_kvpair[idx].keyword) && (var->opt_grib_kvpair[idx].data_type == t_int)) break;
 
-  if (idx < vlistptr->vars[varID].opt_grib_nentries)
+  if (idx < var->opt_grib_nentries)
   {
-    vlistptr->vars[varID].opt_grib_kvpair[idx].int_val = value;
-    vlistptr->vars[varID].opt_grib_kvpair[idx].update = true;
+    var->opt_grib_kvpair[idx].int_val = value;
+    var->opt_grib_kvpair[idx].update = true;
   }
   else
   {
-    resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries + 1);
-    vlistptr->vars[varID].opt_grib_nentries += 1;
-    idx = vlistptr->vars[varID].opt_grib_nentries - 1;
-    vlistptr->vars[varID].opt_grib_kvpair[idx].data_type = t_int;
-    vlistptr->vars[varID].opt_grib_kvpair[idx].int_val = value;
-    vlistptr->vars[varID].opt_grib_kvpair[idx].update = true;
+    resize_opt_grib_entries(&vlistptr->vars[varID], var->opt_grib_nentries + 1);
+    var->opt_grib_nentries += 1;
+    idx = var->opt_grib_nentries - 1;
+    var->opt_grib_kvpair[idx].data_type = t_int;
+    var->opt_grib_kvpair[idx].int_val = value;
+    var->opt_grib_kvpair[idx].update = true;
     if (name)
-      vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdup(name);
+      var->opt_grib_kvpair[idx].keyword = strdup(name);
     else
       Error("Internal error, name undefined!");
   }
@@ -48,16 +47,14 @@ vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
   if (CDI_Debug)
   {
     Message("define additional GRIB2 key \"%s\" (integer): %d", name, value);
-    Message("total list of registered, additional GRIB2 keys (total: %d):", vlistptr->vars[varID].opt_grib_nentries);
-    for (idx = 0; idx < vlistptr->vars[varID].opt_grib_nentries; idx++)
-      if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_int)
-        Message("%s -> integer %d", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
-                vlistptr->vars[varID].opt_grib_kvpair[idx].int_val);
-      else if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_double)
-        Message("%s -> double %d", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
-                vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val);
+    Message("total list of registered, additional GRIB2 keys (total: %d):", var->opt_grib_nentries);
+    for (idx = 0; idx < var->opt_grib_nentries; idx++)
+      if (var->opt_grib_kvpair[idx].data_type == t_int)
+        Message("%s -> integer %d", var->opt_grib_kvpair[idx].keyword, var->opt_grib_kvpair[idx].int_val);
+      else if (var->opt_grib_kvpair[idx].data_type == t_double)
+        Message("%s -> double %d", var->opt_grib_kvpair[idx].keyword, var->opt_grib_kvpair[idx].dbl_val);
       else
-        Message("%s -> unknown", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword);
+        Message("%s -> unknown", var->opt_grib_kvpair[idx].keyword);
   }
 
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
@@ -76,6 +73,7 @@ vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 #ifdef HAVE_LIBGRIB_API
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   if (vlistptr == NULL) Error("Internal error!");
+  var_t *var = &vlistptr->vars[varID];
   int idx;
 
   if (vlistptr->immutable)
@@ -84,26 +82,24 @@ vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
           "or use the stream-internal vlist by calling streamInqVlist().",
           vlistID);
 
-  for (idx = 0; idx < vlistptr->vars[varID].opt_grib_nentries; idx++)
-    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[idx].keyword)
-        && (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_double))
-      break;
+  for (idx = 0; idx < var->opt_grib_nentries; idx++)
+    if (str_is_equal(name, var->opt_grib_kvpair[idx].keyword) && (var->opt_grib_kvpair[idx].data_type == t_double)) break;
 
-  if (idx < vlistptr->vars[varID].opt_grib_nentries)
+  if (idx < var->opt_grib_nentries)
   {
-    vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val = value;
-    vlistptr->vars[varID].opt_grib_kvpair[idx].update = true;
+    var->opt_grib_kvpair[idx].dbl_val = value;
+    var->opt_grib_kvpair[idx].update = true;
   }
   else
   {
-    resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries + 1);
-    vlistptr->vars[varID].opt_grib_nentries += 1;
-    idx = vlistptr->vars[varID].opt_grib_nentries - 1;
-    vlistptr->vars[varID].opt_grib_kvpair[idx].data_type = t_double;
-    vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val = value;
-    vlistptr->vars[varID].opt_grib_kvpair[idx].update = true;
+    resize_opt_grib_entries(&vlistptr->vars[varID], var->opt_grib_nentries + 1);
+    var->opt_grib_nentries += 1;
+    idx = var->opt_grib_nentries - 1;
+    var->opt_grib_kvpair[idx].data_type = t_double;
+    var->opt_grib_kvpair[idx].dbl_val = value;
+    var->opt_grib_kvpair[idx].update = true;
     if (name)
-      vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdup(name);
+      var->opt_grib_kvpair[idx].keyword = strdup(name);
     else
       Error("Internal error, name undefined!");
   }
@@ -111,16 +107,14 @@ vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
   if (CDI_Debug)
   {
     Message("define additional GRIB2 key \"%s\" (double): %d", name, value);
-    Message("total list of registered, additional GRIB2 keys (total: %d):", vlistptr->vars[varID].opt_grib_nentries);
-    for (idx = 0; idx < vlistptr->vars[varID].opt_grib_nentries; idx++)
-      if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_int)
-        Message("%s -> integer %d", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
-                vlistptr->vars[varID].opt_grib_kvpair[idx].int_val);
-      else if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_double)
-        Message("%s -> double %d", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
-                vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val);
+    Message("total list of registered, additional GRIB2 keys (total: %d):", var->opt_grib_nentries);
+    for (idx = 0; idx < var->opt_grib_nentries; idx++)
+      if (var->opt_grib_kvpair[idx].data_type == t_int)
+        Message("%s -> integer %d", var->opt_grib_kvpair[idx].keyword, var->opt_grib_kvpair[idx].int_val);
+      else if (var->opt_grib_kvpair[idx].data_type == t_double)
+        Message("%s -> double %d", var->opt_grib_kvpair[idx].keyword, var->opt_grib_kvpair[idx].dbl_val);
       else
-        Message("%s -> unknown", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword);
+        Message("%s -> unknown", var->opt_grib_kvpair[idx].keyword);
   }
 
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
@@ -133,7 +127,7 @@ vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 }
 
 void
-vlistDefVarIntArrKey(int vlistID, int varID, const char *name, int *values, int nvalues)
+vlistDefVarIntArrKey(int vlistID, int varID, const char *name, const int *values, int nvalues)
 {
 #ifdef HAVE_LIBGRIB_API
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
@@ -146,25 +140,24 @@ vlistDefVarIntArrKey(int vlistID, int varID, const char *name, int *values, int 
           "or use the stream-internal vlist by calling streamInqVlist().",
           vlistID);
 
+  var_t *var = &vlistptr->vars[varID];
   int idx;
-  for (idx = 0; idx < vlistptr->vars[varID].opt_grib_nentries; idx++)
-    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[idx].keyword)
-        && (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_intarr))
-      break;
+  for (idx = 0; idx < var->opt_grib_nentries; idx++)
+    if (str_is_equal(name, var->opt_grib_kvpair[idx].keyword) && (var->opt_grib_kvpair[idx].data_type == t_intarr)) break;
 
-  opt_key_val_pair_t *entry;
+  opt_key_val_pair_t *entry = NULL;
 
-  if (idx < vlistptr->vars[varID].opt_grib_nentries)
+  if (idx < var->opt_grib_nentries)
   {
-    entry = &vlistptr->vars[varID].opt_grib_kvpair[idx];
+    entry = &var->opt_grib_kvpair[idx];
     free(entry->int_arr);
   }
   else
   {
-    resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries + 1);
-    vlistptr->vars[varID].opt_grib_nentries += 1;
-    idx = vlistptr->vars[varID].opt_grib_nentries - 1;
-    entry = &vlistptr->vars[varID].opt_grib_kvpair[idx];
+    resize_opt_grib_entries(&vlistptr->vars[varID], var->opt_grib_nentries + 1);
+    var->opt_grib_nentries += 1;
+    idx = var->opt_grib_nentries - 1;
+    entry = &var->opt_grib_kvpair[idx];
 
     entry->keyword = strdup(name);
     entry->data_type = t_intarr;
@@ -195,7 +188,7 @@ vlistDefVarIntArrKey(int vlistID, int varID, const char *name, int *values, int 
 }
 
 void
-vlistDefVarDblArrKey(int vlistID, int varID, const char *name, double *values, int nvalues)
+vlistDefVarDblArrKey(int vlistID, int varID, const char *name, const double *values, int nvalues)
 {
 #ifdef HAVE_LIBGRIB_API
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
@@ -208,25 +201,24 @@ vlistDefVarDblArrKey(int vlistID, int varID, const char *name, double *values, i
           "or use the stream-internal vlist by calling streamInqVlist().",
           vlistID);
 
+  var_t *var = &vlistptr->vars[varID];
   int idx;
-  for (idx = 0; idx < vlistptr->vars[varID].opt_grib_nentries; idx++)
-    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[idx].keyword)
-        && (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_doublearr))
-      break;
+  for (idx = 0; idx < var->opt_grib_nentries; idx++)
+    if (str_is_equal(name, var->opt_grib_kvpair[idx].keyword) && (var->opt_grib_kvpair[idx].data_type == t_doublearr)) break;
 
   opt_key_val_pair_t *entry;
 
-  if (idx < vlistptr->vars[varID].opt_grib_nentries)
+  if (idx < var->opt_grib_nentries)
   {
-    entry = &vlistptr->vars[varID].opt_grib_kvpair[idx];
+    entry = &var->opt_grib_kvpair[idx];
     free(entry->dbl_arr);
   }
   else
   {
-    resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries + 1);
-    vlistptr->vars[varID].opt_grib_nentries += 1;
-    idx = vlistptr->vars[varID].opt_grib_nentries - 1;
-    entry = &vlistptr->vars[varID].opt_grib_kvpair[idx];
+    resize_opt_grib_entries(&vlistptr->vars[varID], var->opt_grib_nentries + 1);
+    var->opt_grib_nentries += 1;
+    idx = var->opt_grib_nentries - 1;
+    entry = &var->opt_grib_kvpair[idx];
 
     entry->keyword = strdup(name);
     entry->data_type = t_doublearr;
@@ -289,11 +281,12 @@ vlistHasVarKey(int vlistID, int varID, const char *name)
 {
 #ifdef HAVE_LIBGRIB_API
   /* check if the GRIB key was previously read and is stored */
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  const var_t *var = &vlistptr->vars[varID];
 
-  for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
+  for (int i = 0; i < var->opt_grib_nentries; ++i)
   {
-    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)) return 1;
+    if (str_is_equal(name, var->opt_grib_kvpair[i].keyword)) return 1;
   }
 #else
   (void) vlistID;
@@ -310,15 +303,15 @@ vlistInqVarDblKey(int vlistID, int varID, const char *name)
   double value = 0;
 #ifdef HAVE_LIBGRIB_API
   /* check if the GRIB key was previously read and is stored in "opt_grib_dbl_val" */
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  const var_t *var = &vlistptr->vars[varID];
 
-  for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
+  for (int i = 0; i < var->opt_grib_nentries; ++i)
   {
-    int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
-    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)
-        && (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)
-        && (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub))
-      return vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val;
+    int isub = subtypeInqActiveIndex(var->subtypeID);
+    if (str_is_equal(name, var->opt_grib_kvpair[i].keyword) && (var->opt_grib_kvpair[i].data_type == t_double)
+        && (var->opt_grib_kvpair[i].subtype_index == isub))
+      return var->opt_grib_kvpair[i].dbl_val;
   }
 #else
   (void) vlistID;
@@ -335,15 +328,15 @@ vlistInqVarIntKey(int vlistID, int varID, const char *name)
   long value = 0;
 #ifdef HAVE_LIBGRIB_API
   /* check if the GRIB key was previously read and is stored in "opt_grib_int_val" */
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  const var_t *var = &vlistptr->vars[varID];
 
-  for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
+  for (int i = 0; i < var->opt_grib_nentries; ++i)
   {
-    int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
-    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)
-        && (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_int)
-        && (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub))
-      return vlistptr->vars[varID].opt_grib_kvpair[i].int_val;
+    int isub = subtypeInqActiveIndex(var->subtypeID);
+    if (str_is_equal(name, var->opt_grib_kvpair[i].keyword) && (var->opt_grib_kvpair[i].data_type == t_int)
+        && (var->opt_grib_kvpair[i].subtype_index == isub))
+      return var->opt_grib_kvpair[i].int_val;
   }
 
 #else
@@ -361,16 +354,16 @@ vlistInqVarIntArrKey(int vlistID, int varID, const char *name)
   int *int_arr = NULL;
 
 #ifdef HAVE_LIBGRIB_API
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  const var_t *var = &vlistptr->vars[varID];
 
-  for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
+  for (int i = 0; i < var->opt_grib_nentries; ++i)
   {
-    int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
-    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)
-        && (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_intarr)
-        && (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub))
+    int isub = subtypeInqActiveIndex(var->subtypeID);
+    if (str_is_equal(name, var->opt_grib_kvpair[i].keyword) && (var->opt_grib_kvpair[i].data_type == t_intarr)
+        && (var->opt_grib_kvpair[i].subtype_index == isub))
     {
-      int_arr = vlistptr->vars[varID].opt_grib_kvpair[i].int_arr;
+      int_arr = var->opt_grib_kvpair[i].int_arr;
       break;
     }
   }
@@ -390,16 +383,16 @@ vlistInqVarDblArrKey(int vlistID, int varID, const char *name)
   double *dbl_arr = NULL;
 
 #ifdef HAVE_LIBGRIB_API
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  const var_t *var = &vlistptr->vars[varID];
 
-  for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; ++i)
+  for (int i = 0; i < var->opt_grib_nentries; ++i)
   {
-    int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
-    if (str_is_equal(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword)
-        && (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_doublearr)
-        && (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub))
+    int isub = subtypeInqActiveIndex(var->subtypeID);
+    if (str_is_equal(name, var->opt_grib_kvpair[i].keyword) && (var->opt_grib_kvpair[i].data_type == t_doublearr)
+        && (var->opt_grib_kvpair[i].subtype_index == isub))
     {
-      dbl_arr = vlistptr->vars[varID].opt_grib_kvpair[i].dbl_arr;
+      dbl_arr = var->opt_grib_kvpair[i].dbl_arr;
       break;
     }
   }

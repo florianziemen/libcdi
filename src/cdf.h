@@ -11,6 +11,8 @@ int cdfOpen(const char *filename, const char *mode, int filetype);
 int cdf4Open(const char *filename, const char *mode, int *filetype);
 void cdfClose(int fileID);
 
+int cdf_inq_group(int fileID, const char *groupName);
+
 #endif /* CDF_H */
 /*
  * Local Variables:

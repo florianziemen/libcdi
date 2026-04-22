@@ -20,7 +20,7 @@ static void
 cdfReadGridTraj(stream_t *streamptr, int gridID)
 {
   int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
+  int fileID = streamptr->groupID;
 
   int gridindex = vlistGridIndex(vlistID, gridID);
   const CdfGrid *cdfGrid = &(streamptr->cdfInfo.cdfGridList[gridindex]);
@@ -62,7 +62,8 @@ cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[MAX_DIMENS
 
   int ndims = 0;
 #define addDimension(startCoord, length) \
-  do {                                   \
+  do                                     \
+  {                                      \
     (*start)[ndims] = startCoord;        \
     (*count)[ndims] = length;            \
     ndims++;                             \
@@ -401,7 +402,7 @@ stream_inq_dimlen(stream_t *streamptr, int dimid)
   }
 
   size_t size = 0;
-  cdf_inq_dimlen(streamptr->fileID, dimid, &size);
+  cdf_inq_dimlen(streamptr->groupID, dimid, &size);
   return size;
 }
 
@@ -410,7 +411,7 @@ stream_get_skip_dim(stream_t *streamptr, int ncvarid, int dimIds[3])
 {
   if (dimIds[0] != CDI_UNDEFID || dimIds[1] != CDI_UNDEFID) return 0;
 
-  int fileId = streamptr->fileID;
+  int fileId = streamptr->groupID;
   int nvdims;
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
   if (nvdims != 3) return 0;
@@ -439,7 +440,7 @@ static void
 cdfGetSliceSlapDescription(stream_t *streamptr, long tsID, int varID, int levelID, bool *outSwapXY, size_t start[cdfSliceNDim],
                            size_t count[cdfSliceNDim])
 {
-  int fileId = streamptr->fileID;
+  int fileId = streamptr->groupID;
   int vlistID = streamptr->vlistID;
   int ncvarid = streamptr->vars[varID].ncvarid;
   size_t ncStepIndex = (size_t) streamptr->tsteps[tsID].ncStepIndex;
@@ -469,7 +470,8 @@ cdfGetSliceSlapDescription(stream_t *streamptr, long tsID, int varID, int levelI
   int ndims = 0;
 
 #define addDimension(startIndex, extent) \
-  do {                                   \
+  do                                     \
+  {                                      \
     start[ndims] = startIndex;           \
     count[ndims] = extent;               \
     ndims++;                             \
@@ -668,7 +670,7 @@ cdfReadDataFP64(stream_t *streamptr, int varID, size_t length, size_t start[MAX_
                 double *data)
 {
   int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
+  int fileID = streamptr->groupID;
   int ncvarid = streamptr->vars[varID].ncvarid;
   int datatype = vlistInqVarDatatype(vlistID, varID);
 
@@ -703,7 +705,7 @@ cdfReadDataFP32(stream_t *streamptr, int varID, size_t length, size_t start[MAX_
                 float *data)
 {
   int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
+  int fileID = streamptr->groupID;
   int ncvarid = streamptr->vars[varID].ncvarid;
   int datatype = vlistInqVarDatatype(vlistID, varID);
   CdfCache *cdfCache = streamptr->vars[varID].cdfCache;
@@ -721,7 +723,10 @@ cdfReadDataFP32(stream_t *streamptr, int varID, size_t length, size_t start[MAX_
       }
       Free(cdata);
     }
-    else { cdf_get_vara(fileID, ncvarid, start, count, data); }
+    else
+    {
+      cdf_get_vara(fileID, ncvarid, start, count, data);
+    }
   }
   else
   {
@@ -888,7 +893,7 @@ job_args_init(stream_t *streamptr, long tsID, long recID, int memtype, void *dat
 
   if (!data) data = Malloc(gridsize * ((memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
 
-  return (JobArgsCDF){
+  return (JobArgsCDF) {
     .streamptr = streamptr,
     .varID = recInfo->varID,
     .levelID = recInfo->levelID,
@@ -954,7 +959,7 @@ cdf_get_local_step_and_recId(stream_t *streamptr, long globalRecId)
     globalRecId -= tsteps[1].nrecs;
   }
 
-  return (struct recTsId){ .recID = globalRecId, .tsID = localTsId };
+  return (struct recTsId) { .recID = globalRecId, .tsID = localTsId };
 }
 
 static void
@@ -1111,7 +1116,7 @@ cdfReadVarDPPart(stream_t *streamptr, int varID, int varType, int startpoint, si
   start[1 + ltime] += (size_t) startpoint;
   count[1 + ltime] = length;
 
-  cdf_get_vara_double(streamptr->fileID, ncvarid, start, count, data);
+  cdf_get_vara_double(streamptr->groupID, ncvarid, start, count, data);
 
   *numMissVals = cdfDoInputDataTransformationDP(vlistID, varID, length, data);
 }

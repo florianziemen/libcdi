@@ -26,8 +26,11 @@
 #include "serialize.h"
 #include "zaxis.h"
 
-#define LevelUp 1
-#define LevelDown 2
+enum
+{
+  LevelUp = 1,
+  LevelDown = 2
+};
 
 // clang-format off
 static const struct
