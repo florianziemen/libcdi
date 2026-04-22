@@ -289,9 +289,9 @@ printGridNp(int gridtype, int gridID, size_t gridsize, size_t xsize, size_t ysiz
 static void
 printGridInfoKernel(int gridID, int index, bool lproj)
 {
-  int gridtype = gridInqType(gridID);
+  int gridType = gridInqType(gridID);
 
-  if (lproj && gridtype != GRID_PROJECTION)
+  if (lproj && gridType != GRID_PROJECTION)
     fprintf(stderr, "Internal problem (%s): sub grid not equal GRID_PROJECTION!\n", __func__);
 
   int trunc = gridInqTrunc(gridID);
@@ -306,19 +306,19 @@ printGridInfoKernel(int gridID, int index, bool lproj)
   if (!lproj)
   {
     fprintf(stdout, "  %4d : ", index + 1);
-    fprintf(stdout, "%-24s", gridNamePtr(gridtype));
+    fprintf(stdout, "%-24s", gridNamePtr(gridType));
     fprintf(stdout, " : ");
   }
 
-  if (gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION || gridtype == GRID_GENERIC || gridtype == GRID_CHARXY
-      || gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED)
+  if (gridType == GRID_LONLAT || gridType == GRID_PROJECTION || gridType == GRID_GENERIC || gridType == GRID_CHARXY
+      || gridType == GRID_GAUSSIAN || gridType == GRID_GAUSSIAN_REDUCED)
   {
-    if (!lproj) { printGridNp(gridtype, gridID, gridsize, xsize, ysize); }
+    if (!lproj) { printGridNp(gridType, gridID, gridsize, xsize, ysize); }
 
     char name[CDI_MAX_NAME];
     int length = CDI_MAX_NAME;
     cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, name, &length);
-    if (gridtype == GRID_PROJECTION || name[0])
+    if (gridType == GRID_PROJECTION || name[0])
     {
       if (name[0] == 0) strcpy(name, "undefined");
       fprintf(stdout, "         %24s", "mapping");
@@ -336,30 +336,30 @@ printGridInfoKernel(int gridID, int index, bool lproj)
               gridHasArea(gridID) ? " area" : "", gridInqMask(gridID, NULL) ? " mask" : "");
     }
   }
-  else if (gridtype == GRID_SPECTRAL)
+  else if (gridType == GRID_SPECTRAL)
   {
     fprintf(stdout, "points=%zu  nsp=%zu  T%d%s\n", gridsize, gridsize / 2, trunc,
             gridInqComplexPacking(gridID) ? "  complexPacking" : "");
   }
-  else if (gridtype == GRID_FOURIER) { fprintf(stdout, "points=%zu  nfc=%zu  T%d\n", gridsize, gridsize / 2, trunc); }
-  else if (gridtype == GRID_GME)
+  else if (gridType == GRID_FOURIER) { fprintf(stdout, "points=%zu  nfc=%zu  T%d\n", gridsize, gridsize / 2, trunc); }
+  else if (gridType == GRID_GME)
   {
     int nd, ni, ni2, ni3;
     gridInqParamGME(gridID, &nd, &ni, &ni2, &ni3);
     fprintf(stdout, "points=%zu  nd=%d  ni=%d\n", gridsize, nd, ni);
   }
-  else if (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
+  else if (gridType == GRID_CURVILINEAR || gridType == GRID_UNSTRUCTURED)
   {
-    if (gridtype == GRID_CURVILINEAR)
+    if (gridType == GRID_CURVILINEAR)
       fprintf(stdout, "points=%zu (%zux%zu)", gridsize, xsize, ysize);
     else
       fprintf(stdout, "points=%zu", gridsize);
 
-    if (gridtype == GRID_UNSTRUCTURED && gridInqNvertex(gridID) > 0) fprintf(stdout, "  nvertex=%d", gridInqNvertex(gridID));
+    if (gridType == GRID_UNSTRUCTURED && gridInqNvertex(gridID) > 0) fprintf(stdout, "  nvertex=%d", gridInqNvertex(gridID));
 
     fprintf(stdout, "\n");
 
-    if (gridtype == GRID_UNSTRUCTURED)
+    if (gridType == GRID_UNSTRUCTURED)
     {
       int number = gridInqNumber(gridID);
       int position = gridInqPosition(gridID);
@@ -383,7 +383,7 @@ printGridInfoKernel(int gridID, int index, bool lproj)
       fprintf(stdout, "points=%zu (%zux%zu)\n", gridsize, xsize, ysize);
   }
 
-  if (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
+  if (gridType == GRID_CURVILINEAR || gridType == GRID_UNSTRUCTURED)
   {
     if (gridHasArea(gridID) || gridInqXbounds(gridID, NULL) || gridInqYbounds(gridID, NULL))
     {
@@ -508,7 +508,7 @@ printZaxisReferenceInfo(int zaxisID)
 void
 printZaxisInfo(int vlistID)
 {
-  char zaxisname[CDI_MAX_NAME], zname[CDI_MAX_NAME], zunits[CDI_MAX_NAME];
+  char zname[CDI_MAX_NAME], zunits[CDI_MAX_NAME];
 
   int nzaxis = vlistNumZaxis(vlistID);
   for (int index = 0; index < nzaxis; index++)
@@ -517,7 +517,7 @@ printZaxisInfo(int vlistID)
     //______________________________________________________--
     double zinc = 0;
     int zaxisID = vlistZaxis(vlistID, index);
-    int zaxistype = zaxisInqType(zaxisID);
+    int zaxisType = zaxisInqType(zaxisID);
     int ltype = 0;
     cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE, &ltype);
     int levelsize = zaxisInqSize(zaxisID);
@@ -525,7 +525,6 @@ printZaxisInfo(int vlistID)
     // cdiInqKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, &datatype);
     // int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
 
-    zaxisName(zaxistype, zaxisname);
     int length = CDI_MAX_NAME;
     cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, zname, &length);
     length = CDI_MAX_NAME;
@@ -534,23 +533,23 @@ printZaxisInfo(int vlistID)
 
     fprintf(stdout, "  %4d : ", vlistZaxisIndex(vlistID, zaxisID) + 1);
 
-    printZaxisGenericInfo(ltype, zaxistype, zaxisname);
+    printZaxisGenericInfo(ltype, zaxisType, zaxisNamePtr(zaxisType));
 
     fprintf(stdout, " :");
 
     const bool zscalar = (levelsize == 1) ? zaxisInqScalar(zaxisID) : false;
     fprintf(stdout, " levels=%d%s\n", levelsize, zscalar ? "  scalar" : "");
 
-    if (zaxisInqLevels(zaxisID, NULL)) { printZaxisLevelInfo(levelsize, zaxisID, zaxistype, zinc, dig, zname, zunits); }
+    if (zaxisInqLevels(zaxisID, NULL)) { printZaxisLevelInfo(levelsize, zaxisID, zaxisType, zinc, dig, zname, zunits); }
 
     if (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL))
     {
       printZaxisBoundsInfo(zaxisID, dig, levelsize, zinc, zunits);
     }
 
-    if (zaxistype == ZAXIS_HYBRID) printZaxisHybridInfo(zaxisID);
+    if (zaxisType == ZAXIS_HYBRID) printZaxisHybridInfo(zaxisID);
 
-    if (zaxistype == ZAXIS_REFERENCE) printZaxisReferenceInfo(zaxisID);
+    if (zaxisType == ZAXIS_REFERENCE) printZaxisReferenceInfo(zaxisID);
   }
 }
 

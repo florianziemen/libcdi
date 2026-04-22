@@ -6,11 +6,11 @@
 
 2026-04-22  Uwe Schulzweida
 
-        * Removed obsolete function gridName() and zaxisName()
+	* Removed obsolete function gridName() and zaxisName()
 
 2026-04-21  Uwe Schulzweida
 
-        * query: added date key
+	* query: added date key
 
 2026-03-30  Uwe Schulzweida
 

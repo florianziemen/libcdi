@@ -575,12 +575,6 @@ gridNamePtr(int gridtype)
   return (gridtype >= 0 && gridtype < size) ? Grids[gridtype] : Grids[GRID_GENERIC];
 }
 
-void
-gridName(int gridtype, char *gridname)
-{
-  strcpy(gridname, gridNamePtr(gridtype));
-}
-
 /*
 @Function  gridDefXname
 @Title     Define the name of a X-axis

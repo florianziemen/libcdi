@@ -765,8 +765,7 @@ int     cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp_
 
 // GRID routines
 
-void    gridName(int gridtype, char *gridname);
-const char *gridNamePtr(int gridtype);
+const char *gridNamePtr(int gridType);
 
 void    gridCompress(int gridID);
 
@@ -777,7 +776,7 @@ void    gridDefMask(int gridID, const int mask[]);
 int     gridInqMask(int gridID, int mask[]);
 
 //      gridCreate: Create a horizontal Grid
-int     gridCreate(int gridtype, SizeType size);
+int     gridCreate(int gridType, SizeType size);
 
 //      gridDestroy: Destroy a horizontal Grid
 void    gridDestroy(int gridID);
@@ -1070,18 +1069,17 @@ const double *gridInqYboundsPtr(int gridID);
 
 void    gridDefReducedPoints(int gridID, int reducedPointsSize, const int reducedPoints[]);
 void    gridInqReducedPoints(int gridID, int reducedPoints[]);
-void    gridChangeType(int gridID, int gridtype);
+void    gridChangeType(int gridID, int gridType);
 
 void    gridDefComplexPacking(int gridID, int lpack);
 int     gridInqComplexPacking(int gridID);
 
 // ZAXIS routines
 
-void    zaxisName(int zaxistype, char *zaxisname);
-const char *zaxisNamePtr(int leveltype);
+const char *zaxisNamePtr(int zaxisType);
 
 //      zaxisCreate: Create a vertical Z-axis
-int     zaxisCreate(int zaxistype, int size);
+int     zaxisCreate(int zaxisType, int size);
 
 //      zaxisDestroy: Destroy a vertical Z-axis
 void    zaxisDestroy(int zaxisID);
@@ -1176,7 +1174,7 @@ int     zaxisInqUbounds(int zaxisID, double ubounds_optional[]);
 double  zaxisInqUbound(int zaxisID, int index);
 void    zaxisDefWeights(int zaxisID, const double weights[]);
 int     zaxisInqWeights(int zaxisID, double weights_optional[]);
-void    zaxisChangeType(int zaxisID, int zaxistype);
+void    zaxisChangeType(int zaxisID, int zaxisType);
 
 // TAXIS routines
 
@@ -1363,10 +1361,12 @@ void cdiQuerySetNames(struct CdiQuery *query, int numNames, const char **names);
 void cdiQuerySetCells(struct CdiQuery *query, int numCells, const size_t *cells);
 void cdiQuerySetLayers(struct CdiQuery *query, int numLayers, const int *layers);
 void cdiQuerySetSteps(struct CdiQuery *query, int numSteps, const int *steps);
+void cdiQuerySetDates(struct CdiQuery *query, int numDates, const double *dates);
 const char *cdiQueryGetGroup(const struct CdiQuery *query, int index);
 size_t cdiQueryGetCell(const struct CdiQuery *query, int index);
 int cdiQueryGetLayer(const struct CdiQuery *query, int index);
 int cdiQueryGetStep(const struct CdiQuery *query, int index);
+double cdiQueryGetDate(const struct CdiQuery *query, int index);
 int cdiQueryName(struct CdiQuery *query, const char *name);
 // int cdiQueryCell(struct CdiQuery *query, size_t cell);
 // int cdiQueryLayer(struct CdiQuery *query, int layer);
@@ -1376,6 +1376,7 @@ int cdiQueryNumNames(const struct CdiQuery *query);
 int cdiQueryNumCells(const struct CdiQuery *query);
 int cdiQueryNumLayers(const struct CdiQuery *query);
 int cdiQueryNumSteps(const struct CdiQuery *query);
+int cdiQueryNumDates(const struct CdiQuery *query);
 int cdiQueryNumEntries(const struct CdiQuery *query);
 int cdiQueryNumEntriesFound(const struct CdiQuery *query);
 void cdiQueryPrint(const struct CdiQuery *query);
