@@ -765,8 +765,8 @@ int     cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp_
 
 // GRID routines
 
-void    gridName(int gridtype, char *gridname);
-const char *gridNamePtr(int gridtype);
+void    gridName(int gridType, char *gridname);
+const char *gridNamePtr(int gridType);
 
 void    gridCompress(int gridID);
 
@@ -777,7 +777,7 @@ void    gridDefMask(int gridID, const int mask[]);
 int     gridInqMask(int gridID, int mask[]);
 
 //      gridCreate: Create a horizontal Grid
-int     gridCreate(int gridtype, SizeType size);
+int     gridCreate(int gridType, SizeType size);
 
 //      gridDestroy: Destroy a horizontal Grid
 void    gridDestroy(int gridID);
@@ -1070,7 +1070,7 @@ const double *gridInqYboundsPtr(int gridID);
 
 void    gridDefReducedPoints(int gridID, int reducedPointsSize, const int reducedPoints[]);
 void    gridInqReducedPoints(int gridID, int reducedPoints[]);
-void    gridChangeType(int gridID, int gridtype);
+void    gridChangeType(int gridID, int gridType);
 
 void    gridDefComplexPacking(int gridID, int lpack);
 int     gridInqComplexPacking(int gridID);
@@ -1078,10 +1078,10 @@ int     gridInqComplexPacking(int gridID);
 // ZAXIS routines
 
 void    zaxisName(int zaxistype, char *zaxisname);
-const char *zaxisNamePtr(int leveltype);
+const char *zaxisNamePtr(int zaxisType);
 
 //      zaxisCreate: Create a vertical Z-axis
-int     zaxisCreate(int zaxistype, int size);
+int     zaxisCreate(int zaxisType, int size);
 
 //      zaxisDestroy: Destroy a vertical Z-axis
 void    zaxisDestroy(int zaxisID);
@@ -1176,7 +1176,7 @@ int     zaxisInqUbounds(int zaxisID, double ubounds_optional[]);
 double  zaxisInqUbound(int zaxisID, int index);
 void    zaxisDefWeights(int zaxisID, const double weights[]);
 int     zaxisInqWeights(int zaxisID, double weights_optional[]);
-void    zaxisChangeType(int zaxisID, int zaxistype);
+void    zaxisChangeType(int zaxisID, int zaxisType);
 
 // TAXIS routines
 
