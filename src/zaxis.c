@@ -327,12 +327,6 @@ zaxisNamePtr(int zaxisType)
   return name;
 }
 
-void
-zaxisName(int zaxistype, char *zaxisname)
-{
-  strcpy(zaxisname, zaxisNamePtr(zaxistype));
-}
-
 // obsolete function
 void
 zaxisDefLtype(int zaxisID, int ltype)

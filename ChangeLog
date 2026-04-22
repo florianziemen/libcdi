@@ -4,6 +4,10 @@
 	* using FILE library version 1.9.2
 	* Version 2.6.1 released
 
+2026-04-22  Uwe Schulzweida
+
+	* Removed obsolete function gridName() and zaxisName()
+
 2026-04-21  Uwe Schulzweida
 
 	* query: added date key

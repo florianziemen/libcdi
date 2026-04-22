@@ -765,7 +765,6 @@ int     cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp_
 
 // GRID routines
 
-void    gridName(int gridType, char *gridname);
 const char *gridNamePtr(int gridType);
 
 void    gridCompress(int gridID);
@@ -1077,7 +1076,6 @@ int     gridInqComplexPacking(int gridID);
 
 // ZAXIS routines
 
-void    zaxisName(int zaxistype, char *zaxisname);
 const char *zaxisNamePtr(int zaxisType);
 
 //      zaxisCreate: Create a vertical Z-axis
