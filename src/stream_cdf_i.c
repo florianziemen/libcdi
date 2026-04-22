@@ -4495,6 +4495,38 @@ get_timevalue(int fileID, int nctimevarid, size_t ncStepIndex, double *timevarBu
 }
 
 static void
+process_time_query(struct CdiQuery *query, size_t numTimesteps, CdiDateTime *vDateTimeList, int *ncStepIndices)
+{
+  if (query)
+  {
+    int queryNumSteps = cdiQueryNumSteps(query);
+    int queryNumDates = cdiQueryNumDates(query);
+    if (queryNumSteps > 0)
+    {
+      int startStep = cdiQueryGetStep(query, 0) - 1;
+      int endStep = startStep + ((queryNumSteps == 2) ? (cdiQueryGetStep(query, 1) - 1) : 0);
+      // currently, the query interface does not support more than INT_MAX-1 steps!
+      assert(numTimesteps < INT_MAX);
+      for (int i = 0; i < startStep; ++i) { ncStepIndices[i] = -1; }
+      for (int i = endStep + 1; i < (int) numTimesteps; ++i) { ncStepIndices[i] = -1; }
+    }
+    else if (queryNumDates > 0)
+    {
+      double startDateFloat = cdiQueryGetDate(query, 0);
+      double endDateFloat = (queryNumDates == 2) ? cdiQueryGetDate(query, 1) : startDateFloat;
+      if (vDateTimeList)
+      {
+        for (size_t i = 0; i < numTimesteps; ++i)
+        {
+          double dateTimeFloat = cdiDateTime_to_double(vDateTimeList[i]);
+          if (dateTimeFloat < startDateFloat || dateTimeFloat > endDateFloat) { ncStepIndices[i] = -1; }
+        }
+      }
+    }
+  }
+}
+
+static void
 cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
 {
   streamptr->curTsID = 0;
@@ -4513,7 +4545,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
     bool hasTimesteps = (nctimevarid != CDI_UNDEFID /*&& streamptr->basetime.hasUnits*/);
 
     int *ncStepIndices = (int *) Malloc(numTimesteps * sizeof(int));
-    for (size_t tsID = 0; tsID < numTimesteps; ++tsID) ncStepIndices[tsID] = (int) tsID;
+    for (size_t tsID = 0; tsID < numTimesteps; ++tsID) { ncStepIndices[tsID] = (int) tsID; }
 
     CdiDateTime *vDateTimeList = NULL;
 
@@ -4523,14 +4555,16 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
 
       if (streamptr->basetime.isWRF)
       {
-        for (size_t tsID = 0; tsID < numTimesteps; ++tsID) vDateTimeList[tsID] = wrf_read_timestep(fileID, nctimevarid, tsID);
+        for (size_t i = 0; i < numTimesteps; ++i) { vDateTimeList[i] = wrf_read_timestep(fileID, nctimevarid, i); }
       }
       else if (streamptr->basetime.hasUnits)
       {
         double *timevarBuffer = (double *) Malloc(numTimesteps * sizeof(double));
         cdf_get_var_double(fileID, nctimevarid, timevarBuffer);
-        for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
-          vDateTimeList[tsID] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, tsID, timevarBuffer), taxis0);
+        for (size_t i = 0; i < numTimesteps; ++i)
+        {
+          vDateTimeList[i] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, i, timevarBuffer), taxis0);
+        }
         if (timevarBuffer) Free(timevarBuffer);
       }
       else
@@ -4540,35 +4574,10 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
     }
 
     // process step query information if available
-    struct CdiQuery *query = streamptr->query;
-    if (query)
-    {
-      int queryNumSteps = cdiQueryNumSteps(query);
-      int queryNumDates = cdiQueryNumDates(query);
-      if (queryNumSteps > 0)
-      {
-        int startStep = cdiQueryGetStep(query, 0) - 1;
-        int endStep = startStep + ((queryNumSteps == 2) ? (cdiQueryGetStep(query, 1) - 1) : 0);
-        // currently, the query interface does not support more than INT_MAX-1 steps!
-        assert(numTimesteps < INT_MAX);
-        for (int i = 0; i < startStep; ++i) ncStepIndices[i] = -1;
-        for (int i = endStep + 1; i < (int) numTimesteps; ++i) ncStepIndices[i] = -1;
-      }
-      else if (queryNumDates > 0)
-      {
-        double startDate = cdiQueryGetDate(query, 0);
-        double endDate = (queryNumDates == 2) ? cdiQueryGetDate(query, 1) : startDate;
-        printf("startDate %g endDate %g\n", startDate, endDate);
-        if (vDateTimeList)
-        {
-          for (size_t tsID = 0; tsID < numTimesteps; ++tsID)
-            printf("%zu %.18g\n", tsID + 1, cdiDateTime_to_double(vDateTimeList[tsID]));
-        }
-      }
-    }
+    process_time_query(streamptr->query, numTimesteps, vDateTimeList, ncStepIndices);
 
     size_t numSteps = 0;
-    for (size_t tsID = 0; tsID < numTimesteps; ++tsID) numSteps += (ncStepIndices[tsID] >= 0);
+    for (size_t tsID = 0; tsID < numTimesteps; ++tsID) { numSteps += (ncStepIndices[tsID] >= 0); }
 
     cdi_create_timesteps(numSteps, streamptr);
 
@@ -4610,7 +4619,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
           double timeBnds[numBnds];
           cdf_get_vara_double(fileID, nctimeboundsid, start, count, timeBnds);
           for (size_t i = 0; i < numBnds; ++i)
-            if (timeBnds[i] >= NC_FILL_DOUBLE || timeBnds[i] < -NC_FILL_DOUBLE) timeBnds[i] = 0.0;
+            if (timeBnds[i] >= NC_FILL_DOUBLE || timeBnds[i] < -NC_FILL_DOUBLE) { timeBnds[i] = 0.0; }
 
           taxis->vDateTime_lb = cdi_decode_timeval(timeBnds[0], taxis);
           taxis->vDateTime_ub = cdi_decode_timeval(timeBnds[1], taxis);
