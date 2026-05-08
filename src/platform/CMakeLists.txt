@@ -1,0 +1,6 @@
+target_include_directories(libcdi PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+if(WIN32)
+  target_include_directories(libcdi PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/windows)
+elseif(UNIX)
+  target_include_directories(libcdi PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/unix)
+endif()

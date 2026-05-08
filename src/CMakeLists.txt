@@ -1,6 +1,8 @@
 add_library(libcdi)
 add_library(libcdi::libcdi ALIAS libcdi)
 
+add_subdirectory(platform)
+
 target_compile_definitions(libcdi PRIVATE CDI=1 CDI_SIZE_TYPE=size_t PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}")
 
 target_sources(libcdi
