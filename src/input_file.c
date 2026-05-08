@@ -15,19 +15,13 @@
 
 #include "cdi.h"
 #include "dmemory.h"
+#include "cdi/pread.h"
 
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 
-// On Windows, define ssize_t and pread manually
-#ifdef _WIN32
-#define ssize_t __int64
-#define pread read
-#include <io.h>
-#else
-#include <unistd.h>
-#endif
+
 
 #if HAVE_LIBPTHREAD
 #include <pthread.h>
@@ -134,7 +128,7 @@ cdiInputFile_read(const CdiInputFile *me, off_t readPosition, size_t readSize, s
   *outActualReadSize = 0;
   while (readSize)
   {
-    ssize_t bytesRead = pread(me->fileDescriptor, byteBuffer, readSize, readPosition);
+    ssize_t bytesRead = cdi_pread(me->fileDescriptor, byteBuffer, readSize, readPosition);
     if (bytesRead == -1) return (errno == EINVAL) ? CDI_EINVAL : CDI_ESYSTEM;
     if (bytesRead == 0) return CDI_EEOF;
     byteBuffer += bytesRead;
