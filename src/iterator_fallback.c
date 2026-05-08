@@ -19,13 +19,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <stdlib.h>
-
-// On Windows, define ssize_t manually
-#ifdef _WIN32
-#define ssize_t __int64
-#else
-#include <unistd.h>
-#endif
+#include <stdint.h>
 
 struct CdiFallbackIterator
 {
@@ -317,7 +311,7 @@ cdiFallbackIterator_level(CdiIterator *super, int levelSelector, double *outValu
   *outValue2 = 0.0;
 
   // if this is a hybrid zaxis, lookup the coordinates in the vertical coordinate table
-  ssize_t intLevel = (ssize_t) (2 * *outValue1);
+  int64_t intLevel = (int64_t) (2 * *outValue1);
   if (0 <= intLevel && intLevel < zaxisInqVctSize(zaxisId) - 1)
   {
     const double *coordinateTable = zaxisInqVctPtr(zaxisId);
