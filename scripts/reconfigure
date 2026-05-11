@@ -116,16 +116,8 @@ find . -name Makefile.in -exec $SED "${sed_inplace_options[@]}" \
   -e 's/[	 ][	 ]*$//' \{\} +
 \rm -f config/ltmain.sh.orig m4/libtool.m4.orig
 
-if command -v wget >/dev/null ; then
-  DL_CMD=(wget -o /dev/null -O)
-elif command -v curl >/dev/null ; then
-  DL_CMD=(curl -s -o)
-fi
-
-"${DL_CMD[@]}" config/config.guess \
-     'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD'
-"${DL_CMD[@]}" config/config.sub \
-     'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD'
+cp contrib/config.guess config/config.guess
+cp contrib/config.sub config/config.sub
 
 if [ -x scripts/recreate-testsuite.sh ]; then
   scripts/recreate-testsuite.sh
