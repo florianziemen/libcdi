@@ -304,30 +304,21 @@ transpose2dArrayDP(int gridId, double *data)
 {
   size_t inWidth = (size_t) gridInqYsize(gridId);
   size_t inHeight = (size_t) gridInqXsize(gridId);
-
-  size_t cacheBlockSize = 256;  // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
-                                // which should be a decent compromise on many architectures.
-  double **out = (double **) malloc(inWidth * sizeof(double *));
-  double **temp = (double **) malloc(inHeight * sizeof(double *));
-  temp[0] = (double *) malloc(inHeight * inWidth * sizeof(double));
-  memcpy(temp[0], data, inHeight * inWidth * sizeof(double));
-  for (size_t i = 0; i < inWidth; ++i) out[i] = data + (inHeight * i);
-  for (size_t i = 1; i < inHeight; ++i) temp[i] = temp[0] + (inWidth * i);
-
-  /*
-  for (size_t y = 0; y < inHeight; ++y)
-    for (size_t x = 0; x < inWidth; ++x)
-      out[x][y] = temp[y][x];
-  */
+  size_t numElements = inHeight * inWidth;
+  size_t cacheBlockSize = 32;  // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
+                               // which should be a decent compromise on many architectures.
+  double *tmp = (double *) malloc(numElements * sizeof(double));
+  memcpy(tmp, data, numElements * sizeof(double));
 
   for (size_t yBlock = 0; yBlock < inHeight; yBlock += cacheBlockSize)
     for (size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize)
       for (size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++)
-        for (size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++) { out[x][y] = temp[y][x]; }
+        for (size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++)
+        {
+          data[x * inHeight + y] = tmp[y * inWidth + x];
+        }
 
-  free(out);
-  free(temp[0]);
-  free(temp);
+  free(tmp);
 }
 
 static void
@@ -335,30 +326,21 @@ transpose2dArraySP(int gridId, float *data)
 {
   size_t inWidth = (size_t) gridInqYsize(gridId);
   size_t inHeight = (size_t) gridInqXsize(gridId);
-
-  size_t cacheBlockSize = 256;  // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
-                                // which should be a decent compromise on many architectures.
-  float **out = (float **) malloc(inWidth * sizeof(float *));
-  float **temp = (float **) malloc(inHeight * sizeof(float *));
-  temp[0] = (float *) malloc(inHeight * inWidth * sizeof(float));
-  memcpy(temp[0], data, inHeight * inWidth * sizeof(float));
-  for (size_t i = 0; i < inWidth; i++) out[i] = data + (inHeight * i);
-  for (size_t i = 1; i < inHeight; i++) temp[i] = temp[0] + (inWidth * i);
-
-  /*
-  for (size_t y = 0; y < inHeight; ++y)
-    for (size_t x = 0; x < inWidth; ++x)
-      out[x][y] = temp[y][x];
-  */
+  size_t numElements = inHeight * inWidth;
+  size_t cacheBlockSize = 32;  // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
+                               // which should be a decent compromise on many architectures.
+  float *tmp = (float *) malloc(numElements * sizeof(float));
+  memcpy(tmp, data, numElements * sizeof(float));
 
   for (size_t yBlock = 0; yBlock < inHeight; yBlock += cacheBlockSize)
     for (size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize)
       for (size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++)
-        for (size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++) { out[x][y] = temp[y][x]; }
+        for (size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++)
+        {
+          data[x * inHeight + y] = tmp[y * inWidth + x];
+        }
 
-  free(out);
-  free(temp[0]);
-  free(temp);
+  free(tmp);
 }
 
 static void
@@ -1047,7 +1029,11 @@ cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varType, 
 
   int position = 0;
   for (int i = 0; i < MAX_DIMENSIONS; ++i)
-    if (count[i] == (size_t) gridsize) position = i;
+    if (count[i] == (size_t) gridsize)
+    {
+      position = i;
+      break;
+    }
 
   start[position] += (size_t) startpoint;
   count[position] = length;
@@ -1078,7 +1064,11 @@ cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varType, 
 
   int position = 0;
   for (int i = 0; i < MAX_DIMENSIONS; ++i)
-    if (count[i] == (size_t) gridsize) position = i;
+    if (count[i] == (size_t) gridsize)
+    {
+      position = i;
+      break;
+    }
 
   start[position] += (size_t) startpoint;
   count[position] = length;

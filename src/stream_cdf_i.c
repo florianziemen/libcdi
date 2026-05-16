@@ -163,7 +163,7 @@ typedef struct
 
 typedef struct
 {
-  char gridfile[8912];
+  char gridfile[8192];
   unsigned char uuid[CDI_UUID_SIZE];
   int number_of_grid_used;
   int timedimid;
@@ -1440,10 +1440,8 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
         else if (str_is_equal(attname, "positive"))
         {
           str_to_lower(attstring);
-          if (str_is_equal(attstring, "down"))
-            ncvar->positive = POSITIVE_DOWN;
-          else if (str_is_equal(attstring, "up"))
-            ncvar->positive = POSITIVE_UP;
+          if (str_is_equal(attstring, "down")) { ncvar->positive = POSITIVE_DOWN; }
+          else if (str_is_equal(attstring, "up")) { ncvar->positive = POSITIVE_UP; }
 
           int dimid0 = ncvar->dimids[0];
           if (ncvar->varStatus == UndefVar
@@ -3498,8 +3496,8 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
             zvarid2 = ncvars[ncvarid2].zvarid;
 
           int zdimid2 = CDI_UNDEFID;
-          ndims = ncvars[ncvarid2].ndims;
-          for (int i = 0; i < ndims; i++)
+          int ndims2 = ncvars[ncvarid2].ndims;
+          for (int i = 0; i < ndims2; i++)
           {
             if (ncvars[ncvarid2].dimtypes[i] == Z_AXIS) zdimid2 = ncvars[ncvarid2].dimids[i];
           }
@@ -3775,7 +3773,9 @@ static void
 cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int nvars, int num_ncvars, ncvar_t *ncvars,
                     ncdim_t *ncdims, int timedimid)
 {
-  int *varids = (int *) Malloc((size_t) nvars * sizeof(int));
+  int varids_local[1024];
+  int *varids = (nvars <= (int) (sizeof(varids_local) / sizeof(varids_local[0]))) ? varids_local
+                                                                                  : (int *) Malloc((size_t) nvars * sizeof(int));
   int n = 0;
   for (int ncvarid = 0; ncvarid < num_ncvars; ncvarid++)
     if (ncvars[ncvarid].varStatus == DataVar) { varids[n++] = ncvarid; }
@@ -3942,7 +3942,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
     ncvar->atts = NULL;
   }
 
-  if (varids) Free(varids);
+  if (varids && varids != varids_local) Free(varids);
 
   for (int varID = 0; varID < nvars; varID++) cdf_define_code_and_param(vlistID, varID);
   for (int varID = 0; varID < nvars; varID++) cdf_define_institut_and_model_id(vlistID, varID);
@@ -4694,16 +4694,17 @@ find_coordinates_vars(int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
 {
   for (int gdimid = 0; gdimid < ndims; gdimid++)
   {
+    int *dimvarid = &ncdims[gdimid].ncvarid;
+    if (*dimvarid != CDI_UNDEFID) continue;
+
+    const char *dimname = ncdims[gdimid].name;
     for (int varid = 0; varid < nvars; varid++)
     {
       ncvar_t *ncvar = &ncvars[varid];
-      if (ncvar->ndims == 1 && gdimid == ncvar->dimids[0] && ncdims[gdimid].ncvarid == CDI_UNDEFID)
+      if (ncvar->ndims == 1 && gdimid == ncvar->dimids[0] && str_is_equal(ncvar->name, dimname))
       {
-        if (str_is_equal(ncvar->name, ncdims[gdimid].name))
-        {
-          ncdims[gdimid].ncvarid = varid;
-          ncvar->varStatus = CoordVar;
-        }
+        *dimvarid = varid;
+        ncvar->varStatus = CoordVar;
       }
     }
   }
