@@ -300,25 +300,22 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
 bool
 xtypeIsText(int xtype)
 {
-  bool isText = (xtype == NC_CHAR) || (xtype == NC_STRING);
-  return isText;
+  return (xtype == NC_CHAR) || (xtype == NC_STRING);
 }
 
-static bool
+static inline bool
 xtypeIsFloat(nc_type xtype)
 {
   return (xtype == NC_FLOAT || xtype == NC_DOUBLE);
 }
 
-static bool
+static inline bool
 xtypeIsInt(nc_type xtype)
 {
-  bool isInt
-      = xtype == NC_SHORT || xtype == NC_INT || xtype == NC_BYTE || xtype == NC_USHORT || xtype == NC_UINT || xtype == NC_UBYTE;
-  return isInt;
+  return (xtype == NC_SHORT || xtype == NC_INT || xtype == NC_BYTE || xtype == NC_USHORT || xtype == NC_UINT || xtype == NC_UBYTE);
 }
 
-static bool
+static inline bool
 xtypeIsInt64(nc_type xtype)
 {
   return (xtype == NC_INT64 || xtype == NC_UINT64);
@@ -327,57 +324,56 @@ xtypeIsInt64(nc_type xtype)
 static int
 cdfInqDatatype(stream_t *streamptr, int xtype, bool isUnsigned)
 {
-  int datatype = -1;
-
   if (xtype == NC_BYTE && isUnsigned) xtype = NC_UBYTE;
 
   // clang-format off
-  if      (xtype == NC_BYTE  )  datatype = CDI_DATATYPE_INT8;
-  else if (xtype == NC_CHAR  )  datatype = CDI_DATATYPE_UINT8;
-  else if (xtype == NC_SHORT )  datatype = CDI_DATATYPE_INT16;
-  else if (xtype == NC_INT   )  datatype = CDI_DATATYPE_INT32;
-  else if (xtype == NC_FLOAT )  datatype = CDI_DATATYPE_FLT32;
-  else if (xtype == NC_DOUBLE)  datatype = CDI_DATATYPE_FLT64;
-  else if (xtype == NC_UBYTE )  datatype = CDI_DATATYPE_UINT8;
-  else if (xtype == NC_LONG  )  datatype = CDI_DATATYPE_INT32;
-  else if (xtype == NC_USHORT)  datatype = CDI_DATATYPE_UINT16;
-  else if (xtype == NC_UINT  )  datatype = CDI_DATATYPE_UINT32;
-  else if (xtype == NC_INT64 )  datatype = CDI_DATATYPE_FLT64;
-  else if (xtype == NC_UINT64)  datatype = CDI_DATATYPE_FLT64;
-  else
+  if (xtype == NC_BYTE  )  return CDI_DATATYPE_INT8;
+  if (xtype == NC_CHAR  )  return CDI_DATATYPE_UINT8;
+  if (xtype == NC_SHORT )  return CDI_DATATYPE_INT16;
+  if (xtype == NC_INT   )  return CDI_DATATYPE_INT32;
+  if (xtype == NC_FLOAT )  return CDI_DATATYPE_FLT32;
+  if (xtype == NC_DOUBLE)  return CDI_DATATYPE_FLT64;
+  if (xtype == NC_UBYTE )  return CDI_DATATYPE_UINT8;
+  if (xtype == NC_LONG  )  return CDI_DATATYPE_INT32;
+  if (xtype == NC_USHORT)  return CDI_DATATYPE_UINT16;
+  if (xtype == NC_UINT  )  return CDI_DATATYPE_UINT32;
+  if (xtype == NC_INT64 )  return CDI_DATATYPE_FLT64;
+  if (xtype == NC_UINT64)  return CDI_DATATYPE_FLT64;
+  // clang-format on
+
+  CdfInfo *cdfInfo = &(streamptr->cdfInfo);
+  if (xtype != cdfInfo->complexFloatId && xtype != cdfInfo->complexDoubleId)
   {
-    CdfInfo *cdfInfo = &(streamptr->cdfInfo);
-    if (xtype != cdfInfo->complexFloatId && xtype != cdfInfo->complexDoubleId)
-    {
-      bool isUserDefinedType = false;
+    bool isUserDefinedType = false;
 #ifdef NC_FIRSTUSERTYPEID
-      isUserDefinedType = (xtype >= NC_FIRSTUSERTYPEID);
+    isUserDefinedType = (xtype >= NC_FIRSTUSERTYPEID);
 #endif
-      if (isUserDefinedType)
+    if (isUserDefinedType)
+    {
+      int fileID = streamptr->groupID;
+      size_t nfields = 0, compoundsize = 0;
+      int status = nc_inq_compound(fileID, xtype, NULL, &compoundsize, &nfields);
+      if (status == NC_NOERR && nfields == 2 && (compoundsize == 8 || compoundsize == 16))
       {
-        int fileID = streamptr->groupID;
-        size_t nfields = 0, compoundsize = 0;
-        int status = nc_inq_compound(fileID, xtype, NULL, &compoundsize, &nfields);
-        if (status == NC_NOERR && nfields == 2 && (compoundsize == 8 || compoundsize == 16))
+        nc_type field_type1 = -1, field_type2 = -1;
+        int field_dims1 = 0, field_dims2 = 0;
+        nc_inq_compound_field(fileID, xtype, 0, NULL, NULL, &field_type1, &field_dims1, NULL);
+        nc_inq_compound_field(fileID, xtype, 1, NULL, NULL, &field_type2, &field_dims2, NULL);
+        if (field_type1 == field_type2 && field_dims1 == 0 && field_dims2 == 0)
         {
-          nc_type field_type1 = -1, field_type2 = -1;
-          int field_dims1 = 0, field_dims2 = 0;
-          nc_inq_compound_field(fileID, xtype, 0, NULL, NULL, &field_type1, &field_dims1, NULL);
-          nc_inq_compound_field(fileID, xtype, 1, NULL, NULL, &field_type2, &field_dims2, NULL);
-          if (field_type1 == field_type2 && field_dims1 == 0 && field_dims2 == 0)
-          {
-            if      (field_type1 == NC_FLOAT)  cdfInfo->complexFloatId = xtype;
-            else if (field_type1 == NC_DOUBLE) cdfInfo->complexDoubleId = xtype;
-          }
+          if (field_type1 == NC_FLOAT)
+            cdfInfo->complexFloatId = xtype;
+          else if (field_type1 == NC_DOUBLE)
+            cdfInfo->complexDoubleId = xtype;
         }
       }
     }
-    if      (xtype == cdfInfo->complexFloatId )  datatype = CDI_DATATYPE_CPX32;
-    else if (xtype == cdfInfo->complexDoubleId)  datatype = CDI_DATATYPE_CPX64;
   }
-  // clang-format on
 
-  return datatype;
+  if (xtype == cdfInfo->complexFloatId) return CDI_DATATYPE_CPX32;
+  if (xtype == cdfInfo->complexDoubleId) return CDI_DATATYPE_CPX64;
+
+  return -1;
 }
 
 static void
@@ -805,14 +801,13 @@ static int
 atttypeInt_to_datatype(nc_type atttype)
 {
   // clang-format off
-  int datatype = (atttype == NC_SHORT)  ? CDI_DATATYPE_INT16 :
-                 (atttype == NC_BYTE)   ? CDI_DATATYPE_INT8 :
-                 (atttype == NC_UBYTE)  ? CDI_DATATYPE_UINT8 :
-                 (atttype == NC_USHORT) ? CDI_DATATYPE_UINT16 :
-                 (atttype == NC_UINT)   ? CDI_DATATYPE_UINT32 :
-                                          CDI_DATATYPE_INT32;
+  return (atttype == NC_SHORT)  ? CDI_DATATYPE_INT16 :
+         (atttype == NC_BYTE)   ? CDI_DATATYPE_INT8 :
+         (atttype == NC_UBYTE)  ? CDI_DATATYPE_UINT8 :
+         (atttype == NC_USHORT) ? CDI_DATATYPE_UINT16 :
+         (atttype == NC_UINT)   ? CDI_DATATYPE_UINT32 :
+                                  CDI_DATATYPE_INT32;
   // clang-format on
-  return datatype;
 }
 
 static void
@@ -3337,15 +3332,16 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
       char *pname = NULL, *plongname = NULL, *punits = NULL, *pstdname = NULL;
       if (zvarid != CDI_UNDEFID)
       {
-        positive = ncvars[zvarid].positive;
-        pname = ncvars[zvarid].name;
-        plongname = ncvars[zvarid].longname;
-        punits = ncvars[zvarid].units;
-        pstdname = ncvars[zvarid].stdname;
+        ncvar_t *zncvar = &ncvars[zvarid];
+        positive = zncvar->positive;
+        pname = zncvar->name;
+        plongname = zncvar->longname;
+        punits = zncvar->units;
+        pstdname = zncvar->stdname;
         // clang-format off
-        if      (ncvars[zvarid].xtype == NC_FLOAT) { zdatatype = CDI_DATATYPE_FLT32; }
-        else if (ncvars[zvarid].xtype == NC_INT)   { zdatatype = CDI_DATATYPE_INT32; }
-        else if (ncvars[zvarid].xtype == NC_SHORT) { zdatatype = CDI_DATATYPE_INT16; }
+        if      (zncvar->xtype == NC_FLOAT) { zdatatype = CDI_DATATYPE_FLT32; }
+        else if (zncvar->xtype == NC_INT)   { zdatatype = CDI_DATATYPE_INT32; }
+        else if (zncvar->xtype == NC_SHORT) { zdatatype = CDI_DATATYPE_INT16; }
         // clang-format on
 
 #ifndef USE_MPI
@@ -3367,16 +3363,15 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 
         if (zaxisType != ZAXIS_CHAR)
         {
+          zvar = (double *) Malloc(zsize * sizeof(double));
           if (layerPart.count > 0 && layerPart.count == (long) zsize)
           {
             size_t start = layerPart.start;
             size_t count = layerPart.count;
-            zvar = (double *) Malloc(zsize * sizeof(double));
             cdf_get_vara_double(ncvars[zvarid].ncid, zvarid, &start, &count, zvar);
           }
           else
           {
-            zvar = (double *) Malloc(zsize * sizeof(double));
             cdf_get_var_double(ncvars[zvarid].ncid, zvarid, zvar);
           }
         }
@@ -3530,7 +3525,8 @@ struct cdf_varinfo
 static int
 cdf_cmp_varname(const void *s1, const void *s2)
 {
-  const struct cdf_varinfo *x = (const struct cdf_varinfo *) s1, *y = (const struct cdf_varinfo *) s2;
+  const struct cdf_varinfo *x = (const struct cdf_varinfo *) s1;
+  const struct cdf_varinfo *y = (const struct cdf_varinfo *) s2;
   return strcmp(x->name, y->name);
 }
 
@@ -3557,8 +3553,7 @@ cdf_define_code_and_param(int vlistID, int varID)
 {
   if (vlistInqVarCode(vlistID, varID) == -varID - 1)
   {
-    char name[CDI_MAX_NAME];
-    name[0] = 0;
+    char name[CDI_MAX_NAME] = { 0 };
     vlistInqVarName(vlistID, varID, name);
     size_t len = strlen(name);
     if (len > 3 && isdigit((int) name[3]))
@@ -3590,12 +3585,9 @@ cdf_define_institut_and_model_id(int vlistID, int varID)
   int code = vlistInqVarCode(vlistID, varID);
   if (CDI_Default_TableID != CDI_UNDEFID)
   {
-    char name[CDI_MAX_NAME];
-    name[0] = 0;
-    char longname[CDI_MAX_NAME];
-    longname[0] = 0;
-    char units[CDI_MAX_NAME];
-    units[0] = 0;
+    char name[CDI_MAX_NAME] = { 0 };
+    char longname[CDI_MAX_NAME] = { 0 };
+    char units[CDI_MAX_NAME] = { 0 };
     tableInqEntry(CDI_Default_TableID, code, -1, name, longname, units);
     if (name[0])
     {
@@ -4468,8 +4460,7 @@ wrf_read_timestep(int fileID, int nctimevarid, size_t tsID)
     dateTimeStrSize = 128,
   };
   size_t start[2] = { tsID, 0 }, count[2] = { 1, dateTimeSepPos };
-  char stvalue[dateTimeStrSize];
-  stvalue[0] = 0;
+  char stvalue[dateTimeStrSize] = { 0 };
   cdf_get_vara_text(fileID, nctimevarid, start, count, stvalue);
   stvalue[dateTimeSepPos] = 0;
 
