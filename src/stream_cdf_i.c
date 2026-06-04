@@ -1195,7 +1195,7 @@ set_dimension_ids(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims)
   for (int varid = 0; varid < nvars; varid++)
   {
     ncvar_t *ncvar = &ncvars[varid];
-    for (int i = 0; i < ncvar->ndims; ++i) { add_dimid_ifnew(ncvar->dimids[i], ndims, ncdims); }
+    for (int i = 0; i < ncvar->ndims; ++i) add_dimid_ifnew(ncvar->dimids[i], ndims, ncdims);
   }
 }
 
@@ -4646,6 +4646,7 @@ read_ncdims(int fileID, int ndims, ncdim_t *ncdims)
 {
   for (int i = 0; i < ndims; i++)
   {
+    if (ncdims[i].dimid == -1) continue;
     cdf_inq_dimlen(fileID, ncdims[i].dimid, &ncdims[i].len);
     cdf_inq_dimname(fileID, ncdims[i].dimid, ncdims[i].name);
   }

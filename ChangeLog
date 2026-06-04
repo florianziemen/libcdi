@@ -1,3 +1,11 @@
+2026-06-11  Uwe Schulzweida
+
+	* Version 2.6.1 released
+
+2026-06-04  Uwe Schulzweida
+
+	* Unsued NetCDF dimension fails since release 2.6.1 [Bug #12388]
+
 2026-04-22  Uwe Schulzweida
 
         * using EXSE library version 2.1.0
