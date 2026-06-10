@@ -86,14 +86,14 @@ cdiGetFiletype(const char *uri, int *byteorder)
   int protocol = cdiGetProtocol(uri, &filename);
 
   switch (protocol)
-    {
+  {
     case CDI_PROTOCOL_ACROSS: return CDI_FILETYPE_GRB2;
     case CDI_PROTOCOL_FDB:    return CDI_FILETYPE_GRB2;
     case CDI_PROTOCOL_OTHER:  return CDI_FILETYPE_NC4;  // support for NetCDF remote types and ESDM
     case CDI_PROTOCOL_FILE:
       // handled below;
       break;
-    }
+  }
 
   int fileID = fileOpen(filename, "r");
 
@@ -102,25 +102,25 @@ cdiGetFiletype(const char *uri, int *byteorder)
 
   char buffer[8];
   if (fileRead(fileID, buffer, 8) != 8)
+  {
+    struct stat buf;
+    if (stat(filename, &buf) == 0)
     {
-      struct stat buf;
-      if (stat(filename, &buf) == 0)
-        {
-          if (buf.st_size == 0)      return CDI_EISEMPTY;
-          if (buf.st_mode & S_IFDIR) return CDI_EISDIR;
-        }
-
-      return CDI_EUFTYPE;
+      if (buf.st_size == 0)      return CDI_EISEMPTY;
+      if (buf.st_mode & S_IFDIR) return CDI_EISDIR;
     }
+
+    return CDI_EUFTYPE;
+  }
 
   fileRewind(fileID);
 
   if (memcmp(buffer, "GRIB", 4) == 0)
-    {
-      version = buffer[7];
-      if      (version <= 1) { filetype = CDI_FILETYPE_GRB; }
-      else if (version == 2) { filetype = CDI_FILETYPE_GRB2; }
-    }
+  {
+    version = buffer[7];
+    if      (version <= 1) { filetype = CDI_FILETYPE_GRB; }
+    else if (version == 2) { filetype = CDI_FILETYPE_GRB2; }
+  }
   else if (memcmp(buffer, "CDF\001", 4) == 0) { filetype = CDI_FILETYPE_NC; }
   else if (memcmp(buffer, "CDF\002", 4) == 0) { filetype = CDI_FILETYPE_NC2; }
   else if (memcmp(buffer, "CDF\005", 4) == 0) { filetype = CDI_FILETYPE_NC5; }
@@ -136,10 +136,10 @@ cdiGetFiletype(const char *uri, int *byteorder)
 #endif
 #ifdef HAVE_LIBGRIB
   else if (gribCheckSeek(fileID, &recpos, &version) == 0)
-    {
-      if      (version <= 1) { filetype = CDI_FILETYPE_GRB; }
-      else if (version == 2) { filetype = CDI_FILETYPE_GRB2; }
-    }
+  {
+    if      (version <= 1) { filetype = CDI_FILETYPE_GRB; }
+    else if (version == 2) { filetype = CDI_FILETYPE_GRB2; }
+  }
 #endif
   // clang-format on
 
@@ -304,7 +304,6 @@ streamDefByteorder(int streamID, int byteorder)
     {
       srvrec_t *srvp = (srvrec_t *) streamptr->record->objectp;
       srvp->byteswap = getByteswap(byteorder);
-
       break;
     }
 #endif
@@ -313,7 +312,6 @@ streamDefByteorder(int streamID, int byteorder)
     {
       extrec_t *extp = (extrec_t *) streamptr->record->objectp;
       extp->byteswap = getByteswap(byteorder);
-
       break;
     }
 #endif
@@ -322,7 +320,6 @@ streamDefByteorder(int streamID, int byteorder)
     {
       iegrec_t *iegp = (iegrec_t *) streamptr->record->objectp;
       iegp->byteswap = getByteswap(byteorder);
-
       break;
     }
 #endif
@@ -1617,51 +1614,28 @@ streamInqTimestep(int streamID, int tsID)
   {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRIB:
-    {
       switch (streamptr->protocol)
       {
         case CDI_PROTOCOL_FDB: nrecs = fdbInqTimestep(streamptr, tsID); break;
-
         case CDI_PROTOCOL_ACROSS:  // TODO read from ACROSS
         case CDI_PROTOCOL_OTHER:
         case CDI_PROTOCOL_FILE: nrecs = grbInqTimestep(streamptr, tsID); break;
       }
       break;
-    }
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV:
-    {
-      nrecs = srvInqTimestep(streamptr, tsID);
-      break;
-    }
+    case CDI_FILETYPE_SRV: nrecs = srvInqTimestep(streamptr, tsID); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT:
-    {
-      nrecs = extInqTimestep(streamptr, tsID);
-      break;
-    }
+    case CDI_FILETYPE_EXT: nrecs = extInqTimestep(streamptr, tsID); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG:
-    {
-      nrecs = iegInqTimestep(streamptr, tsID);
-      break;
-    }
+    case CDI_FILETYPE_IEG: nrecs = iegInqTimestep(streamptr, tsID); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF:
-    {
-      nrecs = cdfInqTimestep(streamptr, tsID);
-      break;
-    }
+    case CDI_FILETYPE_NETCDF: nrecs = cdfInqTimestep(streamptr, tsID); break;
 #endif
-    default:
-    {
-      Error("%s support not compiled in!", strfiletype(filetype));
-      break;
-    }
+    default: Error("%s support not compiled in!", strfiletype(filetype)); break;
   }
 
   if (streamptr->lockIO) CDI_IO_UNLOCK();

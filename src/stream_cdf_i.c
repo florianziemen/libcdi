@@ -3193,10 +3193,9 @@ cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 
     int gridID = ncvar->gridID;
 
-    if (grid->type == GRID_HEALPIX && ncvar->ivarid != CDI_UNDEFID)
+    if (grid->type == GRID_HEALPIX && ncvar->ivarid != CDI_UNDEFID && !xtypeIsInt64(ncvars[ncvar->ivarid].xtype))
     {
-      if (!xtypeIsInt64(ncvars[ncvar->ivarid].xtype)) cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, CDI_DATATYPE_INT32);
-      if (xdimid != CDI_UNDEFID) cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_DIMNAME, ncdims[xdimid].name);
+      cdiDefKeyInt(gridID, CDI_GLOBAL, CDI_KEY_DATATYPE, CDI_DATATYPE_INT32);
     }
 
     if (lproj && gmapvarid != CDI_UNDEFID)
@@ -3243,7 +3242,8 @@ cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 
     if (xdimid == CDI_UNDEFID && ydimid == CDI_UNDEFID && grid->size == 1) gridDefHasDims(gridID, CoordVar);
 
-    if (xdimid != CDI_UNDEFID) cdiDefKeyString(gridID, CDI_XAXIS, CDI_KEY_DIMNAME, ncdims[xdimid].name);
+    int xvarID = (grid->type == GRID_HEALPIX && ydimid == CDI_UNDEFID) ? CDI_GLOBAL : CDI_XAXIS;
+    if (xdimid != CDI_UNDEFID) cdiDefKeyString(gridID, xvarID, CDI_KEY_DIMNAME, ncdims[xdimid].name);
     if (ydimid != CDI_UNDEFID) cdiDefKeyString(gridID, CDI_YAXIS, CDI_KEY_DIMNAME, ncdims[ydimid].name);
     if (vdimid != CDI_UNDEFID) cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_VDIMNAME, ncdims[vdimid].name);
 
