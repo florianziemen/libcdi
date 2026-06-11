@@ -1,5 +1,7 @@
 # Autoreconf stage files:
 /autom4te.cache
+/config/config.guess~
+/config/config.sub~
 /configure~
 /src/config.h.in~
 

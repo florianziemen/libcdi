@@ -2,9 +2,6 @@ lib_LTLIBRARIES =
 check_LTLIBRARIES =
 noinst_LTLIBRARIES =
 EXTRA_PROGRAMS = make_fint
-EXTRA_DIST = \
-  cdilib.c \
-  make_cdilib
 
 if FC_MOD_UPPERCASE
 mo_cdi_mod = MO_CDI.$(FCMODEXT)
@@ -304,9 +301,6 @@ cdipioFortran.c: cdipio.inc
 
 mo_cdi.f90: cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(AM_V_GEN)$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $< $@
-
-cdilib.c: $(libcdi_la_SOURCES) $(srcdir)/make_cdilib
-	$(AM_V_GEN)CPP='$(CPP)' $(srcdir)/make_cdilib $(srcdir)
 else !MAINTAINER_MODE
 cdiFortran.c cdi.inc cdipioFortran.c cdipio.inc mo_cdi.f90 cdilib.c:
 	@:;{ \

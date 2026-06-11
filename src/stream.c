@@ -86,14 +86,14 @@ cdiGetFiletype(const char *uri, int *byteorder)
   int protocol = cdiGetProtocol(uri, &filename);
 
   switch (protocol)
-    {
+  {
     case CDI_PROTOCOL_ACROSS: return CDI_FILETYPE_GRB2;
     case CDI_PROTOCOL_FDB:    return CDI_FILETYPE_GRB2;
     case CDI_PROTOCOL_OTHER:  return CDI_FILETYPE_NC4;  // support for NetCDF remote types and ESDM
     case CDI_PROTOCOL_FILE:
       // handled below;
       break;
-    }
+  }
 
   int fileID = fileOpen(filename, "r");
 
@@ -102,25 +102,25 @@ cdiGetFiletype(const char *uri, int *byteorder)
 
   char buffer[8];
   if (fileRead(fileID, buffer, 8) != 8)
+  {
+    struct stat buf;
+    if (stat(filename, &buf) == 0)
     {
-      struct stat buf;
-      if (stat(filename, &buf) == 0)
-        {
-          if (buf.st_size == 0)      return CDI_EISEMPTY;
-          if (buf.st_mode & S_IFDIR) return CDI_EISDIR;
-        }
-
-      return CDI_EUFTYPE;
+      if (buf.st_size == 0)      return CDI_EISEMPTY;
+      if (buf.st_mode & S_IFDIR) return CDI_EISDIR;
     }
+
+    return CDI_EUFTYPE;
+  }
 
   fileRewind(fileID);
 
   if (memcmp(buffer, "GRIB", 4) == 0)
-    {
-      version = buffer[7];
-      if      (version <= 1) { filetype = CDI_FILETYPE_GRB; }
-      else if (version == 2) { filetype = CDI_FILETYPE_GRB2; }
-    }
+  {
+    version = buffer[7];
+    if      (version <= 1) { filetype = CDI_FILETYPE_GRB; }
+    else if (version == 2) { filetype = CDI_FILETYPE_GRB2; }
+  }
   else if (memcmp(buffer, "CDF\001", 4) == 0) { filetype = CDI_FILETYPE_NC; }
   else if (memcmp(buffer, "CDF\002", 4) == 0) { filetype = CDI_FILETYPE_NC2; }
   else if (memcmp(buffer, "CDF\005", 4) == 0) { filetype = CDI_FILETYPE_NC5; }
@@ -136,10 +136,10 @@ cdiGetFiletype(const char *uri, int *byteorder)
 #endif
 #ifdef HAVE_LIBGRIB
   else if (gribCheckSeek(fileID, &recpos, &version) == 0)
-    {
-      if      (version <= 1) { filetype = CDI_FILETYPE_GRB; }
-      else if (version == 2) { filetype = CDI_FILETYPE_GRB2; }
-    }
+  {
+    if      (version <= 1) { filetype = CDI_FILETYPE_GRB; }
+    else if (version == 2) { filetype = CDI_FILETYPE_GRB2; }
+  }
 #endif
   // clang-format on
 
@@ -235,41 +235,42 @@ get_max_global_recs(stream_t *streamptr)
 void
 streamDefNumWorker(int streamID, int numWorker)
 {
-  if (numWorker > 0)
+  if (numWorker == 0) return;
+
+  stream_t *streamptr = stream_to_pointer(streamID);
+  int filetype = streamptr->filetype;
+
+  if (streamptr->filemode != 'r') return;
+
+  if (cdiBaseFiletype(filetype) == CDI_FILETYPE_GRIB)
   {
-    stream_t *streamptr = stream_to_pointer(streamID);
-    int filetype = streamptr->filetype;
-
-    if (streamptr->filemode == 'r')
+    if (cdiBaseFiletype(filetype) == CDI_FILETYPE_GRIB)
     {
-      if (cdiBaseFiletype(filetype) == CDI_FILETYPE_GRIB)
-      {
-        (void) streamInqNumSteps(streamID);
-        streamptr->maxGlobalRecs = get_max_global_recs(streamptr);
-      }
-#ifdef HAVE_LIBNETCDF
-      else if (filetype == CDI_FILETYPE_NCZARR || (CDI_Test && cdiBaseFiletype(filetype) == CDI_FILETYPE_NETCDF))
-      {
-        streamptr->maxGlobalRecs = get_max_global_recs(streamptr);
-        if (CDI_Test) Message("numWorker=%d", numWorker);
-        if (CDI_Test) Message("maxGlobalRecs=%ld", streamptr->maxGlobalRecs);
-        if (streamptr->maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
-        if (streamptr->maxGlobalRecs == 1) numWorker = 0;
-        if (numWorker > streamptr->maxGlobalRecs) numWorker = (int) streamptr->maxGlobalRecs;
-        CdfInfo *cdfInfo = &(streamptr->cdfInfo);
-        if (cdfInfo->chunkSizeDimT > 1 && numWorker > streamptr->nvars) numWorker = streamptr->nvars;
-        if (cdfInfo->chunkSizeDimZ > 1) numWorker = 0;
-        if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", cdfInfo->chunkSizeDimT, cdfInfo->chunkSizeDimZ);
-      }
-#endif
-      else
-      {
-        numWorker = 0;
-      }
-
-      streamptr->numWorker = numWorker;
-      if (CDI_Debug || CDI_Test) Message("Number of asynchronous worker: %d", numWorker);
+      (void) streamInqNumSteps(streamID);
+      streamptr->maxGlobalRecs = get_max_global_recs(streamptr);
     }
+#ifdef HAVE_LIBNETCDF
+    else if (filetype == CDI_FILETYPE_NCZARR || (CDI_Test && cdiBaseFiletype(filetype) == CDI_FILETYPE_NETCDF))
+    {
+      streamptr->maxGlobalRecs = get_max_global_recs(streamptr);
+      if (CDI_Test) Message("numWorker=%d", numWorker);
+      if (CDI_Test) Message("maxGlobalRecs=%ld", streamptr->maxGlobalRecs);
+      if (streamptr->maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
+      if (streamptr->maxGlobalRecs == 1) numWorker = 0;
+      if (numWorker > streamptr->maxGlobalRecs) numWorker = (int) streamptr->maxGlobalRecs;
+      CdfInfo *cdfInfo = &(streamptr->cdfInfo);
+      if (cdfInfo->chunkSizeDimT > 1 && numWorker > streamptr->nvars) numWorker = streamptr->nvars;
+      if (cdfInfo->chunkSizeDimZ > 1) numWorker = 0;
+      if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", cdfInfo->chunkSizeDimT, cdfInfo->chunkSizeDimZ);
+    }
+#endif
+    else
+    {
+      numWorker = 0;
+    }
+
+    streamptr->numWorker = numWorker;
+    if (CDI_Debug || CDI_Test) Message("Number of asynchronous worker: %d", numWorker);
   }
 }
 
@@ -303,7 +304,6 @@ streamDefByteorder(int streamID, int byteorder)
     {
       srvrec_t *srvp = (srvrec_t *) streamptr->record->objectp;
       srvp->byteswap = getByteswap(byteorder);
-
       break;
     }
 #endif
@@ -312,7 +312,6 @@ streamDefByteorder(int streamID, int byteorder)
     {
       extrec_t *extp = (extrec_t *) streamptr->record->objectp;
       extp->byteswap = getByteswap(byteorder);
-
       break;
     }
 #endif
@@ -321,7 +320,6 @@ streamDefByteorder(int streamID, int byteorder)
     {
       iegrec_t *iegp = (iegrec_t *) streamptr->record->objectp;
       iegp->byteswap = getByteswap(byteorder);
-
       break;
     }
 #endif
@@ -699,7 +697,7 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
   if (fileID < 0)
   {
     streamID = fileID;
-    if (streamptr->record) FREE_AND_NULL(streamptr->record);
+    FREE_AND_NULL(streamptr->record);
     reshRemove(streamptr->self, &streamOps);
     if (streamptr->lockIO) CDI_IO_UNLOCK();
     FREE_AND_NULL(streamptr);
@@ -749,7 +747,7 @@ streamOpenNCMem(int ncidp, char mode)
     if (status < 0)
     {
       streamID = status;
-      if (streamptr->record) FREE_AND_NULL(streamptr->record);
+      FREE_AND_NULL(streamptr->record);
       reshRemove(streamptr->self, &streamOps);
     }
   }
@@ -941,7 +939,7 @@ streamOpenRead(const char *filename)
     if (status < 0)
     {
       streamID = (int) status;
-      if (streamptr->record) FREE_AND_NULL(streamptr->record);
+      FREE_AND_NULL(streamptr->record);
       reshRemove(streamptr->self, &streamOps);
     }
   }
@@ -999,7 +997,7 @@ streamOpenReadQuery(const char *filename, struct CdiQuery *query)
     if (status < 0)
     {
       streamID = (int) status;
-      if (streamptr->record) FREE_AND_NULL(streamptr->record);
+      FREE_AND_NULL(streamptr->record);
       reshRemove(streamptr->self, &streamOps);
     }
   }
@@ -1193,7 +1191,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
   int fileID = streamptr->fileID;
   int filetype = streamptr->filetype;
 
-  if (streamptr->filterSpec) { FREE_AND_NULL(streamptr->filterSpec); }
+  FREE_AND_NULL(streamptr->filterSpec);
 
   switch (streamptr->protocol)
   {
@@ -1277,11 +1275,9 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
       if (streamptr->ntsteps == 0 && streamptr->tsteps != NULL)
       {
         tsteps_t *tstep = &(streamptr->tsteps[0]);
-        // clang-format off
-        if (tstep->recinfo) { FREE_AND_NULL(tstep->recinfo); }
-        if (tstep->records) { FREE_AND_NULL(tstep->records); }
-        if (tstep->recIDs) { FREE_AND_NULL(tstep->recIDs); }
-        // clang-format on
+        FREE_AND_NULL(tstep->recinfo);
+        FREE_AND_NULL(tstep->records);
+        FREE_AND_NULL(tstep->recIDs);
       }
       break;
     }
@@ -1297,15 +1293,15 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 static void
 deallocate_sleveltable_t(sleveltable_t *entry)
 {
-  if (entry->recordID) FREE_AND_NULL(entry->recordID);
-  if (entry->lindex) FREE_AND_NULL(entry->lindex);
+  FREE_AND_NULL(entry->recordID);
+  FREE_AND_NULL(entry->lindex);
 }
 
 #ifdef HAVE_LIBNETCDF
 static void
 deallocate_cdfCache(CdfCache *cache)
 {
-  if (cache->buffer) FREE_AND_NULL(cache->buffer);
+  FREE_AND_NULL(cache->buffer);
 }
 #endif
 
@@ -1322,8 +1318,8 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
   }
 
   streamptr->filetype = CDI_FILETYPE_UNDEF;
-  if (streamptr->filename) { FREE_AND_NULL(streamptr->filename); }
-  if (streamptr->filterSpec) FREE_AND_NULL(streamptr->filterSpec);
+  FREE_AND_NULL(streamptr->filename);
+  FREE_AND_NULL(streamptr->filterSpec);
 
   if (streamptr->vars)
   {
@@ -1347,11 +1343,9 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
     for (int index = 0; index < maxSteps; ++index)
     {
       tsteps_t *tstep = &(streamptr->tsteps[index]);
-      // clang-format off
-      if (tstep->recinfo) { FREE_AND_NULL(tstep->recinfo); }
-      if (tstep->records) { FREE_AND_NULL(tstep->records); }
-      if (tstep->recIDs) { FREE_AND_NULL(tstep->recIDs); }
-      // clang-format on
+      FREE_AND_NULL(tstep->recinfo);
+      FREE_AND_NULL(tstep->records);
+      FREE_AND_NULL(tstep->recIDs);
       taxisDestroyKernel(&(tstep->taxis));
     }
 
@@ -1620,51 +1614,28 @@ streamInqTimestep(int streamID, int tsID)
   {
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRIB:
-    {
       switch (streamptr->protocol)
       {
         case CDI_PROTOCOL_FDB: nrecs = fdbInqTimestep(streamptr, tsID); break;
-
         case CDI_PROTOCOL_ACROSS:  // TODO read from ACROSS
         case CDI_PROTOCOL_OTHER:
         case CDI_PROTOCOL_FILE: nrecs = grbInqTimestep(streamptr, tsID); break;
       }
       break;
-    }
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV:
-    {
-      nrecs = srvInqTimestep(streamptr, tsID);
-      break;
-    }
+    case CDI_FILETYPE_SRV: nrecs = srvInqTimestep(streamptr, tsID); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT:
-    {
-      nrecs = extInqTimestep(streamptr, tsID);
-      break;
-    }
+    case CDI_FILETYPE_EXT: nrecs = extInqTimestep(streamptr, tsID); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG:
-    {
-      nrecs = iegInqTimestep(streamptr, tsID);
-      break;
-    }
+    case CDI_FILETYPE_IEG: nrecs = iegInqTimestep(streamptr, tsID); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF:
-    {
-      nrecs = cdfInqTimestep(streamptr, tsID);
-      break;
-    }
+    case CDI_FILETYPE_NETCDF: nrecs = cdfInqTimestep(streamptr, tsID); break;
 #endif
-    default:
-    {
-      Error("%s support not compiled in!", strfiletype(filetype));
-      break;
-    }
+    default: Error("%s support not compiled in!", strfiletype(filetype)); break;
   }
 
   if (streamptr->lockIO) CDI_IO_UNLOCK();
@@ -2077,11 +2048,9 @@ freePtrAfterNCMem(stream_t *streamptr, int recordBufIsToBeDeleted)
   if (streamptr->ntsteps == 0 && streamptr->tsteps != NULL)
   {
     tsteps_t *tstep = &(streamptr->tsteps[0]);
-    // clang-format off
-    if (tstep->recinfo) { FREE_AND_NULL(tstep->recinfo); }
-    if (tstep->records) { FREE_AND_NULL(tstep->records); }
-    if (tstep->recIDs) { FREE_AND_NULL(tstep->recIDs); }
-    // clang-format on
+    FREE_AND_NULL(tstep->recinfo);
+    FREE_AND_NULL(tstep->records);
+    FREE_AND_NULL(tstep->recIDs);
   }
 }
 

@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -81,8 +82,6 @@ grid_is_irregular(int gridType)
 static bool
 cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int attlen, double *attflt)
 {
-  bool status = true;
-
   if (atttype == CDI_DATATYPE_INT32)
   {
     int attint = 0;
@@ -90,17 +89,16 @@ cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int attl
     cdiInqAttInt(gridID, CDI_GLOBAL, attname, attlen, pattint);
     for (int i = 0; i < attlen; ++i) attflt[i] = (double) pattint[i];
     if (attlen > 1) Free(pattint);
-  }
-  else if (atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64)
-  {
-    cdiInqAttFlt(gridID, CDI_GLOBAL, attname, attlen, attflt);
-  }
-  else
-  {
-    status = false;
+    return true;
   }
 
-  return status;
+  if (atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64)
+  {
+    cdiInqAttFlt(gridID, CDI_GLOBAL, attname, attlen, attflt);
+    return true;
+  }
+
+  return false;
 }
 
 static void
@@ -210,8 +208,7 @@ gridNewEntry(cdiResH resH)
   grid_t *gridptr = (grid_t *) Malloc(sizeof(grid_t));
   grid_init(gridptr);
 
-  if (resH == CDI_UNDEFID)
-    gridptr->self = reshPut(gridptr, &gridOps);
+  if (resH == CDI_UNDEFID) { gridptr->self = reshPut(gridptr, &gridOps); }
   else
   {
     gridptr->self = resH;
@@ -225,8 +222,7 @@ static void
 gridInit(void)
 {
   static bool gridInitialized = false;
-  if (gridInitialized) return;
-  gridInitialized = true;
+  if (!gridInitialized) { gridInitialized = true; }
 }
 
 static void
@@ -288,26 +284,15 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
     case GRID_UNSTRUCTURED:
     case GRID_GME:
     {
-      if (gridtype == GRID_TRAJECTORY)
-      {
-        gridaxisSetKey(&gridptr->x, CDI_KEY_NAME, "tlon");
-        gridaxisSetKey(&gridptr->y, CDI_KEY_NAME, "tlat");
-      }
-      else
-      {
-        gridaxisSetKey(&gridptr->x, CDI_KEY_NAME, "lon");
-        gridaxisSetKey(&gridptr->y, CDI_KEY_NAME, "lat");
-      }
-
+      bool isTraj = gridtype == GRID_TRAJECTORY;
+      gridaxisSetKey(&gridptr->x, CDI_KEY_NAME, isTraj ? "tlon" : "lon");
+      gridaxisSetKey(&gridptr->y, CDI_KEY_NAME, isTraj ? "tlat" : "lat");
       gridaxisSetKey(&gridptr->x, CDI_KEY_LONGNAME, "longitude");
       gridaxisSetKey(&gridptr->y, CDI_KEY_LONGNAME, "latitude");
-
       gridaxisSetKey(&gridptr->x, CDI_KEY_UNITS, "degrees_east");
       gridaxisSetKey(&gridptr->y, CDI_KEY_UNITS, "degrees_north");
-
       gridaxisSetKey(&gridptr->x, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_latlon][0]);
       gridaxisSetKey(&gridptr->y, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_latlon][1]);
-
       break;
     }
 #ifndef USE_MPI
@@ -315,7 +300,6 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
     {
       if (gridptr->x.cvals) gridaxisSetKey(&gridptr->x, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_char][0]);
       if (gridptr->y.cvals) gridaxisSetKey(&gridptr->y, CDI_KEY_STDNAME, xystdname_tab[grid_xystdname_char][1]);
-
       break;
     }
 #endif
@@ -344,7 +328,7 @@ gridGenXvals(size_t xsize, double xfirst, double xlast, double xinc, double *res
   {
     if (xfirst >= xlast)
     {
-      while (xfirst >= xlast) xlast += 360;
+      while (xfirst >= xlast) { xlast += 360; }
       xinc = (xlast - xfirst) / (double) xsize;
     }
     else
@@ -353,7 +337,7 @@ gridGenXvals(size_t xsize, double xfirst, double xlast, double xinc, double *res
     }
   }
 
-  for (size_t i = 0; i < xsize; ++i) xvals[i] = xfirst + (double) i * xinc;
+  for (size_t i = 0; i < xsize; ++i) { xvals[i] = xfirst + (double) i * xinc; }
 }
 
 static void
@@ -362,7 +346,7 @@ calc_gaussgrid(double *restrict yvals, size_t ysize, double yfirst, double ylast
   double *restrict yw = (double *) Malloc(ysize * sizeof(double));
   gaussianLatitudes(ysize, yvals, yw);
   Free(yw);
-  for (size_t i = 0; i < ysize; i++) yvals[i] = asin(yvals[i]) / M_PI * 180.0;
+  for (size_t i = 0; i < ysize; i++) { yvals[i] = asin(yvals[i]) / M_PI * 180.0; }
 
   if (yfirst < ylast && yfirst > -90.0 && ylast < 90.0)
   {
@@ -428,10 +412,8 @@ gridGenYvalsRegular(size_t ysize, double yfirst, double ylast, double yinc, doub
   {
     if (IS_EQUAL(yfirst, ylast) && IS_NOT_EQUAL(yfirst, 0)) ylast *= -1;
 
-    if (yfirst > ylast)
-      yinc = (yfirst - ylast) / (double) (ysize - 1);
-    else if (yfirst < ylast)
-      yinc = (ylast - yfirst) / (double) (ysize - 1);
+    if (yfirst > ylast) { yinc = (yfirst - ylast) / (double) (ysize - 1); }
+    else if (yfirst < ylast) { yinc = (ylast - yfirst) / (double) (ysize - 1); }
     else
     {
       if (ysize % 2 != 0)
@@ -447,9 +429,9 @@ gridGenYvalsRegular(size_t ysize, double yfirst, double ylast, double yinc, doub
     }
   }
 
-  if (yfirst > ylast && yinc > 0) yinc = -yinc;
+  if (yfirst > ylast && yinc > 0) { yinc = -yinc; }
 
-  for (size_t i = 0; i < ysize; i++) yvals[i] = yfirst + (double) i * yinc;
+  for (size_t i = 0; i < ysize; i++) { yvals[i] = yfirst + (double) i * yinc; }
 }
 
 // used also in CDO
@@ -539,7 +521,6 @@ static void
 gridDestroyKernel(grid_t *gridptr)
 {
   xassert(gridptr);
-
   grid_free_components(gridptr);
   Free(gridptr);
 }
@@ -571,7 +552,7 @@ gridDestroyP(void *gridptr)
 const char *
 gridNamePtr(int gridtype)
 {
-  int size = (int) (sizeof(Grids) / sizeof(Grids[0]));
+  const int size = (int) (sizeof(Grids) / sizeof(Grids[0]));
   return (gridtype >= 0 && gridtype < size) ? Grids[gridtype] : Grids[GRID_GENERIC];
 }
 
