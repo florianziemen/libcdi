@@ -267,7 +267,7 @@ static nc_type
 int_datatype_to_xtype(int filetype, int datatype)
 {
   // clang-format off
-  if (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR)
+  if (is_filetype_nc4(filetype))
   {
     return (datatype == CDI_DATATYPE_INT8)   ? NC_BYTE :
            (datatype == CDI_DATATYPE_INT16)  ? NC_SHORT :
@@ -415,18 +415,17 @@ cdfDefVarFilter(int fileID, int fileType, int ncvarID, const char *filterSpec)
 {
   if (filterSpec)
   {
-    if (fileType == CDI_FILETYPE_NC4 || fileType == CDI_FILETYPE_NC4C || fileType == CDI_FILETYPE_NCZARR)
+    if (is_filetype_nc4(fileType))
     {
       cdf_def_var_filter(fileID, ncvarID, filterSpec);
+      return;
     }
-    else
+
+    static bool lwarn = true;
+    if (lwarn)
     {
-      static bool lwarn = true;
-      if (lwarn)
-      {
-        lwarn = false;
-        Warning("Filter is only available with NetCDF4!");
-      }
+      lwarn = false;
+      Warning("Filter is only available with NetCDF4!");
     }
   }
 }
@@ -436,55 +435,49 @@ cdfDefVarCompression(const stream_t *streamptr, int ncvarID, nc_type xtype)
 {
   if (streamptr->comptype == CDI_COMPRESS_ZIP)
   {
-    if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
-        || streamptr->filetype == CDI_FILETYPE_NCZARR)
+    if (is_filetype_nc4(streamptr->filetype))
     {
       cdfDefVarDeflate(streamptr->fileID, ncvarID, streamptr->shuffle, streamptr->complevel);
+      return;
     }
-    else
+
+    static bool lwarn = true;
+    if (lwarn)
     {
-      static bool lwarn = true;
-      if (lwarn)
-      {
-        lwarn = false;
-        Warning("Deflate compression is only available for NetCDF4!");
-      }
+      lwarn = false;
+      Warning("Deflate compression is only available for NetCDF4!");
     }
   }
   /*
   else if (streamptr->comptype == CDI_COMPRESS_ZSTD)
+  {
+    if (is_filetype_nc4(streamptr->filetype))
     {
-      if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
-          || streamptr->filetype == CDI_FILETYPE_NCZARR)
-        {
-          cdfDefVarZstd(streamptr->fileID, ncvarID, streamptr->complevel);
-        }
-      else
-        {
-          static bool lwarn = true;
-          if (lwarn)
-            {
-              lwarn = false;
-              Warning("SZIP compression is only available for NetCDF4!");
-            }
-        }
+      cdfDefVarZstd(streamptr->fileID, ncvarID, streamptr->complevel);
+      return;
     }
+
+    static bool lwarn = true;
+    if (lwarn)
+    {
+      lwarn = false;
+      Warning("SZIP compression is only available for NetCDF4!");
+    }
+  }
   */
   else if (streamptr->comptype == CDI_COMPRESS_SZIP)
   {
-    if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C
-        || streamptr->filetype == CDI_FILETYPE_NCZARR)
+    if (is_filetype_nc4(streamptr->filetype))
     {
       cdfDefVarSzip(streamptr->fileID, ncvarID, xtype2ppb(xtype));
+      return;
     }
-    else
+
+    static bool lwarn = true;
+    if (lwarn)
     {
-      static bool lwarn = true;
-      if (lwarn)
-      {
-        lwarn = false;
-        Warning("SZIP compression is only available for NetCDF4!");
-      }
+      lwarn = false;
+      Warning("SZIP compression is only available for NetCDF4!");
     }
   }
 }
@@ -1006,8 +999,7 @@ cdfDefVar(stream_t *streamptr, int varID)
   }
 #endif
 
-  if (useChunks && (fileType == CDI_FILETYPE_NC4 || fileType == CDI_FILETYPE_NC4C || fileType == CDI_FILETYPE_NCZARR))
-    cdf_def_var_chunking(fileID, ncvarID, NC_CHUNKED, chunks);
+  if (useChunks && is_filetype_nc4(fileType)) cdf_def_var_chunking(fileID, ncvarID, NC_CHUNKED, chunks);
 
   if (useChunks) cdfDefVarCompression(streamptr, ncvarID, xtype);
   if (useChunks && ((long) chunkCacheSize >= CDI_FilterSize_Min))

@@ -534,8 +534,7 @@ cdfPostDefActionAddPut1Int(struct cdfPostDefActionList **list_, int fileID, int 
 static void
 cdfGridCompress(int fileID, int ncvarid, size_t gridsize, int filetype, int comptype, size_t *chunks)
 {
-  if (gridsize >= 32 && comptype == CDI_COMPRESS_ZIP
-      && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR))
+  if (gridsize >= 32 && comptype == CDI_COMPRESS_ZIP && is_filetype_nc4(filetype))
   {
     cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
     int shuffle = 1, compLevel = 1;

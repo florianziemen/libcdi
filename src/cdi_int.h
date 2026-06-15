@@ -52,6 +52,12 @@ char *str_to_lower(char *str);
 bool strStartsWith(const char *vstr, const char *cstr);
 
 static inline bool
+is_filetype_nc4(int filetype)
+{
+  return filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR;
+}
+
+static inline bool
 str_is_equal(const char *x, const char *y)
 {
   return (*x == *y) && (strcmp(x, y) == 0);
