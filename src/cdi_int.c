@@ -322,13 +322,13 @@ static int
 calendar_from_name(const char *name)
 {
   // clang-format off
-	if (strncmp(name, "standard", 8)  == 0) return CALENDAR_STANDARD;
-	if (strncmp(name, "gregorian", 9) == 0) return CALENDAR_GREGORIAN;
-	if (strncmp(name, "proleptic", 9) == 0) return CALENDAR_PROLEPTIC;
-	if (strncmp(name, "360days", 7)   == 0) return CALENDAR_360DAYS;
-	if (strncmp(name, "365days", 7)   == 0) return CALENDAR_365DAYS;
-	if (strncmp(name, "366days", 7)   == 0) return CALENDAR_366DAYS;
-	if (strncmp(name, "none", 4)      == 0) return CALENDAR_NONE;
+	if (strStartsWith(name, "standard"))  return CALENDAR_STANDARD;
+	if (strStartsWith(name, "gregorian")) return CALENDAR_GREGORIAN;
+	if (strStartsWith(name, "prolepc"))   return CALENDAR_PROLEPTIC;
+	if (strStartsWith(name, "360"))       return CALENDAR_360DAYS;
+	if (strStartsWith(name, "365"))       return CALENDAR_365DAYS;
+	if (strStartsWith(name, "366"))       return CALENDAR_366DAYS;
+	if (strStartsWith(name, "none") )     return CALENDAR_NONE;
   // clang-format on
   return CDI_UNDEFID;
 }
@@ -413,7 +413,7 @@ cdiInitialize(void)
     envstr = getenv("CDI_INVENTORY_MODE");
     if (envstr)
     {
-      if (strncmp(envstr, "time", 4) == 0)
+      if (strStartsWith(envstr, "time"))
       {
         CDI_Inventory_Mode = 2;
         if (CDI_Debug) Message("Inventory mode was set to timestep!");
