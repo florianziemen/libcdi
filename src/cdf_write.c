@@ -804,12 +804,12 @@ cdfDefineAttrLeveltype(int fileID, int ncvarID, int zaxisID, int zaxistype)
        zaxistype == ZAXIS_SEDIMENT_BOTTOM_TW  ||
        zaxistype == ZAXIS_MIX_LAYER           ||
        zaxistype == ZAXIS_ATMOSPHERE )
-    {
-      char varname[CDI_MAX_NAME];
-      int length = CDI_MAX_NAME;
-      cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, varname, &length);
-      cdf_put_att_text(fileID, ncvarID, "level_type", strlen(varname), varname);
-    }
+  {
+    char varname[CDI_MAX_NAME];
+    int length = CDI_MAX_NAME;
+    cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, varname, &length);
+    cdf_put_att_text(fileID, ncvarID, "level_type", strlen(varname), varname);
+  }
   // clang-format on
 }
 
@@ -1112,6 +1112,13 @@ cdfWriteGridTraj(stream_t *streamptr, int gridID)
   cdf_put_var1_double(streamptr->fileID, latID, &index, &xlat);
 }
 
+static inline void
+apply_packing(double *v, bool haveAddoffset, bool haveScalefactor, double addoffset, double scalefactor)
+{
+  if (haveAddoffset) *v -= addoffset;
+  if (haveScalefactor) *v /= scalefactor;
+}
+
 static void
 cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, size_t nvals, size_t xsize, size_t ysize,
                    bool swapxy, size_t *start, size_t *count, int memtype, const void *data, size_t numMissVals)
@@ -1145,8 +1152,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
             double temp = mdata_sp[i];
             if (!DBL_IS_EQUAL(temp, (float) missval))
             {
-              if (haveAddoffset) temp -= addoffset;
-              if (haveScalefactor) temp /= scalefactor;
+              apply_packing(&temp, haveAddoffset, haveScalefactor, addoffset, scalefactor);
               mdata_sp[i] = (float) temp;
             }
           }
@@ -1156,8 +1162,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
           for (size_t i = 0; i < nvals; ++i)
           {
             double temp = mdata_sp[i];
-            if (haveAddoffset) temp -= addoffset;
-            if (haveScalefactor) temp /= scalefactor;
+            apply_packing(&temp, haveAddoffset, haveScalefactor, addoffset, scalefactor);
             mdata_sp[i] = (float) temp;
           }
         }
@@ -1174,8 +1179,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
           {
             if (!DBL_IS_EQUAL(mdata_dp[i], missval))
             {
-              if (haveAddoffset) mdata_dp[i] -= addoffset;
-              if (haveScalefactor) mdata_dp[i] /= scalefactor;
+              apply_packing(&mdata_dp[i], haveAddoffset, haveScalefactor, addoffset, scalefactor);
             }
           }
         }
@@ -1183,148 +1187,117 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
         {
           for (size_t i = 0; i < nvals; ++i)
           {
-            if (haveAddoffset) mdata_dp[i] -= addoffset;
-            if (haveScalefactor) mdata_dp[i] /= scalefactor;
+            apply_packing(&mdata_dp[i], haveAddoffset, haveScalefactor, addoffset, scalefactor);
           }
         }
       }
     }
+
+#define ALLOC_IMPL(TYPE, SUFFIX)                                    \
+  do                                                                \
+  {                                                                 \
+    if (mdata_##SUFFIX == NULL)                                     \
+    {                                                               \
+      mdata_##SUFFIX = (TYPE *) Malloc(nvals * sizeof(TYPE));       \
+      memcpy(mdata_##SUFFIX, pdata_##SUFFIX, nvals * sizeof(TYPE)); \
+      pdata_##SUFFIX = mdata_##SUFFIX;                              \
+    }                                                               \
+  } while (0);
+
+#define BYTE_CHECK_IMPL(SUFFIX)                                      \
+  do                                                                 \
+  {                                                                  \
+    if (dtype == CDI_DATATYPE_UINT8)                                 \
+    {                                                                \
+      nc_type xtype;                                                 \
+      cdf_inq_vartype(fileID, ncvarID, &xtype);                      \
+      if (xtype == NC_BYTE)                                          \
+      {                                                              \
+        for (size_t i = 0; i < nvals; ++i)                           \
+          if (mdata_##SUFFIX[i] > 127) { mdata_##SUFFIX[i] -= 256; } \
+      }                                                              \
+    }                                                                \
+  } while (0);
 
     if (dtype == CDI_DATATYPE_UINT8 || dtype == CDI_DATATYPE_INT8 || dtype == CDI_DATATYPE_UINT16 || dtype == CDI_DATATYPE_INT16
         || dtype == CDI_DATATYPE_UINT32 || dtype == CDI_DATATYPE_INT32)
     {
       if (memtype == MEMTYPE_FLOAT)
       {
-        if (mdata_sp == NULL)
-        {
-          mdata_sp = (float *) Malloc(nvals * sizeof(float));
-          memcpy(mdata_sp, pdata_sp, nvals * sizeof(float));
-          pdata_sp = mdata_sp;
-        }
-
-        for (size_t i = 0; i < nvals; ++i) mdata_sp[i] = roundf(mdata_sp[i]);
-
-        if (dtype == CDI_DATATYPE_UINT8)
-        {
-          nc_type xtype;
-          cdf_inq_vartype(fileID, ncvarID, &xtype);
-          if (xtype == NC_BYTE)
-          {
-            for (size_t i = 0; i < nvals; ++i)
-              if (mdata_sp[i] > 127) mdata_sp[i] -= 256;
-          }
-        }
+        ALLOC_IMPL(float, sp);
+        for (size_t i = 0; i < nvals; ++i) { mdata_sp[i] = roundf(mdata_sp[i]); }
+        BYTE_CHECK_IMPL(sp);
       }
       else
       {
-        if (mdata_dp == NULL)
-        {
-          mdata_dp = (double *) Malloc(nvals * sizeof(double));
-          memcpy(mdata_dp, pdata_dp, nvals * sizeof(double));
-          pdata_dp = mdata_dp;
-        }
-
-        for (size_t i = 0; i < nvals; ++i) mdata_dp[i] = round(mdata_dp[i]);
-
-        if (dtype == CDI_DATATYPE_UINT8)
-        {
-          nc_type xtype;
-          cdf_inq_vartype(fileID, ncvarID, &xtype);
-          if (xtype == NC_BYTE)
-          {
-            for (size_t i = 0; i < nvals; ++i)
-              if (mdata_dp[i] > 127) mdata_dp[i] -= 256;
-          }
-        }
+        ALLOC_IMPL(double, dp);
+        for (size_t i = 0; i < nvals; ++i) { mdata_dp[i] = round(mdata_dp[i]); }
+        BYTE_CHECK_IMPL(dp);
       }
     }
+
+#define DEBUG_MINMAX_IMPL(SUFFIX, MISSVAL)                      \
+  do                                                            \
+  {                                                             \
+    for (size_t i = 0; i < nvals; ++i)                          \
+    {                                                           \
+      if (!DBL_IS_EQUAL(pdata_##SUFFIX[i], MISSVAL))            \
+      {                                                         \
+        if (pdata_##SUFFIX[i] < fmin) fmin = pdata_##SUFFIX[i]; \
+        if (pdata_##SUFFIX[i] > fmax) fmax = pdata_##SUFFIX[i]; \
+      }                                                         \
+    }                                                           \
+  } while (0);
 
     if (CDF_Debug)
     {
       double fmin = 1.0e200;
       double fmax = -1.0e200;
-      if (memtype == MEMTYPE_FLOAT)
-      {
-        for (size_t i = 0; i < nvals; ++i)
-        {
-          if (!DBL_IS_EQUAL(pdata_sp[i], (float) missval))
-          {
-            if (pdata_sp[i] < fmin) fmin = pdata_sp[i];
-            if (pdata_sp[i] > fmax) fmax = pdata_sp[i];
-          }
-        }
-      }
-      else
-      {
-        for (size_t i = 0; i < nvals; ++i)
-        {
-          if (!DBL_IS_EQUAL(pdata_dp[i], missval))
-          {
-            if (pdata_dp[i] < fmin) fmin = pdata_dp[i];
-            if (pdata_dp[i] > fmax) fmax = pdata_dp[i];
-          }
-        }
-      }
+      if (memtype == MEMTYPE_FLOAT) { DEBUG_MINMAX_IMPL(sp, (float) missval); }
+      else if (memtype == MEMTYPE_DOUBLE) { DEBUG_MINMAX_IMPL(dp, missval); }
 
       Message("nvals = %zu, numMissVals = %d, missval = %g, minval = %g, maxval = %g", nvals, numMissVals, missval, fmin, fmax);
     }
   }
 
+#define SWAPXY_IMPL(TYPE, SUFFIX)                                                                       \
+  do                                                                                                    \
+  {                                                                                                     \
+    size_t gridsize = xsize * ysize;                                                                    \
+    sdata_##SUFFIX = (TYPE *) Malloc(gridsize * sizeof(TYPE));                                          \
+    for (size_t j = 0; j < ysize; ++j)                                                                  \
+      for (size_t i = 0; i < xsize; ++i) sdata_##SUFFIX[i * ysize + j] = pdata_##SUFFIX[j * xsize + i]; \
+    pdata_##SUFFIX = sdata_##SUFFIX;                                                                    \
+  } while (0);
+
   if (swapxy)  // implemented only for cdf_write_var_slice()
   {
-    size_t gridsize = xsize * ysize;
-    if (memtype == MEMTYPE_FLOAT)
-    {
-      sdata_sp = (float *) Malloc(gridsize * sizeof(float));
-      for (size_t j = 0; j < ysize; ++j)
-        for (size_t i = 0; i < xsize; ++i) sdata_sp[i * ysize + j] = pdata_sp[j * xsize + i];
-      pdata_sp = sdata_sp;
-    }
-    else
-    {
-      sdata_dp = (double *) Malloc(gridsize * sizeof(double));
-      for (size_t j = 0; j < ysize; ++j)
-        for (size_t i = 0; i < xsize; ++i) sdata_dp[i * ysize + j] = pdata_dp[j * xsize + i];
-      pdata_dp = sdata_dp;
-    }
+    if (memtype == MEMTYPE_FLOAT) { SWAPXY_IMPL(float, sp); }
+    else if (memtype == MEMTYPE_DOUBLE) { SWAPXY_IMPL(double, dp); }
   }
+
+#define WRITE_CPX(TYPE, src)                               \
+  do                                                       \
+  {                                                        \
+    TYPE *dst = (TYPE *) Malloc(2 * nvals * sizeof(TYPE)); \
+    for (size_t i = 0; i < nvals; ++i)                     \
+    {                                                      \
+      dst[2 * i] = (TYPE) (src[2 * i]);                    \
+      dst[2 * i + 1] = (TYPE) (src[2 * i + 1]);            \
+    }                                                      \
+    cdf_put_vara(fileID, ncvarID, start, count, dst);      \
+    if (dst) Free(dst);                                    \
+  } while (0);
 
   if (dtype == CDI_DATATYPE_CPX32 || dtype == CDI_DATATYPE_CPX64)
   {
-    void *pdata = (memtype == MEMTYPE_FLOAT) ? (void *) pdata_sp : (void *) pdata_dp;
-    float *cdata_sp = NULL;
-    double *cdata_dp = NULL;
-    if (memtype == MEMTYPE_FLOAT && dtype == CDI_DATATYPE_CPX64)
-    {
-      cdata_dp = (double *) Malloc(2 * nvals * sizeof(double));
-      for (size_t i = 0; i < nvals; ++i)
-      {
-        cdata_dp[2 * i] = (double) (pdata_sp[2 * i]);
-        cdata_dp[2 * i + 1] = (double) (pdata_sp[2 * i + 1]);
-      }
-      pdata = cdata_dp;
-    }
-    else if (memtype == MEMTYPE_DOUBLE && dtype == CDI_DATATYPE_CPX32)
-    {
-      cdata_sp = (float *) Malloc(2 * nvals * sizeof(float));
-      for (size_t i = 0; i < nvals; ++i)
-      {
-        cdata_sp[2 * i] = (float) (pdata_dp[2 * i]);
-        cdata_sp[2 * i + 1] = (float) (pdata_dp[2 * i + 1]);
-      }
-      pdata = cdata_sp;
-    }
-
-    cdf_put_vara(fileID, ncvarID, start, count, pdata);
-    if (cdata_sp) Free(cdata_sp);
-    if (cdata_dp) Free(cdata_dp);
+    if (memtype == MEMTYPE_FLOAT && dtype == CDI_DATATYPE_CPX64) { WRITE_CPX(double, pdata_sp); }
+    else if (memtype == MEMTYPE_DOUBLE && dtype == CDI_DATATYPE_CPX32) { WRITE_CPX(float, pdata_dp); }
   }
   else
   {
-    if (memtype == MEMTYPE_FLOAT)
-      cdf_put_vara_float(fileID, ncvarID, start, count, pdata_sp);
-    else
-      cdf_put_vara_double(fileID, ncvarID, start, count, pdata_dp);
+    if (memtype == MEMTYPE_FLOAT) { cdf_put_vara_float(fileID, ncvarID, start, count, pdata_sp); }
+    else if (memtype == MEMTYPE_DOUBLE) { cdf_put_vara_double(fileID, ncvarID, start, count, pdata_dp); }
   }
 
   if (mdata_dp) Free(mdata_dp);
