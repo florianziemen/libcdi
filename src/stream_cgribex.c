@@ -77,7 +77,7 @@ cgribexDelete(void *cgribex)
   cgribexrec_t *cgribexp = (cgribexrec_t *) cgribex;
   if (cgribexp)
   {
-    if (cgribexp->sec2) Free(cgribexp->sec2);
+    Free(cgribexp->sec2);
     Free(cgribexp);
   }
 }
@@ -128,7 +128,7 @@ cgribex_handle_new_from_meassage(void *gribbuffer, size_t gribbuffersize)
 void
 cgribex_handle_delete(void *gh)
 {
-  if (gh) Free(gh);
+  Free(gh);
 }
 
 static int

@@ -1585,8 +1585,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
     }
   }
 
-  for (int i = 0; i < max_check_vars; ++i)
-    if (checked_vars[i]) Free(checked_vars[i]);
+  for (int i = 0; i < max_check_vars; ++i) Free(checked_vars[i]);
 }
 
 #if defined __GNUC__ || (__GNUC__ == 4 && __GNUC_MINOR__ == 9)
@@ -3459,13 +3458,13 @@ cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvar
 
       if (zdimid != CDI_UNDEFID) cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_DIMNAME, ncdims[zdimid].name);
 
-      if (zvar) Free(zvar);
+      Free(zvar);
       if (zcvals)
       {
         for (size_t i = 0; i < zsize; i++) Free(zcvals[i]);
         Free(zcvals);
       }
-      if (lbounds) Free(lbounds);
+      Free(lbounds);
 
       if (zvarid != CDI_UNDEFID)
       {
@@ -3919,8 +3918,8 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
     int nvatts = ncvar->natts;
     for (int iatt = 0; iatt < nvatts; ++iatt) cdf_set_cdi_attr(ncid, ncvarid, ncvar->atts[iatt], vlistID, varID, false);
 
-    if (ncvar->atts) Free(ncvar->atts);
-    if (ncvar->vct) Free(ncvar->vct);
+    Free(ncvar->atts);
+    Free(ncvar->vct);
 
     ncvar->atts = NULL;
     ncvar->vct = NULL;
@@ -3930,7 +3929,7 @@ cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, i
   for (int ncvarid = 0; ncvarid < num_ncvars; ncvarid++)
   {
     ncvar_t *ncvar = &ncvars[ncvarid];
-    if (ncvar->atts) Free(ncvar->atts);
+    Free(ncvar->atts);
     ncvar->atts = NULL;
   }
 
@@ -4556,7 +4555,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamptr, taxis_t *taxis0)
         {
           vDateTimeList[i] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, i, timevarBuffer), taxis0);
         }
-        if (timevarBuffer) Free(timevarBuffer);
+        Free(timevarBuffer);
       }
       else
       {
@@ -4921,7 +4920,7 @@ cdfInqContents(stream_t *streamptr)
 
   // define all zaxes
   status = cdf_define_all_zaxes(streamptr, vlistID, ncdims, nvars, ncvars, vctsize, vct, uuidOfVGrid);
-  if (vct) Free(vct);
+  Free(vct);
   if (status < 0) return status;
 
   // verify vars
@@ -5041,7 +5040,7 @@ cdfInqContents(stream_t *streamptr)
   taxisDestroyKernel(&taxis0);
 
   // free ncdims
-  if (ncdims) Free(ncdims);
+  Free(ncdims);
 
   // free ncvars
   if (ncvars)
@@ -5049,8 +5048,8 @@ cdfInqContents(stream_t *streamptr)
     for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
-      if (ncvar->atts) Free(ncvar->atts);
-      if (ncvar->vct) Free(ncvar->vct);
+      Free(ncvar->atts);
+      Free(ncvar->vct);
     }
     Free(ncvars);
   }

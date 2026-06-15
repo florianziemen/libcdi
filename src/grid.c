@@ -180,8 +180,7 @@ grid_free_components(grid_t *gridptr)
 #endif
                      gridptr->x.bounds, gridptr->y.bounds, gridptr->reducedPoints, gridptr->area,   gridptr->name };
 
-  for (size_t i = 0; i < sizeof(p2free) / sizeof(p2free[0]); ++i)
-    if (p2free[i]) Free(p2free[i]);
+  for (size_t i = 0; i < sizeof(p2free) / sizeof(p2free[0]); ++i) Free(p2free[i]);
 
   cdiDeleteVarKeys(&(gridptr->x.keys));
   cdiDeleteVarKeys(&(gridptr->y.keys));
@@ -392,7 +391,7 @@ gridGenYvalsGaussian(size_t ysize, double yfirst, double ylast, double *restrict
           for (size_t i = 0; i < ysize; i++) yvals[i] = ytmp[i + nstart];
         }
 
-        if (ytmp) Free(ytmp);
+        Free(ytmp);
       }
 
       if (!lfound)

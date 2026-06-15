@@ -136,11 +136,7 @@ cdi_delete_key(cdi_key_t *keyp)
   if (keyp != NULL && keyp->length)  // key in use
   {
     keyp->length = 0;
-    if (keyp->type == KeyBytes)
-    {
-      if (keyp->v.s) Free(keyp->v.s);
-      keyp->v.s = NULL;
-    }
+    if (keyp->type == KeyBytes) { FREE_AND_NULL(keyp->v.s); }
     else if (keyp->type == KeyFloat) { keyp->v.d = 0.0; }
     else if (keyp->type == KeyInt) { keyp->v.i = 0; }
   }
@@ -484,7 +480,7 @@ cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, int le
   {
     if (keyp->length != 0 && keyp->length != length)
     {
-      if (keyp->v.s) Free(keyp->v.s);
+      Free(keyp->v.s);
       keyp->length = 0;
     }
     if (keyp->length == 0)

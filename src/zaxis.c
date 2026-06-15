@@ -275,7 +275,7 @@ zaxisDestroyKernel(zaxis_t *zaxisptr)
 {
   xassert(zaxisptr);
 
-  if (zaxisptr->vals) Free(zaxisptr->vals);
+  Free(zaxisptr->vals);
 #ifndef USE_MPI
   if (zaxisptr->cvals)
   {
@@ -283,10 +283,10 @@ zaxisDestroyKernel(zaxis_t *zaxisptr)
     Free(zaxisptr->cvals);
   }
 #endif
-  if (zaxisptr->lbounds) Free(zaxisptr->lbounds);
-  if (zaxisptr->ubounds) Free(zaxisptr->ubounds);
-  if (zaxisptr->weights) Free(zaxisptr->weights);
-  if (zaxisptr->vct) Free(zaxisptr->vct);
+  Free(zaxisptr->lbounds);
+  Free(zaxisptr->ubounds);
+  Free(zaxisptr->weights);
+  Free(zaxisptr->vct);
 
   int zaxisID = zaxisptr->self;
   cdiDeleteKeys(zaxisID, CDI_GLOBAL);

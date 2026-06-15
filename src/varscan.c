@@ -156,7 +156,7 @@ varFree(void)
       Free(var->recordTable);
     }
 
-    if (var->name) Free(var->name);
+    Free(var->name);
     if (var->tiles) subtypeDestroyPtr(var->tiles);
 
     cdi_keys_t *keysp = &(var->keys);
@@ -164,10 +164,7 @@ varFree(void)
 
     if (var->opt_grib_kvpair)
     {
-      for (int i = 0; i < var->opt_grib_nentries; i++)
-      {
-        if (var->opt_grib_kvpair[i].keyword) Free(var->opt_grib_kvpair[i].keyword);
-      }
+      for (int i = 0; i < var->opt_grib_nentries; i++) { Free(var->opt_grib_kvpair[i].keyword); }
       Free(var->opt_grib_kvpair);
     }
     var->opt_grib_nentries = 0;
@@ -175,13 +172,11 @@ varFree(void)
     var->opt_grib_kvpair = NULL;
   }
 
-  if (varInfoList) Free(varInfoList);
-  varInfoList = NULL;
+  FREE_AND_NULL(varInfoList);
   varInfoListSize = 0;
   varInfoListUsed = 0;
 
-  if (Vct) Free(Vct);
-  Vct = NULL;
+  FREE_AND_NULL(Vct);
   Vctsize = 0;
 }
 
@@ -211,10 +206,11 @@ tileNewEntry(int varID)
 
     for (int isub = 0; isub < var->nsubtypes_alloc; isub++)
     {
-      var->recordTable[isub].levelTable = NULL;
-      var->recordTable[isub].levelTableSize = 0;
-      var->recordTable[isub].nlevels = 0;
-      var->recordTable[isub].subtypeIndex = CDI_UNDEFID;
+      subtypetable_t *record = &var->recordTable[isub];
+      record->levelTable = NULL;
+      record->levelTableSize = 0;
+      record->nlevels = 0;
+      record->subtypeIndex = CDI_UNDEFID;
     }
   }
   else
@@ -236,10 +232,11 @@ tileNewEntry(int varID)
     if (var->recordTable == NULL) SysError("Reallocation of leveltable failed");
     for (int isub = tileID; isub < var->nsubtypes_alloc; isub++)
     {
-      var->recordTable[isub].levelTable = NULL;
-      var->recordTable[isub].levelTableSize = 0;
-      var->recordTable[isub].nlevels = 0;
-      var->recordTable[isub].subtypeIndex = CDI_UNDEFID;
+      subtypetable_t *record = &var->recordTable[isub];
+      record->levelTable = NULL;
+      record->levelTableSize = 0;
+      record->nlevels = 0;
+      record->subtypeIndex = CDI_UNDEFID;
     }
   }
 
@@ -656,7 +653,7 @@ cdi_generate_vars(stream_t *streamptr)
       if (!cdiUUIDIsNull(uuidVGrid)) cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuidVGrid, CDI_UUID_SIZE);
     }
 
-    if (hasBounds) Free(dlevels1);
+    Free(dlevels1);
     Free(dlevels);
 
     // define new subtype for tile set
@@ -1079,7 +1076,7 @@ varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword)
   }
   else
   {
-    if (var->opt_grib_kvpair[idx].keyword) Free(var->opt_grib_kvpair[idx].keyword);
+    Free(var->opt_grib_kvpair[idx].keyword);
   }
   var->opt_grib_kvpair[idx].data_type = t_int;
   var->opt_grib_kvpair[idx].int_val = (int) lval;
@@ -1109,7 +1106,7 @@ varDefOptGribDbl(int varID, int tile_index, double dval, const char *keyword)
   }
   else
   {
-    if (var->opt_grib_kvpair[idx].keyword) Free(var->opt_grib_kvpair[idx].keyword);
+    Free(var->opt_grib_kvpair[idx].keyword);
   }
   var->opt_grib_kvpair[idx].data_type = t_double;
   var->opt_grib_kvpair[idx].dbl_val = dval;
@@ -1146,8 +1143,8 @@ varDefOptGribIntArr(int varID, int tile_index, const long *larr, size_t arr_len,
   else
   {
     // Free existing keyword and array
-    if (var->opt_grib_kvpair[idx].keyword) Free(var->opt_grib_kvpair[idx].keyword);
-    if (var->opt_grib_kvpair[idx].int_arr) Free(var->opt_grib_kvpair[idx].int_arr);
+    Free(var->opt_grib_kvpair[idx].keyword);
+    Free(var->opt_grib_kvpair[idx].int_arr);
   }
 
   // Assign keyword, data type, and tile index
@@ -1200,8 +1197,8 @@ varDefOptGribDblArr(int varID, int tile_index, const double *darr, size_t arr_le
   else
   {
     // Free existing keyword and array
-    if (var->opt_grib_kvpair[idx].keyword) Free(var->opt_grib_kvpair[idx].keyword);
-    if (var->opt_grib_kvpair[idx].dbl_arr) Free(var->opt_grib_kvpair[idx].dbl_arr);
+    Free(var->opt_grib_kvpair[idx].keyword);
+    Free(var->opt_grib_kvpair[idx].dbl_arr);
   }
 
   // Assign keyword, data type, and tile index

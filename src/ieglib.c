@@ -121,7 +121,7 @@ iegDelete(void *ieg)
   iegrec_t *iegp = (iegrec_t *) ieg;
   if (iegp)
   {
-    if (iegp->buffer) Free(iegp->buffer);
+    Free(iegp->buffer);
     Free(iegp);
   }
 }

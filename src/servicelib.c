@@ -128,7 +128,7 @@ srvDelete(void *srv)
   srvrec_t *srvp = (srvrec_t *) srv;
   if (srvp)
   {
-    if (srvp->buffer) Free(srvp->buffer);
+    Free(srvp->buffer);
     Free(srvp);
   }
 }

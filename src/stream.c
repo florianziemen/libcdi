@@ -43,10 +43,6 @@
 #include "namespace.h"
 #include "async_worker.h"
 
-// clang-format off
-#define FREE_AND_NULL(p) do { if (p) { Free(p); (p) = NULL; } } while(0)
-// clang-format on
-
 static stream_t *stream_new_entry(int resH);
 static int streamCompareP(void *streamptr1, void *streamptr2);
 static void streamDestroyP(void *streamptr);
@@ -1313,7 +1309,7 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
 
   if (streamptr->record)
   {
-    if (streamptr->record->buffer) Free(streamptr->record->buffer);
+    Free(streamptr->record->buffer);
     FREE_AND_NULL(streamptr->record);
   }
 
@@ -1328,7 +1324,7 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
       sleveltable_t *pslev = streamptr->vars[index].recordTable;
       unsigned nsub = streamptr->vars[index].subtypeSize >= 0 ? (unsigned) streamptr->vars[index].subtypeSize : 0U;
       for (size_t isub = 0; isub < nsub; isub++) deallocate_sleveltable_t(pslev + isub);
-      if (pslev) Free(pslev);
+      Free(pslev);
 #ifdef HAVE_LIBNETCDF
       if (streamptr->vars[index].cdfCache) deallocate_cdfCache(streamptr->vars[index].cdfCache);
       streamptr->vars[index].cdfCache = NULL;
@@ -1370,7 +1366,7 @@ streamDestroyViaDelegate(stream_t *streamptr, void (*streamCloseDelegate)(stream
     mycdiVlistDestroy_(vlistID, true);
   }
 
-  if (streamptr->jobs) Free(streamptr->jobs);
+  Free(streamptr->jobs);
   if (streamptr->jobManager) AsyncWorker_finalize((AsyncManager *) streamptr->jobManager);
 
   Free(streamptr);

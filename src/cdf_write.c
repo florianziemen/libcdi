@@ -338,7 +338,7 @@ cdfDefineAttributes(int filetype, int cdiID, int varID, int fileID, int ncvarID)
     }
   }
 
-  if (attBuf) Free(attBuf);
+  Free(attBuf);
 }
 
 static void
@@ -1286,7 +1286,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
       dst[2 * i + 1] = (TYPE) (src[2 * i + 1]);            \
     }                                                      \
     cdf_put_vara(fileID, ncvarID, start, count, dst);      \
-    if (dst) Free(dst);                                    \
+    Free(dst);                                             \
   } while (0);
 
   if (dtype == CDI_DATATYPE_CPX32 || dtype == CDI_DATATYPE_CPX64)
@@ -1300,10 +1300,10 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
     else if (memtype == MEMTYPE_DOUBLE) { cdf_put_vara_double(fileID, ncvarID, start, count, pdata_dp); }
   }
 
-  if (mdata_dp) Free(mdata_dp);
-  if (sdata_dp) Free(sdata_dp);
-  if (mdata_sp) Free(mdata_sp);
-  if (sdata_sp) Free(sdata_sp);
+  Free(mdata_dp);
+  Free(sdata_dp);
+  Free(mdata_sp);
+  Free(sdata_sp);
 }
 
 static void
