@@ -4672,9 +4672,9 @@ check_ncgroups(int fileID)
   for (int i = 0; i < numGroups; ++i)
   {
     int ncid = ncids[i];
-    nc_inq_grpname(ncid, gname);
     int gndims, gnvars, gngatts, gunlimdimid;
     cdf_inq(ncid, &gndims, &gnvars, &gngatts, &gunlimdimid);
+    nc_inq_grpname(ncid, gname);
 
     if (CDI_Debug) Message("%s: ndims %d, nvars %d, ngatts %d", gname, gndims, gnvars, gngatts);
   }
