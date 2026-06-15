@@ -370,7 +370,7 @@ varAddRecord(int recID, int param, int gridID, int zaxistype, int hasBounds, int
              int prec, int *pvarID, int *plevelID, int tsteptype, int ltype1, int ltype2, const char *name,
              const VarScanKeys *scanKeys, const var_tile_t *tiles, int *tile_index)
 {
-  int varID = (CDI_Split_Ltype105 != 1 || zaxistype != ZAXIS_HEIGHT)
+  int varID = (CDI_Split_Ltype105 == false || zaxistype != ZAXIS_HEIGHT)
                   ? varGetEntry(param, gridID, zaxistype, ltype1, tsteptype, name, scanKeys, tiles)
                   : CDI_UNDEFID;
 

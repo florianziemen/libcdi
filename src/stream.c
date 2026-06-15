@@ -1107,7 +1107,7 @@ streamDefaultValue(stream_t *streamptr)
   streamptr->comptype = CDI_COMPRESS_NONE;
   streamptr->complevel = 0;
   streamptr->shuffle = 0;
-  streamptr->sortname = (cdiSortName > 0);
+  streamptr->sortname = cdiSortName;
   streamptr->lockIO = CDI_Lock_IO;
   // netcdf4/HDF5 filter
   streamptr->filterSpec = NULL;

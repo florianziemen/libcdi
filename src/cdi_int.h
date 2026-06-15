@@ -360,8 +360,8 @@ typedef struct
   long maxGlobalRecs;
   int globalatts;
   int localatts;
-  int unreduced;
-  int have_missval;
+  bool unreduced;
+  bool have_missval;
   int shuffle;
   // netcdf4/HDF5 filter
   char *filterSpec;
@@ -431,8 +431,7 @@ typedef enum
 #define CDI_FILETYPE_UNDEF -1  // Unknown/not yet defined file type
 
 extern int cdiDebugExt;
-extern int CDI_Debug;  // If set to 1, debuggig (default 0)
-extern int CDI_Recopt;
+extern bool CDI_Debug;  // If set to 1, debuggig (default 0)
 extern bool CDI_gribapi_debug;
 extern bool CDI_gribapi_grib1;
 extern double CDI_Default_Missval;
@@ -445,16 +444,17 @@ extern int CDI_Default_Calendar;
 // extern int cdiNcMissingValue;
 extern int CDI_Netcdf_Chunksizehint;
 extern int CDI_ChunkType;
-extern int CDI_Test;
-extern int CDI_Split_Ltype105;
+extern bool CDI_Test;
+extern bool CDI_Split_Ltype105;
 extern bool CDI_Lock_IO;
 extern bool CDI_Threadsafe;
-extern int cdiDataUnreduced;
-extern int cdiSortName;
-extern int cdiHaveMissval;
+extern bool cdiDataUnreduced;
+extern bool cdiSortName;
+extern bool cdiHaveMissval;
 extern bool CDI_Ignore_Att_Coordinates;
 extern bool CDI_Coordinates_Lon_Lat;
 extern bool CDI_Ignore_Valid_Range;
+extern bool CDI_Shuffle;
 extern int CDI_Skip_Records;
 extern const char *CDI_GRIB1_Template;
 extern const char *CDI_GRIB2_Template;
@@ -463,15 +463,14 @@ extern int CDI_Inventory_Mode;
 extern int CDI_Query_Abort;
 extern int CDI_Version_Info;
 extern int CDI_Convert_Cubesphere;
-extern int CDI_Read_Cell_Center;
-extern int CDI_Read_Cell_Corners;
+extern bool CDI_Read_Cell_Center;
+extern bool CDI_Read_Cell_Corners;
 extern int CDI_CMOR_Mode;
 extern int CDI_Reduce_Dim;
 extern int CDI_Reduce_DimX;
 extern int CDI_Reduce_DimY;
 extern int CDI_Reduce_DimZ;
 extern int CDI_Reduce_DimT;
-extern int CDI_Shuffle;
 extern size_t CDI_Netcdf_Hdr_Pad;
 extern bool CDI_Copy_ChunkSpec;
 extern bool CDI_Remove_ChunkSpec;
@@ -485,7 +484,6 @@ extern size_t CDI_CacheSize_Max;
 extern bool CDI_Netcdf_Lazy_Grid_Load;
 extern int STREAM_Debug;
 
-extern char *cdiPartabPath;
 extern int cdiPartabIntern;
 extern const resOps streamOps;
 
