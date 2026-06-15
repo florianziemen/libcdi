@@ -18,9 +18,7 @@ void
 cdfDefVarDeflate(int ncid, int ncvarID, int shuffle, int compLevel)
 {
   int deflate = 1;
-
   if (CDI_Shuffle > 0 && shuffle == 0) shuffle = 1;
-
   if (compLevel < 1 || compLevel > 9) compLevel = 1;
 
   int status;
@@ -112,38 +110,42 @@ cdfTypeComplexDouble(stream_t *streamptr)
 nc_type
 cdfDefDatatype(int datatype, stream_t *streamptr)
 {
-  nc_type xtype = NC_FLOAT;
-
   // clang-format off
   if (streamptr->filetype == CDI_FILETYPE_NC4)
   {
-    if      (datatype == CDI_DATATYPE_INT8  ) xtype = NC_BYTE;
-    else if (datatype == CDI_DATATYPE_INT16 ) xtype = NC_SHORT;
-    else if (datatype == CDI_DATATYPE_INT32 ) xtype = NC_INT;
-    else if (datatype == CDI_DATATYPE_UINT8 ) xtype = NC_UBYTE;
-    else if (datatype == CDI_DATATYPE_UINT16) xtype = NC_USHORT;
-    else if (datatype == CDI_DATATYPE_UINT32) xtype = NC_UINT;
-    else if (datatype == CDI_DATATYPE_CPX32 ) xtype = cdfTypeComplexFloat(streamptr);
-    else if (datatype == CDI_DATATYPE_CPX64 ) xtype = cdfTypeComplexDouble(streamptr);
-    else if (datatype == CDI_DATATYPE_FLT64 ) xtype = NC_DOUBLE;
-    else if (datatype == CDI_DATATYPE_FLT32 ) xtype = NC_FLOAT;
+    switch(datatype)
+    {
+      case CDI_DATATYPE_INT8  : return NC_BYTE;
+      case CDI_DATATYPE_INT16 : return NC_SHORT;
+      case CDI_DATATYPE_INT32 : return NC_INT;
+      case CDI_DATATYPE_UINT8 : return NC_UBYTE;
+      case CDI_DATATYPE_UINT16: return NC_USHORT;
+      case CDI_DATATYPE_UINT32: return NC_UINT;
+      case CDI_DATATYPE_FLT64 : return NC_DOUBLE;
+      case CDI_DATATYPE_FLT32 : return NC_FLOAT;
+      case CDI_DATATYPE_CPX32 : return cdfTypeComplexFloat(streamptr);
+      case CDI_DATATYPE_CPX64 : return cdfTypeComplexDouble(streamptr);
+    }
   }
   else
   {
-    if      (datatype == CDI_DATATYPE_INT8  ) xtype = NC_BYTE;
-    else if (datatype == CDI_DATATYPE_INT16 ) xtype = NC_SHORT;
-    else if (datatype == CDI_DATATYPE_INT32 ) xtype = NC_INT;
-    else if (datatype == CDI_DATATYPE_UINT8 ) xtype = NC_SHORT;
-    else if (datatype == CDI_DATATYPE_UINT16) xtype = NC_INT;
-    else if (datatype == CDI_DATATYPE_UINT32) xtype = NC_INT;
-    else if (datatype == CDI_DATATYPE_FLT64 ) xtype = NC_DOUBLE;
-    else if (datatype == CDI_DATATYPE_FLT32 ) xtype = NC_FLOAT;
-    else if (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64)
-      Error("CDI library does not support complex numbers with NetCDF classic!");
+    switch (datatype)
+    {
+      case CDI_DATATYPE_INT8  : return NC_BYTE;
+      case CDI_DATATYPE_INT16 : return NC_SHORT;
+      case CDI_DATATYPE_INT32 : return NC_INT;
+      case CDI_DATATYPE_UINT8 : return NC_SHORT;
+      case CDI_DATATYPE_UINT16: return NC_INT;
+      case CDI_DATATYPE_UINT32: return NC_INT;
+      case CDI_DATATYPE_FLT64 : return NC_DOUBLE;
+      case CDI_DATATYPE_FLT32 : return NC_FLOAT;
+      case CDI_DATATYPE_CPX32 :
+      case CDI_DATATYPE_CPX64 : Error("CDI library does not support complex numbers with NetCDF classic!");
+    }
   }
   // clang-format on
 
-  return xtype;
+  return NC_FLOAT;
 }
 
 static void
@@ -177,9 +179,7 @@ static void
 cdfDefInstituteGlobal(const stream_t *streamptr)
 {
   int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
   int instID = vlistInqInstitut(vlistID);
-
   if (instID != CDI_UNDEFID)
   {
     const char *longname = institutInqLongnamePtr(instID);
@@ -188,6 +188,7 @@ cdfDefInstituteGlobal(const stream_t *streamptr)
       size_t len = strlen(longname);
       if (len > 0)
       {
+        int fileID = streamptr->fileID;
         if (streamptr->ncmode == 2) cdf_redef(fileID);
         cdf_put_att_text(fileID, NC_GLOBAL, "institution", len, longname);
         if (streamptr->ncmode == 2) cdf_enddef(fileID, streamptr->self);
@@ -200,9 +201,7 @@ static void
 cdfDefSourceGlobal(const stream_t *streamptr)
 {
   int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
   int modelID = vlistInqModel(vlistID);
-
   if (modelID != CDI_UNDEFID)
   {
     const char *longname = modelInqNamePtr(modelID);
@@ -211,6 +210,7 @@ cdfDefSourceGlobal(const stream_t *streamptr)
       size_t len = strlen(longname);
       if (len > 0)
       {
+        int fileID = streamptr->fileID;
         if (streamptr->ncmode == 2) cdf_redef(fileID);
         cdf_put_att_text(fileID, NC_GLOBAL, "source", len, longname);
         if (streamptr->ncmode == 2) cdf_enddef(fileID, streamptr->self);
@@ -367,9 +367,7 @@ cdfDefGlobalAtts(stream_t *streamptr)
   cdiInqNatts(vlistID, CDI_GLOBAL, &natts);
 
   if (natts > 0 && streamptr->ncmode == 2) cdf_redef(fileID);
-
   cdfDefineAttributes(streamptr->filetype, vlistID, CDI_GLOBAL, fileID, NC_GLOBAL);
-
   if (natts > 0 && streamptr->ncmode == 2) cdf_enddef(fileID, streamptr->self);
 
   streamptr->globalatts = 1;
@@ -555,29 +553,23 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
     int ncyvarID = cdfGrid->ncIdList[CDF_VARID_Y];
     if (ncyvarID != CDI_UNDEFID)
     {
-      char name[CDI_MAX_NAME];
-      name[0] = 0;
+      char name[CDI_MAX_NAME] = { 0 };
       cdf_inq_varname(fileID, ncyvarID, name);
-      size_t len = strlen(name);
-      cdf_put_att_text(fileID, ncvarID, "CDI_grid_latitudes", len, name);
+      cdf_put_att_text(fileID, ncvarID, "CDI_grid_latitudes", strlen(name), name);
     }
 
     int ncrpvarID = cdfGrid->ncIdList[CDF_VARID_RP];
     if (ncrpvarID != CDI_UNDEFID)
     {
-      char name[CDI_MAX_NAME];
-      name[0] = 0;
+      char name[CDI_MAX_NAME] = { 0 };
       cdf_inq_varname(fileID, ncrpvarID, name);
-      size_t len = strlen(name);
-      cdf_put_att_text(fileID, ncvarID, "CDI_grid_reduced_points", len, name);
+      cdf_put_att_text(fileID, ncvarID, "CDI_grid_reduced_points", strlen(name), name);
     }
   }
 
   // define coordinates attribute
 
-  char coordinates[CDI_MAX_NAME];
-  coordinates[0] = 0;
-
+  char coordinates[CDI_MAX_NAME] = { 0 };
   if (nczvarID != CDI_UNDEFID) cdfAppendCoordinates(fileID, nczvarID, coordinates);
 
   if (gridtype == GRID_TRAJECTORY) { cdf_put_att_text(fileID, ncvarID, "coordinates", 9, "tlon tlat"); }
@@ -619,8 +611,7 @@ cdfDefineCoordinates(const stream_t *streamptr, int ncvarID, int nczvarID, int g
       char cellarea[CDI_MAX_NAME] = "area: ";
       size_t len = strlen(cellarea);
       cdf_inq_varname(fileID, ncavarID, cellarea + len);
-      len = strlen(cellarea);
-      cdf_put_att_text(fileID, ncvarID, "cell_measures", len, cellarea);
+      cdf_put_att_text(fileID, ncvarID, "cell_measures", strlen(cellarea), cellarea);
     }
 
     if (gridtype == GRID_UNSTRUCTURED)
