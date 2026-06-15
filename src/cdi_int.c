@@ -472,10 +472,7 @@ cdiInitialize(void)
 const char *
 strfiletype(int filetype)
 {
-  enum
-  {
-    numFiletypes = (int) (sizeof(Filetypes) / sizeof(Filetypes[0]))
-  };
+  static const size_t numFiletypes = sizeof(Filetypes) / sizeof(Filetypes[0]);
   return (filetype > 0 && filetype < numFiletypes) ? Filetypes[filetype] : Filetypes[0];
 }
 
