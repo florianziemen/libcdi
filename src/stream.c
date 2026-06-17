@@ -785,6 +785,7 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
   streamptr->filemode = tolower(*filemode);
   streamptr->filename = strdup(filename);
   streamptr->fileID = fileID;
+  streamptr->groupID = fileID;
 
   streamptr->vlistID = vlistCreate();
   cdiVlistMakeInternal(streamptr->vlistID);
@@ -869,10 +870,10 @@ streamOpenA(const char *filename, const char *filemode, int filetype)
     }
   }
 
-  if (fileID == CDI_UNDEFID)
-    streamID = CDI_UNDEFID;
-  else
-    streamptr->fileID = fileID;
+  if (fileID == CDI_UNDEFID) return CDI_UNDEFID;
+
+  streamptr->fileID = fileID;
+  streamptr->groupID = fileID;
 
   return streamID;
 }

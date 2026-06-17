@@ -1,3 +1,11 @@
+2026-06-18  Uwe Schulzweida
+
+	* Version 2.6.3 released
+
+2026-06-17  Uwe Schulzweida
+
+	* streamOpenAppend: fail since release 2.6.1 (bug fix)
+
 2026-06-11  Uwe Schulzweida
 
 	* Version 2.6.2 released
