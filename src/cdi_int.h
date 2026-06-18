@@ -624,6 +624,9 @@ void cdi_check_gridsize_int_limit(const char *format, SizeType gridsize)
 bool cdiFiletypeIsExse(int filetype);
 int cdiBaseFiletype(int filetype);
 
+void printDblsPrefixAutoBrk(FILE *fp, int dig, const char prefix[], size_t n, const double vals[]);
+
+
 #ifdef __cplusplus
 }
 #endif
