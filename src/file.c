@@ -1125,8 +1125,8 @@ fileClose_serial(int fileID)
     if (close(fileptr->fd) == -1) SysError("EOF returned for close of %s!", name);
   }
 
-  if (fileptr->name) free((void *) fileptr->name);
-  if (fileptr->buffer) free((void *) fileptr->buffer);
+  free((void *) fileptr->name);
+  free((void *) fileptr->buffer);
 
   file_delete_entry(fileptr);
 

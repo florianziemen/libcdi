@@ -1259,8 +1259,8 @@ fdbScanTimesteps(stream_t *streamptr)
   streamptr->fdbNumItems = numItems;
   streamptr->fdbKeyValueList = keyValueList;
 
-  if (recordInfoList) free(recordInfoList);
-  if (timestepRecordOffset) free(timestepRecordOffset);
+  free(recordInfoList);
+  free(timestepRecordOffset);
 
   return 0;
 }

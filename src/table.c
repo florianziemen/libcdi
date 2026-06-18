@@ -55,27 +55,28 @@ tableDefEntry(int tableID, int id, int ltype, const char *name, const char *long
     Error("Invalid table ID %d", tableID);
 
   int item = parTable[tableID].npars++;
-  parTable[tableID].pars[item].id = id;
-  parTable[tableID].pars[item].ltype = ltype;
-  parTable[tableID].pars[item].dupflags = 0;
-  parTable[tableID].pars[item].name = NULL;
-  parTable[tableID].pars[item].longname = NULL;
-  parTable[tableID].pars[item].units = NULL;
+  param_type *par = &parTable[tableID].pars[item];
+  par->id = id;
+  par->ltype = ltype;
+  par->dupflags = 0;
+  par->name = NULL;
+  par->longname = NULL;
+  par->units = NULL;
 
   if (name && name[0])
   {
-    parTable[tableID].pars[item].name = strdup(name);
-    parTable[tableID].pars[item].dupflags |= TABLE_DUP_NAME;
+    par->name = strdup(name);
+    par->dupflags |= TABLE_DUP_NAME;
   }
   if (longname && longname[0])
   {
-    parTable[tableID].pars[item].longname = strdup(longname);
-    parTable[tableID].pars[item].dupflags |= TABLE_DUP_LONGNAME;
+    par->longname = strdup(longname);
+    par->dupflags |= TABLE_DUP_LONGNAME;
   }
   if (units && units[0])
   {
-    parTable[tableID].pars[item].units = strdup(units);
-    parTable[tableID].pars[item].dupflags |= TABLE_DUP_UNITS;
+    par->units = strdup(units);
+    par->dupflags |= TABLE_DUP_UNITS;
   }
 }
 
@@ -84,12 +85,13 @@ tableLink(int tableID, const param_type *pars, int npars)
 {
   for (int item = 0; item < npars; item++)
   {
-    parTable[tableID].pars[item].id = pars[item].id;
-    parTable[tableID].pars[item].ltype = pars[item].ltype;
-    parTable[tableID].pars[item].dupflags = 0;
-    parTable[tableID].pars[item].name = pars[item].name;
-    parTable[tableID].pars[item].longname = pars[item].longname;
-    parTable[tableID].pars[item].units = pars[item].units;
+    param_type *par = &parTable[tableID].pars[item];
+    par->id = pars[item].id;
+    par->ltype = pars[item].ltype;
+    par->dupflags = 0;
+    par->name = pars[item].name;
+    par->longname = pars[item].longname;
+    par->units = pars[item].units;
   }
 
   parTable[tableID].npars = npars;

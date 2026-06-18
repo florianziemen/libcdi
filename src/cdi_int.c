@@ -29,11 +29,12 @@ int CDI_Default_ModelID = CDI_UNDEFID;
 int CDI_Default_TableID = CDI_UNDEFID;
 // int cdiNcMissingValue  = CDI_UNDEFID;
 int CDI_Netcdf_Chunksizehint = CDI_UNDEFID;
-int CDI_Split_Ltype105 = CDI_UNDEFID;
+bool CDI_Split_Ltype105 = false;
 
 bool CDI_Ignore_Att_Coordinates = false;
 bool CDI_Coordinates_Lon_Lat = false;
 bool CDI_Ignore_Valid_Range = false;
+bool CDI_Shuffle = false;
 int CDI_Skip_Records = 0;
 const char *CDI_GRIB1_Template = NULL;
 const char *CDI_GRIB2_Template = NULL;
@@ -42,16 +43,15 @@ int CDI_Inventory_Mode = 1;
 int CDI_Version_Info = 1;
 int CDI_Query_Abort = 1;
 int CDI_Convert_Cubesphere = 1;
-int CDI_Read_Cell_Center = 1;
-int CDI_Read_Cell_Corners = 1;
+bool CDI_Read_Cell_Center = true;
+bool CDI_Read_Cell_Corners = true;
 int CDI_CMOR_Mode = 0;
 int CDI_Reduce_Dim = 0;
 int CDI_Reduce_DimX = 0;
 int CDI_Reduce_DimY = 0;
 int CDI_Reduce_DimZ = 0;
 int CDI_Reduce_DimT = 0;
-int CDI_Shuffle = 0;
-int CDI_Test = 0;
+bool CDI_Test = false;
 size_t CDI_Netcdf_Hdr_Pad = 0UL;
 bool CDI_Copy_ChunkSpec = false;
 bool CDI_Remove_ChunkSpec = false;
@@ -64,7 +64,6 @@ long CDI_FilterSize_Min = 0;
 size_t CDI_CacheSize_Max = 0UL;
 bool CDI_Netcdf_Lazy_Grid_Load = false;
 
-char *cdiPartabPath = NULL;
 int cdiPartabIntern = 1;
 
 double CDI_Default_Missval = -9.E33;
@@ -88,17 +87,16 @@ static const char *Filetypes[] = {
 };
 // clang-format on
 
-int CDI_Debug = 0;  // If set to 1, debugging
-int CDI_Recopt = 0;
+bool CDI_Debug = false;  // If set to 1, debugging
 
 bool CDI_gribapi_debug = false;
 bool CDI_gribapi_grib1 = false;
 bool CDI_Lock_IO = false;
 bool CDI_Threadsafe = false;
 int cdiDefaultLeveltype = -1;
-int cdiDataUnreduced = 0;
-int cdiSortName = 0;
-int cdiHaveMissval = 0;
+bool cdiDataUnreduced = false;
+bool cdiSortName = false;
+bool cdiHaveMissval = false;
 
 static long
 cdi_getenv_int(const char *envName)
@@ -110,11 +108,11 @@ cdi_getenv_int(const char *envName)
   {
     long fact = 1;
     int len = (int) strlen(envString);
-    for (int loop = 0; loop < len; loop++)
+    for (int i = 0; i < len; i++)
     {
-      if (!isdigit((int) envString[loop]))
+      if (!isdigit((int) envString[i]))
       {
-        switch (tolower((int) envString[loop]))
+        switch (tolower((int) envString[i]))
         {
           case 'k': fact = 1024; break;
           case 'm': fact = 1048576; break;
@@ -129,7 +127,7 @@ cdi_getenv_int(const char *envName)
       }
     }
 
-    if (fact) envValue = fact * atol(envString);
+    if (fact) { envValue = fact * atol(envString); }
 
     if (CDI_Debug) Message("set %s to %ld", envName, envValue);
   }
@@ -228,7 +226,7 @@ cdiDebug(int level)
 {
   unsigned ulevel = (level == 1) ? (1U << 16) : (unsigned) level;
 
-  if (ulevel & 2) CDI_Debug = 1;
+  if (ulevel & 2) CDI_Debug = true;
   if (ulevel & 4) memDebug(1);
   if (ulevel & 8) fileDebug(1);
 
@@ -324,13 +322,13 @@ static int
 calendar_from_name(const char *name)
 {
   // clang-format off
-	if (strncmp(name, "standard", 8)  == 0) return CALENDAR_STANDARD;
-	if (strncmp(name, "gregorian", 9) == 0) return CALENDAR_GREGORIAN;
-	if (strncmp(name, "proleptic", 9) == 0) return CALENDAR_PROLEPTIC;
-	if (strncmp(name, "360days", 7)   == 0) return CALENDAR_360DAYS;
-	if (strncmp(name, "365days", 7)   == 0) return CALENDAR_365DAYS;
-	if (strncmp(name, "366days", 7)   == 0) return CALENDAR_366DAYS;
-	if (strncmp(name, "none", 4)      == 0) return CALENDAR_NONE;
+	if (strStartsWith(name, "standard"))  return CALENDAR_STANDARD;
+	if (strStartsWith(name, "gregorian")) return CALENDAR_GREGORIAN;
+	if (strStartsWith(name, "prolepc"))   return CALENDAR_PROLEPTIC;
+	if (strStartsWith(name, "360"))       return CALENDAR_360DAYS;
+	if (strStartsWith(name, "365"))       return CALENDAR_365DAYS;
+	if (strStartsWith(name, "366"))       return CALENDAR_366DAYS;
+	if (strStartsWith(name, "none") )     return CALENDAR_NONE;
   // clang-format on
   return CDI_UNDEFID;
 }
@@ -339,7 +337,6 @@ void
 cdiInitialize(void)
 {
   static bool Init_CDI = false;
-
   if (!Init_CDI)
   {
     Init_CDI = true;
@@ -352,168 +349,57 @@ cdiInitialize(void)
     grib_multi_support_off(NULL);
 #endif
 
-    {
-      long value = cdi_getenv_int("CDI_DEBUG");
-      if (value >= 0) { CDI_Debug = (int) value; }
-    }
+    // clang-format off
+#define GETENV_STR(name, var)  do { char *v = getenv(name); if (v) var = v; } while(0)
+#define GETENV_BOOL(name, var) do { char *v = getenv(name); if (v) var = (atoi(v) > 0); } while(0)
+#define GETENV_FLT(name, var)  do { char *v = getenv(name); if (v) var = atof(v); } while(0)
+#define GETENV_INT(name, var)  do { char *v = getenv(name); if (v) var = atoi(v); } while(0)
+#define GETENV_SIZE(name, var)  do { long v = cdi_getenv_int(name); if (v >= 0) var = v; } while(0)
+    // clang-format on
 
-    {
-      long value = cdi_getenv_int("CDI_GRIBAPI_DEBUG");
-      if (value >= 0) { CDI_gribapi_debug = (bool) value; }
-    }
+    GETENV_STR("CDI_GRIB1_TEMPLATE", CDI_GRIB1_Template);
+    GETENV_STR("CDI_GRIB2_TEMPLATE", CDI_GRIB2_Template);
 
-    {
-      long value = cdi_getenv_int("CDI_ECCODES_DEBUG");
-      if (value >= 0) { CDI_gribapi_debug = (bool) value; }
-    }
+    GETENV_BOOL("CDI_DEBUG", CDI_Debug);
+    GETENV_BOOL("CDI_GRIBAPI_DEBUG", CDI_gribapi_debug);
+    GETENV_BOOL("CDI_ECCODES_DEBUG", CDI_gribapi_debug);
+    GETENV_BOOL("CDI_LOCK_IO", CDI_Lock_IO);
+    GETENV_BOOL("CDI_READ_CELL_CENTER", CDI_Read_Cell_Center);
+    GETENV_BOOL("CDI_READ_CELL_CORNERS", CDI_Read_Cell_Corners);
+    GETENV_BOOL("CDI_REGULARGRID", cdiDataUnreduced);
+    GETENV_BOOL("CDI_SORTNAME", cdiSortName);
+    GETENV_BOOL("CDI_HAVE_MISSVAL", cdiHaveMissval);
+    GETENV_BOOL("CDI_COPY_CHUNKSPEC", CDI_Copy_ChunkSpec);
+    GETENV_BOOL("CDI_REMOVE_CHUNKSPEC", CDI_Remove_ChunkSpec);
+    GETENV_BOOL("CDI_CACHE_INFO", CDI_Cache_Info);
+    GETENV_BOOL("CDI_CACHE_NC4", CDI_Cache_NC4);
+    GETENV_BOOL("CDI_CACHE_NCZ", CDI_Cache_NCZ);
+    GETENV_BOOL("CDI_CACHE_NC", CDI_Cache_NC4);
+    GETENV_BOOL("CDI_CACHE_NC", CDI_Cache_NCZ);
+    GETENV_BOOL("CDI_SHUFFLE", CDI_Shuffle);
+    GETENV_BOOL("CDI_TEST", CDI_Test);
+    GETENV_BOOL("SPLIT_LTYPE_105", CDI_Split_Ltype105);
+    GETENV_BOOL("IGNORE_ATT_COORDINATES", CDI_Ignore_Att_Coordinates);
+    GETENV_BOOL("CDI_COORDINATES_LONLAT", CDI_Coordinates_Lon_Lat);
+    GETENV_BOOL("IGNORE_VALID_RANGE", CDI_Ignore_Valid_Range);
 
-    {
-      long value = cdi_getenv_int("CDI_ECCODES_GRIB1");
-      if (value >= 0) { cdiSetEccodesGrib1((bool) value); }
-    }
+    GETENV_FLT("CDI_MISSVAL", CDI_Default_Missval);
 
-    {
-      long value = cdi_getenv_int("CDI_LOCK_IO");
-      if (value >= 0) { CDI_Lock_IO = (bool) value; }
-    }
+    GETENV_INT("CDI_LEVELTYPE", cdiDefaultLeveltype);
+    GETENV_INT("NC_CHUNKSIZEHINT", CDI_Netcdf_Chunksizehint);
+    GETENV_INT("CDI_SKIP_RECORDS", CDI_Skip_Records);
+    if (CDI_Skip_Records < 0) CDI_Skip_Records = 0;
+    int CDI_Eccodes_grib1 = -1;
+    GETENV_INT("CDI_ECCODES_GRIB1", CDI_Eccodes_grib1);
+    if (CDI_Eccodes_grib1 >= 0) { cdiSetEccodesGrib1((bool) CDI_Eccodes_grib1); }
 
-    {
-      long value = cdi_getenv_int("CDI_READ_CELL_CENTER");
-      if (value >= 0) { CDI_Read_Cell_Center = (int) value; }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_READ_CELL_CORNERS");
-      if (value >= 0) { CDI_Read_Cell_Corners = (int) value; }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_RECOPT");
-      if (value >= 0) { CDI_Recopt = (int) value; }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_REGULARGRID");
-      if (value >= 0) { cdiDataUnreduced = (int) value; }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_SORTNAME");
-      if (value >= 0) { cdiSortName = (int) value; }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_HAVE_MISSVAL");
-      if (value >= 0) { cdiHaveMissval = (int) value; }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_LEVELTYPE");
-      if (value >= 0) { cdiDefaultLeveltype = (int) value; }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_NETCDF_HDR_PAD");
-      if (value >= 0) { CDI_Netcdf_Hdr_Pad = (size_t) value; }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_COPY_CHUNKSPEC");
-      if (value >= 0) { CDI_Copy_ChunkSpec = (value > 0); }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_REMOVE_CHUNKSPEC");
-      if (value >= 0) { CDI_Remove_ChunkSpec = (value > 0); }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_CACHE_INFO");
-      if (value >= 0) { CDI_Cache_Info = (value > 0); }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_CACHE_NC");
-      if (value >= 0)
-      {
-        CDI_Cache_NC4 = (value > 0);
-        CDI_Cache_NCZ = (value > 0);
-      }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_CACHE_NC4");
-      if (value >= 0) { CDI_Cache_NC4 = (value > 0); }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_CACHE_NCZ");
-      if (value >= 0) { CDI_Cache_NCZ = (value > 0); }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_CACHESIZE_IN");
-      if (value >= 0) { CDI_CacheSize_In = value; }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_CACHESIZE_OUT");
-      if (value >= 0) { CDI_CacheSize_Out = value; }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_CACHESIZE_MAX");
-      if (value >= 0) { CDI_CacheSize_Max = (size_t) value; }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_FILTERSIZE_MIN");
-      if (value >= 0) { CDI_FilterSize_Min = value; }
-    }
-
-    {
-      long value = cdi_getenv_int("CDI_TEST");
-      if (value >= 0) { CDI_Test = (int) value; }
-    }
+    GETENV_SIZE("CDI_NETCDF_HDR_PAD", CDI_Netcdf_Hdr_Pad);
+    GETENV_SIZE("CDI_CACHESIZE_IN", CDI_CacheSize_In);
+    GETENV_SIZE("CDI_CACHESIZE_OUT", CDI_CacheSize_Out);
+    GETENV_SIZE("CDI_CACHESIZE_MAX", CDI_CacheSize_Max);
+    GETENV_SIZE("CDI_FILTERSIZE_MIN", CDI_FilterSize_Min);
 
     char *envstr;
-    envstr = getenv("CDI_GRIB1_TEMPLATE");
-    if (envstr) { CDI_GRIB1_Template = envstr; }
-
-    envstr = getenv("CDI_GRIB2_TEMPLATE");
-    if (envstr) { CDI_GRIB2_Template = envstr; }
-
-    envstr = getenv("CDI_SHUFFLE");
-    if (envstr) { CDI_Shuffle = atoi(envstr); }
-
-    envstr = getenv("CDI_MISSVAL");
-    if (envstr) { CDI_Default_Missval = atof(envstr); }
-    /*
-    envstr = getenv("NC_MISSING_VALUE");
-    if ( envstr ) {cdiNcMissingValue = atoi(envstr);}
-    */
-    envstr = getenv("NC_CHUNKSIZEHINT");
-    if (envstr) { CDI_Netcdf_Chunksizehint = atoi(envstr); }
-
-    envstr = getenv("SPLIT_LTYPE_105");
-    if (envstr) { CDI_Split_Ltype105 = atoi(envstr); }
-
-    envstr = getenv("IGNORE_ATT_COORDINATES");
-    if (envstr) { CDI_Ignore_Att_Coordinates = atoi(envstr) > 0; }
-
-    envstr = getenv("CDI_COORDINATES_LONLAT");
-    if (envstr) { CDI_Coordinates_Lon_Lat = atoi(envstr) > 0; }
-
-    envstr = getenv("IGNORE_VALID_RANGE");
-    if (envstr) { CDI_Ignore_Valid_Range = atoi(envstr) > 0; }
-
-    envstr = getenv("CDI_SKIP_RECORDS");
-    if (envstr)
-    {
-      CDI_Skip_Records = atoi(envstr);
-      CDI_Skip_Records = CDI_Skip_Records > 0 ? CDI_Skip_Records : 0;
-    }
-
     envstr = getenv("CDI_CONVENTION");
     if (envstr)
     {
@@ -527,7 +413,7 @@ cdiInitialize(void)
     envstr = getenv("CDI_INVENTORY_MODE");
     if (envstr)
     {
-      if (strncmp(envstr, "time", 4) == 0)
+      if (strStartsWith(envstr, "time"))
       {
         CDI_Inventory_Mode = 2;
         if (CDI_Debug) Message("Inventory mode was set to timestep!");
@@ -580,19 +466,13 @@ cdiInitialize(void)
 
     envstr = getenv("PARTAB_INTERN");
     if (envstr) { cdiPartabIntern = atoi(envstr); }
-
-    envstr = getenv("PARTAB_PATH");
-    if (envstr) { cdiPartabPath = strdup(envstr); }
   }
 }
 
 const char *
 strfiletype(int filetype)
 {
-  enum
-  {
-    numFiletypes = (int) (sizeof(Filetypes) / sizeof(Filetypes[0]))
-  };
+  static const size_t numFiletypes = sizeof(Filetypes) / sizeof(Filetypes[0]);
   return (filetype > 0 && filetype < numFiletypes) ? Filetypes[filetype] : Filetypes[0];
 }
 
@@ -600,13 +480,13 @@ void
 cdiDefGlobal(const char *string, int value)
 {
   // clang-format off
-  if      (str_is_equal(string, "REGULARGRID"))           { cdiDataUnreduced = value; }
+  if      (str_is_equal(string, "REGULARGRID"))           { cdiDataUnreduced = (bool) value; }
   else if (str_is_equal(string, "LOCKIO"))                { CDI_Lock_IO = (bool) value; }
   else if (str_is_equal(string, "THREADSAFE"))            { CDI_Threadsafe = (bool) value; }
   else if (str_is_equal(string, "ECCODES_DEBUG"))         { CDI_gribapi_debug = (bool) value; }
   else if (str_is_equal(string, "ECCODES_GRIB1"))         { cdiSetEccodesGrib1((bool) value); }
-  else if (str_is_equal(string, "SORTNAME"))              { cdiSortName = value; }
-  else if (str_is_equal(string, "HAVE_MISSVAL"))          { cdiHaveMissval = value; }
+  else if (str_is_equal(string, "SORTNAME"))              { cdiSortName = (bool) value; }
+  else if (str_is_equal(string, "HAVE_MISSVAL"))          { cdiHaveMissval = (bool) value; }
   else if (str_is_equal(string, "NC_CHUNKSIZEHINT"))      { CDI_Netcdf_Chunksizehint = value; }
   else if (str_is_equal(string, "READ_CELL_CENTER"))      { CDI_Read_Cell_Center = value; }
   else if (str_is_equal(string, "READ_CELL_CORNERS"))     { CDI_Read_Cell_Corners = value; }

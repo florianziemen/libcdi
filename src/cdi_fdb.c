@@ -38,8 +38,8 @@ cdi_fdb_delete_kvlist(int numItems, fdbKeyValueEntry *keyValueList)
   {
     for (int k = 0; k < keyValueList[i].numKeys; ++k)
     {
-      if (keyValueList[i].keys[k]) free(keyValueList[i].keys[k]);
-      if (keyValueList[i].values[k]) free(keyValueList[i].values[k]);
+      free(keyValueList[i].keys[k]);
+      free(keyValueList[i].values[k]);
     }
   }
   free(keyValueList);
@@ -514,7 +514,7 @@ cdi_create_fdb_request(const char *filename)
   if (!expverDefined) Error("FDB parameter <expver> undefined!");
   if (!classDefined) Error("FDB parameter <class> undefined!");
 
-  if (keyValue.item) free(keyValue.item);
+  free(keyValue.item);
 
   return request;
 }

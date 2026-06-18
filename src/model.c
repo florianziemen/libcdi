@@ -232,7 +232,7 @@ void
 modelDestroyP(void *modelptr)
 {
   model_t *mp = (model_t *) modelptr;
-  if (mp->name) free(mp->name);
+  free(mp->name);
   free(mp);
 }
 
@@ -304,7 +304,10 @@ modelUnpack(void *buf, int size, int *position, int originNamespace, void *conte
     serializeUnpack(buf, size, position, name, tempbuf[MODEL_PACK_INT_NAMELEN], CDI_DATATYPE_TXT, context);
     name[len] = '\0';
   }
-  else { name = (char *) ""; }
+  else
+  {
+    name = (char *) "";
+  }
   int targetID = adaptKey(tempbuf[MODEL_PACK_INT_SELF]);
   model_t *mp = modelNewEntry(force_id ? targetID : CDI_UNDEFID, adaptKey(tempbuf[MODEL_PACK_INT_INSTID]),
                               tempbuf[MODEL_PACK_INT_MODELGRIBID], name);

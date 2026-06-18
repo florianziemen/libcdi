@@ -125,7 +125,7 @@ extDelete(void *ext)
   extrec_t *extp = (extrec_t *) ext;
   if (extp)
   {
-    if (extp->buffer) Free(extp->buffer);
+    Free(extp->buffer);
     Free(extp);
   }
 }

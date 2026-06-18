@@ -436,7 +436,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     case CDI_PROTOCOL_FILE:
     {
       size_t (*myFileWrite)(int fileID, const void *restrict buffer, size_t len)
-          = (size_t(*)(int, const void *restrict, size_t)) namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
+          = (size_t (*)(int, const void *restrict, size_t)) namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
 
       size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes);
       if (nwrite != nbytes) SysError("Failed to write GRIB slice!");
@@ -444,7 +444,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     break;
   }
 
-  if (gribbuffer) Free(gribbuffer);
+  Free(gribbuffer);
 }
 
 void

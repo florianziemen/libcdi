@@ -173,7 +173,7 @@ cdfDefTime(stream_t *streamptr)
   cdf_def_var(fileID, taxisName, xtype, 1, &timeDimId, &timeVarId);
   streamptr->basetime.ncvarid = timeVarId;
 
-  if (timeDimLen == NC_UNLIMITED && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C))
+  if (timeDimLen == NC_UNLIMITED && is_filetype_nc4(streamptr->filetype))
   {
     static const size_t chunk = 512;
     cdf_def_var_chunking(fileID, timeVarId, NC_CHUNKED, &chunk);

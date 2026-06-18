@@ -229,14 +229,11 @@ vlist_delete(vlist_t *vlistptr)
   for (int varID = 0; varID < nvars; varID++)
   {
     var_t *var = &vars[varID];
-    if (var->levinfo) Free(var->levinfo);
+    Free(var->levinfo);
 
     if (var->opt_grib_kvpair)
     {
-      for (int i = 0; i < var->opt_grib_nentries; i++)
-      {
-        if (var->opt_grib_kvpair[i].keyword) Free(var->opt_grib_kvpair[i].keyword);
-      }
+      for (int i = 0; i < var->opt_grib_nentries; i++) { Free(var->opt_grib_kvpair[i].keyword); }
       Free(var->opt_grib_kvpair);
     }
     var->opt_grib_nentries = 0;
@@ -247,8 +244,7 @@ vlist_delete(vlist_t *vlistptr)
     cdiDeleteAtts(vlistID, varID);
   }
 
-  if (vars) Free(vars);
-
+  Free(vars);
   Free(vlistptr);
 }
 
@@ -683,8 +679,8 @@ vlistCopyFlag(int vlistID2, int vlistID1)
 
           int zaxisID2 = vlist_generate_zaxis(vlistID2, zaxisType, nlevs2, levels, lbounds, ubounds, nvct, vct,
                                               (const char **) cvals2, clen2);
-          if (levels) Free(levels);
-          if (lbounds) Free(lbounds);
+          Free(levels);
+          Free(lbounds);
           if (cvals2)
           {
             for (int levID = 0; levID < nlevs2; ++levID) Free(cvals2[levID]);
