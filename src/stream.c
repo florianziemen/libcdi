@@ -27,6 +27,7 @@
 #include "cdf.h"
 #include "dmemory.h"
 #include "error.h"
+#include "stream_pack.h"
 #include "stream_cgribex.h"
 #include "stream_grb.h"
 #include "stream_cdf.h"
@@ -37,21 +38,15 @@
 #include "cgribex.h"
 #include "gribapi.h"
 #include "vlist.h"
-#include "serialize.h"
-#include "resource_handle.h"
-#include "resource_unpack.h"
 #include "namespace.h"
 #include "async_worker.h"
 
 static stream_t *stream_new_entry(int resH);
-static int streamCompareP(void *streamP1, void *streamP2);
-static void streamDestroyP(void *streamP);
-static void streamPrintP(void *streamP, FILE *fp);
-static int streamGetPackSize(void *streamP, void *context);
-static void streamPack(void *streamP, void *buff, int size, int *position, void *context);
-static int streamTxCode(void *streamP);
+static int stream_compare(void *streamP1, void *streamP2);
+static void stream_destroy(void *streamP);
+static void stream_print(void *streamP, FILE *fp);
 
-const resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP, streamGetPackSize, streamPack, streamTxCode };
+const resOps streamOps = { stream_compare, stream_destroy, stream_print, streamGetPackSize, streamPack, streamTxCode };
 
 static int
 getByteorder(int byteswap)
@@ -1383,7 +1378,7 @@ streamDestroy(stream_t *streamP)
 }
 
 static void
-streamDestroyP(void *streamP)
+stream_destroy(void *streamP)
 {
   streamDestroy((stream_t *) streamP);
 }
@@ -1791,13 +1786,6 @@ streamInqFileID(int streamID)
   return s->fileID;
 }
 
-static int
-streamTxCode(void *s)
-{
-  (void) s;
-  return STREAM;
-}
-
 void
 cdiStreamSetupVlist(stream_t *s, int vlistID)
 {
@@ -1886,7 +1874,7 @@ streamInqNvars(int streamID)
 }
 
 static int
-streamCompareP(void *streamP1, void *streamP2)
+stream_compare(void *streamP1, void *streamP2)
 {
   stream_t *s1 = (stream_t *) streamP1;
   stream_t *s2 = (stream_t *) streamP2;
@@ -1915,10 +1903,9 @@ streamCompareP(void *streamP1, void *streamP2)
 }
 
 void
-streamPrintP(void *streamP, FILE *fp)
+stream_print(void *streamP, FILE *fp)
 {
   stream_t *sp = (stream_t *) streamP;
-
   if (!sp) return;
 
   fprintf(fp,
@@ -1954,77 +1941,6 @@ streamPrintP(void *streamP, FILE *fp)
           sp->nrecs, sp->nvars, sp->varsAllocated, sp->curTsID, sp->rtsteps, sp->ntsteps, sp->tstepsTableSize, sp->tstepsNextID,
           sp->ncmode, sp->vlistID, sp->globalatts, sp->localatts, sp->unreduced, sp->sortname, sp->have_missval, sp->comptype,
           sp->complevel);
-}
-
-enum
-{
-  streamNint = 10,
-};
-
-static int
-streamGetPackSize(void *voidP, void *context)
-{
-  stream_t *streamP = (stream_t *) voidP;
-  int packBufferSize = serializeGetSize(streamNint, CDI_DATATYPE_INT, context) + serializeGetSize(2, CDI_DATATYPE_UINT32, context)
-                       + serializeGetSize((int) strlen(streamP->filename) + 1, CDI_DATATYPE_TXT, context)
-                       + serializeGetSize(1, CDI_DATATYPE_FLT64, context);
-  return packBufferSize;
-}
-
-static void
-streamPack(void *streamPV, void *packBuffer, int packBufferSize, int *packBufferPos, void *context)
-{
-  stream_t *streamP = (stream_t *) streamPV;
-  int intBuffer[streamNint];
-
-  intBuffer[0] = streamP->self;
-  intBuffer[1] = streamP->filetype;
-  intBuffer[2] = (int) strlen(streamP->filename) + 1;
-  intBuffer[3] = streamP->vlistID;
-  intBuffer[4] = streamP->byteorder;
-  intBuffer[5] = streamP->comptype;
-  intBuffer[6] = streamP->complevel;
-  intBuffer[7] = streamP->unreduced;
-  intBuffer[8] = streamP->sortname;
-  intBuffer[9] = streamP->have_missval;
-
-  serializePack(intBuffer, streamNint, CDI_DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
-  uint32_t d = cdiCheckSum(CDI_DATATYPE_INT, streamNint, intBuffer);
-  serializePack(&d, 1, CDI_DATATYPE_UINT32, packBuffer, packBufferSize, packBufferPos, context);
-
-  serializePack(&CDI_Default_Missval, 1, CDI_DATATYPE_FLT64, packBuffer, packBufferSize, packBufferPos, context);
-  serializePack(streamP->filename, intBuffer[2], CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
-  d = cdiCheckSum(CDI_DATATYPE_TXT, intBuffer[2], streamP->filename);
-  serializePack(&d, 1, CDI_DATATYPE_UINT32, packBuffer, packBufferSize, packBufferPos, context);
-}
-
-struct streamAssoc
-streamUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context)
-{
-  int intBuffer[streamNint];
-  uint32_t d;
-  char filename[CDI_MAX_NAME];
-
-  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, intBuffer, streamNint, CDI_DATATYPE_INT, context);
-  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);
-  xassert(cdiCheckSum(CDI_DATATYPE_INT, streamNint, intBuffer) == d);
-
-  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &CDI_Default_Missval, 1, CDI_DATATYPE_FLT64, context);
-  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &filename, intBuffer[2], CDI_DATATYPE_TXT, context);
-  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);
-  xassert(d == cdiCheckSum(CDI_DATATYPE_TXT, intBuffer[2], filename));
-  int targetStreamID = namespaceAdaptKey(intBuffer[0], originNamespace),
-      streamID = streamOpenID(filename, 'w', intBuffer[1], targetStreamID);
-  xassert(streamID >= 0 && targetStreamID == streamID);
-  streamDefByteorder(streamID, intBuffer[4]);
-  streamDefCompType(streamID, intBuffer[5]);
-  streamDefCompLevel(streamID, intBuffer[6]);
-  stream_t *streamP = stream_to_pointer(streamID);
-  streamP->unreduced = intBuffer[7];
-  streamP->sortname = intBuffer[8];
-  streamP->have_missval = intBuffer[9];
-  struct streamAssoc retval = { streamID, intBuffer[3] };
-  return retval;
 }
 
 /* *

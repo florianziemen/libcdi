@@ -183,6 +183,8 @@ libcdi_la_SOURCES = \
   stream_gribapi.h \
   stream_ieg.c \
   stream_ieg.h \
+  stream_pack.c \
+  stream_pack.h \
   stream_read.c \
   stream_record.c \
   stream_scan.c \
