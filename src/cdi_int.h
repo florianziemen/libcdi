@@ -572,10 +572,7 @@ struct streamAssoc
   int streamID, vlistID;
 };
 
-struct streamAssoc streamUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context);
-
-int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filetype, stream_t *streamP,
-                                 int recordBufIsToBeCreated);
+int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filetype, stream_t *streamP, int recordBufIsToBeCreated);
 
 int streamOpenID(const char *filename, char filemode, int filetype, int resH);
 

@@ -137,6 +137,8 @@ target_sources(libcdi
   tablepar.h
   taxis.c
   taxis.h
+  taxis_pack.c
+  taxis_pack.h
   tsteps.c
   util.c
   varscan.c

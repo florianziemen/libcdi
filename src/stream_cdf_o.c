@@ -1554,8 +1554,8 @@ cdf_def_zaxis_hybrid(stream_t *streamP, int type, int *ncvarid, int zaxisID, int
                      char *axisname)
 {
   bool isHybridEcham = ((!CDI_CMOR_Mode && CDI_Convention == CDI_CONVENTION_ECHAM) || type == ZAXIS_HYBRID_HALF);
-  struct cdfPostDefActionList *(*def_zaxis_hybrid_delegate)(stream_t *streamP, int type, int *ncvarid, int zaxisID,
-                                                            int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
+  struct cdfPostDefActionList *(*def_zaxis_hybrid_delegate)(stream_t *streamP, int type, int *ncvarid, int zaxisID, int zaxisindex,
+                                                            int xtype, size_t dimlen, int *dimID, char *axisname)
       = isHybridEcham ? cdf_def_zaxis_hybrid_echam : cdf_def_zaxis_hybrid_cf;
   return def_zaxis_hybrid_delegate(streamP, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, dimID, axisname);
 }

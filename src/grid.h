@@ -192,8 +192,6 @@ int gridGenerate(const grid_t *grid);
 
 void cdiGridGetIndexList(unsigned, int *);
 
-int gridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id);
-
 /* apply func to each grid */
 enum cdiApplyRet cdiGridApply(enum cdiApplyRet (*func)(int id, void *res, void *data), void *data);
 

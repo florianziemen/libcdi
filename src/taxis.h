@@ -32,6 +32,8 @@ typedef struct
   cdi_keys_t keys;
 } taxis_t;
 
+taxis_t *taxisNewEntry(cdiResH resH);
+
 //      taxisInqSdatetime: Get the start date/time
 CdiDateTime taxisInqSdatetime(int taxisID);
 
@@ -51,9 +53,6 @@ void taxisDestroyKernel(taxis_t *taxisP);
 #ifndef SX
 extern const resOps taxisOps;
 #endif
-
-int taxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context,
-                int checkForSameID);
 
 enum
 {
