@@ -141,6 +141,8 @@ libcdi_la_SOURCES = \
   gribapi_utilities.h \
   grid.c \
   grid.h \
+  grid_pack.c \
+  grid_pack.h \
   ieg.h \
   ieglib.c \
   input_file.c \

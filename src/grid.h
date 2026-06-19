@@ -12,6 +12,12 @@ typedef unsigned char mask_t;
 
 typedef struct grid_t grid_t;
 
+enum GridAxis
+{
+  GRID_AXIS_X,
+  GRID_AXIS_Y,
+};
+
 enum gridPropInq
 {
   GRID_PROP_MASK,
@@ -138,6 +144,22 @@ struct grid_t
   cdi_atts_t atts;
   void *extraData;
 };
+
+inline bool
+grid_is_irregular(int gridType)
+{
+  return (gridType == GRID_UNSTRUCTURED || gridType == GRID_CURVILINEAR);
+}
+
+inline size_t
+grid_axis_size(const grid_t *g, enum GridAxis axis)
+{
+  if (grid_is_irregular(g->type)) return g->size;
+  return (axis == GRID_AXIS_Y) ? g->y.size : g->x.size;
+}
+
+void gridInit(void);
+grid_t *gridNewEntry(cdiResH resH);
 
 void grid_init(grid_t *gridP);
 void cdiGridTypeInit(grid_t *gridP, int gridtype, size_t size);
