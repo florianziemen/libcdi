@@ -32,21 +32,21 @@ gribbyte_clear_bit(int *number, int bit)
 
 int grbBitsPerValue(int datatype);
 
-int fdbInqContents(stream_t *streamptr);
-int grbInqContents(stream_t *streamptr);
-int fdbInqTimestep(stream_t *streamptr, int tsID);
-int grbInqTimestep(stream_t *streamptr, int tsID);
+int fdbInqContents(stream_t *streamP);
+int grbInqContents(stream_t *streamP);
+int fdbInqTimestep(stream_t *streamP, int tsID);
+int grbInqTimestep(stream_t *streamP, int tsID);
 
-void grbDefField(stream_t *streamptr);
-void grb_read_field(stream_t *streamptr, int memtype, void *data, size_t *numMissVals);
-void grb_write_field(stream_t *streamptr, int memtype, const void *data, size_t numMissVals);
-void grbCopyField(stream_t *streamptr2, stream_t *streamptr1);
+void grbDefField(stream_t *streamP);
+void grb_read_field(stream_t *streamP, int memtype, void *data, size_t *numMissVals);
+void grb_write_field(stream_t *streamP, int memtype, const void *data, size_t numMissVals);
+void grbCopyField(stream_t *streamP2, stream_t *streamP1);
 
-void grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *numMissVals);
-void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t numMissVals);
+void grb_read_var(stream_t *streamP, int varID, int memtype, void *data, size_t *numMissVals);
+void grb_write_var(stream_t *streamP, int varID, int memtype, const void *data, size_t numMissVals);
 
-void grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *numMissVals);
-void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t numMissVals);
+void grb_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *data, size_t *numMissVals);
+void grb_write_var_slice(stream_t *streamP, int varID, int levelID, int memtype, const void *data, size_t numMissVals);
 
 int grib1ltypeToZaxisType(int grib_ltype);
 int grib2ltypeToZaxisType(int grib_ltype);

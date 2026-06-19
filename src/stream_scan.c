@@ -14,9 +14,9 @@
 #include "stream_scan.h"
 
 void
-streamScanResizeRecords1(stream_t *streamptr)
+streamScanResizeRecords1(stream_t *streamP)
 {
-  tsteps_t *step1 = &streamptr->tsteps[0];
+  tsteps_t *step1 = &streamP->tsteps[0];
   int nrecords = step1->nallrecs;
   if (nrecords < step1->recordSize)
   {
@@ -31,10 +31,10 @@ streamScanResizeRecords1(stream_t *streamptr)
 }
 
 int
-streamScanInitRecords2(stream_t *streamptr)
+streamScanInitRecords2(stream_t *streamP)
 {
-  tsteps_t *step1 = &streamptr->tsteps[0];
-  tsteps_t *step2 = &streamptr->tsteps[1];
+  tsteps_t *step1 = &streamP->tsteps[0];
+  tsteps_t *step2 = &streamP->tsteps[1];
   int nrecords = step2->nallrecs;
   step2->recIDs = (int *) Malloc((size_t) nrecords * sizeof(int));
   step2->nrecs = 0;
@@ -50,12 +50,12 @@ streamScanInitRecords2(stream_t *streamptr)
 }
 
 int
-streamScanInitRecords(stream_t *streamptr, int tsID)
+streamScanInitRecords(stream_t *streamP, int tsID)
 {
-  tsteps_t *step2 = &streamptr->tsteps[1];
+  tsteps_t *step2 = &streamP->tsteps[1];
   int nrecs = step2->nrecs;
 
-  tsteps_t *step = &streamptr->tsteps[tsID];
+  tsteps_t *step = &streamP->tsteps[tsID];
   step->nrecs = nrecs;
   step->recIDs = (int *) Malloc((size_t) nrecs * sizeof(int));
 
@@ -65,25 +65,25 @@ streamScanInitRecords(stream_t *streamptr, int tsID)
 }
 
 void
-streamScanTimeConstAdjust(stream_t *streamptr, const taxis_t *taxis)
+streamScanTimeConstAdjust(stream_t *streamP, const taxis_t *taxis)
 {
-  int vlistID = streamptr->vlistID;
-  if (streamptr->ntsteps == 1 && cdiDateTime_isNull(taxis->vDateTime))
+  int vlistID = streamP->vlistID;
+  if (streamP->ntsteps == 1 && cdiDateTime_isNull(taxis->vDateTime))
   {
-    streamptr->ntsteps = 0;
-    for (int varID = 0; varID < streamptr->nvars; ++varID) vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
+    streamP->ntsteps = 0;
+    for (int varID = 0; varID < streamP->nvars; ++varID) vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
   }
 }
 
 void
-streamScanTsFixNtsteps(stream_t *streamptr, off_t recpos)
+streamScanTsFixNtsteps(stream_t *streamP, off_t recpos)
 {
-  if (streamptr->ntsteps == -1)
+  if (streamP->ntsteps == -1)
   {
-    int tsID = tstepsNewEntry(streamptr);
-    if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
+    int tsID = tstepsNewEntry(streamP);
+    if (tsID != streamP->rtsteps) Error("Internal error. tsID = %d", tsID);
 
-    streamptr->tsteps[tsID - 1].next = true;
-    streamptr->tsteps[tsID].position = recpos;
+    streamP->tsteps[tsID - 1].next = true;
+    streamP->tsteps[tsID].position = recpos;
   }
 }

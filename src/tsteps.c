@@ -34,11 +34,11 @@ tstepsInitEntry(tsteps_t *tstep)
 }
 
 int
-tstepsNewEntry(stream_t *streamptr)
+tstepsNewEntry(stream_t *streamP)
 {
-  int tsID = streamptr->tstepsNextID++;
-  int tstepsTableSize = streamptr->tstepsTableSize;
-  tsteps_t *tstepsTable = streamptr->tsteps;
+  int tsID = streamP->tstepsNextID++;
+  int tstepsTableSize = streamP->tstepsTableSize;
+  tsteps_t *tstepsTable = streamP->tsteps;
 
   // If the table overflows, double its size.
   if (tsID == tstepsTableSize)
@@ -54,29 +54,29 @@ tstepsNewEntry(stream_t *streamptr)
     tstepsTable = (tsteps_t *) Realloc(tstepsTable, (size_t) tstepsTableSize * sizeof(tsteps_t));
   }
 
-  streamptr->tstepsTableSize = tstepsTableSize;
-  streamptr->tsteps = tstepsTable;
+  streamP->tstepsTableSize = tstepsTableSize;
+  streamP->tsteps = tstepsTable;
 
-  tsteps_t *curTstep = &streamptr->tsteps[tsID];
+  tsteps_t *curTstep = &streamP->tsteps[tsID];
   tstepsInitEntry(curTstep);
 
   return tsID;
 }
 
 void
-cdi_create_timesteps(size_t numTimesteps, stream_t *streamptr)
+cdi_create_timesteps(size_t numTimesteps, stream_t *streamP)
 {
-  streamptr->ntsteps = (long) numTimesteps;
-  if (streamptr->tstepsTableSize > 0) return;
+  streamP->ntsteps = (long) numTimesteps;
+  if (streamP->tstepsTableSize > 0) return;
 
   size_t ntsteps = (numTimesteps == 0) ? 1 : numTimesteps;
 
-  streamptr->tsteps = (tsteps_t *) Malloc(ntsteps * sizeof(tsteps_t));
+  streamP->tsteps = (tsteps_t *) Malloc(ntsteps * sizeof(tsteps_t));
 
-  streamptr->tstepsTableSize = (int) ntsteps;
-  streamptr->tstepsNextID = (int) ntsteps;
+  streamP->tstepsTableSize = (int) ntsteps;
+  streamP->tstepsNextID = (int) ntsteps;
 
-  for (size_t tsID = 0; tsID < ntsteps; tsID++) { tstepsInitEntry(&streamptr->tsteps[tsID]); }
+  for (size_t tsID = 0; tsID < ntsteps; tsID++) { tstepsInitEntry(&streamP->tsteps[tsID]); }
 }
 /*
  * Local Variables:

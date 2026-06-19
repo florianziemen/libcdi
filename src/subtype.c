@@ -801,12 +801,12 @@ vlistDefTileSubtype(int vlistID, subtype_t *tiles)
   int subtypeID = CDI_UNDEFID;
 
   /* loop over subtypes and search for an identical tileset */
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
   int tileset_defined = 0;
-  for (int isub = 0; isub < vlistptr->nsubtypes; isub++)
+  for (int isub = 0; isub < vlistP->nsubtypes; isub++)
   {
     /* get the ID of the "isub"th subtype */
-    subtypeID = vlistptr->subtypeIDs[isub];
+    subtypeID = vlistP->subtypeIDs[isub];
     if (subtypeComparePtr(subtypeID, tiles) == 0)
     {
       tileset_defined = 1;
@@ -819,7 +819,7 @@ vlistDefTileSubtype(int vlistID, subtype_t *tiles)
   {
     subtype_t *tiles_duplicate = NULL;
     subtypeDuplicate(tiles, &tiles_duplicate);
-    subtypeID = vlistptr->subtypeIDs[vlistptr->nsubtypes++] = subtypePush(tiles_duplicate);
+    subtypeID = vlistP->subtypeIDs[vlistP->nsubtypes++] = subtypePush(tiles_duplicate);
   }
 
   return subtypeID;
@@ -836,8 +836,8 @@ vlistInsertTrivialTileSubtype(int vlistID)
   (void) subtypeEntryInsert(subtype_ptr);
 
   /* register tile */
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  int subtypeID = vlistptr->subtypeIDs[vlistptr->nsubtypes++] = subtypePush(subtype_ptr);
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
+  int subtypeID = vlistP->subtypeIDs[vlistP->nsubtypes++] = subtypePush(subtype_ptr);
   return subtypeID;
 }
 

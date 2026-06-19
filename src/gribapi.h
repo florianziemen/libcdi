@@ -60,8 +60,8 @@
 #define  GRIB2_GTYPE_HEALPIX             150  // HEALPix Grid
 
 const char *gribapiLibraryVersionString(void);
-void gribContainersNew(stream_t *streamptr);
-void gribContainersDelete(stream_t *streamptr);
+void gribContainersNew(stream_t *streamP);
+void gribContainersDelete(stream_t *streamP);
 
 #ifdef HAVE_LIBGRIB_API
 

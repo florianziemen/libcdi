@@ -31,11 +31,11 @@ typedef struct
 } institute_t;
 
 static int instituteCompareKernel(institute_t *ip1, institute_t *ip2);
-static void instituteDestroyP(institute_t *instituteptr);
-static void institutePrintP(institute_t *instituteptr, FILE *fp);
-static int instituteGetPackSize(institute_t *instituteptr, void *context);
-static void institutePackP(void *instituteptr, void *buf, int size, int *position, void *context);
-static int instituteTxCode(void *instituteptr);
+static void instituteDestroyP(institute_t *instituteP);
+static void institutePrintP(institute_t *instituteP, FILE *fp);
+static int instituteGetPackSize(institute_t *instituteP, void *context);
+static void institutePackP(void *instituteP, void *buf, int size, int *position, void *context);
+static int instituteTxCode(void *instituteP);
 
 static const resOps instituteOps = { (int (*)(void *, void *)) instituteCompareKernel,
                                      (void (*)(void *)) instituteDestroyP,
@@ -45,13 +45,13 @@ static const resOps instituteOps = { (int (*)(void *, void *)) instituteCompareK
                                      instituteTxCode };
 
 static void
-instituteDefaultValue(institute_t *instituteptr)
+instituteDefaultValue(institute_t *instituteP)
 {
-  instituteptr->self = CDI_UNDEFID;
-  instituteptr->center = CDI_UNDEFID;
-  instituteptr->subcenter = CDI_UNDEFID;
-  instituteptr->name = NULL;
-  instituteptr->longname = NULL;
+  instituteP->self = CDI_UNDEFID;
+  instituteP->center = CDI_UNDEFID;
+  instituteP->subcenter = CDI_UNDEFID;
+  instituteP->name = NULL;
+  instituteP->longname = NULL;
 }
 
 void
@@ -158,27 +158,27 @@ institutInq(int center, int subcenter, const char *name, const char *longname)
 static institute_t *
 instituteNewEntry(cdiResH resH, int center, int subcenter, const char *name, const char *longname)
 {
-  institute_t *instituteptr = (institute_t *) malloc(sizeof(institute_t));
-  instituteDefaultValue(instituteptr);
+  institute_t *instituteP = (institute_t *) malloc(sizeof(institute_t));
+  instituteDefaultValue(instituteP);
   if (resH == CDI_UNDEFID)
-    instituteptr->self = reshPut(instituteptr, &instituteOps);
+    instituteP->self = reshPut(instituteP, &instituteOps);
   else
   {
-    instituteptr->self = resH;
-    reshReplace(resH, instituteptr, &instituteOps);
+    instituteP->self = resH;
+    reshReplace(resH, instituteP, &instituteOps);
   }
-  instituteptr->center = center;
-  instituteptr->subcenter = subcenter;
-  if (name && *name) instituteptr->name = strdup(name);
-  if (longname && *longname) instituteptr->longname = strdup(longname);
-  return instituteptr;
+  instituteP->center = center;
+  instituteP->subcenter = subcenter;
+  if (name && *name) instituteP->name = strdup(name);
+  if (longname && *longname) instituteP->longname = strdup(longname);
+  return instituteP;
 }
 
 int
 institutDef(int center, int subcenter, const char *name, const char *longname)
 {
-  institute_t *instituteptr = instituteNewEntry(CDI_UNDEFID, center, subcenter, name, longname);
-  return instituteptr->self;
+  institute_t *instituteP = instituteNewEntry(CDI_UNDEFID, center, subcenter, name, longname);
+  return instituteP->self;
 }
 
 int
@@ -213,12 +213,12 @@ institutInqNumber(void)
 }
 
 static void
-instituteDestroyP(institute_t *instituteptr)
+instituteDestroyP(institute_t *instituteP)
 {
-  xassert(instituteptr);
-  free(instituteptr->name);
-  free(instituteptr->longname);
-  free(instituteptr);
+  xassert(instituteP);
+  free(instituteP->name);
+  free(instituteP->longname);
+  free(instituteP);
 }
 
 static void
@@ -238,9 +238,9 @@ institutePrintP(institute_t *ip, FILE *fp)
 }
 
 static int
-instituteTxCode(void *instituteptr)
+instituteTxCode(void *instituteP)
 {
-  (void) instituteptr;
+  (void) instituteP;
   return INSTITUTE;
 }
 
@@ -267,9 +267,9 @@ instituteGetPackSize(institute_t *ip, void *context)
 }
 
 static void
-institutePackP(void *instituteptr, void *buf, int size, int *position, void *context)
+institutePackP(void *instituteP, void *buf, int size, int *position, void *context)
 {
-  institute_t *p = (institute_t *) instituteptr;
+  institute_t *p = (institute_t *) instituteP;
   int tempbuf[institute_nints];
   tempbuf[INSTITUTE_PACK_INT_SELF] = p->self;
   tempbuf[INSTITUTE_PACK_INT_CENTER] = p->center;

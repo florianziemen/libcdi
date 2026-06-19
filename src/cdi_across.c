@@ -154,7 +154,7 @@ across_write_buf(int sock, const void *buf, size_t nbytes)
 }
 
 int
-across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nbytes)
+across_write_grib_message(stream_t *streamP, const void *gribbuffer, size_t nbytes)
 {
   unsigned char section0[] = { 'G', 'R', 'I', 'B', 255, 255, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0 };
   const size_t section0_len = sizeof(section0);
@@ -193,7 +193,7 @@ across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nb
     return 1;
   }
 
-  across_info_t *info = (across_info_t *) streamptr->protocolData;
+  across_info_t *info = (across_info_t *) streamP->protocolData;
 
   size_t expid_len = strlen(info->expid);
   if (expid_len < EXPID_MIN_LENGTH)
@@ -238,9 +238,9 @@ across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nb
   set64(section0 + section0_len - 8, nbytes + section2_len);  // total message length
 
   int res = 0;
-  if (across_write_buf(streamptr->fileID, section0, section0_len) || across_write_buf(streamptr->fileID, section1, section1_len)
-      || across_write_buf(streamptr->fileID, section2, section2_len)
-      || across_write_buf(streamptr->fileID, other_sections, other_sections_len))
+  if (across_write_buf(streamP->fileID, section0, section0_len) || across_write_buf(streamP->fileID, section1, section1_len)
+      || across_write_buf(streamP->fileID, section2, section2_len)
+      || across_write_buf(streamP->fileID, other_sections, other_sections_len))
     res = 1;
 
   Free(section2);
@@ -248,7 +248,7 @@ across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nb
 }
 
 static int
-across_connect_int(char *path, char filemode, stream_t *streamptr)
+across_connect_int(char *path, char filemode, stream_t *streamP)
 {
   (void) filemode;
   // parse ACROSS address format: across://<host>[:<port>]/<expid>[@<expver>]
@@ -428,13 +428,13 @@ across_connect_int(char *path, char filemode, stream_t *streamptr)
   info->expid = strdup(expid);
   assert(expver <= INT_MAX);
   info->expver = (int) expver;
-  streamptr->protocolData = info;
+  streamP->protocolData = info;
 
   return sock;
 }
 
 int
-across_connect(const char *path, char filemode, stream_t *streamptr)
+across_connect(const char *path, char filemode, stream_t *streamP)
 {
   if (filemode != 'w')
   {
@@ -443,7 +443,7 @@ across_connect(const char *path, char filemode, stream_t *streamptr)
   }
 
   char *p = strdup(path);  // needed to adjust part strings
-  int sock = across_connect_int(p, filemode, streamptr);
+  int sock = across_connect_int(p, filemode, streamP);
   free(p);
   return sock;
 }

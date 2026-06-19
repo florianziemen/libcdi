@@ -504,9 +504,9 @@ stream_to_pointer(int idx)
 }
 
 static inline void
-stream_check_ptr(const char *caller, stream_t *streamptr)
+stream_check_ptr(const char *caller, stream_t *streamP)
 {
-  if (streamptr == NULL) Errorc("stream undefined!");
+  if (streamP == NULL) Errorc("stream undefined!");
 }
 
 int streamInqFileID(int streamID);
@@ -521,26 +521,26 @@ void streamDefineTaxis(int streamID);
 
 int streamsNewEntry(int filetype);
 void streamsInitEntry(int streamID);
-void cdiStreamSetupVlist(stream_t *streamptr, int vlistID);
+void cdiStreamSetupVlist(stream_t *streamP, int vlistID);
 // default implementation of the overridable function
-void cdiStreamSetupVlist_(stream_t *streamptr, int vlistID);
-int stream_new_var(stream_t *streamptr, int gridID, int zaxisID, int tilesetID);
+void cdiStreamSetupVlist_(stream_t *streamP, int vlistID);
+int stream_new_var(stream_t *streamP, int gridID, int zaxisID, int tilesetID);
 
-int tstepsNewEntry(stream_t *streamptr);
+int tstepsNewEntry(stream_t *streamP);
 
 const char *strfiletype(int filetype);
 
-void cdi_generate_vars(stream_t *streamptr);
+void cdi_generate_vars(stream_t *streamP);
 
 void vlist_check_contents(int vlistID);
 
-void cdi_create_records(stream_t *streamptr, int tsID, bool allocRecords);
+void cdi_create_records(stream_t *streamP, int tsID, bool allocRecords);
 
-void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *container_name);
+void streamFCopyRecord(stream_t *streamP2, stream_t *streamP1, const char *container_name);
 
-int recordNewEntry(stream_t *streamptr, int tsID);
+int recordNewEntry(stream_t *streamP, int tsID);
 
-void cdi_create_timesteps(size_t numTimesteps, stream_t *streamptr);
+void cdi_create_timesteps(size_t numTimesteps, stream_t *streamP);
 
 void recinfoInitEntry(recinfo_t *recinfo);
 
@@ -574,7 +574,7 @@ struct streamAssoc
 
 struct streamAssoc streamUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context);
 
-int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filetype, stream_t *streamptr,
+int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filetype, stream_t *streamP,
                                  int recordBufIsToBeCreated);
 
 int streamOpenID(const char *filename, char filemode, int filetype, int resH);
@@ -584,11 +584,11 @@ void cdiStreamDefVlist_(int streamID, int vlistID);
 int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, SizeType numMissVals);
 
 void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype, const int rect[][2], const void *data, SizeType numMissVals);
-void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted);
+void cdiStreamCloseDefaultDelegate(stream_t *streamP, int recordBufIsToBeDeleted);
 
-int cdiStreamDefTimestep_(stream_t *streamptr, int tsID);
+int cdiStreamDefTimestep_(stream_t *streamP, int tsID);
 
-void cdiStreamSync_(stream_t *streamptr);
+void cdiStreamSync_(stream_t *streamP);
 
 const char *cdiUnitNamePtr(int cdi_unit);
 
@@ -599,8 +599,6 @@ enum
 };
 
 size_t cdiGetPageSize(bool largePageAlign);
-
-void zaxisGetIndexList(int nzaxis, int *zaxisIndexList);
 
 // clang-format off
 

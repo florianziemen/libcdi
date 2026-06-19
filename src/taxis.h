@@ -2,8 +2,7 @@
 #define TAXIS_H
 
 #include <stdbool.h>
-#include "cdi.h"
-
+#include "cdi_datetime.h"
 #include "cdi_key.h"
 
 #ifndef RESOURCE_HANDLE_H
@@ -43,12 +42,12 @@ void cdi_set_forecast_period(double timevalue, taxis_t *taxis);
 CdiDateTime cdi_decode_timeval(double timevalue, const taxis_t *taxis);
 double cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis);
 
-void ptaxisDefDatatype(taxis_t *taxisptr, int datatype);
-void ptaxisDefName(taxis_t *taxisptr, const char *name);
-void ptaxisDefLongname(taxis_t *taxisptr, const char *longname);
-void ptaxisDefUnits(taxis_t *taxisptr, const char *units);
-char *ptaxisAllocUnits(taxis_t *taxisptr, size_t len);
-void taxisDestroyKernel(taxis_t *taxisptr);
+void ptaxisDefDatatype(taxis_t *taxisP, int datatype);
+void ptaxisDefName(taxis_t *taxisP, const char *name);
+void ptaxisDefLongname(taxis_t *taxisP, const char *longname);
+void ptaxisDefUnits(taxis_t *taxisP, const char *units);
+char *ptaxisAllocUnits(taxis_t *taxisP, size_t len);
+void taxisDestroyKernel(taxis_t *taxisP);
 #ifndef SX
 extern const resOps taxisOps;
 #endif

@@ -34,41 +34,41 @@ typedef struct
 
 static void modelInit(void);
 
-static int modelCompareP(void *modelptr1, void *modelptr2);
-static void modelDestroyP(void *modelptr);
-static void modelPrintP(void *modelptr, FILE *fp);
-static int modelGetSizeP(void *modelptr, void *context);
-static void modelPackP(void *modelptr, void *buff, int size, int *position, void *context);
-static int modelTxCode(void *modelptr);
+static int modelCompareP(void *modelP1, void *modelP2);
+static void modelDestroyP(void *modelP);
+static void modelPrintP(void *modelP, FILE *fp);
+static int modelGetSizeP(void *modelP, void *context);
+static void modelPackP(void *modelP, void *buff, int size, int *position, void *context);
+static int modelTxCode(void *modelP);
 
 static const resOps modelOps = { modelCompareP, modelDestroyP, modelPrintP, modelGetSizeP, modelPackP, modelTxCode };
 
 static void
-modelDefaultValue(model_t *modelptr)
+modelDefaultValue(model_t *modelP)
 {
-  modelptr->self = CDI_UNDEFID;
-  modelptr->instID = CDI_UNDEFID;
-  modelptr->modelgribID = CDI_UNDEFID;
-  modelptr->name = NULL;
+  modelP->self = CDI_UNDEFID;
+  modelP->instID = CDI_UNDEFID;
+  modelP->modelgribID = CDI_UNDEFID;
+  modelP->name = NULL;
 }
 
 static model_t *
 modelNewEntry(cdiResH resH, int instID, int modelgribID, const char *name)
 {
-  model_t *modelptr = (model_t *) malloc(sizeof(model_t));
-  modelDefaultValue(modelptr);
+  model_t *modelP = (model_t *) malloc(sizeof(model_t));
+  modelDefaultValue(modelP);
   if (resH == CDI_UNDEFID)
-    modelptr->self = reshPut(modelptr, &modelOps);
+    modelP->self = reshPut(modelP, &modelOps);
   else
   {
-    modelptr->self = resH;
-    reshReplace(resH, modelptr, &modelOps);
+    modelP->self = resH;
+    reshReplace(resH, modelP, &modelOps);
   }
-  modelptr->instID = instID;
-  modelptr->modelgribID = modelgribID;
-  if (name && *name) modelptr->name = strdup(name);
+  modelP->instID = instID;
+  modelP->modelgribID = modelgribID;
+  if (name && *name) modelP->name = strdup(name);
 
-  return (modelptr);
+  return (modelP);
 }
 
 void
@@ -126,10 +126,10 @@ struct modelLoc
 static enum cdiApplyRet
 findModelByID(int resID, void *res, void *data)
 {
-  model_t *modelptr = (model_t *) res;
+  model_t *modelP = (model_t *) res;
   struct modelLoc *ret = (struct modelLoc *) data;
   int instID = ret->instID, modelgribID = ret->modelgribID;
-  if (modelptr->instID == instID && modelptr->modelgribID == modelgribID)
+  if (modelP->instID == instID && modelP->modelgribID == modelgribID)
   {
     ret->resID = resID;
     return CDI_APPLY_STOP;
@@ -141,13 +141,13 @@ findModelByID(int resID, void *res, void *data)
 static enum cdiApplyRet
 findModelByName(int resID, void *res, void *data)
 {
-  model_t *modelptr = (model_t *) res;
+  model_t *modelP = (model_t *) res;
   struct modelLoc *ret = (struct modelLoc *) data;
   int instID = ret->instID, modelgribID = ret->modelgribID;
   const char *name = ret->name;
-  if ((instID == -1 || modelptr->instID == instID) && (modelgribID == 0 || modelptr->modelgribID == modelgribID) && modelptr->name)
+  if ((instID == -1 || modelP->instID == instID) && (modelgribID == 0 || modelP->modelgribID == modelgribID) && modelP->name)
   {
-    const char *p = name, *q = modelptr->name;
+    const char *p = name, *q = modelP->name;
     while (*p != '\0' && *p == *q) ++p, ++q;
     if (*p == '\0' || *q == '\0')
     {
@@ -174,72 +174,72 @@ modelInq(int instID, int modelgribID, const char *name)
 int
 modelDef(int instID, int modelgribID, const char *name)
 {
-  model_t *modelptr;
+  model_t *modelP;
 
   modelInit();
 
-  modelptr = modelNewEntry(CDI_UNDEFID, instID, modelgribID, name);
+  modelP = modelNewEntry(CDI_UNDEFID, instID, modelgribID, name);
 
-  return modelptr->self;
+  return modelP->self;
 }
 
 int
 modelInqInstitut(int modelID)
 {
-  model_t *modelptr = NULL;
+  model_t *modelP = NULL;
 
   modelInit();
 
-  if (modelID != CDI_UNDEFID) modelptr = (model_t *) reshGetVal(modelID, &modelOps);
+  if (modelID != CDI_UNDEFID) modelP = (model_t *) reshGetVal(modelID, &modelOps);
 
-  return modelptr ? modelptr->instID : CDI_UNDEFID;
+  return modelP ? modelP->instID : CDI_UNDEFID;
 }
 
 int
 modelInqGribID(int modelID)
 {
-  model_t *modelptr = NULL;
+  model_t *modelP = NULL;
 
   modelInit();
 
-  if (modelID != CDI_UNDEFID) modelptr = (model_t *) reshGetVal(modelID, &modelOps);
+  if (modelID != CDI_UNDEFID) modelP = (model_t *) reshGetVal(modelID, &modelOps);
 
-  return modelptr ? modelptr->modelgribID : CDI_UNDEFID;
+  return modelP ? modelP->modelgribID : CDI_UNDEFID;
 }
 
 const char *
 modelInqNamePtr(int modelID)
 {
-  model_t *modelptr = NULL;
+  model_t *modelP = NULL;
 
   modelInit();
 
-  if (modelID != CDI_UNDEFID) modelptr = (model_t *) reshGetVal(modelID, &modelOps);
+  if (modelID != CDI_UNDEFID) modelP = (model_t *) reshGetVal(modelID, &modelOps);
 
-  return modelptr ? modelptr->name : NULL;
+  return modelP ? modelP->name : NULL;
 }
 
 static int
-modelCompareP(void *modelptr1, void *modelptr2)
+modelCompareP(void *modelP1, void *modelP2)
 {
-  model_t *model1 = (model_t *) modelptr1, *model2 = (model_t *) modelptr2;
+  model_t *model1 = (model_t *) modelP1, *model2 = (model_t *) modelP2;
   int diff = (namespaceResHDecode(model1->instID).idx != namespaceResHDecode(model2->instID).idx)
              | (model1->modelgribID != model2->modelgribID) | !str_is_equal(model1->name, model2->name);
   return diff;
 }
 
 void
-modelDestroyP(void *modelptr)
+modelDestroyP(void *modelP)
 {
-  model_t *mp = (model_t *) modelptr;
+  model_t *mp = (model_t *) modelP;
   free(mp->name);
   free(mp);
 }
 
 void
-modelPrintP(void *modelptr, FILE *fp)
+modelPrintP(void *modelP, FILE *fp)
 {
-  model_t *mp = (model_t *) modelptr;
+  model_t *mp = (model_t *) modelP;
   fprintf(fp,
           "#\n"
           "# modelID %d\n"
@@ -252,9 +252,9 @@ modelPrintP(void *modelptr, FILE *fp)
 }
 
 static int
-modelTxCode(void *modelptr)
+modelTxCode(void *modelP)
 {
-  (void) modelptr;
+  (void) modelP;
   return MODEL;
 }
 
@@ -268,9 +268,9 @@ enum
 };
 
 static int
-modelGetSizeP(void *modelptr, void *context)
+modelGetSizeP(void *modelP, void *context)
 {
-  model_t *p = (model_t *) modelptr;
+  model_t *p = (model_t *) modelP;
   size_t txsize = (size_t) serializeGetSize(modelNints, CDI_DATATYPE_INT, context)
                   + (size_t) serializeGetSize(p->name ? (int) strlen(p->name) : 0, CDI_DATATYPE_TXT, context);
   xassert(txsize <= INT_MAX);
@@ -278,9 +278,9 @@ modelGetSizeP(void *modelptr, void *context)
 }
 
 static void
-modelPackP(void *modelptr, void *buf, int size, int *position, void *context)
+modelPackP(void *modelP, void *buf, int size, int *position, void *context)
 {
-  model_t *p = (model_t *) modelptr;
+  model_t *p = (model_t *) modelP;
   int tempbuf[modelNints];
   tempbuf[MODEL_PACK_INT_SELF] = p->self;
   tempbuf[MODEL_PACK_INT_INSTID] = p->instID;

@@ -4,9 +4,9 @@
 void *cgribexNew(void);
 void cgribexDelete(void *cgribexp);
 
-int cgribexScanTimestep1(stream_t *streamptr);
-int cgribexScanTimestep2(stream_t *streamptr);
-int cgribexScanTimestep(stream_t *streamptr);
+int cgribexScanTimestep1(stream_t *streamP);
+int cgribexScanTimestep2(stream_t *streamP);
+int cgribexScanTimestep(stream_t *streamP);
 
 int cgribexDecode(int memtype, void *cgribexp, void *gribbuffer, size_t gribsize, void *data, size_t datasize, int unreduced,
                   size_t *numMissVals, double missval);

@@ -108,7 +108,7 @@ vlistVarUnpack(int vlistID, char *buf, int size, int *position, int originNamesp
 #define adaptKey(key) (namespaceAdaptKey((key), originNamespace))
   double dtempbuf[vlistvar_ndbls];
   int tempbuf[vlistvarNint];
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
   serializeUnpack(buf, size, position, tempbuf, vlistvarNint, CDI_DATATYPE_INT, context);
   serializeUnpack(buf, size, position, dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64, context);
 
@@ -128,11 +128,11 @@ vlistVarUnpack(int vlistID, char *buf, int size, int *position, int originNamesp
   vlistDefVarCompType(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_COMPTYPE]);
   vlistDefVarCompLevel(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_COMPLEVEL]);
   const int nlevs = tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS];
-  var_t *var = vlistptr->vars + newvar;
+  var_t *var = vlistP->vars + newvar;
   if (nlevs)
   {
     int i, flagSetLev = 0;
-    cdiVlistCreateVarLevInfo(vlistptr, newvar);
+    cdiVlistCreateVarLevInfo(vlistP, newvar);
 
     int *levbuf = (int *) Malloc((size_t) nlevs * sizeof(int));
     serializeUnpack(buf, size, position, levbuf, nlevs, CDI_DATATYPE_INT, context);

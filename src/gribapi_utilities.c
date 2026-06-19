@@ -884,7 +884,7 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
     gridtype = GRID_PROJECTION;
   }
   /*
-  if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
+  if ( streamP->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
     {
       gridtype = GRID_GAUSSIAN;
       ISEC2_NumLon = 2*ISEC2_NumLat;

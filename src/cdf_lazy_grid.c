@@ -128,7 +128,7 @@ cdfLazyGridInqYValsPtr(grid_t *grid)
 
 static double
 cdfLazyGridInqXYVal(grid_t *grid, size_t index, const struct xyValGet *valsGet, double *vals,
-                    const double *(*inqValsPtr)(grid_t *gridptr))
+                    const double *(*inqValsPtr)(grid_t *gridP))
 {
   size_t size = valsGet->size;
   double v;
@@ -301,10 +301,10 @@ cdfLazyGridInqYBoundsPtr(grid_t *grid)
 }
 
 static void
-cdfLazyGridCopyScalarFields(grid_t *gridptrOrig, grid_t *gridptrDup)
+cdfLazyGridCopyScalarFields(grid_t *gridPOrig, grid_t *gridPDup)
 {
-  struct cdfLazyGrid *lazyGridDup = (struct cdfLazyGrid *) gridptrDup, *lazyGridOrig = (struct cdfLazyGrid *) gridptrOrig;
-  lazyGridOrig->baseVtable->copyScalarFields(gridptrOrig, &lazyGridDup->base);
+  struct cdfLazyGrid *lazyGridDup = (struct cdfLazyGrid *) gridPDup, *lazyGridOrig = (struct cdfLazyGrid *) gridPOrig;
+  lazyGridOrig->baseVtable->copyScalarFields(gridPOrig, &lazyGridDup->base);
   lazyGridDup->baseVtable = lazyGridOrig->baseVtable;
   lazyGridDup->cellAreaGet = lazyGridOrig->cellAreaGet;
   lazyGridDup->xBoundsGet = lazyGridOrig->xBoundsGet;
@@ -315,77 +315,77 @@ cdfLazyGridCopyScalarFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 }
 
 static void
-cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
+cdfLazyGridCopyArrayFields(grid_t *gridPOrig, grid_t *gridPDup)
 {
-  size_t reducedPointsSize = (size_t) gridptrOrig->reducedPointsSize;
-  size_t gridsize = gridptrOrig->size;
-  int gridtype = gridptrOrig->type;
+  size_t reducedPointsSize = (size_t) gridPOrig->reducedPointsSize;
+  size_t gridsize = gridPOrig->size;
+  int gridtype = gridPOrig->type;
   int irregular = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED);
 
   if (reducedPointsSize)
   {
-    gridptrDup->reducedPoints = (int *) Malloc(reducedPointsSize * sizeof(int));
-    memcpy(gridptrDup->reducedPoints, gridptrOrig->reducedPoints, reducedPointsSize * sizeof(int));
+    gridPDup->reducedPoints = (int *) Malloc(reducedPointsSize * sizeof(int));
+    memcpy(gridPDup->reducedPoints, gridPOrig->reducedPoints, reducedPointsSize * sizeof(int));
   }
 
-  if (gridptrOrig->x.vals != NULL && gridptrOrig->x.vals != cdfPendingLoad)
+  if (gridPOrig->x.vals != NULL && gridPOrig->x.vals != cdfPendingLoad)
   {
-    size_t size = irregular ? gridsize : gridptrOrig->x.size;
-    gridptrDup->x.vals = (double *) Malloc(size * sizeof(double));
-    memcpy(gridptrDup->x.vals, gridptrOrig->x.vals, size * sizeof(double));
+    size_t size = irregular ? gridsize : gridPOrig->x.size;
+    gridPDup->x.vals = (double *) Malloc(size * sizeof(double));
+    memcpy(gridPDup->x.vals, gridPOrig->x.vals, size * sizeof(double));
   }
 
-  if (gridptrOrig->y.vals != NULL && gridptrOrig->y.vals != cdfPendingLoad)
+  if (gridPOrig->y.vals != NULL && gridPOrig->y.vals != cdfPendingLoad)
   {
-    size_t size = irregular ? gridsize : gridptrOrig->y.size;
-    gridptrDup->y.vals = (double *) Malloc(size * sizeof(double));
-    memcpy(gridptrDup->y.vals, gridptrOrig->y.vals, size * sizeof(double));
+    size_t size = irregular ? gridsize : gridPOrig->y.size;
+    gridPDup->y.vals = (double *) Malloc(size * sizeof(double));
+    memcpy(gridPDup->y.vals, gridPOrig->y.vals, size * sizeof(double));
   }
 
-  if (gridptrOrig->x.bounds != NULL && gridptrOrig->x.bounds != cdfPendingLoad)
+  if (gridPOrig->x.bounds != NULL && gridPOrig->x.bounds != cdfPendingLoad)
   {
-    size_t size = (irregular ? gridsize : gridptrOrig->x.size) * (size_t) gridptrOrig->nvertex;
-    gridptrDup->x.bounds = (double *) Malloc(size * sizeof(double));
-    memcpy(gridptrDup->x.bounds, gridptrOrig->x.bounds, size * sizeof(double));
+    size_t size = (irregular ? gridsize : gridPOrig->x.size) * (size_t) gridPOrig->nvertex;
+    gridPDup->x.bounds = (double *) Malloc(size * sizeof(double));
+    memcpy(gridPDup->x.bounds, gridPOrig->x.bounds, size * sizeof(double));
   }
 
-  if (gridptrOrig->y.bounds != NULL && gridptrOrig->y.bounds != cdfPendingLoad)
+  if (gridPOrig->y.bounds != NULL && gridPOrig->y.bounds != cdfPendingLoad)
   {
-    size_t size = (irregular ? gridsize : gridptrOrig->y.size) * (size_t) gridptrOrig->nvertex;
-    gridptrDup->y.bounds = (double *) Malloc(size * sizeof(double));
-    memcpy(gridptrDup->y.bounds, gridptrOrig->y.bounds, size * sizeof(double));
+    size_t size = (irregular ? gridsize : gridPOrig->y.size) * (size_t) gridPOrig->nvertex;
+    gridPDup->y.bounds = (double *) Malloc(size * sizeof(double));
+    memcpy(gridPDup->y.bounds, gridPOrig->y.bounds, size * sizeof(double));
   }
 
   {
-    if (gridptrOrig->area != NULL && gridptrOrig->area != cdfPendingLoad)
+    if (gridPOrig->area != NULL && gridPOrig->area != cdfPendingLoad)
     {
       size_t size = gridsize;
-      gridptrDup->area = (double *) Malloc(size * sizeof(double));
-      memcpy(gridptrDup->area, gridptrOrig->area, size * sizeof(double));
+      gridPDup->area = (double *) Malloc(size * sizeof(double));
+      memcpy(gridPDup->area, gridPOrig->area, size * sizeof(double));
     }
   }
 
-  if (gridptrOrig->mask != NULL)
+  if (gridPOrig->mask != NULL)
   {
     size_t size = gridsize;
-    gridptrDup->mask = (mask_t *) Malloc(size * sizeof(mask_t));
-    memcpy(gridptrDup->mask, gridptrOrig->mask, size * sizeof(mask_t));
+    gridPDup->mask = (mask_t *) Malloc(size * sizeof(mask_t));
+    memcpy(gridPDup->mask, gridPOrig->mask, size * sizeof(mask_t));
   }
 
-  if (gridptrOrig->mask_gme != NULL)
+  if (gridPOrig->mask_gme != NULL)
   {
     size_t size = gridsize;
-    gridptrDup->mask_gme = (mask_t *) Malloc(size * sizeof(mask_t));
-    memcpy(gridptrDup->mask_gme, gridptrOrig->mask_gme, size * sizeof(mask_t));
+    gridPDup->mask_gme = (mask_t *) Malloc(size * sizeof(mask_t));
+    memcpy(gridPDup->mask_gme, gridPOrig->mask_gme, size * sizeof(mask_t));
   }
 }
 
 static grid_t *
-cdfLazyGridCopy(grid_t *gridptrOrig)
+cdfLazyGridCopy(grid_t *gridPOrig)
 {
   struct cdfLazyGrid *lazyGridDup = (struct cdfLazyGrid *) Malloc(sizeof(*lazyGridDup));
-  gridptrOrig->vtable->copyScalarFields(gridptrOrig, &lazyGridDup->base);
-  gridptrOrig->vtable->copyArrayFields(gridptrOrig, &lazyGridDup->base);
+  gridPOrig->vtable->copyScalarFields(gridPOrig, &lazyGridDup->base);
+  gridPOrig->vtable->copyArrayFields(gridPOrig, &lazyGridDup->base);
   return &lazyGridDup->base;
 }
 

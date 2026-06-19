@@ -36,20 +36,20 @@ iegDefDatatype(int datatype)
 }
 
 static void
-ieg_read_recordSP(stream_t *streamptr, float *data, size_t *numMissVals)
+ieg_read_recordSP(stream_t *streamP, float *data, size_t *numMissVals)
 {
-  int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
-  int tsID = streamptr->curTsID;
+  int vlistID = streamP->vlistID;
+  int fileID = streamP->fileID;
+  int tsID = streamP->curTsID;
 
-  int vrecID = streamptr->tsteps[tsID].curRecID;
-  int recID = streamptr->tsteps[tsID].recIDs[vrecID];
-  int varID = streamptr->tsteps[tsID].recinfo[recID].varID;
-  off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+  int vrecID = streamP->tsteps[tsID].curRecID;
+  int recID = streamP->tsteps[tsID].recIDs[vrecID];
+  int varID = streamP->tsteps[tsID].recinfo[recID].varID;
+  off_t recpos = streamP->tsteps[tsID].records[recID].position;
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
-  void *iegp = streamptr->record->objectp;
+  void *iegp = streamP->record->objectp;
   if (iegRead(fileID, iegp) < 0) Error("Could not read IEG record!");
 
   iegInqDataFP32(iegp, data);
@@ -59,24 +59,24 @@ ieg_read_recordSP(stream_t *streamptr, float *data, size_t *numMissVals)
 
   *numMissVals = get_num_missvalsSP(size, data, (float) missval);
 
-  streamptr->numvals += (SizeType) size;
+  streamP->numvals += (SizeType) size;
 }
 
 static void
-ieg_read_recordDP(stream_t *streamptr, double *data, size_t *numMissVals)
+ieg_read_recordDP(stream_t *streamP, double *data, size_t *numMissVals)
 {
-  int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
-  int tsID = streamptr->curTsID;
+  int vlistID = streamP->vlistID;
+  int fileID = streamP->fileID;
+  int tsID = streamP->curTsID;
 
-  int vrecID = streamptr->tsteps[tsID].curRecID;
-  int recID = streamptr->tsteps[tsID].recIDs[vrecID];
-  int varID = streamptr->tsteps[tsID].recinfo[recID].varID;
-  off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+  int vrecID = streamP->tsteps[tsID].curRecID;
+  int recID = streamP->tsteps[tsID].recIDs[vrecID];
+  int varID = streamP->tsteps[tsID].recinfo[recID].varID;
+  off_t recpos = streamP->tsteps[tsID].records[recID].position;
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
-  void *iegp = streamptr->record->objectp;
+  void *iegp = streamP->record->objectp;
   if (iegRead(fileID, iegp) < 0) Error("Could not read IEG record!");
 
   iegInqDataFP64(iegp, data);
@@ -86,16 +86,16 @@ ieg_read_recordDP(stream_t *streamptr, double *data, size_t *numMissVals)
 
   *numMissVals = get_num_missvalsDP(size, data, missval);
 
-  streamptr->numvals += (SizeType) size;
+  streamP->numvals += (SizeType) size;
 }
 
 void
-ieg_read_field(stream_t *streamptr, int memtype, void *data, size_t *numMissVals)
+ieg_read_field(stream_t *streamP, int memtype, void *data, size_t *numMissVals)
 {
   if (memtype == MEMTYPE_DOUBLE)
-    ieg_read_recordDP(streamptr, (double *) data, numMissVals);
+    ieg_read_recordDP(streamP, (double *) data, numMissVals);
   else
-    ieg_read_recordSP(streamptr, (float *) data, numMissVals);
+    ieg_read_recordSP(streamP, (float *) data, numMissVals);
 }
 
 static int
@@ -415,23 +415,23 @@ iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 }
 
 void
-iegCopyField(stream_t *streamptr2, stream_t *streamptr1)
+iegCopyField(stream_t *streamP2, stream_t *streamP1)
 {
-  streamFCopyRecord(streamptr2, streamptr1, "IEG");
+  streamFCopyRecord(streamP2, streamP1, "IEG");
 }
 
 void
-iegDefField(stream_t *streamptr)
+iegDefField(stream_t *streamP)
 {
-  Record *record = streamptr->record;
+  Record *record = streamP->record;
 
-  int vlistID = streamptr->vlistID;
-  int byteorder = streamptr->byteorder;
+  int vlistID = streamP->vlistID;
+  int byteorder = streamP->byteorder;
 
   int varID = record->varID;
   int levelID = record->levelID;
-  int tsID = streamptr->curTsID;
-  CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
+  int tsID = streamP->curTsID;
+  CdiDateTime vDateTime = streamP->tsteps[tsID].taxis.vDateTime;
 
   int gridID = vlistInqVarGrid(vlistID, varID);
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
@@ -474,12 +474,12 @@ calc_refvalDP(size_t size, const double *data)
 }
 
 static void
-ieg_write_recordSP(stream_t *streamptr, const float *data)
+ieg_write_recordSP(stream_t *streamP, const float *data)
 {
-  Record *record = streamptr->record;
+  Record *record = streamP->record;
   iegrec_t *iegp = (iegrec_t *) record->objectp;
 
-  int fileID = streamptr->fileID;
+  int fileID = streamP->fileID;
   size_t gridsize = (size_t) gridInqSize(record->gridID);
 
   iegp->refval = calc_refvalSP(gridsize, data);
@@ -489,12 +489,12 @@ ieg_write_recordSP(stream_t *streamptr, const float *data)
 }
 
 static void
-ieg_write_recordDP(stream_t *streamptr, const double *data)
+ieg_write_recordDP(stream_t *streamP, const double *data)
 {
-  Record *record = streamptr->record;
+  Record *record = streamP->record;
   iegrec_t *iegp = (iegrec_t *) record->objectp;
 
-  int fileID = streamptr->fileID;
+  int fileID = streamP->fileID;
   size_t gridsize = (size_t) gridInqSize(record->gridID);
 
   iegp->refval = calc_refvalDP(gridsize, data);
@@ -504,22 +504,22 @@ ieg_write_recordDP(stream_t *streamptr, const double *data)
 }
 
 void
-ieg_write_field(stream_t *streamptr, int memtype, const void *data)
+ieg_write_field(stream_t *streamP, int memtype, const void *data)
 {
   if (memtype == MEMTYPE_DOUBLE)
-    ieg_write_recordDP(streamptr, (const double *) data);
+    ieg_write_recordDP(streamP, (const double *) data);
   else
-    ieg_write_recordSP(streamptr, (const float *) data);
+    ieg_write_recordSP(streamP, (const float *) data);
 }
 
 static void
-iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, size_t recsize, off_t position, int prec)
+iegAddRecord(stream_t *streamP, int param, int *pdb, int *gdb, double *vct, size_t recsize, off_t position, int prec)
 {
-  int vlistID = streamptr->vlistID;
-  int tsID = streamptr->curTsID;
-  int recID = recordNewEntry(streamptr, tsID);
-  recinfo_t *recinfo = &(streamptr->tsteps[tsID].recinfo[recID]);
-  record_t *record = &(streamptr->tsteps[tsID].records[recID]);
+  int vlistID = streamP->vlistID;
+  int tsID = streamP->curTsID;
+  int recID = recordNewEntry(streamP, tsID);
+  recinfo_t *recinfo = &(streamP->tsteps[tsID].recinfo[recID]);
+  record_t *record = &(streamP->tsteps[tsID].records[recID]);
 
   int level1, level2;
   if (IEG_P_LevelType(pdb) == IEG_LTYPE_HYBRID_LAYER)
@@ -642,21 +642,21 @@ iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct, si
   recinfo->varID = (short) varID;
   recinfo->levelID = levelID;
 
-  streamptr->tsteps[tsID].nallrecs++;
-  streamptr->nrecs++;
+  streamP->tsteps[tsID].nallrecs++;
+  streamP->nrecs++;
 
   if (CDI_Debug) Message("varID = %d gridID = %d levelID = %d", varID, gridID, levelID);
 }
 
 #if 0
 static
-void iegCmpRecord(stream_t *streamptr, int tsID, int recID, off_t position, int param,
+void iegCmpRecord(stream_t *streamP, int tsID, int recID, off_t position, int param,
 		  int level, size_t xsize, size_t ysize)
 {
   int varID = 0;
   int levelID = 0;
 
-  record_t *record  = &streamptr->tsteps[tsID].records[recID];
+  record_t *record  = &streamP->tsteps[tsID].records[recID];
 
   if (param != (*record).param || level != (*record).ilevel) Error("inconsistent timestep");
 
@@ -665,10 +665,10 @@ void iegCmpRecord(stream_t *streamptr, int tsID, int recID, off_t position, int 
   varID   = (*record).varID;
   levelID = (*record).levelID;
 
-  streamptr->vars[varID].level[levelID] = recID;
+  streamP->vars[varID].level[levelID] = recID;
 
-  streamptr->tsteps[tsID].nallrecs++;
-  streamptr->nrecs++;
+  streamP->tsteps[tsID].nallrecs++;
+  streamP->nrecs++;
   */
   if (CDI_Debug) Message("varID = %d levelID = %d", varID, levelID);
 }
@@ -693,20 +693,20 @@ iegDateTime(const int *pdb)
 }
 
 static void
-iegScanTimestep1(stream_t *streamptr)
+iegScanTimestep1(stream_t *streamP)
 {
   CdiDateTime datetime0;
   cdiDateTime_init(&datetime0);
   off_t recpos;
-  iegrec_t *iegp = (iegrec_t *) streamptr->record->objectp;
+  iegrec_t *iegp = (iegrec_t *) streamP->record->objectp;
 
-  streamptr->curTsID = 0;
+  streamP->curTsID = 0;
 
-  int tsID = tstepsNewEntry(streamptr);
+  int tsID = tstepsNewEntry(streamP);
   if (tsID != 0) Error("Internal problem! tstepsNewEntry returns %d", tsID);
-  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+  taxis_t *taxis = &streamP->tsteps[tsID].taxis;
 
-  int fileID = streamptr->fileID;
+  int fileID = streamP->fileID;
 
   int nrecs = 0;
   while (true)
@@ -714,7 +714,7 @@ iegScanTimestep1(stream_t *streamptr)
     recpos = fileGetPos(fileID);
     if (iegRead(fileID, iegp) != 0)
     {
-      streamptr->ntsteps = 1;
+      streamP->ntsteps = 1;
       break;
     }
 
@@ -737,7 +737,7 @@ iegScanTimestep1(stream_t *streamptr)
     }
     else
     {
-      record_t *records = streamptr->tsteps[tsID].records;
+      record_t *records = streamP->tsteps[tsID].records;
       for (int recID = 0; recID < nrecs; recID++)
         if (param == records[recID].param && rlevel == records[recID].ilevel) goto tstepScanLoopFinished;
 
@@ -748,59 +748,59 @@ iegScanTimestep1(stream_t *streamptr)
 
     if (CDI_Debug) Message("%4d%8d%4d%8d %s", nrecs, (int) recpos, param, rlevel, cdiDateTime_to_string(datetime));
 
-    iegAddRecord(streamptr, param, iegp->ipdb, iegp->igdb, iegp->vct, recsize, recpos, prec);
+    iegAddRecord(streamP, param, iegp->ipdb, iegp->igdb, iegp->vct, recsize, recpos, prec);
   }
 
 tstepScanLoopFinished:
-  streamptr->rtsteps = 1;
+  streamP->rtsteps = 1;
 
-  cdi_generate_vars(streamptr);
+  cdi_generate_vars(streamP);
 
   int taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type = TAXIS_ABSOLUTE;
   taxis->rDateTime = taxis->vDateTime;
 
-  int vlistID = streamptr->vlistID;
+  int vlistID = streamP->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
   vlist_check_contents(vlistID);
 
-  streamScanResizeRecords1(streamptr);
+  streamScanResizeRecords1(streamP);
 
-  streamScanTsFixNtsteps(streamptr, recpos);
-  streamScanTimeConstAdjust(streamptr, taxis);
+  streamScanTsFixNtsteps(streamP, recpos);
+  streamScanTimeConstAdjust(streamP, taxis);
 }
 
 static int
-iegScanTimestep2(stream_t *streamptr)
+iegScanTimestep2(stream_t *streamP)
 {
   off_t recpos = 0;
-  iegrec_t *iegp = (iegrec_t *) streamptr->record->objectp;
+  iegrec_t *iegp = (iegrec_t *) streamP->record->objectp;
 
-  streamptr->curTsID = 1;
+  streamP->curTsID = 1;
 
-  int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
+  int vlistID = streamP->vlistID;
+  int fileID = streamP->fileID;
 
-  int tsID = streamptr->rtsteps;
+  int tsID = streamP->rtsteps;
   if (tsID != 1) Error("Internal problem! unexpected timestep %d", tsID + 1);
 
-  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+  taxis_t *taxis = &streamP->tsteps[tsID].taxis;
 
-  fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+  fileSetPos(fileID, streamP->tsteps[tsID].position, SEEK_SET);
 
-  cdi_create_records(streamptr, tsID, true);
-  recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
-  record_t *records = streamptr->tsteps[tsID].records;
+  cdi_create_records(streamP, tsID, true);
+  recinfo_t *recinfo = streamP->tsteps[tsID].recinfo;
+  record_t *records = streamP->tsteps[tsID].records;
 
-  int nrecords = streamScanInitRecords2(streamptr);
+  int nrecords = streamScanInitRecords2(streamP);
 
   for (int rindex = 0; rindex <= nrecords; rindex++)
   {
     recpos = fileGetPos(fileID);
     if (iegRead(fileID, iegp) != 0)
     {
-      streamptr->ntsteps = 2;
+      streamP->ntsteps = 2;
       break;
     }
 
@@ -831,7 +831,7 @@ iegScanTimestep2(stream_t *streamptr)
         else
         {
           recinfo[recID].used = true;
-          streamptr->tsteps[tsID].recIDs[rindex] = recID;
+          streamP->tsteps[tsID].recIDs[rindex] = recID;
         }
         break;
       }
@@ -867,58 +867,58 @@ iegScanTimestep2(stream_t *streamptr)
     else
       vlistDefVarTimetype(vlistID, recinfo[recID].varID, TIME_CONSTANT);
   }
-  streamptr->tsteps[tsID].nrecs = nrecs;
+  streamP->tsteps[tsID].nrecs = nrecs;
 
-  streamptr->rtsteps = 2;
+  streamP->rtsteps = 2;
 
-  streamScanTsFixNtsteps(streamptr, recpos);
+  streamScanTsFixNtsteps(streamP, recpos);
 
   return 0;
 }
 
 int
-iegInqContents(stream_t *streamptr)
+iegInqContents(stream_t *streamP)
 {
-  streamptr->curTsID = 0;
+  streamP->curTsID = 0;
 
-  iegScanTimestep1(streamptr);
+  iegScanTimestep1(streamP);
 
-  int status = (streamptr->ntsteps == -1) ? iegScanTimestep2(streamptr) : 0;
+  int status = (streamP->ntsteps == -1) ? iegScanTimestep2(streamP) : 0;
 
-  fileSetPos(streamptr->fileID, 0, SEEK_SET);
+  fileSetPos(streamP->fileID, 0, SEEK_SET);
 
   return status;
 }
 
 static long
-iegScanTimestep(stream_t *streamptr)
+iegScanTimestep(stream_t *streamP)
 {
   off_t recpos = 0;
-  iegrec_t *iegp = (iegrec_t *) streamptr->record->objectp;
+  iegrec_t *iegp = (iegrec_t *) streamP->record->objectp;
 
-  if (streamptr->rtsteps == 0) Error("Internal problem! Missing contents.");
+  if (streamP->rtsteps == 0) Error("Internal problem! Missing contents.");
 
-  int tsID = streamptr->rtsteps;
-  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+  int tsID = streamP->rtsteps;
+  taxis_t *taxis = &streamP->tsteps[tsID].taxis;
 
   int nrecs = 0;
-  if (streamptr->tsteps[tsID].recordSize == 0)
+  if (streamP->tsteps[tsID].recordSize == 0)
   {
-    cdi_create_records(streamptr, tsID, true);
-    record_t *records = streamptr->tsteps[tsID].records;
+    cdi_create_records(streamP, tsID, true);
+    record_t *records = streamP->tsteps[tsID].records;
 
-    nrecs = streamScanInitRecords(streamptr, tsID);
+    nrecs = streamScanInitRecords(streamP, tsID);
 
-    int fileID = streamptr->fileID;
+    int fileID = streamP->fileID;
 
-    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+    fileSetPos(fileID, streamP->tsteps[tsID].position, SEEK_SET);
 
     for (int rindex = 0; rindex <= nrecs; rindex++)
     {
       recpos = fileGetPos(fileID);
       if (iegRead(fileID, iegp) != 0)
       {
-        streamptr->ntsteps = streamptr->rtsteps + 1;
+        streamP->ntsteps = streamP->rtsteps + 1;
         break;
       }
 
@@ -935,7 +935,7 @@ iegScanTimestep(stream_t *streamptr)
 
       // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
       if (rindex == nrecs) continue;
-      int recID = streamptr->tsteps[tsID].recIDs[rindex];
+      int recID = streamP->tsteps[tsID].recIDs[rindex];
 
       if (rindex == 0)
       {
@@ -956,68 +956,68 @@ iegScanTimestep(stream_t *streamptr)
       if (CDI_Debug) Message("%4d%8d%4d%8d %s", rindex, (int) recpos, param, rlevel, cdiDateTime_to_string(datetime));
     }
 
-    streamptr->rtsteps++;
+    streamP->rtsteps++;
 
-    if (streamptr->ntsteps != streamptr->rtsteps)
+    if (streamP->ntsteps != streamP->rtsteps)
     {
-      tsID = tstepsNewEntry(streamptr);
-      if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
+      tsID = tstepsNewEntry(streamP);
+      if (tsID != streamP->rtsteps) Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID - 1].next = true;
-      streamptr->tsteps[tsID].position = recpos;
+      streamP->tsteps[tsID - 1].next = true;
+      streamP->tsteps[tsID].position = recpos;
     }
 
-    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
-    streamptr->tsteps[tsID].position = recpos;
+    fileSetPos(fileID, streamP->tsteps[tsID].position, SEEK_SET);
+    streamP->tsteps[tsID].position = recpos;
   }
 
-  if (nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs)
+  if (nrecs > 0 && nrecs < streamP->tsteps[tsID].nrecs)
   {
     Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
-    streamptr->ntsteps = tsID;
+    streamP->ntsteps = tsID;
   }
 
-  return streamptr->ntsteps;
+  return streamP->ntsteps;
 }
 
 int
-iegInqTimestep(stream_t *streamptr, int tsID)
+iegInqTimestep(stream_t *streamP, int tsID)
 {
-  if (tsID == 0 && streamptr->rtsteps == 0) Error("Call to cdiInqContents missing!");
+  if (tsID == 0 && streamP->rtsteps == 0) Error("Call to cdiInqContents missing!");
 
-  if (CDI_Debug) Message("tsID = %d rtsteps = %d", tsID, streamptr->rtsteps);
+  if (CDI_Debug) Message("tsID = %d rtsteps = %d", tsID, streamP->rtsteps);
 
   long ntsteps = CDI_UNDEFID;
-  while ((tsID + 1) > streamptr->rtsteps && ntsteps == CDI_UNDEFID) ntsteps = iegScanTimestep(streamptr);
+  while ((tsID + 1) > streamP->rtsteps && ntsteps == CDI_UNDEFID) ntsteps = iegScanTimestep(streamP);
 
   int nrecs = 0;
-  if (!(tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID))
+  if (!(tsID >= streamP->ntsteps && streamP->ntsteps != CDI_UNDEFID))
   {
-    streamptr->curTsID = tsID;
-    nrecs = streamptr->tsteps[tsID].nrecs;
+    streamP->curTsID = tsID;
+    nrecs = streamP->tsteps[tsID].nrecs;
   }
 
   return nrecs;
 }
 
 void
-iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_t *numMissVals)
+iegReadVarSliceDP(stream_t *streamP, int varID, int levID, double *data, size_t *numMissVals)
 {
-  if (CDI_Debug) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
+  if (CDI_Debug) Message("streamID = %d  varID = %d  levID = %d", streamP->self, varID, levID);
 
-  void *iegp = streamptr->record->objectp;
+  void *iegp = streamP->record->objectp;
 
-  int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
+  int vlistID = streamP->vlistID;
+  int fileID = streamP->fileID;
 
   double missval = vlistInqVarMissval(vlistID, varID);
   size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
-  int tsid = streamptr->curTsID;
+  int tsid = streamP->curTsID;
 
   off_t currentfilepos = fileGetPos(fileID);
 
-  int recID = streamptr->vars[varID].recordTable[0].recordID[levID];
-  off_t recpos = streamptr->tsteps[tsid].records[recID].position;
+  int recID = streamP->vars[varID].recordTable[0].recordID[levID];
+  off_t recpos = streamP->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
   iegRead(fileID, iegp);
   iegInqDataFP64(iegp, data);
@@ -1028,31 +1028,31 @@ iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_
 }
 
 void
-iegReadVarDP(stream_t *streamptr, int varID, double *data, size_t *numMissVals)
+iegReadVarDP(stream_t *streamP, int varID, double *data, size_t *numMissVals)
 {
-  if (CDI_Debug) Message("streamID = %d  varID = %d", streamptr->self, varID);
+  if (CDI_Debug) Message("streamID = %d  varID = %d", streamP->self, varID);
 
-  int vlistID = streamptr->vlistID;
+  int vlistID = streamP->vlistID;
   size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
-  size_t nlevs = (size_t) streamptr->vars[varID].recordTable[0].nlevs;
+  size_t nlevs = (size_t) streamP->vars[varID].recordTable[0].nlevs;
 
   for (size_t levID = 0; levID < nlevs; levID++)
-    iegReadVarSliceDP(streamptr, varID, (int) levID, &data[levID * gridsize], numMissVals);
+    iegReadVarSliceDP(streamP, varID, (int) levID, &data[levID * gridsize], numMissVals);
 }
 
 void
-iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data)
+iegWriteVarSliceDP(stream_t *streamP, int varID, int levID, const double *data)
 {
-  if (CDI_Debug) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
+  if (CDI_Debug) Message("streamID = %d  varID = %d  levID = %d", streamP->self, varID, levID);
 
-  iegrec_t *iegp = (iegrec_t *) streamptr->record->objectp;
+  iegrec_t *iegp = (iegrec_t *) streamP->record->objectp;
   iegInitMem(iegp);
   for (int i = 0; i < 37; i++) iegp->ipdb[i] = -1;
 
-  int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
-  int tsID = streamptr->curTsID;
-  CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
+  int vlistID = streamP->vlistID;
+  int fileID = streamP->fileID;
+  int tsID = streamP->curTsID;
+  CdiDateTime vDateTime = streamP->tsteps[tsID].taxis.vDateTime;
   int gridID = vlistInqVarGrid(vlistID, varID);
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
 
@@ -1076,15 +1076,15 @@ iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data
 }
 
 void
-iegWriteVarDP(stream_t *streamptr, int varID, const double *data)
+iegWriteVarDP(stream_t *streamP, int varID, const double *data)
 {
-  if (CDI_Debug) Message("streamID = %d  varID = %d", streamptr->self, varID);
+  if (CDI_Debug) Message("streamID = %d  varID = %d", streamP->self, varID);
 
-  int vlistID = streamptr->vlistID;
+  int vlistID = streamP->vlistID;
   size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
   size_t nlevels = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
-  for (size_t levID = 0; levID < nlevels; levID++) iegWriteVarSliceDP(streamptr, varID, (int) levID, &data[levID * gridsize]);
+  for (size_t levID = 0; levID < nlevels; levID++) iegWriteVarSliceDP(streamP, varID, (int) levID, &data[levID * gridsize]);
 }
 
 #endif /* HAVE_LIBIEG */

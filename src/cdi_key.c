@@ -20,34 +20,34 @@
 #include "dmemory.h"
 
 static cdi_keys_t *
-vlist_get_keysp(vlist_t *vlistptr, int varID)
+vlist_get_keysp(vlist_t *vlistP, int varID)
 {
-  if (varID == CDI_GLOBAL) return &vlistptr->keys;
-  if (varID >= 0 && varID < vlistptr->nvars) return &(vlistptr->vars[varID].keys);
+  if (varID == CDI_GLOBAL) return &vlistP->keys;
+  if (varID >= 0 && varID < vlistP->nvars) return &(vlistP->vars[varID].keys);
 
   return NULL;
 }
 
 static cdi_keys_t *
-grid_get_keysp(grid_t *gridptr, int varID)
+grid_get_keysp(grid_t *gridP, int varID)
 {
-  if (varID == CDI_GLOBAL) return &gridptr->keys;
-  if (varID == CDI_XAXIS) return &gridptr->x.keys;
-  if (varID == CDI_YAXIS) return &gridptr->y.keys;
+  if (varID == CDI_GLOBAL) return &gridP->keys;
+  if (varID == CDI_XAXIS) return &gridP->x.keys;
+  if (varID == CDI_YAXIS) return &gridP->y.keys;
 
   return NULL;
 }
 
 static cdi_keys_t *
-zaxis_get_keysp(zaxis_t *zaxisptr, int varID)
+zaxis_get_keysp(zaxis_t *zaxisP, int varID)
 {
-  return (varID == CDI_GLOBAL) ? &zaxisptr->keys : NULL;
+  return (varID == CDI_GLOBAL) ? &zaxisP->keys : NULL;
 }
 
 static cdi_keys_t *
-taxis_get_keysp(taxis_t *taxisptr, int varID)
+taxis_get_keysp(taxis_t *taxisP, int varID)
 {
-  return (varID == CDI_GLOBAL) ? &taxisptr->keys : NULL;
+  return (varID == CDI_GLOBAL) ? &taxisP->keys : NULL;
 }
 
 static cdi_key_t *

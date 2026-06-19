@@ -4773,14 +4773,14 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
   bool gridIsDefinedGlobal = false;
   bool gridIsDefined = false;
   int gridID = CDI_UNDEFID;
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
 
-  int ngrids = vlistptr->ngrids;
+  int ngrids = vlistP->ngrids;
 
   if (mode == 0)
     for (int index = 0; index < ngrids; index++)
     {
-      if ((gridID = vlistptr->gridIDs[index]) != CDI_UNDEFID)
+      if ((gridID = vlistP->gridIDs[index]) != CDI_UNDEFID)
       {
         if (gridCompare(gridID, grid, false) == false)
         {
@@ -4800,7 +4800,7 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
 
     if (mode == 1 && gridIsDefinedGlobal)
       for (int index = 0; index < ngrids; index++)
-        if (vlistptr->gridIDs[index] == gridID)
+        if (vlistP->gridIDs[index] == gridID)
         {
           gridIsDefinedGlobal = false;
           break;
@@ -4817,8 +4817,8 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
     if (mode < 2)
     {
       if (ngrids >= MAX_GRIDS_PS) Error("Internal limit exceeded, MAX_GRIDS_PS=%d needs to be increased!", MAX_GRIDS_PS);
-      vlistptr->gridIDs[ngrids] = gridID;
-      vlistptr->ngrids++;
+      vlistP->gridIDs[ngrids] = gridID;
+      vlistP->ngrids++;
     }
   }
 

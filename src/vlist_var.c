@@ -25,44 +25,44 @@
 static void
 vlistvar_init_entry(var_t *vlistvars, int varID)
 {
-  var_t *varptr = &vlistvars[varID];
-  memset(varptr, 0, sizeof(var_t));
+  var_t *varP = &vlistvars[varID];
+  memset(varP, 0, sizeof(var_t));
 
-  varptr->xyz = 5;  // xyzStorVals[5] == 321
-  varptr->mvarID = varID;
-  varptr->fvarID = varID;
-  varptr->gridID = CDI_UNDEFID;
-  varptr->zaxisID = CDI_UNDEFID;
-  varptr->timetype = CDI_UNDEFID;
-  varptr->tsteptype = TSTEP_INSTANT;
-  varptr->datatype = CDI_UNDEFID;
-  varptr->instID = CDI_UNDEFID;
-  varptr->modelID = CDI_UNDEFID;
-  varptr->tableID = CDI_UNDEFID;
-  varptr->missval = CDI_Default_Missval;
-  varptr->validrange[0] = VALIDMISS;
-  varptr->validrange[1] = VALIDMISS;
-  varptr->comptype = CDI_COMPRESS_NONE;
-  varptr->complevel = 1;
-  varptr->keys.nalloc = MAX_KEYS;
-  for (int i = 0; i < MAX_KEYS; ++i) varptr->keys.value[i].length = 0;
-  varptr->atts.nalloc = MAX_ATTRIBUTES;
-  varptr->subtypeID = CDI_UNDEFID;
+  varP->xyz = 5;  // xyzStorVals[5] == 321
+  varP->mvarID = varID;
+  varP->fvarID = varID;
+  varP->gridID = CDI_UNDEFID;
+  varP->zaxisID = CDI_UNDEFID;
+  varP->timetype = CDI_UNDEFID;
+  varP->tsteptype = TSTEP_INSTANT;
+  varP->datatype = CDI_UNDEFID;
+  varP->instID = CDI_UNDEFID;
+  varP->modelID = CDI_UNDEFID;
+  varP->tableID = CDI_UNDEFID;
+  varP->missval = CDI_Default_Missval;
+  varP->validrange[0] = VALIDMISS;
+  varP->validrange[1] = VALIDMISS;
+  varP->comptype = CDI_COMPRESS_NONE;
+  varP->complevel = 1;
+  varP->keys.nalloc = MAX_KEYS;
+  for (int i = 0; i < MAX_KEYS; ++i) varP->keys.value[i].length = 0;
+  varP->atts.nalloc = MAX_ATTRIBUTES;
+  varP->subtypeID = CDI_UNDEFID;
 }
 
 static int
 vlistvarNewEntry(int vlistID)
 {
   int varID = 0;
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  int vlistvarSize = vlistptr->varsAllocated;
-  var_t *vlistvars = vlistptr->vars;
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
+  int vlistvarSize = vlistP->varsAllocated;
+  var_t *vlistvars = vlistP->vars;
   // Look for a free slot in vlistvar. (Create the table the first time through).
   if (!vlistvarSize)
   {
     vlistvarSize = 2;
     vlistvars = (var_t *) Malloc((size_t) vlistvarSize * sizeof(var_t));
-    for (int i = 0; i < vlistvarSize; ++i) vlistvars[i].isUsed = false;
+    for (int i = 0; i < vlistvarSize; ++i) { vlistvars[i].isUsed = false; }
   }
   else
   {
@@ -72,11 +72,11 @@ vlistvarNewEntry(int vlistID)
   if (varID == vlistvarSize)
   {
     vlistvars = (var_t *) Realloc(vlistvars, (size_t) (vlistvarSize *= 2) * sizeof(var_t));
-    for (int i = varID; i < vlistvarSize; ++i) vlistvars[i].isUsed = false;
+    for (int i = varID; i < vlistvarSize; ++i) { vlistvars[i].isUsed = false; }
   }
 
-  vlistptr->varsAllocated = vlistvarSize;
-  vlistptr->vars = vlistvars;
+  vlistP->varsAllocated = vlistvarSize;
+  vlistP->vars = vlistvars;
 
   vlistvar_init_entry(vlistvars, varID);
   vlistvars[varID].isUsed = true;
@@ -84,11 +84,11 @@ vlistvarNewEntry(int vlistID)
   return varID;
 }
 
-static var_t *
-vlistptr_get_varptr(const char *caller, vlist_t *vlistptr, int varID)
+static inline var_t *
+vlistP_get_varP(const char *caller, vlist_t *vlistP, int varID)
 {
-  if (varID < 0 || varID >= vlistptr->nvars || !vlistptr->vars[varID].isUsed) Errorc("varID %d undefined!", varID);
-  return &vlistptr->vars[varID];
+  if (varID < 0 || varID >= vlistP->nvars || !vlistP->vars[varID].isUsed) Errorc("varID %d undefined!", varID);
+  return &vlistP->vars[varID];
 }
 
 int
@@ -98,25 +98,25 @@ vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int timetype, int tileset
 
   int varID = vlistvarNewEntry(vlistID);
 
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  vlistptr->nvars++;
-  var_t *varptr = &vlistptr->vars[varID];
-  varptr->gridID = gridID;
-  varptr->zaxisID = zaxisID;
-  varptr->timetype = timetype;
-  varptr->subtypeID = tilesetID;
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
+  vlistP->nvars++;
+  var_t *varP = &vlistP->vars[varID];
+  varP->gridID = gridID;
+  varP->zaxisID = zaxisID;
+  varP->timetype = timetype;
+  varP->subtypeID = tilesetID;
 
   if (timetype < 0)
   {
     Warning("Unexpected time type %d, set to TIME_VARYING!", timetype);
-    varptr->timetype = TIME_VARYING;
+    varP->timetype = TIME_VARYING;
   }
 
   // Compatibility for release 1.8.3
   if (timetype > 1 && timetype < 15)
   {
-    varptr->timetype = TIME_VARYING;
-    varptr->tsteptype = timetype;
+    varP->timetype = TIME_VARYING;
+    varP->tsteptype = timetype;
     static bool printInfo = true;
     if (printInfo)
     {
@@ -131,11 +131,11 @@ vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int timetype, int tileset
     }
   }
 
-  vlistAdd2GridIDs(vlistptr, gridID);
-  vlistAdd2ZaxisIDs(vlistptr, zaxisID);
-  vlistAdd2SubtypeIDs(vlistptr, tilesetID);
+  vlistAdd2GridIDs(vlistP, gridID);
+  vlistAdd2ZaxisIDs(vlistP, zaxisID);
+  vlistAdd2SubtypeIDs(vlistP, tilesetID);
 
-  varptr->param = cdiEncodeParam(-(varID + 1), 255, 255);
+  varP->param = cdiEncodeParam(-(varID + 1), 255, 255);
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 
   return varID;
@@ -186,17 +186,17 @@ vlistDefVar(int vlistID, int gridID, int zaxisID, int timetype)
 }
 
 void
-cdiVlistCreateVarLevInfo(vlist_t *vlistptr, int varID)
+cdiVlistCreateVarLevInfo(vlist_t *vlistP, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlistptr, varID);
-  xassert(varID >= 0 && varID < vlistptr->nvars && varptr->levinfo == NULL);
+  var_t *varP = vlistP_get_varP(__func__, vlistP, varID);
+  xassert(varID >= 0 && varID < vlistP->nvars && varP->levinfo == NULL);
 
-  int zaxisID = varptr->zaxisID;
+  int zaxisID = varP->zaxisID;
   size_t nlevs = (size_t) zaxisInqSize(zaxisID);
 
-  varptr->levinfo = (levinfo_t *) Malloc(nlevs * sizeof(levinfo_t));
+  varP->levinfo = (levinfo_t *) Malloc(nlevs * sizeof(levinfo_t));
 
-  for (size_t levID = 0; levID < nlevs; ++levID) varptr->levinfo[levID] = DEFAULT_LEVINFO((int) levID);
+  for (size_t levID = 0; levID < nlevs; ++levID) varP->levinfo[levID] = DEFAULT_LEVINFO((int) levID);
 }
 
 /*
@@ -217,11 +217,11 @@ The function @func{vlistDefVarParam} defines the parameter number of a variable.
 void
 vlistDefVarParam(int vlistID, int varID, int param)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->param != param)
+  if (varP->param != param)
   {
-    varptr->param = param;
+    varP->param = param;
     reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -244,14 +244,14 @@ The function @func{vlistDefVarCode} defines the code number of a variable.
 void
 vlistDefVarCode(int vlistID, int varID, int code)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
   int pnum, pcat, pdis;
-  cdiDecodeParam(varptr->param, &pnum, &pcat, &pdis);
+  cdiDecodeParam(varP->param, &pnum, &pcat, &pdis);
   int newParam = cdiEncodeParam(code, pcat, pdis);
-  if (varptr->param != newParam)
+  if (varP->param != newParam)
   {
-    varptr->param = newParam;
+    varP->param = newParam;
     reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -259,11 +259,11 @@ vlistDefVarCode(int vlistID, int varID, int code)
 void
 vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timetype)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
-  *gridID = varptr->gridID;
-  *zaxisID = varptr->zaxisID;
-  *timetype = varptr->timetype;
+  *gridID = varP->gridID;
+  *zaxisID = varP->zaxisID;
+  *timetype = varP->timetype;
 }
 
 /*
@@ -286,8 +286,8 @@ The function @func{vlistInqVarGrid} returns the grid ID of a Variable.
 int
 vlistInqVarGrid(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->gridID;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->gridID;
 }
 
 /*
@@ -310,8 +310,8 @@ The function @func{vlistInqVarZaxis} returns the zaxis ID of a variable.
 int
 vlistInqVarZaxis(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->zaxisID;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->zaxisID;
 }
 
 /*
@@ -329,8 +329,8 @@ The function @func{vlistInqVarSubtype} returns the subtype ID of a variable.
 int
 vlistInqVarSubtype(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->subtypeID;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->subtypeID;
 }
 
 /*
@@ -353,8 +353,8 @@ The function @func{vlistInqVarParam} returns the parameter number of a variable.
 int
 vlistInqVarParam(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->param;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->param;
 }
 
 /*
@@ -377,14 +377,14 @@ The function @func{vlistInqVarCode} returns the code number of a variable.
 int
 vlistInqVarCode(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
   int pdis, pcat, pnum;
-  cdiDecodeParam(varptr->param, &pnum, &pcat, &pdis);
+  cdiDecodeParam(varP->param, &pnum, &pcat, &pdis);
   int code = pnum;
   if (pdis != 255) code = -varID - 1;  // GRIB2 Parameter
 
-  int tableID = varptr->tableID;
+  int tableID = varP->tableID;
   if (code < 0 && tableID != -1)
   {
     char name[CDI_MAX_NAME];
@@ -424,14 +424,14 @@ vlistInqVarName(int vlistID, int varID, char *name)
   int length = CDI_MAX_NAME;
   if (CDI_NOERR != cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length))
   {
-    var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+    var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
     int pdis, pcat, pnum;
-    cdiDecodeParam(varptr->param, &pnum, &pcat, &pdis);
+    cdiDecodeParam(varP->param, &pnum, &pcat, &pdis);
     if (pdis == 255)
     {
       int code = pnum;
-      int tableID = varptr->tableID;
+      int tableID = varP->tableID;
       tableInqEntry(tableID, code, -1, name, NULL, NULL);
       if (!name[0]) snprintf(name, 8, "var%d", code);
     }
@@ -468,15 +468,15 @@ vlistCopyVarName(int vlistID, int varID)
   (void) cdiInqKeyString(vlistID, varID, CDI_KEY_NAME, name, &length);
   if (name[0]) return strdup(name);
 
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
   // Otherwise we check if we should use the table of parameter descriptions.
   int discipline, category, number;
-  cdiDecodeParam(varptr->param, &number, &category, &discipline);
+  cdiDecodeParam(varP->param, &number, &category, &discipline);
   char *result = NULL;
   if (discipline == 255)
   {
-    tableInqEntry(varptr->tableID, number, -1, name, NULL, NULL);
+    tableInqEntry(varP->tableID, number, -1, name, NULL, NULL);
     if (name[0])
       result = strdup(name);
     else
@@ -524,11 +524,11 @@ vlistInqVarLongname(int vlistID, int varID, char *longname)
   int length = CDI_MAX_NAME;
   if (CDI_NOERR != cdiInqKeyString(vlistID, varID, CDI_KEY_LONGNAME, longname, &length))
   {
-    var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+    var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
     int pdis, pcat, pnum;
-    cdiDecodeParam(varptr->param, &pnum, &pcat, &pdis);
-    if (pdis == 255) tableInqEntry(varptr->tableID, pnum, -1, NULL, longname, NULL);
+    cdiDecodeParam(varP->param, &pnum, &pcat, &pdis);
+    if (pdis == 255) tableInqEntry(varP->tableID, pnum, -1, NULL, longname, NULL);
   }
 }
 
@@ -616,11 +616,11 @@ vlistInqVarUnits(int vlistID, int varID, char *units)
   int length = CDI_MAX_NAME;
   if (CDI_NOERR != cdiInqKeyString(vlistID, varID, CDI_KEY_UNITS, units, &length))
   {
-    var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+    var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
     int pdis, pcat, pnum;
-    cdiDecodeParam(varptr->param, &pnum, &pcat, &pdis);
-    if (pdis == 255) tableInqEntry(varptr->tableID, pnum, -1, NULL, NULL, units);
+    cdiDecodeParam(varP->param, &pnum, &pcat, &pdis);
+    if (pdis == 255) tableInqEntry(varP->tableID, pnum, -1, NULL, NULL, units);
   }
 }
 
@@ -628,11 +628,11 @@ vlistInqVarUnits(int vlistID, int varID, char *units)
 int
 vlistInqVarID(int vlistID, int code)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
 
-  for (int varID = 0; varID < vlistptr->nvars; ++varID)
+  for (int varID = 0; varID < vlistP->nvars; ++varID)
   {
-    int param = vlistptr->vars[varID].param;
+    int param = vlistP->vars[varID].param;
     int pdis, pcat, pnum;
     cdiDecodeParam(param, &pnum, &pcat, &pdis);
     if (pnum == code) return varID;
@@ -676,18 +676,18 @@ The valid CDI data types are @func{CDI_DATATYPE_PACK8}, @func{CDI_DATATYPE_PACK1
 int
 vlistInqVarDatatype(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->datatype;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->datatype;
 }
 
 int
 vlistInqVarNumber(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return (varptr->datatype == CDI_DATATYPE_CPX32 || varptr->datatype == CDI_DATATYPE_CPX64) ? CDI_COMP : CDI_REAL;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return (varP->datatype == CDI_DATATYPE_CPX32 || varP->datatype == CDI_DATATYPE_CPX64) ? CDI_COMP : CDI_REAL;
 }
 
-static bool
+static inline bool
 check_range(double value, double lowerBound, double upperBound)
 {
   return (value >= lowerBound && value <= upperBound);
@@ -714,44 +714,44 @@ The function @func{vlistDefVarDatatype} defines the data type of a variable.
 void
 vlistDefVarDatatype(int vlistID, int varID, int datatype)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->datatype == datatype) return;
+  if (varP->datatype == datatype) return;
 
-  varptr->datatype = datatype;
+  varP->datatype = datatype;
 
-  if (!varptr->missvalused)
+  if (!varP->missvalused)
   {
-    double missval = varptr->missval;
+    double missval = varP->missval;
     bool missvalIsDefault = DBL_IS_EQUAL(missval, CDI_Default_Missval);
     if (missvalIsDefault)
     {
       // clang-format off
-        switch (datatype)
-          {
-          case CDI_DATATYPE_INT8:   varptr->missval = -SCHAR_MAX; break;
-          case CDI_DATATYPE_UINT8:  varptr->missval =  UCHAR_MAX; break;
-          case CDI_DATATYPE_INT16:  varptr->missval = -SHRT_MAX;  break;
-          case CDI_DATATYPE_UINT16: varptr->missval =  USHRT_MAX; break;
-          case CDI_DATATYPE_INT32:  varptr->missval = -INT_MAX;   break;
-          case CDI_DATATYPE_UINT32: varptr->missval =  UINT_MAX;  break;
-          case CDI_DATATYPE_FLT32:  varptr->missval =  (float) CDI_Default_Missval;  break;
-          }
+      switch (datatype)
+      {
+        case CDI_DATATYPE_INT8:   varP->missval = -SCHAR_MAX; break;
+        case CDI_DATATYPE_UINT8:  varP->missval =  UCHAR_MAX; break;
+        case CDI_DATATYPE_INT16:  varP->missval = -SHRT_MAX;  break;
+        case CDI_DATATYPE_UINT16: varP->missval =  USHRT_MAX; break;
+        case CDI_DATATYPE_INT32:  varP->missval = -INT_MAX;   break;
+        case CDI_DATATYPE_UINT32: varP->missval =  UINT_MAX;  break;
+        case CDI_DATATYPE_FLT32:  varP->missval =  (float) CDI_Default_Missval;  break;
+      }
       // clang-format on
     }
     else
     {
       // clang-format off
-        switch (datatype)
-          {
-          case CDI_DATATYPE_INT8:   varptr->missval = check_range(missval, -SCHAR_MAX, SCHAR_MAX) ? missval : -SCHAR_MAX; break;
-          case CDI_DATATYPE_UINT8:  varptr->missval = check_range(missval,          0, UCHAR_MAX) ? missval :  UCHAR_MAX; break;
-          case CDI_DATATYPE_INT16:  varptr->missval = check_range(missval,  -SHRT_MAX,  SHRT_MAX) ? missval : -SHRT_MAX;  break;
-          case CDI_DATATYPE_UINT16: varptr->missval = check_range(missval,          0, USHRT_MAX) ? missval :  USHRT_MAX; break;
-          case CDI_DATATYPE_INT32:  varptr->missval = check_range(missval,   -INT_MAX,   INT_MAX) ? missval : -INT_MAX;   break;
-          case CDI_DATATYPE_UINT32: varptr->missval = check_range(missval,          0,  UINT_MAX) ? missval :  UINT_MAX;  break;
-          case CDI_DATATYPE_FLT32:  varptr->missval = check_range(missval,   -FLT_MAX,   FLT_MAX) ? missval :  CDI_Default_Missval;  break;
-          }
+      switch (datatype)
+      {
+        case CDI_DATATYPE_INT8:   varP->missval = check_range(missval, -SCHAR_MAX, SCHAR_MAX) ? missval : -SCHAR_MAX; break;
+        case CDI_DATATYPE_UINT8:  varP->missval = check_range(missval,          0, UCHAR_MAX) ? missval :  UCHAR_MAX; break;
+        case CDI_DATATYPE_INT16:  varP->missval = check_range(missval,  -SHRT_MAX,  SHRT_MAX) ? missval : -SHRT_MAX;  break;
+        case CDI_DATATYPE_UINT16: varP->missval = check_range(missval,          0, USHRT_MAX) ? missval :  USHRT_MAX; break;
+        case CDI_DATATYPE_INT32:  varP->missval = check_range(missval,   -INT_MAX,   INT_MAX) ? missval : -INT_MAX;   break;
+        case CDI_DATATYPE_UINT32: varP->missval = check_range(missval,          0,  UINT_MAX) ? missval :  UINT_MAX;  break;
+        case CDI_DATATYPE_FLT32:  varP->missval = check_range(missval,   -FLT_MAX,   FLT_MAX) ? missval :  CDI_Default_Missval;  break;
+      }
       // clang-format on
     }
   }
@@ -761,10 +761,10 @@ vlistDefVarDatatype(int vlistID, int varID, int datatype)
 void
 vlistDefVarInstitut(int vlistID, int varID, int instID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  if (varptr->instID != instID)
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  if (varP->instID != instID)
   {
-    varptr->instID = instID;
+    varP->instID = instID;
     reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -772,17 +772,17 @@ vlistDefVarInstitut(int vlistID, int varID, int instID)
 int
 vlistInqVarInstitut(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->instID;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->instID;
 }
 
 void
 vlistDefVarModel(int vlistID, int varID, int modelID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  if (varptr->modelID != modelID)
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  if (varP->modelID != modelID)
   {
-    varptr->modelID = modelID;
+    varP->modelID = modelID;
     reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -790,22 +790,22 @@ vlistDefVarModel(int vlistID, int varID, int modelID)
 int
 vlistInqVarModel(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->modelID;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->modelID;
 }
 
 void
 vlistDefVarTable(int vlistID, int varID, int tableID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->tableID != tableID)
+  if (varP->tableID != tableID)
   {
-    varptr->tableID = tableID;
+    varP->tableID = tableID;
     int tablenum = tableInqNum(tableID);
     int pnum, pcat, pdis;
-    cdiDecodeParam(varptr->param, &pnum, &pcat, &pdis);
-    varptr->param = cdiEncodeParam(pnum, tablenum, pdis);
+    cdiDecodeParam(varP->param, &pnum, &pcat, &pdis);
+    varP->param = cdiEncodeParam(pnum, tablenum, pdis);
     reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -813,8 +813,8 @@ vlistDefVarTable(int vlistID, int varID, int tableID)
 int
 vlistInqVarTable(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->tableID;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->tableID;
 }
 
 /*
@@ -921,8 +921,8 @@ The function @func{vlistInqVarMissval} returns the missing value of a variable.
 double
 vlistInqVarMissval(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->missval;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->missval;
 }
 
 /*
@@ -943,43 +943,43 @@ The function @func{vlistDefVarMissval} defines the missing value of a variable.
 void
 vlistDefVarMissval(int vlistID, int varID, double missval)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  varptr->missval = missval;
-  varptr->missvalused = true;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  varP->missval = missval;
+  varP->missvalused = true;
   cdiDefKeyFloat(vlistID, varID, CDI_KEY_MISSVAL, missval);
 }
 
 int
 vlistInqVarValidrange(int vlistID, int varID, double *validrange)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (validrange != NULL && varptr->lvalidrange)
+  if (validrange != NULL && varP->lvalidrange)
   {
-    validrange[0] = varptr->validrange[0];
-    validrange[1] = varptr->validrange[1];
+    validrange[0] = varP->validrange[0];
+    validrange[1] = varP->validrange[1];
   }
 
-  return (int) varptr->lvalidrange;
+  return (int) varP->lvalidrange;
 }
 
 void
 vlistDefVarValidrange(int vlistID, int varID, const double *validrange)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  varptr->validrange[0] = validrange[0];
-  varptr->validrange[1] = validrange[1];
-  varptr->lvalidrange = true;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  varP->validrange[0] = validrange[0];
+  varP->validrange[1] = validrange[1];
+  varP->lvalidrange = true;
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
 void
 vlistDefVarTimetype(int vlistID, int varID, int timetype)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  if (varptr->timetype != timetype)
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  if (varP->timetype != timetype)
   {
-    varptr->timetype = timetype;
+    varP->timetype = timetype;
     reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -987,17 +987,17 @@ vlistDefVarTimetype(int vlistID, int varID, int timetype)
 int
 vlistInqVarTimetype(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->timetype;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->timetype;
 }
 
 void
 vlistDefVarTsteptype(int vlistID, int varID, int tsteptype)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  if (varptr->tsteptype != tsteptype)
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  if (varP->tsteptype != tsteptype)
   {
-    varptr->tsteptype = tsteptype;
+    varP->tsteptype = tsteptype;
     reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -1025,40 +1025,39 @@ The valid CDI timestep types are @func{TSTEP_INSTANT},
 int
 vlistInqVarTsteptype(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->tsteptype;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->tsteptype;
 }
 
 int
 vlistInqVarMissvalUsed(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return (int) varptr->missvalused;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return (int) varP->missvalused;
 }
 
 void
 vlistDefFlag(int vlistID, int varID, int levID, int flag)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  var_t *varptr = vlistptr_get_varptr(__func__, vlistptr, varID);
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
+  var_t *varP = vlistP_get_varP(__func__, vlistP, varID);
 
   levinfo_t li = DEFAULT_LEVINFO(levID);
-  if (varptr->levinfo) { ; }
-  else if (flag != li.flag) { cdiVlistCreateVarLevInfo(vlistptr, varID); }
-  else
+  if (varP->levinfo == NULL)
   {
-    return;
+    if (flag == li.flag) return;
+    cdiVlistCreateVarLevInfo(vlistP, varID);
   }
 
-  varptr->levinfo[levID].flag = flag;
-  varptr->flag = 0;
+  varP->levinfo[levID].flag = flag;
+  varP->flag = 0;
 
-  int nlevs = zaxisInqSize(varptr->zaxisID);
+  int nlevs = zaxisInqSize(varP->zaxisID);
   for (int levelID = 0; levelID < nlevs; ++levelID)
   {
-    if (varptr->levinfo[levelID].flag)
+    if (varP->levinfo[levelID].flag)
     {
-      varptr->flag = 1;
+      varP->flag = 1;
       break;
     }
   }
@@ -1067,20 +1066,20 @@ vlistDefFlag(int vlistID, int varID, int levID, int flag)
 }
 
 int
-vlist_inq_flag(vlist_t *vlistPtr, int varID, int levelID)
+vlist_inq_flag(vlist_t *vlistP, int varID, int levelID)
 {
-  var_t *varPtr = vlistptr_get_varptr(__func__, vlistPtr, varID);
+  var_t *varP = vlistP_get_varP(__func__, vlistP, varID);
 
-  if (varPtr->levinfo) return varPtr->levinfo[levelID].flag;
+  if (varP->levinfo) return varP->levinfo[levelID].flag;
 
   levinfo_t li = DEFAULT_LEVINFO(levelID);
   return li.flag;
 }
 
 int
-pvlistInqFlag(void *vlistPtr, int varID, int levelID)
+pvlistInqFlag(void *vlistP, int varID, int levelID)
 {
-  return vlist_inq_flag((vlist_t *) vlistPtr, varID, levelID);
+  return vlist_inq_flag((vlist_t *) vlistP, varID, levelID);
 }
 
 int
@@ -1093,14 +1092,14 @@ int
 vlistFindVar(int vlistID, int fvarID)
 {
   int varID;
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
 
-  for (varID = 0; varID < vlistptr->nvars; ++varID)
+  for (varID = 0; varID < vlistP->nvars; ++varID)
   {
-    if (vlistptr->vars[varID].fvarID == fvarID) break;
+    if (vlistP->vars[varID].fvarID == fvarID) break;
   }
 
-  if (varID == vlistptr->nvars)
+  if (varID == vlistP->nvars)
   {
     varID = -1;
     Warning("varID not found for fvarID %d in vlistID %d!", fvarID, vlistID);
@@ -1114,14 +1113,14 @@ vlistFindLevel(int vlistID, int fvarID, int flevelID)
 {
   int levelID = -1;
   int varID = vlistFindVar(vlistID, fvarID);
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
   if (varID != -1)
   {
-    int nlevs = zaxisInqSize(varptr->zaxisID);
+    int nlevs = zaxisInqSize(varP->zaxisID);
     for (levelID = 0; levelID < nlevs; ++levelID)
     {
-      if (varptr->levinfo[levelID].flevelID == flevelID) break;
+      if (varP->levinfo[levelID].flevelID == flevelID) break;
     }
 
     if (levelID == nlevs)
@@ -1137,16 +1136,16 @@ vlistFindLevel(int vlistID, int fvarID, int flevelID)
 int
 vlistMergedVar(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->mvarID;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->mvarID;
 }
 
 int
 vlistMergedLevel(int vlistID, int varID, int levelID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->levinfo) return varptr->levinfo[levelID].mlevelID;
+  if (varP->levinfo) return varP->levinfo[levelID].mlevelID;
 
   levinfo_t li = DEFAULT_LEVINFO(levelID);
   return li.mlevelID;
@@ -1155,27 +1154,27 @@ vlistMergedLevel(int vlistID, int varID, int levelID)
 void
 vlistDefIndex(int vlistID, int varID, int levelID, int index)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  var_t *varptr = vlistptr_get_varptr(__func__, vlistptr, varID);
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
+  var_t *varP = vlistP_get_varP(__func__, vlistP, varID);
 
   levinfo_t li = DEFAULT_LEVINFO(levelID);
-  if (varptr->levinfo) { ; }
-  else if (index != li.index) { cdiVlistCreateVarLevInfo(vlistptr, varID); }
+  if (varP->levinfo) { ; }
+  else if (index != li.index) { cdiVlistCreateVarLevInfo(vlistP, varID); }
   else
   {
     return;
   }
 
-  varptr->levinfo[levelID].index = index;
+  varP->levinfo[levelID].index = index;
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
 int
 vlistInqIndex(int vlistID, int varID, int levelID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->levinfo) return varptr->levinfo[levelID].index;
+  if (varP->levinfo) return varP->levinfo[levelID].index;
 
   levinfo_t li = DEFAULT_LEVINFO(levelID);
   return li.index;
@@ -1184,65 +1183,65 @@ vlistInqIndex(int vlistID, int varID, int levelID)
 void
 vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  var_t *varptr = vlistptr_get_varptr(__func__, vlistptr, varID);
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
+  var_t *varP = vlistP_get_varP(__func__, vlistP, varID);
 
-  int nlevs1 = zaxisInqSize(varptr->zaxisID);
+  int nlevs1 = zaxisInqSize(varP->zaxisID);
   int nlevs2 = zaxisInqSize(zaxisID);
 
   if (nlevs1 != nlevs2) Error("Number of levels must not change!");
 
-  int nvars = vlistptr->nvars;
+  int nvars = vlistP->nvars;
   int found = 0;
-  int oldZaxisID = varptr->zaxisID;
-  for (int i = 0; i < varID; ++i) found |= (vlistptr->vars[i].zaxisID == oldZaxisID);
-  for (int i = varID + 1; i < nvars; ++i) found |= (vlistptr->vars[i].zaxisID == oldZaxisID);
+  int oldZaxisID = varP->zaxisID;
+  for (int i = 0; i < varID; ++i) found |= (vlistP->vars[i].zaxisID == oldZaxisID);
+  for (int i = varID + 1; i < nvars; ++i) found |= (vlistP->vars[i].zaxisID == oldZaxisID);
 
   if (found)
   {
-    int nzaxis = vlistptr->nzaxis;
+    int nzaxis = vlistP->nzaxis;
     for (int i = 0; i < nzaxis; ++i)
-      if (vlistptr->zaxisIDs[i] == oldZaxisID) vlistptr->zaxisIDs[i] = zaxisID;
+      if (vlistP->zaxisIDs[i] == oldZaxisID) vlistP->zaxisIDs[i] = zaxisID;
   }
   else
-    vlistAdd2ZaxisIDs(vlistptr, zaxisID);
+    vlistAdd2ZaxisIDs(vlistP, zaxisID);
 
-  varptr->zaxisID = zaxisID;
+  varP->zaxisID = zaxisID;
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
 void
 vlistChangeVarGrid(int vlistID, int varID, int gridID)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  var_t *varptr = vlistptr_get_varptr(__func__, vlistptr, varID);
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
+  var_t *varP = vlistP_get_varP(__func__, vlistP, varID);
 
-  int nvars = vlistptr->nvars;
+  int nvars = vlistP->nvars;
   int index;
   for (index = 0; index < nvars; index++)
     if (index != varID)
-      if (vlistptr->vars[index].gridID == vlistptr->vars[varID].gridID) break;
+      if (vlistP->vars[index].gridID == vlistP->vars[varID].gridID) break;
 
   if (index == nvars)
   {
-    for (index = 0; index < vlistptr->ngrids; index++)
-      if (vlistptr->gridIDs[index] == vlistptr->vars[varID].gridID) vlistptr->gridIDs[index] = gridID;
+    for (index = 0; index < vlistP->ngrids; index++)
+      if (vlistP->gridIDs[index] == vlistP->vars[varID].gridID) vlistP->gridIDs[index] = gridID;
   }
   else
-    vlistAdd2GridIDs(vlistptr, gridID);
+    vlistAdd2GridIDs(vlistP, gridID);
 
-  varptr->gridID = gridID;
+  varP->gridID = gridID;
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
 void
 vlistDefVarCompType(int vlistID, int varID, int comptype)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->comptype != comptype)
+  if (varP->comptype != comptype)
   {
-    varptr->comptype = comptype;
+    varP->comptype = comptype;
     reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -1250,18 +1249,18 @@ vlistDefVarCompType(int vlistID, int varID, int comptype)
 int
 vlistInqVarCompType(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->comptype;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->comptype;
 }
 
 void
 vlistDefVarCompLevel(int vlistID, int varID, int complevel)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (varptr->complevel != complevel)
+  if (varP->complevel != complevel)
   {
-    varptr->complevel = complevel;
+    varP->complevel = complevel;
     reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -1269,17 +1268,17 @@ vlistDefVarCompLevel(int vlistID, int varID, int complevel)
 int
 vlistInqVarCompLevel(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->complevel;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->complevel;
 }
 
 void
 vlistDefVarNSB(int vlistID, int varID, int nsb)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  if (varptr->nsb != nsb)
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  if (varP->nsb != nsb)
   {
-    varptr->nsb = nsb;
+    varP->nsb = nsb;
     reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -1287,8 +1286,8 @@ vlistDefVarNSB(int vlistID, int varID, int nsb)
 int
 vlistInqVarNSB(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return varptr->nsb;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return varP->nsb;
 }
 
 static int
@@ -1314,7 +1313,7 @@ enum
 void
 vlistDefVarXYZ(int vlistID, int varID, int xyz)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
   if (xyz == 3) xyz = 321;
 
@@ -1354,22 +1353,22 @@ vlistDefVarXYZ(int vlistID, int varID, int xyz)
       xyz = (int) i;
       break;
     }
-  varptr->xyz = (signed char) xyz;
+  varP->xyz = (signed char) xyz;
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
 void
 vlistInqVarDimorder(int vlistID, int varID, int outDimorder[3])
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  vlistDecodeXyz(xyzStorVals[varptr->xyz], outDimorder);
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  vlistDecodeXyz(xyzStorVals[varP->xyz], outDimorder);
 }
 
 int
 vlistInqVarXYZ(int vlistID, int varID)
 {
-  var_t *varptr = vlistptr_get_varptr(__func__, vlist_to_pointer(vlistID), varID);
-  return xyzStorVals[varptr->xyz];
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return xyzStorVals[varP->xyz];
 }
 
 int

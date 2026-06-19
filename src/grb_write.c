@@ -210,29 +210,29 @@ fillup_gribbuffer(size_t nbytes, unsigned char *gribbuffer)
 }
 
 void
-grbCopyField(stream_t *streamptr2, stream_t *streamptr1)
+grbCopyField(stream_t *streamP2, stream_t *streamP1)
 {
-  int filetype = streamptr1->filetype;
-  int fileID1 = streamptr1->fileID;
-  int fileID2 = streamptr2->fileID;
-  int tsID = streamptr1->curTsID;
-  int vrecID = streamptr1->tsteps[tsID].curRecID;
-  int recID = streamptr1->tsteps[tsID].recIDs[vrecID];
-  const recinfo_t *recinfo = &(streamptr1->tsteps[tsID].recinfo[recID]);
-  const record_t *record = &(streamptr1->tsteps[tsID].records[recID]);
+  int filetype = streamP1->filetype;
+  int fileID1 = streamP1->fileID;
+  int fileID2 = streamP2->fileID;
+  int tsID = streamP1->curTsID;
+  int vrecID = streamP1->tsteps[tsID].curRecID;
+  int recID = streamP1->tsteps[tsID].recIDs[vrecID];
+  const recinfo_t *recinfo = &(streamP1->tsteps[tsID].recinfo[recID]);
+  const record_t *record = &(streamP1->tsteps[tsID].records[recID]);
   off_t recpos = record->position;
   size_t recsize = record->size;
 
   void *gribbuffer = NULL;
 
-  if (streamptr1->protocol == CDI_PROTOCOL_FDB)
+  if (streamP1->protocol == CDI_PROTOCOL_FDB)
   {
 #ifdef HAVE_LIBFDB5
-    int fdbItemIndex = streamptr1->tsteps[tsID].records[recID].fdbItemIndex;
+    int fdbItemIndex = streamP1->tsteps[tsID].records[recID].fdbItemIndex;
     if (fdbItemIndex == -1) Error("fdbItem not available!");
 
     size_t buffersize = 0;
-    recsize = cdi_fdb_read_record(streamptr1->protocolData, &(streamptr1->fdbKeyValueList[fdbItemIndex]), &buffersize, &gribbuffer);
+    recsize = cdi_fdb_read_record(streamP1->protocolData, &(streamP1->fdbKeyValueList[fdbItemIndex]), &buffersize, &gribbuffer);
 
     // round up recsize to next multiple of 8
     size_t gribbuffersize = ((recsize + 7U) & ~7U);
@@ -308,7 +308,7 @@ grbCopyField(stream_t *streamptr2, stream_t *streamptr1)
     {
       size_t numMissVals = 0;
 
-      int vlistID = streamptr1->vlistID;
+      int vlistID = streamP1->vlistID;
       int varID = recinfo->varID;
       int levelID = recinfo->levelID;
       int gridID = vlistInqVarGrid(vlistID, varID);
@@ -319,7 +319,7 @@ grbCopyField(stream_t *streamptr2, stream_t *streamptr1)
 
       if (cdiDebugExt >= 20) Message(" processing varID %d; levelID %d", varID, levelID);
 
-      grb_write_var_slice(streamptr2, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, numMissVals);
+      grb_write_var_slice(streamP2, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, numMissVals);
 
       free(data);
     }
@@ -332,18 +332,18 @@ grbCopyField(stream_t *streamptr2, stream_t *streamptr1)
     size_t unzipsize;
     int izip = gribGetZip(recsize, (unsigned char *) gribbuffer, &unzipsize);
 
-    if (izip == 0 && (streamptr2->comptype == CDI_COMPRESS_SZIP || streamptr2->comptype == CDI_COMPRESS_AEC))
+    if (izip == 0 && (streamP2->comptype == CDI_COMPRESS_SZIP || streamP2->comptype == CDI_COMPRESS_AEC))
       nbytes = grbSzip(filetype, gribbuffer, nbytes);
   }
 
   fillup_gribbuffer(nbytes, (unsigned char *) gribbuffer);
 
-  if (streamptr2->protocol == CDI_PROTOCOL_FDB)
+  if (streamP2->protocol == CDI_PROTOCOL_FDB)
   {
-    int vlistID = streamptr1->vlistID;
+    int vlistID = streamP1->vlistID;
     int zaxisID = vlistInqVarZaxis(vlistID, recinfo->varID);
     int zaxisType = zaxisInqType(zaxisID);
-    CdiDateTime vDateTime = streamptr1->tsteps[tsID].taxis.vDateTime;
+    CdiDateTime vDateTime = streamP1->tsteps[tsID].taxis.vDateTime;
 
     FDB_Keys fdbKeys;
     snprintf(fdbKeys.date, sizeof(fdbKeys.date), "%d", (int) cdiDate_get(vDateTime.date));
@@ -355,7 +355,7 @@ grbCopyField(stream_t *streamptr2, stream_t *streamptr1)
     if (isML) snprintf(fdbKeys.levelist, sizeof(fdbKeys.levelist), "%d", isML ? record->ilevel : 0);
 
 #ifdef HAVE_LIBFDB5
-    cdi_fdb_store(streamptr2->protocolData, streamptr2->filename, gribbuffer, nbytes, &fdbKeys);
+    cdi_fdb_store(streamP2->protocolData, streamP2->filename, gribbuffer, nbytes, &fdbKeys);
 #endif
   }
   else
@@ -368,18 +368,18 @@ grbCopyField(stream_t *streamptr2, stream_t *streamptr1)
 }
 
 void
-grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t numMissVals)
+grb_write_var_slice(stream_t *streamP, int varID, int levelID, int memtype, const void *data, size_t numMissVals)
 {
-  int filetype = streamptr->filetype;
-  int fileID = streamptr->fileID;
-  int vlistID = streamptr->vlistID;
+  int filetype = streamP->filetype;
+  int fileID = streamP->fileID;
+  int vlistID = streamP->vlistID;
   int gridID = vlistInqVarGrid(vlistID, varID);
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
   int tsteptype = vlistInqVarTsteptype(vlistID, varID);
-  int tsID = streamptr->curTsID;
-  CdiDateTime vDateTime = streamptr->tsteps[tsID].taxis.vDateTime;
-  int numavg = (tsteptype == TSTEP_AVG) ? streamptr->tsteps[tsID].taxis.numavg : 0;
-  int comptype = streamptr->comptype;
+  int tsID = streamP->curTsID;
+  CdiDateTime vDateTime = streamP->tsteps[tsID].taxis.vDateTime;
+  int numavg = (tsteptype == TSTEP_AVG) ? streamP->tsteps[tsID].taxis.numavg : 0;
+  int comptype = streamP->comptype;
 
   if (CDI_Debug) Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
@@ -396,17 +396,17 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
 
   void *gribbuffer = NULL;
   size_t nbytes = grb_encode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, vDateTime, tsteptype, numavg, datasize,
-                             data, numMissVals, &gribbuffer, comptype, streamptr->gribContainers);
+                             data, numMissVals, &gribbuffer, comptype, streamP->gribContainers);
 
   if (filetype == CDI_FILETYPE_GRB && (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC))
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
-  switch (streamptr->protocol)
+  switch (streamP->protocol)
   {
     case CDI_PROTOCOL_ACROSS:
     {
 #ifdef HAVE_ACROSS
-      if (across_write_grib_message(streamptr, gribbuffer, nbytes)) SysError("Failed to write GRIB slice!");
+      if (across_write_grib_message(streamP, gribbuffer, nbytes)) SysError("Failed to write GRIB slice!");
 #endif
     }
     break;
@@ -427,7 +427,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
       int ilevel = (isML) ? (int) level : 0;
       if (isML) snprintf(fdbKeys.levelist, sizeof(fdbKeys.levelist), "%d", isML ? ilevel : 0);
 
-      cdi_fdb_store(streamptr->protocolData, streamptr->filename, gribbuffer, nbytes, &fdbKeys);
+      cdi_fdb_store(streamP->protocolData, streamP->filename, gribbuffer, nbytes, &fdbKeys);
 #endif
     }
     break;
@@ -448,9 +448,9 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
 }
 
 void
-grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t numMissVals)
+grb_write_var(stream_t *streamP, int varID, int memtype, const void *data, size_t numMissVals)
 {
-  int vlistID = streamptr->vlistID, gridID = vlistInqVarGrid(vlistID, varID), zaxisID = vlistInqVarZaxis(vlistID, varID),
+  int vlistID = streamP->vlistID, gridID = vlistInqVarGrid(vlistID, varID), zaxisID = vlistInqVarZaxis(vlistID, varID),
       nlevs = zaxisInqSize(zaxisID);
   size_t gridsize = (size_t) gridInqSize(gridID);
   double missval = vlistInqVarMissval(vlistID, varID);
@@ -465,7 +465,7 @@ grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, siz
       if (numMissVals)
         for (size_t i = 0; i < chunkLen; ++i) numMissVals_slice += DBL_IS_EQUAL(fdata[i], missval);
 
-      grb_write_var_slice(streamptr, varID, levelID, memtype, fdata, numMissVals_slice);
+      grb_write_var_slice(streamP, varID, levelID, memtype, fdata, numMissVals_slice);
     }
   else
     for (int levelID = 0; levelID < nlevs; levelID++)
@@ -476,16 +476,16 @@ grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, siz
       if (numMissVals)
         for (size_t i = 0; i < chunkLen; ++i) numMissVals_slice += DBL_IS_EQUAL(ddata[i], missval);
 
-      grb_write_var_slice(streamptr, varID, levelID, memtype, ddata, numMissVals_slice);
+      grb_write_var_slice(streamP, varID, levelID, memtype, ddata, numMissVals_slice);
     }
 }
 
 void
-grb_write_field(stream_t *streamptr, int memtype, const void *data, size_t numMissVals)
+grb_write_field(stream_t *streamP, int memtype, const void *data, size_t numMissVals)
 {
-  int varID = streamptr->record->varID;
-  int levelID = streamptr->record->levelID;
-  grb_write_var_slice(streamptr, varID, levelID, memtype, data, numMissVals);
+  int varID = streamP->record->varID;
+  int levelID = streamP->record->levelID;
+  grb_write_var_slice(streamP, varID, levelID, memtype, data, numMissVals);
 }
 
 #endif

@@ -24,8 +24,8 @@ cdiStreamReadVar(int streamID, int varID, int memType, void *data, size_t *numMi
   check_parg(data);
   check_parg(numMissVals);
 
-  stream_t *streamPtr = stream_to_pointer(streamID);
-  const int fileType = streamPtr->filetype;
+  stream_t *streamP = stream_to_pointer(streamID);
+  const int fileType = streamP->filetype;
 
   *numMissVals = 0;
 
@@ -34,19 +34,19 @@ cdiStreamReadVar(int streamID, int varID, int memType, void *data, size_t *numMi
   switch (cdiBaseFiletype(fileType))
   {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB: grb_read_var(streamPtr, varID, memType, data, numMissVals); break;
+    case CDI_FILETYPE_GRIB: grb_read_var(streamP, varID, memType, data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV: srvReadVarDP(streamPtr, varID, (double *) data, numMissVals); break;
+    case CDI_FILETYPE_SRV: srvReadVarDP(streamP, varID, (double *) data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT: extReadVarDP(streamPtr, varID, (double *) data, numMissVals); break;
+    case CDI_FILETYPE_EXT: extReadVarDP(streamP, varID, (double *) data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG: iegReadVarDP(streamPtr, varID, (double *) data, numMissVals); break;
+    case CDI_FILETYPE_IEG: iegReadVarDP(streamP, varID, (double *) data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdf_read_var(streamPtr, varID, memType, data, numMissVals); break;
+    case CDI_FILETYPE_NETCDF: cdf_read_var(streamP, varID, memType, data, numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(fileType));
   }
@@ -126,8 +126,8 @@ cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memType, void *d
   check_parg(data);
   check_parg(numMissVals);
 
-  stream_t *streamPtr = stream_to_pointer(streamID);
-  const int fileType = streamPtr->filetype;
+  stream_t *streamP = stream_to_pointer(streamID);
+  const int fileType = streamP->filetype;
 
   *numMissVals = 0;
 
@@ -136,19 +136,19 @@ cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memType, void *d
   switch (cdiBaseFiletype(fileType))
   {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB: grb_read_var_slice(streamPtr, varID, levelID, memType, data, numMissVals); break;
+    case CDI_FILETYPE_GRIB: grb_read_var_slice(streamP, varID, levelID, memType, data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV: srvReadVarSliceDP(streamPtr, varID, levelID, (double *) data, numMissVals); break;
+    case CDI_FILETYPE_SRV: srvReadVarSliceDP(streamP, varID, levelID, (double *) data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT: extReadVarSliceDP(streamPtr, varID, levelID, (double *) data, numMissVals); break;
+    case CDI_FILETYPE_EXT: extReadVarSliceDP(streamP, varID, levelID, (double *) data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG: iegReadVarSliceDP(streamPtr, varID, levelID, (double *) data, numMissVals); break;
+    case CDI_FILETYPE_IEG: iegReadVarSliceDP(streamP, varID, levelID, (double *) data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdf_read_var_slice(streamPtr, varID, levelID, memType, data, numMissVals); break;
+    case CDI_FILETYPE_NETCDF: cdf_read_var_slice(streamP, varID, levelID, memType, data, numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(fileType));
   }
@@ -228,33 +228,33 @@ stream_read_record(int streamID, int memType, void *data, size_t *numMissVals)
   check_parg(data);
   check_parg(numMissVals);
 
-  stream_t *streamPtr = stream_to_pointer(streamID);
+  stream_t *streamP = stream_to_pointer(streamID);
 
-  if (streamPtr->lockIO) CDI_IO_LOCK();
+  if (streamP->lockIO) CDI_IO_LOCK();
 
   *numMissVals = 0;
 
-  switch (cdiBaseFiletype(streamPtr->filetype))
+  switch (cdiBaseFiletype(streamP->filetype))
   {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB: grb_read_field(streamPtr, memType, data, numMissVals); break;
+    case CDI_FILETYPE_GRIB: grb_read_field(streamP, memType, data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV: srv_read_field(streamPtr, memType, data, numMissVals); break;
+    case CDI_FILETYPE_SRV: srv_read_field(streamP, memType, data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT: ext_read_field(streamPtr, memType, data, numMissVals); break;
+    case CDI_FILETYPE_EXT: ext_read_field(streamP, memType, data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG: ieg_read_field(streamPtr, memType, data, numMissVals); break;
+    case CDI_FILETYPE_IEG: ieg_read_field(streamP, memType, data, numMissVals); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdf_read_field(streamPtr, memType, data, numMissVals); break;
+    case CDI_FILETYPE_NETCDF: cdf_read_field(streamP, memType, data, numMissVals); break;
 #endif
-    default: Error("%s support not compiled in!", strfiletype(streamPtr->filetype));
+    default: Error("%s support not compiled in!", strfiletype(streamP->filetype));
   }
 
-  if (streamPtr->lockIO) CDI_IO_UNLOCK();
+  if (streamP->lockIO) CDI_IO_UNLOCK();
 }
 
 void
@@ -284,8 +284,8 @@ cdiStreamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int
   check_parg(data);
   check_parg(numMissVals);
 
-  stream_t *streamPtr = stream_to_pointer(streamID);
-  int fileType = streamPtr->filetype;
+  stream_t *streamP = stream_to_pointer(streamID);
+  int fileType = streamP->filetype;
 
   *numMissVals = 0;
 
@@ -295,14 +295,14 @@ cdiStreamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRIB:
     {
-      grb_read_var_slice(streamPtr, varID, levelID, memType, data, numMissVals);
+      grb_read_var_slice(streamP, varID, levelID, memType, data, numMissVals);
       break;
     }
 #endif
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF:
     {
-      cdf_read_var_slice_part(streamPtr, varID, levelID, memType, varType, start, size, data, numMissVals);
+      cdf_read_var_slice_part(streamP, varID, levelID, memType, varType, start, size, data, numMissVals);
       break;
     }
 #endif
@@ -326,8 +326,8 @@ cdiStreamReadVarPart(int streamID, int varID, int varType, int start, size_t siz
   check_parg(data);
   check_parg(numMissVals);
 
-  stream_t *streamPtr = stream_to_pointer(streamID);
-  int fileType = streamPtr->filetype;
+  stream_t *streamP = stream_to_pointer(streamID);
+  int fileType = streamP->filetype;
 
   *numMissVals = 0;
 
@@ -337,14 +337,14 @@ cdiStreamReadVarPart(int streamID, int varID, int varType, int start, size_t siz
 #ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRIB:
     {
-      grb_read_var(streamPtr, varID, memType, data, numMissVals);
+      grb_read_var(streamP, varID, memType, data, numMissVals);
       break;
     }
 #endif
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF:
     {
-      cdf_read_var_part(streamPtr, varID, memType, varType, start, size, data, numMissVals);
+      cdf_read_var_part(streamP, varID, memType, varType, start, size, data, numMissVals);
       break;
     }
 #endif

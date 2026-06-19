@@ -27,12 +27,12 @@
 #include "resource_unpack.h"
 
 static cdi_atts_t *
-get_attsp(vlist_t *vlistptr, int varID)
+get_attsp(vlist_t *vlistP, int varID)
 {
   if (varID == CDI_GLOBAL)
-    return &vlistptr->atts;
-  else if (varID >= 0 && varID < vlistptr->nvars)
-    return &(vlistptr->vars[varID].atts);
+    return &vlistP->atts;
+  else if (varID >= 0 && varID < vlistP->nvars)
+    return &(vlistP->vars[varID].atts);
 
   return NULL;
 }
@@ -104,18 +104,18 @@ cdi_get_attsp(int objID, int varID)
 
   if (varID == CDI_GLOBAL && reshGetTxCode(objID) == GRID)
   {
-    grid_t *gridptr = grid_to_pointer(objID);
-    attsp = &gridptr->atts;
+    grid_t *gridP = grid_to_pointer(objID);
+    attsp = &gridP->atts;
   }
   else if (varID == CDI_GLOBAL && reshGetTxCode(objID) == ZAXIS)
   {
-    zaxis_t *zaxisptr = zaxis_to_pointer(objID);
-    attsp = &zaxisptr->atts;
+    zaxis_t *zaxisP = zaxis_to_pointer(objID);
+    attsp = &zaxisP->atts;
   }
   else
   {
-    vlist_t *vlistptr = vlist_to_pointer(objID);
-    attsp = get_attsp(vlistptr, varID);
+    vlist_t *vlistP = vlist_to_pointer(objID);
+    attsp = get_attsp(vlistP, varID);
   }
 
   return attsp;

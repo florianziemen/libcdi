@@ -468,7 +468,7 @@ void    streamCopyField(int streamIDdest, int streamIDsrc);
 
 void *  stream_get_pointer(int streamID);
 void *  stream_get_vlist_pointer(int streamID);
-void    pstreamInqField(void *streamPtr, int *varID, int *levelID);
+void    pstreamInqField(void *streamP, int *varID, int *levelID);
 
 void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);
 

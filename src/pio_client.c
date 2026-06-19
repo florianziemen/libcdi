@@ -68,14 +68,14 @@ cdiPioClientUpdateResHList()
 }
 
 static int
-cdiPioClientStreamOpen(const char *filename, char filemode, int filetype, stream_t *streamptr, int recordBufIsToBeCreated)
+cdiPioClientStreamOpen(const char *filename, char filemode, int filetype, stream_t *streamP, int recordBufIsToBeCreated)
 {
-  (void) streamptr;
+  (void) streamP;
   (void) recordBufIsToBeCreated;
   int fileID = 0;
   if (filemode == 'w')
   {
-    int streamID = streamptr->self;
+    int streamID = streamP->self;
     reshSetStatus(streamID, &streamOps, reshGetStatus(streamID, &streamOps) & ~RESH_SYNC_BIT);
     struct ResHListUpdate rup = cdiPioClientUpdateResHList();
     MPI_Comm comm = rup.comm;
@@ -87,7 +87,7 @@ cdiPioClientStreamOpen(const char *filename, char filemode, int filetype, stream
       int size;
       size_t filename_len = strlen(filename);
       xassert(filename_len < (size_t) (INT_MAX - rup.msgPos));
-      int soHdr[3] = { streamptr->self, filetype, (int) filename_len };
+      int soHdr[3] = { streamP->self, filetype, (int) filename_len };
       xmpi(MPI_Pack_size(3, MPI_INT, comm, &size));
       msgSize += size;
       xmpi(MPI_Pack_size(1, MPI_CHAR, comm, &size));
@@ -106,7 +106,7 @@ cdiPioClientStreamOpen(const char *filename, char filemode, int filetype, stream
     else { xmpi(MPI_Recv(&fileID, 1, MPI_INT, collRank, STREAMOPEN, comm, MPI_STATUS_IGNORE)); }
     if (fileID >= 0)
     {
-      streamptr->filetype = filetype;
+      streamP->filetype = filetype;
       cdiPioClientStreamWinInit(streamID);
     }
   }
@@ -356,23 +356,23 @@ cdiPioClientStreamWriteVarChunk_(int streamID, int varID, int memtype, const int
 
 #if defined HAVE_LIBNETCDF
 static void
-cdiPioCdfDefTimestepNOP(stream_t *streamptr, int tsID)
+cdiPioCdfDefTimestepNOP(stream_t *streamP, int tsID)
 {
-  (void) streamptr;
+  (void) streamP;
   (void) tsID;
 }
 #endif
 
 static void
-cdiPioClientStreamNOP(stream_t *streamptr)
+cdiPioClientStreamNOP(stream_t *streamP)
 {
-  (void) streamptr;
+  (void) streamP;
 }
 
 static void
-cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
+cdiPioClientStreamClose(stream_t *streamP, int recordBufIsToBeDeleted)
 {
-  int streamID = streamptr->self;
+  int streamID = streamP->self;
   int clientRank = commInqRankModel(), numClients = cdiPioCommInqSizeClients(), numColl = commInqSizeColl(),
       collRank = cdiPioCollRank(clientRank, numClients, numColl);
   reshSetStatus(streamID, &streamOps, reshGetStatus(streamID, &streamOps) & ~RESH_SYNC_BIT);
@@ -390,18 +390,18 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
     }
     /* optimize: pos + size */
     msgBuffer = Realloc(msgBuffer, (size_t) msgSize);
-    xmpi(MPI_Pack(&streamptr->self, 1, MPI_INT, msgBuffer, msgSize, &rup.msgPos, comm));
+    xmpi(MPI_Pack(&streamP->self, 1, MPI_INT, msgBuffer, msgSize, &rup.msgPos, comm));
     int tag = needsFlush ? STREAMFLUSHCLOSE : STREAMCLOSE;
     xmpi(MPI_Send(msgBuffer, rup.msgPos, MPI_PACKED, collRank, tag, comm));
     Free(msgBuffer);
   }
   if (needsFlush) cdiPioClientStreamWinPost(streamID);
   cdiPioClientStreamWinDestroy(streamID);
-  if (recordBufIsToBeDeleted) switch (streamptr->filetype)
+  if (recordBufIsToBeDeleted) switch (streamP->filetype)
     {
 #ifdef HAVE_LIBGRIB
       case CDI_FILETYPE_GRB:
-      case CDI_FILETYPE_GRB2: gribContainersDelete(streamptr); break;
+      case CDI_FILETYPE_GRB2: gribContainersDelete(streamP); break;
 #endif
     }
 }
@@ -414,13 +414,13 @@ cdiPioTaxisPackWrap(void *data, void *buf, int size, int *pos, void *context)
 }
 
 static int
-cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
+cdiPioClientStreamDefTimestep_(stream_t *streamP, int tsID)
 {
-  int taxisID = vlistInqTaxis(streamptr->vlistID);
-  struct winHeaderEntry header = { .id = STREAMDEFTIMESTEP, .specific.funcArgs.streamNewTimestep = { streamptr->self, tsID } };
+  int taxisID = vlistInqTaxis(streamP->vlistID);
+  struct winHeaderEntry header = { .id = STREAMDEFTIMESTEP, .specific.funcArgs.streamNewTimestep = { streamP->self, tsID } };
   xassert(sizeof(void *) >= sizeof(int));
-  pioBufferFuncCall(streamptr->self, header, (void *) (intptr_t) taxisID, cdiPioTaxisPackWrap);
-  return cdiStreamDefTimestep_(streamptr, tsID);
+  pioBufferFuncCall(streamP->self, header, (void *) (intptr_t) taxisID, cdiPioTaxisPackWrap);
+  return cdiStreamDefTimestep_(streamP, tsID);
 }
 
 static void

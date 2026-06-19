@@ -475,9 +475,9 @@ cmpLevelTableInv(const void *s1, const void *s2)
 void
 varCopyKeys(int vlistID, int varID)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  cdiInitKeys(&vlistptr->vars[varID].keys);
-  cdiCopyVarKeys(&(varInfoList[varID].keys), &(vlistptr->vars[varID].keys));
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
+  cdiInitKeys(&vlistP->vars[varID].keys);
+  cdiCopyVarKeys(&(varInfoList[varID].keys), &(vlistP->vars[varID].keys));
 }
 /*
 struct cdi_generate_varinfo
@@ -494,14 +494,14 @@ cdi_generate_cmp_varname(const void *s1, const void *s2)
 }
 */
 void
-cdi_generate_vars(stream_t *streamptr)
+cdi_generate_vars(stream_t *streamP)
 {
-  int vlistID = streamptr->vlistID;
+  int vlistID = streamP->vlistID;
 
   int *varids = (int *) Malloc((size_t) varInfoListUsed * sizeof(int));
   for (int varID = 0; varID < varInfoListUsed; varID++) { varids[varID] = (int) varID; }
   /*
-    if (streamptr->sortname)
+    if (streamP->sortname)
       {
         bool hasName = true;
         for (int varID = 0; varID < varTableUsed; varID++)
@@ -661,7 +661,7 @@ cdi_generate_vars(stream_t *streamptr)
     if (var->tiles) tilesetID = vlistDefTileSubtype(vlistID, var->tiles);
 
     // generate new variable
-    (void) stream_new_var(streamptr, gridID, zaxisID, tilesetID);
+    (void) stream_new_var(streamP, gridID, zaxisID, tilesetID);
     int varID = vlistDefVarTiles(vlistID, gridID, zaxisID, TIME_VARYING, tilesetID);
 
     vlistDefVarTsteptype(vlistID, varID, tsteptype);
@@ -674,8 +674,8 @@ cdi_generate_vars(stream_t *streamptr)
     if (var->lmissval) vlistDefVarMissval(vlistID, varID, var->missval);
     if (var->name) cdiDefKeyString(vlistID, varID, CDI_KEY_NAME, var->name);
 
-    vlist_t *vlistptr = vlist_to_pointer(vlistID);
-    var_t *varx = &vlistptr->vars[varID];
+    vlist_t *vlistP = vlist_to_pointer(vlistID);
+    var_t *varx = &vlistP->vars[varID];
     for (int i = 0; i < var->opt_grib_nentries; i++)
     {
       resize_opt_grib_entries(varx, varx->opt_grib_nentries + 1);
@@ -729,7 +729,7 @@ cdi_generate_vars(stream_t *streamptr)
     int nsub = (var->nsubtypes >= 0) ? var->nsubtypes : 0;
     for (int isub = 0; isub < nsub; isub++)
     {
-      sleveltable_t *streamRecordTable = streamptr->vars[index].recordTable + isub;
+      sleveltable_t *streamRecordTable = streamP->vars[index].recordTable + isub;
       leveltable_t *vartableLevelTable = var->recordTable[isub].levelTable;
       for (int levelID = 0; levelID < nlevels; levelID++)
       {
@@ -875,15 +875,15 @@ varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const
   int zaxisID = CDI_UNDEFID;
   bool zaxisdefined = false;
   bool zaxisglobdefined = false;
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  int nzaxis = vlistptr->nzaxis;
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
+  int nzaxis = vlistP->nzaxis;
 
   if (ltype2 == 255) { ltype2 = -1; }
 
   if (mode == 0)
     for (int index = 0; index < nzaxis; index++)
     {
-      zaxisID = vlistptr->zaxisIDs[index];
+      zaxisID = vlistP->zaxisIDs[index];
 
       if (!zaxis_compare(zaxisID, zaxistype, nlevels, levels, levels1, levels2, longname, units, ltype1, ltype2))
       {
@@ -910,7 +910,7 @@ varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const
 
     if (mode == 1 && zaxisglobdefined)
       for (int index = 0; index < nzaxis; index++)
-        if (vlistptr->zaxisIDs[index] == zaxisID)
+        if (vlistP->zaxisIDs[index] == zaxisID)
         {
           zaxisglobdefined = false;
           break;
@@ -941,8 +941,8 @@ varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const
       if (ltype2 != -1) cdiDefKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_TYPEOFSECONDFIXEDSURFACE, ltype2);
     }
 
-    vlistptr->zaxisIDs[nzaxis] = zaxisID;
-    vlistptr->nzaxis++;
+    vlistP->zaxisIDs[nzaxis] = zaxisID;
+    vlistP->nzaxis++;
   }
 
   return zaxisID;

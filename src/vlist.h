@@ -123,52 +123,52 @@ void vlistInqVarDimorder(int vlistID, int varID, int outDimorder[3]);
 void resize_opt_grib_entries(var_t *var, int nentries);
 
 static inline void
-vlistAdd2GridIDs(vlist_t *vlistptr, int gridID)
+vlistAdd2GridIDs(vlist_t *vlistP, int gridID)
 {
-  int index, ngrids = vlistptr->ngrids;
+  int index, ngrids = vlistP->ngrids;
   for (index = 0; index < ngrids; index++)
   {
-    if (vlistptr->gridIDs[index] == gridID) break;
-    //      if ( gridIsEqual(vlistptr->gridIDs[index], gridID) ) break;
+    if (vlistP->gridIDs[index] == gridID) break;
+    //      if ( gridIsEqual(vlistP->gridIDs[index], gridID) ) break;
   }
 
   if (index == ngrids)
   {
     if (ngrids >= MAX_GRIDS_PS) Error("Internal limit exceeded: more than %d grids.", MAX_GRIDS_PS);
-    vlistptr->gridIDs[ngrids] = gridID;
-    ++(vlistptr->ngrids);
+    vlistP->gridIDs[ngrids] = gridID;
+    ++(vlistP->ngrids);
   }
 }
 
 static inline void
-vlistAdd2ZaxisIDs(vlist_t *vlistptr, int zaxisID)
+vlistAdd2ZaxisIDs(vlist_t *vlistP, int zaxisID)
 {
-  int index, nzaxis = vlistptr->nzaxis;
+  int index, nzaxis = vlistP->nzaxis;
   for (index = 0; index < nzaxis; index++)
-    if (zaxisID == vlistptr->zaxisIDs[index]) break;
+    if (zaxisID == vlistP->zaxisIDs[index]) break;
 
   if (index == nzaxis)
   {
     if (nzaxis >= MAX_ZAXES_PS) Error("Internal limit exceeded: more than %d zaxis.", MAX_ZAXES_PS);
-    vlistptr->zaxisIDs[nzaxis] = zaxisID;
-    ++(vlistptr->nzaxis);
+    vlistP->zaxisIDs[nzaxis] = zaxisID;
+    ++(vlistP->nzaxis);
   }
 }
 
 static inline void
-vlistAdd2SubtypeIDs(vlist_t *vlistptr, int subtypeID)
+vlistAdd2SubtypeIDs(vlist_t *vlistP, int subtypeID)
 {
   if (subtypeID == CDI_UNDEFID) return;
 
-  int index, nsubs = vlistptr->nsubtypes;
+  int index, nsubs = vlistP->nsubtypes;
   for (index = 0; index < nsubs; index++)
-    if (vlistptr->subtypeIDs[index] == subtypeID) break;
+    if (vlistP->subtypeIDs[index] == subtypeID) break;
 
   if (index == nsubs)
   {
     if (nsubs >= MAX_SUBTYPES_PS) Error("Internal limit exceeded: more than %d subs.", MAX_SUBTYPES_PS);
-    vlistptr->subtypeIDs[nsubs] = subtypeID;
-    ++(vlistptr->nsubtypes);
+    vlistP->subtypeIDs[nsubs] = subtypeID;
+    ++(vlistP->nsubtypes);
   }
 }
 

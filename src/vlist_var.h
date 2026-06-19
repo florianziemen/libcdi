@@ -16,7 +16,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB);
 void vlistDefVarIOrank(int, int, int);
 int vlistInqVarIOrank(int, int);
 
-void cdiVlistCreateVarLevInfo(vlist_t *vlistptr, int varID);
+void cdiVlistCreateVarLevInfo(vlist_t *vlistP, int varID);
 
 #endif
 /*
