@@ -152,6 +152,8 @@ target_sources(libcdi
   vlist_var_pack.c
   zaxis.c
   zaxis.h
+  zaxis_pack.c
+  zaxis_pack.h
 )
 
 option(CDI_BUILD_PIO "Build unknown sources in libcdi" OFF)

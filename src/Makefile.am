@@ -218,7 +218,9 @@ libcdi_la_SOURCES = \
   vlist_var_key.c \
   vlist_var_pack.c \
   zaxis.c \
-  zaxis.h
+  zaxis.h \
+  zaxis_pack.c \
+  zaxis_pack.h
 
 if ENABLE_CF_INTERFACE
 libcdi_la_SOURCES += \

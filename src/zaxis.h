@@ -7,6 +7,7 @@
 
 #include "cdi_key.h"
 #include "cdi_att.h"
+#include "resource_handle.h"
 
 // clang-format off
 typedef struct
@@ -32,6 +33,9 @@ typedef struct
 }
 zaxis_t;
 // clang-format on
+
+void zaxisInit(void);
+zaxis_t *zaxisNewEntry(int id);
 
 void zaxisGetTypeDescription(int zaxisType, int *outPositive, const char **outName, const char **outLongName,
                              const char **outStdName,

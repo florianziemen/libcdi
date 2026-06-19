@@ -12,7 +12,7 @@
 
 #include "cdi.h"
 #include "dmemory.h"
-#include "grid.h"
+#include "grid_pack.h"
 #include "institution.h"
 #include "model.h"
 #include "cdi_int.h"
@@ -23,7 +23,7 @@
 #include "resource_handle.h"
 #include "resource_unpack.h"
 #include "taxis.h"
-#include "zaxis.h"
+#include "zaxis_pack.h"
 
 int (*reshDistGridUnpack)(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context,
                           int force_id);
