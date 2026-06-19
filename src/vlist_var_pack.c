@@ -12,7 +12,6 @@
 
 #include "dmemory.h"
 #include "cdi.h"
-#include "cdi_int.h"
 #include "vlist.h"
 #include "vlist_var.h"
 #include "namespace.h"

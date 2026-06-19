@@ -140,6 +140,8 @@ target_sources(libcdi
   version.c
   vlist.c
   vlist.h
+  vlist_pack.c
+  vlist_pack.h
   vlist_var.c
   vlist_var.h
   vlist_var_key.c

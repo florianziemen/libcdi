@@ -16,7 +16,7 @@
 #include "institution.h"
 #include "model.h"
 #include "cdi_int.h"
-#include "vlist.h"
+#include "vlist_pack.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "resource_handle.h"

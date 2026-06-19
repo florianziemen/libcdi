@@ -12,15 +12,9 @@
 
 #include <float.h> /* FLT_MAX */
 #include "dmemory.h"
-#include "cdi.h"
-#include "cdi_int.h"
 #include "vlist.h"
-#include "vlist_var.h"
-#include "resource_handle.h"
 #include "tablepar.h"
 #include "namespace.h"
-#include "serialize.h"
-#include "error.h"
 
 static void
 vlistvar_init_entry(var_t *vlistvars, int varID)
@@ -45,7 +39,7 @@ vlistvar_init_entry(var_t *vlistvars, int varID)
   varP->comptype = CDI_COMPRESS_NONE;
   varP->complevel = 1;
   varP->keys.nalloc = MAX_KEYS;
-  for (int i = 0; i < MAX_KEYS; ++i) varP->keys.value[i].length = 0;
+  for (int i = 0; i < MAX_KEYS; ++i) { varP->keys.value[i].length = 0; }
   varP->atts.nalloc = MAX_ATTRIBUTES;
   varP->subtypeID = CDI_UNDEFID;
 }
@@ -218,7 +212,6 @@ void
 vlistDefVarParam(int vlistID, int varID, int param)
 {
   var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
-
   if (varP->param != param)
   {
     varP->param = param;
@@ -260,7 +253,6 @@ void
 vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timetype)
 {
   var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
-
   *gridID = varP->gridID;
   *zaxisID = varP->zaxisID;
   *timetype = varP->timetype;
@@ -477,8 +469,7 @@ vlistCopyVarName(int vlistID, int varID)
   if (discipline == 255)
   {
     tableInqEntry(varP->tableID, number, -1, name, NULL, NULL);
-    if (name[0])
-      result = strdup(name);
+    if (name[0]) { result = strdup(name); }
     else
     {
       // No luck, fall back to outputting a name of the format "var<num>".
@@ -1194,14 +1185,14 @@ vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
   int nvars = vlistP->nvars;
   int found = 0;
   int oldZaxisID = varP->zaxisID;
-  for (int i = 0; i < varID; ++i) found |= (vlistP->vars[i].zaxisID == oldZaxisID);
-  for (int i = varID + 1; i < nvars; ++i) found |= (vlistP->vars[i].zaxisID == oldZaxisID);
+  for (int i = 0; i < varID; ++i) { found |= (vlistP->vars[i].zaxisID == oldZaxisID); }
+  for (int i = varID + 1; i < nvars; ++i) { found |= (vlistP->vars[i].zaxisID == oldZaxisID); }
 
   if (found)
   {
     int nzaxis = vlistP->nzaxis;
     for (int i = 0; i < nzaxis; ++i)
-      if (vlistP->zaxisIDs[i] == oldZaxisID) vlistP->zaxisIDs[i] = zaxisID;
+      if (vlistP->zaxisIDs[i] == oldZaxisID) { vlistP->zaxisIDs[i] = zaxisID; }
   }
   else
     vlistAdd2ZaxisIDs(vlistP, zaxisID);
@@ -1225,7 +1216,7 @@ vlistChangeVarGrid(int vlistID, int varID, int gridID)
   if (index == nvars)
   {
     for (index = 0; index < vlistP->ngrids; index++)
-      if (vlistP->gridIDs[index] == vlistP->vars[varID].gridID) vlistP->gridIDs[index] = gridID;
+      if (vlistP->gridIDs[index] == vlistP->vars[varID].gridID) { vlistP->gridIDs[index] = gridID; }
   }
   else
     vlistAdd2GridIDs(vlistP, gridID);
@@ -1299,7 +1290,8 @@ vlistEncodeXyz(const int dimorder[3])
 static void
 vlistDecodeXyz(int xyz, int outDimorder[3])
 {
-  outDimorder[0] = xyz / 100, xyz = xyz % 100;
+  outDimorder[0] = xyz / 100;
+  xyz = xyz % 100;
   outDimorder[1] = xyz / 10;
   outDimorder[2] = xyz % 10;
 }
@@ -1378,7 +1370,7 @@ vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
   var_t *pva = a->vars + varIDA, *pvb = b->vars + varIDB;
 #define FCMP(f) ((pva->f) != (pvb->f))
 #define FCMPFLT(f) (IS_NOT_EQUAL((pva->f), (pvb->f)))
-#define FCMPSTR(fs) ((pva->fs) != (pvb->fs) && strcmp((pva->fs), (pvb->fs)))
+// #define FCMPSTR(fs) ((pva->fs) != (pvb->fs) && strcmp((pva->fs), (pvb->fs)))
 #define FCMP2(f) (namespaceResHDecode(pva->f).idx != namespaceResHDecode(pvb->f).idx)
   int diff = (int) FCMP(fvarID) | FCMP(mvarID) | FCMP(flag) | FCMP(param) | FCMP(datatype) | FCMP(timetype) | FCMP(tsteptype)
              | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID) | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
@@ -1386,7 +1378,7 @@ vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
              | FCMPFLT(validrange[1]);
 #undef FCMP
 #undef FCMPFLT
-#undef FCMPSTR
+// #undef FCMPSTR
 #undef FCMP2
   if ((diff |= ((pva->levinfo == NULL) ^ (pvb->levinfo == NULL)))) return 1;
 

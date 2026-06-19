@@ -5,22 +5,14 @@
 #include "config.h"
 #endif
 
-#ifndef ERROR_H
-#include "error.h"
-#endif
-
 #include <stdbool.h>
 #include <stddef.h> /* size_t */
 
-#ifndef CDI_LIMITS_H
-#include "cdi_limits.h"
-#endif
-
-#define VALIDMISS 1.e+303
-
+#include "cdi_int.h"
 #include "cdi_key.h"
 #include "cdi_att.h"
-#include "grid.h"
+
+#define VALIDMISS 1.e+303
 
 typedef struct
 {
@@ -104,13 +96,13 @@ typedef struct
 } vlist_t;
 
 vlist_t *vlist_to_pointer(int vlistID);
+vlist_t *vlist_new_entry(cdiResH resH);
+
 void cdiVlistMakeInternal(int vlistID);
 void cdiVlistMakeImmutable(int vlistID);
 void cdiVlistDestroy_(int vlistID, bool assertInternal);
 int vlistInqVarMissvalUsed(int vlistID, int varID);
 bool vlistHasTime(int vlistID);
-
-int vlistUnpack(char *buffer, int bufferSize, int *pos, int originNamespace, void *context, int force_id);
 
 /*      vlistDefVarValidrange: Define the valid range of a Variable */
 void vlistDefVarValidrange(int vlistID, int varID, const double *validrange);

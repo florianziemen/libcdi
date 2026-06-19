@@ -1,13 +1,7 @@
 #ifndef VLIST_VAR_H
 #define VLIST_VAR_H
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifndef VLIST_H
 #include "vlist.h"
-#endif
 
 int vlistVarGetPackSize(vlist_t *p, int varID, void *context);
 void vlistVarPack(vlist_t *p, int varID, char *buffer, int bufferSize, int *pos, void *context);
