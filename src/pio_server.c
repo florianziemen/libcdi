@@ -26,6 +26,7 @@
 #include "dmemory.h"
 #include "namespace.h"
 #include "taxis.h"
+#include "taxis_unoack.h"
 #include "pio.h"
 #include "pio_cdf_int.h"
 #include "pio_comm.h"
@@ -91,7 +92,7 @@ static struct
   size_t numRetained;
   struct cacheRedist *retained;
   struct partDescPreset clientDeco;
-} * rxWin;
+} *rxWin;
 
 static struct
 {
@@ -328,7 +329,8 @@ findMaxDivision(unsigned npartMax, unsigned composite_div)
   for (int numAssigned = 1; numAssigned <= numFactors; ++numAssigned)
   {
     uint_fast32_t pattern = (UINT32_C(1) << numAssigned) - 1, lastPattern = pattern << (numFactors - numAssigned);
-    do {
+    do
+    {
       divAttempt = 1;
       /* loop over all factors */
       for (uint_fast32_t i = 0; i < (uint_fast32_t) numFactors; ++i)
@@ -583,7 +585,7 @@ streamMappingSpeculativeNew(int vlistID, struct partDescPreset clientDeco, const
       size_t elemSize = cdiPioElemSizeInference((size_t) varID, conversion);
       size_t recordDataSize = recordNumElem * elemSize;
       for (size_t lvl = 0; lvl < numLvl; ++lvl)
-        writtenRecords[++j] = (struct recordWrite){ .varID = varID, .level = (int) lvl, .dataSize = recordDataSize };
+        writtenRecords[++j] = (struct recordWrite) { .varID = varID, .level = (int) lvl, .dataSize = recordDataSize };
     }
   }
   result->numVars = nVars;
@@ -791,7 +793,10 @@ buildVarRedist(int headerIdx, size_t streamIdx,
     }
     if ((gatherXmap = cdiPioXmapCacheLookup(XmapCache, uids, partSizes))) { goto afterNewXmapCacheEntry; }
   }
-  else { tmpBuf = partSizes = Malloc(sizeof(*partSizes) * (numClients + 1)); }
+  else
+  {
+    tmpBuf = partSizes = Malloc(sizeof(*partSizes) * (numClients + 1));
+  }
   partSizes[0] = gatherExt.size;
   gatherXmap = buildVarXmap(partSizes, clientBuf, (size_t) headerIdx, dstList, partDescPreset, pioInterComm, collComm, varID, conf);
   if (cacheXmaps) { cdiPioXmapCacheAdd(XmapCache, uids, partSizes, gatherXmap); }
@@ -1007,9 +1012,9 @@ writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, void 
             = countVarChunkMissingVals(vlistID, varID, mapping, (size_t) (PPM_extents_size(3, varChunk)), conversion, data);
         /* write chunk */
         if (conversion == DATA_HEADER_DOUBLE)
-          streamWriteVarChunk(streamID, varID, (const int(*)[2]) myChunk, data, (int) numMissVals);
+          streamWriteVarChunk(streamID, varID, (const int (*)[2]) myChunk, data, (int) numMissVals);
         else
-          streamWriteVarChunkF(streamID, varID, (const int(*)[2]) myChunk, data, (int) numMissVals);
+          streamWriteVarChunkF(streamID, varID, (const int (*)[2]) myChunk, data, (int) numMissVals);
       }
     }
 }
@@ -1176,7 +1181,7 @@ static void
 writeNetCDFStream(size_t streamIdx, struct streamMapping *mapping, void **data_, size_t *currentDataBufSize,
                   const struct cdiPioConf *conf)
 {
-  void (*writeNetCDFStream_)(size_t streamIdx, struct streamMapping * mapping, void **data_, size_t *currentDataBufSize,
+  void (*writeNetCDFStream_)(size_t streamIdx, struct streamMapping *mapping, void **data_, size_t *currentDataBufSize,
                              const struct cdiPioConf *conf)
       = writeNetCDFStreamSerial;
 #ifdef HAVE_PARALLEL_NC4
@@ -1212,7 +1217,7 @@ getLayout(size_t streamIdx)
       size_t varID = (size_t) varHeader[0].specific.dataRecord.varID;
       int offset = varHeader[0].offset;
       Xt_uid uid = unpackXTUID(varHeader[1].specific.partDesc.packedUID);
-      layout[client][varID] = (struct streamMemLayout){ .varPartIdxListUID = uid, .offset = offset, .conversion = conversion };
+      layout[client][varID] = (struct streamMemLayout) { .varPartIdxListUID = uid, .offset = offset, .conversion = conversion };
     }
   return *layout;
 }
@@ -1274,7 +1279,7 @@ streamMappingNew(size_t streamIdx, const struct winHeaderEntry *winDict, const s
       result->varMap[varID] = varMap[varID];
       result->hasMissing[varID] = hasMissing_[varID];
       for (size_t lvl = 0; lvl < numLvl; ++lvl)
-        result->writtenRecords[++j] = (struct recordWrite){ .varID = varID, .level = (int) lvl, .dataSize = recordDataSize };
+        result->writtenRecords[++j] = (struct recordWrite) { .varID = varID, .level = (int) lvl, .dataSize = recordDataSize };
     }
   }
   result->numVars = numVars;
@@ -1340,7 +1345,7 @@ planPasses(const struct streamMapping *mapping, const struct cdiPioConf *conf, s
     for (size_t rank = 0; rank < collSize; ++rank)
     {
       size_t startRecord = recordSeparations[rank], lastRecord = recordSeparations[rank + 1] - 1;
-      passes[rank] = (struct passPlan){
+      passes[rank] = (struct passPlan) {
         .recordAggStart = (unsigned) startRecord,
         .recordAggEnd = (unsigned) lastRecord,
         .varStart = writtenRecords[startRecord].varID,
@@ -1363,7 +1368,8 @@ planPasses(const struct streamMapping *mapping, const struct cdiPioConf *conf, s
     struct passPlan *passes = NULL;
 #endif
     size_t sizeof_pass = collSize * sizeof(struct passPlan);
-    do {
+    do
+    {
       size_t taskBegin = firstRecordOfPass;
       curRecord = firstRecordOfPass - 1;
       passes = Realloc(passes, sizeof_pass * (numPasses + 1));
@@ -1378,7 +1384,7 @@ planPasses(const struct streamMapping *mapping, const struct cdiPioConf *conf, s
 #else
         passes[numPasses * collSize + rank]
 #endif
-            = (struct passPlan){
+            = (struct passPlan) {
                 .recordAggStart = (unsigned) taskBegin,
                 .recordAggEnd = (unsigned) curRecord,
                 .varStart = writtenRecords[taskBegin].varID,
@@ -1485,7 +1491,7 @@ dstListFromRecordRange(int vlistID, int varID, int myVarStart, int myVarEnd, siz
     dstList = xt_idxempty_new();
     listSize = 0;
   }
-  return (struct idxlistAndSize){ .list = dstList, .listSize = listSize };
+  return (struct idxlistAndSize) { .list = dstList, .listSize = listSize };
 }
 
 static void
@@ -1506,7 +1512,7 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, void **data_, s
   Xt_idxlist(*partDescPreset)[numClients] = (Xt_idxlist(*)[numClients]) rxWin[streamIdx].clientDeco.lists;
   struct recordWrite *restrict writtenRecords = mapping->writtenRecords;
   size_t (*cdiPioFileWrite)(int fileID, const void *restrict buffer, size_t len, int tsID)
-      = (size_t(*)(int, const void *restrict, size_t, int)) namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
+      = (size_t (*)(int, const void *restrict, size_t, int)) namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
   bool reuseRedists
       = conf->cacheRedists != 0 ? handleRedistCache(streamIdx, mapping, (size_t) numPasses, vlistID, collComm) : false;
   struct cacheRedist *restrict retained = rxWin[streamIdx].retained;
