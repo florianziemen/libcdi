@@ -75,7 +75,7 @@ cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int attl
     int attint = 0;
     int *pattint = attlen > 1 ? (int *) Malloc((size_t) attlen * sizeof(int)) : &attint;
     cdiInqAttInt(gridID, CDI_GLOBAL, attname, attlen, pattint);
-    for (int i = 0; i < attlen; ++i) attflt[i] = (double) pattint[i];
+    for (int i = 0; i < attlen; ++i) { attflt[i] = (double) pattint[i]; }
     if (attlen > 1) Free(pattint);
     return true;
   }
@@ -203,13 +203,6 @@ gridNewEntry(cdiResH resH)
   }
 
   return gridP;
-}
-
-void
-gridInit(void)
-{
-  static bool gridInitialized = false;
-  if (!gridInitialized) { gridInitialized = true; }
 }
 
 static void
@@ -491,7 +484,6 @@ gridCreate(int gridtype, SizeType size)
   if (CDI_Debug) Message("gridtype=%s  size=%zu", gridNamePtr(gridtype), (size_t) size);
 
   xassert(size);
-  gridInit();
 
   grid_t *gridP = gridNewEntry(CDI_UNDEFID);
   if (!gridP) Error("No memory");
@@ -1065,7 +1057,7 @@ gridDefXsize(int gridID, SizeType xsize)
   SizeType gridSize = gridInqSize(gridID);
   if (xsize > gridSize) Error("xsize %lld is greater then gridsize %lld", (long long) xsize, (long long) gridSize);
 
-  int gridType = gridInqType(gridID);
+  int gridType = gridP->type;
   if (gridType == GRID_UNSTRUCTURED && xsize != gridSize)
     Error("xsize %lld must be equal to gridsize %lld for gridtype: %s", (long long) xsize, (long long) gridSize,
           gridNamePtr(gridType));
@@ -1147,7 +1139,7 @@ gridDefYsize(int gridID, SizeType ysize)
 
   if (ysize > gridSize) Error("ysize %lld is greater then gridsize %lld", (long long) ysize, (long long) gridSize);
 
-  int gridType = gridInqType(gridID);
+  int gridType = gridP->type;
   if (gridType == GRID_UNSTRUCTURED && ysize != gridSize)
     Error("ysize %lld must be equal gridsize %lld for gridtype: %s", (long long) ysize, (long long) gridSize,
           gridNamePtr(gridType));
@@ -1292,7 +1284,7 @@ gridInqMaskSerialGeneric(grid_t *gridP, mask_t **internalMask, int *restrict mas
   if (mask_src)
   {
     if (mask && size > 0)
-      for (size_t i = 0; i < size; ++i) mask[i] = (int) mask_src[i];
+      for (size_t i = 0; i < size; ++i) { mask[i] = (int) mask_src[i]; }
   }
   else
     size = 0;
@@ -1387,7 +1379,7 @@ copy_darray(size_t n, const double *restrict in, double *restrict out)
 #ifdef _OPENMP
 #pragma omp parallel for if (n > 99999) default(shared) schedule(static)
 #endif
-  for (size_t i = 0; i < n; ++i) out[i] = in[i];
+  for (size_t i = 0; i < n; ++i) { out[i] = in[i]; }
 }
 
 static SizeType
@@ -2872,7 +2864,7 @@ gridCompress(int gridID)
 {
   grid_t *gridP = grid_to_pointer(gridID);
 
-  int gridtype = gridInqType(gridID);
+  int gridtype = gridP->type;
   if (gridtype == GRID_UNSTRUCTURED)
   {
     if (gridP->mask_gme != NULL)
@@ -2889,7 +2881,11 @@ gridCompress(int gridID)
       size_t nselect;
       {
         size_t j = 0;
-        for (size_t i = 0; i < gridsize; i++) selection[j] = i, j += (mask_gme[i] != 0);
+        for (size_t i = 0; i < gridsize; i++)
+        {
+          selection[j] = i;
+          j += (mask_gme[i] != 0);
+        }
         nselect = j;
       }
       selection = (size_t *) Realloc(selection, nselect * sizeof(selection[0]));
@@ -3740,10 +3736,10 @@ gridInqParamsLCC(int gridID, struct CDI_GridProjParams *gpp)
         else if (str_is_equal(attname, "longitudeOfSouthernPoleInDegrees"))   gpp->x_SP   = attflt[0];
         else if (str_is_equal(attname, "latitudeOfSouthernPoleInDegrees"))    gpp->y_SP   = attflt[0];
         else if (str_is_equal(attname, "standard_parallel"))
-          {
-            gpp->lat_1 = attflt[0];
-            gpp->lat_2 = (attlen == 2) ? attflt[1] : attflt[0];
-          }
+        {
+          gpp->lat_1 = attflt[0];
+          gpp->lat_2 = (attlen == 2) ? attflt[1] : attflt[0];
+        }
         // clang-format on
       }
     }
@@ -3801,7 +3797,7 @@ gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp)
       if (proj_stere_to_lonlat_func)
       {
         gpp->xval_0 = -gpp->x_0;
-        gpp->xval_0 = -gpp->y_0;
+        gpp->yval_0 = -gpp->y_0;
         proj_stere_to_lonlat_func(*gpp, 0.0, 0.0, (SizeType) 1, &gpp->xval_0, &gpp->yval_0);
       }
       if (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv))

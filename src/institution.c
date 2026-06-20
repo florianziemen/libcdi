@@ -77,7 +77,7 @@ instituteDefaultEntries(void)
   };
   // clang-format on
 
-  const size_t n = sizeof(resH) / sizeof(*resH);
+  size_t n = sizeof(resH) / sizeof(*resH);
   for (size_t i = 0; i < n; i++) reshSetStatus(resH[i], &instituteOps, RESH_IN_USE);
 }
 
@@ -95,8 +95,8 @@ instituteCompareKernel(institute_t *ip1, institute_t *ip2)
     {
       if (ip2->name)
       {
-        const size_t len1 = strlen(ip1->name);
-        const size_t len2 = strlen(ip2->name);
+        size_t len1 = strlen(ip1->name);
+        size_t len2 = strlen(ip2->name);
         if ((len1 != len2) || memcmp(ip2->name, ip1->name, len2)) differ = 1;
       }
     }
@@ -105,8 +105,8 @@ instituteCompareKernel(institute_t *ip1, institute_t *ip2)
   {
     if (ip2->longname)
     {
-      const size_t len1 = strlen(ip1->longname);
-      const size_t len2 = strlen(ip2->longname);
+      size_t len1 = strlen(ip1->longname);
+      size_t len2 = strlen(ip2->longname);
       if ((len1 != len2) || memcmp(ip2->longname, ip1->longname, len2)) differ = 1;
     }
   }

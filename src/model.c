@@ -32,8 +32,6 @@ typedef struct
   char *name;
 } model_t;
 
-static void modelInit(void);
-
 static int modelCompareP(void *modelP1, void *modelP2);
 static void modelDestroyP(void *modelP);
 static void modelPrintP(void *modelP, FILE *fp);
@@ -74,14 +72,13 @@ modelNewEntry(cdiResH resH, int instID, int modelgribID, const char *name)
 void
 modelDefaultEntries(void)
 {
-  int instID;
   enum
   {
     nDefModels = 10
   };
   cdiResH resH[nDefModels];
 
-  instID = institutInq(0, 0, "ECMWF", NULL);
+  int instID = institutInq(0, 0, "ECMWF", NULL);
   /* (void)    modelDef(instID, 131, "ERA15"); */
   /* (void)    modelDef(instID, 199, "ERA40"); */
 
@@ -108,13 +105,6 @@ modelDefaultEntries(void)
 
   /* pre-defined models are not synchronized */
   for (int i = 0; i < nDefModels; i++) reshSetStatus(resH[i], &modelOps, RESH_IN_USE);
-}
-
-static void
-modelInit(void)
-{
-  static bool modelInitialized = false;
-  if (modelInitialized) return;
 }
 
 struct modelLoc
@@ -161,8 +151,6 @@ findModelByName(int resID, void *res, void *data)
 int
 modelInq(int instID, int modelgribID, const char *name)
 {
-  modelInit();
-
   struct modelLoc searchState = { .name = name, .instID = instID, .modelgribID = modelgribID, .resID = CDI_UNDEFID };
   if (name && *name)
     cdiResHFilterApply(&modelOps, findModelByName, &searchState);
@@ -174,12 +162,7 @@ modelInq(int instID, int modelgribID, const char *name)
 int
 modelDef(int instID, int modelgribID, const char *name)
 {
-  model_t *modelP;
-
-  modelInit();
-
-  modelP = modelNewEntry(CDI_UNDEFID, instID, modelgribID, name);
-
+  model_t *modelP = modelNewEntry(CDI_UNDEFID, instID, modelgribID, name);
   return modelP->self;
 }
 
@@ -187,11 +170,7 @@ int
 modelInqInstitut(int modelID)
 {
   model_t *modelP = NULL;
-
-  modelInit();
-
-  if (modelID != CDI_UNDEFID) modelP = (model_t *) reshGetVal(modelID, &modelOps);
-
+  if (modelID != CDI_UNDEFID) { modelP = (model_t *) reshGetVal(modelID, &modelOps); }
   return modelP ? modelP->instID : CDI_UNDEFID;
 }
 
@@ -199,11 +178,7 @@ int
 modelInqGribID(int modelID)
 {
   model_t *modelP = NULL;
-
-  modelInit();
-
-  if (modelID != CDI_UNDEFID) modelP = (model_t *) reshGetVal(modelID, &modelOps);
-
+  if (modelID != CDI_UNDEFID) { modelP = (model_t *) reshGetVal(modelID, &modelOps); }
   return modelP ? modelP->modelgribID : CDI_UNDEFID;
 }
 
@@ -211,11 +186,7 @@ const char *
 modelInqNamePtr(int modelID)
 {
   model_t *modelP = NULL;
-
-  modelInit();
-
-  if (modelID != CDI_UNDEFID) modelP = (model_t *) reshGetVal(modelID, &modelOps);
-
+  if (modelID != CDI_UNDEFID) { modelP = (model_t *) reshGetVal(modelID, &modelOps); }
   return modelP ? modelP->name : NULL;
 }
 

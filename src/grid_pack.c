@@ -174,7 +174,6 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
 int
 gridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id)
 {
-  gridInit();
   int memberMask;
   grid_t *gridP
       = gridUnpackScalars(unpackBuffer, unpackBufferSize, unpackBufferPos, originNamespace, context, force_id, &memberMask);

@@ -158,7 +158,6 @@ grid_axis_size(const grid_t *g, enum GridAxis axis)
   return (axis == GRID_AXIS_Y) ? g->y.size : g->x.size;
 }
 
-void gridInit(void);
 grid_t *gridNewEntry(cdiResH resH);
 
 void grid_init(grid_t *gridP);
