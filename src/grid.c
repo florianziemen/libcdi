@@ -980,17 +980,7 @@ SizeType
 gridInqSize(int gridID)
 {
   grid_t *gridP = grid_to_pointer(gridID);
-
-  size_t size = gridP->size;
-  if (size == 0)
-  {
-    size_t xsize = gridP->x.size;
-    size_t ysize = gridP->y.size;
-    size = ysize ? xsize * ysize : xsize;
-    gridP->size = size;
-  }
-
-  return (SizeType) size;
+  return (SizeType) gridP->size;
 }
 
 static int
@@ -1054,7 +1044,7 @@ gridDefXsize(int gridID, SizeType xsize)
 {
   grid_t *gridP = grid_to_pointer(gridID);
 
-  SizeType gridSize = gridInqSize(gridID);
+  SizeType gridSize = gridP->size;
   if (xsize > gridSize) Error("xsize %lld is greater then gridsize %lld", (long long) xsize, (long long) gridSize);
 
   int gridType = gridP->type;
@@ -1135,7 +1125,7 @@ gridDefYsize(int gridID, SizeType ysize)
 {
   grid_t *gridP = grid_to_pointer(gridID);
 
-  SizeType gridSize = gridInqSize(gridID);
+  SizeType gridSize = gridP->size;
 
   if (ysize > gridSize) Error("ysize %lld is greater then gridsize %lld", (long long) ysize, (long long) gridSize);
 
@@ -2869,7 +2859,7 @@ gridCompress(int gridID)
   {
     if (gridP->mask_gme != NULL)
     {
-      size_t gridsize = (size_t) gridInqSize(gridID);
+      size_t gridsize = gridP->size;
       size_t nv = (size_t) gridP->nvertex;
       double *restrict area = (double *) gridP->vtable->inqAreaPtr(gridP),
                        *restrict xvals = (double *) gridP->vtable->inqXValsPtr(gridP),
