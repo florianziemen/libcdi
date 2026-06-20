@@ -94,8 +94,6 @@ zaxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int 
 
   xassert(cdiCheckSum(CDI_DATATYPE_INT, zaxisNint, intBuffer) == d);
 
-  zaxisInit();
-
   zaxis_t *zaxisP = zaxisNewEntry(force_id ? namespaceAdaptKey(intBuffer[ZAXIS_PACK_INT_SELF], originNamespace) : CDI_UNDEFID);
 
   zaxisP->type = intBuffer[ZAXIS_PACK_INT_TYPE];

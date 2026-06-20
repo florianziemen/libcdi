@@ -163,14 +163,6 @@ zaxisNewEntry(int id)
   return zaxisP;
 }
 
-void
-zaxisInit(void)
-{
-  static bool zaxisInitialized = false;
-  if (zaxisInitialized) return;
-  zaxisInitialized = true;
-}
-
 static void
 zaxis_copy(zaxis_t *zaxisP2, zaxis_t *zaxisP1)
 {
@@ -263,7 +255,6 @@ zaxisCreate(int zaxistype, int size)
   if (CDI_Debug) Message("zaxistype: %d size: %d ", zaxistype, size);
 
   xassert(size);
-  zaxisInit();
 
   return zaxisCreate_(zaxistype, size, CDI_UNDEFID);
 }
@@ -559,7 +550,7 @@ zaxisDefLevels(int zaxisID, const double *levels)
     size_t size = (size_t) zaxisP->size;
     xassert(size);
 
-    if (zaxisP->vals == NULL && size) zaxisP->vals = (double *) Malloc(size * sizeof(double));
+    if (zaxisP->vals == NULL && size) { zaxisP->vals = (double *) Malloc(size * sizeof(double)); }
     memcpy(zaxisP->vals, levels, size * sizeof(double));
 
     reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
@@ -577,7 +568,7 @@ zaxisDefCvals(int zaxisID, const char **cvals, int clen)
     xassert(size);
 
     zaxisP->clength = clen;
-    if (size) zaxisP->cvals = (char **) Malloc(size * sizeof(char *));
+    if (size) { zaxisP->cvals = (char **) Malloc(size * sizeof(char *)); }
 
     for (size_t ilev = 0; ilev < size; ++ilev)
     {
@@ -983,7 +974,7 @@ cdiCheckZaxis(int zaxisID)
 {
   zaxis_t *zaxisP = zaxis_to_pointer(zaxisID);
 
-  if (zaxisInqType(zaxisID) == ZAXIS_GENERIC && zaxisP->vals)
+  if (zaxisP->type == ZAXIS_GENERIC && zaxisP->vals)
   {
     int size = zaxisP->size;
     if (size > 1)
@@ -1013,7 +1004,7 @@ zaxisDefVct(int zaxisID, int size, const double *vct)
 {
   zaxis_t *zaxisP = zaxis_to_pointer(zaxisID);
 
-  if (zaxisP->vct == 0 || zaxisP->vctsize != size)
+  if (zaxisP->vct == NULL || zaxisP->vctsize != size)
   {
     zaxisP->vctsize = size;
     zaxisP->vct = (double *) Realloc(zaxisP->vct, (size_t) size * sizeof(double));
@@ -1131,10 +1122,7 @@ zaxisDuplicate(int zaxisID)
 {
   zaxis_t *zaxisP = zaxis_to_pointer(zaxisID);
 
-  int zaxisType = zaxisInqType(zaxisID);
-  int zaxisSize = zaxisInqSize(zaxisID);
-
-  int zaxisIDnew = zaxisCreate(zaxisType, zaxisSize);
+  int zaxisIDnew = zaxisCreate(zaxisP->type, zaxisP->size);
   zaxis_t *zaxisPnew = zaxis_to_pointer(zaxisIDnew);
 
   zaxis_copy(zaxisPnew, zaxisP);
@@ -1143,9 +1131,9 @@ zaxisDuplicate(int zaxisID)
   zaxisCopyKeyStr(zaxisP, zaxisPnew, CDI_KEY_LONGNAME);
   zaxisCopyKeyStr(zaxisP, zaxisPnew, CDI_KEY_UNITS);
 
-  if (zaxisP->vals) { zaxisPnew->vals = copy_double_array(zaxisP->vals, (size_t) zaxisSize); }
-  if (zaxisP->lbounds) { zaxisPnew->lbounds = copy_double_array(zaxisP->lbounds, (size_t) zaxisSize); }
-  if (zaxisP->ubounds) zaxisPnew->ubounds = copy_double_array(zaxisP->ubounds, (size_t) zaxisSize);
+  if (zaxisP->vals) { zaxisPnew->vals = copy_double_array(zaxisP->vals, (size_t) zaxisP->size); }
+  if (zaxisP->lbounds) { zaxisPnew->lbounds = copy_double_array(zaxisP->lbounds, (size_t) zaxisP->size); }
+  if (zaxisP->ubounds) zaxisPnew->ubounds = copy_double_array(zaxisP->ubounds, (size_t) zaxisP->size);
   if (zaxisP->vct && zaxisP->vctsize)
   {
     zaxisPnew->vctsize = zaxisP->vctsize;
@@ -1231,17 +1219,18 @@ zaxis_compare(zaxis_t *z1, zaxis_t *z2)
   {
     differ = 1
   };
-  int diff = 0;
   xassert(z1 && z2);
 
-  diff |= (int) (z1->type != z2->type)
-          | (cdiInqVarKeyInt(&z1->keys, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE)
-             != cdiInqVarKeyInt(&z2->keys, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE))
-          | (cdiInqVarKeyInt(&z1->keys, CDI_KEY_DATATYPE) != cdiInqVarKeyInt(&z2->keys, CDI_KEY_DATATYPE))
-          | (z1->direction != z2->direction) | (z1->size != z2->size) | (z1->vctsize != z2->vctsize)
-          | (z1->positive != z2->positive);
+  if (z1->type != z2->type) return differ;
+  if (z1->direction != z2->direction) return differ;
+  if (z1->size != z2->size) return differ;
+  if (z1->vctsize != z2->vctsize) return differ;
+  if (z1->positive != z2->positive) return differ;
+  if (cdiInqVarKeyInt(&z1->keys, CDI_KEY_DATATYPE) != cdiInqVarKeyInt(&z2->keys, CDI_KEY_DATATYPE)) return differ;
+  if (cdiInqVarKeyInt(&z1->keys, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE) != cdiInqVarKeyInt(&z2->keys, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE))
+    return differ;
 
-  if (diff) return differ;
+  int diff = 0;
 
   int size = z1->size;
   int anyPresent = 0;
@@ -1251,7 +1240,7 @@ zaxis_compare(zaxis_t *z1, zaxis_t *z2)
   if (!diff && present)
   {
     const double *p = z1->vals, *q = z2->vals;
-    for (int i = 0; i < size; i++) diff |= IS_NOT_EQUAL(p[i], q[i]);
+    for (int i = 0; i < size; i++) { diff |= IS_NOT_EQUAL(p[i], q[i]); }
   }
 
   present = (z1->lbounds != NULL);
@@ -1260,7 +1249,7 @@ zaxis_compare(zaxis_t *z1, zaxis_t *z2)
   if (!diff && present)
   {
     const double *p = z1->lbounds, *q = z2->lbounds;
-    for (int i = 0; i < size; i++) diff |= IS_NOT_EQUAL(p[i], q[i]);
+    for (int i = 0; i < size; i++) { diff |= IS_NOT_EQUAL(p[i], q[i]); }
   }
 
   present = (z1->ubounds != NULL);
@@ -1269,7 +1258,7 @@ zaxis_compare(zaxis_t *z1, zaxis_t *z2)
   if (!diff && present)
   {
     const double *p = z1->ubounds, *q = z2->ubounds;
-    for (int i = 0; i < size; ++i) diff |= IS_NOT_EQUAL(p[i], q[i]);
+    for (int i = 0; i < size; ++i) { diff |= IS_NOT_EQUAL(p[i], q[i]); }
   }
 
   present = (z1->weights != NULL);
@@ -1278,7 +1267,7 @@ zaxis_compare(zaxis_t *z1, zaxis_t *z2)
   if (!diff && present)
   {
     const double *p = z1->weights, *q = z2->weights;
-    for (int i = 0; i < size; ++i) diff |= IS_NOT_EQUAL(p[i], q[i]);
+    for (int i = 0; i < size; ++i) { diff |= IS_NOT_EQUAL(p[i], q[i]); }
   }
 
   present = (z1->vct != NULL);
@@ -1288,7 +1277,7 @@ zaxis_compare(zaxis_t *z1, zaxis_t *z2)
     int vctsize = z1->vctsize;
     xassert(vctsize);
     const double *p = z1->vct, *q = z2->vct;
-    for (int i = 0; i < vctsize; ++i) diff |= IS_NOT_EQUAL(p[i], q[i]);
+    for (int i = 0; i < vctsize; ++i) { diff |= IS_NOT_EQUAL(p[i], q[i]); }
   }
 
   if (anyPresent) xassert(size);

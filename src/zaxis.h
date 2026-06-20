@@ -34,7 +34,6 @@ typedef struct
 zaxis_t;
 // clang-format on
 
-void zaxisInit(void);
 zaxis_t *zaxisNewEntry(int id);
 
 void zaxisGetTypeDescription(int zaxisType, int *outPositive, const char **outName, const char **outLongName,
