@@ -21,9 +21,6 @@
 #include "resource_unpack.h"
 #include "serialize.h"
 
-#undef CDI_UNDEFID
-#define CDI_UNDEFID -1
-
 typedef struct
 {
   int self;
@@ -97,7 +94,6 @@ modelDefaultEntries(void)
   resH[7] = modelDef(instID, 149, "GME");
 
   instID = institutInq(0, 0, "MCH", NULL);
-  //(void)  = modelDef(instID, 137, "COSMO");
   resH[8] = modelDef(instID, 255, "COSMO");
 
   instID = institutInq(0, 1, "NCEP", NULL);
@@ -194,9 +190,9 @@ static int
 modelCompareP(void *modelP1, void *modelP2)
 {
   model_t *model1 = (model_t *) modelP1, *model2 = (model_t *) modelP2;
-  int diff = (namespaceResHDecode(model1->instID).idx != namespaceResHDecode(model2->instID).idx)
-             | (model1->modelgribID != model2->modelgribID) | !str_is_equal(model1->name, model2->name);
-  return diff;
+  if (model1->modelgribID != model2->modelgribID) return 1;
+  if (namespaceResHDecode(model1->instID).idx != namespaceResHDecode(model2->instID).idx) return 1;
+  return !str_is_equal(model1->name, model2->name);
 }
 
 void

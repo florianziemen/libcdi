@@ -84,21 +84,15 @@ instituteDefaultEntries(void)
 static int
 instituteCompareKernel(institute_t *ip1, institute_t *ip2)
 {
-  int differ = 0;
-
   if (ip1->name)
   {
-    if (ip1->center > 0 && ip2->center != ip1->center) differ = 1;
-    if (ip1->subcenter > 0 && ip2->subcenter != ip1->subcenter) differ = 1;
-
-    if (!differ)
+    if (ip1->center > 0 && ip2->center != ip1->center) return 1;
+    if (ip1->subcenter > 0 && ip2->subcenter != ip1->subcenter) return 1;
+    if (ip2->name)
     {
-      if (ip2->name)
-      {
-        size_t len1 = strlen(ip1->name);
-        size_t len2 = strlen(ip2->name);
-        if ((len1 != len2) || memcmp(ip2->name, ip1->name, len2)) differ = 1;
-      }
+      size_t len1 = strlen(ip1->name);
+      size_t len2 = strlen(ip2->name);
+      if ((len1 != len2) || memcmp(ip2->name, ip1->name, len2)) return 1;
     }
   }
   else if (ip1->longname)
@@ -107,16 +101,16 @@ instituteCompareKernel(institute_t *ip1, institute_t *ip2)
     {
       size_t len1 = strlen(ip1->longname);
       size_t len2 = strlen(ip2->longname);
-      if ((len1 != len2) || memcmp(ip2->longname, ip1->longname, len2)) differ = 1;
+      if ((len1 != len2) || memcmp(ip2->longname, ip1->longname, len2)) return 1;
     }
   }
   else
   {
-    if (!(ip2->center == ip1->center && ip2->subcenter == ip1->subcenter)) differ = 1;
-    if (ip1->subcenter > 0 && ip1->subcenter != 255 && ip2->subcenter != ip1->subcenter) differ = 1;
+    if (!(ip2->center == ip1->center && ip2->subcenter == ip1->subcenter)) return 1;
+    if (ip1->subcenter > 0 && ip1->subcenter != 255 && ip2->subcenter != ip1->subcenter) return 1;
   }
 
-  return differ;
+  return 0;
 }
 
 struct instLoc
@@ -208,8 +202,7 @@ institutInqLongnamePtr(int instID)
 int
 institutInqNumber(void)
 {
-  int instNum = (int) (reshCountType(&instituteOps));
-  return instNum;
+  return (int) reshCountType(&instituteOps);
 }
 
 static void
