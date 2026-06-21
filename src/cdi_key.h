@@ -2,15 +2,14 @@
 #define CDI_KEY_H
 
 #include <stdio.h>
-#include <stdint.h>
 #include "cdi_limits.h"
 
 // CDI key
 typedef struct
 {
-  uint16_t key;   // CDI key
-  uint16_t type;  // KEY_INT, KEY_FLOAT, KEY_BYTES
-  int length;     // number of bytes in v.s
+  short key;   // CDI key
+  short type;  // KeyInt, KeyFloat, KeyBytes
+  int length;  // number of bytes in v.s
   union
   {
     int i;
@@ -21,8 +20,8 @@ typedef struct
 
 typedef struct
 {
-  uint16_t nalloc;  // number allocated >= nelems
-  uint16_t nelems;  // length of the array
+  short nalloc;  // number allocated >= nelems
+  short nelems;  // length of the array
   cdi_key_t value[MAX_KEYS];
 } cdi_keys_t;
 
@@ -33,32 +32,32 @@ enum
   KeyBytes
 };
 
-void cdiDefVarKeyInt(cdi_keys_t *keysp, int key, int value);
-void cdiDefVarKeyFloat(cdi_keys_t *keysp, int key, double value);
-void cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, int length);
-int cdiInqVarKeyInt(const cdi_keys_t *keysp, int key);
-int cdiInqVarKeyBytes(const cdi_keys_t *keysp, int key, unsigned char *bytes, int *length);
+void cdiDefVarKeyInt(cdi_keys_t *keysP, int key, int value);
+void cdiDefVarKeyFloat(cdi_keys_t *keysP, int key, double value);
+void cdiDefVarKeyBytes(cdi_keys_t *keysP, int key, const unsigned char *bytes, int length);
+int cdiInqVarKeyInt(const cdi_keys_t *keysP, int key);
+int cdiInqVarKeyBytes(const cdi_keys_t *keysP, int key, unsigned char *bytes, int *length);
 
-cdi_key_t *find_key(cdi_keys_t *keysp, int key);
-const char *cdiInqVarKeyStringPtr(const cdi_keys_t *keysp, int key);
+const cdi_key_t *find_key(const cdi_keys_t *keysP, int key);
+const char *cdiInqVarKeyStringPtr(const cdi_keys_t *keysP, int key);
 
 static inline const char *
-cdiInqVarKeyString(const cdi_keys_t *keysp, int key)
+cdiInqVarKeyString(const cdi_keys_t *keysP, int key)
 {
-  const char *string = cdiInqVarKeyStringPtr(keysp, key);
+  const char *string = cdiInqVarKeyStringPtr(keysP, key);
   if (string == NULL) string = "";
   return string;
 }
 
-int cdiCopyVarKey(const cdi_keys_t *keysp1, int key, cdi_keys_t *keysp2);
-void cdiCopyVarKeys(const cdi_keys_t *keysp1, cdi_keys_t *keysp2);
-void cdiDeleteVarKeys(cdi_keys_t *keysp);
+int cdiCopyVarKey(const cdi_keys_t *keysP1, int key, cdi_keys_t *keysP2);
+void cdiCopyVarKeys(const cdi_keys_t *keysP1, cdi_keys_t *keysP2);
+void cdiDeleteVarKeys(cdi_keys_t *keysP);
 void cdiDeleteKeys(int cdiID, int varID);
 void cdiPrintKeys(int cdiID, int varID);
 
-void cdiInitKeys(cdi_keys_t *keysp);
+void cdiInitKeys(cdi_keys_t *keysP);
 
-int cdi_key_compare(cdi_keys_t *keyspa, cdi_keys_t *keyspb, int keynum);
+int cdi_key_compare(const cdi_keys_t *keysPa, const cdi_keys_t *keysPb, int keynum);
 
 #endif
 

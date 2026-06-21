@@ -1105,7 +1105,7 @@ zaxisResize(int zaxisID, int size)
 static inline void
 zaxisCopyKeyStr(zaxis_t *zaxisP1, zaxis_t *zaxisP2, int key)
 {
-  cdi_key_t *keyp = find_key(&zaxisP1->keys, key);
+  const cdi_key_t *keyp = find_key(&zaxisP1->keys, key);
   if (keyp && keyp->type == KeyBytes) cdiDefVarKeyBytes(&zaxisP2->keys, key, (const unsigned char *) keyp->v.s, (int) keyp->length);
 }
 
