@@ -3797,9 +3797,8 @@ cdf_define_all_vars(stream_t *streamP, int vlistID, int instID, int modelID, int
       if (ncvar->chunkSize > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE, ncvar->chunkSize);
 
       bool cacheGrid = (ncvar->gridtype == GRID_UNSTRUCTURED || ncvar->isHealpixMapping);
-      bool cacheFormat
-          = (streamP->filetype == CDI_FILETYPE_NCZARR && CDI_Cache_NCZ)
-            || ((streamP->filetype == CDI_FILETYPE_NC4 || streamP->filetype == CDI_FILETYPE_NC4C) && CDI_Cache_NC4);
+      bool cacheFormat = (streamP->filetype == CDI_FILETYPE_NCZARR && CDI_Cache_NCZ)
+                         || ((streamP->filetype == CDI_FILETYPE_NC4 || streamP->filetype == CDI_FILETYPE_NC4C) && CDI_Cache_NC4);
       ChunkCacheValues chunkCacheValues
           = (cacheFormat && cacheGrid) ? get_chunk_cache_size(timedimid, ncvar) : calc_chunk_cache_size(timedimid, ncvar);
       size_t cacheSize = chunkCacheValues.cacheSize;
@@ -4209,8 +4208,8 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
       {
         ncvar_t *ncvar = &ncvars[ncvarid];
         int dim1len = ncdims[ncvar->dimids[1]].len;
-        if (ncvarid != streamP->basetime.ncvarid && ncvar->ndims == 2 && timedimid == ncvar->dimids[0]
-            && xtypeIsText(ncvar->xtype) && (dim1len == 19 || dim1len == 64))
+        if (ncvarid != streamP->basetime.ncvarid && ncvar->ndims == 2 && timedimid == ncvar->dimids[0] && xtypeIsText(ncvar->xtype)
+            && (dim1len == 19 || dim1len == 64))
         {
           ncvar->isTaxis = true;
           streamP->basetime.ncvarid = ncvarid;
