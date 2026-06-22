@@ -324,21 +324,23 @@ xtypeIsInt64(nc_type xtype)
 static int
 cdfInqDatatype(stream_t *streamP, int xtype, bool isUnsigned)
 {
-  if (xtype == NC_BYTE && isUnsigned) xtype = NC_UBYTE;
+  if (xtype == NC_BYTE && isUnsigned) { xtype = NC_UBYTE; }
 
   // clang-format off
-  if (xtype == NC_BYTE  )  return CDI_DATATYPE_INT8;
-  if (xtype == NC_CHAR  )  return CDI_DATATYPE_UINT8;
-  if (xtype == NC_SHORT )  return CDI_DATATYPE_INT16;
-  if (xtype == NC_INT   )  return CDI_DATATYPE_INT32;
-  if (xtype == NC_FLOAT )  return CDI_DATATYPE_FLT32;
-  if (xtype == NC_DOUBLE)  return CDI_DATATYPE_FLT64;
-  if (xtype == NC_UBYTE )  return CDI_DATATYPE_UINT8;
-  if (xtype == NC_LONG  )  return CDI_DATATYPE_INT32;
-  if (xtype == NC_USHORT)  return CDI_DATATYPE_UINT16;
-  if (xtype == NC_UINT  )  return CDI_DATATYPE_UINT32;
-  if (xtype == NC_INT64 )  return CDI_DATATYPE_FLT64;
-  if (xtype == NC_UINT64)  return CDI_DATATYPE_FLT64;
+  switch (xtype)
+  {
+    case NC_BYTE:   return CDI_DATATYPE_INT8;
+    case NC_CHAR:   return CDI_DATATYPE_UINT8;
+    case NC_SHORT:  return CDI_DATATYPE_INT16;
+    case NC_INT:    return CDI_DATATYPE_INT32;
+    case NC_FLOAT:  return CDI_DATATYPE_FLT32;
+    case NC_DOUBLE: return CDI_DATATYPE_FLT64;
+    case NC_UBYTE:  return CDI_DATATYPE_UINT8;
+    case NC_USHORT: return CDI_DATATYPE_UINT16;
+    case NC_UINT:   return CDI_DATATYPE_UINT32;
+    case NC_INT64:  return CDI_DATATYPE_FLT64;
+    case NC_UINT64: return CDI_DATATYPE_FLT64;
+  }
   // clang-format on
 
   CdfInfo *cdfInfo = &(streamP->cdfInfo);
@@ -607,12 +609,9 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
     for (int i = 0; i < MAX_AUXVARS; ++i) { ncvar->auxvarids[i] = CDI_UNDEFID; }
     ncvar->cellarea = CDI_UNDEFID;
     ncvar->tableID = CDI_UNDEFID;
-    ncvar->missvalDefined = false;
-    ncvar->fillvalDefined = false;
     ncvar->gmapid = CDI_UNDEFID;
     for (int i = 0; i < MAX_DIMS_CDF; ++i) { ncvar->dimids[i] = CDI_UNDEFID; }
     for (int i = 0; i < MAX_DIMS_CDF; ++i) { ncvar->dimtypes[i] = CDI_UNDEFID; }
-    for (int i = 0; i < MAX_DIMS_CDF; ++i) { ncvar->chunks[i] = 0; }
     ncvar->chunkType = CDI_UNDEFID;
     ncvar->chunkSize = CDI_UNDEFID;
     ncvar->addoffset = 0.0;
@@ -622,12 +621,6 @@ init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
     ncvar->typeOfEnsembleForecast = -1;
     ncvar->numberOfForecastsInEnsemble = -1;
     ncvar->perturbationNumber = -1;
-
-    memset(ncvar->name, 0, CDI_MAX_NAME);
-    memset(ncvar->longname, 0, CDI_MAX_NAME);
-    memset(ncvar->stdname, 0, CDI_MAX_NAME);
-    memset(ncvar->units, 0, CDI_MAX_NAME);
-    memset(ncvar->filterSpec, 0, CDI_MAX_NAME);
   }
 }
 
@@ -885,12 +878,13 @@ cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
       axis[ndim++] = ':';
       for (int i = 0; i < ncvar->ndims; i++)
       {
-        if      (ncvar->dimtypes[i] == T_AXIS) axis[ndim++] = TAXIS;
-        else if (ncvar->dimtypes[i] == Z_AXIS) axis[ndim++] = ZAXIS;
-        else if (ncvar->dimtypes[i] == E_AXIS) axis[ndim++] = EAXIS;
-        else if (ncvar->dimtypes[i] == Y_AXIS) axis[ndim++] = YAXIS;
-        else if (ncvar->dimtypes[i] == X_AXIS) axis[ndim++] = XAXIS;
-        else                                   axis[ndim++] = '?';
+        int dimType = ncvar->dimtypes[i];
+        if      (dimType == T_AXIS) axis[ndim++] = TAXIS;
+        else if (dimType == Z_AXIS) axis[ndim++] = ZAXIS;
+        else if (dimType == E_AXIS) axis[ndim++] = EAXIS;
+        else if (dimType == Y_AXIS) axis[ndim++] = YAXIS;
+        else if (dimType == X_AXIS) axis[ndim++] = XAXIS;
+        else                        axis[ndim++] = '?';
       }
     }
     else
