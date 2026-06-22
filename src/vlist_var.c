@@ -186,11 +186,9 @@ cdiVlistCreateVarLevInfo(vlist_t *vlistP, int varID)
   xassert(varID >= 0 && varID < vlistP->nvars && varP->levinfo == NULL);
 
   int zaxisID = varP->zaxisID;
-  size_t nlevs = (size_t) zaxisInqSize(zaxisID);
-
+  int nlevs = zaxisInqSize(zaxisID);
   varP->levinfo = (levinfo_t *) Malloc(nlevs * sizeof(levinfo_t));
-
-  for (size_t levID = 0; levID < nlevs; ++levID) varP->levinfo[levID] = DEFAULT_LEVINFO((int) levID);
+  for (int levID = 0; levID < nlevs; ++levID) { varP->levinfo[levID] = DEFAULT_LEVINFO(levID); }
 }
 
 /*
@@ -1324,8 +1322,7 @@ vlistDefVarXYZ(int vlistID, int varID, int xyz)
         default: dimorder[id] = 0; break;  // Ensure that we assign a valid dimension to this position.
       }
     }
-    if (dimz > 1 || dimy > 1 || dimx > 1)
-      xyz = 321;  // ZYX
+    if (dimz > 1 || dimy > 1 || dimx > 1) { xyz = 321; }  // ZYX
     else
     {
       // clang-format off
@@ -1390,13 +1387,13 @@ vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
     if (diff) return 1;
   }
 
-  size_t natts = a->vars[varIDA].atts.nelems;
+  int natts = a->vars[varIDA].atts.nelems;
   if (natts != b->vars[varIDB].atts.nelems) return 1;
-  for (size_t attID = 0; attID < natts; ++attID) diff |= cdi_att_compare(&a->vars[varIDA].atts, &b->vars[varIDB].atts, (int) attID);
+  for (int attID = 0; attID < natts; ++attID) diff |= cdi_att_compare(&a->vars[varIDA].atts, &b->vars[varIDB].atts, attID);
 
-  size_t nkeys = a->vars[varIDA].keys.nelems;
+  int nkeys = a->vars[varIDA].keys.nelems;
   if (nkeys != b->vars[varIDB].keys.nelems) return 1;
-  for (size_t keyID = 0; keyID < nkeys; ++keyID) diff |= cdi_key_compare(&a->vars[varIDA].keys, &b->vars[varIDB].keys, (int) keyID);
+  for (int keyID = 0; keyID < nkeys; ++keyID) diff |= cdi_key_compare(&a->vars[varIDA].keys, &b->vars[varIDB].keys, keyID);
 
   return diff;
 }

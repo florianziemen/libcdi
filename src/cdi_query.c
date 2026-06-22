@@ -309,7 +309,7 @@ print_list_compact_float(int n, const double *list)
     {
       printf("/to/");
       double last = list[++i];
-      while ((i + 1) < n && (last + 1) == list[i + 1]) last = list[++i];
+      while ((i + 1) < n && (last + 1) == list[i + 1]) { last = list[++i]; }
       printf("%g", last);
     }
   }
