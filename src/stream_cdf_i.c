@@ -64,22 +64,6 @@ typedef struct
   int cdiVarID;
   int ncid;
   int varStatus;
-  bool ignoreVar;
-  bool isLonLatMapping;
-  bool isHealpixMapping;
-  bool isCubeSphere;
-  bool isCharAxis;
-  bool isIndexAxis;
-  bool isXaxis;
-  bool isYaxis;
-  bool isZaxis;
-  bool isTaxis;
-  bool isLon;
-  bool isLat;
-  bool isClimatology;
-  bool hasCalendar;
-  bool hasFormulaterms;
-  bool printWarning;
   int timetype;
   int param;
   int code;
@@ -110,8 +94,6 @@ typedef struct
   int truncation;
   int position;
   int numLPE;
-  bool missvalDefined;
-  bool fillvalDefined;
   int xtype;
   int gmapid;
   int positive;
@@ -125,7 +107,6 @@ typedef struct
   size_t zcount;
   size_t tstart;
   size_t tcount;
-  bool isChunked;
   int chunkType;
   int chunkSize;
   size_t chunkCacheSize;
@@ -144,11 +125,6 @@ typedef struct
   double fillval;
   double addoffset;
   double scalefactor;
-  bool hasFilter;
-  bool hasDeflate;
-  bool hasSzip;
-  bool isUnsigned;
-  bool validrangeDefined;
   double validrange[2];
   int typeOfEnsembleForecast;
   int numberOfForecastsInEnsemble;
@@ -159,6 +135,30 @@ typedef struct
   char stdname[CDI_MAX_NAME];
   char units[CDI_MAX_NAME];
   char filterSpec[CDI_MAX_NAME];
+  bool ignoreVar;
+  bool isLonLatMapping;
+  bool isHealpixMapping;
+  bool isCubeSphere;
+  bool isCharAxis;
+  bool isIndexAxis;
+  bool isXaxis;
+  bool isYaxis;
+  bool isZaxis;
+  bool isTaxis;
+  bool isLon;
+  bool isLat;
+  bool isClimatology;
+  bool hasCalendar;
+  bool hasFormulaterms;
+  bool printWarning;
+  bool missvalDefined;
+  bool fillvalDefined;
+  bool isChunked;
+  bool hasFilter;
+  bool hasDeflate;
+  bool hasSzip;
+  bool isUnsigned;
+  bool validrangeDefined;
 } ncvar_t;
 
 typedef struct
@@ -1768,6 +1768,24 @@ cdf_set_dimtype(int numVars, ncvar_t *ncvars, ncdim_t *ncdims)
           cdf_set_dim(ncvar, i, Z_AXIS);
         }
       }
+    }
+  }
+
+  // find variables with coordinates attribute on unstructured grids
+  for (int varId = 0; varId < numVars; ++varId)
+  {
+    ncvar_t *ncvar = &ncvars[varId];
+    if (ncvar->varStatus == DataVar && ncvar->gridtype == CDI_UNDEFID && ncvar->ncoordvars > 0)
+    {
+      int xDimId = -1, yDimId = -1;
+      for (int i = 0; i < ncvar->ncoordvars; ++i)
+      {
+        int cvarId = ncvar->coordvarids[i];
+        ncvar_t *cvar = &ncvars[cvarId];
+        if (cvar->ndims == 1 && cvar->isLon) { xDimId = cvar->dimids[0]; }
+        if (cvar->ndims == 1 && cvar->isLat) { yDimId = cvar->dimids[0]; }
+      }
+      if (xDimId != -1 && xDimId == yDimId) { ncvar->gridtype = GRID_UNSTRUCTURED; }
     }
   }
 

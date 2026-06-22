@@ -1,3 +1,7 @@
+2026-06-22  Uwe Schulzweida
+
+	* NetCDF: find variables with coordinates attribute on unstructured grids
+
 2026-06-18  Uwe Schulzweida
 
 	* Version 2.6.3 released
