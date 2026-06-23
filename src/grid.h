@@ -145,13 +145,13 @@ struct grid_t
   void *extraData;
 };
 
-inline bool
+static inline bool
 grid_is_irregular(int gridType)
 {
   return (gridType == GRID_UNSTRUCTURED || gridType == GRID_CURVILINEAR);
 }
 
-inline size_t
+static inline size_t
 grid_axis_size(const grid_t *g, enum GridAxis axis)
 {
   if (grid_is_irregular(g->type)) return g->size;
