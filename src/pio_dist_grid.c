@@ -178,8 +178,8 @@ cdiPioDistGridSwitchSyncMode(int gridID, int mode)
   {
     struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridP->extraData;
     PPM_dist_mult_array_set_sync_mode(extraData->distData, (enum PPM_dma_sync_mode) mode, 0);
-    bool dataDefined = gridP->x.vals || gridP->y.vals || gridP->x.bounds || gridP->y.bounds || gridP->area
-                       || gridP->mask || gridP->mask_gme;
+    bool dataDefined
+        = gridP->x.vals || gridP->y.vals || gridP->x.bounds || gridP->y.bounds || gridP->area || gridP->mask || gridP->mask_gme;
     if (dataDefined) PPM_dist_mult_array_expose(extraData->distData);
     extraData->rmaEnabled = mode == PPM_dma_sync_mode_passive_target;
     switched = true;
@@ -410,7 +410,8 @@ static pthread_once_t cdiPioDistGridInitOnceState = PTHREAD_ONCE_INIT;
 #else
 static bool cdiPioDistGridInitOnceState = false;
 #define CDI_PIO_DIST_GRID_INIT_ONCE()     \
-  do {                                    \
+  do                                      \
+  {                                       \
     if (!cdiPioDistGridInitOnceState)     \
     {                                     \
       cdiPioDistGridInitOnce();           \
@@ -711,7 +712,7 @@ cdiPioDistGridDestroy(grid_t *gridP)
   for (size_t saIdx = cdiPioGDsaXVals; saIdx <= cdiPioGDsaYVals; ++saIdx)
     if (extraData->aReduce[saIdx].dist2scanRedist) xt_redist_delete(extraData->aReduce[saIdx].dist2scanRedist);
   gridP->extraData = NULL;
-  void (*baseDestroy)(grid_t * gridP) = extraData->baseVtable->destroy;
+  void (*baseDestroy)(grid_t *gridP) = extraData->baseVtable->destroy;
   Free(extraData);
   baseDestroy(gridP);
 }
@@ -773,10 +774,11 @@ cdiPioDistGridCopyArrays(grid_t *gridPOrig, grid_t *gridPDup)
     memcpy(gridPDup->reducedPoints, gridPOrig->reducedPoints, reducedPointsSize * sizeof(int));
   }
 
-  void *saPtr[cdiPioGDsaNum] = { [cdiPioGDsaXVals] = gridPOrig->x.vals,     [cdiPioGDsaYVals] = gridPOrig->y.vals,
-                                 [cdiPioGDsaXBounds] = gridPOrig->x.bounds, [cdiPioGDsaYBounds] = gridPOrig->y.bounds,
-                                 [cdiPioGDsaArea] = gridPOrig->area,        [cdiPioGDsaMask] = gridPOrig->mask,
-                                 [cdiPioGDsaMaskGME] = gridPOrig->mask_gme };
+  void *saPtr[cdiPioGDsaNum] = {
+    [cdiPioGDsaXVals] = gridPOrig->x.vals,     [cdiPioGDsaYVals] = gridPOrig->y.vals, [cdiPioGDsaXBounds] = gridPOrig->x.bounds,
+    [cdiPioGDsaYBounds] = gridPOrig->y.bounds, [cdiPioGDsaArea] = gridPOrig->area,    [cdiPioGDsaMask] = gridPOrig->mask,
+    [cdiPioGDsaMaskGME] = gridPOrig->mask_gme
+  };
 
   size_t nvertex = (size_t) gridPOrig->nvertex;
   for (size_t saIdx = 0; saIdx < cdiPioGDsaNum; ++saIdx)
@@ -804,8 +806,8 @@ defDistData(grid_t *gridP, const void *indata, enum cdiPioGDsa saIdx)
 {
   struct cdiPioDistGridExtraData *restrict extraData = (struct cdiPioDistGridExtraData *) gridP->extraData;
   Xt_redist redist = cdiPioDistGridLazyRedistCreate(gridP, saIdx);
-  bool dataDefined = gridP->x.vals || gridP->y.vals || gridP->x.bounds || gridP->y.bounds || gridP->area || gridP->mask
-                     || gridP->mask_gme;
+  bool dataDefined
+      = gridP->x.vals || gridP->y.vals || gridP->x.bounds || gridP->y.bounds || gridP->area || gridP->mask || gridP->mask_gme;
   if (dataDefined) PPM_dist_mult_array_unexpose(extraData->distData);
   void *redistData = PPM_dist_mult_array_local_ptr(extraData->distData, saIdx);
   xt_redist_s_exchange1(redist, indata, redistData);
@@ -970,16 +972,16 @@ cdiPioDistGridDefAReductions(grid_t *gridP, size_t saIdx)
     int (*commSizeQuery)(void) = inClientGroup ? cdiPioCommInqSizeClients : commInqSizeColl;
     int commSize = commSizeQuery();
     struct PPM_extent gridScanChunk
-        = PPM_uniform_partition((struct PPM_extent){ .first = 0, .size = (int32_t) gsize }, commSize, commRank);
+        = PPM_uniform_partition((struct PPM_extent) { .first = 0, .size = (int32_t) gsize }, commSize, commRank);
     Xt_redist dist2scanRedist;
     if (!(dist2scanRedist = aReduce->dist2scanRedist))
     {
       struct Xt_stripe stripes[2];
       int numStripes = 1;
-      stripes[0] = (struct Xt_stripe){ .start = gridScanChunk.first, .stride = 1, .nstrides = gridScanChunk.size };
+      stripes[0] = (struct Xt_stripe) { .start = gridScanChunk.first, .stride = 1, .nstrides = gridScanChunk.size };
       if (commRank == 0)
       {
-        stripes[numStripes++] = (struct Xt_stripe){ .start = gsize - (Xt_int) 1, .stride = 1, .nstrides = 1 };
+        stripes[numStripes++] = (struct Xt_stripe) { .start = gsize - (Xt_int) 1, .stride = 1, .nstrides = 1 };
         int nstrides = stripes[0].nstrides;
         gridScanChunk.size = stripes[0].nstrides = nstrides > 0 ? nstrides : 1;
       }
@@ -1057,7 +1059,7 @@ static void
 cdiPioDistGridDefXVals(grid_t *gridP, const double *xvals)
 {
   gridP->x.vals = defDistData(gridP, xvals, cdiPioGDsaXVals);
-  gridP->y.inc = cdiPioDistGridDefAReductions(gridP, cdiPioGDsaXVals);
+  gridP->x.inc = cdiPioDistGridDefAReductions(gridP, cdiPioGDsaXVals);
 }
 
 static int
@@ -1262,11 +1264,10 @@ cdiPioDistGridPackSizeArrays(grid_t *gridP, void *context)
      * in another */
     packBufferSize += serializeGetSize(2, CDI_DATATYPE_INT, context);
     struct cdiPioDistGridExtraData *extraData = (struct cdiPioDistGridExtraData *) gridP->extraData;
-    bool presence[cdiPioGDsaNum]
-        = { [cdiPioGDsaXVals] = gridP->x.vals != NULL,     [cdiPioGDsaYVals] = gridP->y.vals != NULL,
-            [cdiPioGDsaXBounds] = gridP->x.bounds != NULL, [cdiPioGDsaYBounds] = gridP->y.bounds != NULL,
-            [cdiPioGDsaArea] = gridP->area != NULL,        [cdiPioGDsaMask] = gridP->mask != NULL,
-            [cdiPioGDsaMaskGME] = gridP->mask_gme != NULL };
+    bool presence[cdiPioGDsaNum] = { [cdiPioGDsaXVals] = gridP->x.vals != NULL,     [cdiPioGDsaYVals] = gridP->y.vals != NULL,
+                                     [cdiPioGDsaXBounds] = gridP->x.bounds != NULL, [cdiPioGDsaYBounds] = gridP->y.bounds != NULL,
+                                     [cdiPioGDsaArea] = gridP->area != NULL,        [cdiPioGDsaMask] = gridP->mask != NULL,
+                                     [cdiPioGDsaMaskGME] = gridP->mask_gme != NULL };
     int lastClientInGroup = cdiPioClientRangeStart(collRank + 1, numClients, numColl) - 1,
         numClientsInGroup = lastClientInGroup - clientRank + 1;
     struct PPM_dist_mult_array *distData = extraData->distData;
@@ -1467,15 +1468,14 @@ cdiPioDistGridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, in
       struct Xt_stripe *stripes = (struct Xt_stripe *) (Malloc((size_t) numClientsInGroup * sizeof(*stripes)));
       for (size_t rankOfs = 0; rankOfs < (size_t) numClientsInGroup; ++rankOfs)
         stripes[rankOfs]
-            = (struct Xt_stripe){ .start = (Xt_int) chunks[rankOfs].first, .stride = 1, .nstrides = (int) chunks[rankOfs].size };
+            = (struct Xt_stripe) { .start = (Xt_int) chunks[rankOfs].first, .stride = 1, .nstrides = (int) chunks[rankOfs].size };
       partDesc2D = xt_idxstripes_new(stripes, numClientsInGroup);
       partDescY = partDescX = NULL;
       Free(stripes);
     }
     else if (type == GRID_CURVILINEAR)
     {
-      Xt_int global_size[cdiPioGDsaMaxRank] = { (Xt_int) gridP->y.size, (Xt_int) gridP->x.size },
-             local_start[cdiPioGDsaMaxRank];
+      Xt_int global_size[cdiPioGDsaMaxRank] = { (Xt_int) gridP->y.size, (Xt_int) gridP->x.size }, local_start[cdiPioGDsaMaxRank];
       int local_size[cdiPioGDsaMaxRank];
       Xt_idxlist *partDescClient2D = Malloc((size_t) numClientsInGroup * sizeof(*partDescClient2D));
       for (size_t rankOfs = 0; rankOfs < (size_t) numClientsInGroup; ++rankOfs)
@@ -1494,8 +1494,7 @@ cdiPioDistGridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, in
     }
     else
     {
-      Xt_int global_size[cdiPioGDsaMaxRank] = { (Xt_int) gridP->y.size, (Xt_int) gridP->x.size },
-             local_start[cdiPioGDsaMaxRank];
+      Xt_int global_size[cdiPioGDsaMaxRank] = { (Xt_int) gridP->y.size, (Xt_int) gridP->x.size }, local_start[cdiPioGDsaMaxRank];
       int local_size[cdiPioGDsaMaxRank];
       /* describe 2D decomposition via section for later collection
        * construction */
@@ -1513,9 +1512,9 @@ cdiPioDistGridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, in
         }
         partDescClient2D[rankOfs] = xt_idxsection_new(0, cdiPioGDsaMaxRank, global_size, local_size, local_start);
         for (size_t i = cdiPioGDdtX; i <= cdiPioGDdtY; ++i)
-          stripes[i][rankOfs] = (struct Xt_stripe){ .start = (Xt_int) chunks[cdiPioGDsaMaxRank * rankOfs + i].first,
-                                                    .stride = 1,
-                                                    .nstrides = (int) chunks[cdiPioGDsaMaxRank * rankOfs + i].size };
+          stripes[i][rankOfs] = (struct Xt_stripe) { .start = (Xt_int) chunks[cdiPioGDsaMaxRank * rankOfs + i].first,
+                                                     .stride = 1,
+                                                     .nstrides = (int) chunks[cdiPioGDsaMaxRank * rankOfs + i].size };
       }
       partDesc2D = xt_idxlist_collection_new(partDescClient2D, numClientsInGroup);
       partDescX = xt_idxstripes_new(stripes[cdiPioGDdtX], numClientsInGroup);
@@ -1523,8 +1522,7 @@ cdiPioDistGridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, in
       Free(stripes);
       Free(partDescClient2D);
     }
-    cdiPioDistGridInit(gridP, type, gridP->size, gridP->x.size, gridP->y.size, nvertex, NULL, partDesc2D, partDescX,
-                       partDescY);
+    cdiPioDistGridInit(gridP, type, gridP->size, gridP->x.size, gridP->y.size, nvertex, NULL, partDesc2D, partDescX, partDescY);
     if (!irregular)
     {
       xt_idxlist_delete(partDescY);

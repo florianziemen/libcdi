@@ -720,9 +720,9 @@ cdf_def_var_chunking(int ncid, int varid, int storage, const size_t *chunksizesp
     int ndims;
     cdf_inq_varndims(ncid, varid, &ndims);
     // clang-format off
-    if      (ndims == 1) Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0]);
-    else if (ndims == 2) Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0], chunksizesp[1]);
-    else if (ndims == 3) Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0], chunksizesp[1], chunksizesp[2]);
+    if      (ndims == 1) Message("chunks=%zu", chunksizesp[0]);
+    else if (ndims == 2) Message("chunks=%zu/%zu", chunksizesp[0], chunksizesp[1]);
+    else if (ndims == 3) Message("chunks=%zu/%zu/%zu", chunksizesp[0], chunksizesp[1], chunksizesp[2]);
     else if (ndims == 4) Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0], chunksizesp[1], chunksizesp[2], chunksizesp[3]);
     // clang-format on
   }
