@@ -129,8 +129,9 @@ extDefField(stream_t *streamP)
   header[1] = pnum;
   header[2] = record->ilevel;
   int gridID = record->gridID;
-  cdi_check_gridsize_int_limit("EXTRA", gridInqSize(gridID));
-  header[3] = (int) gridInqSize(gridID);
+  SizeType gridSize = gridInqSize(gridID);
+  cdi_check_gridsize_int_limit("EXTRA", gridSize);
+  header[3] = (int) gridSize;
 
   extrec_t *extp = (extrec_t *) record->objectp;
   extDefDatatype(record->prec, &extp->prec, &extp->number);
@@ -574,8 +575,9 @@ extWriteVarSliceDP(stream_t *streamP, int varID, int levID, const double *data)
   header[1] = pnum;
   header[2] = (int) lround(zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
   int gridID = vlistInqVarGrid(vlistID, varID);
-  cdi_check_gridsize_int_limit("EXTRA", gridInqSize(gridID));
-  header[3] = (int) gridInqSize(gridID);
+  SizeType gridSize = gridInqSize(gridID);
+  cdi_check_gridsize_int_limit("EXTRA", gridSize);
+  header[3] = (int) gridSize;
 
   extrec_t *extp = (extrec_t *) streamP->record->objectp;
   extDefDatatype(vlistInqVarDatatype(vlistID, varID), &extp->prec, &extp->number);

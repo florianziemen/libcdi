@@ -58,9 +58,8 @@ void cdiAbortC(const char *caller, const char *filename,
 #define cdiAbort(file, func, line, ...)                 \
   cdiAbortC(NULL, (file), (func), (line), __VA_ARGS__)
 
-#define xassert(arg) do {                       \
-    if ((arg)) { } else {                       \
-      xabort("assertion `" #arg "` failed");}   \
+#define xassert(arg) do {                                   \
+    if (!(arg)) { xabort("assertion `" #arg "` failed");}   \
   } while(0)
 
 void

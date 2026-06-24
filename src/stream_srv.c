@@ -1,3 +1,4 @@
+#include "grid.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -122,16 +123,17 @@ srvDefField(stream_t *streamP)
   header[3] = record->vtime;
 
   int gridID = record->gridID;
+  SizeType gridSize = gridInqSize(gridID);
   SizeType xsize = gridInqXsize(gridID), ysize = gridInqYsize(gridID);
   if (xsize == 0 || ysize == 0)
   {
-    xsize = gridInqSize(gridID);
+    xsize = gridSize;
     ysize = 1;
   }
   if (gridInqType(gridID) == GRID_UNSTRUCTURED) ysize = 1;
-  if (gridInqSize(gridID) != xsize * ysize) Error("Internal problem with gridsize!");
+  if (gridSize != xsize * ysize) Error("Internal problem with gridsize!");
 
-  cdi_check_gridsize_int_limit("SERVICE", gridInqSize(gridID));
+  cdi_check_gridsize_int_limit("SERVICE", gridSize);
 
   header[4] = (int) xsize;
   header[5] = (int) ysize;
@@ -584,16 +586,17 @@ srvWriteVarSliceDP(stream_t *streamP, int varID, int levID, const double *data)
   header[2] = (int) cdiDate_get(vDateTime.date);
   header[3] = cdiTime_get(vDateTime.time);
 
+  SizeType gridSize = gridInqSize(gridID);
   SizeType xsize = gridInqXsize(gridID), ysize = gridInqYsize(gridID);
   if (xsize == 0 || ysize == 0)
   {
-    xsize = gridInqSize(gridID);
+    xsize = gridSize;
     ysize = 1;
   }
   if (gridInqType(gridID) == GRID_UNSTRUCTURED) ysize = 1;
-  if (gridInqSize(gridID) != xsize * ysize) Error("Internal problem with gridsize!");
+  if (gridSize != xsize * ysize) Error("Internal problem with gridsize!");
 
-  cdi_check_gridsize_int_limit("SERVICE", gridInqSize(gridID));
+  cdi_check_gridsize_int_limit("SERVICE", gridSize);
 
   header[4] = (int) xsize;
   header[5] = (int) ysize;
@@ -619,8 +622,7 @@ srvWriteVarDP(stream_t *streamP, int varID, const double *data)
   SizeType gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   int nlevs = zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
-  for (int levID = 0; levID < nlevs; levID++)
-    srvWriteVarSliceDP(streamP, varID, levID, data + (size_t) levID * (size_t) gridsize);
+  for (int levID = 0; levID < nlevs; levID++) srvWriteVarSliceDP(streamP, varID, levID, data + (size_t) levID * (size_t) gridsize);
 }
 
 #endif /* HAVE_LIBSERVICE */

@@ -50,9 +50,7 @@ static void tableDefNum(int tableID, int tablenum);
 static void
 tableDefEntry(int tableID, int id, int ltype, const char *name, const char *longname, const char *units)
 {
-  if (tableID >= 0 && tableID < MAX_TABLE && parTable[tableID].used) {}
-  else
-    Error("Invalid table ID %d", tableID);
+  if (!(tableID >= 0 && tableID < MAX_TABLE && parTable[tableID].used)) Error("Invalid table ID %d", tableID);
 
   int item = parTable[tableID].npars++;
   param_type *par = &parTable[tableID].pars[item];
@@ -717,9 +715,7 @@ tableFWriteC(FILE *ptfp, int tableID)
 void
 tableInqEntry(int tableID, int id, int ltype, char *name, char *longname, char *units)
 {
-  if (((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID)) {}
-  else
-    Error("Invalid table ID %d", tableID);
+  if (!(((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID))) Error("Invalid table ID %d", tableID);
 
   if (tableID != CDI_UNDEFID)
   {

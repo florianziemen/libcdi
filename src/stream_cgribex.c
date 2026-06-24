@@ -50,10 +50,10 @@ typedef struct
   unsigned char *bds;
 } cgribex_handle;
 
-static void
+static inline void
 fill_intarr(int *iarr, int val, int n)
 {
-  for (int i = 0; i < n; ++i) iarr[i] = val;
+  memset(iarr, val, n * sizeof(int));
 }
 
 static void
@@ -1339,8 +1339,7 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
   float fsec2f[sizeof(cgribexp->fsec2) / sizeof(double)];
   float fsec3f[sizeof(cgribexp->fsec3) / sizeof(double)];
 
-  char hoper[2];
-  strcpy(hoper, unreduced ? "R" : "D");
+  const char *hoper = unreduced ? "R" : "D";
 
   FSEC3_MissVal = missval;
 
