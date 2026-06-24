@@ -34,7 +34,7 @@ enum
 };
 
 // clang-format off
-static const struct
+static const struct ZaxisParam
 {
   unsigned char positive;   // 1: up;  2: down
   const char *name;
@@ -106,11 +106,12 @@ zaxisGetTypeDescription(int zaxisType, int *outPositive, const char **outName, c
   }
   else
   {
-    if (outPositive) *outPositive = ZaxistypeEntry[zaxisType].positive;
-    if (outName) *outName = ZaxistypeEntry[zaxisType].name;
-    if (outLongName && zaxisType != ZAXIS_GENERIC) *outLongName = ZaxistypeEntry[zaxisType].longname;
-    if (outStdName) *outStdName = ZaxistypeEntry[zaxisType].stdname;
-    if (outUnit) *outUnit = ZaxistypeEntry[zaxisType].units;
+    const struct ZaxisParam *zaxisParam = &ZaxistypeEntry[zaxisType];
+    if (outPositive) *outPositive = zaxisParam->positive;
+    if (outName) *outName = zaxisParam->name;
+    if (outLongName && zaxisType != ZAXIS_GENERIC) *outLongName = zaxisParam->longname;
+    if (outStdName) *outStdName = zaxisParam->stdname;
+    if (outUnit) *outUnit = zaxisParam->units;
   }
 }
 
@@ -180,30 +181,31 @@ cdiZaxisCount(void)
 }
 
 static int
-zaxisCreate_(int zaxistype, int size, int id)
+zaxisCreate_(int zaxisType, int size, int id)
 {
   zaxis_t *zaxisP = zaxisNewEntry(id);
 
   xassert(size >= 0);
-  zaxisP->type = zaxistype;
+  zaxisP->type = zaxisType;
   zaxisP->size = size;
 
   int zaxisID = zaxisP->self;
 
-  if (zaxistype >= 0 && zaxistype < CDI_NumZaxistype)
+  if (zaxisType >= 0 && zaxisType < CDI_NumZaxistype)
   {
-    cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, ZaxistypeEntry[zaxistype].name);
-    if (zaxistype != ZAXIS_GENERIC) zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
-    cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, ZaxistypeEntry[zaxistype].units);
+    const struct ZaxisParam *zaxisParam = &ZaxistypeEntry[zaxisType];
+    cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, zaxisParam->name);
+    if (zaxisType != ZAXIS_GENERIC) cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_LONGNAME, zaxisParam->longname);
+    if (*zaxisParam->units) cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, zaxisParam->units);
 
-    const char *stdname = ZaxistypeEntry[zaxistype].stdname;
+    const char *stdname = zaxisParam->stdname;
     if (*stdname) cdiDefVarKeyBytes(&zaxisP->keys, CDI_KEY_STDNAME, (const unsigned char *) stdname, (int) strlen(stdname) + 1);
 
-    zaxisP->positive = ZaxistypeEntry[zaxistype].positive;
+    zaxisP->positive = zaxisParam->positive;
   }
   else
   {
-    Error("Internal problem! zaxistype=%d out of range (min=0/max=%d)!", zaxistype, CDI_NumZaxistype - 1);
+    Error("Internal problem! zaxistype=%d out of range (min=0/max=%d)!", zaxisType, CDI_NumZaxistype - 1);
   }
 
   return zaxisID;
