@@ -236,9 +236,12 @@ libcdi_la_SOURCES += \
   stream_gribapi.c
 endif HAVE_LIBGRIB_API
 
+AM_CPPFLAGS += -I$(top_srcdir)/src/platform/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/platform/unix
 libcdi_la_SOURCES +=\
 platform/unix/cdi_pread.c\
-platform/unix/cdi_pread.h
+platform/unix/cdi_pread.h \
+platform/include/cdi/pread.h
 
 libcdi_f2003_la_SOURCES = mo_cdi.f90
 libcdi_f2003_la_LIBADD = libcdi.la
