@@ -1294,6 +1294,7 @@ static void
 deallocate_cdfCache(CdfCache *cache)
 {
   FreeAndNull(cache->buffer);
+  FreeAndNull(cache);
 }
 #endif
 
