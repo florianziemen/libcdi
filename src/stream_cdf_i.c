@@ -831,7 +831,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
     cdfGetAttInt64(ncid, ncvarid, attname, attlen, pattint64);
     bool defineAtts = true;
     for (size_t i = 0; i < attlen; ++i)
-      if (pattint64[i] > INT_MAX) defineAtts = false;
+      if (pattint64[i] > INT_MAX) { defineAtts = false; }
     if (defineAtts)
     {
       int attint = 0;
@@ -3485,7 +3485,8 @@ cdf_define_all_zaxes(stream_t *streamP, int vlistID, ncdim_t *ncdims, int nvars,
         for (int iatt = 0; iatt < nvatts; ++iatt)
         {
           int attnum = ncvars[zvarid].atts[iatt];
-          cdf_set_cdi_attr(ncid, zvarid, attnum, zaxisID, CDI_GLOBAL, false);
+          bool removeFillValue = true;
+          cdf_set_cdi_attr(ncid, zvarid, attnum, zaxisID, CDI_GLOBAL, removeFillValue);
         }
       }
 
