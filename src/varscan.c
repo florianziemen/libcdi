@@ -172,11 +172,11 @@ varFree(void)
     var->opt_grib_kvpair = NULL;
   }
 
-  FREE_AND_NULL(varInfoList);
+  FreeAndNull(varInfoList);
   varInfoListSize = 0;
   varInfoListUsed = 0;
 
-  FREE_AND_NULL(Vct);
+  FreeAndNull(Vct);
   Vctsize = 0;
 }
 

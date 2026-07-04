@@ -48,10 +48,6 @@ extern pthread_mutex_t CDI_IO_Mutex;
 #define UNUSED(x) (void) x
 #endif
 
-// clang-format off
-#define FREE_AND_NULL(p) do { if (p) { Free(p); (p) = NULL; } } while(0)
-// clang-format on
-
 char *str_to_lower(char *str);
 bool strStartsWith(const char *vstr, const char *cstr);
 

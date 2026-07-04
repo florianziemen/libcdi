@@ -688,10 +688,10 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
   if (fileID < 0)
   {
     streamID = fileID;
-    FREE_AND_NULL(streamP->record);
+    FreeAndNull(streamP->record);
     reshRemove(streamP->self, &streamOps);
     if (streamP->lockIO) CDI_IO_UNLOCK();
-    FREE_AND_NULL(streamP);
+    FreeAndNull(streamP);
   }
   else
   {
@@ -738,7 +738,7 @@ streamOpenNCMem(int ncidp, char mode)
     if (status < 0)
     {
       streamID = status;
-      FREE_AND_NULL(streamP->record);
+      FreeAndNull(streamP->record);
       reshRemove(streamP->self, &streamOps);
     }
   }
@@ -931,7 +931,7 @@ streamOpenRead(const char *filename)
     if (status < 0)
     {
       streamID = (int) status;
-      FREE_AND_NULL(streamP->record);
+      FreeAndNull(streamP->record);
       reshRemove(streamP->self, &streamOps);
     }
   }
@@ -989,7 +989,7 @@ streamOpenReadQuery(const char *filename, struct CdiQuery *query)
     if (status < 0)
     {
       streamID = (int) status;
-      FREE_AND_NULL(streamP->record);
+      FreeAndNull(streamP->record);
       reshRemove(streamP->self, &streamOps);
     }
   }
@@ -1183,7 +1183,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamP, int recordBufIsToBeDeleted)
   int fileID = streamP->fileID;
   int filetype = streamP->filetype;
 
-  FREE_AND_NULL(streamP->filterSpec);
+  FreeAndNull(streamP->filterSpec);
 
   switch (streamP->protocol)
   {
@@ -1193,7 +1193,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamP, int recordBufIsToBeDeleted)
       if (streamP->protocolData)
       {
         Free(((across_info_t *) streamP->protocolData)->expid);
-        FREE_AND_NULL(streamP->protocolData);
+        FreeAndNull(streamP->protocolData);
       }
 #endif
       return;
@@ -1267,9 +1267,9 @@ cdiStreamCloseDefaultDelegate(stream_t *streamP, int recordBufIsToBeDeleted)
       if (streamP->ntsteps == 0 && streamP->tsteps != NULL)
       {
         tsteps_t *tstep = &(streamP->tsteps[0]);
-        FREE_AND_NULL(tstep->recinfo);
-        FREE_AND_NULL(tstep->records);
-        FREE_AND_NULL(tstep->recIDs);
+        FreeAndNull(tstep->recinfo);
+        FreeAndNull(tstep->records);
+        FreeAndNull(tstep->recIDs);
       }
       break;
     }
@@ -1285,15 +1285,15 @@ cdiStreamCloseDefaultDelegate(stream_t *streamP, int recordBufIsToBeDeleted)
 static void
 deallocate_sleveltable_t(sleveltable_t *entry)
 {
-  FREE_AND_NULL(entry->recordID);
-  FREE_AND_NULL(entry->lindex);
+  FreeAndNull(entry->recordID);
+  FreeAndNull(entry->lindex);
 }
 
 #ifdef HAVE_LIBNETCDF
 static void
 deallocate_cdfCache(CdfCache *cache)
 {
-  FREE_AND_NULL(cache->buffer);
+  FreeAndNull(cache->buffer);
 }
 #endif
 
@@ -1306,12 +1306,12 @@ streamDestroyViaDelegate(stream_t *streamP, void (*streamCloseDelegate)(stream_t
   if (streamP->record)
   {
     Free(streamP->record->buffer);
-    FREE_AND_NULL(streamP->record);
+    FreeAndNull(streamP->record);
   }
 
   streamP->filetype = CDI_FILETYPE_UNDEF;
-  FREE_AND_NULL(streamP->filename);
-  FREE_AND_NULL(streamP->filterSpec);
+  FreeAndNull(streamP->filename);
+  FreeAndNull(streamP->filterSpec);
 
   if (streamP->vars)
   {
@@ -1326,7 +1326,7 @@ streamDestroyViaDelegate(stream_t *streamP, void (*streamCloseDelegate)(stream_t
       streamP->vars[index].cdfCache = NULL;
 #endif
     }
-    FREE_AND_NULL(streamP->vars);
+    FreeAndNull(streamP->vars);
   }
 
   if (streamP->tsteps)
@@ -1335,13 +1335,13 @@ streamDestroyViaDelegate(stream_t *streamP, void (*streamCloseDelegate)(stream_t
     for (int index = 0; index < maxSteps; ++index)
     {
       tsteps_t *tstep = &(streamP->tsteps[index]);
-      FREE_AND_NULL(tstep->recinfo);
-      FREE_AND_NULL(tstep->records);
-      FREE_AND_NULL(tstep->recIDs);
+      FreeAndNull(tstep->recinfo);
+      FreeAndNull(tstep->records);
+      FreeAndNull(tstep->recIDs);
       taxisDestroyKernel(&(tstep->taxis));
     }
 
-    FREE_AND_NULL(streamP->tsteps);
+    FreeAndNull(streamP->tsteps);
   }
 
 #ifdef HAVE_LIBFDB5
@@ -1961,9 +1961,9 @@ freePtrAfterNCMem(stream_t *streamP, int recordBufIsToBeDeleted)
   if (streamP->ntsteps == 0 && streamP->tsteps != NULL)
   {
     tsteps_t *tstep = &(streamP->tsteps[0]);
-    FREE_AND_NULL(tstep->recinfo);
-    FREE_AND_NULL(tstep->records);
-    FREE_AND_NULL(tstep->recIDs);
+    FreeAndNull(tstep->recinfo);
+    FreeAndNull(tstep->records);
+    FreeAndNull(tstep->recIDs);
   }
 }
 

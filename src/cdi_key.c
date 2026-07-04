@@ -126,7 +126,7 @@ cdi_delete_key(cdi_key_t *keyP)
   if (keyP != NULL && keyP->length)  // key in use
   {
     keyP->length = 0;
-    if (keyP->type == KeyBytes) { FREE_AND_NULL(keyP->v.s); }
+    if (keyP->type == KeyBytes) { FreeAndNull(keyP->v.s); }
     else if (keyP->type == KeyFloat) { keyP->v.d = 0.0; }
     else if (keyP->type == KeyInt) { keyP->v.i = 0; }
   }
