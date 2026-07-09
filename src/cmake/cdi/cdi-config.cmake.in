@@ -15,7 +15,7 @@ find_path(CDI_INCLUDE_DIRECTORY
 mark_as_advanced(CDI_INCLUDE_DIRECTORY)
 
 find_library(CDI_LIBRARY
-  NAMES cdilib
+  NAMES libcdi
   PATHS "${CDI_ROOT_DIR}/lib"
   # use following line instead of previous if this file can be configured 
   # PATHS "@libdir@"
