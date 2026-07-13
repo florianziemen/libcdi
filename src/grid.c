@@ -2341,7 +2341,7 @@ compare_unstructured(const grid_t *grid, const grid_t *gridRef, bool compareCoor
   cdiInqVarKeyBytes(&gridRef->keys, CDI_KEY_UUID, uuid1, &length);
   length = CDI_UUID_SIZE;
   cdiInqVarKeyBytes(&grid->keys, CDI_KEY_UUID, uuid2, &length);
-  differ = ((!cdiUUIDIsNull(uuid1) || !cdiUUIDIsNull(uuid2)) && memcmp(uuid1, uuid2, CDI_UUID_SIZE));
+  differ = ((!cdiUUIDIsNull(uuid1) || !cdiUUIDIsNull(uuid2)) && memcmp(uuid1, uuid2, CDI_UUID_SIZE) != 0);
   if (!differ)
   {
     int numberA = cdiInqVarKeyInt(&grid->keys, CDI_KEY_NUMBEROFGRIDUSED);
@@ -2562,7 +2562,7 @@ grid_compare(void *gridP1, void *gridP2)
   cdiInqVarKeyBytes(&g1->keys, CDI_KEY_UUID, uuid1, &length);
   length = CDI_UUID_SIZE;
   cdiInqVarKeyBytes(&g2->keys, CDI_KEY_UUID, uuid2, &length);
-  if (memcmp(uuid1, uuid2, CDI_UUID_SIZE)) return differ;
+  if (memcmp(uuid1, uuid2, CDI_UUID_SIZE) != 0) return differ;
 
   return equal;
 }

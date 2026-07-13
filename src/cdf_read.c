@@ -113,7 +113,7 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
         int outOfRange = (data[i] < validMin || data[i] > validMax);
         int isMissVal = DBL_IS_EQUAL(data[i], missVal);
         missValCount += (size_t) (outOfRange | isMissVal);
-        data[i] = outOfRange ? missVal : isMissVal ? data[i] : data[i] * scalefactor + addoffset;
+        data[i] = outOfRange ? missVal : (isMissVal ? data[i] : data[i] * scalefactor + addoffset);
       }
       break;
     case 13:  // haveRangeCheck & haveMissVal & haveAddoffset
@@ -122,7 +122,7 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
         int outOfRange = (data[i] < validMin || data[i] > validMax);
         int isMissVal = DBL_IS_EQUAL(data[i], missVal);
         missValCount += (size_t) (outOfRange | isMissVal);
-        data[i] = outOfRange ? missVal : isMissVal ? data[i] : data[i] + addoffset;
+        data[i] = outOfRange ? missVal : (isMissVal ? data[i] : data[i] + addoffset);
       }
       break;
     case 11:  // haveRangeCheck & haveMissVal & haveScalefactor
@@ -131,7 +131,7 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
         int outOfRange = (data[i] < validMin || data[i] > validMax);
         int isMissVal = DBL_IS_EQUAL(data[i], missVal);
         missValCount += (size_t) (outOfRange | isMissVal);
-        data[i] = outOfRange ? missVal : isMissVal ? data[i] : data[i] * scalefactor;
+        data[i] = outOfRange ? missVal : (isMissVal ? data[i] : data[i] * scalefactor);
       }
       break;
     case 9:  // haveRangeCheck & haveMissVal
@@ -218,7 +218,7 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
         int outOfRange = (data[i] < validMin || data[i] > validMax);
         int isMissVal = DBL_IS_EQUAL(data[i], missVal);
         missValCount += (size_t) (outOfRange | isMissVal);
-        data[i] = outOfRange ? (float) missVal : isMissVal ? data[i] : (float) (data[i] * scalefactor + addoffset);
+        data[i] = outOfRange ? (float) missVal : (isMissVal ? data[i] : (float) (data[i] * scalefactor + addoffset));
       }
       break;
     case 13:  // haveRangeCheck & haveMissVal & haveAddoffset
@@ -227,7 +227,7 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
         int outOfRange = (data[i] < validMin || data[i] > validMax);
         int isMissVal = DBL_IS_EQUAL(data[i], missVal);
         missValCount += (size_t) (outOfRange | isMissVal);
-        data[i] = outOfRange ? (float) missVal : isMissVal ? data[i] : (float) (data[i] + addoffset);
+        data[i] = outOfRange ? (float) missVal : (isMissVal ? data[i] : (float) (data[i] + addoffset));
       }
       break;
     case 11:  // haveRangeCheck & haveMissVal & haveScalefactor
@@ -236,7 +236,7 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
         int outOfRange = (data[i] < validMin || data[i] > validMax);
         int isMissVal = DBL_IS_EQUAL(data[i], missVal);
         missValCount += (size_t) (outOfRange | isMissVal);
-        data[i] = outOfRange ? (float) missVal : isMissVal ? data[i] : (float) (data[i] * scalefactor);
+        data[i] = outOfRange ? (float) missVal : (isMissVal ? data[i] : (float) (data[i] * scalefactor));
       }
       break;
     case 9:  // haveRangeCheck & haveMissVal
@@ -987,8 +987,7 @@ cdf_read_next_record(stream_t *streamP, int recID, int memtype, void *data, size
       {
         jobFound = true;
         cdf_JobDescriptor_finishJob(jobManager, jobs + i, data, numMissVals);
-        if (streamP->nextGlobalRecId < streamP->maxGlobalRecs)
-          cdf_read_next_record_async(jobManager, jobs + i, streamP, memtype);
+        if (streamP->nextGlobalRecId < streamP->maxGlobalRecs) cdf_read_next_record_async(jobManager, jobs + i, streamP, memtype);
       }
   }
 

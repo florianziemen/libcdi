@@ -5504,7 +5504,7 @@ gribRepair1(int nrec, long recsize, unsigned char *gribbuffer)
 #include <stdio.h>
 #include <string.h>
 
-#if defined(HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #endif
 
 #if defined(HAVE_LIBSZ)

@@ -659,7 +659,7 @@ vlistCopyFlag(int vlistID2, int vlistID1)
           if (cvals2)
           {
             for (int levID = 0; levID < nlevs2; ++levID) Free(cvals2[levID]);
-            Free(cvals2);
+            Free((void *) cvals2);
           }
 
           char ctemp[CDI_MAX_NAME];
