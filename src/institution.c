@@ -92,7 +92,7 @@ instituteCompareKernel(institute_t *ip1, institute_t *ip2)
     {
       size_t len1 = strlen(ip1->name);
       size_t len2 = strlen(ip2->name);
-      if ((len1 != len2) || memcmp(ip2->name, ip1->name, len2)) return 1;
+      if ((len1 != len2) || memcmp(ip2->name, ip1->name, len2) != 0) return 1;
     }
   }
   else if (ip1->longname)
@@ -101,7 +101,7 @@ instituteCompareKernel(institute_t *ip1, institute_t *ip2)
     {
       size_t len1 = strlen(ip1->longname);
       size_t len2 = strlen(ip2->longname);
-      if ((len1 != len2) || memcmp(ip2->longname, ip1->longname, len2)) return 1;
+      if ((len1 != len2) || memcmp(ip2->longname, ip1->longname, len2) != 0) return 1;
     }
   }
   else

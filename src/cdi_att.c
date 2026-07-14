@@ -534,7 +534,7 @@ cdi_att_compare(cdi_atts_t *attsPa, cdi_atts_t *attsPb, int attnum)
   cdi_att_t *attpb = attsPb->value + attnum;
 
   if (attpa->namesz != attpb->namesz) return 1;
-  if (attpa->name && attpb->name && memcmp(attpa->name, attpb->name, attpa->namesz)) return 1;
+  if (attpa->name && attpb->name && memcmp(attpa->name, attpb->name, attpa->namesz) != 0) return 1;
   if (attpa->indtype != attpb->indtype || attpa->exdtype != attpb->exdtype || attpa->nelems != attpb->nelems) return 1;
 
   return memcmp(attpa->xvalue, attpb->xvalue, attpa->xsz);

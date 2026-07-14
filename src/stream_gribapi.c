@@ -1861,7 +1861,7 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
     }
   }
 
-  size_t recsize = (size_t) gribsize;
+  size_t recsize = gribsize;
   grib_handle *gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
   GRIB_CHECK(my_grib_set_double(gh, "missingValue", missval), 0);
 

@@ -685,7 +685,7 @@ cgribexDecodeHeader(cgribexrec_t *cgribexp, int *gribbuffer, int recsize, int *l
   fill_intarr(isec2, 0, 32);
 
   double *fsec4 = NULL;
-  gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4, ipunp, (int *) gribbuffer, recsize, &iword, "J", iret);
+  gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4, ipunp, gribbuffer, recsize, &iword, "J", iret);
 
   if (!(ISEC1_Sec2Or3Flag & 128)) isec2[0] = -1;  // default generic grid
 

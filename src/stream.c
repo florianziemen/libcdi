@@ -988,7 +988,7 @@ streamOpenReadQuery(const char *filename, struct CdiQuery *query)
     int status = stream_create_vlist(streamP, query);
     if (status < 0)
     {
-      streamID = (int) status;
+      streamID = status;
       FreeAndNull(streamP->record);
       reshRemove(streamP->self, &streamOps);
     }

@@ -260,7 +260,7 @@ grbCopyField(stream_t *streamP2, stream_t *streamP1)
     if (cdiGribChangeParameterID.active)
     {
       // Even if you are stream-copy records you might need to change a bit of grib-header !
-      void *gh = cgribex_handle_new_from_meassage((void *) gribbuffer, recsize);
+      void *gh = cgribex_handle_new_from_meassage(gribbuffer, recsize);
       cgribexChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype,
                                            cdiGribChangeParameterID.lev);
       cgribex_handle_delete(gh);
@@ -274,7 +274,7 @@ grbCopyField(stream_t *streamP2, stream_t *streamP1)
     if (cdiGribChangeParameterID.active)
     {
       // Even if you are stream-copy records you might need to change a bit of grib-header !
-      grib_handle *gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
+      grib_handle *gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
       gribapiChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype,
                                            cdiGribChangeParameterID.lev);
       grib_handle_delete(gh);

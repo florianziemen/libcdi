@@ -414,7 +414,7 @@ varAddRecord(int recID, int param, int gridID, int zaxistype, int hasBounds, int
   if (tile_index) (*tile_index) = this_tile;
   if (tileID == CDI_UNDEFID)
   {
-    tileID = tileNewEntry((int) varID);
+    tileID = tileNewEntry(varID);
     var->recordTable[tileID].subtypeIndex = this_tile;
     var->nsubtypes++;
   }
@@ -426,7 +426,7 @@ varAddRecord(int recID, int param, int gridID, int zaxistype, int hasBounds, int
             level2);
   var->recordTable[tileID].levelTable[levelID].recID = recID;
 
-  *pvarID = (int) varID;
+  *pvarID = varID;
   *plevelID = levelID;
 }
 
@@ -499,7 +499,7 @@ cdi_generate_vars(stream_t *streamP)
   int vlistID = streamP->vlistID;
 
   int *varids = (int *) Malloc((size_t) varInfoListUsed * sizeof(int));
-  for (int varID = 0; varID < varInfoListUsed; varID++) { varids[varID] = (int) varID; }
+  for (int varID = 0; varID < varInfoListUsed; varID++) { varids[varID] = varID; }
   /*
     if (streamP->sortname)
       {
@@ -738,7 +738,7 @@ cdi_generate_vars(stream_t *streamP)
         for (lindex = 0; lindex < nlevels; lindex++)
           if (levelID == vartableLevelTable[lindex].lindex) break;
         if (lindex == nlevels) Error("Internal problem! lindex not found.");
-        streamRecordTable->lindex[levelID] = (int) lindex;
+        streamRecordTable->lindex[levelID] = lindex;
       }
     }
   }

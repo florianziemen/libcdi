@@ -363,7 +363,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
       maxMatch = maxFunMatch;
   }
   ++maxMatch;
-  reMatch = (regmatch_t *)malloc((size_t)maxMatch * sizeof (reMatch[0]));
+  reMatch = (regmatch_t *)malloc(maxMatch * sizeof (reMatch[0]));
   /* compile comment start regular expression */
   {
     static const char commentStartREString[] = "^"WS"*/\\*"WS"*(.*"NWS")"WS"*";

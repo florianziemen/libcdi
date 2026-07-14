@@ -2542,7 +2542,7 @@ grid_compare(void *gridP1, void *gridP2)
   {
     xassert(g1->size);
     if (!g2->mask) return differ;
-    if (memcmp(g1->mask, g2->mask, g1->size * sizeof(mask_t))) return differ;
+    if (memcmp(g1->mask, g2->mask, g1->size * sizeof(mask_t)) != 0) return differ;
   }
   else if (g2->mask)
     return differ;
@@ -2551,7 +2551,7 @@ grid_compare(void *gridP1, void *gridP2)
   {
     xassert(g1->size);
     if (!g2->mask_gme) return differ;
-    if (memcmp(g1->mask_gme, g2->mask_gme, g1->size * sizeof(mask_t))) return differ;
+    if (memcmp(g1->mask_gme, g2->mask_gme, g1->size * sizeof(mask_t)) != 0) return differ;
   }
   else if (g2->mask_gme)
     return differ;
