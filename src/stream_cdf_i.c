@@ -450,15 +450,16 @@ cdfGetAttInt64(int fileID, int ncvarid, const char *attname, size_t attlen, int6
 
   if (xtypeIsFloat(atttype) || xtypeIsInt(atttype) || xtypeIsInt64(atttype))
   {
-    long long *plongatt = (long long *) Malloc(nc_attlen * sizeof(long long));
-    cdf_get_att_longlong(fileID, ncvarid, attname, plongatt);
-    for (size_t i = 0; i < attlen; ++i) attint[i] = plongatt[i];
-    Free(plongatt);
+    long long attLong = 0;
+    long long *pattLong = (attlen > 1) ? (long long *) Malloc(nc_attlen * sizeof(long long)) : &attLong;
+    cdf_get_att_longlong(fileID, ncvarid, attname, pattLong);
+    for (size_t i = 0; i < attlen; ++i) { attint[i] = pattLong[i]; }
+    if (attlen > 1) Free(pattLong);
   }
 }
 
 static void
-cdfGetAttDouble(int fileID, int ncvarid, char *attname, size_t attlen, double *attdouble)
+cdfGetAttDouble(int fileID, int ncvarid, const char *attname, size_t attlen, double *attdouble)
 {
   *attdouble = 0.0;
 
@@ -864,21 +865,21 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
   }
   else if (xtypeIsInt64(atttype))
   {
-    int64_t attint64 = 0;
-    int64_t *pattint64 = (attlen > 1) ? (int64_t *) Malloc(attlen * sizeof(int64_t)) : &attint64;
-    cdfGetAttInt64(ncid, ncvarid, attname, attlen, pattint64);
+    int64_t attInt64 = 0;
+    int64_t *pattInt64 = (attlen > 1) ? (int64_t *) Malloc(attlen * sizeof(int64_t)) : &attInt64;
+    cdfGetAttInt64(ncid, ncvarid, attname, attlen, pattInt64);
     bool defineAtts = true;
     for (size_t i = 0; i < attlen; ++i)
-      if (pattint64[i] > INT_MAX) { defineAtts = false; }
+      if (pattInt64[i] > INT_MAX) { defineAtts = false; }
     if (defineAtts)
     {
-      int attint = 0;
-      int *pattint = (attlen > 1) ? (int *) Malloc(attlen * sizeof(int)) : &attint;
-      for (size_t i = 0; i < attlen; ++i) pattint[i] = (int) pattint64[i];
-      cdiDefAttInt(cdiID, varID, attname, CDI_DATATYPE_INT32, (int) attlen, pattint);
-      if (attlen > 1) Free(pattint);
+      int attInt = 0;
+      int *pattInt = (attlen > 1) ? (int *) Malloc(attlen * sizeof(int)) : &attInt;
+      for (size_t i = 0; i < attlen; ++i) { pattInt[i] = (int) pattInt64[i]; }
+      cdiDefAttInt(cdiID, varID, attname, CDI_DATATYPE_INT32, (int) attlen, pattInt);
+      if (attlen > 1) Free(pattInt);
     }
-    if (attlen > 1) Free(pattint64);
+    if (attlen > 1) Free(pattInt64);
   }
   else if (xtypeIsFloat(atttype))
   {
@@ -1388,6 +1389,34 @@ scan_bounds_attr(ncvar_t *ncvar, char attstring[8192], ncvar_t *ncvars)
   }
 }
 
+static bool
+scan_valid_range_attr(ncvar_t *ncvar, int fileID, int ncvarid, const char *attname, nc_type atttype, nc_type xtype, size_t attlen)
+{
+  // attlen: 2 für valid_range, 1 für valid_min/valid_max
+  bool ignoreDatatype = (xtypeIsFloat(atttype) != xtypeIsFloat(xtype));
+  if (CDI_Ignore_Valid_Range || ignoreDatatype)
+  {
+    if (ignoreDatatype) Warning("Inconsistent data type for attribute %s:%s, ignored!", ncvar->name, attname);
+    return true;
+  }
+
+  if (ncvar->validrangeDefined && attlen == 1) return true;
+
+  size_t idx = (attlen == 1 && str_is_equal(attname, "valid_max")) ? 1 : 0;
+  size_t count = (attlen == 2) ? 2 : 1;
+
+  cdfGetAttDouble(fileID, ncvarid, attname, count, &ncvar->validrange[idx]);
+  ncvar->validrangeDefined = true;
+
+  if (attlen == 2)
+  {
+    ncvar->validrangeDefined = (ncvar->validrange[0] <= ncvar->validrange[1]);
+    if (((int) ncvar->validrange[0]) == 0 && ((int) ncvar->validrange[1]) == 255) ncvar->isUnsigned = true;
+  }
+
+  return true;
+}
+
 static void
 scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int modelID)
 {
@@ -1407,7 +1436,6 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
   {
     ncvar_t *ncvar = &ncvars[ncvarid];
     int ncid = ncvar->ncid;
-    const char *name = ncvar->name;
     int nvdims = ncvar->ndims;
     nc_type xtype = ncvar->xtype;
     int nvatts = ncvar->nattsNC;
@@ -1562,40 +1590,10 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
           ncvar->missvalDefined = true;
           // cdf_set_var(ncvar, DataVar);
         }
-        else if (str_is_equal(attname, "valid_range") && attlen == 2)
+        else if ((str_is_equal(attname, "valid_range") && attlen == 2) || (str_is_equal(attname, "valid_min") && attlen == 1)
+                 || (str_is_equal(attname, "valid_max") && attlen == 1))
         {
-          if (ncvar->validrangeDefined == false)
-          {
-            bool ignoreDatatype = (xtypeIsFloat(atttype) != xtypeIsFloat(xtype));
-            if (!CDI_Ignore_Valid_Range && ignoreDatatype == false)
-            {
-              cdfGetAttDouble(ncid, ncvarid, attname, 2, ncvar->validrange);
-              ncvar->validrangeDefined = (ncvar->validrange[0] <= ncvar->validrange[1]);
-              if (((int) ncvar->validrange[0]) == 0 && ((int) ncvar->validrange[1]) == 255) ncvar->isUnsigned = true;
-              // cdf_set_var(ncvar, DataVar);
-            }
-            else if (ignoreDatatype) { Warning("Inconsistent data type for attribute %s:valid_range, ignored!", name); }
-          }
-        }
-        else if (str_is_equal(attname, "valid_min") && attlen == 1)
-        {
-          bool ignoreDatatype = (xtypeIsFloat(atttype) != xtypeIsFloat(xtype));
-          if (!CDI_Ignore_Valid_Range && ignoreDatatype == false)
-          {
-            cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvar->validrange)[0]);
-            ncvar->validrangeDefined = true;
-          }
-          else if (ignoreDatatype) { Warning("Inconsistent data type for attribute %s:valid_min, ignored!", name); }
-        }
-        else if (str_is_equal(attname, "valid_max") && attlen == 1)
-        {
-          bool ignoreDatatype = (xtypeIsFloat(atttype) != xtypeIsFloat(xtype));
-          if (!CDI_Ignore_Valid_Range && ignoreDatatype == false)
-          {
-            cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvar->validrange)[1]);
-            ncvar->validrangeDefined = true;
-          }
-          else if (ignoreDatatype) { Warning("Inconsistent data type for attribute %s:valid_max, ignored!", name); }
+          scan_valid_range_attr(ncvar, ncid, ncvarid, attname, atttype, xtype, attlen);
         }
         else if ((isRealization = str_is_equal(attname, "realization"))
                  || (isEnsembleMembers = str_is_equal(attname, "ensemble_members"))
