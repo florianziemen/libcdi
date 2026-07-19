@@ -474,7 +474,9 @@ cdfPostDefActionAdd(struct cdfPostDefActionList *list, struct cdfPostDefAction a
     list->len = newLen;
   }
   else
+  {
     ++(list->len);
+  }
   list->actions[appendPos] = addendum;
   return list;
 }
@@ -500,7 +502,9 @@ cdfPostDefActionConcat(struct cdfPostDefActionList *listA, const struct cdfPostD
       listA->len = newLen;
     }
     else
+    {
       listA->len = newLen;
+    }
     struct cdfPostDefAction *restrict actionsA = listA->actions;
     const struct cdfPostDefAction *restrict actionsB = listB->actions;
     for (size_t i = 0; i < appendLen; ++i) actionsA[appendPos + i] = actionsB[i];
@@ -1404,7 +1408,9 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamP, int type, int *ncvaridp, int zaxisID,
     zlongnameLen = sizeof(default_zlongname) - 1;
   }
   else
+  {
     zlongnameLen = strlen(zlongname);
+  }
   length = CDI_MAX_NAME;
   cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, zunits, &length);
   size_t zunitsLen;

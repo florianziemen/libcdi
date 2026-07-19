@@ -60,7 +60,7 @@ get_time_units(size_t len, const char *ptu)
     if (strStartsWith(ptu, "calendar_month")) return TUNIT_MONTH;
     if (strStartsWith(ptu, "year"))           return TUNIT_YEAR;
   }
-  else if (len == 1 && ptu[0] == 's')         return TUNIT_SECOND;
+  else if (len == 1 && ptu[0] == 's')       { return TUNIT_SECOND; }
   // clang-format on
 
   return -1;

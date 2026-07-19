@@ -44,7 +44,7 @@ static void
 cdfLazyGridDelete(grid_t *grid)
 {
   struct cdfLazyGrid *cdfGrid = (struct cdfLazyGrid *) grid;
-  void (*baseDestroy)(grid_t * grid) = cdfGrid->baseVtable->destroy;
+  void (*baseDestroy)(grid_t *grid) = cdfGrid->baseVtable->destroy;
   cdfLazyGridDestroy(cdfGrid);
   baseDestroy(grid);
 }
@@ -150,7 +150,9 @@ cdfLazyGridInqXYVal(grid_t *grid, size_t index, const struct xyValGet *valsGet, 
         indexND[1] = index % grid->x.size;
       }
       else
+      {
         indexND[0] = index;
+      }
       cdf_get_var1_double(valsGet->datasetNCId, valsGet->varNCId, indexND, &v);
     }
     else
@@ -159,10 +161,11 @@ cdfLazyGridInqXYVal(grid_t *grid, size_t index, const struct xyValGet *valsGet, 
       v = grid_vals[index];
     }
   }
-  else if (vals)
-    v = vals[index];
+  else if (vals) { v = vals[index]; }
   else
+  {
     v = 0.0;
+  }
 
   return v;
 }

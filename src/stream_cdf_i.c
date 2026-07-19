@@ -488,7 +488,6 @@ cdfGetAttText(int fileID, int ncvarid, const char *attname, size_t attlen, char 
     {
       char *attbuf = NULL;
       cdf_get_att_string(fileID, ncvarid, attname, &attbuf);
-
       size_t ssize = strlen(attbuf) + 1;
       if (ssize > attlen) ssize = attlen;
       memcpy(atttext, attbuf, ssize);
@@ -1389,7 +1388,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
       {
         cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
         size_t attstringsize = strlen(attstring) + 1;
-        if (attstringsize > CDI_MAX_NAME) attstringsize = CDI_MAX_NAME;
+        if (attstringsize > CDI_MAX_NAME) { attstringsize = CDI_MAX_NAME; }
 
         if (str_is_equal(attname, "long_name")) { memcpy(ncvar->longname, attstring, attstringsize); }
         else if (str_is_equal(attname, "standard_name")) { memcpy(ncvar->stdname, attstring, attstringsize); }

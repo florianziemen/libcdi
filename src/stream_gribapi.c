@@ -122,8 +122,7 @@ gribapiGetSteps(grib_handle *gh, int timeunits, int *startStep, int *endStep)
 
   long lpar;
   status = grib_get_long(gh, "forecastTime", &lpar);
-  if (status == 0)
-    *startStep = (int) lpar;
+  if (status == 0) { *startStep = (int) lpar; }
   else
   {
     status = grib_get_long(gh, "startStep", &lpar);
@@ -971,8 +970,8 @@ gribapiVarCompare(const compvar2_t *compVar, const record_t *record, int flag)
   compVar0.param = record->param;
   compVar0.level1 = record->ilevel;
   compVar0.level2 = record->ilevel2;
-  compVar0.ltype = (short) record->ltype;
-  compVar0.tsteptype = (short) record->tsteptype;
+  compVar0.ltype = record->ltype;
+  compVar0.tsteptype = record->tsteptype;
   compVar0.gridsize = record->gridsize;
   memcpy(compVar0.name, record->varname, sizeof(compVar->name));
 
