@@ -28,6 +28,43 @@
 #include <strings.h>
 #endif
 
+typedef struct
+{
+  char buffer[128];
+  char *mem;
+  char *data;
+  size_t size;
+} String;
+
+void
+string_init(String *str)
+{
+  str->mem = NULL;
+  str->data = str->buffer;
+  str->size = sizeof(str->buffer);
+}
+
+void
+string_reserve(String *str, size_t requiredSize)
+{
+  if (requiredSize > str->size)
+  {
+    str->mem = realloc(str->mem, requiredSize);
+    str->data = str->mem;
+    str->size = requiredSize;
+  }
+}
+
+void
+string_free(String *str)
+{
+  if (str->mem != NULL)
+  {
+    free(str->mem);
+    string_init(str);
+  }
+}
+
 enum VarStatus
 {
   UndefVar = -1,
@@ -460,38 +497,30 @@ cdfCheckAttText(int fileID, int ncvarid, const char *attname)
 }
 
 static void
-cdfGetAttText(int fileID, int ncvarid, const char *attname, size_t attlen, char *atttext)
+cdfGetAttString(int fileID, int ncvarid, const char *attname, String *attString)
 {
-  atttext[0] = 0;
+  attString->data[0] = 0;
 
   nc_type atttype;
-  size_t nc_attlen;
+  size_t attlen;
   cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
-  cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
+  cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
 
   if (atttype == NC_CHAR)
   {
-    char attbuf[65636];
-    if (nc_attlen < sizeof(attbuf))
-    {
-      cdf_get_att_text(fileID, ncvarid, attname, attbuf);
-
-      if (nc_attlen > (attlen - 1)) nc_attlen = (attlen - 1);
-
-      attbuf[nc_attlen++] = 0;
-      memcpy(atttext, attbuf, nc_attlen);
-    }
+    string_reserve(attString, attlen + 1);
+    cdf_get_att_text(fileID, ncvarid, attname, attString->data);
+    attString->data[attlen] = 0;
   }
   else if (atttype == NC_STRING)
   {
-    if (nc_attlen == 1)
+    if (attlen == 1)
     {
+      string_reserve(attString, attlen + 1);
       char *attbuf = NULL;
       cdf_get_att_string(fileID, ncvarid, attname, &attbuf);
-      size_t ssize = strlen(attbuf) + 1;
-      if (ssize > attlen) ssize = attlen;
-      memcpy(atttext, attbuf, ssize);
-      atttext[ssize - 1] = 0;
+      memcpy(attString->data, attbuf, attlen);
+      attString->data[attlen] = 0;
       Free(attbuf);
     }
   }
@@ -502,7 +531,6 @@ cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor)
 {
   bool haveAddoffset = IS_NOT_EQUAL(addoffset, 0.0);
   bool haveScalefactor = IS_NOT_EQUAL(scalefactor, 1.0);
-
   if (haveAddoffset && haveScalefactor)
   {
     for (size_t i = 0; i < size; ++i) { data[i] = data[i] * scalefactor + addoffset; }
@@ -522,14 +550,21 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
 {
   for (int dimIdx = 0; dimIdx < ndims; ++dimIdx)
   {
-    char dimname[CDI_MAX_NAME];
-    strcpy(dimname, ncdims[dimIdx].name);
-    if (str_is_equal("time", str_to_lower(dimname))) return ncdims[dimIdx].dimid;
+    const char *name = ncdims[dimIdx].name;
+    if (name[0] == 't' || name[0] == 'T')
+    {
+      char dimname[CDI_MAX_NAME];
+      strcpy(dimname, name);
+      if (str_is_equal("time", str_to_lower(dimname))) return ncdims[dimIdx].dimid;
+    }
   }
 
   bool check_dimids[MAX_DIMS_CDF];
   for (int i = 0; i < MAX_DIMS_CDF; ++i) { check_dimids[i] = false; }
 
+  char name[CDI_MAX_NAME];
+  String attString;
+  string_init(&attString);
   for (int varid = 0; varid < nvars; ++varid)
   {
     ncvar_t *ncvar = &ncvars[varid];
@@ -541,19 +576,20 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
       if (ncdims[dimid0].ncvarid != CDI_UNDEFID && ncdims[dimid0].ncvarid != varid) { continue; }
       check_dimids[dimid0] = true;
 
-      char sbuf[CDI_MAX_NAME];
       for (int iatt = 0, n = ncvar->nattsNC; iatt < n; ++iatt)
       {
-        sbuf[0] = 0;
-        cdf_inq_attname(fileID, varid, iatt, sbuf);
-        if (str_is_equal(sbuf, "units"))
+        name[0] = 0;
+        cdf_inq_attname(fileID, varid, iatt, name);
+        if (str_is_equal(name, "units"))
         {
-          cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
-          if (is_timeaxis_units(sbuf)) return ncdims[dimid0].dimid;
+          cdfGetAttString(fileID, varid, "units", &attString);
+          if (is_timeaxis_units(attString.data)) return ncdims[dimid0].dimid;
         }
       }
     }
   }
+
+  string_free(&attString);
 
   return CDI_UNDEFID;
 }
@@ -657,9 +693,10 @@ scan_hybrid_formulaterms(int ncid, int ncfvarid, int *avarid, int *bvarid, int *
   *psvarid = -1;
   *p0varid = -1;
 
-  char attstring[1024];
-  cdfGetAttText(ncid, ncfvarid, "formula_terms", sizeof(attstring), attstring);
-  char *pstring = attstring;
+  String attString;
+  string_init(&attString);
+  cdfGetAttString(ncid, ncfvarid, "formula_terms", &attString);
+  char *pstring = attString.data;
 
   bool lstop = false;
   for (int i = 0; i < 4; i++)
@@ -694,6 +731,8 @@ scan_hybrid_formulaterms(int ncid, int ncfvarid, int *avarid, int *bvarid, int *
 
     if (lstop) break;
   }
+
+  string_free(&attString);
 }
 
 static void
@@ -852,9 +891,11 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
   }
   else if (xtypeIsText(atttype))
   {
-    char attstring[8192];
-    cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
-    cdiDefAttTxt(cdiID, varID, attname, (int) strlen(attstring), attstring);
+    String attString;
+    string_init(&attString);
+    cdfGetAttString(ncid, ncvarid, attname, &attString);
+    cdiDefAttTxt(cdiID, varID, attname, (int) strlen(attString.data), attString.data);
+    string_free(&attString);
   }
 }
 
@@ -1090,10 +1131,12 @@ read_grid_mapping(int ncid, char *attstring, ncvar_t *ncvar, ncvar_t *ncvars)
     int nc_gmap_varid = ncvars[ncvar->gmapid].ncid;
     if (cdfCheckAttText(nc_gmap_varid, nc_gmap_id, "grid_mapping_name"))
     {
-      char gridMappingName[CDI_MAX_NAME];
-      cdfGetAttText(nc_gmap_varid, nc_gmap_id, "grid_mapping_name", CDI_MAX_NAME, gridMappingName);
-      if (str_is_equal(gridMappingName, "healpix")) { ncvar->isHealpixMapping = true; }
-      else if (str_is_equal(gridMappingName, "latitude_longitude")) { ncvar->isLonLatMapping = true; }
+      String attString;
+      string_init(&attString);
+      cdfGetAttString(nc_gmap_varid, nc_gmap_id, "grid_mapping_name", &attString);
+      if (str_is_equal(attString.data, "healpix")) { ncvar->isHealpixMapping = true; }
+      else if (str_is_equal(attString.data, "latitude_longitude")) { ncvar->isLonLatMapping = true; }
+      string_free(&attString);
     }
   }
   else
@@ -1357,7 +1400,8 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
   for (int i = 0; i < max_check_vars; ++i) checked_vars[i] = NULL;
 
   char attname[CDI_MAX_NAME];
-  char attstring[8192];
+  String attString;
+  string_init(&attString);
 
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
   {
@@ -1386,9 +1430,9 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
 
       if (isText)
       {
-        cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
-        size_t attstringsize = strlen(attstring) + 1;
-        if (attstringsize > CDI_MAX_NAME) { attstringsize = CDI_MAX_NAME; }
+        cdfGetAttString(ncid, ncvarid, attname, &attString);
+        size_t attstringsize = strlen(attString.data) + 1;
+        char *attstring = attString.data;
 
         if (str_is_equal(attname, "long_name")) { memcpy(ncvar->longname, attstring, attstringsize); }
         else if (str_is_equal(attname, "standard_name")) { memcpy(ncvar->stdname, attstring, attstringsize); }
@@ -1578,6 +1622,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
     }
   }
 
+  string_free(&attString);
   for (int i = 0; i < max_check_vars; ++i) Free(checked_vars[i]);
 }
 
@@ -1633,7 +1678,8 @@ verify_vars_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
   nc_type atttype;
   size_t attlen;
   char attname[CDI_MAX_NAME];
-  char attstring[8192];
+  String attString;
+  string_init(&attString);
 
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
   {
@@ -1650,21 +1696,21 @@ verify_vars_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
       cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
       cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
 
-      size_t attstringsize = sizeof(attstring);
       // bool isNumber = (xtypeIsFloat(atttype) || xtypeIsInt(atttype));
 
       bool isText = xtypeIsText(atttype);
       if (isText)
       {
-        cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
-        attstringsize = strlen(attstring) + 1;
-        if (attstringsize > CDI_MAX_NAME) { attstringsize = CDI_MAX_NAME; }
-
-        if (str_is_equal(attname, "axis")) { cdf_scan_attr_axis(ncvars, ncdims, ncvarid, attstring, nvdims, dimidsp); }
-        // else if (str_is_equal(attname, "standard_name")) { memcpy(ncvar->stdname, attstring, attstringsize); }
+        if (str_is_equal(attname, "axis"))
+        {
+          cdfGetAttString(ncid, ncvarid, attname, &attString);
+          cdf_scan_attr_axis(ncvars, ncdims, ncvarid, attString.data, nvdims, dimidsp);
+        }
       }
     }
   }
+
+  string_free(&attString);
 }
 
 static void
@@ -2910,9 +2956,11 @@ cdf_read_mapping_atts(int ncid, int gmapvarid, int nvatts, int projID)
 {
   if (cdfCheckAttText(ncid, gmapvarid, "grid_mapping_name"))
   {
-    char attstring[CDI_MAX_NAME];
-    cdfGetAttText(ncid, gmapvarid, "grid_mapping_name", CDI_MAX_NAME, attstring);
-    cdiDefKeyString(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, attstring);
+    String attString;
+    string_init(&attString);
+    cdfGetAttString(ncid, gmapvarid, "grid_mapping_name", &attString);
+    cdiDefKeyString(projID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, attString.data);
+    string_free(&attString);
   }
 
   bool removeFillValue = true;
@@ -3645,8 +3693,23 @@ chunkCacheValues_init(ChunkCacheValues *chunkCacheValues)
 {
   chunkCacheValues->cacheSize = 0;
   chunkCacheValues->numDims = 0;
-  for (int i = 0; i < MAX_DIMENSIONS; ++i) { chunkCacheValues->start[i] = 0; }
-  for (int i = 0; i < MAX_DIMENSIONS; ++i) { chunkCacheValues->count[i] = 0; }
+  memset(chunkCacheValues->start, 0, sizeof(chunkCacheValues->start));
+  memset(chunkCacheValues->count, 0, sizeof(chunkCacheValues->count));
+}
+
+static void
+get_chunk_sizes_for_dims(ncvar_t *ncvar, size_t *cx, size_t *cy, size_t *cz)
+{
+  *cx = *cy = *cz = 0;
+  for (int i = 0; i < ncvar->ndims; i++)
+  {
+    int dimtype = ncvar->dimtypes[i];
+    // clang-format off
+    if      (dimtype == Z_AXIS) *cz = ncvar->chunks[i];
+    else if (dimtype == Y_AXIS) *cy = ncvar->chunks[i];
+    else if (dimtype == X_AXIS) *cx = ncvar->chunks[i];
+    // clang-format on
+  }
 }
 
 static ChunkCacheValues
@@ -3657,15 +3720,7 @@ calc_chunk_cache_size(int timedimid, ncvar_t *ncvar)
   int numDims = 0;
   size_t nx = ncvar->xSize, ny = ncvar->ySize, nz = ncvar->zSize;
   size_t cx = 0, cy = 0, cz = 0;
-  for (int i = 0; i < ncvar->ndims; i++)
-  {
-    int dimtype = ncvar->dimtypes[i];
-    // clang-format off
-    if      (dimtype == Z_AXIS) { cz = ncvar->chunks[i]; }
-    else if (dimtype == Y_AXIS) { cy = ncvar->chunks[i]; }
-    else if (dimtype == X_AXIS) { cx = ncvar->chunks[i]; }
-    // clang-format on
-  }
+  get_chunk_sizes_for_dims(ncvar, &cx, &cy, &cz);
 
   size_t numSteps = (ncvar->dimids[0] == timedimid) ? ncvar->chunks[0] : 1;
   size_t chunkCacheSize = numSteps;
@@ -3700,15 +3755,7 @@ get_chunk_cache_size(int timedimid, ncvar_t *ncvar)
   size_t nxc = ncvar->xcount, nzc = ncvar->zcount;
   size_t nx = ncvar->xSize, ny = ncvar->ySize, nz = ncvar->zSize;
   size_t cx = 0, cy = 0, cz = 0;
-  for (int i = 0; i < ncvar->ndims; i++)
-  {
-    int dimtype = ncvar->dimtypes[i];
-    // clang-format off
-    if      (dimtype == Z_AXIS) { cz = ncvar->chunks[i]; }
-    else if (dimtype == Y_AXIS) { cy = ncvar->chunks[i]; }
-    else if (dimtype == X_AXIS) { cx = ncvar->chunks[i]; }
-    // clang-format on
-  }
+  get_chunk_sizes_for_dims(ncvar, &cx, &cy, &cz);
 
   size_t numSteps = (ncvar->dimids[0] == timedimid) ? ncvar->chunks[0] : 0;
   size_t chunkCacheSize = (numSteps == 0) ? 1 : numSteps;
@@ -3762,8 +3809,8 @@ static void
 cdf_init_cache(CdfCache *cache)
 {
   cache->buffer = NULL;
-  for (int i = 0; i < MAX_DIMENSIONS; ++i) { cache->start[i] = 0; }
-  for (int i = 0; i < MAX_DIMENSIONS; ++i) { cache->count[i] = 0; }
+  memset(cache->start, 0, sizeof(cache->start));
+  memset(cache->count, 0, sizeof(cache->count));
   cache->bufferSize = 0;
   cache->cacheSize = 0;
   cache->numSteps = 0;
@@ -4063,6 +4110,8 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
   nc_type xtype = 0;
   size_t attlen = 0;
   char attname[CDI_MAX_NAME] = { 0 };
+  String attString;
+  string_init(&attString);
 
   for (int iatt = 0; iatt < ngatts; iatt++)
   {
@@ -4072,16 +4121,9 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
 
     if (xtypeIsText(xtype))
     {
-      enum
-      {
-        attstringsize = 65636
-      };
-      char attstring[attstringsize] = { 0 };
-
-      cdfGetAttText(fileID, NC_GLOBAL, attname, attstringsize, attstring);
-
+      cdfGetAttString(fileID, NC_GLOBAL, attname, &attString);
+      char *attstring = attString.data;
       size_t attstrlen = strlen(attstring);
-
       if (attlen > 0 && attstring[0] != 0)
       {
         if (str_is_equal(attname, "institution"))
@@ -4141,6 +4183,8 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
     }
     else if (xtype == NC_FLOAT || xtype == NC_DOUBLE) { cdf_copy_attflt(fileID, vlistID, xtype, attlen, attname); }
   }
+
+  string_free(&attString);
 }
 
 static int
@@ -5009,10 +5053,12 @@ cdfInqContents(stream_t *streamP)
   int calendar = CDI_UNDEFID;
   if (nctimevarid != CDI_UNDEFID && ncvars[nctimevarid].hasCalendar)
   {
-    char attstring[1024];
-    cdfGetAttText(fileID, nctimevarid, "calendar", sizeof(attstring), attstring);
-    str_to_lower(attstring);
-    calendar = attribute_to_calendar(attstring);
+    String attString;
+    string_init(&attString);
+    cdfGetAttString(fileID, nctimevarid, "calendar", &attString);
+    str_to_lower(attString.data);
+    calendar = attribute_to_calendar(attString.data);
+    string_free(&attString);
   }
 
   if (streamP->basetime.isWRF) taxis0.type = TAXIS_ABSOLUTE;
