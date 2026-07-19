@@ -2358,20 +2358,25 @@ cdf_check_gridtype(int *gridtype, bool isLon, bool isLat, size_t xsize, size_t y
   }
 }
 
+// isX=true  → Lese X-Koordinate (grid->x, lazyGrid->xValsGet)
+// isX=false → Lese Y-Koordinate (grid->y, lazyGrid->yValsGet)
+// primarySize: Pointer auf die primäre Achsengröße (xsize für X, ysize für Y)
+// otherSize:   Wert der anderen Achsengröße  (ysize für X, xsize für Y)
 static bool
-cdf_read_xcoord(stream_t *streamP, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int xvarid, ncvar_t *axisvar,
-                size_t *xsize, size_t ysize, bool hasTimeDim, bool readPart, size_t *start, size_t *count, bool *isLon)
+cdf_read_coord(stream_t *streamP, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int varid, ncvar_t *axisvar,
+               size_t *primarySize, size_t otherSize, bool isX, bool hasTimeDim, bool readPart, size_t *start, size_t *count,
+               bool *isAxis)
 {
   grid_t *grid = &lazyGrid->base;
   bool skipvar = true;
-  *isLon = axisvar->isLon;
+  *isAxis = isX ? axisvar->isLon : axisvar->isLat;
   int ndims = axisvar->ndims;
   size_t size = 0;
 
   if (ndims == 1 && xtypeIsText(axisvar->xtype))
   {
     ncvar->varStatus = CoordVar;
-    Warning("Unsupported x-coordinate type (char/string), skipped variable %s!", ncvar->name);
+    Warning("Unsupported %c-coordinate type (char/string), skipped variable %s!", isX ? 'x' : 'y', ncvar->name);
     return true;
   }
 
@@ -2389,31 +2394,31 @@ cdf_read_xcoord(stream_t *streamP, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdims
     {
       ncvar->gridtype = GRID_CHARXY;
       size = dimsize1 * dimsize2;
-      skipvar = (dimsize1 != *xsize);
+      skipvar = (dimsize1 != *primarySize);
     }
     else
     {
       ncvar->gridtype = GRID_CURVILINEAR;
-      size = (*xsize) * ysize;
+      size = (*primarySize) * otherSize;
       skipvar = (dimsize1 * dimsize2 != size);
     }
   }
   else if ((ndims - hasTimeDim) == 1)
   {
-    size = *xsize;
+    size = isX ? *primarySize : ((*primarySize) ? *primarySize : otherSize);
     // Check size of 1 dimensional coordinates variables
     int dimid = axisvar->dimids[ndims - 1];
     size_t dimsize = ncdims[dimid].len;
     skipvar = readPart ? false : (dimsize != size);
   }
-  else if (ndims == 0 && *xsize == 0)
+  else if (ndims == 0 && *primarySize == 0)
   {
-    size = *xsize = 1;
+    size = *primarySize = 1;
     skipvar = false;
   }
   else if (ncvar->isCubeSphere)
   {
-    size = *xsize;
+    size = *primarySize;
     skipvar = false;
   }
 
@@ -2426,103 +2431,24 @@ cdf_read_xcoord(stream_t *streamP, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdims
 
   if (datatype != -1) grid->datatype = datatype;
 
+  struct gridaxis_t *gaxis = isX ? &grid->x : &grid->y;
+
   if (datatype == CDI_DATATYPE_UINT8 && !CDI_Netcdf_Lazy_Grid_Load)
   {
 #ifndef USE_MPI
-    cdf_load_cvals(size, xvarid, axisvar, &grid->x.cvals, *xsize);
-    grid->x.clength = size / (*xsize);
+    cdf_load_cvals(size, varid, axisvar, &gaxis->cvals, *primarySize);
+    gaxis->clength = size / (*primarySize);
 #endif
   }
   else if (CDI_Read_Cell_Center)
   {
-    cdf_load_vals(size, ndims, xvarid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, hasTimeDim, readPart, start, count);
-  }
-
-  cdf_copy_grid_axis_attr(axisvar, &grid->x);
-
-  return false;
-}
-
-static bool
-cdf_read_ycoord(stream_t *streamP, struct cdfLazyGrid *lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int yvarid, ncvar_t *axisvar,
-                size_t xsize, size_t *ysize, bool hasTimeDim, bool readPart, size_t *start, size_t *count, bool *isLat)
-{
-  grid_t *grid = &lazyGrid->base;
-  bool skipvar = true;
-  *isLat = axisvar->isLat;
-  int ndims = axisvar->ndims;
-  size_t size = 0;
-
-  if (ndims == 1 && xtypeIsText(axisvar->xtype))
-  {
-    ncvar->varStatus = CoordVar;
-    Warning("Unsupported y-coordinate type (char/string), skipped variable %s!", ncvar->name);
-    return true;
-  }
-
-  int datatype = cdfInqDatatype(streamP, axisvar->xtype, axisvar->isUnsigned);
-
-  if ((ndims - hasTimeDim) == 2)
-  {
-    // Check size of 2 dimensional coordinates variables
-    int dimid = axisvar->dimids[ndims - 2];
-    size_t dimsize1 = ncdims[dimid].len;
-    dimid = axisvar->dimids[ndims - 1];
-    size_t dimsize2 = ncdims[dimid].len;
-
-    if (datatype == CDI_DATATYPE_UINT8)
-    {
-      ncvar->gridtype = GRID_CHARXY;
-      size = dimsize1 * dimsize2;
-      skipvar = (dimsize1 != *ysize);
-    }
+    if (isX)
+      cdf_load_vals(size, ndims, varid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, hasTimeDim, readPart, start, count);
     else
-    {
-      ncvar->gridtype = GRID_CURVILINEAR;
-      size = xsize * (*ysize);
-      skipvar = (dimsize1 * dimsize2 != size);
-    }
-  }
-  else if ((ndims - hasTimeDim) == 1)
-  {
-    size = (*ysize) ? *ysize : xsize;
-    int dimid = axisvar->dimids[ndims - 1];
-    size_t dimsize = ncdims[dimid].len;
-    skipvar = readPart ? false : (dimsize != size);
-  }
-  else if (ndims == 0 && *ysize == 0)
-  {
-    size = *ysize = 1;
-    skipvar = false;
-  }
-  else if (ncvar->isCubeSphere)
-  {
-    size = *ysize;
-    skipvar = false;
+      cdf_load_vals(size, ndims, varid, axisvar, &grid->y.vals, &lazyGrid->yValsGet, hasTimeDim, readPart, start, count);
   }
 
-  if (skipvar)
-  {
-    Warning("Unsupported array structure, skipped variable %s!", ncvar->name);
-    ncvar->varStatus = UndefVar;
-    return true;
-  }
-
-  if (datatype != -1) grid->datatype = datatype;
-
-  if (datatype == CDI_DATATYPE_UINT8 && !CDI_Netcdf_Lazy_Grid_Load)
-  {
-#ifndef USE_MPI
-    cdf_load_cvals(size, yvarid, axisvar, &grid->y.cvals, *ysize);
-    grid->y.clength = size / (*ysize);
-#endif
-  }
-  else if (CDI_Read_Cell_Center)
-  {
-    cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet, hasTimeDim, readPart, start, count);
-  }
-
-  cdf_copy_grid_axis_attr(axisvar, &grid->y);
+  cdf_copy_grid_axis_attr(axisvar, gaxis);
 
   return false;
 }
@@ -2543,73 +2469,26 @@ gridpart_init(GridPart *gridPart)
 }
 
 static void
-cdf_load_xbounds(struct cdfLazyGrid *lazyGrid, ncvar_t *ncvar, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, int xvarid,
-                 int *vdimid, bool readPart, size_t *start, size_t *count)
+cdf_load_bounds_impl(struct cdfLazyGrid *lazyGrid, ncvar_t *ncvar, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, int axisVarId,
+                     int *vdimid, bool readPart, size_t *start, size_t *count, bool isX)
 {
   grid_t *grid = &lazyGrid->base;
   size_t size = grid->size;
-  grid->x.flag = 1;
-  int bvarid = ncvars[xvarid].bounds;
-  if (bvarid != CDI_UNDEFID)
-  {
-    int ndims = ncvars[xvarid].ndims;
-    int nbdims = ncvars[bvarid].ndims;
-    if (nbdims == 2 || nbdims == 3)
-    {
-      if (ncvars[bvarid].dimids[0] == timedimid)
-      {
-        static bool ltwarn = true;
-        if (ltwarn) Warning("Time varying grid x-bounds unsupported, skipped!");
-        ltwarn = false;
-      }
-      else if (ncvar->isCubeSphere)
-      {
-        grid->nvertex = 4;
-        size_t bxsize = ncdims[ncvars[bvarid].dimids[2]].len;
-        size_t bysize = ncdims[ncvars[bvarid].dimids[1]].len;
-        cdf_load_bounds_cube_sphere(bxsize, bysize, size * (size_t) grid->nvertex, &ncvars[xvarid], &grid->x.bounds,
-                                    &lazyGrid->xBoundsGet);
-      }
-      else if (nbdims == ndims + 1)
-      {
-        *vdimid = ncvars[bvarid].dimids[nbdims - 1];
-        grid->nvertex = (int) ncdims[*vdimid].len;
-        if (readPart)
-        {
-          start[1] = 0;
-          count[1] = (size_t) grid->nvertex;
-        }
-        cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[xvarid], &grid->x.bounds, &lazyGrid->xBoundsGet, readPart, start,
-                        count);
-      }
-      else
-      {
-        static bool lwarn = true;
-        if (lwarn) Warning("x-bounds doesn't follow the CF-Convention, skipped!");
-        lwarn = false;
-      }
-    }
-  }
-}
+  struct gridaxis_t *gaxis = isX ? &grid->x : &grid->y;
+  gaxis->flag = 1;
 
-static void
-cdf_load_ybounds(struct cdfLazyGrid *lazyGrid, ncvar_t *ncvar, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, int yvarid,
-                 int *vdimid, bool readPart, size_t *start, size_t *count)
-{
-  grid_t *grid = &lazyGrid->base;
-  size_t size = grid->size;
-  grid->y.flag = 1;
-  int bvarid = ncvars[yvarid].bounds;
+  const char axisChar = isX ? 'x' : 'y';
+  int bvarid = ncvars[axisVarId].bounds;
   if (bvarid != CDI_UNDEFID)
   {
-    int ndims = ncvars[yvarid].ndims;
+    int ndims = ncvars[axisVarId].ndims;
     int nbdims = ncvars[bvarid].ndims;
     if (nbdims == 2 || nbdims == 3)
     {
       if (ncvars[bvarid].dimids[0] == timedimid)
       {
         static bool ltwarn = true;
-        if (ltwarn) Warning("Time varying grid y-bounds unsupported, skipped!");
+        if (ltwarn) Warning("Time varying grid %c-bounds unsupported, skipped!", axisChar);
         ltwarn = false;
       }
       else if (ncvar->isCubeSphere)
@@ -2617,12 +2496,12 @@ cdf_load_ybounds(struct cdfLazyGrid *lazyGrid, ncvar_t *ncvar, ncvar_t *ncvars, 
         grid->nvertex = 4;
         size_t bxsize = ncdims[ncvars[bvarid].dimids[2]].len;
         size_t bysize = ncdims[ncvars[bvarid].dimids[1]].len;
-        cdf_load_bounds_cube_sphere(bxsize, bysize, size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds,
-                                    &lazyGrid->yBoundsGet);
+        struct cdfLazyGridIds *boundsGet = isX ? &lazyGrid->xBoundsGet : &lazyGrid->yBoundsGet;
+        cdf_load_bounds_cube_sphere(bxsize, bysize, size * (size_t) grid->nvertex, &ncvars[axisVarId], &gaxis->bounds, boundsGet);
       }
       else if (nbdims == ndims + 1)
       {
-        if (*vdimid == CDI_UNDEFID)
+        if (isX || *vdimid == CDI_UNDEFID)
         {
           *vdimid = ncvars[bvarid].dimids[nbdims - 1];
           grid->nvertex = (int) ncdims[*vdimid].len;
@@ -2632,13 +2511,13 @@ cdf_load_ybounds(struct cdfLazyGrid *lazyGrid, ncvar_t *ncvar, ncvar_t *ncvars, 
           start[1] = 0;
           count[1] = (size_t) grid->nvertex;
         }
-        cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[yvarid], &grid->y.bounds, &lazyGrid->yBoundsGet, readPart, start,
-                        count);
+        struct cdfLazyGridIds *boundsGet = isX ? &lazyGrid->xBoundsGet : &lazyGrid->yBoundsGet;
+        cdf_load_bounds(size * (size_t) grid->nvertex, &ncvars[axisVarId], &gaxis->bounds, boundsGet, readPart, start, count);
       }
       else
       {
         static bool lwarn = true;
-        if (lwarn) Warning("y-bounds doesn't follow the CF-Convention, skipped!");
+        if (lwarn) Warning("%c-bounds doesn't follow the CF-Convention, skipped!", axisChar);
         lwarn = false;
       }
     }
@@ -2763,13 +2642,13 @@ cdf_read_coordinates(stream_t *streamP, struct cdfLazyGrid *lazyGrid, ncvar_t *n
     bool isLon = false, isLat = false;
 
     if (xvarid != CDI_UNDEFID)
-      if (cdf_read_xcoord(streamP, lazyGrid, ncdims, ncvar, xvarid, &ncvars[xvarid], &xsize, ysize, hasTimeDim, readPart, start,
-                          count, &isLon))
+      if (cdf_read_coord(streamP, lazyGrid, ncdims, ncvar, xvarid, &ncvars[xvarid], &xsize, ysize, true, hasTimeDim, readPart,
+                         start, count, &isLon))
         return true;
 
     if (yvarid != CDI_UNDEFID)
-      if (cdf_read_ycoord(streamP, lazyGrid, ncdims, ncvar, yvarid, &ncvars[yvarid], xsize, &ysize, hasTimeDim, readPart, start,
-                          count, &isLat))
+      if (cdf_read_coord(streamP, lazyGrid, ncdims, ncvar, yvarid, &ncvars[yvarid], &ysize, xsize, false, hasTimeDim, readPart,
+                         start, count, &isLat))
         return true;
 
     // clang-format off
@@ -2803,11 +2682,11 @@ cdf_read_coordinates(stream_t *streamP, struct cdfLazyGrid *lazyGrid, ncvar_t *n
       grid->y.size = ysize;
       if (xvarid != CDI_UNDEFID && CDI_Read_Cell_Corners)
       {
-        cdf_load_xbounds(lazyGrid, ncvar, ncvars, ncdims, timedimid, xvarid, vdimid, readPart, start, count);
+        cdf_load_bounds_impl(lazyGrid, ncvar, ncvars, ncdims, timedimid, xvarid, vdimid, readPart, start, count, true);
       }
       if (yvarid != CDI_UNDEFID && CDI_Read_Cell_Corners)
       {
-        cdf_load_ybounds(lazyGrid, ncvar, ncvars, ncdims, timedimid, yvarid, vdimid, readPart, start, count);
+        cdf_load_bounds_impl(lazyGrid, ncvar, ncvars, ncdims, timedimid, yvarid, vdimid, readPart, start, count, false);
       }
 
       if (ncvar->cellarea != CDI_UNDEFID) cdf_load_cellarea(size, ncvar, &grid->area, &lazyGrid->cellAreaGet);
