@@ -25,26 +25,21 @@ void
 cdfDebug(int debug)
 {
   CDF_Debug = debug;
-
   if (CDF_Debug) Message("debug level %d", debug);
 }
 
 static void
 cdfComment(int ncid)
 {
-  static char comment[256] = "Climate Data Interface version ";
+  static char comment[256] = "Climate Data Interface version";
   static bool init = false;
-
   if (!init)
   {
     init = true;
     const char *libvers = cdiLibraryVersion();
-
-    if (!isdigit((int) *libvers))
-      strcat(comment, "??");
-    else
-      strcat(comment, libvers);
-    strcat(comment, " (https://mpimet.mpg.de/cdi)");
+    size_t len = strlen(comment);
+    snprintf(comment + len, sizeof(comment) - len, " %s %s", isdigit((int) *libvers) ? libvers : "??",
+             "(https://mpimet.mpg.de/cdi)");
   }
 
   cdf_put_att_text(ncid, NC_GLOBAL, "CDI", strlen(comment), comment);

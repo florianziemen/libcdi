@@ -853,7 +853,7 @@ ptaxisDefName(taxis_t *taxisP, const char *name)
     size_t len = strlen(name);
     delete_refcount_string(taxisP->name);
     char *taxisname = taxisP->name = new_refcount_string(len);
-    strcpy(taxisname, name);
+    strncpy(taxisname, name, len + 1);
   }
 }
 
@@ -865,7 +865,7 @@ ptaxisDefLongname(taxis_t *taxisP, const char *longname)
     size_t len = strlen(longname);
     delete_refcount_string(taxisP->longname);
     char *taxislongname = taxisP->longname = new_refcount_string(len);
-    strcpy(taxislongname, longname);
+    strncpy(taxislongname, longname, len + 1);
   }
 }
 
@@ -883,7 +883,7 @@ ptaxisDefUnits(taxis_t *taxisP, const char *units)
   {
     size_t len = strlen(units);
     char *taxisunits = ptaxisAllocUnits(taxisP, len);
-    strcpy(taxisunits, units);
+    strncpy(taxisunits, units, len + 1);
   }
 }
 

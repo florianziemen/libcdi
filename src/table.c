@@ -406,15 +406,13 @@ tableFromEnv(int modelID, int tablenum)
   if (tablePath) lenp = strlen(tablePath);
   // if (tablePath) printf("tablePath = %s\n", tablePath);
   // if (tablename) printf("tableName = %s\n", tablename);
-  char *tablefile = (char *) malloc(lenp + lenf + 3);
-  if (tablePath)
-  {
-    strcpy(tablefile, tablePath);
-    strcat(tablefile, "/");
-  }
+  size_t len = lenp + lenf + 3;
+  char *tablefile = (char *) malloc(len);
+  if (tablePath) { snprintf(tablefile, len, "%s/%s", tablePath, tablename); }
   else
-    tablefile[0] = '\0';
-  strcat(tablefile, tablename);
+  {
+    snprintf(tablefile, len, tablename);
+  }
   // if (tablefile) printf("tableFile = %s\n", tablefile);
 
   int tableID = tableRead(tablefile);

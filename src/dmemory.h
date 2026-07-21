@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 // clang-format off
-#define FreeAndNull(p) if (p) { Free(p); (p) = NULL; }
+#define FreeAndNull(p) do { if (p) { Free(p); (p) = NULL; } } while(0)
 // clang-format on
 
 // if DEBUG_MEMORY is defined setenv MEMORY_DEBUG to debug memory
