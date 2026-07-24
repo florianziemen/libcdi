@@ -41,3 +41,5 @@ foreach(target ${current_targets})
     set_property(TEST ${target} PROPERTY LABELS labels_${target})
   endif()
 endforeach()
+
+add_subdirectory(platform)

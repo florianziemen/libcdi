@@ -1,33 +1,40 @@
 #include <stdlib.h>
-
+#include <string.h>
+#include <errno.h>
 #include <windows.h>
 #include <io.h>
 #include <stdint.h>
 #include <stdio.h>
 #include "cdi_pread.h"
+#include "win_err_to_cdi_err.h"
 
-cdi_ssize_t
+ssize_t
 cdi_pread(int fd, void *buf, size_t count, size_t offset)
 {
-  cdi_ssize_t read_bytes = 0;
+    HANDLE file = (HANDLE)_get_osfhandle(fd);
+    if (file == INVALID_HANDLE_VALUE)
+    {
+        errno = EBADF;
+        return -1;
+    }
 
-  OVERLAPPED overlapped;
-  memset(&overlapped, 0, sizeof(OVERLAPPED));
+    OVERLAPPED overlapped;
+    memset(&overlapped, 0, sizeof(OVERLAPPED));
+    overlapped.OffsetHigh = (uint32_t)((offset & 0xFFFFFFFF00000000ULL) >> 32);
+    overlapped.Offset     = (uint32_t)(offset & 0xFFFFFFFFULL);
 
-  overlapped.OffsetHigh = (uint32_t) ((offset & 0xFFFFFFFF00000000LL) >> 32);
-  overlapped.Offset = (uint32_t) (offset & 0xFFFFFFFFLL);
+    DWORD chunk = (count > MAXDWORD) ? MAXDWORD : (DWORD)count;
+    DWORD bytes_read = 0;
 
-  HANDLE file = (HANDLE) _get_osfhandle(fd);
-  SetLastError(0);
-  int RF = ReadFile(file, buf, count, &read_bytes, &overlapped);
+    SetLastError(0);
+    BOOL ok = ReadFile(file, buf, chunk, &bytes_read, &overlapped);
 
-  /* For some reason it errors when it hits end of file so we don't want to check that */
-  if ((RF == 0) && GetLastError() != ERROR_HANDLE_EOF)
-  {
-    DWORD dwError = GetLastError();
-    errno = translate_windows_error_to_errno(dwError);
-    return -1;
-  }
+    /* EOF on an async-style read via OVERLAPPED reports as an error; treat it as 0 bytes read. */
+    if (!ok && GetLastError() != ERROR_HANDLE_EOF)
+    {
+        errno = translate_windows_error_to_errno(GetLastError());
+        return -1;
+    }
 
-  return read_bytes;
+    return (ssize_t)bytes_read;
 }
