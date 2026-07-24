@@ -213,11 +213,14 @@ if (CDI_BUILD_UNKNOWN)
   target_sources( libcdi PRIVATE
     cfortran.h
     getline.c
-    make_fint.c
     resource_unpack.c
     resource_unpack.h
   )
 endif ()
+
+if(CDI_BUILD_MAKE_FINT)
+    add_executable(make_fint make_fint.c)
+endif()
 
 # Support exporting all symbols on Windows
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)

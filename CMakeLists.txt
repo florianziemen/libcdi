@@ -24,6 +24,7 @@ option(CDI_SERVICE "Use the extra library [default=ON]" ON)
 option(CDI_ECCODES "Use the eccodes library [default=ON]" ON)
 option(CDI_NETCDF "Use the netcdf library [default=ON]" ON)
 option(CDI_BUILD_APP "Build the app" ON)
+option(CDI_BUILD_MAKE_FINT "Build the fortran conversion tool" OFF)
 option(CDI_ENABLE_f2003_INTERFACE "Enable fortran 2003 interface (requires ruby) [default=ON]" ON)
 
 add_subdirectory(src)
@@ -39,5 +40,8 @@ endif ()
 if (BUILD_TESTING)
   add_subdirectory(tests)
 endif ()
+if (BUILD_PLATFORM_TESTING)
+  add_subdirectory(tests/platform)
+endif()
 
 

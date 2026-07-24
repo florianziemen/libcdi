@@ -42,4 +42,3 @@ foreach(target ${current_targets})
   endif()
 endforeach()
 
-add_subdirectory(platform)
