@@ -104,18 +104,21 @@ cdi_get_keysP(int objID, int varID)
 }
 
 int
-cdi_key_compare(const cdi_keys_t *keysPa, const cdi_keys_t *keysPb, int keynum)
+cdi_key_compare(const cdi_keys_t *restrict keysPa, const cdi_keys_t *restrict keysPb, int keynum)
 {
-  xassert(keynum >= 0 && keynum < (int) keysPa->nelems && keynum < (int) keysPb->nelems);
+  xassert(keynum >= 0 && keynum < keysPa->nelems && keynum < keysPb->nelems);
   const cdi_key_t *keyPa = keysPa->value + keynum, *keyPb = keysPb->value + keynum;
 
   if (keyPa->key != keyPb->key) return 1;
   if (keyPa->type != keyPb->type) return 1;
   if (keyPa->length != keyPb->length) return 1;
 
-  if (keyPa->type == KeyBytes) return (memcmp(keyPa->v.s, keyPb->v.s, (size_t) keyPa->length) != 0);
-  if (keyPa->type == KeyFloat) return (IS_NOT_EQUAL(keyPa->v.d, keyPb->v.d));
-  if (keyPa->type == KeyInt) return (keyPa->v.i != keyPb->v.i);
+  switch (keyPa->type)
+  {
+    case KeyBytes: return memcmp(keyPa->v.s, keyPb->v.s, (size_t) keyPa->length) != 0;
+    case KeyFloat: return IS_NOT_EQUAL(keyPa->v.d, keyPb->v.d);
+    case KeyInt: return keyPa->v.i != keyPb->v.i;
+  }
 
   return 0;
 }
@@ -126,18 +129,21 @@ cdi_delete_key(cdi_key_t *keyP)
   if (keyP != NULL && keyP->length)  // key in use
   {
     keyP->length = 0;
-    if (keyP->type == KeyBytes) { FreeAndNull(keyP->v.s); }
-    else if (keyP->type == KeyFloat) { keyP->v.d = 0.0; }
-    else if (keyP->type == KeyInt) { keyP->v.i = 0; }
+    switch (keyP->type)
+    {
+      case KeyBytes: FreeAndNull(keyP->v.s); break;
+      case KeyFloat: keyP->v.d = 0.0; break;
+      case KeyInt: keyP->v.i = 0; break;
+    }
   }
 }
 
 void
 cdiDeleteVarKeys(cdi_keys_t *keysP)
 {
-  int nelems = keysP ? keysP->nelems : 0;
+  if (!keysP) return;
+  int nelems = keysP->nelems;
   for (int i = 0; i < nelems; i++) { cdi_delete_key(&(keysP->value[i])); }
-
   keysP->nelems = 0;
 }
 
@@ -153,14 +159,17 @@ cdiDeleteKeys(int cdiID, int varID)
 void
 cdiPrintVarKeys(cdi_keys_t *keysP)
 {
-  int nelems = keysP ? (int) keysP->nelems : 0;
+  int nelems = keysP ? keysP->nelems : 0;
   for (int i = 0; i < nelems; i++)
   {
     cdi_key_t *keyP = &(keysP->value[i]);
     if (keyP->length == 0) continue;
-    if (keyP->type == KeyBytes) { printf("%d key %d length %d value %s\n", i + 1, keyP->key, keyP->length, keyP->v.s); }
-    else if (keyP->type == KeyFloat) { printf("%d key %d value %g\n", i + 1, keyP->key, keyP->v.d); }
-    else if (keyP->type == KeyInt) { printf("%d key %d value %d\n", i + 1, keyP->key, keyP->v.i); }
+    switch (keyP->type)
+    {
+      case KeyBytes: printf("%d key %d length %d value %s\n", i + 1, keyP->key, keyP->length, keyP->v.s); break;
+      case KeyFloat: printf("%d key %d value %g\n", i + 1, keyP->key, keyP->v.d); break;
+      case KeyInt: printf("%d key %d value %d\n", i + 1, keyP->key, keyP->v.i); break;
+    }
   }
 }
 
@@ -478,14 +487,12 @@ The function @func{cdiDefKeyBytes} defines a byte array from a key.
 int
 cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, int length)
 {
-  int status = CDI_NOERR;
-
   cdi_keys_t *keysP = cdi_get_keysP(cdiID, varID);
   xassert(keysP != NULL);
 
   cdiDefVarKeyBytes(keysP, key, bytes, length);
 
-  return status;
+  return CDI_NOERR;
 }
 
 int

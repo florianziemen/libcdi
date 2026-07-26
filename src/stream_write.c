@@ -112,7 +112,7 @@ streamWriteVarF(int streamID, int varID, const float *data, SizeType numMissVals
     SizeType elementCount = gridInqSize(vlistInqVarGrid(vlistID, varID));
     elementCount *= (SizeType) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
     double *conversionBuffer = (double *) Malloc((size_t) elementCount * sizeof(*conversionBuffer));
-    for (SizeType i = elementCount; i--;) conversionBuffer[i] = data[i];
+    for (SizeType i = elementCount; i--;) { conversionBuffer[i] = data[i]; }
     myCdiStreamWriteVar_(streamID, varID, MEMTYPE_DOUBLE, (const void *) conversionBuffer, numMissVals);
     Free(conversionBuffer);
   }
@@ -209,9 +209,9 @@ streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, Si
   {
     // In case the file format does not support single precision writing,
     // we fall back to double precision writing, converting the data on the fly.
-    const SizeType elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+    SizeType elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
     double *conversionBuffer = (double *) Malloc((size_t) elementCount * sizeof(*conversionBuffer));
-    for (SizeType i = elementCount; i--;) conversionBuffer[i] = (double) data[i];
+    for (SizeType i = elementCount; i--;) { conversionBuffer[i] = (double) data[i]; }
     streamWriteVarSlice(streamID, varID, levelID, conversionBuffer, numMissVals);
     Free(conversionBuffer);
   }

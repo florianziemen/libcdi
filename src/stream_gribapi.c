@@ -291,30 +291,11 @@ grib1_get_level(grib_handle *gh, int *leveltype, int *lbounds, int *level1, int 
 static double
 grib2ScaleFactor(long factor)
 {
-  switch (factor)
-  {
-    case GRIB_MISSING_LONG: return 1;
-    case -9: return 1000000000;
-    case -8: return 100000000;
-    case -7: return 10000000;
-    case -6: return 1000000;
-    case -5: return 100000;
-    case -4: return 10000;
-    case -3: return 1000;
-    case -2: return 100;
-    case -1: return 10;
-    case 0: return 1;
-    case 1: return 0.1;
-    case 2: return 0.01;
-    case 3: return 0.001;
-    case 4: return 0.0001;
-    case 5: return 0.00001;
-    case 6: return 0.000001;
-    case 7: return 0.0000001;
-    case 8: return 0.00000001;
-    case 9: return 0.000000001;
-    default: return 0;
-  }
+  if (factor == GRIB_MISSING_LONG) return 1.0;
+  if (factor < -9 || factor > 9) return 0.0;
+  static const double pow10[]
+      = { 1e9, 1e8, 1e7, 1e6, 1e5, 1e4, 1e3, 1e2, 1e1, 1e0, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9 };
+  return pow10[factor + 9];
 }
 
 static int
@@ -492,39 +473,36 @@ gribapiGetNameKeys(grib_handle *gh, int varID)
   if (string[0]) varDefKeyString(varID, CDI_KEY_STDNAME, string);
 }
 
+static const struct
+{
+  const char *grib_key;
+  int cdi_key;
+} long_key_map[] = {
+  { "tablesVersion", CDI_KEY_TABLESVERSION },
+  { "localTablesVersion", CDI_KEY_LOCALTABLESVERSION },
+  { "typeOfGeneratingProcess", CDI_KEY_TYPEOFGENERATINGPROCESS },
+  { "productDefinitionTemplateNumber", CDI_KEY_PRODUCTDEFINITIONTEMPLATE },
+  { "typeOfProcessedData", CDI_KEY_TYPEOFPROCESSEDDATA },
+  { "shapeOfTheEarth", CDI_KEY_SHAPEOFTHEEARTH },
+  { "backgroundProcess", CDI_KEY_BACKGROUNDPROCESS },
+  { "typeOfTimeIncrement", CDI_KEY_TYPEOFTIMEINCREMENT },
+};
+
+static void
+gribapiGetLongKeys(grib_handle *gh, int varID)
+{
+  for (size_t i = 0; i < sizeof(long_key_map) / sizeof(long_key_map[0]); i++)
+  {
+    long val = 0;
+    if (grib_get_long(gh, long_key_map[i].grib_key, &val) == 0) varDefKeyInt(varID, long_key_map[i].cdi_key, (int) val);
+  }
+}
+
 static void
 gribapiGetKeys(grib_handle *gh, int varID)
 {
-  long tablesVersion = 0;
-  if (grib_get_long(gh, "tablesVersion", &tablesVersion) == 0) varDefKeyInt(varID, CDI_KEY_TABLESVERSION, (int) tablesVersion);
+  gribapiGetLongKeys(gh, varID);
 
-  long localTablesVersion = 0;
-  if (grib_get_long(gh, "localTablesVersion", &localTablesVersion) == 0)
-    varDefKeyInt(varID, CDI_KEY_LOCALTABLESVERSION, (int) localTablesVersion);
-
-  long typeOfGeneratingProcess = 0;
-  if (grib_get_long(gh, "typeOfGeneratingProcess", &typeOfGeneratingProcess) == 0)
-    varDefKeyInt(varID, CDI_KEY_TYPEOFGENERATINGPROCESS, (int) typeOfGeneratingProcess);
-
-  long productDefinitionTemplate = 0;
-  if (grib_get_long(gh, "productDefinitionTemplateNumber", &productDefinitionTemplate) == 0)
-    varDefKeyInt(varID, CDI_KEY_PRODUCTDEFINITIONTEMPLATE, (int) productDefinitionTemplate);
-
-  long typeOfProcessedData = 0;
-  if (grib_get_long(gh, "typeOfProcessedData", &typeOfProcessedData) == 0)
-    varDefKeyInt(varID, CDI_KEY_TYPEOFPROCESSEDDATA, (int) typeOfProcessedData);
-
-  long shapeOfTheEarth = 0;
-  if (grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth) == 0)
-    varDefKeyInt(varID, CDI_KEY_SHAPEOFTHEEARTH, (int) shapeOfTheEarth);
-
-  long backgroundProcess = 0;
-  if (grib_get_long(gh, "backgroundProcess", &backgroundProcess) == 0)
-    varDefKeyInt(varID, CDI_KEY_BACKGROUNDPROCESS, (int) backgroundProcess);
-
-  long typeOfTimeIncrement = 0;
-  if (grib_get_long(gh, "typeOfTimeIncrement", &typeOfTimeIncrement) == 0)
-    varDefKeyInt(varID, CDI_KEY_TYPEOFTIMEINCREMENT, (int) typeOfTimeIncrement);
   /*
   long constituentType = 0;
   if ( grib_get_long(gh, "constituentType", &constituentType) == 0 )

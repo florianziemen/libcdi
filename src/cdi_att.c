@@ -141,14 +141,12 @@ The function @func{cdiInqNatts} gets the number of attributes assigned to this v
 int
 cdiInqNatts(int cdiID, int varID, int *nattsP)
 {
-  int status = CDI_NOERR;
-
   cdi_atts_t *attsP = cdi_get_attsP(cdiID, varID);
   xassert(attsP != NULL);
 
   *nattsP = attsP->nelems;
 
-  return status;
+  return CDI_NOERR;
 }
 
 /*
