@@ -411,7 +411,7 @@ tableFromEnv(int modelID, int tablenum)
   if (tablePath) { snprintf(tablefile, len, "%s/%s", tablePath, tablename); }
   else
   {
-    snprintf(tablefile, len, tablename);
+    snprintf(tablefile, len, "%s", tablename);
   }
   // if (tablefile) printf("tableFile = %s\n", tablefile);
 
