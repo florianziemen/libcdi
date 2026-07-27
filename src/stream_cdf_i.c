@@ -530,8 +530,8 @@ cdfGetAttString(int fileID, int ncvarid, const char *attname, String *attString)
 void
 cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor)
 {
-  bool haveAddoffset = IS_NOT_EQUAL(addoffset, 0.0);
-  bool haveScalefactor = IS_NOT_EQUAL(scalefactor, 1.0);
+  bool haveAddoffset = is_not_equal(addoffset, 0.0);
+  bool haveScalefactor = is_not_equal(scalefactor, 1.0);
   if (haveAddoffset && haveScalefactor)
   {
     for (size_t i = 0; i < size; ++i) { data[i] = data[i] * scalefactor + addoffset; }
@@ -816,7 +816,7 @@ isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, const nc
 
           readVCT(ncid, ndims2, dimlen, dimlen2, avarid2, bvarid2, vct);
 
-          if (p0varid1 != -1 && IS_NOT_EQUAL(px, 1))
+          if (p0varid1 != -1 && is_not_equal(px, 1))
             for (size_t i = 0; i < dimlen + 1; ++i) vct[i] *= px;
 
           ncvar->vct = vct;
@@ -2340,7 +2340,7 @@ cdf_check_gridtype(int *gridtype, bool isLon, bool isLat, size_t xsize, size_t y
           break;
         }
     }
-    if (ysize < 10000 && IS_EQUAL(yinc, 0.0) && isGaussianLatitudes(ysize, grid->y.vals))
+    if (ysize < 10000 && is_equal(yinc, 0.0) && isGaussianLatitudes(ysize, grid->y.vals))
     {
       *gridtype = GRID_GAUSSIAN;
       grid->np = (int) (ysize / 2);
@@ -3701,8 +3701,7 @@ cdf_define_all_vars(stream_t *streamP, int vlistID, int instID, int modelID, int
                     ncdim_t *ncdims, int timedimid)
 {
   int varids_local[1024];
-  int *varids = (nvars <= (int) (sizeof(varids_local) / sizeof(varids_local[0]))) ? varids_local
-                                                                                  : (int *) Malloc((size_t) nvars * sizeof(int));
+  int *varids = (nvars <= (int) ARRAY_SIZE(varids_local)) ? varids_local : (int *) Malloc((size_t) nvars * sizeof(int));
   int n = 0;
   for (int ncvarid = 0; ncvarid < num_ncvars; ncvarid++)
     if (ncvars[ncvarid].varStatus == DataVar) { varids[n++] = ncvarid; }
@@ -3771,8 +3770,8 @@ cdf_define_all_vars(stream_t *streamP, int vlistID, int instID, int modelID, int
 
     if (ncvar->validrangeDefined) vlistDefVarValidrange(vlistID, varID, ncvar->validrange);
 
-    if (IS_NOT_EQUAL(ncvar->addoffset, 0.0)) cdiDefKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, ncvar->addoffset);
-    if (IS_NOT_EQUAL(ncvar->scalefactor, 1.0)) cdiDefKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, ncvar->scalefactor);
+    if (is_not_equal(ncvar->addoffset, 0.0)) cdiDefKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, ncvar->addoffset);
+    if (is_not_equal(ncvar->scalefactor, 1.0)) cdiDefKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, ncvar->scalefactor);
 
     vlistDefVarDatatype(vlistID, varID, cdfInqDatatype(streamP, ncvar->xtype, ncvar->isUnsigned));
 

@@ -232,7 +232,7 @@ int
 check_keyvalueList(int numItems, fdbKeyValueEntry *keyValueList)
 {
   const char *searchKeys[] = { "param", "levtype", "date", "time" };
-  int numSearchKeys = sizeof(searchKeys) / sizeof(searchKeys[0]);
+  int numSearchKeys = ARRAY_SIZE(searchKeys);
   int searchKeysCount[numSearchKeys];
   for (int k = 0; k < numSearchKeys; k++) searchKeysCount[k] = 0;
 

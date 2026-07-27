@@ -494,8 +494,8 @@ cdfDefVarPacking(const stream_t *streamP, int ncvarID, nc_type xtype, int vlistI
     if (haveAddoffset || haveScalefactor)
     {
       nc_type astype = (xtype == NC_FLOAT) ? NC_FLOAT : NC_DOUBLE;
-      if ((astype == NC_DOUBLE) && IS_EQUAL(addoffset, (double) ((float) addoffset))
-          && IS_EQUAL(scalefactor, (double) ((float) scalefactor)))
+      if ((astype == NC_DOUBLE) && is_equal(addoffset, (double) ((float) addoffset))
+          && is_equal(scalefactor, (double) ((float) scalefactor)))
       {
         astype = NC_FLOAT;
       }
@@ -518,8 +518,8 @@ cdfAppendCoordinates(int fileID, int ncvarID, char coordinates[CDI_MAX_NAME])
 }
 
 static void
-cdfDefineCoordinates(const stream_t *streamP, int ncvarID, int nczvarID, int gridtype, int gridID, int gridindex, int xid,
-                     int yid, size_t gridsize, char axis[5], size_t iax)
+cdfDefineCoordinates(const stream_t *streamP, int ncvarID, int nczvarID, int gridtype, int gridID, int gridindex, int xid, int yid,
+                     size_t gridsize, char axis[5], size_t iax)
 {
   int fileID = streamP->fileID;
 
@@ -1150,7 +1150,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
           for (size_t i = 0; i < nvals; ++i)
           {
             double temp = mdata_sp[i];
-            if (!DBL_IS_EQUAL(temp, (float) missval))
+            if (!dbl_is_equal(temp, (float) missval))
             {
               apply_packing(&temp, haveAddoffset, haveScalefactor, addoffset, scalefactor);
               mdata_sp[i] = (float) temp;
@@ -1177,7 +1177,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
         {
           for (size_t i = 0; i < nvals; ++i)
           {
-            if (!DBL_IS_EQUAL(mdata_dp[i], missval))
+            if (!dbl_is_equal(mdata_dp[i], missval))
             {
               apply_packing(&mdata_dp[i], haveAddoffset, haveScalefactor, addoffset, scalefactor);
             }
@@ -1241,7 +1241,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
   {                                                             \
     for (size_t i = 0; i < nvals; ++i)                          \
     {                                                           \
-      if (!DBL_IS_EQUAL(pdata_##SUFFIX[i], MISSVAL))            \
+      if (!dbl_is_equal(pdata_##SUFFIX[i], MISSVAL))            \
       {                                                         \
         if (pdata_##SUFFIX[i] < fmin) fmin = pdata_##SUFFIX[i]; \
         if (pdata_##SUFFIX[i] > fmax) fmax = pdata_##SUFFIX[i]; \
@@ -1518,8 +1518,8 @@ cdf_write_var_chunk(stream_t *streamP, int varID, int memtype, const int rect[][
 }
 
 static void
-cdfDefineStartAndCountSlice(stream_t *streamP, int varID, int levelID, int dimorder[3], int xid, int yid, int zid,
-                            size_t start[5], size_t count[5], size_t *xsize, size_t *ysize)
+cdfDefineStartAndCountSlice(stream_t *streamP, int varID, int levelID, int dimorder[3], int xid, int yid, int zid, size_t start[5],
+                            size_t count[5], size_t *xsize, size_t *ysize)
 {
   size_t ndims = 0;
   *xsize = 0;

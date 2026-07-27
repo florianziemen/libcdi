@@ -511,7 +511,7 @@ cgribexDefProjLCC(int *isec2, int gridID)
   {
     double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
     proj_lonlat_to_lcc_func(gpp, (size_t) 1, &x_0, &y_0);
-    if (IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv))
+    if (is_not_equal(x_0, gpp.mv) && is_not_equal(y_0, gpp.mv))
     {
       gpp.x_0 = -x_0;
       gpp.y_0 = -y_0;
@@ -1078,8 +1078,8 @@ cgribexScanTimestep2(stream_t *streamP)
     int gridID = vlistInqVarGrid(vlistID, varID);
     if (gridInqSize(gridID) == 1 && gridInqType(gridID) == GRID_LONLAT)
     {
-      if (IS_NOT_EQUAL(gridInqXval(gridID, 0), ISEC2_FirstLon * 0.001)
-          || IS_NOT_EQUAL(gridInqYval(gridID, 0), ISEC2_FirstLat * 0.001))
+      if (is_not_equal(gridInqXval(gridID, 0), ISEC2_FirstLon * 0.001)
+          || is_not_equal(gridInqYval(gridID, 0), ISEC2_FirstLat * 0.001))
         gridChangeType(gridID, GRID_TRAJECTORY);
     }
 
@@ -1363,7 +1363,7 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
     {
       float *restrict dataf = (float *) data;
       for (size_t i = 0; i < datasize; i++)
-        if ((fabs(dataf[i] - undef_pds) < undef_eps) || IS_EQUAL(dataf[i], FSEC3_MissVal))
+        if ((fabs(dataf[i] - undef_pds) < undef_eps) || is_equal(dataf[i], FSEC3_MissVal))
         {
           dataf[i] = (float) missval;
           (*numMissVals)++;
@@ -1373,7 +1373,7 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
     {
       double *restrict datad = (double *) data;
       for (size_t i = 0; i < datasize; i++)
-        if ((fabs(datad[i] - undef_pds) < undef_eps) || IS_EQUAL(datad[i], FSEC3_MissVal))
+        if ((fabs(datad[i] - undef_pds) < undef_eps) || is_equal(datad[i], FSEC3_MissVal))
         {
           datad[i] = missval;
           (*numMissVals)++;
@@ -1716,7 +1716,7 @@ cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
 
   struct CDI_GridProjParams gpp;
   gridInqParamsLCC(gridID, &gpp);
-  if (IS_EQUAL(gpp.x_0, gpp.mv) && IS_EQUAL(gpp.y_0, gpp.mv) && (IS_EQUAL(gpp.xval_0, gpp.mv) || IS_EQUAL(gpp.yval_0, gpp.mv)))
+  if (is_equal(gpp.x_0, gpp.mv) && is_equal(gpp.y_0, gpp.mv) && (is_equal(gpp.xval_0, gpp.mv) || is_equal(gpp.yval_0, gpp.mv)))
   {
     gpp.x_0 = gridInqXval(gridID, 0);
     gpp.y_0 = gridInqYval(gridID, 0);
@@ -1732,8 +1732,8 @@ cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
 
   double xinc = gridInqXinc(gridID);
   double yinc = gridInqYinc(gridID);
-  if (IS_EQUAL(xinc, 0.0)) xinc = gridInqXincInMeter(gridID);
-  if (IS_EQUAL(yinc, 0.0)) yinc = gridInqYincInMeter(gridID);
+  if (is_equal(xinc, 0.0)) xinc = gridInqXincInMeter(gridID);
+  if (is_equal(yinc, 0.0)) yinc = gridInqYincInMeter(gridID);
 
   ISEC2_GridType = GRIB1_GTYPE_LCC;
   ISEC2_NumLon = xsize;
@@ -1750,7 +1750,7 @@ cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
   ISEC2_Lambert_ProjFlag = 0;
   if (lsouth) gribbyte_set_bit(&ISEC2_Lambert_ProjFlag, 1);
 
-  bool earthIsOblate = (IS_EQUAL(gpp.a, 6378160.0) && IS_EQUAL(gpp.rf, 297.0));
+  bool earthIsOblate = (is_equal(gpp.a, 6378160.0) && is_equal(gpp.rf, 297.0));
   ISEC2_ResFlag = 0;
   if (ISEC2_Lambert_dx && ISEC2_Lambert_dy) gribbyte_set_bit(&ISEC2_ResFlag, 1);
   if (earthIsOblate) gribbyte_set_bit(&ISEC2_ResFlag, 2);

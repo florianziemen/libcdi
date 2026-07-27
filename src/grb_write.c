@@ -463,7 +463,7 @@ grb_write_var(stream_t *streamP, int varID, int memtype, const void *data, size_
 
       size_t numMissVals_slice = 0;
       if (numMissVals)
-        for (size_t i = 0; i < chunkLen; ++i) numMissVals_slice += DBL_IS_EQUAL(fdata[i], missval);
+        for (size_t i = 0; i < chunkLen; ++i) numMissVals_slice += dbl_is_equal(fdata[i], missval);
 
       grb_write_var_slice(streamP, varID, levelID, memtype, fdata, numMissVals_slice);
     }
@@ -474,7 +474,7 @@ grb_write_var(stream_t *streamP, int varID, int memtype, const void *data, size_
 
       size_t numMissVals_slice = 0;
       if (numMissVals)
-        for (size_t i = 0; i < chunkLen; ++i) numMissVals_slice += DBL_IS_EQUAL(ddata[i], missval);
+        for (size_t i = 0; i < chunkLen; ++i) numMissVals_slice += dbl_is_equal(ddata[i], missval);
 
       grb_write_var_slice(streamP, varID, levelID, memtype, ddata, numMissVals_slice);
     }

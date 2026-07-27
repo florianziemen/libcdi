@@ -712,7 +712,7 @@ vlistDefVarDatatype(int vlistID, int varID, int datatype)
   if (!varP->missvalused)
   {
     double missval = varP->missval;
-    bool missvalIsDefault = DBL_IS_EQUAL(missval, CDI_Default_Missval);
+    bool missvalIsDefault = dbl_is_equal(missval, CDI_Default_Missval);
     if (missvalIsDefault)
     {
       // clang-format off
@@ -1297,7 +1297,7 @@ vlistDecodeXyz(int xyz, int outDimorder[3])
 static const short xyzStorVals[] = { 123, 132, 213, 231, 312, 321 };
 enum
 {
-  numXYZStorVals = sizeof(xyzStorVals) / sizeof(xyzStorVals[0])
+  numXYZStorVals = ARRAY_SIZE(xyzStorVals)
 };
 
 void
@@ -1305,7 +1305,7 @@ vlistDefVarXYZ(int vlistID, int varID, int xyz)
 {
   var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
-  if (xyz == 3) xyz = 321;
+  if (xyz == 3) { xyz = 321; }
 
   // check xyz dimension order
   {
@@ -1366,7 +1366,7 @@ vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
   xassert(a && b && varIDA >= 0 && varIDA < a->nvars && varIDB >= 0 && varIDB < b->nvars);
   var_t *pva = a->vars + varIDA, *pvb = b->vars + varIDB;
 #define FCMP(f) ((pva->f) != (pvb->f))
-#define FCMPFLT(f) (IS_NOT_EQUAL((pva->f), (pvb->f)))
+#define FCMPFLT(f) (is_not_equal((pva->f), (pvb->f)))
 // #define FCMPSTR(fs) ((pva->fs) != (pvb->fs) && strcmp((pva->fs), (pvb->fs)))
 #define FCMP2(f) (namespaceResHDecode(pva->f).idx != namespaceResHDecode(pvb->f).idx)
   int diff = (int) FCMP(fvarID) | FCMP(mvarID) | FCMP(flag) | FCMP(param) | FCMP(datatype) | FCMP(timetype) | FCMP(tsteptype)

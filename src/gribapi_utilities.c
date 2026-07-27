@@ -138,7 +138,7 @@ double
 gribGetDoubleDefault(grib_handle *gribHandle, const char *key, double defaultValue)
 {
   double result;
-  if (grib_get_double(gribHandle, key, &result) || IS_EQUAL(result, GRIB_MISSING_DOUBLE)) result = defaultValue;
+  if (grib_get_double(gribHandle, key, &result) || is_equal(result, GRIB_MISSING_DOUBLE)) result = defaultValue;
   return result;
 }
 
@@ -654,7 +654,7 @@ gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, long editionNumber,
   FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfLastGridPointInDegrees", &grid->y.last);
 
   // FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->x.inc);
-  // if ( IS_EQUAL(grid->x.inc, GRIB_MISSING_DOUBLE) ) grid->x.inc = 0;
+  // if ( is_equal(grid->x.inc, GRIB_MISSING_DOUBLE) ) grid->x.inc = 0;
 
   if (grid->x.last < grid->x.first)
   {
@@ -667,7 +667,7 @@ gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, long editionNumber,
   grid->x.flag = 2;
 
   grid->y.flag = 0;
-  // if (IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0))
+  // if (is_not_equal(grid->y.first, 0) || is_not_equal(grid->y.last, 0))
   {
     if (grid->y.size > 1)
     {
@@ -716,7 +716,7 @@ gribapiGetGridRegular(grib_handle *gh, grid_t *grid, long editionNumber, int gri
   if (grid->x.inc < -999 || grid->x.inc > 999) grid->x.inc = 0;
   if (grid->y.inc < -999 || grid->y.inc > 999) grid->y.inc = 0;
 
-  // if ( IS_NOT_EQUAL(grid->x.first, 0) || IS_NOT_EQUAL(grid->x.last, 0) )
+  // if ( is_not_equal(grid->x.first, 0) || is_not_equal(grid->x.last, 0) )
   {
     if (grid->x.size > 1)
     {
@@ -731,7 +731,7 @@ gribapiGetGridRegular(grib_handle *gh, grid_t *grid, long editionNumber, int gri
         }
 
         // correct xinc if necessary
-        if (IS_EQUAL(grid->x.first, 0) && grid->x.last > 354 && grid->x.last < 360)
+        if (is_equal(grid->x.first, 0) && grid->x.last > 354 && grid->x.last < 360)
         {
           double xinc = 360. / (double) grid->x.size;
           if (fabs(grid->x.inc - xinc) > 0.0)
@@ -746,7 +746,7 @@ gribapiGetGridRegular(grib_handle *gh, grid_t *grid, long editionNumber, int gri
   }
 
   grid->y.flag = 0;
-  // if ( IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0) )
+  // if ( is_not_equal(grid->y.first, 0) || is_not_equal(grid->y.last, 0) )
   {
     if (grid->y.size > 1)
     {

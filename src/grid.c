@@ -168,7 +168,7 @@ grid_free_components(grid_t *gridP)
 #endif
                      gridP->x.bounds, gridP->y.bounds, gridP->reducedPoints, gridP->area,   gridP->name };
 
-  for (size_t i = 0; i < sizeof(p2free) / sizeof(p2free[0]); ++i) Free(p2free[i]);
+  for (size_t i = 0; i < ARRAY_SIZE(p2free); ++i) Free(p2free[i]);
 
   cdiDeleteVarKeys(&(gridP->x.keys));
   cdiDeleteVarKeys(&(gridP->y.keys));
@@ -347,7 +347,7 @@ gridGenYvalsGaussian(size_t ysize, double yfirst, double ylast, double *restrict
 
   calc_gaussgrid(yvals, ysize, yfirst, ylast);
 
-  if (!(IS_EQUAL(yfirst, 0) && IS_EQUAL(ylast, 0)))
+  if (!(is_equal(yfirst, 0) && is_equal(ylast, 0)))
     if (fabs(yvals[0] - yfirst) > deleps || fabs(yvals[ysize - 1] - ylast) > deleps)
     {
       bool lfound = false;
@@ -390,7 +390,7 @@ gridGenYvalsRegular(size_t ysize, double yfirst, double ylast, double yinc, doub
 {
   if (fabs(yinc) <= 0 && ysize > 1)
   {
-    if (IS_EQUAL(yfirst, ylast) && IS_NOT_EQUAL(yfirst, 0)) ylast *= -1;
+    if (is_equal(yfirst, ylast) && is_not_equal(yfirst, 0)) ylast *= -1;
 
     if (yfirst > ylast) { yinc = (yfirst - ylast) / (double) (ysize - 1); }
     else if (yfirst < ylast) { yinc = (ylast - yfirst) / (double) (ysize - 1); }
@@ -531,7 +531,7 @@ grid_destroy(void *gridP)
 const char *
 gridNamePtr(int gridtype)
 {
-  const int size = (int) (sizeof(Grids) / sizeof(Grids[0]));
+  const int size = (int) ARRAY_SIZE(Grids);
   return (gridtype >= 0 && gridtype < size) ? Grids[gridtype] : Grids[GRID_GENERIC];
 }
 
@@ -1922,7 +1922,7 @@ gridDefParamRLL(int gridID, double xpole, double ypole, double angle)
   cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int) (strlen(gmapname)), gmapname);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_longitude", CDI_DATATYPE_FLT64, 1, &xpole);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_latitude", CDI_DATATYPE_FLT64, 1, &ypole);
-  if (IS_NOT_EQUAL(angle, 0)) cdiDefAttFlt(gridID, CDI_GLOBAL, "north_pole_grid_longitude", CDI_DATATYPE_FLT64, 1, &angle);
+  if (is_not_equal(angle, 0)) cdiDefAttFlt(gridID, CDI_GLOBAL, "north_pole_grid_longitude", CDI_DATATYPE_FLT64, 1, &angle);
 
   grid_t *gridP = grid_to_pointer(gridID);
   gridP->projtype = CDI_PROJ_RLL;
@@ -2013,10 +2013,10 @@ check_cyclic_reg2d(grid_t *gridP)
     if (xval2 < xval1) { xval2 += 360; }
     if (xvaln < xval1) { xvaln += 360; }
 
-    if (IS_NOT_EQUAL(xval1, xvaln))
+    if (is_not_equal(xval1, xvaln))
     {
       double xinc = xval2 - xval1;
-      if (IS_EQUAL(xinc, 0)) { xinc = (xvaln - xval1) / (double) (xsize - 1); }
+      if (is_equal(xinc, 0)) { xinc = (xvaln - xval1) / (double) (xsize - 1); }
 
       double x0 = xvaln + xinc - 360;
       if (fabs(x0 - xval1) < 0.01 * xinc) { gridP->isCyclic = 1; }
@@ -2211,11 +2211,11 @@ compare_lonlat(int gridID, const grid_t *grid, const grid_t *gridRef)
   {
     if (grid->x.flag == 2 && grid->y.flag == 2)
     {
-      if (!(IS_EQUAL(grid->x.first, 0) && IS_EQUAL(grid->x.last, 0) && IS_EQUAL(grid->x.inc, 0))
-          && !(IS_EQUAL(grid->y.first, 0) && IS_EQUAL(grid->y.last, 0) && IS_EQUAL(grid->y.inc, 0))
-          && IS_NOT_EQUAL(grid->x.first, grid->x.last) && IS_NOT_EQUAL(grid->y.first, grid->y.last))
+      if (!(is_equal(grid->x.first, 0) && is_equal(grid->x.last, 0) && is_equal(grid->x.inc, 0))
+          && !(is_equal(grid->y.first, 0) && is_equal(grid->y.last, 0) && is_equal(grid->y.inc, 0))
+          && is_not_equal(grid->x.first, grid->x.last) && is_not_equal(grid->y.first, grid->y.last))
       {
-        if (IS_NOT_EQUAL(grid->x.first, gridInqXval(gridID, 0)) || IS_NOT_EQUAL(grid->y.first, gridInqYval(gridID, 0)))
+        if (is_not_equal(grid->x.first, gridInqXval(gridID, 0)) || is_not_equal(grid->y.first, gridInqYval(gridID, 0)))
         {
           differ = true;
         }
@@ -2285,8 +2285,8 @@ compare_gaussian(int gridID, const grid_t *grid, const grid_t *gridRef)
   {
     if (grid->x.flag == 2 && grid->y.flag == 2)
     {
-      if (!(IS_EQUAL(grid->x.first, 0) && IS_EQUAL(grid->x.last, 0) && IS_EQUAL(grid->x.inc, 0))
-          && !(IS_EQUAL(grid->y.first, 0) && IS_EQUAL(grid->y.last, 0)))
+      if (!(is_equal(grid->x.first, 0) && is_equal(grid->x.last, 0) && is_equal(grid->x.inc, 0))
+          && !(is_equal(grid->y.first, 0) && is_equal(grid->y.last, 0)))
         if (fabs(grid->x.first - gridInqXval(gridID, 0)) > cmp_eps || fabs(grid->y.first - gridInqYval(gridID, 0)) > cmp_eps
             || (fabs(grid->x.inc) > 0 && fabs(fabs(grid->x.inc) - fabs(gridRef->x.inc)) > fabs(grid->x.inc / 1000)))
         {
@@ -2449,12 +2449,12 @@ grid_compare(void *gridP1, void *gridP2)
   if (g1->y.size != g2->y.size) return differ;
   if (g1->lcomplex != g2->lcomplex) return differ;
 
-  if (IS_NOT_EQUAL(g1->x.first, g2->x.first)) return differ;
-  if (IS_NOT_EQUAL(g1->y.first, g2->y.first)) return differ;
-  if (IS_NOT_EQUAL(g1->x.last, g2->x.last)) return differ;
-  if (IS_NOT_EQUAL(g1->y.last, g2->y.last)) return differ;
-  if (IS_NOT_EQUAL(g1->x.inc, g2->x.inc)) return differ;
-  if (IS_NOT_EQUAL(g1->y.inc, g2->y.inc)) return differ;
+  if (is_not_equal(g1->x.first, g2->x.first)) return differ;
+  if (is_not_equal(g1->y.first, g2->y.first)) return differ;
+  if (is_not_equal(g1->x.last, g2->x.last)) return differ;
+  if (is_not_equal(g1->y.last, g2->y.last)) return differ;
+  if (is_not_equal(g1->x.inc, g2->x.inc)) return differ;
+  if (is_not_equal(g1->y.inc, g2->y.inc)) return differ;
   if (cmp_key_int(&g1->keys, &g2->keys, CDI_KEY_SCANNINGMODE)) return differ;
 
   {
@@ -2465,7 +2465,7 @@ grid_compare(void *gridP1, void *gridP2)
       size_t size = grid_axis_size(g1, GRID_AXIS_X);
       xassert(size);
       for (size_t i = 0; i < size; i++)
-        if (IS_NOT_EQUAL(g1_xvals[i], g2_xvals[i])) return differ;
+        if (is_not_equal(g1_xvals[i], g2_xvals[i])) return differ;
     }
   }
 
@@ -2477,7 +2477,7 @@ grid_compare(void *gridP1, void *gridP2)
       size_t size = grid_axis_size(g1, GRID_AXIS_Y);
       xassert(size);
       for (size_t i = 0; i < size; i++)
-        if (IS_NOT_EQUAL(g1_yvals[i], g2_yvals[i])) return differ;
+        if (is_not_equal(g1_yvals[i], g2_yvals[i])) return differ;
     }
   }
 
@@ -2490,7 +2490,7 @@ grid_compare(void *gridP1, void *gridP2)
       xassert(size);
 
       for (size_t i = 0; i < size; i++)
-        if (IS_NOT_EQUAL(g1_area[i], g2_area[i])) return differ;
+        if (is_not_equal(g1_area[i], g2_area[i])) return differ;
     }
   }
 
@@ -2504,7 +2504,7 @@ grid_compare(void *gridP1, void *gridP2)
       xassert(size);
 
       for (size_t i = 0; i < size; i++)
-        if (IS_NOT_EQUAL(g1_xbounds[i], g2_xbounds[i])) return differ;
+        if (is_not_equal(g1_xbounds[i], g2_xbounds[i])) return differ;
     }
   }
 
@@ -2518,7 +2518,7 @@ grid_compare(void *gridP1, void *gridP2)
       xassert(size);
 
       for (size_t i = 0; i < size; i++)
-        if (IS_NOT_EQUAL(g1_ybounds[i], g2_ybounds[i])) return differ;
+        if (is_not_equal(g1_ybounds[i], g2_ybounds[i])) return differ;
     }
   }
 
@@ -2721,8 +2721,7 @@ gridGenerate(const grid_t *grid)
   int valdef_group1 = 0;
   static const int valdef_group1_tab[]
       = { GRID_LONLAT, GRID_GAUSSIAN, GRID_UNSTRUCTURED, GRID_CURVILINEAR, GRID_GENERIC, GRID_PROJECTION, GRID_HEALPIX };
-  for (size_t i = 0; i < sizeof(valdef_group1_tab) / sizeof(valdef_group1_tab[0]); ++i)
-    valdef_group1 |= (gridType == valdef_group1_tab[i]);
+  for (size_t i = 0; i < ARRAY_SIZE(valdef_group1_tab); ++i) { valdef_group1 |= (gridType == valdef_group1_tab[i]); }
   if (valdef_group1 && grid->x.flag == 1)
   {
     gridDefXvals(gridID, grid->x.vals);
@@ -2901,7 +2900,7 @@ gridCompress(int gridID)
 
       double **resizeP[] = { &gridP->x.vals, &gridP->y.vals, &gridP->area, &gridP->x.bounds, &gridP->y.bounds };
       size_t newSize[] = { gridsize, gridsize, gridsize, nv * gridsize, nv * gridsize };
-      for (size_t i = 0; i < sizeof(resizeP) / sizeof(resizeP[0]); ++i)
+      for (size_t i = 0; i < ARRAY_SIZE(resizeP); ++i)
         if (*(resizeP[i])) *(resizeP[i]) = (double *) Realloc(*(resizeP[i]), newSize[i] * sizeof(double));
 
       Free(gridP->mask_gme);
@@ -3417,7 +3416,7 @@ gridPrintKernel(int gridID, int opt, FILE *fp)
           xinc = gridInqXinc(gridID);
         }
 
-        if (IS_NOT_EQUAL(xinc, 0) && opt)
+        if (is_not_equal(xinc, 0) && opt)
         {
           fprintf(fp,
                   "xfirst    = %.*g\n"
@@ -3442,7 +3441,7 @@ gridPrintKernel(int gridID, int opt, FILE *fp)
           yinc = gridInqYinc(gridID);
         }
 
-        if (IS_NOT_EQUAL(yinc, 0) && opt)
+        if (is_not_equal(yinc, 0) && opt)
         {
           fprintf(fp,
                   "yfirst    = %.*g\n"
@@ -3602,9 +3601,9 @@ gridProjParamsInit(struct CDI_GridProjParams *gpp)
 static void
 gridDefParamsCommon(int gridID, struct CDI_GridProjParams gpp)
 {
-  if (IS_NOT_EQUAL(gpp.a, gpp.mv))
+  if (is_not_equal(gpp.a, gpp.mv))
   {
-    if (IS_NOT_EQUAL(gpp.b, gpp.mv))
+    if (is_not_equal(gpp.b, gpp.mv))
     {
       cdiDefAttFlt(gridID, CDI_GLOBAL, "semi_major_axis", CDI_DATATYPE_FLT64, 1, &gpp.a);
       cdiDefAttFlt(gridID, CDI_GLOBAL, "semi_minor_axis", CDI_DATATYPE_FLT64, 1, &gpp.b);
@@ -3614,16 +3613,16 @@ gridDefParamsCommon(int gridID, struct CDI_GridProjParams gpp)
       cdiDefAttFlt(gridID, CDI_GLOBAL, "earth_radius", CDI_DATATYPE_FLT64, 1, &gpp.a);
     }
   }
-  if (IS_NOT_EQUAL(gpp.rf, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "inverse_flattening", CDI_DATATYPE_FLT64, 1, &gpp.rf);
-  if (IS_NOT_EQUAL(gpp.x_0, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_easting", CDI_DATATYPE_FLT64, 1, &gpp.x_0);
-  if (IS_NOT_EQUAL(gpp.y_0, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_northing", CDI_DATATYPE_FLT64, 1, &gpp.y_0);
-  if (IS_NOT_EQUAL(gpp.xval_0, gpp.mv))
+  if (is_not_equal(gpp.rf, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "inverse_flattening", CDI_DATATYPE_FLT64, 1, &gpp.rf);
+  if (is_not_equal(gpp.x_0, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_easting", CDI_DATATYPE_FLT64, 1, &gpp.x_0);
+  if (is_not_equal(gpp.y_0, gpp.mv)) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_northing", CDI_DATATYPE_FLT64, 1, &gpp.y_0);
+  if (is_not_equal(gpp.xval_0, gpp.mv))
     cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.xval_0);
-  if (IS_NOT_EQUAL(gpp.yval_0, gpp.mv))
+  if (is_not_equal(gpp.yval_0, gpp.mv))
     cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.yval_0);
-  if (IS_NOT_EQUAL(gpp.x_SP, gpp.mv))
+  if (is_not_equal(gpp.x_SP, gpp.mv))
     cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfSouthernPoleInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.x_SP);
-  if (IS_NOT_EQUAL(gpp.y_SP, gpp.mv))
+  if (is_not_equal(gpp.y_SP, gpp.mv))
     cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfSouthernPoleInDegrees", CDI_DATATYPE_FLT64, 1, &gpp.y_SP);
 }
 
@@ -3652,7 +3651,7 @@ gridDefParamsLCC(int gridID, struct CDI_GridProjParams gpp)
   int nlats = 0;
   double lats[2];
   lats[nlats++] = gpp.lat_1;
-  if (IS_NOT_EQUAL(gpp.lat_1, gpp.lat_2)) lats[nlats++] = gpp.lat_2;
+  if (is_not_equal(gpp.lat_1, gpp.lat_2)) lats[nlats++] = gpp.lat_2;
   cdiDefAttFlt(gridID, CDI_GLOBAL, "standard_parallel", CDI_DATATYPE_FLT64, nlats, lats);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "longitude_of_central_meridian", CDI_DATATYPE_FLT64, 1, &gpp.lon_0);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "latitude_of_projection_origin", CDI_DATATYPE_FLT64, 1, &gpp.lat_0);
@@ -3747,11 +3746,11 @@ gridVerifyProjParamsLCC(struct CDI_GridProjParams *gpp)
   {
     // lwarn = false;
     const char *projection = "lambert_conformal_conic";
-    if (IS_EQUAL(gpp->lon_0, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "longitude_of_central_meridian");
-    if (IS_EQUAL(gpp->lat_0, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "latitude_of_central_meridian");
-    if (IS_EQUAL(gpp->lat_1, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "standard_parallel");
-    if (IS_NOT_EQUAL(gpp->x_0, gpp->mv) && IS_NOT_EQUAL(gpp->y_0, gpp->mv)
-        && (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv)))
+    if (is_equal(gpp->lon_0, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "longitude_of_central_meridian");
+    if (is_equal(gpp->lat_0, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "latitude_of_central_meridian");
+    if (is_equal(gpp->lat_1, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "standard_parallel");
+    if (is_not_equal(gpp->x_0, gpp->mv) && is_not_equal(gpp->y_0, gpp->mv)
+        && (is_equal(gpp->xval_0, gpp->mv) || is_equal(gpp->yval_0, gpp->mv)))
     {
       if (proj_lcc_to_lonlat_func)
       {
@@ -3759,7 +3758,7 @@ gridVerifyProjParamsLCC(struct CDI_GridProjParams *gpp)
         gpp->yval_0 = -gpp->y_0;
         proj_lcc_to_lonlat_func(*gpp, 0.0, 0.0, (SizeType) 1, &gpp->xval_0, &gpp->yval_0);
       }
-      if (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv))
+      if (is_equal(gpp->xval_0, gpp->mv) || is_equal(gpp->yval_0, gpp->mv))
         Warning("%s mapping parameter %s missing!", projection,
                 "longitudeOfFirstGridPointInDegrees and latitudeOfFirstGridPointInDegrees");
     }
@@ -3777,12 +3776,12 @@ gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp)
   {
     // lwarn = false;
     const char *projection = "polar_stereographic";
-    if (IS_EQUAL(gpp->lon_0, gpp->mv))
+    if (is_equal(gpp->lon_0, gpp->mv))
       Warning("%s mapping parameter %s missing!", projection, "straight_vertical_longitude_from_pole");
-    if (IS_EQUAL(gpp->lat_0, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "latitude_of_projection_origin");
-    if (IS_EQUAL(gpp->lat_1, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "standard_parallel");
-    if (IS_NOT_EQUAL(gpp->x_0, gpp->mv) && IS_NOT_EQUAL(gpp->y_0, gpp->mv)
-        && (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv)))
+    if (is_equal(gpp->lat_0, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "latitude_of_projection_origin");
+    if (is_equal(gpp->lat_1, gpp->mv)) Warning("%s mapping parameter %s missing!", projection, "standard_parallel");
+    if (is_not_equal(gpp->x_0, gpp->mv) && is_not_equal(gpp->y_0, gpp->mv)
+        && (is_equal(gpp->xval_0, gpp->mv) || is_equal(gpp->yval_0, gpp->mv)))
     {
       if (proj_stere_to_lonlat_func)
       {
@@ -3790,7 +3789,7 @@ gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp)
         gpp->yval_0 = -gpp->y_0;
         proj_stere_to_lonlat_func(*gpp, 0.0, 0.0, (SizeType) 1, &gpp->xval_0, &gpp->yval_0);
       }
-      if (IS_EQUAL(gpp->xval_0, gpp->mv) || IS_EQUAL(gpp->yval_0, gpp->mv))
+      if (is_equal(gpp->xval_0, gpp->mv) || is_equal(gpp->yval_0, gpp->mv))
         Warning("%s mapping parameter %s missing!", projection,
                 "longitudeOfFirstGridPointInDegrees and latitudeOfFirstGridPointInDegrees");
     }
@@ -3808,8 +3807,8 @@ gridVerifyProjParamsHEALPIX(struct CDI_GridProjParams *gpp)
   {
     lwarn = false;
     const char *projection = "healpix";
-    if (IS_EQUAL(gpp->nside, -1)) Error("%s mapping parameter %s missing!", projection, "nside");
-    if (IS_EQUAL(gpp->order, -1)) Error("%s mapping parameter %s missing!", projection, "order");
+    if (is_equal(gpp->nside, -1)) Error("%s mapping parameter %s missing!", projection, "nside");
+    if (is_equal(gpp->order, -1)) Error("%s mapping parameter %s missing!", projection, "order");
     if (gpp->nside == 0) Error("%s mapping parameter %s unsupported!", projection, "nside", gpp->nside);
     if (gpp->order != 0 && gpp->order != 1) Error("%s mapping parameter %s=%d unsupported!", projection, "order", gpp->order);
   }

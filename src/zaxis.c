@@ -76,7 +76,7 @@ ZaxistypeEntry[] = {
 
 enum
 {
-  CDI_NumZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]),
+  CDI_NumZaxistype = ARRAY_SIZE(ZaxistypeEntry)
 };
 
 static int zaxis_compare(zaxis_t *z1, zaxis_t *z2);
@@ -1242,7 +1242,7 @@ zaxis_compare(zaxis_t *z1, zaxis_t *z2)
   if (!diff && present)
   {
     const double *p = z1->vals, *q = z2->vals;
-    for (int i = 0; i < size; i++) { diff |= IS_NOT_EQUAL(p[i], q[i]); }
+    for (int i = 0; i < size; i++) { diff |= is_not_equal(p[i], q[i]); }
   }
 
   present = (z1->lbounds != NULL);
@@ -1251,7 +1251,7 @@ zaxis_compare(zaxis_t *z1, zaxis_t *z2)
   if (!diff && present)
   {
     const double *p = z1->lbounds, *q = z2->lbounds;
-    for (int i = 0; i < size; i++) { diff |= IS_NOT_EQUAL(p[i], q[i]); }
+    for (int i = 0; i < size; i++) { diff |= is_not_equal(p[i], q[i]); }
   }
 
   present = (z1->ubounds != NULL);
@@ -1260,7 +1260,7 @@ zaxis_compare(zaxis_t *z1, zaxis_t *z2)
   if (!diff && present)
   {
     const double *p = z1->ubounds, *q = z2->ubounds;
-    for (int i = 0; i < size; ++i) { diff |= IS_NOT_EQUAL(p[i], q[i]); }
+    for (int i = 0; i < size; ++i) { diff |= is_not_equal(p[i], q[i]); }
   }
 
   present = (z1->weights != NULL);
@@ -1269,7 +1269,7 @@ zaxis_compare(zaxis_t *z1, zaxis_t *z2)
   if (!diff && present)
   {
     const double *p = z1->weights, *q = z2->weights;
-    for (int i = 0; i < size; ++i) { diff |= IS_NOT_EQUAL(p[i], q[i]); }
+    for (int i = 0; i < size; ++i) { diff |= is_not_equal(p[i], q[i]); }
   }
 
   present = (z1->vct != NULL);
@@ -1279,7 +1279,7 @@ zaxis_compare(zaxis_t *z1, zaxis_t *z2)
     int vctsize = z1->vctsize;
     xassert(vctsize);
     const double *p = z1->vct, *q = z2->vct;
-    for (int i = 0; i < vctsize; ++i) { diff |= IS_NOT_EQUAL(p[i], q[i]); }
+    for (int i = 0; i < vctsize; ++i) { diff |= is_not_equal(p[i], q[i]); }
   }
 
   if (anyPresent) xassert(size);

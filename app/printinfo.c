@@ -132,7 +132,7 @@ print_xvals(int gridID, int dig)
     if (xsize > 1)
     {
       fprintf(stdout, " to %.*g", dig, xlast);
-      if (IS_NOT_EQUAL(xinc, 0)) fprintf(stdout, " by %.*g", dig, xinc);
+      if (is_not_equal(xinc, 0)) fprintf(stdout, " by %.*g", dig, xinc);
     }
     fprintf(stdout, " %s%s\n", xunits, gridIsCyclic(gridID) ? "  cyclic" : "");
   }
@@ -158,7 +158,7 @@ print_yvals(int gridID, int dig)
     {
       int gridtype = gridInqType(gridID);
       fprintf(stdout, " to %.*g", dig, ylast);
-      if (IS_NOT_EQUAL(yinc, 0) && gridtype != GRID_GAUSSIAN && gridtype != GRID_GAUSSIAN_REDUCED)
+      if (is_not_equal(yinc, 0) && gridtype != GRID_GAUSSIAN && gridtype != GRID_GAUSSIAN_REDUCED)
         fprintf(stdout, " by %.*g", dig, yinc);
     }
     fprintf(stdout, " %s\n", yunits);
@@ -218,10 +218,10 @@ print_xyvals2D(int gridID, int dig)
             break;
           }
         free(xvals);
-        if (IS_NOT_EQUAL(xinc, 0))
+        if (is_not_equal(xinc, 0))
         {
           for (size_t i = 1; i < ysize; i++)
-            if (IS_NOT_EQUAL(xvals2D[i * xsize], xvals2D[0]) || IS_NOT_EQUAL(xvals2D[(i + 1) * xsize - 1], xvals2D[xsize - 1]))
+            if (is_not_equal(xvals2D[i * xsize], xvals2D[0]) || is_not_equal(xvals2D[(i + 1) * xsize - 1], xvals2D[xsize - 1]))
             {
               xinc = 0;
               break;
@@ -240,11 +240,11 @@ print_xyvals2D(int gridID, int dig)
             break;
           }
         free(yvals);
-        if (IS_NOT_EQUAL(yinc, 0))
+        if (is_not_equal(yinc, 0))
         {
           for (size_t i = 1; i < xsize; i++)
-            if (IS_NOT_EQUAL(yvals2D[i], yvals2D[0])
-                || IS_NOT_EQUAL(yvals2D[(ysize - 1) * xsize + i], yvals2D[(ysize - 1) * xsize]))
+            if (is_not_equal(yvals2D[i], yvals2D[0])
+                || is_not_equal(yvals2D[(ysize - 1) * xsize + i], yvals2D[(ysize - 1) * xsize]))
             {
               yinc = 0;
               break;
@@ -255,11 +255,11 @@ print_xyvals2D(int gridID, int dig)
 
     fprintf(stdout, "%33s : %.*g", xname, dig, xfirst);
     if (gridsize > 1) fprintf(stdout, " to %.*g", dig, xlast);
-    if (IS_NOT_EQUAL(xinc, 0)) fprintf(stdout, " by %.*g", dig, xinc);
+    if (is_not_equal(xinc, 0)) fprintf(stdout, " by %.*g", dig, xinc);
     fprintf(stdout, " %s%s\n", xunits, gridIsCyclic(gridID) ? "  cyclic" : "");
     fprintf(stdout, "%33s : %.*g", yname, dig, yfirst);
     if (gridsize > 1) fprintf(stdout, " to %.*g", dig, ylast);
-    if (IS_NOT_EQUAL(yinc, 0)) fprintf(stdout, " by %.*g", dig, yinc);
+    if (is_not_equal(yinc, 0)) fprintf(stdout, " by %.*g", dig, yinc);
     fprintf(stdout, " %s\n", yunits);
 
     free(xvals2D);
@@ -427,7 +427,7 @@ printZaxisBoundsInfo(int zaxisID, int dig, int levelsize, const double zinc, con
     level1 = zaxisInqLbound(zaxisID, levelsize - 1);
     level2 = zaxisInqUbound(zaxisID, levelsize - 1);
     fprintf(stdout, " to %.*g-%.*g", dig, level1, dig, level2);
-    if (IS_NOT_EQUAL(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
+    if (is_not_equal(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
   }
   fprintf(stdout, " %s\n", zunits);
 }
@@ -457,7 +457,7 @@ printZaxisLevelInfo(int levelsize, int zaxisID, int zaxistype, double zinc, int 
     if (levelsize > 1)
     {
       fprintf(stdout, " to %.*g", dig, zlast);
-      if (IS_NOT_EQUAL(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
+      if (is_not_equal(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
     }
     fprintf(stdout, " %s\n", zunits);
   }

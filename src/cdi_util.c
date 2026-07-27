@@ -69,7 +69,7 @@ cdiUnitNamePtr(int cdi_unit)
   };
   enum
   {
-    numUnits = (int) (sizeof(cdiUnits) / sizeof(cdiUnits[0]))
+    numUnits = (int) ARRAY_SIZE(cdiUnits)
   };
 
   return (cdi_unit > 0 && cdi_unit < numUnits) ? cdiUnits[cdi_unit] : NULL;

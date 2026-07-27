@@ -48,6 +48,10 @@ extern pthread_mutex_t CDI_IO_Mutex;
 #define UNUSED(x) (void) x
 #endif
 
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#endif
+
 char *str_to_lower(char *str);
 bool strStartsWith(const char *vstr, const char *cstr);
 
@@ -67,62 +71,21 @@ str_is_equal(const char *x, const char *y)
 #define M_PI 3.14159265358979323846 /* pi */
 #endif
 
-#ifndef ERROR_H
 #include "error.h"
-#endif
-#ifndef _BASETIME_H
 #include "basetime.h"
-#endif
-#ifndef JULIAN_DATE_H
 #include "julian_date.h"
-#endif
-#ifndef TAXIS_H
 #include "taxis.h"
-#endif
-#ifndef CDI_LIMITS_H
 #include "cdi_limits.h"
-#endif
-#ifndef _SERVICE_H
 #include "service.h"
-#endif
-#ifndef _EXTRA_H
 #include "extra.h"
-#endif
-#ifndef _IEG_H
 #include "ieg.h"
-#endif
-#ifndef RESOURCE_HANDLE_H
 #include "resource_handle.h"
-#endif
 
-#define check_parg(arg) \
-  if (arg == 0) Warning("Argument '" #arg "' not allocated!")
-
-#ifdef __xlC__ /* performance problems on IBM */
-#ifndef DBL_IS_NAN
-#define DBL_IS_NAN(x) ((x) != (x))
-#endif
-#else
-#ifndef DBL_IS_NAN
-#if defined(HAVE_DECL_ISNAN)
-#define DBL_IS_NAN(x) (isnan(x))
-#elif defined(FP_NAN)
-#define DBL_IS_NAN(x) (fpclassify(x) == FP_NAN)
-#else
-#define DBL_IS_NAN(x) ((x) != (x))
-#endif
-#endif
-#endif
-
-#ifndef DBL_IS_EQUAL
-// #define DBL_IS_EQUAL(x,y) (!(x < y || y < x))
-#define DBL_IS_EQUAL(x, y) (DBL_IS_NAN(x) || DBL_IS_NAN(y) ? (DBL_IS_NAN(x) && DBL_IS_NAN(y)) : !(x < y || y < x))
-#endif
-
-#ifndef IS_EQUAL
-#define IS_NOT_EQUAL(x, y) (x < y || y < x)
-#define IS_EQUAL(x, y) (!IS_NOT_EQUAL(x, y))
-#endif
+#define check_parg(arg)                                          \
+  do                                                             \
+  {                                                              \
+    if (arg == 0) Warning("Argument '" #arg "' not allocated!"); \
+  } while (0)
 
 static inline bool
 dbl_is_nan(double x)
@@ -140,6 +103,18 @@ static inline bool
 dbl_is_equal(double x, double y)
 {
   return (dbl_is_nan(x) || dbl_is_nan(y)) ? dbl_is_nan(x) && dbl_is_nan(y) : !(x < y || y < x);
+}
+
+static inline bool
+is_not_equal(double x, double y)
+{
+  return (x < y || y < x);
+}
+
+static inline bool
+is_equal(double x, double y)
+{
+  return !(x < y || y < x);
 }
 
 enum

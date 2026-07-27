@@ -116,7 +116,7 @@ cdi_key_compare(const cdi_keys_t *restrict keysPa, const cdi_keys_t *restrict ke
   switch (keyPa->type)
   {
     case KeyBytes: return memcmp(keyPa->v.s, keyPb->v.s, (size_t) keyPa->length) != 0;
-    case KeyFloat: return IS_NOT_EQUAL(keyPa->v.d, keyPb->v.d);
+    case KeyFloat: return is_not_equal(keyPa->v.d, keyPb->v.d);
     case KeyInt: return keyPa->v.i != keyPb->v.i;
   }
 

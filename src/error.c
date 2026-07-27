@@ -21,7 +21,7 @@ int _Debug = 0;        // If set to 1, debugging
 #define __attribute__(x) /*NOTHING*/
 #endif
 
-void SysError_(const char *caller, const char *fmt, ...) __attribute__((noreturn));
+_Noreturn void SysError_(const char *caller, const char *fmt, ...);
 
 void
 SysError_(const char *caller, const char *fmt, ...)

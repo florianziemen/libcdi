@@ -84,7 +84,7 @@ tunitNamePtr(int unitID)
   };
   enum
   {
-    size = sizeof(Timeunits) / sizeof(Timeunits[0])
+    size = ARRAY_SIZE(Timeunits)
   };
 
   return (unitID > 0 && unitID < size) ? Timeunits[unitID] : Timeunits[0];
@@ -457,7 +457,7 @@ taxisDefForecastPeriod(int taxisID, double fc_period)
 {
   taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (IS_NOT_EQUAL(taxisP->fc_period, fc_period))
+  if (is_not_equal(taxisP->fc_period, fc_period))
   {
     taxisP->fc_period = fc_period;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
@@ -989,7 +989,7 @@ cdi_encode_timevalue(int64_t days, double secs, int timeunit)
 static CdiDateTime
 rtimeval2datetime(double timevalue, const taxis_t *taxis)
 {
-  if (IS_EQUAL(timevalue, 0.0)) return taxis->rDateTime;
+  if (is_equal(timevalue, 0.0)) return taxis->rDateTime;
 
   int timeunits = taxis->unit;
   int calendar = taxis->calendar;
@@ -1226,7 +1226,7 @@ cdi_set_forecast_period(double timevalue, taxis_t *taxis)
   int timeunits = taxis->fc_unit;
   int calendar = taxis->calendar;
 
-  if (cdiDateTime_isNull(taxis->vDateTime) && DBL_IS_EQUAL(timevalue, 0.0)) return;
+  if (cdiDateTime_isNull(taxis->vDateTime) && dbl_is_equal(timevalue, 0.0)) return;
 
   if (timeunits == TUNIT_MONTH && calendar == CALENDAR_360DAYS)
   {
@@ -1403,7 +1403,7 @@ taxis_compare(void *taxisP1, void *taxisP2)
 
   return !(t1->type == t2->type && cdiDateTime_isEQ(t1->vDateTime, t2->vDateTime) && cdiDateTime_isEQ(t1->rDateTime, t2->rDateTime)
            && cdiDateTime_isEQ(t1->fDateTime, t2->fDateTime) && t1->calendar == t2->calendar && t1->unit == t2->unit
-           && t1->fc_unit == t2->fc_unit && IS_EQUAL(t1->fc_period, t2->fc_period) && t1->numavg == t2->numavg
+           && t1->fc_unit == t2->fc_unit && is_equal(t1->fc_period, t2->fc_period) && t1->numavg == t2->numavg
            && t1->climatology == t2->climatology && t1->hasBounds == t2->hasBounds
            && cdiDateTime_isEQ(t1->vDateTime_lb, t2->vDateTime_lb) && cdiDateTime_isEQ(t1->vDateTime_ub, t2->vDateTime_ub));
 }

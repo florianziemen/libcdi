@@ -472,8 +472,7 @@ cdiInitialize(void)
 const char *
 strfiletype(int filetype)
 {
-  static const size_t numFiletypes = sizeof(Filetypes) / sizeof(Filetypes[0]);
-  return (filetype > 0 && filetype < numFiletypes) ? Filetypes[filetype] : Filetypes[0];
+  return (filetype > 0 && filetype < ARRAY_SIZE(Filetypes)) ? Filetypes[filetype] : Filetypes[0];
 }
 
 void

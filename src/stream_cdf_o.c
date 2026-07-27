@@ -579,7 +579,7 @@ cdfDefAxisCommon(stream_t *streamP, int gridID, int gridIndex, int ndims, bool a
       if (dimlen == dimlen0 && lname)
       {
         double (*inqVal)(int gridID, SizeType index) = gridAxisInq->axisVal;
-        if (IS_EQUAL(inqVal(gridID0, 0), inqVal(gridID, 0)) && IS_EQUAL(inqVal(gridID0, dimlen - 1), inqVal(gridID, dimlen - 1)))
+        if (is_equal(inqVal(gridID0, 0), inqVal(gridID, 0)) && is_equal(inqVal(gridID0, dimlen - 1), inqVal(gridID, dimlen - 1)))
         {
           dimID = cdfGridList[index].ncIdList[(axisLetter == 'X') ? CDF_DIMID_X : CDF_DIMID_Y];
           break;
@@ -950,10 +950,10 @@ cdfDefCurvilinear(stream_t *streamP, int gridID, int gridIndex)
     if (index != SIZE_MAX)
     {
       int gridID0 = cdfGridList[index].gridID;
-      if (IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0))
-          && IS_EQUAL(gridInqXval(gridID0, dimlen - 1), gridInqXval(gridID, dimlen - 1))
-          && IS_EQUAL(gridInqYval(gridID0, 0), gridInqYval(gridID, 0))
-          && IS_EQUAL(gridInqYval(gridID0, dimlen - 1), gridInqYval(gridID, dimlen - 1)))
+      if (is_equal(gridInqXval(gridID0, 0), gridInqXval(gridID, 0))
+          && is_equal(gridInqXval(gridID0, dimlen - 1), gridInqXval(gridID, dimlen - 1))
+          && is_equal(gridInqYval(gridID0, 0), gridInqYval(gridID, 0))
+          && is_equal(gridInqYval(gridID0, dimlen - 1), gridInqYval(gridID, dimlen - 1)))
       {
         xdimID = cdfGridList[index].ncIdList[CDF_DIMID_X];
         ydimID = cdfGridList[index].ncIdList[CDF_DIMID_Y];
@@ -1010,10 +1010,10 @@ cdfDefUnstructured(stream_t *streamP, int gridID, int gridIndex)
     if (index != SIZE_MAX)
     {
       int gridID0 = cdfGridList[index].gridID;
-      if (gridInqNvertex(gridID0) == gridInqNvertex(gridID) && IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0))
-          && IS_EQUAL(gridInqXval(gridID0, dimlen - 1), gridInqXval(gridID, dimlen - 1))
-          && IS_EQUAL(gridInqYval(gridID0, 0), gridInqYval(gridID, 0))
-          && IS_EQUAL(gridInqYval(gridID0, dimlen - 1), gridInqYval(gridID, dimlen - 1)))
+      if (gridInqNvertex(gridID0) == gridInqNvertex(gridID) && is_equal(gridInqXval(gridID0, 0), gridInqXval(gridID, 0))
+          && is_equal(gridInqXval(gridID0, dimlen - 1), gridInqXval(gridID, dimlen - 1))
+          && is_equal(gridInqYval(gridID0, 0), gridInqYval(gridID, 0))
+          && is_equal(gridInqYval(gridID0, dimlen - 1), gridInqYval(gridID, dimlen - 1)))
       {
         dimID = cdfGridList[index].ncIdList[CDF_DIMID_X];
         ncxvarid = cdfGridList[index].ncIdList[CDF_VARID_X];
@@ -1116,7 +1116,7 @@ cdf_def_vct_echam(stream_t *streamP, int zaxisID)
       };
       enum
       {
-        tabLen = sizeof(tab) / sizeof(tab[0])
+        tabLen = ARRAY_SIZE(tab)
       };
       int ids[tabLen] = { hyaiid, hyaiid, hybiid, hybiid };
       for (size_t i = 0; i < tabLen; ++i) cdf_put_att_text(fileID, ids[i], tab[i].attName, tab[i].valLen, tab[i].attVal);
@@ -1133,7 +1133,7 @@ cdf_def_vct_echam(stream_t *streamP, int zaxisID)
       };
       enum
       {
-        tabLen = sizeof(tab) / sizeof(tab[0])
+        tabLen = ARRAY_SIZE(tab)
       };
       int ids[tabLen] = { hyamid, hyamid, hybmid, hybmid };
       for (size_t i = 0; i < tabLen; ++i) cdf_put_att_text(fileID, ids[i], tab[i].attName, tab[i].valLen, tab[i].attVal);
@@ -1209,8 +1209,8 @@ cdf_def_vct_cf(stream_t *streamP, int zaxisID, int nclevID, int ncbndsID, int p0
       int termid[] = { hyamid, hybmid };
       enum
       {
-        numTerms = sizeof(termid) / sizeof(termid[0]),
-        numAtts = sizeof(anametab) / sizeof(anametab[0]),
+        numTerms = ARRAY_SIZE(termid),
+        numAtts = ARRAY_SIZE(anametab),
       };
       for (size_t termIdx = 0; termIdx < numTerms; ++termIdx)
         for (size_t attIdx = 0; attIdx < numAtts; ++attIdx)
@@ -1218,7 +1218,7 @@ cdf_def_vct_cf(stream_t *streamP, int zaxisID, int nclevID, int ncbndsID, int p0
                            attvtab[termIdx][attIdx].txt);
     }
     double *restrict vctptr = (double *) zaxisInqVctPtr(zaxisID);
-    if (p0status == 0 && IS_NOT_EQUAL(p0value, 0))
+    if (p0status == 0 && is_not_equal(p0value, 0))
     {
       double *restrict temp = (double *) Malloc((size_t) 2 * ilev * sizeof(*temp));
       memcpy(temp, vctptr, (size_t) 2 * ilev * sizeof(*temp));
@@ -1250,8 +1250,8 @@ cdf_def_vct_cf(stream_t *streamP, int zaxisID, int nclevID, int ncbndsID, int p0
       int termid[] = { hyaiid, hybiid };
       enum
       {
-        numTerms = sizeof(termid) / sizeof(termid[0]),
-        numAtts = sizeof(anametab) / sizeof(anametab[0]),
+        numTerms = ARRAY_SIZE(termid),
+        numAtts = ARRAY_SIZE(anametab),
       };
       for (size_t termIdx = 0; termIdx < numTerms; ++termIdx)
         for (size_t attIdx = 0; attIdx < numAtts; ++attIdx)
@@ -1277,7 +1277,7 @@ cdf_def_vct_cf(stream_t *streamP, int zaxisID, int nclevID, int ncbndsID, int p0
         cdfPostDefActionAddPutVal(&delayed, fileID, hybiid, ilevValB, cdfDelayedPutVarDeepCleanup);
       }
     }
-    if (p0status == 0 && IS_NOT_EQUAL(p0value, 0)) Free(vctptr);
+    if (p0status == 0 && is_not_equal(p0value, 0)) Free(vctptr);
 
     if (switchNCMode)
     {
@@ -1314,7 +1314,7 @@ cdf_def_zaxis_hybrid_echam(stream_t *streamP, int type, int *ncvaridp, int zaxis
     static const char *attName[] = { "long_name", "formula", "formula_terms" };
     enum
     {
-      nAtt = sizeof(attName) / sizeof(attName[0])
+      nAtt = ARRAY_SIZE(attName)
     };
     static const char lname_m[] = "hybrid level at layer midpoints", formula_m[] = "hyam hybm (mlev=hyam+hybm*aps)",
                       fterms_m[] = "ap: hyam b: hybm ps: aps", lname_i[] = "hybrid level at layer interfaces",
@@ -1439,7 +1439,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamP, int type, int *ncvaridp, int zaxisID,
     };
     enum
     {
-      nAtt = sizeof(tab) / sizeof(tab[0])
+      nAtt = ARRAY_SIZE(tab)
     };
     for (size_t i = 0; i < nAtt; ++i) cdf_put_att_text(fileID, ncvarid, tab[i].attName, tab[i].valLen, tab[i].attVal);
   }
@@ -1510,7 +1510,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamP, int type, int *ncvaridp, int zaxisID,
         };
         enum
         {
-          nAtt = sizeof(tab) / sizeof(tab[0])
+          nAtt = ARRAY_SIZE(tab)
         };
         for (size_t i = 0; i < nAtt; ++i) cdf_put_att_text(fileID, ncbvarid, tab[i].attName, tab[i].valLen, tab[i].attVal);
       }

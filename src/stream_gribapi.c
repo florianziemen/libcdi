@@ -491,7 +491,7 @@ static const struct
 static void
 gribapiGetLongKeys(grib_handle *gh, int varID)
 {
-  for (size_t i = 0; i < sizeof(long_key_map) / sizeof(long_key_map[0]); i++)
+  for (size_t i = 0; i < ARRAY_SIZE(long_key_map); i++)
   {
     long val = 0;
     if (grib_get_long(gh, long_key_map[i].grib_key, &val) == 0) varDefKeyInt(varID, long_key_map[i].cdi_key, (int) val);
@@ -629,7 +629,7 @@ gribapiInqProjLCC(grib_handle *gh, int gridID)
   {
     double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
     proj_lonlat_to_lcc_func(gpp, (size_t) 1, &x_0, &y_0);
-    if (IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv))
+    if (is_not_equal(x_0, gpp.mv) && is_not_equal(y_0, gpp.mv))
     {
       gpp.x_0 = -x_0;
       gpp.y_0 = -y_0;
@@ -660,7 +660,7 @@ gribapiInqProjSTERE(grib_handle *gh, int gridID)
   {
     double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
     proj_lonlat_to_stere_func(gpp, (size_t) 1, &x_0, &y_0);
-    if (IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv))
+    if (is_not_equal(x_0, gpp.mv) && is_not_equal(y_0, gpp.mv))
     {
       gpp.x_0 = -x_0;
       gpp.y_0 = -y_0;
@@ -2360,7 +2360,7 @@ gribapiDefProjLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
 
   struct CDI_GridProjParams gpp;
   gridInqParamsLCC(gridID, &gpp);
-  if (IS_EQUAL(gpp.x_0, gpp.mv) && IS_EQUAL(gpp.y_0, gpp.mv) && (IS_EQUAL(gpp.xval_0, gpp.mv) || IS_EQUAL(gpp.yval_0, gpp.mv)))
+  if (is_equal(gpp.x_0, gpp.mv) && is_equal(gpp.y_0, gpp.mv) && (is_equal(gpp.xval_0, gpp.mv) || is_equal(gpp.yval_0, gpp.mv)))
   {
     gpp.x_0 = gridInqXval(gridID, 0);
     gpp.y_0 = gridInqYval(gridID, 0);
@@ -2380,8 +2380,8 @@ gribapiDefProjLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
 
   double xinc = gridInqXinc(gridID);
   double yinc = gridInqYinc(gridID);
-  if (IS_EQUAL(xinc, 0.0)) xinc = gridInqXincInMeter(gridID);
-  if (IS_EQUAL(yinc, 0.0)) yinc = gridInqYincInMeter(gridID);
+  if (is_equal(xinc, 0.0)) xinc = gridInqXincInMeter(gridID);
+  if (is_equal(yinc, 0.0)) yinc = gridInqYincInMeter(gridID);
 
   static const char mesg[] = "lambert";
   size_t len = sizeof(mesg) - 1;
@@ -2442,7 +2442,7 @@ gribapiDefProjSTERE(grib_handle *gh, int editionNumber, int gridID, int uvRelati
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", gpp.yval_0), 0);
   if (editionNumber > 1) GRIB_CHECK(my_grib_set_double(gh, "LaDInDegrees", gpp.lat_1), 0);
   GRIB_CHECK(my_grib_set_double(gh, "orientationOfTheGridInDegrees", gpp.lon_0), 0);
-  long southPoleOnProjectionPlane = IS_EQUAL(gpp.lat_0, -90.0);
+  long southPoleOnProjectionPlane = is_equal(gpp.lat_0, -90.0);
   GRIB_CHECK(my_grib_set_double(gh, "southPoleOnProjectionPlane", (double) southPoleOnProjectionPlane), 0);
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 

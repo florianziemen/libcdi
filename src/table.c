@@ -438,7 +438,7 @@ tableInq(int modelID, int tablenum, const char *tablename)
 
   if (tablename)
   {
-    strcpy(tablefile, tablename);
+    snprintf(tablefile, sizeof(tablefile), "%s", tablename);
     /*
     printf("tableInq: tablefile = >%s<\n", tablefile);
     */

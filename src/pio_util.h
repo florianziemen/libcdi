@@ -20,8 +20,8 @@
 
 #define debugString "#####"
 
-void cdiAbortC_MPI(const char *caller, const char *filename, const char *functionname, int line, const char *errorString,
-                   va_list ap) __attribute__((noreturn));
+_Noreturn void cdiAbortC_MPI(const char *caller, const char *filename, const char *functionname, int line, const char *errorString,
+                             va_list ap);
 
 void cdiPioWarning(const char *caller, const char *fmt, va_list ap);
 
@@ -56,21 +56,24 @@ getMPICommWorldRank()
 
 void pcdiXMPI(int iret, const char *, int);
 #define xmpi(ret)                                                      \
-  do {                                                                 \
+  do                                                                   \
+  {                                                                    \
     int tmpIRet = (ret);                                               \
     if (tmpIRet != MPI_SUCCESS) pcdiXMPI(tmpIRet, __FILE__, __LINE__); \
   } while (0)
 
 void pcdiXMPIStat(int, const char *, int, MPI_Status *);
 #define xmpiStat(ret, stat)                                                  \
-  do {                                                                       \
+  do                                                                         \
+  {                                                                          \
     int tmpIRet = (ret);                                                     \
     if (tmpIRet != MPI_SUCCESS) pcdiXMPIStat(ret, __FILE__, __LINE__, stat); \
   } while (0)
 
 void pcdiXMPIStats(int, const char *, int, int, MPI_Status *);
 #define xmpiStats(ret, n, stats)                                                  \
-  do {                                                                            \
+  do                                                                              \
+  {                                                                               \
     int tmpIRet = (ret);                                                          \
     if (tmpIRet != MPI_SUCCESS) pcdiXMPIStats(ret, __FILE__, __LINE__, n, stats); \
   } while (0)
@@ -88,7 +91,8 @@ void cdiPioAssertConsistentIntVec(size_t n, const int *restrict a, MPI_Comm comm
                                   int rankRangeEnd);
 #else
 #define cdiPioAssertConsistentIntVec(n, a, comm, r, rs, re) \
-  do {                                                      \
+  do                                                        \
+  {                                                         \
   } while (0)
 #endif
 
