@@ -351,7 +351,7 @@ cdiInitialize(void)
 
     // clang-format off
 #define GETENV_STR(name, var)  do { char *v = getenv(name); if (v) var = v; } while(0)
-#define GETENV_BOOL(name, var) do { char *v = getenv(name); if (v) var = (atoi(v) > 0); } while(0)
+#define GETENV_BOOL(name, var) do { char *v = getenv(name); if (v) var = (v[0] == 't' || v[0] == 'T' || atoi(v) != 0); } while(0)
 #define GETENV_FLT(name, var)  do { char *v = getenv(name); if (v) var = atof(v); } while(0)
 #define GETENV_INT(name, var)  do { char *v = getenv(name); if (v) var = atoi(v); } while(0)
 #define GETENV_SIZE(name, var)  do { long v = cdi_getenv_int(name); if (v >= 0) var = v; } while(0)
@@ -472,7 +472,7 @@ cdiInitialize(void)
 const char *
 strfiletype(int filetype)
 {
-  return (filetype > 0 && filetype < ARRAY_SIZE(Filetypes)) ? Filetypes[filetype] : Filetypes[0];
+  return (filetype > 0 && filetype < (int) ARRAY_SIZE(Filetypes)) ? Filetypes[filetype] : Filetypes[0];
 }
 
 void
