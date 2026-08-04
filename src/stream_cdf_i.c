@@ -12,6 +12,7 @@
 
 #include "dmemory.h"
 #include "cdi_int.h"
+#include "cdi_utils.h"
 #include "cdi_uuid.h"
 #include "stream_cdf.h"
 #include "cdf_int.h"
@@ -2340,7 +2341,7 @@ cdf_check_gridtype(int *gridtype, bool isLon, bool isLat, size_t xsize, size_t y
           break;
         }
     }
-    if (ysize < 10000 && is_equal(yinc, 0.0) && isGaussianLatitudes(ysize, grid->y.vals))
+    if (ysize < 10000 && is_equal(yinc, 0.0) && latitudes_are_gaussian(ysize, grid->y.vals))
     {
       *gridtype = GRID_GAUSSIAN;
       grid->np = (int) (ysize / 2);

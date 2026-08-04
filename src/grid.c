@@ -9,6 +9,7 @@
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
+#include "cdi_utils.h"
 #include "cdi_uuid.h"
 #include "grid.h"
 #include "grid_pack.h"
@@ -323,8 +324,8 @@ gridGenXvals(size_t xsize, double xfirst, double xlast, double xinc, double *res
 static void
 calc_gaussgrid(double *restrict yvals, size_t ysize, double yfirst, double ylast)
 {
-  double *restrict yw = (double *) Malloc(ysize * sizeof(double));
-  gaussianLatitudes(ysize, yvals, yw);
+  double *yw = (double *) Malloc(ysize * sizeof(double));
+  gaussian_latitudes(ysize, yvals, yw);
   Free(yw);
   for (size_t i = 0; i < ysize; i++) { yvals[i] = asin(yvals[i]) / M_PI * 180.0; }
 

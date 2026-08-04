@@ -76,9 +76,7 @@ gawl(double *pfn, double *pl, double *pw, size_t kn)
 
   int iflag = 0;
   int itemax = 20;
-
   size_t iodd = (kn % 2);
-
   double zdlx = *pl;
 
   // 2.0 Newton iteration
@@ -88,7 +86,7 @@ gawl(double *pfn, double *pl, double *pw, size_t kn)
     cpledn(kn, iodd, pfn, zdlx, iflag, &zw, &zdlxn, &pmod);
     zdlx = zdlxn;
     if (iflag == 1) break;
-    if (fabs(pmod) <= DBL_EPSILON * 1000.0) iflag = 1;
+    if (fabs(pmod) <= DBL_EPSILON * 1000.0) { iflag = 1; }
   }
 
   *pl = zdlxn;
@@ -103,33 +101,34 @@ gauaw(size_t kn, double *restrict pl, double *restrict pw)
    *
    * Belousov, Swarztrauber, and ECHAM use zfn(0,0) = sqrt(2)
    * IFS normalisation chosen to be 0.5*Integral(Pnm**2) = 1 (zfn(0,0) = 2.0)
+   *
+   * Of the original (kn+1)^2 coefficient table only the last row zfn[kn][*] is
+   * ever read out. Each row is self-contained (it depends only on its diagonal
+   * element and the in-row recursion), so the full table is replaced by a single
+   * row of kn+1 doubles. Memory drops from O(kn^2) to O(kn).
    */
-  double *zfn = (double *) malloc((kn + 1) * (kn + 1) * sizeof(double));
-  double *zfnlat = (double *) malloc((kn / 2 + 1 + 1) * sizeof(double));
+  size_t iodd = kn % 2;
 
-  zfn[0] = M_SQRT2;
-  for (size_t jn = 1; jn <= kn; ++jn)
+  // Diagonal element zfn[kn][kn] = M_SQRT2 * prod_{j=1..kn} sqrt(1 - 0.25/j^2),
+  // computed incrementally in O(kn); the original recomputed the same product
+  // for every row jn in a nested loop (O(kn^2) sqrt() calls).
+  double diag = M_SQRT2;
+  for (size_t jn = 1; jn <= kn; ++jn) { diag *= sqrt(1.0 - 0.25 / ((double) jn * (double) jn)); }
+
+  double *zfnlast = (double *) malloc((kn + 1) * sizeof(double));
+  zfnlast[kn] = diag;
+  for (size_t jgl = 2; jgl <= kn - iodd; jgl += 2)
   {
-    double zfnn = zfn[0];
-    for (size_t jgl = 1; jgl <= jn; ++jgl) { zfnn *= sqrt(1.0 - 0.25 / ((double) (jgl * jgl))); }
-
-    zfn[jn * (kn + 1) + jn] = zfnn;
-
-    size_t iodd = jn % 2;
-    for (size_t jgl = 2; jgl <= jn - iodd; jgl += 2)
-    {
-      zfn[jn * (kn + 1) + jn - jgl]
-          = zfn[jn * (kn + 1) + jn - jgl + 2] * ((double) ((jgl - 1) * (2 * jn - jgl + 2))) / ((double) (jgl * (2 * jn - jgl + 1)));
-    }
+    zfnlast[kn - jgl] = zfnlast[kn - jgl + 2] * ((double) ((jgl - 1) * (2 * kn - jgl + 2))) / ((double) (jgl * (2 * kn - jgl + 1)));
   }
 
   // 2.0 Gaussian latitudes and weights
 
-  size_t iodd = kn % 2;
+  double *zfnlat = (double *) malloc((kn / 2 + 1 + 1) * sizeof(double));
   size_t ik = iodd;
   for (size_t jgl = iodd; jgl <= kn; jgl += 2)
   {
-    zfnlat[ik] = zfn[kn * (kn + 1) + jgl];
+    zfnlat[ik] = zfnlast[jgl];
     ik++;
   }
 
@@ -153,7 +152,7 @@ gauaw(size_t kn, double *restrict pl, double *restrict pw)
 
   // convert to physical latitude
 
-  for (size_t jgl = 0; jgl < ins2; ++jgl) pl[jgl] = cos(pl[jgl]);
+  for (size_t jgl = 0; jgl < ins2; ++jgl) { pl[jgl] = cos(pl[jgl]); }
 
   for (size_t jgl = 1; jgl <= kn / 2; ++jgl)
   {
@@ -164,42 +163,44 @@ gauaw(size_t kn, double *restrict pl, double *restrict pw)
   }
 
   free(zfnlat);
-  free(zfn);
+  free(zfnlast);
 }
 
 void
-gaussianLatitudes(size_t nlats, double *latitudes, double *weights)
+gaussian_latitudes(size_t nlats, double *latitudes, double *weights)
 {
   gauaw(nlats, latitudes, weights);
 }
 
 bool
-isGaussianLatitudes(size_t nlats, const double *latitudes)
+latitudes_are_gaussian(size_t nlats, const double *latitudes)
 {
   bool is_gauss_lats = false;
 
   if (nlats > 2)  // check if gaussian
   {
-    size_t i;
     double *yv = (double *) malloc(nlats * sizeof(double));
     double *yw = (double *) malloc(nlats * sizeof(double));
-    gaussianLatitudes(nlats, yv, yw);
+    gaussian_latitudes(nlats, yv, yw);
     free(yw);
 
-    for (i = 0; i < nlats; i++) yv[i] = asin(yv[i]) / M_PI * 180.0;
+    for (size_t i = 0; i < nlats; ++i) { yv[i] = asin(yv[i]) / M_PI * 180.0; }
 
-    for (i = 0; i < nlats; i++)
-      if (fabs(yv[i] - latitudes[i]) > ((yv[0] - yv[1]) / 500.0)) break;
+    const double tol = (yv[0] - yv[1]) / 500.0;
 
-    if (i == nlats) is_gauss_lats = true;
-
-    // check S->N
-    if (is_gauss_lats == false)
+    for (size_t pass = 0; pass < 2; pass++)
     {
+      size_t i;
       for (i = 0; i < nlats; i++)
-        if (fabs(yv[i] - latitudes[nlats - i - 1]) > ((yv[0] - yv[1]) / 500.0)) break;
-
-      if (i == nlats) is_gauss_lats = true;
+      {
+        size_t idx = (pass == 0) ? i : nlats - i - 1;
+        if (fabs(yv[i] - latitudes[idx]) > tol) break;
+      }
+      if (i == nlats)
+      {
+        is_gauss_lats = true;
+        break;
+      }
     }
 
     free(yv);

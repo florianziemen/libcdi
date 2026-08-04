@@ -117,6 +117,7 @@ libcdi_la_SOURCES = \
   cdi_limits.h \
   cdi_query.c \
   cdi_util.c \
+  cdi_utils.h \
   cdi_uuid.h \
   cgribex.h \
   cgribexlib.c \

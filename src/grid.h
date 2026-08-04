@@ -206,9 +206,6 @@ int gridVerifyProjParamsLCC(struct CDI_GridProjParams *gpp);
 int gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp);
 int gridVerifyProjParamsHEALPIX(struct CDI_GridProjParams *gpp);
 
-bool isGaussianLatitudes(size_t nlats, const double *latitudes);
-void gaussianLatitudes(size_t nlats, double *latitudes, double *weights);
-
 #endif
 /*
  * Local Variables:

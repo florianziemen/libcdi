@@ -48,6 +48,7 @@ target_sources(libcdi
   cdi_limits.h
   cdi_query.c
   cdi_util.c
+  cdi_utils.h
   cdi_uuid.h
   cgribex.h
   cgribexlib.c
