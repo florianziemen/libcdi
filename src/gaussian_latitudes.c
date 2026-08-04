@@ -175,7 +175,7 @@ gaussian_latitudes(size_t nlats, double *latitudes, double *weights)
 bool
 latitudes_are_gaussian(size_t nlats, const double *latitudes)
 {
-  bool is_gauss_lats = false;
+  bool latsAreGaussian = false;
 
   if (nlats > 2)  // check if gaussian
   {
@@ -198,7 +198,7 @@ latitudes_are_gaussian(size_t nlats, const double *latitudes)
       }
       if (i == nlats)
       {
-        is_gauss_lats = true;
+        latsAreGaussian = true;
         break;
       }
     }
@@ -206,5 +206,5 @@ latitudes_are_gaussian(size_t nlats, const double *latitudes)
     free(yv);
   }
 
-  return is_gauss_lats;
+  return latsAreGaussian;
 }
