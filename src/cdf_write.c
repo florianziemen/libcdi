@@ -8,6 +8,7 @@
 #include "error.h"
 #include "dmemory.h"
 #include "cdi.h"
+#include "cdi_utils.h"
 #include "cdi_int.h"
 #include "stream_cdf.h"
 #include "cdf.h"
