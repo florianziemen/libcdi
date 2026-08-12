@@ -4,6 +4,7 @@
 #include "cdi.h"
 #include <stdbool.h>
 
+#include "cdi_proj.h"
 #include "cdi_key.h"
 #include "cdi_att.h"
 #include "resource_handle.h"

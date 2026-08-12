@@ -46,6 +46,7 @@ target_sources(libcdi
   cdi_key.c
   cdi_key.h
   cdi_limits.h
+  cdi_proj.h
   cdi_query.c
   cdi_query.h
   cdi_util.c
