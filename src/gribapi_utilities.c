@@ -16,7 +16,8 @@
 #include <time.h>
 
 #define FAIL_ON_GRIB_ERROR(function, gribHandle, key, ...)                                                                       \
-  do {                                                                                                                           \
+  do                                                                                                                             \
+  {                                                                                                                              \
     int errorCode = (int) function(gribHandle, key, __VA_ARGS__);                                                                \
     if (errorCode)                                                                                                               \
     {                                                                                                                            \
@@ -194,7 +195,10 @@ resetTz(char *savedTz)
     setenv("TZ", savedTz, 1);
     Free(savedTz);
   }
-  else { unsetenv("TZ"); }
+  else
+  {
+    unsetenv("TZ");
+  }
 }
 
 // This function uses the system functions to normalize the date representation according to the gregorian calendar.
@@ -591,8 +595,7 @@ gribapiGetGridType(grib_handle *gh)
     case GRIB2_GTYPE_SPECTRAL: return GRID_SPECTRAL;
     case GRIB2_GTYPE_GME: return GRID_GME;
     case GRIB2_GTYPE_UNSTRUCTURED: return GRID_UNSTRUCTURED;
-    case GRIB2_GTYPE_HEALPIX: return CDI_PROJ_HEALPIX;
-    // case GRIB2_GTYPE_HEALPIX: return GRID_HEALPIX;
+    case GRIB2_GTYPE_HEALPIX: return GRID_HEALPIX;
     default:
     {
       static bool lwarn = true;
@@ -786,13 +789,6 @@ gribapiGetGridProj(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 }
 
 static void
-gribapiGetProjHealpix(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
-{
-  (void) gh;
-  grid->size = numberOfPoints;
-}
-
-static void
 gribapiGetGridHealpix(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 {
   (void) gh;
@@ -878,7 +874,7 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
   long editionNumber = gribEditionNumber(gh);
   int gridtype = gribapiGetGridType(gh);
   int projtype = (gridtype == GRID_PROJECTION && gribapiGetIsRotated(gh)) ? CDI_PROJ_RLL : CDI_UNDEFID;
-  if (gridtype == CDI_PROJ_LCC || gridtype == CDI_PROJ_STERE || gridtype == CDI_PROJ_HEALPIX)
+  if (gridtype == CDI_PROJ_LCC || gridtype == CDI_PROJ_STERE)
   {
     projtype = gridtype;
     gridtype = GRID_PROJECTION;
@@ -907,16 +903,18 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
   else if (gridtype == GRID_GAUSSIAN_REDUCED) { gribapiGetGridGaussianReduced(gh, grid, editionNumber, numberOfPoints); }
   else if (projtype == CDI_PROJ_LCC) { gribapiGetGridProj(gh, grid, numberOfPoints); }
   else if (projtype == CDI_PROJ_STERE) { gribapiGetGridProj(gh, grid, numberOfPoints); }
-  else if (projtype == CDI_PROJ_HEALPIX) { gribapiGetProjHealpix(gh, grid, numberOfPoints); }
   else if (gridtype == GRID_HEALPIX) { gribapiGetGridHealpix(gh, grid, numberOfPoints); }
   else if (gridtype == GRID_SPECTRAL) { gribapiGetGridSpectral(gh, grid, datasize); }
   else if (gridtype == GRID_GME) { gribapiGetGridGME(gh, grid, numberOfPoints); }
   else if (gridtype == GRID_UNSTRUCTURED) { gribapiGetGridUnstructured(gh, grid, numberOfPoints); }
   else if (gridtype == GRID_GENERIC) { gribapiGetGridGeneric(gh, grid, numberOfPoints); }
-  else { Error("Unsupported grid type: %s", gridNamePtr(gridtype)); }
+  else
+  {
+    Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+  }
 
   if (gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || projtype == CDI_PROJ_RLL || projtype == CDI_PROJ_LCC
-      || projtype == CDI_PROJ_HEALPIX)
+      || gridtype == GRID_HEALPIX)
   {
     long temp = 0;
     GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &temp), 0);
@@ -924,7 +922,7 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
     uvRelativeToGrid = (bool) temp;
   }
 
-  if (gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || (gridtype == GRID_PROJECTION && projtype != CDI_PROJ_HEALPIX))
+  if (gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION)
   {
     long iScansNegatively, jScansPositively, jPointsAreConsecutive;
     GRIB_CHECK(grib_get_long(gh, "iScansNegatively", &iScansNegatively), 0);

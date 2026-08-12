@@ -672,24 +672,6 @@ gribapiInqProjSTERE(grib_handle *gh, int gridID)
 }
 
 static void
-gribapiInqProjHEALPIX(grib_handle *gh, int gridID)
-{
-  struct CDI_GridProjParams gpp;
-  gridProjParamsInit(&gpp);
-
-  decode_shapeOfTheEarth(gh, &gpp);
-
-  long lval = -1;
-  grib_get_long(gh, "Nside", &lval);
-  gpp.nside = (int) lval;
-  lval = -1;
-  grib_get_long(gh, "ordering", &lval);
-  gpp.order = (int) lval;
-
-  gridDefParamsHEALPIX(gridID, gpp);
-}
-
-static void
 gribapiInqGridHEALPIX(grib_handle *gh, int gridID)
 {
   long lval = -1;
@@ -818,7 +800,6 @@ gribapiAddRecord(stream_t *streamP, int param, grib_handle *gh, size_t recsize, 
   else if (gridP->projtype == CDI_PROJ_RLL) { gribapiInqProjRLL(gh, gridID); }
   else if (gridP->projtype == CDI_PROJ_LCC) { gribapiInqProjLCC(gh, gridID); }
   else if (gridP->projtype == CDI_PROJ_STERE) { gribapiInqProjSTERE(gh, gridID); }
-  else if (gridP->projtype == CDI_PROJ_HEALPIX) { gribapiInqProjHEALPIX(gh, gridID); }
   else if (gridP->type == GRID_HEALPIX) { gribapiInqGridHEALPIX(gh, gridID); }
 
   int zaxistype = gribapi_get_zaxis_type(gribEditionNumber(gh), leveltype1);
