@@ -3,6 +3,8 @@
 #endif
 
 #include "cdi.h"
+#include "cdi_utils.h"
+#include "cdi_query.h"
 #include "cdi_limits.h"
 
 #ifdef HAVE_LIBNETCDF

@@ -1,5 +1,4 @@
-/* DO NOT REMOVE the config.h include file under any circumstances,
- * it's very much needed on some platforms */
+/* DO NOT REMOVE the config.h include file under any circumstances, it's very much needed on some platforms */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -12,7 +11,8 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "cdi.h"
+#include <stdbool.h>
+#include "cdi_query.h"
 #include "dmemory.h"
 
 struct CdiQuery
@@ -104,14 +104,14 @@ cdiQueryDelete(struct CdiQuery *query)
     if (query->numGroups)
     {
       for (int i = 0; i < query->numGroups; ++i) Free((void *) query->groups[i]);
-      Free(query->groups);
+      Free((void *) query->groups);
       Free(query->groupsFound);
     }
 
     if (query->numNames)
     {
       for (int i = 0; i < query->numNames; ++i) Free((void *) query->names[i]);
-      Free(query->names);
+      Free((void *) query->names);
       Free(query->namesFound);
     }
 

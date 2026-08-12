@@ -6,6 +6,7 @@
 
 #include "dmemory.h"
 #include "cdi.h"
+#include "cdi_query.h"
 #include "cdi_int.h"
 #include "file.h"
 #include "gribapi_utilities.h"

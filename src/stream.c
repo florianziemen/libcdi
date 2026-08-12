@@ -21,6 +21,7 @@
 
 #include "binary.h"
 #include "cdi.h"
+#include "cdi_query.h"
 #include "cdi_across.h"
 #include "cdi_int.h"
 #include "cdi_cksum.h"
