@@ -3851,27 +3851,6 @@ gridDefParamsSTERE(int gridID, struct CDI_GridProjParams gpp)
   gridVerifyProj(gridID);
 }
 
-void
-gridDefParamsHEALPIX(int gridID, struct CDI_GridProjParams gpp)
-{
-  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, "healpix");
-
-  const char *gmapname = "healpix";
-  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname);
-  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int) (strlen(gmapname)), gmapname);
-
-  cdiDefAttInt(gridID, CDI_GLOBAL, "healpix_nside", CDI_DATATYPE_INT32, 1, &gpp.nside);
-  const char *orderName = (gpp.order == 1) ? "nested" : "ring";
-  cdiDefAttTxt(gridID, CDI_GLOBAL, "healpix_order", (int) (strlen(orderName)), orderName);
-
-  // gridDefParamsCommon(gridID, gpp);
-
-  grid_t *gridP = grid_to_pointer(gridID);
-  gridP->projtype = CDI_PROJ_HEALPIX;
-
-  // gridVerifyProj(gridID);
-}
-
 /*
 @Function  gridInqParamsSTERE
 @Title     Get the parameter of a Polar stereographic grid

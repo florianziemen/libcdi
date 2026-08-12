@@ -206,6 +206,8 @@ int gridVerifyProjParamsLCC(struct CDI_GridProjParams *gpp);
 int gridVerifyProjParamsSTERE(struct CDI_GridProjParams *gpp);
 int gridVerifyProjParamsHEALPIX(struct CDI_GridProjParams *gpp);
 
+int gridInqParamsHEALPIX(int gridID, struct CDI_GridProjParams *gridProjParams);
+
 #endif
 /*
  * Local Variables:

@@ -1410,10 +1410,6 @@ int  gridInqParamsLCC(int gridID, struct CDI_GridProjParams *gridProjParams);
 void gridDefParamsSTERE(int gridID, struct CDI_GridProjParams gridProjParams);
 int  gridInqParamsSTERE(int gridID, struct CDI_GridProjParams *gridProjParams);
 
-// HEALPix grid
-void gridDefParamsHEALPIX(int gridID, struct CDI_GridProjParams gridProjParams);
-int  gridInqParamsHEALPIX(int gridID, struct CDI_GridProjParams *gridProjParams);
-
 #define HAVE_CDI_PROJ_FUNCS 1
 extern int (*proj_lonlat_to_lcc_func)(struct CDI_GridProjParams gpp, size_t, double*, double*);
 extern int (*proj_lcc_to_lonlat_func)(struct CDI_GridProjParams gpp, double, double, size_t, double*, double*);
