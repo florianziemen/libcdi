@@ -1,3 +1,7 @@
+2026-08-31  Uwe Schulzweida
+
+	* Version 2.6.4 released
+
 2026-08-12  Uwe Schulzweida
 
 	* GRIB2: change from CDI_PROJ_HEALPIX to GRID_HEALPIX
