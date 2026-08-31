@@ -15,6 +15,7 @@
 #include <limits.h>
 
 #include "cdi.h"
+#include "cdi_int.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
 #include "namespace.h"
@@ -77,7 +78,7 @@ instituteDefaultEntries(void)
   };
   // clang-format on
 
-  size_t n = sizeof(resH) / sizeof(*resH);
+  size_t n = ARRAY_SIZE(resH);
   for (size_t i = 0; i < n; i++) reshSetStatus(resH[i], &instituteOps, RESH_IN_USE);
 }
 

@@ -96,11 +96,11 @@ struct gridVirtTable
 struct gridaxis_t
 {
   size_t size;  // number of values
-  short flag;   // 0: undefined 1:vals 2:first+inc
   double first, last, inc;
   double *vals;
   double *bounds;
   cdi_keys_t keys;
+  short flag;  // 0: undefined 1:vals 2:first+inc
 #ifndef USE_MPI
   int clength;
   char **cvals;
@@ -116,8 +116,8 @@ struct grid_gme_t
 struct grid_t
 {
   char *name;
-  int self;
   size_t size;
+  int self;
   int type;      // grid type
   int datatype;  // grid data type (used only internal in gridComplete())
   int proj;      // grid projection

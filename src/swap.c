@@ -38,14 +38,14 @@ swap8byte_value(uint64_t x)
 void
 swap4byte(void *ptr, size_t size)
 {
-  uint32_t *v = (uint32_t *) ptr;
+  uint32_t *restrict v = (uint32_t *) ptr;
   for (size_t i = 0; i < size; ++i) { v[i] = swap4byte_value(v[i]); }
 }
 
 void
 swap8byte(void *ptr, size_t size)
 {
-  uint64_t *v = (uint64_t *) ptr;
+  uint64_t *restrict v = (uint64_t *) ptr;
   for (size_t i = 0; i < size; ++i) { v[i] = swap8byte_value(v[i]); }
 }
 /*

@@ -18,8 +18,6 @@
 void
 basetimeInit(basetime_t *basetime)
 {
-  if (basetime == NULL) Error("Internal problem! Basetime not allocated.");
-
   if (basetime)
   {
     basetime->ncvarid = CDI_UNDEFID;
@@ -28,6 +26,10 @@ basetimeInit(basetime_t *basetime)
     basetime->leadtimeid = CDI_UNDEFID;
     basetime->hasUnits = false;
     basetime->isWRF = false;
+  }
+  else
+  {
+    Error("Internal problem! Basetime not allocated.");
   }
 }
 
