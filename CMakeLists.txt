@@ -1,7 +1,7 @@
 cmake_minimum_required( VERSION 3.27 FATAL_ERROR )
 
 message(VERBOSE "Entering libcdi")
-project(libcdi VERSION 2.6.2 LANGUAGES C )
+project(libcdi VERSION 2.6.4 LANGUAGES C )
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 
@@ -39,5 +39,3 @@ endif ()
 if (BUILD_TESTING)
   add_subdirectory(tests)
 endif ()
-
-

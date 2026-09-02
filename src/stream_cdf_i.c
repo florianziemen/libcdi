@@ -3700,21 +3700,21 @@ cdf_init_cache(CdfCache *cache)
 
 // define all input data variables
 static void
-cdf_define_all_vars(stream_t *streamP, int vlistID, int instID, int modelID, int nvars, int num_ncvars, ncvar_t *ncvars,
+cdf_define_all_vars(stream_t *streamP, int vlistID, int instID, int modelID, int nvarsData, int num_ncvars, ncvar_t *ncvars,
                     ncdim_t *ncdims, int timedimid)
 {
-  int varids_local[1024];
-  int *varids = (nvars <= (int) ARRAY_SIZE(varids_local)) ? varids_local : (int *) Malloc((size_t) nvars * sizeof(int));
+  int varidsLocal[1024];
+  int *varids = (nvarsData <= (int) ARRAY_SIZE(varidsLocal)) ? varidsLocal : (int *) Malloc((size_t) nvarsData * sizeof(int));
   int n = 0;
   for (int ncvarid = 0; ncvarid < num_ncvars; ncvarid++)
     if (ncvars[ncvarid].varStatus == DataVar) { varids[n++] = ncvarid; }
 
   if (CDI_Debug)
-    for (int i = 0; i < nvars; i++) Message("varids[%d] = %d", i, varids[i]);
+    for (int i = 0; i < nvarsData; i++) Message("varids[%d] = %d", i, varids[i]);
 
-  if (streamP->sortname) cdf_sort_varnames(varids, nvars, ncvars);
+  if (streamP->sortname) cdf_sort_varnames(varids, nvarsData, ncvars);
 
-  for (int varID1 = 0; varID1 < nvars; varID1++)
+  for (int varID1 = 0; varID1 < nvarsData; varID1++)
   {
     int ncvarid = varids[varID1];
     ncvar_t *ncvar = &ncvars[ncvarid];
@@ -3847,7 +3847,7 @@ cdf_define_all_vars(stream_t *streamP, int vlistID, int instID, int modelID, int
     }
   }
 
-  for (int varID = 0; varID < nvars; varID++)
+  for (int varID = 0; varID < nvarsData; varID++)
   {
     int ncvarid = varids[varID];
     ncvar_t *ncvar = &ncvars[ncvarid];
@@ -3870,10 +3870,10 @@ cdf_define_all_vars(stream_t *streamP, int vlistID, int instID, int modelID, int
     ncvar->atts = NULL;
   }
 
-  if (varids && varids != varids_local) Free(varids);
+  if (varids && varids != varidsLocal) Free(varids);
 
-  for (int varID = 0; varID < nvars; varID++) cdf_define_code_and_param(vlistID, varID);
-  for (int varID = 0; varID < nvars; varID++) cdf_define_institut_and_model_id(vlistID, varID);
+  for (int varID = 0; varID < nvarsData; varID++) cdf_define_code_and_param(vlistID, varID);
+  for (int varID = 0; varID < nvarsData; varID++) cdf_define_institut_and_model_id(vlistID, varID);
 }
 
 static void
@@ -4700,7 +4700,7 @@ process_var_query(struct CdiQuery *query, int nvars, ncvar_t *ncvars)
     for (int ncvarid = 0; ncvarid < nvars; ++ncvarid)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
-      if (ncvar->varStatus == DataVar && cdiQueryName(query, ncvar->name) < 0) ncvar->varStatus = CoordVar;
+      if (ncvar->varStatus == DataVar && cdiQueryName(query, ncvar->name) < 0) { ncvar->varStatus = CoordVar; }
     }
   }
 }
