@@ -374,7 +374,7 @@ cdiQueryNumEntriesFound(const struct CdiQuery *query)
     if (query->numCells) { numEntriesFound += sum_found(query->numCells, query->cellsFound); }
     if (query->numLayers) { numEntriesFound += sum_found(query->numLayers, query->layersFound); }
     if (query->numSteps) { numEntriesFound += sum_found(query->numSteps, query->stepsFound); }
-    if (query->numDates) { numEntriesFound += sum_found(query->numDates, query->datesFound); }
+    // if (query->numDates) { numEntriesFound += sum_found(query->numDates, query->datesFound); }
   }
 
   return numEntriesFound;
@@ -431,7 +431,7 @@ cdiQueryPrintEntriesNotFound(const struct CdiQuery *query)
           printf("\n");
         }
       }
-
+      /*
       if (query->numDates)
       {
         if (sum_not_found(query->numDates, query->datesFound) > 0)
@@ -442,6 +442,7 @@ cdiQueryPrintEntriesNotFound(const struct CdiQuery *query)
           printf("\n");
         }
       }
+      */
     }
   }
 }
@@ -509,6 +510,7 @@ cdiQueryLayer(struct CdiQuery *query, int layer)
 
   return -1;
 }
+*/
 
 int
 cdiQueryStep(struct CdiQuery *query, int step)
@@ -525,4 +527,3 @@ cdiQueryStep(struct CdiQuery *query, int step)
 
   return -1;
 }
-*/

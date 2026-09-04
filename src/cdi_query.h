@@ -29,7 +29,7 @@ extern "C"
   int cdiQueryName(struct CdiQuery *query, const char *name);
   // int cdiQueryCell(struct CdiQuery *query, size_t cell);
   // int cdiQueryLayer(struct CdiQuery *query, int layer);
-  // int cdiQueryStep(struct CdiQuery *query, int step);
+  int cdiQueryStep(struct CdiQuery *query, int step);
   int cdiQueryNumGroups(const struct CdiQuery *query);
   int cdiQueryNumNames(const struct CdiQuery *query);
   int cdiQueryNumCells(const struct CdiQuery *query);

@@ -4433,6 +4433,8 @@ process_time_query(struct CdiQuery *query, size_t numTimesteps, CdiDateTime *vDa
       assert(numTimesteps < INT_MAX);
       for (int i = 0; i < startStep; ++i) { ncStepIndices[i] = -1; }
       for (int i = endStep + 1; i < (int) numTimesteps; ++i) { ncStepIndices[i] = -1; }
+      if (startStep < (int) numTimesteps) { cdiQueryStep(query, startStep + 1); }
+      if (endStep < (int) numTimesteps) { cdiQueryStep(query, endStep + 1); }
     }
     else if (queryNumDates > 0)
     {

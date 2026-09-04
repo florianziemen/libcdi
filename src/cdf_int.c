@@ -67,7 +67,7 @@ cdf_open(const char *path, int omode, int *ncidp)
 {
   int status = 0;
 
-  if (strstr(path, ":/"))  // ESDM and DAP
+  if (strstr(path, ":/"))  // ZARR, ESDM and DAP
   {
     status = nc_open(path, omode, ncidp);
   }
@@ -93,7 +93,7 @@ cdf_open(const char *path, int omode, int *ncidp)
   if (CDF_Debug) Message("ncid=%d  mode=%d  file=%s", *ncidp, omode, path);
 
   if (CDF_Debug && status != NC_NOERR) Message("%s", nc_strerror(status));
-  if (status != NC_NOERR && status < 0) status -= 1000;
+  if (status != NC_NOERR && status < 0) { status -= 1000; }
 
   return status;
 }

@@ -62,22 +62,20 @@ static int
 cdf_open_read(const char *filename, int *filetype)
 {
   int ncid = -1;
-  int readmode = NC_NOWRITE;
-  int status = cdf_open(filename, readmode, &ncid);
-  if (status > 0 && ncid < 0) { ncid = CDI_ESYSTEM; }
-  if (status < -1000 && ncid == -1) { ncid = status; }
-  else
-  {
-    int format = -1;
-    status = nc_inq_format(ncid, &format);
-    if (status == NC_NOERR && format == NC_FORMAT_NETCDF4_CLASSIC) { *filetype = CDI_FILETYPE_NC4C; }
+  int readMode = NC_NOWRITE;
+  int status = cdf_open(filename, readMode, &ncid);
+  if (status > 0 && ncid < 0) return CDI_ESYSTEM;
+  if (status < -1000 && ncid == -1) return status;
+
+  int format = -1;
+  status = nc_inq_format(ncid, &format);
+  if (status == NC_NOERR && format == NC_FORMAT_NETCDF4_CLASSIC) { *filetype = CDI_FILETYPE_NC4C; }
 
 #ifdef NC_FORMATX_NCZARR
-    int modeNC;
-    status = nc_inq_format_extended(ncid, &format, &modeNC);
-    if (status == NC_NOERR && format == NC_FORMATX_NCZARR) { *filetype = CDI_FILETYPE_NCZARR; }
+  int modeNC;
+  status = nc_inq_format_extended(ncid, &format, &modeNC);
+  if (status == NC_NOERR && format == NC_FORMATX_NCZARR) { *filetype = CDI_FILETYPE_NCZARR; }
 #endif
-  }
 
   return ncid;
 }
@@ -120,26 +118,23 @@ cdf_open_write(const char *filename, int *filetype)
 static int
 cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
-  int ncid = -1;
+  if (filename == NULL) return CDI_EINVAL;
 
-  if (filename == NULL) { ncid = CDI_EINVAL; }
-  else
+  int ncid = -1;
+  int fmode = tolower(*mode);
+  switch (fmode)
   {
-    int fmode = tolower(*mode);
-    switch (fmode)
-    {
-      case 'r': ncid = cdf_open_read(filename, filetype); break;
-      case 'w':
-        ncid = cdf_open_write(filename, filetype);
-        if (ncid != CDI_EINVAL)
-        {
-          if (CDI_Version_Info) cdfComment(ncid);
-          cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.6");
-        }
-        break;
-      case 'a': cdf_open(filename, NC_WRITE, &ncid); break;
-      default: ncid = CDI_EINVAL;
-    }
+    case 'r': ncid = cdf_open_read(filename, filetype); break;
+    case 'w':
+      ncid = cdf_open_write(filename, filetype);
+      if (ncid != CDI_EINVAL)
+      {
+        if (CDI_Version_Info) cdfComment(ncid);
+        cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.6");
+      }
+      break;
+    case 'a': cdf_open(filename, NC_WRITE, &ncid); break;
+    default: ncid = CDI_EINVAL;
   }
 
   return ncid;

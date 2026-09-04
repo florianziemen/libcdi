@@ -25,10 +25,10 @@ extern "C"
   extern void memDebug(int debug);
   extern void memExitOnError(void);
 
-  extern void *memRealloc(void *ptr, size_t size, const char *file, const char *functionname, int line);
-  extern void *memCalloc(size_t nobjs, size_t size, const char *file, const char *functionname, int line);
-  extern void *memMalloc(size_t size, const char *file, const char *functionname, int line);
-  extern void memFree(void *ptr, const char *file, const char *functionname, int line);
+  extern void *memRealloc(void *ptr, size_t size, const char *file, const char *funcName, int line);
+  extern void *memCalloc(size_t nobjs, size_t size, const char *file, const char *funcName, int line);
+  extern void *memMalloc(size_t size, const char *file, const char *funcName, int line);
+  extern void memFree(void *ptr, const char *file, const char *funcName, int line);
 
 #ifdef __cplusplus
 }
