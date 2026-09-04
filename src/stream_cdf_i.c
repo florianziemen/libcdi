@@ -2973,7 +2973,7 @@ process_layer_query(struct CdiQuery *query, ncvar_t *ncvar, size_t *zsize, GridP
 static int
 process_cell_query(struct CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncvar, size_t *xsize, size_t *ysize, GridPart *gridPart)
 {
-  // process grid query information if available
+  // process cell query information if available
   if (query)
   {
     int numCells = cdiQueryNumCells(query);
@@ -2989,7 +2989,7 @@ process_cell_query(struct CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncva
 
       size_t start = cdiQueryGetCell(query, 0);
       size_t count = (numCells == 2) ? cdiQueryGetCell(query, 1) : 1;
-      if ((start + count) > *xsize)
+      if ((start + count - 1) > *xsize)
       {
         Error("%s: cells %zu-%zu out of range (gridsize=%zu)", ncvar->name, start, start + count - 1, *xsize);
       }
@@ -4504,6 +4504,8 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0)
 
     size_t numSteps = 0;
     for (size_t tsID = 0; tsID < numTimesteps; ++tsID) { numSteps += (ncStepIndices[tsID] >= 0); }
+
+    if (numTimesteps > 0 && numSteps == 0) Error("No timesteps selected!");
 
     cdi_create_timesteps(numSteps, streamP);
 

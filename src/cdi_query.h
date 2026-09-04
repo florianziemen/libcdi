@@ -27,8 +27,6 @@ extern "C"
   int cdiQueryGetStep(const struct CdiQuery *query, int index);
   double cdiQueryGetDate(const struct CdiQuery *query, int index);
   int cdiQueryName(struct CdiQuery *query, const char *name);
-  // int cdiQueryCell(struct CdiQuery *query, size_t cell);
-  // int cdiQueryLayer(struct CdiQuery *query, int layer);
   int cdiQueryStep(struct CdiQuery *query, int step);
   int cdiQueryNumGroups(const struct CdiQuery *query);
   int cdiQueryNumNames(const struct CdiQuery *query);
