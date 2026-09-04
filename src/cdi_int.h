@@ -592,7 +592,6 @@ int cdiBaseFiletype(int filetype);
 
 void printDblsPrefixAutoBrk(FILE *fp, int dig, const char prefix[], size_t n, const double vals[]);
 
-
 #ifdef __cplusplus
 }
 #endif

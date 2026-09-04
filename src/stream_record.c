@@ -10,6 +10,7 @@
 
 #include "cdi.h"
 #include "cdi_int.h"
+#include "vlist.h"
 #include "stream_grb.h"
 #include "stream_cdf.h"
 #include "stream_srv.h"
@@ -183,21 +184,18 @@ streamDefField(int streamID, int varID, int levelID)
 
   if (!streamP->record) cdiInitRecord(streamP);
 
-  int vlistID = streamP->vlistID;
-  int gridID = vlistInqVarGrid(vlistID, varID);
-  int zaxisID = vlistInqVarZaxis(vlistID, varID);
-  int param = vlistInqVarParam(vlistID, varID);
-  int ilevel = (int) lround(zaxisInqLevel(zaxisID, levelID));
+  var_t *varP = vlist_get_varP(__func__, streamP->vlistID, varID);
+  int ilevel = (int) lround(zaxisInqLevel(varP->zaxisID, levelID));
 
   Record *record = streamP->record;
   record->varID = varID;
   record->levelID = levelID;
-  record->param = param;
+  record->param = varP->param;
   record->ilevel = ilevel;
   record->vdate = (int) cdiDate_get(streamP->tsteps[tsID].taxis.vDateTime.date);
   record->vtime = cdiTime_get(streamP->tsteps[tsID].taxis.vDateTime.time);
-  record->gridID = gridID;
-  record->prec = vlistInqVarDatatype(vlistID, varID);
+  record->gridID = varP->gridID;
+  record->prec = varP->datatype;
 
   switch (cdiBaseFiletype(streamP->filetype))
   {
@@ -278,7 +276,10 @@ cdi_create_records(stream_t *streamP, int tsID, bool allocRecords)
       for (int isub = 0; isub < streamP->vars[varID].subtypeSize; isub++)
         maxrecords += (unsigned) streamP->vars[varID].recordTable[isub].nlevs;
   }
-  else { maxrecords = (unsigned) sourceTstep->recordSize; }
+  else
+  {
+    maxrecords = (unsigned) sourceTstep->recordSize;
+  }
 
   if (tsID == 0) { nrecords = maxrecords; }
   else if (tsID == 1)
@@ -295,9 +296,15 @@ cdi_create_records(stream_t *streamP, int tsID, bool allocRecords)
         //    printf("varID nrecords %d %d %d \n", varID, nrecords, vlistInqVarTsteptype(vlistID, varID));
       }
     }
-    else { nrecords = maxrecords; }
+    else
+    {
+      nrecords = maxrecords;
+    }
   }
-  else { nrecords = (unsigned) streamP->tsteps[1].nallrecs; }
+  else
+  {
+    nrecords = (unsigned) streamP->tsteps[1].nallrecs;
+  }
   //  printf("tsID, nrecords %d %d\n", tsID, nrecords);
 
   recinfo_t *recinfo = (maxrecords > 0) ? (recinfo_t *) Malloc(maxrecords * sizeof(recinfo_t)) : (recinfo_t *) NULL;

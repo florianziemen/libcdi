@@ -161,6 +161,8 @@ vlistAdd2SubtypeIDs(vlist_t *vlistP, int subtypeID)
   }
 }
 
+var_t *vlist_get_varP(const char *caller, int vlistID, int varID);
+
 #ifdef HAVE_LIBGRIB_API
 extern int cdiNAdditionalGRIBKeys;
 extern char *cdiAdditionalGRIBKeys[];

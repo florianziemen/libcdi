@@ -85,6 +85,12 @@ vlistP_get_varP(const char *caller, vlist_t *vlistP, int varID)
   return &vlistP->vars[varID];
 }
 
+var_t *
+vlist_get_varP(const char *caller, int vlistID, int varID)
+{
+  return vlistP_get_varP(caller, vlist_to_pointer(vlistID), varID);
+}
+
 int
 vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int timetype, int tilesetID)
 {
