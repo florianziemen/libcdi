@@ -1,6 +1,10 @@
-2026-08-31  Uwe Schulzweida
+2026-09-08  Uwe Schulzweida
 
 	* Version 2.6.4 released
+
+2026-09-04  Uwe Schulzweida
+
+	* gribapi: Only use a relative time axis if it does not change [Bug #12406]
 
 2026-08-12  Uwe Schulzweida
 

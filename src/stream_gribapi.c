@@ -2121,7 +2121,7 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, CdiDateTime fDateTime,
 
   JulianDate julianDate1 = julianDate_encode(calendar, fDateTime);
 
-  if (cdiDateTime_isNull(vDateTime)) vDateTime = fDateTime;
+  if (cdiDateTime_isNull(vDateTime)) { vDateTime = fDateTime; }
 
   JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
   JulianDate julianDate = julianDate_sub(julianDate2, julianDate1);
@@ -2133,6 +2133,13 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, CdiDateTime fDateTime,
     int proDefTempNum
         = gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
     gribapiDefStepUnits(editionNumber, gh, timeunit, proDefTempNum, gcinit);
+
+    if (gcinit)
+    {
+      long unitsOfTime;
+      grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime);
+      if (unitsOfTime != getUnitsOfTime(timeunit)) return status;
+    }
 
     long startStep = 0;
     double endStepF = julianDate_to_seconds(julianDate) / factor;
@@ -2202,14 +2209,14 @@ gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGener
     int calendar = taxisInqCalendar(taxisID);
 
     CdiDateTime fDateTime = taxisInqFdatetime(taxisID);
-    if (cdiDateTime_isNull(fDateTime)) fDateTime = taxisInqRdatetime(taxisID);
-    if (cdiDateTime_isLT(vDateTime, fDateTime)) fDateTime = vDateTime;
+    if (cdiDateTime_isNull(fDateTime)) { fDateTime = taxisInqRdatetime(taxisID); }
+    if (cdiDateTime_isLT(vDateTime, fDateTime)) { fDateTime = vDateTime; }
 
     CdiDateTime sDateTime = taxisInqSdatetime(taxisID);
 
     int status = gribapiDefDateTimeRel(editionNumber, gh, fDateTime, vDateTime, sDateTime, productDefinitionTemplate,
                                        typeOfGeneratingProcess, tsteptype, timeunit, calendar, gcinit);
-    if (status != 0) taxistype = TAXIS_ABSOLUTE;
+    if (status != 0) { taxistype = TAXIS_ABSOLUTE; }
   }
 
   if (taxistype == TAXIS_ABSOLUTE)
