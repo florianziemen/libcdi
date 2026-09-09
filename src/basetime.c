@@ -1,6 +1,6 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined(HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
@@ -18,8 +18,6 @@
 void
 basetimeInit(basetime_t *basetime)
 {
-  if (basetime == NULL) Error("Internal problem! Basetime not allocated.");
-
   if (basetime)
   {
     basetime->ncvarid = CDI_UNDEFID;
@@ -28,6 +26,10 @@ basetimeInit(basetime_t *basetime)
     basetime->leadtimeid = CDI_UNDEFID;
     basetime->hasUnits = false;
     basetime->isWRF = false;
+  }
+  else
+  {
+    Error("Internal problem! Basetime not allocated.");
   }
 }
 

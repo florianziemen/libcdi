@@ -16,7 +16,8 @@
 #include <time.h>
 
 #define FAIL_ON_GRIB_ERROR(function, gribHandle, key, ...)                                                                       \
-  do {                                                                                                                           \
+  do                                                                                                                             \
+  {                                                                                                                              \
     int errorCode = (int) function(gribHandle, key, __VA_ARGS__);                                                                \
     if (errorCode)                                                                                                               \
     {                                                                                                                            \
@@ -138,7 +139,7 @@ double
 gribGetDoubleDefault(grib_handle *gribHandle, const char *key, double defaultValue)
 {
   double result;
-  if (grib_get_double(gribHandle, key, &result) || IS_EQUAL(result, GRIB_MISSING_DOUBLE)) result = defaultValue;
+  if (grib_get_double(gribHandle, key, &result) || is_equal(result, GRIB_MISSING_DOUBLE)) result = defaultValue;
   return result;
 }
 
@@ -194,7 +195,10 @@ resetTz(char *savedTz)
     setenv("TZ", savedTz, 1);
     Free(savedTz);
   }
-  else { unsetenv("TZ"); }
+  else
+  {
+    unsetenv("TZ");
+  }
 }
 
 // This function uses the system functions to normalize the date representation according to the gregorian calendar.
@@ -591,8 +595,7 @@ gribapiGetGridType(grib_handle *gh)
     case GRIB2_GTYPE_SPECTRAL: return GRID_SPECTRAL;
     case GRIB2_GTYPE_GME: return GRID_GME;
     case GRIB2_GTYPE_UNSTRUCTURED: return GRID_UNSTRUCTURED;
-    case GRIB2_GTYPE_HEALPIX: return CDI_PROJ_HEALPIX;
-    // case GRIB2_GTYPE_HEALPIX: return GRID_HEALPIX;
+    case GRIB2_GTYPE_HEALPIX: return GRID_HEALPIX;
     default:
     {
       static bool lwarn = true;
@@ -654,7 +657,7 @@ gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, long editionNumber,
   FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfLastGridPointInDegrees", &grid->y.last);
 
   // FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->x.inc);
-  // if ( IS_EQUAL(grid->x.inc, GRIB_MISSING_DOUBLE) ) grid->x.inc = 0;
+  // if ( is_equal(grid->x.inc, GRIB_MISSING_DOUBLE) ) grid->x.inc = 0;
 
   if (grid->x.last < grid->x.first)
   {
@@ -667,7 +670,7 @@ gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, long editionNumber,
   grid->x.flag = 2;
 
   grid->y.flag = 0;
-  // if (IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0))
+  // if (is_not_equal(grid->y.first, 0) || is_not_equal(grid->y.last, 0))
   {
     if (grid->y.size > 1)
     {
@@ -716,7 +719,7 @@ gribapiGetGridRegular(grib_handle *gh, grid_t *grid, long editionNumber, int gri
   if (grid->x.inc < -999 || grid->x.inc > 999) grid->x.inc = 0;
   if (grid->y.inc < -999 || grid->y.inc > 999) grid->y.inc = 0;
 
-  // if ( IS_NOT_EQUAL(grid->x.first, 0) || IS_NOT_EQUAL(grid->x.last, 0) )
+  // if ( is_not_equal(grid->x.first, 0) || is_not_equal(grid->x.last, 0) )
   {
     if (grid->x.size > 1)
     {
@@ -731,7 +734,7 @@ gribapiGetGridRegular(grib_handle *gh, grid_t *grid, long editionNumber, int gri
         }
 
         // correct xinc if necessary
-        if (IS_EQUAL(grid->x.first, 0) && grid->x.last > 354 && grid->x.last < 360)
+        if (is_equal(grid->x.first, 0) && grid->x.last > 354 && grid->x.last < 360)
         {
           double xinc = 360. / (double) grid->x.size;
           if (fabs(grid->x.inc - xinc) > 0.0)
@@ -746,7 +749,7 @@ gribapiGetGridRegular(grib_handle *gh, grid_t *grid, long editionNumber, int gri
   }
 
   grid->y.flag = 0;
-  // if ( IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0) )
+  // if ( is_not_equal(grid->y.first, 0) || is_not_equal(grid->y.last, 0) )
   {
     if (grid->y.size > 1)
     {
@@ -783,13 +786,6 @@ gribapiGetGridProj(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
   grid->y.inc = yinc;
   grid->x.flag = 2;
   grid->y.flag = 2;
-}
-
-static void
-gribapiGetProjHealpix(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
-{
-  (void) gh;
-  grid->size = numberOfPoints;
 }
 
 static void
@@ -878,13 +874,13 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
   long editionNumber = gribEditionNumber(gh);
   int gridtype = gribapiGetGridType(gh);
   int projtype = (gridtype == GRID_PROJECTION && gribapiGetIsRotated(gh)) ? CDI_PROJ_RLL : CDI_UNDEFID;
-  if (gridtype == CDI_PROJ_LCC || gridtype == CDI_PROJ_STERE || gridtype == CDI_PROJ_HEALPIX)
+  if (gridtype == CDI_PROJ_LCC || gridtype == CDI_PROJ_STERE)
   {
     projtype = gridtype;
     gridtype = GRID_PROJECTION;
   }
   /*
-  if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
+  if ( streamP->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
     {
       gridtype = GRID_GAUSSIAN;
       ISEC2_NumLon = 2*ISEC2_NumLat;
@@ -907,16 +903,18 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
   else if (gridtype == GRID_GAUSSIAN_REDUCED) { gribapiGetGridGaussianReduced(gh, grid, editionNumber, numberOfPoints); }
   else if (projtype == CDI_PROJ_LCC) { gribapiGetGridProj(gh, grid, numberOfPoints); }
   else if (projtype == CDI_PROJ_STERE) { gribapiGetGridProj(gh, grid, numberOfPoints); }
-  else if (projtype == CDI_PROJ_HEALPIX) { gribapiGetProjHealpix(gh, grid, numberOfPoints); }
   else if (gridtype == GRID_HEALPIX) { gribapiGetGridHealpix(gh, grid, numberOfPoints); }
   else if (gridtype == GRID_SPECTRAL) { gribapiGetGridSpectral(gh, grid, datasize); }
   else if (gridtype == GRID_GME) { gribapiGetGridGME(gh, grid, numberOfPoints); }
   else if (gridtype == GRID_UNSTRUCTURED) { gribapiGetGridUnstructured(gh, grid, numberOfPoints); }
   else if (gridtype == GRID_GENERIC) { gribapiGetGridGeneric(gh, grid, numberOfPoints); }
-  else { Error("Unsupported grid type: %s", gridNamePtr(gridtype)); }
+  else
+  {
+    Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+  }
 
   if (gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || projtype == CDI_PROJ_RLL || projtype == CDI_PROJ_LCC
-      || projtype == CDI_PROJ_HEALPIX)
+      || gridtype == GRID_HEALPIX)
   {
     long temp = 0;
     GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &temp), 0);
@@ -924,7 +922,7 @@ gribapiGetGrid(grib_handle *gh, grid_t *grid)
     uvRelativeToGrid = (bool) temp;
   }
 
-  if (gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || (gridtype == GRID_PROJECTION && projtype != CDI_PROJ_HEALPIX))
+  if (gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION)
   {
     long iScansNegatively, jScansPositively, jPointsAreConsecutive;
     GRIB_CHECK(grib_get_long(gh, "iScansNegatively", &iScansNegatively), 0);

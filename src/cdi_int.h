@@ -48,9 +48,9 @@ extern pthread_mutex_t CDI_IO_Mutex;
 #define UNUSED(x) (void) x
 #endif
 
-// clang-format off
-#define FREE_AND_NULL(p) do { if (p) { Free(p); (p) = NULL; } } while(0)
-// clang-format on
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#endif
 
 char *str_to_lower(char *str);
 bool strStartsWith(const char *vstr, const char *cstr);
@@ -71,62 +71,21 @@ str_is_equal(const char *x, const char *y)
 #define M_PI 3.14159265358979323846 /* pi */
 #endif
 
-#ifndef ERROR_H
 #include "error.h"
-#endif
-#ifndef _BASETIME_H
 #include "basetime.h"
-#endif
-#ifndef JULIAN_DATE_H
 #include "julian_date.h"
-#endif
-#ifndef TAXIS_H
 #include "taxis.h"
-#endif
-#ifndef CDI_LIMITS_H
 #include "cdi_limits.h"
-#endif
-#ifndef _SERVICE_H
 #include "service.h"
-#endif
-#ifndef _EXTRA_H
 #include "extra.h"
-#endif
-#ifndef _IEG_H
 #include "ieg.h"
-#endif
-#ifndef RESOURCE_HANDLE_H
 #include "resource_handle.h"
-#endif
 
-#define check_parg(arg) \
-  if (arg == 0) Warning("Argument '" #arg "' not allocated!")
-
-#ifdef __xlC__ /* performance problems on IBM */
-#ifndef DBL_IS_NAN
-#define DBL_IS_NAN(x) ((x) != (x))
-#endif
-#else
-#ifndef DBL_IS_NAN
-#if defined(HAVE_DECL_ISNAN)
-#define DBL_IS_NAN(x) (isnan(x))
-#elif defined(FP_NAN)
-#define DBL_IS_NAN(x) (fpclassify(x) == FP_NAN)
-#else
-#define DBL_IS_NAN(x) ((x) != (x))
-#endif
-#endif
-#endif
-
-#ifndef DBL_IS_EQUAL
-// #define DBL_IS_EQUAL(x,y) (!(x < y || y < x))
-#define DBL_IS_EQUAL(x, y) (DBL_IS_NAN(x) || DBL_IS_NAN(y) ? (DBL_IS_NAN(x) && DBL_IS_NAN(y)) : !(x < y || y < x))
-#endif
-
-#ifndef IS_EQUAL
-#define IS_NOT_EQUAL(x, y) (x < y || y < x)
-#define IS_EQUAL(x, y) (!IS_NOT_EQUAL(x, y))
-#endif
+#define check_parg(arg)                                          \
+  do                                                             \
+  {                                                              \
+    if (arg == 0) Warning("Argument '" #arg "' not allocated!"); \
+  } while (0)
 
 static inline bool
 dbl_is_nan(double x)
@@ -144,6 +103,18 @@ static inline bool
 dbl_is_equal(double x, double y)
 {
   return (dbl_is_nan(x) || dbl_is_nan(y)) ? dbl_is_nan(x) && dbl_is_nan(y) : !(x < y || y < x);
+}
+
+static inline bool
+is_not_equal(double x, double y)
+{
+  return (x < y || y < x);
+}
+
+static inline bool
+is_equal(double x, double y)
+{
+  return !(x < y || y < x);
 }
 
 enum
@@ -504,9 +475,9 @@ stream_to_pointer(int idx)
 }
 
 static inline void
-stream_check_ptr(const char *caller, stream_t *streamptr)
+stream_check_ptr(const char *caller, stream_t *streamP)
 {
-  if (streamptr == NULL) Errorc("stream undefined!");
+  if (streamP == NULL) Errorc("stream undefined!");
 }
 
 int streamInqFileID(int streamID);
@@ -521,26 +492,26 @@ void streamDefineTaxis(int streamID);
 
 int streamsNewEntry(int filetype);
 void streamsInitEntry(int streamID);
-void cdiStreamSetupVlist(stream_t *streamptr, int vlistID);
+void cdiStreamSetupVlist(stream_t *streamP, int vlistID);
 // default implementation of the overridable function
-void cdiStreamSetupVlist_(stream_t *streamptr, int vlistID);
-int stream_new_var(stream_t *streamptr, int gridID, int zaxisID, int tilesetID);
+void cdiStreamSetupVlist_(stream_t *streamP, int vlistID);
+int stream_new_var(stream_t *streamP, int gridID, int zaxisID, int tilesetID);
 
-int tstepsNewEntry(stream_t *streamptr);
+int tstepsNewEntry(stream_t *streamP);
 
 const char *strfiletype(int filetype);
 
-void cdi_generate_vars(stream_t *streamptr);
+void cdi_generate_vars(stream_t *streamP);
 
 void vlist_check_contents(int vlistID);
 
-void cdi_create_records(stream_t *streamptr, int tsID, bool allocRecords);
+void cdi_create_records(stream_t *streamP, int tsID, bool allocRecords);
 
-void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *container_name);
+void streamFCopyRecord(stream_t *streamP2, stream_t *streamP1, const char *container_name);
 
-int recordNewEntry(stream_t *streamptr, int tsID);
+int recordNewEntry(stream_t *streamP, int tsID);
 
-void cdi_create_timesteps(size_t numTimesteps, stream_t *streamptr);
+void cdi_create_timesteps(size_t numTimesteps, stream_t *streamP);
 
 void recinfoInitEntry(recinfo_t *recinfo);
 
@@ -572,10 +543,7 @@ struct streamAssoc
   int streamID, vlistID;
 };
 
-struct streamAssoc streamUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context);
-
-int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filetype, stream_t *streamptr,
-                                 int recordBufIsToBeCreated);
+int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filetype, stream_t *streamP, int recordBufIsToBeCreated);
 
 int streamOpenID(const char *filename, char filemode, int filetype, int resH);
 
@@ -584,11 +552,11 @@ void cdiStreamDefVlist_(int streamID, int vlistID);
 int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, SizeType numMissVals);
 
 void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype, const int rect[][2], const void *data, SizeType numMissVals);
-void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted);
+void cdiStreamCloseDefaultDelegate(stream_t *streamP, int recordBufIsToBeDeleted);
 
-int cdiStreamDefTimestep_(stream_t *streamptr, int tsID);
+int cdiStreamDefTimestep_(stream_t *streamP, int tsID);
 
-void cdiStreamSync_(stream_t *streamptr);
+void cdiStreamSync_(stream_t *streamP);
 
 const char *cdiUnitNamePtr(int cdi_unit);
 
@@ -599,8 +567,6 @@ enum
 };
 
 size_t cdiGetPageSize(bool largePageAlign);
-
-void zaxisGetIndexList(int nzaxis, int *zaxisIndexList);
 
 // clang-format off
 
@@ -625,7 +591,6 @@ bool cdiFiletypeIsExse(int filetype);
 int cdiBaseFiletype(int filetype);
 
 void printDblsPrefixAutoBrk(FILE *fp, int dig, const char prefix[], size_t n, const double vals[]);
-
 
 #ifdef __cplusplus
 }

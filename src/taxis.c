@@ -1,6 +1,6 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined(HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
@@ -15,28 +15,20 @@
 
 #include "cdi.h"
 #include "dmemory.h"
-#include "error.h"
 #include "taxis.h"
-#include "cdi_cksum.h"
+#include "taxis_pack.h"
 #include "cdi_int.h"
-#include "namespace.h"
-#include "serialize.h"
-#include "resource_handle.h"
-#include "resource_unpack.h"
 #include "normalize_month.h"
 
 static int DefaultTimeType = TAXIS_ABSOLUTE;
 static int DefaultTimeUnit = TUNIT_HOUR;
 
-static int taxisCompareP(void *taxisptr1, void *taxisptr2);
-static void taxisDestroyP(void *taxisptr);
-static void taxisPrintKernel(taxis_t *taxisptr, FILE *fp);
-static int taxisGetPackSize(void *taxisptr, void *context);
-static void taxisPack(void *taxisptr, void *buf, int size, int *position, void *context);
-static int taxisTxCode(void *taxisptr);
+static int taxis_compare(void *taxisP1, void *taxisP2);
+static void taxis_destroy(void *taxisP);
+static void taxis_print(taxis_t *taxisP, FILE *fp);
 
 const resOps taxisOps
-    = { taxisCompareP, taxisDestroyP, (void (*)(void *, FILE *)) taxisPrintKernel, taxisGetPackSize, taxisPack, taxisTxCode };
+    = { taxis_compare, taxis_destroy, (void (*)(void *, FILE *)) taxis_print, taxisGetPackSize, taxisPack, taxisTxCode };
 
 #define container_of(ptr, type, member) ((type *) (void *) ((unsigned char *) ptr - offsetof(type, member)))
 
@@ -46,7 +38,7 @@ struct refcount_string
   char string[];
 };
 
-static char *
+char *
 new_refcount_string(size_t len)
 {
   struct refcount_string *container = (struct refcount_string *) Malloc(sizeof(*container) + len + 1);
@@ -80,8 +72,8 @@ dup_refcount_string(char *p)
 const char *
 taxisNamePtr(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return taxisptr->name;
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  return taxisP->name;
 }
 
 const char *
@@ -92,53 +84,52 @@ tunitNamePtr(int unitID)
   };
   enum
   {
-    size = sizeof(Timeunits) / sizeof(Timeunits[0])
+    size = ARRAY_SIZE(Timeunits)
   };
 
   return (unitID > 0 && unitID < size) ? Timeunits[unitID] : Timeunits[0];
 }
 
 void
-ptaxisInit(taxis_t *taxisptr)
+ptaxisInit(taxis_t *taxisP)
 {
-  taxisptr->self = CDI_UNDEFID;
-  taxisptr->type = DefaultTimeType;
-  taxisptr->calendar = CDI_Default_Calendar;
-  taxisptr->unit = DefaultTimeUnit;
-  taxisptr->numavg = 0;
-  taxisptr->climatology = false;
-  taxisptr->hasBounds = false;
-  cdiDateTime_init(&taxisptr->sDateTime);
-  cdiDateTime_init(&taxisptr->vDateTime);
-  cdiDateTime_init(&taxisptr->rDateTime);
-  cdiDateTime_init(&taxisptr->fDateTime);
-  cdiDateTime_init(&taxisptr->vDateTime_lb);
-  cdiDateTime_init(&taxisptr->vDateTime_ub);
-  taxisptr->fc_unit = DefaultTimeUnit;
-  taxisptr->fc_period = 0;
-  taxisptr->name = NULL;
-  taxisptr->longname = NULL;
-  taxisptr->units = NULL;
+  taxisP->self = CDI_UNDEFID;
+  taxisP->type = DefaultTimeType;
+  taxisP->calendar = CDI_Default_Calendar;
+  taxisP->unit = DefaultTimeUnit;
+  taxisP->numavg = 0;
+  taxisP->climatology = false;
+  taxisP->hasBounds = false;
+  cdiDateTime_init(&taxisP->sDateTime);
+  cdiDateTime_init(&taxisP->vDateTime);
+  cdiDateTime_init(&taxisP->rDateTime);
+  cdiDateTime_init(&taxisP->fDateTime);
+  cdiDateTime_init(&taxisP->vDateTime_lb);
+  cdiDateTime_init(&taxisP->vDateTime_ub);
+  taxisP->fc_unit = DefaultTimeUnit;
+  taxisP->fc_period = 0;
+  taxisP->name = NULL;
+  taxisP->longname = NULL;
+  taxisP->units = NULL;
 
-  cdiInitKeys(&taxisptr->keys);
-  cdiDefVarKeyInt(&taxisptr->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
+  cdiInitKeys(&taxisP->keys);
+  cdiDefVarKeyInt(&taxisP->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
 }
 
-static taxis_t *
+taxis_t *
 taxisNewEntry(cdiResH resH)
 {
-  taxis_t *taxisptr = (taxis_t *) Malloc(sizeof(taxis_t));
+  taxis_t *taxisP = (taxis_t *) Malloc(sizeof(taxis_t));
 
-  ptaxisInit(taxisptr);
-  if (resH == CDI_UNDEFID)
-    taxisptr->self = reshPut(taxisptr, &taxisOps);
+  ptaxisInit(taxisP);
+  if (resH == CDI_UNDEFID) { taxisP->self = reshPut(taxisP, &taxisOps); }
   else
   {
-    taxisptr->self = resH;
-    reshReplace(resH, taxisptr, &taxisOps);
+    taxisP->self = resH;
+    reshReplace(resH, taxisP, &taxisOps);
   }
 
-  return taxisptr;
+  return taxisP;
 }
 
 /*
@@ -175,19 +166,19 @@ taxisDefRtime(taxisID, 120000);
 int
 taxisCreate(int taxistype)
 {
-  taxis_t *taxisptr = taxisNewEntry(CDI_UNDEFID);
-  taxisptr->type = taxistype;
+  taxis_t *taxisP = taxisNewEntry(CDI_UNDEFID);
+  taxisP->type = taxistype;
 
-  int taxisID = taxisptr->self;
+  int taxisID = taxisP->self;
   return taxisID;
 }
 
 void
-taxisDestroyKernel(taxis_t *taxisptr)
+taxisDestroyKernel(taxis_t *taxisP)
 {
-  delete_refcount_string(taxisptr->name);
-  delete_refcount_string(taxisptr->longname);
-  delete_refcount_string(taxisptr->units);
+  delete_refcount_string(taxisP->name);
+  delete_refcount_string(taxisP->longname);
+  delete_refcount_string(taxisP->units);
 }
 
 /*
@@ -203,28 +194,28 @@ taxisDestroyKernel(taxis_t *taxisptr)
 void
 taxisDestroy(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   reshRemove(taxisID, &taxisOps);
-  taxisDestroyKernel(taxisptr);
-  Free(taxisptr);
+  taxisDestroyKernel(taxisP);
+  Free(taxisP);
 }
 
 void
-taxisDestroyP(void *taxisptr)
+taxis_destroy(void *taxisP)
 {
-  taxisDestroyKernel((taxis_t *) taxisptr);
-  Free(taxisptr);
+  taxisDestroyKernel((taxis_t *) taxisP);
+  Free(taxisP);
 }
 
 int
 taxisDuplicate(int taxisID1)
 {
-  taxis_t *taxisptr1 = (taxis_t *) reshGetVal(taxisID1, &taxisOps);
-  taxis_t *taxisptr2 = taxisNewEntry(CDI_UNDEFID);
+  taxis_t *taxisP1 = (taxis_t *) reshGetVal(taxisID1, &taxisOps);
+  taxis_t *taxisP2 = taxisNewEntry(CDI_UNDEFID);
 
-  int taxisID2 = taxisptr2->self;
+  int taxisID2 = taxisP2->self;
 
-  ptaxisCopy(taxisptr2, taxisptr1);
+  ptaxisCopy(taxisP2, taxisP1);
 
   return taxisID2;
 }
@@ -232,14 +223,14 @@ taxisDuplicate(int taxisID1)
 void
 taxisDefType(int taxisID, int taxistype)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->type != taxistype)
+  if (taxisP->type != taxistype)
   {
-    taxisptr->type = taxistype;
-    cdiDefVarKeyInt(&taxisptr->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
-    delete_refcount_string(taxisptr->units);
-    taxisptr->units = NULL;
+    taxisP->type = taxistype;
+    cdiDefVarKeyInt(&taxisP->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
+    delete_refcount_string(taxisP->units);
+    taxisP->units = NULL;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -261,11 +252,11 @@ The function @func{taxisDefVdate} defines the verification date of a Time axis.
 void
 taxisDefVdate(int taxisID, int vdate)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if ((int) cdiDate_get(taxisptr->vDateTime.date) != vdate)
+  if ((int) cdiDate_get(taxisP->vDateTime.date) != vdate)
   {
-    taxisptr->vDateTime.date = cdiDate_set(vdate);
+    taxisP->vDateTime.date = cdiDate_set(vdate);
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -287,11 +278,11 @@ The function @func{taxisDefVtime} defines the verification time of a Time axis.
 void
 taxisDefVtime(int taxisID, int vtime)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (cdiTime_get(taxisptr->vDateTime.time) != vtime)
+  if (cdiTime_get(taxisP->vDateTime.time) != vtime)
   {
-    taxisptr->vDateTime.time = cdiTime_set(vtime);
+    taxisP->vDateTime.time = cdiTime_set(vtime);
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -299,11 +290,11 @@ taxisDefVtime(int taxisID, int vtime)
 void
 taxisDefVdatetime(int taxisID, CdiDateTime vDateTime)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (cdiDateTime_isNE(taxisptr->vDateTime, vDateTime))
+  if (cdiDateTime_isNE(taxisP->vDateTime, vDateTime))
   {
-    taxisptr->vDateTime = vDateTime;
+    taxisP->vDateTime = vDateTime;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -311,13 +302,13 @@ taxisDefVdatetime(int taxisID, CdiDateTime vDateTime)
 void
 taxisDefRdatetime(int taxisID, CdiDateTime rDateTime)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (cdiDateTime_isNE(taxisptr->rDateTime, rDateTime))
+  if (cdiDateTime_isNE(taxisP->rDateTime, rDateTime))
   {
-    taxisptr->rDateTime = rDateTime;
-    delete_refcount_string(taxisptr->units);
-    taxisptr->units = NULL;
+    taxisP->rDateTime = rDateTime;
+    delete_refcount_string(taxisP->units);
+    taxisP->units = NULL;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -339,13 +330,13 @@ The function @func{taxisDefRdate} defines the reference date of a Time axis.
 void
 taxisDefRdate(int taxisID, int rdate)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if ((int) cdiDate_get(taxisptr->rDateTime.date) != rdate)
+  if ((int) cdiDate_get(taxisP->rDateTime.date) != rdate)
   {
-    taxisptr->rDateTime.date = cdiDate_set(rdate);
-    delete_refcount_string(taxisptr->units);
-    taxisptr->units = NULL;
+    taxisP->rDateTime.date = cdiDate_set(rdate);
+    delete_refcount_string(taxisP->units);
+    taxisP->units = NULL;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -367,15 +358,15 @@ The function @func{taxisDefRtime} defines the reference time of a Time axis.
 void
 taxisDefRtime(int taxisID, int rtime)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (cdiTime_get(taxisptr->rDateTime.time) != rtime)
+  if (cdiTime_get(taxisP->rDateTime.time) != rtime)
   {
-    taxisptr->rDateTime.time = cdiTime_set(rtime);
-    if (taxisptr->units)
+    taxisP->rDateTime.time = cdiTime_set(rtime);
+    if (taxisP->units)
     {
-      delete_refcount_string(taxisptr->units);
-      taxisptr->units = NULL;
+      delete_refcount_string(taxisP->units);
+      taxisP->units = NULL;
     }
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
@@ -398,11 +389,11 @@ The function @func{taxisDefFdatetime} defines the forecast reference date/time o
 void
 taxisDefFdatetime(int taxisID, CdiDateTime fDateTime)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (cdiDateTime_isNE(taxisptr->fDateTime, fDateTime))
+  if (cdiDateTime_isNE(taxisP->fDateTime, fDateTime))
   {
-    taxisptr->fDateTime = fDateTime;
+    taxisP->fDateTime = fDateTime;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -426,11 +417,11 @@ The function @func{taxisDefCalendar} defines the calendar of a Time axis.
 void
 taxisDefCalendar(int taxisID, int calendar)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->calendar != calendar)
+  if (taxisP->calendar != calendar)
   {
-    taxisptr->calendar = calendar;
+    taxisP->calendar = calendar;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -438,13 +429,13 @@ taxisDefCalendar(int taxisID, int calendar)
 void
 taxisDefTunit(int taxisID, int unit)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->unit != unit)
+  if (taxisP->unit != unit)
   {
-    taxisptr->unit = unit;
-    delete_refcount_string(taxisptr->units);
-    taxisptr->units = NULL;
+    taxisP->unit = unit;
+    delete_refcount_string(taxisP->units);
+    taxisP->units = NULL;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -452,11 +443,11 @@ taxisDefTunit(int taxisID, int unit)
 void
 taxisDefForecastTunit(int taxisID, int unit)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->fc_unit != unit)
+  if (taxisP->fc_unit != unit)
   {
-    taxisptr->fc_unit = unit;
+    taxisP->fc_unit = unit;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -464,11 +455,11 @@ taxisDefForecastTunit(int taxisID, int unit)
 void
 taxisDefForecastPeriod(int taxisID, double fc_period)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (IS_NOT_EQUAL(taxisptr->fc_period, fc_period))
+  if (is_not_equal(taxisP->fc_period, fc_period))
   {
-    taxisptr->fc_period = fc_period;
+    taxisP->fc_period = fc_period;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -476,11 +467,11 @@ taxisDefForecastPeriod(int taxisID, double fc_period)
 void
 taxisDefNumavg(int taxisID, int numavg)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->numavg != numavg)
+  if (taxisP->numavg != numavg)
   {
-    taxisptr->numavg = numavg;
+    taxisP->numavg = numavg;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -492,25 +483,25 @@ taxisDefNumavg(int taxisID, int numavg)
 int
 taxisInqType(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return taxisptr->type;
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  return taxisP->type;
 }
 
 int
 taxisHasBounds(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return (int) taxisptr->hasBounds;
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  return (int) taxisP->hasBounds;
 }
 
 void
 taxisWithBounds(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->hasBounds == false)
+  if (taxisP->hasBounds == false)
   {
-    taxisptr->hasBounds = true;
+    taxisP->hasBounds = true;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -518,11 +509,11 @@ taxisWithBounds(int taxisID)
 void
 taxisDeleteBounds(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->hasBounds)
+  if (taxisP->hasBounds)
   {
-    taxisptr->hasBounds = false;
+    taxisP->hasBounds = false;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -530,24 +521,24 @@ taxisDeleteBounds(int taxisID)
 void
 taxisCopyTimestep(int taxisID2, int taxisID1)
 {
-  taxis_t *taxisptr1 = (taxis_t *) reshGetVal(taxisID1, &taxisOps), *taxisptr2 = (taxis_t *) reshGetVal(taxisID2, &taxisOps);
+  taxis_t *taxisP1 = (taxis_t *) reshGetVal(taxisID1, &taxisOps), *taxisP2 = (taxis_t *) reshGetVal(taxisID2, &taxisOps);
 
   reshLock();
 
   // reference date/time and units can't be changed after streamDefVlist()!
 
-  taxisptr2->sDateTime = taxisptr1->sDateTime;
-  taxisptr2->vDateTime = taxisptr1->vDateTime;
-  taxisptr2->fDateTime = taxisptr1->fDateTime;
+  taxisP2->sDateTime = taxisP1->sDateTime;
+  taxisP2->vDateTime = taxisP1->vDateTime;
+  taxisP2->fDateTime = taxisP1->fDateTime;
 
-  if (taxisptr2->hasBounds)
+  if (taxisP2->hasBounds)
   {
-    taxisptr2->vDateTime_lb = taxisptr1->vDateTime_lb;
-    taxisptr2->vDateTime_ub = taxisptr1->vDateTime_ub;
+    taxisP2->vDateTime_lb = taxisP1->vDateTime_lb;
+    taxisP2->vDateTime_ub = taxisP1->vDateTime_ub;
   }
 
-  taxisptr2->fc_unit = taxisptr1->fc_unit;
-  taxisptr2->fc_period = taxisptr1->fc_period;
+  taxisP2->fc_unit = taxisP1->fc_unit;
+  taxisP2->fc_period = taxisP1->fc_period;
 
   reshSetStatus(taxisID2, &taxisOps, RESH_DESYNC_IN_USE);
   reshUnlock();
@@ -556,22 +547,22 @@ taxisCopyTimestep(int taxisID2, int taxisID1)
 CdiDateTime
 taxisInqVdatetime(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return taxisptr->vDateTime;
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  return taxisP->vDateTime;
 }
 
 CdiDateTime
 taxisInqRdatetime(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (cdiDateTime_isNull(taxisptr->rDateTime))
+  if (cdiDateTime_isNull(taxisP->rDateTime))
   {
-    taxisptr->rDateTime = taxisptr->vDateTime;
+    taxisP->rDateTime = taxisP->vDateTime;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 
-  return taxisptr->rDateTime;
+  return taxisP->rDateTime;
 }
 
 /*
@@ -593,44 +584,44 @@ The function @func{taxisInqVdate} returns the verification date of a Time axis.
 int
 taxisInqVdate(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return (int) cdiDate_get(taxisptr->vDateTime.date);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  return (int) cdiDate_get(taxisP->vDateTime.date);
 }
 
 CdiDateTime
 taxisInqSdatetime(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return taxisptr->sDateTime;
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  return taxisP->sDateTime;
 }
 
 void
 taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  *vdate_lb = (int) cdiDate_get(taxisptr->vDateTime_lb.date);
-  *vdate_ub = (int) cdiDate_get(taxisptr->vDateTime_ub.date);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  *vdate_lb = (int) cdiDate_get(taxisP->vDateTime_lb.date);
+  *vdate_ub = (int) cdiDate_get(taxisP->vDateTime_ub.date);
 }
 
 void
 taxisInqVdatetimeBounds(int taxisID, CdiDateTime *vDateTime_lb, CdiDateTime *vDateTime_ub)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  *vDateTime_lb = taxisptr->vDateTime_lb;
-  *vDateTime_ub = taxisptr->vDateTime_ub;
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  *vDateTime_lb = taxisP->vDateTime_lb;
+  *vDateTime_ub = taxisP->vDateTime_ub;
 }
 
 void
 taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->hasBounds == false || (int) cdiDate_get(taxisptr->vDateTime_lb.date) != vdate_lb
-      || (int) cdiDate_get(taxisptr->vDateTime_ub.date) != vdate_ub)
+  if (taxisP->hasBounds == false || (int) cdiDate_get(taxisP->vDateTime_lb.date) != vdate_lb
+      || (int) cdiDate_get(taxisP->vDateTime_ub.date) != vdate_ub)
   {
-    taxisptr->vDateTime_lb.date = cdiDate_set(vdate_lb);
-    taxisptr->vDateTime_ub.date = cdiDate_set(vdate_ub);
-    taxisptr->hasBounds = true;
+    taxisP->vDateTime_lb.date = cdiDate_set(vdate_lb);
+    taxisP->vDateTime_ub.date = cdiDate_set(vdate_ub);
+    taxisP->hasBounds = true;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -638,14 +629,14 @@ taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub)
 void
 taxisDefVdatetimeBounds(int taxisID, CdiDateTime vDateTime_lb, CdiDateTime vDateTime_ub)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->hasBounds == false || cdiDateTime_isNE(taxisptr->vDateTime_lb, vDateTime_lb)
-      || cdiDateTime_isNE(taxisptr->vDateTime_ub, vDateTime_ub))
+  if (taxisP->hasBounds == false || cdiDateTime_isNE(taxisP->vDateTime_lb, vDateTime_lb)
+      || cdiDateTime_isNE(taxisP->vDateTime_ub, vDateTime_ub))
   {
-    taxisptr->vDateTime_lb = vDateTime_lb;
-    taxisptr->vDateTime_ub = vDateTime_ub;
-    taxisptr->hasBounds = true;
+    taxisP->vDateTime_lb = vDateTime_lb;
+    taxisP->vDateTime_ub = vDateTime_ub;
+    taxisP->hasBounds = true;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -669,29 +660,29 @@ The function @func{taxisInqVtime} returns the verification time of a Time axis.
 int
 taxisInqVtime(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return cdiTime_get(taxisptr->vDateTime.time);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  return cdiTime_get(taxisP->vDateTime.time);
 }
 
 void
 taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  *vtime_lb = cdiTime_get(taxisptr->vDateTime_lb.time);
-  *vtime_ub = cdiTime_get(taxisptr->vDateTime_ub.time);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  *vtime_lb = cdiTime_get(taxisP->vDateTime_lb.time);
+  *vtime_ub = cdiTime_get(taxisP->vDateTime_ub.time);
 }
 
 void
 taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->hasBounds == false || cdiTime_get(taxisptr->vDateTime_lb.time) != vtime_lb
-      || cdiTime_get(taxisptr->vDateTime_ub.time) != vtime_ub)
+  if (taxisP->hasBounds == false || cdiTime_get(taxisP->vDateTime_lb.time) != vtime_lb
+      || cdiTime_get(taxisP->vDateTime_ub.time) != vtime_ub)
   {
-    taxisptr->vDateTime_lb.time = cdiTime_set(vtime_lb);
-    taxisptr->vDateTime_ub.time = cdiTime_set(vtime_ub);
-    taxisptr->hasBounds = true;
+    taxisP->vDateTime_lb.time = cdiTime_set(vtime_lb);
+    taxisP->vDateTime_ub.time = cdiTime_set(vtime_ub);
+    taxisP->hasBounds = true;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -715,15 +706,15 @@ The function @func{taxisInqRdate} returns the reference date of a Time axis.
 int
 taxisInqRdate(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (cdiDateTime_isNull(taxisptr->rDateTime))
+  if (cdiDateTime_isNull(taxisP->rDateTime))
   {
-    taxisptr->rDateTime = taxisptr->vDateTime;
+    taxisP->rDateTime = taxisP->vDateTime;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 
-  return (int) cdiDate_get(taxisptr->rDateTime.date);
+  return (int) cdiDate_get(taxisP->rDateTime.date);
 }
 
 /*
@@ -745,15 +736,15 @@ The function @func{taxisInqRtime} returns the reference time of a Time axis.
 int
 taxisInqRtime(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (cdiDateTime_isNull(taxisptr->rDateTime))
+  if (cdiDateTime_isNull(taxisP->rDateTime))
   {
-    taxisptr->rDateTime = taxisptr->vDateTime;
+    taxisP->rDateTime = taxisP->vDateTime;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 
-  return cdiTime_get(taxisptr->rDateTime.time);
+  return cdiTime_get(taxisP->rDateTime.time);
 }
 
 /*
@@ -775,16 +766,16 @@ The function @func{taxisInqFdatetime} returns the forecast reference date/time o
 CdiDateTime
 taxisInqFdatetime(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (cdiDateTime_isNull(taxisptr->fDateTime))
+  if (cdiDateTime_isNull(taxisP->fDateTime))
   {
     // rDateTime is initialized from vDateTime if empty!
-    taxisptr->fDateTime = taxisInqRdatetime(taxisID);
+    taxisP->fDateTime = taxisInqRdatetime(taxisID);
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 
-  return taxisptr->fDateTime;
+  return taxisP->fDateTime;
 }
 
 /*
@@ -809,90 +800,90 @@ The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_PROLEP
 int
 taxisInqCalendar(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return taxisptr->calendar;
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  return taxisP->calendar;
 }
 
 int
 taxisInqTunit(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return taxisptr->unit;
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  return taxisP->unit;
 }
 
 int
 taxisInqForecastTunit(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return taxisptr->fc_unit;
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  return taxisP->fc_unit;
 }
 
 double
 taxisInqForecastPeriod(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return taxisptr->fc_period;
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  return taxisP->fc_period;
 }
 
 int
 taxisInqNumavg(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return taxisptr->numavg;
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  return taxisP->numavg;
 }
 
 taxis_t *
 taxis_to_pointer(int taxisID)
 {
-  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return taxisptr;
+  taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
+  return taxisP;
 }
 
 void
-ptaxisDefDatatype(taxis_t *taxisptr, int datatype)
+ptaxisDefDatatype(taxis_t *taxisP, int datatype)
 {
-  cdiDefVarKeyInt(&taxisptr->keys, CDI_KEY_DATATYPE, datatype);
+  cdiDefVarKeyInt(&taxisP->keys, CDI_KEY_DATATYPE, datatype);
 }
 
 void
-ptaxisDefName(taxis_t *taxisptr, const char *name)
+ptaxisDefName(taxis_t *taxisP, const char *name)
 {
   if (name)
   {
     size_t len = strlen(name);
-    delete_refcount_string(taxisptr->name);
-    char *taxisname = taxisptr->name = new_refcount_string(len);
-    strcpy(taxisname, name);
+    delete_refcount_string(taxisP->name);
+    char *taxisname = taxisP->name = new_refcount_string(len);
+    strncpy(taxisname, name, len + 1);
   }
 }
 
 void
-ptaxisDefLongname(taxis_t *taxisptr, const char *longname)
+ptaxisDefLongname(taxis_t *taxisP, const char *longname)
 {
   if (longname)
   {
     size_t len = strlen(longname);
-    delete_refcount_string(taxisptr->longname);
-    char *taxislongname = taxisptr->longname = new_refcount_string(len);
-    strcpy(taxislongname, longname);
+    delete_refcount_string(taxisP->longname);
+    char *taxislongname = taxisP->longname = new_refcount_string(len);
+    strncpy(taxislongname, longname, len + 1);
   }
 }
 
 char *
-ptaxisAllocUnits(taxis_t *taxisptr, size_t len)
+ptaxisAllocUnits(taxis_t *taxisP, size_t len)
 {
-  delete_refcount_string(taxisptr->units);
-  return taxisptr->units = new_refcount_string(len);
+  delete_refcount_string(taxisP->units);
+  return taxisP->units = new_refcount_string(len);
 }
 
 void
-ptaxisDefUnits(taxis_t *taxisptr, const char *units)
+ptaxisDefUnits(taxis_t *taxisP, const char *units)
 {
   if (units)
   {
     size_t len = strlen(units);
-    char *taxisunits = ptaxisAllocUnits(taxisptr, len);
-    strcpy(taxisunits, units);
+    char *taxisunits = ptaxisAllocUnits(taxisP, len);
+    strncpy(taxisunits, units, len + 1);
   }
 }
 
@@ -998,7 +989,7 @@ cdi_encode_timevalue(int64_t days, double secs, int timeunit)
 static CdiDateTime
 rtimeval2datetime(double timevalue, const taxis_t *taxis)
 {
-  if (IS_EQUAL(timevalue, 0.0)) return taxis->rDateTime;
+  if (is_equal(timevalue, 0.0)) return taxis->rDateTime;
 
   int timeunits = taxis->unit;
   int calendar = taxis->calendar;
@@ -1235,7 +1226,7 @@ cdi_set_forecast_period(double timevalue, taxis_t *taxis)
   int timeunits = taxis->fc_unit;
   int calendar = taxis->calendar;
 
-  if (cdiDateTime_isNull(taxis->vDateTime) && DBL_IS_EQUAL(timevalue, 0.0)) return;
+  if (cdiDateTime_isNull(taxis->vDateTime) && dbl_is_equal(timevalue, 0.0)) return;
 
   if (timeunits == TUNIT_MONTH && calendar == CALENDAR_360DAYS)
   {
@@ -1351,7 +1342,6 @@ ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->fc_unit = source->fc_unit;
   dest->fc_period = source->fc_period;
 
-  dest->climatology = source->climatology;
   delete_refcount_string(dest->name);
   delete_refcount_string(dest->longname);
   delete_refcount_string(dest->units);
@@ -1367,13 +1357,12 @@ ptaxisCopy(taxis_t *dest, taxis_t *source)
 }
 
 static void
-taxisPrintKernel(taxis_t *taxisptr, FILE *fp)
+taxis_print(taxis_t *taxisP, FILE *fp)
 {
   int vdate_lb, vdate_ub;
   int vtime_lb, vtime_ub;
-
-  taxisInqVdateBounds(taxisptr->self, &vdate_lb, &vdate_ub);
-  taxisInqVtimeBounds(taxisptr->self, &vtime_lb, &vtime_ub);
+  taxisInqVdateBounds(taxisP->self, &vdate_lb, &vdate_ub);
+  taxisInqVtimeBounds(taxisP->self, &vtime_lb, &vtime_ub);
 
   fprintf(fp,
           "#\n"
@@ -1399,197 +1388,24 @@ taxisPrintKernel(taxis_t *taxisptr, FILE *fp)
           "fc_unit     = %d\n"
           "fc_period   = %g\n"
           "\n",
-          taxisptr->self, taxisptr->self, taxisptr->type, (int) cdiDate_get(taxisptr->vDateTime.date),
-          cdiTime_get(taxisptr->vDateTime.time), (int) cdiDate_get(taxisptr->rDateTime.date), cdiTime_get(taxisptr->rDateTime.time),
-          (int) cdiDate_get(taxisptr->fDateTime.date), cdiTime_get(taxisptr->fDateTime.time), taxisptr->calendar, taxisptr->unit,
-          taxisptr->numavg, (int) taxisptr->climatology, (int) taxisptr->hasBounds, vdate_lb, vtime_lb, vdate_ub, vtime_ub,
-          taxisptr->fc_unit, taxisptr->fc_period);
+          taxisP->self, taxisP->self, taxisP->type, (int) cdiDate_get(taxisP->vDateTime.date), cdiTime_get(taxisP->vDateTime.time),
+          (int) cdiDate_get(taxisP->rDateTime.date), cdiTime_get(taxisP->rDateTime.time), (int) cdiDate_get(taxisP->fDateTime.date),
+          cdiTime_get(taxisP->fDateTime.time), taxisP->calendar, taxisP->unit, taxisP->numavg, (int) taxisP->climatology,
+          (int) taxisP->hasBounds, vdate_lb, vtime_lb, vdate_ub, vtime_ub, taxisP->fc_unit, taxisP->fc_period);
 }
 
 static int
-taxisCompareP(void *taxisptr1, void *taxisptr2)
+taxis_compare(void *taxisP1, void *taxisP2)
 {
-  const taxis_t *t1 = (const taxis_t *) taxisptr1, *t2 = (const taxis_t *) taxisptr2;
+  const taxis_t *t1 = (const taxis_t *) taxisP1, *t2 = (const taxis_t *) taxisP2;
 
   xassert(t1 && t2);
 
   return !(t1->type == t2->type && cdiDateTime_isEQ(t1->vDateTime, t2->vDateTime) && cdiDateTime_isEQ(t1->rDateTime, t2->rDateTime)
            && cdiDateTime_isEQ(t1->fDateTime, t2->fDateTime) && t1->calendar == t2->calendar && t1->unit == t2->unit
-           && t1->fc_unit == t2->fc_unit && IS_EQUAL(t1->fc_period, t2->fc_period) && t1->numavg == t2->numavg
+           && t1->fc_unit == t2->fc_unit && is_equal(t1->fc_period, t2->fc_period) && t1->numavg == t2->numavg
            && t1->climatology == t2->climatology && t1->hasBounds == t2->hasBounds
            && cdiDateTime_isEQ(t1->vDateTime_lb, t2->vDateTime_lb) && cdiDateTime_isEQ(t1->vDateTime_ub, t2->vDateTime_ub));
-}
-
-static int
-taxisTxCode(void *taxisptr)
-{
-  (void) taxisptr;
-  return TAXIS;
-}
-
-enum
-{
-  TAXIS_PACK_INT_SELF,
-  TAXIS_PACK_INT_TYPE,
-  TAXIS_PACK_INT_VDATE,
-  TAXIS_PACK_INT_VTIME,
-  TAXIS_PACK_INT_RDATE,
-  TAXIS_PACK_INT_RTIME,
-  TAXIS_PACK_INT_FDATE,
-  TAXIS_PACK_INT_FTIME,
-  TAXIS_PACK_INT_CALENDAR,
-  TAXIS_PACK_INT_UNIT,
-  TAXIS_PACK_INT_FC_UNIT,
-  TAXIS_PACK_INT_NUMAVG,
-  TAXIS_PACK_INT_CLIMATOLOGY,
-  TAXIS_PACK_INT_HAS_BOUNDS,
-  TAXIS_PACK_INT_VDATE_LB,
-  TAXIS_PACK_INT_VDATE_UB,
-  TAXIS_PACK_INT_VTIME_LB,
-  TAXIS_PACK_INT_VTIME_UB,
-  TAXIS_PACK_INT_NAMELEN,
-  TAXIS_PACK_INT_LNAMELEN,
-  TAXIS_PACK_INT_UNITSLEN,
-  taxisNint
-};
-
-enum
-{
-  TAXIS_PACK_FC_PERIOD,
-  taxisNdouble
-};
-
-static int
-taxisGetPackSize(void *p, void *context)
-{
-  taxis_t *taxisptr = (taxis_t *) p;
-  int packBufferSize = serializeGetSize(taxisNint, CDI_DATATYPE_INT, context)
-                       + serializeGetSize(taxisNdouble, CDI_DATATYPE_FLT64, context)
-                       + (taxisptr->name ? serializeGetSize((int) strlen(taxisptr->name), CDI_DATATYPE_TXT, context) : 0)
-                       + (taxisptr->longname ? serializeGetSize((int) strlen(taxisptr->longname), CDI_DATATYPE_TXT, context) : 0)
-                       + (taxisptr->units ? serializeGetSize((int) strlen(taxisptr->units), CDI_DATATYPE_TXT, context) : 0)
-                       + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
-  packBufferSize += serializeKeysGetPackSize(&taxisptr->keys, context);
-  return packBufferSize;
-}
-
-int
-taxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id)
-{
-#define adaptKey(key) (namespaceAdaptKey((key), originNamespace))
-  taxis_t *taxisP;
-  int intBuffer[taxisNint];
-  double dblBuffer[taxisNdouble];
-  uint32_t d;
-
-  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, intBuffer, taxisNint, CDI_DATATYPE_INT, context);
-  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, dblBuffer, taxisNdouble, CDI_DATATYPE_FLT64, context);
-  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);
-
-  xassert(cdiCheckSum(CDI_DATATYPE_INT, taxisNint, intBuffer) == d);
-
-  cdiResH targetID = force_id ? adaptKey(intBuffer[TAXIS_PACK_INT_SELF]) : CDI_UNDEFID;
-  taxisP = taxisNewEntry(targetID);
-
-  xassert(!force_id || targetID == taxisP->self);
-
-  taxisP->type = intBuffer[TAXIS_PACK_INT_TYPE];
-  taxisP->vDateTime.date = cdiDate_set(intBuffer[TAXIS_PACK_INT_VDATE]);
-  taxisP->vDateTime.time = cdiTime_set(intBuffer[TAXIS_PACK_INT_VTIME]);
-  taxisP->rDateTime.date = cdiDate_set(intBuffer[TAXIS_PACK_INT_RDATE]);
-  taxisP->rDateTime.time = cdiTime_set(intBuffer[TAXIS_PACK_INT_RTIME]);
-  taxisP->fDateTime.date = cdiDate_set(intBuffer[TAXIS_PACK_INT_FDATE]);
-  taxisP->fDateTime.time = cdiTime_set(intBuffer[TAXIS_PACK_INT_FTIME]);
-  taxisP->calendar = intBuffer[TAXIS_PACK_INT_CALENDAR];
-  taxisP->unit = intBuffer[TAXIS_PACK_INT_UNIT];
-  taxisP->fc_unit = intBuffer[TAXIS_PACK_INT_FC_UNIT];
-  taxisP->numavg = intBuffer[TAXIS_PACK_INT_NUMAVG];
-  taxisP->climatology = intBuffer[TAXIS_PACK_INT_CLIMATOLOGY];
-  taxisP->hasBounds = (bool) intBuffer[TAXIS_PACK_INT_HAS_BOUNDS];
-  taxisP->vDateTime_lb.date = cdiDate_set(intBuffer[TAXIS_PACK_INT_VDATE_LB]);
-  taxisP->vDateTime_lb.time = cdiTime_set(intBuffer[TAXIS_PACK_INT_VDATE_UB]);
-  taxisP->vDateTime_ub.date = cdiDate_set(intBuffer[TAXIS_PACK_INT_VTIME_LB]);
-  taxisP->vDateTime_ub.time = cdiTime_set(intBuffer[TAXIS_PACK_INT_VTIME_UB]);
-  taxisP->fc_period = dblBuffer[TAXIS_PACK_FC_PERIOD];
-  if (intBuffer[TAXIS_PACK_INT_NAMELEN])
-  {
-    int len = intBuffer[TAXIS_PACK_INT_NAMELEN];
-    char *name = new_refcount_string((size_t) len);
-    serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, name, len, CDI_DATATYPE_TXT, context);
-    name[len] = '\0';
-    taxisP->name = name;
-  }
-  if (intBuffer[TAXIS_PACK_INT_LNAMELEN])
-  {
-    int len = intBuffer[TAXIS_PACK_INT_LNAMELEN];
-    char *longname = new_refcount_string((size_t) len);
-    serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, longname, len, CDI_DATATYPE_TXT, context);
-    longname[len] = '\0';
-    taxisP->longname = longname;
-  }
-  if (intBuffer[TAXIS_PACK_INT_UNITSLEN])
-  {
-    int len = intBuffer[TAXIS_PACK_INT_UNITSLEN];
-    char *units = new_refcount_string((size_t) len);
-    serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, units, len, CDI_DATATYPE_TXT, context);
-    units[len] = '\0';
-    taxisP->units = units;
-  }
-
-  serializeKeysUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &taxisP->keys, context);
-
-  reshSetStatus(taxisP->self, &taxisOps, reshGetStatus(taxisP->self, &taxisOps) & ~RESH_SYNC_BIT);
-#undef adaptKey
-
-  return taxisP->self;
-}
-
-static void
-taxisPack(void *voidP, void *packBuffer, int packBufferSize, int *packBufferPos, void *context)
-{
-  taxis_t *taxisP = (taxis_t *) voidP;
-  int nameLen, lnameLen, unitsLen;
-  uint32_t d;
-
-  {
-    int intBuffer[taxisNint];
-    intBuffer[TAXIS_PACK_INT_SELF] = taxisP->self;
-    intBuffer[TAXIS_PACK_INT_TYPE] = taxisP->type;
-    intBuffer[TAXIS_PACK_INT_VDATE] = (int) cdiDate_get(taxisP->vDateTime.date);
-    intBuffer[TAXIS_PACK_INT_VTIME] = cdiTime_get(taxisP->vDateTime.time);
-    intBuffer[TAXIS_PACK_INT_RDATE] = (int) cdiDate_get(taxisP->rDateTime.date);
-    intBuffer[TAXIS_PACK_INT_RTIME] = cdiTime_get(taxisP->rDateTime.time);
-    intBuffer[TAXIS_PACK_INT_FDATE] = (int) cdiDate_get(taxisP->fDateTime.date);
-    intBuffer[TAXIS_PACK_INT_FTIME] = cdiTime_get(taxisP->fDateTime.time);
-    intBuffer[TAXIS_PACK_INT_CALENDAR] = taxisP->calendar;
-    intBuffer[TAXIS_PACK_INT_UNIT] = taxisP->unit;
-    intBuffer[TAXIS_PACK_INT_FC_UNIT] = taxisP->fc_unit;
-    intBuffer[TAXIS_PACK_INT_NUMAVG] = taxisP->numavg;
-    intBuffer[TAXIS_PACK_INT_CLIMATOLOGY] = taxisP->climatology;
-    intBuffer[TAXIS_PACK_INT_HAS_BOUNDS] = taxisP->hasBounds;
-    intBuffer[TAXIS_PACK_INT_VDATE_LB] = (int) cdiDate_get(taxisP->vDateTime_lb.date);
-    intBuffer[TAXIS_PACK_INT_VDATE_UB] = cdiTime_get(taxisP->vDateTime_lb.time);
-    intBuffer[TAXIS_PACK_INT_VTIME_LB] = (int) cdiDate_get(taxisP->vDateTime_ub.date);
-    intBuffer[TAXIS_PACK_INT_VTIME_UB] = cdiTime_get(taxisP->vDateTime_ub.time);
-    intBuffer[TAXIS_PACK_INT_NAMELEN] = nameLen = taxisP->name ? (int) strlen(taxisP->name) : 0;
-    intBuffer[TAXIS_PACK_INT_LNAMELEN] = lnameLen = taxisP->longname ? (int) strlen(taxisP->longname) : 0;
-    intBuffer[TAXIS_PACK_INT_UNITSLEN] = unitsLen = taxisP->units ? (int) strlen(taxisP->units) : 0;
-    serializePack(intBuffer, taxisNint, CDI_DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
-    d = cdiCheckSum(CDI_DATATYPE_INT, taxisNint, intBuffer);
-  }
-
-  {
-    double dblBuffer[taxisNdouble];
-    dblBuffer[TAXIS_PACK_FC_PERIOD] = taxisP->fc_period;
-    serializePack(dblBuffer, taxisNdouble, CDI_DATATYPE_FLT64, packBuffer, packBufferSize, packBufferPos, context);
-  }
-  serializePack(&d, 1, CDI_DATATYPE_UINT32, packBuffer, packBufferSize, packBufferPos, context);
-  if (taxisP->name) serializePack(taxisP->name, nameLen, CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
-  if (taxisP->longname)
-    serializePack(taxisP->longname, lnameLen, CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
-  if (taxisP->units) serializePack(taxisP->units, unitsLen, CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
-
-  serializeKeysPack(&taxisP->keys, packBuffer, packBufferSize, packBufferPos, context);
 }
 
 /*

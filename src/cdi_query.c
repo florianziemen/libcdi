@@ -1,6 +1,5 @@
-/* DO NOT REMOVE the config.h include file under any circumstances,
- * it's very much needed on some platforms */
-#if defined(HAVE_CONFIG_H)
+/* DO NOT REMOVE the config.h include file under any circumstances, it's very much needed on some platforms */
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
@@ -12,7 +11,8 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "cdi.h"
+#include <stdbool.h>
+#include "cdi_query.h"
 #include "dmemory.h"
 
 struct CdiQuery
@@ -104,14 +104,14 @@ cdiQueryDelete(struct CdiQuery *query)
     if (query->numGroups)
     {
       for (int i = 0; i < query->numGroups; ++i) Free((void *) query->groups[i]);
-      Free(query->groups);
+      Free((void *) query->groups);
       Free(query->groupsFound);
     }
 
     if (query->numNames)
     {
       for (int i = 0; i < query->numNames; ++i) Free((void *) query->names[i]);
-      Free(query->names);
+      Free((void *) query->names);
       Free(query->namesFound);
     }
 
@@ -309,7 +309,7 @@ print_list_compact_float(int n, const double *list)
     {
       printf("/to/");
       double last = list[++i];
-      while ((i + 1) < n && (last + 1) == list[i + 1]) last = list[++i];
+      while ((i + 1) < n && (last + 1) == list[i + 1]) { last = list[++i]; }
       printf("%g", last);
     }
   }
@@ -374,7 +374,7 @@ cdiQueryNumEntriesFound(const struct CdiQuery *query)
     if (query->numCells) { numEntriesFound += sum_found(query->numCells, query->cellsFound); }
     if (query->numLayers) { numEntriesFound += sum_found(query->numLayers, query->layersFound); }
     if (query->numSteps) { numEntriesFound += sum_found(query->numSteps, query->stepsFound); }
-    if (query->numDates) { numEntriesFound += sum_found(query->numDates, query->datesFound); }
+    // if (query->numDates) { numEntriesFound += sum_found(query->numDates, query->datesFound); }
   }
 
   return numEntriesFound;
@@ -399,28 +399,6 @@ cdiQueryPrintEntriesNotFound(const struct CdiQuery *query)
         }
       }
 
-      if (query->numCells)
-      {
-        if (sum_not_found(query->numCells, query->cellsFound) > 0)
-        {
-          printf("Grid cell index not found:");
-          for (int i = 0; i < query->numCells; ++i)
-            if (!query->cellsFound[i]) printf(" %zu", query->cells[i]);
-          printf("\n");
-        }
-      }
-
-      if (query->numLayers)
-      {
-        if (sum_not_found(query->numLayers, query->layersFound) > 0)
-        {
-          printf("Layer not found:");
-          for (int i = 0; i < query->numLayers; ++i)
-            if (!query->layersFound[i]) printf(" %d", query->layers[i]);
-          printf("\n");
-        }
-      }
-
       if (query->numSteps)
       {
         if (sum_not_found(query->numSteps, query->stepsFound) > 0)
@@ -428,17 +406,6 @@ cdiQueryPrintEntriesNotFound(const struct CdiQuery *query)
           printf("Step not found:");
           for (int i = 0; i < query->numSteps; ++i)
             if (!query->stepsFound[i]) printf(" %d", query->steps[i]);
-          printf("\n");
-        }
-      }
-
-      if (query->numDates)
-      {
-        if (sum_not_found(query->numDates, query->datesFound) > 0)
-        {
-          printf("Date not found:");
-          for (int i = 0; i < query->numDates; ++i)
-            if (!query->datesFound[i]) printf(" %g", query->dates[i]);
           printf("\n");
         }
       }
@@ -477,38 +444,6 @@ cdiQueryName(struct CdiQuery *query, const char *name)
 
   return -1;
 }
-/*
-int
-cdiQueryCell(struct CdiQuery *query, size_t cell)
-{
-  if (query && query->numCells)
-  {
-    for (int i = 0; i < query->numCells; ++i)
-      if (query->cells[i] == cell)
-      {
-        query->cellsFound[i] = true;
-        return 0;
-      }
-  }
-
-  return -1;
-}
-
-int
-cdiQueryLayer(struct CdiQuery *query, int layer)
-{
-  if (query && query->numLayers)
-  {
-    for (int i = 0; i < query->numLayers; ++i)
-      if (query->layers[i] == layer)
-      {
-        query->layersFound[i] = true;
-        return 0;
-      }
-  }
-
-  return -1;
-}
 
 int
 cdiQueryStep(struct CdiQuery *query, int step)
@@ -525,4 +460,3 @@ cdiQueryStep(struct CdiQuery *query, int step)
 
   return -1;
 }
-*/

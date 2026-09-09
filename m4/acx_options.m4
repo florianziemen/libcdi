@@ -27,41 +27,6 @@ AS_CASE([$with_threads],
 AC_SUBST([THREADS_INCLUDE])
 AC_SUBST([THREADS_LIBS])
 #  ----------------------------------------------------------------------
-#  Compile application with FDB5 library
-FDB5_INCLUDE=''
-FDB5_LIBS=''
-AC_ARG_WITH([fdb5],
-            [AS_HELP_STRING([--with-fdb5=<yes|no|directory> (default=no)],[location of fdb5 library (optional)])],
-            [AS_CASE(["$with_fdb5"],
-                     [no],[AC_MSG_CHECKING([for fdb5 library])
-                           AC_MSG_RESULT([suppressed])],
-                     [yes],[AC_CHECK_HEADERS([fdb5/api/fdb_c.h],,
-                                             [AC_MSG_ERROR([Could not find fdb5/api/fdb_c.h])],
-                                             [AC_INCLUDES_DEFAULT])
-                            AC_SEARCH_LIBS([fdb_initialise],
-                                           [fdb5],
-                                           [AC_DEFINE([HAVE_LIBFDB5],[1],[Define to 1 for FDB5 support])],
-                                           [AC_MSG_ERROR([Could not link to fdb5])])
-                            FDB5_LIBS=" -lfdb5"],
-                     [*],[FDB5_ROOT=$with_fdb5
-                          AS_IF([test -d "$FDB5_ROOT"],
-                                [LDFLAGS="-L$FDB5_ROOT/lib $LDFLAGS"
-                                 CPPFLAGS="-I$FDB5_ROOT/include $CPPFLAGS"
-                                 AC_CHECK_HEADERS([fdb5/api/fdb_c.h],,
-                                                  [AC_MSG_ERROR([Could not find fdb5/api/fdb_c.h])],
-                                                  [AC_INCLUDES_DEFAULT])
-                                 AC_SEARCH_LIBS([fdb_initialise],
-                                                [fdb5],
-                                                [AC_DEFINE([HAVE_LIBFDB5],[1],[Define to 1 for FDB5 support])],
-                                                [AC_MSG_ERROR([Could not link to fdb5])])
-                                 FDB5_LIBS=" -L$FDB5_ROOT/lib -lfdb5"
-                                 FDB5_INCLUDE=" -I$FDB5_ROOT/include"],
-                                [AC_MSG_NOTICE([$FDB5_ROOT is not a directory! FDB5 suppressed])])])],
-            [AC_MSG_CHECKING([for fdb5 library])
-             AC_MSG_RESULT([suppressed])])
-AC_SUBST([FDB5_INCLUDE])
-AC_SUBST([FDB5_LIBS])
-#  ----------------------------------------------------------------------
 #  Compile application with SZLIB library, needed for GRIB1
 SZLIB_INCLUDE=''
 SZLIB_LIBS=''

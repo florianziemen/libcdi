@@ -1,6 +1,6 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined(HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
@@ -60,7 +60,7 @@ get_time_units(size_t len, const char *ptu)
     if (strStartsWith(ptu, "calendar_month")) return TUNIT_MONTH;
     if (strStartsWith(ptu, "year"))           return TUNIT_YEAR;
   }
-  else if (len == 1 && ptu[0] == 's')         return TUNIT_SECOND;
+  else if (len == 1 && ptu[0] == 's')       { return TUNIT_SECOND; }
   // clang-format on
 
   return -1;

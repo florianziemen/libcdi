@@ -115,8 +115,11 @@ libcdi_la_SOURCES = \
   cdi_key.c \
   cdi_key.h \
   cdi_limits.h \
+  cdi_proj.h \
   cdi_query.c \
+  cdi_query.h \
   cdi_util.c \
+  cdi_utils.h \
   cdi_uuid.h \
   cgribex.h \
   cgribexlib.c \
@@ -141,6 +144,8 @@ libcdi_la_SOURCES = \
   gribapi_utilities.h \
   grid.c \
   grid.h \
+  grid_pack.c \
+  grid_pack.h \
   ieg.h \
   ieglib.c \
   input_file.c \
@@ -183,6 +188,8 @@ libcdi_la_SOURCES = \
   stream_gribapi.h \
   stream_ieg.c \
   stream_ieg.h \
+  stream_pack.c \
+  stream_pack.h \
   stream_read.c \
   stream_record.c \
   stream_scan.c \
@@ -200,6 +207,8 @@ libcdi_la_SOURCES = \
   tablepar.h \
   taxis.c \
   taxis.h \
+  taxis_pack.c \
+  taxis_pack.h \
   tsteps.c \
   util.c \
   varscan.c \
@@ -207,12 +216,16 @@ libcdi_la_SOURCES = \
   version.c \
   vlist.c \
   vlist.h \
+  vlist_pack.c \
+  vlist_pack.h \
   vlist_var.c \
   vlist_var.h \
   vlist_var_key.c \
   vlist_var_pack.c \
   zaxis.c \
-  zaxis.h
+  zaxis.h \
+  zaxis_pack.c \
+  zaxis_pack.h
 
 if ENABLE_CF_INTERFACE
 libcdi_la_SOURCES += \

@@ -50,10 +50,10 @@ typedef struct
   unsigned char *bds;
 } cgribex_handle;
 
-static void
+static inline void
 fill_intarr(int *iarr, int val, int n)
 {
-  for (int i = 0; i < n; ++i) iarr[i] = val;
+  memset(iarr, val, n * sizeof(int));
 }
 
 static void
@@ -400,7 +400,7 @@ cgribexGetGridLCC(int *isec2, int *isec4, grid_t *grid)
 }
 
 static bool
-cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, int iret)
+cgribexGetGrid(stream_t *streamP, int *isec2, int *isec4, grid_t *grid, int iret)
 {
   bool uvRelativeToGrid = false;
   bool compyinc = true;
@@ -412,7 +412,7 @@ cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, int ir
     gridtype = GRID_PROJECTION;
   }
 
-  if (streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED && iret != -801)
+  if (streamP->unreduced && gridtype == GRID_GAUSSIAN_REDUCED && iret != -801)
   {
     int nlon = 0;
     for (int ilat = 0; ilat < ISEC2_NumLat; ++ilat)
@@ -511,7 +511,7 @@ cgribexDefProjLCC(int *isec2, int gridID)
   {
     double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
     proj_lonlat_to_lcc_func(gpp, (size_t) 1, &x_0, &y_0);
-    if (IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv))
+    if (is_not_equal(x_0, gpp.mv) && is_not_equal(y_0, gpp.mv))
     {
       gpp.x_0 = -x_0;
       gpp.y_0 = -y_0;
@@ -528,7 +528,7 @@ cgribexGetGridsize(const int *isec4)
 }
 
 static void
-cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t recsize, off_t position, int comptype, int lmv,
+cgribexAddRecord(stream_t *streamP, cgribexrec_t *cgribexp, int param, size_t recsize, off_t position, int comptype, int lmv,
                  int iret)
 {
   int *isec1 = cgribexp->sec1;
@@ -539,11 +539,11 @@ cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t 
 
   int datatype = (ISEC4_NumBits > 0 && ISEC4_NumBits <= 32) ? ISEC4_NumBits : CDI_DATATYPE_PACK;
 
-  int vlistID = streamptr->vlistID;
-  int tsID = streamptr->curTsID;
-  int recID = recordNewEntry(streamptr, tsID);
-  recinfo_t *recinfo = &(streamptr->tsteps[tsID].recinfo[recID]);
-  record_t *record = &(streamptr->tsteps[tsID].records[recID]);
+  int vlistID = streamP->vlistID;
+  int tsID = streamP->curTsID;
+  int recID = recordNewEntry(streamP, tsID);
+  recinfo_t *recinfo = &(streamP->tsteps[tsID].recinfo[recID]);
+  record_t *record = &(streamP->tsteps[tsID].records[recID]);
 
   int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
 
@@ -561,24 +561,24 @@ cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t 
   record->tsteptype = (short) tsteptype;
   record->gridsize = cgribexGetGridsize(cgribexp->sec4);
 
-  grid_t *gridptr = (grid_t *) Malloc(sizeof(*gridptr));
-  bool uvRelativeToGrid = cgribexGetGrid(streamptr, isec2, isec4, gridptr, iret);
+  grid_t *gridP = (grid_t *) Malloc(sizeof(*gridP));
+  bool uvRelativeToGrid = cgribexGetGrid(streamP, isec2, isec4, gridP, iret);
 
-  struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
+  struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridP, 0);
   int gridID = gridAdded.Id;
   if (!gridAdded.isNew)
   {
-    grid_free(gridptr);
-    Free(gridptr);
+    grid_free(gridP);
+    Free(gridP);
   }
-  else if (gridptr->projtype == CDI_PROJ_RLL)
+  else if (gridP->projtype == CDI_PROJ_RLL)
   {
     double xpole = ISEC2_LonSP * 0.001 - 180;
     double ypole = -ISEC2_LatSP * 0.001;
     double angle = -FSEC2_RotAngle;
     gridDefParamRLL(gridID, xpole, ypole, angle);
   }
-  else if (gridptr->projtype == CDI_PROJ_LCC) { cgribexDefProjLCC(isec2, gridID); }
+  else if (gridP->projtype == CDI_PROJ_LCC) { cgribexDefProjLCC(isec2, gridID); }
 
   int zaxistype = grib1ltypeToZaxisType(leveltype);
   if (zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF)
@@ -642,8 +642,8 @@ cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t 
     varDefTable(varID, tableID);
   }
 
-  streamptr->tsteps[tsID].nallrecs++;
-  streamptr->nrecs++;
+  streamP->tsteps[tsID].nallrecs++;
+  streamP->nrecs++;
 }
 
 static void
@@ -685,7 +685,7 @@ cgribexDecodeHeader(cgribexrec_t *cgribexp, int *gribbuffer, int recsize, int *l
   fill_intarr(isec2, 0, 32);
 
   double *fsec4 = NULL;
-  gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4, ipunp, (int *) gribbuffer, recsize, &iword, "J", iret);
+  gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4, ipunp, gribbuffer, recsize, &iword, "J", iret);
 
   if (!(ISEC1_Sec2Or3Flag & 128)) isec2[0] = -1;  // default generic grid
 
@@ -760,7 +760,7 @@ cgribexDateTimeX(int *isec1, CdiDateTime *sDateTime)
 }
 
 int
-cgribexScanTimestep1(stream_t *streamptr)
+cgribexScanTimestep1(stream_t *streamP)
 {
   CdiDateTime vDateTime0;
   cdiDateTime_init(&vDateTime0);
@@ -776,16 +776,16 @@ cgribexScanTimestep1(stream_t *streamptr)
   bool fcast = false;
   char paramstr[32];
 
-  streamptr->curTsID = 0;
+  streamP->curTsID = 0;
 
-  cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->objectp;
+  cgribexrec_t *cgribexp = (cgribexrec_t *) streamP->record->objectp;
 
-  int tsID = tstepsNewEntry(streamptr);
+  int tsID = tstepsNewEntry(streamP);
   if (tsID != 0) Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
-  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+  taxis_t *taxis = &streamP->tsteps[tsID].taxis;
 
-  int fileID = streamptr->fileID;
+  int fileID = streamP->fileID;
 
   if (CDI_Skip_Records) cgribexSkipRecords(fileID);
 
@@ -798,7 +798,7 @@ cgribexScanTimestep1(stream_t *streamptr)
     if (recsize == 0)
     {
       if (nrecs == 0) Error("No GRIB records found!");
-      streamptr->ntsteps = 1;
+      streamP->ntsteps = 1;
       break;
     }
 
@@ -846,7 +846,7 @@ cgribexScanTimestep1(stream_t *streamptr)
 
       size_t gridsize = cgribexGetGridsize(cgribexp->sec4);
       compvar_t compVar = cgribexVarSet(param, level1, level2, leveltype, ISEC1_TimeRange, gridsize);
-      record_t *records = streamptr->tsteps[tsID].records;
+      record_t *records = streamP->tsteps[tsID].records;
       for (recID = 0; recID < nrecs; recID++)
       {
         if (cgribexVarCompare(&compVar, &records[recID], 0) == 0) break;
@@ -893,34 +893,34 @@ cgribexScanTimestep1(stream_t *streamptr)
       Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2,
               cdiDateTime_to_string(vDateTime));
 
-    cgribexAddRecord(streamptr, cgribexp, param, recsize, recpos, comptype, lmv, iret);
+    cgribexAddRecord(streamP, cgribexp, param, recsize, recpos, comptype, lmv, iret);
   }
 
-  streamptr->rtsteps = 1;
+  streamP->rtsteps = 1;
 
   if (nrecs == 0) return CDI_EUFSTRUCT;
 
-  cdi_generate_vars(streamptr);
+  cdi_generate_vars(streamP);
 
   taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
   int taxisID = taxisCreate(taxis->type);
 
-  int vlistID = streamptr->vlistID;
+  int vlistID = streamP->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
-  streamScanResizeRecords1(streamptr);
+  streamScanResizeRecords1(streamP);
 
-  streamptr->record->buffer = gribbuffer;
-  streamptr->record->buffersize = buffersize;
+  streamP->record->buffer = gribbuffer;
+  streamP->record->buffersize = buffersize;
 
-  streamScanTsFixNtsteps(streamptr, recpos);
-  streamScanTimeConstAdjust(streamptr, taxis);
+  streamScanTsFixNtsteps(streamP, recpos);
+  streamScanTimeConstAdjust(streamP, taxis);
 
   return 0;
 }
 
 int
-cgribexScanTimestep2(stream_t *streamptr)
+cgribexScanTimestep2(stream_t *streamP)
 {
   CdiDateTime vDateTime0;
   cdiDateTime_init(&vDateTime0);
@@ -931,30 +931,30 @@ cgribexScanTimestep2(stream_t *streamptr)
   bool warn_numavg = true;
   char paramstr[32];
 
-  streamptr->curTsID = 1;
+  streamP->curTsID = 1;
 
-  cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->objectp;
+  cgribexrec_t *cgribexp = (cgribexrec_t *) streamP->record->objectp;
   int *isec1 = cgribexp->sec1;
   int *isec2 = cgribexp->sec2;
 
-  int fileID = streamptr->fileID;
-  int vlistID = streamptr->vlistID;
+  int fileID = streamP->fileID;
+  int vlistID = streamP->vlistID;
 
-  void *gribbuffer = streamptr->record->buffer;
-  size_t buffersize = streamptr->record->buffersize;
+  void *gribbuffer = streamP->record->buffer;
+  size_t buffersize = streamP->record->buffersize;
 
-  int tsID = streamptr->rtsteps;
+  int tsID = streamP->rtsteps;
   if (tsID != 1) Error("Internal problem! unexpected timestep %d", tsID + 1);
 
-  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+  taxis_t *taxis = &streamP->tsteps[tsID].taxis;
 
-  fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+  fileSetPos(fileID, streamP->tsteps[tsID].position, SEEK_SET);
 
-  cdi_create_records(streamptr, tsID, true);
-  recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
-  record_t *records = streamptr->tsteps[tsID].records;
+  cdi_create_records(streamP, tsID, true);
+  recinfo_t *recinfo = streamP->tsteps[tsID].recinfo;
+  record_t *records = streamP->tsteps[tsID].records;
 
-  int nrecords = streamScanInitRecords2(streamptr);
+  int nrecords = streamScanInitRecords2(streamP);
 
   int nrecsScanned = nrecords;
   int rindex = 0;
@@ -966,7 +966,7 @@ cgribexScanTimestep2(stream_t *streamptr)
     recpos = fileGetPos(fileID);
     if (recsize == 0)
     {
-      streamptr->ntsteps = 2;
+      streamP->ntsteps = 2;
       break;
     }
 
@@ -1041,7 +1041,7 @@ cgribexScanTimestep2(stream_t *streamptr)
       else
       {
         recinfo[recID].used = true;
-        streamptr->tsteps[tsID].recIDs[rindex] = recID;
+        streamP->tsteps[tsID].recIDs[rindex] = recID;
       }
     }
     else
@@ -1056,7 +1056,7 @@ cgribexScanTimestep2(stream_t *streamptr)
       else
       {
         recinfo[recID].used = true;
-        streamptr->tsteps[tsID].recIDs[rindex] = recID;
+        streamP->tsteps[tsID].recIDs[rindex] = recID;
       }
     }
 
@@ -1064,7 +1064,7 @@ cgribexScanTimestep2(stream_t *streamptr)
       Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2,
               cdiDateTime_to_string(vDateTime));
 
-    if (cgribexVarCompare(&compVar, &streamptr->tsteps[tsID].records[recID], 0) != 0)
+    if (cgribexVarCompare(&compVar, &streamP->tsteps[tsID].records[recID], 0) != 0)
     {
       Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
               records[recID].ilevel, level1);
@@ -1078,8 +1078,8 @@ cgribexScanTimestep2(stream_t *streamptr)
     int gridID = vlistInqVarGrid(vlistID, varID);
     if (gridInqSize(gridID) == 1 && gridInqType(gridID) == GRID_LONLAT)
     {
-      if (IS_NOT_EQUAL(gridInqXval(gridID, 0), ISEC2_FirstLon * 0.001)
-          || IS_NOT_EQUAL(gridInqYval(gridID, 0), ISEC2_FirstLat * 0.001))
+      if (is_not_equal(gridInqXval(gridID, 0), ISEC2_FirstLon * 0.001)
+          || is_not_equal(gridInqYval(gridID, 0), ISEC2_FirstLat * 0.001))
         gridChangeType(gridID, GRID_TRAJECTORY);
     }
 
@@ -1097,20 +1097,20 @@ cgribexScanTimestep2(stream_t *streamptr)
     else
       vlistDefVarTimetype(vlistID, recinfo[recID].varID, TIME_CONSTANT);
   }
-  streamptr->tsteps[tsID].nrecs = nrecs;
+  streamP->tsteps[tsID].nrecs = nrecs;
 
-  streamptr->rtsteps = 2;
+  streamP->rtsteps = 2;
 
-  streamScanTsFixNtsteps(streamptr, recpos);
+  streamScanTsFixNtsteps(streamP, recpos);
 
-  streamptr->record->buffer = gribbuffer;
-  streamptr->record->buffersize = buffersize;
+  streamP->record->buffer = gribbuffer;
+  streamP->record->buffersize = buffersize;
 
   return 0;
 }
 
 int
-cgribexScanTimestep(stream_t *streamptr)
+cgribexScanTimestep(stream_t *streamP)
 {
   CdiDateTime vDateTime0;
   cdiDateTime_init(&vDateTime0);
@@ -1122,28 +1122,28 @@ cgribexScanTimestep(stream_t *streamptr)
   int nrecs = 0;
   char paramstr[32];
 
-  cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->objectp;
+  cgribexrec_t *cgribexp = (cgribexrec_t *) streamP->record->objectp;
   int *isec1 = cgribexp->sec1;
 
-  int tsID = streamptr->rtsteps;
-  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+  int tsID = streamP->rtsteps;
+  taxis_t *taxis = &streamP->tsteps[tsID].taxis;
 
-  if (streamptr->tsteps[tsID].recordSize == 0)
+  if (streamP->tsteps[tsID].recordSize == 0)
   {
-    void *gribbuffer = streamptr->record->buffer;
-    size_t buffersize = streamptr->record->buffersize;
+    void *gribbuffer = streamP->record->buffer;
+    size_t buffersize = streamP->record->buffersize;
 
-    cdi_create_records(streamptr, tsID, true);
-    recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
-    record_t *records = streamptr->tsteps[tsID].records;
+    cdi_create_records(streamP, tsID, true);
+    recinfo_t *recinfo = streamP->tsteps[tsID].recinfo;
+    record_t *records = streamP->tsteps[tsID].records;
 
-    nrecs = streamScanInitRecords(streamptr, tsID);
+    nrecs = streamScanInitRecords(streamP, tsID);
 
-    int fileID = streamptr->fileID;
+    int fileID = streamP->fileID;
 
-    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+    fileSetPos(fileID, streamP->tsteps[tsID].position, SEEK_SET);
 
-    int nrecsScanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs * (tsID - 1);
+    int nrecsScanned = streamP->tsteps[0].nallrecs + streamP->tsteps[1].nrecs * (tsID - 1);
     int rindex = 0;
     while (true)
     {
@@ -1153,7 +1153,7 @@ cgribexScanTimestep(stream_t *streamptr)
       recpos = fileGetPos(fileID);
       if (recsize == 0)
       {
-        streamptr->ntsteps = streamptr->rtsteps + 1;
+        streamP->ntsteps = streamP->rtsteps + 1;
         break;
       }
 
@@ -1163,7 +1163,7 @@ cgribexScanTimestep(stream_t *streamptr)
       size_t readsize = recsize;
       if (gribRead(fileID, gribbuffer, &readsize))
       {
-        Warning("Inconsistent timestep %d (GRIB record %d/%d)!", tsID + 1, rindex + 1, streamptr->tsteps[tsID].recordSize);
+        Warning("Inconsistent timestep %d (GRIB record %d/%d)!", tsID + 1, rindex + 1, streamP->tsteps[tsID].recordSize);
         break;
       }
 
@@ -1185,7 +1185,7 @@ cgribexScanTimestep(stream_t *streamptr)
       if (rindex == 0)
       {
         vDateTime0 = vDateTime;
-        int vlistID = streamptr->vlistID;
+        int vlistID = streamP->vlistID;
         int taxisID = vlistInqTaxis(vlistID);
         if (taxisInqType(taxisID) == TAXIS_RELATIVE)
         {
@@ -1218,7 +1218,7 @@ cgribexScanTimestep(stream_t *streamptr)
 
       for (vrecID = 0; vrecID < nrecs; vrecID++)
       {
-        recID = streamptr->tsteps[1].recIDs[vrecID];
+        recID = streamP->tsteps[1].recIDs[vrecID];
         if (cgribexVarCompare(&compVar, &records[recID], 0) == 0) break;
       }
 
@@ -1235,7 +1235,7 @@ cgribexScanTimestep(stream_t *streamptr)
       if (CDI_Inventory_Mode == 1)
       {
         recinfo[recID].used = true;
-        streamptr->tsteps[tsID].recIDs[rindex] = recID;
+        streamP->tsteps[tsID].recIDs[rindex] = recID;
       }
       else
       {
@@ -1253,7 +1253,7 @@ cgribexScanTimestep(stream_t *streamptr)
         else
         {
           recinfo[recID].used = true;
-          streamptr->tsteps[tsID].recIDs[rindex] = recID;
+          streamP->tsteps[tsID].recIDs[rindex] = recID;
         }
       }
 
@@ -1276,7 +1276,7 @@ cgribexScanTimestep(stream_t *streamptr)
 
     for (vrecID = 0; vrecID < nrecs; vrecID++)
     {
-      recID = streamptr->tsteps[tsID].recIDs[vrecID];
+      recID = streamP->tsteps[tsID].recIDs[vrecID];
       if (!recinfo[recID].used) break;
     }
 
@@ -1287,33 +1287,33 @@ cgribexScanTimestep(stream_t *streamptr)
       return CDI_EUFSTRUCT;
     }
 
-    streamptr->rtsteps++;
+    streamP->rtsteps++;
 
-    if (streamptr->ntsteps != streamptr->rtsteps)
+    if (streamP->ntsteps != streamP->rtsteps)
     {
-      tsID = tstepsNewEntry(streamptr);
-      if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
+      tsID = tstepsNewEntry(streamP);
+      if (tsID != streamP->rtsteps) Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID - 1].next = true;
-      streamptr->tsteps[tsID].position = recpos;
+      streamP->tsteps[tsID - 1].next = true;
+      streamP->tsteps[tsID].position = recpos;
     }
 
-    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
-    streamptr->tsteps[tsID].position = recpos;
+    fileSetPos(fileID, streamP->tsteps[tsID].position, SEEK_SET);
+    streamP->tsteps[tsID].position = recpos;
 
-    streamptr->record->buffer = gribbuffer;
-    streamptr->record->buffersize = buffersize;
+    streamP->record->buffer = gribbuffer;
+    streamP->record->buffersize = buffersize;
   }
 
-  if (nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs)
+  if (nrecs > 0 && nrecs < streamP->tsteps[tsID].nrecs)
   {
     Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
-    streamptr->ntsteps = tsID;
+    streamP->ntsteps = tsID;
   }
 
   /* this will need work for files containing more than INT_MAX timesteps! */
-  assert(streamptr->ntsteps <= INT_MAX);
-  return (int) streamptr->ntsteps;
+  assert(streamP->ntsteps <= INT_MAX);
+  return (int) streamP->ntsteps;
 }
 
 #ifdef gribWarning
@@ -1339,8 +1339,7 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
   float fsec2f[sizeof(cgribexp->fsec2) / sizeof(double)];
   float fsec3f[sizeof(cgribexp->fsec3) / sizeof(double)];
 
-  char hoper[2];
-  strcpy(hoper, unreduced ? "R" : "D");
+  const char *hoper = unreduced ? "R" : "D";
 
   FSEC3_MissVal = missval;
 
@@ -1364,7 +1363,7 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
     {
       float *restrict dataf = (float *) data;
       for (size_t i = 0; i < datasize; i++)
-        if ((fabs(dataf[i] - undef_pds) < undef_eps) || IS_EQUAL(dataf[i], FSEC3_MissVal))
+        if ((fabs(dataf[i] - undef_pds) < undef_eps) || is_equal(dataf[i], FSEC3_MissVal))
         {
           dataf[i] = (float) missval;
           (*numMissVals)++;
@@ -1374,7 +1373,7 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
     {
       double *restrict datad = (double *) data;
       for (size_t i = 0; i < datasize; i++)
-        if ((fabs(datad[i] - undef_pds) < undef_eps) || IS_EQUAL(datad[i], FSEC3_MissVal))
+        if ((fabs(datad[i] - undef_pds) < undef_eps) || is_equal(datad[i], FSEC3_MissVal))
         {
           datad[i] = missval;
           (*numMissVals)++;
@@ -1717,7 +1716,7 @@ cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
 
   struct CDI_GridProjParams gpp;
   gridInqParamsLCC(gridID, &gpp);
-  if (IS_EQUAL(gpp.x_0, gpp.mv) && IS_EQUAL(gpp.y_0, gpp.mv) && (IS_EQUAL(gpp.xval_0, gpp.mv) || IS_EQUAL(gpp.yval_0, gpp.mv)))
+  if (is_equal(gpp.x_0, gpp.mv) && is_equal(gpp.y_0, gpp.mv) && (is_equal(gpp.xval_0, gpp.mv) || is_equal(gpp.yval_0, gpp.mv)))
   {
     gpp.x_0 = gridInqXval(gridID, 0);
     gpp.y_0 = gridInqYval(gridID, 0);
@@ -1733,8 +1732,8 @@ cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
 
   double xinc = gridInqXinc(gridID);
   double yinc = gridInqYinc(gridID);
-  if (IS_EQUAL(xinc, 0.0)) xinc = gridInqXincInMeter(gridID);
-  if (IS_EQUAL(yinc, 0.0)) yinc = gridInqYincInMeter(gridID);
+  if (is_equal(xinc, 0.0)) xinc = gridInqXincInMeter(gridID);
+  if (is_equal(yinc, 0.0)) yinc = gridInqYincInMeter(gridID);
 
   ISEC2_GridType = GRIB1_GTYPE_LCC;
   ISEC2_NumLon = xsize;
@@ -1751,7 +1750,7 @@ cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
   ISEC2_Lambert_ProjFlag = 0;
   if (lsouth) gribbyte_set_bit(&ISEC2_Lambert_ProjFlag, 1);
 
-  bool earthIsOblate = (IS_EQUAL(gpp.a, 6378160.0) && IS_EQUAL(gpp.rf, 297.0));
+  bool earthIsOblate = (is_equal(gpp.a, 6378160.0) && is_equal(gpp.rf, 297.0));
   ISEC2_ResFlag = 0;
   if (ISEC2_Lambert_dx && ISEC2_Lambert_dy) gribbyte_set_bit(&ISEC2_ResFlag, 1);
   if (earthIsOblate) gribbyte_set_bit(&ISEC2_ResFlag, 2);

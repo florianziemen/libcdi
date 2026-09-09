@@ -48,11 +48,11 @@ typedef struct
   int item;
   int mtype;
   int line;
-  char filename[MEM_MAXNAME];
-  char functionname[MEM_MAXNAME];
-} MemTable_t;
+  char fileName[MEM_MAXNAME];
+  char funcName[MEM_MAXNAME];
+} MemEntry;
 
-static MemTable_t *memTable;
+static MemEntry *memTable;
 static size_t memTableSize = 0;
 static long memAccess = 0;
 
@@ -68,12 +68,7 @@ static const char *
 get_filename(const char *file)
 {
   const char *fnptr = strrchr(file, '/');
-  if (fnptr)
-    fnptr++;
-  else
-    fnptr = (char *) file;
-
-  return fnptr;
+  return (fnptr) ? fnptr++ : file;
 }
 
 void
@@ -83,14 +78,8 @@ memDebug(int debug)
   if (MEM_Debug && !MEM_Info) MEM_Info = 1;
 }
 
-// If we're not using GNU C, elide __attribute__
-#if !defined __GNUC__ && !defined __attribute__
-#define __attribute__(x) /*NOTHING*/
-#endif
-
-static void memInternalProblem(const char *caller, const char *fmt, ...) __attribute__((noreturn));
-
-static void memError(const char *caller, const char *file, int line, size_t size) __attribute__((noreturn));
+static _Noreturn void memInternalProblem(const char *caller, const char *fmt, ...);
+static _Noreturn void memError(const char *caller, const char *file, int line, size_t size);
 
 static void
 memInternalProblem(const char *caller, const char *fmt, ...)
@@ -127,13 +116,26 @@ memListPrintEntry(int mtype, int item, size_t size, void *ptr, const char *calle
   fprintf(stderr, "memory item %3d ", item);
   fprintf(stderr, "(%6zu byte) ", size);
   fprintf(stderr, "at %p", ptr);
-  if (file != NULL)
+  if (file)
   {
     fprintf(stderr, " line %4d", line);
     fprintf(stderr, " file %s", get_filename(file));
   }
-  if (caller != NULL) fprintf(stderr, " (%s)", caller);
+  if (caller) fprintf(stderr, " (%s)", caller);
   fprintf(stderr, "]\n");
+}
+
+static void
+printMemorySize(size_t bytes)
+{
+  if (bytes > 1024 * 1024 * 1024)
+    fprintf(stderr, "%5d GB\n", (int) (bytes / (1024 * 1024 * 1024)));
+  else if (bytes > 1024 * 1024)
+    fprintf(stderr, "%5d MB\n", (int) (bytes / (1024 * 1024)));
+  else if (bytes > 1024)
+    fprintf(stderr, "%5d KB\n", (int) (bytes / 1024));
+  else
+    fprintf(stderr, "%5d Byte\n", (int) bytes);
 }
 
 static void
@@ -143,9 +145,8 @@ memListPrintTable(void)
 
   for (size_t memID = 0; memID < memTableSize; memID++)
   {
-    if (memTable[memID].item != MEM_UNDEFID)
-      memListPrintEntry(memTable[memID].mtype, memTable[memID].item, memTable[memID].size * memTable[memID].nobj,
-                        memTable[memID].ptr, memTable[memID].functionname, memTable[memID].filename, memTable[memID].line);
+    MemEntry *m = &memTable[memID];
+    if (m->item != MEM_UNDEFID) memListPrintEntry(m->mtype, m->item, m->size * m->nobj, m->ptr, m->funcName, m->fileName, m->line);
   }
 
   if (MemObjs)
@@ -155,27 +156,13 @@ memListPrintTable(void)
     fprintf(stderr, "  Objects used              : %6u\n", (unsigned) MaxMemObjs);
     fprintf(stderr, "  Objects in use            : %6u\n", (unsigned) MemObjs);
     fprintf(stderr, "  Memory allocated          : ");
-    if (MemUsed > 1024 * 1024 * 1024)
-      fprintf(stderr, " %5d GB\n", (int) (MemUsed / (1024 * 1024 * 1024)));
-    else if (MemUsed > 1024 * 1024)
-      fprintf(stderr, " %5d MB\n", (int) (MemUsed / (1024 * 1024)));
-    else if (MemUsed > 1024)
-      fprintf(stderr, " %5d KB\n", (int) (MemUsed / (1024)));
-    else
-      fprintf(stderr, " %5d Byte\n", (int) MemUsed);
+    printMemorySize(MemUsed);
   }
 
   if (MaxMemUsed)
   {
     fprintf(stderr, "  Maximum memory allocated  : ");
-    if (MaxMemUsed > 1024 * 1024 * 1024)
-      fprintf(stderr, " %5d GB\n", (int) (MaxMemUsed / (1024 * 1024 * 1024)));
-    else if (MaxMemUsed > 1024 * 1024)
-      fprintf(stderr, " %5d MB\n", (int) (MaxMemUsed / (1024 * 1024)));
-    else if (MaxMemUsed > 1024)
-      fprintf(stderr, " %5d KB\n", (int) (MaxMemUsed / (1024)));
-    else
-      fprintf(stderr, " %5d Byte\n", (int) MaxMemUsed);
+    printMemorySize(MaxMemUsed);
   }
 }
 
@@ -197,7 +184,6 @@ static void
 memInit(void)
 {
   static int initDebugLevel = 0;
-
   if (!initDebugLevel)
   {
     memGetDebugLevel();
@@ -251,28 +237,34 @@ set_filename(const char *file, char *memEntyFilename)
     size_t len = strlen(filename);
     if (len > MEM_MAXNAME - 1) len = MEM_MAXNAME - 1;
 
-    (void) memcpy(memEntyFilename, filename, len);
+    memcpy(memEntyFilename, filename, len);
     memEntyFilename[len] = '\0';
   }
-  else { (void) strcpy(memEntyFilename, "unknown"); }
+  else
+  {
+    strcpy(memEntyFilename, "unknown");
+  }
 }
 
 static void
-set_functionname(const char *functionname, char *memEntyFunctionname)
+set_funcName(const char *funcName, char *memEntryFuncName)
 {
-  if (functionname)
+  if (funcName)
   {
-    size_t len = strlen(functionname);
-    if (len > MEM_MAXNAME - 1) len = MEM_MAXNAME - 1;
+    size_t len = strlen(funcName);
+    if (len > MEM_MAXNAME - 1) { len = MEM_MAXNAME - 1; }
 
-    (void) memcpy(memEntyFunctionname, functionname, len);
-    memEntyFunctionname[len] = '\0';
+    memcpy(memEntryFuncName, funcName, len);
+    memEntryFuncName[len] = '\0';
   }
-  else { (void) strcpy(memEntyFunctionname, "unknown"); }
+  else
+  {
+    strcpy(memEntryFuncName, "unknown");
+  }
 }
 
 static int
-memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj, const char *functionname, const char *file, int line)
+memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj, const char *funcName, const char *file, int line)
 {
   static int item = 0;
   size_t memID = 0;
@@ -281,9 +273,9 @@ memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj, const char *func
   if (memTableSize == 0)
   {
     memTableSize = 8;
-    size_t memSize = memTableSize * sizeof(MemTable_t);
-    memTable = (MemTable_t *) malloc(memSize);
-    if (memTable == NULL) memError(__func__, __FILE__, __LINE__, memSize);
+    size_t memSize = memTableSize * sizeof(MemEntry);
+    memTable = (MemEntry *) malloc(memSize);
+    if (!memTable) memError(__func__, __FILE__, __LINE__, memSize);
 
     for (size_t i = 0; i < memTableSize; i++) memTableInitEntry(i);
   }
@@ -300,9 +292,9 @@ memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj, const char *func
   if (memID == memTableSize)
   {
     memTableSize = 2 * memTableSize;
-    size_t memSize = memTableSize * sizeof(MemTable_t);
-    memTable = (MemTable_t *) realloc(memTable, memSize);
-    if (memTable == NULL) memError(__func__, __FILE__, __LINE__, memSize);
+    size_t memSize = memTableSize * sizeof(MemEntry);
+    memTable = (MemEntry *) realloc(memTable, memSize);
+    if (!memTable) memError(__func__, __FILE__, __LINE__, memSize);
 
     for (size_t i = memID; i < memTableSize; i++) memTableInitEntry(i);
   }
@@ -314,8 +306,8 @@ memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj, const char *func
   memTable[memID].mtype = mtype;
   memTable[memID].line = line;
 
-  set_filename(file, memTable[memID].filename);
-  set_functionname(functionname, memTable[memID].functionname);
+  set_filename(file, memTable[memID].fileName);
+  set_funcName(funcName, memTable[memID].funcName);
 
   MaxMemObjs++;
   MemObjs++;
@@ -326,7 +318,7 @@ memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj, const char *func
 }
 
 static int
-memListChangeEntry(intptr_t ptrold, void *ptr, size_t size, const char *functionname, const char *file, int line)
+memListChangeEntry(intptr_t ptrold, void *ptr, size_t size, const char *funcName, const char *file, int line)
 {
   int item = MEM_UNDEFID;
   size_t memID = 0;
@@ -345,7 +337,7 @@ memListChangeEntry(intptr_t ptrold, void *ptr, size_t size, const char *function
   {
     item = memTable[memID].item;
 
-    size_t sizeold = memTable[memID].size * memTable[memID].nobj;
+    size_t sizeOld = memTable[memID].size * memTable[memID].nobj;
 
     memTable[memID].ptr = ptr;
     memTable[memID].size = size;
@@ -353,10 +345,10 @@ memListChangeEntry(intptr_t ptrold, void *ptr, size_t size, const char *function
     memTable[memID].mtype = REALLOC_FUNC;
     memTable[memID].line = line;
 
-    set_filename(file, memTable[memID].filename);
-    set_functionname(functionname, memTable[memID].functionname);
+    set_filename(file, memTable[memID].fileName);
+    set_funcName(funcName, memTable[memID].funcName);
 
-    MemUsed -= sizeold;
+    MemUsed -= sizeOld;
     MemUsed += size;
     if (MemUsed > MaxMemUsed) MaxMemUsed = MemUsed;
   }
@@ -365,7 +357,7 @@ memListChangeEntry(intptr_t ptrold, void *ptr, size_t size, const char *function
 }
 
 void *
-memCalloc(size_t nobjs, size_t size, const char *file, const char *functionname, int line)
+memCalloc(size_t nobjs, size_t size, const char *file, const char *funcName, int line)
 {
   void *ptr = NULL;
 
@@ -380,21 +372,21 @@ memCalloc(size_t nobjs, size_t size, const char *file, const char *functionname,
       memAccess++;
 
       int item = MEM_UNDEFID;
-      if (ptr) item = memListNewEntry(CALLOC_FUNC, ptr, size, nobjs, functionname, file, line);
+      if (ptr) item = memListNewEntry(CALLOC_FUNC, ptr, size, nobjs, funcName, file, line);
 
-      if (MEM_Debug) memListPrintEntry(CALLOC_FUNC, item, size * nobjs, ptr, functionname, file, line);
+      if (MEM_Debug) memListPrintEntry(CALLOC_FUNC, item, size * nobjs, ptr, funcName, file, line);
     }
 
-    if (ptr == NULL && dmemory_ExitOnError) memError(functionname, file, line, size * nobjs);
+    if (ptr == NULL && dmemory_ExitOnError) memError(funcName, file, line, size * nobjs);
   }
   else
-    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", functionname, line, file);
+    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", funcName, line, file);
 
   return ptr;
 }
 
 void *
-memMalloc(size_t size, const char *file, const char *functionname, int line)
+memMalloc(size_t size, const char *file, const char *funcName, int line)
 {
   void *ptr = NULL;
 
@@ -409,21 +401,20 @@ memMalloc(size_t size, const char *file, const char *functionname, int line)
       memAccess++;
 
       int item = MEM_UNDEFID;
-      if (ptr) item = memListNewEntry(MALLOC_FUNC, ptr, size, 1, functionname, file, line);
-
-      if (MEM_Debug) memListPrintEntry(MALLOC_FUNC, item, size, ptr, functionname, file, line);
+      if (ptr) item = memListNewEntry(MALLOC_FUNC, ptr, size, 1, funcName, file, line);
+      if (MEM_Debug) memListPrintEntry(MALLOC_FUNC, item, size, ptr, funcName, file, line);
     }
 
-    if (ptr == NULL && dmemory_ExitOnError) memError(functionname, file, line, size);
+    if (ptr == NULL && dmemory_ExitOnError) memError(funcName, file, line, size);
   }
   else
-    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", functionname, line, file);
+    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", funcName, line, file);
 
   return ptr;
 }
 
 void *
-memRealloc(void *ptrold, size_t size, const char *file, const char *functionname, int line)
+memRealloc(void *ptrold, size_t size, const char *file, const char *funcName, int line)
 {
   void *ptr = NULL;
 
@@ -441,23 +432,23 @@ memRealloc(void *ptrold, size_t size, const char *file, const char *functionname
       int item = MEM_UNDEFID;
       if (ptr)
       {
-        item = memListChangeEntry(ptrold_, ptr, size, functionname, file, line);
-        if (item == MEM_UNDEFID) item = memListNewEntry(REALLOC_FUNC, ptr, size, 1, functionname, file, line);
+        item = memListChangeEntry(ptrold_, ptr, size, funcName, file, line);
+        if (item == MEM_UNDEFID) item = memListNewEntry(REALLOC_FUNC, ptr, size, 1, funcName, file, line);
       }
 
-      if (MEM_Debug) memListPrintEntry(REALLOC_FUNC, item, size, ptr, functionname, file, line);
+      if (MEM_Debug) memListPrintEntry(REALLOC_FUNC, item, size, ptr, funcName, file, line);
     }
 
-    if (ptr == NULL && dmemory_ExitOnError) memError(functionname, file, line, size);
+    if (ptr == NULL && dmemory_ExitOnError) memError(funcName, file, line, size);
   }
   else
-    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", functionname, line, get_filename(file));
+    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", funcName, line, get_filename(file));
 
   return ptr;
 }
 
 void
-memFree(void *ptr, const char *file, const char *functionname, int line)
+memFree(void *ptr, const char *file, const char *funcName, int line)
 {
   memInit();
 
@@ -467,13 +458,13 @@ memFree(void *ptr, const char *file, const char *functionname, int line)
     int item = memListDeleteEntry(ptr, &size);
     if (item >= 0)
     {
-      if (MEM_Debug) memListPrintEntry(FREE_FUNC, item, size, ptr, functionname, file, line);
+      if (MEM_Debug) memListPrintEntry(FREE_FUNC, item, size, ptr, funcName, file, line);
     }
     else
     {
       if (ptr && MEM_Debug)
         fprintf(stderr, "%s info: memory entry at %p not found. [line %4d file %s (%s)]\n", __func__, ptr, line, get_filename(file),
-                functionname);
+                funcName);
     }
   }
 

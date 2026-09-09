@@ -1,6 +1,6 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined(HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
@@ -50,9 +50,7 @@ static void tableDefNum(int tableID, int tablenum);
 static void
 tableDefEntry(int tableID, int id, int ltype, const char *name, const char *longname, const char *units)
 {
-  if (tableID >= 0 && tableID < MAX_TABLE && parTable[tableID].used) {}
-  else
-    Error("Invalid table ID %d", tableID);
+  if (!(tableID >= 0 && tableID < MAX_TABLE && parTable[tableID].used)) Error("Invalid table ID %d", tableID);
 
   int item = parTable[tableID].npars++;
   param_type *par = &parTable[tableID].pars[item];
@@ -408,15 +406,13 @@ tableFromEnv(int modelID, int tablenum)
   if (tablePath) lenp = strlen(tablePath);
   // if (tablePath) printf("tablePath = %s\n", tablePath);
   // if (tablename) printf("tableName = %s\n", tablename);
-  char *tablefile = (char *) malloc(lenp + lenf + 3);
-  if (tablePath)
-  {
-    strcpy(tablefile, tablePath);
-    strcat(tablefile, "/");
-  }
+  size_t len = lenp + lenf + 3;
+  char *tablefile = (char *) malloc(len);
+  if (tablePath) { snprintf(tablefile, len, "%s/%s", tablePath, tablename); }
   else
-    tablefile[0] = '\0';
-  strcat(tablefile, tablename);
+  {
+    snprintf(tablefile, len, "%s", tablename);
+  }
   // if (tablefile) printf("tableFile = %s\n", tablefile);
 
   int tableID = tableRead(tablefile);
@@ -442,7 +438,7 @@ tableInq(int modelID, int tablenum, const char *tablename)
 
   if (tablename)
   {
-    strcpy(tablefile, tablename);
+    snprintf(tablefile, sizeof(tablefile), "%s", tablename);
     /*
     printf("tableInq: tablefile = >%s<\n", tablefile);
     */
@@ -717,9 +713,7 @@ tableFWriteC(FILE *ptfp, int tableID)
 void
 tableInqEntry(int tableID, int id, int ltype, char *name, char *longname, char *units)
 {
-  if (((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID)) {}
-  else
-    Error("Invalid table ID %d", tableID);
+  if (!(((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID))) Error("Invalid table ID %d", tableID);
 
   if (tableID != CDI_UNDEFID)
   {

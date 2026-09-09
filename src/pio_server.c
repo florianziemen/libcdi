@@ -26,6 +26,7 @@
 #include "dmemory.h"
 #include "namespace.h"
 #include "taxis.h"
+#include "taxis_pack.h"
 #include "pio.h"
 #include "pio_cdf_int.h"
 #include "pio_comm.h"
@@ -91,7 +92,7 @@ static struct
   size_t numRetained;
   struct cacheRedist *retained;
   struct partDescPreset clientDeco;
-} * rxWin;
+} *rxWin;
 
 static struct
 {
@@ -328,7 +329,8 @@ findMaxDivision(unsigned npartMax, unsigned composite_div)
   for (int numAssigned = 1; numAssigned <= numFactors; ++numAssigned)
   {
     uint_fast32_t pattern = (UINT32_C(1) << numAssigned) - 1, lastPattern = pattern << (numFactors - numAssigned);
-    do {
+    do
+    {
       divAttempt = 1;
       /* loop over all factors */
       for (uint_fast32_t i = 0; i < (uint_fast32_t) numFactors; ++i)
@@ -583,7 +585,7 @@ streamMappingSpeculativeNew(int vlistID, struct partDescPreset clientDeco, const
       size_t elemSize = cdiPioElemSizeInference((size_t) varID, conversion);
       size_t recordDataSize = recordNumElem * elemSize;
       for (size_t lvl = 0; lvl < numLvl; ++lvl)
-        writtenRecords[++j] = (struct recordWrite){ .varID = varID, .level = (int) lvl, .dataSize = recordDataSize };
+        writtenRecords[++j] = (struct recordWrite) { .varID = varID, .level = (int) lvl, .dataSize = recordDataSize };
     }
   }
   result->numVars = nVars;
@@ -791,7 +793,10 @@ buildVarRedist(int headerIdx, size_t streamIdx,
     }
     if ((gatherXmap = cdiPioXmapCacheLookup(XmapCache, uids, partSizes))) { goto afterNewXmapCacheEntry; }
   }
-  else { tmpBuf = partSizes = Malloc(sizeof(*partSizes) * (numClients + 1)); }
+  else
+  {
+    tmpBuf = partSizes = Malloc(sizeof(*partSizes) * (numClients + 1));
+  }
   partSizes[0] = gatherExt.size;
   gatherXmap = buildVarXmap(partSizes, clientBuf, (size_t) headerIdx, dstList, partDescPreset, pioInterComm, collComm, varID, conf);
   if (cacheXmaps) { cdiPioXmapCacheAdd(XmapCache, uids, partSizes, gatherXmap); }
@@ -1007,9 +1012,9 @@ writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, void 
             = countVarChunkMissingVals(vlistID, varID, mapping, (size_t) (PPM_extents_size(3, varChunk)), conversion, data);
         /* write chunk */
         if (conversion == DATA_HEADER_DOUBLE)
-          streamWriteVarChunk(streamID, varID, (const int(*)[2]) myChunk, data, (int) numMissVals);
+          streamWriteVarChunk(streamID, varID, (const int (*)[2]) myChunk, data, (int) numMissVals);
         else
-          streamWriteVarChunkF(streamID, varID, (const int(*)[2]) myChunk, data, (int) numMissVals);
+          streamWriteVarChunkF(streamID, varID, (const int (*)[2]) myChunk, data, (int) numMissVals);
       }
     }
 }
@@ -1089,15 +1094,15 @@ cdiPioCloseFileOnRank(int rank)
 }
 
 static void
-cdiPioServerCdfDefVars(stream_t *streamptr)
+cdiPioServerCdfDefVars(stream_t *streamP)
 {
-  int rankOpen = cdiPioStream2Owner(streamptr->self);
+  int rankOpen = cdiPioStream2Owner(streamP->self);
   if (commInqIOMode() == PIO_NONE
 #ifdef HAVE_PARALLEL_NC4
       || rankOpen == CDI_PIO_COLLECTIVE_OPEN
 #endif
       || commInqRankColl() == rankOpen)
-    cdfDefCoordinateVars(streamptr);
+    cdfDefCoordinateVars(streamP);
 }
 
 static void
@@ -1176,7 +1181,7 @@ static void
 writeNetCDFStream(size_t streamIdx, struct streamMapping *mapping, void **data_, size_t *currentDataBufSize,
                   const struct cdiPioConf *conf)
 {
-  void (*writeNetCDFStream_)(size_t streamIdx, struct streamMapping * mapping, void **data_, size_t *currentDataBufSize,
+  void (*writeNetCDFStream_)(size_t streamIdx, struct streamMapping *mapping, void **data_, size_t *currentDataBufSize,
                              const struct cdiPioConf *conf)
       = writeNetCDFStreamSerial;
 #ifdef HAVE_PARALLEL_NC4
@@ -1212,7 +1217,7 @@ getLayout(size_t streamIdx)
       size_t varID = (size_t) varHeader[0].specific.dataRecord.varID;
       int offset = varHeader[0].offset;
       Xt_uid uid = unpackXTUID(varHeader[1].specific.partDesc.packedUID);
-      layout[client][varID] = (struct streamMemLayout){ .varPartIdxListUID = uid, .offset = offset, .conversion = conversion };
+      layout[client][varID] = (struct streamMemLayout) { .varPartIdxListUID = uid, .offset = offset, .conversion = conversion };
     }
   return *layout;
 }
@@ -1274,7 +1279,7 @@ streamMappingNew(size_t streamIdx, const struct winHeaderEntry *winDict, const s
       result->varMap[varID] = varMap[varID];
       result->hasMissing[varID] = hasMissing_[varID];
       for (size_t lvl = 0; lvl < numLvl; ++lvl)
-        result->writtenRecords[++j] = (struct recordWrite){ .varID = varID, .level = (int) lvl, .dataSize = recordDataSize };
+        result->writtenRecords[++j] = (struct recordWrite) { .varID = varID, .level = (int) lvl, .dataSize = recordDataSize };
     }
   }
   result->numVars = numVars;
@@ -1340,7 +1345,7 @@ planPasses(const struct streamMapping *mapping, const struct cdiPioConf *conf, s
     for (size_t rank = 0; rank < collSize; ++rank)
     {
       size_t startRecord = recordSeparations[rank], lastRecord = recordSeparations[rank + 1] - 1;
-      passes[rank] = (struct passPlan){
+      passes[rank] = (struct passPlan) {
         .recordAggStart = (unsigned) startRecord,
         .recordAggEnd = (unsigned) lastRecord,
         .varStart = writtenRecords[startRecord].varID,
@@ -1363,7 +1368,8 @@ planPasses(const struct streamMapping *mapping, const struct cdiPioConf *conf, s
     struct passPlan *passes = NULL;
 #endif
     size_t sizeof_pass = collSize * sizeof(struct passPlan);
-    do {
+    do
+    {
       size_t taskBegin = firstRecordOfPass;
       curRecord = firstRecordOfPass - 1;
       passes = Realloc(passes, sizeof_pass * (numPasses + 1));
@@ -1378,7 +1384,7 @@ planPasses(const struct streamMapping *mapping, const struct cdiPioConf *conf, s
 #else
         passes[numPasses * collSize + rank]
 #endif
-            = (struct passPlan){
+            = (struct passPlan) {
                 .recordAggStart = (unsigned) taskBegin,
                 .recordAggEnd = (unsigned) curRecord,
                 .varStart = writtenRecords[taskBegin].varID,
@@ -1485,7 +1491,7 @@ dstListFromRecordRange(int vlistID, int varID, int myVarStart, int myVarEnd, siz
     dstList = xt_idxempty_new();
     listSize = 0;
   }
-  return (struct idxlistAndSize){ .list = dstList, .listSize = listSize };
+  return (struct idxlistAndSize) { .list = dstList, .listSize = listSize };
 }
 
 static void
@@ -1506,7 +1512,7 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, void **data_, s
   Xt_idxlist(*partDescPreset)[numClients] = (Xt_idxlist(*)[numClients]) rxWin[streamIdx].clientDeco.lists;
   struct recordWrite *restrict writtenRecords = mapping->writtenRecords;
   size_t (*cdiPioFileWrite)(int fileID, const void *restrict buffer, size_t len, int tsID)
-      = (size_t(*)(int, const void *restrict, size_t, int)) namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
+      = (size_t (*)(int, const void *restrict, size_t, int)) namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
   bool reuseRedists
       = conf->cacheRedists != 0 ? handleRedistCache(streamIdx, mapping, (size_t) numPasses, vlistID, collComm) : false;
   struct cacheRedist *restrict retained = rxWin[streamIdx].retained;
@@ -1720,7 +1726,7 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
 /************************************************************************/
 
 static int
-cdiPioServerStreamOpen(const char *filename, char filemode, int filetype, stream_t *streamptr, int recordBufIsToBeCreated)
+cdiPioServerStreamOpen(const char *filename, char filemode, int filetype, stream_t *streamP, int recordBufIsToBeCreated)
 {
   int fileID = -1;
 #ifdef HAVE_LIBNETCDF
@@ -1746,11 +1752,11 @@ cdiPioServerStreamOpen(const char *filename, char filemode, int filetype, stream
       if (!setjmp(retJmpBuf.jmpBuf)) /* attempt parallel open first */
         /* in case it fails, ranks other than retJmpBuf.openRank
          * will call longjmp and return 1 from the above setjmp */
-        fileID = cdiStreamOpenDefaultDelegate(filename, filemode, filetype, streamptr, recordBufIsToBeCreated);
+        fileID = cdiStreamOpenDefaultDelegate(filename, filemode, filetype, streamP, recordBufIsToBeCreated);
       rank = retJmpBuf.openRank;
       if (rank != CDI_PIO_COLLECTIVE_OPEN)
       {
-        streamptr->filetype = filetype;
+        streamP->filetype = filetype;
         if (commInqIOMode() != PIO_NONE) xmpi(MPI_Bcast(&fileID, 1, MPI_INT, rank, commInqCommColl()));
         cdiPioOpenFileOnRank(rank);
       }
@@ -1759,21 +1765,21 @@ cdiPioServerStreamOpen(const char *filename, char filemode, int filetype, stream
     {
       int ioMode = commInqIOMode();
       if (ioMode == PIO_NONE || commInqRankColl() == (rank = cdiPioNextOpenRank()))
-        fileID = cdiStreamOpenDefaultDelegate(filename, filemode, filetype, streamptr, recordBufIsToBeCreated);
+        fileID = cdiStreamOpenDefaultDelegate(filename, filemode, filetype, streamP, recordBufIsToBeCreated);
       else
-        streamptr->filetype = filetype;
+        streamP->filetype = filetype;
       if (ioMode != PIO_NONE) xmpi(MPI_Bcast(&fileID, 1, MPI_INT, rank, commInqCommColl()));
       cdiPioOpenFileOnRank(rank);
     }
 #endif
     break;
 #endif
-    default: fileID = cdiStreamOpenDefaultDelegate(filename, filemode, filetype, streamptr, recordBufIsToBeCreated);
+    default: fileID = cdiStreamOpenDefaultDelegate(filename, filemode, filetype, streamP, recordBufIsToBeCreated);
   }
   if (fileID >= 0)
   {
     size_t oldNumStreams = openStreams.size;
-    size_t streamIdx = insertID(&openStreams, streamptr->self);
+    size_t streamIdx = insertID(&openStreams, streamP->self);
     size_t numStreams = openStreams.size;
     struct clientBuf *oldClientBufs = rxWin ? rxWin[0].clientBuf : NULL;
     rxWin = Realloc(rxWin, numStreams * sizeof(rxWin[0]));
@@ -1799,11 +1805,11 @@ cdiPioServerStreamOpen(const char *filename, char filemode, int filetype, stream
 }
 
 static size_t
-getMaxNumStreamWrites(stream_t *streamptr)
+getMaxNumStreamWrites(stream_t *streamP)
 {
-  int filetype = streamptr->filetype;
-  int vlistID = streamptr->vlistID;
-  size_t numVars = (size_t) vlistNvars(streamptr->vlistID), maxNumStreamWrites = 0, numColl = (size_t) commInqSizeColl();
+  int filetype = streamP->filetype;
+  int vlistID = streamP->vlistID;
+  size_t numVars = (size_t) vlistNvars(streamP->vlistID), maxNumStreamWrites = 0, numColl = (size_t) commInqSizeColl();
   switch (filetype)
   {
 #ifdef HAVE_LIBNETCDF
@@ -1812,7 +1818,7 @@ getMaxNumStreamWrites(stream_t *streamptr)
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
     {
-      int rankOpen = cdiPioStream2Owner(streamptr->self);
+      int rankOpen = cdiPioStream2Owner(streamP->self);
       if (commInqIOMode() == PIO_NONE
 #ifdef HAVE_PARALLEL_NC4
           || rankOpen == CDI_PIO_COLLECTIVE_OPEN
@@ -1833,20 +1839,20 @@ getMaxNumStreamWrites(stream_t *streamptr)
 }
 
 static void
-cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
+cdiPioServerStreamClose(stream_t *streamP, int recordBufIsToBeDeleted)
 {
-  int fileID = streamptr->fileID;
-  int filetype = streamptr->filetype;
-  int vlistID = streamptr->vlistID;
+  int fileID = streamP->fileID;
+  int filetype = streamP->filetype;
+  int vlistID = streamP->vlistID;
   const struct cdiPioConf *conf = cdiPioGetConf();
   if (vlistID != CDI_UNDEFID)
   {
-    size_t maxNumStreamWrites = getMaxNumStreamWrites(streamptr);
+    size_t maxNumStreamWrites = getMaxNumStreamWrites(streamP);
     neededDstIdxlistCacheSize -= maxNumStreamWrites;
     if (conf->cacheXmaps) neededXmapCacheSize -= maxNumStreamWrites;
   }
   if (fileID == CDI_UNDEFID)
-    Warning("File %s not open!", streamptr->filename);
+    Warning("File %s not open!", streamP->filename);
   else
   {
     switch (cdiBaseFiletype(filetype))
@@ -1854,13 +1860,13 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
 #ifdef HAVE_LIBNETCDF
       case CDI_FILETYPE_NETCDF:
       {
-        int rankOpen = cdiPioStream2Owner(streamptr->self);
+        int rankOpen = cdiPioStream2Owner(streamP->self);
         if (commInqIOMode() == PIO_NONE
 #ifdef HAVE_PARALLEL_NC4
             || rankOpen == CDI_PIO_COLLECTIVE_OPEN
 #endif
             || commInqRankColl() == rankOpen)
-          cdiStreamCloseDefaultDelegate(streamptr, recordBufIsToBeDeleted);
+          cdiStreamCloseDefaultDelegate(streamP, recordBufIsToBeDeleted);
 #ifdef HAVE_PARALLEL_NC4
         if (rankOpen != CDI_PIO_COLLECTIVE_OPEN)
 #endif
@@ -1868,9 +1874,9 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
       }
       break;
 #endif
-      default: cdiStreamCloseDefaultDelegate(streamptr, recordBufIsToBeDeleted);
+      default: cdiStreamCloseDefaultDelegate(streamP, recordBufIsToBeDeleted);
     }
-    int streamID = streamptr->self;
+    int streamID = streamP->self;
     size_t streamIdx = indexOfID(&openStreams, streamID);
     destructRetained(rxWin[streamIdx].retained, rxWin[streamIdx].numRetained);
     if (rxWin[streamIdx].clientDeco.lists)
@@ -1881,7 +1887,7 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
     removeID(&openStreams, streamID);
   }
   void (*streamCloseCallBack)(int streamID) = (void (*)(int)) conf->callbacks[CDIPIO_CALLBACK_POSTSTREAMCLOSE];
-  streamCloseCallBack(streamptr->self);
+  streamCloseCallBack(streamP->self);
 }
 
 #if defined HAVE_H5GET_LIBVERSION && defined HAVE_PARALLEL_NC4
@@ -1890,15 +1896,15 @@ static bool parH5ZeroCountProblem = false;
 
 #ifdef HAVE_LIBNETCDF
 static void
-cdiPioCdfDefTimestep(stream_t *streamptr, int tsID, size_t valCount)
+cdiPioCdfDefTimestep(stream_t *streamP, int tsID, size_t valCount)
 {
-  int streamID = streamptr->self, rankOpen = cdiPioStream2Owner(streamID);
+  int streamID = streamP->self, rankOpen = cdiPioStream2Owner(streamID);
 #ifdef HAVE_PARALLEL_NC4
   valCount = rankOpen != CDI_PIO_COLLECTIVE_OPEN
 #if defined HAVE_H5GET_LIBVERSION
-             || (parH5ZeroCountProblem && streamptr->filetype == CDI_FILETYPE_NC4)
+             || (parH5ZeroCountProblem && streamP->filetype == CDI_FILETYPE_NC4)
 #else
-             || streamptr->filetype == CDI_FILETYPE_NC4
+             || streamP->filetype == CDI_FILETYPE_NC4
 #endif
              || commInqRankColl() == 0;
 #endif
@@ -1907,7 +1913,7 @@ cdiPioCdfDefTimestep(stream_t *streamptr, int tsID, size_t valCount)
       || rankOpen == CDI_PIO_COLLECTIVE_OPEN
 #endif
       || commInqRankColl() == rankOpen)
-    cdfDefTimestep(streamptr, tsID, valCount);
+    cdfDefTimestep(streamP, tsID, valCount);
 }
 #endif
 
@@ -1996,9 +2002,9 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
     serverStreamID = namespaceAdaptKey2(msgData[0]);
     serverVlistID = namespaceAdaptKey2(msgData[1]);
   }
-  stream_t *streamptr = stream_to_pointer(serverStreamID);
+  stream_t *streamP = stream_to_pointer(serverStreamID);
   cdiPioCdfGridAccess(serverStreamID, serverVlistID);
-  cdiStreamSetupVlist(streamptr, serverVlistID);
+  cdiStreamSetupVlist(streamP, serverVlistID);
   size_t streamIdx = indexOfID(&openStreams, serverStreamID);
   cdiPioServerStreamWinCreate(streamIdx, cdiPioInqCollClientIntraComm());
   int numClients = cdiPioCommInqSizeClients(), numColl = commInqSizeColl();
@@ -2059,7 +2065,7 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
   }
   createClientStreamBuf(streamIdx, bufSizes, conf);
 
-  size_t maxNumStreamWrites = (size_t) getMaxNumStreamWrites(streamptr),
+  size_t maxNumStreamWrites = (size_t) getMaxNumStreamWrites(streamP),
          currentDstIdxlistCacheSize = cdiPioIdxlistCacheGetSize(DstIdxlistCache);
   if ((neededDstIdxlistCacheSize += maxNumStreamWrites) > currentDstIdxlistCacheSize)
     DstIdxlistCache = cdiPioIdxlistCacheResize(DstIdxlistCache, neededDstIdxlistCacheSize);

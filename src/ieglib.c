@@ -1,6 +1,6 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined(HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
@@ -372,7 +372,7 @@ iegRead(int fileID, void *ieg)
   {
     fileRead(fileID, buf.d, 8);
     if (byteswap) swap8byte(buf.d, 1);
-    iegp->refval = (double) buf.d[0];
+    iegp->refval = buf.d[0];
   }
 
   binReadInt32(fileID, byteswap, 3, buf.i32);
@@ -448,7 +448,7 @@ iegWrite(int fileID, void *ieg)
   for (int i = 0; i < 18; i++) buf.i32[i] = (int32_t) iegp->igdb[i];
   binWriteInt32(fileID, byteswap, 18, buf.i32);
 
-  double refval = (double) iegp->refval;
+  double refval = iegp->refval;
   float refvalf = (float) iegp->refval;
   if (dprec == EXSE_PREC_FP32)
     binWriteFlt32(fileID, byteswap, 1, &refvalf);

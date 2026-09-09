@@ -1,6 +1,6 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined(HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
@@ -232,7 +232,7 @@ int
 check_keyvalueList(int numItems, fdbKeyValueEntry *keyValueList)
 {
   const char *searchKeys[] = { "param", "levtype", "date", "time" };
-  int numSearchKeys = sizeof(searchKeys) / sizeof(searchKeys[0]);
+  int numSearchKeys = ARRAY_SIZE(searchKeys);
   int searchKeysCount[numSearchKeys];
   for (int k = 0; k < numSearchKeys; k++) searchKeysCount[k] = 0;
 

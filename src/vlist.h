@@ -5,22 +5,14 @@
 #include "config.h"
 #endif
 
-#ifndef ERROR_H
-#include "error.h"
-#endif
-
 #include <stdbool.h>
 #include <stddef.h> /* size_t */
 
-#ifndef CDI_LIMITS_H
-#include "cdi_limits.h"
-#endif
-
-#define VALIDMISS 1.e+303
-
+#include "cdi_int.h"
 #include "cdi_key.h"
 #include "cdi_att.h"
-#include "grid.h"
+
+#define VALIDMISS 1.e+303
 
 typedef struct
 {
@@ -31,11 +23,8 @@ typedef struct
 } levinfo_t;
 
 #define DEFAULT_LEVINFO(levID) \
-  (levinfo_t) { 0, -1, levID, levID }
-/*
-#define DEFAULT_LEVINFO(levID) \
-  (levinfo_t){ .flag = 0, .index = -1, .flevelID = levID, .mlevelID = levID}
-*/
+  (levinfo_t) { .flag = 0, .index = -1, .flevelID = levID, .mlevelID = levID }
+
 typedef struct
 {
   int ens_index;
@@ -104,13 +93,13 @@ typedef struct
 } vlist_t;
 
 vlist_t *vlist_to_pointer(int vlistID);
+vlist_t *vlist_new_entry(cdiResH resH);
+
 void cdiVlistMakeInternal(int vlistID);
 void cdiVlistMakeImmutable(int vlistID);
 void cdiVlistDestroy_(int vlistID, bool assertInternal);
 int vlistInqVarMissvalUsed(int vlistID, int varID);
 bool vlistHasTime(int vlistID);
-
-int vlistUnpack(char *buffer, int bufferSize, int *pos, int originNamespace, void *context, int force_id);
 
 /*      vlistDefVarValidrange: Define the valid range of a Variable */
 void vlistDefVarValidrange(int vlistID, int varID, const double *validrange);
@@ -123,54 +112,56 @@ void vlistInqVarDimorder(int vlistID, int varID, int outDimorder[3]);
 void resize_opt_grib_entries(var_t *var, int nentries);
 
 static inline void
-vlistAdd2GridIDs(vlist_t *vlistptr, int gridID)
+vlistAdd2GridIDs(vlist_t *vlistP, int gridID)
 {
-  int index, ngrids = vlistptr->ngrids;
+  int index, ngrids = vlistP->ngrids;
   for (index = 0; index < ngrids; index++)
   {
-    if (vlistptr->gridIDs[index] == gridID) break;
-    //      if ( gridIsEqual(vlistptr->gridIDs[index], gridID) ) break;
+    if (vlistP->gridIDs[index] == gridID) break;
+    //      if ( gridIsEqual(vlistP->gridIDs[index], gridID) ) break;
   }
 
   if (index == ngrids)
   {
     if (ngrids >= MAX_GRIDS_PS) Error("Internal limit exceeded: more than %d grids.", MAX_GRIDS_PS);
-    vlistptr->gridIDs[ngrids] = gridID;
-    ++(vlistptr->ngrids);
+    vlistP->gridIDs[ngrids] = gridID;
+    ++(vlistP->ngrids);
   }
 }
 
 static inline void
-vlistAdd2ZaxisIDs(vlist_t *vlistptr, int zaxisID)
+vlistAdd2ZaxisIDs(vlist_t *vlistP, int zaxisID)
 {
-  int index, nzaxis = vlistptr->nzaxis;
+  int index, nzaxis = vlistP->nzaxis;
   for (index = 0; index < nzaxis; index++)
-    if (zaxisID == vlistptr->zaxisIDs[index]) break;
+    if (zaxisID == vlistP->zaxisIDs[index]) break;
 
   if (index == nzaxis)
   {
     if (nzaxis >= MAX_ZAXES_PS) Error("Internal limit exceeded: more than %d zaxis.", MAX_ZAXES_PS);
-    vlistptr->zaxisIDs[nzaxis] = zaxisID;
-    ++(vlistptr->nzaxis);
+    vlistP->zaxisIDs[nzaxis] = zaxisID;
+    ++(vlistP->nzaxis);
   }
 }
 
 static inline void
-vlistAdd2SubtypeIDs(vlist_t *vlistptr, int subtypeID)
+vlistAdd2SubtypeIDs(vlist_t *vlistP, int subtypeID)
 {
   if (subtypeID == CDI_UNDEFID) return;
 
-  int index, nsubs = vlistptr->nsubtypes;
+  int index, nsubs = vlistP->nsubtypes;
   for (index = 0; index < nsubs; index++)
-    if (vlistptr->subtypeIDs[index] == subtypeID) break;
+    if (vlistP->subtypeIDs[index] == subtypeID) break;
 
   if (index == nsubs)
   {
     if (nsubs >= MAX_SUBTYPES_PS) Error("Internal limit exceeded: more than %d subs.", MAX_SUBTYPES_PS);
-    vlistptr->subtypeIDs[nsubs] = subtypeID;
-    ++(vlistptr->nsubtypes);
+    vlistP->subtypeIDs[nsubs] = subtypeID;
+    ++(vlistP->nsubtypes);
   }
 }
+
+var_t *vlist_get_varP(const char *caller, int vlistID, int varID);
 
 #ifdef HAVE_LIBGRIB_API
 extern int cdiNAdditionalGRIBKeys;

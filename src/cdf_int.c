@@ -67,7 +67,7 @@ cdf_open(const char *path, int omode, int *ncidp)
 {
   int status = 0;
 
-  if (strstr(path, ":/"))  // ESDM and DAP
+  if (strstr(path, ":/"))  // ZARR, ESDM and DAP
   {
     status = nc_open(path, omode, ncidp);
   }
@@ -93,7 +93,7 @@ cdf_open(const char *path, int omode, int *ncidp)
   if (CDF_Debug) Message("ncid=%d  mode=%d  file=%s", *ncidp, omode, path);
 
   if (CDF_Debug && status != NC_NOERR) Message("%s", nc_strerror(status));
-  if (status != NC_NOERR && status < 0) status -= 1000;
+  if (status != NC_NOERR && status < 0) { status -= 1000; }
 
   return status;
 }
@@ -720,9 +720,9 @@ cdf_def_var_chunking(int ncid, int varid, int storage, const size_t *chunksizesp
     int ndims;
     cdf_inq_varndims(ncid, varid, &ndims);
     // clang-format off
-    if      (ndims == 1) Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0]);
-    else if (ndims == 2) Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0], chunksizesp[1]);
-    else if (ndims == 3) Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0], chunksizesp[1], chunksizesp[2]);
+    if      (ndims == 1) Message("chunks=%zu", chunksizesp[0]);
+    else if (ndims == 2) Message("chunks=%zu/%zu", chunksizesp[0], chunksizesp[1]);
+    else if (ndims == 3) Message("chunks=%zu/%zu/%zu", chunksizesp[0], chunksizesp[1], chunksizesp[2]);
     else if (ndims == 4) Message("chunks=%zu/%zu/%zu/%zu", chunksizesp[0], chunksizesp[1], chunksizesp[2], chunksizesp[3]);
     // clang-format on
   }

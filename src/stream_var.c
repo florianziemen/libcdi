@@ -1,6 +1,6 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined(HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
@@ -43,11 +43,11 @@ var_init(svarinfo_t *var)
 }
 
 static int
-streamvar_new_entry(stream_t *streamptr)
+streamvar_new_entry(stream_t *streamP)
 {
   int varID = 0;
-  int streamvarSize = streamptr->varsAllocated;
-  svarinfo_t *streamvar = streamptr->vars;
+  int streamvarSize = streamP->varsAllocated;
+  svarinfo_t *streamvar = streamP->vars;
   /*
     Look for a free slot in streamvar.
     (Create the table the first time through).
@@ -89,18 +89,18 @@ streamvar_new_entry(stream_t *streamptr)
     for (int i = varID; i < streamvarSize; i++) streamvar[i].isUsed = false;
   }
 
-  streamptr->varsAllocated = streamvarSize;
-  streamptr->vars = streamvar;
+  streamP->varsAllocated = streamvarSize;
+  streamP->vars = streamvar;
 
-  var_init(&streamptr->vars[varID]);
+  var_init(&streamP->vars[varID]);
 
-  streamptr->vars[varID].isUsed = true;
+  streamP->vars[varID].isUsed = true;
 
   return varID;
 }
 
 static void
-allocate_record_table_entry(stream_t *streamptr, int varID, int subID, int nlevs)
+allocate_record_table_entry(stream_t *streamP, int varID, int subID, int nlevs)
 {
   int *level = (int *) Malloc((size_t) nlevs * sizeof(int));
   int *lindex = (int *) Malloc((size_t) nlevs * sizeof(int));
@@ -111,23 +111,23 @@ allocate_record_table_entry(stream_t *streamptr, int varID, int subID, int nlevs
     lindex[levID] = levID;
   }
 
-  sleveltable_t *record = &streamptr->vars[varID].recordTable[subID];
+  sleveltable_t *record = &streamP->vars[varID].recordTable[subID];
   record->nlevs = nlevs;
   record->recordID = level;
   record->lindex = lindex;
 }
 
 int
-stream_new_var(stream_t *streamptr, int gridID, int zaxisID, int tilesetID)
+stream_new_var(stream_t *streamP, int gridID, int zaxisID, int tilesetID)
 {
   if (CDI_Debug) Message("gridID = %d  zaxisID = %d", gridID, zaxisID);
 
-  int varID = streamvar_new_entry(streamptr);
+  int varID = streamvar_new_entry(streamP);
   int nlevs = zaxisInqSize(zaxisID);
 
-  streamptr->nvars++;
+  streamP->nvars++;
 
-  svarinfo_t *var = &streamptr->vars[varID];
+  svarinfo_t *var = &streamP->vars[varID];
   var->gridID = gridID;
   var->zaxisID = zaxisID;
 
@@ -140,9 +140,9 @@ stream_new_var(stream_t *streamptr, int gridID, int zaxisID, int tilesetID)
 
   for (int isub = 0; isub < nsub; isub++)
   {
-    record_init(&streamptr->vars[varID].recordTable[isub]);
-    allocate_record_table_entry(streamptr, varID, isub, nlevs);
-    if (CDI_Debug) Message("streamptr->vars[varID].recordTable[isub].recordID[0]=%d", var->recordTable[isub].recordID[0]);
+    record_init(&streamP->vars[varID].recordTable[isub]);
+    allocate_record_table_entry(streamP, varID, isub, nlevs);
+    if (CDI_Debug) Message("streamP->vars[varID].recordTable[isub].recordID[0]=%d", var->recordTable[isub].recordID[0]);
   }
 
   var->subtypeID = tilesetID;

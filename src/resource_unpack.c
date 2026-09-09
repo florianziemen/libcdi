@@ -1,6 +1,6 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined(HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
@@ -12,17 +12,18 @@
 
 #include "cdi.h"
 #include "dmemory.h"
-#include "grid.h"
+#include "grid_pack.h"
 #include "institution.h"
 #include "model.h"
 #include "cdi_int.h"
-#include "vlist.h"
+#include "vlist_pack.h"
+#include "stream_pack.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
-#include "taxis.h"
-#include "zaxis.h"
+#include "taxis_pack.h"
+#include "zaxis_pack.h"
 
 int (*reshDistGridUnpack)(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context,
                           int force_id);

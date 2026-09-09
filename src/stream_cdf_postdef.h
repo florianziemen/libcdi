@@ -18,10 +18,10 @@ struct cdfPostDefActionList
   struct cdfPostDefAction actions[];
 };
 
-void cdfPostDefActionGridProp(stream_t *streamptr, int gridID, int ncvarid, enum gridPropInq gridProp,
+void cdfPostDefActionGridProp(stream_t *streamP, int gridID, int ncvarid, enum gridPropInq gridProp,
                               struct cdfPostDefActionList **delayed);
 
-typedef void (*cdfFuncPtrPostDefActionGridProp)(stream_t *streamptr, int gridID, int ncvarid, enum gridPropInq gridProp,
+typedef void (*cdfFuncPtrPostDefActionGridProp)(stream_t *streamP, int gridID, int ncvarid, enum gridPropInq gridProp,
                                                 struct cdfPostDefActionList **delayed);
 
 struct cdfPostDefActionList *cdfPostDefActionAdd(struct cdfPostDefActionList *list, struct cdfPostDefAction addendum);

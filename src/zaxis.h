@@ -7,6 +7,7 @@
 
 #include "cdi_key.h"
 #include "cdi_att.h"
+#include "resource_handle.h"
 
 // clang-format off
 typedef struct
@@ -33,6 +34,8 @@ typedef struct
 zaxis_t;
 // clang-format on
 
+zaxis_t *zaxisNewEntry(int id);
+
 void zaxisGetTypeDescription(int zaxisType, int *outPositive, const char **outName, const char **outLongName,
                              const char **outStdName,
                              const char **outUnit);  // The returned const char* point to static storage. Don't free or modify them.
@@ -42,8 +45,6 @@ unsigned cdiZaxisCount(void);
 zaxis_t *zaxis_to_pointer(int zaxisID);
 
 void cdiZaxisGetIndexList(unsigned numIDs, int *IDs);
-
-int zaxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id);
 
 const resOps *getZaxisOps(void);
 

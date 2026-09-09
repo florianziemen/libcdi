@@ -1,13 +1,7 @@
 #ifndef VLIST_VAR_H
 #define VLIST_VAR_H
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifndef VLIST_H
 #include "vlist.h"
-#endif
 
 int vlistVarGetPackSize(vlist_t *p, int varID, void *context);
 void vlistVarPack(vlist_t *p, int varID, char *buffer, int bufferSize, int *pos, void *context);
@@ -16,7 +10,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB);
 void vlistDefVarIOrank(int, int, int);
 int vlistInqVarIOrank(int, int);
 
-void cdiVlistCreateVarLevInfo(vlist_t *vlistptr, int varID);
+void cdiVlistCreateVarLevInfo(vlist_t *vlistP, int varID);
 
 #endif
 /*

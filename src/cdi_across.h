@@ -17,9 +17,9 @@ typedef struct
   int expver;
 } across_info_t;
 
-int across_connect(const char *path, char filemode, stream_t *streamptr);
+int across_connect(const char *path, char filemode, stream_t *streamP);
 void across_disconnect(int sock);
-int across_write_grib_message(stream_t *streamptr, const void *gribbuffer, size_t nbytes);
+int across_write_grib_message(stream_t *streamP, const void *gribbuffer, size_t nbytes);
 
 #endif
 

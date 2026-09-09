@@ -11,12 +11,12 @@ void
 vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
 {
 #ifdef HAVE_LIBGRIB_API
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (vlistptr == NULL) Error("Internal error!");
-  var_t *var = &vlistptr->vars[varID];
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
+  if (vlistP == NULL) Error("Internal error!");
+  var_t *var = &vlistP->vars[varID];
   int idx;
 
-  if (vlistptr->immutable)
+  if (vlistP->immutable)
     Error("vlistDefVarIntKey() was called on an immutable vlist object (vlistID = %d)\n"
           "Either call vlistDefVarIntKey() before passing the vlist object to streamDefVlist(),\n"
           "or use the stream-internal vlist by calling streamInqVlist().",
@@ -32,7 +32,7 @@ vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
   }
   else
   {
-    resize_opt_grib_entries(&vlistptr->vars[varID], var->opt_grib_nentries + 1);
+    resize_opt_grib_entries(&vlistP->vars[varID], var->opt_grib_nentries + 1);
     var->opt_grib_nentries += 1;
     idx = var->opt_grib_nentries - 1;
     var->opt_grib_kvpair[idx].data_type = t_int;
@@ -71,12 +71,12 @@ void
 vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 {
 #ifdef HAVE_LIBGRIB_API
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (vlistptr == NULL) Error("Internal error!");
-  var_t *var = &vlistptr->vars[varID];
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
+  if (vlistP == NULL) Error("Internal error!");
+  var_t *var = &vlistP->vars[varID];
   int idx;
 
-  if (vlistptr->immutable)
+  if (vlistP->immutable)
     Error("vlistDefVarDblKey() was called on an immutable vlist object (vlistID = %d)\n"
           "Either call vlistDefVarIntKey() before passing the vlist object to streamDefVlist(),\n"
           "or use the stream-internal vlist by calling streamInqVlist().",
@@ -92,7 +92,7 @@ vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
   }
   else
   {
-    resize_opt_grib_entries(&vlistptr->vars[varID], var->opt_grib_nentries + 1);
+    resize_opt_grib_entries(&vlistP->vars[varID], var->opt_grib_nentries + 1);
     var->opt_grib_nentries += 1;
     idx = var->opt_grib_nentries - 1;
     var->opt_grib_kvpair[idx].data_type = t_double;
@@ -130,17 +130,17 @@ void
 vlistDefVarIntArrKey(int vlistID, int varID, const char *name, const int *values, int nvalues)
 {
 #ifdef HAVE_LIBGRIB_API
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (vlistptr == NULL) Error("Internal error!");
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
+  if (vlistP == NULL) Error("Internal error!");
   if (name == NULL) Error("Internal error, name undefined!");
 
-  if (vlistptr->immutable)
+  if (vlistP->immutable)
     Error("vlistDefVarIntArrKey() was called on an immutable vlist object (vlistID = %d)\n"
           "Either call this before passing the vlist object to streamDefVlist(),\n"
           "or use the stream-internal vlist by calling streamInqVlist().",
           vlistID);
 
-  var_t *var = &vlistptr->vars[varID];
+  var_t *var = &vlistP->vars[varID];
   int idx;
   for (idx = 0; idx < var->opt_grib_nentries; idx++)
     if (str_is_equal(name, var->opt_grib_kvpair[idx].keyword) && (var->opt_grib_kvpair[idx].data_type == t_intarr)) break;
@@ -154,7 +154,7 @@ vlistDefVarIntArrKey(int vlistID, int varID, const char *name, const int *values
   }
   else
   {
-    resize_opt_grib_entries(&vlistptr->vars[varID], var->opt_grib_nentries + 1);
+    resize_opt_grib_entries(&vlistP->vars[varID], var->opt_grib_nentries + 1);
     var->opt_grib_nentries += 1;
     idx = var->opt_grib_nentries - 1;
     entry = &var->opt_grib_kvpair[idx];
@@ -191,17 +191,17 @@ void
 vlistDefVarDblArrKey(int vlistID, int varID, const char *name, const double *values, int nvalues)
 {
 #ifdef HAVE_LIBGRIB_API
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (vlistptr == NULL) Error("Internal error!");
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
+  if (vlistP == NULL) Error("Internal error!");
   if (name == NULL) Error("Internal error, name undefined!");
 
-  if (vlistptr->immutable)
+  if (vlistP->immutable)
     Error("vlistDefVarDblArrKey() was called on an immutable vlist object (vlistID = %d)\n"
           "Either call this before passing the vlist object to streamDefVlist(),\n"
           "or use the stream-internal vlist by calling streamInqVlist().",
           vlistID);
 
-  var_t *var = &vlistptr->vars[varID];
+  var_t *var = &vlistP->vars[varID];
   int idx;
   for (idx = 0; idx < var->opt_grib_nentries; idx++)
     if (str_is_equal(name, var->opt_grib_kvpair[idx].keyword) && (var->opt_grib_kvpair[idx].data_type == t_doublearr)) break;
@@ -215,7 +215,7 @@ vlistDefVarDblArrKey(int vlistID, int varID, const char *name, const double *val
   }
   else
   {
-    resize_opt_grib_entries(&vlistptr->vars[varID], var->opt_grib_nentries + 1);
+    resize_opt_grib_entries(&vlistP->vars[varID], var->opt_grib_nentries + 1);
     var->opt_grib_nentries += 1;
     idx = var->opt_grib_nentries - 1;
     entry = &var->opt_grib_kvpair[idx];
@@ -281,8 +281,8 @@ vlistHasVarKey(int vlistID, int varID, const char *name)
 {
 #ifdef HAVE_LIBGRIB_API
   /* check if the GRIB key was previously read and is stored */
-  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  const var_t *var = &vlistptr->vars[varID];
+  const vlist_t *vlistP = vlist_to_pointer(vlistID);
+  const var_t *var = &vlistP->vars[varID];
 
   for (int i = 0; i < var->opt_grib_nentries; ++i)
   {
@@ -303,8 +303,8 @@ vlistInqVarDblKey(int vlistID, int varID, const char *name)
   double value = 0;
 #ifdef HAVE_LIBGRIB_API
   /* check if the GRIB key was previously read and is stored in "opt_grib_dbl_val" */
-  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  const var_t *var = &vlistptr->vars[varID];
+  const vlist_t *vlistP = vlist_to_pointer(vlistID);
+  const var_t *var = &vlistP->vars[varID];
 
   for (int i = 0; i < var->opt_grib_nentries; ++i)
   {
@@ -328,8 +328,8 @@ vlistInqVarIntKey(int vlistID, int varID, const char *name)
   long value = 0;
 #ifdef HAVE_LIBGRIB_API
   /* check if the GRIB key was previously read and is stored in "opt_grib_int_val" */
-  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  const var_t *var = &vlistptr->vars[varID];
+  const vlist_t *vlistP = vlist_to_pointer(vlistID);
+  const var_t *var = &vlistP->vars[varID];
 
   for (int i = 0; i < var->opt_grib_nentries; ++i)
   {
@@ -354,8 +354,8 @@ vlistInqVarIntArrKey(int vlistID, int varID, const char *name)
   int *int_arr = NULL;
 
 #ifdef HAVE_LIBGRIB_API
-  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  const var_t *var = &vlistptr->vars[varID];
+  const vlist_t *vlistP = vlist_to_pointer(vlistID);
+  const var_t *var = &vlistP->vars[varID];
 
   for (int i = 0; i < var->opt_grib_nentries; ++i)
   {
@@ -383,8 +383,8 @@ vlistInqVarDblArrKey(int vlistID, int varID, const char *name)
   double *dbl_arr = NULL;
 
 #ifdef HAVE_LIBGRIB_API
-  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  const var_t *var = &vlistptr->vars[varID];
+  const vlist_t *vlistP = vlist_to_pointer(vlistID);
+  const var_t *var = &vlistP->vars[varID];
 
   for (int i = 0; i < var->opt_grib_nentries; ++i)
   {

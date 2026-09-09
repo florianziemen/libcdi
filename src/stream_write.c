@@ -24,32 +24,32 @@ cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, SizeT
 
   check_parg(data);
 
-  stream_t *streamptr = stream_to_pointer(streamID);
-  if (subtypeInqActiveIndex(streamptr->vars[varID].subtypeID) != 0) Error("Writing of non-trivial subtypes not yet implemented!");
+  stream_t *streamP = stream_to_pointer(streamID);
+  if (subtypeInqActiveIndex(streamP->vars[varID].subtypeID) != 0) Error("Writing of non-trivial subtypes not yet implemented!");
 
   // check taxis
-  if (streamptr->curTsID == CDI_UNDEFID) streamDefTimestep(streamID, 0);
+  if (streamP->curTsID == CDI_UNDEFID) streamDefTimestep(streamID, 0);
 
-  const int filetype = streamptr->filetype;
+  const int filetype = streamP->filetype;
 
   if (memtype == MEMTYPE_FLOAT && cdiFiletypeIsExse(filetype)) return 1;
 
   switch (cdiBaseFiletype(filetype))
   {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB: grb_write_var(streamptr, varID, memtype, data, (size_t) numMissVals); break;
+    case CDI_FILETYPE_GRIB: grb_write_var(streamP, varID, memtype, data, (size_t) numMissVals); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV: srvWriteVarDP(streamptr, varID, (double *) data); break;
+    case CDI_FILETYPE_SRV: srvWriteVarDP(streamP, varID, (double *) data); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT: extWriteVarDP(streamptr, varID, (double *) data); break;
+    case CDI_FILETYPE_EXT: extWriteVarDP(streamP, varID, (double *) data); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG: iegWriteVarDP(streamptr, varID, (double *) data); break;
+    case CDI_FILETYPE_IEG: iegWriteVarDP(streamP, varID, (double *) data); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdf_write_var(streamptr, varID, memtype, data, (size_t) numMissVals); break;
+    case CDI_FILETYPE_NETCDF: cdf_write_var(streamP, varID, memtype, data, (size_t) numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(filetype));
   }
@@ -112,7 +112,7 @@ streamWriteVarF(int streamID, int varID, const float *data, SizeType numMissVals
     SizeType elementCount = gridInqSize(vlistInqVarGrid(vlistID, varID));
     elementCount *= (SizeType) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
     double *conversionBuffer = (double *) Malloc((size_t) elementCount * sizeof(*conversionBuffer));
-    for (SizeType i = elementCount; i--;) conversionBuffer[i] = data[i];
+    for (SizeType i = elementCount; i--;) { conversionBuffer[i] = data[i]; }
     myCdiStreamWriteVar_(streamID, varID, MEMTYPE_DOUBLE, (const void *) conversionBuffer, numMissVals);
     Free(conversionBuffer);
   }
@@ -129,32 +129,32 @@ cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, const 
 
   check_parg(data);
 
-  stream_t *streamptr = stream_to_pointer(streamID);
-  if (subtypeInqActiveIndex(streamptr->vars[varID].subtypeID) != 0) Error("Writing of non-trivial subtypes not yet implemented!");
+  stream_t *streamP = stream_to_pointer(streamID);
+  if (subtypeInqActiveIndex(streamP->vars[varID].subtypeID) != 0) Error("Writing of non-trivial subtypes not yet implemented!");
 
   // check taxis
-  if (streamptr->curTsID == CDI_UNDEFID) streamDefTimestep(streamID, 0);
+  if (streamP->curTsID == CDI_UNDEFID) streamDefTimestep(streamID, 0);
 
-  const int filetype = streamptr->filetype;
+  const int filetype = streamP->filetype;
 
   if (memtype == MEMTYPE_FLOAT && cdiFiletypeIsExse(filetype)) return 1;
 
   switch (cdiBaseFiletype(filetype))
   {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB: grb_write_var_slice(streamptr, varID, levelID, memtype, data, (size_t) numMissVals); break;
+    case CDI_FILETYPE_GRIB: grb_write_var_slice(streamP, varID, levelID, memtype, data, (size_t) numMissVals); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV: srvWriteVarSliceDP(streamptr, varID, levelID, (double *) data); break;
+    case CDI_FILETYPE_SRV: srvWriteVarSliceDP(streamP, varID, levelID, (double *) data); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT: extWriteVarSliceDP(streamptr, varID, levelID, (double *) data); break;
+    case CDI_FILETYPE_EXT: extWriteVarSliceDP(streamP, varID, levelID, (double *) data); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG: iegWriteVarSliceDP(streamptr, varID, levelID, (double *) data); break;
+    case CDI_FILETYPE_IEG: iegWriteVarSliceDP(streamP, varID, levelID, (double *) data); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdf_write_var_slice(streamptr, varID, levelID, memtype, data, (size_t) numMissVals); break;
+    case CDI_FILETYPE_NETCDF: cdf_write_var_slice(streamP, varID, levelID, memtype, data, (size_t) numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(filetype));
   }
@@ -209,9 +209,9 @@ streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, Si
   {
     // In case the file format does not support single precision writing,
     // we fall back to double precision writing, converting the data on the fly.
-    const SizeType elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+    SizeType elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
     double *conversionBuffer = (double *) Malloc((size_t) elementCount * sizeof(*conversionBuffer));
-    for (SizeType i = elementCount; i--;) conversionBuffer[i] = (double) data[i];
+    for (SizeType i = elementCount; i--;) { conversionBuffer[i] = (double) data[i]; }
     streamWriteVarSlice(streamID, varID, levelID, conversionBuffer, numMissVals);
     Free(conversionBuffer);
   }
@@ -243,11 +243,11 @@ cdiStreamWriteVarChunk_(int streamID, int varID, int memtype, const int rect[][2
 {
   if (CDI_Debug) Message("streamID = %d varID = %d", streamID, varID);
 
-  stream_t *streamptr = stream_to_pointer(streamID);
+  stream_t *streamP = stream_to_pointer(streamID);
 
   // streamDefineTaxis(streamID);
 
-  const int filetype = streamptr->filetype;
+  const int filetype = streamP->filetype;
 
   switch (cdiBaseFiletype(filetype))
   {
@@ -268,7 +268,7 @@ cdiStreamWriteVarChunk_(int streamID, int varID, int memtype, const int rect[][2
       break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdf_write_var_chunk(streamptr, varID, memtype, rect, data, (size_t) numMissVals); break;
+    case CDI_FILETYPE_NETCDF: cdf_write_var_chunk(streamP, varID, memtype, rect, data, (size_t) numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(filetype)); break;
   }
@@ -279,31 +279,31 @@ stream_write_record(int streamID, int memtype, const void *data, SizeType numMis
 {
   check_parg(data);
 
-  stream_t *streamptr = stream_to_pointer(streamID);
+  stream_t *streamP = stream_to_pointer(streamID);
 
-  if (streamptr->lockIO) CDI_IO_LOCK();
+  if (streamP->lockIO) CDI_IO_LOCK();
 
-  switch (cdiBaseFiletype(streamptr->filetype))
+  switch (cdiBaseFiletype(streamP->filetype))
   {
 #ifdef HAVE_LIBGRIB
-    case CDI_FILETYPE_GRIB: grb_write_field(streamptr, memtype, data, (size_t) numMissVals); break;
+    case CDI_FILETYPE_GRIB: grb_write_field(streamP, memtype, data, (size_t) numMissVals); break;
 #endif
 #ifdef HAVE_LIBSERVICE
-    case CDI_FILETYPE_SRV: srv_write_field(streamptr, memtype, data); break;
+    case CDI_FILETYPE_SRV: srv_write_field(streamP, memtype, data); break;
 #endif
 #ifdef HAVE_LIBEXTRA
-    case CDI_FILETYPE_EXT: ext_write_field(streamptr, memtype, data); break;
+    case CDI_FILETYPE_EXT: ext_write_field(streamP, memtype, data); break;
 #endif
 #ifdef HAVE_LIBIEG
-    case CDI_FILETYPE_IEG: ieg_write_field(streamptr, memtype, data); break;
+    case CDI_FILETYPE_IEG: ieg_write_field(streamP, memtype, data); break;
 #endif
 #ifdef HAVE_LIBNETCDF
-    case CDI_FILETYPE_NETCDF: cdf_write_field(streamptr, memtype, data, (size_t) numMissVals); break;
+    case CDI_FILETYPE_NETCDF: cdf_write_field(streamP, memtype, data, (size_t) numMissVals); break;
 #endif
-    default: Error("%s support not compiled in!", strfiletype(streamptr->filetype));
+    default: Error("%s support not compiled in!", strfiletype(streamP->filetype));
   }
 
-  if (streamptr->lockIO) CDI_IO_UNLOCK();
+  if (streamP->lockIO) CDI_IO_UNLOCK();
 }
 
 /*

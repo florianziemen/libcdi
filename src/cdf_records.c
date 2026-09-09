@@ -1,6 +1,6 @@
 /* DO NOT REMOVE the config.h include file under any circumstances,
  * it's very much needed on some platforms */
-#if defined(HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 /* DO NOT REMOVE the above config.h include file under any
@@ -65,15 +65,15 @@ cdf_init_records_step1(int numRecs, int *recIDs, recinfo_t *recinfo, int vlistID
 }
 
 void
-cdf_create_records(stream_t *streamptr, size_t tsID)
+cdf_create_records(stream_t *streamP, size_t tsID)
 {
-  if ((streamptr->ntsteps < 0 || tsID >= (size_t) streamptr->ntsteps) && tsID > 0) return;
+  if ((streamP->ntsteps < 0 || tsID >= (size_t) streamP->ntsteps) && tsID > 0) return;
 
-  if (streamptr->tsteps[tsID].nallrecs > 0) return;
+  if (streamP->tsteps[tsID].nallrecs > 0) return;
 
-  int vlistID = streamptr->vlistID;
+  int vlistID = streamP->vlistID;
 
-  tsteps_t *sourceTstep = streamptr->tsteps;
+  tsteps_t *sourceTstep = streamP->tsteps;
   tsteps_t *destTstep = sourceTstep + tsID;
 
   int numFields = vlistNumFields(vlistID);
@@ -83,7 +83,7 @@ cdf_create_records(stream_t *streamptr, size_t tsID)
   {
     int numRecsAvail = numFields;  // use all records at first timestep
 
-    streamptr->nrecs += numFields;
+    streamP->nrecs += numFields;
 
     cdf_init_timestep(destTstep, numFields, numRecsAvail);
 
@@ -94,7 +94,7 @@ cdf_create_records(stream_t *streamptr, size_t tsID)
   {
     int numRecsAvail = cdf_get_numRecsAvail(vlistID);
 
-    streamptr->nrecs += numRecsAvail;
+    streamP->nrecs += numRecsAvail;
 
     cdf_init_timestep(destTstep, numFields, numRecsAvail);
 
@@ -108,11 +108,11 @@ cdf_create_records(stream_t *streamptr, size_t tsID)
   }
   else
   {
-    if (streamptr->tsteps[1].recinfo == 0) cdf_create_records(streamptr, 1);
+    if (streamP->tsteps[1].recinfo == 0) cdf_create_records(streamP, 1);
 
-    int numRecsAvail = streamptr->tsteps[1].nrecs;
+    int numRecsAvail = streamP->tsteps[1].nrecs;
 
-    streamptr->nrecs += numRecsAvail;
+    streamP->nrecs += numRecsAvail;
 
     cdf_init_timestep(destTstep, numFields, numRecsAvail);
 
@@ -121,7 +121,7 @@ cdf_create_records(stream_t *streamptr, size_t tsID)
     if (numRecsAvail)
     {
       destTstep->recIDs = (int *) Malloc((size_t) numRecsAvail * sizeof(int));
-      memcpy(destTstep->recIDs, streamptr->tsteps[1].recIDs, (size_t) numRecsAvail * sizeof(int));
+      memcpy(destTstep->recIDs, streamP->tsteps[1].recIDs, (size_t) numRecsAvail * sizeof(int));
     }
   }
 }

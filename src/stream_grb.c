@@ -251,26 +251,26 @@ grbBitsPerValue(int datatype)
 }
 
 void
-grbDefField(stream_t *streamptr)
+grbDefField(stream_t *streamP)
 {
-  UNUSED(streamptr);
+  UNUSED(streamP);
 }
 
 #ifdef HAVE_LIBGRIB
 static int
-grbScanTimestep1(stream_t *streamptr)
+grbScanTimestep1(stream_t *streamP)
 {
   int status = CDI_EUFTYPE;
 
 #ifdef HAVE_LIBCGRIBEX
-  int filetype = streamptr->filetype;
+  int filetype = streamP->filetype;
 
   if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
-    status = cgribexScanTimestep1(streamptr);
+    status = cgribexScanTimestep1(streamP);
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
-    status = gribapiScanTimestep1(streamptr);
+    status = gribapiScanTimestep1(streamP);
 #else
   Error("GRIB_API support unavailable!");
 #endif
@@ -279,19 +279,19 @@ grbScanTimestep1(stream_t *streamptr)
 }
 
 static long
-grbScanTimestep2(stream_t *streamptr)
+grbScanTimestep2(stream_t *streamP)
 {
   long status = CDI_EUFTYPE;
 
 #ifdef HAVE_LIBCGRIBEX
-  int filetype = streamptr->filetype;
+  int filetype = streamP->filetype;
 
   if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
-    status = cgribexScanTimestep2(streamptr);
+    status = cgribexScanTimestep2(streamP);
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
-    status = gribapiScanTimestep2(streamptr);
+    status = gribapiScanTimestep2(streamP);
 #else
   Error("GRIB_API support unavailable!");
 #endif
@@ -300,19 +300,19 @@ grbScanTimestep2(stream_t *streamptr)
 }
 
 static int
-grbScanTimestep(stream_t *streamptr)
+grbScanTimestep(stream_t *streamP)
 {
   int status = CDI_EUFTYPE;
 
 #ifdef HAVE_LIBCGRIBEX
-  int filetype = streamptr->filetype;
+  int filetype = streamP->filetype;
 
   if (filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1)
-    status = cgribexScanTimestep(streamptr);
+    status = cgribexScanTimestep(streamP);
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
-    status = gribapiScanTimestep(streamptr);
+    status = gribapiScanTimestep(streamP);
 #else
   Error("GRIB_API support unavailable!");
 #endif
@@ -323,14 +323,14 @@ grbScanTimestep(stream_t *streamptr)
 
 #ifdef HAVE_LIBGRIB
 int
-grbInqContents(stream_t *streamptr)
+grbInqContents(stream_t *streamP)
 {
-  streamptr->curTsID = 0;
+  streamP->curTsID = 0;
 
-  int status = grbScanTimestep1(streamptr);
-  if (status == 0 && streamptr->ntsteps == -1) status = grbScanTimestep2(streamptr);
+  int status = grbScanTimestep1(streamP);
+  if (status == 0 && streamP->ntsteps == -1) status = grbScanTimestep2(streamP);
 
-  int fileID = streamptr->fileID;
+  int fileID = streamP->fileID;
   fileSetPos(fileID, 0, SEEK_SET);
 
   return status;
@@ -338,11 +338,11 @@ grbInqContents(stream_t *streamptr)
 
 #ifdef HAVE_LIBFDB5
 int
-fdbInqContents(stream_t *streamptr)
+fdbInqContents(stream_t *streamP)
 {
-  streamptr->curTsID = 0;
+  streamP->curTsID = 0;
 #ifdef HAVE_LIBGRIB_API
-  return fdbScanTimesteps(streamptr);
+  return fdbScanTimesteps(streamP);
 #else
   return -1;
 #endif
@@ -350,47 +350,47 @@ fdbInqContents(stream_t *streamptr)
 #endif
 
 int
-fdbInqTimestep(stream_t *streamptr, int tsID)
+fdbInqTimestep(stream_t *streamP, int tsID)
 {
-  if (tsID == 0 && streamptr->rtsteps == 0) Error("Call to cdiInqContents missing!");
+  if (tsID == 0 && streamP->rtsteps == 0) Error("Call to cdiInqContents missing!");
 
-  if (CDI_Debug) Message("tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
+  if (CDI_Debug) Message("tsid = %d rtsteps = %d", tsID, streamP->rtsteps);
 
   int nrecs;
-  if (tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID) { nrecs = 0; }
+  if (tsID >= streamP->ntsteps && streamP->ntsteps != CDI_UNDEFID) { nrecs = 0; }
   else
   {
-    streamptr->curTsID = tsID;
-    nrecs = streamptr->tsteps[tsID].nrecs;
+    streamP->curTsID = tsID;
+    nrecs = streamP->tsteps[tsID].nrecs;
   }
 
   return nrecs;
 }
 
 int
-grbInqTimestep(stream_t *streamptr, int tsID)
+grbInqTimestep(stream_t *streamP, int tsID)
 {
-  if (tsID == 0 && streamptr->rtsteps == 0) Error("Call to cdiInqContents missing!");
+  if (tsID == 0 && streamP->rtsteps == 0) Error("Call to cdiInqContents missing!");
 
-  if (CDI_Debug) Message("tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
+  if (CDI_Debug) Message("tsid = %d rtsteps = %d", tsID, streamP->rtsteps);
 
   long ntsteps = -1;
-  while ((tsID + 1) > streamptr->rtsteps && ntsteps == -1)
+  while ((tsID + 1) > streamP->rtsteps && ntsteps == -1)
   {
-    ntsteps = grbScanTimestep(streamptr);
+    ntsteps = grbScanTimestep(streamP);
     if (ntsteps == CDI_EUFSTRUCT)
     {
-      streamptr->ntsteps = streamptr->rtsteps;
+      streamP->ntsteps = streamP->rtsteps;
       break;
     }
   }
 
   int nrecs;
-  if (tsID >= streamptr->ntsteps && streamptr->ntsteps != -1) { nrecs = 0; }
+  if (tsID >= streamP->ntsteps && streamP->ntsteps != -1) { nrecs = 0; }
   else
   {
-    streamptr->curTsID = tsID;
-    nrecs = streamptr->tsteps[tsID].nrecs;
+    streamP->curTsID = tsID;
+    nrecs = streamP->tsteps[tsID].nrecs;
   }
 
   return nrecs;
@@ -457,19 +457,19 @@ grbGetGridtype(int *gridID, SizeType gridsize, bool *gridIsRotated, bool *gridIs
 void
 streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
 {
-  stream_t *streamptr = stream_to_pointer(streamID);
+  stream_t *streamP = stream_to_pointer(streamID);
 
-  if (streamptr->filetype == CDI_FILETYPE_GRB)
+  if (streamP->filetype == CDI_FILETYPE_GRB)
   {
 #ifdef HAVE_LIBGRIB
-    int tsID = streamptr->curTsID;
-    int vrecID = streamptr->tsteps[tsID].curRecID;
-    int recID = streamptr->tsteps[tsID].recIDs[vrecID];
-    off_t recpos = streamptr->tsteps[tsID].records[recID].position;
-    int zip = streamptr->tsteps[tsID].records[recID].zip;
+    int tsID = streamP->curTsID;
+    int vrecID = streamP->tsteps[tsID].curRecID;
+    int recID = streamP->tsteps[tsID].recIDs[vrecID];
+    off_t recpos = streamP->tsteps[tsID].records[recID].position;
+    int zip = streamP->tsteps[tsID].records[recID].zip;
 
-    void *gribbuffer = streamptr->record->buffer;
-    size_t gribbuffersize = streamptr->record->buffersize;
+    void *gribbuffer = streamP->record->buffer;
+    size_t gribbuffersize = streamP->record->buffersize;
 
     if (zip > 0)
       Error("Compressed GRIB records unsupported!");

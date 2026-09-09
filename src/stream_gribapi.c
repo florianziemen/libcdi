@@ -6,6 +6,7 @@
 
 #include "dmemory.h"
 #include "cdi.h"
+#include "cdi_query.h"
 #include "cdi_int.h"
 #include "file.h"
 #include "gribapi_utilities.h"
@@ -122,8 +123,7 @@ gribapiGetSteps(grib_handle *gh, int timeunits, int *startStep, int *endStep)
 
   long lpar;
   status = grib_get_long(gh, "forecastTime", &lpar);
-  if (status == 0)
-    *startStep = (int) lpar;
+  if (status == 0) { *startStep = (int) lpar; }
   else
   {
     status = grib_get_long(gh, "startStep", &lpar);
@@ -292,30 +292,11 @@ grib1_get_level(grib_handle *gh, int *leveltype, int *lbounds, int *level1, int 
 static double
 grib2ScaleFactor(long factor)
 {
-  switch (factor)
-  {
-    case GRIB_MISSING_LONG: return 1;
-    case -9: return 1000000000;
-    case -8: return 100000000;
-    case -7: return 10000000;
-    case -6: return 1000000;
-    case -5: return 100000;
-    case -4: return 10000;
-    case -3: return 1000;
-    case -2: return 100;
-    case -1: return 10;
-    case 0: return 1;
-    case 1: return 0.1;
-    case 2: return 0.01;
-    case 3: return 0.001;
-    case 4: return 0.0001;
-    case 5: return 0.00001;
-    case 6: return 0.000001;
-    case 7: return 0.0000001;
-    case 8: return 0.00000001;
-    case 9: return 0.000000001;
-    default: return 0;
-  }
+  if (factor == GRIB_MISSING_LONG) return 1.0;
+  if (factor < -9 || factor > 9) return 0.0;
+  static const double pow10[]
+      = { 1e9, 1e8, 1e7, 1e6, 1e5, 1e4, 1e3, 1e2, 1e1, 1e0, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9 };
+  return pow10[factor + 9];
 }
 
 static int
@@ -493,39 +474,36 @@ gribapiGetNameKeys(grib_handle *gh, int varID)
   if (string[0]) varDefKeyString(varID, CDI_KEY_STDNAME, string);
 }
 
+static const struct
+{
+  const char *grib_key;
+  int cdi_key;
+} long_key_map[] = {
+  { "tablesVersion", CDI_KEY_TABLESVERSION },
+  { "localTablesVersion", CDI_KEY_LOCALTABLESVERSION },
+  { "typeOfGeneratingProcess", CDI_KEY_TYPEOFGENERATINGPROCESS },
+  { "productDefinitionTemplateNumber", CDI_KEY_PRODUCTDEFINITIONTEMPLATE },
+  { "typeOfProcessedData", CDI_KEY_TYPEOFPROCESSEDDATA },
+  { "shapeOfTheEarth", CDI_KEY_SHAPEOFTHEEARTH },
+  { "backgroundProcess", CDI_KEY_BACKGROUNDPROCESS },
+  { "typeOfTimeIncrement", CDI_KEY_TYPEOFTIMEINCREMENT },
+};
+
+static void
+gribapiGetLongKeys(grib_handle *gh, int varID)
+{
+  for (size_t i = 0; i < ARRAY_SIZE(long_key_map); i++)
+  {
+    long val = 0;
+    if (grib_get_long(gh, long_key_map[i].grib_key, &val) == 0) varDefKeyInt(varID, long_key_map[i].cdi_key, (int) val);
+  }
+}
+
 static void
 gribapiGetKeys(grib_handle *gh, int varID)
 {
-  long tablesVersion = 0;
-  if (grib_get_long(gh, "tablesVersion", &tablesVersion) == 0) varDefKeyInt(varID, CDI_KEY_TABLESVERSION, (int) tablesVersion);
+  gribapiGetLongKeys(gh, varID);
 
-  long localTablesVersion = 0;
-  if (grib_get_long(gh, "localTablesVersion", &localTablesVersion) == 0)
-    varDefKeyInt(varID, CDI_KEY_LOCALTABLESVERSION, (int) localTablesVersion);
-
-  long typeOfGeneratingProcess = 0;
-  if (grib_get_long(gh, "typeOfGeneratingProcess", &typeOfGeneratingProcess) == 0)
-    varDefKeyInt(varID, CDI_KEY_TYPEOFGENERATINGPROCESS, (int) typeOfGeneratingProcess);
-
-  long productDefinitionTemplate = 0;
-  if (grib_get_long(gh, "productDefinitionTemplateNumber", &productDefinitionTemplate) == 0)
-    varDefKeyInt(varID, CDI_KEY_PRODUCTDEFINITIONTEMPLATE, (int) productDefinitionTemplate);
-
-  long typeOfProcessedData = 0;
-  if (grib_get_long(gh, "typeOfProcessedData", &typeOfProcessedData) == 0)
-    varDefKeyInt(varID, CDI_KEY_TYPEOFPROCESSEDDATA, (int) typeOfProcessedData);
-
-  long shapeOfTheEarth = 0;
-  if (grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth) == 0)
-    varDefKeyInt(varID, CDI_KEY_SHAPEOFTHEEARTH, (int) shapeOfTheEarth);
-
-  long backgroundProcess = 0;
-  if (grib_get_long(gh, "backgroundProcess", &backgroundProcess) == 0)
-    varDefKeyInt(varID, CDI_KEY_BACKGROUNDPROCESS, (int) backgroundProcess);
-
-  long typeOfTimeIncrement = 0;
-  if (grib_get_long(gh, "typeOfTimeIncrement", &typeOfTimeIncrement) == 0)
-    varDefKeyInt(varID, CDI_KEY_TYPEOFTIMEINCREMENT, (int) typeOfTimeIncrement);
   /*
   long constituentType = 0;
   if ( grib_get_long(gh, "constituentType", &constituentType) == 0 )
@@ -652,7 +630,7 @@ gribapiInqProjLCC(grib_handle *gh, int gridID)
   {
     double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
     proj_lonlat_to_lcc_func(gpp, (size_t) 1, &x_0, &y_0);
-    if (IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv))
+    if (is_not_equal(x_0, gpp.mv) && is_not_equal(y_0, gpp.mv))
     {
       gpp.x_0 = -x_0;
       gpp.y_0 = -y_0;
@@ -683,7 +661,7 @@ gribapiInqProjSTERE(grib_handle *gh, int gridID)
   {
     double x_0 = gpp.xval_0, y_0 = gpp.yval_0;
     proj_lonlat_to_stere_func(gpp, (size_t) 1, &x_0, &y_0);
-    if (IS_NOT_EQUAL(x_0, gpp.mv) && IS_NOT_EQUAL(y_0, gpp.mv))
+    if (is_not_equal(x_0, gpp.mv) && is_not_equal(y_0, gpp.mv))
     {
       gpp.x_0 = -x_0;
       gpp.y_0 = -y_0;
@@ -691,24 +669,6 @@ gribapiInqProjSTERE(grib_handle *gh, int gridID)
   }
 
   gridDefParamsSTERE(gridID, gpp);
-}
-
-static void
-gribapiInqProjHEALPIX(grib_handle *gh, int gridID)
-{
-  struct CDI_GridProjParams gpp;
-  gridProjParamsInit(&gpp);
-
-  decode_shapeOfTheEarth(gh, &gpp);
-
-  long lval = -1;
-  grib_get_long(gh, "Nside", &lval);
-  gpp.nside = (int) lval;
-  lval = -1;
-  grib_get_long(gh, "ordering", &lval);
-  gpp.order = (int) lval;
-
-  gridDefParamsHEALPIX(gridID, gpp);
 }
 
 static void
@@ -780,15 +740,15 @@ read_additional_keys(grib_handle *gh, int varID, int tile_index)
 }
 
 static void
-gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize, off_t position, int datatype, int comptype,
+gribapiAddRecord(stream_t *streamP, int param, grib_handle *gh, size_t recsize, off_t position, int datatype, int comptype,
                  const char *varname, int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf,
                  int level_unit, VarScanKeys *scanKeys, const var_tile_t *tiles, bool lread_additional_keys, int fdbItemIndex)
 {
-  int vlistID = streamptr->vlistID;
-  int tsID = streamptr->curTsID;
-  int recID = recordNewEntry(streamptr, tsID);
-  recinfo_t *recinfo = &(streamptr->tsteps[tsID].recinfo[recID]);
-  record_t *record = &(streamptr->tsteps[tsID].records[recID]);
+  int vlistID = streamP->vlistID;
+  int tsID = streamP->curTsID;
+  int recID = recordNewEntry(streamP, tsID);
+  recinfo_t *recinfo = &(streamP->tsteps[tsID].recinfo[recID]);
+  record_t *record = &(streamP->tsteps[tsID].records[recID]);
 
   int tsteptype = gribapiGetTsteptype(gh);
 
@@ -813,12 +773,12 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
   strncpy(record->varname, varname, sizeof(record->varname) - 1);
   record->varname[sizeof(record->varname) - 1] = 0;
 
-  streamptr->tsteps[tsID].nallrecs++;
-  streamptr->nrecs++;
+  streamP->tsteps[tsID].nallrecs++;
+  streamP->nrecs++;
 
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-  struct CdiQuery *query = streamptr->query;
+  struct CdiQuery *query = streamP->query;
   if (query && cdiQueryName(query, varname) < 0)
   {
     recinfo->used = false;
@@ -827,21 +787,20 @@ gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize
 
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-  grid_t *gridptr = (grid_t *) Malloc(sizeof(*gridptr));
-  bool uvRelativeToGrid = gribapiGetGrid(gh, gridptr);
+  grid_t *gridP = (grid_t *) Malloc(sizeof(*gridP));
+  bool uvRelativeToGrid = gribapiGetGrid(gh, gridP);
 
-  struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
+  struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridP, 0);
   int gridID = gridAdded.Id;
   if (!gridAdded.isNew)
   {
-    grid_free(gridptr);
-    Free(gridptr);
+    grid_free(gridP);
+    Free(gridP);
   }
-  else if (gridptr->projtype == CDI_PROJ_RLL) { gribapiInqProjRLL(gh, gridID); }
-  else if (gridptr->projtype == CDI_PROJ_LCC) { gribapiInqProjLCC(gh, gridID); }
-  else if (gridptr->projtype == CDI_PROJ_STERE) { gribapiInqProjSTERE(gh, gridID); }
-  else if (gridptr->projtype == CDI_PROJ_HEALPIX) { gribapiInqProjHEALPIX(gh, gridID); }
-  else if (gridptr->type == GRID_HEALPIX) { gribapiInqGridHEALPIX(gh, gridID); }
+  else if (gridP->projtype == CDI_PROJ_RLL) { gribapiInqProjRLL(gh, gridID); }
+  else if (gridP->projtype == CDI_PROJ_LCC) { gribapiInqProjLCC(gh, gridID); }
+  else if (gridP->projtype == CDI_PROJ_STERE) { gribapiInqProjSTERE(gh, gridID); }
+  else if (gridP->type == GRID_HEALPIX) { gribapiInqGridHEALPIX(gh, gridID); }
 
   int zaxistype = gribapi_get_zaxis_type(gribEditionNumber(gh), leveltype1);
 
@@ -971,8 +930,8 @@ gribapiVarCompare(const compvar2_t *compVar, const record_t *record, int flag)
   compVar0.param = record->param;
   compVar0.level1 = record->ilevel;
   compVar0.level2 = record->ilevel2;
-  compVar0.ltype = (short) record->ltype;
-  compVar0.tsteptype = (short) record->tsteptype;
+  compVar0.ltype = record->ltype;
+  compVar0.tsteptype = record->tsteptype;
   compVar0.gridsize = record->gridsize;
   memcpy(compVar0.name, record->varname, sizeof(compVar->name));
 
@@ -1042,15 +1001,15 @@ typedef enum
 } checkTimeResult;
 
 static checkTimeResult
-checkTime(stream_t *streamptr, const compvar2_t *compVar, CdiDateTime verificationTime, CdiDateTime expectedVTime)
+checkTime(stream_t *streamP, const compvar2_t *compVar, CdiDateTime verificationTime, CdiDateTime expectedVTime)
 {
   // First determine whether the current record exists already.
   int recID = 0;
-  for (; recID < streamptr->nrecs; recID++)
+  for (; recID < streamP->nrecs; recID++)
   {
-    if (gribapiVarCompare(compVar, &streamptr->tsteps[0].records[recID], 1) == 0) break;
+    if (gribapiVarCompare(compVar, &streamP->tsteps[0].records[recID], 1) == 0) break;
   }
-  bool recordExists = (recID < streamptr->nrecs);
+  bool recordExists = (recID < streamP->nrecs);
 
   // Then we need to know whether the verification time is consistent.
   bool consistentTime = cdiDateTime_isEQ(verificationTime, expectedVTime);
@@ -1083,15 +1042,15 @@ checkTime(stream_t *streamptr, const compvar2_t *compVar, CdiDateTime verificati
 #include "cdi_fdb.h"
 
 int
-fdbScanTimesteps(stream_t *streamptr)
+fdbScanTimesteps(stream_t *streamP)
 {
   void *gribbuffer = NULL;
   size_t buffersize = 0;
   grib_handle *gh = NULL;
 
-  fdb_handle_t *fdbHandle = streamptr->protocolData;
+  fdb_handle_t *fdbHandle = streamP->protocolData;
 
-  fdb_request_t *request = cdi_create_fdb_request(streamptr->filename);
+  fdb_request_t *request = cdi_create_fdb_request(streamP->filename);
 
   fdbKeyValueEntry *keyValueList = NULL;
   int numItems = cdi_fdb_fill_kvlist(fdbHandle, request, &keyValueList);
@@ -1132,12 +1091,12 @@ fdbScanTimesteps(stream_t *streamptr)
   // cdiDateTime_init(&vDateTime0);
   int fcast = 0;
 
-  streamptr->curTsID = 0;
+  streamP->curTsID = 0;
 
-  int tsIDnew = tstepsNewEntry(streamptr);
+  int tsIDnew = tstepsNewEntry(streamP);
   if (tsIDnew != 0) Error("Internal problem! tstepsNewEntry returns %d", tsIDnew);
 
-  taxis_t *taxis = &streamptr->tsteps[tsIDnew].taxis;
+  taxis_t *taxis = &streamP->tsteps[tsIDnew].taxis;
 
   for (int recID = 0; recID < numRecords; recID++)
   {
@@ -1190,7 +1149,7 @@ fdbScanTimesteps(stream_t *streamptr)
 
     var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
     int recpos = 0;
-    gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2, lbounds, level1,
+    gribapiAddRecord(streamP, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2, lbounds, level1,
                      level2, level_sf, level_unit, &scanKeys, ptiles, true, fdbItem);
 
     grib_handle_delete(gh);
@@ -1199,20 +1158,20 @@ fdbScanTimesteps(stream_t *streamptr)
 
   if (gh) grib_handle_delete(gh);
 
-  cdi_generate_vars(streamptr);
+  cdi_generate_vars(streamP);
 
   taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
   int taxisID = taxisCreate(taxis->type);
 
-  vlistDefTaxis(streamptr->vlistID, taxisID);
+  vlistDefTaxis(streamP->vlistID, taxisID);
 
-  streamScanResizeRecords1(streamptr);
+  streamScanResizeRecords1(streamP);
 
-  streamptr->record->buffer = gribbuffer;
-  streamptr->record->buffersize = buffersize;
+  streamP->record->buffer = gribbuffer;
+  streamP->record->buffersize = buffersize;
 
-  if (numTimesteps == 1) streamptr->ntsteps = 1;
-  streamScanTimeConstAdjust(streamptr, taxis);
+  if (numTimesteps == 1) streamP->ntsteps = 1;
+  streamScanTimeConstAdjust(streamP, taxis);
 
   for (int tsID = 1; tsID < numTimesteps; tsID++)
   {
@@ -1221,19 +1180,19 @@ fdbScanTimesteps(stream_t *streamptr)
     int vtime = recordInfoList[recordOffset].time * 100;
     // printf("timestep=%d recOffset=%d date=%d time=%d\n", tsID + 1, recordOffset, vdate, vtime);
 
-    int tsIDnext = tstepsNewEntry(streamptr);
+    int tsIDnext = tstepsNewEntry(streamP);
     if (tsIDnext != tsID) Error("Internal error. tsID = %d", tsID);
 
-    streamptr->tsteps[tsID - 1].next = true;
-    streamptr->tsteps[tsID].position = 0;
+    streamP->tsteps[tsID - 1].next = true;
+    streamP->tsteps[tsID].position = 0;
 
-    taxis = &streamptr->tsteps[tsID].taxis;
+    taxis = &streamP->tsteps[tsID].taxis;
 
-    cdi_create_records(streamptr, tsID, true);
-    recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
-    record_t *records = streamptr->tsteps[tsID].records;
+    cdi_create_records(streamP, tsID, true);
+    recinfo_t *recinfo = streamP->tsteps[tsID].recinfo;
+    record_t *records = streamP->tsteps[tsID].records;
 
-    int nrecs = (tsID == 1) ? streamScanInitRecords2(streamptr) : streamScanInitRecords(streamptr, tsID);
+    int nrecs = (tsID == 1) ? streamScanInitRecords2(streamP) : streamScanInitRecords(streamP, tsID);
     if (nrecs != numRecords) Error("Internal error. nrecs = %d", nrecs);
 
     taxis->vDateTime = cdiDateTime_set(vdate, vtime);
@@ -1242,7 +1201,7 @@ fdbScanTimesteps(stream_t *streamptr)
     for (int recID = 0; recID < numRecords; recID++)
     {
       recinfo[recID].used = true;
-      streamptr->tsteps[tsID].recIDs[rindex] = recID;
+      streamP->tsteps[tsID].recIDs[rindex] = recID;
       rindex++;
 
       records[recID].position = 0;
@@ -1250,14 +1209,14 @@ fdbScanTimesteps(stream_t *streamptr)
       records[recID].fdbItemIndex = recordInfoList[recordOffset + recID].fdbIndex;
     }
 
-    if (tsID == 1) streamptr->tsteps[1].nrecs = numRecords;
+    if (tsID == 1) streamP->tsteps[1].nrecs = numRecords;
   }
 
-  streamptr->rtsteps = numTimesteps;
-  streamptr->ntsteps = numTimesteps;
+  streamP->rtsteps = numTimesteps;
+  streamP->ntsteps = numTimesteps;
 
-  streamptr->fdbNumItems = numItems;
-  streamptr->fdbKeyValueList = keyValueList;
+  streamP->fdbNumItems = numItems;
+  streamP->fdbKeyValueList = keyValueList;
 
   free(recordInfoList);
   free(timestepRecordOffset);
@@ -1275,16 +1234,16 @@ records_cmp_varname(const void *s1, const void *s2)
 }
 
 static void
-sort_records(stream_t *streamptr)
+sort_records(stream_t *streamP)
 {
-  record_t *records = streamptr->tsteps[0].records;
-  size_t numRecords = (size_t) streamptr->tsteps[0].recordSize;
+  record_t *records = streamP->tsteps[0].records;
+  size_t numRecords = (size_t) streamP->tsteps[0].recordSize;
   qsort(records, numRecords, sizeof(records[0]), records_cmp_varname);
 }
 */
 
 int
-gribapiScanTimestep1(stream_t *streamptr)
+gribapiScanTimestep1(stream_t *streamP)
 {
   CdiDateTime vDateTime0;
   cdiDateTime_init(&vDateTime0);
@@ -1296,14 +1255,14 @@ gribapiScanTimestep1(stream_t *streamptr)
   int fcast = 0;
   grib_handle *gh = NULL;
 
-  streamptr->curTsID = 0;
+  streamP->curTsID = 0;
 
-  int tsID = tstepsNewEntry(streamptr);
+  int tsID = tstepsNewEntry(streamP);
   if (tsID != 0) Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
-  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+  taxis_t *taxis = &streamP->tsteps[tsID].taxis;
 
-  int fileID = streamptr->fileID;
+  int fileID = streamP->fileID;
 
   unsigned nrecs = 0;
   while (true)
@@ -1313,7 +1272,7 @@ gribapiScanTimestep1(stream_t *streamptr)
 
     if (recsize == 0)
     {
-      streamptr->ntsteps = 1;
+      streamP->ntsteps = 1;
       break;
     }
 
@@ -1364,7 +1323,7 @@ gribapiScanTimestep1(stream_t *streamptr)
       int tsteptype = gribapiGetTsteptype(gh);
       size_t gridsize = gribapiGetGridsize(gh);
       compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, scanKeys, tiles);
-      checkTimeResult result = checkTime(streamptr, &compVar, vDateTime, vDateTime0);
+      checkTimeResult result = checkTime(streamP, &compVar, vDateTime, vDateTime0);
       if (result == CHECKTIME_STOP)
       {
         nrecsScanned--;
@@ -1394,7 +1353,7 @@ gribapiScanTimestep1(stream_t *streamptr)
     }
 
     var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
-    gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2, lbounds, level1,
+    gribapiAddRecord(streamP, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2, lbounds, level1,
                      level2, level_sf, level_unit, &scanKeys, ptiles, true, -1);
 
     grib_handle_delete(gh);
@@ -1403,41 +1362,41 @@ gribapiScanTimestep1(stream_t *streamptr)
 
   if (gh) grib_handle_delete(gh);
 
-  streamptr->rtsteps = 1;
+  streamP->rtsteps = 1;
 
   if (nrecs == 0) return CDI_EUFSTRUCT;
 
-  if (streamptr->query)
+  if (streamP->query)
   {
-    int numEntries = cdiQueryNumEntries(streamptr->query);
-    int numEntriesFound = cdiQueryNumEntriesFound(streamptr->query);
-    cdiQueryPrintEntriesNotFound(streamptr->query);
+    int numEntries = cdiQueryNumEntries(streamP->query);
+    int numEntriesFound = cdiQueryNumEntriesFound(streamP->query);
+    cdiQueryPrintEntriesNotFound(streamP->query);
     if (numEntriesFound == 0 || (CDI_Query_Abort && numEntries != numEntriesFound)) return CDI_EQENF;
   }
 
-  cdi_generate_vars(streamptr);
+  cdi_generate_vars(streamP);
 
   taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
   int taxisID = taxisCreate(taxis->type);
 
-  int vlistID = streamptr->vlistID;
+  int vlistID = streamP->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
-  streamScanResizeRecords1(streamptr);
+  streamScanResizeRecords1(streamP);
 
-  streamptr->record->buffer = gribbuffer;
-  streamptr->record->buffersize = buffersize;
+  streamP->record->buffer = gribbuffer;
+  streamP->record->buffersize = buffersize;
 
-  streamScanTsFixNtsteps(streamptr, recpos);
-  streamScanTimeConstAdjust(streamptr, taxis);
+  streamScanTsFixNtsteps(streamP, recpos);
+  streamScanTimeConstAdjust(streamP, taxis);
 
-  // if (streamptr->sortname) sort_records(streamptr);
+  // if (streamP->sortname) sort_records(streamP);
 
   return 0;
 }
 
 int
-gribapiScanTimestep2(stream_t *streamptr)
+gribapiScanTimestep2(stream_t *streamP)
 {
   CdiDateTime vDateTime0;
   cdiDateTime_init(&vDateTime0);
@@ -1447,26 +1406,26 @@ gribapiScanTimestep2(stream_t *streamptr)
   int recID;
   grib_handle *gh = NULL;
 
-  streamptr->curTsID = 1;
+  streamP->curTsID = 1;
 
-  int fileID = streamptr->fileID;
-  int vlistID = streamptr->vlistID;
+  int fileID = streamP->fileID;
+  int vlistID = streamP->vlistID;
 
-  void *gribbuffer = streamptr->record->buffer;
-  size_t buffersize = streamptr->record->buffersize;
+  void *gribbuffer = streamP->record->buffer;
+  size_t buffersize = streamP->record->buffersize;
 
-  int tsID = streamptr->rtsteps;
+  int tsID = streamP->rtsteps;
   if (tsID != 1) Error("Internal problem! unexpected timestep %d", tsID + 1);
 
-  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+  taxis_t *taxis = &streamP->tsteps[tsID].taxis;
 
-  fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+  fileSetPos(fileID, streamP->tsteps[tsID].position, SEEK_SET);
 
-  cdi_create_records(streamptr, tsID, true);
-  recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
-  record_t *records = streamptr->tsteps[tsID].records;
+  cdi_create_records(streamP, tsID, true);
+  recinfo_t *recinfo = streamP->tsteps[tsID].recinfo;
+  record_t *records = streamP->tsteps[tsID].records;
 
-  int nrecords = streamScanInitRecords2(streamptr);
+  int nrecords = streamScanInitRecords2(streamP);
 
   int nrecsScanned = nrecords;  // Only used for debug output
   for (int rindex = 0; rindex <= nrecords; ++rindex)
@@ -1475,7 +1434,7 @@ gribapiScanTimestep2(stream_t *streamptr)
     recpos = fileGetPos(fileID);
     if (recsize == 0)
     {
-      streamptr->ntsteps = 2;
+      streamP->ntsteps = 2;
       break;
     }
 
@@ -1564,7 +1523,7 @@ gribapiScanTimestep2(stream_t *streamptr)
     }
 
     recinfo[recID].used = true;
-    streamptr->tsteps[tsID].recIDs[rindex] = recID;
+    streamP->tsteps[tsID].recIDs[rindex] = recID;
 
     if (CDI_Debug)
     {
@@ -1602,43 +1561,43 @@ gribapiScanTimestep2(stream_t *streamptr)
     else
       vlistDefVarTimetype(vlistID, recinfo[recID].varID, TIME_CONSTANT);
   }
-  streamptr->tsteps[tsID].nrecs = nrecs;
+  streamP->tsteps[tsID].nrecs = nrecs;
 
-  streamptr->rtsteps = 2;
+  streamP->rtsteps = 2;
 
-  streamScanTsFixNtsteps(streamptr, recpos);
+  streamScanTsFixNtsteps(streamP, recpos);
 
-  streamptr->record->buffer = gribbuffer;
-  streamptr->record->buffersize = buffersize;
+  streamP->record->buffer = gribbuffer;
+  streamP->record->buffersize = buffersize;
 
   return rstatus;
 }
 
 int
-gribapiScanTimestep(stream_t *streamptr)
+gribapiScanTimestep(stream_t *streamP)
 {
   int vrecID, recID = -1;
   int nrecs = 0;
-  int vlistID = streamptr->vlistID;
-  int tsID = streamptr->rtsteps;
-  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+  int vlistID = streamP->vlistID;
+  int tsID = streamP->rtsteps;
+  taxis_t *taxis = &streamP->tsteps[tsID].taxis;
 
-  if (streamptr->tsteps[tsID].recordSize == 0)
+  if (streamP->tsteps[tsID].recordSize == 0)
   {
-    void *gribbuffer = streamptr->record->buffer;
-    size_t buffersize = streamptr->record->buffersize;
+    void *gribbuffer = streamP->record->buffer;
+    size_t buffersize = streamP->record->buffersize;
 
-    cdi_create_records(streamptr, tsID, true);
-    recinfo_t *recinfo = streamptr->tsteps[tsID].recinfo;
-    record_t *records = streamptr->tsteps[tsID].records;
+    cdi_create_records(streamP, tsID, true);
+    recinfo_t *recinfo = streamP->tsteps[tsID].recinfo;
+    record_t *records = streamP->tsteps[tsID].records;
 
-    nrecs = streamScanInitRecords(streamptr, tsID);
+    nrecs = streamScanInitRecords(streamP, tsID);
 
-    int fileID = streamptr->fileID;
+    int fileID = streamP->fileID;
 
-    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+    fileSetPos(fileID, streamP->tsteps[tsID].position, SEEK_SET);
 
-    int nrecsScanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs * (tsID - 1);  // Only used for debug output.
+    int nrecsScanned = streamP->tsteps[0].nallrecs + streamP->tsteps[1].nrecs * (tsID - 1);  // Only used for debug output.
     off_t recpos = 0;
     CdiDateTime vDateTime0;
     cdiDateTime_init(&vDateTime0);
@@ -1651,7 +1610,7 @@ gribapiScanTimestep(stream_t *streamptr)
       recpos = fileGetPos(fileID);
       if (recsize == 0)
       {
-        streamptr->ntsteps = streamptr->rtsteps + 1;
+        streamP->ntsteps = streamP->rtsteps + 1;
         break;
       }
 
@@ -1661,7 +1620,7 @@ gribapiScanTimestep(stream_t *streamptr)
       size_t readsize = recsize;
       if (gribRead(fileID, gribbuffer, &readsize))
       {
-        Warning("Inconsistent timestep %d (GRIB record %d/%d)!", tsID + 1, rindex + 1, streamptr->tsteps[tsID].recordSize);
+        Warning("Inconsistent timestep %d (GRIB record %d/%d)!", tsID + 1, rindex + 1, streamP->tsteps[tsID].recordSize);
         break;
       }
 
@@ -1716,7 +1675,7 @@ gribapiScanTimestep(stream_t *streamptr)
 
       for (vrecID = 0; vrecID < nrecs; vrecID++)
       {
-        recID = streamptr->tsteps[1].recIDs[vrecID];
+        recID = streamP->tsteps[1].recIDs[vrecID];
         if (gribapiVarCompare(&compVar, &records[recID], 0) == 0) break;
       }
 
@@ -1747,7 +1706,7 @@ gribapiScanTimestep(stream_t *streamptr)
       }
 
       recinfo[recID].used = true;
-      streamptr->tsteps[tsID].recIDs[rindex] = recID;
+      streamP->tsteps[tsID].recIDs[rindex] = recID;
 
       if (CDI_Debug)
         Message("%4d %8lld %4d %8d %8s", rindex + 1, (long long) recpos, param, level1, cdiDateTime_to_string(vDateTime));
@@ -1772,7 +1731,7 @@ gribapiScanTimestep(stream_t *streamptr)
 
     for (vrecID = 0; vrecID < nrecs; vrecID++)
     {
-      recID = streamptr->tsteps[tsID].recIDs[vrecID];
+      recID = streamP->tsteps[tsID].recIDs[vrecID];
       if (!recinfo[recID].used) break;
     }
 
@@ -1783,31 +1742,31 @@ gribapiScanTimestep(stream_t *streamptr)
       return CDI_EUFSTRUCT;
     }
 
-    streamptr->rtsteps++;
+    streamP->rtsteps++;
 
-    if (streamptr->ntsteps != streamptr->rtsteps)
+    if (streamP->ntsteps != streamP->rtsteps)
     {
-      tsID = tstepsNewEntry(streamptr);
-      if (tsID != streamptr->rtsteps) Error("Internal error. tsID = %d", tsID);
+      tsID = tstepsNewEntry(streamP);
+      if (tsID != streamP->rtsteps) Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID - 1].next = true;
-      streamptr->tsteps[tsID].position = recpos;
+      streamP->tsteps[tsID - 1].next = true;
+      streamP->tsteps[tsID].position = recpos;
     }
 
-    fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
-    streamptr->tsteps[tsID].position = recpos;
+    fileSetPos(fileID, streamP->tsteps[tsID].position, SEEK_SET);
+    streamP->tsteps[tsID].position = recpos;
 
-    streamptr->record->buffer = gribbuffer;
-    streamptr->record->buffersize = buffersize;
+    streamP->record->buffer = gribbuffer;
+    streamP->record->buffersize = buffersize;
   }
 
-  if (nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs)
+  if (nrecs > 0 && nrecs < streamP->tsteps[tsID].nrecs)
   {
     Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
-    streamptr->ntsteps = tsID;
+    streamP->ntsteps = tsID;
   }
 
-  return (int) streamptr->ntsteps;
+  return (int) streamP->ntsteps;
 }
 
 #ifdef gribWarning
@@ -1861,7 +1820,7 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
     }
   }
 
-  size_t recsize = (size_t) gribsize;
+  size_t recsize = gribsize;
   grib_handle *gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
   GRIB_CHECK(my_grib_set_double(gh, "missingValue", missval), 0);
 
@@ -2162,7 +2121,7 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, CdiDateTime fDateTime,
 
   JulianDate julianDate1 = julianDate_encode(calendar, fDateTime);
 
-  if (cdiDateTime_isNull(vDateTime)) vDateTime = fDateTime;
+  if (cdiDateTime_isNull(vDateTime)) { vDateTime = fDateTime; }
 
   JulianDate julianDate2 = julianDate_encode(calendar, vDateTime);
   JulianDate julianDate = julianDate_sub(julianDate2, julianDate1);
@@ -2174,6 +2133,13 @@ gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, CdiDateTime fDateTime,
     int proDefTempNum
         = gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
     gribapiDefStepUnits(editionNumber, gh, timeunit, proDefTempNum, gcinit);
+
+    if (gcinit)
+    {
+      long unitsOfTime;
+      grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime);
+      if (unitsOfTime != getUnitsOfTime(timeunit)) return status;
+    }
 
     long startStep = 0;
     double endStepF = julianDate_to_seconds(julianDate) / factor;
@@ -2243,14 +2209,14 @@ gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGener
     int calendar = taxisInqCalendar(taxisID);
 
     CdiDateTime fDateTime = taxisInqFdatetime(taxisID);
-    if (cdiDateTime_isNull(fDateTime)) fDateTime = taxisInqRdatetime(taxisID);
-    if (cdiDateTime_isLT(vDateTime, fDateTime)) fDateTime = vDateTime;
+    if (cdiDateTime_isNull(fDateTime)) { fDateTime = taxisInqRdatetime(taxisID); }
+    if (cdiDateTime_isLT(vDateTime, fDateTime)) { fDateTime = vDateTime; }
 
     CdiDateTime sDateTime = taxisInqSdatetime(taxisID);
 
     int status = gribapiDefDateTimeRel(editionNumber, gh, fDateTime, vDateTime, sDateTime, productDefinitionTemplate,
                                        typeOfGeneratingProcess, tsteptype, timeunit, calendar, gcinit);
-    if (status != 0) taxistype = TAXIS_ABSOLUTE;
+    if (status != 0) { taxistype = TAXIS_ABSOLUTE; }
   }
 
   if (taxistype == TAXIS_ABSOLUTE)
@@ -2383,7 +2349,7 @@ gribapiDefProjLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
 
   struct CDI_GridProjParams gpp;
   gridInqParamsLCC(gridID, &gpp);
-  if (IS_EQUAL(gpp.x_0, gpp.mv) && IS_EQUAL(gpp.y_0, gpp.mv) && (IS_EQUAL(gpp.xval_0, gpp.mv) || IS_EQUAL(gpp.yval_0, gpp.mv)))
+  if (is_equal(gpp.x_0, gpp.mv) && is_equal(gpp.y_0, gpp.mv) && (is_equal(gpp.xval_0, gpp.mv) || is_equal(gpp.yval_0, gpp.mv)))
   {
     gpp.x_0 = gridInqXval(gridID, 0);
     gpp.y_0 = gridInqYval(gridID, 0);
@@ -2403,8 +2369,8 @@ gribapiDefProjLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
 
   double xinc = gridInqXinc(gridID);
   double yinc = gridInqYinc(gridID);
-  if (IS_EQUAL(xinc, 0.0)) xinc = gridInqXincInMeter(gridID);
-  if (IS_EQUAL(yinc, 0.0)) yinc = gridInqYincInMeter(gridID);
+  if (is_equal(xinc, 0.0)) xinc = gridInqXincInMeter(gridID);
+  if (is_equal(yinc, 0.0)) yinc = gridInqYincInMeter(gridID);
 
   static const char mesg[] = "lambert";
   size_t len = sizeof(mesg) - 1;
@@ -2465,7 +2431,7 @@ gribapiDefProjSTERE(grib_handle *gh, int editionNumber, int gridID, int uvRelati
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", gpp.yval_0), 0);
   if (editionNumber > 1) GRIB_CHECK(my_grib_set_double(gh, "LaDInDegrees", gpp.lat_1), 0);
   GRIB_CHECK(my_grib_set_double(gh, "orientationOfTheGridInDegrees", gpp.lon_0), 0);
-  long southPoleOnProjectionPlane = IS_EQUAL(gpp.lat_0, -90.0);
+  long southPoleOnProjectionPlane = is_equal(gpp.lat_0, -90.0);
   GRIB_CHECK(my_grib_set_double(gh, "southPoleOnProjectionPlane", (double) southPoleOnProjectionPlane), 0);
   GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
@@ -3519,60 +3485,60 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
 
   gribapiDefLevel((int) editionNumber, gh, zaxisID, levelID, gc->init, productDefinitionTemplate);
 
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  vlist_t *vlistP = vlist_to_pointer(vlistID);
   int zaxisSize = zaxisInqSize(zaxisID);
   // if (!gc->init)
   {
     // NOTE: Optional key/value pairs: Note that we do not distinguish between tiles here!
 
-    for (int i = 0; i < vlistptr->vars[varID].opt_grib_nentries; i++)
+    for (int i = 0; i < vlistP->vars[varID].opt_grib_nentries; i++)
     {
-      if (vlistptr->vars[varID].opt_grib_kvpair[i].update)
+      if (vlistP->vars[varID].opt_grib_kvpair[i].update)
       {
         // DR: Fix for multi-level fields (otherwise only the 1st level is correct)
-        if (zaxisSize == (levelID + 1)) vlistptr->vars[varID].opt_grib_kvpair[i].update = false;
+        if (zaxisSize == (levelID + 1)) vlistP->vars[varID].opt_grib_kvpair[i].update = false;
 
         int ret = 0;
 
-        if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)
+        if (vlistP->vars[varID].opt_grib_kvpair[i].data_type == t_double)
         {
           if (CDI_Debug)
-            Message("key \"%s\"  :   double value = %g", vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
-                    vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val);
+            Message("key \"%s\"  :   double value = %g", vlistP->vars[varID].opt_grib_kvpair[i].keyword,
+                    vlistP->vars[varID].opt_grib_kvpair[i].dbl_val);
 
-          ret = my_grib_set_double(gh, vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
-                                   vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val);
+          ret = my_grib_set_double(gh, vlistP->vars[varID].opt_grib_kvpair[i].keyword,
+                                   vlistP->vars[varID].opt_grib_kvpair[i].dbl_val);
           GRIB_CHECK(ret, 0);
         }
 
-        if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_int)
+        if (vlistP->vars[varID].opt_grib_kvpair[i].data_type == t_int)
         {
           if (CDI_Debug)
-            Message("key \"%s\"  :   integer value = %d", vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
-                    vlistptr->vars[varID].opt_grib_kvpair[i].int_val);
+            Message("key \"%s\"  :   integer value = %d", vlistP->vars[varID].opt_grib_kvpair[i].keyword,
+                    vlistP->vars[varID].opt_grib_kvpair[i].int_val);
 
-          ret = my_grib_set_long(gh, vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
-                                 (long) vlistptr->vars[varID].opt_grib_kvpair[i].int_val);
+          ret = my_grib_set_long(gh, vlistP->vars[varID].opt_grib_kvpair[i].keyword,
+                                 (long) vlistP->vars[varID].opt_grib_kvpair[i].int_val);
           GRIB_CHECK(ret, 0);
         }
 
         /* ------------------------------------------------------------------
          * NEW: Support for integer arrays (t_intarr)
          * ------------------------------------------------------------------ */
-        if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_intarr)
+        if (vlistP->vars[varID].opt_grib_kvpair[i].data_type == t_intarr)
         {
-          size_t len = vlistptr->vars[varID].opt_grib_kvpair[i].arr_len;
-          int *src = vlistptr->vars[varID].opt_grib_kvpair[i].int_arr;
+          size_t len = vlistP->vars[varID].opt_grib_kvpair[i].arr_len;
+          int *src = vlistP->vars[varID].opt_grib_kvpair[i].int_arr;
 
           if (src && len > 0)
           {
             if (CDI_Debug)
-              Message("key \"%s\"  :   integer array of length %zu", vlistptr->vars[varID].opt_grib_kvpair[i].keyword, len);
+              Message("key \"%s\"  :   integer array of length %zu", vlistP->vars[varID].opt_grib_kvpair[i].keyword, len);
 
             long *long_arr = (long *) Malloc(len * sizeof(long));
             for (size_t j = 0; j < len; ++j) long_arr[j] = src[j];
 
-            ret = grib_set_long_array(gh, vlistptr->vars[varID].opt_grib_kvpair[i].keyword, long_arr, len);
+            ret = grib_set_long_array(gh, vlistP->vars[varID].opt_grib_kvpair[i].keyword, long_arr, len);
             Free(long_arr);
             GRIB_CHECK(ret, 0);
           }
@@ -3581,17 +3547,17 @@ gribapiEncode(int memType, int varID, int levelID, int vlistID, int gridID, int 
         /* ------------------------------------------------------------------
          * NEW: Support for double arrays (t_doublearr)
          * ------------------------------------------------------------------ */
-        if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_doublearr)
+        if (vlistP->vars[varID].opt_grib_kvpair[i].data_type == t_doublearr)
         {
-          size_t len = vlistptr->vars[varID].opt_grib_kvpair[i].arr_len;
-          double *src = vlistptr->vars[varID].opt_grib_kvpair[i].dbl_arr;
+          size_t len = vlistP->vars[varID].opt_grib_kvpair[i].arr_len;
+          double *src = vlistP->vars[varID].opt_grib_kvpair[i].dbl_arr;
 
           if (src && len > 0)
           {
             if (CDI_Debug)
-              Message("key \"%s\"  :   double array of length %zu", vlistptr->vars[varID].opt_grib_kvpair[i].keyword, len);
+              Message("key \"%s\"  :   double array of length %zu", vlistP->vars[varID].opt_grib_kvpair[i].keyword, len);
 
-            ret = grib_set_double_array(gh, vlistptr->vars[varID].opt_grib_kvpair[i].keyword, src, len);
+            ret = grib_set_double_array(gh, vlistP->vars[varID].opt_grib_kvpair[i].keyword, src, len);
             GRIB_CHECK(ret, 0);
           }
         }

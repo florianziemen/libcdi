@@ -97,16 +97,16 @@ gribHandleDelete(void *gh)
 }
 
 void
-gribContainersNew(stream_t *streamptr)
+gribContainersNew(stream_t *streamP)
 {
-  const int editionNumber = (streamptr->filetype == CDI_FILETYPE_GRB) ? 1 : 2;
+  const int editionNumber = (streamP->filetype == CDI_FILETYPE_GRB) ? 1 : 2;
 
 #ifdef HAVE_LIBCGRIBEX
   if (editionNumber == 1 && !CDI_gribapi_grib1) {}
   else
 #endif
   {
-    const int nvars = streamptr->nvars;
+    const int nvars = streamP->nvars;
 
 #ifdef GRIBCONTAINER2D
     gribContainer_t **gribContainers;
@@ -114,7 +114,7 @@ gribContainersNew(stream_t *streamptr)
 
     for (int varID = 0; varID < nvars; ++varID)
     {
-      const int nlevs = streamptr->vars[varID].nlevs;
+      const int nlevs = streamP->vars[varID].nlevs;
       gribContainers[varID] = (gribContainer_t *) Malloc(nlevs * sizeof(gribContainer_t));
 
       for (int levelID = 0; levelID < nlevs; ++levelID)
@@ -124,7 +124,7 @@ gribContainersNew(stream_t *streamptr)
       }
     }
 
-    streamptr->gribContainers = (void *) gribContainers;
+    streamP->gribContainers = (void *) gribContainers;
 #else
     gribContainer_t *gribContainers = (gribContainer_t *) Malloc((size_t) nvars * sizeof(gribContainer_t));
 
@@ -134,36 +134,36 @@ gribContainersNew(stream_t *streamptr)
       gribContainers[varID].init = false;
     }
 
-    streamptr->gribContainers = (void *) gribContainers;
+    streamP->gribContainers = (void *) gribContainers;
 #endif
   }
 }
 
 void
-gribContainersDelete(stream_t *streamptr)
+gribContainersDelete(stream_t *streamP)
 {
-  if (streamptr->gribContainers)
+  if (streamP->gribContainers)
   {
-    const int nvars = streamptr->nvars;
+    const int nvars = streamP->nvars;
 
 #ifdef GRIBCONTAINER2D
-    gribContainer_t **gribContainers = (gribContainer_t **) streamptr->gribContainers;
+    gribContainer_t **gribContainers = (gribContainer_t **) streamP->gribContainers;
 
     for (int varID = 0; varID < nvars; ++varID)
     {
-      const int nlevs = streamptr->vars[varID].nlevs;
+      const int nlevs = streamP->vars[varID].nlevs;
       for (int levelID = 0; levelID < nlevs; ++levelID) { gribHandleDelete(gribContainers[varID][levelID].gribHandle); }
       Free(gribContainers[varID]);
     }
 #else
-    gribContainer_t *gribContainers = (gribContainer_t *) streamptr->gribContainers;
+    gribContainer_t *gribContainers = (gribContainer_t *) streamP->gribContainers;
 
     for (int varID = 0; varID < nvars; ++varID) { gribHandleDelete(gribContainers[varID].gribHandle); }
 #endif
 
     Free(gribContainers);
 
-    streamptr->gribContainers = NULL;
+    streamP->gribContainers = NULL;
   }
 }
 /*

@@ -42,15 +42,9 @@ void  Message_(const char *caller, const char *fmt, ...);
 #  define   Message(...)   Message_((void *), __VA_ARGS__)
 #endif
 
-/* If we're not using GNU C, elide __attribute__ */
-#ifndef __GNUC__
-#  define  __attribute__(x)  /*NOTHING*/
-#endif
-
-void cdiAbortC(const char *caller, const char *filename,
+_Noreturn void cdiAbortC(const char *caller, const char *filename,
                const char *functionname, int line,
-               const char *errorString, ... )
-  __attribute__((noreturn));
+               const char *errorString, ... );
 #define xabortC(caller, ...)                                    \
   cdiAbortC(caller, __FILE__, __func__, __LINE__, __VA_ARGS__ )
 #define xabort(...)                                             \
@@ -58,16 +52,14 @@ void cdiAbortC(const char *caller, const char *filename,
 #define cdiAbort(file, func, line, ...)                 \
   cdiAbortC(NULL, (file), (func), (line), __VA_ARGS__)
 
-#define xassert(arg) do {                       \
-    if ((arg)) { } else {                       \
-      xabort("assertion `" #arg "` failed");}   \
+#define xassert(arg) do {                                   \
+    if (!(arg)) { xabort("assertion `" #arg "` failed");}   \
   } while(0)
 
-void
+_Noreturn void
 cdiAbortC_serial(const char *caller, const char *filename,
                  const char *functionname, int line,
-                 const char *errorString, va_list ap)
-  __attribute__((noreturn));
+                 const char *errorString, va_list ap);
 
 
 bool cdiObsoleteInfo(const char *oldFunction, const char *newFunction);
