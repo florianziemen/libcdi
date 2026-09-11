@@ -1584,12 +1584,14 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
         else if (str_is_equal(attname, "_FillValue"))
         {
           cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvar->fillval);
+          if (xtype == NC_FLOAT) { ncvar->fillval = (float) ncvar->fillval; }
           ncvar->fillvalDefined = true;
           // cdf_set_var(ncvar, DataVar);
         }
         else if (str_is_equal(attname, "missing_value"))
         {
           cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvar->missval);
+          if (xtype == NC_FLOAT) { ncvar->missval = (float) ncvar->missval; }
           ncvar->missvalDefined = true;
           // cdf_set_var(ncvar, DataVar);
         }

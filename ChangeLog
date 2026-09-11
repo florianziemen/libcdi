@@ -1,3 +1,7 @@
+2026-09-11  Uwe Schulzweida
+
+	* NetCDF: cast missing_value attribute of float data to float (needed for nczarr)
+
 2026-09-08  Uwe Schulzweida
 
 	* Version 2.6.4 released

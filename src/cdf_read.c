@@ -194,7 +194,11 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
   double missVal = vlistInqVarMissval(vlistID, varID);
   int haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double validRange[2];
-  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange))) validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
+  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
+  {
+    validRange[0] = DBL_MIN;
+    validRange[1] = DBL_MAX;
+  }
   double addoffset = 0.0, scalefactor = 1.0;
   int haveAddoffset = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &addoffset) == CDI_NOERR);
   int haveScalefactor = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scalefactor) == CDI_NOERR);
