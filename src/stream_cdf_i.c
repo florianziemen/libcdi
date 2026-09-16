@@ -425,8 +425,7 @@ cdfGetAttInt(int fileID, int ncvarid, const char *attname, size_t attlen, int *a
 
   nc_type atttype;
   size_t nc_attlen;
-  cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
-  cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
+  cdf_inq_att(fileID, ncvarid, attname, &atttype, &nc_attlen);
 
   if (xtypeIsFloat(atttype) || xtypeIsInt(atttype))
   {
@@ -448,8 +447,7 @@ cdfGetAttInt64(int fileID, int ncvarid, const char *attname, size_t attlen, int6
 
   nc_type atttype;
   size_t nc_attlen;
-  cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
-  cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
+  cdf_inq_att(fileID, ncvarid, attname, &atttype, &nc_attlen);
 
   if (xtypeIsFloat(atttype) || xtypeIsInt(atttype) || xtypeIsInt64(atttype))
   {
@@ -468,8 +466,7 @@ cdfGetAttDouble(int fileID, int ncvarid, const char *attname, size_t attlen, dou
 
   nc_type atttype;
   size_t nc_attlen;
-  cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
-  cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
+  cdf_inq_att(fileID, ncvarid, attname, &atttype, &nc_attlen);
 
   if (xtypeIsFloat(atttype) || xtypeIsInt(atttype))
   {
@@ -507,8 +504,7 @@ cdfGetAttString(int fileID, int ncvarid, const char *attname, String *attString)
 
   nc_type atttype;
   size_t attlen;
-  cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
-  cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
+  cdf_inq_att(fileID, ncvarid, attname, &atttype, &attlen);
 
   if (atttype == NC_CHAR)
   {
@@ -531,7 +527,7 @@ cdfGetAttString(int fileID, int ncvarid, const char *attname, String *attString)
 }
 
 void
-cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor)
+cdf_scale_add(size_t size, double *restrict data, double addoffset, double scalefactor)
 {
   bool haveAddoffset = is_not_equal(addoffset, 0.0);
   bool haveScalefactor = is_not_equal(scalefactor, 1.0);
@@ -555,18 +551,12 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
   for (int dimIdx = 0; dimIdx < ndims; ++dimIdx)
   {
     const char *name = ncdims[dimIdx].name;
-    if (name[0] == 't' || name[0] == 'T')
-    {
-      char dimname[CDI_MAX_NAME];
-      strcpy(dimname, name);
-      if (str_is_equal("time", str_to_lower(dimname))) return ncdims[dimIdx].dimid;
-    }
+    if ((name[0] == 't' || name[0] == 'T') && strcasecmp(name, "time") == 0) return ncdims[dimIdx].dimid;
   }
 
-  bool check_dimids[MAX_DIMS_CDF];
-  for (int i = 0; i < MAX_DIMS_CDF; ++i) { check_dimids[i] = false; }
+  bool check_dimids[MAX_DIMS_CDF * 4];  // *4, because ndims could be greater than MAX_DIMS_CDF
+  for (int i = 0; i < MAX_DIMS_CDF * 4; ++i) { check_dimids[i] = false; }
 
-  char name[CDI_MAX_NAME];
   String attString;
   string_init(&attString);
   for (int varid = 0; varid < nvars; ++varid)
@@ -575,19 +565,18 @@ cdf_time_dimid(int fileID, int ndims, ncdim_t *ncdims, int nvars, ncvar_t *ncvar
     if (ncvars[varid].ndims == 1)
     {
       int dimid0 = ncvar->dimids[0];
-
       if (dimid0 == CDI_UNDEFID || check_dimids[dimid0] == true) { continue; }
       if (ncdims[dimid0].ncvarid != CDI_UNDEFID && ncdims[dimid0].ncvarid != varid) { continue; }
       check_dimids[dimid0] = true;
 
-      for (int iatt = 0, n = ncvar->nattsNC; iatt < n; ++iatt)
+      int attid = -1;
+      if (nc_inq_attid(fileID, varid, "units", &attid) == NC_NOERR)
       {
-        name[0] = 0;
-        cdf_inq_attname(fileID, varid, iatt, name);
-        if (str_is_equal(name, "units"))
+        cdfGetAttString(fileID, varid, "units", &attString);
+        if (is_timeaxis_units(attString.data))
         {
-          cdfGetAttString(fileID, varid, "units", &attString);
-          if (is_timeaxis_units(attString.data)) return ncdims[dimid0].dimid;
+          string_free(&attString);
+          return ncdims[dimid0].dimid;
         }
       }
     }
@@ -853,8 +842,7 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
   char attname[CDI_MAX_NAME];
 
   cdf_inq_attname(ncid, ncvarid, attnum, attname);
-  cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
-  cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
+  cdf_inq_att(ncid, ncvarid, attname, &atttype, &attlen);
 
   if (removeFillValue && str_is_equal("_FillValue", attname)) return;
 
@@ -1284,11 +1272,19 @@ set_vars_timetype(int nvars, ncvar_t *ncvars, int timedimid)
   }
 }
 
-static void
-scan_units_attr(ncvar_t *ncvar, char attstring[8192], size_t attstringsize)
+static size_t
+copy_str_bounded(char *dest, size_t destSize, const char *src, size_t srcLen)
 {
-  ncvar->unitsLen = (int) attstringsize;
-  memcpy(ncvar->units, attstring, attstringsize);
+  if (srcLen > destSize - 1) { srcLen = destSize - 1; }
+  memcpy(dest, src, srcLen);
+  dest[srcLen] = 0;
+  return srcLen;
+}
+
+static void
+scan_units_attr(ncvar_t *ncvar, const char *attstring, size_t attstringsize)
+{
+  ncvar->unitsLen = (int) copy_str_bounded(ncvar->units, sizeof(ncvar->units), attstring, attstringsize);
 }
 
 static void
@@ -1429,7 +1425,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
     max_check_vars = 9
   };
   char *checked_vars[max_check_vars];
-  for (int i = 0; i < max_check_vars; ++i) checked_vars[i] = NULL;
+  for (int i = 0; i < max_check_vars; ++i) { checked_vars[i] = NULL; }
 
   char attname[CDI_MAX_NAME];
   String attString;
@@ -1443,7 +1439,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
     nc_type xtype = ncvar->xtype;
     int nvatts = ncvar->nattsNC;
 
-    if (ncvar->natts == 0 && nvatts > 0) ncvar->atts = (int *) Malloc((size_t) nvatts * sizeof(int));
+    if (ncvar->natts == 0 && nvatts > 0) { ncvar->atts = (int *) Malloc((size_t) nvatts * sizeof(int)); }
 
     for (int iatt = 0; iatt < nvatts; ++iatt)
     {
@@ -1452,8 +1448,7 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
       nc_type atttype;
       size_t attlen;
       cdf_inq_attname(ncid, ncvarid, iatt, attname);
-      cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
-      cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
+      cdf_inq_att(ncid, ncvarid, attname, &atttype, &attlen);
 
       bool isText = xtypeIsText(atttype);
       bool isNumber = xtypeIsFloat(atttype) || xtypeIsInt(atttype);
@@ -1462,12 +1457,18 @@ scan_vars_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int model
       if (isText)
       {
         cdfGetAttString(ncid, ncvarid, attname, &attString);
-        size_t attstringsize = strlen(attString.data) + 1;
+        size_t attstringLen = strlen(attString.data) + 1;
         char *attstring = attString.data;
 
-        if (str_is_equal(attname, "long_name")) { memcpy(ncvar->longname, attstring, attstringsize); }
-        else if (str_is_equal(attname, "standard_name")) { memcpy(ncvar->stdname, attstring, attstringsize); }
-        else if (str_is_equal(attname, "units")) { scan_units_attr(ncvar, attstring, attstringsize); }
+        if (str_is_equal(attname, "long_name"))
+        {
+          copy_str_bounded(ncvar->longname, sizeof(ncvar->longname), attstring, attstringLen);
+        }
+        else if (str_is_equal(attname, "standard_name"))
+        {
+          copy_str_bounded(ncvar->stdname, sizeof(ncvar->stdname), attstring, attstringLen);
+        }
+        else if (str_is_equal(attname, "units")) { scan_units_attr(ncvar, attstring, attstringLen); }
         else if (str_is_equal(attname, "calendar")) { ncvar->hasCalendar = true; }
         else if (str_is_equal(attname, "param")) { scan_param_attr(ncvar, attstring); }
         else if (str_is_equal(attname, "trunc_type")) { scan_trunctype_attr(ncvar, attstring); }
@@ -1696,8 +1697,7 @@ verify_vars_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
     {
       int attnum = ncvar->atts[i];
       cdf_inq_attname(ncid, ncvarid, attnum, attname);
-      cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
-      cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
+      cdf_inq_att(ncid, ncvarid, attname, &atttype, &attlen);
 
       // bool isNumber = (xtypeIsFloat(atttype) || xtypeIsInt(atttype));
 
@@ -2221,16 +2221,18 @@ cdf_load_bounds_cube_sphere(size_t bxsize, size_t bysize, size_t size, ncvar_t *
 
     size_t m = 0;
     for (size_t k = 0; k < 6; ++k)
+    {
+      size_t offset = k * bysize * bxsize;
       for (size_t j = 0; j < (bysize - 1); ++j)
         for (size_t i = 0; i < (bxsize - 1); ++i)
         {
-          size_t offset = k * bysize * bxsize;
           pbounds[m + 0] = bounds[offset + (j + 1) * bxsize + i];
           pbounds[m + 1] = bounds[offset + j * bxsize + i];
           pbounds[m + 2] = bounds[offset + j * bxsize + (i + 1)];
           pbounds[m + 3] = bounds[offset + (j + 1) * bxsize + (i + 1)];
           m += 4;
         }
+    }
 
     Free(bounds);
   }
@@ -2519,9 +2521,7 @@ cdf_load_bounds_impl(struct cdfLazyGrid *lazyGrid, ncvar_t *ncvar, ncvar_t *ncva
       }
       else
       {
-        static bool lwarn = true;
-        if (lwarn) Warning("%c-bounds doesn't follow the CF-Convention, skipped!", axisChar);
-        lwarn = false;
+        CDI_WARN_ONCE("%c-bounds doesn't follow the CF-Convention, skipped!", axisChar);
       }
     }
   }
@@ -3997,8 +3997,7 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
   for (int iatt = 0; iatt < ngatts; iatt++)
   {
     cdf_inq_attname(fileID, NC_GLOBAL, iatt, attname);
-    cdf_inq_atttype(fileID, NC_GLOBAL, attname, &xtype);
-    cdf_inq_attlen(fileID, NC_GLOBAL, attname, &attlen);
+    cdf_inq_att(fileID, NC_GLOBAL, attname, &xtype, &attlen);
 
     if (xtypeIsText(xtype))
     {
