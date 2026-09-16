@@ -97,7 +97,7 @@ from an open dataset.
 @EndFunction
 */
 void
-streamReadVarF(int streamID, int varID, float *data, SizeType *numMissVals)
+streamReadVarF(int streamID, int varID, float *restrict data, SizeType *numMissVals)
 {
   size_t numMiss = 0;
   if (cdiStreamReadVar(streamID, varID, MEMTYPE_FLOAT, data, &numMiss))
@@ -106,7 +106,7 @@ streamReadVarF(int streamID, int varID, float *data, SizeType *numMissVals)
     // we fall back to double precision reading, converting the data on the fly.
     size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
     elementCount *= (size_t) zaxisInqSize(vlistInqVarZaxis(streamInqVlist(streamID), varID));
-    double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
+    double *restrict conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
     streamReadVar(streamID, varID, conversionBuffer, numMissVals);
     for (size_t i = elementCount; i--;) data[i] = (float) conversionBuffer[i];
     Free(conversionBuffer);
@@ -206,7 +206,7 @@ from an open dataset.
 @EndFunction
 */
 void
-streamReadVarSliceF(int streamID, int varID, int levelID, float *data, SizeType *numMissVals)
+streamReadVarSliceF(int streamID, int varID, int levelID, float *restrict data, SizeType *numMissVals)
 {
   size_t numMiss = 0;
   if (cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_FLOAT, data, &numMiss))
@@ -214,7 +214,7 @@ streamReadVarSliceF(int streamID, int varID, int levelID, float *data, SizeType 
     // In case the file format does not support single precision reading,
     // we fall back to double precision reading, converting the data on the fly.
     size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
-    double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
+    double *restrict conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
     streamReadVarSlice(streamID, varID, levelID, conversionBuffer, numMissVals);
     for (size_t i = elementCount; i--;) data[i] = (float) conversionBuffer[i];
     Free(conversionBuffer);
