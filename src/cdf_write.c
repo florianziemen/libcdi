@@ -49,12 +49,7 @@ cdfDefVarSzip(int ncid, int ncvarID, int pixels_per_block)
   (void) ncid;
   (void) ncvarID;
   (void) pixels_per_block;
-  static bool lwarn = true;
-  if (lwarn)
-  {
-    lwarn = false;
-    Warning("Szip compression failed, NetCDF4/szlib not available!");
-  }
+  CDI_WARN_ONCE("Szip compression failed, NetCDF4/szlib not available!");
 #endif
 }
 
@@ -152,7 +147,7 @@ cdfDefDatatype(int datatype, stream_t *streamP)
 static void
 cdfDefVarMissval(stream_t *streamP, int varID, int dtype, int lcheck)
 {
-  if (streamP->vars[varID].defmiss == false)
+  if (!streamP->vars[varID].defmiss)
   {
     int vlistID = streamP->vlistID;
     int fileID = streamP->fileID;
@@ -422,12 +417,7 @@ cdfDefVarFilter(int fileID, int fileType, int ncvarID, const char *filterSpec)
       return;
     }
 
-    static bool lwarn = true;
-    if (lwarn)
-    {
-      lwarn = false;
-      Warning("Filter is only available with NetCDF4!");
-    }
+    CDI_WARN_ONCE("Filter is only available with NetCDF4!");
   }
 }
 
@@ -442,12 +432,7 @@ cdfDefVarCompression(const stream_t *streamP, int ncvarID, nc_type xtype)
       return;
     }
 
-    static bool lwarn = true;
-    if (lwarn)
-    {
-      lwarn = false;
-      Warning("Deflate compression is only available for NetCDF4!");
-    }
+    CDI_WARN_ONCE("Deflate compression is only available for NetCDF4!");
   }
   /*
   else if (streamP->comptype == CDI_COMPRESS_ZSTD)
@@ -458,12 +443,7 @@ cdfDefVarCompression(const stream_t *streamP, int ncvarID, nc_type xtype)
       return;
     }
 
-    static bool lwarn = true;
-    if (lwarn)
-    {
-      lwarn = false;
-      Warning("SZIP compression is only available for NetCDF4!");
-    }
+    CDI_WARN_ONCE("SZIP compression is only available for NetCDF4!");
   }
   */
   else if (streamP->comptype == CDI_COMPRESS_SZIP)
@@ -474,12 +454,7 @@ cdfDefVarCompression(const stream_t *streamP, int ncvarID, nc_type xtype)
       return;
     }
 
-    static bool lwarn = true;
-    if (lwarn)
-    {
-      lwarn = false;
-      Warning("SZIP compression is only available for NetCDF4!");
-    }
+    CDI_WARN_ONCE("SZIP compression is only available for NetCDF4!");
   }
 }
 
@@ -847,7 +822,7 @@ cdfCheckVarname(int fileID, char name[CDI_MAX_NAME])
       ++iz;
     } while (iz <= 99);
 
-    if (iz > 99) Error("Variable name %s already exsist!", name);
+    if (iz > 99) Error("Variable name %s already exist!", name);
 
     if (!str_is_equal(name, varname))
       Warning("Changed %s entry of variable name '%s' to '%s'!", (iz == 1) ? "double" : "multiple", name, varname);
@@ -884,7 +859,7 @@ cdfGenVarname(int fileID, char name[CDI_MAX_NAME], int pnum, int pcat, int *pdis
     ++iz;
   } while (iz <= 99);
 
-  if (iz > 99) Error("Variable name %s already exsist!", name);
+  if (iz > 99) Error("Variable name %s already exist!", name);
 
   strcpy(name, varname);
   *pcode = 0;
@@ -1113,23 +1088,16 @@ cdfWriteGridTraj(stream_t *streamP, int gridID)
   cdf_put_var1_double(streamP->fileID, latID, &index, &xlat);
 }
 
-static inline void
-apply_packing(double *v, bool haveAddoffset, bool haveScalefactor, double addoffset, double scalefactor)
-{
-  if (haveAddoffset) *v -= addoffset;
-  if (haveScalefactor) *v /= scalefactor;
-}
-
 static void
 cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, size_t nvals, size_t xsize, size_t ysize,
                    bool swapxy, size_t *start, size_t *count, int memtype, const void *data, size_t numMissVals)
 {
   const double *pdata_dp = (const double *) data;
-  double *mdata_dp = NULL;
-  double *sdata_dp = NULL;
+  double *restrict mdata_dp = NULL;
+  double *restrict sdata_dp = NULL;
   const float *pdata_sp = (const float *) data;
-  float *mdata_sp = NULL;
-  float *sdata_sp = NULL;
+  float *restrict mdata_sp = NULL;
+  float *restrict sdata_sp = NULL;
 
   /*  if ( dtype == CDI_DATATYPE_INT8 || dtype == CDI_DATATYPE_INT16 || dtype == CDI_DATATYPE_INT32 ) */
   {
@@ -1140,6 +1108,9 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
 
     if (haveAddoffset || haveScalefactor)
     {
+      const int packmask = (haveScalefactor ? 2 : 0) | (haveAddoffset ? 1 : 0);
+      const double invScale = haveScalefactor ? 1.0 / scalefactor : 0.0;
+
       if (memtype == MEMTYPE_FLOAT)
       {
         mdata_sp = (float *) Malloc(nvals * sizeof(float));
@@ -1148,23 +1119,40 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
 
         if (numMissVals > 0)
         {
+          double missvalF = (double) ((float) missval);
           for (size_t i = 0; i < nvals; ++i)
           {
             double temp = mdata_sp[i];
-            if (!dbl_is_equal(temp, (float) missval))
+            if (!dbl_is_equal(temp, missvalF))
             {
-              apply_packing(&temp, haveAddoffset, haveScalefactor, addoffset, scalefactor);
+              if (haveAddoffset) temp -= addoffset;
+              if (haveScalefactor) temp *= invScale;
               mdata_sp[i] = (float) temp;
             }
           }
         }
         else
         {
-          for (size_t i = 0; i < nvals; ++i)
+          switch (packmask)
           {
-            double temp = mdata_sp[i];
-            apply_packing(&temp, haveAddoffset, haveScalefactor, addoffset, scalefactor);
-            mdata_sp[i] = (float) temp;
+            case 1:
+#ifdef _OPENMP
+#pragma omp simd
+#endif
+              for (size_t i = 0; i < nvals; ++i) { mdata_sp[i] = (float) ((double) mdata_sp[i] - addoffset); }
+              break;
+            case 2:
+#ifdef _OPENMP
+#pragma omp simd
+#endif
+              for (size_t i = 0; i < nvals; ++i) { mdata_sp[i] = (float) ((double) mdata_sp[i] * invScale); }
+              break;
+            default:
+#ifdef _OPENMP
+#pragma omp simd
+#endif
+              for (size_t i = 0; i < nvals; ++i) { mdata_sp[i] = (float) (((double) mdata_sp[i] - addoffset) * invScale); }
+              break;
           }
         }
       }
@@ -1180,15 +1168,33 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
           {
             if (!dbl_is_equal(mdata_dp[i], missval))
             {
-              apply_packing(&mdata_dp[i], haveAddoffset, haveScalefactor, addoffset, scalefactor);
+              if (haveAddoffset) mdata_dp[i] -= addoffset;
+              if (haveScalefactor) mdata_dp[i] *= invScale;
             }
           }
         }
         else
         {
-          for (size_t i = 0; i < nvals; ++i)
+          switch (packmask)
           {
-            apply_packing(&mdata_dp[i], haveAddoffset, haveScalefactor, addoffset, scalefactor);
+            case 1:
+#ifdef _OPENMP
+#pragma omp simd
+#endif
+              for (size_t i = 0; i < nvals; ++i) { mdata_dp[i] -= addoffset; }
+              break;
+            case 2:
+#ifdef _OPENMP
+#pragma omp simd
+#endif
+              for (size_t i = 0; i < nvals; ++i) { mdata_dp[i] *= invScale; }
+              break;
+            default:
+#ifdef _OPENMP
+#pragma omp simd
+#endif
+              for (size_t i = 0; i < nvals; ++i) { mdata_dp[i] = (mdata_dp[i] - addoffset) * invScale; }
+              break;
           }
         }
       }
@@ -1226,12 +1232,18 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarID, int dtype, s
       if (memtype == MEMTYPE_FLOAT)
       {
         ALLOC_IMPL(float, sp);
+#ifdef _OPENMP
+#pragma omp simd
+#endif
         for (size_t i = 0; i < nvals; ++i) { mdata_sp[i] = roundf(mdata_sp[i]); }
         BYTE_CHECK_IMPL(sp);
       }
       else
       {
         ALLOC_IMPL(double, dp);
+#ifdef _OPENMP
+#pragma omp simd
+#endif
         for (size_t i = 0; i < nvals; ++i) { mdata_dp[i] = round(mdata_dp[i]); }
         BYTE_CHECK_IMPL(dp);
       }
