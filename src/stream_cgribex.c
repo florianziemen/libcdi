@@ -1411,20 +1411,16 @@ cgribexDefParam(int *isec1, int param)
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
   if (pnum < 0) pnum = -pnum;
 
-  static bool lwarn_pdis = true;
-  if (pdis != 255 && lwarn_pdis)
+  if (pdis != 255)
   {
     char paramstr[32];
     cdiParamToString(param, paramstr, sizeof(paramstr));
-    Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
-    lwarn_pdis = false;
+    CDI_WARN_ONCE("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
   }
 
-  static bool lwarn_pnum = true;
-  if (pnum > 255 && lwarn_pnum)
+  if (pnum > 255)
   {
-    Warning("Parameter number %d out of range (1-255), set to %d!", pnum, pnum % 256);
-    lwarn_pnum = false;
+    CDI_WARN_ONCE("Parameter number %d out of range (1-255), set to %d!", pnum, pnum % 256);
     pnum = pnum % 256;
   }
 
@@ -1853,10 +1849,8 @@ cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID, in
     }
     default:
     {
-      static bool lwarn = true;
       ISEC1_Sec2Or3Flag = 0;
-      if (lwarn) Warning("CGRIBEX library doesn't support %s grids, grid information will be lost!", gridNamePtr(gridtype));
-      lwarn = false;
+      CDI_WARN_ONCE("CGRIBEX library doesn't support %s grids, grid information will be lost!", gridNamePtr(gridtype));
       break;
     }
   }
@@ -1931,13 +1925,8 @@ cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
       int vctsize = zaxisInqVctSize(zaxisID);
       if (vctsize > 255)
       {
-        static bool lwarning_vct = true;
         ISEC2_NumVCP = 0;
-        if (lwarning_vct)
-        {
-          Warning("VCT size of %d is too large (maximum is 255). Set to 0!", vctsize);
-          lwarning_vct = false;
-        }
+        CDI_WARN_ONCE("VCT size of %d is too large (maximum is 255). Set to 0!", vctsize);
       }
       else
       {
@@ -1958,11 +1947,9 @@ cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
       else
         level = level / 100;
 
-      static bool lwarn = true;
-      if (lwarn && modf(level, &dum) > 0.001)
+      if (modf(level, &dum) > 0.001)
       {
-        lwarn = false;
-        Message("GRIB1 can store only full pressure levels! Level changed from %ghPa to %dhPa.", level, level2int(level));
+        CDI_WARN_ONCE("GRIB1 can store only full pressure levels! Level changed from %ghPa to %dhPa.", level, level2int(level));
       }
 
       isec1DefLevel(isec1, grib_ltype, level2int(level), 0);

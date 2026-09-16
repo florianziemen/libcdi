@@ -425,12 +425,7 @@ grbGetGridtype(int *gridID, SizeType gridsize, bool *gridIsRotated, bool *gridIs
     }
     else
     {
-      static bool lwarning = true;
-      if (lwarning && gridsize > 1)
-      {
-        lwarning = false;
-        Warning("Curvilinear grid is unsupported in GRIB format! Created wrong Grid Description Section!");
-      }
+      CDI_WARN_ONCE("Curvilinear grid is unsupported in GRIB format! Created wrong Grid Description Section!");
       *gridIsCurvilinear = true;
       gridtype = GRID_LONLAT;
     }

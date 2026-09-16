@@ -1810,15 +1810,7 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
 {
   int status = 0;
 
-  if (unreduced)
-  {
-    static bool lwarn = true;
-    if (lwarn)
-    {
-      lwarn = false;
-      Warning("Conversion of gaussian reduced grids unsupported!");
-    }
-  }
+  if (unreduced) { CDI_WARN_ONCE("Conversion of gaussian reduced grids unsupported!"); }
 
   size_t recsize = gribsize;
   grib_handle *gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
@@ -1950,24 +1942,17 @@ gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *name,
 
     if (pnum > 255)
     {
-      static bool lwarn_pnum = true;
-      if (lwarn_pnum)
-      {
-        Warning("Parameter number %d out of range (1-255), set to %d!", pnum, pnum % 256);
-        lwarn_pnum = false;
-      }
+      CDI_WARN_ONCE("Parameter number %d out of range (1-255), set to %d!", pnum, pnum % 256);
       pnum = pnum % 256;
     }
 
     if (editionNumber <= 1)
     {
-      static bool lwarn_pdis = true;
-      if (pdis != 255 && lwarn_pdis)
+      if (pdis != 255)
       {
         char paramstr[32];
         cdiParamToString(param, paramstr, sizeof(paramstr));
-        Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
-        lwarn_pdis = false;
+        CDI_WARN_ONCE("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
       }
 
       GRIB_CHECK(my_grib_set_long(gh, "table2Version", pcat), 0);
@@ -2873,28 +2858,20 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
         else
           level /= 100;
 
-        static bool lwarn = true;
-        if (lwarn && modf(level, &dum) > 0.001)
+        if (modf(level, &dum) > 0.001)
         {
-          lwarn = false;
-          Warning("GRIB1 can store only full pressure levels! Level changed from %ghPa to %dhPa.", level, (int) lround(level));
+          CDI_WARN_ONCE("GRIB1 can store only full pressure levels! Level changed from %ghPa to %dhPa.", level,
+                        (int) lround(level));
         }
       }
-      else if (ltype2 == -1)
-        ltype2 = GRIB2_LTYPE_ISOBARIC;
+      else if (ltype2 == -1) { ltype2 = GRIB2_LTYPE_ISOBARIC; }
 
       defLevel(gh, gcinit, grib_ltype, ltype2, hasBounds, level, dlevel1, dlevel2);
 
       break;
     }
     case ZAXIS_SNOW:
-      if (editionNumber <= 1)
-        ;  // not available
-      else
-      {
-        grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, hasBounds, level, dlevel1, dlevel2);
-      }
-
+      if (editionNumber > 1) { grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, hasBounds, level, dlevel1, dlevel2); }
       break;
     case ZAXIS_DEPTH_BELOW_LAND:
     {
@@ -2908,9 +2885,7 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
     {
       if (!gcinit) GRIB_CHECK(my_grib_set_long(gh, "genVertHeightCoords", 1), 0);
 
-      if (editionNumber <= 1)
-        ;  // not available
-      else
+      if (editionNumber > 1)
       {
         if (hasBounds)
         {

@@ -946,12 +946,7 @@ timevalue_decode(int timeunits, double timevalue)
   }
   else
   {
-    static bool lwarn = true;
-    if (lwarn)
-    {
-      Warning("timeunit %s unsupported!", tunitNamePtr(timeunits));
-      lwarn = false;
-    }
+    CDI_WARN_ONCE("timeunit %s unsupported!", tunitNamePtr(timeunits));
   }
 
   return julianDate;
@@ -974,12 +969,7 @@ cdi_encode_timevalue(int64_t days, double secs, int timeunit)
   else if (timeunit == TUNIT_DAY) { timevalue = (double) days + secs / 86400.; }
   else
   {
-    static bool lwarn = true;
-    if (lwarn)
-    {
-      Warning("timeunit %s unsupported!", tunitNamePtr(timeunit));
-      lwarn = false;
-    }
+    CDI_WARN_ONCE("timeunit %s unsupported!", tunitNamePtr(timeunit));
   }
 
   return timevalue;
@@ -1143,35 +1133,17 @@ split_timevalue(double timevalue, int timeunit)
   }
   else if (timeunit == TUNIT_YEAR)
   {
-    {
-      static bool lwarn = true;
-      if (lwarn && (fabs(timevalue - trunc(timevalue)) > 0))
-      {
-        Warning("Fraction of a year is not supported!!");
-        lwarn = false;
-      }
-    }
+    CDI_WARN_ONCE("Fraction of a year is not supported!!");
 
+    if (timevalue < -214700)
     {
-      static bool lwarn = true;
-      if (timevalue < -214700)
-      {
-        if (lwarn)
-        {
-          Warning("Year %g out of range, set to -214700", timevalue);
-          lwarn = false;
-        }
-        timevalue = -214700;
-      }
-      else if (timevalue > 214700)
-      {
-        if (lwarn)
-        {
-          Warning("Year %g out of range, set to 214700", timevalue);
-          lwarn = false;
-        }
-        timevalue = 214700;
-      }
+      CDI_WARN_ONCE("Year %g out of range, set to -214700", timevalue);
+      timevalue = -214700;
+    }
+    else if (timevalue > 214700)
+    {
+      CDI_WARN_ONCE("Year %g out of range, set to 214700", timevalue);
+      timevalue = 214700;
     }
 
     int64_t vdate = (int64_t) timevalue * 10000;
@@ -1180,12 +1152,7 @@ split_timevalue(double timevalue, int timeunit)
   }
   else
   {
-    static bool lwarn = true;
-    if (lwarn)
-    {
-      Warning("timeunit %s unsupported!", tunitNamePtr(timeunit));
-      lwarn = false;
-    }
+    CDI_WARN_ONCE("timeunit %s unsupported!", tunitNamePtr(timeunit));
   }
 
   // verify date and time
@@ -1207,12 +1174,7 @@ split_timevalue(double timevalue, int timeunit)
     datetime.date = cdiDate_encode(year, month, day);
     datetime.time = cdiTime_encode(hour, minute, second, ms);
 
-    static bool lwarn = true;
-    if (lwarn)
-    {
-      lwarn = false;
-      Warning("Reset wrong date/time to %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d!", year, month, day, hour, minute, second);
-    }
+    CDI_WARN_ONCE("Reset wrong date/time to %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d!", year, month, day, hour, minute, second);
   }
 
   return datetime;

@@ -38,6 +38,17 @@ extern pthread_mutex_t CDI_IO_Mutex;
 #define CDI_IO_UNLOCK()
 #endif
 
+#define CDI_WARN_ONCE(...)    \
+  do                          \
+  {                           \
+    static bool lwarn = true; \
+    if (lwarn)                \
+    {                         \
+      lwarn = false;          \
+      Warning(__VA_ARGS__);   \
+    }                         \
+  } while (0);
+
 // Base file types
 
 #define CDI_FILETYPE_GRIB 100    // File type GRIB

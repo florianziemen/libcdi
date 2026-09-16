@@ -670,12 +670,7 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
 #ifdef HAVE_LIBPTHREAD
     if (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR) streamP->lockIO = true;
 #else
-    static bool lwarn = true;
-    if (lwarn)
-    {
-      lwarn = false;
-      Warning("CDI threadsafe failed, pthread support not compiled in!");
-    }
+    CDI_WARN_ONCE("CDI threadsafe failed, pthread support not compiled in!");
 #endif
   }
 #endif
