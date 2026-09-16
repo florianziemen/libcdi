@@ -54,7 +54,7 @@ memcrc(const unsigned char *b, size_t n)
   /* Extend with the length of the string. */
   while (n != 0)
   {
-    register uint32_t c = n & 0377;
+    uint32_t c = n & 0377;
     n >>= 8;
     s = (s << 8) ^ crctab[(s >> 24) ^ c];
   }
@@ -70,9 +70,9 @@ memcrc_r(uint32_t *state, const unsigned char *block, size_t block_len)
    *  size_t        n == length of sequence
    */
 
-  register uint32_t c, s = *state;
-  register size_t n = block_len;
-  register const unsigned char *b = block;
+  uint32_t c, s = *state;
+  size_t n = block_len;
+  const unsigned char *b = block;
 
   for (; n > 0; --n)
   {
@@ -84,22 +84,23 @@ memcrc_r(uint32_t *state, const unsigned char *block, size_t block_len)
 }
 
 #ifdef WORDS_BIGENDIAN
-#define SWAP_CSUM(BITWIDTH, BYTEWIDTH, NACC)                             \
-  do {                                                                   \
-    register const uint##BITWIDTH##_t *b = (uint##BITWIDTH##_t *) elems; \
-    for (size_t i = 0; i < num_elems; ++i)                               \
-    {                                                                    \
-      for (size_t aofs = NACC; aofs > 0; --aofs)                         \
-      {                                                                  \
-        uint##BITWIDTH##_t accum = b[i + aofs - 1];                      \
-        for (size_t j = 0; j < BYTEWIDTH; ++j)                           \
-        {                                                                \
-          uint32_t c = (uint32_t) (accum & UCHAR_MAX);                   \
-          s = (s << 8) ^ crctab[(s >> 24) ^ c];                          \
-          accum >>= 8;                                                   \
-        }                                                                \
-      }                                                                  \
-    }                                                                    \
+#define SWAP_CSUM(BITWIDTH, BYTEWIDTH, NACC)                    \
+  do                                                            \
+  {                                                             \
+    const uint##BITWIDTH##_t *b = (uint##BITWIDTH##_t *) elems; \
+    for (size_t i = 0; i < num_elems; ++i)                      \
+    {                                                           \
+      for (size_t aofs = NACC; aofs > 0; --aofs)                \
+      {                                                         \
+        uint##BITWIDTH##_t accum = b[i + aofs - 1];             \
+        for (size_t j = 0; j < BYTEWIDTH; ++j)                  \
+        {                                                       \
+          uint32_t c = (uint32_t) (accum & UCHAR_MAX);          \
+          s = (s << 8) ^ crctab[(s >> 24) ^ c];                 \
+          accum >>= 8;                                          \
+        }                                                       \
+      }                                                         \
+    }                                                           \
   } while (0)
 #endif
 
@@ -114,7 +115,7 @@ void
 memcrc_r_eswap(uint32_t *state, const unsigned char *elems, size_t num_elems, size_t elem_size)
 {
 #ifdef WORDS_BIGENDIAN
-  register uint32_t s = *state;
+  uint32_t s = *state;
 
   switch (elem_size)
   {
@@ -133,8 +134,8 @@ memcrc_r_eswap(uint32_t *state, const unsigned char *elems, size_t num_elems, si
 uint32_t
 memcrc_finish(uint32_t *state, off_t total_size)
 {
-  register uint32_t c, s = *state;
-  register uint64_t n = (uint64_t) total_size;
+  uint32_t c, s = *state;
+  uint64_t n = (uint64_t) total_size;
 
   /* Extend with the length of the string. */
   while (n != 0)
