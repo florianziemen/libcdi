@@ -173,7 +173,6 @@ gribapiSetDataDateTime(grib_handle *gh, CdiDateTime dataDateTime)
 static int
 gribapi_get_timeunits_factor(int timeUnits)
 {
-  static bool lprint = true;
   switch (timeUnits)
   {
     case TUNIT_SECOND: return 1;
@@ -183,12 +182,7 @@ gribapi_get_timeunits_factor(int timeUnits)
     case TUNIT_6HOURS: return 21600;
     case TUNIT_12HOURS: return 43200;
     case TUNIT_DAY: return 86400;
-    default:
-      if (lprint)
-      {
-        Warning("Time unit %d unsupported", timeUnits);
-        lprint = false;
-      }
+    default: CDI_WARN_ONCE("Time unit %d unsupported", timeUnits);
   }
 
   return 0;
@@ -908,7 +902,7 @@ gribapiVarSet(int param, int level1, int level2, int leveltype, int tsteptype, s
   compvar2_t compVar = { 0 };
   size_t maxlen = sizeof(compVar.name);
   size_t len = strlen(name);
-  if (len > maxlen) len = maxlen;
+  if (len > maxlen) { len = maxlen; }
 
   compVar.param = param;
   compVar.level1 = level1;
@@ -1970,9 +1964,9 @@ gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *name,
 }
 
 static int
-getTimeunitFactor(int timeunit)
+getTimeunitFactor(int timeUnits)
 {
-  switch (timeunit)
+  switch (timeUnits)
   {
     case TUNIT_SECOND: return 1;
     case TUNIT_MINUTE: return 60;
@@ -2346,7 +2340,7 @@ gribapiDefProjLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
   bool isSouthPole = (gpp.lat_1 < 0.0);
   if (isSouthPole && gribEditionNumber(gh) == 1)
   {
-    gpp.lat_1 = -gpp.lat_2;
+    gpp.lat_1 = -gpp.lat_1;
     gpp.lat_2 = -gpp.lat_2;
   }
   int projflag = 0;

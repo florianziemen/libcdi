@@ -91,14 +91,17 @@ find_key_mutable(cdi_keys_t *keysP, int key)
 static cdi_keys_t *
 cdi_get_keysP(int objID, int varID)
 {
-  int reshID = reshGetTxCode(objID);
+  int reshID;
+  void *objP = reshGetTxValue(objID, &reshID);
+  if (objP == NULL) return NULL;
+
   switch (reshID)
   {
     case GRID:
-    case DIST_GRID: return grid_get_keysP(grid_to_pointer(objID), varID);
-    case ZAXIS: return zaxis_get_keysP(zaxis_to_pointer(objID), varID);
-    case TAXIS: return taxis_get_keysP(taxis_to_pointer(objID), varID);
-    case VLIST: return vlist_get_keysP(vlist_to_pointer(objID), varID);
+    case DIST_GRID: return grid_get_keysP((grid_t *) objP, varID);
+    case ZAXIS: return zaxis_get_keysP((zaxis_t *) objP, varID);
+    case TAXIS: return taxis_get_keysP((taxis_t *) objP, varID);
+    case VLIST: return vlist_get_keysP((vlist_t *) objP, varID);
     default: return NULL;
   }
 }
@@ -115,7 +118,7 @@ cdi_key_compare(const cdi_keys_t *restrict keysPa, const cdi_keys_t *restrict ke
 
   switch (keyPa->type)
   {
-    case KeyBytes: return memcmp(keyPa->v.s, keyPb->v.s, (size_t) keyPa->length) != 0;
+    case KeyBytes: return keyPa->length > 0 && memcmp(keyPa->v.s, keyPb->v.s, (size_t) keyPa->length) != 0;
     case KeyFloat: return is_not_equal(keyPa->v.d, keyPb->v.d);
     case KeyInt: return keyPa->v.i != keyPb->v.i;
   }
@@ -340,7 +343,7 @@ cdiInqKeyInt(int cdiID, int varID, int key, int *value)
   xassert(keysP != NULL);
 
   const cdi_key_t *keyP = find_key(keysP, key);
-  if (keyP != NULL && keyP->length == 1 && keyP->type == KeyInt)
+  if (keyP != NULL && keyP->type == KeyInt && keyP->length == 1)
   {
     *value = keyP->v.i;
     status = CDI_NOERR;
@@ -432,7 +435,7 @@ cdiInqKeyFloat(int cdiID, int varID, int key, double *value)
   xassert(keysP != NULL);
 
   const cdi_key_t *keyP = find_key(keysP, key);
-  if (keyP != NULL && keyP->length == 1 && keyP->type == KeyFloat)
+  if (keyP != NULL && keyP->type == KeyFloat && keyP->length == 1)
   {
     *value = keyP->v.d;
     status = CDI_NOERR;
@@ -641,7 +644,9 @@ cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
 
   int status = cdiInqKeyBytes(cdiID, varID, key, (unsigned char *) string, length);
   if (CDI_NOERR == status)
-    string[maxlength - 1] = '\0';
+  {
+    if (maxlength > 0) string[maxlength - 1] = '\0';
+  }
   else
     *length = 0;
 
