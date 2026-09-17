@@ -477,14 +477,14 @@ vlistCopyVarName(int vlistID, int varID)
     else
     {
       // No luck, fall back to outputting a name of the format "var<num>".
-      size_t len = 3 + 3 * sizeof(int) * CHAR_BIT / 8 + 2;
+      size_t len = 16;  // 3 + 3 * sizeof(int) * CHAR_BIT / 8 + 2;
       result = (char *) Malloc(len);
       snprintf(result, len, "var%d", number);
     }
   }
   else
   {
-    size_t len = 5 + 2 + 3 * (3 * sizeof(int) * CHAR_BIT + 1) + 1;
+    size_t len = 64;  // 5 + 2 + 3 * (3 * sizeof(int) * CHAR_BIT + 1) + 1;
     result = (char *) Malloc(len);
     snprintf(result, len, "param%d.%d.%d", number, category, discipline);
   }
@@ -639,13 +639,8 @@ vlistInqVarID(int vlistID, int code)
 SizeType
 vlistInqVarSize(int vlistID, int varID)
 {
-  int zaxisID, gridID, timetype;
-  vlistInqVar(vlistID, varID, &gridID, &zaxisID, &timetype);
-
-  SizeType nlevs = (SizeType) zaxisInqSize(zaxisID);
-  SizeType gridsize = gridInqSize(gridID);
-
-  return gridsize * nlevs;
+  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
+  return gridInqSize(varP->gridID) * (SizeType) zaxisInqSize(varP->zaxisID);
 }
 
 /*
@@ -1108,10 +1103,10 @@ vlistFindLevel(int vlistID, int fvarID, int flevelID)
 {
   int levelID = -1;
   int varID = vlistFindVar(vlistID, fvarID);
-  var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
 
   if (varID != -1)
   {
+    var_t *varP = vlistP_get_varP(__func__, vlist_to_pointer(vlistID), varID);
     int nlevs = zaxisInqSize(varP->zaxisID);
     for (levelID = 0; levelID < nlevs; ++levelID)
     {
@@ -1152,12 +1147,10 @@ vlistDefIndex(int vlistID, int varID, int levelID, int index)
   vlist_t *vlistP = vlist_to_pointer(vlistID);
   var_t *varP = vlistP_get_varP(__func__, vlistP, varID);
 
-  levinfo_t li = DEFAULT_LEVINFO(levelID);
-  if (varP->levinfo) { ; }
-  else if (index != li.index) { cdiVlistCreateVarLevInfo(vlistP, varID); }
-  else
+  if (!varP->levinfo)
   {
-    return;
+    if (index == DEFAULT_LEVINFO(levelID).index) return;
+    cdiVlistCreateVarLevInfo(vlistP, varID);
   }
 
   varP->levinfo[levelID].index = index;
@@ -1189,8 +1182,8 @@ vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
   int nvars = vlistP->nvars;
   int found = 0;
   int oldZaxisID = varP->zaxisID;
-  for (int i = 0; i < varID; ++i) { found |= (vlistP->vars[i].zaxisID == oldZaxisID); }
-  for (int i = varID + 1; i < nvars; ++i) { found |= (vlistP->vars[i].zaxisID == oldZaxisID); }
+  for (int i = 0; i < varID && !found; ++i) { found = (vlistP->vars[i].zaxisID == oldZaxisID); }
+  for (int i = varID + 1; i < nvars && !found; ++i) { found = (vlistP->vars[i].zaxisID == oldZaxisID); }
 
   if (found)
   {

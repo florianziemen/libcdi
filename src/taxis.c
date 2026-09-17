@@ -214,7 +214,6 @@ taxisDuplicate(int taxisID1)
   taxis_t *taxisP2 = taxisNewEntry(CDI_UNDEFID);
 
   int taxisID2 = taxisP2->self;
-
   ptaxisCopy(taxisP2, taxisP1);
 
   return taxisID2;
@@ -975,6 +974,31 @@ cdi_encode_timevalue(int64_t days, double secs, int timeunit)
   return timevalue;
 }
 
+// Add/subtract a whole number of months (or years) to/from a date/time and
+// return the remaining fraction of a month expressed in days in *timevalue.
+static CdiDateTime
+taxisResidualMonths(CdiDateTime datetime, int calendar, int timeunits, int sign, double *timevalue)
+{
+  int year = datetime.date.year;
+  int month = datetime.date.month;
+
+  if (timeunits == TUNIT_YEAR) *timevalue *= 12;
+
+  double fmon = fmod(*timevalue, 1.0);
+  month += sign * (int) *timevalue;
+
+  struct YearMonth ym = normalize_month(year, month);
+  year = ym.year;
+  month = ym.month;
+
+  datetime.date.year = year;
+  datetime.date.month = (short) month;
+
+  *timevalue = fmon * days_per_month(calendar, year, month);
+
+  return datetime;
+}
+
 // convert relative time value to CdiDateTime
 static CdiDateTime
 rtimeval2datetime(double timevalue, const taxis_t *taxis)
@@ -994,24 +1018,8 @@ rtimeval2datetime(double timevalue, const taxis_t *taxis)
 
   if (timeunits == TUNIT_MONTH || timeunits == TUNIT_YEAR)
   {
-    int year = rDateTime.date.year;
-    int month = rDateTime.date.month;
-
-    if (timeunits == TUNIT_YEAR) timevalue *= 12;
-
-    double fmon = fmod(timevalue, 1.0);
-
-    month += (int) timevalue;
-
-    struct YearMonth ym = normalize_month(year, month);
-    year = ym.year;
-    month = ym.month;
-
+    rDateTime = taxisResidualMonths(rDateTime, calendar, timeunits, 1, &timevalue);
     timeunits = TUNIT_DAY;
-    timevalue = fmon * days_per_month(calendar, year, month);
-
-    rDateTime.date.year = year;
-    rDateTime.date.month = (short) month;
   }
 
   JulianDate julianDate = julianDate_encode(calendar, rDateTime);
@@ -1082,15 +1090,11 @@ datetime2rtimeval(CdiDateTime vDateTime, const taxis_t *taxis)
 static CdiDateTime
 seconds2datetime(double timevalue)
 {
+  // Julian date of 0001-01-01 00:00:00 in the standard calendar
+  static const JulianDate epoch = { .julianDay = 1721424, .secondOfDay = 0.0 };
   int calendar = CALENDAR_STANDARD;
   int64_t seconds = (int64_t) timevalue;
-
-  CdiDateTime datetime0;
-  datetime0.date = cdiDate_encode(1, 1, 1);
-  datetime0.time = cdiTime_encode(0, 0, 0, 0);
-  JulianDate julianDate = julianDate_encode(calendar, datetime0);
-
-  return julianDate_decode(calendar, julianDate_add_seconds(julianDate, seconds));
+  return julianDate_decode(calendar, julianDate_add_seconds(epoch, seconds));
 }
 
 // convert absolute time value to CdiDateTime
@@ -1200,24 +1204,8 @@ cdi_set_forecast_period(double timevalue, taxis_t *taxis)
 
   if (timeunits == TUNIT_MONTH || timeunits == TUNIT_YEAR)
   {
-    int year = vDateTime.date.year;
-    int month = vDateTime.date.month;
-
-    if (timeunits == TUNIT_YEAR) timevalue *= 12;
-
-    double fmon = fmod(timevalue, 1.0);
-
-    month -= (int) timevalue;
-
-    struct YearMonth ym = normalize_month(year, month);
-    year = ym.year;
-    month = ym.month;
-
+    vDateTime = taxisResidualMonths(vDateTime, calendar, timeunits, -1, &timevalue);
     timeunits = TUNIT_DAY;
-    timevalue = fmon * days_per_month(calendar, year, month);
-
-    vDateTime.date.year = year;
-    vDateTime.date.month = (short) month;
   }
 
   JulianDate julianDate = julianDate_encode(calendar, vDateTime);
