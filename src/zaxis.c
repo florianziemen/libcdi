@@ -1132,7 +1132,6 @@ zaxisDuplicate(int zaxisID)
     zaxisPnew->vctsize = zaxisP->vctsize;
     zaxisPnew->vct = copy_double_array(zaxisP->vct, (size_t) zaxisP->vctsize);
   }
-  if (zaxisP->cvals) { zaxisPnew = NULL; }
 
   zaxisPnew->atts.nelems = 0;
   cdiCopyAtts(zaxisID, CDI_GLOBAL, zaxisIDnew, CDI_GLOBAL);
