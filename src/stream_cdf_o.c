@@ -1765,6 +1765,7 @@ cdf_def_grid_indices(stream_t *streamP, int gridID, int gridIndex)
   SizeType dimlen = gridInqSize(gridID);
 
   bool switchNCMode = cdfDefModeBegin(streamP);
+  (void) switchNCMode;
 
   char dimname[CDI_MAX_NAME];
   dimname[0] = 0;
