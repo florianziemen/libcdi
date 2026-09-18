@@ -1765,7 +1765,6 @@ cdf_def_grid_indices(stream_t *streamP, int gridID, int gridIndex)
   SizeType dimlen = gridInqSize(gridID);
 
   bool switchNCMode = cdfDefModeBegin(streamP);
-  (void) switchNCMode;
 
   char dimname[CDI_MAX_NAME];
   dimname[0] = 0;
@@ -1783,11 +1782,7 @@ cdf_def_grid_indices(stream_t *streamP, int gridID, int gridIndex)
   cdf_put_att_text(fileID, ncivarid, "standard_name", sizeof(stdname) - 1, stdname);
   // cdf_put_att_text(fileID, ncivarid, "units", sizeof(units) - 1, units);
 
-  // if (switchNCMode)
-  {
-    cdf_enddef(fileID, streamP->self);
-    streamP->ncmode = 2;
-  }
+  cdfDefModeEnd(streamP, switchNCMode = true);
 
   int64_t *cellIndices = (int64_t *) Malloc((size_t) dimlen * sizeof(int64_t));
   gridInqIndices(gridID, cellIndices);
