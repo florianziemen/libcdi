@@ -76,15 +76,15 @@ case "${HOSTNAME}" in
           MPI_LAUNCH="$(which mpirun)"
           YAXT_ROOT='/Users/m214003/local/yaxt-0.10.0'
           ${CONFPATH}configure --enable-mpi $CONFIG_OPTS $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
-	             CC=mpicc CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3 -Werror" \
+	             CC=mpicc CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3" \
                      MPI_LAUNCH="${MPI_LAUNCH}" \
                      PKG_CONFIG_PATH="${YAXT_ROOT}/lib/pkgconfig"
         elif  test "$COMP" = clang ; then
           ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
-	             CC=clang CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3 -Werror"
+	             CC=clang CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3"
 	else
           ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
-	             CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3 -Werror"
+	             CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3"
         fi;
 	;;
 # ia64-nec-linux
