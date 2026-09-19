@@ -16,10 +16,7 @@
 static int
 cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *taxis_name, taxis_t *taxis)
 {
-  int dims[2];
-
-  dims[0] = nctimedimid;
-
+  int dims[2] = { nctimedimid, -1 };
   static const char bndsName[] = "bnds";
   if (nc_inq_dimid(fileID, bndsName, &dims[1]) != NC_NOERR) cdf_def_dim(fileID, bndsName, 2, &dims[1]);
 
@@ -53,18 +50,33 @@ cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *taxis
   return time_bndsid;
 }
 
+static int
+roundTimeUnits(int timeUnits)
+{
+  switch (timeUnits)
+  {
+    case -1:
+    case TUNIT_3HOURS:
+    case TUNIT_6HOURS:
+    case TUNIT_12HOURS: return TUNIT_HOUR;
+    case TUNIT_QUARTER:
+    case TUNIT_30MINUTES: return TUNIT_MINUTE;
+    default: return timeUnits;
+  }
+}
+
 static const char *
 cdfGetTimeUnits(taxis_t *taxis)
 {
-  const char *unitstr;
-  if (taxis->units && taxis->units[0]) { unitstr = taxis->units; }
+  const char *unitsStr;
+  if (taxis->units && taxis->units[0]) { unitsStr = taxis->units; }
   else
   {
     if (taxis->type == TAXIS_ABSOLUTE)
     {
-      static const char *const unitstrfmt[3] = { "year as %Y.%f", "month as %Y%m.%f", "day as %Y%m%d.%f" };
-      size_t fmtidx = ((taxis->unit == TUNIT_YEAR) ? 0 : ((taxis->unit == TUNIT_MONTH) ? 1 : 2));
-      unitstr = unitstrfmt[fmtidx];
+      static const char *const unitsStrFmt[3] = { "year as %Y.%f", "month as %Y%m.%f", "day as %Y%m%d.%f" };
+      size_t fmtidx = ((taxis->unitsValue == TUNIT_YEAR) ? 0 : ((taxis->unitsValue == TUNIT_MONTH) ? 1 : 2));
+      unitsStr = unitsStrFmt[fmtidx];
     }
     else
     {
@@ -75,38 +87,22 @@ cdfGetTimeUnits(taxis_t *taxis)
       int minute = taxis->rDateTime.time.minute;
       int second = taxis->rDateTime.time.second;
 
-      int timeunit = (taxis->unit != -1) ? taxis->unit : TUNIT_HOUR;
-      if (timeunit == TUNIT_QUARTER)
-        timeunit = TUNIT_MINUTE;
-      else if (timeunit == TUNIT_30MINUTES)
-        timeunit = TUNIT_MINUTE;
-      else if (timeunit == TUNIT_3HOURS || timeunit == TUNIT_6HOURS || timeunit == TUNIT_12HOURS)
-        timeunit = TUNIT_HOUR;
-
-      char *unitstr_ = ptaxisAllocUnits(taxis, CDF_MAX_TIME_UNIT_STR);
+      int timeUnits = roundTimeUnits(taxis->unitsValue);
+      char *unitsStr2 = ptaxisAllocUnits(taxis, CDF_MAX_TIME_UNIT_STR);
       assert(month >= 1 && month <= 12 && day > 0 && day <= 31 && hour >= 0 && hour <= 24 && minute >= 0 && minute < 60
              && second >= 0 && second <= 60);
-      snprintf(unitstr_, CDF_MAX_TIME_UNIT_STR, "%s since %d-%d-%d %02d:%02d:%02d", tunitNamePtr(timeunit), year, month & 31,
+      snprintf(unitsStr2, CDF_MAX_TIME_UNIT_STR, "%s since %d-%d-%d %02d:%02d:%02d", tunitNamePtr(timeUnits), year, month & 31,
                day & 63, hour & 63, minute & 63, second & 63);
-      unitstr = unitstr_;
+      unitsStr = unitsStr2;
     }
   }
-  return unitstr;
+  return unitsStr;
 }
 
 static const char *
-cdfGetForecastTimeUnits(int timeunit)
+cdfGetForecastTimeUnitsStr(int timeUnits)
 {
-  if (timeunit == -1)
-    timeunit = TUNIT_HOUR;
-  else if (timeunit == TUNIT_QUARTER)
-    timeunit = TUNIT_MINUTE;
-  else if (timeunit == TUNIT_30MINUTES)
-    timeunit = TUNIT_MINUTE;
-  else if (timeunit == TUNIT_3HOURS || timeunit == TUNIT_6HOURS || timeunit == TUNIT_12HOURS)
-    timeunit = TUNIT_HOUR;
-
-  return tunitNamePtr(timeunit);
+  return tunitNamePtr(roundTimeUnits(timeUnits));
 }
 
 static void
@@ -202,7 +198,7 @@ cdfDefTime(stream_t *streamP)
      * i.e. when defining the units attribute to this value, a later redefinition will not
      * cause a recreation of on-disk data
      */
-    for (size_t i = 0; i < CDF_MAX_TIME_UNIT_STR; ++i) unitsStr_[i] = 'a';
+    memset(unitsStr_, 'a', CDF_MAX_TIME_UNIT_STR);
     unitsStr_[CDF_MAX_TIME_UNIT_STR - 1] = '\0';
     unitsStr = unitsStr_;
     unitsStrLen = CDF_MAX_TIME_UNIT_STR - 1;
@@ -223,7 +219,7 @@ cdfDefTime(stream_t *streamP)
     static const char longName[] = "Time elapsed since the start of the forecast";
     cdf_put_att_text(fileID, leadtimeid, "long_name", sizeof(longName) - 1, longName);
 
-    unitsStr = cdfGetForecastTimeUnits(taxis->fc_unit);
+    unitsStr = cdfGetForecastTimeUnitsStr(taxis->fc_units);
     size_t len = strlen(unitsStr);
     if (len) cdf_put_att_text(fileID, leadtimeid, "units", len, unitsStr);
   }
@@ -258,7 +254,7 @@ cdfDefTimestep(stream_t *streamP, int tsID, size_t valCount)
     streamP->ncmode = 2;
   }
 
-  if (streamP->accessmode == 0) { cdfEndDef(streamP); }
+  if (streamP->accessmode == 0) cdfEndDef(streamP);
 
   const size_t start[2] = { [0] = (size_t) tsID, [1] = 0 }, count[2] = { [0] = valCount, [1] = 2 * valCount };
 

@@ -73,11 +73,15 @@ cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int attl
 {
   if (atttype == CDI_DATATYPE_INT32)
   {
-    int attint = 0;
-    int *pattint = attlen > 1 ? (int *) Malloc((size_t) attlen * sizeof(int)) : &attint;
+    enum
+    {
+      intStackSize = 8
+    };
+    int attintStack[intStackSize];
+    int *pattint = (attlen <= intStackSize) ? attintStack : (int *) Malloc((size_t) attlen * sizeof(int));
     cdiInqAttInt(gridID, CDI_GLOBAL, attname, attlen, pattint);
     for (int i = 0; i < attlen; ++i) { attflt[i] = (double) pattint[i]; }
-    if (attlen > 1) Free(pattint);
+    if (attlen > intStackSize) Free(pattint);
     return true;
   }
 
@@ -2120,9 +2124,28 @@ gridIsCyclic(int gridID)
 }
 
 static bool
+compareDblsTol(const double *restrict a, const double *restrict b, size_t n)
+{
+  const double tol = 1.e-10;
+  enum
+  {
+    sampleStride = 64
+  };
+
+  if (memcmp(a, b, n * sizeof(double)) == 0) return false;
+
+  for (size_t i = 0; i < n; i += sampleStride)
+    if (fabs(a[i] - b[i]) > tol) return true;
+
+  for (size_t i = 0; i < n; ++i)
+    if (fabs(a[i] - b[i]) > tol) return true;
+
+  return false;
+}
+
+static bool
 compareXYvals(grid_t *gridRef, grid_t *gridTest)
 {
-  bool differ = false;
   size_t xsizeTest = grid_axis_size(gridTest, GRID_AXIS_X);
   size_t xsizeRef = (size_t) gridRef->vtable->inqXVals(gridRef, NULL);
   if (xsizeTest != xsizeRef) return true;
@@ -2132,9 +2155,7 @@ compareXYvals(grid_t *gridRef, grid_t *gridTest)
     const double *xvalsRef = gridRef->vtable->inqXValsPtr(gridRef);
     const double *xvalsTest = gridTest->vtable->inqXValsPtr(gridTest);
     if (!xvalsTest) return true;
-
-    for (size_t i = 0; i < xsizeTest; ++i)
-      if (fabs(xvalsTest[i] - xvalsRef[i]) > 1.e-10) return true;
+    if (compareDblsTol(xvalsTest, xvalsRef, xsizeTest)) return true;
   }
 
   size_t ysizeTest = grid_axis_size(gridTest, GRID_AXIS_Y);
@@ -2146,12 +2167,10 @@ compareXYvals(grid_t *gridRef, grid_t *gridTest)
     const double *yvalsRef = gridRef->vtable->inqYValsPtr(gridRef);
     const double *yvalsTest = gridTest->vtable->inqYValsPtr(gridTest);
     if (!yvalsTest) return true;
-
-    for (size_t i = 0; i < ysizeTest; ++i)
-      if (fabs(yvalsTest[i] - yvalsRef[i]) > 1.e-10) return true;
+    if (compareDblsTol(yvalsTest, yvalsRef, ysizeTest)) return true;
   }
 
-  return differ;
+  return false;
 }
 
 static bool
@@ -2435,8 +2454,7 @@ cmp_mask(const mask_t *restrict x, const mask_t *restrict y, size_t size)
   if ((x != NULL) ^ (y != NULL)) return true;
   if (x == NULL || x == y) return false;
   xassert(size);
-  if (memcmp(x, y, size * sizeof(mask_t)) == 0) return false;
-  return false;
+  return (memcmp(x, y, size * sizeof(mask_t)) != 0);
 }
 
 int

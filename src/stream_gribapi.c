@@ -1127,7 +1127,7 @@ fdbScanTimesteps(stream_t *streamP)
       // vDateTime0 = vDateTime;
       taxis->rDateTime = gribapiGetDataDateTime(gh);
       fcast = gribapiTimeIsFC(gh);
-      if (fcast) taxis->unit = gribapi_get_timeunits(gh);
+      if (fcast) taxis->unitsValue = gribapi_get_timeunits(gh);
       taxis->fDateTime = taxis->rDateTime;
       taxis->sDateTime = sDateTime;
       taxis->vDateTime = vDateTime;
@@ -1305,7 +1305,7 @@ gribapiScanTimestep1(stream_t *streamP)
       vDateTime0 = vDateTime;
       taxis->rDateTime = gribapiGetDataDateTime(gh);
       fcast = gribapiTimeIsFC(gh);
-      if (fcast) taxis->unit = gribapi_get_timeunits(gh);
+      if (fcast) taxis->unitsValue = gribapi_get_timeunits(gh);
       taxis->fDateTime = taxis->rDateTime;
       taxis->sDateTime = sDateTime;
       taxis->vDateTime = vDateTime;
@@ -1464,7 +1464,7 @@ gribapiScanTimestep2(stream_t *streamP)
       if (taxisInqType(taxisID) == TAXIS_RELATIVE)
       {
         taxis->type = TAXIS_RELATIVE;
-        taxis->unit = gribapi_get_timeunits(gh);
+        taxis->unitsValue = gribapi_get_timeunits(gh);
         taxis->rDateTime = gribapiGetDataDateTime(gh);
       }
       else
@@ -1645,7 +1645,7 @@ gribapiScanTimestep(stream_t *streamP)
         if (taxisInqType(taxisID) == TAXIS_RELATIVE)
         {
           taxis->type = TAXIS_RELATIVE;
-          taxis->unit = gribapi_get_timeunits(gh);
+          taxis->unitsValue = gribapi_get_timeunits(gh);
           taxis->rDateTime = gribapiGetDataDateTime(gh);
         }
         else

@@ -96,7 +96,7 @@ ptaxisInit(taxis_t *taxisP)
   taxisP->self = CDI_UNDEFID;
   taxisP->type = DefaultTimeType;
   taxisP->calendar = CDI_Default_Calendar;
-  taxisP->unit = DefaultTimeUnit;
+  taxisP->unitsValue = DefaultTimeUnit;
   taxisP->numavg = 0;
   taxisP->climatology = false;
   taxisP->hasBounds = false;
@@ -106,7 +106,7 @@ ptaxisInit(taxis_t *taxisP)
   cdiDateTime_init(&taxisP->fDateTime);
   cdiDateTime_init(&taxisP->vDateTime_lb);
   cdiDateTime_init(&taxisP->vDateTime_ub);
-  taxisP->fc_unit = DefaultTimeUnit;
+  taxisP->fc_units = DefaultTimeUnit;
   taxisP->fc_period = 0;
   taxisP->name = NULL;
   taxisP->longname = NULL;
@@ -430,9 +430,9 @@ taxisDefTunit(int taxisID, int unit)
 {
   taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisP->unit != unit)
+  if (taxisP->unitsValue != unit)
   {
-    taxisP->unit = unit;
+    taxisP->unitsValue = unit;
     delete_refcount_string(taxisP->units);
     taxisP->units = NULL;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
@@ -444,9 +444,9 @@ taxisDefForecastTunit(int taxisID, int unit)
 {
   taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisP->fc_unit != unit)
+  if (taxisP->fc_units != unit)
   {
-    taxisP->fc_unit = unit;
+    taxisP->fc_units = unit;
     reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
   }
 }
@@ -536,7 +536,7 @@ taxisCopyTimestep(int taxisID2, int taxisID1)
     taxisP2->vDateTime_ub = taxisP1->vDateTime_ub;
   }
 
-  taxisP2->fc_unit = taxisP1->fc_unit;
+  taxisP2->fc_units = taxisP1->fc_units;
   taxisP2->fc_period = taxisP1->fc_period;
 
   reshSetStatus(taxisID2, &taxisOps, RESH_DESYNC_IN_USE);
@@ -807,14 +807,14 @@ int
 taxisInqTunit(int taxisID)
 {
   taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return taxisP->unit;
+  return taxisP->unitsValue;
 }
 
 int
 taxisInqForecastTunit(int taxisID)
 {
   taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
-  return taxisP->fc_unit;
+  return taxisP->fc_units;
 }
 
 double
@@ -1005,7 +1005,7 @@ rtimeval2datetime(double timevalue, const taxis_t *taxis)
 {
   if (is_equal(timevalue, 0.0)) return taxis->rDateTime;
 
-  int timeunits = taxis->unit;
+  int timeunits = taxis->unitsValue;
   int calendar = taxis->calendar;
 
   if (timeunits == TUNIT_MONTH && calendar == CALENDAR_360DAYS)
@@ -1035,7 +1035,7 @@ datetime2rtimeval(CdiDateTime vDateTime, const taxis_t *taxis)
   double value = 0.0;
 
   int calendar = taxis->calendar;
-  int timeunits = taxis->unit;
+  int timeunits = taxis->unitsValue;
   int timeunits0 = timeunits;
 
   CdiDateTime rDateTime = taxis->rDateTime;
@@ -1189,7 +1189,7 @@ cdi_set_forecast_period(double timevalue, taxis_t *taxis)
 {
   taxis->fc_period = timevalue;
 
-  int timeunits = taxis->fc_unit;
+  int timeunits = taxis->fc_units;
   int calendar = taxis->calendar;
 
   if (cdiDateTime_isNull(taxis->vDateTime) && dbl_is_equal(timevalue, 0.0)) return;
@@ -1217,7 +1217,7 @@ cdi_set_forecast_period(double timevalue, taxis_t *taxis)
 CdiDateTime
 cdi_decode_timeval(double timevalue, const taxis_t *taxis)
 {
-  return (taxis->type == TAXIS_ABSOLUTE) ? split_timevalue(timevalue, taxis->unit) : rtimeval2datetime(timevalue, taxis);
+  return (taxis->type == TAXIS_ABSOLUTE) ? split_timevalue(timevalue, taxis->unitsValue) : rtimeval2datetime(timevalue, taxis);
 }
 
 /*
@@ -1245,8 +1245,8 @@ cdi_encode_timeval(CdiDateTime datetime, taxis_t *taxis)
 
   if (taxis->type == TAXIS_ABSOLUTE)
   {
-    if (taxis->unit == TUNIT_YEAR) { timeValue = datetime.date.year; }
-    else if (taxis->unit == TUNIT_MONTH)
+    if (taxis->unitsValue == TUNIT_YEAR) { timeValue = datetime.date.year; }
+    else if (taxis->unitsValue == TUNIT_MONTH)
     {
       int64_t xdate = cdiDate_get(datetime.date);
       timeValue = (double) xdate / 100 + copysign((double) (datetime.date.day != 0) * 0.5, (double) xdate);
@@ -1279,7 +1279,7 @@ ptaxisCopy(taxis_t *dest, taxis_t *source)
   // memcpy(dest, source, sizeof(taxis_t));
   dest->type = source->type;
   dest->calendar = source->calendar;
-  dest->unit = source->unit;
+  dest->unitsValue = source->unitsValue;
   dest->numavg = source->numavg;
   dest->climatology = source->climatology;
   dest->hasBounds = source->hasBounds;
@@ -1289,7 +1289,7 @@ ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->fDateTime = source->fDateTime;
   dest->vDateTime_lb = source->vDateTime_lb;
   dest->vDateTime_ub = source->vDateTime_ub;
-  dest->fc_unit = source->fc_unit;
+  dest->fc_units = source->fc_units;
   dest->fc_period = source->fc_period;
 
   delete_refcount_string(dest->name);
@@ -1340,8 +1340,8 @@ taxis_print(taxis_t *taxisP, FILE *fp)
           "\n",
           taxisP->self, taxisP->self, taxisP->type, (int) cdiDate_get(taxisP->vDateTime.date), cdiTime_get(taxisP->vDateTime.time),
           (int) cdiDate_get(taxisP->rDateTime.date), cdiTime_get(taxisP->rDateTime.time), (int) cdiDate_get(taxisP->fDateTime.date),
-          cdiTime_get(taxisP->fDateTime.time), taxisP->calendar, taxisP->unit, taxisP->numavg, (int) taxisP->climatology,
-          (int) taxisP->hasBounds, vdate_lb, vtime_lb, vdate_ub, vtime_ub, taxisP->fc_unit, taxisP->fc_period);
+          cdiTime_get(taxisP->fDateTime.time), taxisP->calendar, taxisP->unitsValue, taxisP->numavg, (int) taxisP->climatology,
+          (int) taxisP->hasBounds, vdate_lb, vtime_lb, vdate_ub, vtime_ub, taxisP->fc_units, taxisP->fc_period);
 }
 
 static int
@@ -1352,8 +1352,8 @@ taxis_compare(void *taxisP1, void *taxisP2)
   xassert(t1 && t2);
 
   return !(t1->type == t2->type && cdiDateTime_isEQ(t1->vDateTime, t2->vDateTime) && cdiDateTime_isEQ(t1->rDateTime, t2->rDateTime)
-           && cdiDateTime_isEQ(t1->fDateTime, t2->fDateTime) && t1->calendar == t2->calendar && t1->unit == t2->unit
-           && t1->fc_unit == t2->fc_unit && is_equal(t1->fc_period, t2->fc_period) && t1->numavg == t2->numavg
+           && cdiDateTime_isEQ(t1->fDateTime, t2->fDateTime) && t1->calendar == t2->calendar && t1->unitsValue == t2->unitsValue
+           && t1->fc_units == t2->fc_units && is_equal(t1->fc_period, t2->fc_period) && t1->numavg == t2->numavg
            && t1->climatology == t2->climatology && t1->hasBounds == t2->hasBounds
            && cdiDateTime_isEQ(t1->vDateTime_lb, t2->vDateTime_lb) && cdiDateTime_isEQ(t1->vDateTime_ub, t2->vDateTime_ub));
 }

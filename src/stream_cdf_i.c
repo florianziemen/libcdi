@@ -328,7 +328,7 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
   }
 
   taxis->type = taxisType;
-  taxis->unit = timeUnits;
+  taxis->unitsValue = timeUnits;
 
   if (tu != tmp) Free(tu);
 
@@ -4912,8 +4912,8 @@ cdfInqContents(stream_t *streamP)
       taxis0.type = TAXIS_FORECAST;
 
       int timeunit = (ncvars[leadtime_id].units[0] != 0) ? scan_time_units(ncvars[leadtime_id].units) : -1;
-      if (timeunit == -1) timeunit = taxis0.unit;
-      taxis0.fc_unit = timeunit;
+      if (timeunit == -1) timeunit = taxis0.unitsValue;
+      taxis0.fc_units = timeunit;
     }
   }
 
@@ -4956,7 +4956,7 @@ cdfInqContents(stream_t *streamP)
     if (!timeHasUnits)
     {
       taxisDefTunit(taxisID, TUNIT_DAY);
-      taxis0.unit = TUNIT_DAY;
+      taxis0.unitsValue = TUNIT_DAY;
     }
   }
 
