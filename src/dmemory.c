@@ -131,9 +131,9 @@ printMemorySize(size_t bytes)
   static const size_t GibiByte = 1024 * 1024 * 1024;
   static const size_t MebiByte = 1024 * 1024;
   static const size_t KibiByte = 1024;
-  if (bytes > GibiByte) { fprintf(stderr, "%5d GiB\n", (int) (bytes / GibiByte)); }
-  else if (bytes > MebiByte) { fprintf(stderr, "%5d MiB\n", (int) (bytes / MebiByte)); }
-  else if (bytes > KibiByte) { fprintf(stderr, "%5d KiB\n", (int) (bytes / KibiByte)); }
+  if (bytes > GibiByte) { fprintf(stderr, "%5dG\n", (int) (bytes / GibiByte)); }
+  else if (bytes > MebiByte) { fprintf(stderr, "%5dM\n", (int) (bytes / MebiByte)); }
+  else if (bytes > KibiByte) { fprintf(stderr, "%5dK\n", (int) (bytes / KibiByte)); }
   else
   {
     fprintf(stderr, "%5d Byte\n", (int) bytes);
