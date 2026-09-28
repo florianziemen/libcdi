@@ -128,14 +128,16 @@ memListPrintEntry(int mtype, int item, size_t size, void *ptr, const char *calle
 static void
 printMemorySize(size_t bytes)
 {
-  if (bytes > 1024 * 1024 * 1024)
-    fprintf(stderr, "%5d GB\n", (int) (bytes / (1024 * 1024 * 1024)));
-  else if (bytes > 1024 * 1024)
-    fprintf(stderr, "%5d MB\n", (int) (bytes / (1024 * 1024)));
-  else if (bytes > 1024)
-    fprintf(stderr, "%5d KB\n", (int) (bytes / 1024));
+  static const size_t GibiByte = 1024 * 1024 * 1024;
+  static const size_t MebiByte = 1024 * 1024;
+  static const size_t KibiByte = 1024;
+  if (bytes > GibiByte) { fprintf(stderr, "%5d GiB\n", (int) (bytes / GibiByte)); }
+  else if (bytes > MebiByte) { fprintf(stderr, "%5d MiB\n", (int) (bytes / MebiByte)); }
+  else if (bytes > KibiByte) { fprintf(stderr, "%5d KiB\n", (int) (bytes / KibiByte)); }
   else
+  {
     fprintf(stderr, "%5d Byte\n", (int) bytes);
+  }
 }
 
 static void
