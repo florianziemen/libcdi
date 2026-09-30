@@ -6,7 +6,7 @@ unset CDPATH
 module purge
 module load git
 
-install_dir='/work/mh0287/m300488/libcdi-ci-sw/install'
+install_dir='/work/mh1570/m214003/libcdi-ci-sw/install'
 work_dir="$(pwd)/build"
 make_cmd='make -j22'
 

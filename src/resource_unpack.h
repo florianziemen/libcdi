@@ -15,7 +15,7 @@ enum
   STREAM = 6,
   VLIST = 7,
   DIST_GRID = 8,
-  RESH_DELETE,
+  RESH_DELETE = 9,
   START = 55555555,
   END = 99999999
 };

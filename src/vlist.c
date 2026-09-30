@@ -56,14 +56,17 @@ vlist_compare(vlist_t *a, vlist_t *b)
   int diff = (a->nvars != b->nvars) | (a->ngrids != b->ngrids) | (a->nzaxis != b->nzaxis) | (a->instID != b->instID)
              | (a->modelID != b->modelID) | (a->tableID != b->tableID) | (a->ntsteps != b->ntsteps)
              | (a->atts.nelems != b->atts.nelems);
+  if (diff) return diff;
 
   int nvars = a->nvars;
-  for (int varID = 0; varID < nvars; ++varID) diff |= vlistVarCompare(a, varID, b, varID);
+  for (int varID = 0; varID < nvars; ++varID)
+    if (vlistVarCompare(a, varID, b, varID) != 0) return 1;
 
   size_t natts = a->atts.nelems;
-  for (size_t attID = 0; attID < natts; ++attID) diff |= cdi_att_compare(&a->atts, &b->atts, (int) attID);
+  for (size_t attID = 0; attID < natts; ++attID)
+    if (cdi_att_compare(&a->atts, &b->atts, (int) attID) != 0) return 1;
 
-  return diff;
+  return 0;
 }
 
 static void vlist_print(vlist_t *vlistP, FILE *fp);
@@ -91,9 +94,8 @@ vlist_init_entry(vlist_t *vlistP)
   vlistP->tableID = CDI_Default_TableID;
   vlistP->ntsteps = CDI_UNDEFID;
   vlistP->keys.nalloc = MAX_KEYS;
-  for (int i = 0; i < MAX_KEYS; ++i) vlistP->keys.value[i].length = 0;
   vlistP->atts.nalloc = MAX_ATTRIBUTES;
-  for (int i = 0; i < MAX_SUBTYPES_PS; ++i) vlistP->subtypeIDs[i] = CDI_UNDEFID;
+  for (int i = 0; i < MAX_SUBTYPES_PS; ++i) { vlistP->subtypeIDs[i] = CDI_UNDEFID; }
 }
 
 vlist_t *
@@ -1507,22 +1509,17 @@ resize_opt_grib_entries(var_t *var, int nentries)
   if (CDI_Debug) Message("resize data structure, %d -> %d", var->opt_grib_kvpair_size, nentries);
 
   int new_size = (2 * var->opt_grib_kvpair_size) > nentries ? (2 * var->opt_grib_kvpair_size) : nentries;
-  opt_key_val_pair_t *tmp = (opt_key_val_pair_t *) Malloc((size_t) new_size * sizeof(opt_key_val_pair_t));
-  for (int i = 0; i < var->opt_grib_kvpair_size; ++i) { tmp[i] = var->opt_grib_kvpair[i]; }
+  var->opt_grib_kvpair = (opt_key_val_pair_t *) Realloc(var->opt_grib_kvpair, new_size * sizeof(opt_key_val_pair_t));
   for (int i = var->opt_grib_kvpair_size; i < new_size; ++i)
   {
-    tmp[i].int_val = 0;
-    tmp[i].dbl_val = 0;
-    tmp[i].int_arr = 0;
-    tmp[i].dbl_arr = 0;
-    tmp[i].update = false;
-    tmp[i].keyword = NULL;
-  }  // for
-  var->opt_grib_kvpair_size = new_size;
-  Free(var->opt_grib_kvpair);
-  var->opt_grib_kvpair = tmp;
+    var->opt_grib_kvpair[i].int_val = 0;
+    var->opt_grib_kvpair[i].dbl_val = 0;
+    var->opt_grib_kvpair[i].int_arr = 0;
+    var->opt_grib_kvpair[i].dbl_arr = 0;
+    var->opt_grib_kvpair[i].update = false;
+    var->opt_grib_kvpair[i].keyword = NULL;
+  }
 }
-
 /*
  * Local Variables:
  * c-file-style: "Java"

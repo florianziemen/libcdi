@@ -14,7 +14,7 @@ typedef struct
   int self;
   int type;  // time type
   int calendar;
-  int unit;  // time units
+  int unitsValue;  // time units
   int numavg;
   CdiDateTime sDateTime;     // start date/time
   CdiDateTime vDateTime;     // verification date/time
@@ -23,7 +23,7 @@ typedef struct
   CdiDateTime vDateTime_lb;  // lower bounds of verification date/time
   CdiDateTime vDateTime_ub;  // upper bounds of verification date/time
   double fc_period;          // forecast time period
-  int fc_unit;               // forecast time unit
+  int fc_units;              // forecast time unit
   char *name;
   char *longname;
   char *units;

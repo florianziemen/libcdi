@@ -30,11 +30,11 @@ zaxis_units_to_centimeter(int zaxisID)
   double sf = 100.0;  // default: meter
   // clang-format off
   if (units[1] == 'm' && !units[2])
-    {
-      if      (units[0] == 'm') sf =   0.1;
-      else if (units[0] == 'c') sf =   1.0;
-      else if (units[0] == 'd') sf =  10.0;
-    }
+  {
+    if      (units[0] == 'm') sf =   0.1;
+    else if (units[0] == 'c') sf =   1.0;
+    else if (units[0] == 'd') sf =  10.0;
+  }
   // clang-format on
 
   return sf;
@@ -50,12 +50,12 @@ zaxis_units_to_meter(int zaxisID)
   double sf = 1.0;  // default: meter
   // clang-format off
   if (units[1] == 'm' && !units[2])
-    {
-      if      (units[0] == 'm') sf /= 1000.0;
-      else if (units[0] == 'c') sf /= 100.0;
-      else if (units[0] == 'd') sf /= 10.0;
-      else if (units[0] == 'k') sf *= 1000.0;
-    }
+  {
+    if      (units[0] == 'm') sf /= 1000.0;
+    else if (units[0] == 'c') sf /= 100.0;
+    else if (units[0] == 'd') sf /= 10.0;
+    else if (units[0] == 'k') sf *= 1000.0;
+  }
   // clang-format on
 
   return sf;
@@ -131,7 +131,7 @@ enum
   MapValue = 1
 };
 
-static const int grib1ltypeMap[][2] = {
+static const short grib1ltypeMap[][2] = {
   // clang-format off
   {  GRIB1_LTYPE_SURFACE,             ZAXIS_SURFACE            },
   {  GRIB1_LTYPE_CLOUD_BASE,          ZAXIS_CLOUD_BASE         },
@@ -163,9 +163,7 @@ static const int grib1ltypeMap[][2] = {
   // clang-format on
 };
 
-static const size_t grib1ltypeMapSize = sizeof(grib1ltypeMap) / (2 * sizeof(int));
-
-static const int grib2ltypeMap[][2] = {
+static const short grib2ltypeMap[][2] = {
   // clang-format off
   {  GRIB2_LTYPE_SURFACE,             ZAXIS_SURFACE            },
   {  GRIB2_LTYPE_CLOUD_BASE,          ZAXIS_CLOUD_BASE         },
@@ -195,10 +193,8 @@ static const int grib2ltypeMap[][2] = {
   // clang-format on
 };
 
-static const size_t grib2ltypeMapSize = sizeof(grib2ltypeMap) / (2 * sizeof(int));
-
 static int
-getInt2IntMap(int searchKey, bool keyValue, size_t mapSize, const int gribltypeMap[][2], int defaultValue)
+getInt2IntMap(int searchKey, bool keyValue, size_t mapSize, const short gribltypeMap[][2], int defaultValue)
 {
   for (size_t i = 0; i < mapSize; ++i)
     if (gribltypeMap[i][keyValue] == searchKey) return gribltypeMap[i][!keyValue];
@@ -209,25 +205,25 @@ getInt2IntMap(int searchKey, bool keyValue, size_t mapSize, const int gribltypeM
 int
 grib1ltypeToZaxisType(int grib_ltype)
 {
-  return getInt2IntMap(grib_ltype, MapKey, grib1ltypeMapSize, grib1ltypeMap, ZAXIS_GENERIC);
+  return getInt2IntMap(grib_ltype, MapKey, ARRAY_SIZE(grib2ltypeMap), grib1ltypeMap, ZAXIS_GENERIC);
 }
 
 int
 zaxisTypeToGrib1ltype(int zaxistype)
 {
-  return getInt2IntMap(zaxistype, MapValue, grib1ltypeMapSize, grib1ltypeMap, -1);
+  return getInt2IntMap(zaxistype, MapValue, ARRAY_SIZE(grib2ltypeMap), grib1ltypeMap, -1);
 }
 
 int
 grib2ltypeToZaxisType(int grib_ltype)
 {
-  return getInt2IntMap(grib_ltype, MapKey, grib2ltypeMapSize, grib2ltypeMap, ZAXIS_GENERIC);
+  return getInt2IntMap(grib_ltype, MapKey, ARRAY_SIZE(grib2ltypeMap), grib2ltypeMap, ZAXIS_GENERIC);
 }
 
 int
 zaxisTypeToGrib2ltype(int zaxistype)
 {
-  return getInt2IntMap(zaxistype, MapValue, grib2ltypeMapSize, grib2ltypeMap, -1);
+  return getInt2IntMap(zaxistype, MapValue, ARRAY_SIZE(grib2ltypeMap), grib2ltypeMap, -1);
 }
 
 int
@@ -425,12 +421,7 @@ grbGetGridtype(int *gridID, SizeType gridsize, bool *gridIsRotated, bool *gridIs
     }
     else
     {
-      static bool lwarning = true;
-      if (lwarning && gridsize > 1)
-      {
-        lwarning = false;
-        Warning("Curvilinear grid is unsupported in GRIB format! Created wrong Grid Description Section!");
-      }
+      CDI_WARN_ONCE("Curvilinear grid is unsupported in GRIB format! Created wrong Grid Description Section!");
       *gridIsCurvilinear = true;
       gridtype = GRID_LONLAT;
     }

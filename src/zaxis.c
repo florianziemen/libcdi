@@ -17,12 +17,8 @@
 #include "dmemory.h"
 
 #include "cdi.h"
-#include "cdi_cksum.h"
 #include "cdi_int.h"
-#include "cdi_uuid.h"
 #include "resource_handle.h"
-#include "resource_unpack.h"
-#include "namespace.h"
 #include "serialize.h"
 #include "zaxis.h"
 #include "zaxis_pack.h"
@@ -313,9 +309,8 @@ zaxis_destroy(void *zaxisP)
 const char *
 zaxisNamePtr(int zaxisType)
 {
-  const char *name = (zaxisType >= 0 && zaxisType < CDI_NumZaxistype) ? ZaxistypeEntry[zaxisType].longname
-                                                                      : ZaxistypeEntry[ZAXIS_GENERIC].longname;
-  return name;
+  return (zaxisType >= 0 && zaxisType < CDI_NumZaxistype) ? ZaxistypeEntry[zaxisType].longname
+                                                          : ZaxistypeEntry[ZAXIS_GENERIC].longname;
 }
 
 // obsolete function
@@ -691,7 +686,6 @@ void
 zaxisDefUUID(int zaxisID, const unsigned char uuid[CDI_UUID_SIZE])
 {
   cdiDefKeyBytes(zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, CDI_UUID_SIZE);
-
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
@@ -984,11 +978,13 @@ cdiCheckZaxis(int zaxisID)
       /* check direction */
       if (!zaxisP->direction)
       {
+        double *vals = zaxisP->vals;
         int ups = 0, downs = 0;
         for (int i = 1; i < size; i++)
         {
-          ups += (zaxisP->vals[i] > zaxisP->vals[i - 1]);
-          downs += (zaxisP->vals[i] < zaxisP->vals[i - 1]);
+          ups += (vals[i] > vals[i - 1]);
+          downs += (vals[i] < vals[i - 1]);
+          if (ups && downs) break;
         }
         if (ups == size - 1) { zaxisP->direction = LevelUp; }
         else if (downs == size - 1) { zaxisP->direction = LevelDown; }
@@ -1041,7 +1037,6 @@ void
 zaxisDefLbounds(int zaxisID, const double *lbounds)
 {
   zaxis_t *zaxisP = zaxis_to_pointer(zaxisID);
-
   size_t size = (size_t) zaxisP->size;
 
   if (CDI_Debug)
@@ -1057,7 +1052,6 @@ void
 zaxisDefUbounds(int zaxisID, const double *ubounds)
 {
   zaxis_t *zaxisP = zaxis_to_pointer(zaxisID);
-
   size_t size = (size_t) zaxisP->size;
 
   if (CDI_Debug)
@@ -1073,7 +1067,6 @@ void
 zaxisDefWeights(int zaxisID, const double *weights)
 {
   zaxis_t *zaxisP = zaxis_to_pointer(zaxisID);
-
   size_t size = (size_t) zaxisP->size;
 
   if (CDI_Debug)
@@ -1096,11 +1089,8 @@ void
 zaxisResize(int zaxisID, int size)
 {
   zaxis_t *zaxisP = zaxis_to_pointer(zaxisID);
-
   xassert(size >= 0);
-
   zaxisP->size = size;
-
   if (zaxisP->vals) zaxisP->vals = (double *) Realloc(zaxisP->vals, (size_t) size * sizeof(double));
 }
 
@@ -1135,7 +1125,8 @@ zaxisDuplicate(int zaxisID)
 
   if (zaxisP->vals) { zaxisPnew->vals = copy_double_array(zaxisP->vals, (size_t) zaxisP->size); }
   if (zaxisP->lbounds) { zaxisPnew->lbounds = copy_double_array(zaxisP->lbounds, (size_t) zaxisP->size); }
-  if (zaxisP->ubounds) zaxisPnew->ubounds = copy_double_array(zaxisP->ubounds, (size_t) zaxisP->size);
+  if (zaxisP->ubounds) { zaxisPnew->ubounds = copy_double_array(zaxisP->ubounds, (size_t) zaxisP->size); }
+  if (zaxisP->weights) { zaxisPnew->weights = copy_double_array(zaxisP->weights, (size_t) zaxisP->size); }
   if (zaxisP->vct && zaxisP->vctsize)
   {
     zaxisPnew->vctsize = zaxisP->vctsize;
@@ -1208,88 +1199,48 @@ static void
 zaxis_print(void *voidptr, FILE *fp)
 {
   zaxis_t *zaxisP = (zaxis_t *) voidptr;
-
   xassert(zaxisP);
-
   zaxisPrintKernel(zaxisP, fp);
+}
+
+static inline bool
+cmp_darray(const double *restrict x, const double *restrict y, size_t size)
+{
+  if ((x != NULL) ^ (y != NULL)) return true;
+  if (x == NULL || x == y) return false;
+  xassert(size);
+  if (memcmp(x, y, size * sizeof(double)) == 0) return false;
+  for (size_t i = 0; i < size; ++i)
+    if (is_not_equal(x[i], y[i])) return true;
+  return false;
 }
 
 static int
 zaxis_compare(zaxis_t *z1, zaxis_t *z2)
 {
-  enum
-  {
-    differ = 1
-  };
   xassert(z1 && z2);
 
-  if (z1->type != z2->type) return differ;
-  if (z1->direction != z2->direction) return differ;
-  if (z1->size != z2->size) return differ;
-  if (z1->vctsize != z2->vctsize) return differ;
-  if (z1->positive != z2->positive) return differ;
-  if (cdiInqVarKeyInt(&z1->keys, CDI_KEY_DATATYPE) != cdiInqVarKeyInt(&z2->keys, CDI_KEY_DATATYPE)) return differ;
+  if (z1->type != z2->type) return 1;
+  if (z1->direction != z2->direction) return 1;
+  if (z1->size != z2->size) return 1;
+  if (z1->vctsize != z2->vctsize) return 1;
+  if (z1->positive != z2->positive) return 1;
+  if (cdiInqVarKeyInt(&z1->keys, CDI_KEY_DATATYPE) != cdiInqVarKeyInt(&z2->keys, CDI_KEY_DATATYPE)) return 1;
   if (cdiInqVarKeyInt(&z1->keys, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE) != cdiInqVarKeyInt(&z2->keys, CDI_KEY_TYPEOFFIRSTFIXEDSURFACE))
-    return differ;
+    return 1;
 
-  int diff = 0;
+  if (!str_is_equal(cdiInqVarKeyString(&z1->keys, CDI_KEY_NAME), cdiInqVarKeyString(&z2->keys, CDI_KEY_NAME))) return 1;
+  if (!str_is_equal(cdiInqVarKeyString(&z1->keys, CDI_KEY_LONGNAME), cdiInqVarKeyString(&z2->keys, CDI_KEY_LONGNAME))) return 1;
+  if (!str_is_equal(cdiInqVarKeyString(&z1->keys, CDI_KEY_STDNAME), cdiInqVarKeyString(&z2->keys, CDI_KEY_STDNAME))) return 1;
+  if (!str_is_equal(cdiInqVarKeyString(&z1->keys, CDI_KEY_UNITS), cdiInqVarKeyString(&z2->keys, CDI_KEY_UNITS))) return 1;
 
-  int size = z1->size;
-  int anyPresent = 0;
-  int present = (z1->vals != NULL);
-  diff |= (present ^ (z2->vals != NULL));
-  anyPresent |= present;
-  if (!diff && present)
-  {
-    const double *p = z1->vals, *q = z2->vals;
-    for (int i = 0; i < size; i++) { diff |= is_not_equal(p[i], q[i]); }
-  }
+  if (cmp_darray(z1->vals, z2->vals, (size_t) z1->size)) return 1;
+  if (cmp_darray(z1->lbounds, z2->lbounds, (size_t) z1->size)) return 1;
+  if (cmp_darray(z1->ubounds, z2->ubounds, (size_t) z1->size)) return 1;
+  if (cmp_darray(z1->weights, z2->weights, (size_t) z1->size)) return 1;
+  if (cmp_darray(z1->vct, z2->vct, (size_t) z1->vctsize)) return 1;
 
-  present = (z1->lbounds != NULL);
-  diff |= (present ^ (z2->lbounds != NULL));
-  anyPresent |= present;
-  if (!diff && present)
-  {
-    const double *p = z1->lbounds, *q = z2->lbounds;
-    for (int i = 0; i < size; i++) { diff |= is_not_equal(p[i], q[i]); }
-  }
-
-  present = (z1->ubounds != NULL);
-  diff |= (present ^ (z2->ubounds != NULL));
-  anyPresent |= present;
-  if (!diff && present)
-  {
-    const double *p = z1->ubounds, *q = z2->ubounds;
-    for (int i = 0; i < size; ++i) { diff |= is_not_equal(p[i], q[i]); }
-  }
-
-  present = (z1->weights != NULL);
-  diff |= (present ^ (z2->weights != NULL));
-  anyPresent |= present;
-  if (!diff && present)
-  {
-    const double *p = z1->weights, *q = z2->weights;
-    for (int i = 0; i < size; ++i) { diff |= is_not_equal(p[i], q[i]); }
-  }
-
-  present = (z1->vct != NULL);
-  diff |= (present ^ (z2->vct != NULL));
-  if (!diff && present)
-  {
-    int vctsize = z1->vctsize;
-    xassert(vctsize);
-    const double *p = z1->vct, *q = z2->vct;
-    for (int i = 0; i < vctsize; ++i) { diff |= is_not_equal(p[i], q[i]); }
-  }
-
-  if (anyPresent) xassert(size);
-
-  diff |= strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_NAME), cdiInqVarKeyString(&z2->keys, CDI_KEY_NAME))
-          | strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_LONGNAME), cdiInqVarKeyString(&z2->keys, CDI_KEY_LONGNAME))
-          | strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_STDNAME), cdiInqVarKeyString(&z2->keys, CDI_KEY_STDNAME))
-          | strcmp(cdiInqVarKeyString(&z1->keys, CDI_KEY_UNITS), cdiInqVarKeyString(&z2->keys, CDI_KEY_UNITS));
-
-  return diff != 0;
+  return 0;
 }
 
 void

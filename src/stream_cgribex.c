@@ -5,6 +5,8 @@
 #include <limits.h>
 #include <stdio.h>
 
+#if defined(HAVE_LIBCGRIBEX) && defined(HAVE_LIBGRIB)
+
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -13,9 +15,6 @@
 #include "stream_scan.h"
 #include "stream_grb.h"
 #include "stream_cgribex.h"
-
-#if defined(HAVE_LIBCGRIBEX) && defined(HAVE_LIBGRIB)
-
 #include "cgribex.h"
 
 typedef struct
@@ -51,9 +50,9 @@ typedef struct
 } cgribex_handle;
 
 static inline void
-fill_intarr(int *iarr, int val, int n)
+zerofill_intarr(int *iarr, int n)
 {
-  memset(iarr, val, n * sizeof(int));
+  memset(iarr, 0, n * sizeof(int));
 }
 
 static void
@@ -175,67 +174,44 @@ cgribexGetZaxisHasBounds(int grb_ltype)
 static int
 cgribexGetTimeUnit(int *isec1)
 {
-  int timeunit = TUNIT_HOUR;
-  static bool lprint = true;
+  switch (ISEC1_TimeUnit)
+  {
+    case ISEC1_TABLE4_MINUTE: return TUNIT_MINUTE;
+    case ISEC1_TABLE4_QUARTER: return TUNIT_QUARTER;
+    case ISEC1_TABLE4_30MINUTES: return TUNIT_30MINUTES;
+    case ISEC1_TABLE4_HOUR: return TUNIT_HOUR;
+    case ISEC1_TABLE4_3HOURS: return TUNIT_3HOURS;
+    case ISEC1_TABLE4_6HOURS: return TUNIT_6HOURS;
+    case ISEC1_TABLE4_12HOURS: return TUNIT_12HOURS;
+    case ISEC1_TABLE4_DAY: return TUNIT_DAY;
+    default: CDI_WARN_ONCE("GRIB time unit %d unsupported!", ISEC1_TimeUnit);
+  }
 
-  // clang-format off
-  switch ( ISEC1_TimeUnit )
-    {
-    case ISEC1_TABLE4_MINUTE:    timeunit = TUNIT_MINUTE;    break;
-    case ISEC1_TABLE4_QUARTER:   timeunit = TUNIT_QUARTER;   break;
-    case ISEC1_TABLE4_30MINUTES: timeunit = TUNIT_30MINUTES; break;
-    case ISEC1_TABLE4_HOUR:      timeunit = TUNIT_HOUR;      break;
-    case ISEC1_TABLE4_3HOURS:    timeunit = TUNIT_3HOURS;    break;
-    case ISEC1_TABLE4_6HOURS:    timeunit = TUNIT_6HOURS;    break;
-    case ISEC1_TABLE4_12HOURS:   timeunit = TUNIT_12HOURS;   break;
-    case ISEC1_TABLE4_DAY:       timeunit = TUNIT_DAY;       break;
-    default:
-      if (lprint)
-	    {
-	      Warning("GRIB time unit %d unsupported!", ISEC1_TimeUnit);
-	      lprint = false;
-	    }
-      break;
-    }
-  // clang-format on
-
-  return timeunit;
+  return TUNIT_HOUR;
 }
 
 static bool
 cgribexTimeIsFC(int *isec1)
 {
-  bool isFC = (ISEC1_TimeRange == 10 && ISEC1_TimePeriod1 == 0 && ISEC1_TimePeriod2 == 0) ? false : true;
-  return isFC;
+  return !(ISEC1_TimeRange == 10 && ISEC1_TimePeriod1 == 0 && ISEC1_TimePeriod2 == 0);
 }
 
 static int
 cgribexGetTsteptype(int timerange)
 {
-  static bool lprint = true;
+  switch (timerange)
+  {
+    case 0: return TSTEP_INSTANT;
+    case 1: return TSTEP_INSTANT2;
+    case 2: return TSTEP_RANGE;
+    case 3: return TSTEP_AVG;
+    case 4: return TSTEP_ACCUM;
+    case 5: return TSTEP_DIFF;
+    case 10: return TSTEP_INSTANT3;
+    default: CDI_WARN_ONCE("Time range indicator %d unsupported, set to 0!", timerange);
+  }
 
-  // clang-format off
-  int tsteptype = TSTEP_INSTANT;
-  switch ( timerange )
-    {
-    case  0:  tsteptype = TSTEP_INSTANT;  break;
-    case  1:  tsteptype = TSTEP_INSTANT2; break;
-    case  2:  tsteptype = TSTEP_RANGE;    break;
-    case  3:  tsteptype = TSTEP_AVG;      break;
-    case  4:  tsteptype = TSTEP_ACCUM;    break;
-    case  5:  tsteptype = TSTEP_DIFF;     break;
-    case 10:  tsteptype = TSTEP_INSTANT3; break;
-    default:
-      if (lprint)
-    	{
-	      Warning("Time range indicator %d unsupported, set to 0!", timerange);
-	      lprint = false;
-	    }
-      break;
-    }
-  // clang-format on
-
-  return tsteptype;
+  return TSTEP_INSTANT;
 }
 
 static bool
@@ -332,10 +308,10 @@ cgribexGetGridReduced(int *isec2, int *isec4, grid_t *grid)
   grid->np = ISEC2_NumPar;
   grid->size = (size_t) ISEC4_NumValues;
 
-  size_t reducedPointsSize = (size_t) ISEC2_NumLat;
-  grid->reducedPointsSize = ISEC2_NumLat;
-  grid->reducedPoints = (int *) Malloc(reducedPointsSize * sizeof(int));
-  memcpy(grid->reducedPoints, ISEC2_ReducedPointsPtr, reducedPointsSize * sizeof(int));
+  size_t nlat = (size_t) ISEC2_NumLat;
+  grid->reducedPointsSize = nlat;
+  grid->reducedPoints = (int *) Malloc(nlat * sizeof(int));
+  memcpy(grid->reducedPoints, ISEC2_ReducedPointsPtr, nlat * sizeof(int));
 
   grid->y.size = (size_t) ISEC2_NumLat;
   grid->x.inc = 0;
@@ -681,13 +657,16 @@ cgribexDecodeHeader(cgribexrec_t *cgribexp, int *gribbuffer, int recsize, int *l
 
   int ipunp = 0, iword = 0;
 
-  fill_intarr(isec1, 0, 256);
-  fill_intarr(isec2, 0, 32);
+  zerofill_intarr(isec1, 256);
+  zerofill_intarr(isec2, 32);
 
   double *fsec4 = NULL;
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4, ipunp, gribbuffer, recsize, &iword, "J", iret);
 
-  if (!(ISEC1_Sec2Or3Flag & 128)) isec2[0] = -1;  // default generic grid
+  if (!(ISEC1_Sec2Or3Flag & 128))
+  {
+    isec2[0] = -1;  // default generic grid
+  }
 
   *lmv = 0;
 
@@ -704,27 +683,23 @@ static compvar_t
 cgribexVarSet(int param, int level1, int level2, int leveltype, int trange, size_t gridsize)
 {
   int tsteptype = cgribexGetTsteptype(trange);
-
-  compvar_t compVar;
-  compVar.param = param;
-  compVar.level1 = level1;
-  compVar.level2 = level2;
-  compVar.ltype = (short) leveltype;
-  compVar.tsteptype = (short) tsteptype;
-  compVar.gridsize = gridsize;
-
-  return compVar;
+  return (compvar_t) { .param = param,
+                       .level1 = level1,
+                       .level2 = level2,
+                       .ltype = (short) leveltype,
+                       .tsteptype = (short) tsteptype,
+                       .gridsize = gridsize };
 }
 
 static inline int
-cgribexVarCompare(const compvar_t *compVar, const record_t *record, int flag)
+cgribexVarCompare(const compvar_t *restrict compVar, const record_t *restrict record)
 {
   bool vinst
       = (compVar->tsteptype == TSTEP_INSTANT || compVar->tsteptype == TSTEP_INSTANT2 || compVar->tsteptype == TSTEP_INSTANT3);
   bool rinst = (record->tsteptype == TSTEP_INSTANT || record->tsteptype == TSTEP_INSTANT2 || record->tsteptype == TSTEP_INSTANT3);
-  int tstepDiff = (!((flag == 0) & (vinst && rinst))) & (compVar->tsteptype != record->tsteptype);
   int rstatus = (compVar->param != record->param) | (compVar->level1 != record->ilevel) | (compVar->level2 != record->ilevel2)
-                | (compVar->ltype != record->ltype) | (compVar->gridsize != record->gridsize) | tstepDiff;
+                | (compVar->ltype != record->ltype) | (compVar->gridsize != record->gridsize);
+  if (!(vinst && rinst) && compVar->tsteptype != record->tsteptype) rstatus = 1;
   return rstatus;
 }
 
@@ -835,7 +810,7 @@ cgribexScanTimestep1(stream_t *streamP)
     {
       vDateTime0 = vDateTime;
       fcast = cgribexTimeIsFC(isec1);
-      taxis->unit = cgribexGetTimeUnit(isec1);
+      taxis->unitsValue = cgribexGetTimeUnit(isec1);
       taxis->rDateTime = cdiDateTime_set(gribRefDate(isec1), gribRefTime(isec1));
       taxis->sDateTime = sDateTime;
       taxis->vDateTime = vDateTime;
@@ -849,7 +824,7 @@ cgribexScanTimestep1(stream_t *streamP)
       record_t *records = streamP->tsteps[tsID].records;
       for (recID = 0; recID < nrecs; recID++)
       {
-        if (cgribexVarCompare(&compVar, &records[recID], 0) == 0) break;
+        if (cgribexVarCompare(&compVar, &records[recID]) == 0) break;
       }
 
       if (CDI_Inventory_Mode == 1)
@@ -1002,7 +977,7 @@ cgribexScanTimestep2(stream_t *streamP)
       {
         taxis->type = TAXIS_ABSOLUTE;
       }
-      taxis->unit = cgribexGetTimeUnit(isec1);
+      taxis->unitsValue = cgribexGetTimeUnit(isec1);
       taxis->vDateTime = vDateTime;
       taxis->sDateTime = sDateTime;
     }
@@ -1026,7 +1001,7 @@ cgribexScanTimestep2(stream_t *streamP)
 
     for (recID = 0; recID < nrecords; recID++)
     {
-      if (cgribexVarCompare(&compVar, &records[recID], 0) == 0) break;
+      if (cgribexVarCompare(&compVar, &records[recID]) == 0) break;
     }
 
     if (recID == nrecords)
@@ -1064,7 +1039,7 @@ cgribexScanTimestep2(stream_t *streamP)
       Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2,
               cdiDateTime_to_string(vDateTime));
 
-    if (cgribexVarCompare(&compVar, &streamP->tsteps[tsID].records[recID], 0) != 0)
+    if (cgribexVarCompare(&compVar, &streamP->tsteps[tsID].records[recID]) != 0)
     {
       Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
               records[recID].ilevel, level1);
@@ -1196,7 +1171,7 @@ cgribexScanTimestep(stream_t *streamP)
         {
           taxis->type = TAXIS_ABSOLUTE;
         }
-        taxis->unit = cgribexGetTimeUnit(isec1);
+        taxis->unitsValue = cgribexGetTimeUnit(isec1);
         taxis->vDateTime = vDateTime;
         taxis->sDateTime = sDateTime;
       }
@@ -1219,7 +1194,7 @@ cgribexScanTimestep(stream_t *streamP)
       for (vrecID = 0; vrecID < nrecs; vrecID++)
       {
         recID = streamP->tsteps[1].recIDs[vrecID];
-        if (cgribexVarCompare(&compVar, &records[recID], 0) == 0) break;
+        if (cgribexVarCompare(&compVar, &records[recID]) == 0) break;
       }
 
       if (vrecID == nrecs)
@@ -1261,7 +1236,7 @@ cgribexScanTimestep(stream_t *streamP)
         Message("Read record %2d (id=%s lev1=%d lev2=%d) %s", nrecsScanned, paramstr, level1, level2,
                 cdiDateTime_to_string(vDateTime));
 
-      if (cgribexVarCompare(&compVar, &records[recID], 0) != 0)
+      if (cgribexVarCompare(&compVar, &records[recID]) != 0)
       {
         Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID, records[recID].param, param,
                 records[recID].ilevel, level1);
@@ -1362,8 +1337,9 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
     if (memtype == MEMTYPE_FLOAT)
     {
       float *restrict dataf = (float *) data;
+      float missvalF = (float) FSEC3_MissVal;
       for (size_t i = 0; i < datasize; i++)
-        if ((fabs(dataf[i] - undef_pds) < undef_eps) || is_equal(dataf[i], FSEC3_MissVal))
+        if ((fabs(dataf[i] - undef_pds) < undef_eps) || is_equal(dataf[i], missvalF))
         {
           dataf[i] = (float) missval;
           (*numMissVals)++;
@@ -1372,8 +1348,9 @@ cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, voi
     else
     {
       double *restrict datad = (double *) data;
+      double missvalD = FSEC3_MissVal;
       for (size_t i = 0; i < datasize; i++)
-        if ((fabs(datad[i] - undef_pds) < undef_eps) || is_equal(datad[i], FSEC3_MissVal))
+        if ((fabs(datad[i] - undef_pds) < undef_eps) || is_equal(datad[i], missvalD))
         {
           datad[i] = missval;
           (*numMissVals)++;
@@ -1411,20 +1388,16 @@ cgribexDefParam(int *isec1, int param)
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
   if (pnum < 0) pnum = -pnum;
 
-  static bool lwarn_pdis = true;
-  if (pdis != 255 && lwarn_pdis)
+  if (pdis != 255)
   {
     char paramstr[32];
     cdiParamToString(param, paramstr, sizeof(paramstr));
-    Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
-    lwarn_pdis = false;
+    CDI_WARN_ONCE("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
   }
 
-  static bool lwarn_pnum = true;
-  if (pnum > 255 && lwarn_pnum)
+  if (pnum > 255)
   {
-    Warning("Parameter number %d out of range (1-255), set to %d!", pnum, pnum % 256);
-    lwarn_pnum = false;
+    CDI_WARN_ONCE("Parameter number %d out of range (1-255), set to %d!", pnum, pnum % 256);
     pnum = pnum % 256;
   }
 
@@ -1442,9 +1415,10 @@ cgribexDefTimerange(int tsteptype, int factor, int calendar, CdiDateTime rDateTi
 
   int timerange = -1;
   int ip1 = 0, ip2 = 0;
-  if (!(int) (fmod(julianDate_to_seconds(julianDate), factor)))
+  double dateInSeconds = julianDate_to_seconds(julianDate);
+  if (!(int) fmod(dateInSeconds, factor))
   {
-    int ip = (int) lround(julianDate_to_seconds(julianDate) / factor);
+    int ip = (int) lround(dateInSeconds / factor);
     if ((ip > 255) && (tsteptype == TSTEP_INSTANT)) tsteptype = TSTEP_INSTANT3;
 
     int ipx = 0;
@@ -1609,8 +1583,8 @@ cgribexDefTime(int *isec1, CdiDateTime vDateTime, int tsteptype, int numavg, int
 }
 
 static void
-cgribexDefGridRegular(int *isec2, double *fsec2, int gridID, int gridtype, bool gridIsRotated, bool gridIsCurvilinear,
-                      int uvRelativeToGrid)
+cgribexDefGridRegular(int *restrict isec2, double *restrict fsec2, int gridID, int gridtype, bool gridIsRotated,
+                      bool gridIsCurvilinear, int uvRelativeToGrid)
 {
   if (gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED)
     ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
@@ -1726,7 +1700,7 @@ cgribexDefGridLambert(int *isec2, int gridID, int uvRelativeToGrid)
   bool lsouth = (gpp.lat_1 < 0);
   if (lsouth)
   {
-    gpp.lat_1 = -gpp.lat_2;
+    gpp.lat_1 = -gpp.lat_1;
     gpp.lat_2 = -gpp.lat_2;
   }
 
@@ -1803,9 +1777,9 @@ cgribexDefGridGME(int *isec2, int gridID)
 }
 
 static void
-cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID, int uvRelativeToGrid)
+cgribexDefGrid(int *restrict isec1, int *restrict isec2, double *restrict fsec2, int *isec4, int gridID, int uvRelativeToGrid)
 {
-  fill_intarr(isec2, 0, 16);
+  zerofill_intarr(isec2, 16);
   ISEC1_Sec2Or3Flag = 128;
   ISEC1_GridDefinition = 255;
   ISEC2_Reduced = false;
@@ -1853,10 +1827,8 @@ cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID, in
     }
     default:
     {
-      static bool lwarn = true;
       ISEC1_Sec2Or3Flag = 0;
-      if (lwarn) Warning("CGRIBEX library doesn't support %s grids, grid information will be lost!", gridNamePtr(gridtype));
-      lwarn = false;
+      CDI_WARN_ONCE("CGRIBEX library doesn't support %s grids, grid information will be lost!", gridNamePtr(gridtype));
       break;
     }
   }
@@ -1877,7 +1849,7 @@ isec1DefLevel(int *isec1, int leveltype, int level1, int level2)
 }
 
 static void
-cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
+cgribexDefLevel(int *isec1, int *restrict isec2, double *restrict fsec2, int zaxisID, int levelID)
 {
   int zaxistype = zaxisInqType(zaxisID);
   int ltype = 0;
@@ -1931,13 +1903,8 @@ cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
       int vctsize = zaxisInqVctSize(zaxisID);
       if (vctsize > 255)
       {
-        static bool lwarning_vct = true;
         ISEC2_NumVCP = 0;
-        if (lwarning_vct)
-        {
-          Warning("VCT size of %d is too large (maximum is 255). Set to 0!", vctsize);
-          lwarning_vct = false;
-        }
+        CDI_WARN_ONCE("VCT size of %d is too large (maximum is 255). Set to 0!", vctsize);
       }
       else
       {
@@ -1958,11 +1925,9 @@ cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
       else
         level = level / 100;
 
-      static bool lwarn = true;
-      if (lwarn && modf(level, &dum) > 0.001)
+      if (modf(level, &dum) > 0.001)
       {
-        lwarn = false;
-        Message("GRIB1 can store only full pressure levels! Level changed from %ghPa to %dhPa.", level, level2int(level));
+        CDI_WARN_ONCE("GRIB1 can store only full pressure levels! Level changed from %ghPa to %dhPa.", level, level2int(level));
       }
 
       isec1DefLevel(isec1, grib_ltype, level2int(level), 0);
@@ -2018,7 +1983,7 @@ cgribexDefaultSec1(int *isec1)
 static void
 cgribexDefaultSec4(int *isec4)
 {
-  for (int i = 2; i <= 10; ++i) isec4[i] = 0;
+  zerofill_intarr(isec4 + 2, 9);
 }
 
 static void
@@ -2072,7 +2037,7 @@ cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int 
   float fsec2f[sizeof(cgribexp->fsec2) / sizeof(double)];
   float fsec3f[sizeof(cgribexp->fsec3) / sizeof(double)];
 
-  fill_intarr(isec1, 0, 256);
+  zerofill_intarr(isec1, 256);
   fsec2[0] = 0;
   fsec2[1] = 0;
   fsec2f[0] = 0;

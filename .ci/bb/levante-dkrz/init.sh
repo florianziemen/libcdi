@@ -26,8 +26,8 @@ init_gcc ()
 
   ECCODES_ROOT='/sw/spack-levante/eccodes-2.21.0-4ywkk4'
   NETCDF_ROOT='/sw/spack-levante/netcdf-c-4.8.1-6qheqr'
-  PPM_ROOT='/work/mh0287/m300488/libcdi-ci-sw/install/ppm-1.0.8-gcc-11.2.0'
-  YAXT_ROOT='/work/mh0287/m300488/libcdi-ci-sw/install/yaxt-0.9.3-gcc-11.2.0'
+  PPM_ROOT='/work/mh1570/m214003/libcdi-ci-sw/install/ppm-1.0.8-gcc-11.2.0'
+  YAXT_ROOT='/work/mh1570/m214003/libcdi-ci-sw/install/yaxt-0.9.3-gcc-11.2.0'
 
   # The installations of NetCDF and ecCodes libraries do not provide '*.la'
   # files, which would trigger the RPATH injection:
@@ -56,8 +56,8 @@ init_intelclassic ()
 
   ECCODES_ROOT='/sw/spack-levante/eccodes-2.21.0-3ehkbb'
   NETCDF_ROOT='/sw/spack-levante/netcdf-c-4.8.1-2k3cmu'
-  PPM_ROOT='/work/mh0287/m300488/libcdi-ci-sw/install/ppm-1.0.8-intel-classic-2021.5.0'
-  YAXT_ROOT='/work/mh0287/m300488/libcdi-ci-sw/install/yaxt-0.9.3-intel-classic-2021.5.0'
+  PPM_ROOT='/work/mh1570/m214003/libcdi-ci-sw/install/ppm-1.0.8-intel-classic-2021.5.0'
+  YAXT_ROOT='/work/mh1570/m214003/libcdi-ci-sw/install/yaxt-0.9.3-intel-classic-2021.5.0'
 
   # The installations of NetCDF and ecCodes libraries do not provide '*.la'
   # files, which would trigger the RPATH injection:

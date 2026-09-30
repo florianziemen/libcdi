@@ -64,7 +64,7 @@ recordNewEntry(stream_t *streamP, int tsID)
     recordSize = 1;  //  <<<<----
     recinfo = (recinfo_t *) Malloc((size_t) recordSize * sizeof(recinfo_t));
     records = (record_t *) Malloc((size_t) recordSize * sizeof(record_t));
-    for (int i = recordID; i < recordSize; i++) recinfo[i].used = CDI_UNDEFID;
+    for (int i = recordID; i < recordSize; i++) { recinfo[i].used = CDI_UNDEFID; }
   }
 
   // If the table overflows, double its size.
@@ -78,7 +78,7 @@ recordNewEntry(stream_t *streamP, int tsID)
     recinfo = (recinfo_t *) Realloc(recinfo, (size_t) recordSize * sizeof(recinfo_t));
     records = (record_t *) Realloc(records, (size_t) recordSize * sizeof(record_t));
 
-    for (int i = recordID; i < recordSize; i++) recinfo[i].used = CDI_UNDEFID;
+    for (int i = recordID; i < recordSize; i++) { recinfo[i].used = CDI_UNDEFID; }
   }
 
   recinfoInitEntry(&recinfo[recordID]);
@@ -96,18 +96,8 @@ recordNewEntry(stream_t *streamP, int tsID)
 static void
 cdiInitRecord(stream_t *streamP)
 {
-  Record *record = (Record *) Malloc(sizeof(Record));
+  Record *record = (Record *) Calloc(1, sizeof(Record));
   streamP->record = record;
-
-  record->param = 0;
-  record->ilevel = 0;
-  record->vdate = 0;
-  record->vtime = 0;
-  record->gridID = 0;
-  record->buffer = NULL;
-  record->buffersize = 0;
-  record->position = 0;
-  record->varID = 0;
   record->levelID = CDI_UNDEFID;
 }
 
@@ -140,7 +130,6 @@ stream_inq_field(stream_t *streamP, int *varID, int *levelID)
   if (CDI_Debug)
     Message("streamID = %d tsID = %d, recID = %d, varID = %d, levelID = %d", streamP->self, tsID, recID, *varID, *levelID);
 
-  streamP->curTsID = tsID;
   tstep->curRecID = rindex;
 }
 
@@ -332,7 +321,6 @@ cdi_create_records(stream_t *streamP, int tsID, bool allocRecords)
     for (size_t recID = 0; recID < maxrecords; recID++)
     {
       recinfo_t *curRecord = &sourceTstep->recinfo[recID];
-      destTstep->recinfo[recID].used = curRecord->used;
       if (curRecord->used != CDI_UNDEFID && curRecord->varID != -1)  // curRecord->varID = -1 for write mode !!!
       {
         if (vlistInqVarTimetype(vlistID, curRecord->varID) != TIME_CONSTANT)
@@ -359,6 +347,7 @@ streamFCopyRecord(stream_t *streamP2, stream_t *streamP1, const char *container_
   int recID = streamP1->tsteps[tsID].recIDs[vrecID];
   off_t recpos = streamP1->tsteps[tsID].records[recID].position;
   size_t recsize = streamP1->tsteps[tsID].records[recID].size;
+  if (recsize == 0) return;
 
   if (fileSetPos(fileID1, recpos, SEEK_SET) != 0) Error("Cannot seek input file for %s record copy!", container_name);
 

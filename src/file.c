@@ -1094,10 +1094,10 @@ fileClose_serial(int fileID)
 
     if (fileptr->time_in_sec > 0) rout = (double) fileptr->byteTrans / (1024. * 1024. * fileptr->time_in_sec);
 
-    fprintf(stderr, " wall time [s]    : %.2f\n", fileptr->time_in_sec);
-    fprintf(stderr, " data rate [MB/s] : %.1f\n", rout);
+    fprintf(stderr, " wall time [s]     : %.2f\n", fileptr->time_in_sec);
+    fprintf(stderr, " data rate [MiB/s] : %.1f\n", rout);
 
-    fprintf(stderr, " file access      : %ld\n", fileptr->access);
+    fprintf(stderr, " file access       : %ld\n", fileptr->access);
     if (fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN)
     {
       fprintf(stderr, " buffer type      : %d (%s)\n", fileptr->bufferType, fbtname[fileptr->bufferType]);

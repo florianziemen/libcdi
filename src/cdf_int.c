@@ -2,6 +2,7 @@
 #include "config.h"
 #endif
 
+#include <string.h>
 #include <sys/stat.h>
 
 #include "cdi.h"
@@ -264,7 +265,7 @@ void
 cdf_inq_vartype(int ncid, int varid, nc_type *xtypep)
 {
   int status = nc_inq_vartype(ncid, varid, xtypep);
-  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  xtype=%s", ncid, varid, *xtypep);
+  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  varid=%d  xtype=%d", ncid, varid, (int) *xtypep);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
@@ -344,20 +345,21 @@ cdf_put_var_float(int ncid, int varid, const float *fp)
 static const char *
 cdf_var_type(nc_type xtype)
 {
-  if (xtype == NC_BYTE) return "NC_BYTE";
-  if (xtype == NC_CHAR) return "NC_CHAR";
-  if (xtype == NC_SHORT) return "NC_SHORT";
-  if (xtype == NC_INT) return "NC_INT";
-  if (xtype == NC_FLOAT) return "NC_FLOAT";
-  if (xtype == NC_DOUBLE) return "NC_DOUBLE";
-  if (xtype == NC_UBYTE) return "NC_UBYTE";
-  if (xtype == NC_LONG) return "NC_LONG";
-  if (xtype == NC_USHORT) return "NC_USHORT";
-  if (xtype == NC_UINT) return "NC_UINT";
-  if (xtype == NC_INT64) return "NC_INT64";
-  if (xtype == NC_UINT64) return "NC_UINT64";
-
-  return "unknown";
+  switch (xtype)
+  {
+    case NC_BYTE: return "NC_BYTE";
+    case NC_CHAR: return "NC_CHAR";
+    case NC_SHORT: return "NC_SHORT";
+    case NC_INT: return "NC_INT";
+    case NC_FLOAT: return "NC_FLOAT";
+    case NC_DOUBLE: return "NC_DOUBLE";
+    case NC_UBYTE: return "NC_UBYTE";
+    case NC_USHORT: return "NC_USHORT";
+    case NC_UINT: return "NC_UINT";
+    case NC_INT64: return "NC_INT64";
+    case NC_UINT64: return "NC_UINT64";
+    default: return "unknown";
+  }
 }
 
 static void
@@ -404,7 +406,7 @@ cdf_put_vara_double(int ncid, int varid, const size_t start[], const size_t coun
     nc_inq_varndims(ncid, varid, &ndims);
     double minval = 0.0, maxval = 0.0;
     size_t nvals = 1;
-    for (int i = 0; i < ndims; ++i) nvals *= count[i];
+    for (int i = 0; i < ndims; ++i) { nvals *= count[i]; }
     minmaxval(nvals, dp, &minval, &maxval);
     Message("name=%s  type=%s  minval=%f  maxval=%f", name, cdf_var_type(xtype), minval, maxval);
   }
@@ -592,7 +594,7 @@ void
 cdf_copy_att(int ncid_in, int varid_in, const char *name, int ncid_out, int varid_out)
 {
   int status = nc_copy_att(ncid_in, varid_in, name, ncid_out, varid_out);
-  if (CDF_Debug || status != NC_NOERR) Message("%d %d %s %d %d", ncid_in, varid_out, name, ncid_out, varid_out);
+  if (CDF_Debug || status != NC_NOERR) Message("%d %d %s %d %d", ncid_in, varid_in, name, ncid_out, varid_out);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
@@ -732,11 +734,18 @@ cdf_def_var_chunking(int ncid, int varid, int storage, const size_t *chunksizesp
 size_t
 cdf_xtype_to_numbytes(nc_type xtype)
 {
-  if (xtype == NC_BYTE || xtype == NC_CHAR || xtype == NC_UBYTE) return 1;
-  if (xtype == NC_SHORT || xtype == NC_USHORT) return 2;
-  if (xtype == NC_INT || xtype == NC_FLOAT || xtype == NC_LONG || xtype == NC_UINT) return 4;
-
-  return 8;
+  switch (xtype)
+  {
+    case NC_BYTE:
+    case NC_CHAR:
+    case NC_UBYTE: return 1;
+    case NC_SHORT:
+    case NC_USHORT: return 2;
+    case NC_INT:
+    case NC_FLOAT:
+    case NC_UINT: return 4;
+    default: return 8;
+  }
 }
 
 #endif

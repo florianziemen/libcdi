@@ -73,11 +73,15 @@ cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int attl
 {
   if (atttype == CDI_DATATYPE_INT32)
   {
-    int attint = 0;
-    int *pattint = attlen > 1 ? (int *) Malloc((size_t) attlen * sizeof(int)) : &attint;
+    enum
+    {
+      intStackSize = 8
+    };
+    int attintStack[intStackSize];
+    int *pattint = (attlen <= intStackSize) ? attintStack : (int *) Malloc((size_t) attlen * sizeof(int));
     cdiInqAttInt(gridID, CDI_GLOBAL, attname, attlen, pattint);
     for (int i = 0; i < attlen; ++i) { attflt[i] = (double) pattint[i]; }
-    if (attlen > 1) Free(pattint);
+    if (attlen > intStackSize) Free(pattint);
     return true;
   }
 
@@ -1367,10 +1371,7 @@ gridDefMaskGME(int gridID, const int *mask)
 static void
 copy_darray(size_t n, const double *restrict in, double *restrict out)
 {
-#ifdef _OPENMP
-#pragma omp parallel for if (n > 99999) default(shared) schedule(static)
-#endif
-  for (size_t i = 0; i < n; ++i) { out[i] = in[i]; }
+  memcpy(out, in, n * sizeof(double));
 }
 
 static SizeType
@@ -1730,8 +1731,9 @@ grid_calc_increment(size_t size, const double *vals)
   {
     double inc = (vals[size - 1] - vals[0]) / (double) (size - 1);
     double abs_inc = fabs(inc);
+    double tol = 0.01 * abs_inc;
     for (size_t i = 1; i < size; ++i)
-      if (fabs(fabs(vals[i - 1] - vals[i]) - abs_inc) > 0.01 * abs_inc)
+      if (fabs(fabs(vals[i - 1] - vals[i]) - abs_inc) > tol)
       {
         inc = 0.0;
         break;
@@ -2053,7 +2055,9 @@ check_cyclic_curvilinear(grid_t *gridP)
     size_t nc = 0;
     for (size_t j = 0; j < ysize; ++j)
     {
-      size_t i1 = j * xsize, i2 = j * xsize + 1, in = j * xsize + (xsize - 1);
+      size_t i1 = j * xsize;
+      size_t i2 = j * xsize + 1;
+      size_t in = j * xsize + (xsize - 1);
       double val1 = xvals[i1], val2 = xvals[i2], valn = xvals[in];
       double xinc = fabs(val2 - val1);
 
@@ -2120,9 +2124,28 @@ gridIsCyclic(int gridID)
 }
 
 static bool
+compareDblsTol(const double *restrict a, const double *restrict b, size_t n)
+{
+  const double tol = 1.e-10;
+  enum
+  {
+    sampleStride = 64
+  };
+
+  if (memcmp(a, b, n * sizeof(double)) == 0) return false;
+
+  for (size_t i = 0; i < n; i += sampleStride)
+    if (fabs(a[i] - b[i]) > tol) return true;
+
+  for (size_t i = 0; i < n; ++i)
+    if (fabs(a[i] - b[i]) > tol) return true;
+
+  return false;
+}
+
+static bool
 compareXYvals(grid_t *gridRef, grid_t *gridTest)
 {
-  bool differ = false;
   size_t xsizeTest = grid_axis_size(gridTest, GRID_AXIS_X);
   size_t xsizeRef = (size_t) gridRef->vtable->inqXVals(gridRef, NULL);
   if (xsizeTest != xsizeRef) return true;
@@ -2132,9 +2155,7 @@ compareXYvals(grid_t *gridRef, grid_t *gridTest)
     const double *xvalsRef = gridRef->vtable->inqXValsPtr(gridRef);
     const double *xvalsTest = gridTest->vtable->inqXValsPtr(gridTest);
     if (!xvalsTest) return true;
-
-    for (size_t i = 0; i < xsizeTest; ++i)
-      if (fabs(xvalsTest[i] - xvalsRef[i]) > 1.e-10) return true;
+    if (compareDblsTol(xvalsTest, xvalsRef, xsizeTest)) return true;
   }
 
   size_t ysizeTest = grid_axis_size(gridTest, GRID_AXIS_Y);
@@ -2146,12 +2167,10 @@ compareXYvals(grid_t *gridRef, grid_t *gridTest)
     const double *yvalsRef = gridRef->vtable->inqYValsPtr(gridRef);
     const double *yvalsTest = gridTest->vtable->inqYValsPtr(gridTest);
     if (!yvalsTest) return true;
-
-    for (size_t i = 0; i < ysizeTest; ++i)
-      if (fabs(yvalsTest[i] - yvalsRef[i]) > 1.e-10) return true;
+    if (compareDblsTol(yvalsTest, yvalsRef, ysizeTest)) return true;
   }
 
-  return differ;
+  return false;
 }
 
 static bool
@@ -2409,12 +2428,33 @@ gridCompare(int gridID, const grid_t *grid, bool compareCoord)
   return differ;
 }
 
-int
+static inline int
 cmp_key_int(const cdi_keys_t *keysp1, const cdi_keys_t *keysp2, int key)
 {
   int v1 = cdiInqVarKeyInt(keysp1, key);
   int v2 = cdiInqVarKeyInt(keysp2, key);
   return (v1 != v2);
+}
+
+static inline bool
+cmp_darray(const double *restrict x, const double *restrict y, size_t size)
+{
+  if ((x != NULL) ^ (y != NULL)) return true;
+  if (x == NULL || x == y) return false;
+  xassert(size);
+  if (memcmp(x, y, size * sizeof(double)) == 0) return false;
+  for (size_t i = 0; i < size; ++i)
+    if (is_not_equal(x[i], y[i])) return true;
+  return false;
+}
+
+static inline bool
+cmp_mask(const mask_t *restrict x, const mask_t *restrict y, size_t size)
+{
+  if ((x != NULL) ^ (y != NULL)) return true;
+  if (x == NULL || x == y) return false;
+  xassert(size);
+  return (memcmp(x, y, size * sizeof(mask_t)) != 0);
 }
 
 int
@@ -2458,70 +2498,18 @@ grid_compare(void *gridP1, void *gridP2)
   if (is_not_equal(g1->y.inc, g2->y.inc)) return differ;
   if (cmp_key_int(&g1->keys, &g2->keys, CDI_KEY_SCANNINGMODE)) return differ;
 
-  {
-    const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1), *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
-    if ((g1_xvals != NULL) ^ (g2_xvals != NULL)) return differ;
-    if (g1_xvals)
-    {
-      size_t size = grid_axis_size(g1, GRID_AXIS_X);
-      xassert(size);
-      for (size_t i = 0; i < size; i++)
-        if (is_not_equal(g1_xvals[i], g2_xvals[i])) return differ;
-    }
-  }
+  const struct gridVirtTable *v1 = g1->vtable;
+  const struct gridVirtTable *v2 = g2->vtable;
+  size_t xsize = grid_axis_size(g1, GRID_AXIS_X);
+  size_t ysize = grid_axis_size(g1, GRID_AXIS_Y);
+  if (cmp_darray(v1->inqXValsPtr(g1), v2->inqXValsPtr(g2), xsize)) return differ;
+  if (cmp_darray(v1->inqYValsPtr(g1), v2->inqYValsPtr(g2), ysize)) return differ;
+  if (cmp_darray(v1->inqAreaPtr(g1), v2->inqAreaPtr(g2), g1->size)) return differ;
+  if (cmp_darray(v1->inqXBoundsPtr(g1), v2->inqXBoundsPtr(g2), (size_t) g1->nvertex * xsize)) return differ;
+  if (cmp_darray(v1->inqYBoundsPtr(g1), v2->inqYBoundsPtr(g2), (size_t) g1->nvertex * ysize)) return differ;
 
-  {
-    const double *restrict g1_yvals = g1->vtable->inqYValsPtr(g1), *restrict g2_yvals = g2->vtable->inqYValsPtr(g2);
-    if ((g1_yvals != NULL) ^ (g2_yvals != NULL)) return differ;
-    if (g1_yvals)
-    {
-      size_t size = grid_axis_size(g1, GRID_AXIS_Y);
-      xassert(size);
-      for (size_t i = 0; i < size; i++)
-        if (is_not_equal(g1_yvals[i], g2_yvals[i])) return differ;
-    }
-  }
-
-  {
-    const double *restrict g1_area = g1->vtable->inqAreaPtr(g1), *restrict g2_area = g2->vtable->inqAreaPtr(g2);
-    if ((g1_area != NULL) ^ (g2_area != NULL)) return differ;
-    if (g1_area)
-    {
-      size_t size = g1->size;
-      xassert(size);
-
-      for (size_t i = 0; i < size; i++)
-        if (is_not_equal(g1_area[i], g2_area[i])) return differ;
-    }
-  }
-
-  {
-    const double *restrict g1_xbounds = g1->vtable->inqXBoundsPtr(g1), *restrict g2_xbounds = g2->vtable->inqXBoundsPtr(g2);
-    if ((g1_xbounds != NULL) ^ (g2_xbounds != NULL)) return differ;
-    if (g1_xbounds)
-    {
-      xassert(g1->nvertex);
-      size_t size = g1->nvertex * grid_axis_size(g1, GRID_AXIS_X);
-      xassert(size);
-
-      for (size_t i = 0; i < size; i++)
-        if (is_not_equal(g1_xbounds[i], g2_xbounds[i])) return differ;
-    }
-  }
-
-  {
-    const double *restrict g1_ybounds = g1->vtable->inqYBoundsPtr(g1), *restrict g2_ybounds = g2->vtable->inqYBoundsPtr(g2);
-    if ((g1_ybounds != NULL) ^ (g2_ybounds != NULL)) return differ;
-    if (g1_ybounds)
-    {
-      xassert(g1->nvertex);
-      size_t size = g1->nvertex * grid_axis_size(g1, GRID_AXIS_Y);
-      xassert(size);
-
-      for (size_t i = 0; i < size; i++)
-        if (is_not_equal(g1_ybounds[i], g2_ybounds[i])) return differ;
-    }
-  }
+  if (cmp_mask(g1->mask, g2->mask, g1->size)) return differ;
+  if (cmp_mask(g1->mask_gme, g2->mask_gme, g1->size)) return differ;
 
   if (!str_is_equal(cdiInqVarKeyString(&g1->x.keys, CDI_KEY_NAME), cdiInqVarKeyString(&g2->x.keys, CDI_KEY_NAME))) return differ;
   if (!str_is_equal(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_NAME), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_NAME))) return differ;
@@ -2537,24 +2525,6 @@ grid_compare(void *gridP1, void *gridP2)
     return differ;
 
   if (!str_is_equal(cdiInqVarKeyString(&g1->y.keys, CDI_KEY_REFERENCEURI), cdiInqVarKeyString(&g2->y.keys, CDI_KEY_REFERENCEURI)))
-    return differ;
-
-  if (g1->mask)
-  {
-    xassert(g1->size);
-    if (!g2->mask) return differ;
-    if (memcmp(g1->mask, g2->mask, g1->size * sizeof(mask_t)) != 0) return differ;
-  }
-  else if (g2->mask)
-    return differ;
-
-  if (g1->mask_gme)
-  {
-    xassert(g1->size);
-    if (!g2->mask_gme) return differ;
-    if (memcmp(g1->mask_gme, g2->mask_gme, g1->size * sizeof(mask_t)) != 0) return differ;
-  }
-  else if (g2->mask_gme)
     return differ;
 
   unsigned char uuid1[CDI_UUID_SIZE] = { 0 };
@@ -2861,11 +2831,11 @@ gridCompress(int gridID)
     {
       size_t gridsize = gridP->size;
       size_t nv = (size_t) gridP->nvertex;
-      double *restrict area = (double *) gridP->vtable->inqAreaPtr(gridP),
-                       *restrict xvals = (double *) gridP->vtable->inqXValsPtr(gridP),
-                       *restrict yvals = (double *) gridP->vtable->inqYValsPtr(gridP),
-                       *restrict xbounds = (double *) gridP->vtable->inqXBoundsPtr(gridP),
-                       *restrict ybounds = (double *) gridP->vtable->inqYBoundsPtr(gridP);
+      double *restrict area = (double *) gridP->vtable->inqAreaPtr(gridP);
+      double *restrict xvals = (double *) gridP->vtable->inqXValsPtr(gridP);
+      double *restrict yvals = (double *) gridP->vtable->inqYValsPtr(gridP);
+      double *restrict xbounds = (double *) gridP->vtable->inqXBoundsPtr(gridP);
+      double *restrict ybounds = (double *) gridP->vtable->inqYBoundsPtr(gridP);
       mask_t *restrict mask_gme = gridP->mask_gme;
       size_t *restrict selection = (size_t *) Malloc(gridsize * sizeof(selection[0]));
       size_t nselect;
@@ -2878,19 +2848,26 @@ gridCompress(int gridID)
         }
         nselect = j;
       }
-      selection = (size_t *) Realloc(selection, nselect * sizeof(selection[0]));
       if (xvals)
-        for (size_t i = 0; i < nselect; i++) xvals[i] = xvals[selection[i]];
+        for (size_t i = 0; i < nselect; i++) { xvals[i] = xvals[selection[i]]; }
       if (yvals)
-        for (size_t i = 0; i < nselect; i++) yvals[i] = yvals[selection[i]];
+        for (size_t i = 0; i < nselect; i++) { yvals[i] = yvals[selection[i]]; }
       if (area)
-        for (size_t i = 0; i < nselect; i++) area[i] = area[selection[i]];
+        for (size_t i = 0; i < nselect; i++) { area[i] = area[selection[i]]; }
       if (xbounds)
         for (size_t i = 0; i < nselect; i++)
-          for (size_t iv = 0; iv < nv; iv++) xbounds[i * nv + iv] = xbounds[selection[i] * nv + iv];
+        {
+          size_t off1 = i * nv;
+          size_t off2 = selection[i] * nv;
+          for (size_t iv = 0; iv < nv; iv++) { xbounds[off1 + iv] = xbounds[off2 + iv]; }
+        }
       if (ybounds)
         for (size_t i = 0; i < nselect; i++)
-          for (size_t iv = 0; iv < nv; iv++) ybounds[i * nv + iv] = ybounds[selection[i] * nv + iv];
+        {
+          size_t off1 = i * nv;
+          size_t off2 = selection[i] * nv;
+          for (size_t iv = 0; iv < nv; iv++) { ybounds[off1 + iv] = ybounds[off2 + iv]; }
+        }
       Free(selection);
 
       /* fprintf(stderr, "grid compress %d %d %d\n", i, j, gridsize); */
@@ -2955,7 +2932,7 @@ gridInqPropPresenceBase(grid_t *gridP, enum gridPropInq inq)
   switch (inq)
   {
     case GRID_PROP_MASK: present = gridP->mask != NULL; break;
-    case GRID_PROP_MASK_GME: present = gridP->mask != NULL; break;
+    case GRID_PROP_MASK_GME: present = gridP->mask_gme != NULL; break;
     case GRID_PROP_AREA: present = gridP->area != NULL; break;
     case GRID_PROP_XVALS: present = gridP->x.vals != NULL; break;
     case GRID_PROP_YVALS: present = gridP->y.vals != NULL; break;
@@ -3810,7 +3787,7 @@ gridVerifyProjParamsHEALPIX(struct CDI_GridProjParams *gpp)
     const char *projection = "healpix";
     if (is_equal(gpp->nside, -1)) Error("%s mapping parameter %s missing!", projection, "nside");
     if (is_equal(gpp->order, -1)) Error("%s mapping parameter %s missing!", projection, "order");
-    if (gpp->nside == 0) Error("%s mapping parameter %s unsupported!", projection, "nside", gpp->nside);
+    if (gpp->nside == 0) Error("%s mapping parameter %s=%d unsupported!", projection, "nside", gpp->nside);
     if (gpp->order != 0 && gpp->order != 1) Error("%s mapping parameter %s=%d unsupported!", projection, "order", gpp->order);
   }
 

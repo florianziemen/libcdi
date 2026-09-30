@@ -33,24 +33,38 @@ get_attsP(vlist_t *vlistP, int varID)
   return NULL;
 }
 
-static cdi_att_t *
-find_att(cdi_atts_t *attsP, const char *name)
+static inline short
+att_name_nlen(const char *name)
+{
+  size_t len = strlen(name);
+  if (len >= (size_t) CDI_MAX_NAME) return (short) (CDI_MAX_NAME - 1);
+  return (short) len;
+}
+
+static int
+att_index(cdi_atts_t *attsP, const char *name)
 {
   xassert(attsP != NULL);
-  if (attsP->nelems == 0) return NULL;
+  if (attsP->nelems == 0) return -1;
 
-  int slen = (int) strlen(name);
-  if (slen > CDI_MAX_NAME) { slen = CDI_MAX_NAME; }
+  short slen = att_name_nlen(name);
 
   cdi_att_t *atts = attsP->value;
   for (int i = 0; i < attsP->nelems; i++)
   {
     cdi_att_t *attp = atts + i;
     if (attp->namesz != slen) continue;
-    if (memcmp(attp->name, name, slen) == 0) return attp;  // Normal return
+    if (memcmp(attp->name, name, (size_t) slen + 1) == 0) return i;
   }
 
-  return NULL;
+  return -1;
+}
+
+static cdi_att_t *
+find_att(cdi_atts_t *attsP, const char *name)
+{
+  int idx = att_index(attsP, name);
+  return (idx >= 0) ? attsP->value + idx : NULL;
 }
 
 static cdi_att_t *
@@ -64,38 +78,41 @@ new_att(cdi_atts_t *attsP, const char *name)
   cdi_att_t *attp = &(attsP->value[attsP->nelems]);
   attsP->nelems++;
 
-  size_t slen = strlen(name);
-  if (slen > CDI_MAX_NAME) slen = CDI_MAX_NAME;
+  short slen = att_name_nlen(name);
 
-  attp->name = (char *) Malloc(slen + 1);
-  memcpy(attp->name, name, slen + 1);
+  attp->name = (char *) Malloc((size_t) slen + 1);
+  memcpy(attp->name, name, (size_t) slen + 1);
   attp->namesz = slen;
   attp->xvalue = NULL;
+  attp->xsz = 0;
+  attp->nelems = 0;
+  attp->indtype = 0;
+  attp->exdtype = 0;
 
   return attp;
 }
 
 static void
-fill_att(cdi_att_t *attp, int indtype, int exdtype, size_t nelems, size_t xsz, const void *xvalue)
+fill_att(cdi_att_t *attp, short indtype, short exdtype, short nelems, int xsz, const void *xvalue)
 {
   xassert(attp != NULL);
+  xassert(xsz == 0 || xvalue != NULL);
 
-  // size_t oldxsz = (size_t) attp->xsz;
+  int oldxsz = attp->xsz;
   attp->xsz = xsz;
   attp->indtype = indtype;
   attp->exdtype = exdtype;
   attp->nelems = nelems;
 
-  if (xsz == 0 && attp->xvalue != NULL)
+  if (xsz == 0)
   {
     Free(attp->xvalue);
     attp->xvalue = NULL;
   }
-  if (xsz > 0)
+  else
   {
-    // if (xsz != oldxsz) { attp->xvalue = Realloc(attp->xvalue, xsz); }
-    attp->xvalue = Realloc(attp->xvalue, xsz);
-    memcpy(attp->xvalue, xvalue, xsz);
+    if (attp->xvalue == NULL || xsz != oldxsz) { attp->xvalue = Realloc(attp->xvalue, (size_t) xsz); }
+    if (attp->xvalue != xvalue) memcpy(attp->xvalue, xvalue, (size_t) xsz);
   }
 }
 
@@ -180,11 +197,11 @@ cdiInqAtt(int cdiID, int varID, int attnum, char *name, int *typep, int *lenp)
   xassert(attsP != NULL);
 
   cdi_att_t *attp = NULL;
-  if (attnum >= 0 && attnum < attsP->nelems) attp = &(attsP->value[attnum]);
+  if (attnum >= 0 && attnum < attsP->nelems) { attp = &(attsP->value[attnum]); }
 
   if (attp != NULL && attp->name)  // name in use
   {
-    memcpy(name, attp->name, attp->namesz + 1);
+    memcpy(name, attp->name, (size_t) attp->namesz + 1);
     *typep = attp->exdtype;
     *lenp = attp->nelems;
   }
@@ -230,17 +247,9 @@ cdiInqAttType(int cdiID, int varID, const char *name)
 static void
 cdi_attribute_free(cdi_att_t *attp)
 {
-  if (attp->name)
-  {
-    Free(attp->name);
-    attp->name = NULL;
-    attp->namesz = 0;
-  }
-  if (attp->xvalue)
-  {
-    Free(attp->xvalue);
-    attp->xvalue = NULL;
-  }
+  if (attp->name) { Free(attp->name); }
+  if (attp->xvalue) { Free(attp->xvalue); }
+  memset(attp, 0, sizeof(*attp));
 }
 
 int
@@ -266,18 +275,21 @@ cdiDelAtt(int cdiID, int varID, const char *name)
   cdi_atts_t *attsP = cdi_get_attsP(cdiID, varID);
   xassert(attsP != NULL);
 
-  const cdi_att_t *attP = find_att(attsP, name);
-  if (attP != NULL)
-  {
-    cdi_attribute_free((cdi_att_t *) attP);
-    return CDI_NOERR;
-  }
+  int idx = att_index(attsP, name);
+  if (idx < 0) return -1;
 
-  return -1;
+  cdi_attribute_free(&attsP->value[idx]);
+
+  int last = attsP->nelems - 1;
+  if (idx < last) memmove(&attsP->value[idx], &attsP->value[idx + 1], (size_t) (last - idx) * sizeof(cdi_att_t));
+  memset(&attsP->value[last], 0, sizeof(cdi_att_t));
+  attsP->nelems = last;
+
+  return CDI_NOERR;
 }
 
 static void
-define_attribute(cdi_atts_t *attsP, const char *name, int indtype, int exdtype, size_t len, size_t xsz, const void *xp)
+define_attribute(cdi_atts_t *attsP, const char *name, short indtype, short exdtype, short len, int xsz, const void *xp)
 {
   cdi_att_t *attp = find_att(attsP, name);
   if (attp == NULL) attp = new_att(attsP, name);
@@ -285,7 +297,7 @@ define_attribute(cdi_atts_t *attsP, const char *name, int indtype, int exdtype, 
 }
 
 static int
-cdi_def_att(int indtype, int exdtype, int cdiID, int varID, const char *name, size_t len, size_t xsz, const void *xp)
+cdi_def_att(short indtype, short exdtype, int cdiID, int varID, const char *name, short len, int xsz, const void *xp)
 {
   if (len != 0 && xp == NULL) return CDI_EINVAL;  // Null arg
 
@@ -298,7 +310,7 @@ cdi_def_att(int indtype, int exdtype, int cdiID, int varID, const char *name, si
 }
 
 static int
-cdi_inq_att(int indtype, int cdiID, int varID, const char *name, size_t mxsz, void *xp)
+cdi_inq_att(int indtype, int cdiID, int varID, const char *name, int mxsz, void *xp)
 {
   int status = CDI_NOERR;
 
@@ -312,9 +324,9 @@ cdi_inq_att(int indtype, int cdiID, int varID, const char *name, size_t mxsz, vo
   {
     if (attp->indtype == indtype)
     {
-      size_t xsz = attp->xsz;
-      if (mxsz < xsz) xsz = mxsz;
-      if (xsz > 0) memcpy(xp, attp->xvalue, xsz);
+      int xsz = attp->xsz;
+      if (mxsz < xsz) { xsz = mxsz; }
+      if (xsz > 0) memcpy(xp, attp->xvalue, (size_t) xsz);
     }
     else
     {
@@ -371,7 +383,7 @@ The function @func{cdiDefAttInt} defines an integer attribute.
 int
 cdiDefAttInt(int cdiID, int varID, const char *name, int type, int len, const int *ip)
 {
-  return cdi_def_att(CDI_DATATYPE_INT, type, cdiID, varID, name, (size_t) len, (size_t) len * sizeof(int), ip);
+  return cdi_def_att(CDI_DATATYPE_INT, type, cdiID, varID, name, (short) len, len * (int) sizeof(int), ip);
 }
 
 /*
@@ -396,7 +408,7 @@ The function @func{cdiDefAttFlt} defines a floating point attribute.
 int
 cdiDefAttFlt(int cdiID, int varID, const char *name, int type, int len, const double *dp)
 {
-  return cdi_def_att(CDI_DATATYPE_FLT, type, cdiID, varID, name, (size_t) len, (size_t) len * sizeof(double), dp);
+  return cdi_def_att(CDI_DATATYPE_FLT, type, cdiID, varID, name, (short) len, len * (int) sizeof(double), dp);
 }
 
 /*
@@ -435,7 +447,7 @@ status = cdiDefAttTxt(vlistID, varID, "description", LEN(text), text);
 int
 cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp)
 {
-  return cdi_def_att(CDI_DATATYPE_TXT, CDI_DATATYPE_TXT, cdiID, varID, name, (size_t) len, (size_t) len, tp);
+  return cdi_def_att(CDI_DATATYPE_TXT, CDI_DATATYPE_TXT, cdiID, varID, name, (short) len, len, tp);
 }
 
 /*
@@ -458,7 +470,7 @@ The function @func{cdiInqAttInt} gets the values(s) of an integer attribute.
 int
 cdiInqAttInt(int cdiID, int varID, const char *name, int mlen, int *ip)
 {
-  return cdi_inq_att(CDI_DATATYPE_INT, cdiID, varID, name, (size_t) mlen * sizeof(int), ip);
+  return cdi_inq_att(CDI_DATATYPE_INT, cdiID, varID, name, mlen * (int) sizeof(int), ip);
 }
 
 /*
@@ -481,7 +493,7 @@ The function @func{cdiInqAttFlt} gets the values(s) of a floating point attribut
 int
 cdiInqAttFlt(int cdiID, int varID, const char *name, int mlen, double *dp)
 {
-  return cdi_inq_att(CDI_DATATYPE_FLT, cdiID, varID, name, (size_t) mlen * sizeof(double), dp);
+  return cdi_inq_att(CDI_DATATYPE_FLT, cdiID, varID, name, mlen * (int) sizeof(double), dp);
 }
 
 /*
@@ -504,7 +516,7 @@ The function @func{cdiInqAttTxt} gets the values(s) of a text attribute.
 int
 cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp)
 {
-  return cdi_inq_att(CDI_DATATYPE_TXT, cdiID, varID, name, (size_t) mlen * sizeof(char), tp);
+  return cdi_inq_att(CDI_DATATYPE_TXT, cdiID, varID, name, mlen, tp);
 }
 
 enum
@@ -513,14 +525,26 @@ enum
 };
 
 static inline int
-cdiAttTypeLookup(cdi_att_t *attp)
+cdiAttSerialType(int indtype)
 {
-  switch (attp->indtype)
+  switch (indtype)
   {
     case CDI_DATATYPE_FLT: return CDI_DATATYPE_FLT64;
     case CDI_DATATYPE_INT:
-    case CDI_DATATYPE_TXT: return attp->indtype;
-    default: xabort("Unknown datatype encountered in attribute %s: %d\n", attp->name, attp->indtype);
+    case CDI_DATATYPE_TXT: return indtype;
+    default: xabort("Unknown datatype encountered: %d\n", indtype);
+  }
+}
+
+static inline int
+cdiAttElemSize(int indtype)
+{
+  switch (indtype)
+  {
+    case CDI_DATATYPE_FLT: return (int) sizeof(double);
+    case CDI_DATATYPE_INT: return (int) sizeof(int);
+    case CDI_DATATYPE_TXT: return 1;
+    default: xabort("Unknown datatype encountered: %d\n", indtype);
   }
 }
 
@@ -531,11 +555,13 @@ cdi_att_compare(cdi_atts_t *attsPa, cdi_atts_t *attsPb, int attnum)
   cdi_att_t *attpa = attsPa->value + attnum;
   cdi_att_t *attpb = attsPb->value + attnum;
 
+  if (attpa->xsz != attpb->xsz) return 1;
   if (attpa->namesz != attpb->namesz) return 1;
   if (attpa->name && attpb->name && memcmp(attpa->name, attpb->name, attpa->namesz) != 0) return 1;
   if (attpa->indtype != attpb->indtype || attpa->exdtype != attpb->exdtype || attpa->nelems != attpb->nelems) return 1;
+  if (attpa->xsz > 0 && memcmp(attpa->xvalue, attpb->xvalue, (size_t) attpa->xsz) != 0) return 1;
 
-  return memcmp(attpa->xvalue, attpb->xvalue, attpa->xsz);
+  return 0;
 }
 
 static int
@@ -545,7 +571,7 @@ cdiAttGetSize(cdi_atts_t *attsP, int attnum, void *context)
   cdi_att_t *attp = &(attsP->value[attnum]);
   int txsize
       = serializeGetSize(cdi_att_nints, CDI_DATATYPE_INT, context) + serializeGetSize(attp->namesz, CDI_DATATYPE_TXT, context);
-  txsize += serializeGetSize(attp->nelems, cdiAttTypeLookup(attp), context);
+  txsize += serializeGetSize(attp->nelems, cdiAttSerialType(attp->indtype), context);
   return txsize;
 }
 
@@ -573,7 +599,7 @@ cdiAttPack(cdi_atts_t *attsP, int attnum, void *buf, int size, int *position, vo
   tempbuf[3] = attp->nelems;
   serializePack(tempbuf, cdi_att_nints, CDI_DATATYPE_INT, buf, size, position, context);
   serializePack(attp->name, attp->namesz, CDI_DATATYPE_TXT, buf, size, position, context);
-  serializePack(attp->xvalue, attp->nelems, cdiAttTypeLookup(attp), buf, size, position, context);
+  serializePack(attp->xvalue, attp->nelems, cdiAttSerialType(attp->indtype), buf, size, position, context);
 }
 
 void
@@ -594,32 +620,21 @@ cdiAttUnpack(int cdiID, int varID, void *buf, int size, int *position, void *con
   int tempbuf[cdi_att_nints];
 
   serializeUnpack(buf, size, position, tempbuf, cdi_att_nints, CDI_DATATYPE_INT, context);
-  char *attName = (char *) Malloc((size_t) tempbuf[0] + 1);
-  serializeUnpack(buf, size, position, attName, tempbuf[0], CDI_DATATYPE_TXT, context);
-  attName[tempbuf[0]] = '\0';
-  int attVDt;
-  size_t elemSize;
-  switch (tempbuf[2])
-  {
-    case CDI_DATATYPE_FLT:
-      attVDt = CDI_DATATYPE_FLT64;
-      elemSize = sizeof(double);
-      break;
-    case CDI_DATATYPE_INT:
-      attVDt = CDI_DATATYPE_INT;
-      elemSize = sizeof(int);
-      break;
-    case CDI_DATATYPE_TXT:
-      attVDt = CDI_DATATYPE_TXT;
-      elemSize = 1;
-      break;
-    default: xabort("Unknown datatype encountered in attribute %s: %d\n", attName, tempbuf[2]);
-  }
-  void *attData = Malloc(elemSize * (size_t) tempbuf[3]);
+  int namesz = tempbuf[0];
+  xassert(namesz >= 0);
+  char attNameStack[CDI_MAX_NAME];
+  char *attName = ((size_t) namesz < CDI_MAX_NAME) ? attNameStack : (char *) Malloc((size_t) namesz + 1);
+  serializeUnpack(buf, size, position, attName, namesz, CDI_DATATYPE_TXT, context);
+  attName[namesz] = '\0';
+  int attVDt = cdiAttSerialType(tempbuf[2]);
+  int elemSize = cdiAttElemSize(tempbuf[2]);
+  size_t dataSize = (size_t) elemSize * (size_t) tempbuf[3];
+  char attDataStack[512];
+  void *attData = (dataSize <= sizeof(attDataStack)) ? attDataStack : Malloc(dataSize);
   serializeUnpack(buf, size, position, attData, tempbuf[3], attVDt, context);
-  cdi_def_att(tempbuf[2], tempbuf[1], cdiID, varID, attName, (size_t) tempbuf[3], (size_t) tempbuf[3] * elemSize, attData);
-  Free(attName);
-  Free(attData);
+  cdi_def_att(tempbuf[2], tempbuf[1], cdiID, varID, attName, (short) tempbuf[3], (int) dataSize, attData);
+  if (attData != attDataStack) Free(attData);
+  if (attName != attNameStack) Free(attName);
 }
 
 void

@@ -85,8 +85,8 @@ taxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int 
   taxisP->fDateTime.date = cdiDate_set(intBuffer[TAXIS_PACK_INT_FDATE]);
   taxisP->fDateTime.time = cdiTime_set(intBuffer[TAXIS_PACK_INT_FTIME]);
   taxisP->calendar = intBuffer[TAXIS_PACK_INT_CALENDAR];
-  taxisP->unit = intBuffer[TAXIS_PACK_INT_UNIT];
-  taxisP->fc_unit = intBuffer[TAXIS_PACK_INT_FC_UNIT];
+  taxisP->unitsValue = intBuffer[TAXIS_PACK_INT_UNIT];
+  taxisP->fc_units = intBuffer[TAXIS_PACK_INT_FC_UNIT];
   taxisP->numavg = intBuffer[TAXIS_PACK_INT_NUMAVG];
   taxisP->climatology = intBuffer[TAXIS_PACK_INT_CLIMATOLOGY];
   taxisP->hasBounds = (bool) intBuffer[TAXIS_PACK_INT_HAS_BOUNDS];
@@ -146,8 +146,8 @@ taxisPack(void *voidP, void *packBuffer, int packBufferSize, int *packBufferPos,
     intBuffer[TAXIS_PACK_INT_FDATE] = (int) cdiDate_get(taxisP->fDateTime.date);
     intBuffer[TAXIS_PACK_INT_FTIME] = cdiTime_get(taxisP->fDateTime.time);
     intBuffer[TAXIS_PACK_INT_CALENDAR] = taxisP->calendar;
-    intBuffer[TAXIS_PACK_INT_UNIT] = taxisP->unit;
-    intBuffer[TAXIS_PACK_INT_FC_UNIT] = taxisP->fc_unit;
+    intBuffer[TAXIS_PACK_INT_UNIT] = taxisP->unitsValue;
+    intBuffer[TAXIS_PACK_INT_FC_UNIT] = taxisP->fc_units;
     intBuffer[TAXIS_PACK_INT_NUMAVG] = taxisP->numavg;
     intBuffer[TAXIS_PACK_INT_CLIMATOLOGY] = taxisP->climatology;
     intBuffer[TAXIS_PACK_INT_HAS_BOUNDS] = taxisP->hasBounds;

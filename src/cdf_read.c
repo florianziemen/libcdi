@@ -84,7 +84,7 @@ cdfGetSlapDescription(stream_t *streamP, int varID, size_t (*start)[MAX_DIMENSIO
 // Scans the data array for missVals, optionally applying first a scale factor and then an offset.
 // Returns the number of missing + out-of-range values encountered.
 static size_t
-cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double *data)
+cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double *restrict data)
 {
   double missVal = vlistInqVarMissval(vlistID, varID);
   int haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
@@ -176,11 +176,17 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
     case 1:  // haveMissVal
       if (missValIsNaN)
       {
-        for (size_t i = 0; i < valueCount; ++i) missValCount += (size_t) dbl_is_nan(data[i]);
+#ifdef _OPENMP
+#pragma omp simd reduction(+ : missValCount)
+#endif
+        for (size_t i = 0; i < valueCount; ++i) { missValCount += (size_t) dbl_is_nan(data[i]); }
       }
       else
       {
-        for (size_t i = 0; i < valueCount; ++i) missValCount += (size_t) dbl_is_equal(data[i], missVal);
+#ifdef _OPENMP
+#pragma omp simd reduction(+ : missValCount)
+#endif
+        for (size_t i = 0; i < valueCount; ++i) { missValCount += (size_t) dbl_is_equal(data[i], missVal); }
       }
       break;
   }
@@ -189,12 +195,16 @@ cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double
 }
 
 static size_t
-cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float *data)
+cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float *restrict data)
 {
   double missVal = vlistInqVarMissval(vlistID, varID);
   int haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double validRange[2];
-  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange))) validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
+  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
+  {
+    validRange[0] = DBL_MIN;
+    validRange[1] = DBL_MAX;
+  }
   double addoffset = 0.0, scalefactor = 1.0;
   int haveAddoffset = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &addoffset) == CDI_NOERR);
   int haveScalefactor = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scalefactor) == CDI_NOERR);
@@ -281,11 +291,17 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
     case 1:  // haveMissVal
       if (missValIsNaN)
       {
-        for (size_t i = 0; i < valueCount; ++i) missValCount += (size_t) dbl_is_nan(data[i]);
+#ifdef _OPENMP
+#pragma omp simd reduction(+ : missValCount)
+#endif
+        for (size_t i = 0; i < valueCount; ++i) { missValCount += (size_t) dbl_is_nan(data[i]); }
       }
       else
       {
-        for (size_t i = 0; i < valueCount; ++i) missValCount += (size_t) dbl_is_equal(data[i], missVal);
+#ifdef _OPENMP
+#pragma omp simd reduction(+ : missValCount)
+#endif
+        for (size_t i = 0; i < valueCount; ++i) { missValCount += (size_t) dbl_is_equal(data[i], missVal); }
       }
       break;
   }
@@ -1126,7 +1142,7 @@ cdfReadVarSPPart(stream_t *streamP, int varID, int varType, int startpoint, size
   start[1 + ltime] = (size_t) startpoint;
   count[1 + ltime] = length;
 
-  cdf_get_vara_float(streamP->fileID, ncvarid, start, count, data);
+  cdf_get_vara_float(streamP->groupID, ncvarid, start, count, data);
 
   *numMissVals = cdfDoInputDataTransformationSP(vlistID, varID, length, data);
 }

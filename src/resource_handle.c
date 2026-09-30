@@ -86,7 +86,8 @@ static pthread_mutex_t listMutex;
 #define LIST_LOCK() pthread_mutex_lock(&listMutex)
 #define LIST_UNLOCK() pthread_mutex_unlock(&listMutex)
 #define LIST_INIT(init0)                                                     \
-  do {                                                                       \
+  do                                                                         \
+  {                                                                          \
     pthread_once(&listInitThread, listInitialize);                           \
     pthread_mutex_lock(&listMutex);                                          \
     if ((init0) && (!resHList || !resHList[0].resources)) reshListCreate(0); \
@@ -100,7 +101,8 @@ static int listInit = 0;
 #define LIST_LOCK()
 #define LIST_UNLOCK()
 #define LIST_INIT(init0)                                                       \
-  do {                                                                         \
+  do                                                                           \
+  {                                                                            \
     if (!listInit)                                                             \
     {                                                                          \
       listInitialize();                                                        \
@@ -685,6 +687,34 @@ reshGetTxCode(cdiResH resH)
   LIST_UNLOCK();
 
   return type;
+}
+
+void *
+reshGetTxValue(cdiResH resH, int *type)
+{
+  void *value = NULL;
+  int type_ = 0;
+
+  LIST_LOCK();
+
+  int nsp = namespaceGetActive();
+
+  namespaceTuple_t nspT = namespaceResHDecode(resH);
+  assert(nspT.idx >= 0);
+
+  if (nspT.nsp == nsp && nspT.idx < resHList[nsp].size)
+  {
+    listElem_t *listElem = resHList[nsp].resources + nspT.idx;
+    xassert(listElem->res.v.ops);
+    type_ = listElem->res.v.ops->valTxCode(listElem->res.v.val);
+    value = listElem->res.v.val;
+  }
+
+  LIST_UNLOCK();
+
+  if (type) *type = type_;
+
+  return value;
 }
 
 /**************************************************************/

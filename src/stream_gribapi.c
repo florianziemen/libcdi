@@ -173,7 +173,6 @@ gribapiSetDataDateTime(grib_handle *gh, CdiDateTime dataDateTime)
 static int
 gribapi_get_timeunits_factor(int timeUnits)
 {
-  static bool lprint = true;
   switch (timeUnits)
   {
     case TUNIT_SECOND: return 1;
@@ -183,12 +182,7 @@ gribapi_get_timeunits_factor(int timeUnits)
     case TUNIT_6HOURS: return 21600;
     case TUNIT_12HOURS: return 43200;
     case TUNIT_DAY: return 86400;
-    default:
-      if (lprint)
-      {
-        Warning("Time unit %d unsupported", timeUnits);
-        lprint = false;
-      }
+    default: CDI_WARN_ONCE("Time unit %d unsupported", timeUnits);
   }
 
   return 0;
@@ -908,7 +902,7 @@ gribapiVarSet(int param, int level1, int level2, int leveltype, int tsteptype, s
   compvar2_t compVar = { 0 };
   size_t maxlen = sizeof(compVar.name);
   size_t len = strlen(name);
-  if (len > maxlen) len = maxlen;
+  if (len > maxlen) { len = maxlen; }
 
   compVar.param = param;
   compVar.level1 = level1;
@@ -1133,7 +1127,7 @@ fdbScanTimesteps(stream_t *streamP)
       // vDateTime0 = vDateTime;
       taxis->rDateTime = gribapiGetDataDateTime(gh);
       fcast = gribapiTimeIsFC(gh);
-      if (fcast) taxis->unit = gribapi_get_timeunits(gh);
+      if (fcast) taxis->unitsValue = gribapi_get_timeunits(gh);
       taxis->fDateTime = taxis->rDateTime;
       taxis->sDateTime = sDateTime;
       taxis->vDateTime = vDateTime;
@@ -1311,7 +1305,7 @@ gribapiScanTimestep1(stream_t *streamP)
       vDateTime0 = vDateTime;
       taxis->rDateTime = gribapiGetDataDateTime(gh);
       fcast = gribapiTimeIsFC(gh);
-      if (fcast) taxis->unit = gribapi_get_timeunits(gh);
+      if (fcast) taxis->unitsValue = gribapi_get_timeunits(gh);
       taxis->fDateTime = taxis->rDateTime;
       taxis->sDateTime = sDateTime;
       taxis->vDateTime = vDateTime;
@@ -1470,7 +1464,7 @@ gribapiScanTimestep2(stream_t *streamP)
       if (taxisInqType(taxisID) == TAXIS_RELATIVE)
       {
         taxis->type = TAXIS_RELATIVE;
-        taxis->unit = gribapi_get_timeunits(gh);
+        taxis->unitsValue = gribapi_get_timeunits(gh);
         taxis->rDateTime = gribapiGetDataDateTime(gh);
       }
       else
@@ -1651,7 +1645,7 @@ gribapiScanTimestep(stream_t *streamP)
         if (taxisInqType(taxisID) == TAXIS_RELATIVE)
         {
           taxis->type = TAXIS_RELATIVE;
-          taxis->unit = gribapi_get_timeunits(gh);
+          taxis->unitsValue = gribapi_get_timeunits(gh);
           taxis->rDateTime = gribapiGetDataDateTime(gh);
         }
         else
@@ -1810,15 +1804,7 @@ gribapiDecode(int memType, void *gribbuffer, size_t gribsize, void *data, size_t
 {
   int status = 0;
 
-  if (unreduced)
-  {
-    static bool lwarn = true;
-    if (lwarn)
-    {
-      lwarn = false;
-      Warning("Conversion of gaussian reduced grids unsupported!");
-    }
-  }
+  if (unreduced) { CDI_WARN_ONCE("Conversion of gaussian reduced grids unsupported!"); }
 
   size_t recsize = gribsize;
   grib_handle *gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
@@ -1950,24 +1936,17 @@ gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *name,
 
     if (pnum > 255)
     {
-      static bool lwarn_pnum = true;
-      if (lwarn_pnum)
-      {
-        Warning("Parameter number %d out of range (1-255), set to %d!", pnum, pnum % 256);
-        lwarn_pnum = false;
-      }
+      CDI_WARN_ONCE("Parameter number %d out of range (1-255), set to %d!", pnum, pnum % 256);
       pnum = pnum % 256;
     }
 
     if (editionNumber <= 1)
     {
-      static bool lwarn_pdis = true;
-      if (pdis != 255 && lwarn_pdis)
+      if (pdis != 255)
       {
         char paramstr[32];
         cdiParamToString(param, paramstr, sizeof(paramstr));
-        Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
-        lwarn_pdis = false;
+        CDI_WARN_ONCE("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
       }
 
       GRIB_CHECK(my_grib_set_long(gh, "table2Version", pcat), 0);
@@ -1985,9 +1964,9 @@ gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *name,
 }
 
 static int
-getTimeunitFactor(int timeunit)
+getTimeunitFactor(int timeUnits)
 {
-  switch (timeunit)
+  switch (timeUnits)
   {
     case TUNIT_SECOND: return 1;
     case TUNIT_MINUTE: return 60;
@@ -2361,7 +2340,7 @@ gribapiDefProjLCC(grib_handle *gh, int editionNumber, int gridID, int uvRelative
   bool isSouthPole = (gpp.lat_1 < 0.0);
   if (isSouthPole && gribEditionNumber(gh) == 1)
   {
-    gpp.lat_1 = -gpp.lat_2;
+    gpp.lat_1 = -gpp.lat_1;
     gpp.lat_2 = -gpp.lat_2;
   }
   int projflag = 0;
@@ -2873,28 +2852,20 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
         else
           level /= 100;
 
-        static bool lwarn = true;
-        if (lwarn && modf(level, &dum) > 0.001)
+        if (modf(level, &dum) > 0.001)
         {
-          lwarn = false;
-          Warning("GRIB1 can store only full pressure levels! Level changed from %ghPa to %dhPa.", level, (int) lround(level));
+          CDI_WARN_ONCE("GRIB1 can store only full pressure levels! Level changed from %ghPa to %dhPa.", level,
+                        (int) lround(level));
         }
       }
-      else if (ltype2 == -1)
-        ltype2 = GRIB2_LTYPE_ISOBARIC;
+      else if (ltype2 == -1) { ltype2 = GRIB2_LTYPE_ISOBARIC; }
 
       defLevel(gh, gcinit, grib_ltype, ltype2, hasBounds, level, dlevel1, dlevel2);
 
       break;
     }
     case ZAXIS_SNOW:
-      if (editionNumber <= 1)
-        ;  // not available
-      else
-      {
-        grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, hasBounds, level, dlevel1, dlevel2);
-      }
-
+      if (editionNumber > 1) { grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, hasBounds, level, dlevel1, dlevel2); }
       break;
     case ZAXIS_DEPTH_BELOW_LAND:
     {
@@ -2908,9 +2879,7 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
     {
       if (!gcinit) GRIB_CHECK(my_grib_set_long(gh, "genVertHeightCoords", 1), 0);
 
-      if (editionNumber <= 1)
-        ;  // not available
-      else
+      if (editionNumber > 1)
       {
         if (hasBounds)
         {

@@ -236,34 +236,31 @@ streamDefNumWorker(int streamID, int numWorker)
 
   if (cdiBaseFiletype(filetype) == CDI_FILETYPE_GRIB)
   {
-    if (cdiBaseFiletype(filetype) == CDI_FILETYPE_GRIB)
-    {
-      (void) streamInqNumSteps(streamID);
-      streamP->maxGlobalRecs = get_max_global_recs(streamP);
-    }
-#ifdef HAVE_LIBNETCDF
-    else if (filetype == CDI_FILETYPE_NCZARR || (CDI_Test && cdiBaseFiletype(filetype) == CDI_FILETYPE_NETCDF))
-    {
-      streamP->maxGlobalRecs = get_max_global_recs(streamP);
-      if (CDI_Test) Message("numWorker=%d", numWorker);
-      if (CDI_Test) Message("maxGlobalRecs=%ld", streamP->maxGlobalRecs);
-      if (streamP->maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
-      if (streamP->maxGlobalRecs == 1) numWorker = 0;
-      if (numWorker > streamP->maxGlobalRecs) numWorker = (int) streamP->maxGlobalRecs;
-      CdfInfo *cdfInfo = &(streamP->cdfInfo);
-      if (cdfInfo->chunkSizeDimT > 1 && numWorker > streamP->nvars) numWorker = streamP->nvars;
-      if (cdfInfo->chunkSizeDimZ > 1) numWorker = 0;
-      if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", cdfInfo->chunkSizeDimT, cdfInfo->chunkSizeDimZ);
-    }
-#endif
-    else
-    {
-      numWorker = 0;
-    }
-
-    streamP->numWorker = numWorker;
-    if (CDI_Debug || CDI_Test) Message("Number of asynchronous worker: %d", numWorker);
+    (void) streamInqNumSteps(streamID);
+    streamP->maxGlobalRecs = get_max_global_recs(streamP);
   }
+#ifdef HAVE_LIBNETCDF
+  else if (filetype == CDI_FILETYPE_NCZARR || (CDI_Test && cdiBaseFiletype(filetype) == CDI_FILETYPE_NETCDF))
+  {
+    streamP->maxGlobalRecs = get_max_global_recs(streamP);
+    if (CDI_Test) Message("numWorker=%d", numWorker);
+    if (CDI_Test) Message("maxGlobalRecs=%ld", streamP->maxGlobalRecs);
+    if (streamP->maxGlobalRecs == -1) xabort("Internal error: number of timesteps missing!");
+    if (streamP->maxGlobalRecs == 1) numWorker = 0;
+    if (numWorker > streamP->maxGlobalRecs) numWorker = (int) streamP->maxGlobalRecs;
+    CdfInfo *cdfInfo = &(streamP->cdfInfo);
+    if (cdfInfo->chunkSizeDimT > 1 && numWorker > streamP->nvars) numWorker = streamP->nvars;
+    if (cdfInfo->chunkSizeDimZ > 1) numWorker = 0;
+    if (CDI_Test) Message("chunkSizeTdim=%d chunkSizeZdim=%d", cdfInfo->chunkSizeDimT, cdfInfo->chunkSizeDimZ);
+  }
+#endif
+  else
+  {
+    numWorker = 0;
+  }
+
+  streamP->numWorker = numWorker;
+  if (CDI_Debug || CDI_Test) Message("Number of asynchronous worker: %d", numWorker);
 }
 
 /*
@@ -670,12 +667,7 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
 #ifdef HAVE_LIBPTHREAD
     if (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C || filetype == CDI_FILETYPE_NCZARR) streamP->lockIO = true;
 #else
-    static bool lwarn = true;
-    if (lwarn)
-    {
-      lwarn = false;
-      Warning("CDI threadsafe failed, pthread support not compiled in!");
-    }
+    CDI_WARN_ONCE("CDI threadsafe failed, pthread support not compiled in!");
 #endif
   }
 #endif
@@ -697,7 +689,14 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
   else
   {
     streamID = streamP->self;
-    if (streamID < 0) return CDI_ELIMIT;
+    if (streamID < 0)
+    {
+      FreeAndNull(streamP->record);
+      reshRemove(streamP->self, &streamOps);
+      if (streamP->lockIO) CDI_IO_UNLOCK();
+      FreeAndNull(streamP);
+      return CDI_ELIMIT;
+    }
 
     streamP->filemode = filemode;
     streamP->filename = strdup(filename);
@@ -723,11 +722,12 @@ streamOpenNCMem(int ncidp, char mode)
 
   size_t max_file_path_length = 128;
   size_t actual_length = 0;
-  char *filename = (char *) malloc(sizeof(char) * max_file_path_length);
+  char *filename = (char *) malloc(max_file_path_length);
 
   nc_inq_path(ncidp, &actual_length, filename);
 
   streamP->filename = strdup(filename);
+  free(filename);
   streamP->filemode = mode;
   streamP->filetype = CDI_FILETYPE_NC5;
   streamP->fileID = ncidp;

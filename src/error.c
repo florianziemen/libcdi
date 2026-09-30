@@ -26,9 +26,8 @@ _Noreturn void SysError_(const char *caller, const char *fmt, ...);
 void
 SysError_(const char *caller, const char *fmt, ...)
 {
-  va_list args;
   int saved_errno = errno;
-
+  va_list args;
   va_start(args, fmt);
 
   printf("\n");
@@ -51,7 +50,6 @@ void
 Error_(const char *caller, const char *fmt, ...)
 {
   va_list args;
-
   va_start(args, fmt);
 
   printf("\n");
@@ -97,7 +95,6 @@ void
 Warning_(const char *caller, const char *fmt, ...)
 {
   va_list args;
-
   va_start(args, fmt);
 
   if (_Verbose)
@@ -121,7 +118,6 @@ void
 Message_(const char *caller, const char *fmt, ...)
 {
   va_list args;
-
   va_start(args, fmt);
 
   fprintf(stdout, "%s  %-18s: ", PACKAGE_NAME, caller);

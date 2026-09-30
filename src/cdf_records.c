@@ -10,6 +10,7 @@
  * struct offsets almost imperceptibly change from one file to the
  * next to find out what happened */
 
+#include <string.h>
 #include "dmemory.h"
 #include "cdi_int.h"
 
@@ -58,9 +59,16 @@ cdf_init_records_step0(int numRecs, int *recIDs, recinfo_t *recinfo, int vlistID
 static void
 cdf_init_records_step1(int numRecs, int *recIDs, recinfo_t *recinfo, int vlistID)
 {
+  int curVarID = CDI_UNDEFID;
+  int curTimetype = TIME_CONSTANT;
   for (int recID = 0, vrecID = 0; recID < numRecs; recID++)
   {
-    if (vlistInqVarTimetype(vlistID, recinfo[recID].varID) != TIME_CONSTANT) { recIDs[vrecID++] = recID; }
+    if (recinfo[recID].varID != curVarID)
+    {
+      curVarID = recinfo[recID].varID;
+      curTimetype = vlistInqVarTimetype(vlistID, curVarID);
+    }
+    if (curTimetype != TIME_CONSTANT) { recIDs[vrecID++] = recID; }
   }
 }
 
@@ -82,7 +90,6 @@ cdf_create_records(stream_t *streamP, size_t tsID)
   if (tsID == 0)
   {
     int numRecsAvail = numFields;  // use all records at first timestep
-
     streamP->nrecs += numFields;
 
     cdf_init_timestep(destTstep, numFields, numRecsAvail);
@@ -93,7 +100,6 @@ cdf_create_records(stream_t *streamP, size_t tsID)
   else if (tsID == 1)
   {
     int numRecsAvail = cdf_get_numRecsAvail(vlistID);
-
     streamP->nrecs += numRecsAvail;
 
     cdf_init_timestep(destTstep, numFields, numRecsAvail);
@@ -111,7 +117,6 @@ cdf_create_records(stream_t *streamP, size_t tsID)
     if (streamP->tsteps[1].recinfo == 0) cdf_create_records(streamP, 1);
 
     int numRecsAvail = streamP->tsteps[1].nrecs;
-
     streamP->nrecs += numRecsAvail;
 
     cdf_init_timestep(destTstep, numFields, numRecsAvail);
