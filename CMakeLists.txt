@@ -13,13 +13,15 @@ include(CTest)
 include(CheckIncludeFile)
 
 option(CDI_PTHREAD "Use the pthread library [default=ON]" ON)
-option(CDI_LIBGRIB "GRIB support [default=ON]" ON)
-option(CDI_LIBGRIBEX "Use the CGRIBEX library [default=ON]" ON)
-option(CDI_EXTRA "Use the extra library [default=ON]" ON)
-option(CDI_IEG "Use the extra library [default=ON]" ON)
-option(CDI_SERVICE "Use the extra library [default=ON]" ON)
-option(CDI_ECCODES "Use the eccodes library [default=ON]" ON)
-option(CDI_NETCDF "Use the netcdf library [default=ON]" ON)
+
+option(CDI_LIBGRIB   " GRIB support [default=ON]            " ON)
+option(CDI_LIBGRIBEX " Use the CGRIBEX library [default=ON] " ON)
+option(CDI_EXTRA     " Use the EXTRA library [default=ON]   " ON)
+option(CDI_IEG       " Use the IEG library [default=ON]   " ON)
+option(CDI_SERVICE   " Use the SERVICE library [default=ON]   " ON)
+option(CDI_ECCODES   " Use the ECCODES library [default=ON] " ON)
+option(CDI_NETCDF    " Use the NETCDF library [default=ON]  " ON)
+
 option(CDI_BUILD_APP "Build the app" ON)
 option(CDI_ENABLE_f2003_INTERFACE "Enable fortran 2003 interface (requires ruby) [default=ON]" ON)
 
