@@ -1,6 +1,15 @@
 add_library(libcdi)
 add_library(libcdi::libcdi ALIAS libcdi)
 
+include(feature_eccodes)
+include(feature_extra)
+include(feature_grib)
+include(feature_gribex)
+include(feature_ieg)
+include(feature_netcdf)
+include(feature_pthread)
+include(feature_service)
+
 target_compile_definitions(libcdi PRIVATE CDI=1 CDI_SIZE_TYPE=size_t PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}")
 
 target_sources(libcdi
