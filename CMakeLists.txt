@@ -12,9 +12,6 @@ list(APPEND CMAKE_MODULE_PATH
 include(CTest)
 include(CheckIncludeFile)
 
-# Finding libraries
-### -------------- Pthread ---------------------------
-
 option(CDI_PTHREAD "Use the pthread library [default=ON]" ON)
 option(CDI_LIBGRIB "GRIB support [default=ON]" ON)
 option(CDI_LIBGRIBEX "Use the CGRIBEX library [default=ON]" ON)
