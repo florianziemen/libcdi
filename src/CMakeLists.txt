@@ -1,16 +1,10 @@
 add_library(libcdi)
 add_library(libcdi::libcdi ALIAS libcdi)
 
-include(feature_eccodes)
-include(feature_extra)
-include(feature_grib)
-include(feature_gribex)
-include(feature_ieg)
-include(feature_netcdf)
-include(feature_pthread)
-include(feature_service)
-
-target_compile_definitions(libcdi PRIVATE CDI=1 CDI_SIZE_TYPE=size_t PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}")
+target_compile_definitions(libcdi PRIVATE CDI=1 CDI_SIZE_TYPE=size_t)
+target_compile_definitions(libcdi PRIVATE PACKAGE_NAME="${PROJECT_NAME}")
+target_compile_definitions(libcdi PRIVATE VERSION="${CMAKE_PROJECT_VERSION}")
+target_compile_definitions(libcdi PRIVATE HAVE_CONFIG_H=1)
 
 target_sources(libcdi
   INTERFACE
@@ -243,7 +237,7 @@ set_property(TARGET libcdi PROPERTY CDI_INSTALL_HEADERS
 
 target_include_directories(libcdi
   PRIVATE
-  ${CMARE_CURRENT_BINARY_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
   PUBLIC
   # where top-level project will look for the library's public headers
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

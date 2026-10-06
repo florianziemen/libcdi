@@ -1,0 +1,28 @@
+#ifndef CDI_CONFIG_H
+#define CDI_CONFIG_H
+
+/* Define to 1 for GRIB1 decoding/encoding with cgribex */
+#cmakedefine HAVE_LIBCGRIBEX @HAVE_LIBCGRIBEX@
+
+/* Define to 1 for EXTRA interface */
+#cmakedefine HAVE_LIBEXTRA @HAVE_LIBEXTRA@
+
+/* Define to 1 for GRIB support */
+#cmakedefine HAVE_LIBGRIB @HAVE_LIBGRIB@
+
+/* ECCODES library is present if defined to 1 */
+#cmakedefine HAVE_LIBGRIB_API @HAVE_LIBGRIB_API@
+
+/* Define to 1 for IEG interface */
+#cmakedefine HAVE_LIBIEG @HAVE_LIBIEG@
+
+/* Define to 1 for NetCDF support */
+#cmakedefine HAVE_LIBNETCDF @HAVE_LIBNETCDF@
+
+/* Define to 1 if you have the 'pthread' library (-lpthread). */
+#cmakedefine HAVE_LIBPTHREAD @HAVE_LIBPTHREAD@
+
+/* Define to 1 for SERVICE interface */
+#cmakedefine HAVE_LIBSERVICE @HAVE_LIBSERVICE@
+
+#endif
