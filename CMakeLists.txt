@@ -1,24 +1,27 @@
-cmake_minimum_required( VERSION 3.27 FATAL_ERROR )
+cmake_minimum_required(VERSION 3.27 FATAL_ERROR)
 
 message(VERBOSE "Entering libcdi")
-project(libcdi VERSION 2.6.5 LANGUAGES C )
+project(libcdi VERSION 2.6.5 LANGUAGES C CXX)
+
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_FLAGS "-g -O3")
+set(CMAKE_CXX_FLAGS "-g -O3")
 set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 
-
-list(APPEND CMAKE_MODULE_PATH
-  "${CMAKE_CURRENT_LIST_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 include(CTest)
 include(CheckIncludeFile)
 
-option(CDI_PTHREAD "Use the pthread library [default=ON]" ON)
+option(CDI_PTHREAD   "Use the pthread library [default=ON]"   ON)
 
 option(CDI_LIBGRIB   " GRIB support [default=ON]            " ON)
 option(CDI_LIBGRIBEX " Use the CGRIBEX library [default=ON] " ON)
 option(CDI_EXTRA     " Use the EXTRA library [default=ON]   " ON)
-option(CDI_IEG       " Use the IEG library [default=ON]   " ON)
-option(CDI_SERVICE   " Use the SERVICE library [default=ON]   " ON)
+option(CDI_IEG       " Use the IEG library [default=ON]     " ON)
+option(CDI_SERVICE   " Use the SERVICE library [default=ON] " ON)
 option(CDI_ECCODES   " Use the ECCODES library [default=ON] " ON)
 option(CDI_NETCDF    " Use the NETCDF library [default=ON]  " ON)
 
@@ -27,9 +30,9 @@ option(CDI_ENABLE_f2003_INTERFACE "Enable fortran 2003 interface (requires ruby)
 
 add_subdirectory(src)
 
-if(CDI_ENABLE_f2003_INTERFACE)
+if (CDI_ENABLE_f2003_INTERFACE)
   add_subdirectory(interfaces/f2003)
-endif()
+endif ()
 
 if (CDI_BUILD_APP)
   add_subdirectory(app)
