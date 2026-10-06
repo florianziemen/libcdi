@@ -24,6 +24,8 @@ option(CDI_IEG       " Use the IEG library [default=ON]     " ON)
 option(CDI_PTHREAD   " Use the pthread library [default=ON] " ON)
 option(CDI_SERVICE   " Use the SERVICE library [default=ON] " ON)
 
+option(CDI_HIRLAM_EXTENSIONS " Enable hirlam extensions [default=OFF] " OFF)
+
 option(CDI_BUILD_APP "Build the app" ON)
 option(CDI_ENABLE_f2003_INTERFACE "Enable fortran 2003 interface (requires ruby) [default=ON]" ON)
 
@@ -49,5 +51,17 @@ include(feature_ieg)
 include(feature_netcdf)
 include(feature_pthread)
 include(feature_service)
+
+if (CDI_HIRLAM_EXTENSIONS)
+  set(HIRLAM_EXTENSIONS 1)
+endif ()
+
+if (CMAKE_C_COMPILER)
+  set(COMPILER "${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS}")
+endif ()
+
+if (CMAKE_C_COMPILER_VERSION)
+  set(COMP_VERSION "${CMAKE_C_COMPILER_VERSION}")
+endif ()
 
 configure_file(src/cdi_config.h.in src/config.h @ONLY)

@@ -1,5 +1,5 @@
 # NetCDF
-if (CDI_NETCDF OR netCDF_ROOT )
+if (CDI_NETCDF OR netCDF_ROOT)
   find_package(NetCDF COMPONENTS C REQUIRED)
   if (TARGET netCDF::netcdf)
     target_link_libraries(libcdi PUBLIC netCDF::netcdf)

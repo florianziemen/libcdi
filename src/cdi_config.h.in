@@ -1,6 +1,12 @@
 #ifndef CDI_CONFIG_H
 #define CDI_CONFIG_H
 
+/* Compiler */
+#cmakedefine COMPILER "@COMPILER@"
+
+/* Compiler version */
+#cmakedefine COMP_VERSION "@COMP_VERSION@"
+
 /* Define to 1 for GRIB1 decoding/encoding with cgribex */
 #cmakedefine HAVE_LIBCGRIBEX @HAVE_LIBCGRIBEX@
 
@@ -24,5 +30,8 @@
 
 /* Define to 1 for SERVICE interface */
 #cmakedefine HAVE_LIBSERVICE @HAVE_LIBSERVICE@
+
+/* Define to 1 for HIRLAM extensions */
+#cmakedefine HIRLAM_EXTENSIONS @HIRLAM_EXTENSIONS@
 
 #endif
