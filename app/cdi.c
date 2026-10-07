@@ -86,11 +86,17 @@ version(void)
   const char *typenames[] = { "srv", "ext", "ieg", "grb", "grb2", "nc", "nc2", "nc4", "nc4c", "nc5", "nczarr" };
 
   fprintf(stderr, "CDI version 2.2\n");
-#ifdef COMPILER
-  fprintf(stderr, "C Compiler: %s\n", COMPILER);
+#ifdef C_COMPILER
+  fprintf(stderr, "C compiler: %s\n", C_COMPILER);
 #endif
-#ifdef COMP_VERSION
-  fprintf(stderr, "C version: %s\n", COMP_VERSION);
+#ifdef C_COMPILER_VERSION
+  fprintf(stderr, "C version: %s\n", C_COMPILER_VERSION);
+#endif
+#ifdef CXX_COMPILER
+  fprintf(stderr, "C++ compiler: %s\n", CXX_COMPILER);
+#endif
+#ifdef CXX_COMPILER_VERSION
+  fprintf(stderr, "C++ version: %s\n", CXX_COMPILER_VERSION);
 #endif
 #ifdef SYSTEM_TYPE
   fprintf(stderr, "System: %s\n", SYSTEM_TYPE);

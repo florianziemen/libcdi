@@ -1,11 +1,17 @@
 #ifndef CDI_CONFIG_H
 #define CDI_CONFIG_H
 
-/* Compiler */
-#cmakedefine COMPILER "@COMPILER@"
+/* C compiler */
+#cmakedefine C_COMPILER "@C_COMPILER@"
 
-/* Compiler version */
-#cmakedefine COMP_VERSION "@COMP_VERSION@"
+/* C compiler version */
+#cmakedefine C_COMPILER_VERSION "@C_COMPILER_VERSION@"
+
+/* C++ compiler */
+#cmakedefine CXX_COMPILER "@CXX_COMPILER@"
+
+/* C++ compiler version */
+#cmakedefine CXX_COMPILER_VERSION "@CXX_COMPILER_VERSION@"
 
 /* System type */
 #cmakedefine SYSTEM_TYPE "@SYSTEM_TYPE@"
