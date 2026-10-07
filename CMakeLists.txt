@@ -65,6 +65,10 @@ if (CMAKE_C_COMPILER_VERSION)
   set(COMP_VERSION "${CMAKE_C_COMPILER_VERSION}")
 endif ()
 
+if (CMAKE_SYSTEM_NAME)
+  set(SYSTEM_TYPE "${CMAKE_SYSTEM_NAME}${CMAKE_SYSTEM_VERSION}")
+endif ()
+
 configure_file(src/cdi_config.h.in src/config.h @ONLY)
 
 if (CDI_ENABLE_f2003_INTERFACE)

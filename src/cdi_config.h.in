@@ -7,6 +7,9 @@
 /* Compiler version */
 #cmakedefine COMP_VERSION "@COMP_VERSION@"
 
+/* System type */
+#cmakedefine SYSTEM_TYPE "@SYSTEM_TYPE@"
+
 /* Define to 1 for GRIB1 decoding/encoding with cgribex */
 #cmakedefine HAVE_LIBCGRIBEX 1
 
