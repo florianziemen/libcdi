@@ -9,5 +9,4 @@ target_include_directories(cdi PRIVATE
 
 target_link_libraries(cdi PRIVATE libcdi)
 target_include_directories(cdi PRIVATE "${PROJECT_BINARY_DIR}/src")
-target_compile_definitions(cdi PRIVATE  ${cdi_netcdf_definitions})
 target_compile_definitions(cdi PRIVATE HAVE_CONFIG_H=1)
