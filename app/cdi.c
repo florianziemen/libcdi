@@ -14,7 +14,6 @@
 
 #include "cdi.h"
 #include "cdi_query.h"
-#include "cdf_config.h"
 
 int vlistInqVarMissvalUsed(int vlistID, int varID);
 #ifndef DBL_IS_NAN
