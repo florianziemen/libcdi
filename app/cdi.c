@@ -80,9 +80,10 @@ static int datamode = DP_MODE;
 static void
 version(void)
 {
-  int filetypes[] = { CDI_FILETYPE_SRV, CDI_FILETYPE_EXT, CDI_FILETYPE_IEG,  CDI_FILETYPE_GRB, CDI_FILETYPE_GRB2,  CDI_FILETYPE_NC,
-                      CDI_FILETYPE_NC2, CDI_FILETYPE_NC4, CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5, CDI_FILETYPE_NCZARR };
-  const char *typenames[] = { "srv", "ext", "ieg", "grb", "grb2", "nc", "nc2", "nc4", "nc4c", "nc5", "nczarr" };
+  int fileTypes[] = { CDI_FILETYPE_SRV,    CDI_FILETYPE_EXT,   CDI_FILETYPE_IEG,  CDI_FILETYPE_GRB,  CDI_FILETYPE_GRB2,
+                      CDI_FILETYPE_NC,     CDI_FILETYPE_NC2,   CDI_FILETYPE_NC4,  CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5,
+                      CDI_FILETYPE_NCZARR, CDI_FILETYPE_ZARR2, CDI_FILETYPE_ZARR3 };
+  const char *typeNames[] = { "srv", "ext", "ieg", "grb", "grb2", "nc", "nc2", "nc4", "nc4c", "nc5", "nczarr", "zarr2", "zarr3" };
 
   fprintf(stderr, "CDI version 2.2\n");
 #ifdef C_COMPILER
@@ -137,8 +138,8 @@ version(void)
   fprintf(stderr, "\n");
 
   fprintf(stderr, "Filetypes: ");
-  for (size_t i = 0; i < sizeof(filetypes) / sizeof(int); ++i)
-    if (cdiHaveFiletype(filetypes[i])) fprintf(stderr, "%s ", typenames[i]);
+  for (size_t i = 0; i < sizeof(fileTypes) / sizeof(int); ++i)
+    if (cdiHaveFiletype(fileTypes[i])) fprintf(stderr, "%s ", typeNames[i]);
   fprintf(stderr, "\n");
 
   cdiPrintVersion();
@@ -643,29 +644,29 @@ setDefaultDataType(char *datatypestr)
 }
 
 static void
-setDefaultFileType(char *filetypestr)
+setDefaultFileType(char *fileTypeStr)
 {
-  if (filetypestr)
+  if (fileTypeStr)
   {
-    char *ftstr = filetypestr;
+    char *ftstr = fileTypeStr;
 
     // clang-format off
-    if      (memcmp(filetypestr, "grb2",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB2;   }
-    else if (memcmp(filetypestr, "grb1",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB;    }
-    else if (memcmp(filetypestr, "grb",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_GRB;    }
-    else if (memcmp(filetypestr, "nc2",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC2;    }
-    else if (memcmp(filetypestr, "nc4c",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_NC4C;   }
-    else if (memcmp(filetypestr, "nc4",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC4;    }
-    else if (memcmp(filetypestr, "nc5",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC5;    }
-    else if (memcmp(filetypestr, "nc1",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC;     }
-    else if (memcmp(filetypestr, "nczarr", 6)  == 0) { ftstr += 6; DefaultFileType = CDI_FILETYPE_NCZARR; }
-    else if (memcmp(filetypestr, "nc",     2)  == 0) { ftstr += 2; DefaultFileType = CDI_FILETYPE_NC2;    }
-    else if (memcmp(filetypestr, "srv",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_SRV;    }
-    else if (memcmp(filetypestr, "ext",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_EXT;    }
-    else if (memcmp(filetypestr, "ieg",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_IEG;    }
+    if      (memcmp(fileTypeStr, "grb2",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB2;   }
+    else if (memcmp(fileTypeStr, "grb1",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB;    }
+    else if (memcmp(fileTypeStr, "grb",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_GRB;    }
+    else if (memcmp(fileTypeStr, "nc2",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC2;    }
+    else if (memcmp(fileTypeStr, "nc4c",   4)  == 0) { ftstr += 4; DefaultFileType = CDI_FILETYPE_NC4C;   }
+    else if (memcmp(fileTypeStr, "nc4",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC4;    }
+    else if (memcmp(fileTypeStr, "nc5",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC5;    }
+    else if (memcmp(fileTypeStr, "nc1",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC;     }
+    else if (memcmp(fileTypeStr, "nczarr", 6)  == 0) { ftstr += 6; DefaultFileType = CDI_FILETYPE_NCZARR; }
+    else if (memcmp(fileTypeStr, "nc",     2)  == 0) { ftstr += 2; DefaultFileType = CDI_FILETYPE_NC2;    }
+    else if (memcmp(fileTypeStr, "srv",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_SRV;    }
+    else if (memcmp(fileTypeStr, "ext",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_EXT;    }
+    else if (memcmp(fileTypeStr, "ieg",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_IEG;    }
     else
 	{
-	  fprintf(stderr, "Unsupported filetype %s!\n", filetypestr);
+	  fprintf(stderr, "Unsupported filetype %s!\n", fileTypeStr);
 	  fprintf(stderr, "Available filetypes: grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext and ieg\n");
 	  exit(EXIT_FAILURE);
 	}
@@ -676,7 +677,7 @@ setDefaultFileType(char *filetypestr)
       if (*ftstr == '_') { setDefaultDataType(++ftstr); }
       else
       {
-        fprintf(stderr, "Unexpected character >%c< in file type >%s<!\n", *ftstr, filetypestr);
+        fprintf(stderr, "Unexpected character >%c< in file type >%s<!\n", *ftstr, fileTypeStr);
         fprintf(stderr, "Use format[_nbits] with:\n");
         fprintf(stderr, "    format = grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext or ieg\n");
         fprintf(stderr, "    nbits  = 32/64 for grb2/nc/nc2/nc4/nc4c/nc5/nczarr/srv/ext/ieg; 1 - 24 for grb/grb2\n");

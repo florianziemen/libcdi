@@ -81,21 +81,21 @@ cdf_open_read(const char *filename, int *filetype)
 }
 
 static int
-cdf_open_write(const char *filename, int *filetype)
+cdf_open_write(const char *filename, int filetype)
 {
   int ncid = -1;
   int writemode = NC_CLOBBER;
 
 #ifdef NC_64BIT_OFFSET
-  if (*filetype == CDI_FILETYPE_NC2) writemode |= NC_64BIT_OFFSET;
+  if (filetype == CDI_FILETYPE_NC2) writemode |= NC_64BIT_OFFSET;
 #endif
 #ifdef NC_64BIT_DATA
-  if (*filetype == CDI_FILETYPE_NC5) writemode |= NC_64BIT_DATA;
+  if (filetype == CDI_FILETYPE_NC5) writemode |= NC_64BIT_DATA;
 #endif
-  if (*filetype == CDI_FILETYPE_NC4C) writemode |= (NC_NETCDF4 | NC_CLASSIC_MODEL);
-  if (*filetype == CDI_FILETYPE_NC4) writemode |= NC_NETCDF4;
-  if (*filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
-  if (*filetype == CDI_FILETYPE_NCZARR)
+  if (filetype == CDI_FILETYPE_NC4C) writemode |= (NC_NETCDF4 | NC_CLASSIC_MODEL);
+  if (filetype == CDI_FILETYPE_NC4) writemode |= NC_NETCDF4;
+  if (filetype == CDI_FILETYPE_NCZARR) writemode |= NC_NETCDF4;
+  if (filetype == CDI_FILETYPE_NCZARR)
   {
     if (!has_uri_scheme(filename))
     {
@@ -126,7 +126,7 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
   {
     case 'r': ncid = cdf_open_read(filename, filetype); break;
     case 'w':
-      ncid = cdf_open_write(filename, filetype);
+      ncid = cdf_open_write(filename, *filetype);
       if (ncid != CDI_EINVAL)
       {
         if (CDI_Version_Info) cdfComment(ncid);

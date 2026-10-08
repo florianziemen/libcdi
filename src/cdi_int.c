@@ -74,7 +74,7 @@ double CDI_Default_Missval = -9.E33;
 double CDI_Grid_Missval = -9999.;
 
 // clang-format off
-static const char *Filetypes[] = {
+static const char *FileTypes[] = {
   "UNKNOWN",
   "GRIB",
   "GRIB2",
@@ -87,6 +87,8 @@ static const char *Filetypes[] = {
   "EXTRA",
   "IEG",
   "NCZarr",
+  "Zarr2",
+  "Zarr3",
   "HDF5",
 };
 // clang-format on
@@ -299,6 +301,10 @@ cdiHaveFiletype(int filetype)
     case CDI_FILETYPE_NC5: return 1;
 #endif
 #endif
+#ifdef HAVE_TENSORSTORE
+    case CDI_FILETYPE_ZARR2: return 1;
+    case CDI_FILETYPE_ZARR3: return 1;
+#endif
   }
 
   return 0;
@@ -479,7 +485,7 @@ cdiInitialize(void)
 const char *
 strfiletype(int filetype)
 {
-  return (filetype > 0 && filetype < (int) ARRAY_SIZE(Filetypes)) ? Filetypes[filetype] : Filetypes[0];
+  return (filetype > 0 && filetype < (int) ARRAY_SIZE(FileTypes)) ? FileTypes[filetype] : FileTypes[0];
 }
 
 void
