@@ -17,6 +17,10 @@
 #include "cgribex.h"
 #endif
 
+#ifdef HAVE_TENSORSTORE
+#include "tsio.h"
+#endif
+
 #ifdef HAVE_LIBPTHREAD
 #include <pthread.h>
 pthread_mutex_t CDI_IO_Mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -169,6 +173,9 @@ cdiPrintVersion(void)
   fprintf(stdout, "    FILE library version : %s\n", fileLibraryVersion());
 #ifdef HAVE_LIBFDB5
   fprintf(stdout, "    FDB5 library version : %s\n", fdb5_version());
+#endif
+#ifdef HAVE_TENSORSTORE
+  fprintf(stdout, "     TensorStore version : %s\n", ts_lib_version());
 #endif
 }
 

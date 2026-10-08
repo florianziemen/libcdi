@@ -221,6 +221,19 @@ if (CDI_BUILD_UNKNOWN)
   )
 endif ()
 
+if (WITH_TENSORSTORE)
+  set_source_files_properties(tsio.cpp PROPERTIES COMPILE_OPTIONS "-std=gnu++17")
+  target_sources(libcdi PRIVATE
+    tsio.h
+    tsio.cpp
+  )
+  target_link_libraries(libcdi
+      PRIVATE
+          tensorstore::tensorstore
+          tensorstore::all_drivers
+  )
+endif ()
+
 # Support exporting all symbols on Windows
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 

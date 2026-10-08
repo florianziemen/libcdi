@@ -16,6 +16,7 @@ endif ()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 include(CTest)
+include(FetchContent)
 
 option(CDI_ECCODES   " Use the ECCODES library [default=ON] " ON)
 option(CDI_EXTRA     " Use the EXTRA library [default=ON]   " ON)
@@ -25,6 +26,8 @@ option(CDI_NETCDF    " Use the NETCDF library [default=ON]  " ON)
 option(CDI_IEG       " Use the IEG library [default=ON]     " ON)
 option(CDI_PTHREAD   " Use the pthread library [default=ON] " ON)
 option(CDI_SERVICE   " Use the SERVICE library [default=ON] " ON)
+
+option(WITH_TENSORSTORE "Build with TensorStore support" OFF)
 
 option(CDI_HIRLAM_EXTENSIONS " Enable hirlam extensions [default=OFF] " OFF)
 
@@ -43,6 +46,29 @@ include(feature_ieg)
 include(feature_netcdf)
 include(feature_pthread)
 include(feature_service)
+
+if (WITH_TENSORSTORE)
+  # TensorStore's CMake bootstrap (bazel_to_cmake) needs Python >= 3.10, but
+  # FindPython3 prefers the Xcode framework Python 3.9 on macOS.  Point it at
+  # the newest python3 found on PATH unless the user set one explicitly.
+  if (NOT Python3_EXECUTABLE)
+    find_program(CDI_PYTHON3 NAMES python3.14 python3.13 python3.12 python3.11 python3.10 python3)
+    if (CDI_PYTHON3)
+      set(Python3_EXECUTABLE "${CDI_PYTHON3}"
+                CACHE FILEPATH "Python interpreter used by TensorStore's CMake scripts")
+    endif()
+  endif()
+
+  FetchContent_Declare(
+        tensorstore
+        URL https://github.com/google/tensorstore/archive/refs/tags/v0.1.85.tar.gz
+        # URL https://github.com/google/tensorstore/archive/master.tar.gz
+    )
+
+  FetchContent_MakeAvailable(tensorstore)
+
+  set(HAVE_TENSORSTORE 1)
+endif()
 
 if (CDI_HIRLAM_EXTENSIONS)
   set(HIRLAM_EXTENSIONS 1)

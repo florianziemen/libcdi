@@ -40,6 +40,9 @@
 /* Define to 1 for SERVICE interface */
 #cmakedefine HAVE_LIBSERVICE 1
 
+/* Define to 1 for TensorStore support */
+#cmakedefine HAVE_TENSORSTORE 1
+
 /* Define to 1 for HIRLAM extensions */
 #cmakedefine HIRLAM_EXTENSIONS 1
 
