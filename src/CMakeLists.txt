@@ -225,7 +225,7 @@ if (WITH_TENSORSTORE)
   set_source_files_properties(tsio.cpp PROPERTIES COMPILE_OPTIONS "-std=gnu++17")
   target_sources(libcdi PRIVATE
     tstore.h
-    tstore.c
+    tstore.cpp
     tsio.h
     tsio.cpp
   )

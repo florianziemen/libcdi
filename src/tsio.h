@@ -44,19 +44,20 @@ struct tsConfig
   bool consolidated = false;                 // Metadaten aus `.zmetadata` (zarr2)
   std::optional<std::string> group;          // zarr3 Gruppe unterhalb `path`
   bool debug = false;                        // Diagnose auf stderr (in tsio)
-  bool info = false;                        // nur TensorStore-Version ausgeben
+  bool info = false;                         // nur TensorStore-Version ausgeben
   std::optional<int> data_copy_concurrency;  // parallele Chunk-(De)Kompression
   bool double_buffer = false;                // Double-Buffer-Prefetch
   bool overwrite = false;                    // --out-path vorher loeschen
   std::optional<std::string> out_path;       // Ausgabe-Datensatz (Schreibmodus)
-  std::string out_format = "zarr3";   // Ausgabeformat: "zarr2", "zarr3" oder "n5"
-  std::string out_dtype = "float32";  // Datenarrays (zarr3): "float64", "float32", "float16" oder "bfloat16"
-  std::optional<std::string> compressor;  // --compressor: Ausgabe-Kompressor (Schreibmodus); ungesetzt = Quell-Kompression uebernehmen
+  std::string out_format = "zarr3";          // Ausgabeformat: "zarr2", "zarr3" oder "n5"
+  std::string out_dtype = "float32";         // Datenarrays (zarr3): "float64", "float32", "float16" oder "bfloat16"
+  std::optional<std::string>
+      compressor;  // --compressor: Ausgabe-Kompressor (Schreibmodus); ungesetzt = Quell-Kompression uebernehmen
   std::optional<std::int64_t> step_chunk;  // --step-chunk: Laenge der step-Ausgabe-Chunks (Schreibmodus)
   std::optional<std::int64_t> cell_chunk;  // --cell-chunk: Laenge der cell-Ausgabe-Chunks (letzte Dim, Schreibmodus)
-  tsRange step;                              // Zeitachse
-  tsRange layer;                             // Layer-Achse (rank >= 3)
-  tsRange cell;                              // letzte Achse (Gitterpunkte)
+  tsRange step;                            // Zeitachse
+  tsRange layer;                           // Layer-Achse (rank >= 3)
+  tsRange cell;                            // letzte Achse (Gitterpunkte)
 };
 
 // Ein Array des Datensatzes mit Auswahl und Metadaten.  Nur einfache
@@ -66,14 +67,14 @@ struct tsConfig
 struct tsArray
 {
   std::string name;
-  int format = 0;       // 2 oder 3
+  int format = 0;  // 2 oder 3
   std::string kvstore;
   std::string dataType;
-  std::string compressor;     // Quell-Kompressor, "-" wenn keiner/unbekannt
-  std::vector<std::int64_t> shape;    // volle Quellform
-  std::vector<std::int64_t> chunks;   // aeussere Quell-Chunkform
-  std::vector<std::int64_t> bstart;   // Auswahl, 0-basiert
-  std::vector<std::int64_t> bcount;   // Auswahl, auf die Form geklemmt
+  std::string compressor;                // Quell-Kompressor, "-" wenn keiner/unbekannt
+  std::vector<std::int64_t> shape;       // volle Quellform
+  std::vector<std::int64_t> chunks;      // aeussere Quell-Chunkform
+  std::vector<std::int64_t> bstart;      // Auswahl, 0-basiert
+  std::vector<std::int64_t> bcount;      // Auswahl, auf die Form geklemmt
   std::vector<std::int64_t> out_chunks;  // Ausgabe-Chunkform (Schreibmodus)
   std::vector<std::string> dim_names;    // dimension_names / _ARRAY_DIMENSIONS
   std::map<std::string, std::string> attributes;
@@ -96,8 +97,8 @@ struct tsMetadata
 struct tsInfo
 {
   std::string name;
-  std::string units;       // "-" wenn nicht gesetzt
-  std::string data_type;   // z. B. "float32", "-"
+  std::string units;      // "-" wenn nicht gesetzt
+  std::string data_type;  // z. B. "float32", "-"
   std::string shape;
   std::string chunks;
   std::string compressor;  // "-" wenn unbekannt
