@@ -184,7 +184,7 @@ vlistDestroy(vlistID);
 int
 vlistCreate(void)
 {
-  cdiInitialize();
+  cdi_initialize();
 
   VLIST_INIT();
 

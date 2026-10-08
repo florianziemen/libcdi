@@ -178,7 +178,8 @@ usage(void)
   fprintf(stderr, "  Options:\n");
   fprintf(stderr, "    -d             Print debugging information\n");
   fprintf(stderr, "    -E             Use ecCodes to decode/encode GRIB1 messages\n");
-  fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext or ieg)\n");
+  fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, zarr2, zarr3, srv, "
+                  "ext or ieg)\n");
   fprintf(stderr, "    -G <group>     Select NetCDF4 group\n");
   fprintf(stderr, "    -i <num>       Number of worker to decode/decompress GRIB records\n");
   fprintf(stderr, "    -m             Move fields\n");
@@ -569,8 +570,8 @@ setDefaultDataType(char *datatypestr)
       else
       {
         fprintf(stderr, "Unsupported number of bits %d!\n", nbits);
-        fprintf(stderr,
-                "Use I8/I16/I32/F32/F64 for nc/nc2/nc4/nc4c/nc5/nczarr; F32/F64 for grb2/srv/ext/ieg; P1 - P24 for grb/grb2.\n");
+        fprintf(stderr, "Use I8/I16/I32/F32/F64 for nc/nc2/nc4/nc4c/nc5/nczarr/zarr2/zarr3; F32/F64 for grb2/srv/ext/ieg; P1 - P24 "
+                        "for grb/grb2.\n");
         exit(EXIT_FAILURE);
       }
     }
@@ -660,6 +661,8 @@ setDefaultFileType(char *fileTypeStr)
     else if (memcmp(fileTypeStr, "nc5",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC5;    }
     else if (memcmp(fileTypeStr, "nc1",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC;     }
     else if (memcmp(fileTypeStr, "nczarr", 6)  == 0) { ftstr += 6; DefaultFileType = CDI_FILETYPE_NCZARR; }
+    else if (memcmp(fileTypeStr, "zarr2",  5)  == 0) { ftstr += 5; DefaultFileType = CDI_FILETYPE_ZARR2;  }
+    else if (memcmp(fileTypeStr, "zarr3",  5)  == 0) { ftstr += 5; DefaultFileType = CDI_FILETYPE_ZARR3;  }
     else if (memcmp(fileTypeStr, "nc",     2)  == 0) { ftstr += 2; DefaultFileType = CDI_FILETYPE_NC2;    }
     else if (memcmp(fileTypeStr, "srv",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_SRV;    }
     else if (memcmp(fileTypeStr, "ext",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_EXT;    }
@@ -667,7 +670,7 @@ setDefaultFileType(char *fileTypeStr)
     else
 	{
 	  fprintf(stderr, "Unsupported filetype %s!\n", fileTypeStr);
-	  fprintf(stderr, "Available filetypes: grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext and ieg\n");
+	  fprintf(stderr, "Available filetypes: grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, zarr2, zarr3, srv, ext and ieg\n");
 	  exit(EXIT_FAILURE);
 	}
     // clang-format on
@@ -679,8 +682,8 @@ setDefaultFileType(char *fileTypeStr)
       {
         fprintf(stderr, "Unexpected character >%c< in file type >%s<!\n", *ftstr, fileTypeStr);
         fprintf(stderr, "Use format[_nbits] with:\n");
-        fprintf(stderr, "    format = grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, srv, ext or ieg\n");
-        fprintf(stderr, "    nbits  = 32/64 for grb2/nc/nc2/nc4/nc4c/nc5/nczarr/srv/ext/ieg; 1 - 24 for grb/grb2\n");
+        fprintf(stderr, "    format = grb, grb2, nc, nc2, nc4, nc4c, nc5, nczarr, zarr2, zarr3, srv, ext or ieg\n");
+        fprintf(stderr, "    nbits  = 32/64 for grb2/nc/nc2/nc4/nc4c/nc5/nczarr/zarr2/zarr3/srv/ext/ieg; 1 - 24 for grb/grb2\n");
         exit(EXIT_FAILURE);
       }
     }
@@ -923,7 +926,8 @@ main(int argc, char *argv[])
       if (streamID2 < 0) return handle_error(streamID2, "Open failed on %s", fname2);
 
       int maxSteps = vlistNtsteps(vlistID1);
-      if (filetype == CDI_FILETYPE_NCZARR && maxSteps >= 0) streamDefMaxSteps(streamID2, maxSteps);
+      if ((filetype == CDI_FILETYPE_NCZARR || filetype == CDI_FILETYPE_ZARR2 || filetype == CDI_FILETYPE_ZARR3) && maxSteps >= 0)
+        streamDefMaxSteps(streamID2, maxSteps);
       if (numWorkerOut > 0) streamDefNumWorker(streamID2, numWorkerOut);
 
       if (DefaultByteorder != CDI_UNDEFID) streamDefByteorder(streamID2, DefaultByteorder);

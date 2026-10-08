@@ -11,6 +11,10 @@
 #include <netcdf.h>  // NC_FORMAT_64BIT_DATA
 #endif
 
+#ifdef HAVE_TENSORSTORE
+#include "tsio.h"  // NC_FORMAT_64BIT_DATA
+#endif
+
 #ifdef HAVE_LIBFDB5
 #include "cdi_fdb.h"
 #endif
@@ -617,6 +621,14 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
       break;
     }
 #endif
+#ifdef HAVE_TENSORSTORE
+    case CDI_FILETYPE_ZARR2:
+    case CDI_FILETYPE_ZARR3:
+    {
+      fileID = ts_open(filename, temp, filetype);
+      break;
+    }
+#endif
     default:
     {
       if (CDI_Debug) Message("%s support not compiled in!", strfiletype(filetype));
@@ -710,7 +722,7 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
 int
 streamOpenNCMem(int ncidp, char mode)
 {
-  cdiInitialize();
+  cdi_initialize();
   stream_t *streamP = stream_new_entry(CDI_UNDEFID);
   int streamID = CDI_ESYSTEM;
 
@@ -915,7 +927,7 @@ if ( streamID < 0 ) handle_error(streamID);
 int
 streamOpenRead(const char *filename)
 {
-  cdiInitialize();
+  cdi_initialize();
 
   int byteorder = 0;
   int filetype = cdiGetFiletype(filename, &byteorder);
@@ -963,7 +975,7 @@ process_group_query(stream_t *streamP, struct CdiQuery *query)
 int
 streamOpenReadQuery(const char *filename, struct CdiQuery *query)
 {
-  cdiInitialize();
+  cdi_initialize();
 
   int byteorder = 0;
   int filetype = cdiGetFiletype(filename, &byteorder);
@@ -1001,7 +1013,7 @@ streamOpenReadQuery(const char *filename, struct CdiQuery *query)
 int
 streamOpenAppend(const char *filename)
 {
-  cdiInitialize();
+  cdi_initialize();
 
   int byteorder = 0;
   int filetype = cdiGetFiletype(filename, &byteorder);
@@ -1060,7 +1072,7 @@ if ( streamID < 0 ) handle_error(streamID);
 int
 streamOpenWrite(const char *filename, int filetype)
 {
-  cdiInitialize();
+  cdi_initialize();
 
   return streamOpen(filename, "w", filetype);
 }
@@ -1163,7 +1175,7 @@ streamDefaultValue(stream_t *streamP)
 static stream_t *
 stream_new_entry(int resH)
 {
-  cdiInitialize(); /* ***************** make MT version !!! */
+  cdi_initialize(); /* ***************** make MT version !!! */
 
   stream_t *streamP = (stream_t *) Malloc(sizeof(stream_t));
   streamDefaultValue(streamP);

@@ -534,7 +534,7 @@ int getByteswap(int byteorder);
 
 void cdiStreamGetIndexList(unsigned numIDs, int IDs[]);
 
-void cdiInitialize(void);
+void cdi_initialize(void);
 
 char *cdiEscapeSpaces(const char *string);
 char *cdiUnescapeSpaces(const char *string, const char **outStringEnd);

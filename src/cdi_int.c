@@ -3,6 +3,7 @@
 #endif
 
 #include <ctype.h>
+#include <stdlib.h>
 
 #include "binary.h"
 #include "cdf_config.h"
@@ -347,12 +348,28 @@ calendar_from_name(const char *name)
 }
 
 void
-cdiInitialize(void)
+cdi_finalize(void)
+{
+  /*
+  int streamIDs[32] = {};
+  int numIDs = (int) ARRAY_SIZE(streamIDs);
+  reshGetResHListOfType(numIDs, streamIDs, &streamOps);
+  for (int i = 0; i < numIDs; ++i)
+  {
+    if (streamIDs[i] > 0) streamClose(streamIDs[i]);
+  }
+  */
+}
+
+void
+cdi_initialize(void)
 {
   static bool Init_CDI = false;
   if (!Init_CDI)
   {
     Init_CDI = true;
+
+    atexit(cdi_finalize);
 
 #ifdef HAVE_LIBCGRIBEX
     gribFixZSE(1);    // 1: Fix ZeroShiftError of simple packed spherical harmonics
@@ -519,7 +536,7 @@ cdiDefGlobal(const char *string, int value)
 void
 cdiDefMissval(double missval)
 {
-  cdiInitialize();
+  cdi_initialize();
 
   CDI_Default_Missval = missval;
 }
@@ -527,7 +544,7 @@ cdiDefMissval(double missval)
 double
 cdiInqMissval(void)
 {
-  cdiInitialize();
+  cdi_initialize();
 
   return CDI_Default_Missval;
 }
