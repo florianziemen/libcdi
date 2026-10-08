@@ -1287,6 +1287,20 @@ cdiStreamCloseDefaultDelegate(stream_t *streamP, int recordBufIsToBeDeleted)
       break;
     }
 #endif
+#ifdef HAVE_TENSORSTORE
+    case CDI_FILETYPE_ZARR:
+    {
+      ts_close(fileID);
+      if (streamP->ntsteps == 0 && streamP->tsteps != NULL)
+      {
+        tsteps_t *tstep = &(streamP->tsteps[0]);
+        FreeAndNull(tstep->recinfo);
+        FreeAndNull(tstep->records);
+        FreeAndNull(tstep->recIDs);
+      }
+      break;
+    }
+#endif
     default:
     {
       Error("%s support not compiled in (fileID = %d)!", strfiletype(filetype), fileID);

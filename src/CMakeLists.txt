@@ -224,6 +224,8 @@ endif ()
 if (WITH_TENSORSTORE)
   set_source_files_properties(tsio.cpp PROPERTIES COMPILE_OPTIONS "-std=gnu++17")
   target_sources(libcdi PRIVATE
+    stream_ts.h
+    stream_ts.c
     tstore.h
     tstore.cpp
     tsio.h

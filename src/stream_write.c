@@ -12,6 +12,10 @@
 #include "dmemory.h"
 #include "namespace.h"
 
+#ifdef HAVE_TENSORSTORE
+#include "stream_ts.h"
+#endif
+
 // the single image implementation
 int
 cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, SizeType numMissVals)
@@ -155,6 +159,9 @@ cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, const 
 #endif
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF: cdf_write_var_slice(streamP, varID, levelID, memtype, data, (size_t) numMissVals); break;
+#endif
+#ifdef HAVE_TENSORSTORE
+    case CDI_FILETYPE_ZARR: ts_write_var_slice(streamP, varID, levelID, memtype, data, (size_t) numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(filetype));
   }

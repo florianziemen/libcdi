@@ -53,6 +53,7 @@ extern pthread_mutex_t CDI_IO_Mutex;
 
 #define CDI_FILETYPE_GRIB 100    // File type GRIB
 #define CDI_FILETYPE_NETCDF 101  // File type NetCDF
+#define CDI_FILETYPE_ZARR 102    // File type ZARR
 
 // dummy use of unused parameters to silence compiler warnings
 #ifndef UNUSED

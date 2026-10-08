@@ -552,11 +552,11 @@ cdfDefineCoordinates(const stream_t *streamP, int ncvarID, int nczvarID, int gri
   else if (gridtype == GRID_GAUSSIAN_REDUCED)
   {
     /*
-   int ncxvarID = ncgrid->ncIDs[CDF_VARID_X];
-   int ncyvarID = ncgrid->ncIDs[CDF_VARID_Y];
-   cdfAppendCoordinates(fileID, ncyvarID, coordinates);
-   cdfAppendCoordinates(fileID, ncxvarID, coordinates);
-   */
+    int ncxvarID = ncgrid->ncIDs[CDF_VARID_X];
+    int ncyvarID = ncgrid->ncIDs[CDF_VARID_Y];
+    cdfAppendCoordinates(fileID, ncyvarID, coordinates);
+    cdfAppendCoordinates(fileID, ncxvarID, coordinates);
+    */
   }
   else if (gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR)
   {
@@ -629,9 +629,9 @@ calc_chunksize(size_t chunkSizeLim, size_t size)
   return chunkSize;
 }
 
-static const size_t chunkSizeMin = 262144;  // 256kb
-// static const size_t chunkSizeLim = 16777216;  // 16mb
-static const size_t chunkSizeLim = 4194304;  // 4mb
+static const size_t chunkSizeMin = 262144;  // 256K
+// static const size_t chunkSizeLim = 16777216;  // 16M
+static const size_t chunkSizeLim = 4194304;  // 4M
 
 size_t
 auto_chunksize_y(size_t gridsize, size_t xsize, size_t ysize)

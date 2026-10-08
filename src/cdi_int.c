@@ -568,6 +568,8 @@ cdiBaseFiletype(int filetype)
     case CDI_FILETYPE_NC4C:
     case CDI_FILETYPE_NCZARR:
     case CDI_FILETYPE_NC5: return CDI_FILETYPE_NETCDF;
+    case CDI_FILETYPE_ZARR2:
+    case CDI_FILETYPE_ZARR3: return CDI_FILETYPE_ZARR;
   }
 
   return filetype;
