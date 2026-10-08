@@ -19,7 +19,7 @@
 #endif
 
 #ifdef HAVE_TENSORSTORE
-#include "tsio.h"
+#include "tstore.h"
 #endif
 
 #ifdef HAVE_LIBPTHREAD

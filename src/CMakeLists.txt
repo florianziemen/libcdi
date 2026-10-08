@@ -224,13 +224,15 @@ endif ()
 if (WITH_TENSORSTORE)
   set_source_files_properties(tsio.cpp PROPERTIES COMPILE_OPTIONS "-std=gnu++17")
   target_sources(libcdi PRIVATE
+    tstore.h
+    tstore.c
     tsio.h
     tsio.cpp
   )
   target_link_libraries(libcdi
-      PRIVATE
-          tensorstore::tensorstore
-          tensorstore::all_drivers
+    PRIVATE
+      tensorstore::tensorstore
+      tensorstore::all_drivers
   )
 endif ()
 

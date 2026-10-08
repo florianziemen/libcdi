@@ -12,7 +12,7 @@
 #endif
 
 #ifdef HAVE_TENSORSTORE
-#include "tsio.h"  // NC_FORMAT_64BIT_DATA
+#include "tstore.h"  // NC_FORMAT_64BIT_DATA
 #endif
 
 #ifdef HAVE_LIBFDB5
