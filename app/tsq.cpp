@@ -46,8 +46,11 @@ print_usage(const char *prog)
                "[--overwrite] "
                "[--data-copy-concurrency <N>] [--double-buffer] "
                "[--layer <S/E>] [--cell <S/E>] [--info] [--debug]\n"
-            << "  --name: comma-separated array names.  When omitted, an\n"
-            << "         overview of every array in the dataset is printed.\n"
+            << "  --name: comma-separated array names.  When omitted, every\n"
+            << "         data array in the dataset is selected; coordinate\n"
+            << "         arrays are excluded (they are selected automatically\n"
+            << "         alongside the data arrays).  A Zarr 3 root that only\n"
+            << "         contains groups lists those groups instead.\n"
             << "  --group: name of a nested Zarr 3 group below --path.  Array\n"
             << "         metadata is served from the consolidated `zarr.json`\n"
             << "         of the store root (no recursive metadata reads).\n"
@@ -100,6 +103,8 @@ print_usage(const char *prog)
             << "         Only the chunks overlapping the hypercube are read, so the\n"
             << "         cache is sized exactly to the requested data.\n"
             << "  --info: print the TensorStore version (works without --path).\n"
+            << "         With --path, print only the present array names (the\n"
+            << "         Selected/Coordinate arrays tables) and no measurements.\n"
             << "  --debug: write detection details to stderr: one line with\n"
             << "         the Zarr format of the dataset, and a further line\n"
             << "         when consolidated metadata was found.\n";
@@ -436,13 +441,27 @@ print_overview(const tsConfig &cfg, const tsOverview &ov)
     return true;
   }
   if (ov.arrays.empty()) return false;
+
+  // Ohne --name werden nur die Datenarrays gelistet: ein Array, dessen Name
+  // als Dimensionsname oder als `grid_mapping`-Ziel eines Arrays vorkommt, ist
+  // eine Koordinate und wird aussortiert.
+  std::set<std::string> coord_names;
+  for (const auto &row : ov.arrays)
+    for (const auto &d : row.dim_names) coord_names.insert(d);
+  for (const auto &row : ov.arrays)
+    if (!row.grid_mapping.empty()) coord_names.insert(row.grid_mapping);
+  std::vector<const tsInfo *> data_arrays;
+  for (const auto &row : ov.arrays)
+    if (!coord_names.count(row.name)) data_arrays.push_back(&row);
+  if (data_arrays.empty()) return false;
+
   std::cout << "=== Dataset overview ===\n";
   std::cout << "#  Name  [Units]  DataType  Shape  Chunks  Compressor\n";
   std::size_t idx = 1;
-  for (const auto &row : ov.arrays)
+  for (const auto *row : data_arrays)
   {
-    std::cout << std::setw(2) << idx++ << "  " << row.name << "  [" << row.units << "]  " << row.data_type << "  " << row.shape
-              << "  " << row.chunks << "  " << row.compressor << "\n";
+    std::cout << std::setw(2) << idx++ << "  " << row->name << "  [" << row->units << "]  " << row->data_type << "  " << row->shape
+              << "  " << row->chunks << "  " << row->compressor << "\n";
   }
   return ov.ok;
 }
@@ -506,13 +525,35 @@ main(int argc, char **argv)
             << "Reconfigure with -DWITH_TENSORSTORE=ON.\n";
   return 2;
 #else
-  // Ohne --name: Uebersicht des Datensatzes (Gruppen der Wurzel, sonst eine
-  // Zeile pro Array).
+  // Ohne --name werden alle Arrays ausgewaehlt; die Namen der Koordinaten-
+  // arrays werden aussortiert, weil sie automatisch mit den Datenarrays
+  // ausgewaehlt werden.  Eine Wurzel mit nur Gruppen wird wie bisher gelistet.
   if (cfg.arrays.empty())
   {
     tsOverview ov;
     ov.ok = tsDatasetOverview(cfg, ov);
-    return print_overview(cfg, ov) ? 0 : 1;
+    if (!ov.groups.empty())
+    {
+      print_overview(cfg, ov);
+      return 0;
+    }
+    std::set<std::string> coord_names;
+    for (const auto &row : ov.arrays)
+      for (const auto &d : row.dim_names) coord_names.insert(d);
+    for (const auto &row : ov.arrays)
+      if (!row.grid_mapping.empty()) coord_names.insert(row.grid_mapping);
+    cfg.arrays.clear();
+    for (const auto &row : ov.arrays)
+      if (!coord_names.count(row.name)) cfg.arrays.push_back(row.name);
+    if (cfg.arrays.empty()) return print_overview(cfg, ov) ? 0 : 1;
+  }
+
+  // --info gibt nur die beiden Kopf-Tabellen (Selected/Coordinate arrays) aus
+  // und liest keine Messwerte; ein etwaiger Schreibmodus wird dafuer ignoriert.
+  if (cfg.info)
+  {
+    cfg.out_path.reset();
+    cfg.overwrite = false;
   }
 
   // Schreibmodus-Vorbereitung: --overwrite ohne --out-path ist ein Fehler; ein
@@ -551,8 +592,22 @@ main(int argc, char **argv)
 
   tsHandle *input = tsOpenFileRead(cfg.path, cfg);
   if (!input) return 1;
-  tsMetadata &md = tsGetMetadata(input);
+  tsMetadata &md = tsGetReadMetadata(input);
 
+  /*
+  printf("numSteps %lld\n", md.num_steps);
+  printf("Found %zu data arrays:\n", md.arrayList.size());
+  for (auto const &array : md.arrayList) printf(" %s", array.name.c_str());
+  printf("\n");
+  printf("Found %zu coordinate arrays:\n", md.coordList.size());
+  for (auto const &array : md.coordList) printf(" %s", array.name.c_str());
+  printf("\n");
+  auto const &array = md.arrayList[0];
+  printf("%s: num_steps=%lld, num_layers=%lld, num_cells=%lld\n", array.name.c_str(), array.num_steps, array.num_layers,
+         array.num_cells);
+  auto const &attributes = array.attributes;
+  for (const auto &[key, value] : attributes) printf("[%s] = %s\n", key.c_str(), value.c_str());
+  */
   // Datenarrays vs. Koordinatenarrays: die Dimensionsnamen eines Datenarrays
   // verweisen auf Koordinaten; ein Array mit genau diesem Namen ist eine
   // Koordinate und kann nicht mit `--name` gewaehlt werden.
@@ -593,6 +648,12 @@ main(int argc, char **argv)
   }
   print_coordinate_arrays(md);
 
+  if (cfg.info)
+  {
+    tsCloseFile(input);
+    return 0;
+  }
+
   if (!cfg.out_path) { std::cout << "# timestep  layer  count  missing  min  mean  max  array\n"; }
 
   // Die Datenarrays dtype-neutral oeffnen (Lesepuffer arbeiten auf float32);
@@ -612,9 +673,25 @@ main(int argc, char **argv)
       tsCloseFile(input);
       return 1;
     }
-    // Zuerst die Koordinaten, dann die Datenarrays (jeweils mit Attributen und
-    // uebernommener Kompression).
-    if (!tsWriteCoordinates(input, output) || !tsSetMetadata(input, output))
+    // Zuerst die Koordinaten und Datenarray-Metadaten lesen, dann das
+    // Ausgabe-Config anwenden und schliesslich die Ausgabestores schreiben
+    // (jeweils mit Attributen und uebernommener Kompression).
+    std::vector<tsCoordinate> coords;
+    tsOutputMetadata meta;
+    if (!tsReadCoordinates(input, coords) || !tsGetMetadata(input, meta))
+    {
+      tsCloseFile(input);
+      tsCloseFile(output);
+      return 1;
+    }
+    if (!tsApplyCoordinateConfig(output->cfg, coords))
+    {
+      tsCloseFile(input);
+      tsCloseFile(output);
+      return 1;
+    }
+    tsApplyMetadataConfig(output->cfg, meta);
+    if (!tsWriteCoordinates(output, coords) || !tsSetMetadata(output, meta))
     {
       tsCloseFile(input);
       tsCloseFile(output);
@@ -637,8 +714,8 @@ main(int argc, char **argv)
     {
       if (!tsGetField(input, field)) break;
       const tsArray &a = md.arrayList[field.array];
-      if (data.capacity() == 0 && a.num_cells > 0) data.reserve(static_cast<std::size_t>(a.num_cells));
-      if (!tsReadField(input, data))
+      data.resize(static_cast<std::size_t>(a.num_cells));
+      if (!tsReadField(input, data.data(), data.size()))
       {
         tsCloseFile(input);
         tsCloseFile(output);
@@ -646,7 +723,7 @@ main(int argc, char **argv)
       }
       if (output)
       {
-        if (!tsSetField(output, field) || !tsWriteField(output, data))
+        if (!tsSetField(output, field) || !tsWriteField(output, data.data(), data.size()))
         {
           tsCloseFile(input);
           tsCloseFile(output);

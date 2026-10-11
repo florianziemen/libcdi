@@ -362,7 +362,6 @@ int     cdiEncodeTime(int hour, int minute, int second);
 // STREAM control routines
 
 int     cdiGetFiletype(const char *uri, int *byteorder);
-int     cdiGetProtocol(const char *uri, const char **filename);
 
 int     streamOpenReadNCMem(int ncid);
 int     streamOpenWriteNCMem(int ncid);
@@ -375,6 +374,8 @@ int     streamOpenRead(const char *path);
 int     streamOpenWrite(const char *path, int filetype);
 
 int     streamOpenAppend(const char *path);
+
+int     streamOpenTensorstore(const char *path);
 
 //      streamClose: Close an open dataset
 void    streamClose(int streamID);

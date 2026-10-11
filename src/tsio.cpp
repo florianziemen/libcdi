@@ -819,12 +819,9 @@ v2_compressor_to_n5(const nlohmann::json &comp)
 {
   if (!comp.is_object()) return nlohmann::json{ { "type", "raw" } };
   const std::string id = comp.value("id", std::string());
-  if (id == "gzip")
-    return nlohmann::json{ { "type", "gzip" }, { "level", comp.value("level", -1) }, { "useZlib", false } };
-  if (id == "zlib")
-    return nlohmann::json{ { "type", "gzip" }, { "level", comp.value("level", -1) }, { "useZlib", true } };
-  if (id == "zstd")
-    return nlohmann::json{ { "type", "zstd" }, { "level", comp.value("level", 0) } };
+  if (id == "gzip") return nlohmann::json{ { "type", "gzip" }, { "level", comp.value("level", -1) }, { "useZlib", false } };
+  if (id == "zlib") return nlohmann::json{ { "type", "gzip" }, { "level", comp.value("level", -1) }, { "useZlib", true } };
+  if (id == "zstd") return nlohmann::json{ { "type", "zstd" }, { "level", comp.value("level", 0) } };
   if (id == "blosc")
     return nlohmann::json{ { "type", "blosc" },
                            { "cname", comp.value("cname", "lz4") },
@@ -860,12 +857,9 @@ nlohmann::json
 compressor_v2_by_name(const std::string &name)
 {
   if (name == "blosc")
-    return nlohmann::json{ { "id", "blosc" }, { "cname", "zstd" }, { "clevel", 5 },
-                           { "shuffle", 1 }, { "blocksize", 0 } };
-  if (name == "gzip")
-    return nlohmann::json{ { "id", "gzip" }, { "level", 5 } };
-  if (name == "zstd")
-    return nlohmann::json{ { "id", "zstd" }, { "level", 5 } };
+    return nlohmann::json{ { "id", "blosc" }, { "cname", "zstd" }, { "clevel", 5 }, { "shuffle", 1 }, { "blocksize", 0 } };
+  if (name == "gzip") return nlohmann::json{ { "id", "gzip" }, { "level", 5 } };
+  if (name == "zstd") return nlohmann::json{ { "id", "zstd" }, { "level", 5 } };
   return nlohmann::json();
 }
 
@@ -874,13 +868,13 @@ nlohmann::json
 compressor_v3_by_name(const std::string &name, int dtype_size)
 {
   if (name == "blosc")
-    return nlohmann::json{ { "name", "blosc" },
-                           { "configuration", { { "typesize", dtype_size }, { "cname", "zstd" },
-                                                { "clevel", 5 }, { "shuffle", "shuffle" }, { "blocksize", 0 } } } };
-  if (name == "gzip")
-    return nlohmann::json{ { "name", "gzip" }, { "configuration", { { "level", 5 } } } };
-  if (name == "zstd")
-    return nlohmann::json{ { "name", "zstd" }, { "configuration", { { "level", 5 }, { "checksum", false } } } };
+    return nlohmann::json{
+      { "name", "blosc" },
+      { "configuration",
+        { { "typesize", dtype_size }, { "cname", "zstd" }, { "clevel", 5 }, { "shuffle", "shuffle" }, { "blocksize", 0 } } }
+    };
+  if (name == "gzip") return nlohmann::json{ { "name", "gzip" }, { "configuration", { { "level", 5 } } } };
+  if (name == "zstd") return nlohmann::json{ { "name", "zstd" }, { "configuration", { { "level", 5 }, { "checksum", false } } } };
   return nlohmann::json();
 }
 
@@ -901,8 +895,7 @@ apply_compressor_by_name(const std::string &name, const std::string &out_format,
   }
   else if (out_format == "n5")
   {
-    md["compression"] = (name == "none") ? nlohmann::json{ { "type", "raw" } }
-                                         : v2_compressor_to_n5(compressor_v2_by_name(name));
+    md["compression"] = (name == "none") ? nlohmann::json{ { "type", "raw" } } : v2_compressor_to_n5(compressor_v2_by_name(name));
   }
   else
   {
@@ -910,22 +903,12 @@ apply_compressor_by_name(const std::string &name, const std::string &out_format,
   }
 }
 
-template <typename T, tensorstore::DimensionIndex R>
+// Wendet die Quell-Kompression (bereits geparstes Roh-.zarray/zarr.json der
+// Quelle) auf die Ausgabe-Metadaten an; benoetigt keinen Store.
 void
-copy_source_compression(const tensorstore::TensorStore<T, R> *store, int source_format, const std::string &out_format, int dtype_size,
-                        const std::vector<Index> &out_chunks, nlohmann::json &md)
+apply_source_compression_json(const nlohmann::json &j, int source_format, const std::string &out_format, int dtype_size,
+                              const std::vector<Index> &out_chunks, nlohmann::json &md)
 {
-  const std::string raw = read_store_key(store, (source_format == 3) ? "zarr.json" : ".zarray");
-  if (raw.empty()) return;
-  nlohmann::json j;
-  try
-  {
-    j = nlohmann::json::parse(raw);
-  }
-  catch (...)
-  {
-    return;
-  }
   if (!j.is_object()) return;
 
   const auto adapt_sharding = [&out_chunks](nlohmann::json &codecs)
@@ -1260,9 +1243,9 @@ list_array_names(const tsConfig &cfg, tensorstore::Context &context)
 // wird kopiert).  Dadurch hat der Cache denselben Datentyp wie die Quelle.
 template <typename S>
 void
-append_as_float(const S *src, std::size_t n, std::vector<float> &out)
+append_as_float(const S *src, std::size_t n, float *out, std::size_t &pos)
 {
-  for (std::size_t i = 0; i < n; ++i) out.push_back(static_cast<float>(src[i]));
+  for (std::size_t i = 0; i < n; ++i) out[pos++] = static_cast<float>(src[i]);
 }
 
 struct TsEngine
@@ -1378,9 +1361,12 @@ struct TsEngine
         }
         {
           const DimensionIndex d = rank - 1;
-          const Index o = (brange_lo[d] + static_cast<Index>(g)) * chunk_shape[d];
-          ib.off[d - 1] = std::max(o, bs[d]);
-          ib.ext[d - 1] = std::min(o + chunk_shape[d], bs[d] + bc[d]) - ib.off[d - 1];
+          if (rank >= 2)
+          {
+            const Index o = (brange_lo[d] + static_cast<Index>(g)) * chunk_shape[d];
+            ib.off[d - 1] = std::max(o, bs[d]);
+            ib.ext[d - 1] = std::min(o + chunk_shape[d], bs[d] + bc[d]) - ib.off[d - 1];
+          }
         }
         for (DimensionIndex d = 1; d < rank; ++d) ib.seg *= static_cast<std::size_t>(ib.ext[d - 1]);
         ibs.push_back(std::move(ib));
@@ -1440,36 +1426,43 @@ struct TsEngine
   // Fenster in `out` aus.  Reihenfolge und Anzahl der Werte entsprechen genau
   // der bisherigen Auswertung dieses Feldes.
   void
-  extract(const WindowChunks &buf, Index win_t0, Index t_abs, Index lay, std::vector<float> &out) const
+  extract(const WindowChunks &buf, Index win_t0, Index t_abs, Index lay, float *out, std::size_t n) const
   {
     using namespace tensorstore;
     const Index lt = t_abs - win_t0;
-    out.clear();
+    std::size_t pos = 0;
     // Schneidet `n` Elemente ab Elementindex `off` des Chunks als float32 aus
     // (Laufzeit-Dispatch auf den nativen Cache-Datentyp).
-    auto append = [&out](const SharedArray<void, dynamic_rank> &chunk, std::size_t off, std::size_t n)
+    auto append = [&out, &pos](const SharedArray<void, dynamic_rank> &chunk, std::size_t off, std::size_t cnt)
     {
       const void *base = chunk.data();
       const DataType dt = chunk.dtype();
       if (dt == dtype_v<float>)
       {
         const float *p = static_cast<const float *>(base) + off;
-        out.insert(out.end(), p, p + static_cast<std::ptrdiff_t>(n));
+        std::copy(p, p + static_cast<std::ptrdiff_t>(cnt), out + pos);
+        pos += cnt;
       }
       else if (dt == dtype_v<double>)
-        append_as_float(static_cast<const double *>(base) + off, n, out);
+        append_as_float(static_cast<const double *>(base) + off, cnt, out, pos);
       else if (dt == dtype_v<tensorstore::dtypes::float16_t>)
-        append_as_float(static_cast<const tensorstore::dtypes::float16_t *>(base) + off, n, out);
+        append_as_float(static_cast<const tensorstore::dtypes::float16_t *>(base) + off, cnt, out, pos);
       else if (dt == dtype_v<tensorstore::dtypes::bfloat16_t>)
-        append_as_float(static_cast<const tensorstore::dtypes::bfloat16_t *>(base) + off, n, out);
+        append_as_float(static_cast<const tensorstore::dtypes::bfloat16_t *>(base) + off, cnt, out, pos);
       else
       {
         std::cerr << "Unsupported source data type for statistics: " << dt << "\n";
-        out.insert(out.end(), static_cast<std::ptrdiff_t>(n), 0.0f);
+        std::fill_n(out + pos, cnt, 0.0f);
+        pos += cnt;
       }
     };
     if (!layered)
     {
+      // Rank-1: dim 0 is both the time and the (single) cell dim.  The field of
+      // one step is a single value; the remaining `n - 1` slots are NaN so the
+      // reported count/missing match the Python reference (count = extent along
+      // dim 0, one valid value per step).
+      if (rank == 1) std::fill_n(out, n, std::numeric_limits<float>::quiet_NaN());
       for (std::size_t b = 0; b < nblocks_total; ++b)
       {
         const SharedArray<void, dynamic_rank> &chunk = *buf.chunks[b];
@@ -1505,7 +1498,7 @@ struct TsEngine
       append(chunk, off, egrid);
     }
   }
-};// ---------------------------------------------------------------------------
+};  // ---------------------------------------------------------------------------
 // Lesezustand eines Arrays: Engine (Auswahl + Zeitfenster) und zwei
 // Fensterpuffer mit optionalem Prefetch des naechsten Fensters.  Die Felder
 // werden daraus der Reihe nach ausgeschnitten; die Werte eines Feldes kommen in
@@ -1516,15 +1509,14 @@ struct Reader
 {
   TsEngine eng;
   std::unique_ptr<TsEngine::WindowChunks> buf[2];
-  int fwin = 0;       // Fenster, auf dem wir stehen
-  int ready = -1;     // Fenster liegt fertig in buf[ready % 2]
-  int launch = -1;    // Fenster, das der Prefetch-Thread fuellt
+  int fwin = 0;     // Fenster, auf dem wir stehen
+  int ready = -1;   // Fenster liegt fertig in buf[ready % 2]
+  int launch = -1;  // Fenster, das der Prefetch-Thread fuellt
   std::thread filler;
 
   bool direct_read = false;  // direkt pro Feld lesen (kein Window-Cache)
 
-  Reader(AnyStoreType &store, const std::vector<Index> &bstart, const std::vector<Index> &bcount,
-         int threads, bool double_buffer)
+  Reader(AnyStoreType &store, const std::vector<Index> &bstart, const std::vector<Index> &bcount, int threads, bool double_buffer)
       : eng(store, bstart, bcount, threads)
   {
     buf[0] = std::make_unique<TsEngine::WindowChunks>();
@@ -1578,44 +1570,44 @@ struct Reader
     }
   }
 
-void
-  extract(Index t_abs, Index lay, std::vector<float> &out)
+  void
+  extract(Index t_abs, Index lay, float *out, std::size_t n)
   {
     if (direct_read && eng.rank == 2 && !eng.layered)
     {
       using namespace tensorstore;
-      auto sliced = eng.store | tensorstore::Dims(0).ClosedInterval(t_abs, t_abs) | tensorstore::Dims(1).HalfOpenInterval(0, eng.bc[1]);
+      auto sliced
+          = eng.store | tensorstore::Dims(0).ClosedInterval(t_abs, t_abs) | tensorstore::Dims(1).HalfOpenInterval(0, eng.bc[1]);
       auto r = Read<zero_origin>(sliced).result();
       if (!r)
       {
         std::cerr << "Read failed in direct mode\n";
-        out.assign(static_cast<std::size_t>(eng.bc.back()), 0.0f);
+        std::fill_n(out, n, 0.0f);
         return;
       }
       const void *base = r->data();
       const tensorstore::DataType dt = r->dtype();
-      out.clear();
+      const std::size_t cnt = std::min<std::size_t>(static_cast<std::size_t>(r->num_elements()), n);
+      std::size_t pos = 0;
       if (dt == dtype_v<float>)
       {
         const float *src = static_cast<const float *>(base);
-        const std::size_t n = r->num_elements();
-        out.resize(n);
-        std::copy(src, src + n, out.begin());
+        std::copy(src, src + static_cast<std::ptrdiff_t>(cnt), out);
       }
       else if (dt == dtype_v<double>)
-        append_as_float(static_cast<const double *>(base), static_cast<std::size_t>(r->num_elements()), out);
+        append_as_float(static_cast<const double *>(base), cnt, out, pos);
       else if (dt == dtype_v<tensorstore::dtypes::float16_t>)
-        append_as_float(static_cast<const tensorstore::dtypes::float16_t *>(base), static_cast<std::size_t>(r->num_elements()), out);
+        append_as_float(static_cast<const tensorstore::dtypes::float16_t *>(base), cnt, out, pos);
       else if (dt == dtype_v<tensorstore::dtypes::bfloat16_t>)
-        append_as_float(static_cast<const tensorstore::dtypes::bfloat16_t *>(base), static_cast<std::size_t>(r->num_elements()), out);
+        append_as_float(static_cast<const tensorstore::dtypes::bfloat16_t *>(base), cnt, out, pos);
       else
       {
         std::cerr << "Unsupported source data type in direct read: " << dt << "\n";
-        out.assign(static_cast<std::size_t>(eng.bc.back()), 0.0f);
+        std::fill_n(out, n, 0.0f);
       }
       return;
     }
-    eng.extract(*buf[buf[1] ? (fwin % 2) : 0], eng.windows[static_cast<std::size_t>(fwin)].first, t_abs, lay, out);
+    eng.extract(*buf[buf[1] ? (fwin % 2) : 0], eng.windows[static_cast<std::size_t>(fwin)].first, t_abs, lay, out, n);
   }
 };
 
@@ -1737,6 +1729,46 @@ make_context(const tsConfig &cfg, tensorstore::Context &context, std::optional<i
 // Uebersicht: eine Zeile pro Array.
 // ---------------------------------------------------------------------------
 
+// Alle String-Eintraege eines JSON-Arrays (nicht-Strings werden uebersprungen).
+std::vector<std::string>
+json_string_list(const nlohmann::json &j)
+{
+  std::vector<std::string> out;
+  if (j.is_array())
+    for (const auto &v : j)
+      if (v.is_string()) out.push_back(v.get<std::string>());
+  return out;
+}
+
+// Dimensionsnamen eines Array-Metadaten-Objekts: Zarr 3 `dimension_names`,
+// sonst das `_ARRAY_DIMENSIONS`-Attribut (auch direkt fuer Zarr-2-`.zattrs`).
+std::vector<std::string>
+json_dim_names(const nlohmann::json &j)
+{
+  if (j.contains("dimension_names"))
+  {
+    std::vector<std::string> dims = json_string_list(j["dimension_names"]);
+    if (!dims.empty()) return dims;
+  }
+  if (j.contains("attributes") && j["attributes"].is_object() && j["attributes"].contains("_ARRAY_DIMENSIONS"))
+    return json_string_list(j["attributes"]["_ARRAY_DIMENSIONS"]);
+  if (j.contains("_ARRAY_DIMENSIONS")) return json_string_list(j["_ARRAY_DIMENSIONS"]);
+  return {};
+}
+
+// `grid_mapping`-Attribut eines Array-Metadaten-Objekts ("" wenn nicht gesetzt).
+std::string
+json_grid_mapping(const nlohmann::json &j)
+{
+  if (j.contains("attributes") && j["attributes"].is_object() && j["attributes"].contains("grid_mapping")
+      && j["attributes"]["grid_mapping"].is_string())
+  {
+    return j["attributes"]["grid_mapping"].get<std::string>();
+  }
+  if (j.contains("grid_mapping") && j["grid_mapping"].is_string()) return j["grid_mapping"].get<std::string>();
+  return {};
+}
+
 tsInfo
 overview_line_from_zarr3(const std::string &name, const nlohmann::json &j)
 {
@@ -1748,15 +1780,14 @@ overview_line_from_zarr3(const std::string &name, const nlohmann::json &j)
   row.compressor = j.contains("codecs") ? zarr3_codec_names(j["codecs"]) : "";
   if (row.compressor.empty()) row.compressor = "-";
   row.units = "-";
-  if (j.contains("units") && j["units"].is_string())
-  {
-    row.units = j["units"].get<std::string>();
-  }
+  if (j.contains("units") && j["units"].is_string()) { row.units = j["units"].get<std::string>(); }
   else if (j.contains("attributes") && j["attributes"].is_object() && j["attributes"].contains("units")
            && j["attributes"]["units"].is_string())
   {
     row.units = j["attributes"]["units"].get<std::string>();
   }
+  row.dim_names = json_dim_names(j);
+  row.grid_mapping = json_grid_mapping(j);
   return row;
 }
 
@@ -1832,6 +1863,8 @@ overview_rows_from_zarr2_consolidated(const std::map<std::string, std::string> &
       {
         const nlohmann::json a = nlohmann::json::parse(attrs->second);
         if (a.contains("units") && a["units"].is_string()) row.units = a["units"].get<std::string>();
+        row.dim_names = json_dim_names(a);
+        row.grid_mapping = json_grid_mapping(a);
       }
       catch (...)
       {
@@ -1903,6 +1936,8 @@ overview_rows_from_stores(const tsConfig &cfg, tensorstore::Context &context, co
           {
             row.units = j["attributes"]["units"].get<std::string>();
           }
+          row.dim_names = json_dim_names(j);
+          row.grid_mapping = json_grid_mapping(j);
         }
         else if (j.contains("compressor") && j["compressor"].is_object() && j["compressor"].contains("id"))
         {
@@ -1922,6 +1957,8 @@ overview_rows_from_stores(const tsConfig &cfg, tensorstore::Context &context, co
         {
           const nlohmann::json j = nlohmann::json::parse(attrs);
           if (j.contains("units") && j["units"].is_string()) row.units = j["units"].get<std::string>();
+          row.dim_names = json_dim_names(j);
+          row.grid_mapping = json_grid_mapping(j);
         }
         catch (...)
         {
@@ -1935,11 +1972,11 @@ overview_rows_from_stores(const tsConfig &cfg, tensorstore::Context &context, co
 
 }  // namespace
 
-struct tsHandle
+// TensorStore-spezifischer Teil des Handles; die TensorStore-freien Felder
+// stehen in tsHandle (tsio.h).
+struct tsHandleImpl : tsHandle
 {
-  tsConfig cfg;
   tensorstore::Context context;
-  tsMetadata metadata;
 
   // Quelle elementunabhaengig (Metadaten, Kompression, Koordinaten).
   std::vector<AnyStoreType> stores;
@@ -1948,25 +1985,6 @@ struct tsHandle
   std::vector<AnyStoreType> fstores;
   std::vector<std::unique_ptr<Reader>> readers;
   std::vector<Writer> writers;
-  std::vector<std::string> out_dirs;
-
-  std::int64_t start_t = 0;                 // erster absoluter Schritt (kleinstes bstart[0])
-  std::int64_t cur_t = 0;                   // aktueller absoluter Schritt (Eingabe)
-  std::size_t next_field = 0;               // naechstes Feld des aktuellen Schritts
-  std::vector<std::pair<std::size_t, std::int64_t>> fields;  // (Array, absoluter Layer) je Schritt
-  tsField last_field;                       // Feld, das tsGetField zuletzt geliefert hat
-  bool have_field = false;
-
-  // Ausgabe-Schrittzaehler (nur Schreibmodus).
-  std::int64_t out_start = 0;               // erster absoluter Schritt der Ausgabe
-  std::int64_t out_t = 0;                   // aktueller absoluter Schreib-Schritt
-  std::int64_t out_end = 0;                 // ein hinter dem letzten Schreib-Schritt
-  std::size_t sel_field = 0;                // zuletzt mit tsSetField gewaehltes Array
-  std::int64_t sel_layer = 0;               // absoluter Layer des Schreibziels
-  bool have_sel = false;
-
-  bool fields_open = false;
-  bool done = false;
 };
 
 // ---------------------------------------------------------------------------
@@ -1980,7 +1998,7 @@ tsVersion()
 }
 
 tsMetadata &
-tsGetMetadata(tsHandle *handle)
+tsGetReadMetadata(tsHandle *handle)
 {
   static tsMetadata empty;
   return handle ? handle->metadata : empty;
@@ -1993,7 +2011,7 @@ tsHandle *
 tsOpenFileRead(const std::string &path, const tsConfig &config)
 {
   using namespace tensorstore;
-  auto *h = new tsHandle();
+  auto *h = new tsHandleImpl();
   h->cfg = config;
   h->cfg.path = path;
   std::sort(h->cfg.arrays.begin(), h->cfg.arrays.end());
@@ -2102,7 +2120,7 @@ tsResolveArray(tsHandle *handle, std::size_t index)
   // Physische (aeussere) Chunkform = Shardform bei geshardetem Zarr 3
   // (write_chunk_shape); 0/-1 = unspezifiziert -> volle Ausdehnung.
   a.chunks.assign(shape.begin(), shape.end());
-  if (auto cl = handle->stores[index].chunk_layout())
+  if (auto cl = static_cast<tsHandleImpl *>(handle)->stores[index].chunk_layout())
   {
     for (DimensionIndex d = 0; d < rank; ++d)
     {
@@ -2116,10 +2134,7 @@ tsResolveArray(tsHandle *handle, std::size_t index)
   // Laenge der step- (Dim 0) bzw. cell- (letzte Dim) Chunks, auf die Auswahl
   // geklemmt.
   a.out_chunks.assign(static_cast<std::size_t>(rank), 1);
-  for (DimensionIndex d = 0; d < rank; ++d)
-  {
-    a.out_chunks[d] = std::max<Index>(1, std::min(a.chunks[d], a.bcount[d]));
-  }
+  for (DimensionIndex d = 0; d < rank; ++d) { a.out_chunks[d] = std::max<Index>(1, std::min(a.chunks[d], a.bcount[d])); }
   if (handle->cfg.step_chunk && rank > 0)
   {
     a.out_chunks[0] = std::max<Index>(1, std::min<Index>(*handle->cfg.step_chunk, a.bcount[0]));
@@ -2142,9 +2157,10 @@ tsOpenFields(tsHandle *handle)
 {
   using namespace tensorstore;
   if (!handle || handle->fields_open) return false;
+  auto *h = static_cast<tsHandleImpl *>(handle);
   const std::size_t n = handle->metadata.arrayList.size();
-  handle->fstores.reserve(n);
-  handle->readers.reserve(n);
+  h->fstores.reserve(n);
+  h->readers.reserve(n);
   for (std::size_t i = 0; i < n; ++i)
   {
     tsArray &a = handle->metadata.arrayList[i];
@@ -2155,12 +2171,11 @@ tsOpenFields(tsHandle *handle)
     }
     std::string kvstore = a.kvstore;
     int detected_format = a.format;
-    auto store = open_array_any(handle->cfg, handle->context, a.name, kvstore, detected_format);
+    auto store = open_array_any(handle->cfg, h->context, a.name, kvstore, detected_format);
     if (!store) return false;
-    handle->fstores.push_back(std::move(*store));
-    handle->readers.push_back(
-        std::make_unique<Reader>(handle->fstores.back(), a.bstart, a.bcount, *handle->cfg.data_copy_concurrency,
-                                 handle->cfg.double_buffer));
+    h->fstores.push_back(std::move(*store));
+    h->readers.push_back(std::make_unique<Reader>(h->fstores.back(), a.bstart, a.bcount, *handle->cfg.data_copy_concurrency,
+                                                  handle->cfg.double_buffer));
   }
   handle->metadata.num_steps = 0;
   handle->start_t = std::numeric_limits<std::int64_t>::max();
@@ -2241,14 +2256,15 @@ tsGetField(tsHandle *handle, tsField &field)
 // Liest das zuletzt von tsGetField gelieferte Feld; der Schritt ist der
 // aktuelle Schritt von tsGetNextStep.
 bool
-tsReadField(tsHandle *handle, std::vector<float> &data)
+tsReadField(tsHandle *handle, float *data, std::size_t n)
 {
   if (!handle || !handle->fields_open || !handle->have_field) return false;
   const tsField &field = handle->last_field;
-  if (field.array >= handle->readers.size()) return false;
-  Reader &r = *handle->readers[field.array];
+  auto *h = static_cast<tsHandleImpl *>(handle);
+  if (field.array >= h->readers.size()) return false;
+  Reader &r = *h->readers[field.array];
   r.ensure(handle->cur_t);
-  r.extract(handle->cur_t, field.layer, data);
+  r.extract(handle->cur_t, field.layer, data, n);
   return true;
 }
 
@@ -2257,7 +2273,7 @@ tsReadField(tsHandle *handle, std::vector<float> &data)
 tsHandle *
 tsOpenFileWrite(const std::string &path, const tsConfig &config)
 {
-  tsHandle *h = new tsHandle();
+  tsHandleImpl *h = new tsHandleImpl();
   h->cfg = config;
   h->cfg.path = path;
   h->cfg.arrays = config.arrays;
@@ -2289,42 +2305,83 @@ template <typename T>
 tensorstore::Result<tensorstore::TensorStore<void, tensorstore::dynamic_rank>>
 open_output_store(const nlohmann::json &spec, tensorstore::Context &ctx)
 {
-  auto st = tensorstore::Open<T, tensorstore::dynamic_rank>(spec, ctx, tensorstore::OpenMode::create,
-                                                            tensorstore::ReadWriteMode::write)
-                .result();
+  auto st
+      = tensorstore::Open<T, tensorstore::dynamic_rank>(spec, ctx, tensorstore::OpenMode::create, tensorstore::ReadWriteMode::write)
+            .result();
   if (!st) return st.status();
   return tensorstore::TensorStore<void, tensorstore::dynamic_rank>(*st);
 }
 
-// Uebernimmt Attribute, Dimensionsnamen und Kompression der Quelle in die
-// Ausgabe-Stores.
+// Liest Attribute, dimension_names und die Roh-Kompressionsmetadaten aller
+// Datenarrays in `meta` ein; unabhaengig vom Output-Config.
 bool
-tsSetMetadata(tsHandle *input, tsHandle *output)
+tsGetMetadata(tsHandle *input, tsOutputMetadata &meta)
 {
   using namespace tensorstore;
-  if (!input || !output) return false;
-  if (input->fstores.size() != input->metadata.arrayList.size()) return false;  // tsOpenFields fehlt
+  if (!input) return false;
+  auto *in = static_cast<tsHandleImpl *>(input);
+  if (in->fstores.size() != input->metadata.arrayList.size()) return false;  // tsOpenFields fehlt
+  meta = tsOutputMetadata();
+  meta.start_t = input->start_t;
+  meta.num_steps = input->metadata.num_steps;
+  meta.arrays.reserve(input->metadata.arrayList.size());
   for (std::size_t i = 0; i < input->metadata.arrayList.size(); ++i)
   {
     const tsArray &a = input->metadata.arrayList[i];
-    if (i >= output->out_dirs.size()) return false;
-    const std::vector<Index> shape = a.bcount;
-    const std::vector<Index> chunks = a.out_chunks;
-    const std::string dir = output->out_dirs[i];
-
     nlohmann::json src_attrs, src_dims;
-    read_source_metadata(&input->fstores[i], a.format, src_attrs, src_dims);
+    read_source_metadata(&in->fstores[i], a.format, src_attrs, src_dims);
+    const std::string raw = read_store_key(&in->fstores[i], (a.format == 3) ? "zarr.json" : ".zarray");
+
+    tsArrayMeta m;
+    m.name = a.name;
+    m.format = a.format;
+    m.source_metadata = raw;
+    m.attributes = src_attrs.dump();
+    m.dim_names = src_dims.dump();
+    m.bstart = a.bstart;
+    m.bcount = a.bcount;
+    m.out_chunks = a.out_chunks;
+    meta.arrays.push_back(std::move(m));
+  }
+  return true;
+}
+
+// Wendet das Ausgabe-Config auf die gelesenen Metadaten an und baut je Array
+// driver + Store-Metadaten.
+void
+tsApplyMetadataConfig(const tsConfig &cfg, tsOutputMetadata &meta)
+{
+  using namespace tensorstore;
+  for (tsArrayMeta &m : meta.arrays)
+  {
+    const std::vector<Index> shape = m.bcount;
+    const std::vector<Index> chunks = m.out_chunks;
+
+    nlohmann::json src_attrs = nlohmann::json::object(), src_dims = nlohmann::json::array();
+    try
+    {
+      src_attrs = nlohmann::json::parse(m.attributes);
+      src_dims = nlohmann::json::parse(m.dim_names);
+    }
+    catch (...)
+    {
+      src_attrs = nlohmann::json::object();
+      src_dims = nlohmann::json::array();
+    }
 
     nlohmann::json md;
-    if (output->cfg.out_format == "zarr3")
+    if (cfg.out_format == "zarr3")
     {
-      md = { { "zarr_format", 3 },       { "node_type", "array" },
-             { "shape", shape },         { "chunk_grid", { { "name", "regular" }, { "configuration", { { "chunk_shape", chunks } } } } },
-             { "data_type", output->cfg.out_dtype }, { "fill_value", 0.0 } };
+      md = { { "zarr_format", 3 },
+             { "node_type", "array" },
+             { "shape", shape },
+             { "chunk_grid", { { "name", "regular" }, { "configuration", { { "chunk_shape", chunks } } } } },
+             { "data_type", cfg.out_dtype },
+             { "fill_value", 0.0 } };
       if (!src_attrs.empty()) md["attributes"] = src_attrs;
       if (!src_dims.empty()) md["dimension_names"] = src_dims;
     }
-    else if (output->cfg.out_format == "n5")
+    else if (cfg.out_format == "n5")
     {
       // N5: mandatory attributes plus the source attributes (with
       // `_ARRAY_DIMENSIONS`) as additional attributes in attributes.json.
@@ -2341,51 +2398,100 @@ tsSetMetadata(tsHandle *input, tsHandle *output)
              { "order", "C" },     { "filters", nullptr },    { "dimension_separator", "." } };
     }
 
-    if (output->cfg.compressor)
-      apply_compressor_by_name(*output->cfg.compressor, output->cfg.out_format,
-                               out_dtype_size(output->cfg.out_dtype), md);
+    if (cfg.compressor) { apply_compressor_by_name(*cfg.compressor, cfg.out_format, out_dtype_size(cfg.out_dtype), md); }
     else
-      copy_source_compression(&input->fstores[i], a.format, output->cfg.out_format,
-                              out_dtype_size(output->cfg.out_dtype), chunks, md);
+    {
+      nlohmann::json src;
+      try
+      {
+        src = nlohmann::json::parse(m.source_metadata);
+      }
+      catch (...)
+      {
+        src = nlohmann::json();
+      }
+      apply_source_compression_json(src, m.format, cfg.out_format, out_dtype_size(cfg.out_dtype), chunks, md);
+    }
 
-    const char *driver = (output->cfg.out_format == "zarr3") ? "zarr3"
-                        : (output->cfg.out_format == "n5") ? "n5"
-                                                        : "zarr";
-    nlohmann::json spec{ { "driver", driver },
+    m.driver = (cfg.out_format == "zarr3") ? "zarr3" : (cfg.out_format == "n5") ? "n5" : "zarr";
+    m.metadata = md.dump();
+  }
+}
+
+// Legt je Datenarray den Ausgabestore an und setzt die Schreibgrenzen; benoetigt
+// nur das Output-Handle.
+bool
+tsSetMetadata(tsHandle *output, const tsOutputMetadata &meta)
+{
+  using namespace tensorstore;
+  if (!output) return false;
+  auto *out = static_cast<tsHandleImpl *>(output);
+  if (out->out_dirs.size() < meta.arrays.size()) return false;
+  for (std::size_t i = 0; i < meta.arrays.size(); ++i)
+  {
+    const tsArrayMeta &m = meta.arrays[i];
+    const std::string dir = out->out_dirs[i];
+
+    nlohmann::json md;
+    try
+    {
+      md = nlohmann::json::parse(m.metadata);
+    }
+    catch (...)
+    {
+      std::cerr << "Invalid metadata for '" << m.name << "'\n";
+      return false;
+    }
+
+    nlohmann::json spec{ { "driver", m.driver },
                          { "kvstore", { { "driver", "file" }, { "path", dir } } },
                          { "create", true },
                          { "delete_existing", true },
                          { "metadata", md } };
     tensorstore::Result<tensorstore::TensorStore<void, tensorstore::dynamic_rank>> store_result;
-    const bool z3 = (output->cfg.out_format == "zarr3");
+    const bool z3 = (m.driver == "zarr3");
     if (z3 && output->cfg.out_dtype == "float16")
-      store_result = open_output_store<tensorstore::dtypes::float16_t>(spec, output->context);
+      store_result = open_output_store<tensorstore::dtypes::float16_t>(spec, out->context);
     else if (z3 && output->cfg.out_dtype == "float64")
-      store_result = open_output_store<double>(spec, output->context);
+      store_result = open_output_store<double>(spec, out->context);
     else if (z3 && output->cfg.out_dtype == "bfloat16")
-      store_result = open_output_store<tensorstore::dtypes::bfloat16_t>(spec, output->context);
+      store_result = open_output_store<tensorstore::dtypes::bfloat16_t>(spec, out->context);
     else
-      store_result = open_output_store<float>(spec, output->context);
+      store_result = open_output_store<float>(spec, out->context);
     if (!store_result)
     {
-      std::cerr << "Failed to create output store for '" << a.name << "': " << store_result.status().ToString() << "\n";
+      std::cerr << "Failed to create output store for '" << m.name << "': " << store_result.status().ToString() << "\n";
       return false;
     }
     auto store = *store_result;
-    if (output->cfg.out_format == "zarr2" && !write_v2_zattrs_if_needed(dir, src_attrs, src_dims)) return false;
+    if (m.driver == "zarr")
+    {
+      nlohmann::json src_attrs = nlohmann::json::object(), src_dims = nlohmann::json::array();
+      try
+      {
+        src_attrs = nlohmann::json::parse(m.attributes);
+        src_dims = nlohmann::json::parse(m.dim_names);
+      }
+      catch (...)
+      {
+        src_attrs = nlohmann::json::object();
+        src_dims = nlohmann::json::array();
+      }
+      if (!write_v2_zattrs_if_needed(dir, src_attrs, src_dims)) return false;
+    }
 
     Writer w;
-    w.name = a.name;
+    w.name = m.name;
     w.store = std::move(store);
-    w.bstart = a.bstart;
-    w.bcount = a.bcount;
-    w.chunks = a.out_chunks;
-    output->writers.push_back(std::move(w));
+    w.bstart = m.bstart;
+    w.bcount = m.bcount;
+    w.chunks = m.out_chunks;
+    out->writers.push_back(std::move(w));
   }
-  output->out_start = input->start_t;
-  output->out_t = input->start_t - 1;
-  output->out_end = input->metadata.num_steps;
-  output->have_sel = false;
+  out->out_start = meta.start_t;
+  out->out_t = meta.start_t - 1;
+  out->out_end = meta.num_steps;
+  out->have_sel = false;
   return true;
 }
 
@@ -2394,7 +2500,7 @@ tsSetMetadata(tsHandle *input, tsHandle *output)
 std::int64_t
 tsSetNextStep(tsHandle *handle)
 {
-  if (!handle || handle->writers.empty() || handle->out_t >= handle->out_end - 1) return -1;
+  if (!handle || static_cast<tsHandleImpl *>(handle)->writers.empty() || handle->out_t >= handle->out_end - 1) return -1;
   ++handle->out_t;
   return handle->out_t;
 }
@@ -2403,7 +2509,7 @@ tsSetNextStep(tsHandle *handle)
 bool
 tsSetField(tsHandle *handle, const tsField &field)
 {
-  if (!handle || field.array >= handle->writers.size()) return false;
+  if (!handle || field.array >= static_cast<tsHandleImpl *>(handle)->writers.size()) return false;
   handle->sel_field = field.array;
   handle->sel_layer = field.layer;
   handle->have_sel = true;
@@ -2412,17 +2518,33 @@ tsSetField(tsHandle *handle, const tsField &field)
 
 // Schreibt ein Feld in die Ausgabe (Fenstersammelpuffer, chunkweises Schreiben).
 bool
-tsWriteField(tsHandle *handle, const std::vector<float> &data)
+tsWriteField(tsHandle *handle, const float *data, std::size_t n)
 {
   using namespace tensorstore;
-  if (!handle || !handle->have_sel || handle->sel_field >= handle->writers.size()) return false;
-  Writer &w = handle->writers[handle->sel_field];
+  if (!handle || !handle->have_sel || handle->sel_field >= static_cast<tsHandleImpl *>(handle)->writers.size()) return false;
+  Writer &w = static_cast<tsHandleImpl *>(handle)->writers[handle->sel_field];
   const Index step = handle->out_t;
-  const Index lay = w.store.domain().rank() >= 3 ? handle->sel_layer - w.bstart[1] : 0;
-  const Index cells = w.bcount.back();
-  if (static_cast<Index>(data.size()) != cells)
+  const DimensionIndex rank = w.store.domain().rank();
+  if (rank == 1)
   {
-    std::cerr << "Field '" << w.name << "' has " << data.size() << " values, expected " << cells << "\n";
+    // Rank-1: one value per step (dim 0 is both the time and the cell dim).
+    // `data` comes from the reader padded to `num_cells` (= step count); only
+    // its first entry holds the value of this step.
+    if (n < 1) return false;
+    if (!w.buf || step >= w.win_t0 + w.win_n)
+    {
+      if (!flush_window(w)) return false;
+      if (!start_window(w, step)) return false;
+    }
+    w.buf->data()[step - w.win_t0] = data[0];
+    w.filled = std::max(w.filled, step - w.win_t0 + 1);
+    return true;
+  }
+  const Index lay = rank >= 3 ? handle->sel_layer - w.bstart[1] : 0;
+  const Index cells = w.bcount.back();
+  if (static_cast<Index>(n) != cells)
+  {
+    std::cerr << "Field '" << w.name << "' has " << n << " values, expected " << cells << "\n";
     return false;
   }
   if (!w.buf || step >= w.win_t0 + w.win_n)
@@ -2430,40 +2552,70 @@ tsWriteField(tsHandle *handle, const std::vector<float> &data)
     if (!flush_window(w)) return false;
     if (!start_window(w, step)) return false;
   }
-  const DimensionIndex rank = w.store.domain().rank();
   const Index layers = rank >= 3 ? w.bcount[1] : 1;
   if (lay < 0 || lay >= layers) return false;
-  float *dst
-      = w.buf->data() + ((step - w.win_t0) * layers + lay) * static_cast<std::size_t>(cells);
-  std::copy(data.begin(), data.end(), dst);
+  float *dst = w.buf->data() + ((step - w.win_t0) * layers + lay) * static_cast<std::size_t>(cells);
+  std::copy(data, data + n, dst);
   w.filled = std::max(w.filled, step - w.win_t0 + 1);
   return true;
 }
 
-// Schreibt alle erkannten Koordinatenarrays in die Ausgabe (dtype erhalten).
+// Liest die Quell-Metadaten aller benutzten Koordinatenarrays in `coords` ein
+// (nativer Datentyp, Roh-Kompression); unabhaengig vom Output-Config.
 bool
-tsWriteCoordinates(tsHandle *input, tsHandle *output)
+tsReadCoordinates(tsHandle *input, std::vector<tsCoordinate> &coords)
 {
   using namespace tensorstore;
-  if (!input || !output) return false;
+  if (!input) return false;
+  auto *in = static_cast<tsHandleImpl *>(input);
+  coords.clear();
+  coords.reserve(input->metadata.coordList.size());
   for (std::size_t i = 0; i < input->metadata.coordList.size(); ++i)
   {
     const tsArray &c = input->metadata.coordList[i];
-    const std::string &cname = c.name;
-    const AnyStoreType &store = input->coord_stores[i];
+    const AnyStoreType &store = in->coord_stores[i];
     const auto domain = store.domain();
-    const DimensionIndex rank = domain.rank();
+
+    nlohmann::json src_attrs, src_dims;
+    read_source_metadata(&store, c.format, src_attrs, src_dims);
+    const std::string raw = read_store_key(&store, (c.format == 3) ? "zarr.json" : ".zarray");
+
+    tsCoordinate coord;
+    coord.name = c.name;
+    coord.format = c.format;
+    coord.source_metadata = raw;
+    coord.attributes = src_attrs.dump();
+    coord.dim_names = src_dims.dump();
+    coord.shape.assign(domain.shape().begin(), domain.shape().end());
+    coord.source = &store;
+    coords.push_back(std::move(coord));
+  }
+  return true;
+}
+
+// Wendet das Ausgabe-Config auf die gelesenen Koordinaten an (Auswahl,
+// Zielpfad, Format, Chunk-Overrides und Kompression) und materialisiert die
+// ausgewaehlten Werte.
+bool
+tsApplyCoordinateConfig(const tsConfig &cfg, std::vector<tsCoordinate> &coords)
+{
+  using namespace tensorstore;
+  for (tsCoordinate &coord : coords)
+  {
+    const std::string &cname = coord.name;
+    const AnyStoreType &store = *static_cast<const AnyStoreType *>(coord.source);
+    const DimensionIndex rank = static_cast<DimensionIndex>(coord.shape.size());
 
     std::vector<Index> bstart, bcount;
-    resolve_selection(output->cfg, std::vector<Index>(domain.shape().begin(), domain.shape().end()), bstart, bcount);
+    resolve_selection(cfg, coord.shape, bstart, bcount);
     for (DimensionIndex d = 0; d < rank; ++d)
     {
-      if (bstart[d] >= domain.shape()[d])
+      if (bstart[d] >= coord.shape[static_cast<std::size_t>(d)])
       {
         std::cerr << "Start index beyond array extent (dim " << d << ") for coordinate '" << cname << "'\n";
         return false;
       }
-      bcount[d] = std::min(bcount[d], domain.shape()[d] - bstart[d]);
+      bcount[d] = std::min(bcount[d], coord.shape[static_cast<std::size_t>(d)] - bstart[d]);
       bcount[d] = std::max<Index>(bcount[d], 1);
     }
 
@@ -2477,31 +2629,36 @@ tsWriteCoordinates(tsHandle *input, tsHandle *output)
       }
     }
     for (auto &ch : chunks) ch = std::max<Index>(ch, 1);
-    if (output->cfg.step_chunk && rank > 0)
-    {
-      chunks[0] = std::max<Index>(1, std::min<Index>(*output->cfg.step_chunk, bcount[0]));
-    }
-    if (output->cfg.cell_chunk && rank > 0)
+    if (cfg.step_chunk && rank > 0) { chunks[0] = std::max<Index>(1, std::min<Index>(*cfg.step_chunk, bcount[0])); }
+    if (cfg.cell_chunk && rank > 0)
     {
       chunks[static_cast<std::size_t>(rank) - 1]
-          = std::max<Index>(1, std::min<Index>(*output->cfg.cell_chunk, bcount[static_cast<std::size_t>(rank) - 1]));
+          = std::max<Index>(1, std::min<Index>(*cfg.cell_chunk, bcount[static_cast<std::size_t>(rank) - 1]));
     }
 
-    const auto dtype_code = coord_dtype_encoded(store.dtype(), output->cfg.out_format);
+    const auto dtype_code = coord_dtype_encoded(store.dtype(), cfg.out_format);
     if (!dtype_code)
     {
-      std::cerr << "Data type '" << store.dtype().name() << "' of coordinate '" << cname
-                << "' is not supported for writing\n";
+      std::cerr << "Data type '" << store.dtype().name() << "' of coordinate '" << cname << "' is not supported for writing\n";
       return false;
     }
 
-    const std::string dir = *output->cfg.out_path + "/" + cname + "/";
+    const std::string dir = *cfg.out_path + "/" + cname + "/";
 
-    nlohmann::json src_attrs, src_dims;
-    read_source_metadata(&store, c.format, src_attrs, src_dims);
+    nlohmann::json src_attrs = nlohmann::json::object(), src_dims = nlohmann::json::array();
+    try
+    {
+      src_attrs = nlohmann::json::parse(coord.attributes);
+      src_dims = nlohmann::json::parse(coord.dim_names);
+    }
+    catch (...)
+    {
+      src_attrs = nlohmann::json::object();
+      src_dims = nlohmann::json::array();
+    }
 
     nlohmann::json md;
-    if (output->cfg.out_format == "zarr3")
+    if (cfg.out_format == "zarr3")
     {
       md = { { "zarr_format", 3 },
              { "node_type", "array" },
@@ -2512,7 +2669,7 @@ tsWriteCoordinates(tsHandle *input, tsHandle *output)
       if (!src_attrs.empty()) md["attributes"] = src_attrs;
       if (!src_dims.empty()) md["dimension_names"] = src_dims;
     }
-    else if (output->cfg.out_format == "n5")
+    else if (cfg.out_format == "n5")
     {
       // N5: mandatory attributes plus the source attributes (with
       // `_ARRAY_DIMENSIONS`) as additional attributes in attributes.json.
@@ -2529,32 +2686,92 @@ tsWriteCoordinates(tsHandle *input, tsHandle *output)
              { "order", "C" },         { "filters", nullptr },    { "dimension_separator", "." } };
     }
 
-    if (output->cfg.compressor)
-      apply_compressor_by_name(*output->cfg.compressor, output->cfg.out_format,
-                               static_cast<int>(store.dtype().size()), md);
+    if (cfg.compressor) { apply_compressor_by_name(*cfg.compressor, cfg.out_format, static_cast<int>(store.dtype().size()), md); }
     else
-      copy_source_compression(&store, c.format, output->cfg.out_format, static_cast<int>(store.dtype().size()), chunks, md);
+    {
+      nlohmann::json src;
+      try
+      {
+        src = nlohmann::json::parse(coord.source_metadata);
+      }
+      catch (...)
+      {
+        src = nlohmann::json();
+      }
+      apply_source_compression_json(src, coord.format, cfg.out_format, static_cast<int>(store.dtype().size()), chunks, md);
+    }
 
-    const char *driver = (output->cfg.out_format == "zarr3") ? "zarr3"
-                        : (output->cfg.out_format == "n5") ? "n5"
-                                                        : "zarr";
-    nlohmann::json spec{ { "driver", driver },
-                         { "kvstore", { { "driver", "file" }, { "path", dir } } },
+    auto read = Read<zero_origin>(store | Box(bstart, bcount)).result();
+    if (!read)
+    {
+      std::cerr << "Failed to read coordinate '" << cname << "': " << read.status().ToString() << "\n";
+      return false;
+    }
+
+    coord.directory = dir;
+    coord.driver = (cfg.out_format == "zarr3") ? "zarr3" : (cfg.out_format == "n5") ? "n5" : "zarr";
+    coord.metadata = md.dump();
+    coord.data = std::make_shared<SharedArray<void, dynamic_rank>>(std::move(*read));
+  }
+  return true;
+}
+
+// Schreibt die mit tsReadCoordinates gelesenen Koordinaten in die Ausgabe.
+bool
+tsWriteCoordinates(tsHandle *output, const std::vector<tsCoordinate> &coords)
+{
+  using namespace tensorstore;
+  if (!output) return false;
+  auto *out = static_cast<tsHandleImpl *>(output);
+  for (const tsCoordinate &coord : coords)
+  {
+    nlohmann::json md;
+    try
+    {
+      md = nlohmann::json::parse(coord.metadata);
+    }
+    catch (...)
+    {
+      std::cerr << "Invalid metadata for coordinate '" << coord.name << "'\n";
+      return false;
+    }
+
+    nlohmann::json spec{ { "driver", coord.driver },
+                         { "kvstore", { { "driver", "file" }, { "path", coord.directory } } },
                          { "create", true },
                          { "delete_existing", true },
                          { "metadata", md } };
-    auto target = Open<void, dynamic_rank>(spec, output->context, OpenMode::create, ReadWriteMode::write).result();
+    auto target = Open<void, dynamic_rank>(spec, out->context, OpenMode::create, ReadWriteMode::write).result();
     if (!target)
     {
-      std::cerr << "Failed to create output store for coordinate '" << cname << "': " << target.status().ToString() << "\n";
+      std::cerr << "Failed to create output store for coordinate '" << coord.name << "': " << target.status().ToString() << "\n";
       return false;
     }
-    if (output->cfg.out_format == "zarr2" && !write_v2_zattrs_if_needed(dir, src_attrs, src_dims)) return false;
 
-    const auto st = Copy(store | Box(bstart, bcount), *target).copy_future.result();
-    if (!st.ok())
+    if (coord.driver == "zarr")
     {
-      std::cerr << "Failed to write coordinate '" << cname << "': " << st.status().ToString() << "\n";
+      nlohmann::json src_attrs = nlohmann::json::object(), src_dims = nlohmann::json::array();
+      try
+      {
+        src_attrs = nlohmann::json::parse(coord.attributes);
+        src_dims = nlohmann::json::parse(coord.dim_names);
+      }
+      catch (...)
+      {
+      }
+      if (!write_v2_zattrs_if_needed(coord.directory, src_attrs, src_dims)) return false;
+    }
+
+    auto *arr = static_cast<const SharedArray<void, dynamic_rank> *>(coord.data.get());
+    if (!arr)
+    {
+      std::cerr << "Missing data for coordinate '" << coord.name << "'\n";
+      return false;
+    }
+    const auto st = Write(*arr, *target).result();
+    if (!st)
+    {
+      std::cerr << "Failed to write coordinate '" << coord.name << "': " << st.status().ToString() << "\n";
       return false;
     }
   }
@@ -2622,10 +2839,7 @@ tsDatasetOverview(const tsConfig &config, tsOverview &ov)
     ov.groups = consolidated_children(meta3, "", /*want_groups=*/true);
     if (!ov.groups.empty()) return true;
     const std::vector<std::string> arrays = consolidated_children(meta3, "", /*want_groups=*/false);
-    if (!arrays.empty())
-    {
-      return overview_rows_from_consolidated(meta3, "", arrays, ov.arrays);
-    }
+    if (!arrays.empty()) { return overview_rows_from_consolidated(meta3, "", arrays, ov.arrays); }
   }
 
   const auto meta2 = read_zarr2_consolidated(root_kv, context);
@@ -2634,10 +2848,7 @@ tsDatasetOverview(const tsConfig &config, tsOverview &ov)
     ov.groups = zarr2_children(meta2, "", /*want_groups=*/true);
     if (!ov.groups.empty()) return true;
     const std::vector<std::string> arrays = zarr2_children(meta2, "", /*want_groups=*/false);
-    if (!arrays.empty())
-    {
-      return overview_rows_from_zarr2_consolidated(meta2, "", arrays, ov.arrays);
-    }
+    if (!arrays.empty()) { return overview_rows_from_zarr2_consolidated(meta2, "", arrays, ov.arrays); }
   }
 
   const std::vector<std::string> names = list_array_names(config, context);
@@ -2653,6 +2864,7 @@ void
 tsCloseFile(tsHandle *handle)
 {
   if (!handle) return;
-  for (auto &w : handle->writers) flush_window(w);
-  delete handle;
+  auto *h = static_cast<tsHandleImpl *>(handle);
+  for (auto &w : h->writers) flush_window(w);
+  delete h;
 }

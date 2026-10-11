@@ -3705,7 +3705,7 @@ static void
 cdf_define_all_vars(stream_t *streamP, int vlistID, int instID, int modelID, int nvarsData, int num_ncvars, ncvar_t *ncvars,
                     ncdim_t *ncdims, int timedimid)
 {
-  int varidsLocal[1024];
+  int varidsLocal[512];
   int *varids = (nvarsData <= (int) ARRAY_SIZE(varidsLocal)) ? varidsLocal : (int *) Malloc((size_t) nvarsData * sizeof(int));
   int n = 0;
   for (int ncvarid = 0; ncvarid < num_ncvars; ncvarid++)

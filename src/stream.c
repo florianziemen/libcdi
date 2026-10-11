@@ -68,34 +68,75 @@ getByteorder(int byteswap)
   return -1;
 }
 
+static int
+cdi_get_protocol(const char *uri, const char **filename)
+{
+  const char *pos = strstr(uri, "://");
+  if (pos == NULL)
+  {
+    *filename = uri;
+    return CDI_PROTOCOL_FILE;
+  }
+
+  size_t protocollen = (size_t) (pos - uri);
+  *filename = pos + 3;
+
+  // if (strncmp(uri, "file", protocollen) == 0) return CDI_PROTOCOL_FILE; // file is already used in NetCDF
+  if (strncmp(uri, "fdb", protocollen) == 0) return CDI_PROTOCOL_FDB;
+  if (strncmp(uri, "across", protocollen) == 0) return CDI_PROTOCOL_ACROSS;
+
+  *filename = uri;
+
+  return CDI_PROTOCOL_OTHER;
+}
+
+int
+get_filetype_from_name(const char **path)
+{
+  const char *uri = *path;
+  if (uri[0] == 'z' && uri[1] == 'a' && uri[2] == 'r' && uri[3] == 'r')
+  {
+    if (uri[4] == '2' && uri[5] == ':' && uri[6])
+    {
+      *path = uri + 6;
+      return CDI_FILETYPE_ZARR2;
+    }
+    if (uri[4] == '3' && uri[5] == ':' && uri[6])
+    {
+      *path = uri + 6;
+      return CDI_FILETYPE_ZARR3;
+    }
+  }
+
+  return CDI_EUFTYPE;
+}
+
 // used also in CDO
 int
 cdiGetFiletype(const char *uri, int *byteorder)
 {
-  // clang-format off
-  int filetype = CDI_EUFTYPE;
-  int swap = 0;
-  int version;
-  long recpos;
+  int filetype = get_filetype_from_name(&uri);
+  if (filetype != CDI_EUFTYPE) return filetype;
 
   const char *filename;
-  int protocol = cdiGetProtocol(uri, &filename);
-
+  int protocol = cdi_get_protocol(uri, &filename);
   switch (protocol)
   {
     case CDI_PROTOCOL_ACROSS: return CDI_FILETYPE_GRB2;
-    case CDI_PROTOCOL_FDB:    return CDI_FILETYPE_GRB2;
-    case CDI_PROTOCOL_OTHER:  return CDI_FILETYPE_NC4;  // support for NetCDF remote types and ESDM
-    case CDI_PROTOCOL_FILE:
-      // handled below;
-      break;
+    case CDI_PROTOCOL_FDB: return CDI_FILETYPE_GRB2;
+    case CDI_PROTOCOL_OTHER: return CDI_FILETYPE_NC4;  // support for NetCDF remote types and ESDM
+    case CDI_PROTOCOL_FILE: break;                     // handled below;
   }
 
   int fileID = fileOpen(filename, "r");
 
+  // clang-format off
   if      (fileID == CDI_UNDEFID) return CDI_ESYSTEM;
   else if (fileID == -2)          return CDI_ETMOF;
 
+  int swap = 0;
+  int version;
+  long recpos;
   char buffer[8];
   if (fileRead(fileID, buffer, 8) != 8)
   {
@@ -411,6 +452,9 @@ cdiInqContents(stream_t *streamP)
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF: status = cdfInqContents(streamP); break;
 #endif
+#ifdef HAVE_TENSORSTORE
+    case CDI_FILETYPE_ZARR: status = ts_inq_contents(streamP); break;
+#endif
     default:
     {
       status = CDI_ELIBNAVAIL;
@@ -435,36 +479,13 @@ cdiInqContents(stream_t *streamP)
 }
 
 int
-cdiGetProtocol(const char *uri, const char **filename)
-{
-  const char *pos = strstr(uri, "://");
-  if (pos == NULL)
-  {
-    *filename = uri;
-    return CDI_PROTOCOL_FILE;
-  }
-
-  size_t protocollen = (size_t) (pos - uri);
-  *filename = pos + 3;
-
-  // if (strncmp(uri, "file", protocollen) == 0) return CDI_PROTOCOL_FILE; // file is already used in NetCDF
-  if (strncmp(uri, "fdb", protocollen) == 0) return CDI_PROTOCOL_FDB;
-  if (strncmp(uri, "across", protocollen) == 0) return CDI_PROTOCOL_ACROSS;
-
-  *filename = uri;
-
-  return CDI_PROTOCOL_OTHER;
-}
-
-int
 cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, stream_t *streamP, int recordBufIsToBeCreated)
 {
   int fileID;
   char temp[2] = { filemode, 0 };
 
   const char *filename;
-  streamP->protocol = cdiGetProtocol(uri, &filename);
-
+  streamP->protocol = cdi_get_protocol(uri, &filename);
   switch (streamP->protocol)
   {
     case CDI_PROTOCOL_ACROSS:
@@ -761,6 +782,7 @@ streamOpenNCMem(int ncidp, char mode)
 
   return streamID;
 }
+
 static int
 streamOpen(const char *filename, const char *filemode, int filetype)
 {
@@ -950,6 +972,35 @@ streamOpenRead(const char *filename)
   }
 
   return streamID;
+}
+
+int
+streamOpenTensorstore(const char *path)
+{
+  cdi_initialize();
+
+  /*int byteorder = 0;
+  int filetype = cdiGetFiletype(filename, &byteorder);
+  if (filetype < 0) return filetype;
+
+  int streamID = streamOpen(filename, "r", filetype);
+  if (streamID >= 0)
+  {
+    stream_t *streamP = stream_to_pointer(streamID);
+    streamP->byteorder = byteorder;
+
+    streamP->groupID = streamP->fileID;
+    long status = stream_create_vlist(streamP, NULL);
+    if (status < 0)
+    {
+      streamID = (int) status;
+      FreeAndNull(streamP->record);
+      reshRemove(streamP->self, &streamOps);
+    }
+  }
+
+  return streamID;*/
+  return -1;
 }
 
 static int

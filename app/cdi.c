@@ -749,6 +749,23 @@ define_filter(const char *arg)
 }
 
 int
+check_tensorstore(const char **filename)
+{
+  const char ts[] = "ts:";
+  int tsLen = (int) sizeof(ts) - 1;
+  const char *uri = *filename;
+  int len = (int) strlen(uri);
+  if (len > tsLen && strncmp(uri, ts, tsLen) == 0)
+  {
+    *filename = uri + tsLen;
+    return 1;
+  }
+
+  *filename = uri;
+  return 0;
+}
+
+int
 main(int argc, char *argv[])
 {
   char *rTable = NULL;
@@ -823,8 +840,8 @@ main(int argc, char *argv[])
     }
   }
 
-  char *fname1 = (optind < argc) ? argv[optind++] : NULL;
-  char *fname2 = (optind < argc) ? argv[optind++] : NULL;
+  const char *fname1 = (optind < argc) ? argv[optind++] : NULL;
+  const char *fname2 = (optind < argc) ? argv[optind++] : NULL;
   if (optind < argc) fprintf(stderr, "optind: %d argc: %d\n", optind, argc);
 
   if (Debug || Version) version();
@@ -874,7 +891,14 @@ main(int argc, char *argv[])
       if (Debug) cdiQueryPrint(query);
     }
 
-    int streamID1 = useQuery ? streamOpenReadQuery(fname1, query) : streamOpenRead(fname1);
+    int isZarrFormat = check_tensorstore(&fname1);
+
+    int streamID1 = -1;
+    if (isZarrFormat) { streamID1 = streamOpenTensorstore(fname1); }
+    else
+    {
+      streamID1 = useQuery ? streamOpenReadQuery(fname1, query) : streamOpenRead(fname1);
+    }
     if (streamID1 < 0) return handle_error(streamID1, "Open failed on %s", fname1);
 
     if (useQuery) cdiQueryPrintEntriesNotFound(query);

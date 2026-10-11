@@ -1352,6 +1352,9 @@ def print_means_table(cfg, items, coords=()):
         suffix = f"  {cdetails}" if cdetails else ""
         print(f"{cidx}  {cname}  {cshape}{suffix}")
 
+    if cfg.info:
+        return True
+
     # --out-path mode: create one output store per selected data array (same
     # selected hypercube as the tables), then run the same window loops but
     # write the data instead of printing min/mean/max.
@@ -1756,14 +1759,114 @@ def _overview_fields(meta, attrs, fmt):
     return str(dtype), shape, chunks, compressor, "-" if units is None else str(units)
 
 
+def _meta_dim_names(meta, attrs, fmt):
+    """Dimension names of an array's metadata: Zarr 2 `_ARRAY_DIMENSIONS`
+    attribute or Zarr 3 `dimension_names`.  Empty list when not defined."""
+    if fmt == 2:
+        return list((attrs or {}).get("_ARRAY_DIMENSIONS") or [])
+    dn = meta.get("dimension_names")
+    if dn:
+        return list(dn)
+    a = meta.get("attributes") or {}
+    return list(a.get("_ARRAY_DIMENSIONS") or [])
+
+
+def _meta_grid_mapping(meta, attrs, fmt):
+    """The `grid_mapping` attribute of an array's metadata (None if unset)."""
+    if fmt == 2:
+        return (attrs or {}).get("grid_mapping")
+    a = meta.get("attributes") or {}
+    return a.get("grid_mapping")
+
+
+def _coordinate_names(entries):
+    """Set of coordinate-array names among `entries` (tuples of
+    `(name, dim_names, grid_mapping)`).  An array is a coordinate when its name
+    is the dimension name of some array or the `grid_mapping` target of some
+    array."""
+    names = set()
+    for _name, dims, gm in entries:
+        names.update(dims or ())
+        if gm:
+            names.add(gm)
+    return names
+
+
+def _discover_data_array_names(cfg):
+    """Names of the DATA arrays below `--path` / `--group`: every array whose
+    name is not a coordinate array.  An array is a coordinate when its name is
+    the dimension name of some array or the `grid_mapping` target of some array
+    (coordinate arrays are selected automatically alongside the data arrays)."""
+    entries = []
+    if cfg.group:
+        kvstore, path, endpoint = resolve_kvstore(cfg)
+        try:
+            meta = _read_root_zarr3_consolidated(path)
+            names = _consolidated_children(meta, cfg.group, want_groups=False)
+            if not names:
+                print(f"No arrays found in group '{cfg.group}'", file=sys.stderr)
+                return []
+            for name in names:
+                key = f"{cfg.group}/{name}"
+                node = meta.get(key)
+                if node is None:
+                    print(
+                        f"Failed to read metadata for array '{name}' (missing '{key}')",
+                        file=sys.stderr,
+                    )
+                    continue
+                entries.append((name, node, None, 3))
+        except Exception:
+            meta = _read_root_zarr2_consolidated(path)
+            names = _zarr2_children(meta, cfg.group, want_groups=False)
+            if not names:
+                print(f"No arrays found in group '{cfg.group}'", file=sys.stderr)
+                return []
+            for name in names:
+                key = f"{cfg.group}/{name}"
+                za = meta.get(f"{key}/.zarray")
+                if za is None:
+                    print(
+                        f"Failed to read metadata for array '{name}' (missing '{key}/.zarray')",
+                        file=sys.stderr,
+                    )
+                    continue
+                entries.append((name, za, meta.get(f"{key}/.zattrs"), 2))
+    else:
+        # A root that contains groups is listed (groups win), exactly like the
+        # dataset overview; only a root of plain arrays is selected.
+        kvstore, path, endpoint = resolve_kvstore(cfg)
+        try:
+            root = _read_root_zarr3_consolidated(path)
+            if _consolidated_children(root, "", want_groups=True):
+                return []
+        except Exception:
+            try:
+                root = _read_root_zarr2_consolidated(path)
+                if _zarr2_children(root, "", want_groups=True):
+                    return []
+            except Exception:
+                pass
+        names = _discover_array_names(cfg)
+        for name in names:
+            try:
+                meta, attrs, fmt = _raw_metadata(cfg, name)
+                entries.append((name, meta, attrs, fmt))
+            except Exception as e:
+                print(f"Failed to open '{name}': {e}", file=sys.stderr)
+    coord = _coordinate_names(
+        [(n, _meta_dim_names(m, a, f), _meta_grid_mapping(m, a, f)) for n, m, a, f in entries]
+    )
+    return sorted(n for n, _m, _a, _f in entries if n not in coord)
+
+
 def _print_consolidated_overview(meta: dict, prefix: str, names: list[str]) -> bool:
     """Print the overview table for Zarr 3 arrays served from a consolidated
     node map.  `prefix` is "" for the store root, or the group name.  Mirrors
-    the C++ `print_overview_from_consolidated`."""
-    print("=== Dataset overview ===")
-    print("#  Name  [Units]  DataType  Shape  Chunks  Compressor")
+    the C++ `print_overview_from_consolidated`.  Coordinate arrays are omitted."""
     ok = True
-    for index, name in enumerate(names, start=1):
+    rows = []
+    for name in names:
         key = f"{prefix}/{name}" if prefix else name
         node = meta.get(key)
         if node is None:
@@ -1774,6 +1877,27 @@ def _print_consolidated_overview(meta: dict, prefix: str, names: list[str]) -> b
             ok = False
             continue
         dtype, shape, chunks, compressor, units = _overview_fields(node, None, 3)
+        rows.append(
+            (
+                name,
+                dtype,
+                shape,
+                chunks,
+                compressor,
+                units,
+                _meta_dim_names(node, None, 3),
+                _meta_grid_mapping(node, None, 3),
+            )
+        )
+    coord = _coordinate_names([(r[0], r[6], r[7]) for r in rows])
+    data_rows = [r for r in rows if r[0] not in coord]
+    if not data_rows:
+        return False
+    print("=== Dataset overview ===")
+    print("#  Name  [Units]  DataType  Shape  Chunks  Compressor")
+    for index, (name, dtype, shape, chunks, compressor, units, _dims, _gm) in enumerate(
+        data_rows, start=1
+    ):
         shape_s = "[" + ",".join(str(s) for s in shape) + "]"
         chunk_s = "[" + ",".join(str(s) for s in chunks) + "]"
         print(
@@ -1785,11 +1909,11 @@ def _print_consolidated_overview(meta: dict, prefix: str, names: list[str]) -> b
 def _print_zarr2_overview(meta: dict, prefix: str, names: list[str]) -> bool:
     """Print the overview table for Zarr 2 arrays served from a `.zmetadata`
     map.  `prefix` is "" for the store root, or the group name.  Mirrors the
-    C++ `print_zarr2_overview_from_consolidated`."""
-    print("=== Dataset overview ===")
-    print("#  Name  [Units]  DataType  Shape  Chunks  Compressor")
+    C++ `print_zarr2_overview_from_consolidated`.  Coordinate arrays are
+    omitted."""
     ok = True
-    for index, name in enumerate(names, start=1):
+    rows = []
+    for name in names:
         key = f"{prefix}/{name}" if prefix else name
         za = meta.get(f"{key}/.zarray")
         if za is None:
@@ -1799,9 +1923,29 @@ def _print_zarr2_overview(meta: dict, prefix: str, names: list[str]) -> bool:
             )
             ok = False
             continue
-        dtype, shape, chunks, compressor, units = _overview_fields(
-            za, meta.get(f"{key}/.zattrs"), 2
+        attrs = meta.get(f"{key}/.zattrs")
+        dtype, shape, chunks, compressor, units = _overview_fields(za, attrs, 2)
+        rows.append(
+            (
+                name,
+                dtype,
+                shape,
+                chunks,
+                compressor,
+                units,
+                _meta_dim_names(za, attrs, 2),
+                _meta_grid_mapping(za, attrs, 2),
+            )
         )
+    coord = _coordinate_names([(r[0], r[6], r[7]) for r in rows])
+    data_rows = [r for r in rows if r[0] not in coord]
+    if not data_rows:
+        return False
+    print("=== Dataset overview ===")
+    print("#  Name  [Units]  DataType  Shape  Chunks  Compressor")
+    for index, (name, dtype, shape, chunks, compressor, units, _dims, _gm) in enumerate(
+        data_rows, start=1
+    ):
         shape_s = "[" + ",".join(str(s) for s in shape) + "]"
         chunk_s = "[" + ",".join(str(s) for s in chunks) + "]"
         print(
@@ -1837,21 +1981,41 @@ def print_dataset_overview(cfg):
         print(f"No zarr arrays found in dataset at: {cfg.path}", file=sys.stderr)
         return False
 
-    print("=== Dataset overview ===")
-    print("#  Name  [Units]  DataType  Shape  Chunks  Compressor")
     ok = True
-    for index, name in enumerate(names, start=1):
+    rows = []
+    for name in names:
         try:
             meta, attrs, fmt = _raw_metadata(cfg, name)
             dtype, shape, chunks, compressor, units = _overview_fields(meta, attrs, fmt)
-            shape_s = "[" + ",".join(str(s) for s in shape) + "]"
-            chunk_s = "[" + ",".join(str(s) for s in chunks) + "]"
-            print(
-                f"{index:>2}  {name}  [{units}]  {dtype}  {shape_s}  {chunk_s}  {compressor}"
+            rows.append(
+                (
+                    name,
+                    dtype,
+                    shape,
+                    chunks,
+                    compressor,
+                    units,
+                    _meta_dim_names(meta, attrs, fmt),
+                    _meta_grid_mapping(meta, attrs, fmt),
+                )
             )
         except Exception as e:
             print(f"Failed to open '{name}': {e}", file=sys.stderr)
             ok = False
+    coord = _coordinate_names([(r[0], r[6], r[7]) for r in rows])
+    data_rows = [r for r in rows if r[0] not in coord]
+    if not data_rows:
+        return False
+    print("=== Dataset overview ===")
+    print("#  Name  [Units]  DataType  Shape  Chunks  Compressor")
+    for index, (name, dtype, shape, chunks, compressor, units, _dims, _gm) in enumerate(
+        data_rows, start=1
+    ):
+        shape_s = "[" + ",".join(str(s) for s in shape) + "]"
+        chunk_s = "[" + ",".join(str(s) for s in chunks) + "]"
+        print(
+            f"{index:>2}  {name}  [{units}]  {dtype}  {shape_s}  {chunk_s}  {compressor}"
+        )
     return ok
 
 
@@ -1953,9 +2117,10 @@ def parse_args(argv):
     p = argparse.ArgumentParser(
         description="Read Zarr2/Zarr3 arrays (disk or S3) and print the "
         "per-timestep mean of all elements in the trailing dimensions. "
-        "The Zarr format is auto-detected.  When --name is omitted, a "
-        "one-line overview (Name, Units, DataType, Shape, Chunks, Compressor) "
-        "is printed for every array in the dataset."
+        "The Zarr format is auto-detected.  When --name is omitted, every "
+        "data array in the dataset is selected (coordinate arrays are "
+        "excluded; they are selected automatically alongside the data "
+        "arrays)."
     )
     p.add_argument(
         "--format",
@@ -1977,7 +2142,7 @@ def parse_args(argv):
     p.add_argument(
         "--name",
         dest="arrays",
-        help="comma-separated array names (omit to list all arrays in the dataset)",
+        help="comma-separated array names (omit to select all data arrays in the dataset)",
     )
     p.add_argument("--endpoint", help="S3 endpoint URL (optional, for s3)")
     p.add_argument(
@@ -2007,7 +2172,11 @@ def parse_args(argv):
     p.add_argument(
         "--info",
         action="store_true",
-        help="print the TensorStore version as the first line of output",
+        help=(
+            "print the TensorStore version as the first line of output; with "
+            "--path, print only the present array names (the Selected/"
+            "Coordinate arrays tables) and no measurements"
+        ),
     )
     p.add_argument(
         "--debug",
@@ -2179,9 +2348,17 @@ def _main_core(argv):
 
         zconfig.set({"async.concurrency": cfg.data_copy_concurrency})
     if not cfg.arrays:
-        if cfg.group:
-            return 0 if print_dataset_overview(cfg) else 1
-        return _list_root_contents(cfg)
+        cfg.arrays = _discover_data_array_names(cfg)
+        if not cfg.arrays:
+            if cfg.group:
+                return 0 if print_dataset_overview(cfg) else 1
+            return _list_root_contents(cfg)
+
+    # --info prints only the two header tables (Selected arrays / Coordinate
+    # arrays) and reads no measurements; any write mode is ignored for it.
+    if cfg.info:
+        cfg.out_path = None
+        cfg.overwrite = False
 
     # --overwrite without --out-path is an error; an existing --out-path is
     # only replaced (deleted first) with --overwrite, and must not be the

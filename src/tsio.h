@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <utility>
@@ -102,6 +103,8 @@ struct tsInfo
   std::string shape;
   std::string chunks;
   std::string compressor;  // "-" wenn unbekannt
+  std::vector<std::string> dim_names;  // dimension_names / _ARRAY_DIMENSIONS
+  std::string grid_mapping;            // `grid_mapping`-Attribut, "" wenn nicht gesetzt
 };
 
 // Uebersicht eines Datensatzes: Gruppenliste (nur Zarr-3-Wurzel) oder eine
@@ -122,8 +125,84 @@ struct tsField
   std::int64_t layer = 0;
 };
 
-// Undurchsichtiger Dateizugriff; die Definition steht in tsio.cpp.
-struct tsHandle;
+// Eine Koordinatenausgabe: der von tsReadCoordinates gelesene Quell-Teil
+// (unabhaengig vom Output-Config) und der von tsApplyCoordinateConfig gesetzte
+// Ausgabe-Teil.  `source` ist ein opaker Zeiger auf den Quell-Store (nur
+// waehrend das Input-Handle offen ist gueltig), `data` ein opaker
+// TensorStore-Puffer (SharedArray im Quell-Datentyp).
+struct tsCoordinate
+{
+  // Quelle (von tsReadCoordinates gefuellt)
+  std::string name;
+  int format = 0;                 // Quell-Zarr-Format (2 oder 3)
+  std::string source_metadata;    // Roh-.zarray/zarr.json der Quelle (Kompression)
+  std::string attributes;         // Quell-Attribute als JSON-Text (v2 .zattrs)
+  std::string dim_names;          // Quell-dimension_names als JSON-Text (v2 .zattrs)
+  std::vector<std::int64_t> shape;
+  const void *source = nullptr;   // opaker Quell-Store
+
+  // Ausgabe (von tsApplyCoordinateConfig gesetzt)
+  std::string directory;          // Zielpfad <out_path>/<name>/
+  std::string driver;             // "zarr3", "n5" oder "zarr"
+  std::string metadata;           // Store-Metadaten als JSON-Text
+  std::shared_ptr<void> data;
+};
+
+// Ausgabe-Metadaten eines Datenarrays.  Der Quell-Teil wird von tsGetMetadata
+// gefuellt (unabhaengig vom Output-Config), der Ausgabe-Teil von
+// tsApplyMetadataConfig; tsSetMetadata legt daraus den Store an.
+struct tsArrayMeta
+{
+  // Quelle
+  std::string name;
+  int format = 0;                 // Quell-Zarr-Format (2 oder 3)
+  std::string source_metadata;    // Roh-.zarray/zarr.json der Quelle (Kompression)
+  std::string attributes;         // Quell-Attribute als JSON-Text (v2 .zattrs)
+  std::string dim_names;          // Quell-dimension_names als JSON-Text (v2 .zattrs)
+  std::vector<std::int64_t> bstart;
+  std::vector<std::int64_t> bcount;
+  std::vector<std::int64_t> out_chunks;
+
+  // Ausgabe (von tsApplyMetadataConfig gesetzt)
+  std::string driver;      // "zarr3", "n5" oder "zarr"
+  std::string metadata;    // Store-Metadaten als JSON-Text
+};
+
+// Ausgabe-Metadaten des Schreibmodus: Zeitgrenzen und je Datenarray die
+// Metadaten.  Wird von tsGetMetadata gefuellt und an tsSetMetadata uebergeben.
+struct tsOutputMetadata
+{
+  std::int64_t start_t = 0;
+  std::int64_t num_steps = 0;
+  std::vector<tsArrayMeta> arrays;
+};
+
+// TensorStore-freier Teil des Dateizugriffs.  Der TensorStore-spezifische Teil
+// (Context, Stores, Reader/Writer) wird in tsio.cpp als `tsHandleImpl` ergaenzt.
+struct tsHandle
+{
+  tsConfig cfg;
+  tsMetadata metadata;
+  std::vector<std::string> out_dirs;
+
+  std::int64_t start_t = 0;                                  // erster absoluter Schritt (kleinstes bstart[0])
+  std::int64_t cur_t = 0;                                    // aktueller absoluter Schritt (Eingabe)
+  std::size_t next_field = 0;                                // naechstes Feld des aktuellen Schritts
+  std::vector<std::pair<std::size_t, std::int64_t>> fields;  // (Array, absoluter Layer) je Schritt
+  tsField last_field;                                        // Feld, das tsGetField zuletzt geliefert hat
+  bool have_field = false;
+
+  // Ausgabe-Schrittzaehler (nur Schreibmodus).
+  std::int64_t out_start = 0;  // erster absoluter Schritt der Ausgabe
+  std::int64_t out_t = 0;      // aktueller absoluter Schreib-Schritt
+  std::int64_t out_end = 0;    // ein hinter dem letzten Schreib-Schritt
+  std::size_t sel_field = 0;   // zuletzt mit tsSetField gewaehltes Array
+  std::int64_t sel_layer = 0;  // absoluter Layer des Schreibziels
+  bool have_sel = false;
+
+  bool fields_open = false;
+  bool done = false;
+};
 
 // TensorStore-Version dieses Builds.
 const char *tsVersion();
@@ -139,11 +218,22 @@ tsHandle *tsOpenFileWrite(const std::string &path, const tsConfig &config);
 
 // Metadaten des geoeffneten Datensatzes; gueltig bis tsCloseFile.  Nach
 // tsResolveArray stehen darin auch die aufgeloesten Auswahlgrenzen.
-tsMetadata &tsGetMetadata(tsHandle *handle);
+tsMetadata &tsGetReadMetadata(tsHandle *handle);
 
-// Uebertraegt Kompression, Attribute und dimension_names aller Arrays von `in`
-// nach `out`; nach tsOpenFields(`in`) und vor dem ersten tsWriteField aufrufen.
-bool tsSetMetadata(tsHandle *in, tsHandle *out);
+// Liest Attribute, dimension_names und die Roh-Kompressionsmetadaten aller
+// Datenarrays in `meta` ein (Reihenfolge wie tsMetadata::arrayList);
+// unabhaengig vom Output-Config.  Nach tsOpenFields(`in`) aufrufen.  false bei
+// Fehlern (Diagnose auf stderr).
+bool tsGetMetadata(tsHandle *in, tsOutputMetadata &meta);
+
+// Wendet das Ausgabe-Config (Format, dtype, Kompression) auf die von
+// tsGetMetadata gelesenen Metadaten an und baut driver + Store-Metadaten.
+void tsApplyMetadataConfig(const tsConfig &cfg, tsOutputMetadata &meta);
+
+// Legt je Datenarray den Ausgabestore an und setzt die Schreibgrenzen.  Benoetigt
+// nur das Output-Handle (Ergebnis von tsApplyMetadataConfig).  false bei Fehlern
+// (Diagnose auf stderr).
+bool tsSetMetadata(tsHandle *out, const tsOutputMetadata &meta);
 
 // Loest die Auswahl (step/layer/cell) eines Arrays aus tsConfig gegen dessen
 // Ausdehnung auf und fuellt bstart, bcount, chunks und out_chunks.  false, wenn
@@ -169,9 +259,9 @@ std::int64_t tsGetNextStep(tsHandle *handle);
 // bzw. false, wenn der Schritt keine weiteren Felder hat.
 bool tsGetField(tsHandle *handle, tsField &field);
 
-// Liest das soeben von tsGetField gelieferte Feld in `data` (Groesse
+// Liest das soeben von tsGetField gelieferte Feld in `data` (Laenge
 // arrayList[field.array].num_cells).  false ohne ausgewaehltes Feld.
-bool tsReadField(tsHandle *handle, std::vector<float> &data);
+bool tsReadField(tsHandle *handle, float *data, std::size_t n);
 
 // Zeitschritt-Zaehler der Ausgabe: rueckt auf den naechsten absoluten
 // Schreib-Schritt vor und gibt ihn zurueck (-1 am Ende); vor dem ersten Schritt
@@ -182,11 +272,22 @@ std::int64_t tsSetNextStep(tsHandle *handle);
 bool tsSetField(tsHandle *handle, const tsField &field);
 
 // Schreibt das zuvor mit tsSetField ausgewaehlte Feld in die Ausgabe.
-bool tsWriteField(tsHandle *handle, const std::vector<float> &data);
+bool tsWriteField(tsHandle *handle, const float *data, std::size_t n);
 
-// Schreibt alle benutzten Koordinaten-Arrays unter <out_path>/<name>/ mit
-// Quell-Datentyp, Auswahl, Attributen und Kompression.
-bool tsWriteCoordinates(tsHandle *in, tsHandle *out);
+// Liest alle benutzten Koordinaten-Arrays in `coords` ein (Reihenfolge wie
+// tsMetadata::coordList); unabhaengig vom Output-Config.  false bei Fehlern
+// (Diagnose auf stderr).
+bool tsReadCoordinates(tsHandle *in, std::vector<tsCoordinate> &coords);
+
+// Wendet das Ausgabe-Config (Auswahl, Zielpfad, Format, Chunk-Overrides und
+// Kompression) auf die von tsReadCoordinates gelesenen Koordinaten an und
+// materialisiert die ausgewaehlten Werte.  false bei Fehlern (Diagnose auf
+// stderr).
+bool tsApplyCoordinateConfig(const tsConfig &cfg, std::vector<tsCoordinate> &coords);
+
+// Schreibt die mit tsReadCoordinates gelesenen Koordinaten unter <out_path>/
+// <name>/ mit Quell-Datentyp, Auswahl, Attributen und Kompression.
+bool tsWriteCoordinates(tsHandle *out, const std::vector<tsCoordinate> &coords);
 
 // Gibt den Zugriff frei.
 void tsCloseFile(tsHandle *handle);
