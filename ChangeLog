@@ -1,3 +1,11 @@
+2026-10-22  Uwe Schulzweida
+
+	* Version 2.6.6 released
+
+2026-10-14  Uwe Schulzweida
+
+	* NCZARR: An error occurs when reading the last time chunk if there are fewer time steps than in the previous chunks (bug fix)
+
 2026-10-01  Uwe Schulzweida
 
 	* Version 2.6.5 released
