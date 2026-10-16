@@ -234,6 +234,8 @@ steptype_to_cellmethod(int stepType)
          : (stepType == TSTEP_RANGE) ? "range"
          : (stepType == TSTEP_MIN)   ? "minimum"
          : (stepType == TSTEP_MAX)   ? "maximum"
+         : (stepType == TSTEP_SD)    ? "standard_deviation"
+         : (stepType == TSTEP_VAR)   ? "variance"
                                      : NULL;
 }
 
