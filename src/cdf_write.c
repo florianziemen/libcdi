@@ -255,7 +255,7 @@ cdfDefineCellMethods(stream_t *streamP, int cdiID, int varID, int fileID, int nc
   if (cellMethod)
   {
     const char *attname = "cell_methods";
-    char atttxt[CDI_MAX_NAME + 10];
+    char atttxt[CDI_MAX_NAME + 30];
     snprintf(atttxt, sizeof(atttxt), "%s: %s", timeVarName, cellMethod);
     cdf_put_att_text(fileID, ncvarID, attname, strlen(atttxt), atttxt);
   }
