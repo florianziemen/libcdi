@@ -412,6 +412,8 @@ print_short_info(int streamID, int vlistID, int vardis)
 	  else if (tsteptype == TSTEP_RANGE   ) fprintf(stdout, "%-8s ", "range");
 	  else if (tsteptype == TSTEP_DIFF    ) fprintf(stdout, "%-8s ", "diff");
 	  else if (tsteptype == TSTEP_SUM     ) fprintf(stdout, "%-8s ", "sum");
+	  else if (tsteptype == TSTEP_SD      ) fprintf(stdout, "%-8s ", "std");
+	  else if (tsteptype == TSTEP_VAR     ) fprintf(stdout, "%-8s ", "var");
 	  else                                  fprintf(stdout, "%-8s ", "unknown");
     // clang-format on
 

@@ -267,6 +267,7 @@ typedef struct  {
 #define  TSTEP_RANGE             12
 #define  TSTEP_INSTANT2          13
 #define  TSTEP_INSTANT3          14
+#define  TSTEP_VAR               15
 
 // TAXIS types
 

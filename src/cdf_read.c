@@ -631,12 +631,17 @@ get_cache_offset(int fileID, int ncvarid, const size_t *start, const size_t *cou
   }
   if (fillCache)
   {
-    cache->numSteps += cache->count[0];
-    if (cache->numSteps > cache->maxSteps) { cache->count[0] = cache->maxSteps % cache->count[0]; }
+    size_t countTemp[3];
+    for (int i = 0; i < numDims; ++i) { countTemp[i] = cache->count[i]; }
+    if (cache->maxSteps > 0 && cache->start[0] + countTemp[0] > cache->maxSteps)
+    {
+      countTemp[0] = cache->maxSteps - cache->start[0];
+    }
+    cache->numSteps += countTemp[0];
     if (datatype == CDI_DATATYPE_FLT32)
-      cdf_get_vara_float(fileID, ncvarid, cache->start, cache->count, cache->buffer);
+      cdf_get_vara_float(fileID, ncvarid, cache->start, countTemp, cache->buffer);
     else
-      cdf_get_vara_double(fileID, ncvarid, cache->start, cache->count, cache->buffer);
+      cdf_get_vara_double(fileID, ncvarid, cache->start, countTemp, cache->buffer);
   }
   size_t offset = (start[0] % cache->count[0]) * cache->count[lastDim];
   if (numDims == 3) { offset = offset * cache->count[1] + (start[1] - cache->start[1]) * cache->count[2]; }
