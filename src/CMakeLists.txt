@@ -1,7 +1,10 @@
 add_library(libcdi)
 add_library(libcdi::libcdi ALIAS libcdi)
 
-target_compile_definitions(libcdi PRIVATE CDI=1 CDI_SIZE_TYPE=size_t PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}")
+target_compile_definitions(libcdi PRIVATE CDI=1 CDI_SIZE_TYPE=size_t)
+target_compile_definitions(libcdi PRIVATE PACKAGE_NAME="${PROJECT_NAME}")
+target_compile_definitions(libcdi PRIVATE VERSION="${CMAKE_PROJECT_VERSION}")
+target_compile_definitions(libcdi PRIVATE HAVE_CONFIG_H=1)
 
 target_sources(libcdi
   INTERFACE
@@ -213,8 +216,6 @@ mark_as_advanced(CDI_BUILD_UNKNOWN)
 if (CDI_BUILD_UNKNOWN)
   target_sources( libcdi PRIVATE
     cfortran.h
-    getline.c
-    make_fint.c
     resource_unpack.c
     resource_unpack.h
   )
@@ -223,7 +224,7 @@ endif ()
 # Support exporting all symbols on Windows
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-set_target_properties(libcdi PROPERTIES PUBLIC_HEADER cdi.h)
+set_target_properties(libcdi PROPERTIES PUBLIC_HEADER cdi.h OUTPUT_NAME cdi)
 
 set_property(TARGET libcdi PROPERTY CDI_INSTALL_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/cdi.h
@@ -232,9 +233,11 @@ set_property(TARGET libcdi PROPERTY CDI_INSTALL_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/julian_date.h
 )
 
+include(GNUInstallDirs)
+
 target_include_directories(libcdi
   PRIVATE
-  ${CMARE_CURRENT_BINARY_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
   PUBLIC
   # where top-level project will look for the library's public headers
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
@@ -246,7 +249,6 @@ target_compile_definitions(libcdi PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION
 
 # --- Installation
 # packages required for installation
-include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 install(TARGETS libcdi
@@ -264,7 +266,6 @@ configure_package_config_file(
   INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/cdi")
 write_basic_package_version_file(
   "${CMAKE_BINARY_DIR}/cmake/cdi-config-version.cmake"
-  VERSION "${PACKAGE_VERSION}"
   COMPATIBILITY SameMajorVersion)
 
 #Install CMake configuration files to

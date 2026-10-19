@@ -1,0 +1,84 @@
+#ifndef CDI_CONFIG_H
+#define CDI_CONFIG_H
+
+/* C compiler */
+#cmakedefine C_COMPILER "@C_COMPILER@"
+
+/* C compiler version */
+#cmakedefine C_COMPILER_VERSION "@C_COMPILER_VERSION@"
+
+/* C++ compiler */
+#cmakedefine CXX_COMPILER "@CXX_COMPILER@"
+
+/* C++ compiler version */
+#cmakedefine CXX_COMPILER_VERSION "@CXX_COMPILER_VERSION@"
+
+/* System type */
+#cmakedefine SYSTEM_TYPE "@SYSTEM_TYPE@"
+
+/* Define to 1 for GRIB1 decoding/encoding with cgribex */
+#cmakedefine HAVE_LIBCGRIBEX 1
+
+/* Define to 1 for EXTRA interface */
+#cmakedefine HAVE_LIBEXTRA 1
+
+/* Define to 1 for GRIB support */
+#cmakedefine HAVE_LIBGRIB 1
+
+/* ECCODES library is present if defined to 1 */
+#cmakedefine HAVE_LIBGRIB_API 1
+
+/* Define to 1 for IEG interface */
+#cmakedefine HAVE_LIBIEG 1
+
+/* Define to 1 for NetCDF support */
+#cmakedefine HAVE_LIBNETCDF 1
+
+/* Define to 1 if you have the 'pthread' library (-lpthread). */
+#cmakedefine HAVE_LIBPTHREAD 1
+
+/* Define to 1 for SERVICE interface */
+#cmakedefine HAVE_LIBSERVICE 1
+
+/* Define to 1 for HIRLAM extensions */
+#cmakedefine HIRLAM_EXTENSIONS 1
+
+/* System and compiler checks, see cmake/config_checks.cmake */
+
+/* Define to 1 if you have <malloc.h>. */
+#cmakedefine HAVE_MALLOC_H 1
+
+/* Define to 1 if you have <sys/time.h>. */
+#cmakedefine HAVE_SYS_TIME_H 1
+
+/* Define to 1 if the `mallinfo' function is available in <malloc.h>. */
+#cmakedefine HAVE_MALLINFO 1
+
+/* Define to 1 if `mmap' is declared in <sys/mman.h>. */
+#cmakedefine HAVE_MMAP 1
+
+/* Define to 1 if `isnan' is declared in <math.h>. */
+#cmakedefine HAVE_DECL_ISNAN 1
+
+/* Define to 1 if `sysconf' accepts _SC_LARGE_PAGESIZE. */
+#cmakedefine HAVE_DECL__SC_LARGE_PAGESIZE 1
+
+/* Define to 1 if `sysconf' accepts _SC_PAGE_SIZE. */
+#cmakedefine HAVE_DECL__SC_PAGE_SIZE 1
+
+/* Define to 1 if `sysconf' accepts _SC_PAGESIZE. */
+#cmakedefine HAVE_DECL__SC_PAGESIZE 1
+
+/* Define to 1 if the PAGE_SIZE constant is declared in <unistd.h>/<sys/param.h>. */
+#cmakedefine HAVE_DECL_PAGE_SIZE 1
+
+/* Define to 1 if the PAGESIZE constant is declared in <unistd.h>/<sys/param.h>. */
+#cmakedefine HAVE_DECL_PAGESIZE 1
+
+/* Define to 1 if `struct stat' has an `st_blksize' member. */
+#cmakedefine HAVE_STRUCT_STAT_ST_BLKSIZE 1
+
+/* Define to 1 if the compiler supports the _Float16 type. */
+#cmakedefine HAVE__FLOAT16 1
+
+#endif
