@@ -516,12 +516,13 @@ cdfGetAttString(int fileID, int ncvarid, const char *attname, String *attString)
   {
     if (attlen == 1)
     {
-      string_reserve(attString, attlen + 1);
       char *attbuf = NULL;
       cdf_get_att_string(fileID, ncvarid, attname, &attbuf);
-      memcpy(attString->data, attbuf, attlen);
-      attString->data[attlen] = 0;
-      Free(attbuf);
+      size_t stringLen = strlen(attbuf);
+      string_reserve(attString, stringLen + 1);
+      memcpy(attString->data, attbuf, stringLen);
+      attString->data[stringLen] = 0;
+      nc_free_string(1, &attbuf);
     }
   }
 }

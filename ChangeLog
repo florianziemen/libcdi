@@ -2,6 +2,10 @@
 
 	* Version 2.6.6 released
 
+2026-10-21  Uwe Schulzweida
+
+	* NC_STRING attributes truncated to first character [Bug #12417]
+
 2026-10-14  Uwe Schulzweida
 
 	* NCZARR: An error occurs when reading the last time chunk if there are fewer time steps than in the previous chunks (bug fix)
