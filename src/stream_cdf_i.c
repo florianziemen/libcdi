@@ -261,9 +261,9 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
     len--;
   }
   char tmp[32], *tu = tmp;
-  if (len + 1 > sizeof(tmp)) tu = (char *) Malloc(len + 1);
+  if (len + 1 > sizeof(tmp)) { tu = (char *) Malloc(len + 1); }
 
-  for (size_t i = 0; i < len; i++) tu[i] = (char) tolower((int) timeUnitsStr[i]);
+  for (size_t i = 0; i < len; i++) { tu[i] = (char) tolower((int) timeUnitsStr[i]); }
   tu[len] = 0;
 
   int timeUnits = get_time_units(len, tu);
@@ -516,12 +516,13 @@ cdfGetAttString(int fileID, int ncvarid, const char *attname, String *attString)
   {
     if (attlen == 1)
     {
-      string_reserve(attString, attlen + 1);
       char *attbuf = NULL;
       cdf_get_att_string(fileID, ncvarid, attname, &attbuf);
-      memcpy(attString->data, attbuf, attlen);
-      attString->data[attlen] = 0;
-      Free(attbuf);
+      size_t stringLen = strlen(attbuf);
+      string_reserve(attString, stringLen + 1);
+      memcpy(attString->data, attbuf, stringLen);
+      attString->data[stringLen] = 0;
+      nc_free_string(1, &attbuf);
     }
   }
 }
@@ -848,38 +849,38 @@ cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID, bool r
 
   if (xtypeIsInt(atttype))
   {
-    int attint = 0;
-    int *pattint = (attlen > 1) ? (int *) Malloc(attlen * sizeof(int)) : &attint;
+    int attint[8];
+    int *pattint = (attlen > 8) ? (int *) Malloc(attlen * sizeof(int)) : attint;
     cdfGetAttInt(ncid, ncvarid, attname, attlen, pattint);
     cdiDefAttInt(cdiID, varID, attname, atttypeInt_to_datatype(atttype), (int) attlen, pattint);
-    if (attlen > 1) Free(pattint);
+    if (attlen > 8) Free(pattint);
   }
   else if (xtypeIsInt64(atttype))
   {
-    int64_t attInt64 = 0;
-    int64_t *pattInt64 = (attlen > 1) ? (int64_t *) Malloc(attlen * sizeof(int64_t)) : &attInt64;
+    int64_t attInt64[8];
+    int64_t *pattInt64 = (attlen > 8) ? (int64_t *) Malloc(attlen * sizeof(int64_t)) : attInt64;
     cdfGetAttInt64(ncid, ncvarid, attname, attlen, pattInt64);
     bool defineAtts = true;
     for (size_t i = 0; i < attlen; ++i)
       if (pattInt64[i] > INT_MAX) { defineAtts = false; }
     if (defineAtts)
     {
-      int attInt = 0;
-      int *pattInt = (attlen > 1) ? (int *) Malloc(attlen * sizeof(int)) : &attInt;
+      int attInt[8];
+      int *pattInt = (attlen > 1) ? (int *) Malloc(attlen * sizeof(int)) : attInt;
       for (size_t i = 0; i < attlen; ++i) { pattInt[i] = (int) pattInt64[i]; }
       cdiDefAttInt(cdiID, varID, attname, CDI_DATATYPE_INT32, (int) attlen, pattInt);
-      if (attlen > 1) Free(pattInt);
+      if (attlen > 8) Free(pattInt);
     }
-    if (attlen > 1) Free(pattInt64);
+    if (attlen > 8) Free(pattInt64);
   }
   else if (xtypeIsFloat(atttype))
   {
-    double attflt = 0.0;
-    double *pattflt = (attlen > 1) ? (double *) Malloc(attlen * sizeof(double)) : &attflt;
+    double attflt[8];
+    double *pattflt = (attlen > 8) ? (double *) Malloc(attlen * sizeof(double)) : attflt;
     cdfGetAttDouble(ncid, ncvarid, attname, attlen, pattflt);
     int datatype = (atttype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
     cdiDefAttFlt(cdiID, varID, attname, datatype, (int) attlen, pattflt);
-    if (attlen > 1) Free(pattflt);
+    if (attlen > 8) Free(pattflt);
   }
   else if (xtypeIsText(atttype))
   {
@@ -1676,7 +1677,7 @@ cdf_set_chunk_info(stream_t *streamP, int nvars, ncvar_t *ncvars)
   }
 }
 
-void
+static void
 verify_vars_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
   nc_type atttype;
@@ -1700,7 +1701,6 @@ verify_vars_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
       cdf_inq_att(ncid, ncvarid, attname, &atttype, &attlen);
 
       // bool isNumber = (xtypeIsFloat(atttype) || xtypeIsInt(atttype));
-
       bool isText = xtypeIsText(atttype);
       if (isText)
       {
@@ -3705,7 +3705,7 @@ static void
 cdf_define_all_vars(stream_t *streamP, int vlistID, int instID, int modelID, int nvarsData, int num_ncvars, ncvar_t *ncvars,
                     ncdim_t *ncdims, int timedimid)
 {
-  int varidsLocal[512];
+  int varidsLocal[256];
   int *varids = (nvarsData <= (int) ARRAY_SIZE(varidsLocal)) ? varidsLocal : (int *) Malloc((size_t) nvarsData * sizeof(int));
   int n = 0;
   for (int ncvarid = 0; ncvarid < num_ncvars; ncvarid++)
@@ -4604,19 +4604,26 @@ static void
 check_ncgroups(int fileID)
 {
   int numGroups = 0;
-  int ncids[NC_MAX_VARS];
   char gname[CDI_MAX_NAME];
-  nc_inq_grps(fileID, &numGroups, ncids);
-  for (int i = 0; i < numGroups; ++i)
+  nc_inq_grps(fileID, &numGroups, NULL);
+  if (numGroups)
   {
-    int ncid = ncids[i];
-    int gndims, gnvars, gngatts, gunlimdimid;
-    cdf_inq(ncid, &gndims, &gnvars, &gngatts, &gunlimdimid);
-    nc_inq_grpname(ncid, gname);
-
-    if (CDI_Debug) Message("%s: ndims %d, nvars %d, ngatts %d", gname, gndims, gnvars, gngatts);
+    if (CDI_Debug)
+    {
+      int *ncIds = (int *) Malloc(numGroups * sizeof(int));
+      nc_inq_grps(fileID, NULL, ncIds);
+      for (int i = 0; i < numGroups; ++i)
+      {
+        int ncId = ncIds[i];
+        int gndims, gnvars, gngatts, gunlimdimid;
+        cdf_inq(ncId, &gndims, &gnvars, &gngatts, &gunlimdimid);
+        nc_inq_grpname(ncId, gname);
+        Message("%s: ndims %d, nvars %d, ngatts %d", gname, gndims, gnvars, gngatts);
+      }
+      Free(ncIds);
+    }
+    Warning("NetCDF4 sub-groups not supported! Skipped %d group%s.", numGroups, (numGroups > 1) ? "s" : "");
   }
-  if (numGroups) Warning("NetCDF4 sub-groups not supported! Skipped %d group%s.", numGroups, (numGroups > 1) ? "s" : "");
 }
 
 static void
