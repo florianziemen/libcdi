@@ -25,6 +25,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <thread>
 #include <vector>
 
 #include <sys/resource.h>
@@ -518,6 +519,22 @@ main(int argc, char **argv)
 #else
   if (cfg.info) { std::cerr << "TensorStore support: disabled (built with -DWITH_TENSORSTORE=OFF)\n"; }
 #endif
+  if (cfg.info)
+  {
+    unsigned int tc = std::thread::hardware_concurrency();
+    if (tc == 0) tc = 1;
+    std::cerr << "TensorStore threads: " << tc << '\n';
+#ifdef TSQ_CXX
+    std::cerr << "CXX=" << TSQ_CXX << '\n';
+#else
+    std::cerr << "CXX=unknown\n";
+#endif
+#ifdef TSQ_CXXFLAGS
+    std::cerr << "CXXFLAGS=" << TSQ_CXXFLAGS << '\n';
+#else
+    std::cerr << "CXXFLAGS=\n";
+#endif
+  }
   if (cfg.info && cfg.path.empty()) return 0;  // --info alone
 
 #ifndef HAVE_TENSORSTORE

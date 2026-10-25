@@ -11,6 +11,10 @@
 #include "stream_ieg.h"
 #include "dmemory.h"
 
+#ifdef HAVE_TENSORSTORE
+#include "tstore.h"
+#endif
+
 // the single image implementation
 static int
 cdiStreamReadVar(int streamID, int varID, int memType, void *data, size_t *numMissVals)
@@ -149,6 +153,9 @@ cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memType, void *d
 #endif
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF: cdf_read_var_slice(streamP, varID, levelID, memType, data, numMissVals); break;
+#endif
+#ifdef HAVE_TENSORSTORE
+    case CDI_FILETYPE_ZARR: ts_read_var_slice(streamP, varID, levelID, memType, data, numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(fileType));
   }

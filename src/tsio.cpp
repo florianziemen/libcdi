@@ -1521,9 +1521,10 @@ struct Reader
   {
     buf[0] = std::make_unique<TsEngine::WindowChunks>();
     if (double_buffer) buf[1] = std::make_unique<TsEngine::WindowChunks>();
-    // Direkter Lesemodus: rank-2, kein Layering — pro Schritt wird die
-    // komplette Zellzeile direkt aus dem Store gelesen.
-    if (eng.rank == 2 && !eng.layered) direct_read = true;
+    // Direkter Lesemodus: rank-2, kein Layering und Zeit-Chunk == 1.  Nur dann
+    // entspricht das Zugriffsmuster (ein Schritt = eine Zellzeile) exakt der
+    // Chunkgroesse, d.h. ein Read dekodiert genau einen Chunk ohne Redundanz.
+    if (eng.rank == 2 && !eng.layered && eng.time_chunk == 1) direct_read = true;
   }
 
   ~Reader()
@@ -1576,8 +1577,8 @@ struct Reader
     if (direct_read && eng.rank == 2 && !eng.layered)
     {
       using namespace tensorstore;
-      auto sliced
-          = eng.store | tensorstore::Dims(0).ClosedInterval(t_abs, t_abs) | tensorstore::Dims(1).HalfOpenInterval(0, eng.bc[1]);
+      auto sliced = eng.store | tensorstore::Dims(0).ClosedInterval(t_abs, t_abs)
+                    | tensorstore::Dims(1).HalfOpenInterval(eng.bs[1], eng.bs[1] + eng.bc[1]);
       auto r = Read<zero_origin>(sliced).result();
       if (!r)
       {
@@ -2867,4 +2868,83 @@ tsCloseFile(tsHandle *handle)
   auto *h = static_cast<tsHandleImpl *>(handle);
   for (auto &w : h->writers) flush_window(w);
   delete h;
+}
+
+bool
+ts_read_array(tsHandle *handle, const char *arrayName, double *buffer)
+{
+  using namespace tensorstore;
+  if (!handle || !arrayName || !buffer) return false;
+  auto *h = static_cast<tsHandleImpl *>(handle);
+
+  // Array wie in open_array_any öffnen (zarr2/zarr3)
+  std::string kvstore_out;
+  int detected_format = 0;
+  auto st_res = open_array_any(h->cfg, h->context, std::string(arrayName), kvstore_out, detected_format);
+  // auto st_res = open_array_impl<double>(h->cfg, h->context, std::string(arrayName), kvstore_out, detected_format);
+  if (!st_res)
+  {
+    std::cerr << "ts_read_array: failed to open array '" << arrayName << "'\n";
+    return false;
+  }
+  auto &st = *st_res;
+
+  // Komplettes Array lesen (zero-origin)
+  auto read_res = Read<zero_origin>(st).result();
+  if (!read_res)
+  {
+    std::cerr << "ts_read_array: failed to read array '" << arrayName << "': " << read_res.status().ToString() << "\n";
+    return false;
+  }
+
+  auto arr = std::move(*read_res);
+  // arr ist SharedArray<void,...> oder typisiert; iterieren und nach double konvertieren
+  // Total elements
+  Index total = 1;
+  for (DimensionIndex d = 0; d < arr.rank(); ++d) total *= arr.shape()[d];
+  if (total == 0) return true;
+
+  // Typsicher konvertieren (analog zu append_as_float im Repo)
+  const DataType dtype = arr.dtype();
+  // iterate over array in order
+  // einfache Variante: kopieren je nach dtype
+  // (kann auch mit tensorstore::Iterate gemacht werden)
+  /*
+  const double *src = static_cast<const double *>(arr.data());
+  std::copy(src, src + total, buffer);
+  return true;
+  */
+  if (dtype == dtype_v<double>)
+  {
+    const double *src = static_cast<const double *>(arr.data());
+    std::copy(src, src + total, buffer);
+    return true;
+  }
+  else if (dtype == dtype_v<float>)
+  {
+    const float *src = static_cast<const float *>(arr.data());
+    for (Index i = 0; i < total; ++i) buffer[i] = static_cast<double>(src[i]);
+    return true;
+  }
+  else if (dtype == dtype_v<int64_t>)
+  {
+    const int64_t *src = static_cast<const int64_t *>(arr.data());
+    for (Index i = 0; i < total; ++i) buffer[i] = static_cast<double>(src[i]);
+    return true;
+  }
+  else if (dtype == dtype_v<tensorstore::dtypes::float16_t>)
+  {
+    // je nach Toolchain Half/float16 -> konvertieren (Repo hat bereits Pfade dafür)
+    // hier vereinfacht
+    const uint16_t *src = static_cast<const uint16_t *>(arr.data());
+    // ... Konvertierung wie im Codebase nutzen
+  }
+  else if (dtype == dtype_v<tensorstore::dtypes::bfloat16_t>)
+  {
+    // ähnlich
+  }
+  // weitere Typen falls nötig
+
+  std::cerr << "ts_read_array: unsupported dtype '" << dtype.name() << "'\n";
+  return false;
 }

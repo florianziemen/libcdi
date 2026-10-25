@@ -102,7 +102,7 @@ struct tsInfo
   std::string data_type;  // z. B. "float32", "-"
   std::string shape;
   std::string chunks;
-  std::string compressor;  // "-" wenn unbekannt
+  std::string compressor;              // "-" wenn unbekannt
   std::vector<std::string> dim_names;  // dimension_names / _ARRAY_DIMENSIONS
   std::string grid_mapping;            // `grid_mapping`-Attribut, "" wenn nicht gesetzt
 };
@@ -134,17 +134,17 @@ struct tsCoordinate
 {
   // Quelle (von tsReadCoordinates gefuellt)
   std::string name;
-  int format = 0;                 // Quell-Zarr-Format (2 oder 3)
-  std::string source_metadata;    // Roh-.zarray/zarr.json der Quelle (Kompression)
-  std::string attributes;         // Quell-Attribute als JSON-Text (v2 .zattrs)
-  std::string dim_names;          // Quell-dimension_names als JSON-Text (v2 .zattrs)
+  int format = 0;               // Quell-Zarr-Format (2 oder 3)
+  std::string source_metadata;  // Roh-.zarray/zarr.json der Quelle (Kompression)
+  std::string attributes;       // Quell-Attribute als JSON-Text (v2 .zattrs)
+  std::string dim_names;        // Quell-dimension_names als JSON-Text (v2 .zattrs)
   std::vector<std::int64_t> shape;
-  const void *source = nullptr;   // opaker Quell-Store
+  const void *source = nullptr;  // opaker Quell-Store
 
   // Ausgabe (von tsApplyCoordinateConfig gesetzt)
-  std::string directory;          // Zielpfad <out_path>/<name>/
-  std::string driver;             // "zarr3", "n5" oder "zarr"
-  std::string metadata;           // Store-Metadaten als JSON-Text
+  std::string directory;  // Zielpfad <out_path>/<name>/
+  std::string driver;     // "zarr3", "n5" oder "zarr"
+  std::string metadata;   // Store-Metadaten als JSON-Text
   std::shared_ptr<void> data;
 };
 
@@ -155,17 +155,17 @@ struct tsArrayMeta
 {
   // Quelle
   std::string name;
-  int format = 0;                 // Quell-Zarr-Format (2 oder 3)
-  std::string source_metadata;    // Roh-.zarray/zarr.json der Quelle (Kompression)
-  std::string attributes;         // Quell-Attribute als JSON-Text (v2 .zattrs)
-  std::string dim_names;          // Quell-dimension_names als JSON-Text (v2 .zattrs)
+  int format = 0;               // Quell-Zarr-Format (2 oder 3)
+  std::string source_metadata;  // Roh-.zarray/zarr.json der Quelle (Kompression)
+  std::string attributes;       // Quell-Attribute als JSON-Text (v2 .zattrs)
+  std::string dim_names;        // Quell-dimension_names als JSON-Text (v2 .zattrs)
   std::vector<std::int64_t> bstart;
   std::vector<std::int64_t> bcount;
   std::vector<std::int64_t> out_chunks;
 
   // Ausgabe (von tsApplyMetadataConfig gesetzt)
-  std::string driver;      // "zarr3", "n5" oder "zarr"
-  std::string metadata;    // Store-Metadaten als JSON-Text
+  std::string driver;    // "zarr3", "n5" oder "zarr"
+  std::string metadata;  // Store-Metadaten als JSON-Text
 };
 
 // Ausgabe-Metadaten des Schreibmodus: Zeitgrenzen und je Datenarray die
@@ -297,5 +297,7 @@ std::vector<std::string> tsListArrays(const tsConfig &config);
 
 // Uebersicht des Datensatzes: Gruppen der Wurzel, sonst eine Zeile pro Array.
 bool tsDatasetOverview(const tsConfig &config, tsOverview &overview);
+
+bool ts_read_array(tsHandle *handle, const char *arrayName, double *buffer);
 
 #endif  // TSIO_H

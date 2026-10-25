@@ -12,7 +12,7 @@
 #endif
 
 #ifdef HAVE_TENSORSTORE
-#include "tstore.h"  // NC_FORMAT_64BIT_DATA
+#include "tstore.h"
 #endif
 
 #ifdef HAVE_LIBFDB5
@@ -467,6 +467,7 @@ cdiInqContents(stream_t *streamP)
   if (status == 0)
   {
     int taxisID = vlistInqTaxis(streamP->vlistID);
+    printf("cdiInqContents: taxisID=%d\n", taxisID);
     if (taxisID != CDI_UNDEFID)
     {
       taxis_t *taxisP1 = &streamP->tsteps[0].taxis;
@@ -1660,7 +1661,7 @@ streamInqTimestep(int streamID, int tsID)
   stream_t *streamP = stream_to_pointer(streamID);
   int vlistID = streamP->vlistID;
 
-  if (tsID < streamP->ntsteps) streamP->tsteps[tsID].curRecID = CDI_UNDEFID;  // fix for netCDF
+  if (tsID < streamP->ntsteps) { streamP->tsteps[tsID].curRecID = CDI_UNDEFID; }  // fix for netCDF
   if (tsID < streamP->rtsteps)
   {
     streamP->curTsID = tsID;
@@ -1706,13 +1707,16 @@ streamInqTimestep(int streamID, int tsID)
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF: nrecs = cdfInqTimestep(streamP, tsID); break;
 #endif
+#ifdef HAVE_TENSORSTORE
+    case CDI_FILETYPE_ZARR: nrecs = ts_inq_timestep(streamP, tsID); break;
+#endif
     default: Error("%s support not compiled in!", strfiletype(filetype)); break;
   }
 
   if (streamP->lockIO) CDI_IO_UNLOCK();
 
   int taxisID = vlistInqTaxis(vlistID);
-  if (taxisID == -1) Error("Timestep undefined for fileID = %d", streamID);
+  if (taxisID == -1) Error("Time axis undefined for fileID = %d", streamID);
 
   ptaxisCopy(taxis_to_pointer(taxisID), &streamP->tsteps[tsID].taxis);
 
