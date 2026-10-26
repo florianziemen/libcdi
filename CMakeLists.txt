@@ -38,15 +38,6 @@ include(config_checks)
 
 add_subdirectory(src)
 
-include(feature_eccodes)
-include(feature_extra)
-include(feature_grib)
-include(feature_gribex)
-include(feature_ieg)
-include(feature_netcdf)
-include(feature_pthread)
-include(feature_service)
-
 if (WITH_TENSORSTORE)
   # TensorStore's CMake bootstrap (bazel_to_cmake) needs Python >= 3.10, but
   # FindPython3 prefers the Xcode framework Python 3.9 on macOS.  Point it at
@@ -59,11 +50,6 @@ if (WITH_TENSORSTORE)
     endif()
   endif()
 
-  if (TARGET ZLIB::ZLIB)
-    set(TENSORSTORE_USE_SYSTEM_ZLIB ON
-        CACHE BOOL "Use the installed ZLIB library for TensorStore" FORCE)
-  endif ()
-
   FetchContent_Declare(
         tensorstore
         URL https://github.com/google/tensorstore/archive/refs/tags/v0.1.85.tar.gz
@@ -74,6 +60,15 @@ if (WITH_TENSORSTORE)
 
   set(HAVE_TENSORSTORE 1)
 endif()
+
+include(feature_eccodes)
+include(feature_extra)
+include(feature_grib)
+include(feature_gribex)
+include(feature_ieg)
+include(feature_netcdf)
+include(feature_pthread)
+include(feature_service)
 
 if (CDI_HIRLAM_EXTENSIONS)
   set(HIRLAM_EXTENSIONS 1)
