@@ -59,6 +59,11 @@ if (WITH_TENSORSTORE)
     endif()
   endif()
 
+  if (TARGET ZLIB::ZLIB)
+    set(TENSORSTORE_USE_SYSTEM_ZLIB ON
+        CACHE BOOL "Use the installed ZLIB library for TensorStore" FORCE)
+  endif ()
+
   FetchContent_Declare(
         tensorstore
         URL https://github.com/google/tensorstore/archive/refs/tags/v0.1.85.tar.gz
