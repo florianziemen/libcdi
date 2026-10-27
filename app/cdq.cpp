@@ -335,10 +335,12 @@ int vlistInqVarMissvalUsed(int vlistID, int varID);
 #define IS_NOT_EQUAL(x, y) (x < y || y < x)
 #endif
 
+template <typename T>
 static void
-printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, int number, size_t nmiss, double missval,
-          const double *data, int vardis)
+printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, int number, size_t nmiss, double mv, const T *data,
+          int vardis)
 {
+  T missval = static_cast<T>(mv);
   static int rec = 0;
   size_t ivals = 0, imiss = 0;
   double arrmean, arrmin, arrmax;
@@ -449,21 +451,16 @@ handle_error(int cdiErrno, const char *fmt, ...)
   return cdiErrno;
 }
 
-static int
-check_tensorstore(const char **filename)
+static bool
+strip_ts_prefix(std::string_view &s)
 {
-  const char ts[] = "ts:";
-  int tsLen = (int) sizeof(ts) - 1;
-  const char *uri = *filename;
-  int len = (int) strlen(uri);
-  if (len > tsLen && strncmp(uri, ts, tsLen) == 0)
+  constexpr std::string_view prefix = "ts:";
+  if (s.size() >= prefix.size() && s.substr(0, prefix.size()) == prefix)
   {
-    *filename = uri + tsLen;
-    return 1;
+    s.remove_prefix(prefix.size());
+    return true;
   }
-
-  *filename = uri;
-  return 0;
+  return false;
 }
 
 int
@@ -475,13 +472,14 @@ main(int argc, char **argv)
     print_usage(argv[0]);
     return 1;
   }
-#ifdef HAVE_TENSORSTORE
-  if (cfg.info) { std::cerr << "TensorStore " << tsVersion() << '\n'; }
-#else
-  if (cfg.info) { std::cerr << "TensorStore support: disabled (built with -DWITH_TENSORSTORE=OFF)\n"; }
-#endif
+
   if (cfg.info)
   {
+#ifdef HAVE_TENSORSTORE
+    std::cerr << "TensorStore " << tsVersion() << '\n';
+#else
+    std::cerr << "TensorStore support: disabled (built with -DWITH_TENSORSTORE=OFF)\n";
+#endif
     unsigned int tc = std::thread::hardware_concurrency();
     if (tc == 0) tc = 1;
     std::cerr << "TensorStore threads: " << tc << '\n';
@@ -497,8 +495,8 @@ main(int argc, char **argv)
 #ifdef CXX_COMPILER_VERSION
     std::cerr << "CXX version=" << CXX_COMPILER_VERSION << '\n';
 #endif
+    if (cfg.path.empty()) return 0;  // --info alone
   }
-  if (cfg.info && cfg.path.empty()) return 0;  // --info alone
 
   int numQueryGroups = 0;
   int numQueryNames = 0;
@@ -525,6 +523,14 @@ main(int argc, char **argv)
     // if (Debug) cdiQueryPrint(query);
   }
 
+  enum struct MemType
+  {
+    Native,
+    Float,
+    Double
+  };
+
+  auto memType = MemType::Float;
   int Move = 0;
   int Field = 0;
   int Variable = 0;
@@ -537,11 +543,13 @@ main(int argc, char **argv)
 
   auto fname1 = cfg.path.c_str();
   const char *fname2 = NULL;
+  if (cfg.out_path) { fname2 = (*cfg.out_path).c_str(); }
 
-  int isZarrFormat = check_tensorstore(&fname1);
+  std::string_view fnameView = fname1;
+  bool isZarr = strip_ts_prefix(fnameView);
 
   int streamID1 = -1;
-  if (isZarrFormat) { streamID1 = streamOpenTensorstore(fname1); }
+  if (isZarr) { streamID1 = streamOpenTensorstore(fname1); }
   else
   {
     streamID1 = useQuery ? streamOpenReadQuery(fname1, query.get()) : streamOpenRead(fname1);
@@ -564,6 +572,9 @@ main(int argc, char **argv)
 
   // if (Debug) fprintf(stderr, "nvars   = %d\nntsteps = %d\n", nvars, ntsteps);
 
+  StreamH stream2;
+  VlistH vlist2;
+  TaxisH taxis2;
   int vlistID2 = -1;
   int taxisID2 = -1;
   if (fname2)
@@ -575,7 +586,7 @@ main(int argc, char **argv)
 
   char varname[CDI_MAX_NAME];
   size_t datasize = 0;
-  int maxlev = 0;
+  int maxLayers = 0;
 
   for (int varID = 0; varID < nvars; varID++)
   {
@@ -583,21 +594,22 @@ main(int argc, char **argv)
     size_t gridsize = (size_t) gridInqSize(gridID);
     if (gridsize > datasize) datasize = gridsize;
     int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-    size_t nlev = (size_t) zaxisInqSize(zaxisID);
-    if (nlev > maxlev) maxlev = nlev;
+    int numLayers = zaxisInqSize(zaxisID);
+    if (numLayers > maxLayers) { maxLayers = numLayers; }
     if (fname2)
     {
       // if (DefaultDataType != CDI_UNDEFID) vlistDefVarDatatype(vlistID2, varID, DefaultDataType);
+      vlistDefVarDatatype(vlistID2, varID, CDI_DATATYPE_FLT32);
     }
   }
 
-  /*
+  int streamID2 = CDI_UNDEFID;
   if (fname2)
   {
     Info = 0;
-    filetype = streamInqFiletype(streamID1);
-
-    if (DefaultFileType != CDI_UNDEFID) filetype = DefaultFileType;
+    auto filetype = streamInqFiletype(streamID1);
+    filetype = CDI_FILETYPE_NC4;
+    // if (DefaultFileType != CDI_UNDEFID) filetype = DefaultFileType;
 
     streamID2 = streamOpenWrite(fname2, filetype);
     if (streamID2 < 0) return handle_error(streamID2, "Open failed on %s", fname2);
@@ -605,27 +617,30 @@ main(int argc, char **argv)
     int maxSteps = vlistNtsteps(vlistID1);
     if ((filetype == CDI_FILETYPE_NCZARR || filetype == CDI_FILETYPE_ZARR2 || filetype == CDI_FILETYPE_ZARR3) && maxSteps >= 0)
       streamDefMaxSteps(streamID2, maxSteps);
-    if (numWorkerOut > 0) streamDefNumWorker(streamID2, numWorkerOut);
+    // if (numWorkerOut > 0) streamDefNumWorker(streamID2, numWorkerOut);
 
-    if (DefaultByteorder != CDI_UNDEFID) streamDefByteorder(streamID2, DefaultByteorder);
+    // if (DefaultByteorder != CDI_UNDEFID) streamDefByteorder(streamID2, DefaultByteorder);
 
-    if (filterSpec[0]) streamDefFilter(streamID2, filterSpec);
+    // if (filterSpec[0]) streamDefFilter(streamID2, filterSpec);
 
-    if (comptype != CDI_COMPRESS_NONE)
-    {
-      streamDefCompType(streamID2, comptype);
-      streamDefCompLevel(streamID2, complevel);
-    }
+    // if (comptype != CDI_COMPRESS_NONE)
+    //{
+    //   streamDefCompType(streamID2, comptype);
+    //   streamDefCompLevel(streamID2, complevel);
+    // }
 
     streamDefVlist(streamID2, vlistID2);
 
-    if (otableID == CDI_UNDEFID) otableID = itableID;
+    // if (otableID == CDI_UNDEFID) otableID = itableID;
   }
-  */
 
   if (vlistNumber(vlistID1) != CDI_REAL) datasize *= 2;
-  // if (Variable) datasize *= maxlev;
-  double *data = (double *) malloc(datasize * sizeof(double));
+  if (Variable) { datasize *= maxLayers; }
+  std::vector<float> dataF16;
+  std::vector<float> dataF32;
+  std::vector<double> dataF64;
+  if (memType == MemType::Float) { dataF32.resize(datasize); }
+  else if (memType == MemType::Double) { dataF64.resize(datasize); }
 
   // if (Debug) printf("nts = %d streamID1 = %d, streamID2 = %d\n", nts, streamID1, streamID2);
 
@@ -636,28 +651,30 @@ main(int argc, char **argv)
     print_short_info(streamID1, vlistID1, Vardis);
   }
   */
-  int nrecs = 0;
+  int numFields = 0;
   int tsID = 0;
   // if (Info || fname2 || NoInfo)
-  while ((nrecs = streamInqTimestep(streamID1, tsID)) > 0)
+  while ((numFields = streamInqTimestep(streamID1, tsID)) > 0)
   {
-    /*
     if (fname2)
     {
       taxisCopyTimestep(taxisID2, taxisID1);
       streamDefTimestep(streamID2, tsID);
     }
-    */
+
     CdiDateTime vdatetime = taxisInqVdatetime(taxisID1);
 
     if (Field)
     {
-      for (int recID = 0; recID < nrecs; recID++)
+      for (int fieldID = 0; fieldID < numFields; fieldID++)
       {
         int varID, levelID;
         SizeType nmiss;
         streamInqField(streamID1, &varID, &levelID);
-        streamReadField(streamID1, data, &nmiss);
+        if (memType == MemType::Float)
+          streamReadFieldF(streamID1, dataF32.data(), &nmiss);
+        else
+          streamReadField(streamID1, dataF64.data(), &nmiss);
 
         int number = vlistInqVarNumber(vlistID1, varID);
         int gridID = vlistInqVarGrid(vlistID1, varID);
@@ -677,18 +694,26 @@ main(int argc, char **argv)
         double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
         double missval = vlistInqVarMissval(vlistID1, varID);
 
-        if (Info) printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, data, Vardis);
+        if (Info)
+        {
+          if (memType == MemType::Float)
+            printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, dataF32.data(), Vardis);
+          else
+            printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, dataF64.data(), Vardis);
+        }
 
-        /*
         if (fname2)
         {
           streamDefField(streamID2, varID, levelID);
-          if (Move)
-            streamCopyField(streamID2, streamID1);
+          if (Move) { streamCopyField(streamID2, streamID1); }
           else
-            streamWriteField(streamID2, data, nmiss);
+          {
+            if (memType == MemType::Float)
+              streamWriteFieldF(streamID2, dataF32.data(), nmiss);
+            else
+              streamWriteField(streamID2, dataF64.data(), nmiss);
+          }
         }
-        */
       }
     }
     else if (Variable)
@@ -715,17 +740,34 @@ main(int argc, char **argv)
         double missval = vlistInqVarMissval(vlistID1, varID);
 
         SizeType nmiss;
-        streamReadVar(streamID1, varID, data, &nmiss);
+        if (memType == MemType::Float)
+          streamReadVarF(streamID1, varID, dataF32.data(), &nmiss);
+        else
+          streamReadVar(streamID1, varID, dataF64.data(), &nmiss);
 
         int nlevs = zaxisInqSize(zaxisID);
         for (int levelID = 0; levelID < nlevs; levelID++)
         {
           double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
           size_t offset = (size_t) levelID * gridsize;
-          if (Info) printInfo(vdatetime, varname, level, gridsize, number, (size_t) nmiss, missval, data + offset, Vardis);
+          if (Info)
+          {
+            if (memType == MemType::Float)
+              printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, dataF32.data() + offset,
+                        Vardis);
+            else
+              printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, dataF64.data() + offset,
+                        Vardis);
+          }
         }
 
-        // if (fname2) streamWriteVar(streamID2, varID, data, nmiss);
+        if (fname2)
+        {
+          if (memType == MemType::Float)
+            streamWriteVarF(streamID2, varID, dataF32.data(), nmiss);
+          else
+            streamWriteVar(streamID2, varID, dataF64.data(), nmiss);
+        }
       }
     }
     else
@@ -756,11 +798,26 @@ main(int argc, char **argv)
         {
           double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
           SizeType nmiss;
-          streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
+          if (memType == MemType::Float)
+            streamReadVarSliceF(streamID1, varID, levelID, dataF32.data(), &nmiss);
+          else
+            streamReadVarSlice(streamID1, varID, levelID, dataF64.data(), &nmiss);
 
-          if (Info) printInfo(vdatetime, varname, level, gridsize, number, (size_t) nmiss, missval, data, Vardis);
+          if (Info)
+          {
+            if (memType == MemType::Float)
+              printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, dataF32.data(), Vardis);
+            else
+              printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, dataF64.data(), Vardis);
+          }
 
-          // if (fname2) streamWriteVarSlice(streamID2, varID, levelID, data, nmiss);
+          if (fname2)
+          {
+            if (memType == MemType::Float)
+              streamWriteVarSliceF(streamID2, varID, levelID, dataF32.data(), nmiss);
+            else
+              streamWriteVarSlice(streamID2, varID, levelID, dataF64.data(), nmiss);
+          }
         }
       }
     }
@@ -768,13 +825,11 @@ main(int argc, char **argv)
     tsID++;
   }
 
-  free(data);
-
   // fprintf(stderr, "%ld\n", (long) streamNvals(streamID1));
 
   if (fname2)
   {
-    // streamClose(streamID2);
+    streamClose(streamID2);
     vlistDestroy(vlistID2);
     taxisDestroy(taxisID2);
   }

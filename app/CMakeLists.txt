@@ -16,6 +16,7 @@ target_include_directories(cdq PRIVATE
 )
 
 target_compile_definitions(cdq PRIVATE HAVE_CONFIG_H=1)
+target_compile_definitions(cdq PRIVATE CDI_SIZE_TYPE=size_t)
 target_include_directories(cdq PRIVATE "${PROJECT_BINARY_DIR}/src")
 target_link_libraries(cdq PRIVATE libcdi)
 
