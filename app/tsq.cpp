@@ -524,15 +524,11 @@ main(int argc, char **argv)
     unsigned int tc = std::thread::hardware_concurrency();
     if (tc == 0) tc = 1;
     std::cerr << "TensorStore threads: " << tc << '\n';
-#ifdef TSQ_CXX
-    std::cerr << "CXX=" << TSQ_CXX << '\n';
-#else
-    std::cerr << "CXX=unknown\n";
+#ifdef CXX_COMPILER
+    std::cerr << "CXX=" << CXX_COMPILER << '\n';
 #endif
-#ifdef TSQ_CXXFLAGS
-    std::cerr << "CXXFLAGS=" << TSQ_CXXFLAGS << '\n';
-#else
-    std::cerr << "CXXFLAGS=\n";
+#ifdef CXX_COMPILER_VERSION
+    std::cerr << "CXX version=" << CXX_COMPILER_VERSION << '\n';
 #endif
   }
   if (cfg.info && cfg.path.empty()) return 0;  // --info alone
@@ -611,20 +607,6 @@ main(int argc, char **argv)
   if (!input) return 1;
   tsMetadata &md = tsGetReadMetadata(input);
 
-  /*
-  printf("numSteps %lld\n", md.num_steps);
-  printf("Found %zu data arrays:\n", md.arrayList.size());
-  for (auto const &array : md.arrayList) printf(" %s", array.name.c_str());
-  printf("\n");
-  printf("Found %zu coordinate arrays:\n", md.coordList.size());
-  for (auto const &array : md.coordList) printf(" %s", array.name.c_str());
-  printf("\n");
-  auto const &array = md.arrayList[0];
-  printf("%s: num_steps=%lld, num_layers=%lld, num_cells=%lld\n", array.name.c_str(), array.num_steps, array.num_layers,
-         array.num_cells);
-  auto const &attributes = array.attributes;
-  for (const auto &[key, value] : attributes) printf("[%s] = %s\n", key.c_str(), value.c_str());
-  */
   // Datenarrays vs. Koordinatenarrays: die Dimensionsnamen eines Datenarrays
   // verweisen auf Koordinaten; ein Array mit genau diesem Namen ist eine
   // Koordinate und kann nicht mit `--name` gewaehlt werden.

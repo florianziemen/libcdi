@@ -2,47 +2,20 @@
 #include "config.h"
 #endif
 
+#include "tsio.h"
+#include "cdi.h"
+#include "cdi_cpp.h"
+#include "cdi_query.h"
+
 #include <iostream>
 #include <optional>
 #include <string>
 #include <sstream>
+#include <thread>
 #include <vector>
 
 namespace
 {
-
-struct tsRange
-{
-  std::int64_t start = 1;
-  std::optional<std::int64_t> end;
-};
-
-// Konfiguration eines Datensatzes inklusive Array- und Hypercube-Auswahl.
-struct tsConfig
-{
-  int format = 0;       // 0 = auto-detect, 2 or 3 = force
-  std::string kvstore;  // "" = auto-detect, "file", "s3" or "http"
-  std::string path;
-  std::vector<std::string> arrays;
-  std::optional<std::string> endpoint;
-  bool consolidated = false;                 // Metadaten aus `.zmetadata` (zarr2)
-  std::optional<std::string> group;          // zarr3 Gruppe unterhalb `path`
-  bool debug = false;                        // Diagnose auf stderr (in tsio)
-  bool info = false;                         // nur TensorStore-Version ausgeben
-  std::optional<int> data_copy_concurrency;  // parallele Chunk-(De)Kompression
-  bool double_buffer = false;                // Double-Buffer-Prefetch
-  bool overwrite = false;                    // --out-path vorher loeschen
-  std::optional<std::string> out_path;       // Ausgabe-Datensatz (Schreibmodus)
-  std::string out_format = "zarr3";          // Ausgabeformat: "zarr2", "zarr3" oder "n5"
-  std::string out_dtype = "float32";         // Datenarrays (zarr3): "float64", "float32", "float16" oder "bfloat16"
-  std::optional<std::string>
-      compressor;  // --compressor: Ausgabe-Kompressor (Schreibmodus); ungesetzt = Quell-Kompression uebernehmen
-  std::optional<std::int64_t> step_chunk;  // --step-chunk: Laenge der step-Ausgabe-Chunks (Schreibmodus)
-  std::optional<std::int64_t> cell_chunk;  // --cell-chunk: Laenge der cell-Ausgabe-Chunks (letzte Dim, Schreibmodus)
-  tsRange step;                            // Zeitachse
-  tsRange layer;                           // Layer-Achse (rank >= 3)
-  tsRange cell;                            // letzte Achse (Gitterpunkte)
-};
 
 void
 print_usage(const char *prog)
@@ -315,8 +288,18 @@ parse_args(int argc, char **argv, tsConfig &cfg)
     }
     else
     {
-      std::cerr << "Unknown argument: " << arg << "\n";
-      return false;
+      auto numArgsLeft = argc - i;
+      if (numArgsLeft == 1 && cfg.path.empty()) { cfg.path = argv[i]; }
+      else if (numArgsLeft == 2 && cfg.path.empty())
+      {
+        cfg.path = argv[i];
+        cfg.out_path = argv[++i];
+      }
+      else
+      {
+        std::cerr << "Unknown argument: " << arg << "\n";
+        return false;
+      }
     }
   }
 
@@ -327,6 +310,7 @@ parse_args(int argc, char **argv, tsConfig &cfg)
   }
   return true;
 }
+
 }  // namespace
 
 int
@@ -338,6 +322,57 @@ main(int argc, char **argv)
     print_usage(argv[0]);
     return 1;
   }
+#ifdef HAVE_TENSORSTORE
+  if (cfg.info) { std::cerr << "TensorStore " << tsVersion() << '\n'; }
+#else
+  if (cfg.info) { std::cerr << "TensorStore support: disabled (built with -DWITH_TENSORSTORE=OFF)\n"; }
+#endif
+  if (cfg.info)
+  {
+    unsigned int tc = std::thread::hardware_concurrency();
+    if (tc == 0) tc = 1;
+    std::cerr << "TensorStore threads: " << tc << '\n';
+#ifdef C_COMPILER
+    std::cerr << "C=" << C_COMPILER << '\n';
+#endif
+#ifdef C_COMPILER_VERSION
+    std::cerr << "C version=" << C_COMPILER_VERSION << '\n';
+#endif
+#ifdef CXX_COMPILER
+    std::cerr << "CXX=" << CXX_COMPILER << '\n';
+#endif
+#ifdef CXX_COMPILER_VERSION
+    std::cerr << "CXX version=" << CXX_COMPILER_VERSION << '\n';
+#endif
+  }
+  if (cfg.info && cfg.path.empty()) return 0;  // --info alone
+
+  int numQueryGroups = 0;
+  int numQueryNames = 0;
+  int numQueryCells = 0;
+  int numQueryLayers = 0;
+  int numQuerySteps = 0;
+  int querySteps[2];
+  if (cfg.step.end)
+  {
+    numQuerySteps = 2;
+    querySteps[0] = cfg.step.start;
+    querySteps[1] = *cfg.step.end;
+  }
+  bool useQuery = (numQueryGroups > 0) || (numQueryNames > 0) || (numQueryCells > 0) || (numQueryLayers > 0) || (numQuerySteps > 0);
+  CdiQueryPtr query;
+  if (useQuery)
+  {
+    query = cdi_query_create();
+    // if (numQueryGroups) cdiQuerySetGroups(query, numQueryGroups, queryGroups);
+    // if (numQueryNames) cdiQuerySetNames(query, numQueryNames, queryNames);
+    // if (numQueryCells) cdiQuerySetCells(query, numQueryCells, queryCells);
+    // if (numQueryLayers) cdiQuerySetLayers(query, numQueryLayers, queryLayers);
+    if (numQuerySteps) cdiQuerySetSteps(query.get(), numQuerySteps, querySteps);
+    // if (Debug) cdiQueryPrint(query);
+  }
+
+  if (useQuery && query) cdiQueryPrintEntriesNotFound(query.get());
 
   return 0;
 }
