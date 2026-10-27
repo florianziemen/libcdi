@@ -750,7 +750,7 @@ define_filter(const char *arg)
   }
 }
 
-int
+static int
 check_tensorstore(const char **filename)
 {
   const char ts[] = "ts:";
