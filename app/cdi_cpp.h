@@ -36,9 +36,9 @@ struct CdiHandle
   }
 };
 
-using StreamH = CdiHandle<+[](int x) { streamClose(x); }>;
-using VlistH = CdiHandle<+[](int x) { vlistDestroy(x); }>;
-using TaxisH = CdiHandle<+[](int x) { taxisDestroy(x); }>;
+using StreamHandle = CdiHandle<+[](int x) { streamClose(x); }>;
+using VlistHandle = CdiHandle<+[](int x) { vlistDestroy(x); }>;
+using TaxisHandle = CdiHandle<+[](int x) { taxisDestroy(x); }>;
 
 struct CdiQueryDeleter
 {
@@ -49,12 +49,12 @@ struct CdiQueryDeleter
   }
 };
 
-using CdiQueryPtr = std::unique_ptr<struct CdiQuery, CdiQueryDeleter>;
+using CdiQueryHandle = std::unique_ptr<struct CdiQuery, CdiQueryDeleter>;
 
-inline CdiQueryPtr
+inline CdiQueryHandle
 cdi_query_create()
 {
-  return CdiQueryPtr(cdiQueryCreate());
+  return CdiQueryHandle(cdiQueryCreate());
 }
 
 #endif

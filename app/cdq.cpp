@@ -3,6 +3,7 @@
 #endif
 
 #include "printinfo.h"
+#include "field.h"
 
 #include "tsio.h"
 #include "cdi.h"
@@ -315,37 +316,20 @@ parse_args(int argc, char **argv, tsConfig &cfg)
 
 }  // namespace
 
-int vlistInqVarMissvalUsed(int vlistID, int varID);
-#ifndef DBL_IS_NAN
-#if defined(HAVE_DECL_ISNAN)
-#define DBL_IS_NAN(x) (isnan(x))
-#elif defined(FP_NAN)
-#define DBL_IS_NAN(x) (fpclassify(x) == FP_NAN)
-#else
-#define DBL_IS_NAN(x) ((x) != (x))
-#endif
-#endif
-
-#ifndef DBL_IS_EQUAL
-/*#define DBL_IS_EQUAL(x,y) (!(x < y || y < x)) */
-#define DBL_IS_EQUAL(x, y) (DBL_IS_NAN(x) || DBL_IS_NAN(y) ? (DBL_IS_NAN(x) && DBL_IS_NAN(y) ? 1 : 0) : !(x < y || y < x))
-#endif
-
-#ifndef IS_NOT_EQUAL
-#define IS_NOT_EQUAL(x, y) (x < y || y < x)
-#endif
-
-template <typename T>
-static void
-printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, int number, size_t nmiss, double mv, const T *data,
-          int vardis)
+static MinMaxMean
+compute_stat(Field const &field)
 {
-  T missval = static_cast<T>(mv);
-  static int rec = 0;
-  size_t ivals = 0, imiss = 0;
-  double arrmean, arrmin, arrmax;
+  return (field.numMiss) ? field_min_max_mean_mv(field) : field_min_max_mean(field);
+}
 
-  if (!rec)
+static void
+field_print(Field const &field, CdiVar const &var, int levelID, CdiDateTime vdatetime, int vardis)
+{
+  static int recNum = 0;
+  size_t numMissFound = 0;
+  auto numMiss = field.numMiss;
+
+  if (!recNum)
   {
     if (vardis)
       fprintf(stdout,
@@ -361,76 +345,95 @@ printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, i
   date2str(vdatetime.date, vdatestr, sizeof(vdatestr));
   time2str(vdatetime.time, vtimestr, sizeof(vtimestr));
 
-  fprintf(stdout, "%6d :%s %s %7g ", ++rec, vdatestr, vtimestr, level);
-  fprintf(stdout, "%8zu ", datasize);
-  fprintf(stdout, "%7zu :", nmiss);
+  fprintf(stdout, "%6d :%s %s %7g ", ++recNum, vdatestr, vtimestr, var.layers[levelID]);
+  fprintf(stdout, "%8zu ", field.size);
+  fprintf(stdout, "%7zu :", field.numMiss);
 
-  if (number == CDI_REAL)
+  auto mmm = compute_stat(field);
+
+  if (numMiss) { numMissFound = field.size - mmm.n; }
+
+  fprintf(stdout, "%#12.5g%#12.5g%#12.5g", mmm.min, mmm.mean, mmm.max);
+
+  fprintf(stdout, " : %-14s\n", var.name.c_str());
+
+  if (numMissFound != numMiss && numMiss > 0) fprintf(stdout, "Found %zu of %zu missing values!\n", numMissFound, numMiss);
+}
+
+void
+print_shortinfo(StreamHandle const &stream, int vlistID, VarList const &varList)
+{
+}
+
+static bool
+is_int16_type(int dataType)
+{
+  return (dataType == CDI_DATATYPE_UINT16 || dataType == CDI_DATATYPE_INT16);
+}
+
+static bool
+is_int8_type(int dataType)
+{
+  return (dataType == CDI_DATATYPE_UINT8 || dataType == CDI_DATATYPE_INT8);
+}
+
+static bool
+is_float_type(int dataType)
+{
+  return (dataType == CDI_DATATYPE_FLT32 || dataType == CDI_DATATYPE_CPX32);
+}
+
+static VarList
+varlist_create(int vlistID)
+{
+  char buffer[CDI_MAX_NAME];
+  auto numVars = vlistNvars(vlistID);
+  VarList varList(numVars);
+  for (int varID = 0; varID < numVars; ++varID)
   {
-    if (nmiss > 0)
+    auto &var = varList[varID];
+    var.ID = varID;
+    buffer[0] = 0;
+    vlistInqVarName(vlistID, varID, buffer);
+    var.name = buffer;
+    buffer[0] = 0;
+    vlistInqVarUnits(vlistID, varID, buffer);
+    if (buffer[0]) var.units = buffer;
+    var.gridID = vlistInqVarGrid(vlistID, varID);
+    var.zaxisID = vlistInqVarZaxis(vlistID, varID);
+    var.timeType = vlistInqVarTimetype(vlistID, varID);
+    var.stepType = vlistInqVarTsteptype(vlistID, varID);
+    var.gridType = gridInqType(var.gridID);
+    var.numCells = gridInqSize(var.gridID);
+    var.zaxisType = zaxisInqType(var.zaxisID);
+    var.numLayers = zaxisInqSize(var.zaxisID);
+    var.dataType = vlistInqVarDatatype(vlistID, varID);
+    var.missval = vlistInqVarMissval(vlistID, varID);
+    var.code = vlistInqVarCode(vlistID, varID);
+    var.param = vlistInqVarParam(vlistID, varID);
+    var.nwpv = vlistInqVarNumber(vlistID, varID);
+    var.isConstant = (var.timeType == TIME_CONSTANT);
+    double addOffset = 0.0, scaleFactor = 1.0;
+    auto haveAddOffset = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_ADDOFFSET, &addOffset) == CDI_NOERR);
+    auto haveScaleFactor = (cdiInqKeyFloat(vlistID, varID, CDI_KEY_SCALEFACTOR, &scaleFactor) == CDI_NOERR);
+    auto isPacked = (haveAddOffset || haveScaleFactor);
+
+    auto defaultMemType{ MemType::Native };
+    if (defaultMemType == MemType::Native)
     {
-      arrmean = 0;
-      arrmin = 1.e300;
-      arrmax = -1.e300;
-      for (size_t i = 0; i < datasize; i++)
-      {
-        if (!DBL_IS_EQUAL(data[i], missval))
-        {
-          if (data[i] < arrmin) arrmin = data[i];
-          if (data[i] > arrmax) arrmax = data[i];
-          arrmean += data[i];
-          ivals++;
-        }
-      }
-      imiss = datasize - ivals;
-      datasize = ivals;
+      auto useFloatType = (var.dataType == CDI_UNDEFID) || is_float_type(var.dataType) || is_int8_type(var.dataType)
+                          || (is_int16_type(var.dataType) && isPacked);
+      var.memType = useFloatType ? MemType::Float : MemType::Double;
     }
     else
     {
-      arrmean = data[0];
-      arrmin = data[0];
-      arrmax = data[0];
-      for (size_t i = 1; i < datasize; i++)
-      {
-        if (data[i] < arrmin) arrmin = data[i];
-        if (data[i] > arrmax) arrmax = data[i];
-        arrmean += data[i];
-      }
+      var.memType = defaultMemType;
     }
 
-    if (datasize > 0) arrmean /= (double) datasize;
-
-    fprintf(stdout, "%#12.5g%#12.5g%#12.5g", arrmin, arrmean, arrmax);
+    var.layers.resize(var.numLayers);
+    zaxisInqLevels(var.zaxisID, var.layers.data());
   }
-  else
-  {
-    size_t nvals_r = 0, nvals_i = 0;
-    double arrsum_r = 0, arrsum_i = 0, arrmean_r = 0, arrmean_i = 0;
-
-    for (size_t i = 0; i < datasize; i++)
-    {
-      if (!DBL_IS_EQUAL(data[i * 2], missval))
-      {
-        arrsum_r += data[i * 2];
-        nvals_r++;
-      }
-      if (!DBL_IS_EQUAL(data[i * 2 + 1], missval))
-      {
-        arrsum_i += data[i * 2 + 1];
-        nvals_i++;
-      }
-    }
-
-    imiss = datasize - nvals_r;
-
-    if (nvals_r > 0) arrmean_r = arrsum_r / (double) nvals_r;
-    if (nvals_i > 0) arrmean_i = arrsum_i / (double) nvals_i;
-    fprintf(stdout, "  -  (%#12.5g,%#12.5g)  -", arrmean_r, arrmean_i);
-  }
-
-  fprintf(stdout, " : %-14s\n", varname);
-
-  if (imiss != nmiss && nmiss > 0) fprintf(stdout, "Found %zu of %zu missing values!\n", imiss, nmiss);
+  return varList;
 }
 
 static int
@@ -511,7 +514,7 @@ main(int argc, char **argv)
     querySteps[1] = *cfg.step.end;
   }
   bool useQuery = (numQueryGroups > 0) || (numQueryNames > 0) || (numQueryCells > 0) || (numQueryLayers > 0) || (numQuerySteps > 0);
-  CdiQueryPtr query;
+  CdiQueryHandle query;
   if (useQuery)
   {
     query = cdi_query_create();
@@ -523,23 +526,20 @@ main(int argc, char **argv)
     // if (Debug) cdiQueryPrint(query);
   }
 
-  enum struct MemType
+  enum struct AccessMode
   {
-    Native,
-    Float,
-    Double
+    Sequential,
+    Direct,
   };
 
-  auto memType = MemType::Float;
+  auto accessMode{ AccessMode::Direct };
   int Move = 0;
-  int Field = 0;
-  int Variable = 0;
   int Debug = 0;
   int Vardis = 0;
   int Version = 0;
   int Info = 1;
   int Longinfo = 0;
-  int Shortinfo = 0;
+  bool printShortinfo{ true };
 
   auto fname1 = cfg.path.c_str();
   const char *fname2 = NULL;
@@ -548,292 +548,148 @@ main(int argc, char **argv)
   std::string_view fnameView = fname1;
   bool isZarr = strip_ts_prefix(fnameView);
 
-  int streamID1 = -1;
-  if (isZarr) { streamID1 = streamOpenTensorstore(fname1); }
+  StreamHandle stream1;
+  if (isZarr) { stream1.id = streamOpenTensorstore(fname1); }
   else
   {
-    streamID1 = useQuery ? streamOpenReadQuery(fname1, query.get()) : streamOpenRead(fname1);
+    stream1.id = useQuery ? streamOpenReadQuery(fname1, query.get()) : streamOpenRead(fname1);
   }
-  if (streamID1 < 0) return handle_error(streamID1, "Open failed on %s", fname1);
+  if (stream1 < 0) return handle_error(stream1, "Open failed on %s", fname1);
 
   if (useQuery && query) cdiQueryPrintEntriesNotFound(query.get());
 
-  // if (numWorkerIn > 0) streamDefNumWorker(streamID1, numWorkerIn);
+  // if (numWorkerIn > 0) streamDefNumWorker(stream1, numWorkerIn);
 
-  // if (preScan) fprintf(stdout, "numSteps=%d\n", streamInqNumSteps(streamID1));
+  // if (preScan) fprintf(stdout, "numSteps=%d\n", streamInqNumSteps(stream1));
 
-  int vlistID1 = streamInqVlist(streamID1);
+  int vlistID1 = streamInqVlist(stream1);
+  auto varList = varlist_create(vlistID1);
 
   // if (Longinfo) vlistPrint(vlistID1);
 
-  int nvars = vlistNvars(vlistID1);
+  int numVars = varList.size();
   int taxisID1 = vlistInqTaxis(vlistID1);
-  int ntsteps = vlistNtsteps(vlistID1);
 
-  // if (Debug) fprintf(stderr, "nvars   = %d\nntsteps = %d\n", nvars, ntsteps);
-
-  StreamH stream2;
-  VlistH vlist2;
-  TaxisH taxis2;
-  int vlistID2 = -1;
-  int taxisID2 = -1;
-  if (fname2)
+  if (printShortinfo)
   {
-    vlistID2 = vlistDuplicate(vlistID1);
-    taxisID2 = taxisDuplicate(taxisID1);
-    vlistDefTaxis(vlistID2, taxisID2);
+    print_shortinfo(stream1, vlistID1, varList);
+    return 0;
   }
 
-  char varname[CDI_MAX_NAME];
-  size_t datasize = 0;
-  int maxLayers = 0;
-
-  for (int varID = 0; varID < nvars; varID++)
+  StreamHandle stream2;
+  VlistHandle vlist2;
+  TaxisHandle taxis2;
+  if (fname2)
   {
-    int gridID = vlistInqVarGrid(vlistID1, varID);
-    size_t gridsize = (size_t) gridInqSize(gridID);
-    if (gridsize > datasize) datasize = gridsize;
-    int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-    int numLayers = zaxisInqSize(zaxisID);
-    if (numLayers > maxLayers) { maxLayers = numLayers; }
+    vlist2.id = vlistDuplicate(vlistID1);
+    taxis2.id = taxisDuplicate(taxisID1);
+    vlistDefTaxis(vlist2, taxis2);
+  }
+
+  for (int varID = 0; varID < numVars; varID++)
+  {
     if (fname2)
     {
-      // if (DefaultDataType != CDI_UNDEFID) vlistDefVarDatatype(vlistID2, varID, DefaultDataType);
-      vlistDefVarDatatype(vlistID2, varID, CDI_DATATYPE_FLT32);
+      // if (DefaultDataType != CDI_UNDEFID) vlistDefVarDatatype(vlist2, varID, DefaultDataType);
+      vlistDefVarDatatype(vlist2, varID, CDI_DATATYPE_FLT32);
     }
   }
 
-  int streamID2 = CDI_UNDEFID;
   if (fname2)
   {
     Info = 0;
-    auto filetype = streamInqFiletype(streamID1);
+    auto filetype = streamInqFiletype(stream1);
     filetype = CDI_FILETYPE_NC4;
     // if (DefaultFileType != CDI_UNDEFID) filetype = DefaultFileType;
 
-    streamID2 = streamOpenWrite(fname2, filetype);
-    if (streamID2 < 0) return handle_error(streamID2, "Open failed on %s", fname2);
+    stream2.id = streamOpenWrite(fname2, filetype);
+    if (stream2 < 0) return handle_error(stream2, "Open failed on %s", fname2);
 
     int maxSteps = vlistNtsteps(vlistID1);
     if ((filetype == CDI_FILETYPE_NCZARR || filetype == CDI_FILETYPE_ZARR2 || filetype == CDI_FILETYPE_ZARR3) && maxSteps >= 0)
-      streamDefMaxSteps(streamID2, maxSteps);
-    // if (numWorkerOut > 0) streamDefNumWorker(streamID2, numWorkerOut);
+      streamDefMaxSteps(stream2, maxSteps);
+    // if (numWorkerOut > 0) streamDefNumWorker(stream2, numWorkerOut);
 
-    // if (DefaultByteorder != CDI_UNDEFID) streamDefByteorder(streamID2, DefaultByteorder);
+    // if (DefaultByteorder != CDI_UNDEFID) streamDefByteorder(stream2, DefaultByteorder);
 
-    // if (filterSpec[0]) streamDefFilter(streamID2, filterSpec);
+    // if (filterSpec[0]) streamDefFilter(stream2, filterSpec);
 
     // if (comptype != CDI_COMPRESS_NONE)
     //{
-    //   streamDefCompType(streamID2, comptype);
-    //   streamDefCompLevel(streamID2, complevel);
+    //   streamDefCompType(stream2, comptype);
+    //   streamDefCompLevel(stream2, complevel);
     // }
 
-    streamDefVlist(streamID2, vlistID2);
+    streamDefVlist(stream2, vlist2);
 
     // if (otableID == CDI_UNDEFID) otableID = itableID;
   }
 
-  if (vlistNumber(vlistID1) != CDI_REAL) datasize *= 2;
-  if (Variable) { datasize *= maxLayers; }
-  std::vector<float> dataF16;
-  std::vector<float> dataF32;
-  std::vector<double> dataF64;
-  if (memType == MemType::Float) { dataF32.resize(datasize); }
-  else if (memType == MemType::Double) { dataF64.resize(datasize); }
-
-  // if (Debug) printf("nts = %d streamID1 = %d, streamID2 = %d\n", nts, streamID1, streamID2);
+  Field field;
 
   /*
   if (Shortinfo)
   {
     Info = 0;
-    print_short_info(streamID1, vlistID1, Vardis);
+    print_short_info(stream1, vlistID1, Vardis);
   }
   */
   int numFields = 0;
   int tsID = 0;
   // if (Info || fname2 || NoInfo)
-  while ((numFields = streamInqTimestep(streamID1, tsID)) > 0)
+  while ((numFields = streamInqTimestep(stream1, tsID)) > 0)
   {
     if (fname2)
     {
-      taxisCopyTimestep(taxisID2, taxisID1);
-      streamDefTimestep(streamID2, tsID);
+      taxisCopyTimestep(taxis2, taxisID1);
+      streamDefTimestep(stream2, tsID);
     }
 
     CdiDateTime vdatetime = taxisInqVdatetime(taxisID1);
 
-    if (Field)
+    if (accessMode == AccessMode::Sequential)
     {
       for (int fieldID = 0; fieldID < numFields; fieldID++)
       {
         int varID, levelID;
-        SizeType nmiss;
-        streamInqField(streamID1, &varID, &levelID);
-        if (memType == MemType::Float)
-          streamReadFieldF(streamID1, dataF32.data(), &nmiss);
-        else
-          streamReadField(streamID1, dataF64.data(), &nmiss);
+        streamInqField(stream1, &varID, &levelID);
+        auto const &var = varList[varID];
+        field.init(var);
+        stream_read_field(stream1, field);
 
-        int number = vlistInqVarNumber(vlistID1, varID);
-        int gridID = vlistInqVarGrid(vlistID1, varID);
-        int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-        int param = vlistInqVarParam(vlistID1, varID);
-
-        // cdiParamToString(param, paramstr, sizeof(paramstr));
-
-        // if (Vardis)
-        vlistInqVarName(vlistID1, varID, varname);
-        // else
-        //  strcpy(varname, paramstr);
-
-        // printf("varID=%d, param=%d, gridID=%d, zaxisID=%d levelID=%d\n", varID, param, gridID, zaxisID, levelID);
-
-        SizeType gridsize = gridInqSize(gridID);
-        double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
-        double missval = vlistInqVarMissval(vlistID1, varID);
-
-        if (Info)
-        {
-          if (memType == MemType::Float)
-            printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, dataF32.data(), Vardis);
-          else
-            printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, dataF64.data(), Vardis);
-        }
-
+        if (Info) field_print(field, var, levelID, vdatetime, Vardis);
         if (fname2)
         {
-          streamDefField(streamID2, varID, levelID);
-          if (Move) { streamCopyField(streamID2, streamID1); }
+          streamDefField(stream2, varID, levelID);
+          if (Move) { streamCopyField(stream2, stream1); }
           else
           {
-            if (memType == MemType::Float)
-              streamWriteFieldF(streamID2, dataF32.data(), nmiss);
-            else
-              streamWriteField(streamID2, dataF64.data(), nmiss);
+            stream_write_field(stream2, field);
           }
-        }
-      }
-    }
-    else if (Variable)
-    {
-      for (int varID = 0; varID < nvars; varID++)
-      {
-        if (vlistInqVarTimetype(vlistID1, varID) == TIME_CONSTANT && tsID > 0) continue;
-
-        int number = vlistInqVarNumber(vlistID1, varID);
-        int gridID = vlistInqVarGrid(vlistID1, varID);
-        int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-        int param = vlistInqVarParam(vlistID1, varID);
-
-        // cdiParamToString(param, paramstr, sizeof(paramstr));
-
-        // if (Vardis)
-        vlistInqVarName(vlistID1, varID, varname);
-        // else
-        //  strcpy(varname, paramstr);
-
-        if (Debug) fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
-
-        size_t gridsize = (size_t) gridInqSize(gridID);
-        double missval = vlistInqVarMissval(vlistID1, varID);
-
-        SizeType nmiss;
-        if (memType == MemType::Float)
-          streamReadVarF(streamID1, varID, dataF32.data(), &nmiss);
-        else
-          streamReadVar(streamID1, varID, dataF64.data(), &nmiss);
-
-        int nlevs = zaxisInqSize(zaxisID);
-        for (int levelID = 0; levelID < nlevs; levelID++)
-        {
-          double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
-          size_t offset = (size_t) levelID * gridsize;
-          if (Info)
-          {
-            if (memType == MemType::Float)
-              printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, dataF32.data() + offset,
-                        Vardis);
-            else
-              printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, dataF64.data() + offset,
-                        Vardis);
-          }
-        }
-
-        if (fname2)
-        {
-          if (memType == MemType::Float)
-            streamWriteVarF(streamID2, varID, dataF32.data(), nmiss);
-          else
-            streamWriteVar(streamID2, varID, dataF64.data(), nmiss);
         }
       }
     }
     else
     {
-      for (int varID = 0; varID < nvars; varID++)
+      for (int varID = 0; varID < numVars; varID++)
       {
-        if (vlistInqVarTimetype(vlistID1, varID) == TIME_CONSTANT && tsID > 0) continue;
+        auto const &var = varList[varID];
+        if (var.timeType == TIME_CONSTANT && tsID > 0) continue;
 
-        int number = vlistInqVarNumber(vlistID1, varID);
-        int gridID = vlistInqVarGrid(vlistID1, varID);
-        int zaxisID = vlistInqVarZaxis(vlistID1, varID);
-        int param = vlistInqVarParam(vlistID1, varID);
-
-        // cdiParamToString(param, paramstr, sizeof(paramstr));
-
-        // if (Vardis)
-        vlistInqVarName(vlistID1, varID, varname);
-        // else
-        //  strcpy(varname, paramstr);
-
-        // if (Debug) fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n", varID, param, gridID, zaxisID);
-
-        size_t gridsize = (size_t) gridInqSize(gridID);
-        double missval = vlistInqVarMissval(vlistID1, varID);
-
-        int nlevs = zaxisInqSize(zaxisID);
-        for (int levelID = 0; levelID < nlevs; levelID++)
+        field.init(var);
+        for (int levelID = 0; levelID < var.numLayers; levelID++)
         {
-          double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID + 1;
-          SizeType nmiss;
-          if (memType == MemType::Float)
-            streamReadVarSliceF(streamID1, varID, levelID, dataF32.data(), &nmiss);
-          else
-            streamReadVarSlice(streamID1, varID, levelID, dataF64.data(), &nmiss);
-
-          if (Info)
-          {
-            if (memType == MemType::Float)
-              printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, dataF32.data(), Vardis);
-            else
-              printInfo(vdatetime, varname, level, (size_t) gridsize, number, (size_t) nmiss, missval, dataF64.data(), Vardis);
-          }
-
-          if (fname2)
-          {
-            if (memType == MemType::Float)
-              streamWriteVarSliceF(streamID2, varID, levelID, dataF32.data(), nmiss);
-            else
-              streamWriteVarSlice(streamID2, varID, levelID, dataF64.data(), nmiss);
-          }
+          stream_read_var_slice(stream1, varID, levelID, field);
+          if (Info) field_print(field, var, levelID, vdatetime, Vardis);
+          if (fname2) stream_write_var_slice(stream2, varID, levelID, field);
         }
       }
     }
 
-    tsID++;
+    ++tsID;
   }
 
-  // fprintf(stderr, "%ld\n", (long) streamNvals(streamID1));
-
-  if (fname2)
-  {
-    streamClose(streamID2);
-    vlistDestroy(vlistID2);
-    taxisDestroy(taxisID2);
-  }
-  streamClose(streamID1);
+  // fprintf(stderr, "%ld\n", (long) streamNvals(stream1));
 
   return 0;
 }
