@@ -14,8 +14,8 @@ void date2str(CdiDate date, char *datestr, int maxlen);
 void time2str(CdiTime time, char *timestr, int maxlen);
 const char *comptype_to_name(int comptype);
 void printFiletype(int streamID, int vlistID);
-void printGridInfo(int vlistID);
-void printZaxisInfo(int vlistID);
+void print_grid_info(int vlistID);
+void print_zaxis_info(int vlistID);
 void printSubtypeInfo(int vlistID);
 void printTimesteps(int streamID, int taxisID, int verbose);
 

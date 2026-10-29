@@ -478,12 +478,12 @@ print_short_info(int streamID, int vlistID, int vardis)
   fprintf(stdout, "   Grid coordinates");
   fprintf(stdout, " :\n");
 
-  printGridInfo(vlistID);
+  print_grid_info(vlistID);
 
   fprintf(stdout, "   Vertical coordinates");
   fprintf(stdout, " :\n");
 
-  printZaxisInfo(vlistID);
+  print_zaxis_info(vlistID);
 
   if (nsubtypes > 0)
   {

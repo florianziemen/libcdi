@@ -404,7 +404,7 @@ printGridInfoKernel(int gridID, int index, bool lproj)
 }
 
 void
-printGridInfo(int vlistID)
+print_grid_info(int vlistID)
 {
   int ngrids = vlistNumGrids(vlistID);
   for (int index = 0; index < ngrids; index++)
@@ -506,7 +506,7 @@ printZaxisReferenceInfo(int zaxisID)
 }
 
 void
-printZaxisInfo(int vlistID)
+print_zaxis_info(int vlistID)
 {
   char zname[CDI_MAX_NAME], zunits[CDI_MAX_NAME];
 

@@ -363,6 +363,13 @@ field_print(Field const &field, CdiVar const &var, int levelID, CdiDateTime vdat
 void
 print_shortinfo(StreamHandle const &stream, int vlistID, VarList const &varList)
 {
+  std::fprintf(stdout, "   Grid coordinates");
+  std::fprintf(stdout, " :\n");
+  print_grid_info(vlistID);
+
+  std::fprintf(stdout, "   Vertical coordinates");
+  std::fprintf(stdout, " :\n");
+  print_zaxis_info(vlistID);
 }
 
 static bool
