@@ -4,7 +4,7 @@
 
 #include "printinfo.h"
 #include "printinfo.hpp"
-#include "field.h"
+#include "field.hpp"
 
 #include "tsio.h"
 #include "cdi.h"
@@ -792,11 +792,11 @@ main(int argc, char **argv)
   int Version = 0;
   int Info = 1;
   int Longinfo = 0;
-  bool printShortinfo{ true };
 
   auto fname1 = cfg.path.c_str();
   const char *fname2 = NULL;
   if (cfg.out_path) { fname2 = (*cfg.out_path).c_str(); }
+  auto printShortinfo = !fname2;
 
   std::string_view fnameView = fname1;
   bool isZarr = strip_ts_prefix(fnameView);

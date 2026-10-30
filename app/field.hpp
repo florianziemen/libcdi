@@ -1,5 +1,5 @@
-#ifndef FIELD_H
-#define FIELD_H
+#ifndef FIELD_HPP
+#define FIELD_HPP
 
 #include "cdi_cpp.h"
 #include "compare.h"
