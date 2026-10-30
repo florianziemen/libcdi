@@ -439,9 +439,22 @@ ts_inq_contents(stream_t *streamP)
       printf("[%s] = %s\n", key.c_str(), value.c_str());
       if (key == "grid_mapping_name" && value == "healpix") printf("healpix grid\n");
     }
-    if (attributes.contains("grid_mapping_name") && attributes.find("grid_mapping_name")->second == "healpix")
+    if (gridID != -1 && attributes.contains("grid_mapping_name") && attributes.find("grid_mapping_name")->second == "healpix")
     {
       printf("healpix grid\n");
+      if (attributes.contains("refinement_level") && attributes.contains("indexing_scheme"))
+      {
+
+        auto it1 = attributes.find("refinement_level");
+        printf("%s %d\n", it1->first.c_str(), std::stoi(it1->second));
+        auto it2 = attributes.find("indexing_scheme");
+        printf("%s %s\n", it2->first.c_str(), it2->second.c_str());
+        int attlen = 1;
+        int refinement_level = std::stoi(it1->second);
+        auto indexing_scheme = it2->second;
+        cdiDefAttInt(gridID, CDI_GLOBAL, "refinement_level", CDI_DATATYPE_INT32, (int) attlen, &refinement_level);
+        cdiDefAttTxt(gridID, CDI_GLOBAL, "indexing_scheme", (int) indexing_scheme.size(), indexing_scheme.c_str());
+      }
     }
   }
 

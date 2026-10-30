@@ -3,12 +3,14 @@
 #endif
 
 #include "printinfo.h"
+#include "printinfo.hpp"
 #include "field.h"
 
 #include "tsio.h"
 #include "cdi.h"
 #include "cdi_cpp.h"
 #include "cdi_query.h"
+#include "julian_date.h"
 
 #include <iostream>
 #include <optional>
@@ -360,9 +362,235 @@ field_print(Field const &field, CdiVar const &var, int levelID, CdiDateTime vdat
   if (numMissFound != numMiss && numMiss > 0) fprintf(stdout, "Found %zu of %zu missing values!\n", numMissFound, numMiss);
 }
 
+static int
+print_time_info(int numSteps, int taxisID, StreamHandle const &stream)
+{
+  int numTimesteps = numSteps;
+  TimeIncrement timeIncrement0;
+  CdiDateTime vDateTimeFirst{};
+  CdiDateTime vDateTimeLast{};
+
+  std::fprintf(stdout, "   Time coordinate");
+  std::fprintf(stdout, " :\n");
+
+  if (taxisID != CDI_UNDEFID)
+  {
+    auto calendar = taxisInqCalendar(taxisID);
+
+    bool computeTimeIncrement = true;
+    int tsID = 0;
+    while (true)
+    {
+      auto numFields = streamInqTimestep(stream, tsID);
+      if (numFields == 0) break;
+
+      auto vDateTime = taxisInqVdatetime(taxisID);
+
+      if (tsID == 0) { vDateTimeFirst = vDateTime; }
+      else if (computeTimeIncrement)
+      {
+        auto julianDate0 = julianDate_encode(calendar, vDateTimeLast);
+        auto julianDate = julianDate_encode(calendar, vDateTime);
+        auto jdelta = julianDate_to_seconds(julianDate_sub(julianDate, julianDate0));
+        auto timeIncrement = get_time_increment(jdelta, vDateTimeLast.date, vDateTime.date);
+
+        if (tsID == 1) { timeIncrement0 = timeIncrement; }
+        else if (timeIncrement0 != timeIncrement)
+        {
+          timeIncrement0.period = 0;
+          computeTimeIncrement = false;
+        }
+      }
+
+      vDateTimeLast = vDateTime;
+
+      tsID++;
+    }
+
+    numTimesteps = tsID;
+  }
+
+  const auto *taxisName = taxisNamePtr(taxisID);
+  const auto *tname = taxisName ? taxisName : "time";
+
+  std::fprintf(stdout, "%33s : ", "steps");
+
+  if (numSteps == CDI_UNDEFID)
+    std::fprintf(stdout, "unlimited (%d currently)\n", numTimesteps);
+  else
+    std::fprintf(stdout, "%d\n", numSteps);
+
+  if (taxisID != CDI_UNDEFID)
+  {
+    std::fprintf(stdout, "%33s : ", tname);
+
+    std::fprintf(stdout, "%s", datetime_to_string(vDateTimeFirst).c_str());
+    if (numTimesteps > 1)
+    {
+      std::fprintf(stdout, " to %s", datetime_to_string(vDateTimeLast).c_str());
+      if (timeIncrement0.period)
+        std::fprintf(stdout, " by %ld %s%s", static_cast<long>(timeIncrement0.period), time_units_cstr(timeIncrement0.units),
+                     (timeIncrement0.period != 1) ? "s" : "");
+    }
+    std::fprintf(stdout, "\n");
+
+    auto taxisType = taxisInqType(taxisID);
+    if (taxisType != TAXIS_ABSOLUTE)
+    {
+      std::fprintf(stdout, "%33s : ", "units");
+
+      auto tunits = taxisInqTunit(taxisID);
+      std::fprintf(stdout, "%s", tunit_to_cstr(tunits));
+
+      auto rDateTime = taxisInqRdatetime(taxisID);
+      std::fprintf(stdout, " since %s\n", datetime_to_string(rDateTime).c_str());
+
+      auto calendar = taxisInqCalendar(taxisID);
+      if (calendar != CDI_UNDEFID) std::fprintf(stdout, "%33s : %s\n", "calendar", calendar_to_cstr(calendar));
+
+      if (taxisType == TAXIS_FORECAST)
+      {
+        auto fDateTime = taxisInqFdatetime(taxisID);
+        std::fprintf(stdout, "%33s : %s\n", "forecastRefTime", datetime_to_string(fDateTime).c_str());
+      }
+    }
+
+    if (taxisHasBounds(taxisID)) std::fprintf(stdout, "%33s : %s\n", "available", "bounds");
+  }
+
+  return numTimesteps;
+}
+
+const char *
+datatype_to_cstr(int datatype)
+{
+  static char cstr[20]{};
+  if (datatype > 0 && datatype <= 32) std::snprintf(cstr, sizeof(cstr), "P%d", datatype);
+
+  // clang-format off
+  if      (datatype == CDI_DATATYPE_PACK  ) return "P0";
+  else if (datatype > 0 && datatype <= 32 ) return cstr;
+  else if (datatype == CDI_DATATYPE_CPX32 ) return "C32";
+  else if (datatype == CDI_DATATYPE_CPX64 ) return "C64";
+  else if (datatype == CDI_DATATYPE_FLT32 ) return "F32";
+  else if (datatype == CDI_DATATYPE_FLT64 ) return "F64";
+  else if (datatype == CDI_DATATYPE_INT8  ) return "I8";
+  else if (datatype == CDI_DATATYPE_INT16 ) return "I16";
+  else if (datatype == CDI_DATATYPE_INT32 ) return "I32";
+  else if (datatype == CDI_DATATYPE_UINT8 ) return "U8";
+  else if (datatype == CDI_DATATYPE_UINT16) return "U16";
+  else if (datatype == CDI_DATATYPE_UINT32) return "U32";
+  else                                      return "";
+  // clang-format on
+}
+
+const char *
+get_steptype_name(int tsteptype)
+{
+  // clang-format off
+  if      (tsteptype == TSTEP_INSTANT)  return "instant";
+  else if (tsteptype == TSTEP_INSTANT2) return "instant";
+  else if (tsteptype == TSTEP_INSTANT3) return "instant";
+  else if (tsteptype == TSTEP_MIN)      return "min";
+  else if (tsteptype == TSTEP_MAX)      return "max";
+  else if (tsteptype == TSTEP_AVG)      return "avg";
+  else if (tsteptype == TSTEP_ACCUM)    return "accum";
+  else if (tsteptype == TSTEP_RANGE)    return "range";
+  else if (tsteptype == TSTEP_DIFF)     return "diff";
+  else if (tsteptype == TSTEP_SUM)      return "sum";
+  else if (tsteptype == TSTEP_SD)       return "standard_deviation";
+  else if (tsteptype == TSTEP_VAR)      return "variance";
+  // clang-format on
+  return "unknown";
+}
+
+[[nodiscard]] static constexpr const char *
+memtype_to_cstr(MemType memType) noexcept
+{
+  return (memType == MemType::Double) ? "F64" : "F32";
+}
+
+[[nodiscard]] static constexpr std::string_view
+limit_string_view(std::string_view name, size_t maxLen) noexcept
+{
+  if (maxLen == 0) return {};
+
+  name = name.substr(0, maxLen - 1);
+  if (name.size() > 10)
+  {
+    auto pos = name.find_first_of(" ,", 3);
+    auto dotPos = name.find('.', 11);
+    if (dotPos < pos) pos = dotPos;
+    if (pos != std::string_view::npos) name = name.substr(0, pos);
+  }
+
+  return name;
+}
+
+void
+print_vars_info(int vlistID, VarList const &varList)
+{
+  for (auto const &var : varList)
+  {
+    fprintf(stdout, "%6d : ", var.ID + 1);
+
+    // institute info
+    const auto *instptr = institutInqNamePtr(vlistInqVarInstitut(vlistID, var.ID));
+    auto instName = limit_string_view(instptr ? std::string_view(instptr) : std::string_view("unknown"), 32);
+    std::fprintf(stdout, "%-8.*s ", static_cast<int>(instName.size()), instName.data());
+
+    // source info
+    const auto *modelptr = modelInqNamePtr(vlistInqVarModel(vlistID, var.ID));
+    auto modelName = limit_string_view(modelptr ? std::string_view(modelptr) : std::string_view("unknown"), 32);
+    std::fprintf(stdout, "%-8.*s ", static_cast<int>(modelName.size()), modelName.data());
+
+    fprintf(stdout, "%c ", var.isConstant ? 'c' : 'v');
+
+    // tsteptype
+    fprintf(stdout, "%-8s ", get_steptype_name(var.stepType));
+
+    // layer info
+    fprintf(stdout, "%6d ", var.numLayers);
+    fprintf(stdout, "%3d ", vlistZaxisIndex(vlistID, var.zaxisID) + 1);
+
+    // grid info
+    fprintf(stdout, "%9zu ", var.numCells);
+    fprintf(stdout, "%3d ", vlistGridIndex(vlistID, var.gridID) + 1);
+
+    // datatype
+    fprintf(stdout, " %-3s", datatype_to_cstr(var.dataType));
+    int compType = vlistInqVarCompType(vlistID, var.ID);
+    bool isCompressed = (compType != CDI_COMPRESS_NONE);
+    fprintf(stdout, "%c ", isCompressed ? (int) comptype_to_name(compType)[0] : ' ');
+
+    std::fprintf(stdout, "  %-3s ", memtype_to_cstr(var.memType));
+
+    // parameter info
+    fprintf(stdout, ": ");
+    fprintf(stdout, "%-14s", var.name.c_str());
+    fprintf(stdout, "\n");
+  }
+}
+
 void
 print_shortinfo(StreamHandle const &stream, int vlistID, VarList const &varList)
 {
+  std::fprintf(stdout, "   Var : Institut Source   T Steptype Levels Num    Points Num Dtype Mtype : ");
+  std::fprintf(stdout, "Parameter name\n");
+
+  int numFieldsConst = 0;
+  int numFieldsVar = 0;
+  for (auto const &var : varList)
+  {
+    if (var.isConstant) { numFieldsConst += var.numLayers; }
+    else
+    {
+      numFieldsVar += var.numLayers;
+    }
+  }
+
+  print_vars_info(vlistID, varList);
+
   std::fprintf(stdout, "   Grid coordinates");
   std::fprintf(stdout, " :\n");
   print_grid_info(vlistID);
@@ -370,6 +598,18 @@ print_shortinfo(StreamHandle const &stream, int vlistID, VarList const &varList)
   std::fprintf(stdout, "   Vertical coordinates");
   std::fprintf(stdout, " :\n");
   print_zaxis_info(vlistID);
+
+  int taxisID = vlistInqTaxis(vlistID);
+  int numSteps = vlistNtsteps(vlistID);
+  int numTimesteps = numSteps;
+  if (numSteps != 0) print_time_info(numSteps, taxisID, stream);
+
+  std::fprintf(stdout, "   Summary");
+  std::fprintf(stdout, " :\n");
+  std::fprintf(stdout, "%33s : %zu\n", "number of variables", varList.size());
+  if (numTimesteps) std::fprintf(stdout, "%33s : %d\n", "number of timesteps", numTimesteps);
+  int numFields = numFieldsVar * numTimesteps + numFieldsConst;
+  std::fprintf(stdout, "%33s : %d\n", "number of fields", numFields);
 }
 
 static bool
@@ -438,7 +678,13 @@ varlist_create(int vlistID)
     }
 
     var.layers.resize(var.numLayers);
-    zaxisInqLevels(var.zaxisID, var.layers.data());
+    if (zaxisInqLevels(var.zaxisID, nullptr) == var.numLayers) { zaxisInqLevels(var.zaxisID, var.layers.data()); }
+    else
+    {
+      if (var.numLayers == 1 && var.zaxisType == ZAXIS_SURFACE) { var.layers[0] = 0.0; }
+      else
+        for (int i = 0; i < var.numLayers; ++i) { var.layers[i] = i + 1.0; }
+    }
   }
   return varList;
 }

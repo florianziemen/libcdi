@@ -298,38 +298,6 @@ printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, i
   if (imiss != nmiss && nmiss > 0) fprintf(stdout, "Found %zu of %zu missing values!\n", imiss, nmiss);
 }
 
-static const char *
-tunit2str(int tunits)
-{
-  // clang-format off
-  if      (tunits == TUNIT_YEAR)       return "years";
-  else if (tunits == TUNIT_MONTH)      return "months";
-  else if (tunits == TUNIT_DAY)        return "days";
-  else if (tunits == TUNIT_12HOURS)    return "12hours";
-  else if (tunits == TUNIT_6HOURS)     return "6hours";
-  else if (tunits == TUNIT_3HOURS)     return "3hours";
-  else if (tunits == TUNIT_HOUR)       return "hours";
-  else if (tunits == TUNIT_30MINUTES)  return "30minutes";
-  else if (tunits == TUNIT_QUARTER)    return "15minutes";
-  else if (tunits == TUNIT_MINUTE)     return "minutes";
-  else if (tunits == TUNIT_SECOND)     return "seconds";
-  else                                 return "unknown";
-  // clang-format on
-}
-
-static const char *
-calendar2str(int calendar)
-{
-  // clang-format off
-  if      (calendar == CALENDAR_STANDARD)  return "standard";
-  else if (calendar == CALENDAR_PROLEPTIC) return "proleptic_gregorian";
-  else if (calendar == CALENDAR_360DAYS)   return "360_day";
-  else if (calendar == CALENDAR_365DAYS)   return "365_day";
-  else if (calendar == CALENDAR_366DAYS)   return "366_day";
-  else                                     return "unknown";
-  // clang-format on
-}
-
 static void
 limit_string_length(char *string, size_t maxlen)
 {

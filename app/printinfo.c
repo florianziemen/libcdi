@@ -25,6 +25,38 @@ date2str(CdiDate date, char *datestr, int maxlen)
   snprintf(datestr, (size_t) maxlen, DATE_FORMAT, date.year, date.month, date.day);
 }
 
+const char *
+calendar2str(int calendar)
+{
+  // clang-format off
+  if      (calendar == CALENDAR_STANDARD)  return "standard";
+  else if (calendar == CALENDAR_PROLEPTIC) return "proleptic_gregorian";
+  else if (calendar == CALENDAR_360DAYS)   return "360_day";
+  else if (calendar == CALENDAR_365DAYS)   return "365_day";
+  else if (calendar == CALENDAR_366DAYS)   return "366_day";
+  else                                     return "unknown";
+  // clang-format on
+}
+
+const char *
+tunit2str(int tunits)
+{
+  // clang-format off
+  if      (tunits == TUNIT_YEAR)       return "years";
+  else if (tunits == TUNIT_MONTH)      return "months";
+  else if (tunits == TUNIT_DAY)        return "days";
+  else if (tunits == TUNIT_12HOURS)    return "12hours";
+  else if (tunits == TUNIT_6HOURS)     return "6hours";
+  else if (tunits == TUNIT_3HOURS)     return "3hours";
+  else if (tunits == TUNIT_HOUR)       return "hours";
+  else if (tunits == TUNIT_30MINUTES)  return "30minutes";
+  else if (tunits == TUNIT_QUARTER)    return "15minutes";
+  else if (tunits == TUNIT_MINUTE)     return "minutes";
+  else if (tunits == TUNIT_SECOND)     return "seconds";
+  else                                 return "unknown";
+  // clang-format on
+}
+
 void
 time2str(CdiTime time, char *timestr, int maxlen)
 {
@@ -134,7 +166,7 @@ print_xvals(int gridID, int dig)
       fprintf(stdout, " to %.*g", dig, xlast);
       if (is_not_equal(xinc, 0)) fprintf(stdout, " by %.*g", dig, xinc);
     }
-    fprintf(stdout, " %s%s\n", xunits, gridIsCyclic(gridID) ? "  cyclic" : "");
+    fprintf(stdout, " [%s]%s\n", xunits, gridIsCyclic(gridID) ? "  cyclic" : "");
   }
 }
 
@@ -161,7 +193,7 @@ print_yvals(int gridID, int dig)
       if (is_not_equal(yinc, 0) && gridtype != GRID_GAUSSIAN && gridtype != GRID_GAUSSIAN_REDUCED)
         fprintf(stdout, " by %.*g", dig, yinc);
     }
-    fprintf(stdout, " %s\n", yunits);
+    fprintf(stdout, " [%s]\n", yunits);
   }
 }
 
@@ -287,6 +319,30 @@ printGridNp(int gridtype, int gridID, size_t gridsize, size_t xsize, size_t ysiz
 }
 
 static void
+print_healpix_parameter(int gridID, size_t gridSize)
+{
+  fprintf(stdout, "         %24s", "parameter");
+  fprintf(stdout, " : ");
+
+  int refinementLevel = -1;
+  cdiInqAttInt(gridID, CDI_GLOBAL, "refinement_level", 1, &refinementLevel);
+  int attlen = cdiInqAttLen(gridID, CDI_GLOBAL, "indexing_scheme");
+  char order[256];
+  order[0] = 0;
+  if (attlen > 0 && attlen < (sizeof(order) - 1))
+  {
+    cdiInqAttTxt(gridID, CDI_GLOBAL, "indexing_scheme", attlen, order);
+    order[attlen] = 0;
+  }
+  fprintf(stdout, "refinement_level=%d", refinementLevel);
+  fprintf(stdout, "  indexing_scheme=%s", order[0] ? order : "undefined");
+
+  if (gridSize == gridInqIndices(gridID, NULL)) { fprintf(stdout, "  cell_index=true"); }
+
+  fprintf(stdout, "\n");
+}
+
+static void
 printGridInfoKernel(int gridID, int index, bool lproj)
 {
   int gridType = gridInqType(gridID);
@@ -311,19 +367,23 @@ printGridInfoKernel(int gridID, int index, bool lproj)
   }
 
   if (gridType == GRID_LONLAT || gridType == GRID_PROJECTION || gridType == GRID_GENERIC || gridType == GRID_CHARXY
-      || gridType == GRID_GAUSSIAN || gridType == GRID_GAUSSIAN_REDUCED)
+      || gridType == GRID_GAUSSIAN || gridType == GRID_GAUSSIAN_REDUCED || gridType == GRID_HEALPIX)
   {
     if (!lproj) { printGridNp(gridType, gridID, gridsize, xsize, ysize); }
 
-    char name[CDI_MAX_NAME];
-    int length = CDI_MAX_NAME;
-    cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, name, &length);
-    if (gridType == GRID_PROJECTION || name[0])
+    if (gridType == GRID_HEALPIX) { print_healpix_parameter(gridID, gridsize); }
+    else
     {
-      if (name[0] == 0) strcpy(name, "undefined");
-      fprintf(stdout, "         %24s", "mapping");
-      fprintf(stdout, " : ");
-      fprintf(stdout, "%s\n", name);
+      char name[CDI_MAX_NAME];
+      int length = CDI_MAX_NAME;
+      cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, name, &length);
+      if (gridType == GRID_PROJECTION || name[0])
+      {
+        if (name[0] == 0) strcpy(name, "undefined");
+        fprintf(stdout, "         %24s", "mapping");
+        fprintf(stdout, " : ");
+        fprintf(stdout, "%s\n", name);
+      }
     }
 
     print_xvals(gridID, dig);
@@ -429,7 +489,7 @@ printZaxisBoundsInfo(int zaxisID, int dig, int levelsize, const double zinc, con
     fprintf(stdout, " to %.*g-%.*g", dig, level1, dig, level2);
     if (is_not_equal(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
   }
-  fprintf(stdout, " %s\n", zunits);
+  fprintf(stdout, " [%s]\n", zunits);
 }
 
 static void
@@ -440,8 +500,8 @@ printZaxisLevelInfo(int levelsize, int zaxisID, int zaxistype, double zinc, int 
 
   if (!(zaxistype == ZAXIS_SURFACE && levelsize == 1 && fabs(levels[0]) <= 0))
   {
-    const double zfirst = levels[0];
-    const double zlast = levels[levelsize - 1];
+    double zfirst = levels[0];
+    double zlast = levels[levelsize - 1];
     if (levelsize > 2)
     {
       zinc = (levels[levelsize - 1] - levels[0]) / (levelsize - 1);
@@ -459,7 +519,7 @@ printZaxisLevelInfo(int levelsize, int zaxisID, int zaxistype, double zinc, int 
       fprintf(stdout, " to %.*g", dig, zlast);
       if (is_not_equal(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
     }
-    fprintf(stdout, " %s\n", zunits);
+    fprintf(stdout, " [%s]\n", zunits);
   }
 
   free(levels);

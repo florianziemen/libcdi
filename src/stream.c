@@ -467,7 +467,6 @@ cdiInqContents(stream_t *streamP)
   if (status == 0)
   {
     int taxisID = vlistInqTaxis(streamP->vlistID);
-    printf("cdiInqContents: taxisID=%d\n", taxisID);
     if (taxisID != CDI_UNDEFID)
     {
       taxis_t *taxisP1 = &streamP->tsteps[0].taxis;

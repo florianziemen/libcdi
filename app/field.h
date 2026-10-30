@@ -3,6 +3,7 @@
 
 #include "cdi_cpp.h"
 #include "compare.h"
+#include <string>
 #include <vector>
 
 constexpr size_t ompLoopSizeLarge = 999999;

@@ -3856,20 +3856,15 @@ cdf_define_all_vars(stream_t *streamP, int vlistID, int instID, int modelID, int
     int ncid = ncvar->ncid;
     int nvatts = ncvar->natts;
     for (int iatt = 0; iatt < nvatts; ++iatt) cdf_set_cdi_attr(ncid, ncvarid, ncvar->atts[iatt], vlistID, varID, false);
-
-    Free(ncvar->atts);
-    Free(ncvar->vct);
-
-    ncvar->atts = NULL;
-    ncvar->vct = NULL;
+    FreeAndNull(ncvar->atts);
+    FreeAndNull(ncvar->vct);
   }
 
   // release mem of not freed attributes
   for (int ncvarid = 0; ncvarid < num_ncvars; ncvarid++)
   {
     ncvar_t *ncvar = &ncvars[ncvarid];
-    Free(ncvar->atts);
-    ncvar->atts = NULL;
+    FreeAndNull(ncvar->atts);
   }
 
   if (varids && varids != varidsLocal) Free(varids);

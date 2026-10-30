@@ -12,6 +12,8 @@ extern "C"
 void datetime2str(CdiDateTime dt, char *datetimestr, int maxlen);
 void date2str(CdiDate date, char *datestr, int maxlen);
 void time2str(CdiTime time, char *timestr, int maxlen);
+const char *calendar2str(int calendar);
+const char *tunit2str(int tunits);
 const char *comptype_to_name(int comptype);
 void printFiletype(int streamID, int vlistID);
 void print_grid_info(int vlistID);
