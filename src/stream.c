@@ -94,7 +94,7 @@ int
 get_filetype_from_name(const char **path)
 {
   const char *uri = *path;
-  if (uri[0] == 'z' && uri[1] == 'a' && uri[2] == 'r' && uri[3] == 'r')
+  if (memcmp(uri, "zarr", 4) == 0)
   {
     if (uri[4] == '2' && uri[5] == ':' && uri[6])
     {

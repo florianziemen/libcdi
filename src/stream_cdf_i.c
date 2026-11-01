@@ -249,7 +249,7 @@ scan_time_units(const char *unitstr)
   return timeunit;
 }
 
-static int
+int
 set_base_time(const char *timeUnitsStr, taxis_t *taxis)
 {
   int taxisType = TAXIS_ABSOLUTE;

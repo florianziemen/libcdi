@@ -532,43 +532,43 @@ print_vars_info(int vlistID, VarList const &varList)
 {
   for (auto const &var : varList)
   {
-    fprintf(stdout, "%6d : ", var.ID + 1);
+    std::fprintf(stdout, "%6d : ", var.ID + 1);
 
     // institute info
     const auto *instptr = institutInqNamePtr(vlistInqVarInstitut(vlistID, var.ID));
-    auto instName = limit_string_view(instptr ? std::string_view(instptr) : std::string_view("unknown"), 32);
+    auto instName = limit_string_view(instptr ? instptr : "unknown", 32);
     std::fprintf(stdout, "%-8.*s ", static_cast<int>(instName.size()), instName.data());
 
     // source info
     const auto *modelptr = modelInqNamePtr(vlistInqVarModel(vlistID, var.ID));
-    auto modelName = limit_string_view(modelptr ? std::string_view(modelptr) : std::string_view("unknown"), 32);
+    auto modelName = limit_string_view(modelptr ? modelptr : "unknown", 32);
     std::fprintf(stdout, "%-8.*s ", static_cast<int>(modelName.size()), modelName.data());
 
-    fprintf(stdout, "%c ", var.isConstant ? 'c' : 'v');
+    std::fprintf(stdout, "%c ", var.isConstant ? 'c' : 'v');
 
     // tsteptype
-    fprintf(stdout, "%-8s ", get_steptype_name(var.stepType));
+    std::fprintf(stdout, "%-8s ", get_steptype_name(var.stepType));
 
     // layer info
-    fprintf(stdout, "%6d ", var.numLayers);
-    fprintf(stdout, "%3d ", vlistZaxisIndex(vlistID, var.zaxisID) + 1);
+    std::fprintf(stdout, "%6d ", var.numLayers);
+    std::fprintf(stdout, "%3d ", vlistZaxisIndex(vlistID, var.zaxisID) + 1);
 
     // grid info
-    fprintf(stdout, "%9zu ", var.numCells);
-    fprintf(stdout, "%3d ", vlistGridIndex(vlistID, var.gridID) + 1);
+    std::fprintf(stdout, "%9zu ", var.numCells);
+    std::fprintf(stdout, "%3d ", vlistGridIndex(vlistID, var.gridID) + 1);
 
     // datatype
-    fprintf(stdout, " %-3s", datatype_to_cstr(var.dataType));
+    std::fprintf(stdout, " %-3s", datatype_to_cstr(var.dataType));
     int compType = vlistInqVarCompType(vlistID, var.ID);
     bool isCompressed = (compType != CDI_COMPRESS_NONE);
-    fprintf(stdout, "%c ", isCompressed ? (int) comptype_to_name(compType)[0] : ' ');
+    std::fprintf(stdout, "%c ", isCompressed ? (int) comptype_to_name(compType)[0] : ' ');
 
     std::fprintf(stdout, "  %-3s ", memtype_to_cstr(var.memType));
 
     // parameter info
-    fprintf(stdout, ": ");
-    fprintf(stdout, "%-14s", var.name.c_str());
-    fprintf(stdout, "\n");
+    std::fprintf(stdout, ": ");
+    std::fprintf(stdout, "%-14s", var.name.c_str());
+    std::fprintf(stdout, "\n");
   }
 }
 
@@ -737,7 +737,7 @@ main(int argc, char **argv)
     std::cerr << "TensorStore support: disabled (built with -DWITH_TENSORSTORE=OFF)\n";
 #endif
     unsigned int tc = std::thread::hardware_concurrency();
-    if (tc == 0) tc = 1;
+    if (tc == 0) { tc = 1; }
     std::cerr << "TensorStore threads: " << tc << '\n';
 #ifdef C_COMPILER
     std::cerr << "C=" << C_COMPILER << '\n';
@@ -797,6 +797,8 @@ main(int argc, char **argv)
   const char *fname2 = NULL;
   if (cfg.out_path) { fname2 = (*cfg.out_path).c_str(); }
   auto printShortinfo = !fname2;
+  auto printInfo = !fname2;
+  printInfo = false;
 
   std::string_view fnameView = fname1;
   bool isZarr = strip_ts_prefix(fnameView);
@@ -823,7 +825,7 @@ main(int argc, char **argv)
   int numVars = varList.size();
   int taxisID1 = vlistInqTaxis(vlistID1);
 
-  if (printShortinfo)
+  if (printShortinfo && !printInfo)
   {
     print_shortinfo(stream1, vlistID1, varList);
     return 0;
@@ -910,7 +912,7 @@ main(int argc, char **argv)
         field.init(var);
         stream_read_field(stream1, field);
 
-        if (Info) field_print(field, var, levelID, vdatetime, Vardis);
+        if (printInfo) field_print(field, var, levelID, vdatetime, Vardis);
         if (fname2)
         {
           streamDefField(stream2, varID, levelID);

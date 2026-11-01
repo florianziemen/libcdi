@@ -1,5 +1,7 @@
 #include "tstore.h"
+#include "cdi.h"
 #include "cdi_int.h"
+#include "cdf_util.h"
 #include "tsio.h"
 
 #include <cmath>  // nanf()
@@ -232,6 +234,7 @@ ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0)
     int nctimevarid = streamP->basetime.ncvarid;
     int nctimeboundsid = streamP->basetime.ncvarboundsid;
     bool hasTimesteps = (nctimevarid != CDI_UNDEFID /*&& streamP->basetime.hasUnits*/);
+    hasTimesteps = true;
 
     int *ncStepIndices = (int *) malloc(numTimesteps * sizeof(int));
     for (size_t tsID = 0; tsID < numTimesteps; ++tsID) { ncStepIndices[tsID] = (int) tsID; }
@@ -255,7 +258,7 @@ ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0)
         for (size_t i = 0; i < numTimesteps; ++i)
         {
           // vDateTimeList[i] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, i, timevarBuffer), taxis0);
-          // vDateTimeList[i] = cdi_decode_timeval(timevarBuffer[i], taxis0);
+          vDateTimeList[i] = cdi_decode_timeval(timevarBuffer[i], taxis0);
         }
         free(timevarBuffer);
       }
@@ -284,7 +287,6 @@ ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0)
 
         taxis_t *taxis = &streamP->tsteps[stepID].taxis;
         ptaxisCopy(taxis, taxis0);
-
         if (hasTimesteps) { taxis->vDateTime = vDateTimeList[tsID]; }
 
         stepID++;
@@ -386,34 +388,94 @@ ts_inq_contents(stream_t *streamP)
   printf("Found %zu data arrays:\n", md.arrayList.size());
   for (auto const &array : md.arrayList) printf(" %s", array.name.c_str());
   printf("\n");
-  auto const &array = md.arrayList[0];
-  printf("%s: num_steps=%lld, num_layers=%lld, num_cells=%lld\n", array.name.c_str(), array.num_steps, array.num_layers,
-         array.num_cells);
-  auto const &attributes = array.attributes;
-  for (const auto &[key, value] : attributes) printf("[%s] = %s\n", key.c_str(), value.c_str());
 
-  int gridID = -1;
-  int zaxisID = -1;
-  int taxisID = taxisCreate(TAXIS_ABSOLUTE);
-  printf("ts_inq_contents: taxisID=%d\n", taxisID);
+  {
+    auto const &array = md.arrayList[0];
+    printf("%s: num_steps=%lld, num_layers=%lld, num_cells=%lld\n", array.name.c_str(), array.num_steps, array.num_layers,
+           array.num_cells);
+    for (const auto &[key, value] : array.attributes) printf("[%s] = %s\n", key.c_str(), value.c_str());
+  }
 
   size_t numVars = md.arrayList.size();
   assert(numVars == 1);
   int vlistID = streamP->vlistID;
 
-  int timeType = TIME_VARYING;
+  auto numCells = static_cast<size_t>(md.arrayList[0].num_cells);
+  printf("numCells %zu\n", numCells);
+  int gridID = gridCreate(GRID_HEALPIX, numCells);
+  int surfaceID = zaxisCreate(ZAXIS_SURFACE, 1);
+
+  std::string timeUnits;
+  int calendar = CALENDAR_STANDARD;
+  std::map<std::string, int> zaxisMap;
+
+  printf("Found %zu coordinate arrays:\n", md.coordList.size());
+  for (auto const &array : md.coordList) printf("  %s: size=%lld\n", array.name.c_str(), array.shape[0]);
+  for (auto const &array : md.coordList)
+  {
+    auto const &attributes = array.attributes;
+    for (auto const &[key, value] : attributes)
+    {
+      // printf("[%s] = %s\n", key.c_str(), value.c_str());
+      // if (key == "grid_mapping_name" && value == "healpix") printf("healpix grid\n");
+    }
+    if (array.name == "time")
+    {
+      if (attributes.contains("units")) { timeUnits = attributes.find("units")->second; }
+      if (attributes.contains("calendar")) { calendar = attribute_to_calendar(attributes.find("calendar")->second.c_str()); }
+    }
+    else if (gridID != -1 && attributes.contains("grid_mapping_name") && attributes.find("grid_mapping_name")->second == "healpix")
+    {
+      printf("healpix grid\n");
+      if (attributes.contains("refinement_level") && attributes.contains("indexing_scheme"))
+      {
+
+        auto it1 = attributes.find("refinement_level");
+        auto it2 = attributes.find("indexing_scheme");
+        int attlen = 1;
+        int refinement_level = std::stoi(it1->second);
+        auto indexing_scheme = it2->second;
+        cdiDefAttInt(gridID, CDI_GLOBAL, "refinement_level", CDI_DATATYPE_INT32, (int) attlen, &refinement_level);
+        cdiDefAttTxt(gridID, CDI_GLOBAL, "indexing_scheme", (int) indexing_scheme.size(), indexing_scheme.c_str());
+      }
+    }
+    else
+    {
+      auto numLayers = array.shape[0];
+      std::vector<double> layers(numLayers);
+      ts_read_array(handle, array.name.c_str(), layers.data());
+
+      int zaxisID = zaxisCreate(ZAXIS_GENERIC, numLayers);
+      zaxisDefLevels(zaxisID, layers.data());
+      cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, array.name.c_str());
+      if (attributes.contains("units"))
+      {
+        auto units = attributes.find("units")->second;
+        cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units.c_str());
+      }
+      zaxisMap[array.name] = zaxisID;
+      printf("zaxis: %s with %lld layers\n", array.name.c_str(), numLayers);
+    }
+  }
+
   for (size_t i = 0; i < numVars; ++i)
   {
     auto const &a = md.arrayList[i];
     auto rank = a.shape.size();
-    if (rank != 2 && rank != 3) continue;
+    if (rank > 3) continue;
+    int timeType = TIME_VARYING;
     auto numCells = static_cast<size_t>(a.shape[rank - 1]);
-    printf("%zu %s: numCells=%zu %lld\n", i + 1, a.name.c_str(), numCells, a.num_cells);
-    gridID = gridCreate(GRID_HEALPIX, numCells);
-    if (rank == 3) { zaxisID = zaxisCreate(ZAXIS_GENERIC, a.num_layers); }
-    else
+    int zaxisID = surfaceID;
+    if (rank == 3)
     {
-      zaxisID = zaxisCreate(ZAXIS_SURFACE, 1);
+      // zaxisID = zaxisCreate(ZAXIS_GENERIC, a.num_layers);
+      // printf("array 3d: %s dimname %s zaxisID %d\n", a.name.c_str(), a.dim_names[1].c_str(), zaxisMap[a.dim_names[1]]);
+      zaxisID = zaxisMap[a.dim_names[1]];
+    }
+    else if (a.dim_names[0] != "time")
+    {
+      timeType = TIME_CONSTANT;
+      if (rank == 2) { zaxisID = zaxisMap[a.dim_names[0]]; }
     }
     stream_new_var(streamP, gridID, zaxisID, CDI_UNDEFID);
     int varID = vlistDefVar(vlistID, gridID, zaxisID, timeType);
@@ -422,41 +484,28 @@ ts_inq_contents(stream_t *streamP)
     vlistDefVarMissval(vlistID, varID, std::nanf(""));
   }
 
-  vlistDefTaxis(vlistID, taxisID);
   taxis_t taxis0;
   ptaxisInit(&taxis0);
+  if (set_base_time(timeUnits.c_str(), &taxis0) == 1)
+  {
+    // nctimevarid = CDI_UNDEFID;
+    streamP->basetime.ncvarid = CDI_UNDEFID;
+    streamP->basetime.hasUnits = false;
+  }
+  ptaxisDefName(&taxis0, "time");
+  ptaxisDefUnits(&taxis0, timeUnits.c_str());
+  ptaxisDefDatatype(&taxis0, CDI_DATATYPE_FLT64);
+
+  int taxisID = taxisCreate(TAXIS_RELATIVE);
+
+  taxis0.calendar = calendar;
+  taxisDefCalendar(taxisID, calendar);
+
+  vlistDefTaxis(vlistID, taxisID);
+
   int ntsteps = 16;
   ts_read_timesteps(ntsteps, streamP, &taxis0);
   taxisDestroyKernel(&taxis0);
-
-  printf("Found %zu coordinate arrays:\n", md.coordList.size());
-  for (auto const &array : md.coordList) printf("  %s: size=%lld\n", array.name.c_str(), array.shape[0]);
-  for (auto const &array : md.coordList)
-  {
-    auto const &attributes = array.attributes;
-    for (const auto &[key, value] : attributes)
-    {
-      printf("[%s] = %s\n", key.c_str(), value.c_str());
-      if (key == "grid_mapping_name" && value == "healpix") printf("healpix grid\n");
-    }
-    if (gridID != -1 && attributes.contains("grid_mapping_name") && attributes.find("grid_mapping_name")->second == "healpix")
-    {
-      printf("healpix grid\n");
-      if (attributes.contains("refinement_level") && attributes.contains("indexing_scheme"))
-      {
-
-        auto it1 = attributes.find("refinement_level");
-        printf("%s %d\n", it1->first.c_str(), std::stoi(it1->second));
-        auto it2 = attributes.find("indexing_scheme");
-        printf("%s %s\n", it2->first.c_str(), it2->second.c_str());
-        int attlen = 1;
-        int refinement_level = std::stoi(it1->second);
-        auto indexing_scheme = it2->second;
-        cdiDefAttInt(gridID, CDI_GLOBAL, "refinement_level", CDI_DATATYPE_INT32, (int) attlen, &refinement_level);
-        cdiDefAttTxt(gridID, CDI_GLOBAL, "indexing_scheme", (int) indexing_scheme.size(), indexing_scheme.c_str());
-      }
-    }
-  }
 
   // Die Datenarrays dtype-neutral oeffnen (Lesepuffer arbeiten auf float32);
   // die Ausgabe-Stores erben daraus Attribute und Kompression.
@@ -502,8 +551,8 @@ ts_inq_contents(stream_t *streamP)
         if (v > mx) mx = v;
         ++valid;
       }
-      print_row(step + 1, a.bstart.size() >= 3 ? field.layer + 1 : 0, a.num_cells, valid, mn, sum / static_cast<double>(valid), mx,
-                a.name);
+      print_row(step + 1, a.bstart.size() >= 3 ? field.layer + 1 : 0, a.num_cells, valid, mn, sum / static_cast<double>(valid),
+  mx, a.name);
     }
   }
   handle->cur_t = handle->start_t - 1;

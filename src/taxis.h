@@ -37,6 +37,8 @@ taxis_t *taxisNewEntry(cdiResH resH);
 //      taxisInqSdatetime: Get the start date/time
 CdiDateTime taxisInqSdatetime(int taxisID);
 
+int set_base_time(const char *timeUnitsStr, taxis_t *taxis);
+
 void ptaxisInit(taxis_t *taxis);
 void ptaxisCopy(taxis_t *dest, taxis_t *source);
 taxis_t *taxis_to_pointer(int taxisID);

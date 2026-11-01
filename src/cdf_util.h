@@ -1,6 +1,11 @@
 #ifndef CDF_UTIL_H_
 #define CDF_UTIL_H_
 
+// clang-format off
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -28,5 +33,10 @@ bool is_y_axis(const char *units, const char *stdname);
 void cdf_set_gridtype(const char *attstring, int *gridtype);
 void cdf_set_zaxistype(const char *attstring, int *zaxistype);
 int attribute_to_calendar(const char *attstring);
+
+#ifdef __cplusplus
+}
+#endif
+// clang-format on
 
 #endif
