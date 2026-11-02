@@ -406,7 +406,7 @@ cdiQueryPrintEntriesNotFound(const struct CdiQuery *query)
         {
           printf("Step not found:");
           for (int i = 0; i < query->numSteps; ++i)
-            if (!query->stepsFound[i]) printf(" %d", query->steps[i]);
+            if (!query->stepsFound[i]) printf(" %lld", query->steps[i]);
           printf("\n");
         }
       }
