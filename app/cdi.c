@@ -772,11 +772,11 @@ main(int argc, char *argv[])
   int numQueryGroups = 0;
   const char *queryNames[256];
   int numQueryNames = 0;
-  size_t queryCells[256];
+  int64_t queryCells[256];
   int numQueryCells = 0;
-  int queryLayers[256];
+  int64_t queryLayers[256];
   int numQueryLayers = 0;
-  int querySteps[256];
+  int64_t querySteps[256];
   int numQuerySteps = 0;
 
   Progname = strrchr(argv[0], '/');
@@ -791,7 +791,7 @@ main(int argc, char *argv[])
     switch (c)
     {
       case 'b': setDefaultDataType(optarg); break;
-      case 'C': queryCells[numQueryCells++] = (size_t) atol(optarg); break;
+      case 'C': queryCells[numQueryCells++] = (int64_t) atol(optarg); break;
       case 'd': Debug = 1; break;
       case 'E': cdiDefGlobal("ECCODES_GRIB1", true); break;
       case 'f': setDefaultFileType(optarg); break;
@@ -799,7 +799,7 @@ main(int argc, char *argv[])
       case 'h': usage(); exit(0);
       case 'i': numWorkerIn = atoi(optarg); break;
       case 'o': numWorkerOut = atoi(optarg); break;
-      case 'L': queryLayers[numQueryLayers++] = atoi(optarg); break;
+      case 'L': queryLayers[numQueryLayers++] = atol(optarg); break;
       case 'l': Longinfo = 1; break;
       case 'M': cdiDefGlobal("HAVE_MISSVAL", 1); break;
       case 'm': Move = 1; break;
@@ -808,7 +808,7 @@ main(int argc, char *argv[])
       case 'R': cdiDefGlobal("REGULARGRID", 1); break;
       case 'r': Field = 1; break;
       case 'X': Variable = 1; break;
-      case 'S': querySteps[numQuerySteps++] = atoi(optarg); break;
+      case 'S': querySteps[numQuerySteps++] = atol(optarg); break;
       case 's': Shortinfo = 1; break;
       case 'T': preScan = true; break;
       case 't': rTable = optarg; break;

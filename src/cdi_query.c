@@ -9,6 +9,7 @@
  * struct offsets almost imperceptibly change from one file to the
  * next to find out what happened */
 
+#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -29,15 +30,15 @@ struct CdiQuery
   // Grid cell indices
   int numCells;
   bool cellsFound[2];
-  size_t cells[2];
+  int64_t cells[2];
   // Layer indices
   int numLayers;
   bool layersFound[2];
-  int layers[2];
+  int64_t layers[2];
   // Time step indices
   int numSteps;
   bool stepsFound[2];
-  int steps[2];
+  int64_t steps[2];
   // Date indices
   int numDates;
   bool datesFound[2];
@@ -189,7 +190,7 @@ cdiQuerySetNames(struct CdiQuery *query, int numNames, const char **names)
 }
 
 void
-cdiQuerySetCells(struct CdiQuery *query, int numCells, const size_t *cells)
+cdiQuerySetCells(struct CdiQuery *query, int numCells, const int64_t *cells)
 {
   if (numCells > 0 && numCells <= 2)
   {
@@ -200,7 +201,7 @@ cdiQuerySetCells(struct CdiQuery *query, int numCells, const size_t *cells)
 }
 
 void
-cdiQuerySetLayers(struct CdiQuery *query, int numLayers, const int *layers)
+cdiQuerySetLayers(struct CdiQuery *query, int numLayers, const int64_t *layers)
 {
   if (numLayers > 0 && numLayers <= 2)
   {
@@ -211,7 +212,7 @@ cdiQuerySetLayers(struct CdiQuery *query, int numLayers, const int *layers)
 }
 
 void
-cdiQuerySetSteps(struct CdiQuery *query, int numSteps, const int *steps)
+cdiQuerySetSteps(struct CdiQuery *query, int numSteps, const int64_t *steps)
 {
   if (numSteps > 0 && numSteps <= 2)
   {
@@ -238,19 +239,19 @@ cdiQueryGetGroup(const struct CdiQuery *query, int index)
   return (index >= 0 && index < query->numGroups) ? query->groups[index] : NULL;
 }
 
-size_t
+int64_t
 cdiQueryGetCell(const struct CdiQuery *query, int index)
 {
-  return (index >= 0 && index < query->numCells) ? query->cells[index] : (size_t) -1;
+  return (index >= 0 && index < query->numCells) ? query->cells[index] : -1;
 }
 
-int
+int64_t
 cdiQueryGetLayer(const struct CdiQuery *query, int index)
 {
   return (index >= 0 && index < query->numLayers) ? query->layers[index] : -1;
 }
 
-int
+int64_t
 cdiQueryGetStep(const struct CdiQuery *query, int index)
 {
   return (index >= 0 && index < query->numSteps) ? query->steps[index] : -1;
@@ -281,18 +282,18 @@ cdiQueryClone(const struct CdiQuery *query)
 }
 
 static void
-print_list_compact_int(int n, const int *list)
+print_list_compact_int64(int n, const int64_t *list)
 {
   for (int i = 0; i < n; ++i)
   {
-    int value = list[i];
-    printf(" %d", value);
+    int64_t value = list[i];
+    printf(" %lld", value);
     if ((i + 2) < n && (value + 1) == list[i + 1] && (value + 2) == list[i + 2])
     {
-      printf("/to/");
-      int last = list[++i];
+      printf("/");
+      int64_t last = list[++i];
       while ((i + 1) < n && (last + 1) == list[i + 1]) last = list[++i];
-      printf("%d", last);
+      printf("%lld", last);
     }
   }
   printf("\n");
@@ -307,7 +308,7 @@ print_list_compact_float(int n, const double *list)
     printf(" %g", value);
     if ((i + 2) < n && (value + 1) == list[i + 1] && (value + 2) == list[i + 2])
     {
-      printf("/to/");
+      printf("/");
       double last = list[++i];
       while ((i + 1) < n && (last + 1) == list[i + 1]) { last = list[++i]; }
       printf("%g", last);
@@ -338,20 +339,20 @@ cdiQueryPrint(const struct CdiQuery *query)
     if (query->numCells)
     {
       printf("Cells:");
-      for (int i = 0; i < query->numCells; ++i) printf(" %zu", query->cells[i]);
+      for (int i = 0; i < query->numCells; ++i) printf(" %lld", query->cells[i]);
       printf("\n");
     }
 
     if (query->numLayers)
     {
       printf("Layers:");
-      print_list_compact_int(query->numLayers, query->layers);
+      print_list_compact_int64(query->numLayers, query->layers);
     }
 
     if (query->numSteps)
     {
       printf("Steps:");
-      print_list_compact_int(query->numSteps, query->steps);
+      print_list_compact_int64(query->numSteps, query->steps);
     }
 
     if (query->numDates)
@@ -446,7 +447,7 @@ cdiQueryName(struct CdiQuery *query, const char *name)
 }
 
 int
-cdiQueryStep(struct CdiQuery *query, int step)
+cdiQueryStep(struct CdiQuery *query, int64_t step)
 {
   if (query && query->numSteps)
   {
