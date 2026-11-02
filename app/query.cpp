@@ -1,16 +1,13 @@
 #include "cdi_query.h"
-/*
-#include "cdo_options.h"
-#include "cdo_output.h"
-#include "param_conversion.h"
-#include "util_string.h"
-#include "grid_proj.h"
-*/
+
 #include <string>
 #include <string_view>
 #include <vector>
 #include <format>
 #include <iostream>
+#include <optional>
+#include <charconv>
+#include <system_error>
 
 template <typename... Args>
 static bool
@@ -22,24 +19,11 @@ handle_error(std::format_string<Args...> fmt, Args &&...args)
   return true;
 }
 
-struct IndexRange
-{
-  std::int64_t start = 1;
-  std::optional<std::int64_t> end;
-};
-
-#include <optional>
-#include <charconv>
-#include <string>
-#include <iostream>
-#include <system_error>
-
 std::optional<int64_t>
-string_to_int64(const std::string &str)
+string_to_int64(std::string_view str)
 {
   int64_t value{};
-  const auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
-
+  auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
   if (ec != std::errc{} || ptr != str.data() + str.size())
   {
     std::cerr << "Error: '" << str << "' kann nicht in einen Integer konvertiert werden!\n";
@@ -63,21 +47,18 @@ string_to_double(const std::string &str)
   return value;
 }
 */
-#include <string>
-#include <vector>
-#include <optional>
-#include <iostream>
 
 std::optional<std::vector<int64_t>>
-string_to_intlist(const std::string &str)
+string_to_intlist(std::string_view str)
 {
+  constexpr auto separator = '/';
   std::vector<int64_t> result;
 
   size_t start = 0;
   while (true)
   {
-    const size_t pos = str.find('/', start);
-    const std::string part = str.substr(start, pos == std::string::npos ? pos : pos - start);
+    auto pos = str.find(separator, start);
+    auto part = str.substr(start, pos == std::string::npos ? pos : pos - start);
 
     auto value = string_to_int64(part);
     if (!value)
@@ -102,9 +83,6 @@ string_to_intlist(const std::string &str)
 
   return result;
 }
-
-static constexpr std::string_view separator1("/to/");
-static constexpr std::string_view separator2("/");
 
 static std::optional<std::vector<int64_t>>
 decode_int_parameter(std::string_view key, std::string const &value)
@@ -311,8 +289,7 @@ query_set_parameter(std::string_view keyValueString, struct CdiQuery *query)
       if (numValues > 1) return handle_error("Too many values for key=step (maxvalues=1 or range=START/END)");
       auto querySteps = decode_int_parameter(key, values[0]);
       if (!querySteps) return true;
-      printf("querySteps %lld\n", (*querySteps)[0]);
-      // cdiQuerySetSteps(query, (*querySteps).size(), (*querySteps).data());
+      cdiQuerySetSteps(query, (*querySteps).size(), (*querySteps).data());
     }
     else if (key == "layer")
     {
