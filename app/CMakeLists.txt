@@ -1,5 +1,5 @@
 add_executable(cdi cdi.c printinfo.c)
-add_executable(cdq cdq.cpp printinfo.cpp printinfo.c)
+add_executable(cdq cdq.cpp query.cpp printinfo.cpp printinfo.c)
 
 target_include_directories(cdi PRIVATE
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>

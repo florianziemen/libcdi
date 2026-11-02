@@ -19,6 +19,8 @@
 #include <thread>
 #include <vector>
 
+bool query_set_parameter(std::string_view params, struct CdiQuery *query);
+
 namespace
 {
 
@@ -55,6 +57,7 @@ struct cdqConfig
   indexRange step;                         // Zeitachse
   indexRange layer;                        // Layer-Achse (rank >= 3)
   indexRange cell;                         // letzte Achse (Gitterpunkte)
+  std::string query;                       // query parameter
 };
 
 void
@@ -171,7 +174,7 @@ parse_index_range(const std::string &opt, const std::string &value, indexRange &
 }
 
 bool
-parse_args(int argc, char **argv, cdqConfig &cfg)
+parse_args(int argc, char **argv, cdqConfig &config)
 {
   for (int i = 1; i < argc; ++i)
   {
@@ -192,9 +195,9 @@ parse_args(int argc, char **argv, cdqConfig &cfg)
       if (!v) return false;
       const std::string s = v;
       if (s == "zarr2")
-        cfg.format = 2;
+        config.format = 2;
       else if (s == "zarr3")
-        cfg.format = 3;
+        config.format = 3;
       else
       {
         std::cerr << "Invalid zarr format: " << s << " (must be zarr2 or zarr3)\n";
@@ -211,13 +214,13 @@ parse_args(int argc, char **argv, cdqConfig &cfg)
         std::cerr << "Invalid kvstore: " << s << " (must be file, s3 or http)\n";
         return false;
       }
-      cfg.kvstore = s;
+      config.kvstore = s;
     }
     else if (arg == "--path")
     {
       const char *v = need_value("--path");
       if (!v) return false;
-      cfg.path = v;
+      config.path = v;
     }
     else if (arg == "--name")
     {
@@ -227,20 +230,20 @@ parse_args(int argc, char **argv, cdqConfig &cfg)
       std::string item;
       while (std::getline(ss, item, ','))
       {
-        if (!item.empty()) cfg.arrays.push_back(item);
+        if (!item.empty()) config.arrays.push_back(item);
       }
     }
     else if (arg == "--endpoint")
     {
       const char *v = need_value("--endpoint");
       if (!v) return false;
-      cfg.endpoint = v;
+      config.endpoint = v;
     }
     else if (arg == "--step" || arg == "--layer" || arg == "--cell")
     {
       const char *v = need_value(arg.c_str());
       if (!v) return false;
-      indexRange &range = (arg == "--step") ? cfg.step : (arg == "--layer" ? cfg.layer : cfg.cell);
+      indexRange &range = (arg == "--step") ? config.step : (arg == "--layer" ? config.layer : config.cell);
       if (!parse_index_range(arg, v, range)) return false;
     }
     else if (arg == "--step-chunk" || arg == "--cell-chunk")
@@ -255,19 +258,19 @@ parse_args(int argc, char **argv, cdqConfig &cfg)
         std::cerr << "Invalid " << arg << " value: " << v << " (must be a positive integer)\n";
         return false;
       }
-      std::optional<std::int64_t> &slot = (arg == "--step-chunk") ? cfg.step_chunk : cfg.cell_chunk;
+      std::optional<std::int64_t> &slot = (arg == "--step-chunk") ? config.step_chunk : config.cell_chunk;
       slot = n;
     }
-    else if (arg == "--consolidated") { cfg.consolidated = true; }
-    else if (arg == "--double-buffer") { cfg.double_buffer = true; }
-    else if (arg == "--overwrite") { cfg.overwrite = true; }
-    else if (arg == "--info") { cfg.info = true; }
-    else if (arg == "--debug") { cfg.debug = true; }
+    else if (arg == "--consolidated") { config.consolidated = true; }
+    else if (arg == "--double-buffer") { config.double_buffer = true; }
+    else if (arg == "--overwrite") { config.overwrite = true; }
+    else if (arg == "--info") { config.info = true; }
+    else if (arg == "--debug") { config.debug = true; }
     else if (arg == "--out-path")
     {
       const char *v = need_value("--out-path");
       if (!v) return false;
-      cfg.out_path = v;
+      config.out_path = v;
     }
     else if (arg == "--out-format")
     {
@@ -275,7 +278,7 @@ parse_args(int argc, char **argv, cdqConfig &cfg)
       if (!v) return false;
       const std::string s = v;
       if (s == "zarr2" || s == "zarr3" || s == "n5")
-        cfg.out_format = s;
+        config.out_format = s;
       else
       {
         std::cerr << "Invalid --out-format value: " << v << " (must be zarr2, zarr3 or n5)\n";
@@ -288,7 +291,7 @@ parse_args(int argc, char **argv, cdqConfig &cfg)
       if (!v) return false;
       const std::string s = v;
       if (s == "float64" || s == "float32" || s == "float16" || s == "bfloat16")
-        cfg.out_dtype = s;
+        config.out_dtype = s;
       else
       {
         std::cerr << "Invalid --dtype value: " << v << " (must be float64, float32, float16 or bfloat16)\n";
@@ -301,7 +304,7 @@ parse_args(int argc, char **argv, cdqConfig &cfg)
       if (!v) return false;
       const std::string s = v;
       if (s == "none" || s == "blosc" || s == "gzip" || s == "zstd")
-        cfg.compressor = s;
+        config.compressor = s;
       else
       {
         std::cerr << "Invalid --compressor value: " << v << " (must be none, blosc, gzip or zstd)\n";
@@ -312,7 +315,13 @@ parse_args(int argc, char **argv, cdqConfig &cfg)
     {
       const char *v = need_value("--group");
       if (!v) return false;
-      cfg.group = v;
+      config.group = v;
+    }
+    else if (arg == "--query")
+    {
+      const char *v = need_value("--query");
+      if (!v) return false;
+      config.query = v;
     }
     else if (arg == "--data-copy-concurrency")
     {
@@ -324,16 +333,16 @@ parse_args(int argc, char **argv, cdqConfig &cfg)
         std::cerr << "Invalid --data-copy-concurrency value: " << v << " (must be positive)\n";
         return false;
       }
-      cfg.data_copy_concurrency = static_cast<int>(n);
+      config.data_copy_concurrency = static_cast<int>(n);
     }
     else
     {
       auto numArgsLeft = argc - i;
-      if (numArgsLeft == 1 && cfg.path.empty()) { cfg.path = argv[i]; }
-      else if (numArgsLeft == 2 && cfg.path.empty())
+      if (numArgsLeft == 1 && config.path.empty()) { config.path = argv[i]; }
+      else if (numArgsLeft == 2 && config.path.empty())
       {
-        cfg.path = argv[i];
-        cfg.out_path = argv[++i];
+        config.path = argv[i];
+        config.out_path = argv[++i];
       }
       else
       {
@@ -343,7 +352,7 @@ parse_args(int argc, char **argv, cdqConfig &cfg)
     }
   }
 
-  if (cfg.path.empty() && !cfg.info)
+  if (config.path.empty() && !config.info)
   {
     std::cerr << "Missing required argument(s).\n";
     return false;
@@ -752,14 +761,14 @@ strip_ts_prefix(std::string_view &s)
 int
 main(int argc, char **argv)
 {
-  cdqConfig cfg;
-  if (!parse_args(argc, argv, cfg))
+  cdqConfig config;
+  if (!parse_args(argc, argv, config))
   {
     print_usage(argv[0]);
     return 1;
   }
 
-  if (cfg.info)
+  if (config.info)
   {
 #ifdef HAVE_TENSORSTORE
     //  std::cerr << "TensorStore " << tsVersion() << '\n';
@@ -781,32 +790,7 @@ main(int argc, char **argv)
 #ifdef CXX_COMPILER_VERSION
     std::cerr << "CXX version=" << CXX_COMPILER_VERSION << '\n';
 #endif
-    if (cfg.path.empty()) return 0;  // --info alone
-  }
-
-  int numQueryGroups = 0;
-  int numQueryNames = 0;
-  int numQueryCells = 0;
-  int numQueryLayers = 0;
-  int numQuerySteps = 0;
-  int querySteps[2];
-  if (cfg.step.end)
-  {
-    numQuerySteps = 2;
-    querySteps[0] = cfg.step.start;
-    querySteps[1] = *cfg.step.end;
-  }
-  bool useQuery = (numQueryGroups > 0) || (numQueryNames > 0) || (numQueryCells > 0) || (numQueryLayers > 0) || (numQuerySteps > 0);
-  CdiQueryHandle query;
-  if (useQuery)
-  {
-    query = cdi_query_create();
-    // if (numQueryGroups) cdiQuerySetGroups(query, numQueryGroups, queryGroups);
-    // if (numQueryNames) cdiQuerySetNames(query, numQueryNames, queryNames);
-    // if (numQueryCells) cdiQuerySetCells(query, numQueryCells, queryCells);
-    // if (numQueryLayers) cdiQuerySetLayers(query, numQueryLayers, queryLayers);
-    if (numQuerySteps) cdiQuerySetSteps(query.get(), numQuerySteps, querySteps);
-    // if (Debug) cdiQueryPrint(query);
+    if (config.path.empty()) return 0;  // --info alone
   }
 
   enum struct AccessMode
@@ -822,24 +806,34 @@ main(int argc, char **argv)
   int Info = 1;
   int Longinfo = 0;
 
-  auto fname1 = cfg.path.c_str();
+  auto fname1 = config.path.c_str();
   const char *fname2 = NULL;
-  if (cfg.out_path) { fname2 = (*cfg.out_path).c_str(); }
-  auto printShortinfo = !cfg.info && !fname2;
-  auto printInfo = cfg.info && !fname2;
+  if (config.out_path) { fname2 = (*config.out_path).c_str(); }
+  auto printShortinfo = !config.info && !fname2;
+  auto printInfo = config.info && !fname2;
 
   std::string_view fnameView = fname1;
   bool isZarr = strip_ts_prefix(fnameView);
+  auto useQuery = !config.query.empty();
 
   StreamHandle stream1;
   if (isZarr) { stream1.id = streamOpenTensorstore(fname1); }
   else
   {
+    auto query = cdi_query_create();
+    if (useQuery)
+    {
+      if (query_set_parameter(config.query, query.get()))
+      {
+        std::cerr << "Parse error!\n";
+        return 1;
+      }
+      if (config.debug) cdiQueryPrint(query.get());
+    }
     stream1.id = useQuery ? streamOpenReadQuery(fname1, query.get()) : streamOpenRead(fname1);
+    if (stream1 < 0) return handle_error(stream1, "Open failed on %s", fname1);
+    if (useQuery && query) cdiQueryPrintEntriesNotFound(query.get());
   }
-  if (stream1 < 0) return handle_error(stream1, "Open failed on %s", fname1);
-
-  if (useQuery && query) cdiQueryPrintEntriesNotFound(query.get());
 
   // if (numWorkerIn > 0) streamDefNumWorker(stream1, numWorkerIn);
 

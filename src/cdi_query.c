@@ -398,7 +398,7 @@ cdiQueryPrintEntriesNotFound(const struct CdiQuery *query)
           printf("\n");
         }
       }
-
+      /*
       if (query->numSteps)
       {
         if (sum_not_found(query->numSteps, query->stepsFound) > 0)
@@ -409,6 +409,7 @@ cdiQueryPrintEntriesNotFound(const struct CdiQuery *query)
           printf("\n");
         }
       }
+      */
     }
   }
 }
