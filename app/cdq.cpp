@@ -58,6 +58,7 @@ struct cdqConfig
   indexRange layer;                        // Layer-Achse (rank >= 3)
   indexRange cell;                         // letzte Achse (Gitterpunkte)
   std::string query;                       // query parameter
+  std::string access;                      // access parameter
 };
 
 void
@@ -322,6 +323,12 @@ parse_args(int argc, char **argv, cdqConfig &config)
       const char *v = need_value("--query");
       if (!v) return false;
       config.query = v;
+    }
+    else if (arg == "--access")
+    {
+      const char *v = need_value("--access");
+      if (!v) return false;
+      config.access = v;
     }
     else if (arg == "--data-copy-concurrency")
     {
@@ -799,7 +806,8 @@ main(int argc, char **argv)
     Direct,
   };
 
-  auto accessMode{ AccessMode::Direct };
+  auto accessMode{ AccessMode::Sequential };
+  if (config.access == "direct") { accessMode = AccessMode::Direct; }
   int Move = 0;
   int Debug = 0;
   int Version = 0;
