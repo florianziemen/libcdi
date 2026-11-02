@@ -4428,14 +4428,13 @@ process_time_query(struct CdiQuery *query, size_t numTimesteps, CdiDateTime *vDa
     int queryNumDates = cdiQueryNumDates(query);
     if (queryNumSteps > 0)
     {
-      int startStep = cdiQueryGetStep(query, 0) - 1;
-      int endStep = startStep + ((queryNumSteps == 2) ? (cdiQueryGetStep(query, 1) - 1) : 0);
-      // currently, the query interface does not support more than INT_MAX-1 steps!
-      assert(numTimesteps < INT_MAX);
-      for (int i = 0; i < startStep; ++i) { ncStepIndices[i] = -1; }
-      for (int i = endStep + 1; i < (int) numTimesteps; ++i) { ncStepIndices[i] = -1; }
-      if (startStep < (int) numTimesteps) { cdiQueryStep(query, startStep + 1); }
-      if (endStep < (int) numTimesteps) { cdiQueryStep(query, endStep + 1); }
+      int64_t startStep = cdiQueryGetStep(query, 0) - 1;
+      if ((startStep + 1) > (int64_t) numTimesteps) Error("query start step > maxSteps=%zu", numTimesteps);
+      int64_t endStep = startStep + ((queryNumSteps == 2) ? (cdiQueryGetStep(query, 1) - 1) : 0);
+      for (int64_t i = 0; i < startStep; ++i) { ncStepIndices[i] = -1; }
+      for (int64_t i = endStep + 1; i < (int) numTimesteps; ++i) { ncStepIndices[i] = -1; }
+      if (startStep < (int64_t) numTimesteps) { cdiQueryStep(query, startStep + 1); }
+      if (endStep < (int64_t) numTimesteps) { cdiQueryStep(query, endStep + 1); }
     }
     else if (queryNumDates > 0)
     {
