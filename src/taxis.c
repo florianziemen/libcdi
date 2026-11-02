@@ -72,6 +72,7 @@ dup_refcount_string(char *p)
 const char *
 taxisNamePtr(int taxisID)
 {
+  if (taxisID == CDI_UNDEFID) return NULL;
   taxis_t *taxisP = (taxis_t *) reshGetVal(taxisID, &taxisOps);
   return taxisP->name;
 }
