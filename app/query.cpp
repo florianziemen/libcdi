@@ -34,10 +34,10 @@ struct IndexRange
 #include <iostream>
 #include <system_error>
 
-std::optional<int>
-string_to_int(const std::string &str)
+std::optional<int64_t>
+string_to_int64(const std::string &str)
 {
-  int value{};
+  int64_t value{};
   const auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
 
   if (ec != std::errc{} || ptr != str.data() + str.size())
@@ -68,10 +68,10 @@ string_to_double(const std::string &str)
 #include <optional>
 #include <iostream>
 
-std::optional<std::vector<int>>
+std::optional<std::vector<int64_t>>
 string_to_intlist(const std::string &str)
 {
-  std::vector<int> result;
+  std::vector<int64_t> result;
 
   size_t start = 0;
   while (true)
@@ -79,7 +79,7 @@ string_to_intlist(const std::string &str)
     const size_t pos = str.find('/', start);
     const std::string part = str.substr(start, pos == std::string::npos ? pos : pos - start);
 
-    auto value = string_to_int(part);
+    auto value = string_to_int64(part);
     if (!value)
     {
       std::cerr << "Fehler: Ungültiger Integer in '" << str << "'!\n";
@@ -106,7 +106,7 @@ string_to_intlist(const std::string &str)
 static constexpr std::string_view separator1("/to/");
 static constexpr std::string_view separator2("/");
 
-static std::optional<std::vector<int>>
+static std::optional<std::vector<int64_t>>
 decode_int_parameter(std::string_view key, std::string const &value)
 {
   auto values = string_to_intlist(value);
@@ -311,7 +311,8 @@ query_set_parameter(std::string_view keyValueString, struct CdiQuery *query)
       if (numValues > 1) return handle_error("Too many values for key=step (maxvalues=1 or range=START/END)");
       auto querySteps = decode_int_parameter(key, values[0]);
       if (!querySteps) return true;
-      cdiQuerySetSteps(query, (*querySteps).size(), (*querySteps).data());
+      printf("querySteps %lld\n", (*querySteps)[0]);
+      // cdiQuerySetSteps(query, (*querySteps).size(), (*querySteps).data());
     }
     else if (key == "layer")
     {
