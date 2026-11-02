@@ -59,6 +59,7 @@ struct cdqConfig
   indexRange cell;                         // letzte Achse (Gitterpunkte)
   std::string query;                       // query parameter
   std::string access;                      // access parameter
+  bool version{ false };
 };
 
 void
@@ -330,6 +331,7 @@ parse_args(int argc, char **argv, cdqConfig &config)
       if (!v) return false;
       config.access = v;
     }
+    else if (arg == "--version") { config.version = true; }
     else if (arg == "--data-copy-concurrency")
     {
       const char *v = need_value("--data-copy-concurrency");
@@ -775,7 +777,7 @@ main(int argc, char **argv)
     return 1;
   }
 
-  if (config.info)
+  if (config.version)
   {
 #ifdef HAVE_TENSORSTORE
     //  std::cerr << "TensorStore " << tsVersion() << '\n';
