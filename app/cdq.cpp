@@ -6,7 +6,7 @@
 #include "printinfo.hpp"
 #include "field.hpp"
 
-#include "tsio.h"
+// #include "tsio.h"
 #include "cdi.h"
 #include "cdi_cpp.h"
 #include "cdi_query.h"
@@ -21,6 +21,41 @@
 
 namespace
 {
+
+// 1-basierter, inklusiver Bereich einer Achse; ein nicht gesetztes `end`
+// bedeutet "bis zur Ausdehnung des Arrays".
+struct indexRange
+{
+  std::int64_t start = 1;
+  std::optional<std::int64_t> end;
+};
+
+// Konfiguration eines Datensatzes inklusive Array- und Hypercube-Auswahl.
+struct cdqConfig
+{
+  int format = 0;       // 0 = auto-detect, 2 or 3 = force
+  std::string kvstore;  // "" = auto-detect, "file", "s3" or "http"
+  std::string path;
+  std::vector<std::string> arrays;
+  std::optional<std::string> endpoint;
+  bool consolidated = false;                 // Metadaten aus `.zmetadata` (zarr2)
+  std::optional<std::string> group;          // zarr3 Gruppe unterhalb `path`
+  bool debug = false;                        // Diagnose auf stderr (in tsio)
+  bool info = false;                         // nur TensorStore-Version ausgeben
+  std::optional<int> data_copy_concurrency;  // parallele Chunk-(De)Kompression
+  bool double_buffer = false;                // Double-Buffer-Prefetch
+  bool overwrite = false;                    // --out-path vorher loeschen
+  std::optional<std::string> out_path;       // Ausgabe-Datensatz (Schreibmodus)
+  std::string out_format = "zarr3";          // Ausgabeformat: "zarr2", "zarr3" oder "n5"
+  std::string out_dtype = "float32";         // Datenarrays (zarr3): "float64", "float32", "float16" oder "bfloat16"
+  std::optional<std::string>
+      compressor;  // --compressor: Ausgabe-Kompressor (Schreibmodus); ungesetzt = Quell-Kompression uebernehmen
+  std::optional<std::int64_t> step_chunk;  // --step-chunk: Laenge der step-Ausgabe-Chunks (Schreibmodus)
+  std::optional<std::int64_t> cell_chunk;  // --cell-chunk: Laenge der cell-Ausgabe-Chunks (letzte Dim, Schreibmodus)
+  indexRange step;                         // Zeitachse
+  indexRange layer;                        // Layer-Achse (rank >= 3)
+  indexRange cell;                         // letzte Achse (Gitterpunkte)
+};
 
 void
 print_usage(const char *prog)
@@ -103,7 +138,7 @@ print_usage(const char *prog)
 // into `range`.  Both bounds must be positive and END must not be smaller than
 // START; the whole value must be consumed.
 bool
-parse_index_range(const std::string &opt, const std::string &value, tsRange &range)
+parse_index_range(const std::string &opt, const std::string &value, indexRange &range)
 {
   const auto invalid = [&]() -> bool
   {
@@ -136,7 +171,7 @@ parse_index_range(const std::string &opt, const std::string &value, tsRange &ran
 }
 
 bool
-parse_args(int argc, char **argv, tsConfig &cfg)
+parse_args(int argc, char **argv, cdqConfig &cfg)
 {
   for (int i = 1; i < argc; ++i)
   {
@@ -205,7 +240,7 @@ parse_args(int argc, char **argv, tsConfig &cfg)
     {
       const char *v = need_value(arg.c_str());
       if (!v) return false;
-      tsRange &range = (arg == "--step") ? cfg.step : (arg == "--layer" ? cfg.layer : cfg.cell);
+      indexRange &range = (arg == "--step") ? cfg.step : (arg == "--layer" ? cfg.layer : cfg.cell);
       if (!parse_index_range(arg, v, range)) return false;
     }
     else if (arg == "--step-chunk" || arg == "--cell-chunk")
@@ -325,7 +360,7 @@ compute_stat(Field const &field)
 }
 
 static void
-field_print(Field const &field, CdiVar const &var, int levelID, CdiDateTime vdatetime, int vardis)
+field_print(Field const &field, CdiVar const &var, int levelID, CdiDateTime vdatetime)
 {
   static int recNum = 0;
   size_t numMissFound = 0;
@@ -333,14 +368,9 @@ field_print(Field const &field, CdiVar const &var, int levelID, CdiDateTime vdat
 
   if (!recNum)
   {
-    if (vardis)
-      fprintf(stdout,
-              "   Rec :       Date     Time   Level Gridsize    Miss :     Minimum        Mean     Maximum : Parameter name\n");
-    //         ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+
-    else
-      fprintf(stdout,
-              "   Rec :       Date     Time   Level Gridsize    Miss :     Minimum        Mean     Maximum : Parameter ID\n");
-    //         ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+
+    fprintf(stdout,
+            " Field :       Date     Time   Level Gridsize    Miss :     Minimum        Mean     Maximum : Parameter name\n");
+    //       ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+
   }
 
   char vdatestr[32], vtimestr[32];
@@ -722,7 +752,7 @@ strip_ts_prefix(std::string_view &s)
 int
 main(int argc, char **argv)
 {
-  tsConfig cfg;
+  cdqConfig cfg;
   if (!parse_args(argc, argv, cfg))
   {
     print_usage(argv[0]);
@@ -732,9 +762,9 @@ main(int argc, char **argv)
   if (cfg.info)
   {
 #ifdef HAVE_TENSORSTORE
-    std::cerr << "TensorStore " << tsVersion() << '\n';
+    //  std::cerr << "TensorStore " << tsVersion() << '\n';
 #else
-    std::cerr << "TensorStore support: disabled (built with -DWITH_TENSORSTORE=OFF)\n";
+    //  std::cerr << "TensorStore support: disabled (built with -DWITH_TENSORSTORE=OFF)\n";
 #endif
     unsigned int tc = std::thread::hardware_concurrency();
     if (tc == 0) { tc = 1; }
@@ -788,7 +818,6 @@ main(int argc, char **argv)
   auto accessMode{ AccessMode::Direct };
   int Move = 0;
   int Debug = 0;
-  int Vardis = 0;
   int Version = 0;
   int Info = 1;
   int Longinfo = 0;
@@ -796,9 +825,8 @@ main(int argc, char **argv)
   auto fname1 = cfg.path.c_str();
   const char *fname2 = NULL;
   if (cfg.out_path) { fname2 = (*cfg.out_path).c_str(); }
-  auto printShortinfo = !fname2;
-  auto printInfo = !fname2;
-  printInfo = false;
+  auto printShortinfo = !cfg.info && !fname2;
+  auto printInfo = cfg.info && !fname2;
 
   std::string_view fnameView = fname1;
   bool isZarr = strip_ts_prefix(fnameView);
@@ -882,13 +910,6 @@ main(int argc, char **argv)
 
   Field field;
 
-  /*
-  if (Shortinfo)
-  {
-    Info = 0;
-    print_short_info(stream1, vlistID1, Vardis);
-  }
-  */
   int numFields = 0;
   int tsID = 0;
   // if (Info || fname2 || NoInfo)
@@ -912,7 +933,7 @@ main(int argc, char **argv)
         field.init(var);
         stream_read_field(stream1, field);
 
-        if (printInfo) field_print(field, var, levelID, vdatetime, Vardis);
+        if (printInfo) field_print(field, var, levelID, vdatetime);
         if (fname2)
         {
           streamDefField(stream2, varID, levelID);
@@ -935,7 +956,7 @@ main(int argc, char **argv)
         for (int levelID = 0; levelID < var.numLayers; levelID++)
         {
           stream_read_var_slice(stream1, varID, levelID, field);
-          if (Info) field_print(field, var, levelID, vdatetime, Vardis);
+          if (Info) field_print(field, var, levelID, vdatetime);
           if (fname2) stream_write_var_slice(stream2, varID, levelID, field);
         }
       }
