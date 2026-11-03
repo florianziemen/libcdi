@@ -287,13 +287,13 @@ print_list_compact_int64(int n, const int64_t *list)
   for (int i = 0; i < n; ++i)
   {
     int64_t value = list[i];
-    printf(" %ld", value);
+    printf(" %ld", (long) value);
     if ((i + 2) < n && (value + 1) == list[i + 1] && (value + 2) == list[i + 2])
     {
       printf("/");
       int64_t last = list[++i];
       while ((i + 1) < n && (last + 1) == list[i + 1]) last = list[++i];
-      printf("%ld", last);
+      printf("%ld", (long) last);
     }
   }
   printf("\n");
@@ -339,7 +339,7 @@ cdiQueryPrint(const struct CdiQuery *query)
     if (query->numCells)
     {
       printf("Cells:");
-      for (int i = 0; i < query->numCells; ++i) printf(" %ld", query->cells[i]);
+      for (int i = 0; i < query->numCells; ++i) printf(" %ld", (long) query->cells[i]);
       printf("\n");
     }
 
@@ -399,17 +399,18 @@ cdiQueryPrintEntriesNotFound(const struct CdiQuery *query)
           printf("\n");
         }
       }
-
+      /*
       if (query->numSteps)
       {
         if (sum_not_found(query->numSteps, query->stepsFound) > 0)
         {
           printf("Step not found:");
           for (int i = 0; i < query->numSteps; ++i)
-            if (!query->stepsFound[i]) printf(" %ld", query->steps[i]);
+            if (!query->stepsFound[i]) printf(" %ld", (long)query->steps[i]);
           printf("\n");
         }
       }
+      */
     }
   }
 }
