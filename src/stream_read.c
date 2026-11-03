@@ -258,6 +258,9 @@ stream_read_record(int streamID, int memType, void *data, size_t *numMissVals)
 #ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NETCDF: cdf_read_field(streamP, memType, data, numMissVals); break;
 #endif
+#ifdef HAVE_TENSORSTORE
+    case CDI_FILETYPE_ZARR: ts_read_field(streamP, memType, data, numMissVals); break;
+#endif
     default: Error("%s support not compiled in!", strfiletype(streamP->filetype));
   }
 

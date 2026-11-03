@@ -17,6 +17,7 @@ void ts_close(int fileID);
 int ts_inq_contents(stream_t *streamP);
 int ts_inq_timestep(stream_t *streamP, int tsID);
 void ts_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *data, size_t *numMissVals);
+void ts_read_field(stream_t *streamP, int memtype, void *data, size_t *numMissVals);
 
 void cdf_create_records(stream_t *streamP, size_t tsID);
 

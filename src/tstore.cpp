@@ -609,3 +609,14 @@ ts_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *
     cdfReadVarSliceSP(streamP, varID, levelID, (float *) data, numMissVals);
   */
 }
+
+void
+ts_read_field(stream_t *streamP, int memtype, void *data, size_t *numMissVals)
+{
+  int tsID = streamP->curTsID;
+  int vrecID = streamP->tsteps[tsID].curRecID;
+  int recID = streamP->tsteps[tsID].recIDs[vrecID];
+  recinfo_t *recInfo = &(streamP->tsteps[tsID].recinfo[recID]);
+
+  ts_read_var_slice(streamP, recInfo->varID, recInfo->levelID, memtype, data, numMissVals);
+}

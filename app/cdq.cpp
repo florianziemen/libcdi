@@ -24,26 +24,15 @@ bool query_set_parameter(std::string_view params, struct CdiQuery *query);
 namespace
 {
 
-// 1-basierter, inklusiver Bereich einer Achse; ein nicht gesetztes `end`
-// bedeutet "bis zur Ausdehnung des Arrays".
-struct indexRange
-{
-  std::int64_t start = 1;
-  std::optional<std::int64_t> end;
-};
-
 // Konfiguration eines Datensatzes inklusive Array- und Hypercube-Auswahl.
 struct cdqConfig
 {
   int format = 0;       // 0 = auto-detect, 2 or 3 = force
   std::string kvstore;  // "" = auto-detect, "file", "s3" or "http"
   std::string path;
-  std::vector<std::string> arrays;
   std::optional<std::string> endpoint;
   bool consolidated = false;                 // Metadaten aus `.zmetadata` (zarr2)
   std::optional<std::string> group;          // zarr3 Gruppe unterhalb `path`
-  bool debug = false;                        // Diagnose auf stderr (in tsio)
-  bool info = false;                         // nur TensorStore-Version ausgeben
   std::optional<int> data_copy_concurrency;  // parallele Chunk-(De)Kompression
   bool double_buffer = false;                // Double-Buffer-Prefetch
   bool overwrite = false;                    // --out-path vorher loeschen
@@ -54,12 +43,11 @@ struct cdqConfig
       compressor;  // --compressor: Ausgabe-Kompressor (Schreibmodus); ungesetzt = Quell-Kompression uebernehmen
   std::optional<std::int64_t> step_chunk;  // --step-chunk: Laenge der step-Ausgabe-Chunks (Schreibmodus)
   std::optional<std::int64_t> cell_chunk;  // --cell-chunk: Laenge der cell-Ausgabe-Chunks (letzte Dim, Schreibmodus)
-  indexRange step;                         // Zeitachse
-  indexRange layer;                        // Layer-Achse (rank >= 3)
-  indexRange cell;                         // letzte Achse (Gitterpunkte)
   std::string query;                       // query parameter
   std::string access;                      // access parameter
   bool version{ false };
+  bool debug{ false };  // Diagnose auf stderr (in tsio)
+  bool info{ false };   // nur TensorStore-Version ausgeben
 };
 
 void
@@ -75,7 +63,8 @@ print_usage(const char *prog)
                "[--step-chunk <N>] [--cell-chunk <N>] "
                "[--overwrite] "
                "[--data-copy-concurrency <N>] [--double-buffer] "
-               "[--layer <S/E>] [--cell <S/E>] [--info] [--debug]\n"
+               "[--layer <S/E>] [--cell <S/E>] [--info] [--debug]"
+               "source_data_path [target_data_path]\n "
             << "  --name: comma-separated array names.  When omitted, every\n"
             << "         data array in the dataset is selected; coordinate\n"
             << "         arrays are excluded (they are selected automatically\n"
@@ -140,41 +129,6 @@ print_usage(const char *prog)
             << "         when consolidated metadata was found.\n";
 }
 
-// into `range`.  Both bounds must be positive and END must not be smaller than
-// START; the whole value must be consumed.
-bool
-parse_index_range(const std::string &opt, const std::string &value, indexRange &range)
-{
-  const auto invalid = [&]() -> bool
-  {
-    std::cerr << "Invalid " << opt << " value: " << value << " (expected START/END, both positive 1-based indices, END >= START)\n";
-    return false;
-  };
-
-  const std::size_t slash = value.find('/');
-  if (slash == std::string::npos || value.find('/', slash + 1) != std::string::npos) return invalid();
-
-  const auto parse_bound = [&](const std::string &text, std::ptrdiff_t &out) -> bool
-  {
-    if (text.empty()) return false;
-    errno = 0;
-    char *endp = nullptr;
-    const long long n = std::strtoll(text.c_str(), &endp, 10);
-    if (errno != 0 || endp != text.c_str() + text.size() || n <= 0) return false;
-    out = static_cast<std::ptrdiff_t>(n);
-    return true;
-  };
-
-  std::ptrdiff_t start = 0, end = 0;
-  if (!parse_bound(value.substr(0, slash), start)) return invalid();
-  if (!parse_bound(value.substr(slash + 1), end)) return invalid();
-  if (end < start) return invalid();
-
-  range.start = start;
-  range.end = end;
-  return true;
-}
-
 bool
 parse_args(int argc, char **argv, cdqConfig &config)
 {
@@ -218,35 +172,11 @@ parse_args(int argc, char **argv, cdqConfig &config)
       }
       config.kvstore = s;
     }
-    else if (arg == "--path")
-    {
-      const char *v = need_value("--path");
-      if (!v) return false;
-      config.path = v;
-    }
-    else if (arg == "--name")
-    {
-      const char *v = need_value("--name");
-      if (!v) return false;
-      std::stringstream ss(v);
-      std::string item;
-      while (std::getline(ss, item, ','))
-      {
-        if (!item.empty()) config.arrays.push_back(item);
-      }
-    }
     else if (arg == "--endpoint")
     {
       const char *v = need_value("--endpoint");
       if (!v) return false;
       config.endpoint = v;
-    }
-    else if (arg == "--step" || arg == "--layer" || arg == "--cell")
-    {
-      const char *v = need_value(arg.c_str());
-      if (!v) return false;
-      indexRange &range = (arg == "--step") ? config.step : (arg == "--layer" ? config.layer : config.cell);
-      if (!parse_index_range(arg, v, range)) return false;
     }
     else if (arg == "--step-chunk" || arg == "--cell-chunk")
     {
@@ -268,12 +198,6 @@ parse_args(int argc, char **argv, cdqConfig &config)
     else if (arg == "--overwrite") { config.overwrite = true; }
     else if (arg == "--info") { config.info = true; }
     else if (arg == "--debug") { config.debug = true; }
-    else if (arg == "--out-path")
-    {
-      const char *v = need_value("--out-path");
-      if (!v) return false;
-      config.out_path = v;
-    }
     else if (arg == "--out-format")
     {
       const char *v = need_value("--out-format");
