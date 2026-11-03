@@ -2901,7 +2901,7 @@ ts_read_array(tsHandle *handle, const char *arrayName, double *buffer)
   // arr ist SharedArray<void,...> oder typisiert; iterieren und nach double konvertieren
   // Total elements
   Index total = 1;
-  for (DimensionIndex d = 0; d < arr.rank(); ++d) total *= arr.shape()[d];
+  for (DimensionIndex d = 0; d < arr.rank(); ++d) { total *= arr.shape()[d]; }
   if (total == 0) return true;
 
   // Typsicher konvertieren (analog zu append_as_float im Repo)
@@ -2916,19 +2916,25 @@ ts_read_array(tsHandle *handle, const char *arrayName, double *buffer)
   */
   if (dtype == dtype_v<double>)
   {
-    const double *src = static_cast<const double *>(arr.data());
+    auto *src = static_cast<const double *>(arr.data());
     std::copy(src, src + total, buffer);
     return true;
   }
   else if (dtype == dtype_v<float>)
   {
-    const float *src = static_cast<const float *>(arr.data());
+    auto *src = static_cast<const float *>(arr.data());
     for (Index i = 0; i < total; ++i) buffer[i] = static_cast<double>(src[i]);
     return true;
   }
   else if (dtype == dtype_v<int64_t>)
   {
-    const int64_t *src = static_cast<const int64_t *>(arr.data());
+    auto *src = static_cast<const int64_t *>(arr.data());
+    for (Index i = 0; i < total; ++i) buffer[i] = static_cast<double>(src[i]);
+    return true;
+  }
+  else if (dtype == dtype_v<int32_t>)
+  {
+    auto *src = static_cast<const int32_t *>(arr.data());
     for (Index i = 0; i < total; ++i) buffer[i] = static_cast<double>(src[i]);
     return true;
   }
@@ -2936,14 +2942,13 @@ ts_read_array(tsHandle *handle, const char *arrayName, double *buffer)
   {
     // je nach Toolchain Half/float16 -> konvertieren (Repo hat bereits Pfade dafür)
     // hier vereinfacht
-    const uint16_t *src = static_cast<const uint16_t *>(arr.data());
+    auto *src = static_cast<const uint16_t *>(arr.data());
     // ... Konvertierung wie im Codebase nutzen
   }
   else if (dtype == dtype_v<tensorstore::dtypes::bfloat16_t>)
   {
     // ähnlich
   }
-  // weitere Typen falls nötig
 
   std::cerr << "ts_read_array: unsupported dtype '" << dtype.name() << "'\n";
   return false;
