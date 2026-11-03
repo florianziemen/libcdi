@@ -849,7 +849,7 @@ main(int argc, char **argv)
       streamDefTimestep(stream2, tsID);
     }
 
-    CdiDateTime vdatetime = taxisInqVdatetime(taxisID1);
+    auto vdatetime = taxisInqVdatetime(taxisID1);
 
     if (accessMode == AccessMode::Sequential)
     {

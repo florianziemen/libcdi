@@ -570,7 +570,10 @@ ts_inq_timestep(stream_t *streamP, int tsID)
 {
   auto handle = get_tsHandle(streamP->fileID);
   std::int64_t step = tsGetNextStep(handle);
-  return (int) step;
+
+  streamP->curTsID = tsID;
+  int numRecs = streamP->tsteps[tsID].nrecs;
+  return numRecs;
 }
 
 void
