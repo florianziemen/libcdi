@@ -314,6 +314,7 @@ ts_inq_contents(stream_t *streamP)
   auto handle = get_tsHandle(streamP->fileID);
   auto &cfg = handle->cfg;
 
+  auto *query = streamP->query;
   if (cfg.arrays.empty())
   {
     tsOverview ov;
@@ -328,7 +329,6 @@ ts_inq_contents(stream_t *streamP)
     }
 
     // process var query information if available
-    auto *query = streamP->query;
     if (query && cdiQueryNumNames(query) > 0)
     {
       for (const auto &a : ov.arrays)
@@ -355,6 +355,19 @@ ts_inq_contents(stream_t *streamP)
     }
   }
 
+  if (query)
+  {
+    int numCells = cdiQueryNumCells(query);
+    if (numCells > 0)
+    {
+      size_t start = cdiQueryGetCell(query, 0);
+      size_t count = (numCells == 2) ? cdiQueryGetCell(query, 1) : 1;
+      // if ((start + count - 1) > *xsize) { Error("Cells %zu-%zu out of range (numCells=%zu)", start, start + count - 1, *xsize); }
+      cfg.cell.start = start;
+      cfg.cell.end = start + count - 1;
+    }
+  }
+
   if (!tsApplyConfig(handle))
   {
     printf("Apply config failed for %s!", cfg.path.c_str());
@@ -376,7 +389,6 @@ ts_inq_contents(stream_t *streamP)
     }
   }
 
-  auto *query = streamP->query;
   if (query)
   {
     int queryNumSteps = cdiQueryNumSteps(query);

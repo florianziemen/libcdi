@@ -329,11 +329,16 @@ field_print(Field const &field, CdiVar const &var, int levelID, CdiDateTime vdat
 
   if (numMiss) { numMissFound = field.size - mmm.n; }
 
-  fprintf(stdout, "%#12.5g%#12.5g%#12.5g", mmm.min, mmm.mean, mmm.max);
+  if (mmm.n == 0)
+    std::fprintf(stdout, "                     nan            ");
+  else if (mmm.n == 1)
+    std::fprintf(stdout, "            %#12.5g            ", mmm.mean);
+  else
+    std::fprintf(stdout, "%#12.5g%#12.5g%#12.5g", mmm.min, mmm.mean, mmm.max);
 
-  fprintf(stdout, " : %-14s\n", var.name.c_str());
+  std::fprintf(stdout, " : %-14s\n", var.name.c_str());
 
-  if (numMissFound != numMiss && numMiss > 0) fprintf(stdout, "Found %zu of %zu missing values!\n", numMissFound, numMiss);
+  if (numMissFound != numMiss && numMiss > 0) std::fprintf(stdout, "Found %zu of %zu missing values!\n", numMissFound, numMiss);
 }
 
 static int

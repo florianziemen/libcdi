@@ -136,55 +136,6 @@ decode_float_parameter(std::string const &param)
   return values;
 }
 
-static std::vector<size_t>
-decode_cell_parameter(std::string const &param)
-{
-  std::vector<size_t> cells;
-  auto sep = separator1;
-  auto n = param.find(sep);
-  if (n == std::string::npos)
-  {
-    sep = separator2;
-    n = param.find(sep);
-  }
-  if (n == std::string::npos) { cells.push_back(parameter_to_size_t(param)); }
-  else
-  {
-    auto v1 = parameter_to_size_t(param.substr(0, n));
-    auto v2 = parameter_to_size_t(param.substr(n + sep.size()));
-    if (v2 < v1) cdo_abort("Second parameter %zu must be greater than first parameter %zu!", v2, v1);
-    cells.push_back(v1);
-    auto numVals = (v2 - v1 + 1);
-    if (numVals > 1) cells.push_back(numVals);
-  }
-
-  return cells;
-}
-
-static std::vector<int>
-decode_layer_parameter(std::string const &param)
-{
-  std::vector<int> layers;
-  auto sep = separator1;
-  auto n = param.find(sep);
-  if (n == std::string::npos)
-  {
-    sep = separator2;
-    n = param.find(sep);
-  }
-  if (n == std::string::npos) { layers.push_back(parameter_to_int(param)); }
-  else
-  {
-    auto v1 = parameter_to_int(param.substr(0, n));
-    auto v2 = parameter_to_int(param.substr(n + sep.size()));
-    if (v2 < v1) cdo_abort("Second parameter %d must be greater than first parameter %d!", v2, v1);
-    layers.push_back(v1);
-    auto numVals = (v2 - v1 + 1);
-    if (numVals > 1) layers.push_back(numVals);
-  }
-
-  return layers;
-}
 */
 
 #include <string>
@@ -294,14 +245,14 @@ query_set_parameter(std::string_view keyValueString, struct CdiQuery *query)
     else if (key == "layer")
     {
       if (numValues > 1) return handle_error("Too many values for key=layer (maxvalues=1 or range=start/end)");
-      // auto queryLayers = decode_layer_parameter(values[0]);
-      // cdiQuerySetLayers(query, queryLayers.size(), queryLayers.data());
+      auto queryLayers = decode_int_parameter(key, values[0]);
+      cdiQuerySetLayers(query, (*queryLayers).size(), (*queryLayers).data());
     }
     else if (key == "cell")
     {
       if (numValues > 1) return handle_error("Too many values for key=cell (maxvalues=1 or range=start/end)");
-      // auto queryCells = decode_cell_parameter(values[0]);
-      // cdiQuerySetCells(query, queryCells.size(), queryCells.data());
+      auto queryCells = decode_int_parameter(key, values[0]);
+      cdiQuerySetCells(query, (*queryCells).size(), (*queryCells).data());
     }
     else
     {
