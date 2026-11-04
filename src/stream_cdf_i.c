@@ -4414,7 +4414,7 @@ get_timevalue(int fileID, int nctimevarid, size_t ncStepIndex, double *timevarBu
   return timevalue;
 }
 
-static void
+void
 process_time_query(struct CdiQuery *query, size_t numTimesteps, CdiDateTime *vDateTimeList, int *ncStepIndices)
 {
   if (query)

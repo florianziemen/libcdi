@@ -1,6 +1,7 @@
 #include "tstore.h"
 #include "cdi.h"
 #include "cdi_int.h"
+#include "cdi_query.h"
 #include "cdf_util.h"
 #include "tsio.h"
 
@@ -243,18 +244,14 @@ ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0)
 
     // if (hasTimesteps)
     {
-      // vDateTimeList = (CdiDateTime *) malloc(numTimesteps * sizeof(CdiDateTime));
-      vDateTimeList = (CdiDateTime *) malloc(1000 * sizeof(CdiDateTime));
+      vDateTimeList = (CdiDateTime *) malloc(numTimesteps * sizeof(CdiDateTime));
 
       if (1 || streamP->basetime.hasUnits)
       {
-        printf("numTimesteps %ld\n", numTimesteps);
-        // double *timevarBuffer = (double *) malloc(numTimesteps * sizeof(double));
-        double *timevarBuffer = (double *) malloc(1000 * sizeof(double));
+        double *timevarBuffer = (double *) malloc(numTimesteps * sizeof(double));
         // cdf_get_var_double(fileID, nctimevarid, timevarBuffer);
         auto handle = get_tsHandle(streamP->fileID);
         ts_read_array(handle, "time", timevarBuffer);
-        for (int i = 0; i < 16; ++i) printf("step %d %g\n", i + 1, timevarBuffer[i]);
         for (size_t i = 0; i < numTimesteps; ++i)
         {
           // vDateTimeList[i] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, i, timevarBuffer), taxis0);
@@ -269,7 +266,7 @@ ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0)
     }
 
     // process step query information if available
-    // process_time_query(streamP->query, numTimesteps, vDateTimeList, ncStepIndices);
+    process_time_query(streamP->query, numTimesteps, vDateTimeList, ncStepIndices);
 
     size_t numSteps = 0;
     for (size_t tsID = 0; tsID < numTimesteps; ++tsID) { numSteps += (ncStepIndices[tsID] >= 0); }
@@ -344,7 +341,7 @@ ts_inq_contents(stream_t *streamP)
   printf("%s: fileID=%d\n", __func__, streamP->fileID);
 
   auto handle = get_tsHandle(streamP->fileID);
-  auto const &cfg = handle->cfg;
+  auto &cfg = handle->cfg;
 
   tsMetadata const &md = tsGetReadMetadata(handle);
 
@@ -358,6 +355,21 @@ ts_inq_contents(stream_t *streamP)
       std::cerr << "'" << a.name << "' is a coordinate array and cannot be selected with --name.\n";
       tsCloseFile(handle);
       return 1;
+    }
+  }
+
+  auto *query = streamP->query;
+  if (query)
+  {
+    int queryNumSteps = cdiQueryNumSteps(query);
+    int queryNumDates = cdiQueryNumDates(query);
+    if (queryNumSteps > 0)
+    {
+      int64_t startStep = cdiQueryGetStep(query, 0) - 1;
+      // if ((startStep + 1) > (int64_t) numTimesteps) Error("query start step > maxSteps=%zu", numTimesteps);
+      int64_t endStep = startStep + ((queryNumSteps == 2) ? (cdiQueryGetStep(query, 1) - 1) : 0);
+      cfg.step.start = startStep + 1;
+      cfg.step.end = endStep + 1;
     }
   }
 
@@ -383,17 +395,15 @@ ts_inq_contents(stream_t *streamP)
   }
   print_coordinate_arrays(md);
 
-  handle->metadata.num_steps = 16;
-  printf("numSteps %lld\n", md.num_steps);
-  printf("Found %zu data arrays:\n", md.arrayList.size());
-  for (auto const &array : md.arrayList) printf(" %s", array.name.c_str());
-  printf("\n");
+  // printf("Found %zu data arrays:\n", md.arrayList.size());
+  // for (auto const &array : md.arrayList) printf(" %s", array.name.c_str());
+  // printf("\n");
 
   {
     auto const &array = md.arrayList[0];
-    printf("%s: num_steps=%lld, num_layers=%lld, num_cells=%lld\n", array.name.c_str(), array.num_steps, array.num_layers,
-           array.num_cells);
-    for (const auto &[key, value] : array.attributes) printf("[%s] = %s\n", key.c_str(), value.c_str());
+    // printf("%s: num_steps=%lld, num_layers=%lld, num_cells=%lld\n", array.name.c_str(), array.num_steps, array.num_layers,
+    //      array.num_cells);
+    // for (const auto &[key, value] : array.attributes) printf("[%s] = %s\n", key.c_str(), value.c_str());
   }
 
   size_t numVars = md.arrayList.size();
@@ -401,16 +411,17 @@ ts_inq_contents(stream_t *streamP)
   int vlistID = streamP->vlistID;
 
   auto numCells = static_cast<size_t>(md.arrayList[0].num_cells);
-  printf("numCells %zu\n", numCells);
+  // printf("numCells %zu\n", numCells);
   int gridID = gridCreate(GRID_HEALPIX, numCells);
   int surfaceID = zaxisCreate(ZAXIS_SURFACE, 1);
 
+  size_t numSteps{};
   std::string timeUnits;
   int calendar = CALENDAR_STANDARD;
   std::map<std::string, int> zaxisMap;
 
-  printf("Found %zu coordinate arrays:\n", md.coordList.size());
-  for (auto const &array : md.coordList) printf("  %s: size=%lld\n", array.name.c_str(), array.shape[0]);
+  // printf("Found %zu coordinate arrays:\n", md.coordList.size());
+  // for (auto const &array : md.coordList) printf("  %s: size=%lld\n", array.name.c_str(), array.shape[0]);
   for (auto const &array : md.coordList)
   {
     auto const &attributes = array.attributes;
@@ -421,12 +432,12 @@ ts_inq_contents(stream_t *streamP)
     }
     if (array.name == "time")
     {
+      numSteps = array.shape[0];
       if (attributes.contains("units")) { timeUnits = attributes.find("units")->second; }
       if (attributes.contains("calendar")) { calendar = attribute_to_calendar(attributes.find("calendar")->second.c_str()); }
     }
     else if (gridID != -1 && attributes.contains("grid_mapping_name") && attributes.find("grid_mapping_name")->second == "healpix")
     {
-      printf("healpix grid\n");
       if (attributes.contains("refinement_level") && attributes.contains("indexing_scheme"))
       {
 
@@ -454,7 +465,6 @@ ts_inq_contents(stream_t *streamP)
         cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units.c_str());
       }
       zaxisMap[array.name] = zaxisID;
-      printf("zaxis: %s with %lld layers\n", array.name.c_str(), numLayers);
     }
   }
 
@@ -484,6 +494,14 @@ ts_inq_contents(stream_t *streamP)
     vlistDefVarMissval(vlistID, varID, std::nanf(""));
   }
 
+  // Die Datenarrays dtype-neutral oeffnen (Lesepuffer arbeiten auf float32);
+  // die Ausgabe-Stores erben daraus Attribute und Kompression.
+  if (!handle->fields_open && !tsOpenFields(handle))
+  {
+    tsCloseFile(handle);
+    return 1;
+  }
+
   taxis_t taxis0;
   ptaxisInit(&taxis0);
   if (set_base_time(timeUnits.c_str(), &taxis0) == 1)
@@ -503,19 +521,10 @@ ts_inq_contents(stream_t *streamP)
 
   vlistDefTaxis(vlistID, taxisID);
 
-  int ntsteps = 16;
-  ts_read_timesteps(ntsteps, streamP, &taxis0);
+  int ntsteps = handle->metadata.num_steps;
+  ts_read_timesteps((int) numSteps, streamP, &taxis0);
   taxisDestroyKernel(&taxis0);
 
-  // Die Datenarrays dtype-neutral oeffnen (Lesepuffer arbeiten auf float32);
-  // die Ausgabe-Stores erben daraus Attribute und Kompression.
-  if (!handle->fields_open && !tsOpenFields(handle))
-  {
-    tsCloseFile(handle);
-    return 1;
-  }
-
-  handle->metadata.num_steps = 16;
   // Ein sequentieller Durchlauf: aeussere Schleife ueber die Zeitschritte,
   // innere Schleife ueber die (konstant viele) Felder je Schritt.  Zeitdimension
   // und Feldzahl sind fuer alle Arrays gleich; jedes Feld wird genau einmal

@@ -43,6 +43,9 @@ extern "C"
   // streamOpenReadQuery: Open a dataset for reading and apply query
   int streamOpenReadQuery(const char *path, struct CdiQuery *query);
 
+#include "cdi_datetime.h"
+  void process_time_query(struct CdiQuery *query, size_t numTimesteps, CdiDateTime *vDateTimeList, int *ncStepIndices);
+
 #ifdef __cplusplus
 }
 #endif

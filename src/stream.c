@@ -1032,7 +1032,8 @@ streamOpenReadQuery(const char *filename, struct CdiQuery *query)
   int filetype = cdiGetFiletype(filename, &byteorder);
   if (filetype < 0) return filetype;
 
-  if (cdiBaseFiletype(filetype) != CDI_FILETYPE_NETCDF && filetype != CDI_FILETYPE_GRB2) return CDI_EQNAVAIL;
+  int baseType = cdiBaseFiletype(filetype);
+  if (baseType != CDI_FILETYPE_NETCDF && baseType != CDI_FILETYPE_ZARR && filetype != CDI_FILETYPE_GRB2) return CDI_EQNAVAIL;
 
   int streamID = streamOpen(filename, "r", filetype);
   if (streamID >= 0)
