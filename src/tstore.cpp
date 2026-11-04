@@ -362,9 +362,20 @@ ts_inq_contents(stream_t *streamP)
     {
       size_t start = cdiQueryGetCell(query, 0);
       size_t count = (numCells == 2) ? cdiQueryGetCell(query, 1) : 1;
-      // if ((start + count - 1) > *xsize) { Error("Cells %zu-%zu out of range (numCells=%zu)", start, start + count - 1, *xsize); }
       cfg.cell.start = start;
       cfg.cell.end = start + count - 1;
+    }
+  }
+
+  if (query)
+  {
+    int numLayers = cdiQueryNumLayers(query);
+    if (numLayers > 0)
+    {
+      size_t start = cdiQueryGetLayer(query, 0);
+      size_t count = (numLayers == 2) ? cdiQueryGetLayer(query, 1) : 1;
+      cfg.layer.start = start;
+      cfg.layer.end = start + count - 1;
     }
   }
 
@@ -476,7 +487,6 @@ ts_inq_contents(stream_t *streamP)
     {
       if (attributes.contains("refinement_level") && attributes.contains("indexing_scheme"))
       {
-
         auto it1 = attributes.find("refinement_level");
         auto it2 = attributes.find("indexing_scheme");
         int attlen = 1;
@@ -492,8 +502,15 @@ ts_inq_contents(stream_t *streamP)
       std::vector<double> layers(numLayers);
       ts_read_array(handle, array.name.c_str(), layers.data());
 
+      int64_t start = 0;
+      if (query && cdiQueryNumLayers(query) > 0)
+      {
+        start = cfg.layer.start - 1;
+        numLayers = *cfg.layer.end - cfg.layer.start + 1;
+      }
+
       int zaxisID = zaxisCreate(ZAXIS_GENERIC, numLayers);
-      zaxisDefLevels(zaxisID, layers.data());
+      zaxisDefLevels(zaxisID, layers.data() + start);
       cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, array.name.c_str());
       if (attributes.contains("units"))
       {
