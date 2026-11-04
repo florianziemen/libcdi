@@ -211,6 +211,7 @@ const char *tsVersion();
 // Koordinaten-Arrays und liefert deren Metadaten.  `nullptr` bei Fehlern
 // (Diagnose auf stderr).
 tsHandle *tsOpenFileRead(const std::string &path, const tsConfig &config);
+tsHandle *tsApplyConfig(tsHandle *h);
 
 // Legt je gewaehltem Array einen Ausgabestore unter <path>/<name>/ an.
 // `nullptr` bei Fehlern (Diagnose auf stderr).

@@ -549,13 +549,13 @@ main(int argc, char **argv)
       return 0;
     }
     std::set<std::string> coord_names;
-    for (const auto &row : ov.arrays)
-      for (const auto &d : row.dim_names) coord_names.insert(d);
-    for (const auto &row : ov.arrays)
-      if (!row.grid_mapping.empty()) coord_names.insert(row.grid_mapping);
+    for (const auto &a : ov.arrays)
+      for (const auto &d : a.dim_names) coord_names.insert(d);
+    for (const auto &a : ov.arrays)
+      if (!a.grid_mapping.empty()) coord_names.insert(a.grid_mapping);
     cfg.arrays.clear();
-    for (const auto &row : ov.arrays)
-      if (!coord_names.count(row.name)) cfg.arrays.push_back(row.name);
+    for (const auto &a : ov.arrays)
+      if (!coord_names.count(a.name)) cfg.arrays.push_back(a.name);
     if (cfg.arrays.empty()) return print_overview(cfg, ov) ? 0 : 1;
   }
 
@@ -603,6 +603,11 @@ main(int argc, char **argv)
 
   tsHandle *input = tsOpenFileRead(cfg.path, cfg);
   if (!input) return 1;
+  if (!tsApplyConfig(input))
+  {
+    printf("Apply config failed for %s!", cfg.path.c_str());
+    return -1;
+  }
   tsMetadata &md = tsGetReadMetadata(input);
 
   // Datenarrays vs. Koordinatenarrays: die Dimensionsnamen eines Datenarrays

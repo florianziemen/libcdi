@@ -2015,15 +2015,23 @@ tsOpenFileRead(const std::string &path, const tsConfig &config)
   auto *h = new tsHandleImpl();
   h->cfg = config;
   h->cfg.path = path;
-  std::sort(h->cfg.arrays.begin(), h->cfg.arrays.end());
   make_context(h->cfg, h->context, h->cfg.data_copy_concurrency);
   if (!h->cfg.data_copy_concurrency)
   {
     delete h;
     return nullptr;
   }
+  return h;
+}
+
+tsHandle *
+tsApplyConfig(tsHandle *handle)
+{
+  tsHandleImpl *h = static_cast<tsHandleImpl *>(handle);
+  using namespace tensorstore;
 
   bool debug_reported = false;  // das Format ist im ganzen Datensatz gleich: einmal melden
+  std::sort(h->cfg.arrays.begin(), h->cfg.arrays.end());
   h->stores.reserve(h->cfg.arrays.size());
   h->metadata.arrayList.reserve(h->cfg.arrays.size());
   for (const auto &name : h->cfg.arrays)

@@ -59,32 +59,6 @@ ts_open(const char *fileName, const char *mode, int fileType)
       // printf("open %s\n", fileName + 6);
       tsConfig cfg;
       cfg.path = fileName + 6;
-      tsOverview ov;
-      ov.ok = tsDatasetOverview(cfg, ov);
-      if (!ov.ok) return -1;
-      if (!ov.groups.empty())
-      {
-        printf("Found %zu groups in %s, select one of them:\n", ov.groups.size(), fileName + 6);
-        for (const auto &group : ov.groups) printf(" %s", group.c_str());
-        printf("\n");
-        return -1;
-      }
-      // printf("Found %zu arrays in %s:\n", ov.arrays.size(), fileName + 6);
-      // for (const auto &row : ov.arrays) printf(" %s", row.name.c_str());
-      // printf("\n");
-      std::set<std::string> coord_names;
-      for (const auto &row : ov.arrays)
-        for (const auto &d : row.dim_names) coord_names.insert(d);
-      for (const auto &row : ov.arrays)
-        if (!row.grid_mapping.empty()) coord_names.insert(row.grid_mapping);
-      cfg.arrays.clear();
-      for (const auto &row : ov.arrays)
-        if (!coord_names.count(row.name)) cfg.arrays.push_back(row.name);
-      if (cfg.arrays.empty())
-      {
-        printf("No data arrays found in %s!", fileName + 6);
-        return -1;
-      };
 
       tsHandle *handle = tsOpenFileRead(fileName + 6, cfg);
       if (!handle) return -1;
@@ -339,6 +313,53 @@ ts_inq_contents(stream_t *streamP)
 {
   auto handle = get_tsHandle(streamP->fileID);
   auto &cfg = handle->cfg;
+
+  if (cfg.arrays.empty())
+  {
+    tsOverview ov;
+    ov.ok = tsDatasetOverview(cfg, ov);
+    if (!ov.ok) return -1;
+    if (!ov.groups.empty())
+    {
+      printf("Found %zu groups in %s, select one of them:\n", ov.groups.size(), cfg.path.c_str());
+      for (const auto &group : ov.groups) printf(" %s", group.c_str());
+      printf("\n");
+      return -1;
+    }
+
+    // process var query information if available
+    auto *query = streamP->query;
+    if (query && cdiQueryNumNames(query) > 0)
+    {
+      for (const auto &a : ov.arrays)
+      {
+        if (cdiQueryName(query, a.name.c_str()) == 0) cfg.arrays.push_back(a.name);
+      }
+    }
+    else
+    {
+      std::set<std::string> coord_names;
+      for (const auto &a : ov.arrays)
+        for (const auto &d : a.dim_names) coord_names.insert(d);
+      for (const auto &a : ov.arrays)
+        if (!a.grid_mapping.empty()) coord_names.insert(a.grid_mapping);
+      cfg.arrays.clear();
+      for (const auto &a : ov.arrays)
+        if (!coord_names.count(a.name)) cfg.arrays.push_back(a.name);
+    }
+
+    if (cfg.arrays.empty())
+    {
+      printf("No data arrays found in %s!", cfg.path.c_str());
+      return -1;
+    }
+  }
+
+  if (!tsApplyConfig(handle))
+  {
+    printf("Apply config failed for %s!", cfg.path.c_str());
+    return -1;
+  }
 
   tsMetadata const &md = tsGetReadMetadata(handle);
 
