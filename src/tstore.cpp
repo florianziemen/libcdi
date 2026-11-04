@@ -56,7 +56,7 @@ ts_open(const char *fileName, const char *mode, int fileType)
   {
     case 'r':
     {
-      printf("open %s\n", fileName + 6);
+      // printf("open %s\n", fileName + 6);
       tsConfig cfg;
       cfg.path = fileName + 6;
       tsOverview ov;
@@ -69,9 +69,9 @@ ts_open(const char *fileName, const char *mode, int fileType)
         printf("\n");
         return -1;
       }
-      printf("Found %zu arrays in %s:\n", ov.arrays.size(), fileName + 6);
-      for (const auto &row : ov.arrays) printf(" %s", row.name.c_str());
-      printf("\n");
+      // printf("Found %zu arrays in %s:\n", ov.arrays.size(), fileName + 6);
+      // for (const auto &row : ov.arrays) printf(" %s", row.name.c_str());
+      // printf("\n");
       std::set<std::string> coord_names;
       for (const auto &row : ov.arrays)
         for (const auto &d : row.dim_names) coord_names.insert(d);
@@ -98,7 +98,7 @@ ts_open(const char *fileName, const char *mode, int fileType)
       break;
   }
 
-  printf("%s: %s fileID=%d\n", __func__, fileName, fileID);
+  // printf("%s: %s fileID=%d\n", __func__, fileName, fileID);
   if (fileID < 0) fprintf(stderr, "%s: fileID failed for %s!", __func__, fileName);
   return fileID;
 }
@@ -106,7 +106,6 @@ ts_open(const char *fileName, const char *mode, int fileType)
 void
 ts_close(int fileID)
 {
-  printf("%s: fileID=%d\n", __func__, fileID);
   tsCloseFile(get_tsHandle(fileID));
 }
 
@@ -338,8 +337,6 @@ ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0)
 int
 ts_inq_contents(stream_t *streamP)
 {
-  printf("%s: fileID=%d\n", __func__, streamP->fileID);
-
   auto handle = get_tsHandle(streamP->fileID);
   auto &cfg = handle->cfg;
 
@@ -373,10 +370,13 @@ ts_inq_contents(stream_t *streamP)
     }
   }
 
-  std::cout << "=== Selected arrays ===\n";
-  std::cout << "#  name  format  kvstore  dtype  compressor  shape  chunks  indices";
-  if (cfg.out_path) std::cout << "  out_chunks";
-  std::cout << "\n";
+  if (CDI_Debug)
+  {
+    std::cout << "=== Selected arrays ===\n";
+    std::cout << "#  name  format  kvstore  dtype  compressor  shape  chunks  indices";
+    if (cfg.out_path) std::cout << "  out_chunks";
+    std::cout << "\n";
+  }
   {
     std::size_t idx = 1;
     for (std::size_t i = 0; i < md.arrayList.size(); ++i)
@@ -387,20 +387,23 @@ ts_inq_contents(stream_t *streamP)
         tsCloseFile(handle);
         return 1;
       }
-      std::cout << idx++ << "  " << a.name << "  zarr" << a.format << "  " << a.kvstore << "  " << a.dataType << "  "
-                << a.compressor << "  " << fmt_dims(a.shape) << "  " << fmt_dims(a.chunks) << "  " << fmt_indices(a);
-      if (cfg.out_path) std::cout << "  " << fmt_dims(a.out_chunks);
-      std::cout << '\n';
+      if (CDI_Debug)
+      {
+        std::cout << idx++ << "  " << a.name << "  zarr" << a.format << "  " << a.kvstore << "  " << a.dataType << "  "
+                  << a.compressor << "  " << fmt_dims(a.shape) << "  " << fmt_dims(a.chunks) << "  " << fmt_indices(a);
+        if (cfg.out_path) std::cout << "  " << fmt_dims(a.out_chunks);
+        std::cout << '\n';
+      }
     }
   }
-  print_coordinate_arrays(md);
+  if (CDI_Debug) print_coordinate_arrays(md);
 
   // printf("Found %zu data arrays:\n", md.arrayList.size());
   // for (auto const &array : md.arrayList) printf(" %s", array.name.c_str());
   // printf("\n");
 
   {
-    auto const &array = md.arrayList[0];
+    // auto const &array = md.arrayList[0];
     // printf("%s: num_steps=%lld, num_layers=%lld, num_cells=%lld\n", array.name.c_str(), array.num_steps, array.num_layers,
     //      array.num_cells);
     // for (const auto &[key, value] : array.attributes) printf("[%s] = %s\n", key.c_str(), value.c_str());
@@ -425,7 +428,7 @@ ts_inq_contents(stream_t *streamP)
   for (auto const &array : md.coordList)
   {
     auto const &attributes = array.attributes;
-    for (auto const &[key, value] : attributes)
+    // for (auto const &[key, value] : attributes)
     {
       // printf("[%s] = %s\n", key.c_str(), value.c_str());
       // if (key == "grid_mapping_name" && value == "healpix") printf("healpix grid\n");
@@ -474,7 +477,7 @@ ts_inq_contents(stream_t *streamP)
     auto rank = a.shape.size();
     if (rank > 3) continue;
     int timeType = TIME_VARYING;
-    auto numCells = static_cast<size_t>(a.shape[rank - 1]);
+    // auto numCells = static_cast<size_t>(a.shape[rank - 1]);
     int zaxisID = surfaceID;
     if (rank == 3)
     {
@@ -492,6 +495,11 @@ ts_inq_contents(stream_t *streamP)
     vlistDefVarDatatype(vlistID, varID, DATATYPE_FLT32);
     vlistDefVarName(vlistID, varID, a.name.c_str());
     vlistDefVarMissval(vlistID, varID, std::nanf(""));
+    if (a.attributes.contains("units"))
+    {
+      auto units = a.attributes.find("units")->second;
+      cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units.c_str());
+    }
   }
 
   // Die Datenarrays dtype-neutral oeffnen (Lesepuffer arbeiten auf float32);
@@ -521,7 +529,6 @@ ts_inq_contents(stream_t *streamP)
 
   vlistDefTaxis(vlistID, taxisID);
 
-  int ntsteps = handle->metadata.num_steps;
   ts_read_timesteps((int) numSteps, streamP, &taxis0);
   taxisDestroyKernel(&taxis0);
 

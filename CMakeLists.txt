@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.27 FATAL_ERROR)
 
 message(VERBOSE "Entering libcdi")
-project(libcdi VERSION 2.6.5 LANGUAGES C CXX)
+project(libcdi VERSION 2.7.0 LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)

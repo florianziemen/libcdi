@@ -45,6 +45,7 @@ struct cdqConfig
   std::optional<std::int64_t> cell_chunk;  // --cell-chunk: Laenge der cell-Ausgabe-Chunks (letzte Dim, Schreibmodus)
   std::string query;                       // query parameter
   std::string access;                      // access parameter
+  bool verbose{ false };
   bool version{ false };
   bool debug{ false };  // Diagnose auf stderr (in tsio)
   bool info{ false };   // nur TensorStore-Version ausgeben
@@ -255,6 +256,7 @@ parse_args(int argc, char **argv, cdqConfig &config)
       if (!v) return false;
       config.access = v;
     }
+    else if (arg == "--verbose") { config.verbose = true; }
     else if (arg == "--version") { config.version = true; }
     else if (arg == "--data-copy-concurrency")
     {
@@ -500,7 +502,7 @@ limit_string_view(std::string_view name, size_t maxLen) noexcept
 }
 
 void
-print_vars_info(int vlistID, VarList const &varList)
+print_vars_info(cdqConfig const &config, int vlistID, VarList const &varList)
 {
   for (auto const &var : varList)
   {
@@ -540,12 +542,13 @@ print_vars_info(int vlistID, VarList const &varList)
     // parameter info
     std::fprintf(stdout, ": ");
     std::fprintf(stdout, "%-14s", var.name.c_str());
+    if (config.verbose && !var.units.empty()) std::fprintf(stdout, " [%s]", var.units.c_str());
     std::fprintf(stdout, "\n");
   }
 }
 
 void
-print_shortinfo(StreamHandle const &stream, int vlistID, VarList const &varList)
+print_shortinfo(cdqConfig const &config, StreamHandle const &stream, int vlistID, VarList const &varList)
 {
   std::fprintf(stdout, "   Var : Institut Source   T Steptype Levels Num    Points Num Dtype Mtype : ");
   std::fprintf(stdout, "Parameter name\n");
@@ -561,7 +564,7 @@ print_shortinfo(StreamHandle const &stream, int vlistID, VarList const &varList)
     }
   }
 
-  print_vars_info(vlistID, varList);
+  print_vars_info(config, vlistID, varList);
 
   std::fprintf(stdout, "   Grid coordinates");
   std::fprintf(stdout, " :\n");
@@ -726,6 +729,8 @@ main(int argc, char **argv)
     if (config.path.empty()) return 0;  // --info alone
   }
 
+  if (config.debug) cdiDebug(2);
+
   enum struct AccessMode
   {
     Sequential,
@@ -735,10 +740,7 @@ main(int argc, char **argv)
   auto accessMode{ AccessMode::Sequential };
   if (config.access == "direct") { accessMode = AccessMode::Direct; }
   int Move = 0;
-  int Debug = 0;
-  int Version = 0;
   int Info = 1;
-  int Longinfo = 0;
 
   auto fname1 = config.path.c_str();
   const char *fname2 = NULL;
@@ -783,7 +785,7 @@ main(int argc, char **argv)
 
   if (printShortinfo && !printInfo)
   {
-    print_shortinfo(stream1, vlistID1, varList);
+    print_shortinfo(config, stream1, vlistID1, varList);
     return 0;
   }
 
