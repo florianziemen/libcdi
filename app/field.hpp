@@ -55,6 +55,7 @@ struct Field
   void
   init(CdiVar const &var)
   {
+    missval = var.missval;
     if (var.numCells != size || var.memType != memType)
     {
       size = var.numCells;

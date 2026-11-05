@@ -308,6 +308,20 @@ ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0)
   }
 }
 
+#include <string>
+#include <charconv>
+#include <system_error>
+#include <optional>
+
+std::optional<double>
+string_to_double(const std::string &str)
+{
+  double value{};
+  auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+  if (ec != std::errc{} || ptr != str.data() + str.size()) return std::nullopt;
+  return value;
+}
+
 int
 ts_inq_contents(stream_t *streamP)
 {
@@ -544,7 +558,12 @@ ts_inq_contents(stream_t *streamP)
     int varID = vlistDefVar(vlistID, gridID, zaxisID, timeType);
     vlistDefVarDatatype(vlistID, varID, DATATYPE_FLT32);
     vlistDefVarName(vlistID, varID, a.name.c_str());
-    vlistDefVarMissval(vlistID, varID, std::nanf(""));
+    if (a.fill_value != "-")
+    {
+      auto missVal = string_to_double(a.fill_value);
+      if (*missVal) vlistDefVarMissval(vlistID, varID, *missVal);
+      // vlistDefVarMissval(vlistID, varID, std::nanf(""));
+    }
     if (a.attributes.contains("units"))
     {
       auto units = a.attributes.find("units")->second;
@@ -658,10 +677,31 @@ ts_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *
   size_t numCells = a.num_cells;
   float *fdata = (float *) data;
   tsReadField(handle, fdata, numCells);
+
   size_t numMiss = 0;
-  for (size_t i = 0; i < numCells; ++i)
+  if (a.fill_value != "-")
   {
-    if (std::isnan(fdata[i])) numMiss++;
+    auto missValOpt = string_to_double(a.fill_value);
+    if (*missValOpt)
+    {
+      double missVal = *missValOpt;
+      float missValF = (float) missVal;
+      if (std::isnan(missVal))
+      {
+        for (size_t i = 0; i < numCells; ++i)
+        {
+          if (std::isnan(fdata[i])) numMiss++;
+        }
+      }
+      else
+      {
+        constexpr auto is_equal = [](auto a, auto b) noexcept { return (!(a < b || b < a)); };
+        for (size_t i = 0; i < numCells; ++i)
+        {
+          if (is_equal(fdata[i], missValF)) numMiss++;
+        }
+      }
+    }
   }
   *numMissVals = numMiss;
 

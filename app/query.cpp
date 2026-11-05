@@ -32,20 +32,30 @@ string_to_int64(std::string_view str)
 
   return value;
 }
+
 /*
 std::optional<double>
 string_to_double(const std::string &str)
 {
   double value{};
-  const auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value, std::chars_format::general);
-  if (ec != std::errc{} || ptr != str.data() + str.size())
-  {
-    std::cerr << "Fehler: '" << str << "' kann nicht in einen Double konvertiert werden!\n";
-    return std::nullopt;
-  }
-
+  auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+  if (ec != std::errc{} || ptr != str.data() + str.size()) return std::nullopt;
   return value;
 }
+
+ std::optional<double>
+ string_to_double(const std::string &str)
+ {
+   double value{};
+   const auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value, std::chars_format::general);
+   if (ec != std::errc{} || ptr != str.data() + str.size())
+   {
+     std::cerr << "Fehler: '" << str << "' kann nicht in einen Double konvertiert werden!\n";
+     return std::nullopt;
+   }
+
+   return value;
+ }
 */
 
 std::optional<std::vector<int64_t>>

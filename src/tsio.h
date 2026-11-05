@@ -72,6 +72,7 @@ struct tsArray
   std::string kvstore;
   std::string dataType;
   std::string compressor;                // Quell-Kompressor, "-" wenn keiner/unbekannt
+  std::string fill_value;                // Quell-fill_value, "-" wenn nicht gesetzt
   std::vector<std::int64_t> shape;       // volle Quellform
   std::vector<std::int64_t> chunks;      // aeussere Quell-Chunkform
   std::vector<std::int64_t> bstart;      // Auswahl, 0-basiert

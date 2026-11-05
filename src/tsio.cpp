@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <fstream>
 #include <functional>
@@ -1092,6 +1093,43 @@ array_compressor(const tensorstore::TensorStore<T, R> *store, int format)
 }
 
 std::string
+json_fill_value_text(const nlohmann::json &v)
+{
+  if (v.is_null()) return "-";
+  if (v.is_string()) return v.get<std::string>();
+  if (v.is_boolean()) return v.get<bool>() ? "true" : "false";
+  if (v.is_number_integer()) return std::to_string(v.get<long long>());
+  if (v.is_number_unsigned()) return std::to_string(v.get<unsigned long long>());
+  if (v.is_number_float())
+  {
+    const double d = v.get<double>();
+    if (std::isnan(d)) return "NaN";
+    if (std::isinf(d)) return d > 0 ? "Infinity" : "-Infinity";
+  }
+  return v.dump();
+}
+
+// Quell-fill_value eines Arrays als Text ("-" wenn nicht gesetzt).  Gelesen
+// wird der Roh-Wert aus `.zarray` / `zarr.json`, damit der Wert nicht durch
+// den Datentyp normalisiert wird (wie beim Kompressor).
+template <typename T, tensorstore::DimensionIndex R>
+std::string
+array_fill_value(const tensorstore::TensorStore<T, R> *store, int format)
+{
+  const std::string raw = read_store_key(store, (format == 3) ? "zarr.json" : ".zarray");
+  if (raw.empty()) return "-";
+  try
+  {
+    const nlohmann::json j = nlohmann::json::parse(sanitize_invalid_json(raw));
+    if (j.contains("fill_value")) return json_fill_value_text(j["fill_value"]);
+  }
+  catch (...)
+  {
+  }
+  return "-";
+}
+
+std::string
 format_dim_list(const nlohmann::json &dims)
 {
   std::string out = "[";
@@ -2050,6 +2088,7 @@ tsApplyConfig(tsHandle *handle)
     a.format = detected_format;
     a.dataType = std::string(store->dtype().name());
     a.compressor = array_compressor(&*store, detected_format);
+    a.fill_value = array_fill_value(&*store, detected_format);
     const auto domain = store->domain();
     a.shape.assign(domain.shape().begin(), domain.shape().end());
     a.dim_names = read_array_dim_names(&*store, detected_format);

@@ -9,6 +9,7 @@
 
 #include "tsio.h"
 
+#include <algorithm>
 #include <cerrno>
 #include <chrono>
 #include <cmath>
@@ -23,6 +24,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <vector>
 
@@ -350,14 +352,14 @@ void
 print_selected_arrays(const tsMetadata &md, bool with_out_chunks)
 {
   std::cout << "=== Selected arrays ===\n";
-  std::cout << "#  name  format  kvstore  dtype  compressor  shape  chunks  indices";
+  std::cout << "#  name  format  kvstore  dtype  compressor  fill_value  shape  chunks  indices";
   if (with_out_chunks) std::cout << "  out_chunks";
   std::cout << "\n";
   std::size_t idx = 1;
   for (const auto &a : md.arrayList)
   {
     std::cout << idx++ << "  " << a.name << "  zarr" << a.format << "  " << a.kvstore << "  " << a.dataType << "  " << a.compressor
-              << "  " << fmt_dims(a.shape) << "  " << fmt_dims(a.chunks) << "  " << fmt_indices(a);
+              << "  " << a.fill_value << "  " << fmt_dims(a.shape) << "  " << fmt_dims(a.chunks) << "  " << fmt_indices(a);
     if (with_out_chunks) std::cout << "  " << fmt_dims(a.out_chunks);
     std::cout << '\n';
   }
@@ -526,7 +528,7 @@ main(int argc, char **argv)
     std::cerr << "CXX=" << CXX_COMPILER << '\n';
 #endif
 #ifdef CXX_COMPILER_VERSION
-    std::cerr << "CXX version=" << CXX_COMPILER_VERSION << '\n';
+    std::cerr << "CXXFLAGS=" << CXX_COMPILER_VERSION << '\n';
 #endif
   }
   if (cfg.info && cfg.path.empty()) return 0;  // --info alone
@@ -549,13 +551,13 @@ main(int argc, char **argv)
       return 0;
     }
     std::set<std::string> coord_names;
-    for (const auto &a : ov.arrays)
-      for (const auto &d : a.dim_names) coord_names.insert(d);
-    for (const auto &a : ov.arrays)
-      if (!a.grid_mapping.empty()) coord_names.insert(a.grid_mapping);
+    for (const auto &row : ov.arrays)
+      for (const auto &d : row.dim_names) coord_names.insert(d);
+    for (const auto &row : ov.arrays)
+      if (!row.grid_mapping.empty()) coord_names.insert(row.grid_mapping);
     cfg.arrays.clear();
-    for (const auto &a : ov.arrays)
-      if (!coord_names.count(a.name)) cfg.arrays.push_back(a.name);
+    for (const auto &row : ov.arrays)
+      if (!coord_names.count(row.name)) cfg.arrays.push_back(row.name);
     if (cfg.arrays.empty()) return print_overview(cfg, ov) ? 0 : 1;
   }
 
@@ -603,11 +605,7 @@ main(int argc, char **argv)
 
   tsHandle *input = tsOpenFileRead(cfg.path, cfg);
   if (!input) return 1;
-  if (!tsApplyConfig(input))
-  {
-    printf("Apply config failed for %s!", cfg.path.c_str());
-    return -1;
-  }
+  if (!tsApplyConfig(input)) return 1;
   tsMetadata &md = tsGetReadMetadata(input);
 
   // Datenarrays vs. Koordinatenarrays: die Dimensionsnamen eines Datenarrays
@@ -629,7 +627,7 @@ main(int argc, char **argv)
   // Die Auswahl wird Array fuer Array aufgeloest, damit die Tabelle Zeile fuer
   // Zeile entsteht und ein Startindex ausserhalb der Ausdehnung sofort abricht.
   std::cout << "=== Selected arrays ===\n";
-  std::cout << "#  name  format  kvstore  dtype  compressor  shape  chunks  indices";
+  std::cout << "#  name  format  kvstore  dtype  compressor  fill_value  shape  chunks  indices";
   if (cfg.out_path) std::cout << "  out_chunks";
   std::cout << "\n";
   {
@@ -643,7 +641,8 @@ main(int argc, char **argv)
         return 1;
       }
       std::cout << idx++ << "  " << a.name << "  zarr" << a.format << "  " << a.kvstore << "  " << a.dataType << "  "
-                << a.compressor << "  " << fmt_dims(a.shape) << "  " << fmt_dims(a.chunks) << "  " << fmt_indices(a);
+                << a.compressor << "  " << a.fill_value << "  " << fmt_dims(a.shape) << "  " << fmt_dims(a.chunks) << "  "
+                << fmt_indices(a);
       if (cfg.out_path) std::cout << "  " << fmt_dims(a.out_chunks);
       std::cout << '\n';
     }

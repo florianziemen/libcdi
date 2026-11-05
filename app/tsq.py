@@ -21,6 +21,7 @@ START/END ranges (time dim, layer dim, last dim); omitted means all.
 
 import argparse
 import asyncio
+import math
 import os
 import resource
 import shutil
@@ -1305,7 +1306,7 @@ def print_means_table(cfg, items, coords=()):
     data is written to a NEW Zarr store at that path instead (one float32 array
     per selected data array, using the same window loops)."""
     print("=== Selected arrays ===")
-    head = "#  name  format  kvstore  dtype  compressor  shape  chunks  indices"
+    head = "#  name  format  kvstore  dtype  compressor  fill_value  shape  chunks  indices"
     if cfg.out_path:
         head += "  out_chunks"
     print(head)
@@ -1336,7 +1337,7 @@ def print_means_table(cfg, items, coords=()):
             ochunks = _out_chunks(cfg, chunk_shape, eng.bc)
             out_s = f"  [{', '.join(str(s) for s in ochunks)}]"
         print(
-            f"{idx}  {name}  zarr{fmt}  {kvstore}  {dtype_s}  {_source_compressor_name(z, fmt)}  {shape_s}  {chunk_s}  {idx_s}{out_s}"
+            f"{idx}  {name}  zarr{fmt}  {kvstore}  {dtype_s}  {_source_compressor_name(z, fmt)}  {_source_fill_value(cfg, name, z)}  {shape_s}  {chunk_s}  {idx_s}{out_s}"
         )
         engs.append(eng)
 
@@ -1728,6 +1729,50 @@ def _source_compressor_name(z, fmt):
     if fmt == 2:
         return comp.get("id") if isinstance(comp, dict) else "-"
     return _zarr3_codec_names(comp) or "-"
+
+
+def _fill_value_text(value):
+    """Table text for a raw `fill_value` JSON scalar ("-" for null/missing)."""
+    import json
+
+    if value is None:
+        return "-"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, str):
+        return value
+    if isinstance(value, float) and not math.isfinite(value):
+        if math.isnan(value):
+            return "NaN"
+        return "Infinity" if value > 0 else "-Infinity"
+    return json.dumps(value)
+
+
+def _source_fill_value(cfg, name, z):
+    """Raw source `fill_value` of an open array, formatted for the table.
+    Read from the raw metadata so it is not dtype-normalized (mirrors
+    `array_fill_value` in tsio.cpp); falls back to the parsed metadata when the
+    raw metadata is not directly reachable (e.g. s3)."""
+    kvstore, path, _endpoint = resolve_kvstore(cfg)
+    try:
+        if (cfg.consolidated or cfg.group) and kvstore in ("file", "http"):
+            meta = _read_root_zarr3_consolidated(path)
+            key = f"{cfg.group}/{name}" if cfg.group else name
+            node = meta.get(key)
+            if isinstance(node, dict):
+                return _fill_value_text(node.get("fill_value"))
+    except Exception:
+        pass
+    try:
+        meta, _attrs, _fmt = _raw_metadata(cfg, name)
+        if isinstance(meta, dict):
+            return _fill_value_text(meta.get("fill_value"))
+    except Exception:
+        pass
+    value = getattr(z.metadata, "fill_value", None)
+    if hasattr(value, "item"):
+        value = value.item()
+    return _fill_value_text(value)
 
 
 def _overview_fields(meta, attrs, fmt):
