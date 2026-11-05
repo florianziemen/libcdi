@@ -8,10 +8,13 @@
 // jedes Feld wird genau einmal gelesen.  Der Aufrufer iteriert aeusserlich
 // ueber die Schritte (tsGetNextStep) und innerlich ueber die Felder eines
 // Schritts (tsGetField/tsReadField).  Die Reihenfolge ist: Schritt aufsteigend,
-// darin die Arrays in der Reihenfolge von tsMetadata::arrayList, darin die
-// Layer aufsteigend.  Die Schrittzahl und die Zahl der Felder pro Schritt ist
-// fuer alle Arrays gleich.  Die Identitaet des gelieferten Feldes steht in
-// tsField; tsReadField/tsWriteField arbeiten immer auf dem zuletzt durch
+// darin zuerst die zeitlich varianten Arrays, danach (nur im ersten Schritt)
+// die zeitlich konstanten Arrays, jeweils in der Reihenfolge von
+// tsMetadata::arrayList, darin die Layer aufsteigend.  Die zeitlich konstanten
+// Arrays werden also so behandelt, als gaebe es sie nur im ersten Zeitschritt;
+// dadurch haben die zeitlich varianten Arrays in jedem Schritt denselben
+// Feldindex.  Die Identitaet des gelieferten Feldes steht in tsField;
+// tsReadField/tsWriteField arbeiten immer auf dem zuletzt durch
 // tsGetField/tsSetField ausgewaehlten Feld.
 
 #ifndef TSIO_H
@@ -80,9 +83,12 @@ struct tsArray
   std::vector<std::int64_t> out_chunks;  // Ausgabe-Chunkform (Schreibmodus)
   std::vector<std::string> dim_names;    // dimension_names / _ARRAY_DIMENSIONS
   std::map<std::string, std::string> attributes;
-  std::int64_t num_steps = 0;  // ausgewaehlte Zeitschritte dieses Arrays
+  bool time_constant = false;  // keine `time`-Dimension: nur im ersten Schritt
+  bool layered = false;        // eine Statistik-Zeile pro Layer
+  std::int64_t num_steps = 0;  // ausgewaehlte Zeitschritte dieses Arrays (1 bei time_constant)
   std::int64_t num_layers = 1;
   std::int64_t num_cells = 0;  // Werte pro Layer
+  std::int64_t num_values = 0; // Produkt von bcount (gesamter ausgewaehlter Hypercube)
 };
 
 // Metadaten eines geoeffneten Datensatzes: die ausgewaehlten Daten-Arrays
@@ -163,6 +169,7 @@ struct tsArrayMeta
   std::vector<std::int64_t> bstart;
   std::vector<std::int64_t> bcount;
   std::vector<std::int64_t> out_chunks;
+  bool static_array = false;  // zeitkonstant (keine `time`-Dimension)
 
   // Ausgabe (von tsApplyMetadataConfig gesetzt)
   std::string driver;    // "zarr3", "n5" oder "zarr"
@@ -190,6 +197,7 @@ struct tsHandle
   std::int64_t cur_t = 0;                                    // aktueller absoluter Schritt (Eingabe)
   std::size_t next_field = 0;                                // naechstes Feld des aktuellen Schritts
   std::vector<std::pair<std::size_t, std::int64_t>> fields;  // (Array, absoluter Layer) je Schritt
+  std::size_t dynamic_field_count = 0;                       // Felder der zeitlich varianten Arrays (Anfang von `fields`)
   tsField last_field;                                        // Feld, das tsGetField zuletzt geliefert hat
   bool have_field = false;
 
@@ -246,8 +254,10 @@ bool tsResolveArray(tsHandle *handle, std::size_t index);
 // nach der Koordinaten-Pruefung aufgerufen, bevor Felder gelesen werden.
 bool tsOpenFields(tsHandle *handle);
 
-// Anzahl der Felder pro Zeitschritt (konstant: Summe der `num_layers` aller
-// ausgewaehlten Daten-Arrays).  Erst nach tsOpenFields abfragen.
+// Anzahl der Felder des aktuellen Zeitschritts (nach tsGetNextStep abfragen):
+// im ersten Schritt die Summe der `num_layers` aller zeitlich varianten Arrays
+// plus die der zeitlich konstanten Arrays, in allen weiteren Schritten nur die
+// der zeitlich varianten Arrays.
 std::size_t tsGetNumFields(tsHandle *handle);
 
 // Rueckt auf den naechsten Zeitschritt (absolute Nummer) und gibt ihn zurueck

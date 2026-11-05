@@ -499,28 +499,43 @@ class _MeanEngine:
         if rank < 1:
             raise ValueError("Array must have at least rank 1")
 
+        # Time-constant arrays (dimension names known and no "time") have no
+        # time axis: they are read exactly once.  For rank >= 2 the first
+        # dimension is then the layer dimension and --step is ignored.
+        dims = _array_dims(z)
+        self.time_constant = bool(dims) and "time" not in dims
+
         # Resolve the requested hypercube (1-based inclusive --step/--layer/
         # --cell ranges) against the domain.  0 = time, 1 = layers (rank >= 3),
         # last dim = grid points.  A None end means "up to the extent".
         bs = [0] * rank
         bc = list(shape)
-        bs[0] = max(0, step[0] - 1)
-        if step[1] is not None:
-            bc[0] = step[1] - step[0] + 1
-        if rank >= 3:
-            bs[1] = max(0, layer[0] - 1)
-            if layer[1] is not None:
-                bc[1] = layer[1] - layer[0] + 1
-        if rank >= 2:
+        if self.time_constant:
+            if rank >= 2:
+                bs[0] = max(0, layer[0] - 1)
+                if layer[1] is not None:
+                    bc[0] = layer[1] - layer[0] + 1
             bs[rank - 1] = max(0, cell[0] - 1)
             if cell[1] is not None:
                 bc[rank - 1] = cell[1] - cell[0] + 1
+        else:
+            bs[0] = max(0, step[0] - 1)
+            if step[1] is not None:
+                bc[0] = step[1] - step[0] + 1
+            if rank >= 3:
+                bs[1] = max(0, layer[0] - 1)
+                if layer[1] is not None:
+                    bc[1] = layer[1] - layer[0] + 1
+            if rank >= 2:
+                bs[rank - 1] = max(0, cell[0] - 1)
+                if cell[1] is not None:
+                    bc[rank - 1] = cell[1] - cell[0] + 1
         for d in range(rank):
             bs[d] = min(max(bs[d], 0), shape[d] - 1)
             bc[d] = max(1, min(bc[d], shape[d] - bs[d]))
         self.bs = bs
         self.bc = bc
-        self.layered = rank >= 3
+        self.layered = rank >= 2 if self.time_constant else rank >= 3
 
         chunks = z.chunks
         time_chunk = chunks[0] if chunks else None
@@ -532,14 +547,15 @@ class _MeanEngine:
         # per-window allocated data = the timesteps of one chunk that are
         # actually needed).
         self.windows = []
-        tcur = bs[0]
-        remaining = bc[0]
-        while remaining > 0:
-            chunk_base = (tcur // time_chunk) * time_chunk
-            nw = min(remaining, chunk_base + time_chunk - tcur)
-            self.windows.append((tcur, nw))
-            tcur += nw
-            remaining -= nw
+        if not self.time_constant:
+            tcur = bs[0]
+            remaining = bc[0]
+            while remaining > 0:
+                chunk_base = (tcur // time_chunk) * time_chunk
+                nw = min(remaining, chunk_base + time_chunk - tcur)
+                self.windows.append((tcur, nw))
+                tcur += nw
+                remaining -= nw
         self.z = z
         self.widx = 0
         self.wcache = None  # cached np.ndarray for one window
@@ -1279,13 +1295,13 @@ class _V3Bf16Out:
             self._write_pending(oc)
 
 
-def _out_chunks(cfg, shapes, bc):
+def _out_chunks(cfg, shapes, bc, time_constant=False):
     """Output chunk shape for --out-path: source physical chunks clamped to the
     selected extent, with --step-chunk (dim 0) and --cell-chunk (last dim)
     overrides (also clamped to the extent).  Mirrors tsResolveArray in
     tsio.cpp."""
     nc = [max(1, min(int(c), int(b))) for c, b in zip(shapes, bc)]
-    if cfg.step_chunk:
+    if cfg.step_chunk and not time_constant:
         nc[0] = max(1, min(int(cfg.step_chunk), int(bc[0])))
     if cfg.cell_chunk:
         nc[-1] = max(1, min(int(cfg.cell_chunk), int(bc[-1])))
@@ -1334,7 +1350,7 @@ def print_means_table(cfg, items, coords=()):
         # to the selected hypercube) is appended at the end of the line.
         out_s = ""
         if cfg.out_path:
-            ochunks = _out_chunks(cfg, chunk_shape, eng.bc)
+            ochunks = _out_chunks(cfg, chunk_shape, eng.bc, eng.time_constant)
             out_s = f"  [{', '.join(str(s) for s in ochunks)}]"
         print(
             f"{idx}  {name}  zarr{fmt}  {kvstore}  {dtype_s}  {_source_compressor_name(z, fmt)}  {_source_fill_value(cfg, name, z)}  {shape_s}  {chunk_s}  {idx_s}{out_s}"
@@ -1369,7 +1385,7 @@ def print_means_table(cfg, items, coords=()):
             # Physical (outer) chunk shape (shard shape), clamped to the
             # selected extent - matches the C++ tool's output chunking.
             shapes = getattr(eng.z, "shards", None) or eng.z.chunks
-            ochunks = _out_chunks(cfg, shapes, eng.bc)
+            ochunks = _out_chunks(cfg, shapes, eng.bc, eng.time_constant)
             src_attrs, src_dims = _source_metadata(eng.z, eng.fmt)
             src_comp = _source_compression(eng.z, eng.fmt)
             comp_kwargs = (
@@ -1437,9 +1453,17 @@ def print_means_table(cfg, items, coords=()):
     if targets is None:
         print("# timestep  layer  count  missing  min  mean  max  array")
 
-    max_at = max(e.bs[0] + e.bc[0] for e in engs)
-    for at in range(max_at):
-        for e in engs:
+    static_engs = [e for e in engs if e.time_constant]
+    dynamic_engs = [e for e in engs if not e.time_constant]
+
+    # Time-constant arrays (no "time" dimension) are treated as fields of the
+    # first timestep only, appended after the time-varying arrays, so the
+    # time-varying arrays keep the same field index in every step (mirrors the
+    # field list in tsio.cpp::tsOpenFields).
+    first_at = min((e.bs[0] for e in dynamic_engs), default=0)
+    max_at = max((e.bs[0] + e.bc[0] for e in dynamic_engs), default=first_at + 1)
+    for at in range(first_at, max_at):
+        for e in dynamic_engs:
             if not (e.bs[0] <= at < e.bs[0] + e.bc[0]):
                 continue
             e.ensure(at)
@@ -1491,6 +1515,32 @@ def print_means_table(cfg, items, coords=()):
                             f"{at + 1}  {lay + 1}  {total}  {total - nvalid}  {float(rv.min()):12.5g}  {float(rv.mean()):12.5g}  {float(rv.max()):12.5g}  {name}"
                         )
 
+        if at != first_at:
+            continue
+        # The time-constant arrays appear once, in the first timestep.  In write
+        # mode the whole selected hypercube is written in one shot.
+        for e in static_engs:
+            sel = tuple(slice(e.bs[d], e.bs[d] + e.bc[d]) for d in range(len(e.bs)))
+            data = np.asarray(e.z[sel], dtype=None if targets is not None else np.float64)
+            if targets is not None:
+                targets[e.name][tuple(slice(0, b) for b in e.bc)] = data
+                continue
+            total = e.bc[-1]
+            rows = int(np.prod(e.bc[:-1])) if e.layered else 1
+            flat = data.reshape((rows, total))
+            for r in range(rows):
+                row = flat[r]
+                valid = ~np.isnan(row)
+                nvalid = int(valid.sum())
+                lay = e.bs[0] + r + 1 if e.layered else 0
+                if nvalid == 0:
+                    print(f"{at + 1}  {lay}  {total}  {total - nvalid}  NaN  NaN  NaN  {e.name}")
+                else:
+                    rv = row[valid]
+                    print(
+                        f"{at + 1}  {lay}  {total}  {total - nvalid}  {float(rv.min()):12.5g}  {float(rv.mean()):12.5g}  {float(rv.max()):12.5g}  {e.name}"
+                    )
+
     if targets is not None:
         for out in targets.values():
             flush = getattr(out, "_flush", None)
@@ -1515,10 +1565,16 @@ def _write_coord_arrays(cfg, coord_items):
             cfg.layer,
             cfg.cell,
         )
+        # A time-constant rank-1 coordinate whose single dimension is not the
+        # cell dimension (e.g. crs/ocean_model_level) is not clipped.  Mirrors
+        # tsApplyCoordinateConfig in tsio.cpp.
+        if e.time_constant and len(e.bs) == 1 and _array_dims(cz) != ["cell"]:
+            e.bs[0] = 0
+            e.bc[0] = cz.shape[0]
         bs, bc = e.bs, e.bc
         sel = tuple(slice(bs[d], bs[d] + bc[d]) for d in range(len(bs)))
         shapes = getattr(cz, "shards", None) or cz.chunks
-        ochunks = _out_chunks(cfg, shapes, bc)
+        ochunks = _out_chunks(cfg, shapes, bc, e.time_constant)
         src_attrs, src_dims = _source_metadata(cz, fmt)
         src_comp = _source_compression(cz, fmt)
         dtype_size = np.dtype(cz.dtype).itemsize

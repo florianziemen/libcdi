@@ -535,39 +535,44 @@ ts_inq_contents(stream_t *streamP)
     }
   }
 
-  for (size_t i = 0; i < numVars; ++i)
+  for (int k = 0; k < 2; ++k)
   {
-    auto const &a = md.arrayList[i];
-    auto rank = a.shape.size();
-    if (rank > 3) continue;
-    int timeType = TIME_VARYING;
-    // auto numCells = static_cast<size_t>(a.shape[rank - 1]);
-    int zaxisID = surfaceID;
-    if (rank == 3)
+    for (size_t i = 0; i < numVars; ++i)
     {
-      // zaxisID = zaxisCreate(ZAXIS_GENERIC, a.num_layers);
-      // printf("array 3d: %s dimname %s zaxisID %d\n", a.name.c_str(), a.dim_names[1].c_str(), zaxisMap[a.dim_names[1]]);
-      zaxisID = zaxisMap[a.dim_names[1]];
-    }
-    else if (a.dim_names[0] != "time")
-    {
-      timeType = TIME_CONSTANT;
-      if (rank == 2) { zaxisID = zaxisMap[a.dim_names[0]]; }
-    }
-    stream_new_var(streamP, gridID, zaxisID, CDI_UNDEFID);
-    int varID = vlistDefVar(vlistID, gridID, zaxisID, timeType);
-    vlistDefVarDatatype(vlistID, varID, DATATYPE_FLT32);
-    vlistDefVarName(vlistID, varID, a.name.c_str());
-    if (a.fill_value != "-")
-    {
-      auto missVal = string_to_double(a.fill_value);
-      if (*missVal) vlistDefVarMissval(vlistID, varID, *missVal);
-      // vlistDefVarMissval(vlistID, varID, std::nanf(""));
-    }
-    if (a.attributes.contains("units"))
-    {
-      auto units = a.attributes.find("units")->second;
-      cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units.c_str());
+      auto const &a = md.arrayList[i];
+      auto rank = a.shape.size();
+      if (rank > 3) continue;
+      int timeType = TIME_VARYING;
+      // auto numCells = static_cast<size_t>(a.shape[rank - 1]);
+      int zaxisID = surfaceID;
+      if (rank == 3)
+      {
+        // zaxisID = zaxisCreate(ZAXIS_GENERIC, a.num_layers);
+        // printf("array 3d: %s dimname %s zaxisID %d\n", a.name.c_str(), a.dim_names[1].c_str(), zaxisMap[a.dim_names[1]]);
+        zaxisID = zaxisMap[a.dim_names[1]];
+      }
+      else if (a.dim_names[0] != "time")
+      {
+        timeType = TIME_CONSTANT;
+        if (rank == 2) { zaxisID = zaxisMap[a.dim_names[0]]; }
+      }
+      if (k == 0 && timeType == TIME_CONSTANT) continue;
+      if (k == 1 && timeType == TIME_VARYING) continue;
+      stream_new_var(streamP, gridID, zaxisID, CDI_UNDEFID);
+      int varID = vlistDefVar(vlistID, gridID, zaxisID, timeType);
+      vlistDefVarDatatype(vlistID, varID, DATATYPE_FLT32);
+      vlistDefVarName(vlistID, varID, a.name.c_str());
+      if (a.fill_value != "-")
+      {
+        auto missVal = string_to_double(a.fill_value);
+        if (*missVal) vlistDefVarMissval(vlistID, varID, *missVal);
+        // vlistDefVarMissval(vlistID, varID, std::nanf(""));
+      }
+      if (a.attributes.contains("units"))
+      {
+        auto units = a.attributes.find("units")->second;
+        cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units.c_str());
+      }
     }
   }
 

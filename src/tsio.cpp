@@ -550,6 +550,31 @@ resolve_selection(const tsConfig &cfg, const std::vector<Index> &shape, std::vec
   if (shape.size() >= 2) apply(cfg.cell, shape.size() - 1);
 }
 
+// Auswahl eines zeitkonstanten Arrays: es gibt keine Zeitdimension, die erste
+// Dimension ist (bei rank >= 2) die Layer-Dimension.  `--step` wird ignoriert.
+void
+resolve_selection_static(const tsConfig &cfg, const std::vector<Index> &shape, std::vector<Index> &bstart,
+                         std::vector<Index> &bcount)
+{
+  bstart.assign(shape.size(), 0);
+  bcount = shape;
+  const auto apply = [&bstart, &bcount](const tsRange &range, std::size_t d)
+  {
+    bstart[d] = static_cast<Index>(range.start - 1);
+    if (range.end) bcount[d] = static_cast<Index>(*range.end - range.start + 1);
+  };
+  if (shape.size() >= 2) apply(cfg.layer, 0);
+  if (shape.size() >= 1) apply(cfg.cell, shape.size() - 1);
+}
+
+// Zeitkonstant = Dimensionsnamen sind bekannt und enthalten kein "time".
+bool
+is_time_constant(const std::vector<std::string> &dim_names)
+{
+  if (dim_names.empty()) return false;
+  return std::find(dim_names.begin(), dim_names.end(), "time") == dim_names.end();
+}
+
 template <typename T, tensorstore::DimensionIndex R>
 std::string
 read_store_key(const tensorstore::TensorStore<T, R> *store, const std::string &key)
@@ -1661,11 +1686,53 @@ struct Writer
   std::string name;
   tensorstore::TensorStore<void, dynamic_rank> store;
   std::vector<Index> bstart, bcount, chunks;
+  bool static_array = false;  // zeitkonstant: der ganze Hypercube wird einmal geschrieben
   Index win_t0 = -1;  // erster Schritt des aktuellen Fensters
   Index win_n = 0;    // Schritte im aktuellen Fensters
   std::shared_ptr<SharedArray<float, dynamic_rank>> buf;
   Index filled = 0;  // bereits abgelegte Schritte in `buf`
 };
+
+// Schreibt `buf` (Form `shp`) an die Position `ori` des Ausgabestores, mit
+// elementweiser Konvertierung fuer verlustbehaftete Ziele (float16/bfloat16).
+bool
+write_shared_block(Writer &w, const SharedArray<float, dynamic_rank> &buf, const std::vector<Index> &ori,
+                   const std::vector<Index> &shp)
+{
+  using namespace tensorstore;
+  const auto target = w.store | Box(ori, shp);
+  const DataType dt = w.store.dtype();
+  WriteFutures wr;
+  if (dt == dtype_v<float>)
+    wr = Write(buf, target);
+  else if (dt == dtype_v<tensorstore::dtypes::float16_t>)
+  {
+    const auto conv = AllocateArray<tensorstore::dtypes::float16_t>(shp);
+    const float *ip = buf.data();
+    tensorstore::dtypes::float16_t *op = conv.data();
+    const std::size_t n = conv.num_elements();
+    for (std::size_t i = 0; i < n; ++i) op[i] = static_cast<tensorstore::dtypes::float16_t>(ip[i]);
+    wr = Write(conv, target);
+  }
+  else if (dt == dtype_v<tensorstore::dtypes::bfloat16_t>)
+  {
+    const auto conv = AllocateArray<tensorstore::dtypes::bfloat16_t>(shp);
+    const float *ip = buf.data();
+    tensorstore::dtypes::bfloat16_t *op = conv.data();
+    const std::size_t n = conv.num_elements();
+    for (std::size_t i = 0; i < n; ++i) op[i] = static_cast<tensorstore::dtypes::bfloat16_t>(ip[i]);
+    wr = Write(conv, target);
+  }
+  else
+    wr = Write(buf, target);
+  const auto st = wr.result();
+  if (!st)
+  {
+    std::cerr << "Failed to write '" << w.name << "': " << st.status().message() << "\n";
+    return false;
+  }
+  return true;
+}
 
 bool
 flush_window(Writer &w)
@@ -1676,40 +1743,7 @@ flush_window(Writer &w)
   std::vector<Index> ori(rank, 0), shp = w.bcount;
   ori[0] = w.win_t0 - w.bstart[0];
   shp[0] = w.filled;
-  const auto target = w.store | Box(ori, shp);
-  // Verlustbehaftete Konvertierungen (float32 -> float16/bfloat16) verlangen
-  // eine explizite Elementkonvertierung; lossless (-> float64) konvertiert
-  // das Write automatisch.
-  const DataType dt = w.store.dtype();
-  WriteFutures wr;
-  if (dt == dtype_v<float>)
-    wr = Write(*w.buf, target);
-  else if (dt == dtype_v<tensorstore::dtypes::float16_t>)
-  {
-    const auto conv = AllocateArray<tensorstore::dtypes::float16_t>(w.buf->shape());
-    float *ip = w.buf->data();
-    tensorstore::dtypes::float16_t *op = conv.data();
-    const std::size_t n = w.buf->num_elements();
-    for (std::size_t i = 0; i < n; ++i) op[i] = static_cast<tensorstore::dtypes::float16_t>(ip[i]);
-    wr = Write(conv, target);
-  }
-  else if (dt == dtype_v<tensorstore::dtypes::bfloat16_t>)
-  {
-    const auto conv = AllocateArray<tensorstore::dtypes::bfloat16_t>(w.buf->shape());
-    float *ip = w.buf->data();
-    tensorstore::dtypes::bfloat16_t *op = conv.data();
-    const std::size_t n = w.buf->num_elements();
-    for (std::size_t i = 0; i < n; ++i) op[i] = static_cast<tensorstore::dtypes::bfloat16_t>(ip[i]);
-    wr = Write(conv, target);
-  }
-  else
-    wr = Write(*w.buf, target);
-  const auto st = wr.result();
-  if (!st)
-  {
-    std::cerr << "Failed to write '" << w.name << "': " << st.status().message() << "\n";
-    return false;
-  }
+  if (!write_shared_block(w, *w.buf, ori, shp)) return false;
   w.buf.reset();
   w.filled = 0;
   return true;
@@ -2023,6 +2057,9 @@ struct tsHandleImpl : tsHandle
   // Quelle dtype-neutral geoeffnet (float32 oder per to_float konvertiert).
   std::vector<AnyStoreType> fstores;
   std::vector<std::unique_ptr<Reader>> readers;
+  // Zeitkonstante Arrays: der ganze ausgewaehlte Hypercube, einmal gelesen.
+  std::vector<std::vector<float>> static_data;
+  std::vector<char> static_loaded;
   std::vector<Writer> writers;
 };
 
@@ -2093,6 +2130,7 @@ tsApplyConfig(tsHandle *handle)
     a.shape.assign(domain.shape().begin(), domain.shape().end());
     a.dim_names = read_array_dim_names(&*store, detected_format);
     a.attributes = read_array_attrs(&*store, detected_format);
+    a.time_constant = is_time_constant(a.dim_names);
     if (h->cfg.debug && !debug_reported)
     {
       std::cerr << "debug: zarr format " << detected_format << "\n";
@@ -2147,7 +2185,10 @@ tsResolveArray(tsHandle *handle, std::size_t index)
   std::vector<Index> shape(a.shape.begin(), a.shape.end());
 
   std::vector<Index> bstart, bcount;
-  resolve_selection(handle->cfg, shape, bstart, bcount);
+  if (a.time_constant)
+    resolve_selection_static(handle->cfg, shape, bstart, bcount);
+  else
+    resolve_selection(handle->cfg, shape, bstart, bcount);
   for (DimensionIndex d = 0; d < rank; ++d)
   {
     if (bstart[d] >= shape[d])
@@ -2183,7 +2224,7 @@ tsResolveArray(tsHandle *handle, std::size_t index)
   // geklemmt.
   a.out_chunks.assign(static_cast<std::size_t>(rank), 1);
   for (DimensionIndex d = 0; d < rank; ++d) { a.out_chunks[d] = std::max<Index>(1, std::min(a.chunks[d], a.bcount[d])); }
-  if (handle->cfg.step_chunk && rank > 0)
+  if (handle->cfg.step_chunk && rank > 0 && !a.time_constant)
   {
     a.out_chunks[0] = std::max<Index>(1, std::min<Index>(*handle->cfg.step_chunk, a.bcount[0]));
   }
@@ -2193,9 +2234,23 @@ tsResolveArray(tsHandle *handle, std::size_t index)
         = std::max<Index>(1, std::min<Index>(*handle->cfg.cell_chunk, a.bcount[static_cast<std::size_t>(rank) - 1]));
   }
 
-  a.num_steps = a.bcount[0];
-  a.num_layers = rank >= 3 ? a.bcount[1] : 1;
+  a.num_values = 1;
+  for (DimensionIndex d = 0; d < rank; ++d) a.num_values *= a.bcount[d];
   a.num_cells = a.bcount[static_cast<std::size_t>(rank) - 1];
+  if (a.time_constant)
+  {
+    // Keine Zeitdimension: genau ein (impliziter) Zeitschritt, die erste
+    // Dimension ist die Layer-Dimension.
+    a.num_steps = 1;
+    a.layered = rank >= 2;
+    a.num_layers = rank >= 2 ? a.num_values / a.num_cells : 1;
+  }
+  else
+  {
+    a.num_steps = a.bcount[0];
+    a.layered = rank >= 3;
+    a.num_layers = rank >= 3 ? a.bcount[1] : 1;
+  }
   return true;
 }
 
@@ -2209,6 +2264,8 @@ tsOpenFields(tsHandle *handle)
   const std::size_t n = handle->metadata.arrayList.size();
   h->fstores.reserve(n);
   h->readers.reserve(n);
+  h->static_data.resize(n);
+  h->static_loaded.assign(n, 0);
   for (std::size_t i = 0; i < n; ++i)
   {
     tsArray &a = handle->metadata.arrayList[i];
@@ -2222,25 +2279,61 @@ tsOpenFields(tsHandle *handle)
     auto store = open_array_any(handle->cfg, h->context, a.name, kvstore, detected_format);
     if (!store) return false;
     h->fstores.push_back(std::move(*store));
+    if (a.time_constant)
+    {
+      // Zeitkonstante Arrays werden als Feld des ersten Schritts geliefert;
+      // gelesen wird der ganze Hypercube einmal in tsReadField.
+      h->readers.push_back(nullptr);
+      continue;
+    }
     h->readers.push_back(std::make_unique<Reader>(h->fstores.back(), a.bstart, a.bcount, *handle->cfg.data_copy_concurrency,
                                                   handle->cfg.double_buffer));
   }
   handle->metadata.num_steps = 0;
   handle->start_t = std::numeric_limits<std::int64_t>::max();
+  bool have_time_array = false;
+  bool have_static_array = false;
   for (const auto &a : handle->metadata.arrayList)
   {
+    if (a.time_constant)
+    {
+      have_static_array = true;
+      continue;
+    }
+    have_time_array = true;
     handle->metadata.num_steps = std::max(handle->metadata.num_steps, a.bstart[0] + a.num_steps);
     handle->start_t = std::min(handle->start_t, a.bstart[0]);
   }
-  // Die Zeitdimension ist fuer alle Arrays gleich, und die Zahl der Felder pro
-  // Schritt ist konstant: je Array `num_layers` Felder, Layer aufsteigend.
+  if (!have_time_array)
+  {
+    // Nur zeitkonstante Arrays: genau ein (impliziter) Zeitschritt.
+    handle->start_t = 0;
+    if (have_static_array) handle->metadata.num_steps = 1;
+  }
+  // Feldliste: zuerst die zeitlich varianten Arrays (in jedem Schritt), danach
+  // die zeitlich konstanten (nur im ersten Schritt).  Dadurch haben die
+  // varianten Arrays in allen Schritten denselben Feldindex.
+  handle->fields.clear();
   for (std::size_t i = 0; i < handle->metadata.arrayList.size(); ++i)
   {
     const tsArray &a = handle->metadata.arrayList[i];
+    if (a.time_constant) continue;
     const std::int64_t nlay = a.num_layers;
     for (std::int64_t l = 0; l < nlay; ++l)
     {
       const std::int64_t lay = a.bcount.size() >= 3 ? a.bstart[1] + l : 0;
+      handle->fields.emplace_back(i, lay);
+    }
+  }
+  handle->dynamic_field_count = handle->fields.size();
+  for (std::size_t i = 0; i < handle->metadata.arrayList.size(); ++i)
+  {
+    const tsArray &a = handle->metadata.arrayList[i];
+    if (!a.time_constant) continue;
+    const std::int64_t nlay = a.num_layers;
+    for (std::int64_t l = 0; l < nlay; ++l)
+    {
+      const std::int64_t lay = a.layered ? a.bstart[0] + l : 0;
       handle->fields.emplace_back(i, lay);
     }
   }
@@ -2252,11 +2345,14 @@ tsOpenFields(tsHandle *handle)
   return true;
 }
 
-// Anzahl der Felder pro Zeitschritt (konstant).
+// Anzahl der Felder des aktuellen Zeitschritts: im ersten Schritt auch die
+// zeitlich konstanten Arrays, sonst nur die zeitlich varianten.
 std::size_t
 tsGetNumFields(tsHandle *handle)
 {
-  return handle && handle->fields_open ? handle->fields.size() : 0;
+  if (!handle || !handle->fields_open) return 0;
+  if (handle->cur_t == handle->start_t) return handle->fields.size();
+  return handle->dynamic_field_count;
 }
 
 // Rueckt auf den naechsten Zeitschritt vor und gibt ihn zurueck (absolute
@@ -2291,7 +2387,13 @@ tsGetField(tsHandle *handle, tsField &field)
   {
     const auto [j, lay] = handle->fields[handle->next_field++];
     const tsArray &a = arrays[j];
-    if (handle->cur_t < a.bstart[0] || handle->cur_t >= a.bstart[0] + a.num_steps) continue;
+    if (a.time_constant)
+    {
+      // Zeitkonstant: nur im ersten Schritt vorhanden.
+      if (handle->cur_t != handle->start_t) continue;
+    }
+    else if (handle->cur_t < a.bstart[0] || handle->cur_t >= a.bstart[0] + a.num_steps)
+      continue;
     field.array = j;
     field.layer = lay;
     handle->last_field = field;
@@ -2299,6 +2401,45 @@ tsGetField(tsHandle *handle, tsField &field)
     return true;
   }
   return false;
+}
+
+// Liest den gesamten ausgewaehlten Hypercube eines zeitkonstanten Arrays in
+// `out` (Laenge num_values, C-Reihenfolge).
+static bool
+read_static_hypercube(tsHandleImpl *h, std::size_t index, std::vector<float> &out)
+{
+  using namespace tensorstore;
+  const tsArray &a = h->metadata.arrayList[index];
+  if (index >= h->fstores.size()) return false;
+  const AnyStoreType &store = h->fstores[index];
+  auto read = Read<zero_origin>(store | Box(a.bstart, a.bcount)).result();
+  if (!read)
+  {
+    std::cerr << "Failed to read '" << a.name << "': " << read.status().ToString() << "\n";
+    return false;
+  }
+  const void *base = read->data();
+  const DataType dt = read->dtype();
+  const std::size_t cnt = static_cast<std::size_t>(read->num_elements());
+  out.assign(cnt, 0.0f);
+  std::size_t pos = 0;
+  if (dt == dtype_v<float>)
+  {
+    const float *src = static_cast<const float *>(base);
+    std::copy(src, src + static_cast<std::ptrdiff_t>(cnt), out.data());
+  }
+  else if (dt == dtype_v<double>)
+    append_as_float(static_cast<const double *>(base), cnt, out.data(), pos);
+  else if (dt == dtype_v<tensorstore::dtypes::float16_t>)
+    append_as_float(static_cast<const tensorstore::dtypes::float16_t *>(base), cnt, out.data(), pos);
+  else if (dt == dtype_v<tensorstore::dtypes::bfloat16_t>)
+    append_as_float(static_cast<const tensorstore::dtypes::bfloat16_t *>(base), cnt, out.data(), pos);
+  else
+  {
+    std::cerr << "Unsupported source data type for statistics: " << dt << "\n";
+    std::fill_n(out.data(), cnt, 0.0f);
+  }
+  return true;
 }
 
 // Liest das zuletzt von tsGetField gelieferte Feld; der Schritt ist der
@@ -2309,7 +2450,26 @@ tsReadField(tsHandle *handle, float *data, std::size_t n)
   if (!handle || !handle->fields_open || !handle->have_field) return false;
   const tsField &field = handle->last_field;
   auto *h = static_cast<tsHandleImpl *>(handle);
-  if (field.array >= h->readers.size()) return false;
+  const tsArray &a = handle->metadata.arrayList[field.array];
+  if (a.time_constant)
+  {
+    // Der ganze Hypercube wird beim ersten Feld einmal gelesen; ein Feld ist
+    // ein Layer (rank 1: der ganze Hypercube).
+    if (field.array >= h->static_data.size()) return false;
+    std::vector<float> &buf = h->static_data[field.array];
+    if (!h->static_loaded[field.array])
+    {
+      if (!read_static_hypercube(h, field.array, buf)) return false;
+      h->static_loaded[field.array] = 1;
+    }
+    const std::int64_t r = a.layered ? field.layer - a.bstart[0] : 0;
+    if (r < 0 || a.num_cells <= 0) return false;
+    const std::size_t off = static_cast<std::size_t>(r) * static_cast<std::size_t>(a.num_cells);
+    if (off + n > buf.size()) return false;
+    std::copy_n(buf.data() + off, n, data);
+    return true;
+  }
+  if (field.array >= h->readers.size() || !h->readers[field.array]) return false;
   Reader &r = *h->readers[field.array];
   r.ensure(handle->cur_t);
   r.extract(handle->cur_t, field.layer, data, n);
@@ -2389,6 +2549,7 @@ tsGetMetadata(tsHandle *input, tsOutputMetadata &meta)
     m.bstart = a.bstart;
     m.bcount = a.bcount;
     m.out_chunks = a.out_chunks;
+    m.static_array = a.time_constant;
     meta.arrays.push_back(std::move(m));
   }
   return true;
@@ -2534,6 +2695,7 @@ tsSetMetadata(tsHandle *output, const tsOutputMetadata &meta)
     w.bstart = m.bstart;
     w.bcount = m.bcount;
     w.chunks = m.out_chunks;
+    w.static_array = m.static_array;
     out->writers.push_back(std::move(w));
   }
   out->out_start = meta.start_t;
@@ -2573,6 +2735,30 @@ tsWriteField(tsHandle *handle, const float *data, std::size_t n)
   Writer &w = static_cast<tsHandleImpl *>(handle)->writers[handle->sel_field];
   const Index step = handle->out_t;
   const DimensionIndex rank = w.store.domain().rank();
+  if (w.static_array)
+  {
+    // Zeitkonstant: ein Feld ist ein Layer des ausgewaehlten Hypercubes
+    // (rank 1: der ganze Hypercube), der direkt geschrieben wird.
+    const std::size_t rk = w.bcount.size();
+    const Index cells = w.bcount[rk - 1];
+    if (static_cast<Index>(n) != cells) return false;
+    std::vector<Index> ori(rk, 0), shp(rk, 1);
+    shp[rk - 1] = cells;
+    if (rk >= 2)
+    {
+      Index flat = handle->sel_layer - w.bstart[0];
+      if (flat < 0) return false;
+      for (std::size_t d = rk - 1; d-- > 0;)
+      {
+        ori[d] = flat % w.bcount[d];
+        flat /= w.bcount[d];
+      }
+      if (flat != 0) return false;
+    }
+    const auto arr = AllocateArray<float>(shp, c_order, value_init);
+    std::copy(data, data + n, arr.data());
+    return write_shared_block(w, arr, ori, shp);
+  }
   if (rank == 1)
   {
     // Rank-1: one value per step (dim 0 is both the time and the cell dim).
@@ -2654,8 +2840,30 @@ tsApplyCoordinateConfig(const tsConfig &cfg, std::vector<tsCoordinate> &coords)
     const AnyStoreType &store = *static_cast<const AnyStoreType *>(coord.source);
     const DimensionIndex rank = static_cast<DimensionIndex>(coord.shape.size());
 
+    nlohmann::json dims_json = nlohmann::json::array();
+    try
+    {
+      dims_json = nlohmann::json::parse(coord.dim_names);
+    }
+    catch (...)
+    {
+      dims_json = nlohmann::json::array();
+    }
+    const std::vector<std::string> cdim_names = json_string_list(dims_json);
+    const bool static_coord = is_time_constant(cdim_names);
+
     std::vector<Index> bstart, bcount;
-    resolve_selection(cfg, coord.shape, bstart, bcount);
+    if (static_coord)
+      resolve_selection_static(cfg, coord.shape, bstart, bcount);
+    else
+      resolve_selection(cfg, coord.shape, bstart, bcount);
+    if (static_coord && rank == 1 && (cdim_names.size() != 1 || cdim_names[0] != "cell"))
+    {
+      // Zeitkonstante Rang-1-Koordinate, deren einzige Dimension nicht die
+      // Zellachse ist (z. B. crs/ocean_model_level): keine Auswahl anwenden.
+      bstart[0] = 0;
+      bcount[0] = coord.shape[0];
+    }
     for (DimensionIndex d = 0; d < rank; ++d)
     {
       if (bstart[d] >= coord.shape[static_cast<std::size_t>(d)])
@@ -2677,7 +2885,7 @@ tsApplyCoordinateConfig(const tsConfig &cfg, std::vector<tsCoordinate> &coords)
       }
     }
     for (auto &ch : chunks) ch = std::max<Index>(ch, 1);
-    if (cfg.step_chunk && rank > 0) { chunks[0] = std::max<Index>(1, std::min<Index>(*cfg.step_chunk, bcount[0])); }
+    if (cfg.step_chunk && rank > 0 && !static_coord) { chunks[0] = std::max<Index>(1, std::min<Index>(*cfg.step_chunk, bcount[0])); }
     if (cfg.cell_chunk && rank > 0)
     {
       chunks[static_cast<std::size_t>(rank) - 1]

@@ -860,6 +860,7 @@ main(int argc, char **argv)
 
     if (accessMode == AccessMode::Sequential)
     {
+      fprintf(stderr, "step=%d numFields %d\n", tsID + 1, numFields);
       for (int fieldID = 0; fieldID < numFields; fieldID++)
       {
         int varID, levelID;

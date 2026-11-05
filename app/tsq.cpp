@@ -524,11 +524,15 @@ main(int argc, char **argv)
     unsigned int tc = std::thread::hardware_concurrency();
     if (tc == 0) tc = 1;
     std::cerr << "TensorStore threads: " << tc << '\n';
-#ifdef CXX_COMPILER
-    std::cerr << "CXX=" << CXX_COMPILER << '\n';
+#ifdef TSQ_CXX
+    std::cerr << "CXX=" << TSQ_CXX << '\n';
+#else
+    std::cerr << "CXX=unknown\n";
 #endif
-#ifdef CXX_COMPILER_VERSION
-    std::cerr << "CXXFLAGS=" << CXX_COMPILER_VERSION << '\n';
+#ifdef TSQ_CXXFLAGS
+    std::cerr << "CXXFLAGS=" << TSQ_CXXFLAGS << '\n';
+#else
+    std::cerr << "CXXFLAGS=\n";
 #endif
   }
   if (cfg.info && cfg.path.empty()) return 0;  // --info alone
@@ -701,16 +705,18 @@ main(int argc, char **argv)
   }
 
   // Ein sequentieller Durchlauf: aeussere Schleife ueber die Zeitschritte,
-  // innere Schleife ueber die (konstant viele) Felder je Schritt.  Zeitdimension
-  // und Feldzahl sind fuer alle Arrays gleich; jedes Feld wird genau einmal
-  // gelesen, im Schreibmodus direkt in den Ausgabestore geschrieben.
-  const std::size_t numFields = tsGetNumFields(input);
+  // innere Schleife ueber die Felder je Schritt.  Die zeitlich konstanten
+  // Arrays sind nur im ersten Schritt Felder (am Ende der Feldliste), alle
+  // anderen Schritte enthalten nur die zeitlich varianten Arrays.  Jedes Feld
+  // wird genau einmal gelesen, im Schreibmodus direkt in den Ausgabestore
+  // geschrieben.
   tsField field;
   std::vector<float> data;
   std::int64_t step;
   while ((step = tsGetNextStep(input)) >= 0)
   {
     if (output) tsSetNextStep(output);
+    const std::size_t numFields = tsGetNumFields(input);
     for (std::size_t f = 0; f < numFields; ++f)
     {
       if (!tsGetField(input, field)) break;
@@ -745,7 +751,7 @@ main(int argc, char **argv)
         if (v > mx) mx = v;
         ++valid;
       }
-      print_row(step + 1, a.bstart.size() >= 3 ? field.layer + 1 : 0, a.num_cells, valid, mn, sum / static_cast<double>(valid), mx,
+      print_row(step + 1, a.layered ? field.layer + 1 : 0, a.num_cells, valid, mn, sum / static_cast<double>(valid), mx,
                 a.name);
     }
   }
