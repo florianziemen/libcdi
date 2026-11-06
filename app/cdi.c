@@ -16,24 +16,22 @@
 #include "cdi_query.h"
 
 int vlistInqVarMissvalUsed(int vlistID, int varID);
-#ifndef DBL_IS_NAN
-#if defined(HAVE_DECL_ISNAN)
-#define DBL_IS_NAN(x) (isnan(x))
-#elif defined(FP_NAN)
-#define DBL_IS_NAN(x) (fpclassify(x) == FP_NAN)
-#else
-#define DBL_IS_NAN(x) ((x) != (x))
-#endif
-#endif
+static inline bool
+dbl_is_nan(double x)
+{
+  return isnan(x);
+}
 
-#ifndef DBL_IS_EQUAL
-/*#define DBL_IS_EQUAL(x,y) (!(x < y || y < x)) */
-#define DBL_IS_EQUAL(x, y) (DBL_IS_NAN(x) || DBL_IS_NAN(y) ? (DBL_IS_NAN(x) && DBL_IS_NAN(y) ? 1 : 0) : !(x < y || y < x))
-#endif
-
-#ifndef IS_NOT_EQUAL
-#define IS_NOT_EQUAL(x, y) (x < y || y < x)
-#endif
+static inline bool
+dbl_is_equal(double x, double y)
+{
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+  bool xNan = dbl_is_nan(x);
+  bool yNan = dbl_is_nan(y);
+  return (xNan || yNan) ? (xNan && yNan) : (x == y);
+#pragma GCC diagnostic pop
+};
 
 #ifndef HOST_ENDIANNESS
 #ifdef __cplusplus
@@ -239,7 +237,7 @@ printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, i
       arrmax = -1.e300;
       for (size_t i = 0; i < datasize; i++)
       {
-        if (!DBL_IS_EQUAL(data[i], missval))
+        if (!dbl_is_equal(data[i], missval))
         {
           if (data[i] < arrmin) arrmin = data[i];
           if (data[i] > arrmax) arrmax = data[i];
@@ -274,12 +272,12 @@ printInfo(CdiDateTime vdatetime, char *varname, double level, size_t datasize, i
 
     for (size_t i = 0; i < datasize; i++)
     {
-      if (!DBL_IS_EQUAL(data[i * 2], missval))
+      if (!dbl_is_equal(data[i * 2], missval))
       {
         arrsum_r += data[i * 2];
         nvals_r++;
       }
-      if (!DBL_IS_EQUAL(data[i * 2 + 1], missval))
+      if (!dbl_is_equal(data[i * 2 + 1], missval))
       {
         arrsum_i += data[i * 2 + 1];
         nvals_i++;

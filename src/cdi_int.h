@@ -102,20 +102,19 @@ str_is_equal(const char *x, const char *y)
 static inline bool
 dbl_is_nan(double x)
 {
-#ifdef HAVE_DECL_ISNAN
   return isnan(x);
-#elif defined(FP_NAN)
-  return (fpclassify(x) == FP_NAN);
-#else
-  return x != x;
-#endif
 }
 
 static inline bool
 dbl_is_equal(double x, double y)
 {
-  return (dbl_is_nan(x) || dbl_is_nan(y)) ? dbl_is_nan(x) && dbl_is_nan(y) : !(x < y || y < x);
-}
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+  bool xNan = dbl_is_nan(x);
+  bool yNan = dbl_is_nan(y);
+  return (xNan || yNan) ? (xNan && yNan) : (x == y);
+#pragma GCC diagnostic pop
+};
 
 static inline bool
 is_not_equal(double x, double y)
@@ -126,7 +125,7 @@ is_not_equal(double x, double y)
 static inline bool
 is_equal(double x, double y)
 {
-  return !(x < y || y < x);
+  return !is_not_equal(x, y);
 }
 
 enum
