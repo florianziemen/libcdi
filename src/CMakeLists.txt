@@ -5,6 +5,9 @@ target_compile_definitions(libcdi PRIVATE CDI=1 CDI_SIZE_TYPE=size_t)
 target_compile_definitions(libcdi PRIVATE PACKAGE_NAME="${PROJECT_NAME}")
 target_compile_definitions(libcdi PRIVATE VERSION="${CMAKE_PROJECT_VERSION}")
 target_compile_definitions(libcdi PRIVATE HAVE_CONFIG_H=1)
+target_compile_definitions(libcdi PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
+
+include(GNUInstallDirs)
 
 target_sources(libcdi
   INTERFACE
@@ -250,8 +253,6 @@ set_property(TARGET libcdi PROPERTY CDI_INSTALL_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/julian_date.h
 )
 
-include(GNUInstallDirs)
-
 target_include_directories(libcdi
   PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}
@@ -262,7 +263,6 @@ target_include_directories(libcdi
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 target_link_libraries(libcdi PUBLIC m)
-target_compile_definitions(libcdi PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
 
 # --- Installation
 # packages required for installation
