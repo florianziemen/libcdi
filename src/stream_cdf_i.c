@@ -2949,21 +2949,23 @@ process_layer_query(struct CdiQuery *query, ncvar_t *ncvar, size_t *zsize, GridP
     int numLayers = cdiQueryNumLayers(query);
     if (numLayers > 0)
     {
-      // Error("Query of layers not implemented!");
-      size_t start = cdiQueryGetLayer(query, 0) - 1;
-      size_t count = (numLayers == 2) ? cdiQueryGetLayer(query, 1) : 1;
-      if ((start + count) > *zsize)
+      const int64_t *layerRange = cdiQueryGetLayers(query);
+      int64_t startLayer = layerRange[0];
+      int64_t endLayer = layerRange[1];
+      if ((size_t) endLayer > *zsize)
       {
         if (*zsize > 1)
-          Warning("%s: layer %zu-%zu out of range (numLayers=%zu), skipped", ncvar->name, start + 1, start + count - 1, *zsize);
+          Warning("%s: layer %ld-%ld out of range (numLayers=%zu), skipped", ncvar->name, (long) startLayer, (long) endLayer,
+                  *zsize);
         ncvar->varStatus = UndefVar;
         return -1;
       }
 
-      *zsize = count;
-      ncvar->zstart = start;
+      int64_t count = endLayer - startLayer + 1;
+      *zsize = (size_t) count;
+      ncvar->zstart = (size_t) startLayer - 1;
       ncvar->zcount = count;
-      layerPart->start = (long) start;
+      layerPart->start = (long) startLayer - 1;
       layerPart->count = (long) count;
       layerPart->readPart = true;
     }
@@ -2989,18 +2991,20 @@ process_cell_query(struct CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncva
         return -1;
       }
 
-      size_t start = cdiQueryGetCell(query, 0);
-      size_t count = (numCells == 2) ? cdiQueryGetCell(query, 1) : 1;
-      if ((start + count - 1) > *xsize)
+      const int64_t *cellRange = cdiQueryGetCells(query);
+      int64_t startCell = cellRange[0];
+      int64_t endCell = cellRange[1];
+      if ((size_t) endCell > *xsize)
       {
-        Error("%s: cells %zu-%zu out of range (gridsize=%zu)", ncvar->name, start, start + count - 1, *xsize);
+        Error("%s: cells %ld-%ld out of range (gridsize=%zu)", ncvar->name, (long) startCell, (long) endCell, *xsize);
       }
 
-      *xsize = count;
+      int64_t count = endCell - startCell + 1;
+      *xsize = (size_t) count;
       *ysize = 0;
-      ncvar->xstart = start - 1;
+      ncvar->xstart = (size_t) startCell - 1;
       ncvar->xcount = count;
-      gridPart->start = (long) start - 1;
+      gridPart->start = (long) startCell - 1;
       gridPart->count = (long) count;
       gridPart->readPart = true;
     }
@@ -4428,18 +4432,20 @@ process_time_query(struct CdiQuery *query, size_t numTimesteps, CdiDateTime *vDa
     int queryNumDates = cdiQueryNumDates(query);
     if (queryNumSteps > 0)
     {
-      int64_t startStep = cdiQueryGetStep(query, 0) - 1;
-      if ((startStep + 1) > (int64_t) numTimesteps) Error("query start step > maxSteps=%zu", numTimesteps);
-      int64_t endStep = startStep + ((queryNumSteps == 2) ? (cdiQueryGetStep(query, 1) - 1) : 0);
-      for (int64_t i = 0; i < startStep; ++i) { ncStepIndices[i] = -1; }
-      for (int64_t i = endStep + 1; i < (int) numTimesteps; ++i) { ncStepIndices[i] = -1; }
-      if (startStep < (int64_t) numTimesteps) { cdiQueryStep(query, startStep + 1); }
-      if (endStep < (int64_t) numTimesteps) { cdiQueryStep(query, endStep + 1); }
+      const int64_t *stepRange = cdiQueryGetSteps(query);
+      int64_t startStep = stepRange[0];
+      if (startStep > (int64_t) numTimesteps) Error("query start step > maxSteps=%zu", numTimesteps);
+      int64_t endStep = stepRange[1];
+      for (int64_t i = 0; i < startStep - 1; ++i) { ncStepIndices[i] = -1; }
+      for (int64_t i = endStep; i < (int64_t) numTimesteps; ++i) { ncStepIndices[i] = -1; }
+      if (startStep <= (int64_t) numTimesteps) { cdiQueryStep(query, startStep); }
+      if (endStep <= (int64_t) numTimesteps) { cdiQueryStep(query, endStep); }
     }
     else if (queryNumDates > 0)
     {
-      double startDateFloat = cdiQueryGetDate(query, 0);
-      double endDateFloat = (queryNumDates == 2) ? cdiQueryGetDate(query, 1) : startDateFloat;
+      const double *dateRange = cdiQueryGetDates(query);
+      double startDateFloat = dateRange[0];
+      double endDateFloat = dateRange[1];
       if (vDateTimeList)
       {
         for (size_t i = 0; i < numTimesteps; ++i)

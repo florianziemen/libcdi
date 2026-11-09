@@ -239,28 +239,28 @@ cdiQueryGetGroup(const struct CdiQuery *query, int index)
   return (index >= 0 && index < query->numGroups) ? query->groups[index] : NULL;
 }
 
-int64_t
-cdiQueryGetCell(const struct CdiQuery *query, int index)
+const int64_t *
+cdiQueryGetCells(const struct CdiQuery *query)
 {
-  return (index >= 0 && index < query->numCells) ? query->cells[index] : -1;
+  return query->cells;
 }
 
-int64_t
-cdiQueryGetLayer(const struct CdiQuery *query, int index)
+const int64_t *
+cdiQueryGetLayers(const struct CdiQuery *query)
 {
-  return (index >= 0 && index < query->numLayers) ? query->layers[index] : -1;
+  return query->layers;
 }
 
-int64_t
-cdiQueryGetStep(const struct CdiQuery *query, int index)
+const int64_t *
+cdiQueryGetSteps(const struct CdiQuery *query)
 {
-  return (index >= 0 && index < query->numSteps) ? query->steps[index] : -1;
+  return query->steps;
 }
 
-double
-cdiQueryGetDate(const struct CdiQuery *query, int index)
+const double *
+cdiQueryGetDates(const struct CdiQuery *query)
 {
-  return (index >= 0 && index < query->numDates) ? query->dates[index] : -1;
+  return query->dates;
 }
 
 struct CdiQuery *
