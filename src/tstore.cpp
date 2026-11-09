@@ -417,7 +417,6 @@ ts_inq_contents(stream_t *streamP)
   if (query)
   {
     int queryNumSteps = cdiQueryNumSteps(query);
-    int queryNumDates = cdiQueryNumDates(query);
     if (queryNumSteps > 0)
     {
       int64_t startStep = cdiQueryGetStep(query, 0) - 1;

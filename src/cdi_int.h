@@ -114,7 +114,7 @@ dbl_is_equal(double x, double y)
   bool yNan = dbl_is_nan(y);
   return (xNan || yNan) ? (xNan && yNan) : (x == y);
 #pragma GCC diagnostic pop
-};
+}
 
 static inline bool
 is_not_equal(double x, double y)
