@@ -333,7 +333,7 @@ print_healpix_parameter(int gridID, size_t gridSize)
   int attlen = cdiInqAttLen(gridID, CDI_GLOBAL, "indexing_scheme");
   char order[256];
   order[0] = 0;
-  if (attlen > 0 && attlen < (sizeof(order) - 1))
+  if (attlen > 0 && attlen < (int) (sizeof(order) - 1))
   {
     cdiInqAttTxt(gridID, CDI_GLOBAL, "indexing_scheme", attlen, order);
     order[attlen] = 0;
@@ -525,7 +525,6 @@ printZaxisLevelInfo(int levelsize, int zaxisID, int zaxistype, double zinc, int 
       if (is_not_equal(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
     }
     if (zunits && *zunits) fprintf(stdout, " [%s]\n", zunits);
-    fprintf(stdout, "\n");
   }
 
   free(levels);

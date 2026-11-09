@@ -374,10 +374,9 @@ ts_inq_contents(stream_t *streamP)
     int numCells = cdiQueryNumCells(query);
     if (numCells > 0)
     {
-      size_t start = cdiQueryGetCell(query, 0);
-      size_t count = (numCells == 2) ? cdiQueryGetCell(query, 1) : 1;
-      cfg.cell.start = start;
-      cfg.cell.end = start + count - 1;
+      const int64_t *cellRange = cdiQueryGetCells(query);
+      cfg.cell.start = cellRange[0];
+      cfg.cell.end = cellRange[1];
     }
   }
 
@@ -386,10 +385,9 @@ ts_inq_contents(stream_t *streamP)
     int numLayers = cdiQueryNumLayers(query);
     if (numLayers > 0)
     {
-      size_t start = cdiQueryGetLayer(query, 0);
-      size_t count = (numLayers == 2) ? cdiQueryGetLayer(query, 1) : 1;
-      cfg.layer.start = start;
-      cfg.layer.end = start + count - 1;
+      const int64_t *layerRange = cdiQueryGetLayers(query);
+      cfg.layer.start = layerRange[0];
+      cfg.layer.end = layerRange[1];
     }
   }
 
@@ -419,11 +417,9 @@ ts_inq_contents(stream_t *streamP)
     int queryNumSteps = cdiQueryNumSteps(query);
     if (queryNumSteps > 0)
     {
-      int64_t startStep = cdiQueryGetStep(query, 0) - 1;
-      // if ((startStep + 1) > (int64_t) numTimesteps) Error("query start step > maxSteps=%zu", numTimesteps);
-      int64_t endStep = startStep + ((queryNumSteps == 2) ? (cdiQueryGetStep(query, 1) - 1) : 0);
-      cfg.step.start = startStep + 1;
-      cfg.step.end = endStep + 1;
+      const int64_t *stepRange = cdiQueryGetSteps(query);
+      cfg.step.start = stepRange[0];
+      cfg.step.end = stepRange[1];
     }
   }
 
