@@ -166,8 +166,8 @@ print_xvals(int gridID, int dig)
       fprintf(stdout, " to %.*g", dig, xlast);
       if (is_not_equal(xinc, 0)) fprintf(stdout, " by %.*g", dig, xinc);
     }
-    if (*xunits) fprintf(stdout, " [%s]", xunits);
-    fprintf(stdout, " %s\n", gridIsCyclic(gridID) ? "  cyclic" : "");
+    if (*xunits) fprintf(stdout, " %s", xunits);
+    fprintf(stdout, "%s\n", gridIsCyclic(gridID) ? "  cyclic" : "");
   }
 }
 
@@ -194,7 +194,7 @@ print_yvals(int gridID, int dig)
       if (is_not_equal(yinc, 0) && gridtype != GRID_GAUSSIAN && gridtype != GRID_GAUSSIAN_REDUCED)
         fprintf(stdout, " by %.*g", dig, yinc);
     }
-    if (*yunits) fprintf(stdout, " [%s]", yunits);
+    if (*yunits) fprintf(stdout, " %s", yunits);
     fprintf(stdout, "\n");
   }
 }
@@ -290,12 +290,12 @@ print_xyvals2D(int gridID, int dig)
     fprintf(stdout, "%33s : %.*g", xname, dig, xfirst);
     if (gridsize > 1) fprintf(stdout, " to %.*g", dig, xlast);
     if (is_not_equal(xinc, 0)) fprintf(stdout, " by %.*g", dig, xinc);
-    if (*xunits) fprintf(stdout, " [%s]", xunits);
-    fprintf(stdout, " %s\n", gridIsCyclic(gridID) ? "  cyclic" : "");
+    if (*xunits) fprintf(stdout, " %s", xunits);
+    fprintf(stdout, "%s\n", gridIsCyclic(gridID) ? "  cyclic" : "");
     fprintf(stdout, "%33s : %.*g", yname, dig, yfirst);
     if (gridsize > 1) fprintf(stdout, " to %.*g", dig, ylast);
     if (is_not_equal(yinc, 0)) fprintf(stdout, " by %.*g", dig, yinc);
-    if (*yunits) fprintf(stdout, " [%s]", yunits);
+    if (*yunits) fprintf(stdout, " %s", yunits);
     fprintf(stdout, "\n");
 
     free(xvals2D);
@@ -493,7 +493,7 @@ printZaxisBoundsInfo(int zaxisID, int dig, int levelsize, double zinc, const cha
     fprintf(stdout, " to %.*g-%.*g", dig, level1, dig, level2);
     if (is_not_equal(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
   }
-  if (zunits && *zunits) fprintf(stdout, " [%s]", zunits);
+  if (zunits && *zunits) fprintf(stdout, " %s", zunits);
   fprintf(stdout, "\n");
 }
 
@@ -524,7 +524,7 @@ printZaxisLevelInfo(int levelsize, int zaxisID, int zaxistype, double zinc, int 
       fprintf(stdout, " to %.*g", dig, zlast);
       if (is_not_equal(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
     }
-    if (zunits && *zunits) fprintf(stdout, " [%s]\n", zunits);
+    if (zunits && *zunits) fprintf(stdout, " %s\n", zunits);
   }
 
   free(levels);
