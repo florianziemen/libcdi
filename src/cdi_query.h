@@ -43,6 +43,8 @@ extern "C"
   // streamOpenReadQuery: Open a dataset for reading and apply query
   int streamOpenReadQuery(const char *path, struct CdiQuery *query);
 
+  int64_t adjust_negative_index(int64_t n, int64_t index);
+
 #ifdef __cplusplus
 }
 #endif
