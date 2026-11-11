@@ -462,3 +462,10 @@ cdiQueryStep(struct CdiQuery *query, int64_t step)
 
   return -1;
 }
+
+int64_t
+adjust_negative_index(int64_t n, int64_t index)
+{
+  if (index < 0) { index = n + index + 1; }
+  return (index < 0) ? 1 : index;
+}

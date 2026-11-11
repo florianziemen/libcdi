@@ -2950,8 +2950,8 @@ process_layer_query(struct CdiQuery *query, ncvar_t *ncvar, size_t *zsize, GridP
     if (numLayers > 0)
     {
       const int64_t *layerRange = cdiQueryGetLayers(query);
-      int64_t startLayer = layerRange[0];
-      int64_t endLayer = layerRange[1];
+      int64_t startLayer = adjust_negative_index((int64_t) *zsize, layerRange[0]);
+      int64_t endLayer = adjust_negative_index((int64_t) *zsize, layerRange[1]);
       if ((size_t) endLayer > *zsize)
       {
         if (*zsize > 1)
@@ -2992,8 +2992,8 @@ process_cell_query(struct CdiQuery *query, int xdimid, int ydimid, ncvar_t *ncva
       }
 
       const int64_t *cellRange = cdiQueryGetCells(query);
-      int64_t startCell = cellRange[0];
-      int64_t endCell = cellRange[1];
+      int64_t startCell = adjust_negative_index((int64_t) *xsize, cellRange[0]);
+      int64_t endCell = adjust_negative_index((int64_t) *xsize, cellRange[1]);
       if ((size_t) endCell > *xsize)
       {
         Error("%s: cells %ld-%ld out of range (gridsize=%zu)", ncvar->name, (long) startCell, (long) endCell, *xsize);
@@ -4428,9 +4428,10 @@ process_time_query(struct CdiQuery *query, size_t numTimesteps, CdiDateTime *vDa
     if (queryNumSteps > 0)
     {
       const int64_t *stepRange = cdiQueryGetSteps(query);
-      int64_t startStep = stepRange[0];
+      int64_t startStep = adjust_negative_index(numTimesteps, stepRange[0]);
       if (startStep > (int64_t) numTimesteps) Error("query start step > maxSteps=%zu", numTimesteps);
-      int64_t endStep = stepRange[1];
+      int64_t endStep = adjust_negative_index(numTimesteps, stepRange[1]);
+      if (endStep < 0) { endStep = numTimesteps + endStep + 1; }
       for (int64_t i = 0; i < startStep - 1; ++i) { ncStepIndices[i] = -1; }
       for (int64_t i = endStep; i < (int64_t) numTimesteps; ++i) { ncStepIndices[i] = -1; }
       if (startStep <= (int64_t) numTimesteps) { cdiQueryStep(query, startStep); }
