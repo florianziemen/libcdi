@@ -155,7 +155,7 @@ cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memType, void *d
     case CDI_FILETYPE_NETCDF: cdf_read_var_slice(streamP, varID, levelID, memType, data, numMissVals); break;
 #endif
 #ifdef HAVE_TENSORSTORE
-    case CDI_FILETYPE_ZARR: ts_read_var_slice(streamP, varID, levelID, memType, data, numMissVals); break;
+    case CDI_FILETYPE_TSZARR: ts_read_var_slice(streamP, varID, levelID, memType, data, numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(fileType));
   }
@@ -259,7 +259,7 @@ stream_read_record(int streamID, int memType, void *data, size_t *numMissVals)
     case CDI_FILETYPE_NETCDF: cdf_read_field(streamP, memType, data, numMissVals); break;
 #endif
 #ifdef HAVE_TENSORSTORE
-    case CDI_FILETYPE_ZARR: ts_read_field(streamP, memType, data, numMissVals); break;
+    case CDI_FILETYPE_TSZARR: ts_read_field(streamP, memType, data, numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(streamP->filetype));
   }

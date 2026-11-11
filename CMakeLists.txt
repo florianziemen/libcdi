@@ -109,10 +109,10 @@ if (CMAKE_CXX_COMPILER_VERSION)
 endif ()
 
 if (CMAKE_SYSTEM_NAME)
-  set(SYSTEM_TYPE "${CMAKE_SYSTEM_NAME}${CMAKE_SYSTEM_VERSION}")
+  set(SYSTEM_TYPE "${CMAKE_SYSTEM_NAME}${CMAKE_SYSTEM_VERSION}-${CMAKE_SYSTEM_PROCESSOR}")
 endif ()
 
-configure_file(cmake/cdi_config.h.in src/config.h @ONLY)
+configure_file("cmake/cdi_config.h.in" "src/config.h" @ONLY)
 
 if (CDI_ENABLE_f2003_INTERFACE)
   add_subdirectory(interfaces/f2003)

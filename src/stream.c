@@ -99,12 +99,12 @@ get_filetype_from_name(const char **path)
     if (uri[4] == '2' && uri[5] == ':' && uri[6])
     {
       *path = uri + 6;
-      return CDI_FILETYPE_ZARR2;
+      return CDI_FILETYPE_TSZARR2;
     }
     if (uri[4] == '3' && uri[5] == ':' && uri[6])
     {
       *path = uri + 6;
-      return CDI_FILETYPE_ZARR3;
+      return CDI_FILETYPE_TSZARR3;
     }
   }
 
@@ -453,7 +453,7 @@ cdiInqContents(stream_t *streamP)
     case CDI_FILETYPE_NETCDF: status = cdfInqContents(streamP); break;
 #endif
 #ifdef HAVE_TENSORSTORE
-    case CDI_FILETYPE_ZARR: status = ts_inq_contents(streamP); break;
+    case CDI_FILETYPE_TSZARR: status = ts_inq_contents(streamP); break;
 #endif
     default:
     {
@@ -643,8 +643,8 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
     }
 #endif
 #ifdef HAVE_TENSORSTORE
-    case CDI_FILETYPE_ZARR2:
-    case CDI_FILETYPE_ZARR3:
+    case CDI_FILETYPE_TSZARR2:
+    case CDI_FILETYPE_TSZARR3:
     {
       fileID = ts_open(filename, temp, filetype);
       break;
@@ -1033,7 +1033,7 @@ streamOpenReadQuery(const char *filename, struct CdiQuery *query)
   if (filetype < 0) return filetype;
 
   int baseType = cdiBaseFiletype(filetype);
-  if (baseType != CDI_FILETYPE_NETCDF && baseType != CDI_FILETYPE_ZARR && filetype != CDI_FILETYPE_GRB2) return CDI_EQNAVAIL;
+  if (baseType != CDI_FILETYPE_NETCDF && baseType != CDI_FILETYPE_TSZARR && filetype != CDI_FILETYPE_GRB2) return CDI_EQNAVAIL;
 
   int streamID = streamOpen(filename, "r", filetype);
   if (streamID >= 0)
@@ -1340,7 +1340,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamP, int recordBufIsToBeDeleted)
     }
 #endif
 #ifdef HAVE_TENSORSTORE
-    case CDI_FILETYPE_ZARR:
+    case CDI_FILETYPE_TSZARR:
     {
       ts_close(fileID);
       if (streamP->ntsteps == 0 && streamP->tsteps != NULL)
@@ -1708,7 +1708,7 @@ streamInqTimestep(int streamID, int tsID)
     case CDI_FILETYPE_NETCDF: nrecs = cdfInqTimestep(streamP, tsID); break;
 #endif
 #ifdef HAVE_TENSORSTORE
-    case CDI_FILETYPE_ZARR: nrecs = ts_inq_timestep(streamP, tsID); break;
+    case CDI_FILETYPE_TSZARR: nrecs = ts_inq_timestep(streamP, tsID); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(filetype)); break;
   }

@@ -244,7 +244,7 @@ endif ()
 # Support exporting all symbols on Windows
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-set_target_properties(libcdi PROPERTIES PUBLIC_HEADER cdi.h OUTPUT_NAME cdi)
+set_target_properties(libcdi PROPERTIES OUTPUT_NAME cdi)
 
 set_property(TARGET libcdi PROPERTY CDI_INSTALL_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/cdi.h

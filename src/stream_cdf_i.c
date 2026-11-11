@@ -3259,15 +3259,16 @@ cdf_define_all_zaxes(stream_t *streamP, int vlistID, ncdim_t *ncdims, int nvars,
       // process layer query information if available
       GridPart layerPart;
       gridpart_init(&layerPart);
-      if (process_layer_query(streamP->query, ncvar, &zsize, &layerPart) < 0) { continue; }
+      if (zsize > 1)
+        if (process_layer_query(streamP->query, ncvar, &zsize, &layerPart) < 0) { continue; }
 
       double *zvar = NULL;
       char **zcvals = NULL;
       size_t zclength = 0;
 
       int zaxisType = CDI_UNDEFID;
-      if (zvarid != CDI_UNDEFID) zaxisType = ncvars[zvarid].zaxistype;
-      if (zaxisType == CDI_UNDEFID) zaxisType = ZAXIS_GENERIC;
+      if (zvarid != CDI_UNDEFID) { zaxisType = ncvars[zvarid].zaxistype; }
+      if (zaxisType == CDI_UNDEFID) { zaxisType = ZAXIS_GENERIC; }
 
       int zdatatype = CDI_DATATYPE_FLT64;
       double *lbounds = NULL;

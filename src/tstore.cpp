@@ -468,7 +468,7 @@ ts_inq_contents(stream_t *streamP)
 
   auto numCells = static_cast<size_t>(md.arrayList[0].num_cells);
   // printf("numCells %zu\n", numCells);
-  int gridID = gridCreate(GRID_HEALPIX, numCells);
+  int gridID = CDI_UNDEFID;
   int surfaceID = zaxisCreate(ZAXIS_SURFACE, 1);
 
   size_t numSteps{};
@@ -492,10 +492,12 @@ ts_inq_contents(stream_t *streamP)
       if (attributes.contains("units")) { timeUnits = attributes.find("units")->second; }
       if (attributes.contains("calendar")) { calendar = attribute_to_calendar(attributes.find("calendar")->second.c_str()); }
     }
-    else if (gridID != -1 && attributes.contains("grid_mapping_name") && attributes.find("grid_mapping_name")->second == "healpix")
+    else if (gridID == CDI_UNDEFID && attributes.contains("grid_mapping_name")
+             && attributes.find("grid_mapping_name")->second == "healpix")
     {
       if (attributes.contains("refinement_level") && attributes.contains("indexing_scheme"))
       {
+        gridID = gridCreate(GRID_HEALPIX, numCells);
         auto it1 = attributes.find("refinement_level");
         auto it2 = attributes.find("indexing_scheme");
         int attlen = 1;
@@ -529,6 +531,8 @@ ts_inq_contents(stream_t *streamP)
       zaxisMap[array.name] = zaxisID;
     }
   }
+
+  if (gridID == CDI_UNDEFID) { gridID = gridCreate(GRID_GENERIC, numCells); }
 
   for (int k = 0; k < 2; ++k)
   {

@@ -80,7 +80,7 @@ version(void)
 {
   int fileTypes[] = { CDI_FILETYPE_SRV,    CDI_FILETYPE_EXT,   CDI_FILETYPE_IEG,  CDI_FILETYPE_GRB,  CDI_FILETYPE_GRB2,
                       CDI_FILETYPE_NC,     CDI_FILETYPE_NC2,   CDI_FILETYPE_NC4,  CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5,
-                      CDI_FILETYPE_NCZARR, CDI_FILETYPE_ZARR2, CDI_FILETYPE_ZARR3 };
+                      CDI_FILETYPE_NCZARR, CDI_FILETYPE_TSZARR2, CDI_FILETYPE_TSZARR3 };
   const char *typeNames[] = { "srv", "ext", "ieg", "grb", "grb2", "nc", "nc2", "nc4", "nc4c", "nc5", "nczarr", "zarr2", "zarr3" };
 
   fprintf(stderr, "CDI version 2.2\n");
@@ -629,8 +629,8 @@ setDefaultFileType(char *fileTypeStr)
     else if (memcmp(fileTypeStr, "nc5",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC5;    }
     else if (memcmp(fileTypeStr, "nc1",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC;     }
     else if (memcmp(fileTypeStr, "nczarr", 6)  == 0) { ftstr += 6; DefaultFileType = CDI_FILETYPE_NCZARR; }
-    else if (memcmp(fileTypeStr, "zarr2",  5)  == 0) { ftstr += 5; DefaultFileType = CDI_FILETYPE_ZARR2;  }
-    else if (memcmp(fileTypeStr, "zarr3",  5)  == 0) { ftstr += 5; DefaultFileType = CDI_FILETYPE_ZARR3;  }
+    else if (memcmp(fileTypeStr, "zarr2",  5)  == 0) { ftstr += 5; DefaultFileType = CDI_FILETYPE_TSZARR2;  }
+    else if (memcmp(fileTypeStr, "zarr3",  5)  == 0) { ftstr += 5; DefaultFileType = CDI_FILETYPE_TSZARR3;  }
     else if (memcmp(fileTypeStr, "nc",     2)  == 0) { ftstr += 2; DefaultFileType = CDI_FILETYPE_NC2;    }
     else if (memcmp(fileTypeStr, "srv",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_SRV;    }
     else if (memcmp(fileTypeStr, "ext",    3)  == 0) { ftstr += 3; DefaultFileType = CDI_FILETYPE_EXT;    }
@@ -918,7 +918,7 @@ main(int argc, char *argv[])
       if (streamID2 < 0) return handle_error(streamID2, "Open failed on %s", fname2);
 
       int maxSteps = vlistNtsteps(vlistID1);
-      if ((filetype == CDI_FILETYPE_NCZARR || filetype == CDI_FILETYPE_ZARR2 || filetype == CDI_FILETYPE_ZARR3) && maxSteps >= 0)
+      if ((filetype == CDI_FILETYPE_NCZARR || filetype == CDI_FILETYPE_TSZARR2 || filetype == CDI_FILETYPE_TSZARR3) && maxSteps >= 0)
         streamDefMaxSteps(streamID2, maxSteps);
       if (numWorkerOut > 0) streamDefNumWorker(streamID2, numWorkerOut);
 

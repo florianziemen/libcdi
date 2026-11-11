@@ -161,7 +161,7 @@ cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, const 
     case CDI_FILETYPE_NETCDF: cdf_write_var_slice(streamP, varID, levelID, memtype, data, (size_t) numMissVals); break;
 #endif
 #ifdef HAVE_TENSORSTORE
-    case CDI_FILETYPE_ZARR: ts_write_var_slice(streamP, varID, levelID, memtype, data, (size_t) numMissVals); break;
+    case CDI_FILETYPE_TSZARR: ts_write_var_slice(streamP, varID, levelID, memtype, data, (size_t) numMissVals); break;
 #endif
     default: Error("%s support not compiled in!", strfiletype(filetype));
   }

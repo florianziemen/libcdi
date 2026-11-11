@@ -298,8 +298,8 @@ cdiHaveFiletype(int filetype)
 #endif
 #endif
 #ifdef HAVE_TENSORSTORE
-    case CDI_FILETYPE_ZARR2: return 1;
-    case CDI_FILETYPE_ZARR3: return 1;
+    case CDI_FILETYPE_TSZARR2: return 1;
+    case CDI_FILETYPE_TSZARR3: return 1;
 #endif
   }
 
@@ -563,8 +563,8 @@ cdiBaseFiletype(int filetype)
     case CDI_FILETYPE_NC4C:
     case CDI_FILETYPE_NCZARR:
     case CDI_FILETYPE_NC5: return CDI_FILETYPE_NETCDF;
-    case CDI_FILETYPE_ZARR2:
-    case CDI_FILETYPE_ZARR3: return CDI_FILETYPE_ZARR;
+    case CDI_FILETYPE_TSZARR2:
+    case CDI_FILETYPE_TSZARR3: return CDI_FILETYPE_TSZARR;
   }
 
   return filetype;
