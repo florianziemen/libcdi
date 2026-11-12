@@ -53,7 +53,7 @@ extern pthread_mutex_t CDI_IO_Mutex;
 
 #define CDI_FILETYPE_GRIB 100    // File type GRIB
 #define CDI_FILETYPE_NETCDF 101  // File type NetCDF
-#define CDI_FILETYPE_TSZARR 102    // File type ZARR
+#define CDI_FILETYPE_TSZARR 102  // File type ZARR
 
 // dummy use of unused parameters to silence compiler warnings
 #ifndef UNUSED
@@ -134,10 +134,16 @@ enum
   TYPE_VAR,
 };
 
-enum
+enum MemType
 {
   MEMTYPE_DOUBLE = 1,
   MEMTYPE_FLOAT,
+};
+
+enum CdiConvention
+{
+  CDI_CONVENTION_ECHAM,
+  CDI_CONVENTION_CF
 };
 
 typedef struct
@@ -383,12 +389,6 @@ typedef struct
 // Length of optional keyword/value pair list
 #define MAX_OPT_GRIB_ENTRIES 500
 
-enum cdi_convention
-{
-  CDI_CONVENTION_ECHAM,
-  CDI_CONVENTION_CF
-};
-
 // Data type specification for optional key/value pairs (GRIB)
 typedef enum
 {
@@ -450,6 +450,7 @@ extern bool CDI_Shuffle;
 extern int CDI_Skip_Records;
 extern const char *CDI_GRIB1_Template;
 extern const char *CDI_GRIB2_Template;
+extern int CDI_HTTP_Engine;
 extern int CDI_Convention;
 extern int CDI_Inventory_Mode;
 extern int CDI_Query_Abort;

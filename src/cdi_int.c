@@ -43,6 +43,7 @@ bool CDI_Shuffle = false;
 int CDI_Skip_Records = 0;
 const char *CDI_GRIB1_Template = NULL;
 const char *CDI_GRIB2_Template = NULL;
+int CDI_HTTP_Engine = CDI_HTTP_NETCDF;
 int CDI_Convention = CDI_CONVENTION_ECHAM;
 int CDI_Inventory_Mode = 1;
 int CDI_Version_Info = 1;
@@ -425,6 +426,21 @@ cdi_initialize(void)
     GETENV_SIZE("CDI_FILTERSIZE_MIN", CDI_FilterSize_Min);
 
     char *envstr;
+    envstr = getenv("CDI_HTTP_ENGINE");
+    if (envstr)
+    {
+      if (str_is_equal(envstr, "netcdf"))
+      {
+        CDI_HTTP_Engine = CDI_HTTP_NETCDF;
+        if (CDI_Debug) Message("CDI http engine was set to netcdf!");
+      }
+      else if (str_is_equal(envstr, "tensorstore"))
+      {
+        CDI_HTTP_Engine = CDI_HTTP_TENSORSTORE;
+        if (CDI_Debug) Message("CDI http engine was set to tensorstore!");
+      }
+    }
+
     envstr = getenv("CDI_CONVENTION");
     if (envstr)
     {
@@ -524,6 +540,7 @@ cdiDefGlobal(const char *string, int value)
   else if (str_is_equal(string, "NETCDF_LAZY_GRID_LOAD")) { CDI_Netcdf_Lazy_Grid_Load = (bool) value; }
   else if (str_is_equal(string, "COPY_CHUNKSPEC"))        { CDI_Copy_ChunkSpec = (bool) value; }
   else if (str_is_equal(string, "REMOVE_CHUNKSPEC"))      { CDI_Remove_ChunkSpec = (bool) value; }
+  else if (str_is_equal(string, "HTTP_ENGINE"))           { CDI_HTTP_Engine = value; }
   else Warning("Unsupported global key: %s", string);
   // clang-format on
 }

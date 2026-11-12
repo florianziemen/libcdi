@@ -93,6 +93,9 @@ extern "C" {
 #define CDI_PROTOCOL_ACROSS         3
 #define CDI_PROTOCOL_TENSORSTORE    4
 
+#define CDI_HTTP_NETCDF             1
+#define CDI_HTTP_TENSORSTORE        2
+
 // Compress types
 
 #define  CDI_COMPRESS_NONE          0

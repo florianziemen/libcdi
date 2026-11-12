@@ -48,7 +48,7 @@ ts_lib_version(void)
 }
 
 int
-ts_open(const char *fileName, const char *mode, int fileType)
+ts_open(const char *fileName, const char *mode, int *fileType)
 {
   int fileID = -1;
   int fmode = tolower(*mode);
@@ -60,6 +60,8 @@ ts_open(const char *fileName, const char *mode, int fileType)
       cfg.path = fileName;
       tsHandle *handle = tsOpenFileRead(fileName, cfg);
       if (!handle) return -1;
+      if (handle->cfg.format == 2) { *fileType = CDI_FILETYPE_TSZARR2; }
+      else if (handle->cfg.format == 3) { *fileType = CDI_FILETYPE_TSZARR3; }
       fileID = get_next_fileID(handle);
       break;
     }

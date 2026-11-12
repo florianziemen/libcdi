@@ -141,25 +141,24 @@ cdfOpenFile(const char *filename, const char *mode, int *filetype)
 }
 
 int
-cdfOpen(const char *filename, const char *mode, int filetype)
+cdfOpen(const char *fileName, const char *mode, int fileType)
 {
   int fileID = -1;
-  bool open_file = true;
+  bool openFile = true;
 
-  if (CDF_Debug) Message("Open %s with mode %c", filename, *mode);
+  if (CDF_Debug) Message("Open %s with mode %c", fileName, *mode);
 
 #ifndef NC_64BIT_OFFSET
-  if (filetype == CDI_FILETYPE_NC2) open_file = false;
+  if (fileType == CDI_FILETYPE_NC2) open_file = false;
 #endif
 #ifndef NC_64BIT_DATA
-  if (filetype == CDI_FILETYPE_NC5) open_file = false;
+  if (fileType == CDI_FILETYPE_NC5) open_file = false;
 #endif
 
-  if (open_file)
+  if (openFile)
   {
-    fileID = cdfOpenFile(filename, mode, &filetype);
-
-    if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
+    fileID = cdfOpenFile(fileName, mode, &fileType);
+    if (CDF_Debug) Message("File %s opened with id %d", fileName, fileID);
   }
   else
   {
@@ -170,12 +169,12 @@ cdfOpen(const char *filename, const char *mode, int filetype)
 }
 
 int
-cdf4Open(const char *filename, const char *mode, int *filetype)
+cdf4Open(const char *fileName, const char *mode, int *fileType)
 {
-  if (CDF_Debug) Message("Open %s with mode %c", filename, *mode);
+  if (CDF_Debug) Message("Open %s with mode %c", fileName, *mode);
 
-  int fileID = cdfOpenFile(filename, mode, filetype);
-  if (CDF_Debug) Message("File %s opened with id %d", filename, fileID);
+  int fileID = cdfOpenFile(fileName, mode, fileType);
+  if (CDF_Debug) Message("File %s opened with id %d", fileName, fileID);
   return fileID;
 }
 

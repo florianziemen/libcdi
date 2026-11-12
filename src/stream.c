@@ -84,17 +84,12 @@ cdi_get_protocol(const char *uri, const char **fileName)
   // if (strncmp(uri, "file", protocolLen) == 0) return CDI_PROTOCOL_FILE; // file is already used in NetCDF
   if (strncmp(uri, "fdb", protocolLen) == 0) return CDI_PROTOCOL_FDB;
   if (strncmp(uri, "across", protocolLen) == 0) return CDI_PROTOCOL_ACROSS;
-  if (strncmp(uri, "https", protocolLen) == 0)
-  {
-    const char *pos = strstr(uri, "://");
-    if (strstr(uri, "#mode=") == NULL)
-    {
-      *fileName = uri;
-      return CDI_PROTOCOL_TENSORSTORE;
-    }
-  }
 
   *fileName = uri;
+  if (strncmp(uri, "https", 5) == 0)
+  {
+    if (CDI_HTTP_Engine == CDI_HTTP_TENSORSTORE && strstr(uri, "#mode=") == NULL) { return CDI_PROTOCOL_TENSORSTORE; }
+  }
 
   return CDI_PROTOCOL_OTHER;
 }
@@ -707,7 +702,7 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
         size_t len = strlen(filename);
         if (len > 6 && filename[5] == ':' && memcmp(filename, "zarr", 4) == 0) { offset = 6; }
       }
-      fileID = ts_open(filename + offset, temp, filetype);
+      fileID = ts_open(filename + offset, temp, &filetype);
       break;
     }
 #endif

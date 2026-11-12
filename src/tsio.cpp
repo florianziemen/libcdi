@@ -1687,8 +1687,8 @@ struct Writer
   tensorstore::TensorStore<void, dynamic_rank> store;
   std::vector<Index> bstart, bcount, chunks;
   bool static_array = false;  // zeitkonstant: der ganze Hypercube wird einmal geschrieben
-  Index win_t0 = -1;  // erster Schritt des aktuellen Fensters
-  Index win_n = 0;    // Schritte im aktuellen Fensters
+  Index win_t0 = -1;          // erster Schritt des aktuellen Fensters
+  Index win_n = 0;            // Schritte im aktuellen Fensters
   std::shared_ptr<SharedArray<float, dynamic_rank>> buf;
   Index filled = 0;  // bereits abgelegte Schritte in `buf`
 };
@@ -2043,6 +2043,33 @@ overview_rows_from_stores(const tsConfig &cfg, tensorstore::Context &context, co
   return ok;
 }
 
+int
+detect_root_zarr_format(const tsConfig &cfg, tensorstore::Context &context)
+{
+  try
+  {
+    const nlohmann::json root_kv = build_root_kvstore(cfg, context);
+    auto store_result = tensorstore::kvstore::Open(root_kv, context).result();
+    if (!store_result) return 0;
+    const auto &store = *store_result;
+    for (const char *key : { "zarr.json" })
+    {
+      auto r = tensorstore::kvstore::Read(store, key).result();
+      if (r && r->has_value()) return 3;
+    }
+    for (const char *key : { ".zmetadata", ".zattrs", ".zgroup" })
+    {
+      auto r = tensorstore::kvstore::Read(store, key).result();
+      if (r && r->has_value()) return 2;
+    }
+    return 0;
+  }
+  catch (...)
+  {
+    return 0;
+  }
+}
+
 }  // namespace
 
 // TensorStore-spezifischer Teil des Handles; die TensorStore-freien Felder
@@ -2095,6 +2122,15 @@ tsOpenFileRead(const std::string &path, const tsConfig &config)
   {
     delete h;
     return nullptr;
+  }
+  if (!h->cfg.format)
+  {
+    int detected = detect_root_zarr_format(h->cfg, h->context);
+    if (detected)
+    {
+      h->cfg.format = detected;
+      if (h->cfg.debug) std::cerr << "debug: root zarr format " << detected << "\n";
+    }
   }
   return h;
 }
@@ -2885,7 +2921,10 @@ tsApplyCoordinateConfig(const tsConfig &cfg, std::vector<tsCoordinate> &coords)
       }
     }
     for (auto &ch : chunks) ch = std::max<Index>(ch, 1);
-    if (cfg.step_chunk && rank > 0 && !static_coord) { chunks[0] = std::max<Index>(1, std::min<Index>(*cfg.step_chunk, bcount[0])); }
+    if (cfg.step_chunk && rank > 0 && !static_coord)
+    {
+      chunks[0] = std::max<Index>(1, std::min<Index>(*cfg.step_chunk, bcount[0]));
+    }
     if (cfg.cell_chunk && rank > 0)
     {
       chunks[static_cast<std::size_t>(rank) - 1]
