@@ -56,13 +56,10 @@ ts_open(const char *fileName, const char *mode, int fileType)
   {
     case 'r':
     {
-      // printf("open %s\n", fileName + 6);
       tsConfig cfg;
-      cfg.path = fileName + 6;
-
-      tsHandle *handle = tsOpenFileRead(fileName + 6, cfg);
+      cfg.path = fileName;
+      tsHandle *handle = tsOpenFileRead(fileName, cfg);
       if (!handle) return -1;
-
       fileID = get_next_fileID(handle);
       break;
     }

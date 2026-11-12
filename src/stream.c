@@ -111,6 +111,41 @@ get_filetype_from_name(const char **path)
   return CDI_EUFTYPE;
 }
 
+int
+get_filetype_from_dir(const char *uri)
+{
+  size_t len = strlen(uri) + 30;
+  char *path = (char *) malloc(len);
+
+  struct stat buf;
+  const char *zarr3meta = "zarr.json";
+  snprintf(path, len, "%s/%s", uri, zarr3meta);
+  if (stat(path, &buf) == 0 && buf.st_size != 0)
+  {
+    free(path);
+    return CDI_FILETYPE_TSZARR3;
+  }
+
+  const char *zarr2meta = ".zattrs";
+  snprintf(path, len, "%s/%s", uri, zarr2meta);
+  if (stat(path, &buf) == 0 && buf.st_size != 0)
+  {
+    free(path);
+    return CDI_FILETYPE_TSZARR2;
+  }
+
+  zarr2meta = ".zmetadata";
+  snprintf(path, len, "%s/%s", uri, zarr2meta);
+  if (stat(path, &buf) == 0 && buf.st_size != 0)
+  {
+    free(path);
+    return CDI_FILETYPE_TSZARR2;
+  }
+
+  free(path);
+  return CDI_EUFTYPE;
+}
+
 // used also in CDO
 int
 cdiGetFiletype(const char *uri, int *byteorder)
@@ -129,24 +164,34 @@ cdiGetFiletype(const char *uri, int *byteorder)
   }
 
   int fileID = fileOpen(filename, "r");
-
-  // clang-format off
-  if      (fileID == CDI_UNDEFID) return CDI_ESYSTEM;
-  else if (fileID == -2)          return CDI_ETMOF;
+  if (fileID == CDI_UNDEFID) return CDI_ESYSTEM;
+  if (fileID == -2) return CDI_ETMOF;
 
   int swap = 0;
   int version;
   long recpos;
   char buffer[8];
+  // clang-format off
   if (fileRead(fileID, buffer, 8) != 8)
   {
     struct stat buf;
     if (stat(filename, &buf) == 0)
     {
-      if (buf.st_size == 0)      return CDI_EISEMPTY;
-      if (buf.st_mode & S_IFDIR) return CDI_EISDIR;
+      if (buf.st_size == 0)
+      {
+        fileClose(fileID);
+        return CDI_EISEMPTY;
+      }
+      if (buf.st_mode & S_IFDIR)
+      {
+        fileClose(fileID);
+        filetype = get_filetype_from_dir(filename);
+        if (filetype != CDI_EUFTYPE) return filetype;
+        return CDI_EISDIR;
+      }
     }
 
+    fileClose(fileID);
     return CDI_EUFTYPE;
   }
 
@@ -646,7 +691,13 @@ cdiStreamOpenDefaultDelegate(const char *uri, char filemode, int filetype, strea
     case CDI_FILETYPE_TSZARR2:
     case CDI_FILETYPE_TSZARR3:
     {
-      fileID = ts_open(filename, temp, filetype);
+      int offset = 0;
+      if (*filename == 'z')
+      {
+        size_t len = strlen(filename);
+        if (len > 6 && filename[5] == ':' && memcmp(filename, "zarr", 4) == 0) { offset = 6; }
+      }
+      fileID = ts_open(filename + offset, temp, filetype);
       break;
     }
 #endif
