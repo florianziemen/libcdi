@@ -91,6 +91,7 @@ extern "C" {
 #define CDI_PROTOCOL_FILE           1
 #define CDI_PROTOCOL_FDB            2
 #define CDI_PROTOCOL_ACROSS         3
+#define CDI_PROTOCOL_TENSORSTORE    4
 
 // Compress types
 

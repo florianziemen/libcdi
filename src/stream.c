@@ -69,23 +69,32 @@ getByteorder(int byteswap)
 }
 
 static int
-cdi_get_protocol(const char *uri, const char **filename)
+cdi_get_protocol(const char *uri, const char **fileName)
 {
   const char *pos = strstr(uri, "://");
   if (pos == NULL)
   {
-    *filename = uri;
+    *fileName = uri;
     return CDI_PROTOCOL_FILE;
   }
 
-  size_t protocollen = (size_t) (pos - uri);
-  *filename = pos + 3;
+  size_t protocolLen = (size_t) (pos - uri);
+  *fileName = pos + 3;
 
-  // if (strncmp(uri, "file", protocollen) == 0) return CDI_PROTOCOL_FILE; // file is already used in NetCDF
-  if (strncmp(uri, "fdb", protocollen) == 0) return CDI_PROTOCOL_FDB;
-  if (strncmp(uri, "across", protocollen) == 0) return CDI_PROTOCOL_ACROSS;
+  // if (strncmp(uri, "file", protocolLen) == 0) return CDI_PROTOCOL_FILE; // file is already used in NetCDF
+  if (strncmp(uri, "fdb", protocolLen) == 0) return CDI_PROTOCOL_FDB;
+  if (strncmp(uri, "across", protocolLen) == 0) return CDI_PROTOCOL_ACROSS;
+  if (strncmp(uri, "https", protocolLen) == 0)
+  {
+    const char *pos = strstr(uri, "://");
+    if (strstr(uri, "#mode=") == NULL)
+    {
+      *fileName = uri;
+      return CDI_PROTOCOL_TENSORSTORE;
+    }
+  }
 
-  *filename = uri;
+  *fileName = uri;
 
   return CDI_PROTOCOL_OTHER;
 }
@@ -150,20 +159,21 @@ get_filetype_from_dir(const char *uri)
 int
 cdiGetFiletype(const char *uri, int *byteorder)
 {
-  int filetype = get_filetype_from_name(&uri);
-  if (filetype != CDI_EUFTYPE) return filetype;
+  int fileType = get_filetype_from_name(&uri);
+  if (fileType != CDI_EUFTYPE) return fileType;
 
-  const char *filename;
-  int protocol = cdi_get_protocol(uri, &filename);
+  const char *fileName;
+  int protocol = cdi_get_protocol(uri, &fileName);
   switch (protocol)
   {
     case CDI_PROTOCOL_ACROSS: return CDI_FILETYPE_GRB2;
     case CDI_PROTOCOL_FDB: return CDI_FILETYPE_GRB2;
-    case CDI_PROTOCOL_OTHER: return CDI_FILETYPE_NC4;  // support for NetCDF remote types and ESDM
-    case CDI_PROTOCOL_FILE: break;                     // handled below;
+    case CDI_PROTOCOL_TENSORSTORE: return CDI_FILETYPE_TSZARR3;  // support for Tensorstore remote zarr
+    case CDI_PROTOCOL_OTHER: return CDI_FILETYPE_NC4;            // support for NetCDF remote types and ESDM
+    case CDI_PROTOCOL_FILE: break;                               // handled below;
   }
 
-  int fileID = fileOpen(filename, "r");
+  int fileID = fileOpen(fileName, "r");
   if (fileID == CDI_UNDEFID) return CDI_ESYSTEM;
   if (fileID == -2) return CDI_ETMOF;
 
@@ -171,11 +181,10 @@ cdiGetFiletype(const char *uri, int *byteorder)
   int version;
   long recpos;
   char buffer[8];
-  // clang-format off
   if (fileRead(fileID, buffer, 8) != 8)
   {
     struct stat buf;
-    if (stat(filename, &buf) == 0)
+    if (stat(fileName, &buf) == 0)
     {
       if (buf.st_size == 0)
       {
@@ -185,8 +194,8 @@ cdiGetFiletype(const char *uri, int *byteorder)
       if (buf.st_mode & S_IFDIR)
       {
         fileClose(fileID);
-        filetype = get_filetype_from_dir(filename);
-        if (filetype != CDI_EUFTYPE) return filetype;
+        fileType = get_filetype_from_dir(fileName);
+        if (fileType != CDI_EUFTYPE) return fileType;
         return CDI_EISDIR;
       }
     }
@@ -197,41 +206,42 @@ cdiGetFiletype(const char *uri, int *byteorder)
 
   fileRewind(fileID);
 
+  // clang-format off
   if (memcmp(buffer, "GRIB", 4) == 0)
   {
     version = buffer[7];
-    if      (version <= 1) { filetype = CDI_FILETYPE_GRB; }
-    else if (version == 2) { filetype = CDI_FILETYPE_GRB2; }
+    if      (version <= 1) { fileType = CDI_FILETYPE_GRB; }
+    else if (version == 2) { fileType = CDI_FILETYPE_GRB2; }
   }
-  else if (memcmp(buffer, "CDF\001", 4) == 0) { filetype = CDI_FILETYPE_NC; }
-  else if (memcmp(buffer, "CDF\002", 4) == 0) { filetype = CDI_FILETYPE_NC2; }
-  else if (memcmp(buffer, "CDF\005", 4) == 0) { filetype = CDI_FILETYPE_NC5; }
-  else if (memcmp(buffer + 1, "HDF", 3) == 0) { filetype = CDI_FILETYPE_NC4; }
+  else if (memcmp(buffer, "CDF\001", 4) == 0) { fileType = CDI_FILETYPE_NC; }
+  else if (memcmp(buffer, "CDF\002", 4) == 0) { fileType = CDI_FILETYPE_NC2; }
+  else if (memcmp(buffer, "CDF\005", 4) == 0) { fileType = CDI_FILETYPE_NC5; }
+  else if (memcmp(buffer + 1, "HDF", 3) == 0) { fileType = CDI_FILETYPE_NC4; }
 #ifdef HAVE_LIBSERVICE
-  else if (srvCheckFiletype(fileID, &swap))   { filetype = CDI_FILETYPE_SRV; }
+  else if (srvCheckFiletype(fileID, &swap))   { fileType = CDI_FILETYPE_SRV; }
 #endif
 #ifdef HAVE_LIBEXTRA
-  else if (extCheckFiletype(fileID, &swap))   { filetype = CDI_FILETYPE_EXT; }
+  else if (extCheckFiletype(fileID, &swap))   { fileType = CDI_FILETYPE_EXT; }
 #endif
 #ifdef HAVE_LIBIEG
-  else if (iegCheckFiletype(fileID, &swap))   { filetype = CDI_FILETYPE_IEG; }
+  else if (iegCheckFiletype(fileID, &swap))   { fileType = CDI_FILETYPE_IEG; }
 #endif
 #ifdef HAVE_LIBGRIB
   else if (gribCheckSeek(fileID, &recpos, &version) == 0)
   {
-    if      (version <= 1) { filetype = CDI_FILETYPE_GRB; }
-    else if (version == 2) { filetype = CDI_FILETYPE_GRB2; }
+    if      (version <= 1) { fileType = CDI_FILETYPE_GRB; }
+    else if (version == 2) { fileType = CDI_FILETYPE_GRB2; }
   }
 #endif
   // clang-format on
 
-  if (CDI_Debug && filetype != CDI_EUFTYPE) Message("found %s file = %s", strfiletype(filetype), filename);
+  if (CDI_Debug && fileType != CDI_EUFTYPE) Message("found %s file = %s", strfiletype(fileType), fileName);
 
   fileClose(fileID);
 
   *byteorder = getByteorder(swap);
 
-  return filetype;
+  return fileType;
 }
 
 /*
@@ -1079,18 +1089,18 @@ streamOpenReadQuery(const char *filename, struct CdiQuery *query)
 {
   cdi_initialize();
 
-  int byteorder = 0;
-  int filetype = cdiGetFiletype(filename, &byteorder);
-  if (filetype < 0) return filetype;
+  int byteOrder = 0;
+  int fileType = cdiGetFiletype(filename, &byteOrder);
+  if (fileType < 0) return fileType;
 
-  int baseType = cdiBaseFiletype(filetype);
-  if (baseType != CDI_FILETYPE_NETCDF && baseType != CDI_FILETYPE_TSZARR && filetype != CDI_FILETYPE_GRB2) return CDI_EQNAVAIL;
+  int baseType = cdiBaseFiletype(fileType);
+  if (baseType != CDI_FILETYPE_NETCDF && baseType != CDI_FILETYPE_TSZARR && fileType != CDI_FILETYPE_GRB2) return CDI_EQNAVAIL;
 
-  int streamID = streamOpen(filename, "r", filetype);
+  int streamID = streamOpen(filename, "r", fileType);
   if (streamID >= 0)
   {
     stream_t *streamP = stream_to_pointer(streamID);
-    streamP->byteorder = byteorder;
+    streamP->byteorder = byteOrder;
 
     int groupID = process_group_query(streamP, query);
     if (groupID < -1)
@@ -1098,7 +1108,6 @@ streamOpenReadQuery(const char *filename, struct CdiQuery *query)
       streamClose(streamID);
       return groupID;
     }
-
     streamP->groupID = (groupID > -1) ? groupID : streamP->fileID;
 
     int status = stream_create_vlist(streamP, query);
@@ -1118,15 +1127,15 @@ streamOpenAppend(const char *filename)
 {
   cdi_initialize();
 
-  int byteorder = 0;
-  int filetype = cdiGetFiletype(filename, &byteorder);
-  if (filetype < 0) return filetype;
+  int byteOrder = 0;
+  int fileType = cdiGetFiletype(filename, &byteOrder);
+  if (fileType < 0) return fileType;
 
-  int streamID = streamOpenA(filename, "a", filetype);
+  int streamID = streamOpenA(filename, "a", fileType);
   if (streamID >= 0)
   {
     stream_t *streamP = stream_to_pointer(streamID);
-    streamP->byteorder = byteorder;
+    streamP->byteorder = byteOrder;
   }
 
   return streamID;
