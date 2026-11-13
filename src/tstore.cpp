@@ -191,7 +191,7 @@ print_row(std::int64_t step, std::int64_t layer, std::int64_t total, std::size_t
 }
 
 static void
-ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0)
+ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0, const char *timeName)
 {
   streamP->curTsID = 0;
   streamP->rtsteps = 1;
@@ -223,7 +223,7 @@ ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0)
         double *timevarBuffer = (double *) malloc(numTimesteps * sizeof(double));
         // cdf_get_var_double(fileID, nctimevarid, timevarBuffer);
         auto handle = get_tsHandle(streamP->fileID);
-        ts_read_array(handle, "time", timevarBuffer);
+        ts_read_array(handle, timeName, timevarBuffer);
         for (size_t i = 0; i < numTimesteps; ++i)
         {
           // vDateTimeList[i] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, i, timevarBuffer), taxis0);
@@ -321,6 +321,25 @@ string_to_double(const std::string &str)
   return value;
 }
 
+static std::string
+find_time_dimname(tsMetadata const &md)
+{
+  for (auto const &c : md.coordList)
+  {
+    if (c.shape.size() == 1)
+    {
+      auto const &attributes = c.attributes;
+      if (attributes.contains("units"))
+      {
+        auto units = attributes.find("units")->second;
+        if (is_timeaxis_units(units.c_str())) return c.name;
+      }
+    }
+  }
+
+  return {};
+}
+
 int
 ts_inq_contents(stream_t *streamP)
 {
@@ -396,7 +415,7 @@ ts_inq_contents(stream_t *streamP)
     return -1;
   }
 
-  tsMetadata const &md = tsGetReadMetadata(handle);
+  tsMetadata &md = tsGetReadMetadata(handle);
 
   std::set<std::string> used_dims;
   for (const auto &a : md.arrayList)
@@ -420,6 +439,12 @@ ts_inq_contents(stream_t *streamP)
       cfg.step.start = stepRange[0];
       cfg.step.end = stepRange[1];
     }
+  }
+
+  auto timeDimName = find_time_dimname(md);
+  for (auto &a : md.arrayList)
+  {
+    if (a.shape.size() > 0) { a.time_constant = (a.dim_names[0] != timeDimName); }
   }
 
   if (CDI_Debug)
@@ -485,7 +510,7 @@ ts_inq_contents(stream_t *streamP)
       // printf("[%s] = %s\n", key.c_str(), value.c_str());
       // if (key == "grid_mapping_name" && value == "healpix") printf("healpix grid\n");
     }
-    if (array.name == "time")
+    if (array.name == timeDimName)
     {
       numSteps = array.shape[0];
       if (attributes.contains("units")) { timeUnits = attributes.find("units")->second; }
@@ -549,7 +574,7 @@ ts_inq_contents(stream_t *streamP)
         // printf("array 3d: %s dimname %s zaxisID %d\n", a.name.c_str(), a.dim_names[1].c_str(), zaxisMap[a.dim_names[1]]);
         zaxisID = zaxisMap[a.dim_names[1]];
       }
-      else if (a.dim_names[0] != "time")
+      else if (a.dim_names[0] != timeDimName)
       {
         timeType = TIME_CONSTANT;
         if (rank == 2) { zaxisID = zaxisMap[a.dim_names[0]]; }
@@ -582,28 +607,30 @@ ts_inq_contents(stream_t *streamP)
     return 1;
   }
 
-  taxis_t taxis0;
-  ptaxisInit(&taxis0);
-  if (set_base_time(timeUnits.c_str(), &taxis0) == 1)
+  if (numSteps)
   {
-    // nctimevarid = CDI_UNDEFID;
-    streamP->basetime.ncvarid = CDI_UNDEFID;
-    streamP->basetime.hasUnits = false;
+    taxis_t taxis0;
+    ptaxisInit(&taxis0);
+    if (!timeUnits.empty() && set_base_time(timeUnits.c_str(), &taxis0) == 1)
+    {
+      // nctimevarid = CDI_UNDEFID;
+      streamP->basetime.ncvarid = CDI_UNDEFID;
+      streamP->basetime.hasUnits = false;
+    }
+    ptaxisDefName(&taxis0, timeDimName.c_str());
+    ptaxisDefUnits(&taxis0, timeUnits.c_str());
+    ptaxisDefDatatype(&taxis0, CDI_DATATYPE_FLT64);
+
+    int taxisID = taxisCreate(TAXIS_RELATIVE);
+
+    taxis0.calendar = calendar;
+    taxisDefCalendar(taxisID, calendar);
+
+    vlistDefTaxis(vlistID, taxisID);
+
+    ts_read_timesteps((int) numSteps, streamP, &taxis0, timeDimName.c_str());
+    taxisDestroyKernel(&taxis0);
   }
-  ptaxisDefName(&taxis0, "time");
-  ptaxisDefUnits(&taxis0, timeUnits.c_str());
-  ptaxisDefDatatype(&taxis0, CDI_DATATYPE_FLT64);
-
-  int taxisID = taxisCreate(TAXIS_RELATIVE);
-
-  taxis0.calendar = calendar;
-  taxisDefCalendar(taxisID, calendar);
-
-  vlistDefTaxis(vlistID, taxisID);
-
-  ts_read_timesteps((int) numSteps, streamP, &taxis0);
-  taxisDestroyKernel(&taxis0);
-
   // Ein sequentieller Durchlauf: aeussere Schleife ueber die Zeitschritte,
   // innere Schleife ueber die (konstant viele) Felder je Schritt.  Zeitdimension
   // und Feldzahl sind fuer alle Arrays gleich; jedes Feld wird genau einmal

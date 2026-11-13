@@ -280,7 +280,7 @@ set_base_time(const char *timeUnitsStr, taxis_t *taxis)
   {
     while (isspace(tu[pos])) ++pos;
 
-    if (strStartsWith(tu + pos, "since")) taxisType = TAXIS_RELATIVE;
+    if (strStartsWith(tu + pos, "since")) { taxisType = TAXIS_RELATIVE; }
 
     while (pos < len && !isspace(tu[pos])) ++pos;
     if (tu[pos])
@@ -1133,7 +1133,14 @@ read_grid_mapping(int ncid, char *attstring, ncvar_t *ncvar, ncvar_t *ncvars)
     }
   }
   else
-    Warning("%s - %s", nc_strerror(status), attstring);
+  {
+    static bool printOnce = true;
+    if (printOnce)
+    {
+      printOnce = false;
+      Warning("%s - %s", nc_strerror(status), attstring);
+    }
+  }
 }
 
 static void
@@ -4890,7 +4897,7 @@ cdfInqContents(stream_t *streamP)
     return CDI_EUFSTRUCT;
   }
 
-  if (ntsteps == 0 && streamP->basetime.ncdimid == CDI_UNDEFID && streamP->basetime.ncvarid != CDI_UNDEFID) ntsteps = 1;
+  if (ntsteps == 0 && streamP->basetime.ncdimid == CDI_UNDEFID && streamP->basetime.ncvarid != CDI_UNDEFID) { ntsteps = 1; }
 
   // define all data variables
   cdf_define_all_vars(streamP, vlistID, instID, modelID, nvarsData, nvars, ncvars, ncdims, timedimid);
