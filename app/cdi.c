@@ -78,12 +78,13 @@ static int datamode = DP_MODE;
 static void
 version(void)
 {
-  int fileTypes[] = { CDI_FILETYPE_SRV,    CDI_FILETYPE_EXT,   CDI_FILETYPE_IEG,  CDI_FILETYPE_GRB,  CDI_FILETYPE_GRB2,
-                      CDI_FILETYPE_NC,     CDI_FILETYPE_NC2,   CDI_FILETYPE_NC4,  CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5,
+  int fileTypes[] = { CDI_FILETYPE_SRV,    CDI_FILETYPE_EXT,     CDI_FILETYPE_IEG,    CDI_FILETYPE_GRB,  CDI_FILETYPE_GRB2,
+                      CDI_FILETYPE_NC,     CDI_FILETYPE_NC2,     CDI_FILETYPE_NC4,    CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5,
                       CDI_FILETYPE_NCZARR, CDI_FILETYPE_TSZARR2, CDI_FILETYPE_TSZARR3 };
-  const char *typeNames[] = { "srv", "ext", "ieg", "grb", "grb2", "nc", "nc2", "nc4", "nc4c", "nc5", "nczarr", "zarr2", "zarr3" };
+  const char *typeNames[]
+      = { "srv", "ext", "ieg", "grb", "grb2", "nc", "nc2", "nc4", "nc4c", "nc5", "nczarr", "tszarr2", "tszarr3" };
 
-  fprintf(stderr, "CDI version 2.2\n");
+  fprintf(stderr, "CDI version 2.7\n");
 #ifdef C_COMPILER
   fprintf(stderr, "C compiler: %s\n", C_COMPILER);
 #endif
@@ -918,7 +919,8 @@ main(int argc, char *argv[])
       if (streamID2 < 0) return handle_error(streamID2, "Open failed on %s", fname2);
 
       int maxSteps = vlistNtsteps(vlistID1);
-      if ((filetype == CDI_FILETYPE_NCZARR || filetype == CDI_FILETYPE_TSZARR2 || filetype == CDI_FILETYPE_TSZARR3) && maxSteps >= 0)
+      if ((filetype == CDI_FILETYPE_NCZARR || filetype == CDI_FILETYPE_TSZARR2 || filetype == CDI_FILETYPE_TSZARR3)
+          && maxSteps >= 0)
         streamDefMaxSteps(streamID2, maxSteps);
       if (numWorkerOut > 0) streamDefNumWorker(streamID2, numWorkerOut);
 

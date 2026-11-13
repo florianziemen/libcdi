@@ -17,5 +17,12 @@ EXTRA_DIST = \
   src/cfortran.doc
 
 EXTRA_DIST += cmake CMakeLists.txt app/CMakeLists.txt src/CMakeLists.txt tests/CMakeLists.txt interfaces/f2003/CMakeLists.txt
+EXTRA_DIST += app/tsq.cpp \
+    src/stream_ts.h \
+    src/stream_ts.c \
+    src/tstore.h \
+    src/tstore.cpp \
+    src/tsio.h \
+    src/tsio.cpp
 
 ACLOCAL_AMFLAGS = -I m4
