@@ -312,6 +312,13 @@ ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0, const
 #include <system_error>
 #include <optional>
 
+static int
+dtype_str_to_id(std::string const &s)
+{
+  if (s == "float64") return CDI_DATATYPE_FLT64;
+  return CDI_DATATYPE_FLT32;
+}
+
 std::optional<double>
 string_to_double(const std::string &str)
 {
@@ -583,7 +590,7 @@ ts_inq_contents(stream_t *streamP)
       if (k == 1 && timeType == TIME_VARYING) continue;
       stream_new_var(streamP, gridID, zaxisID, CDI_UNDEFID);
       int varID = vlistDefVar(vlistID, gridID, zaxisID, timeType);
-      vlistDefVarDatatype(vlistID, varID, DATATYPE_FLT32);
+      vlistDefVarDatatype(vlistID, varID, dtype_str_to_id(a.dataType));
       vlistDefVarName(vlistID, varID, a.name.c_str());
       if (a.fill_value != "-")
       {
