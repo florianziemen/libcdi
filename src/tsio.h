@@ -87,8 +87,8 @@ struct tsArray
   bool layered = false;        // eine Statistik-Zeile pro Layer
   std::int64_t num_steps = 0;  // ausgewaehlte Zeitschritte dieses Arrays (1 bei time_constant)
   std::int64_t num_layers = 1;
-  std::int64_t num_cells = 0;  // Werte pro Layer
-  std::int64_t num_values = 0; // Produkt von bcount (gesamter ausgewaehlter Hypercube)
+  std::int64_t num_cells = 0;   // Werte pro Layer
+  std::int64_t num_values = 0;  // Produkt von bcount (gesamter ausgewaehlter Hypercube)
 };
 
 // Metadaten eines geoeffneten Datensatzes: die ausgewaehlten Daten-Arrays
@@ -273,7 +273,8 @@ bool tsGetField(tsHandle *handle, tsField &field);
 
 // Liest das soeben von tsGetField gelieferte Feld in `data` (Laenge
 // arrayList[field.array].num_cells).  false ohne ausgewaehltes Feld.
-bool tsReadField(tsHandle *handle, float *data, std::size_t n);
+template <typename Out>
+bool tsReadField(tsHandle *handle, Out *data, std::size_t n);
 
 // Zeitschritt-Zaehler der Ausgabe: rueckt auf den naechsten absoluten
 // Schreib-Schritt vor und gibt ihn zurueck (-1 am Ende); vor dem ersten Schritt

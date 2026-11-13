@@ -1485,17 +1485,14 @@ struct TsEngine
     for (auto &w : pool) w.join();
   }
 
-  // Schneidet das Feld (Schritt `t_abs`, Layer `lay`) aus dem gefuellten
-  // Fenster in `out` aus.  Reihenfolge und Anzahl der Werte entsprechen genau
-  // der bisherigen Auswertung dieses Feldes.
+  template <typename Out>
   void
-  extract(const WindowChunks &buf, Index win_t0, Index t_abs, Index lay, float *out, std::size_t n) const
+  extract(const WindowChunks &buf, Index win_t0, Index t_abs, Index lay, Out *out, std::size_t n) const
   {
     using namespace tensorstore;
     const Index lt = t_abs - win_t0;
     std::size_t pos = 0;
-    // Schneidet `n` Elemente ab Elementindex `off` des Chunks als float32 aus
-    // (Laufzeit-Dispatch auf den nativen Cache-Datentyp).
+
     auto append = [&out, &pos](const SharedArray<void, dynamic_rank> &chunk, std::size_t off, std::size_t cnt)
     {
       const void *base = chunk.data();
@@ -1503,29 +1500,44 @@ struct TsEngine
       if (dt == dtype_v<float>)
       {
         const float *p = static_cast<const float *>(base) + off;
-        std::copy(p, p + static_cast<std::ptrdiff_t>(cnt), out + pos);
+        if constexpr (std::is_same_v<Out, float>)
+          std::copy(p, p + static_cast<std::ptrdiff_t>(cnt), out + pos);
+        else
+          for (std::size_t i = 0; i < cnt; ++i) out[pos + i] = static_cast<Out>(p[i]);
         pos += cnt;
       }
       else if (dt == dtype_v<double>)
-        append_as_float(static_cast<const double *>(base) + off, cnt, out, pos);
+      {
+        const double *p = static_cast<const double *>(base) + off;
+        if constexpr (std::is_same_v<Out, double>)
+          std::copy(p, p + static_cast<std::ptrdiff_t>(cnt), out + pos);
+        else
+          for (std::size_t i = 0; i < cnt; ++i) out[pos + i] = static_cast<Out>(p[i]);
+        pos += cnt;
+      }
       else if (dt == dtype_v<tensorstore::dtypes::float16_t>)
-        append_as_float(static_cast<const tensorstore::dtypes::float16_t *>(base) + off, cnt, out, pos);
+      {
+        const tensorstore::dtypes::float16_t *p = static_cast<const tensorstore::dtypes::float16_t *>(base) + off;
+        for (std::size_t i = 0; i < cnt; ++i) out[pos + i] = static_cast<Out>(p[i]);
+        pos += cnt;
+      }
       else if (dt == dtype_v<tensorstore::dtypes::bfloat16_t>)
-        append_as_float(static_cast<const tensorstore::dtypes::bfloat16_t *>(base) + off, cnt, out, pos);
+      {
+        const tensorstore::dtypes::bfloat16_t *p = static_cast<const tensorstore::dtypes::bfloat16_t *>(base) + off;
+        for (std::size_t i = 0; i < cnt; ++i) out[pos + i] = static_cast<Out>(p[i]);
+        pos += cnt;
+      }
       else
       {
         std::cerr << "Unsupported source data type for statistics: " << dt << "\n";
-        std::fill_n(out + pos, cnt, 0.0f);
+        std::fill_n(out + pos, cnt, static_cast<Out>(0));
         pos += cnt;
       }
     };
+
     if (!layered)
     {
-      // Rank-1: dim 0 is both the time and the (single) cell dim.  The field of
-      // one step is a single value; the remaining `n - 1` slots are NaN so the
-      // reported count/missing match the Python reference (count = extent along
-      // dim 0, one valid value per step).
-      if (rank == 1) std::fill_n(out, n, std::numeric_limits<float>::quiet_NaN());
+      if (rank == 1) std::fill_n(out, n, std::numeric_limits<Out>::quiet_NaN());
       for (std::size_t b = 0; b < nblocks_total; ++b)
       {
         const SharedArray<void, dynamic_rank> &chunk = *buf.chunks[b];
@@ -1553,20 +1565,14 @@ struct TsEngine
 
     for (std::size_t g = 0; g < nb_grid; ++g)
     {
-      const std::size_t b = base_ib + g;
+      std::size_t b = base_ib + g;
       const SharedArray<void, dynamic_rank> &chunk = *buf.chunks[b];
-      const std::size_t egrid = ibs[b].ext[rank - 2];
-      const std::size_t off
-          = (static_cast<std::size_t>(lt) * static_cast<std::size_t>(layer_seg) + static_cast<std::size_t>(lo)) * egrid;
+      std::size_t egrid = ibs[b].ext[rank - 2];
+      std::size_t off = (static_cast<std::size_t>(lt) * static_cast<std::size_t>(layer_seg) + static_cast<std::size_t>(lo)) * egrid;
       append(chunk, off, egrid);
     }
   }
 };  // ---------------------------------------------------------------------------
-// Lesezustand eines Arrays: Engine (Auswahl + Zeitfenster) und zwei
-// Fensterpuffer mit optionalem Prefetch des naechsten Fensters.  Die Felder
-// werden daraus der Reihe nach ausgeschnitten; die Werte eines Feldes kommen in
-// genau der Reihenfolge, in der sie bisher ausgewertet wurden.
-// ---------------------------------------------------------------------------
 
 struct Reader
 {
@@ -1634,8 +1640,9 @@ struct Reader
     }
   }
 
+  template <typename Out>
   void
-  extract(Index t_abs, Index lay, float *out, std::size_t n)
+  extract(Index t_abs, Index lay, Out *out, std::size_t n)
   {
     if (direct_read && eng.rank == 2 && !eng.layered)
     {
@@ -1652,22 +1659,37 @@ struct Reader
       const void *base = r->data();
       const tensorstore::DataType dt = r->dtype();
       const std::size_t cnt = std::min<std::size_t>(static_cast<std::size_t>(r->num_elements()), n);
-      std::size_t pos = 0;
+
       if (dt == dtype_v<float>)
       {
         const float *src = static_cast<const float *>(base);
-        std::copy(src, src + static_cast<std::ptrdiff_t>(cnt), out);
+        if constexpr (std::is_same_v<Out, float>)
+          std::copy(src, src + static_cast<std::ptrdiff_t>(cnt), out);
+        else
+          for (std::size_t i = 0; i < cnt; ++i) out[i] = static_cast<Out>(src[i]);
       }
       else if (dt == dtype_v<double>)
-        append_as_float(static_cast<const double *>(base), cnt, out, pos);
+      {
+        const double *src = static_cast<const double *>(base);
+        if constexpr (std::is_same_v<Out, double>)
+          std::copy(src, src + static_cast<std::ptrdiff_t>(cnt), out);
+        else
+          for (std::size_t i = 0; i < cnt; ++i) out[i] = static_cast<Out>(src[i]);
+      }
       else if (dt == dtype_v<tensorstore::dtypes::float16_t>)
-        append_as_float(static_cast<const tensorstore::dtypes::float16_t *>(base), cnt, out, pos);
+      {
+        const tensorstore::dtypes::float16_t *src = static_cast<const tensorstore::dtypes::float16_t *>(base);
+        for (std::size_t i = 0; i < cnt; ++i) out[i] = static_cast<Out>(src[i]);
+      }
       else if (dt == dtype_v<tensorstore::dtypes::bfloat16_t>)
-        append_as_float(static_cast<const tensorstore::dtypes::bfloat16_t *>(base), cnt, out, pos);
+      {
+        const tensorstore::dtypes::bfloat16_t *src = static_cast<const tensorstore::dtypes::bfloat16_t *>(base);
+        for (std::size_t i = 0; i < cnt; ++i) out[i] = static_cast<Out>(src[i]);
+      }
       else
       {
         std::cerr << "Unsupported source data type in direct read: " << dt << "\n";
-        std::fill_n(out, n, 0.0f);
+        std::fill_n(out, n, static_cast<Out>(0));
       }
       return;
     }
@@ -2480,8 +2502,9 @@ read_static_hypercube(tsHandleImpl *h, std::size_t index, std::vector<float> &ou
 
 // Liest das zuletzt von tsGetField gelieferte Feld; der Schritt ist der
 // aktuelle Schritt von tsGetNextStep.
+template <typename Out>
 bool
-tsReadField(tsHandle *handle, float *data, std::size_t n)
+tsReadField(tsHandle *handle, Out *data, std::size_t n)
 {
   if (!handle || !handle->fields_open || !handle->have_field) return false;
   const tsField &field = handle->last_field;
@@ -2502,7 +2525,10 @@ tsReadField(tsHandle *handle, float *data, std::size_t n)
     if (r < 0 || a.num_cells <= 0) return false;
     const std::size_t off = static_cast<std::size_t>(r) * static_cast<std::size_t>(a.num_cells);
     if (off + n > buf.size()) return false;
-    std::copy_n(buf.data() + off, n, data);
+    if constexpr (std::is_same_v<Out, float>)
+      std::copy_n(buf.data() + off, n, data);
+    else
+      for (std::size_t i = 0; i < n; ++i) { data[i] = static_cast<Out>(buf[off + i]); }
     return true;
   }
   if (field.array >= h->readers.size() || !h->readers[field.array]) return false;
@@ -2511,6 +2537,9 @@ tsReadField(tsHandle *handle, float *data, std::size_t n)
   r.extract(handle->cur_t, field.layer, data, n);
   return true;
 }
+
+template bool tsReadField<float>(tsHandle *handle, float *data, std::size_t n);
+template bool tsReadField<double>(tsHandle *handle, double *data, std::size_t n);
 
 // Bereitet den Schreibmodus vor: ein Ausgabe-Verzeichnis pro ausgewaehltem
 // Datenarray.  Die Stores erzeugt `tsSetMetadata`.

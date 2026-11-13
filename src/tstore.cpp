@@ -698,6 +698,31 @@ ts_inq_timestep(stream_t *streamP, int tsID)
   return numRecs;
 }
 
+template <typename T>
+size_t
+count_nummiss(T *data, size_t numCells, double mv)
+{
+  size_t numMiss = 0;
+  T missVal = (T) mv;
+  if (std::isnan(missVal))
+  {
+    for (size_t i = 0; i < numCells; ++i)
+    {
+      if (std::isnan(data[i])) numMiss++;
+    }
+  }
+  else
+  {
+    constexpr auto is_equal = [](auto a, auto b) noexcept { return (!(a < b || b < a)); };
+    for (size_t i = 0; i < numCells; ++i)
+    {
+      if (is_equal(data[i], missVal)) numMiss++;
+    }
+  }
+
+  return numMiss;
+}
+
 void
 ts_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *data, size_t *numMissVals)
 {
@@ -713,7 +738,10 @@ ts_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *
   const tsArray &a = md.arrayList[field.array];
   size_t numCells = a.num_cells;
   float *fdata = (float *) data;
-  tsReadField(handle, fdata, numCells);
+  if (memtype == MEMTYPE_DOUBLE)
+    tsReadField(handle, (double *) data, numCells);
+  else
+    tsReadField(handle, (float *) data, numCells);
 
   size_t numMiss = 0;
   if (a.fill_value != "-")
@@ -721,39 +749,13 @@ ts_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *
     auto missValOpt = string_to_double(a.fill_value);
     if (*missValOpt)
     {
-      double missVal = *missValOpt;
-      float missValF = (float) missVal;
-      if (std::isnan(missVal))
-      {
-        for (size_t i = 0; i < numCells; ++i)
-        {
-          if (std::isnan(fdata[i])) numMiss++;
-        }
-      }
+      if (memtype == MEMTYPE_DOUBLE)
+        numMiss = count_nummiss((double *) data, numCells, *missValOpt);
       else
-      {
-        constexpr auto is_equal = [](auto a, auto b) noexcept { return (!(a < b || b < a)); };
-        for (size_t i = 0; i < numCells; ++i)
-        {
-          if (is_equal(fdata[i], missValF)) numMiss++;
-        }
-      }
+        numMiss = count_nummiss((float *) data, numCells, *missValOpt);
     }
   }
   *numMissVals = numMiss;
-
-  if (memtype == MEMTYPE_DOUBLE)
-  {
-    double *ddata = (double *) data;
-    for (size_t i = 0; i < numCells; ++i) { ddata[numCells - i - 1] = fdata[numCells - i - 1]; }
-  }
-
-  /*
-  if (memtype == MEMTYPE_DOUBLE)
-    cdfReadVarSliceDP(streamP, varID, levelID, (double *) data, numMissVals);
-  else
-    cdfReadVarSliceSP(streamP, varID, levelID, (float *) data, numMissVals);
-  */
 }
 
 void
