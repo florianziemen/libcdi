@@ -3266,8 +3266,8 @@ cdf_define_all_zaxes(stream_t *streamP, int vlistID, ncdim_t *ncdims, int nvars,
       // process layer query information if available
       GridPart layerPart;
       gridpart_init(&layerPart);
-      if (zsize > 1)
-        if (process_layer_query(streamP->query, ncvar, &zsize, &layerPart) < 0) { continue; }
+      // if (zsize > 1)
+      if (process_layer_query(streamP->query, ncvar, &zsize, &layerPart) < 0) { continue; }
 
       double *zvar = NULL;
       char **zcvals = NULL;

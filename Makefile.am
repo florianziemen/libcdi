@@ -16,4 +16,6 @@ EXTRA_DIST = \
   doc/cdi_fman.pdf \
   src/cfortran.doc
 
+EXTRA_DIST += cmake CMakeLists.txt app/CMakeLists.txt src/CMakeLists.txt tests/CMakeLists.txt interfaces/f2003/CMakeLists.txt
+
 ACLOCAL_AMFLAGS = -I m4
