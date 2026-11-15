@@ -58,6 +58,7 @@ ts_open(const char *fileName, const char *mode, int *fileType)
     {
       tsConfig cfg;
       cfg.path = fileName;
+      if (CDI_Data_Copy_Concurrency > 0) { cfg.data_copy_concurrency = CDI_Data_Copy_Concurrency; }
       tsHandle *handle = tsOpenFileRead(fileName, cfg);
       if (!handle) return -1;
       if (handle->cfg.format == 2) { *fileType = CDI_FILETYPE_TSZARR2; }
@@ -354,6 +355,14 @@ ts_inq_contents(stream_t *streamP)
   auto &cfg = handle->cfg;
 
   auto *query = streamP->query;
+
+  // process group query information if available
+  if (query && cdiQueryNumGroups(query) > 0)
+  {
+    const char *groupName = cdiQueryGetGroup(query, 0);
+    if (groupName) { cfg.group = groupName; }
+  }
+
   if (cfg.arrays.empty())
   {
     tsOverview ov;

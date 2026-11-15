@@ -42,7 +42,7 @@ void  Message_(const char *caller, const char *fmt, ...);
 #  define   Message(...)   Message_((void *), __VA_ARGS__)
 #endif
 
-_Noreturn void cdiAbortC(const char *caller, const char *filename,
+/*_Noreturn*/ void cdiAbortC(const char *caller, const char *filename,
                const char *functionname, int line,
                const char *errorString, ... );
 #define xabortC(caller, ...)                                    \
@@ -56,7 +56,7 @@ _Noreturn void cdiAbortC(const char *caller, const char *filename,
     if (!(arg)) { xabort("assertion `" #arg "` failed");}   \
   } while(0)
 
-_Noreturn void
+/*_Noreturn*/ void
 cdiAbortC_serial(const char *caller, const char *filename,
                  const char *functionname, int line,
                  const char *errorString, va_list ap);

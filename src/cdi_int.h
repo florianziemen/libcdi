@@ -436,6 +436,7 @@ extern int CDI_Default_Calendar;
 // extern int cdiNcMissingValue;
 extern int CDI_Netcdf_Chunksizehint;
 extern int CDI_ChunkType;
+extern int CDI_Data_Copy_Concurrency;
 extern bool CDI_Test;
 extern bool CDI_Split_Ltype105;
 extern bool CDI_Lock_IO;

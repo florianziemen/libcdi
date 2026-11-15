@@ -1068,7 +1068,7 @@ process_group_query(stream_t *streamP, struct CdiQuery *query)
   int filetype = streamP->filetype;
   if (cdiBaseFiletype(filetype) == CDI_FILETYPE_NETCDF)
   {
-    // process var query information if available
+    // process group query information if available
     if (query && cdiQueryNumGroups(query) > 0)
     {
       const char *groupName = cdiQueryGetGroup(query, 0);

@@ -69,6 +69,7 @@ long CDI_CacheSize_Out = -1L;
 long CDI_FilterSize_Min = 0;
 size_t CDI_CacheSize_Max = 0UL;
 bool CDI_Netcdf_Lazy_Grid_Load = false;
+int CDI_Data_Copy_Concurrency = -1;
 
 int cdiPartabIntern = 1;
 
@@ -411,6 +412,7 @@ cdi_initialize(void)
 
     GETENV_FLT("CDI_MISSVAL", CDI_Default_Missval);
 
+    GETENV_INT("CDI_DATA_COPY_CONCURRENCY", CDI_Data_Copy_Concurrency);
     GETENV_INT("CDI_LEVELTYPE", cdiDefaultLeveltype);
     GETENV_INT("NC_CHUNKSIZEHINT", CDI_Netcdf_Chunksizehint);
     GETENV_INT("CDI_SKIP_RECORDS", CDI_Skip_Records);
@@ -541,6 +543,7 @@ cdiDefGlobal(const char *string, int value)
   else if (str_is_equal(string, "COPY_CHUNKSPEC"))        { CDI_Copy_ChunkSpec = (bool) value; }
   else if (str_is_equal(string, "REMOVE_CHUNKSPEC"))      { CDI_Remove_ChunkSpec = (bool) value; }
   else if (str_is_equal(string, "HTTP_ENGINE"))           { CDI_HTTP_Engine = value; }
+  else if (str_is_equal(string, "DATA_COPY_CONCURRENCY")) { CDI_Data_Copy_Concurrency = value; }
   else Warning("Unsupported global key: %s", string);
   // clang-format on
 }
