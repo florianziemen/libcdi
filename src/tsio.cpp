@@ -1306,7 +1306,10 @@ list_array_names(const tsConfig &cfg, tensorstore::Context &context)
   if (kvstore == "file")
   {
     if (is_zip_path(cfg.path)) { group_spec = make_zip_root_kvstore(cfg.path, context); }
-    else { group_spec = { { "driver", "file" }, { "path", cfg.path } }; }
+    else
+    {
+      group_spec = { { "driver", "file" }, { "path", cfg.path } };
+    }
   }
   else if (kvstore == "http")
   {

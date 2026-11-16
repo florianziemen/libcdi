@@ -7,6 +7,7 @@
 
 #include <cmath>  // nanf()
 #include <array>
+#include <filesystem>
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -42,7 +43,19 @@ get_tsHandle(int fileID)
 
 const char *
 ts_lib_version(void)
-{ return tsVersion(); }
+{
+  return tsVersion();
+}
+
+static std::string
+effective_path(std::string const &path)
+{
+  if (path.starts_with("https://") || path.ends_with(".zip")) return path;
+
+  std::error_code ec;
+  const auto canon = std::filesystem::canonical(path, ec);
+  return ec ? path : canon.string();
+}
 
 int
 ts_open(const char *fileName, const char *mode, int *fileType)
@@ -54,9 +67,9 @@ ts_open(const char *fileName, const char *mode, int *fileType)
     case 'r':
     {
       tsConfig cfg;
-      cfg.path = fileName;
+      cfg.path = effective_path(fileName);
       if (CDI_Data_Copy_Concurrency > 0) { cfg.data_copy_concurrency = CDI_Data_Copy_Concurrency; }
-      tsHandle *handle = tsOpenFileRead(fileName, cfg);
+      tsHandle *handle = tsOpenFileRead(cfg.path, cfg);
       if (!handle) return -1;
       if (handle->cfg.format == 2) { *fileType = CDI_FILETYPE_TSZARR2; }
       else if (handle->cfg.format == 3) { *fileType = CDI_FILETYPE_TSZARR3; }
@@ -76,7 +89,9 @@ ts_open(const char *fileName, const char *mode, int *fileType)
 
 void
 ts_close(int fileID)
-{ tsCloseFile(get_tsHandle(fileID)); }
+{
+  tsCloseFile(get_tsHandle(fileID));
+}
 
 std::string
 fmt_dims(const std::vector<std::int64_t> &dims)
