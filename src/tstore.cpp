@@ -8,7 +8,6 @@
 #include <cmath>  // nanf()
 #include <array>
 #include <iostream>
-#include <iomanip>
 #include <set>
 #include <sstream>
 #include <string>
@@ -20,7 +19,7 @@ get_next_fileID(tsHandle *handle)
 {
   if (!handle) return -1;
 
-  for (size_t i = 0; i < (int) tsHandleIDs.size(); ++i)
+  for (size_t i = 0; i < tsHandleIDs.size(); ++i)
   {
     if (tsHandleIDs[i] == nullptr)
     {
@@ -43,9 +42,7 @@ get_tsHandle(int fileID)
 
 const char *
 ts_lib_version(void)
-{
-  return tsVersion();
-}
+{ return tsVersion(); }
 
 int
 ts_open(const char *fileName, const char *mode, int *fileType)
@@ -73,15 +70,13 @@ ts_open(const char *fileName, const char *mode, int *fileType)
   }
 
   // printf("%s: %s fileID=%d\n", __func__, fileName, fileID);
-  if (fileID < 0) fprintf(stderr, "%s: fileID failed for %s!", __func__, fileName);
+  if (fileID < 0) fprintf(stderr, "%s: fileID failed for %s!\n", __func__, fileName);
   return fileID;
 }
 
 void
 ts_close(int fileID)
-{
-  tsCloseFile(get_tsHandle(fileID));
-}
+{ tsCloseFile(get_tsHandle(fileID)); }
 
 std::string
 fmt_dims(const std::vector<std::int64_t> &dims)
@@ -98,7 +93,7 @@ fmt_dims(const std::vector<std::int64_t> &dims)
 }
 
 // "1:416, 1:7, 1:768" - ausgewaehlte 1-basierte Indizes pro Achse.
-std::string
+static std::string
 fmt_indices(const tsArray &a)
 {
   std::ostringstream ss;
@@ -112,7 +107,7 @@ fmt_indices(const tsArray &a)
   return ss.str();
 }
 
-void
+static void
 print_coordinate_arrays(const tsMetadata &md)
 {
   std::cout << "=== Coordinate arrays ===\n";
@@ -162,7 +157,7 @@ print_coordinate_arrays(const tsMetadata &md)
       if (it == c.attributes.end()) return;
       if (!details.empty()) details += "  ";
       details += label;
-      details += "=";
+      details += '=';
       details += it->second;
     };
     add_attr("grid_mapping_name", "grid_mapping");
@@ -171,24 +166,6 @@ print_coordinate_arrays(const tsMetadata &md)
     if (!details.empty()) std::cout << "  " << details;
     std::cout << '\n';
   }
-}
-
-void
-print_row(std::int64_t step, std::int64_t layer, std::int64_t total, std::size_t valid, double mn, double mean, double mx,
-          const std::string &name)
-{
-  const std::int64_t missing = total - static_cast<std::int64_t>(valid);
-  if (valid == 0)
-  {
-    std::cout << step << "  " << layer << "  " << total << "  " << missing << "  NaN  NaN  NaN  " << name << '\n';
-    return;
-  }
-  char bmin[64], bmean[64], bmax[64];
-  std::snprintf(bmin, sizeof bmin, "%12.5g", mn);
-  std::snprintf(bmean, sizeof bmean, "%12.5g", mean);
-  std::snprintf(bmax, sizeof bmax, "%12.5g", mx);
-  std::cout << step << "  " << layer << "  " << total << "  " << missing << "  " << bmin << "  " << bmean << "  " << bmax << "  "
-            << name << '\n';
 }
 
 static void
@@ -221,9 +198,9 @@ ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0, const
 
       if (1 || streamP->basetime.hasUnits)
       {
-        double *timevarBuffer = (double *) malloc(numTimesteps * sizeof(double));
+        auto *timevarBuffer = (double *) malloc(numTimesteps * sizeof(double));
         // cdf_get_var_double(fileID, nctimevarid, timevarBuffer);
-        auto handle = get_tsHandle(streamP->fileID);
+        auto *handle = get_tsHandle(streamP->fileID);
         ts_read_array(handle, timeName, timevarBuffer);
         for (size_t i = 0; i < numTimesteps; ++i)
         {
@@ -320,7 +297,7 @@ dtype_str_to_id(std::string const &s)
   return CDI_DATATYPE_FLT32;
 }
 
-std::optional<double>
+static std::optional<double>
 string_to_double(const std::string &str)
 {
   double value{};
@@ -351,7 +328,7 @@ find_time_dimname(tsMetadata const &md)
 int
 ts_inq_contents(stream_t *streamP)
 {
-  auto handle = get_tsHandle(streamP->fileID);
+  auto *handle = get_tsHandle(streamP->fileID);
   auto &cfg = handle->cfg;
 
   auto *query = streamP->query;
@@ -398,7 +375,7 @@ ts_inq_contents(stream_t *streamP)
 
     if (cfg.arrays.empty())
     {
-      printf("No data arrays found in %s!", cfg.path.c_str());
+      printf("No data arrays found in %s!\n", cfg.path.c_str());
       return -1;
     }
   }
@@ -427,7 +404,7 @@ ts_inq_contents(stream_t *streamP)
 
   if (!tsApplyConfig(handle))
   {
-    printf("Apply config failed for %s!", cfg.path.c_str());
+    printf("Apply config failed for %s!\n", cfg.path.c_str());
     return -1;
   }
 
@@ -460,7 +437,7 @@ ts_inq_contents(stream_t *streamP)
   auto timeDimName = find_time_dimname(md);
   for (auto &a : md.arrayList)
   {
-    if (a.shape.size() > 0) { a.time_constant = (a.dim_names[0] != timeDimName); }
+    if (!a.shape.empty()) { a.time_constant = (a.dim_names[0] != timeDimName); }
   }
 
   if (CDI_Debug)
@@ -647,50 +624,7 @@ ts_inq_contents(stream_t *streamP)
     ts_read_timesteps((int) numSteps, streamP, &taxis0, timeDimName.c_str());
     taxisDestroyKernel(&taxis0);
   }
-  // Ein sequentieller Durchlauf: aeussere Schleife ueber die Zeitschritte,
-  // innere Schleife ueber die (konstant viele) Felder je Schritt.  Zeitdimension
-  // und Feldzahl sind fuer alle Arrays gleich; jedes Feld wird genau einmal
-  // gelesen, im Schreibmodus direkt in den Ausgabestore geschrieben.
-  /*
-  const std::size_t numFields = tsGetNumFields(handle);
-  tsField field;
-  std::vector<float> data;
-  std::int64_t step;
-  if (!cfg.out_path) { std::cout << "# timestep  layer  count  missing  min  mean  max  array\n"; }
-  while ((step = tsGetNextStep(handle)) >= 0)
-  {
-    for (std::size_t f = 0; f < numFields; ++f)
-    {
-      if (!tsGetField(handle, field)) break;
-      const tsArray &a = md.arrayList[field.array];
-      data.resize(static_cast<std::size_t>(a.num_cells));
-      if (!tsReadField(handle, data.data(), data.size()))
-      {
-        tsCloseFile(handle);
-        return 1;
-      }
-      double sum = 0.0;
-      std::size_t valid = 0;
-      double mn = std::numeric_limits<double>::infinity();
-      double mx = -std::numeric_limits<double>::infinity();
-      for (const float value : data)
-      {
-        const double v = static_cast<double>(value);
-        if (std::isnan(v)) continue;
-        sum += v;
-        if (v < mn) mn = v;
-        if (v > mx) mx = v;
-        ++valid;
-      }
-      print_row(step + 1, a.bstart.size() >= 3 ? field.layer + 1 : 0, a.num_cells, valid, mn, sum / static_cast<double>(valid),
-  mx, a.name);
-    }
-  }
-  handle->cur_t = handle->start_t - 1;
-  handle->next_field = 0;
-  handle->have_field = false;
-  handle->done = false;
-  */
+
   handle->cur_t = handle->start_t;
 
   return 0;
@@ -699,7 +633,7 @@ ts_inq_contents(stream_t *streamP)
 int
 ts_inq_timestep(stream_t *streamP, int tsID)
 {
-  auto handle = get_tsHandle(streamP->fileID);
+  auto *handle = get_tsHandle(streamP->fileID);
   std::int64_t step = tsGetNextStep(handle);
 
   streamP->curTsID = tsID;
@@ -735,7 +669,7 @@ count_nummiss(T *data, size_t numCells, double mv)
 void
 ts_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *data, size_t *numMissVals)
 {
-  auto handle = get_tsHandle(streamP->fileID);
+  auto *handle = get_tsHandle(streamP->fileID);
 
   tsField field;
   if (!tsGetField(handle, field))
@@ -746,11 +680,10 @@ ts_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *
   tsMetadata const &md = tsGetReadMetadata(handle);
   const tsArray &a = md.arrayList[field.array];
   size_t numCells = a.num_cells;
-  float *fdata = (float *) data;
   if (memtype == MEMTYPE_DOUBLE)
-    tsReadField(handle, (double *) data, numCells);
+    tsReadField(handle, static_cast<double *>(data), numCells);
   else
-    tsReadField(handle, (float *) data, numCells);
+    tsReadField(handle, static_cast<float *>(data), numCells);
 
   size_t numMiss = 0;
   if (a.fill_value != "-")
@@ -759,9 +692,9 @@ ts_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *
     if (*missValOpt)
     {
       if (memtype == MEMTYPE_DOUBLE)
-        numMiss = count_nummiss((double *) data, numCells, *missValOpt);
+        numMiss = count_nummiss(static_cast<double *>(data), numCells, *missValOpt);
       else
-        numMiss = count_nummiss((float *) data, numCells, *missValOpt);
+        numMiss = count_nummiss(static_cast<float *>(data), numCells, *missValOpt);
     }
   }
   *numMissVals = numMiss;
@@ -773,7 +706,7 @@ ts_read_field(stream_t *streamP, int memtype, void *data, size_t *numMissVals)
   int tsID = streamP->curTsID;
   int vrecID = streamP->tsteps[tsID].curRecID;
   int recID = streamP->tsteps[tsID].recIDs[vrecID];
-  recinfo_t *recInfo = &(streamP->tsteps[tsID].recinfo[recID]);
+  recinfo_t *recInfo = &streamP->tsteps[tsID].recinfo[recID];
 
   ts_read_var_slice(streamP, recInfo->varID, recInfo->levelID, memtype, data, numMissVals);
 }
