@@ -700,6 +700,8 @@ ts_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *
   else
     tsReadField(handle, static_cast<float *>(data), numCells);
 
+  streamP->numvals += numCells;
+
   size_t numMiss = 0;
   if (a.fill_value != "-")
   {
