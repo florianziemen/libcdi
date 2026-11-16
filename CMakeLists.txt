@@ -125,3 +125,8 @@ endif ()
 if (BUILD_TESTING)
   add_subdirectory(tests)
 endif ()
+
+find_package(OpenMP)
+if(OpenMP_FOUND)
+  target_link_libraries(libcdi PUBLIC OpenMP::OpenMP_C)
+endif()
