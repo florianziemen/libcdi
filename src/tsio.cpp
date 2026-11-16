@@ -139,6 +139,74 @@ make_s3_kvstore(const std::string &bucket, const std::string &prefix, const std:
   return kv;
 }
 
+static bool
+is_zip_path(const std::string &p)
+{
+  return p.size() >= 4 && p.compare(p.size() - 4, 4, ".zip") == 0;
+}
+
+static nlohmann::json
+make_zip_kvstore(const std::string &zip_path, const std::string &internal_path)
+{
+  nlohmann::json spec = { { "driver", "zip" }, { "base", { { "driver", "file" }, { "path", zip_path } } } };
+  if (!internal_path.empty())
+  {
+    std::string p = internal_path;
+    if (p.back() != '/') p.push_back('/');
+    spec["path"] = p;
+  }
+  return spec;
+}
+
+static std::string
+detect_zip_internal_root(const std::string &zip_path, tensorstore::Context &context)
+{
+  using namespace tensorstore;
+  auto is_zarr_root = [&](const std::string &p) -> bool
+  {
+    auto kv = make_zip_kvstore(zip_path, p);
+    auto store = kvstore::Open(kv, context).result();
+    if (!store) return false;
+    for (const char *key : { "zarr.json", ".zmetadata", ".zattrs", ".zgroup" })
+    {
+      auto r = kvstore::Read(*store, key).result();
+      if (r && r->has_value()) return true;
+    }
+    return false;
+  };
+
+  if (is_zarr_root("")) return "";
+
+  auto root_kv = make_zip_kvstore(zip_path, "");
+  auto store = kvstore::Open(root_kv, context).result();
+  if (!store) return "";
+  auto entries = kvstore::ListFuture(*store).result();
+  if (!entries) return "";
+
+  std::set<std::string> dirs;
+  for (const auto &e : *entries)
+  {
+    std::string key = e.key;
+    while (!key.empty() && key.front() == '/') key.erase(key.begin());
+    const std::size_t slash = key.find('/');
+    if (slash != std::string::npos) dirs.insert(key.substr(0, slash));
+  }
+
+  if (dirs.size() == 1)
+  {
+    const std::string cand = *dirs.begin();
+    if (is_zarr_root(cand)) return cand;
+  }
+  return "";
+}
+
+static nlohmann::json
+make_zip_root_kvstore(const std::string &zip_path, tensorstore::Context &context)
+{
+  const std::string internal = detect_zip_internal_root(zip_path, context);
+  return make_zip_kvstore(zip_path, internal);
+}
+
 nlohmann::json
 build_root_kvstore(const tsConfig &cfg, tensorstore::Context &context)
 {
@@ -149,7 +217,11 @@ build_root_kvstore(const tsConfig &cfg, tensorstore::Context &context)
   std::optional<std::string> endpoint;
   resolve_kvstore(cfg, kvstore, path, endpoint);
 
-  if (kvstore == "file") return { { "driver", "file" }, { "path", cfg.path + "/" } };
+  if (kvstore == "file")
+  {
+    if (is_zip_path(cfg.path)) return make_zip_root_kvstore(cfg.path, context);
+    return { { "driver", "file" }, { "path", cfg.path + "/" } };
+  }
 
   if (kvstore == "http")
   {
@@ -525,6 +597,19 @@ build_kvstore(const tsConfig &cfg, tensorstore::Context &context, const std::str
   }
 
   // --- file ---
+  if (is_zip_path(cfg.path))
+  {
+    const std::string internal = detect_zip_internal_root(cfg.path, context);
+    const std::string prefix = internal.empty() ? std::string() : internal + "/";
+    if (cfg.consolidated)
+    {
+      const nlohmann::json group_kv = make_zip_kvstore(cfg.path, internal);
+      const nlohmann::json array_kv = make_zip_kvstore(cfg.path, prefix + array_name + "/");
+      return build_consolidated_kvstore(context, array_name, group_kv, array_kv);
+    }
+    return { make_zip_kvstore(cfg.path, internal), /*path_embedded=*/false };
+  }
+
   if (cfg.consolidated)
   {
     const nlohmann::json group_kv{ { "driver", "file" }, { "path", cfg.path + "/" } };
@@ -1218,7 +1303,11 @@ list_array_names(const tsConfig &cfg, tensorstore::Context &context)
   resolve_kvstore(cfg, kvstore, path, endpoint);
 
   nlohmann::json group_spec;
-  if (kvstore == "file") { group_spec = { { "driver", "file" }, { "path", cfg.path } }; }
+  if (kvstore == "file")
+  {
+    if (is_zip_path(cfg.path)) { group_spec = make_zip_root_kvstore(cfg.path, context); }
+    else { group_spec = { { "driver", "file" }, { "path", cfg.path } }; }
+  }
   else if (kvstore == "http")
   {
     const std::size_t scheme = path.find("://");

@@ -168,6 +168,12 @@ cdiGetFiletype(const char *uri, int *byteorder)
     case CDI_PROTOCOL_FILE: break;                               // handled below;
   }
 
+  size_t _plen = strlen(fileName);
+  if (_plen > 4 && strcmp(fileName + _plen - 4, ".zip") == 0)
+  {
+    return CDI_FILETYPE_TSZARR3;
+  }
+
   int fileID = fileOpen(fileName, "r");
   if (fileID == CDI_UNDEFID) return CDI_ESYSTEM;
   if (fileID == -2) return CDI_ETMOF;
