@@ -415,7 +415,7 @@ ts_inq_contents(stream_t *streamP)
 
   if (!tsApplyConfig(handle))
   {
-    printf("Apply config failed for %s!\n", cfg.path.c_str());
+    fprintf(stderr, "Apply config failed for %s!\n", cfg.path.c_str());
     return -1;
   }
 
