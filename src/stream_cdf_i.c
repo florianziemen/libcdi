@@ -4718,6 +4718,27 @@ process_var_query(struct CdiQuery *query, int nvars, ncvar_t *ncvars)
   // process var query information if available
   if (query && cdiQueryNumNames(query) > 0)
   {
+    /*
+    int numNames = cdiQueryNumNames(query);
+    const char **names = cdiQueryGetNames(query);
+    for (int ncvarid = 0; ncvarid < nvars; ++ncvarid)
+    {
+      ncvar_t *ncvar = &ncvars[ncvarid];
+      if (ncvar->varStatus == DataVar)
+      {
+        bool foundName = false;
+        for (int i = 0; i < numNames; ++i)
+        {
+          if (str_is_equal(names[i], ncvar->name))
+          {
+            foundName = true;
+            break;
+          }
+        }
+        if (!foundName) { ncvar->varStatus = CoordVar; }
+      }
+    }
+    */
     for (int ncvarid = 0; ncvarid < nvars; ++ncvarid)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];

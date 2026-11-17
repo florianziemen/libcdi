@@ -239,6 +239,12 @@ cdiQueryGetGroup(const struct CdiQuery *query, int index)
   return (index >= 0 && index < query->numGroups) ? query->groups[index] : NULL;
 }
 
+const char **
+cdiQueryGetNames(const struct CdiQuery *query)
+{
+  return query->names;
+}
+
 const int64_t *
 cdiQueryGetCells(const struct CdiQuery *query)
 {
@@ -393,10 +399,10 @@ cdiQueryPrintEntriesNotFound(const struct CdiQuery *query)
       {
         if (sum_not_found(query->numNames, query->namesFound) > 0)
         {
-          printf("Name not found:");
+          fprintf(stderr, "Name not found:");
           for (int i = 0; i < query->numNames; ++i)
-            if (!query->namesFound[i]) printf(" %s", query->names[i]);
-          printf("\n");
+            if (!query->namesFound[i]) fprintf(stderr, " %s", query->names[i]);
+          fprintf(stderr, "\n");
         }
       }
       /*
