@@ -23,6 +23,7 @@ extern "C"
   void cdiQuerySetSteps(struct CdiQuery *query, int numSteps, const int64_t *steps);
   void cdiQuerySetDates(struct CdiQuery *query, int numDates, const double *dates);
   const char *cdiQueryGetGroup(const struct CdiQuery *query, int index);
+  const char **cdiQueryGetNames(const struct CdiQuery *query);
   const int64_t *cdiQueryGetCells(const struct CdiQuery *query);
   const int64_t *cdiQueryGetLayers(const struct CdiQuery *query);
   const int64_t *cdiQueryGetSteps(const struct CdiQuery *query);
