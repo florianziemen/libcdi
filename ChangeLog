@@ -1,3 +1,7 @@
+2026-11-17  Uwe Schulzweida
+
+    * NetCDF: move time constant fields at the end of the first timesteps
+
 2026-10-22  Uwe Schulzweida
 
 	* Version 2.6.6 released

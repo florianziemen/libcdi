@@ -3720,8 +3720,20 @@ cdf_define_all_vars(stream_t *streamP, int vlistID, int instID, int modelID, int
   int varidsLocal[256];
   int *varids = (nvarsData <= (int) ARRAY_SIZE(varidsLocal)) ? varidsLocal : (int *) Malloc((size_t) nvarsData * sizeof(int));
   int n = 0;
-  for (int ncvarid = 0; ncvarid < num_ncvars; ncvarid++)
-    if (ncvars[ncvarid].varStatus == DataVar) { varids[n++] = ncvarid; }
+  int nk = 2;
+  for (int k = 0; k < nk; ++k)
+  {
+    for (int ncvarid = 0; ncvarid < num_ncvars; ncvarid++)
+    {
+      ncvar_t *ncvar = &ncvars[ncvarid];
+      if (ncvar->varStatus == DataVar)
+      {
+        if (nk == 2 && k == 0 && ncvar->timetype == TIME_CONSTANT) continue;
+        if (nk == 2 && k == 1 && ncvar->timetype == TIME_VARYING) continue;
+        varids[n++] = ncvarid;
+      }
+    }
+  }
 
   if (CDI_Debug)
     for (int i = 0; i < nvarsData; i++) Message("varids[%d] = %d", i, varids[i]);

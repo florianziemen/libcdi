@@ -43,7 +43,9 @@ get_tsHandle(int fileID)
 
 const char *
 ts_lib_version(void)
-{ return tsVersion(); }
+{
+  return tsVersion();
+}
 
 static std::string
 effective_path(std::string const &path)
@@ -87,7 +89,9 @@ ts_open(const char *fileName, const char *mode, int *fileType)
 
 void
 ts_close(int fileID)
-{ tsCloseFile(get_tsHandle(fileID)); }
+{
+  tsCloseFile(get_tsHandle(fileID));
+}
 
 std::string
 fmt_dims(const std::vector<std::int64_t> &dims)
