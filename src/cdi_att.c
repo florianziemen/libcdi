@@ -382,9 +382,7 @@ The function @func{cdiDefAttInt} defines an integer attribute.
 */
 int
 cdiDefAttInt(int cdiID, int varID, const char *name, int type, int len, const int *ip)
-{
-  return cdi_def_att(CDI_DATATYPE_INT, type, cdiID, varID, name, (short) len, len * (int) sizeof(int), ip);
-}
+{ return cdi_def_att(CDI_DATATYPE_INT, type, cdiID, varID, name, (short) len, len * (int) sizeof(int), ip); }
 
 /*
 @Function  cdiDefAttFlt
@@ -407,9 +405,7 @@ The function @func{cdiDefAttFlt} defines a floating point attribute.
 */
 int
 cdiDefAttFlt(int cdiID, int varID, const char *name, int type, int len, const double *dp)
-{
-  return cdi_def_att(CDI_DATATYPE_FLT, type, cdiID, varID, name, (short) len, len * (int) sizeof(double), dp);
-}
+{ return cdi_def_att(CDI_DATATYPE_FLT, type, cdiID, varID, name, (short) len, len * (int) sizeof(double), dp); }
 
 /*
 @Function  cdiDefAttTxt
@@ -446,9 +442,7 @@ status = cdiDefAttTxt(vlistID, varID, "description", LEN(text), text);
 */
 int
 cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp)
-{
-  return cdi_def_att(CDI_DATATYPE_TXT, CDI_DATATYPE_TXT, cdiID, varID, name, (short) len, len, tp);
-}
+{ return cdi_def_att(CDI_DATATYPE_TXT, CDI_DATATYPE_TXT, cdiID, varID, name, (short) len, len, tp); }
 
 /*
 @Function  cdiInqAttInt
@@ -469,9 +463,7 @@ The function @func{cdiInqAttInt} gets the values(s) of an integer attribute.
 */
 int
 cdiInqAttInt(int cdiID, int varID, const char *name, int mlen, int *ip)
-{
-  return cdi_inq_att(CDI_DATATYPE_INT, cdiID, varID, name, mlen * (int) sizeof(int), ip);
-}
+{ return cdi_inq_att(CDI_DATATYPE_INT, cdiID, varID, name, mlen * (int) sizeof(int), ip); }
 
 /*
 @Function  cdiInqAttFlt
@@ -492,9 +484,7 @@ The function @func{cdiInqAttFlt} gets the values(s) of a floating point attribut
 */
 int
 cdiInqAttFlt(int cdiID, int varID, const char *name, int mlen, double *dp)
-{
-  return cdi_inq_att(CDI_DATATYPE_FLT, cdiID, varID, name, mlen * (int) sizeof(double), dp);
-}
+{ return cdi_inq_att(CDI_DATATYPE_FLT, cdiID, varID, name, mlen * (int) sizeof(double), dp); }
 
 /*
 @Function  cdiInqAttTxt
@@ -515,9 +505,7 @@ The function @func{cdiInqAttTxt} gets the values(s) of a text attribute.
 */
 int
 cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp)
-{
-  return cdi_inq_att(CDI_DATATYPE_TXT, cdiID, varID, name, mlen, tp);
-}
+{ return cdi_inq_att(CDI_DATATYPE_TXT, cdiID, varID, name, mlen, tp); }
 
 enum
 {
@@ -534,6 +522,7 @@ cdiAttSerialType(int indtype)
     case CDI_DATATYPE_TXT: return indtype;
     default: xabort("Unknown datatype encountered: %d\n", indtype);
   }
+  return indtype;
 }
 
 static inline int
@@ -546,6 +535,7 @@ cdiAttElemSize(int indtype)
     case CDI_DATATYPE_TXT: return 1;
     default: xabort("Unknown datatype encountered: %d\n", indtype);
   }
+  return indtype;
 }
 
 int

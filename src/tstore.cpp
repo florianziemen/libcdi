@@ -43,9 +43,7 @@ get_tsHandle(int fileID)
 
 const char *
 ts_lib_version(void)
-{
-  return tsVersion();
-}
+{ return tsVersion(); }
 
 static std::string
 effective_path(std::string const &path)
@@ -89,9 +87,7 @@ ts_open(const char *fileName, const char *mode, int *fileType)
 
 void
 ts_close(int fileID)
-{
-  tsCloseFile(get_tsHandle(fileID));
-}
+{ tsCloseFile(get_tsHandle(fileID)); }
 
 std::string
 fmt_dims(const std::vector<std::int64_t> &dims)
@@ -362,10 +358,10 @@ ts_inq_contents(stream_t *streamP)
     if (!ov.ok) return -1;
     if (!ov.groups.empty())
     {
-      printf("Found %zu groups in %s, select one of them:\n", ov.groups.size(), cfg.path.c_str());
-      for (const auto &group : ov.groups) printf(" %s", group.c_str());
-      printf("\n");
-      return -1;
+      fprintf(stderr, "Found %zu groups in %s, select one of them:\n", ov.groups.size(), cfg.path.c_str());
+      for (auto const &group : ov.groups) fprintf(stderr, " %s", group.c_str());
+      fprintf(stderr, "\n");
+      return CDI_ETMG;
     }
 
     // process var query information if available

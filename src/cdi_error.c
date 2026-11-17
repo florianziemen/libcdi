@@ -30,6 +30,7 @@ cdiStringError(int cdiErrno)
   static const char _EUFSTRUCT[]   = "Unsupported file structure";
   static const char _EUNC4[]       = "Unsupported NetCDF4 structure";
   static const char _EDIMSIZE[]    = "Invalid dimension size";
+  static const char _ETMG[]        = "Too many groups";
   static const char _EQENF[]       = "Query entries not found";
   static const char _EQNAVAIL[]    = "Query not available for file type";
   static const char _ELIMIT[]      = "Internal limits exceeded";
@@ -56,6 +57,7 @@ cdiStringError(int cdiErrno)
   case CDI_EUFSTRUCT:  return _EUFSTRUCT;
   case CDI_EUNC4:      return _EUNC4;
   case CDI_EDIMSIZE:   return _EDIMSIZE;
+  case CDI_ETMG:       return _ETMG;
   case CDI_EQENF:      return _EQENF;
   case CDI_EQNAVAIL:   return _EQNAVAIL;
   case CDI_ELIMIT:     return _ELIMIT;

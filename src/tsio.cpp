@@ -141,9 +141,7 @@ make_s3_kvstore(const std::string &bucket, const std::string &prefix, const std:
 
 static bool
 is_zip_path(const std::string &p)
-{
-  return p.size() >= 4 && p.compare(p.size() - 4, 4, ".zip") == 0;
-}
+{ return p.size() >= 4 && p.compare(p.size() - 4, 4, ".zip") == 0; }
 
 static nlohmann::json
 make_zip_kvstore(const std::string &zip_path, const std::string &internal_path)
@@ -885,9 +883,7 @@ open_array_impl(const tsConfig &cfg, tensorstore::Context &context, const std::s
 std::optional<AnyStoreType>
 open_array_any(const tsConfig &cfg, tensorstore::Context &context, const std::string &array_name, std::string &kvstore_out,
                int &detected_format, bool quiet = false)
-{
-  return open_array_impl<void>(cfg, context, array_name, kvstore_out, detected_format, quiet);
-}
+{ return open_array_impl<void>(cfg, context, array_name, kvstore_out, detected_format, quiet); }
 
 bool
 write_v2_zattrs_if_needed(const std::string &dir, const nlohmann::json &src_attrs, const nlohmann::json &src_dims)
@@ -1949,7 +1945,8 @@ make_context(const tsConfig &cfg, tensorstore::Context &context, std::optional<i
     // (hardware_concurrency * 16) und ueberlastet die Maschine, ~2x langsamer
     // als ein explizites Limit.  Default: Anzahl der Kerne.
     const unsigned int cores = std::thread::hardware_concurrency();
-    concurrency = static_cast<int>(cores > 0 ? cores : 1);
+    concurrency = static_cast<int>(cores > 1 ? cores / 2 : 1);
+    if (cfg.debug) std::cerr << "debug: use " << *concurrency << " cores\n";
   }
   nlohmann::json spec_json{ { "data_copy_concurrency", { { "limit", *concurrency } } } };
   // TensorStore-Caching ist deaktiviert (cache_pool fehlt: total_bytes_limit
@@ -2262,9 +2259,7 @@ struct tsHandleImpl : tsHandle
 
 const char *
 tsVersion()
-{
-  return TENSORSTORE_VERSION;
-}
+{ return TENSORSTORE_VERSION; }
 
 tsMetadata &
 tsGetReadMetadata(tsHandle *handle)
