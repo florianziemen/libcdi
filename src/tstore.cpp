@@ -386,8 +386,8 @@ ts_inq_contents(stream_t *streamP)
 
     if (cfg.arrays.empty())
     {
-      printf("No data arrays found in %s!\n", cfg.path.c_str());
-      return -1;
+      fprintf(stderr, "No data arrays found in %s!\n", cfg.path.c_str());
+      return CDI_ENAF;
     }
   }
 
@@ -657,7 +657,7 @@ size_t
 count_nummiss(T *data, size_t numCells, double mv)
 {
   size_t numMiss = 0;
-  T missVal = (T) mv;
+  auto missVal = static_cast<T>(mv);
   if (std::isnan(missVal))
   {
     for (size_t i = 0; i < numCells; ++i)
@@ -685,7 +685,7 @@ ts_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *
   tsField field;
   if (!tsGetField(handle, field))
   {
-    printf("ts_read_var_slice::tsGetField failed\n");
+    fprintf(stderr, "ts_read_var_slice::tsGetField failed\n");
     return;
   }
   tsMetadata const &md = tsGetReadMetadata(handle);
