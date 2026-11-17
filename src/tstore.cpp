@@ -691,10 +691,10 @@ ts_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *
   tsMetadata const &md = tsGetReadMetadata(handle);
   const tsArray &a = md.arrayList[field.array];
   size_t numCells = a.num_cells;
-  if (memtype == MEMTYPE_DOUBLE)
-    tsReadField(handle, static_cast<double *>(data), numCells);
-  else
+  if (memtype == MEMTYPE_FLOAT)
     tsReadField(handle, static_cast<float *>(data), numCells);
+  else
+    tsReadField(handle, static_cast<double *>(data), numCells);
 
   streamP->numvals += numCells;
 
@@ -704,10 +704,10 @@ ts_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *
     auto missValOpt = string_to_double(a.fill_value);
     if (*missValOpt)
     {
-      if (memtype == MEMTYPE_DOUBLE)
-        numMiss = count_nummiss(static_cast<double *>(data), numCells, *missValOpt);
-      else
+      if (memtype == MEMTYPE_FLOAT)
         numMiss = count_nummiss(static_cast<float *>(data), numCells, *missValOpt);
+      else
+        numMiss = count_nummiss(static_cast<double *>(data), numCells, *missValOpt);
     }
   }
   *numMissVals = numMiss;
