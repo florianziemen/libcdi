@@ -50,9 +50,9 @@ cdfCopyField(stream_t *streamP2, stream_t *streamP1)
   int gridID = vlistInqVarGrid(vlistID1, ivarID);
   size_t datasize = (size_t) gridInqSize(gridID);
   int datatype = vlistInqVarDatatype(vlistID1, ivarID);
-  int memtype = (datatype != CDI_DATATYPE_FLT32) ? MEMTYPE_DOUBLE : MEMTYPE_FLOAT;
+  int memtype = (datatype == CDI_DATATYPE_FLT32) ? MEMTYPE_FLOAT : MEMTYPE_DOUBLE;
 
-  void *data = Malloc(datasize * ((memtype == MEMTYPE_DOUBLE) ? sizeof(double) : sizeof(float)));
+  void *data = Malloc(datasize * ((memtype == MEMTYPE_FLOAT) ? sizeof(float) : sizeof(double)));
 
   size_t numMissVals;
   cdf_read_field(streamP1, memtype, data, &numMissVals);
@@ -63,9 +63,7 @@ cdfCopyField(stream_t *streamP2, stream_t *streamP1)
 
 void
 cdfDefField(stream_t *streamP)
-{
-  (void) streamP;
-}
+{ (void) streamP; }
 
 static void
 cdfDefComplex(stream_t *streamP, int gridID, int gridIndex)
@@ -131,9 +129,7 @@ cdfSearchIDBySize(size_t startIdx, size_t numIDs, const CdfGrid cdfGridList[/*nu
 
 static SizeType
 cdfGridInqHalfSize(int gridID)
-{
-  return gridInqSize(gridID) / 2;
-}
+{ return gridInqSize(gridID) / 2; }
 
 static void
 cdfDefSPorFC(stream_t *streamP, int gridID, int gridIndex, char *axisname, size_t maxlen, int gridRefType)
@@ -280,15 +276,11 @@ cdfDefTrajLatLon(stream_t *streamP, int gridID, int gridIndex, const struct cdfD
 
 static void
 cdfDefTrajLon(stream_t *streamP, int gridID, int gridIndex)
-{
-  cdfDefTrajLatLon(streamP, gridID, gridIndex, &gridInqsX);
-}
+{ cdfDefTrajLatLon(streamP, gridID, gridIndex, &gridInqsX); }
 
 static void
 cdfDefTrajLat(stream_t *streamP, int gridID, int gridIndex)
-{
-  cdfDefTrajLatLon(streamP, gridID, gridIndex, &gridInqsY);
-}
+{ cdfDefTrajLatLon(streamP, gridID, gridIndex, &gridInqsY); }
 
 static int
 checkDimName(int fileID, size_t dimlen, char *dimname)
@@ -695,15 +687,11 @@ finishCyclicYBounds(double *pbounds, SizeType dimlen, const double *pvals)
 
 static struct cdfPostDefActionList *
 cdfDefXaxis(stream_t *streamP, int gridID, int gridIndex, int ndims, bool addVarToGrid)
-{
-  return cdfDefAxisCommon(streamP, gridID, gridIndex, ndims, addVarToGrid, &gridInqsX, CDI_XAXIS, 'X', finishCyclicXBounds);
-}
+{ return cdfDefAxisCommon(streamP, gridID, gridIndex, ndims, addVarToGrid, &gridInqsX, CDI_XAXIS, 'X', finishCyclicXBounds); }
 
 static struct cdfPostDefActionList *
 cdfDefYaxis(stream_t *streamP, int gridID, int gridIndex, int ndims, bool addVarToGrid)
-{
-  return cdfDefAxisCommon(streamP, gridID, gridIndex, ndims, addVarToGrid, &gridInqsY, CDI_YAXIS, 'Y', finishCyclicYBounds);
-}
+{ return cdfDefAxisCommon(streamP, gridID, gridIndex, ndims, addVarToGrid, &gridInqsY, CDI_YAXIS, 'Y', finishCyclicYBounds); }
 
 static void
 cdfDefGridReference(stream_t *streamP, int gridID)

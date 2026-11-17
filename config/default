@@ -44,7 +44,6 @@ case "${HOSTNAME}" in
     bailung*|d146*)
 	${CONFPATH}configure --prefix=$HOME/local/cdi \
                     --enable-maintainer-mode \
-                    --enable-iso-c-interface \
                     --enable-swig \
                     --with-eccodes=/opt/local \
                     --with-netcdf=/opt/local \

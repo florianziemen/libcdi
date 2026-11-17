@@ -20,9 +20,7 @@
 
 static int
 srvInqDatatype(int prec)
-{
-  return (prec == EXSE_PREC_FP64) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
-}
+{ return (prec == EXSE_PREC_FP64) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32; }
 
 static int
 srvDefDatatype(int datatype)
@@ -96,17 +94,15 @@ srv_read_recordDP(stream_t *streamP, double *data, size_t *numMissVals)
 void
 srv_read_field(stream_t *streamP, int memtype, void *data, size_t *numMissVals)
 {
-  if (memtype == MEMTYPE_DOUBLE)
-    srv_read_recordDP(streamP, (double *) data, numMissVals);
-  else
+  if (memtype == MEMTYPE_FLOAT)
     srv_read_recordSP(streamP, (float *) data, numMissVals);
+  else
+    srv_read_recordDP(streamP, (double *) data, numMissVals);
 }
 
 void
 srvCopyField(stream_t *streamP2, stream_t *streamP1)
-{
-  streamFCopyRecord(streamP2, streamP1, "SRV");
-}
+{ streamFCopyRecord(streamP2, streamP1, "SRV"); }
 
 void
 srvDefField(stream_t *streamP)
@@ -165,10 +161,10 @@ srv_write_recordDP(stream_t *streamP, const double *data)
 void
 srv_write_field(stream_t *streamP, int memtype, const void *data)
 {
-  if (memtype == MEMTYPE_DOUBLE)
-    srv_write_recordDP(streamP, (const double *) data);
-  else
+  if (memtype == MEMTYPE_FLOAT)
     srv_write_recordSP(streamP, (const float *) data);
+  else
+    srv_write_recordDP(streamP, (const double *) data);
 }
 
 static void
