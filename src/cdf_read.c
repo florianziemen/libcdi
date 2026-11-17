@@ -311,9 +311,7 @@ cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float 
 
 static size_t
 min_size(size_t a, size_t b)
-{
-  return a < b ? a : b;
-}
+{ return a < b ? a : b; }
 
 static void
 transpose2dArrayDP(int gridId, double *data)
@@ -780,10 +778,10 @@ cdfReadVarSP(stream_t *streamP, int varID, float *data, size_t *numMissVals)
 void
 cdf_read_var(stream_t *streamP, int varID, int memtype, void *data, size_t *numMissVals)
 {
-  if (memtype == MEMTYPE_DOUBLE)
-    cdfReadVarDP(streamP, varID, (double *) data, numMissVals);
-  else
+  if (memtype == MEMTYPE_FLOAT)
     cdfReadVarSP(streamP, varID, (float *) data, numMissVals);
+  else
+    cdfReadVarDP(streamP, varID, (double *) data, numMissVals);
 }
 
 static void
@@ -807,9 +805,7 @@ cdf_read_var_slice_DP(stream_t *streamP, long tsID, int varID, int levelID, doub
 
 static void
 cdfReadVarSliceDP(stream_t *streamP, int varID, int levelID, double *data, size_t *numMissVals)
-{
-  cdf_read_var_slice_DP(streamP, streamP->curTsID, varID, levelID, data, numMissVals);
-}
+{ cdf_read_var_slice_DP(streamP, streamP->curTsID, varID, levelID, data, numMissVals); }
 
 static void
 cdf_read_var_slice_SP(stream_t *streamP, long tsID, int varID, int levelID, float *data, size_t *numMissVals)
@@ -832,17 +828,15 @@ cdf_read_var_slice_SP(stream_t *streamP, long tsID, int varID, int levelID, floa
 
 static void
 cdfReadVarSliceSP(stream_t *streamP, int varID, int levelID, float *data, size_t *numMissVals)
-{
-  cdf_read_var_slice_SP(streamP, streamP->curTsID, varID, levelID, data, numMissVals);
-}
+{ cdf_read_var_slice_SP(streamP, streamP->curTsID, varID, levelID, data, numMissVals); }
 
 void
 cdf_read_var_slice(stream_t *streamP, int varID, int levelID, int memtype, void *data, size_t *numMissVals)
 {
-  if (memtype == MEMTYPE_DOUBLE)
-    cdfReadVarSliceDP(streamP, varID, levelID, (double *) data, numMissVals);
-  else
+  if (memtype == MEMTYPE_FLOAT)
     cdfReadVarSliceSP(streamP, varID, levelID, (float *) data, numMissVals);
+  else
+    cdfReadVarSliceDP(streamP, varID, levelID, (double *) data, numMissVals);
 }
 
 typedef struct JobArgsCDF
@@ -859,10 +853,10 @@ cdf_read_data_async(void *untypedArgs)
 {
   JobArgsCDF *args = (JobArgsCDF *) untypedArgs;
 
-  if (args->memtype == MEMTYPE_DOUBLE)
-    cdf_read_var_slice_DP(args->streamP, args->tsID, args->varID, args->levelID, (double *) args->data, &args->numMissVals);
-  else
+  if (args->memtype == MEMTYPE_FLOAT)
     cdf_read_var_slice_SP(args->streamP, args->tsID, args->varID, args->levelID, (float *) args->data, &args->numMissVals);
+  else
+    cdf_read_var_slice_DP(args->streamP, args->tsID, args->varID, args->levelID, (double *) args->data, &args->numMissVals);
 
   return 0;
 }
@@ -874,10 +868,10 @@ cdf_read_data(stream_t *streamP, int recID, int memtype, void *data)
   recinfo_t *recInfo = &(streamP->tsteps[tsID].recinfo[recID]);
 
   size_t numMissVals = 0;
-  if (memtype == MEMTYPE_DOUBLE)
-    cdf_read_var_slice_DP(streamP, tsID, recInfo->varID, recInfo->levelID, (double *) data, &numMissVals);
-  else
+  if (memtype == MEMTYPE_FLOAT)
     cdf_read_var_slice_SP(streamP, tsID, recInfo->varID, recInfo->levelID, (float *) data, &numMissVals);
+  else
+    cdf_read_var_slice_DP(streamP, tsID, recInfo->varID, recInfo->levelID, (double *) data, &numMissVals);
 
   return numMissVals;
 }
@@ -941,9 +935,7 @@ get_global_recId(stream_t *streamP, int tsID, int recID)
 */
 
 struct recTsId
-{
-  long recID, tsID;
-};
+{ long recID, tsID; };
 
 static struct recTsId
 cdf_get_local_step_and_recId(stream_t *streamP, long globalRecId)
