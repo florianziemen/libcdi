@@ -514,6 +514,25 @@ main(int argc, char **argv)
     print_usage(argv[0]);
     return 1;
   }
+
+  // Lokale Dateisystem-Stores: eine Gruppenauswahl ueber --group kann direkt
+  // auf das Gruppenverzeichnis abgebildet werden (schneller Pfad, keine
+  // konsolidierten Wurzel-Metadaten).  Nur wenn das Verzeichnis existiert;
+  // sonst bleibt der konsolidierte Pfad als Fallback.
+  /*
+  if (cfg.group && !cfg.path.empty() && (cfg.kvstore.empty() || cfg.kvstore == "file")
+      && cfg.path.find("://") == std::string::npos)
+  {
+    std::error_code ec;
+    const std::filesystem::path candidate = std::filesystem::path(cfg.path) / *cfg.group;
+    if (std::filesystem::is_directory(candidate, ec))
+    {
+      if (!cfg.path.empty() && cfg.path.back() == '/') cfg.path.pop_back();
+      cfg.path += "/" + *cfg.group;
+      cfg.group.reset();
+    }
+  }
+  */
 #ifdef HAVE_TENSORSTORE
   if (cfg.info) { std::cerr << "TensorStore " << tsVersion() << '\n'; }
 #else
@@ -751,8 +770,7 @@ main(int argc, char **argv)
         if (v > mx) mx = v;
         ++valid;
       }
-      print_row(step + 1, a.layered ? field.layer + 1 : 0, a.num_cells, valid, mn, sum / static_cast<double>(valid), mx,
-                a.name);
+      print_row(step + 1, a.layered ? field.layer + 1 : 0, a.num_cells, valid, mn, sum / static_cast<double>(valid), mx, a.name);
     }
   }
 

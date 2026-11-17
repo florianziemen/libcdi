@@ -277,16 +277,35 @@ read_consolidated_metadata(const nlohmann::json &group_kvstore, tensorstore::Con
   return out;
 }
 
+// Cache fuer die geparsten konsolidierten Metadaten der Store-Wurzel: das
+// Lesen+Parsen der (potentiell mehrere MB grossen) Wurzel-`zarr.json` /
+// `.zmetadata` darf nicht fuer jedes Array erneut passieren.
+static std::mutex g_consolidated_cache_mutex;
+static std::map<std::string, std::map<std::string, std::string>> g_zarr3_consolidated_cache;
+static std::map<std::string, std::map<std::string, std::string>> g_zarr2_consolidated_cache;
+
 std::map<std::string, std::string>
 read_zarr3_consolidated(const nlohmann::json &root_kvstore, tensorstore::Context &context)
 {
   using namespace tensorstore;
 
+  const std::string cache_key = root_kvstore.dump();
+  {
+    std::lock_guard<std::mutex> lock(g_consolidated_cache_mutex);
+    auto it = g_zarr3_consolidated_cache.find(cache_key);
+    if (it != g_zarr3_consolidated_cache.end()) return it->second;
+  }
+
   auto store = kvstore::Open(root_kvstore, context).result();
   if (!store) return {};
 
   auto read_result = kvstore::Read(*store, "zarr.json").result();
-  if (!read_result || !read_result->has_value()) return {};
+  if (!read_result || !read_result->has_value())
+  {
+    std::lock_guard<std::mutex> lock(g_consolidated_cache_mutex);
+    g_zarr3_consolidated_cache[cache_key] = {};
+    return {};
+  }
 
   std::string raw;
   for (const absl::string_view chunk : read_result->value.Chunks()) raw.append(chunk.data(), chunk.size());
@@ -298,16 +317,25 @@ read_zarr3_consolidated(const nlohmann::json &root_kvstore, tensorstore::Context
   }
   catch (...)
   {
+    std::lock_guard<std::mutex> lock(g_consolidated_cache_mutex);
+    g_zarr3_consolidated_cache[cache_key] = {};
     return {};
   }
   if (!root.contains("consolidated_metadata") || !root["consolidated_metadata"].contains("metadata")
       || !root["consolidated_metadata"]["metadata"].is_object())
   {
+    std::lock_guard<std::mutex> lock(g_consolidated_cache_mutex);
+    g_zarr3_consolidated_cache[cache_key] = {};
     return {};
   }
 
   std::map<std::string, std::string> out;
   for (const auto &[key, value] : root["consolidated_metadata"]["metadata"].items()) { out[key] = value.dump(); }
+
+  {
+    std::lock_guard<std::mutex> lock(g_consolidated_cache_mutex);
+    g_zarr3_consolidated_cache[cache_key] = out;
+  }
   return out;
 }
 
@@ -316,11 +344,23 @@ read_zarr2_consolidated(const nlohmann::json &root_kvstore, tensorstore::Context
 {
   using namespace tensorstore;
 
+  const std::string cache_key = root_kvstore.dump();
+  {
+    std::lock_guard<std::mutex> lock(g_consolidated_cache_mutex);
+    auto it = g_zarr2_consolidated_cache.find(cache_key);
+    if (it != g_zarr2_consolidated_cache.end()) return it->second;
+  }
+
   auto store = kvstore::Open(root_kvstore, context).result();
   if (!store) return {};
 
   auto read_result = kvstore::Read(*store, ".zmetadata").result();
-  if (!read_result || !read_result->has_value()) return {};
+  if (!read_result || !read_result->has_value())
+  {
+    std::lock_guard<std::mutex> lock(g_consolidated_cache_mutex);
+    g_zarr2_consolidated_cache[cache_key] = {};
+    return {};
+  }
 
   std::string raw;
   for (const absl::string_view chunk : read_result->value.Chunks()) raw.append(chunk.data(), chunk.size());
@@ -332,12 +372,24 @@ read_zarr2_consolidated(const nlohmann::json &root_kvstore, tensorstore::Context
   }
   catch (...)
   {
+    std::lock_guard<std::mutex> lock(g_consolidated_cache_mutex);
+    g_zarr2_consolidated_cache[cache_key] = {};
     return {};
   }
-  if (!root.contains("metadata") || !root["metadata"].is_object()) return {};
+  if (!root.contains("metadata") || !root["metadata"].is_object())
+  {
+    std::lock_guard<std::mutex> lock(g_consolidated_cache_mutex);
+    g_zarr2_consolidated_cache[cache_key] = {};
+    return {};
+  }
 
   std::map<std::string, std::string> out;
   for (const auto &[key, value] : root["metadata"].items()) { out[key] = value.dump(); }
+
+  {
+    std::lock_guard<std::mutex> lock(g_consolidated_cache_mutex);
+    g_zarr2_consolidated_cache[cache_key] = out;
+  }
   return out;
 }
 
