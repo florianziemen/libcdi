@@ -340,6 +340,38 @@ find_time_dimname(tsMetadata const &md)
   return {};
 }
 
+static int
+define_healpix(size_t numCells, std::map<std::string, std::string> const &attributes)
+{
+  auto mapName = attributes.find("grid_mapping_name")->second;
+  if (mapName != "healpix") return CDI_UNDEFID;
+  int refinementLevel{};
+  std::string indexingScheme;
+  if (attributes.contains("refinement_level") && attributes.contains("indexing_scheme"))
+  {
+    refinementLevel = std::stoi(attributes.find("refinement_level")->second);
+    indexingScheme = attributes.find("indexing_scheme")->second;
+  }
+  else if (attributes.contains("healpix_nside") && attributes.contains("healpix_order"))
+  {
+    refinementLevel = std::log2(std::stoi(attributes.find("healpix_nside")->second));
+    indexingScheme = attributes.find("healpix_order")->second;
+  }
+  else
+  {
+    return CDI_UNDEFID;
+  }
+
+  auto gridID = gridCreate(GRID_HEALPIX, numCells);
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_DIMNAME, "cell");
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, "healpix");
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, mapName.c_str());
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", static_cast<int>(mapName.size()), mapName.c_str());
+  cdiDefAttInt(gridID, CDI_GLOBAL, "refinement_level", CDI_DATATYPE_INT32, 1, &refinementLevel);
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "indexing_scheme", (int) indexingScheme.size(), indexingScheme.c_str());
+  return gridID;
+}
+
 int
 ts_inq_contents(stream_t *streamP)
 {
@@ -526,35 +558,7 @@ ts_inq_contents(stream_t *streamP)
       if (attributes.contains("units")) { timeUnits = attributes.find("units")->second; }
       if (attributes.contains("calendar")) { calendar = attribute_to_calendar(attributes.find("calendar")->second.c_str()); }
     }
-    else if (gridID == CDI_UNDEFID && attributes.contains("grid_mapping_name"))
-    {
-      auto mapName = attributes.find("grid_mapping_name")->second;
-      if (mapName != "healpix") continue;
-      int refinementLevel{};
-      std::string indexingScheme;
-      if (attributes.contains("refinement_level") && attributes.contains("indexing_scheme"))
-      {
-        refinementLevel = std::stoi(attributes.find("refinement_level")->second);
-        indexingScheme = attributes.find("indexing_scheme")->second;
-      }
-      else if (attributes.contains("healpix_nside") && attributes.contains("healpix_order"))
-      {
-        refinementLevel = std::log2(std::stoi(attributes.find("healpix_nside")->second));
-        indexingScheme = attributes.find("healpix_order")->second;
-      }
-      else
-      {
-        continue;
-      }
-
-      gridID = gridCreate(GRID_HEALPIX, numCells);
-      cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_DIMNAME, "cell");
-      cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, "healpix");
-      cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, mapName.c_str());
-      cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", static_cast<int>(mapName.size()), mapName.c_str());
-      cdiDefAttInt(gridID, CDI_GLOBAL, "refinement_level", CDI_DATATYPE_INT32, 1, &refinementLevel);
-      cdiDefAttTxt(gridID, CDI_GLOBAL, "indexing_scheme", (int) indexingScheme.size(), indexingScheme.c_str());
-    }
+    else if (gridID == CDI_UNDEFID && attributes.contains("grid_mapping_name")) { gridID = define_healpix(numCells, attributes); }
     else
     {
       auto numLayers = array.shape[0];
