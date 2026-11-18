@@ -572,7 +572,14 @@ ts_inq_contents(stream_t *streamP)
         numLayers = *cfg.layer.end - cfg.layer.start + 1;
       }
 
-      int zaxisID = zaxisCreate(ZAXIS_GENERIC, numLayers);
+      int zaxisType = ZAXIS_GENERIC;
+      if (attributes.contains("standard_name"))
+      {
+        auto stdName = attributes.find("standard_name")->second;
+        if (stdName == "air_pressure") { zaxisType = ZAXIS_PRESSURE; }
+      }
+
+      int zaxisID = zaxisCreate(zaxisType, numLayers);
       zaxisDefLevels(zaxisID, layers.data() + start);
       cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, array.name.c_str());
       if (attributes.contains("units"))
