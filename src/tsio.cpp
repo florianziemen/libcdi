@@ -141,7 +141,9 @@ make_s3_kvstore(const std::string &bucket, const std::string &prefix, const std:
 
 static bool
 is_zip_path(const std::string &p)
-{ return p.size() >= 4 && p.compare(p.size() - 4, 4, ".zip") == 0; }
+{
+  return p.size() >= 4 && p.compare(p.size() - 4, 4, ".zip") == 0;
+}
 
 static nlohmann::json
 make_zip_kvstore(const std::string &zip_path, const std::string &internal_path)
@@ -883,7 +885,9 @@ open_array_impl(const tsConfig &cfg, tensorstore::Context &context, const std::s
 std::optional<AnyStoreType>
 open_array_any(const tsConfig &cfg, tensorstore::Context &context, const std::string &array_name, std::string &kvstore_out,
                int &detected_format, bool quiet = false)
-{ return open_array_impl<void>(cfg, context, array_name, kvstore_out, detected_format, quiet); }
+{
+  return open_array_impl<void>(cfg, context, array_name, kvstore_out, detected_format, quiet);
+}
 
 bool
 write_v2_zattrs_if_needed(const std::string &dir, const nlohmann::json &src_attrs, const nlohmann::json &src_dims)
@@ -1992,17 +1996,47 @@ json_dim_names(const nlohmann::json &j)
   return {};
 }
 
-// `grid_mapping`-Attribut eines Array-Metadaten-Objekts ("" wenn nicht gesetzt).
 std::string
-json_grid_mapping(const nlohmann::json &j)
+json_get_attribute_string(const nlohmann::json &j, std::string_view attrName)
 {
-  if (j.contains("attributes") && j["attributes"].is_object() && j["attributes"].contains("grid_mapping")
-      && j["attributes"]["grid_mapping"].is_string())
+  if (j.contains("attributes") && j["attributes"].is_object() && j["attributes"].contains(attrName)
+      && j["attributes"][attrName].is_string())
   {
-    return j["attributes"]["grid_mapping"].get<std::string>();
+    return j["attributes"][attrName].get<std::string>();
   }
-  if (j.contains("grid_mapping") && j["grid_mapping"].is_string()) return j["grid_mapping"].get<std::string>();
+  if (j.contains(attrName) && j[attrName].is_string()) return j[attrName].get<std::string>();
   return {};
+}
+
+/*
+#include <regex>
+std::vector<std::string>
+_split_string_regex(std::string const &str, std::string const &regexStr)
+{
+  if (str.empty()) return {};
+  std::regex regex(regexStr);
+  return { std::sregex_token_iterator(str.begin(), str.end(), regex, -1), std::sregex_token_iterator() };
+}
+*/
+std::vector<std::string>
+_split_string(std::string_view sv, std::string_view delimiter)
+{
+  std::vector<std::string> tokens;
+  if (sv.empty()) return tokens;
+  if (delimiter.empty())
+  {
+    tokens.emplace_back(sv);
+    return tokens;
+  }
+  size_t pos = 0;
+  size_t found;
+  while ((found = sv.find(delimiter, pos)) != std::string_view::npos)
+  {
+    tokens.emplace_back(sv.substr(pos, found - pos));
+    pos = found + delimiter.size();
+  }
+  tokens.emplace_back(sv.substr(pos));
+  return tokens;
 }
 
 tsInfo
@@ -2023,7 +2057,8 @@ overview_line_from_zarr3(const std::string &name, const nlohmann::json &j)
     row.units = j["attributes"]["units"].get<std::string>();
   }
   row.dim_names = json_dim_names(j);
-  row.grid_mapping = json_grid_mapping(j);
+  row.grid_mapping = json_get_attribute_string(j, "grid_mapping");
+  row.coordNames = _split_string(json_get_attribute_string(j, "coordinates"), " ");
   return row;
 }
 
@@ -2100,7 +2135,8 @@ overview_rows_from_zarr2_consolidated(const std::map<std::string, std::string> &
         const nlohmann::json a = nlohmann::json::parse(attrs->second);
         if (a.contains("units") && a["units"].is_string()) row.units = a["units"].get<std::string>();
         row.dim_names = json_dim_names(a);
-        row.grid_mapping = json_grid_mapping(a);
+        row.grid_mapping = json_get_attribute_string(a, "grid_mapping");
+        row.coordNames = _split_string(json_get_attribute_string(a, "coordinates"), " ");
       }
       catch (...)
       {
@@ -2173,7 +2209,8 @@ overview_rows_from_stores(const tsConfig &cfg, tensorstore::Context &context, co
             row.units = j["attributes"]["units"].get<std::string>();
           }
           row.dim_names = json_dim_names(j);
-          row.grid_mapping = json_grid_mapping(j);
+          row.grid_mapping = json_get_attribute_string(j, "grid_mapping");
+          row.coordNames = _split_string(json_get_attribute_string(j, "coordinates"), " ");
         }
         else if (j.contains("compressor") && j["compressor"].is_object() && j["compressor"].contains("id"))
         {
@@ -2194,7 +2231,8 @@ overview_rows_from_stores(const tsConfig &cfg, tensorstore::Context &context, co
           const nlohmann::json j = nlohmann::json::parse(attrs);
           if (j.contains("units") && j["units"].is_string()) row.units = j["units"].get<std::string>();
           row.dim_names = json_dim_names(j);
-          row.grid_mapping = json_grid_mapping(j);
+          row.grid_mapping = json_get_attribute_string(j, "grid_mapping");
+          row.coordNames = _split_string(json_get_attribute_string(j, "coordinates"), " ");
         }
         catch (...)
         {
@@ -2259,7 +2297,9 @@ struct tsHandleImpl : tsHandle
 
 const char *
 tsVersion()
-{ return TENSORSTORE_VERSION; }
+{
+  return TENSORSTORE_VERSION;
+}
 
 tsMetadata &
 tsGetReadMetadata(tsHandle *handle)

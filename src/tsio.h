@@ -112,6 +112,7 @@ struct tsInfo
   std::string compressor;              // "-" wenn unbekannt
   std::vector<std::string> dim_names;  // dimension_names / _ARRAY_DIMENSIONS
   std::string grid_mapping;            // `grid_mapping`-Attribut, "" wenn nicht gesetzt
+  std::vector<std::string> coordNames;
 };
 
 // Uebersicht eines Datensatzes: Gruppenliste (nur Zarr-3-Wurzel) oder eine

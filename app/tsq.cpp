@@ -447,22 +447,22 @@ print_overview(const tsConfig &cfg, const tsOverview &ov)
   // als Dimensionsname oder als `grid_mapping`-Ziel eines Arrays vorkommt, ist
   // eine Koordinate und wird aussortiert.
   std::set<std::string> coord_names;
-  for (const auto &row : ov.arrays)
-    for (const auto &d : row.dim_names) coord_names.insert(d);
-  for (const auto &row : ov.arrays)
-    if (!row.grid_mapping.empty()) coord_names.insert(row.grid_mapping);
+  for (const auto &a : ov.arrays)
+    for (const auto &d : a.dim_names) coord_names.insert(d);
+  for (const auto &a : ov.arrays)
+    if (!a.grid_mapping.empty()) coord_names.insert(a.grid_mapping);
   std::vector<const tsInfo *> data_arrays;
-  for (const auto &row : ov.arrays)
-    if (!coord_names.count(row.name)) data_arrays.push_back(&row);
+  for (const auto &a : ov.arrays)
+    if (!coord_names.count(a.name)) data_arrays.push_back(&a);
   if (data_arrays.empty()) return false;
 
   std::cout << "=== Dataset overview ===\n";
   std::cout << "#  Name  [Units]  DataType  Shape  Chunks  Compressor\n";
   std::size_t idx = 1;
-  for (const auto *row : data_arrays)
+  for (const auto *a : data_arrays)
   {
-    std::cout << std::setw(2) << idx++ << "  " << row->name << "  [" << row->units << "]  " << row->data_type << "  " << row->shape
-              << "  " << row->chunks << "  " << row->compressor << "\n";
+    std::cout << std::setw(2) << idx++ << "  " << a->name << "  [" << a->units << "]  " << a->data_type << "  " << a->shape << "  "
+              << a->chunks << "  " << a->compressor << "\n";
   }
   return ov.ok;
 }

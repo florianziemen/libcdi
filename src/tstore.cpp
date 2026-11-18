@@ -410,16 +410,22 @@ ts_inq_contents(stream_t *streamP)
     }
     else
     {
-      std::set<std::string> coord_names;
+      std::set<std::string> coordNames;
       for (const auto &a : ov.arrays)
-        for (const auto &d : a.dim_names) coord_names.insert(d);
+        for (const auto &d : a.dim_names) coordNames.insert(d);
       for (const auto &a : ov.arrays)
-        if (!a.grid_mapping.empty()) coord_names.insert(a.grid_mapping);
+        if (!a.grid_mapping.empty()) coordNames.insert(a.grid_mapping);
       for (const auto &a : ov.arrays)
-        if (a.dim_names.empty()) coord_names.insert(a.name);
+        if (a.dim_names.empty()) coordNames.insert(a.name);
+      for (const auto &a : ov.arrays)
+        if (!a.coordNames.empty())
+        {
+          for (const auto &cname : a.coordNames) coordNames.insert(cname);
+        }
+
       cfg.arrays.clear();
       for (const auto &a : ov.arrays)
-        if (!coord_names.count(a.name)) cfg.arrays.push_back(a.name);
+        if (!coordNames.count(a.name)) cfg.arrays.push_back(a.name);
     }
 
     if (cfg.arrays.empty())
