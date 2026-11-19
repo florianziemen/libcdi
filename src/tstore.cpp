@@ -614,16 +614,28 @@ ts_inq_contents(stream_t *streamP)
       int timeType = TIME_VARYING;
       // auto numCells = static_cast<size_t>(a.shape[rank - 1]);
       int zaxisID = surfaceID;
+      int tindex = 0;
+      int zindex = -1;
+      int xindex = 1;
       if (rank == 3)
       {
         // zaxisID = zaxisCreate(ZAXIS_GENERIC, a.num_layers);
         // printf("array 3d: %s dimname %s zaxisID %d\n", a.name.c_str(), a.dim_names[1].c_str(), zaxisMap[a.dim_names[1]]);
+        tindex = 0;
+        zindex = 1;
+        xindex = 2;
         zaxisID = zaxisMap[a.dim_names[1]];
       }
       else if (a.dim_names[0] != timeDimName)
       {
         timeType = TIME_CONSTANT;
-        if (rank == 2) { zaxisID = zaxisMap[a.dim_names[0]]; }
+        if (rank == 2)
+        {
+          tindex = -1;
+          zindex = 0;
+          xindex = 1;
+          zaxisID = zaxisMap[a.dim_names[0]];
+        }
       }
       if (k == 0 && timeType == TIME_CONSTANT) continue;
       if (k == 1 && timeType == TIME_VARYING) continue;
@@ -642,6 +654,11 @@ ts_inq_contents(stream_t *streamP)
         auto units = a.attributes.find("units")->second;
         cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units.c_str());
       }
+
+      if (tindex >= 0 && a.chunks[tindex] > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMT, a.chunks[tindex]);
+      if (zindex >= 0 && a.chunks[zindex] > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMZ, a.chunks[zindex]);
+      // if (yindex >= 0 && a.chunks[yindex] > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMY, a.chunks[yindex]);
+      if (xindex >= 0 && a.chunks[xindex] > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMX, a.chunks[xindex]);
     }
   }
 
