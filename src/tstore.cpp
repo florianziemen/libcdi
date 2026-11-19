@@ -659,6 +659,8 @@ ts_inq_contents(stream_t *streamP)
       if (zindex >= 0 && a.chunks[zindex] > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMZ, a.chunks[zindex]);
       // if (yindex >= 0 && a.chunks[yindex] > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMY, a.chunks[yindex]);
       if (xindex >= 0 && a.chunks[xindex] > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMX, a.chunks[xindex]);
+
+      if (!a.compressor.empty()) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_FILTER);
     }
   }
 
