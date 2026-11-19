@@ -3339,19 +3339,45 @@ tsDatasetOverview(const tsConfig &config, tsOverview &ov)
   const auto meta3 = read_zarr3_consolidated(root_kv, context);
   if (!meta3.empty())
   {
-    ov.groups = consolidated_children(meta3, "", /*want_groups=*/true);
-    if (!ov.groups.empty()) return true;
-    const std::vector<std::string> arrays = consolidated_children(meta3, "", /*want_groups=*/false);
-    if (!arrays.empty()) { return overview_rows_from_consolidated(meta3, "", arrays, ov.arrays); }
+    std::string group;
+    for (int i = 0; i < 2; ++i)
+    {
+      ov.groups = consolidated_children(meta3, group, /*want_groups=*/true);
+      const std::vector<std::string> arrays = consolidated_children(meta3, group, /*want_groups=*/false);
+      if (!arrays.empty()) { return overview_rows_from_consolidated(meta3, group, arrays, ov.arrays); }
+      if (i == 0 && ov.groups.size() == 1)
+      {
+        group = ov.groups[0];
+        continue;
+      }
+      else
+      {
+        for (auto &g : ov.groups) { g = group + '/' + g; }
+      }
+      if (!ov.groups.empty()) return true;
+    }
   }
 
   const auto meta2 = read_zarr2_consolidated(root_kv, context);
   if (!meta2.empty())
   {
-    ov.groups = zarr2_children(meta2, "", /*want_groups=*/true);
-    if (!ov.groups.empty()) return true;
-    const std::vector<std::string> arrays = zarr2_children(meta2, "", /*want_groups=*/false);
-    if (!arrays.empty()) { return overview_rows_from_zarr2_consolidated(meta2, "", arrays, ov.arrays); }
+    std::string group;
+    for (int i = 0; i < 2; ++i)
+    {
+      ov.groups = zarr2_children(meta2, group, /*want_groups=*/true);
+      const std::vector<std::string> arrays = zarr2_children(meta2, group, /*want_groups=*/false);
+      if (!arrays.empty()) { return overview_rows_from_zarr2_consolidated(meta2, group, arrays, ov.arrays); }
+      if (i == 0 && ov.groups.size() == 1)
+      {
+        group = ov.groups[0];
+        continue;
+      }
+      else
+      {
+        for (auto &g : ov.groups) { g = group + '/' + g; }
+      }
+      if (!ov.groups.empty()) return true;
+    }
   }
 
   const std::vector<std::string> names = list_array_names(config, context);

@@ -394,10 +394,15 @@ ts_inq_contents(stream_t *streamP)
     if (!ov.ok) return -1;
     if (!ov.groups.empty())
     {
-      fprintf(stderr, "Found %zu groups in %s, select one of them:\n", ov.groups.size(), cfg.path.c_str());
-      for (auto const &group : ov.groups) fprintf(stderr, " %s", group.c_str());
-      fprintf(stderr, "\n");
-      return CDI_ETMG;
+      if (ov.arrays.empty())
+      {
+        fprintf(stderr, "Found %zu sub-groups, select one of them:\n", ov.groups.size());
+        for (auto const &group : ov.groups) fprintf(stderr, " %s", group.c_str());
+        fprintf(stderr, "\n");
+        return CDI_ETMG;
+      }
+
+      fprintf(stderr, "Found %zu sub-groups and %zu arrays, only the array are used!\n", ov.groups.size(), ov.arrays.size());
     }
 
     // process var query information if available
