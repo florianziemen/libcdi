@@ -614,14 +614,11 @@ ts_inq_contents(stream_t *streamP)
       int timeType = TIME_VARYING;
       // auto numCells = static_cast<size_t>(a.shape[rank - 1]);
       int zaxisID = surfaceID;
-      int tindex = 0;
+      int tindex = (k == 0) ? 0 : -1;
       int zindex = -1;
       int xindex = 1;
       if (rank == 3)
       {
-        // zaxisID = zaxisCreate(ZAXIS_GENERIC, a.num_layers);
-        // printf("array 3d: %s dimname %s zaxisID %d\n", a.name.c_str(), a.dim_names[1].c_str(), zaxisMap[a.dim_names[1]]);
-        tindex = 0;
         zindex = 1;
         xindex = 2;
         zaxisID = zaxisMap[a.dim_names[1]];
@@ -631,11 +628,11 @@ ts_inq_contents(stream_t *streamP)
         timeType = TIME_CONSTANT;
         if (rank == 2)
         {
-          tindex = -1;
           zindex = 0;
           xindex = 1;
           zaxisID = zaxisMap[a.dim_names[0]];
         }
+        else if (rank == 1) { xindex = 0; }
       }
       if (k == 0 && timeType == TIME_CONSTANT) continue;
       if (k == 1 && timeType == TIME_VARYING) continue;
