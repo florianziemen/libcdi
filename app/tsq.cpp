@@ -151,8 +151,8 @@ parse_args(int argc, char **argv, tsConfig &cfg)
 {
   for (int i = 1; i < argc; ++i)
   {
-    const std::string arg = argv[i];
-    auto need_value = [&](const char *name) -> const char *
+    const auto arg = std::string{ argv[i] };
+    auto need_value = [&](std::string_view name) -> const char *
     {
       if (i + 1 >= argc)
       {
@@ -164,13 +164,11 @@ parse_args(int argc, char **argv, tsConfig &cfg)
 
     if (arg == "--format")
     {
-      const char *v = need_value("--format");
+      const char *v = need_value(arg);
       if (!v) return false;
-      const std::string s = v;
-      if (s == "zarr2")
-        cfg.format = 2;
-      else if (s == "zarr3")
-        cfg.format = 3;
+      const auto s = std::string{ v };
+      if (s == "zarr2") { cfg.format = 2; }
+      else if (s == "zarr3") { cfg.format = 3; }
       else
       {
         std::cerr << "Invalid zarr format: " << s << " (must be zarr2 or zarr3)\n";
@@ -179,9 +177,9 @@ parse_args(int argc, char **argv, tsConfig &cfg)
     }
     else if (arg == "--kvstore")
     {
-      const char *v = need_value("--kvstore");
+      const char *v = need_value(arg);
       if (!v) return false;
-      const std::string s = v;
+      const auto s = std::string{ v };
       if (s != "file" && s != "s3" && s != "http")
       {
         std::cerr << "Invalid kvstore: " << s << " (must be file, s3 or http)\n";
@@ -191,13 +189,13 @@ parse_args(int argc, char **argv, tsConfig &cfg)
     }
     else if (arg == "--path")
     {
-      const char *v = need_value("--path");
+      const char *v = need_value(arg);
       if (!v) return false;
       cfg.path = v;
     }
     else if (arg == "--name")
     {
-      const char *v = need_value("--name");
+      const char *v = need_value(arg);
       if (!v) return false;
       std::stringstream ss(v);
       std::string item;
@@ -208,20 +206,20 @@ parse_args(int argc, char **argv, tsConfig &cfg)
     }
     else if (arg == "--endpoint")
     {
-      const char *v = need_value("--endpoint");
+      const char *v = need_value(arg);
       if (!v) return false;
       cfg.endpoint = v;
     }
     else if (arg == "--step" || arg == "--layer" || arg == "--cell")
     {
-      const char *v = need_value(arg.c_str());
+      const char *v = need_value(arg);
       if (!v) return false;
       tsRange &range = (arg == "--step") ? cfg.step : (arg == "--layer" ? cfg.layer : cfg.cell);
       if (!parse_index_range(arg, v, range)) return false;
     }
     else if (arg == "--step-chunk" || arg == "--cell-chunk")
     {
-      const char *v = need_value(arg.c_str());
+      const char *v = need_value(arg);
       if (!v) return false;
       errno = 0;
       char *endp = nullptr;
@@ -241,15 +239,15 @@ parse_args(int argc, char **argv, tsConfig &cfg)
     else if (arg == "--debug") { cfg.debug = true; }
     else if (arg == "--out-path")
     {
-      const char *v = need_value("--out-path");
+      const char *v = need_value(arg);
       if (!v) return false;
       cfg.out_path = v;
     }
     else if (arg == "--out-format")
     {
-      const char *v = need_value("--out-format");
+      const char *v = need_value(arg);
       if (!v) return false;
-      const std::string s = v;
+      const auto s = std::string{ v };
       if (s == "zarr2" || s == "zarr3" || s == "n5")
         cfg.out_format = s;
       else
@@ -260,9 +258,9 @@ parse_args(int argc, char **argv, tsConfig &cfg)
     }
     else if (arg == "--dtype")
     {
-      const char *v = need_value("--dtype");
+      const char *v = need_value(arg);
       if (!v) return false;
-      const std::string s = v;
+      const auto s = std::string{ v };
       if (s == "float64" || s == "float32" || s == "float16" || s == "bfloat16")
         cfg.out_dtype = s;
       else
@@ -273,9 +271,9 @@ parse_args(int argc, char **argv, tsConfig &cfg)
     }
     else if (arg == "--compressor")
     {
-      const char *v = need_value("--compressor");
+      const char *v = need_value(arg);
       if (!v) return false;
-      const std::string s = v;
+      const auto s = std::string{ v };
       if (s == "none" || s == "blosc" || s == "gzip" || s == "zstd")
         cfg.compressor = s;
       else
@@ -286,13 +284,13 @@ parse_args(int argc, char **argv, tsConfig &cfg)
     }
     else if (arg == "--group")
     {
-      const char *v = need_value("--group");
+      const char *v = need_value(arg);
       if (!v) return false;
       cfg.group = v;
     }
     else if (arg == "--data-copy-concurrency")
     {
-      const char *v = need_value("--data-copy-concurrency");
+      const char *v = need_value(arg);
       if (!v) return false;
       const long n = std::strtol(v, nullptr, 10);
       if (n <= 0)
@@ -573,14 +571,23 @@ main(int argc, char **argv)
       print_overview(cfg, ov);
       return 0;
     }
-    std::set<std::string> coord_names;
+
+    std::set<std::string> coordNames;
     for (const auto &row : ov.arrays)
-      for (const auto &d : row.dim_names) coord_names.insert(d);
+      for (const auto &d : row.dim_names) coordNames.insert(d);
     for (const auto &row : ov.arrays)
-      if (!row.grid_mapping.empty()) coord_names.insert(row.grid_mapping);
+      if (!row.grid_mapping.empty()) coordNames.insert(row.grid_mapping);
+    for (const auto &a : ov.arrays)
+      if (a.dim_names.empty()) coordNames.insert(a.name);
+    for (const auto &a : ov.arrays)
+      if (!a.coordNames.empty())
+      {
+        for (const auto &cname : a.coordNames) coordNames.insert(cname);
+      }
+
     cfg.arrays.clear();
     for (const auto &row : ov.arrays)
-      if (!coord_names.count(row.name)) cfg.arrays.push_back(row.name);
+      if (!coordNames.count(row.name)) cfg.arrays.push_back(row.name);
     if (cfg.arrays.empty()) return print_overview(cfg, ov) ? 0 : 1;
   }
 
