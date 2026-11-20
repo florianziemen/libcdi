@@ -27,6 +27,7 @@
 #include <optional>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
 // 1-basierter, inklusiver Bereich einer Achse; ein nicht gesetztes `end`
@@ -53,7 +54,7 @@ struct tsConfig
   bool double_buffer = false;                // Double-Buffer-Prefetch
   bool overwrite = false;                    // --out-path vorher loeschen
   std::optional<std::string> out_path;       // Ausgabe-Datensatz (Schreibmodus)
-  std::string out_format = "zarr3";          // Ausgabeformat: "zarr2", "zarr3" oder "n5"
+  std::string out_format = "zarr3";          // Ausgabeformat: "zarr2" oder "zarr3"
   std::string out_dtype = "float32";         // Datenarrays (zarr3): "float64", "float32", "float16" oder "bfloat16"
   std::optional<std::string>
       compressor;  // --compressor: Ausgabe-Kompressor (Schreibmodus); ungesetzt = Quell-Kompression uebernehmen
@@ -91,6 +92,15 @@ struct tsArray
   std::int64_t num_values = 0;  // Produkt von bcount (gesamter ausgewaehlter Hypercube)
 };
 
+// Ein Attributwert im nativen C++-Datentyp.  Skalare werden in den
+// entsprechenden Feldern gespeichert, Arrays in `values` (rekursiv).
+struct ValueObject
+{
+  enum Type : std::uint8_t { Null, Bool, Int, Double, String, Array };
+  Type type = Null;
+  std::variant<std::monostate, bool, long long, double, std::string, std::vector<ValueObject>> data;
+};
+
 // Metadaten eines geoeffneten Datensatzes: die ausgewaehlten Daten-Arrays
 // (alphabetisch) und die von ihnen benutzten Koordinaten-Arrays (alphabetisch).
 struct tsMetadata
@@ -98,6 +108,7 @@ struct tsMetadata
   std::int64_t num_steps = 0;  // Maximum der num_steps aller Daten-Arrays
   std::vector<tsArray> arrayList;
   std::vector<tsArray> coordList;
+  std::map<std::string, ValueObject> global_attributes;  // globale (Gruppen-/Wurzel-)Attribute
 };
 
 // Eine Zeile der Dataset-Uebersicht.  Die Listen sind bereits formatiert
@@ -152,7 +163,7 @@ struct tsCoordinate
 
   // Ausgabe (von tsApplyCoordinateConfig gesetzt)
   std::string directory;  // Zielpfad <out_path>/<name>/
-  std::string driver;     // "zarr3", "n5" oder "zarr"
+  std::string driver;     // "zarr3" oder "zarr"
   std::string metadata;   // Store-Metadaten als JSON-Text
   std::shared_ptr<void> data;
 };
@@ -175,7 +186,7 @@ struct tsArrayMeta
   bool static_array = false;  // zeitkonstant (keine `time`-Dimension)
 
   // Ausgabe (von tsApplyMetadataConfig gesetzt)
-  std::string driver;    // "zarr3", "n5" oder "zarr"
+  std::string driver;    // "zarr3" oder "zarr"
   std::string metadata;  // Store-Metadaten als JSON-Text
 };
 
@@ -186,6 +197,7 @@ struct tsOutputMetadata
   std::int64_t start_t = 0;
   std::int64_t num_steps = 0;
   std::vector<tsArrayMeta> arrays;
+  std::string global_attributes;  // globale (Gruppen-/Wurzel-)Attribute als JSON-Objekttext
 };
 
 // TensorStore-freier Teil des Dateizugriffs.  Der TensorStore-spezifische Teil

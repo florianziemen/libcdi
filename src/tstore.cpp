@@ -372,6 +372,67 @@ define_healpix(size_t numCells, std::map<std::string, std::string> const &attrib
   return gridID;
 }
 
+void
+cdi_def_int_attrs(int cdiID, int varID, std::string const &k, int n, int *values)
+{
+  cdiDefAttInt(cdiID, varID, k.c_str(), CDI_DATATYPE_INT32, n, values);
+}
+
+void
+cdi_def_flt_attrs(int cdiID, int varID, std::string const &k, int n, double *values)
+{
+  cdiDefAttFlt(cdiID, varID, k.c_str(), CDI_DATATYPE_FLT64, n, values);
+}
+
+void
+cdi_def_attribute(int cdiID, int varID, std::string const &k, const ValueObject &v)
+{
+  switch (v.type)
+  {
+    case ValueObject::Null: return;
+    case ValueObject::Bool: return;
+    case ValueObject::Int:
+    {
+      auto iVal = static_cast<int>(std::get<long long>(v.data));
+      cdi_def_int_attrs(cdiID, varID, k, 1, &iVal);
+      break;
+    }
+    case ValueObject::Double:
+    {
+      auto dVal = std::get<double>(v.data);
+      cdi_def_flt_attrs(cdiID, varID, k, 1, &dVal);
+      break;
+    }
+    case ValueObject::String:
+    {
+      auto const &sVal = std::get<std::string>(v.data);
+      if (!sVal.empty()) cdiDefAttTxt(cdiID, varID, k.c_str(), static_cast<int>(sVal.size()), sVal.c_str());
+      break;
+    }
+    case ValueObject::Array:
+    {
+      const auto &arr = std::get<std::vector<ValueObject>>(v.data);
+      if (!arr.empty())
+      {
+        auto avType = arr[0].type;
+        if (avType == ValueObject::Int)
+        {
+          std::vector<int> v(arr.size());
+          for (std::size_t i = 0; i < arr.size(); ++i) { v[i] = static_cast<int>(std::get<long long>(arr[i].data)); }
+          cdi_def_int_attrs(cdiID, varID, k, static_cast<int>(v.size()), v.data());
+        }
+        if (avType == ValueObject::Double)
+        {
+          std::vector<double> v(arr.size());
+          for (std::size_t i = 0; i < arr.size(); ++i) { v[i] = static_cast<int>(std::get<double>(arr[i].data)); }
+          cdi_def_flt_attrs(cdiID, varID, k, static_cast<int>(v.size()), v.data());
+        }
+      }
+      break;
+    }
+  }
+}
+
 int
 ts_inq_contents(stream_t *streamP)
 {
@@ -644,7 +705,6 @@ ts_inq_contents(stream_t *streamP)
       {
         auto missVal = string_to_double(a.fill_value);
         if (*missVal) vlistDefVarMissval(vlistID, varID, *missVal);
-        // vlistDefVarMissval(vlistID, varID, std::nanf(""));
       }
       if (a.attributes.contains("units"))
       {
@@ -658,8 +718,18 @@ ts_inq_contents(stream_t *streamP)
       if (xindex >= 0 && a.chunks[xindex] > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMX, a.chunks[xindex]);
 
       if (!a.compressor.empty()) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_FILTER);
+
+      for (auto [key, value] : a.attributes)
+      {
+        if (!value.empty() && key != "_ARRAY_DIMENSIONS" && key != "grid_mapping" && key != "units")
+        {
+          cdiDefAttTxt(vlistID, varID, key.c_str(), static_cast<int>(value.size()), value.c_str());
+        }
+      }
     }
   }
+
+  for (const auto &kv : md.global_attributes) { cdi_def_attribute(vlistID, CDI_GLOBAL, kv.first, kv.second); }
 
   // Die Datenarrays dtype-neutral oeffnen (Lesepuffer arbeiten auf float32);
   // die Ausgabe-Stores erben daraus Attribute und Kompression.

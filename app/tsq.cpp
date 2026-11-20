@@ -32,6 +32,34 @@
 
 namespace
 {
+bool g_print_global_attributes = false;
+
+std::string
+format_value(const ValueObject &v)
+{
+  switch (v.type)
+  {
+    case ValueObject::Null: return "null";
+    case ValueObject::Bool: return std::get<bool>(v.data) ? "true" : "false";
+    case ValueObject::Int: return std::to_string(std::get<long long>(v.data));
+    case ValueObject::Double: return std::to_string(std::get<double>(v.data));
+    case ValueObject::String: return "\"" + std::get<std::string>(v.data) + "\"";
+    case ValueObject::Array:
+    {
+      std::string s = "[";
+      const auto &arr = std::get<std::vector<ValueObject>>(v.data);
+      for (std::size_t i = 0; i < arr.size(); ++i)
+      {
+        if (i) s += ", ";
+        s += format_value(arr[i]);
+      }
+      s += "]";
+      return s;
+    }
+
+  }
+  return "";
+}
 
 void
 print_usage(const char *prog)
@@ -40,7 +68,7 @@ print_usage(const char *prog)
             << " --path <PATH> [--name a,b,c] "
                "[--kvstore file|s3|http] [--format zarr2|zarr3] [--endpoint <URL>] "
                "[--step <S/E>] [--consolidated] [--group <NAME>] "
-               "[--out-path <PATH>] [--out-format zarr2|zarr3|n5] "
+               "[--out-path <PATH>] [--out-format zarr2|zarr3] "
                "[--dtype float64|float32|float16|bfloat16] "
                "[--compressor none|blosc|gzip|zstd] "
                "[--step-chunk <N>] [--cell-chunk <N>] "
@@ -76,10 +104,10 @@ print_usage(const char *prog)
             << "  --overwrite: replace an existing store at --out-path (it is\n"
             << "         deleted first).  Without it, an existing --out-path is\n"
             << "         rejected.  Only valid with --out-path.\n"
-            << "  --out-format: output store format: zarr2 or zarr3 (Zarr) or n5 (default zarr3).\n"
+            << "  --out-format: output store format: zarr2 or zarr3 (Zarr) (default zarr3).\n"
             << "  --dtype: output data type of the float data arrays for --out-format\n"
             << "         zarr3: float64, float32, float16 or bfloat16 (default float32).\n"
-            << "         Zarr 2 and N5 outputs always use float32.\n"
+            << "         Zarr 2 output always uses float32.\n"
             << "  --compressor: output compressor for --out-path: 'none' disables\n"
             << "         compression, else blosc/gzip/zstd (default: reuse the input\n"
             << "         compression).  Applies to the data arrays and the coordinate\n"
@@ -108,7 +136,9 @@ print_usage(const char *prog)
             << "         Selected/Coordinate arrays tables) and no measurements.\n"
             << "  --debug: write detection details to stderr: one line with\n"
             << "         the Zarr format of the dataset, and a further line\n"
-            << "         when consolidated metadata was found.\n";
+            << "         when consolidated metadata was found.\n"
+  << "  --global-attributes: print the global (group/root) attributes\n"
+  << "         of the dataset and exit.\n";
 }
 
 // into `range`.  Both bounds must be positive and END must not be smaller than
@@ -233,6 +263,7 @@ parse_args(int argc, char **argv, tsConfig &cfg)
       slot = n;
     }
     else if (arg == "--consolidated") { cfg.consolidated = true; }
+    else if (arg == "--global-attributes") { g_print_global_attributes = true; }
     else if (arg == "--double-buffer") { cfg.double_buffer = true; }
     else if (arg == "--overwrite") { cfg.overwrite = true; }
     else if (arg == "--info") { cfg.info = true; }
@@ -248,11 +279,11 @@ parse_args(int argc, char **argv, tsConfig &cfg)
       const char *v = need_value(arg);
       if (!v) return false;
       const auto s = std::string{ v };
-      if (s == "zarr2" || s == "zarr3" || s == "n5")
+      if (s == "zarr2" || s == "zarr3")
         cfg.out_format = s;
       else
       {
-        std::cerr << "Invalid --out-format value: " << v << " (must be zarr2, zarr3 or n5)\n";
+        std::cerr << "Invalid --out-format value: " << v << " (must be zarr2 or zarr3)\n";
         return false;
       }
     }
@@ -637,6 +668,17 @@ main(int argc, char **argv)
   if (!input) return 1;
   if (!tsApplyConfig(input)) return 1;
   tsMetadata &md = tsGetReadMetadata(input);
+
+  if (g_print_global_attributes)
+  {
+    std::cout << "=== Global attributes ===\n";
+    for (const auto &kv : md.global_attributes)
+    {
+      std::cout << kv.first << " = " << format_value(kv.second) << "\n";
+    }
+    tsCloseFile(input);
+    return 0;
+  }
 
   // Datenarrays vs. Koordinatenarrays: die Dimensionsnamen eines Datenarrays
   // verweisen auf Koordinaten; ein Array mit genau diesem Namen ist eine

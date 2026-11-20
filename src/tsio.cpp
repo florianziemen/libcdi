@@ -677,12 +677,13 @@ resolve_selection(const tsConfig &cfg, const std::vector<Index> &shape, std::vec
 {
   bstart.assign(shape.size(), 0);
   bcount = shape;
+  if (shape.empty()) return;
   const auto apply = [&bstart, &bcount](const tsRange &range, std::size_t d)
   {
     bstart[d] = static_cast<Index>(range.start - 1);
     if (range.end) bcount[d] = static_cast<Index>(*range.end - range.start + 1);
   };
-  apply(cfg.step, 0);
+  if (shape.size() >= 1) apply(cfg.step, 0);
   if (shape.size() >= 3) apply(cfg.layer, 1);
   if (shape.size() >= 2) apply(cfg.cell, shape.size() - 1);
 }
@@ -695,6 +696,7 @@ resolve_selection_static(const tsConfig &cfg, const std::vector<Index> &shape, s
 {
   bstart.assign(shape.size(), 0);
   bcount = shape;
+  if (shape.empty()) return;
   const auto apply = [&bstart, &bcount](const tsRange &range, std::size_t d)
   {
     bstart[d] = static_cast<Index>(range.start - 1);
@@ -977,43 +979,6 @@ first_v3_compressor(const nlohmann::json &codecs)
   return nlohmann::json();
 }
 
-nlohmann::json
-v2_compressor_to_n5(const nlohmann::json &comp)
-{
-  if (!comp.is_object()) return nlohmann::json{ { "type", "raw" } };
-  const std::string id = comp.value("id", std::string());
-  if (id == "gzip") return nlohmann::json{ { "type", "gzip" }, { "level", comp.value("level", -1) }, { "useZlib", false } };
-  if (id == "zlib") return nlohmann::json{ { "type", "gzip" }, { "level", comp.value("level", -1) }, { "useZlib", true } };
-  if (id == "zstd") return nlohmann::json{ { "type", "zstd" }, { "level", comp.value("level", 0) } };
-  if (id == "blosc")
-    return nlohmann::json{ { "type", "blosc" },
-                           { "cname", comp.value("cname", "lz4") },
-                           { "clevel", comp.value("clevel", 5) },
-                           { "shuffle", comp.value("shuffle", 0) },
-                           { "blocksize", comp.value("blocksize", 0) } };
-  return nlohmann::json{ { "type", "raw" } };
-}
-
-// Zusaetzliche N5-Attribute fuer attributes.json: die Quell-Attribute, aber
-// ohne die von N5 belegten Schluessel (die eine andere ZARR-Form erwarten),
-// plus `_ARRAY_DIMENSIONS`.
-nlohmann::json
-n5_extra_attrs(const nlohmann::json &attrs, const nlohmann::json &dims)
-{
-  static const std::set<std::string> reserved
-      = { "dimensions", "blockSize", "dataType", "compression", "axes", "units", "resolution" };
-  nlohmann::json out = nlohmann::json::object();
-  if (attrs.is_object())
-  {
-    for (auto it = attrs.begin(); it != attrs.end(); ++it)
-    {
-      if (!reserved.count(it.key())) out[it.key()] = it.value();
-    }
-  }
-  if (!dims.empty()) out["_ARRAY_DIMENSIONS"] = dims;
-  return out;
-}
-
 // Name -> zarr2-Kompressor-Dict fuer --compressor (kanonische Form, wie sie auch
 // numcodecs im zarr2-Store versteht).
 nlohmann::json
@@ -1055,10 +1020,6 @@ apply_compressor_by_name(const std::string &name, const std::string &out_format,
       if (!c.empty()) codecs.push_back(c);
     }
     md["codecs"] = std::move(codecs);
-  }
-  else if (out_format == "n5")
-  {
-    md["compression"] = (name == "none") ? nlohmann::json{ { "type", "raw" } } : v2_compressor_to_n5(compressor_v2_by_name(name));
   }
   else
   {
@@ -1121,17 +1082,6 @@ apply_source_compression_json(const nlohmann::json &j, int source_format, const 
       md["codecs"] = arr;
     }
   }
-  else if (out_format == "n5")
-  {
-    // N5: compression object (N5 has no codecs pipeline).  Unknown or missing
-    // compressors fall back to raw, like the other cross-format conversions.
-    nlohmann::json comp;
-    if (source_format == 2)
-      comp = j.value("compressor", nlohmann::json());
-    else
-      comp = first_v3_compressor(j.value("codecs", nlohmann::json::array()));
-    md["compression"] = v2_compressor_to_n5(comp);
-  }
   else
   {
     if (source_format == 2)
@@ -1150,24 +1100,6 @@ coord_dtype_encoded(const tensorstore::DataType &dtype, const std::string &zarr_
 {
   using namespace tensorstore;
   if (zarr_format == "zarr3") return std::string(dtype.name());
-  if (zarr_format == "n5")
-  {
-    // N5 dataType: plain type name, only for the types N5 supports.
-    switch (dtype.id())
-    {
-      case DataTypeId::int8_t:
-      case DataTypeId::int16_t:
-      case DataTypeId::int32_t:
-      case DataTypeId::int64_t:
-      case DataTypeId::uint8_t:
-      case DataTypeId::uint16_t:
-      case DataTypeId::uint32_t:
-      case DataTypeId::uint64_t:
-      case DataTypeId::float32_t:
-      case DataTypeId::float64_t: return std::string(dtype.name());
-      default: return std::nullopt;
-    }
-  }
   switch (dtype.id())
   {
     case DataTypeId::bool_t: return "|b1";
@@ -2271,6 +2203,137 @@ detect_root_zarr_format(const tsConfig &cfg, tensorstore::Context &context)
   }
 }
 
+// Liest die globalen (Gruppen-/Wurzel-)Attribute eines Datensatzes als
+// std::map<std::string, ValueObject>.  Gibt ein leeres Objekt zurueck, wenn
+// keine vorhanden sind.
+std::map<std::string, ValueObject>
+read_global_attrs(const tsConfig &cfg, tensorstore::Context &context)
+{
+  using namespace tensorstore;
+  nlohmann::json parsed = nlohmann::json::object();
+
+  int fmt = cfg.format;
+  if (!fmt) fmt = detect_root_zarr_format(cfg, context);
+  if (fmt == 0)
+  {
+    std::map<std::string, ValueObject> attrs;
+    return attrs;
+  }
+
+  std::string group = cfg.group.value_or("");
+  const nlohmann::json root_kv = build_root_kvstore(cfg, context);
+
+  auto parse_attrs = [&parsed](const std::string &raw, int f)
+  {
+    if (raw.empty()) return;
+    try
+    {
+      nlohmann::json j = nlohmann::json::parse(raw);
+      if (f == 3)
+      {
+        if (j.contains("attributes") && j["attributes"].is_object()) parsed = j["attributes"];
+      }
+      else
+      {
+        if (j.is_object()) parsed = j;
+      }
+    }
+    catch (...)
+    {
+    }
+  };
+
+  auto read_kv_key = [&](const nlohmann::json &kv, const std::string &key) -> std::string
+  {
+    std::string raw;
+    auto store = kvstore::Open(kv, context).result();
+    if (!store) return raw;
+    auto r = kvstore::Read(*store, key).result();
+    if (!r || !r->has_value()) return raw;
+    for (const absl::string_view chunk : r->value.Chunks()) raw.append(chunk.data(), chunk.size());
+    return raw;
+  };
+
+  if (fmt == 3)
+  {
+    if (group.empty()) { parse_attrs(read_kv_key(root_kv, "zarr.json"), 3); }
+    else
+    {
+      const auto meta3 = read_zarr3_consolidated(root_kv, context);
+      auto it = meta3.find(group);
+      if (it != meta3.end()) { parse_attrs(it->second, 3); }
+      else
+      {
+        tsConfig gcfg = cfg;
+        std::string p = cfg.path;
+        while (!p.empty() && p.back() == '/') p.pop_back();
+        p += "/" + group;
+        gcfg.path = p;
+        gcfg.group.reset();
+        gcfg.consolidated = false;
+        const nlohmann::json gkv = build_root_kvstore(gcfg, context);
+        parse_attrs(read_kv_key(gkv, "zarr.json"), 3);
+      }
+    }
+  }
+  else
+  {
+    if (cfg.consolidated)
+    {
+      const auto meta2 = read_zarr2_consolidated(root_kv, context);
+      const std::string key = group.empty() ? std::string(".zattrs") : (group + "/.zattrs");
+      auto it = meta2.find(key);
+      if (it != meta2.end()) parse_attrs(it->second, 2);
+    }
+    else
+    {
+      tsConfig gcfg = cfg;
+      std::string p = cfg.path;
+      while (!p.empty() && p.back() == '/') p.pop_back();
+      if (!group.empty()) p += "/" + group;
+      gcfg.path = p;
+      gcfg.group.reset();
+      gcfg.consolidated = false;
+      const nlohmann::json gkv = build_root_kvstore(gcfg, context);
+      parse_attrs(read_kv_key(gkv, ".zattrs"), 2);
+    }
+  }
+
+  auto from_json = [](const nlohmann::json &j, auto &self) -> ValueObject
+  {
+    ValueObject v;
+    if (j.is_null()) { v.type = ValueObject::Null; v.data = std::monostate{}; }
+    else if (j.is_boolean()) { v.type = ValueObject::Bool; v.data = j.get<bool>(); }
+    else if (j.is_number_integer()) { v.type = ValueObject::Int; v.data = j.get<long long>(); }
+    else if (j.is_number_unsigned()) { v.type = ValueObject::Int; v.data = static_cast<long long>(j.get<unsigned long long>()); }
+    else if (j.is_number_float()) { v.type = ValueObject::Double; v.data = j.get<double>(); }
+    else if (j.is_string()) { v.type = ValueObject::String; v.data = j.get<std::string>(); }
+    else if (j.is_array())
+    {
+      v.type = ValueObject::Array;
+      std::vector<ValueObject> arr;
+      for (const auto &e : j) arr.push_back(self(e, self));
+      v.data = std::move(arr);
+    }
+    else if (j.is_object())
+    {
+      v.type = ValueObject::String;
+      v.data = j.dump();
+    }
+    return v;
+  };
+
+  std::map<std::string, ValueObject> attrs;
+  if (parsed.is_object())
+  {
+    for (auto it = parsed.begin(); it != parsed.end(); ++it)
+    {
+      attrs[it.key()] = from_json(it.value(), from_json);
+    }
+  }
+  return attrs;
+}
+
 }  // namespace
 
 // Globale Hilfsfunktionen fuer das fill_value (ausserhalb des anonymen
@@ -2418,6 +2481,7 @@ tsOpenFileRead(const std::string &path, const tsConfig &config)
       if (h->cfg.debug) std::cerr << "debug: root zarr format " << detected << "\n";
     }
   }
+  h->metadata.global_attributes = read_global_attrs(h->cfg, h->context);
   return h;
 }
 
@@ -2492,6 +2556,7 @@ tsApplyConfig(tsHandle *handle)
     h->coord_stores.push_back(std::move(*store));
     h->metadata.coordList.push_back(std::move(c));
   }
+  h->metadata.global_attributes = read_global_attrs(h->cfg, h->context);
   return h;
 }
 
@@ -2882,6 +2947,31 @@ tsGetMetadata(tsHandle *input, tsOutputMetadata &meta)
     m.static_array = a.time_constant;
     meta.arrays.push_back(std::move(m));
   }
+  {
+    const std::map<std::string, ValueObject> global_attrs = read_global_attrs(input->cfg, static_cast<tsHandleImpl *>(input)->context);
+    std::function<nlohmann::json(const ValueObject &)> to_json = [&](const ValueObject &v) -> nlohmann::json
+    {
+      switch (v.type)
+      {
+        case ValueObject::Null: return nullptr;
+        case ValueObject::Bool: return std::get<bool>(v.data);
+        case ValueObject::Int: return std::get<long long>(v.data);
+        case ValueObject::Double: return std::get<double>(v.data);
+        case ValueObject::String: return std::get<std::string>(v.data);
+        case ValueObject::Array:
+        {
+          nlohmann::json a = nlohmann::json::array();
+          for (const auto &e : std::get<std::vector<ValueObject>>(v.data)) a.push_back(to_json(e));
+          return a;
+        }
+
+      }
+      return nullptr;
+    };
+    nlohmann::json ga = nlohmann::json::object();
+    for (const auto &kv : global_attrs) ga[kv.first] = to_json(kv.second);
+    meta.global_attributes = ga.dump();
+  }
   return true;
 }
 
@@ -2916,8 +3006,14 @@ tsApplyMetadataConfig(const tsConfig &cfg, tsOutputMetadata &meta)
         fv = m.fill_value;
       else
       {
-        try { fv = std::stod(m.fill_value); }
-        catch (...) { fv = m.fill_value; }
+        try
+        {
+          fv = std::stod(m.fill_value);
+        }
+        catch (...)
+        {
+          fv = m.fill_value;
+        }
       }
     }
 
@@ -2932,16 +3028,6 @@ tsApplyMetadataConfig(const tsConfig &cfg, tsOutputMetadata &meta)
              { "fill_value", fv } };
       if (!src_attrs.empty()) md["attributes"] = src_attrs;
       if (!src_dims.empty()) md["dimension_names"] = src_dims;
-    }
-    else if (cfg.out_format == "n5")
-    {
-      // N5: mandatory attributes plus the source attributes (with
-      // `_ARRAY_DIMENSIONS`) as additional attributes in attributes.json.
-      md = { { "dimensions", shape }, { "blockSize", chunks }, { "dataType", "float32" } };
-      {
-        const nlohmann::json extra = n5_extra_attrs(src_attrs, src_dims);
-        for (auto it = extra.begin(); it != extra.end(); ++it) md[it.key()] = it.value();
-      }
     }
     else
     {
@@ -2965,7 +3051,7 @@ tsApplyMetadataConfig(const tsConfig &cfg, tsOutputMetadata &meta)
       apply_source_compression_json(src, m.format, cfg.out_format, out_dtype_size(cfg.out_dtype), chunks, md);
     }
 
-    m.driver = (cfg.out_format == "zarr3") ? "zarr3" : (cfg.out_format == "n5") ? "n5" : "zarr";
+    m.driver = (cfg.out_format == "zarr3") ? "zarr3" : "zarr";
     m.metadata = md.dump();
   }
 }
@@ -3045,6 +3131,43 @@ tsSetMetadata(tsHandle *output, const tsOutputMetadata &meta)
   out->out_t = meta.start_t - 1;
   out->out_end = meta.num_steps;
   out->have_sel = false;
+
+  // Globale (Gruppen-/Wurzel-)Attribute in den Ausgabe-Root schreiben.
+  if (!meta.global_attributes.empty())
+  {
+    nlohmann::json ga = nlohmann::json::object();
+    try
+    {
+      ga = nlohmann::json::parse(meta.global_attributes);
+    }
+    catch (...)
+    {
+      ga = nlohmann::json::object();
+    }
+    if (ga.is_object() && !ga.empty())
+    {
+      const std::string out_path = *output->cfg.out_path;
+      if (output->cfg.out_format == "zarr3")
+      {
+        nlohmann::json md = { { "zarr_format", 3 }, { "node_type", "group" }, { "attributes", ga } };
+        std::ofstream f(out_path + "/zarr.json");
+        if (f) f << md.dump();
+      }
+      else if (output->cfg.out_format == "zarr2")
+      {
+        {
+          std::ofstream f(out_path + "/.zgroup");
+          if (f) f << nlohmann::json{ { "zarr_format", 2 } }.dump();
+        }
+        {
+          std::ofstream f(out_path + "/.zattrs");
+          if (f) f << ga.dump();
+        }
+      }
+
+    }
+  }
+
   return true;
 }
 
@@ -3259,7 +3382,8 @@ tsApplyCoordinateConfig(const tsConfig &cfg, std::vector<tsCoordinate> &coords)
       src_dims = nlohmann::json::array();
     }
 
-    const std::string coord_fv_text = coord.fill_value.empty() ? ts_extract_fill_value_text(coord.source_metadata, coord.format) : coord.fill_value;
+    const std::string coord_fv_text
+        = coord.fill_value.empty() ? ts_extract_fill_value_text(coord.source_metadata, coord.format) : coord.fill_value;
     nlohmann::json coord_fv = nlohmann::json(0);
     if (coord_fv_text != "-" && !coord_fv_text.empty())
     {
@@ -3267,8 +3391,14 @@ tsApplyCoordinateConfig(const tsConfig &cfg, std::vector<tsCoordinate> &coords)
         coord_fv = coord_fv_text;
       else
       {
-        try { coord_fv = std::stod(coord_fv_text); }
-        catch (...) { coord_fv = coord_fv_text; }
+        try
+        {
+          coord_fv = std::stod(coord_fv_text);
+        }
+        catch (...)
+        {
+          coord_fv = coord_fv_text;
+        }
       }
     }
 
@@ -3283,16 +3413,6 @@ tsApplyCoordinateConfig(const tsConfig &cfg, std::vector<tsCoordinate> &coords)
              { "fill_value", coord_fv } };
       if (!src_attrs.empty()) md["attributes"] = src_attrs;
       if (!src_dims.empty()) md["dimension_names"] = src_dims;
-    }
-    else if (cfg.out_format == "n5")
-    {
-      // N5: mandatory attributes plus the source attributes (with
-      // `_ARRAY_DIMENSIONS`) as additional attributes in attributes.json.
-      md = { { "dimensions", bcount }, { "blockSize", chunks }, { "dataType", *dtype_code } };
-      {
-        const nlohmann::json extra = n5_extra_attrs(src_attrs, src_dims);
-        for (auto it = extra.begin(); it != extra.end(); ++it) md[it.key()] = it.value();
-      }
     }
     else
     {
@@ -3324,7 +3444,7 @@ tsApplyCoordinateConfig(const tsConfig &cfg, std::vector<tsCoordinate> &coords)
     }
 
     coord.directory = dir;
-    coord.driver = (cfg.out_format == "zarr3") ? "zarr3" : (cfg.out_format == "n5") ? "n5" : "zarr";
+    coord.driver = (cfg.out_format == "zarr3") ? "zarr3" : "zarr";
     coord.metadata = md.dump();
     coord.data = std::make_shared<SharedArray<void, dynamic_rank>>(std::move(*read));
   }

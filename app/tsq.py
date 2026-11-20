@@ -814,7 +814,7 @@ def _compressor_v3_by_name(name, dtype_size):
 
 
 def _compressor_name_kwargs(name, out_format, dtype_size):
-    """zarr.open kwargs / N5 compression for --compressor NAME (no sharding).
+    """zarr.open kwargs for --compressor NAME (no sharding).
     Mirrors `apply_compressor_by_name` in tsio.cpp."""
     if out_format == "zarr3":
         codecs = [{"name": "bytes", "configuration": {"endian": "little"}}]
@@ -822,211 +822,9 @@ def _compressor_name_kwargs(name, out_format, dtype_size):
         if c is not None:
             codecs.append(c)
         return {"codecs": codecs}
-    if out_format == "n5":
-        if name == "none":
-            return {"n5_compression": {"type": "raw"}}
-        return {"n5_compression": _n5_compression_from_v2(_compressor_v2_by_name(name))}
     if name == "none":
         return {"compressor": None}
     return {"compressor": _compressor_v2_by_name(name)}
-
-
-_N5_DATA_TYPES = {
-    "uint8", "uint16", "uint32", "uint64",
-    "int8", "int16", "int32", "int64",
-    "float32", "float64",
-}
-
-# Attribute keys reserved by the N5 format (they expect arrays, unlike the
-# Zarr attribute of the same name) - they are NOT copied to N5.
-_N5_RESERVED_ATTRS = {
-    "dimensions", "blockSize", "dataType", "compression",
-    "axes", "units", "resolution",
-}
-
-
-def _n5_extra_attrs(attrs, dims):
-    """Additional N5 attributes for attributes.json: the source attributes
-    minus the N5-reserved keys, plus `_ARRAY_DIMENSIONS`.  Mirrors
-    `n5_extra_attrs` in tsio.cpp."""
-    extra = {k: v for k, v in attrs.items() if k not in _N5_RESERVED_ATTRS}
-    if dims:
-        extra.setdefault("_ARRAY_DIMENSIONS", dims)
-    return extra
-
-
-def _n5_data_type(dtype):
-    """N5 `dataType` string for a numpy dtype (None if N5 cannot store it)."""
-    s = np.dtype(dtype).name
-    return s if s in _N5_DATA_TYPES else None
-
-
-def _n5_compression_from_v2(comp):
-    """Map a Zarr 2 compressor dict (or None) to the N5 `compression` object.
-    Unknown or missing compressors fall back to raw, like the other
-    cross-format conversions.  Mirrors `v2_compressor_to_n5` in tsio.cpp."""
-    if not comp or not isinstance(comp, dict):
-        return {"type": "raw"}
-    cid = comp.get("id")
-    if cid == "gzip":
-        return {"type": "gzip", "level": comp.get("level", -1), "useZlib": False}
-    if cid == "zlib":
-        return {"type": "gzip", "level": comp.get("level", -1), "useZlib": True}
-    if cid == "zstd":
-        return {"type": "zstd", "level": comp.get("level", 0)}
-    if cid == "blosc":
-        return {
-            "type": "blosc",
-            "cname": comp.get("cname", "lz4"),
-            "clevel": comp.get("clevel", 5),
-            "shuffle": comp.get("shuffle", 0),
-            "blocksize": comp.get("blocksize", 0),
-        }
-    return {"type": "raw"}
-
-
-def _n5_codec(comp):
-    """numcodecs codec matching an N5 `compression` object (None = raw)."""
-    import numcodecs
-
-    if not isinstance(comp, dict):
-        return None
-    cid = comp.get("type")
-    if cid == "gzip":
-        if comp.get("useZlib"):
-            return numcodecs.Zlib(level=comp.get("level", -1))
-        return numcodecs.GZip(level=comp.get("level", -1))
-    if cid == "zstd":
-        return numcodecs.Zstd(level=comp.get("level", 0))
-    if cid == "blosc":
-        return numcodecs.Blosc(
-            cname=comp.get("cname", "lz4"),
-            clevel=comp.get("clevel", 5),
-            shuffle=comp.get("shuffle", 0),
-            blocksize=comp.get("blocksize", 0),
-        )
-    return None
-
-
-class _N5Out:
-    """Minimal N5 dataset writer (zarr-python has no N5 support): writes
-    `attributes.json` plus the standard chunk files, each with the N5 header
-    (mode 0, rank, block size - all uint big endian) followed by the raw
-    big-endian, Fortran-order block data, optionally compressed.  Values match
-    the TensorStore N5 driver; the chunk file bytes need not be identical."""
-
-    def __init__(self, base, shape, chunks, dtype, compression, attrs):
-        import json
-
-        self.base = base
-        self.shape = tuple(int(s) for s in shape)
-        self.chunks = tuple(int(c) for c in chunks)
-        self.dtype = np.dtype(dtype)
-        self.codec = _n5_codec(compression)
-        data_type = _n5_data_type(self.dtype)
-        if data_type is None:
-            raise ValueError(
-                f"data type '{self.dtype.name}' is not supported for N5 output"
-            )
-        os.makedirs(base, exist_ok=True)
-        meta = {
-            "dimensions": list(self.shape),
-            "blockSize": list(self.chunks),
-            "dataType": data_type,
-            "compression": compression,
-        }
-        if attrs:
-            meta.update(attrs)
-        with open(os.path.join(base, "attributes.json"), "w") as f:
-            json.dump(meta, f)
-
-    def __setitem__(self, sl, arr):
-        arr = np.asarray(arr, dtype=self.dtype)
-        rank = len(self.shape)
-        if sl is Ellipsis:
-            sl = [slice(None)] * rank
-        else:
-            if sl == (Ellipsis,):
-                sl = [slice(None)] * rank
-            else:
-                sl = list(sl)
-        while len(sl) < rank:
-            sl.append(slice(None))
-        ranges = []
-        for s, ext in zip(sl, arr.shape):
-            if isinstance(s, slice):
-                ranges.append(
-                    (
-                        0 if s.start is None else int(s.start),
-                        int(ext) if s.stop is None else int(s.stop),
-                    )
-                )
-            else:
-                v = int(s)
-                ranges.append((v, v + 1))
-        been = self.dtype.newbyteorder(">")
-        grid = tuple(int(-(-s // c)) for s, c in zip(self.shape, self.chunks))
-        for ci in np.ndindex(*grid):
-            d0 = tuple(ci[d] * self.chunks[d] for d in range(rank))
-            reg = tuple(
-                (d0[d], min(d0[d] + self.chunks[d], self.shape[d]))
-                for d in range(rank)
-            )
-            ov = tuple(
-                (max(reg[d][0], ranges[d][0]), min(reg[d][1], ranges[d][1]))
-                for d in range(rank)
-            )
-            if any(o[1] <= o[0] for o in ov):
-                continue
-            win = tuple(
-                slice(ov[d][0] - ranges[d][0], ov[d][1] - ranges[d][0])
-                for d in range(rank)
-            )
-            dst = tuple(
-                slice(o[0] - d0[d], o[1] - d0[d]) for d, o in enumerate(ov)
-            )
-            blk = self._read_block(ci)
-            blk[dst] = arr[win]
-            import struct
-
-            hdr = struct.pack(">HH", 0, rank) + struct.pack(
-                ">" + "I" * rank, *self.chunks
-            )
-            payload = blk.astype(been).tobytes(order="F")
-            if self.codec is not None:
-                payload = self.codec.encode(payload)
-            path = os.path.join(self.base, "/".join(str(int(x)) for x in ci))
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, "wb") as f:
-                f.write(hdr + payload)
-
-    def _read_block(self, ci):
-        """Current block content of chunk `ci` (zeros-padded to the full block
-        size) so that partial writes merge instead of overwriting the other
-        cells of the chunk."""
-        import struct
-
-        path = os.path.join(self.base, "/".join(str(int(x)) for x in ci))
-        blk = np.zeros(self.chunks, dtype=self.dtype)
-        if not os.path.exists(path):
-            return blk
-        with open(path, "rb") as f:
-            data = f.read()
-        rank = len(self.chunks)
-        hsz = 2 + 2 + 4 * rank
-        if len(data) < hsz:
-            return blk
-        dims = struct.unpack(">" + "I" * rank, data[4:hsz])
-        payload = data[hsz:]
-        if self.codec is not None:
-            payload = self.codec.decode(payload)
-        have = np.frombuffer(
-            payload, dtype=self.dtype.newbyteorder(">")
-        ).reshape(dims, order="F").astype(self.dtype)
-        sl = tuple(slice(0, min(d, c)) for d, c in zip(dims, self.chunks))
-        blk[sl] = have[sl]
-        return blk
-
 
 def _out_dtype_size(out_dtype):
     """Element size in bytes of an output data type (for the copied blosc
@@ -1405,23 +1203,7 @@ def print_means_table(cfg, items, coords=()):
                     else {}
                 )
             )
-            if cfg.out_format == "n5":
-                if comp_kwargs:
-                    n5_comp = comp_kwargs["n5_compression"]
-                else:
-                    src_comp_v2 = (
-                        src_comp if eng.fmt == 2 else _first_v3_compressor(src_comp)
-                    )
-                    n5_comp = _n5_compression_from_v2(src_comp_v2)
-                out = _N5Out(
-                    os.path.join(cfg.out_path, eng.name),
-                    tuple(eng.bc),
-                    ochunks,
-                    np.float32,
-                    n5_comp,
-                    _n5_extra_attrs(src_attrs, src_dims),
-                )
-            elif cfg.out_format == "zarr3" and cfg.out_dtype == "bfloat16":
+            if cfg.out_format == "zarr3" and cfg.out_dtype == "bfloat16":
                 out = _V3Bf16Out(
                     os.path.join(cfg.out_path, eng.name),
                     tuple(eng.bc),
@@ -1587,22 +1369,7 @@ def _write_coord_arrays(cfg, coord_items):
                 else {}
             )
         )
-        if cfg.out_format == "n5":
-            if comp_kwargs:
-                n5_comp = comp_kwargs["n5_compression"]
-            else:
-                src_comp_v2 = src_comp if fmt == 2 else _first_v3_compressor(src_comp)
-                n5_comp = _n5_compression_from_v2(src_comp_v2)
-            out = _N5Out(
-                os.path.join(cfg.out_path, cname),
-                tuple(bc),
-                ochunks,
-                cz.dtype,
-                n5_comp,
-                _n5_extra_attrs(src_attrs, src_dims),
-            )
-        else:
-            out = zarr.open(
+        out = zarr.open(
                 os.path.join(cfg.out_path, cname),
                 mode="w",
                 shape=tuple(bc),
@@ -2321,9 +2088,9 @@ def parse_args(argv):
     p.add_argument(
         "--out-format",
         type=str,
-        choices=("zarr2", "zarr3", "n5"),
+        choices=("zarr2", "zarr3"),
         default="zarr3",
-        help="output store format: zarr2 or zarr3 (Zarr) or n5 (default: zarr3)",
+        help="output store format: zarr2 or zarr3 (Zarr) (default: zarr3)",
     )
     p.add_argument(
         "--dtype",
@@ -2332,7 +2099,7 @@ def parse_args(argv):
         choices=("float64", "float32", "float16", "bfloat16"),
         default="float32",
         help="output data type of the float data arrays for --out-format "
-        "zarr3 (default: float32).  Zarr 2 and N5 outputs always use "
+        "zarr3 (default: float32).  Zarr 2 output always uses "
         "float32.",
     )
     p.add_argument(
@@ -2373,8 +2140,8 @@ def parse_args(argv):
             p.error(f"Invalid --{opt} value: {value} ({e})")
     if args.data_copy_concurrency is not None and args.data_copy_concurrency <= 0:
         p.error("--data-copy-concurrency must be positive")
-    if args.out_path and args.out_format not in ("zarr2", "zarr3", "n5"):
-        p.error("--out-format must be zarr2, zarr3 or n5")
+    if args.out_path and args.out_format not in ("zarr2", "zarr3"):
+        p.error("--out-format must be zarr2 or zarr3")
     if args.compressor is not None and args.compressor not in ("none", "blosc", "gzip", "zstd"):
         p.error(
             f"Invalid --compressor value: {args.compressor} (must be none, blosc, gzip or zstd)"
