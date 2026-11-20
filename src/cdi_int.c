@@ -90,8 +90,8 @@ static const char *FileTypes[] = {
   "EXTRA",
   "IEG",
   "NCZarr",
-  "Zarr2",
-  "Zarr3",
+  "TSZarr2",
+  "TSZarr3",
   "HDF5",
 };
 // clang-format on

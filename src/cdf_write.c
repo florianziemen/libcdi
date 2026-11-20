@@ -915,7 +915,7 @@ cdfDefVar(stream_t *streamP, int varID)
   int dimorder[3];  // ZYX/321 and ZXY/312
   vlistInqVarDimorder(vlistID, varID, dimorder);
   bool useChunks
-      = (gridsize >= 32) && ((dimorder[0] == 3) || (dimorder[1] == 3 && dimorder[2] == 1 && gridsize == gridInqXsize(gridID)));
+      = (gridsize >= 10) && ((dimorder[0] == 3) || (dimorder[1] == 3 && dimorder[2] == 1 && gridsize == gridInqXsize(gridID)));
 
   if (((dimorder[0] > 0) + (dimorder[1] > 0) + (dimorder[2] > 0))
       < ((xid != CDI_UNDEFID) + (yid != CDI_UNDEFID) + (zid != CDI_UNDEFID)))
