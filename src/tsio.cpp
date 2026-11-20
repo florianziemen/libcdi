@@ -2273,6 +2273,91 @@ detect_root_zarr_format(const tsConfig &cfg, tensorstore::Context &context)
 
 }  // namespace
 
+// Globale Hilfsfunktionen fuer das fill_value (ausserhalb des anonymen
+// Namespace, damit auch tsApply*Config darauf zugreifen koennen).
+static std::string
+ts_sanitize_invalid_json(const std::string &src)
+{
+  static const std::array<std::string_view, 3> kTokens = { "NaN", "Infinity", "-Infinity" };
+  auto is_ident_char = [](char c) { return std::isalnum(static_cast<unsigned char>(c)) != 0 || c == '_' || c == '-' || c == '.'; };
+  std::string out;
+  out.reserve(src.size());
+  bool in_string = false;
+  bool escape = false;
+  for (std::size_t i = 0; i < src.size();)
+  {
+    const char c = src[i];
+    if (in_string)
+    {
+      out.push_back(c);
+      ++i;
+      if (escape) { escape = false; }
+      else if (c == '\\') { escape = true; }
+      else if (c == '"') { in_string = false; }
+      continue;
+    }
+    if (c == '"')
+    {
+      in_string = true;
+      out.push_back(c);
+      ++i;
+      continue;
+    }
+    bool replaced = false;
+    for (const std::string_view token : kTokens)
+    {
+      if (src.compare(i, token.size(), token) != 0) continue;
+      const bool prev_ok = (i == 0) || !is_ident_char(src[i - 1]);
+      const bool next_ok = (i + token.size() >= src.size()) || !is_ident_char(src[i + token.size()]);
+      if (!prev_ok || !next_ok) continue;
+      out.push_back('"');
+      out.append(token);
+      out.push_back('"');
+      i += token.size();
+      replaced = true;
+      break;
+    }
+    if (!replaced)
+    {
+      out.push_back(c);
+      ++i;
+    }
+  }
+  return out;
+}
+
+static std::string
+ts_json_fill_value_text(const nlohmann::json &v)
+{
+  if (v.is_null()) return "-";
+  if (v.is_string()) return v.get<std::string>();
+  if (v.is_boolean()) return v.get<bool>() ? "true" : "false";
+  if (v.is_number_integer()) return std::to_string(v.get<long long>());
+  if (v.is_number_unsigned()) return std::to_string(v.get<unsigned long long>());
+  if (v.is_number_float())
+  {
+    const double d = v.get<double>();
+    if (std::isnan(d)) return "NaN";
+    if (std::isinf(d)) return d > 0 ? "Infinity" : "-Infinity";
+  }
+  return v.dump();
+}
+
+static std::string
+ts_extract_fill_value_text(const std::string &raw, int format)
+{
+  if (raw.empty()) return "-";
+  try
+  {
+    const nlohmann::json j = nlohmann::json::parse(ts_sanitize_invalid_json(raw));
+    if (j.contains("fill_value")) return ts_json_fill_value_text(j["fill_value"]);
+  }
+  catch (...)
+  {
+  }
+  return "-";
+}
+
 // TensorStore-spezifischer Teil des Handles; die TensorStore-freien Felder
 // stehen in tsHandle (tsio.h).
 struct tsHandleImpl : tsHandle
@@ -2790,6 +2875,7 @@ tsGetMetadata(tsHandle *input, tsOutputMetadata &meta)
     m.source_metadata = raw;
     m.attributes = src_attrs.dump();
     m.dim_names = src_dims.dump();
+    m.fill_value = a.fill_value;
     m.bstart = a.bstart;
     m.bcount = a.bcount;
     m.out_chunks = a.out_chunks;
@@ -2822,6 +2908,19 @@ tsApplyMetadataConfig(const tsConfig &cfg, tsOutputMetadata &meta)
       src_dims = nlohmann::json::array();
     }
 
+    // fill_value aus der Quelle uebernehmen (sonst 0.0).
+    nlohmann::json fv = nlohmann::json(0.0);
+    if (m.fill_value != "-" && !m.fill_value.empty())
+    {
+      if (m.fill_value == "NaN" || m.fill_value == "Infinity" || m.fill_value == "-Infinity")
+        fv = m.fill_value;
+      else
+      {
+        try { fv = std::stod(m.fill_value); }
+        catch (...) { fv = m.fill_value; }
+      }
+    }
+
     nlohmann::json md;
     if (cfg.out_format == "zarr3")
     {
@@ -2830,7 +2929,7 @@ tsApplyMetadataConfig(const tsConfig &cfg, tsOutputMetadata &meta)
              { "shape", shape },
              { "chunk_grid", { { "name", "regular" }, { "configuration", { { "chunk_shape", chunks } } } } },
              { "data_type", cfg.out_dtype },
-             { "fill_value", 0.0 } };
+             { "fill_value", fv } };
       if (!src_attrs.empty()) md["attributes"] = src_attrs;
       if (!src_dims.empty()) md["dimension_names"] = src_dims;
     }
@@ -2847,7 +2946,7 @@ tsApplyMetadataConfig(const tsConfig &cfg, tsOutputMetadata &meta)
     else
     {
       md = { { "zarr_format", 2 }, { "shape", shape },        { "chunks", chunks },
-             { "dtype", "<f4" },   { "compressor", nullptr }, { "fill_value", 0.0 },
+             { "dtype", "<f4" },   { "compressor", nullptr }, { "fill_value", fv },
              { "order", "C" },     { "filters", nullptr },    { "dimension_separator", "." } };
     }
 
@@ -3160,6 +3259,19 @@ tsApplyCoordinateConfig(const tsConfig &cfg, std::vector<tsCoordinate> &coords)
       src_dims = nlohmann::json::array();
     }
 
+    const std::string coord_fv_text = coord.fill_value.empty() ? ts_extract_fill_value_text(coord.source_metadata, coord.format) : coord.fill_value;
+    nlohmann::json coord_fv = nlohmann::json(0);
+    if (coord_fv_text != "-" && !coord_fv_text.empty())
+    {
+      if (coord_fv_text == "NaN" || coord_fv_text == "Infinity" || coord_fv_text == "-Infinity")
+        coord_fv = coord_fv_text;
+      else
+      {
+        try { coord_fv = std::stod(coord_fv_text); }
+        catch (...) { coord_fv = coord_fv_text; }
+      }
+    }
+
     nlohmann::json md;
     if (cfg.out_format == "zarr3")
     {
@@ -3168,7 +3280,7 @@ tsApplyCoordinateConfig(const tsConfig &cfg, std::vector<tsCoordinate> &coords)
              { "shape", bcount },
              { "chunk_grid", { { "name", "regular" }, { "configuration", { { "chunk_shape", chunks } } } } },
              { "data_type", *dtype_code },
-             { "fill_value", 0 } };
+             { "fill_value", coord_fv } };
       if (!src_attrs.empty()) md["attributes"] = src_attrs;
       if (!src_dims.empty()) md["dimension_names"] = src_dims;
     }
@@ -3185,7 +3297,7 @@ tsApplyCoordinateConfig(const tsConfig &cfg, std::vector<tsCoordinate> &coords)
     else
     {
       md = { { "zarr_format", 2 },     { "shape", bcount },       { "chunks", chunks },
-             { "dtype", *dtype_code }, { "compressor", nullptr }, { "fill_value", 0 },
+             { "dtype", *dtype_code }, { "compressor", nullptr }, { "fill_value", coord_fv },
              { "order", "C" },         { "filters", nullptr },    { "dimension_separator", "." } };
     }
 

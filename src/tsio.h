@@ -146,6 +146,7 @@ struct tsCoordinate
   std::string source_metadata;  // Roh-.zarray/zarr.json der Quelle (Kompression)
   std::string attributes;       // Quell-Attribute als JSON-Text (v2 .zattrs)
   std::string dim_names;        // Quell-dimension_names als JSON-Text (v2 .zattrs)
+  std::string fill_value;       // Quell-fill_value als Text ("-" wenn nicht gesetzt)
   std::vector<std::int64_t> shape;
   const void *source = nullptr;  // opaker Quell-Store
 
@@ -167,6 +168,7 @@ struct tsArrayMeta
   std::string source_metadata;  // Roh-.zarray/zarr.json der Quelle (Kompression)
   std::string attributes;       // Quell-Attribute als JSON-Text (v2 .zattrs)
   std::string dim_names;        // Quell-dimension_names als JSON-Text (v2 .zattrs)
+  std::string fill_value;       // Quell-fill_value als Text ("-" wenn nicht gesetzt)
   std::vector<std::int64_t> bstart;
   std::vector<std::int64_t> bcount;
   std::vector<std::int64_t> out_chunks;
