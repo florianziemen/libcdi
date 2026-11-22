@@ -423,45 +423,62 @@ define_healpix(size_t numCells, KeyValuesMap const &attributes)
   return gridID;
 }
 
+static int
+map_external_type_to_cdi(ValueExternalType type)
+{
+  switch (type)
+  {
+    case ValueExternalType::Int8: return CDI_DATATYPE_INT8;
+    case ValueExternalType::UInt8: return CDI_DATATYPE_UINT8;
+    case ValueExternalType::Int16: return CDI_DATATYPE_INT16;
+    case ValueExternalType::UInt16: return CDI_DATATYPE_UINT16;
+    case ValueExternalType::Int32: return CDI_DATATYPE_INT32;
+    case ValueExternalType::UInt32: return CDI_DATATYPE_UINT32;
+    case ValueExternalType::Int64: return CDI_DATATYPE_INT64;
+    case ValueExternalType::UInt64: return CDI_DATATYPE_UINT64;
+    case ValueExternalType::Float32: return CDI_DATATYPE_FLT32;
+    case ValueExternalType::Float64: return CDI_DATATYPE_FLT64;
+    case ValueExternalType::Char: return CDI_DATATYPE_TXT;
+    case ValueExternalType::String: return CDI_DATATYPE_TXT;
+
+    default: throw std::runtime_error("Unsupported NetCDF attribute type");
+  }
+}
+
 void
-cdi_def_int_attrs(int cdiID, int varID, std::string const &k, int n, int *values)
+cdi_def_int_attrs(int cdiID, int varID, std::string const &k, int n, const int *values)
 {
   cdiDefAttInt(cdiID, varID, k.c_str(), CDI_DATATYPE_INT32, n, values);
 }
 
 void
-cdi_def_flt_attrs(int cdiID, int varID, std::string const &k, int n, double *values)
+cdi_def_flt_attrs(int cdiID, int varID, std::string const &k, int n, const double *values)
 {
   cdiDefAttFlt(cdiID, varID, k.c_str(), CDI_DATATYPE_FLT64, n, values);
 }
 
 void
-cdi_def_attribute(int cdiID, int varID, std::string const &k, const Values &v)
+cdi_def_attribute(int cdiID, int varID, std::string const &k, Values const &v)
 {
   if (v.size() == 0) return;  // Null
   switch (v.internalType())
   {
     case ValueInternalType::Int64:
     {
-      if (v.externalType() == ValueExternalType::Int8) return;  // Bool wird uebersprungen
       const int n = static_cast<int>(v.size());
       std::vector<int> vals(n);
-      for (int i = 0; i < n; ++i) vals[i] = static_cast<int>(v.integers()[i]);
+      for (int i = 0; i < n; ++i) { vals[i] = static_cast<int>(v.integers()[i]); }
       cdi_def_int_attrs(cdiID, varID, k, n, vals.data());
       break;
     }
     case ValueInternalType::Double:
     {
-      const int n = static_cast<int>(v.size());
-      std::vector<double> vals(n);
-      for (int i = 0; i < n; ++i) vals[i] = v.doubles()[i];
-      cdi_def_flt_attrs(cdiID, varID, k, n, vals.data());
+      cdi_def_flt_attrs(cdiID, varID, k, static_cast<int>(v.size()), v.doubles());
       break;
     }
     case ValueInternalType::Char:
     {
-      std::string s(v.chars(), v.size());
-      if (!s.empty()) cdiDefAttTxt(cdiID, varID, k.c_str(), static_cast<int>(s.size()), s.c_str());
+      cdiDefAttTxt(cdiID, varID, k.c_str(), static_cast<int>(v.size()), v.chars());
       break;
     }
     default: return;
@@ -760,7 +777,7 @@ ts_inq_contents(stream_t *streamP)
       for (const auto &[key, value] : a.attributes)
       {
         std::string sval = values_to_string(value);
-        if (!sval.empty() && key != "_ARRAY_DIMENSIONS" && key != "grid_mapping" && key != "units")
+        if (!sval.empty() && key != "_ARRAY_DIMENSIONS" && key != "grid_mapping" && key != "units" && key != "coordinates")
         {
           cdiDefAttTxt(vlistID, varID, key.c_str(), static_cast<int>(sval.size()), sval.c_str());
         }
