@@ -300,6 +300,7 @@ cdf_set_zaxistype(const char *attstring, int *zaxistype)
   else if (str_is_equal(attstring, "sedimentbottomtw")) *zaxistype = ZAXIS_SEDIMENT_BOTTOM_TW;
   else if (str_is_equal(attstring, "mixlayer"))         *zaxistype = ZAXIS_MIX_LAYER;
   else if (str_is_equal(attstring, "atmosphere"))       *zaxistype = ZAXIS_ATMOSPHERE;
+  /*
   else
     {
       static bool warn = true;
@@ -309,6 +310,7 @@ cdf_set_zaxistype(const char *attstring, int *zaxistype)
           Warning("NetCDF attribute level_type='%s' unsupported!", attstring);
         }
     }
+  */
   // clang-format on
 }
 
