@@ -1830,6 +1830,7 @@ cdf_set_dimtype(int numVars, ncvar_t *ncvars, ncdim_t *ncdims)
       for (int i = 0; i < ncvar->ncoordvars; ++i)
       {
         int cvarId = ncvar->coordvarids[i];
+        if (cvarId == -1) continue;
         ncvar_t *cvar = &ncvars[cvarId];
         if (cvar->ndims == 1 && cvar->isLon) { xDimId = cvar->dimids[0]; }
         if (cvar->ndims == 1 && cvar->isLat) { yDimId = cvar->dimids[0]; }
