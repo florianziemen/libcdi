@@ -812,8 +812,10 @@ json_to_values(const nlohmann::json &j)
       vals.reserve(j.size());
       for (const auto &e : j)
       {
-        if (e.is_number_unsigned()) vals.push_back(static_cast<int64_t>(e.get<unsigned long long>()));
-        else vals.push_back(static_cast<int64_t>(e.get<long long>()));
+        if (e.is_number_unsigned())
+          vals.push_back(static_cast<int64_t>(e.get<unsigned long long>()));
+        else
+          vals.push_back(static_cast<int64_t>(e.get<long long>()));
       }
       return Values(vals.size(), vals.data(), ValueExternalType::Int64);
     }
@@ -823,9 +825,12 @@ json_to_values(const nlohmann::json &j)
       vals.reserve(j.size());
       for (const auto &e : j)
       {
-        if (e.is_number_integer()) vals.push_back(static_cast<double>(e.get<long long>()));
-        else if (e.is_number_unsigned()) vals.push_back(static_cast<double>(e.get<unsigned long long>()));
-        else vals.push_back(e.get<double>());
+        if (e.is_number_integer())
+          vals.push_back(static_cast<double>(e.get<long long>()));
+        else if (e.is_number_unsigned())
+          vals.push_back(static_cast<double>(e.get<unsigned long long>()));
+        else
+          vals.push_back(e.get<double>());
       }
       return Values(vals.size(), vals.data(), ValueExternalType::Float64);
     }
@@ -849,15 +854,11 @@ values_to_json(const Values &v)
 {
   switch (v.internalType())
   {
-    case ValueInternalType::None:
-      return nullptr;
+    case ValueInternalType::None: return nullptr;
 
     case ValueInternalType::Int64:
     {
-      if (v.externalType() == ValueExternalType::Int8)
-      {
-        return (v.size() > 0 && v.integers()[0] != 0);
-      }
+      if (v.externalType() == ValueExternalType::Int8) { return (v.size() > 0 && v.integers()[0] != 0); }
       if (v.size() <= 1)
       {
         if (v.size() == 0) return nullptr;
@@ -884,10 +885,7 @@ values_to_json(const Values &v)
     {
       const char *c = v.chars();
       std::string s(c, v.size());
-      if (v.externalType() == ValueExternalType::String)
-      {
-        return s;
-      }
+      if (v.externalType() == ValueExternalType::String) { return s; }
       try
       {
         return nlohmann::json::parse(s);
@@ -913,10 +911,7 @@ read_array_attrs(const tensorstore::TensorStore<T, R> *store, int format)
     nlohmann::json j = nlohmann::json::parse(raw);
     if (j.contains("attributes") && j["attributes"].is_object()) j = j["attributes"];
     if (!j.is_object()) return attrs;
-    for (auto it = j.begin(); it != j.end(); ++it)
-    {
-      attrs[it.key()] = json_to_values(it.value());
-    }
+    for (auto it = j.begin(); it != j.end(); ++it) { attrs[it.key()] = json_to_values(it.value()); }
   }
   catch (...)
   {
@@ -2473,8 +2468,10 @@ read_global_attrs(const tsConfig &cfg, tensorstore::Context &context)
         vals.reserve(j.size());
         for (const auto &e : j)
         {
-          if (e.is_number_unsigned()) vals.push_back(static_cast<int64_t>(e.get<unsigned long long>()));
-          else vals.push_back(static_cast<int64_t>(e.get<long long>()));
+          if (e.is_number_unsigned())
+            vals.push_back(static_cast<int64_t>(e.get<unsigned long long>()));
+          else
+            vals.push_back(static_cast<int64_t>(e.get<long long>()));
         }
         return Values(vals.size(), vals.data(), ValueExternalType::Int64);
       }
@@ -2484,9 +2481,12 @@ read_global_attrs(const tsConfig &cfg, tensorstore::Context &context)
         vals.reserve(j.size());
         for (const auto &e : j)
         {
-          if (e.is_number_integer()) vals.push_back(static_cast<double>(e.get<long long>()));
-          else if (e.is_number_unsigned()) vals.push_back(static_cast<double>(e.get<unsigned long long>()));
-          else vals.push_back(e.get<double>());
+          if (e.is_number_integer())
+            vals.push_back(static_cast<double>(e.get<long long>()));
+          else if (e.is_number_unsigned())
+            vals.push_back(static_cast<double>(e.get<unsigned long long>()));
+          else
+            vals.push_back(e.get<double>());
         }
         return Values(vals.size(), vals.data(), ValueExternalType::Float64);
       }
@@ -2507,10 +2507,7 @@ read_global_attrs(const tsConfig &cfg, tensorstore::Context &context)
   KeyValuesMap attrs;
   if (parsed.is_object())
   {
-    for (auto it = parsed.begin(); it != parsed.end(); ++it)
-    {
-      attrs[it.key()] = from_json(it.value(), from_json);
-    }
+    for (auto it = parsed.begin(); it != parsed.end(); ++it) { attrs[it.key()] = from_json(it.value(), from_json); }
   }
   return attrs;
 }
@@ -2721,12 +2718,15 @@ tsApplyConfig(tsHandle *handle)
     {
       const Values &gv = it->second;
       std::string gm;
-      if (gv.internalType() == ValueInternalType::Char) gm.assign(gv.chars(), gv.size());
+      if (gv.internalType() == ValueInternalType::Char)
+        gm.assign(gv.chars(), gv.size());
       else
       {
         nlohmann::json j = values_to_json(gv);
-        if (j.is_string()) gm = j.get<std::string>();
-        else gm = j.dump();
+        if (j.is_string())
+          gm = j.get<std::string>();
+        else
+          gm = j.dump();
       }
       coord_names.insert(gm);
     }
@@ -3135,8 +3135,7 @@ tsGetMetadata(tsHandle *input, tsOutputMetadata &meta)
       KeyValuesMap attrs;
       if (src_attrs.is_object())
       {
-        for (auto it = src_attrs.begin(); it != src_attrs.end(); ++it)
-          attrs[it.key()] = json_to_values(it.value());
+        for (auto it = src_attrs.begin(); it != src_attrs.end(); ++it) attrs[it.key()] = json_to_values(it.value());
       }
       m.attributes = std::move(attrs);
     }
@@ -3315,7 +3314,7 @@ tsSetMetadata(tsHandle *output, const tsOutputMetadata &meta)
       if (!write_v2_zattrs_if_needed(dir, src_attrs, src_dims)) return false;
     }
 
-    pretty_print_json_file(dir + ((m.driver == "zarr3") ? "zarr.json" : ".zarray"));
+    if (output->cfg.debug) pretty_print_json_file(dir + ((m.driver == "zarr3") ? "zarr.json" : ".zarray"));
 
     Writer w;
     w.name = m.name;
@@ -3356,7 +3355,6 @@ tsSetMetadata(tsHandle *output, const tsOutputMetadata &meta)
           if (f) f << ga.dump(2);
         }
       }
-
     }
   }
 
@@ -3479,8 +3477,7 @@ tsReadCoordinates(tsHandle *input, std::vector<tsCoordinate> &coords)
     {
       KeyValuesMap attrs;
       if (src_attrs.is_object())
-        for (auto it = src_attrs.begin(); it != src_attrs.end(); ++it)
-          attrs[it.key()] = json_to_values(it.value());
+        for (auto it = src_attrs.begin(); it != src_attrs.end(); ++it) attrs[it.key()] = json_to_values(it.value());
       coord.attributes = std::move(attrs);
     }
     coord.dim_names = src_dims.dump();
@@ -3686,7 +3683,13 @@ tsWriteCoordinates(tsHandle *output, const std::vector<tsCoordinate> &coords)
       try
       {
         for (const auto &kv : coord.attributes) src_attrs[kv.first] = values_to_json(kv.second);
-         try { src_dims = nlohmann::json::parse(coord.dim_names); } catch (...) {}
+        try
+        {
+          src_dims = nlohmann::json::parse(coord.dim_names);
+        }
+        catch (...)
+        {
+        }
       }
       catch (...)
       {
@@ -3694,7 +3697,7 @@ tsWriteCoordinates(tsHandle *output, const std::vector<tsCoordinate> &coords)
       if (!write_v2_zattrs_if_needed(coord.directory, src_attrs, src_dims)) return false;
     }
 
-    pretty_print_json_file(coord.directory + ((coord.driver == "zarr3") ? "zarr.json" : ".zarray"));
+    if (output->cfg.debug) pretty_print_json_file(coord.directory + ((coord.driver == "zarr3") ? "zarr.json" : ".zarray"));
 
     auto *arr = static_cast<const SharedArray<void, dynamic_rank> *>(coord.data.get());
     if (!arr)

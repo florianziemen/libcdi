@@ -130,8 +130,8 @@ print_coordinate_arrays(const tsMetadata &md)
 {
   std::cout << "=== Coordinate arrays ===\n";
   std::cout << "#  name  shape\n";
-  std::set<std::string> coord_arrays;
-  for (const auto &c : md.coordList) coord_arrays.insert(c.name);
+  std::set<std::string> coordArrays;
+  for (const auto &c : md.coordList) coordArrays.insert(c.name);
 
   std::map<std::string, std::int64_t> grid_len;
   for (const auto &a : md.arrayList)
@@ -139,11 +139,11 @@ print_coordinate_arrays(const tsMetadata &md)
     const auto gm = a.attributes.find("grid_mapping");
     if (gm == a.attributes.end()) continue;
     std::string gmValue = values_to_string(gm->second);
-    if (grid_len.count(gmValue)) continue;
+    if (grid_len.contains(gmValue)) continue;
     for (std::size_t di = 0; di < a.dim_names.size() && di < a.shape.size(); ++di)
     {
-      if (coord_arrays.count(a.dim_names[di])) continue;  // Achse mit gleichnamiger Koordinate
-      grid_len[gmValue] = a.shape[di];                 // Gitter-Achse dieser grid_mapping
+      if (coordArrays.contains(a.dim_names[di])) continue;  // Achse mit gleichnamiger Koordinate
+      grid_len[gmValue] = a.shape[di];                      // Gitter-Achse dieser grid_mapping
       break;
     }
   }
@@ -347,7 +347,7 @@ find_time_dimname(tsMetadata const &md)
 static std::string
 values_to_string(const Values &v)
 {
-  if (v.size() == 0) return std::string();
+  if (v.size() == 0) return {};
   switch (v.internalType())
   {
     case ValueInternalType::Int64:
@@ -385,11 +385,9 @@ values_to_string(const Values &v)
     {
       return std::string(v.chars(), v.size());
     }
-    default:
-      return std::string();
+    default: return std::string();
   }
 }
-
 
 static int
 define_healpix(size_t numCells, KeyValuesMap const &attributes)
@@ -665,7 +663,10 @@ ts_inq_contents(stream_t *streamP)
     {
       numSteps = array.shape[0];
       if (attributes.contains("units")) { timeUnits = values_to_string(attributes.find("units")->second); }
-      if (attributes.contains("calendar")) { calendar = attribute_to_calendar(values_to_string(attributes.find("calendar")->second).c_str()); }
+      if (attributes.contains("calendar"))
+      {
+        calendar = attribute_to_calendar(values_to_string(attributes.find("calendar")->second).c_str());
+      }
     }
     else if (gridID == CDI_UNDEFID && attributes.contains("grid_mapping_name")) { gridID = define_healpix(numCells, attributes); }
     else

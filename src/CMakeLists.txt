@@ -225,7 +225,7 @@ if (CDI_BUILD_UNKNOWN)
 endif ()
 
 if (WITH_TENSORSTORE)
-  set_source_files_properties(tsio.cpp PROPERTIES COMPILE_OPTIONS "-std=gnu++17")
+  set_source_files_properties(tsio.cpp PROPERTIES COMPILE_OPTIONS "-std=gnu++20")
   target_sources(libcdi PRIVATE
     stream_ts.h
     stream_ts.c

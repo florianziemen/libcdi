@@ -48,7 +48,6 @@ enum class ValueExternalType : uint8_t
 // =====================================================
 // Values
 // =====================================================
-
 class Values
 {
 public:
@@ -75,7 +74,6 @@ private:
   // =================================================
   // Internal type deduction
   // =================================================
-
   template <typename T>
   static constexpr ValueInternalType
   getInternalType()
@@ -93,18 +91,14 @@ private:
   // =================================================
   // Element size
   // =================================================
-
   static constexpr size_t
   elementSize(ValueInternalType type) noexcept
   {
     switch (type)
     {
       case ValueInternalType::Int64: return sizeof(int64_t);
-
       case ValueInternalType::Double: return sizeof(double);
-
       case ValueInternalType::Char: return sizeof(char);
-
       default: return 0;
     }
   }
@@ -112,7 +106,6 @@ private:
   // =================================================
   // Safe storage size calculation
   // =================================================
-
   static size_t
   calculateSize(ValueInternalType type, size_t elements)
   {
@@ -126,7 +119,6 @@ private:
     const size_t bytesPerElement = elementSize(type);
 
     if (bytesPerElement == 0) throw std::invalid_argument("Invalid value type");
-
     if (elements > std::numeric_limits<size_t>::max() / bytesPerElement) { throw std::length_error("Value too large"); }
 
     return elements * bytesPerElement;
@@ -135,7 +127,6 @@ private:
   // =================================================
   // Storage management
   // =================================================
-
   [[nodiscard]]
   bool
   usesHeap() const noexcept
@@ -181,7 +172,6 @@ private:
   // =================================================
   // Internal constructor
   // =================================================
-
   Values(ValueInternalType internalType, ValueExternalType externalType, size_t elements)
       : inType(internalType), exType(externalType), count(elements), _buffer{}
   {
@@ -192,26 +182,23 @@ public:
   // =================================================
   // Default constructor
   // =================================================
-
   Values() noexcept : _buffer{} {}
 
   // =================================================
   // Factory for direct data initialization
   // =================================================
-
   static Values
   createUninitialized(ValueInternalType internalType, size_t elements, ValueExternalType externalType = ValueExternalType::None)
   {
-    return Values(internalType, externalType, elements);
+    return { internalType, externalType, elements };
   }
 
   // =================================================
   // Numeric constructor
   // Supports int64_t and double.
   // =================================================
-
-  template <typename T, typename = std::enable_if_t<std::is_same_v<std::remove_cv_t<T>, int64_t>
-                                                    || std::is_same_v<std::remove_cv_t<T>, double>>>
+  template <typename T>
+    requires(std::is_same_v<std::remove_cv_t<T>, int64_t> || std::is_same_v<std::remove_cv_t<T>, double>)
   Values(size_t elements, const T *values, ValueExternalType externalType = ValueExternalType::None)
       : Values(getInternalType<T>(), externalType, elements)
   {
@@ -223,7 +210,6 @@ public:
   // =================================================
   // Char constructor
   // =================================================
-
   Values(std::string_view value, ValueExternalType externalType = ValueExternalType::None)
       : Values(ValueInternalType::Char, externalType, value.size())
   {
@@ -235,7 +221,6 @@ public:
   // =================================================
   // Char constructor for direct data reading
   // =================================================
-
   Values(size_t charLength, ValueExternalType externalType = ValueExternalType::None)
       : Values(ValueInternalType::Char, externalType, charLength)
   {
@@ -245,13 +230,11 @@ public:
   // =================================================
   // Destructor
   // =================================================
-
   ~Values() { release(); }
 
   // =================================================
   // Copy constructor
   // =================================================
-
   Values(const Values &other) : inType(other.inType), exType(other.exType), count(other.count), _buffer{}
   {
     const size_t bytes = calculateSize(inType, count);
@@ -264,7 +247,6 @@ public:
   // =================================================
   // Copy assignment
   // =================================================
-
   Values &
   operator=(const Values &other)
   {
@@ -279,7 +261,6 @@ public:
   // =================================================
   // Move constructor
   // =================================================
-
   Values(Values &&other) noexcept
       : inType(other.inType), exType(other.exType), count(other.count), capacity(other.capacity), _buffer{}
   {
@@ -291,7 +272,6 @@ public:
 
     other.capacity = BufferSize;
     other.count = 0;
-
     other.inType = ValueInternalType::None;
     other.exType = ValueExternalType::None;
   }
@@ -299,7 +279,6 @@ public:
   // =================================================
   // Move assignment
   // =================================================
-
   Values &
   operator=(Values &&other) noexcept
   {
@@ -330,7 +309,6 @@ public:
   // =================================================
   // Swap
   // =================================================
-
   void
   swap(Values &other) noexcept
   {
@@ -351,7 +329,6 @@ public:
   // =================================================
   // Metadata
   // =================================================
-
   [[nodiscard]]
   ValueInternalType
   internalType() const noexcept
@@ -390,7 +367,6 @@ public:
   // =================================================
   // Raw data access
   // =================================================
-
   [[nodiscard]]
   void *
   rawData() noexcept
@@ -408,7 +384,6 @@ public:
   // =================================================
   // Integer access
   // =================================================
-
   [[nodiscard]]
   int64_t *
   integers()
@@ -430,7 +405,6 @@ public:
   // =================================================
   // Double access
   // =================================================
-
   [[nodiscard]]
   double *
   doubles()
@@ -452,7 +426,6 @@ public:
   // =================================================
   // Char access
   // =================================================
-
   [[nodiscard]]
   char *
   chars()
@@ -475,5 +448,4 @@ public:
 // =====================================================
 // KeyValuesMap
 // =====================================================
-
 using KeyValuesMap = std::map<std::string, Values>;
