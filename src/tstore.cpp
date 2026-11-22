@@ -5,6 +5,9 @@
 #include "cdf_util.h"
 #include "tsio.h"
 
+static std::string values_to_string(const Values &v);
+
+#include <charconv>
 #include <cmath>  // nanf()
 #include <array>
 #include <filesystem>
@@ -135,11 +138,12 @@ print_coordinate_arrays(const tsMetadata &md)
   {
     const auto gm = a.attributes.find("grid_mapping");
     if (gm == a.attributes.end()) continue;
-    if (grid_len.count(gm->second)) continue;
+    std::string gmValue = values_to_string(gm->second);
+    if (grid_len.count(gmValue)) continue;
     for (std::size_t di = 0; di < a.dim_names.size() && di < a.shape.size(); ++di)
     {
       if (coord_arrays.count(a.dim_names[di])) continue;  // Achse mit gleichnamiger Koordinate
-      grid_len[gm->second] = a.shape[di];                 // Gitter-Achse dieser grid_mapping
+      grid_len[gmValue] = a.shape[di];                 // Gitter-Achse dieser grid_mapping
       break;
     }
   }
@@ -173,7 +177,7 @@ print_coordinate_arrays(const tsMetadata &md)
       if (!details.empty()) details += "  ";
       details += label;
       details += '=';
-      details += it->second;
+      details += values_to_string(it->second);
     };
     add_attr("grid_mapping_name", "grid_mapping");
     add_attr("refinement_level", "refinement_level");
@@ -332,7 +336,7 @@ find_time_dimname(tsMetadata const &md)
       if (attributes.contains("units"))
       {
         auto units = attributes.find("units")->second;
-        if (is_timeaxis_units(units.c_str())) return c.name;
+        if (is_timeaxis_units(values_to_string(units).c_str())) return c.name;
       }
     }
   }
@@ -340,22 +344,71 @@ find_time_dimname(tsMetadata const &md)
   return {};
 }
 
-static int
-define_healpix(size_t numCells, std::map<std::string, std::string> const &attributes)
+static std::string
+values_to_string(const Values &v)
 {
-  auto mapName = attributes.find("grid_mapping_name")->second;
+  if (v.size() == 0) return std::string();
+  switch (v.internalType())
+  {
+    case ValueInternalType::Int64:
+    {
+      if (v.externalType() == ValueExternalType::Int8) return v.integers()[0] ? std::string("true") : std::string("false");
+      if (v.size() == 1) return std::to_string(v.integers()[0]);
+      std::string s = "[";
+      for (size_t i = 0; i < v.size(); ++i)
+      {
+        if (i) s += ",";
+        s += std::to_string(v.integers()[i]);
+      }
+      s += "]";
+      return s;
+    }
+    case ValueInternalType::Double:
+    {
+      auto fmt_double = [](double d) -> std::string
+      {
+        char buf[64];
+        auto res = std::to_chars(buf, buf + 64, d);
+        return std::string(buf, res.ptr);
+      };
+      if (v.size() == 1) return fmt_double(v.doubles()[0]);
+      std::string s = "[";
+      for (size_t i = 0; i < v.size(); ++i)
+      {
+        if (i) s += ",";
+        s += fmt_double(v.doubles()[i]);
+      }
+      s += "]";
+      return s;
+    }
+    case ValueInternalType::Char:
+    {
+      return std::string(v.chars(), v.size());
+    }
+    default:
+      return std::string();
+  }
+}
+
+
+static int
+define_healpix(size_t numCells, KeyValuesMap const &attributes)
+{
+  auto it = attributes.find("grid_mapping_name");
+  if (it == attributes.end()) return CDI_UNDEFID;
+  std::string mapName = values_to_string(it->second);
   if (mapName != "healpix") return CDI_UNDEFID;
   int refinementLevel{};
   std::string indexingScheme;
   if (attributes.contains("refinement_level") && attributes.contains("indexing_scheme"))
   {
-    refinementLevel = std::stoi(attributes.find("refinement_level")->second);
-    indexingScheme = attributes.find("indexing_scheme")->second;
+    refinementLevel = std::stoi(values_to_string(attributes.find("refinement_level")->second));
+    indexingScheme = values_to_string(attributes.find("indexing_scheme")->second);
   }
   else if (attributes.contains("healpix_nside") && attributes.contains("healpix_order"))
   {
-    refinementLevel = std::log2(std::stoi(attributes.find("healpix_nside")->second));
-    indexingScheme = attributes.find("healpix_order")->second;
+    refinementLevel = std::log2(std::stoi(values_to_string(attributes.find("healpix_nside")->second)));
+    indexingScheme = values_to_string(attributes.find("healpix_order")->second);
   }
   else
   {
@@ -385,51 +438,35 @@ cdi_def_flt_attrs(int cdiID, int varID, std::string const &k, int n, double *val
 }
 
 void
-cdi_def_attribute(int cdiID, int varID, std::string const &k, const ValueObject &v)
+cdi_def_attribute(int cdiID, int varID, std::string const &k, const Values &v)
 {
-  switch (v.type)
+  if (v.size() == 0) return;  // Null
+  switch (v.internalType())
   {
-    case ValueObject::Null: return;
-    case ValueObject::Bool: return;
-    case ValueObject::Int:
+    case ValueInternalType::Int64:
     {
-      auto iVal = static_cast<int>(std::get<long long>(v.data));
-      cdi_def_int_attrs(cdiID, varID, k, 1, &iVal);
+      if (v.externalType() == ValueExternalType::Int8) return;  // Bool wird uebersprungen
+      const int n = static_cast<int>(v.size());
+      std::vector<int> vals(n);
+      for (int i = 0; i < n; ++i) vals[i] = static_cast<int>(v.integers()[i]);
+      cdi_def_int_attrs(cdiID, varID, k, n, vals.data());
       break;
     }
-    case ValueObject::Double:
+    case ValueInternalType::Double:
     {
-      auto dVal = std::get<double>(v.data);
-      cdi_def_flt_attrs(cdiID, varID, k, 1, &dVal);
+      const int n = static_cast<int>(v.size());
+      std::vector<double> vals(n);
+      for (int i = 0; i < n; ++i) vals[i] = v.doubles()[i];
+      cdi_def_flt_attrs(cdiID, varID, k, n, vals.data());
       break;
     }
-    case ValueObject::String:
+    case ValueInternalType::Char:
     {
-      auto const &sVal = std::get<std::string>(v.data);
-      if (!sVal.empty()) cdiDefAttTxt(cdiID, varID, k.c_str(), static_cast<int>(sVal.size()), sVal.c_str());
+      std::string s(v.chars(), v.size());
+      if (!s.empty()) cdiDefAttTxt(cdiID, varID, k.c_str(), static_cast<int>(s.size()), s.c_str());
       break;
     }
-    case ValueObject::Array:
-    {
-      const auto &arr = std::get<std::vector<ValueObject>>(v.data);
-      if (!arr.empty())
-      {
-        auto avType = arr[0].type;
-        if (avType == ValueObject::Int)
-        {
-          std::vector<int> v(arr.size());
-          for (std::size_t i = 0; i < arr.size(); ++i) { v[i] = static_cast<int>(std::get<long long>(arr[i].data)); }
-          cdi_def_int_attrs(cdiID, varID, k, static_cast<int>(v.size()), v.data());
-        }
-        if (avType == ValueObject::Double)
-        {
-          std::vector<double> v(arr.size());
-          for (std::size_t i = 0; i < arr.size(); ++i) { v[i] = static_cast<int>(std::get<double>(arr[i].data)); }
-          cdi_def_flt_attrs(cdiID, varID, k, static_cast<int>(v.size()), v.data());
-        }
-      }
-      break;
-    }
+    default: return;
   }
 }
 
@@ -627,8 +664,8 @@ ts_inq_contents(stream_t *streamP)
     if (array.name == timeDimName)
     {
       numSteps = array.shape[0];
-      if (attributes.contains("units")) { timeUnits = attributes.find("units")->second; }
-      if (attributes.contains("calendar")) { calendar = attribute_to_calendar(attributes.find("calendar")->second.c_str()); }
+      if (attributes.contains("units")) { timeUnits = values_to_string(attributes.find("units")->second); }
+      if (attributes.contains("calendar")) { calendar = attribute_to_calendar(values_to_string(attributes.find("calendar")->second).c_str()); }
     }
     else if (gridID == CDI_UNDEFID && attributes.contains("grid_mapping_name")) { gridID = define_healpix(numCells, attributes); }
     else
@@ -647,7 +684,7 @@ ts_inq_contents(stream_t *streamP)
       int zaxisType = ZAXIS_GENERIC;
       if (attributes.contains("standard_name"))
       {
-        auto stdName = attributes.find("standard_name")->second;
+        std::string stdName = values_to_string(attributes.find("standard_name")->second);
         if (stdName == "air_pressure") { zaxisType = ZAXIS_PRESSURE; }
       }
 
@@ -656,7 +693,7 @@ ts_inq_contents(stream_t *streamP)
       cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, array.name.c_str());
       if (attributes.contains("units"))
       {
-        auto units = attributes.find("units")->second;
+        std::string units = values_to_string(attributes.find("units")->second);
         cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units.c_str());
       }
       zaxisMap[array.name] = zaxisID;
@@ -708,7 +745,7 @@ ts_inq_contents(stream_t *streamP)
       }
       if (a.attributes.contains("units"))
       {
-        auto units = a.attributes.find("units")->second;
+        std::string units = values_to_string(a.attributes.find("units")->second);
         cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units.c_str());
       }
 
@@ -719,11 +756,12 @@ ts_inq_contents(stream_t *streamP)
 
       if (!a.compressor.empty()) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_FILTER);
 
-      for (auto [key, value] : a.attributes)
+      for (const auto &[key, value] : a.attributes)
       {
-        if (!value.empty() && key != "_ARRAY_DIMENSIONS" && key != "grid_mapping" && key != "units")
+        std::string sval = values_to_string(value);
+        if (!sval.empty() && key != "_ARRAY_DIMENSIONS" && key != "grid_mapping" && key != "units")
         {
-          cdiDefAttTxt(vlistID, varID, key.c_str(), static_cast<int>(value.size()), value.c_str());
+          cdiDefAttTxt(vlistID, varID, key.c_str(), static_cast<int>(sval.size()), sval.c_str());
         }
       }
     }

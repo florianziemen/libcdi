@@ -30,6 +30,8 @@
 #include <variant>
 #include <vector>
 
+#include "keyvalues.hpp"
+
 // 1-basierter, inklusiver Bereich einer Achse; ein nicht gesetztes `end`
 // bedeutet "bis zur Ausdehnung des Arrays".
 struct tsRange
@@ -83,22 +85,13 @@ struct tsArray
   std::vector<std::int64_t> bcount;      // Auswahl, auf die Form geklemmt
   std::vector<std::int64_t> out_chunks;  // Ausgabe-Chunkform (Schreibmodus)
   std::vector<std::string> dim_names;    // dimension_names / _ARRAY_DIMENSIONS
-  std::map<std::string, std::string> attributes;
+  KeyValuesMap attributes;
   bool time_constant = false;  // keine `time`-Dimension: nur im ersten Schritt
   bool layered = false;        // eine Statistik-Zeile pro Layer
   std::int64_t num_steps = 0;  // ausgewaehlte Zeitschritte dieses Arrays (1 bei time_constant)
   std::int64_t num_layers = 1;
   std::int64_t num_cells = 0;   // Werte pro Layer
   std::int64_t num_values = 0;  // Produkt von bcount (gesamter ausgewaehlter Hypercube)
-};
-
-// Ein Attributwert im nativen C++-Datentyp.  Skalare werden in den
-// entsprechenden Feldern gespeichert, Arrays in `values` (rekursiv).
-struct ValueObject
-{
-  enum Type : std::uint8_t { Null, Bool, Int, Double, String, Array };
-  Type type = Null;
-  std::variant<std::monostate, bool, long long, double, std::string, std::vector<ValueObject>> data;
 };
 
 // Metadaten eines geoeffneten Datensatzes: die ausgewaehlten Daten-Arrays
@@ -108,7 +101,7 @@ struct tsMetadata
   std::int64_t num_steps = 0;  // Maximum der num_steps aller Daten-Arrays
   std::vector<tsArray> arrayList;
   std::vector<tsArray> coordList;
-  std::map<std::string, ValueObject> global_attributes;  // globale (Gruppen-/Wurzel-)Attribute
+  KeyValuesMap global_attributes;  // globale (Gruppen-/Wurzel-)Attribute
 };
 
 // Eine Zeile der Dataset-Uebersicht.  Die Listen sind bereits formatiert
@@ -155,7 +148,7 @@ struct tsCoordinate
   std::string name;
   int format = 0;               // Quell-Zarr-Format (2 oder 3)
   std::string source_metadata;  // Roh-.zarray/zarr.json der Quelle (Kompression)
-  std::string attributes;       // Quell-Attribute als JSON-Text (v2 .zattrs)
+  KeyValuesMap attributes;       // Quell-Attribute
   std::string dim_names;        // Quell-dimension_names als JSON-Text (v2 .zattrs)
   std::string fill_value;       // Quell-fill_value als Text ("-" wenn nicht gesetzt)
   std::vector<std::int64_t> shape;
@@ -177,7 +170,7 @@ struct tsArrayMeta
   std::string name;
   int format = 0;               // Quell-Zarr-Format (2 oder 3)
   std::string source_metadata;  // Roh-.zarray/zarr.json der Quelle (Kompression)
-  std::string attributes;       // Quell-Attribute als JSON-Text (v2 .zattrs)
+  KeyValuesMap attributes;       // Quell-Attribute
   std::string dim_names;        // Quell-dimension_names als JSON-Text (v2 .zattrs)
   std::string fill_value;       // Quell-fill_value als Text ("-" wenn nicht gesetzt)
   std::vector<std::int64_t> bstart;
@@ -197,7 +190,7 @@ struct tsOutputMetadata
   std::int64_t start_t = 0;
   std::int64_t num_steps = 0;
   std::vector<tsArrayMeta> arrays;
-  std::string global_attributes;  // globale (Gruppen-/Wurzel-)Attribute als JSON-Objekttext
+  KeyValuesMap global_attributes;  // globale (Gruppen-/Wurzel-)Attribute
 };
 
 // TensorStore-freier Teil des Dateizugriffs.  Der TensorStore-spezifische Teil

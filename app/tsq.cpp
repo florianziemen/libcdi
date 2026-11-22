@@ -35,28 +35,58 @@ namespace
 bool g_print_global_attributes = false;
 
 std::string
-format_value(const ValueObject &v)
+format_value(const Values &v)
 {
-  switch (v.type)
+  switch (v.internalType())
   {
-    case ValueObject::Null: return "null";
-    case ValueObject::Bool: return std::get<bool>(v.data) ? "true" : "false";
-    case ValueObject::Int: return std::to_string(std::get<long long>(v.data));
-    case ValueObject::Double: return std::to_string(std::get<double>(v.data));
-    case ValueObject::String: return "\"" + std::get<std::string>(v.data) + "\"";
-    case ValueObject::Array:
+    case ValueInternalType::None: return "null";
+
+    case ValueInternalType::Int64:
     {
+      if (v.externalType() == ValueExternalType::Int8)
+      {
+        if (v.size() == 0) return "null";
+        return (v.integers()[0] != 0) ? "true" : "false";
+      }
+      if (v.size() == 1) return std::to_string(v.integers()[0]);
       std::string s = "[";
-      const auto &arr = std::get<std::vector<ValueObject>>(v.data);
-      for (std::size_t i = 0; i < arr.size(); ++i)
+      for (std::size_t i = 0; i < v.size(); ++i)
       {
         if (i) s += ", ";
-        s += format_value(arr[i]);
+        s += std::to_string(v.integers()[i]);
       }
       s += "]";
       return s;
     }
 
+    case ValueInternalType::Double:
+    {
+      if (v.size() == 1) return std::to_string(v.doubles()[0]);
+      std::string s = "[";
+      for (std::size_t i = 0; i < v.size(); ++i)
+      {
+        if (i) s += ", ";
+        s += std::to_string(v.doubles()[i]);
+      }
+      s += "]";
+      return s;
+    }
+
+    case ValueInternalType::Char:
+    {
+      const char *c = v.chars();
+      std::string s(c, v.size());
+      if (v.externalType() == ValueExternalType::String)
+      {
+        return "\"" + s + "\"";
+      }
+      // Complex value (array/object) stored as JSON text.
+      if (!s.empty() && s.front() == '[')
+      {
+        return s;
+      }
+      return "\"" + s + "\"";
+    }
   }
   return "";
 }
@@ -410,11 +440,17 @@ print_coordinate_arrays(const tsMetadata &md)
   {
     const auto gm = a.attributes.find("grid_mapping");
     if (gm == a.attributes.end()) continue;
-    if (grid_len.count(gm->second)) continue;
+    std::string gm_value;
+    {
+      const Values &gv = gm->second;
+      if (gv.internalType() == ValueInternalType::Char) gm_value.assign(gv.chars(), gv.size());
+      else gm_value = std::to_string(gv.internalType() == ValueInternalType::Int64 ? gv.integers()[0] : gv.doubles()[0]);
+    }
+    if (grid_len.count(gm_value)) continue;
     for (std::size_t di = 0; di < a.dim_names.size() && di < a.shape.size(); ++di)
     {
       if (coord_arrays.count(a.dim_names[di])) continue;  // Achse mit gleichnamiger Koordinate
-      grid_len[gm->second] = a.shape[di];                 // Gitter-Achse dieser grid_mapping
+      grid_len[gm_value] = a.shape[di];                 // Gitter-Achse dieser grid_mapping
       break;
     }
   }
@@ -445,10 +481,16 @@ print_coordinate_arrays(const tsMetadata &md)
     {
       const auto it = c.attributes.find(key);
       if (it == c.attributes.end()) return;
+      const Values &iv = it->second;
+      std::string val;
+      if (iv.internalType() == ValueInternalType::Char) val.assign(iv.chars(), iv.size());
+      else if (iv.internalType() == ValueInternalType::Int64) val = std::to_string(iv.integers()[0]);
+      else if (iv.internalType() == ValueInternalType::Double) val = std::to_string(iv.doubles()[0]);
+      else val = "";
       if (!details.empty()) details += "  ";
       details += label;
       details += "=";
-      details += it->second;
+      details += val;
     };
     add_attr("grid_mapping_name", "grid_mapping");
     add_attr("refinement_level", "refinement_level");
