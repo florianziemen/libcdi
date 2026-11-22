@@ -157,9 +157,11 @@ extern "C" {
 #define  CDI_DATATYPE_INT8        208
 #define  CDI_DATATYPE_INT16       216
 #define  CDI_DATATYPE_INT32       232
+#define  CDI_DATATYPE_INT64       264
 #define  CDI_DATATYPE_UINT8       308
 #define  CDI_DATATYPE_UINT16      316
 #define  CDI_DATATYPE_UINT32      332
+#define  CDI_DATATYPE_UINT64      364
 
 // internal data types
 #define  CDI_DATATYPE_INT         251
