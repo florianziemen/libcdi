@@ -197,8 +197,10 @@ public:
   // Numeric constructor
   // Supports int64_t and double.
   // =================================================
-  template <typename T>
-    requires(std::is_same_v<std::remove_cv_t<T>, int64_t> || std::is_same_v<std::remove_cv_t<T>, double>)
+  // template <typename T>
+  //  requires(std::is_same_v<std::remove_cv_t<T>, int64_t> || std::is_same_v<std::remove_cv_t<T>, double>)
+  template <typename T, typename = std::enable_if_t<std::is_same_v<std::remove_cv_t<T>, int64_t>
+                                                    || std::is_same_v<std::remove_cv_t<T>, double>>>
   Values(size_t elements, const T *values, ValueExternalType externalType = ValueExternalType::None)
       : Values(getInternalType<T>(), externalType, elements)
   {
