@@ -18,6 +18,7 @@ EXTRA_DIST = \
 
 EXTRA_DIST += cmake CMakeLists.txt app/CMakeLists.txt src/CMakeLists.txt tests/CMakeLists.txt interfaces/f2003/CMakeLists.txt
 EXTRA_DIST += app/tsq.cpp \
+    src/keyvalues.hpp \
     src/stream_ts.h \
     src/stream_ts.c \
     src/tstore.h \
