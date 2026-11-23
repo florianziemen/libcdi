@@ -8,6 +8,7 @@
 static std::string values_to_string(const Values &v);
 
 #include <charconv>
+#include <climits>
 #include <cmath>  // nanf()
 #include <array>
 #include <filesystem>
@@ -46,7 +47,9 @@ get_tsHandle(int fileID)
 
 const char *
 ts_lib_version(void)
-{ return tsVersion(); }
+{
+  return tsVersion();
+}
 
 static std::string
 effective_path(std::string const &path)
@@ -90,7 +93,9 @@ ts_open(const char *fileName, const char *mode, int *fileType)
 
 void
 ts_close(int fileID)
-{ tsCloseFile(get_tsHandle(fileID)); }
+{
+  tsCloseFile(get_tsHandle(fileID));
+}
 
 std::string
 fmt_dims(const std::vector<std::int64_t> &dims)
@@ -437,17 +442,61 @@ map_external_type_to_cdi(ValueExternalType type)
     case ValueExternalType::Char: return CDI_DATATYPE_TXT;
     case ValueExternalType::String: return CDI_DATATYPE_TXT;
 
-    default: throw std::runtime_error("Unsupported NetCDF attribute type");
+    default: throw std::runtime_error("Unsupported attribute type");
   }
 }
 
-void
-cdi_def_int_attrs(int cdiID, int varID, std::string const &k, int n, const int *values)
-{ cdiDefAttInt(cdiID, varID, k.c_str(), CDI_DATATYPE_INT32, n, values); }
+static int
+identify_external_datatype_int(const int64_t *vals, size_t n)
+{
+  if (n == 0) return CDI_DATATYPE_INT64;
+
+  int64_t mn = vals[0];
+  int64_t mx = vals[0];
+  for (size_t i = 1; i < n; ++i)
+  {
+    if (vals[i] < mn) mn = vals[i];
+    if (vals[i] > mx) mx = vals[i];
+  }
+
+  // signed: Missing-Value reserviert (-SCHAR_MAX, ...), daher exclusive Grenzen
+  if (mn > -SCHAR_MAX && mx < SCHAR_MAX + 1) return CDI_DATATYPE_INT8;
+  // unsigned: Missing-Value ist das Maximum, daher mx < UCHAR_MAX
+  if (mn >= 0 && mx < UCHAR_MAX) return CDI_DATATYPE_UINT8;
+
+  if (mn > -SHRT_MAX && mx < SHRT_MAX + 1) return CDI_DATATYPE_INT16;
+  if (mn >= 0 && mx < USHRT_MAX) return CDI_DATATYPE_UINT16;
+
+  if (mn > -INT_MAX && mx < static_cast<int64_t>(INT_MAX) + 1) return CDI_DATATYPE_INT32;
+  if (mn >= 0 && mx < static_cast<int64_t>(UINT_MAX)) return CDI_DATATYPE_UINT32;
+
+  return CDI_DATATYPE_INT64;
+}
+
+static int
+identify_external_datatype_float(const double *vals, size_t n)
+{
+  if (n == 0) return CDI_DATATYPE_FLT64;
+
+  for (size_t i = 0; i < n; ++i)
+  {
+    if (static_cast<double>(static_cast<float>(vals[i])) != vals[i]) return CDI_DATATYPE_FLT64;
+  }
+
+  return CDI_DATATYPE_FLT32;
+}
 
 void
-cdi_def_flt_attrs(int cdiID, int varID, std::string const &k, int n, const double *values)
-{ cdiDefAttFlt(cdiID, varID, k.c_str(), CDI_DATATYPE_FLT64, n, values); }
+cdi_def_int_attrs(int cdiID, int varID, std::string const &k, int cdiExternalType, int n, const int *values)
+{
+  cdiDefAttInt(cdiID, varID, k.c_str(), cdiExternalType, n, values);
+}
+
+void
+cdi_def_flt_attrs(int cdiID, int varID, std::string const &k, int cdiExternalType, int n, const double *values)
+{
+  cdiDefAttFlt(cdiID, varID, k.c_str(), cdiExternalType, n, values);
+}
 
 void
 cdi_def_attribute(int cdiID, int varID, std::string const &k, Values const &v)
@@ -459,13 +508,15 @@ cdi_def_attribute(int cdiID, int varID, std::string const &k, Values const &v)
     {
       const int n = static_cast<int>(v.size());
       std::vector<int> vals(n);
+      auto cdiDataType = identify_external_datatype_int(v.integers(), v.size());
       for (int i = 0; i < n; ++i) { vals[i] = static_cast<int>(v.integers()[i]); }
-      cdi_def_int_attrs(cdiID, varID, k, n, vals.data());
+      cdi_def_int_attrs(cdiID, varID, k, cdiDataType, n, vals.data());
       break;
     }
     case ValueInternalType::Double:
     {
-      cdi_def_flt_attrs(cdiID, varID, k, static_cast<int>(v.size()), v.doubles());
+      auto cdiDataType = identify_external_datatype_float(v.doubles(), v.size());
+      cdi_def_flt_attrs(cdiID, varID, k, cdiDataType, static_cast<int>(v.size()), v.doubles());
       break;
     }
     case ValueInternalType::Char:
