@@ -506,7 +506,7 @@ cdi_def_attribute(int cdiID, int varID, std::string const &k, Values const &v)
   {
     case ValueInternalType::Int64:
     {
-      const int n = static_cast<int>(v.size());
+      auto n = static_cast<int>(v.size());
       std::vector<int> vals(n);
       auto cdiDataType = identify_external_datatype_int(v.integers(), v.size());
       for (int i = 0; i < n; ++i) { vals[i] = static_cast<int>(v.integers()[i]); }
@@ -817,18 +817,17 @@ ts_inq_contents(stream_t *streamP)
 
       if (!a.compressor.empty()) vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_FILTER);
 
-      for (const auto &[key, value] : a.attributes)
+      for (auto const &[key, values] : a.attributes)
       {
-        std::string sval = values_to_string(value);
-        if (!sval.empty() && key != "_ARRAY_DIMENSIONS" && key != "grid_mapping" && key != "units" && key != "coordinates")
+        if (values.size() && key != "_ARRAY_DIMENSIONS" && key != "grid_mapping" && key != "units" && key != "coordinates")
         {
-          cdiDefAttTxt(vlistID, varID, key.c_str(), static_cast<int>(sval.size()), sval.c_str());
+          cdi_def_attribute(vlistID, varID, key, values);
         }
       }
     }
   }
 
-  for (const auto &kv : md.global_attributes) { cdi_def_attribute(vlistID, CDI_GLOBAL, kv.first, kv.second); }
+  for (auto const &[key, values] : md.global_attributes) { cdi_def_attribute(vlistID, CDI_GLOBAL, key, values); }
 
   // Die Datenarrays dtype-neutral oeffnen (Lesepuffer arbeiten auf float32);
   // die Ausgabe-Stores erben daraus Attribute und Kompression.
