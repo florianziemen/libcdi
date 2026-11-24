@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <cstring>
 #include <limits>
-#include <new>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -22,7 +21,7 @@ enum class ValueInternalType : uint8_t
   None,
   Int64,
   Double,
-  Char
+  Char,
 };
 
 enum class ValueExternalType : uint8_t
@@ -42,7 +41,7 @@ enum class ValueExternalType : uint8_t
   Float64,
 
   Char,
-  String
+  String,
 };
 
 // =====================================================
@@ -51,19 +50,19 @@ enum class ValueExternalType : uint8_t
 class Values
 {
 public:
-  static constexpr size_t BufferSize = 64;
+  static constexpr size_t BufferSize{ 64 };
 
 private:
-  ValueInternalType inType = ValueInternalType::None;
-  ValueExternalType exType = ValueExternalType::None;
+  ValueInternalType inType{ ValueInternalType::None };
+  ValueExternalType exType{ ValueExternalType::None };
 
   // Number of elements.
   // For Char: length without null terminator.
-  size_t count = 0;
+  size_t count{ 0 };
 
   // BufferSize means inline storage.
   // Values greater than BufferSize indicate heap storage.
-  size_t capacity = BufferSize;
+  size_t capacity{ BufferSize };
 
   union
   {
@@ -130,23 +129,17 @@ private:
   [[nodiscard]]
   bool
   usesHeap() const noexcept
-  {
-    return capacity > BufferSize;
-  }
+  { return capacity > BufferSize; }
 
   [[nodiscard]]
   void *
   data() noexcept
-  {
-    return usesHeap() ? buffer : _buffer;
-  }
+  { return usesHeap() ? buffer : _buffer; }
 
   [[nodiscard]]
   const void *
   data() const noexcept
-  {
-    return usesHeap() ? buffer : _buffer;
-  }
+  { return usesHeap() ? buffer : _buffer; }
 
   void
   allocate(size_t bytes)
@@ -174,9 +167,7 @@ private:
   // =================================================
   Values(ValueInternalType internalType, ValueExternalType externalType, size_t elements)
       : inType(internalType), exType(externalType), count(elements), _buffer{}
-  {
-    allocate(calculateSize(inType, count));
-  }
+  { allocate(calculateSize(inType, count)); }
 
 public:
   // =================================================
@@ -189,16 +180,14 @@ public:
   // =================================================
   static Values
   createUninitialized(ValueInternalType internalType, size_t elements, ValueExternalType externalType = ValueExternalType::None)
-  {
-    return { internalType, externalType, elements };
-  }
+  { return { internalType, externalType, elements }; }
 
   // =================================================
   // Numeric constructor
   // Supports int64_t and double.
   // =================================================
   // template <typename T>
-  //  requires(std::is_same_v<std::remove_cv_t<T>, int64_t> || std::is_same_v<std::remove_cv_t<T>, double>)
+  //  requires(std::is_same_v<std::remove_cv_t<T>, int64_t> || std::is_same_v<std::remove_cv_t<T>, double>) // C++20
   template <typename T, typename = std::enable_if_t<std::is_same_v<std::remove_cv_t<T>, int64_t>
                                                     || std::is_same_v<std::remove_cv_t<T>, double>>>
   Values(size_t elements, const T *values, ValueExternalType externalType = ValueExternalType::None)
@@ -225,9 +214,7 @@ public:
   // =================================================
   Values(size_t charLength, ValueExternalType externalType = ValueExternalType::None)
       : Values(ValueInternalType::Char, externalType, charLength)
-  {
-    static_cast<char *>(data())[charLength] = '\0';
-  }
+  { static_cast<char *>(data())[charLength] = '\0'; }
 
   // =================================================
   // Destructor
@@ -324,9 +311,7 @@ public:
 
   friend void
   swap(Values &lhs, Values &rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs); }
 
   // =================================================
   // Metadata
@@ -334,37 +319,27 @@ public:
   [[nodiscard]]
   ValueInternalType
   internalType() const noexcept
-  {
-    return inType;
-  }
+  { return inType; }
 
   [[nodiscard]]
   ValueExternalType
   externalType() const noexcept
-  {
-    return exType;
-  }
+  { return exType; }
 
   [[nodiscard]]
   size_t
   size() const noexcept
-  {
-    return count;
-  }
+  { return count; }
 
   [[nodiscard]]
   size_t
   storageSize() const
-  {
-    return calculateSize(inType, count);
-  }
+  { return calculateSize(inType, count); }
 
   [[nodiscard]]
   bool
   isInline() const noexcept
-  {
-    return !usesHeap();
-  }
+  { return !usesHeap(); }
 
   // =================================================
   // Raw data access
@@ -372,16 +347,12 @@ public:
   [[nodiscard]]
   void *
   rawData() noexcept
-  {
-    return data();
-  }
+  { return data(); }
 
   [[nodiscard]]
   const void *
   rawData() const noexcept
-  {
-    return data();
-  }
+  { return data(); }
 
   // =================================================
   // Integer access

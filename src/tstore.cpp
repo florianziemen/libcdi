@@ -47,9 +47,7 @@ get_tsHandle(int fileID)
 
 const char *
 ts_lib_version(void)
-{
-  return tsVersion();
-}
+{ return tsVersion(); }
 
 static std::string
 effective_path(std::string const &path)
@@ -81,9 +79,11 @@ ts_open(const char *fileName, const char *mode, int *fileType)
       break;
     }
     case 'w':
+    {
       tsConfig cfg;
       fileID = get_next_fileID(tsOpenFileWrite(fileName, cfg));
       break;
+    }
   }
 
   // printf("%s: %s fileID=%d\n", __func__, fileName, fileID);
@@ -93,9 +93,7 @@ ts_open(const char *fileName, const char *mode, int *fileType)
 
 void
 ts_close(int fileID)
-{
-  tsCloseFile(get_tsHandle(fileID));
-}
+{ tsCloseFile(get_tsHandle(fileID)); }
 
 std::string
 fmt_dims(const std::vector<std::int64_t> &dims)
@@ -358,10 +356,10 @@ values_to_string(const Values &v)
       std::string s = "[";
       for (size_t i = 0; i < v.size(); ++i)
       {
-        if (i) s += ",";
+        if (i) s += ',';
         s += std::to_string(v.integers()[i]);
       }
-      s += "]";
+      s += ']';
       return s;
     }
     case ValueInternalType::Double:
@@ -488,15 +486,11 @@ identify_external_datatype_float(const double *vals, size_t n)
 
 void
 cdi_def_int_attrs(int cdiID, int varID, std::string const &k, int cdiExternalType, int n, const int *values)
-{
-  cdiDefAttInt(cdiID, varID, k.c_str(), cdiExternalType, n, values);
-}
+{ cdiDefAttInt(cdiID, varID, k.c_str(), cdiExternalType, n, values); }
 
 void
 cdi_def_flt_attrs(int cdiID, int varID, std::string const &k, int cdiExternalType, int n, const double *values)
-{
-  cdiDefAttFlt(cdiID, varID, k.c_str(), cdiExternalType, n, values);
-}
+{ cdiDefAttFlt(cdiID, varID, k.c_str(), cdiExternalType, n, values); }
 
 void
 cdi_def_attribute(int cdiID, int varID, std::string const &k, Values const &v)

@@ -141,9 +141,7 @@ make_s3_kvstore(const std::string &bucket, const std::string &prefix, const std:
 
 static bool
 is_zip_path(const std::string &p)
-{
-  return p.size() >= 4 && p.compare(p.size() - 4, 4, ".zip") == 0;
-}
+{ return p.size() >= 4 && p.compare(p.size() - 4, 4, ".zip") == 0; }
 
 static nlohmann::json
 make_zip_kvstore(const std::string &zip_path, const std::string &internal_path)
@@ -1009,9 +1007,7 @@ open_array_impl(const tsConfig &cfg, tensorstore::Context &context, const std::s
 std::optional<AnyStoreType>
 open_array_any(const tsConfig &cfg, tensorstore::Context &context, const std::string &array_name, std::string &kvstore_out,
                int &detected_format, bool quiet = false)
-{
-  return open_array_impl<void>(cfg, context, array_name, kvstore_out, detected_format, quiet);
-}
+{ return open_array_impl<void>(cfg, context, array_name, kvstore_out, detected_format, quiet); }
 
 bool
 write_v2_zattrs_if_needed(const std::string &dir, const nlohmann::json &src_attrs, const nlohmann::json &src_dims)
@@ -2421,93 +2417,10 @@ read_global_attrs(const tsConfig &cfg, tensorstore::Context &context)
     }
   }
 
-  auto from_json = [](const nlohmann::json &j, auto &self) -> Values
-  {
-    if (j.is_null()) { return Values(); }
-    if (j.is_boolean())
-    {
-      int64_t b = j.get<bool>() ? 1 : 0;
-      return Values(1, &b, ValueExternalType::Int8);
-    }
-    if (j.is_number_integer())
-    {
-      long long x = j.get<long long>();
-      int64_t v = static_cast<int64_t>(x);
-      return Values(1, &v, ValueExternalType::Int64);
-    }
-    if (j.is_number_unsigned())
-    {
-      unsigned long long x = j.get<unsigned long long>();
-      int64_t v = static_cast<int64_t>(x);
-      return Values(1, &v, ValueExternalType::Int64);
-    }
-    if (j.is_number_float())
-    {
-      double d = j.get<double>();
-      return Values(1, &d, ValueExternalType::Float64);
-    }
-    if (j.is_string())
-    {
-      std::string s = j.get<std::string>();
-      return Values(std::string_view(s), ValueExternalType::String);
-    }
-    if (j.is_array())
-    {
-      bool all_int = !j.empty();
-      bool all_number = !j.empty();
-      for (const auto &e : j)
-      {
-        if (!(e.is_number_integer() || e.is_number_unsigned())) all_int = false;
-        if (!e.is_number()) all_number = false;
-      }
-      if (j.empty()) all_int = all_number = false;
-
-      if (all_int)
-      {
-        std::vector<int64_t> vals;
-        vals.reserve(j.size());
-        for (const auto &e : j)
-        {
-          if (e.is_number_unsigned())
-            vals.push_back(static_cast<int64_t>(e.get<unsigned long long>()));
-          else
-            vals.push_back(static_cast<int64_t>(e.get<long long>()));
-        }
-        return Values(vals.size(), vals.data(), ValueExternalType::Int64);
-      }
-      if (all_number)
-      {
-        std::vector<double> vals;
-        vals.reserve(j.size());
-        for (const auto &e : j)
-        {
-          if (e.is_number_integer())
-            vals.push_back(static_cast<double>(e.get<long long>()));
-          else if (e.is_number_unsigned())
-            vals.push_back(static_cast<double>(e.get<unsigned long long>()));
-          else
-            vals.push_back(e.get<double>());
-        }
-        return Values(vals.size(), vals.data(), ValueExternalType::Float64);
-      }
-
-      std::string dump = j.dump();
-      return Values(std::string_view(dump), ValueExternalType::Char);
-    }
-    if (j.is_object())
-    {
-      std::string dump = j.dump();
-      return Values(std::string_view(dump), ValueExternalType::Char);
-    }
-
-    std::string dump = j.dump();
-    return Values(std::string_view(dump), ValueExternalType::Char);
-  };
-
   KeyValuesMap attrs;
   if (parsed.is_object())
   {
-    for (auto it = parsed.begin(); it != parsed.end(); ++it) { attrs[it.key()] = from_json(it.value(), from_json); }
+    for (auto it = parsed.begin(); it != parsed.end(); ++it) { attrs[it.key()] = json_to_values(it.value()); }
   }
   return attrs;
 }
@@ -2623,9 +2536,7 @@ struct tsHandleImpl : tsHandle
 
 const char *
 tsVersion()
-{
-  return TENSORSTORE_VERSION;
-}
+{ return TENSORSTORE_VERSION; }
 
 tsMetadata &
 tsGetReadMetadata(tsHandle *handle)
