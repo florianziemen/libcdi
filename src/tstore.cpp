@@ -5,8 +5,6 @@
 #include "cdf_util.h"
 #include "tsio.h"
 
-static std::string values_to_string(const Values &v);
-
 #include <charconv>
 #include <climits>
 #include <cmath>  // nanf()
@@ -136,17 +134,16 @@ print_coordinate_arrays(const tsMetadata &md)
   std::set<std::string> coordArrays;
   for (const auto &c : md.coordList) coordArrays.insert(c.name);
 
-  std::map<std::string, std::int64_t> grid_len;
+  std::map<std::string_view, std::int64_t> shapeMap;
   for (const auto &a : md.arrayList)
   {
-    const auto gm = a.attributes.find("grid_mapping");
-    if (gm == a.attributes.end()) continue;
-    std::string gmValue = values_to_string(gm->second);
-    if (grid_len.contains(gmValue)) continue;
+    auto gmValue = kvmap_get_stringview(a.attributes, "grid_mapping");
+    if (gmValue.empty()) continue;
+    if (shapeMap.contains(gmValue)) continue;
     for (std::size_t di = 0; di < a.dim_names.size() && di < a.shape.size(); ++di)
     {
       if (coordArrays.contains(a.dim_names[di])) continue;  // Achse mit gleichnamiger Koordinate
-      grid_len[gmValue] = a.shape[di];                      // Gitter-Achse dieser grid_mapping
+      shapeMap[gmValue] = a.shape[di];                      // Gitter-Achse dieser grid_mapping
       break;
     }
   }
@@ -156,10 +153,10 @@ print_coordinate_arrays(const tsMetadata &md)
   {
     std::ostringstream ss;
     ss << '[';
-    const auto glen = grid_len.find(c.name);
-    if (glen != grid_len.end())
+    auto shapeSize = shapeMap.find(c.name);
+    if (shapeSize != shapeMap.end())
     {
-      ss << glen->second;  // Gitter-Laenge statt [1]
+      ss << shapeSize->second;  // Gitter-Laenge statt [1]
     }
     else
     {
@@ -180,7 +177,7 @@ print_coordinate_arrays(const tsMetadata &md)
       if (!details.empty()) details += "  ";
       details += label;
       details += '=';
-      details += values_to_string(it->second);
+      details += it->second.to_string();
     };
     add_attr("grid_mapping_name", "grid_mapping");
     add_attr("refinement_level", "refinement_level");
@@ -335,61 +332,13 @@ find_time_dimname(tsMetadata const &md)
   {
     if (c.shape.size() == 1)
     {
-      auto const &attributes = c.attributes;
-      if (attributes.contains("units"))
-      {
-        auto units = attributes.find("units")->second;
-        if (is_timeaxis_units(values_to_string(units).c_str())) return c.name;
-      }
+      auto units = kvmap_get_stringview(c.attributes, "units");
+      if (units.empty()) continue;
+      if (is_timeaxis_units(units.data())) return c.name;
     }
   }
 
   return {};
-}
-
-static std::string
-values_to_string(const Values &v)
-{
-  if (v.size() == 0) return {};
-  switch (v.internalType())
-  {
-    case ValueInternalType::Int64:
-    {
-      if (v.externalType() == ValueExternalType::Int8) return v.integers()[0] ? std::string("true") : std::string("false");
-      if (v.size() == 1) return std::to_string(v.integers()[0]);
-      std::string s = "[";
-      for (size_t i = 0; i < v.size(); ++i)
-      {
-        if (i) s += ',';
-        s += std::to_string(v.integers()[i]);
-      }
-      s += ']';
-      return s;
-    }
-    case ValueInternalType::Double:
-    {
-      auto fmt_double = [](double d) -> std::string
-      {
-        char buf[64];
-        auto res = std::to_chars(buf, buf + 64, d);
-        return std::string(buf, res.ptr);
-      };
-      if (v.size() == 1) return fmt_double(v.doubles()[0]);
-      std::string s = "[";
-      for (size_t i = 0; i < v.size(); ++i)
-      {
-        if (i) s += ",";
-        s += fmt_double(v.doubles()[i]);
-      }
-      s += "]";
-      return s;
-    }
-    case ValueInternalType::Char:
-    {
-      return { v.chars(), v.size() };
-    }
-    default: return {};
-  }
 }
 
 static int
@@ -800,8 +749,8 @@ ts_inq_contents(stream_t *streamP)
       }
       if (a.attributes.contains("units"))
       {
-        std::string units = values_to_string(a.attributes.find("units")->second);
-        cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units.c_str());
+        auto units = kvmap_get_stringview(a.attributes, "units");
+        cdiDefKeyString(vlistID, varID, CDI_KEY_UNITS, units.data());
       }
 
       if (tindex >= 0 && a.chunks[tindex] > 1) cdiDefKeyInt(vlistID, varID, CDI_KEY_CHUNKSIZE_DIMT, a.chunks[tindex]);

@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <charconv>
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
@@ -452,6 +453,59 @@ public:
 
     return static_cast<const char *>(data());
   }
+
+  // =================================================
+  // convert to string
+  // =================================================
+
+  std::string
+  to_string() const
+  {
+    if (size() == 0) return {};
+    switch (internalType())
+    {
+      case ValueInternalType::Int64:
+      {
+        if (externalType() == ValueExternalType::Int8) return integers()[0] ? std::string("true") : std::string("false");
+        if (size() == 1) return std::to_string(integers()[0]);
+        std::string s = "[";
+        for (size_t i = 0; i < size(); ++i)
+        {
+          if (i) s += ',';
+          s += std::to_string(integers()[i]);
+        }
+        s += ']';
+        return s;
+      }
+      case ValueInternalType::Double:
+      {
+        auto fmt_double = [](double d) -> std::string
+        {
+          char buf[64];
+          auto res = std::to_chars(buf, buf + 64, d);
+          return std::string(buf, res.ptr);
+        };
+        if (size() == 1) return fmt_double(doubles()[0]);
+        std::string s = "[";
+        for (size_t i = 0; i < size(); ++i)
+        {
+          if (i) s += ",";
+          s += fmt_double(doubles()[i]);
+        }
+        s += "]";
+        return s;
+      }
+      case ValueInternalType::Char:
+      {
+        return { chars(), size() };
+      }
+      default: return {};
+    }
+  }
+
+  // =================================================
+  // get values
+  // =================================================
 
   template <typename T>
   std::optional<T>
