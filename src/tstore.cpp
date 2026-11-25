@@ -47,7 +47,9 @@ get_tsHandle(int fileID)
 
 const char *
 ts_lib_version(void)
-{ return tsVersion(); }
+{
+  return tsVersion();
+}
 
 static std::string
 effective_path(std::string const &path)
@@ -93,7 +95,9 @@ ts_open(const char *fileName, const char *mode, int *fileType)
 
 void
 ts_close(int fileID)
-{ tsCloseFile(get_tsHandle(fileID)); }
+{
+  tsCloseFile(get_tsHandle(fileID));
+}
 
 std::string
 fmt_dims(const std::vector<std::int64_t> &dims)
@@ -382,43 +386,40 @@ values_to_string(const Values &v)
     }
     case ValueInternalType::Char:
     {
-      return std::string(v.chars(), v.size());
+      return { v.chars(), v.size() };
     }
-    default: return std::string();
+    default: return {};
   }
 }
 
 static int
-define_healpix(size_t numCells, KeyValuesMap const &attributes)
+define_healpix(size_t numCells, KeyValuesMap const &kvmap)
 {
-  auto it = attributes.find("grid_mapping_name");
-  if (it == attributes.end()) return CDI_UNDEFID;
-  std::string mapName = values_to_string(it->second);
-  if (mapName != "healpix") return CDI_UNDEFID;
-  int refinementLevel{};
-  std::string indexingScheme;
-  if (attributes.contains("refinement_level") && attributes.contains("indexing_scheme"))
+  auto mapName = kvmap_get_value<std::string_view>(kvmap, "grid_mapping_name");
+  if (!mapName) return CDI_UNDEFID;
+  if (*mapName != "healpix") return CDI_UNDEFID;
+
+  auto refinementLevel = kvmap_get_value<int>(kvmap, "refinement_level");
+  auto indexingScheme = kvmap_get_value<std::string_view>(kvmap, "indexing_scheme");
+  if (!(refinementLevel && indexingScheme))
   {
-    refinementLevel = std::stoi(values_to_string(attributes.find("refinement_level")->second));
-    indexingScheme = values_to_string(attributes.find("indexing_scheme")->second);
+    auto nside = kvmap_get_value<int>(kvmap, "healpix_nside");
+    auto order = kvmap_get_value<std::string_view>(kvmap, "healpix_order");
+    if (nside && order)
+    {
+      refinementLevel = static_cast<int>(std::log2(*nside));
+      indexingScheme = order;
+    }
   }
-  else if (attributes.contains("healpix_nside") && attributes.contains("healpix_order"))
-  {
-    refinementLevel = std::log2(std::stoi(values_to_string(attributes.find("healpix_nside")->second)));
-    indexingScheme = values_to_string(attributes.find("healpix_order")->second);
-  }
-  else
-  {
-    return CDI_UNDEFID;
-  }
+  if (!(refinementLevel && indexingScheme)) return CDI_UNDEFID;
 
   auto gridID = gridCreate(GRID_HEALPIX, numCells);
   cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_DIMNAME, "cell");
   cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, "healpix");
-  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, mapName.c_str());
-  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", static_cast<int>(mapName.size()), mapName.c_str());
-  cdiDefAttInt(gridID, CDI_GLOBAL, "refinement_level", CDI_DATATYPE_INT32, 1, &refinementLevel);
-  cdiDefAttTxt(gridID, CDI_GLOBAL, "indexing_scheme", (int) indexingScheme.size(), indexingScheme.c_str());
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, (*mapName).data());
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", static_cast<int>((*mapName).size()), (*mapName).data());
+  cdiDefAttInt(gridID, CDI_GLOBAL, "refinement_level", CDI_DATATYPE_INT32, 1, &(*refinementLevel));
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "indexing_scheme", static_cast<int>((*indexingScheme).size()), (*indexingScheme).data());
   return gridID;
 }
 
@@ -486,11 +487,15 @@ identify_external_datatype_float(const double *vals, size_t n)
 
 void
 cdi_def_int_attrs(int cdiID, int varID, std::string const &k, int cdiExternalType, int n, const int *values)
-{ cdiDefAttInt(cdiID, varID, k.c_str(), cdiExternalType, n, values); }
+{
+  cdiDefAttInt(cdiID, varID, k.c_str(), cdiExternalType, n, values);
+}
 
 void
 cdi_def_flt_attrs(int cdiID, int varID, std::string const &k, int cdiExternalType, int n, const double *values)
-{ cdiDefAttFlt(cdiID, varID, k.c_str(), cdiExternalType, n, values); }
+{
+  cdiDefAttFlt(cdiID, varID, k.c_str(), cdiExternalType, n, values);
+}
 
 void
 cdi_def_attribute(int cdiID, int varID, std::string const &k, Values const &v)

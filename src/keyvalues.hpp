@@ -11,6 +11,7 @@
 #include <type_traits>
 #include <utility>
 #include <map>
+#include <optional>
 
 // =====================================================
 // Value types
@@ -129,17 +130,23 @@ private:
   [[nodiscard]]
   bool
   usesHeap() const noexcept
-  { return capacity > BufferSize; }
+  {
+    return capacity > BufferSize;
+  }
 
   [[nodiscard]]
   void *
   data() noexcept
-  { return usesHeap() ? buffer : _buffer; }
+  {
+    return usesHeap() ? buffer : _buffer;
+  }
 
   [[nodiscard]]
   const void *
   data() const noexcept
-  { return usesHeap() ? buffer : _buffer; }
+  {
+    return usesHeap() ? buffer : _buffer;
+  }
 
   void
   allocate(size_t bytes)
@@ -167,7 +174,9 @@ private:
   // =================================================
   Values(ValueInternalType internalType, ValueExternalType externalType, size_t elements)
       : inType(internalType), exType(externalType), count(elements), _buffer{}
-  { allocate(calculateSize(inType, count)); }
+  {
+    allocate(calculateSize(inType, count));
+  }
 
 public:
   // =================================================
@@ -180,7 +189,9 @@ public:
   // =================================================
   static Values
   createUninitialized(ValueInternalType internalType, size_t elements, ValueExternalType externalType = ValueExternalType::None)
-  { return { internalType, externalType, elements }; }
+  {
+    return { internalType, externalType, elements };
+  }
 
   // =================================================
   // Numeric constructor
@@ -214,7 +225,9 @@ public:
   // =================================================
   Values(size_t charLength, ValueExternalType externalType = ValueExternalType::None)
       : Values(ValueInternalType::Char, externalType, charLength)
-  { static_cast<char *>(data())[charLength] = '\0'; }
+  {
+    static_cast<char *>(data())[charLength] = '\0';
+  }
 
   // =================================================
   // Destructor
@@ -311,7 +324,9 @@ public:
 
   friend void
   swap(Values &lhs, Values &rhs) noexcept
-  { lhs.swap(rhs); }
+  {
+    lhs.swap(rhs);
+  }
 
   // =================================================
   // Metadata
@@ -319,27 +334,44 @@ public:
   [[nodiscard]]
   ValueInternalType
   internalType() const noexcept
-  { return inType; }
+  {
+    return inType;
+  }
 
   [[nodiscard]]
   ValueExternalType
   externalType() const noexcept
-  { return exType; }
+  {
+    return exType;
+  }
 
   [[nodiscard]]
   size_t
   size() const noexcept
-  { return count; }
+  {
+    return count;
+  }
+
+  [[nodiscard]]
+  int
+  isize() const noexcept
+  {
+    return static_cast<int>(count);
+  }
 
   [[nodiscard]]
   size_t
   storageSize() const
-  { return calculateSize(inType, count); }
+  {
+    return calculateSize(inType, count);
+  }
 
   [[nodiscard]]
   bool
   isInline() const noexcept
-  { return !usesHeap(); }
+  {
+    return !usesHeap();
+  }
 
   // =================================================
   // Raw data access
@@ -347,12 +379,16 @@ public:
   [[nodiscard]]
   void *
   rawData() noexcept
-  { return data(); }
+  {
+    return data();
+  }
 
   [[nodiscard]]
   const void *
   rawData() const noexcept
-  { return data(); }
+  {
+    return data();
+  }
 
   // =================================================
   // Integer access
@@ -416,9 +452,86 @@ public:
 
     return static_cast<const char *>(data());
   }
+
+  template <typename T>
+  std::optional<T>
+  get_integral_value() const noexcept
+  {
+    static_assert(std::is_integral_v<T>, "T must be an integral type");
+    if (internalType() != ValueInternalType::Int64) return std::nullopt;
+
+    // Check number of elements.
+    if (size() != 1) return std::nullopt;
+
+    const auto value = *integers();
+    // Check conversion range.
+    if constexpr (std::is_signed_v<T>)
+    {
+      if (value < std::numeric_limits<T>::min() || value > std::numeric_limits<T>::max()) return std::nullopt;
+    }
+    else
+    {
+      if (value < 0 || static_cast<uint64_t>(value) > std::numeric_limits<T>::max()) return std::nullopt;
+    }
+    return static_cast<T>(value);
+  }
+
+  template <typename T>
+  std::optional<T>
+  get_floating_value() const noexcept
+  {
+    static_assert(std::is_floating_point_v<T>, "T must be an floating point type");
+    if (internalType() != ValueInternalType::Double && internalType() != ValueInternalType::Int64) return std::nullopt;
+
+    // Check number of elements.
+    if (size() != 1) return std::nullopt;
+
+    if (internalType() == ValueInternalType::Int64) return static_cast<T>(*integers());
+    return static_cast<T>(*doubles());
+  }
+
+  std::optional<std::string_view>
+  get_string_view() const noexcept
+  {
+    if (internalType() != ValueInternalType::Char) return std::nullopt;
+
+    // Check number of elements.
+    if (size() == 0) return std::nullopt;
+
+    return std::string_view(chars(), size());
+  }
+
+  std::optional<std::string>
+  get_string() const noexcept
+  {
+    if (internalType() != ValueInternalType::Char) return std::nullopt;
+
+    // Check number of elements.
+    if (size() == 0) return std::nullopt;
+
+    return std::string(chars(), size());
+  }
 };
 
 // =====================================================
 // KeyValuesMap
 // =====================================================
 using KeyValuesMap = std::map<std::string, Values>;
+
+template <typename T>
+std::optional<T>
+kvmap_get_value(const KeyValuesMap &kvmap, const std::string &key)
+{
+  // Check if key exists.
+  const auto it = kvmap.find(key);
+  if (it == kvmap.end()) return std::nullopt;
+
+  const Values &values = it->second;
+
+  if constexpr (std::is_integral_v<T>) { return values.get_integral_value<T>(); }
+  else if constexpr (std::is_floating_point_v<T>) { return values.get_floating_value<T>(); }
+  else if constexpr (std::is_same_v<T, std::string_view>) { return values.get_string_view(); }
+  else if constexpr (std::is_same_v<T, std::string>) { return values.get_string(); }
+
+  return std::nullopt;
+}
