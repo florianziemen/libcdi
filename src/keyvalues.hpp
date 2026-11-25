@@ -490,13 +490,13 @@ public:
     return static_cast<T>(*doubles());
   }
 
-  std::optional<std::string_view>
+  std::string_view
   get_string_view() const noexcept
   {
-    if (internalType() != ValueInternalType::Char) return std::nullopt;
+    if (internalType() != ValueInternalType::Char) return {};
 
     // Check number of elements.
-    if (size() == 0) return std::nullopt;
+    if (size() == 0) return {};
 
     return std::string_view(chars(), size());
   }
@@ -530,8 +530,18 @@ kvmap_get_value(const KeyValuesMap &kvmap, const std::string &key)
 
   if constexpr (std::is_integral_v<T>) { return values.get_integral_value<T>(); }
   else if constexpr (std::is_floating_point_v<T>) { return values.get_floating_value<T>(); }
-  else if constexpr (std::is_same_v<T, std::string_view>) { return values.get_string_view(); }
   else if constexpr (std::is_same_v<T, std::string>) { return values.get_string(); }
 
   return std::nullopt;
+}
+
+inline std::string_view
+kvmap_get_stringview(const KeyValuesMap &kvmap, const std::string &key)
+{
+  // Check if key exists.
+  const auto it = kvmap.find(key);
+  if (it == kvmap.end()) return {};
+
+  const Values &values = it->second;
+  return values.get_string_view();
 }

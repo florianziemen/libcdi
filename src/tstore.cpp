@@ -393,33 +393,34 @@ values_to_string(const Values &v)
 }
 
 static int
-define_healpix(size_t numCells, KeyValuesMap const &kvmap)
+define_healpix(size_t numCells, KeyValuesMap const &crsAttrs)
 {
-  auto mapName = kvmap_get_value<std::string_view>(kvmap, "grid_mapping_name");
-  if (!mapName) return CDI_UNDEFID;
-  if (*mapName != "healpix") return CDI_UNDEFID;
+  auto mapName = kvmap_get_stringview(crsAttrs, "grid_mapping_name");
+  if (mapName.empty()) return CDI_UNDEFID;
+  if (mapName != "healpix") return CDI_UNDEFID;
 
-  auto refinementLevel = kvmap_get_value<int>(kvmap, "refinement_level");
-  auto indexingScheme = kvmap_get_value<std::string_view>(kvmap, "indexing_scheme");
-  if (!(refinementLevel && indexingScheme))
+  auto refinementLevelOpt = kvmap_get_value<int>(crsAttrs, "refinement_level");
+  auto indexingScheme = kvmap_get_stringview(crsAttrs, "indexing_scheme");
+  if (!refinementLevelOpt || indexingScheme.empty())
   {
-    auto nside = kvmap_get_value<int>(kvmap, "healpix_nside");
-    auto order = kvmap_get_value<std::string_view>(kvmap, "healpix_order");
-    if (nside && order)
+    auto nsideOpt = kvmap_get_value<int>(crsAttrs, "healpix_nside");
+    auto order = kvmap_get_stringview(crsAttrs, "healpix_order");
+    if (nsideOpt && !order.empty())
     {
-      refinementLevel = static_cast<int>(std::log2(*nside));
+      refinementLevelOpt = static_cast<int>(std::log2(*nsideOpt));
       indexingScheme = order;
     }
   }
-  if (!(refinementLevel && indexingScheme)) return CDI_UNDEFID;
+  if (!refinementLevelOpt || indexingScheme.empty()) return CDI_UNDEFID;
 
+  auto refinementLevel = *refinementLevelOpt;
   auto gridID = gridCreate(GRID_HEALPIX, numCells);
   cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_DIMNAME, "cell");
   cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_VARNAME, "healpix");
-  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, (*mapName).data());
-  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", static_cast<int>((*mapName).size()), (*mapName).data());
-  cdiDefAttInt(gridID, CDI_GLOBAL, "refinement_level", CDI_DATATYPE_INT32, 1, &(*refinementLevel));
-  cdiDefAttTxt(gridID, CDI_GLOBAL, "indexing_scheme", static_cast<int>((*indexingScheme).size()), (*indexingScheme).data());
+  cdiDefKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, mapName.data());
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", static_cast<int>(mapName.size()), mapName.data());
+  cdiDefAttInt(gridID, CDI_GLOBAL, "refinement_level", CDI_DATATYPE_INT32, 1, &refinementLevel);
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "indexing_scheme", static_cast<int>(indexingScheme.size()), indexingScheme.data());
   return gridID;
 }
 
@@ -704,35 +705,29 @@ ts_inq_contents(stream_t *streamP)
   int surfaceID = zaxisCreate(ZAXIS_SURFACE, 1);
 
   size_t numSteps{};
-  std::string timeUnits;
+  std::string_view timeUnits;
   int calendar = CALENDAR_STANDARD;
   std::map<std::string, int> zaxisMap;
 
   // printf("Found %zu coordinate arrays:\n", md.coordList.size());
   // for (auto const &array : md.coordList) printf("  %s: size=%lld\n", array.name.c_str(), array.shape[0]);
-  for (auto const &array : md.coordList)
+  for (auto const &coord : md.coordList)
   {
-    auto const &attributes = array.attributes;
-    // for (auto const &[key, value] : attributes)
+    auto const &coordAttrs = coord.attributes;
+
+    if (coord.name == timeDimName)
     {
-      // printf("[%s] = %s\n", key.c_str(), value.c_str());
-      // if (key == "grid_mapping_name" && value == "healpix") printf("healpix grid\n");
+      numSteps = coord.shape[0];
+      timeUnits = kvmap_get_stringview(coordAttrs, "units");
+      auto calendarSV = kvmap_get_stringview(coordAttrs, "calendar");
+      if (!calendarSV.empty()) { calendar = attribute_to_calendar(calendarSV.data()); }
     }
-    if (array.name == timeDimName)
-    {
-      numSteps = array.shape[0];
-      if (attributes.contains("units")) { timeUnits = values_to_string(attributes.find("units")->second); }
-      if (attributes.contains("calendar"))
-      {
-        calendar = attribute_to_calendar(values_to_string(attributes.find("calendar")->second).c_str());
-      }
-    }
-    else if (gridID == CDI_UNDEFID && attributes.contains("grid_mapping_name")) { gridID = define_healpix(numCells, attributes); }
+    else if (gridID == CDI_UNDEFID && coordAttrs.contains("grid_mapping_name")) { gridID = define_healpix(numCells, coordAttrs); }
     else
     {
-      auto numLayers = array.shape[0];
+      auto numLayers = coord.shape[0];
       std::vector<double> layers(numLayers);
-      ts_read_array(handle, array.name.c_str(), layers.data());
+      ts_read_array(handle, coord.name.c_str(), layers.data());
 
       int64_t start = 0;
       if (query && cdiQueryNumLayers(query) > 0)
@@ -742,21 +737,21 @@ ts_inq_contents(stream_t *streamP)
       }
 
       int zaxisType = ZAXIS_GENERIC;
-      if (attributes.contains("standard_name"))
+      if (coordAttrs.contains("standard_name"))
       {
-        std::string stdName = values_to_string(attributes.find("standard_name")->second);
+        auto stdName = kvmap_get_stringview(coordAttrs, "standard_name");
         if (stdName == "air_pressure") { zaxisType = ZAXIS_PRESSURE; }
       }
 
       int zaxisID = zaxisCreate(zaxisType, numLayers);
       zaxisDefLevels(zaxisID, layers.data() + start);
-      cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, array.name.c_str());
-      if (attributes.contains("units"))
+      cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, coord.name.c_str());
+      if (coordAttrs.contains("units"))
       {
-        std::string units = values_to_string(attributes.find("units")->second);
-        cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units.c_str());
+        auto units = kvmap_get_stringview(coordAttrs, "units");
+        cdiDefKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, units.data());
       }
-      zaxisMap[array.name] = zaxisID;
+      zaxisMap[coord.name] = zaxisID;
     }
   }
 
@@ -840,14 +835,14 @@ ts_inq_contents(stream_t *streamP)
   {
     taxis_t taxis0;
     ptaxisInit(&taxis0);
-    if (!timeUnits.empty() && set_base_time(timeUnits.c_str(), &taxis0) == 1)
+    if (!timeUnits.empty() && set_base_time(timeUnits.data(), &taxis0) == 1)
     {
       // nctimevarid = CDI_UNDEFID;
       streamP->basetime.ncvarid = CDI_UNDEFID;
       streamP->basetime.hasUnits = false;
     }
     ptaxisDefName(&taxis0, timeDimName.c_str());
-    ptaxisDefUnits(&taxis0, timeUnits.c_str());
+    if (!timeUnits.empty()) ptaxisDefUnits(&taxis0, timeUnits.data());
     ptaxisDefDatatype(&taxis0, CDI_DATATYPE_FLT64);
 
     int taxisID = taxisCreate(TAXIS_RELATIVE);
