@@ -221,8 +221,9 @@ if (CDI_BUILD_UNKNOWN)
   )
 endif ()
 
-# Support exporting all symbols on Windows
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+# Support exporting all symbols on Windows. Set the target property: the
+# CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS variable only affects targets created after it.
+set_target_properties(libcdi PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 set_target_properties(libcdi PROPERTIES PUBLIC_HEADER cdi.h OUTPUT_NAME cdi)
 
@@ -244,7 +245,10 @@ target_include_directories(libcdi
   # where external projects will look for the library's public headers
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-target_link_libraries(libcdi PUBLIC m)
+if (NOT WIN32)
+  # libm; on Windows the math functions are part of the C runtime
+  target_link_libraries(libcdi PUBLIC m)
+endif ()
 target_compile_definitions(libcdi PRIVATE PACKAGE_NAME="${PROJECT_NAME}" VERSION="${CMAKE_PROJECT_VERSION}" ${cdi_compile_defs})
 
 # --- Installation
