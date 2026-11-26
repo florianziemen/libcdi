@@ -49,7 +49,8 @@ jobs:
           }
           # Forward slashes: CMake treats backslashes as escapes in generated scripts.
           "DEPS_PREFIX=$($prefix -replace '\\', '/')" >> $env:GITHUB_ENV
-          "CDI_PREFIX=$($env:GITHUB_WORKSPACE -replace '\\', '/')/install" >> $env:GITHUB_ENV
+          # Outside the checkout: Windows is case-insensitive and the repo has an INSTALL file.
+          "CDI_PREFIX=$($env:RUNNER_TEMP -replace '\\', '/')/cdi-install" >> $env:GITHUB_ENV
           # netCDF and HDF5 DLLs for running the smoke test
           (Join-Path $prefix "bin") >> $env:GITHUB_PATH
 
