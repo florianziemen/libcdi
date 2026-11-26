@@ -109,10 +109,16 @@ jobs:
                    build/CMakeFiles/CMakeConfigureLog.yaml; do
             [ -f "$f" ] && cp "$f" logs/
           done
-          # The log of the last step that ran is the most useful summary.
-          for f in ctest.log build.log configure.log; do
-            if [ -s "logs/$f" ]; then cp "logs/$f" logs/summary.log; break; fi
-          done
+          # Summary for the GitLab issue: test output, else the build's error
+          # lines (progress lines would hide them), else the configure log.
+          if [ -s logs/ctest.log ]; then
+            cp logs/ctest.log logs/summary.log
+          elif [ -s logs/build.log ]; then
+            grep -E ': (fatal )?error |FAILED:|LNK[0-9]+|ninja: build stopped' logs/build.log \
+              > logs/summary.log || cp logs/build.log logs/summary.log
+          elif [ -s logs/configure.log ]; then
+            cp logs/configure.log logs/summary.log
+          fi
           true
 
       - name: Upload logs
