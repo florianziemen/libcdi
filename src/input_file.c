@@ -23,8 +23,39 @@
 // On Windows, define ssize_t and pread manually
 #ifdef _WIN32
 #define ssize_t __int64
-#define pread read
 #include <io.h>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
+// Positional read like POSIX pread(): reads at offset without moving the file pointer.
+static ssize_t
+cdi_pread(int fd, void *buf, size_t count, long long offset)
+{
+  HANDLE handle = (HANDLE) _get_osfhandle(fd);
+  if (handle == INVALID_HANDLE_VALUE)
+  {
+    errno = EBADF;
+    return -1;
+  }
+  if (count > 0x7FFFFFFFu) count = 0x7FFFFFFFu;  // ReadFile takes a DWORD; keep result in range
+  OVERLAPPED overlapped = { 0 };
+  overlapped.Offset = (DWORD) ((unsigned long long) offset & 0xFFFFFFFFu);
+  overlapped.OffsetHigh = (DWORD) ((unsigned long long) offset >> 32);
+  DWORD bytesRead = 0;
+  if (!ReadFile(handle, buf, (DWORD) count, &bytesRead, &overlapped))
+  {
+    if (GetLastError() == ERROR_HANDLE_EOF) return 0;
+    errno = EIO;
+    return -1;
+  }
+  return (ssize_t) bytesRead;
+}
+#define pread cdi_pread
 #else
 #include <unistd.h>
 #endif
