@@ -1,9 +1,12 @@
 # Windows (MSVC) build and test of libcdi on GitHub-hosted runners.
 #
 # The repository on GitHub is a push mirror of the GitLab project; see
-# doc/github-windows-ci.md. The CMake options follow the ParaView superbuild
-# (projects/cdi.cmake), which ships libcdi for ParaView's CDIReader plugin,
-# except that the tests are built and run.
+# doc/github-windows-ci.md. libcdi is built and installed exactly like the
+# ParaView superbuild does (projects/cdi.cmake), which ships libcdi for
+# ParaView's CDIReader plugin. A smoke test (.github/smoke) then uses the
+# installed library the way CDIReader does and round-trips netCDF files.
+# The unit tests in tests/ are not built: they need C99 VLAs and POSIX APIs
+# that MSVC lacks.
 name: windows
 
 on:
@@ -44,8 +47,10 @@ jobs:
             Write-Error "netcdf.h not found below $prefix"
             exit 1
           }
-          "DEPS_PREFIX=$prefix" >> $env:GITHUB_ENV
-          # netCDF and HDF5 DLLs for running the tests
+          # Forward slashes: CMake treats backslashes as escapes in generated scripts.
+          "DEPS_PREFIX=$($prefix -replace '\\', '/')" >> $env:GITHUB_ENV
+          "CDI_PREFIX=$($env:GITHUB_WORKSPACE -replace '\\', '/')/install" >> $env:GITHUB_ENV
+          # netCDF and HDF5 DLLs for running the smoke test
           (Join-Path $prefix "bin") >> $env:GITHUB_PATH
 
       - uses: ilammy/msvc-dev-cmd@v1
@@ -58,7 +63,7 @@ jobs:
           cmake -S . -B build -G Ninja
           -DCMAKE_BUILD_TYPE=Release
           "-DCMAKE_PREFIX_PATH=$env:DEPS_PREFIX"
-          "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${{ github.workspace }}/build/bin"
+          "-DCMAKE_INSTALL_PREFIX=$env:CDI_PREFIX"
           -DCMAKE_REQUIRE_FIND_PACKAGE_NetCDF=ON
           -DBUILD_SHARED_LIBS=ON
           -DCMAKE_INSTALL_LIBDIR=lib
@@ -73,17 +78,30 @@ jobs:
           -DCDI_BUILD_APP=OFF
           -DCDI_BUILD_UNKNOWN=OFF
           -DCDI_ENABLE_f2003_INTERFACE=OFF
-          -DBUILD_TESTING=ON
+          -DBUILD_TESTING=OFF
           *>&1 | Tee-Object -FilePath configure.log
 
       - name: Build
         id: build
         run: cmake --build build --parallel -- -k 0 *>&1 | Tee-Object -FilePath build.log
 
-      - name: Test
+      - name: Install
+        id: install
+        run: cmake --install build *>&1 | Tee-Object -FilePath install.log
+
+      - name: Build smoke test
+        id: smoke_build
+        run: |
+          cmake -S .github/smoke -B smoke -G Ninja -DCMAKE_BUILD_TYPE=Release `
+            "-DCMAKE_PREFIX_PATH=$env:CDI_PREFIX" *>&1 |
+            Tee-Object -FilePath smoke.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --build smoke *>&1 | Tee-Object -FilePath smoke.log -Append
+
+      - name: Smoke test
         id: test
         shell: bash
-        run: ctest --test-dir build --output-on-failure --timeout 300 2>&1 | tee ctest.log
+        run: ctest --test-dir smoke --output-on-failure --timeout 300 2>&1 | tee ctest.log
 
       - name: Record failed step
         id: result
@@ -92,7 +110,9 @@ jobs:
         run: |
           for step in "Configure:${{ steps.configure.outcome }}" \
                       "Build:${{ steps.build.outcome }}" \
-                      "Test:${{ steps.test.outcome }}"; do
+                      "Install:${{ steps.install.outcome }}" \
+                      "Build smoke test:${{ steps.smoke_build.outcome }}" \
+                      "Smoke test:${{ steps.test.outcome }}"; do
             if [ "${step#*:}" = failure ]; then
               echo "failed_step=${step%%:*}" >> "$GITHUB_OUTPUT"
               break
@@ -104,8 +124,8 @@ jobs:
         shell: bash
         run: |
           mkdir -p logs
-          for f in configure.log build.log ctest.log \
-                   build/Testing/Temporary/LastTest*.log \
+          for f in configure.log build.log install.log smoke.log ctest.log \
+                   smoke/Testing/Temporary/LastTest*.log \
                    build/CMakeFiles/CMakeConfigureLog.yaml; do
             [ -f "$f" ] && cp "$f" logs/
           done
@@ -113,9 +133,10 @@ jobs:
           # lines (progress lines would hide them), else the configure log.
           if [ -s logs/ctest.log ]; then
             cp logs/ctest.log logs/summary.log
-          elif [ -s logs/build.log ]; then
-            grep -E ': (fatal )?error |FAILED:|LNK[0-9]+|ninja: build stopped' logs/build.log \
-              > logs/summary.log || cp logs/build.log logs/summary.log
+          elif [ -s logs/smoke.log ] || [ -s logs/build.log ]; then
+            log=logs/build.log; [ -s logs/smoke.log ] && log=logs/smoke.log
+            grep -E ': (fatal )?error |FAILED:|LNK[0-9]+|CMake Error|ninja: build stopped' "$log" \
+              > logs/summary.log || cp "$log" logs/summary.log
           elif [ -s logs/configure.log ]; then
             cp logs/configure.log logs/summary.log
           fi

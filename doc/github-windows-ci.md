@@ -5,8 +5,15 @@ runners:
 
 1. GitLab **push-mirrors** the repository to a public GitHub repository.
 2. On every push, GitHub Actions runs `.github/workflows/windows.yml`. It builds
-   with MSVC (VS 2022) + Ninja and runs `ctest`, using the CDI options of the
+   and installs libcdi with MSVC (VS 2022) + Ninja, using the CDI options of the
    ParaView superbuild (`projects/cdi.cmake`), the main Windows consumer of libcdi.
+   A smoke test (`.github/smoke`) then uses the installed library the way
+   ParaView's CDIReader does (`find_package(CDI)`, `CDI::CDI`, C++,
+   `CDI_SIZE_TYPE=size_t`). It writes netCDF classic and netCDF4 files with a
+   lon/lat and an unstructured grid, reads them back and compares the data.
+   The unit tests in `tests/` are not built on Windows: they use C99
+   variable-length arrays and POSIX APIs (`getopt`, `unistd.h`, `gettimeofday`)
+   that MSVC does not provide.
 3. A small reporter (`.github/scripts/gitlab_report.py`) writes the result back to
    GitLab:
    - failed build → issue *"Windows CI failing on &lt;branch&gt;"* (label `windows-ci`);
@@ -74,8 +81,13 @@ with the GitLab project path (e.g. `mpim-sw/libcdi`).
   push. Running the workflow manually (*Run workflow* on GitHub) also works.
 - Never push to the GitHub repository directly. The mirror overwrites it.
 
-## Running the reporter tests locally
+## Running the checks locally
 
 ```sh
+# reporter unit tests
 python3 -m unittest discover -s .github/scripts -v
+
+# smoke test against an installed libcdi (any platform)
+cmake -S .github/smoke -B smoke -DCMAKE_PREFIX_PATH=<libcdi install prefix>
+cmake --build smoke && ctest --test-dir smoke --output-on-failure
 ```
