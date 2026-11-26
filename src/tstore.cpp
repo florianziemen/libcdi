@@ -5,7 +5,6 @@
 #include "cdf_util.h"
 #include "tsio.h"
 
-#include <charconv>
 #include <climits>
 #include <cmath>  // nanf()
 #include <array>
@@ -211,7 +210,7 @@ ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0, const
 
     CdiDateTime *vDateTimeList = NULL;
 
-    // if (hasTimesteps)
+    if (hasTimesteps)
     {
       vDateTimeList = (CdiDateTime *) malloc(numTimesteps * sizeof(CdiDateTime));
 
@@ -253,6 +252,7 @@ ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0, const
 
         taxis_t *taxis = &streamP->tsteps[stepID].taxis;
         ptaxisCopy(taxis, taxis0);
+
         if (hasTimesteps) { taxis->vDateTime = vDateTimeList[tsID]; }
 
         stepID++;
@@ -312,8 +312,7 @@ ts_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0, const
 static int
 dtype_str_to_id(std::string const &s)
 {
-  if (s == "float64") return CDI_DATATYPE_FLT64;
-  return CDI_DATATYPE_FLT32;
+  return (s == "float64") ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
 }
 
 static std::optional<double>

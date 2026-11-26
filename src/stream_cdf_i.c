@@ -4500,7 +4500,7 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0)
 
     if (hasTimesteps)
     {
-      vDateTimeList = (CdiDateTime *) Malloc(numTimesteps * sizeof(CdiDateTime));
+      vDateTimeList = (CdiDateTime *) malloc(numTimesteps * sizeof(CdiDateTime));
 
       if (streamP->basetime.isWRF)
       {
@@ -4508,13 +4508,13 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0)
       }
       else if (streamP->basetime.hasUnits)
       {
-        double *timevarBuffer = (double *) Malloc(numTimesteps * sizeof(double));
+        double *timevarBuffer = (double *) malloc(numTimesteps * sizeof(double));
         cdf_get_var_double(fileID, nctimevarid, timevarBuffer);
         for (size_t i = 0; i < numTimesteps; ++i)
         {
           vDateTimeList[i] = cdi_decode_timeval(get_timevalue(fileID, nctimevarid, i, timevarBuffer), taxis0);
         }
-        Free(timevarBuffer);
+        free(timevarBuffer);
       }
       else
       {
@@ -4548,8 +4548,8 @@ cdf_read_timesteps(size_t numTimesteps, stream_t *streamP, taxis_t *taxis0)
       }
     }
 
-    if (ncStepIndices) Free(ncStepIndices);
-    if (vDateTimeList) Free(vDateTimeList);
+    if (ncStepIndices) free(ncStepIndices);
+    if (vDateTimeList) free(vDateTimeList);
 
     if (hasTimesteps)
     {
