@@ -1,0 +1,158 @@
+# Windows (MSVC) build and test of libcdi on GitHub-hosted runners.
+#
+# The repository on GitHub is a push mirror of the GitLab project; see
+# doc/github-windows-ci.md. The CMake options follow the ParaView superbuild
+# (projects/cdi.cmake), which ships libcdi for ParaView's CDIReader plugin,
+# except that the tests are built and run.
+name: windows
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: MSVC (ParaView superbuild options)
+    runs-on: windows-2022
+    outputs:
+      failed_step: ${{ steps.result.outputs.failed_step }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install netCDF (conda-forge)
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: deps
+          create-args: libnetcdf
+          cache-environment: true
+
+      - name: Locate dependencies
+        run: |
+          $prefix = Join-Path $env:MAMBA_ROOT_PREFIX "envs\deps\Library"
+          if (-not (Test-Path (Join-Path $prefix "include\netcdf.h"))) {
+            Write-Error "netcdf.h not found below $prefix"
+            exit 1
+          }
+          "DEPS_PREFIX=$prefix" >> $env:GITHUB_ENV
+          # netCDF and HDF5 DLLs for running the tests
+          (Join-Path $prefix "bin") >> $env:GITHUB_PATH
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure
+        id: configure
+        run: >-
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          "-DCMAKE_PREFIX_PATH=$env:DEPS_PREFIX"
+          "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${{ github.workspace }}/build/bin"
+          -DCMAKE_REQUIRE_FIND_PACKAGE_NetCDF=ON
+          -DBUILD_SHARED_LIBS=ON
+          -DCMAKE_INSTALL_LIBDIR=lib
+          -DCDI_PTHREAD=OFF
+          -DCDI_LIBGRIB=OFF
+          -DCDI_LIBGRIBEX=OFF
+          -DCDI_EXTRA=OFF
+          -DCDI_IEG=OFF
+          -DCDI_SERVICE=OFF
+          -DCDI_ECCODES=OFF
+          -DCDI_NETCDF=ON
+          -DCDI_BUILD_APP=OFF
+          -DCDI_BUILD_UNKNOWN=OFF
+          -DCDI_ENABLE_f2003_INTERFACE=OFF
+          -DBUILD_TESTING=ON
+          *>&1 | Tee-Object -FilePath configure.log
+
+      - name: Build
+        id: build
+        run: cmake --build build --parallel *>&1 | Tee-Object -FilePath build.log
+
+      - name: Test
+        id: test
+        shell: bash
+        run: ctest --test-dir build --output-on-failure --timeout 300 2>&1 | tee ctest.log
+
+      - name: Record failed step
+        id: result
+        if: always()
+        shell: bash
+        run: |
+          for step in "Configure:${{ steps.configure.outcome }}" \
+                      "Build:${{ steps.build.outcome }}" \
+                      "Test:${{ steps.test.outcome }}"; do
+            if [ "${step#*:}" = failure ]; then
+              echo "failed_step=${step%%:*}" >> "$GITHUB_OUTPUT"
+              break
+            fi
+          done
+
+      - name: Collect logs
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p logs
+          for f in configure.log build.log ctest.log \
+                   build/Testing/Temporary/LastTest*.log \
+                   build/CMakeFiles/CMakeConfigureLog.yaml; do
+            [ -f "$f" ] && cp "$f" logs/
+          done
+          # The log of the last step that ran is the most useful summary.
+          for f in ctest.log build.log configure.log; do
+            if [ -s "logs/$f" ]; then cp "logs/$f" logs/summary.log; break; fi
+          done
+          true
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-logs
+          path: logs/
+          if-no-files-found: ignore
+
+  report:
+    name: Report to GitLab
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      # GitLab project that receives issues and MR badges.
+      GITLAB_API_URL: https://gitlab.dkrz.de/api/v4
+      GITLAB_PROJECT: k202134/libcdi
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+
+      - name: Unit-test reporter
+        run: python3 -m unittest discover -s .github/scripts -v
+
+      - name: Download logs
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: windows-logs
+          path: logs
+
+      - name: Report
+        env:
+          # Project access token, role Reporter, scope api. Unset: skip.
+          GITLAB_TOKEN: ${{ secrets.GITLAB_ISSUE_TOKEN }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          FAILED_STEP: ${{ needs.build.outputs.failed_step }}
+          SUMMARY_FILE: logs/summary.log
+          WORKFLOW_FILE: windows.yml
+        run: python3 .github/scripts/gitlab_report.py
